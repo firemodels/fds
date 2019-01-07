@@ -1,0 +1,148 @@
+&HEAD CHID='natconv_16_8_rot_18', TITLE='LES of free convection in enclosed space, Ra = 3.57e13' /
+
+&MESH IJK=48,32,64, XB=-60,60,-40,40,-160,0 /
+&MESH IJK=48,32,64, XB=-60,60,-40,40, 0,160 /
+
+&TIME T_END=13517./
+
+&DUMP DT_DEVC=10/
+
+&MISC STRATIFICATION=F, SIMULATION_MODE='LES', IBM_PLANE_INTERPOLATION=F, GVEC=3.0283665448744808,0.,-9.32035385969251 /
+
+&RADI RADIATION=.FALSE./
+
+&SPEC ID='AIR', SPECIFIC_HEAT=1., CONDUCTIVITY=0.018216, VISCOSITY=1.8216E-5, BACKGROUND=.TRUE./ ! Pr=1.00
+
+&VENT PBY=-40, SURF_ID='MIRROR' /
+&VENT PBY= 40, SURF_ID='MIRROR' /
+
+&SURF ID = 'insulated', COLOR = 'GRAY', HEAT_TRANSFER_COEFFICIENT=0./
+&SURF ID = 'T1', COLOR = 'RED',  TMP_FRONT = 60., TAU_T=0., HEAT_TRANSFER_MODEL='RAYLEIGH' /
+&SURF ID = 'T2', COLOR = 'BLUE', TMP_FRONT = 20., TAU_T=0., HEAT_TRANSFER_MODEL='RAYLEIGH' /
+
+&INIT XB=-60,60,-40,40,-160,160, TEMPERATURE=40./
+
+&BNDF QUANTITY='WALL TEMPERATURE', CELL_CENTERED=T/
+&BNDF QUANTITY='CONVECTIVE HEAT FLUX', CELL_CENTERED=T/
+&BNDF QUANTITY='HEAT TRANSFER COEFFICIENT', CELL_CENTERED=T/
+&BNDF QUANTITY='THERMAL WALL UNITS', CELL_CENTERED=T /
+&BNDF QUANTITY='VISCOUS WALL UNITS', CELL_CENTERED=T /
+
+&SLCF PBY=0, QUANTITY='VELOCITY', VECTOR=.TRUE. /
+&SLCF PBY=0, QUANTITY='TEMPERATURE', CELL_CENTERED=.TRUE. /
+&SLCF PBY=0, QUANTITY='TEMPERATURE', CELL_CENTERED=.TRUE., SLICETYPE='INCLUDE_GEOM' /
+&SLCF PBY=0, QUANTITY='DIVERGENCE', CELL_CENTERED=.TRUE., SLICETYPE='INCLUDE_GEOM' /
+&SLCF PBY=0, QUANTITY='DENSITY', CELL_CENTERED=.TRUE., SLICETYPE='INCLUDE_GEOM' /
+
+&SLCF PBY=0, QUANTITY='BACKGROUND PRESSURE', CELL_CENTERED=.TRUE., SLICETYPE='INCLUDE_GEOM' /
+
+&DEVC XYZ=0,0,0, QUANTITY='BACKGROUND PRESSURE', ID='p0' /
+&DEVC XYZ=0,0,0, QUANTITY='DENSITY', ID='rho' /
+
+&DEVC XB=-60,60,-40,40,-160,160, QUANTITY='CONVECTIVE HEAT FLUX', SPATIAL_STATISTIC='SURFACE INTEGRAL', SURF_ID='T1', ID='Q1-0'/
+&DEVC XB=-60,60,-40,40,-160,160, QUANTITY='CONVECTIVE HEAT FLUX', SPATIAL_STATISTIC='SURFACE INTEGRAL', SURF_ID='T2', ID='Q2-0'/
+
+&GEOM ID='CAVITY', SURF_ID='insulated','T1','T2',
+GAXIS=0.,1.,0.
+GROTATE=18.
+VERTS=
+    120.0000    50.0000  -180.0000
+    10.0000    50.0000  -180.0000
+   -10.0000    50.0000  -180.0000
+   -120.0000    50.0000  -180.0000
+    120.0000    50.0000  -160.0000
+    10.0000    50.0000  -160.0000
+   -10.0000    50.0000  -160.0000
+   -120.0000    50.0000  -160.0000
+    120.0000    50.0000   160.0000
+    10.0000    50.0000   160.0000
+   -10.0000    50.0000   160.0000
+   -120.0000    50.0000   160.0000
+    120.0000    50.0000   180.0000
+    10.0000    50.0000   180.0000
+   -10.0000    50.0000   180.0000
+   -120.0000    50.0000   180.0000
+    120.0000   -50.0000  -180.0000
+    10.0000   -50.0000  -180.0000
+   -10.0000   -50.0000  -180.0000
+   -120.0000   -50.0000  -180.0000
+    120.0000   -50.0000  -160.0000
+    10.0000   -50.0000  -160.0000
+   -10.0000   -50.0000  -160.0000
+   -120.0000   -50.0000  -160.0000
+    120.0000   -50.0000   160.0000
+    10.0000   -50.0000   160.0000
+   -10.0000   -50.0000   160.0000
+   -120.0000   -50.0000   160.0000
+    120.0000   -50.0000   180.0000
+    10.0000   -50.0000   180.0000
+   -10.0000   -50.0000   180.0000
+   -120.0000   -50.0000   180.0000
+FACES =
+     1     6     5     1
+     1     2     6     1
+     2     7     6     1
+     2     3     7     1
+     3     4     7     1
+     7     4     8     1
+     5    10     9     1
+     5     6    10     1
+     7    12    11     1
+     7     8    12     1
+    10    14    13     1
+     9    10    13     1
+    10    15    14     1
+    10    11    15     1
+    11    16    15     1
+    11    12    16     1
+    17    21    22     1
+    17    22    18     1
+    18    22    23     1
+    18    23    19     1
+    19    23    20     1
+    23    24    20     1
+    21    25    26     1
+    21    26    22     1
+    23    27    28     1
+    23    28    24     1
+    25    29    26     1
+    29    30    26     1
+    26    30    31     1
+    26    31    27     1
+    27    31    32     1
+    27    32    28     1
+     4    20     8     1
+     8    20    24     1
+     8    24    12     1
+    12    24    28     1
+    12    28    16     1
+    16    28    32     1
+    16    32    15     1
+    15    32    31     1
+    15    31    14     1
+    14    31    30     1
+    14    30    13     1
+    13    30    29     1
+    13    29     9     1
+     9    29    25     1
+     9    25     5     1
+     5    25    21     1
+     5    21     1     1
+     1    21    17     1
+     1    17     2     1
+     2    17    18     1
+     2    18     3     1
+     3    18    19     1
+     3    19     4     1
+     4    19    20     1
+     6     7    23     1
+     6    23    22     1
+    10     6    22     3
+    10    22    26     3
+    11    10    26     1
+    11    26    27     1
+     7    11    27     2
+     7    27    23     2
+/
+
+&TAIL /

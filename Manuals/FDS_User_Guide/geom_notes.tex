@@ -246,8 +246,8 @@ A {\ct GEOM}\ namelist defining a 2D terrain elevation is given by
 /
 \end{verbatim}
 
-\noindent where {\ct XB}\ defines a rectangular region bounded by $(x_{min}, x_{max}, y_{min})$ and $(y_{max})$
-where elevation data is defined with {\ct ZVALS}.
+\noindent where {\ct XB}\ defines a rectangular region bounded by $(x_{\rm min}, y_{\rm min})$  and $(x_{\rm max}, y_{\rm max})$
+and where {\ct ZVALS} defines elevation data in this region.
 {\ct IJK}\ specifies how many vertices occur in this region along each dimension.
 In this example {\ct ivals}\ values occur along the x dimension and {\ct jval}\ values occur along the y dimension.
 The {\ct ZVALS} keyword is used to specify elevations at each $(x,y)$ location.
@@ -371,72 +371,61 @@ For example, in the following {\ct GEOM}\ namelist,
 
 {\small
 \begin{verbatim}
+&MOVE ID='ChairMove', AXIS=...,...,..., ROTATION_ANGLE=..., DX=, /
 &GEOM ID='chair'
+
+      SURF_ID='woodSID','apholsterySID',
 
       VERTS=X1,Y1,Z1,...,XM,YM,ZM,
 
-      FACES=F1_1,F1_2,F1_3,...,FN_1,FN_2,FN_3,
+      FACES=F1_1,F1_2,F1_3,F1_SID...,FN_1,FN_2,FN_3,F2_SID
 
-      SCALE=sx,sy,sz,
-      AZIM=az,
-      ELEV=elev,
-
-      XYZ0=x0,y0,z0,
-      XYZ=x,y,z,
+      MOVE_ID='ChairMove'
 /
 \end{verbatim}
 }
 
-\noindent the chair object is translated by $(x,y,z)$ by specifying {\ct XYZ=x,y,z}.
-Similarly, the chair is scaled by $sx$, $sy$, $sz$ along each coordinate direction using {\ct SCALE=sx,sy,sz}.
-An object may be flipped by using a negative scale factor.
-An object is rotated using {\ct AZIM=az}\ and {\ct ELEV=elev}.
-{\ct AZIM}\ is used to specify an azimuthal rotation angle about a vertical (z) axis centered at an origin defined by {\ct XYZ0}.
-{\ct ELEV}\ specifies a rotation angle relative to a horizontal plane again containing an origin defined by {\ct XYZ0}..
-An object may also be rotated about an arbitrary axis.
-{\ct GAXIS} is used to specify this axis.
-{\ct GROTATE}\ is used to specify the amount of rotation about this axis.
-All rotation angles are specified in degrees.
+\noindent the chair object is translated and rotated using a reference to the $\&MOVE$ namelist, defined and explained in section XX.
 
-\subsection{Grouping Objects}
-One may group objects to form a new object.  In the following example,
-{\ct chair}\ and {\ct couch}\ are objects that have been defined previously.  A new {\ct living room set}\ object
-is defined by referencing {\ct chair}\ and {\ct couch}\ in the {\ct GEOM\_IDS}\ keyword.  The chair and couch
-are place at a particular locations using the {\ct DXYZ}\ keyword.
-
-{\small
-\begin{verbatim}
-&GEOM ID='chair' ..... /
-
-&GEOM ID='sofa' ...... /
-
-&GEOM ID='living room set'
-
-      XYZ=[0,0,0],
-      AZIM=[0],
-      ELEV=[0],
-
-      GEOM_IDS(1)='chair',  DSCALE(1)=..., DAZIM(1)=..., DELEV(1)...
-                            DXYZ0(1:3,1)=..., DXYZ(1:3,1)=...,
-      GEOM_IDS(2)='couch',  DSCALE(2)=..., DAZIM(2)=..., DELEV(2)...
-                            DXYZ0(1:3,2)=..., DXYZ(1:3,2)=...,
-/
-\end{verbatim}
-}
-
-\noindent Referenced objects such as {\ct chair}\ and {\ct couch} in this case must be defined in
-previous {GEOM}\ lines.  Forward references are not permitted.
-One may scale, rotate and translate objects as they are placed in the group using
-{\ct DSCALE}\, for scaling, {\ct DAZIM} and {\ct DELEV} for rotation and {\ct DXYZ} for translation.
-
-The {\ct DXYZ0}\ and {\ct DXYZ}\ keywords use two coordinates (array indices) to specify data.
-The first coordinate specifies the spatial component (1 for x, 2 for y, 3 for z or 1:3 for all three).
-The second coordinate specifies the object number according to its position in the {\ct GEOM\_IDS}\ array.
-For example,
-DXYZ(1,3) would specify the translation along the x direction for the third object in the {\ct GEOM\_IDS}\ array.
-
-The {\ct COMPONENT\_ONLY}\ keyword if .TRUE., indicates that the object being defined is only a component found in other geometries.
-It will not appear by itself in the FDS model.
+%\subsection{Grouping Objects}
+%One may group objects to form a new object.  In the following example,
+%{\ct chair}\ and {\ct couch}\ are objects that have been defined previously.  A new {\ct living room set}\ object
+%is defined by referencing {\ct chair}\ and {\ct couch}\ in the {\ct GEOM\_IDS}\ keyword.  The chair and couch
+%are place at a particular locations using the {\ct DXYZ}\ keyword.
+%
+%{\small
+%\begin{verbatim}
+%&GEOM ID='chair' ..... /
+%
+%&GEOM ID='sofa' ...... /
+%
+%&GEOM ID='living room set'
+%
+%      XYZ=[0,0,0],
+%      AZIM=[0],
+%      ELEV=[0],
+%
+%      GEOM_IDS(1)='chair',  DSCALE(1)=..., DAZIM(1)=..., DELEV(1)...
+%                            DXYZ0(1:3,1)=..., DXYZ(1:3,1)=...,
+%      GEOM_IDS(2)='couch',  DSCALE(2)=..., DAZIM(2)=..., DELEV(2)...
+%                            DXYZ0(1:3,2)=..., DXYZ(1:3,2)=...,
+%/
+%\end{verbatim}
+%}
+%
+%\noindent Referenced objects such as {\ct chair}\ and {\ct couch} in this case must be defined in
+%previous {GEOM}\ lines.  Forward references are not permitted.
+%One may scale, rotate and translate objects as they are placed in the group using
+%{\ct DSCALE}\, for scaling, {\ct DAZIM} and {\ct DELEV} for rotation and {\ct DXYZ} for translation.
+%
+%The {\ct DXYZ0}\ and {\ct DXYZ}\ keywords use two coordinates (array indices) to specify data.
+%The first coordinate specifies the spatial component (1 for x, 2 for y, 3 for z or 1:3 for all three).
+%The second coordinate specifies the object number according to its position in the {\ct GEOM\_IDS}\ array.
+%For example,
+%DXYZ(1,3) would specify the translation along the x direction for the third object in the {\ct GEOM\_IDS}\ array.
+%
+%The {\ct COMPONENT\_ONLY}\ keyword if .TRUE., indicates that the object being defined is only a component found in other geometries.
+%It will not appear by itself in the FDS model.
 
 %\subsection{Dynamic Objects}
 %An object's position and orientation may change with time.
@@ -467,25 +456,14 @@ It will not appear by itself in the FDS model.
 \multicolumn{5}{|c|}{{\ct GEOM} (Unstructured Geometry Parameters)} \\
 \hline \hline
 \endhead
-{\ct AZIM}         & Real                   & Section~\ref{info:GEOM}            &  deg      &    0.0                   \\ \hline
-{\ct COMPONENT\_ONLY} & LOGICAL             & Section~\ref{info:GEOM}            &           &  {\ct .FALSE.}           \\ \hline
-{\ct DAZIM}        & array of Reals         & Section~\ref{info:GEOM}            &  deg      &    0.0                   \\ \hline
-{\ct DELEV}        & array of Reals         & Section~\ref{info:GEOM}            &  deg      &    0.0                   \\ \hline
-{\ct DSCALE}       & array of Real Triplets & Section~\ref{info:GEOM}            &           &   1.0                    \\ \hline
-{\ct DXYZ0}        & array of Real Triplets & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
-{\ct DXYZ}         & array of Real Triplets & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
-{\ct ELEV}         & Real                   & Section~\ref{info:GEOM}            &  deg      &    0.0                   \\ \hline
 {\ct FACES}        & array of Integer Triplets     & Section~\ref{info:GEOM}     &           &    0                     \\ \hline
-{\ct GAXIS}        & Real Triplet           & Section~\ref{info:GEOM}            &           &                          \\ \hline
-{\ct GEOM\_IDS}    & Real                   & Section~\ref{info:GEOM}            &           &                          \\ \hline
-{\ct GROTATE}      & Real Triplet           & Section~\ref{info:GEOM}            &  deg      &    0.0                   \\ \hline
 {\ct ID}           & Character              & Section~\ref{info:GEOM}            &           &   {\ct 'geom'}           \\ \hline
 {\ct IJK}          & Integer Triplet        & Section~\ref{info:GEOM}            &           &   0,0,0                  \\ \hline
 {\ct MATL\_ID}     & Character              & Section~\ref{info:GEOM}            &           &  {\ct 'INERT'}           \\ \hline
+{\ct MOVE\_ID}     & Character              & Section~\ref{info:GEOM}            &           &  {\ct 'null'}           \\ \hline
 {\ct N\_LAT}       & Integer                & Section~\ref{info:GEOM}            &           &   0                      \\ \hline
 {\ct N\_LEVELS}    & Integer                & Section~\ref{info:GEOM}            &           &   0                      \\ \hline
 {\ct N\_LONG}      & Integer                & Section~\ref{info:GEOM}            &           &   0                      \\ \hline
-{\ct SCALE}        & Real Triplet           & Section~\ref{info:GEOM}            &           &   1.0,1.0,1.0            \\ \hline
 {\ct SPHERE\_ORIGIN}& Real Triplet          & Section~\ref{info:GEOM}            &   m       &  0.0,0.0,0.0             \\ \hline
 {\ct SPHERE\_RADIUS}& Real                  & Section~\ref{info:GEOM}            &   m       &  1.0                     \\ \hline
 {\ct SPHERE\_TYPE} & Integer                & Section~\ref{info:GEOM}            &           &  1                       \\ \hline
@@ -496,12 +474,25 @@ It will not appear by itself in the FDS model.
 {\ct VERTS}        & array of Real Triplets & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
 {\ct VOLUS}        & array of Integer Quadruplets     & Section~\ref{info:GEOM}  &           &    0                     \\ \hline
 {\ct XB}           & Real sex-tuplet        & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
-{\ct XYZ0}         & Real Triplet           & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
-{\ct XYZ}          & Real Triplet           & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
 {\ct ZVALS}        & Real                   & Section~\ref{info:GEOM}            &   m/s     &   0.0                    \\ \hline
 
 
 % Related to moving geometry:
+%{\ct AZIM}         & Real                   & Section~\ref{info:GEOM}            &  deg      &    0.0                   \\ \hline
+%{\ct COMPONENT\_ONLY} & LOGICAL             & Section~\ref{info:GEOM}            &           &  {\ct .FALSE.}           \\ \hline
+%{\ct DAZIM}        & array of Reals         & Section~\ref{info:GEOM}            &  deg      &    0.0                   \\ \hline
+%{\ct DELEV}        & array of Reals         & Section~\ref{info:GEOM}            &  deg      &    0.0                   \\ \hline
+%{\ct DSCALE}       & array of Real Triplets & Section~\ref{info:GEOM}            &           &   1.0                    \\ \hline
+%{\ct DXYZ0}        & array of Real Triplets & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
+%{\ct DXYZ}         & array of Real Triplets & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
+%{\ct ELEV}         & Real                   & Section~\ref{info:GEOM}            &  deg      &    0.0                   \\ \hline
+%{\ct GAXIS}        & Real Triplet           & Section~\ref{info:GEOM}            &           &                          \\ \hline
+%{\ct GEOM\_IDS}    & Real                   & Section~\ref{info:GEOM}            &           &                          \\ \hline
+%{\ct GROTATE}      & Real Triplet           & Section~\ref{info:GEOM}            &  deg      &    0.0                   \\ \hline
+%{\ct SCALE}        & Real Triplet           & Section~\ref{info:GEOM}            &           &   1.0,1.0,1.0            \\ \hline
+%{\ct XYZ0}         & Real Triplet           & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
+%{\ct XYZ}          & Real Triplet           & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
+
 %{\ct AZIM\_DOT}    & Real                   & Section~\ref{info:GEOM}            &  deg/s    &    0.0                   \\ \hline
 %{\ct ELEV\_DOT}    & Real                   & Section~\ref{info:GEOM}            &  deg/s    &    0.0                   \\ \hline
 %{\ct GROTATE\_DOT}  & Real Triplet          & Section~\ref{info:GEOM}            & deg/s     &    0.0                   \\ \hline
@@ -1831,7 +1822,7 @@ Although in the original problem~\eqref{eq:LowMachMom}-\eqref{eq:LowMachDiv} no 
 %%
 The next component of our scheme is used to approximate the no slip boundary condition for immersed solid boundaries. We employ a direct forcing immersed boundary method for the momentum equations~\cite{Fadlun:2000}. In order to do this, a force field is devised on the discrete momentum equations on grid faces crossed by the immersed surfaces, to approximate the no-slip boundary condition on said surfaces. We describe some preliminary concepts before introducing our IBM+CC momentum-pressure coupling scheme.
 
-\subsubsection{Velocity interpolation:}
+\subsubsection{Simple Planar Velocity interpolation:}
 
 Immersed boundary forcing requires estimates for velocities at time step $n+1$ on \texttt{INBOUNDARY} and \texttt{GASPHASE} cut-faces. For the former, the face velocities are assumed known at step $n+1$, given by the known (or predicted) motion of the immersed bodies (i.e. horizontal velocity component $u_{B}^{n+1}$ in immersed boundary point $B$ defined by $\mathbf{x}_B$ in figure~\ref{Fig:IBCart}). For collocated velocities on  \texttt{GASPHASE} cut-face centroids interpolation is required. For linear velocity interpolation from a boundary point $B$ and a $\{1,...,ne\}$ set of \textit{fluid} points to forcing point $d$, the target $x$ velocity component $u_d$ on gas phase cut-face $\mathbf{3}$ of figure~\ref{Fig:IBCart} is defined by the following interpolation formula:
 %
@@ -1884,6 +1875,203 @@ Similar expressions are used for velocity components on other directions (i.e. $
 	\label{Fig:IBCart}
 \end{figure}
 
+
+\subsubsection{Dynamic Velocity estimation for wall modeled IBM:}
+
+In this section we describe a scheme to dynamically define the value of $\hat{u}_d^{n+1}$ making use of an equilibrium wall model solution and simplified boundary layer equations along a local streamwise direction. 
+
+\bigskip
+\noindent 
+\textbf{Boundary conforming grids:}
+\bigskip
+
+In order to define this scheme, we first look at the case of wall modeling with a simple wall function (\textit{log law}) for a boundary conforming mesh. Consider the case depicted in figure X, where a velocity component $\hat{u}_e^n$ is defined in a face adjacent to the solid boundary. The vertex point on the wall for this face is point $B$. A simple model representation in this case is given by a function $u^+ = f(y^+)$:
+%
+\begin{eqnarray}
+   u^+ = y^+ \; \; , \; \; y^+ < 12 \\
+   u^+ = \frac{1}{\kappa} ln(y^+) + Br \; \; , \; \; y^+ > 12
+\end{eqnarray}
+%
+and the relationships:
+%
+\begin{equation}
+   u_\tau = \sqrt{\frac{\tau_w}{\rho}}; \; \; y^+= \frac{u_\tau y}{\nu}; \; \; u^+=\frac{u}{u_\tau}
+\end{equation}
+%
+which approximate the mean solution of an equilibrium boundary layer problem. Here $\tau_w$ is the stress at the wall point $B$; $\rho, \nu$ are the density and molecular kinematic viscosity, and $\kappa \simeq 0.41, Br \simeq 5.2$ are the log law constants.
+
+Through the expression for the wall stress $\tau_w = \rho \nu \left( \frac{d u}{d y} \right)_{y=0}$ and a known value $\hat{u}_e^n$, a fixed iteration can be applied to compute the corresponding $y^{+}_e$. Start by:
+%
+\begin{itemize}
+   \item compute $\tau_w^0 = \rho \nu \frac{2 |\hat{u}_e^n|}{\Delta y}$
+   \item compute $u_\tau^0 = \sqrt{\tau_w^0 / \rho}$
+   \item compute $\delta_\nu^0 = \frac{\nu}{u_\tau^0}$
+   \item compute $y^{+,0} = \frac{\Delta y}{2 \delta_\nu^0}$
+\end{itemize}
+%
+If a direct numerical simulation (DNS) is performed, this is all we need to compute the wall stress (its definition). If we perform a wall modeled large eddy simulation (LES), for $k=1,2,..$ up to desired convergence do:
+%
+\begin{enumerate}
+   \item compute $y^{+,k} = \frac{\Delta y}{2 \delta_\nu^{k-1}}$
+   \item if $y^+ < 12$ : compute $\tau_w^k = \rho (\hat{u}_e^n / y^{+,k})^2$; $u_\tau^k = \sqrt{\tau_w^k/\rho}$ %; $\left( \frac{\partial u}{\partial y} \right)_w^k = \frac{2 |\hat{u}_e^n|}{\Delta y}$
+   \item else : compute   $\tau_w^k = \rho \left( \frac{\hat{u}_e^n}{\ln (y^{+,k})/\kappa+Br} \right)^2$; $u_\tau^k = \sqrt{\tau_w^k/\rho}$ %; $\left( \frac{\partial u}{\partial y} \right)_w^k = \frac{2 u_\tau}{\kappa \Delta y}$
+   \item compute $\delta_\nu^{k} = \frac{\nu}{u_\tau^k}$
+\end{enumerate}
+%
+%The final value of $\left( \frac{\partial U}{\partial y} \right)_w^k$ can be used to compute a slip factor $S_F$, that would define the ghost cell value of velocity, in order to compute the right stress from the centered finite difference definition. This is done in the following form:
+%%
+%\begin{equation}
+%   \left( \frac{\partial u}{\partial y} \right)_w = \frac{\hat{u}_e^n - \hat{u}_g}{\Delta y} = (1-S_F) \frac{\hat{u}_e^n}{\Delta y}
+%\end{equation}
+%%
+%from which the slip factor can be computed as $S_F = 1 -  \left( \frac{\partial u}{\partial y} \right)_w \frac{\Delta y}{|\hat{u}_e^n|}$.
+%
+Once the stress at the wall $\tau_w$ is computed, it is used in the right hand side definition of the momentum equations to evolve the velocity flow variable $\hat{u}_e^n \rightarrow \hat{u}_e^{n+1}$. Note the velocity on this face point off the wall is integrated in time in the same manner as the rest of the discrete velocities, having to obey CFL and viscous constraints for stability.
+
+% figure: Boundary conforming setup:
+
+
+
+\bigskip
+\noindent 
+\textbf{Momentum equations along a local streamwise direction}
+\bigskip
+
+The simplified equations used in a streamwise - wall normal local coordinate system are:
+%
+\begin{eqnarray}
+   \frac{\partial u_{\hat{\mathbf{s}}}}{\partial s} +  \frac{\partial u_{\hat{\mathbf{n}}}}{\partial n} &=& \left( \nabla \cdot \mathbf{u} \right)^{th}  \label{eq:blcont} \\
+    \frac{\partial u_{\hat{\mathbf{s}}}}{\partial t} + u_{\hat{\mathbf{s}}} \frac{\partial u_{\hat{\mathbf{s}}}}{\partial s} +
+    u_{\hat{\mathbf{n}}} \frac{\partial u_{\hat{\mathbf{s}}}}{\partial n} &=& - \frac{1}{\rho} \left( \frac{\partial p}{\partial s} +
+    \frac{\partial \tau_{sn}}{\partial n} - (\rho -\rho_0) g_s \right) \label{eq:blmom}
+\end{eqnarray}
+%
+where $\hat{\mathbf{s}},\hat{\mathbf{n}}$ are the streamwise and normal unit vectors, and $u_{\hat{\mathbf{s}}},u_{\hat{\mathbf{n}}}$ are the corresponding velocity components. Also, $p$ is the pressure field, $\tau_{sn}$ is the shear stress in local coordinates and $g_s$ is the gravity acceleration along the streamwise direction.
+
+\bigskip
+\noindent 
+\textbf{Geometry not conforming to fluid mesh:}
+\bigskip
+
+For cases where the geometry does not conform to the fluid mesh, as depicted in figure X1, the sequence of operations to define an immersed boundary forcing term in gas phase cut faces is the following:
+%
+\begin{itemize}
+   \item Define normal probe components for gas cut-face centroid $d$, in particular, boundary point B and external point $e_x$.
+   \item Interpolate known velocities, velocity gradients and cell centered variables to point $e_x$.
+   \item Define a local coordinate system represented by the normal $\hat{\mathbf{n}}$, streamwise $\hat{\mathbf{s}}$ and orthonormal $\hat{\mathbf{t}}$ unit vectors.
+   \item Apply wall model described before to estimate the known streamwise velocity $u_{\hat{\mathbf{s}},d}^n$ value at point $d$ and wall stress $\tau_w$ in this local coordinate system.
+   \item Estimate pressure gradient and gravity force along streamwise direction.
+   \item Using streamwise-normal boundary layer equations: estimate velocity in the normal direction $u_{\hat{\mathbf{n}},d}^{n+1}$, and perform a one step time integration of the streamwise boundary layer equations to obtain $u_{\hat{\mathbf{s}},d}^{n+1}$.
+   \item Recompute the component $\hat{u}_d^{n+1}$ on the gas cut-face.
+\end{itemize}
+%
+We note the previous steps can be gathered in four general tasks: interpolation, wall function estimation of wall stress, integration in local coordinate system, and recomputation of $\hat{u}_d^{n+1}$ on the gas cut-face (inertial reference frame).
+
+\bigskip
+\noindent 
+\textbf{Interpolation of variables to external point:}
+\bigskip
+
+The first task, interpolation, requires the following operations \textit{for each} gas cut-face:
+%
+\begin{itemize}
+   \item Define external point $e_x$ in the normal direction crossing through the gas cut-face centroid $d$.
+   \item Use an interpolation stencil composed of fluid points to interpolate velocity components and gradients from staggered locations to $e_x$ (i.e. equation~\eqref{eq:interpu}).
+   \item Use an interpolation stencil to interpolate total viscosity to point $e_x$ from Cartesian cell centroids. Similar operation to obtain a pressure gradient.   
+\end{itemize}
+%
+
+We describe the trilinear interpolation of one velocity component to the external point $e_x$, masked to a stencil of admissible fluid points.  
+The first step is to locate the point $e_x$ within the cuboid space defined by  eight $u$ velocity component collocation points $\mathbf{x}_k$, $k=1,..,8$, in the fluid grid. The interpolation coefficients from these to $e_x$ are noted as $\phi_k(\mathbf{x}_{ex}-\mathbf{x}_k)$. Consider the $\mathbf{x}_k$ collocation points defining the vertices of a box with coordinates $[x_{lo},x_{hi}] \times [ y_{lo},y_{hi}] \times [z_{lo} , z_{hi}]$, and the normalized coordinates $\xi,\eta,\zeta$:
+%
+\begin{equation}
+   \xi = \frac{x_{ex}-x_{lo}}{x_{hi}-x_{lo}}, \; \; \;  \eta = \frac{y_{ex}-y_{lo}}{y_{hi}-y_{lo}}, \; \; \; \zeta = \frac{z_{ex}-z_{lo}}{z_{hi}-z_{lo}}
+\end{equation}
+%
+Then, $\phi_k(\mathbf{x}_{ex}-\mathbf{x}_k)$ takes the form:
+%
+\begin{eqnarray}
+    \phi_k(\mathbf{x}_{ex}-\mathbf{x}_k) = 
+    \left[ \frac{x_{k}-x_{lo}}{x_{hi}-x_{lo}} \xi + \frac{x_{hi}-x_{k}}{x_{hi}-x_{lo}} (1-\xi) \right] \times \nonumber \\
+    \left[ \frac{y_{k}-y_{lo}}{y_{hi}-y_{lo}} \eta + \frac{y_{hi}-y_{k}}{y_{hi}-y_{lo}} (1-\eta) \right] \times \nonumber \\
+    \left[ \frac{z_{k}-z_{lo}}{z_{hi}-z_{lo}} \zeta + \frac{z_{hi}-z_{k}}{z_{hi}-z_{lo}} (1-\zeta) \right] \; \; \; \; \;
+\end{eqnarray}
+%
+
+Depending on the distance $\delta_{ex}$ from the boundary to point $e_x$, some of these $k$ points might lay in Cartesian faces containing gas cut-faces, which will be eventually also forced. To avoid this dependence, a mask is defined in the interpolation, such that the final interpolation coefficients used are non-zero only in fluid points. We require the nonzero masked interpolation coefficients to be positive and add to unity. Ideally we would want them to preserve the accuracy of the original interpolation.
+We rescale the interpolation coefficients on fluid points, dividing them by their sum. Also, we set to zero (mask) the interpolation coefficients related to inadmissible points.
+
+Other unstructured interpolation schemes can also be implemented defined only on fluid points (i.e. weighted least squares, inverse distance method).
+
+
+\bigskip
+\noindent
+\textbf{Local streamwise - wall normal coordinate system velocity components:}
+\bigskip
+
+Having the wall normal direction $\hat{\mathbf{n}}$, an orthonormal direction can be computed from:
+%
+\begin{equation}
+    \hat{\mathbf{t}} = \frac{\hat{\mathbf{n}} \times \mathbf{u}_{ex}^n}{\| \hat{\mathbf{n}} \times \mathbf{u}_{ex}^n \| }
+\end{equation}
+%
+where $\mathbf{u}_{ex}^n=\mathbf{u}_{ex,abs}^n-\mathbf{u}_{B}^n$ is the known relative velocity of the fluid respect to the boundary, and the absolute velocity $\mathbf{u}_{ex,abs}^n$ was interpolated as described previously.
+The streamwise velocity component is defined by the product $\hat{\mathbf{s}} = \hat{\mathbf{t}} \times \hat{\mathbf{n}}$ and streamwise and normal velocity components  $u_{\hat{\mathbf{s}},ex}^n= \mathbf{u}_{ex}^n \cdot \hat{\mathbf{s}}$, $u_{\hat{\mathbf{n}},ex}^n= \mathbf{u}_{ex}^n \cdot \hat{\mathbf{n}}$. The local component in the $\hat{\mathbf{t}}$ direction is zero by construction.
+
+\bigskip
+\noindent 
+\textbf{Wall function estimation of wall stress $\tau_w$:}
+ 
+With the local streamwise velocity component, as well as fluid properties $\rho, \mu$ and the distance $\delta_{ex}$ from boundary to the $ex$ point, we are equipped to compute the wall function iteration described for boundary conforming grids. From this iteration, values of $\tau_w$, $y^+$ and $u_\tau$ and $u_{\hat{\mathbf{s}},d}^n$ can be computed. The last variable is the velocity at time step $n$ in point $d$, and along the streamwise direction. 
+ 
+\bigskip
+\noindent
+\textbf{Cut-face centroid velocity $\hat{u}_d^{n+1}$ update from local momentum equations}
+\bigskip
+
+We discretize equations \eqref{eq:blcont}-\eqref{eq:blmom} in the following form:
+%
+\begin{eqnarray}
+   u_{\hat{\mathbf{n}},d}^{n+1} &=& \mathbf{u}_{B}^n \cdot \hat{\mathbf{n}} + \delta_d \left(  \left( \nabla \cdot \mathbf{u} \right)^{th}  
+   - \frac{\partial u_{\hat{\mathbf{s}}} }{\partial s} |_{d}^n \right) \label{eq:un} \\
+   RHS_{u_{\hat{\mathbf{s}},d}} &=&  u_{\hat{\mathbf{s}},d}^n  \frac{\partial u_{\hat{\mathbf{s}}} }{\partial s} |_{d}^n  +
+   u_{\hat{\mathbf{n}},d}^{n+1} \frac{\partial u_{\hat{\mathbf{s}}} }{\partial n} |_{d}^n +
+   \frac{1}{\rho} \left[  \frac{\partial p}{\partial s} |_d^n + \frac{\tau_{sn} |_{ex}^n - \tau_w}{\delta_{ex}} - (\rho-\rho_0) g_s \right] \label{eq:rhsus} \\
+   u_{\hat{\mathbf{s}},d}^{n+1} &=& u_{\hat{\mathbf{s}},d}^{n}+\mathbf{u}_{B}^n \cdot \hat{\mathbf{s}} - \Delta t RHS_{u_{\hat{\mathbf{s}},d}} \label{eq:us}
+\end{eqnarray}
+%
+In equations~\eqref{eq:un}-\eqref{eq:us} we compute: 
+%
+\begin{eqnarray}
+   \frac{\partial u_{\hat{\mathbf{s}}} }{\partial s} |_{d}^n &\simeq& \frac{ \delta_d}{ \delta_{ex}} \frac{\partial u_{\hat{\mathbf{s}}} }{\partial s} |_{ex}^n \\
+    \frac{\partial u_{\hat{\mathbf{s}}} }{\partial n} |_{d}^n &\simeq& \frac{ \delta_d}{ \delta_{ex}} \frac{\partial u_{\hat{\mathbf{s}}} }{\partial n} |_{ex}^n
+\end{eqnarray}
+%
+that is, a linear variation of the streamline velocity component $s$ derivative along the wall normal direction has been assumed.
+The term $\frac{\partial u_{\hat{\mathbf{s}}} }{\partial s} |_{ex}^n$ on the previous is computed from the expression:
+%
+\begin{eqnarray}
+   \frac{\partial u_{\hat{\mathbf{s}}} }{\partial s} |_{ex}^n &=& \hat{\mathbf{s}}^T \left[ \nabla \mathbf{u}_{ex}^n \right]  \hat{\mathbf{s}} \\
+   \left[ \nabla \mathbf{u}_{ex}^n \right] &=& \begin{bmatrix}
+   \frac{\partial u}{\partial x} & \frac{\partial u}{\partial y} & \frac{\partial u}{\partial z} \\
+   \frac{\partial v}{\partial x} & \frac{\partial v}{\partial y} & \frac{\partial v}{\partial z} \\
+   \frac{\partial w}{\partial x} & \frac{\partial w}{\partial y} & \frac{\partial w}{\partial z} \\
+   \end{bmatrix}_{ex}^n
+\end{eqnarray}
+%
+where the derivatives of velocity components at the external $e_x$ point are computed from derivatives of the interpolation functions. Also,  $\frac{\partial u_{\hat{\mathbf{s}}} }{\partial n} |_{ex}^n=\hat{\mathbf{n}}^T \left[ \nabla \mathbf{u}_{ex}^n \right]  \hat{\mathbf{s}}$.
+
+Further, $\frac{\partial p}{\partial s}  |_d^n \simeq \frac{\partial p}{\partial s} |_{ex}^n = (\nabla p)_{ex}^n \cdot \hat{\mathbf{s}}$,
+and, being $[ \tau ]_{ex}^n$ the stress tensor at $e_x$ evaluated from interpolated velocity derivatives and total viscosity, the shear component of the rotated stress tensor $\tau_{sn} |_{ex}^n = \hat{\mathbf{s}}^T [ \tau ]_{ex}^n \hat{\mathbf{n}}$. Finally, on the buoyancy term, $\rho$, $\rho_0$ are interpolated to the $d$ centroid position,  and $g_s = \mathbf{g} \cdot \hat{\mathbf{s}}$.
+
+
+The target velocity on the cut-face centroid, assumed in the $i$ Cartesian direction is:
+%
+\begin{equation} 
+   u_d^{n+1} = u_{\hat{\mathbf{n}},d}^{n+1} (\hat{\mathbf{n}} \cdot \hat{\mathbf{e}}_i) + u_{\hat{\mathbf{s}},d}^{n+1} (\hat{\mathbf{s}} \cdot \hat{\mathbf{e}}_i) + (\mathbf{u}_{B}^{n+1} \cdot \hat{\mathbf{t}})(\hat{\mathbf{t}} \cdot \hat{\mathbf{e}}_i)
+\end{equation}
+%
+where $\hat{\mathbf{e}}_i$ is the Cartesian versor in direction $i$.
 
 \subsubsection{Equivalence of discrete divergence integrals among cut-cells and underlying Eulerian cells:}
 
@@ -2103,97 +2291,97 @@ SURF_ID='surf1'/
 \label{fig:geom_simple}
 \end{figure}
 
-\subsection{geom\_azim.fds}
-Figure \ref{fig:geom_azim} was created using the following GEOM namelists.
-The {\ct AZIM}\ keyword is used to rotate the object about a vertical axis
-centered at $(0,0,0)$.
-
-{\small
-\begin{verbatim}
-&GEOM ID='geom1',
-VERTS=0.0,0.0,0.0, 0.0,1.0,0.0, 0.0,1.0,1.0,
-FACES=1,2,3,AZIM=0.0,SURF_ID='surf1'/
-
-&GEOM ID='geom2',
-VERTS=0.0,0.0,0.0, 0.0,1.0,0.0, 0.0,1.0,1.0,
-FACES=1,2,3,AZIM=45.0,SURF_ID='surf2'/
-
-&GEOM ID='geom3',
-VERTS=0.0,0.0,0.0, 0.0,1.0,0.0, 0.0,1.0,1.0,
-FACES=1,2,3,AZIM=90.0,SURF_ID='surf3'/
-\end{verbatim}
-}
-
-\begin{figure}
-\begin{center}
-\begin{tabular}{c}
- \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_azim}
-  \end{tabular}
-\end{center}
- \caption{Three triangles generated at different azimuthal angles using the {\ct AZIM}\ keyword. Case: geom\_azim.fds}
-\label{fig:geom_azim}
-\end{figure}
-
-\subsection{geom\_elev.fds}
-Figure \ref{fig:geom_elev} was created using the following GEOM namelists.
-The {\ct ELEV}\ keyword is used to rotate the object with respect to a horizontal plane
-passing through $(0,0,0)$.
-
-{\small
-\begin{verbatim}
-&GEOM ID='geom1',
-VERTS=0.0,0.0,1.0,1.0,0.0,1.0,1.0,1.0,1.0,
-FACES=1,2,3,ELEV=0,XYZ0=0.0,0.0,1.0,SURF_ID='surf1'/
-
-&GEOM ID='geom2',
-VERTS=0.0,0.0,1.0,1.0,0.0,1.0,1.0,1.0,1.0,
-FACES=1,2,3,ELEV=45,XYZ0=0.0,0.0,1.0,SURF_ID='surf2'/
-
-&GEOM ID='geom3',
-VERTS=0.0,0.0,1.0,1.0,0.0,1.0,1.0,1.0,1.0,
-FACES=1,2,3,ELEV=90,XYZ0=0.0,0.0,1.0,SURF_ID='surf3'/
-\end{verbatim}
-}
-
-\begin{figure}
-\begin{center}
-\begin{tabular}{c}
- \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_elev}
-  \end{tabular}
-\end{center}
- \caption{Three triangles generated at different elevation angles using the {\ct ELEV}\ keyword. Case: geom\_elev.fds}
-\label{fig:geom_elev}
-\end{figure}
-
-\subsection{geom\_scale.fds}
-Figure \ref{fig:geom_scale} was created using the following GEOM namelists.
-The {\ct SCALE}\ keyword is used to change the size of the object.
-
-{\small
-\begin{verbatim}
-&GEOM ID='geom4',
-VERTS=-2.0,0.0,0.0,-1.0,0.0,0.0,-1.0,0.0,1.0,
-FACES=1,2,3,XYZ0=-2.0,0.0,0.0,SCALE=1.0,1.0,1.0,SURF_ID='surf1'/
-
-&GEOM ID='geom4',
-VERTS= 0.0,0.0,0.0,1.0,0.0,0.0,1.0,0.0,1.0,
-FACES=1,2,3,XYZ0= 0.0,0.0,0.0,SCALE=1.0,1.0,2.0,SURF_ID='surf2'/
-
-&GEOM ID='geom4',
-VERTS= 2.0,0.0,0.0,3.0,0.0,0.0,3.0,0.0,1.0,
-FACES=1,2,3,XYZ0= 2.0,0.0,0.0,SCALE=2.0,1.0,1.0,SURF_ID='surf3'/
-\end{verbatim}
-}
-
-\begin{figure}
-\begin{center}
-\begin{tabular}{c}
- \includegraphics[width=6.0in]{SCRIPT_FIGURES/geom_scale}
-  \end{tabular}
-\end{center}
-\caption{Three triangles generated at different scale sizes using the {\ct SCALE}\ keyword. Case: geom\_scale.fds}
-\label{fig:geom_scale}
-\end{figure}
+%\subsection{geom\_azim.fds}
+%Figure \ref{fig:geom_azim} was created using the following GEOM namelists.
+%The {\ct AZIM}\ keyword is used to rotate the object about a vertical axis
+%centered at $(0,0,0)$.
+%
+%{\small
+%\begin{verbatim}
+%&GEOM ID='geom1',
+%VERTS=0.0,0.0,0.0, 0.0,1.0,0.0, 0.0,1.0,1.0,
+%FACES=1,2,3,AZIM=0.0,SURF_ID='surf1'/
+%
+%&GEOM ID='geom2',
+%VERTS=0.0,0.0,0.0, 0.0,1.0,0.0, 0.0,1.0,1.0,
+%FACES=1,2,3,AZIM=45.0,SURF_ID='surf2'/
+%
+%&GEOM ID='geom3',
+%VERTS=0.0,0.0,0.0, 0.0,1.0,0.0, 0.0,1.0,1.0,
+%FACES=1,2,3,AZIM=90.0,SURF_ID='surf3'/
+%\end{verbatim}
+%}
+%
+%\begin{figure}
+%\begin{center}
+%\begin{tabular}{c}
+%\includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_azim}
+%\end{tabular}
+%\end{center}
+%\caption{Three triangles generated at different azimuthal angles using the {\ct AZIM}\ keyword. Case: geom\_azim.fds}
+%\label{fig:geom_azim}
+%\end{figure}
+%
+%\subsection{geom\_elev.fds}
+%Figure \ref{fig:geom_elev} was created using the following GEOM namelists.
+%The {\ct ELEV}\ keyword is used to rotate the object with respect to a horizontal plane
+%passing through $(0,0,0)$.
+%
+%{\small
+%\begin{verbatim}
+%&GEOM ID='geom1',
+%VERTS=0.0,0.0,1.0,1.0,0.0,1.0,1.0,1.0,1.0,
+%FACES=1,2,3,ELEV=0,XYZ0=0.0,0.0,1.0,SURF_ID='surf1'/
+%
+%&GEOM ID='geom2',
+%VERTS=0.0,0.0,1.0,1.0,0.0,1.0,1.0,1.0,1.0,
+%FACES=1,2,3,ELEV=45,XYZ0=0.0,0.0,1.0,SURF_ID='surf2'/
+%
+%&GEOM ID='geom3',
+%VERTS=0.0,0.0,1.0,1.0,0.0,1.0,1.0,1.0,1.0,
+%FACES=1,2,3,ELEV=90,XYZ0=0.0,0.0,1.0,SURF_ID='surf3'/
+%\end{verbatim}
+%}
+%
+%\begin{figure}
+%\begin{center}
+%\begin{tabular}{c}
+%\includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_elev}
+%\end{tabular}
+%\end{center}
+%\caption{Three triangles generated at different elevation angles using the {\ct ELEV}\ keyword. Case: geom\_elev.fds}
+%\label{fig:geom_elev}
+%\end{figure}
+%
+%\subsection{geom\_scale.fds}
+%Figure \ref{fig:geom_scale} was created using the following GEOM namelists.
+%The {\ct SCALE}\ keyword is used to change the size of the object.
+%
+%{\small
+%\begin{verbatim}
+%&GEOM ID='geom4',
+%VERTS=-2.0,0.0,0.0,-1.0,0.0,0.0,-1.0,0.0,1.0,
+%FACES=1,2,3,XYZ0=-2.0,0.0,0.0,SCALE=1.0,1.0,1.0,SURF_ID='surf1'/
+%
+%&GEOM ID='geom4',
+%VERTS= 0.0,0.0,0.0,1.0,0.0,0.0,1.0,0.0,1.0,
+%FACES=1,2,3,XYZ0= 0.0,0.0,0.0,SCALE=1.0,1.0,2.0,SURF_ID='surf2'/
+%
+%&GEOM ID='geom4',
+%VERTS= 2.0,0.0,0.0,3.0,0.0,0.0,3.0,0.0,1.0,
+%FACES=1,2,3,XYZ0= 2.0,0.0,0.0,SCALE=2.0,1.0,1.0,SURF_ID='surf3'/
+%\end{verbatim}
+%}
+%
+%\begin{figure}
+%\begin{center}
+%\begin{tabular}{c}
+%\includegraphics[width=6.0in]{SCRIPT_FIGURES/geom_scale}
+%\end{tabular}
+%\end{center}
+%\caption{Three triangles generated at different scale sizes using the {\ct SCALE}\ keyword. Case: geom\_scale.fds}
+%\label{fig:geom_scale}
+%\end{figure}
 
 \subsection{geom\_obst.fds}
 Figure \ref{fig:geom_obst} was created using the following GEOM namelist.
@@ -2669,7 +2857,7 @@ Consider the solution of the following constant density, incompressible flow, mo
 %
 \begin{eqnarray}
   \frac{\partial \rho \mathbf{u}(\mathbf{x},t)}{\partial t} &=& -\left[ \mathbf{F_v}(\mathbf{u},\mathbf{x},t) + \boldsymbol{\nabla} p(\mathbf{x},t) + \mathbf{fe_v}(\mathbf{u},p) \right] \label{eq:mmsMom} \\
-  \frac{\partial \rho Z}{\partial t} &=& -\left[   \mathbf{F_z}(\mathbf{u},\mathbf{x},t) +  \mathbf{fe_Z}(\mathbf{u},Z)   \right] 
+  \frac{\partial \rho Z}{\partial t} &=& -\left[   \mathbf{F_z}(\mathbf{u},\mathbf{x},t) +  \mathbf{fe_Z}(\mathbf{u},Z)   \right]
   \label{eq:mmsZ}
 \end{eqnarray}
 %
@@ -2692,19 +2880,19 @@ which is similar on velocities and pressure to the functions given in reference~
    for \; \; kx'=ky'= m \pi \; ; \; m \in \mathbb{N}
 \end{equation}
 %
-which can be used as \textit{no-slip wall} conditions in square boundaries defined by the integer $m$. Indeed, one could be interested in the flow field inside the square boundaries, or outside. 
+which can be used as \textit{no-slip wall} conditions in square boundaries defined by the integer $m$. Indeed, one could be interested in the flow field inside the square boundaries, or outside.
 
- The MMS sources $\mathbf{fe_v}$ and $\mathbf{fe_Z}$ are computed analytically as functions of $(\mathbf{x},t)$ replacing definitions~\eqref{eq:upmf}-\eqref{eq:qmf} in the governing equations~\eqref{eq:mmsMom}-\eqref{eq:mmsZ} and computing symbolically the corresponding terms. The Matlab script that performs said derivations can be found in the fds repository in \textbf{DEFINE LOCATION of matlab script}.  
+ The MMS sources $\mathbf{fe_v}$ and $\mathbf{fe_Z}$ are computed analytically as functions of $(\mathbf{x},t)$ replacing definitions~\eqref{eq:upmf}-\eqref{eq:qmf} in the governing equations~\eqref{eq:mmsMom}-\eqref{eq:mmsZ} and computing symbolically the corresponding terms. The Matlab script that performs said derivations can be found in the fds repository in \textbf{DEFINE LOCATION of matlab script}.
 
 
 
-We take values $m=0,1$ and wavenumber $k=1$, and consider the external flow to the resulting square immersed body, as seen in figure~\ref{Fig:ManuSoln}. The velocity field function inside the immersed object $\Omega_1$ (i.e. solid region) is assumed zero at all times, consistent with the fixed rigid body hypothesis. 
+We take values $m=0,1$ and wavenumber $k=1$, and consider the external flow to the resulting square immersed body, as seen in figure~\ref{Fig:ManuSoln}. The velocity field function inside the immersed object $\Omega_1$ (i.e. solid region) is assumed zero at all times, consistent with the fixed rigid body hypothesis.
 %
 % figure
 \begin{figure}[h]
       \centering
       \includegraphics[trim = 40mm 20mm 40mm 20mm, clip,
-       width=0.6\linewidth]{../../../fig/fds/RotCube_ManuSolnSketch.png} 
+       width=0.6\linewidth]{../../../fig/fds/RotCube_ManuSolnSketch.png}
       \caption{Reference frames for Eulerian ($E$) and immersed body local system ($B$), and vectors relating a generic point $p$ on the fluid region $\Omega-\Omega_1$.}
 	\label{Fig:ManuSoln}
 \end{figure}
@@ -2712,7 +2900,7 @@ We take values $m=0,1$ and wavenumber $k=1$, and consider the external flow to t
 An angular parameter $\alpha$ defines the orientation of the local axes $x',y'$ respect to the Eulerian frame coordinates $x,y$. The center of $\Omega_1$ in the Eulerian frame is situated in position $\mathbf{x}_{Ec}=(\pi,\pi)$. The rotation matrix from Eulerian $E$ to local frame $B$ coordinates is
 %
 \begin{equation}
-  [\mathbf{T}_{BE}] = \left[ \begin{array}{c c} 
+  [\mathbf{T}_{BE}] = \left[ \begin{array}{c c}
                                           \cos(\alpha) & \sin(\alpha) \\
                                          -\sin(\alpha)  & \cos(\alpha) \end{array} \right]
 \end{equation}
@@ -2721,7 +2909,7 @@ In the local system, the center of the square in local coordinates is given by $
 %
 \begin{equation}
     \mathbf{x}_{Bp}'= \mathbf{x}_{Bc}' +\mathbf{x}_{cp}'
-\end{equation}  
+\end{equation}
 %
 The same point $p$ location can be defined in terms of the $E$ frame as $\mathbf{x}_{Ep}= \mathbf{x}_{Ec} +\mathbf{x}_{cp}$ (Eulerian coordinates). Then
 %
@@ -2733,7 +2921,7 @@ and finally
 %
 \begin{equation}
     \mathbf{x}_{Bp}'= \mathbf{x}_{Bc}' +[\mathbf{T}_{BE}] \left( \mathbf{x}_{Ep} - \mathbf{x}_{Ec} \right)
-\end{equation}  
+\end{equation}
 %
 This last equation is employed to translate a given point $\mathbf{x}_{Ep}$ in the Eulerian frame (with Eulerian frame coordinates $x,y$) to the local frame coordinates where equations~\eqref{eq:upmf}-\eqref{eq:qmf} are defined. This transformation is used to define the initial conditions in the local frame, for points collocated in the Eulerian frame aligned fluid grid. Also, the manufactured variables can be defined at the final time to define error norms. Finally, the velocity components of interest are the ones defined in the Eulerian frame, and can be readily computed as
 %
@@ -2741,7 +2929,7 @@ This last equation is employed to translate a given point $\mathbf{x}_{Ep}$ in t
   \left\{ \begin{array}{c}  u \\ v \end{array} \right\}_p = [\mathbf{T}_{BE}]^T \left\{ \begin{array}{c}  u' \\ v' \end{array} \right\}_p
 \end{equation}
 %
-We assume periodic boundary conditions on $\partial \Omega$. Then, the size of the domain $\Omega$ depends on the periodicity lengths for a rotated flow field. 
+We assume periodic boundary conditions on $\partial \Omega$. Then, the size of the domain $\Omega$ depends on the periodicity lengths for a rotated flow field.
 When $\alpha=0$, a domain $\Omega$ of size $L_x=L_y=2\pi$ centered in $\mathbf{x}_{Ec}$ is sufficient for application of periodic boundary conditions. Then, for $\alpha=\arctan(1/r)$, $r=1,2,3,...$ the periodicity lengths on the Eulerian reference frame are $L_x=L_y=2\pi \sqrt{1+r^2}$.
 That is, if $\alpha=\arctan(1)$,  the periodicity length increases to $L_x=L_y=\sqrt{8} \pi$. If $\alpha=\arctan(1/2)$, $L_x=L_y=\sqrt{20} \pi$.
 %See figures~\ref{}a-c.
@@ -2761,13 +2949,13 @@ where in our case $Re_H= \rho \overline{u} H/ \mu \simeq 155$, being the analyti
    \Delta p / L = f \frac{L}{H}  \frac{1}{2} \rho \overline{u}^2
 \end{equation}
 %
-which can be used to compute the simulation error in $f$, as a function of the mean velocity evaluated on the numerical mesh. To evaluate the solution quality of the CC-IBM scheme we consider three sets of test cases. See figure~\ref{Fig:PoiseSketch}. 
+which can be used to compute the simulation error in $f$, as a function of the mean velocity evaluated on the numerical mesh. To evaluate the solution quality of the CC-IBM scheme we consider three sets of test cases. See figure~\ref{Fig:PoiseSketch}.
 %
 % figure
 \begin{figure}[h]
       \centering
       \includegraphics[trim = 60mm 34mm 60mm 42mm, clip,
-       width=0.75\linewidth]{../../../fig/fds/Poiseuille_cc_Sketch.png} 
+       width=0.75\linewidth]{../../../fig/fds/Poiseuille_cc_Sketch.png}
       \caption{Poiseuille flow created by two geometries $\Omega_1, \Omega_2$: Location of channel walls respect to Cartesian grid lines (in blue).}
 	\label{Fig:PoiseSketch}
 \end{figure}
@@ -2781,9 +2969,9 @@ There is more noise on the fixed geometry case $h=\Delta z_{10}/11$, because the
 \begin{figure}[h]
       \centering
       \includegraphics[trim = 5mm 0mm 5mm 0mm, clip,
-       width=0.49\linewidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/geom_poiseuille_convergence_theta0a.pdf} 
+       width=0.49\linewidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/geom_poiseuille_convergence_theta0a.pdf}
       \includegraphics[trim = 5mm 0mm 5mm 0mm, clip,
-       width=0.49\linewidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/geom_poiseuille_convergence_theta0na.pdf} 
+       width=0.49\linewidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/geom_poiseuille_convergence_theta0na.pdf}
       \caption{Poiseuille flow created by two geometries: Convergence trends on friction factor (Moody) for $h=0$, grid dependent $h=\Delta z/3$ and fixed $h=\Delta z_{10}/11$. Fluctuations on the friction factor error in the last case are produced by changes in cut-cell aspect ratios and velocity interpolation stencils as grids are refined.}
       \label{Fig:PoiseConvg}
 \end{figure}
@@ -2796,9 +2984,35 @@ There is more noise on the fixed geometry case $h=\Delta z_{10}/11$, because the
 
 
 
-\subsection{Parallel consistency test of helium plume around sphere, 1 mesh vs. 3 meshes}
 
-
+%\subsection{Flow around Sphere at different Reynolds numbers}
+%
+%We look first at the canonical case of isothermal flow around a sphere of diameter $D$, for Reynolds numbers up to $Re=300$. This flow is steady for Reynolds numbers up to $Re \simeq 270$ where it transitions to an oscillatory state.
+%
+%The first set of steady cases are defined in a domain of size $[-3.7D,12.5D]$ in the streamwise $x$ direction, and $[-2.7D,2.7D]$ in the cross stream directions $y$ and $z$. A resolution of 40 cubic cells in $D$ is defined around the sphere and on the wake region up to $4.4D$. A coarser resolution of 20 cells in $D$ is defined in the far field. 
+%In figure~\ref{}a, the streamwise velocity curves along the axis of the sphere and from its center downstream are shown. The zero crossings of these curves on the fluid region define the length $x_s$ of the recirculation bubble behind the sphere.
+%In figure~\ref{}b, $x_s$ is compared against results reported by Johnson and Patel~\cite{}. The agreement is very good, with a difference of the order of $10\%$ at $Re=50$ and $5\%$ on the other $Re=100,150,200$ data points.  
+%
+%% Figs steady:
+%%\begin{figure}
+%%\includegraphics[width=3.2in]{SCRIPT_FIGURES/ }
+%%\includegraphics[width=3.2in]{SCRIPT_FIGURES/ }
+%%\caption{}
+%%\end{figure}
+%
+%% Something on the force coefficients for steady.
+%
+%For the case of $Re=300$, the domain size defined is $[4D,14D]$ in the streamwise $x$ direction, and $[-3D,3D]$ in the cross stream directions. The blockage ratio for the sphere is in this case $2.18\%$. Tomboulides and Orzag~\cite{} provide an estimated laminar boundary layer thickness $\delta \simeq 0.065D$. We define a marginal resolution of $60$ cubic cells on $D$ on the sphere surface and in the wake region up to a downstream distance of $11D$. The Strouhal number from the streamwise velocity signal at $x=3.93D$ computed at oscillatory state is XXX, in excellent agreement with the the value of $St=0.136$ and $0.137$ provided in references~\cite{},\cite{} (computed from force coefficients). In figures~\ref{}a,b, mean and RMS streamwise velocity as function of axis positions downstream of the sphere are shown. Close agreement with reference~\cite{} is found. Lower RMS peaks on the near wake are noted on the current computation, likely consequence of a marginal resolution behind the sphere. 
+%
+%
+%% Figs Re=300:
+%%\begin{figure}
+%%\includegraphics[width=3.2in]{SCRIPT_FIGURES/ }
+%%\includegraphics[width=3.2in]{SCRIPT_FIGURES/ }
+%%\caption{}
+%%\end{figure}
+%
+%% Something on the force coefficients for Re=300.
 
 
 \subsection{Consistency test for OBST and GEOM of flow around heated cubes}

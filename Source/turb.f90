@@ -15,10 +15,11 @@ PRIVATE
 PUBLIC :: INIT_TURB_ARRAYS, VARDEN_DYNSMAG, WANNIER_FLOW, &
           WALL_MODEL, COMPRESSION_WAVE, VELTAN2D,VELTAN3D, &
           SYNTHETIC_TURBULENCE, SYNTHETIC_EDDY_SETUP, TEST_FILTER, EX2G3D, TENSOR_DIFFUSIVITY_MODEL, &
-          TWOD_VORTEX_CERFACS, TWOD_VORTEX_UMD, LOGLAW_HEAT_FLUX_MODEL, ABL_HEAT_FLUX_MODEL, RNG_EDDY_VISCOSITY, &
+          TWOD_VORTEX_CERFACS, TWOD_VORTEX_UMD, TWOD_SOBOROT_UMD, &
+          LOGLAW_HEAT_FLUX_MODEL, ABL_HEAT_FLUX_MODEL, RNG_EDDY_VISCOSITY, &
           NS_ANALYTICAL_SOLUTION, NS_U_EXACT, NS_V_EXACT, NS_H_EXACT, SANDIA_DAT, SPECTRAL_OUTPUT, SANDIA_OUT, &
           FILL_EDGES, NATURAL_CONVECTION_MODEL, FORCED_CONVECTION_MODEL, RAYLEIGH_HEAT_FLUX_MODEL, YUAN_HEAT_FLUX_MODEL, &
-          WALE_VISCOSITY
+          WALE_VISCOSITY, TAU_WALL_IJ
 
 CONTAINS
 
@@ -411,6 +412,107 @@ DO K=0,KBAR
 ENDDO
 
 END SUBROUTINE TWOD_VORTEX_UMD
+
+
+SUBROUTINE TWOD_SOBOROT_UMD(NM)
+!-------------------------------------------------------------------------------
+! Salman Verma, University of Maryland
+!
+! Solid body rotation velocity field, u = z and w = -x.
+!
+! Used for PERIODIC_TEST==12,13
+!-------------------------------------------------------------------------------
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: NM
+INTEGER :: I,J,K,IOR,II,JJ,KK,IW,IC
+REAL(EB), PARAMETER :: USCAL = 1._EB     ! scale velocity (m/s)
+REAL(EB), PARAMETER :: WSCAL = 1._EB     ! scale velocity (m/s)
+REAL(EB), PARAMETER :: XCLOC = 0._EB     ! Center of vortex, x (m)
+REAL(EB), PARAMETER :: ZCLOC = 0._EB     ! Center of vortex, z (m)
+
+CALL POINT_TO_MESH(NM)
+
+DO K=0,KBP1
+   DO J=0,JBP1
+      DO I=0,IBP1
+         U(I,J,K) = USCAL*(ZC(K)-ZCLOC)
+         US(I,J,K) = U(I,J,K)
+      ENDDO
+   ENDDO
+ENDDO
+
+V=0._EB
+VS=0._EB
+
+DO K=-0,KBP1
+   DO J=0,JBP1
+      DO I=0,IBP1
+         W(I,J,K) = -WSCAL*(XC(I)-XCLOC)
+         WS(I,J,K) = W(I,J,K)
+      ENDDO
+   ENDDO
+ENDDO
+
+! fill ghost values for smokeview
+
+DO K=0,KBP1
+   DO J=0,JBP1
+      DO I=0,IBAR
+         IC = CELL_INDEX(I,J,K)
+         IF (IC==0) CYCLE
+         V_EDGE_X(IC) = 0.5_EB*(V(I,J,K)+V(I+1,J,K))
+         W_EDGE_X(IC) = 0.5_EB*(W(I,J,K)+W(I+1,J,K))
+      ENDDO
+   ENDDO
+ENDDO
+
+DO K=0,KBP1
+   DO J=0,JBAR
+      DO I=0,IBP1
+         IC = CELL_INDEX(I,J,K)
+         IF (IC==0) CYCLE
+         U_EDGE_Y(IC) = 0.5_EB*(U(I,J,K)+U(I,J+1,K))
+         W_EDGE_Y(IC) = 0.5_EB*(W(I,J,K)+W(I,J+1,K))
+      ENDDO
+   ENDDO
+ENDDO
+
+DO K=0,KBAR
+   DO J=0,JBP1
+      DO I=0,IBP1
+         IC = CELL_INDEX(I,J,K)
+         IF (IC==0) CYCLE
+         U_EDGE_Z(IC) = 0.5_EB*(U(I,J,K)+U(I,J,K+1))
+         V_EDGE_Z(IC) = 0.5_EB*(V(I,J,K)+V(I,J,K+1))
+      ENDDO
+   ENDDO
+ENDDO
+
+! Set normal velocity on external and internal boundaries (follows divg)
+
+DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+   IOR = WALL(IW)%ONE_D%IOR
+   II  = WALL(IW)%ONE_D%II
+   JJ  = WALL(IW)%ONE_D%JJ
+   KK  = WALL(IW)%ONE_D%KK
+   SELECT CASE(IOR)
+      CASE( 1)
+         WALL(IW)%ONE_D%UWS = -U(II,JJ,KK)
+      CASE(-1)
+         WALL(IW)%ONE_D%UWS =  U(II-1,JJ,KK)
+      CASE( 2)
+         WALL(IW)%ONE_D%UWS = -V(II,JJ,KK)
+      CASE(-2)
+         WALL(IW)%ONE_D%UWS =  V(II,JJ-1,KK)
+      CASE( 3)
+         WALL(IW)%ONE_D%UWS = -W(II,JJ,KK)
+      CASE(-3)
+         WALL(IW)%ONE_D%UWS =  W(II,JJ,KK-1)
+   END SELECT
+   WALL(IW)%ONE_D%UW = WALL(IW)%ONE_D%UWS
+ENDDO
+
+END SUBROUTINE TWOD_SOBOROT_UMD
 
 
 SUBROUTINE VARDEN_DYNSMAG(NM)
@@ -1138,6 +1240,7 @@ ENDDO
 ! using Caley-Hamilton theorem
 
 SD2 = ONSI*(S2*S2 + O2*O2) + TWTH*S2*O2 + 2._EB*IV_SO
+IF (SD2 < 0.0) SD2 = 0._EB
 
 DENOM = S2**2.5_EB + SD2**1.25_EB
 IF (DENOM>TWO_EPSILON_EB) THEN
@@ -1149,10 +1252,12 @@ ENDIF
 END SUBROUTINE WALE_VISCOSITY
 
 
-SUBROUTINE WALL_MODEL(SLIP_FACTOR,U_TAU,Y_PLUS,U,NU,DY,S)
+SUBROUTINE WALL_MODEL(SLIP_FACTOR,U_TAU,Y_PLUS,U,NU,DY,S,DY2,U_DY2)
 
 REAL(EB), INTENT(OUT) :: SLIP_FACTOR,U_TAU,Y_PLUS
 REAL(EB), INTENT(IN) :: U,NU,DY,S ! S is the roughness length scale (Pope's notation)
+REAL(EB), OPTIONAL, INTENT(IN)  :: DY2
+REAL(EB), OPTIONAL, INTENT(OUT) :: U_DY2
 
 REAL(EB), PARAMETER :: RKAPPA=1._EB/0.41_EB ! 1/von Karman constant
 REAL(EB), PARAMETER :: B=5.2_EB,BTILDE_ROUGH=8.5_EB,BTILDE_MAX=9.5_EB ! see Pope (2000) pp. 294,297,298
@@ -1161,7 +1266,7 @@ REAL(EB), PARAMETER :: Y1=5._EB,Y2=30._EB
 REAL(EB), PARAMETER :: U1=5._EB,U2=RKAPPA*LOG(Y2)+B
 REAL(EB), PARAMETER :: EPS=1.E-10_EB
 
-REAL(EB) :: Y_CELL_CENTER,TAU_W,BTILDE,DELTA_NU,S_PLUS,DUDY
+REAL(EB) :: Y_CELL_CENTER,TAU_W,BTILDE,DELTA_NU,S_PLUS,DUDY,Y_CELL_CENTER2,Y_PLUS2
 INTEGER :: ITER
 
 ! References:
@@ -1242,6 +1347,38 @@ LES_IF: IF (SIM_MODE/=DNS_MODE) THEN
    SLIP_FACTOR = MAX(-1._EB,MIN(1._EB,1._EB-DUDY*DY/(ABS(U)+EPS))) ! -1.0 <= SLIP_FACTOR <= 1.0
 
 ENDIF LES_IF
+
+DY2_IF : IF (PRESENT(DY2)) THEN
+   IF (SIM_MODE==DNS_MODE) THEN
+      Y_CELL_CENTER2 = 0.5_EB*DY2
+      U_DY2 = Y_CELL_CENTER2/Y_CELL_CENTER * U ! Linear Variation of velocities is assumed.
+   ELSE
+      Y_CELL_CENTER2 = 0.5_EB*DY2
+      S_PLUS = S/(DELTA_NU+EPS) ! roughness in viscous units
+      IF (S_PLUS < S0) THEN
+         ! smooth wall
+         Y_PLUS2 = Y_CELL_CENTER2/(DELTA_NU+EPS)
+         IF (Y_PLUS2 < Y_WERNER_WENGLE) THEN
+            ! viscous sublayer
+            U_DY2 = Y_CELL_CENTER2/Y_CELL_CENTER * U ! Linear Variation of velocities is assumed.
+         ELSE
+            ! log layer
+            U_DY2   = U_TAU*(RKAPPA*LOG(Y_PLUS2)+B) ! U_TAU*U_PLUS2
+         ENDIF
+      ELSE
+         ! rough wall
+         IF (S_PLUS < S1) THEN
+            BTILDE = B + RKAPPA*LOG(S_PLUS) ! Pope (2000) p. 297, Eq. (7.122)
+         ELSE IF (S_PLUS < S2) THEN
+            BTILDE = BTILDE_MAX ! approximation from Fig. 7.24, Pope (2000) p. 297
+         ELSE
+            BTILDE = BTILDE_ROUGH ! fully rough
+         ENDIF
+         Y_PLUS2 = Y_CELL_CENTER2/S
+         U_DY2   = U_TAU*(RKAPPA*LOG(Y_PLUS2)+BTILDE) ! U_TAU*U_PLUS2 Pope (2000) p. 297, Eq. (7.121)
+      ENDIF
+   ENDIF
+ENDIF DY2_IF
 
 CONTAINS
 
@@ -1727,6 +1864,92 @@ ENDIF
 VELTAN3D = C(I_VEL,1)*U_STRM + C(I_VEL,3)*U_NORM + U_SURF(I_VEL)
 
 END FUNCTION VELTAN3D
+
+
+SUBROUTINE TAU_WALL_IJ(TAU_IJ,SS,U_VELO,U_SURF,NN,DN,DIVU,MU,RHO,ROUGHNESS)
+USE MATH_FUNCTIONS, ONLY: CROSS_PRODUCT
+
+REAL(EB), INTENT(OUT) :: TAU_IJ(3,3),SS(3)
+REAL(EB), INTENT(IN) :: U_VELO(3),U_SURF(3),NN(3),DN,DIVU,MU,RHO,ROUGHNESS
+REAL(EB) :: C(3,3),TT(3),U_RELA(3),SLIP_COEF,Y_PLUS,U_STRM,U_ORTH,U_NORM,TAUBAR_IJ(3,3),U_TAU
+INTEGER :: K,L,M,N
+
+! Cartesian grid coordinate system orthonormal basis vectors
+REAL(EB), DIMENSION(3), PARAMETER :: E1=(/1._EB,0._EB,0._EB/),E2=(/0._EB,1._EB,0._EB/),E3=(/0._EB,0._EB,1._EB/)
+
+! find a vector TT in the tangent plane of the surface and orthogonal to U_VELO-U_SURF
+U_RELA = U_VELO-U_SURF
+CALL CROSS_PRODUCT(TT,NN,U_RELA) ! TT = NN x U_RELA
+IF (ABS(NORM2(TT))<=TWO_EPSILON_EB) THEN
+   ! tangent vector is completely arbitrary, just perpendicular to NN
+   IF (ABS(NN(1))>=TWO_EPSILON_EB .OR.  ABS(NN(2))>=TWO_EPSILON_EB) TT = (/NN(2),-NN(1),0._EB/)
+   IF (ABS(NN(1))<=TWO_EPSILON_EB .AND. ABS(NN(2))<=TWO_EPSILON_EB) TT = (/NN(3),0._EB,-NN(1)/)
+ENDIF
+TT = TT/NORM2(TT) ! normalize to unit vector
+CALL CROSS_PRODUCT(SS,TT,NN) ! define the streamwise unit vector SS
+
+!! check unit normal vectors
+!print *,DOT_PRODUCT(SS,SS) ! should be 1
+!print *,DOT_PRODUCT(SS,TT) ! should be 0
+!print *,DOT_PRODUCT(SS,NN) ! should be 0
+!print *,DOT_PRODUCT(TT,TT) ! should be 1
+!print *,DOT_PRODUCT(TT,NN) ! should be 0
+!print *,DOT_PRODUCT(NN,NN) ! should be 1
+!print *                    ! blank line
+
+! directional cosines (see Pope, Eq. A.11)
+C(1,1) = DOT_PRODUCT(E1,SS)
+C(1,2) = DOT_PRODUCT(E1,TT)
+C(1,3) = DOT_PRODUCT(E1,NN)
+C(2,1) = DOT_PRODUCT(E2,SS)
+C(2,2) = DOT_PRODUCT(E2,TT)
+C(2,3) = DOT_PRODUCT(E2,NN)
+C(3,1) = DOT_PRODUCT(E3,SS)
+C(3,2) = DOT_PRODUCT(E3,TT)
+C(3,3) = DOT_PRODUCT(E3,NN)
+
+! transform velocity (see Pope, Eq. A.17)
+U_STRM = C(1,1)*U_RELA(1) + C(2,1)*U_RELA(2) + C(3,1)*U_RELA(3)
+U_ORTH = C(1,2)*U_RELA(1) + C(2,2)*U_RELA(2) + C(3,2)*U_RELA(3)
+U_NORM = C(1,3)*U_RELA(1) + C(2,3)*U_RELA(2) + C(3,3)*U_RELA(3)
+
+! ! check U_ORTH, should be zero
+! print *, 'U_STRM: ',U_STRM
+! print *, 'U_ORTH: ',U_ORTH
+! print *, 'U_NORM: ',U_NORM
+
+! in the streamwise coordinate system, the stress tensor simplifies to the symmetric tensor
+! T = [0      0 T(1,3)]
+!     [0      0      0]
+!     [T(3,1) 0 T(3,3)]
+
+TAUBAR_IJ      = 0._EB
+TAUBAR_IJ(3,3) = -2._EB*MU*(U_NORM*2._EB/DN - ONTH*DIVU)
+
+IF (SIM_MODE==DNS_MODE) THEN
+   TAUBAR_IJ(1,3) = MU*U_STRM*2._EB/DN
+ELSE
+   CALL WALL_MODEL(SLIP_COEF,U_TAU,Y_PLUS,U_STRM,MU/RHO,DN,ROUGHNESS)
+   TAUBAR_IJ(1,3) = RHO*U_TAU**2
+ENDIF
+TAUBAR_IJ(3,1) = TAUBAR_IJ(1,3)
+
+! transform tensors (Pope A.23)
+TAU_IJ = 0._EB
+DO M=1,3
+   DO N=1,3
+      ! inner summation for component m,n ---------------------
+      DO L=1,3
+         DO K=1,3
+            TAU_IJ(M,N) = TAU_IJ(M,N) + C(M,K)*C(N,L)*TAUBAR_IJ(K,L)
+         ENDDO
+      ENDDO
+      !--------------------------------------------------------
+   ENDDO
+ENDDO
+
+RETURN
+END SUBROUTINE TAU_WALL_IJ
 
 
 SUBROUTINE SYNTHETIC_EDDY_SETUP(NM)

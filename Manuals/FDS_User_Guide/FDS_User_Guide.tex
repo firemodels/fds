@@ -441,7 +441,7 @@ Running FDS using MPI requires shared disk access to each computer where cases w
 
 The goal of making FDS and Smokeview publicly available has been to enable practicing engineers to perform fairly sophisticated simulations at a reasonable cost. Thus, FDS and Smokeview have been designed for computers running Microsoft Windows, Mac OS~X, and Linux.
 \begin{description}
-\item[{\bf MS Windows}] An installation package is available for Windows operating system. It is not recommended to run FDS/Smokeview under any version of MS Windows released prior to Windows 7.
+\item[{\bf MS Windows}] An installation package is available for the 64~bit Windows operating system. It is not recommended to run FDS/Smokeview under any version of MS Windows released prior to Windows 7.
 \item[{\bf Mac OS X}] Pre-compiled executables are installed into a user selected directory using an installation script.  Mac OS~X 10.4.x or better is recommended. You can always download the latest version of FDS source and compile FDS for other versions of OS~X (See Appendix~\ref{info:compilation} for details).
 \item[{\bf Linux}] Pre-compiled executables are installed into a user selected directory using an installation script. If the pre-compiled FDS executable does not work (usually because of library incompatibilities), the FDS Fortran source code can be downloaded and compiled (See Appendix~\ref{info:compilation} for details). If Smokeview does not work on the Linux workstation, you can use the Windows version to view FDS output.
 \end{description}
@@ -461,91 +461,37 @@ If you are new to FDS and Smokeview, it is strongly suggested that you start wit
 
 Sample input files are included as part of the standard installation. A good case for a first time user is located in the subfolder called {\ct Fires} within the folder called {\ct Examples}. Find the file called \linebreak[4]{\ct simple\_test.fds} and copy it to a folder on your computer that is not within the installation folder. The reason for doing this is to avoid cluttering up the installation folder with a lot of output files. Follow the instructions in Section~\ref{single_mesh} to run this simple single mesh case. The simulation should only take a few minutes. Once the simulation is completed, use Smokeview to examine the output. In this way, you will quickly learn the basics of running and analyzing simulations.
 
-\section{A Brief Primer on Computer Hardware}
 
-The following brief definitions were copied from the Indiana University Knowledge Base, which was developed with support from (U.S) National Science Foundation grant OCI-1053575.
-\begin{description}
-\item[Cores:] Recent developments in computational architecture can lead to confusion concerning what a microprocessor is. Since the advent of multi-core technology, such as dual-cores and quad-cores, the term ``processor'' has been used to describe a logical execution unit or a physical chip. A multi-core chip may have several cores. With the advent of multi-core technology, the term ``processor'' has become context-sensitive, and is largely ambiguous when describing large multi-core systems. Essentially a core comprises a logical execution unit containing an L1 cache and functional units. Cores are able to independently execute programs or threads. Supercomputers are listed as having thousands of cores.
-\item[Chips:] A chip refers to a physical integrated circuit (IC) on a computer. A chip in the context of this document refers to an execution unit that can be single- or multi-core technology.
-\item[Sockets:] The socket refers to a physical connector on a computer motherboard that accepts a single physical chip. Many motherboards can have multiple sockets that can in turn accept multi-core chips.
-\item[Processes:] A process is an independent program running on a computer. A process has a full stack of memory associated for its own use, and does not depend on another process for execution. MPI (Message Passing Interface) processes are true processes because they can run on independent machines or the same machine.
-\item[Threads:] A thread is essentially a process that does not have a full stack of memory associated for it. The thread is tied to a parent process, and is merely an offshoot of execution. Typically thread processes must run on the same computer, but can execute simultaneously on separate cores of the same node. OpenMP parallelism uses threads for child processes.
-\item[Hyper-threading:] Hyper-threading is an Intel technology that originally preceded multi-core systems, and was used to make a single core appear logically as multiple cores on the same chip. Intel abandoned hyper-threading briefly during the advent of multi-core processors but reintroduced the technology in 2008. Since then, Intel has used it extensively to improve the performance of parallel computations in its multi-core processors. Hyper-threading improves performance by sharing the computational workload between multiple cores whenever possible, allowing the operating system to schedule more than one process at a time.
-\item[N-ways:] Multi-core compute nodes can be described by the number of execution units, or cores. A computer with 8 cores would be described as an 8-way node. This machine can have 8 independent processes running simultaneously. A 32-core system would be called a 32-way node.
-\item[Processors:] As explained above, a processor could describe either a single execution core or a single physical multi-core chip. The context of use will define the meaning of the term.
-\end{description}
+\section{Computer Basics}
 
-\section{Starting an FDS Calculation}
+\subsection{A Brief Primer on Computer Hardware}
 
-FDS can be run on a single computer, using one or more cores, or it can be run on multiple computers. Starting with FDS version~6.2.0, for each supported operating system (Windows, Linux, Mac~OS~X) there is a single executable file called {\ct fds} (with an {\ct .exe}\ file extension on Windows). Previous releases of FDS contained two executables, one that ran on a single processor and one that ran on multiple processors. Starting with FDS~6.2.0, these two executables have been combined into one, and it can run either in serial or parallel mode.
+FDS simulations can exploit multiple processing units on a single computer or multiple computers on a network. Before running an FDS simulation, you should familiarize yourself with your computer hardware. 
+
+If you are using a computer running Microsoft Windows, open up the Task Manager, Performance tab, and look for the number of {\em sockets}, {\em cores}, and {\em logical processors}\footnote{The terms sockets, cores, and logical processors are used by the Windows~10 Task Manager on a computer using an Intel processor. These terms might vary with different versions of Windows and different processors.}. The socket refers to the physical connector on the motherboard that has a power supply and a connection to random access memory (RAM). This is usually referred to as the central processing unit or CPU. Some motherboards have multiple sockets that can in turn support multiple CPUs, but for typical Windows desktops or laptops, there is one socket/CPU. Each CPU, however, typically has multiple cores, and each core is essentially an independent processing unit that shares access to power and memory. Sometimes cores are referred to as {\em physical cores} to distinguish them from {\em logical cores} or {\em logical processors}. A logical processor is one of multiple {\em threads} that can be supported by a core. For the purpose of running FDS on a Windows computer, the number of logical processors is your most important consideration.
+
+If you are running FDS under any variety of Linux or Mac~OS~X, you can determine the number of logical processors using the command ``lscpu'' for Linux or ``sysctl hw'' for OS~X. These operating systems might use slightly different terms, but the processors are similar if not the same as those on a Windows computer.
+
+
+\subsection{Two Ways to Use Multiple Processors}
+
+FDS can be run on a single computer, using one or more cores, or it can be run on multiple computers. Starting with FDS version~6.2.0, for each supported operating system (Windows, Linux, Mac~OS~X) there is a single\footnote{Previous releases of FDS contained two executables, one that ran on a single processor and one that ran on multiple processors. Starting with FDS~6.2.0, these two executables have been combined into one, and it can run either in serial or parallel mode.} executable file called {\ct fds} (with an {\ct .exe}\ file extension on Windows).
 
 There are two ways that FDS can be run in parallel; that is, exploit multiple cores on a single computer or multiple processors/cores distributed over multiple computers on a network or compute cluster. The first way is OpenMP (Open Multi-Processing)~\cite{Chapman:OpenMP} which allows a single computer to run a single or multiple mesh FDS simulation on multiple cores. The use of OpenMP does not require the computational domain to be broken up into multiple meshes, and it will still work with cases that have multiple meshes defined. The second way to run FDS in parallel is by way of MPI (Message Passing Interface). Here, the computational domain must be divided into multiple meshes and typically each mesh is assigned its own {\em process}. These processes can be limited to a single computer, or they can be distributed over a network.
 
-MPI and OpenMP can also be used together. For example, 4 MPI processes can be assigned to 4 different computers, and each MPI process can be supported by, say, 8 OpenMP threads, assuming each computer has 8 cores. Most of the speed up is achieved by the MPI. For a reasonably fast network, you can expect 4 MPI processes to speed up the computation time by a factor of about 0.9 times 4. The OpenMP can provide an extra factor up to about 2, regardless of the number of cores used beyond about 4.
 
-\subsection{Single or Multiple Mesh Simulation with OpenMP Parallel Processing}
+
+\subsubsection{What is OpenMP?}
 \label{single_mesh}
 
 If your simulation involves only one mesh, you can only run it on one computer, but you can exploit its multiple processors or cores using OpenMP. When you install FDS, it will query your computer to determine the number of available cores. By default, FDS will use approximately half of the available cores\footnote{To determine the number of cores used by OpenMP, just type {\ct fds} at the command prompt.} on a single computer. This is done for two reasons: (1) so as not to take over your entire machine when you run a simulation, and (2) because using all cores for a single simulation may not minimize the run time. OpenMP works best when exploiting multiple (logical) cores associated with a single (physical) processor or ``socket''.  For example, if your computer has two processors, each with 4 cores, it may not be worthwhile to use all 8 cores in an OpenMP simulation. You need to experiment with your own machine to determine the strategy that is best for you. To change the number of cores that are available for a given FDS simulation, you can set an environment variable called {\ct OMP\_NUM\_THREADS}. The way to do this depends on the operating system and will be explained below.
 
 When the job is started, FDS will print the number of cores that will be used for that job. Note that this setting only applies until you log out or restart your machine. To set the default value of available cores upon startup, the {\ct OMP\_NUM\_THREADS} environment variable can also be set in the startup configuration scripts on the machine. Refer to the documentation for your operating system for more information on how to configure environment variables upon startup.
 
-To confirm the speedup for the OpenMP version of the code, a series of test cases are run for two problem sizes ($64^3$ and $128^3$) varying the number of OpenMP threads.  The setup is a simple channel flow carrying two extra species to mimic the scalar transport performed in typical fire problems (see the {\ct Timing\_Benchmarks/openmp\_test} series in the FDS verification suite).  The results are shown in Fig.~\ref{fig:openmp_timing_benchmarks}.  Generally, users can expect a factor of 2 speedup using 4 cores (default setting).
-
-\begin{figure}[ht!]
-\centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/openmp_timing_benchmarks}
-\caption[OpenMP timing study]{Benchmark timing comparison for the OpenMP test cases. The computer that ran these jobs has 2 (physical) sockets, and each socket has 4 (logical) cores. This explains the decrease in efficiency beyond 4 OpenMP threads.}
-\label{fig:openmp_timing_benchmarks}
-\end{figure}
-Details of how to run the simulation are included below for the different operating systems.
-
-\subsubsection{MS Windows}
-
-Open up a Command Prompt window (click Start, then Run, then type ``cmd''), and change directories (``cd'') to where the input file for the case is located. Decide how many cores you want to devote to the simulation. For example, if you have 4 cores available, type the following at the command prompt:
-\begin{lstlisting}
-set OMP_NUM_THREADS=4
-\end{lstlisting}
-Then run the simulation by typing:
-\begin{lstlisting}
-fds job_name.fds
-\end{lstlisting}
-The progress of the simulation is indicated by diagnostic output that is written out onto the screen. Detailed diagnostic information is automatically written to a file {\ct job\_name.out}. Screen output can be redirected to a file via the alternative command:
-\begin{lstlisting}
-fds job_name.fds > job_name.err
-\end{lstlisting}
-Note that it is also possible to associate the {\ct .fds} extension with the FDS executable directly, thereby making FDS run by double-clicking on the input file. Be careful not to accidentally double-click on the input file when trying to edit it. This action will cause previously generated output files to be over-written.
-
-\subsubsection{Mac OS X, Unix, Linux}
-
-The installer for Mac OS~X, Unix, and Linux versions of FDS sets the {\ct PATH}\ variable allowing one to invoke FDS without a full path reference to the executable.  To specify 4 OpenMP threads on a Mac~OS~X or Linux computer running a Bash shell, type the following at the command prompt:
-\begin{lstlisting}
-export OMP_NUM_THREADS=4
-\end{lstlisting}
-To run FDS from the command line type:
-\begin{lstlisting}
-fds job_name.fds
-\end{lstlisting}
-The input parameters are read from the file {\ct job\_name.fds}, and error statements and other diagnostics are written out to the screen. To run the job in the background:
-\begin{lstlisting}
-fds job_name.fds >& job_name.err &
-\end{lstlisting}
-Note that in the latter case, the screen output is stored in the file {\ct job\_name.err} and the detailed diagnostics are saved automatically in a file {\ct job\_name.out}. It is preferable to run jobs in the background so as to free the console for other uses. To see output while an
-FDS job is running type:
-\begin{lstlisting}
-tail -f job_name.err
-\end{lstlisting}
-or
-\begin{lstlisting}
-tail -f job_name.out
-\end{lstlisting}
-
-
-\subsection{Multiple Mesh Simulation with MPI Parallel Processing}
+\subsubsection{What is MPI?}
 \label{info:parallelprocessing}
 
-FDS uses MPI (Message-Passing Interface)~\cite{Gropp:1} to allow multiple computers, or multiple cores on one computer, to run a single multi-mesh FDS job. The main idea is that you must break up the FDS domain into multiple meshes, and then the flow field in each mesh is computed as a different {\em process.} Note the subtle difference between these terms -- a {\em process} does not have the same meaning as a {\em processor}. The {\em process} can be thought of as a ``task'' that you would see in
-the Windows Task Manager or by executing the ``top'' command on a Linux/Unix machine. The {\em processor} refers to the computer hardware. A single {\em processor} may run multiple {\em processes}, for example. The computation on a given FDS mesh is thought of as an individual {\em process}, and MPI handles the transfer of information between these {\em processes}. Usually, each mesh is assigned its own {\em process} in an MPI calculation, although it is also possible to assign multiple meshes to a single {\em process}. In this way, large meshes can be computed on dedicated {\em processors}, while smaller meshes can be clustered together in a single {\em process} running on a single {\em processor}, without the need for MPI message passing between themselves.
+MPI (Message-Passing Interface)~\cite{Gropp:1} enables multiple computers, or multiple cores on one computer, to run a multi-mesh FDS job. The main idea is that you must break up the FDS domain into multiple meshes, and then the flow field in each mesh is computed as an MPI {\em process.}  The {\em process} can be thought of as a ``task'' that you would see in the Windows Task Manager or by executing the ``top'' command on a Linux/Unix machine. MPI handles the transfer of information between the meshes, i.e. MPI processes. Usually, each mesh is assigned its own {\em process} in an MPI calculation, although it is also possible to assign multiple meshes to a single MPI {\em process}. In this way, large meshes can be computed on dedicated cores, while smaller meshes can be clustered together in a single {\em process} running on a single core, without the need for MPI message passing.
 
 Also note that FDS refers to its meshes by the numbers 1, 2, 3, and so on, whereas MPI refers to its processes by the numbers 0, 1, 2, and so on. Thus, Mesh~1 is assigned to Process~0; Mesh~2 to Process~1, and so on. You do not explicitly number the meshes or the processes yourself, but error statements from FDS or from MPI might refer to the meshes or processes by number. As an example, if a FDS case with five meshes, the first printout (usually to the screen unless otherwise directed) is:
 \begin{lstlisting}
@@ -557,98 +503,103 @@ Mesh   5 is assigned to MPI Process   4
 \end{lstlisting}
 This means that 5 MPI processes (numbered 0 to 4) have started and that each mesh is being handled by its own process. The processes may be on the same or different computers. Each computer has its own memory (RAM), but each individual MPI process has its own independent memory, even if the processes are on the same computer.
 
-There are different implementations of MPI, much like there are different Fortran and C compilers. Each implementation is essentially a library of subroutines called from FDS that transfer data from one process to another across a fast network. The format of the subroutine calls has been widely accepted in the community, allowing different vendors and organizations the freedom to develop better software while working within an open framework. For Mac OS~X and Linux, we use Open MPI, an open source implementation that is developed and maintained by a consortium of academic, research, and industry partners (www.open-mpi.org). For Windows, we use Intel MPI~\footnote{Prior to FDS version 6.1.2, the Windows version of FDS used MPICH, a free implementation of MPI developed by Argonne National Laboratory. The MPICH developers have announced that they are no longer supporting the Windows version.}.
+There are different implementations of MPI, much like there are different Fortran and C compilers. Each implementation is essentially a library of subroutines called from FDS that transfer data from one process to another across a fast network. The format of the subroutine calls has been widely accepted in the community, allowing different vendors and organizations the freedom to develop better software while working within an open framework. For Mac OS~X, we use Open MPI, an open source implementation that is developed and maintained by a consortium of academic, research, and industry partners (www.open-mpi.org). For Windows and Linux, we use Intel MPI~\footnote{Prior to FDS version 6.1.2, the Windows version of FDS used MPICH, a free implementation of MPI developed by Argonne National Laboratory. The MPICH developers have announced that they are no longer supporting the Windows version.}.
 
-\subsubsection{Intel MPI for Windows}
+MPI and OpenMP can be used together. For example, 4 MPI processes can be assigned to 4 different computers, and each MPI process can be supported by, say, 8 OpenMP threads, assuming each computer has 8 cores. Most of the speed up is achieved by the MPI. For a reasonably fast network, you can expect 4 MPI processes to speed up the computation time by a factor of about 0.9 times 4. The OpenMP can provide an extra factor up to about 2, regardless of the number of cores used beyond about 4.
 
-The files needed to run an MPI calculation across a Windows domain network are bundled in with the FDS download. There is no need to install Intel MPI or its redistributable libraries. The following procedure is intended for a Windows domain network; that is, a network where user accounts are centrally managed such that any user can log in to any machine using the same credentials.
 
-To run an MPI calculation with FDS, you need to have administrator privileges on the machine that launches the job, but not necessarily on the machines that run the job. We have designed the FDS installation script to set up the necessary firewall exceptions and system environment variables automatically so that you need only install FDS as you normally would to make this work. You do not have to download and install the MPI software separately. Everything you need is in the FDS installation package.
+\section{Launching an FDS Job}
 
-First, uninstall the FDS-SMV package on all of the machines you plan to use. The new version will overwrite all existing versions unless they are moved or renamed.
+To start an FDS simulation, you can either use a third-party graphical user interface (GUI) or you can invoke the computer's command prompt and type a one-line command, as described in the following sections.
 
-If you wish to run FDS on more than one core on a single machine, then type the following command:
+\subsubsection{MS Windows}
+
+The files needed to run an FDS simulation on a single Windows computer or across a Windows domain network are bundled in with the FDS download. There is no need to install MPI or any redistributable libraries. The following procedure is intended for a Windows domain network; that is, a network where user accounts are centrally managed such that any user can log in to any machine using the same credentials. If you are not on a domain network, you can still run FDS locally, and instructions are given below.
+
+First, it is a good idea to uninstall older versions of FDS from all computers you plan to use. Even though the new version will overwrite older versions, there is always a chance that some remnant of an older version might cause incompatibilities with the new.
+
+Open up a Command Prompt window (click Start, then Run, then type ``cmd''), and change directories (``cd'') to where the input file for the case is located. Decide how many logical processes you want to devote to the simulation. For example, if you have 8 logical processes available, and you have an FDS job that involves 4 meshes, you would type the following at the command prompt:
 \begin{lstlisting}
-mpiexec -n 4 fds job_name.fds
+mpiexec -n 4 -env OMP_NUM_THREADS 2 fds job_name.fds
 \end{lstlisting}
-where 4 indicates the number of processes that will be created.  Note that as a default each process will use 4 OpenMP threads. It is advisable to set the environmental variable {\ct OMP\_NUM\_THREADS} so that the total number of threads ({\ct n $\times$ OMP\_NUM\_THREADS}) is less than or equal to the total number of cores on the machine
+If you are not on a Windows domain network, add the argument {\ct -localonly} to the command line, which means that you do not intend to run the job across multiple computers and that you do not need to provide network credentials.
 
-If you wish to run FDS on more than one machine, the following steps should be taken:
+The progress of the simulation is indicated by diagnostic output that is written onto the screen. Detailed diagnostic information is automatically written to a file {\ct job\_name.out}. Screen output can be redirected to a file via the alternative command:
+\begin{lstlisting}
+mpiexec ... fds job_name.fds > job_name.err
+\end{lstlisting}
+Note that it is also possible to associate the {\ct .fds} extension with the FDS executable directly, thereby making FDS run by double-clicking on the input file. However, we do not recommend this because of complications associated with the {\ct mpiexec} program.
 
+Also, you can automatically set the number of OpenMP threads via the command:
+\begin{lstlisting}
+set OMP_NUM_THREADS=N
+\end{lstlisting}
+where {\ct N} is the number of OpenMP threads to assign to each MPI process for all jobs launched during that particular session. You can change {\ct OMP\_NUM\_THREADS} permanently by changing the system environment variable of the same name.
+
+If you wish to run FDS on more than one computer, do the following:
 \begin{enumerate}
-\item Open up a command prompt by right-clicking on the command prompt icon and choosing ``Run as administrator''. Type the following command:
+\item Type the following command:
 
-    {\ct mpiexec -hosts 2 <my\_machine> 1 <other\_machine> 1 test\_mpi}
+    {\ct mpiexec -hosts 2 <my\_computer> 1 <other\_computer> 1 test\_mpi}
 
-    If this command returns a ``Hello World'' message from your machine and the other machine on your network, proceed to the next step. If this command fails, check that you can ``see'' the other machine by pinging it, and check that the other machine can ``see'' your machine as well.
+    If this command returns a ``Hello World'' message from your computer and the other computer on your network, proceed to the next step. If this command fails, check that you can ``see'' the other machine by pinging it, and check that the other computer can ``see'' your computer as well. Also, make sure that the same version of FDS is installed on the other computer.
 
-\item Share (with both read and write privilege) a working directory on your machine. Do not put this directory within the Program Files path. Share the working directory with everybody so that all other machines can see it. Note how this directory is defined on the other machines. Sometimes it is {\ct \textbackslash\textbackslash<my\_machine>\textbackslash<my\_shared\_directory>\textbackslash} and sometimes it is defined via the numerical IP address, like {\ct \textbackslash\textbackslash129.6.129.87\textbackslash<my\_shared\_directory>\textbackslash}. The definition depends on the way your domain name server (DNS) works. In any case, do not leave blank spaces within any directory or file names. We have found that blanks create all sorts of trouble. Unless you are a DOS/Windows expert, avoid them.
+\item Share (with both read and write privilege) a working directory on your machine. Do not put this directory within the ``Program Files'' folder because it is write-protected. Share the working directory with everybody so that all other computers can see it. Note how this directory is defined on the other computers. Sometimes it is {\ct \textbackslash\textbackslash<my\_computer>\textbackslash<my\_shared\_directory>\textbackslash} and sometimes it is defined via the numerical IP address, like {\ct \textbackslash\textbackslash129.6.129.87\textbackslash<my\_shared\_directory>\textbackslash}. The definition depends on the way your domain name server (DNS) works. In any case, do not leave blank spaces within any directory or file names. We have found that blanks create all sorts of trouble. Unless you are a DOS/Windows expert, avoid them.
 
 \item Within the command prompt, {\ct cd} to the working directory. Find or create within the working directory a relatively small, simple, two mesh FDS input file. At the command prompt, type:
 
-   {\ct mpiexec -hosts 2 m1 1 m2 1 -wdir \textbackslash\textbackslash...\textbackslash... fds job\_name.fds}
+   {\ct mpiexec -hosts 2 fred 1 ethel 1 -wdir \textbackslash\textbackslash...\textbackslash... fds job\_name.fds}
 
-   where {\ct m1} and {\ct m2} are the names of two computers on your network.
+   where {\ct fred} and {\ct ethel} are the names of two computers on your network. Remember to add the argument {\ct -env OMP\_NUM\_THREADS N} to set the number of OpenMP threads per MPI process on all computers. The default is {\em not} 1, but rather depends on the number of logical processors your computer has. If you accidently set too many OpenMP threads, you can overload your logical processors and reduce the job efficiency.
 
-\item If successful, you should see the usual FDS printout indicating the processes being assigned to the machines. If unsuccessful, try running the case on your own machine:
+\item If successful, you should see the usual FDS printout indicating the processes being assigned to the computers. If unsuccessful, try running the case on your own machine:
 
-   {\ct mpiexec -hosts 1 m1 2 -wdir \textbackslash\textbackslash...\textbackslash... fds job\_name.fds}
+   {\ct mpiexec -hosts 1 fred 2 -wdir \textbackslash\textbackslash...\textbackslash... fds job\_name.fds}
 
    If this is not successful, check with your network administrator or monitor the FDS help forums for advice.
 \end{enumerate}
 
 
 
-\subsubsection{Open MPI for Linux and Mac OS X}
+\subsubsection{Linux and Mac OS X}
 
-The release versions of FDS for Linux and Mac OSX are built with Open MPI, an open source MPI implementation that is developed and maintained by a consortium of academic, research, and industry partners. With Open~MPI, FDS is run using the command:
+A compute cluster that consists of a rack of dedicated compute nodes usually runs one of several variants of the Linux operating system. In such an environment, it is suggested, or required, that you use a job scheduler like PBS/Torque or Slurm to submit jobs by writing a short script that includes the command that launches the job, the amount of resources you require, and so on. The syntax used by PBS/Torque and Slurm is slightly different. Here is an example of a script for Intel MPI using the PBS/Torque job scheduler:
 \begin{lstlisting}
-mpirun -np 5 fds -hostfile my_hosts.txt job_name.fds
+#!/bin/bash
+#PBS -N job_name
+#PBS -e <pwd>/job_name.err
+#PBS -o <pwd>/job_name.log
+#PBS -l nodes=4:ppn=2
+#PBS -l walltime=24:0:0
+export OMP_NUM_THREADS=2
+export I_MPI_PIN_DOMAIN=omp
+cd <pwd>
+mpiexec -n 8 <full_path>/fds job_name.fds
 \end{lstlisting}
-where the 5 indicates that 5 processes are to be used. In this case, the executable {\ct fds} is located in the working directory, but you can also provide the full path name to the installation directory. The file {\ct my\_hosts.txt} might look like this:
+The first line invokes the bash shell. The second line provides a name for the job. The third and fourth lines provide file names for standard error and standard out. The fifth line requests 2~processors per node on 4~nodes. The sixth line requests 24~h of time. The seventh line sets the number of OpenMP threads. The eighth line is a specific Intel MPI parameter that indicates how the OpenMP threads are to be ``pinned''. The ninth line establishes the working directory. The tenth line launches FDS. You will probably have to supplement this script with additional options unique to your compute environment. Consult the man pages for {\ct mpiexec} and the chosen job scheduler for details.
+
+If you opt to run the job without using a job scheduler, you can issue the commands directly at the command prompt:
+\begin{lstlisting}
+export OMP_NUM_THREADS=M
+mpiexec -n N -hostfile my_hosts.txt /home/username/.../fds job_name.fds >& job_name.err &
+\end{lstlisting}
+The file {\ct my\_hosts.txt} looks something like this:
 \begin{lstlisting}
 comp1 slots=2
 comp2 slots=1
 comp3 slots=2
 \end{lstlisting}
-where {\ct slots} indicate the number of available cores on that computer.
+where {\ct compX} are the names of available nodes and {\ct slots} indicate the number of available cores on each node. The parameter {\ct slots} is optional. On a cluster shared by others, you should not run long jobs without a job scheduler because it is possible for multiple jobs to share the same nodes/cores when a scheduler is not used.
+If you are using a single Linux or Mac OS X workstation, there is no need to define a host file. You just need to invoke the previously described {\ct mpiexec} line with a number of processors suitable to your case and computer. 
 
-To make the process run in the background, use the command:
-\begin{lstlisting}
-mpirun ... >& job_name.err &
-\end{lstlisting}
-The file {\ct job\_name.err} contains what is normally printed out to the screen.
 
+
+
+\section{Strategies for Running FDS}
 
 \subsection{Using MPI and OpenMP Together}
 
-Because it more efficiently divides the computation, MPI is the better choice for multiple mesh simulations. However, it is possible to combine MPI and OpenMP in the same simulation. If you have multiple computers at your disposal, and each computer has multiple cores, you can assign one MPI process to each computer, and use multiple cores on each computer to speed up the processing of a given mesh using OpenMP. For example, on a Windows Domain Network, if you have two computers that are available and each computer has four cores, you can run a two mesh simulation as follows:
-\begin{lstlisting}
-mpiexec -hosts 2 m1 1 m2 1 -wdir \\...\... -env OMP_NUM_THREADS 4 fds job\_name.fds
-\end{lstlisting}
-The use of OpenMP in this instance will probably speed the calculation by a factor of 2, but now you will be using 8 cores rather than 2. It might be better to divide the computational domain into 8 meshes and simply use MPI to process them. This all depends on your particular OS, hardware, network traffic, and so on. You should choose a good test case and try different meshing and parallel processing strategies to see what is best for you.
-
-\subsection{Efficiency of an MPI Calculation}
-
-At the end of a calculation, FDS prints out a file called {\ct CHID\_cpu.csv} that records the amount of CPU time that each MPI process spends in the major routines. For example, the column header {\ct VELO} stands for all the subroutines related to computing the flow velocity; {\ct MASS} stands for all the subroutines related to computing the species mass fractions and density. The column header {\ct MAIN} represents all of the CPU time that is not explicitly accounted for; that is, time spend in the main control loop. Ideally, this ought to be a few percent of the overall CPU time usage.
-
-There are two basic approaches to assessing the efficiency or scalability of an MPI (parallel) computation. The first is known as ``weak scaling,'' in which the amount of work done by each MPI process stays the same and additional processes are added to solve a larger problem. For example, if you are simulating the flow of air over a patch of terrain, and you keep adding more and more meshes of the same physical and numerical dimension, assigning each new mesh to its own MPI process, so as to simulate a larger and larger patch of terrain, then you would expect that the overall time of the simulation would not increase significantly with each additional mesh. The efficiency of such a calculation is given by the following expression:
-\be
-   E_{\rm w} = \frac{t_1}{t_N}
-\ee
-where $t_1$ is the CPU time for the case with 1 mesh (MPI process), and $t_N$ is the CPU time for the case with $N$ meshes (MPI processes). The left hand plot of Fig.~\ref{fig:scaling_tests} shows the results of a weak scaling study of FDS. Meshes with dimension 50 by 50 by 50 are lined up side by side, ranging from 1 to 288 meshes. Ideally, the CPU time ought to be about the same for all cases, because each MPI process is doing the same amount of work. Only mesh to mesh communication should lead to inefficiencies. However, notice in the figure that the efficiency of the 1, 2, 4, and 8 mesh cases is greater than those with more MPI processes. The reason for this is that on most compute clusters, each node has multiple cores, and typically jobs run faster when a node is less than completely full. These test cases were run at NIST, where there is a compute cluster with 8 cores per node, and one with 12 cores per node.
-
-The second way to assess MPI efficiency is known as ``strong scaling.'' Here, you simulate a given scenario on a single mesh, and then you divide the mesh so that the cell size and the overall number of cells does not change. Ideally, if you divide a given mesh into two and run the case with two MPI processes instead of one, you would expect your computation time to decrease by a factor of two. But as you increase the number of MPI processes, you increase the amount of communication required among the processes. You also increase the overall number of boundary cells to compute, even though the overall number of gas phase cells remains the same. The efficiency of such a set of calculations is given by:
-\be
-   E_{\rm s} =  \frac{t_1}{N \; t_N}
-\ee
-In the strong study demonstrated here, a single mesh of dimension 180 by 160 by 80 is divided into a range of smaller meshes, with the smallest partitioning being 288 meshes of dimension 20 by 20 by 20. The resulting decrease in the CPU time of the entire calculation and the major subroutines is shown in the right hand plot of Fig.~\ref{fig:scaling_tests}. Ideally, the CPU time should be inversely proportional to the number of meshes (MPI processes); that is, the relative CPU times ought to follow the black dotted lines. The one notable exception to this rule is for ``COMM'' or COMMunications. This curve represents the time spent in communicating information across the network.
-\begin{figure}[!ht]
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/weak_scaling_test}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/strong_scaling_test}
-\caption[MPI scaling study]{Example of a weak (left) and strong (right) scaling study.}
-\label{fig:scaling_tests}
-\end{figure}
+Because it more efficiently divides the computational work, MPI is the better choice for multiple mesh simulations. However, it is possible to combine MPI and OpenMP in the same simulation. If you have multiple computers at your disposal, and each computer has multiple cores, you can assign one MPI process to each computer, and use multiple cores on each computer to speed up the processing of a given mesh using OpenMP. Typically, the use of OpenMP speeds the calculation by at most factor of 2, regardless of how many OpenMP threads you assign to each MPI process. It is usually better to divide the computational domain into more meshes and set the number of OpenMP threads to 1. This all depends on your particular OS, hardware, network traffic, and so on. You should choose a good test case and try different meshing and parallel processing strategies to see what is best for you.
 
 \subsection{Running Very Large Jobs}
 
@@ -660,6 +611,46 @@ Most FDS simulations reported in the literature use one to several dozen meshes,
 \item Run your job for a short amount of time to estimate the time required for the full job. Most large compute clusters will limit you to a certain amount of wall clock time, after which your job is simply stopped. If you have to use the restart feature in FDS, practice first with a short job to make sure that the job can be continued properly.
 \item Do a strong scaling study for your particular case. That is, run the job a fixed number of time steps with the least number of meshes that can fit within the machine's memory. Then divide the mesh by factors of 2, 4, or 8 until you reach a point where the increased number of meshes/processes does not provide a significant speed up.
 \end{enumerate}
+
+
+\section{Efficiency of Multi-Process Simulations}
+
+At the end of a calculation, FDS prints out a file called {\ct CHID\_cpu.csv} that records the amount of CPU time that each MPI process spends in the major routines. For example, the column header {\ct VELO} stands for all the subroutines related to computing the flow velocity; {\ct MASS} stands for all the subroutines related to computing the species mass fractions and density. The column header {\ct MAIN} represents all of the CPU time that is not explicitly accounted for; that is, time spend in the main control loop. Ideally, this ought to be a few percent of the overall CPU time usage.
+
+\subsection{MPI Efficiency}
+
+There are two basic approaches to assessing the efficiency or {\em scalability} of MPI. The first is known as ``weak scaling,'' in which the amount of work done by each MPI process stays the same and additional processes are added to solve a larger problem. For example, if you are simulating the wind over a patch of terrain, and you keep adding more and more meshes of the same physical and numerical dimension, assigning each new mesh to its own MPI process, so as to simulate a larger and larger patch of terrain, then you would expect that the overall time of the simulation would not increase significantly with each additional mesh. The efficiency of such a calculation is given by the following expression:
+\be
+   E_{\rm w} = \frac{t_1}{t_N}
+\ee
+where $t_1$ is the CPU time for the case with 1 mesh (MPI process), and $t_N$ is the CPU time for the case with $N$ meshes (MPI processes). The left hand plot of Fig.~\ref{fig:scaling_tests} shows the results of a weak scaling study of FDS. Meshes with dimension 50 by 50 by 50 are lined up side by side, ranging from 1 to 288 meshes. Ideally, the CPU time ought to be about the same for all cases, because each MPI process is doing the same amount of work. Only mesh to mesh communication should lead to inefficiencies. However, notice in the figure that the efficiency of the 1, 2, 4, and 8 mesh cases is greater than those with more MPI processes. The reason for this is that on most compute clusters, each node has multiple cores, and typically jobs run faster when a node is less than completely full. These test cases were run at NIST, where there is a compute cluster with 8 cores per node, and one with 12 cores per node.
+
+The second way to assess MPI efficiency is known as ``strong scaling.'' Here, you simulate a given scenario on a single mesh, and then you divide the mesh so that the cell size and the overall number of cells does not change. Ideally, if you divide a given mesh into two and run the case with two MPI processes instead of one, you would expect your computation time to decrease by a factor of two. But as you increase the number of MPI processes, you increase the amount of communication required among the processes. You also increase the overall number of boundary cells to compute, even though the overall number of gas phase cells remains the same. The efficiency of such a set of calculations is given by:
+\be
+   E_{\rm s} =  \frac{t_1}{N \; t_N}
+\ee
+In the strong study demonstrated here, a single mesh of dimension 180 by 160 by 120 is divided into a range of smaller meshes, with the smallest partitioning being 432 meshes of dimension 20 by 20 by 20. The resulting decrease in the CPU time of the entire calculation and the major subroutines is shown in the right hand plot of Fig.~\ref{fig:scaling_tests}. Ideally, the CPU time should be inversely proportional to the number of meshes (MPI processes); that is, the relative CPU times ought to follow the black dotted lines. The one notable exception to this rule is for ``COMM'' or COMMunications. This curve represents the time spent in communicating information across the network.
+\begin{figure}[!ht]
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/weak_scaling_test}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/strong_scaling_test}
+\caption[MPI scaling study]{Example of a weak (left) and strong (right) scaling study.}
+\label{fig:scaling_tests}
+\end{figure}
+
+\subsubsection{OpenMP Efficiency}
+
+To confirm the speedup provided by OpenMP, a series of test cases\footnote{The input files are available in the \href{https://github.com/firemodels/fds/tree/master/Verification/Timing_Benchmarks}{FDS GitHub repository}.} are run for two mesh sizes ($64^3$ and $128^3$), varying the number of OpenMP threads.  The setup is a simple channel flow carrying two extra species to mimic the scalar transport performed in typical fire problems. The results are shown in Fig.~\ref{fig:openmp_timing_benchmarks}.  Generally, users can expect a factor of 2 speedup using 4~cores (default setting).
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/openmp_timing_benchmarks}
+\caption[OpenMP timing study]{Benchmark timing comparison for the OpenMP test cases. The computer that ran these jobs has 2 (physical) sockets, and each socket has 4 (logical) cores. This explains the decrease in efficiency beyond 4 OpenMP threads.}
+\label{fig:openmp_timing_benchmarks}
+\end{figure}
+
+
+
+
 
 
 \section{Monitoring Progress}
@@ -855,21 +846,9 @@ Validation Suite} removed for clarity.
 ...
 &TAIL / End of file.
 \end{lstlisting}
-It is recommended that when looking at a new scenario,
-first select a pre-written input file that resembles the case,
-make the necessary changes, then run the case at fairly low
-mesh resolution to determine if the geometry is set up correctly.
-It is best to start off with a relatively simple file that captures the main
-features of the problem without getting tied down with too much detail that
-might mask a fundamental flaw in the calculation. Initial calculations ought
-to be meshed coarsely so that the run times are less than an hour and
-corrections can easily be made without wasting too much time.
-As you learn how to write input files, you will continually
-run and re-run your case as you add in complexity.
+It is recommended that when looking at a new scenario, first select a pre-written input file that resembles the case, make the necessary changes, then run the case at fairly low mesh resolution to determine if the geometry is set up correctly. It is best to start off with a relatively simple file that captures the main features of the problem without getting tied down with too much detail that might mask a fundamental flaw in the calculation. Initial calculations ought to be meshed coarsely so that the run times are less than an hour and corrections can easily be made without wasting too much time. As you learn how to write input files, you will continually run and re-run your case as you add in complexity.
 
-Table~\ref{tbl:namelistgroups} provides a quick reference to all the namelist parameters and
-where you can find the reference to where it is introduced in the document and the
-table containing all of the keywords for each group.
+Table~\ref{tbl:namelistgroups} provides a quick reference to all the namelist parameters and where you can find the reference to where it is introduced in the document and the table containing all of the keywords for each group.
 
 \vspace{\baselineskip}
 \begin{table}[ht]
@@ -895,6 +874,7 @@ Group Name  & Namelist Group Description   & Reference Section & Parameter Table
 {\ct MATL}  & Material Property            & \ref{info:MATL} & \ref{tbl:MATL}  \\ \hline
 {\ct MESH}  & Mesh Parameters              & \ref{info:MESH} & \ref{tbl:MESH}  \\ \hline
 {\ct MISC}  & Miscellaneous                & \ref{info:MISC} & \ref{tbl:MISC}  \\ \hline
+{\ct MOVE}  & Transformation Parameters    & \ref{info:MOVE} & \ref{tbl:MOVE}  \\ \hline
 {\ct MULT}  & Multiplier Parameters        & \ref{info:MULT} & \ref{tbl:MULT}  \\ \hline
 {\ct OBST}  & Obstruction                  & \ref{info:OBST} & \ref{tbl:OBST}  \\ \hline
 {\ct PART}  & Lagrangian Particle          & \ref{info:PART} & \ref{tbl:PART}  \\ \hline
@@ -922,9 +902,7 @@ Group Name  & Namelist Group Description   & Reference Section & Parameter Table
 \section{Concatenating input files}
 \label{info:CATF}
 
-The namelist group {\ct \&CATF} allows for the inclusion of input information from different files into a simulation. Consider an
-FDS input file {\ct couch2.fds}\footnote{Referenced files can be found in the {\ct Examples/Fires} directory of the FDS bundle.} which contains
-%
+The namelist group {\ct \&CATF} allows for the inclusion of input information from different files into a simulation. Consider an FDS input file {\ct couch2.fds}\footnote{Referenced files can be found in the {\ct Examples/Fires} directory of the FDS bundle.} which contains
 \begin{lstlisting}
 &HEAD CHID='couch2', TITLE='Single Couch Test Case using two meshes & CATF files.'  /
 &MESH IJK=12,10,24, XB=1.1,2.3,3.6,4.6,0.0,2.4, MULT_ID='mesh' /
@@ -961,7 +939,6 @@ the namelist {\ct OTHER\_FILES} field. These contain information in the form of 
       MATL_ID        = 'GYPSUM PLASTER'
       THICKNESS      = 0.012 /
 \end{lstlisting}
-%
 In the second {\ct \&CATF} line, a file {\ct couch2\_devices.dat} defines in FDS input format a set of sensor device lines, potentially produced by an
 automated script.
 
@@ -1308,7 +1285,7 @@ Key Parameter                          & Section                        & {\ct '
 \section{Stopping and Restarting Calculations}
 \label{info:restart}
 
-An important {\ct MISC} parameter is called {\ct RESTART}. Normally, a simulation consists of a sequence of events starting from ambient conditions. However, there are occasions when you might want to stop a calculation, make a few limited adjustments, and then restart the calculation from that point in time. To do this, first bring the calculation to a halt gracefully by creating a file called {\ct CHID.stop} in the directory where the output files are located. Remember that FDS is case-sensitive. The file name must be exactly the same as the {\ct CHID} and `stop' should be lower case. FDS checks for the existence of this file at each time step, and if it finds it, gracefully shuts down the calculation after first creating a final Plot3D file and a file (or files in the case of a multiple mesh job) called {\ct CHID.restart} (or {\ct CHID\_nn.restart}). To restart a job, the file(s) {\ct CHID.restart} should exist in the working directory, and the phrase {\ct RESTART=.TRUE.} needs to be added to the {\ct MISC} line of the input data file. For example, suppose that the job whose {\ct CHID} is ``plume'' is halted by creating a dummy file called {\ct plume.stop} in the directory where all the output files are being created. Note you wil also need to delete the file {\ct CHID.stop} so that FDS does not immeadiately stop the calculation. To restart this job from where it left off, add {\ct RESTART=.TRUE.} to the {\ct MISC} line of the input file {\ct plume.fds}, or whatever you have chosen to name the input file. The existence of a restart file with the same {\ct CHID} as the original job tells FDS to continue saving the new data in the same files as the old\footnote{By default, when a job is restarted, the spreadsheet output files will be appended at the time the job was restarted, not the time the job was stopped. If you want the output files to be appended without clipping off any existing data, even though some duplicate output will be left over, then set {\ct CLIP\_RESTART\_FILES} to {\ct .FALSE.} on the {\ct DUMP} line.}.  If {\ct RESTART\_CHID} is also specified on the {\ct MISC} line, then FDS will look for old output files tagged with this string instead of using the specified {\ct CHID} on the {\ct HEAD} line. In this case, the new output files will be tagged with {\ct CHID}, and the old output files will not be altered. When running the restarted job, the diagnostic output of the restarted job is appended to output files from the original job.
+An important {\ct MISC} parameter is called {\ct RESTART}. Normally, a simulation consists of a sequence of events starting from ambient conditions. However, there are occasions when you might want to stop a calculation, make a few limited adjustments, and then restart the calculation from that point in time. To do this, first bring the calculation to a halt gracefully by creating a file called {\ct CHID.stop} in the directory where the output files are located. Remember that FDS is case-sensitive. The file name must be exactly the same as the {\ct CHID} and `stop' should be lower case. FDS checks for the existence of this file at each time step, and if it finds it, gracefully shuts down the calculation after first creating a final Plot3D file and a file (or files in the case of a multiple mesh job) called {\ct CHID.restart} (or {\ct CHID\_nn.restart}). To restart a job, the file(s) {\ct CHID.restart} should exist in the working directory, and the phrase {\ct RESTART=.TRUE.} needs to be added to the {\ct MISC} line of the input data file. For example, suppose that the job whose {\ct CHID} is ``plume'' is halted by creating a dummy file called {\ct plume.stop} in the directory where all the output files are being created. Note you wil also need to delete the file {\ct CHID.stop} so that FDS does not immediately stop the calculation. To restart this job from where it left off, add {\ct RESTART=.TRUE.} to the {\ct MISC} line of the input file {\ct plume.fds}, or whatever you have chosen to name the input file. The existence of a restart file with the same {\ct CHID} as the original job tells FDS to continue saving the new data in the same files as the old\footnote{By default, when a job is restarted, the spreadsheet output files will be appended at the time the job was restarted, not the time the job was stopped. If you want the output files to be appended without clipping off any existing data, even though some duplicate output will be left over, then set {\ct CLIP\_RESTART\_FILES} to {\ct .FALSE.} on the {\ct DUMP} line.}.  If {\ct RESTART\_CHID} is also specified on the {\ct MISC} line, then FDS will look for old output files tagged with this string instead of using the specified {\ct CHID} on the {\ct HEAD} line. In this case, the new output files will be tagged with {\ct CHID}, and the old output files will not be altered. When running the restarted job, the diagnostic output of the restarted job is appended to output files from the original job.
 
 There may be times when you want to save restart files periodically during a run as insurance against power outages or system crashes. If this is the case, at the start of the original run set {\ct DT\_RESTART=50.} on the {\ct DUMP} line to save restart files every 50~s, for example. The default for {\ct DT\_RESTART} is 1000000, meaning no restart files are created unless you gracefully stop a job by creating a dummy file called {\ct CHID.stop}.
 It is also possible to use the new control function feature (see Section~\ref{info:CTRL}) to stop a calculation or dump a restart file when the computation reaches some measurable condition such as a first sprinkler activation.
@@ -1455,11 +1432,11 @@ The exact CFL needed to maintain stability depends on the order (as well as othe
     \begin{equation}
     \frac{\|\mathbf{u}\|}{\Delta} = \max \left(\frac{|u|}{\delta x}, \frac{|v|}{\delta y}, \frac{|w|}{\delta z}\right) + |\nabla \cdot \bu|
     \end{equation}
-{\ct CFL\_VELOCITY\_NORM=1} (DNS default, most restrictive, corresponds to $L_1$ norm of velocity vector)
+{\ct CFL\_VELOCITY\_NORM=1} (DNS and LES defaults, most restrictive, corresponds to $L_1$ norm of velocity vector)
     \begin{equation}
     \frac{\|\mathbf{u}\|}{\Delta} = \frac{|u|}{\delta x}+\frac{|v|}{\delta y}+\frac{|w|}{\delta z} + |\nabla \cdot \bu|
     \end{equation}
-{\ct CFL\_VELOCITY\_NORM=2} (LES default, $L_2$ norm of velocity vector)
+{\ct CFL\_VELOCITY\_NORM=2} ($L_2$ norm of velocity vector)
     \begin{equation}
     \frac{\|\mathbf{u}\|}{\Delta} = \sqrt{ \left( \frac{u}{\delta x} \right)^2 + \left( \frac{v}{\delta y} \right)^2 + \left( \frac{w}{\delta z} \right)^2 } + |\nabla \cdot \bu|
     \end{equation}
@@ -1513,7 +1490,7 @@ One additional parameter might be useful in some special cases. The numerical tr
 \subsection{Heat Transfer Constraint}
 \label{info:HT}
 
-Note that the heat transfer coefficient, $h$, has units of \si{W/(m$^2$.K)}.  Thus, a velocity scale may be formed from $h/(\rho\, c_p)$. Anytime we have a velocity scale to resolve, we have a CFL-type stability restriction. Therefore, the heat transfer stability check loops over all wall cells to ensure $\delta t \le \delta x \,\rho \,c_p/h$. This check may be invoked by setting {\ct CHECK\_HT=.TRUE.} on the {\ct MISC} line. It is {\ct .FALSE.} by default.
+Note that the heat flux, $\dot{q}''_{\rm c}$, has units of \si{W/m$^2$}.  Thus, a velocity scale may be formed from $(\dot{q}''_{\rm c}/\rho_{\rm w})^{1/3}$, where $\rho_{\rm w}$ is the gas phase density at the wall. Anytime we have a velocity scale to resolve, we have a CFL-type stability restriction. Therefore, the heat transfer stability check loops over all wall cells to ensure $\delta t < (\delta x/2) / (\dot{q}''_{\rm c}/\rho_{\rm w})^{1/3}$. This check is invoked by setting {\ct CHECK\_HT=.TRUE.} on the {\ct MISC} line. It is {\ct .FALSE.} by default.
 
 
 
@@ -2115,7 +2092,7 @@ of the ceiling, FDS will ignore the ceiling properties and apply the supply prop
 the second as it did in versions prior to FDS 5. Now, the rule for {\ct VENT}s is ``first come, first served.''
 Keep in mind, however, that the
 second {\ct VENT} is not rejected entirely -- only where there is overlap. FDS will also print out a warning to the screen (or to
-standard error) saying which {\ct VENT} has priority.
+standard error) saying which {\ct VENT} has priority.  Also, be careful if any of the {\ct VENT}s are applying {\ct OPEN} boundary conditions -- {\ct OPEN} boundaries disable pressure {\ct ZONE}s, which will change the solutio of the problem.
 
 Smokeview can help identify where two {\ct VENT}s overlap, assuming each has a unique {\ct COLOR}. Because Smokeview draws {\ct VENT}s
 on top of each other, areas of overlap will have a grainy, awkward appearance that changes pattern as you move the scene. In situations
@@ -2207,33 +2184,12 @@ Name & &  R  & G & B & Name & & R & G & B   \\ \hline \hline
 \subsection{Texture Maps}
 \label{info:texture_map}
 
-There are various ways of prescribing the color of various objects
-within the computational domain, but there is also a way of pasting
-images onto the obstructions for the purpose of making the Smokeview
-images more realistic. This technique is known as ``texture mapping.''
-For example, to apply a wood paneling image to a wall,
-add to the {\ct SURF} line defining the physical properties of the
-paneling the line:
+There are various ways of prescribing the color of various objects within the computational domain, but there is also a way of pasting images onto the obstructions for the purpose of making the Smokeview images more realistic. This technique is known as ``texture mapping.'' For example, to apply a wood paneling image to a wall, add to the {\ct SURF} line defining the physical properties of the paneling the line:
 \begin{lstlisting}
 &SURF ID='wood paneling',..., TEXTURE_MAP='paneling.jpg', TEXTURE_WIDTH=1.,
       TEXTURE_HEIGHT=2. /
 \end{lstlisting}
-Assuming that a JPEG file called {\ct paneling.jpg} exists in the
-working directory, Smokeview should read it and display the image
-wherever the paneling is used.
-Note that the image does not appear when Smokeview is first invoked. It is an option controlled by
-the {\ct Show/Hide} menu. The parameters {\ct TEXTURE\_WIDTH}
-and {\ct TEXTURE\_HEIGHT} are the physical dimensions of the image. In this case,
-the JPEG image is of a 1~m wide by 2~m high piece of
-paneling. Smokeview replicates the image as often as necessary to
-make it appear that the paneling is applied where desired.
-Consider carefully how the image repeats itself when
-applied in a scene. If the image has no obvious pattern, there is no
-problem with the image being repeated. If the image has an obvious
-direction, the real triplet {\ct TEXTURE\_ORIGIN} should be added to
-the {\ct VENT} or {\ct OBST} line to which a texture map
-should be applied. For example,
-
+Assuming that a JPEG file called {\ct paneling.jpg} exists in the working directory, Smokeview should read it and display the image wherever the paneling is used. Note that the image does not appear when Smokeview is first invoked. It is an option controlled by the {\ct Show/Hide} menu. The parameters {\ct TEXTURE\_WIDTH} and {\ct TEXTURE\_HEIGHT} are the physical dimensions of the image. In this case, the JPEG image is of a 1~m wide by 2~m high piece of paneling. Smokeview replicates the image as often as necessary to make it appear that the paneling is applied where desired. Consider carefully how the image repeats itself when applied in a scene. If the image has no obvious pattern, there is no problem with the image being repeated. If the image has an obvious direction, the real triplet {\ct TEXTURE\_ORIGIN} should be added to the {\ct VENT} or {\ct OBST} line to which a texture map should be applied. For example,
 \begin{lstlisting}
 &OBST XB=1.,2.,3.,4.,5.,7., SURF_ID='wood paneling', TEXTURE_ORIGIN=1.,3.,5. /
 \end{lstlisting}
@@ -2846,27 +2802,27 @@ See Section~\ref{solid_phase_verification} for ways to check and improve the acc
 
 The conduction model described in the previous sections does not account for lateral heat transfer within a solid.  Further, if a solid is immersed within a gas phase region it must be only one cell thick in order to communicate with neighboring gas phase regions for surface boundary conditions.  These issues are addressed by the solid heat transfer 3D ({\ct HT3D}) method, currently in beta testing in FDS.
 
-The method is invoked by adding {\ct {HT3D=.TRUE.}} to an {\ct {OBST}} line.  The {\ct {OBST}} line must then also have a {\ct {MATL\_ID}} associated.  The thermal properties of the material are uniform within a cell and are taken from a {\ct {MATL}} tied to the {\ct {OBST}} line.  You may connect multiple {\ct {OBST}} regions.  If you want layers of material, you must use a different {\ct {OBST}} for each layer, and each layer must be at least one cell thick. The thermal boundary conditions for the solid are taken from a {\ct SURF} associated with the faces of the {\ct OBST}.  The usual rules for associating {\ct SURF\_ID} with an {\ct OBST} apply: if only one {\ct SURF\_ID} is given, it applies to all six faces of the {\ct OBST}, if different thermal conditions apply to different faces you will need to use {\ct SURF\_IDS} or {\ct SURF\_ID6}.
+\subsubsection*{Invoking the 3D Heat Transfer Model (HT3D)}
 
-Recall that the default {\ct SURF} for an {\ct OBST} is {\ct 'INERT'}, which is a Dirichlet condition for the surface temperature equivalent to {\ct TMP\_FRONT=TMPA}.  If two-way coupling with the gas phase is desired, then the {\ct {SURF}} associated with the {\ct {OBST}} face should have {\ct {HT3D=.TRUE.}} and, generally, no other specified thermal boundary condition.  For example,
+The method is invoked by adding {\ct {HT3D=.TRUE.}} to an {\ct {OBST}} line.  The material properties for the solid are obtained either from a {\ct {MATL\_ID}} on the {\ct {OBST}} line (simple heat transfer) or from a {\ct SURF\_ID} (typically used in conjunction with pyrolysis).
+
+The thermal properties of the material are uniform within a cell.  You may connect multiple {\ct {OBST}} regions.  If you want layers of material, you must use a different {\ct {OBST}} for each layer, and each layer must be at least one cell thick.  Note the difference here between the 1D and 3D models---at present, each layer of a material must be explicitly resolved by the 3D model using the Eulerian grid.  That is, at present, lateral heat transfer is not possible with ``thin obstructions'' with zero thickness.
+
+The thermal boundary conditions for the solid are taken from a {\ct SURF} associated with the faces of the {\ct OBST}.  The usual rules for associating {\ct SURF\_ID} with an {\ct OBST} apply: if only one {\ct SURF\_ID} is given, it applies to all six faces of the {\ct OBST}, if different thermal conditions apply to different faces {\ct SURF\_IDS} or {\ct SURF\_ID6} must be used.
+
+\subsubsection*{Simple Heat Transfer}
+\label{sec:ht_only}
+
+The default {\ct SURF} for an {\ct OBST} is {\ct 'INERT'}, which is a Dirichlet condition for the surface temperature set to ambient.  If two-way coupling with the gas phase is desired, then the {\ct {SURF}} associated with the {\ct {OBST}} face should have {\ct {HT3D=.TRUE.}} and, generally, no other specified thermal boundary condition.  For example,
 \begin{lstlisting}
 &MATL ID='steel', .../
 &SURF ID='s1', HT3D=.TRUE./
 &OBST XB=..., HT3D=.TRUE., MATL_ID='steel', SURF_ID='s1'/
 \end{lstlisting}
-The exception to this rule is that an {\ct EXTERNAL\_FLUX} may be applied together with {\ct {HT3D=.TRUE.}} on {\ct SURF}.  Make sure that the {\ct {SURF}} doesn't also have an associated {\ct {MATL\_ID}}, which implements the 1D heat conduction model.
+The exception to this rule is that an {\ct EXTERNAL\_FLUX} may be applied together with {\ct {HT3D=.TRUE.}} on {\ct SURF}.  The user should make sure that the {\ct {SURF}} does not also have an associated {\ct {MATL\_ID}}, which implements the 1D heat conduction model.
 
-An {\ct OBST} with {\ct HT3D} may cross {\ct MESH} boundaries.  If the {\ct OBST} abuts the computational domain, the boundary condition is equivalent to {\ct ADIABATIC=.TRUE.}, that is, a no flux boundary.  If something other than no flux is desired, then allow at least one gas phase cell between the {\ct OBST} and the domain boundary.  Note that you can use {\ct SOLID\_PHASE\_ONLY=.TRUE.} on {\ct MISC} together with {\ct HT3D} to avoid wasting CPU time in gas phase cells.
-
-{\ct HT3D} solves the 3D (or 2D if appropriate) heat equation within an {\ct {OBST}} region of the domain.  {\ct HT3D} may be used with 2D cylindrical (axisymmetric) coordinates (specify {\ct CYLINDRICAL=.TRUE.} on {\ct MESH}).  The model uses the underlying gas phase grid resolution and explicit time integration that subcycles if necessary to achieve a stable solution to the heat equation.  The advantage of using the {\ct {OBST}} framework is that things like parallel capabilities and output methods ({\ct {DEVC}} and {\ct {SLCF}}) are automatically available without additional code requirements.
-
-Note that if the FDS time step is too large then the accuracy of two-way coupling can be poor.  You may need to set {\ct {DT}} on the {\ct {TIME}} line to be on the same order as the Von Neumann time step restriction based on the thermal diffusivity, $\alpha = k/(\rho c)$, of the solid (see also Sec.~\ref{info:CFL}).  In 3D, the time step restriction is
-\begin{equation}
-\label{eq:vnht3d}
-\delta t < \left[ 2 \alpha \left( \frac{1}{\delta x^2} + \frac{1}{\delta y^2} + \frac{1}{\delta z^2} \right) \right]^{-1}
-\end{equation}
-
-\subsubsection{Internal Heat Sources}
+\subsubsection*{Internal Heat Sources}
+\label{sec:heat_sources}
 
 Volumetric heat sources may be applied inside the solid.  Below is an example using an {\ct INIT} line, where {\ct HRRPUV} is in units of \si{kW/m^3}:
 \begin{lstlisting}
@@ -2879,6 +2835,15 @@ You can also use {\ct INTERNAL\_HEAT\_SOURCE} in \si{kW/m^3} on the {\ct OBST} l
 &SURF ID='SPHERE', HT3D=.TRUE./
 &OBST XB=..., HT3D=.TRUE., MATL_ID='orange', SURF_ID='SPHERE', INTERNAL_HEAT_SOURCE=200./
 \end{lstlisting}
+
+\subsubsection*{Internal Radiation}
+\label{sec:radiation_parameters}
+
+The parameters affecting in-depth radiation absorption are the material's refractive index and absorption coefficient.  They are specified on the MATL line:
+\begin{lstlisting}
+&MATL ID='...', REFRACTIVE_INDEX=1.33, ABSORPTION_COEFFICIENT=1000, .../
+\end{lstlisting}
+
 
 
 \section{Simple Pyrolysis Models}
@@ -3022,6 +2987,7 @@ HEAT_OF_COMBUSTION(4,1) = 14500. /
 Note that the indices associated with the parameters are not needed {\em in this case}, but they are shown to emphasize that, in general, there can be multiple reactions with corresponding kinetic parameters and products.
 
 \subsection{Reaction Rates}
+\label{sec:reaction_rates}
 
 For each reaction that each material component undergoes you must specify kinetic parameters of the reaction rate. The general evolution equation for a material undergoing one or more reactions is:
 \be
@@ -3317,6 +3283,8 @@ The burnout time of a liquid fuel is calculated automatically based on the liqui
 \label{box_burn_away2}
 \label{box_burn_away3}
 \label{box_burn_away4}
+\label{box_burn_away5}
+\label{box_burn_away6}
 \label{box_burn_away_2D}
 \label{box_burn_away_2D_residue}
 
@@ -3329,7 +3297,7 @@ If a burning object is to disappear from the simulation once it is consumed, set
 \item The mass of the object is based on the densities of all material components ({\ct MATL}), but it is only consumed by mass fluxes of the {\em known} species. If the sum of the gaseous yields is less than one, it will take longer to consume the mass.
 \end{itemize}
 Simple examples demonstrating how solid fuels can be forced to disappear from the domain are labeled \linebreak[4] {\ct Fires/box\_burn\_away}. These are examples of a solid block of solid material that is pyrolyzed until it is completely consumed. The heat flux is generated by placing hot surfaces around the box. There is no combustion. In the first
-example, {\ct box\_burn\_away1}, the released gas is ({\ct 'METHANE'}), and in the second example, {\ct box\_burn\_away2}, it is an additional species called {\ct 'GAS'}. In the third and fourth examples {\ct box\_burn\_away3} and {\ct box\_burn\_away4}, the released gas is fuel but the pyrolysis rate is specified. In the fourth case, the heat of combustion for the foam material is set different from that of the gas, with a ratio of 0.75. The properties of the solid material were chosen simply to assure a quick calculation. The objective of the test is to
+example, {\ct box\_burn\_away1}, the released gas is ({\ct 'METHANE'}), and in the second example, {\ct box\_burn\_away2}, it is an additional species called {\ct 'GAS'}. In the third and fourth examples {\ct box\_burn\_away3} and {\ct box\_burn\_away4}, the released gas is fuel but the pyrolysis rate is specified. In the fourth case, the heat of combustion for the foam material is set different from that of the gas, with a ratio of 0.75. In the fifth example, {\ct box\_burn\_away2}, the first example is repeated using with {\ct N\_SIMPLE\_CHEMSITRY\_REACTIONS=2}. The results should match the first case as the creation of fuel should be based upon the total heat of combustion for {\ct 'METHANE'} and not the heat of combustion for the first reaction. The sixth case, {\ct box\_burn\_away6}, has two fuels with the second fuel defined with half the heat of combustion of the second. On the MATL input the two fuels are given equal {\ct NU} and are assigned the same {\ct HEAT\_OF\_COMBUSTION}. As a result, the second fuel will have twice as much mass in the gas phase.  The properties of the solid material were chosen simply to assure a quick calculation. The objective of the test is to
 check that the released mass and the integrated burning rate are consistent with the material properties of the block. The block is 0.4~m on a side, with a density of 20~kg/m$^3$.  The integrated densities of the pyrolysis product gases (written to {\ct box\_burn\_away\#\_devc.csv}), as well as the integrated burning rate (written to {\ct box\_burn\_away\#\_hrr.csv}) at
 the end of the 30~s calculation ought to be:
 \be
@@ -3340,24 +3308,35 @@ except for the fourth case, where the amount of released gas is affected by the 
 0.75 \times 1.28 \; \hbox{kg}\; = 0.96 \; \hbox{kg}
 \ee
 The same case is tested in two dimensions ({\ct box\_burn\_away\_2D} and {\ct box\_burn\_away\_2D\_residue}). In the latter case, only half of the mass is converted to fuel, leaving behind a residue that is 50~\% of the original mass. The box is forced to burn away by setting the {\ct BULK\_DENSITY} to 10~kg/m$^3$. This is the {\em combustible} mass. These two cases exhibit a fictitious increase in solid mass when new unburned surfaces are exposed as entire mesh cells disappear. The increased mass is just an artifact of reporting the residual solid mass as the product of surface density and surface area. Both the final solid mass and the gaseous degradation products should match the expected values at the end of the simulation.
+
 \begin{figure}[p]
+	\begin{tabular*}{\textwidth}{lr}
+		\includegraphics[width=3.2in]{SCRIPT_FIGURES/box_burn_away1} &
+		\includegraphics[width=3.2in]{SCRIPT_FIGURES/box_burn_away2} \\
+		\includegraphics[width=3.2in]{SCRIPT_FIGURES/box_burn_away3} &
+		\includegraphics[width=3.2in]{SCRIPT_FIGURES/box_burn_away4} \\
+		\includegraphics[width=3.2in]{SCRIPT_FIGURES/box_burn_away5} &
+		\includegraphics[width=3.2in]{SCRIPT_FIGURES/box_burn_away6} \\
+	\end{tabular*}
+	\caption[Results of the {\ct box\_burn\_away} test cases]{Output of {\ct box\_burn\_away} test cases.}
+	\label{box_burn_away}
+\end{figure}
+
+
+\begin{figure}
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/box_burn_away1} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/box_burn_away2} \\
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/box_burn_away3} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/box_burn_away4} \\
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/box_burn_away_2D} &
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/box_burn_away_2D_residue} \\
 \end{tabular*}
-\caption[Results of the {\ct box\_burn\_away} test cases]{Output of {\ct box\_burn\_away} test cases.}
-\label{box_burn_away}
+\caption[Results of the {\ct box\_burn\_away\_2D} test cases]{Output of {\ct box\_burn\_away\_2D} test cases.}
+\label{box_burn_away_2D_fig}
 \end{figure}
 
 
 \subsection{Solid Pyrolysis 3D (Beta)}
 \label{info:pyro3d}
 
-Pyrolysis may also be applied with 3D heat transfer.  To invoke the 3D pyrolysis model, set {\ct HT3D=T} on the {\ct SURF} line with a {\ct MATL\_ID} that specifies the kinetics parameters (this is discussed in detail for the 1D solver).  An example is given below.
+Pyrolysis may also be applied with 3D heat transfer.  To invoke the 3D pyrolysis model, set {\ct HT3D=T} on the {\ct SURF} line with a {\ct MATL\_ID} that specifies the kinetics parameters (see Sec.~\ref{sec:reaction_rates}) for details on kinetics parameters).  An example is given below:
 \begin{lstlisting}
 &SURF ID='PMMA SLAB 3D'
       MATL_ID='BLACKPMMA 3D'
@@ -3373,16 +3352,22 @@ By default, like the 1D model, the current 3D pyrolysis model uses a very simple
       SURF_IDS='PMMA SLAB 3D','INSULATION','INSULATION' /
 \end{lstlisting}
 
-As an alternative to direct mass ejection, a diffusion approximation may be used to transport gas from the cell where it was generated to the surface of the solid.  To invoke this model, add {\ct PYRO3D\_MASS\_TRANSPORT=T} on {\ct OBST} (this supercedes {\ct PYRO3D\_IOR}).  At present, only transport \emph{out} of the solid is possible.  The fuel gas diffusivity may be specified on the {\ct MATL} line using the array {\ct DIFFUSIVITY\_SPEC(:)} in the same order as {\ct SPEC\_ID}.  If no diffusivity is specified, then the molecular diffusivity of the gas is used (see Sec.~\ref{gas_species_props}).
+As an alternative to direct mass ejection, a diffusion approximation may be used to transport gas from the cell where it was generated to the surface of the solid.  To invoke this model, use
+\begin{lstlisting}
+&OBST XB=..., PYRO3D_MASS_TRANSPORT=T, .../ ! supersedes PYRO3D_IOR
+\end{lstlisting}
+\vskip-.5\baselineskip
+At present, fuel gases are transported \emph{out} of the solid.  Other species, such as oxidizer, may transport into the solid.  The fuel gas diffusivity may be specified on the {\ct MATL} line using the array {\ct DIFFUSIVITY\_SPEC(:)} in the same order as {\ct SPEC\_ID}.  If no diffusivity is specified, then the molecular diffusivity of the gas is used.
 
 \subsubsection*{Useful Outputs}
+\label{sec:useful_outputs}
 
-With the 3D pyrolysis model you no longer have to ``view'' output through {\ct DEVC}s only.  An {\ct SCLF} that passes through the {\ct OBST} may be viewed in Smokeview (use Show/Hide > Geometry > Obstacles > Hidden or Outline Only to view slices inside obstructions [toggle with Alt + o]).  The solid cell temperatures can be viewed using the gas phase output
+With the 3D pyrolysis model you no longer have to ``view'' output through {\ct DEVC}s only.  An {\ct SLCF} that passes through the {\ct OBST} may be viewed in Smokeview (use Show/Hide > Geometry > Obstacles > Hidden or Outline Only to view slices inside obstructions [toggle with ALT + O]).  The solid cell temperatures can be viewed using the gas phase output
 \begin{lstlisting}
 &SLCF PBY=..., QUANTITY='TEMPERATURE', CELL_CENTERED=T /
 \end{lstlisting}
 
-With 3D pyrolysis it is also useful to view the solid density, both in total and for individual components, and the solid volume to gas phase cell volume ratio
+With 3D pyrolysis it is also useful to view the solid density, both in total and for individual components, and the solid-volume-to-cell-volume ratio:
 \begin{lstlisting}
 &SLCF PBY=..., QUANTITY='SOLID CELL DENSITY', CELL_CENTERED=T / total material density (omit MATL_ID)
 &SLCF PBY=..., QUANTITY='SOLID CELL DENSITY', MATL_ID='CHAR', CELL_CENTERED=T /
@@ -3624,14 +3609,16 @@ There are a number of techniques to measure the thermo-physical properties of a 
 \end{lstlisting}
 The two {\ct TGA} entries will force FDS to perform a numerical version of the TGA, DSC and MCC measurements. The {\ct THICKNESS} and other boundary conditions on the {\ct SURF} line will be ignored. After running the analysis, which only takes a second or two, FDS will then shut down without running the actual simulation. To run the simulation, either remove the {\ct TGA} entries or set {\ct TGA\_ANALYSIS} to {\ct .FALSE.}
 
-The result of the {\ct TGA\_ANALYSIS} is a single comma-delimited file called {\ct CHID\_tga.csv}. The first and second columns of the file consist of the time and sample temperature. The third column is the normalized sample mass; that is, the sample mass divided by its initial mass. The fourth column is the mass loss rate, in units of s$^{-1}$. The fifth column is the heat release rate per unit mass of the sample in units of W/g, typical of an MCC measurement. The sixth column is the heat absorbed by the sample normalized by its mass, also in units of W/g, typical of a DSC measurement. Results for a typical analysis of wood are shown in Fig.~\ref{tga_results}. In this case, a sample of wood containing about 10~\% water by mass heats up and undergoes three reactions, including the evaporation of water. Note that the TGA plots include both fuel and water vapor, while the MCC results only show fuel.
+The result of the {\ct TGA\_ANALYSIS} is a single comma-delimited file called {\ct CHID\_tga.csv}. The first and second columns of the file consist of the time and sample temperature. The third column is the normalized sample mass; that is, the sample mass divided by its initial mass. The following columns list the mass fractions of the individual material components. The next column is the total mass loss rate, in units of s$^{-1}$, followed by the mass loss rates of the individual material components. The next column is the heat release rate per unit mass of the sample in units of W/g, typical of an MCC measurement. The final column is the heat absorbed by the sample normalized by its mass, also in units of W/g, typical of a DSC measurement. Results for a typical analysis of wood are shown in Fig.~\ref{tga_results}. In this case, a sample of wood containing about 10~\% water by mass heats up and undergoes three reactions, including the evaporation of water. Note that the TGA plots include both fuel and water vapor, while the MCC results only show fuel.
 
 Details of the output quantities are discussed in Section~\ref{info:material_components}. Further details on these measurement techniques and how to interpret them are found in the FDS Verification Guide~\cite{FDS_Verification_Guide}.
 
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/tga_analysis_mass} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/tga_analysis_mlr} \\
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/tga_analysis_mass_components} \\
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/tga_analysis_mlr} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/tga_analysis_mlr_components} \\
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/tga_analysis_mcc} &
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/tga_analysis_dsc}
 \end{tabular*}
@@ -3834,9 +3821,7 @@ It may be helpful to use the boundary file output quantity {\ct MASS FLUX WALL C
 \label{info:HVAC}
 
 There are occasions where simply defining fixed flow and fixed species boundary conditions is not sufficient to model the behavior of an HVAC (Heating, Ventilation, and Air Conditioning) system.
-If the ability to transport heat and combustion products through a duct network or the ability to fully account for the pressurization of a compartment
-due to a fire on the flows in a duct network is important, you can make use of a coupled HVAC network solver.  The solver computes the flows through a
-duct network described as a mapping of duct segments and nodes where a node is either the joining of two or more ducts (a tee for example) or where a duct segment connects to the FDS computational domain.
+If the ability to transport heat and combustion products through a duct network or the ability to fully account for the pressurization of a compartment due to a fire on the flows in a duct network is important, you can make use of a coupled HVAC network solver. The solver computes the flows through a duct network described as a mapping of duct segments and nodes where a node is either the joining of two or more ducts (a tee for example) or where a duct segment connects to the FDS computational domain. For more information on coupled hybrid modelling in fire safety engineering, interested readers may want to refer to Ralph et al.'s literature review of the topic~\cite{Ralph:1}.
 
 By default the HVAC solver does not allow for mass storage in the duct network (i.e., what goes in during a time step, goes out during a time step). However, if you set {\ct HVAC\_MASS\_TRANSPORT=.TRUE.} on the {\ct MISC} line, then the HVAC solver will account for mass storage and will compute transient species and energy transport through the ducts.
 
@@ -4168,42 +4153,26 @@ If you are using {\ct DEVC}s to output spatially-integrated statistics as per Se
 \section{Pressure-Related Effects: The \texorpdfstring{{\tt ZONE}}{ZONE} Namelist Group (Table \ref{tbl:VENT})}
 \label{info:ZONE}
 
-FDS assumes pressure to be composed of a ``background'' component, $\bp(z,t)$, plus a perturbation pressure, $\tp(\bx,t)$. Most
-often, $\bp$ is just the hydrostatic pressure, and $\tp$ is the flow-induced spatially-resolved perturbation.
-You can specify any number of sealed compartments within the computational
-domain that can have their own ``background'' pressures, and these compartments, or ``pressure zones,'' can be connected via leakage and duct paths whose
-flow rates are tied to the pressure of the adjacent zones.
+FDS assumes pressure to be composed of a ``background'' component, $\bp(z,t)$, plus a perturbation pressure, $\tp(\bx,t)$. Most often, $\bp$ is just the hydrostatic pressure, and $\tp$ is the flow-induced spatially-resolved perturbation. You can specify any number of sealed compartments within the computational domain that can have their own ``background'' pressures, and these compartments, or ``pressure zones,'' can be connected via leakage and duct paths whose flow rates are tied to the pressure of the adjacent zones.
 
 
 
 \subsection{Specifying Pressure Zones}
 \label{info:ZONE_Basics}
 
-A pressure zone can be any region within the computational domain that is separated from the rest of the domain, or the exterior,
-by solid obstructions. There is currently no algorithm within FDS to identify these zones based solely on your specified obstructions. Consequently, it is
-necessary that you identify these zones explicitly in the input file. The basic syntax for a pressure {\ct ZONE} is:
+A pressure zone can be any region within the computational domain that is separated from the rest of the domain, or the exterior, by solid obstructions. There is currently no algorithm within FDS to identify these zones based solely on your specified obstructions. Consequently, it is necessary that you identify these zones explicitly in the input file. The basic syntax for a pressure {\ct ZONE} is:
 \begin{lstlisting}
 &ZONE XB=0.3,1.2,0.4,2.9,0.3,4.5 /
 \end{lstlisting}
-This means that the rectangular region, $0.3<x<1.2$, $0.4<y<2.9$, $0.3<z<4.5$, is assumed to be within a sealed compartment. There can be multiple {\ct ZONE}s
-declared. The indices of the zones, which are required for the specification of leaks and fans, are determined simply by the order in which they are specified in the input file.
-By default, the exterior of the computational
-domain is Zone~0. If there are no {\ct OPEN} boundaries, the entire computational domain will be assumed to be Zone~1.
+This means that the rectangular region, $0.3<x<1.2$, $0.4<y<2.9$, $0.3<z<4.5$, is assumed to be within a sealed compartment. There can be multiple {\ct ZONE}s declared. The indices of the zones, which are required for the specification of leaks and fans, are determined simply by the order in which they are specified in the input file. By default, the exterior of the computational domain is Zone~0. If there are no {\ct OPEN} boundaries, the entire computational domain will be assumed to be Zone~1.
 
-There are several restrictions to assigning pressure zones. First, the declared pressure zones must be completely within a region of the
-domain that is bordered by solid obstructions. If the sealed region is not rectangular, FDS will extend the specified {\ct ZONE} boundaries to
-conform to the non-rectangular region. It is possible to ``break'' pressure zones by removing
-obstructions between them. An example of how to break pressure zones is given below.
-Second, pressure zones can span multiple meshes, but it is recommended that you check the pressure in each mesh to ensure consistency. Also, if the {\ct ZONE} does span multiple
-meshes, make sure that the specified rectangular coordinates do so as well. This allows FDS to determine the actual extent of the {\ct ZONE} independently for each
-mesh.
+There are several restrictions to assigning pressure zones. First, the declared pressure zones must be completely within a region of the domain that is bordered by solid obstructions. If the sealed region is not rectangular, FDS will extend the specified {\ct ZONE} boundaries to conform to the non-rectangular region. It is possible to ``break'' pressure zones by removing obstructions between them. An example of how to break pressure zones is given below. Second, pressure zones can span multiple meshes, but it is recommended that you check the pressure in each mesh to ensure consistency. Also, if the {\ct ZONE} does span multiple meshes, make sure that the specified rectangular coordinates do so as well. This allows FDS to determine the actual extent of the {\ct ZONE} independently for each mesh. If the pressure zone has a non-rectangular shape such that it winds its way in and out of multiple meshes and you cannot create a single rectangular region to span it, you may use a series of points, one in each mesh touched by the pressure zone:
+\begin{lstlisting}
+&ZONE XYZ=1.0,2.0,2.3, 3.1,4.2,5.6, ... /
+\end{lstlisting}
+Each point should be clear of solid obstructions. A search algorithm will determine all other grid cells within the particular mesh belonging to that pressure zone.
 
-Note that if you plan to have one zone open up to another via the removal of an obstruction, make sure that the coordinates of the two
-zones abut (i.e., touch) even if one of the zones includes the solid obstruction that separates them. FDS recognizes that a zone boundary has been removed when
-two adjacent cells belonging to two different zones have no solid obstruction between them. It is recommended that you extend at least one
-of the zone boundaries {\em into} the solid obstruction separating the two zones. That way, when the obstruction is removed, the newly created
-gas phase cells will be assigned to one or the other zone and it will become obvious that two adjacent gas phase cells are of two different zones, at
-which point the zones will merge and no longer have distinct background pressures.
+Note that if you plan to have one zone open up to another via the removal of an obstruction, make sure that the coordinates of the two zones abut (i.e., touch) even if one of the zones includes the solid obstruction that separates them. FDS recognizes that a zone boundary has been removed when two adjacent cells belonging to two different zones have no solid obstruction between them. It is recommended that you extend at least one of the zone boundaries {\em into} the solid obstruction separating the two zones. That way, when the obstruction is removed, the newly created gas phase cells will be assigned to one or the other zone and it will become obvious that two adjacent gas phase cells are of two different zones, at which point the zones will merge and no longer have distinct background pressures.
 
 For the special case where a zone has periodic boundaries ({\ct SURF\_ID='PERIODIC'} on {\ct VENT}), you must add {\ct PERIODIC=.TRUE.} on the {\ct ZONE} line.
 
@@ -4838,6 +4807,19 @@ Note that {\ct V} indicates the velocity component normal to the surface.  You c
 {\ct T} does not need to be directly related to the FDS mesh.  The velocity points will be interpolated linearly by the ramp function.  In fact, this functionality is convenient for taking experimental data directly as a boundary condition to FDS.  You basically just need to list {\ct T} and {\ct F} from the data (you can set {\ct VEL=-1} if you want).  The results for this particular case are included under the heading ``Backward Facing Step'' in the FDS Validation Guide~\cite{FDS_Validation_Guide}. In this problem, the step height is $h=0.0098$ m, and the specification of the inlet profile is critical to correctly matching the reattachment point downstream of the step.
 
 
+\section{Rotation and Translation}
+\label{info:MOVE}
+
+It is possible to rotate and/or translate various objects within an FDS simulation using the namelist group called {\ct MOVE}. For example, the line
+\begin{lstlisting}
+&MOVE ID='spin', ROTATION_ANGLE=45., X0=2., Y0=3., Z0=4., AXIS=1,0,0 /
+\end{lstlisting}
+causes an object to be rotated 45$^\circ$ about the direction vector ({\ct AXIS}) (1,0,0) emanating from the point $(x_0,y_0,z_0)$. You may also translate the object in the three coordinate directions using the parameters {\ct DX}, {\ct DY}, {\ct DZ}, each in meters.
+
+Currently, this feature only applies to point and line devices, and in future shall be applied to non-rectangular immersed objects.
+
+
+
 \chapter{Chemical Species}
 \label{info:SPEC}
 
@@ -4942,7 +4924,7 @@ Species &   Mol.~Wt.            & Formula          & $\sigma$ & $\epsilon/k$   &
 {\ct HYDROGEN CYANIDE}   & 27.025340  & HCN              & 3.63     & 569.1    &  Y       &                            \\ \hline
 {\ct HYDROGEN FLUORIDE}  & 20.006343  & HF               & 3.148    & 330.0    &  Y       &                            \\ \hline
 {\ct HYDROGEN PEROXIDE}  & 34.014680  & H$_2$O$_2$       & 3.02     & 106.5    &  Y       &                            \\ \hline
-{\ct HYDROGEN SULFIDE}   & 34.08088   & H$_2$O$_2$       & 3.623    & 301.1    &  Y       &                            \\ \hline
+{\ct HYDROGEN SULFIDE}   & 34.08088   & H$_2$S           & 3.623    & 301.1    &  Y       &                            \\ \hline
 {\ct HYDROPEROXY RADICAL}& 33.006740  & HO$_2$           & 3.02     & 106.5    &          &                            \\ \hline
 {\ct HYDROXYL RADICAL}   & 17.007340  & OH               & 2.66     & 92.1     &          &                            \\ \hline
 {\ct ISOPROPANOL}        & 60.095020  & C$_3$H$_7$OH     & 4.549    & 576.7    &  Y       &  {\ct METHANOL}            \\ \hline
@@ -5009,7 +4991,7 @@ If no inputs for enthalpy are provided, then the specific heat of the gas will b
 \be
    c_{p,\alpha} = \frac{\gamma}{\gamma-1} \frac{\R}{W_\alpha}
 \ee
-The ratio of specific heats, {\ct GAMMA}, is 1.4 by default and can be changed on the {\ct MISC} line. If you want all the gas specific heats to follow this relation, set {\ct CONSTANT\_SPECIFIC\_HEAT\_RATIO=.TRUE.} on the {\ct MISC} line (note: this option also requires {\ct STRATIFICATION=.FALSE.} on the {\ct WIND} line and {\ct EXTINCTION\_MODEL = 'EXTINCTION 1'} or {\ct SUPPRESSION=.FALSE.} on the {\ct COMB} line).  In this case the {\ct REFERENCE\_ENTHALPY} will be assumed to be 0 kJ/kg at a {\ct REFERENCE\_TEMPERATURE} of 0 K. For high molecular weight species, use of the default gamma will result in very low values of the specific heat which can cause issues with the default extinction model. In this case it is recommened that enthalpy are provided. If the FDS is determining enthalpies using this relation, then it is recommened that you check the {\ct CHID.out} and verify that reasonable specific heat values have been created.
+The ratio of specific heats, {\ct GAMMA}, is 1.4 by default and can be changed on the {\ct MISC} line. If you want all the gas specific heats to follow this relation, set {\ct CONSTANT\_SPECIFIC\_HEAT\_RATIO=.TRUE.} on the {\ct MISC} line (note: this option also requires {\ct STRATIFICATION=.FALSE.} on the {\ct WIND} line and {\ct EXTINCTION\_MODEL = 'EXTINCTION 1'} or {\ct SUPPRESSION=.FALSE.} on the {\ct COMB} line).  In this case the {\ct REFERENCE\_ENTHALPY} will be assumed to be 0 kJ/kg at a {\ct REFERENCE\_TEMPERATURE} of 0 K. For high molecular weight species, use of the default gamma will result in very low values of the specific heat which can cause issues with the default extinction model. In this case it is recommended that enthalpy are provided. If the FDS is determining enthalpies using this relation, then it is recommended that you check the {\ct CHID.out} and verify that reasonable specific heat values have been created.
 
 The reference enthalpy can also be determined by defining the {\ct ENTHALPY\_OF\_FORMATION} on the {\ct SPEC} line with a reference temperature for all species given by {\ct H\_F\_REFERENCE\_TEMPERATURE} on the {\ct MISC} line (default is 25~$^\circ$C). Note that {\ct ENTHALPY\_OF\_FORMATION} will override any value given for {\ct REFERENCE\_ENTHALPY}.
 
@@ -5427,7 +5409,17 @@ The {\ct REAC} line specifies an AIT of 627~\si{\degreeCelsius} throughout the d
 &SURF ..., HRRPUA=..., AUTO_IGNITION_TEMPERATURE=-273. /
 \end{lstlisting}
 
-\newpage
+\subsection{Special Topic: Time Ramp of Ignition Temperature}
+\label{info:ramp_ait}
+
+The AIT for a given reaction may be ramped in time using {\ct RAMP\_AIT} on the {\ct REAC} line.  The ramp factor {\ct F} is applied to the AIT in Kelvins.  For example, to ramp AIT from -273 \si{\degreeCelsius} to 627 \si{\degreeCelsius} linearly over 10 s use
+\begin{lstlisting}
+&REAC ID='R1', FUEL='METHANE', AUTO_IGNITION_TEMPERATURE=627., RAMP_AIT='R1 AIT RAMP' /
+&RAMP ID='R1 AIT RAMP', T=0., F=0. /
+&RAMP ID='R1 AIT RAMP', T=10., F=1. /
+\end{lstlisting}
+
+
 
 \section{Complex Stoichiometry}
 \label{info:REAC_Diagnostics}
@@ -5921,7 +5913,7 @@ An important quantity in fire science is the fraction of the fire's heat release
 
 \vspace{\baselineskip}
 
-\noindent There are four ways of treating thermal radiation in FDS, as explained in the following sections. 
+\noindent There are four ways of treating thermal radiation in FDS, as explained in the following sections.
 
 \begin{table}[!ht]
 \caption[Default radiative fraction for some common fuels]{Default radiative fraction for some common fuels.}
@@ -6138,7 +6130,7 @@ By specifying a {\ct SPEC\_ID}, you are implicitly invoking the droplet evaporat
 
 The properties you need to supply for a liquid droplet depend on whether or not the {\ct SPEC\_ID} is listed in Table~\ref{tab:gasspecies}, and if the column labelled ``Liquid'' is checked with a ``Y'', meaning that its liquid properties are known. The following sub-sections provide instructions on what to do in various instances. Note that the {\ct INITIAL\_TEMPERATURE} ($^\circ$C) of the liquid droplets is specified on the {\ct PART} line. Its default value is the overall ambient temperature of the simulation, {\ct TMPA}, from the {\ct MISC} line.
 
-\subsubsection{{\it Known} Liquid/Gas Species}
+\subsubsection{Known Liquid/Gas Species}
 
 If the {\ct SPEC\_ID} is listed in Table~\ref{tab:gasspecies}, and if the column labelled ``Liquid'' is checked with a ``Y'', you need only list the following:
 \begin{lstlisting}
@@ -6147,7 +6139,7 @@ If the {\ct SPEC\_ID} is listed in Table~\ref{tab:gasspecies}, and if the column
 \end{lstlisting}
 There might be other optional parameters listed on the {\ct PART} line, but these are the ones that are absolutely necessary. In addition, if {\ct SPEC\_ID='WATER VAPOR'} the droplets are not only assigned the thermo-physical properties of water, but also the radiation absorption properties are set to that of water, and the droplets are colored blue in Smokeview.
 
-\subsubsection{{\it Unknown} Liquid/Gas Species}
+\subsubsection{Unknown Liquid/Gas Species}
 
 If the {\ct SPEC\_ID} is not listed in Table~\ref{tab:gasspecies} with a ``Y'' in the ``Liquid'' column, you must provide all of the following properties of the liquid on the {\ct SPEC} line:
 \begin{description}
@@ -6550,7 +6542,7 @@ where $l$ is the screen thickness (equal to the wire diameter), $\mu$ is the vis
    Y &=& 0.043 \; \hbox{\ct FREE\_AREA\_FRACTION}^{2.13}
 \end{eqnarray}
 
-The {\ct MISC} input parameter {\ct DRAG\_CFL\_MAX} controls the time step on the pressure drop across a screen (or other porous media). If a screen or other porous media introduces numerical instabilities, reducing the value of {\ct DRAG\_CFL\_MAX} may resolve them.
+The {\ct MISC} input parameter {\ct PARTICLE\_CFL\_MAX} controls the time step on the pressure drop across a screen (or other porous media). If a screen or other porous media introduces numerical instabilities, reducing the value of {\ct PARTICLE\_CFL\_MAX} below 1 may resolve them.
 
 \subsection{Electrical Cables}
 \label{info:THIEF}
@@ -7068,14 +7060,11 @@ The same smoke detector model is used that was described above, but now, the spe
 \subsection{Beam Detection Systems}
 \label{info:beam_detector}
 
-A beam detector can be defined by specifying the endpoints, {\ct (x1,y1,z1) and (x2,y2,z2)}, of the beam and the
-total percent obscuration at which the detector activates.  The two endpoints must lie in the same mesh.  FDS determines which mesh
-cells lie along the linear path defined by the two endpoints.  The beam detector response is evaluated as
+A beam detector can be defined by specifying the endpoints, {\ct (x1,y1,z1) and (x2,y2,z2)}, of the beam and the total percent obscuration at which the detector activates.  The two endpoints must lie in the same mesh.  FDS determines which mesh cells lie along the linear path defined by the two endpoints.  The beam detector response is evaluated as
 \be
   \hbox{Obscuration}  = \left(1 - \exp \left( -K_{\rm m} \sum_{i=1}^N {\rho_{{\rm s},i}\; \Delta x_i} \right)  \right) \times 100  \; \; \hbox{\%}
 \ee
-where $i$ is a mesh cell along the path of the beam, $\rho_{{\rm s},i}$ is the soot density of the mesh cell, $ \Delta x_i$
-is the distance within the mesh cell that is traversed by the beam, and $K_{\rm m}$ is the mass extinction coefficient. The line in the input file has the form:
+where $i$ is a mesh cell along the path of the beam, $\rho_{{\rm s},i}$ is the soot density of the mesh cell, $ \Delta x_i$ is the distance within the mesh cell that is traversed by the beam, and $K_{\rm m}$ is the mass extinction coefficient. The line in the input file has the form:
 \begin{lstlisting}
 &DEVC XB=x1,x2,y1,y2,z1,z2, QUANTITY='PATH OBSCURATION', ID='beam1', SETPOINT=33.0 /
 \end{lstlisting}
@@ -7085,16 +7074,13 @@ A similar {\ct QUANTITY} is {\ct 'TRANSMISSION'} which is given by the following
 \ee
 Note that the transmission is given in units of \%/m rather than \% like obscuration. $L$ is the total path length of the beam, and $L_0$ is the reference dimension of 1~m.
 
-Since a single linear path cannot span more than one mesh, having a beam detector that crosses multiple meshes will require post processing.
-Break the beam detector path into multiple {\ct DEVC} lines, one for each mesh that the beam crosses.  The total obscuration is given by
-\be
-  O  = \left[ 1 -  \prod_{i=1}^N \left( 1-O_i/100 \right)  \right] \times 100  \; \hbox{\%}
-\ee
-where $O_i$ is the FDS output for the beam detector of the $i$th path (note that the bracketed term contains a product rather than a sum).
+
 
 \subsubsection{Example Case: A Beam Detector}
 
-A 10~m $\times$ 10~m $\times$ 4~m compartment is filled with smoke from burning propane, represented as 0.006~kg/kg of the lumped species variable, {\ct PRODUCTS}. The soot yield is specified as 0.01~kg/kg, resulting in a uniform soot density of 71.9~mg/m$^3$. Using the default mass extinction coefficient of 8700~m$^2$/kg, the optical depth is calculated to be 0.626~\si{m^{-1}}.  The compartment has a series of obstructions located at increasing distance from the front in increments of 1~m.  The correlation for the output quantity {\ct VISIBILITY}, Eq.~(\ref{vis}), produces a visibility distance of 4.8~m. When viewing the smoke levels with Smokeview, you should just barely see the fifth obstacle which is at a distance of 5~m from the front of the compartment. If this is the case, Smokeview is properly displaying the obscuration of the smoke.  Three beam detectors are also placed in the compartment.  These all have a path length of 10~m, but are at different orientations within the compartment. Using the optical depth of 0.626~\si{m^{-1}} and the path length of 10~m, the expected total obscuration is 99.81~\%, which is the result computed by FDS for each of the three detectors.
+A 10~m $\times$ 10~m $\times$ 4~m compartment is filled with smoke from burning propane, represented as 0.006~kg/kg of the lumped species variable, {\ct PRODUCTS}. The soot yield is specified as 0.01~kg/kg, resulting in a uniform soot density of 71.9~mg/m$^3$. Using the default mass extinction coefficient of 8700~m$^2$/kg, the optical depth is calculated to be 0.626~\si{m^{-1}}.  The compartment has a series of obstructions located at increasing distance from the front in increments of 1~m.  The correlation for the output quantity {\ct VISIBILITY}, Eq.~(\ref{vis}), produces a visibility distance of 4.8~m. When viewing the smoke levels with Smokeview, you should just barely see the fifth obstacle which is at a distance of 5~m from the front of the compartment. If this is the case, Smokeview is properly displaying the obscuration of the smoke.  Three beam detectors are also placed in the compartment.  These all have a pathlength of 10~m, but are at different orientations within the compartment. Using the optical depth of 0.626~\si{m^{-1}} and the path length of 10~m, the expected total obscuration is 99.81~\%, which is the result computed by FDS for each of the three detectors.
+
+Note that this case uses 8 meshes to span the computational domain, and the beams are permitted to pass from one mesh to another.
 
 \begin{figure}[ht]
 \begin{center}
@@ -7105,22 +7091,7 @@ A 10~m $\times$ 10~m $\times$ 4~m compartment is filled with smoke from burning 
 \label{beam_detector}
 \end{figure}
 
-\subsubsection{Special Topic: Beam Detectors Spanning Multiple Meshes}
-The data from a device are processed and stored on the mesh in which the device is spatially located; therefore you cannot specify a single beam detector which spans multiple meshes. To model a single beam detector which is required to span multiple meshes, specify one beam on each mesh spanned and use a combination of secondary {\ct DEVC}s and {\ct CTRL}s to sum the obscuration from each of the constituent beams. For example, to model {\ct beam\_1}, which is required to span two meshes, specify two constituent beams (\,{\ct beam\_1a} and {\ct beam\_1b}\,) and sum their obscuration to output the total obscuration of {\ct beam\_1}:
-\begin{lstlisting}
-&DEVC ID='beam_1a', XB=..., QUANTITY='PATH OBSCURATION', OUTPUT=.FALSE. /
-&DEVC ID='beam_1b', XB=..., QUANTITY='PATH OBSCURATION', OUTPUT=.FALSE. /
-&CTRL ID='beam_1a_s', FUNCTION_TYPE='SUBTRACT', INPUT_ID='CONSTANT','beam_1a', CONSTANT=100. /
-&CTRL ID='beam_1b_s', FUNCTION_TYPE='SUBTRACT', INPUT_ID='CONSTANT','beam_1b', CONSTANT=100. /
-&CTRL ID='beam_1_m', FUNCTION_TYPE='MULTIPLY', INPUT_ID='CONSTANT','beam_1a_s','beam_1b_s', CONSTANT=1E-2 /
-&CTRL ID='beam_1_f', FUNCTION_TYPE='SUBTRACT', INPUT_ID='CONSTANT','beam_1_m', CONSTANT=100. /
-&DEVC ID='beam_1', QUANTITY='CONTROL VALUE', CTRL_ID='beam_1_f', XYZ=... /
-\end{lstlisting}
-The outputs of the constituent beams are suppressed and the obscuration of {\ct beam\_1} will be in percent. The constant on the line:
-\begin{lstlisting}
-&CTRL ID='beam_1_m', FUNCTION_TYPE='MULTIPLY', INPUT_ID='CONSTANT','beam_1a_s','beam_1b_s', CONSTANT=1E-2 /
-\end{lstlisting}
-needs to be modified to suit the number of constituent beams. To maintain correct decimal placement, the value of the negative exponent should be equal to the number of constituent beams multiplied by \num{2}, minus \num{2}.
+
 \subsection{Aspiration Detection Systems}
 \label{info:aspiration_detector}
 
@@ -7444,10 +7415,10 @@ where $K_{\rm p}$, $K_{\rm i}$, and $K_{\rm d}$ are respectively the {\ct PROPOR
 \subsubsection{Example Case: using PID for time integration of mass loss rate }
 \label{sec:pidintmlr}
 
-The PID controller can be used to time integrate the mass loss from a pyrolyzing surface.  First, use a {\ct DEVC} with {\ct STATISTICS='SURFACE INTEGRAL'} as input to the PID controller.  Omit the {\ct TARGET\_VALUE}, which then defaults to 0, and the input becomes the error function, $e(t)$.  Set the {\ct INTEGRAL\_GAIN} to 1 and the other gains to 0.  Then send the PID output to a {\ct DEVC} for a {\ct 'CONTROL VALUE'}.  Here is example syntax:
+The PID controller can be used to time integrate the mass loss from a pyrolyzing surface.  First, use a {\ct DEVC} with {\ct SPATIAL\_STATISTIC='SURFACE INTEGRAL'} as input to the PID controller.  Omit the {\ct TARGET\_VALUE}, which then defaults to 0, and the input becomes the error function, $e(t)$.  Set the {\ct INTEGRAL\_GAIN} to 1 and the other gains to 0.  Then send the PID output to a {\ct DEVC} for a {\ct 'CONTROL VALUE'}.  Here is example syntax:
 \begin{lstlisting}
 &DEVC ID='MY MLR', XB=..., QUANTITY='BURNING RATE', SURF_ID='s1',
-      STATISTICS='SURFACE INTEGRAL'/
+      SPATIAL_STATISTIC='SURFACE INTEGRAL'/
 &CTRL ID='MY PID', FUNCTION_TYPE='PID', INPUT_ID='MY MLR',
       PROPORTIONAL_GAIN=0, DIFFERENTIAL_GAIN=0, INTEGRAL_GAIN=1/
 &DEVC ID='PYROLYZATE', XYZ=..., QUANTITY='CONTROL VALUE', CTRL_ID='MY PID'/
@@ -7642,7 +7613,7 @@ and a column will be added to the output file {\ct CHID\_devc.csv} under the lab
 
 \subsubsection{Devices on Solid Surfaces}
 
-When prescribing a solid phase quantity, be sure to position the device at a solid surface. It is not always obvious where the solid surface is since the mesh does not always align with the input obstruction locations. To help locate the appropriate surface, the parameter {\ct IOR} {\em must} be included when designating a solid phase quantity, except when using the {\ct STATISTICS} feature described in Section~\ref{info:statistics} in which case the output quantity is not associated with just a single point on the surface. If the orientation of the solid surface is in the positive $x$ direction, set {\ct IOR=1}. If it is in the negative $x$ direction, set {\ct IOR=-1}, and so for the $y$ and $z$ directions. For example, the line
+When prescribing a solid phase quantity, be sure to position the device at a solid surface. It is not always obvious where the solid surface is since the mesh does not always align with the input obstruction locations. To help locate the appropriate surface, the parameter {\ct IOR} {\em must} be included when designating a solid phase quantity, except when using one of the spatial statistics options that are described in Section~\ref{info:statistics} in which case the output quantity is not associated with just a single point on the surface. If the orientation of the solid surface is in the positive $x$ direction, set {\ct IOR=1}. If it is in the negative $x$ direction, set {\ct IOR=-1}, and so for the $y$ and $z$ directions. For example, the line
 \begin{lstlisting}
 &DEVC XYZ=0.7,0.9,2.1, QUANTITY='WALL TEMPERATURE', IOR=-2, ID='...' /
 \end{lstlisting}
@@ -7667,11 +7638,12 @@ You can use a single {\ct DEVC} line to specify a linear array of devices. By ad
 
 Sometimes it is convenient to calculate a steady-state profile. For example, the vertical velocity profile along the centerline of a doorway can be recorded with the following line of input:
 \begin{lstlisting}
-&DEVC XB=X1,X2,Y1,Y2,Z1,Z2, QUANTITY='U-VELOCITY', ID='vel', POINTS=20 /
+&DEVC XB=X1,X2,Y1,Y2,Z1,Z2, QUANTITY='U-VELOCITY', ID='vel', POINTS=20,
+      STATISTICS_START=20., STATISTICS_END=40. /
 \end{lstlisting}
-In a file called {\ct CHID\_line.csv}, there will be between 1 and 4 columns of data associated with this single {\ct DEVC} line. If {\ct X1} is different than {\ct X2}, there will be a column of $x$ coordinates associated with the linear array of points. The same holds for the $y$ and $z$ coordinates. The last column contains the 20 temperature points averaged over the time interval between {\ct T\_DEVC\_LINE\_END} minus {\ct DT\_DEVC\_LINE} and {\ct T\_DEVC\_LINE\_END}. Both {\ct T\_DEVC\_LINE\_END} and {\ct DT\_DEVC\_LINE} are specified on the {\ct DUMP} line. The default value of the former is {\ct T\_END} and the latter is half the total simulation time. This is a convenient way to output a time-averaged linear profile of a quantity, like an array of thermocouples.  Note that the statistics output to the {\ct \_line.csv} file start being averaged at {\ct T=T\_DEVC\_LINE\_END-DT\_DEVC\_LINE}.  Prior to this point in the simulation, the raw values are output.  This prevents initial transients from biasing the stat values and forces the ``line'' file output at the end of the simulation to be equivalent to manually processing a point {\ct DEVC} time history over a time interval of duration {\ct DT\_DEVC\_LINE}.
+In a file called {\ct CHID\_line.csv}, there will be between 1 and 4 columns of data associated with this single {\ct DEVC} line. If {\ct X1} is different than {\ct X2}, there will be a column of $x$ coordinates associated with the linear array of points. The same holds for the $y$ and $z$ coordinates. The last column contains the 20 temperature points time-averaged over the interval between {\ct STATISTICS\_START} and {\ct STATISTICS\_END}. The default value of the latter is {\ct T\_END} and the former is half the total simulation time. This is a convenient way to output a time-averaged linear profile of a quantity, like an array of thermocouples.  Note that the statistics output to the {\ct \_line.csv} file start being averaged at {\ct T=STATISTICS\_START}.  Prior to this time, the values are zero.  This prevents initial transient from biasing the final average value or other temporal statistics.
 
-A single ``line'' file can hold more than a single line of data. By default, the coordinate columns are labeled using the {\ct ID} of the {\ct DEVC} appended with either {\ct -x}, {\ct -y}, or {\ct -z}. To change these labels, use {\ct X\_ID}, {\ct Y\_ID}, and/or {\ct Z\_ID}. To suppress the coordinate columns altogether, add {\ct HIDE\_COORDINATES=.TRUE.} to the {\ct DEVC} line. This is convenient if you have multiple arrays of data that use the same coordinates. If you want the data plotted as a function of the distance from the origin, $r=\sqrt{x^2+y^2+z^2}$, provide the label {\ct R\_ID}.
+A single ``line'' file can hold more than a single line of data. By default, the coordinate columns are labeled using the {\ct ID} of the {\ct DEVC} appended with either {\ct -x}, {\ct -y}, or {\ct -z}. To change these labels, use {\ct X\_ID}, {\ct Y\_ID}, and/or {\ct Z\_ID}. To suppress the coordinate columns altogether, add {\ct HIDE\_COORDINATES=.TRUE.} to the {\ct DEVC} line. This is convenient if you have multiple arrays of data that use the same coordinates. If you want the data plotted as a function of the distance from the origin, $r=\sqrt{x^2+y^2+z^2}$, provide the label {\ct R\_ID}. If you want the data plotted as a function of the distance from the first point on the line, ({\ct X1,Y1,Z1}), provide the label {\ct D\_ID}.
 
 You can convert the spatial coordinate of a steady-state profile by setting {\ct COORD\_FACTOR} on the {\ct DEVC} line. For example, to convert from the default unit of meters to centimeters, set {\ct COORD\_FACTOR} to 100. Also set {\ct XYZ\_UNITS} to the appropriate character string, in this case {\ct XYZ\_UNITS='cm'}.
 
@@ -7686,17 +7658,9 @@ This directs FDS to just add 20 devices to the on-going list, saving you from ha
 
 
 
-\subsubsection{Single-Point Statistics}
+\subsubsection{Other Statistics for a Linear Array of Devices}
 
-\begin{description}
-\item[Mean] By default, a {\em line} of devices records a mean or time-averaged profile of a particular quantity,
-\be
-   \overline{\phi} = \frac{ \sum_{i=1}^n \phi_i }{n}
-\ee
-where $n$ is the number of uniform output samples.
-
-\item[Min, Max] For line devices it is also possible to record the \emph{min} or the \emph{max} values of the output quantity for each point on the line.  Set {\ct STATISTICS='TIME MIN'} or {\ct STATISTICS='TIME MAX'}.  FDS will output the values over the last {\ct DT\_DEVC\_LINE} of the simulation.
-\end{description}
+By default, when you specify multiple {\ct POINTS} on a {\ct DEVC} line and you do not specify {\ct TIME\_HISTORY=T}, a running average of the specified {\ct QUANTITY} is saved at each point location and written to the file with suffix {\ct \_line.csv} with the accumulated values at the time {\ct STATISTICS\_END}. However, you can apply any other {\ct TEMPORAL\_STATISTIC} and compute, for example, the root-mean-square ({\ct 'RMS'}), minimum ({\ct 'MIN'}), or maximum ({\ct 'MAX'}) value over the specified time interval.
 
 
 \subsection{Quantities at Certain Depth}
@@ -7772,7 +7736,7 @@ Animated vectors can be created in Smokeview if a given {\ct SLCF} line has the 
 
 Normally, FDS averages slice file data at cell corners. For example, gas temperatures are computed at cell centers, but they are linearly interpolated to cell corners and output to a file that is read by Smokeview. To prevent this from happening, set {\ct CELL\_CENTERED=.TRUE.} This forces FDS to output the actual cell-centered data with no averaging. Note that this feature is mainly useful for diagnostics because it enables you to visualize the values that FDS actually computes.  If {\ct CELL\_CENTERED=.TRUE.} is combined with {\ct VECTOR=.TRUE.} then the staggered velocity components will be displayed.  For example,
 \begin{lstlisting}
-&SLCF PBY=0, QUANTITY='VELOCITY', VELOCITY=.TRUE., CELL_CENTERED=.TRUE. /
+&SLCF PBY=0, QUANTITY='VELOCITY', VECTOR=.TRUE., CELL_CENTERED=.TRUE. /
 \end{lstlisting}
 will show the staggered velocity components as cell face normal vectors in Smokeview.
 
@@ -7788,7 +7752,7 @@ The {\ct BNDF} (``boundary file'') namelist group parameters allows you to recor
 
 Note that {\ct BNDF} files (Section~\ref{out:BNDF}) can become very large, so be careful in prescribing the time interval, {\ct DT\_BNDF} on the {\ct DUMP} line. One way to reduce the size of the output file is to turn off the drawing of boundary information on desired obstructions. On any given {\ct OBST} line, if the string {\ct BNDF\_OBST=.FALSE.} is included, the obstruction is not colored. To turn off all boundary drawing, set {\ct BNDF\_DEFAULT=.FALSE.} on the {\ct MISC} line. Then individual obstructions can be turned back on with {\ct BNDF\_OBST=.TRUE.} on the appropriate {\ct OBST} line. Individual faces of a given obstruction can be controlled via {\ct BNDF\_FACE(IOR)}, where {\ct IOR} is the index of orientation (+1 for the positive $x$ direction, -1 for negative, and so on). Normally, FDS averages boundary file data at cell corners. For example, surface temperatures are computed at the center of each surface cell, but they are linearly interpolated to cell corners and output to a file that is read by Smokeview. To prevent this from happening, set {\ct CELL\_CENTERED=.TRUE.} on the {\ct BNDF} line. This forces FDS to output the actual cell-centered data with no averaging. Note that this feature is mainly useful for diagnostics.
 
-Sometimes it is useful to render the {\ct QUANTITY} integrated over time. For example, a heat flux in units of kW/m$^2$ can be integrated in time producing the total energy absorbed by the surface in units of kJ/m$^2$. To do this, set {\ct STATISTICS} equal to {\ct 'TIME INTEGRAL'} on the {\ct BNDF} line. Note that there are no other options for {\ct STATISTICS} on a {\ct BNDF} line.
+Sometimes it is useful to render the {\ct QUANTITY} integrated over time. For example, a heat flux in units of kW/m$^2$ can be integrated in time producing the total energy absorbed by the surface in units of kJ/m$^2$. To do this, set {\ct TEMPORAL\_STATISTIC} equal to {\ct 'TIME INTEGRAL'} on the {\ct BNDF} line. Note that there are no other options for {\ct TEMPORAL\_STATISTIC} on a {\ct BNDF} line.
 
 
 
@@ -7800,6 +7764,15 @@ The {\ct ISOF} (``ISOsurface File'') namelist group creates three-dimensional an
 &ISOF QUANTITY='TEMPERATURE', VALUE(1)=50., VALUE(2)=200., VALUE(3)=500. /
 \end{lstlisting}
 where the values are in $^\circ$C. Note that the isosurface output files {\ct CHID\_$n$.iso} can become very large, so experiment with different sampling rates ({\ct DT\_ISOF} on the {\ct DUMP} line).
+The parameter {\ct QUANTITY2}\ can be used to color the isosurface.
+For example, the line:
+\begin{lstlisting}
+&ISOF QUANTITY='MIXTURE FRACTION' , VALUE(1)=0.05, QUANTITY2='TEMPERATURE' /
+\end{lstlisting}
+draws a surface where the mixture fraction has a value of 0.05~kg/kg and colors the surface this using temperature.
+The parameter {\ct SKIP=n}\ (default: 1) can also be used to reduce data by skipping {\ct n-1}\ values in each direction.
+The parameter {\ct DELTA=val}\ can also be used to reduce data by forcing each triangle to have all
+sides larger than {\ct val}.
 
 Any gas phase quantity can be animated via iso-surfaces, but use caution. To render an iso-surface, the desired quantity must be computed in every mesh cell at every output time step. For quantities like {\ct 'TEMPERATURE'}, this is not a problem, as FDS computes it and saves it anyway. However, species volume fractions demand substantial amounts of time to compute at each mesh cell. Remember to include the {\ct SPEC\_ID} corresponding to the given {\ct QUANTITY} if necessary.
 
@@ -7850,7 +7823,7 @@ As an example of how to use these kinds of output quantities, the test case {\ct
 \be
   \mathrm{ 180 \; \frac{L}{min} \times 1 \; \frac{kg}{L} \times \frac{1}{60} \; \frac{min}{s} \times 30 \; s = 90 \; kg }
 \ee
-In the simulation, the quantity {\ct 'AMPUA'} with {\ct STATISTICS='SURFACE INTEGRAL'} is specified on the {\ct DEVC} line.  This results in FDS summing {\ct 'AMPUA'} over each grid cell in the volume defined by {\ct XB}, in this case the entire floor, analogous to if there were an single bucket present that was the same size as the area specified with {\ct XB}. Summing the values of {\ct 'AMPUA'} over the entire floor yields a total of 90~kg (Fig.~\ref{bucket_test_fig}). Note that there really is no need to time-average the results. The quantity is inherently accumulating.
+In the simulation, the quantity {\ct 'AMPUA'} with {\ct SPATIAL\_STATISTIC='SURFACE INTEGRAL'} is specified on the {\ct DEVC} line.  This results in FDS summing {\ct 'AMPUA'} over each grid cell in the volume defined by {\ct XB}, in this case the entire floor, analogous to if there were an single bucket present that was the same size as the area specified with {\ct XB}. Summing the values of {\ct 'AMPUA'} over the entire floor yields a total of 90~kg (Fig.~\ref{bucket_test_fig}). Note that there really is no need to time-average the results. The quantity is inherently accumulating.
 
 \begin{figure}[ht]
 \centering
@@ -7864,7 +7837,7 @@ In the simulation, the quantity {\ct 'AMPUA'} with {\ct STATISTICS='SURFACE INTE
 
 If you want to monitor the accumulation of solid particles that have fallen on a solid surface, use a device as follows:
 \begin{lstlisting}
-&DEVC ID=..., XB=..., QUANTITY='MPUV', PART_ID='rods', STATISTICS='VOLUME INTEGRAL' /
+&DEVC ID=..., XB=..., QUANTITY='MPUV', PART_ID='rods', SPATIAL_STATISTIC='VOLUME INTEGRAL' /
 \end{lstlisting}
 The volume over which to integrate, {\ct XB}, should be at least one grid cell thick above the surface.
 
@@ -7876,7 +7849,7 @@ Away from solid surfaces, {\ct 'MPUV'} is the \underline{M}ass \underline{P}er \
 
 The quantities {\ct 'PARTICLE FLUX X'},  {\ct 'PARTICLE FLUX Y'}, and {\ct 'PARTICLE FLUX Z'} produce slice and Plot3D colored contours of the mass flux of particles in the $x$, $y$, and $z$ directions, respectively, in units of kg/m$^2$/s. You can also apply these quantities to a device. For example, in the case called {\ct bucket\_test\_4.fds}, the input line
 \begin{lstlisting}
-&DEVC XB=..., ID='flux', QUANTITY='PARTICLE FLUX Z', STATISTICS='AREA INTEGRAL'  /
+&DEVC XB=..., ID='flux', QUANTITY='PARTICLE FLUX Z', SPATIAL_STATISTIC='AREA INTEGRAL'  /
 \end{lstlisting}
 records the integrated mass flux of {\em all} particles passing through the given horizontal plane. Figure~\ref{bucket_test_4_fig} presents the results of this simple test case in which water spraying at a rate of 0.0005~kg/s for 55~s passes through a measurement plane and onto the floor. The total water accumulated is 0.0275~kg.
 
@@ -7897,6 +7870,9 @@ The parameter {\ct QUANTITIES} on the {\ct PART} line is an array of character s
 {\ct 'PARTICLE MASS'} (kg) \\
 {\ct 'PARTICLE AGE'} (s) \\
 {\ct 'PARTICLE WEIGHTING FACTOR'} \\
+{\ct 'PARTICLE PHASE'} \\
+{\ct 'PARTICLE X'}, {\ct 'PARTICLE Y'}, {\ct 'PARTICLE Z'} (m) \\
+{\ct 'PARTICLE U'}, {\ct 'PARTICLE V'}, {\ct 'PARTICLE W'} (m/s) \\
 By default, if no {\ct QUANTITIES} are specified and none are selected in Smokeview, then Smokeview will display particles with a single color. To select this color specify either {\ct RGB} or {\ct COLOR}. By default, water droplets are colored blue. All others are colored black.
 
 The {\ct PARTICLE WEIGHTING FACTOR} describes how many actual particles each of the computational particles represent.
@@ -8096,7 +8072,7 @@ The {\ct GAUGE\_TEMPERATURE} ($T_{\rm gauge}$) and {\ct GAUGE\_EMISSIVITY} ($\ep
 \begin{lstlisting}
 &DEVC ID='hf', QUANTITY='RADIATIVE HEAT FLUX GAS', XYZ=..., ORIENTATION=-1,0,0/
 \end{lstlisting}
-Note that the parameter {\ct STATISTICS} is not appropriate for this quantity. However, you can use the parameter {\ct POINTS} to create a one-dimensional array of heat flux gauges (see Section~\ref{info:line_file}).
+Note that the parameter {\ct SPATIAL\_STATISTIC} is not appropriate for this quantity, meaning that you cannot integrate this quantity over a plane or volume. However, you can use the parameter {\ct POINTS} to create a one-dimensional array of heat flux gauges (see Section~\ref{info:line_file}).
 
 \item[\ct 'RADIANCE']
 \hspace{1in} \newline This is the term for the radiation intensity at the point, $\bx$, and direction angle, $\bs$, where the summation is over all spectral bands:
@@ -8438,108 +8414,88 @@ In order to view the FED slice file in smokeview, CO, CO${}_2$ and O${}_2$ slice
 
 A useful feature of a device ({\ct DEVC}) is to specify an output quantity along with a desired statistic. For example,
 \begin{lstlisting}
-&DEVC XB=..., QUANTITY='TEMPERATURE', ID='maxT', STATISTICS='MAX' /
+&DEVC XB=..., QUANTITY='TEMPERATURE', ID='maxT', SPATIAL_STATISTIC='MAX' /
 \end{lstlisting}
-causes FDS to write out the maximum gas phase temperature over the volume bounded by {\ct XB}. Note that it does not compute the maximum over the entire computational domain, just the specified volume, and this volume must lie within a single mesh. Other {\ct STATISTICS} are discussed below.  Note that some are appropriate for gas phase output quantities, some for solid phase, and some for both.
+causes FDS to write out the maximum gas phase temperature over the volume bounded by {\ct XB}. Note that it does not compute the maximum over the entire computational domain, just the specified volume, and this volume must lie within a single mesh. Other {\ct SPATIAL\_STATISTIC}'s are discussed below.  Note that some are appropriate for gas phase output quantities, some for solid phase, and some for both.
 
 For solid phase output quantities, like heat fluxes and surface temperatures, the specification of a {\ct SURF\_ID} along with the appropriate statistic limits the calculation to only those surfaces. You can further limit the search by using the sextuplet of coordinates {\ct XB} to force FDS to only compute statistics for surface cells within the given volume. Be careful to account for the fact that the solid surface might shift to conform to the underlying numerical grid. Also, be careful not to specify a volume that extends beyond a single mesh. Note that you do not (and should not) specify an orientation via the parameter {\ct IOR} when using a spatial statistic. {\ct IOR} is only needed to find a specific point on the solid surface.
-
-Use the {\ct STATISTICS} feature with caution because it demands that FDS evaluate the given {\ct QUANTITY} in all gas or solid phase cells.
 
 
 \subsubsection{Minimum or Maximum Value}
 
-For a given gas phase scalar output quantity defined at the center of each grid cell, $\phi_{ijk}$, {\ct STATISTICS='MIN'} or {\ct STATISTICS='MAX'} computes the minimum or maximum value, respectively
+For a gas phase scalar quantity defined at the center of each grid cell, $\phi_{ijk}$, set {\ct SPATIAL\_STATISTIC} to {\ct ='MIN'} or {\ct 'MAX'} to compute the minimum or maximum value, respectively, over the cells that are included in the specified volume bounded by {\ct XB}:
 \be
    \min_{ijk} \, \phi_{ijk} \quad ; \quad  \max_{ijk} \, \phi_{ijk}
 \ee
-over the cells that are included in the specified volume bounded by {\ct XB}. Note that this statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the coordinate parameters, {\ct XB}, all of which must be contained within the same mesh.
+Note that this statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the coordinate parameters, {\ct XB}, which can extend into multiple meshes.
 
 
 \subsubsection{Average Value}
 
-For a given gas phase scalar output quantity defined at the center of each grid cell, $\phi_{ijk}$, {\ct STATISTICS='MEAN'} computes the average value,
+For a gas phase scalar quantity defined at the center of each grid cell, $\phi_{ijk}$, the {\ct SPATIAL\_STATISTIC} {\ct 'MEAN'} computes the average value,
 \be \frac{1}{N} \; \sum_{ijk} \phi_{ijk}  \ee
-over the cells that are included in the specified volume bounded by {\ct XB}. Note that this
-statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the
-coordinate parameters, {\ct XB}, all of which must be contained within the same mesh.
+over the cells that are included in the specified volume bounded by {\ct XB}. Note that this statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the coordinate parameters, {\ct XB}, which can extend into multiple meshes.
 
 \subsubsection{Volume-Weighted Mean}
 
-For a given gas phase output quantity, $\phi(x,y,z)$, {\ct STATISTICS='VOLUME MEAN'} produces the discrete analog of
+For a gas phase scalar quantity, $\phi(x,y,z)$, {\ct SPATIAL\_STATISTIC='VOLUME MEAN'} produces the discrete analog of
 \be \frac{1}{V} \; \int \phi(x,y,z) \; \d x \, \d y \, \d z \ee
-which is very similar to {\ct 'MEAN'}, but it weights the values according to the relative size of the mesh cell. Note that this
-statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the
-coordinate parameters, {\ct XB}, all of which must be contained within the same mesh.
+which is very similar to {\ct 'MEAN'}, but it weights the values according to the relative size of the mesh cell. Note that this statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the coordinate parameters, {\ct XB}, which can extend into multiple meshes.
 
 \subsubsection{Mass-Weighted Mean}
 
-For a given gas phase output quantity, $\phi(x,y,z)$, {\ct STATISTICS='MASS MEAN'} produces the discrete analog of
+For a gas phase scalar quantity, $\phi(x,y,z)$, {\ct SPATIAL\_STATISTIC='MASS MEAN'} produces the discrete analog of
 \be \frac{ \int \rho(x,y,z) \; \phi(x,y,z) \; \d x \, \d y \, \d z}{\int \rho \; \d x \, \d y \, \d z}  \ee
-which is similar to {\ct 'VOLUME MEAN'}, but it weights the values according to the relative mass of the mesh cell. Note that this
-statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the
-coordinate parameters, {\ct XB}, all of which must be contained within the same mesh.
+which is similar to {\ct 'VOLUME MEAN'}, but it weights the values according to the relative mass of the mesh cell. Note that this statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the coordinate parameters, {\ct XB}, which can extend into multiple meshes.
 
 \subsubsection{Volume Integral}
 
-For a given gas phase output quantity, $\phi(x,y,z)$, {\ct STATISTICS='VOLUME INTEGRAL'} produces the discrete analog of
+For a gas phase scalar quantity, $\phi(x,y,z)$, {\ct SPATIAL\_STATISTIC='VOLUME INTEGRAL'} produces the discrete analog of
 \be \int \phi(x,y,z) \; \d x \, \d y \, \d z \ee
-This statistic is only appropriate for gas phase quantities, in particular those whose units involve m$^{-3}$. For example, heat release rate per unit volume is an appropriate output quantity. This statistic can also be used on a {\ct DEVC} line with an output quantity of {\ct DENSITY} to output the total mass within the volume bound by {\ct XB}. In all cases, you must specify a volume to sum over via the coordinate parameters, {\ct XB}, all of which must be contained within the same mesh.
+This statistic is only appropriate for gas phase quantities, in particular those whose units involve m$^{-3}$. For example, heat release rate per unit volume is an appropriate output quantity. This statistic can also be used on a {\ct DEVC} line with an output quantity of {\ct DENSITY} to output the total mass within the volume bound by {\ct XB}. In all cases, you must specify a volume to sum over via the coordinate parameters, {\ct XB}, which can extend into multiple meshes.
 
 \subsubsection{Mass Integral}
 
-For a given gas phase output quantity, $\phi(x,y,z)$, {\ct STATISTICS='MASS INTEGRAL'} produces the discrete analog of
+For a given gas phase output quantity, $\phi(x,y,z)$, {\ct SPATIAL\_STATISTIC='MASS INTEGRAL'} produces the discrete analog of
 \be \int \, \rho(x,y,z) \; \phi(x,y,z) \; \d x \, \d y \, \d z \ee
-Note that this statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the
-coordinate parameters, {\ct XB}, all of which must be contained within the same mesh.
+Note that this statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the coordinate parameters, {\ct XB}, which can extend into multiple meshes.
 
 \subsubsection{Area Integral}
 
-For a given gas phase output quantity, $\phi(x,y,z)$, {\ct STATISTICS='AREA INTEGRAL'} produces the discrete analog of
+For a gas phase scalar quantity, $\phi(x,y,z)$, {\ct SPATIAL\_STATISTIC='AREA INTEGRAL'} produces the discrete analog of
 \be \int \phi(x,y,z) \; \d A \ee
-where $dA$ depends on the coordinates you specify for {\ct XB}.
-Note that this statistic is only appropriate for gas phase quantities, in particular those whose units involve m$^{-2}$. For example,
-the quantity {\ct 'MASS FLUX X'} along with {\ct SPEC\_ID='my gas'} is an appropriate output quantity if you want to know the mass flux of the gas species that
-you have named {\ct 'my gas'} through an
-area normal to the $x$ direction. Note also that you must specify an area to sum over via the
-coordinate parameters, {\ct XB}, all of which must be contained within the same mesh.
+where $dA$ depends on the coordinates you specify for {\ct XB}. Note that this statistic is only appropriate for gas phase quantities, in particular those whose units involve m$^{-2}$. For example,
+the quantity {\ct 'MASS FLUX X'} along with {\ct SPEC\_ID='my gas'} is an appropriate output quantity if you want to know the mass flux of the gas species that you have named {\ct 'my gas'} through an
+area normal to the $x$ direction. Note also that you must specify an area to sum over via the coordinate parameters, {\ct XB}, which can extend into multiple meshes.
 
 \subsubsection{Surface Integral}
 
-For a given solid phase output quantity, $\phi$, {\ct STATISTICS='SURFACE INTEGRAL'} produces the discrete analog of
+For a solid phase scalar quantity, $\phi$, {\ct SPATIAL\_STATISTIC='SURFACE INTEGRAL'} produces the discrete analog of
 \be \int \phi \; \d A \ee
-Note that this statistic is only appropriate for solid phase quantities, in particular those whose units involve m$^{-2}$. For example, the various heat and mass
-fluxes are appropriate output quantities.
+Note that this statistic is only appropriate for solid phase quantities, in particular those whose units involve m$^{-2}$. For example, the various heat and mass fluxes are appropriate output quantities.
 
 \subsubsection{Limiting the Integration}
 
-The input parameter {\ct QUANTITY\_RANGE} can be used to limit the region of integration for {\ct STATISTICS} types of {\ct 'AREA INTEGRAL'}, {\ct 'VOLUME INTEGRAL'}, {\ct 'MASS INTEGRAL'}, and {\ct 'SURFACE INTEGRAL'}.  If {\ct QUANTITY\_RANGE} is set, the integration will only be performed if the value of the {\ct QUANTITY} lies within the {\ct QUANTITY\_RANGE} where {\ct QUANTITY\_RANGE(1)} is the lower bound and {\ct QUANTITY\_RANGE(2)} is the upper bound.  For example:
-
+The input parameter {\ct QUANTITY\_RANGE} can be used to limit the region of integration for {\ct 'AREA INTEGRAL'}, {\ct 'VOLUME INTEGRAL'}, {\ct 'MASS INTEGRAL'}, and {\ct 'SURFACE INTEGRAL'}.  If {\ct QUANTITY\_RANGE} is set, the integration will only be performed if the value of the {\ct QUANTITY} lies within the {\ct QUANTITY\_RANGE} where {\ct QUANTITY\_RANGE(1)} is the lower bound and {\ct QUANTITY\_RANGE(2)} is the upper bound.  For example:
 \begin{lstlisting}
-&DEVC XB=..., QUANTITY='MASS FRACTION', SPEC_ID='METHANE', STATISTICS='MASS INTEGRAL', QUANTITY_RANGE=0.03,0.15/
+&DEVC XB=..., QUANTITY='MASS FRACTION', SPEC_ID='METHANE', SPATIAL_STATISTIC='MASS INTEGRAL', QUANTITY_RANGE=0.03,0.15/
 \end{lstlisting}
 would output the total mass of methane in the volume {\ct XB} where the mass fraction was between 0.03 and 0.15.
 
-A set of additional {\ct STATISTICS} are available for use with {\ct QUANTITY\_RANGE}: {\ct 'AREA'}, {\ct 'MASS'}, {\ct 'VOLUME'}, and {\ct 'SURFACE AREA'}.  These {\ct STATISTICS} output the area, mass, volume, or surface area (for a solid phase quantity) where the {\ct QUANTITY} lies within the {\ct QUANTITY\_RANGE}.  For example:
-
+A set of additional {\ct SPATIAL\_STATISTIC}'s are available for use with {\ct QUANTITY\_RANGE}: {\ct 'MASS'}, {\ct 'VOLUME'}, and {\ct 'SURFACE AREA'}.  These output the mass, volume, or surface area (for a solid phase quantity) where the {\ct QUANTITY} lies within the {\ct QUANTITY\_RANGE}.  For example:
 \begin{lstlisting}
-&DEVC XB=..., QUANTITY='NET HEAT FLUX', STATISTICS='SURFACE AREA', QUANTITY_RANGE(1)=10./
+&DEVC XB=..., QUANTITY='NET HEAT FLUX', SPATIAL_STATISTIC='SURFACE AREA', QUANTITY_RANGE(1)=10./
 \end{lstlisting}
-would output the total surface area in the volume {\ct XB} where the net heat flux exceeds 10 kW/m$^2$.
+would output the total surface area in the volume {\ct XB} where the net heat flux exceeds 10~kW/m$^2$.
 
 \subsubsection{Volume, Mass, and Heat Flow}
 \label{info:flows}
 
-The net flow of mass and energy into or out of a planar surface can be a useful diagnostic. There are several outputs that address these. All are prescribed via
-the device ({\ct DEVC}) namelist group only. For example:
-
+The net flow of mass and energy into or out of a planar surface can be a useful diagnostic. There are several outputs that address these. All are prescribed via the device ({\ct DEVC}) namelist group only. For example:
 \begin{lstlisting}
 &DEVC XB=0.3,0.5,2.1,2.5,3.0,3.0, QUANTITY='MASS FLOW', ID='whatever' /
 \end{lstlisting}
-
-\noindent
-outputs the net integrated mass flux through the given planar area, oriented in the positive $z$ direction, in this case. The three flows {\ct 'VOLUME FLOW'}, {\ct 'MASS FLOW'},
-and {\ct 'HEAT FLOW'} are defined:
+outputs the net integrated mass flux through the given planar area, oriented in the positive $z$ direction, in this case. The three flows {\ct 'VOLUME FLOW'}, {\ct 'MASS FLOW'}, and {\ct 'HEAT FLOW'} are defined:
 \begin{align}
 \dot{V} &= \int \bu \cdot \d \mathbf{S}  \\
 \dot{m} &= \int \rho \bu \cdot \d \mathbf{S} \\
@@ -8551,9 +8507,9 @@ The addition of a {\ct +} or {\ct -} to the {\ct QUANTITY} names yields the inte
 \label{info:wallflows}
 
 The quantities {\ct 'VOLUME FLOW'}, {\ct 'MASS FLOW'}, and {\ct 'HEAT FLOW'} cannot be applied at a solid boundary.  Instead, use the wall equivalents {\ct 'VOLUME FLOW WALL'}, {\ct 'MASS FLOW WALL'}, and {\ct 'HEAT FLOW WALL'}.  These quantities require an {\ct IOR} for the surface (positive points into the domain).  If you want the mass flow of a particular gas species, include the {\ct SPEC\_ID} of that gas species. Note that, in order to be a more useful diagnostic for global energy balances, the heat flow at the wall is defined using the sensible enthalpy of the mixture (composition taken at the wall) and is not relative to ambient conditions:
-\begin{align}
-\dot{q}_{\si{w}} &= \int \rho h_s(T) \, \bu \cdot \d \mathbf{S}
-\end{align}
+\be
+\dot{q}_{\mathrm{w}} = \int \rho h_s(T) \, \bu \cdot \d \mathbf{S}
+\ee
 
 \subsubsection{Mass Flux at a Boundary}
 \label{info:wallflux}
@@ -8566,25 +8522,50 @@ The purpose of {\ct 'MASS FLUX WALL'} is for generating detailed species mass ba
 \subsection{Temporally-Integrated Outputs}
 \label{info:time_integral}
 
-In addition to the spatial statistics, a time integral of an {\ct DEVC} output can be computed by specifying
-{\ct STATISTICS = 'TIME INTEGRAL'} on the {\ct DEVC} line. This produces a discrete analog of
+In addition to the spatial statistics, temporal statistics can be applied to {\ct DEVC} output via the parameter {\ct TEMPORAL\_STATISTIC}. Both {\ct SPATIAL\_STATISTIC} and {\ct TEMPORAL\_STATISTIC} can be specified simultaneously on the {\ct DEVC} line, assuming the combination makes sense. The {\ct SPATIAL\_STATISTIC} is applied first, say an integration of the {\ct QUANTITY} over a given volume {\ct XB}, followed by the {\ct TEMPORAL\_STATISTIC}, like a time integral.
+
+\subsubsection{Time Average}
+
+The {\ct TEMPORAL\_STATISTIC='TIME AVERAGE'} is typically applied by default, unless it is inappropriate for the chosen {\ct QUANTITY}. With this statistic, FDS outputs the average value of the {\ct QUANTITY} over the time period of {\ct DT\_DEVC}~s just prior to the time of output. The parameter {\ct DT\_DEVC} is specified on the {\ct DUMP} line.
+
+\subsubsection{Running Average}
+
+The {\ct TEMPORAL\_STATISTIC='RUNNING AVERAGE'} outputs the running average value of the {\ct QUANTITY} over the time period starting at {\ct STATISTICS\_START} and ending at {\ct STATISTICS\_END}. This is the default behavior of ``line'' devices discussed in Section~\ref{info:line_file}.
+
+\subsubsection{Instantaneous Value}
+
+For various reasons you might want to output the value of the {\ct QUANTITY} that has not been time-averaged or processed in any way. Sometimes this is important for device and control functions. To output the instantaneous value, set {\ct TEMPORAL\_STATISTIC} to {\ct 'INSTANT VALUE'}.
+
+\subsubsection{Time Integral}
+
+{\ct TEMPORAL\_STATISTIC='TIME INTEGRAL'} produces a discrete analog of the time integral:
 \be
  \int_{t_0}^t \phi(\tau) \; \d \tau
 \ee
-Note that the spatial and time integrals can not be used simultaneously.
 
-\subsection{Statistical Outputs}
-\label{info:rmscovcorr}
+\subsubsection{Minimum and Maximum Values over Time}
 
-Statistical quantities can also be generated for either point or line devices.  Note that these are quantities only have significant meaning if the flow is steady-state.  These quantities are estimated using a logarithmic averaging process.  The weighting coefficient for the averaging is determined by the desired time interval for the device.  For a point device this time interval is starts at {\ct STATISTICS\_START} on the {\ct DEVC} line and continues until {\ct T\_END}.  For a line device is is determined by {\ct DT\_DEVC\_LINE} on the {\ct DUMP} line.
+Set {\ct TEMPORAL\_STATISTIC} to {\ct 'MIN'} or {\ct 'MAX'} to determine the minimum or maximum value of the {\ct QUANTITY} over a time interval:
+\be
+   \min_{t_0<=t<=t_1} \phi(t) \quad ; \quad  \max_{t_0<=t<=t_1} \phi(t)
+\ee
+where $t_0$ is {\ct STATISTICS\_START} and $t_1$ is {\ct STATISTICS\_END}.
+
+For some applications you might need to predict a minimum or maximum value of the {\ct QUANTITY} over a time interval that is longer than the simulation time. For example, in wind engineering the so-called 50~year maximum wind speed can be estimated using maximum yearly values collected over, say, 10~years. The idea is that extreme values conform to certain statistical distributions from which one can extrapolate extreme values over long time periods. In FDS, you can do something similar. If you add the parameter {\ct TIME\_PERIOD} to the {\ct DEVC} line where you have also set the {\ct TEMPORAL\_STATISTIC} to {\ct 'MIN'} or {\ct 'MAX'}, the time interval bounded by $t_0$ and $t_1$ is subdivided into $N=${\ct N\_INTERVALS} (default 10), and a minimum or maximum value is stored for each interval. At the end of the simulation, the set of maximum values (minimum values are handled similarly) are ranked in ascending order, $m=1,N$. Next, the cumulative statistical distribution is introduced~\cite{Harris:JWE1996}:
+\be
+   F(\phi) = 1 - \exp[-\exp(\phi)]  \quad ; \quad  \phi = \ln[-\ln(1-F)]
+\ee
+which represents the probability\footnote{Note that the parameterless form of the distribution is intended for extrapolation only.} of the value $\phi$ not being exceeded in the given time interval, $(t_1-t_0)/N$. The probabilities for each of the $N$ ascending maximum values are assumed to be $m/(N+1)$. Plotting $\phi$ versus the expression on the right yields an approximate straight line from which we can estimate the value of $\phi$ appropriate for the longer {\ct TIME\_PERIOD}; that is, the value for which the probability of not being exceeded in the relatively short time interval $(t_1-t_0)/N$ is very close to 1. Returning to the example from wind engineering, the probability of not exceeding the 50~year wind speed in a given year is $1-1/50=0.98$.
 
 \subsubsection{Root Mean Square}
 \label{info:rms}
+\label{info:rmscovcorr}
 
-If you set {\ct STATISTICS='RMS'} on the {\ct DEVC} line, the output will be an unbiased estimate of the {\em root mean square} value:
+{\ct TEMPORAL\_STATISTIC='RMS'} produces the unbiased estimate of the {\em root mean square} of the {\ct QUANTITY} $\phi$:
 \be
    \phi_{\rm rms} = \sqrt{ \frac{ \sum_{i=1}^n (\phi_i - \overline{\phi})^2 }{n-1} }
 \ee
+The computation starts at {\ct STATISTICS\_START} and ends at {\ct STATISTICS\_END}.
 
 \subsubsection{Covariance}
 \label{info:covariance}
@@ -8593,19 +8574,18 @@ If $u = U - \overline{U}$ and $v= V-\overline{V}$ are the deviations for two ran
 \be
    \overline{u\, v} = \frac{ \sum_{i=1}^n (U_i - \overline{U}) (V_i - \overline{V}) }{n-1}
 \ee
-To output this statistic you must add a {\ct QUANTITY2} to the device line and set {\ct STATISTICS='COV'}.  The following lines would create a line of devices and a single point device equivalent to the first point in the line:
+To output this statistic you must add a {\ct QUANTITY2} to the {\ct DEVC} line and set {\ct TEMPORAL\_STATISTIC='COV'}.  The following lines would create a line of devices and a single point device equivalent to the first point in the line:
 \begin{lstlisting}
-&DUMP DT_DEVC_LINE=20/
 &DEVC XB=X1,X2,Y1,Y2,Z1,Z2, QUANTITY='CELL W', QUANTITY2='TEMPERATURE',
-      STATISTICS='COV', ID='wT-cov_line', POINTS=20/
+      TEMPORAL_STATISTIC='COV', ID='wT-cov_line', POINTS=20 /
 &DEVC XYZ=X1,Y1,Z1, QUANTITY='CELL W', QUANTITY2='TEMPERATURE',
-      STATISTICS='COV', ID='wT-cov_point', STATISTICS_DT=20/
+      TEMPORAL_STATISTIC='COV', ID='wT-cov_point', STATISTICS_START=20. /
 \end{lstlisting}
 
 \subsubsection{Correlation Coefficient}
 \label{info:corrcoef}
 
-Setting {\ct STATISTICS='CORRCOEF'} outputs the \emph{correlation coefficient} given by
+Setting {\ct TEMPORAL\_STATISTIC='CORRCOEF'} outputs the \emph{correlation coefficient} given by
 \be
    \rho_{uv} = \frac{ \overline{u\, v} }{ u_{\rm rms} \,v_{\rm rms} }
 \ee
@@ -8614,23 +8594,16 @@ Here again you must add a {\ct QUANTITY2} to the device line.
 \subsection{Wind and the Pressure Coefficient}
 \label{info:pressure_coefficient}
 
-In the field of wind engineering, a commonly used quantity is known as
-the {\ct PRESSURE\_COEFFICIENT}:
+In the field of wind engineering, a commonly used quantity is known as the {\ct PRESSURE\_COEFFICIENT}:
 \be
    C_p = \frac{p-p_\infty}{\ha \rho_\infty U^2}
 \ee
-$p_\infty$ is the ambient, or ``free stream'' pressure, and
-$\rho_\infty$ is the ambient density.  The parameter $U$ is the
-free-stream wind speed, given as {\ct CHARACTERISTIC\_VELOCITY} on the
-{\ct PROP} line
-
+$p_\infty$ is the ambient, or ``free stream'' pressure, and $\rho_\infty$ is the ambient density.  The parameter $U$ is the free-stream wind speed, given as {\ct CHARACTERISTIC\_VELOCITY} on the {\ct PROP} line
 \begin{lstlisting}
 &BNDF QUANTITY='PRESSURE COEFFICIENT', PROP_ID='U' /
 &DEVC ID='pressure tap', XYZ=..., IOR=2, QUANTITY='PRESSURE COEFFICIENT', PROP_ID='U' /
 &PROP ID='U', CHARACTERISTIC_VELOCITY=3.4 /
 \end{lstlisting}
-
-\noindent
 Thus, you can either paint values of $C_p$ at all surface points, or create a single time history of $C_p$ using a single device at a single point.
 
 
@@ -8929,7 +8902,7 @@ Table~\ref{tab:output}, spread over the following pages, summarizes the various 
 For those output quantities that require a species name via {\ct SPEC\_ID}, the species implicitly defined when using the simple chemistry combustion model are {\ct 'OXYGEN'}, {\ct 'NITROGEN'}, {\ct 'WATER VAPOR'}, and {\ct 'CARBON DIOXIDE'}. If {\ct CO\_YIELD} and/or {\ct SOOT\_YIELD} are specified on the {\ct REAC} line, then {\ct 'CARBON MONOXIDE'} and {\ct 'SOOT'} are included as output species. The fuel species can be output via the {\ct FUEL} specified on the {\ct REAC} line. As an example of how to use the species names, suppose you want to calculate the integrated mass flux of carbon monoxide through a horizontal plane, like the total amount entrained in a fire plume. Use a ``device'' as follows
 \begin{lstlisting}
 &DEVC ID='CO_flow', XB=-5,5,-5,5,2,2, QUANTITY='MASS FLUX Z',
-      SPEC_ID='CARBON MONOXIDE', STATISTICS='AREA INTEGRAL' /
+      SPEC_ID='CARBON MONOXIDE', SPATIAL_STATISTIC='AREA INTEGRAL' /
 \end{lstlisting}
 Here, the {\ct ID} is just a label in the output file. When an output quantity is related to a particular gas species or particle type, you must specify the appropriate {\ct SPEC\_ID} or {\ct PART\_ID} on the same input line. Also note that the use of underscores in output quantity names has been eliminated -- just remember that all output quantity names ought to be in single quotes.
 
@@ -9088,6 +9061,7 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct QUANTITY}                           & Symbol                                        & Units          & File Type    \\
 \hline \hline
 \endhead
+{\ct ABSOLUTE PRESSURE}                         & Absolute Pressure                                 & Pa             & D,I,P,S      \\ \hline
 {\ct ADA}$^2$                                   & Avg.~Droplet (cross sectional) Area               & m$^2$/m$^3$    & D,I,P,S      \\ \hline
 {\ct ADA\_Z}$^1$                                & Avg.~Droplet (cross sectional) Area               & m$^2$/m$^3$    & D,I,P,S      \\ \hline
 {\ct ADD}$^2$                                   & Avg.~Droplet Diameter                             & $\mu$m         & D,I,P,S      \\ \hline
@@ -9096,7 +9070,7 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct ADT\_Z}$^1$                                & Avg.~Droplet Temperature                          & $^\circ$C      & D,I,P,S      \\ \hline
 {\ct ASSUMED GAS TEMPERATURE}                   & Section~\ref{solid_phase_verification}            & $^\circ$C      & D,I,P,S      \\ \hline
 {\ct C\_SMAG}                                   & Smagorinsky coefficient                           &                & D,I,P,S      \\ \hline
-{\ct AUTO IGNITION TEMPERATURE}                 & Auto-ignition temperature                         & $^\circ$C      & D,I,P,S      \\ \hline
+{\ct AUTO IGNITION TEMPERATURE}$^5$             & Section \ref{info:ignition}                       & $^\circ$C      & D,I,P,S      \\ \hline
 {\ct CABLE TEMPERATURE}                         & Inner temperature of cable                        & $^\circ$C      & D            \\ \hline
 {\ct CELL INDEX I}                              & Mesh cell index in x                              &                & D,S          \\ \hline
 {\ct CELL INDEX J}                              & Mesh cell index in y                              &                & D,S          \\ \hline
@@ -9134,8 +9108,8 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct PARTICLE PHASE}                            & Orientation of droplet                            &                & PA           \\ \hline
 {\ct PARTICLE RADIATION LOSS}                   & $\nabla \cdot \bq_r''$ due to Lagrangian particles& kW/m$^3$       & D,I,P,S      \\ \hline
 {\ct PDPA}                                      & Droplet diagnostics                               &                & D            \\ \hline
-{\ct PRESSURE ITERATIONS}                       & No. pressure iterations                           &                & D            \\ \hline
-{\ct Q CRITERION}                                  & $1/2 [Tr(\nabla \mathbf{u})^2 - Tr( (\nabla \mathbf{u})^2)]$  &    1/s$^2$            & D,I,P,S    \\ \hline
+{\ct PRESSURE ITERATIONS}                       & Number of pressure iterations                     &                & D            \\ \hline
+{\ct Q CRITERION} & $\frac{1}{2} [\mathrm{trace}(\nabla \mathbf{u})^2 - \mathrm{trace}( (\nabla \mathbf{u})^2)]$ & 1/s$^2$ & D,I,P,S \\ \hline
 {\ct QABS}$^2$                                  & Absorption efficiency of droplets                 &                & D,I,P,S      \\ \hline
 {\ct QABS\_Z}$^1$                               & Absorption efficiency of droplets                 &                & D,I,P,S      \\ \hline
 {\ct QSCA}$^2$                                  & Scattering efficiency of droplets                 &                & D,I,P,S      \\ \hline
@@ -9165,11 +9139,11 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 
 \noindent
 \begin{tabbing}
-$^1$ \hspace{0.05in} \= Requires the specification of a gas species using {\ct SPEC\_ID}. \\
-                     \> Omit {\ct SPEC\_ID} for total flux. \\
+$^1$ \hspace{0.05in} \= Requires the specification of a gas species using {\ct SPEC\_ID}. Omit {\ct SPEC\_ID} for total flux. \\
 $^2$                 \> Requires the specification of a particle name using {\ct PART\_ID}. \\
 $^3$                 \> Requires specification of an additional scalar using {\ct QUANTITY2}. \\
-$^4$                 \> Allows for an optional {\ct MATL\_ID}.
+$^4$                 \> Allows for an optional {\ct MATL\_ID}. \\
+$^5$                 \> Allows for an optional {\ct REAC\_ID}.  Default is Reaction 1.
 \end{tabbing}
 
 
@@ -9236,12 +9210,12 @@ properties be specified as well. Simply prescribing as many properties as possib
 \multicolumn{5}{|c|}{{\ct BNDF} (Boundary File Parameters)} \\
 \hline \hline
 \endhead
-{\ct CELL\_CENTERED}    & Logical     & Section \ref{info:BNDF}                 &           & {\ct .FALSE.}   \\ \hline
-{\ct PART\_ID}          & Character   & Section \ref{info:outputquantities}     &           &                 \\ \hline
-{\ct PROP\_ID}          & Character   & Section \ref{info:BNDF}                 &           &                 \\ \hline
-{\ct QUANTITY}          & Character   & Section \ref{info:outputquantities}     &           &                 \\ \hline
-{\ct SPEC\_ID}          & Character   & Section \ref{info:outputquantities}     &           &                 \\ \hline
-{\ct STATISTICS}        & Character   & Section \ref{info:BNDF}                 &           &                 \\ \hline
+{\ct CELL\_CENTERED}             & Logical     & Section \ref{info:BNDF}                 &           & {\ct .FALSE.}   \\ \hline
+{\ct PART\_ID}                   & Character   & Section \ref{info:outputquantities}     &           &                 \\ \hline
+{\ct PROP\_ID}                   & Character   & Section \ref{info:BNDF}                 &           &                 \\ \hline
+{\ct QUANTITY}                   & Character   & Section \ref{info:outputquantities}     &           &                 \\ \hline
+{\ct SPEC\_ID}                   & Character   & Section \ref{info:outputquantities}     &           &                 \\ \hline
+{\ct TEMPORAL\_STATISTIC}        & Character   & Section \ref{info:BNDF}                 &           &                 \\ \hline
 \end{longtable}
 
 
@@ -9409,6 +9383,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct DELAY}                 & Real            & Section~\ref{info:aspiration_detector}                          & s     & 0             \\ \hline
 {\ct DEPTH}                 & Real            & Section~\ref{info:material_components}                          & m     & 0             \\ \hline
 {\ct DEVC\_ID}              & Character       & Sections~\ref{info:aspiration_detector} and \ref{info:RAMPDEVC} &       &               \\ \hline
+{\ct D\_ID}                 & Character       & Section~\ref{info:line_file}                                    &       &               \\ \hline
 {\ct DRY}                   & Logical         & Section~\ref{info:dry}                                          &       & {\ct .FALSE.} \\ \hline
 {\ct DUCT\_ID}              & Character       & Section~\ref{info:HVAC}                                         &       &               \\ \hline
 {\ct EVACUATION}            & Logical         & Reference~\cite{FDS_Evac_Users_Guide}                           &       & {\ct .FALSE.} \\ \hline
@@ -9420,6 +9395,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct IOR}                   & Integer         & Section~\ref{info:DEVC}                                         &       &               \\ \hline
 {\ct LATCH}                 & Logical         & Section~\ref{info:basic_control}                                &       & {\ct .TRUE.}  \\ \hline
 {\ct MATL\_ID}              & Character       & Section~\ref{info:material_components}                          &       &               \\ \hline
+{\ct N\_INTERVALS}          & Integer         & Section~\ref{info:time_integral}                                &       & 10            \\ \hline
 {\ct NODE\_ID}              & Character(2)    & Section~\ref{info:HVAC}                                         &       &               \\ \hline
 {\ct NO\_UPDATE\_DEVC\_ID}  & Character       & Section~\ref{info:freeze_device}                                &       &               \\ \hline
 {\ct NO\_UPDATE\_CTRL\_ID}  & Character       & Section~\ref{info:freeze_device}                                &       &               \\ \hline
@@ -9437,13 +9413,15 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct R\_ID}                 & Character       & Section~\ref{info:line_file}                                    &       &               \\ \hline
 {\ct ROTATION}              & Real            & Section~\ref{info:DEVC}                                         & deg.  & 0             \\ \hline
 {\ct SETPOINT}              & Real            & Section~\ref{info:basic_control}                                &       &               \\ \hline
-{\ct STATISTICS}            & Character       & Section~\ref{info:statistics}                                   &       &               \\ \hline
+{\ct SPATIAL\_STATISTIC}    & Character       & Section~\ref{info:statistics}                                   &       &               \\ \hline
 {\ct STATISTICS\_START}     & Real            & Section~\ref{info:rmscovcorr}                                   & s     & {\ct T\_BEGIN}\\ \hline
+{\ct STATISTICS\_END}       & Real            & Section~\ref{info:rmscovcorr}                                   & s     & {\ct T\_BEGIN}\\ \hline
 {\ct SMOOTHING\_FACTOR}     & Real            & Section~\ref{info:basic_control}                                &       & 0             \\ \hline
 {\ct SPEC\_ID}              & Character       & Section~\ref{info:outputquantities}                             &       &               \\ \hline
 {\ct SURF\_ID}              & Character       & Section~\ref{info:statistics}                                   &       &               \\ \hline
-{\ct TIME\_AVERAGED}        & Logical         & Section~\ref{info:out:DEVC}                                     &       &  {\ct .TRUE.} \\ \hline
+{\ct TEMPORAL\_STATISTIC}   & Character       & Section~\ref{info:statistics}                                   &       &               \\ \hline
 {\ct TIME\_HISTORY}         & Logical         & Section~\ref{info:line_file}                                    &       &               \\ \hline
+{\ct TIME\_PERIOD}          & Real            & Section~\ref{info:time_integral}                                & s     &               \\ \hline
 {\ct TRIP\_DIRECTION}       & Integer         & Section~\ref{info:basic_control}                                &       &  1            \\ \hline
 {\ct UNITS}                 & Character       & Section~\ref{info:out:DEVC}                                     &       &               \\ \hline
 {\ct VELO\_INDEX}           & Integer         & Section~\ref{info:velocity}                                     &       &  0            \\ \hline
@@ -9485,7 +9463,6 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct DT\_CPU}                       & Real         & Section~\ref{out:CPU}                  &  s        & 1000000                        \\ \hline
 {\ct DT\_CTRL}                      & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
 {\ct DT\_DEVC}                      & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
-{\ct DT\_DEVC\_LINE}                & Real         & Section~\ref{info:line_file}           &  s        & $\Delta t${\ct /2}             \\ \hline
 {\ct DT\_FLUSH}                     & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
 %{\ct DT\_GEOM}                      & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
 {\ct DT\_HRR}                       & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
@@ -9514,7 +9491,6 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct SMOKE3D\_SPEC\_ID}             & Character    & Section~\ref{info:SMOKE3D}             &           &                                \\ \hline
 {\ct STATUS\_FILES}                 & Logical      & Section~\ref{info:DUMP}                &           & {\ct .FALSE.}                  \\ \hline
 {\ct SUPPRESS\_DIAGNOSTICS}         & Logical      & Section~\ref{info:monitoring_progress} &           & {\ct .FALSE.}                  \\ \hline
-{\ct T\_DEVC\_LINE\_END}            & Real         & Section~\ref{info:line_file}           &  s        & {\ct T\_END}                   \\ \hline
 {\ct UVW\_TIMER}                    & Real Vector (10)  & Section~\ref{info:velo_restart}   &  s        &                                \\ \hline
 {\ct VELOCITY\_ERROR\_FILE}         & Logical      & Section~\ref{info:TIMING}              &           & {\ct .FALSE.}                  \\ \hline
 {\ct WRITE\_XYZ}                    & Logical      & Section~\ref{info:PL3D}                &           & {\ct .FALSE.}                  \\ \hline
@@ -9709,11 +9685,17 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct ISOF} (Isosurface Parameters)} \\
 \hline \hline
 \endhead
+{\ct DELTA}                 & Real          & Section~\ref{info:ISOF}                   &       &         \\ \hline
 {\ct QUANTITY}              & Character     & Section~\ref{info:ISOF}                   &       &         \\ \hline
+{\ct QUANTITY2}             & Character     & Section~\ref{info:ISOF}                   &       &         \\ \hline
 {\ct REDUCE\_TRIANGLES}     & Integer       & Reference~\cite{Smokeview_Users_Guide}    &       & 1       \\ \hline
+{\ct SPEC\_ID}              & Character     & Section~\ref{info:ISOF}                   &       &         \\ \hline
+{\ct SPEC\_ID2}             & Character     & Section~\ref{info:ISOF}                   &       &         \\ \hline
+{\ct SKIP}                  & Character     & Section~\ref{info:ISOF}                   &       &         \\ \hline
 {\ct SPEC\_ID}              & Character     & Section~\ref{info:ISOF}                   &       &         \\ \hline
 {\ct VALUE(I)}              & Real Array    & Section~\ref{info:ISOF}                   &       &         \\ \hline
 {\ct VELO\_INDEX}           & Integer       & Section~\ref{info:velocity}               &       &  0      \\ \hline
+{\ct VELO\_INDEX2}          & Integer       & Section~\ref{info:velocity}               &       &  0      \\ \hline
 \end{longtable}
 
 
@@ -9845,7 +9827,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CNF\_CUTOFF}                               & Real          & Section~\ref{info:particle_size}                      &               & 0.005             \\ \hline
 {\ct \footnotesize CONSTANT\_SPECIFIC\_HEAT\_RATIO}  & Logical  & Section~\ref{info:Enthalpy}                           &               & {\ct .FALSE.}     \\ \hline
 {\ct DEPOSITION}                                & Logical       & Section~\ref{info:deposition}                         &               & {\ct .TRUE.}      \\ \hline
-{\ct DRAG\_CFL\_MAX}                            & Real          & Section~\ref{info:particle_screen}                    &               &   1.0               \\ \hline
 {\ct EVACUATION\_DRILL}                         & Logical       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & {\ct .FALSE.}     \\ \hline
 {\ct EVACUATION\_MC\_MODE}                      & Logical       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & {\ct .FALSE.}     \\ \hline
 {\ct EVAC\_PRESSURE\_ITERATIONS}                & Integer       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & 50                \\ \hline
@@ -9917,6 +9898,34 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 
 \vspace{\baselineskip}
 
+
+\section{\texorpdfstring{{\tt MOVE}}{MOVE} (Coordinate Transformation Parameters)}
+
+\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\caption[Coordinate transformation parameters ({\ct MULT} namelist group)]{For more information see Section~\ref{info:MOVE}.}
+\label{tbl:MOVE} \\
+\hline
+\multicolumn{5}{|c|}{{\ct MOVE} (Coordinate Transformation Parameters)} \\
+\hline \hline
+\endfirsthead
+\caption[]{Continued} \\
+\hline
+\multicolumn{5}{|c|}{{\ct MOVE} (Coordinate Transformation Parameters)} \\
+\hline \hline
+\endhead
+{\ct AXIS(1:3)}       & Real Triplet     & Axis of rotation                                &        & (0,0,1)                    \\ \hline
+{\ct DX}              & Real             & Translation in the $x$ direction                & m      & 0.                         \\ \hline
+{\ct DY}              & Real             & Translation in the $y$ direction                & m      & 0.                         \\ \hline
+{\ct DZ}              & Real             & Translation in the $z$ direction                & m      & 0.                         \\ \hline
+{\ct ID }             & Character        & Identification tag                              &        &                            \\ \hline
+{\ct ROTATION\_ANGLE} & Real             & Angle of rotation about {\ct AXIS}              & deg.   & 0.                         \\ \hline
+{\ct X0}              & Real             & $x$ origin                                      & m      & 0.                         \\ \hline
+{\ct Y0}              & Real             & $y$ origin                                      & m      & 0.                         \\ \hline
+{\ct Z0}              & Real             & $z$ origin                                      & m      & 0.                         \\ \hline
+\end{longtable}
+
+
+\vspace{\baselineskip}
 
 \section{\texorpdfstring{{\tt MULT}}{MULT} (Multiplier Function Parameters)}
 
@@ -10352,6 +10361,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct O}                                   & Real        & Section~\ref{info:simple_chemistry}       &                   & 0                 \\ \hline
 {\ct PRIORITY}                            & Integer     & Section~\ref{info:priority}               &                   & 1                 \\ \hline
 {\ct RADIATIVE\_FRACTION}                 & Real        & Section~\ref{info:CHI_R}                  &                   &                   \\ \hline
+{\ct RAMP\_AIT}                           & Character   & Section~\ref{info:ramp_ait}               &                   &                   \\ \hline
 {\ct RAMP\_CHI\_R}                        & Character   & Section~\ref{info:CHI_R}                  &                   &                   \\ \hline
 {\ct REAC\_ATOM\_ERROR}                   & Real        & Section~\ref{info:REAC_Diagnostics}       & atoms             & 1.E-5             \\ \hline
 {\ct REAC\_MASS\_ERROR}                   & Real        & Section~\ref{info:REAC_Diagnostics}       & kg/kg             & 1.E-4             \\ \hline
@@ -10773,12 +10783,13 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct ZONE} (Pressure Zone Parameters)} \\
 \hline \hline
 \endhead
-{\ct ID}                    & Character         & Section~\ref{info:ZONE_Basics}     &        &               \\ \hline
-{\ct LEAK\_AREA(N)}         & Real              & Section~\ref{info:Leaks}           & m$^2$  & 0             \\ \hline
-{\ct LEAK\_PRESSURE\_EXPONENT(N)} & Real              & Section~\ref{info:Leaks}           &        & 0.5           \\ \hline
-{\ct LEAK\_REFERENCE\_PRESSURE(N)} & Real              & Section~\ref{info:Leaks}           & Pa     & 4             \\ \hline
-{\ct PERIODIC}              & Logical           & Section~\ref{info:ZONE_Basics}     &        & {\ct .FALSE.} \\ \hline
-{\ct XB(6)}                 & Real Sextuplet    & Section~\ref{info:ZONE_Basics}     & m      &               \\ \hline
+{\ct ID}                           & Character             & Section~\ref{info:ZONE_Basics}     &        &               \\ \hline
+{\ct LEAK\_AREA(N)}                & Real                  & Section~\ref{info:Leaks}           & m$^2$  & 0             \\ \hline
+{\ct LEAK\_PRESSURE\_EXPONENT(N)}  & Real                  & Section~\ref{info:Leaks}           &        & 0.5           \\ \hline
+{\ct LEAK\_REFERENCE\_PRESSURE(N)} & Real                  & Section~\ref{info:Leaks}           & Pa     & 4             \\ \hline
+{\ct PERIODIC}                     & Logical               & Section~\ref{info:ZONE_Basics}     &        & {\ct .FALSE.} \\ \hline
+{\ct XB(6)}                        & Real Sextuplet        & Section~\ref{info:ZONE_Basics}     & m      &               \\ \hline
+{\ct XYZ(3:N)}                     & Real Triplet Array    & Section~\ref{info:ZONE_Basics}     & m      &               \\ \hline
 \end{longtable}
 
 

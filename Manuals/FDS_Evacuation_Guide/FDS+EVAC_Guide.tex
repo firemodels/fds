@@ -3,9 +3,9 @@
 \usepackage{times} 
 \usepackage[pdftex]{graphicx}
 %
-% FDS version  6.5.3
+% FDS version  6.6.0
 % Evac version 2.5.2
-% March 2017
+% February 2018
 %
 \usepackage[T1]{fontenc}
 \usepackage[latin1]{inputenc}
@@ -155,7 +155,7 @@
       Technical Reference and User's Guide }
 
     { \normalfont\fontsize{14}{18}\selectfont\sffamily
-      (FDS 6.5.3, Evac 2.5.2, DRAFT) }
+      (FDS 6.6.0, Evac 2.5.2, DRAFT) }
 
     \vspace{15mm}
 
@@ -187,7 +187,7 @@
 the evacuation module, FDS+Evac, developed at VTT Technical Research
 Centre of Finland, which is fully embedded in Fire Dynamics Simulator
 (FDS).  This manual applies to the FDS+Evac version 2.5.2, which is
-embedded in the current FDS version 6.5.3 (GIT FDS6.5.3-937-gee70904).
+embedded in the current FDS version 6.6.0 (GIT FDS6.6.0-986-g47260e6).
 The most up to date version of this manual can be obtained from the
 FDS+Evac web page at
 \texttt{http://www.vtt.fi/}\linebreak[4]\texttt{fdsevac/}.
@@ -335,7 +335,7 @@ This page contains the most recent version of this combined Technical
 Reference and User's Guide of FDS+Evac and some examples on the use of
 FDS+Evac.  This web site is also used to store the validation and
 verification test cases including the input files.  This (printed)
-manual refers to FDS 6.5.3 + Evac 2.5.2 (GIT FDS6.5.3-937-gee70904).
+manual refers to FDS 6.6.0 + Evac 2.5.2 (GIT FDS6.6.0-986-g47260e6).
 
 
 \section{Features of Limited Functionality}\label{Sec_SpecFeatures}
@@ -857,7 +857,11 @@ can partly control the model and algorithm by usng parameters in PERS namelist
 behaviours are not yet validated.
 
 
-\textbf{Detection and Reaction Times:} The pre-movement time of the evacuating agents is defined by the user input where the probablity distributions are given for the detection time and reaction time, and such time slots are functional if there is no fire simulation.  If fire simulation is included, the local smoke concentration can be used to trigger the detection of a fire.  Currently, the fire detection can
+\textbf{Detection and Reaction Times:} The pre-movement time of the
+evacuating agents is decided by the user input by giving distributions
+for the detection and reaction times.  In addition to the detection
+time given by the user, the local smoke concentration can be used to
+trigger the detection of a fire.  Currently, the fire detection can
 also be connected to the control logic of FDS, \emph{e.g.}  the
 smoke/heat detectors in FDS fire calculation can also be used to
 trigger the movement of the agents.
@@ -1879,9 +1883,7 @@ are heading towards an exit, they start to follow these other agents.
 A herding agent will remain still even after detecting the fire and
 its reaction time has passed if it has not been able to select any
 exit either by being familiar with it or by observing other agents.
-If the nearest neighbors of a herding agent are heading towards some
-exit then the herding agent starts to follow these agents almost
-immediately regardless of its detection and reaction times.  If there
+If there
 are available familiar exits at a given floor for a herding agent then
 it behaves like a conservative agent, i.e., the familiar route
 behavior overrides the herding behavior.
@@ -2261,7 +2263,7 @@ see ``by own eyes'' that the programme is working as it should.
 %
 \begin{figure}[!tb]
   \centerline{\includegraphics[clip=true,
-  width=100mm]{FIGURES/Test_Fds653Evac252_FED}} 
+  width=100mm]{FIGURES/Test_Fds660Evac252_FED}} 
   \caption{A FED test.}\label{Fig_FED_Test}
 \end{figure}
 %
@@ -2287,7 +2289,7 @@ see ``by own eyes'' that the programme is working as it should.
 %
 \begin{figure}[!tb]
   \centerline{\includegraphics[clip=true,
-  width=100mm]{FIGURES/Fds653Evac252_Smoke_vs_Speed}}   
+  width=100mm]{FIGURES/Fds660Evac252_Smoke_vs_Speed}}   
   \caption{A smoke vs speed test.}\label{Fig_SmokeSpeedTest}
 \end{figure}
 %
@@ -2654,7 +2656,7 @@ will decrease specific flows slightly.
   \includegraphics[clip=true,
   width=50mm]{FIGURES/Collect_MainParametricStudies_Fds600Evac241_Tau} 
   \includegraphics[clip=true,
-  width=50mm]{FIGURES/Collect_MainParametricStudies_Fds600Evac241_B} }
+  width=50mm]{FIGURES/Collect_MainParametricStudies_Fds600Evac241_Bw} }
   \caption{Effects of different model parameters, $A_i$, $B_i$,
     $\lambda_i$, $v^0_i$, $\tau_i$, and $B_w$ on the specific flows
     through doors and corridors.  The corridor is 2.0~m wide, the
@@ -3002,8 +3004,8 @@ A speed reduction factor $\gtrsim$0.5 seems to produce more or less
 quite constant flow at the exit door, \emph{i.e.}, at these speed
 reduction values the stairs are feeding the front door fast enough.
 For the case with $\lambda_i$=0.3 the specific flow in FDS+Evac
-simulations is about 1.15~p/s/m and for the case with $\lambda_i$=0.5
-the flow is about 1.29~p/s/m at the final exit door (speed factor
+simulations is about 1.16~p/s/m and for the case with $\lambda_i$=0.5
+the flow is about 1.30~p/s/m at the final exit door (speed factor
 0.75).  The observed flow rate at the final exit door (width 1.07~m)
 was 1.35 p/s in the experiment.
 % Numbers are for fds6.5.3Evac2.5.2
@@ -3031,8 +3033,8 @@ $\gtrsim$0.7 seems to give a good agreement with the observations.
 Note that there exists some queuing at the final exit door opening to
 the street in the experiment and this is also seen in the simulation
 results, when the speed reduction parameter is not too low.  For the
-case with $\lambda_i$=0.3 the specific flow is about 1.19~p/s/m and
-for the case with $\lambda_i$=0.5 the flow is about 1.31~p/s/m at the
+case with $\lambda_i$=0.3 the specific flow is about 1.17~p/s/m and
+for the case with $\lambda_i$=0.5 the flow is about 1.30~p/s/m at the
 final exit door (speed factor 0.75).  Similar flows were also obtained
 when using the simple staircase model (type 1).  When a speed
 reduction factor $\gtrsim$0.7 is used seems to produce more or less
@@ -3198,7 +3200,7 @@ using FDS+Evac version 2.5.2.
   %
   \begin{figure}[!tb]
     \centerline{\includegraphics[clip=true,
-      width=100mm]{FIGURES/SportHall_Results_FDS653_Evac252}}
+      width=100mm]{FIGURES/SportHall_Results_FDS660_Evac252}}
     \caption{The comparison of FDS+Evac to Simulex in a sport hall
       case.  The average of five different simulations are shown for
       each case.}\label{Fig_SportResults}
@@ -3240,7 +3242,7 @@ using FDS+Evac version 2.5.2.
 %
 \begin{figure}[!b]
   \centerline{\includegraphics[clip=true,
-  width=100mm]{FIGURES/Office_Results_FDS653_Evac252}} 
+  width=100mm]{FIGURES/Office_Results_FDS660_Evac252}} 
   \caption{The comparison of FDS+Evac to Simulex in an open floor
     office case.}\label{Fig_OpenFloorResults} 
 \end{figure}
@@ -3313,8 +3315,8 @@ using FDS+Evac version 2.5.2.
   and standard input.  (An advanced user of these codes might be able
   to get different results by using some additional features.)  The
   results of FDS+Evac model look more realistic.  The calculated
-  specific flows (1/p/m) are: Simulex 0.47, Exodus 0.69, FDS+Evac 1.24
-  ($\lambda_i=0.3$), and 1.56 ($\lambda_i=0.5$).
+  specific flows (1/p/m) are: Simulex 0.47, Exodus 0.69, FDS+Evac 1.23
+  ($\lambda_i=0.3$), and 1.57 ($\lambda_i=0.5$).
   % Numbers are for fds6.5.3Evac2.5.2
   
   In Figure~\ref{Fig_AssemblyResults} also shown are the results of
@@ -3329,7 +3331,7 @@ using FDS+Evac version 2.5.2.
 %
 \begin{figure}[!tb]
   \centerline{\includegraphics[clip=true,
-  width=100mm]{FIGURES/AssSpace_Results_FDS653_Evac252}} 
+  width=100mm]{FIGURES/AssSpace_Results_FDS660_Evac252}} 
   \caption{The comparison of FDS+Evac to buildingExodus
     and Simulex in an assembly space.}\label{Fig_AssemblyResults}
 \end{figure}
@@ -6245,7 +6247,7 @@ of the programme.
   Association, Quincy, MA, 2003.
 %
 \bibitem{Frantzich03} Frantzich, H., and Nilsson, D., ``Utrymning
-  genom tät r\"ok: beteende och f\"orflyttning'', 75~p., Report 3126,
+  genom t\"at r\"ok: beteende och f\"orflyttning'', 75~p., Report 3126,
   Department of Fire Safety Engineering, Lund University, Sweden,
   2003.
 %

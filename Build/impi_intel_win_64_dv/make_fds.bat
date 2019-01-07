@@ -6,7 +6,7 @@ if x%arg1% == xbot goto skip1
 call ..\..\Utilities\Scripts\setup_intel_compilers.bat
 :skip1
 
-Title Building FDS (mpi) for 64 bit Windows
+Title Building DV FDS (Intel MPI) for 64 bit Windows
 
 make SHELL="%ComSpec%" VPATH="../../Source" -f ..\makefile impi_intel_win_64_dv
 if x%arg1% == xbot goto skip2

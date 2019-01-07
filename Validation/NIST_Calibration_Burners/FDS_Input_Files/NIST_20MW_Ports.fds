@@ -1,0 +1,93 @@
+&HEAD CHID='NIST_20MW_Ports', TITLE='Near-field high momentum jets from 20 MW NIST Calibration Burner'/
+
+! &MESH ID='Domain' IJK=10,10,10 XB=-0.0254,0.0254,-0.0572,0.0572,-0.1143,0.3048 / ! single coarse mesh for testing setup
+
+! coarse outer mesh
+&MULT ID='m1', DX=0.0254,DY=0.0286,DZ=0.02619375,
+      I_LOWER=0,I_LOWER_SKIP=0,I_UPPER_SKIP=1,I_UPPER=1,
+      J_LOWER=0,J_LOWER_SKIP=1,J_UPPER_SKIP=2,J_UPPER=3,
+      K_LOWER=0,K_LOWER_SKIP=3,K_UPPER_SKIP=6,K_UPPER=15 / 128 - 16 = 112 mesh
+&MESH IJK=32,32,32, XB=-0.0254,0,-0.0572,-0.0286,-0.1143,-0.08810625,
+      MULT_ID='m1', COLOR='GRAY', CHECK_MESH_ALIGNMENT=T /
+
+! fine mesh near jets
+&MULT ID='m2', DX=0.0127,DY=0.0143,DZ=0.013096875,
+      I_LOWER=0,I_UPPER=3,
+      J_LOWER=0,J_UPPER=3,
+      K_LOWER=0,K_UPPER=7 / 112 + 128 = 240 mesh
+&MESH IJK=32,32,32, XB=-0.0254,-0.0127,-0.0286,-0.0143,-0.03571875,-0.022621875,
+      MULT_ID='m2', COLOR='RED', CHECK_MESH_ALIGNMENT=T /
+
+&TIME T_BEGIN=4,T_END=5/
+
+&MISC SIMULATION_MODE='LES' /
+&PRES VELOCITY_TOLERANCE=0.0001, MAX_PRESSURE_ITERATIONS=10 /
+
+&REAC FUEL='METHANE', AUTO_IGNITION_TEMPERATURE=540., RAMP_AIT='ramp_ait'/
+
+&RAMP ID='ramp_ait',T=4.0, F=0/
+&RAMP ID='ramp_ait',T=4.5, F=1/
+&RAMP ID='ramp_ait',T=5.0, F=1/
+
+! Ramp roughly follows NFRL commissioning test video
+&RAMP ID='rampq', T=0.0, F=0.00 /
+&RAMP ID='rampq', T=0.1, F=1.00 /
+&RAMP ID='rampq', T=0.9, F=1.00 /
+&RAMP ID='rampq', T=1.0, F=5.00 /
+&RAMP ID='rampq', T=1.9, F=5.00 /
+&RAMP ID='rampq', T=2.0, F=10.0 /
+&RAMP ID='rampq', T=2.9, F=10.0 /
+&RAMP ID='rampq', T=3.0, F=15.0 /
+&RAMP ID='rampq', T=3.9, F=15.0 /
+&RAMP ID='rampq', T=4.0, F=20.0 /
+&RAMP ID='rampq', T=5.9, F=20.0 /
+&RAMP ID='rampq', T=6.0, F=1.00 /
+&RAMP ID='rampq', T=6.5, F=1.00 /
+
+! Area for 1/8 inch fuel port is pi*(0.125*0.0254/2)**2 = 7.917304360898401e-06 m2
+! Fuel pipe arrangement is 20 pipes * 75 ports/pipe + 2 pilots * 172 ports/pilot = 1844 total ports
+! Total area is num ports * area/port = 0.014599509241496653 m2
+! HRRPUA = 1000 kW / 0.014599509241496653 m2 = 68495.45306342682 kW/m2
+! RHO_METHANE = 0.667 kg/m3
+! HOC_METHANE = 50010 kJ/kg
+! Mass flowrate per port at 1 MW = 1.08437e-5 kg/s
+! Vol. flowrate per port at 1 MW = 1.62575e-5 m3/s
+! Vel. at 1 MW = 2.0
+&SURF ID='Burner'
+      FYI='HRRPUA for 1 MW'
+      RGB=204,0,0
+      HRRPUA=68495.45306342682
+      RAMP_Q='rampq'
+      /
+
+&SURF ID='Steel'
+      RGB=35,35,35
+      ADIABATIC=T/
+
+&VENT PBX=-0.0254, SURF_ID='PERIODIC'/
+&VENT PBX= 0.0254, SURF_ID='PERIODIC'/
+&VENT PBY=-0.0572, SURF_ID='PERIODIC'/
+&VENT PBY= 0.0572, SURF_ID='PERIODIC'/
+&VENT PBZ=-0.1143, SURF_ID='OPEN'/
+&VENT PBZ= 0.3048, SURF_ID='OPEN'/
+
+&SLCF PBY=0, QUANTITY='VELOCITY', VECTOR=T /
+&SLCF PBX=0, QUANTITY='VELOCITY', VECTOR=T /
+&SLCF PBY=0, QUANTITY='TEMPERATURE', CELL_CENTERED=T /
+&SLCF PBX=0, QUANTITY='TEMPERATURE', CELL_CENTERED=T /
+
+&SLCF PBY=0, QUANTITY='TEMPERATURE', FACE_CENTERED=.TRUE., SLICETYPE='INCLUDE_GEOM' /
+&SLCF PBY=0, QUANTITY='MASS FRACTION', SPEC_ID='METHANE', FACE_CENTERED=.TRUE., SLICETYPE='INCLUDE_GEOM' /
+&SLCF PBY=0, QUANTITY='MASS FRACTION', SPEC_ID='CARBON MONOXIDE', FACE_CENTERED=.TRUE., SLICETYPE='INCLUDE_GEOM' /
+&SLCF PBY=0, QUANTITY='MACH NUMBER', FACE_CENTERED=.TRUE., SLICETYPE='INCLUDE_GEOM' /
+
+&DEVC XB=0.0127,0.0127,0,0,0,0.3048, POINTS=20, QUANTITY='VELOCITY', ID='VEL', TIME_HISTORY=T /
+
+&DEVC XYZ=0,0,0.15, QUANTITY='AUTO IGNITION TEMPERATURE', ID='AIT'
+
+! --- Geometric entities (from Blender Objects)
+! Use CATF line, concatenate geometry file from cad repo:
+! &GEOM ID='Pipe' SURF_ID='Steel','Burner' ! required SURF_IDs
+&CATF OTHER_FILES='../../../../cad/NIST_Calibration_Burners/Two_Ports.geom' /
+
+&TAIL /
