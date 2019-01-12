@@ -737,7 +737,7 @@ DO ICF=1,N_CFACE_CELLS
    TVEC1=(/ 0._EB,0._EB,0._EB/)
    TVEC2=(/ 0._EB,0._EB,0._EB/)
    ! velocity vector of the surface
-   VEL_WALL = -ONE_D%UW*NVEC + SF%VEL_T(1)*TVEC1 + SF%VEL_T(2)*TVEC2
+   VEL_WALL = -ONE_D%U_NORMAL*NVEC + SF%VEL_T(1)*TVEC1 + SF%VEL_T(2)*TVEC2
 
    ! find cut-cell adjacent to CFACE
    IND1 = CFA%CUT_FACE_IND1
@@ -893,7 +893,7 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
 
          CASE (NULL_BOUNDARY)
 
-            CFA%ONE_D%UWS = 0._EB
+            CFA%ONE_D%U_NORMAL_S = 0._EB
 
          CASE (SOLID_BOUNDARY)
 
@@ -908,7 +908,7 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
             ELSE
                TSI = T + DT - CFA%ONE_D%T_IGN
                IF (TSI<0._EB) THEN
-                  CFA%ONE_D%UWS = 0._EB
+                  CFA%ONE_D%U_NORMAL_S = 0._EB
                   CYCLE CFACE_LOOP
                ENDIF
             ENDIF
@@ -919,13 +919,14 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
 
             VEL_INTO_BOD0    =-(CFA%NVEC(IAXIS)*U0 + CFA%NVEC(JAXIS)*V0 + CFA%NVEC(KAXIS)*W0)
 
-            CFA%ONE_D%UWS    = VEL_INTO_BOD0 + TIME_RAMP_FACTOR*(CFA%UW0-VEL_INTO_BOD0)
+            CFA%ONE_D%U_NORMAL_S    = VEL_INTO_BOD0 + TIME_RAMP_FACTOR*(CFA%ONE_D%U_NORMAL_0-VEL_INTO_BOD0)
 
             ! Special Cases
             ! NEUMANN_IF: IF (SF%SPECIFIED_NORMAL_GRADIENT) THEN
             ! TO DO, following PREDICT_NORMAL_VELOCITY.
 
-            IF (ABS(SURFACE(CFA%SURF_INDEX)%MASS_FLUX_TOTAL)>=TWO_EPSILON_EB) CFA%ONE_D%UWS = CFA%ONE_D%UWS*RHOA/CFA%ONE_D%RHO_F
+            IF (ABS(SURFACE(CFA%SURF_INDEX)%MASS_FLUX_TOTAL)>=TWO_EPSILON_EB) CFA%ONE_D%U_NORMAL_S = &
+                                                                              CFA%ONE_D%U_NORMAL_S*RHOA/CFA%ONE_D%RHO_F
 
             ! VENT_IF: IF (WC%VENT_INDEX>0) THEN
             ! TO DO, following PREDICT_NORMAL_VELOCITY.
@@ -936,8 +937,8 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
 
 ELSE PREDICT_NORMALS
 
-   ! In the CORRECTOR step, the normal component of velocity, UW, is the same as the predicted value, UWS.
-   ! However, for species mass fluxes and HVAC, UW is computed elsewhere (wall.f90).
+   ! In the CORRECTOR step, the normal component of velocity, U_NORMAL, is the same as the predicted value, U_NORMAL_S.
+   ! However, for species mass fluxes and HVAC, U_NORMAL is computed elsewhere (wall.f90).
 
    CFACE_LOOPC: DO ICF=1,N_CFACE_CELLS
       CFA => CFACE(ICF)
@@ -946,7 +947,7 @@ ELSE PREDICT_NORMALS
          IF (SF%SPECIES_BC_INDEX==SPECIFIED_MASS_FLUX .OR. &
              ANY(SF%LEAK_PATH>0)) CYCLE
       ENDIF
-      CFA%ONE_D%UW = CFA%ONE_D%UWS
+      CFA%ONE_D%U_NORMAL = CFA%ONE_D%U_NORMAL_S
    ENDDO CFACE_LOOPC
 
 ENDIF PREDICT_NORMALS
@@ -4716,7 +4717,7 @@ AVERAGE_LINKDIV_IF: IF (AVERAGE_LINKDIV) THEN
          IF(ICF>0) THEN
             DO JCF=1,CUT_FACE(ICF)%NFACE ! Loop all cut-faces inside cell I,J,K
                ICFACE    = CUT_FACE(ICF)%CFACE_INDEX(JCF)  ! Find corresponding CFACE index for this boundary cut-face.
-               DIVVOL_BC = DIVVOL_BC - CFACE(ICFACE)%ONE_D%UWS * CFACE(ICFACE)%AREA ! Add flux to BC divergence.
+               DIVVOL_BC = DIVVOL_BC - CFACE(ICFACE)%ONE_D%U_NORMAL_S * CFACE(ICFACE)%AREA ! Add flux to BC divergence.
             ENDDO
          ENDIF
          CUT_CELL(ICC)%DIVVOL_BC = DIVVOL_BC
@@ -4744,7 +4745,7 @@ AVERAGE_LINKDIV_IF: IF (AVERAGE_LINKDIV) THEN
          IF(ICF>0) THEN
             DO JCF=1,CUT_FACE(ICF)%NFACE
                ICFACE    = CUT_FACE(ICF)%CFACE_INDEX(JCF)
-               DIVVOL_BC = DIVVOL_BC - CFACE(ICFACE)%ONE_D%UW * CFACE(ICFACE)%AREA
+               DIVVOL_BC = DIVVOL_BC - CFACE(ICFACE)%ONE_D%U_NORMAL * CFACE(ICFACE)%AREA
             ENDDO
          ENDIF
          CUT_CELL(ICC)%DIVVOL_BC = DIVVOL_BC
@@ -5270,8 +5271,8 @@ DO IFACE=1,MESHES(NM)%IBM_NBBREGFACE_Z(X1AXIS)
       CASE DEFAULT
          VELC = UU(I,J,K)
       CASE(SOLID_BOUNDARY)
-         IF (PREDICTOR) VELC = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UWS
-         IF (CORRECTOR) VELC = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UW
+         IF (PREDICTOR) VELC = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%U_NORMAL_S
+         IF (CORRECTOR) VELC = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%U_NORMAL
    END SELECT
    ! Add: -(bar{rho*zz} u dot n - (rho*zz) u dot n) to corresponding cell DP:
    AF = DY(J)*DZ(K)
@@ -5301,8 +5302,8 @@ DO IFACE=1,MESHES(NM)%IBM_NBBREGFACE_Z(X1AXIS)
       CASE DEFAULT
          VELC = VV(I,J,K)
       CASE(SOLID_BOUNDARY)
-         IF (PREDICTOR) VELC = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UWS
-         IF (CORRECTOR) VELC = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UW
+         IF (PREDICTOR) VELC = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%U_NORMAL_S
+         IF (CORRECTOR) VELC = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%U_NORMAL
    END SELECT
    ! Add: -(bar{rho*zz} u dot n - (rho*zz) u dot n) to corresponding cell DP:
    AF = DX(I)*DZ(K)
@@ -5332,8 +5333,8 @@ DO IFACE=1,MESHES(NM)%IBM_NBBREGFACE_Z(X1AXIS)
       CASE DEFAULT
          VELC = WW(I,J,K)
       CASE(SOLID_BOUNDARY)
-         IF (PREDICTOR) VELC = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UWS
-         IF (CORRECTOR) VELC = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UW
+         IF (PREDICTOR) VELC = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%U_NORMAL_S
+         IF (CORRECTOR) VELC = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%U_NORMAL
    END SELECT
    ! Add: -(bar{rho*zz} u dot n - (rho*zz) u dot n) to corresponding cell DP:
    AF = DX(I)*DY(J)
@@ -5405,8 +5406,8 @@ DO IFACE=1,MESHES(NM)%IBM_NBBRCFACE_Z
       CASE DEFAULT
          ! Already filled in previous X1AXIS select case.
       CASE(SOLID_BOUNDARY)
-         IF (PREDICTOR) VELC = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UWS
-         IF (CORRECTOR) VELC = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UW
+         IF (PREDICTOR) VELC = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%U_NORMAL_S
+         IF (CORRECTOR) VELC = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%U_NORMAL
    END SELECT
    SELECT CASE(IBM_RCFACE_Z(IFACE)%CELL_LIST(1,ISIDE+2))
    CASE(IBM_FTYPE_RGGAS)
@@ -5468,9 +5469,9 @@ CFACE_LOOP : DO ICFA=1,N_CFACE_CELLS
    JCC = CUT_FACE(IND1)%CELL_LIST(3,LOW_IND,IND2)
    AF = CFA%AREA
    IF (PREDICTOR) THEN
-      VELC = CFA%ONE_D%UWS
+      VELC = CFA%ONE_D%U_NORMAL_S
    ELSE
-      VELC = CFA%ONE_D%UW
+      VELC = CFA%ONE_D%U_NORMAL
    ENDIF
    ! Takes place of flux limited interpolation:
    FN_ZZ           = CFA%ONE_D%RHO_F * CFA%ONE_D%ZZ_F(N)
@@ -5515,8 +5516,8 @@ DO IEXIM=1,MESHES(NM)%IBM_NEXIMFACE_MESH
                 VELC = WW(I,J,K)
              END SELECT
           CASE(SOLID_BOUNDARY)
-             IF (PREDICTOR) VELC = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UWS
-             IF (CORRECTOR) VELC = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UW
+             IF (PREDICTOR) VELC = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%U_NORMAL_S
+             IF (CORRECTOR) VELC = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%U_NORMAL
        END SELECT
        SELECT CASE(X1AXIS)
        CASE(IAXIS)
@@ -5934,9 +5935,9 @@ DO IFACE=1,MESHES(NM)%IBM_NBBREGFACE_Z(X1AXIS)
    ! Calculate the sensible enthalpy at the boundary. If the boundary is solid
    ! and the gas is flowing out, use the gas temperature for the calculation.
    IF (PREDICTOR) THEN
-      VELC2 = WC%ONE_D%UWS
+      VELC2 = WC%ONE_D%U_NORMAL_S
    ELSE
-      VELC2 = WC%ONE_D%UW
+      VELC2 = WC%ONE_D%U_NORMAL
    ENDIF
    IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY .AND. VELC2>0._EB) THEN
       TMP_F_GAS = WC%ONE_D%TMP_G
@@ -5949,8 +5950,8 @@ DO IFACE=1,MESHES(NM)%IBM_NBBREGFACE_Z(X1AXIS)
       CASE DEFAULT
          VELC = UU(I,J,K)
       CASE(SOLID_BOUNDARY)
-         IF (PREDICTOR) VELC = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UWS
-         IF (CORRECTOR) VELC = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UW
+         IF (PREDICTOR) VELC = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%U_NORMAL_S
+         IF (CORRECTOR) VELC = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%U_NORMAL
    END SELECT
    FN_H_S = WC%ONE_D%RHO_F*H_S ! bar{rho*hs}
    ! Add: -(bar{rho*hs} u dot n - (rho*hs) u dot n) to corresponding cell DP:
@@ -5982,9 +5983,9 @@ DO IFACE=1,MESHES(NM)%IBM_NBBREGFACE_Z(X1AXIS)
    ! Calculate the sensible enthalpy at the boundary. If the boundary is solid
    ! and the gas is flowing out, use the gas temperature for the calculation.
    IF (PREDICTOR) THEN
-      VELC2 = WC%ONE_D%UWS
+      VELC2 = WC%ONE_D%U_NORMAL_S
    ELSE
-      VELC2 = WC%ONE_D%UW
+      VELC2 = WC%ONE_D%U_NORMAL
    ENDIF
    IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY .AND. VELC2>0._EB) THEN
       TMP_F_GAS = WC%ONE_D%TMP_G
@@ -5997,8 +5998,8 @@ DO IFACE=1,MESHES(NM)%IBM_NBBREGFACE_Z(X1AXIS)
       CASE DEFAULT
          VELC = VV(I,J,K)
       CASE(SOLID_BOUNDARY)
-         IF (PREDICTOR) VELC = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UWS
-         IF (CORRECTOR) VELC = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UW
+         IF (PREDICTOR) VELC = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%U_NORMAL_S
+         IF (CORRECTOR) VELC = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%U_NORMAL
    END SELECT
    FN_H_S = WC%ONE_D%RHO_F*H_S ! bar{rho*hs}
    ! Add: -(bar{rho*hs} u dot n - (rho*hs) u dot n) to corresponding cell DP:
@@ -6030,9 +6031,9 @@ DO IFACE=1,MESHES(NM)%IBM_NBBREGFACE_Z(X1AXIS)
    ! Calculate the sensible enthalpy at the boundary. If the boundary is solid
    ! and the gas is flowing out, use the gas temperature for the calculation.
    IF (PREDICTOR) THEN
-      VELC2 = WC%ONE_D%UWS
+      VELC2 = WC%ONE_D%U_NORMAL_S
    ELSE
-      VELC2 = WC%ONE_D%UW
+      VELC2 = WC%ONE_D%U_NORMAL
    ENDIF
    IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY .AND. VELC2>0._EB) THEN
       TMP_F_GAS = WC%ONE_D%TMP_G
@@ -6045,8 +6046,8 @@ DO IFACE=1,MESHES(NM)%IBM_NBBREGFACE_Z(X1AXIS)
       CASE DEFAULT
          VELC = WW(I,J,K)
       CASE(SOLID_BOUNDARY)
-         IF (PREDICTOR) VELC = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UWS
-         IF (CORRECTOR) VELC = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UW
+         IF (PREDICTOR) VELC = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%U_NORMAL_S
+         IF (CORRECTOR) VELC = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%U_NORMAL
    END SELECT
    FN_H_S = WC%ONE_D%RHO_F*H_S ! bar{rho*hs}
    ! Add: -(bar{rho*hs} u dot n - (rho*hs) u dot n) to corresponding cell DP:
@@ -6128,9 +6129,9 @@ DO IFACE=1,MESHES(NM)%IBM_NBBRCFACE_Z
    ! Calculate the sensible enthalpy at the boundary. If the boundary is solid
    ! and the gas is flowing out, use the gas temperature for the calculation.
    IF (PREDICTOR) THEN
-      VELC2 = WC%ONE_D%UWS
+      VELC2 = WC%ONE_D%U_NORMAL_S
    ELSE
-      VELC2 = WC%ONE_D%UW
+      VELC2 = WC%ONE_D%U_NORMAL
    ENDIF
    IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY .AND. VELC2>0._EB) THEN
       TMP_F_GAS = WC%ONE_D%TMP_G
@@ -6143,8 +6144,8 @@ DO IFACE=1,MESHES(NM)%IBM_NBBRCFACE_Z
       CASE DEFAULT
          ! Already filled in previous X1AXIS select case.
       CASE(SOLID_BOUNDARY)
-         IF (PREDICTOR) VELC = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UWS
-         IF (CORRECTOR) VELC = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UW
+         IF (PREDICTOR) VELC = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%U_NORMAL_S
+         IF (CORRECTOR) VELC = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%U_NORMAL
    END SELECT
    FN_H_S = WC%ONE_D%RHO_F*H_S ! bar{rho*hs}
    ! Finally add to Div:
@@ -6181,9 +6182,9 @@ DO ICF = 1,MESHES(NM)%N_BBCUTFACE_MESH
    ! Flux limited face value bar{rho*hs}_F, the ONE_D variable values fo TMP, RHOP, ZZ and RSUM have been averaged to
    ! the cartesian cell location in CCREGION_DENSITY:
    IF (PREDICTOR) THEN
-      VELC2 = WC%ONE_D%UWS
+      VELC2 = WC%ONE_D%U_NORMAL_S
    ELSE
-      VELC2 = WC%ONE_D%UW
+      VELC2 = WC%ONE_D%U_NORMAL
    ENDIF
    IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY .AND. VELC2>0._EB) THEN
       TMP_F_GAS = WC%ONE_D%TMP_G
@@ -6233,9 +6234,9 @@ CFACE_LOOP : DO ICFA=1,N_CFACE_CELLS
    AF = CFA%AREA
 
    IF (PREDICTOR) THEN
-      VELC = CFA%ONE_D%UWS
+      VELC = CFA%ONE_D%U_NORMAL_S
    ELSE
-      VELC = CFA%ONE_D%UW
+      VELC = CFA%ONE_D%U_NORMAL
    ENDIF
    IF (VELC>0._EB) THEN
       TMP_F_GAS = CUT_CELL(ICC)%TMP(JCC)
@@ -6296,8 +6297,8 @@ DO IEXIM=1,MESHES(NM)%IBM_NEXIMFACE_MESH
                 VELC = WW(I,J,K)
              END SELECT
           CASE(SOLID_BOUNDARY)
-             IF (PREDICTOR) VELC = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UWS
-             IF (CORRECTOR) VELC = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UW
+             IF (PREDICTOR) VELC = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%U_NORMAL_S
+             IF (CORRECTOR) VELC = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%U_NORMAL
        END SELECT
        SELECT CASE(X1AXIS)
        CASE(IAXIS)
@@ -6404,7 +6405,7 @@ SUBROUTINE CCREGION_DIFFUSIVE_HEAT_FLUXES
 
 ! Local Variables:
 INTEGER :: IIG, JJG, KKG , IOR, N_ZZ_MAX
-REAL(EB) :: UWP, RHO_D_DZDN
+REAL(EB) :: UN_P, RHO_D_DZDN
 REAL(EB) :: RHO_D_DZDN_GET(1:N_TRACKED_SPECIES)
 TYPE(CFACE_TYPE), POINTER :: CFA=>NULL()
 
@@ -6677,11 +6678,11 @@ CFACE_LOOP : DO ICF=1,N_CFACE_CELLS
    ICC  = CUT_FACE(IND1)%CELL_LIST(2,LOW_IND,IND2);  JCC  = CUT_FACE(IND1)%CELL_LIST(3,LOW_IND,IND2)
    ! H_RHO_D_DZDN
    IF (PREDICTOR) THEN
-      UWP = CFA%ONE_D%UWS
+      UN_P = CFA%ONE_D%U_NORMAL_S
    ELSE
-      UWP = CFA%ONE_D%UW
+      UN_P = CFA%ONE_D%U_NORMAL
    ENDIF
-   IF (UWP>0._EB) THEN
+   IF (UN_P>0._EB) THEN
       TMP_G = CFA%ONE_D%TMP_G ! CUT_CELL(ICC)%TMP(JCC)
    ELSE
       TMP_G = CFA%ONE_D%TMP_F
@@ -6720,11 +6721,11 @@ SPECIES_LOOP2: DO N=1,N_TOTAL_SCALARS
       WC => WALL(IW)
       ! H_RHO_D_DZDN
       IF (PREDICTOR) THEN
-         UWP = WC%ONE_D%UWS
+         UN_P = WC%ONE_D%U_NORMAL_S
       ELSE
-         UWP = WC%ONE_D%UW
+         UN_P = WC%ONE_D%U_NORMAL
       ENDIF
-      IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY .AND. UWP>0._EB) THEN
+      IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY .AND. UN_P>0._EB) THEN
          TMP_G = WC%ONE_D%TMP_G
       ELSE
          TMP_G = WC%ONE_D%TMP_F
@@ -6760,11 +6761,11 @@ SPECIES_LOOP2: DO N=1,N_TOTAL_SCALARS
       WC => WALL(IW)
       ! H_RHO_D_DZDN
       IF (PREDICTOR) THEN
-         UWP = WC%ONE_D%UWS
+         UN_P = WC%ONE_D%U_NORMAL_S
       ELSE
-         UWP = WC%ONE_D%UW
+         UN_P = WC%ONE_D%U_NORMAL
       ENDIF
-      IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY .AND. UWP>0._EB) THEN
+      IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY .AND. UN_P>0._EB) THEN
          TMP_G = WC%ONE_D%TMP_G
       ELSE
          TMP_G = WC%ONE_D%TMP_F
@@ -6800,11 +6801,11 @@ SPECIES_LOOP2: DO N=1,N_TOTAL_SCALARS
       WC => WALL(IW)
       ! H_RHO_D_DZDN
       IF (PREDICTOR) THEN
-         UWP = WC%ONE_D%UWS
+         UN_P = WC%ONE_D%U_NORMAL_S
       ELSE
-         UWP = WC%ONE_D%UW
+         UN_P = WC%ONE_D%U_NORMAL
       ENDIF
-      IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY .AND. UWP>0._EB) THEN
+      IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY .AND. UN_P>0._EB) THEN
          TMP_G = WC%ONE_D%TMP_G
       ELSE
          TMP_G = WC%ONE_D%TMP_F
@@ -8948,7 +8949,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          SELECT CASE(WC%BOUNDARY_TYPE)
             CASE DEFAULT; CYCLE WALL_LOOP
             ! SOLID_BOUNDARY is not currently functional here, but keep for testing
-            CASE(SOLID_BOUNDARY);        UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UW
+            CASE(SOLID_BOUNDARY);        UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%U_NORMAL
             CASE(INTERPOLATED_BOUNDARY); UN = UVW_SAVE(IW)
          END SELECT
          SELECT CASE(IOR)
@@ -8978,7 +8979,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          SELECT CASE(WC%BOUNDARY_TYPE)
             CASE DEFAULT; CYCLE WALL_LOOP_2
             ! SOLID_BOUNDARY is not currently functional here, but keep for testing
-            CASE(SOLID_BOUNDARY);        UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UWS
+            CASE(SOLID_BOUNDARY);        UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%U_NORMAL_S
             CASE(INTERPOLATED_BOUNDARY); UN = UVW_SAVE(IW)
          END SELECT
          SELECT CASE(IOR)
@@ -11185,9 +11186,9 @@ DO IEXIM=1,MESHES(NM)%IBM_NEXIMFACE_MESH
       WC=>WALL(IW)
       IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE
       IF (PREDICTOR) THEN
-         VELC2 = WC%ONE_D%UWS
+         VELC2 = WC%ONE_D%U_NORMAL_S
       ELSE
-         VELC2 = WC%ONE_D%UW
+         VELC2 = WC%ONE_D%U_NORMAL
       ENDIF
       IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY .AND. VELC2>0._EB) THEN
          TMP_F_GAS = WC%ONE_D%TMP_G
@@ -11843,9 +11844,9 @@ MESH_LOOP_DBND : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       ICC  = CUT_FACE(IND1)%CELL_LIST(2,LOW_IND,IND2);  JCC  = CUT_FACE(IND1)%CELL_LIST(3,LOW_IND,IND2)
       IROW = CUT_CELL(ICC)%UNKZ(JCC) - UNKZ_IND(NM_START)
       IF (PREDICTOR) THEN
-         VELC = CFA%ONE_D%UW
+         VELC = CFA%ONE_D%U_NORMAL
       ELSE
-         VELC = CFA%ONE_D%UWS
+         VELC = CFA%ONE_D%U_NORMAL_S
       ENDIF
       IF (VELC>0._EB) THEN
          RHO_Z = PRFCT *CUT_CELL(ICC)% RHO(JCC)*CUT_CELL(ICC)% ZZ(N,JCC) + &
@@ -12477,7 +12478,7 @@ STORE_FLG_CND : IF (STORE_FLG) THEN
                ICF2 = CUT_FACE(ICF)%INT_INBFC(3,IFACE)
                ICFA = CUT_FACE(ICF1)%CFACE_INDEX(ICF2)
                IF (ICFA>0) THEN
-                  VELN = -CFACE(ICFA)%ONE_D%UW
+                  VELN = -CFACE(ICFA)%ONE_D%U_NORMAL
                   SRGH = SURFACE(CFACE(ICFA)%SURF_INDEX)%ROUGHNESS
                ENDIF
             ENDIF
@@ -12756,7 +12757,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                      ICF2 = CUT_FACE(ICF)%INT_INBFC(3,IFACE)
                      ICFA = CUT_FACE(ICF1)%CFACE_INDEX(ICF2)
                      IF (ICFA>0) THEN
-                        VELN = -CFACE(ICFA)%ONE_D%UW
+                        VELN = -CFACE(ICFA)%ONE_D%U_NORMAL
                         SRGH = SURFACE(CFACE(ICFA)%SURF_INDEX)%ROUGHNESS
                      ENDIF
                   ENDIF
@@ -12895,7 +12896,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                         TAU_W = -RHO_FACE*U_TAU**2
                         GRAV_SS = DOT_PRODUCT(GVEC,SS)*(RHO_FACE-RHO_0(K))
 
-                        ! Normal component of velocity at forcing point, U_NORM_FP = UW + DXN_STRM_FP * ( DIV - DUDS )
+                        ! Normal component of velocity at forcing point, U_NORM_FP = U_NORMAL + DXN_STRM_FP * ( DIV - DUDS )
                         U_NORM_FP = VELN + DXN_STRM_FP * (DIV_FACE - DUSTRMDS_FP)
 
                         ! All values evaluated at forcing point
@@ -13056,7 +13057,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                ICF2 = MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_INBFC(3,IFACE)
                ICFA = CUT_FACE(ICF1)%CFACE_INDEX(ICF2)
                IF (ICFA>0) THEN
-                  VELN = -CFACE(ICFA)%ONE_D%UW
+                  VELN = -CFACE(ICFA)%ONE_D%U_NORMAL
                   SRGH = SURFACE(CFACE(ICFA)%SURF_INDEX)%ROUGHNESS
                ENDIF
             ENDIF
@@ -13978,7 +13979,7 @@ VELX1 = 0._EB
 ! This routine computes boundary velocity of a boundary point on INBFC_CFCEN(1:3) INBOUNDARY cut-face
 ! with coordinates XYZ_PP. Will make use of velocity field defined on GEOMETRY.
 
-! For now Set to CFACEs UW or UWS depending on predictor or corrector:
+! For now Set to CFACEs U_NORMAL or U_NORMAL_S depending on predictor or corrector:
 DUMMY = XYZ_PP(X1AXIS) ! Dummy to avoid compilation warning on currently unused point location within cut-face.
 
 ! Inboundary cut-face indexes:
@@ -13996,9 +13997,9 @@ IF (ICF <=0) RETURN ! This uses VELX1 = 0._EB when the inboundary cut-face used 
 
 ! Velocity into Gas Region, component along X1AXIS:
 IF (PREDICTOR) THEN
-   VELX1 = -CFACE(ICF)%ONE_D%UW * CFACE(ICF)%NVEC(X1AXIS)
+   VELX1 = -CFACE(ICF)%ONE_D%U_NORMAL * CFACE(ICF)%NVEC(X1AXIS)
 ELSE
-   VELX1 = -CFACE(ICF)%ONE_D%UWS* CFACE(ICF)%NVEC(X1AXIS)
+   VELX1 = -CFACE(ICF)%ONE_D%U_NORMAL_S* CFACE(ICF)%NVEC(X1AXIS)
 ENDIF
 
 RETURN
@@ -14220,8 +14221,8 @@ MESHES_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                   ICFA    = CUT_FACE(IFC2)%CFACE_INDEX(IFACE2)
 
                   AF      = CUT_FACE(IFC2)%AREA(IFACE2)
-                  VELN    = FCT*((1._EB-PRFCT)*(CUT_FACE(IFC2)%VEL( IFACE2)+CFACE(ICFA)%ONE_D%UW) + &
-                                        PRFCT *(CUT_FACE(IFC2)%VELS(IFACE2)+CFACE(ICFA)%ONE_D%UWS))
+                  VELN    = FCT*((1._EB-PRFCT)*(CUT_FACE(IFC2)%VEL( IFACE2)+CFACE(ICFA)%ONE_D%U_NORMAL) + &
+                                        PRFCT *(CUT_FACE(IFC2)%VELS(IFACE2)+CFACE(ICFA)%ONE_D%U_NORMAL_S))
 
                END SELECT
 
@@ -14862,7 +14863,7 @@ MESHES_LOOP : DO NM=1,NMESHES
          KKG   = WC%ONE_D%KKG
          IOR   = WC%ONE_D%IOR
 
-         DHDXN = -WC%UW0
+         DHDXN = -WC%ONE_D%U_NORMAL_0
 
          ! Define cell size, normal to WC:
          SELECT CASE (IOR)
@@ -15405,7 +15406,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                       ICF2 = CUT_FACE(ICF)%INT_INBFC(3,IFACE)
                       ICFA = CUT_FACE(ICF1)%CFACE_INDEX(ICF2)
                       IF (ICFA>0) THEN
-                         VELN = -CFACE(ICFA)%ONE_D%UW
+                         VELN = -CFACE(ICFA)%ONE_D%U_NORMAL
                          SRGH = SURFACE(CFACE(ICFA)%SURF_INDEX)%ROUGHNESS
                       ENDIF
                    ENDIF
@@ -15559,7 +15560,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                   ICF2 = MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_INBFC(3,IFACE)
                   ICFA = CUT_FACE(ICF1)%CFACE_INDEX(ICF2)
                   IF (ICFA>0) THEN
-                     VELN = -CFACE(ICFA)%ONE_D%UW
+                     VELN = -CFACE(ICFA)%ONE_D%U_NORMAL
                      SRGH = SURFACE(CFACE(ICFA)%SURF_INDEX)%ROUGHNESS
                   ENDIF
                ENDIF
@@ -23228,7 +23229,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          SELECT CASE(WC%BOUNDARY_TYPE)
             CASE DEFAULT; CYCLE WALL_LOOP
             ! SOLID_BOUNDARY is not currently functional here, but keep for testing
-            CASE(SOLID_BOUNDARY);        UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UW
+            CASE(SOLID_BOUNDARY);        UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%U_NORMAL
             CASE(INTERPOLATED_BOUNDARY); UN = UVW_SAVE(IW)
          END SELECT
          SELECT CASE(IOR)
@@ -23261,7 +23262,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          SELECT CASE(WC%BOUNDARY_TYPE)
             CASE DEFAULT; CYCLE WALL_LOOP_2
             ! SOLID_BOUNDARY is not currently functional here, but keep for testing
-            CASE(SOLID_BOUNDARY);        UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UWS
+            CASE(SOLID_BOUNDARY);        UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%U_NORMAL_S
             CASE(INTERPOLATED_BOUNDARY); UN = UVW_SAVE(IW)
          END SELECT
          SELECT CASE(IOR)
@@ -29342,7 +29343,7 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          MESHES(NM)%CFACE(CFACE_INDEX_LOCAL)%ONE_D%AREA = CUT_FACE(ICF)%AREA(IFACE) ! Init to CFACE AREA.
 
          ! Assign normal velocity to CFACE from SURF input:
-         MESHES(NM)%CFACE(CFACE_INDEX_LOCAL)%UW0 = SURFACE(SURF_INDEX)%VEL
+         MESHES(NM)%CFACE(CFACE_INDEX_LOCAL)%ONE_D%U_NORMAL_0 = SURFACE(SURF_INDEX)%VEL
 
       ENDDO
    ENDDO

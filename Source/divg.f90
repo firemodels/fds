@@ -37,7 +37,7 @@ REAL(EB), POINTER, DIMENSION(:,:) :: PBAR_P
 REAL(EB) :: DELKDELT,VC,VC1,DTDX,DTDY,DTDZ,TNOW, &
             DZDX,DZDY,DZDZ,RDT,RHO_D_DZDN,TSI,TIME_RAMP_FACTOR,DELTA_P,PRES_RAMP_FACTOR,&
             TMP_G,DIV_DIFF_HEAT_FLUX,H_S,ZZZ(1:4),DU,DU_P,DU_M,UN,PROFILE_FACTOR, &
-            XHAT,ZHAT,TT,Q_Z,D_Z_TEMP,D_Z_N(0:5000),RHO_D_DZDN_GET(1:N_TRACKED_SPECIES),JCOR,UWP,TMP_F_GAS
+            XHAT,ZHAT,TT,Q_Z,D_Z_TEMP,D_Z_N(0:5000),RHO_D_DZDN_GET(1:N_TRACKED_SPECIES),JCOR,UN_P,TMP_F_GAS
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_GET
 TYPE(SURFACE_TYPE), POINTER :: SF
 TYPE(SPECIES_MIXTURE_TYPE), POINTER :: SM
@@ -79,7 +79,7 @@ DP = 0._EB
 
 CALL MERGE_PRESSURE_ZONES
 
-! Compute normal component of velocity at boundaries, UWS in the PREDICTOR step, UW in the CORRECTOR.
+! Compute normal component of velocity at boundaries, U_NORMAL_S in the PREDICTOR step, U_NORMAL in the CORRECTOR.
 
 CALL PREDICT_NORMAL_VELOCITY
 IF (CC_IBM) CALL CFACE_PREDICT_NORMAL_VELOCITY(T,DT)
@@ -335,11 +335,11 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
          WC%ONE_D%RHO_D_DZDN_F(N) = RHO_D_DZDN
 
          IF (PREDICTOR) THEN
-            UWP = WC%ONE_D%UWS
+            UN_P = WC%ONE_D%U_NORMAL_S
          ELSE
-            UWP = WC%ONE_D%UW
+            UN_P = WC%ONE_D%U_NORMAL
          ENDIF
-         IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY .AND. UWP>0._EB) THEN
+         IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY .AND. UN_P>0._EB) THEN
             TMP_F_GAS = WC%ONE_D%TMP_G
          ELSE
             TMP_F_GAS = WC%ONE_D%TMP_F
@@ -736,8 +736,8 @@ IF_PRESSURE_ZONES: IF (N_ZONE>0) THEN
       IPZ = WC%ONE_D%PRESSURE_ZONE
       IF (IPZ<1) CYCLE WALL_LOOP4
       IF (WC%BOUNDARY_TYPE/=SOLID_BOUNDARY) CYCLE WALL_LOOP4
-      IF (PREDICTOR) USUM(IPZ,NM) = USUM(IPZ,NM) + WC%ONE_D%UWS*WALL(IW)%ONE_D%AREA
-      IF (CORRECTOR) USUM(IPZ,NM) = USUM(IPZ,NM) + WC%ONE_D%UW* WALL(IW)%ONE_D%AREA
+      IF (PREDICTOR) USUM(IPZ,NM) = USUM(IPZ,NM) + WC%ONE_D%U_NORMAL_S*WALL(IW)%ONE_D%AREA
+      IF (CORRECTOR) USUM(IPZ,NM) = USUM(IPZ,NM) + WC%ONE_D%U_NORMAL* WALL(IW)%ONE_D%AREA
    ENDDO WALL_LOOP4
 
 ENDIF IF_PRESSURE_ZONES
@@ -750,7 +750,7 @@ CONTAINS
 SUBROUTINE ENTHALPY_ADVECTION
 
 REAL(EB), POINTER, DIMENSION(:,:,:) :: FX_H_S=>NULL(),FY_H_S=>NULL(),FZ_H_S=>NULL()
-REAL(EB) :: UWP,TMP_F_GAS
+REAL(EB) :: UN_P,TMP_F_GAS
 
 RHO_H_S_P=>WORK1
 FX_H_S=>WORK2
@@ -846,11 +846,11 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    ! and the gas is flowing out, use the gas temperature for the calculation.
 
    IF (PREDICTOR) THEN
-      UWP = WC%ONE_D%UWS
+      UN_P = WC%ONE_D%U_NORMAL_S
    ELSE
-      UWP = WC%ONE_D%UW
+      UN_P = WC%ONE_D%U_NORMAL
    ENDIF
-   IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY .AND. UWP>0._EB) THEN
+   IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY .AND. UN_P>0._EB) THEN
       TMP_F_GAS = WC%ONE_D%TMP_G
    ELSE
       TMP_F_GAS = WC%ONE_D%TMP_F
@@ -915,8 +915,8 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
             CASE(-3); UN = WW(II,JJ,KK-1)
          END SELECT IOR_SELECT
       CASE(SOLID_BOUNDARY)
-         IF (PREDICTOR) UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UWS
-         IF (CORRECTOR) UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UW
+         IF (PREDICTOR) UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%U_NORMAL_S
+         IF (CORRECTOR) UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%U_NORMAL
       CASE(INTERPOLATED_BOUNDARY)
          UN = UVW_SAVE(IW)
    END SELECT BOUNDARY_SELECT
@@ -1101,8 +1101,8 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
             CASE(-3); UN = WW(II,JJ,KK-1)
          END SELECT IOR_SELECT
       CASE(SOLID_BOUNDARY)
-         IF (PREDICTOR) UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UWS
-         IF (CORRECTOR) UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UW
+         IF (PREDICTOR) UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%U_NORMAL_S
+         IF (CORRECTOR) UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%U_NORMAL
       CASE(INTERPOLATED_BOUNDARY)
          UN = UVW_SAVE(IW)
    END SELECT BOUNDARY_SELECT
@@ -1195,7 +1195,7 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
 
          CASE (NULL_BOUNDARY)
 
-            WC%ONE_D%UWS = 0._EB
+            WC%ONE_D%U_NORMAL_S = 0._EB
 
          CASE (SOLID_BOUNDARY)
 
@@ -1212,7 +1212,7 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
             ELSE
                TSI = T + DT - WC%ONE_D%T_IGN
                IF (TSI<0._EB) THEN
-                  WC%ONE_D%UWS = 0._EB
+                  WC%ONE_D%U_NORMAL_S = 0._EB
                   CYCLE WALL_LOOP3
                ENDIF
             ENDIF
@@ -1222,17 +1222,17 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
             PRES_RAMP_FACTOR = SIGN(1._EB,SF%MAX_PRESSURE-DELTA_P)*SQRT(ABS((DELTA_P-SF%MAX_PRESSURE)/SF%MAX_PRESSURE))
             SELECT CASE(IOR)
                CASE( 1)
-                  WC%ONE_D%UWS =-U0 + TIME_RAMP_FACTOR*(WC%UW0+U0)
+                  WC%ONE_D%U_NORMAL_S =-U0 + TIME_RAMP_FACTOR*(WC%ONE_D%U_NORMAL_0+U0)
                CASE(-1)
-                  WC%ONE_D%UWS = U0 + TIME_RAMP_FACTOR*(WC%UW0-U0)
+                  WC%ONE_D%U_NORMAL_S = U0 + TIME_RAMP_FACTOR*(WC%ONE_D%U_NORMAL_0-U0)
                CASE( 2)
-                  WC%ONE_D%UWS =-V0 + TIME_RAMP_FACTOR*(WC%UW0+V0)
+                  WC%ONE_D%U_NORMAL_S =-V0 + TIME_RAMP_FACTOR*(WC%ONE_D%U_NORMAL_0+V0)
                CASE(-2)
-                  WC%ONE_D%UWS = V0 + TIME_RAMP_FACTOR*(WC%UW0-V0)
+                  WC%ONE_D%U_NORMAL_S = V0 + TIME_RAMP_FACTOR*(WC%ONE_D%U_NORMAL_0-V0)
                CASE( 3)
-                  WC%ONE_D%UWS =-W0 + TIME_RAMP_FACTOR*(WC%UW0+W0)
+                  WC%ONE_D%U_NORMAL_S =-W0 + TIME_RAMP_FACTOR*(WC%ONE_D%U_NORMAL_0+W0)
                CASE(-3)
-                  WC%ONE_D%UWS = W0 + TIME_RAMP_FACTOR*(WC%UW0-W0)
+                  WC%ONE_D%U_NORMAL_S = W0 + TIME_RAMP_FACTOR*(WC%ONE_D%U_NORMAL_0-W0)
             END SELECT
             ! Special Cases
             NEUMANN_IF: IF (SF%SPECIFIED_NORMAL_GRADIENT) THEN
@@ -1241,20 +1241,21 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
                KKG = WC%ONE_D%KKG
                SELECT CASE(IOR)
                   CASE( 1)
-                     WC%ONE_D%UWS =-(U(IIG,JJG,KKG)   + SF%VEL_GRAD*WC%ONE_D%RDN)
+                     WC%ONE_D%U_NORMAL_S =-(U(IIG,JJG,KKG)   + SF%VEL_GRAD*WC%ONE_D%RDN)
                   CASE(-1)
-                     WC%ONE_D%UWS = (U(IIG-1,JJG,KKG) + SF%VEL_GRAD*WC%ONE_D%RDN)
+                     WC%ONE_D%U_NORMAL_S = (U(IIG-1,JJG,KKG) + SF%VEL_GRAD*WC%ONE_D%RDN)
                   CASE( 2)
-                     WC%ONE_D%UWS =-(V(IIG,JJG,KKG)   + SF%VEL_GRAD*WC%ONE_D%RDN)
+                     WC%ONE_D%U_NORMAL_S =-(V(IIG,JJG,KKG)   + SF%VEL_GRAD*WC%ONE_D%RDN)
                   CASE(-2)
-                     WC%ONE_D%UWS = (V(IIG,JJG-1,KKG) + SF%VEL_GRAD*WC%ONE_D%RDN)
+                     WC%ONE_D%U_NORMAL_S = (V(IIG,JJG-1,KKG) + SF%VEL_GRAD*WC%ONE_D%RDN)
                   CASE( 3)
-                     WC%ONE_D%UWS =-(W(IIG,JJG,KKG)   + SF%VEL_GRAD*WC%ONE_D%RDN)
+                     WC%ONE_D%U_NORMAL_S =-(W(IIG,JJG,KKG)   + SF%VEL_GRAD*WC%ONE_D%RDN)
                   CASE(-3)
-                     WC%ONE_D%UWS = (W(IIG,JJG,KKG-1) + SF%VEL_GRAD*WC%ONE_D%RDN)
+                     WC%ONE_D%U_NORMAL_S = (W(IIG,JJG,KKG-1) + SF%VEL_GRAD*WC%ONE_D%RDN)
                END SELECT
             ENDIF NEUMANN_IF
-            IF (ABS(SURFACE(WC%SURF_INDEX)%MASS_FLUX_TOTAL)>=TWO_EPSILON_EB) WC%ONE_D%UWS = WC%ONE_D%UWS*RHOA/WC%ONE_D%RHO_F
+            IF (ABS(SURFACE(WC%SURF_INDEX)%MASS_FLUX_TOTAL)>=TWO_EPSILON_EB) WC%ONE_D%U_NORMAL_S = &
+                                                                             WC%ONE_D%U_NORMAL_S*RHOA/WC%ONE_D%RHO_F
             VENT_IF: IF (WC%VENT_INDEX>0) THEN
                VT=>VENTS(WC%VENT_INDEX)
                IF (VT%N_EDDY>0) THEN ! Synthetic Eddy Method
@@ -1262,23 +1263,23 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
                   JJ = WC%ONE_D%JJ
                   KK = WC%ONE_D%KK
                   IF (SF%PROFILE/=0 .AND. ABS(SF%VEL)>TWO_EPSILON_EB) THEN
-                     PROFILE_FACTOR = ABS(WC%UW0/SF%VEL)
+                     PROFILE_FACTOR = ABS(WC%ONE_D%U_NORMAL_0/SF%VEL)
                   ELSE
                      PROFILE_FACTOR = 1._EB
                   ENDIF
                   SELECT CASE(IOR)
                      CASE( 1)
-                        WC%ONE_D%UWS = WC%ONE_D%UWS - TIME_RAMP_FACTOR*VT%U_EDDY(JJ,KK)*PROFILE_FACTOR
+                        WC%ONE_D%U_NORMAL_S = WC%ONE_D%U_NORMAL_S - TIME_RAMP_FACTOR*VT%U_EDDY(JJ,KK)*PROFILE_FACTOR
                      CASE(-1)
-                        WC%ONE_D%UWS = WC%ONE_D%UWS + TIME_RAMP_FACTOR*VT%U_EDDY(JJ,KK)*PROFILE_FACTOR
+                        WC%ONE_D%U_NORMAL_S = WC%ONE_D%U_NORMAL_S + TIME_RAMP_FACTOR*VT%U_EDDY(JJ,KK)*PROFILE_FACTOR
                      CASE( 2)
-                        WC%ONE_D%UWS = WC%ONE_D%UWS - TIME_RAMP_FACTOR*VT%V_EDDY(II,KK)*PROFILE_FACTOR
+                        WC%ONE_D%U_NORMAL_S = WC%ONE_D%U_NORMAL_S - TIME_RAMP_FACTOR*VT%V_EDDY(II,KK)*PROFILE_FACTOR
                      CASE(-2)
-                        WC%ONE_D%UWS = WC%ONE_D%UWS + TIME_RAMP_FACTOR*VT%V_EDDY(II,KK)*PROFILE_FACTOR
+                        WC%ONE_D%U_NORMAL_S = WC%ONE_D%U_NORMAL_S + TIME_RAMP_FACTOR*VT%V_EDDY(II,KK)*PROFILE_FACTOR
                      CASE( 3)
-                        WC%ONE_D%UWS = WC%ONE_D%UWS - TIME_RAMP_FACTOR*VT%W_EDDY(II,JJ)*PROFILE_FACTOR
+                        WC%ONE_D%U_NORMAL_S = WC%ONE_D%U_NORMAL_S - TIME_RAMP_FACTOR*VT%W_EDDY(II,JJ)*PROFILE_FACTOR
                      CASE(-3)
-                        WC%ONE_D%UWS = WC%ONE_D%UWS + TIME_RAMP_FACTOR*VT%W_EDDY(II,JJ)*PROFILE_FACTOR
+                        WC%ONE_D%U_NORMAL_S = WC%ONE_D%U_NORMAL_S + TIME_RAMP_FACTOR*VT%W_EDDY(II,JJ)*PROFILE_FACTOR
                   END SELECT
                ENDIF
                EVACUATION_BC_IF: IF (EVACUATION_ONLY(NM)) THEN
@@ -1289,7 +1290,7 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
                   ELSE
                      TIME_RAMP_FACTOR = 0.0_EB
                   END IF
-                  WC%ONE_D%UWS = TIME_RAMP_FACTOR*WC%UW0
+                  WC%ONE_D%U_NORMAL_S = TIME_RAMP_FACTOR*WC%ONE_D%U_NORMAL_0
                END IF EVACUATION_BC_IF
                WANNIER_BC: IF (PERIODIC_TEST==5) THEN
                   II = WC%ONE_D%II
@@ -1297,13 +1298,13 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
                   KK = WC%ONE_D%KK
                   SELECT CASE(IOR)
                      CASE( 1)
-                        WC%ONE_D%UWS = -WANNIER_FLOW(X(II),ZC(KK),1)
+                        WC%ONE_D%U_NORMAL_S = -WANNIER_FLOW(X(II),ZC(KK),1)
                      CASE(-1)
-                        WC%ONE_D%UWS =  WANNIER_FLOW(X(II-1),ZC(KK),1)
+                        WC%ONE_D%U_NORMAL_S =  WANNIER_FLOW(X(II-1),ZC(KK),1)
                      CASE( 3)
-                        WC%ONE_D%UWS = -WANNIER_FLOW(XC(II),Z(KK),2)
+                        WC%ONE_D%U_NORMAL_S = -WANNIER_FLOW(XC(II),Z(KK),2)
                      CASE(-3)
-                        WC%ONE_D%UWS =  WANNIER_FLOW(XC(II),Z(KK-1),2)
+                        WC%ONE_D%U_NORMAL_S =  WANNIER_FLOW(XC(II),Z(KK-1),2)
                   END SELECT
                ENDIF WANNIER_BC
             ENDIF VENT_IF
@@ -1315,35 +1316,35 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
             KK = WC%ONE_D%KK
             SELECT CASE(IOR)
                CASE( 1)
-                  WC%ONE_D%UWS = -U(II,JJ,KK)
+                  WC%ONE_D%U_NORMAL_S = -U(II,JJ,KK)
                CASE(-1)
-                  WC%ONE_D%UWS =  U(II-1,JJ,KK)
+                  WC%ONE_D%U_NORMAL_S =  U(II-1,JJ,KK)
                CASE( 2)
-                  WC%ONE_D%UWS = -V(II,JJ,KK)
+                  WC%ONE_D%U_NORMAL_S = -V(II,JJ,KK)
                CASE(-2)
-                  WC%ONE_D%UWS =  V(II,JJ-1,KK)
+                  WC%ONE_D%U_NORMAL_S =  V(II,JJ-1,KK)
                CASE( 3)
-                  WC%ONE_D%UWS = -W(II,JJ,KK)
+                  WC%ONE_D%U_NORMAL_S = -W(II,JJ,KK)
                CASE(-3)
-                  WC%ONE_D%UWS =  W(II,JJ,KK-1)
+                  WC%ONE_D%U_NORMAL_S =  W(II,JJ,KK-1)
             END SELECT
 
       END SELECT WALL_CELL_TYPE
 
    ENDDO WALL_LOOP3
 
-   ! Calculate du/dt, dv/dt, dw/dt at external boundaries. DUWDT is only used for Neumann BCs.
+   ! Calculate du/dt, dv/dt, dw/dt at external boundaries. DUNDT is only used for Neumann BCs.
 
    !$OMP PARALLEL DO SCHEDULE(STATIC)
    DO IW=1,N_EXTERNAL_WALL_CELLS
-      WALL(IW)%DUWDT = RDT*(WALL(IW)%ONE_D%UWS-WALL(IW)%ONE_D%UW)
+      WALL(IW)%DUNDT = RDT*(WALL(IW)%ONE_D%U_NORMAL_S-WALL(IW)%ONE_D%U_NORMAL)
    ENDDO
    !$OMP END PARALLEL DO
 
 ELSE PREDICT_NORMALS
 
-   ! In the CORRECTOR step, the normal component of velocity, UW, is the same as the predicted value, UWS. However, for species
-   ! mass fluxes and HVAC, UW is computed elsewhere (wall.f90).
+   ! In the CORRECTOR step, the normal component of velocity, U_NORMAL, is the same as the predicted value, U_NORMAL_S. 
+   ! However, for species mass fluxes and HVAC, U_NORMAL is computed elsewhere (wall.f90).
 
    DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       WC => WALL(IW)
@@ -1354,14 +1355,14 @@ ELSE PREDICT_NORMALS
              WC%NODE_INDEX > 0                        .OR. &
              ANY(SF%LEAK_PATH>0)) CYCLE
       ENDIF
-      WC%ONE_D%UW = WC%ONE_D%UWS
+      WC%ONE_D%U_NORMAL = WC%ONE_D%U_NORMAL_S
    ENDDO
 
-   ! Calculate du/dt, dv/dt, dw/dt at external boundaries. DUWDT is only used for Neumann BCs. Note the second-order RK formula.
+   ! Calculate du/dt, dv/dt, dw/dt at external boundaries. DUNDT is only used for Neumann BCs. Note the second-order RK formula.
 
    !$OMP PARALLEL DO SCHEDULE(STATIC)
    DO IW=1,N_EXTERNAL_WALL_CELLS
-      WALL(IW)%DUWDT = WALL(IW)%DUWDT + 2._EB*RDT*(WALL(IW)%ONE_D%UW-WALL(IW)%ONE_D%UWS)
+      WALL(IW)%DUNDT = WALL(IW)%DUNDT + 2._EB*RDT*(WALL(IW)%ONE_D%U_NORMAL-WALL(IW)%ONE_D%U_NORMAL_S)
    ENDDO
    !$OMP END PARALLEL DO
 
@@ -1449,7 +1450,7 @@ EVACUATION_PREDICTOR: IF (PREDICTOR) THEN
       DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
          WC=>WALL(IW)
          WC%ONE_D%PRESSURE_ZONE = 0
-         WC%ONE_D%UW = 0._EB
+         WC%ONE_D%U_NORMAL = 0._EB
          WC%ONE_D%U_TAU = 0._EB
          WC%ONE_D%RHO_F = RHO_0(1)
          WC%ONE_D%Y_PLUS = 1._EB
@@ -1481,7 +1482,7 @@ USE COMPLEX_GEOMETRY, ONLY : IBM_CGSC, IBM_SOLID
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: DT
 REAL(EB), POINTER, DIMENSION(:,:,:) :: DP,D_NEW,RTRM,DIV
-REAL(EB) :: USUM_ADD(N_ZONE),UWP
+REAL(EB) :: USUM_ADD(N_ZONE),UN_P
 REAL(EB) :: RDT,TNOW,P_EQ,SUM_P_PSUM,SUM_USUM,SUM_DSUM,SUM_PSUM
 LOGICAL :: OPEN_ZONE
 REAL(EB), POINTER, DIMENSION(:) :: D_PBAR_DT_P
@@ -1613,23 +1614,23 @@ BC_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
          IF (.NOT.SOLID(CELL_INDEX(II,JJ,KK))) CYCLE BC_LOOP
          IOR = WC%ONE_D%IOR
          IF (PREDICTOR) THEN
-            UWP = WC%ONE_D%UWS
+            UN_P = WC%ONE_D%U_NORMAL_S
          ELSE
-            UWP = WC%ONE_D%UW
+            UN_P = WC%ONE_D%U_NORMAL
          ENDIF
          SELECT CASE(IOR)
             CASE( 1)
-               DP(II,JJ,KK) = DP(II,JJ,KK) - UWP*RDX(II)*RRN(II)*R(II)
+               DP(II,JJ,KK) = DP(II,JJ,KK) - UN_P*RDX(II)*RRN(II)*R(II)
             CASE(-1)
-               DP(II,JJ,KK) = DP(II,JJ,KK) - UWP*RDX(II)*RRN(II)*R(II-1)
+               DP(II,JJ,KK) = DP(II,JJ,KK) - UN_P*RDX(II)*RRN(II)*R(II-1)
             CASE( 2)
-               DP(II,JJ,KK) = DP(II,JJ,KK) - UWP*RDY(JJ)
+               DP(II,JJ,KK) = DP(II,JJ,KK) - UN_P*RDY(JJ)
             CASE(-2)
-               DP(II,JJ,KK) = DP(II,JJ,KK) - UWP*RDY(JJ)
+               DP(II,JJ,KK) = DP(II,JJ,KK) - UN_P*RDY(JJ)
             CASE( 3)
-               DP(II,JJ,KK) = DP(II,JJ,KK) - UWP*RDZ(KK)
+               DP(II,JJ,KK) = DP(II,JJ,KK) - UN_P*RDZ(KK)
             CASE(-3)
-               DP(II,JJ,KK) = DP(II,JJ,KK) - UWP*RDZ(KK)
+               DP(II,JJ,KK) = DP(II,JJ,KK) - UN_P*RDZ(KK)
          END SELECT
       CASE (OPEN_BOUNDARY,MIRROR_BOUNDARY,INTERPOLATED_BOUNDARY)
          IIG = WC%ONE_D%IIG

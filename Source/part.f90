@@ -583,29 +583,29 @@ PARTICLE_INSERT_LOOP2: DO I=1,SF%NPPC
       IF (.NOT.LPC%STATIC) THEN
          SELECT CASE(IOR)
             CASE( 1)
-               LP%U = -ONE_D%UW
+               LP%U = -ONE_D%U_NORMAL
                LP%V = SF%VEL_T(1)
                LP%W = SF%VEL_T(2)
             CASE(-1)
-               LP%U =  ONE_D%UW
+               LP%U =  ONE_D%U_NORMAL
                LP%V = SF%VEL_T(1)
                LP%W = SF%VEL_T(2)
             CASE( 2)
                LP%U = SF%VEL_T(1)
-               LP%V = -ONE_D%UW
+               LP%V = -ONE_D%U_NORMAL
                LP%W = SF%VEL_T(2)
             CASE(-2)
                LP%U = SF%VEL_T(1)
-               LP%V =  ONE_D%UW
+               LP%V =  ONE_D%U_NORMAL
                LP%W = SF%VEL_T(2)
             CASE( 3)
                LP%U = SF%VEL_T(1)
                LP%V = SF%VEL_T(2)
-               LP%W = -ONE_D%UW
+               LP%W = -ONE_D%U_NORMAL
             CASE(-3)
                LP%U = SF%VEL_T(1)
                LP%V = SF%VEL_T(2)
-               LP%W =  ONE_D%UW
+               LP%W =  ONE_D%U_NORMAL
          END SELECT
       ENDIF
    ELSEIF (PRESENT(CFACE_INDEX)) THEN
@@ -613,9 +613,9 @@ PARTICLE_INSERT_LOOP2: DO I=1,SF%NPPC
       LP%X = CFA_X + CFA%NVEC(1)*VENT_OFFSET*DX(IIG)
       LP%Y = CFA_Y + CFA%NVEC(2)*VENT_OFFSET*DY(JJG)
       LP%Z = CFA_Z + CFA%NVEC(3)*VENT_OFFSET*DZ(KKG)
-      LP%U = DOT_PRODUCT(CFA%NVEC,(/-ONE_D%UW,SF%VEL_T(1),SF%VEL_T(2)/))
-      LP%V = DOT_PRODUCT(CFA%NVEC,(/SF%VEL_T(1),-ONE_D%UW,SF%VEL_T(2)/))
-      LP%W = DOT_PRODUCT(CFA%NVEC,(/SF%VEL_T(1),SF%VEL_T(2),-ONE_D%UW/))
+      LP%U = DOT_PRODUCT(CFA%NVEC,(/-ONE_D%U_NORMAL,SF%VEL_T(1),SF%VEL_T(2)/))
+      LP%V = DOT_PRODUCT(CFA%NVEC,(/SF%VEL_T(1),-ONE_D%U_NORMAL,SF%VEL_T(2)/))
+      LP%W = DOT_PRODUCT(CFA%NVEC,(/SF%VEL_T(1),SF%VEL_T(2),-ONE_D%U_NORMAL/))
    ENDIF WALL_OR_CFACE_IF_2
 
    LP%ONE_D%IIG = IIG
