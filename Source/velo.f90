@@ -1612,8 +1612,9 @@ OBST_LOOP: DO N=1,N_OBST
 
 ENDDO OBST_LOOP
 
-! Set FVX, FVY and FVZ to drive the normal velocity at solid boundaries towards the specified value (UW or UWS)
+! Set FVX, FVY and FVZ to drive the normal velocity at solid boundaries towards the specified value (U_NORMAL or U_NORMAL_S)
 ! Logical to define not to apply pressure gradient on external mesh boundaries for GLMAT.
+
 GLMAT_ON_WHOLE_DOMAIN = (PRES_METHOD=='GLMAT') .AND. PRES_ON_WHOLE_DOMAIN
 
 WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
@@ -1640,9 +1641,9 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
    IF (NOM/=0 .OR. WC%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. WC%BOUNDARY_TYPE==NULL_BOUNDARY) THEN
       IF (PREDICTOR) THEN
-         UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UWS
+         UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%U_NORMAL_S
       ELSE
-         UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UW
+         UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%U_NORMAL
       ENDIF
       SELECT CASE(IOR)
          CASE( 1)
@@ -2271,7 +2272,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
             ENDIF
             VELOCITY_BC_INDEX = SF%VELOCITY_BC_INDEX
             IF (WCM%VENT_INDEX==WCP%VENT_INDEX .AND. WCP%VENT_INDEX > 0) THEN
-               IF(VENTS(WCM%VENT_INDEX)%NODE_INDEX>0 .AND. WCM%ONE_D%UW >= 0._EB) VELOCITY_BC_INDEX=FREE_SLIP_BC
+               IF(VENTS(WCM%VENT_INDEX)%NODE_INDEX>0 .AND. WCM%ONE_D%U_NORMAL >= 0._EB) VELOCITY_BC_INDEX=FREE_SLIP_BC
             ENDIF
 
             ! Compute the viscosity in the two adjacent gas cells
@@ -2335,23 +2336,23 @@ EDGE_LOOP: DO IE=1,N_EDGES
                   TSI=T-SF%T_IGN
                ENDIF
                PROFILE_FACTOR = 1._EB
-               IF (HVAC_TANGENTIAL .AND. 0.5_EB*(WCM%ONE_D%UWS+WCP%ONE_D%UWS) > 0._EB) HVAC_TANGENTIAL = .FALSE.
+               IF (HVAC_TANGENTIAL .AND. 0.5_EB*(WCM%ONE_D%U_NORMAL_S+WCP%ONE_D%U_NORMAL_S) > 0._EB) HVAC_TANGENTIAL = .FALSE.
                IF (HVAC_TANGENTIAL) THEN
                   VEL_T = 0._EB
                   IEC_SELECT: SELECT CASE(IEC) ! edge orientation
                      CASE (1)
-                        IF (ICD==1) VEL_T = 0.5_EB*ABS((WCM%ONE_D%UWS+WCP%ONE_D%UWS)/VT%UVW(ABS(VT%IOR)))*VT%UVW(3)
-                        IF (ICD==2) VEL_T = 0.5_EB*ABS((WCM%ONE_D%UWS+WCP%ONE_D%UWS)/VT%UVW(ABS(VT%IOR)))*VT%UVW(2)
+                        IF (ICD==1) VEL_T = 0.5_EB*ABS((WCM%ONE_D%U_NORMAL_S+WCP%ONE_D%U_NORMAL_S)/VT%UVW(ABS(VT%IOR)))*VT%UVW(3)
+                        IF (ICD==2) VEL_T = 0.5_EB*ABS((WCM%ONE_D%U_NORMAL_S+WCP%ONE_D%U_NORMAL_S)/VT%UVW(ABS(VT%IOR)))*VT%UVW(2)
                      CASE (2)
-                        IF (ICD==1) VEL_T = 0.5_EB*ABS((WCM%ONE_D%UWS+WCP%ONE_D%UWS)/VT%UVW(ABS(VT%IOR)))*VT%UVW(1)
-                        IF (ICD==2) VEL_T = 0.5_EB*ABS((WCM%ONE_D%UWS+WCP%ONE_D%UWS)/VT%UVW(ABS(VT%IOR)))*VT%UVW(3)
+                        IF (ICD==1) VEL_T = 0.5_EB*ABS((WCM%ONE_D%U_NORMAL_S+WCP%ONE_D%U_NORMAL_S)/VT%UVW(ABS(VT%IOR)))*VT%UVW(1)
+                        IF (ICD==2) VEL_T = 0.5_EB*ABS((WCM%ONE_D%U_NORMAL_S+WCP%ONE_D%U_NORMAL_S)/VT%UVW(ABS(VT%IOR)))*VT%UVW(3)
                      CASE (3)
-                        IF (ICD==1) VEL_T = 0.5_EB*ABS((WCM%ONE_D%UWS+WCP%ONE_D%UWS)/VT%UVW(ABS(VT%IOR)))*VT%UVW(2)
-                        IF (ICD==2) VEL_T = 0.5_EB*ABS((WCM%ONE_D%UWS+WCP%ONE_D%UWS)/VT%UVW(ABS(VT%IOR)))*VT%UVW(1)
+                        IF (ICD==1) VEL_T = 0.5_EB*ABS((WCM%ONE_D%U_NORMAL_S+WCP%ONE_D%U_NORMAL_S)/VT%UVW(ABS(VT%IOR)))*VT%UVW(2)
+                        IF (ICD==2) VEL_T = 0.5_EB*ABS((WCM%ONE_D%U_NORMAL_S+WCP%ONE_D%U_NORMAL_S)/VT%UVW(ABS(VT%IOR)))*VT%UVW(1)
                   END SELECT IEC_SELECT
                ELSE
                   IF (SF%PROFILE/=0 .AND. SF%VEL>TWO_EPSILON_EB) &
-                     PROFILE_FACTOR = ABS(0.5_EB*(WCM%UW0+WCP%UW0)/SF%VEL)
+                     PROFILE_FACTOR = ABS(0.5_EB*(WCM%ONE_D%U_NORMAL_0+WCP%ONE_D%U_NORMAL_0)/SF%VEL)
                   RAMP_T = EVALUATE_RAMP(TSI,SF%TAU(TIME_VELO),SF%RAMP_INDEX(TIME_VELO))
                   IF (IEC==1 .OR. (IEC==2 .AND. ICD==2)) VEL_T = RAMP_T*(PROFILE_FACTOR*(SF%VEL_T(2) + VEL_EDDY))
                   IF (IEC==3 .OR. (IEC==2 .AND. ICD==1)) VEL_T = RAMP_T*(PROFILE_FACTOR*(SF%VEL_T(1) + VEL_EDDY))
@@ -2416,7 +2417,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
                            WT2 = 1._EB-WT1
                            SLIP_COEF = WT1*SLIP_COEF-WT2
                         CASE(4)
-                           IF ( ABS(0.5_EB*(WCM%ONE_D%UWS+WCP%ONE_D%UWS))>ABS(VEL_GAS-VEL_T) ) THEN
+                           IF ( ABS(0.5_EB*(WCM%ONE_D%U_NORMAL_S+WCP%ONE_D%U_NORMAL_S))>ABS(VEL_GAS-VEL_T) ) THEN
                               SLIP_COEF = -1._EB
                            ELSE
                               SLIP_COEF = 0.5_EB*(SLIP_COEF-1._EB)

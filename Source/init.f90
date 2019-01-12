@@ -1198,7 +1198,7 @@ WALL_LOOP_0: DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
    ENDIF
 
    IF (.NOT.SOLID_CELL) THEN
-      IF ( (ABS(WC%UW0)>TWO_EPSILON_EB .OR. ANY(SF%LEAK_PATH>=0) .OR. SF%PYROLYSIS_MODEL/=PYROLYSIS_NONE) &
+      IF ( (ABS(WC%ONE_D%U_NORMAL_0)>TWO_EPSILON_EB .OR. ANY(SF%LEAK_PATH>=0) .OR. SF%PYROLYSIS_MODEL/=PYROLYSIS_NONE) &
            .AND. WC%OBST_INDEX>0 ) THEN
          WRITE(LU_ERR,'(A,A,A,I0)') 'ERROR: SURF ',TRIM(SF%ID),' cannot be applied to a thin obstruction, OBST #',&
                                     M%OBSTRUCTION(WC%OBST_INDEX)%ORDINAL
@@ -2595,8 +2595,8 @@ WC%ONE_D%JJG    = JJG
 WC%ONE_D%KKG    = KKG
 WC%ONE_D%RDN    = RDN
 WC%ONE_D%AREA   = AW
-WC%ONE_D%UW     = UW
-WC%ONE_D%UWS    = UW
+WC%ONE_D%U_NORMAL   = UW
+WC%ONE_D%U_NORMAL_S = UW
 
 IF (IW<=M%N_EXTERNAL_WALL_CELLS) THEN
    M%EXTERNAL_WALL(IW)%NOM     = NOM_FOUND
@@ -2630,7 +2630,7 @@ ENDIF
 
 ! Do not assign normal velocities at boundaries of evacuation meshes
 
-IF (EVACUATION_ONLY(NM)) WC%ONE_D%UW = 0._EB
+IF (EVACUATION_ONLY(NM)) WC%ONE_D%U_NORMAL = 0._EB
 
 ! Assign internal values of temp, density, and mass fraction
 
@@ -2659,17 +2659,17 @@ IF (OBST_INDEX>0 .AND. .NOT.EVACUATION_ONLY(NM)) THEN
    ENDIF
 ENDIF
 
-! Prescribe normal velocity for surface cell (UW0)
+! Prescribe normal velocity for surface cell (U_NORMAL_0)
 
-WC%UW0 = SF%VEL
+WC%ONE_D%U_NORMAL_0 = SF%VEL
 
 IF (OBST_INDEX>0 .AND. ABS(SF%VOLUME_FLOW)>=TWO_EPSILON_EB .AND. .NOT.EVACUATION_ONLY(NM)) THEN
    OBX=>M%OBSTRUCTION(OBST_INDEX)
-   WC%UW0 = SF%VOLUME_FLOW*(OBX%INPUT_AREA(ABS(IOR))/OBX%UNDIVIDED_INPUT_AREA(ABS(IOR))) / OBX%FDS_AREA(ABS(IOR))
+   WC%ONE_D%U_NORMAL_0 = SF%VOLUME_FLOW*(OBX%INPUT_AREA(ABS(IOR))/OBX%UNDIVIDED_INPUT_AREA(ABS(IOR))) / OBX%FDS_AREA(ABS(IOR))
 ENDIF
 IF (OBST_INDEX>0 .AND. ABS(SF%MASS_FLUX_TOTAL)>=TWO_EPSILON_EB .AND. .NOT.EVACUATION_ONLY(NM)) THEN
    OBX=>M%OBSTRUCTION(OBST_INDEX)
-   WC%UW0 = SF%MASS_FLUX_TOTAL / RHOA * WC%ONE_D%AREA_ADJUST
+   WC%ONE_D%U_NORMAL_0 = SF%MASS_FLUX_TOTAL / RHOA * WC%ONE_D%AREA_ADJUST
 ENDIF
 
 ! Do VENT-specific set-ups
@@ -2688,21 +2688,21 @@ PROCESS_VENT: IF (WC%VENT_INDEX>0) THEN
 
    ! Set the velocity at each surface cell
 
-   WC%UW0 = SF%VEL
+   WC%ONE_D%U_NORMAL_0 = SF%VEL
 
    IF (ABS(SF%VOLUME_FLOW)>TWO_EPSILON_EB)   THEN
-      WC%UW0 = SF%VOLUME_FLOW*(VT%INPUT_AREA/VT%UNDIVIDED_INPUT_AREA)/VT%FDS_AREA
+      WC%ONE_D%U_NORMAL_0 = SF%VOLUME_FLOW*(VT%INPUT_AREA/VT%UNDIVIDED_INPUT_AREA)/VT%FDS_AREA
    ENDIF
    IF (ABS(SF%MASS_FLUX_TOTAL)>TWO_EPSILON_EB .AND. .NOT.EVACUATION_ONLY(NM)) THEN
-      WC%UW0 = SF%MASS_FLUX_TOTAL/RHOA*WC%ONE_D%AREA_ADJUST
+      WC%ONE_D%U_NORMAL_0 = SF%MASS_FLUX_TOTAL/RHOA*WC%ONE_D%AREA_ADJUST
    ENDIF
 
    IF (SF%CONVERT_VOLUME_TO_MASS) THEN
-      IF (ABS(WC%UW0)>TWO_EPSILON_EB) THEN
+      IF (ABS(WC%ONE_D%U_NORMAL_0)>TWO_EPSILON_EB) THEN
          ZZ_GET=0._EB
          ZZ_GET(1:N_TRACKED_SPECIES) = MAX(0._EB,SF%MASS_FRACTION(1:N_TRACKED_SPECIES))
          CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,RSUM_F)
-         SF%MASS_FLUX = -RHOA*(RSUM0/RSUM_F)*(TMPA/SF%TMP_FRONT)*SF%MASS_FRACTION*WC%UW0
+         SF%MASS_FLUX = -RHOA*(RSUM0/RSUM_F)*(TMPA/SF%TMP_FRONT)*SF%MASS_FRACTION*WC%ONE_D%U_NORMAL_0
          SF%SPECIES_BC_INDEX = SPECIFIED_MASS_FLUX
       ELSE
          CALL SHUTDOWN('ERROR: SURF: '//TRIM(SF%ID)//' must specify velocity boundary condition for conversion',&
@@ -2719,40 +2719,40 @@ PROCESS_VENT: IF (WC%VENT_INDEX>0) THEN
          CASE(1)
             IF (VT%RADIUS>0._EB) THEN
                RR = (M%YC(J)-VT%Y0)**2 + (M%ZC(K)-VT%Z0)**2
-               WC%UW0 = WC%UW0*(VT%RADIUS**2-RR)/VT%RADIUS**2
+               WC%ONE_D%U_NORMAL_0 = WC%ONE_D%U_NORMAL_0*(VT%RADIUS**2-RR)/VT%RADIUS**2
             ELSE
                PY = 4._EB*(M%YC(J)-VT%Y1_ORIG)*(VT%Y2_ORIG-M%YC(J))/(VT%Y2_ORIG-VT%Y1_ORIG)**2
                PZ = 4._EB*(M%ZC(K)-VT%Z1_ORIG)*(VT%Z2_ORIG-M%ZC(K))/(VT%Z2_ORIG-VT%Z1_ORIG)**2
-               WC%UW0 = WC%UW0*PY*PZ
+               WC%ONE_D%U_NORMAL_0 = WC%ONE_D%U_NORMAL_0*PY*PZ
             ENDIF
          CASE(2)
             IF (VT%RADIUS>0._EB) THEN
                RR = (M%XC(I)-VT%X0)**2 + (M%ZC(K)-VT%Z0)**2
-               WC%UW0 = WC%UW0*(VT%RADIUS**2-RR)/VT%RADIUS**2
+               WC%ONE_D%U_NORMAL_0 = WC%ONE_D%U_NORMAL_0*(VT%RADIUS**2-RR)/VT%RADIUS**2
             ELSE
                PX = 4._EB*(M%XC(I)-VT%X1_ORIG)*(VT%X2_ORIG-M%XC(I))/(VT%X2_ORIG-VT%X1_ORIG)**2
                PZ = 4._EB*(M%ZC(K)-VT%Z1_ORIG)*(VT%Z2_ORIG-M%ZC(K))/(VT%Z2_ORIG-VT%Z1_ORIG)**2
-               WC%UW0 = WC%UW0*PX*PZ
+               WC%ONE_D%U_NORMAL_0 = WC%ONE_D%U_NORMAL_0*PX*PZ
             ENDIF
          CASE(3)
             IF (VT%RADIUS>0._EB) THEN
                RR = (M%XC(I)-VT%X0)**2 + (M%YC(J)-VT%Y0)**2
-               WC%UW0 = WC%UW0*(VT%RADIUS**2-RR)/VT%RADIUS**2
+               WC%ONE_D%U_NORMAL_0 = WC%ONE_D%U_NORMAL_0*(VT%RADIUS**2-RR)/VT%RADIUS**2
             ELSE
                PX = 4._EB*(M%XC(I)-VT%X1_ORIG)*(VT%X2_ORIG-M%XC(I))/(VT%X2_ORIG-VT%X1_ORIG)**2
                PY = 4._EB*(M%YC(J)-VT%Y1_ORIG)*(VT%Y2_ORIG-M%YC(J))/(VT%Y2_ORIG-VT%Y1_ORIG)**2
                IF (CYLINDRICAL) THEN
-                  WC%UW0 = WC%UW0*PX
+                  WC%ONE_D%U_NORMAL_0 = WC%ONE_D%U_NORMAL_0*PX
                ELSE
-                  WC%UW0 = WC%UW0*PX*PY
+                  WC%ONE_D%U_NORMAL_0 = WC%ONE_D%U_NORMAL_0*PX*PY
                ENDIF
             ENDIF
       END SELECT
       IF (ABS(SF%VOLUME_FLOW)>=TWO_EPSILON_EB) THEN   ! Match desired volume flow
          IF (VT%RADIUS>0._EB) THEN
-            WC%UW0 = WC%UW0*2._EB
+            WC%ONE_D%U_NORMAL_0 = WC%ONE_D%U_NORMAL_0*2._EB
          ELSE
-            WC%UW0 = WC%UW0*9._EB/4._EB
+            WC%ONE_D%U_NORMAL_0 = WC%ONE_D%U_NORMAL_0*9._EB/4._EB
          ENDIF
       ENDIF
    ENDIF PARABOLIC_IF
@@ -2768,7 +2768,7 @@ PROCESS_VENT: IF (WC%VENT_INDEX>0) THEN
                R1 = VT%RADIUS - DELTA
                RR = SQRT( (M%YC(J)-VT%Y0)**2 + (M%ZC(K)-VT%Z0)**2 )
                IF (RR>R1 .AND. RR<=VT%RADIUS .AND. DELTA>TWO_EPSILON_EB) THEN
-                  WC%UW0 = WC%UW0*(1._EB - ((RR-R1)/DELTA)**2 )
+                  WC%ONE_D%U_NORMAL_0 = WC%ONE_D%U_NORMAL_0*(1._EB - ((RR-R1)/DELTA)**2 )
                ENDIF
             ENDIF
          CASE(2)
@@ -2777,7 +2777,7 @@ PROCESS_VENT: IF (WC%VENT_INDEX>0) THEN
                R1 = VT%RADIUS - DELTA
                RR = SQRT( (M%XC(I)-VT%X0)**2 + (M%ZC(K)-VT%Z0)**2 )
                IF (RR>R1 .AND. RR<=VT%RADIUS .AND. DELTA>TWO_EPSILON_EB) THEN
-                  WC%UW0 = WC%UW0*(1._EB - ((RR-R1)/DELTA)**2 )
+                  WC%ONE_D%U_NORMAL_0 = WC%ONE_D%U_NORMAL_0*(1._EB - ((RR-R1)/DELTA)**2 )
                ENDIF
             ENDIF
          CASE(3)
@@ -2786,7 +2786,7 @@ PROCESS_VENT: IF (WC%VENT_INDEX>0) THEN
                R1 = VT%RADIUS - DELTA
                RR = SQRT( (M%XC(I)-VT%X0)**2 + (M%YC(J)-VT%Y0)**2 )
                IF (RR>R1 .AND. RR<=VT%RADIUS .AND. DELTA>TWO_EPSILON_EB) THEN
-                  WC%UW0 = WC%UW0*(1._EB - ((RR-R1)/DELTA)**2 )
+                  WC%ONE_D%U_NORMAL_0 = WC%ONE_D%U_NORMAL_0*(1._EB - ((RR-R1)/DELTA)**2 )
                ENDIF
             ENDIF
       END SELECT
@@ -2798,7 +2798,7 @@ PROCESS_VENT: IF (WC%VENT_INDEX>0) THEN
          IERR = 1
          RETURN
       ENDIF
-      WC%UW0 =  WC%UW0*((M%ZC(K)-GROUND_LEVEL)/SF%Z0)**SF%PLE
+      WC%ONE_D%U_NORMAL_0 =  WC%ONE_D%U_NORMAL_0*((M%ZC(K)-GROUND_LEVEL)/SF%Z0)**SF%PLE
    ENDIF
 
    IF (SF%PROFILE==RAMP_PROFILE) THEN
@@ -2809,24 +2809,24 @@ PROCESS_VENT: IF (WC%VENT_INDEX>0) THEN
                IERR = 1
                RETURN
             ENDIF
-            WC%UW0 = WC%UW0*EVALUATE_RAMP(M%YC(J),1._EB,SF%RAMP_INDEX(VELO_PROF_Y))
-            WC%UW0 = WC%UW0*EVALUATE_RAMP(M%ZC(K),1._EB,SF%RAMP_INDEX(VELO_PROF_Z))
+            WC%ONE_D%U_NORMAL_0 = WC%ONE_D%U_NORMAL_0*EVALUATE_RAMP(M%YC(J),1._EB,SF%RAMP_INDEX(VELO_PROF_Y))
+            WC%ONE_D%U_NORMAL_0 = WC%ONE_D%U_NORMAL_0*EVALUATE_RAMP(M%ZC(K),1._EB,SF%RAMP_INDEX(VELO_PROF_Z))
          CASE(2)
             IF (SF%RAMP_V_Y/='null') THEN
                CALL SHUTDOWN('ERROR: RAMP_V_Y assigned to SURF '//TRIM(SF%ID),PROCESS_0_ONLY=.FALSE.)
                IERR = 1
                RETURN
             ENDIF
-            WC%UW0 = WC%UW0*EVALUATE_RAMP(M%XC(I),1._EB,SF%RAMP_INDEX(VELO_PROF_X))
-            WC%UW0 = WC%UW0*EVALUATE_RAMP(M%ZC(K),1._EB,SF%RAMP_INDEX(VELO_PROF_Z))
+            WC%ONE_D%U_NORMAL_0 = WC%ONE_D%U_NORMAL_0*EVALUATE_RAMP(M%XC(I),1._EB,SF%RAMP_INDEX(VELO_PROF_X))
+            WC%ONE_D%U_NORMAL_0 = WC%ONE_D%U_NORMAL_0*EVALUATE_RAMP(M%ZC(K),1._EB,SF%RAMP_INDEX(VELO_PROF_Z))
          CASE(3)
             IF (SF%RAMP_V_Z/='null') THEN
                CALL SHUTDOWN('ERROR: RAMP_V_Z assigned to SURF '//TRIM(SF%ID),PROCESS_0_ONLY=.FALSE.)
                IERR = 1
                RETURN
             ENDIF
-            WC%UW0 = WC%UW0*EVALUATE_RAMP(M%XC(I),1._EB,SF%RAMP_INDEX(VELO_PROF_X))
-            WC%UW0 = WC%UW0*EVALUATE_RAMP(M%YC(J),1._EB,SF%RAMP_INDEX(VELO_PROF_Y))
+            WC%ONE_D%U_NORMAL_0 = WC%ONE_D%U_NORMAL_0*EVALUATE_RAMP(M%XC(I),1._EB,SF%RAMP_INDEX(VELO_PROF_X))
+            WC%ONE_D%U_NORMAL_0 = WC%ONE_D%U_NORMAL_0*EVALUATE_RAMP(M%YC(J),1._EB,SF%RAMP_INDEX(VELO_PROF_Y))
       END SELECT
    ENDIF
 
@@ -3916,19 +3916,19 @@ DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    KK  = WC%ONE_D%KK
    SELECT CASE(IOR)
       CASE( 1)
-         WC%ONE_D%UWS = -U(II,JJ,KK)
+         WC%ONE_D%U_NORMAL_S = -U(II,JJ,KK)
       CASE(-1)
-         WC%ONE_D%UWS =  U(II-1,JJ,KK)
+         WC%ONE_D%U_NORMAL_S =  U(II-1,JJ,KK)
       CASE( 2)
-         WC%ONE_D%UWS = -V(II,JJ,KK)
+         WC%ONE_D%U_NORMAL_S = -V(II,JJ,KK)
       CASE(-2)
-         WC%ONE_D%UWS =  V(II,JJ-1,KK)
+         WC%ONE_D%U_NORMAL_S =  V(II,JJ-1,KK)
       CASE( 3)
-         WC%ONE_D%UWS = -W(II,JJ,KK)
+         WC%ONE_D%U_NORMAL_S = -W(II,JJ,KK)
       CASE(-3)
-         WC%ONE_D%UWS =  W(II,JJ,KK-1)
+         WC%ONE_D%U_NORMAL_S =  W(II,JJ,KK-1)
    END SELECT
-   WALL(IW)%ONE_D%UW = WALL(IW)%ONE_D%UWS
+   WALL(IW)%ONE_D%U_NORMAL = WALL(IW)%ONE_D%U_NORMAL_S
 ENDDO
 
 END SUBROUTINE UVW_INIT
