@@ -391,6 +391,7 @@ MODULE EVAC
        FC_DAMPING, EVAC_DT_MIN, V_MAX, V_ANGULAR_MAX, V_ANGULAR, &
        SMOKE_MIN_SPEED, SMOKE_MIN_SPEED_FACTOR, SMOKE_MIN_SPEED_VISIBILITY, TAU_CHANGE_DOOR, &
        HUMAN_SMOKE_HEIGHT, TAU_CHANGE_V0, THETA_SECTOR, CONST_DF, FAC_DF, &
+	   TPRE_TAU, TPRE_TAU_INER, &
        CONST_CF, FAC_CF, FAC_1_WALL, FAC_2_WALL, FAC_V0_DIR, FAC_V0_NOCF, FAC_NOCF, &
        CF_MIN_A, CF_FAC_A_WALL, CF_MIN_TAU, CF_MIN_TAU_INER, CF_FAC_TAUS, FAC_DOOR_QUEUE, FAC_DOOR_ALPHA,&
        FAC_DOOR_WAIT, CF_MIN_B, FAC_DOOR_OLD, FAC_DOOR_OLD2, R_HERDING, W0_HERDING, WR_HERDING, &
@@ -568,6 +569,7 @@ CONTAINS
          TAU_CHANGE_V0, THETA_SECTOR, CONST_DF, FAC_DF, CONST_CF, FAC_CF, &
          FAC_1_WALL, FAC_2_WALL, FAC_V0_DIR, FAC_V0_NOCF, FAC_NOCF, &
          CF_MIN_A, CF_FAC_A_WALL, CF_MIN_TAU, CF_MIN_TAU_INER, CF_FAC_TAUS, &
+		 TPRE_TAU, TPRE_TAU_INER, &
          FAC_DOOR_QUEUE, FAC_DOOR_ALPHA, FAC_DOOR_WAIT, CF_MIN_B, NASH_CLOSE_ENOUGH, &
          FAC_V0_UP, FAC_V0_DOWN, FAC_V0_HORI, FAC_DOOR_OLD, FAC_DOOR_OLD2, &
          R_HERDING, W0_HERDING, WR_HERDING, I_HERDING_TYPE, DOT_HERDING, EVAC_FDS6, EVAC_DELTA_SEE, &
@@ -1472,6 +1474,10 @@ CONTAINS
       ! c(Ks) = ( 1 + (BETA*Ks)/ALPHA )  [0,1] interval, c(Ks=0)=1, c(Ks=inf)=0
       SMOKE_SPEED_ALPHA = 0.706_EB   ! Lund 2003, report 3126 (Frantzich & Nilsson)
       SMOKE_SPEED_BETA  = -0.057_EB  ! Lund 2003, report 3126 (Frantzich & Nilsson)
+	  
+	  ! Tune mobility of agent in pre-evacuation time period
+      TPRE_TAU = 10.0_EB
+      TPRE_TAU_INER = 1.3_EB
 
       ! Next parameters are for the counterflow (CF)
       ! Evac 2.2.0: Counterflow treatment is the default
@@ -8104,8 +8110,8 @@ CONTAINS
           END IF
 
           IF (T < T_BEGIN .OR. T < TPRE) THEN
-             HR_TAU = MAX(CF_MIN_TAU, 0.1_EB*HR%TAU)
-             HR_TAU_INER = MAX(CF_MIN_TAU_INER, 0.1_EB*HR%TAU_INER)
+             HR_TAU = MAX(TPRE_TAU, CF_MIN_TAU, 0.1_EB*HR%TAU)
+             HR_TAU_INER = MAX(TPRE_TAU_INER, CF_MIN_TAU_INER, 0.1_EB*HR%TAU_INER)
           END IF
 
           ! Counterflow: Increase motivation to go ahead
@@ -8868,8 +8874,8 @@ CONTAINS
              TPRE = HR%TDET ! Member of a group
           END IF
           IF (T < T_BEGIN .OR. T < TPRE) THEN
-             HR_TAU = MAX(CF_MIN_TAU, 0.1_EB*HR%TAU)
-             HR_TAU_INER = MAX(CF_MIN_TAU_INER, 0.1_EB*HR%TAU_INER)
+             HR_TAU = MAX(TPRE_TAU, CF_MIN_TAU, 0.1_EB*HR%TAU)
+             HR_TAU_INER = MAX(TPRE_TAU_INER, CF_MIN_TAU_INER, 0.1_EB*HR%TAU_INER)
           END IF
           ! =======================================================
           ! Speed dependent social force
@@ -10030,7 +10036,7 @@ CONTAINS
           ! Add self-propelling force terms, self-consistent VV
           ! (First time step towards the exit door)
           IF ( T <= TPRE ) THEN
-             HR_TAU = MAX(CF_MIN_TAU, 0.1_EB*HR%TAU)
+             HR_TAU = MAX(TPRE_TAU, CF_MIN_TAU, 0.1_EB*HR%TAU)
              IF ( (T+DTSP_NEW) > TPRE) THEN
                 EVEL = SQRT(UBAR**2 + VBAR**2)
                 IF (EVEL >= TWO_EPSILON_EB) THEN
