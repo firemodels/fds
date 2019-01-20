@@ -7,6 +7,7 @@ Fire Dynamics Simulator ([FDS](https://github.com/firemodels/fds)) is a large-ed
 Smokeview ([SMV](https://github.com/firemodels/smv)) is a visualization program used to display the output of FDS and [CFAST](https://github.com/firemodels/cfast) simulations.
 
 For more information, including a link to our discussion forum, please visit the [FDS-SMV website](https://pages.nist.gov/fds-smv/).
+For information on how to create  local copy of the FDS Smokeview website, [see this web page](https://github.com/firemodels/fds/wiki/Web-Pages) .
 
 Here is a link to our [Firebot Build Status](https://pages.nist.gov/fds-smv/firebot_status.html).
 
