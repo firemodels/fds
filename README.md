@@ -8,8 +8,6 @@ Smokeview ([SMV](https://github.com/firemodels/smv)) is a visualization program 
 
 For more information, including a link to our discussion forum, please visit the [FDS-SMV website](https://pages.nist.gov/fds-smv/).
 
-For information on how to create  local copy of the FDS Smokeview website, [see this web page](https://github.com/firemodels/fds/wiki/Web-Pages) .
-
 Here is a link to our [Firebot Build Status](https://pages.nist.gov/fds-smv/firebot_status.html).
 
 Here is a link to [contributing](https://github.com/firemodels/fds/blob/master/CONTRIBUTING.md) to the FDS and Smokeview project.
