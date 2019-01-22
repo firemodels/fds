@@ -466,7 +466,7 @@ Sample input files are included as part of the standard installation. A good cas
 
 \subsection{A Brief Primer on Computer Hardware}
 
-FDS simulations can exploit multiple processing units on a single computer or multiple computers on a network. Before running an FDS simulation, you should familiarize yourself with your computer hardware. 
+FDS simulations can exploit multiple processing units on a single computer or multiple computers on a network. Before running an FDS simulation, you should familiarize yourself with your computer hardware.
 
 If you are using a computer running Microsoft Windows, open up the Task Manager, Performance tab, and look for the number of {\em sockets}, {\em cores}, and {\em logical processors}\footnote{The terms sockets, cores, and logical processors are used by the Windows~10 Task Manager on a computer using an Intel processor. These terms might vary with different versions of Windows and different processors.}. The socket refers to the physical connector on the motherboard that has a power supply and a connection to random access memory (RAM). This is usually referred to as the central processing unit or CPU. Some motherboards have multiple sockets that can in turn support multiple CPUs, but for typical Windows desktops or laptops, there is one socket/CPU. Each CPU, however, typically has multiple cores, and each core is essentially an independent processing unit that shares access to power and memory. Sometimes cores are referred to as {\em physical cores} to distinguish them from {\em logical cores} or {\em logical processors}. A logical processor is one of multiple {\em threads} that can be supported by a core. For the purpose of running FDS on a Windows computer, the number of logical processors is your most important consideration.
 
@@ -516,17 +516,17 @@ To start an FDS simulation, you can either use a third-party graphical user inte
 
 The files needed to run an FDS simulation on a single Windows computer or across a Windows domain network are bundled in with the FDS download. There is no need to install MPI or any redistributable libraries. The following procedure is intended for a Windows domain network; that is, a network where user accounts are centrally managed such that any user can log in to any machine using the same credentials. If you are not on a domain network, you can still run FDS locally, and instructions are given below.
 
-First, it is a good idea to uninstall older versions of FDS from all computers you plan to use. Even though the new version will overwrite older versions, there is always a chance that some remnant of an older version might cause incompatibilities with the new.
+Open up the special FDS command prompt, CMDfds, which should appear on your desktop when you install FDS. By opening this special command prompt, a script is run automatically ensuring that the FDS commands and libraries are all consistent. Change directories (``cd'') to where the input file for the case is located. Decide how many logical processes you want to devote to the simulation. Next, decide if you want to run the job solely on your own computer or on multiple computers on the network.
 
-Open up a Command Prompt window (click Start, then Run, then type ``cmd''), and change directories (``cd'') to where the input file for the case is located. Decide how many logical processes you want to devote to the simulation. For example, if you have 8 logical processes available, and you have an FDS job that involves 4 meshes, you would type the following at the command prompt:
+If you decide you want to run the case solely on your own computer, and suppose you have 8 logical processors (cores) available, and you have an FDS job that uses 4 meshes, type the following at the command prompt:
 \begin{lstlisting}
-mpiexec -n 4 -env OMP_NUM_THREADS 2 fds job_name.fds
+fds_local -p 4 -o 2 job_name.fds
 \end{lstlisting}
-If you are not on a Windows domain network, add the argument {\ct -localonly} to the command line, which means that you do not intend to run the job across multiple computers and that you do not need to provide network credentials.
+This job will exploit all $4 \times 2 = 8$ logical processors, which you can confirm by opening the Task Manager. The {\ct -p} parameter indicates the number of MPI processes, and the {\ct -o} indicates the number of OpenMP threads.
 
 The progress of the simulation is indicated by diagnostic output that is written onto the screen. Detailed diagnostic information is automatically written to a file {\ct job\_name.out}. Screen output can be redirected to a file via the alternative command:
 \begin{lstlisting}
-mpiexec ... fds job_name.fds > job_name.err
+fds_local ... job_name.fds > job_name.err
 \end{lstlisting}
 Note that it is also possible to associate the {\ct .fds} extension with the FDS executable directly, thereby making FDS run by double-clicking on the input file. However, we do not recommend this because of complications associated with the {\ct mpiexec} program.
 
@@ -552,11 +552,14 @@ If you wish to run FDS on more than one computer, do the following:
 
    where {\ct fred} and {\ct ethel} are the names of two computers on your network. Remember to add the argument {\ct -env OMP\_NUM\_THREADS N} to set the number of OpenMP threads per MPI process on all computers. The default is {\em not} 1, but rather depends on the number of logical processors your computer has. If you accidently set too many OpenMP threads, you can overload your logical processors and reduce the job efficiency.
 
-\item If successful, you should see the usual FDS printout indicating the processes being assigned to the computers. If unsuccessful, try running the case on your own machine:
+\item If successful, you should see the usual FDS printout indicating the processes being assigned to the computers. If unsuccessful, try running the case on your own computer:
 
    {\ct mpiexec -hosts 1 fred 2 -wdir \textbackslash\textbackslash...\textbackslash... fds job\_name.fds}
 
    If this is not successful, check with your network administrator or monitor the FDS help forums for advice.
+\item If you plan to use more than just a few computers to run the job, create a text file, say, {\ct hostfile.txt}, and list, line by line, the name of each computer, followed by the number of MPI processes per computer.
+
+   {\ct mpiexec -hostfile hostfile.txt -env ... -wdir ... fds job\_name.fds}
 \end{enumerate}
 
 
@@ -590,7 +593,7 @@ comp2 slots=1
 comp3 slots=2
 \end{lstlisting}
 where {\ct compX} are the names of available nodes and {\ct slots} indicate the number of available cores on each node. The parameter {\ct slots} is optional. On a cluster shared by others, you should not run long jobs without a job scheduler because it is possible for multiple jobs to share the same nodes/cores when a scheduler is not used.
-If you are using a single Linux or Mac OS X workstation, there is no need to define a host file. You just need to invoke the previously described {\ct mpiexec} line with a number of processors suitable to your case and computer. 
+If you are using a single Linux or Mac OS X workstation, there is no need to define a host file. You just need to invoke the previously described {\ct mpiexec} line with a number of processors suitable to your case and computer.
 
 
 
@@ -6541,7 +6544,7 @@ where $l$ is the screen thickness (equal to the wire diameter), $\mu$ is the vis
    K &=& 3.44 \times 10^{-9} \; \hbox{\ct FREE\_AREA\_FRACTION}^{1.6} \; \; \hbox{m}^2 \\
    Y &=& 0.043 \; \hbox{\ct FREE\_AREA\_FRACTION}^{2.13}
 \end{eqnarray}
-This correlation was developed using screens with {\ct FREE\_AREA\_FRACTION} ranging from ~0.3 to ~0.6. 
+This correlation was developed using screens with {\ct FREE\_AREA\_FRACTION} ranging from ~0.3 to ~0.6.
 
 The {\ct MISC} input parameter {\ct PARTICLE\_CFL\_MAX} controls the time step on the pressure drop across a screen (or other porous media). If a screen or other porous media introduces numerical instabilities, reducing the value of {\ct PARTICLE\_CFL\_MAX} below 1 may resolve them.
 
