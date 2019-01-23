@@ -8706,7 +8706,7 @@ where the resolved turbulent kinetic energy per unit mass is:
 \begin{align}
 \mbox{TKE} &= \mbox{$\frac{1}{2}$}(\textbf{u}_i - \left\langle \textbf{u}_i \right\rangle) (\textbf{u}_i - \left\langle \textbf{u}_i \right\rangle)
 \end{align}
-Where $\textbf{u}$ is the cell centered velocity vector from the velocity components at cell faces (i.e. $ \tilde{\textbf{u}}=\left( \bar{u},\bar{v},\bar{w} \right) $), angled brackets denote time-averaged values and subscript $i$ indicate grid indices. To output resolved TKE use the following {\ct DEVC}s to output the three velocity components:
+Where $\textbf{u}$ is the cell centered velocity vector from the velocity components at cell faces (i.e. $ \tilde{\textbf{u}}=\left( \bar{u},\bar{v},\bar{w} \right) $), angled brackets denote time-averaged values and subscript $i$ indicate grid indices. To output the resolved TKE use the following {\ct DEVC}s to output the three velocity components:
 
 \begin{lstlisting}
 &DEVC ..., QUANTITY='U-VELOCITY' /
@@ -8714,7 +8714,13 @@ Where $\textbf{u}$ is the cell centered velocity vector from the velocity compon
 &DEVC ..., QUANTITY='W-VELOCITY' /
 \end{lstlisting}
 
-The output of these {\ct DEVC}s must be post-processed to obtain resolved TKE. First, output the velocity vector $\textbf{u}$ using the velocity components, choose a suitable time-averaging period (which will be case-specific), output a mean velocity $\left\langle \textbf{u} \right\rangle$ and hence the fluctuation in velocity $(\textbf{u} - \left\langle \textbf{u} \right\rangle)$.
+The output of these {\ct DEVC}s must be post-processed to obtain resolved TKE. The TKE is equivalent to the mean squared error where the ``target vector'' is the time-averaged velocity vector. You must choose a suitable time-averaging period (which will be case-specific). On a component-wise basis TKE can be computed:
+
+\vskip-.6cm
+
+\begin{gather}
+	\mbox{TKE} = \frac{1}{2} \big( (\Bar{u}-\left\langle \Bar{u} \right\rangle)^2 + (\Bar{v}-\left\langle \Bar{v} \right\rangle)^2 +(\Bar{w}-\left\langle \Bar{w} \right\rangle)^2 \big)
+\end{gather}
 
 The subgrid kinetic energy is estimated from Deardorff's eddy viscosity model
 \begin{align}
