@@ -12,6 +12,11 @@ Here is a link to our [Firebot Build Status](https://pages.nist.gov/fds-smv/fire
 
 Here is a link to [contributing](https://github.com/firemodels/fds/blob/master/CONTRIBUTING.md) to the FDS and Smokeview project.
 
-Here are some other links [Discussion forum](https://groups.google.com/forum/#!forum/fds-smv), [Issue tracker](https://github.com/firemodels/fds/issues), [Full Downloads](https://github.com/firemodels/fds/releases), [Smokeview Downloads](https://github.com/firemodels/smv/releases) .
+Here are some other useful links:
+
+[FDS-SMV Downloads](https://github.com/firemodels/fds/releases)
+[Smokeview Downloads](https://github.com/firemodels/smv/releases)
+[Discussion Forum](https://groups.google.com/forum/#!forum/fds-smv)
+[Issues](https://github.com/firemodels/fds/issues)
 
 Pull requests welcome!
