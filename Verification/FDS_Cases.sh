@@ -16,6 +16,7 @@ $QFDS -d Aerosols propane_flame_deposition_gravitational.fds
 $QFDS -d Aerosols propane_flame_deposition_none.fds
 $QFDS -d Aerosols propane_flame_deposition_thermophoretic.fds
 $QFDS -d Aerosols propane_flame_deposition_turbulent.fds
+$QFDS -d Aerosols soot_oxidation_wall.fds
 
 $QFDS -d Atmospheric_Effects lee_waves.fds
 $QFDS -d Atmospheric_Effects stack_effect.fds
