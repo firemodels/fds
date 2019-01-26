@@ -22,4 +22,6 @@ Here are some other useful links:
 
 [Issues](https://github.com/firemodels/fds/issues)
 
+[Smokeview Issues](https://github.com/firemodels/smv/issues)
+
 Pull requests welcome!
