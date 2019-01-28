@@ -1111,12 +1111,18 @@ OTHER_MESH_LOOP: DO NOM=1,NMESHES
    IF (EVACUATION_ONLY(NOM)) CYCLE OTHER_MESH_LOOP
    M2=>MESHES(NOM)
    IF (XX>=M2%XS .AND. XX<=M2%XF .AND.  YY>=M2%YS .AND. YY<=M2%YF .AND. ZZ>=M2%ZS .AND. ZZ<=M2%ZF) THEN
-      XI  = MAX( 1._EB , MIN( REAL(M2%IBAR,EB)+ALMOST_ONE , M2%CELLSI(FLOOR((XX-M2%XS)*M2%RDXINT)) + 1._EB ) )
-      YJ  = MAX( 1._EB , MIN( REAL(M2%JBAR,EB)+ALMOST_ONE , M2%CELLSJ(FLOOR((YY-M2%YS)*M2%RDYINT)) + 1._EB ) )
-      ZK  = MAX( 1._EB , MIN( REAL(M2%KBAR,EB)+ALMOST_ONE , M2%CELLSK(FLOOR((ZZ-M2%ZS)*M2%RDZINT)) + 1._EB ) )
-      IIO = FLOOR(XI)
-      JJO = FLOOR(YJ)
-      KKO = FLOOR(ZK)
+      IF (ALLOCATED(M2%CELLSI)) THEN
+         XI  = MAX( 1._EB , MIN( REAL(M2%IBAR,EB)+ALMOST_ONE , M2%CELLSI(FLOOR((XX-M2%XS)*M2%RDXINT)) + 1._EB ) )
+         YJ  = MAX( 1._EB , MIN( REAL(M2%JBAR,EB)+ALMOST_ONE , M2%CELLSJ(FLOOR((YY-M2%YS)*M2%RDYINT)) + 1._EB ) )
+         ZK  = MAX( 1._EB , MIN( REAL(M2%KBAR,EB)+ALMOST_ONE , M2%CELLSK(FLOOR((ZZ-M2%ZS)*M2%RDZINT)) + 1._EB ) )
+         IIO = FLOOR(XI)
+         JJO = FLOOR(YJ)
+         KKO = FLOOR(ZK)
+      ELSE
+         IIO = 0  ! The mesh if found, but no detailed information is available to the current process
+         JJO = 0
+         KKO = 0
+      ENDIF
       RETURN
    ENDIF
 ENDDO OTHER_MESH_LOOP
