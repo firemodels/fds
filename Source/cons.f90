@@ -376,6 +376,7 @@ LOGICAL :: PRES_ON_CARTESIAN=.TRUE.
 LOGICAL :: DO_IMPLICIT_CCREGION=.FALSE.
 LOGICAL :: COMPUTE_CUTCELLS_ONLY=.FALSE.
 LOGICAL :: CC_ZEROIBM_VELO=.FALSE.
+LOGICAL :: CC_SLIPIBM_VELO=.FALSE.
 
 ! Threshold factor for volume of cut-cells respect to volume of Cartesian cells:
 ! Currently used in the thermo div definition of cut-cells.
