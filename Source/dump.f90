@@ -5473,8 +5473,8 @@ DEVICE_LOOP: DO N=1,N_DEVC
 
    SDV%VALUE_1 = 0._EB
    SDV%VALUE_2 = 0._EB
-   IF (DV%TEMPORAL_STATISTIC=='MAX' .OR. DV%SPATIAL_STATISTIC=='MAX') SDV%VALUE_1 = -HUGE(0.0_EB) + 1.0_EB
-   IF (DV%TEMPORAL_STATISTIC=='MIN' .OR. DV%SPATIAL_STATISTIC=='MIN') SDV%VALUE_1 =  HUGE(0.0_EB) - 1.0_EB
+   IF (DV%TEMPORAL_STATISTIC=='MAX' .OR. DV%SPATIAL_STATISTIC(1:3)=='MAX') SDV%VALUE_1 = -HUGE(0.0_EB) + 1.0_EB
+   IF (DV%TEMPORAL_STATISTIC=='MIN' .OR. DV%SPATIAL_STATISTIC(1:3)=='MIN') SDV%VALUE_1 =  HUGE(0.0_EB) - 1.0_EB
 
    ! Select hvac or gas phase or solid phase output quantity
 
@@ -5515,10 +5515,22 @@ DEVICE_LOOP: DO N=1,N_DEVC
                       WC%Z<SDV%Z1-MICRON .OR. WC%Z>SDV%Z2+MICRON) CYCLE WALL_CELL_LOOP
                   VALUE = SOLID_PHASE_OUTPUT(NM,ABS(DV%OUTPUT_INDEX),DV%Y_INDEX,DV%Z_INDEX,DV%PART_CLASS_INDEX,OPT_WALL_INDEX=IW)
                   SELECT CASE(DV%SPATIAL_STATISTIC)
-                     CASE('MAX')
-                        SDV%VALUE_1 = MAX(SDV%VALUE_1,VALUE)
-                     CASE('MIN')
-                        SDV%VALUE_1 = MIN(SDV%VALUE_1,VALUE)
+                     CASE('MAX','MAXLOC X','MAXLOC Y','MAXLOC Z')
+                        IF (VALUE>SDV%VALUE_1) THEN
+                           SDV%VALUE_1 = VALUE
+                           SDV%VALUE_2 = REAL(SDV%MESH,EB)
+                           IF (DV%SPATIAL_STATISTIC=='MAXLOC X') SDV%VALUE_3 = WC%X
+                           IF (DV%SPATIAL_STATISTIC=='MAXLOC Y') SDV%VALUE_3 = WC%Y
+                           IF (DV%SPATIAL_STATISTIC=='MAXLOC Z') SDV%VALUE_3 = WC%Z
+                        ENDIF
+                     CASE('MIN','MINLOC X','MINLOC Y','MINLOC Z')
+                        IF (VALUE<SDV%VALUE_1) THEN
+                           SDV%VALUE_1 = VALUE
+                           SDV%VALUE_2 = REAL(SDV%MESH,EB)
+                           IF (DV%SPATIAL_STATISTIC=='MINLOC X') SDV%VALUE_3 = WC%X
+                           IF (DV%SPATIAL_STATISTIC=='MINLOC Y') SDV%VALUE_3 = WC%Y
+                           IF (DV%SPATIAL_STATISTIC=='MINLOC Z') SDV%VALUE_3 = WC%Z
+                        ENDIF
                      CASE('MEAN')
                         SDV%VALUE_1 = SDV%VALUE_1 + VALUE
                         SDV%VALUE_2 = SDV%VALUE_2 + 1._EB
@@ -5548,10 +5560,22 @@ DEVICE_LOOP: DO N=1,N_DEVC
                   VALUE = SOLID_PHASE_OUTPUT(NM,ABS(DV%OUTPUT_INDEX),DV%Y_INDEX,DV%Z_INDEX,DV%PART_CLASS_INDEX,&
                      OPT_CFACE_INDEX=ICF)
                   SELECT CASE(DV%SPATIAL_STATISTIC)
-                     CASE('MAX')
-                        SDV%VALUE_1 = MAX(SDV%VALUE_1,VALUE)
-                     CASE('MIN')
-                        SDV%VALUE_1 = MIN(SDV%VALUE_1,VALUE)
+                     CASE('MAX','MAXLOC X','MAXLOC Y','MAXLOC Z')
+                        IF (VALUE>SDV%VALUE_1) THEN
+                           SDV%VALUE_1 = VALUE
+                           SDV%VALUE_2 = REAL(SDV%MESH,EB)
+                           IF (DV%SPATIAL_STATISTIC=='MAXLOC X') SDV%VALUE_3 = CFA%X
+                           IF (DV%SPATIAL_STATISTIC=='MAXLOC Y') SDV%VALUE_3 = CFA%Y
+                           IF (DV%SPATIAL_STATISTIC=='MAXLOC Z') SDV%VALUE_3 = CFA%Z
+                        ENDIF
+                     CASE('MIN','MINLOC X','MINLOC Y','MINLOC Z')
+                        IF (VALUE<SDV%VALUE_1) THEN
+                           SDV%VALUE_1 = VALUE
+                           SDV%VALUE_2 = REAL(SDV%MESH,EB)
+                           IF (DV%SPATIAL_STATISTIC=='MINLOC X') SDV%VALUE_3 = CFA%X
+                           IF (DV%SPATIAL_STATISTIC=='MINLOC Y') SDV%VALUE_3 = CFA%Y
+                           IF (DV%SPATIAL_STATISTIC=='MINLOC Z') SDV%VALUE_3 = CFA%Z
+                        ENDIF
                      CASE('MEAN')
                         SDV%VALUE_1 = SDV%VALUE_1 + VALUE
                         SDV%VALUE_2 = SDV%VALUE_2 + 1._EB
@@ -5599,10 +5623,22 @@ DEVICE_LOOP: DO N=1,N_DEVC
                         VALUE = GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,DV%PART_CLASS_INDEX,DV%VELO_INDEX,&
                                                  DV%PIPE_INDEX,DV%PROP_INDEX,DV%REAC_INDEX,DV%MATL_INDEX,T,DT,NM)
                         STATISTICS_SELECT: SELECT CASE(DV%SPATIAL_STATISTIC)
-                           CASE('MAX')
-                              SDV%VALUE_1 = MAX(SDV%VALUE_1,VALUE)
-                           CASE('MIN')
-                              SDV%VALUE_1 = MIN(SDV%VALUE_1,VALUE)
+                           CASE('MAX','MAXLOC X','MAXLOC Y','MAXLOC Z')
+                              IF (VALUE>SDV%VALUE_1) THEN
+                                 SDV%VALUE_1 = VALUE
+                                 SDV%VALUE_2 = REAL(SDV%MESH,EB)
+                                 IF (DV%SPATIAL_STATISTIC=='MAXLOC X') SDV%VALUE_3 = XC(I)
+                                 IF (DV%SPATIAL_STATISTIC=='MAXLOC Y') SDV%VALUE_3 = YC(J)
+                                 IF (DV%SPATIAL_STATISTIC=='MAXLOC Z') SDV%VALUE_3 = ZC(K)
+                              ENDIF
+                           CASE('MIN','MINLOC X','MINLOC Y','MINLOC Z')
+                              IF (VALUE<SDV%VALUE_1) THEN
+                                 SDV%VALUE_1 = VALUE
+                                 SDV%VALUE_2 = REAL(SDV%MESH,EB)
+                                 IF (DV%SPATIAL_STATISTIC=='MINLOC X') SDV%VALUE_3 = XC(I)
+                                 IF (DV%SPATIAL_STATISTIC=='MINLOC Y') SDV%VALUE_3 = YC(J)
+                                 IF (DV%SPATIAL_STATISTIC=='MINLOC Z') SDV%VALUE_3 = ZC(K)
+                              ENDIF
                            CASE('MEAN')
                               SDV%VALUE_1 = SDV%VALUE_1 + VALUE
                               SDV%VALUE_2 = SDV%VALUE_2 + 1._EB
