@@ -59,7 +59,6 @@
 
 # Boundary colormap in &GEOM surface:
 &BNDF QUANTITY='WALL TEMPERATURE' /
-&BNDE QUANTITY='WALL TEMPERATURE' /
 
 # 3D Boundary slices in cut-cell and EXIM region boundary:
 &SLCF QUANTITY='TEMPERATURE',   FACE_CENTERED=.TRUE., SLICETYPE='EXIMBND_FACES'    /
