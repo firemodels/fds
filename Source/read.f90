@@ -12761,6 +12761,10 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
          DV%TMP_UP  = TMPA
          DV%Z_INT   = 0._EB
          CALL SEARCH_OTHER_MESHES(DV%X1,DV%Y1,DV%Z1,NOM,I,J,K)
+         IF (NOM==0) THEN
+            WRITE(MESSAGE,'(A,A,A)') 'ERROR: DEVC ',TRIM(DV%ID),' is partially outside of the domain'
+            CALL SHUTDOWN(MESSAGE) ; RETURN
+         ENDIF
          DV%LOWEST_MESH = NOM
 
       CASE ('TRANSMISSION','PATH OBSCURATION')
