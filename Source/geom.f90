@@ -12395,6 +12395,7 @@ REAL(EB) :: TNOW
 DT2 = 0._EB*DT
 
 IF ( FREEZE_VELOCITY ) RETURN
+IF ( CC_ZEROIBM_VELO ) RETURN
 IF (PERIODIC_TEST == 103 .OR. PERIODIC_TEST == 11 .OR. PERIODIC_TEST==7) RETURN
 TNOW = CURRENT_TIME()
 
@@ -12494,44 +12495,53 @@ STORE_FLG_CND : IF (STORE_FLG) THEN
                ! U_STRM    = U_RELA(X1AXIS)
                ! SS(X1AXIS)= 1._EB ! Make stream the X1AXIS dir.
 
-               ! Apply wall model to define streamwise velocity at interpolation point:
-               DXN_STRM =2._EB*CUT_FACE(ICF)%INT_XN(EP,IFACE) ! EP Position from Boundary in NOUT direction
-               DXN_STRM2=2._EB*CUT_FACE(ICF)%INT_XN(0,IFACE)  ! Interpolation point position from Bound in NOUT dir.
-                                                        ! If this is a -ve number (i.e. case of Cartesian Faces),
-                                                        ! Linear velocity variation should be used be used.
-               ! Linear variation:
-               U_NORM2 = DXN_STRM2/DXN_STRM*U_NORM      ! Assumes relative U_normal decreases linearly to boundry.
+               SLIPVEL_CONDITIONAL : IF(CC_SLIPIBM_VELO) THEN
+                  ! Slip condition: Make FP velocities equal to EP values.
+                  U_STRM2 = U_STRM
+                  U_NORM2 = U_NORM
 
-               X1F= MESHES(NM)%CUT_FACE(ICF)%XYZCEN(X1AXIS,1)
-               IDX= 1._EB/ ( MESHES(NM)%CUT_FACE(ICF)%XCENHIGH(X1AXIS,1) - &
-                             MESHES(NM)%CUT_FACE(ICF)%XCENLOW(X1AXIS, 1) )
-               CCM1= IDX*(MESHES(NM)%CUT_FACE(ICF)%XCENHIGH(X1AXIS,1)-X1F)
-               CCP1= IDX*(X1F-MESHES(NM)%CUT_FACE(ICF)%XCENLOW(X1AXIS, 1))
-               ! For NU use interpolation of values on neighboring cut-cells:
-               TMPV(-1:0) = -1._EB; RHOV(-1:0) = 0._EB
-               DO ISIDE=-1,0
-                  ZZ_GET = 0._EB
-                  SELECT CASE(CUT_FACE(ICF)%CELL_LIST(1,ISIDE+2,1))
-                  CASE(IBM_FTYPE_CFGAS) ! Cut-cell -> use Temperature value from CUT_CELL data struct:
-                     ICC = CUT_FACE(ICF)%CELL_LIST(2,ISIDE+2,1)
-                     JCC = CUT_FACE(ICF)%CELL_LIST(3,ISIDE+2,1)
-                     TMPV(ISIDE) = CUT_CELL(ICC)%TMP(JCC)
-                     ZZ_GET(1:N_TRACKED_SPECIES) =  &
-                            PRFCT *CUT_CELL(ICC)%ZZ(1:N_TRACKED_SPECIES,JCC) + &
-                     (1._EB-PRFCT)*CUT_CELL(ICC)%ZZS(1:N_TRACKED_SPECIES,JCC)
-                     RHOV(ISIDE) = PRFCT *CUT_CELL(ICC)%RHO(JCC) + &
-                            (1._EB-PRFCT)*CUT_CELL(ICC)%RHOS(JCC)
-                  END SELECT
-                  CALL GET_VISCOSITY(ZZ_GET,MUV(ISIDE),TMPV(ISIDE))
-               ENDDO
-               MU_FACE = CCM1* MUV(-1) + CCP1* MUV(0)
-               RHO_FACE= CCM1*RHOV(-1) + CCP1*RHOV(0)
-               NU      = MU_FACE/RHO_FACE
-               CALL WALL_MODEL(SLIP_FACTOR,U_TAU,Y_PLUS,U_STRM,NU,DXN_STRM,SRGH,ABS(DXN_STRM2),U_STRM2)
+               ELSE SLIPVEL_CONDITIONAL
 
-               ! If Cartesian face centroid inside the solid (i.e. acts like ghost cell) recompute U_STRM2
-               ! using slip factor:
-               IF(DXN_STRM2 < 0._EB) U_STRM2 = SLIP_FACTOR*ABS(DXN_STRM2)/DXN_STRM*U_STRM
+                  ! Apply wall model to define streamwise velocity at interpolation point:
+                  DXN_STRM =2._EB*CUT_FACE(ICF)%INT_XN(EP,IFACE) ! EP Position from Boundary in NOUT direction
+                  DXN_STRM2=2._EB*CUT_FACE(ICF)%INT_XN(0,IFACE)  ! Interpolation point position from Bound in NOUT dir.
+                                                           ! If this is a -ve number (i.e. case of Cartesian Faces),
+                                                           ! Linear velocity variation should be used be used.
+                  ! Linear variation:
+                  U_NORM2 = DXN_STRM2/DXN_STRM*U_NORM      ! Assumes relative U_normal decreases linearly to boundry.
+
+                  X1F= MESHES(NM)%CUT_FACE(ICF)%XYZCEN(X1AXIS,1)
+                  IDX= 1._EB/ ( MESHES(NM)%CUT_FACE(ICF)%XCENHIGH(X1AXIS,1) - &
+                                MESHES(NM)%CUT_FACE(ICF)%XCENLOW(X1AXIS, 1) )
+                  CCM1= IDX*(MESHES(NM)%CUT_FACE(ICF)%XCENHIGH(X1AXIS,1)-X1F)
+                  CCP1= IDX*(X1F-MESHES(NM)%CUT_FACE(ICF)%XCENLOW(X1AXIS, 1))
+                  ! For NU use interpolation of values on neighboring cut-cells:
+                  TMPV(-1:0) = -1._EB; RHOV(-1:0) = 0._EB
+                  DO ISIDE=-1,0
+                     ZZ_GET = 0._EB
+                     SELECT CASE(CUT_FACE(ICF)%CELL_LIST(1,ISIDE+2,1))
+                     CASE(IBM_FTYPE_CFGAS) ! Cut-cell -> use Temperature value from CUT_CELL data struct:
+                        ICC = CUT_FACE(ICF)%CELL_LIST(2,ISIDE+2,1)
+                        JCC = CUT_FACE(ICF)%CELL_LIST(3,ISIDE+2,1)
+                        TMPV(ISIDE) = CUT_CELL(ICC)%TMP(JCC)
+                        ZZ_GET(1:N_TRACKED_SPECIES) =  &
+                               PRFCT *CUT_CELL(ICC)%ZZ(1:N_TRACKED_SPECIES,JCC) + &
+                        (1._EB-PRFCT)*CUT_CELL(ICC)%ZZS(1:N_TRACKED_SPECIES,JCC)
+                        RHOV(ISIDE) = PRFCT *CUT_CELL(ICC)%RHO(JCC) + &
+                               (1._EB-PRFCT)*CUT_CELL(ICC)%RHOS(JCC)
+                     END SELECT
+                     CALL GET_VISCOSITY(ZZ_GET,MUV(ISIDE),TMPV(ISIDE))
+                  ENDDO
+                  MU_FACE = CCM1* MUV(-1) + CCP1* MUV(0)
+                  RHO_FACE= CCM1*RHOV(-1) + CCP1*RHOV(0)
+                  NU      = MU_FACE/RHO_FACE
+                  CALL WALL_MODEL(SLIP_FACTOR,U_TAU,Y_PLUS,U_STRM,NU,DXN_STRM,SRGH,ABS(DXN_STRM2),U_STRM2)
+
+                  ! If Cartesian face centroid inside the solid (i.e. acts like ghost cell) recompute U_STRM2
+                  ! using slip factor:
+                  IF(DXN_STRM2 < 0._EB) U_STRM2 = SLIP_FACTOR*ABS(DXN_STRM2)/DXN_STRM*U_STRM
+
+               ENDIF SLIPVEL_CONDITIONAL
 
                ! Velocity U_ORTH is zero by construction. Surface velocity is added to get absolute vel.
                U_IBM = U_NORM2*NN(X1AXIS) + U_STRM2*SS(X1AXIS) + U_SURF(X1AXIS)
@@ -12785,7 +12795,11 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                                                               ! Note if this is a -ve number (i.e. Cartesian Faces),
                                                               ! Linear velocity variation should be used be used.
 
-                     DXN_STRMFP_IF: IF(DXN_STRM_FP < 0._EB) THEN
+                     DXN_STRMFP_IF: IF(CC_SLIPIBM_VELO) THEN
+                        ! Slip condition: Make FP velocities equal to EP values.
+                        U_STRM_FP = U_STRM_EP
+                        U_NORM_FP = U_NORM_EP
+                     ELSEIF(DXN_STRM_FP < 0._EB) THEN
                         ! Linear variation:
                         U_STRM_FP = DXN_STRM_FP/DXN_STRM_EP*U_STRM_EP
                         U_NORM_FP = DXN_STRM_FP/DXN_STRM_EP*U_NORM_EP ! Assume rel U_normal decreases linearly.
@@ -12893,7 +12907,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                         ENDDO
                         TAU_SN_EP = TBAR_IJ(IAXIS,KAXIS)
 
-                        TAU_W = -RHO_FACE*U_TAU**2
+                        TAU_W   = -RHO_FACE*U_TAU**2
                         GRAV_SS = DOT_PRODUCT(GVEC,SS)*(RHO_FACE-RHO_0(K))
 
                         ! Normal component of velocity at forcing point, U_NORM_FP = U_NORMAL + DXN_STRM_FP * ( DIV - DUDS )
@@ -15904,7 +15918,7 @@ IF (FORCE_REGC_FACE_NXT) THEN
    DO_GASNXT_CARTCELL= .TRUE.
 ENDIF
 
-IF(.NOT.IBM_PLANE_INTERPOLATION) FORCE_REGC_FACE = .FALSE. ! 3D Interpolation.
+IF(.NOT.IBM_PLANE_INTERPOLATION .OR. CC_ZEROIBM_VELO .OR. CC_SLIPIBM_VELO) FORCE_REGC_FACE = .FALSE. ! 3D Interpolation.
 
 ! First fill IJK of cut-cells for CUT_FACE and IBM_RCFACE_VEL, in field CELL_LIST:
 ! Meshes Loop:
@@ -18745,6 +18759,9 @@ IF(CFRC_FLG) THEN
          CUT_FACE(ICF)%INT_NOMIND(LOW_IND:HIGH_IND,INPE)
       ENDIF
    ENDDO
+   IF (ABS(PROD_COEF) < TWO_EPSILON_EB) THEN ! Any viable points throught EP_TAG have been discarded by IJKFACE2.
+      INT_IJK=IBM_UNDEFINED; INT_COEF=0._EB; INT_NOMIND=IBM_UNDEFINED; NPE_COUNT=0
+   ENDIF
    CUT_FACE(ICF)%INT_IJK(IAXIS:KAXIS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI) = &
    INT_IJK(IAXIS:KAXIS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
    CUT_FACE(ICF)%INT_NOMIND(LOW_IND:HIGH_IND,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI) = &
@@ -18767,6 +18784,10 @@ ELSE
          MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_NOMIND(LOW_IND:HIGH_IND,INPE)
       ENDIF
    ENDDO
+   IF (ABS(PROD_COEF) < TWO_EPSILON_EB) THEN ! Any viable points throught EP_TAG have been discarded by IJKFACE2.
+      INT_IJK=IBM_UNDEFINED; INT_COEF=0._EB; INT_NOMIND=IBM_UNDEFINED; NPE_COUNT=0
+   ENDIF
+
    MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_IJK(IAXIS:KAXIS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI) = &
    INT_IJK(IAXIS:KAXIS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
    MESHES(NM)%IBM_RCFACE_VEL(ICF)%INT_NOMIND(LOW_IND:HIGH_IND,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI) = &
@@ -27128,7 +27149,7 @@ ENDDO MAIN_MESH_LOOP
 ! Now link small cells to surrounding cells in the mesh:
 ! NOTE: This linking scheme assumes there are no small cells trapped against a block boundary, i.e. there is a path
 ! within the mesh between them and a large cell.
-! NOTE2: Two remediation methods are used to link small cells trapped acainst a block boundary:
+! NOTE2: Two remediation methods are used to link small cells trapped against a block boundary:
 ! 1. Try linking them to the closest cell regular cell with UNKZ > 0.
 ! 2. Set for Mass matrix entry the cut-cell volume to ~ a cartesian cell and give a UNKZ > 0 to said cut-cell.
 !    This is done setting MESH(NM)%CUT_CELL(ICC)%USE_CC_VOL(JCC) = .FALSE., which will be used when building the
@@ -27306,6 +27327,22 @@ MAIN_MESH_LOOP3 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             CUT_CELL(ICC)%UNKZ(JCC) = VAL_UNKZ
          ENDDO
       ENDDO
+
+      ! Then attempt to connect to large cut-cells, or already connected small cells (CUT_CELL(OCC)%UNKZ(JCC) > 0):
+      ! DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+      !    NCELL = CUT_CELL(ICC)%NCELL
+      !    I = CUT_CELL(ICC)%IJK(IAXIS)
+      !    J = CUT_CELL(ICC)%IJK(JAXIS)
+      !    K = CUT_CELL(ICC)%IJK(KAXIS)
+      !    CCVOL_THRES = CCVOL_LINK*DX(I)*DY(J)*DZ(K)
+      !    ! For cases with more than one cut-cell, define UNKZ of all cells to be the one of first cut-cell
+      !    ! with UNKZ > 0:
+      !    DO JCC=1,NCELL
+      !       IF ( CUT_CELL(ICC)%UNKZ(JCC) > 0 ) EXIT
+      !    ENDDO
+      !    VAL_UNKZ = CUT_CELL(ICC)%UNKZ(JCC)
+      !    IF (JCC <= NCELL) CUT_CELL(ICC)%UNKZ(1:NCELL) = VAL_UNKZ
+      ! ENDDO
 
       IF (QUITLINK_FLG) EXIT LINK_LOOP
 
