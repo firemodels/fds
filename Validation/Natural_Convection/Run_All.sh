@@ -119,4 +119,95 @@ $QFDS $DEBUG -I -p 64 -n 4 $QUEUE -d $INDIR natconh_17_32.fds
 $QFDS $DEBUG -I -p 64 -n 4 $QUEUE -d $INDIR natconh_18_32.fds
 $QFDS $DEBUG -I -p 64 -n 4 $QUEUE -d $INDIR natconh_19_32.fds
 
+# FREE CONVECTION FROM A SPHERE
+
+$QFDS $DEBUG -I -p 8 $QUEUE -d $INDIR free_conv_sphere_1_8.fds
+$QFDS $DEBUG -I -p 8 $QUEUE -d $INDIR free_conv_sphere_2_8.fds
+$QFDS $DEBUG -I -p 8 $QUEUE -d $INDIR free_conv_sphere_3_8.fds
+$QFDS $DEBUG -I -p 8 $QUEUE -d $INDIR free_conv_sphere_4_8.fds
+
+$QFDS $DEBUG -I -p 120 -n 6 $QUEUE -d $INDIR free_conv_sphere_1_16.fds
+$QFDS $DEBUG -I -p 120 -n 6 $QUEUE -d $INDIR free_conv_sphere_2_16.fds
+$QFDS $DEBUG -I -p 120 -n 6 $QUEUE -d $INDIR free_conv_sphere_3_16.fds
+$QFDS $DEBUG -I -p 120 -n 6 $QUEUE -d $INDIR free_conv_sphere_4_16.fds
+
+# ROTATED NATURAL CONVECTION CASES USING GEOM
+
+$QFDS $DEBUG -I -p 2 $QUEUE -d $INDIR natconh_1_8_rot_18.fds
+$QFDS $DEBUG -I -p 2 $QUEUE -d $INDIR natconh_2_8_rot_18.fds
+$QFDS $DEBUG -I -p 2 $QUEUE -d $INDIR natconh_3_8_rot_18.fds
+$QFDS $DEBUG -I -p 2 $QUEUE -d $INDIR natconh_4_8_rot_18.fds
+$QFDS $DEBUG -I -p 2 $QUEUE -d $INDIR natconh_5_8_rot_18.fds
+$QFDS $DEBUG -I -p 2 $QUEUE -d $INDIR natconh_6_8_rot_18.fds
+$QFDS $DEBUG -I -p 2 $QUEUE -d $INDIR natconh_7_8_rot_18.fds
+$QFDS $DEBUG -I -p 2 $QUEUE -d $INDIR natconh_8_8_rot_18.fds
+$QFDS $DEBUG -I -p 2 $QUEUE -d $INDIR natconh_9_8_rot_18.fds
+$QFDS $DEBUG -I -p 2 $QUEUE -d $INDIR natconh_10_8_rot_18.fds
+$QFDS $DEBUG -I -p 2 $QUEUE -d $INDIR natconh_11_8_rot_18.fds
+$QFDS $DEBUG -I -p 2 $QUEUE -d $INDIR natconh_12_8_rot_18.fds
+$QFDS $DEBUG -I -p 2 $QUEUE -d $INDIR natconh_13_8_rot_18.fds
+$QFDS $DEBUG -I -p 2 $QUEUE -d $INDIR natconh_14_8_rot_18.fds
+$QFDS $DEBUG -I -p 2 $QUEUE -d $INDIR natconh_15_8_rot_18.fds
+$QFDS $DEBUG -I -p 2 $QUEUE -d $INDIR natconh_16_8_rot_18.fds
+$QFDS $DEBUG -I -p 2 $QUEUE -d $INDIR natconh_17_8_rot_18.fds
+$QFDS $DEBUG -I -p 2 $QUEUE -d $INDIR natconh_18_8_rot_18.fds
+$QFDS $DEBUG -I -p 2 $QUEUE -d $INDIR natconh_19_8_rot_18.fds
+
+$QFDS $DEBUG -I -p 2 $QUEUE -d $INDIR natconv_1_8_rot_18.fds
+$QFDS $DEBUG -I -p 2 $QUEUE -d $INDIR natconv_2_8_rot_18.fds
+$QFDS $DEBUG -I -p 2 $QUEUE -d $INDIR natconv_3_8_rot_18.fds
+$QFDS $DEBUG -I -p 2 $QUEUE -d $INDIR natconv_4_8_rot_18.fds
+$QFDS $DEBUG -I -p 2 $QUEUE -d $INDIR natconv_5_8_rot_18.fds
+$QFDS $DEBUG -I -p 2 $QUEUE -d $INDIR natconv_6_8_rot_18.fds
+$QFDS $DEBUG -I -p 2 $QUEUE -d $INDIR natconv_7_8_rot_18.fds
+$QFDS $DEBUG -I -p 2 $QUEUE -d $INDIR natconv_8_8_rot_18.fds
+$QFDS $DEBUG -I -p 2 $QUEUE -d $INDIR natconv_9_8_rot_18.fds
+$QFDS $DEBUG -I -p 2 $QUEUE -d $INDIR natconv_10_8_rot_18.fds
+$QFDS $DEBUG -I -p 2 $QUEUE -d $INDIR natconv_11_8_rot_18.fds
+$QFDS $DEBUG -I -p 2 $QUEUE -d $INDIR natconv_12_8_rot_18.fds
+$QFDS $DEBUG -I -p 2 $QUEUE -d $INDIR natconv_13_8_rot_18.fds
+$QFDS $DEBUG -I -p 2 $QUEUE -d $INDIR natconv_14_8_rot_18.fds
+$QFDS $DEBUG -I -p 2 $QUEUE -d $INDIR natconv_15_8_rot_18.fds
+$QFDS $DEBUG -I -p 2 $QUEUE -d $INDIR natconv_16_8_rot_18.fds
+$QFDS $DEBUG -I -p 2 $QUEUE -d $INDIR natconv_17_8_rot_18.fds
+
+$QFDS $DEBUG -I -p 32 -n 4 $QUEUE -d $INDIR natconh_1_16_rot_18.fds
+$QFDS $DEBUG -I -p 32 -n 4 $QUEUE -d $INDIR natconh_2_16_rot_18.fds
+$QFDS $DEBUG -I -p 32 -n 4 $QUEUE -d $INDIR natconh_3_16_rot_18.fds
+$QFDS $DEBUG -I -p 32 -n 4 $QUEUE -d $INDIR natconh_4_16_rot_18.fds
+$QFDS $DEBUG -I -p 32 -n 4 $QUEUE -d $INDIR natconh_5_16_rot_18.fds
+$QFDS $DEBUG -I -p 32 -n 4 $QUEUE -d $INDIR natconh_6_16_rot_18.fds
+$QFDS $DEBUG -I -p 32 -n 4 $QUEUE -d $INDIR natconh_7_16_rot_18.fds
+$QFDS $DEBUG -I -p 32 -n 4 $QUEUE -d $INDIR natconh_8_16_rot_18.fds
+$QFDS $DEBUG -I -p 32 -n 4 $QUEUE -d $INDIR natconh_9_16_rot_18.fds
+$QFDS $DEBUG -I -p 32 -n 4 $QUEUE -d $INDIR natconh_10_16_rot_18.fds
+$QFDS $DEBUG -I -p 32 -n 4 $QUEUE -d $INDIR natconh_11_16_rot_18.fds
+$QFDS $DEBUG -I -p 32 -n 4 $QUEUE -d $INDIR natconh_12_16_rot_18.fds
+$QFDS $DEBUG -I -p 32 -n 4 $QUEUE -d $INDIR natconh_13_16_rot_18.fds
+$QFDS $DEBUG -I -p 32 -n 4 $QUEUE -d $INDIR natconh_14_16_rot_18.fds
+$QFDS $DEBUG -I -p 32 -n 4 $QUEUE -d $INDIR natconh_15_16_rot_18.fds
+$QFDS $DEBUG -I -p 32 -n 4 $QUEUE -d $INDIR natconh_16_16_rot_18.fds
+$QFDS $DEBUG -I -p 32 -n 4 $QUEUE -d $INDIR natconh_17_16_rot_18.fds
+$QFDS $DEBUG -I -p 32 -n 4 $QUEUE -d $INDIR natconh_18_16_rot_18.fds
+$QFDS $DEBUG -I -p 32 -n 4 $QUEUE -d $INDIR natconh_19_16_rot_18.fds
+
+$QFDS $DEBUG -I -p 32 -n 4 $QUEUE -d $INDIR natconv_1_16_rot_18.fds
+$QFDS $DEBUG -I -p 32 -n 4 $QUEUE -d $INDIR natconv_2_16_rot_18.fds
+$QFDS $DEBUG -I -p 32 -n 4 $QUEUE -d $INDIR natconv_3_16_rot_18.fds
+$QFDS $DEBUG -I -p 32 -n 4 $QUEUE -d $INDIR natconv_4_16_rot_18.fds
+$QFDS $DEBUG -I -p 32 -n 4 $QUEUE -d $INDIR natconv_5_16_rot_18.fds
+$QFDS $DEBUG -I -p 32 -n 4 $QUEUE -d $INDIR natconv_6_16_rot_18.fds
+$QFDS $DEBUG -I -p 32 -n 4 $QUEUE -d $INDIR natconv_7_16_rot_18.fds
+$QFDS $DEBUG -I -p 32 -n 4 $QUEUE -d $INDIR natconv_8_16_rot_18.fds
+$QFDS $DEBUG -I -p 32 -n 4 $QUEUE -d $INDIR natconv_9_16_rot_18.fds
+$QFDS $DEBUG -I -p 32 -n 4 $QUEUE -d $INDIR natconv_10_16_rot_18.fds
+$QFDS $DEBUG -I -p 32 -n 4 $QUEUE -d $INDIR natconv_11_16_rot_18.fds
+$QFDS $DEBUG -I -p 32 -n 4 $QUEUE -d $INDIR natconv_12_16_rot_18.fds
+$QFDS $DEBUG -I -p 32 -n 4 $QUEUE -d $INDIR natconv_13_16_rot_18.fds
+$QFDS $DEBUG -I -p 32 -n 4 $QUEUE -d $INDIR natconv_14_16_rot_18.fds
+$QFDS $DEBUG -I -p 32 -n 4 $QUEUE -d $INDIR natconv_15_16_rot_18.fds
+$QFDS $DEBUG -I -p 32 -n 4 $QUEUE -d $INDIR natconv_16_16_rot_18.fds
+$QFDS $DEBUG -I -p 32 -n 4 $QUEUE -d $INDIR natconv_17_16_rot_18.fds
+
+
 echo FDS cases submitted
