@@ -27329,20 +27329,20 @@ MAIN_MESH_LOOP3 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       ENDDO
 
       ! Then attempt to connect to large cut-cells, or already connected small cells (CUT_CELL(OCC)%UNKZ(JCC) > 0):
-      ! DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
-      !    NCELL = CUT_CELL(ICC)%NCELL
-      !    I = CUT_CELL(ICC)%IJK(IAXIS)
-      !    J = CUT_CELL(ICC)%IJK(JAXIS)
-      !    K = CUT_CELL(ICC)%IJK(KAXIS)
+       DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+          NCELL = CUT_CELL(ICC)%NCELL
+          I = CUT_CELL(ICC)%IJK(IAXIS)
+          J = CUT_CELL(ICC)%IJK(JAXIS)
+          K = CUT_CELL(ICC)%IJK(KAXIS)
       !    CCVOL_THRES = CCVOL_LINK*DX(I)*DY(J)*DZ(K)
       !    ! For cases with more than one cut-cell, define UNKZ of all cells to be the one of first cut-cell
       !    ! with UNKZ > 0:
-      !    DO JCC=1,NCELL
-      !       IF ( CUT_CELL(ICC)%UNKZ(JCC) > 0 ) EXIT
-      !    ENDDO
-      !    VAL_UNKZ = CUT_CELL(ICC)%UNKZ(JCC)
-      !    IF (JCC <= NCELL) CUT_CELL(ICC)%UNKZ(1:NCELL) = VAL_UNKZ
-      ! ENDDO
+          DO JCC=1,NCELL
+             IF ( CUT_CELL(ICC)%UNKZ(JCC) > 0 ) EXIT
+          ENDDO
+          VAL_UNKZ = CUT_CELL(ICC)%UNKZ(JCC)
+          IF (JCC <= NCELL) CUT_CELL(ICC)%UNKZ(1:NCELL) = VAL_UNKZ
+       ENDDO
 
       IF (QUITLINK_FLG) EXIT LINK_LOOP
 
@@ -31570,7 +31570,7 @@ LOGICAL :: FLG_LOHI
 INTEGER, ALLOCATABLE, DIMENSION(:)  :: NELVERT,ISTVERT,EDGE_RNK
 INTEGER, ALLOCATABLE, DIMENSION(:,:):: EDGES2,EDGE_FACES2
 
-LOGICAL, PARAMETER :: OPTIMIZE_SEG_DEF = .FALSE.
+LOGICAL, PARAMETER :: OPTIMIZE_SEG_DEF = .TRUE.
 
 
 REAL(EB) :: CPUTIME_START, CPUTIME
@@ -31820,6 +31820,63 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
    ENDDO
 
    DEALLOCATE(NELVERT,ISTVERT,EDGES2,EDGE_FACES2,EDGE_RNK)
+
+   ! Perform manifoldness tests:
+   ALLOCATE(EDGES2(2,NWSEDG)); EDGES2=0
+   DO IWSEL=1,NWSEL
+      WSELEM(NOD1:NOD3) = GEOMETRY(IG)%FACES(NODS_WSEL*(IWSEL-1)+1:NODS_WSEL*IWSEL)
+      DO IEDGE=EDG1,EDG3
+         IEDLIST = GEOMETRY(IG)%FACE_EDGES(IEDGE,IWSEL)
+         IF(WSELEM(IEDGE) == GEOMETRY(IG)%EDGES(NOD1,IEDLIST)) THEN ! First node of face edge equals first node of seg.
+            EDGES2(1,IEDLIST)=EDGES2(1,IEDLIST)+1
+         ELSEIF(WSELEM(IEDGE) == GEOMETRY(IG)%EDGES(NOD2,IEDLIST)) THEN ! Inverted.
+            EDGES2(2,IEDLIST)=EDGES2(2,IEDLIST)+1
+         ENDIF
+      ENDDO
+   ENDDO
+   DO IWSEL=1,NWSEDG
+      IF(SUM(EDGES2(1:2,IWSEL)) < 2) THEN ! Less that two faces have this edge as boundary:
+         SEG(NOD1:NOD2) = GEOMETRY(IG)%EDGES(NOD1:NOD2,IWSEL)
+         XYZV(IAXIS:KAXIS,NOD1) = GEOMETRY(IG)%VERTS(MAX_DIM*(SEG(NOD1)-1)+1:MAX_DIM*SEG(NOD1))
+         XYZV(IAXIS:KAXIS,NOD2) = GEOMETRY(IG)%VERTS(MAX_DIM*(SEG(NOD2)-1)+1:MAX_DIM*SEG(NOD2))
+         IF (POSITIVE_ERROR_TEST) THEN
+           WRITE(LU_ERR,'(A,A,A)') "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+         ELSE
+           WRITE(LU_ERR,'(A,A,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+         ENDIF
+         WRITE(LU_ERR,'(A)') "  Non manifold geometry, open surface at edge:"
+         WRITE(LU_ERR,'(A,3F12.3,A,3F12.3,A)') "  (", XYZV(IAXIS:KAXIS,NOD1), ")-(", XYZV(IAXIS:KAXIS,NOD2), ")"
+         CALL SHUTDOWN("") ; RETURN
+
+      ELSEIF(SUM(EDGES2(1:2,IWSEL)) > 2) THEN ! More than two faces share this edge:
+         SEG(NOD1:NOD2) = GEOMETRY(IG)%EDGES(NOD1:NOD2,IWSEL)
+         XYZV(IAXIS:KAXIS,NOD1) = GEOMETRY(IG)%VERTS(MAX_DIM*(SEG(NOD1)-1)+1:MAX_DIM*SEG(NOD1))
+         XYZV(IAXIS:KAXIS,NOD2) = GEOMETRY(IG)%VERTS(MAX_DIM*(SEG(NOD2)-1)+1:MAX_DIM*SEG(NOD2))
+         IF (POSITIVE_ERROR_TEST) THEN
+           WRITE(LU_ERR,'(A,A,A)') "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+         ELSE
+           WRITE(LU_ERR,'(A,A,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+         ENDIF
+         WRITE(LU_ERR,'(A)') "  Non manifold geometry, more that two triangles share edge:"
+         WRITE(LU_ERR,'(A,3F12.3,A,3F12.3,A)') "  (", XYZV(IAXIS:KAXIS,NOD1), ")-(", XYZV(IAXIS:KAXIS,NOD2), ")"
+         CALL SHUTDOWN("") ; RETURN
+
+      ELSEIF(ANY(EDGES2(1:2,IWSEL) > 1)) THEN ! half edge counted more than once, opposite normals on triangles
+         SEG(NOD1:NOD2) = GEOMETRY(IG)%EDGES(NOD1:NOD2,IWSEL)
+         XYZV(IAXIS:KAXIS,NOD1) = GEOMETRY(IG)%VERTS(MAX_DIM*(SEG(NOD1)-1)+1:MAX_DIM*SEG(NOD1))
+         XYZV(IAXIS:KAXIS,NOD2) = GEOMETRY(IG)%VERTS(MAX_DIM*(SEG(NOD2)-1)+1:MAX_DIM*SEG(NOD2))
+         IF (POSITIVE_ERROR_TEST) THEN
+           WRITE(LU_ERR,'(A,A,A)') "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+         ELSE
+           WRITE(LU_ERR,'(A,A,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+         ENDIF
+         WRITE(LU_ERR,'(A)') "  Non manifold geometry, opposite normals on triangles that share edge:"
+         WRITE(LU_ERR,'(A,3F12.3,A,3F12.3,A)') "  (", XYZV(IAXIS:KAXIS,NOD1), ")-(", XYZV(IAXIS:KAXIS,NOD2), ")"
+         CALL SHUTDOWN("") ; RETURN
+
+      ENDIF
+   ENDDO
+   DEALLOCATE(EDGES2)
 
    ELSE OPTIMIZE_SEG_DEF_COND
 
@@ -36392,6 +36449,9 @@ DO K=KLO,KHI
                IF ( CTR > NSEG_FACE**3 ) THEN
                       WRITE(LU_ERR,*) "Error GET_CARTCELL_CUTFACES: ctr > nseg_face^3 ,",BNDINT_FLAG,I,J,K,NCUTFACE,&
                       MESHES(NM)%CUT_FACE(NCUTFACE)%NFACE
+                      WRITE(LU_ERR,*) "Cannot build boundary cut faces in cell:",I,J,K
+                      WRITE(LU_ERR,*) "Located in position:",XC(I),YC(J),ZC(K)
+                      WRITE(LU_ERR,*) "Check for Geometry surface inconsistencies at said location."
 #ifdef DEBUG_SET_CUTCELLS
                       WRITE(LU_ERR,*) 'Cartesian CELL:',BNDINT_FLAG,MESHES(NM)%CCVAR(I,J,K,IBM_CGSC),IBM_CUTCFE,I,J,K
                       OPEN(UNIT=33,FILE="./Cartcell_cutfaces.dat", STATUS='REPLACE')
@@ -36427,6 +36487,8 @@ DO K=KLO,KHI
                       ENDDO
                       CLOSE(33)
                       CALL DEBUG_WAIT
+#else
+                      CALL SHUTDOWN(""); RETURN
 #endif
                ENDIF
 
