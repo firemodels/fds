@@ -51,6 +51,7 @@ REAL(EB) :: T,DT,DT_EVAC,TNOW
 REAL :: CPUTIME
 REAL(EB), ALLOCATABLE, DIMENSION(:) ::  TC_GLB,TC_LOC,DT_NEW,TI_LOC,TI_GLB, &
                                         DSUM_ALL,PSUM_ALL,USUM_ALL,DSUM_ALL_LOCAL,PSUM_ALL_LOCAL,USUM_ALL_LOCAL
+REAL(EB), ALLOCATABLE, DIMENSION(:,:) ::  TC2_GLB,TC2_LOC
 LOGICAL, ALLOCATABLE, DIMENSION(:,:) :: CONNECTED_ZONES_GLOBAL,CONNECTED_ZONES_LOCAL
 LOGICAL, ALLOCATABLE, DIMENSION(:) ::  STATE_GLB,STATE_LOC
 INTEGER :: NOM,IWW,IW
@@ -1005,6 +1006,10 @@ SELECT CASE(TASK_NUMBER)
       CALL ChkMemErr('MAIN','TC_GLB',IZERO)
       ALLOCATE(TC_LOC(3*N_DEVC),STAT=IZERO)
       CALL ChkMemErr('MAIN','TC_LOC',IZERO)
+      ALLOCATE(TC2_GLB(2,N_DEVC),STAT=IZERO)
+      CALL ChkMemErr('MAIN','TC2_GLB',IZERO)
+      ALLOCATE(TC2_LOC(2,N_DEVC),STAT=IZERO)
+      CALL ChkMemErr('MAIN','TC2_LOC',IZERO)
 
       ! Allocate a few arrays needed to exchange divergence and pressure info among meshes
 
@@ -3121,21 +3126,21 @@ EXCHANGE_DEVICE: IF (N_DEVC>0) THEN
    ! In the following loop, for OP_INDEX=1, we add together VALUE_1 and possibly VALUE_2 for all SUBDEVICEs (i.e. meshes)
    ! allocated by the copy of the DEViCe associated with the current MPI process, MYID. Then we do an MPI_ALLREDUCE that
    ! adds the VALUE_1 and VALUE_2 from other SUBDEVICEs allocated by the copies of the DEViCE stored by the other MPI processes.
-   ! For OP_INDEX=2 and 3, we take the MIN or MAX insteading of adding VALUE_1 togheter.
+   ! For OP_INDEX=2 and 3, we take the MIN or MAX of all the VALUEs, along with the MINLOC or MAXLOC.
 
    OPERATION_LOOP: DO OP_INDEX=1,3
       IF (OP_INDEX==2 .AND. .NOT.MIN_DEVICES_EXIST) CYCLE OPERATION_LOOP
       IF (OP_INDEX==3 .AND. .NOT.MAX_DEVICES_EXIST) CYCLE OPERATION_LOOP
       SELECT CASE(OP_INDEX)
-         CASE(1) ; TC_LOC =  0._EB    ; MPI_OP_INDEX = MPI_SUM ; DIM_FAC = 3
-         CASE(2) ; TC_LOC =  1.E10_EB ; MPI_OP_INDEX = MPI_MIN ; DIM_FAC = 1
-         CASE(3) ; TC_LOC = -1.E10_EB ; MPI_OP_INDEX = MPI_MAX ; DIM_FAC = 1
+         CASE(1) ; TC_LOC  =  0._EB    ; MPI_OP_INDEX = MPI_SUM    ; DIM_FAC = 3
+         CASE(2) ; TC2_LOC =  1.E10_EB ; MPI_OP_INDEX = MPI_MINLOC ; DIM_FAC = 1
+         CASE(3) ; TC2_LOC = -1.E10_EB ; MPI_OP_INDEX = MPI_MAXLOC ; DIM_FAC = 1
       END SELECT
-      DO N=1,N_DEVC
+      DEVICE_LOOP_1: DO N=1,N_DEVC
          DV => DEVICE(N)
-         IF (OP_INDEX==1 .AND. (DV%SPATIAL_STATISTIC=='MIN' .OR. DV%SPATIAL_STATISTIC=='MAX')) CYCLE
-         IF (OP_INDEX==2 .AND.  DV%SPATIAL_STATISTIC/='MIN') CYCLE
-         IF (OP_INDEX==3 .AND.  DV%SPATIAL_STATISTIC/='MAX') CYCLE
+         IF (OP_INDEX==1 .AND. (DV%SPATIAL_STATISTIC(1:3)=='MIN' .OR. DV%SPATIAL_STATISTIC(1:3)=='MAX')) CYCLE
+         IF (OP_INDEX==2 .AND.  DV%SPATIAL_STATISTIC(1:3)/='MIN') CYCLE
+         IF (OP_INDEX==3 .AND.  DV%SPATIAL_STATISTIC(1:3)/='MAX') CYCLE
          DO NN=1,DV%N_SUBDEVICES
             SDV => DV%SUBDEVICE(NN)
             SELECT CASE(OP_INDEX)
@@ -3144,28 +3149,57 @@ EXCHANGE_DEVICE: IF (N_DEVC>0) THEN
                   TC_LOC(N+N_DEVC)     = TC_LOC(N+N_DEVC)   + SDV%VALUE_2
                   TC_LOC(N+2*N_DEVC)   = TC_LOC(N+2*N_DEVC) + SDV%VALUE_3
                CASE(2)
-                  TC_LOC(N) = MIN(TC_LOC(N),SDV%VALUE_1)
+                  IF (SDV%VALUE_1<TC2_LOC(1,N)) THEN
+                     TC2_LOC(1,N) = SDV%VALUE_1
+                     TC2_LOC(2,N) = SDV%VALUE_2
+                  ENDIF
                CASE(3)
-                  TC_LOC(N) = MAX(TC_LOC(N),SDV%VALUE_1)
+                  IF (SDV%VALUE_1>TC2_LOC(1,N)) THEN
+                     TC2_LOC(1,N) = SDV%VALUE_1
+                     TC2_LOC(2,N) = SDV%VALUE_2
+                  ENDIF
             END SELECT
          ENDDO
-      ENDDO
+      ENDDO DEVICE_LOOP_1
       IF (N_MPI_PROCESSES>1) THEN
-         CALL MPI_ALLREDUCE(TC_LOC(1),TC_GLB(1),DIM_FAC*N_DEVC,MPI_DOUBLE_PRECISION,MPI_OP_INDEX,MPI_COMM_WORLD,IERR)
+         SELECT CASE(OP_INDEX)
+            CASE(1) ; CALL MPI_ALLREDUCE(TC_LOC(1),TC_GLB(1),DIM_FAC*N_DEVC,MPI_DOUBLE_PRECISION,MPI_OP_INDEX,MPI_COMM_WORLD,IERR)
+            CASE(2:3) ; CALL MPI_ALLREDUCE(TC2_LOC,TC2_GLB,N_DEVC,MPI_2DOUBLE_PRECISION,MPI_OP_INDEX,MPI_COMM_WORLD,IERR)
+         END SELECT
       ELSE
-         TC_GLB = TC_LOC
+         SELECT CASE(OP_INDEX)
+            CASE(1)   ; TC_GLB = TC_LOC
+            CASE(2:3) ; TC2_GLB = TC2_LOC
+         END SELECT
       ENDIF
-      DO N=1,N_DEVC
+      DEVICE_LOOP_2: DO N=1,N_DEVC
          DV => DEVICE(N)
-         IF (OP_INDEX==1 .AND. (DV%SPATIAL_STATISTIC=='MIN' .OR. DV%SPATIAL_STATISTIC=='MAX')) CYCLE
-         IF (OP_INDEX==2 .AND.  DV%SPATIAL_STATISTIC/='MIN') CYCLE
-         IF (OP_INDEX==3 .AND.  DV%SPATIAL_STATISTIC/='MAX') CYCLE
-         DV%VALUE_1 = TC_GLB(N)
+         IF (OP_INDEX==1 .AND. (DV%SPATIAL_STATISTIC(1:3)=='MIN' .OR. DV%SPATIAL_STATISTIC(1:3)=='MAX')) CYCLE
+         IF (OP_INDEX==2 .AND.  DV%SPATIAL_STATISTIC(1:3)/='MIN') CYCLE
+         IF (OP_INDEX==3 .AND.  DV%SPATIAL_STATISTIC(1:3)/='MAX') CYCLE
          IF (OP_INDEX==1) THEN
+            DV%VALUE_1 = TC_GLB(N)
             DV%VALUE_2 = TC_GLB(  N_DEVC+N)
             DV%VALUE_3 = TC_GLB(2*N_DEVC+N)
          ENDIF
-      ENDDO
+         IF (OP_INDEX>1 .AND.  (DV%SPATIAL_STATISTIC=='MIN'.OR.DV%SPATIAL_STATISTIC=='MAX')) THEN
+            DV%VALUE_1 = TC2_GLB(1,N)
+         ENDIF
+         IF (OP_INDEX>1 .AND. (DV%SPATIAL_STATISTIC(1:6)=='MINLOC'.OR.DV%SPATIAL_STATISTIC(1:6)=='MAXLOC')) THEN
+            DO NN=1,DV%N_SUBDEVICES
+               SDV => DV%SUBDEVICE(NN)
+               IF (PROCESS(SDV%MESH)==MYID) THEN
+                  IF (SDV%MESH==NINT(TC2_GLB(2,N))) THEN
+                     DV%VALUE_1 = SDV%VALUE_3
+                     CALL MPI_SEND(DV%VALUE_1,1,MPI_DOUBLE_PRECISION,0,999,MPI_COMM_WORLD,IERR)
+                  ENDIF
+               ENDIF
+            ENDDO
+            IF (MYID==0) CALL MPI_RECV(DV%VALUE_1,1,MPI_DOUBLE_PRECISION,MPI_ANY_SOURCE,MPI_ANY_TAG,MPI_COMM_WORLD,STATUS,IERR)
+            CALL MPI_BARRIER(MPI_COMM_WORLD,IERR)
+            CALL MPI_BCAST(DV%VALUE_1,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,IERR)
+         ENDIF
+      ENDDO DEVICE_LOOP_2
    ENDDO OPERATION_LOOP
 
 ENDIF EXCHANGE_DEVICE
