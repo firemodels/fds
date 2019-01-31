@@ -6914,7 +6914,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
             ENDIF
          ENDDO
          IF (INDEX_LIST(N_LIST)<0) THEN
-            WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR: MATL_ID ',TRIM(NAME_LIST(N_LIST)),', on SURF: ',TRIM(SF%ID),', does not exist'
+            WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR: MATL_ID, ',TRIM(NAME_LIST(N_LIST)),', on SURF, ',TRIM(SF%ID),', does not exist'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
       ENDDO COUNT_LAYER_MATL

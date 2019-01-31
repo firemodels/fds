@@ -159,7 +159,7 @@ READLOOP: DO
    TLOOP: DO II=1,72
       IF (TEXT(II:II)/='&' .AND. TEXT(II:II)/=' ') EXIT TLOOP
       IF (TEXT(II:II)=='&') THEN
-         IF (TEXT(II+1:II+4)==NAME) THEN
+         IF (TEXT(II+1:II+4)==NAME .AND. TEXT(II+5:II+5)==' ') THEN
             BACKSPACE(LU)
             IOS = 0
             EXIT READLOOP
