@@ -12908,7 +12908,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                         TAU_SN_EP = TBAR_IJ(IAXIS,KAXIS)
 
                         TAU_W   = -RHO_FACE*U_TAU**2
-                        GRAV_SS = DOT_PRODUCT(GVEC,SS)*(RHO_FACE-RHO_0(K))
+                        GRAV_SS = -DOT_PRODUCT(GVEC,SS)*(RHO_FACE-RHO_0(K))
 
                         ! Normal component of velocity at forcing point, U_NORM_FP = U_NORMAL + DXN_STRM_FP * ( DIV - DUDS )
                         U_NORM_FP = VELN + DXN_STRM_FP * (DIV_FACE - DUSTRMDS_FP)
