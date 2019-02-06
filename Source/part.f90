@@ -301,7 +301,8 @@ SPRINKLER_INSERT_LOOP: DO KS=1,N_DEVC
       ! Set PARTICLE properties
 
       LP%T_INSERT = T
-      IF (MOD(NLP,LPC%SAMPLING)==0) LP%SHOW = .TRUE.
+      CALL RANDOM_NUMBER(RN)
+      IF (RN < 1._EB/REAL(LPC%SAMPLING,EB)) LP%SHOW = .TRUE.
 
       ! Randomly choose particle direction angles, theta and phi
 
@@ -487,7 +488,7 @@ USE COMPLEX_GEOMETRY, ONLY : RANDOM_CFACE_XYZ
 
 INTEGER, INTENT(IN), OPTIONAL :: WALL_INDEX,CFACE_INDEX
 INTEGER :: I
-REAL(EB):: CFA_X, CFA_Y, CFA_Z
+REAL(EB):: CFA_X, CFA_Y, CFA_Z, RN
 
 TYPE(CFACE_TYPE), POINTER :: CFA=>NULL()
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
@@ -624,7 +625,8 @@ PARTICLE_INSERT_LOOP2: DO I=1,SF%NPPC
 
    ! Save the insertion time (TP) and scalar property (SP) for the particle
 
-   IF (MOD(NLP,LPC%SAMPLING)==0) LP%SHOW = .TRUE.
+   CALL RANDOM_NUMBER(RN)
+   IF (RN < 1._EB/REAL(LPC%SAMPLING,EB)) LP%SHOW = .TRUE.
    LP%T_INSERT = T
 
    CALL INITIALIZE_SINGLE_PARTICLE
@@ -1026,7 +1028,8 @@ ENDIF
 ! Save insert time and other miscellaneous attributes
 
 LP%T_INSERT = T
-IF (MOD(NLP,LPC%SAMPLING)==0) LP%SHOW = .TRUE.
+CALL RANDOM_NUMBER(RN)
+IF (RN < 1._EB/REAL(LPC%SAMPLING,EB)) LP%SHOW = .TRUE.
 
 ! Get the particle ORIENTATION from the PART line
 
@@ -1368,7 +1371,8 @@ PARTICLE_LOOP: DO IP=1,NLP
 
       ! Throw out particles that have run out of mass.
 
-      IF (.NOT.LPC%MASSLESS_TRACER .AND. (R_D<=0._EB .OR. (.NOT.LPC%STATIC .AND. LP%MASS<=TWO_EPSILON_EB))) CYCLE PARTICLE_LOOP
+      IF (.NOT.LPC%MASSLESS_TRACER .AND. &
+            (R_D < LPC%KILL_RADIUS .OR. (LPC%STATIC .AND. .NOT.LP%EMBER) .OR. LP%PWT < TWO_EPSILON_EB)) CYCLE PARTICLE_LOOP
 
       ! Save original particle radius.
 
@@ -1393,19 +1397,11 @@ PARTICLE_LOOP: DO IP=1,NLP
 
       ! Move the particle one sub-time-step, (X_OLD,Y_OLD,Z_OLD) --> (LP%X,LP%Y,LP%Z)
 
-      SOLID_GAS_MOVE: IF (LP%ONE_D%IOR/=0) THEN
-
+      IF (LP%ONE_D%IOR/=0) THEN
          CALL MOVE_ON_SOLID
-
-      ELSE SOLID_GAS_MOVE
-
+      ELSE
          CALL MOVE_IN_GAS
-
-         ! If the particle is massless or does not move, go on to the next particle
-
-         IF (LPC%MASSLESS_TRACER .OR. LP%PWT<=TWO_EPSILON_EB .OR. (LPC%STATIC .AND. .NOT.LP%EMBER)) CYCLE PARTICLE_LOOP
-
-      ENDIF SOLID_GAS_MOVE
+      ENDIF
 
       ! Special case where a liquid droplet hits a POROUS_FLOOR
 
