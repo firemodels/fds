@@ -1371,8 +1371,7 @@ PARTICLE_LOOP: DO IP=1,NLP
 
       ! Throw out particles that have run out of mass.
 
-      IF (.NOT.LPC%MASSLESS_TRACER .AND. &
-            (R_D < LPC%KILL_RADIUS .OR. (LPC%STATIC .AND. .NOT.LP%EMBER) .OR. LP%PWT < TWO_EPSILON_EB)) CYCLE PARTICLE_LOOP
+      IF (.NOT.LPC%MASSLESS_TRACER .AND. R_D<LPC%KILL_RADIUS) CYCLE PARTICLE_LOOP
 
       ! Save original particle radius.
 
@@ -1397,11 +1396,19 @@ PARTICLE_LOOP: DO IP=1,NLP
 
       ! Move the particle one sub-time-step, (X_OLD,Y_OLD,Z_OLD) --> (LP%X,LP%Y,LP%Z)
 
-      IF (LP%ONE_D%IOR/=0) THEN
+      SOLID_GAS_MOVE: IF (LP%ONE_D%IOR/=0) THEN
+
          CALL MOVE_ON_SOLID
-      ELSE
+
+      ELSE SOLID_GAS_MOVE
+
          CALL MOVE_IN_GAS
-      ENDIF
+
+         ! If the particle is massless or does not move, go on to the next particle
+
+         IF (LPC%MASSLESS_TRACER .OR. LP%PWT<=TWO_EPSILON_EB .OR. (LPC%STATIC .AND. .NOT.LP%EMBER)) CYCLE PARTICLE_LOOP
+
+      ENDIF SOLID_GAS_MOVE
 
       ! Special case where a liquid droplet hits a POROUS_FLOOR
 
