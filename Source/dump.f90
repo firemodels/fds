@@ -1417,7 +1417,7 @@ ENDIF
 
 IF (MYID>0 .AND. APPEND) RETURN
 
-! In cases where the MPI processes write to their own .smv file, give each .smv file for the MPI processes 
+! In cases where the MPI processes write to their own .smv file, give each .smv file for the MPI processes
 ! greater than 0 a unique name.
 
 IF (MYID>0 .AND.      SHARED_FILE_SYSTEM) OPEN(LU_SMV,FILE=FN_SMV,FORM='FORMATTED', STATUS='OLD',POSITION='APPEND')
@@ -6268,6 +6268,8 @@ IND_SELECT: SELECT CASE(IND)
       SS = GAS_PHASE_OUTPUT(II,JJ,KK,84,IND2,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,PIPE_INDEX,PROP_INDEX,&
                             REAC_INDEX,MATL_INDEX,T,DT,NM)
       GAS_PHASE_OUTPUT_RES = MU(II,JJ,KK)/RHO(II,JJ,KK)*SS**2
+   CASE(89)  ! KINEMATIC VISCOSITY
+      GAS_PHASE_OUTPUT_RES = MU(II,JJ,KK)/RHO(II,JJ,KK)
    CASE(90)  ! MASS FRACTION
       GAS_PHASE_OUTPUT_RES = Y_SPECIES/(1._EB-Y_H2O)
    CASE(91:93) ! MASS FLUX
