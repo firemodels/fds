@@ -623,7 +623,7 @@ CONTAINS
           VERTICAL_LANDING_SEPARATION = 0._EB
           EVAC_Z_OFFSET               = 1.0_EB
           !
-          CALL CHECKREAD('STRS',LU_INPUT,IOS)
+          CALL CHECKREAD('STRS',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
           IF (IOS == 1) THEN
              EXIT READ_STRS_LOOP
           END IF
@@ -699,7 +699,7 @@ CONTAINS
           COUNT_DENSITY = .FALSE.
           COLOR_INDEX   = -1
 
-          CALL CHECKREAD('EXIT', LU_INPUT, IOS)
+          CALL CHECKREAD('EXIT', LU_INPUT, IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
           IF (IOS == 1) THEN
              EXIT READ_EXIT_LOOP_0
           END IF
@@ -829,7 +829,7 @@ CONTAINS
           VENT_FFIELD   = 'null'
           COLOR_INDEX   = -1
 
-          CALL CHECKREAD('DOOR', LU_INPUT, IOS)
+          CALL CHECKREAD('DOOR', LU_INPUT, IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
           IF (IOS == 1) THEN
              EXIT READ_DOOR_LOOP_0
           END IF
@@ -1067,7 +1067,7 @@ CONTAINS
          MAX_HUMANS_DIM = 10000 ! Maximum number of agents in an evacuation mesh
          REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
          COUNT_PERS_LOOP: DO
-            CALL CHECKREAD('PERS',LU_INPUT,IOS)
+            CALL CHECKREAD('PERS',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
             IF (IOS == 1) THEN
                EXIT COUNT_PERS_LOOP
             END IF
@@ -1087,7 +1087,7 @@ CONTAINS
          NPC_EVAC = 0
          COUNT_EVAC_LOOP: DO
             NUMBER_INITIAL_PERSONS = 0
-            CALL CHECKREAD('EVAC',LU_INPUT,IOS)
+            CALL CHECKREAD('EVAC',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
             IF (IOS == 1) THEN
                EXIT COUNT_EVAC_LOOP
             END IF
@@ -1111,7 +1111,7 @@ CONTAINS
          COUNT_EXITS_LOOP: DO
             COUNT_ONLY = .FALSE.
             COUNT_DENSITY = .FALSE.
-            CALL CHECKREAD('EXIT',LU_INPUT,IOS)
+            CALL CHECKREAD('EXIT',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
             IF (IOS == 1) THEN
                EXIT COUNT_EXITS_LOOP
             END IF
@@ -1133,7 +1133,7 @@ CONTAINS
          !
          N_DOORS = 0
          COUNT_DOORS_LOOP: DO
-            CALL CHECKREAD('DOOR',LU_INPUT,IOS)
+            CALL CHECKREAD('DOOR',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
             IF (IOS == 1) THEN
                EXIT COUNT_DOORS_LOOP
             END IF
@@ -1155,7 +1155,7 @@ CONTAINS
          COUNT_ENTRYS_LOOP: DO
             MAX_FLOW        = 0.0_EB
             MAX_HUMANS_RAMP = 'null'
-            CALL CHECKREAD('ENTR',LU_INPUT,IOS)
+            CALL CHECKREAD('ENTR',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
             IF (IOS == 1) THEN
                EXIT COUNT_ENTRYS_LOOP
             END IF
@@ -1175,7 +1175,7 @@ CONTAINS
          !
          N_CORRS = 0
          COUNT_CORRS_LOOP: DO
-            CALL CHECKREAD('CORR',LU_INPUT,IOS)
+            CALL CHECKREAD('CORR',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
             IF (IOS == 1) THEN
                EXIT COUNT_CORRS_LOOP
             END IF
@@ -1192,7 +1192,7 @@ CONTAINS
          !
          N_HOLES = 0
          COUNT_EVHO_LOOP: DO
-            CALL CHECKREAD('EVHO',LU_INPUT,IOS)
+            CALL CHECKREAD('EVHO',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
             IF (IOS == 1) THEN
                EXIT COUNT_EVHO_LOOP
             END IF
@@ -1209,7 +1209,7 @@ CONTAINS
          !
          N_SSTANDS = 0
          COUNT_EVSS_LOOP: DO
-            CALL CHECKREAD('EVSS',LU_INPUT,IOS)
+            CALL CHECKREAD('EVSS',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
             IF (IOS == 1) THEN
                EXIT COUNT_EVSS_LOOP
             END IF
@@ -1226,7 +1226,7 @@ CONTAINS
          !
          N_STRS = 0
          COUNT_STRS_LOOP: DO
-            CALL CHECKREAD('STRS',LU_INPUT,IOS)
+            CALL CHECKREAD('STRS',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
             IF (IOS == 1) THEN
                EXIT COUNT_STRS_LOOP
             END IF
@@ -1243,7 +1243,7 @@ CONTAINS
          !
          N_EDEV = 0
          COUNT_EDEV_LOOP: DO
-            CALL CHECKREAD('EDEV',LU_INPUT,IOS)
+            CALL CHECKREAD('EDEV',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
             IF (IOS == 1) THEN
                EXIT COUNT_EDEV_LOOP
             END IF
@@ -1628,7 +1628,7 @@ CONTAINS
          !
          ! No read for default values
          IF (N > 0) THEN
-            CALL CHECKREAD('PERS',LU_INPUT,IOS)
+            CALL CHECKREAD('PERS',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
             IF (IOS == 1) THEN
                EXIT READ_PERS_LOOP
             END IF
@@ -2219,7 +2219,7 @@ CONTAINS
          WAIT_AT_XYZ        = .FALSE.
          KNOWN_DOOR         = .FALSE.
          !
-         CALL CHECKREAD('EXIT',LU_INPUT,IOS)
+         CALL CHECKREAD('EXIT',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
          IF (IOS == 1) THEN
             EXIT READ_EXIT_LOOP
          END IF
@@ -2662,7 +2662,7 @@ CONTAINS
          WAIT_AT_XYZ        = .FALSE.
          KNOWN_DOOR         = .FALSE.
          !
-         CALL CHECKREAD('DOOR',LU_INPUT,IOS)
+         CALL CHECKREAD('DOOR',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
          IF (IOS == 1) THEN
             EXIT READ_DOOR_LOOP
          END IF
@@ -3103,7 +3103,7 @@ CONTAINS
          TRAVEL_TIME   = -.1_EB
          MAX_HUMANS_INSIDE = 0
          !
-         CALL CHECKREAD('CORR',LU_INPUT,IOS)
+         CALL CHECKREAD('CORR',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
          IF (IOS == 1) THEN
             EXIT READ_CORR_LOOP
          END IF
@@ -3359,7 +3359,7 @@ CONTAINS
          FAC_V0_DOWN                 = 1.0_EB
          FAC_V0_HORI                 = 1.0_EB
          !
-         CALL CHECKREAD('STRS',LU_INPUT,IOS)
+         CALL CHECKREAD('STRS',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
          IF (IOS == 1) THEN
             EXIT READ_STRS_LOOP
          END IF
@@ -3710,7 +3710,7 @@ CONTAINS
          CROWBAR_INPUT_FILE = 'null'
          !
          !
-         CALL CHECKREAD('ENTR',LU_INPUT,IOS)
+         CALL CHECKREAD('ENTR',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
          IF (IOS == 1) THEN
             EXIT READ_ENTR_LOOP
          END IF
@@ -4161,7 +4161,7 @@ CONTAINS
          PROP_ID                  = 'null'
          CROWBAR_INPUT_FILE = 'null'
          !
-         CALL CHECKREAD('EVAC',LU_INPUT,IOS)
+         CALL CHECKREAD('EVAC',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
          IF (IOS == 1) THEN
             EXIT READ_EVAC_LOOP
          END IF
@@ -4511,7 +4511,7 @@ CONTAINS
          PRE_HIGH      = HUGE(PRE_HIGH)
          INPUT_ID      = 'null'
          !
-         CALL CHECKREAD('EDEV',LU_INPUT,IOS)
+         CALL CHECKREAD('EDEV',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
          IF (IOS == 1) THEN
             EXIT READ_EDEV_LOOP
          END IF
@@ -4608,7 +4608,7 @@ CONTAINS
          SHOW          = .TRUE.
          TIME_FALL_DOWN = -1.0_EB
          !
-         CALL CHECKREAD('EVHO',LU_INPUT,IOS)
+         CALL CHECKREAD('EVHO',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
          IF (IOS == 1) THEN
             EXIT READ_EVHO_LOOP
          END IF
@@ -4715,7 +4715,7 @@ CONTAINS
          USE_V0        = .FALSE.
          SHOW          = .TRUE.
          !
-         CALL CHECKREAD('EVSS',LU_INPUT,IOS)
+         CALL CHECKREAD('EVSS',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
          IF (IOS == 1) THEN
             EXIT READ_EVSS_LOOP
          END IF

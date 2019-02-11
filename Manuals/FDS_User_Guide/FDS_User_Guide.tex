@@ -5893,6 +5893,7 @@ Note: The sign of {\ct NU} corresponds to whether that species is consumed (-) o
 
 If soot deposition is being computed, the soot present on surfaces can undergo oxidation if the local temperature is high enough and oxygen is present. Soot oxidation is enabled with the logical flag {\ct SOOT\_OXIDATION} on the {\ct MISC} input. Oxidation is computed as a single step, Arrhenius reaction using the soot surface density and the local oxygen mole fraction. The reaction uses a rate constant of $4.7 \times 10^{12}$ and an activation energy of 211~kJ/mol. These values are based upon work performed by Hartman, Beyler, Riahi, and Beyler~\cite{Hartman_2012}.
 
+Soot oxidation cannot be used with simple chemistry; you must use primitve species. See the {\ct soot\_oxidation\_wall} example case in the Verification Guide.
 
 \section{Special Topic: Aerosol Agglomeration}
 \label{info:agglomeration}
@@ -6245,7 +6246,7 @@ distributed about the median value.
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/droplet_distributions_3} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/droplet_distributions_4}
 \end{tabular}
-\caption[Droplet size distributions]{Droplet size distributions. The first three plots are based on a specified CVF from which the CNF is derived. The fourth plot (lower right) is an example of a specified CNF from which the CVF is derived. CVF:s are plotted with black lines, while CNF:s are plotted with red lines. The solid lines show the prescribed sampling distribution, while the dashed lines show the actual sampled droplet size distribution, measured with the {\ct PDPA\_HISTOGRAM} functionality.}
+\caption[Droplet size distributions]{Droplet size distributions. The first three plots are based on a specified CVF (black curves) from which the CNF (red curves) is derived. The fourth plot (lower right) is an example of a specified CNF from which the CVF is derived. The solid lines show the prescribed sampling distribution, while the dashed lines show the actual sampled droplet size distribution, measured with the {\ct PDPA\_HISTOGRAM} functionality.}
 \label{droplet_distributions}
 \end{figure}
 
@@ -9175,6 +9176,7 @@ of a {\ct DUCT\_ID}, and quantities for a node require the specification of a {\
 \endhead
 {\ct AIRCOIL HEAT EXCHANGE}                     & Heat exchange rate for an aircoil         &  kW                   \\ \hline
 {\ct DUCT DENSITY}                              & Density of the flow in a duct             &  kg/m$^3$             \\ \hline
+{\ct DUCT ENERGY FLOW}                          & Energy flow in a duct                     &  kW                   \\ \hline
 {\ct DUCT MASS FLOW}                            & Mass flow in a duct                       &  kg/s                 \\ \hline
 {\ct DUCT MASS FRACTION}                        & Mass fraction of a species in a duct      &  kg/kg                \\ \hline
 {\ct DUCT TEMPERATURE}                          & Temperature of the flow in a duct         & $^\circ$C             \\ \hline
@@ -9185,6 +9187,7 @@ of a {\ct DUCT\_ID}, and quantities for a node require the specification of a {\
 {\ct FILTER LOADING}                            & Loading of a species in a filter          &  kg                   \\ \hline
 {\ct FILTER LOSS}                               & Flow loss through a filter                &                       \\ \hline
 {\ct NODE DENSITY}                              & Density of the flow through a node        &  kg/m$^3$             \\ \hline
+{\ct NODE ENTHALPY}                             & Enthalpy of a node                        &  kJ/kg                \\ \hline
 {\ct NODE MASS FRACTION}                        & Mass fraction of a species in a node      &  kg/kg                \\ \hline
 {\ct NODE PRESSURE}                             & Pressure of a node                        &       Pa              \\ \hline
 {\ct NODE PRESSURE DIFFERENCE}                  & Pressure difference between two nodes     &       Pa              \\ \hline
