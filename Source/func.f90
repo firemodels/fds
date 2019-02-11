@@ -145,7 +145,7 @@ SUBROUTINE CHECKREAD(NAME,LU,IOS)
 
 ! Look for the namelist variable NAME and then stop at that line.
 
-USE GLOBAL_CONSTANTS, ONLY: INPUT_FILE_LINE_NUMBER
+USE GLOBAL_CONSTANTS, ONLY: INPUT_FILE_LINE_NUMBER,STOP_STATUS,SETUP_STOP,MYID,LU_ERR
 INTEGER :: II
 INTEGER, INTENT(OUT) :: IOS
 INTEGER, INTENT(IN) :: LU
@@ -160,9 +160,17 @@ READLOOP: DO
       IF (TEXT(II:II)/='&' .AND. TEXT(II:II)/=' ') EXIT TLOOP
       IF (TEXT(II:II)=='&') THEN
          IF (TEXT(II+1:II+4)==NAME) THEN
-            BACKSPACE(LU)
-            IOS = 0
-            EXIT READLOOP
+            IF (TEXT(II+5:II+5)==' ') THEN
+               BACKSPACE(LU)
+               IOS = 0
+               EXIT READLOOP
+            ELSE
+               IF (MYID==0) WRITE(LU_ERR,'(/A,I0,A,A)') 'ERROR: Input line ',INPUT_FILE_LINE_NUMBER,&
+                                                      ' is not formatted properly; NAMELIST: ',NAME
+               STOP_STATUS = SETUP_STOP
+               IOS = 1
+               EXIT READLOOP
+            ENDIF
          ELSE
             CYCLE READLOOP
          ENDIF

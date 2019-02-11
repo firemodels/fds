@@ -113,7 +113,7 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
          RHO_D_TURB => WORK9
          RHO_D_TURB = MAX(0._EB,MU-MU_DNS)*RSC
       ELSE
-         RHO_D = MU*RSC
+         RHO_D = MAX(0._EB,MU)*RSC
       ENDIF
    ENDIF
 
@@ -1343,7 +1343,7 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
 
 ELSE PREDICT_NORMALS
 
-   ! In the CORRECTOR step, the normal component of velocity, U_NORMAL, is the same as the predicted value, U_NORMAL_S. 
+   ! In the CORRECTOR step, the normal component of velocity, U_NORMAL, is the same as the predicted value, U_NORMAL_S.
    ! However, for species mass fluxes and HVAC, U_NORMAL is computed elsewhere (wall.f90).
 
    DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS

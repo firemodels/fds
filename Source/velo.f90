@@ -196,6 +196,7 @@ SELECT_TURB: SELECT CASE (TURB_MODEL)
                   IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                   DELTA = LES_FILTER_WIDTH_FUNCTION(DX(I),DY(J),DZ(K))
                   KSGS = 0.5_EB*( (UP(I,J,K)-UP_HAT(I,J,K))**2 + (VP(I,J,K)-VP_HAT(I,J,K))**2 + (WP(I,J,K)-WP_HAT(I,J,K))**2 )
+
                   NU_EDDY = C_DEARDORFF*DELTA*SQRT(KSGS)
                   MU(I,J,K) = MU_DNS(I,J,K) + RHOP(I,J,K)*NU_EDDY
                ENDDO
