@@ -37248,8 +37248,28 @@ DO K=KLO,KHI
                ! xyzcen:
                XYZCEN(IAXIS:KAXIS,ICELL) = XYZCEN(IAXIS:KAXIS,ICELL)+AREAVARS(2:4,IFACE)
             ENDDO
-            ! divide xyzcen by 2*vol:
-            XYZCEN(IAXIS:KAXIS,ICELL) = XYZCEN(IAXIS:KAXIS,ICELL) / (2._EB*VOL(ICELL))
+            IF(VOL(ICELL) < GEOMEPS) THEN ! Volume too small for correct calculation of XYZCEN -> average cut-face
+                                          ! centroids.
+               JJ = 0
+               VOL(ICELL) = ABS(VOL(ICELL))
+               XYZCEN(IAXIS:KAXIS,ICELL) = 0._EB
+               DO II=2,NP+1
+                  IFACE = CCELEM(II,ICELL)
+                  IF(FACE_LIST(1,IFACE) /= IBM_FTYPE_RGGAS) THEN
+                     JJ = JJ + 1
+                     XYZCEN(IAXIS:KAXIS,ICELL) = XYZCEN(IAXIS:KAXIS,ICELL) + &
+                     MESHES(NM)%CUT_FACE(FACE_LIST(4,IFACE))%XYZCEN(IAXIS:KAXIS,FACE_LIST(5,IFACE))
+                  ENDIF
+               ENDDO
+               IF(JJ > 0) THEN
+                  XYZCEN(IAXIS:KAXIS,ICELL) = XYZCEN(IAXIS:KAXIS,ICELL)/REAL(JJ,EB)
+               ELSE
+                  XYZCEN(IAXIS:KAXIS,ICELL) = (/ XCELL(I), YCELL(J), ZCELL(K) /)
+               ENDIF
+            ELSE
+               ! divide xyzcen by 2*vol:
+               XYZCEN(IAXIS:KAXIS,ICELL) = XYZCEN(IAXIS:KAXIS,ICELL) / (2._EB*VOL(ICELL))
+            ENDIF
          ENDDO
 
          ! Load into CUT_CELL data structure
