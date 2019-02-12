@@ -1,13 +1,13 @@
-&HEAD CHID='FAA_B747_geom_4cm', TITLE='Guo et al. (2018) Modeling of Hidden Fire in Aircraft Overhead Area'/
+&HEAD CHID='FAA_B747_geom_6cm', TITLE='Guo et al. (2018) Modeling of Hidden Fire in Aircraft Overhead Area'/
 
-! Mult Mesh, 144 Meshes:
-&MULT ID='mesh multiplier', DX=0.84, DY=0.6, DZ=1.0, I_UPPER=7, J_UPPER=8, K_UPPER=1 /
-&MESH IJK=21,15,25, XB=-0.01,0.83,0.01,0.61,0.0,1.0, MULT_ID='mesh multiplier' /
+! 12 meshes:
+&MULT ID='mesh multiplier', DX=1.68, DY=1.8, I_UPPER=3, J_UPPER=2 /
+&MESH IJK=28,30,33, XB=-0.01,1.67,0.01,1.81,0.0,2.0, MULT_ID='mesh multiplier'  /
 
 &TIME T_END=300.0 /
 &DUMP DT_HRR=10, DT_DEVC=10, GET_CUTCELLS_VERBOSE=.TRUE. /
 
-&MISC P_INF=100000, STRATIFICATION=F, PROJECTION=T, CFL_VELOCITY_NORM=1 /
+&MISC P_INF=100000, SIMULATION_MODE='LES' /
 
 &RADI RADIATION=F /
 

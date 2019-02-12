@@ -301,7 +301,8 @@ SPRINKLER_INSERT_LOOP: DO KS=1,N_DEVC
       ! Set PARTICLE properties
 
       LP%T_INSERT = T
-      IF (MOD(NLP,LPC%SAMPLING)==0) LP%SHOW = .TRUE.
+      CALL RANDOM_NUMBER(RN)
+      IF (RN < 1._EB/REAL(LPC%SAMPLING,EB)) LP%SHOW = .TRUE.
 
       ! Randomly choose particle direction angles, theta and phi
 
@@ -487,7 +488,7 @@ USE COMPLEX_GEOMETRY, ONLY : RANDOM_CFACE_XYZ
 
 INTEGER, INTENT(IN), OPTIONAL :: WALL_INDEX,CFACE_INDEX
 INTEGER :: I
-REAL(EB):: CFA_X, CFA_Y, CFA_Z
+REAL(EB):: CFA_X, CFA_Y, CFA_Z, RN
 
 TYPE(CFACE_TYPE), POINTER :: CFA=>NULL()
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
@@ -583,29 +584,29 @@ PARTICLE_INSERT_LOOP2: DO I=1,SF%NPPC
       IF (.NOT.LPC%STATIC) THEN
          SELECT CASE(IOR)
             CASE( 1)
-               LP%U = -ONE_D%UW
+               LP%U = -ONE_D%U_NORMAL
                LP%V = SF%VEL_T(1)
                LP%W = SF%VEL_T(2)
             CASE(-1)
-               LP%U =  ONE_D%UW
+               LP%U =  ONE_D%U_NORMAL
                LP%V = SF%VEL_T(1)
                LP%W = SF%VEL_T(2)
             CASE( 2)
                LP%U = SF%VEL_T(1)
-               LP%V = -ONE_D%UW
+               LP%V = -ONE_D%U_NORMAL
                LP%W = SF%VEL_T(2)
             CASE(-2)
                LP%U = SF%VEL_T(1)
-               LP%V =  ONE_D%UW
+               LP%V =  ONE_D%U_NORMAL
                LP%W = SF%VEL_T(2)
             CASE( 3)
                LP%U = SF%VEL_T(1)
                LP%V = SF%VEL_T(2)
-               LP%W = -ONE_D%UW
+               LP%W = -ONE_D%U_NORMAL
             CASE(-3)
                LP%U = SF%VEL_T(1)
                LP%V = SF%VEL_T(2)
-               LP%W =  ONE_D%UW
+               LP%W =  ONE_D%U_NORMAL
          END SELECT
       ENDIF
    ELSEIF (PRESENT(CFACE_INDEX)) THEN
@@ -613,9 +614,9 @@ PARTICLE_INSERT_LOOP2: DO I=1,SF%NPPC
       LP%X = CFA_X + CFA%NVEC(1)*VENT_OFFSET*DX(IIG)
       LP%Y = CFA_Y + CFA%NVEC(2)*VENT_OFFSET*DY(JJG)
       LP%Z = CFA_Z + CFA%NVEC(3)*VENT_OFFSET*DZ(KKG)
-      LP%U = DOT_PRODUCT(CFA%NVEC,(/-ONE_D%UW,SF%VEL_T(1),SF%VEL_T(2)/))
-      LP%V = DOT_PRODUCT(CFA%NVEC,(/SF%VEL_T(1),-ONE_D%UW,SF%VEL_T(2)/))
-      LP%W = DOT_PRODUCT(CFA%NVEC,(/SF%VEL_T(1),SF%VEL_T(2),-ONE_D%UW/))
+      LP%U = DOT_PRODUCT(CFA%NVEC,(/-ONE_D%U_NORMAL,SF%VEL_T(1),SF%VEL_T(2)/))
+      LP%V = DOT_PRODUCT(CFA%NVEC,(/SF%VEL_T(1),-ONE_D%U_NORMAL,SF%VEL_T(2)/))
+      LP%W = DOT_PRODUCT(CFA%NVEC,(/SF%VEL_T(1),SF%VEL_T(2),-ONE_D%U_NORMAL/))
    ENDIF WALL_OR_CFACE_IF_2
 
    LP%ONE_D%IIG = IIG
@@ -624,7 +625,8 @@ PARTICLE_INSERT_LOOP2: DO I=1,SF%NPPC
 
    ! Save the insertion time (TP) and scalar property (SP) for the particle
 
-   IF (MOD(NLP,LPC%SAMPLING)==0) LP%SHOW = .TRUE.
+   CALL RANDOM_NUMBER(RN)
+   IF (RN < 1._EB/REAL(LPC%SAMPLING,EB)) LP%SHOW = .TRUE.
    LP%T_INSERT = T
 
    CALL INITIALIZE_SINGLE_PARTICLE
@@ -935,7 +937,8 @@ VOLUME_INSERT_LOOP: DO IB=1,N_INIT
 
    DO IIP=1,MIN(MAXIMUM_PARTICLES,N_INSERT)
       IP = LP_INDEX_LOOKUP(IIP)
-      LAGRANGIAN_PARTICLE(IP)%PWT = LAGRANGIAN_PARTICLE(IP)%PWT*PWT0
+      LP => LAGRANGIAN_PARTICLE(IP)
+      LP%PWT = LP%PWT*PWT0*DX(LP%ONE_D%IIG)*DY(LP%ONE_D%JJG)*DZ(LP%ONE_D%KKG)*RDXI*RDETA*RDZETA
    ENDDO
 
    DEALLOCATE(LP_INDEX_LOOKUP)
@@ -1025,7 +1028,8 @@ ENDIF
 ! Save insert time and other miscellaneous attributes
 
 LP%T_INSERT = T
-IF (MOD(NLP,LPC%SAMPLING)==0) LP%SHOW = .TRUE.
+CALL RANDOM_NUMBER(RN)
+IF (RN < 1._EB/REAL(LPC%SAMPLING,EB)) LP%SHOW = .TRUE.
 
 ! Get the particle ORIENTATION from the PART line
 
@@ -1049,7 +1053,7 @@ IF (IN%ID/='null') THEN
             ENDIF
             IF (DV%PROP_INDEX>0) THEN
                LP%ONE_D%EMISSIVITY = PROPERTY(DV%PROP_INDEX)%EMISSIVITY
-               LP%ONE_D%QRADOUT    = PROPERTY(DV%PROP_INDEX)%EMISSIVITY*SIGMA*TMPA4
+               LP%ONE_D%Q_RAD_OUT    = PROPERTY(DV%PROP_INDEX)%EMISSIVITY*SIGMA*TMPA4
                IF (PROPERTY(DV%PROP_INDEX)%HEAT_TRANSFER_COEFFICIENT>0._EB) &
                   LP%ONE_D%HEAT_TRANS_COEF = PROPERTY(DV%PROP_INDEX)%HEAT_TRANSFER_COEFFICIENT
             ENDIF
@@ -1367,7 +1371,7 @@ PARTICLE_LOOP: DO IP=1,NLP
 
       ! Throw out particles that have run out of mass.
 
-      IF (.NOT.LPC%MASSLESS_TRACER .AND. (R_D<=0._EB .OR. (.NOT.LPC%STATIC .AND. LP%MASS<=TWO_EPSILON_EB))) CYCLE PARTICLE_LOOP
+      IF (.NOT.LPC%MASSLESS_TRACER .AND. R_D<LPC%KILL_RADIUS) CYCLE PARTICLE_LOOP
 
       ! Save original particle radius.
 
@@ -2167,7 +2171,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
 
                IW   = LP%WALL_INDEX
                A_DROP = M_DROP/(FILM_THICKNESS(IW)*LPC%DENSITY)
-               Q_DOT_RAD = MIN(A_DROP,WALL(IW)%ONE_D%AREA/LP%PWT)*WALL(IW)%ONE_D%QRADIN
+               Q_DOT_RAD = MIN(A_DROP,WALL(IW)%ONE_D%AREA/LP%PWT)*WALL(IW)%ONE_D%Q_RAD_IN
                TMP_WALL = MAX(TMPMIN,TMP_WALL_INTERIM(IW))
             ELSE SOLID_OR_GAS_PHASE_1
                IW = -1
@@ -2605,7 +2609,8 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                IF (IW > 0) THEN
                   WALL(IW)%LP_CPUA(LPC%ARRAY_INDEX) = WALL(IW)%LP_CPUA(LPC%ARRAY_INDEX) + &
                                                       OMRAF*WGT*Q_CON_WALL/(WALL(IW)%ONE_D%AREA*DT)
-                  WALL(IW)%ONE_D%QRADIN = (WALL(IW)%ONE_D%AREA*DT*WALL(IW)%ONE_D%QRADIN - WGT*DT*Q_DOT_RAD)/(WALL(IW)%ONE_D%AREA*DT)
+                  WALL(IW)%ONE_D%Q_RAD_IN = (WALL(IW)%ONE_D%AREA*DT*WALL(IW)%ONE_D%Q_RAD_IN - WGT*DT*Q_DOT_RAD) / &
+                                            (WALL(IW)%ONE_D%AREA*DT)
                ENDIF
 
             ENDIF BOIL_ALL

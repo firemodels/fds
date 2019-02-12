@@ -196,6 +196,7 @@ SELECT_TURB: SELECT CASE (TURB_MODEL)
                   IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                   DELTA = LES_FILTER_WIDTH_FUNCTION(DX(I),DY(J),DZ(K))
                   KSGS = 0.5_EB*( (UP(I,J,K)-UP_HAT(I,J,K))**2 + (VP(I,J,K)-VP_HAT(I,J,K))**2 + (WP(I,J,K)-WP_HAT(I,J,K))**2 )
+
                   NU_EDDY = C_DEARDORFF*DELTA*SQRT(KSGS)
                   MU(I,J,K) = MU_DNS(I,J,K) + RHOP(I,J,K)*NU_EDDY
                ENDDO
@@ -938,6 +939,8 @@ CONTAINS
 
 SUBROUTINE MOMENTUM_NUDGING
 
+USE COMPLEX_GEOMETRY, ONLY : IBM_GASPHASE, IBM_FGSC
+
 ! Add a force vector to the momentum equation that moves the flow field towards the direction of the mean flow.
 
 REAL(EB) :: UBAR,VBAR,WBAR,INTEGRAL,SUM_VOLUME,VC,UMEAN,VMEAN,WMEAN,DU_FORCING,DV_FORCING,DW_FORCING,DT_LOC
@@ -958,6 +961,9 @@ MEAN_FORCING_X: IF (MEAN_FORCING(1)) THEN
                   IC2 = CELL_INDEX(I+1,J,K)
                   IF (SOLID(IC1)) CYCLE
                   IF (SOLID(IC2)) CYCLE
+                  IF (CC_IBM) THEN
+                     IF(FCVAR(I,J,K,IBM_FGSC,IAXIS) /= IBM_GASPHASE) CYCLE ! If face not regular gasphase type cycle.
+                  ENDIF
                   IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
                   IF (.NOT.MEAN_FORCING_CELL(I+1,J,K)) CYCLE
                   VC = DXN(I)*DY(J)*DZ(K)
@@ -992,6 +998,9 @@ MEAN_FORCING_X: IF (MEAN_FORCING(1)) THEN
                   IC2 = CELL_INDEX(I+1,J,K)
                   IF (SOLID(IC1)) CYCLE
                   IF (SOLID(IC2)) CYCLE
+                  IF (CC_IBM) THEN
+                     IF(FCVAR(I,J,K,IBM_FGSC,IAXIS) /= IBM_GASPHASE) CYCLE
+                  ENDIF
                   VC = DXN(I)*DY(J)*DZ(K)
                   INTEGRAL = INTEGRAL + UU(I,J,K)*VC
                   SUM_VOLUME = SUM_VOLUME + VC
@@ -1033,6 +1042,9 @@ MEAN_FORCING_Y: IF (MEAN_FORCING(2)) THEN
                   IC2 = CELL_INDEX(I,J+1,K)
                   IF (SOLID(IC1)) CYCLE
                   IF (SOLID(IC2)) CYCLE
+                  IF (CC_IBM) THEN
+                     IF(FCVAR(I,J,K,IBM_FGSC,JAXIS) /= IBM_GASPHASE) CYCLE
+                  ENDIF
                   IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
                   IF (.NOT.MEAN_FORCING_CELL(I,J+1,K)) CYCLE
                   VC = DX(I)*DYN(J)*DZ(K)
@@ -1067,6 +1079,9 @@ MEAN_FORCING_Y: IF (MEAN_FORCING(2)) THEN
                   IC2 = CELL_INDEX(I,J+1,K)
                   IF (SOLID(IC1)) CYCLE
                   IF (SOLID(IC2)) CYCLE
+                  IF (CC_IBM) THEN
+                     IF(FCVAR(I,J,K,IBM_FGSC,JAXIS) /= IBM_GASPHASE) CYCLE
+                  ENDIF
                   VC = DX(I)*DYN(J)*DZ(K)
                   INTEGRAL = INTEGRAL + VV(I,J,K)*VC
                   SUM_VOLUME = SUM_VOLUME + VC
@@ -1107,6 +1122,9 @@ MEAN_FORCING_Z: IF (MEAN_FORCING(3)) THEN
                   IC2 = CELL_INDEX(I,J,K+1)
                   IF (SOLID(IC1)) CYCLE
                   IF (SOLID(IC2)) CYCLE
+                  IF (CC_IBM) THEN
+                     IF(FCVAR(I,J,K,IBM_FGSC,KAXIS) /= IBM_GASPHASE) CYCLE
+                  ENDIF
                   IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
                   IF (.NOT.MEAN_FORCING_CELL(I,J,K+1)) CYCLE
                   VC = DX(I)*DY(J)*DZN(K)
@@ -1141,6 +1159,9 @@ MEAN_FORCING_Z: IF (MEAN_FORCING(3)) THEN
                   IC2 = CELL_INDEX(I,J,K+1)
                   IF (SOLID(IC1)) CYCLE
                   IF (SOLID(IC2)) CYCLE
+                  IF (CC_IBM) THEN
+                     IF(FCVAR(I,J,K,IBM_FGSC,KAXIS) /= IBM_GASPHASE) CYCLE
+                  ENDIF
                   VC = DX(I)*DY(J)*DZN(K)
                   INTEGRAL = INTEGRAL + WW(I,J,K)*VC
                   SUM_VOLUME = SUM_VOLUME + VC
@@ -1612,8 +1633,9 @@ OBST_LOOP: DO N=1,N_OBST
 
 ENDDO OBST_LOOP
 
-! Set FVX, FVY and FVZ to drive the normal velocity at solid boundaries towards the specified value (UW or UWS)
+! Set FVX, FVY and FVZ to drive the normal velocity at solid boundaries towards the specified value (U_NORMAL or U_NORMAL_S)
 ! Logical to define not to apply pressure gradient on external mesh boundaries for GLMAT.
+
 GLMAT_ON_WHOLE_DOMAIN = (PRES_METHOD=='GLMAT') .AND. PRES_ON_WHOLE_DOMAIN
 
 WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
@@ -1640,9 +1662,9 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
    IF (NOM/=0 .OR. WC%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. WC%BOUNDARY_TYPE==NULL_BOUNDARY) THEN
       IF (PREDICTOR) THEN
-         UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UWS
+         UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%U_NORMAL_S
       ELSE
-         UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UW
+         UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%U_NORMAL
       ENDIF
       SELECT CASE(IOR)
          CASE( 1)
@@ -2271,7 +2293,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
             ENDIF
             VELOCITY_BC_INDEX = SF%VELOCITY_BC_INDEX
             IF (WCM%VENT_INDEX==WCP%VENT_INDEX .AND. WCP%VENT_INDEX > 0) THEN
-               IF(VENTS(WCM%VENT_INDEX)%NODE_INDEX>0 .AND. WCM%ONE_D%UW >= 0._EB) VELOCITY_BC_INDEX=FREE_SLIP_BC
+               IF(VENTS(WCM%VENT_INDEX)%NODE_INDEX>0 .AND. WCM%ONE_D%U_NORMAL >= 0._EB) VELOCITY_BC_INDEX=FREE_SLIP_BC
             ENDIF
 
             ! Compute the viscosity in the two adjacent gas cells
@@ -2335,23 +2357,23 @@ EDGE_LOOP: DO IE=1,N_EDGES
                   TSI=T-SF%T_IGN
                ENDIF
                PROFILE_FACTOR = 1._EB
-               IF (HVAC_TANGENTIAL .AND. 0.5_EB*(WCM%ONE_D%UWS+WCP%ONE_D%UWS) > 0._EB) HVAC_TANGENTIAL = .FALSE.
+               IF (HVAC_TANGENTIAL .AND. 0.5_EB*(WCM%ONE_D%U_NORMAL_S+WCP%ONE_D%U_NORMAL_S) > 0._EB) HVAC_TANGENTIAL = .FALSE.
                IF (HVAC_TANGENTIAL) THEN
                   VEL_T = 0._EB
                   IEC_SELECT: SELECT CASE(IEC) ! edge orientation
                      CASE (1)
-                        IF (ICD==1) VEL_T = 0.5_EB*ABS((WCM%ONE_D%UWS+WCP%ONE_D%UWS)/VT%UVW(ABS(VT%IOR)))*VT%UVW(3)
-                        IF (ICD==2) VEL_T = 0.5_EB*ABS((WCM%ONE_D%UWS+WCP%ONE_D%UWS)/VT%UVW(ABS(VT%IOR)))*VT%UVW(2)
+                        IF (ICD==1) VEL_T = 0.5_EB*ABS((WCM%ONE_D%U_NORMAL_S+WCP%ONE_D%U_NORMAL_S)/VT%UVW(ABS(VT%IOR)))*VT%UVW(3)
+                        IF (ICD==2) VEL_T = 0.5_EB*ABS((WCM%ONE_D%U_NORMAL_S+WCP%ONE_D%U_NORMAL_S)/VT%UVW(ABS(VT%IOR)))*VT%UVW(2)
                      CASE (2)
-                        IF (ICD==1) VEL_T = 0.5_EB*ABS((WCM%ONE_D%UWS+WCP%ONE_D%UWS)/VT%UVW(ABS(VT%IOR)))*VT%UVW(1)
-                        IF (ICD==2) VEL_T = 0.5_EB*ABS((WCM%ONE_D%UWS+WCP%ONE_D%UWS)/VT%UVW(ABS(VT%IOR)))*VT%UVW(3)
+                        IF (ICD==1) VEL_T = 0.5_EB*ABS((WCM%ONE_D%U_NORMAL_S+WCP%ONE_D%U_NORMAL_S)/VT%UVW(ABS(VT%IOR)))*VT%UVW(1)
+                        IF (ICD==2) VEL_T = 0.5_EB*ABS((WCM%ONE_D%U_NORMAL_S+WCP%ONE_D%U_NORMAL_S)/VT%UVW(ABS(VT%IOR)))*VT%UVW(3)
                      CASE (3)
-                        IF (ICD==1) VEL_T = 0.5_EB*ABS((WCM%ONE_D%UWS+WCP%ONE_D%UWS)/VT%UVW(ABS(VT%IOR)))*VT%UVW(2)
-                        IF (ICD==2) VEL_T = 0.5_EB*ABS((WCM%ONE_D%UWS+WCP%ONE_D%UWS)/VT%UVW(ABS(VT%IOR)))*VT%UVW(1)
+                        IF (ICD==1) VEL_T = 0.5_EB*ABS((WCM%ONE_D%U_NORMAL_S+WCP%ONE_D%U_NORMAL_S)/VT%UVW(ABS(VT%IOR)))*VT%UVW(2)
+                        IF (ICD==2) VEL_T = 0.5_EB*ABS((WCM%ONE_D%U_NORMAL_S+WCP%ONE_D%U_NORMAL_S)/VT%UVW(ABS(VT%IOR)))*VT%UVW(1)
                   END SELECT IEC_SELECT
                ELSE
                   IF (SF%PROFILE/=0 .AND. SF%VEL>TWO_EPSILON_EB) &
-                     PROFILE_FACTOR = ABS(0.5_EB*(WCM%UW0+WCP%UW0)/SF%VEL)
+                     PROFILE_FACTOR = ABS(0.5_EB*(WCM%ONE_D%U_NORMAL_0+WCP%ONE_D%U_NORMAL_0)/SF%VEL)
                   RAMP_T = EVALUATE_RAMP(TSI,SF%TAU(TIME_VELO),SF%RAMP_INDEX(TIME_VELO))
                   IF (IEC==1 .OR. (IEC==2 .AND. ICD==2)) VEL_T = RAMP_T*(PROFILE_FACTOR*(SF%VEL_T(2) + VEL_EDDY))
                   IF (IEC==3 .OR. (IEC==2 .AND. ICD==1)) VEL_T = RAMP_T*(PROFILE_FACTOR*(SF%VEL_T(1) + VEL_EDDY))
@@ -2416,7 +2438,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
                            WT2 = 1._EB-WT1
                            SLIP_COEF = WT1*SLIP_COEF-WT2
                         CASE(4)
-                           IF ( ABS(0.5_EB*(WCM%ONE_D%UWS+WCP%ONE_D%UWS))>ABS(VEL_GAS-VEL_T) ) THEN
+                           IF ( ABS(0.5_EB*(WCM%ONE_D%U_NORMAL_S+WCP%ONE_D%U_NORMAL_S))>ABS(VEL_GAS-VEL_T) ) THEN
                               SLIP_COEF = -1._EB
                            ELSE
                               SLIP_COEF = 0.5_EB*(SLIP_COEF-1._EB)
@@ -3059,7 +3081,7 @@ HEAT_TRANSFER_IF: IF (CHECK_HT) THEN
       IIG = WC%ONE_D%IIG
       JJG = WC%ONE_D%JJG
       KKG = WC%ONE_D%KKG
-      UVW = (ABS(WC%ONE_D%QCONF)/WC%ONE_D%RHO_F)**ONTH * 2._EB*WC%ONE_D%RDN
+      UVW = (ABS(WC%ONE_D%Q_CON_F)/WC%ONE_D%RHO_F)**ONTH * 2._EB*WC%ONE_D%RDN
       IF (UVW>=UVWMAX) THEN
          UVWMAX = UVW
          ICFL=IIG

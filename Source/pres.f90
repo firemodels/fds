@@ -71,17 +71,17 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
    IF_NEUMANN: IF (WC%PRESSURE_BC_INDEX==NEUMANN) THEN
       SELECT CASE(IOR)
          CASE( 1)
-            BXS(J,K) = HX(0)   *(-FVX(0,J,K)    + WC%DUWDT)
+            BXS(J,K) = HX(0)   *(-FVX(0,J,K)    + WC%DUNDT)
          CASE(-1)
-            BXF(J,K) = HX(IBP1)*(-FVX(IBAR,J,K) - WC%DUWDT)
+            BXF(J,K) = HX(IBP1)*(-FVX(IBAR,J,K) - WC%DUNDT)
          CASE( 2)
-            BYS(I,K) = HY(0)   *(-FVY(I,0,K)    + WC%DUWDT)
+            BYS(I,K) = HY(0)   *(-FVY(I,0,K)    + WC%DUNDT)
          CASE(-2)
-            BYF(I,K) = HY(JBP1)*(-FVY(I,JBAR,K) - WC%DUWDT)
+            BYF(I,K) = HY(JBP1)*(-FVY(I,JBAR,K) - WC%DUNDT)
          CASE( 3)
-            BZS(I,J) = HZ(0)   *(-FVZ(I,J,0)    + WC%DUWDT)
+            BZS(I,J) = HZ(0)   *(-FVZ(I,J,0)    + WC%DUNDT)
          CASE(-3)
-            BZF(I,J) = HZ(KBP1)*(-FVZ(I,J,KBAR) - WC%DUWDT)
+            BZF(I,J) = HZ(KBP1)*(-FVZ(I,J,KBAR) - WC%DUNDT)
       END SELECT
    ENDIF IF_NEUMANN
 
@@ -702,9 +702,9 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
    IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
       IF (PREDICTOR) THEN
-         UN_NEW_OTHER = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UWS
+         UN_NEW_OTHER = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%U_NORMAL_S
       ELSE
-         UN_NEW_OTHER = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UW
+         UN_NEW_OTHER = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%U_NORMAL
       ENDIF
    ENDIF
 
@@ -846,9 +846,9 @@ EXTERNAL_SOLID_BOUNDARY_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
    ! At solid boundaries, compare updated normal velocity with specified normal velocity
 
    IF (PREDICTOR) THEN
-      UN_NEW_OTHER = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UWS
+      UN_NEW_OTHER = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%U_NORMAL_S
    ELSE
-      UN_NEW_OTHER = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UW
+      UN_NEW_OTHER = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%U_NORMAL
    ENDIF
 
    LAPLACE_BC_INDEX_SELECT: SELECT CASE(WC%LAPLACE_BC_INDEX)

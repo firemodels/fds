@@ -60,7 +60,7 @@ N_HVAC_READ = 0
 
 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
 COUNT_HVAC_LOOP: DO
-   CALL CHECKREAD('HVAC',LU_INPUT,IOS)
+   CALL CHECKREAD('HVAC',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
    IF (IOS==1) EXIT COUNT_HVAC_LOOP
    READ(LU_INPUT,HVAC,END=15,ERR=16,IOSTAT=IOS)
    N_HVAC_READ = N_HVAC_READ + 1
@@ -1758,33 +1758,33 @@ WALL_LOOP: DO IW = 1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
             CASE (1)
                NODE_P(WC%NODE_INDEX,NM) = NODE_P(WC%NODE_INDEX,NM) + &
                                           (PBARP(KK,WC%ONE_D%PRESSURE_ZONE)-RHO(II,JJ,KK) * &
-                                          0.5_EB*(UP(II-1,JJ,KK)+WC%ONE_D%UW)**2 * &
-                                          SIGN(1._EB,UP(II-1,JJ,KK)+WC%ONE_D%UW))* AREA
+                                          0.5_EB*(UP(II-1,JJ,KK)+WC%ONE_D%U_NORMAL)**2 * &
+                                          SIGN(1._EB,UP(II-1,JJ,KK)+WC%ONE_D%U_NORMAL))* AREA
             CASE(-1)
                NODE_P(WC%NODE_INDEX,NM) = NODE_P(WC%NODE_INDEX,NM) + &
                                           (PBARP(KK,WC%ONE_D%PRESSURE_ZONE)+RHO(II,JJ,KK) * &
-                                          0.5_EB*(UP(II,JJ,KK)-WC%ONE_D%UW)**2  * &
-                                          SIGN(1._EB,UP(II,JJ,KK)-WC%ONE_D%UW))*AREA
+                                          0.5_EB*(UP(II,JJ,KK)-WC%ONE_D%U_NORMAL)**2  * &
+                                          SIGN(1._EB,UP(II,JJ,KK)-WC%ONE_D%U_NORMAL))*AREA
             CASE (2)
                NODE_P(WC%NODE_INDEX,NM) = NODE_P(WC%NODE_INDEX,NM) + &
                                           (PBARP(KK,WC%ONE_D%PRESSURE_ZONE)-RHO(II,JJ,KK) * &
-                                          0.5_EB*(VP(II,JJ-1,KK)+WC%ONE_D%UW)**2 * &
-                                          SIGN(1._EB,VP(II,JJ-1,KK)+WC%ONE_D%UW))*AREA
+                                          0.5_EB*(VP(II,JJ-1,KK)+WC%ONE_D%U_NORMAL)**2 * &
+                                          SIGN(1._EB,VP(II,JJ-1,KK)+WC%ONE_D%U_NORMAL))*AREA
             CASE(-2)
                NODE_P(WC%NODE_INDEX,NM) = NODE_P(WC%NODE_INDEX,NM) + &
                                           (PBARP(KK,WC%ONE_D%PRESSURE_ZONE)+RHO(II,JJ,KK) * &
-                                          0.5_EB*(VP(II,JJ,KK)-WC%ONE_D%UW)**2 * &
-                                          SIGN(1._EB,VP(II,JJ,KK)-WC%ONE_D%UW))*AREA
+                                          0.5_EB*(VP(II,JJ,KK)-WC%ONE_D%U_NORMAL)**2 * &
+                                          SIGN(1._EB,VP(II,JJ,KK)-WC%ONE_D%U_NORMAL))*AREA
             CASE (3)
                NODE_P(WC%NODE_INDEX,NM) = NODE_P(WC%NODE_INDEX,NM) + &
                                           (PBARP(KK,WC%ONE_D%PRESSURE_ZONE)-RHO(II,JJ,KK) * &
-                                          0.5_EB*(WP(II,JJ,KK-1)+WC%ONE_D%UW)**2 * &
-                                          SIGN(1._EB,WP(II,JJ,KK-1)+WC%ONE_D%UW))*AREA
+                                          0.5_EB*(WP(II,JJ,KK-1)+WC%ONE_D%U_NORMAL)**2 * &
+                                          SIGN(1._EB,WP(II,JJ,KK-1)+WC%ONE_D%U_NORMAL))*AREA
             CASE (-3)
                NODE_P(WC%NODE_INDEX,NM) = NODE_P(WC%NODE_INDEX,NM) + &
                                           (PBARP(KK,WC%ONE_D%PRESSURE_ZONE)+RHO(II,JJ,KK) * &
-                                          0.5_EB*(WP(II,JJ,KK)-WC%ONE_D%UW)**2 * &
-                                          SIGN(1._EB,WP(II,JJ,KK)-WC%ONE_D%UW))*AREA
+                                          0.5_EB*(WP(II,JJ,KK)-WC%ONE_D%U_NORMAL)**2 * &
+                                          SIGN(1._EB,WP(II,JJ,KK)-WC%ONE_D%U_NORMAL))*AREA
          END SELECT
       ENDIF
    ELSE ZONE_LEAK_IF

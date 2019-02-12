@@ -441,7 +441,7 @@ Running FDS using MPI requires shared disk access to each computer where cases w
 
 The goal of making FDS and Smokeview publicly available has been to enable practicing engineers to perform fairly sophisticated simulations at a reasonable cost. Thus, FDS and Smokeview have been designed for computers running Microsoft Windows, Mac OS~X, and Linux.
 \begin{description}
-\item[{\bf MS Windows}] An installation package is available for Windows operating system. It is not recommended to run FDS/Smokeview under any version of MS Windows released prior to Windows 7.
+\item[{\bf MS Windows}] An installation package is available for the 64~bit Windows operating system. It is not recommended to run FDS/Smokeview under any version of MS Windows released prior to Windows 7.
 \item[{\bf Mac OS X}] Pre-compiled executables are installed into a user selected directory using an installation script.  Mac OS~X 10.4.x or better is recommended. You can always download the latest version of FDS source and compile FDS for other versions of OS~X (See Appendix~\ref{info:compilation} for details).
 \item[{\bf Linux}] Pre-compiled executables are installed into a user selected directory using an installation script. If the pre-compiled FDS executable does not work (usually because of library incompatibilities), the FDS Fortran source code can be downloaded and compiled (See Appendix~\ref{info:compilation} for details). If Smokeview does not work on the Linux workstation, you can use the Windows version to view FDS output.
 \end{description}
@@ -461,91 +461,37 @@ If you are new to FDS and Smokeview, it is strongly suggested that you start wit
 
 Sample input files are included as part of the standard installation. A good case for a first time user is located in the subfolder called {\ct Fires} within the folder called {\ct Examples}. Find the file called \linebreak[4]{\ct simple\_test.fds} and copy it to a folder on your computer that is not within the installation folder. The reason for doing this is to avoid cluttering up the installation folder with a lot of output files. Follow the instructions in Section~\ref{single_mesh} to run this simple single mesh case. The simulation should only take a few minutes. Once the simulation is completed, use Smokeview to examine the output. In this way, you will quickly learn the basics of running and analyzing simulations.
 
-\section{A Brief Primer on Computer Hardware}
 
-The following brief definitions were copied from the Indiana University Knowledge Base, which was developed with support from (U.S) National Science Foundation grant OCI-1053575.
-\begin{description}
-\item[Cores:] Recent developments in computational architecture can lead to confusion concerning what a microprocessor is. Since the advent of multi-core technology, such as dual-cores and quad-cores, the term ``processor'' has been used to describe a logical execution unit or a physical chip. A multi-core chip may have several cores. With the advent of multi-core technology, the term ``processor'' has become context-sensitive, and is largely ambiguous when describing large multi-core systems. Essentially a core comprises a logical execution unit containing an L1 cache and functional units. Cores are able to independently execute programs or threads. Supercomputers are listed as having thousands of cores.
-\item[Chips:] A chip refers to a physical integrated circuit (IC) on a computer. A chip in the context of this document refers to an execution unit that can be single- or multi-core technology.
-\item[Sockets:] The socket refers to a physical connector on a computer motherboard that accepts a single physical chip. Many motherboards can have multiple sockets that can in turn accept multi-core chips.
-\item[Processes:] A process is an independent program running on a computer. A process has a full stack of memory associated for its own use, and does not depend on another process for execution. MPI (Message Passing Interface) processes are true processes because they can run on independent machines or the same machine.
-\item[Threads:] A thread is essentially a process that does not have a full stack of memory associated for it. The thread is tied to a parent process, and is merely an offshoot of execution. Typically thread processes must run on the same computer, but can execute simultaneously on separate cores of the same node. OpenMP parallelism uses threads for child processes.
-\item[Hyper-threading:] Hyper-threading is an Intel technology that originally preceded multi-core systems, and was used to make a single core appear logically as multiple cores on the same chip. Intel abandoned hyper-threading briefly during the advent of multi-core processors but reintroduced the technology in 2008. Since then, Intel has used it extensively to improve the performance of parallel computations in its multi-core processors. Hyper-threading improves performance by sharing the computational workload between multiple cores whenever possible, allowing the operating system to schedule more than one process at a time.
-\item[N-ways:] Multi-core compute nodes can be described by the number of execution units, or cores. A computer with 8 cores would be described as an 8-way node. This machine can have 8 independent processes running simultaneously. A 32-core system would be called a 32-way node.
-\item[Processors:] As explained above, a processor could describe either a single execution core or a single physical multi-core chip. The context of use will define the meaning of the term.
-\end{description}
+\section{Computer Basics}
 
-\section{Starting an FDS Calculation}
+\subsection{A Brief Primer on Computer Hardware}
 
-FDS can be run on a single computer, using one or more cores, or it can be run on multiple computers. Starting with FDS version~6.2.0, for each supported operating system (Windows, Linux, Mac~OS~X) there is a single executable file called {\ct fds} (with an {\ct .exe}\ file extension on Windows). Previous releases of FDS contained two executables, one that ran on a single processor and one that ran on multiple processors. Starting with FDS~6.2.0, these two executables have been combined into one, and it can run either in serial or parallel mode.
+FDS simulations can exploit multiple processing units on a single computer or multiple computers on a network. Before running an FDS simulation, you should familiarize yourself with your computer hardware.
+
+If you are using a computer running Microsoft Windows, open up the Task Manager, Performance tab, and look for the number of {\em sockets}, {\em cores}, and {\em logical processors}\footnote{The terms sockets, cores, and logical processors are used by the Windows~10 Task Manager on a computer using an Intel processor. These terms might vary with different versions of Windows and different processors.}. The socket refers to the physical connector on the motherboard that has a power supply and a connection to random access memory (RAM). This is usually referred to as the central processing unit or CPU. Some motherboards have multiple sockets that can in turn support multiple CPUs, but for typical Windows desktops or laptops, there is one socket/CPU. Each CPU, however, typically has multiple cores, and each core is essentially an independent processing unit that shares access to power and memory. Sometimes cores are referred to as {\em physical cores} to distinguish them from {\em logical cores} or {\em logical processors}. A logical processor is one of multiple {\em threads} that can be supported by a core. For the purpose of running FDS on a Windows computer, the number of logical processors is your most important consideration.
+
+If you are running FDS under any variety of Linux or Mac~OS~X, you can determine the number of logical processors using the command ``lscpu'' for Linux or ``sysctl hw'' for OS~X. These operating systems might use slightly different terms, but the processors are similar if not the same as those on a Windows computer.
+
+
+\subsection{Two Ways to Use Multiple Processors}
+
+FDS can be run on a single computer, using one or more cores, or it can be run on multiple computers. Starting with FDS version~6.2.0, for each supported operating system (Windows, Linux, Mac~OS~X) there is a single\footnote{Previous releases of FDS contained two executables, one that ran on a single processor and one that ran on multiple processors. Starting with FDS~6.2.0, these two executables have been combined into one, and it can run either in serial or parallel mode.} executable file called {\ct fds} (with an {\ct .exe}\ file extension on Windows).
 
 There are two ways that FDS can be run in parallel; that is, exploit multiple cores on a single computer or multiple processors/cores distributed over multiple computers on a network or compute cluster. The first way is OpenMP (Open Multi-Processing)~\cite{Chapman:OpenMP} which allows a single computer to run a single or multiple mesh FDS simulation on multiple cores. The use of OpenMP does not require the computational domain to be broken up into multiple meshes, and it will still work with cases that have multiple meshes defined. The second way to run FDS in parallel is by way of MPI (Message Passing Interface). Here, the computational domain must be divided into multiple meshes and typically each mesh is assigned its own {\em process}. These processes can be limited to a single computer, or they can be distributed over a network.
 
-MPI and OpenMP can also be used together. For example, 4 MPI processes can be assigned to 4 different computers, and each MPI process can be supported by, say, 8 OpenMP threads, assuming each computer has 8 cores. Most of the speed up is achieved by the MPI. For a reasonably fast network, you can expect 4 MPI processes to speed up the computation time by a factor of about 0.9 times 4. The OpenMP can provide an extra factor up to about 2, regardless of the number of cores used beyond about 4.
 
-\subsection{Single or Multiple Mesh Simulation with OpenMP Parallel Processing}
+
+\subsubsection{What is OpenMP?}
 \label{single_mesh}
 
 If your simulation involves only one mesh, you can only run it on one computer, but you can exploit its multiple processors or cores using OpenMP. When you install FDS, it will query your computer to determine the number of available cores. By default, FDS will use approximately half of the available cores\footnote{To determine the number of cores used by OpenMP, just type {\ct fds} at the command prompt.} on a single computer. This is done for two reasons: (1) so as not to take over your entire machine when you run a simulation, and (2) because using all cores for a single simulation may not minimize the run time. OpenMP works best when exploiting multiple (logical) cores associated with a single (physical) processor or ``socket''.  For example, if your computer has two processors, each with 4 cores, it may not be worthwhile to use all 8 cores in an OpenMP simulation. You need to experiment with your own machine to determine the strategy that is best for you. To change the number of cores that are available for a given FDS simulation, you can set an environment variable called {\ct OMP\_NUM\_THREADS}. The way to do this depends on the operating system and will be explained below.
 
 When the job is started, FDS will print the number of cores that will be used for that job. Note that this setting only applies until you log out or restart your machine. To set the default value of available cores upon startup, the {\ct OMP\_NUM\_THREADS} environment variable can also be set in the startup configuration scripts on the machine. Refer to the documentation for your operating system for more information on how to configure environment variables upon startup.
 
-To confirm the speedup for the OpenMP version of the code, a series of test cases are run for two problem sizes ($64^3$ and $128^3$) varying the number of OpenMP threads.  The setup is a simple channel flow carrying two extra species to mimic the scalar transport performed in typical fire problems (see the {\ct Timing\_Benchmarks/openmp\_test} series in the FDS verification suite).  The results are shown in Fig.~\ref{fig:openmp_timing_benchmarks}.  Generally, users can expect a factor of 2 speedup using 4 cores (default setting).
-
-\begin{figure}[ht!]
-\centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/openmp_timing_benchmarks}
-\caption[OpenMP timing study]{Benchmark timing comparison for the OpenMP test cases. The computer that ran these jobs has 2 (physical) sockets, and each socket has 4 (logical) cores. This explains the decrease in efficiency beyond 4 OpenMP threads.}
-\label{fig:openmp_timing_benchmarks}
-\end{figure}
-Details of how to run the simulation are included below for the different operating systems.
-
-\subsubsection{MS Windows}
-
-Open up a Command Prompt window (click Start, then Run, then type ``cmd''), and change directories (``cd'') to where the input file for the case is located. Decide how many cores you want to devote to the simulation. For example, if you have 4 cores available, type the following at the command prompt:
-\begin{lstlisting}
-set OMP_NUM_THREADS=4
-\end{lstlisting}
-Then run the simulation by typing:
-\begin{lstlisting}
-fds job_name.fds
-\end{lstlisting}
-The progress of the simulation is indicated by diagnostic output that is written out onto the screen. Detailed diagnostic information is automatically written to a file {\ct job\_name.out}. Screen output can be redirected to a file via the alternative command:
-\begin{lstlisting}
-fds job_name.fds > job_name.err
-\end{lstlisting}
-Note that it is also possible to associate the {\ct .fds} extension with the FDS executable directly, thereby making FDS run by double-clicking on the input file. Be careful not to accidentally double-click on the input file when trying to edit it. This action will cause previously generated output files to be over-written.
-
-\subsubsection{Mac OS X, Unix, Linux}
-
-The installer for Mac OS~X, Unix, and Linux versions of FDS sets the {\ct PATH}\ variable allowing one to invoke FDS without a full path reference to the executable.  To specify 4 OpenMP threads on a Mac~OS~X or Linux computer running a Bash shell, type the following at the command prompt:
-\begin{lstlisting}
-export OMP_NUM_THREADS=4
-\end{lstlisting}
-To run FDS from the command line type:
-\begin{lstlisting}
-fds job_name.fds
-\end{lstlisting}
-The input parameters are read from the file {\ct job\_name.fds}, and error statements and other diagnostics are written out to the screen. To run the job in the background:
-\begin{lstlisting}
-fds job_name.fds >& job_name.err &
-\end{lstlisting}
-Note that in the latter case, the screen output is stored in the file {\ct job\_name.err} and the detailed diagnostics are saved automatically in a file {\ct job\_name.out}. It is preferable to run jobs in the background so as to free the console for other uses. To see output while an
-FDS job is running type:
-\begin{lstlisting}
-tail -f job_name.err
-\end{lstlisting}
-or
-\begin{lstlisting}
-tail -f job_name.out
-\end{lstlisting}
-
-
-\subsection{Multiple Mesh Simulation with MPI Parallel Processing}
+\subsubsection{What is MPI?}
 \label{info:parallelprocessing}
 
-FDS uses MPI (Message-Passing Interface)~\cite{Gropp:1} to allow multiple computers, or multiple cores on one computer, to run a single multi-mesh FDS job. The main idea is that you must break up the FDS domain into multiple meshes, and then the flow field in each mesh is computed as a different {\em process.} Note the subtle difference between these terms -- a {\em process} does not have the same meaning as a {\em processor}. The {\em process} can be thought of as a ``task'' that you would see in
-the Windows Task Manager or by executing the ``top'' command on a Linux/Unix machine. The {\em processor} refers to the computer hardware. A single {\em processor} may run multiple {\em processes}, for example. The computation on a given FDS mesh is thought of as an individual {\em process}, and MPI handles the transfer of information between these {\em processes}. Usually, each mesh is assigned its own {\em process} in an MPI calculation, although it is also possible to assign multiple meshes to a single {\em process}. In this way, large meshes can be computed on dedicated {\em processors}, while smaller meshes can be clustered together in a single {\em process} running on a single {\em processor}, without the need for MPI message passing between themselves.
+MPI (Message-Passing Interface)~\cite{Gropp:1} enables multiple computers, or multiple cores on one computer, to run a multi-mesh FDS job. The main idea is that you must break up the FDS domain into multiple meshes, and then the flow field in each mesh is computed as an MPI {\em process.}  The {\em process} can be thought of as a ``task'' that you would see in the Windows Task Manager or by executing the ``top'' command on a Linux/Unix machine. MPI handles the transfer of information between the meshes, i.e. MPI processes. Usually, each mesh is assigned its own {\em process} in an MPI calculation, although it is also possible to assign multiple meshes to a single MPI {\em process}. In this way, large meshes can be computed on dedicated cores, while smaller meshes can be clustered together in a single {\em process} running on a single core, without the need for MPI message passing.
 
 Also note that FDS refers to its meshes by the numbers 1, 2, 3, and so on, whereas MPI refers to its processes by the numbers 0, 1, 2, and so on. Thus, Mesh~1 is assigned to Process~0; Mesh~2 to Process~1, and so on. You do not explicitly number the meshes or the processes yourself, but error statements from FDS or from MPI might refer to the meshes or processes by number. As an example, if a FDS case with five meshes, the first printout (usually to the screen unless otherwise directed) is:
 \begin{lstlisting}
@@ -557,98 +503,106 @@ Mesh   5 is assigned to MPI Process   4
 \end{lstlisting}
 This means that 5 MPI processes (numbered 0 to 4) have started and that each mesh is being handled by its own process. The processes may be on the same or different computers. Each computer has its own memory (RAM), but each individual MPI process has its own independent memory, even if the processes are on the same computer.
 
-There are different implementations of MPI, much like there are different Fortran and C compilers. Each implementation is essentially a library of subroutines called from FDS that transfer data from one process to another across a fast network. The format of the subroutine calls has been widely accepted in the community, allowing different vendors and organizations the freedom to develop better software while working within an open framework. For Mac OS~X and Linux, we use Open MPI, an open source implementation that is developed and maintained by a consortium of academic, research, and industry partners (www.open-mpi.org). For Windows, we use Intel MPI~\footnote{Prior to FDS version 6.1.2, the Windows version of FDS used MPICH, a free implementation of MPI developed by Argonne National Laboratory. The MPICH developers have announced that they are no longer supporting the Windows version.}.
+There are different implementations of MPI, much like there are different Fortran and C compilers. Each implementation is essentially a library of subroutines called from FDS that transfer data from one process to another across a fast network. The format of the subroutine calls has been widely accepted in the community, allowing different vendors and organizations the freedom to develop better software while working within an open framework. For Mac OS~X, we use Open MPI, an open source implementation that is developed and maintained by a consortium of academic, research, and industry partners (www.open-mpi.org). For Windows and Linux, we use Intel MPI~\footnote{Prior to FDS version 6.1.2, the Windows version of FDS used MPICH, a free implementation of MPI developed by Argonne National Laboratory. The MPICH developers have announced that they are no longer supporting the Windows version.}.
 
-\subsubsection{Intel MPI for Windows}
+MPI and OpenMP can be used together. For example, 4 MPI processes can be assigned to 4 different computers, and each MPI process can be supported by, say, 8 OpenMP threads, assuming each computer has 8 cores. Most of the speed up is achieved by the MPI. For a reasonably fast network, you can expect 4 MPI processes to speed up the computation time by a factor of about 0.9 times 4. The OpenMP can provide an extra factor up to about 2, regardless of the number of cores used beyond about 4.
 
-The files needed to run an MPI calculation across a Windows domain network are bundled in with the FDS download. There is no need to install Intel MPI or its redistributable libraries. The following procedure is intended for a Windows domain network; that is, a network where user accounts are centrally managed such that any user can log in to any machine using the same credentials.
 
-To run an MPI calculation with FDS, you need to have administrator privileges on the machine that launches the job, but not necessarily on the machines that run the job. We have designed the FDS installation script to set up the necessary firewall exceptions and system environment variables automatically so that you need only install FDS as you normally would to make this work. You do not have to download and install the MPI software separately. Everything you need is in the FDS installation package.
+\section{Launching an FDS Job}
 
-First, uninstall the FDS-SMV package on all of the machines you plan to use. The new version will overwrite all existing versions unless they are moved or renamed.
+To start an FDS simulation, you can either use a third-party graphical user interface (GUI) or you can invoke the computer's command prompt and type a one-line command, as described in the following sections.
 
-If you wish to run FDS on more than one core on a single machine, then type the following command:
+\subsubsection{MS Windows}
+
+The files needed to run an FDS simulation on a single Windows computer or across a Windows domain network are bundled in with the FDS download. There is no need to install MPI or any redistributable libraries. The following procedure is intended for a Windows domain network; that is, a network where user accounts are centrally managed such that any user can log in to any machine using the same credentials. If you are not on a domain network, you can still run FDS locally, and instructions are given below.
+
+Open up the special FDS command prompt, CMDfds, which should appear on your desktop when you install FDS. By opening this special command prompt, a script is run automatically ensuring that the FDS commands and libraries are all consistent. Change directories (``cd'') to where the input file for the case is located. Decide how many logical processes you want to devote to the simulation. Next, decide if you want to run the job solely on your own computer or on multiple computers on the network.
+
+If you decide you want to run the case solely on your own computer, and suppose you have 8 logical processors (cores) available, and you have an FDS job that uses 4 meshes, type the following at the command prompt:
 \begin{lstlisting}
-mpiexec -n 4 fds job_name.fds
+fds_local -p 4 -o 2 job_name.fds
 \end{lstlisting}
-where 4 indicates the number of processes that will be created.  Note that as a default each process will use 4 OpenMP threads. It is advisable to set the environmental variable {\ct OMP\_NUM\_THREADS} so that the total number of threads ({\ct n $\times$ OMP\_NUM\_THREADS}) is less than or equal to the total number of cores on the machine
+This job will exploit all $4 \times 2 = 8$ logical processors, which you can confirm by opening the Task Manager. The {\ct -p} parameter indicates the number of MPI processes, and the {\ct -o} indicates the number of OpenMP threads.
 
-If you wish to run FDS on more than one machine, the following steps should be taken:
+The progress of the simulation is indicated by diagnostic output that is written onto the screen. Detailed diagnostic information is automatically written to a file {\ct job\_name.out}. Screen output can be redirected to a file via the alternative command:
+\begin{lstlisting}
+fds_local ... job_name.fds > job_name.err
+\end{lstlisting}
+Note that it is also possible to associate the {\ct .fds} extension with the FDS executable directly, thereby making FDS run by double-clicking on the input file. However, we do not recommend this because of complications associated with the {\ct mpiexec} program.
 
+Also, you can automatically set the number of OpenMP threads via the command:
+\begin{lstlisting}
+set OMP_NUM_THREADS=N
+\end{lstlisting}
+where {\ct N} is the number of OpenMP threads to assign to each MPI process for all jobs launched during that particular session. You can change {\ct OMP\_NUM\_THREADS} permanently by changing the system environment variable of the same name.
+
+If you wish to run FDS on more than one computer, do the following:
 \begin{enumerate}
-\item Open up a command prompt by right-clicking on the command prompt icon and choosing ``Run as administrator''. Type the following command:
+\item Type the following command:
 
-    {\ct mpiexec -hosts 2 <my\_machine> 1 <other\_machine> 1 test\_mpi}
+    {\ct mpiexec -hosts 2 <my\_computer> 1 <other\_computer> 1 test\_mpi}
 
-    If this command returns a ``Hello World'' message from your machine and the other machine on your network, proceed to the next step. If this command fails, check that you can ``see'' the other machine by pinging it, and check that the other machine can ``see'' your machine as well.
+    If this command returns a ``Hello World'' message from your computer and the other computer on your network, proceed to the next step. If this command fails, check that you can ``see'' the other machine by pinging it, and check that the other computer can ``see'' your computer as well. Also, make sure that the same version of FDS is installed on the other computer.
 
-\item Share (with both read and write privilege) a working directory on your machine. Do not put this directory within the Program Files path. Share the working directory with everybody so that all other machines can see it. Note how this directory is defined on the other machines. Sometimes it is {\ct \textbackslash\textbackslash<my\_machine>\textbackslash<my\_shared\_directory>\textbackslash} and sometimes it is defined via the numerical IP address, like {\ct \textbackslash\textbackslash129.6.129.87\textbackslash<my\_shared\_directory>\textbackslash}. The definition depends on the way your domain name server (DNS) works. In any case, do not leave blank spaces within any directory or file names. We have found that blanks create all sorts of trouble. Unless you are a DOS/Windows expert, avoid them.
+\item Share (with both read and write privilege) a working directory on your machine. Do not put this directory within the ``Program Files'' folder because it is write-protected. Share the working directory with everybody so that all other computers can see it. Note how this directory is defined on the other computers. Sometimes it is {\ct \textbackslash\textbackslash<my\_computer>\textbackslash<my\_shared\_directory>\textbackslash} and sometimes it is defined via the numerical IP address, like {\ct \textbackslash\textbackslash129.6.129.87\textbackslash<my\_shared\_directory>\textbackslash}. The definition depends on the way your domain name server (DNS) works. In any case, do not leave blank spaces within any directory or file names. We have found that blanks create all sorts of trouble. Unless you are a DOS/Windows expert, avoid them.
 
 \item Within the command prompt, {\ct cd} to the working directory. Find or create within the working directory a relatively small, simple, two mesh FDS input file. At the command prompt, type:
 
-   {\ct mpiexec -hosts 2 m1 1 m2 1 -wdir \textbackslash\textbackslash...\textbackslash... fds job\_name.fds}
+   {\ct mpiexec -hosts 2 fred 1 ethel 1 -wdir \textbackslash\textbackslash...\textbackslash... fds job\_name.fds}
 
-   where {\ct m1} and {\ct m2} are the names of two computers on your network.
+   where {\ct fred} and {\ct ethel} are the names of two computers on your network. Remember to add the argument {\ct -env OMP\_NUM\_THREADS N} to set the number of OpenMP threads per MPI process on all computers. The default is {\em not} 1, but rather depends on the number of logical processors your computer has. If you accidently set too many OpenMP threads, you can overload your logical processors and reduce the job efficiency.
 
-\item If successful, you should see the usual FDS printout indicating the processes being assigned to the machines. If unsuccessful, try running the case on your own machine:
+\item If successful, you should see the usual FDS printout indicating the processes being assigned to the computers. If unsuccessful, try running the case on your own computer:
 
-   {\ct mpiexec -hosts 1 m1 2 -wdir \textbackslash\textbackslash...\textbackslash... fds job\_name.fds}
+   {\ct mpiexec -hosts 1 fred 2 -wdir \textbackslash\textbackslash...\textbackslash... fds job\_name.fds}
 
    If this is not successful, check with your network administrator or monitor the FDS help forums for advice.
+\item If you plan to use more than just a few computers to run the job, create a text file, say, {\ct hostfile.txt}, and list, line by line, the name of each computer, followed by the number of MPI processes per computer.
+
+   {\ct mpiexec -hostfile hostfile.txt -env ... -wdir ... fds job\_name.fds}
 \end{enumerate}
 
 
 
-\subsubsection{Open MPI for Linux and Mac OS X}
+\subsubsection{Linux and Mac OS X}
 
-The release versions of FDS for Linux and Mac OSX are built with Open MPI, an open source MPI implementation that is developed and maintained by a consortium of academic, research, and industry partners. With Open~MPI, FDS is run using the command:
+A compute cluster that consists of a rack of dedicated compute nodes usually runs one of several variants of the Linux operating system. In such an environment, it is suggested, or required, that you use a job scheduler like PBS/Torque or Slurm to submit jobs by writing a short script that includes the command that launches the job, the amount of resources you require, and so on. The syntax used by PBS/Torque and Slurm is slightly different. Here is an example of a script for Intel MPI using the PBS/Torque job scheduler:
 \begin{lstlisting}
-mpirun -np 5 fds -hostfile my_hosts.txt job_name.fds
+#!/bin/bash
+#PBS -N job_name
+#PBS -e <pwd>/job_name.err
+#PBS -o <pwd>/job_name.log
+#PBS -l nodes=4:ppn=2
+#PBS -l walltime=24:0:0
+export OMP_NUM_THREADS=2
+export I_MPI_PIN_DOMAIN=omp
+cd <pwd>
+mpiexec -n 8 <full_path>/fds job_name.fds
 \end{lstlisting}
-where the 5 indicates that 5 processes are to be used. In this case, the executable {\ct fds} is located in the working directory, but you can also provide the full path name to the installation directory. The file {\ct my\_hosts.txt} might look like this:
+The first line invokes the bash shell. The second line provides a name for the job. The third and fourth lines provide file names for standard error and standard out. The fifth line requests 2~processors per node on 4~nodes. The sixth line requests 24~h of time. The seventh line sets the number of OpenMP threads. The eighth line is a specific Intel MPI parameter that indicates how the OpenMP threads are to be ``pinned''. The ninth line establishes the working directory. The tenth line launches FDS. You will probably have to supplement this script with additional options unique to your compute environment. Consult the man pages for {\ct mpiexec} and the chosen job scheduler for details.
+
+If you opt to run the job without using a job scheduler, you can issue the commands directly at the command prompt:
+\begin{lstlisting}
+export OMP_NUM_THREADS=M
+mpiexec -n N -hostfile my_hosts.txt /home/username/.../fds job_name.fds >& job_name.err &
+\end{lstlisting}
+The file {\ct my\_hosts.txt} looks something like this:
 \begin{lstlisting}
 comp1 slots=2
 comp2 slots=1
 comp3 slots=2
 \end{lstlisting}
-where {\ct slots} indicate the number of available cores on that computer.
+where {\ct compX} are the names of available nodes and {\ct slots} indicate the number of available cores on each node. The parameter {\ct slots} is optional. On a cluster shared by others, you should not run long jobs without a job scheduler because it is possible for multiple jobs to share the same nodes/cores when a scheduler is not used.
+If you are using a single Linux or Mac OS X workstation, there is no need to define a host file. You just need to invoke the previously described {\ct mpiexec} line with a number of processors suitable to your case and computer.
 
-To make the process run in the background, use the command:
-\begin{lstlisting}
-mpirun ... >& job_name.err &
-\end{lstlisting}
-The file {\ct job\_name.err} contains what is normally printed out to the screen.
 
+
+
+\section{Strategies for Running FDS}
 
 \subsection{Using MPI and OpenMP Together}
 
-Because it more efficiently divides the computation, MPI is the better choice for multiple mesh simulations. However, it is possible to combine MPI and OpenMP in the same simulation. If you have multiple computers at your disposal, and each computer has multiple cores, you can assign one MPI process to each computer, and use multiple cores on each computer to speed up the processing of a given mesh using OpenMP. For example, on a Windows Domain Network, if you have two computers that are available and each computer has four cores, you can run a two mesh simulation as follows:
-\begin{lstlisting}
-mpiexec -hosts 2 m1 1 m2 1 -wdir \\...\... -env OMP_NUM_THREADS 4 fds job\_name.fds
-\end{lstlisting}
-The use of OpenMP in this instance will probably speed the calculation by a factor of 2, but now you will be using 8 cores rather than 2. It might be better to divide the computational domain into 8 meshes and simply use MPI to process them. This all depends on your particular OS, hardware, network traffic, and so on. You should choose a good test case and try different meshing and parallel processing strategies to see what is best for you.
-
-\subsection{Efficiency of an MPI Calculation}
-
-At the end of a calculation, FDS prints out a file called {\ct CHID\_cpu.csv} that records the amount of CPU time that each MPI process spends in the major routines. For example, the column header {\ct VELO} stands for all the subroutines related to computing the flow velocity; {\ct MASS} stands for all the subroutines related to computing the species mass fractions and density. The column header {\ct MAIN} represents all of the CPU time that is not explicitly accounted for; that is, time spend in the main control loop. Ideally, this ought to be a few percent of the overall CPU time usage.
-
-There are two basic approaches to assessing the efficiency or scalability of an MPI (parallel) computation. The first is known as ``weak scaling,'' in which the amount of work done by each MPI process stays the same and additional processes are added to solve a larger problem. For example, if you are simulating the flow of air over a patch of terrain, and you keep adding more and more meshes of the same physical and numerical dimension, assigning each new mesh to its own MPI process, so as to simulate a larger and larger patch of terrain, then you would expect that the overall time of the simulation would not increase significantly with each additional mesh. The efficiency of such a calculation is given by the following expression:
-\be
-   E_{\rm w} = \frac{t_1}{t_N}
-\ee
-where $t_1$ is the CPU time for the case with 1 mesh (MPI process), and $t_N$ is the CPU time for the case with $N$ meshes (MPI processes). The left hand plot of Fig.~\ref{fig:scaling_tests} shows the results of a weak scaling study of FDS. Meshes with dimension 50 by 50 by 50 are lined up side by side, ranging from 1 to 288 meshes. Ideally, the CPU time ought to be about the same for all cases, because each MPI process is doing the same amount of work. Only mesh to mesh communication should lead to inefficiencies. However, notice in the figure that the efficiency of the 1, 2, 4, and 8 mesh cases is greater than those with more MPI processes. The reason for this is that on most compute clusters, each node has multiple cores, and typically jobs run faster when a node is less than completely full. These test cases were run at NIST, where there is a compute cluster with 8 cores per node, and one with 12 cores per node.
-
-The second way to assess MPI efficiency is known as ``strong scaling.'' Here, you simulate a given scenario on a single mesh, and then you divide the mesh so that the cell size and the overall number of cells does not change. Ideally, if you divide a given mesh into two and run the case with two MPI processes instead of one, you would expect your computation time to decrease by a factor of two. But as you increase the number of MPI processes, you increase the amount of communication required among the processes. You also increase the overall number of boundary cells to compute, even though the overall number of gas phase cells remains the same. The efficiency of such a set of calculations is given by:
-\be
-   E_{\rm s} =  \frac{t_1}{N \; t_N}
-\ee
-In the strong study demonstrated here, a single mesh of dimension 180 by 160 by 80 is divided into a range of smaller meshes, with the smallest partitioning being 288 meshes of dimension 20 by 20 by 20. The resulting decrease in the CPU time of the entire calculation and the major subroutines is shown in the right hand plot of Fig.~\ref{fig:scaling_tests}. Ideally, the CPU time should be inversely proportional to the number of meshes (MPI processes); that is, the relative CPU times ought to follow the black dotted lines. The one notable exception to this rule is for ``COMM'' or COMMunications. This curve represents the time spent in communicating information across the network.
-\begin{figure}[!ht]
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/weak_scaling_test}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/strong_scaling_test}
-\caption[MPI scaling study]{Example of a weak (left) and strong (right) scaling study.}
-\label{fig:scaling_tests}
-\end{figure}
+Because it more efficiently divides the computational work, MPI is the better choice for multiple mesh simulations. However, it is possible to combine MPI and OpenMP in the same simulation. If you have multiple computers at your disposal, and each computer has multiple cores, you can assign one MPI process to each computer, and use multiple cores on each computer to speed up the processing of a given mesh using OpenMP. Typically, the use of OpenMP speeds the calculation by at most factor of 2, regardless of how many OpenMP threads you assign to each MPI process. It is usually better to divide the computational domain into more meshes and set the number of OpenMP threads to 1. This all depends on your particular OS, hardware, network traffic, and so on. You should choose a good test case and try different meshing and parallel processing strategies to see what is best for you.
 
 \subsection{Running Very Large Jobs}
 
@@ -660,6 +614,46 @@ Most FDS simulations reported in the literature use one to several dozen meshes,
 \item Run your job for a short amount of time to estimate the time required for the full job. Most large compute clusters will limit you to a certain amount of wall clock time, after which your job is simply stopped. If you have to use the restart feature in FDS, practice first with a short job to make sure that the job can be continued properly.
 \item Do a strong scaling study for your particular case. That is, run the job a fixed number of time steps with the least number of meshes that can fit within the machine's memory. Then divide the mesh by factors of 2, 4, or 8 until you reach a point where the increased number of meshes/processes does not provide a significant speed up.
 \end{enumerate}
+
+
+\section{Efficiency of Multi-Process Simulations}
+
+At the end of a calculation, FDS prints out a file called {\ct CHID\_cpu.csv} that records the amount of CPU time that each MPI process spends in the major routines. For example, the column header {\ct VELO} stands for all the subroutines related to computing the flow velocity; {\ct MASS} stands for all the subroutines related to computing the species mass fractions and density. The column header {\ct MAIN} represents all of the CPU time that is not explicitly accounted for; that is, time spend in the main control loop. Ideally, this ought to be a few percent of the overall CPU time usage.
+
+\subsection{MPI Efficiency}
+
+There are two basic approaches to assessing the efficiency or {\em scalability} of MPI. The first is known as ``weak scaling,'' in which the amount of work done by each MPI process stays the same and additional processes are added to solve a larger problem. For example, if you are simulating the wind over a patch of terrain, and you keep adding more and more meshes of the same physical and numerical dimension, assigning each new mesh to its own MPI process, so as to simulate a larger and larger patch of terrain, then you would expect that the overall time of the simulation would not increase significantly with each additional mesh. The efficiency of such a calculation is given by the following expression:
+\be
+   E_{\rm w} = \frac{t_1}{t_N}
+\ee
+where $t_1$ is the CPU time for the case with 1 mesh (MPI process), and $t_N$ is the CPU time for the case with $N$ meshes (MPI processes). The left hand plot of Fig.~\ref{fig:scaling_tests} shows the results of a weak scaling study of FDS. Meshes with dimension 50 by 50 by 50 are lined up side by side, ranging from 1 to 288 meshes. Ideally, the CPU time ought to be about the same for all cases, because each MPI process is doing the same amount of work. Only mesh to mesh communication should lead to inefficiencies. However, notice in the figure that the efficiency of the 1, 2, 4, and 8 mesh cases is greater than those with more MPI processes. The reason for this is that on most compute clusters, each node has multiple cores, and typically jobs run faster when a node is less than completely full. These test cases were run at NIST, where there is a compute cluster with 8 cores per node, and one with 12 cores per node.
+
+The second way to assess MPI efficiency is known as ``strong scaling.'' Here, you simulate a given scenario on a single mesh, and then you divide the mesh so that the cell size and the overall number of cells does not change. Ideally, if you divide a given mesh into two and run the case with two MPI processes instead of one, you would expect your computation time to decrease by a factor of two. But as you increase the number of MPI processes, you increase the amount of communication required among the processes. You also increase the overall number of boundary cells to compute, even though the overall number of gas phase cells remains the same. The efficiency of such a set of calculations is given by:
+\be
+   E_{\rm s} =  \frac{t_1}{N \; t_N}
+\ee
+In the strong study demonstrated here, a single mesh of dimension 180 by 160 by 120 is divided into a range of smaller meshes, with the smallest partitioning being 432 meshes of dimension 20 by 20 by 20. The resulting decrease in the CPU time of the entire calculation and the major subroutines is shown in the right hand plot of Fig.~\ref{fig:scaling_tests}. Ideally, the CPU time should be inversely proportional to the number of meshes (MPI processes); that is, the relative CPU times ought to follow the black dotted lines. The one notable exception to this rule is for ``COMM'' or COMMunications. This curve represents the time spent in communicating information across the network.
+\begin{figure}[!ht]
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/weak_scaling_test}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/strong_scaling_test}
+\caption[MPI scaling study]{Example of a weak (left) and strong (right) scaling study.}
+\label{fig:scaling_tests}
+\end{figure}
+
+\subsubsection{OpenMP Efficiency}
+
+To confirm the speedup provided by OpenMP, a series of test cases\footnote{The input files are available in the \href{https://github.com/firemodels/fds/tree/master/Verification/Timing_Benchmarks}{FDS GitHub repository}.} are run for two mesh sizes ($64^3$ and $128^3$), varying the number of OpenMP threads.  The setup is a simple channel flow carrying two extra species to mimic the scalar transport performed in typical fire problems. The results are shown in Fig.~\ref{fig:openmp_timing_benchmarks}.  Generally, users can expect a factor of 2 speedup using 4~cores (default setting).
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/openmp_timing_benchmarks}
+\caption[OpenMP timing study]{Benchmark timing comparison for the OpenMP test cases. The computer that ran these jobs has 2 (physical) sockets, and each socket has 4 (logical) cores. This explains the decrease in efficiency beyond 4 OpenMP threads.}
+\label{fig:openmp_timing_benchmarks}
+\end{figure}
+
+
+
+
 
 
 \section{Monitoring Progress}
@@ -1294,7 +1288,7 @@ Key Parameter                          & Section                        & {\ct '
 \section{Stopping and Restarting Calculations}
 \label{info:restart}
 
-An important {\ct MISC} parameter is called {\ct RESTART}. Normally, a simulation consists of a sequence of events starting from ambient conditions. However, there are occasions when you might want to stop a calculation, make a few limited adjustments, and then restart the calculation from that point in time. To do this, first bring the calculation to a halt gracefully by creating a file called {\ct CHID.stop} in the directory where the output files are located. Remember that FDS is case-sensitive. The file name must be exactly the same as the {\ct CHID} and `stop' should be lower case. FDS checks for the existence of this file at each time step, and if it finds it, gracefully shuts down the calculation after first creating a final Plot3D file and a file (or files in the case of a multiple mesh job) called {\ct CHID.restart} (or {\ct CHID\_nn.restart}). To restart a job, the file(s) {\ct CHID.restart} should exist in the working directory, and the phrase {\ct RESTART=.TRUE.} needs to be added to the {\ct MISC} line of the input data file. For example, suppose that the job whose {\ct CHID} is ``plume'' is halted by creating a dummy file called {\ct plume.stop} in the directory where all the output files are being created. Note you wil also need to delete the file {\ct CHID.stop} so that FDS does not immeadiately stop the calculation. To restart this job from where it left off, add {\ct RESTART=.TRUE.} to the {\ct MISC} line of the input file {\ct plume.fds}, or whatever you have chosen to name the input file. The existence of a restart file with the same {\ct CHID} as the original job tells FDS to continue saving the new data in the same files as the old\footnote{By default, when a job is restarted, the spreadsheet output files will be appended at the time the job was restarted, not the time the job was stopped. If you want the output files to be appended without clipping off any existing data, even though some duplicate output will be left over, then set {\ct CLIP\_RESTART\_FILES} to {\ct .FALSE.} on the {\ct DUMP} line.}.  If {\ct RESTART\_CHID} is also specified on the {\ct MISC} line, then FDS will look for old output files tagged with this string instead of using the specified {\ct CHID} on the {\ct HEAD} line. In this case, the new output files will be tagged with {\ct CHID}, and the old output files will not be altered. When running the restarted job, the diagnostic output of the restarted job is appended to output files from the original job.
+An important {\ct MISC} parameter is called {\ct RESTART}. Normally, a simulation consists of a sequence of events starting from ambient conditions. However, there are occasions when you might want to stop a calculation, make a few limited adjustments, and then restart the calculation from that point in time. To do this, first bring the calculation to a halt gracefully by creating a file called {\ct CHID.stop} in the directory where the output files are located. Remember that FDS is case-sensitive. The file name must be exactly the same as the {\ct CHID} and `stop' should be lower case. FDS checks for the existence of this file at each time step, and if it finds it, gracefully shuts down the calculation after first creating a final Plot3D file and a file (or files in the case of a multiple mesh job) called {\ct CHID.restart} (or {\ct CHID\_nn.restart}). To restart a job, the file(s) {\ct CHID.restart} should exist in the working directory, and the phrase {\ct RESTART=.TRUE.} needs to be added to the {\ct MISC} line of the input data file. For example, suppose that the job whose {\ct CHID} is ``plume'' is halted by creating a dummy file called {\ct plume.stop} in the directory where all the output files are being created. Note you wil also need to delete the file {\ct CHID.stop} so that FDS does not immediately stop the calculation. To restart this job from where it left off, add {\ct RESTART=.TRUE.} to the {\ct MISC} line of the input file {\ct plume.fds}, or whatever you have chosen to name the input file. The existence of a restart file with the same {\ct CHID} as the original job tells FDS to continue saving the new data in the same files as the old\footnote{By default, when a job is restarted, the spreadsheet output files will be appended at the time the job was restarted, not the time the job was stopped. If you want the output files to be appended without clipping off any existing data, even though some duplicate output will be left over, then set {\ct CLIP\_RESTART\_FILES} to {\ct .FALSE.} on the {\ct DUMP} line.}.  If {\ct RESTART\_CHID} is also specified on the {\ct MISC} line, then FDS will look for old output files tagged with this string instead of using the specified {\ct CHID} on the {\ct HEAD} line. In this case, the new output files will be tagged with {\ct CHID}, and the old output files will not be altered. When running the restarted job, the diagnostic output of the restarted job is appended to output files from the original job.
 
 There may be times when you want to save restart files periodically during a run as insurance against power outages or system crashes. If this is the case, at the start of the original run set {\ct DT\_RESTART=50.} on the {\ct DUMP} line to save restart files every 50~s, for example. The default for {\ct DT\_RESTART} is 1000000, meaning no restart files are created unless you gracefully stop a job by creating a dummy file called {\ct CHID.stop}.
 It is also possible to use the new control function feature (see Section~\ref{info:CTRL}) to stop a calculation or dump a restart file when the computation reaches some measurable condition such as a first sprinkler activation.
@@ -3371,7 +3365,7 @@ At present, fuel gases are transported \emph{out} of the solid.  Other species, 
 \subsubsection*{Useful Outputs}
 \label{sec:useful_outputs}
 
-With the 3D pyrolysis model you no longer have to ``view'' output through {\ct DEVC}s only.  An {\ct SCLF} that passes through the {\ct OBST} may be viewed in Smokeview (use Show/Hide > Geometry > Obstacles > Hidden or Outline Only to view slices inside obstructions [toggle with ALT + O]).  The solid cell temperatures can be viewed using the gas phase output
+With the 3D pyrolysis model you no longer have to ``view'' output through {\ct DEVC}s only.  An {\ct SLCF} that passes through the {\ct OBST} may be viewed in Smokeview (use Show/Hide > Geometry > Obstacles > Hidden or Outline Only to view slices inside obstructions [toggle with ALT + O]).  The solid cell temperatures can be viewed using the gas phase output
 \begin{lstlisting}
 &SLCF PBY=..., QUANTITY='TEMPERATURE', CELL_CENTERED=T /
 \end{lstlisting}
@@ -4604,7 +4598,33 @@ This feature is typically used together with periodic boundaries.  To specify a 
 \end{lstlisting}
 You may apply a time ramp to {\ct FORCE\_VECTOR(1)}, for example, via {\ct RAMP\_FVX\_T} on the {\ct WIND} line.
 
+\subsection{Coriolis Force}
+\label{info:coriolis_force}
 
+The Coriolis force accounts for a rotating reference frame \cite{Kundu:1}.  The Coriolis acceleration augments the right-hand side of the Navier-Stokes equations as follows:
+\begin{equation}
+\DoD{\mathbf{u}}{t} = ... - 2 {\bm\Omega} \times \mathbf{u}
+\end{equation}
+Where is ${\bm\Omega}$ is the rotation vector (see Fig.~\ref{fig:rotation_vector}).  To apply the Coriolis force in FDS, you have two options: either specify the components of ${\bm\Omega}$ directly on the {\ct WIND} lines via {\ct CORIOLIS\_VECTOR(3)}, or you can take the easy route and simply specify the {\ct LATITUDE} (degrees) of the domain, provided you align the $x$ direction with east.  In this latter case, FDS will compute the rotation vector for you as
+\begin{equation}
+\label{eq:earth_rotvec}
+{\bm\Omega} = \omega \left[ \begin{array}{c} 0 \\ \cos(\phi \pi/180) \\ \sin(\phi \pi/180) \end{array} \right]
+\end{equation}
+where $\omega$ is Earth's rotation rate in Hz, about $1.16 \times 10^{-5}$ 1/s.
+
+The nondimensional number that determines if the Coriolis force is significant is the Rossby number.  Let $U$ be the relevant velocity scale and $L$ the length scale of the problem.  The Coriolis freqency is given by $f=\omega \sin(\phi\pi/180)$.  The Rossby number is then given by
+\begin{equation}
+\label{eq:rossby_number}
+\mbox{Ro} = \frac{U}{fL}
+\end{equation}
+When the Rossby number is large, the Coriolis force is negligible.  In building fires, this is typically the case, as $U$ and $L$ are of order unity and $f \approx 10^5$.
+
+\begin{figure}
+\centering
+\includegraphics[scale=1.5]{FIGURES/Coriolis_vector}
+\caption{The rotation vector ${\bm\Omega}$ points from the Earth's center to the North Pole.  To apply the effect of rotation on our model, we need to know the components of the rotation vector in the reference frame of the computational domain.  Typically, we align the computational domain so that $x$ points east, $y$ points north, and $z$ represents elevation.  The angle $\phi$ [degrees] is the latitude, positive [$0^{\circ}$, $90^{\circ}$] in the northern hemisphere, negative [$0^{\circ}$, $-90^{\circ}$] in the southern hemisphere.  The rotation rate $\omega$ is (obviously) 1 rotation per day or $1/(24 \times 3600) \approx 1.16 \times 10^{-5}$ 1/s.}
+\label{fig:rotation_vector}
+\end{figure}
 
 \section{Wind Method 3: The ``Wall of Wind''}
 \label{info:wall_of_wind}
@@ -5000,7 +5020,7 @@ If no inputs for enthalpy are provided, then the specific heat of the gas will b
 \be
    c_{p,\alpha} = \frac{\gamma}{\gamma-1} \frac{\R}{W_\alpha}
 \ee
-The ratio of specific heats, {\ct GAMMA}, is 1.4 by default and can be changed on the {\ct MISC} line. If you want all the gas specific heats to follow this relation, set {\ct CONSTANT\_SPECIFIC\_HEAT\_RATIO=.TRUE.} on the {\ct MISC} line (note: this option also requires {\ct STRATIFICATION=.FALSE.} on the {\ct WIND} line and {\ct EXTINCTION\_MODEL = 'EXTINCTION 1'} or {\ct SUPPRESSION=.FALSE.} on the {\ct COMB} line).  In this case the {\ct REFERENCE\_ENTHALPY} will be assumed to be 0 kJ/kg at a {\ct REFERENCE\_TEMPERATURE} of 0 K. For high molecular weight species, use of the default gamma will result in very low values of the specific heat which can cause issues with the default extinction model. In this case it is recommened that enthalpy are provided. If the FDS is determining enthalpies using this relation, then it is recommened that you check the {\ct CHID.out} and verify that reasonable specific heat values have been created.
+The ratio of specific heats, {\ct GAMMA}, is 1.4 by default and can be changed on the {\ct MISC} line. If you want all the gas specific heats to follow this relation, set {\ct CONSTANT\_SPECIFIC\_HEAT\_RATIO=.TRUE.} on the {\ct MISC} line (note: this option also requires {\ct STRATIFICATION=.FALSE.} on the {\ct WIND} line and {\ct EXTINCTION\_MODEL = 'EXTINCTION 1'} or {\ct SUPPRESSION=.FALSE.} on the {\ct COMB} line).  In this case the {\ct REFERENCE\_ENTHALPY} will be assumed to be 0 kJ/kg at a {\ct REFERENCE\_TEMPERATURE} of 0 K. For high molecular weight species, use of the default gamma will result in very low values of the specific heat which can cause issues with the default extinction model. In this case it is recommended that enthalpy are provided. If the FDS is determining enthalpies using this relation, then it is recommended that you check the {\ct CHID.out} and verify that reasonable specific heat values have been created.
 
 The reference enthalpy can also be determined by defining the {\ct ENTHALPY\_OF\_FORMATION} on the {\ct SPEC} line with a reference temperature for all species given by {\ct H\_F\_REFERENCE\_TEMPERATURE} on the {\ct MISC} line (default is 25~$^\circ$C). Note that {\ct ENTHALPY\_OF\_FORMATION} will override any value given for {\ct REFERENCE\_ENTHALPY}.
 
@@ -5899,6 +5919,7 @@ Note: The sign of {\ct NU} corresponds to whether that species is consumed (-) o
 
 If soot deposition is being computed, the soot present on surfaces can undergo oxidation if the local temperature is high enough and oxygen is present. Soot oxidation is enabled with the logical flag {\ct SOOT\_OXIDATION} on the {\ct MISC} input. Oxidation is computed as a single step, Arrhenius reaction using the soot surface density and the local oxygen mole fraction. The reaction uses a rate constant of $4.7 \times 10^{12}$ and an activation energy of 211~kJ/mol. These values are based upon work performed by Hartman, Beyler, Riahi, and Beyler~\cite{Hartman_2012}.
 
+Soot oxidation cannot be used with simple chemistry; you must use primitve species. See the {\ct soot\_oxidation\_wall} example case in the Verification Guide.
 
 \section{Special Topic: Aerosol Agglomeration}
 \label{info:agglomeration}
@@ -6251,7 +6272,7 @@ distributed about the median value.
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/droplet_distributions_3} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/droplet_distributions_4}
 \end{tabular}
-\caption[Droplet size distributions]{Droplet size distributions. The first three plots are based on a specified CVF from which the CNF is derived. The fourth plot (lower right) is an example of a specified CNF from which the CVF is derived. CVF:s are plotted with black lines, while CNF:s are plotted with red lines. The solid lines show the prescribed sampling distribution, while the dashed lines show the actual sampled droplet size distribution, measured with the {\ct PDPA\_HISTOGRAM} functionality.}
+\caption[Droplet size distributions]{Droplet size distributions. The first three plots are based on a specified CVF (black curves) from which the CNF (red curves) is derived. The fourth plot (lower right) is an example of a specified CNF from which the CVF is derived. The solid lines show the prescribed sampling distribution, while the dashed lines show the actual sampled droplet size distribution, measured with the {\ct PDPA\_HISTOGRAM} functionality.}
 \label{droplet_distributions}
 \end{figure}
 
@@ -6545,11 +6566,12 @@ The {\ct INIT} line designates the plane of the screen using the sextuplet {\ct 
    \label{eqn_screen}
    \Delta p =  l \; \left(\frac{\mu}{K} u + \rho \frac{Y}{\sqrt{K}} u^2 \right)
 \ee
-where $l$ is the screen thickness (equal to the wire diameter), $\mu$ is the viscosity of the gas, $u$ is the velocity normal to the screen, $\rho$ is the density of the gas, and $Y$ and $K$ are empirical constants given by
+where $l$ is the screen thickness (equal to the wire diameter), $\mu$ is the viscosity of the gas, $u$ is the velocity normal to the screen, $\rho$ is the density of the gas, and $Y$ and $K$ are empirical constants given by \cite{Bartzanas:1}
 \begin{eqnarray}
    K &=& 3.44 \times 10^{-9} \; \hbox{\ct FREE\_AREA\_FRACTION}^{1.6} \; \; \hbox{m}^2 \\
    Y &=& 0.043 \; \hbox{\ct FREE\_AREA\_FRACTION}^{2.13}
 \end{eqnarray}
+This correlation was developed using screens with {\ct FREE\_AREA\_FRACTION} ranging from ~0.3 to ~0.6.
 
 The {\ct MISC} input parameter {\ct PARTICLE\_CFL\_MAX} controls the time step on the pressure drop across a screen (or other porous media). If a screen or other porous media introduces numerical instabilities, reducing the value of {\ct PARTICLE\_CFL\_MAX} below 1 may resolve them.
 
@@ -8432,11 +8454,13 @@ For solid phase output quantities, like heat fluxes and surface temperatures, th
 
 \subsubsection{Minimum or Maximum Value}
 
-For a gas phase scalar quantity defined at the center of each grid cell, $\phi_{ijk}$, set {\ct SPATIAL\_STATISTIC} to {\ct ='MIN'} or {\ct 'MAX'} to compute the minimum or maximum value, respectively, over the cells that are included in the specified volume bounded by {\ct XB}:
+For a scalar quantity defined at the center of gas or solid phase cells, $\phi_{ijk}$, set {\ct SPATIAL\_STATISTIC} to {\ct 'MIN'} or {\ct 'MAX'} to compute the minimum or maximum value, respectively, over the cells that are included in the specified volume bounded by {\ct XB}:
 \be
    \min_{ijk} \, \phi_{ijk} \quad ; \quad  \max_{ijk} \, \phi_{ijk}
 \ee
-Note that this statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the coordinate parameters, {\ct XB}, which can extend into multiple meshes.
+Note also that you must specify a volume to sum over via the coordinate parameters, {\ct XB}, which can extend into multiple meshes.
+
+If you want to know where the specified {\ct QUANTITY} achieves its minimum or maximum value over the specified volume {\ct XB}, set {\ct SPATIAL\_STATISTIC} to {\ct 'MINLOC X'} or {\ct 'MAXLOC X'} for the $x$ coordinate. Substitute {\ct Y} or {\ct Z} if you desire the $y$ or $z$ coordinate, in m.
 
 
 \subsubsection{Average Value}
@@ -8704,33 +8728,32 @@ The quality of a particular simulation is most directly tied to grid resolution.
 
 A scalar quantity referred to as the \emph{measure of turbulence resolution} \cite{Pope:2004} is defined locally as:
 \begin{eqnarray}
+\label{eq:MTR}
 M(\mathbf{x}) = \frac{\left\langle k_{\rm sgs} \right\rangle}{\left\langle \mbox{TKE} \right\rangle + \left\langle k_{\rm sgs} \right\rangle}
 \end{eqnarray}
-where the resolved turbulent kinetic energy per unit mass is:
-\vskip-.6cm
-\begin{align}
-\mbox{TKE} &= \mbox{$\frac{1}{2}$}(\textbf{u}_i - \left\langle \textbf{u}_i \right\rangle) (\textbf{u}_i - \left\langle \textbf{u}_i \right\rangle)
-\end{align}
-Where $\textbf{u}$ is the cell centered velocity vector from the velocity components at cell faces (i.e. $ \tilde{\textbf{u}}=\left( \bar{u},\bar{v},\bar{w} \right) $), angled brackets denote time-averaged values and subscript $i$ indicate grid indices. To output resolved TKE use the following {\ct DEVC}s to output the three velocity components:
+Angled brackets denote suitable time-averages.
+
+The turbulent kinetic energy (TKE) must be post processed because we cannot compute the fluctuation until we know the mean. Use the following {\ct DEVC}s to output the three velocity components:
 
 \begin{lstlisting}
 &DEVC ..., QUANTITY='U-VELOCITY' /
 &DEVC ..., QUANTITY='V-VELOCITY' /
 &DEVC ..., QUANTITY='W-VELOCITY' /
 \end{lstlisting}
-
-The output of these {\ct DEVC}s must be post-processed to obtain resolved TKE. First, output the velocity vector $\textbf{u}$ using the velocity components, choose a suitable time-averaging period (which will be case-specific), output a mean velocity $\left\langle \textbf{u} \right\rangle$ and hence the fluctuation in velocity $(\textbf{u} - \left\langle \textbf{u} \right\rangle)$.
-
-The subgrid kinetic energy is estimated from Deardorff's eddy viscosity model
+TKE is then computed by
+\vskip-.6cm
+\begin{gather}
+  \mbox{TKE} = \mbox{$\frac{1}{2}$} \big( (\tilde{u}-\left\langle \tilde{u} \right\rangle)^2 + (\tilde{v}-\left\langle \tilde{v} \right\rangle)^2 +(\tilde{w}-\left\langle \tilde{w} \right\rangle)^2 \big)
+\end{gather}
+The subgrid kinetic energy is estimated from Deardorff's eddy viscosity model (see \cite{FDS_Math_Guide})
 \begin{align}
-k_{\rm sgs} &\approx \mbox{$\frac{1}{2}$}(\tilde{u}_i - \hat{\tilde{u}}_i)(\tilde{u}_i - \hat{\tilde{u}}_i) = ( \mu_t/(\rho C_\nu \Delta) )^2
+k_{\rm sgs} &\approx ( \mu_t/(\rho C_\nu \Delta) )^2
 \end{align}
-Here, $C_\nu$ is the Deardorff eddy viscosity model constant, $\tilde{u}_i$ is the resolved LES velocity and $\hat{\tilde{u}}_i$ is test filtered at a scale $2\Delta$ where $\Delta$ is the LES filter width (in FDS, $\Delta=\delta x$).  In the bulk flow region, the model for the SGS fluctuations is taken from scale similarity \cite{Bardina:1980}.  Cross-term energy is ignored.  Keep in the mind, however, that the test filter operation is ill-defined near walls, and so FDS employs constant Smagorinsky in these cells to compute the eddy viscosity.
-
 To output an estimate of the subgrid kinetic energy per unit mass use
 \begin{lstlisting}
 &DEVC ..., QUANTITY='SUBGRID KINETIC ENERGY' /
 \end{lstlisting}
+You should then average TKE and $k_{sgs}$ for use in (\ref{eq:MTR}).
 
 The concept behind the measure of turbulence resolution is illustrated in Figure \ref{fig_mtr}. Notice that on the left the difference between the grid signal and the test signal is very small.  On the right, the grid signal is highly turbulent and the corresponding test signal is much smoother.  We infer then that the flow is under-resolved.
 \begin{figure}[ht]
@@ -9178,6 +9201,7 @@ of a {\ct DUCT\_ID}, and quantities for a node require the specification of a {\
 \endhead
 {\ct AIRCOIL HEAT EXCHANGE}                     & Heat exchange rate for an aircoil         &  kW                   \\ \hline
 {\ct DUCT DENSITY}                              & Density of the flow in a duct             &  kg/m$^3$             \\ \hline
+{\ct DUCT ENERGY FLOW}                          & Energy flow in a duct                     &  kW                   \\ \hline
 {\ct DUCT MASS FLOW}                            & Mass flow in a duct                       &  kg/s                 \\ \hline
 {\ct DUCT MASS FRACTION}                        & Mass fraction of a species in a duct      &  kg/kg                \\ \hline
 {\ct DUCT TEMPERATURE}                          & Temperature of the flow in a duct         & $^\circ$C             \\ \hline
@@ -9188,6 +9212,7 @@ of a {\ct DUCT\_ID}, and quantities for a node require the specification of a {\
 {\ct FILTER LOADING}                            & Loading of a species in a filter          &  kg                   \\ \hline
 {\ct FILTER LOSS}                               & Flow loss through a filter                &                       \\ \hline
 {\ct NODE DENSITY}                              & Density of the flow through a node        &  kg/m$^3$             \\ \hline
+{\ct NODE ENTHALPY}                             & Enthalpy of a node                        &  kJ/kg                \\ \hline
 {\ct NODE MASS FRACTION}                        & Mass fraction of a species in a node      &  kg/kg                \\ \hline
 {\ct NODE PRESSURE}                             & Pressure of a node                        &       Pa              \\ \hline
 {\ct NODE PRESSURE DIFFERENCE}                  & Pressure difference between two nodes     &       Pa              \\ \hline
@@ -10745,13 +10770,14 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct WIND} (Wind and atmospheric parameters)} \\
 \hline \hline
 \endhead
-%{\ct CORIOLIS\_VECTOR(3)}                       & Real          &                                               &               & 0.                \\ \hline
+{\ct CORIOLIS\_VECTOR(3)}                       & Real          & Section~\ref{info:coriolis_force}             &               & 0.                \\ \hline
 {\ct DIRECTION}                                 & Real          & Section~\ref{info:WIND}                       & degrees       & 270               \\ \hline
 {\ct DT\_MEAN\_FORCING}                         & Real          & Section~\ref{info:WIND}                       & s             & 1.                \\ \hline
 {\ct FORCE\_VECTOR(3)}                          & Real          & Section~\ref{info:force_vector}               &               & 0.                \\ \hline
 {\ct GROUND\_LEVEL}                             & Real          & Section~\ref{info:stratification}             & m             & 0.                \\ \hline
 {\ct L}                                         & Real          & Section~\ref{info:WIND}                       & m             & 0                 \\ \hline
 {\ct LAPSE\_RATE}                               & Real          & Section~\ref{info:stratification}             & $^\circ$C/m   & 0                 \\ \hline
+{\ct LATITUDE}                                  & Real          & Section~\ref{info:coriolis_force}             & degrees       &                   \\ \hline
 {\ct RAMP\_DIRECTION}                           & Character     & Section~\ref{info:WIND}                       &               &                   \\ \hline
 {\ct RAMP\_FVX\_T}                              & Character     & Section~\ref{info:force_vector}               &               &                   \\ \hline
 {\ct RAMP\_FVY\_T}                              & Character     & Section~\ref{info:force_vector}               &               &                   \\ \hline
