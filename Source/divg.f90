@@ -448,6 +448,8 @@ ELSE K_DNS_OR_LES
 
    KP = MU*CPOPR
 
+   IF (POTENTIAL_TEMPERATURE_CORRECTION) KP = MU*CPOPR*PR/PR_T
+
 ENDIF K_DNS_OR_LES
 
 ! Store max diffusivity for stability check
