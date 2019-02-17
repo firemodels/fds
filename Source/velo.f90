@@ -205,7 +205,6 @@ SELECT_TURB: SELECT CASE (TURB_MODEL)
          !$OMP END PARALLEL DO
       ELSE POTENTIAL_TEMPERATURE_IF
          DTDZ => WORK7
-         DTDZ = 0._EB
          DO K=0,KBAR
             DO J=0,JBAR
                DO I=0,IBAR
