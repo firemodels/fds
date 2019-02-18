@@ -2349,12 +2349,13 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                   IF (Y_DROP<=Y_GAS) THEN
                      H_MASS = 0._EB
                   ELSE
+                     !M# expressions taken from Sazhin, Prog in Energy and Comb Sci 32 (2006) 162-214
                      SELECT CASE(EVAP_MODEL)
                         CASE(-1) ! Ranz Marshall
                            H_MASS   = MAX(2._EB,SHERWOOD)*D_AIR/LENGTH
-                        CASE(0:1) !Shazin M0 - M1
+                        CASE(0:1) !Shazin M0 - M1, see next code block for Refs
                            H_MASS   = MAX(2._EB,SHERWOOD)*D_AIR/LENGTH*LOG(1._EB+B_NUMBER)/B_NUMBER
-                        CASE(2) !Shazin M2
+                        CASE(2) !Shazin M2, see next code block for Refs
                            H_MASS   = MAX(2._EB,SHERWOOD)*D_AIR/LENGTH*LOG(1._EB+B_NUMBER)/(B_NUMBER*F_B(B_NUMBER))
                      END SELECT
                   ENDIF
@@ -2371,7 +2372,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                            SHERWOOD  = 2._EB + NU_FAC_GAS*SQRT(RE_L)
                            H_MASS = SHERWOOD*D_AIR/LENGTH
                         ENDIF
-                     CASE(0) ! Shazin M0
+                     CASE(0) ! Shazin M0, Eq 106 + 109 with B_T=B_M
                         IF (Y_DROP <= Y_GAS) THEN
                            NUSSELT  = 2._EB + NU_FAC_GAS*SQRT(RE_L)
                            H_HEAT   = NUSSELT*K_AIR/LENGTH
@@ -2382,7 +2383,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                            SHERWOOD  = 2._EB + NU_FAC_GAS*SQRT(RE_L)*LOG(1._EB+B_NUMBER)/(Y_DROP-Y_GAS)
                            H_MASS = SHERWOOD*D_AIR/LENGTH
                         ENDIF
-                     CASE(1) ! Shazin M1
+                     CASE(1) ! Shazin M1, Eq 106 + 109 with eq 102.
                         IF (Y_DROP <= Y_GAS) THEN
                            NUSSELT  = 2._EB + NU_FAC_GAS*SQRT(RE_L)
                            H_HEAT   = NUSSELT*K_AIR/LENGTH
@@ -2401,7 +2402,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                            NUSSELT  = 2._EB + NU_FAC_GAS*SQRT(RE_L)*LOG(1._EB+B_NUMBER)/B_NUMBER
                            H_HEAT   = NUSSELT*K_AIR/LENGTH
                         ENDIF
-                     CASE(2) ! Shazin M1
+                     CASE(2) ! Shazin M2, Eq 116 and 117 with eq 106,109, and 102.
                         IF (Y_DROP <= Y_GAS) THEN
                            NUSSELT  = 2._EB + NU_FAC_GAS*SQRT(RE_L)
                            H_HEAT   = NUSSELT*K_AIR/LENGTH
