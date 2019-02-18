@@ -1887,7 +1887,7 @@ NAMELIST /MISC/ AGGLOMERATION,AEROSOL_AL2O3,ALLOW_SURFACE_PARTICLES,ALLOW_UNDERS
                 C_DEARDORFF,C_RNG,C_RNG_CUTOFF,C_SMAGORINSKY,C_VREMAN,&
                 C_WALE,DNS,DO_IMPLICIT_CCREGION,DEPOSITION,ENTHALPY_TRANSPORT,&
                 EVACUATION_DRILL,EVACUATION_MC_MODE,EVAC_PRESSURE_ITERATIONS,EVAC_SURF_DEFAULT,EVAC_TIME_ITERATIONS,&
-                EXTERNAL_BOUNDARY_CORRECTION,HVAC_PRES_RELAX,HT3D_TEST,&
+                EVAP_MODEL,EXTERNAL_BOUNDARY_CORRECTION,HVAC_PRES_RELAX,HT3D_TEST,&
                 POSITIVE_ERROR_TEST,FLUX_LIMITER,FREEZE_VELOCITY,FYI,GAMMA,GRAVITATIONAL_DEPOSITION,&
                 GRAVITATIONAL_SETTLING,GVEC,H_F_REFERENCE_TEMPERATURE,&
                 HUMIDITY,HVAC_LOCAL_PRESSURE,HVAC_MASS_TRANSPORT,&
@@ -5002,7 +5002,11 @@ READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
       MINIMUM_DIAMETER                  = 0.005_EB*DIAMETER
    ENDIF
    LPC%MINIMUM_DIAMETER                 = MINIMUM_DIAMETER*1.E-6_EB
-   LPC%KILL_RADIUS                      = MINIMUM_DIAMETER*0.5_EB*1.E-6_EB*0.005**ONTH ! Kill if mass <= 0.5 % of MINIMUM_DIAMETER
+   IF (MONODISPERSE) THEN
+      LPC%KILL_RADIUS                   = MINIMUM_DIAMETER*1.E-6_EB
+   ELSE
+      LPC%KILL_RADIUS                   = (MINIMUM_DIAMETER**3*0.005_EB)**ONTH*1.E-6_EB ! Kill if mass <= 0.5 % of MINIMUM_DIAMETER
+   ENDIF
    LPC%MONODISPERSE                     = MONODISPERSE
    LPC%PERIODIC_X                       = PERIODIC_X
    LPC%PERIODIC_Y                       = PERIODIC_Y
@@ -5177,8 +5181,10 @@ DEVC_ID                  = 'null'
 INITIAL_TEMPERATURE      = TMPA - TMPM  ! C
 HEAT_OF_COMBUSTION       = -1._EB       ! kJ/kg
 DIAMETER                 = -1._EB       !
-MAXIMUM_DIAMETER         = 1.E9_EB      ! microns, meant to be infinitely large and not used
-MINIMUM_DIAMETER         = -1._EB       ! microns, below which the PARTICLE evaporates in one time step
+MAXIMUM_DIAMETER         = 1.E9_EB      ! microns, sets the largest particle generated when using a size distribution
+MINIMUM_DIAMETER         = -1._EB       ! microns, sets the smallest particle generated when using a size distribution
+                                        ! For a monodisperse distribution, this also sets the evaporation size limit; otherwise, it is
+                                        ! 5 % of the particle volume defined by this parameter.
 MONODISPERSE             = .FALSE.
 N_STRATA                 = 6
 GAMMA_D                  = 2.4_EB
