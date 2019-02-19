@@ -11887,7 +11887,7 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
             XYZ(2) = MESHES(1)%YS
             XYZ(3) = MESHES(1)%ZS
             MESH_NUMBER = 1
-            IF (PROCESS(1)==MYID) MESH_DEVICE(1) = 1
+            MESH_DEVICE = 1
          ELSE
             IF (ALL(EVACUATION_ONLY)) CYCLE READ_DEVC_LOOP
             WRITE(MESSAGE,'(A,A,A)') 'WARNING: DEVC ',TRIM(ID),' is not within any mesh.'
