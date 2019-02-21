@@ -872,6 +872,13 @@ ENDDO MESH_LOOP
 
 NM_EVAC = NM
 
+! Check if there are too many MPI processes assigned to the job
+
+IF (PROCESS(NMESHES) < N_MPI_PROCESSES-1) THEN
+   WRITE(MESSAGE,'(A)') 'ERROR: Too many MPI processes have been assigned to this job'
+   CALL SHUTDOWN(MESSAGE) ; RETURN
+ENDIF
+
 ! Check for bad mesh ordering if MPI_PROCESS used
 
 DO NM=1,NMESHES
@@ -11887,7 +11894,11 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
             XYZ(2) = MESHES(1)%YS
             XYZ(3) = MESHES(1)%ZS
             MESH_NUMBER = 1
-            MESH_DEVICE = 1
+            IF (INIT_ID/='null') THEN
+               MESH_DEVICE = 1  ! This is the case where a DEVC is assigned to particles specified on an INIT line
+            ELSE
+               IF (PROCESS(1)==MYID) MESH_DEVICE(1) = 1  ! This refers to HVAC or control logic
+            ENDIF
          ELSE
             IF (ALL(EVACUATION_ONLY)) CYCLE READ_DEVC_LOOP
             WRITE(MESSAGE,'(A,A,A)') 'WARNING: DEVC ',TRIM(ID),' is not within any mesh.'
