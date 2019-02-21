@@ -24,13 +24,13 @@
 &SURF ID='GROUND', ROUGHNESS=3.0, COLOR='FOREST GREEN', NET_HEAT_FLUX=-0.00502, RAMP_Q='heat flux ramp'/
 
 &RAMP ID='heat flux ramp', T=0     ,F=0/
-&RAMP ID='heat flux ramp', T=111599,F=0/ 31 hrs
-&RAMP ID='heat flux ramp', T=111600,F=1/ Schoenberg applies flux for last "6+3" hours
+&RAMP ID='heat flux ramp', T=21600, F=0/ 6 hrs
+&RAMP ID='heat flux ramp', T=21601, F=1/ Schoenberg applies flux for last "6+3" hours
 &RAMP ID='heat flux ramp', T=144000,F=1/
 
 &RAMP ID='geo wind ramp', T=0     ,F=1/
-&RAMP ID='geo wind ramp', T=111599,F=1/ 31 hrs
-&RAMP ID='geo wind ramp', T=111600,F=0.7/ Schoenberg applies flux for last "6+3" hours
+&RAMP ID='geo wind ramp', T=21600, F=1/ 31 hrs
+&RAMP ID='geo wind ramp', T=21601, F=0.7/ Schoenberg applies flux for last "6+3" hours
 &RAMP ID='geo wind ramp', T=144000,F=0.7/
 
 &VENT PBX=0,    SURF_ID = 'PERIODIC' /
