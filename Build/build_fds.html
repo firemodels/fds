@@ -13,7 +13,7 @@ function get_fullpath(command,platform){
   return fullpath;
 }
 function run_script(script){
-  MyObject.Run(get_fullpath("../Utilities/Scripts/webRUN_script.bat ",script));
+  MyObject.Run(get_fullpath("../../bot/Bundle/fds/scripts/webRUN_script.bat ",script));
 }
 function build_fds(args){
   MyObject.Run(get_fullpath("Scripts/webBUILDfds.bat ",args));
