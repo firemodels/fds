@@ -1195,18 +1195,24 @@ and you want to alter the uniform spacing in the $x$ direction. First, refer to 
 
 Two types of transformation functions are allowed. The first, and simplest, is a piecewise-linear function. Figure~\ref{fig:grid2} gives an example of a piecewise-linear transformation. The graph indicates how 15 uniformly spaced mesh cells along the horizontal axis are transformed into 15 non-uniformly spaced cells along the vertical axis. In this case, the function is made up of straight line segments connecting points ({\ct CC},{\ct PC}), in increasing order, as specified by the following lines in the input file:
 \begin{lstlisting}
-&TRNX CC=0.30, PC=0.50, MESH_NUMBER=2 /
-&TRNX CC=1.20, PC=1.00, MESH_NUMBER=2 /
+&MESH ..., TRNX_ID='my trnx' /
+&TRNX ID='my trnx', CC=0.30, PC=0.50 /
+&TRNX ID='my trnx', CC=1.20, PC=1.00 /
 \end{lstlisting}
-The integer {\ct MESH\_NUMBER} indicates which mesh to apply the transformation. If you want the transformation to be applied to all meshes, set {\ct MESH\_NUMBER} to 0. The parameter {\ct CC} refers to the Computational Coordinate, $\xi$, located on the horizontal axis; {\ct PC} is the Physical Coordinate, $x$, located on the vertical axis.  The slopes of the line segments in the plot indicate whether the mesh is being stretched (slopes greater than 1) or shrunk (slopes less than 1). The tricky part about this process is that you usually have a desired shrinking/stretching strategy for the Physical Coordinate on the vertical axis, and must work backwards to determine what the corresponding points should be for the Computational Coordinate on the horizontal axis. Note that the above transformation is applied to the second mesh in a multiple mesh job.
-It should be also noted that the start and endpoints should not be specified in this linear grid transformation.
+Note that an {\ct ID} may be applied to a set of {\ct TRNX} lines and invoked using a {\ct TRNX\_ID}, etc., on the desired {\ct MESH} lines.  This strategy also works when a {\ct MULT\_ID} is applied to the {\ct MESH}.  Alternatively, you may indicate the integer {\ct MESH\_NUMBER} (based on the order of the {\ct MESH} lines) for which you wish to apply the transformation (this approach is deprecated because it requires a set of transformation lines for each mesh, which can be impractical for MPI calculations).  If you want the transformation to be applied to all meshes, set {\ct MESH\_NUMBER} to 0.  Thus, an equivalent representation of the previous example applied to all meshes would be:
+\begin{lstlisting}
+&TRNX CC=0.30, PC=0.50, MESH_NUMBER=0 /
+&TRNX CC=1.20, PC=1.00, MESH_NUMBER=0 /
+\end{lstlisting}
+The parameter {\ct CC} refers to the Computational Coordinate, $\xi$, located on the horizontal axis; {\ct PC} is the Physical Coordinate, $x$, located on the vertical axis.  The slopes of the line segments in the plot indicate whether the mesh is being stretched (slopes greater than 1) or shrunk (slopes less than 1). The tricky part about this process is that you usually have a desired shrinking/stretching strategy for the Physical Coordinate on the vertical axis, and must work backwards to determine what the corresponding points should be for the Computational Coordinate on the horizontal axis. Note that the above transformation is applied to the second mesh in a multiple mesh job. It should be also noted that the start and endpoints should not be specified in this linear grid transformation.
 
 The second type of transformation is a polynomial function whose constraints are of the form
 \[ \frac{\d^n f(\hbox{\ct CC})}{\d\xi^n} = \hbox{\ct PC}   \]
-Figure~\ref{fig:grid1} gives an example of a polynomial transformation, for which the parameters are specified (assuming that this is the third mesh):
+Figure~\ref{fig:grid1} gives an example of a polynomial transformation, for which the parameters are specified:
 \begin{lstlisting}
-&TRNX IDERIV=0, CC=0.75, PC=0.75, MESH_NUMBER=3 /
-&TRNX IDERIV=1, CC=0.75, PC=0.50, MESH_NUMBER=3 /
+&MESH ..., TRNX_ID='my trnx'
+&TRNX ID='my trnx', IDERIV=0, CC=0.75, PC=0.75 /
+&TRNX ID='my trnx', IDERIV=1, CC=0.75, PC=0.50 /
 \end{lstlisting}
 which correspond to the constraints
 $f(0.75)=0.75$ and $\frac{\d f}{\d \xi}(0.75) = 0.5$, or, in words, the
@@ -9817,7 +9823,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct MESH} (Mesh Parameters)} \\
 \hline \hline
 \endhead
-{\ct CHECK\_MESH\_ALIGNMENT}         & Logical                       & Section~\ref{info:mesh_alignment}        &    & {\ct .FALSE.}    \\ \hline
+{\ct CHECK\_MESH\_ALIGNMENT}         & Logical                       & Section~\ref{info:mesh_alignment}         &    & {\ct .FALSE.}    \\ \hline
 {\ct COLOR}                          & Character                     & Section~\ref{info:multimesh}              &    & {\ct 'BLACK'}    \\ \hline
 {\ct CYLINDRICAL}                    & Logical                       & Section~\ref{info:2D}                     &    & {\ct .FALSE.}    \\ \hline
 {\ct EVACUATION}                     & Logical                       & Reference~\cite{FDS_Evac_Users_Guide}     &    & {\ct .FALSE.}    \\ \hline
@@ -9830,6 +9836,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct N\_THREADS}                     & Integer                       & Section~\ref{info:multimesh}              &    &                  \\ \hline
 {\ct MULT\_ID }                      & Character                     & Section~\ref{info:MULT}                   &    &                  \\ \hline
 {\ct RGB}                            & Integer Triplet               & Section~\ref{info:multimesh}              &    & 0,0,0            \\ \hline
+{\ct TRNX\_ID}                       & Character                     & Section~\ref{info:TRNX}                   &    &                  \\ \hline
+{\ct TRNY\_ID}                       & Character                     & Section~\ref{info:TRNX}                   &    &                  \\ \hline
+{\ct TRNZ\_ID}                       & Character                     & Section~\ref{info:TRNX}                   &    &                  \\ \hline
 {\ct XB(6)}                          & Real Sextuplet                & Section~\ref{info:MESH_Basics}            & m  & 0,1,0,1,0,1      \\ \hline
 \end{longtable}
 
@@ -10709,6 +10718,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hline \hline
 \endhead
 {\ct CC    }            & Real          & Section~\ref{info:TRNX}   & m            &     \\ \hline
+{\ct ID}                & Character     & Section~\ref{info:TRNX}   &              &     \\ \hline
 {\ct IDERIV}            & Integer       & Section~\ref{info:TRNX}   &              &     \\ \hline
 {\ct MESH\_NUMBER}      & Integer       & Section~\ref{info:TRNX}   &              &     \\ \hline
 {\ct PC    }            & Real          & Section~\ref{info:TRNX}   &              &     \\ \hline
