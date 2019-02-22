@@ -41198,7 +41198,7 @@ LOGICAL, INTENT(IN) :: ABS_FLG
 REAL(FB), PARAMETER :: EPS_FB = 1.E-7_FB
 REAL(FB), PARAMETER :: EPS_MID= 1.E-4_FB
 REAL(FB), POINTER, DIMENSION(:) :: V1, V2, V3
-REAL(FB) :: U1(3), U2(3), CRPD(3)
+REAL(FB) :: U1(3), U2(3), CRPD(3), NORMU(2)
 LOGICAL :: TEST_FLAG=.FALSE.
 
 DIFF_ANGLE = .FALSE.
@@ -41209,6 +41209,14 @@ V3(1:3)=>VERTS(3*IV3-2:3*IV3)
 
 U1 = V2 - V1;
 U2 = V3 - V2;
+
+NORMU(1)=SQRT(U1(1)**2._FB+U1(2)**2._FB+U1(3)**2._FB)
+NORMU(2)=SQRT(U2(1)**2._FB+U2(2)**2._FB+U2(3)**2._FB)
+
+IF(ANY(NORMU(1:2)<EPS_FB)) THEN
+   DIFF_ANGLE = .TRUE.
+   RETURN
+ENDIF
 
 ! triangle is invalid if angle at V2 is > 180 deg
 SELECT CASE(DIR)
@@ -41228,8 +41236,8 @@ CASE(KAXIS)
    U2(1) = U2(1)
    U2(2) = U2(2)
 CASE(0) ! 3D Cross for Inboundary faces:
-   U1(1:3) = U1(1:3) / SQRT(U1(1)**2._FB+U1(2)**2._FB+U1(3)**2._FB) ! Normalize
-   U2(1:3) = U2(1:3) / SQRT(U2(1)**2._FB+U2(2)**2._FB+U2(3)**2._FB) ! Normalize
+   U1(1:3) = U1(1:3) / NORMU(1) ! Normalize
+   U2(1:3) = U2(1:3) / NORMU(2) ! Normalize
    CRPD(1) = U1(2)*U2(3)-U1(3)*U2(2)
    CRPD(2) = U1(3)*U2(1)-U1(1)*U2(3)
    CRPD(3) = U1(1)*U2(2)-U1(2)*U2(1)
@@ -41348,6 +41356,13 @@ DO I = 1, NVERTS
 ENDDO
 
 NLIST  = SUM(VERT_FLAG(1:NVERTS))
+
+IF (NLIST < 3) THEN
+   FACES(1:3*(NVERTS-2)) = VERT_OFFSET + 1
+   LOCTYPE(1:NVERTS-2) = 4+8+16
+   RETURN
+ENDIF
+
 NVERTS2= NLIST
 NEDGES = NLIST
 COUNT = 0
