@@ -464,9 +464,9 @@ INTEGER, ALLOCATABLE, DIMENSION(:) :: NEIGHBOR_LIST
 LOGICAL :: EVACUATION, EVAC_HUMANS,OVERLAPPING_X,OVERLAPPING_Y,OVERLAPPING_Z,POSSIBLY_PERIODIC
 REAL(EB) :: EVAC_Z_OFFSET,XB1,XB2,XB3,XB4,XB5,XB6
 CHARACTER(25) :: COLOR
-CHARACTER(LABEL_LENGTH) :: MULT_ID
+CHARACTER(LABEL_LENGTH) :: MULT_ID,TRAN_ID
 NAMELIST /MESH/ CHECK_MESH_ALIGNMENT,COLOR,CYLINDRICAL,EVACUATION,EVAC_HUMANS,EVAC_Z_OFFSET, FYI,ID,IJK,LEVEL,MPI_PROCESS,MULT_ID,&
-                RGB,XB,N_THREADS
+                RGB,TRAN_ID,XB,N_THREADS
 TYPE (MESH_TYPE), POINTER :: M,M2
 TYPE (MULTIPLIER_TYPE), POINTER :: MR
 
@@ -654,6 +654,7 @@ MESH_LOOP: DO N=1,NMESHES_READ
    MPI_PROCESS = -1
    LEVEL = 0
    MULT_ID = 'null'
+   TRAN_ID = 'null'
    N_THREADS = -1
 
    ! Read the MESH line
@@ -725,6 +726,7 @@ MESH_LOOP: DO N=1,NMESHES_READ
             ! Fill in MESH related variables
 
             M => MESHES(NM)
+            M%TRAN_ID = TRAN_ID
             M%MESH_LEVEL = LEVEL
             M%IBAR = IJK(1)
             M%JBAR = IJK(2)
@@ -767,31 +769,31 @@ MESH_LOOP: DO N=1,NMESHES_READ
 
             ! Check the number of OMP threads for a valid value (positive, larger than 0), -1 indicates default unchanged value
             IF (N_THREADS < 1 .AND. N_THREADS /= -1) THEN
-              WRITE(MESSAGE, '(A)') 'ERROR: N_THREADS must be at least 1'
-              CALL SHUTDOWN(MESSAGE) ; RETURN
+               WRITE(MESSAGE, '(A)') 'ERROR: N_THREADS must be at least 1'
+               CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
 
             ! If OMP number of threads is explicitly set for this mesh and the mesh is assigned to this MPI process,
             ! then set this value
             IF (MYID == PROCESS(NM) .AND. N_THREADS > 0) THEN
-              ! Check if OPENMP is active
-              IF (USE_OPENMP .NEQV. .TRUE.) THEN
-                WRITE(MESSAGE, '(A)') 'ERROR: setting N_THREADS, but OPENMP is not active'
-                CALL SHUTDOWN(MESSAGE) ; RETURN
-              END IF
-
-              ! Check if the process' thread number was already set in a previous mesh definition
-              IF (OPENMP_USER_SET_THREADS .EQV. .TRUE.) THEN
-                ! Check if previous definitions are consistent
-                IF (N_THREADS .NE. OPENMP_USED_THREADS) THEN
-                  WRITE(MESSAGE, '(A)') 'ERROR: N_THREADS not consistent for MPI process'
+               ! Check if OPENMP is active
+               IF (USE_OPENMP .NEQV. .TRUE.) THEN
+                  WRITE(MESSAGE, '(A)') 'ERROR: setting N_THREADS, but OPENMP is not active'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
-                END IF
-              END IF
+               END IF
 
-              ! set the value-changed-flag and the new thread number
-              OPENMP_USER_SET_THREADS = .TRUE.
-              OPENMP_USED_THREADS     = N_THREADS
+               ! Check if the process' thread number was already set in a previous mesh definition
+               IF (OPENMP_USER_SET_THREADS .EQV. .TRUE.) THEN
+                  ! Check if previous definitions are consistent
+                  IF (N_THREADS .NE. OPENMP_USED_THREADS) THEN
+                     WRITE(MESSAGE, '(A)') 'ERROR: N_THREADS not consistent for MPI process'
+                     CALL SHUTDOWN(MESSAGE) ; RETURN
+                  END IF
+               END IF
+
+               ! set the value-changed-flag and the new thread number
+               OPENMP_USER_SET_THREADS = .TRUE.
+               OPENMP_USED_THREADS     = N_THREADS
             END IF
 
             ! Mesh boundary colors
@@ -1206,6 +1208,7 @@ USE MATH_FUNCTIONS, ONLY : GAUSSJ
 
 ! Compute the polynomial transform function for the vertical coordinate
 
+CHARACTER(LABEL_LENGTH) :: ID
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: A,XX
 INTEGER, ALLOCATABLE, DIMENSION(:,:) :: ND
 REAL(EB) :: PC,CC,COEF,XI,ETA,ZETA
@@ -1213,9 +1216,9 @@ INTEGER  IEXP,IC,IDERIV,N,K,IOS,I,MESH_NUMBER, NIPX,NIPY,NIPZ,NIPXS,NIPYS,NIPZS,
 LOGICAL :: PROCESS_TRANS
 TYPE (MESH_TYPE), POINTER :: M=>NULL()
 TYPE (TRAN_TYPE), POINTER :: T=>NULL()
-NAMELIST /TRNX/ CC,FYI,IDERIV,MESH_NUMBER,PC
-NAMELIST /TRNY/ CC,FYI,IDERIV,MESH_NUMBER,PC
-NAMELIST /TRNZ/ CC,FYI,IDERIV,MESH_NUMBER,PC
+NAMELIST /TRNX/ CC,FYI,IDERIV,MESH_NUMBER,PC,ID
+NAMELIST /TRNY/ CC,FYI,IDERIV,MESH_NUMBER,PC,ID
+NAMELIST /TRNZ/ CC,FYI,IDERIV,MESH_NUMBER,PC,ID
 
 ! Scan the input file, counting the number of NAMELIST entries
 
@@ -1253,18 +1256,21 @@ MESH_LOOP: DO NM=1,NMESHES
                IF (IOS==1) EXIT TRNLOOP
                MESH_NUMBER = 1
                READ(LU_INPUT,NML=TRNX,END=17,ERR=18,IOSTAT=IOS)
+               IF (TRIM(M%TRAN_ID)==TRIM(ID)) MESH_NUMBER=NM
                IF (MESH_NUMBER>0 .AND. MESH_NUMBER/=NM) CYCLE TRNLOOP
             CASE(2)
                CALL CHECKREAD('TRNY',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
                IF (IOS==1) EXIT TRNLOOP
                MESH_NUMBER = 1
                READ(LU_INPUT,NML=TRNY,END=17,ERR=18,IOSTAT=IOS)
+               IF (TRIM(M%TRAN_ID)==TRIM(ID)) MESH_NUMBER=NM
                IF (MESH_NUMBER>0 .AND. MESH_NUMBER/=NM) CYCLE TRNLOOP
             CASE(3)
                CALL CHECKREAD('TRNZ',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
                IF (IOS==1) EXIT TRNLOOP
                MESH_NUMBER = 1
                READ(LU_INPUT,NML=TRNZ,END=17,ERR=18,IOSTAT=IOS)
+               IF (TRIM(M%TRAN_ID)==TRIM(ID)) MESH_NUMBER=NM
                IF (MESH_NUMBER>0 .AND. MESH_NUMBER/=NM) CYCLE TRNLOOP
          END SELECT
          T%NOC(N) = T%NOC(N) + 1
@@ -1288,51 +1294,54 @@ MESH_LOOP: DO NM=1,NMESHES
 
    T%ITRAN  = 0
 
-   DO IC=1,3
-      NLOOP:  DO N=1,T%NOC(IC)
+   ICLOOP_1: DO IC=1,3
+      NLOOP: DO N=1,T%NOC(IC)
          IDERIV = -1
-         IF (IC==1) THEN
-            LOOP1: DO
-               CALL CHECKREAD('TRNX',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
-               IF (IOS==1) EXIT NLOOP
-               MESH_NUMBER = 1
-               READ(LU_INPUT,TRNX,END=1,ERR=2)
-               IF (MESH_NUMBER==0 .OR. MESH_NUMBER==NM) EXIT LOOP1
-            ENDDO LOOP1
-         ENDIF
-         IF (IC==2) THEN
-            LOOP2: DO
-               CALL CHECKREAD('TRNY',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
-               IF (IOS==1) EXIT NLOOP
-               MESH_NUMBER = 1
-               READ(LU_INPUT,TRNY,END=1,ERR=2)
-               IF (MESH_NUMBER==0 .OR. MESH_NUMBER==NM) EXIT LOOP2
-            ENDDO LOOP2
-         ENDIF
-         IF (IC==3) THEN
-            LOOP3: DO
-               CALL CHECKREAD('TRNZ',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
-               IF (IOS==1) EXIT NLOOP
-               MESH_NUMBER = 1
-               READ(LU_INPUT,TRNZ,END=1,ERR=2)
-               IF (MESH_NUMBER==0 .OR. MESH_NUMBER==NM) EXIT LOOP3
-            ENDDO LOOP3
-         ENDIF
+         IC_SELECT: SELECT CASE(IC)
+            CASE(1)
+               LOOP1: DO
+                  CALL CHECKREAD('TRNX',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
+                  IF (IOS==1) EXIT NLOOP
+                  MESH_NUMBER = 1
+                  READ(LU_INPUT,TRNX,END=1,ERR=2)
+                  IF (TRIM(M%TRAN_ID)==TRIM(ID)) MESH_NUMBER=NM
+                  IF (MESH_NUMBER==0 .OR. MESH_NUMBER==NM) EXIT LOOP1
+               ENDDO LOOP1
+            CASE(2)
+               LOOP2: DO
+                  CALL CHECKREAD('TRNY',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
+                  IF (IOS==1) EXIT NLOOP
+                  MESH_NUMBER = 1
+                  READ(LU_INPUT,TRNY,END=1,ERR=2)
+                  IF (TRIM(M%TRAN_ID)==TRIM(ID)) MESH_NUMBER=NM
+                  IF (MESH_NUMBER==0 .OR. MESH_NUMBER==NM) EXIT LOOP2
+               ENDDO LOOP2
+            CASE(3)
+               LOOP3: DO
+                  CALL CHECKREAD('TRNZ',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
+                  IF (IOS==1) EXIT NLOOP
+                  MESH_NUMBER = 1
+                  READ(LU_INPUT,TRNZ,END=1,ERR=2)
+                  IF (TRIM(M%TRAN_ID)==TRIM(ID)) MESH_NUMBER=NM
+                  IF (MESH_NUMBER==0 .OR. MESH_NUMBER==NM) EXIT LOOP3
+               ENDDO LOOP3
+         END SELECT IC_SELECT
          T%CCSTORE(N,IC) = CC
          T%PCSTORE(N,IC) = PC
          T%IDERIVSTORE(N,IC) = IDERIV
          IF (IDERIV>=0) T%ITRAN(IC) = 1
          IF (IDERIV<0)  T%ITRAN(IC) = 2
       2 CONTINUE
-        ENDDO NLOOP
+      ENDDO NLOOP
       1 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
-   ENDDO
+   ENDDO ICLOOP_1
 
-   ICLOOP: DO IC=1,3
+   ICLOOP_2: DO IC=1,3
 
       SELECT CASE (T%ITRAN(IC))
 
          CASE (1)  ! polynomial transformation
+
             ND(1,IC)  = 0
             SELECT CASE(IC)
                CASE(1)
@@ -1411,7 +1420,7 @@ MESH_LOOP: DO NM=1,NMESHES
                T%C3(N,IC) = (T%C2(N,IC)-T%C2(N-1,IC))/(T%C1(N,IC)-T%C1(N-1,IC))
             ENDDO
       END SELECT
-   ENDDO ICLOOP
+   ENDDO ICLOOP_2
 
    DEALLOCATE(A)
    DEALLOCATE(XX)
