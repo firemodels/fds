@@ -944,36 +944,41 @@ SUBROUTINE MOMENTUM_NUDGING
 REAL(EB) :: UBAR,VBAR,WBAR,INTEGRAL,SUM_VOLUME,VC,UMEAN,VMEAN,WMEAN,DU_FORCING,DV_FORCING,DW_FORCING,DT_LOC
 INTEGER  :: NSC,I_LO,J_LO,I_HI,J_HI
 
+IF (ICYC==1) RETURN ! need one cycle to initialize forcing arrays
+
 DT_LOC = MAX(DT,DT_MEAN_FORCING)
 NSC    = SPONGE_CELLS
 
 MEAN_FORCING_X: IF (MEAN_FORCING(1)) THEN
    SELECT_RAMP_U: SELECT CASE(I_RAMP_U0_Z)
       CASE(0) SELECT_RAMP_U
-         INTEGRAL = 0._EB
-         SUM_VOLUME = 0._EB
-         DO K=1,KBAR
-            DO J=1,JBAR
-               DO I=0,IBAR
-                  IC1 = CELL_INDEX(I,J,K)
-                  IC2 = CELL_INDEX(I+1,J,K)
-                  IF (SOLID(IC1)) CYCLE
-                  IF (SOLID(IC2)) CYCLE
-                  IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
-                  IF (.NOT.MEAN_FORCING_CELL(I+1,J,K)) CYCLE
-                  VC = DXN(I)*DY(J)*DZ(K)
-                  INTEGRAL = INTEGRAL + UU(I,J,K)*VC
-                  SUM_VOLUME = SUM_VOLUME + VC
+         PREDICTOR_IF_U: IF (PREDICTOR) THEN
+            INTEGRAL = 0._EB
+            SUM_VOLUME = 0._EB
+            DO K=1,KBAR
+               DO J=1,JBAR
+                  DO I=0,IBAR
+                     IC1 = CELL_INDEX(I,J,K)
+                     IC2 = CELL_INDEX(I+1,J,K)
+                     IF (SOLID(IC1)) CYCLE
+                     IF (SOLID(IC2)) CYCLE
+                     IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
+                     IF (.NOT.MEAN_FORCING_CELL(I+1,J,K)) CYCLE
+                     VC = DXN(I)*DY(J)*DZ(K)
+                     INTEGRAL = INTEGRAL + UU(I,J,K)*VC
+                     SUM_VOLUME = SUM_VOLUME + VC
+                  ENDDO
                ENDDO
             ENDDO
-         ENDDO
-         IF (SUM_VOLUME>TWO_EPSILON_EB) THEN
-            UMEAN = INTEGRAL/SUM_VOLUME
-         ELSE
-            UMEAN = 0._EB
-         ENDIF
+            IF (SUM_VOLUME>TWO_EPSILON_EB) THEN
+               U_MEAN_LOC(NM) = INTEGRAL
+            ELSE
+               U_MEAN_LOC(NM) = 0._EB
+            ENDIF
+            M_VOLU_LOC(NM) = SUM_VOLUME
+         ENDIF PREDICTOR_IF_U
          UBAR = U0*EVALUATE_RAMP(T,DUMMY,I_RAMP_U0_T)
-         DU_FORCING = (UBAR-UMEAN)/DT_LOC
+         DU_FORCING = (UBAR-U_MEAN_GLOBAL)/DT_LOC
          DO K=1,KBAR
             DO J=1,JBAR
                DO I=0,IBAR
@@ -1025,30 +1030,33 @@ ENDIF MEAN_FORCING_X
 MEAN_FORCING_Y: IF (MEAN_FORCING(2)) THEN
    SELECT_RAMP_V: SELECT CASE(I_RAMP_V0_Z)
       CASE(0) SELECT_RAMP_V
-         INTEGRAL = 0._EB
-         SUM_VOLUME = 0._EB
-         DO K=1,KBAR
-            DO J=0,JBAR
-               DO I=1,IBAR
-                  IC1 = CELL_INDEX(I,J,K)
-                  IC2 = CELL_INDEX(I,J+1,K)
-                  IF (SOLID(IC1)) CYCLE
-                  IF (SOLID(IC2)) CYCLE
-                  IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
-                  IF (.NOT.MEAN_FORCING_CELL(I,J+1,K)) CYCLE
-                  VC = DX(I)*DYN(J)*DZ(K)
-                  INTEGRAL = INTEGRAL + VV(I,J,K)*VC
-                  SUM_VOLUME = SUM_VOLUME + VC
+         PREDICTOR_IF_V: IF (PREDICTOR) THEN
+            INTEGRAL = 0._EB
+            SUM_VOLUME = 0._EB
+            DO K=1,KBAR
+               DO J=0,JBAR
+                  DO I=1,IBAR
+                     IC1 = CELL_INDEX(I,J,K)
+                     IC2 = CELL_INDEX(I,J+1,K)
+                     IF (SOLID(IC1)) CYCLE
+                     IF (SOLID(IC2)) CYCLE
+                     IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
+                     IF (.NOT.MEAN_FORCING_CELL(I,J+1,K)) CYCLE
+                     VC = DX(I)*DYN(J)*DZ(K)
+                     INTEGRAL = INTEGRAL + VV(I,J,K)*VC
+                     SUM_VOLUME = SUM_VOLUME + VC
+                  ENDDO
                ENDDO
             ENDDO
-         ENDDO
-         IF (SUM_VOLUME>TWO_EPSILON_EB) THEN
-            VMEAN = INTEGRAL/SUM_VOLUME
-         ELSE
-            VMEAN = 0._EB
-         ENDIF
+            IF (SUM_VOLUME>TWO_EPSILON_EB) THEN
+               V_MEAN_LOC(NM) = INTEGRAL
+            ELSE
+               V_MEAN_LOC(NM) = 0._EB
+            ENDIF
+            M_VOLV_LOC(NM) = SUM_VOLUME
+         ENDIF PREDICTOR_IF_V
          VBAR = V0*EVALUATE_RAMP(T,DUMMY,I_RAMP_V0_T)
-         DV_FORCING = (VBAR-VMEAN)/DT_LOC
+         DV_FORCING = (VBAR-V_MEAN_GLOBAL)/DT_LOC
          DO K=1,KBAR
             DO J=0,JBAR
                DO I=1,IBAR
@@ -1099,30 +1107,33 @@ ENDIF MEAN_FORCING_Y
 MEAN_FORCING_Z: IF (MEAN_FORCING(3)) THEN
    SELECT_RAMP_W: SELECT CASE(I_RAMP_W0_Z)
       CASE(0) SELECT_RAMP_W
-         INTEGRAL = 0._EB
-         SUM_VOLUME = 0._EB
-         DO K=0,KBAR
-            DO J=1,JBAR
-               DO I=1,IBAR
-                  IC1 = CELL_INDEX(I,J,K)
-                  IC2 = CELL_INDEX(I,J,K+1)
-                  IF (SOLID(IC1)) CYCLE
-                  IF (SOLID(IC2)) CYCLE
-                  IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
-                  IF (.NOT.MEAN_FORCING_CELL(I,J,K+1)) CYCLE
-                  VC = DX(I)*DY(J)*DZN(K)
-                  INTEGRAL = INTEGRAL + WW(I,J,K)*VC
-                  SUM_VOLUME = SUM_VOLUME + VC
+         PREDICTOR_IF_W: IF (PREDICTOR) THEN
+            INTEGRAL = 0._EB
+            SUM_VOLUME = 0._EB
+            DO K=0,KBAR
+               DO J=1,JBAR
+                  DO I=1,IBAR
+                     IC1 = CELL_INDEX(I,J,K)
+                     IC2 = CELL_INDEX(I,J,K+1)
+                     IF (SOLID(IC1)) CYCLE
+                     IF (SOLID(IC2)) CYCLE
+                     IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
+                     IF (.NOT.MEAN_FORCING_CELL(I,J,K+1)) CYCLE
+                     VC = DX(I)*DY(J)*DZN(K)
+                     INTEGRAL = INTEGRAL + WW(I,J,K)*VC
+                     SUM_VOLUME = SUM_VOLUME + VC
+                  ENDDO
                ENDDO
             ENDDO
-         ENDDO
-         IF (SUM_VOLUME>TWO_EPSILON_EB) THEN
-            WMEAN = INTEGRAL/SUM_VOLUME
-         ELSE
-            WMEAN = 0._EB
-         ENDIF
+            IF (SUM_VOLUME>TWO_EPSILON_EB) THEN
+               W_MEAN_LOC(NM) = INTEGRAL
+            ELSE
+               W_MEAN_LOC(NM) = 0._EB
+            ENDIF
+            M_VOLW_LOC(NM) = SUM_VOLUME
+         ENDIF PREDICTOR_IF_W
          WBAR = W0*EVALUATE_RAMP(T,DUMMY,I_RAMP_W0_T)
-         DW_FORCING = (WBAR-WMEAN)/DT_LOC
+         DW_FORCING = (WBAR-W_MEAN_GLOBAL)/DT_LOC
          DO K=0,KBAR
             DO J=1,JBAR
                DO I=1,IBAR
