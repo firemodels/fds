@@ -939,6 +939,8 @@ CONTAINS
 
 SUBROUTINE MOMENTUM_NUDGING
 
+USE COMPLEX_GEOMETRY, ONLY : IBM_GASPHASE, IBM_FGSC
+
 ! Add a force vector to the momentum equation that moves the flow field towards the direction of the mean flow.
 
 REAL(EB) :: UBAR,VBAR,WBAR,INTEGRAL,SUM_VOLUME,VC,UMEAN,VMEAN,WMEAN,DU_FORCING,DV_FORCING,DW_FORCING,DT_LOC
@@ -962,6 +964,9 @@ MEAN_FORCING_X: IF (MEAN_FORCING(1)) THEN
                      IC2 = CELL_INDEX(I+1,J,K)
                      IF (SOLID(IC1)) CYCLE
                      IF (SOLID(IC2)) CYCLE
+                     IF (CC_IBM) THEN
+                        IF(FCVAR(I,J,K,IBM_FGSC,IAXIS) /= IBM_GASPHASE) CYCLE ! If face not regular gasphase type cycle.
+                     ENDIF
                      IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
                      IF (.NOT.MEAN_FORCING_CELL(I+1,J,K)) CYCLE
                      VC = DXN(I)*DY(J)*DZ(K)
@@ -998,6 +1003,9 @@ MEAN_FORCING_X: IF (MEAN_FORCING(1)) THEN
                   IC2 = CELL_INDEX(I+1,J,K)
                   IF (SOLID(IC1)) CYCLE
                   IF (SOLID(IC2)) CYCLE
+                  IF (CC_IBM) THEN
+                     IF(FCVAR(I,J,K,IBM_FGSC,IAXIS) /= IBM_GASPHASE) CYCLE
+                  ENDIF
                   VC = DXN(I)*DY(J)*DZ(K)
                   INTEGRAL = INTEGRAL + UU(I,J,K)*VC
                   SUM_VOLUME = SUM_VOLUME + VC
@@ -1040,6 +1048,9 @@ MEAN_FORCING_Y: IF (MEAN_FORCING(2)) THEN
                      IC2 = CELL_INDEX(I,J+1,K)
                      IF (SOLID(IC1)) CYCLE
                      IF (SOLID(IC2)) CYCLE
+                     IF (CC_IBM) THEN
+                        IF(FCVAR(I,J,K,IBM_FGSC,JAXIS) /= IBM_GASPHASE) CYCLE
+                     ENDIF
                      IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
                      IF (.NOT.MEAN_FORCING_CELL(I,J+1,K)) CYCLE
                      VC = DX(I)*DYN(J)*DZ(K)
@@ -1076,6 +1087,9 @@ MEAN_FORCING_Y: IF (MEAN_FORCING(2)) THEN
                   IC2 = CELL_INDEX(I,J+1,K)
                   IF (SOLID(IC1)) CYCLE
                   IF (SOLID(IC2)) CYCLE
+                  IF (CC_IBM) THEN
+                     IF(FCVAR(I,J,K,IBM_FGSC,JAXIS) /= IBM_GASPHASE) CYCLE
+                  ENDIF
                   VC = DX(I)*DYN(J)*DZ(K)
                   INTEGRAL = INTEGRAL + VV(I,J,K)*VC
                   SUM_VOLUME = SUM_VOLUME + VC
@@ -1117,6 +1131,9 @@ MEAN_FORCING_Z: IF (MEAN_FORCING(3)) THEN
                      IC2 = CELL_INDEX(I,J,K+1)
                      IF (SOLID(IC1)) CYCLE
                      IF (SOLID(IC2)) CYCLE
+                     IF (CC_IBM) THEN
+                        IF(FCVAR(I,J,K,IBM_FGSC,KAXIS) /= IBM_GASPHASE) CYCLE
+                     ENDIF
                      IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
                      IF (.NOT.MEAN_FORCING_CELL(I,J,K+1)) CYCLE
                      VC = DX(I)*DY(J)*DZN(K)
@@ -1153,6 +1170,9 @@ MEAN_FORCING_Z: IF (MEAN_FORCING(3)) THEN
                   IC2 = CELL_INDEX(I,J,K+1)
                   IF (SOLID(IC1)) CYCLE
                   IF (SOLID(IC2)) CYCLE
+                  IF (CC_IBM) THEN
+                     IF(FCVAR(I,J,K,IBM_FGSC,KAXIS) /= IBM_GASPHASE) CYCLE
+                  ENDIF
                   VC = DX(I)*DY(J)*DZN(K)
                   INTEGRAL = INTEGRAL + WW(I,J,K)*VC
                   SUM_VOLUME = SUM_VOLUME + VC
