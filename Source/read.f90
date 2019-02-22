@@ -118,8 +118,8 @@ CALL READ_EVAC(2) ; IF (STOP_STATUS==SETUP_STOP) RETURN
 CALL READ_HVAC    ; IF (STOP_STATUS==SETUP_STOP) RETURN
 CALL PROC_SURF_1  ; IF (STOP_STATUS==SETUP_STOP) RETURN
 CALL READ_RAMP    ; IF (STOP_STATUS==SETUP_STOP) RETURN
-CALL PROC_WIND    ; IF (STOP_STATUS==SETUP_STOP) RETURN
 CALL PROC_SMIX    ; IF (STOP_STATUS==SETUP_STOP) RETURN
+CALL PROC_WIND    ; IF (STOP_STATUS==SETUP_STOP) RETURN
 CALL PROC_REAC_2  ; IF (STOP_STATUS==SETUP_STOP) RETURN
 CALL PROC_HVAC    ; IF (STOP_STATUS==SETUP_STOP) RETURN
 CALL PROC_MATL    ; IF (STOP_STATUS==SETUP_STOP) RETURN
@@ -464,9 +464,9 @@ INTEGER, ALLOCATABLE, DIMENSION(:) :: NEIGHBOR_LIST
 LOGICAL :: EVACUATION, EVAC_HUMANS,OVERLAPPING_X,OVERLAPPING_Y,OVERLAPPING_Z,POSSIBLY_PERIODIC
 REAL(EB) :: EVAC_Z_OFFSET,XB1,XB2,XB3,XB4,XB5,XB6
 CHARACTER(25) :: COLOR
-CHARACTER(LABEL_LENGTH) :: MULT_ID
+CHARACTER(LABEL_LENGTH) :: MULT_ID,TRAN_ID
 NAMELIST /MESH/ CHECK_MESH_ALIGNMENT,COLOR,CYLINDRICAL,EVACUATION,EVAC_HUMANS,EVAC_Z_OFFSET, FYI,ID,IJK,LEVEL,MPI_PROCESS,MULT_ID,&
-                RGB,XB,N_THREADS
+                RGB,TRAN_ID,XB,N_THREADS
 TYPE (MESH_TYPE), POINTER :: M,M2
 TYPE (MULTIPLIER_TYPE), POINTER :: MR
 
@@ -654,6 +654,7 @@ MESH_LOOP: DO N=1,NMESHES_READ
    MPI_PROCESS = -1
    LEVEL = 0
    MULT_ID = 'null'
+   TRAN_ID = 'null'
    N_THREADS = -1
 
    ! Read the MESH line
@@ -725,6 +726,7 @@ MESH_LOOP: DO N=1,NMESHES_READ
             ! Fill in MESH related variables
 
             M => MESHES(NM)
+            M%TRAN_ID = TRAN_ID
             M%MESH_LEVEL = LEVEL
             M%IBAR = IJK(1)
             M%JBAR = IJK(2)
@@ -767,31 +769,31 @@ MESH_LOOP: DO N=1,NMESHES_READ
 
             ! Check the number of OMP threads for a valid value (positive, larger than 0), -1 indicates default unchanged value
             IF (N_THREADS < 1 .AND. N_THREADS /= -1) THEN
-              WRITE(MESSAGE, '(A)') 'ERROR: N_THREADS must be at least 1'
-              CALL SHUTDOWN(MESSAGE) ; RETURN
+               WRITE(MESSAGE, '(A)') 'ERROR: N_THREADS must be at least 1'
+               CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
 
             ! If OMP number of threads is explicitly set for this mesh and the mesh is assigned to this MPI process,
             ! then set this value
             IF (MYID == PROCESS(NM) .AND. N_THREADS > 0) THEN
-              ! Check if OPENMP is active
-              IF (USE_OPENMP .NEQV. .TRUE.) THEN
-                WRITE(MESSAGE, '(A)') 'ERROR: setting N_THREADS, but OPENMP is not active'
-                CALL SHUTDOWN(MESSAGE) ; RETURN
-              END IF
-
-              ! Check if the process' thread number was already set in a previous mesh definition
-              IF (OPENMP_USER_SET_THREADS .EQV. .TRUE.) THEN
-                ! Check if previous definitions are consistent
-                IF (N_THREADS .NE. OPENMP_USED_THREADS) THEN
-                  WRITE(MESSAGE, '(A)') 'ERROR: N_THREADS not consistent for MPI process'
+               ! Check if OPENMP is active
+               IF (USE_OPENMP .NEQV. .TRUE.) THEN
+                  WRITE(MESSAGE, '(A)') 'ERROR: setting N_THREADS, but OPENMP is not active'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
-                END IF
-              END IF
+               END IF
 
-              ! set the value-changed-flag and the new thread number
-              OPENMP_USER_SET_THREADS = .TRUE.
-              OPENMP_USED_THREADS     = N_THREADS
+               ! Check if the process' thread number was already set in a previous mesh definition
+               IF (OPENMP_USER_SET_THREADS .EQV. .TRUE.) THEN
+                  ! Check if previous definitions are consistent
+                  IF (N_THREADS .NE. OPENMP_USED_THREADS) THEN
+                     WRITE(MESSAGE, '(A)') 'ERROR: N_THREADS not consistent for MPI process'
+                     CALL SHUTDOWN(MESSAGE) ; RETURN
+                  END IF
+               END IF
+
+               ! set the value-changed-flag and the new thread number
+               OPENMP_USER_SET_THREADS = .TRUE.
+               OPENMP_USED_THREADS     = N_THREADS
             END IF
 
             ! Mesh boundary colors
@@ -871,6 +873,13 @@ MESH_LOOP: DO N=1,NMESHES_READ
 ENDDO MESH_LOOP
 
 NM_EVAC = NM
+
+! Check if there are too many MPI processes assigned to the job
+
+IF (PROCESS(NMESHES) < N_MPI_PROCESSES-1) THEN
+   WRITE(MESSAGE,'(A)') 'ERROR: Too many MPI processes have been assigned to this job'
+   CALL SHUTDOWN(MESSAGE) ; RETURN
+ENDIF
 
 ! Check for bad mesh ordering if MPI_PROCESS used
 
@@ -1199,6 +1208,7 @@ USE MATH_FUNCTIONS, ONLY : GAUSSJ
 
 ! Compute the polynomial transform function for the vertical coordinate
 
+CHARACTER(LABEL_LENGTH) :: ID
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: A,XX
 INTEGER, ALLOCATABLE, DIMENSION(:,:) :: ND
 REAL(EB) :: PC,CC,COEF,XI,ETA,ZETA
@@ -1206,9 +1216,9 @@ INTEGER  IEXP,IC,IDERIV,N,K,IOS,I,MESH_NUMBER, NIPX,NIPY,NIPZ,NIPXS,NIPYS,NIPZS,
 LOGICAL :: PROCESS_TRANS
 TYPE (MESH_TYPE), POINTER :: M=>NULL()
 TYPE (TRAN_TYPE), POINTER :: T=>NULL()
-NAMELIST /TRNX/ CC,FYI,IDERIV,MESH_NUMBER,PC
-NAMELIST /TRNY/ CC,FYI,IDERIV,MESH_NUMBER,PC
-NAMELIST /TRNZ/ CC,FYI,IDERIV,MESH_NUMBER,PC
+NAMELIST /TRNX/ CC,FYI,IDERIV,MESH_NUMBER,PC,ID
+NAMELIST /TRNY/ CC,FYI,IDERIV,MESH_NUMBER,PC,ID
+NAMELIST /TRNZ/ CC,FYI,IDERIV,MESH_NUMBER,PC,ID
 
 ! Scan the input file, counting the number of NAMELIST entries
 
@@ -1246,18 +1256,21 @@ MESH_LOOP: DO NM=1,NMESHES
                IF (IOS==1) EXIT TRNLOOP
                MESH_NUMBER = 1
                READ(LU_INPUT,NML=TRNX,END=17,ERR=18,IOSTAT=IOS)
+               IF (TRIM(M%TRAN_ID)==TRIM(ID)) MESH_NUMBER=NM
                IF (MESH_NUMBER>0 .AND. MESH_NUMBER/=NM) CYCLE TRNLOOP
             CASE(2)
                CALL CHECKREAD('TRNY',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
                IF (IOS==1) EXIT TRNLOOP
                MESH_NUMBER = 1
                READ(LU_INPUT,NML=TRNY,END=17,ERR=18,IOSTAT=IOS)
+               IF (TRIM(M%TRAN_ID)==TRIM(ID)) MESH_NUMBER=NM
                IF (MESH_NUMBER>0 .AND. MESH_NUMBER/=NM) CYCLE TRNLOOP
             CASE(3)
                CALL CHECKREAD('TRNZ',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
                IF (IOS==1) EXIT TRNLOOP
                MESH_NUMBER = 1
                READ(LU_INPUT,NML=TRNZ,END=17,ERR=18,IOSTAT=IOS)
+               IF (TRIM(M%TRAN_ID)==TRIM(ID)) MESH_NUMBER=NM
                IF (MESH_NUMBER>0 .AND. MESH_NUMBER/=NM) CYCLE TRNLOOP
          END SELECT
          T%NOC(N) = T%NOC(N) + 1
@@ -1281,51 +1294,54 @@ MESH_LOOP: DO NM=1,NMESHES
 
    T%ITRAN  = 0
 
-   DO IC=1,3
-      NLOOP:  DO N=1,T%NOC(IC)
+   ICLOOP_1: DO IC=1,3
+      NLOOP: DO N=1,T%NOC(IC)
          IDERIV = -1
-         IF (IC==1) THEN
-            LOOP1: DO
-               CALL CHECKREAD('TRNX',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
-               IF (IOS==1) EXIT NLOOP
-               MESH_NUMBER = 1
-               READ(LU_INPUT,TRNX,END=1,ERR=2)
-               IF (MESH_NUMBER==0 .OR. MESH_NUMBER==NM) EXIT LOOP1
-            ENDDO LOOP1
-         ENDIF
-         IF (IC==2) THEN
-            LOOP2: DO
-               CALL CHECKREAD('TRNY',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
-               IF (IOS==1) EXIT NLOOP
-               MESH_NUMBER = 1
-               READ(LU_INPUT,TRNY,END=1,ERR=2)
-               IF (MESH_NUMBER==0 .OR. MESH_NUMBER==NM) EXIT LOOP2
-            ENDDO LOOP2
-         ENDIF
-         IF (IC==3) THEN
-            LOOP3: DO
-               CALL CHECKREAD('TRNZ',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
-               IF (IOS==1) EXIT NLOOP
-               MESH_NUMBER = 1
-               READ(LU_INPUT,TRNZ,END=1,ERR=2)
-               IF (MESH_NUMBER==0 .OR. MESH_NUMBER==NM) EXIT LOOP3
-            ENDDO LOOP3
-         ENDIF
+         IC_SELECT: SELECT CASE(IC)
+            CASE(1)
+               LOOP1: DO
+                  CALL CHECKREAD('TRNX',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
+                  IF (IOS==1) EXIT NLOOP
+                  MESH_NUMBER = 1
+                  READ(LU_INPUT,TRNX,END=1,ERR=2)
+                  IF (TRIM(M%TRAN_ID)==TRIM(ID)) MESH_NUMBER=NM
+                  IF (MESH_NUMBER==0 .OR. MESH_NUMBER==NM) EXIT LOOP1
+               ENDDO LOOP1
+            CASE(2)
+               LOOP2: DO
+                  CALL CHECKREAD('TRNY',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
+                  IF (IOS==1) EXIT NLOOP
+                  MESH_NUMBER = 1
+                  READ(LU_INPUT,TRNY,END=1,ERR=2)
+                  IF (TRIM(M%TRAN_ID)==TRIM(ID)) MESH_NUMBER=NM
+                  IF (MESH_NUMBER==0 .OR. MESH_NUMBER==NM) EXIT LOOP2
+               ENDDO LOOP2
+            CASE(3)
+               LOOP3: DO
+                  CALL CHECKREAD('TRNZ',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
+                  IF (IOS==1) EXIT NLOOP
+                  MESH_NUMBER = 1
+                  READ(LU_INPUT,TRNZ,END=1,ERR=2)
+                  IF (TRIM(M%TRAN_ID)==TRIM(ID)) MESH_NUMBER=NM
+                  IF (MESH_NUMBER==0 .OR. MESH_NUMBER==NM) EXIT LOOP3
+               ENDDO LOOP3
+         END SELECT IC_SELECT
          T%CCSTORE(N,IC) = CC
          T%PCSTORE(N,IC) = PC
          T%IDERIVSTORE(N,IC) = IDERIV
          IF (IDERIV>=0) T%ITRAN(IC) = 1
          IF (IDERIV<0)  T%ITRAN(IC) = 2
       2 CONTINUE
-        ENDDO NLOOP
+      ENDDO NLOOP
       1 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
-   ENDDO
+   ENDDO ICLOOP_1
 
-   ICLOOP: DO IC=1,3
+   ICLOOP_2: DO IC=1,3
 
       SELECT CASE (T%ITRAN(IC))
 
          CASE (1)  ! polynomial transformation
+
             ND(1,IC)  = 0
             SELECT CASE(IC)
                CASE(1)
@@ -1404,7 +1420,7 @@ MESH_LOOP: DO NM=1,NMESHES
                T%C3(N,IC) = (T%C2(N,IC)-T%C2(N-1,IC))/(T%C1(N,IC)-T%C1(N-1,IC))
             ENDDO
       END SELECT
-   ENDDO ICLOOP
+   ENDDO ICLOOP_2
 
    DEALLOCATE(A)
    DEALLOCATE(XX)
@@ -1887,7 +1903,7 @@ NAMELIST /MISC/ AGGLOMERATION,AEROSOL_AL2O3,ALLOW_SURFACE_PARTICLES,ALLOW_UNDERS
                 C_DEARDORFF,C_RNG,C_RNG_CUTOFF,C_SMAGORINSKY,C_VREMAN,&
                 C_WALE,DNS,DO_IMPLICIT_CCREGION,DEPOSITION,ENTHALPY_TRANSPORT,&
                 EVACUATION_DRILL,EVACUATION_MC_MODE,EVAC_PRESSURE_ITERATIONS,EVAC_SURF_DEFAULT,EVAC_TIME_ITERATIONS,&
-                EXTERNAL_BOUNDARY_CORRECTION,HVAC_PRES_RELAX,HT3D_TEST,&
+                EVAP_MODEL,EXTERNAL_BOUNDARY_CORRECTION,HVAC_PRES_RELAX,HT3D_TEST,&
                 POSITIVE_ERROR_TEST,FLUX_LIMITER,FREEZE_VELOCITY,FYI,GAMMA,GRAVITATIONAL_DEPOSITION,&
                 GRAVITATIONAL_SETTLING,GVEC,H_F_REFERENCE_TEMPERATURE,&
                 HUMIDITY,HVAC_LOCAL_PRESSURE,HVAC_MASS_TRANSPORT,&
@@ -2195,7 +2211,7 @@ EQUIVALENCE(TMP_REF,REFERENCE_TEMPERATURE)
 EQUIVALENCE(L,OBUKHOV_LENGTH)
 REAL(EB), PARAMETER :: KAPPA_VK = 0.41_EB
 
-NAMELIST /WIND/ CORIOLIS_VECTOR,DIRECTION,DT_MEAN_FORCING,FORCE_VECTOR,FYI,GROUND_LEVEL,L,&
+NAMELIST /WIND/ CORIOLIS_VECTOR,DIRECTION,DT_MEAN_FORCING,FORCE_VECTOR,FYI,GEOSTROPHIC_WIND,GROUND_LEVEL,L,&
                 LAPSE_RATE,LATITUDE,MEAN_FORCING,OBUKHOV_LENGTH,&
                 POTENTIAL_TEMPERATURE_CORRECTION,RAMP_DIRECTION,RAMP_SPEED,RAMP_FVX_T,RAMP_FVY_T,RAMP_FVZ_T,&
                 RAMP_TMP0_Z,RAMP_U0_T,RAMP_V0_T,RAMP_W0_T,RAMP_U0_Z,RAMP_V0_Z,RAMP_W0_Z,REFERENCE_HEIGHT,REFERENCE_TEMPERATURE,&
@@ -2206,7 +2222,6 @@ NAMELIST /WIND/ CORIOLIS_VECTOR,DIRECTION,DT_MEAN_FORCING,FORCE_VECTOR,FYI,GROUN
 DIRECTION           = 270._EB   ! westerly wind
 DT_MEAN_FORCING     = 1._EB     ! s
 LAPSE_RATE          = 0._EB     ! K/m
-LATITUDE            = 360._EB   ! degrees (northern hemisphere 0 to 90 deg, southern hemisphere 0 to -90 deg)
 MEAN_FORCING        = .FALSE.
 OBUKHOV_LENGTH      = 0._EB     ! m
 RAMP_DIRECTION      = 'null'
@@ -2264,7 +2279,7 @@ ENDIF
 
 FVEC = FORCE_VECTOR
 OVEC = CORIOLIS_VECTOR
-IF (LATITUDE<360._EB) THEN
+IF (LATITUDE>-90.1_EB .AND. LATITUDE<90.1_EB) THEN
    OVEC(1) = 0._EB
    OVEC(2) = EARTH_OMEGA*COS(LATITUDE*PI/180._EB)
    OVEC(3) = EARTH_OMEGA*SIN(LATITUDE*PI/180._EB)
@@ -2432,6 +2447,15 @@ IF (I_RAMP_DIRECTION/=0 .OR. I_RAMP_SPEED/=0) THEN
       RAMPS(I_RAMP_U0_T)%INTERPOLATED_DATA(I) = SPEED_FACTOR*SIN_THETA
       RAMPS(I_RAMP_V0_T)%INTERPOLATED_DATA(I) = SPEED_FACTOR*COS_THETA
    ENDDO
+ENDIF
+
+IF (ANY(ABS(GEOSTROPHIC_WIND)>TWO_EPSILON_EB)) THEN
+   IF (ALL(ABS(OVEC)<TWO_EPSILON_EB)) THEN
+      WRITE(MESSAGE,'(A)') 'ERROR: GEOSTROPHIC_WIND requires Coriolis force, set LATITUDE on WIND line'
+      CALL SHUTDOWN(MESSAGE) ; RETURN
+   ENDIF
+   FVEC(1) = - GEOSTROPHIC_WIND(2)*RHOA*2._EB*EARTH_OMEGA*SIN(LATITUDE*PI/180._EB)
+   FVEC(2) =   GEOSTROPHIC_WIND(1)*RHOA*2._EB*EARTH_OMEGA*SIN(LATITUDE*PI/180._EB)
 ENDIF
 
 END SUBROUTINE PROC_WIND
@@ -4994,7 +5018,11 @@ READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
       MINIMUM_DIAMETER                  = 0.005_EB*DIAMETER
    ENDIF
    LPC%MINIMUM_DIAMETER                 = MINIMUM_DIAMETER*1.E-6_EB
-   LPC%KILL_RADIUS                      = MINIMUM_DIAMETER*0.5_EB*1.E-6_EB*0.005**ONTH ! Kill if mass <= 0.5 % of MINIMUM_DIAMETER
+   IF (MONODISPERSE) THEN
+      LPC%KILL_RADIUS                   = MINIMUM_DIAMETER*1.E-6_EB
+   ELSE
+      LPC%KILL_RADIUS                   = (MINIMUM_DIAMETER**3*0.005_EB)**ONTH*1.E-6_EB ! Kill if mass <= 0.5 % of MINIMUM_DIAMETER
+   ENDIF
    LPC%MONODISPERSE                     = MONODISPERSE
    LPC%PERIODIC_X                       = PERIODIC_X
    LPC%PERIODIC_Y                       = PERIODIC_Y
@@ -5169,8 +5197,10 @@ DEVC_ID                  = 'null'
 INITIAL_TEMPERATURE      = TMPA - TMPM  ! C
 HEAT_OF_COMBUSTION       = -1._EB       ! kJ/kg
 DIAMETER                 = -1._EB       !
-MAXIMUM_DIAMETER         = 1.E9_EB      ! microns, meant to be infinitely large and not used
-MINIMUM_DIAMETER         = -1._EB       ! microns, below which the PARTICLE evaporates in one time step
+MAXIMUM_DIAMETER         = 1.E9_EB      ! microns, sets the largest particle generated when using a size distribution
+MINIMUM_DIAMETER         = -1._EB       ! microns, sets the smallest particle generated when using a size distribution
+                                        ! For a monodisperse distribution, this also sets the evaporation size limit; otherwise, it is
+                                        ! 5 % of the particle volume defined by this parameter.
 MONODISPERSE             = .FALSE.
 N_STRATA                 = 6
 GAMMA_D                  = 2.4_EB
@@ -11873,7 +11903,11 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
             XYZ(2) = MESHES(1)%YS
             XYZ(3) = MESHES(1)%ZS
             MESH_NUMBER = 1
-            IF (PROCESS(1)==MYID) MESH_DEVICE(1) = 1
+            IF (INIT_ID/='null') THEN
+               MESH_DEVICE = 1  ! This is the case where a DEVC is assigned to particles specified on an INIT line
+            ELSE
+               IF (PROCESS(1)==MYID) MESH_DEVICE(1) = 1  ! This refers to HVAC or control logic
+            ENDIF
          ELSE
             IF (ALL(EVACUATION_ONLY)) CYCLE READ_DEVC_LOOP
             WRITE(MESSAGE,'(A,A,A)') 'WARNING: DEVC ',TRIM(ID),' is not within any mesh.'
@@ -12020,7 +12054,7 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
           DV%QUANTITY=='ADIABATIC SURFACE TEMPERATURE GAS') THEN
          DV%INIT_ID = DV%ID
          TARGET_PARTICLES_INCLUDED = .TRUE.
-         IF (DV%POINT==1) THEN
+         IF (DV%POINT==1 .OR. TIME_HISTORY) THEN
             N_INIT_RESERVED = N_INIT_RESERVED + 1
             INIT_RESERVED(N_INIT_RESERVED)%DEVC_INDEX = N_DEVC
             INIT_RESERVED(N_INIT_RESERVED)%N_PARTICLES = POINTS

@@ -37262,24 +37262,10 @@ DO K=KLO,KHI
                ! xyzcen:
                XYZCEN(IAXIS:KAXIS,ICELL) = XYZCEN(IAXIS:KAXIS,ICELL)+AREAVARS(2:4,IFACE)
             ENDDO
-            IF(VOL(ICELL) < GEOMEPS) THEN ! Volume too small for correct calculation of XYZCEN -> average cut-face
-                                          ! centroids.
+            IF(VOL(ICELL) < GEOMEPS) THEN ! Volume too small for correct calculation of XYZCEN-> take cartcell centroid.
                JJ = 0
                VOL(ICELL) = ABS(VOL(ICELL))
-               XYZCEN(IAXIS:KAXIS,ICELL) = 0._EB
-               DO II=2,NP+1
-                  IFACE = CCELEM(II,ICELL)
-                  IF(FACE_LIST(1,IFACE) /= IBM_FTYPE_RGGAS) THEN
-                     JJ = JJ + 1
-                     XYZCEN(IAXIS:KAXIS,ICELL) = XYZCEN(IAXIS:KAXIS,ICELL) + &
-                     MESHES(NM)%CUT_FACE(FACE_LIST(4,IFACE))%XYZCEN(IAXIS:KAXIS,FACE_LIST(5,IFACE))
-                  ENDIF
-               ENDDO
-               IF(JJ > 0) THEN
-                  XYZCEN(IAXIS:KAXIS,ICELL) = XYZCEN(IAXIS:KAXIS,ICELL)/REAL(JJ,EB)
-               ELSE
-                  XYZCEN(IAXIS:KAXIS,ICELL) = (/ XCELL(I), YCELL(J), ZCELL(K) /)
-               ENDIF
+               XYZCEN(IAXIS:KAXIS,ICELL) = (/ XCELL(I), YCELL(J), ZCELL(K) /)
             ELSE
                ! divide xyzcen by 2*vol:
                XYZCEN(IAXIS:KAXIS,ICELL) = XYZCEN(IAXIS:KAXIS,ICELL) / (2._EB*VOL(ICELL))
@@ -41212,7 +41198,7 @@ LOGICAL, INTENT(IN) :: ABS_FLG
 REAL(FB), PARAMETER :: EPS_FB = 1.E-7_FB
 REAL(FB), PARAMETER :: EPS_MID= 1.E-4_FB
 REAL(FB), POINTER, DIMENSION(:) :: V1, V2, V3
-REAL(FB) :: U1(3), U2(3), CRPD(3)
+REAL(FB) :: U1(3), U2(3), CRPD(3), NORMU(2)
 LOGICAL :: TEST_FLAG=.FALSE.
 
 DIFF_ANGLE = .FALSE.
@@ -41223,6 +41209,14 @@ V3(1:3)=>VERTS(3*IV3-2:3*IV3)
 
 U1 = V2 - V1;
 U2 = V3 - V2;
+
+NORMU(1)=SQRT(U1(1)**2._FB+U1(2)**2._FB+U1(3)**2._FB)
+NORMU(2)=SQRT(U2(1)**2._FB+U2(2)**2._FB+U2(3)**2._FB)
+
+IF(ANY(NORMU(1:2)<EPS_FB)) THEN
+   DIFF_ANGLE = .TRUE.
+   RETURN
+ENDIF
 
 ! triangle is invalid if angle at V2 is > 180 deg
 SELECT CASE(DIR)
@@ -41242,8 +41236,8 @@ CASE(KAXIS)
    U2(1) = U2(1)
    U2(2) = U2(2)
 CASE(0) ! 3D Cross for Inboundary faces:
-   U1(1:3) = U1(1:3) / SQRT(U1(1)**2._FB+U1(2)**2._FB+U1(3)**2._FB) ! Normalize
-   U2(1:3) = U2(1:3) / SQRT(U2(1)**2._FB+U2(2)**2._FB+U2(3)**2._FB) ! Normalize
+   U1(1:3) = U1(1:3) / NORMU(1) ! Normalize
+   U2(1:3) = U2(1:3) / NORMU(2) ! Normalize
    CRPD(1) = U1(2)*U2(3)-U1(3)*U2(2)
    CRPD(2) = U1(3)*U2(1)-U1(1)*U2(3)
    CRPD(3) = U1(1)*U2(2)-U1(2)*U2(1)
@@ -41362,6 +41356,13 @@ DO I = 1, NVERTS
 ENDDO
 
 NLIST  = SUM(VERT_FLAG(1:NVERTS))
+
+IF (NLIST < 3) THEN
+   FACES(1:3*(NVERTS-2)) = VERT_OFFSET + 1
+   LOCTYPE(1:NVERTS-2) = 4+8+16
+   RETURN
+ENDIF
+
 NVERTS2= NLIST
 NEDGES = NLIST
 COUNT = 0

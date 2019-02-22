@@ -4588,7 +4588,7 @@ When simulating a wind with {\ct OPEN} boundaries, you might notice spurious vel
 
 Similar to the mean forcing feature, you may specify a constant and uniform force per unit volume by setting {\ct FORCE\_VECTOR(1:3)} on the {\ct WIND} line.  This is useful, for example, in specifying a mean pressure drop in a duct.  In the absence of other forces, the force vector $F_i$ affects the momentum equation by
 \begin{equation}
-\frac{\partial u_i}{\partial t} + \dots = -F_i/\rho
+\frac{\partial u_i}{\partial t} + \dots = F_i/\rho
 \end{equation}
 This feature is typically used together with periodic boundaries.  To specify a mean pressure drop of 0.01 Pa/m in the $x$ direction for a periodic duct, for example, use
 \begin{lstlisting}
@@ -4601,7 +4601,7 @@ You may apply a time ramp to {\ct FORCE\_VECTOR(1)}, for example, via {\ct RAMP\
 \subsection{Coriolis Force}
 \label{info:coriolis_force}
 
-The Coriolis force accounts for a rotating reference frame \cite{Kundu:1}.  The Coriolis acceleration augments the right-hand side of the Navier-Stokes equations as follows:
+The Coriolis force accounts for a rotating reference frame \cite{Stull:2000}.  The Coriolis acceleration augments the right-hand side of the Navier-Stokes equations as follows:
 \begin{equation}
 \DoD{\mathbf{u}}{t} = ... - 2 {\bm\Omega} \times \mathbf{u}
 \end{equation}
@@ -4610,28 +4610,41 @@ Where is ${\bm\Omega}$ is the rotation vector (see Fig.~\ref{fig:rotation_vector
 \label{eq:earth_rotvec}
 {\bm\Omega} = \omega \left[ \begin{array}{c} 0 \\ \cos(\phi \pi/180) \\ \sin(\phi \pi/180) \end{array} \right]
 \end{equation}
-where $\omega$ is Earth's rotation rate in Hz, about $1.16 \times 10^{-5}$ 1/s.
+where $\omega$ is Earth's rotation rate, about $1.16 \times 10^{-5}$ $2\pi$/s.
 
-The nondimensional number that determines if the Coriolis force is significant is the Rossby number.  Let $U$ be the relevant velocity scale and $L$ the length scale of the problem.  The Coriolis freqency is given by $f=\omega \sin(\phi\pi/180)$.  The Rossby number is then given by
+The nondimensional number that determines if the Coriolis force is significant is the Rossby number.  Let $U$ be the relevant velocity scale and $L$ the length scale of the problem.  The Coriolis freqency is given by $f_c=2 \omega \sin(\phi\pi/180)$.  The Rossby number is then given by
 \begin{equation}
 \label{eq:rossby_number}
-\mbox{Ro} = \frac{U}{fL}
+\mbox{Ro} = \frac{U}{f_c L}
 \end{equation}
-When the Rossby number is large, the Coriolis force is negligible.  In building fires, this is typically the case, as $U$ and $L$ are of order unity and $f \approx 10^5$.
+When the Rossby number is large, the Coriolis force is negligible.  In building fires, this is typically the case, as $U$ and $L$ are of order unity and $f_c = {\cal O}(10^4)$.
 
 \begin{figure}
 \centering
 \includegraphics[scale=1.5]{FIGURES/Coriolis_vector}
-\caption{The rotation vector ${\bm\Omega}$ points from the Earth's center to the North Pole.  To apply the effect of rotation on our model, we need to know the components of the rotation vector in the reference frame of the computational domain.  Typically, we align the computational domain so that $x$ points east, $y$ points north, and $z$ represents elevation.  The angle $\phi$ [degrees] is the latitude, positive [$0^{\circ}$, $90^{\circ}$] in the northern hemisphere, negative [$0^{\circ}$, $-90^{\circ}$] in the southern hemisphere.  The rotation rate $\omega$ is (obviously) 1 rotation per day or $1/(24 \times 3600) \approx 1.16 \times 10^{-5}$ 1/s.}
+\caption{The rotation vector ${\bm\Omega}$ points from the Earth's center to the North Pole.  To apply the effect of rotation on our model, we need to know the components of the rotation vector in the reference frame of the computational domain.  Typically, we align the computational domain so that $x$ points east, $y$ points north, and $z$ represents elevation.  The angle $\phi$ [degrees] is the latitude, positive [$0^{\circ}$, $90^{\circ}$] in the northern hemisphere, negative [$0^{\circ}$, $-90^{\circ}$] in the southern hemisphere.  The rotation rate $\omega$ is (obviously) 1 rotation per day or $2\pi/(24 \times 3600) \approx 1.16 \times 10^{-5}$ $2\pi$/s.}
 \label{fig:rotation_vector}
 \end{figure}
+
+
+\subsection{Geostrophic Wind}
+\label{info:geostrophic_wind}
+
+The \emph{geostropic wind} is a theoretical construct obtained from the lateral momentum equations when the Coriolis force is in balance with the horizontal pressure gradient at steady state \cite{Stull:2000}.  The horizontal wind components can be written as
+\begin{align}
+\label{eq:geostrophic_wind}
+U_g &= - \frac{1}{\rho f_c} \frac{\partial \bar{p}}{\partial y} \\
+V_g &= + \frac{1}{\rho f_c} \frac{\partial \bar{p}}{\partial x}
+\end{align}
+If the geostrophic wind speed is known, it can be entered on the {\ct WIND} line via {\ct GEOSTROPHIC\_WIND(1:2)} = $(U_g, V_g)$.  Notice that specification of the wind in $x$ implies a mean pressure gradient in $y$ and vice versa.  When a geostropic wind is specified, FDS converts this value to the implied {\ct FORCE\_VECTOR} according to Eq.~(\ref{eq:geostrophic_wind}).  To achieve the specified geostrophic wind aloft, you must also have the Coriolis force turned on (see Sec.~\ref{info:coriolis_force}).  Since the geostrophic wind is equivalent to applying {\ct FORCE\_VECTOR}, you may also apply a time ramp (see Sec.~\ref{info:force_vector}).
+
 
 \section{Wind Method 3: The ``Wall of Wind''}
 \label{info:wall_of_wind}
 
 An alternative to using Monin-Obukhov similarity theory in specifying a wind is to specify a power law wind profile at an external boundary of the computational domain. This essentially creates a ``wall of wind'' and for early versions of FDS it was the recommended method for specifying a wind. However, the techniques described above are preferable because they handle the lateral boundaries of the computational domain in a more natural way.
 
-To specify a ``wall of wind'', set {\ct PROFILE='ATMOSPHERIC'} on the {\ct SURF} line that is assigned to an exterior lateral boundary of the computational domain. This generates a power law atmospheric wind profile of the form $u=u_0 (z/z_0)^p$ where $z$ is the height above the ground. If an atmospheric profile is prescribed, also prescribe {\ct Z0} for $z_0$  and {\ct PLE} for $p$. {\ct VEL} specifies the reference velocity $u_0$. Note that $z_0$ is not the ground, but rather the height above the ground where the wind speed is measured, like an elevated weather station. It is assumed that the ground is located at 0~m; to change this assumption, set {\ct GROUND\_LEVEL} on the {\ct WIND} line to be the appropriate elevation. Be careful not to apply an atmospheric velocity profile (e.g. negative $z$) below {\ct GROUND\_LEVEL} or FDS will stop with an error
+To specify a ``wall of wind'', set {\ct PROFILE='ATMOSPHERIC'} on the {\ct SURF} line that is assigned to an exterior lateral boundary of the computational domain. This generates a power law atmospheric wind profile of the form $u=u_0 (z/z_0)^p$ where $z$ is the height above the ground. If an atmospheric profile is prescribed, also prescribe {\ct Z0} for $z_0$  and {\ct PLE} for $p$. {\ct VEL} specifies the reference velocity $u_0$. Note that $z_0$ is not the ground, but rather the height above the ground where the wind speed is measured, like an elevated weather station. It is assumed that the ground is located at 0~m; to change this assumption, set {\ct GROUND\_LEVEL} on the {\ct WIND} line to be the appropriate elevation. Be careful not to apply an atmospheric velocity profile (e.g. negative $z$) below {\ct GROUND\_LEVEL} or FDS will stop with an error.
 
 Sometimes when using a wall of wind, you may want to initialize the flow to the chosen wind speed throughout the domain, but you may not want this initial wind field to persist indefinitely. In such cases, specify your initial flow components {\ct U0}, {\ct V0}, and/or {\ct W0} directly and do not use the parameter {\ct SPEED}. Setting the velocity components directly will initialize the simulation with a constant flow field, but the flow field will die off unless you add a blower somewhere in the domain.
 
@@ -10774,6 +10787,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct DIRECTION}                                 & Real          & Section~\ref{info:WIND}                       & degrees       & 270               \\ \hline
 {\ct DT\_MEAN\_FORCING}                         & Real          & Section~\ref{info:WIND}                       & s             & 1.                \\ \hline
 {\ct FORCE\_VECTOR(3)}                          & Real          & Section~\ref{info:force_vector}               &               & 0.                \\ \hline
+{\ct GEOSTROPHIC\_WIND(2)}                      & Real          & Section~\ref{info:geostrophic_wind}           & m/s           &                   \\ \hline
 {\ct GROUND\_LEVEL}                             & Real          & Section~\ref{info:stratification}             & m             & 0.                \\ \hline
 {\ct L}                                         & Real          & Section~\ref{info:WIND}                       & m             & 0                 \\ \hline
 {\ct LAPSE\_RATE}                               & Real          & Section~\ref{info:stratification}             & $^\circ$C/m   & 0                 \\ \hline

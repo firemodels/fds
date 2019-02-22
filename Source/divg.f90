@@ -426,10 +426,20 @@ K_DNS_OR_LES: IF (SIM_MODE==DNS_MODE .OR. SIM_MODE==LES_MODE) THEN
    DEALLOCATE(ZZ_GET)
 
    IF (SIM_MODE==LES_MODE) THEN
-      IF(.NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
-         KP = KP + MAX(0._EB,(MU-MU_DNS))*CP*RPR
+      IF (.NOT.POTENTIAL_TEMPERATURE_CORRECTION) THEN
+         ! normal LES mode, constant turbulent Prandtl number
+         IF(.NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
+            KP = KP + MAX(0._EB,(MU-MU_DNS))*CP*RPR
+         ELSE
+            KP = KP + MAX(0._EB,(MU-MU_DNS))*CPOPR
+         ENDIF
       ELSE
-         KP = KP + MAX(0._EB,(MU-MU_DNS))*CPOPR
+         ! dynamic turbulent Prandtl number (Deardorff, 1980)
+         IF(.NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
+            KP = KP + MAX(0._EB,(MU-MU_DNS))*CP/PR_T
+         ELSE
+            KP = KP + MAX(0._EB,(MU-MU_DNS))*CPOPR*PR/PR_T
+         ENDIF
       ENDIF
    ENDIF
 
@@ -446,7 +456,11 @@ K_DNS_OR_LES: IF (SIM_MODE==DNS_MODE .OR. SIM_MODE==LES_MODE) THEN
 
 ELSE K_DNS_OR_LES
 
+   ! normal VLES mode
    KP = MU*CPOPR
+
+   ! dynamic turbulent Prandtl number (Deardorff, 1980)
+   IF (POTENTIAL_TEMPERATURE_CORRECTION)  KP = KP*PR/PR_T
 
 ENDIF K_DNS_OR_LES
 
