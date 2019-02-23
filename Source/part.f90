@@ -2002,11 +2002,11 @@ REAL(EB) :: R_DROP,NUSSELT,K_AIR,H_V,H_V_REF, H_L,H_V2,&
             Y_DROP,Y_GAS,Y_GAS_NEW,LENGTH,U2,V2,W2,VEL,TMP_DROP_NEW,TMP_WALL,H_WALL,&
             SC_AIR,D_AIR,DHOR,SHERWOOD,X_DROP,M_DROP,RHO_G,MW_RATIO,MW_DROP,FTPR,&
             C_DROP,M_GAS,A_DROP,TMP_G,TMP_DROP,TMP_MELT,TMP_BOIL,MINIMUM_FILM_THICKNESS,RE_L,OMRAF,Q_FRAC,Q_TOT,DT_SUBSTEP,&
-            CP,H_NEW,ZZ_GET(1:N_TRACKED_SPECIES),ZZ_GET2(1:N_TRACKED_SPECIES),&
-            M_GAS_NEW,MW_GAS,DELTA_H_G,TMP_G_I,H_G_OLD,H_S_G_OLD,H_D_OLD,&
+            CP,H_NEW,ZZ_AIR(1:N_TRACKED_SPECIES),ZZ_GET(1:N_TRACKED_SPECIES),ZZ_GET2(1:N_TRACKED_SPECIES),&
+            M_GAS_NEW,MW_GAS,DELTA_H_G,TMP_G_I,H_G_OLD,H_S_G_OLD,H_D_OLD,C_GAS_DROP,C_GAS_AIR,&
             TMP_G_NEW,DT_SUM,DCPDT,X_EQUIL,Y_EQUIL,Y_ALL(1:N_SPECIES),H_S_B,H_S,C_DROP2,&
-            T_BOIL_EFF,P_RATIO,RAYLEIGH,GR,RHOCBAR,MCBAR,&
-            M_GAS_OLD,TMP_G_OLD,NU_LIQUID,H1,H2,TMP_FILM,CP_BAR_2
+            T_BOIL_EFF,P_RATIO,RAYLEIGH,GR,RHOCBAR,MCBAR,LEWIS,THETA,&
+            M_GAS_OLD,TMP_G_OLD,NU_LIQUID,H1,H2,TMP_FILM,CP_BAR_2,CP_AIR,R_AIR,RHO_AIR,Y_AIR,B_NUMBER, H_V_B, H_V_A, DH_V_A_DT
 REAL(EB), PARAMETER :: RUN_AVG_FAC=0.5_EB
 INTEGER :: IP,II,JJ,KK,IW,N_LPC,NS,ITMP,ITMP2,ITCOUNT,Y_INDEX,Z_INDEX,I_BOIL,I_MELT,I_FUEL,NMAT
 REAL(EB), INTENT(IN) :: T,DT
@@ -2036,12 +2036,12 @@ H_SOLID                = 300._EB    ! Heat transfer coefficient from solid surfa
 
 ! Empirical coefficients
 
-SC_AIR                 = SC         ! Can be set on MISC line, otherwise dependent on LES/DNS mode
-PR_AIR                 = PR         ! Can be set on MISC line, otherwise dependent on LES/DNS mode
-SH_FAC_GAS             = 0.6_EB*SC_AIR**ONTH
-NU_FAC_GAS             = 0.6_EB*PR_AIR**ONTH
-SH_FAC_WALL            = 0.037_EB*SC_AIR**ONTH
-NU_FAC_WALL            = 0.037_EB*PR_AIR**ONTH
+!SC_AIR                 = SC         ! Can be set on MISC line, otherwise dependent on LES/DNS mode
+!PR_AIR                 = PR         ! Can be set on MISC line, otherwise dependent on LES/DNS mode
+!SH_FAC_GAS             = 0.6_EB*SC_AIR**ONTH
+!NU_FAC_GAS             = 0.6_EB*PR_AIR**ONTH
+!SH_FAC_WALL            = 0.037_EB*SC_AIR**ONTH
+!NU_FAC_WALL            = 0.037_EB*PR_AIR**ONTH
 
 TMP_WALL_INTERIM=>WALL_WORK1
 
@@ -2064,7 +2064,6 @@ IF (ANY(LAGRANGIAN_PARTICLE_CLASS(:)%LIQUID_DROPLET)) THEN
 ENDIF
 
 ! Loop over all types of evaporative species
-
 SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
 
    ! Initialize quantities common to the evaporation index
@@ -2076,6 +2075,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
    TMP_BOIL = SS%TMP_V
    MW_DROP  = SS%MW
    CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%H_V,1),SS%H_V,SS%H_V_REFERENCE_TEMPERATURE,H_V_REF)
+   CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%H_V,1),SS%H_V,TMP_BOIL,H_V_B)
    I_MELT   = INT(TMP_MELT)
    FILM_THICKNESS => WALL_WORK2
    FILM_THICKNESS =  0._EB
@@ -2145,13 +2145,12 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                CALL SHUTDOWN(MESSAGE)
                RETURN
             ENDIF
-
-            ! Fluid properties evaluated at film temperature
-
-            TMP_FILM = TMP_DROP + EVAP_FILM_FAC*(TMP_G - TMP_DROP) ! LC Eq.(18)
-            CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z(:,Z_INDEX),1),D_Z(:,Z_INDEX),TMP_FILM,D_AIR)
-            CALL GET_VISCOSITY(ZZ_GET,MU_AIR,TMP_FILM)
-            CALL GET_CONDUCTIVITY(ZZ_GET,K_AIR,TMP_FILM)
+            H_V_A = 0.5_EB*(H_V+H_V_B)
+            IF (INT(TMP_DROP) < INT(TMP_BOIL)) THEN
+               DH_V_A_DT = 0.5_EB*(SS%H_V(INT(TMP_DROP)+1) - SS%H_V(INT(TMP_DROP)))
+            ELSE
+               DH_V_A_DT = 0.5_EB*(SS%H_V(INT(TMP_BOIL)) - SS%H_V(INT(TMP_BOIL)-1))
+            ENDIF
 
             M_GAS  = RHO_G/RVC
             IF (DT_SUM <= TWO_EPSILON_EB) THEN
@@ -2168,12 +2167,20 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
             W2 = 0.5_EB*(W(II,JJ,KK)+W(II,JJ,KK-1))
 
             SOLID_OR_GAS_PHASE_1: IF (LP%ONE_D%IOR/=0 .AND. LP%WALL_INDEX>0) THEN
-
+               SELECT CASE(ABS(LP%ONE_D%IOR))
+                  CASE(1)
+                     VEL = SQRT(V2**2+W2**2)
+                  CASE(2)
+                     VEL = SQRT(U2**2+W2**2)
+                  CASE(3)
+                     VEL = SQRT(U2**2+V2**2)
+               END SELECT
                IW   = LP%WALL_INDEX
                A_DROP = M_DROP/(FILM_THICKNESS(IW)*LPC%DENSITY)
                Q_DOT_RAD = MIN(A_DROP,WALL(IW)%ONE_D%AREA/LP%PWT)*WALL(IW)%ONE_D%Q_RAD_IN
                TMP_WALL = MAX(TMPMIN,TMP_WALL_INTERIM(IW))
             ELSE SOLID_OR_GAS_PHASE_1
+               VEL = SQRT((U2-LP%U)**2+(V2-LP%V)**2+(W2-LP%W)**2)
                IW = -1
                A_DROP   = 4._EB*PI*R_DROP**2
                IF (SUM(AVG_DROP_AREA(II,JJ,KK,:))>0._EB) THEN
@@ -2241,15 +2248,42 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%C_P_L_BAR,1),SS%C_P_L_BAR,TMP_DROP,H_L)
                H_L = H_L*TMP_DROP
                H_D_OLD  = H_L*M_DROP
-               DHOR     = H_V*MW_DROP/R0
+               DHOR     = H_V_A*MW_DROP/R0
                ZZ_GET(1:N_TRACKED_SPECIES) = ZZ_INTERIM(II,JJ,KK,1:N_TRACKED_SPECIES)
-
                ! Compute equilibrium PARTICLE vapor mass fraction, Y_DROP, and its derivative w.r.t. PARTICLE temperature
-
                X_DROP  = MIN(1._EB,P_RATIO*EXP(DHOR*(1._EB/TMP_BOIL-1._EB/TMP_DROP)))
                Y_DROP  = X_DROP/(MW_RATIO + (1._EB-MW_RATIO)*X_DROP)
+               ! Compute effective Z at the film temperature location LC Eq (19). Skip if no evaporation will occur.
+               IF (Y_DROP > Y_GAS) THEN
+                  B_NUMBER = (Y_DROP - Y_GAS) / MAX(1.E-8_EB,1._EB-Y_DROP)
+                  Y_AIR = Y_DROP + EVAP_FILM_FAC * (Y_GAS - Y_DROP)
+                  ZZ_AIR = ZZ_GET
+                  ZZ_AIR(Z_INDEX) = ZZ_AIR(Z_INDEX) + (Y_AIR - Y_GAS)/(1-Y_AIR)
+                  ZZ_AIR = ZZ_AIR / SUM(ZZ_AIR)
+               ELSE
+                  ZZ_AIR = ZZ_GET
+               ENDIF
 
-               DYDT = (MW_RATIO/(X_DROP*(1._EB-MW_RATIO)+MW_RATIO)**2)*DHOR*X_DROP/TMP_DROP**2
+               ! Compute thermal and transport properties except D at film temperature
+               CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z(:,Z_INDEX),1),D_Z(:,Z_INDEX),TMP_DROP,D_AIR)
+               
+               TMP_FILM = TMP_DROP + EVAP_FILM_FAC*(TMP_G - TMP_DROP) ! LC Eq.(18)
+               CALL GET_VISCOSITY(ZZ_AIR,MU_AIR,TMP_FILM)
+               CALL GET_CONDUCTIVITY(ZZ_AIR,K_AIR,TMP_FILM)
+               CALL GET_SPECIFIC_HEAT(ZZ_AIR,CP_AIR,TMP_FILM)
+               CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_AIR,R_AIR)
+               PR_AIR = MU_AIR*CP_AIR/K_AIR
+               RHO_AIR = PBAR(0,PRESSURE_ZONE(II,JJ,KK))/(R_AIR*TMP_FILM)
+               SC_AIR = MU_AIR/(RHO_AIR*D_AIR)
+               SH_FAC_GAS             = 0.6_EB*SC_AIR**ONTH
+               NU_FAC_GAS             = 0.6_EB*PR_AIR**ONTH
+               SH_FAC_WALL            = 0.037_EB*SC_AIR**ONTH
+               NU_FAC_WALL            = 0.037_EB*PR_AIR**ONTH
+
+               ! Compute temperature deriviative of the vapor mass fraction
+
+               DYDT = (MW_RATIO/(X_DROP*(1._EB-MW_RATIO)+MW_RATIO)**2) * &
+                      (DHOR*X_DROP/TMP_DROP**2+(1._EB/TMP_BOIL-1._EB/TMP_DROP)*DH_V_A_DT*MW_DROP/R0)
 
                ! Set variables for heat transfer on solid
 
@@ -2280,18 +2314,8 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                      ARRAY_CASE = 2
                   ENDIF
 
-                  SELECT CASE(ABS(LP%ONE_D%IOR))
-                     CASE(1)
-                        VEL = SQRT(V2**2+W2**2)
-                     CASE(2)
-                        VEL = SQRT(U2**2+W2**2)
-                     CASE(3)
-                        VEL = SQRT(U2**2+V2**2)
-                  END SELECT
-
                   IF (.NOT.CONSTANT_H_SOLID) THEN
                      LENGTH = 2._EB*R_DROP
-
                      NU_LIQUID = SS%MU_LIQUID / LPC%DENSITY
                      !Grashoff number
                      GR = MAXVAL(ABS(GVEC))*LENGTH**3*SS%BETA_LIQUID*ABS(TMP_WALL-TMP_DROP)/(NU_LIQUID**2)
@@ -2308,10 +2332,10 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                            ! 4. McGraw-Hill, New York, 3rd edition, 1998.
                            NUSSELT = 0.560_EB*RAYLEIGH**(0.25_EB)/((1._EB+(0.492_EB/SS%PR_LIQUID)**(9._EB/16._EB))**(4._EB/9._EB))
                      END SELECT DIRECTION2
-                     H_WALL   = NUSSELT*SS%K_LIQUID/LENGTH
                      RE_L     = MAX(5.E5_EB,RHO_G*VEL*LENGTH/MU_AIR)
-                     ! NUSSELT  = NU_FAC_WALL*RE_L**0.8_EB
+                     NUSSELT  = NU_FAC_WALL*RE_L**0.8_EB
                      SHERWOOD = SH_FAC_WALL*RE_L**0.8_EB
+                     H_WALL   = NUSSELT*SS%K_LIQUID/LENGTH
                   ELSE
                      LENGTH   = 1._EB
                      RE_L     = MAX(5.E5_EB,RHO_G*VEL*LENGTH/MU_AIR)
@@ -2322,22 +2346,88 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                      H_WALL   = H_SOLID
                   ENDIF
                   H_HEAT   = MAX(2._EB,NUSSELT)*K_AIR/LENGTH
-                  H_MASS   = MAX(2._EB,SHERWOOD)*D_AIR/LENGTH
-
+                  IF (Y_DROP<=Y_GAS) THEN
+                     H_MASS = 0._EB
+                  ELSE
+                     !M# expressions taken from Sazhin, Prog in Energy and Comb Sci 32 (2006) 162-214
+                     SELECT CASE(EVAP_MODEL)
+                        CASE(-1) ! Ranz Marshall
+                           H_MASS   = MAX(2._EB,SHERWOOD)*D_AIR/LENGTH
+                        CASE(0:1) !Shazin M0 - M1, see next code block for Refs
+                           H_MASS   = MAX(2._EB,SHERWOOD)*D_AIR/LENGTH*LOG(1._EB+B_NUMBER)/B_NUMBER
+                        CASE(2) !Shazin M2, see next code block for Refs
+                           H_MASS   = MAX(2._EB,SHERWOOD)*D_AIR/LENGTH*LOG(1._EB+B_NUMBER)/(B_NUMBER*F_B(B_NUMBER))
+                     END SELECT
+                  ENDIF
                ELSE SOLID_OR_GAS_PHASE_2
-
-                  NUSSELT  = 2._EB + NU_FAC_GAS*SQRT( LP%RE )
-                  SHERWOOD = 2._EB + SH_FAC_GAS*SQRT( LP%RE ) ! Sh matches Li&Chow FT 2008
-                  H_HEAT   = NUSSELT *K_AIR/(2._EB*R_DROP)
-                  H_MASS   = SHERWOOD*D_AIR/(2._EB*R_DROP)
+                  LENGTH = 2._EB*R_DROP
+                  RE_L = RHO_AIR*VEL*LENGTH/MU_AIR
+                  SELECT CASE (EVAP_MODEL)
+                     CASE(-1) ! Ranz Marshall
+                        NUSSELT  = 2._EB + NU_FAC_GAS*SQRT(RE_L)
+                        H_HEAT   = NUSSELT*K_AIR/LENGTH
+                        IF (Y_DROP <= Y_GAS) THEN
+                           H_MASS = 0._EB
+                        ELSE
+                           SHERWOOD  = 2._EB + NU_FAC_GAS*SQRT(RE_L)
+                           H_MASS = SHERWOOD*D_AIR/LENGTH
+                        ENDIF
+                     CASE(0) ! Shazin M0, Eq 106 + 109 with B_T=B_M
+                        IF (Y_DROP <= Y_GAS) THEN
+                           NUSSELT  = 2._EB + NU_FAC_GAS*SQRT(RE_L)
+                           H_HEAT   = NUSSELT*K_AIR/LENGTH
+                           H_MASS = 0._EB
+                        ELSE
+                           NUSSELT  = 2._EB + NU_FAC_GAS*SQRT(RE_L)*LOG(1._EB+B_NUMBER)/B_NUMBER
+                           H_HEAT   = NUSSELT*K_AIR/LENGTH
+                           SHERWOOD  = 2._EB + NU_FAC_GAS*SQRT(RE_L)*LOG(1._EB+B_NUMBER)/(Y_DROP-Y_GAS)
+                           H_MASS = SHERWOOD*D_AIR/LENGTH
+                        ENDIF
+                     CASE(1) ! Shazin M1, Eq 106 + 109 with eq 102.
+                        IF (Y_DROP <= Y_GAS) THEN
+                           NUSSELT  = 2._EB + NU_FAC_GAS*SQRT(RE_L)
+                           H_HEAT   = NUSSELT*K_AIR/LENGTH
+                           H_MASS = 0._EB
+                        ELSE
+                           SHERWOOD  = 2._EB + NU_FAC_GAS*SQRT(RE_L)*LOG(1._EB+B_NUMBER)/(Y_DROP-Y_GAS)
+                           H_MASS = SHERWOOD*D_AIR/LENGTH
+                           LEWIS = K_AIR / (RHO_AIR * D_AIR * CP_AIR)
+                           ZZ_GET(1:N_TRACKED_SPECIES) = 0._EB
+                           ZZ_GET(Z_INDEX) = 1._EB
+                           CALL GET_SPECIFIC_HEAT(ZZ_AIR,C_GAS_DROP,TMP_FILM)
+                           ZZ_GET(1:N_TRACKED_SPECIES) = ZZ_INTERIM(II,JJ,KK,1:N_TRACKED_SPECIES)
+                           CALL GET_SPECIFIC_HEAT(ZZ_AIR,C_GAS_AIR,TMP_FILM)
+                           THETA = C_GAS_DROP/C_GAS_AIR/LEWIS
+                           B_NUMBER = (1._EB+B_NUMBER)**THETA-1._EB
+                           NUSSELT  = 2._EB + NU_FAC_GAS*SQRT(RE_L)*LOG(1._EB+B_NUMBER)/B_NUMBER
+                           H_HEAT   = NUSSELT*K_AIR/LENGTH
+                        ENDIF
+                     CASE(2) ! Shazin M2, Eq 116 and 117 with eq 106,109, and 102.
+                        IF (Y_DROP <= Y_GAS) THEN
+                           NUSSELT  = 2._EB + NU_FAC_GAS*SQRT(RE_L)
+                           H_HEAT   = NUSSELT*K_AIR/LENGTH
+                           H_MASS = 0._EB
+                        ELSE
+                           SHERWOOD  = 2._EB + NU_FAC_GAS*SQRT(RE_L)*LOG(1._EB+B_NUMBER)/((Y_DROP-Y_GAS)*F_B(B_NUMBER))
+                           H_MASS = SHERWOOD*D_AIR/LENGTH
+                           LEWIS = K_AIR / (RHO_AIR * D_AIR * CP_AIR)
+                           ZZ_GET(1:N_TRACKED_SPECIES) = 0._EB
+                           ZZ_GET(Z_INDEX) = 1._EB
+                           CALL GET_SPECIFIC_HEAT(ZZ_AIR,C_GAS_DROP,TMP_FILM)
+                           ZZ_GET(1:N_TRACKED_SPECIES) = ZZ_INTERIM(II,JJ,KK,1:N_TRACKED_SPECIES)
+                           CALL GET_SPECIFIC_HEAT(ZZ_AIR,C_GAS_AIR,TMP_FILM)
+                           THETA = C_GAS_DROP/C_GAS_AIR/LEWIS
+                           B_NUMBER = (1._EB+B_NUMBER)**THETA-1._EB
+                           NUSSELT  = 2._EB + NU_FAC_GAS*SQRT(RE_L)*LOG(1._EB+B_NUMBER)/(B_NUMBER*F_B(B_NUMBER))
+                           H_HEAT   = NUSSELT*K_AIR/LENGTH
+                        ENDIF
+                  END SELECT
                   H_WALL   = 0._EB
                   TMP_WALL = TMPA
                   ARRAY_CASE = 1
                ENDIF SOLID_OR_GAS_PHASE_2
-               IF (Y_DROP<=Y_GAS) H_MASS = 0._EB
 
                ! Build and solve implicit arrays for updating particle, gas, and wall temperatures
-
                ITMP = INT(TMP_DROP)
                H1 = H_SENS_Z(ITMP,Z_INDEX)+(TMP_DROP-REAL(ITMP,EB))*(H_SENS_Z(ITMP+1,Z_INDEX)-H_SENS_Z(ITMP,Z_INDEX))
                ITMP = INT(TMP_G)
@@ -2346,7 +2436,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                DTOG = DT_SUBSTEP/(2._EB*M_GAS*CP)
                DTGOG = DT_SUBSTEP*A_DROP*WGT*H_HEAT/(2._EB*M_GAS*CP)
                DTGOP = DT_SUBSTEP*A_DROP*H_HEAT/(2._EB*M_DROP*C_DROP)
-               AGHRHO = A_DROP*WGT*H_MASS*RHO_G/(1._EB+0.5_EB*RVC*DT_SUBSTEP*A_DROP*WGT*H_MASS)
+               AGHRHO = A_DROP*WGT*H_MASS*RHO_AIR/(1._EB+0.5_EB*RVC*DT_SUBSTEP*A_DROP*WGT*H_MASS*RHO_AIR/RHO_G)
                DADYDTHVHL=DTOG*AGHRHO*DYDT*(H1-H2)
                DADYDTHV=DTOP*AGHRHO*DYDT*H_V
                SELECT CASE (ARRAY_CASE)
@@ -2394,7 +2484,6 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                      TMP_G_NEW = (D_VEC(1)-B_COL(1)*TMP_DROP_NEW)/A_COL(1)
                END SELECT
                M_VAP = MAX(0._EB,MIN(M_DROP, DT_SUBSTEP * AGHRHO/WGT * (Y_DROP-Y_GAS+0.5_EB*DYDT*(TMP_DROP_NEW-TMP_DROP))))
-
                ! Compute the total amount of heat extracted from the gas, wall and radiative fields
 
                Q_RAD      = DT_SUBSTEP*Q_DOT_RAD
@@ -2402,7 +2491,6 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                Q_CON_WALL = DT_SUBSTEP*A_DROP*H_WALL*0.5_EB*(TMP_WALL+TMP_WALL_NEW-TMP_DROP-TMP_DROP_NEW)
                Q_TOT = Q_RAD+Q_CON_GAS+Q_CON_WALL
                IF (Q_TOT >= M_DROP*H_V) M_VAP = M_DROP
-
                ! Adjust drop temperature for variable liquid CP
 
                EVAP_ALL: IF (M_VAP < M_DROP) THEN
@@ -2454,7 +2542,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                ZZ_GET2(Z_INDEX) = ZZ_GET2(Z_INDEX) + WGT*M_VAP/M_GAS_NEW
 
                CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%H_V,1),SS%H_V,TMP_DROP_NEW,H_V2)
-               DHOR     = H_V2*MW_DROP/R0
+               DHOR     = 0.5_EB*(H_V2+H_V_B)*MW_DROP/R0
                X_EQUIL  = MIN(1._EB,P_RATIO*EXP(DHOR*(1._EB/TMP_BOIL-1._EB/TMP_DROP_NEW)))
                Y_EQUIL  = X_EQUIL/(MW_RATIO + (1._EB-MW_RATIO)*X_EQUIL)
 
@@ -2465,7 +2553,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                      DT_SUBSTEP = DT_SUBSTEP * 0.5_EB
                      IF (DT_SUBSTEP <= 0.00001_EB*DT) THEN
                         DT_SUBSTEP = DT_SUBSTEP * 2.0_EB
-                        WRITE(LU_ERR,'(A,I0,A,I0)') 'WARNING Y_EQ < Y_G_N. Mesh: ',NM,', Particle: ',IP
+                        WRITE(LU_ERR,'(A,I0,A,I0)') 'WARNING Y_EQ < Y_G_N. Mesh: ',NM,'Particle: ',IP
                         !CALL SHUTDOWN('Numerical instability in particle energy transport, Y_EQUIL < Y_GAS_NEW')
                         !RETURN
                      ELSE
@@ -2481,7 +2569,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                      DT_SUBSTEP = DT_SUBSTEP * 0.5_EB
                      IF (DT_SUBSTEP <= 0.00001_EB*DT) THEN
                         DT_SUBSTEP = DT_SUBSTEP * 2.0_EB
-                        WRITE(LU_ERR,'(A,I0,A,I0)') 'WARNING Y_G_N > Y_EQ. Mesh: ',NM,', Particle: ',IP
+                        WRITE(LU_ERR,'(A,I0,A,I0)') 'WARNING Y_G_N > Y_EQ. Mesh: ',NM,'Particle: ',IP
                         !CALL SHUTDOWN('Numerical instability in particle energy transport, Y_GAS_NEW > Y_EQUIL')
                         !RETURN
                      ELSE
@@ -2536,7 +2624,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                   DT_SUBSTEP = DT_SUBSTEP * 0.5_EB
                   IF (DT_SUBSTEP <= 0.00001_EB*DT) THEN
                      DT_SUBSTEP = DT_SUBSTEP * 2.0_EB
-                     WRITE(LU_ERR,'(A,I0,A,I0)') 'WARNING Delta TMP_G. Mesh: ',NM,', Particle: ',IP
+                     WRITE(LU_ERR,'(A,I0,A,I0)') 'WARNING Delta TMP_G. Mesh: ',NM,' Particle: ',IP
                      !CALL SHUTDOWN('Numerical instability in particle energy transport, TMP_G')
                      !RETURN
                   ELSE
@@ -2551,7 +2639,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                   DT_SUBSTEP = DT_SUBSTEP * 0.5_EB
                   IF (DT_SUBSTEP <= 0.00001_EB*DT) THEN
                      DT_SUBSTEP = DT_SUBSTEP * 2.0_EB
-                     WRITE(LU_ERR,'(A,I0,A,I0)') 'WARNING TMP_G_N < TMP_D_N. Mesh: ',NM,', Particle: ',IP
+                     WRITE(LU_ERR,'(A,I0,A,I0)') 'WARNING TMP_G_N < TMP_D_N. Mesh: ',NM,' Particle: ',IP
                      !CALL SHUTDOWN('Numerical instability in particle energy transport, TMP_G_NEW < TMP_G')
                      !RETURN
                   ELSE
@@ -2609,7 +2697,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                IF (IW > 0) THEN
                   WALL(IW)%LP_CPUA(LPC%ARRAY_INDEX) = WALL(IW)%LP_CPUA(LPC%ARRAY_INDEX) + &
                                                       OMRAF*WGT*Q_CON_WALL/(WALL(IW)%ONE_D%AREA*DT)
-                  WALL(IW)%ONE_D%Q_RAD_IN = (WALL(IW)%ONE_D%AREA*DT*WALL(IW)%ONE_D%Q_RAD_IN - WGT*DT*Q_DOT_RAD) / &
+                  WALL(IW)%ONE_D%Q_RAD_IN = (WALL(IW)%ONE_D%AREA*DT*WALL(IW)%ONE_D%Q_RAD_IN - WGT*DT*Q_DOT_RAD)/ &
                                             (WALL(IW)%ONE_D%AREA*DT)
                ENDIF
 
@@ -2993,6 +3081,17 @@ MESHES(NM)%LAGRANGIAN_PARTICLE(LP_INDEX) = MESHES(NM)%LAGRANGIAN_PARTICLE(NLP)
 MESHES(NM)%LAGRANGIAN_PARTICLE(LP_INDEX)%ARRAY_INDEX = LP_INDEX
 
 END SUBROUTINE REMOVE_OLDEST_PARTICLE
+
+
+REAL(EB) FUNCTION F_B(B)
+REAL(EB), INTENT(IN) :: B
+
+IF (B<=0._EB) THEN
+   F_B = 1._EB
+ELSE
+   F_B = (1._EB+B)**0.7_EB*LOG(1._EB+B)/B
+ENDIF
+END FUNCTION F_B
 
 
 END MODULE PART
