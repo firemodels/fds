@@ -31873,7 +31873,7 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
          ELSE
            WRITE(LU_ERR,'(A,A,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
          ENDIF
-         WRITE(LU_ERR,'(A)') "  Non manifold geometry, more that two triangles share edge:"
+         WRITE(LU_ERR,'(A)') "  Non manifold geometry, more than two triangles share edge:"
          WRITE(LU_ERR,'(A,3F12.3,A,3F12.3,A)') "  (", XYZV(IAXIS:KAXIS,NOD1), ")-(", XYZV(IAXIS:KAXIS,NOD2), ")"
          CALL SHUTDOWN("") ; RETURN
 
