@@ -27,6 +27,8 @@ $QFDS -d Complex_Geometry geom_texture4a.fds
 $QFDS -d Complex_Geometry geom_texture4b.fds
 $QFDS -d Complex_Geometry geom_arch.fds
 
+$QFDS -d Complex_Geometry geom_bad_intersection.fds
+$QFDS -d Complex_Geometry geom_bad_inverted_normals.fds
 $QFDS -d Complex_Geometry geom_bad_inconsistent_normals.fds
 $QFDS -d Complex_Geometry geom_bad_non_manifold_edge.fds
 $QFDS -d Complex_Geometry geom_bad_non_manifold_vert.fds
