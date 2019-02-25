@@ -1676,7 +1676,6 @@ Four turbulence models are tested: (1) Constant Smagorinsky (csmag), (2) Dynamic
 \end{figure}
 
 
-
 \chapter{Boundary Effects}
 
 Wall flows have long been a challenge for large-eddy simulation (LES) \cite{Baggett:1997,Baggett:1998,Cabot:1995,Pope:2000,Sagaut:2001}.  In spite of their promise and sophistication, practical LES codes are resigned to \emph{model} the wall shear stress as opposed to \emph{resolving} the dynamically important length scales near the wall. FDS uses a log law velocity profile \cite{Pope:2000} for modeling turbulent flow near a wall.
@@ -1908,7 +1907,6 @@ The bottom-left and -right plots in Fig.~\ref{fig_ribbed_channel} show the RMS v
    \end{tabular*}
    \caption[Mean and RMS velocity profiles for ribbed square duct flow]{\label{fig_ribbed_channel} Mean and RMS velocity profiles for ribbed square duct flow. Comparison with PIV data from Casara and Arts \cite{Casara:1,Lohasz:1}.}
 \end{figure}
-
 
 
 \chapter{Mass and Energy Conservation}
@@ -2183,21 +2181,28 @@ This case tests the ability of FDS to properly conserve the total of the solid p
 \label{mass_heat_wall_device_test}
 \label{mass_heat_wall_device_test_2}
 
-To obtain tight mass and energy balances it is important to output the actual values used for boundary conditions in the transport equations in FDS.  To do this a user applies the WALL variants of the flow devices.  In Fig.~\ref{mass_heat_wall_device} we show the results for two cases.  These cases are the same except that the vents have opposite {\ct IOR} (orientation) values.  Each case has a prescribed outflow mass flux of 1 \si{kg/(m^2.s)} and exhaust vent area of 4 \si{m^2}.  The inflow balances the outflow with both equal to 4 \si{kg/s}.  The specific heat of the air is set to 1 \si{kJ/(kg.K)}.  The ambient temperature is 100 \si{\degreeCelsius}.  The reference temperature is 25 \si{\degreeCelsius}.  The heat flow at the vent is, therefore, (4 \si{kg/s})(1 \si{kJ/(kg.K)})(75 K) = 300 kW.
+To obtain tight mass and energy balances it is important to output the actual values used for boundary conditions in the transport equations in FDS.  To do this a user applies the WALL variants of the flow devices.  In Figs.~\ref{mass_heat_wall_device_mass_flow} and \ref{mass_heat_wall_device_heat_flow} we show the results for two cases.  These cases are the same except that the vents have opposite {\ct IOR} (orientation) values.  Each case has a prescribed outflow mass flux of 1 \si{kg/(m^2.s)} and exhaust vent area of 4 \si{m^2}.  The inflow balances the outflow with both equal to 4 \si{kg/s}.  The specific heat of the air is set to 1 \si{kJ/(kg.K)}.  The ambient temperature is 100 \si{\degreeCelsius}.  The reference temperature is 25 \si{\degreeCelsius}.  The heat flow at the vent is, therefore, (4 \si{kg/s})(1 \si{kJ/(kg.K)})(75 K) = 300 kW.
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/wall_device_test_massflow_in} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/wall_device_test_massflow_out} \\
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/wall_device_test_massflow_in_2} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/wall_device_test_massflow_out_2} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/wall_device_test_massflow_out_2}
+\end{tabular*}
+\caption[The \textct{mass\_heat\_wall\_device\_test} mass flow results]{The \textct{mass\_heat\_wall\_device\_test} mass flow results.}
+\label{mass_heat_wall_device_mass_flow}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{lr}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/wall_device_test_heatflow_in} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/wall_device_test_heatflow_out} \\
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/wall_device_test_heatflow_in_2} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/wall_device_test_heatflow_out_2}
 \end{tabular*}
-\caption[The \textct{mass\_heat\_wall\_device\_test} cases]{The \textct{mass\_heat\_wall\_device\_test} cases.}
-\label{mass_heat_wall_device}
+\caption[The \textct{mass\_heat\_wall\_device\_test} heat flow results]{The \textct{mass\_heat\_wall\_device\_test} heat flow results.}
+\label{mass_heat_wall_device_heat_flow}
 \end{figure}
 
 
@@ -3461,7 +3466,7 @@ In the second case three pairs of small (3~mm by 3~mm) vents are placed on oppos
 \subsection{Oxidation of Soot on Surfaces (\texorpdfstring{\textct{soot\_oxidation\_wall}}{soot\_oxidation\_wall})}
 \label{soot_oxidation_wall}
 
-This verification case checks the routine for oxidizing soot on a surface. The calculation fills a 1~m$^3$ box with 0.1~g of soot with a mean diameter of 100 microns; the large diameter was selected so the soot would quickly settle to the floor. The case lets the soot settle for 10 s. This is followed by a one-second ramp that heats the floor from 20~$^\circ$C to 1000~$^\circ$C. This results in rapid oxidation of the soot. Once all the soot is oxidized, there should have been a heat release of  3.36~kJ and the production of 0.3~mg of CO$_2$ and 8.3 ~$\mu$g of H$_2$O. 	
+This verification case checks the routine for oxidizing soot on a surface. The calculation fills a 1~m$^3$ box with 0.1~g of soot with a mean diameter of 100 microns; the large diameter was selected so the soot would quickly settle to the floor. The case lets the soot settle for 10 s. This is followed by a one-second ramp that heats the floor from 20~$^\circ$C to 1000~$^\circ$C. This results in rapid oxidation of the soot. Once all the soot is oxidized, there should have been a heat release of  3.36~kJ and the production of 0.3~mg of CO$_2$ and 8.3 ~$\mu$g of H$_2$O.
 
 \begin{figure}[ht]
 	\centering
@@ -3469,7 +3474,7 @@ This verification case checks the routine for oxidizing soot on a surface. The c
 		\includegraphics[height=2.2in]{SCRIPT_FIGURES/soot_oxidation_mass}
 		\includegraphics[height=2.2in]{SCRIPT_FIGURES/soot_oxidation_energy} \\
 		\includegraphics[height=2.2in]{SCRIPT_FIGURES/soot_oxidation_co2}
-		\includegraphics[height=2.2in]{SCRIPT_FIGURES/soot_oxidation_h2o} 		
+		\includegraphics[height=2.2in]{SCRIPT_FIGURES/soot_oxidation_h2o}
 	\end{tabular}
 	\caption[Results of the \textct{soot\_oxidation\_wall} case]{Time evolution the accumulated wall mass of soot (upper left), energy release due to soot combustion (upper right), and mass of CO$_2$ (lower left) and H$_2$O (lower right) in the gas for the \textct{soot\_oxidation\_wall} case.}
 	\label{fig:soot_oxidation}
