@@ -38038,7 +38038,7 @@ SUBROUTINE READ_GEOM
 USE BOXTETRA_ROUTINES, ONLY: TETRAHEDRON_VOLUME, REMOVE_DUPLICATE_VERTS
 USE MATH_FUNCTIONS, ONLY: CROSS_PRODUCT
 
-CHARACTER(LABEL_LENGTH) :: ID,MATL_ID,TEXTURE_MAPPING, &
+CHARACTER(LABEL_LENGTH) :: ID,MATL_ID,TEXTURE_MAPPING, BIN_GEOM_FILENAME,&
                            DEVC_ID,PROP_ID,CTRL_ID,SURF_IDS(3),SURF_ID6(6),MOVE_ID
 CHARACTER(MESSAGE_LENGTH) :: BUFFER
 CHARACTER(LABEL_LENGTH),  ALLOCATABLE, DIMENSION(:) :: GEOM_IDS,SURF_ID
@@ -38069,11 +38069,13 @@ TYPE(GEOMETRY_TYPE), POINTER :: G=>NULL()
 INTEGER, PARAMETER :: CAD_GEOM_TYPE=0,BOX_GEOM_TYPE=1,SPHERE_GEOM_TYPE=2,TERRAIN_GEOM_TYPE=3,CYLINDER_GEOM_TYPE=4
 REAL(EB), PARAMETER :: MAX_VAL=1.0E20_EB
 
+LOGICAL :: READ_BINARY
+
 NAMELIST /GEOM/ AUTO_TEXTURE,BNDF_GEOM,FACES,ID,IJK,MOVE_ID,MATL_ID,N_LAT,N_LEVELS,N_LONG,PROP_ID,&
                 SPHERE_ORIGIN,SPHERE_RADIUS,SPHERE_TYPE,SURF_ID,SURF_IDS,SURF_ID6,&
                 TEXTURE_MAPPING,TEXTURE_ORIGIN,TEXTURE_SCALE,&
                 VERTS,VOLUS,XB,ZMIN,ZVALS,CYLINDER_ORIGIN,CYLINDER_AXIS,&
-                CYLINDER_RADIUS,CYLINDER_LENGTH,CYLINDER_NSEG_THETA,CYLINDER_NSEG_AXIS
+                CYLINDER_RADIUS,CYLINDER_LENGTH,CYLINDER_NSEG_THETA,CYLINDER_NSEG_AXIS,READ_BINARY
 
 ! first pass - determine max number of ZVALS, VERTS, FACES, VOLUS and IDS over all &GEOMs
 
@@ -38162,57 +38164,100 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
    CALL SET_GEOM_DEFAULTS
    READ(LU_INPUT,GEOM,END=35)
 
-   ! count VERTS
-
    N_VERTS=0
-   DO I = 1, MAX_VERTS
-      IF (ANY(VERTS(3*I-2:3*I)>=MAX_VAL)) EXIT
-      N_VERTS = N_VERTS+1
-   ENDDO
-
-   ! count FACES
-
    N_FACES=0
-   DO I = 1, MAX_FACES
-      IF (ANY(FACES(4*(I-1)+1:4*(I-1)+3)==0)) EXIT
-      N_FACES = N_FACES+1
-   ENDDO
-   ! Get number of SURF_IDs defined for the GEOM:
    N_SURF_ID = 0
-   DO I = 1, MAX_SURF_IDS
-      IF( SURF_ID(I)=='null' ) EXIT ! First 'null'
-      N_SURF_ID = N_SURF_ID + 1
-   ENDDO
-   ! Now split FACES array into FACES (connectivity), and SURFS, i.e. local surf ID:
-   IF(N_FACES > 0) THEN
-      IF(ALLOCATED(SURFS)) DEALLOCATE(SURFS); ALLOCATE(SURFS(N_FACES))
-      DO I = 1, N_FACES
-         FACES(3*(I-1)+1:3*(I-1)+3) = FACES(4*(I-1)+1:4*(I-1)+3)
-         SURFS(I)                   = FACES(4*(I-1)+4)
-         IF(SURFS(I) > N_SURF_ID) THEN
-            WRITE(MESSAGE,'(A,A,A,I8,A)') 'ERROR: problem with GEOM ',TRIM(ID),&
-                                        ', local SURF_ID index for FACE ',I,'out of bounds.'
-            CALL SHUTDOWN(MESSAGE); RETURN
-         ENDIF
-      ENDDO
-   ENDIF
    TFACES(1:6*MAX_FACES) = -1.0_EB
-
-   ! count VOLUS
-
    N_VOLUS=0
-   DO I = 1, MAX_VOLUS
-      IF (ANY(VOLUS(4*I-3:4*I)==0)) EXIT
-      N_VOLUS = N_VOLUS+1
-   ENDDO
-
-   ! count ZVALS
-
    N_ZVALS=0
-   DO I = 1, MAX_ZVALS
-      IF (ZVALS(I)>MAX_VAL) EXIT
-      N_ZVALS=N_ZVALS+1
-   ENDDO
+   G%READ_BINARY = READ_BINARY
+   READ_BIN_COND : IF (.NOT.READ_BINARY) THEN
+      ! count VERTS
+
+      DO I = 1, MAX_VERTS
+         IF (ANY(VERTS(3*I-2:3*I)>=MAX_VAL)) EXIT
+         N_VERTS = N_VERTS+1
+      ENDDO
+
+      ! count FACES
+
+      DO I = 1, MAX_FACES
+         IF (ANY(FACES(4*(I-1)+1:4*(I-1)+3)==0)) EXIT
+         N_FACES = N_FACES+1
+      ENDDO
+      ! Get number of SURF_IDs defined for the GEOM:
+      DO I = 1, MAX_SURF_IDS
+         IF( SURF_ID(I)=='null' ) EXIT ! First 'null'
+         N_SURF_ID = N_SURF_ID + 1
+      ENDDO
+      ! Now split FACES array into FACES (connectivity), and SURFS, i.e. local surf ID:
+      IF(N_FACES > 0) THEN
+         IF(ALLOCATED(SURFS)) DEALLOCATE(SURFS); ALLOCATE(SURFS(N_FACES))
+         DO I = 1, N_FACES
+            FACES(3*(I-1)+1:3*(I-1)+3) = FACES(4*(I-1)+1:4*(I-1)+3)
+            SURFS(I)                   = FACES(4*(I-1)+4)
+            IF(SURFS(I) > N_SURF_ID) THEN
+               WRITE(MESSAGE,'(A,A,A,I8,A)') 'ERROR: problem with GEOM ',TRIM(ID),&
+                                           ', local SURF_ID index for FACE ',I,'out of bounds.'
+               CALL SHUTDOWN(MESSAGE); RETURN
+            ENDIF
+         ENDDO
+      ENDIF
+
+      ! count VOLUS
+
+      DO I = 1, MAX_VOLUS
+         IF (ANY(VOLUS(4*I-3:4*I)==0)) EXIT
+         N_VOLUS = N_VOLUS+1
+      ENDDO
+
+      ! count ZVALS
+
+      DO I = 1, MAX_ZVALS
+         IF (ZVALS(I)>MAX_VAL) EXIT
+         N_ZVALS=N_ZVALS+1
+      ENDDO
+
+   ELSE READ_BIN_COND
+      ! Read Binary file, reset values of other geometry types to default:
+      ! Defaults for terrain, sphere, cylinder, box, etc.
+      N_ZVALS = 0
+      XB=1.001_EB*MAX_VAL
+      SPHERE_ORIGIN = 1.001_EB*MAX_VAL
+      SPHERE_RADIUS = 1.001_EB*MAX_VAL
+      CYLINDER_LENGTH = 1.001_EB*MAX_VAL
+      CYLINDER_RADIUS = 1.001_EB*MAX_VAL
+      CYLINDER_ORIGIN = 1.001_EB*MAX_VAL
+      CYLINDER_AXIS   = 1.001_EB*MAX_VAL
+      CYLINDER_NSEG_THETA = -1
+      CYLINDER_NSEG_AXIS  = -1
+      N_LEVELS=-1
+      N_LAT=-1
+      N_LONG=-1
+      SPHERE_TYPE=-1
+
+      ! Read Binary
+      WRITE(BIN_GEOM_FILENAME,'(A,A,A,A,A)') './',TRIM(CHID),'_',TRIM(ID),'.bingeom'
+      OPEN(UNIT=731,FILE=TRIM(BIN_GEOM_FILENAME),STATUS='OLD',FORM='UNFORMATTED',ACTION='READ',ERR=221,IOSTAT=IOS)
+      IF (IOS==0) THEN
+         READ(731) IJ
+         READ(731) N_VERTS,N_FACES,N_SURF_ID,N_VOLUS
+         IF (N_VERTS > 0 ) READ(731) VERTS(1:3*N_VERTS)
+         IF (N_FACES > 0 ) THEN
+            READ(731) FACES(1:3*N_FACES)
+            IF(ALLOCATED(SURFS)) DEALLOCATE(SURFS); ALLOCATE(SURFS(N_FACES))
+            READ(731) SURFS(1:N_FACES)
+         ENDIF
+         IF (N_VOLUS > 0 ) READ(731) VOLUS(1:4*N_VOLUS)
+         CLOSE(731)
+      ENDIF
+221   IF(IOS > 0) THEN
+         WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR: could not read binary connectivity for GEOM ',TRIM(ID),&
+                                       ' in binary file ',TRIM(BIN_GEOM_FILENAME),'. Check file exists.'
+         CALL SHUTDOWN(MESSAGE); RETURN
+      ENDIF
+   ENDIF READ_BIN_COND
+
 
    !--- setup a 2D surface (terrain) object (ZVALS keyword )
 
@@ -38995,6 +39040,20 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
    !    ENDIF
    !
    ! ENDIF NSUB_GEOMS_IF
+
+   ! Case of false READ_BINARY, write a binary file with the geom:
+   IF(.NOT.READ_BINARY) THEN
+      WRITE(BIN_GEOM_FILENAME,'(A,A,A,A,A)') './',TRIM(CHID),'_',TRIM(ID),'.bingeom'
+      OPEN(UNIT=731,FILE=TRIM(BIN_GEOM_FILENAME),STATUS='UNKNOWN',ACTION='WRITE',FORM='UNFORMATTED')
+      WRITE(731) 0
+      WRITE(731) N_VERTS,N_FACES,N_SURF_ID,N_VOLUS
+      WRITE(731) VERTS(1:3*N_VERTS)
+      WRITE(731) FACES(1:3*N_FACES)
+      WRITE(731) SURFS(1:N_FACES)
+      WRITE(731) VOLUS(1:4*N_VOLUS)
+      CLOSE(731)
+   ENDIF
+
 ENDDO READ_GEOM_LOOP
 35 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
 
@@ -39427,7 +39486,7 @@ SUBROUTINE SET_GEOM_DEFAULTS
    CUTCELLS=.FALSE.
    ZMIN=ZS_MIN
    COMPONENT_ONLY=DEFAULT_COMPONENT_ONLY(N)
-   ID = 'geom'
+   WRITE(ID,'(A,I6.6)') 'geom_',N
    SURF_ID(:)= 'null'
    SURF_IDS = 'null'
    SURF_ID6 = 'null'
@@ -39487,6 +39546,7 @@ SUBROUTINE SET_GEOM_DEFAULTS
    SPHERE_TYPE=-1
    GEOM_TYPE=CAD_GEOM_TYPE
    BNDF_GEOM=BNDF_DEFAULT
+   READ_BINARY = .FALSE.
 
 END SUBROUTINE SET_GEOM_DEFAULTS
 
