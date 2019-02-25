@@ -29,7 +29,7 @@
 &RAMP ID='heat flux ramp', T=144000,F=1/
 
 &RAMP ID='geo wind ramp', T=0     ,F=1/
-&RAMP ID='geo wind ramp', T=21600, F=1/ 31 hrs
+&RAMP ID='geo wind ramp', T=21600, F=1/ 6 hrs
 &RAMP ID='geo wind ramp', T=21601, F=0.7/ Schoenberg applies flux for last "6+3" hours
 &RAMP ID='geo wind ramp', T=144000,F=0.7/
 
