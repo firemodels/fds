@@ -1914,7 +1914,27 @@ The bottom-left and -right plots in Fig.~\ref{fig_ribbed_channel} show the RMS v
 
 \section{Ekman Layers (\texorpdfstring{\textct{ekman\_}}{ekman\_})}
 
-Initial commit.
+In a simple turbulent channel flow, the resulting boundary layer profile results from the balance between the streamwise pressure gradient and the turbulent stresses.  In an Ekman layer, the Coriolis force is also part of in the balance.  Here, we are concerned with Ekman layers in the atmosphere.  The Coriolis force has the effect of twisting the atmospheric boundary layer---near the surface there is a component of the wind aligned with the pressure gradient, but aloft the winds tend to be geostrophic, meaning they run parallel to isobars (perpendicular to the pressure gradient).  In FDS, input of a geostrophic wind implies a mean pressure gradient in the orthogonal direction (see FDS User Guide \cite{FDS_Users_Guide}).
+
+In atmospheric flows, it is difficult to separate the forces for verification purposes.  In this section, we will undertake an admittedly weak form of verification, namely, code to code comparison.  We compare FDS with the results from Schoenberg \cite{Schoenberg:2004} where OpenFOAM is modified for atmospheric flows.  We use the same domain, grid resolution, and---as closely as possible---initial conditions as Schoenberg.  The latitude is specified as 45$^\circ$ north (for specifying the Coriolis force).  We use the Deardorff turbulence model with stability correction and we also implement a variable turbulent Prandtl number, as is done in Schoenberg.  The main difference in the models is that Schoenberg solves a transport equation for $k_{sgs}$ whereas FDS uses a simple algebraic closure (see FDS Tech Guide \cite{FDS_Math_Guide}).  Further, it was difficult to discern the exact initialization procedure from the Schoenberg report, so there are likely some minor differences that can account for the small discrepancies we see in the FDS results.  It should also be noted that the Schoenberg simulations apply a Boussinesq assumption and thus do not account for the pressure stratification term in the energy equation.  Hence, to match the Schoenberg results, we had to set {\ct STRATIFICATION=F} for FDS, which is counterintuitive for an atmospheric flow.  In practice, this should not be done.
+
+Three cases are run: neutral, stable, and unstable boundary layers.  The domain size, grid resolution, surface flux condition, and geostrophic wind driving force are presented in Table \ref{tab:ekman_param} (adapted from \cite{Schoenberg:2004}). Note that the density and specific heat are specified in the FDS input file such that the surface heat flux in either \si{K.m/s} or \si{W/m^2} are roughly the same.  The boundary conditions are periodic in $x$ and $y$ and no flux at the top of the domain.  Note that this makes achieving a steady state impossible for the stable and unstable cases.  This is another reason why the code comparison is difficult---essentially we are comparing the resulting profiles after approximately 40 hours of real time evolution.  Schoenberg uses a spin up process of running the neutral case for up to 30 hours before transitioning to stratification.  The surface aerodynamic roughness used by Schoenberg is $z_0 = 0.1$ m.  This translates to a sand grain roughness of 3.0 m in FDS.  Note that the input files for the {\ct ekman\_*} series are stored with the validation suite (see {\ct fds/Validation/Schoenberg\_Ekman\_Layers/}), since the cases use 16 processors and take a few hours to complete.
+
+\begin{table}[ht]
+\centering
+\caption[Schoenberg Ekman Layer parameters]{Schoenberg Ekman Layer parameters.}
+\label{tab:ekman_param}
+\begin{tabular}{|l|l|s|r|r|}
+\hline
+Case     & Domain Size                    & $N_x \times N_y \times N_z$ & Surface Heat Flux & $U_g$ \\
+         & $x\times y \times z$ (m)       &                             & (\si{W/m^2})      & (m/s) \\
+\hline
+Neutral  & $4000 \times 2000 \times 1500$ & $40\times 40 \times 40$     & 0                 & 10    \\
+Stable   & $2000 \times 1000 \times  750$ & $40\times 40 \times 40$     & -0.00502          & 7     \\
+Unstable & $4000 \times 2000 \times 1500$ & $40\times 40 \times 40$     & 0.02008           & 15    \\
+\hline
+\end{tabular}
+\end{table}
 
 \begin{figure}[ht]
    \centering
