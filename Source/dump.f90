@@ -2618,10 +2618,15 @@ IF (SIM_MODE/=DNS_MODE) THEN
       CASE(WALE)
          WRITE(LU_OUTPUT,'(A,F4.2,A)')    '   Near-wall Eddy Viscosity: WALE Model (C_WALE = ',C_WALE,')'
    END SELECT NEAR_WALL_SELECT
-   WRITE(LU_OUTPUT,'(A,F8.2)')   '   Turbulent Prandtl Number      ',PR
-   WRITE(LU_OUTPUT,'(A,F8.2)')   '   Turbulent Schmidt Number      ',SC
+   IF (POTENTIAL_TEMPERATURE_CORRECTION) THEN
+      WRITE(LU_OUTPUT,'(A)')        '   Turbulent Prandtl Number:      Dynamic (Deardorff Model)'
+      WRITE(LU_OUTPUT,'(A)')        '   Turbulent Schmidt Number:      Dynamic (Deardorff Model)'
+   ELSE
+      WRITE(LU_OUTPUT,'(A,F8.2)')   '   Turbulent Prandtl Number:     ',PR
+      WRITE(LU_OUTPUT,'(A,F8.2)')   '   Turbulent Schmidt Number:     ',SC
+   ENDIF
 ENDIF
-WRITE(LU_OUTPUT,'(A,F8.2)')   '   Ambient Temperature (C)       ',TMPA-TMPM
+WRITE(LU_OUTPUT,'(A,F8.2)')   '   Ambient Temperature (C):      ',TMPA-TMPM
 
 ! Write out the transformation matrix that converts species mixtures to primitive species
 

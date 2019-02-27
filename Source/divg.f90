@@ -108,12 +108,25 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
 
    DEL_RHO_D_DEL_Z = 0._EB
    RHO_D => WORK4
-   IF (SIM_MODE/=DNS_MODE) THEN
-      IF (SIM_MODE==LES_MODE) THEN
-         RHO_D_TURB => WORK9
-         RHO_D_TURB = MAX(0._EB,MU-MU_DNS)*RSC
-      ELSE
-         RHO_D = MAX(0._EB,MU)*RSC
+   IF (.NOT.POTENTIAL_TEMPERATURE_CORRECTION) THEN
+      ! default
+      IF (SIM_MODE/=DNS_MODE) THEN
+         IF (SIM_MODE==LES_MODE) THEN
+            RHO_D_TURB => WORK9
+            RHO_D_TURB = MAX(0._EB,MU-MU_DNS)*RSC
+         ELSE
+            RHO_D = MAX(0._EB,MU)*RSC
+         ENDIF
+      ENDIF
+   ELSE
+      ! dynamic turbulent Schmidt number (Deardorff, 1980)
+      IF (SIM_MODE/=DNS_MODE) THEN
+         IF (SIM_MODE==LES_MODE) THEN
+            RHO_D_TURB => WORK9
+            RHO_D_TURB = MAX(0._EB,MU-MU_DNS)/PR_T
+         ELSE
+            RHO_D = MAX(0._EB,MU)/PR_T
+         ENDIF
       ENDIF
    ENDIF
 
