@@ -253,8 +253,49 @@ Figures~\ref{LNG_Dispersion_1}--\ref{LNG_Dispersion_2} compare measured and pred
 \end{figure}
 
 
+\clearpage
 
+\section{Stack Emission Plume Rise}
+\label{Plume_Height_Discussion}
 
+A common exercise in atmospheric dispersion modeling is predicting the plume rise height of stack emissions. In an example given by Stull~\cite{Stull:2000}, a $z_{\rm s}=75$~m stack emits SO$_2$ at a rate of 250~g/s with an exit velocity of $W_0=20$~m/s and temperature of $\Delta T=180$~K above ambient ($T_0=293$~K) through an orifice with radius $R_0=2$~m. The wind speed is $U=5$~m/s. Three cases are considered where the atmosphere is stably stratified with temperature gradients, $\d T/\d z$, of -4.8, -8.8 and 5.2~K/km.  The expected equilibrium height is given by the empirical expression:
+\be
+   z_{\rm c} = z_{\rm s} + 2.6 \, \left( \frac{I_{\rm b} \, U^2}{N_{\rm BV}^2 } \right)^{1/3} \approx \left\{ \begin{array}{ll} 290\; \hbox{m} & \hbox{Case 1} \\ 443\; \hbox{m} & \hbox{Case 2} \\ 224\; \hbox{m} & \hbox{Case 3} \end{array} \right.
+\ee
+where $I_{\rm b}$ is a buoyancy length scale given by
+\be
+   I_{\rm b} = \frac{W_0 \, R_0^2 \, g}{U^3} \; \frac{\Delta T}{T_0} \approx 3.85 \; \hbox{m} \quad \hbox{(all cases)}
+\ee
+and the Brunt-V{\"a}is{\"a}l{\"a} frequency is given by:
+\be
+   N_{\rm BV}^2 = \frac{g}{T_0} \left( \frac{\d T}{\d z} + \Gamma_{\rm d} \right) \approx \left\{ \begin{array}{ll} 1.67\times 10^{-4}\; \hbox{s}^{-2} & \hbox{Case 1} \\ 0.334\times 10^{-4}\; \hbox{s}^{-2} & \hbox{Case 2} \\ 5.02\times 10^{-4}\; \hbox{s}^{-2} & \hbox{Case 3} \end{array} \right.    \quad  \quad \Gamma_{\rm d}=9.8 \times 10^{-3} \; \hbox{K/m}
+\ee
+Notice that the exhaust rate of SO$_2$ has no role in the calculation of plume height because it is greatly diluted by hot air (or other exhaust products) exiting the stack at 20~m/s.
+
+Figure~\ref{plume_height_images} displays snapshots of the simulations, and Fig.~\ref{plume_height} displays the comparison of FDS simulations with the empirical correlation. In the simulations, the plume height was taken as the location of the peak concentration of the SO$_2$ far downwind of the stack. The stack is approximated as a rectangular solid measuring 4~m by 4~m by 76~m. The grid surrounding stack is composed of 2~m cubes. The next grid to the right is 4~m, and the next is 8~m. The wind speed is fixed at 5~m/s, and the temperature is linearly stratified. 
+
+\begin{figure}[p]
+\begin{center}
+\begin{tabular}{c}
+\includegraphics[width=6.0in]{FIGURES/Atmospheric_Dispersion/plume_rise_1_1000} \\
+\includegraphics[width=6.0in]{FIGURES/Atmospheric_Dispersion/plume_rise_2_1000} \\
+\includegraphics[width=6.0in]{FIGURES/Atmospheric_Dispersion/plume_rise_3_1000}
+\end{tabular}
+\end{center}
+\caption[Images of Plume Height simulations]{Snapshots of the simulations of plume rise. The largest computational domain is 800~m high and 1600~m long. The stack at left is 75~m high.}
+\label{plume_height_images}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/Atmospheric_Dispersion/plume_rise_1} &
+\includegraphics[height=2.1in]{SCRIPT_FIGURES/Atmospheric_Dispersion/plume_rise_2} \\
+\multicolumn{2}{c}{\includegraphics[height=2.1in]{SCRIPT_FIGURES/Atmospheric_Dispersion/plume_rise_3}} \\
+\multicolumn{2}{c}{\includegraphics[height=3.1in]{SCRIPT_FIGURES/ScatterPlots/FDS_Plume_Height}}
+\end{tabular*}
+\caption[Atmospheric Dispersion, Plume Height results]{Atmospheric Dispersion, Plume Height results.}
+\label{plume_height}
+\end{figure}
 
 
 
