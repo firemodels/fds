@@ -158,6 +158,34 @@ where $\bar{u}$ is the average value of $u$ at the grid cell center (representin
 \ee
 The terms $\hat{\bar{v}}$ and $\hat{\bar{w}}$ are defined similarly.  The model constant is set to the literature value $C_\nu=0.1$ \cite{Pope:2000}.  The constant value is also derived theoretically in Appendix \ref{app:lilly_analysis}.  The algebraic form of subgrid kinetic energy is based on the ideas presented in the scale-similarity model of Bardina et al.~\cite{Bardina:1980}. (Note that Deardorff \cite{Deardorff:1980} solved a transport equation for $k_{\rm sgs}$.)
 
+\subsubsection*{Corrections for atmospheric stratification}
+\label{sec:potential_temp_correction}
+
+A stably stratified atmosphere will suppress the generation of turbulent eddies and hence it will reduce turbulent transport in the vertical direction.  Deardorff \cite{Deardorff:1980} proposed a modification to the eddy length scale in the eddy viscosity to account for local stratification (temperature gradient in the vertical direction).  The model for the length scale is
+\begin{equation}
+\label{eq:eddy_length_stability_correction}
+\ell_s = 0.76 \, \sqrt{ k_{\rm sgs} } \, \left(\frac{g}{\theta_0} \frac{\partial \theta}{\partial z}\right)^{-1/2}
+\end{equation}
+where the potential temperature is \cite{Stull:2000}
+\begin{equation}
+\label{eq:potential_tmp}
+\theta = T \left(\frac{1\times 10^5}{p}\right)^{R/(\overline{W}c_p)}
+\end{equation}
+When the potential temperature gradient is positive the local fluid is stably stratified.  With the gradient in the demoninator, the length scale is reduced, causing a reduction in the eddy viscosity.  When {\ct POTENTIAL\_TEMPERATURE\_CORRECTION=.TRUE.} the turbulent viscosity is computed from
+\be
+  \label{eq:mut_theta_cor}
+  \mu_{\rm t} = \rho \, C_\nu \, \min(\ell_s,\Delta) \, \sqrt{ k_{\rm sgs} }
+\ee
+
+\subsubsection*{Dynamic turbulent Prandtl number}
+\label{sec:dyn_turb_Pr}
+
+The turbulent Prandtl number is the ratio of the kinematic turbulent visocity to the turbulent thermal diffusivity, $\mbox{Pr}_t = \nu_t/\alpha_t$.  This parameter should approach unity if the flow is fully resolved.  To achieve this, Deardorff \cite{Deardorff:1980} proposed to compute the turbulent Prandtl number as follows:
+\begin{equation}
+\mbox{Pr}_t = \left(1 + \left[ \frac{2 \ell_s}{\Delta}\right]\right)^{-1}
+\end{equation}
+Hence, if $\ell_s = \Delta$, $\mbox{Pr}_t = 1/3$, and if $\ell_s = 0$, $\mbox{Pr}_t = 1$.  This dynamic turbulent Prandtl number is applied automatically if {\ct POTENTIAL\_TEMPERATURE\_CORRECTION=.TRUE.}.
+
 \subsection{Vreman's Model}
 \label{sec:vreman}
 
