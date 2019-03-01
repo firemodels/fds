@@ -27034,6 +27034,9 @@ CHARACTER(MESSAGE_LENGTH) :: UNLINKED_FILE
 REAL(EB) :: DV, DISTCELL
 INTEGER, PARAMETER :: N_LINK_ATTMP = 50
 
+INTEGER, ALLOCATABLE, DIMENSION(:) :: CELLPUNKZ, INDUNKZ
+INTEGER :: COUNT
+
 ! Define local number of cut-cell:
 IF (ALLOCATED(NUNKZ_LOC)) DEALLOCATE(NUNKZ_LOC)
 ALLOCATE(NUNKZ_LOC(1:NMESHES)); NUNKZ_LOC = 0
@@ -27348,9 +27351,8 @@ MAIN_MESH_LOOP3 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
           I = CUT_CELL(ICC)%IJK(IAXIS)
           J = CUT_CELL(ICC)%IJK(JAXIS)
           K = CUT_CELL(ICC)%IJK(KAXIS)
-      !    CCVOL_THRES = CCVOL_LINK*DX(I)*DY(J)*DZ(K)
-      !    ! For cases with more than one cut-cell, define UNKZ of all cells to be the one of first cut-cell
-      !    ! with UNKZ > 0:
+          ! For cases with more than one cut-cell, define UNKZ of all cells to be the one of first cut-cell
+          ! with UNKZ > 0:
           DO JCC=1,NCELL
              IF ( CUT_CELL(ICC)%UNKZ(JCC) > 0 ) EXIT
           ENDDO
@@ -27506,6 +27508,59 @@ MAIN_MESH_LOOP3 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    ENDDO LINK_LOOP
 
 ENDDO MAIN_MESH_LOOP3
+
+! After fixing cut-cell unkz for a given Cartesian cells there might be UNKZ values that haven't been assigned.
+! Condense:
+MAIN_MESH_LOOP31 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   IF(NUNKZ_LOC(NM) == 0) CYCLE
+   CALL POINT_TO_MESH(NM)
+
+   ALLOCATE(CELLPUNKZ(1:NUNKZ_LOC(NM)), INDUNKZ(1:NUNKZ_LOC(NM))); CELLPUNKZ = 0; INDUNKZ = 0;
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            IF(CCVAR(I,J,K,IBM_UNKZ) < 1) CYCLE
+            CELLPUNKZ(CCVAR(I,J,K,IBM_UNKZ)) = CELLPUNKZ(CCVAR(I,J,K,IBM_UNKZ)) + 1
+         ENDDO
+      ENDDO
+   ENDDO
+   DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+      DO JCC=1,CUT_CELL(ICC)%NCELL
+         IF (CUT_CELL(ICC)%UNKZ(JCC) < 1) CYCLE
+         CELLPUNKZ(CUT_CELL(ICC)%UNKZ(JCC)) = CELLPUNKZ(CUT_CELL(ICC)%UNKZ(JCC)) + 1
+      ENDDO
+   ENDDO
+
+   ! Now re-index:
+   COUNT=0
+   DO I=1,NUNKZ_LOC(NM)
+      IF(CELLPUNKZ(I) == 0) CYCLE ! This UNKZ_LOC value has no cells associated to it.
+      COUNT = COUNT + 1
+      INDUNKZ(I) = COUNT
+   ENDDO
+   NUNKZ_LOC(NM) = COUNT
+
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            IF(CCVAR(I,J,K,IBM_UNKZ) < 1) CYCLE
+            VAL_UNKZ = CCVAR(I,J,K,IBM_UNKZ)
+            CCVAR(I,J,K,IBM_UNKZ) = INDUNKZ(VAL_UNKZ) ! Condensed value.
+         ENDDO
+      ENDDO
+   ENDDO
+   DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+      DO JCC=1,CUT_CELL(ICC)%NCELL
+         IF (CUT_CELL(ICC)%UNKZ(JCC) < 1) CYCLE
+         VAL_UNKZ = CUT_CELL(ICC)%UNKZ(JCC)
+         CUT_CELL(ICC)%UNKZ(JCC) = INDUNKZ(VAL_UNKZ) ! Condensed value.
+      ENDDO
+   ENDDO
+   DEALLOCATE(CELLPUNKZ,INDUNKZ)
+
+ENDDO MAIN_MESH_LOOP31
+
+
 
 ! Define total number of unknowns and global unknown index start per MESH:
 IF (ALLOCATED(NUNKZ_TOT)) DEALLOCATE(NUNKZ_TOT)
