@@ -236,6 +236,25 @@ A {\ct GEOM}\ namelist defining a sphere centered at $(0,0,0)$ with radius $1$ i
 \noindent Spheres are discretized by default so that each face is consistent in size with the grid resolution.
 One may specify a {\ct N\_LEVEL}\ parameter which defines the number of times the sphere is split.
 
+
+\subsubsection{Cylinders}
+
+
+A {\ct GEOM} namelist defining a cylinder geometry with centroid at {\ct CYLINDER\_ORIGIN}$=(0,0,0)$, axis {\ct CYLINDER\_AXIS}$=(1.,0,0)$, length {\ct CYLINDER\_LENGTH}$=2.$ and radius {\ct CYLINDER\_RADIUS}$=0.5$ is given by
+
+\begin{verbatim}
+&GEOM ID='cylinder', SURF_ID='S1', 
+              CYLINDER_LENGTH=2., 
+              CYLINDER_RADIUS=.5, 
+              CYLINDER_ORIGIN=0.,0.,0., 
+              CYLINDER_AXIS=1.,0.,0., 
+              CYLINDER_NSEG_AXIS=6, 
+              CYLINDER_NSEG_THETA=48 /             
+ \end{verbatim}
+
+where the cylinder is discretized using 6 segments along its axis and 48 segments across its circumference.
+
+
 \subsubsection{2D Terrain elevations}
 A {\ct GEOM}\ namelist defining a 2D terrain elevation is given by
 
@@ -261,20 +280,13 @@ vertices and triangular faces.
 
 \subsection{Generating complex geometries}
 
-\textbf{FIXME}: [EG] Useful?
-
 Generating well-formed complex geometries is a time-consuming and error-prone process.
 Several third-party pre-processing tools are provided by the FDS-SMV community for automatically translating CAD files to {\ct GEOM}\ namelists.
 
-These tools should always enforce quality checks on the triangulated surfaces and produce well-formed {\ct GEOM}\ namelists.
-
-The links to this tools can be found at the project home page at https://pages.nist.gov/fds-smv/
-
+These tools should always enforce quality checks on the triangulated surfaces and produce well-formed {\ct GEOM}\ namelists. 
+Links to these tools can be found at the project home page at https://pages.nist.gov/fds-smv/.
 
 
-
-
-\textbf{FIXME}: from here unmodified text
 
 %\subsection{Defining Surfaces}
 %
@@ -386,6 +398,29 @@ For example, in the following {\ct GEOM}\ namelist,
 }
 
 \noindent the chair object is translated and rotated using a reference to the $\&MOVE$ namelist, defined and explained in section XX.
+
+
+\subsection{Reading Geometry node locations and connectivity data from binary}
+
+In cases where geometries have very large numbers of nodes and surface triangles, it can be more efficient at setup time to read this data from an FDS produced binary file. This binary file can be obtained running the case in setup only mode ({\ct T\_END=0.0}). 
+Consider the chair geometry defined in the previous section. When a geometry is read by FDS, the {\ct XYZ} and face connectivity data {\ct FACES} is automatically written into a binary file with name {\ct CHID\_GEOM\_ID.bingeom} on the run directory (here, {\ct GEOM\_ID='chair'}). 
+
+Then, the next time the case is run, the geometry line can be modified to:
+{\small
+\begin{verbatim}
+&GEOM ID='chair',
+      SURF_ID='woodSID','apholsterySID',
+      READ_BINARY=.TRUE.
+      MOVE_ID='ChairMove'
+/
+\end{verbatim}
+}
+
+where {\ct READ\_BINARY=.TRUE.} instructs FDS to read nodes and faces from the binary geometry file.
+Note we have deleted the {\ct VERTS, FACES} arrays from the input line. 
+This manner of loading large geometries avoids the testing and reading of all lines related to these arrays on the FDS input file.
+It is particularly efficient in large parallel calculations, where parallel file systems are used.  
+
 
 %\subsection{Grouping Objects}
 %One may group objects to form a new object.  In the following example,

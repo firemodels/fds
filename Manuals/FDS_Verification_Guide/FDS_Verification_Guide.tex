@@ -1676,7 +1676,6 @@ Four turbulence models are tested: (1) Constant Smagorinsky (csmag), (2) Dynamic
 \end{figure}
 
 
-
 \chapter{Boundary Effects}
 
 Wall flows have long been a challenge for large-eddy simulation (LES) \cite{Baggett:1997,Baggett:1998,Cabot:1995,Pope:2000,Sagaut:2001}.  In spite of their promise and sophistication, practical LES codes are resigned to \emph{model} the wall shear stress as opposed to \emph{resolving} the dynamically important length scales near the wall. FDS uses a log law velocity profile \cite{Pope:2000} for modeling turbulent flow near a wall.
@@ -1907,6 +1906,44 @@ The bottom-left and -right plots in Fig.~\ref{fig_ribbed_channel} show the RMS v
       \includegraphics[height=2.2in]{SCRIPT_FIGURES/ribbed_channel_urms_prof} \\
    \end{tabular*}
    \caption[Mean and RMS velocity profiles for ribbed square duct flow]{\label{fig_ribbed_channel} Mean and RMS velocity profiles for ribbed square duct flow. Comparison with PIV data from Casara and Arts \cite{Casara:1,Lohasz:1}.}
+\end{figure}
+
+
+\chapter{Atmospheric Flows}
+
+
+\section{Ekman Layers (\texorpdfstring{\textct{ekman\_}}{ekman\_})}
+
+In a simple turbulent channel flow, the resulting boundary layer profile results from the balance between the streamwise pressure gradient and the turbulent stresses.  In an Ekman layer, the Coriolis force is also part of in the balance.  Here, we are concerned with Ekman layers in the atmosphere.  The Coriolis force has the effect of twisting the atmospheric boundary layer---near the surface there is a component of the wind aligned with the pressure gradient, but aloft the winds tend to be geostrophic, meaning they run parallel to isobars (perpendicular to the pressure gradient).  In FDS, input of a geostrophic wind implies a mean pressure gradient in the orthogonal direction (see FDS User Guide \cite{FDS_Users_Guide}).
+
+In atmospheric flows, it is difficult to separate the forces for verification purposes.  In this section, we will undertake an admittedly weak form of verification, namely, code to code comparison.  We compare FDS with the results from Schoenberg \cite{Schoenberg:2004} where OpenFOAM is modified for atmospheric flows.  We use the same domain, grid resolution, and---as closely as possible---initial conditions as Schoenberg.  The latitude is specified as 45$^\circ$ north (for specifying the Coriolis force).  We use the Deardorff turbulence model with stability correction and we also implement a variable turbulent Prandtl number, as is done in Schoenberg.  The main difference in the models is that Schoenberg solves a transport equation for $k_{sgs}$ whereas FDS uses a simple algebraic closure (see FDS Tech Guide \cite{FDS_Math_Guide}).  Further, it was difficult to discern the exact initialization procedure from the Schoenberg report, so there are likely some minor differences that can account for the small discrepancies we see in the FDS results.  It should also be noted that the Schoenberg simulations apply a Boussinesq assumption and thus do not account for the pressure stratification term in the energy equation.  Hence, to match the Schoenberg results, we had to set {\ct STRATIFICATION=F} for FDS, which is counterintuitive for an atmospheric flow.  In practice, this should not be done.
+
+Three cases are run: neutral, stable, and unstable boundary layers.  The domain size, grid resolution, surface flux condition, and geostrophic wind driving force are presented in Table \ref{tab:ekman_param} (adapted from \cite{Schoenberg:2004}). Note that the density and specific heat are specified in the FDS input file such that the surface heat flux in either \si{K.m/s} or \si{W/m^2} are roughly the same.  The boundary conditions are periodic in $x$ and $y$ and no flux at the top of the domain.  Note that this makes achieving a steady state impossible for the stable and unstable cases.  This is another reason why the code comparison is difficult---essentially we are comparing the resulting profiles after approximately 40 hours of real time evolution.  Schoenberg uses a spin up process of running the neutral case for up to 30 hours before transitioning to stratification.  The surface aerodynamic roughness used by Schoenberg is $z_0 = 0.1$ m.  This translates to a sand grain roughness of 3.0 m in FDS.  Note that the input files for the {\ct ekman\_*} series are stored with the validation suite (see {\ct fds/Validation/Schoenberg\_Ekman\_Layers/}), since the cases use 16 processors and take a few hours to complete.
+
+\begin{table}[ht]
+\centering
+\caption[Schoenberg Ekman Layer parameters]{Schoenberg Ekman Layer parameters.}
+\label{tab:ekman_param}
+\begin{tabular}{|l|l|s|r|r|}
+\hline
+Case     & Domain Size                    & $N_x \times N_y \times N_z$ & Surface Heat Flux & $U_g$ \\
+         & $x\times y \times z$ (m)       &                             & (\si{W/m^2})      & (m/s) \\
+\hline
+Neutral  & $4000 \times 2000 \times 1500$ & $40\times 40 \times 40$     & 0                 & 10    \\
+Stable   & $2000 \times 1000 \times  750$ & $40\times 40 \times 40$     & -0.00502          & 7     \\
+Unstable & $4000 \times 2000 \times 1500$ & $40\times 40 \times 40$     & 0.02008           & 15    \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{figure}[ht]
+   \centering
+   \includegraphics[height=2.2in]{../FDS_Validation_Guide/SCRIPT_FIGURES/Schoenberg_Ekman_Layers/ekman_neutral_winds}
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \includegraphics[height=2.2in]{../FDS_Validation_Guide/SCRIPT_FIGURES/Schoenberg_Ekman_Layers/ekman_stable_winds} &
+      \includegraphics[height=2.2in]{../FDS_Validation_Guide/SCRIPT_FIGURES/Schoenberg_Ekman_Layers/ekman_unstable_winds}
+   \end{tabular*}
+   \caption[Schoenberg Ekman Layers]{\label{fig:ekman_layers} Comparison Ekman layer profiles for neutral (top), stable (bottom-left), and unstable (bottom-right) atmospheric boundary layers with the simulation results of Schoenberg \cite{Schoenberg:2004}.}
 \end{figure}
 
 
@@ -2183,21 +2220,28 @@ This case tests the ability of FDS to properly conserve the total of the solid p
 \label{mass_heat_wall_device_test}
 \label{mass_heat_wall_device_test_2}
 
-To obtain tight mass and energy balances it is important to output the actual values used for boundary conditions in the transport equations in FDS.  To do this a user applies the WALL variants of the flow devices.  In Fig.~\ref{mass_heat_wall_device} we show the results for two cases.  These cases are the same except that the vents have opposite {\ct IOR} (orientation) values.  Each case has a prescribed outflow mass flux of 1 \si{kg/(m^2.s)} and exhaust vent area of 4 \si{m^2}.  The inflow balances the outflow with both equal to 4 \si{kg/s}.  The specific heat of the air is set to 1 \si{kJ/(kg.K)}.  The ambient temperature is 100 \si{\degreeCelsius}.  The reference temperature is 25 \si{\degreeCelsius}.  The heat flow at the vent is, therefore, (4 \si{kg/s})(1 \si{kJ/(kg.K)})(75 K) = 300 kW.
+To obtain tight mass and energy balances it is important to output the actual values used for boundary conditions in the transport equations in FDS.  To do this a user applies the WALL variants of the flow devices.  In Figs.~\ref{mass_heat_wall_device_mass_flow} and \ref{mass_heat_wall_device_heat_flow} we show the results for two cases.  These cases are the same except that the vents have opposite {\ct IOR} (orientation) values.  Each case has a prescribed outflow mass flux of 1 \si{kg/(m^2.s)} and exhaust vent area of 4 \si{m^2}.  The inflow balances the outflow with both equal to 4 \si{kg/s}.  The specific heat of the air is set to 1 \si{kJ/(kg.K)}.  The ambient temperature is 100 \si{\degreeCelsius}.  The reference temperature is 25 \si{\degreeCelsius}.  The heat flow at the vent is, therefore, (4 \si{kg/s})(1 \si{kJ/(kg.K)})(75 K) = 300 kW.
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/wall_device_test_massflow_in} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/wall_device_test_massflow_out} \\
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/wall_device_test_massflow_in_2} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/wall_device_test_massflow_out_2} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/wall_device_test_massflow_out_2}
+\end{tabular*}
+\caption[The \textct{mass\_heat\_wall\_device\_test} mass flow results]{The \textct{mass\_heat\_wall\_device\_test} mass flow results.}
+\label{mass_heat_wall_device_mass_flow}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{lr}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/wall_device_test_heatflow_in} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/wall_device_test_heatflow_out} \\
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/wall_device_test_heatflow_in_2} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/wall_device_test_heatflow_out_2}
 \end{tabular*}
-\caption[The \textct{mass\_heat\_wall\_device\_test} cases]{The \textct{mass\_heat\_wall\_device\_test} cases.}
-\label{mass_heat_wall_device}
+\caption[The \textct{mass\_heat\_wall\_device\_test} heat flow results]{The \textct{mass\_heat\_wall\_device\_test} heat flow results.}
+\label{mass_heat_wall_device_heat_flow}
 \end{figure}
 
 
@@ -3461,7 +3505,7 @@ In the second case three pairs of small (3~mm by 3~mm) vents are placed on oppos
 \subsection{Oxidation of Soot on Surfaces (\texorpdfstring{\textct{soot\_oxidation\_wall}}{soot\_oxidation\_wall})}
 \label{soot_oxidation_wall}
 
-This verification case checks the routine for oxidizing soot on a surface. The calculation fills a 1~m$^3$ box with 0.1~g of soot with a mean diameter of 100 microns; the large diameter was selected so the soot would quickly settle to the floor. The case lets the soot settle for 10 s. This is followed by a one-second ramp that heats the floor from 20~$^\circ$C to 1000~$^\circ$C. This results in rapid oxidation of the soot. Once all the soot is oxidized, there should have been a heat release of  3.36~kJ and the production of 0.3~mg of CO$_2$ and 8.3 ~$\mu$g of H$_2$O. 	
+This verification case checks the routine for oxidizing soot on a surface. The calculation fills a 1~m$^3$ box with 0.1~g of soot with a mean diameter of 100 microns; the large diameter was selected so the soot would quickly settle to the floor. The case lets the soot settle for 10 s. This is followed by a one-second ramp that heats the floor from 20~$^\circ$C to 1000~$^\circ$C. This results in rapid oxidation of the soot. Once all the soot is oxidized, there should have been a heat release of  3.36~kJ and the production of 0.3~mg of CO$_2$ and 8.3 ~$\mu$g of H$_2$O.
 
 \begin{figure}[ht]
 	\centering
@@ -3469,7 +3513,7 @@ This verification case checks the routine for oxidizing soot on a surface. The c
 		\includegraphics[height=2.2in]{SCRIPT_FIGURES/soot_oxidation_mass}
 		\includegraphics[height=2.2in]{SCRIPT_FIGURES/soot_oxidation_energy} \\
 		\includegraphics[height=2.2in]{SCRIPT_FIGURES/soot_oxidation_co2}
-		\includegraphics[height=2.2in]{SCRIPT_FIGURES/soot_oxidation_h2o} 		
+		\includegraphics[height=2.2in]{SCRIPT_FIGURES/soot_oxidation_h2o}
 	\end{tabular}
 	\caption[Results of the \textct{soot\_oxidation\_wall} case]{Time evolution the accumulated wall mass of soot (upper left), energy release due to soot combustion (upper right), and mass of CO$_2$ (lower left) and H$_2$O (lower right) in the gas for the \textct{soot\_oxidation\_wall} case.}
 	\label{fig:soot_oxidation}
