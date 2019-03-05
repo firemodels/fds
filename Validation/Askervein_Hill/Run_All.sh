@@ -5,6 +5,6 @@
 export SVNROOT=`pwd`/../..
 source $SVNROOT/Validation/Common_Run_All.sh
 
-#$QFDS $DEBUG -p 32 $QUEUE -d $INDIR Askervein.fds
+$QFDS $DEBUG -p 32 $QUEUE -d $INDIR Askervein.fds
 
 echo FDS cases submitted
