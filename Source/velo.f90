@@ -2189,7 +2189,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
             VENT_INDEX = MAX(WCM%VENT_INDEX,WCP%VENT_INDEX)
             VT => VENTS(VENT_INDEX)
 
-            WIND_NO_WIND_IF: IF (.NOT.ANY(MEAN_FORCING) .OR. TERRAIN_CASE) THEN  ! For regular OPEN boundary, (free-slip) BCs
+            WIND_NO_WIND_IF: IF (.NOT.ANY(MEAN_FORCING)) THEN  ! For regular OPEN boundary, (free-slip) BCs
 
                SELECT CASE(IEC)
                   CASE(1)

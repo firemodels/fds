@@ -65,16 +65,16 @@ fprintf(fid,'%s\n',head);
 fprintf(fid,'%s\n','  '); % blank line
 
 % place fine mesh first for DEVC output
-n1 = num2str(N(1));
-n2 = num2str(N(2));
-n3 = num2str(N(3));
-x1 = num2str(x_min,'%1.2f');
-x2 = num2str(x_max,'%1.2f');
-y1 = num2str(y_min,'%1.2f');
-y2 = num2str(y_max,'%1.2f');
-z1 = num2str(z_min,'%1.2f');
-z2 = num2str(z_max,'%1.2f');
-mesh = ['&MESH IJK=',n1,',',n2,',',n3,', XB=',x1,',',x2,',',y1,',',y2,',',z1,',',z2,'/']; fprintf(fid,'%s\n',mesh);
+% n1 = num2str(N(1));
+% n2 = num2str(N(2));
+% n3 = num2str(N(3));
+% x1 = num2str(x_min,'%1.2f');
+% x2 = num2str(x_max,'%1.2f');
+% y1 = num2str(y_min,'%1.2f');
+% y2 = num2str(y_max,'%1.2f');
+% z1 = num2str(z_min,'%1.2f');
+% z2 = num2str(z_max,'%1.2f');
+% mesh = ['&MESH IJK=',n1,',',n2,',',n3,', XB=',x1,',',x2,',',y1,',',y2,',',z1,',',z2,'/']; fprintf(fid,'%s\n',mesh);
 % dx2 = 2*dx;
 % dy2 = 2*dy;
 % dz2 = 2*dz;
@@ -91,6 +91,8 @@ mesh = ['&MESH IJK=',n1,',',n2,',',n3,', XB=',x1,',',x2,',',y1,',',y2,',',z1,','
 % z1 = num2str(z_min,'%1.2f');
 % z2 = num2str(z_max,'%1.2f');
 % mesh = ['&MESH IJK=',n1,',',n2,',',n3,', XB=',x1,',',x2,',',y1,',',y2,',',z1,',',z2,'/']; fprintf(fid,'%s\n',mesh);
+mult = ['&MULT ID=''m1'', DX=730,DY=690,DZ=260, I_UPPER=3,J_UPPER=3,K_UPPER=1/ 32 mesh']; fprintf(fid,'%s\n',mult);
+mesh = ['&MESH MULT_ID=''m1'', IJK=36,32,24, XB=-132.45,2787.55,-124.55,2635.45,-16.30,503.70/']; fprintf(fid,'%s\n',mesh);
 fprintf(fid,'%s\n','  '); % blank line
 
 %trnz = ['&TRNZ IDERIV=0, CC=250, PC=100, MESH_NUMBER=1/']; fprintf(fid,'%s\n',trnz);
@@ -107,24 +109,20 @@ dump = ['&DUMP NFRAMES=3600/'];
 fprintf(fid,'%s\n',dump);
 fprintf(fid,'%s\n','  '); % blank line
 
-misc = ['&MISC TMPA=15.0'];         fprintf(fid,'%s\n',misc);
-misc = ['      LAPSE_RATE=-0.01'];  fprintf(fid,'%s\n',misc);
-misc = ['      HUMIDITY=95.0'];     fprintf(fid,'%s\n',misc);
-% misc = ['      U0=6.0, FORCE_VECTOR(1)=0.01']; fprintf(fid,'%s\n',misc);
-% misc = ['      V0=16.0,FORCE_VECTOR(2)=0.02/']; fprintf(fid,'%s\n',misc);
-misc = ['      DT_MEAN_FORCING=60.0'];     fprintf(fid,'%s\n',misc);
-misc = ['      U0=6.0, MEAN_FORCING(1)=T']; fprintf(fid,'%s\n',misc);
-misc = ['      V0=16.0,MEAN_FORCING(2)=T/']; fprintf(fid,'%s\n',misc);
+misc = ['&MISC TMPA=15.0, HUMIDITY=95.0/']; fprintf(fid,'%s\n',misc);
 fprintf(fid,'%s\n','  '); % blank line
 
-surf = ['&SURF ID=''terrain'',ROUGHNESS=0.02, DEFAULT=T/']; fprintf(fid,'%s\n',surf);
+wind = ['&WIND LATITUDE=56, SPEED=17.1, DIRECTION=201, LAPSE_RATE=-0.0098, DT_MEAN_FORCING=10./']; fprintf(fid,'%s\n',wind);
 fprintf(fid,'%s\n','  '); % blank line
 
-vent = ['&VENT MB=''XMIN'',SURF_ID=''OPEN'',WIND=T/']; fprintf(fid,'%s\n',vent);
-vent = ['&VENT MB=''XMAX'',SURF_ID=''OPEN'',WIND=T/']; fprintf(fid,'%s\n',vent);
-vent = ['&VENT MB=''YMIN'',SURF_ID=''OPEN'',WIND=T/']; fprintf(fid,'%s\n',vent);
-vent = ['&VENT MB=''YMAX'',SURF_ID=''OPEN'',WIND=T/']; fprintf(fid,'%s\n',vent);
-vent = ['&VENT MB=''ZMAX'',SURF_ID=''OPEN'',WIND=T/']; fprintf(fid,'%s\n',vent);
+surf = ['&SURF ID=''terrain'',ROUGHNESS=0.9, COLOR=''GREEN'', DEFAULT=T/']; fprintf(fid,'%s\n',surf);
+fprintf(fid,'%s\n','  '); % blank line
+
+vent = ['&VENT MB=''XMIN'',SURF_ID=''OPEN''/']; fprintf(fid,'%s\n',vent);
+vent = ['&VENT MB=''XMAX'',SURF_ID=''OPEN''/']; fprintf(fid,'%s\n',vent);
+vent = ['&VENT MB=''YMIN'',SURF_ID=''OPEN''/']; fprintf(fid,'%s\n',vent);
+vent = ['&VENT MB=''YMAX'',SURF_ID=''OPEN''/']; fprintf(fid,'%s\n',vent);
+vent = ['&VENT MB=''ZMAX'',SURF_ID=''MIRROR''/']; fprintf(fid,'%s\n',vent);
 fprintf(fid,'%s\n','  '); % blank line
 
 slcf = ['&SLCF QUANTITY=''VELOCITY'',VECTOR=.TRUE.,AGL_SLICE=10.0/']; fprintf(fid,'%s\n',slcf);
@@ -226,7 +224,7 @@ geom = ['&GEOM ID=''terrain'', MATL_ID=''terrain''']  ;  fprintf(fid,'%s\n',geom
 geom = ['      IJK=',ivals,',',jvals]                 ;  fprintf(fid,'%s\n',geom);
 geom = ['      XB=',x1,',',x2,',',y1,',',y2]          ;  fprintf(fid,'%s\n',geom);
 geom = ['      ZVALS=']                               ;  fprintf(fid,'%s\n',geom);
-geom = ['      ']                                     ;  fprintf(fid,'%s',geom);
+geom = ['   ']                                        ;  fprintf(fid,'%s',geom);
 
 n = 0;
 for j=1:N(2)+1
@@ -240,7 +238,7 @@ for j=1:N(2)+1
 
         n = n+1;
         if mod(n,10)==0
-            zvals = [num2str(zi,'%1.2f')]; fprintf(fid,'%s\n',zvals);
+            zvals = [num2str(zi,'%1.2f')]; fprintf(fid,'%s\n   ',zvals);
         else
             zvals = [num2str(zi,'%1.2f')]; fprintf(fid,'%s,',zvals);
         end
