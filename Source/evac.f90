@@ -971,7 +971,7 @@ CONTAINS
        CALL ChkMemErr('READ_EVAC','Tsteps',IZERO)
        Tsteps(:) = EVAC_DT_FLOWFIELD
        IF (ABS(TIME_SHRINK_FACTOR-1.0_EB) >= TWO_EPSILON_EB ) THEN
-          CALL SHUTDOWN('ERROR: Evac is not ready for TIME_SHRINK_FACTOR')
+          CALL SHUTDOWN('ERROR: Evac is not ready for TIME_SHRINK_FACTOR',PROCESS_0_ONLY=.FALSE.)
           RETURN
        END IF
     END IF
@@ -5400,8 +5400,9 @@ CONTAINS
                    CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                 END IF
                 IF (IBAR_TMP /= IBAR .OR. JBAR_TMP /= JBAR .OR. N_TMP < 4 ) THEN
+                   WRITE(MESSAGE,'(A)') 'ERROR: Init Evac Dumps, Restart: Problems to read the FED file'
                    CLOSE (LU_EVACFED)
-                   CALL SHUTDOWN('ERROR: Init Evac Dumps, Restart: Problems to read the FED file') ; RETURN
+                   CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                 END IF
                 DO I = 1, IBAR
                    DO J= 1, JBAR
@@ -5468,7 +5469,7 @@ CONTAINS
              I_EVAC = IBCLR(I_EVAC,3)  ! do not read FED
              I_EVAC = IBCLR(I_EVAC,1)  ! do not save FED
           ELSE
-             CALL SHUTDOWN('ERROR: Evac Dumps: FED, no restart yet') ; RETURN
+             CALL SHUTDOWN('ERROR: Evac Dumps: FED, no restart yet',PROCESS_0_ONLY=.FALSE.) ; RETURN
              OPEN (LU_EVACFED,file=FN_EVACFED,form='unformatted', status='old')
              READ (LU_EVACFED,Iostat=ios) n_egrids_tmp
              IF (ios/=0) THEN
@@ -6227,7 +6228,7 @@ CONTAINS
              N_HUMANS = N_HUMANS + 1
              !
              IF (N_HUMANS > N_HUMANS_DIM) THEN
-                CALL SHUTDOWN('ERROR: Init Humans: no re-allocation yet') ; RETURN
+                CALL SHUTDOWN('ERROR: Init Humans: no re-allocation yet',PROCESS_0_ONLY=.FALSE.) ; RETURN
                 CALL RE_ALLOCATE_HUMANS(1,NM)
                 HUMAN=>MESHES(NM)%HUMAN
              END IF
@@ -6964,7 +6965,7 @@ CONTAINS
              END IF
              IF (IBAR_TMP /= IBAR .OR. JBAR_TMP /= JBAR .OR. N_TMP < 4 ) THEN
                 CLOSE (LU_EVACFED)
-                CALL SHUTDOWN('ERROR: Problems to read the FED file') ; RETURN
+                CALL SHUTDOWN('ERROR: Problems to read the FED file',PROCESS_0_ONLY=.FALSE.) ; RETURN
              END IF
 
           END IF
@@ -14163,7 +14164,7 @@ CONTAINS
 
     SELECT CASE(PCP%I_VEL_DIST)
     CASE(-1)
-       CALL SHUTDOWN('ERROR: Class_Properties: -1') ; RETURN
+       CALL SHUTDOWN('ERROR: Class_Properties: -1',PROCESS_0_ONLY=.FALSE.) ; RETURN
     CASE(0)
        HR%Speed  = PCP%V_mean
     CASE(1)   ! Uniform
@@ -14249,13 +14250,13 @@ CONTAINS
        CALL RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
        HR%Speed = rnd_vec(1)
     CASE Default
-       CALL SHUTDOWN('ERROR: Class_Properties I_VEL_DIST') ; RETURN
+       CALL SHUTDOWN('ERROR: Class_Properties I_VEL_DIST',PROCESS_0_ONLY=.FALSE.) ; RETURN
     END SELECT
     HR%Speed = Max(HR%Speed, 0.0_EB)
     
     SELECT CASE(PCP%I_DIA_DIST)
     CASE(-1)
-       CALL SHUTDOWN('ERROR: Class_Properties: -1') ; RETURN
+       CALL SHUTDOWN('ERROR: Class_Properties: -1',PROCESS_0_ONLY=.FALSE.) ; RETURN
     CASE(0)
        HR%Radius  = 0.5_EB*PCP%D_mean
     CASE(1)   ! Uniform
@@ -14340,14 +14341,14 @@ CONTAINS
        CALL RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
        HR%Radius = 0.5_EB*rnd_vec(1)
     CASE Default
-       CALL SHUTDOWN('ERROR: Class_Properties I_DIA_DIST') ; RETURN
+       CALL SHUTDOWN('ERROR: Class_Properties I_DIA_DIST',PROCESS_0_ONLY=.FALSE.) ; RETURN
     END SELECT
     HR%Radius = Max(HR%Radius, 0.05_EB) ! 5cm minimum radius
     HR%Mass   = PCP%m_agent*(HR%Radius/0.27_EB)**2
 
     SELECT CASE(PCP%I_TAU_DIST)
     CASE(-1)
-       CALL SHUTDOWN('ERROR: Class_Properties: -1') ; RETURN
+       CALL SHUTDOWN('ERROR: Class_Properties: -1',PROCESS_0_ONLY=.FALSE.) ; RETURN
     CASE(0)
        HR%Tau  = PCP%Tau_mean
     CASE(1)   ! Uniform
@@ -14434,13 +14435,13 @@ CONTAINS
        CALL RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
        HR%Tau = rnd_vec(1)
     CASE Default
-       CALL SHUTDOWN('ERROR: Class_Properties I_TAU_DIST') ; RETURN
+       CALL SHUTDOWN('ERROR: Class_Properties I_TAU_DIST',PROCESS_0_ONLY=.FALSE.) ; RETURN
     END SELECT
     HR%Tau = Max(HR%Tau, 0.01_EB) ! 0.01s minimum motive force parameter
 
     SELECT CASE(I_DET_DIST)
     CASE(-1)
-       CALL SHUTDOWN('ERROR: Class_Properties: -1') ; RETURN
+       CALL SHUTDOWN('ERROR: Class_Properties: -1',PROCESS_0_ONLY=.FALSE.) ; RETURN
     CASE(0)
        HR%Tdet  = Tdet_mean
     CASE(1)   ! Uniform
@@ -14526,12 +14527,12 @@ CONTAINS
        CALL RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
        HR%Tdet = rnd_vec(1)
     CASE Default
-       CALL SHUTDOWN('ERROR: Class_Properties I_DET_DIST') ; RETURN
+       CALL SHUTDOWN('ERROR: Class_Properties I_DET_DIST',PROCESS_0_ONLY=.FALSE.) ; RETURN
     END SELECT
 
     SELECT CASE(I_PRE_DIST)
     CASE(-1)
-       CALL SHUTDOWN('ERROR: Class_Properties: -1') ; RETURN
+       CALL SHUTDOWN('ERROR: Class_Properties: -1',PROCESS_0_ONLY=.FALSE.) ; RETURN
     CASE(0)
        HR%Tpre  = MAX(0._EB,Tpre_mean)
     CASE(1)   ! Uniform
@@ -14617,7 +14618,7 @@ CONTAINS
        CALL RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
        HR%Tpre = MAX(0._EB,rnd_vec(1))
     CASE Default
-       CALL SHUTDOWN('ERROR: Class_Properties I_PRE_DIST') ; RETURN
+       CALL SHUTDOWN('ERROR: Class_Properties I_PRE_DIST',PROCESS_0_ONLY=.FALSE.) ; RETURN
     END SELECT
     !
     ! Constants for the 'psychological' potential
@@ -14673,7 +14674,7 @@ CONTAINS
 
     SELECT CASE(I_PRE_DIST)
     CASE(-1)
-       CALL SHUTDOWN('ERROR: Tpre_Generation: -1') ; RETURN
+       CALL SHUTDOWN('ERROR: Tpre_Generation: -1',PROCESS_0_ONLY=.FALSE.) ; RETURN
     CASE(0)
        TPRE_OUT = MAX(0._EB,Tpre_mean)
     CASE(1)   ! Uniform
@@ -14759,7 +14760,7 @@ CONTAINS
        CALL RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
        TPRE_OUT = MAX(0._EB,rnd_vec(1))
     CASE Default
-       CALL SHUTDOWN('ERROR: Tpre_Generation I_PRE_DIST') ; RETURN
+       CALL SHUTDOWN('ERROR: Tpre_Generation I_PRE_DIST',PROCESS_0_ONLY=.FALSE.) ; RETURN
     END SELECT
   END SUBROUTINE TPRE_GENERATION
 !
