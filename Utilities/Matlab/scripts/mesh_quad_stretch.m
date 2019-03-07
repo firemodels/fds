@@ -6,7 +6,7 @@
 % to be prescribed.
 %
 % The known paramaters to be prescribed are:
-%   - the length of mesh block Lx, 
+%   - the length of mesh block Lx, and start of block xs.
 %   - the uniform grid size DXS of the first m cells,
 %   - and the total number of cells in the mesh Nx.
 %
@@ -32,21 +32,22 @@ clear all
 clc
 
 %% Directory where to write TRN.dat file: 
-basedir='YOUR DIRECTORY';
+basedir='MY DIRECTORY';
 
 % Write out TRNX, TRNY, TRNZ?
 TRN='TRNZ';
 TRN_ID='''MY TRANSFORM''';
 
 % Mesh size:
-Lx = 10;
+xs = 1; % Mesh block is defined from xs=1 to xf=xs+Lx=2.
+Lx = 1;
 
 % Low side number m of cells with small uniform size DXS:
-m  =    4;
-DXS= 0.25;
+m  =     4;
+DXS= 0.025;
 
 % Total number of cells:
-Nx = 18;
+Nx =   20;
 
 %% Solve for a:
 disp('Solving for stretching parameter..')
@@ -92,14 +93,14 @@ disp(['Time taken :' num2str(cputime-t) ' sec.'])
 figure
 subplot(1,2,1)
 hold on
-plot([0.1*Lx 0.1*Lx],[0 Lx],'k')
-plot([0.3*Lx 0.3*Lx],[0 Lx],'k')
-plot([0.1*Lx 0.3*Lx],[0 0],'k')
-xpl(1) = 0; xipl(1) = 0;
+plot([0.1*Lx 0.1*Lx],[xs xs+Lx],'k')
+plot([0.3*Lx 0.3*Lx],[xs xs+Lx],'k')
+plot([0.1*Lx 0.3*Lx],[xs xs],'k')
+xpl(1) = xs; xipl(1) = xs;
 for i=1:m
-   plot([0.1*Lx 0.3*Lx],[i*DXS i*DXS],'k')
-   xpl(i+1) =i*DXS;
-   xipl(i+1)=i*Lx/Nx;
+   plot([0.1*Lx 0.3*Lx],[xs+i*DXS xs+i*DXS],'k')
+   xpl(i+1) =xs+i*DXS;
+   xipl(i+1)=xs+i*Lx/Nx;
 end
 for i=m+1:Nx
     dx = DXS;
@@ -109,16 +110,16 @@ for i=m+1:Nx
         sdx= sdx + dx;
     end
     x = m*DXS + sdx;
-    plot([0.1*Lx 0.3*Lx],[x x],'k')
-    xpl(i+1) =x;
-    xipl(i+1)=i*Lx/Nx;
+    plot([0.1*Lx 0.3*Lx],[xs+x xs+x],'k')
+    xpl(i+1) =xs+x;
+    xipl(i+1)=xs+i*Lx/Nx;
 end
-xpl(Nx+1) =Lx;
-xipl(Nx+1)=Lx;
+xpl(Nx+1) =xs+Lx;
+xipl(Nx+1)=xs+Lx;
 box on
 ylabel('Stretching direction','FontSize',16)
 set(gca,'XTick',[],'FontSize',14)
-axis([0 0.4*Lx -0.1*Lx 1.1*Lx]);
+axis([0 0.4*Lx xs-0.1*Lx xs+1.1*Lx]);
 
 subplot(1,2,2)
 plot(xipl,xpl,'+k','LineWidth',2)
@@ -138,7 +139,7 @@ fprintf([basedir 'TRN.dat\n'])
 for i=1:m
    % First m cells:
    fprintf(fid,['&' TRN ' ID=' TRN_ID ', CC=%18.12f, PC=%18.12f /\n'],...
-            i*Lx/Nx,i*DXS);
+            xs+i*Lx/Nx,xs+i*DXS);
 end
 for i=m+1:Nx-1
     dx = DXS;
@@ -150,7 +151,7 @@ for i=m+1:Nx-1
     x = m*DXS + sdx;
     % Stretched cells:
     fprintf(fid,['&' TRN ' ID=' TRN_ID ', CC=%18.12f, PC=%18.12f /\n'],...
-            i*Lx/Nx,x);
+            xs+i*Lx/Nx,xs+x);
 end
 fclose(fid);
 fprintf(['Done.\n'])

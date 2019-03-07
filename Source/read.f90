@@ -1260,21 +1260,21 @@ MESH_LOOP: DO NM=1,NMESHES
             CASE(1)
                CALL CHECKREAD('TRNX',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
                IF (IOS==1) EXIT TRNLOOP
-               MESH_NUMBER = 1
+               MESH_NUMBER = HUGE(1)
                READ(LU_INPUT,NML=TRNX,END=17,ERR=18,IOSTAT=IOS)
                IF (TRIM(M%TRNX_ID)==TRIM(ID)) MESH_NUMBER=NM
                IF (MESH_NUMBER>0 .AND. MESH_NUMBER/=NM) CYCLE TRNLOOP
             CASE(2)
                CALL CHECKREAD('TRNY',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
                IF (IOS==1) EXIT TRNLOOP
-               MESH_NUMBER = 1
+               MESH_NUMBER = HUGE(1)
                READ(LU_INPUT,NML=TRNY,END=17,ERR=18,IOSTAT=IOS)
                IF (TRIM(M%TRNY_ID)==TRIM(ID)) MESH_NUMBER=NM
                IF (MESH_NUMBER>0 .AND. MESH_NUMBER/=NM) CYCLE TRNLOOP
             CASE(3)
                CALL CHECKREAD('TRNZ',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
                IF (IOS==1) EXIT TRNLOOP
-               MESH_NUMBER = 1
+               MESH_NUMBER = HUGE(1)
                READ(LU_INPUT,NML=TRNZ,END=17,ERR=18,IOSTAT=IOS)
                IF (TRIM(M%TRNZ_ID)==TRIM(ID)) MESH_NUMBER=NM
                IF (MESH_NUMBER>0 .AND. MESH_NUMBER/=NM) CYCLE TRNLOOP
@@ -1308,7 +1308,7 @@ MESH_LOOP: DO NM=1,NMESHES
                LOOP1: DO
                   CALL CHECKREAD('TRNX',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
                   IF (IOS==1) EXIT NLOOP
-                  MESH_NUMBER = 1
+                  MESH_NUMBER = HUGE(1)
                   READ(LU_INPUT,TRNX,END=1,ERR=2)
                   IF (TRIM(M%TRNX_ID)==TRIM(ID)) MESH_NUMBER=NM
                   IF (MESH_NUMBER==0 .OR. MESH_NUMBER==NM) EXIT LOOP1
@@ -1317,7 +1317,7 @@ MESH_LOOP: DO NM=1,NMESHES
                LOOP2: DO
                   CALL CHECKREAD('TRNY',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
                   IF (IOS==1) EXIT NLOOP
-                  MESH_NUMBER = 1
+                  MESH_NUMBER = HUGE(1)
                   READ(LU_INPUT,TRNY,END=1,ERR=2)
                   IF (TRIM(M%TRNY_ID)==TRIM(ID)) MESH_NUMBER=NM
                   IF (MESH_NUMBER==0 .OR. MESH_NUMBER==NM) EXIT LOOP2
@@ -1326,7 +1326,7 @@ MESH_LOOP: DO NM=1,NMESHES
                LOOP3: DO
                   CALL CHECKREAD('TRNZ',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
                   IF (IOS==1) EXIT NLOOP
-                  MESH_NUMBER = 1
+                  MESH_NUMBER = HUGE(1)
                   READ(LU_INPUT,TRNZ,END=1,ERR=2)
                   IF (TRIM(M%TRNZ_ID)==TRIM(ID)) MESH_NUMBER=NM
                   IF (MESH_NUMBER==0 .OR. MESH_NUMBER==NM) EXIT LOOP3
