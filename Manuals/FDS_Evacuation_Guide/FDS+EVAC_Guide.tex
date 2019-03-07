@@ -707,11 +707,9 @@ on the web page {\tt http://www.vtt.fi/fdsevac/}.
 
 \section{Type of the Model}
 
-\noindent FDS+Evac is a combined agent-based egress calculation model
-and a Computational Fluid Dynamics (CFD) model of fire-driven fluid
-flow, where the fire and egress parts are interacting.  FDS+Evac can
-also be used just to calculate the egress problem without any
-fire-driven fluid flow calculation, \emph{e.g.}, it can be used to
+\noindent FDS+Evac is a fire simulation tool combined with an evacuation module.  
+The fire simulation is based on a well-established Computational Fluid Dynamics 
+(CFD) model of fire-driven fluid flow, and the evacuation simulation is based on multi=agent modelling of pedestrian crowd.  The fire and evacuation components are interacting in several aspects, while each component can also be run independently.  In other words, FDS+Evac can also be used just to calculate the egress problem without any fire-driven fluid flow calculation, \emph{e.g.}, it can be used to
 simulate fire drills.  FDS+Evac models the egress of the agents using
 continuous space and time, but the building geometry is fitted to the
 underlying rectilinear mesh.  FDS+Evac uses simple rules and
@@ -845,14 +843,17 @@ modelled; only its hyperventilation factor is included.
 
 
 \textbf{Exit Route Selection:} The exit door selection algorithm is
-still a relatively simple one.  The user has more or less full control
-on the doors which different agents will be using.  In some
-applications this can be listed as a benefit of the model, but the
-requirements for user's responsibility and expertise should be
-recognised.  The present version of the programme includes some new models
-to characterize herding and following type behaviours of agents.  Users can
-partly control the model and algorithm by usng parameters in PERS namelist
-(i.e., I_HERDING_TYPE, AGENT_TYPE), but these new models of social type
+still a relatively simple one.  Users specify the agent type and
+initialize how agents are familiar with each door and exit (i.e.,
+KNOWN_DOOR_PROB), and the algorithm will assign the proper door and
+exit for each agent.  The target door and exit are dynamically changed
+in egress simulation while the smoke condition in fire simulation is also
+taken into account.  This feature can be listed as a benefit of the model,
+but the requirements for user's responsibility and expertise should be
+recognised.  The present version of the programme includes some new models 
+to characterize herding and following type behaviours of agents.  Users 
+can partly control the model and algorithm by usng parameters in PERS namelist 
+(i.e., I_HERDING_TYPE, AGENT_TYPE), but these new models of social type 
 behaviours are not yet validated.
 
 
@@ -1681,12 +1682,12 @@ versions of FDS+Evac.
 \section{Exit Selection}\label{Sec_ExitSel}
 
 \noindent According to socio-psychological
-literature~\cite{Pan06,Proulx1993}, the familiarity of exit routes is
-an essential factor influencing decision making.  This is because the
-unknown factors related to unknown routes are considered to increase
-the threat.  As a result, evacuees prefer familiar exit routes even if
-there are faster unfamiliar routes available.  For this reason,
-emergency exits are used rarely in evacuations and fire drills.
+literature~\cite{Pan06,Proulx1993}, familiarity of exit routes is
+an essential factor influencing decision making of evacuees.  Because the
+unknown factors in unfamiliar paths are considered to increase the risk of safe egress, 
+evacuees usually prefer familiar exit routes even if there are faster unfamiliar routes available. 
+For this reason, emergency exits are used rarely in many of real-life evacuation 
+events because they are unfamiliar choices to evacuees.  
 
 
 Also a common observation from real life evacuations has been that
@@ -1714,7 +1715,9 @@ out.  Just one person was enough to trigger the use of an emergency
 exit.
 
 
-Many prescriptive fire codes implicitly assume that the total exit capacities of buildings are evenly used in egress.  Herding behavior, as well as people's tendency to favor the familiar routes, may easily lead to
+Many prescriptive fire codes implicitly assume that the total exit 
+capacities of buildings are evenly used in egress.  Herding behavior, 
+as well as people's tendency to favor the familiar routes, may easily lead to
 outcomes against these assumptions, and thus a common scenario is that some exits are overcrowded while others are underused.  In order to exhibit these kinds of phenomena the exit selection algorithm of FDS+Evac was modified and three new agent types were introduced.  So now there are four types of agents: conservative type, active type, herding type and follower type.  The conservative type is the original agent type used in the early version of FDS+Evac.  
 
 
@@ -1752,18 +1755,7 @@ selected their target exits using this algorithm.  This original agent
 type of FDS+Evac is the conservative agent type.
 
 
-The first new agent type is active agents, who use a different
-preference order for the exits than the conservative type.  Active
-agents regard all visible exits also to be in the same preference
-group as familiar exits.  The second new agent type is herding agents.
-Herding agents use only the familiar exits, if any given by the user.
-If there is no familiar exit at the current floor of the building then
-a herding agent looks its nearest neighbor agents and tries to follow
-them. The third new agent type is follower agents.  A follower agent
-looks its nearest neighbors in front of it and check if exit where the
-neighboring agents are going is better than the current exit choice of
-the follower agent, i.e., the follower agent treats its neighbors'
-target exit doors as familiar doors.
+The first new type of agents are active agents. Different from conservative agents, active agents use a new preference order to select exits.  Active agents regard all visible exits also to be in the same preference group as familiar exits. The second new type of agents are herding agents.  Herding agents only use the familiar exits given by users. If no familiar exit is given at the current floor, herding agents look several of their nearest neighbors and try to follow them. The third new type of agents are follower agents. Follower agents look several of their nearest neighbors in front of them and check if the neighbors' exit choices are better than their own choices, i.e., the follower agent treats its neighbors’ target exit doors as familiar doors, and uses the best door among all the choices. 
 
 
 The familiarity of each exit for each agent can be determined by the
