@@ -368,6 +368,7 @@ INTEGER,  SAVE :: IBM_IS_CRS(IBM_MAXCROSS_X2)
 INTEGER,  SAVE :: IBM_IS_CRS2(LOW_IND:HIGH_IND,IBM_MAXCROSS_X2)
 REAL(EB), SAVE :: IBM_SEG_TAN(IAXIS:JAXIS,IBM_MAXCROSS_X2)
 INTEGER,  SAVE :: IBM_SEG_CRS(IBM_MAXCROSS_X2)
+INTEGER :: X1NOC, X2NOC, X3NOC
 
 ! Matrix vector building variables:
 
@@ -3356,13 +3357,11 @@ END SUBROUTINE CCCOMPUTE_RADIATION
 SUBROUTINE CCIBM_SET_DATA
 
 USE MPI
-USE TRAN, ONLY : TRANS
 
 ! Local Variables:
 INTEGER :: NM,IERR,ICALL
 REAL(EB):: LX,LY,LZ,MAX_DIST,MAX_DIST_AUX
 REAL(EB):: TNOW,TNOW2,TDEL
-INTEGER :: TRN_ME(1:2)
 
 INTEGER :: ICF
 CHARACTER(80) :: FN_CCTIME
@@ -3379,19 +3378,6 @@ IF (N_GEOMETRY==0 .AND. .NOT.(PERIODIC_TEST==103 .OR. PERIODIC_TEST==11 .OR. PER
 ENDIF
 
 TNOW2 = CURRENT_TIME()
-
-! Stretched grids not supported:
-TRN_ME(1:2) = 0
-MESH_LOOP_TRN : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-   TRN_ME(1) = TRN_ME(1) + TRANS(NM)%NOCMAX
-ENDDO MESH_LOOP_TRN
-TRN_ME(2)=TRN_ME(1)
-IF (N_MPI_PROCESSES > 1) CALL MPI_ALLREDUCE(TRN_ME(1),TRN_ME(2),1,MPI_INTEGER,MPI_SUM,MPI_COMM_WORLD,IERR)
-IF (TRN_ME(2) > 0) THEN ! There is a TRNX, TRNY or TRNZ line defined for stretched grids. Not Unsupported.
-   IF (MYID == 0) WRITE(LU_ERR,*) 'CCIBM Setup Error : Stretched grids currently unsupported.'
-   STOP_STATUS = SETUP_STOP
-   RETURN
-ENDIF
 
 ! Defined relative GEOMEPS:
 MAX_DIST=0._EB
@@ -12931,7 +12917,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 #ifdef DEBUG_IBM_INTERPOLATION
                   IF (ISNAN(CUT_FACE(ICF)%VELINT(IFACE))) THEN
                      WRITE(LU_ERR,*) 'VELINT CUTFACE IN FLUX2=',CUT_FACE(ICF)%IJK(IAXIS:KAXIS),ICF,IFACE,X1AXIS
-                     WRITE(LU_ERR,*) 'UNORM,NN(X1AXIS),U_STRM2,SS(X1AXIS)=',UNORM,NN(X1AXIS),U_STRM2,SS(X1AXIS)
+                     WRITE(LU_ERR,*) 'UNORM,NN(X1AXIS),U_STRM2,SS(X1AXIS)=',U_NORM_FP,NN(X1AXIS),U_STRM_FP,SS(X1AXIS)
                      CALL DEBUG_WAIT
                   ENDIF
 #endif
@@ -13164,7 +13150,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             IF (ISNAN(MESHES(NM)%IBM_RCFACE_VEL(ICF)%VELINT)) THEN
                WRITE(LU_ERR,*) 'VELINT RCFACE VEL IN FLUX2=', &
                MESHES(NM)%IBM_RCFACE_VEL(ICF)%IJK(IAXIS:KAXIS),ICF,IFACE,X1AXIS
-               WRITE(LU_ERR,*) 'UNORM,NN(X1AXIS),U_STRM2,SS(X1AXIS)=',UNORM,NN(X1AXIS),U_STRM2,SS(X1AXIS)
+               WRITE(LU_ERR,*) 'UNORM,NN(X1AXIS),U_STRM2,SS(X1AXIS)=',U_NORM_FP,NN(X1AXIS),U_STRM_FP,SS(X1AXIS)
                CALL DEBUG_WAIT
             ENDIF
 #endif
@@ -27643,6 +27629,7 @@ END SUBROUTINE GET_MATRIX_INDEXES_Z
 
 SUBROUTINE SET_CUTCELLS_3D
 USE MPI
+USE TRAN, ONLY : TRANS
 IMPLICIT NONE
 
 ! Local indexes:
@@ -28163,6 +28150,11 @@ MAIN_MESH_LOOP : DO NM=1,NMESHES
           X3CELL = YCELL; DX3CELL = DYCELL
 
       END SELECT
+
+      ! Stretched grid vars:
+      X1NOC=TRANS(NM)%NOC(X1AXIS)
+      X2NOC=TRANS(NM)%NOC(X2AXIS)
+      X3NOC=TRANS(NM)%NOC(X3AXIS)
 
       IF(GET_CUTCELLS_VERBOSE) THEN
          CALL CPU_TIME(CPUTIME_START)
@@ -32137,10 +32129,12 @@ CASE(IAXIS)
       ! exactly on a Cartesian cell vertex:
       SELECT CASE(IBM_IS_CRS(ICRS))
       CASE(IBM_GG,IBM_SS)
-
-         ! Optimized and will ONLY work for Uniform Grids:
-         JSTR = MAX(X2LO_LOC,   FLOOR((IBM_SVAR_CRS(ICRS)-GEOMEPS-X2FACE(X2LO_LOC))/DX2FACE(X2LO_LOC)) + X2LO_LOC)
-         JEND = MIN(X2HI_LOC, CEILING((IBM_SVAR_CRS(ICRS)+GEOMEPS-X2FACE(X2LO_LOC))/DX2FACE(X2LO_LOC)) + X2LO_LOC)
+         JSTR = X2LO_LOC; JEND = X2HI_LOC
+         IF(X2NOC==0) THEN
+            ! Optimized and will ONLY work for Uniform Grids:
+            JSTR = MAX(X2LO_LOC,   FLOOR((IBM_SVAR_CRS(ICRS)-GEOMEPS-X2FACE(X2LO_LOC))/DX2FACE(X2LO_LOC)) + X2LO_LOC)
+            JEND = MIN(X2HI_LOC, CEILING((IBM_SVAR_CRS(ICRS)+GEOMEPS-X2FACE(X2LO_LOC))/DX2FACE(X2LO_LOC)) + X2LO_LOC)
+         ENDIF
 
          DO JJ=JSTR,JEND
             ! Crossing on Vertex?
@@ -32161,9 +32155,12 @@ CASE(IAXIS)
          DO ICRS1=ICRS+1,IBM_N_CRS
             IF (IBM_IS_CRS(ICRS1) == IBM_SG) EXIT
          ENDDO
-         ! Optimized for UG:
-         JSTR = MAX(X2LO_LOC, CEILING(( IBM_SVAR_CRS(ICRS)-GEOMEPS-X2FACE(X2LO_LOC))/DX2FACE(X2LO_LOC)) + X2LO_LOC)
-         JEND = MIN(X2HI_LOC,   FLOOR((IBM_SVAR_CRS(ICRS1)+GEOMEPS-X2FACE(X2LO_LOC))/DX2FACE(X2LO_LOC)) + X2LO_LOC)
+         JSTR = X2LO_LOC; JEND = X2HI_LOC
+         IF(X2NOC==0) THEN
+            ! Optimized for UG:
+            JSTR = MAX(X2LO_LOC, CEILING(( IBM_SVAR_CRS(ICRS)-GEOMEPS-X2FACE(X2LO_LOC))/DX2FACE(X2LO_LOC)) + X2LO_LOC)
+            JEND = MIN(X2HI_LOC,   FLOOR((IBM_SVAR_CRS(ICRS1)+GEOMEPS-X2FACE(X2LO_LOC))/DX2FACE(X2LO_LOC)) + X2LO_LOC)
+         ENDIF
 
          DO JJ=JSTR,JEND
             MESHES(NM)%VERTVAR(I,JJ,KK,IBM_VGSC) = IBM_SOLID
@@ -32295,6 +32292,9 @@ INTEGER :: NEDGE, NVERT, IVERT
 LOGICAL :: IS_GASPHASE
 REAL(EB) :: TNOW
 
+LOGICAL :: FOUND_EDGE
+REAL(EB):: XVJJ, DELJJ1
+
 TNOW=CURRENT_TIME()
 
 ! INTEGER, ALLOCATABLE, DIMENSION(:,:) :: CEELEMAUX, INDSEGAUX
@@ -32372,67 +32372,87 @@ ICRS_DO : DO ICRS=1,IBM_N_CRS
 
     ! Check location on grid of crossing:
     ! See if crossing is exactly on a Cartesian cell vertex:
-    ! Optimized for UG:
-    JSTR = FLOOR( (IBM_SVAR_CRS(ICRS)-GEOMEPS-X2CELL(X2LO_CELL))/DX2CELL(X2LO_CELL) ) + X2LO_CELL
+    IF (X2NOC==0) THEN
+       ! Optimized for UG:
+       JSTR = FLOOR( (IBM_SVAR_CRS(ICRS)-GEOMEPS-X2CELL(X2LO_CELL))/DX2CELL(X2LO_CELL) ) + X2LO_CELL
+       ! Discard cut-edges on Cartesian edges laying > X2HI_CELL.
+       IF (JSTR < X2LO_CELL-1) CYCLE
+       IF (JSTR > X2HI_CELL+1) CYCLE
 
-    ! Discard cut-edges on Cartesian edges laying > X2HI_CELL.
-    IF (JSTR < X2LO_CELL-1) CYCLE
-    IF (JSTR > X2HI_CELL+1) CYCLE
+       JJ    = JSTR
+       DELJJ = ABS(X2CELL(JJ)-IBM_SVAR_CRS(ICRS)) - DX2CELL(X2LO_CELL)/2._EB
+       ! Crossing on Vertex?
+       IF ( ABS(DELJJ) < GEOMEPS ) THEN ! Add crossing to two edges:
+           JJLOW=0; JJHIGH=1
+       ELSEIF ( DELJJ < -GEOMEPS ) THEN ! Crossing in jj Edge.
+           JJLOW=0; JJHIGH=0
+       ELSEIF ( DELJJ > GEOMEPS ) THEN ! Crossing in jj+1 Edge.
+           JJLOW=1; JJHIGH=1
+       ENDIF
+    ELSE
+       FOUND_EDGE=.FALSE.
+       JJLOW = -1000000
+       JJHIGH=  1000000
+       DO JJ=X2LO_CELL-1,X2HI_CELL
+          DELJJ = IBM_SVAR_CRS(ICRS)-X2CELL(JJ)
+          XVJJ  = X2CELL(JJ) + DX2CELL(JJ)/2._EB
+          DELJJ1= IBM_SVAR_CRS(ICRS)-X2CELL(JJ+1)
+          ! First two edges:
+          IF(ABS(IBM_SVAR_CRS(ICRS)-XVJJ) < GEOMEPS) THEN ! Both JJ and JJ+1
+             FOUND_EDGE=.TRUE.
+             JJLOW=0; JJHIGH=1
+             EXIT
+          ELSEIF (ABS(DELJJ) <   DX2CELL(JJ)/2._EB) THEN ! JJ
+             FOUND_EDGE=.TRUE.
+             JJLOW=0; JJHIGH=0
+             EXIT
+          ELSEIF (ABS(DELJJ1)< DX2CELL(JJ+1)/2._EB) THEN ! JJ+1
+             FOUND_EDGE=.TRUE.
+             JJLOW=1; JJHIGH=1
+             EXIT
+          ENDIF
+       ENDDO
+       IF(.NOT.FOUND_EDGE) CYCLE
+    ENDIF
 
-    ! Check on candidate cells
-    JJ_DO : DO JJ=JSTR,JSTR ! Cell indexing:
+    DO JJADD=JJLOW,JJHIGH
+        ! Edge in the left:
+        ! Edge at index JJ or JJ+1:
+        INDXI(IAXIS:KAXIS) = (/ INDX1(X1AXIS), JJ+JJADD, KK /) ! Local x1,x2,x3
+        INDIE=INDXI(XIAXIS)
+        INDJE=INDXI(XJAXIS)
+        INDKE=INDXI(XKAXIS)
 
-        DELJJ = ABS(X2CELL(JJ)-IBM_SVAR_CRS(ICRS)) - DX2CELL(X2LO_CELL)/2._EB
+        ! Set MESHES(NM)%ECVAR(IE,JE,KE,IBM_EGSC,X2AXIS) = IBM_CUTCFE:
+        ICROSS = MESHES(NM)%ECVAR(INDIE,INDJE,INDKE,IBM_ECRS,X2AXIS)
 
-        ! Crossing on Vertex?
-        IF ( ABS(DELJJ) < GEOMEPS ) THEN ! Add crossing to two edges:
-            JJLOW=0; JJHIGH=1
-        ELSEIF ( DELJJ < -GEOMEPS ) THEN ! Crossing in jj Edge.
-            JJLOW=0; JJHIGH=0
-        ELSEIF ( DELJJ > GEOMEPS ) THEN ! Crossing in jj+1 Edge.
-            JJLOW=1; JJHIGH=1
+        IF ( ICROSS > 0 ) THEN ! Edge has crossings already.
+
+            ! Populate EDGECROSS struct:
+            NCROSS = MESHES(NM)%EDGE_CROSS(ICROSS)%NCROSS + 1
+            MESHES(NM)%EDGE_CROSS(ICROSS) % NCROSS       = NCROSS
+            MESHES(NM)%EDGE_CROSS(ICROSS) % SVAR(NCROSS) = IBM_SVAR_CRS(ICRS)
+            MESHES(NM)%EDGE_CROSS(ICROSS) % ISVAR(NCROSS)= IBM_IS_CRS(ICRS)
+
+        ELSE ! No crossings yet.
+
+            NEDGECROSS = MESHES(NM)%N_EDGE_CROSS + 1
+            MESHES(NM)%ECVAR(INDIE,INDJE,INDKE,IBM_EGSC,X2AXIS) = IBM_CUTCFE
+            MESHES(NM)%N_EDGE_CROSS                      = NEDGECROSS
+            MESHES(NM)%ECVAR(INDIE,INDJE,INDKE,IBM_ECRS,X2AXIS) = NEDGECROSS
+
+            CALL EDGE_CROSS_ARRAY_REALLOCATE(NM,NEDGECROSS)
+
+            ! Populate EDGECROSS struct:
+            NCROSS = 1
+            MESHES(NM)%EDGE_CROSS(NEDGECROSS) % NCROSS       = NCROSS
+            MESHES(NM)%EDGE_CROSS(NEDGECROSS) % SVAR(NCROSS) = IBM_SVAR_CRS(ICRS)
+            MESHES(NM)%EDGE_CROSS(NEDGECROSS) % ISVAR(NCROSS)= IBM_IS_CRS(ICRS)
+            MESHES(NM)%EDGE_CROSS(NEDGECROSS) % IJK(1:4) = (/ INDIE, INDJE, INDKE, X2AXIS /)
+
         ENDIF
 
-        DO JJADD=JJLOW,JJHIGH
-            ! Edge in the left:
-            ! Edge at index JJ or JJ+1:
-            INDXI(IAXIS:KAXIS) = (/ INDX1(X1AXIS), JJ+JJADD, KK /) ! Local x1,x2,x3
-            INDIE=INDXI(XIAXIS)
-            INDJE=INDXI(XJAXIS)
-            INDKE=INDXI(XKAXIS)
-
-            ! Set MESHES(NM)%ECVAR(IE,JE,KE,IBM_EGSC,X2AXIS) = IBM_CUTCFE:
-            ICROSS = MESHES(NM)%ECVAR(INDIE,INDJE,INDKE,IBM_ECRS,X2AXIS)
-
-            IF ( ICROSS > 0 ) THEN ! Edge has crossings already.
-
-                ! Populate EDGECROSS struct:
-                NCROSS = MESHES(NM)%EDGE_CROSS(ICROSS)%NCROSS + 1
-                MESHES(NM)%EDGE_CROSS(ICROSS) % NCROSS       = NCROSS
-                MESHES(NM)%EDGE_CROSS(ICROSS) % SVAR(NCROSS) = IBM_SVAR_CRS(ICRS)
-                MESHES(NM)%EDGE_CROSS(ICROSS) % ISVAR(NCROSS)= IBM_IS_CRS(ICRS)
-
-            ELSE ! No crossings yet.
-
-                NEDGECROSS = MESHES(NM)%N_EDGE_CROSS + 1
-                MESHES(NM)%ECVAR(INDIE,INDJE,INDKE,IBM_EGSC,X2AXIS) = IBM_CUTCFE
-                MESHES(NM)%N_EDGE_CROSS                      = NEDGECROSS
-                MESHES(NM)%ECVAR(INDIE,INDJE,INDKE,IBM_ECRS,X2AXIS) = NEDGECROSS
-
-                CALL EDGE_CROSS_ARRAY_REALLOCATE(NM,NEDGECROSS)
-
-                ! Populate EDGECROSS struct:
-                NCROSS = 1
-                MESHES(NM)%EDGE_CROSS(NEDGECROSS) % NCROSS       = NCROSS
-                MESHES(NM)%EDGE_CROSS(NEDGECROSS) % SVAR(NCROSS) = IBM_SVAR_CRS(ICRS)
-                MESHES(NM)%EDGE_CROSS(NEDGECROSS) % ISVAR(NCROSS)= IBM_IS_CRS(ICRS)
-                MESHES(NM)%EDGE_CROSS(NEDGECROSS) % IJK(1:4) = (/ INDIE, INDJE, INDKE, X2AXIS /)
-
-            ENDIF
-
-        ENDDO
-
-    ENDDO JJ_DO
+    ENDDO
 
 ENDDO ICRS_DO
 
@@ -32877,11 +32897,27 @@ DO ISEG=1,BODINT_PLANE%NSEGS
    ! Unit vector along segment:
    STANI(IAXIS:JAXIS) = (/ (X2_2-X2_1), (X3_2-X3_1) /)*SLEN**(-1._EB)
 
-   ! Optimized for UG:
+   JSTR = X2LO; JEND = X2HI
    MINX = MIN(X2_1,X2_2)
    MAXX = MAX(X2_1,X2_2)
-   JSTR = MAX(X2LO, CEILING((  MINX-GEOMEPS-X2FACE(X2LO))/DX2FACE(X2LO))+X2LO)
-   JEND = MIN(X2HI,   FLOOR((  MAXX+GEOMEPS-X2FACE(X2LO))/DX2FACE(X2LO))+X2LO)
+   IF(X2NOC==0) THEN
+      ! Optimized for UG:
+      JSTR = MAX(X2LO, CEILING((  MINX-GEOMEPS-X2FACE(X2LO))/DX2FACE(X2LO))+X2LO)
+      JEND = MIN(X2HI,   FLOOR((  MAXX+GEOMEPS-X2FACE(X2LO))/DX2FACE(X2LO))+X2LO)
+   ELSE
+      DO JJ=X2LO,X2HI-1
+         IF((MINX-GEOMEPS-X2FACE(JJ)) >= 0._EB .AND. (MINX-GEOMEPS-X2FACE(JJ+1)) < 0._EB ) THEN
+            JSTR = JJ+1
+            CYCLE
+         ENDIF
+      ENDDO
+      DO JJ=X2LO+1,X2HI
+         IF((MAXX+GEOMEPS-X2FACE(JJ)) >= 0._EB .AND. (MAXX+GEOMEPS-X2FACE(JJ+1)) < 0._EB ) THEN
+            JEND = JJ
+            CYCLE
+         ENDIF
+      ENDDO
+   ENDIF
 
    DO JJ=JSTR,JEND
 
@@ -32946,6 +32982,8 @@ INTEGER  :: INDXI(IAXIS:KAXIS), INDIF, INDJF, INDKF, CEI, NVERT, NEDGE, DIRAXIS
 REAL(EB) :: XYZV1(IAXIS:KAXIS), XYZV1LC(IAXIS:KAXIS)
 REAL(EB) :: XYZV2(IAXIS:KAXIS), XYZV2LC(IAXIS:KAXIS)
 REAL(EB) :: TNOW
+
+LOGICAL :: FOUND_SEG
 
 TNOW=CURRENT_TIME()
 
@@ -33027,10 +33065,22 @@ SEGS_LOOP : DO ISEG=1,BODINT_PLANE%NSEGS
                SVAR12 = 0.5_EB * (SVAR1+SVAR2)
                ! Define Cartesian segment this cut-edge belongs:
                XPOS   = X2_1 + SVAR12*STANI(IAXIS)
-               JJ2 = FLOOR((XPOS-X2FACE(X2LO))/DX2FACE(X2LO)) + X2LO_CELL
+               IF (X2NOC==0) THEN
+                  JJ2 = FLOOR((XPOS-X2FACE(X2LO))/DX2FACE(X2LO)) + X2LO_CELL
+                  ! Discard cut-edges on faces laying on x2hi.
+                  IF ((JJ2 < X2LO_CELL) .OR. (JJ2 > X2HI_CELL)) CYCLE
+               ELSE
+                  FOUND_SEG=.FALSE.
+                  DO JJ2=X2LO_CELL,X2HI_CELL
+                     ! Check if XPOS is within this segment JJ2:
+                     IF((XPOS-X2FACE(JJ2-1)) >= 0._EB .AND. (X2FACE(JJ2)-XPOS) > 0._EB) THEN
+                        FOUND_SEG=.TRUE.
+                        EXIT
+                     ENDIF
+                  ENDDO
+                  IF(.NOT.FOUND_SEG) CYCLE
+               ENDIF
 
-               ! Discard cut-edges on faces laying on x2hi.
-               IF ((JJ2 < X2LO_CELL) .OR. (JJ2 > X2HI_CELL)) CYCLE
                IF ((KK2 < X3LO_CELL) .OR. (KK2 > X3HI_CELL)) CYCLE
 
                ! Face indexes:
@@ -33150,11 +33200,23 @@ SEGS_LOOP : DO ISEG=1,BODINT_PLANE%NSEGS
 
                ! Define Cartesian segment this cut-edge belongs:
                XPOS = X3_1 + SVAR12*STANI(JAXIS)
-               KK2 = FLOOR((XPOS-X3FACE(X3LO))/DX3FACE(X3LO)) + X3LO_CELL
+               IF (X3NOC==0) THEN
+                  KK2 = FLOOR((XPOS-X3FACE(X3LO))/DX3FACE(X3LO)) + X3LO_CELL
+                  ! Discard cut-edges on faces laying on x3hi.
+                  IF ((KK2 < X3LO_CELL) .OR. (KK2 > X3HI_CELL)) CYCLE
+               ELSE
+                  FOUND_SEG=.FALSE.
+                  DO KK2=X3LO_CELL,X3HI_CELL
+                     ! Check if XPOS is within this segment KK2:
+                     IF((XPOS-X3FACE(KK2-1)) >= 0._EB .AND. (X3FACE(KK2)-XPOS) > 0._EB) THEN
+                        FOUND_SEG=.TRUE.
+                        EXIT
+                     ENDIF
+                  ENDDO
+                  IF(.NOT.FOUND_SEG) CYCLE
+               ENDIF
 
-               ! Discard cut-edges on faces laying on x3hi.
                IF ((JJ2 < X2LO_CELL) .OR. (JJ2 > X2HI_CELL)) CYCLE
-               IF ((KK2 < X3LO_CELL) .OR. (KK2 > X3HI_CELL)) CYCLE
 
                ! Face indexes:
                INDXI(IAXIS:KAXIS) = (/ INDX1(X1AXIS), JJ2, KK2 /) ! Local x1,x2,x3
@@ -33241,13 +33303,35 @@ SEGS_LOOP : DO ISEG=1,BODINT_PLANE%NSEGS
 
       ! Define Cartesian face this cut-edge belongs:
       XPOS = X2_1 + SVAR12*STANI(IAXIS)
-      JJ2  = FLOOR((XPOS-X2FACE(X2LO))/DX2FACE(X2LO)) + X2LO_CELL
+      IF (X2NOC==0) THEN
+         JJ2  = FLOOR((XPOS-X2FACE(X2LO))/DX2FACE(X2LO)) + X2LO_CELL
+         IF ((JJ2 < X2LO_CELL) .OR. (JJ2 > X2HI_CELL)) CYCLE
+      ELSE
+         FOUND_SEG=.FALSE.
+         DO JJ2=X2LO_CELL,X2HI_CELL
+            ! Check if XPOS is within this segment JJ2:
+            IF((XPOS-X2FACE(JJ2-1)) >= 0._EB .AND. (X2FACE(JJ2)-XPOS) > 0._EB) THEN
+               FOUND_SEG=.TRUE.
+               EXIT
+            ENDIF
+         ENDDO
+         IF(.NOT.FOUND_SEG) CYCLE
+      ENDIF
       XPOS = X3_1 + SVAR12*STANI(JAXIS)
-      KK2  = FLOOR((XPOS-X3FACE(X3LO))/DX3FACE(X3LO)) + X3LO_CELL
-
-      ! Discard cut-edges on faces laying on x2hi and x3hi.
-      IF ((JJ2 < X2LO_CELL) .OR. (JJ2 > X2HI_CELL)) CYCLE
-      IF ((KK2 < X3LO_CELL) .OR. (KK2 > X3HI_CELL)) CYCLE
+      IF(X3NOC==0) THEN
+         KK2  = FLOOR((XPOS-X3FACE(X3LO))/DX3FACE(X3LO)) + X3LO_CELL
+         IF ((KK2 < X3LO_CELL) .OR. (KK2 > X3HI_CELL)) CYCLE
+      ELSE
+         FOUND_SEG=.FALSE.
+         DO KK2=X3LO_CELL,X3HI_CELL
+            ! Check if XPOS is within this segment KK2:
+            IF((XPOS-X3FACE(KK2-1)) >= 0._EB .AND. (X3FACE(KK2)-XPOS) > 0._EB) THEN
+               FOUND_SEG=.TRUE.
+               EXIT
+            ENDIF
+         ENDDO
+         IF(.NOT.FOUND_SEG) CYCLE
+      ENDIF
 
       ! Face indexes:
       INDXI(IAXIS:KAXIS) = (/ INDX1(X1AXIS), JJ2, KK2 /) ! Local x1,x2,x3
@@ -35562,6 +35646,8 @@ END SUBROUTINE TEST_PT_INPOLY
 
 SUBROUTINE GET_CARTCELL_CUTEDGES(NM,ISTR,IEND,JSTR,JEND,KSTR,KEND)
 
+USE TRAN, ONLY : TRANS
+
 INTEGER, INTENT(IN) :: NM
 INTEGER, INTENT(IN) :: ISTR, IEND, JSTR, JEND, KSTR, KEND
 
@@ -35573,6 +35659,8 @@ REAL(EB):: DOT1, DOT2, DENOM, PLANEEQ, SVARI, XYZV1(IAXIS:KAXIS), XYZV2(IAXIS:KA
 INTEGER :: NWCROSS, IBCR, IDUM, INOD1, INOD2, NVERT, NEDGE, IEDGE, CEI
 REAL(EB):: SVAR1, SVAR2, SVAR12, XPOS, DV(IAXIS:KAXIS)
 REAL(EB) :: TNOW
+
+LOGICAL :: FOUND_SEG
 
 ! GET_CUTCELLS_VERBOSE variables:
 REAL(EB) :: CPUTIME, CPUTIME_START
@@ -35633,8 +35721,11 @@ GEOM_LOOP : DO IG=1,N_GEOMETRY
          MAXX = MAX(XYZ1(X1AXIS),XYZ2(X1AXIS))
 
          IF (MAXX-MINX < GEOMEPS) THEN ! SEGMENT ALIGNED WITH PLANE.
-            LSTR = MAX(X1LO,  FLOOR((MINX-GEOMEPS-X1FACE(X1LO))/DX1FACE(X1LO)) + X1LO)
-            LEND = MIN(X1HI,CEILING((MAXX+GEOMEPS-X1FACE(X1LO))/DX1FACE(X1LO)) + X1LO)
+            LSTR = X1LO; LEND = X1HI
+            IF(X1NOC==0) THEN ! Optimized for Uniform Grid.
+               LSTR = MAX(X1LO,  FLOOR((MINX-GEOMEPS-X1FACE(X1LO))/DX1FACE(X1LO)) + X1LO)
+               LEND = MIN(X1HI,CEILING((MAXX+GEOMEPS-X1FACE(X1LO))/DX1FACE(X1LO)) + X1LO)
+            ENDIF
             DO IPLN=LSTR,LEND
                X1PLN = X1FACE(IPLN)
                DROPSEG=(    ABS(X1PLN-MAXX) < GEOMEPS) .OR. &
@@ -35685,8 +35776,11 @@ GEOM_LOOP : DO IG=1,N_GEOMETRY
          ! Optimized for UG:
          MINX = MIN(XYZ1(X1AXIS),XYZ2(X1AXIS))
          MAXX = MAX(XYZ1(X1AXIS),XYZ2(X1AXIS))
-         LSTR = MAX(X1LO,  FLOOR((MINX-GEOMEPS-X1FACE(X1LO))/DX1FACE(X1LO)) + X1LO)
-         LEND = MIN(X1HI,CEILING((MAXX+GEOMEPS-X1FACE(X1LO))/DX1FACE(X1LO)) + X1LO)
+         LSTR = X1LO; LEND = X1HI
+         IF(X1NOC==0) THEN ! Optimized for Uniform Grid.
+            LSTR = MAX(X1LO,  FLOOR((MINX-GEOMEPS-X1FACE(X1LO))/DX1FACE(X1LO)) + X1LO)
+            LEND = MIN(X1HI,CEILING((MAXX+GEOMEPS-X1FACE(X1LO))/DX1FACE(X1LO)) + X1LO)
+         ENDIF
 
          DO IPLN=LSTR,LEND
             X1PLN = X1FACE(IPLN);
@@ -35742,17 +35836,53 @@ GEOM_LOOP : DO IG=1,N_GEOMETRY
          SVAR12 = 0.5_EB * (SVAR1+SVAR2)
 
          ! Define Cartesian cell this cut-edge belongs:
+         ! Optimized for UG version:
          XPOS = XYZ1(IAXIS) + SVAR12*STANI(IAXIS)
-         II2  = FLOOR( (XPOS-XFACE(ILO_FACE))/DXFACE(ILO_FACE) ) + ILO_CELL
-         XPOS = XYZ1(JAXIS) + SVAR12*STANI(JAXIS)
-         JJ2  = FLOOR( (XPOS-YFACE(JLO_FACE))/DYFACE(JLO_FACE) ) + JLO_CELL
-         XPOS = XYZ1(KAXIS) + SVAR12*STANI(KAXIS)
-         KK2  = FLOOR( (XPOS-ZFACE(KLO_FACE))/DZFACE(KLO_FACE) ) + KLO_CELL
+         IF(TRANS(NM)%NOC(IAXIS)==0)THEN
+            II2  = FLOOR( (XPOS-XFACE(ILO_FACE))/DXFACE(ILO_FACE) ) + ILO_CELL
+            ! Discard cut-edges on faces laying on x2hi and x3hi.
+            IF ( (II2 < ILO_CELL-CCGUARD) .OR. (II2 > IHI_CELL+CCGUARD) ) CYCLE
+         ELSE
+            FOUND_SEG=.FALSE.
+            DO II2=ILO_CELL-CCGUARD,IHI_CELL+CCGUARD
+               IF((XPOS-XFACE(II2-1)) >= 0._EB .AND. (XFACE(II2)-XPOS) > 0._EB) THEN
+                  FOUND_SEG=.TRUE.
+                  EXIT
+               ENDIF
+            ENDDO
+            IF(.NOT.FOUND_SEG) CYCLE
+         ENDIF
 
-         ! Discard cut-edges on faces laying on x2hi and x3hi.
-         IF ( (II2 < ILO_CELL-CCGUARD) .OR. (II2 > IHI_CELL+CCGUARD) ) CYCLE
-         IF ( (JJ2 < JLO_CELL-CCGUARD) .OR. (JJ2 > JHI_CELL+CCGUARD) ) CYCLE
-         IF ( (KK2 < KLO_CELL-CCGUARD) .OR. (KK2 > KHI_CELL+CCGUARD) ) CYCLE
+         XPOS = XYZ1(JAXIS) + SVAR12*STANI(JAXIS)
+         IF(TRANS(NM)%NOC(JAXIS)==0)THEN
+            JJ2  = FLOOR( (XPOS-YFACE(JLO_FACE))/DYFACE(JLO_FACE) ) + JLO_CELL
+            IF ( (JJ2 < JLO_CELL-CCGUARD) .OR. (JJ2 > JHI_CELL+CCGUARD) ) CYCLE
+         ELSE
+            FOUND_SEG=.FALSE.
+            DO JJ2=JLO_CELL-CCGUARD,JHI_CELL+CCGUARD
+               IF((XPOS-YFACE(JJ2-1)) >= 0._EB .AND. (YFACE(JJ2)-XPOS) > 0._EB) THEN
+                  FOUND_SEG=.TRUE.
+                  EXIT
+               ENDIF
+            ENDDO
+            IF(.NOT.FOUND_SEG) CYCLE
+         ENDIF
+
+         XPOS = XYZ1(KAXIS) + SVAR12*STANI(KAXIS)
+         IF(TRANS(NM)%NOC(KAXIS)==0)THEN
+            KK2  = FLOOR( (XPOS-ZFACE(KLO_FACE))/DZFACE(KLO_FACE) ) + KLO_CELL
+            IF ( (KK2 < KLO_CELL-CCGUARD) .OR. (KK2 > KHI_CELL+CCGUARD) ) CYCLE
+         ELSE
+            FOUND_SEG=.FALSE.
+            DO KK2=KLO_CELL-CCGUARD,KHI_CELL+CCGUARD
+               IF((XPOS-ZFACE(KK2-1)) >= 0._EB .AND. (ZFACE(KK2)-XPOS) > 0._EB) THEN
+                  FOUND_SEG=.TRUE.
+                  EXIT
+               ENDIF
+            ENDDO
+            IF(.NOT.FOUND_SEG) CYCLE
+         ENDIF
+
 
          ! CCVAR edge number:
          IF ( MESHES(NM)%CCVAR(II2,JJ2,KK2,IBM_IDCE) > 0 ) THEN ! There is already
