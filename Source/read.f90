@@ -1218,7 +1218,7 @@ CHARACTER(LABEL_LENGTH) :: ID
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: A,XX
 INTEGER, ALLOCATABLE, DIMENSION(:,:) :: ND
 REAL(EB) :: PC,CC,COEF,XI,ETA,ZETA
-INTEGER  IEXP,IC,IDERIV,N,K,IOS,I,MESH_NUMBER, NIPX,NIPY,NIPZ,NIPXS,NIPYS,NIPZS,NIPXF,NIPYF,NIPZF,NM
+INTEGER  IEXP,IC,IDERIV,N,K,IOS,I,MESH_NUMBER,NIPX,NIPY,NIPZ,NIPXS,NIPYS,NIPZS,NIPXF,NIPYF,NIPZF,NM
 LOGICAL :: PROCESS_TRANS
 TYPE (MESH_TYPE), POINTER :: M=>NULL()
 TYPE (TRAN_TYPE), POINTER :: T=>NULL()
@@ -1256,26 +1256,39 @@ MESH_LOOP: DO NM=1,NMESHES
       T%NOC(N) = 0
       TRNLOOP: DO
          IF (EVACUATION_ONLY(NM)) EXIT TRNLOOP
+         ID = 'null'
          SELECT CASE (N)
             CASE(1)
                CALL CHECKREAD('TRNX',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
                IF (IOS==1) EXIT TRNLOOP
-               MESH_NUMBER = HUGE(1)
                READ(LU_INPUT,NML=TRNX,END=17,ERR=18,IOSTAT=IOS)
+               IF (TRIM(ID)=='null') THEN
+                  MESH_NUMBER = 1
+               ELSE
+                  MESH_NUMBER = HUGE(1)
+               ENDIF
                IF (TRIM(M%TRNX_ID)==TRIM(ID)) MESH_NUMBER=NM
                IF (MESH_NUMBER>0 .AND. MESH_NUMBER/=NM) CYCLE TRNLOOP
             CASE(2)
                CALL CHECKREAD('TRNY',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
                IF (IOS==1) EXIT TRNLOOP
-               MESH_NUMBER = HUGE(1)
                READ(LU_INPUT,NML=TRNY,END=17,ERR=18,IOSTAT=IOS)
+               IF (TRIM(ID)=='null') THEN
+                  MESH_NUMBER = 1
+               ELSE
+                  MESH_NUMBER = HUGE(1)
+               ENDIF
                IF (TRIM(M%TRNY_ID)==TRIM(ID)) MESH_NUMBER=NM
                IF (MESH_NUMBER>0 .AND. MESH_NUMBER/=NM) CYCLE TRNLOOP
             CASE(3)
                CALL CHECKREAD('TRNZ',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
                IF (IOS==1) EXIT TRNLOOP
-               MESH_NUMBER = HUGE(1)
                READ(LU_INPUT,NML=TRNZ,END=17,ERR=18,IOSTAT=IOS)
+               IF (TRIM(ID)=='null') THEN
+                  MESH_NUMBER = 1
+               ELSE
+                  MESH_NUMBER = HUGE(1)
+               ENDIF
                IF (TRIM(M%TRNZ_ID)==TRIM(ID)) MESH_NUMBER=NM
                IF (MESH_NUMBER>0 .AND. MESH_NUMBER/=NM) CYCLE TRNLOOP
          END SELECT
@@ -1308,8 +1321,13 @@ MESH_LOOP: DO NM=1,NMESHES
                LOOP1: DO
                   CALL CHECKREAD('TRNX',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
                   IF (IOS==1) EXIT NLOOP
-                  MESH_NUMBER = HUGE(1)
+                  ID = 'null'
                   READ(LU_INPUT,TRNX,END=1,ERR=2)
+                  IF (TRIM(ID)=='null') THEN
+                     MESH_NUMBER = 1
+                  ELSE
+                     MESH_NUMBER = HUGE(1)
+                  ENDIF
                   IF (TRIM(M%TRNX_ID)==TRIM(ID)) MESH_NUMBER=NM
                   IF (MESH_NUMBER==0 .OR. MESH_NUMBER==NM) EXIT LOOP1
                ENDDO LOOP1
@@ -1317,17 +1335,28 @@ MESH_LOOP: DO NM=1,NMESHES
                LOOP2: DO
                   CALL CHECKREAD('TRNY',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
                   IF (IOS==1) EXIT NLOOP
-                  MESH_NUMBER = HUGE(1)
+                  ID = 'null'
                   READ(LU_INPUT,TRNY,END=1,ERR=2)
+                  IF (TRIM(ID)=='null') THEN
+                     MESH_NUMBER = 1
+                  ELSE
+                     MESH_NUMBER = HUGE(1)
+                  ENDIF
                   IF (TRIM(M%TRNY_ID)==TRIM(ID)) MESH_NUMBER=NM
                   IF (MESH_NUMBER==0 .OR. MESH_NUMBER==NM) EXIT LOOP2
                ENDDO LOOP2
             CASE(3)
                LOOP3: DO
+                  ID = 'null'
                   CALL CHECKREAD('TRNZ',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
                   IF (IOS==1) EXIT NLOOP
-                  MESH_NUMBER = HUGE(1)
+                  ID = 'null'
                   READ(LU_INPUT,TRNZ,END=1,ERR=2)
+                  IF (TRIM(ID)=='null') THEN
+                     MESH_NUMBER = 1
+                  ELSE
+                     MESH_NUMBER = HUGE(1)
+                  ENDIF
                   IF (TRIM(M%TRNZ_ID)==TRIM(ID)) MESH_NUMBER=NM
                   IF (MESH_NUMBER==0 .OR. MESH_NUMBER==NM) EXIT LOOP3
                ENDDO LOOP3
