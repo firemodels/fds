@@ -1487,25 +1487,7 @@ MESH_LOOP: DO NM=1,NMESHES
 
    ! Define X grid stretching terms
 
-   M%DXMIN = 1000._EB
-   DO I=1,M%IBAR
-      XI    = (REAL(I,EB)-.5)*M%DXI
-      M%HX(I) = GP(XI,1,NM)
-      M%DX(I) = M%HX(I)*M%DXI
-      M%DXMIN = MIN(M%DXMIN,M%DX(I))
-      IF (M%HX(I)<=0._EB) THEN
-         WRITE(MESSAGE,'(A,I0)')  'ERROR: x transformation not monotonic, mesh ',NM
-         CALL SHUTDOWN(MESSAGE) ; RETURN
-      ENDIF
-      M%RDX(I) = 1._EB/M%DX(I)
-   ENDDO
-
-   M%HX(0)    = M%HX(1)
-   M%HX(M%IBP1) = M%HX(M%IBAR)
-   M%DX(0)    = M%DX(1)
-   M%DX(M%IBP1) = M%DX(M%IBAR)
-   M%RDX(0)    = 1._EB/M%DX(1)
-   M%RDX(M%IBP1) = 1._EB/M%DX(M%IBAR)
+   M%DXMIN = 1000000._EB
 
    DO I=0,M%IBAR
       XI     = I*M%DXI
@@ -1515,14 +1497,30 @@ MESH_LOOP: DO NM=1,NMESHES
       ELSE
          M%R(I) = 1._EB
       ENDIF
+      IF (I>0) THEN
+         M%DX(I) = M%X(I) - M%X(I-1)
+         M%HX(I) = M%DX(I)/M%DXI
+         M%DXMIN = MIN(M%DXMIN,M%DX(I))
+         IF (M%HX(I)<=0._EB) THEN
+            WRITE(MESSAGE,'(A,I0)')  'ERROR: x transformation not monotonic, mesh ',NM
+            CALL SHUTDOWN(MESSAGE) ; RETURN
+         ENDIF
+         M%RDX(I) = 1._EB/M%DX(I)
+      ENDIF
+   ENDDO
+   M%X(0)       = M%XS
+   M%X(M%IBAR)  = M%XF
+   M%HX(0)      = M%HX(1)
+   M%HX(M%IBP1) = M%HX(M%IBAR)
+   M%DX(0)      = M%DX(1)
+   M%DX(M%IBP1) = M%DX(M%IBAR)
+   M%RDX(0)     = 1._EB/M%DX(1)
+   M%RDX(M%IBP1)= 1._EB/M%DX(M%IBAR)
+
+   DO I=0,M%IBAR
       M%DXN(I)  = 0.5_EB*(M%DX(I)+M%DX(I+1))
       M%RDXN(I) = 1._EB/M%DXN(I)
-   ENDDO
-   M%X(0)      = M%XS
-   M%X(M%IBAR) = M%XF
-
-   DO I=1,M%IBAR
-      M%XC(I) = 0.5_EB*(M%X(I)+M%X(I-1))
+      IF (I>0) M%XC(I) = 0.5_EB*(M%X(I)+M%X(I-1))
    ENDDO
    M%XC(0)      = M%XS - 0.5_EB*M%DX(0)
    M%XC(M%IBP1) = M%XF + 0.5_EB*M%DX(M%IBP1)
@@ -1538,76 +1536,70 @@ MESH_LOOP: DO NM=1,NMESHES
 
    ! Define Y grid stretching terms
 
-   M%DYMIN = 1000._EB
-   DO J=1,M%JBAR
-      ETA   = (REAL(J,EB)-.5)*M%DETA
-      M%HY(J) = GP(ETA,2,NM)
-      M%DY(J) = M%HY(J)*M%DETA
-      M%DYMIN = MIN(M%DYMIN,M%DY(J))
-      IF (M%HY(J)<=0._EB) THEN
-         WRITE(MESSAGE,'(A,I0)')  'ERROR: y transformation not monotonic, mesh ',NM
-         CALL SHUTDOWN(MESSAGE) ; RETURN
-      ENDIF
-      M%RDY(J) = 1._EB/M%DY(J)
-   ENDDO
-
-   M%HY(0)    = M%HY(1)
-   M%HY(M%JBP1) = M%HY(M%JBAR)
-   M%DY(0)    = M%DY(1)
-   M%DY(M%JBP1) = M%DY(M%JBAR)
-   M%RDY(0)    = 1._EB/M%DY(1)
-   M%RDY(M%JBP1) = 1._EB/M%DY(M%JBAR)
+   M%DYMIN = 1000000._EB
 
    DO J=0,M%JBAR
-      ETA     = J*M%DETA
-      M%Y(J)    = M%YS + G(ETA,2,NM)
+      ETA    = J*M%DETA
+      M%Y(J) = M%YS + G(ETA,2,NM)
+      IF (J>0) THEN
+         M%DY(J) = M%Y(J) - M%Y(J-1)
+         M%HY(J) = M%DY(J)/M%DETA
+         M%DYMIN = MIN(M%DYMIN,M%DY(J))
+         IF (M%HY(J)<=0._EB) THEN
+            WRITE(MESSAGE,'(A,I0)')  'ERROR: y transformation not monotonic, mesh ',NM
+            CALL SHUTDOWN(MESSAGE) ; RETURN
+         ENDIF
+         M%RDY(J) = 1._EB/M%DY(J)
+      ENDIF
+   ENDDO
+   M%Y(0)       = M%YS
+   M%Y(M%JBAR)  = M%YF
+   M%HY(0)      = M%HY(1)
+   M%HY(M%JBP1) = M%HY(M%JBAR)
+   M%DY(0)      = M%DY(1)
+   M%DY(M%JBP1) = M%DY(M%JBAR)
+   M%RDY(0)     = 1._EB/M%DY(1)
+   M%RDY(M%JBP1)= 1._EB/M%DY(M%JBAR)
+
+   DO J=0,M%JBAR
       M%DYN(J)  = 0.5_EB*(M%DY(J)+M%DY(J+1))
       M%RDYN(J) = 1._EB/M%DYN(J)
-   ENDDO
-
-   M%Y(0)      = M%YS
-   M%Y(M%JBAR) = M%YF
-
-   DO J=1,M%JBAR
-      M%YC(J) = 0.5_EB*(M%Y(J)+M%Y(J-1))
+      IF (J>0) M%YC(J) = 0.5_EB*(M%Y(J)+M%Y(J-1))
    ENDDO
    M%YC(0)      = M%YS - 0.5_EB*M%DY(0)
    M%YC(M%JBP1) = M%YF + 0.5_EB*M%DY(M%JBP1)
 
    ! Define Z grid stretching terms
 
-   M%DZMIN = 1000._EB
-   DO K=1,M%KBAR
-      ZETA  = (REAL(K,EB)-.5_EB)*M%DZETA
-      M%HZ(K) = GP(ZETA,3,NM)
-      M%DZ(K) = M%HZ(K)*M%DZETA
-      M%DZMIN = MIN(M%DZMIN,M%DZ(K))
-      IF (M%HZ(K)<=0._EB) THEN
-         WRITE(MESSAGE,'(A,I0)') 'ERROR: z transformation not monotonic, mesh ',NM
-         CALL SHUTDOWN(MESSAGE) ; RETURN
-      ENDIF
-      M%RDZ(K) = 1._EB/M%DZ(K)
-   ENDDO
-
-   M%HZ(0)    = M%HZ(1)
-   M%HZ(M%KBP1) = M%HZ(M%KBAR)
-   M%DZ(0)    = M%DZ(1)
-   M%DZ(M%KBP1) = M%DZ(M%KBAR)
-   M%RDZ(0)    = 1._EB/M%DZ(1)
-   M%RDZ(M%KBP1) = 1._EB/M%DZ(M%KBAR)
+   M%DZMIN = 1000000._EB
 
    DO K=0,M%KBAR
-      ZETA      = K*M%DZETA
-      M%Z(K)    = M%ZS + G(ZETA,3,NM)
+      ZETA   = K*M%DZETA
+      M%Z(K) = M%ZS + G(ZETA,3,NM)
+      IF (K>0) THEN
+         M%DZ(K) = M%Z(K) - M%Z(K-1)
+         M%HZ(K) = M%DZ(K)/M%DZETA
+         M%DZMIN = MIN(M%DZMIN,M%DZ(K))
+         IF (M%HZ(K)<=0._EB) THEN
+            WRITE(MESSAGE,'(A,I0)') 'ERROR: z transformation not monotonic, mesh ',NM
+            CALL SHUTDOWN(MESSAGE) ; RETURN
+         ENDIF
+         M%RDZ(K) = 1._EB/M%DZ(K)
+      ENDIF
+   ENDDO
+   M%Z(0)       = M%ZS
+   M%Z(M%KBAR)  = M%ZF
+   M%HZ(0)      = M%HZ(1)
+   M%HZ(M%KBP1) = M%HZ(M%KBAR)
+   M%DZ(0)      = M%DZ(1)
+   M%DZ(M%KBP1) = M%DZ(M%KBAR)
+   M%RDZ(0)     = 1._EB/M%DZ(1)
+   M%RDZ(M%KBP1)= 1._EB/M%DZ(M%KBAR)
+
+   DO K=0,M%KBAR
       M%DZN(K)  = 0.5_EB*(M%DZ(K)+M%DZ(K+1))
       M%RDZN(K) = 1._EB/M%DZN(K)
-   ENDDO
-
-   M%Z(0)      = M%ZS
-   M%Z(M%KBAR) = M%ZF
-
-   DO K=1,M%KBAR
-      M%ZC(K) = 0.5_EB*(M%Z(K)+M%Z(K-1))
+      IF (K>0) M%ZC(K) = 0.5_EB*(M%Z(K)+M%Z(K-1))
    ENDDO
    M%ZC(0)      = M%ZS - 0.5_EB*M%DZ(0)
    M%ZC(M%KBP1) = M%ZF + 0.5_EB*M%DZ(M%KBP1)
