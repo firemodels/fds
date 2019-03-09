@@ -1541,6 +1541,7 @@ MESH_LOOP: DO NM=1,NMESHES
    M%X(M%IBAR)  = M%XF
    M%HX(0)      = M%HX(1)
    M%HX(M%IBP1) = M%HX(M%IBAR)
+   IF (T%NOC(1)==0) M%HX = 1._EB
    M%DX(0)      = M%DX(1)
    M%DX(M%IBP1) = M%DX(M%IBAR)
    M%RDX(0)     = 1._EB/M%DX(1)
@@ -1585,6 +1586,7 @@ MESH_LOOP: DO NM=1,NMESHES
    M%Y(M%JBAR)  = M%YF
    M%HY(0)      = M%HY(1)
    M%HY(M%JBP1) = M%HY(M%JBAR)
+   IF (T%NOC(2)==0) M%HY = 1._EB
    M%DY(0)      = M%DY(1)
    M%DY(M%JBP1) = M%DY(M%JBAR)
    M%RDY(0)     = 1._EB/M%DY(1)
@@ -1620,6 +1622,7 @@ MESH_LOOP: DO NM=1,NMESHES
    M%Z(M%KBAR)  = M%ZF
    M%HZ(0)      = M%HZ(1)
    M%HZ(M%KBP1) = M%HZ(M%KBAR)
+   IF (T%NOC(3)==0) M%HZ = 1._EB
    M%DZ(0)      = M%DZ(1)
    M%DZ(M%KBP1) = M%DZ(M%KBAR)
    M%RDZ(0)     = 1._EB/M%DZ(1)
