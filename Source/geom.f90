@@ -32897,7 +32897,6 @@ DO ISEG=1,BODINT_PLANE%NSEGS
    ! Unit vector along segment:
    STANI(IAXIS:JAXIS) = (/ (X2_2-X2_1), (X3_2-X3_1) /)*SLEN**(-1._EB)
 
-   JSTR = X2LO; JEND = X2HI
    MINX = MIN(X2_1,X2_2)
    MAXX = MAX(X2_1,X2_2)
    IF(X2NOC==0) THEN
@@ -32905,18 +32904,30 @@ DO ISEG=1,BODINT_PLANE%NSEGS
       JSTR = MAX(X2LO, CEILING((  MINX-GEOMEPS-X2FACE(X2LO))/DX2FACE(X2LO))+X2LO)
       JEND = MIN(X2HI,   FLOOR((  MAXX+GEOMEPS-X2FACE(X2LO))/DX2FACE(X2LO))+X2LO)
    ELSE
-      DO JJ=X2LO,X2HI-1
-         IF((MINX-GEOMEPS-X2FACE(JJ)) >= 0._EB .AND. (MINX-GEOMEPS-X2FACE(JJ+1)) < 0._EB ) THEN
-            JSTR = JJ+1
-            CYCLE
-         ENDIF
-      ENDDO
-      DO JJ=X2LO+1,X2HI
-         IF((MAXX+GEOMEPS-X2FACE(JJ)) >= 0._EB .AND. (MAXX+GEOMEPS-X2FACE(JJ+1)) < 0._EB ) THEN
-            JEND = JJ
-            CYCLE
-         ENDIF
-      ENDDO
+      IF ((MINX-GEOMEPS-X2FACE(X2LO)) < 0._EB) THEN
+         JSTR=X2LO
+      ELSEIF((MINX-GEOMEPS-X2FACE(X2HI)) >= 0._EB) THEN
+         JSTR=X2HI+1
+      ELSE
+         DO JJ=X2LO,X2HI
+            IF((MINX-GEOMEPS-X2FACE(JJ)) >= 0._EB .AND. (MINX-GEOMEPS-X2FACE(JJ+1)) < 0._EB ) THEN
+               JSTR = JJ+1
+               EXIT
+            ENDIF
+         ENDDO
+      ENDIF
+      IF ((MAXX+GEOMEPS-X2FACE(X2LO)) < 0._EB) THEN
+         JEND=X2LO-1
+      ELSEIF((MAXX+GEOMEPS-X2FACE(X2HI)) >= 0._EB) THEN
+         JEND=X2HI
+      ELSE
+         DO JJ=X2LO,X2HI
+            IF((MAXX+GEOMEPS-X2FACE(JJ)) >= 0._EB .AND. (MAXX+GEOMEPS-X2FACE(JJ+1)) < 0._EB ) THEN
+               JEND = JJ
+               EXIT
+            ENDIF
+         ENDDO
+      ENDIF
    ENDIF
 
    DO JJ=JSTR,JEND
@@ -36680,7 +36691,7 @@ DO K=KLO,KHI
                       WRITE(LU_ERR,*) "Error GET_CARTCELL_CUTFACES: ctr > nseg_face^3 ,",BNDINT_FLAG,I,J,K,NCUTFACE,&
                       MESHES(NM)%CUT_FACE(NCUTFACE)%NFACE
                       WRITE(LU_ERR,*) "Cannot build boundary cut faces in cell:",I,J,K
-                      WRITE(LU_ERR,*) "Located in position:",XC(I),YC(J),ZC(K)
+                      WRITE(LU_ERR,*) "Located in position:",XCELL(I),YCELL(J),ZCELL(K)
                       WRITE(LU_ERR,*) "Check for Geometry surface inconsistencies at said location."
 #ifdef DEBUG_SET_CUTCELLS
                       WRITE(LU_ERR,*) 'Cartesian CELL:',BNDINT_FLAG,MESHES(NM)%CCVAR(I,J,K,IBM_CGSC),IBM_CUTCFE,I,J,K
@@ -36689,9 +36700,9 @@ DO K=KLO,KHI
                       WRITE(33,*) 'I,J,K:'
                       WRITE(33,*) I,J,K
                       WRITE(33,*) 'XC(I),DX(I),YC(J),DY(J),ZC(K),DZ(K):'
-                      WRITE(33,*) MESHES(NM)%XC(I),MESHES(NM)%DX(I)
-                      WRITE(33,*) MESHES(NM)%YC(J),MESHES(NM)%DY(J)
-                      WRITE(33,*) MESHES(NM)%ZC(K),MESHES(NM)%DZ(K)
+                      WRITE(33,*) XCELL(I),DXCELL(I) ! MESHES(NM)%XC(I),MESHES(NM)%DX(I)
+                      WRITE(33,*) YCELL(J),DYCELL(J) ! MESHES(NM)%YC(J),MESHES(NM)%DY(J)
+                      WRITE(33,*) ZCELL(K),DZCELL(K) ! MESHES(NM)%ZC(K),MESHES(NM)%DZ(K)
                       WRITE(33,*) 'NVERT,NSEG,NSEG_FACE,COUNTR,NSEG_LEFT:'
                       WRITE(33,*) NVERT,NSEG,NSEG_FACE,COUNTR,NSEG_LEFT
                       WRITE(33,*) 'XYZVERT(IAXIS:KAXIS,1:NVERT):'
