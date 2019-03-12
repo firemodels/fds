@@ -781,11 +781,11 @@ NODE_LOOP: DO NN = 1, N_DUCTNODES
                EXIT NODE_VENT_LOOP
             ENDIF
          ENDDO NODE_VENT_LOOP
-         IF (.NOT. FOUND) THEN
-            WRITE(MESSAGE,'(A,A,A,A)') 'Cannot find VENT_ID: ',TRIM(DN%VENT_ID),' for Ductnode: ',TRIM(DN%ID)
-            CALL SHUTDOWN(MESSAGE); RETURN
-         ENDIF
       ENDDO MESH_LOOP
+      IF (.NOT. FOUND) THEN
+         WRITE(MESSAGE,'(A,A,A,A)') 'Cannot find VENT_ID: ',TRIM(DN%VENT_ID),' for Ductnode: ',TRIM(DN%ID)
+         CALL SHUTDOWN(MESSAGE); RETURN
+      ENDIF
    ENDIF
    IF (DN%VENT .AND. DN%AMBIENT) THEN
       WRITE(MESSAGE,'(A,I5,A,A)') 'ERROR: DUCTNODE cannot be AMBIENT and have an assigned VENT_ID. Ductnode:',NN,&
