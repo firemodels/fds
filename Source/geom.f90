@@ -32160,6 +32160,33 @@ CASE(IAXIS)
             ! Optimized for UG:
             JSTR = MAX(X2LO_LOC, CEILING(( IBM_SVAR_CRS(ICRS)-GEOMEPS-X2FACE(X2LO_LOC))/DX2FACE(X2LO_LOC)) + X2LO_LOC)
             JEND = MIN(X2HI_LOC,   FLOOR((IBM_SVAR_CRS(ICRS1)+GEOMEPS-X2FACE(X2LO_LOC))/DX2FACE(X2LO_LOC)) + X2LO_LOC)
+         ELSE
+            IF ((IBM_SVAR_CRS(ICRS)-GEOMEPS-X2FACE(X2LO_LOC))    <  0._EB) THEN
+               JSTR=X2LO_LOC
+            ELSEIF((IBM_SVAR_CRS(ICRS)-GEOMEPS-X2FACE(X2HI_LOC)) >= 0._EB) THEN
+               JSTR=X2HI_LOC+1
+            ELSE
+               DO JJ=X2LO_LOC,X2HI_LOC
+                  IF((IBM_SVAR_CRS(ICRS)-GEOMEPS-X2FACE(JJ))   >= 0._EB .AND. &
+                     (IBM_SVAR_CRS(ICRS)-GEOMEPS-X2FACE(JJ+1)) <  0._EB ) THEN
+                     JSTR = JJ+1
+                     EXIT
+                  ENDIF
+               ENDDO
+            ENDIF
+            IF ((IBM_SVAR_CRS(ICRS1)+GEOMEPS-X2FACE(X2LO_LOC)) < 0._EB) THEN
+               JEND=X2LO_LOC-1
+            ELSEIF((IBM_SVAR_CRS(ICRS1)+GEOMEPS-X2FACE(X2HI))  >= 0._EB) THEN
+               JEND=X2HI_LOC
+            ELSE
+               DO JJ=X2LO_LOC,X2HI_LOC
+                  IF((IBM_SVAR_CRS(ICRS1)+GEOMEPS-X2FACE(JJ))   >= 0._EB .AND. &
+                     (IBM_SVAR_CRS(ICRS1)+GEOMEPS-X2FACE(JJ+1)) <  0._EB ) THEN
+                     JEND = JJ
+                     EXIT
+                  ENDIF
+               ENDDO
+            ENDIF
          ENDIF
 
          DO JJ=JSTR,JEND
@@ -32944,7 +32971,10 @@ DO ISEG=1,BODINT_PLANE%NSEGS
       NBCROSS = BODINT_PLANE%NBCROSS(ISEG)
       ISCONT = .FALSE.
       DO IBCR=1,NBCROSS
-         IF ( ABS(SBOD-BODINT_PLANE%SVAR(IBCR,ISEG)) < GEOMEPS ) ISCONT = .TRUE.
+         IF ( ABS(SBOD-BODINT_PLANE%SVAR(IBCR,ISEG)) < GEOMEPS ) THEN
+            ISCONT = .TRUE.
+            EXIT
+         ENDIF
       ENDDO
       IF (ISCONT) CYCLE
 

@@ -138,7 +138,7 @@ fprintf([basedir 'TRN.dat\n'])
 [fid]=fopen([basedir 'TRN.dat'],'w');
 for i=1:m
    % First m cells:
-   fprintf(fid,['&' TRN ' ID=' TRN_ID ', CC=%18.12f, PC=%18.12f /\n'],...
+   fprintf(fid,['&' TRN ' ID=' TRN_ID ', CC=%20.15f, PC=%20.15f /\n'],...
             xs+i*Lx/Nx,xs+i*DXS);
 end
 for i=m+1:Nx-1
@@ -150,7 +150,7 @@ for i=m+1:Nx-1
     end
     x = m*DXS + sdx;
     % Stretched cells:
-    fprintf(fid,['&' TRN ' ID=' TRN_ID ', CC=%18.12f, PC=%18.12f /\n'],...
+    fprintf(fid,['&' TRN ' ID=' TRN_ID ', CC=%20.15f, PC=%20.15f /\n'],...
             xs+i*Lx/Nx,xs+x);
 end
 fclose(fid);
