@@ -38315,7 +38315,7 @@ INTEGER :: MAX_IDS=0,MAX_SURF_IDS=0,MAX_ZVALS=0,MAX_VERTS=0,MAX_FACES=0,MAX_VOLU
            GEOM_TYPE,NXB,IJK(3),N_LEVELS,N_LAT,N_LONG,SPHERE_TYPE,BOXVERTLIST(8),NI,NIJ,IVOL,SORT_FACES,II,II1,II2,II3,&
            WSELEM(NOD1:NOD3),X1AXIS,NNN,CYLINDER_NSEG_THETA,CYLINDER_NSEG_AXIS
 
-LOGICAL :: AUTO_TEXTURE,COMPONENT_ONLY,HAVE_SURF,HAVE_MATL,IN_LIST,SURF_INDEX_PER_FACE,BNDF_GEOM
+LOGICAL :: AUTO_TEXTURE,COMPONENT_ONLY,HAVE_SURF,HAVE_MATL,IN_LIST,SURF_INDEX_PER_FACE,BNDF_GEOM,LOGTEST
 REAL(EB), POINTER, DIMENSION(:) :: VNEW,VOLD,V1,V2,V3,V4
 INTEGER, POINTER, DIMENSION(:) :: FACEI,FACEJ,FACE_FROM,FACE_TO,VOL
 TYPE(MESH_TYPE), POINTER :: M=>NULL()
@@ -38326,11 +38326,20 @@ REAL(EB), PARAMETER :: MAX_VAL=1.0E20_EB
 
 LOGICAL :: READ_BINARY
 
-NAMELIST /GEOM/ AUTO_TEXTURE,BNDF_GEOM,FACES,ID,IJK,MOVE_ID,MATL_ID,N_LAT,N_LEVELS,N_LONG,PROP_ID,&
+INTEGER :: IJF, IJB, IJE, NM
+INTEGER, ALLOCATABLE, DIMENSION(:) :: B_IND,E_IND,F_IND
+REAL(EB) :: XLOW,XHI,YLOW,YHI,ZLOW,DELX,DELY
+
+LOGICAL :: EXTEND_TERRAIN
+REAL(EB):: ZVAL_HORIZON, ZVAL_FACTOR
+
+LOGICAL, PARAMETER :: TERRAIN_NEW_WAY = .TRUE.
+
+NAMELIST /GEOM/ AUTO_TEXTURE,BNDF_GEOM,EXTEND_TERRAIN,FACES,ID,IJK,MOVE_ID,MATL_ID,N_LAT,N_LEVELS,N_LONG,PROP_ID,&
                 SPHERE_ORIGIN,SPHERE_RADIUS,SPHERE_TYPE,SURF_ID,SURF_IDS,SURF_ID6,&
                 TEXTURE_MAPPING,TEXTURE_ORIGIN,TEXTURE_SCALE,&
                 VERTS,VOLUS,XB,ZMIN,ZVALS,CYLINDER_ORIGIN,CYLINDER_AXIS,&
-                CYLINDER_RADIUS,CYLINDER_LENGTH,CYLINDER_NSEG_THETA,CYLINDER_NSEG_AXIS,READ_BINARY
+                CYLINDER_RADIUS,CYLINDER_LENGTH,CYLINDER_NSEG_THETA,CYLINDER_NSEG_AXIS,READ_BINARY,ZVAL_HORIZON
 
 ! first pass - determine max number of ZVALS, VERTS, FACES, VOLUS and IDS over all &GEOMs
 
@@ -38533,126 +38542,405 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
       IF (NXB<4) THEN
          CALL SHUTDOWN('ERROR: At least 4 XB values (xmin, xmax, ymin, ymax) required when using ZVALS')
       ENDIF
-      ALLOCATE(G%ZVALS(N_ZVALS),STAT=IZERO)
-      CALL ChkMemErr('READ_GEOM','G%ZVALS',IZERO)
-      N_FACES=2*(IJK(1)-1)*(IJK(2)-1)
-      N_VERTS=IJK(1)*IJK(2)
 
-      ! define terrain vertices
+      IF (TERRAIN_NEW_WAY) THEN
 
-      IJ = 1
-      DO J = 1, IJK(2)
-         DO I = 1, IJK(1)
-            VERTS(3*IJ-2) = (XB(1)*REAL(IJK(1)-I,EB) + XB(2)*REAL(I-1,EB))/REAL(IJK(1)-1,EB)
-            VERTS(3*IJ-1) = (XB(3)*REAL(IJK(2)-J,EB) + XB(4)*REAL(J-1,EB))/REAL(IJK(2)-1,EB)
-            VERTS(3*IJ) = ZVALS(IJ)
-            IJ = IJ + 1
+         IF (EXTEND_TERRAIN) THEN
+            ! Find XLOW,XHI,YLOW,YHI for the set of NM meshes defined:
+            XLOW = 1.E10_EB
+            XHI  =-1.E10_EB
+            YLOW = 1.E10_EB
+            YHI  =-1.E10_EB
+            DO NM=1,NMESHES
+               XLOW = MIN(XLOW,MESHES(NM)%XS)
+               XHI  = MAX(XHI ,MESHES(NM)%XF)
+               YLOW = MIN(YLOW,MESHES(NM)%YS)
+               YHI  = MAX(YHI ,MESHES(NM)%YF)
+            ENDDO
+         ENDIF
+         ZLOW = 1.E10_EB
+         DO NM=1,NMESHES
+            ZLOW = MIN(ZLOW,MESHES(NM)%ZS)
          ENDDO
-      ENDDO
+         ZLOW = MIN(ZLOW,ZMIN)
 
-      ! define terrain faces
-      !        8 ---- 7
-      !       /|     /|
-      !     5 ----- 6 |
-      !     |  |    | |
-      !     |  |    | |
-      !     |  |    | |
-      !     |  4 ---- 3
-      !     | /     |/
-      !     1 ----  2
+         ZVAL_FACTOR = 1._EB
+         IF(ZVAL_HORIZON > MAX_VAL) ZVAL_FACTOR = 0._EB ! Not defined, use boundary polygon heights.
 
-      IJ = 1
-      DO J = 1, IJK(2) - 1
-         DO I = 1, IJK(1) - 1
-            I1 = (J-1)*IJK(1) + I
-            I2 = I1 + 1
-            I3 = I2 + IJK(1)
-            I4 = I3 - 1
+         N_VOLUS = 0
 
-            FACES(3*IJ-2) = I1
-            FACES(3*IJ-1) = I2
-            FACES(3*IJ) = I3
-            IJ = IJ + 1
+         ALLOCATE(B_IND(2*(IJK(1)+IJK(2))-3)); B_IND=-1
+         ALLOCATE(E_IND(2*(IJK(1)+IJK(2))-3)); E_IND=-1
+         ALLOCATE(F_IND(2*(IJK(1)+IJK(2))-3)); F_IND=-1
 
-            FACES(3*IJ-2) = I1
-            FACES(3*IJ-1) = I3
-            FACES(3*IJ) = I4
-            IJ = IJ + 1
+         ! First add terrain IJK(1)*IJK(2) vertices:
+         IJ = 1
+         DO J = 1, IJK(2)
+            DO I = 1, IJK(1)
+               VERTS(3*IJ-2) = (XB(1)*REAL(IJK(1)-I,EB) + XB(2)*REAL(I-1,EB))/REAL(IJK(1)-1,EB)
+               VERTS(3*IJ-1) = (XB(3)*REAL(IJK(2)-J,EB) + XB(4)*REAL(J-1,EB))/REAL(IJK(2)-1,EB)
+               VERTS(3*IJ) = ZVALS(IJ)
+               IJ = IJ + 1
+            ENDDO
          ENDDO
-      ENDDO
-      N_FACES = IJ - 1
 
-      DO I = 1, N_VERTS
-         VNEW=>VERTS(3*N_VERTS+3*I-2:3*N_VERTS+3*I)
-         VOLD=>VERTS(3*I-2:3*I)
-         VNEW(1:3)=(/VOLD(1:2),ZMIN/)
-      ENDDO
-      N_VERTS=2*N_VERTS
-
-
-      IJ = 1
-      DO J = 1, IJK(2) - 1
-         DO I = 1, IJK(1) - 1
-            I1 = (J-1)*IJK(1) + I
-            I2 = I1 + 1
-            I3 = I2 + IJK(1)
-            I4 = I3 - 1
-
-            I5 = I1 + N_VERTS/2
-            I6 = I2 + N_VERTS/2
-            I7 = I3 + N_VERTS/2
-            I8 = I4 + N_VERTS/2
-
-            !     8-------7
-            !   / .     / |
-            ! 5-------6   |
-            ! |   .   |   |
-            ! |   .   |   |
-            ! |   4-------3
-            ! | /     | /
-            ! 1-------2
-
-            ! split box into 6 tetrahedra using: https://www.ics.uci.edu/~eppstein/projects/tetra/
-
-            VOLUS(4*IJ-3) = I1
-            VOLUS(4*IJ-2) = I2
-            VOLUS(4*IJ-1) = I6
-            VOLUS(4*IJ-0) = I7
-            IJ = IJ + 1
-
-            VOLUS(4*IJ-3) = I1
-            VOLUS(4*IJ-2) = I3
-            VOLUS(4*IJ-1) = I2
-            VOLUS(4*IJ-0) = I7
-            IJ = IJ + 1
-
-            VOLUS(4*IJ-3) = I1
-            VOLUS(4*IJ-2) = I6
-            VOLUS(4*IJ-1) = I5
-            VOLUS(4*IJ-0) = I7
-            IJ = IJ + 1
-
-            VOLUS(4*IJ-3) = I1
-            VOLUS(4*IJ-2) = I4
-            VOLUS(4*IJ-1) = I3
-            VOLUS(4*IJ-0) = I7
-            IJ = IJ + 1
-
-            VOLUS(4*IJ-3) = I1
-            VOLUS(4*IJ-2) = I7
-            VOLUS(4*IJ-1) = I5
-            VOLUS(4*IJ-0) = I8
-            IJ = IJ + 1
-
-            VOLUS(4*IJ-3) = I1
-            VOLUS(4*IJ-2) = I7
-            VOLUS(4*IJ-1) = I8
-            VOLUS(4*IJ-0) = I4
-            IJ = IJ + 1
+         ! Boundary indexes:
+         IJB = 1
+         DO J=1,1
+         DO I=1,IJK(1)
+            B_IND(IJB)=(J-1)*IJK(1)+I
+            IJB = IJB + 1
          ENDDO
-      ENDDO
-      N_VOLUS=IJ - 1
-      N_FACES=0
+         ENDDO
+         DO J=2,IJK(2)
+         DO I=IJK(1),IJK(1)
+            B_IND(IJB)=(J-1)*IJK(1)+I
+            IJB = IJB + 1
+         ENDDO
+         ENDDO
+         DO J=IJK(2),IJK(2)
+         DO I=IJK(1)-1,1,-1
+            B_IND(IJB)=(J-1)*IJK(1)+I
+            IJB = IJB + 1
+         ENDDO
+         ENDDO
+         DO J=IJK(2)-1,2,-1
+         DO I=1,1
+            B_IND(IJB)=(J-1)*IJK(1)+I
+            IJB = IJB + 1
+         ENDDO
+         ENDDO
+         B_IND(IJB)= B_IND(1) ! Last point equal to first.
+
+         ! Now add terrain 2*(IJK(1)-1)*(IJK(2)-1) faces:
+         IJF = 1
+         DO J = 1, IJK(2) - 1
+            DO I = 1, IJK(1) - 1
+               I1 = (J-1)*IJK(1) + I
+               I2 = I1 + 1
+               I3 = I2 + IJK(1)
+               I4 = I3 - 1
+
+               FACES(3*IJF-2) = I1
+               FACES(3*IJF-1) = I2
+               FACES(3*IJF) = I3
+               IJF = IJF + 1
+
+               FACES(3*IJF-2) = I1
+               FACES(3*IJF-1) = I3
+               FACES(3*IJF) = I4
+               IJF = IJF + 1
+            ENDDO
+         ENDDO
+
+         IF (EXTEND_TERRAIN) THEN
+          ! Then add 2*(IJK(1)+IJK(2))-4 extended points:
+            DELX = (XHI - XLOW)/REAL(IJK(1)-1,EB)
+            DELY = (YHI - YLOW)/REAL(IJK(2)-1,EB)
+
+            IJE = 1
+            ! Low Y along X: from IJK(1)*IJK(2)+1 : IJK(1)*IJK(2) + IJK(1)
+            DO J=1,1
+            DO I=1,IJK(1)
+               VERTS(3*IJ-2) = XLOW + DELX*REAL(I-1,EB)
+               VERTS(3*IJ-1) = YLOW + DELY*REAL(J-1,EB)
+               VERTS(3*IJ)   = (1._EB-ZVAL_FACTOR)*ZVALS((J-1)*IJK(1)+I) + ZVAL_FACTOR*ZVAL_HORIZON
+               E_IND(IJE) = IJ
+               IJE= IJE + 1
+               IJ = IJ  + 1
+            ENDDO
+            ENDDO
+
+            ! Hi X along Y: from IJK(1)*IJK(2) + IJK(1) + 1  : IJK(1)*IJK(2) + IJK(1) + IJK(2) - 2
+            DO J=2,IJK(2)
+            DO I=IJK(1),IJK(1)
+               VERTS(3*IJ-2) = XLOW + DELX*REAL(I-1,EB)
+               VERTS(3*IJ-1) = YLOW + DELY*REAL(J-1,EB)
+               VERTS(3*IJ)   = (1._EB-ZVAL_FACTOR)*ZVALS((J-1)*IJK(1)+I) + ZVAL_FACTOR*ZVAL_HORIZON
+               E_IND(IJE) = IJ
+               IJE= IJE + 1
+               IJ = IJ  + 1
+            ENDDO
+            ENDDO
+
+            ! Hi Y along X: from IJK(1)*IJK(2) + IJK(1) + IJK(2) - 1 : IJK(1)*IJK(2) + 2*IJK(1) + IJK(2) - 2
+            DO J=IJK(2),IJK(2)
+            DO I=IJK(1)-1,1,-1
+               VERTS(3*IJ-2) = XLOW + DELX*REAL(I-1,EB)
+               VERTS(3*IJ-1) = YLOW + DELY*REAL(J-1,EB)
+               VERTS(3*IJ)   = (1._EB-ZVAL_FACTOR)*ZVALS((J-1)*IJK(1)+I) + ZVAL_FACTOR*ZVAL_HORIZON
+               E_IND(IJE) = IJ
+               IJE= IJE + 1
+               IJ = IJ  + 1
+            ENDDO
+            ENDDO
+
+            ! Low X Along Y: from IJK(1)*IJK(2) + 2*IJK(1) + IJK(2) - 1 : IJK(1)*IJK(2) + 2*(IJK(1)+IJK(2)) - 4
+            DO J=IJK(2)-1,2,-1
+            DO I=1,1
+               VERTS(3*IJ-2) = XLOW + DELX*REAL(I-1,EB)
+               VERTS(3*IJ-1) = YLOW + DELY*REAL(J-1,EB)
+               VERTS(3*IJ)   = (1._EB-ZVAL_FACTOR)*ZVALS((J-1)*IJK(1)+I) + ZVAL_FACTOR*ZVAL_HORIZON
+               E_IND(IJE) = IJ
+               IJE= IJE + 1
+               IJ = IJ  + 1
+            ENDDO
+            ENDDO
+            E_IND(IJE) = E_IND(1) ! Last point equal to first.
+
+            DO I=1,IJE-1
+               VERTS(3*IJ-2) = VERTS(3*E_IND(I)-2)
+               VERTS(3*IJ-1) = VERTS(3*E_IND(I)-1)
+               VERTS(3*IJ)   = ZLOW
+               F_IND(I)      = IJ
+               IJ            = IJ + 1
+            ENDDO
+            F_IND(IJE) = F_IND(1) ! Last lower point equal to the first.
+
+            ! Remaining Faces:
+            ! Extension faces:
+            DO I=1,2*(IJK(1)+IJK(2))-4
+               I1 = E_IND(I)
+               I2 = E_IND(I+1)
+               I3 = B_IND(I+1)
+               I4 = B_IND(I)
+
+               FACES(3*IJF-2) = I1
+               FACES(3*IJF-1) = I2
+               FACES(3*IJF) = I3
+               IJF = IJF + 1
+
+               FACES(3*IJF-2) = I1
+               FACES(3*IJF-1) = I3
+               FACES(3*IJF) = I4
+               IJF = IJF + 1
+            ENDDO
+
+            ! Side faces:
+            DO I=1,2*(IJK(1)+IJK(2))-4
+               I1 = F_IND(I)
+               I2 = F_IND(I+1)
+               I3 = E_IND(I+1)
+               I4 = E_IND(I)
+
+               FACES(3*IJF-2) = I1
+               FACES(3*IJF-1) = I2
+               FACES(3*IJF) = I3
+               IJF = IJF + 1
+
+               FACES(3*IJF-2) = I1
+               FACES(3*IJF-1) = I3
+               FACES(3*IJF) = I4
+               IJF = IJF + 1
+            ENDDO
+
+         ELSE
+            ! Do not Extend to domain boundary:
+            DO I=1,IJB-1
+               VERTS(3*IJ-2) = VERTS(3*B_IND(I)-2)
+               VERTS(3*IJ-1) = VERTS(3*B_IND(I)-1)
+               VERTS(3*IJ)   = ZLOW
+               F_IND(I)      = IJ
+               IJ            = IJ + 1
+            ENDDO
+            F_IND(IJB) = F_IND(1) ! Last lower point equal to the first.
+
+            ! Side faces:
+            DO I=1,2*(IJK(1)+IJK(2))-4
+               I1 = F_IND(I)
+               I2 = F_IND(I+1)
+               I3 = B_IND(I+1)
+               I4 = B_IND(I)
+
+               FACES(3*IJF-2) = I1
+               FACES(3*IJF-1) = I2
+               FACES(3*IJF) = I3
+               IJF = IJF + 1
+
+               FACES(3*IJF-2) = I1
+               FACES(3*IJF-1) = I3
+               FACES(3*IJF) = I4
+               IJF = IJF + 1
+            ENDDO
+
+         ENDIF
+
+         ! Bottom Faces:
+         ! First Face:
+         I  = 1
+         I1 = F_IND(I)
+         I2 = F_IND(I+1)
+         I3 = F_IND(2*(IJK(1)+IJK(2))-3-I)
+         FACES(3*IJF-2) = I2
+         FACES(3*IJF-1) = I1
+         FACES(3*IJF) = I3
+         IJF = IJF + 1
+
+         DO I=2,(2*(IJK(1)+IJK(2))-6)/2
+            I1 = F_IND(I)
+            I2 = F_IND(I+1)
+            I3 = F_IND(2*(IJK(1)+IJK(2))-3-I)
+            I4 = F_IND(2*(IJK(1)+IJK(2))-2-I)
+
+            FACES(3*IJF-2) = I2
+            FACES(3*IJF-1) = I1
+            FACES(3*IJF) = I4
+            IJF = IJF + 1
+
+            FACES(3*IJF-2) = I2
+            FACES(3*IJF-1) = I4
+            FACES(3*IJF) = I3
+            IJF = IJF + 1
+         ENDDO
+
+         ! Last Face:
+         I  = (2*(IJK(1)+IJK(2))-4)/2
+         I1 = F_IND(I)
+         I2 = F_IND(I+1)
+         I3 = F_IND(I+2)
+         FACES(3*IJF-2) = I2
+         FACES(3*IJF-1) = I1
+         FACES(3*IJF) = I3
+         IJF = IJF + 1
+
+         N_VERTS = IJ  - 1
+         N_FACES = IJF - 1
+
+         ! Surf IDs for generated GEOM:
+         IF(ALLOCATED(SURFS)) DEALLOCATE(SURFS)
+         ALLOCATE(SURFS(N_FACES))
+         IF(SURF_INDEX_PER_FACE) THEN
+            SURFS(:) = 1 ! All external faces point to only entry SURF_ID(1).
+         ELSE
+            SURFS(:) = 0 ! All external faces point to default surf ID.
+         ENDIF
+
+         DEALLOCATE(B_IND,E_IND,F_IND)
+
+      ELSE
+
+         ! OLD WAY of computing:
+         ALLOCATE(G%ZVALS(N_ZVALS),STAT=IZERO)
+         CALL ChkMemErr('READ_GEOM','G%ZVALS',IZERO)
+         N_FACES=2*(IJK(1)-1)*(IJK(2)-1)
+         N_VERTS=IJK(1)*IJK(2)
+
+         ! define terrain vertices
+
+         IJ = 1
+         DO J = 1, IJK(2)
+            DO I = 1, IJK(1)
+               VERTS(3*IJ-2) = (XB(1)*REAL(IJK(1)-I,EB) + XB(2)*REAL(I-1,EB))/REAL(IJK(1)-1,EB)
+               VERTS(3*IJ-1) = (XB(3)*REAL(IJK(2)-J,EB) + XB(4)*REAL(J-1,EB))/REAL(IJK(2)-1,EB)
+               VERTS(3*IJ) = ZVALS(IJ)
+               IJ = IJ + 1
+            ENDDO
+         ENDDO
+
+         ! define terrain faces
+         !        8 ---- 7
+         !       /|     /|
+         !     5 ----- 6 |
+         !     |  |    | |
+         !     |  |    | |
+         !     |  |    | |
+         !     |  4 ---- 3
+         !     | /     |/
+         !     1 ----  2
+
+         IJ = 1
+         DO J = 1, IJK(2) - 1
+            DO I = 1, IJK(1) - 1
+               I1 = (J-1)*IJK(1) + I
+               I2 = I1 + 1
+               I3 = I2 + IJK(1)
+               I4 = I3 - 1
+
+               FACES(3*IJ-2) = I1
+               FACES(3*IJ-1) = I2
+               FACES(3*IJ) = I3
+               IJ = IJ + 1
+
+               FACES(3*IJ-2) = I1
+               FACES(3*IJ-1) = I3
+               FACES(3*IJ) = I4
+               IJ = IJ + 1
+            ENDDO
+         ENDDO
+         N_FACES = IJ - 1
+
+         DO I = 1, N_VERTS
+            VNEW=>VERTS(3*N_VERTS+3*I-2:3*N_VERTS+3*I)
+            VOLD=>VERTS(3*I-2:3*I)
+            VNEW(1:3)=(/VOLD(1:2),ZMIN/)
+         ENDDO
+         N_VERTS=2*N_VERTS
+
+
+         IJ = 1
+         DO J = 1, IJK(2) - 1
+            DO I = 1, IJK(1) - 1
+               I1 = (J-1)*IJK(1) + I
+               I2 = I1 + 1
+               I3 = I2 + IJK(1)
+               I4 = I3 - 1
+
+               I5 = I1 + N_VERTS/2
+               I6 = I2 + N_VERTS/2
+               I7 = I3 + N_VERTS/2
+               I8 = I4 + N_VERTS/2
+
+               !     8-------7
+               !   / .     / |
+               ! 5-------6   |
+               ! |   .   |   |
+               ! |   .   |   |
+               ! |   4-------3
+               ! | /     | /
+               ! 1-------2
+
+               ! split box into 6 tetrahedra using: https://www.ics.uci.edu/~eppstein/projects/tetra/
+
+               VOLUS(4*IJ-3) = I1
+               VOLUS(4*IJ-2) = I2
+               VOLUS(4*IJ-1) = I6
+               VOLUS(4*IJ-0) = I7
+               IJ = IJ + 1
+
+               VOLUS(4*IJ-3) = I1
+               VOLUS(4*IJ-2) = I3
+               VOLUS(4*IJ-1) = I2
+               VOLUS(4*IJ-0) = I7
+               IJ = IJ + 1
+
+               VOLUS(4*IJ-3) = I1
+               VOLUS(4*IJ-2) = I6
+               VOLUS(4*IJ-1) = I5
+               VOLUS(4*IJ-0) = I7
+               IJ = IJ + 1
+
+               VOLUS(4*IJ-3) = I1
+               VOLUS(4*IJ-2) = I4
+               VOLUS(4*IJ-1) = I3
+               VOLUS(4*IJ-0) = I7
+               IJ = IJ + 1
+
+               VOLUS(4*IJ-3) = I1
+               VOLUS(4*IJ-2) = I7
+               VOLUS(4*IJ-1) = I5
+               VOLUS(4*IJ-0) = I8
+               IJ = IJ + 1
+
+               VOLUS(4*IJ-3) = I1
+               VOLUS(4*IJ-2) = I7
+               VOLUS(4*IJ-1) = I8
+               VOLUS(4*IJ-0) = I4
+               IJ = IJ + 1
+            ENDDO
+         ENDDO
+         N_VOLUS=IJ - 1
+         N_FACES=0
+      ENDIF
    ENDIF ZVALS_IF
 
    !--- setup a block object (XB keyword )
@@ -38810,7 +39098,8 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
    ! ENDIF
    ! G%NSUB_GEOMS=NSUB_GEOMS
 
-   IF (GEOM_TYPE /= CAD_GEOM_TYPE) THEN
+   LOGTEST = (GEOM_TYPE==CAD_GEOM_TYPE) .OR. ((GEOM_TYPE==TERRAIN_GEOM_TYPE) .AND. TERRAIN_NEW_WAY)
+   IF (.NOT.LOGTEST) THEN
       ! The geometry has been constructed from predefined object : Terrain, cube, sphere, etc.
       ! This requires removing duplicate verts.
       ! For geometries where VERTS, FACES are being read, GEOM_TYPE=CAD_GEOM_TYPE, it is assumed duplicate vertices
@@ -39765,6 +40054,8 @@ SUBROUTINE SET_GEOM_DEFAULTS
    GEOM_IDS = ''
    IJK = 2 ! minimize number of triangles by default
    IS_GEOMETRY_DYNAMIC = .FALSE.
+   EXTEND_TERRAIN = .FALSE.
+   ZVAL_HORIZON = 1.001_EB*MAX_VAL
 
    AZIM = 0.0_EB
    ELEV = 0.0_EB
