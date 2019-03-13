@@ -261,7 +261,9 @@ A {\ct GEOM}\ namelist defining a 2D terrain elevation is given by
 \begin{verbatim}
 &GEOM ID='terrain'
       SURF_ID='S1'
-      IJK=ivals,jvals, XB=xmin,xmax,ymin,ymax, ZVALS=...
+      IJK=ivals,jvals, XB=xmin,xmax,ymin,ymax, 
+      EXTEND_TERRAIN=etlog, ZVAL_HORIZON=zvhr, 
+      ZVALS=...
 /
 \end{verbatim}
 
@@ -275,6 +277,8 @@ The first row contains {\ct ivals} elevation values occurring at the the ymax po
 Similarly, the last row contains
 {\ct ivals}\ elevation values for the ymin position again from xmin to xmax.
 There are then {\ct jvals}\ rows and {\ct ivals}\ columns of elevation data.
+The optional fields {\ct EXTEND\_TERRAIN} and {\ct ZVAL\_HORIZON} are used in the following form. If the computational domain is set larger than the {\ct XB} defined terrain patch, such that it contains the terrain completely, setting {\ct etlog=.TRUE.} allows for the terrain to be extended to the domain boundaries. This can be helpful when trying to reduce boundary effects on a calculation.
+If, additionally, the real number {\ct zvhr} is defined for {\ct ZVAL\_HORIZON} on the {\ct \&GEOM} line, this elevation will be used on the domain boundaries when extending the domain.
 As with the blocks and spheres, FDS uses the information provided by these keywords to construct
 vertices and triangular faces.
 
@@ -385,13 +389,9 @@ For example, in the following {\ct GEOM}\ namelist,
 \begin{verbatim}
 &MOVE ID='ChairMove', AXIS=...,...,..., ROTATION_ANGLE=..., DX=, /
 &GEOM ID='chair'
-
       SURF_ID='woodSID','apholsterySID',
-
       VERTS=X1,Y1,Z1,...,XM,YM,ZM,
-
       FACES=F1_1,F1_2,F1_3,F1_SID...,FN_1,FN_2,FN_3,F2_SID
-
       MOVE_ID='ChairMove'
 /
 \end{verbatim}
@@ -491,17 +491,25 @@ It is particularly efficient in large parallel calculations, where parallel file
 \multicolumn{5}{|c|}{{\ct GEOM} (Unstructured Geometry Parameters)} \\
 \hline \hline
 \endhead
+{\ct CYLINDER\_LENGTH}& Real                  & Section~\ref{info:GEOM}            &   m       &                      \\ \hline
+{\ct CYLINDER\_RADIUS}& Real                  & Section~\ref{info:GEOM}            &   m       &                       \\ \hline
+{\ct CYLINDER\_ORIGIN}& Real Triplet          & Section~\ref{info:GEOM}            &   m       &             \\ \hline
+{\ct CYLINDER\_AXIS}& Real Triplet          & Section~\ref{info:GEOM}            &          &             \\ \hline
+{\ct CYLINDER\_NSEG\_AXIS}& Integer          & Section~\ref{info:GEOM}            &          &             \\ \hline
+{\ct CYLINDER\_NSEG\_THETA}& Integer          & Section~\ref{info:GEOM}            &          &             \\ \hline
+{\ct EXTEND\_TERRAIN}& Logical          & Section~\ref{info:GEOM}            &          &    {\ct .FALSE.}         \\ \hline
 {\ct FACES}        & array of Integer Triplets     & Section~\ref{info:GEOM}     &           &    0                     \\ \hline
-{\ct ID}           & Character              & Section~\ref{info:GEOM}            &           &   {\ct 'geom'}           \\ \hline
+{\ct ID}           & Character              & Section~\ref{info:GEOM}            &           &   {\ct 'geom'\_\#}           \\ \hline
 {\ct IJK}          & Integer Triplet        & Section~\ref{info:GEOM}            &           &   0,0,0                  \\ \hline
 {\ct MATL\_ID}     & Character              & Section~\ref{info:GEOM}            &           &  {\ct 'INERT'}           \\ \hline
 {\ct MOVE\_ID}     & Character              & Section~\ref{info:GEOM}            &           &  {\ct 'null'}           \\ \hline
 {\ct N\_LAT}       & Integer                & Section~\ref{info:GEOM}            &           &   0                      \\ \hline
 {\ct N\_LEVELS}    & Integer                & Section~\ref{info:GEOM}            &           &   0                      \\ \hline
 {\ct N\_LONG}      & Integer                & Section~\ref{info:GEOM}            &           &   0                      \\ \hline
-{\ct SPHERE\_ORIGIN}& Real Triplet          & Section~\ref{info:GEOM}            &   m       &  0.0,0.0,0.0             \\ \hline
-{\ct SPHERE\_RADIUS}& Real                  & Section~\ref{info:GEOM}            &   m       &  1.0                     \\ \hline
-{\ct SPHERE\_TYPE} & Integer                & Section~\ref{info:GEOM}            &           &  1                       \\ \hline
+{\ct READ\_BINARY}   & Logical         & Section~\ref{info:GEOM}            &              &   {\ct .FALSE.} \\ \hline
+{\ct SPHERE\_ORIGIN}& Real Triplet          & Section~\ref{info:GEOM}            &   m       &             \\ \hline
+{\ct SPHERE\_RADIUS}& Real                  & Section~\ref{info:GEOM}            &   m       &                    \\ \hline
+{\ct SPHERE\_TYPE} & Integer                & Section~\ref{info:GEOM}            &           &                        \\ \hline
 {\ct SURF\_ID}     & Character              & Section~\ref{info:GEOM}            &           &  {\ct 'INERT'}           \\ \hline
 {\ct TEXTURE\_MAPPING}& Character           & Section~\ref{info:GEOM}            &           & {\ct 'RECTANGULAR'}      \\ \hline
 {\ct TEXTURE\_ORIGIN} & Real Triplet        & Section~\ref{info:GEOM}            &   m       &   0.0,0.0,0.0            \\ \hline
@@ -509,7 +517,8 @@ It is particularly efficient in large parallel calculations, where parallel file
 {\ct VERTS}        & array of Real Triplets & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
 {\ct VOLUS}        & array of Integer Quadruplets     & Section~\ref{info:GEOM}  &           &    0                     \\ \hline
 {\ct XB}           & Real sex-tuplet        & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
-{\ct ZVALS}        & Real                   & Section~\ref{info:GEOM}            &   m/s     &   0.0                    \\ \hline
+{\ct ZVALS}        & Real                   & Section~\ref{info:GEOM}            &   m     &   0.0                    \\ \hline
+{\ct ZVAL\_HORIZON}        & Real                   & Section~\ref{info:GEOM}    &      &                    \\ \hline
 
 
 % Related to moving geometry:
