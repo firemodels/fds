@@ -29895,7 +29895,9 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          KKO = EWC%KKO_MIN
          IF ((EWC%IIO_MAX+EWC%JJO_MAX+EWC%KKO_MAX- &
              (EWC%IIO_MIN+EWC%JJO_MIN+EWC%KKO_MIN)) > 0) THEN ! There is an OMESH on finer refinement level, not allowed.
-         WRITE(LU_ERR,*) 'SET_GC_CUTCELLS_3D Error: GEOM not allowed to cross meshes at different refinement levels.'
+         WRITE(LU_ERR,*) 'SET_GC_CUTCELLS_3D Error: GEOM not allowed to cross meshes at different refinement levels.',&
+         ' Mesh NM=',NM,', Guard cell=',II,JJ,KK,'; finer NOM=',NOM,', cell IIO,JJO,KKO limits=',&
+         EWC%IIO_MIN,EWC%IIO_MAX,EWC%JJO_MIN,EWC%JJO_MAX,EWC%KKO_MIN,EWC%KKO_MAX
          ENDIF
          ! Define underlying Cartesian faces indexes:
          SELECT CASE(IOR)
