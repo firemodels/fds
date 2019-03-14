@@ -38806,15 +38806,6 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
          N_VERTS = IJ  - 1
          N_FACES = IJF - 1
 
-         ! Surf IDs for generated GEOM:
-         IF(ALLOCATED(SURFS)) DEALLOCATE(SURFS)
-         ALLOCATE(SURFS(N_FACES))
-         IF(SURF_INDEX_PER_FACE) THEN
-            SURFS(:) = 1 ! All external faces point to only entry SURF_ID(1).
-         ELSE
-            SURFS(:) = 0 ! All external faces point to default surf ID.
-         ENDIF
-
          DEALLOCATE(B_IND,E_IND,F_IND)
 
       ELSE
@@ -39394,6 +39385,18 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
          ENDIF
       ENDIF
    ENDIF N_VOLUS_IF
+
+   ! Terrain case built with ZVALS, optimized way, define SURFS(:):
+   IF (N_ZVALS > 0 .AND. TERRAIN_NEW_WAY) THEN
+      ! Surf IDs for generated GEOM:
+      IF(ALLOCATED(SURFS)) DEALLOCATE(SURFS)
+      ALLOCATE(SURFS(N_FACES))
+      IF(SURF_INDEX_PER_FACE) THEN
+         SURFS(:) = 1 ! All external faces point to only entry SURF_ID(1).
+      ELSE
+         SURFS(:) = 0 ! All external faces point to default surf ID.
+      ENDIF
+   ENDIF
 
    N_FACES_IF: IF (N_FACES>0) THEN
       ALLOCATE(G%FACES(3*N_FACES),STAT=IZERO)
