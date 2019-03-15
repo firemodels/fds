@@ -17935,7 +17935,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                   IF (INNM) THEN
                      NOM=NM; IIO=I; JJO=J; KKO=K
                   ELSE
-                     CALL SEARCH_OTHER_MESHES_FACE(X1AXIS,XFACE(I),YCELL(J),ZCELL(K),NOM,IIO,JJO,KKO)
+                     CALL SEARCH_OTHER_MESHES_FACE(NM,X1AXIS,XFACE(I),YCELL(J),ZCELL(K),NOM,IIO,JJO,KKO)
                   ENDIF
                   CALL ASSIGN_TO_FC_R
                ENDIF
@@ -17956,7 +17956,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                      IF (INNM) THEN
                         NOM=NM; IIO=I; JJO=J; KKO=K
                      ELSE
-                        CALL SEARCH_OTHER_MESHES_FACE(X1AXIS,XFACE(I),YCELL(J),ZCELL(K),NOM,IIO,JJO,KKO)
+                        CALL SEARCH_OTHER_MESHES_FACE(NM,X1AXIS,XFACE(I),YCELL(J),ZCELL(K),NOM,IIO,JJO,KKO)
                      ENDIF
                      CALL ASSIGN_TO_FC_R
                   ENDIF
@@ -17979,7 +17979,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                   IF (INNM) THEN
                      NOM=NM; IIO=I; JJO=J; KKO=K
                   ELSE
-                     CALL SEARCH_OTHER_MESHES_FACE(X1AXIS,XCELL(I),YFACE(J),ZCELL(K),NOM,IIO,JJO,KKO)
+                     CALL SEARCH_OTHER_MESHES_FACE(NM,X1AXIS,XCELL(I),YFACE(J),ZCELL(K),NOM,IIO,JJO,KKO)
                   ENDIF
                   CALL ASSIGN_TO_FC_R
                ENDIF
@@ -18000,7 +18000,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                      IF (INNM) THEN
                         NOM=NM; IIO=I; JJO=J; KKO=K
                      ELSE
-                        CALL SEARCH_OTHER_MESHES_FACE(X1AXIS,XCELL(I),YFACE(J),ZCELL(K),NOM,IIO,JJO,KKO)
+                        CALL SEARCH_OTHER_MESHES_FACE(NM,X1AXIS,XCELL(I),YFACE(J),ZCELL(K),NOM,IIO,JJO,KKO)
                      ENDIF
                      CALL ASSIGN_TO_FC_R
                   ENDIF
@@ -18023,7 +18023,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                   IF (INNM) THEN
                      NOM=NM; IIO=I; JJO=J; KKO=K
                   ELSE
-                     CALL SEARCH_OTHER_MESHES_FACE(X1AXIS,XCELL(I),YCELL(J),ZFACE(K),NOM,IIO,JJO,KKO)
+                     CALL SEARCH_OTHER_MESHES_FACE(NM,X1AXIS,XCELL(I),YCELL(J),ZFACE(K),NOM,IIO,JJO,KKO)
                   ENDIF
                   CALL ASSIGN_TO_FC_R
                ENDIF
@@ -18044,7 +18044,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                      IF (INNM) THEN
                         NOM=NM; IIO=I; JJO=J; KKO=K
                      ELSE
-                        CALL SEARCH_OTHER_MESHES_FACE(X1AXIS,XCELL(I),YCELL(J),ZFACE(K),NOM,IIO,JJO,KKO)
+                        CALL SEARCH_OTHER_MESHES_FACE(NM,X1AXIS,XCELL(I),YCELL(J),ZFACE(K),NOM,IIO,JJO,KKO)
                      ENDIF
                      CALL ASSIGN_TO_FC_R
                   ENDIF
@@ -18083,7 +18083,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                               IF (INNM) THEN
                                  NOM=NM; IIO=I; JJO=J; KKO=K
                               ELSE
-                                 CALL SEARCH_OTHER_MESHES_FACE(X1AXIS,XFACE(I),YCELL(J),ZCELL(K),NOM,IIO,JJO,KKO)
+                                 CALL SEARCH_OTHER_MESHES_FACE(NM,X1AXIS,XFACE(I),YCELL(J),ZCELL(K),NOM,IIO,JJO,KKO)
                               ENDIF
                               IF(NOM==0) EP_TAG(INPE) = .TRUE.
                               CALL ASSIGN_TO_FC_R
@@ -18097,7 +18097,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                               IF (INNM) THEN
                                  NOM=NM; IIO=I; JJO=J; KKO=K
                               ELSE
-                                 CALL SEARCH_OTHER_MESHES_FACE(X1AXIS,XCELL(I),YFACE(J),ZCELL(K),NOM,IIO,JJO,KKO)
+                                 CALL SEARCH_OTHER_MESHES_FACE(NM,X1AXIS,XCELL(I),YFACE(J),ZCELL(K),NOM,IIO,JJO,KKO)
                               ENDIF
                               IF(NOM==0) EP_TAG(INPE) = .TRUE.
                               CALL ASSIGN_TO_FC_R
@@ -18111,7 +18111,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                               IF (INNM) THEN
                                  NOM=NM; IIO=I; JJO=J; KKO=K
                               ELSE
-                                 CALL SEARCH_OTHER_MESHES_FACE(X1AXIS,XCELL(I),YCELL(J),ZFACE(K),NOM,IIO,JJO,KKO)
+                                 CALL SEARCH_OTHER_MESHES_FACE(NM,X1AXIS,XCELL(I),YCELL(J),ZFACE(K),NOM,IIO,JJO,KKO)
                               ENDIF
                               IF(NOM==0) EP_TAG(INPE) = .TRUE.
                               CALL ASSIGN_TO_FC_R
@@ -18151,7 +18151,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                   IF (INNM) THEN
                      NOM=NM; IIO=I; JJO=J; KKO=K
                   ELSE
-                     CALL SEARCH_OTHER_MESHES_FACE(X1AXIS,XFACE(I),YCELL(J),ZCELL(K),NOM,IIO,JJO,KKO)
+                     CALL SEARCH_OTHER_MESHES_FACE(NM,X1AXIS,XFACE(I),YCELL(J),ZCELL(K),NOM,IIO,JJO,KKO)
                   ENDIF
                   CALL ASSIGN_TO_FC_R
                ENDIF
@@ -18173,7 +18173,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                   IF (INNM) THEN
                      NOM=NM; IIO=I; JJO=J; KKO=K
                   ELSE
-                     CALL SEARCH_OTHER_MESHES_FACE(X1AXIS,XCELL(I),YFACE(J),ZCELL(K),NOM,IIO,JJO,KKO)
+                     CALL SEARCH_OTHER_MESHES_FACE(NM,X1AXIS,XCELL(I),YFACE(J),ZCELL(K),NOM,IIO,JJO,KKO)
                   ENDIF
                   CALL ASSIGN_TO_FC_R
                ENDIF
@@ -18195,7 +18195,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                   IF (INNM) THEN
                      NOM=NM; IIO=I; JJO=J; KKO=K
                   ELSE
-                     CALL SEARCH_OTHER_MESHES_FACE(X1AXIS,XCELL(I),YCELL(J),ZFACE(K),NOM,IIO,JJO,KKO)
+                     CALL SEARCH_OTHER_MESHES_FACE(NM,X1AXIS,XCELL(I),YCELL(J),ZFACE(K),NOM,IIO,JJO,KKO)
                   ENDIF
                   CALL ASSIGN_TO_FC_R
                ENDIF
@@ -18231,7 +18231,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                         IF (INNM) THEN
                            NOM=NM; IIO=I; JJO=J; KKO=K
                         ELSE
-                           CALL SEARCH_OTHER_MESHES_FACE(X1AXIS,XFACE(I),YCELL(J),ZCELL(K),NOM,IIO,JJO,KKO)
+                           CALL SEARCH_OTHER_MESHES_FACE(NM,X1AXIS,XFACE(I),YCELL(J),ZCELL(K),NOM,IIO,JJO,KKO)
                         ENDIF
                         IF(NOM==0) EP_TAG(INPE) = .TRUE.
                         CALL ASSIGN_TO_FC_R
@@ -18245,7 +18245,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                         IF (INNM) THEN
                            NOM=NM; IIO=I; JJO=J; KKO=K
                         ELSE
-                           CALL SEARCH_OTHER_MESHES_FACE(X1AXIS,XCELL(I),YFACE(J),ZCELL(K),NOM,IIO,JJO,KKO)
+                           CALL SEARCH_OTHER_MESHES_FACE(NM,X1AXIS,XCELL(I),YFACE(J),ZCELL(K),NOM,IIO,JJO,KKO)
                         ENDIF
                         IF(NOM==0) EP_TAG(INPE) = .TRUE.
                         CALL ASSIGN_TO_FC_R
@@ -18259,7 +18259,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                         IF (INNM) THEN
                            NOM=NM; IIO=I; JJO=J; KKO=K
                         ELSE
-                           CALL SEARCH_OTHER_MESHES_FACE(X1AXIS,XCELL(I),YCELL(J),ZFACE(K),NOM,IIO,JJO,KKO)
+                           CALL SEARCH_OTHER_MESHES_FACE(NM,X1AXIS,XCELL(I),YCELL(J),ZFACE(K),NOM,IIO,JJO,KKO)
                         ENDIF
                         IF(NOM==0) EP_TAG(INPE) = .TRUE.
                         CALL ASSIGN_TO_FC_R
@@ -18301,7 +18301,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                         IF (INNM) THEN
                            NOM=NM; IIO=I; JJO=J; KKO=K
                         ELSE
-                           CALL SEARCH_OTHER_MESHES_FACE(X1AXIS,XFACE(I),YCELL(J),ZCELL(K),NOM,IIO,JJO,KKO)
+                           CALL SEARCH_OTHER_MESHES_FACE(NM,X1AXIS,XFACE(I),YCELL(J),ZCELL(K),NOM,IIO,JJO,KKO)
                         ENDIF
                         IF(NOM==0) EP_TAG(INPE) = .TRUE.
                         CALL ASSIGN_TO_FC_R
@@ -18315,7 +18315,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                         IF (INNM) THEN
                            NOM=NM; IIO=I; JJO=J; KKO=K
                         ELSE
-                           CALL SEARCH_OTHER_MESHES_FACE(X1AXIS,XCELL(I),YFACE(J),ZCELL(K),NOM,IIO,JJO,KKO)
+                           CALL SEARCH_OTHER_MESHES_FACE(NM,X1AXIS,XCELL(I),YFACE(J),ZCELL(K),NOM,IIO,JJO,KKO)
                         ENDIF
                         IF(NOM==0) EP_TAG(INPE) = .TRUE.
                         CALL ASSIGN_TO_FC_R
@@ -18329,7 +18329,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                         IF (INNM) THEN
                            NOM=NM; IIO=I; JJO=J; KKO=K
                         ELSE
-                           CALL SEARCH_OTHER_MESHES_FACE(X1AXIS,XCELL(I),YCELL(J),ZFACE(K),NOM,IIO,JJO,KKO)
+                           CALL SEARCH_OTHER_MESHES_FACE(NM,X1AXIS,XCELL(I),YCELL(J),ZFACE(K),NOM,IIO,JJO,KKO)
                         ENDIF
                         IF(NOM==0) EP_TAG(INPE) = .TRUE.
                         CALL ASSIGN_TO_FC_R
@@ -19386,15 +19386,20 @@ END SUBROUTINE FILL_IJKO_INTERP_STENCILS
 
 ! ------------------------- SEARCH_OTHER_MESHES_FACE ---------------------------------------------
 
-SUBROUTINE SEARCH_OTHER_MESHES_FACE(AXIS,XX,YY,ZZ,NOM,IIO,JJO,KKO)
+SUBROUTINE SEARCH_OTHER_MESHES_FACE(NM,AXIS,XX,YY,ZZ,NOM,IIO,JJO,KKO)
 
 ! Given the point (XX,YY,ZZ), determine which other mesh it intersects and what its indices are.
 
-INTEGER, INTENT(IN) :: AXIS
+INTEGER, INTENT(IN) :: NM,AXIS
 REAL(EB), INTENT(IN) :: XX,YY,ZZ
 REAL(EB) :: XI,YJ,ZK,SGN
 INTEGER, INTENT(OUT) :: NOM,IIO,JJO,KKO
 TYPE (MESH_TYPE), POINTER :: M2=>NULL()
+
+IIO = 0
+JJO = 0
+KKO = 0
+NOM = 0
 
 SELECT CASE(AXIS)
 CASE(IAXIS)
@@ -19402,6 +19407,11 @@ CASE(IAXIS)
       IF (EVACUATION_ONLY(NOM)) CYCLE OTHER_MESH_LOOP_X
       M2=>MESHES(NOM)
       IF (XX>=M2%XS .AND. XX<=M2%XF .AND.  YY>=M2%YS .AND. YY<=M2%YF .AND. ZZ>=M2%ZS .AND. ZZ<=M2%ZF) THEN
+         IF (.NOT.ALLOCATED(M2%X)) THEN
+            WRITE(LU_ERR,*) 'Interpolation point=',AXIS,XX,YY,ZZ,', for mesh NM=',NM,&
+            ', with other mesh NOM=',NOM,'. NOM has non allocated X,Y,Z arrays.'
+            RETURN
+         ENDIF
          DO IIO=0,M2%IBAR
             SGN=SIGN(1._EB,XX-M2%X(IIO))
             IF((SGN >  0._EB) .AND. (ABS(XX-M2%X(IIO)) <= M2%DX(IIO+1)/2._EB)) EXIT
@@ -19420,6 +19430,11 @@ CASE(JAXIS)
       IF (EVACUATION_ONLY(NOM)) CYCLE OTHER_MESH_LOOP_Y
       M2=>MESHES(NOM)
       IF (XX>=M2%XS .AND. XX<=M2%XF .AND.  YY>=M2%YS .AND. YY<=M2%YF .AND. ZZ>=M2%ZS .AND. ZZ<=M2%ZF) THEN
+         IF (.NOT.ALLOCATED(M2%Y)) THEN
+            WRITE(LU_ERR,*) 'Interpolation point=',AXIS,XX,YY,ZZ,', for mesh NM=',NM,&
+            ', with other mesh NOM=',NOM,'. NOM has non allocated X,Y,Z arrays.'
+            RETURN
+         ENDIF
          DO JJO=0,M2%JBAR
             SGN=SIGN(1._EB,YY-M2%Y(JJO))
             IF((SGN >  0._EB) .AND. (ABS(YY-M2%Y(JJO)) <= M2%DY(JJO+1)/2._EB)) EXIT
@@ -19438,6 +19453,11 @@ CASE(KAXIS)
       IF (EVACUATION_ONLY(NOM)) CYCLE OTHER_MESH_LOOP_Z
       M2=>MESHES(NOM)
       IF (XX>=M2%XS .AND. XX<=M2%XF .AND.  YY>=M2%YS .AND. YY<=M2%YF .AND. ZZ>=M2%ZS .AND. ZZ<=M2%ZF) THEN
+         IF (.NOT.ALLOCATED(M2%Z)) THEN
+            WRITE(LU_ERR,*) 'Interpolation point=',AXIS,XX,YY,ZZ,', for mesh NM=',NM,&
+            ', with other mesh NOM=',NOM,'. NOM has non allocated X,Y,Z arrays.'
+            RETURN
+         ENDIF
          DO KKO=0,M2%KBAR
             SGN=SIGN(1._EB,ZZ-M2%Z(KKO))
             IF((SGN >  0._EB) .AND. (ABS(ZZ-M2%Z(KKO)) <= M2%DZ(KKO+1)/2._EB)) EXIT
@@ -19452,11 +19472,6 @@ CASE(KAXIS)
       ENDIF
    ENDDO OTHER_MESH_LOOP_Z
 END SELECT
-
-IIO = 0
-JJO = 0
-KKO = 0
-NOM = 0
 
 END SUBROUTINE SEARCH_OTHER_MESHES_FACE
 
