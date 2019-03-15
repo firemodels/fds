@@ -30237,368 +30237,368 @@ MAIN_GEOM_LOOP : DO IG=1,N_GEOMETRY
       ENDIF
 
       ! Test if we are looking for intersection triangles only:
-      IF (TRI_ONPLANE_ONLY) CYCLE
+      ONLY_TRIANG_EDGES_COND : IF (.NOT.TRI_ONPLANE_ONLY) THEN
+         ! Case a: Typical intersections:
+         ! Points 1,2 on on side of plane, point 3 on the other:
+         IF ( ((DOT1 > 0._EB) .AND. (DOT2 > 0._EB) .AND. (DOT3 < 0._EB)) .OR. &
+              ((DOT1 < 0._EB) .AND. (DOT2 < 0._EB) .AND. (DOT3 > 0._EB)) ) THEN
 
-      ! Case a: Typical intersections:
-      ! Points 1,2 on on side of plane, point 3 on the other:
-      IF ( ((DOT1 > 0._EB) .AND. (DOT2 > 0._EB) .AND. (DOT3 < 0._EB)) .OR. &
-           ((DOT1 < 0._EB) .AND. (DOT2 < 0._EB) .AND. (DOT3 > 0._EB)) ) THEN
+            ! Line 1, from node 2 to 3:
+            LN1(IAXIS:KAXIS,NOD1) = XYZV(IAXIS:KAXIS,NOD2)
+            LN1(IAXIS:KAXIS,NOD2) = XYZV(IAXIS:KAXIS,NOD3)
 
-         ! Line 1, from node 2 to 3:
-         LN1(IAXIS:KAXIS,NOD1) = XYZV(IAXIS:KAXIS,NOD2)
-         LN1(IAXIS:KAXIS,NOD2) = XYZV(IAXIS:KAXIS,NOD3)
+            CALL LINE_INTERSECT_COORDPLANE(X1AXIS,X1PLN,PLNORMAL,LN1,XYZ_INT1,INTFLG)
 
-         CALL LINE_INTERSECT_COORDPLANE(X1AXIS,X1PLN,PLNORMAL,LN1,XYZ_INT1,INTFLG)
-
-         !IF (.NOT. INTFLG) THEN
-         !  print*, "Error GET_BODINT_PLANE: No intersection on LN1, typical 1."
-         !ENDIF
-
-         ! Index to XYZ_INT1:
-         CALL GET_BODINT_NODE_INDEX(X2AXIS,X3AXIS,XYZ_INT1,IND_P(NOD1))
-
-         ! Line 2, from node 1 to 3:
-         LN2(IAXIS:KAXIS,NOD1) = XYZV(IAXIS:KAXIS,NOD1)
-         LN2(IAXIS:KAXIS,NOD2) = XYZV(IAXIS:KAXIS,NOD3)
-
-         CALL LINE_INTERSECT_COORDPLANE(X1AXIS,X1PLN,PLNORMAL,LN2,XYZ_INT2,INTFLG)
-
-         !IF (.NOT. INTFLG) THEN
-         !  print*, "Error GET_BODINT_PLANE: No intersection on LN2, typical 1."
-         !ENDIF
-
-         ! Index to XYZ_INT2:
-         CALL GET_BODINT_NODE_INDEX(X2AXIS,X3AXIS,XYZ_INT2,IND_P(NOD2))
-
-         ! Now add segment:
-         NSEGS = BODINT_PLANE % NSEGS + 1
-         BODINT_PLANE % NSEGS = NSEGS
-         IF ( DOT1 > 0._EB ) THEN ! First case, counterclockwise p1 to p2
-            BODINT_PLANE%SEGS(NOD1:NOD2,NSEGS) = (/ IND_P(NOD1), IND_P(NOD2) /)
-         ELSE
-            BODINT_PLANE%SEGS(NOD1:NOD2,NSEGS) = (/ IND_P(NOD2), IND_P(NOD1) /)
-         ENDIF
-         BODINT_PLANE%INDSEG(1:4,NSEGS) = (/ 1, IWSEL, 0, IG /)
-         BODINT_PLANE%SEGTYPE(1:2,NSEGS)= (/ IBM_SOLID, IBM_GASPHASE /)
-
-         CYCLE ! Next WSELEM
-
-      ENDIF
-      ! Points 2,3 on one side of plane, point 1 on the other:
-      IF ( ((DOT2 > 0._EB) .AND. (DOT3 > 0._EB) .AND. (DOT1 < 0._EB)) .OR. &
-           ((DOT2 < 0._EB) .AND. (DOT3 < 0._EB) .AND. (DOT1 > 0._EB)) ) THEN
-
-           ! Line 1, from node 1 to 2:
-           LN1(IAXIS:KAXIS,NOD1) = XYZV(IAXIS:KAXIS,NOD1)
-           LN1(IAXIS:KAXIS,NOD2) = XYZV(IAXIS:KAXIS,NOD2)
-
-           CALL LINE_INTERSECT_COORDPLANE(X1AXIS,X1PLN,PLNORMAL,LN1,XYZ_INT1,INTFLG)
-
-           !IF (.NOT. INTFLG) THEN
-           !  print*, "Error GET_BODINT_PLANE: No intersection on LN1, typical 2."
-           !ENDIF
-
-           ! Index to XYZ_INT1:
-           CALL GET_BODINT_NODE_INDEX(X2AXIS,X3AXIS,XYZ_INT1,IND_P(NOD1))
-
-           ! Line 2, from node 1 to 3:
-           LN2(IAXIS:KAXIS,NOD1) = XYZV(IAXIS:KAXIS,NOD1)
-           LN2(IAXIS:KAXIS,NOD2) = XYZV(IAXIS:KAXIS,NOD3)
-
-           CALL LINE_INTERSECT_COORDPLANE(X1AXIS,X1PLN,PLNORMAL,LN2,XYZ_INT2,INTFLG)
-
-           !IF (.NOT. INTFLG) THEN
-           !  print*, "Error GET_BODINT_PLANE: No intersection on LN2, typical 2."
-           !ENDIF
-
-           ! Index to XYZ_INT2:
-           CALL GET_BODINT_NODE_INDEX(X2AXIS,X3AXIS,XYZ_INT2,IND_P(NOD2))
-
-           ! Now add segment:
-           NSEGS = BODINT_PLANE % NSEGS + 1
-           BODINT_PLANE % NSEGS = NSEGS
-           IF ( DOT2 > 0._EB ) THEN ! Second case, counterclockwise p2 to p1
-              BODINT_PLANE%SEGS(NOD1:NOD2,NSEGS) = (/ IND_P(NOD2), IND_P(NOD1) /)
-           ELSE
-              BODINT_PLANE%SEGS(NOD1:NOD2,NSEGS) = (/ IND_P(NOD1), IND_P(NOD2) /)
-           ENDIF
-           BODINT_PLANE%INDSEG(1:4,NSEGS) = (/ 1, IWSEL, 0, IG /)
-           BODINT_PLANE%SEGTYPE(1:2,NSEGS)= (/ IBM_SOLID, IBM_GASPHASE /)
-
-           CYCLE ! Next WSELEM
-
-      ENDIF
-      ! Points 1,3 on one side of plane, point 2 on the other:
-      IF ( ((DOT1 > 0._EB) .AND. (DOT3 > 0._EB) .AND. (DOT2 < 0._EB)) .OR. &
-           ((DOT1 < 0._EB) .AND. (DOT3 < 0._EB) .AND. (DOT2 > 0._EB)) ) THEN
-
-           ! Line 1, from node 1 to 2:
-           LN1(IAXIS:KAXIS,NOD1) = XYZV(IAXIS:KAXIS,NOD1)
-           LN1(IAXIS:KAXIS,NOD2) = XYZV(IAXIS:KAXIS,NOD2)
-
-           CALL LINE_INTERSECT_COORDPLANE(X1AXIS,X1PLN,PLNORMAL,LN1,XYZ_INT1,INTFLG)
-
-           !IF (.NOT. INTFLG) THEN
-           !  print*, "Error GET_BODINT_PLANE: No intersection on LN1, typical 3."
-           !ENDIF
-
-           ! Index to XYZ_INT1:
-           CALL GET_BODINT_NODE_INDEX(X2AXIS,X3AXIS,XYZ_INT1,IND_P(NOD1))
-
-           ! Line 2, from node 2 to 3:
-           LN2(IAXIS:KAXIS,NOD1) = XYZV(IAXIS:KAXIS,NOD2)
-           LN2(IAXIS:KAXIS,NOD2) = XYZV(IAXIS:KAXIS,NOD3)
-
-           CALL LINE_INTERSECT_COORDPLANE(X1AXIS,X1PLN,PLNORMAL,LN2,XYZ_INT2,INTFLG)
-
-           !IF (.NOT. INTFLG) THEN
-           !  print*, "Error GET_BODINT_PLANE: No intersection on LN2, typical 2."
-           !ENDIF
-
-           ! Index to XYZ_INT2:
-           CALL GET_BODINT_NODE_INDEX(X2AXIS,X3AXIS,XYZ_INT2,IND_P(NOD2))
-
-           ! Now add segment:
-           NSEGS = BODINT_PLANE % NSEGS + 1
-           BODINT_PLANE % NSEGS = NSEGS
-           IF ( DOT1 > 0._EB ) THEN ! Third case, counterclockwise p1 to p2
-              BODINT_PLANE%SEGS(NOD1:NOD2,NSEGS) = (/ IND_P(NOD1), IND_P(NOD2) /)
-           ELSE
-              BODINT_PLANE%SEGS(NOD1:NOD2,NSEGS) = (/ IND_P(NOD2), IND_P(NOD1) /)
-           ENDIF
-           BODINT_PLANE%INDSEG(1:4,NSEGS) = (/ 1, IWSEL, 0, IG /)
-           BODINT_PLANE%SEGTYPE(1:2,NSEGS)= (/ IBM_SOLID, IBM_GASPHASE /)
-
-           CYCLE ! Next WSELEM
-
-      ENDIF
-
-      ! Case b: only one point intersection. They will be used to define
-      ! Solid vertex points in case of coincidence.
-      ! Point 1 is on the plane:
-      IF ( (DOT1 == 0._EB) .AND. ( ((DOT2 > 0._EB) .AND. (DOT3 > 0._EB)) .OR. &
-                                   ((DOT2 < 0._EB) .AND. (DOT3 < 0._EB)) ) ) THEN
-
-         ! First node is an intersection point:
-         XYZ_INT1 = XYZV(IAXIS:KAXIS,NOD1); XYZ_INT1(X1AXIS) = X1PLN
-
-         ! Index to XYZ_INT1:
-         CALL GET_BODINT_NODE_INDEX(X2AXIS,X3AXIS,XYZ_INT1,IND_P(NOD1))
-
-         ! Add index to singles:
-         ! Find if oriented segment is in list:
-         INLIST = .FALSE.
-         DO ISGL=1,BODINT_PLANE%NSGLS
-            IF (BODINT_PLANE%SGLS(NOD1,ISGL) == IND_P(NOD1)) THEN
-               INLIST = .TRUE.
-               EXIT
-            ENDIF
-         ENDDO
-         IF (.NOT.INLIST) THEN
-            ISGL = BODINT_PLANE%NSGLS + 1
-            BODINT_PLANE % NSGLS = ISGL
-            BODINT_PLANE % SGLS(NOD1,ISGL) = IND_P(NOD1)
-            BODINT_PLANE % INDSGL(1:2,ISGL) = (/ 1, IWSEL /)
-            BODINT_PLANE % INDSGL(IBM_MAX_WSTRIANG_SGL+2,ISGL) = IG
-         ELSE
-            NINDTRI = BODINT_PLANE % INDSGL(1,ISGL) + 1
-            !IF (NINDTRI > IBM_MAX_WSTRIANG_SGL) THEN
-            !   print*, "Error GET_BODINT_PLANE: number of triangles per node > IBM_MAX_WSTRIANG_SGL."
+            !IF (.NOT. INTFLG) THEN
+            !  print*, "Error GET_BODINT_PLANE: No intersection on LN1, typical 1."
             !ENDIF
-            BODINT_PLANE % INDSGL(1,ISGL) = NINDTRI
-            BODINT_PLANE % INDSGL(NINDTRI+1,ISGL) = IWSEL
-         ENDIF
 
-         CYCLE ! Next WSELEM
+            ! Index to XYZ_INT1:
+            CALL GET_BODINT_NODE_INDEX(X2AXIS,X3AXIS,XYZ_INT1,IND_P(NOD1))
 
-      ENDIF
-      ! Point 2 is on the plane:
-      IF ( (DOT2 == 0._EB) .AND. ( ((DOT1 > 0._EB) .AND. (DOT3 > 0._EB)) .OR. &
-                                   ((DOT1 < 0._EB) .AND. (DOT3 < 0._EB)) ) ) THEN
+            ! Line 2, from node 1 to 3:
+            LN2(IAXIS:KAXIS,NOD1) = XYZV(IAXIS:KAXIS,NOD1)
+            LN2(IAXIS:KAXIS,NOD2) = XYZV(IAXIS:KAXIS,NOD3)
 
-         ! Second node is an intersection point:
-         XYZ_INT1 = XYZV(IAXIS:KAXIS,NOD2); XYZ_INT1(X1AXIS) = X1PLN
+            CALL LINE_INTERSECT_COORDPLANE(X1AXIS,X1PLN,PLNORMAL,LN2,XYZ_INT2,INTFLG)
 
-         ! Index to XYZ_INT1:
-         CALL GET_BODINT_NODE_INDEX(X2AXIS,X3AXIS,XYZ_INT1,IND_P(NOD1))
-
-         ! Add index to singles:
-         ! Find if oriented segment is in list:
-         INLIST = .FALSE.
-         DO ISGL=1,BODINT_PLANE%NSGLS
-            IF (BODINT_PLANE%SGLS(NOD1,ISGL) == IND_P(NOD1)) THEN
-               INLIST = .TRUE.
-               EXIT
-            ENDIF
-         ENDDO
-         IF (.NOT.INLIST) THEN
-            ISGL = BODINT_PLANE%NSGLS + 1
-            BODINT_PLANE % NSGLS = ISGL
-            BODINT_PLANE % SGLS(NOD1,ISGL) = IND_P(NOD1)
-            BODINT_PLANE % INDSGL(1:2,ISGL) = (/ 1, IWSEL /)
-            BODINT_PLANE % INDSGL(IBM_MAX_WSTRIANG_SGL+2,ISGL) = IG
-         ELSE
-            NINDTRI = BODINT_PLANE % INDSGL(1,ISGL) + 1
-            !IF (NINDTRI > IBM_MAX_WSTRIANG_SGL) THEN
-            !   print*, "Error GET_BODINT_PLANE: number of triangles per node > IBM_MAX_WSTRIANG_SGL."
+            !IF (.NOT. INTFLG) THEN
+            !  print*, "Error GET_BODINT_PLANE: No intersection on LN2, typical 1."
             !ENDIF
-            BODINT_PLANE % INDSGL(1,ISGL) = NINDTRI
-            BODINT_PLANE % INDSGL(NINDTRI+1,ISGL) = IWSEL
-         ENDIF
 
-         CYCLE ! Next WSELEM
+            ! Index to XYZ_INT2:
+            CALL GET_BODINT_NODE_INDEX(X2AXIS,X3AXIS,XYZ_INT2,IND_P(NOD2))
 
-      ENDIF
-      ! Point 3 is on the plane:
-      IF ( (DOT3 == 0._EB) .AND. ( ((DOT1 > 0._EB) .AND. (DOT2 > 0._EB)) .OR. &
-                                   ((DOT1 < 0._EB) .AND. (DOT2 < 0._EB)) ) ) THEN
-
-         ! Third node is an intersection point:
-         XYZ_INT1 = XYZV(IAXIS:KAXIS,NOD3); XYZ_INT1(X1AXIS) = X1PLN
-
-         ! Index to XYZ_INT1:
-         CALL GET_BODINT_NODE_INDEX(X2AXIS,X3AXIS,XYZ_INT1,IND_P(NOD1))
-
-         ! Add index to singles:
-         ! Find if single element is in list:
-         INLIST = .FALSE.
-         DO ISGL=1,BODINT_PLANE%NSGLS
-            IF (BODINT_PLANE%SGLS(NOD1,ISGL) == IND_P(NOD1)) THEN
-               INLIST = .TRUE.
-               EXIT
+            ! Now add segment:
+            NSEGS = BODINT_PLANE % NSEGS + 1
+            BODINT_PLANE % NSEGS = NSEGS
+            IF ( DOT1 > 0._EB ) THEN ! First case, counterclockwise p1 to p2
+               BODINT_PLANE%SEGS(NOD1:NOD2,NSEGS) = (/ IND_P(NOD1), IND_P(NOD2) /)
+            ELSE
+               BODINT_PLANE%SEGS(NOD1:NOD2,NSEGS) = (/ IND_P(NOD2), IND_P(NOD1) /)
             ENDIF
-         ENDDO
-         IF (.NOT.INLIST) THEN
-            ISGL = BODINT_PLANE%NSGLS + 1
-            BODINT_PLANE % NSGLS = ISGL
-            BODINT_PLANE % SGLS(NOD1,ISGL) = IND_P(NOD1)
-            BODINT_PLANE % INDSGL(1:2,ISGL) = (/ 1, IWSEL /)
-            BODINT_PLANE % INDSGL(IBM_MAX_WSTRIANG_SGL+2,ISGL) = IG
-         ELSE
-            NINDTRI = BODINT_PLANE % INDSGL(1,ISGL) + 1
-            !IF (NINDTRI > IBM_MAX_WSTRIANG_SGL) THEN
-            !   print*, "Error GET_BODINT_PLANE: number of triangles per node > IBM_MAX_WSTRIANG_SGL."
+            BODINT_PLANE%INDSEG(1:4,NSEGS) = (/ 1, IWSEL, 0, IG /)
+            BODINT_PLANE%SEGTYPE(1:2,NSEGS)= (/ IBM_SOLID, IBM_GASPHASE /)
+
+            CYCLE ! Next WSELEM
+
+         ENDIF
+         ! Points 2,3 on one side of plane, point 1 on the other:
+         IF ( ((DOT2 > 0._EB) .AND. (DOT3 > 0._EB) .AND. (DOT1 < 0._EB)) .OR. &
+              ((DOT2 < 0._EB) .AND. (DOT3 < 0._EB) .AND. (DOT1 > 0._EB)) ) THEN
+
+              ! Line 1, from node 1 to 2:
+              LN1(IAXIS:KAXIS,NOD1) = XYZV(IAXIS:KAXIS,NOD1)
+              LN1(IAXIS:KAXIS,NOD2) = XYZV(IAXIS:KAXIS,NOD2)
+
+              CALL LINE_INTERSECT_COORDPLANE(X1AXIS,X1PLN,PLNORMAL,LN1,XYZ_INT1,INTFLG)
+
+              !IF (.NOT. INTFLG) THEN
+              !  print*, "Error GET_BODINT_PLANE: No intersection on LN1, typical 2."
+              !ENDIF
+
+              ! Index to XYZ_INT1:
+              CALL GET_BODINT_NODE_INDEX(X2AXIS,X3AXIS,XYZ_INT1,IND_P(NOD1))
+
+              ! Line 2, from node 1 to 3:
+              LN2(IAXIS:KAXIS,NOD1) = XYZV(IAXIS:KAXIS,NOD1)
+              LN2(IAXIS:KAXIS,NOD2) = XYZV(IAXIS:KAXIS,NOD3)
+
+              CALL LINE_INTERSECT_COORDPLANE(X1AXIS,X1PLN,PLNORMAL,LN2,XYZ_INT2,INTFLG)
+
+              !IF (.NOT. INTFLG) THEN
+              !  print*, "Error GET_BODINT_PLANE: No intersection on LN2, typical 2."
+              !ENDIF
+
+              ! Index to XYZ_INT2:
+              CALL GET_BODINT_NODE_INDEX(X2AXIS,X3AXIS,XYZ_INT2,IND_P(NOD2))
+
+              ! Now add segment:
+              NSEGS = BODINT_PLANE % NSEGS + 1
+              BODINT_PLANE % NSEGS = NSEGS
+              IF ( DOT2 > 0._EB ) THEN ! Second case, counterclockwise p2 to p1
+                 BODINT_PLANE%SEGS(NOD1:NOD2,NSEGS) = (/ IND_P(NOD2), IND_P(NOD1) /)
+              ELSE
+                 BODINT_PLANE%SEGS(NOD1:NOD2,NSEGS) = (/ IND_P(NOD1), IND_P(NOD2) /)
+              ENDIF
+              BODINT_PLANE%INDSEG(1:4,NSEGS) = (/ 1, IWSEL, 0, IG /)
+              BODINT_PLANE%SEGTYPE(1:2,NSEGS)= (/ IBM_SOLID, IBM_GASPHASE /)
+
+              CYCLE ! Next WSELEM
+
+         ENDIF
+         ! Points 1,3 on one side of plane, point 2 on the other:
+         IF ( ((DOT1 > 0._EB) .AND. (DOT3 > 0._EB) .AND. (DOT2 < 0._EB)) .OR. &
+              ((DOT1 < 0._EB) .AND. (DOT3 < 0._EB) .AND. (DOT2 > 0._EB)) ) THEN
+
+              ! Line 1, from node 1 to 2:
+              LN1(IAXIS:KAXIS,NOD1) = XYZV(IAXIS:KAXIS,NOD1)
+              LN1(IAXIS:KAXIS,NOD2) = XYZV(IAXIS:KAXIS,NOD2)
+
+              CALL LINE_INTERSECT_COORDPLANE(X1AXIS,X1PLN,PLNORMAL,LN1,XYZ_INT1,INTFLG)
+
+              !IF (.NOT. INTFLG) THEN
+              !  print*, "Error GET_BODINT_PLANE: No intersection on LN1, typical 3."
+              !ENDIF
+
+              ! Index to XYZ_INT1:
+              CALL GET_BODINT_NODE_INDEX(X2AXIS,X3AXIS,XYZ_INT1,IND_P(NOD1))
+
+              ! Line 2, from node 2 to 3:
+              LN2(IAXIS:KAXIS,NOD1) = XYZV(IAXIS:KAXIS,NOD2)
+              LN2(IAXIS:KAXIS,NOD2) = XYZV(IAXIS:KAXIS,NOD3)
+
+              CALL LINE_INTERSECT_COORDPLANE(X1AXIS,X1PLN,PLNORMAL,LN2,XYZ_INT2,INTFLG)
+
+              !IF (.NOT. INTFLG) THEN
+              !  print*, "Error GET_BODINT_PLANE: No intersection on LN2, typical 2."
+              !ENDIF
+
+              ! Index to XYZ_INT2:
+              CALL GET_BODINT_NODE_INDEX(X2AXIS,X3AXIS,XYZ_INT2,IND_P(NOD2))
+
+              ! Now add segment:
+              NSEGS = BODINT_PLANE % NSEGS + 1
+              BODINT_PLANE % NSEGS = NSEGS
+              IF ( DOT1 > 0._EB ) THEN ! Third case, counterclockwise p1 to p2
+                 BODINT_PLANE%SEGS(NOD1:NOD2,NSEGS) = (/ IND_P(NOD1), IND_P(NOD2) /)
+              ELSE
+                 BODINT_PLANE%SEGS(NOD1:NOD2,NSEGS) = (/ IND_P(NOD2), IND_P(NOD1) /)
+              ENDIF
+              BODINT_PLANE%INDSEG(1:4,NSEGS) = (/ 1, IWSEL, 0, IG /)
+              BODINT_PLANE%SEGTYPE(1:2,NSEGS)= (/ IBM_SOLID, IBM_GASPHASE /)
+
+              CYCLE ! Next WSELEM
+
+         ENDIF
+
+         ! Case b: only one point intersection. They will be used to define
+         ! Solid vertex points in case of coincidence.
+         ! Point 1 is on the plane:
+         IF ( (DOT1 == 0._EB) .AND. ( ((DOT2 > 0._EB) .AND. (DOT3 > 0._EB)) .OR. &
+                                      ((DOT2 < 0._EB) .AND. (DOT3 < 0._EB)) ) ) THEN
+
+            ! First node is an intersection point:
+            XYZ_INT1 = XYZV(IAXIS:KAXIS,NOD1); XYZ_INT1(X1AXIS) = X1PLN
+
+            ! Index to XYZ_INT1:
+            CALL GET_BODINT_NODE_INDEX(X2AXIS,X3AXIS,XYZ_INT1,IND_P(NOD1))
+
+            ! Add index to singles:
+            ! Find if oriented segment is in list:
+            INLIST = .FALSE.
+            DO ISGL=1,BODINT_PLANE%NSGLS
+               IF (BODINT_PLANE%SGLS(NOD1,ISGL) == IND_P(NOD1)) THEN
+                  INLIST = .TRUE.
+                  EXIT
+               ENDIF
+            ENDDO
+            IF (.NOT.INLIST) THEN
+               ISGL = BODINT_PLANE%NSGLS + 1
+               BODINT_PLANE % NSGLS = ISGL
+               BODINT_PLANE % SGLS(NOD1,ISGL) = IND_P(NOD1)
+               BODINT_PLANE % INDSGL(1:2,ISGL) = (/ 1, IWSEL /)
+               BODINT_PLANE % INDSGL(IBM_MAX_WSTRIANG_SGL+2,ISGL) = IG
+            ELSE
+               NINDTRI = BODINT_PLANE % INDSGL(1,ISGL) + 1
+               !IF (NINDTRI > IBM_MAX_WSTRIANG_SGL) THEN
+               !   print*, "Error GET_BODINT_PLANE: number of triangles per node > IBM_MAX_WSTRIANG_SGL."
+               !ENDIF
+               BODINT_PLANE % INDSGL(1,ISGL) = NINDTRI
+               BODINT_PLANE % INDSGL(NINDTRI+1,ISGL) = IWSEL
+            ENDIF
+
+            CYCLE ! Next WSELEM
+
+         ENDIF
+         ! Point 2 is on the plane:
+         IF ( (DOT2 == 0._EB) .AND. ( ((DOT1 > 0._EB) .AND. (DOT3 > 0._EB)) .OR. &
+                                      ((DOT1 < 0._EB) .AND. (DOT3 < 0._EB)) ) ) THEN
+
+            ! Second node is an intersection point:
+            XYZ_INT1 = XYZV(IAXIS:KAXIS,NOD2); XYZ_INT1(X1AXIS) = X1PLN
+
+            ! Index to XYZ_INT1:
+            CALL GET_BODINT_NODE_INDEX(X2AXIS,X3AXIS,XYZ_INT1,IND_P(NOD1))
+
+            ! Add index to singles:
+            ! Find if oriented segment is in list:
+            INLIST = .FALSE.
+            DO ISGL=1,BODINT_PLANE%NSGLS
+               IF (BODINT_PLANE%SGLS(NOD1,ISGL) == IND_P(NOD1)) THEN
+                  INLIST = .TRUE.
+                  EXIT
+               ENDIF
+            ENDDO
+            IF (.NOT.INLIST) THEN
+               ISGL = BODINT_PLANE%NSGLS + 1
+               BODINT_PLANE % NSGLS = ISGL
+               BODINT_PLANE % SGLS(NOD1,ISGL) = IND_P(NOD1)
+               BODINT_PLANE % INDSGL(1:2,ISGL) = (/ 1, IWSEL /)
+               BODINT_PLANE % INDSGL(IBM_MAX_WSTRIANG_SGL+2,ISGL) = IG
+            ELSE
+               NINDTRI = BODINT_PLANE % INDSGL(1,ISGL) + 1
+               !IF (NINDTRI > IBM_MAX_WSTRIANG_SGL) THEN
+               !   print*, "Error GET_BODINT_PLANE: number of triangles per node > IBM_MAX_WSTRIANG_SGL."
+               !ENDIF
+               BODINT_PLANE % INDSGL(1,ISGL) = NINDTRI
+               BODINT_PLANE % INDSGL(NINDTRI+1,ISGL) = IWSEL
+            ENDIF
+
+            CYCLE ! Next WSELEM
+
+         ENDIF
+         ! Point 3 is on the plane:
+         IF ( (DOT3 == 0._EB) .AND. ( ((DOT1 > 0._EB) .AND. (DOT2 > 0._EB)) .OR. &
+                                      ((DOT1 < 0._EB) .AND. (DOT2 < 0._EB)) ) ) THEN
+
+            ! Third node is an intersection point:
+            XYZ_INT1 = XYZV(IAXIS:KAXIS,NOD3); XYZ_INT1(X1AXIS) = X1PLN
+
+            ! Index to XYZ_INT1:
+            CALL GET_BODINT_NODE_INDEX(X2AXIS,X3AXIS,XYZ_INT1,IND_P(NOD1))
+
+            ! Add index to singles:
+            ! Find if single element is in list:
+            INLIST = .FALSE.
+            DO ISGL=1,BODINT_PLANE%NSGLS
+               IF (BODINT_PLANE%SGLS(NOD1,ISGL) == IND_P(NOD1)) THEN
+                  INLIST = .TRUE.
+                  EXIT
+               ENDIF
+            ENDDO
+            IF (.NOT.INLIST) THEN
+               ISGL = BODINT_PLANE%NSGLS + 1
+               BODINT_PLANE % NSGLS = ISGL
+               BODINT_PLANE % SGLS(NOD1,ISGL) = IND_P(NOD1)
+               BODINT_PLANE % INDSGL(1:2,ISGL) = (/ 1, IWSEL /)
+               BODINT_PLANE % INDSGL(IBM_MAX_WSTRIANG_SGL+2,ISGL) = IG
+            ELSE
+               NINDTRI = BODINT_PLANE % INDSGL(1,ISGL) + 1
+               !IF (NINDTRI > IBM_MAX_WSTRIANG_SGL) THEN
+               !   print*, "Error GET_BODINT_PLANE: number of triangles per node > IBM_MAX_WSTRIANG_SGL."
+               !ENDIF
+               BODINT_PLANE % INDSGL(1,ISGL) = NINDTRI
+               BODINT_PLANE % INDSGL(NINDTRI+1,ISGL) = IWSEL
+            ENDIF
+
+            CYCLE ! Next WSELEM
+
+         ENDIF
+
+         ! Case c: one node is part of the intersection:
+         ! Node 1 is in the plane:
+         IF ( (DOT1 == 0._EB) .AND. ( ((DOT2 > 0._EB) .AND. (DOT3 < 0._EB)) .OR. &
+                                      ((DOT2 < 0._EB) .AND. (DOT3 > 0._EB)) ) ) THEN
+
+            ! First node is an intersection point:
+            XYZ_INT1 = XYZV(IAXIS:KAXIS,NOD1); XYZ_INT1(X1AXIS) = X1PLN
+
+            ! Index to XYZ_INT1:
+            CALL GET_BODINT_NODE_INDEX(X2AXIS,X3AXIS,XYZ_INT1,IND_P(NOD1))
+
+            ! Line 2, from node 2 to 3:
+            LN2(IAXIS:KAXIS,NOD1) = XYZV(IAXIS:KAXIS,NOD2)
+            LN2(IAXIS:KAXIS,NOD2) = XYZV(IAXIS:KAXIS,NOD3)
+
+            CALL LINE_INTERSECT_COORDPLANE(X1AXIS,X1PLN,PLNORMAL,LN2,XYZ_INT2,INTFLG)
+
+            !IF (.NOT. INTFLG) THEN
+            !  print*, "Error GET_BODINT_PLANE: No intersection on LN2, Case C 1."
             !ENDIF
-            BODINT_PLANE % INDSGL(1,ISGL) = NINDTRI
-            BODINT_PLANE % INDSGL(NINDTRI+1,ISGL) = IWSEL
+
+            ! Index to XYZ_INT2:
+            CALL GET_BODINT_NODE_INDEX(X2AXIS,X3AXIS,XYZ_INT2,IND_P(NOD2))
+
+            ! Now add segment:
+            NSEGS = BODINT_PLANE % NSEGS + 1
+            BODINT_PLANE % NSEGS = NSEGS
+            IF ( DOT2 > 0._EB ) THEN ! Second case, counterclockwise p2 to p1
+               BODINT_PLANE%SEGS(NOD1:NOD2,NSEGS) = (/ IND_P(NOD2), IND_P(NOD1) /)
+            ELSE
+               BODINT_PLANE%SEGS(NOD1:NOD2,NSEGS) = (/ IND_P(NOD1), IND_P(NOD2) /)
+            ENDIF
+            BODINT_PLANE%INDSEG(1:4,NSEGS) = (/ 1, IWSEL, 0, IG /)
+            BODINT_PLANE%SEGTYPE(1:2,NSEGS)= (/ IBM_SOLID, IBM_GASPHASE /)
+
+            CYCLE ! Next WSELEM
+
          ENDIF
+         ! Node 2 is in the plane:
+         IF ( (DOT2 == 0._EB) .AND. ( ((DOT1 > 0._EB) .AND. (DOT3 < 0._EB)) .OR. &
+                                      ((DOT1 < 0._EB) .AND. (DOT3 > 0._EB)) ) ) THEN
 
-         CYCLE ! Next WSELEM
+            ! Second node is an intersection point:
+            XYZ_INT1 = XYZV(IAXIS:KAXIS,NOD2); XYZ_INT1(X1AXIS) = X1PLN
 
-      ENDIF
+            ! Index to XYZ_INT1:
+            CALL GET_BODINT_NODE_INDEX(X2AXIS,X3AXIS,XYZ_INT1,IND_P(NOD1))
 
-      ! Case c: one node is part of the intersection:
-      ! Node 1 is in the plane:
-      IF ( (DOT1 == 0._EB) .AND. ( ((DOT2 > 0._EB) .AND. (DOT3 < 0._EB)) .OR. &
-                                   ((DOT2 < 0._EB) .AND. (DOT3 > 0._EB)) ) ) THEN
+            ! Line 2, from node 1 to 3:
+            LN2(IAXIS:KAXIS,NOD1) = XYZV(IAXIS:KAXIS,NOD1)
+            LN2(IAXIS:KAXIS,NOD2) = XYZV(IAXIS:KAXIS,NOD3)
 
-         ! First node is an intersection point:
-         XYZ_INT1 = XYZV(IAXIS:KAXIS,NOD1); XYZ_INT1(X1AXIS) = X1PLN
+            CALL LINE_INTERSECT_COORDPLANE(X1AXIS,X1PLN,PLNORMAL,LN2,XYZ_INT2,INTFLG)
 
-         ! Index to XYZ_INT1:
-         CALL GET_BODINT_NODE_INDEX(X2AXIS,X3AXIS,XYZ_INT1,IND_P(NOD1))
+            !IF (.NOT. INTFLG) THEN
+            !  print*, "Error GET_BODINT_PLANE: No intersection on LN2, Case C 2."
+            !ENDIF
 
-         ! Line 2, from node 2 to 3:
-         LN2(IAXIS:KAXIS,NOD1) = XYZV(IAXIS:KAXIS,NOD2)
-         LN2(IAXIS:KAXIS,NOD2) = XYZV(IAXIS:KAXIS,NOD3)
+            ! Index to XYZ_INT2:
+            CALL GET_BODINT_NODE_INDEX(X2AXIS,X3AXIS,XYZ_INT2,IND_P(NOD2))
 
-         CALL LINE_INTERSECT_COORDPLANE(X1AXIS,X1PLN,PLNORMAL,LN2,XYZ_INT2,INTFLG)
+            ! Now add segment:
+            NSEGS = BODINT_PLANE % NSEGS + 1
+            BODINT_PLANE % NSEGS = NSEGS
+            IF ( DOT1 > 0._EB ) THEN
+               BODINT_PLANE%SEGS(NOD1:NOD2,NSEGS) = (/ IND_P(NOD1), IND_P(NOD2) /)
+            ELSE
+               BODINT_PLANE%SEGS(NOD1:NOD2,NSEGS) = (/ IND_P(NOD2), IND_P(NOD1) /)
+            ENDIF
+            BODINT_PLANE%INDSEG(1:4,NSEGS) = (/ 1, IWSEL, 0, IG /)
+            BODINT_PLANE%SEGTYPE(1:2,NSEGS)= (/ IBM_SOLID, IBM_GASPHASE /)
 
-         !IF (.NOT. INTFLG) THEN
-         !  print*, "Error GET_BODINT_PLANE: No intersection on LN2, Case C 1."
-         !ENDIF
+            CYCLE ! Next WSELEM
 
-         ! Index to XYZ_INT2:
-         CALL GET_BODINT_NODE_INDEX(X2AXIS,X3AXIS,XYZ_INT2,IND_P(NOD2))
-
-         ! Now add segment:
-         NSEGS = BODINT_PLANE % NSEGS + 1
-         BODINT_PLANE % NSEGS = NSEGS
-         IF ( DOT2 > 0._EB ) THEN ! Second case, counterclockwise p2 to p1
-            BODINT_PLANE%SEGS(NOD1:NOD2,NSEGS) = (/ IND_P(NOD2), IND_P(NOD1) /)
-         ELSE
-            BODINT_PLANE%SEGS(NOD1:NOD2,NSEGS) = (/ IND_P(NOD1), IND_P(NOD2) /)
          ENDIF
-         BODINT_PLANE%INDSEG(1:4,NSEGS) = (/ 1, IWSEL, 0, IG /)
-         BODINT_PLANE%SEGTYPE(1:2,NSEGS)= (/ IBM_SOLID, IBM_GASPHASE /)
+         ! Node 3 is in the plane:
+         IF ( (DOT3 == 0._EB) .AND. ( ((DOT1 > 0._EB) .AND. (DOT2 < 0._EB)) .OR. &
+                                      ((DOT1 < 0._EB) .AND. (DOT2 > 0._EB)) ) ) THEN
 
-         CYCLE ! Next WSELEM
+            ! Third node is an intersection point:
+            XYZ_INT1 = XYZV(IAXIS:KAXIS,NOD3); XYZ_INT1(X1AXIS) = X1PLN
 
-      ENDIF
-      ! Node 2 is in the plane:
-      IF ( (DOT2 == 0._EB) .AND. ( ((DOT1 > 0._EB) .AND. (DOT3 < 0._EB)) .OR. &
-                                   ((DOT1 < 0._EB) .AND. (DOT3 > 0._EB)) ) ) THEN
+            ! Index to XYZ_INT1:
+            CALL GET_BODINT_NODE_INDEX(X2AXIS,X3AXIS,XYZ_INT1,IND_P(NOD1))
 
-         ! Second node is an intersection point:
-         XYZ_INT1 = XYZV(IAXIS:KAXIS,NOD2); XYZ_INT1(X1AXIS) = X1PLN
+            ! Line 2, from node 1 to 2:
+            LN2(IAXIS:KAXIS,NOD1) = XYZV(IAXIS:KAXIS,NOD1)
+            LN2(IAXIS:KAXIS,NOD2) = XYZV(IAXIS:KAXIS,NOD2)
 
-         ! Index to XYZ_INT1:
-         CALL GET_BODINT_NODE_INDEX(X2AXIS,X3AXIS,XYZ_INT1,IND_P(NOD1))
+            CALL LINE_INTERSECT_COORDPLANE(X1AXIS,X1PLN,PLNORMAL,LN2,XYZ_INT2,INTFLG)
 
-         ! Line 2, from node 1 to 3:
-         LN2(IAXIS:KAXIS,NOD1) = XYZV(IAXIS:KAXIS,NOD1)
-         LN2(IAXIS:KAXIS,NOD2) = XYZV(IAXIS:KAXIS,NOD3)
+            !IF (.NOT. INTFLG) THEN
+            !  print*, "Error GET_BODINT_PLANE: No intersection on LN2, Case C 3."
+            !ENDIF
 
-         CALL LINE_INTERSECT_COORDPLANE(X1AXIS,X1PLN,PLNORMAL,LN2,XYZ_INT2,INTFLG)
+            ! Index to XYZ_INT2:
+            CALL GET_BODINT_NODE_INDEX(X2AXIS,X3AXIS,XYZ_INT2,IND_P(NOD2))
 
-         !IF (.NOT. INTFLG) THEN
-         !  print*, "Error GET_BODINT_PLANE: No intersection on LN2, Case C 2."
-         !ENDIF
+            ! Now add segment:
+            NSEGS = BODINT_PLANE % NSEGS + 1
+            BODINT_PLANE % NSEGS = NSEGS
+            IF ( DOT1 > 0._EB ) THEN
+               BODINT_PLANE%SEGS(NOD1:NOD2,NSEGS) = (/ IND_P(NOD2), IND_P(NOD1) /)
+            ELSE
+               BODINT_PLANE%SEGS(NOD1:NOD2,NSEGS) = (/ IND_P(NOD1), IND_P(NOD2) /)
+            ENDIF
+            BODINT_PLANE%INDSEG(1:4,NSEGS) = (/ 1, IWSEL, 0, IG /)
+            BODINT_PLANE%SEGTYPE(1:2,NSEGS)= (/ IBM_SOLID, IBM_GASPHASE /)
 
-         ! Index to XYZ_INT2:
-         CALL GET_BODINT_NODE_INDEX(X2AXIS,X3AXIS,XYZ_INT2,IND_P(NOD2))
+            CYCLE ! Next WSELEM
 
-         ! Now add segment:
-         NSEGS = BODINT_PLANE % NSEGS + 1
-         BODINT_PLANE % NSEGS = NSEGS
-         IF ( DOT1 > 0._EB ) THEN
-            BODINT_PLANE%SEGS(NOD1:NOD2,NSEGS) = (/ IND_P(NOD1), IND_P(NOD2) /)
-         ELSE
-            BODINT_PLANE%SEGS(NOD1:NOD2,NSEGS) = (/ IND_P(NOD2), IND_P(NOD1) /)
          ENDIF
-         BODINT_PLANE%INDSEG(1:4,NSEGS) = (/ 1, IWSEL, 0, IG /)
-         BODINT_PLANE%SEGTYPE(1:2,NSEGS)= (/ IBM_SOLID, IBM_GASPHASE /)
-
-         CYCLE ! Next WSELEM
-
-      ENDIF
-      ! Node 3 is in the plane:
-      IF ( (DOT3 == 0._EB) .AND. ( ((DOT1 > 0._EB) .AND. (DOT2 < 0._EB)) .OR. &
-                                   ((DOT1 < 0._EB) .AND. (DOT2 > 0._EB)) ) ) THEN
-
-         ! Third node is an intersection point:
-         XYZ_INT1 = XYZV(IAXIS:KAXIS,NOD3); XYZ_INT1(X1AXIS) = X1PLN
-
-         ! Index to XYZ_INT1:
-         CALL GET_BODINT_NODE_INDEX(X2AXIS,X3AXIS,XYZ_INT1,IND_P(NOD1))
-
-         ! Line 2, from node 1 to 2:
-         LN2(IAXIS:KAXIS,NOD1) = XYZV(IAXIS:KAXIS,NOD1)
-         LN2(IAXIS:KAXIS,NOD2) = XYZV(IAXIS:KAXIS,NOD2)
-
-         CALL LINE_INTERSECT_COORDPLANE(X1AXIS,X1PLN,PLNORMAL,LN2,XYZ_INT2,INTFLG)
-
-         !IF (.NOT. INTFLG) THEN
-         !  print*, "Error GET_BODINT_PLANE: No intersection on LN2, Case C 3."
-         !ENDIF
-
-         ! Index to XYZ_INT2:
-         CALL GET_BODINT_NODE_INDEX(X2AXIS,X3AXIS,XYZ_INT2,IND_P(NOD2))
-
-         ! Now add segment:
-         NSEGS = BODINT_PLANE % NSEGS + 1
-         BODINT_PLANE % NSEGS = NSEGS
-         IF ( DOT1 > 0._EB ) THEN
-            BODINT_PLANE%SEGS(NOD1:NOD2,NSEGS) = (/ IND_P(NOD2), IND_P(NOD1) /)
-         ELSE
-            BODINT_PLANE%SEGS(NOD1:NOD2,NSEGS) = (/ IND_P(NOD1), IND_P(NOD2) /)
-         ENDIF
-         BODINT_PLANE%INDSEG(1:4,NSEGS) = (/ 1, IWSEL, 0, IG /)
-         BODINT_PLANE%SEGTYPE(1:2,NSEGS)= (/ IBM_SOLID, IBM_GASPHASE /)
-
-         CYCLE ! Next WSELEM
-
-      ENDIF
+      ENDIF ONLY_TRIANG_EDGES_COND
 
       ! Case D: A triangle segment is in the plane.
       ! Intersection is line 1-2:
@@ -30765,7 +30765,7 @@ MAIN_GEOM_LOOP : DO IG=1,N_GEOMETRY
       ENDIF
 
       ! If you get to this point -> you have a problem:
-      print*, "Error GET_BODINT_PLANE: Missed wet surface Triangle =",IWSEL
+      IF (.NOT.TRI_ONPLANE_ONLY) print*, "Error GET_BODINT_PLANE: Missed wet surface Triangle =",IWSEL
 
    ENDDO ! IWSEL
 
@@ -30958,16 +30958,31 @@ ALLOCATE(INDSEGAUX(IBM_MAX_WSTRIANG_SEG+2,BODINT_PLANE%NSEGS))
 ALLOCATE(SEGTYPEAUX(NOD1:NOD2,BODINT_PLANE%NSEGS))
 
 ISEG_NEW = 0
-DO ISEG=1,BODINT_PLANE%NSEGS
-    IF ( (BODINT_PLANE%SEGTYPE(NOD1,ISEG) == IBM_SOLID) .AND. &
-         (BODINT_PLANE%SEGTYPE(NOD2,ISEG) == IBM_SOLID) ) CYCLE
+IF(.NOT.TRI_ONPLANE_ONLY) THEN
+   DO ISEG=1,BODINT_PLANE%NSEGS
+       IF ( (BODINT_PLANE%SEGTYPE(NOD1,ISEG) == IBM_SOLID) .AND. &
+            (BODINT_PLANE%SEGTYPE(NOD2,ISEG) == IBM_SOLID) ) CYCLE
 
-       ISEG_NEW = ISEG_NEW + 1
-       SEGAUX(NOD1:NOD2,ISEG_NEW) = BODINT_PLANE%SEGS(NOD1:NOD2,ISEG)
-       INDSEGAUX(1:IBM_MAX_WSTRIANG_SEG+2,ISEG_NEW) = &
-          BODINT_PLANE%INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,ISEG)
-       SEGTYPEAUX(NOD1:NOD2,ISEG_NEW) = BODINT_PLANE%SEGTYPE(NOD1:NOD2,ISEG)
-ENDDO
+          ISEG_NEW = ISEG_NEW + 1
+          SEGAUX(NOD1:NOD2,ISEG_NEW) = BODINT_PLANE%SEGS(NOD1:NOD2,ISEG)
+          INDSEGAUX(1:IBM_MAX_WSTRIANG_SEG+2,ISEG_NEW) = &
+             BODINT_PLANE%INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,ISEG)
+          SEGTYPEAUX(NOD1:NOD2,ISEG_NEW) = BODINT_PLANE%SEGTYPE(NOD1:NOD2,ISEG)
+   ENDDO
+ELSE
+   DO ISEG=1,BODINT_PLANE%NSEGS
+       IF ( (BODINT_PLANE%SEGTYPE(NOD1,ISEG) == IBM_SOLID) .AND. &
+            (BODINT_PLANE%SEGTYPE(NOD2,ISEG) == IBM_SOLID) ) THEN
+
+          ISEG_NEW = ISEG_NEW + 1
+          SEGAUX(NOD1:NOD2,ISEG_NEW) = BODINT_PLANE%SEGS(NOD1:NOD2,ISEG)
+          INDSEGAUX(1:IBM_MAX_WSTRIANG_SEG+2,ISEG_NEW) = &
+             BODINT_PLANE%INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,ISEG)
+          SEGTYPEAUX(NOD1:NOD2,ISEG_NEW) = BODINT_PLANE%SEGTYPE(NOD1:NOD2,ISEG)
+       ENDIF
+   ENDDO
+ENDIF
+
 BODINT_PLANE%NSEGS = ISEG_NEW
 BODINT_PLANE%SEGS(NOD1:NOD2,1:ISEG_NEW) = SEGAUX(NOD1:NOD2,1:ISEG_NEW)
 BODINT_PLANE%INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,1:ISEG_NEW) = INDSEGAUX(1:IBM_MAX_WSTRIANG_SEG+2,1:ISEG_NEW)
@@ -37829,7 +37844,7 @@ REAL(EB), INTENT(OUT):: XYVERT(IAXIS:JAXIS,1:IBM_MAXVERTS_FACE)
 
 ! Local Variables:
 REAL(EB) :: X2FMIN, X2FMAX, X3FMIN, X3FMAX, DUMMY(IAXIS:JAXIS)
-INTEGER  :: TRI(NOD1:NOD3), ITRI, INOD
+INTEGER  :: SEG(NOD1:NOD2), TRI(NOD1:NOD3), ITRI, INOD
 LOGICAL  :: INTEST, OUTX2, OUTX3, OUTFACE, TRUETHAT, XIALIGNED, OUTSEG, SEG_IN_SIDE
 INTEGER  :: TSEGS(NOD1:NOD2,EDG1:EDG3)
 INTEGER, ALLOCATABLE, DIMENSION(:,:) :: FVERT_IN_TRIANG, TRIVERT_IN_FACE
@@ -37850,6 +37865,8 @@ INTEGER  :: EDGE_TRI
 
 REAL(EB), ALLOCATABLE, SAVE, DIMENSION(:,:) :: X2X3VERT
 INTEGER, SAVE :: SIZE_X2X3VERT
+
+INTEGER :: IWSSEG,NSVERT,NINTP_SEG,SEGNODS(NOD1:NOD2)
 
 ! Default return values:
 INB_FLG = .FALSE.
@@ -37902,12 +37919,29 @@ DO ITRI=1,BODINT_PLANE%NTRIS
         EXIT
     ENDIF
 ENDDO
+! Run on Triangle edges found:
+DO ISEG=1,BODINT_PLANE%NSEGS
+   SEG(NOD1:NOD2) = BODINT_PLANE%SEGS(NOD1:NOD2,ISEG)
+   DO INOD=NOD1,NOD2
+      XYEL(IAXIS:JAXIS,INOD) = BODINT_PLANE%XYZ( (/ X2AXIS, X3AXIS /) ,SEG(INOD))
+   ENDDO
+   OUTX2= ((X2FMIN-MAXVAL(XYEL(IAXIS,NOD1:NOD2))) > GEOMEPS) .OR. &
+          ((MINVAL(XYEL(IAXIS,NOD1:NOD2))-X2FMAX) > GEOMEPS) ! Segment out of Face in x2 dir
+   OUTX3= ((X3FMIN-MAXVAL(XYEL(JAXIS,NOD1:NOD2))) > GEOMEPS) .OR. &
+          ((MINVAL(XYEL(JAXIS,NOD1:NOD2))-X3FMAX) > GEOMEPS) ! Segment out of Face in x3 dir
+   OUTFACE = OUTX2 .OR. OUTX3
+   IF (.NOT.OUTFACE) THEN
+       INTEST = .TRUE.
+       EXIT
+   ENDIF
+ENDDO
 IF (.NOT.INTEST) RETURN
 
 ! Now if intest is true figure out if there are triangles-face intersection
 ! Polygons:
 NFVERT = 4
 NTVERT = 3
+NSVERT = 2
 
 ! First Vertices:
 ALLOCATE(FVERT_IN_TRIANG(1:NFVERT,BODINT_PLANE%NTRIS)); FVERT_IN_TRIANG = 0
@@ -37926,6 +37960,14 @@ DO ITRI=1,BODINT_PLANE%NTRIS
    DO INOD=NOD1,NOD3
       XYEL(IAXIS:JAXIS,INOD) = BODINT_PLANE%XYZ( (/ X2AXIS, X3AXIS /) ,TRI(INOD))
    ENDDO
+
+   ! Cycle if Triangles BBOX not intersecting face:
+   OUTX2= ((X2FMIN-MAXVAL(XYEL(IAXIS,NOD1:NOD3))) > GEOMEPS) .OR. &
+          ((MINVAL(XYEL(IAXIS,NOD1:NOD3))-X2FMAX) > GEOMEPS) ! Triang out of Face in x2 dir
+   OUTX3= ((X3FMIN-MAXVAL(XYEL(JAXIS,NOD1:NOD3))) > GEOMEPS) .OR. &
+          ((MINVAL(XYEL(JAXIS,NOD1:NOD3))-X3FMAX) > GEOMEPS) ! Triang out of Face in x3 dir
+   OUTFACE = OUTX2 .OR. OUTX3
+   IF (OUTFACE) CYCLE
 
    IF (BODINT_PLANE%X1NVEC(ITRI) < 0) THEN ! ROTATE NODE 2 AND 3 LOCATIONS
       DUMMY(IAXIS:JAXIS)     = XYEL(IAXIS:JAXIS,NOD2)
@@ -38161,7 +38203,7 @@ DO ITRI=1,BODINT_PLANE%NTRIS
                      INLIST = .TRUE.
                      EXIT
                   ELSE
-                     PRINT*, "Error in GET_TRIANG_FACE_INT: Triangle not on 2 WS triang list INDSEG."
+                     WRITE(LU_ERR,*) "Error in GET_TRIANG_FACE_INT: Triangle not on 2 WS triang list INDSEG."
                   ENDIF
             END SELECT
          ENDIF
@@ -38207,6 +38249,162 @@ DO ITRI=1,BODINT_PLANE%NTRIS
       ENDIF
    ENDDO
 
+ENDDO
+
+! Now define cut-edges from solid-solid segments:
+DO IWSSEG=1,BODINT_PLANE%NSEGS
+
+   NINTP_SEG = 0
+   SEGNODS   = IBM_UNDEFINED
+
+   SEG(NOD1:NOD2) = BODINT_PLANE%SEGS(NOD1:NOD2,IWSSEG)
+   DO INOD=NOD1,NOD2
+      XYEL(IAXIS:JAXIS,INOD) = BODINT_PLANE%XYZ( (/ X2AXIS, X3AXIS /) ,SEG(INOD))
+   ENDDO
+   ! Cycle if Edges BBOX not intersecting face:
+   OUTX2= ((X2FMIN-MAXVAL(XYEL(IAXIS,NOD1:NOD2))) > GEOMEPS) .OR. &
+          ((MINVAL(XYEL(IAXIS,NOD1:NOD2))-X2FMAX) > GEOMEPS) ! Segment out of Face in x2 dir
+   OUTX3= ((X3FMIN-MAXVAL(XYEL(JAXIS,NOD1:NOD2))) > GEOMEPS) .OR. &
+          ((MINVAL(XYEL(JAXIS,NOD1:NOD2))-X3FMAX) > GEOMEPS) ! Segment out of Face in x3 dir
+   OUTFACE = OUTX2 .OR. OUTX3
+   IF (OUTFACE) CYCLE
+
+   ! Now define nodes for this CEELEM:
+   ! a-1. Test if Segments vertices Lay on Faces area, including face boundary:
+   DO IPT=1,NSVERT
+      OUTX2= ((X2FMIN-XYEL(IAXIS,IPT)) > GEOMEPS) .OR. &
+             ((XYEL(IAXIS,IPT)-X2FMAX) > GEOMEPS)  ! Triang out of Face in x2 dir
+      OUTX3= ((X3FMIN-XYEL(JAXIS,IPT)) > GEOMEPS) .OR. &
+             ((XYEL(JAXIS,IPT)-X3FMAX) > GEOMEPS)  ! Triang out of Face in x3 dir
+      OUTFACE = OUTX2 .OR. OUTX3
+      IF ( OUTFACE ) CYCLE
+
+      ! Insertion add point to intersection list:
+      XP(IAXIS:JAXIS) = XYEL(IAXIS:JAXIS,IPT)
+      CALL INSERT_POINT_2D(XP,NINTP,SIZE_X2X3VERT,X2X3VERT,INOD)
+
+      ! Insert sort node to triangles local list
+      TRUETHAT = .TRUE.
+      DO INP=1,NINTP_SEG
+         IF (SEGNODS(INP) == INOD) THEN
+            TRUETHAT = .FALSE.
+            EXIT
+         ENDIF
+      ENDDO
+      IF ( TRUETHAT ) THEN ! new inod entry on list
+         NINTP_SEG = NINTP_SEG + 1
+         SEGNODS(NINTP_SEG) = INOD
+      ENDIF
+   ENDDO
+
+   IF(NINTP_SEG < 2) THEN
+      ! b. Now add face edge - SS edge intersection points:
+      ! x2 segments:
+      DO MYAXIS=IAXIS,JAXIS
+         SELECT CASE(MYAXIS)
+            CASE(IAXIS)
+               XIAXIS = IAXIS
+               XJAXIS = JAXIS
+               XIPLNS(LOW_IND:HIGH_IND) = (/ X2FMIN, X2FMAX /)
+               XJPLNS(LOW_IND:HIGH_IND) = (/ X3FMIN, X3FMAX /)
+            CASE(JAXIS)
+               XIAXIS = JAXIS
+               XJAXIS = IAXIS
+               XIPLNS(LOW_IND:HIGH_IND) = (/ X3FMIN, X3FMAX /)
+               XJPLNS(LOW_IND:HIGH_IND) = (/ X2FMIN, X2FMAX /)
+         END SELECT
+
+         DO JPL=LOW_IND,HIGH_IND
+
+            XJPLN = XJPLNS(JPL)
+
+            XY1(IAXIS:JAXIS) = BODINT_PLANE%XYZ( (/ X2AXIS, X3AXIS /) , SEG(NOD1) )
+            XY2(IAXIS:JAXIS) = BODINT_PLANE%XYZ( (/ X2AXIS, X3AXIS /) , SEG(NOD2) )
+
+            ! b-1. Drop if Edge on one side of segment ray:
+            MAXXJ = MAX(XY1(XJAXIS),XY2(XJAXIS))
+            MINXJ = MIN(XY1(XJAXIS),XY2(XJAXIS))
+            OUTPLANE1 = ((XJPLN-MAXXJ) > GEOMEPS) .OR. ((MINXJ-XJPLN) > GEOMEPS)
+            IF ( OUTPLANE1 ) CYCLE
+
+            ! b-2. Also drop if Edge ouside of face edge limits:
+            MAXXI = MAX(XY1(XIAXIS),XY2(XIAXIS))
+            MINXI = MIN(XY1(XIAXIS),XY2(XIAXIS))
+            OUTPLANE2 = ((XIPLNS(LOW_IND)-MAXXI) > GEOMEPS) .OR. ((MINXI-XIPLNS(HIGH_IND)) > GEOMEPS)
+            IF ( OUTPLANE2 ) CYCLE
+
+            ! Test if segment aligned with xi
+            XIALIGNED = ((MAXXJ-MINXJ) < GEOMEPS)
+            IF ( XIALIGNED ) CYCLE ! Aligned and on top of xjpln: Intersection points already added.
+
+            ! Drop intersections in EDGE nodes: already added.
+            ! Compute: dot(plnormal, xyzv - xypl):
+            DOT1 = XY1(XJAXIS) - XJPLN
+            DOT2 = XY2(XJAXIS) - XJPLN
+
+            IF ( ABS(DOT1) <= GEOMEPS ) CYCLE
+            IF ( ABS(DOT2) <= GEOMEPS ) CYCLE
+
+            ! Finally regular case:
+            ! Points 1 on one side of x2 segment, point 2 on the other:
+            IF ( DOT1*DOT2 < 0._EB ) THEN
+
+               ! Intersection Point along segment:
+               DS    = (XJPLN-XY1(XJAXIS))/(XY2(XJAXIS)-XY1(XJAXIS))
+               SVARI = XY1(XIAXIS) + DS*(XY2(XIAXIS)-XY1(XIAXIS))
+
+               OUTSEG= ((XIPLNS(LOW_IND)-SVARI) > -GEOMEPS) .OR. ((SVARI-XIPLNS(HIGH_IND)) > -GEOMEPS)
+               IF ( OUTSEG ) CYCLE
+
+               ! Insertion add point to intersection list:
+               XP(XIAXIS) = SVARI
+               XP(XJAXIS) = XJPLN
+               CALL INSERT_POINT_2D(XP,NINTP,SIZE_X2X3VERT,X2X3VERT,INOD)
+
+               ! Insert sort node to EDGES local list
+               TRUETHAT = .TRUE.
+               DO INP=1,NINTP_SEG
+                  IF (SEGNODS(INP) == INOD) THEN
+                     TRUETHAT = .FALSE.
+                     EXIT
+                  ENDIF
+               ENDDO
+               IF (TRUETHAT) THEN ! new inod entry on list
+                  NINTP_SEG = NINTP_SEG + 1
+                  SEGNODS(NINTP_SEG) = INOD
+               ENDIF
+               CYCLE
+            ENDIF
+         ENDDO
+      ENDDO
+   ENDIF
+
+   IF ( (NINTP_SEG < 2) .OR. (SEGNODS(NOD1) == SEGNODS(NOD2)) ) CYCLE
+
+   ! Test if Edge already on list:
+   INLIST = .FALSE.
+   DO ISEG=1,NEDGE
+
+      IF ( (SEGNODS(NOD1) == CEELEM(NOD1,ISEG)) .AND. & ! same inod1
+           (SEGNODS(NOD2) == CEELEM(NOD2,ISEG)) .AND. & ! same inod2
+           (BODINT_PLANE%INDSEG(4,IWSSEG) == INDSEG(4,ISEG)) ) THEN     ! same ibod
+
+         IF (ANY(BODINT_PLANE%INDSEG(2:3,IWSSEG) == INDSEG(2,ISEG))) THEN
+            ! Edge already in list, Use SS Edge INDSEG:
+            INDSEG(1:4,ISEG) = BODINT_PLANE%INDSEG(1:4,IWSSEG)
+            INLIST = .TRUE.
+            EXIT
+         ELSE
+            WRITE(LU_ERR,*) "Error in GET_TRIANG_FACE_INT: SS EDGE Triangles not on 2 WS triang list INDSEG."
+         ENDIF
+      ENDIF
+   ENDDO
+
+   IF ( .NOT.INLIST ) THEN ! Edge not in list.
+      NEDGE = NEDGE + 1
+      CEELEM(NOD1:NOD2,NEDGE) =  SEGNODS(NOD1:NOD2)
+      INDSEG(1:4,NEDGE)       = BODINT_PLANE%INDSEG(1:4,IWSSEG)
+   ENDIF
 ENDDO
 
 ! Populate XYVERT points array:
