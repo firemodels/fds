@@ -5462,11 +5462,11 @@ SUBROUTINE UPDATE_DEVICES_1(T,DT,NM)
 ! Update the value of all sensing DEVICEs, any control function outputs, and associated output quantities
 
 USE MEMORY_FUNCTIONS, ONLY : GET_LAGRANGIAN_PARTICLE_INDEX
-USE COMPLEX_GEOMETRY, ONLY : IBM_CGSC, IBM_SOLID
+USE COMPLEX_GEOMETRY, ONLY : IBM_CGSC, IBM_SOLID, IBM_CUTCFE, IBM_IDCC
 REAL(EB), INTENT(IN) :: T,DT
 INTEGER, INTENT(IN) :: NM
 REAL(EB) :: VALUE,VOL
-INTEGER :: N,I,J,K,IW,SURF_INDEX,LP_INDEX,ICF
+INTEGER :: N,I,J,K,IW,ICC,SURF_INDEX,LP_INDEX,ICF
 
 CALL POINT_TO_MESH(NM)
 
@@ -5669,10 +5669,15 @@ DEVICE_LOOP: DO N=1,N_DEVC
                             OB => OBSTRUCTION(OBST_INDEX_C(CELL_INDEX(I,J,K)))
                             IF (.NOT.OB%HT3D) CYCLE I_DEVICE_CELL_LOOP
                         ENDIF
-                        IF (CC_IBM) THEN
-                            IF (CCVAR(I,J,K,IBM_CGSC) == IBM_SOLID) CYCLE I_DEVICE_CELL_LOOP
-                        ENDIF
                         VOL = DX(I)*RC(I)*DY(J)*DZ(K)
+                        IF (CC_IBM) THEN
+                            IF (CCVAR(I,J,K,IBM_CGSC) == IBM_SOLID) THEN
+                               CYCLE I_DEVICE_CELL_LOOP
+                            ELSEIF(CCVAR(I,J,K,IBM_CGSC) == IBM_CUTCFE) THEN
+                               ICC=CCVAR(I,J,K,IBM_IDCC)
+                               VOL=SUM(CUT_CELL(ICC)%VOLUME(1:CUT_CELL(ICC)%NCELL))
+                            ENDIF
+                        ENDIF
                         VALUE = GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,DV%PART_CLASS_INDEX,DV%VELO_INDEX,&
                                                  DV%PIPE_INDEX,DV%PROP_INDEX,DV%REAC_INDEX,DV%MATL_INDEX,T,DT,NM)
                         STATISTICS_SELECT: SELECT CASE(DV%SPATIAL_STATISTIC)
