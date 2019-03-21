@@ -2598,6 +2598,14 @@ CHECK_MESHES: IF (IW<=M%N_EXTERNAL_WALL_CELLS .AND. .NOT.EVACUATION_ONLY(NM)) TH
          VENT_INDEX = 0
       ENDIF
 
+      ! Do not allow a MIRROR boundary to sit on a mesh interface
+
+      IF (VENT_INDEX>0) THEN
+         IF (M%VENTS(VENT_INDEX)%BOUNDARY_TYPE==MIRROR_BOUNDARY) VENT_INDEX = 0
+      ENDIF
+
+      ! Open up the ghost cell at the interpolated boundary
+
       IF (BOUNDARY_TYPE == INTERPOLATED_BOUNDARY) M%SOLID(M%CELL_INDEX(I,J,K)) = .FALSE.
 
    ENDIF FOUND_OTHER_MESH
