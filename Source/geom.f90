@@ -4273,31 +4273,34 @@ SELECT CASE(PREDICTOR)
             CUT_CELL(ICC)%DEL_RHO_D_DEL_Z(1:N_TOTAL_SCALARS,JCC)=0._EB
          ENDDO
       ENDDO
-      DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
-         I     = CUT_CELL(ICC)%IJK(IAXIS)
-         J     = CUT_CELL(ICC)%IJK(JAXIS)
-         K     = CUT_CELL(ICC)%IJK(KAXIS)
-         VCELL = DX(I)*DY(J)*DZ(K)
+      IF (N_LP_ARRAY_INDICES>0 .OR. N_REACTIONS>0 .OR. ANY(SPECIES_MIXTURE%DEPOSITING)) THEN
+         DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+            I     = CUT_CELL(ICC)%IJK(IAXIS)
+            J     = CUT_CELL(ICC)%IJK(JAXIS)
+            K     = CUT_CELL(ICC)%IJK(KAXIS)
+            VCELL = DX(I)*DY(J)*DZ(K)
 
-         ! Up to here in D_SOURCE(I,J,K), M_DOT_PPP(I,J,K,1:N_TOTAL_SCALARS) we have contributions by particles.
-         ! Add these contributions in corresponding cut-cells:
-         VCCELL = SUM(CUT_CELL(ICC)%VOLUME(1:CUT_CELL(ICC)%NCELL))
-         DO JCC=1,CUT_CELL(ICC)%NCELL
-            CUT_CELL(ICC)%D_SOURCE(JCC) = CUT_CELL(ICC)%D_SOURCE(JCC) + D_SOURCE(I,J,K)*VCELL/VCCELL
-            CUT_CELL(ICC)%M_DOT_PPP(1:N_TOTAL_SCALARS,JCC) = CUT_CELL(ICC)%M_DOT_PPP(1:N_TOTAL_SCALARS,JCC) + &
-            M_DOT_PPP(I,J,K,1:N_TOTAL_SCALARS)*VCELL/VCCELL
-         ENDDO
+            ! Up to here in D_SOURCE(I,J,K), M_DOT_PPP(I,J,K,1:N_TOTAL_SCALARS) we have contributions by particles.
+            ! Add these contributions in corresponding cut-cells:
+            ! NOTE : Assumes the source from particles is distributed evely over CCs of the Cartesian cell.
+            VCCELL = SUM(CUT_CELL(ICC)%VOLUME(1:CUT_CELL(ICC)%NCELL))
+            DO JCC=1,CUT_CELL(ICC)%NCELL
+               CUT_CELL(ICC)%D_SOURCE(JCC) = CUT_CELL(ICC)%D_SOURCE(JCC) + D_SOURCE(I,J,K)*VCELL/VCCELL
+               CUT_CELL(ICC)%M_DOT_PPP(1:N_TOTAL_SCALARS,JCC) = CUT_CELL(ICC)%M_DOT_PPP(1:N_TOTAL_SCALARS,JCC) + &
+               M_DOT_PPP(I,J,K,1:N_TOTAL_SCALARS)*VCELL/VCCELL
+            ENDDO
 
-         ! Now Add back to D_SOURCE(I,J,K), M_DOT_PPP(I,J,K,1:N_TOTAL_SCALARS) for regular slice plotting:
-         D_SOURCE(I,J,K) = 0._EB; M_DOT_PPP(I,J,K,1:N_TOTAL_SCALARS) = 0._EB
-         DO JCC=1,CUT_CELL(ICC)%NCELL
-            D_SOURCE(I,J,K) = D_SOURCE(I,J,K) + CUT_CELL(ICC)%D_SOURCE(JCC)*CUT_CELL(ICC)%VOLUME(JCC)
-            M_DOT_PPP(I,J,K,1:N_TOTAL_SCALARS) = M_DOT_PPP(I,J,K,1:N_TOTAL_SCALARS) + &
-            CUT_CELL(ICC)%M_DOT_PPP(1:N_TOTAL_SCALARS,JCC)*CUT_CELL(ICC)%VOLUME(JCC)
+            ! Now Add back to D_SOURCE(I,J,K), M_DOT_PPP(I,J,K,1:N_TOTAL_SCALARS) for regular slice plotting:
+            D_SOURCE(I,J,K) = 0._EB; M_DOT_PPP(I,J,K,1:N_TOTAL_SCALARS) = 0._EB
+            DO JCC=1,CUT_CELL(ICC)%NCELL
+               D_SOURCE(I,J,K) = D_SOURCE(I,J,K) + CUT_CELL(ICC)%D_SOURCE(JCC)*CUT_CELL(ICC)%VOLUME(JCC)
+               M_DOT_PPP(I,J,K,1:N_TOTAL_SCALARS) = M_DOT_PPP(I,J,K,1:N_TOTAL_SCALARS) + &
+               CUT_CELL(ICC)%M_DOT_PPP(1:N_TOTAL_SCALARS,JCC)*CUT_CELL(ICC)%VOLUME(JCC)
+            ENDDO
+            D_SOURCE(I,J,K)=D_SOURCE(I,J,K)/VCELL
+            M_DOT_PPP(I,J,K,1:N_TOTAL_SCALARS) = M_DOT_PPP(I,J,K,1:N_TOTAL_SCALARS)/VCELL
          ENDDO
-         D_SOURCE(I,J,K)=D_SOURCE(I,J,K)/VCELL
-         M_DOT_PPP(I,J,K,1:N_TOTAL_SCALARS) = M_DOT_PPP(I,J,K,1:N_TOTAL_SCALARS)/VCELL
-      ENDDO
+      ENDIF
 END SELECT
 
 IF (SET_DIV_TO_ZERO) THEN
