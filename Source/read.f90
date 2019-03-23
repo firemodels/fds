@@ -877,6 +877,12 @@ MESH_LOOP: DO N=1,NMESHES_READ
 ENDDO MESH_LOOP
 
 NM_EVAC = NM
+IF (ANY(EVACUATION_ONLY)) THEN
+   DO NM=1,NMESHES
+      IF(EVACUATION_ONLY(NM)) PROCESS(NM)=MAX(0,EVAC_PROCESS)
+   ENDDO
+ENDIF
+
 
 ! Check if there are too many MPI processes assigned to the job
 
