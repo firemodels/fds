@@ -14807,7 +14807,7 @@ CONTAINS
     ! Local variables
     INTEGER :: NPP,NPLIM,i,izero,nn,n
     LOGICAL :: CROWBAR_DUMP
-    REAL(EB) :: TNOW, EVEL, angle_hr
+    REAL(EB) :: TNOW, EVEL, angle_hr, PART_MIN, PART_MAX
     REAL(FB), ALLOCATABLE, DIMENSION(:) :: XP,YP,ZP
     REAL(FB), ALLOCATABLE, DIMENSION(:,:) :: QP, AP
     INTEGER, ALLOCATABLE, DIMENSION(:) :: TA
@@ -14977,7 +14977,22 @@ CONTAINS
           WRITE(LU_PART(NM)) ((QP(I,NN),I=1,NPLIM),NN=1,EVAC_N_QUANTITIES)
        END IF
        !
+       WRITE(LU_PART(NM+NMESHES),'(ES13.6,1X,I4)')T, EVAC_N_QUANTITIES
        IF (EVAC_N_QUANTITIES > 0) THEN
+          DO NN = 1, EVAC_N_QUANTITIES
+             IF (NPLIM > 0) THEN
+                PART_MAX = QP(1,NN)
+                PART_MIN = PART_MAX
+                DO I = 2, NPLIM
+                   PART_MIN = MIN(QP(I,NN),PART_MIN)
+                   PART_MAX = MAX(QP(I,NN),PART_MAX)
+                END DO
+             ELSE
+                PART_MIN = 1.0_EB
+                PART_MAX = 0.0_EB
+             ENDIF
+             WRITE(LU_PART(NM+NMESHES),'(5X,ES13.6,1X,ES13.6)')PART_MIN, PART_MAX
+          ENDDO
           DEALLOCATE(QP)
        END IF
        DEALLOCATE(AP)
