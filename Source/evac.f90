@@ -14807,7 +14807,8 @@ CONTAINS
     ! Local variables
     INTEGER :: NPP,NPLIM,i,izero,nn,n
     LOGICAL :: CROWBAR_DUMP
-    REAL(EB) :: TNOW, EVEL, angle_hr, PART_MIN, PART_MAX
+    REAL(EB) :: TNOW, EVEL, angle_hr
+    REAL(FB) :: PART_MIN, PART_MAX
     REAL(FB), ALLOCATABLE, DIMENSION(:) :: XP,YP,ZP
     REAL(FB), ALLOCATABLE, DIMENSION(:,:) :: QP, AP
     INTEGER, ALLOCATABLE, DIMENSION(:) :: TA
@@ -14988,8 +14989,8 @@ CONTAINS
                    PART_MAX = MAX(QP(I,NN),PART_MAX)
                 END DO
              ELSE
-                PART_MIN = 1.0_EB
-                PART_MAX = 0.0_EB
+                PART_MIN = 1.0_FB
+                PART_MAX = 0.0_FB
              ENDIF
              WRITE(LU_PART(NM+NMESHES),'(5X,ES13.6,1X,ES13.6)')PART_MIN, PART_MAX
           ENDDO
