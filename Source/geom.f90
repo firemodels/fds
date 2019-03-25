@@ -3356,12 +3356,11 @@ END SUBROUTINE CCCOMPUTE_RADIATION
 
 SUBROUTINE CCIBM_SET_DATA
 
-USE MPI
 
 ! Local Variables:
-INTEGER :: NM,IERR,ICALL
-REAL(EB):: LX,LY,LZ,MAX_DIST,MAX_DIST_AUX
-REAL(EB):: TNOW,TNOW2,TDEL
+INTEGER :: NM,ICALL
+REAL(EB):: LX,LY,LZ,MAX_DIST
+REAL(EB):: TNOW,TNOW2,TDEL,MIN_XS(1:3),MAX_XF(1:3)
 
 INTEGER :: ICF
 CHARACTER(80) :: FN_CCTIME
@@ -3380,20 +3379,22 @@ ENDIF
 TNOW2 = CURRENT_TIME()
 
 ! Defined relative GEOMEPS:
-MAX_DIST=0._EB
-! Loop Meshes:
-DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-   LX=MESHES(NM)%XF-MESHES(NM)%XS
-   LY=MESHES(NM)%YF-MESHES(NM)%YS
-   LZ=MESHES(NM)%ZF-MESHES(NM)%ZS
-   MAX_DIST=MAX(MAX_DIST,LX,LY,LZ)
+! Find largest domain distance to define relative epsilon:
+MIN_XS(1:3) = (/ MESHES(1)%XS, MESHES(1)%YS, MESHES(1)%ZS /)
+MAX_XF(1:3) = (/ MESHES(1)%XF, MESHES(1)%YF, MESHES(1)%ZF /)
+DO NM=2,NMESHES
+   MIN_XS(1) = MIN(MIN_XS(1),MESHES(NM)%XS)
+   MIN_XS(2) = MIN(MIN_XS(2),MESHES(NM)%YS)
+   MIN_XS(3) = MIN(MIN_XS(3),MESHES(NM)%ZS)
+   MAX_XF(1) = MAX(MAX_XF(1),MESHES(NM)%XF)
+   MAX_XF(2) = MAX(MAX_XF(2),MESHES(NM)%YF)
+   MAX_XF(3) = MAX(MAX_XF(3),MESHES(NM)%ZF)
 ENDDO
+LX = MAX_XF(1) - MIN_XS(1)
+LY = MAX_XF(2) - MIN_XS(2)
+LZ = MAX_XF(3) - MIN_XS(3)
+MAX_DIST=MAX(LX,LY,LZ)
 
-! All Reduce Max:
-IF (N_MPI_PROCESSES > 1) THEN
-   MAX_DIST_AUX=MAX_DIST
-   CALL MPI_ALLREDUCE(MAX_DIST_AUX, MAX_DIST, 1, MPI_DOUBLE_PRECISION, MPI_MAX, MPI_COMM_WORLD, IERR)
-ENDIF
 
 ! Set relative epsilon for cut-cell definition:
 MAX_DIST= MAX(1._EB,MAX_DIST)
@@ -34398,11 +34399,13 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
                 NP    = CFELEM(1,ICF)
                 DO IPT=2,NP+1
                    ICF_PT = CFELEM(IPT,ICF)
-                   ! Define closed Polygon:
-                   XY(IAXIS:JAXIS,IPT-1) = (/ XYZVERT(X2AXIS,ICF_PT), XYZVERT(X3AXIS,ICF_PT) /)
+                   ! Define closed Polygon centered in First Point:
+                   XY(IAXIS:JAXIS,IPT-1) = (/ XYZVERT(X2AXIS,ICF_PT)-XYZVERT(X2AXIS,CFELEM(2,ICF)), &
+                                              XYZVERT(X3AXIS,ICF_PT)-XYZVERT(X3AXIS,CFELEM(2,ICF)) /)
                 ENDDO
                 ICF_PT = CFELEM(2,ICF)
-                XY(IAXIS:JAXIS,NP+1) = (/ XYZVERT(X2AXIS,ICF_PT), XYZVERT(X3AXIS,ICF_PT) /) ! Close Polygon.
+                XY(IAXIS:JAXIS,NP+1) = (/ XYZVERT(X2AXIS,ICF_PT)-XYZVERT(X2AXIS,CFELEM(2,ICF)), &
+                                          XYZVERT(X3AXIS,ICF_PT)-XYZVERT(X3AXIS,CFELEM(2,ICF)) /)
 
                 ! Get Area and Centroid properties of Cut-face:
                 AREA = 0._EB
@@ -34419,7 +34422,7 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
                                ( XY(IAXIS,II2)*XY(JAXIS,II2+1)  - &
                                  XY(JAXIS,II2)*XY(IAXIS,II2+1) )
                 ENDDO
-                CX2 = CX2 / (6._EB * AREA)
+                CX2 = CX2 / (6._EB * AREA) + XYZVERT(X2AXIS,CFELEM(2,ICF))
                 ! In x3:
                 CX3 = 0._EB
                 DO II2=1,NP
@@ -34427,7 +34430,7 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
                                ( XY(IAXIS,II2)*XY(JAXIS,II2+1)  - &
                                  XY(JAXIS,II2)*XY(IAXIS,II2+1) )
                 ENDDO
-                CX3 = CX3 / (6._EB * AREA)
+                CX3 = CX3 / (6._EB * AREA) + XYZVERT(X3AXIS,CFELEM(2,ICF))
 
                 ! Add to cut-face:
                 AREAV(ICF) = AREA
@@ -34964,11 +34967,13 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
                 NP    = CFELEM(1,ICF)
                 DO IPT=2,NP+1
                    ICF_PT = CFELEM(IPT,ICF)
-                   ! Define closed Polygon:
-                   XY(IAXIS:JAXIS,IPT-1) = (/ XYZVERT(X2AXIS,ICF_PT), XYZVERT(X3AXIS,ICF_PT) /)
+                   ! Define closed Polygon centered in First Point:
+                   XY(IAXIS:JAXIS,IPT-1) = (/ XYZVERT(X2AXIS,ICF_PT)-XYZVERT(X2AXIS,CFELEM(2,ICF)), &
+                                              XYZVERT(X3AXIS,ICF_PT)-XYZVERT(X3AXIS,CFELEM(2,ICF)) /)
                 ENDDO
                 ICF_PT = CFELEM(2,ICF)
-                XY(IAXIS:JAXIS,NP+1) = (/ XYZVERT(X2AXIS,ICF_PT), XYZVERT(X3AXIS,ICF_PT) /) ! Close Polygon.
+                XY(IAXIS:JAXIS,NP+1) = (/ XYZVERT(X2AXIS,ICF_PT)-XYZVERT(X2AXIS,CFELEM(2,ICF)), &
+                                          XYZVERT(X3AXIS,ICF_PT)-XYZVERT(X3AXIS,CFELEM(2,ICF)) /)
 
                 ! Get Area and Centroid properties of Cut-face:
                 AREA = 0._EB
@@ -34986,7 +34991,7 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
                                  XY(JAXIS,II2)*XY(IAXIS,II2+1) )
                 ENDDO
 
-                CX2 = CX2 / (6._EB * AREA)
+                CX2 = CX2 / (6._EB * AREA) + XYZVERT(X2AXIS,CFELEM(2,ICF))
                 ! In x3:
                 CX3 = 0._EB
                 DO II2=1,NP
@@ -34994,7 +34999,7 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
                                ( XY(IAXIS,II2)*XY(JAXIS,II2+1)  - &
                                  XY(JAXIS,II2)*XY(IAXIS,II2+1) )
                 ENDDO
-                CX3 = CX3 / (6._EB * AREA)
+                CX3 = CX3 / (6._EB * AREA) + XYZVERT(X3AXIS,CFELEM(2,ICF))
 
                 ! Add to cut-face:
                 AREAV(ICF) = AREA
