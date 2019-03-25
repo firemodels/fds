@@ -534,10 +534,13 @@ MESH_LOOP: DO NM=1,NMESHES
    IF (EVACUATION_ONLY(NM)) THEN
       IF (EMESH_INDEX(NM)>0) THEN
          LU_PART(NM) = GET_FILE_NUMBER()
+         LU_PART(NM+NMESHES) = GET_FILE_NUMBER()
          IF (NMESHES>1) THEN
             WRITE(FN_PART(NM),'(A,I4.4,A)') TRIM(CHID)//'_',NM,'.prt5'
+            WRITE(FN_PART(NM+NMESHES),'(A,I4.4,A)') TRIM(CHID)//'_',NM,'.prt5.bnd'
          ELSE
             WRITE(FN_PART(NM),'(A,A)') TRIM(CHID),'.prt5'
+            WRITE(FN_PART(NM+NMESHES),'(A,A)') TRIM(CHID),'.prt5.bnd'
          ENDIF
       END IF
    ENDIF
