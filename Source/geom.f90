@@ -8525,7 +8525,7 @@ TNOW = CURRENT_TIME()
 
 SELECT CASE (PERIODIC_TEST)
    CASE DEFAULT
-      IF (PROJECTION .AND. ICYC<=1) RETURN
+      IF (ICYC<=1) RETURN ! In order to avoid instabilities due to unphysical initial flow fields.
    CASE (5,8)
       RETURN
    CASE (4,7,11,21,22)
@@ -38581,7 +38581,7 @@ LOGICAL :: READ_BINARY
 
 INTEGER :: IJF, IJB, IJE, NM
 INTEGER, ALLOCATABLE, DIMENSION(:) :: B_IND,E_IND,F_IND
-REAL(EB) :: XLOW,XHI,YLOW,YHI,ZLOW,DELX,DELY
+REAL(EB) :: XLOW,XHI,YLOW,YHI,ZLOW,ZHI,DELX,DELY
 
 LOGICAL :: EXTEND_TERRAIN
 REAL(EB):: ZVAL_HORIZON, ZVAL_FACTOR
@@ -38811,11 +38811,9 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
                YHI  = MAX(YHI ,MESHES(NM)%YF)
             ENDDO
          ENDIF
-         ZLOW = 1.E10_EB
-         DO NM=1,NMESHES
-            ZLOW = MIN(ZLOW,MESHES(NM)%ZS)
-         ENDDO
-         ZLOW = MIN(ZLOW,ZMIN)
+         ZHI  = MAXVAL(ZVALS(1:N_ZVALS))
+         ZLOW = MINVAL(ZVALS(1:N_ZVALS))
+         ZLOW = MIN(REAL(FLOOR(ZLOW-0.1_EB*(ZHI-ZLOW)),EB),ZMIN)
 
          ZVAL_FACTOR = 1._EB
          IF(ZVAL_HORIZON > MAX_VAL) ZVAL_FACTOR = 0._EB ! Not defined, use boundary polygon heights.
