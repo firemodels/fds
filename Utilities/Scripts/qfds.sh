@@ -74,6 +74,11 @@ fi
 # ---------------------------- usage ----------------------------------
 
 function usage {
+  if [ "$use_intel_mpi" == "1" ]; then
+    MPI=impi
+  else
+    MPI=mpi
+  fi
   echo "Usage: qfds.sh [-p n_mpi_processes] [-o nthreads] [-e fds_command] [-q queue]  casename.fds"
   echo ""
   echo "qfds.sh runs FDS using an executable from the repository or one specified with the -e option."
@@ -84,8 +89,8 @@ function usage {
   echo "then the currently loaded modules are used."
   echo ""
   echo " -e exe - full path of FDS used to run case "
-  echo "    [default: $FDSROOT/fds/Build/mpi_intel_${platform}_64$DB/fds_mpi_intel_${platform}_64$DB]"
-  echo " -h   - show commony used options"
+  echo "    [default: $FDSROOT/fds/Build/${MPI}_intel_${platform}_64$DB/fds_${MPI}_intel_${platform}_64$DB]"
+  echo " -h   - show commonly used options"
   echo " -H   - show all options"
   echo " -o o - number of OpenMP threads per process [default: 1]"
   echo " -p p - number of MPI processes [default: 1] "
