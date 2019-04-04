@@ -470,7 +470,7 @@ TYPE(REACTION_TYPE), POINTER :: R1=>NULL()
 
 IF (.NOT.REACTION(1)%FAST_CHEMISTRY) RETURN
 R1 => REACTION(1)
-PHI_TILDE = (ZZ_0(R1%AIR_SMIX_INDEX) - ZZ_IN(R1%AIR_SMIX_INDEX)) / ZZ_0(R1%AIR_SMIX_INDEX)  ! FDS Tech Guide (5.45)
+PHI_TILDE = (ZZ_0(R1%AIR_SMIX_INDEX) - ZZ_IN(R1%AIR_SMIX_INDEX)) / ZZ_0(R1%AIR_SMIX_INDEX)  ! FDS Tech Guide (5.53)
 
 ! Define the modified pre and post mixtures (ZZ_HAT_0 and ZZ_HAT) in which excess air and products are excluded.
 
@@ -496,7 +496,7 @@ ZZ_HAT = ZZ_HAT/SUM(ZZ_HAT)
 
 CALL GET_ENTHALPY(ZZ_HAT_0,H_0,TMP_IN) ! H of reactants participating in reaction (includes chemical enthalpy)
 CALL GET_ENTHALPY(ZZ_HAT,H_CRIT,R1%CRIT_FLAME_TMP) ! H of products at the critical flame temperature
-IF (H_0 < H_CRIT) EXTINCT = .TRUE. ! FDS Tech Guide (5.46)
+IF (H_0 < H_CRIT) EXTINCT = .TRUE. ! FDS Tech Guide (5.54)
 
 END SUBROUTINE EXTINCT_2
 
@@ -714,6 +714,72 @@ KINETICS_SELECT: SELECT CASE(KINETICS)
 END SELECT KINETICS_SELECT
 
 END SUBROUTINE REACTION_RATE
+
+
+SUBROUTINE GET_FLAME_TEMPERATURE(TMP_FLAME,ZZ_0,ZZ_IN,TMP_IN)
+
+! Compute adiabatic flame temperature for reaction mixture
+
+USE PHYSICAL_FUNCTIONS, ONLY: GET_ENTHALPY
+REAL(EB),INTENT(IN) :: TMP_IN,ZZ_IN(1:N_TRACKED_SPECIES),ZZ_0(1:N_TRACKED_SPECIES)
+REAL(EB),INTENT(OUT) :: TMP_FLAME
+REAL(EB) :: ZZ_HAT_0(1:N_TRACKED_SPECIES),ZZ_HAT(1:N_TRACKED_SPECIES),H_0,PHI_TILDE,TMP_1,TMP_2,H_1,H_2,H_REL_ERROR
+INTEGER :: NS,ITER
+REAL(EB), PARAMETER :: ERROR_TOL=0.01_EB
+INTEGER, PARAMETER :: MAXIT=10
+TYPE(REACTION_TYPE), POINTER :: R1=>NULL()
+
+TMP_FLAME = TMP_IN
+
+IF (.NOT.REACTION(1)%FAST_CHEMISTRY) RETURN
+R1 => REACTION(1)
+PHI_TILDE = (ZZ_0(R1%AIR_SMIX_INDEX) - ZZ_IN(R1%AIR_SMIX_INDEX)) / ZZ_0(R1%AIR_SMIX_INDEX)  ! FDS Tech Guide (5.53)
+
+! Define the modified pre and post mixtures (ZZ_HAT_0 and ZZ_HAT) in which excess air and products are excluded.
+
+DO NS=1,N_TRACKED_SPECIES
+   IF (NS==R1%FUEL_SMIX_INDEX) THEN
+      ZZ_HAT_0(NS) = ZZ_0(NS)
+      ZZ_HAT(NS)   = ZZ_IN(NS)
+   ELSEIF (NS==R1%AIR_SMIX_INDEX) THEN
+      ZZ_HAT_0(NS) = PHI_TILDE * ZZ_0(NS)
+      ZZ_HAT(NS)   = 0._EB
+   ELSE  ! Products
+      ZZ_HAT_0(NS) = PHI_TILDE * ZZ_0(NS)
+      ZZ_HAT(NS)   = (PHI_TILDE-1._EB)*ZZ_0(NS) + ZZ_IN(NS)
+   ENDIF
+ENDDO
+
+! Normalize the modified pre and post mixtures
+
+ZZ_HAT_0 = ZZ_HAT_0/SUM(ZZ_HAT_0)
+ZZ_HAT = ZZ_HAT/SUM(ZZ_HAT)
+
+! Iteratively guess (Newton method) flame temp until products enthalpy matches reactant enthalpy.
+
+CALL GET_ENTHALPY(ZZ_HAT_0,H_0,TMP_IN) ! H of reactants participating in reaction (includes chemical enthalpy)
+TMP_1 = 2000._EB ! converges faster with better initial guess (only takes 2 or 3 iterations)
+TMP_2 = 2100._EB
+TMP_FLAME = TMP_2
+ITER = 0
+H_REL_ERROR = 1._EB
+DO WHILE (ABS(H_REL_ERROR)>ERROR_TOL)
+   ITER = ITER + 1
+   IF (ITER>MAXIT) EXIT
+
+   CALL GET_ENTHALPY(ZZ_HAT,H_1,TMP_1)
+   CALL GET_ENTHALPY(ZZ_HAT,H_2,TMP_2)
+
+   IF (ABS(H_2-H_1)>TWO_EPSILON_EB) THEN
+      TMP_FLAME = TMP_1 + (TMP_2-TMP_1)/(H_2-H_1) * (H_0-H_1)
+      TMP_FLAME = MAX(TMPMIN,MIN(TMPMAX,TMP_FLAME))
+   ENDIF
+   H_REL_ERROR = (H_2-H_0)/H_0 ! converged when enthalpy relative error less than 1%
+   TMP_1 = TMP_2
+   TMP_2 = TMP_FLAME
+ENDDO
+
+END SUBROUTINE GET_FLAME_TEMPERATURE
 
 
 ! ---------------------------- CCREGION_COMBUSTION ------------------------------
