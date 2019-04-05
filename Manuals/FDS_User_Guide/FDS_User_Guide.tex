@@ -5429,44 +5429,33 @@ All other species &                  & 0.135        & 1427 \\ \hline
 
 \subsubsection{Extinction Model Verification}
 
-In the verification case called {\ct Extinction/extinction.fds}, a 10 $\times$ 10 array of small sealed boxes are generated, each with a varying initial temperature from 300~K to 1875~K and initial oxygen mass fraction from 0.0115 to 0.2185, combined with the stoichiometric amount of fuel, and the remainder nitrogen. A one-step, complete reaction of methane is assumed:
+In the verification cases called {\ct Extinction/extinction\_x.fds}, 100 small, sealed boxes are initialized with temperatures from 300~K to 1875~K and oxygen mass fractions from 0.0115 to 0.2185, combined with the stoichiometric amount of fuel, and the remainder nitrogen. A one-step, complete reaction of methane is assumed:
 \begin{equation}\label{eq:methane_ex}
 \mathrm{CH_4 + 2\, O_2 \rightarrow  CO_2 + 2\, H_2O}
 \end{equation}
-Based on the oxygen and methane concentration and the temperature in each box, combustion can or cannot occur according to the {\ct 'EXTINCTION~2'} model, as shown in Fig.~\ref{fig:extinct}.
+Based on the oxygen and methane concentration and the temperature in each box, combustion can or cannot occur according to the {\ct 'EXTINCTION~1'} and {\ct 'EXTINCTION~2'} models, as shown in Fig.~\ref{fig:extinct}.
 \begin{figure}[h!]
-\centering
-\includegraphics[height=3.2in]{SCRIPT_FIGURES/extinction}
-\caption[The \textct{extinction} test case]{Viability of combustion for an array of initial temperatures and oxygen concentrations.}
+\includegraphics[height=3.2in]{SCRIPT_FIGURES/extinction_1}
+\includegraphics[height=3.2in]{SCRIPT_FIGURES/extinction_2}
+\caption[The \textct{extinction} test cases]{Result of {\ct 'EXTINCTION~1'} (left) and {\ct 'EXTINCTION~2'} (right) for the given initial temperatures and oxygen concentrations.}
 \label{fig:extinct}
 \end{figure}
-The FDS predictions based on the {\ct 'EXTINCTION~2'} model confirm that conditions that sustain burning (red crosses) or cause extinction (blue stars) fall closely on the expected results using thermophysical properties of the reactants and products.  The simplified linear model, {\ct 'EXTINCTION~1'}, conforms well with the more detailed calculation. More detailed information on the extinction model can be found in the Technical Reference Guide~\cite{FDS_Tech_Guide}.
+The FDS predictions based on the {\ct 'EXTINCTION~2'} model (right) confirm that conditions that sustain burning (red crosses) or cause extinction (blue stars) fall closely on the expected results using thermophysical properties of the reactants and products.  The simpler model, {\ct 'EXTINCTION~1'} (left), merely conforms to the specified Burn-No Burn criterion. More detailed information on the extinction models can be found in the Technical Reference Guide~\cite{FDS_Tech_Guide}.
 
 
 
 \subsection{Special Topic: Piloted Ignition Zone}
 \label{info:ignition}
 
-If the mixing-controlled combustion model is used and flame extinction occurs, the unburned fuel gas can re-ignite if it mixes with sufficient oxygen elsewhere in the domain. To prevent this from happening, you can set the {\ct AUTO\_IGNITION\_TEMPERATURE} (AIT) on the {\ct REAC} line, in \si{\degree C}, below which combustion will not occur. Note that if this parameter is used, then some form of heat/ignition source must be present. For most fuels of interest, the AIT may be found in Beyler's chapter of the SFPE Handbook~\cite{SFPE:Beyler}. The default AIT is -273~$^\circ$, meaning that it is possible to get spurious re-ignition of unburned fuel when fresh air is encountered after extinction. Setting an AIT, however, leads to the problem of ignition at a burner surface.  It can be tricky to model the ignition process explicitly because of limited grid resolution. Instead, you can set a fictitiously low value on the {\ct SURF} line that is associated with the burning surface or the {\ct INIT} line that essentially creates a piloted ignition zone in the vicinity of the burning surface. For example, you might use something like this for a piloted methane flame:
-\begin{lstlisting}
-&REAC FUEL='METHANE', AUTO_IGNITION_TEMPERATURE=627. /
-&INIT XB=..., AUTO_IGNITION_TEMPERATURE=-273. /
-\end{lstlisting}
-The {\ct REAC} line specifies an AIT of 627~\si{\degreeCelsius} throughout the domain except within the region specified by {\ct XB} at the base of the burner where the AIT is effectively turned off. You can achieve a similar end with the following {\ct SURF} line:
-\begin{lstlisting}
-&REAC FUEL='METHANE', AUTO_IGNITION_TEMPERATURE=627. /
-&SURF ..., HRRPUA=..., AUTO_IGNITION_TEMPERATURE=-273. /
-\end{lstlisting}
+By default, FDS employs either the {\ct 'EXTINCTION 1'} or {\ct 'EXTINCTION 2'} model to determine if combustion is viable. If local extinction occurs, the unburned fuel gas can re-ignite if it mixes with sufficient oxygen elsewhere in the domain, even if this re-ignition might not happen in reality because the temperature might be too low to sustain combustion. To prevent spurious re-ignition from happening, you can set the {\ct AUTO\_IGNITION\_TEMPERATURE} (AIT) on the {\ct REAC} line or the {\ct COMB} line, in \si{\degree C}, below which combustion will not occur.  For most fuels of interest, the AIT may be found in Beyler's chapter of the SFPE Handbook~\cite{SFPE:Beyler}. The default AIT is $-273 \; ^\circ$C, meaning that fuel and oxygen will burn when mixed providing that either of the extinction models allows combustion to occur.
 
-\subsection{Special Topic: Time Ramp of Ignition Temperature}
-\label{info:ramp_ait}
-
-The AIT for a given reaction may be ramped in time using {\ct RAMP\_AIT} on the {\ct REAC} line.  The ramp factor {\ct F} is applied to the AIT in Kelvins.  For example, to ramp AIT from -273 \si{\degreeCelsius} to 627 \si{\degreeCelsius} linearly over 10 s use
+Note that if an AIT is specified, then some form of heat/ignition source must be present to start the fire. FDS provides a ``spark'' as follows
 \begin{lstlisting}
-&REAC ID='R1', FUEL='METHANE', AUTO_IGNITION_TEMPERATURE=627., RAMP_AIT='R1 AIT RAMP' /
-&RAMP ID='R1 AIT RAMP', T=0., F=0. /
-&RAMP ID='R1 AIT RAMP', T=10., F=1. /
+&INIT PART_ID='FDS SPARK', XYZ=..., N_PARTICLES=1, T_INSERT=10. /
 \end{lstlisting}
+This line creates a hot, burning particle at the location {\ct XYZ} starting at {\ct T\_INSERT} (s) and lasting 1~s. The character string {\ct 'FDS SPARK'} is a reserved phrase that directs FDS to generate internally the necessary {\ct SURF} and {\ct PART} lines that describe the igniter. If you want to generate your own ``spark'', do not use the string {\ct 'FDS SPARK'}.
+
+The spark igniter serves two purposes. First, within its single grid cell it generates a temperature greater than AIT, and second, it generates a local heat release rate per unit volume (HRRPUV) of $10/\Delta$~kW/m$^3$, where $\Delta=(\dx \, \dy \, \dz)^{1/3}$. Neighboring cells are assumed to support combustion if either their temperature exceeds AIT, or if they abut a cell with an HRRPUV exceeding $10/\Delta$~kW/m$^3$. You can change the local HRRPUV by specifying {\ct HRRPUV\_SPARK} on the {\ct COMB} line in units of kW/m$^3$.
 
 
 
@@ -5480,12 +5469,10 @@ the stoichiometry of the reaction.
 \subsection{Balancing the Atoms}
 
 Consider a single reaction involving methane. When you specify the {\ct REAC} line to be:
-
 \begin{lstlisting}
 &REAC FUEL='METHANE' /
 \end{lstlisting}
-
-\noindent FDS assumes the following reaction:
+FDS assumes the following reaction:
 \begin{multline}
 1\,\underbrace{\mathrm{ (CH_4) }}_\text{Fuel} \; + \;
 9.636 \; \underbrace{ \mathrm{\left( 0.2076 \; O_2 + 0.7825 \; N_2 + 0.0095 \; H_2O + 0.0004 \; CO_2 \right)}}_\text{Air} \longrightarrow \\
@@ -6751,6 +6738,11 @@ Note that the {\ct DIAMETER} ($\mu$m) on the {\ct INIT} line is only valid for l
 If you want to introduce particles within a given region periodically in time and not just initially, set {\ct DT\_INSERT} on the {\ct INIT} line to a positive value indicating the time increment (s) for insertion. The parameter {\ct N\_PARTICLES} now indicates the number of droplets/particles inserted every {\ct DT\_INSERT} seconds. If the droplets/particles have mass, use {\ct MASS\_PER\_TIME} (kg/s) instead of {\ct MASS\_PER\_VOLUME} to indicate how much mass is to be introduced per second.
 
 If you want to delay the insertion of droplets, you can use either a {\ct DEVC\_ID} or a {\ct CTRL\_ID} on the {\ct INIT} line to name the controlling device. See Section~\ref{info:basic_control} for more information on controlling devices.
+
+\subsubsection{Delayed Insertion}
+\label{info:delayed_insertion}
+
+If you do not want to introduce the particles right at the start of the simulation, use {\ct T\_INSERT} (s) to insert the particle(s) at some later time.
 
 
 \clearpage
@@ -9331,6 +9323,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 \multicolumn{5}{|c|}{{\ct COMB} (General combustion parameters)} \\
 \hline \hline
 \endhead
+{\ct AUTO\_IGNITION\_TEMPERATURE}               & Real          & Section~\ref{info:ignition}                           & $^\circ$C     &  -273 $^\circ$C      \\ \hline
 {\ct CHECK\_REALIZABILITY}                      & Logical       & Section~\ref{info:chem_integration}                   &               & {\ct .FALSE.}        \\ \hline
 {\ct EXTINCTION\_MODEL}                         & Character     & Section~\ref{info:extinction}                         &               & {\ct 'EXTINCTION 2'} \\ \hline
 {\ct FIXED\_MIX\_TIME}                          & Real          & Section~\ref{info:turbulent_combustion}               &  s            &                      \\ \hline
@@ -9687,7 +9680,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct INIT} (Initial Conditions)} \\
 \hline \hline
 \endhead
-{\ct AUTO\_IGNITION\_TEMPERATURE} & Real              & Section~\ref{info:extinction}                 & \si{\degree C} & {-273.15}     \\ \hline
 {\ct CELL\_CENTERED}              & Logical           & Section~\ref{info:initial_droplets}           &                & {\ct .FALSE.} \\ \hline
 {\ct CTRL\_ID}                    & Character         & Section~\ref{info:initial_droplets}           &                &               \\ \hline
 {\ct DENSITY}                     & Real              & Section~\ref{info:INIT}                       & kg/m$^3$       & Ambient       \\ \hline
@@ -9712,6 +9704,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SHAPE}                       & Character         & Section~\ref{info:initial_droplets}           &                & {\ct 'BLOCK'} \\ \hline
 {\ct SPEC\_ID(N)}                 & Character Array   & Section~\ref{info:INIT}                       &                &               \\ \hline
 {\ct TEMPERATURE}                 & Real              & Section~\ref{info:INIT}                       & \si{\degree C} & {\ct TMPA}    \\ \hline
+{\ct T\_INSERT}                   & Real              & Section~\ref{info:delayed_insertion}          & s              & {\ct T\_BEGIN}\\ \hline
 {\ct UNIFORM}                     & Logical           & Section~\ref{info:initial_droplets}           &                & {\ct .FALSE.} \\ \hline
 {\ct UVW(3)}                      & Real Triplet      & Section~\ref{info:initial_droplets}           & m/s            & 0.            \\ \hline
 {\ct VOLUME\_FRACTION(N)}         & Real Array        & Section~\ref{info:INIT}                       & mol/mol        & Ambient       \\ \hline
@@ -10394,7 +10387,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hline \hline
 \endhead
 {\ct A}                                   & Real        & Section~\ref{info:finite}                 &                   &                   \\ \hline
-{\ct AUTO\_IGNITION\_TEMPERATURE}         & Real        & Section~\ref{info:extinction}             & $^\circ$C         &                   \\ \hline
+{\ct AUTO\_IGNITION\_TEMPERATURE}         & Real        & Section~\ref{info:ignition}               & $^\circ$C         & -273 $^\circ$C    \\ \hline
 {\ct C}                                   & Real        & Section~\ref{info:simple_chemistry}       &                   & 0                 \\ \hline
 {\ct CHECK\_ATOM\_BALANCE}                & Logical     & Section~\ref{info:REAC_Diagnostics}       &                   & {\ct .TRUE.}      \\ \hline
 {\ct CO\_YIELD}                           & Real        & Section~\ref{info:simple_chemistry}       & kg/kg             & 0                 \\ \hline
@@ -10418,7 +10411,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct O}                                   & Real        & Section~\ref{info:simple_chemistry}       &                   & 0                 \\ \hline
 {\ct PRIORITY}                            & Integer     & Section~\ref{info:priority}               &                   & 1                 \\ \hline
 {\ct RADIATIVE\_FRACTION}                 & Real        & Section~\ref{info:CHI_R}                  &                   &                   \\ \hline
-{\ct RAMP\_AIT}                           & Character   & Section~\ref{info:ramp_ait}               &                   &                   \\ \hline
 {\ct RAMP\_CHI\_R}                        & Character   & Section~\ref{info:CHI_R}                  &                   &                   \\ \hline
 {\ct REAC\_ATOM\_ERROR}                   & Real        & Section~\ref{info:REAC_Diagnostics}       & atoms             & 1.E-5             \\ \hline
 {\ct REAC\_MASS\_ERROR}                   & Real        & Section~\ref{info:REAC_Diagnostics}       & kg/kg             & 1.E-4             \\ \hline
@@ -10544,7 +10536,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hline \hline
 \endhead
 {\ct ADIABATIC}                         & Logical         & Section~\ref{info:adiabatic}              &                     & {\ct .FALSE.}           \\ \hline
-{\ct AUTO\_IGNITION\_TEMPERATURE}       & Real            & Section~\ref{info:ignition}               & $^\circ$C           & -273                    \\ \hline
 {\ct BACKING}                           & Character       & Section~\ref{info:BACKING}                &                     & {\ct 'EXPOSED'}         \\ \hline
 {\ct BURN\_AWAY}                        & Logical         & Section~\ref{info:BURN_AWAY}              &                     & {\ct .FALSE.}           \\ \hline
 {\ct CELL\_SIZE\_FACTOR}                & Real            & Section~\ref{info:solid_phase_stability}  &                     & 1.0                     \\ \hline
