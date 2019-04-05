@@ -211,14 +211,15 @@ end
 %-----------------------
 epsilon = 1e-10;
 
-fds_file{1} = 'extinction_devc.csv';
+fds_file{1} = 'extinction_1_devc.csv';
+fds_file{2} = 'extinction_2_devc.csv';
 
 X_ignite=zeros(num_samp,2);
 X_fds_ignite=zeros(num_samp,2);
 X_extinct_o2=zeros(num_samp,2);
 X_fds_ext_o2=zeros(num_samp,2);
 
-for ifile=1:1
+for ifile=2:-1:1
 
 if ~exist(fds_file{ifile})
     display('Error: File ',fds_file{ifile},' does not exist. Skipping case.')
@@ -238,15 +239,24 @@ end
 for i=1:100
     if sum(hrr_ext(:,i)) > epsilon
         fds_ignite(i,:) = [temp_ext(1,i);o2_ext(1,i)];
+        fds_ext_o2(i,:) = [0 0];
     else
         fds_ext_o2(i,:) = [temp_ext(1,i);o2_ext(1,i)];
+        fds_ignite(i,:) = [0 0];
     end
 end
 
+clear hrr_ext temp_ext o2_ext fu_ext
+
 % Simple Extinction Model
 
-simple_o2 = [Y_O2_0 0];
-simple_temp = [293.15 T_crit];
+if ifile==2
+   simple_o2 = [Y_O2_0 0];
+   simple_temp = [293.15 T_crit];
+else
+   simple_o2 = [Y_O2_0 0.0939 0];
+   simple_temp = [293.15 873 873];
+end
 
 % Make the plot
 
@@ -261,6 +271,17 @@ X_ignite(:,2) = (ignite(:,2)/32)./(ignite(:,2)/32 + (1-ignite(:,2))/28);
 X_fds_ignite(:,2) = (fds_ignite(:,2)/32)./(fds_ignite(:,2)/32 + (1-fds_ignite(:,2))/28);
 X_extinct_o2(:,2) = (extinct_o2(:,2)/32)./(extinct_o2(:,2)/32 + (1-extinct_o2(:,2))/28);
 X_fds_ext_o2(:,2) = (fds_ext_o2(:,2)/32)./(fds_ext_o2(:,2)/32 + (1-fds_ext_o2(:,2))/28);
+
+if ifile==1 % Modify expected behavior
+   for jj=1:num_samp
+      if extinct_o2(jj,1)-tmpm>600 && X_extinct_o2(jj,2)>0 ; 
+         X_ignite(jj,2)=X_extinct_o2(jj,2);  
+         X_extinct_o2(jj,2)=0; 
+         ignite(jj,1)=extinct_o2(jj,1);
+         extinct_o2(jj,1)=0;
+      end
+   end
+end
 
 h=plot(simple_temp-tmpm,X_simple_o2,'k',...
        ignite(:,1)-tmpm,X_ignite(:,2),'rs',...
@@ -280,7 +301,7 @@ set(lh,'FontSize',Key_Font_Size)
 
 % add Git if file is available
 
-git_file = 'extinction_git.txt';
+git_file = 'extinction_1_git.txt';
 addverstr(gca,git_file,'linear')
 
 % print to pdf
@@ -289,6 +310,6 @@ set(gcf,'Units',Paper_Units);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
 set(gcf,'Position',[0 0 Scat_Paper_Width Scat_Paper_Height]);
-print(gcf,'-dpdf','../../Manuals/FDS_User_Guide/SCRIPT_FIGURES/extinction');
+print(gcf,'-dpdf',['../../Manuals/FDS_User_Guide/SCRIPT_FIGURES/' 'extinction_' num2str(ifile,'%i')]);
 
 end
