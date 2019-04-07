@@ -3962,7 +3962,7 @@ Below are three example duct node inputs representing a typical tee-type connect
 \begin{description}
 \item[{\ct AMBIENT}] is a logical value.  If {\ct .TRUE.}, then the node is connected to the ambient (i.e., it is equivalent to the {\ct OPEN} boundary condition on a {\ct SURF} line).
 \item[{\ct DUCT\_ID}] gives the {\ct ID}s of the ducts connected to the node.  Up to 10 ducts can be connected to a node.
-\item[{\ct FILTER\_ID}] gives the {\ct ID} a filter located at the node.  A node with a filter can only have two connected ducts.
+\item[{\ct FILTER\_ID}] gives the {\ct ID} a filter located at the node.  A node with a filter must have two connected ducts. A filter cannot be located at an ambient node, a node that is attached to a {\ct VENT}, or node with three or more ducts.
 \item[{\ct LOSS}] is an $n$ by $n$ array of real numbers giving the dimensionless loss coefficients for the node.  {\ct LOSS(I,J)} is the loss coefficient for flow from duct {\ct I} to duct {\ct J} expressed in terms of the downstream duct area (see discussion in ~\ref{info:HVACduct} on how to adjust losses for area changes).  For a terminal node (e.g., a node connected to the ambient or to a {\ct VENT}) the {\ct LOSS} is entered as a pair of numbers representing loss coefficient for flow entering the HVAC system and for flow exiting the HVAC system.
 \item[{\ct VENT\_ID}] is the name of the {\ct VENT} where the node connects to the FDS computational domain.  No two {\ct VENTs} should be defined with the same {\ct VENT\_ID}.
 \item[{\ct XYZ}] is a triplet of real numbers giving the coordinates of the node.  This location is used to compute buoyancy heads.
@@ -4073,6 +4073,7 @@ a short passageway that draws gases in one side and expels them out the other. T
 \subsection{HVAC Filter Parameters}
 \label{info:HVACfilter}
 
+A filter must be located at a node with two connected ducts. A filter cannot be located at an ambient node, a node that is attached to a {\ct VENT}, or node with three or more ducts.
 A sample input for a filter is given by:
 \begin{lstlisting}
 &HVAC TYPE_ID='FILTER', ID='filter 1', LOADING=0., SPEC_ID='SOOT',
