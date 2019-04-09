@@ -6469,6 +6469,12 @@ COUNT_SURF_LOOP_AGAIN: DO
    READ(LU_INPUT,SURF)
    NN = NN+1
    SURFACE(NN)%ID = ID
+   DO NNN=1,NN-1
+      IF (SURFACE(NNN)%ID==SURFACE(NN)%ID) THEN
+         WRITE(MESSAGE,'(A,A,A)') 'ERROR: SURF ID <',TRIM(SURFACE(NN)%ID),'> is used more than once'
+         CALL SHUTDOWN(MESSAGE) ; RETURN
+      ENDIF
+   ENDDO
 ENDDO COUNT_SURF_LOOP_AGAIN
 
 ! Add extra surface types to the list that has already been compiled
