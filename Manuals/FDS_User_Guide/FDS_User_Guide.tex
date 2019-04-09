@@ -5445,18 +5445,18 @@ The FDS predictions based on the {\ct 'EXTINCTION~2'} model (right) confirm that
 
 
 
-\subsection{Special Topic: Piloted Ignition Zone}
+\subsection{Special Topic: Piloted Ignition}
 \label{info:ignition}
 
 By default, FDS employs either the {\ct 'EXTINCTION 1'} or {\ct 'EXTINCTION 2'} model to determine if combustion is viable. If local extinction occurs, the unburned fuel gas can re-ignite if it mixes with sufficient oxygen elsewhere in the domain, even if this re-ignition might not happen in reality because the temperature might be too low to sustain combustion. To prevent spurious re-ignition from happening, you can set the {\ct AUTO\_IGNITION\_TEMPERATURE} (AIT) on the {\ct REAC} line or the {\ct COMB} line, in \si{\degree C}, below which combustion will not occur.  For most fuels of interest, the AIT may be found in Beyler's chapter of the SFPE Handbook~\cite{SFPE:Beyler}. The default AIT is $-273 \; ^\circ$C, meaning that fuel and oxygen will burn when mixed providing that either of the extinction models allows combustion to occur.
 
-Note that if an AIT is specified, then some form of heat/ignition source must be present to start the fire. FDS provides a ``spark'' as follows
+The value of AIT may need to be lowered for cases where the grid size is greater than 10~cm. The purpose of AIT is simply to prevent fuel and oxygen from spontaneously igniting, which is the default behavior of FDS. If an AIT is specified, then some form of heat/ignition source must be present to start the fire. FDS provides a ``spark'' as follows
 \begin{lstlisting}
 &INIT PART_ID='FDS SPARK', XYZ=..., N_PARTICLES=1, T_INSERT=10. /
 \end{lstlisting}
-This line creates a hot, burning particle at the location {\ct XYZ} starting at {\ct T\_INSERT} (s) and lasting 1~s. The character string {\ct 'FDS SPARK'} is a reserved phrase that directs FDS to generate internally the necessary {\ct SURF} and {\ct PART} lines that describe the igniter. If you want to generate your own ``spark'', do not use the string {\ct 'FDS SPARK'}.
+This line creates a hot, burning particle at the location {\ct XYZ} starting at {\ct T\_INSERT} (s) and lasting a short amount of time. The character string {\ct 'FDS SPARK'} is a reserved phrase that directs FDS to generate internally the necessary {\ct SURF} and {\ct PART} lines that describe the igniter. If you want to generate your own ``spark'', do not use the string {\ct 'FDS SPARK'}.
 
-The spark igniter serves two purposes. First, within its single grid cell it generates a temperature greater than AIT, and second, it generates a local heat release rate per unit volume (HRRPUV) of $10/\Delta$~kW/m$^3$, where $\Delta=(\dx \, \dy \, \dz)^{1/3}$. Neighboring cells are assumed to support combustion if either their temperature exceeds AIT, or if they abut a cell with an HRRPUV exceeding $10/\Delta$~kW/m$^3$. You can change the local HRRPUV by specifying {\ct HRRPUV\_SPARK} on the {\ct COMB} line in units of kW/m$^3$.
+The spark igniter serves two purposes. First, within its single grid cell it generates a temperature greater than AIT and allows combustion to proceed; and second, it generates a local heat release rate per unit volume (HRRPUV) of $10/\Delta$~kW/m$^3$, where $\Delta=(\dx \, \dy \, \dz)^{1/3}$. Neighboring cells are assumed to support combustion if either their temperature exceeds AIT, or if they abut a cell with an HRRPUV exceeding $10/\Delta$~kW/m$^3$. You can change the local HRRPUV by specifying {\ct HRRPUV\_SPARK} on the {\ct COMB} line in units of kW/m$^3$. You can change the default spark temperature ($1000 \, ^\circ$C) by specifying {\ct TMP\_SPARK} on the {\ct COMB} line. The duration of the spark is $\Delta/s_L$~s, where $s_L$ is the {\ct LAMINAR\_FLAME\_SPEED}\footnote{Note that the {\ct LAMINAR\_FLAME\_SPEED} has no role in FDS other than to provide a simple scaling relationship for the igniter duration.}, also set on the {\ct COMB} line. Its default value is 0.4~m/s. You can change the duration of the spark by specifying {\ct DT\_SPARK} on the {\ct COMB} line.
 
 
 
@@ -9326,12 +9326,14 @@ properties be specified as well. Simply prescribing as many properties as possib
 \endhead
 {\ct AUTO\_IGNITION\_TEMPERATURE}               & Real          & Section~\ref{info:ignition}                           & $^\circ$C     &  -273 $^\circ$C      \\ \hline
 {\ct CHECK\_REALIZABILITY}                      & Logical       & Section~\ref{info:chem_integration}                   &               & {\ct .FALSE.}        \\ \hline
+{\ct DT\_SPARK}                                 & Real          & Section~\ref{info:ignition}                           &  s            &  $\Delta/s_L$        \\ \hline
 {\ct EXTINCTION\_MODEL}                         & Character     & Section~\ref{info:extinction}                         &               & {\ct 'EXTINCTION 2'} \\ \hline
 {\ct FIXED\_MIX\_TIME}                          & Real          & Section~\ref{info:turbulent_combustion}               &  s            &                      \\ \hline
 {\ct FUEL\_C\_TO\_CO\_FRACTION}                 & Real          & Section~\ref{info:two-step_simple_chemistry}          &               &  2/3                 \\ \hline
 {\ct FUEL\_H\_TO\_H2\_FRACTION}                 & Real          & Section~\ref{info:two-step_simple_chemistry}          &               &  0                   \\ \hline
 %{\ct HRRPUV\_MAX\_SMV}                          & Real          & Section~\ref{}                                        &  kW/m$^3$     & 1200                 \\ \hline
 {\ct INITIAL\_UNMIXED\_FRACTION}                & Real          & Section~\ref{info:turbulent_combustion}               &               & 1.0                  \\ \hline
+{\ct LAMINAR\_FLAME\_SPEED}                     & Real          & $s_L$, Section~\ref{info:ignition}                    & m/s           & 0.4                  \\ \hline
 {\ct MAX\_CHEMISTRY\_SUBSTEPS}                  & Integer       & Section~\ref{info:chem_integration}                   &               & 20                   \\ \hline
 {\ct N\_FIXED\_CHEMISTRY\_SUBSTEPS}             & Integer       & Section~\ref{info:chem_integration}                   &               & -1                   \\ \hline
 {\ct N\_SIMPLE\_CHEMISTRY\_REACTIONS}           & Integer       & Section~\ref{info:two-step_simple_chemistry}          &               & 1                    \\ \hline
@@ -9340,7 +9342,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct SUPPRESSION}                               & Logical       & Section~\ref{info:extinction}                         &               & {\ct .TRUE.}         \\ \hline
 {\ct TAU\_CHEM}                                 & Real          & Section~\ref{info:turbulent_combustion}               &               & 1.E-10               \\ \hline
 {\ct TAU\_FLAME}                                & Real          & Section~\ref{info:turbulent_combustion}               &               & 1.E10                \\ \hline
-%{\ct TEMPERATURE\_DEPENDENT\_REACTION}          & Logical       & Compute mixed zone reactor temperature                &               & {\ct .FALSE.}        \\ \hline
+{\ct TMP\_SPARK}                                & Real          & Section~\ref{info:ignition}                           & $^\circ$C     & 1000                 \\ \hline
 \end{longtable}
 
 \vspace{\baselineskip}
