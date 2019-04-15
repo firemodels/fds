@@ -3789,16 +3789,20 @@ END SUBROUTINE CCIBM_END_STEP
 
 ! ----------------------------- INIT_CUTCELL_DATA -------------------------------
 
-SUBROUTINE INIT_CUTCELL_DATA
+SUBROUTINE INIT_CUTCELL_DATA(T,DT)
 
 USE PHYSICAL_FUNCTIONS, ONLY: GET_SPECIFIC_GAS_CONSTANT
+
+REAL(EB), INTENT(IN) :: T, DT
 
 ! Local Variables:
 INTEGER :: NM,I,J,K,N,ICC,JCC,X1AXIS,NFACE,ICF,IFACE
 REAL(EB) TMP_CC,RHO_CC,AREAT,VEL_CF,RHOPV(-1:0)
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_CC
 TYPE(CFACE_TYPE), POINTER :: CFA=>NULL()
-INTEGER :: IND1, IND2
+INTEGER :: IND1, IND2, INDADD, INDF, IFC, IFACE2, ICFC
+REAL(EB):: FSCU, AREATOT
+
 REAL(EB) :: TNOW
 
 TNOW = CURRENT_TIME()
@@ -3806,7 +3810,7 @@ TNOW = CURRENT_TIME()
 ALLOCATE( ZZ_CC(1:N_TOTAL_SCALARS) )
 
 ! Loop Meshes:
-MESH_LOOP : DO NM=1,NMESHES
+MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
    IF (PROCESS(NM)/=MYID) CYCLE
 
@@ -3848,18 +3852,16 @@ MESH_LOOP : DO NM=1,NMESHES
    ENDDO
 
    ! Gasphase Cut-faces inherit underlying Cartesian face values of Velocity (flux matched):
-   IF (PERIODIC_TEST /= 21 .AND. PERIODIC_TEST /= 22) THEN
-   CUTFACE_LOOP : DO ICF=1,MESHES(NM)%N_CUTFACE_MESH
+   PERIODIC_TEST_COND : IF (PERIODIC_TEST /= 21 .AND. PERIODIC_TEST /= 22) THEN
 
-      NFACE  = CUT_FACE(ICF)%NFACE
-
-      IF (CUT_FACE(ICF)%STATUS == IBM_GASPHASE) THEN
-
+      ! First GASPHASe cut-faces:
+      CUTFACE_LOOP : DO ICF=1,MESHES(NM)%N_CUTFACE_MESH
+         NFACE  = CUT_FACE(ICF)%NFACE
+         IF (CUT_FACE(ICF)%STATUS /= IBM_GASPHASE) CYCLE
          I      = CUT_FACE(ICF)%IJK(IAXIS)
          J      = CUT_FACE(ICF)%IJK(JAXIS)
          K      = CUT_FACE(ICF)%IJK(KAXIS)
          X1AXIS = CUT_FACE(ICF)%IJK(KAXIS+1)
-
 
          AREAT  = SUM( CUT_FACE(ICF)%AREA(1:NFACE) )
 
@@ -3873,17 +3875,63 @@ MESH_LOOP : DO NM=1,NMESHES
             VEL_CF = (DX(I)*DY(J))/AREAT * W(I,J,K)
          END SELECT
 
-      ELSE ! IBM_INBOUNDARY
+         CUT_FACE(ICF)%VEL(1:NFACE)  = VEL_CF
+         CUT_FACE(ICF)%VELS(1:NFACE) = VEL_CF
+      ENDDO CUTFACE_LOOP
 
-         VEL_CF = 0._EB
+      ! Then INBOUNDARY cut-faces:
+      ICC_LOOP : DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+         I      = CUT_CELL(ICC)%IJK(IAXIS)
+         J      = CUT_CELL(ICC)%IJK(JAXIS)
+         K      = CUT_CELL(ICC)%IJK(KAXIS)
+         FSCU = 0._EB
 
-      ENDIF
+         ! Loop on cells neighbors and test if they are of type IBM_SOLID, if so
+         ! Add to velocity flux:
+         ! X faces
+         DO INDADD=-1,1,2
+            INDF = I - FCELL + (INDADD+1)/2
+            IF( FCVAR(INDF,J,K,IBM_FGSC,IAXIS) /= IBM_SOLID) CYCLE
+            FSCU = FSCU + REAL(INDADD,EB)*U(INDF,J,K)*DY(J)*DZ(K)
+         ENDDO
+         ! Y faces
+         DO INDADD=-1,1,2
+            INDF = J - FCELL + (INDADD+1)/2
+            IF( FCVAR(I,INDF,K,IBM_FGSC,JAXIS) /= IBM_SOLID ) CYCLE
+            FSCU = FSCU + REAL(INDADD,EB)*V(I,INDF,K)*DX(I)*DZ(K)
+         ENDDO
+         ! Z faces
+         DO INDADD=-1,1,2
+            INDF = K - FCELL + (INDADD+1)/2
+            IF( FCVAR(I,J,INDF,IBM_FGSC,KAXIS) /= IBM_SOLID ) CYCLE
+            FSCU = FSCU + REAL(INDADD,EB)*W(I,J,INDF)*DX(I)*DY(J)
+         ENDDO
 
-      CUT_FACE(ICF)%VEL(1:NFACE)  = VEL_CF
-      CUT_FACE(ICF)%VELS(1:NFACE) = VEL_CF
+         ! Now Define total area of INBOUNDARY cut-faces:
+         ICF=CCVAR(I,J,K,IBM_IDCF);
+         ICF_COND : IF (ICF > 0) THEN
+            NFACE = CUT_FACE(ICF)%NFACE
+            AREATOT = SUM ( CUT_FACE(ICF)%AREA(1:NFACE) )
+            DO JCC =1,CUT_CELL(ICC)%NCELL
+               IFC_LOOP : DO IFC=1,CUT_CELL(ICC)%CCELEM(1,JCC)
+                  IFACE = CUT_CELL(ICC)%CCELEM(IFC+1,JCC)
+                  IF (CUT_CELL(ICC)%FACE_LIST(1,IFACE) == IBM_FTYPE_CFINB) THEN
+                     IFACE2  = CUT_CELL(ICC)%FACE_LIST(5,IFACE)
+                     ICFC    = CUT_FACE(ICF)%CFACE_INDEX(IFACE2)
+                     IF(PRES_ON_WHOLE_DOMAIN) THEN
+                        CUT_FACE(ICF)%VELS(IFACE2)  = 1._EB/AREATOT*FSCU ! +ve into the solid Velocity error
+                        CUT_FACE(ICF)%VEL( IFACE2)  = 1._EB/AREATOT*FSCU
+                     ELSE
+                        CUT_FACE(ICF)%VELS(IFACE2)  = 0._EB
+                        CUT_FACE(ICF)%VEL( IFACE2)  = 0._EB
+                     ENDIF
+                  ENDIF
+               ENDDO IFC_LOOP
+            ENDDO
+         ENDIF ICF_COND
+      ENDDO ICC_LOOP
 
-   ENDDO CUTFACE_LOOP
-   ENDIF
+   ENDIF PERIODIC_TEST_COND
 
    ! Populate PHOPVN in regular faces of CCIMPREGION:
    ! IAXIS faces:
@@ -3976,7 +4024,9 @@ MESH_LOOP : DO NM=1,NMESHES
       ! Here are some hacky initializations:
       ! Set TMP_F to ambient in under laying cartesian cell.
       CFA%ONE_D%TMP_F = TMP_0(CUT_FACE(IND1)%IJK(KAXIS))
+      CFA%ONE_D%TMP_G = TMP_0(CUT_FACE(IND1)%IJK(KAXIS))
       CFA%ONE_D%RHO_F = CUT_CELL(ICC)%RHO(JCC)
+      CFA%ONE_D%RHO_G = CUT_CELL(ICC)%RHO(JCC)
       CFA%ONE_D%ZZ_F(1:N_TOTAL_SCALARS)  = CUT_CELL(ICC)%ZZ(1:N_TOTAL_SCALARS,JCC)
 
    ENDDO
@@ -3989,6 +4039,9 @@ DEALLOCATE( ZZ_CC )
 CALL MESH_CC_EXCHANGE(1,.FALSE.)
 CALL MESH_CC_EXCHANGE(4,.FALSE.)
 CALL MESH_CC_EXCHANGE(6,.FALSE.)
+
+! Check divergence of initial velocity field:
+IF(GET_CUTCELLS_VERBOSE) CALL CCIBM_CHECK_DIVERGENCE(T,DT,.FALSE.)
 
 T_USED(14) = T_USED(14) + CURRENT_TIME() - TNOW
 RETURN
@@ -12238,33 +12291,30 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          CYCLE
       ENDIF
 
-
-      IF (CC_INTERPOLATE_H) THEN
-         VAL_CC    = 0._EB
-         ! First Cartesian centroid:
-         PTS(IAXIS:KAXIS,NOD1:NOD4) = CUT_CELL(ICC)%IJK_CARTCEN(IAXIS:KAXIS,NOD1:NOD4)
-         INTCOEF(1:5)               = CUT_CELL(ICC)%INTCOEF_CARTCEN(1:5)
-
-         IF ( ABS(1._EB-INTCOEF(1)) < GEOMEPS) CYCLE ! Can't interpolate for dH/dXn = 0., H not known at Bound pt.
-
-         ! Now values:
-         VAL(1) = 0._EB
-         DO IPT=1,MAX_INTERP_POINTS_PLANE
-            VAL(IPT+1) = CUT_CELL(ICC)%H_CARTCEN( IPT+1)
-         ENDDO
-
-         ! This method assumes HB = HCC = Hint in Fluid Plane, i.e. dH/dXn = 0.
-         DO II=1,5
-            VAL_CC = VAL_CC + INTCOEF(II)*VAL(II)
-         ENDDO
-         ! val = CB * HB + (sum(CE*Ci*HEi)), but val = HB = sum(Ci*HEi) as dH/dXn = 0.
-         ! CE = 1 - CB, then val = 1._EB/(1._EB-INTCOEF(1))*VAL_CC
-         VAL_CC = VAL_CC / (1._EB-INTCOEF(1))
-
-         HP(I,J,K) = VAL_CC
-      ENDIF
-
-
+      ! IF (CC_INTERPOLATE_H) THEN
+      !    VAL_CC    = 0._EB
+      !    ! First Cartesian centroid:
+      !    PTS(IAXIS:KAXIS,NOD1:NOD4) = CUT_CELL(ICC)%IJK_CARTCEN(IAXIS:KAXIS,NOD1:NOD4)
+      !    INTCOEF(1:5)               = CUT_CELL(ICC)%INTCOEF_CARTCEN(1:5)
+      !
+      !    IF ( ABS(1._EB-INTCOEF(1)) < GEOMEPS) CYCLE ! Can't interpolate for dH/dXn = 0., H not known at Bound pt.
+      !
+      !    ! Now values:
+      !    VAL(1) = 0._EB
+      !    DO IPT=1,MAX_INTERP_POINTS_PLANE
+      !       VAL(IPT+1) = CUT_CELL(ICC)%H_CARTCEN( IPT+1)
+      !    ENDDO
+      !
+      !    ! This method assumes HB = HCC = Hint in Fluid Plane, i.e. dH/dXn = 0.
+      !    DO II=1,5
+      !       VAL_CC = VAL_CC + INTCOEF(II)*VAL(II)
+      !    ENDDO
+      !    ! val = CB * HB + (sum(CE*Ci*HEi)), but val = HB = sum(Ci*HEi) as dH/dXn = 0.
+      !    ! CE = 1 - CB, then val = 1._EB/(1._EB-INTCOEF(1))*VAL_CC
+      !    VAL_CC = VAL_CC / (1._EB-INTCOEF(1))
+      !
+      !    HP(I,J,K) = VAL_CC
+      ! ENDIF
 
       ! Now if the Pressure equation has been solved on Cartesian cells, interpolate values of
       ! H to corresponding cut-cell centroids:
@@ -13847,14 +13897,18 @@ INTEGER, INTENT(IN) :: PRESSURE_ITERATIONS
 
 ! Local Variables:
 REAL(EB), POINTER, DIMENSION(:,:,:) :: HP
-REAL(EB):: U_IBM,V_IBM,W_IBM,DUUDT,DVVDT,DWWDT
-INTEGER :: I,J,K
+REAL(EB):: U_IBM,V_IBM,W_IBM,DUUDT,DVVDT,DWWDT,RFODT
+INTEGER :: I,J,K,II,JJ,KK,IOR,IW
 LOGICAL :: PRESSURE_ITERATION
+TYPE(WALL_TYPE), POINTER :: WC
+TYPE(EXTERNAL_WALL_TYPE), POINTER :: EWC
 
 ! This is the CCIBM forcing routine for momentum eqns.
 
 IF ( FREEZE_VELOCITY ) RETURN
 IF ( PERIODIC_TEST == 103 .OR. PERIODIC_TEST == 11 .OR. PERIODIC_TEST==7) RETURN
+
+RFODT = RELAXATION_FACTOR/DT
 
 CALL POINT_TO_MESH(NM)
 
@@ -13873,8 +13927,8 @@ DO K=1,KBAR
    DO J=1,JBAR
       DO I=0,IBAR
          IF (MESHES(NM)%FCVAR(I,J,K,IBM_FGSC,IAXIS) /= IBM_SOLID ) CYCLE
-         IF (PREDICTOR) DUUDT = (U_IBM-U(I,J,K))/DT
-         IF (CORRECTOR) DUUDT = (2._EB*U_IBM-(U(I,J,K)+US(I,J,K)))/DT
+         IF (PREDICTOR) DUUDT = (U_IBM-U(I,J,K))*RFODT
+         IF (CORRECTOR) DUUDT = (2._EB*U_IBM-(U(I,J,K)+US(I,J,K)))*RFODT
          FVX(I,J,K) = -RDXN(I)*(HP(I+1,J,K)-HP(I,J,K)) - DUUDT
          IF (.NOT. PRES_ON_WHOLE_DOMAIN) FVX(I,J,K) = - DUUDT ! This is because dH/Dx = 0 in unstructured cases
                                                               ! and solid Cartesian faces.
@@ -13888,8 +13942,8 @@ DO K=1,KBAR
    DO J=0,JBAR
       DO I=1,IBAR
          IF (MESHES(NM)%FCVAR(I,J,K,IBM_FGSC,JAXIS) /= IBM_SOLID ) CYCLE
-         IF (PREDICTOR) DVVDT = (V_IBM-V(I,J,K))/DT
-         IF (CORRECTOR) DVVDT = (2._EB*V_IBM-(V(I,J,K)+VS(I,J,K)))/DT
+         IF (PREDICTOR) DVVDT = (V_IBM-V(I,J,K))*RFODT
+         IF (CORRECTOR) DVVDT = (2._EB*V_IBM-(V(I,J,K)+VS(I,J,K)))*RFODT
          FVY(I,J,K) = -RDYN(J)*(HP(I,J+1,K)-HP(I,J,K)) - DVVDT
          IF (.NOT. PRES_ON_WHOLE_DOMAIN) FVY(I,J,K) = - DVVDT ! This is because dH/Dx = 0 in unstructured cases
                                                               ! and solid Cartesian faces.
@@ -13903,14 +13957,43 @@ DO K=0,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
          IF (MESHES(NM)%FCVAR(I,J,K,IBM_FGSC,KAXIS) /= IBM_SOLID ) CYCLE
-         IF (PREDICTOR) DWWDT = (W_IBM-W(I,J,K))/DT
-         IF (CORRECTOR) DWWDT = (2._EB*W_IBM-(W(I,J,K)+WS(I,J,K)))/DT
+         IF (PREDICTOR) DWWDT = (W_IBM-W(I,J,K))*RFODT
+         IF (CORRECTOR) DWWDT = (2._EB*W_IBM-(W(I,J,K)+WS(I,J,K)))*RFODT
          FVZ(I,J,K) = -RDZN(K)*(HP(I,J,K+1)-HP(I,J,K)) - DWWDT
          IF (.NOT. PRES_ON_WHOLE_DOMAIN) FVZ(I,J,K) = - DWWDT ! This is because dH/Dx = 0 in unstructured cases
                                                               ! and solid Cartesian faces.
       ENDDO
    ENDDO
 ENDDO
+
+! Now set WALL_WORK(IW) to zero in EXTERNAL WALL CELLS of type IBM_SOLID:
+! This Follows what is being done for external boundaries inside OBSTS (NULL_BOUNDARY).
+EWC_LOOP : DO IW=1,N_EXTERNAL_WALL_CELLS
+   WC => WALL(IW)
+   IF (.NOT.(WC%BOUNDARY_TYPE==NULL_BOUNDARY .OR. WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY)) CYCLE
+   EWC=>EXTERNAL_WALL(IW)
+
+   II  = WC%ONE_D%II
+   JJ  = WC%ONE_D%JJ
+   KK  = WC%ONE_D%KK
+   IOR = WC%ONE_D%IOR
+
+   SELECT CASE(IOR)
+   CASE( IAXIS)
+      IF(FCVAR(II  ,JJ,KK,IBM_FGSC,IAXIS)==IBM_SOLID) WALL_WORK1(IW) = 0._EB
+   CASE(-IAXIS)
+      IF(FCVAR(II-1,JJ,KK,IBM_FGSC,IAXIS)==IBM_SOLID) WALL_WORK1(IW) = 0._EB
+   CASE( JAXIS)
+      IF(FCVAR(II,JJ  ,KK,IBM_FGSC,JAXIS)==IBM_SOLID) WALL_WORK1(IW) = 0._EB
+   CASE(-JAXIS)
+      IF(FCVAR(II,JJ-1,KK,IBM_FGSC,JAXIS)==IBM_SOLID) WALL_WORK1(IW) = 0._EB
+   CASE( KAXIS)
+      IF(FCVAR(II,JJ,KK  ,IBM_FGSC,KAXIS)==IBM_SOLID) WALL_WORK1(IW) = 0._EB
+   CASE(-KAXIS)
+      IF(FCVAR(II,JJ,KK-1,IBM_FGSC,KAXIS)==IBM_SOLID) WALL_WORK1(IW) = 0._EB
+   END SELECT
+
+ENDDO EWC_LOOP
 
 RETURN
 
@@ -13935,7 +14018,7 @@ CALL POINT_TO_MESH(NM)
 
 UN_NEW_OTHER = 0._EB ! Body doesn't move.
 
-! Compute U velocity errors in IBM_SOLID faces:
+! Compute U velocity errors in internal IBM_SOLID faces:
 DO K=1,KBAR
    DO J=1,JBAR
       DO I=0,IBAR
@@ -13953,7 +14036,7 @@ DO K=1,KBAR
    ENDDO
 ENDDO
 
-! Compute V velocity errors in IBM_SOLID faces:
+! Compute V velocity errors in internal IBM_SOLID faces:
 DO K=1,KBAR
    DO J=0,JBAR
       DO I=1,IBAR
@@ -13971,7 +14054,7 @@ DO K=1,KBAR
    ENDDO
 ENDDO
 
-! Compute W velocity errors in IBM_SOLID faces:
+! Compute W velocity errors in internal IBM_SOLID faces:
 DO K=0,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
