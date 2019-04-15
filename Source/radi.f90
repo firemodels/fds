@@ -706,16 +706,16 @@ TYPE(LAGRANGIAN_PARTICLE_TYPE), POINTER :: LP
 CHARACTER(20) :: FORMT
 ALLOCATE( IJK_SLICE(3, IBAR*KBAR) )
 
-KFST4_GAS => WORK1
-IL       => WORK2
-UIIOLD   => WORK3
-EXTCOE   => WORK4
+KFST4_GAS  => WORK1
+IL         => WORK2
+UIIOLD     => WORK3
+EXTCOE     => WORK4
 KAPPA_PART => WORK5
-SCAEFF   => WORK6
-KFST4_PART   => WORK7
-IL_UP    => WORK8
-OUTRAD_W => WALL_WORK1
-INRAD_W  => WALL_WORK2
+SCAEFF     => WORK6
+KFST4_PART => WORK7
+IL_UP      => WORK8
+OUTRAD_W   => WALL_WORK1
+INRAD_W    => WALL_WORK2
 IF (CC_IBM) THEN
    OUTRAD_F => FACE_WORK1
    INRAD_F  => FACE_WORK2
@@ -889,6 +889,10 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                ENDDO
             ENDDO
          ENDDO
+
+         ! Turbulence-Radiation Interaction (TRI) model (under construction)
+
+         IF (TRI_MODEL) KFST4_GAS = KFST4_GAS * TRI_COR
 
          ! Correct the source term in the RTE based on user-specified RADIATIVE_FRACTION on REAC
 
