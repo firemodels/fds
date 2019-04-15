@@ -284,7 +284,7 @@ DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 ENDDO
 
 IF (CC_IBM) THEN
-   CALL INIT_CUTCELL_DATA  ! Init centroid data (i.e. rho,zz) on cut-cells and cut-faces.
+   CALL INIT_CUTCELL_DATA(T_BEGIN,DT)  ! Init centroid data (i.e. rho,zz) on cut-cells and cut-faces.
    IF (PERIODIC_TEST==101) CALL LINEARFIELDS_INTERP_TEST
 ENDIF
 
