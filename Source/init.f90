@@ -150,6 +150,9 @@ IF (TRI_MODEL) THEN
    ALLOCATE(M%TRI_COR(0:IBP1,0:JBP1,0:KBP1),STAT=IZERO)
    CALL ChkMemErr('INIT','TRI_COR',IZERO)
    M%TRI_COR=1._EB
+   ALLOCATE(M%TMP_FLAME(0:IBP1,0:JBP1,0:KBP1),STAT=IZERO)
+   CALL ChkMemErr('INIT','TMP_FLAME',IZERO)
+   M%TMP_FLAME=TMPA
 ENDIF
 
 ! Background pressure, temperature, density as a function of height (Z coordinate)
