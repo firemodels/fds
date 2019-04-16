@@ -746,8 +746,16 @@ TMP_FLAME = TMP_IN
 
 IF (.NOT.REACTION(1)%FAST_CHEMISTRY) RETURN
 R1 => REACTION(1)
-!PHI_TILDE = (ZZ_0(R1%AIR_SMIX_INDEX) - ZZ_IN(R1%AIR_SMIX_INDEX)) / ZZ_0(R1%AIR_SMIX_INDEX)  ! FDS Tech Guide (5.51)
-PHI_TILDE = R1%S*ZZ_0(R1%FUEL_SMIX_INDEX)/ZZ_0(R1%AIR_SMIX_INDEX)
+
+! This construct for the equivalence ratio does not rely on a single reaction
+
+IF (ZZ_IN(R1%AIR_SMIX_INDEX)>TWO_EPSILON_EB) THEN
+   ! Excess AIR
+   PHI_TILDE = (ZZ_0(R1%AIR_SMIX_INDEX) - ZZ_IN(R1%AIR_SMIX_INDEX)) / ZZ_0(R1%AIR_SMIX_INDEX)  ! FDS Tech Guide (5.51)
+ELSE
+   ! Excess FUEL
+   PHI_TILDE = ZZ_0(R1%FUEL_SMIX_INDEX) / (ZZ_0(R1%FUEL_SMIX_INDEX) - ZZ_IN(R1%FUEL_SMIX_INDEX))
+ENDIF
 
 ! Define the stoichiometric pre and post mixtures (ZZ_HAT_0 and ZZ_HAT).
 
