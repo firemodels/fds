@@ -400,13 +400,13 @@ The second optional extinction model in FDS, referred to as {\ct 'EXTINCTION 2'}
    \label{eq:dza}
    \tilde{\phi} \equiv  \min \left( \, 1 \, , \, \frac{s \, Z_{\rm F}^0}{Z_{\rm A}^0} \, \right) = \frac{Z_{\rm A}^0-Z_{\rm A}}{Z_{\rm A}^0}
 \ee
-where $s$ is the mass stoichiometric coefficient for Air (mass of Air required per mass of Fuel consumed). The extinction criterion is given by:
-\begin{align}
+where $s$ is the mass stoichiometric coefficient for Air (mass of Air required per mass of Fuel consumed). The extinction criterion assumes that excess fuel acts as a diluent, but excess air and a proportional amount of products do \emph{not}. Hence, a large computational cell that is mostly air with a small amount of fuel is likely to burn, whereas a cell that is mostly fuel with little air will not. To achieve this, a fraction of the total mass of the grid cell equal to $(1-\tilde{\phi}) (Z_{\rm A}^0+Z_{\rm P}^0)$ has been removed from the calculation of the enthalpy. With this amount of mass removed, the extinction criterion is given by:
+\begin{equation}
 \label{eq:extinction}
 Z_{\rm F}^0 \, h_{\rm F}(T) + \tilde{\phi} \, Z_{\rm A}^0 \, h_{\rm A}(T) + \tilde{\phi} \, Z_{\rm P}^0 \, h_{\rm P}(T) <
-Z_{\rm F} \, h_{\rm F}(T_{\rm CFT}) + \left[ (\tilde{\phi}-1) \, Z_{\rm P}^0 + Z_{\rm P} \right] \, h_{\rm P}(T_{\rm CFT})
-\end{align}
-where $T$ is the pre-reaction mean cell temperature and $T_{\rm CFT}$ is the critical flame temperature. Note that $h_\alpha(T)$ represents the chemical plus sensible enthalpy; thus, the left-hand-side includes the combustion heat release.  If the inequality (\ref{eq:extinction}) holds, combustion is suppressed---the combustion heat release is not sufficient to raise the product mixture above its critical flame temperature. The extinction criterion assumes that excess fuel acts as a diluent, but excess air and a proportional amount of products do \emph{not}. Hence, a large computational cell which is mostly air with a small amount of fuel is likely to burn, whereas a cell which is mostly fuel with little air will not. To achieve this, a fraction of the total mass of the grid cell equal to $(1-\tilde{\phi}) (Z_{\rm A}^0+Z_{\rm P}^0)$ has been removed from the calculation of the enthalpy of the left and right hand sides of the inequality (\ref{eq:extinction}).
+Z_{\rm F} \, h_{\rm F}(T_{\rm CFT}) + \left[ Z_{\rm P} - (1-\tilde{\phi}) \, Z_{\rm P}^0 \right] \, h_{\rm P}(T_{\rm CFT})
+\end{equation}
+where $T$ is the pre-reaction mean cell temperature and $T_{\rm CFT}$ is the critical flame temperature. Note that $h_\alpha(T)$ represents the chemical plus sensible enthalpy; thus, the left-hand-side includes the combustion heat release.  If the inequality, (\ref{eq:extinction}), holds, combustion is suppressed---the combustion heat release is not sufficient to raise the product mixture above its critical flame temperature. Notice that the right-hand side of the inequality contains no air because all excess air has been removed from consideration. In other words, for an infinitely fast reaction, $Z_{\rm A}-(1-\tilde{\phi}) Z_{\rm A}^0 \equiv 0$.
 
 This extinction model can be applied to multiple reaction schemes. The critical flame temperature criterion is applied to the entire reaction. In other words, the individual reactions are allowed to occur, and the enthalpy inequality (\ref{eq:extinction}) is applied to the initial and final species mass fractions. If insufficient energy has been released, all reactions are suppressed and the species mass fractions are returned to their original values at the start of the time step.
 
