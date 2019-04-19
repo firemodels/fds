@@ -1,9 +1,3 @@
-! N. Ren, D. Zeng, K.V. Meredith, Y. Wang, S.B. Dorofeev, Modeling of flame extinction/re-ignition in
-!       oxygen-reduced environments, In Proc. Combust. Inst., 2018.
-!
-! D. Zeng, Y. Wang, Dependence of Limiting Oxygen Index of Buoyant Turbulent non-premixed Flame on Fuel,
-!       In 26th ICDERS, Boston, MA, 2017.
-
 &HEAD CHID='FM_15cm_Burner_C3H8', TITLE='LOI test for FM 15 cm burner'/
 
 ! coarse outer meshes (dx=1 cm)
@@ -16,18 +10,6 @@
 ! refined meshes around burner (dx=1 cm, D*/dx=15)
 &MULT ID='m2', DX=0.244,DY=0.244,DZ=0.360, I_UPPER=0,J_UPPER=0,K_UPPER=1/ 2 mesh
 &MESH IJK=24,24,36, XB=-0.122,0.122,-0.122,0.122,-0.150,0.210, MULT_ID='m2', CHECK_MESH_ALIGNMENT=T, COLOR='RED'/
-
-! refined meshes around burner (dx=5 mm, D*/dx=30)
-! &MULT ID='m2', DX=0.244,DY=0.244,DZ=0.360, I_UPPER=0,J_UPPER=0,K_UPPER=1/ 2 mesh
-! &MESH IJK=48,48,72, XB=-0.122,0.122,-0.122,0.122,-0.150,0.210, MULT_ID='m2', CHECK_MESH_ALIGNMENT=T, COLOR='RED'/
-
-! refined meshes around burner (dx=2.5 mm, D*/dx=60)
-! &MULT ID='m2', DX=0.122,DY=0.122,DZ=0.180, I_UPPER=1,J_UPPER=1,K_UPPER=3/ 16 mesh
-! &MESH IJK=48,48,72, XB=-0.122,0.000,-0.122,0.000,-0.150,0.030, MULT_ID='m2', CHECK_MESH_ALIGNMENT=T, COLOR='RED'/
-
-! refined meshes around burner (dx=1.3 mm, D*/dx=120)
-! &MULT ID='m2', DX=0.061,DY=0.061,DZ=0.090, I_UPPER=3,J_UPPER=3,K_UPPER=7/ 128 mesh
-! &MESH IJK=48,48,72, XB=-0.122,-.061,-0.122,-.061,-0.150,-.060, MULT_ID='m2', CHECK_MESH_ALIGNMENT=T, COLOR='RED'/
 
 &TIME T_END=65/
 
@@ -52,13 +34,6 @@
 &RAMP ID='N2 RAMP', T= 0.0, F=0.00 /
 &RAMP ID='N2 RAMP', T= 5.0, F=0.00 /
 &RAMP ID='N2 RAMP', T=65.0, F=1.00 /
-
- SURF ID='SUCK', VOLUME_FLOW=0.3 /
- OBST XB=-0.300,-0.300,-0.300, 0.300, 1.400, 1.600 /
- OBST XB= 0.300, 0.300,-0.300, 0.300, 1.400, 1.600 /
- OBST XB=-0.300, 0.300,-0.300,-0.300, 1.400, 1.600 /
- OBST XB=-0.300, 0.300, 0.300, 0.300, 1.400, 1.600 /
- OBST XB=-0.300, 0.300,-0.300, 0.300, 1.600, 1.620, SURF_IDS='INERT','INERT','SUCK' /
 
 &MULT ID='cube array', DX=0.0025,DY=0.0025,DZ=0.1500, I_UPPER=81,J_UPPER=81,K_UPPER=0/
 
@@ -86,12 +61,5 @@
 &SLCF PBY=0, QUANTITY='MASS FRACTION', SPEC_ID='SOOT' CELL_CENTERED=T/
 
 &DEVC ID='XO2', XYZ=0.152,0,-.149, QUANTITY='VOLUME FRACTION', SPEC_ID='OXYGEN', TIME_AVERAGED=F/
-
-! might be useful as some point
-! &DEVC XB=0,0,0,0,0,0.6, POINTS=100, QUANTITY='TEMPERATURE', ID='TMP_CL', TIME_HISTORY=T/
-! &DEVC XB=0,0,0,0,0,0.6, POINTS=100, QUANTITY='MASS FRACTION', SPEC_ID='PROPANE',         ID='Y_FUEL_CL', TIME_HISTORY=T/
-! &DEVC XB=0,0,0,0,0,0.6, POINTS=100, QUANTITY='MASS FRACTION', SPEC_ID='OXYGEN',          ID='Y_O2_CL',   TIME_HISTORY=T/
-! &DEVC XB=0,0,0,0,0,0.6, POINTS=100, QUANTITY='MASS FRACTION', SPEC_ID='CARBON MONOXIDE', ID='Y_CO_CL',   TIME_HISTORY=T/
-! &DEVC XB=0,0,0,0,0,0.6, POINTS=100, QUANTITY='MASS FRACTION', SPEC_ID='SOOT',            ID='Y_SOOT_CL', TIME_HISTORY=T/
 
 &TAIL /
