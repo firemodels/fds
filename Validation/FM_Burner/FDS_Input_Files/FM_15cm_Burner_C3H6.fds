@@ -35,6 +35,8 @@
 &RAMP ID='N2 RAMP', T= 5.0, F=0.00 /
 &RAMP ID='N2 RAMP', T=65.0, F=1.00 /
 
+&MULT ID='cube array', DX=0.0025,DY=0.0025,DZ=0.1500, I_UPPER=81,J_UPPER=81,K_UPPER=0/
+
 &OBST XB=-0.1050,-0.1025,-0.1050,-0.1025,-0.1500,0.0000
       MULT_ID='cube array'
       SURF_IDS='burner','wall','wall'
