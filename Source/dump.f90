@@ -4499,11 +4499,11 @@ USE COMPLEX_GEOMETRY
             ENDDO
          END SELECT
          IFACECUT = IFACECUT + 1
-         LOCATIONS(IFACECUT) = 1 + 16
+         LOCATIONS(IFACECUT) = 0 + 16
          FACES(3*IFACECUT-2:3*IFACECUT) = (/ IVERTCUT-3, IVERTCUT-2, IVERTCUT   /) ! Local Nodes 1, 2, 4
 
          IFACECUT = IFACECUT + 1
-         LOCATIONS(IFACECUT) = 1 + 16
+         LOCATIONS(IFACECUT) = 0 + 16
          FACES(3*IFACECUT-2:3*IFACECUT) = (/ IVERTCUT  , IVERTCUT-1, IVERTCUT-3 /) ! Local Nodes 4, 3, 1
       ENDDO
    ELSE IF (SLICETYPE_LOCAL=='CUT_CELLS') THEN
@@ -4558,11 +4558,11 @@ USE COMPLEX_GEOMETRY
                            ENDDO
                         END SELECT
                         IFACECUT = IFACECUT + 1
-                        LOCATIONS(IFACECUT) = 1 + 16
+                        LOCATIONS(IFACECUT) = 0 + 16
                         FACES(3*IFACECUT-2:3*IFACECUT) = (/ IVERTCUT-3, IVERTCUT-2, IVERTCUT   /) ! Local Nodes 1, 2, 4
 
                         IFACECUT = IFACECUT + 1
-                        LOCATIONS(IFACECUT) = 1 + 16
+                        LOCATIONS(IFACECUT) = 0 + 16
                         FACES(3*IFACECUT-2:3*IFACECUT) = (/ IVERTCUT  , IVERTCUT-1, IVERTCUT-3 /) ! Local Nodes 4, 3, 1
                      CASE(IBM_FTYPE_CFGAS)
                         ICF2    = CUT_CELL(ICC)%FACE_LIST(4,IFACE)
