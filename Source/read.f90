@@ -4071,8 +4071,9 @@ IF (TRIM(EXTINCTION_MODEL)/='null') THEN
       CASE ('EXTINCTION 1')
          EXTINCT_MOD = EXTINCTION_1
       CASE ('EXTINCTION 2')
-         !Single-step product based calculation
          EXTINCT_MOD = EXTINCTION_2
+      CASE ('EXTINCTION 3')
+         EXTINCT_MOD = EXTINCTION_3
       CASE DEFAULT
          WRITE(MESSAGE,'(A,A,A)') 'ERROR: EXTINCTION_MODEL, ',TRIM(EXTINCTION_MODEL),', is not recognized.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
