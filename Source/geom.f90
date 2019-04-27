@@ -28364,7 +28364,7 @@ MAIN_MESH_LOOP : DO NM=1,NMESHES
                   X3RAY = X3FACE(KK)
 
                   ! Intersections along x2 for X3RAY x3 location:
-                  CALL GET_X2_INTERSECTIONS(X2AXIS,X3AXIS,X3RAY,X1PLN)
+                  CALL GET_X2_INTERSECTIONS(X1AXIS,X2AXIS,X3AXIS,X3RAY,X1PLN)
                   IF (STOP_STATUS==SETUP_STOP) RETURN
 
                   ! Drop x2 ray if all intersections are outside of the MESH block domain:
@@ -31216,10 +31216,10 @@ END SUBROUTINE GET_BODINT_PLANE
 
 ! -------------------------- GET_X2INTERSECTIONS --------------------------------
 
-SUBROUTINE GET_X2_INTERSECTIONS(X2AXIS,X3AXIS,X3RAY,X1PLN)
+SUBROUTINE GET_X2_INTERSECTIONS(X1AXIS,X2AXIS,X3AXIS,X3RAY,X1PLN)
 
 IMPLICIT NONE
-INTEGER, INTENT(IN) :: X2AXIS, X3AXIS
+INTEGER, INTENT(IN) :: X1AXIS, X2AXIS, X3AXIS
 REAL(EB),INTENT(IN) :: X3RAY,X1PLN
 
 ! Local Variables:
@@ -31468,16 +31468,16 @@ DO IDCR=1,CRS_NUM(IBM_N_CRS)
             IBM_IS_CRS2(LOW_IND:HIGH_IND,ICRS) = LEFT_MEDIA
          ELSE
             WRITE(LU_ERR,*) "Error GET_X2INTERSECTIONS: IS_CRS(LOW_IND,ICRS) ~= LEFT_MEDIA, media continuity problem"
-            WRITE(LU_ERR,*) "X1PLN=",X1PLN,ICRS,", X2AXIS,X3AXIS=",X2AXIS,X3AXIS,", X3RAY=",X3RAY
+            WRITE(LU_ERR,*) "X1AXIS,X1PLN=",X1AXIS,X1PLN,", X2AXIS,X3AXIS=",X2AXIS,X3AXIS,", RAY X3 POSITION=",X3RAY
             ! FIXME This was an example of an exception condition creating zombie processes
             IF (IDCR==1) THEN
                ! FIXME: this should be the error message, IG should be made available here
                !    WRITE(MESSAGE,'(A,A,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), &
                !       "': Face normals are probably pointing in the wrong direction. Check they point towards the gas phase."
                IF (POSITIVE_ERROR_TEST) THEN
-                 WRITE(LU_ERR,'(A)') "SUCCESS: GEOM ID Unknown:"
+                 WRITE(LU_ERR,'(A)') " SUCCESS: GEOM ID Unknown:"
                ELSE
-                 WRITE(LU_ERR,'(A)') "ERROR: GEOM ID Unknown:"
+                 WRITE(LU_ERR,'(A)') " ERROR: GEOM ID Unknown:"
                ENDIF
                WRITE(LU_ERR,'(A)') "  Face normals are probably pointing in the wrong direction. "
                WRITE(LU_ERR,'(A)') "  Check they point towards the gas phase."
@@ -31486,9 +31486,9 @@ DO IDCR=1,CRS_NUM(IBM_N_CRS)
                ! WRITE(MESSAGE,'(A,A,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), &
                !    "': Media continuity problem: maybe a self-intersection, or an intersection with other GEOM line geometry."
                IF (POSITIVE_ERROR_TEST) THEN
-                 WRITE(LU_ERR,'(A)') "SUCCESS: GEOM ID Unknown:"
+                 WRITE(LU_ERR,'(A)') " SUCCESS: GEOM ID Unknown:"
                ELSE
-                 WRITE(LU_ERR,'(A)') "ERROR: GEOM ID Unknown:"
+                 WRITE(LU_ERR,'(A)') " ERROR: GEOM ID Unknown:"
                ENDIF
                WRITE(LU_ERR,'(A)') "  Media continuity problem: maybe a self-intersection, "
                WRITE(LU_ERR,'(A)') "  or an intersection with other GEOM line geometry."
