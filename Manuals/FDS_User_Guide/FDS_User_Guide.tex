@@ -5373,8 +5373,6 @@ Here, $\tau_{\rm mix}$ is the mixing time scale. The change in mass of a species
 
 The mixing time, $\tau_{\rm mix}$, is a function of the the level of turbulence in the neighborhood of the point of interest. However, you may override the calculation of $\tau_{\rm mix}$ by setting a {\ct FIXED\_MIX\_TIME} (s) on the {\ct COMB} line. Alternatively, you can bound the computed value of $\tau_{\rm mix}$ by setting a lower bound {\ct TAU\_CHEM} and/or an upper bound {\ct TAU\_FLAME} on the {\ct COMB} line.
 
-Unlike earlier versions, FDS no longer uses the mixture fraction approach for combustion modeling. However, the {\ct 'MIXTURE FRACTION'} output quantity applies the Burke-Schumann solution~\cite{Turns:1996} to map species composition to mixture fraction (i.e., mixture fraction is not a primitive flow variable but rather is calculated from the local fuel and product mass fractions).  This requires simple chemistry with a reaction of the type $\si{F} + \si{A} \rightarrow \si {P}$ with infinitely fast mixing and infinitely fast chemistry.  Therefore, you must set {\ct INITIAL\_UNMIXED\_FRACTION=0} to output {\ct 'MIXTURE FRACTION'}.
-
 The Technical Reference Guide~\cite{FDS_Math_Guide} contains more detailed information about the turbulent combustion model.
 
 \subsection{Special Topic: Flame Extinction}
