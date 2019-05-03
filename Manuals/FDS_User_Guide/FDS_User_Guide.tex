@@ -7906,15 +7906,15 @@ records the integrated mass flux of {\em all} particles passing through the give
 \subsection{Coloring Particles and Droplets in Smokeview}
 
 The parameter {\ct QUANTITIES} on the {\ct PART} line is an array of character strings indicating which scalar quantities should be used to color particles and droplets in Smokeview. The choices are \\
-{\ct 'PARTICLE TEMPERATURE'} ($^\circ$C) \\
-{\ct 'PARTICLE DIAMETER'} ($\mu$m) \\
-{\ct 'PARTICLE VELOCITY'} (m/s) \\
-{\ct 'PARTICLE MASS'} (kg) \\
 {\ct 'PARTICLE AGE'} (s) \\
-{\ct 'PARTICLE WEIGHTING FACTOR'} \\
+{\ct 'PARTICLE DIAMETER'} ($\mu$m) \\
+{\ct 'PARTICLE TEMPERATURE'} ($^\circ$C) \\
+{\ct 'PARTICLE MASS'} (kg) \\
 {\ct 'PARTICLE PHASE'} \\
-{\ct 'PARTICLE X'}, {\ct 'PARTICLE Y'}, {\ct 'PARTICLE Z'} (m) \\
+{\ct 'PARTICLE VELOCITY'} (m/s) \\
+{\ct 'PARTICLE WEIGHTING FACTOR'} \\
 {\ct 'PARTICLE U'}, {\ct 'PARTICLE V'}, {\ct 'PARTICLE W'} (m/s) \\
+{\ct 'PARTICLE X'}, {\ct 'PARTICLE Y'}, {\ct 'PARTICLE Z'} (m) \\
 By default, if no {\ct QUANTITIES} are specified and none are selected in Smokeview, then Smokeview will display particles with a single color. To select this color specify either {\ct RGB} or {\ct COLOR}. By default, water droplets are colored blue. All others are colored black.
 
 The {\ct PARTICLE WEIGHTING FACTOR} describes how many actual particles each of the computational particles represent.
@@ -9035,8 +9035,16 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct PARTICLE FLUX Y}$^2$                       & Section~\ref{info:part_output}                & \si{kg/(m$^2$.s)} & P,S       \\ \hline
 {\ct PARTICLE FLUX Z}$^2$                       & Section~\ref{info:part_output}                & \si{kg/(m$^2$.s)} & P,S       \\ \hline
 {\ct PARTICLE MASS}                             & Section~\ref{info:part_output}                & kg             & PA           \\ \hline
+{\ct PARTICLE PHASE}                            & Section~\ref{info:part_output}                &                & PA           \\ \hline
 {\ct PARTICLE TEMPERATURE}                      & Section~\ref{info:part_output}                & $^\circ$C      & PA           \\ \hline
+{\ct PARTICLE U}                                & Section~\ref{info:part_output}                & m/s            & PA           \\ \hline
+{\ct PARTICLE V}                                & Section~\ref{info:part_output}                & m/s            & PA           \\ \hline
 {\ct PARTICLE VELOCITY}                         & Section~\ref{info:part_output}                & m/s            & PA           \\ \hline
+{\ct PARTICLE W}                                & Section~\ref{info:part_output}                & m/s            & PA           \\ \hline
+{\ct PARTICLE WEIGHTING FACTOR}                 & Section~\ref{info:part_output}                &                & PA           \\ \hline
+{\ct PARTICLE X}                                & Section~\ref{info:part_output}                & m              & PA           \\ \hline
+{\ct PARTICLE Y}                                & Section~\ref{info:part_output}                & m              & PA           \\ \hline
+{\ct PARTICLE Z}                                & Section~\ref{info:part_output}                & m              & PA           \\ \hline
 {\ct PRESSURE}                                  & Perturbation pressure, $\tp-p_\infty$         & Pa             & D,I,P,S      \\ \hline
 {\ct PRESSURE COEFFICIENT}                      & Section~\ref{info:pressure_coefficient}       &                & B,D          \\ \hline
 {\ct PRESSURE ZONE}                             & Section~\ref{info:ZONE}                       &                & D,S          \\ \hline
