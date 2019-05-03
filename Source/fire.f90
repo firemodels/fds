@@ -523,6 +523,11 @@ IF (.NOT.REACTION(1)%FAST_CHEMISTRY) RETURN
 R1 => REACTION(1)
 PHI_TILDE = (ZZ_0(R1%AIR_SMIX_INDEX) - ZZ_IN(R1%AIR_SMIX_INDEX)) / ZZ_0(R1%AIR_SMIX_INDEX)  ! FDS Tech Guide (5.51)
 
+IF ( PHI_TILDE < TWO_EPSILON_EB ) THEN
+   EXTINCT = .TRUE.
+   RETURN
+ENDIF
+
 ! Define the modified pre and post mixtures (ZZ_HAT_0 and ZZ_HAT) in which excess air and products are excluded.
 
 DO NS=1,N_TRACKED_SPECIES
@@ -540,8 +545,18 @@ ENDDO
 
 ! Normalize the modified pre and post mixtures
 
-ZZ_HAT_0 = ZZ_HAT_0/SUM(ZZ_HAT_0)
-ZZ_HAT = ZZ_HAT/SUM(ZZ_HAT)
+IF (SUM(ZZ_HAT_0)<TWO_EPSILON_EB) THEN
+   EXTINCT = .TRUE.
+   RETURN
+ELSE
+   ZZ_HAT_0 = ZZ_HAT_0/SUM(ZZ_HAT_0)
+ENDIF
+IF (SUM(ZZ_HAT)<TWO_EPSILON_EB) THEN
+   EXTINCT = .TRUE.
+   RETURN
+ELSE
+   ZZ_HAT = ZZ_HAT/SUM(ZZ_HAT)
+ENDIF
 
 ! See if enough energy is released to raise the fuel and required "air" temperatures above the critical flame temp.
 
@@ -881,10 +896,18 @@ R1 => REACTION(1)
 
 IF (ZZ_IN(R1%AIR_SMIX_INDEX)>TWO_EPSILON_EB) THEN
    ! Excess AIR
-   PHI_TILDE = (ZZ_0(R1%AIR_SMIX_INDEX) - ZZ_IN(R1%AIR_SMIX_INDEX)) / ZZ_0(R1%AIR_SMIX_INDEX)  ! FDS Tech Guide (5.51)
+   PHI_TILDE = (ZZ_0(R1%AIR_SMIX_INDEX) - ZZ_IN(R1%AIR_SMIX_INDEX)) / MAX( ZZ_0(R1%AIR_SMIX_INDEX), TWO_EPSILON_EB )
 ELSE
    ! Excess FUEL
-   PHI_TILDE = ZZ_0(R1%FUEL_SMIX_INDEX) / (ZZ_0(R1%FUEL_SMIX_INDEX) - ZZ_IN(R1%FUEL_SMIX_INDEX))
+   PHI_TILDE = ZZ_0(R1%FUEL_SMIX_INDEX) / MAX( (ZZ_0(R1%FUEL_SMIX_INDEX) - ZZ_IN(R1%FUEL_SMIX_INDEX)), TWO_EPSILON_EB )
+ENDIF
+
+IF ( PHI_TILDE < TWO_EPSILON_EB ) THEN
+   PHI_TILDE = 0._EB
+   RETURN
+ELSEIF ( (1._EB/PHI_TILDE) < TWO_EPSILON_EB ) THEN
+   PHI_TILDE = 0._EB
+   RETURN
 ENDIF
 
 ! Define the stoichiometric pre and post mixtures (ZZ_HAT_0 and ZZ_HAT).
@@ -921,8 +944,20 @@ ENDIF
 
 ! Normalize the modified pre and post mixtures
 
-ZZ_HAT_0 = ZZ_HAT_0/SUM(ZZ_HAT_0)
-ZZ_HAT = ZZ_HAT/SUM(ZZ_HAT)
+IF (SUM(ZZ_HAT_0)<TWO_EPSILON_EB) THEN
+   ZZ_HAT = ZZ_IN
+   PHI_TILDE = 0._EB
+   RETURN
+ELSE
+   ZZ_HAT_0 = ZZ_HAT_0/SUM(ZZ_HAT_0)
+ENDIF
+IF (SUM(ZZ_HAT)<TWO_EPSILON_EB) THEN
+   ZZ_HAT = ZZ_IN
+   PHI_TILDE = 0._EB
+   RETURN
+ELSE
+   ZZ_HAT = ZZ_HAT/SUM(ZZ_HAT)
+ENDIF
 
 ! Iteratively guess (Newton method) flame temp until products enthalpy matches reactant enthalpy.
 
