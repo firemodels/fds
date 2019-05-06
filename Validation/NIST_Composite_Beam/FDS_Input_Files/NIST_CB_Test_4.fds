@@ -3,7 +3,7 @@
 &MESH IJK=32,30,40, XB=0.0,1.6,0.0,1.5,0.0,2.0, MULT_ID='mesh' /
 &MULT ID='mesh', DX=1.6, DY=1.5, DZ=2.0, I_LOWER=-4, I_UPPER=3, J_LOWER=-1, J_UPPER=0, K_UPPER=1 /
 
-&TIME T_END=4800, TIME_SHRINK_FACTOR=10 / 
+&TIME T_END=6000, TIME_SHRINK_FACTOR=10 / 
 
 &COMB N_SIMPLE_CHEMISTRY_REACTIONS=2 /
 &REAC FUEL='METHANE' /
@@ -84,14 +84,17 @@
 &RAMP ID='lwc_k', T=1000, F=0.50 /
 
 &MATL ID            = 'KAOWOOL'
-      FYI           = 'NEED REFERENCE'
+      FYI           = 'Morgan Advanced Materials product literature'
       EMISSIVITY    = 0.7
       DENSITY       = 96.
       CONDUCTIVITY_RAMP = 'kao_k'
       SPECIFIC_HEAT = 1.13 /
-&RAMP ID='kao_k', T= 25., F=0.04 /
-&RAMP ID='kao_k', T=400., F=0.12 /
-&RAMP ID='kao_k', T=800., F=0.30 /
+&RAMP ID='kao_k', T=  20., F=0.03 /
+&RAMP ID='kao_k', T= 200., F=0.06 /
+&RAMP ID='kao_k', T= 400., F=0.11 /
+&RAMP ID='kao_k', T= 600., F=0.16 /
+&RAMP ID='kao_k', T= 800., F=0.23 /
+&RAMP ID='kao_k', T=1000., F=0.32 /
 
 &MATL ID            = 'NWC'
       FYI           = 'Eurocode 4, normal weight concrete'
