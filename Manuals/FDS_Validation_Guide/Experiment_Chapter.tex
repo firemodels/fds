@@ -780,7 +780,33 @@ Following is additional information provided by the test director, Richard Peaco
 \section{NIST Composite Beam Experiments}
 \label{NIST_Composite_Beam_Description}
 
-A set of experiments was conducted in the Large Fire Laboratory at NIST to study the behavior of long-span steel-concrete composite floor beams designed and constructed following U.S. building codes and standards~\cite{Ramesh:TNXXXX}. The test program consisted of five 12.8~m long composite floor beam specimens with various end support conditions. Each specimen was constructed as a partially-composite beam consisting of a W18$\times$35 steel beam and an 83~mm thick lightweight concrete slab cast on top of 76~mm deep ribbed steel decking units. Simultaneous mechanical and fire loading was applied to the specimens. The measurements focused on evaluation of the characteristics of the fire loading, temperatures, and structural responses of the specimens to fires.
+A set of experiments was conducted in the Large Fire Laboratory at NIST to study the behavior of long-span steel-concrete composite floor beams designed and constructed following U.S. building codes and standards~\cite{Ramesh:TNXXXX}. The composite beam consisted of a 12.8~m long W18$\times$35 steel beam and an 16~cm thick lightweight concrete slab cast on top of 7.6~cm deep ribbed steel decking. Drawings of the compartment are shown in Figs.~\ref{NIST_Composite_Beam_Drawing_1} through \ref{NIST_Composite_Beam_Drawing_3}.
+
+Simultaneous mechanical and fire loading was applied to the specimens. The measurements focused on evaluation of the characteristics of the fire loading, temperatures, and structural responses of the specimens to fires.
+
+\subsubsection{Modeling Notes}
+
+The simulations of the NIST Composite Beam experiments are performed with 5~cm grid cells and 32 meshes. The calculations are sped up by a factor of 10 using {\ct TIME\_SHRINK\_FACTOR=10}, whereby a 60~min experiment is simulated in 6~min of real time because the heat release rate is held steady for most of the experiment. The specific heats of all solid materials are reduced by a factor of 10 automatically to account for the change in time scale. 
+
+Because these experiments involve a global equivalence ratio of approximately 1, the two-step simple chemistry model is used, where soot and CO are produced when the fire becomes under-ventilated.
+
+\begin{sidewaysfigure}[p]
+\includegraphics[width=\textwidth]{FIGURES/NIST_Composite_Beam/NFRL_CompositeBeamTest_CompartmentWallLayout_1}
+\caption[Elevation view of NIST Composite Beam experiments]{Elevation view of NIST Composite Beam experiments.}
+\label{NIST_Composite_Beam_Drawing_1}
+\end{sidewaysfigure}
+
+\begin{sidewaysfigure}[p]
+\includegraphics[width=\textwidth]{FIGURES/NIST_Composite_Beam/NFRL_CompositeBeamTest_CompartmentWallLayout_2}
+\caption[Plan view of NIST Composite Beam experiments]{Plan view of NIST Composite Beam experiments.}
+\label{NIST_Composite_Beam_Drawing_2}
+\end{sidewaysfigure}
+
+\begin{sidewaysfigure}[p]
+\includegraphics[width=\textwidth]{FIGURES/NIST_Composite_Beam/NFRL_CompositeBeamTest_CompartmentWallLayout_3}
+\caption[Side view of NIST Composite Beam experiments]{Side view of NIST Composite Beam experiments.}
+\label{NIST_Composite_Beam_Drawing_3}
+\end{sidewaysfigure}
 
 
 \section{NIST Douglas Firs}
