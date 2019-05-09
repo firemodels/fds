@@ -4463,6 +4463,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
       CALL PARSE_EQUATION(NR)
+      IF (STOP_STATUS==SETUP_STOP) RETURN
       RN%N_SMIX = 0
       DO NS=1,N_TRACKED_SPECIES+1
          IF(ABS(RN%NU_READ(NS))>TWO_EPSILON_EB) THEN
@@ -4500,14 +4501,6 @@ REAC_LOOP: DO NR=1,N_REACTIONS
             RN%NU(NS2)      = RN%NU_READ(NS)
             NAME_FOUND = .TRUE.
             EXIT
-         ENDIF
-         IF (TRIM(RN%EQUATION)/='null') THEN
-            IF (TRIM(RN%SPEC_ID_NU_READ(NS))==TRIM(SPECIES_MIXTURE(NS2)%FORMULA)) THEN
-               RN%SPEC_ID_NU(NS2) = SPECIES_MIXTURE(NS2)%ID
-               RN%NU(NS2)      = RN%NU_READ(NS)
-               NAME_FOUND = .TRUE.
-               EXIT
-            ENDIF
          ENDIF
       ENDDO
       IF (.NOT. NAME_FOUND) THEN
