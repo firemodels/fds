@@ -2752,57 +2752,27 @@ The metal core is heated with a power of 300 {\si kW/m$^3$}.
 
 \label{info:GEOMETRY}
 
-All obstructions in FDS are assumed to conform to the rectilinear
-mesh, and all bounding surfaces are assumed to be flat
-planes. However, many objects, like cables, pipes, and ducts, are not
-flat. Even though these objects have to be represented in FDS as
-``boxes,'' you can still perform the internal heat transfer
-calculation as if the object were really cylindrical or spherical. For
-example, the input lines:
+All obstructions in FDS are assumed to conform to the rectilinear mesh, and all bounding surfaces are assumed to be flat planes. However, many objects, like cables, pipes, and ducts, are not flat. Even though these objects have to be represented in FDS as ``boxes,'' you can still perform the internal heat transfer calculation as if the object were really cylindrical or spherical. For example, the input lines:
 \begin{lstlisting}
 &OBST XB=0.0,5.0,1.1,1.2,3.4,3.5, SURF_ID='CABLE' /
 &SURF ID='CABLE', MATL_ID='PVC', GEOMETRY='CYLINDRICAL', THICKNESS=0.01 /
 \end{lstlisting}
-can be used to model a power cable that is 5~m long, cylindrical in
-cross section, 2~cm in diameter. The heat transfer calculation is
-still one-dimensional; that is, it is assumed that there is a uniform
-heat flux all about the object. This can be somewhat confusing because
-the cable is represented as an obstruction of square cross section,
-with a separate heat transfer calculation performed at each face, and
-no communication among the four faces. Obviously, this is not an ideal
-way to do solid phase heat transfer, but it does provide a reasonable
-bounding surface temperature for the gas phase calculation. More
-detailed assessment of a cable would require a two or
-three-dimensional heat conduction calculation, which is not included
-in FDS. Use {\ct GEOMETRY='SPHERICAL'} to describe a spherical object.
+can be used to model a power cable that is 5~m long, cylindrical in cross section, 2~cm in diameter. The heat transfer calculation is still one-dimensional; that is, it is assumed that there is a uniform heat flux all about the object. This can be somewhat confusing because the cable is represented as an obstruction of square cross section, with a separate heat transfer calculation performed at each face, and no communication among the four faces. Obviously, this is not an ideal way to do solid phase heat transfer, but it does provide a reasonable bounding surface temperature for the gas phase calculation. More detailed assessment of a cable would require a two or three-dimensional heat conduction calculation, which is not included in FDS. Use {\ct GEOMETRY='SPHERICAL'} to describe a spherical object.
 
 
 \subsection{Special Topic: Solid Phase Numerical Gridding Issues}
 \label{info:solid_phase_stability}
 
-To compute the temperature and reactions inside the solids, FDS solves
-the one-dimensional heat transfer equation numerically. The size of
-the mesh cells on the surface of the solid is automatically chosen
-using a rule that makes the cell size smaller than the square root of
-the material diffusivity $(k/\rho c)$. By default, the solid mesh
-cells increase towards the middle of the material layer and are smallest
-on the layer boundaries.
+To compute the temperature and reactions inside the solids, FDS solves the one-dimensional heat transfer equation numerically. The size of the mesh cells on the surface of the solid is automatically chosen using a rule that makes the cell size smaller than the square root of the material diffusivity $(k/\rho c)$. By default, the solid mesh cells increase towards the middle of the material layer and are smallest on the layer boundaries.
 
-The default parameters are usually appropriate for simple heat transfer calculations but sometimes the use of pyrolysis reactions
-makes the temperatures and burning rate fluctuate. Adjustments may also be needed in case of
-extremely transient heat transfer situations. The numerical accuracy and stability of the solid phase solution may be improved by
-one of the following methods:
+The default parameters are usually appropriate for simple heat transfer calculations but sometimes the use of pyrolysis reactions makes the temperatures and burning rate fluctuate. Adjustments may also be needed in case of extremely transient heat transfer situations. The numerical accuracy and stability of the solid phase solution may be improved by one of the following methods:
 \begin{description}
 \item[Make the mesh density more uniform ] inside the material by setting {\ct STRETCH\_FACTOR(NL)=1.} on the {\ct SURF} line. This will generate a perfectly uniform mesh for layer number {\ct NL}. (This happens automatically if the layer contains one or more reacting materials.) Values between 1 and 2 give different levels of stretching. Note that {\ct STRETCH\_FACTOR} needs to be specified for all the layers.
 \item[Make the mesh cells smaller] by setting {\ct CELL\_SIZE\_FACTOR} less than 1.0. For example, a value of 0.5 makes the mesh cells half the size. The scaling always applies to all layers.
 \item[Improve the time resolution] by setting {\ct WALL\_INCREMENT=1} on the {\ct TIME} line. This forces the solid phase temperatures to be solved on every time step.
 \item[Limit the number of cells in a layer] by setting {\ct N\_LAYER\_CELLS\_MAX}. This array input has a default of 1000.
 \end{description}
-If all the material components of the surface are reacting, and the pyrolysis reactions have no solid residue, the thickness of
-the surface is going to shrink when the surface reacts. Each of the shrinking layers will vanish from the computation when its thickness gets
-smaller than a prescribed limiting value. This value can be set on a {\ct SURF} line via {\ct MINIMUM\_LAYER\_THICKNESS} keyword,
-defaulting to $1 \times 10^{-6}$~m. When all the material of a shrinking surface is consumed but {\ct BURN\_AWAY} is not
-prescribed, the surface temperature is set to {\ct TMP\_BACK}, convective heat flux to zero and burning rate to zero.
+If all the material components of the surface are reacting, and the pyrolysis reactions have no solid residue, the thickness of the surface is going to shrink when the surface reacts. Each of the shrinking layers will vanish from the computation when its thickness gets smaller than a prescribed limiting value. This value can be set on a {\ct SURF} line via {\ct MINIMUM\_LAYER\_THICKNESS} keyword, defaulting to $1 \times 10^{-6}$~m. When all the material of a shrinking surface is consumed but {\ct BURN\_AWAY} is not prescribed, the surface temperature is set to {\ct TMP\_BACK}, convective heat flux to zero and burning rate to zero.
 
 See Section~\ref{solid_phase_verification} for ways to check and improve the accuracy of the solid phase calculation.
 
@@ -2858,10 +2828,7 @@ The parameters affecting in-depth radiation absorption are the material's refrac
 
 \section{Simple Pyrolysis Models}
 
-FDS has several approaches for describing the pyrolysis of solids and liquids. The approach to take depends largely
-on the availability of material properties and the appropriateness of the underlying pyrolysis model.
-Note that all pyrolysis models in FDS require that you explicitly define the gas phase reaction. See Chapter~\ref{chap:combustion} for details.
-It should also be noted that the user has to use only one pyrolysis model at a time.
+FDS has several approaches for describing the pyrolysis of solids and liquids. The approach to take depends largely on the availability of material properties and the appropriateness of the underlying pyrolysis model. Note that all pyrolysis models in FDS require that you explicitly define the gas phase reaction. See Chapter~\ref{chap:combustion} for details. It should also be noted that the user has to use only one pyrolysis model at a time.
 
 \subsection{A Gas Burner with a Specified Heat Release Rate}
 
@@ -2979,20 +2946,20 @@ In the example below, the pyrolysis of wood is included within a simulation that
 &SPEC ID = 'CARBON DIOXIDE' /
 
 &MATL ID                    = 'WOOD'
-EMISSIVITY            = 0.9
-CONDUCTIVITY          = 0.2
-SPECIFIC_HEAT         = 1.3
-DENSITY               = 570.
-N_REACTIONS           = 1
-A(1)                  = 1.89E10
-E(1)                  = 1.51E5
-N_S(1)                = 1.0
-MATL_ID(1,1)          = 'CHAR'
-NU_MATL(1,1)          = 0.18
-SPEC_ID(1:4,1)        = 'OXYGEN','WATER VAPOR','CARBON DIOXIDE','PYROLYZATE'
-NU_SPEC(1:4,1)        = 0.82,0,0,0
-HEAT_OF_REACTION(1)   = 430.
-HEAT_OF_COMBUSTION(4,1) = 14500. /
+      EMISSIVITY            = 0.9
+      CONDUCTIVITY          = 0.2
+      SPECIFIC_HEAT         = 1.3
+      DENSITY               = 570.
+      N_REACTIONS           = 1
+      A(1)                  = 1.89E10
+      E(1)                  = 1.51E5
+      N_S(1)                = 1.0
+      MATL_ID(1,1)          = 'CHAR'
+      NU_MATL(1,1)          = 0.18
+      SPEC_ID(1:4,1)        = 'OXYGEN','WATER VAPOR','CARBON DIOXIDE','PYROLYZATE'
+      NU_SPEC(1:4,1)        = 0.82,0,0,0
+      HEAT_OF_REACTION(1)   = 430.
+      HEAT_OF_COMBUSTION(4,1)= 14500. /
 \end{lstlisting}
 Note that the indices associated with the parameters are not needed {\em in this case}, but they are shown to emphasize that, in general, there can be multiple reactions with corresponding kinetic parameters and products.
 
@@ -3077,29 +3044,7 @@ When in doubt about the values of these parameters, just specify the {\ct REFERE
       HEAT_OF_COMBUSTION(1)    = ...
       HEAT_OF_REACTION(1)      = ... /
 \end{lstlisting}
-Note that the indices have been added to the reaction parameters to
-emphasize the fact that these parameters are stored in arrays of
-length equal to {\ct N\_REACTIONS}. If there is only one reaction, you
-need not include the {\ct (1)}, but it is a good habit to get into.
-Note also that if the default combustion model is used, you can denote that the reaction
-produces fuel gas using the appropriate {\ct SPEC\_ID}.
-Note also that the {\ct HEAT\_OF\_COMBUSTION} is the energy released
-per unit mass of fuel gas that mixes with oxygen and combusts.  This
-has nothing to do with the pyrolysis process, so why is it specified
-here? The answer is that when using the default combustion model in FDS there is only one {\em gas phase}
-reaction of fuel and oxygen, but there can be dozens of
-different materials and dozens of {\em solid phase} reactions. To
-ensure that the fuel vapors from different materials combust to
-produce the proper amount of energy, it is very important to specify a
-{\ct HEAT\_OF\_COMBUSTION} for each material. That way, the mass loss
-rate of fuel gases is automatically adjusted so that the effective
-mass loss rate multiplied by the single, global, gas phase heat of
-combustion produces the expected heat release rate. This adjustment uses the value of {\ct HOC\_COMPLETE}, see Section~\ref{info:hoc_complete}, on the {\ct REAC} line.
-If, for example, the {\ct HOC\_COMPLETE} specified on the {\ct REAC} line is twice that
-specified on the {\ct MATL} line, the mass of contained within wall
-cell will be decremented by that determined by the pyrolysis model,
-but the mass added to gas phase would be reduced by 50~\%. A different
-value of heat of combustion can be specified for each species, $i$, in each reaction, $j$, via the parameter {\ct HEAT\_OF\_COMBUSTION(i,j)}.
+Note that the indices have been added to the reaction parameters to emphasize the fact that these parameters are stored in arrays of length equal to {\ct N\_REACTIONS}. If there is only one reaction, you need not include the {\ct (1)}, but it is a good habit to get into. Note also that if the default combustion model is used, you can denote that the reaction produces fuel gas using the appropriate {\ct SPEC\_ID}. Note also that the {\ct HEAT\_OF\_COMBUSTION} is the energy released per unit mass of fuel gas that mixes with oxygen and combusts.  This has nothing to do with the pyrolysis process, so why is it specified here? The answer is that when using the default combustion model in FDS there is only one {\em gas phase} reaction of fuel and oxygen, but there can be dozens of different materials and dozens of {\em solid phase} reactions. To ensure that the fuel vapors from different materials combust to produce the proper amount of energy, it is very important to specify a {\ct HEAT\_OF\_COMBUSTION} for each material. That way, the mass loss rate of fuel gases is automatically adjusted so that the effective mass loss rate multiplied by the single, global, gas phase heat of combustion produces the expected heat release rate. This adjustment uses the value of {\ct HOC\_COMPLETE}, see Section~\ref{info:hoc_complete}, on the {\ct REAC} line. If, for example, the {\ct HOC\_COMPLETE} specified on the {\ct REAC} line is twice that specified on the {\ct MATL} line, the mass of contained within wall cell will be decremented by that determined by the pyrolysis model, but the mass added to gas phase would be reduced by 50~\%. A different value of heat of combustion can be specified for each species, $i$, in each reaction, $j$, via the parameter {\ct HEAT\_OF\_COMBUSTION(i,j)}.
 
 \subsubsection{Modeling Upholstered Furnishings}
 
@@ -5448,13 +5393,7 @@ The FDS predictions based on the {\ct 'EXTINCTION~2'} model (right) confirm that
 
 By default, FDS employs either the {\ct 'EXTINCTION 1'} or {\ct 'EXTINCTION 2'} model to determine if combustion is viable. If local extinction occurs, the unburned fuel gas can re-ignite if it mixes with sufficient oxygen elsewhere in the domain, even if this re-ignition might not happen in reality because the temperature might be too low to sustain combustion. To prevent spurious re-ignition from happening, you can set the {\ct AUTO\_IGNITION\_TEMPERATURE} (AIT) on the {\ct REAC} line or the {\ct COMB} line, in \si{\degree C}, below which combustion will not occur.  For most fuels of interest, the AIT may be found in Beyler's chapter of the SFPE Handbook~\cite{SFPE:Beyler}. The default AIT is $-273 \; ^\circ$C, meaning that fuel and oxygen will burn when mixed providing that either of the extinction models allows combustion to occur.
 
-The value of AIT may need to be lowered for cases where the grid size is greater than 10~cm. The purpose of AIT is simply to prevent fuel and oxygen from spontaneously igniting, which is the default behavior of FDS. If an AIT is specified, then some form of heat/ignition source must be present to start the fire. FDS provides a ``spark'' as follows
-\begin{lstlisting}
-&INIT PART_ID='FDS SPARK', XYZ=..., N_PARTICLES=1, T_INSERT=10. /
-\end{lstlisting}
-This line creates a hot, burning particle at the location {\ct XYZ} starting at {\ct T\_INSERT} (s) and lasting a short amount of time. The character string {\ct 'FDS SPARK'} is a reserved phrase that directs FDS to generate internally the necessary {\ct SURF} and {\ct PART} lines that describe the igniter. If you want to generate your own ``spark'', do not use the string {\ct 'FDS SPARK'}.
-
-The spark igniter serves two purposes. First, within its single grid cell it generates a temperature greater than AIT and allows combustion to proceed; and second, it generates a local heat release rate per unit volume (HRRPUV) of $10/\Delta$~kW/m$^3$, where $\Delta=(\dx \, \dy \, \dz)^{1/3}$. Neighboring cells are assumed to support combustion if either their temperature exceeds AIT, or if they abut a cell with an HRRPUV exceeding $10/\Delta$~kW/m$^3$. You can change the local HRRPUV by specifying {\ct HRRPUV\_SPARK} on the {\ct COMB} line in units of kW/m$^3$. You can change the default spark temperature ($1000 \, ^\circ$C) by specifying {\ct TMP\_SPARK} on the {\ct COMB} line. The duration of the spark is $\Delta/s_L$~s, where $s_L$ is the {\ct LAMINAR\_FLAME\_SPEED}\footnote{Note that the {\ct LAMINAR\_FLAME\_SPEED} has no role in FDS other than to provide a simple scaling relationship for the igniter duration.}, also set on the {\ct COMB} line. Its default value is 0.4~m/s. You can change the duration of the spark by specifying {\ct DT\_SPARK} on the {\ct COMB} line.
+The value of AIT may need to be lowered for cases where the grid size is greater than 10~cm. The purpose of AIT is simply to prevent fuel and oxygen from spontaneously igniting, which is the default behavior of FDS. If an AIT is specified, then some form of heat/ignition source must be present to start the fire. 
 
 
 
@@ -6410,6 +6349,8 @@ specifies that half the particle is facing downwards and half is facing upwards.
 
 Note that if only a single {\ct ORIENTATION} vector is assigned on a {\ct PART} line, the radiative flux to the particle is calculated as if there is a flat plate normal to the direction of the vector, like a conventional heat flux gauge. That is, the heat flux is not an integrated average over the entire particle but rather the directional heat flux with the given orientation. The reason for this exception to the general rule is that often single particles are used as ``targets'' to record a heat flux at a given point in the domain with a given orientation. These particles can be thought of as tiny heat flux gauges that do not disturb the flow.
 
+\FloatBarrier
+
 \subsection{Gas Generating Particles}
 \label{info:particle_mass_generation}
 \label{surf_mass_part_specified}
@@ -6456,13 +6397,13 @@ Lagrangian particles can be used to represent different types of vegetation, lik
 &PART ID='pine needles', SAMPLING_FACTOR=1, SURF_ID='wet vegetation',
       PROP_ID='needle image', STATIC=.TRUE. /
 &INIT PART_ID='pine needles', XB=0.,1.,0.,1.,0.,1., N_PARTICLES=1000,
-      MASS_PER_VOLUME=1. /
+      MASS_PER_VOLUME=0.8 /
 &PROP ID='needle image', SMOKEVIEW_ID='TUBE',
       SMOKEVIEW_PARAMETERS='L=0.1','D=0.0005' /
 
 &SURF ID = 'wet vegetation'
-      MATL_ID(1,1:2) = 'PINE','MOISTURE'
-      MATL_MASS_FRACTION(1,1:2) = 0.8,0.2
+      MATL_ID  = 'PINE'
+      MOISTURE_FRACTION = 0.25
       THICKNESS = 0.00025
       LENGTH = 0.1
       GEOMETRY = 'CYLINDRICAL' /
@@ -6494,7 +6435,7 @@ Lagrangian particles can be used to represent different types of vegetation, lik
       CONDUCTIVITY = 1.0
       SPECIFIC_HEAT = 1.6 /
 \end{lstlisting}
-In the example, 1~kg of pine needles occupy 1~m$^3$. The number of particles used to represent the pine needles is somewhat arbitrary. FDS will automatically weight the specified number so that the total mass per volume is 1~kg. The needles are modeled as cylinders that are 0.5~mm in diameter. The {\ct THICKNESS} on the {\ct SURF} line refers to the radius of the cylinder in units of m. The needles are all 0.1~m long. The needles contain 20~\% (by mass) moisture, and 80~\% cellulose. The moisture is set to evaporate at 100~$^\circ$C to create water vapor and the cellulose pyrolyzes at 300~$^\circ$C to form fuel gas and char. In the example case, the original 1~kg of vegetation is heated until all of the water and fuel evaporate. The fuel is not allowed to burn by setting the ambient oxygen concentration to 1~\%. Figure~\ref{pine_needles_fig} shows the evolution of the fuel, water and char mass. Agreement with the expected values means that mass is conserved.
+In the example, 1~kg of wet pine needles occupy 1~m$^3$. Notice that the specified {\ct MASS\_PER\_VOLUME} is only 0.8~kg/m$^3$ because by convention this the {\em dry} mass. The {\ct SURF} line for {\ct 'wet vegetation'} includes the {\ct MOISTURE\_FRACTION}, typically denoted $M$, so that the total mass per unit volume is actually the specified value multiplied by $(1+M)$. The number of particles used to represent the pine needles is somewhat arbitrary. FDS will automatically weight the specified number so that the total mass per volume is 1~kg. The needles are modeled as cylinders that are 0.5~mm in diameter. The {\ct THICKNESS} on the {\ct SURF} line refers to the radius of the cylinder in units of m. The needles are all 0.1~m long. The needles contain 20~\% (by mass) moisture, and 80~\% cellulose. The moisture is set to evaporate at 100~$^\circ$C to create water vapor and the cellulose pyrolyzes at 300~$^\circ$C to form fuel gas and char. In the example case, the original 1~kg of vegetation is heated until all of the water and fuel evaporate. The fuel is not allowed to burn by setting the ambient oxygen concentration to 1~\%. Figure~\ref{pine_needles_fig} shows the evolution of the fuel, water and char mass. Agreement with the expected values means that mass is conserved.
 
 \begin{figure}[ht]
 \begin{center}
@@ -6506,7 +6447,7 @@ In the example, 1~kg of pine needles occupy 1~m$^3$. The number of particles use
 
 \subsubsection{Notation used in Forestry}
 
-Users of FDS that work in wildland fire or forestry may be unfamiliar with some of the vegetation material properties in FDS input files. Specifically, the thickness and length of needles or roundwood, for a given vegetation type, are not routinely reported (the surface-to-volume ratio is reported instead). Also, while the bulk density is reported (or can be easily found from vegetation loading and height), it is based on the dry mass. Moisture content is reported on a dry weight basis, $M_{\rm dw}$. The {\ct MASS\_FRACTION} of moisture on the {\ct SURF} line is $M_{\rm dw} / (1 + M_{\rm dw})$. In addition, the surface-to-volume ratio of the vegetation, $\sigma_{\rm v}$, is reported instead of the physical dimensions. If we assume a cylindrical shape, with the length of the cylinder being much larger than the radius, then the radius of the cylinder (input as {\ct THICKNESS}) is $2/\sigma_{\rm v}$. The {\ct MASS\_PER\_VOLUME} is equivalent to $m_{\rm d}''' \, (1+M_{\rm dw})$ where $m_{\rm d}'''$ is the mass per unit volume of dry vegetation.
+Users of FDS that work in wildland fire or forestry may be unfamiliar with some of the vegetation material properties in FDS input files. Specifically, the thickness and length of needles or roundwood, for a given vegetation type, are not routinely reported (the surface-to-volume ratio is reported instead). Also, while the bulk density is reported (or can be easily found from vegetation loading and height), it is based on the dry mass. Moisture content is reported on a dry weight basis, $M_{\rm dw}$. You can specify the {\ct MATL\_MASS\_FRACTION} of moisture on the {\ct SURF} line as $M_{\rm dw} / (1 + M_{\rm dw})$, or you can simply specify the {\ct MOISTURE\_FRACTION} directly and FDS will calculate the appropriate mass fraction automatically. In addition, the surface-to-volume ratio of the vegetation, $\sigma_{\rm v}$, is reported instead of the physical dimensions. If we assume a cylindrical shape, with the length of the cylinder being much larger than the radius, then the radius of the cylinder (input as {\ct THICKNESS}) is $2/\sigma_{\rm v}$. If you specify a {\ct MOISTURE\_FRACTION} on the {\ct SURF} line that describes the vegetation, then the {\ct MASS\_PER\_VOLUME} is taken as the {\ct dry} mass per unit volume. However, if you do not specify a {\ct MOISTURE\_FRACTION} explicitly, but rather specify the material content of the vegetation including the moisture, then the {\ct MASS\_PER\_VOLUME} is taken as $m_{\rm d}''' \, (1+M_{\rm dw})$, where $m_{\rm d}'''$ is the mass per unit volume of dry vegetation.
 
 
 \subsection{Firebrands}
@@ -9338,7 +9279,6 @@ properties be specified as well. Simply prescribing as many properties as possib
 \endhead
 {\ct AUTO\_IGNITION\_TEMPERATURE}               & Real          & Section~\ref{info:ignition}                           & $^\circ$C     &  -273 $^\circ$C      \\ \hline
 {\ct CHECK\_REALIZABILITY}                      & Logical       & Section~\ref{info:chem_integration}                   &               & {\ct .FALSE.}        \\ \hline
-{\ct DT\_SPARK}                                 & Real          & Section~\ref{info:ignition}                           &  s            &  $\Delta/s_L$        \\ \hline
 {\ct EXTINCTION\_MODEL}                         & Character     & Section~\ref{info:extinction}                         &               & {\ct 'EXTINCTION 2'} \\ \hline
 {\ct FIXED\_MIX\_TIME}                          & Real          & Section~\ref{info:turbulent_combustion}               &  s            &                      \\ \hline
 {\ct FUEL\_C\_TO\_CO\_FRACTION}                 & Real          & Section~\ref{info:two-step_simple_chemistry}          &               &  2/3                 \\ \hline
@@ -9354,7 +9294,6 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct SUPPRESSION}                               & Logical       & Section~\ref{info:extinction}                         &               & {\ct .TRUE.}         \\ \hline
 {\ct TAU\_CHEM}                                 & Real          & Section~\ref{info:turbulent_combustion}               &               & 1.E-10               \\ \hline
 {\ct TAU\_FLAME}                                & Real          & Section~\ref{info:turbulent_combustion}               &               & 1.E10                \\ \hline
-{\ct TMP\_SPARK}                                & Real          & Section~\ref{info:ignition}                           & $^\circ$C     & 1000                 \\ \hline
 \end{longtable}
 
 \vspace{\baselineskip}
@@ -10596,6 +10535,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MATL\_MASS\_FRACTION(NL,NC)}       & Real Array      & Section~\ref{info:solid_pyrolysis}        &                     &                         \\ \hline
 {\ct MINIMUM\_LAYER\_THICKNESS}         & Real            & Section~\ref{info:solid_phase_stability}  & m                   & 1.E-6                   \\ \hline
 {\ct MLRPUA }                           & Real            & Section~\ref{info:gas_burner}             & \si{kg/(m^2.s)}     &                         \\ \hline
+{\ct MOISTURE\_FRACTION}                & Real            & Section~\ref{info:vegetation}             &                     & 0.                      \\ \hline
 {\ct N\_LAYER\_CELLS\_MAX}              & Integer Array   & Section~\ref{info:solid_phase_stability}  &                     & 1000                    \\ \hline
 {\ct NET\_HEAT\_FLUX}                   & Real            & Section~\ref{info:convection}             & kW/m$^2$            &                         \\ \hline
 {\ct NO\_SLIP}                          & Logical         & Section~\ref{info:WALL_MODEL}             &                     & {\ct .FALSE.}           \\ \hline
