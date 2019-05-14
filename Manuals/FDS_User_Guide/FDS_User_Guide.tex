@@ -5087,7 +5087,7 @@ The FDS predictions based on the {\ct 'EXTINCTION~2'} model (right) confirm that
 
 By default, FDS employs either the {\ct 'EXTINCTION 1'} or {\ct 'EXTINCTION 2'} model to determine if combustion is viable. If local extinction occurs, the unburned fuel gas can re-ignite if it mixes with sufficient oxygen elsewhere in the domain, even if this re-ignition might not happen in reality because the temperature might be too low to sustain combustion. To prevent spurious re-ignition from happening, you can set the {\ct AUTO\_IGNITION\_TEMPERATURE} (AIT) on the {\ct REAC} line or the {\ct COMB} line, in \si{\degree C}, below which combustion will not occur.  For most fuels of interest, the AIT may be found in Beyler's chapter of the SFPE Handbook~\cite{SFPE:Beyler}. The default AIT is $-273 \; ^\circ$C, meaning that fuel and oxygen will burn when mixed providing that either of the extinction models allows combustion to occur.
 
-The value of AIT may need to be lowered for cases where the grid size is greater than 10~cm. The purpose of AIT is simply to prevent fuel and oxygen from spontaneously igniting, which is the default behavior of FDS. If an AIT is specified, then some form of heat/ignition source must be present to start the fire. 
+The value of AIT may need to be lowered for cases where the grid size is greater than 10~cm. The purpose of AIT is simply to prevent fuel and oxygen from spontaneously igniting, which is the default behavior of FDS. If an AIT is specified, then some form of heat/ignition source must be present to start the fire.
 
 
 
@@ -6360,7 +6360,7 @@ The parameter {\ct E\_COEFFICIENT} must be obtained experimentally, and it is ex
 
 \chapter{Earth, Wind and Fire}
 
-This chapter describes techniques for modeling fires outside of buildings, including the effects of wind and the atmospheric boundary layer. 
+This chapter describes techniques for modeling fires outside of buildings, including the effects of wind and the atmospheric boundary layer.
 
 Most of the parameters that describe the atmosphere are entered on a single namelist line called {\ct WIND}. This namelist group is new starting with FDS version 6.6.0. Previous versions of FDS used the {\ct MISC} line for parameters related to wind and atmospheric conditions. There are three ways to specify a wind in FDS. The preferred method, originally implemented in FDS version 6.6.0, is to model the wind and corresponding temperature profile using Monin-Obukhov similarity theory (Section~\ref{info:WIND}). A second, more complicated method, is to specify a uniform horizontal forcing function and allow the wind field to develop naturally. This has proven more useful in wind tunnel applications than for natural winds (Section~\ref{info:force_vector}). The third method, which has traditionally been employed in older versions of FDS, is to create essentially a ``wall of wind'' where an entire side of the computational domain is turned into a giant fan blowing air laterally. This is the least preferred method of creating a wind (Section~\ref{info:wall_of_wind}).
 
@@ -6678,15 +6678,22 @@ Lagrangian particles can be used to represent different types of vegetation, lik
 First, the {\ct PART} line defines a class of solid particles that represent pine needles:
 \begin{lstlisting}
 &PART ID='pine needles', SAMPLING_FACTOR=1, SURF_ID='wet vegetation',
+      DRAG_COEFFICIENT=2.8, SHAPE_FACTOR=0.15,
       PROP_ID='needle image', STATIC=.TRUE. /
 \end{lstlisting}
-This line does not say much about the needles other than that they do not move ({\ct STATIC=.TRUE.}), and that each one is to be shown in Smokeview ({\ct SAMPLNIG\_FACTOR=1}), and that Smokeview should visualize each needle as a tube that is 0.1~m long and 0.5~mm in diameter:
-\begin{lstlisting} 
+{\ct STATIC=.TRUE.} specifies that the needles do not move, and {\ct SAMPLNIG\_FACTOR=1} specifies that each needle is to be shown in Smokeview. More importantly, this line specifies a drag coefficient for the needles based on wind tunnel measurements made at NIST~\cite{Falkenstein-Smith:2018}. The force per unit volume exerted by the vegetation is given by:
+\be
+   F = \frac{\rho}{2} \, C_{\rm d} \, C_{\rm s} \, \beta \, \sigma \, U^2
+\ee
+where $\rho$ is the air density, $C_{\rm d}$ is the drag coefficient, $C_{\rm s}$ is the {\ct SHAPE\_FACTOR}, $\beta$ is the packing ratio (see below), $\sigma$ is the surface area to volume ratio (see below), and $U$ is the air velocity.
+
+The {\ct PART} line also tells Smokeview to visualize each needle as a tube that is 0.1~m long and 0.5~mm in diameter:
+\begin{lstlisting}
 &PROP ID='needle image', SMOKEVIEW_ID='TUBE',
       SMOKEVIEW_PARAMETERS='L=0.1','D=0.0005' /
 \end{lstlisting}
 The geometry and composition of the needle is described on the {\ct SURF} line that is referenced by the {\ct PART} line:
-\begin{lstlisting} 
+\begin{lstlisting}
 &SURF ID = 'wet vegetation'
       MATL_ID  = 'dry pine'
       MOISTURE_FRACTION = 0.25
@@ -6699,7 +6706,7 @@ The needle is composed of two materials---{\ct 'dry pine'} and {\ct 'MOISTURE'}.
    Y_{\rm m} = \frac{M}{1+M}
 \ee
 The length of each needle is specified directly, but its diameter is specified via the surface area to volume ratio, $\sigma=2/r$ for a cylinder. For a sphere, $\sigma=3/r$, where $r$ is the radius of the cylinder or sphere. The {\ct GEOMETRY} can be {\ct 'CARTESIAN'}, i.e. a plate, {\ct 'CYLINDRICAL'}, or {\ct 'SPHERICAL'}. For a plate, $\sigma=1/\delta$ where $\delta$ is the half-thickness of the plate. The {\ct MATL\_ID} specifies the thermo-physical properties of the pine needle.
-\begin{lstlisting} 
+\begin{lstlisting}
 &MATL ID = 'dry pine'
       DENSITY = 500.
       CONDUCTIVITY = 0.1
@@ -6728,7 +6735,7 @@ The length of each needle is specified directly, but its diameter is specified v
 Each {\ct MATL} line must include the {\ct DENSITY}, {\ct CONDUCTIVITY} and {\ct SPECIFIC\_HEAT} of that component. If the material component undergoes a reaction, there needs to be either a {\ct REACTION\_TEMPERATURE} or more detailed kinetic parameters. Material components that react need stoichiometric coefficients {\ct NU\_SPEC} and {\ct NU\_MATL} to designate how much of the material mass is converted to a gas {\ct SPEC}ies and how much to a solid {\ct MAT}eria{\ct L}. In this case, {\ct 'CELLULOSE'} is the gas-phase fuel specified on the {\ct REAC} line. The gas species {\ct 'WATER VAPOR'} is defined by a {\ct SPEC} line. Even though water vapor is included in the combustion products, you still need to explicitly specify {\ct 'WATER VAPOR'} as the gasified form of the moisture in the pine needles.
 
 Finally, the pine needles are introduced into the simulation via the {\ct INIT} line:
-\begin{lstlisting}           
+\begin{lstlisting}
 &INIT PART_ID='pine needles', XB=0.,1.,0.,1.,0.,1., N_PARTICLES=1000,
       PACKING_RATIO=0.0016 /
 \end{lstlisting}
@@ -10120,7 +10127,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RUNNING\_AVERAGE\_FACTOR}           & Real            & Section~\ref{radiative_part_props}      &           & 0.5           \\ \hline
 {\ct SAMPLING\_FACTOR}                   & Integer         & Section~\ref{info:part_output}          &           & 1             \\ \hline
 {\ct SECOND\_ORDER\_PARTICLE\_TRANSPORT} & Logical         & Section~\ref{info:PART_Stability}       &           & {\ct .FALSE.} \\ \hline
-{\ct SHAPE\_FACTOR}                      & Real            & Section~\ref{info:particle_radiation_absorption}&   & 0.25          \\ \hline
+{\ct SHAPE\_FACTOR}                      & Real            & Sections~\ref{info:particle_radiation_absorption}, \ref{pine_needles} &   &            \\ \hline
 {\ct SIGMA\_D}                           & Real            & Section~\ref{info:particle_size}        &           &               \\ \hline
 {\ct SPEC\_ID}                           & Character       & Section~\ref{thermal_part_props}        &           &               \\ \hline
 {\ct STATIC}                             & Logical         & Section~\ref{info:PART_SURF}            &           & {\ct .FALSE.} \\ \hline
