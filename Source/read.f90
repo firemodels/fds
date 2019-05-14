@@ -4914,6 +4914,7 @@ READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
    IF (SPEC_ID/='null') THEN
       SURF_ID = 'DROPLET'
       LPC%LIQUID_DROPLET = .TRUE.
+      IF (SHAPE_FACTOR<0._EB) SHAPE_FACTOR = 0.25_EB
       IF (SAMPLING_FACTOR<=0) SAMPLING_FACTOR = 10
       IF (DIAMETER<=0._EB .AND. CNF_RAMP_ID=='null') THEN
          WRITE(MESSAGE,'(A,I0,A)') 'ERROR: PART ',N,' requires a specified DIAMETER.'
@@ -5277,7 +5278,7 @@ BREAKUP_DISTRIBUTION     = 'ROSIN-RAMMLER-LOGNORMAL'
 BREAKUP_CNF_RAMP_ID      = 'null'
 FREE_AREA_FRACTION       = 0.5_EB
 SECOND_ORDER_PARTICLE_TRANSPORT = .FALSE.
-SHAPE_FACTOR             = 0.25_EB  ! This value is appropriate for a sphere
+SHAPE_FACTOR             = -1._EB
 EMBER_PARTICLE           = .FALSE.
 EMBER_DENSITY_THRESHOLD  = 0._EB
 EMBER_VELOCITY_THRESHOLD = 1000._EB
@@ -7439,9 +7440,15 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
          LPC%SURF_INDEX = N
 
          IF (.NOT.LPC%SOLID_PARTICLE) CYCLE
-         IF (LPC%DRAG_LAW==SCREEN_DRAG) CYCLE
+
+         IF (LPC%DRAG_LAW==SCREEN_DRAG) THEN
+            IF (LPC%SHAPE_FACTOR<0._EB) LPC%SHAPE_FACTOR = 1._EB/PI
+            CYCLE
+         ENDIF
+
          SELECT CASE (SF%GEOMETRY)
             CASE(SURF_CARTESIAN)
+               IF (LPC%SHAPE_FACTOR<0._EB) LPC%SHAPE_FACTOR = 0.5_EB
                IF (SF%THICKNESS<=0._EB) THEN
                   WRITE(MESSAGE,'(A,A,A)') 'ERROR: SURF ',TRIM(SF%ID),' needs a THICKNESS'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
@@ -7457,12 +7464,15 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
                   ENDIF
                ENDIF
             CASE(SURF_CYLINDRICAL)
+               IF (LPC%SHAPE_FACTOR<0._EB) LPC%SHAPE_FACTOR = 1._EB/PI
                IF (.NOT. LPC%DRAG_LAW==POROUS_DRAG) THEN
                   IF (SF%LENGTH <0._EB) THEN
                      WRITE(MESSAGE,'(A,A,A)') 'ERROR: SURF ',TRIM(SF%ID),' needs a LENGTH'
                      CALL SHUTDOWN(MESSAGE) ; RETURN
                   ENDIF
                ENDIF
+            CASE(SURF_SPHERICAL)
+               IF (LPC%SHAPE_FACTOR<0._EB) LPC%SHAPE_FACTOR = 0.25_EB
          END SELECT
       ENDIF
    ENDDO
