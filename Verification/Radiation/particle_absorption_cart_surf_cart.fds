@@ -55,12 +55,14 @@ MESN 3 has 3 particles with cartesian geometry and split in 2 with upward and do
 &VENT XB = 8,11,0,3,3,3 SURF_ID = 'REALLY HOT 2' /
 
 &PART ID='part_1'
+      SHAPE_FACTOR = 0.25
       STATIC = .TRUE.
       INITIAL_TEMPERATURE = 0.
       SAMPLING_FACTOR=1
       SURF_ID = 'part_surf' /
 
 &PART ID='part_2'
+      SHAPE_FACTOR = 0.25
       STATIC = .TRUE.
       INITIAL_TEMPERATURE = 0.
       SAMPLING_FACTOR=1
@@ -69,6 +71,7 @@ MESN 3 has 3 particles with cartesian geometry and split in 2 with upward and do
       ORIENTATION(1:3,2)=0,0,-1 /
 
 &PART ID='part_3'
+      SHAPE_FACTOR = 0.25
       STATIC = .TRUE.
       INITIAL_TEMPERATURE = 0.
       SAMPLING_FACTOR=1
