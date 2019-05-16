@@ -222,6 +222,9 @@ for i=2:n_plots
                         Save_Measured_Metric(i,1,1) = max(M(indices,d1_Dep_Col))-d1_Initial_Value;
                         using_stat_x_y_check_zero = 1;
                     end
+                elseif strcmp(Metric,'slope')
+                    p = polyfit(M(indices,d1_Ind_Col),M(indices,d1_Dep_Col),1);
+                    Save_Measured_Metric(i,j,1) = p(1);
                 elseif strcmp(Metric,'mean')
                     Save_Measured_Metric(i,j,1) = abs(mean(M(indices,d1_Dep_Col))-d1_Initial_Value);
                 % If mean_x_y is specified for a plot with multiple curves,
@@ -338,6 +341,9 @@ for i=2:n_plots
                         Save_Predicted_Metric(i,1,1) = max(M_Dep)-d2_Initial_Value;
                         using_stat_x_y_check_zero = 1;
                     end
+                elseif strcmp(Metric,'slope')
+                    p = polyfit(M(indices,d2_Ind_Col),M(indices,d2_Dep_Col),1);
+                    Save_Predicted_Metric(i,j,1) = p(1);
                 elseif strcmp(Metric,'mean')
                     Save_Predicted_Metric(i,j,1) = abs(mean(M_Dep)-d2_Initial_Value);
                 % If mean_x_y is specified for a plot with multiple curves,
