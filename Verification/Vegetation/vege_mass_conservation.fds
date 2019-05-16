@@ -14,8 +14,8 @@
 &SURF ID='HOT WALL', TMP_FRONT=1000., DEFAULT=.TRUE. /
 
 &SURF ID                        = 'wet vegetation'
-      MATL_ID(1,1:2)            = 'PINE','MOISTURE'
-      MATL_MASS_FRACTION(1,1:2) = 0.8,0.2 
+      MATL_ID                   = 'PINE'
+      MOISTURE_FRACTION         = 0.25
       THICKNESS                 = 0.00025
       LENGTH                    = 0.1
       GEOMETRY                  = 'CYLINDRICAL' /
@@ -52,7 +52,7 @@
 &PART ID='pine needles', SAMPLING_FACTOR=1, SURF_ID='wet vegetation', PROP_ID='wood image'
       QUANTITIES='PARTICLE TEMPERATURE','PARTICLE MASS','PARTICLE DIAMETER', STATIC=.TRUE. /
 
-&INIT PART_ID='pine needles', XB=0.,1.,0.,1.,0.,1., MASS_PER_VOLUME=1., N_PARTICLES_PER_CELL=1, CELL_CENTERED=.TRUE.  /
+&INIT PART_ID='pine needles', XB=0.,1.,0.,1.,0.,1., MASS_PER_VOLUME=0.8, N_PARTICLES_PER_CELL=1, CELL_CENTERED=.TRUE.  /
 
 &PROP ID='wood image', SMOKEVIEW_ID='TUBE', SMOKEVIEW_PARAMETERS='L=0.1','D=0.0005' /
 
