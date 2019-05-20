@@ -1032,7 +1032,7 @@ Figure~\ref{Waterloo_HRR} displays the measured and predicted heat release rates
 \subsection{VTT Large Hall Tests}
 
 In the section, we predict the mass loss rates of the 1.17 m (1.07 m$^2$) and 1.6 m (2.0 m$^2$) diameter heptane pool fires, described in section~\ref{VTT_Description}. Experimental mass loss rates are averages of two or three individual tests. The simulation model consist of 4 $\times$ 4 $\times$ 6 m$^3$ domain with open boundaries, and a circular pool with steel (one cell high and thick) lip. Pool surface is at 1.0 m height from the floor. The liquid phase absorption of radiation is calculated using the Full-spectrum-k method described in~\cite{Isojarvi:IJHT2018}.
-  Figure~\ref{VTT_MLRPUA} shows the measured and predicted mass loss rates, divided by the pool area. 
+  Figure~\ref{VTT_MLRPUA} shows the measured and predicted mass loss rates, divided by the pool area.
 \begin{figure}[!ht]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/Pool_Fires/VTT_heptane_1_m2} &
@@ -1041,11 +1041,16 @@ In the section, we predict the mass loss rates of the 1.17 m (1.07 m$^2$) and 1.
 \caption[VTT Large Hall Test burning rate]{VTT Large Hall Test burning rate.}
 \label{VTT_MLRPUA}
 \end{figure}
-  
+
 \clearpage
 
 \section{Wildland Fire Spread (CSIRO Grassland Fires)}
 \label{WUI}
+
+The following sections present examples of fire spread through vegetation, both small and full-scale. A summary plot is presented in Fig.~\ref{RoS_Summary}.
+
+
+\subsection{CSIRO Grassland Fires}
 
 This section presents the results for simulations of two of the CSIRO Grassland Fire experiments. For details of the experiments and simulations, see Section~\ref{CSIRO_Grassland_Fires_Description}. The first experiment, C064, was conducted on a 100~m by 100~m plot; the second, F19, was conducted on a 200~m by 200~m plot. The results of the simulations are shown in Fig.~\ref{CSIRO}. The fire front in the FDS simulations is defined as the location of the maximum gas temperature in a 1~m wide, 1~m tall strip along the centerline of the grass field. The experimental points were determined from aerial photography.
 
@@ -1060,6 +1065,705 @@ This section presents the results for simulations of two of the CSIRO Grassland 
 
 
 \clearpage
+
+
+\subsection{USFS/Catchpole Experiments}
+\label{USFS_Catchpole_Plots}
+
+Figures~\ref{USFS_Catchpole_008} through \ref{USFS_Catchpole_354} present the results of 354 simulations of the USFS/Catchpole experiments. A brief description is given in Section~\ref{USFS_Catchpole_Description}. The paper by Catchpole et al.~\cite{Catchpole:CST1998} reports a single rate of spread for each experiment, which is depicted in the figures as a straight black line. The rate of spread of the simulations was calculated by fitting the best line through the data points over a time interval between 10~\% and 90~\% of the observed transit time of the real fire over the 8~m fuel bed. The red dashed line is the best fit line from which the rate of spread is taken.
+
+\newpage
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/MF54} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/MF43} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/MF50} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/MF48} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/MF32} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/MF49} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/MF42} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/MF51} \\
+\end{tabular*}
+\caption[Flame front, USFS/Catchpole experiments]{Flame front, USFS/Catchpole experiments}
+\label{USFS_Catchpole_008}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/MF47} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/MF37} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/MF31} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/MF55} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/MF56} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/MF24} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/MF52} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/MF38} \\
+\end{tabular*}
+\caption[Flame front, USFS/Catchpole experiments]{Flame front, USFS/Catchpole experiments}
+\label{USFS_Catchpole_016}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/MF53} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/MF29} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/MF21} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/MF20} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC1} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC60} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC61} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC2B} \\
+\end{tabular*}
+\caption[Flame front, USFS/Catchpole experiments]{Flame front, USFS/Catchpole experiments}
+\label{USFS_Catchpole_024}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC1A} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC67} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC71} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC3F} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC8A} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC68} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC46} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC9E} \\
+\end{tabular*}
+\caption[Flame front, USFS/Catchpole experiments]{Flame front, USFS/Catchpole experiments}
+\label{USFS_Catchpole_032}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC84} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC6A} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC98} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC96} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC99} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC47} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC1C} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC2C} \\
+\end{tabular*}
+\caption[Flame front, USFS/Catchpole experiments]{Flame front, USFS/Catchpole experiments}
+\label{USFS_Catchpole_040}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC7A} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC5E} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC2E} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC64} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC4B} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC48} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC6D} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC65} \\
+\end{tabular*}
+\caption[Flame front, USFS/Catchpole experiments]{Flame front, USFS/Catchpole experiments}
+\label{USFS_Catchpole_048}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC7B} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC49} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC32} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC6B} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC93} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC92} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC75} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC73} \\
+\end{tabular*}
+\caption[Flame front, USFS/Catchpole experiments]{Flame front, USFS/Catchpole experiments}
+\label{USFS_Catchpole_056}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC5B} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC77} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC2} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC3} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC85} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC3D} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC4D} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC66} \\
+\end{tabular*}
+\caption[Flame front, USFS/Catchpole experiments]{Flame front, USFS/Catchpole experiments}
+\label{USFS_Catchpole_064}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC8F} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC5C} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC9B} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC8B} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC4C} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC95} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC3C} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC7C} \\
+\end{tabular*}
+\caption[Flame front, USFS/Catchpole experiments]{Flame front, USFS/Catchpole experiments}
+\label{USFS_Catchpole_072}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC6C} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC8C} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC58} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC55} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC52} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC59} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC2D} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC51} \\
+\end{tabular*}
+\caption[Flame front, USFS/Catchpole experiments]{Flame front, USFS/Catchpole experiments}
+\label{USFS_Catchpole_080}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC56} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC1D} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC9C} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC82} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC7D} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC1E} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC9D} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC8D} \\
+\end{tabular*}
+\caption[Flame front, USFS/Catchpole experiments]{Flame front, USFS/Catchpole experiments}
+\label{USFS_Catchpole_088}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC62} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC83} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC86} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC63} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC3B} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC88} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC44} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC45} \\
+\end{tabular*}
+\caption[Flame front, USFS/Catchpole experiments]{Flame front, USFS/Catchpole experiments}
+\label{USFS_Catchpole_096}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC22} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC1B} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC2A} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC21} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC57} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC70} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC9A} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC5} \\
+\end{tabular*}
+\caption[Flame front, USFS/Catchpole experiments]{Flame front, USFS/Catchpole experiments}
+\label{USFS_Catchpole_104}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC53} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC97} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC5A} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC8E} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC4A} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC69} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC3A} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC23} \\
+\end{tabular*}
+\caption[Flame front, USFS/Catchpole experiments]{Flame front, USFS/Catchpole experiments}
+\label{USFS_Catchpole_112}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC4} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC16} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC24} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC27} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC25} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC80} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC78} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC87} \\
+\end{tabular*}
+\caption[Flame front, USFS/Catchpole experiments]{Flame front, USFS/Catchpole experiments}
+\label{USFS_Catchpole_120}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC54} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC6} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC14} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC30} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC15} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC34} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC28} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC26} \\
+\end{tabular*}
+\caption[Flame front, USFS/Catchpole experiments]{Flame front, USFS/Catchpole experiments}
+\label{USFS_Catchpole_128}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC79} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC81} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC89} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC42} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC7E} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC6E} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC7} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC43} \\
+\end{tabular*}
+\caption[Flame front, USFS/Catchpole experiments]{Flame front, USFS/Catchpole experiments}
+\label{USFS_Catchpole_136}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC4F} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC3E} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC4E} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC20} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC38} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC8} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC17} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC29} \\
+\end{tabular*}
+\caption[Flame front, USFS/Catchpole experiments]{Flame front, USFS/Catchpole experiments}
+\label{USFS_Catchpole_144}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC33} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC40} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC36} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC50} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC18} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC74} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC9} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC19} \\
+\end{tabular*}
+\caption[Flame front, USFS/Catchpole experiments]{Flame front, USFS/Catchpole experiments}
+\label{USFS_Catchpole_152}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC31} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC35} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC37} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC76} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC72} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC12} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC10} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC13} \\
+\end{tabular*}
+\caption[Flame front, USFS/Catchpole experiments]{Flame front, USFS/Catchpole experiments}
+\label{USFS_Catchpole_160}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXSC11} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC78} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC87} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC9H} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC3C} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC59} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC1C} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC7B} \\
+\end{tabular*}
+\caption[Flame front, USFS/Catchpole experiments]{Flame front, USFS/Catchpole experiments}
+\label{USFS_Catchpole_168}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC60} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC2C} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC8B} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC7H} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC3D} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC9C} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC7F} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC8J} \\
+\end{tabular*}
+\caption[Flame front, USFS/Catchpole experiments]{Flame front, USFS/Catchpole experiments}
+\label{USFS_Catchpole_176}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC5F} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC9J} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC1H} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC6C} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC6F} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC3H} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC7C} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC74} \\
+\end{tabular*}
+\caption[Flame front, USFS/Catchpole experiments]{Flame front, USFS/Catchpole experiments}
+\label{USFS_Catchpole_184}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC49} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC54} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC2B} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC2} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC45} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC88} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC99} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC50} \\
+\end{tabular*}
+\caption[Flame front, USFS/Catchpole experiments]{Flame front, USFS/Catchpole experiments}
+\label{USFS_Catchpole_192}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC11} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC56} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC16} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC51} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC52} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC72} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC12} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC77} \\
+\end{tabular*}
+\caption[Flame front, USFS/Catchpole experiments]{Flame front, USFS/Catchpole experiments}
+\label{USFS_Catchpole_200}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC75} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC73} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC55} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC15} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC61} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC53} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC1E} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC9D} \\
+\end{tabular*}
+\caption[Flame front, USFS/Catchpole experiments]{Flame front, USFS/Catchpole experiments}
+\label{USFS_Catchpole_208}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC7D} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC3F} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC76} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC13} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC8D} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC71} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC2F} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC4D} \\
+\end{tabular*}
+\caption[Flame front, USFS/Catchpole experiments]{Flame front, USFS/Catchpole experiments}
+\label{USFS_Catchpole_216}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC17} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC8C} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC4F} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC8E} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC9E} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC98} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC57} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC4E} \\
+\end{tabular*}
+\caption[Flame front, USFS/Catchpole experiments]{Flame front, USFS/Catchpole experiments}
+\label{USFS_Catchpole_224}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC3E} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC2E} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC5E} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC14} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC6H} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC5H} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC7E} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC79} \\
+\end{tabular*}
+\caption[Flame front, USFS/Catchpole experiments]{Flame front, USFS/Catchpole experiments}
+\label{USFS_Catchpole_232}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC6E} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC58} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC9G} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC1B} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC8} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC8F} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC2H} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC1} \\
+\end{tabular*}
+\caption[Flame front, USFS/Catchpole experiments]{Flame front, USFS/Catchpole experiments}
+\label{USFS_Catchpole_240}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC9F} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC10} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC4H} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC44} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC5} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/PPMC6} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC6J} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC20} \\
+\end{tabular*}
+\caption[Flame front, USFS/Catchpole experiments]{Flame front, USFS/Catchpole experiments}
+\label{USFS_Catchpole_248}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC83} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC95} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC86} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC41} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC97} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC42} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC3I} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC1I} \\
+\end{tabular*}
+\caption[Flame front, USFS/Catchpole experiments]{Flame front, USFS/Catchpole experiments}
+\label{USFS_Catchpole_256}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC9I} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC8I} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC2I} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC9B} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC3A} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC91} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC92} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC94} \\
+\end{tabular*}
+\caption[Flame front, USFS/Catchpole experiments]{Flame front, USFS/Catchpole experiments}
+\label{USFS_Catchpole_264}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC33} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC9A} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC61} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC4I} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC51} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC18} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC24} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC26} \\
+\end{tabular*}
+\caption[Flame front, USFS/Catchpole experiments]{Flame front, USFS/Catchpole experiments}
+\label{USFS_Catchpole_272}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC34} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC63} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC46} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC68} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC28} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC22} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC27} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC35} \\
+\end{tabular*}
+\caption[Flame front, USFS/Catchpole experiments]{Flame front, USFS/Catchpole experiments}
+\label{USFS_Catchpole_280}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC64} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC47} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC69} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC23} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC30} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC36} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC65} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC48} \\
+\end{tabular*}
+\caption[Flame front, USFS/Catchpole experiments]{Flame front, USFS/Catchpole experiments}
+\label{USFS_Catchpole_288}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC84} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC96} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/MF23} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EX77} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC25} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/MF30} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC3} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC4} \\
+\end{tabular*}
+\caption[Flame front, USFS/Catchpole experiments]{Flame front, USFS/Catchpole experiments}
+\label{USFS_Catchpole_296}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC7} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC5J} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC2J} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC1J} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC2A} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC1A} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC4A} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC7A} \\
+\end{tabular*}
+\caption[Flame front, USFS/Catchpole experiments]{Flame front, USFS/Catchpole experiments}
+\label{USFS_Catchpole_304}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC19} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC82} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC39} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC40} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC66} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC4G} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC2G} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC6G} \\
+\end{tabular*}
+\caption[Flame front, USFS/Catchpole experiments]{Flame front, USFS/Catchpole experiments}
+\label{USFS_Catchpole_312}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC8G} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC3G} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC1G} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC7G} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC5G} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC5D} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC3B} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC5B} \\
+\end{tabular*}
+\caption[Flame front, USFS/Catchpole experiments]{Flame front, USFS/Catchpole experiments}
+\label{USFS_Catchpole_320}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC71} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC1D} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC1K} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC4C} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC6D} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC8H} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC4B} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC6B} \\
+\end{tabular*}
+\caption[Flame front, USFS/Catchpole experiments]{Flame front, USFS/Catchpole experiments}
+\label{USFS_Catchpole_328}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC2D} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC5C} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC89} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC90} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC70} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC31} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC32} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC37} \\
+\end{tabular*}
+\caption[Flame front, USFS/Catchpole experiments]{Flame front, USFS/Catchpole experiments}
+\label{USFS_Catchpole_336}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC62} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC43} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC93} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC67} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC85} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC6A} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC8A} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC80} \\
+\end{tabular*}
+\caption[Flame front, USFS/Catchpole experiments]{Flame front, USFS/Catchpole experiments}
+\label{USFS_Catchpole_344}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC29} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC21} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC81} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC38} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EX74} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EX73} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EX72} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EX75} \\
+\end{tabular*}
+\caption[Flame front, USFS/Catchpole experiments]{Flame front, USFS/Catchpole experiments}
+\label{USFS_Catchpole_352}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EX76} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Catchpole/EXMC3J} \\
+\end{tabular*}
+\caption[Flame front, USFS/Catchpole experiments]{Flame front, USFS/Catchpole experiments}
+\label{USFS_Catchpole_354}
+\end{figure}
+
+
+\clearpage
+
+\subsection{Summary of Wildfire Spread}
+\label{Rate_of_Spread}
+
+
+\begin{figure}[!h]
+\centering
+\begin{tabular}{l}
+\includegraphics[height=4in]{SCRIPT_FIGURES/ScatterPlots/FDS_Rate_of_Spread} 
+\end{tabular}
+\caption[Summary, Wildfire Rate of Spread]
+{Summary, Wildfire Rate of Spread.}
+\label{RoS_Summary}
+\end{figure}
+
+
+\clearpage
+
+
 
 \section{Burning Trees (NIST Douglas Firs)}
 \label{Douglas_Firs}
