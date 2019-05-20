@@ -208,7 +208,8 @@ for i=2:n_plots
                 % Clear flag for stat_x_y metric
                 using_stat_x_y = 0;
                 using_stat_x_y_check_zero = 0;
-                indices = find(d1_Comp_Start<=M(:,d1_Ind_Col) & M(:,d1_Ind_Col)<=d1_Comp_End);
+                indices = find(d1_Comp_Start<=M(:,d1_Ind_Col)     & M(:,d1_Ind_Col)<=d1_Comp_End & ...
+                               d1_Dep_Comp_Start<=M(:,d1_Dep_Col) & M(:,d1_Dep_Col)<=d1_Dep_Comp_End);
                 if strcmp(Metric,'max')
                     Save_Measured_Metric(i,j,1) = max(M(indices,d1_Dep_Col))-d1_Initial_Value;
                 elseif strcmp(Metric,'min')
@@ -277,6 +278,7 @@ for i=2:n_plots
                 if ~ftest
                     if strcmp(Plot_Type,'linear')
                         K(j) = plot(X,Y,char(style(j))); hold on
+                        if strcmp(Metric,'slope') plot([0 10000],[p(2),p(2)+10000*p(1)],'r-'); end
                     elseif strcmp(Plot_Type,'loglog')
                         K(j) = loglog(X,Y,char(style(j))); hold on
                     elseif strcmp(Plot_Type,'semilogx')
@@ -323,7 +325,8 @@ for i=2:n_plots
                 % Clear flag for stat_x_y metric
                 using_stat_x_y = 0;
                 using_stat_x_y_check_zero = 0;
-                indices = find(d2_Comp_Start<=M(:,d2_Ind_Col) & M(:,d2_Ind_Col)<=d2_Comp_End);
+                indices = find(d2_Comp_Start<=M(:,d2_Ind_Col)     & M(:,d2_Ind_Col)<=d2_Comp_End & ...
+                               d2_Dep_Comp_Start<=M(:,d2_Dep_Col) & M(:,d2_Dep_Col)<=d2_Dep_Comp_End);
 
                 M_Ind = M(indices,d2_Ind_Col);
                 M_Dep = sum(M(indices,d2_Dep_Col),2);
@@ -401,6 +404,7 @@ for i=2:n_plots
                 if ~ftest
                     if strcmp(Plot_Type,'linear')
                         K(length(S1)+j) = plot(X,Y,char(style(j)));
+                        if strcmp(Metric,'slope') plot([0 10000],[p(2),p(2)+10000*p(1)],'r--'); end
                     elseif strcmp(Plot_Type,'loglog')
                         K(length(S1)+j) = loglog(X,Y,char(style(j)));
                     elseif strcmp(Plot_Type,'semilogx')
@@ -412,6 +416,7 @@ for i=2:n_plots
                 else
                     if strcmp(Plot_Type,'linear')
                         K(length(K_save)+j) = plot(X,Y,char(style(j)));
+                        if strcmp(Metric,'slope') plot([0 10000],[p(2),p(2)+10000*p(1)],'r--'); end
                     elseif strcmp(Plot_Type,'loglog')
                         K(length(K_save)+j) = loglog(X,Y,char(style(j)));
                     elseif strcmp(Plot_Type,'semilogx')
