@@ -6516,11 +6516,15 @@ IND_SELECT: SELECT CASE(IND)
                      CASE(1)
                         HMFAC = 1._EB
                      CASE(2)
+                        Y_SPECIES =1._EB
                         Y_SPECIES2=1._EB
-                        ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(IP,JP,KP,1:N_TRACKED_SPECIES)
                         IF (Z_INDEX > 0) THEN
-                           Y_SPECIES2 = ZZ_GET(Z_INDEX)
+                           Y_SPECIES  = ZZ(I ,J ,K ,Z_INDEX)
+                           Y_SPECIES2 = ZZ(IP,JP,KP,Z_INDEX)
                         ELSEIF (Y_INDEX > 0) THEN
+                           ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(I ,J ,K ,1:N_TRACKED_SPECIES)
+                           CALL GET_MASS_FRACTION(ZZ_GET,Y_INDEX,Y_SPECIES )
+                           ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(IP,JP,KP,1:N_TRACKED_SPECIES)
                            CALL GET_MASS_FRACTION(ZZ_GET,Y_INDEX,Y_SPECIES2)
                         ENDIF
                         HMFAC = 0.5_EB*(Y_SPECIES*RHO(I,J,K)+Y_SPECIES2*RHO(IP,JP,KP))
