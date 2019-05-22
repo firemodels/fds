@@ -19,7 +19,7 @@ IF "%SETUP_IFORT_COMPILER_64%"=="1" GOTO envexist
   )
   IF NOT DEFINED I_MPI_ROOT (
     echo "*** Error: Intel MPI environment variable, I_MPI_ROOT, not defined."
-    echo "    Intel MPI development environmenbt probalby not installed."
+    echo "    Intel MPI development environment probably not installed."
     exit /b
   )
 
