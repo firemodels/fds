@@ -155,6 +155,12 @@ IF (TRI_MODEL) THEN
    M%TMP_FLAME=TMPA
 ENDIF
 
+IF (FLAME_INDEX_MODEL) THEN
+   ALLOCATE(M%FLAME_INDEX(0:IBP1,0:JBP1,0:KBP1),STAT=IZERO)
+   CALL ChkMemErr('INIT','FLAME_INDEX',IZERO)
+   M%FLAME_INDEX=-1._EB
+ENDIF
+
 ! Background pressure, temperature, density as a function of height (Z coordinate)
 
 ALLOCATE(  M%PBAR(0:KBP1,0:N_ZONE),STAT=IZERO)
