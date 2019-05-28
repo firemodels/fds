@@ -11,7 +11,9 @@ USE RADCONS
 IMPLICIT NONE
 PRIVATE
 
-PUBLIC INIT_RADIATION,COMPUTE_RADIATION,BLACKBODY_FRACTION
+PUBLIC INIT_RADIATION,COMPUTE_RADIATION,BLACKBODY_FRACTION, GET_KAPPA
+
+REAL(EB) :: TYY_FAC
 
 CONTAINS
 
@@ -559,6 +561,8 @@ MAKE_KAPPA_ARRAYS: IF (.NOT.SOLID_PHASE_ONLY .AND. ANY(SPECIES%RADCAL_ID/='null'
 
 ENDIF MAKE_KAPPA_ARRAYS
 
+TYY_FAC=N_KAPPA_T / (RTMPMAX-RTMPMIN)
+
 ! Tables for PARTICLE absorption coefficients
 
 DO IPC=1,N_LAGRANGIAN_CLASSES
@@ -681,12 +685,12 @@ USE TRAN, ONLY : GET_IJK
 USE COMPLEX_GEOMETRY, ONLY : IBM_IDRA,IBM_CGSC,IBM_SOLID
 USE MPI
 REAL(EB) :: T, RAP, AX, AXU, AXD, AY, AYU, AYD, AZ, VC, RU, RD, RP, &
-            ILXU, ILYU, ILZU, QVAL, BBF, BBFA, NCSDROP, RSA_RAT,EFLUX,TYY_FAC, &
+            ILXU, ILYU, ILZU, QVAL, BBF, BBFA, NCSDROP, RSA_RAT,EFLUX, &
             AIU_SUM,A_SUM,VOL,VC1,AY1,AZ1,COSINE,AFX,AFY,AFZ,ILXU_AUX,ILYU_AUX,ILZU_AUX,AFX_AUX,AFY_AUX,AFZ_AUX
 INTEGER  :: N,NN,IIG,JJG,KKG,I,J,K,IW,ICF,II,JJ,KK,IOR,IC,IWUP,IWDOWN, &
             ISTART, IEND, ISTEP, JSTART, JEND, JSTEP, &
             KSTART, KEND, KSTEP, NSTART, NEND, NSTEP, &
-            I_UIID, N_UPDATES, IBND, TYY, NOM, ARRAY_INDEX,NRA, &
+            I_UIID, N_UPDATES, IBND, NOM, ARRAY_INDEX,NRA, &
             IMIN, JMIN, KMIN, IMAX, JMAX, KMAX, N_SLICE, M_IJK, IJK, LL
 INTEGER  :: IADD,ICR,IFA
 INTEGER, ALLOCATABLE :: IJK_SLICE(:,:)
@@ -706,16 +710,16 @@ TYPE(LAGRANGIAN_PARTICLE_TYPE), POINTER :: LP
 CHARACTER(20) :: FORMT
 ALLOCATE( IJK_SLICE(3, IBAR*KBAR) )
 
-KFST4_GAS => WORK1
-IL       => WORK2
-UIIOLD   => WORK3
-EXTCOE   => WORK4
+KFST4_GAS  => WORK1
+IL         => WORK2
+UIIOLD     => WORK3
+EXTCOE     => WORK4
 KAPPA_PART => WORK5
-SCAEFF   => WORK6
-KFST4_PART   => WORK7
-IL_UP    => WORK8
-OUTRAD_W => WALL_WORK1
-INRAD_W  => WALL_WORK2
+SCAEFF     => WORK6
+KFST4_PART => WORK7
+IL_UP      => WORK8
+OUTRAD_W   => WALL_WORK1
+INRAD_W    => WALL_WORK2
 IF (CC_IBM) THEN
    OUTRAD_F => FACE_WORK1
    INRAD_F  => FACE_WORK2
@@ -833,17 +837,15 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
 
    ELSEIF (KAPPA_ARRAY) THEN
 
-      TYY_FAC = N_KAPPA_T / (RTMPMAX-RTMPMIN)
-      !$OMP PARALLEL PRIVATE(ZZ_GET, TYY)
+      !$OMP PARALLEL PRIVATE(ZZ_GET)
       ALLOCATE(ZZ_GET(1:N_TRACKED_SPECIES))
       !$OMP DO SCHEDULE(STATIC)
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-               TYY = MAX(0 , MIN(N_KAPPA_T,INT((TMP(I,J,K) - RTMPMIN) * TYY_FAC)))
                ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(I,J,K,1:N_TRACKED_SPECIES)
-               KAPPA_GAS(I,J,K) = GET_KAPPA(ZZ_GET,TYY,IBND)
+               KAPPA_GAS(I,J,K) = GET_KAPPA(ZZ_GET,TMP(I,J,K),IBND)
             ENDDO
          ENDDO
       ENDDO
@@ -889,6 +891,10 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                ENDDO
             ENDDO
          ENDDO
+
+         ! Turbulence-Radiation Interaction (TRI) model (under construction)
+
+         IF (TRI_MODEL) KFST4_GAS = KFST4_GAS * TRI_COR
 
          ! Correct the source term in the RTE based on user-specified RADIATIVE_FRACTION on REAC
 
@@ -1165,108 +1171,109 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
 
             ELSE GEOMETRY  ! Sweep in 3D cartesian geometry
 
-              DO N_SLICE = ISTEP*ISTART + JSTEP*JSTART + KSTEP*KSTART, &
-                          ISTEP*IEND + JSTEP*JEND + KSTEP*KEND
-                M_IJK = 0
-                DO K = KMIN, KMAX
-                  IF (ISTEP*JSTEP > 0) THEN ! I STARTS HIGH
-                    JSTART = MAX(JMIN, JSTEP*(N_SLICE - KSTEP*K - ISTEP*IMAX))
-                    JEND   = MIN(JMAX, JSTEP*(N_SLICE - KSTEP*K - ISTEP*IMIN))
-                  ELSE IF (ISTEP*JSTEP < 0) THEN ! I STARTS LOW
-                    JSTART = MAX(JMIN, JSTEP*(N_SLICE - KSTEP*K - ISTEP*IMIN))
-                    JEND   = MIN(JMAX, JSTEP*(N_SLICE - KSTEP*K - ISTEP*IMAX))
-                  ENDIF
-                  IF (JSTART > JEND) THEN
-                    CYCLE
-                  ENDIF
-                  DO J = JSTART, JEND
-                    I = ISTEP * (N_SLICE - J*JSTEP - K*KSTEP)
-                    M_IJK = M_IJK+1
-                    IJK_SLICE(:,M_IJK) = (/I,J,K/)
+               IPROP_LOOP: DO N_SLICE = ISTEP*ISTART + JSTEP*JSTART + KSTEP*KSTART, &
+                                        ISTEP*IEND + JSTEP*JEND + KSTEP*KEND
+                  M_IJK = 0
+                  DO K = KMIN, KMAX
+                     IF (ISTEP*JSTEP > 0) THEN ! I STARTS HIGH
+                        JSTART = MAX(JMIN, JSTEP*(N_SLICE - KSTEP*K - ISTEP*IMAX))
+                        JEND   = MIN(JMAX, JSTEP*(N_SLICE - KSTEP*K - ISTEP*IMIN))
+                     ELSE IF (ISTEP*JSTEP < 0) THEN ! I STARTS LOW
+                        JSTART = MAX(JMIN, JSTEP*(N_SLICE - KSTEP*K - ISTEP*IMIN))
+                        JEND   = MIN(JMAX, JSTEP*(N_SLICE - KSTEP*K - ISTEP*IMAX))
+                     ENDIF
+                     IF (JSTART > JEND) THEN
+                        CYCLE
+                     ENDIF
+                     DO J = JSTART, JEND
+                        I = ISTEP * (N_SLICE - J*JSTEP - K*KSTEP)
+                        M_IJK = M_IJK+1
+                        IJK_SLICE(:,M_IJK) = (/I,J,K/)
+                     ENDDO
                   ENDDO
-                ENDDO
 
-                 !$OMP PARALLEL DO SCHEDULE(GUIDED) &
-                 !$OMP& PRIVATE(I, J, K, AY1, AX, VC1, AZ1, IC, ILXU, ILYU, &
-                 !$OMP& ILZU, VC, AY, AZ, IW, A_SUM, AIU_SUM, RAP, AFX, AFY, AFZ, &
-                 !$OMP& AFX_AUX, AFY_AUX, AFZ_AUX, ILXU_AUX, ILYU_AUX, ILZU_AUX, &
-                 !$OMP& ICF, IADD, ICR, IFA )
-                 SLICELOOP: DO IJK = 1, M_IJK
-                   I = IJK_SLICE(1,IJK)
-                   J = IJK_SLICE(2,IJK)
-                   K = IJK_SLICE(3,IJK)
+                  !$OMP PARALLEL DO SCHEDULE(GUIDED) &
+                  !$OMP& PRIVATE(I, J, K, AY1, AX, VC1, AZ1, IC, ILXU, ILYU, &
+                  !$OMP& ILZU, VC, AY, AZ, IW, A_SUM, AIU_SUM, RAP, AFX, AFY, AFZ, &
+                  !$OMP& AFX_AUX, AFY_AUX, AFZ_AUX, ILXU_AUX, ILYU_AUX, ILZU_AUX, &
+                  !$OMP& ICF, IADD, ICR, IFA )
 
-                   AY1 = DZ(K) * ABS(DLY(N))
-                   AX  = DY(J) * DZ(K) * ABS(DLX(N))
-                   VC1 = DY(J) * DZ(K)
-                   AZ1 = DY(J) * ABS(DLZ(N))
-                   IC = CELL_INDEX(I,J,K)
-                   IF (SOLID(IC)) CYCLE SLICELOOP
-                   ILXU  = IL(I-ISTEP,J,K)
-                   ILYU  = IL(I,J-JSTEP,K)
-                   ILZU  = IL(I,J,K-KSTEP)
-                   VC  = DX(I) * VC1
-                   AY  = DX(I) * AY1
-                   AZ  = DX(I) * AZ1
-                   IF (IC/=0) THEN
-                       IW = WALL_INDEX(IC,-ISTEP)
-                       IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY) ILXU = WALL(IW)%ONE_D%BAND(IBND)%ILW(N)
-                       IW = WALL_INDEX(IC,-JSTEP*2)
-                       IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY) ILYU = WALL(IW)%ONE_D%BAND(IBND)%ILW(N)
-                       IW = WALL_INDEX(IC,-KSTEP*3)
-                       IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY) ILZU = WALL(IW)%ONE_D%BAND(IBND)%ILW(N)
-                   ENDIF
-                   IF (CC_IBM) THEN
-                      IF (CCVAR(I,J,K,IBM_CGSC) == IBM_SOLID) CYCLE SLICELOOP
-                      AFX_AUX  = 0._EB; AFY_AUX  = 0._EB; AFZ_AUX  = 0._EB
-                      ILXU_AUX = 0._EB; ILYU_AUX = 0._EB; ILZU_AUX = 0._EB
-                      ! X axis
-                      IADD= -(1+ISTEP)/2
-                      ICR = FCVAR(I+IADD,J,K,IBM_IDRA,IAXIS) ! List of CFACES assigned to upwind X face.
-                      DO IFA=1,RAD_CFACE(ICR)%N_ASSIGNED_CFACES_RADI
-                         ICF=RAD_CFACE(ICR)%ASSIGNED_CFACES_RADI(IFA)
-                         IF (REAL(ISTEP,EB)*CFACE(ICF)%NVEC(IAXIS)>0._EB) THEN
-                            AFX      = ABS(CFACE(ICF)%NVEC(IAXIS))*CFACE(ICF)%AREA/(DY(J)*DZ(K))
-                            AFX_AUX  = AFX_AUX  + AFX
-                            ILXU_AUX = ILXU_AUX + CFACE(ICF)%ONE_D%BAND(IBND)%ILW(N)*AFX
-                         ENDIF
-                      ENDDO
-                      ! Y axis
-                      IADD= -(1+JSTEP)/2
-                      ICR = FCVAR(I,J+IADD,K,IBM_IDRA,JAXIS) ! List of CFACES assigned to upwind Y face.
-                      DO IFA=1,RAD_CFACE(ICR)%N_ASSIGNED_CFACES_RADI
-                         ICF=RAD_CFACE(ICR)%ASSIGNED_CFACES_RADI(IFA)
-                         IF (REAL(JSTEP,EB)*CFACE(ICF)%NVEC(JAXIS)>0._EB) THEN
-                            AFY      = ABS(CFACE(ICF)%NVEC(JAXIS))*CFACE(ICF)%AREA/(DX(I)*DZ(K))
-                            AFY_AUX  = AFY_AUX  + AFY
-                            ILYU_AUX = ILYU_AUX + CFACE(ICF)%ONE_D%BAND(IBND)%ILW(N)*AFY
-                         ENDIF
-                      ENDDO
-                      ! Z axis
-                      IADD= -(1+KSTEP)/2
-                      ICR = FCVAR(I,J,K+IADD,IBM_IDRA,KAXIS) ! List of CFACES assigned to upwind Z face.
-                      DO IFA=1,RAD_CFACE(ICR)%N_ASSIGNED_CFACES_RADI
-                         ICF=RAD_CFACE(ICR)%ASSIGNED_CFACES_RADI(IFA)
-                         IF (REAL(KSTEP,EB)*CFACE(ICF)%NVEC(KAXIS)>0._EB) THEN
-                            AFZ      = ABS(CFACE(ICF)%NVEC(KAXIS))*CFACE(ICF)%AREA/(DX(I)*DY(J))
-                            AFZ_AUX  = AFZ_AUX  + AFZ
-                            ILZU_AUX = ILZU_AUX + CFACE(ICF)%ONE_D%BAND(IBND)%ILW(N)*AFZ
-                         ENDIF
-                      ENDDO
-                      ILXU = ILXU*(1._EB-AFX_AUX) + ILXU_AUX
-                      ILYU = ILYU*(1._EB-AFY_AUX) + ILYU_AUX
-                      ILZU = ILZU*(1._EB-AFZ_AUX) + ILZU_AUX
-                   ENDIF
-                   A_SUM = AX + AY + AZ
-                   AIU_SUM = AX*ILXU + AY*ILYU + AZ*ILZU
-                   IF (SOLID_PARTICLES) IL_UP(I,J,K) = MAX(0._EB,AIU_SUM/A_SUM)
-                   RAP = 1._EB/(A_SUM + EXTCOE(I,J,K)*VC*RSA(N))
-                   IL(I,J,K) = MAX(0._EB, RAP * (AIU_SUM + VC*RSA(N)*RFPI* &
-                                   ( KFST4_GAS(I,J,K) + KFST4_PART(I,J,K) + RSA_RAT*SCAEFF(I,J,K)*UIIOLD(I,J,K) ) ) )
-                 ENDDO SLICELOOP
-                 !$OMP END PARALLEL DO
+                  SLICE_LOOP: DO IJK = 1, M_IJK
+                     I = IJK_SLICE(1,IJK)
+                     J = IJK_SLICE(2,IJK)
+                     K = IJK_SLICE(3,IJK)
 
-               ENDDO ! IPROP
+                     AY1 = DZ(K) * ABS(DLY(N))
+                     AX  = DY(J) * DZ(K) * ABS(DLX(N))
+                     VC1 = DY(J) * DZ(K)
+                     AZ1 = DY(J) * ABS(DLZ(N))
+                     IC = CELL_INDEX(I,J,K)
+                     IF (SOLID(IC)) CYCLE SLICE_LOOP
+                     ILXU  = IL(I-ISTEP,J,K)
+                     ILYU  = IL(I,J-JSTEP,K)
+                     ILZU  = IL(I,J,K-KSTEP)
+                     VC  = DX(I) * VC1
+                     AY  = DX(I) * AY1
+                     AZ  = DX(I) * AZ1
+                     IF (IC/=0) THEN
+                        IW = WALL_INDEX(IC,-ISTEP)
+                        IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY) ILXU = WALL(IW)%ONE_D%BAND(IBND)%ILW(N)
+                        IW = WALL_INDEX(IC,-JSTEP*2)
+                        IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY) ILYU = WALL(IW)%ONE_D%BAND(IBND)%ILW(N)
+                        IW = WALL_INDEX(IC,-KSTEP*3)
+                        IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY) ILZU = WALL(IW)%ONE_D%BAND(IBND)%ILW(N)
+                     ENDIF
+                     IF (CC_IBM) THEN
+                        IF (CCVAR(I,J,K,IBM_CGSC) == IBM_SOLID) CYCLE SLICE_LOOP
+                        AFX_AUX  = 0._EB; AFY_AUX  = 0._EB; AFZ_AUX  = 0._EB
+                        ILXU_AUX = 0._EB; ILYU_AUX = 0._EB; ILZU_AUX = 0._EB
+                        ! X axis
+                        IADD= -(1+ISTEP)/2
+                        ICR = FCVAR(I+IADD,J,K,IBM_IDRA,IAXIS) ! List of CFACES assigned to upwind X face.
+                        DO IFA=1,RAD_CFACE(ICR)%N_ASSIGNED_CFACES_RADI
+                           ICF=RAD_CFACE(ICR)%ASSIGNED_CFACES_RADI(IFA)
+                           IF (REAL(ISTEP,EB)*CFACE(ICF)%NVEC(IAXIS)>0._EB) THEN
+                              AFX      = ABS(CFACE(ICF)%NVEC(IAXIS))*CFACE(ICF)%AREA/(DY(J)*DZ(K))
+                              AFX_AUX  = AFX_AUX  + AFX
+                              ILXU_AUX = ILXU_AUX + CFACE(ICF)%ONE_D%BAND(IBND)%ILW(N)*AFX
+                           ENDIF
+                        ENDDO
+                        ! Y axis
+                        IADD= -(1+JSTEP)/2
+                        ICR = FCVAR(I,J+IADD,K,IBM_IDRA,JAXIS) ! List of CFACES assigned to upwind Y face.
+                        DO IFA=1,RAD_CFACE(ICR)%N_ASSIGNED_CFACES_RADI
+                           ICF=RAD_CFACE(ICR)%ASSIGNED_CFACES_RADI(IFA)
+                           IF (REAL(JSTEP,EB)*CFACE(ICF)%NVEC(JAXIS)>0._EB) THEN
+                              AFY      = ABS(CFACE(ICF)%NVEC(JAXIS))*CFACE(ICF)%AREA/(DX(I)*DZ(K))
+                              AFY_AUX  = AFY_AUX  + AFY
+                              ILYU_AUX = ILYU_AUX + CFACE(ICF)%ONE_D%BAND(IBND)%ILW(N)*AFY
+                           ENDIF
+                        ENDDO
+                        ! Z axis
+                        IADD= -(1+KSTEP)/2
+                        ICR = FCVAR(I,J,K+IADD,IBM_IDRA,KAXIS) ! List of CFACES assigned to upwind Z face.
+                        DO IFA=1,RAD_CFACE(ICR)%N_ASSIGNED_CFACES_RADI
+                           ICF=RAD_CFACE(ICR)%ASSIGNED_CFACES_RADI(IFA)
+                           IF (REAL(KSTEP,EB)*CFACE(ICF)%NVEC(KAXIS)>0._EB) THEN
+                              AFZ      = ABS(CFACE(ICF)%NVEC(KAXIS))*CFACE(ICF)%AREA/(DX(I)*DY(J))
+                              AFZ_AUX  = AFZ_AUX  + AFZ
+                              ILZU_AUX = ILZU_AUX + CFACE(ICF)%ONE_D%BAND(IBND)%ILW(N)*AFZ
+                           ENDIF
+                        ENDDO
+                        ILXU = ILXU*(1._EB-AFX_AUX) + ILXU_AUX
+                        ILYU = ILYU*(1._EB-AFY_AUX) + ILYU_AUX
+                        ILZU = ILZU*(1._EB-AFZ_AUX) + ILZU_AUX
+                     ENDIF
+                     A_SUM = AX + AY + AZ
+                     AIU_SUM = AX*ILXU + AY*ILYU + AZ*ILZU
+                     IF (SOLID_PARTICLES) IL_UP(I,J,K) = MAX(0._EB,AIU_SUM/A_SUM)
+                     RAP = 1._EB/(A_SUM + EXTCOE(I,J,K)*VC*RSA(N))
+                     IL(I,J,K) = MAX(0._EB, RAP * (AIU_SUM + VC*RSA(N)*RFPI* &
+                                     ( KFST4_GAS(I,J,K) + KFST4_PART(I,J,K) + RSA_RAT*SCAEFF(I,J,K)*UIIOLD(I,J,K) ) ) )
+                  ENDDO SLICE_LOOP
+                  !$OMP END PARALLEL DO
+
+               ENDDO IPROP_LOOP
 
             ENDIF GEOMETRY
 
@@ -1454,7 +1461,7 @@ ENDIF
 ! Save source term for the energy equation (QR = -DIV Q). Done only in one-band (gray gas) case.
 
 IF (.NOT. WIDE_BAND_MODEL) THEN
-   QR  = KAPPA_GAS*UII - KFST4_GAS
+   QR = KAPPA_GAS*UII - KFST4_GAS
    IF (NLP>0 .AND. N_LP_ARRAY_INDICES>0) QR_W = QR_W + KAPPA_PART*UII - KFST4_PART
 ENDIF
 
@@ -1531,17 +1538,19 @@ BLACKBODY_FRACTION = BBFHIGH - BBFLOW
 END FUNCTION BLACKBODY_FRACTION
 
 
-FUNCTION GET_KAPPA(Z_IN,TYY,IBND)
+FUNCTION GET_KAPPA(Z_IN,TMP,IBND)
 
 ! Returns the radiative absorption
 
 USE PHYSICAL_FUNCTIONS, ONLY : GET_MASS_FRACTION_ALL,GET_MOLECULAR_WEIGHT
-REAL(EB), INTENT(INOUT) :: Z_IN(1:N_TRACKED_SPECIES)
+REAL(EB), INTENT(IN) :: Z_IN(1:N_TRACKED_SPECIES),TMP
 REAL(EB) :: KAPPA_TEMP,INT_FAC,GET_KAPPA,SCALED_Y_RADCAL_SPECIES,MWA
-INTEGER, INTENT(IN) :: IBND,TYY
-INTEGER :: LBND,UBND,N
+INTEGER, INTENT(IN) :: IBND
+INTEGER :: LBND,UBND,N,TYY
 
 GET_KAPPA = 0._EB
+
+TYY = MAX(0 , MIN(N_KAPPA_T,INT((TMP - RTMPMIN) * TYY_FAC)))
 
 CALL GET_MOLECULAR_WEIGHT(Z_IN,MWA)
 

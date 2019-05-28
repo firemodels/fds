@@ -52,6 +52,7 @@ PROCESS DelCo_Trainers
 PROCESS FAA_Cargo_Compartments
 PROCESS FAA_Polymers
 PROCESS Fleury_Heat_Flux
+PROCESS FM_Burner
 PROCESS FM_FPRF_Datacenter
 PROCESS FM_Parallel_Panels
 PROCESS FM_SNL
@@ -67,6 +68,7 @@ PROCESS McCaffrey_Plume
 PROCESS Moody_Chart
 PROCESS MPI_Scaling_Tests
 PROCESS NBS_Multi-Room
+PROCESS NIST_Composite_Beam
 PROCESS NIST_Douglas_Firs
 PROCESS NIST_FSE_2008
 PROCESS NIST_He_2009
@@ -96,6 +98,7 @@ PROCESS Ulster_SBI
 PROCESS UMD_Line_Burner
 PROCESS UMD_Polymers
 PROCESS USCG_HAI
+PROCESS USFS_Catchpole
 PROCESS USN_Hangars
 PROCESS UWO_Wind_Tunnel
 PROCESS Vegetation

@@ -2752,57 +2752,27 @@ The metal core is heated with a power of 300 {\si kW/m$^3$}.
 
 \label{info:GEOMETRY}
 
-All obstructions in FDS are assumed to conform to the rectilinear
-mesh, and all bounding surfaces are assumed to be flat
-planes. However, many objects, like cables, pipes, and ducts, are not
-flat. Even though these objects have to be represented in FDS as
-``boxes,'' you can still perform the internal heat transfer
-calculation as if the object were really cylindrical or spherical. For
-example, the input lines:
+All obstructions in FDS are assumed to conform to the rectilinear mesh, and all bounding surfaces are assumed to be flat planes. However, many objects, like cables, pipes, and ducts, are not flat. Even though these objects have to be represented in FDS as ``boxes,'' you can still perform the internal heat transfer calculation as if the object were really cylindrical or spherical. For example, the input lines:
 \begin{lstlisting}
 &OBST XB=0.0,5.0,1.1,1.2,3.4,3.5, SURF_ID='CABLE' /
 &SURF ID='CABLE', MATL_ID='PVC', GEOMETRY='CYLINDRICAL', THICKNESS=0.01 /
 \end{lstlisting}
-can be used to model a power cable that is 5~m long, cylindrical in
-cross section, 2~cm in diameter. The heat transfer calculation is
-still one-dimensional; that is, it is assumed that there is a uniform
-heat flux all about the object. This can be somewhat confusing because
-the cable is represented as an obstruction of square cross section,
-with a separate heat transfer calculation performed at each face, and
-no communication among the four faces. Obviously, this is not an ideal
-way to do solid phase heat transfer, but it does provide a reasonable
-bounding surface temperature for the gas phase calculation. More
-detailed assessment of a cable would require a two or
-three-dimensional heat conduction calculation, which is not included
-in FDS. Use {\ct GEOMETRY='SPHERICAL'} to describe a spherical object.
+can be used to model a power cable that is 5~m long, cylindrical in cross section, 2~cm in diameter. The heat transfer calculation is still one-dimensional; that is, it is assumed that there is a uniform heat flux all about the object. This can be somewhat confusing because the cable is represented as an obstruction of square cross section, with a separate heat transfer calculation performed at each face, and no communication among the four faces. Obviously, this is not an ideal way to do solid phase heat transfer, but it does provide a reasonable bounding surface temperature for the gas phase calculation. More detailed assessment of a cable would require a two or three-dimensional heat conduction calculation, which is not included in FDS. Use {\ct GEOMETRY='SPHERICAL'} to describe a spherical object.
 
 
 \subsection{Special Topic: Solid Phase Numerical Gridding Issues}
 \label{info:solid_phase_stability}
 
-To compute the temperature and reactions inside the solids, FDS solves
-the one-dimensional heat transfer equation numerically. The size of
-the mesh cells on the surface of the solid is automatically chosen
-using a rule that makes the cell size smaller than the square root of
-the material diffusivity $(k/\rho c)$. By default, the solid mesh
-cells increase towards the middle of the material layer and are smallest
-on the layer boundaries.
+To compute the temperature and reactions inside the solids, FDS solves the one-dimensional heat transfer equation numerically. The size of the mesh cells on the surface of the solid is automatically chosen using a rule that makes the cell size smaller than the square root of the material diffusivity $(k/\rho c)$. By default, the solid mesh cells increase towards the middle of the material layer and are smallest on the layer boundaries.
 
-The default parameters are usually appropriate for simple heat transfer calculations but sometimes the use of pyrolysis reactions
-makes the temperatures and burning rate fluctuate. Adjustments may also be needed in case of
-extremely transient heat transfer situations. The numerical accuracy and stability of the solid phase solution may be improved by
-one of the following methods:
+The default parameters are usually appropriate for simple heat transfer calculations but sometimes the use of pyrolysis reactions makes the temperatures and burning rate fluctuate. Adjustments may also be needed in case of extremely transient heat transfer situations. The numerical accuracy and stability of the solid phase solution may be improved by one of the following methods:
 \begin{description}
 \item[Make the mesh density more uniform ] inside the material by setting {\ct STRETCH\_FACTOR(NL)=1.} on the {\ct SURF} line. This will generate a perfectly uniform mesh for layer number {\ct NL}. (This happens automatically if the layer contains one or more reacting materials.) Values between 1 and 2 give different levels of stretching. Note that {\ct STRETCH\_FACTOR} needs to be specified for all the layers.
 \item[Make the mesh cells smaller] by setting {\ct CELL\_SIZE\_FACTOR} less than 1.0. For example, a value of 0.5 makes the mesh cells half the size. The scaling always applies to all layers.
 \item[Improve the time resolution] by setting {\ct WALL\_INCREMENT=1} on the {\ct TIME} line. This forces the solid phase temperatures to be solved on every time step.
 \item[Limit the number of cells in a layer] by setting {\ct N\_LAYER\_CELLS\_MAX}. This array input has a default of 1000.
 \end{description}
-If all the material components of the surface are reacting, and the pyrolysis reactions have no solid residue, the thickness of
-the surface is going to shrink when the surface reacts. Each of the shrinking layers will vanish from the computation when its thickness gets
-smaller than a prescribed limiting value. This value can be set on a {\ct SURF} line via {\ct MINIMUM\_LAYER\_THICKNESS} keyword,
-defaulting to $1 \times 10^{-6}$~m. When all the material of a shrinking surface is consumed but {\ct BURN\_AWAY} is not
-prescribed, the surface temperature is set to {\ct TMP\_BACK}, convective heat flux to zero and burning rate to zero.
+If all the material components of the surface are reacting, and the pyrolysis reactions have no solid residue, the thickness of the surface is going to shrink when the surface reacts. Each of the shrinking layers will vanish from the computation when its thickness gets smaller than a prescribed limiting value. This value can be set on a {\ct SURF} line via {\ct MINIMUM\_LAYER\_THICKNESS} keyword, defaulting to $1 \times 10^{-6}$~m. When all the material of a shrinking surface is consumed but {\ct BURN\_AWAY} is not prescribed, the surface temperature is set to {\ct TMP\_BACK}, convective heat flux to zero and burning rate to zero.
 
 See Section~\ref{solid_phase_verification} for ways to check and improve the accuracy of the solid phase calculation.
 
@@ -2858,10 +2828,7 @@ The parameters affecting in-depth radiation absorption are the material's refrac
 
 \section{Simple Pyrolysis Models}
 
-FDS has several approaches for describing the pyrolysis of solids and liquids. The approach to take depends largely
-on the availability of material properties and the appropriateness of the underlying pyrolysis model.
-Note that all pyrolysis models in FDS require that you explicitly define the gas phase reaction. See Chapter~\ref{chap:combustion} for details.
-It should also be noted that the user has to use only one pyrolysis model at a time.
+FDS has several approaches for describing the pyrolysis of solids and liquids. The approach to take depends largely on the availability of material properties and the appropriateness of the underlying pyrolysis model. Note that all pyrolysis models in FDS require that you explicitly define the gas phase reaction. See Chapter~\ref{chap:combustion} for details. It should also be noted that the user has to use only one pyrolysis model at a time.
 
 \subsection{A Gas Burner with a Specified Heat Release Rate}
 
@@ -2979,20 +2946,20 @@ In the example below, the pyrolysis of wood is included within a simulation that
 &SPEC ID = 'CARBON DIOXIDE' /
 
 &MATL ID                    = 'WOOD'
-EMISSIVITY            = 0.9
-CONDUCTIVITY          = 0.2
-SPECIFIC_HEAT         = 1.3
-DENSITY               = 570.
-N_REACTIONS           = 1
-A(1)                  = 1.89E10
-E(1)                  = 1.51E5
-N_S(1)                = 1.0
-MATL_ID(1,1)          = 'CHAR'
-NU_MATL(1,1)          = 0.18
-SPEC_ID(1:4,1)        = 'OXYGEN','WATER VAPOR','CARBON DIOXIDE','PYROLYZATE'
-NU_SPEC(1:4,1)        = 0.82,0,0,0
-HEAT_OF_REACTION(1)   = 430.
-HEAT_OF_COMBUSTION(4,1) = 14500. /
+      EMISSIVITY            = 0.9
+      CONDUCTIVITY          = 0.2
+      SPECIFIC_HEAT         = 1.3
+      DENSITY               = 570.
+      N_REACTIONS           = 1
+      A(1)                  = 1.89E10
+      E(1)                  = 1.51E5
+      N_S(1)                = 1.0
+      MATL_ID(1,1)          = 'CHAR'
+      NU_MATL(1,1)          = 0.18
+      SPEC_ID(1:4,1)        = 'OXYGEN','WATER VAPOR','CARBON DIOXIDE','PYROLYZATE'
+      NU_SPEC(1:4,1)        = 0.82,0,0,0
+      HEAT_OF_REACTION(1)   = 430.
+      HEAT_OF_COMBUSTION(4,1)= 14500. /
 \end{lstlisting}
 Note that the indices associated with the parameters are not needed {\em in this case}, but they are shown to emphasize that, in general, there can be multiple reactions with corresponding kinetic parameters and products.
 
@@ -3077,29 +3044,7 @@ When in doubt about the values of these parameters, just specify the {\ct REFERE
       HEAT_OF_COMBUSTION(1)    = ...
       HEAT_OF_REACTION(1)      = ... /
 \end{lstlisting}
-Note that the indices have been added to the reaction parameters to
-emphasize the fact that these parameters are stored in arrays of
-length equal to {\ct N\_REACTIONS}. If there is only one reaction, you
-need not include the {\ct (1)}, but it is a good habit to get into.
-Note also that if the default combustion model is used, you can denote that the reaction
-produces fuel gas using the appropriate {\ct SPEC\_ID}.
-Note also that the {\ct HEAT\_OF\_COMBUSTION} is the energy released
-per unit mass of fuel gas that mixes with oxygen and combusts.  This
-has nothing to do with the pyrolysis process, so why is it specified
-here? The answer is that when using the default combustion model in FDS there is only one {\em gas phase}
-reaction of fuel and oxygen, but there can be dozens of
-different materials and dozens of {\em solid phase} reactions. To
-ensure that the fuel vapors from different materials combust to
-produce the proper amount of energy, it is very important to specify a
-{\ct HEAT\_OF\_COMBUSTION} for each material. That way, the mass loss
-rate of fuel gases is automatically adjusted so that the effective
-mass loss rate multiplied by the single, global, gas phase heat of
-combustion produces the expected heat release rate. This adjustment uses the value of {\ct HOC\_COMPLETE}, see Section~\ref{info:hoc_complete}, on the {\ct REAC} line.
-If, for example, the {\ct HOC\_COMPLETE} specified on the {\ct REAC} line is twice that
-specified on the {\ct MATL} line, the mass of contained within wall
-cell will be decremented by that determined by the pyrolysis model,
-but the mass added to gas phase would be reduced by 50~\%. A different
-value of heat of combustion can be specified for each species, $i$, in each reaction, $j$, via the parameter {\ct HEAT\_OF\_COMBUSTION(i,j)}.
+Note that the indices have been added to the reaction parameters to emphasize the fact that these parameters are stored in arrays of length equal to {\ct N\_REACTIONS}. If there is only one reaction, you need not include the {\ct (1)}, but it is a good habit to get into. Note also that if the default combustion model is used, you can denote that the reaction produces fuel gas using the appropriate {\ct SPEC\_ID}. Note also that the {\ct HEAT\_OF\_COMBUSTION} is the energy released per unit mass of fuel gas that mixes with oxygen and combusts.  This has nothing to do with the pyrolysis process, so why is it specified here? The answer is that when using the default combustion model in FDS there is only one {\em gas phase} reaction of fuel and oxygen, but there can be dozens of different materials and dozens of {\em solid phase} reactions. To ensure that the fuel vapors from different materials combust to produce the proper amount of energy, it is very important to specify a {\ct HEAT\_OF\_COMBUSTION} for each material. That way, the mass loss rate of fuel gases is automatically adjusted so that the effective mass loss rate multiplied by the single, global, gas phase heat of combustion produces the expected heat release rate. This adjustment uses the value of {\ct HOC\_COMPLETE}, see Section~\ref{info:hoc_complete}, on the {\ct REAC} line. If, for example, the {\ct HOC\_COMPLETE} specified on the {\ct REAC} line is twice that specified on the {\ct MATL} line, the mass of contained within wall cell will be decremented by that determined by the pyrolysis model, but the mass added to gas phase would be reduced by 50~\%. A different value of heat of combustion can be specified for each species, $i$, in each reaction, $j$, via the parameter {\ct HEAT\_OF\_COMBUSTION(i,j)}.
 
 \subsubsection{Modeling Upholstered Furnishings}
 
@@ -3394,160 +3339,6 @@ When using 3D mass transport, view the fuel gas density inside the solid using
 
 All the above also work as {\ct DEVC} output, which does not require {\ct CELL\_CENTERED=T}.
 
-
-\clearpage
-
-\section{Thermal Degradation Model for Vegetation}
-
-FDS contains a separate pyrolysis model that was developed specifically for vegetation~\cite{Porterie:2006,Morvan:CF2004,Houssami:2016}. The solid-phase thermal degradation process consists of three reactions:
-
-\vspace{\baselineskip}
-
-\noindent 1. Endothermic drying
-\be
- {\rm Wet\ Vegetation} \rightarrow \frac{M}{1+M} \, {\rm H_2O} + \frac{1}{1+M} \, {\rm Dry\ Vegetation}
-\ee
-
-\noindent 2. Endothermic pyrolysis
-\be
- {\rm Dry\ Vegetation} \rightarrow \chi_{\rm char} \, {\rm Char} + (1-\chi_{\rm char}) \, {\rm Fuel\ Gas}
-\ee
-
-\noindent 3. Exothermic char oxidation
-\be
- {\rm Char} + \nu_{\rm O_2, char} \, {\rm O_2} \rightarrow (1+ \nu_{\rm O_2,char} - \chi_{\rm ash}) \, {\rm CO_2} + \chi_{\rm ash} \, {\rm Ash}
-\ee
-$M$ is the vegetation {\em moisture content} determined on a dry weight basis. $M$ is related to the vegetation mass fraction of water, $Y_{\rm w}$, via the relation:
-\be
-  Y_{\rm w} = \frac{M}{1+M}
-\ee
-$\chi_{\rm char}$ is the mass fraction of dry vegetation that is converted to char during pyrolysis;  $\nu_{\rm O_2,char}$ is the stoichiometric coefficient of oxygen;  and $\chi_{\rm ash}$ is the mass fraction of char that is converted to ash during char oxidation.
-
-In the equations to follow, the subscript b denotes bulk quantities that are resolved on the computational grid. For example, the mass of dry vegetation per unit volume is denoted $\rho_{\rm b,dry}$ (kg/m$^{3}$).  In the notation of Mell~et~al.~\cite{Mell:2009}, $\rho_{\rm b,dry}=\langle m^{\prime\prime\prime}_{\rm dry}\rangle_{V_{\rm b}}$ where the angled brackets denote the explicit LES filtering over the grid cell volume $V_{\rm b}$. The initial total mass of vegetation per unit volume is $\rho_{\rm b,0}$.
-
-The Arrhenius rate equations for drying, pyrolysis, and char oxidation are:
-\begin{eqnarray}
-  r_{\rm H_2O} &=& \left( \frac{\rho_{\rm b, H_2O}}{\rho_{\rm b,0}} \right)   \, A_{\rm H_2O} \, T_{\rm v}^{-\frac{1}{2}} \exp \left(-\frac{E_{\rm H_2O}}{R \, T_{\rm v}} \right)  \\[.1in]
-  r_{\rm pyr}  &=& \left( \frac{\rho_{\rm b,dry}}{\rho_{\rm b,0}}   \right)   \, A_{\rm pyr} \, \exp \left({-\frac{E_{\rm pyr}}{R \, T_{\rm v}}} \right)  \\[.1in]
-  r_{\rm char} &=& \left( \frac{\rho_{\rm b,char}}{\rho_{\rm b,0}}  \right)^0 \, A_{\rm char} \,  \exp \left( -\frac{E_{\rm char}}{R \, T_{\rm v}} \right) \,
-  \frac{ \rho_{\rm g}\, Y_{\rm O_2}\, \sigma_{\rm v}\, \beta_{\rm v}\, (1+\beta_{\rm char}\sqrt{\RE_{\rm v}}) }{\nu_{\rm O_2,char} \, \rho_{\rm b,0}}
-\end{eqnarray}
-where $T_{\rm v}$ is the temperature of the vegetation. The default values of the kinetic constants are given in Table~\ref{tab:veg_kinetics}. The Reynolds number is $\RE_{\rm v} = \rho_{\rm g} D_{\rm v} / \mu $ with $D_{\rm v} = 4/\sigma_{\rm v}$ for a cylinder, where $\sigma_{\rm v}$ is the surface area to volume ratio of the cylinder. $\beta_{\rm v}$ is the {\em packing ratio}; that is, the ratio of the vegetation volume to the overall volume containing the vegetation. The term containing $\RE_{\rm v}$ is included to account for the oxygen blowing effects on char oxidation and the constant $\beta_{\rm char}$ is equal to 0.2 by default, which is the value used by Porterie~et~al.~\cite{Porterie:2006}.
-
-\begin{table}[!ht]
-\caption[Default vegetation kinetic constants]{Default vegetation kinetic constants (from Porterie et al.~\cite{Porterie:2006})}
-\vspace{0.1in}
-\label{tab:veg_kinetics}
-\begin{center}
-\begin{tabular}{|l|l|}
-\hline
-Constant                        &   Default Value  \\ \hline \hline
-$A_{\rm H_2O}$ ($\sqrt{K}$/s )  & 600,000          \\ \hline
-$E_{\rm H_2O}$ (J/mol)          & 48,200           \\ \hline
-$A_{\rm pyr}$ (1/s)             & 36,300           \\ \hline
-$E_{\rm pyr}$ (J/mol)           & 60,300           \\ \hline
-$A_{\rm char}$ (m/s)            & 430              \\ \hline
-$E_{\rm char}$ (J/mol)          & 74,800           \\ \hline
-$\nu_{\rm O_2,char}$            & 1.65             \\ \hline
-\end{tabular}
-\end{center}
-\end{table}
-
-The equation governing the temperature of a thermally thin fuel element is
-\be
-\label{eq:Tv_thermally_thin}
-\rho_{\rm b}\ c_{\rm p,v} \frac{dT_{\rm v}}{dt} = -\rho_{\rm b,0} \left( \Delta{\rm h_{vap}}\ r_{\rm H_2O} + \Delta {\rm h_{pyr}}\ r_{\rm pyr} + \alpha_{\rm char}\ \Delta{\rm h_{char}}\ r_{\rm char} + \langle \nabla \cdot{\mathbf{q}}^{\prime\prime}_{\rm c,b}\rangle_{\rm V_b} + \langle \nabla \cdot{\mathbf{q}}^{\prime\prime}_{\rm r,b}\rangle_{\rm V_b} \right)
-\ee
-The first three terms on the right-hand-side are, respectively, endothermic drying, endothermic pyrolysis, exothermic char oxidation. The non-dimensional weighting parameter, $\alpha_{\rm char}$, is the fraction of the heat generated by heterogeneous char oxidation that is deposited in the fuel element and (1-$\alpha_{\rm char}$) in the gas phase. By default, $\alpha_{\rm char}$ = 0.5, which has been used by others (e.g., Porterie~et~al.~\cite{Porterie:2006}). The fourth and fifth terms on the right-hand-side of Eq.~(\ref{eq:Tv_thermally_thin}) are the bulk contributions of convective and radiative heat transfer, respectively~\cite{Mell:2009}. The heats in Eq.~(\ref{eq:Tv_thermally_thin}) are $\Delta{\rm h_{vap}} = 2259$~kJ/kg;  $\Delta{\rm h_{pyr}} = 418$~kJ/kg~\cite{Morvan:CF2001}; $\Delta{\rm h_{char}} = -32000$~kJ/kg~\cite{Dahale:2013}.
-
-In the condensed phase model, the bulk density and specific heat have contributions from dry virgin vegetative fuel, char, ash, and moisture:
-\begin{eqnarray}
-\rho_{\rm b} &=& \rho_{\rm b,dry} + \rho_{\rm b,char} + \rho_{\rm b,ash} + \rho_{\rm b,H_2O} \\[.1in]
-{\rm c_{\rm p,v}} &=& \frac{\rho_{\rm b,dry}\ {\rm c_{p,dry}} + \rho_{\rm b,char}\ {\rm c_{p,char}} + \rho_{\rm b,ash}\ {\rm c_{p,ash}} + \rho_{\rm b,H_2O}\ {\rm c_{p,H_2O}}}{\rho_{\rm b}}
-\end{eqnarray}
-where, initially, $\rho_{\rm b,H_2O} = M_{\rm dw}\ \rho_{\rm b, dry}$. The specific heats (J kg$^{-1}$ K$^{-1}$) in the equations above are
-\begin{eqnarray}
-c_{\rm p, dry} &=& 10 + 3.7 \, T_{\rm v}~~~ ({\rm Ritchie~et~al.~\cite{Ritchie:1}})  \\[.1in]
-c_{\rm p, char} &=& 420 + 2.09 \, T_{\rm v} + 6.85 \times 10^{-4} \, T^2_{\rm v} ~~~({\rm Park~et~al.~ 2010}) \\[.1in]
-c_{\rm p, ash} &=& 1244 \, (T_{\rm v} / 300)^{0.315}~~~({\rm Lautenberger~et~al.~\cite{GPyro:FSJ}}) \\[.1in]
-c_{\rm p,H_2O} &=& 4190
-\end{eqnarray}
-The rate of change of the total vegetative fuel mass is
-\be
-\frac{\d}{\d t} \left( \frac{\rho_{\rm b}}{\rho_{\rm b,0}} \right) = -r_{\rm H_2O} - (1 - \chi_{\rm char}) \, r_{\rm pyr} - (1-\chi_{\rm ash}) \, r_{\rm char}
-\ee
-The rate of change for the components of the vegetative mass during thermal degradation are:
-\begin{eqnarray}
-\frac{\d}{\d t} \left( \frac{\rho_{\rm b,H_2O}}{\rho_{\rm b,0}} \right) &=& -r_{\rm H_2O} \\[.1in]
-\frac{\d}{\d t} \left( \frac{\rho_{\rm b,dry}}{\rho_{\rm b,0}} \right) &=& -r_{\rm dry}  \\[.1in]
-\frac{\d}{\d t} \left( \frac{\rho_{\rm b,char}}{\rho_{\rm b,0}} \right) &=& -\chi_{\rm char}\ r_{\rm pyr} - r_{\rm char}
-\end{eqnarray}
-Gaseous products created during the thermal degradation process are water vapor (during drying), fuel vapor (during pyrolysis), and CO$_2$ (during char oxidation). The source terms (kg m$^{-3}$ s$^{-1}$) for these species are, respectively, $\rho_{\rm b,0} \, r_{\rm H_2O}$, $(1-\chi_{\rm char}) \, \rho_{\rm b,0} \, r_{\rm pyr}$, and  $(1+\nu_{\rm O_2,char} - \chi_{\rm ash}) \, \rho_{\rm b,0} \, r_{\rm char}$. In addition, the char oxidation process consumes oxygen in the gas phase at a rate of $-\nu_{\rm O_2,char} \, \rho_{\rm b,0} \, r_{\rm char}$.
-
-Figure~\ref{vege_inputs} includes sample input lines demonstrating how the vegetation model can be applied to particles that represent pine needles that are 1~mm in diameter and 5~cm long. Note that each {\ct MATL} line contains the flag {\ct VEGETATION=.TRUE.} to indicate that the special vegetation model is to be invoked. All parameters described above must be explicitly specified in the input file---there are no hard-wired default values.
-
-\begin{figure}[p]
-\begin{lstlisting}
-&PART ID='pine needles', SURF_ID='vegetation', STATIC=.TRUE. /
-
-&SURF ID = 'vegetation'
-      MATL_ID = 'WET VEGETATION'
-      THICKNESS = 0.0005
-      LENGTH = 0.05
-      GEOMETRY = 'CYLINDRICAL' /
-
-&MATL ID = 'WET VEGETATION'
-      VEGETATION = .TRUE.
-      DENSITY = 586.
-      CONDUCTIVITY = 0.1
-      SPECIFIC_HEAT = 2.0
-      A = 600000.
-      E = 48200.
-      N_T = -0.5
-      NU_SPEC = 0.123
-      SPEC_ID = 'WATER VAPOR'
-      NU_MATL = 0.877
-      MATL_ID = 'DRY VEGETATION'
-      HEAT_OF_REACTION = 2259. /
-
-&MATL ID = 'DRY VEGETATION'
-      VEGETATION = .TRUE.
-      DENSITY = 514.
-      CONDUCTIVITY = 0.1
-      SPECIFIC_HEAT = 2.0
-      A = 36300.
-      E = 60300.
-      NU_MATL = 0.26
-      MATL_ID = 'CHAR'
-      NU_SPEC = 0.74
-      SPEC_ID = 'CELLULOSE'
-      HEAT_OF_REACTION = 418. /
-
-&MATL ID = 'CHAR'
-      VEGETATION = .TRUE.
-      DENSITY  = 134.
-      CONDUCTIVITY = 0.1
-      SPECIFIC_HEAT = 2.0
-      N_S = 0.
-      NU_O2 = 1.65
-      BETA_CHAR = 0.2
-      A = 430.
-      E = 74800.
-      NU_MATL = 0.5
-      MATL_ID  = 'ASH'
-      NU_SPEC = 2.15
-      SPEC_ID = 'CARBON DIOXIDE'
-      HEAT_OF_REACTION= -32000. /
-
-&MATL ID = 'ASH'
-      VEGETATION = .TRUE.
-      DENSITY = 67.
-      CONDUCTIVITY = 0.1
-      SPECIFIC_HEAT = 2.0 /
-\end{lstlisting}
-\caption[Input parameters describing vegetation]{Input parameters describing vegetation.}
-\label{vege_inputs}
-\end{figure}
 
 
 
@@ -4413,312 +4204,6 @@ The bulk velocity is the volumetric flow rate divided by the circular flow area.
 
 
 
-\chapter{Atmospheric Effects and Wind}
-
-This chapter describes techniques for modeling the atmospheric boundary layer. Most of the parameters that describe the atmosphere are entered on a single namelist line called {\ct WIND}. This namelist group is new starting with FDS version 6.6.0. Previous versions of FDS used the {\ct MISC} line for parameters related to wind and atmospheric conditions.
-
-There are three ways to specify a wind in FDS. The preferred method, originally implemented in FDS version 6.6.0, is to model the wind and corresponding temperature profile using Monin-Obukhov similarity theory (Section~\ref{info:WIND}). A second, more complicated method, is to specify a uniform horizontal forcing function and allow the wind field to develop naturally. This has proven more useful in wind tunnel applications than for natural winds (Section~\ref{info:force_vector}). The third method, which has traditionally been employed in older versions of FDS, is to create essentially a ``wall of wind'' where an entire side of the computational domain is turned into a giant fan blowing air laterally. This is the least preferred method of creating a wind (Section~\ref{info:wall_of_wind}).
-
-
-\section{Wind Method 1: Monin-Obukhov Similarity}
-\label{info:WIND}
-
-\subsection{Basic Equations}
-
-The atmospheric boundary layer in FDS is modeled using Monin-Obukhov similarity theory. The wind speed profile, $u$, and potential temperature\footnote{The potential temperature is given by $$\theta=T \left( \frac{p_0}{p} \right)^{R/(W_{\rm air} \, c_p)}$$ where $p_0$ is typically 1000~mbar and $R/(W_{\rm air} \, c_p) \approx 0.286$.}, $\theta$, vary with height, $z$, according to:
-\begin{eqnarray}
-   u(z)      &=&            \frac{u_*}{\kappa}     \left[ \ln \left( \frac{z}{z_0} \right) - \psi_{\rm m} \left( \frac{z}{L} \right) \right] \label{u_om} \\[.15in]
-   \theta(z) &=& \theta_0 + \frac{\theta_*}{\kappa} \left[ \ln \left( \frac{z}{z_0} \right) - \psi_{\rm h} \left( \frac{z}{L} \right) \right]
-\end{eqnarray}
-where $u_*$ is the friction velocity, $\kappa=0.41$ is the Von K\'{a}rm\'{a}n constant, $z_0$ is the \emph{aerodynamic} roughness length, $\theta_*$ is the scaling potential temperature, $\theta_0$ is the ground level potential temperature, $L$ is the Obukhov length, and the similarity functions are those proposed by Dyer~\cite{Dyer:1974}:
-\begin{eqnarray}
-   \psi_{\rm m}\left(\frac{z}{L}\right) &=& \left\{ \begin{array}{c@{\quad:\quad}l} \displaystyle -5 \, \frac{z}{L} & L \ge 0 \\[.2in]  \displaystyle 2 \, \ln \left[\frac{1+\zeta}{2}\right] + \ln \left[\frac{1+\zeta^2}{2}\right]-2 \, \tan^{-1}(\zeta) + \frac{\pi}{2} & L<0 \end{array} \right.  \\[.2in]
-   \psi_{\rm h}\left(\frac{z}{L}\right) &=& \left\{ \begin{array}{c@{\quad:\quad}l} \displaystyle -5 \, \frac{z}{L} & L \ge 0 \\[.2in]  \displaystyle 2 \, \ln \left[\frac{1+\zeta^2}{2}\right] & L<0 \quad \quad  \displaystyle \zeta=\left( 1 - \frac{16 \, z}{L} \right)^{1/4}  \end{array} \right.
-\end{eqnarray}
-The Obukhov length, $L$, characterizes the thermal stability of the atmosphere. When $L$ is negative, the atmosphere is unstably stratified; when positive, the atmosphere is stably stratified.  The stabilizing or destabilizing effects of stratification are strongest as $L$ nears zero.  Accordingly, a neutrally stratified atmosphere would have an infinite Obukhov length. Generally, an unstable atmosphere exhibits a decreasing temperature with height and relatively large fluctuations in wind direction/velocity. Unstable atmospheres are strongly affected by the buoyancy-generated turbulence, resulting in enhanced mixing.  Conversely, highly stable atmospheric conditions suppress turbulent mixing.
-
-In the event that these various parameters are not reported or known, they can be estimated from the basic meteorological conditions. From just a single measured mean wind velocity, $u_{\rm ref}$, taken at a height, $z_{\rm ref}$, the friction velocity can be calculated from:
-\be
-   u_* = \frac{\kappa \, u_{\rm ref}}{\ln(z_{\rm ref}/z_0)}
-\ee
-The Obukhov length, $L$, can be chosen from Table~\ref{OL}. Suggested values of the aerodynamic roughness length\footnote{Note that \emph{aerodynamic} roughness, $z_0$, is not the same as \emph{sand grain} roughness, $s$, discussed in Sec.~\ref{info:WALL_MODEL}. For more information, see Section~\ref{aerodynamic_roughness}.}, $z_0$, are given in Table~\ref{z0}.
-\begin{table}[!ht]
-\centering
-\caption[Suggested values of Obukhov length]{Suggested values of the Obukhov length, $L$ (m).}
-\begin{tabular}{|l|c|c|} \hline
-Stability           & Value Range            & Suggested Value  \\  \hline \hline
-Very Unstable       & $-200 \le L < 0$       & $-100$           \\ \hline
-Unstable            & $-500 \le L < -200$    & $-350$           \\ \hline
-Neutral             & $|L|>500$              & $1000000$        \\ \hline
-Stable              & $200 < L \le 500$      & $350$            \\ \hline
-Very Stable         & $0 < L \le 200$        & $100$            \\ \hline
-\end{tabular}
-\label{OL}
-\end{table}
-
-\begin{table}[!ht]
-\centering
-\caption[Davenport-Wieringa roughness length classification]{Davenport-Wieringa roughness length classification~\cite{Stull:2000}.}
-\begin{tabular}{|c|c|c|} \hline
-$z_0$ (m)    & Classification    & Landscape  \\  \hline \hline
-0.0002       & sea               & sea, paved areas, snow-covered flat plain, tidal flats, smooth desert \\ \hline
-0.005        & smooth            & beaches, pack ice, snow-covered fields                                \\ \hline
-0.03         & open              & grass prairie, farm fields, tundra, airports, heather                 \\ \hline
-0.1          & roughly open      & low crops and occasional obstacles (single bushes)                    \\ \hline
-0.25         & rough             & high crops, scattered obstacles such as trees or hedgerows, vineyards \\ \hline
-0.5          & very rough        & mixed farm fields and forest clumps, orchards, scattered buildings    \\ \hline
-1.0          & closed            & suburbs, villages, forests                                            \\ \hline
->2           & chaotic           & large towns and cities, irregular forests                             \\ \hline
-\end{tabular}
-\label{z0}
-\end{table}
-
-The scaling potential temperature, $\theta_*$, can be obtained from the relation:
-\be
-   \theta_* = \frac{u_*^2 \, \theta_0}{g \, \kappa \, L}
-\ee
-Alternatively, the scaling potential temperature can be estimated from the expression for the the sensible heat flux:
-\be
-   \dot{q}'' = \rho \, c_p \, u_* \, \theta_*
-\ee
-where a negative value indicates that the ground is warmer than the air above.
-
-Figure~\ref{wind_profiles} displays a few sample wind profiles. Notice that the sign of $L$ determines whether the atmosphere is stable or unstable; that is, whether the temperature increases or decreases relative to the ground temperature.
-
-\begin{figure}[p]
-   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \includegraphics[width=3.2in]{FIGURES/vel_L=-100}  &
-      \includegraphics[width=3.2in]{FIGURES/tmp_L=-100}  \\
-      \includegraphics[width=3.2in]{FIGURES/vel_L=100}  &
-      \includegraphics[width=3.2in]{FIGURES/tmp_L=100}  \\
-      \includegraphics[width=3.2in]{FIGURES/vel_L=-350}  &
-      \includegraphics[width=3.2in]{FIGURES/tmp_L=-350}
-   \end{tabular*}
-   \caption[Sample vertical wind and temperature profiles]{Sample vertical wind and temperature profiles.}
-   \label{wind_profiles}
-\end{figure}
-
-
-\subsection{Adding a Wind to FDS}
-
-
-In simulations where wind and atmospheric effects are of interest, you usually have a limited amount of information about the conditions; typically a wind speed, direction, basic topography, and weather conditions. For example, for a southwesterly wind blowing 5~m/s over a relatively flat, rural landscape on a bright, sunny day, you could specify the following parameters:
-\begin{lstlisting}
-&WIND SPEED=5., DIRECTION=225., L=-100., Z_0=0.03 /
-
-&VENT MB='ZMIN', SURF_ID='GROUND' /
-&VENT MB='ZMAX', SURF_ID='OPEN' /
-&VENT PBY=..., SURF_ID='PERIODIC', WIND=.TRUE. /
-&VENT PBY=..., SURF_ID='PERIODIC', WIND=.TRUE. /
-&VENT PBX=..., SURF_ID='PERIODIC', WIND=.TRUE. /
-&VENT PBX=..., SURF_ID='PERIODIC', WIND=.TRUE. /
-\end{lstlisting}
-It is assumed here that the wind speed is taken at a height 2~m off the ground. If it is not, set {\ct Z\_REF} (m) accordingly. The wind {\ct DIRECTION} follows the usual meteorological convention---a northerly wind has direction of 0$^\circ$ and blows from north to south, or in the negative $y$ direction in the FDS coordinate system. An easterly wind has a direction of 90$^\circ$ and blows from east to west, or in the negative $x$ direction.
-
-If you know the value of $u_*$ or $\theta_*$, you can input these on the {\ct WIND} line as {\ct U\_STAR} (m) and {\ct THETA\_STAR} (K). Otherwise, they will be computed from $L$ and $z_0$.
-
-You may assign material properties to the {\ct GROUND} if you like, but be aware that FDS assumes the ground to be ambient temperature ({\ct TMPA}) initially, and the temperature of the atmosphere either increases or decreases with height according to the stability condition. The top of the domain is set to be {\ct 'OPEN'}, meaning that even though the wind field is more or less parallel to it, there might be, for example, a hot plume that can rise out of the computational domain.
-
-The side boundaries of the domain can be set either to {\ct 'OPEN'} or {\ct 'PERIODIC'}. The former is the usual inflow/outflow condition; the latter assumes that the domain repeats itself endlessly in each direction. This is an important assumption because the turbulent atmospheric boundary layer that is modeled using Monin-Obukhov similarity theory is assumed to develop over distances far beyond the computational domain. The extra parameter on the {\ct VENT} line, {\ct WIND=.TRUE.}, directs FDS to mirror the basic meteorological conditions in all directions, but to not mirror smoke plumes, gas dispersion, etc., that you might create in your fire scenario. That is, you do not want a smoke plume that exits the eastern boundary of the domain to reappear instantly at the western boundary.
-
-\subsubsection{Example Wind Simulation}
-\label{wind_example}
-
-An input file called {\ct wind\_example.fds} in the {\ct Atmospheric\_Effects} folder provides an example of a wind simulation. The computational domain is a flat landscape that is 1~km by 1~km by 100~m high. There are various rectangular blocks scattered about to represent buildings. The wind speed varies with height as shown in the first plot of Fig.~\ref{wind_profiles}. The wind also turns a full 360$^\circ$ in 50~s, starting and ending in the westerly direction (270$^\circ$). This turn of the wind is not realistic, but this case is intended to test the ramp and mean forcing functionality. The plots in Fig.~\ref{wind_example_fig} display some results of the simulation. On the left is a plot showing the mean velocity components of the simulated wind field compared to the specified (ideal) values. Notice that the simulated wind field lags the specified field by roughly 1~s because the relaxation parameter {\ct DT\_MEAN\_FORCING} is set to 1~s by default. The right hand plot of Fig.~\ref{wind_example_fig} displays the specified vertical wind speed profile compared to the simulation after the wind has turned full circle. The two profiles should be roughly aligned to indicate that the lateral boundary conditions of the mean forcing scheme are working properly.
-
-\begin{figure}[ht]
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/wind_example_time}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/wind_example_prof}
-\caption[Results of the {\ct wind\_example} test case]{(Left) Mean velocity components of the wind vs. the specified values. (Right) Simulated vs. specified vertical wind speed profile.}
-\label{wind_example_fig}
-\end{figure}
-
-
-\subsection{Temporal and Spatial Variation of the Wind}
-
-The velocity components {\ct U0}, {\ct V0}, and {\ct W0} (or the velocity magnitude, {\ct SPEED}) can be made functions of time and/or height using the {\ct RAMP} functions: {\ct RAMP\_DIRECTION}, {\ct RAMP\_U0\_T}, {\ct RAMP\_V0\_T}, or {\ct RAMP\_W0\_T} to vary the wind direction or its velocity components with time; and {\ct RAMP\_U0\_Z}, {\ct RAMP\_V0\_Z}, and {\ct RAMP\_W0\_Z} to vary the velocity components with height. For example,
-\begin{lstlisting}
-&RAMP ID='t-ramp', T=  0., F=0. /
-&RAMP ID='t-ramp', T=100., F=1. /
-
-&RAMP ID='z-ramp', Z=  0., F=1.0 /
-&RAMP ID='z-ramp', Z=200., F=1.5 /
-&RAMP ID='z-ramp', Z=500., F=1.8 /
-\end{lstlisting}
-The parameter {\ct F} represents the fraction of the specified velocity component as a function of time {\ct T} (s) or height {\ct Z} (m). Note that if you use Monin-Obukhov similarity parameters, you need not specify the vertical profile of the wind. It will be calculated automatically.
-
-\subsection{Aerodynamic Roughness}
-\label{aerodynamic_roughness}
-
-The \emph{aerodynamic} roughness length, $z_0$, is not the same as the \emph{sand grain} roughness, $s$, discussed in Sec.~\ref{info:WALL_MODEL}. The default wall model used in FDS, in the ``fully rough'' limit, is given by the following log law:
-\be
-   \frac{u(z)}{u_*} = \frac{1}{\kappa} \, \ln \left( \frac{z}{s} \right) + 8.5
-\ee
-For the purpose of implementing the Monin-Obukhov model within FDS, the velocity profile given by Eq.~(\ref{u_om}) near the ground where $\psi_{\rm m} \approx 0$ can be superimposed, leading to the effective translation of roughness factors:
-\be
-   s = z_0 \, {\rm e}^{8.5 \, \kappa} \approx 30 \, z_0
-\ee
-To explicitly assert this relationship, you may set the {\ct ROUGHNESS} (m) on the {\ct SURF} line applied to the ground to be 30 times your chosen value of $z_0$.
-
-\subsection{Sensible Heat Flux}
-
-The ground temperature relative to the air temperature is an important consideration in ground level gas dispersion because it essentially defines the stability of the atmospheric boundary layer. Cold air blowing over a warm ground surface leads to greater dispersion than warm air blowing over cold ground. In FDS wind simulations, the ground temperature is assumed to be fixed at the specified ambient temperature {\ct TMPA}, and the choice of Monin-Obukhov parameters dictate the temperature profile of the atmosphere.  According to the model, the sensible heat flux is given by
-\be
-   \dot{q}_{\rm c}'' = \rho \, c_p \, u_* \theta_*
-\ee
-where a negative value indicates that the ground is warmer than the air above. In the simulation, you can explicitly specify the {\ct CONVECTIVE\_HEAT\_FLUX} (kW/m$^2$) on the {\ct SURF} line to be $-\dot{q}_{\rm c}''$. Note that $\rho$ (kg/m$^3$) is the density of air near the ground and $c_p$ is the specific heat of air near the ground, approximately 1~kJ/(kg$\cdot$K).
-
-\subsection{Shielding Indoor Volumes from the Wind}
-\label{info:BLOCK_WIND}
-
-There is no sense of ``indoor'' or ``outdoor'' in an FDS simulation; there are only grid cells that are solid or not solid. Thus, a wind field will be induced everywhere in the computational domain. You may omit a region of the flow domain from the wind using the {\ct HOLE} feature. For example, to block the wind from a given volume, add a line of the form:
-\begin{lstlisting}
-&HOLE XB=4,8,2,7,0,5, BLOCK_WIND=.TRUE. /
-\end{lstlisting}
-
-\subsection{The Mean Forcing Concept}
-\label{info:SPONGE_CELLS}
-
-The process of steering the solution of the mass, momentum, and energy equations to match wind speed and direction gathered at random weather stations is known as \emph{data assimilation}~\cite{Kalnay:2003}. FDS uses a relatively simple data assimilation technique, a method known as \emph{nudging}, where you add a mean forcing term to the momentum equation to ``nudge'' the flow in the direction of the specified wind.  Currently, FDS can only affect the mean flow velocities. If you specify a wind {\ct SPEED} on the {\ct WIND} line, FDS will automatically drive the mean velocity components toward the desired values by adding a forcing term to the momentum equation:
-\be
-   \dod{u_i}{t} + \ldots = \frac{u_{i,{\rm spec}}(z,t)-\overline{u_i}}{\tau}
-\ee
-Here, $u_i$ is the computed velocity component, $u_{i,{\rm spec}}$ is the specified wind field component that can vary with height and time, and $\overline{u_i}$ is the average of the computed velocity component at the height $z$. The relaxation time scale, $\tau$, is an input parameter called {\ct DT\_MEAN\_FORCING} whose default value is 1~s. The shorter this time scale, the faster the flow field will ``catch up'' to the mean wind, but at the expense of possibly washing out important flow structures. Try several values of this time scale for your particular simulation to determine what is appropriate for your case. There is no firm guidance in the atmospheric modeling literature.
-
-Note that if instead of specifying the wind {\ct SPEED}, you specify its components, {\ct U0} and {\ct V0} (rarely would you use {\ct W0}), FDS will {\em not} automatically assert mean forcing, but rather just initialize the flow field to these constant values of velocity. If you want to override this behavior, you can direct FDS to assert meaning forcing in all coordinate directions by setting {\ct MEAN\_FORCING=.TRUE.}, or you can assert mean forcing in the $x$, $y$, or $z$ directions using {\ct MEAN\_FORCING(N)=.TRUE.} where {\ct N} is set to 1, 2, or 3, respectively.
-
-When simulating a wind with {\ct OPEN} boundaries, you might notice spurious velocity patterns at the downstream edge of the computational domain. These are artifacts related to the mean forcing function and the application of open boundary conditions at the external faces of the domain. To reduce spurious artifacts at external open wind boundaries, FDS forces both the normal and tangential components of the velocity towards that of the mean wind field at the side and top boundaries, which is why you should ensure that your obstructions are reasonably far from the boundaries. Some suggest that the top, upstream, and lateral boundaries extend outward 5 times the characteristic height of the buildings, and the downstream boundary extend 15 times the height. It is also suggested that the cross sectional area of obstructions be less than 3~\% of the total cross sectional area. However, these recommendations might be overly restrictive. It is suggested that you investigate different domain dimensions to ensure that they do not affect the outcome of your simulation. If you see spurious flow activity at external boundaries, consider increasing the ``sponge layer'' that FDS automatically builds around the exterior lateral boundaries. There is a parameter called {\ct SPONGE\_CELLS}, which is the number of grid cells at the exterior boundary where FDS aggressively forces the velocity to conform with the mean wind field. Within the domain interior, the ``nudging'' or mean forcing is less aggressive. The default value of {\ct SPONGE\_CELLS} is 3, meaning that aggressive forcing is employed in the nearest 3 grid cells adjacent to the $x$ and $y$ exterior boundaries.
-
-
-
-\section{Wind Method 2: Letting the Wind Develop Naturally}
-\label{info:force_vector}
-
-Similar to the mean forcing feature, you may specify a constant and uniform force per unit volume by setting {\ct FORCE\_VECTOR(1:3)} on the {\ct WIND} line.  This is useful, for example, in specifying a mean pressure drop in a duct.  In the absence of other forces, the force vector $F_i$ affects the momentum equation by
-\begin{equation}
-\frac{\partial u_i}{\partial t} + \dots = F_i/\rho
-\end{equation}
-This feature is typically used together with periodic boundaries.  To specify a mean pressure drop of 0.01 Pa/m in the $x$ direction for a periodic duct, for example, use
-\begin{lstlisting}
-&WIND FORCE_VECTOR(1)=0.01 /
-&VENT MB='XMIN', SURF_ID='PERIODIC' /
-&VENT MB='XMAX', SURF_ID='PERIODIC' /
-\end{lstlisting}
-You may apply a time ramp to {\ct FORCE\_VECTOR(1)}, for example, via {\ct RAMP\_FVX\_T} on the {\ct WIND} line.
-
-\subsection{Coriolis Force}
-\label{info:coriolis_force}
-
-The Coriolis force accounts for a rotating reference frame \cite{Stull:2000}.  The Coriolis acceleration augments the right-hand side of the Navier-Stokes equations as follows:
-\begin{equation}
-\DoD{\mathbf{u}}{t} = ... - 2 {\bm\Omega} \times \mathbf{u}
-\end{equation}
-Where is ${\bm\Omega}$ is the rotation vector (see Fig.~\ref{fig:rotation_vector}).  To apply the Coriolis force in FDS, you have two options: either specify the components of ${\bm\Omega}$ directly on the {\ct WIND} lines via {\ct CORIOLIS\_VECTOR(3)}, or you can take the easy route and simply specify the {\ct LATITUDE} (degrees) of the domain, provided you align the $x$ direction with east.  In this latter case, FDS will compute the rotation vector for you as
-\begin{equation}
-\label{eq:earth_rotvec}
-{\bm\Omega} = \omega \left[ \begin{array}{c} 0 \\ \cos(\phi \pi/180) \\ \sin(\phi \pi/180) \end{array} \right]
-\end{equation}
-where $\omega$ is Earth's rotation rate, about $1.16 \times 10^{-5}$ $2\pi$/s.
-
-The nondimensional number that determines if the Coriolis force is significant is the Rossby number.  Let $U$ be the relevant velocity scale and $L$ the length scale of the problem.  The Coriolis freqency is given by $f_c=2 \omega \sin(\phi\pi/180)$.  The Rossby number is then given by
-\begin{equation}
-\label{eq:rossby_number}
-\mbox{Ro} = \frac{U}{f_c L}
-\end{equation}
-When the Rossby number is large, the Coriolis force is negligible.  In building fires, this is typically the case, as $U$ and $L$ are of order unity and $f_c = {\cal O}(10^4)$.
-
-\begin{figure}
-\centering
-\includegraphics[scale=1.5]{FIGURES/Coriolis_vector}
-\caption{The rotation vector ${\bm\Omega}$ points from the Earth's center to the North Pole.  To apply the effect of rotation on our model, we need to know the components of the rotation vector in the reference frame of the computational domain.  Typically, we align the computational domain so that $x$ points east, $y$ points north, and $z$ represents elevation.  The angle $\phi$ [degrees] is the latitude, positive [$0^{\circ}$, $90^{\circ}$] in the northern hemisphere, negative [$0^{\circ}$, $-90^{\circ}$] in the southern hemisphere.  The rotation rate $\omega$ is (obviously) 1 rotation per day or $2\pi/(24 \times 3600) \approx 1.16 \times 10^{-5}$ $2\pi$/s.}
-\label{fig:rotation_vector}
-\end{figure}
-
-
-\subsection{Geostrophic Wind}
-\label{info:geostrophic_wind}
-
-The \emph{geostropic wind} is a theoretical construct obtained from the lateral momentum equations when the Coriolis force is in balance with the horizontal pressure gradient at steady state \cite{Stull:2000}.  The horizontal wind components can be written as
-\begin{align}
-\label{eq:geostrophic_wind}
-U_g &= - \frac{1}{\rho f_c} \frac{\partial \bar{p}}{\partial y} \\
-V_g &= + \frac{1}{\rho f_c} \frac{\partial \bar{p}}{\partial x}
-\end{align}
-If the geostrophic wind speed is known, it can be entered on the {\ct WIND} line via {\ct GEOSTROPHIC\_WIND(1:2)} = $(U_g, V_g)$.  Notice that specification of the wind in $x$ implies a mean pressure gradient in $y$ and vice versa.  When a geostropic wind is specified, FDS converts this value to the implied {\ct FORCE\_VECTOR} according to Eq.~(\ref{eq:geostrophic_wind}).  To achieve the specified geostrophic wind aloft, you must also have the Coriolis force turned on (see Sec.~\ref{info:coriolis_force}).  Since the geostrophic wind is equivalent to applying {\ct FORCE\_VECTOR}, you may also apply a time ramp (see Sec.~\ref{info:force_vector}).
-
-
-\section{Wind Method 3: The ``Wall of Wind''}
-\label{info:wall_of_wind}
-
-An alternative to using Monin-Obukhov similarity theory in specifying a wind is to specify a power law wind profile at an external boundary of the computational domain. This essentially creates a ``wall of wind'' and for early versions of FDS it was the recommended method for specifying a wind. However, the techniques described above are preferable because they handle the lateral boundaries of the computational domain in a more natural way.
-
-To specify a ``wall of wind'', set {\ct PROFILE='ATMOSPHERIC'} on the {\ct SURF} line that is assigned to an exterior lateral boundary of the computational domain. This generates a power law atmospheric wind profile of the form $u=u_0 (z/z_0)^p$ where $z$ is the height above the ground. If an atmospheric profile is prescribed, also prescribe {\ct Z0} for $z_0$  and {\ct PLE} for $p$. {\ct VEL} specifies the reference velocity $u_0$. Note that $z_0$ is not the ground, but rather the height above the ground where the wind speed is measured, like an elevated weather station. It is assumed that the ground is located at 0~m; to change this assumption, set {\ct GROUND\_LEVEL} on the {\ct WIND} line to be the appropriate elevation. Be careful not to apply an atmospheric velocity profile (e.g. negative $z$) below {\ct GROUND\_LEVEL} or FDS will stop with an error.
-
-Sometimes when using a wall of wind, you may want to initialize the flow to the chosen wind speed throughout the domain, but you may not want this initial wind field to persist indefinitely. In such cases, specify your initial flow components {\ct U0}, {\ct V0}, and/or {\ct W0} directly and do not use the parameter {\ct SPEED}. Setting the velocity components directly will initialize the simulation with a constant flow field, but the flow field will die off unless you add a blower somewhere in the domain.
-
-
-
-
-
-\section{Temperature Stratification without Wind}
-\label{info:stratification}
-
-Typically, in the first few hundred meters of the atmosphere, the temperature decreases several degrees Celsius per kilometer. This small temperature change is important when considering the rise of smoke since the temperature of the smoke decreases rapidly as it rises. The {\ct LAPSE\_RATE} of the atmosphere can be specified on the {\ct WIND} line in units of $^\circ$C/m. A negative sign indicates that the temperature {\em decreases} with height. This need only be set for outdoor calculations where the height of the domain is tens or hundreds of meters. The default value of the {\ct LAPSE\_RATE} is 0~$^\circ$C/m.
-
-Alternatively, you can specify {\ct RAMP\_TMP0\_Z} on the {\ct WIND} line if you want a non-linear change in temperature with height. For example,
-\begin{lstlisting}
-&WIND ..., RAMP_TMP0_Z='T profile', ...  /
-
-&RAMP ID='T profile', Z= 0.001 , F= 1.0258  /
-&RAMP ID='T profile', Z= 0.500 , F= 1.0019  /
-&RAMP ID='T profile', Z= 1.000 , F= 1.0000  /
-&RAMP ID='T profile', Z= 1.900 , F= 0.9986  /
-&RAMP ID='T profile', Z= 3.000 , F= 0.9977  /
-&RAMP ID='T profile', Z= 4.000 , F= 0.9972  /
-\end{lstlisting}
-The value of {\ct Z} is the height (m) above the ground. The value of {\ct F} is the ratio of the temperature at the given height in degrees K to the ambient temperature in degrees K, {\ct TMPA}+273.
-
-By default, FDS assumes that the density and pressure decrease with height, regardless of the application or domain size. For most simulations, this effect is negligible, but it can be turned off completely by setting {\ct STRATIFICATION=.FALSE.} on the {\ct WIND} line.
-
-\subsection{Stack Effect}
-\label{info:stackeffect}
-\label{stack_effect}
-
-Tall buildings often experience buoyancy-induced air movement due to temperature differences between the interior and exterior, known as {\em stack effect}~\cite{Klote_Milke}. These temperature differences create flows within vertical shafts (stairwells, atriums, elevator shafts, etc.) due to leaks or openings at different levels. To simulate this phenomenon in FDS, you must include the entire building, or a substantial fraction of it, both inside and out, in the computational domain. It is important to capture the pressure and density decrease in the atmosphere based on the specified temperature profile that is entered on the {\ct WIND} line.
-
-For the case where the stack flow is through small leakage paths, divide the building into one or more pressure {\ct ZONE}s. The leakage paths can be defined in terms of HVAC components. Note that the leakage model combines all leaky surfaces over the entire height of the building and as a result averages out the pressure gradients. For doing stack effect calculations individual leakage paths should be defined. A simple example is described next.
-
-\subsubsection{Example Case: Atmospheric\_Effects/stack\_effect}
-
-The {\em stack\_effect} test case is a two-dimensional simulation of a 100~m tall building whose interior air temperature is slightly warmer than its exterior. The building has leakage paths at the top and ground floors only. Since the inside air temperature is slightly warmer, the inside air pressure is slightly higher as well, and it drives air out of the building and in turn draws air into the building at the ground level.
-The interior air temperature, $T_{\rm b}$, is initially 20~$^\circ$C (293~K), and the exterior air temperature, $T_\infty$, is
-10~$^\circ$C (283~K). The {\ct LAPSE\_RATE} is set to 0~$^\circ$C/m; thus, $T_0(z)=T_\infty$ outside the building and $T_0(z)=T_{\rm b}$ inside the building. Two small leakage openings are defined 2.5~m above the ground floor and 2.5~m below the roof using the HVAC solver. Each opening is given an area of 0.01~m$^2$ and a loss coefficient of 2 (e.g., an entrance loss into the leak path of 1 and and exit loss out of the leak path of 1 both of which represent a sharp edge opening).
-
-The initial density stratification inside and outside the building can be calculated using the relation:
-\be
-  \frac{\rho_0(z)}{\rho_\infty} = \exp \left(- \frac{g \overline{W}}{\R T_0} z \right)
-\ee
-where $\R$ is the universal gas constant, $g$ is the acceleration of gravity, and $\overline{W}$ is the average molecular weight of the air, $z$ is the height above the {\ct GROUND\_LEVEL}, and $T_0$ is the ambient temperature. Applying this formula to the external and internal locations at the lower and upper vents results in densities of 1.2412, 1.1989, 1.2272, and 1.1858~kg/m$^3$, respectively.
-
-Since the openings in the building are equally spaced over its height, the neutral plane should be close to its midpoint. This can be computed from:
-\be
-  \frac{\Delta H }{H_{\rm n}} = 1 + \frac{T_{\rm b}}{T_\infty}
-\ee
-where $H_{\rm n}$ is the neutral plane height above the bottom vent and $\Delta H=95$~m is the distance between the leak points. This gives a neutral plane of 46.68~m above the lower vent or 49.18~m above the bottom of the building. Note that this is close to the midpoint value of 50~m above the bottom of the building. The pressure difference across the building's wall is computed from
-\be
-   \Delta p = \frac{\overline{W} \, p_0(z) \, g \, \Delta z} \R \left( \frac{1}{T_\infty} - \frac{1}{T_{\rm b}} \right)
-\ee
-where $ \Delta z$ is the distance from the leak point to the neutral plane.  Using the neutral plane location, the $ \Delta z$ values are -46.68~m for the lower vent and +48.32~m for the upper vent which respectively result in lower and upper vent pressure differences of -19.4~Pa and +20.4~Pa.  Using the loss of 2 and the pressure difference in the HVAC momentum equation results in a steady-state inflow velocity at the bottom of 3.95~m/s and an outflow velocity at the top of 4.15~m/s. Results for velocity and density are shown in Fig.~\ref{fig_stack_effect}.
-
-\begin{figure}[t]
-   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \scalebox{1}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/stack_effect_v} } &
-      \scalebox{1}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/stack_effect_rho} }
-   \end{tabular*}
-   \caption[Results of the {\ct stack\_effect} test case]{(Left) Velocity at the upper and lower vents for the {\ct stack\_effect} case.  (Right) Upper and lower exterior and interior densities.}
-   \label{fig_stack_effect}
-\end{figure}
-
 
 
 
@@ -5373,8 +4858,6 @@ Here, $\tau_{\rm mix}$ is the mixing time scale. The change in mass of a species
 
 The mixing time, $\tau_{\rm mix}$, is a function of the the level of turbulence in the neighborhood of the point of interest. However, you may override the calculation of $\tau_{\rm mix}$ by setting a {\ct FIXED\_MIX\_TIME} (s) on the {\ct COMB} line. Alternatively, you can bound the computed value of $\tau_{\rm mix}$ by setting a lower bound {\ct TAU\_CHEM} and/or an upper bound {\ct TAU\_FLAME} on the {\ct COMB} line.
 
-Unlike earlier versions, FDS no longer uses the mixture fraction approach for combustion modeling. However, the {\ct 'MIXTURE FRACTION'} output quantity applies the Burke-Schumann solution~\cite{Turns:1996} to map species composition to mixture fraction (i.e., mixture fraction is not a primitive flow variable but rather is calculated from the local fuel and product mass fractions).  This requires simple chemistry with a reaction of the type $\si{F} + \si{A} \rightarrow \si {P}$ with infinitely fast mixing and infinitely fast chemistry.  Therefore, you must set {\ct INITIAL\_UNMIXED\_FRACTION=0} to output {\ct 'MIXTURE FRACTION'}.
-
 The Technical Reference Guide~\cite{FDS_Math_Guide} contains more detailed information about the turbulent combustion model.
 
 \subsection{Special Topic: Flame Extinction}
@@ -5450,13 +4933,7 @@ The FDS predictions based on the {\ct 'EXTINCTION~2'} model (right) confirm that
 
 By default, FDS employs either the {\ct 'EXTINCTION 1'} or {\ct 'EXTINCTION 2'} model to determine if combustion is viable. If local extinction occurs, the unburned fuel gas can re-ignite if it mixes with sufficient oxygen elsewhere in the domain, even if this re-ignition might not happen in reality because the temperature might be too low to sustain combustion. To prevent spurious re-ignition from happening, you can set the {\ct AUTO\_IGNITION\_TEMPERATURE} (AIT) on the {\ct REAC} line or the {\ct COMB} line, in \si{\degree C}, below which combustion will not occur.  For most fuels of interest, the AIT may be found in Beyler's chapter of the SFPE Handbook~\cite{SFPE:Beyler}. The default AIT is $-273 \; ^\circ$C, meaning that fuel and oxygen will burn when mixed providing that either of the extinction models allows combustion to occur.
 
-The value of AIT may need to be lowered for cases where the grid size is greater than 10~cm. The purpose of AIT is simply to prevent fuel and oxygen from spontaneously igniting, which is the default behavior of FDS. If an AIT is specified, then some form of heat/ignition source must be present to start the fire. FDS provides a ``spark'' as follows
-\begin{lstlisting}
-&INIT PART_ID='FDS SPARK', XYZ=..., N_PARTICLES=1, T_INSERT=10. /
-\end{lstlisting}
-This line creates a hot, burning particle at the location {\ct XYZ} starting at {\ct T\_INSERT} (s) and lasting a short amount of time. The character string {\ct 'FDS SPARK'} is a reserved phrase that directs FDS to generate internally the necessary {\ct SURF} and {\ct PART} lines that describe the igniter. If you want to generate your own ``spark'', do not use the string {\ct 'FDS SPARK'}.
-
-The spark igniter serves two purposes. First, within its single grid cell it generates a temperature greater than AIT and allows combustion to proceed; and second, it generates a local heat release rate per unit volume (HRRPUV) of $10/\Delta$~kW/m$^3$, where $\Delta=(\dx \, \dy \, \dz)^{1/3}$. Neighboring cells are assumed to support combustion if either their temperature exceeds AIT, or if they abut a cell with an HRRPUV exceeding $10/\Delta$~kW/m$^3$. You can change the local HRRPUV by specifying {\ct HRRPUV\_SPARK} on the {\ct COMB} line in units of kW/m$^3$. You can change the default spark temperature ($1000 \, ^\circ$C) by specifying {\ct TMP\_SPARK} on the {\ct COMB} line. The duration of the spark is $\Delta/s_L$~s, where $s_L$ is the {\ct LAMINAR\_FLAME\_SPEED}\footnote{Note that the {\ct LAMINAR\_FLAME\_SPEED} has no role in FDS other than to provide a simple scaling relationship for the igniter duration.}, also set on the {\ct COMB} line. Its default value is 0.4~m/s. You can change the duration of the spark by specifying {\ct DT\_SPARK} on the {\ct COMB} line.
+The value of AIT may need to be lowered for cases where the grid size is greater than 10~cm. The purpose of AIT is simply to prevent fuel and oxygen from spontaneously igniting, which is the default behavior of FDS. If an AIT is specified, then some form of heat/ignition source must be present to start the fire.
 
 
 
@@ -6412,6 +5889,8 @@ specifies that half the particle is facing downwards and half is facing upwards.
 
 Note that if only a single {\ct ORIENTATION} vector is assigned on a {\ct PART} line, the radiative flux to the particle is calculated as if there is a flat plate normal to the direction of the vector, like a conventional heat flux gauge. That is, the heat flux is not an integrated average over the entire particle but rather the directional heat flux with the given orientation. The reason for this exception to the general rule is that often single particles are used as ``targets'' to record a heat flux at a given point in the domain with a given orientation. These particles can be thought of as tiny heat flux gauges that do not disturb the flow.
 
+\FloatBarrier
+
 \subsection{Gas Generating Particles}
 \label{info:particle_mass_generation}
 \label{surf_mass_part_specified}
@@ -6449,85 +5928,7 @@ In this case, there is no calculation of heat conduction in depth. Only the surf
 
 
 
-\subsection{Vegetation}
-\label{info:vegetation}
-\label{pine_needles}
 
-Lagrangian particles can be used to represent different types of vegetation, like leaves, grass, and so on. The best way to explain how to use this feature is by way of example. Suppose we want to describe a collection of wet pine needles that occupy a certain volume. The following lines have been extracted from the sample file {\ct WUI/pine\_needles.fds}. Note that all of the values have been chosen simply to demonstrate the technique. These values should not be used for a real calculation.
-\begin{lstlisting}
-&PART ID='pine needles', SAMPLING_FACTOR=1, SURF_ID='wet vegetation',
-      PROP_ID='needle image', STATIC=.TRUE. /
-&INIT PART_ID='pine needles', XB=0.,1.,0.,1.,0.,1., N_PARTICLES=1000,
-      MASS_PER_VOLUME=1. /
-&PROP ID='needle image', SMOKEVIEW_ID='TUBE',
-      SMOKEVIEW_PARAMETERS='L=0.1','D=0.0005' /
-
-&SURF ID = 'wet vegetation'
-      MATL_ID(1,1:2) = 'PINE','MOISTURE'
-      MATL_MASS_FRACTION(1,1:2) = 0.8,0.2
-      THICKNESS = 0.00025
-      LENGTH = 0.1
-      GEOMETRY = 'CYLINDRICAL' /
-
-&MATL ID = 'PINE'
-      DENSITY = 500.
-      CONDUCTIVITY = 0.1
-      SPECIFIC_HEAT = 1.0
-      N_REACTIONS = 1
-      REFERENCE_TEMPERATURE = 300.
-      NU_MATL = 0.2
-      NU_SPEC = 0.8
-      SPEC_ID = 'GLUCOSE'
-      HEAT_OF_REACTION = 1000
-      MATL_ID  = 'CHAR' /
-
-&MATL ID = 'MOISTURE'
-      DENSITY = 1000.
-      CONDUCTIVITY = 0.1
-      SPECIFIC_HEAT = 4.184
-      N_REACTIONS = 1
-      REFERENCE_TEMPERATURE = 100.
-      NU_SPEC = 1.0
-      SPEC_ID = 'WATER VAPOR'
-      HEAT_OF_REACTION = 2500. /
-
-&MATL ID = 'CHAR'
-      DENSITY = 200.
-      CONDUCTIVITY = 1.0
-      SPECIFIC_HEAT = 1.6 /
-\end{lstlisting}
-In the example, 1~kg of pine needles occupy 1~m$^3$. The number of particles used to represent the pine needles is somewhat arbitrary. FDS will automatically weight the specified number so that the total mass per volume is 1~kg. The needles are modeled as cylinders that are 0.5~mm in diameter. The {\ct THICKNESS} on the {\ct SURF} line refers to the radius of the cylinder in units of m. The needles are all 0.1~m long. The needles contain 20~\% (by mass) moisture, and 80~\% cellulose. The moisture is set to evaporate at 100~$^\circ$C to create water vapor and the cellulose pyrolyzes at 300~$^\circ$C to form fuel gas and char. In the example case, the original 1~kg of vegetation is heated until all of the water and fuel evaporate. The fuel is not allowed to burn by setting the ambient oxygen concentration to 1~\%. Figure~\ref{pine_needles_fig} shows the evolution of the fuel, water and char mass. Agreement with the expected values means that mass is conserved.
-
-\begin{figure}[ht]
-\begin{center}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/pine_needles}
-\end{center}
-\caption[Example of burning vegetation]{Evolution of vegetation mass in the {\ct pine\_needles} test case.}
-\label{pine_needles_fig}
-\end{figure}
-
-\subsubsection{Notation used in Forestry}
-
-Users of FDS that work in wildland fire or forestry may be unfamiliar with some of the vegetation material properties in FDS input files. Specifically, the thickness and length of needles or roundwood, for a given vegetation type, are not routinely reported (the surface-to-volume ratio is reported instead). Also, while the bulk density is reported (or can be easily found from vegetation loading and height), it is based on the dry mass. Moisture content is reported on a dry weight basis, $M_{\rm dw}$. The {\ct MASS\_FRACTION} of moisture on the {\ct SURF} line is $M_{\rm dw} / (1 + M_{\rm dw})$. In addition, the surface-to-volume ratio of the vegetation, $\sigma_{\rm v}$, is reported instead of the physical dimensions. If we assume a cylindrical shape, with the length of the cylinder being much larger than the radius, then the radius of the cylinder (input as {\ct THICKNESS}) is $2/\sigma_{\rm v}$. The {\ct MASS\_PER\_VOLUME} is equivalent to $m_{\rm d}''' \, (1+M_{\rm dw})$ where $m_{\rm d}'''$ is the mass per unit volume of dry vegetation.
-
-
-\subsection{Firebrands}
-\label{info:firebrands}
-\label{dragon_5a}
-
-Firebrands are small pieces of burning wood and vegetation that can be lofted into the air and blown by the wind ahead of a wildland fire front. Manzello et~al.~\cite{Manzello:FSJ2008a} have developed a variety of experimental apparatus designed to generate firebrands in a laboratory setting. The example input file called {\ct dragon\_5a} in the {\ct WUI} (Wildland-Urban Interface) folder is a very simple mock-up of one of these experiments. The word ``dragon'' is based on the nickname of the apparatus; 5a is the figure number in Ref.~\cite{Manzello:FSJ2008a} on which this example case is loosely based. In the experiment, 700~g of small dowels (length 50~mm, diameter 8~mm) made of Ponderosa Pine wood were poured into a small steel chamber equipped with several propane burners. The dowels were left to burn for roughly a minute subject to a slow induced air flow after which time the air flow was increased and firebrands were propelled horizontally out of a 15~cm duct 2.25~m above the lab floor. It is reported that after several replicate experiments, the average mass of the firebrands collected from pans on the floor was 57~g. The average diameter of the collected dowels was 5.6~mm, and the average length was 13.5~mm.
-
-It is not possible to simulate the experiment in FDS exactly as it was performed. The reason is that in the experiment, all 700~g of the wooden dowels were poured into the heating chamber at once. FDS cannot handle such a dense packing of Lagrangian particles. Instead, the simulated dowels are introduced at a rate of 10 per second. FDS also does not have a mechanism to break-up the dowels, reducing their length from 50~mm to 13.5~mm. Thus, the initial cylindrical particles are 13.5~mm and remain that length throughout the simulation. The diameter of the cylindrical particles is reduced, however, from 8~mm to 5.6~mm, which takes the initial density of 440~kg/m$^3$ down to 71~kg/m$^3$ because the mass of the firebrands is assumed to be 8~\% of the original. The plot in Fig.~\ref{dragon_5a_fig} shows the increasing mass of firebrands thrown to the floor in the simulation after 100~s of particle insertion. The total mass of particles inserted into the apparatus is:
-\be \pi \, (0.004 \; {\rm m})^2 \times (0.0135 \; {\rm m}) \times (440 \; {\rm kg/m}^3) \times (10 \; {\rm part/s}) \times (100 \; {\rm s}) \approx 0.3 \; {\rm kg} \ee
-The amount expected on the floor is approximately 0.024~kg.
-
-\begin{figure}[ht]
-\begin{center}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/dragon_5a}
-\end{center}
-\caption[Mass generation of firebrands in the {\ct dragon\_5a} test case]{Mass generation of firebrands in the {\ct dragon\_5a} test case.}
-\label{dragon_5a_fig}
-\end{figure}
 
 \subsection{Porous Media}
 \label{info:porous_media}
@@ -6800,6 +6201,586 @@ The parameter {\ct E\_COEFFICIENT} must be obtained experimentally, and it is ex
 \caption[Results of the {\ct e\_coefficient} test case]{Output of the  {\ct e\_coefficient} test case.}
 \label{e_coef_fig}
 \end{figure}
+
+
+
+\chapter{Earth, Wind and Fire}
+
+This chapter describes techniques for modeling fires outside of buildings, including the effects of wind and the atmospheric boundary layer.
+
+Most of the parameters that describe the atmosphere are entered on a single namelist line called {\ct WIND}. This namelist group is new starting with FDS version 6.6.0. Previous versions of FDS used the {\ct MISC} line for parameters related to wind and atmospheric conditions. There are three ways to specify a wind in FDS. The preferred method, originally implemented in FDS version 6.6.0, is to model the wind and corresponding temperature profile using Monin-Obukhov similarity theory (Section~\ref{info:WIND}). A second, more complicated method, is to specify a uniform horizontal forcing function and allow the wind field to develop naturally. This has proven more useful in wind tunnel applications than for natural winds (Section~\ref{info:force_vector}). The third method, which has traditionally been employed in older versions of FDS, is to create essentially a ``wall of wind'' where an entire side of the computational domain is turned into a giant fan blowing air laterally. This is the least preferred method of creating a wind (Section~\ref{info:wall_of_wind}).
+
+Wildland fires can be modeled in a number of different ways in FDS. The most common technique is to use Lagrangian particles that represent leaves, grasses, shrubbery, etc., as described in Section~\ref{pine_needles}.
+
+
+\section{Wind Method 1: Monin-Obukhov Similarity}
+\label{info:WIND}
+
+\subsection{Basic Equations}
+
+The atmospheric boundary layer in FDS is modeled using Monin-Obukhov similarity theory. The wind speed profile, $u$, and potential temperature\footnote{The potential temperature is given by $$\theta=T \left( \frac{p_0}{p} \right)^{R/(W_{\rm air} \, c_p)}$$ where $p_0$ is typically 1000~mbar and $R/(W_{\rm air} \, c_p) \approx 0.286$.}, $\theta$, vary with height, $z$, according to:
+\begin{eqnarray}
+   u(z)      &=&            \frac{u_*}{\kappa}     \left[ \ln \left( \frac{z}{z_0} \right) - \psi_{\rm m} \left( \frac{z}{L} \right) \right] \label{u_om} \\[.15in]
+   \theta(z) &=& \theta_0 + \frac{\theta_*}{\kappa} \left[ \ln \left( \frac{z}{z_0} \right) - \psi_{\rm h} \left( \frac{z}{L} \right) \right]
+\end{eqnarray}
+where $u_*$ is the friction velocity, $\kappa=0.41$ is the Von K\'{a}rm\'{a}n constant, $z_0$ is the \emph{aerodynamic} roughness length, $\theta_*$ is the scaling potential temperature, $\theta_0$ is the ground level potential temperature, $L$ is the Obukhov length, and the similarity functions are those proposed by Dyer~\cite{Dyer:1974}:
+\begin{eqnarray}
+   \psi_{\rm m}\left(\frac{z}{L}\right) &=& \left\{ \begin{array}{c@{\quad:\quad}l} \displaystyle -5 \, \frac{z}{L} & L \ge 0 \\[.2in]  \displaystyle 2 \, \ln \left[\frac{1+\zeta}{2}\right] + \ln \left[\frac{1+\zeta^2}{2}\right]-2 \, \tan^{-1}(\zeta) + \frac{\pi}{2} & L<0 \end{array} \right.  \\[.2in]
+   \psi_{\rm h}\left(\frac{z}{L}\right) &=& \left\{ \begin{array}{c@{\quad:\quad}l} \displaystyle -5 \, \frac{z}{L} & L \ge 0 \\[.2in]  \displaystyle 2 \, \ln \left[\frac{1+\zeta^2}{2}\right] & L<0 \quad \quad  \displaystyle \zeta=\left( 1 - \frac{16 \, z}{L} \right)^{1/4}  \end{array} \right.
+\end{eqnarray}
+The Obukhov length, $L$, characterizes the thermal stability of the atmosphere. When $L$ is negative, the atmosphere is unstably stratified; when positive, the atmosphere is stably stratified.  The stabilizing or destabilizing effects of stratification are strongest as $L$ nears zero.  Accordingly, a neutrally stratified atmosphere would have an infinite Obukhov length. Generally, an unstable atmosphere exhibits a decreasing temperature with height and relatively large fluctuations in wind direction/velocity. Unstable atmospheres are strongly affected by the buoyancy-generated turbulence, resulting in enhanced mixing.  Conversely, highly stable atmospheric conditions suppress turbulent mixing.
+
+In the event that these various parameters are not reported or known, they can be estimated from the basic meteorological conditions. From just a single measured mean wind velocity, $u_{\rm ref}$, taken at a height, $z_{\rm ref}$, the friction velocity can be calculated from:
+\be
+   u_* = \frac{\kappa \, u_{\rm ref}}{\ln(z_{\rm ref}/z_0)}
+\ee
+The Obukhov length, $L$, can be chosen from Table~\ref{OL}. Suggested values of the aerodynamic roughness length\footnote{Note that \emph{aerodynamic} roughness, $z_0$, is not the same as \emph{sand grain} roughness, $s$, discussed in Sec.~\ref{info:WALL_MODEL}. For more information, see Section~\ref{aerodynamic_roughness}.}, $z_0$, are given in Table~\ref{z0}.
+\begin{table}[!ht]
+\centering
+\caption[Suggested values of Obukhov length]{Suggested values of the Obukhov length, $L$ (m).}
+\begin{tabular}{|l|c|c|} \hline
+Stability           & Value Range            & Suggested Value  \\  \hline \hline
+Very Unstable       & $-200 \le L < 0$       & $-100$           \\ \hline
+Unstable            & $-500 \le L < -200$    & $-350$           \\ \hline
+Neutral             & $|L|>500$              & $1000000$        \\ \hline
+Stable              & $200 < L \le 500$      & $350$            \\ \hline
+Very Stable         & $0 < L \le 200$        & $100$            \\ \hline
+\end{tabular}
+\label{OL}
+\end{table}
+
+\begin{table}[!ht]
+\centering
+\caption[Davenport-Wieringa roughness length classification]{Davenport-Wieringa roughness length classification~\cite{Stull:2000}.}
+\begin{tabular}{|c|c|c|} \hline
+$z_0$ (m)    & Classification    & Landscape  \\  \hline \hline
+0.0002       & sea               & sea, paved areas, snow-covered flat plain, tidal flats, smooth desert \\ \hline
+0.005        & smooth            & beaches, pack ice, snow-covered fields                                \\ \hline
+0.03         & open              & grass prairie, farm fields, tundra, airports, heather                 \\ \hline
+0.1          & roughly open      & low crops and occasional obstacles (single bushes)                    \\ \hline
+0.25         & rough             & high crops, scattered obstacles such as trees or hedgerows, vineyards \\ \hline
+0.5          & very rough        & mixed farm fields and forest clumps, orchards, scattered buildings    \\ \hline
+1.0          & closed            & suburbs, villages, forests                                            \\ \hline
+>2           & chaotic           & large towns and cities, irregular forests                             \\ \hline
+\end{tabular}
+\label{z0}
+\end{table}
+
+The scaling potential temperature, $\theta_*$, can be obtained from the relation:
+\be
+   \theta_* = \frac{u_*^2 \, \theta_0}{g \, \kappa \, L}
+\ee
+Alternatively, the scaling potential temperature can be estimated from the expression for the the sensible heat flux:
+\be
+   \dot{q}'' = \rho \, c_p \, u_* \, \theta_*
+\ee
+where a negative value indicates that the ground is warmer than the air above.
+
+Figure~\ref{wind_profiles} displays a few sample wind profiles. Notice that the sign of $L$ determines whether the atmosphere is stable or unstable; that is, whether the temperature increases or decreases relative to the ground temperature.
+
+\begin{figure}[p]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \includegraphics[width=3.2in]{FIGURES/vel_L=-100}  &
+      \includegraphics[width=3.2in]{FIGURES/tmp_L=-100}  \\
+      \includegraphics[width=3.2in]{FIGURES/vel_L=100}  &
+      \includegraphics[width=3.2in]{FIGURES/tmp_L=100}  \\
+      \includegraphics[width=3.2in]{FIGURES/vel_L=-350}  &
+      \includegraphics[width=3.2in]{FIGURES/tmp_L=-350}
+   \end{tabular*}
+   \caption[Sample vertical wind and temperature profiles]{Sample vertical wind and temperature profiles.}
+   \label{wind_profiles}
+\end{figure}
+
+
+\subsection{Adding a Wind to FDS}
+
+
+In simulations where wind and atmospheric effects are of interest, you usually have a limited amount of information about the conditions; typically a wind speed, direction, basic topography, and weather conditions. For example, for a southwesterly wind blowing 5~m/s over a relatively flat, rural landscape on a bright, sunny day, you could specify the following parameters:
+\begin{lstlisting}
+&WIND SPEED=5., DIRECTION=225., L=-100., Z_0=0.03 /
+
+&VENT MB='ZMIN', SURF_ID='GROUND' /
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+&VENT PBY=..., SURF_ID='PERIODIC', WIND=.TRUE. /
+&VENT PBY=..., SURF_ID='PERIODIC', WIND=.TRUE. /
+&VENT PBX=..., SURF_ID='PERIODIC', WIND=.TRUE. /
+&VENT PBX=..., SURF_ID='PERIODIC', WIND=.TRUE. /
+\end{lstlisting}
+It is assumed here that the wind speed is taken at a height 2~m off the ground. If it is not, set {\ct Z\_REF} (m) accordingly. The wind {\ct DIRECTION} follows the usual meteorological convention---a northerly wind has direction of 0$^\circ$ and blows from north to south, or in the negative $y$ direction in the FDS coordinate system. An easterly wind has a direction of 90$^\circ$ and blows from east to west, or in the negative $x$ direction.
+
+If you know the value of $u_*$ or $\theta_*$, you can input these on the {\ct WIND} line as {\ct U\_STAR} (m) and {\ct THETA\_STAR} (K). Otherwise, they will be computed from $L$ and $z_0$.
+
+You may assign material properties to the {\ct GROUND} if you like, but be aware that FDS assumes the ground to be ambient temperature ({\ct TMPA}) initially, and the temperature of the atmosphere either increases or decreases with height according to the stability condition. The top of the domain is set to be {\ct 'OPEN'}, meaning that even though the wind field is more or less parallel to it, there might be, for example, a hot plume that can rise out of the computational domain.
+
+The side boundaries of the domain can be set either to {\ct 'OPEN'} or {\ct 'PERIODIC'}. The former is the usual inflow/outflow condition; the latter assumes that the domain repeats itself endlessly in each direction. This is an important assumption because the turbulent atmospheric boundary layer that is modeled using Monin-Obukhov similarity theory is assumed to develop over distances far beyond the computational domain. The extra parameter on the {\ct VENT} line, {\ct WIND=.TRUE.}, directs FDS to mirror the basic meteorological conditions in all directions, but to not mirror smoke plumes, gas dispersion, etc., that you might create in your fire scenario. That is, you do not want a smoke plume that exits the eastern boundary of the domain to reappear instantly at the western boundary.
+
+\subsubsection{Example Wind Simulation}
+\label{wind_example}
+
+An input file called {\ct wind\_example.fds} in the {\ct Atmospheric\_Effects} folder provides an example of a wind simulation. The computational domain is a flat landscape that is 1~km by 1~km by 100~m high. There are various rectangular blocks scattered about to represent buildings. The wind speed varies with height as shown in the first plot of Fig.~\ref{wind_profiles}. The wind also turns a full 360$^\circ$ in 50~s, starting and ending in the westerly direction (270$^\circ$). This turn of the wind is not realistic, but this case is intended to test the ramp and mean forcing functionality. The plots in Fig.~\ref{wind_example_fig} display some results of the simulation. On the left is a plot showing the mean velocity components of the simulated wind field compared to the specified (ideal) values. Notice that the simulated wind field lags the specified field by roughly 1~s because the relaxation parameter {\ct DT\_MEAN\_FORCING} is set to 1~s by default. The right hand plot of Fig.~\ref{wind_example_fig} displays the specified vertical wind speed profile compared to the simulation after the wind has turned full circle. The two profiles should be roughly aligned to indicate that the lateral boundary conditions of the mean forcing scheme are working properly.
+
+\begin{figure}[ht]
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/wind_example_time}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/wind_example_prof}
+\caption[Results of the {\ct wind\_example} test case]{(Left) Mean velocity components of the wind vs. the specified values. (Right) Simulated vs. specified vertical wind speed profile.}
+\label{wind_example_fig}
+\end{figure}
+
+
+\subsection{Temporal and Spatial Variation of the Wind}
+
+The velocity components {\ct U0}, {\ct V0}, and {\ct W0} (or the velocity magnitude, {\ct SPEED}) can be made functions of time and/or height using the {\ct RAMP} functions: {\ct RAMP\_DIRECTION}, {\ct RAMP\_U0\_T}, {\ct RAMP\_V0\_T}, or {\ct RAMP\_W0\_T} to vary the wind direction or its velocity components with time; and {\ct RAMP\_U0\_Z}, {\ct RAMP\_V0\_Z}, and {\ct RAMP\_W0\_Z} to vary the velocity components with height. For example,
+\begin{lstlisting}
+&RAMP ID='t-ramp', T=  0., F=0. /
+&RAMP ID='t-ramp', T=100., F=1. /
+
+&RAMP ID='z-ramp', Z=  0., F=1.0 /
+&RAMP ID='z-ramp', Z=200., F=1.5 /
+&RAMP ID='z-ramp', Z=500., F=1.8 /
+\end{lstlisting}
+The parameter {\ct F} represents the fraction of the specified velocity component as a function of time {\ct T} (s) or height {\ct Z} (m). Note that if you use Monin-Obukhov similarity parameters, you need not specify the vertical profile of the wind. It will be calculated automatically.
+
+\subsection{Aerodynamic Roughness}
+\label{aerodynamic_roughness}
+
+The \emph{aerodynamic} roughness length, $z_0$, is not the same as the \emph{sand grain} roughness, $s$, discussed in Sec.~\ref{info:WALL_MODEL}. The default wall model used in FDS, in the ``fully rough'' limit, is given by the following log law:
+\be
+   \frac{u(z)}{u_*} = \frac{1}{\kappa} \, \ln \left( \frac{z}{s} \right) + 8.5
+\ee
+For the purpose of implementing the Monin-Obukhov model within FDS, the velocity profile given by Eq.~(\ref{u_om}) near the ground where $\psi_{\rm m} \approx 0$ can be superimposed, leading to the effective translation of roughness factors:
+\be
+   s = z_0 \, {\rm e}^{8.5 \, \kappa} \approx 30 \, z_0
+\ee
+To explicitly assert this relationship, you may set the {\ct ROUGHNESS} (m) on the {\ct SURF} line applied to the ground to be 30 times your chosen value of $z_0$.
+
+\subsection{Sensible Heat Flux}
+
+The ground temperature relative to the air temperature is an important consideration in ground level gas dispersion because it essentially defines the stability of the atmospheric boundary layer. Cold air blowing over a warm ground surface leads to greater dispersion than warm air blowing over cold ground. In FDS wind simulations, the ground temperature is assumed to be fixed at the specified ambient temperature {\ct TMPA}, and the choice of Monin-Obukhov parameters dictate the temperature profile of the atmosphere.  According to the model, the sensible heat flux is given by
+\be
+   \dot{q}_{\rm c}'' = \rho \, c_p \, u_* \theta_*
+\ee
+where a negative value indicates that the ground is warmer than the air above. In the simulation, you can explicitly specify the {\ct CONVECTIVE\_HEAT\_FLUX} (kW/m$^2$) on the {\ct SURF} line to be $-\dot{q}_{\rm c}''$. Note that $\rho$ (kg/m$^3$) is the density of air near the ground and $c_p$ is the specific heat of air near the ground, approximately 1~kJ/(kg$\cdot$K).
+
+\subsection{Shielding Indoor Volumes from the Wind}
+\label{info:BLOCK_WIND}
+
+There is no sense of ``indoor'' or ``outdoor'' in an FDS simulation; there are only grid cells that are solid or not solid. Thus, a wind field will be induced everywhere in the computational domain. You may omit a region of the flow domain from the wind using the {\ct HOLE} feature. For example, to block the wind from a given volume, add a line of the form:
+\begin{lstlisting}
+&HOLE XB=4,8,2,7,0,5, BLOCK_WIND=.TRUE. /
+\end{lstlisting}
+
+\subsection{The Mean Forcing Concept}
+\label{info:SPONGE_CELLS}
+
+The process of steering the solution of the mass, momentum, and energy equations to match wind speed and direction gathered at random weather stations is known as \emph{data assimilation}~\cite{Kalnay:2003}. FDS uses a relatively simple data assimilation technique, a method known as \emph{nudging}, where you add a mean forcing term to the momentum equation to ``nudge'' the flow in the direction of the specified wind.  Currently, FDS can only affect the mean flow velocities. If you specify a wind {\ct SPEED} on the {\ct WIND} line, FDS will automatically drive the mean velocity components toward the desired values by adding a forcing term to the momentum equation:
+\be
+   \dod{u_i}{t} + \ldots = \frac{u_{i,{\rm spec}}(z,t)-\overline{u_i}}{\tau}
+\ee
+Here, $u_i$ is the computed velocity component, $u_{i,{\rm spec}}$ is the specified wind field component that can vary with height and time, and $\overline{u_i}$ is the average of the computed velocity component at the height $z$. The relaxation time scale, $\tau$, is an input parameter called {\ct DT\_MEAN\_FORCING} whose default value is 1~s. The shorter this time scale, the faster the flow field will ``catch up'' to the mean wind, but at the expense of possibly washing out important flow structures. Try several values of this time scale for your particular simulation to determine what is appropriate for your case. There is no firm guidance in the atmospheric modeling literature.
+
+Note that if instead of specifying the wind {\ct SPEED}, you specify its components, {\ct U0} and {\ct V0} (rarely would you use {\ct W0}), FDS will {\em not} automatically assert mean forcing, but rather just initialize the flow field to these constant values of velocity. If you want to override this behavior, you can direct FDS to assert meaning forcing in all coordinate directions by setting {\ct MEAN\_FORCING=.TRUE.}, or you can assert mean forcing in the $x$, $y$, or $z$ directions using {\ct MEAN\_FORCING(N)=.TRUE.} where {\ct N} is set to 1, 2, or 3, respectively.
+
+When simulating a wind with {\ct OPEN} boundaries, you might notice spurious velocity patterns at the downstream edge of the computational domain. These are artifacts related to the mean forcing function and the application of open boundary conditions at the external faces of the domain. To reduce spurious artifacts at external open wind boundaries, FDS forces both the normal and tangential components of the velocity towards that of the mean wind field at the side and top boundaries, which is why you should ensure that your obstructions are reasonably far from the boundaries. Some suggest that the top, upstream, and lateral boundaries extend outward 5 times the characteristic height of the buildings, and the downstream boundary extend 15 times the height. It is also suggested that the cross sectional area of obstructions be less than 3~\% of the total cross sectional area. However, these recommendations might be overly restrictive. It is suggested that you investigate different domain dimensions to ensure that they do not affect the outcome of your simulation. If you see spurious flow activity at external boundaries, consider increasing the ``sponge layer'' that FDS automatically builds around the exterior lateral boundaries. There is a parameter called {\ct SPONGE\_CELLS}, which is the number of grid cells at the exterior boundary where FDS aggressively forces the velocity to conform with the mean wind field. Within the domain interior, the ``nudging'' or mean forcing is less aggressive. The default value of {\ct SPONGE\_CELLS} is 3, meaning that aggressive forcing is employed in the nearest 3 grid cells adjacent to the $x$ and $y$ exterior boundaries.
+
+
+
+\section{Wind Method 2: Letting the Wind Develop Naturally}
+\label{info:force_vector}
+
+Similar to the mean forcing feature, you may specify a constant and uniform force per unit volume by setting {\ct FORCE\_VECTOR(1:3)} on the {\ct WIND} line.  This is useful, for example, in specifying a mean pressure drop in a duct.  In the absence of other forces, the force vector $F_i$ affects the momentum equation by
+\begin{equation}
+\frac{\partial u_i}{\partial t} + \dots = F_i/\rho
+\end{equation}
+This feature is typically used together with periodic boundaries.  To specify a mean pressure drop of 0.01 Pa/m in the $x$ direction for a periodic duct, for example, use
+\begin{lstlisting}
+&WIND FORCE_VECTOR(1)=0.01 /
+&VENT MB='XMIN', SURF_ID='PERIODIC' /
+&VENT MB='XMAX', SURF_ID='PERIODIC' /
+\end{lstlisting}
+You may apply a time ramp to {\ct FORCE\_VECTOR(1)}, for example, via {\ct RAMP\_FVX\_T} on the {\ct WIND} line.
+
+\subsection{Coriolis Force}
+\label{info:coriolis_force}
+
+The Coriolis force accounts for a rotating reference frame \cite{Stull:2000}.  The Coriolis acceleration augments the right-hand side of the Navier-Stokes equations as follows:
+\begin{equation}
+\DoD{\mathbf{u}}{t} = ... - 2 {\bm\Omega} \times \mathbf{u}
+\end{equation}
+Where is ${\bm\Omega}$ is the rotation vector (see Fig.~\ref{fig:rotation_vector}).  To apply the Coriolis force in FDS, you have two options: either specify the components of ${\bm\Omega}$ directly on the {\ct WIND} lines via {\ct CORIOLIS\_VECTOR(3)}, or you can take the easy route and simply specify the {\ct LATITUDE} (degrees) of the domain, provided you align the $x$ direction with east.  In this latter case, FDS will compute the rotation vector for you as
+\begin{equation}
+\label{eq:earth_rotvec}
+{\bm\Omega} = \omega \left[ \begin{array}{c} 0 \\ \cos(\phi \pi/180) \\ \sin(\phi \pi/180) \end{array} \right]
+\end{equation}
+where $\omega$ is Earth's rotation rate, about $1.16 \times 10^{-5}$ $2\pi$/s.
+
+The nondimensional number that determines if the Coriolis force is significant is the Rossby number.  Let $U$ be the relevant velocity scale and $L$ the length scale of the problem.  The Coriolis freqency is given by $f_c=2 \omega \sin(\phi\pi/180)$.  The Rossby number is then given by
+\begin{equation}
+\label{eq:rossby_number}
+\mbox{Ro} = \frac{U}{f_c L}
+\end{equation}
+When the Rossby number is large, the Coriolis force is negligible.  In building fires, this is typically the case, as $U$ and $L$ are of order unity and $f_c = {\cal O}(10^4)$.
+
+\begin{figure}
+\centering
+\includegraphics[scale=1.5]{FIGURES/Coriolis_vector}
+\caption{The rotation vector ${\bm\Omega}$ points from the Earth's center to the North Pole.  To apply the effect of rotation on our model, we need to know the components of the rotation vector in the reference frame of the computational domain.  Typically, we align the computational domain so that $x$ points east, $y$ points north, and $z$ represents elevation.  The angle $\phi$ [degrees] is the latitude, positive [$0^{\circ}$, $90^{\circ}$] in the northern hemisphere, negative [$0^{\circ}$, $-90^{\circ}$] in the southern hemisphere.  The rotation rate $\omega$ is (obviously) 1 rotation per day or $2\pi/(24 \times 3600) \approx 1.16 \times 10^{-5}$ $2\pi$/s.}
+\label{fig:rotation_vector}
+\end{figure}
+
+
+\subsection{Geostrophic Wind}
+\label{info:geostrophic_wind}
+
+The \emph{geostropic wind} is a theoretical construct obtained from the lateral momentum equations when the Coriolis force is in balance with the horizontal pressure gradient at steady state \cite{Stull:2000}.  The horizontal wind components can be written as
+\begin{align}
+\label{eq:geostrophic_wind}
+U_g &= - \frac{1}{\rho f_c} \frac{\partial \bar{p}}{\partial y} \\
+V_g &= + \frac{1}{\rho f_c} \frac{\partial \bar{p}}{\partial x}
+\end{align}
+If the geostrophic wind speed is known, it can be entered on the {\ct WIND} line via {\ct GEOSTROPHIC\_WIND(1:2)} = $(U_g, V_g)$.  Notice that specification of the wind in $x$ implies a mean pressure gradient in $y$ and vice versa.  When a geostropic wind is specified, FDS converts this value to the implied {\ct FORCE\_VECTOR} according to Eq.~(\ref{eq:geostrophic_wind}).  To achieve the specified geostrophic wind aloft, you must also have the Coriolis force turned on (see Sec.~\ref{info:coriolis_force}).  Since the geostrophic wind is equivalent to applying {\ct FORCE\_VECTOR}, you may also apply a time ramp (see Sec.~\ref{info:force_vector}).
+
+
+\section{Wind Method 3: The ``Wall of Wind''}
+\label{info:wall_of_wind}
+
+An alternative to using Monin-Obukhov similarity theory in specifying a wind is to specify a power law wind profile at an external boundary of the computational domain. This essentially creates a ``wall of wind'' and for early versions of FDS it was the recommended method for specifying a wind. However, the techniques described above are preferable because they handle the lateral boundaries of the computational domain in a more natural way.
+
+To specify a ``wall of wind'', set {\ct PROFILE='ATMOSPHERIC'} on the {\ct SURF} line that is assigned to an exterior lateral boundary of the computational domain. This generates a power law atmospheric wind profile of the form $u=u_0 (z/z_0)^p$ where $z$ is the height above the ground. If an atmospheric profile is prescribed, also prescribe {\ct Z0} for $z_0$  and {\ct PLE} for $p$. {\ct VEL} specifies the reference velocity $u_0$. Note that $z_0$ is not the ground, but rather the height above the ground where the wind speed is measured, like an elevated weather station. It is assumed that the ground is located at 0~m; to change this assumption, set {\ct GROUND\_LEVEL} on the {\ct WIND} line to be the appropriate elevation. Be careful not to apply an atmospheric velocity profile (e.g. negative $z$) below {\ct GROUND\_LEVEL} or FDS will stop with an error.
+
+Sometimes when using a wall of wind, you may want to initialize the flow to the chosen wind speed throughout the domain, but you may not want this initial wind field to persist indefinitely. In such cases, specify your initial flow components {\ct U0}, {\ct V0}, and/or {\ct W0} directly and do not use the parameter {\ct SPEED}. Setting the velocity components directly will initialize the simulation with a constant flow field, but the flow field will die off unless you add a blower somewhere in the domain.
+
+
+
+
+
+\section{Temperature Stratification without Wind}
+\label{info:stratification}
+
+Typically, in the first few hundred meters of the atmosphere, the temperature decreases several degrees Celsius per kilometer. This small temperature change is important when considering the rise of smoke since the temperature of the smoke decreases rapidly as it rises. The {\ct LAPSE\_RATE} of the atmosphere can be specified on the {\ct WIND} line in units of $^\circ$C/m. A negative sign indicates that the temperature {\em decreases} with height. This need only be set for outdoor calculations where the height of the domain is tens or hundreds of meters. The default value of the {\ct LAPSE\_RATE} is 0~$^\circ$C/m.
+
+Alternatively, you can specify {\ct RAMP\_TMP0\_Z} on the {\ct WIND} line if you want a non-linear change in temperature with height. For example,
+\begin{lstlisting}
+&WIND ..., RAMP_TMP0_Z='T profile', ...  /
+
+&RAMP ID='T profile', Z= 0.001 , F= 1.0258  /
+&RAMP ID='T profile', Z= 0.500 , F= 1.0019  /
+&RAMP ID='T profile', Z= 1.000 , F= 1.0000  /
+&RAMP ID='T profile', Z= 1.900 , F= 0.9986  /
+&RAMP ID='T profile', Z= 3.000 , F= 0.9977  /
+&RAMP ID='T profile', Z= 4.000 , F= 0.9972  /
+\end{lstlisting}
+The value of {\ct Z} is the height (m) above the ground. The value of {\ct F} is the ratio of the temperature at the given height in degrees K to the ambient temperature in degrees K, {\ct TMPA}+273.
+
+By default, FDS assumes that the density and pressure decrease with height, regardless of the application or domain size. For most simulations, this effect is negligible, but it can be turned off completely by setting {\ct STRATIFICATION=.FALSE.} on the {\ct WIND} line.
+
+\subsection{Stack Effect}
+\label{info:stackeffect}
+\label{stack_effect}
+
+Tall buildings often experience buoyancy-induced air movement due to temperature differences between the interior and exterior, known as {\em stack effect}~\cite{Klote_Milke}. These temperature differences create flows within vertical shafts (stairwells, atriums, elevator shafts, etc.) due to leaks or openings at different levels. To simulate this phenomenon in FDS, you must include the entire building, or a substantial fraction of it, both inside and out, in the computational domain. It is important to capture the pressure and density decrease in the atmosphere based on the specified temperature profile that is entered on the {\ct WIND} line.
+
+For the case where the stack flow is through small leakage paths, divide the building into one or more pressure {\ct ZONE}s. The leakage paths can be defined in terms of HVAC components. Note that the leakage model combines all leaky surfaces over the entire height of the building and as a result averages out the pressure gradients. For doing stack effect calculations individual leakage paths should be defined. A simple example is described next.
+
+\subsubsection{Example Case: Atmospheric\_Effects/stack\_effect}
+
+The {\em stack\_effect} test case is a two-dimensional simulation of a 100~m tall building whose interior air temperature is slightly warmer than its exterior. The building has leakage paths at the top and ground floors only. Since the inside air temperature is slightly warmer, the inside air pressure is slightly higher as well, and it drives air out of the building and in turn draws air into the building at the ground level.
+The interior air temperature, $T_{\rm b}$, is initially 20~$^\circ$C (293~K), and the exterior air temperature, $T_\infty$, is
+10~$^\circ$C (283~K). The {\ct LAPSE\_RATE} is set to 0~$^\circ$C/m; thus, $T_0(z)=T_\infty$ outside the building and $T_0(z)=T_{\rm b}$ inside the building. Two small leakage openings are defined 2.5~m above the ground floor and 2.5~m below the roof using the HVAC solver. Each opening is given an area of 0.01~m$^2$ and a loss coefficient of 2 (e.g., an entrance loss into the leak path of 1 and and exit loss out of the leak path of 1 both of which represent a sharp edge opening).
+
+The initial density stratification inside and outside the building can be calculated using the relation:
+\be
+  \frac{\rho_0(z)}{\rho_\infty} = \exp \left(- \frac{g \overline{W}}{\R T_0} z \right)
+\ee
+where $\R$ is the universal gas constant, $g$ is the acceleration of gravity, and $\overline{W}$ is the average molecular weight of the air, $z$ is the height above the {\ct GROUND\_LEVEL}, and $T_0$ is the ambient temperature. Applying this formula to the external and internal locations at the lower and upper vents results in densities of 1.2412, 1.1989, 1.2272, and 1.1858~kg/m$^3$, respectively.
+
+Since the openings in the building are equally spaced over its height, the neutral plane should be close to its midpoint. This can be computed from:
+\be
+  \frac{\Delta H }{H_{\rm n}} = 1 + \frac{T_{\rm b}}{T_\infty}
+\ee
+where $H_{\rm n}$ is the neutral plane height above the bottom vent and $\Delta H=95$~m is the distance between the leak points. This gives a neutral plane of 46.68~m above the lower vent or 49.18~m above the bottom of the building. Note that this is close to the midpoint value of 50~m above the bottom of the building. The pressure difference across the building's wall is computed from
+\be
+   \Delta p = \frac{\overline{W} \, p_0(z) \, g \, \Delta z} \R \left( \frac{1}{T_\infty} - \frac{1}{T_{\rm b}} \right)
+\ee
+where $ \Delta z$ is the distance from the leak point to the neutral plane.  Using the neutral plane location, the $ \Delta z$ values are -46.68~m for the lower vent and +48.32~m for the upper vent which respectively result in lower and upper vent pressure differences of -19.4~Pa and +20.4~Pa.  Using the loss of 2 and the pressure difference in the HVAC momentum equation results in a steady-state inflow velocity at the bottom of 3.95~m/s and an outflow velocity at the top of 4.15~m/s. Results for velocity and density are shown in Fig.~\ref{fig_stack_effect}.
+
+\begin{figure}[t]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \scalebox{1}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/stack_effect_v} } &
+      \scalebox{1}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/stack_effect_rho} }
+   \end{tabular*}
+   \caption[Results of the {\ct stack\_effect} test case]{(Left) Velocity at the upper and lower vents for the {\ct stack\_effect} case.  (Right) Upper and lower exterior and interior densities.}
+   \label{fig_stack_effect}
+\end{figure}
+
+
+\clearpage
+
+\section{Thermal Degradation Model for Vegetation}
+
+FDS contains a separate pyrolysis model that was developed specifically for vegetation~\cite{Porterie:2006,Morvan:CF2004,Houssami:2016}. The solid-phase thermal degradation process consists of three reactions:
+
+\vspace{\baselineskip}
+
+\noindent 1. Endothermic drying
+\be
+ {\rm Wet\ Vegetation} \rightarrow \frac{M}{1+M} \, {\rm H_2O} + \frac{1}{1+M} \, {\rm Dry\ Vegetation}
+\ee
+
+\noindent 2. Endothermic pyrolysis
+\be
+ {\rm Dry\ Vegetation} \rightarrow \chi_{\rm char} \, {\rm Char} + (1-\chi_{\rm char}) \, {\rm Fuel\ Gas}
+\ee
+
+\noindent 3. Exothermic char oxidation
+\be
+ {\rm Char} + \nu_{\rm O_2, char} \, {\rm O_2} \rightarrow (1+ \nu_{\rm O_2,char} - \chi_{\rm ash}) \, {\rm CO_2} + \chi_{\rm ash} \, {\rm Ash}
+\ee
+$M$ is the vegetation {\em moisture content} determined on a dry weight basis. $M$ is related to the vegetation mass fraction of water, $Y_{\rm w}$, via the relation:
+\be
+  Y_{\rm w} = \frac{M}{1+M}
+\ee
+$\chi_{\rm char}$ is the mass fraction of dry vegetation that is converted to char during pyrolysis;  $\nu_{\rm O_2,char}$ is the stoichiometric coefficient of oxygen;  and $\chi_{\rm ash}$ is the mass fraction of char that is converted to ash during char oxidation.
+
+In the equations to follow, the subscript b denotes bulk quantities that are resolved on the computational grid. For example, the mass of dry vegetation per unit volume is denoted $\rho_{\rm b,dry}$ (kg/m$^{3}$).  In the notation of Mell~et~al.~\cite{Mell:2009}, $\rho_{\rm b,dry}=\langle m^{\prime\prime\prime}_{\rm dry}\rangle_{V_{\rm b}}$, where the angled brackets denote the explicit LES filtering over the grid cell volume $V_{\rm b}$. The initial total mass of vegetation per unit volume is $\rho_{\rm b,0}$.
+
+The Arrhenius rate equations for drying, pyrolysis, and char oxidation are:
+\begin{eqnarray}
+  r_{\rm H_2O} &=& \left( \frac{\rho_{\rm b, H_2O}}{\rho_{\rm b,0}} \right)   \, A_{\rm H_2O} \, T_{\rm v}^{-\frac{1}{2}} \exp \left(-\frac{E_{\rm H_2O}}{R \, T_{\rm v}} \right)  \\[.1in]
+  r_{\rm pyr}  &=& \left( \frac{\rho_{\rm b,dry}}{\rho_{\rm b,0}}   \right)   \, A_{\rm pyr} \, \exp \left({-\frac{E_{\rm pyr}}{R \, T_{\rm v}}} \right)  \\[.1in]
+  r_{\rm char} &=& \left( \frac{\rho_{\rm b,char}}{\rho_{\rm b,0}}  \right)^0 \, A_{\rm char} \,  \exp \left( -\frac{E_{\rm char}}{R \, T_{\rm v}} \right) \,
+  \frac{ \rho_{\rm g}\, Y_{\rm O_2}\, \sigma_{\rm v}\, \beta_{\rm v}\, (1+\beta_{\rm char}\sqrt{\RE_{\rm v}}) }{\nu_{\rm O_2,char} \, \rho_{\rm b,0}}
+\end{eqnarray}
+where $T_{\rm v}$ is the temperature of the vegetation. The default values of the kinetic constants are given in Table~\ref{tab:veg_kinetics}. The Reynolds number is $\RE_{\rm v} = \rho_{\rm g} D_{\rm v} / \mu $ with $D_{\rm v} = 4/\sigma_{\rm v}$ for a cylinder, where $\sigma_{\rm v}$ is the surface area to volume ratio of the cylinder. $\beta_{\rm v}$ is the {\em packing ratio}; that is, the ratio of the vegetation volume to the overall volume containing the vegetation. The term containing $\RE_{\rm v}$ is included to account for the oxygen blowing effects on char oxidation and the constant $\beta_{\rm char}$ is equal to 0.2 by default, which is the value used by Porterie~et~al.~\cite{Porterie:2006}.
+
+\begin{table}[!ht]
+\caption[Default vegetation kinetic constants]{Default vegetation kinetic constants (from Porterie et al.~\cite{Porterie:2006})}
+\vspace{0.1in}
+\label{tab:veg_kinetics}
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+Constant                        &   Default Value  \\ \hline \hline
+$A_{\rm H_2O}$ ($\sqrt{K}$/s )  & 600,000          \\ \hline
+$E_{\rm H_2O}$ (J/mol)          & 48,200           \\ \hline
+$A_{\rm pyr}$ (1/s)             & 36,300           \\ \hline
+$E_{\rm pyr}$ (J/mol)           & 60,300           \\ \hline
+$A_{\rm char}$ (m/s)            & 430              \\ \hline
+$E_{\rm char}$ (J/mol)          & 74,800           \\ \hline
+$\nu_{\rm O_2,char}$            & 1.65             \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+The equation governing the temperature of a thermally thin fuel element is
+\be
+\label{eq:Tv_thermally_thin}
+\rho_{\rm b}\ c_{\rm p,v} \frac{dT_{\rm v}}{dt} = -\rho_{\rm b,0} \left( \Delta{h_{\rm vap}}\ r_{\rm H_2O} + \Delta {h_{\rm pyr}}\ r_{\rm pyr} + \alpha_{\rm char}\ \Delta{h_{\rm char}}\ r_{\rm char} \right) + \langle \nabla \cdot{\mathbf{\dot{q}}}^{\prime\prime}_{\rm c,b}\rangle_{\rm V_b} + \langle \nabla \cdot{\mathbf{\dot{q}}}^{\prime\prime}_{\rm r,b}\rangle_{\rm V_b}
+\ee
+The first three terms on the right-hand-side are, respectively, endothermic drying, endothermic pyrolysis, exothermic char oxidation. The non-dimensional weighting parameter, $\alpha_{\rm char}$, is the fraction of the heat generated by heterogeneous char oxidation that is deposited in the fuel element and $(1-\alpha_{\rm char})$ in the gas phase. By default, $\alpha_{\rm char} = 0.5$, which has been used by others (e.g., Porterie~et~al.~\cite{Porterie:2006}). The fourth and fifth terms on the right-hand-side of Eq.~(\ref{eq:Tv_thermally_thin}) are the bulk contributions of convective and radiative heat transfer, respectively~\cite{Mell:2009}. The heats of reaction in Eq.~(\ref{eq:Tv_thermally_thin}) are $\Delta{h_{\rm vap}} = 2259$~kJ/kg;  $\Delta{h_{\rm pyr}} = 418$~kJ/kg~\cite{Morvan:CF2001}; $\Delta{h_{\rm char}} = -32000$~kJ/kg~\cite{Dahale:2013}.
+
+In the condensed phase model, the bulk density and specific heat have contributions from dry virgin vegetative fuel, char, ash, and moisture:
+\begin{eqnarray}
+\rho_{\rm b} &=& \rho_{\rm b,dry} + \rho_{\rm b,char} + \rho_{\rm b,ash} + \rho_{\rm b,H_2O} \\[.1in]
+{\rm c_{\rm p,v}} &=& \frac{\rho_{\rm b,dry}\ {\rm c_{p,dry}} + \rho_{\rm b,char}\ {\rm c_{p,char}} + \rho_{\rm b,ash}\ {\rm c_{p,ash}} + \rho_{\rm b,H_2O}\ {\rm c_{p,H_2O}}}{\rho_{\rm b}}
+\end{eqnarray}
+where, initially, $\rho_{\rm b,H_2O} = M \, \rho_{\rm b, dry}$. Suggested values for the specific heats, in units of kJ/(kg$\cdot$ K), as functions of temperature (K) are listed here:
+\begin{eqnarray}
+c_{\rm p, dry} &=& 0.01 + 0.0037 \, T_{\rm v}~~~ ({\rm Ritchie~et~al.~\cite{Ritchie:1}})  \\[.1in]
+c_{\rm p, char} &=& 0.42 + 0.002 \, T_{\rm v} + 6.85 \times 10^{-7} \, T^2_{\rm v} ~~~({\rm Park~et~al.~ 2010}) \\[.1in]
+c_{\rm p, ash} &=& 1.244 \, (T_{\rm v} / 300)^{0.315}~~~({\rm Lautenberger~et~al.~\cite{GPyro:FSJ}}) \\[.1in]
+c_{\rm p,H_2O} &=& 4.19
+\end{eqnarray}
+The rate of change of the total vegetative fuel mass is
+\be
+\frac{\d}{\d t} \left( \frac{\rho_{\rm b}}{\rho_{\rm b,0}} \right) = -r_{\rm H_2O} - (1 - \chi_{\rm char}) \, r_{\rm pyr} - (1-\chi_{\rm ash}) \, r_{\rm char}
+\ee
+The rate of change for the components of the vegetative mass during thermal degradation are:
+\begin{eqnarray}
+\frac{\d}{\d t} \left( \frac{\rho_{\rm b,H_2O}}{\rho_{\rm b,0}} \right) &=& -r_{\rm H_2O} \\[.1in]
+\frac{\d}{\d t} \left( \frac{\rho_{\rm b,dry}}{\rho_{\rm b,0}} \right) &=& -r_{\rm dry}  \\[.1in]
+\frac{\d}{\d t} \left( \frac{\rho_{\rm b,char}}{\rho_{\rm b,0}} \right) &=& -\chi_{\rm char}\ r_{\rm pyr} - r_{\rm char}
+\end{eqnarray}
+Gaseous products created during the thermal degradation process are water vapor (during drying), fuel vapor (during pyrolysis), and CO$_2$ (during char oxidation). The source terms (kg m$^{-3}$ s$^{-1}$) for these species are, respectively, $\rho_{\rm b,0} \, r_{\rm H_2O}$, $(1-\chi_{\rm char}) \, \rho_{\rm b,0} \, r_{\rm pyr}$, and  $(1+\nu_{\rm O_2,char} - \chi_{\rm ash}) \, \rho_{\rm b,0} \, r_{\rm char}$. In addition, the char oxidation process consumes oxygen in the gas phase at a rate of $-\nu_{\rm O_2,char} \, \rho_{\rm b,0} \, r_{\rm char}$.
+
+Figure~\ref{vege_inputs} includes sample input lines demonstrating how the vegetation model can be applied to particles that represent pine needles that are 1~mm in diameter and 5~cm long. Note that the {\ct MATL} line for char contains the flag {\ct VEGETATION=.TRUE.} to indicate that the special vegetation model is to be invoked. All parameters described above must be explicitly specified in the input file---there are no hard-wired default values.
+
+\begin{figure}[p]
+\begin{lstlisting}
+&SURF ID = 'vegetation'
+      MATL_ID = 'DRY VEGETATION'
+      MOISTURE_FRACTION = 0.1
+      SURFACE_VOLUME_RATIO = 3000.
+      LENGTH = 0.05
+      GEOMETRY = 'CYLINDRICAL' /
+
+&MATL ID = 'MOISTURE'
+      DENSITY = 1000.
+      CONDUCTIVITY = 0.6
+      SPECIFIC_HEAT = 4.190
+      A = 600000.
+      E = 48200.
+      N_T = -0.5
+      NU_SPEC = 1.
+      SPEC_ID = 'WATER VAPOR'
+      HEAT_OF_REACTION = 2259. /
+
+&MATL ID = 'DRY VEGETATION'
+      DENSITY = 400.
+      CONDUCTIVITY = 0.1
+      SPECIFIC_HEAT_RAMP = '...'
+      A = 36300.
+      E = 60300.
+      NU_MATL = 0.26
+      MATL_ID = 'CHAR'
+      NU_SPEC = 0.74
+      SPEC_ID = 'CELLULOSE'
+      HEAT_OF_REACTION = 418. /
+
+&MATL ID = 'CHAR'
+      VEGETATION = .TRUE.
+      DENSITY  = 300.
+      CONDUCTIVITY = 0.05
+      SPECIFIC_HEAT_RAMP = '...'
+      N_S = 0.
+      NU_O2 = 1.65
+      BETA_CHAR = 0.2
+      A = 430.
+      E = 74800.
+      NU_MATL = 0.1
+      MATL_ID  = 'ASH'
+      NU_SPEC = 0.9
+      SPEC_ID = 'CARBON DIOXIDE'
+      HEAT_OF_REACTION= -32000. /
+
+&MATL ID = 'ASH'
+      DENSITY = 67.
+      CONDUCTIVITY = 0.1
+      SPECIFIC_HEAT_RAMP = '...' /
+\end{lstlisting}
+\caption[Input parameters describing vegetation]{Input parameters describing vegetation.}
+\label{vege_inputs}
+\end{figure}
+
+
+
+\section{Wildland Fire Spread}
+
+There are three ways of simulating wildland fire spread.
+
+\begin{enumerate}
+\item {\bf Particle Method:} The vegetation is represented by a collection of Lagrangian particles that are heated via convection and radiation.
+\item {\bf Boundary Fuel Model:} Ground vegetation is modeled as a special kind of ``solid surface'' with a thickness equal to the height of the vegetation.
+\item {\bf Level Set Method:} The fire front propagates using purely empirical rules.
+\end{enumerate}
+Of these, the first two are physics-based; the third empirical.
+
+
+\subsection{Describing Vegetation with Lagrangian Particles}
+\label{info:vegetation}
+\label{pine_needles}
+
+Lagrangian particles can be used to represent different types of vegetation, like leaves, grass, and so on. The best way to explain how to use this feature is by way of example.  The sample input file in the {\ct WUI} (Wildland-Urban Interface) folder called {\ct pine\_needles.fds}\footnote{The parameter values in this example have been chosen simply to demonstrate the technique. These values should not be used for a real calculation.} describes a collection of pine needles that occupy a unit cube. The input parameters for this case are spread among a number of namelist groups.
+
+First, the {\ct PART} line defines a class of solid particles that represent pine needles:
+\begin{lstlisting}
+&PART ID='pine needles', SAMPLING_FACTOR=1, SURF_ID='wet vegetation',
+      DRAG_COEFFICIENT=2.8, SHAPE_FACTOR=0.15,
+      PROP_ID='needle image', STATIC=.TRUE. /
+\end{lstlisting}
+{\ct STATIC=.TRUE.} specifies that the needles do not move, and {\ct SAMPLNIG\_FACTOR=1} specifies that each needle is to be shown in Smokeview. More importantly, this line specifies a drag coefficient for the needles based on wind tunnel measurements made at NIST~\cite{Falkenstein-Smith:2018}. The force per unit volume exerted by the vegetation is given by:
+\be
+   F = \frac{\rho}{2} \, C_{\rm d} \, C_{\rm s} \, \beta \, \sigma \, U^2
+\ee
+where $\rho$ is the air density, $C_{\rm d}$ is the drag coefficient, $C_{\rm s}$ is the {\ct SHAPE\_FACTOR}, $\beta$ is the packing ratio (see below), $\sigma$ is the surface area to volume ratio (see below), and $U$ is the air velocity.
+
+The {\ct PART} line also tells Smokeview to visualize each needle as a tube that is 0.1~m long and 0.5~mm in diameter:
+\begin{lstlisting}
+&PROP ID='needle image', SMOKEVIEW_ID='TUBE',
+      SMOKEVIEW_PARAMETERS='L=0.1','D=0.0005' /
+\end{lstlisting}
+The geometry and composition of the needle is described on the {\ct SURF} line that is referenced by the {\ct PART} line:
+\begin{lstlisting}
+&SURF ID = 'wet vegetation'
+      MATL_ID  = 'dry pine'
+      MOISTURE_FRACTION = 0.25
+      SURFACE_VOLUME_RATIO = 8000.
+      LENGTH = 0.1
+      GEOMETRY = 'CYLINDRICAL' /
+\end{lstlisting}
+The needle is composed of two materials---{\ct 'dry pine'} and {\ct 'MOISTURE'}. Following the convention used in forestry, the moisture content is expressed via the {\ct MOISTURE\_FRACTION}, which is the mass of moisture divided by the mass of {\em dry} vegetation. Do not confuse this with the mass fraction of moisture, $Y_{\rm m}$, which is related to the moisture fraction, $M$, via
+\be
+   Y_{\rm m} = \frac{M}{1+M}
+\ee
+The length of each needle is specified directly, but its diameter is specified via the surface area to volume ratio, $\sigma=2/r$ for a cylinder. For a sphere, $\sigma=3/r$, where $r$ is the radius of the cylinder or sphere. The {\ct GEOMETRY} can be {\ct 'CARTESIAN'}, i.e. a plate, {\ct 'CYLINDRICAL'}, or {\ct 'SPHERICAL'}. For a plate, $\sigma=1/\delta$ where $\delta$ is the half-thickness of the plate. The {\ct MATL\_ID} specifies the thermo-physical properties of the pine needle.
+\begin{lstlisting}
+&MATL ID = 'dry pine'
+      DENSITY = 500.
+      CONDUCTIVITY = 0.1
+      SPECIFIC_HEAT = 1.0
+      REFERENCE_TEMPERATURE = 300.
+      NU_MATL = 0.2
+      NU_SPEC = 0.8
+      SPEC_ID = 'CELLULOSE'
+      HEAT_OF_REACTION = 1000
+      MATL_ID  = 'CHAR' /
+
+&MATL ID = 'MOISTURE'
+      DENSITY = 1000.
+      CONDUCTIVITY = 0.1
+      SPECIFIC_HEAT = 4.184
+      REFERENCE_TEMPERATURE = 100.
+      NU_SPEC = 1.0
+      SPEC_ID = 'WATER VAPOR'
+      HEAT_OF_REACTION = 2500. /
+
+&MATL ID = 'CHAR'
+      DENSITY = 200.
+      CONDUCTIVITY = 1.0
+      SPECIFIC_HEAT = 1.6 /
+\end{lstlisting}
+Each {\ct MATL} line must include the {\ct DENSITY}, {\ct CONDUCTIVITY} and {\ct SPECIFIC\_HEAT} of that component. If the material component undergoes a reaction, there needs to be either a {\ct REACTION\_TEMPERATURE} or more detailed kinetic parameters. Material components that react need stoichiometric coefficients {\ct NU\_SPEC} and {\ct NU\_MATL} to designate how much of the material mass is converted to a gas {\ct SPEC}ies and how much to a solid {\ct MAT}eria{\ct L}. In this case, {\ct 'CELLULOSE'} is the gas-phase fuel specified on the {\ct REAC} line. The gas species {\ct 'WATER VAPOR'} is defined by a {\ct SPEC} line. Even though water vapor is included in the combustion products, you still need to explicitly specify {\ct 'WATER VAPOR'} as the gasified form of the moisture in the pine needles.
+
+Finally, the pine needles are introduced into the simulation via the {\ct INIT} line:
+\begin{lstlisting}
+&INIT PART_ID='pine needles', XB=0.,1.,0.,1.,0.,1., N_PARTICLES=1000,
+      PACKING_RATIO=0.0016 /
+\end{lstlisting}
+This line inserts 1000 Lagrangian particles representing pine needles randomly within a unit cube. The {\ct PACKING\_RATIO} is the volume of solid needles divided by the volume they occupy, typically denoted $\beta$. It is calculated by dividing the dry mass of vegetation per unit volume, the so-called ``bulk density,'' by the density of the dry vegetation, $\rho_{\rm d}$, specified on the {\ct MATL} line. If you have specified a {\ct MOISTURE\_FRACTION} on the {\ct SURF} line that describes the vegetation, then the actual mass per volume of wet vegetation is
+\be
+  m_{\rm w}''' = \rho_{\rm d}\, \beta \, (1+M)
+\ee
+In the example, 1~kg of wet pine needles occupy 1~m$^3$. The number of particles used to represent the pine needles is somewhat arbitrary. FDS will automatically weight the specified number so that the total mass per volume is 1~kg. The vegetation is heated until all of the water and fuel evaporate. The fuel is not allowed to burn by setting the ambient oxygen concentration to 1~\%. Figure~\ref{pine_needles_fig} shows the evolution of the fuel, water and char mass. Agreement with the expected values means that mass is conserved.
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/pine_needles}
+\end{center}
+\caption[Example of burning vegetation]{Evolution of vegetation mass in the {\ct pine\_needles} test case.}
+\label{pine_needles_fig}
+\end{figure}
+
+
+
+\FloatBarrier
+
+\subsection{Firebrands}
+\label{info:firebrands}
+\label{dragon_5a}
+
+Firebrands are small pieces of burning wood and vegetation that can be lofted into the air and blown by the wind ahead of a wildland fire front. Manzello et~al.~\cite{Manzello:FSJ2008a} have developed a variety of experimental apparatus designed to generate firebrands in a laboratory setting. The example input file called {\ct dragon\_5a} in the {\ct WUI} (Wildland-Urban Interface) folder is a very simple mock-up of one of these experiments. The word ``dragon'' is based on the nickname of the apparatus; 5a is the figure number in Ref.~\cite{Manzello:FSJ2008a} on which this example case is loosely based. In the experiment, 700~g of small dowels (length 50~mm, diameter 8~mm) made of Ponderosa Pine wood were poured into a small steel chamber equipped with several propane burners. The dowels were left to burn for roughly a minute subject to a slow induced air flow after which time the air flow was increased and firebrands were propelled horizontally out of a 15~cm duct 2.25~m above the lab floor. It is reported that after several replicate experiments, the average mass of the firebrands collected from pans on the floor was 57~g. The average diameter of the collected dowels was 5.6~mm, and the average length was 13.5~mm.
+
+It is not possible to simulate the experiment in FDS exactly as it was performed. The reason is that in the experiment, all 700~g of the wooden dowels were poured into the heating chamber at once. FDS cannot handle such a dense packing of Lagrangian particles. Instead, the simulated dowels are introduced at a rate of 10 per second. FDS also does not have a mechanism to break-up the dowels, reducing their length from 50~mm to 13.5~mm. Thus, the initial cylindrical particles are 13.5~mm and remain that length throughout the simulation. The diameter of the cylindrical particles is reduced, however, from 8~mm to 5.6~mm, which takes the initial density of 440~kg/m$^3$ down to 71~kg/m$^3$ because the mass of the firebrands is assumed to be 8~\% of the original. The plot in Fig.~\ref{dragon_5a_fig} shows the increasing mass of firebrands thrown to the floor in the simulation after 100~s of particle insertion. The total mass of particles inserted into the apparatus is:
+\be \pi \, (0.004 \; {\rm m})^2 \times (0.0135 \; {\rm m}) \times (440 \; {\rm kg/m}^3) \times (10 \; {\rm part/s}) \times (100 \; {\rm s}) \approx 0.3 \; {\rm kg} \ee
+The amount expected on the floor is approximately 0.024~kg.
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/dragon_5a}
+\end{center}
+\caption[Mass generation of firebrands in the {\ct dragon\_5a} test case]{Mass generation of firebrands in the {\ct dragon\_5a} test case.}
+\label{dragon_5a_fig}
+\end{figure}
+
 
 
 
@@ -7908,15 +7889,15 @@ records the integrated mass flux of {\em all} particles passing through the give
 \subsection{Coloring Particles and Droplets in Smokeview}
 
 The parameter {\ct QUANTITIES} on the {\ct PART} line is an array of character strings indicating which scalar quantities should be used to color particles and droplets in Smokeview. The choices are \\
-{\ct 'PARTICLE TEMPERATURE'} ($^\circ$C) \\
-{\ct 'PARTICLE DIAMETER'} ($\mu$m) \\
-{\ct 'PARTICLE VELOCITY'} (m/s) \\
-{\ct 'PARTICLE MASS'} (kg) \\
 {\ct 'PARTICLE AGE'} (s) \\
-{\ct 'PARTICLE WEIGHTING FACTOR'} \\
+{\ct 'PARTICLE DIAMETER'} ($\mu$m) \\
+{\ct 'PARTICLE TEMPERATURE'} ($^\circ$C) \\
+{\ct 'PARTICLE MASS'} (kg) \\
 {\ct 'PARTICLE PHASE'} \\
-{\ct 'PARTICLE X'}, {\ct 'PARTICLE Y'}, {\ct 'PARTICLE Z'} (m) \\
+{\ct 'PARTICLE VELOCITY'} (m/s) \\
+{\ct 'PARTICLE WEIGHTING FACTOR'} \\
 {\ct 'PARTICLE U'}, {\ct 'PARTICLE V'}, {\ct 'PARTICLE W'} (m/s) \\
+{\ct 'PARTICLE X'}, {\ct 'PARTICLE Y'}, {\ct 'PARTICLE Z'} (m) \\
 By default, if no {\ct QUANTITIES} are specified and none are selected in Smokeview, then Smokeview will display particles with a single color. To select this color specify either {\ct RGB} or {\ct COLOR}. By default, water droplets are colored blue. All others are colored black.
 
 The {\ct PARTICLE WEIGHTING FACTOR} describes how many actual particles each of the computational particles represent.
@@ -8514,6 +8495,12 @@ where $dA$ depends on the coordinates you specify for {\ct XB}. Note that this s
 the quantity {\ct 'MASS FLUX X'} along with {\ct SPEC\_ID='my gas'} is an appropriate output quantity if you want to know the mass flux of the gas species that you have named {\ct 'my gas'} through an
 area normal to the $x$ direction. Note also that you must specify an area to sum over via the coordinate parameters, {\ct XB}, which can extend into multiple meshes.
 
+\subsubsection{Area}
+
+This feature is usually used in conjunction with {\ct SPATIAL\_STATISTIC='AREA INTEGRAL'} above (use two separate {\ct DEVC} lines, each with the same {\ct QUANTITY}). When performing precise mass and energy balances, it is useful to know exactly the area of {\ct VENT} or {\ct SURF} of interest. Note that this may differ slightly from what is specified in the input file due to grid snapping for Cartesian geometries or due to the approximations used to represent curvilinear geometries.  Using {\ct SPATIAL\_STATISTIC='AREA'} produces the discrete analog of
+\be \int \; \d A \ee
+where $dA$ depends on the coordinates you specify for {\ct XB} or the discrete area of a {\ct SURF}.  Knowing this value is useful for reconstructing the average flux on a surface.
+
 \subsubsection{Surface Integral}
 
 For a solid phase scalar quantity, $\phi$, {\ct SPATIAL\_STATISTIC='SURFACE INTEGRAL'} produces the discrete analog of
@@ -9031,8 +9018,16 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct PARTICLE FLUX Y}$^2$                       & Section~\ref{info:part_output}                & \si{kg/(m$^2$.s)} & P,S       \\ \hline
 {\ct PARTICLE FLUX Z}$^2$                       & Section~\ref{info:part_output}                & \si{kg/(m$^2$.s)} & P,S       \\ \hline
 {\ct PARTICLE MASS}                             & Section~\ref{info:part_output}                & kg             & PA           \\ \hline
+{\ct PARTICLE PHASE}                            & Section~\ref{info:part_output}                &                & PA           \\ \hline
 {\ct PARTICLE TEMPERATURE}                      & Section~\ref{info:part_output}                & $^\circ$C      & PA           \\ \hline
+{\ct PARTICLE U}                                & Section~\ref{info:part_output}                & m/s            & PA           \\ \hline
+{\ct PARTICLE V}                                & Section~\ref{info:part_output}                & m/s            & PA           \\ \hline
 {\ct PARTICLE VELOCITY}                         & Section~\ref{info:part_output}                & m/s            & PA           \\ \hline
+{\ct PARTICLE W}                                & Section~\ref{info:part_output}                & m/s            & PA           \\ \hline
+{\ct PARTICLE WEIGHTING FACTOR}                 & Section~\ref{info:part_output}                &                & PA           \\ \hline
+{\ct PARTICLE X}                                & Section~\ref{info:part_output}                & m              & PA           \\ \hline
+{\ct PARTICLE Y}                                & Section~\ref{info:part_output}                & m              & PA           \\ \hline
+{\ct PARTICLE Z}                                & Section~\ref{info:part_output}                & m              & PA           \\ \hline
 {\ct PRESSURE}                                  & Perturbation pressure, $\tp-p_\infty$         & Pa             & D,I,P,S      \\ \hline
 {\ct PRESSURE COEFFICIENT}                      & Section~\ref{info:pressure_coefficient}       &                & B,D          \\ \hline
 {\ct PRESSURE ZONE}                             & Section~\ref{info:ZONE}                       &                & D,S          \\ \hline
@@ -9162,7 +9157,8 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct RADIAL VELOCITY}                           & $(u,v)\cdot(x,y)/\sqrt{x^2+y^2}$                  & m/s            & D,I,P,S      \\ \hline
 {\ct RADIATION LOSS}                            & $\nabla \cdot \bq_r''$                            & kW/m$^3$       & D,I,P,S      \\ \hline
 {\ct RANDOM NUMBER}                             & Uniform random variable over [0,1]                &                & D            \\ \hline
-{\ct STRAIN RATE}                               & $2(S_{ij}S_{ij}-1/3(\nabla\cdot\mathbf{u})^2)$    & 1/s            & D,I,P,S      \\ \hline
+{\ct REAC SOURCE TERM}$^1$                      & $\dot{m}_\alpha^{\prime\prime\prime}$             & kg-$\alpha$/m$^3$  & D,I,P,S      \\ \hline
+{\ct STRAIN RATE}                               & $2(S_{ij}S_{ij}-1/3(\nabla\cdot\mathbf{u})^2)$          & 1/s            & D,I,P,S      \\ \hline
 {\ct STRAIN RATE X}                             & $\partial w/\partial y + \partial v/\partial z$   & 1/s            & D,I,P,S      \\ \hline
 {\ct STRAIN RATE Y}                             & $\partial u/\partial z + \partial w/\partial x$   & 1/s            & D,I,P,S      \\ \hline
 {\ct STRAIN RATE Z}                             & $\partial v/\partial x + \partial u/\partial y$   & 1/s            & D,I,P,S      \\ \hline
@@ -9326,7 +9322,6 @@ properties be specified as well. Simply prescribing as many properties as possib
 \endhead
 {\ct AUTO\_IGNITION\_TEMPERATURE}               & Real          & Section~\ref{info:ignition}                           & $^\circ$C     &  -273 $^\circ$C      \\ \hline
 {\ct CHECK\_REALIZABILITY}                      & Logical       & Section~\ref{info:chem_integration}                   &               & {\ct .FALSE.}        \\ \hline
-{\ct DT\_SPARK}                                 & Real          & Section~\ref{info:ignition}                           &  s            &  $\Delta/s_L$        \\ \hline
 {\ct EXTINCTION\_MODEL}                         & Character     & Section~\ref{info:extinction}                         &               & {\ct 'EXTINCTION 2'} \\ \hline
 {\ct FIXED\_MIX\_TIME}                          & Real          & Section~\ref{info:turbulent_combustion}               &  s            &                      \\ \hline
 {\ct FUEL\_C\_TO\_CO\_FRACTION}                 & Real          & Section~\ref{info:two-step_simple_chemistry}          &               &  2/3                 \\ \hline
@@ -9342,7 +9337,6 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct SUPPRESSION}                               & Logical       & Section~\ref{info:extinction}                         &               & {\ct .TRUE.}         \\ \hline
 {\ct TAU\_CHEM}                                 & Real          & Section~\ref{info:turbulent_combustion}               &               & 1.E-10               \\ \hline
 {\ct TAU\_FLAME}                                & Real          & Section~\ref{info:turbulent_combustion}               &               & 1.E10                \\ \hline
-{\ct TMP\_SPARK}                                & Real          & Section~\ref{info:ignition}                           & $^\circ$C     & 1000                 \\ \hline
 \end{longtable}
 
 \vspace{\baselineskip}
@@ -9701,6 +9695,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MULT\_ID }                   & Character         & Section~\ref{info:MULT}                       &                &               \\ \hline
 {\ct N\_PARTICLES}                & Integer           & Section~\ref{info:initial_droplets}           &                & 0             \\ \hline
 {\ct N\_PARTICLES\_PER\_CELL}     & Integer           & Section~\ref{info:initial_droplets}           &                & 0             \\ \hline
+{\ct PACKING\_RATIO}              & Real              & Section~\ref{pine_needles}                    &                &               \\ \hline
 {\ct PART\_ID}                    & Character         & Section~\ref{info:initial_droplets}           &                &               \\ \hline
 {\ct PARTICLE\_WEIGHT\_FACTOR}    & Real              & Section~\ref{info:initial_droplets}           &                & 1.            \\ \hline
 {\ct RADIUS}                      & Real              & Section~\ref{info:initial_droplets}           & m              &               \\ \hline
@@ -10141,7 +10136,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RUNNING\_AVERAGE\_FACTOR}           & Real            & Section~\ref{radiative_part_props}      &           & 0.5           \\ \hline
 {\ct SAMPLING\_FACTOR}                   & Integer         & Section~\ref{info:part_output}          &           & 1             \\ \hline
 {\ct SECOND\_ORDER\_PARTICLE\_TRANSPORT} & Logical         & Section~\ref{info:PART_Stability}       &           & {\ct .FALSE.} \\ \hline
-{\ct SHAPE\_FACTOR}                      & Real            & Section~\ref{info:particle_radiation_absorption}&   & 0.25          \\ \hline
+{\ct SHAPE\_FACTOR}                      & Real            & Sections~\ref{info:particle_radiation_absorption}, \ref{pine_needles} &   &            \\ \hline
 {\ct SIGMA\_D}                           & Real            & Section~\ref{info:particle_size}        &           &               \\ \hline
 {\ct SPEC\_ID}                           & Character       & Section~\ref{thermal_part_props}        &           &               \\ \hline
 {\ct STATIC}                             & Logical         & Section~\ref{info:PART_SURF}            &           & {\ct .FALSE.} \\ \hline
@@ -10584,6 +10579,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MATL\_MASS\_FRACTION(NL,NC)}       & Real Array      & Section~\ref{info:solid_pyrolysis}        &                     &                         \\ \hline
 {\ct MINIMUM\_LAYER\_THICKNESS}         & Real            & Section~\ref{info:solid_phase_stability}  & m                   & 1.E-6                   \\ \hline
 {\ct MLRPUA }                           & Real            & Section~\ref{info:gas_burner}             & \si{kg/(m^2.s)}     &                         \\ \hline
+{\ct MOISTURE\_FRACTION}                & Real            & Section~\ref{info:vegetation}             &                     & 0.                      \\ \hline
 {\ct N\_LAYER\_CELLS\_MAX}              & Integer Array   & Section~\ref{info:solid_phase_stability}  &                     & 1000                    \\ \hline
 {\ct NET\_HEAT\_FLUX}                   & Real            & Section~\ref{info:convection}             & kW/m$^2$            &                         \\ \hline
 {\ct NO\_SLIP}                          & Logical         & Section~\ref{info:WALL_MODEL}             &                     & {\ct .FALSE.}           \\ \hline
@@ -10609,6 +10605,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SPEC\_ID}                          & Character       & Section~\ref{info:MASS_FLUX}              &                     &                         \\ \hline
 {\ct SPREAD\_RATE}                      & Real            & Section~\ref{info:spread}                 & m/s                 &                         \\ \hline
 {\ct STRETCH\_FACTOR(:) }               & Real            & Section~\ref{info:solid_phase_stability}  &                     & 2.                      \\ \hline
+{\ct SURFACE\_VOLUME\_RATIO }           & Real            & Section~\ref{pine_needles}                & 1/m                 &                         \\ \hline
 {\ct TAU\_EF}                           & Real            & Section~\ref{info:RAMP_Time}              & s                   & 1.                      \\ \hline
 {\ct TAU\_MF(:)}                        & Real            & Section~\ref{info:RAMP_Time}              & s                   & 1.                      \\ \hline
 {\ct TAU\_PART}                         & Real            & Section~\ref{info:RAMP_Time}              & s                   & 1.                      \\ \hline

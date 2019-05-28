@@ -2200,8 +2200,25 @@ The enthalpy of the mixture at the outlet is $1 \times 1 \times (900+273.15) + 1
 \begin{figure}[ht]
 \centering
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/energy_budget_tmix}
-\caption[The \textct{energy\_budget\_tmix} test case]{\label{fig_outlet_temperature} Outlet temperature for \textct{energy\_budget\_tmix} case.  Black circles represent the correct result of 100 \si{\degree C}.}
+\caption[The \textct{energy\_budget\_tmix} test case]{\label{fig_outlet_temperature} Outlet temperature for \textct{energy\_budget\_tmix} case.  Black circles represent the correct result of 100~\si{\degree C}.}
 \end{figure}
+
+
+\subsection{Combustion Chamber (\texorpdfstring{\textct{energy\_budget\_combustion}}{energy\_budget\_combustion})}
+\label{energy_budget_combustion}
+
+Methanol and air are mixed and burned within an adiabatic combustion chamber 1~m on each side. Because the internal energy of the system does not change, we expect that 
+\be
+\Delta h = V \, \Delta p
+\ee
+where $\Delta h$ is the increase in the enthalpy of the system (kJ), $V$ is the volume of the chamber (1~m$^3$), and $\Delta p$ is the increase in pressure (kPa). The enthalpy includes the heats of formation of the various gases. Figure~\ref{fig_energy_budget_combustion} displays the rise in pressure and enthalpy.
+\begin{figure}[ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/energy_budget_combustion}
+\caption[The \textct{energy\_budget\_combustion} test case]{The rise in pressure and enthalpy in a sealed, adiabatic combustion chamber.}
+\label{fig_energy_budget_combustion}
+\end{figure}
+
 
 
 \subsection{Solid phase energy conservation (\texorpdfstring{\textct{energy\_budget\_solid}}{energy\_budget\_solid})}

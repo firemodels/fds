@@ -30,3 +30,4 @@ Mass Flow Rate,Measured Mass Flow Rate (kg/s),Predicted Mass Flow Rate (kg/s),0.
 Atmospheric Dispersion,Measured Concentration (%),Predicted Concentration (%),0.1,100,0.03 0.95,EastOutside,1.5,50,no,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Atmospheric_Dispersion
 Minimum Extinguishing Concentration,Measured MEC (mol/mol),Predicted MEC (mol/mol),0.05,1,0.03 0.95,,1,6,no,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Minimum_Extinguishing_Concentration
 Plume Height,Empirical Plume Height (m),Predicted Plume Height (m),10,1000,0.03 0.96,,1,-1,no,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Plume_Height
+Rate of Spread,Measured Rate of Spread (m/s),Predicted Rate of Spread (m/s),0.01,3,0.03 0.96,EastOutside,1.6,10,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Rate_of_Spread

@@ -22,6 +22,7 @@ cd LNG_Dispersion;  ./Run_All.sh $OPTIONS; cd ..
 cd McCaffrey_Plume;  ./Run_All.sh $OPTIONS; cd ..
 cd Moody_Chart; ./Run_All.sh $OPTIONS; cd ..
 cd NBS_Multi-Room;  ./Run_All.sh $OPTIONS; cd ..
+cd NIST_Composite_Beam;  ./Run_All.sh $OPTIONS; cd ..
 cd NIST_Douglas_Firs;  ./Run_All.sh $OPTIONS; cd ..
 cd NIST_FSE_2008;  ./Run_All.sh $OPTIONS; cd ..
 cd NIST_NRC_Corner_Effects;  ./Run_All.sh $OPTIONS; cd ..
@@ -37,6 +38,7 @@ cd Turbulent_Jet;  ./Run_All.sh $OPTIONS; cd ..
 cd UL_NFPRF;  ./Run_All.sh $OPTIONS; cd ..
 cd UL_NIJ_Houses;  ./Run_All.sh $OPTIONS; cd ..
 cd UMD_Line_Burner;  ./Run_All.sh $OPTIONS; cd ..
+cd USFS_Catchpole;  ./Run_All.sh $OPTIONS; cd ..
 cd USN_Hangars;  ./Run_All.sh $OPTIONS; cd ..
 cd UWO_Wind_Tunnel;  ./Run_All.sh $OPTIONS; cd ..
 cd VTT;  ./Run_All.sh $OPTIONS; cd ..
