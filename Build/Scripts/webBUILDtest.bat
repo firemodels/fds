@@ -31,14 +31,14 @@ if "%platform%" == "windows" (
   goto eof
 )
 if "%platform%" == "linux" (
-  plink %linux_logon% %linux_svn_root%/smv/scripts/clean.sh fds/Utilities/test_mpi/impi_intel_linux
-  plink %linux_logon% %linux_svn_root%/smv/scripts/run_command.sh fds/Utilities/test_mpi/impi_intel_linux make_test_mpi.sh
+  plink %plink_options% %linux_logon% %linux_svn_root%/smv/scripts/clean.sh fds/Utilities/test_mpi/impi_intel_linux
+  plink %plink_options% %linux_logon% %linux_svn_root%/smv/scripts/run_command.sh fds/Utilities/test_mpi/impi_intel_linux make_test_mpi.sh
   pause
   goto eof
 )
 if "%platform%" == "osx" (
-  plink %linux_logon% %linux_svn_root%/smv/scripts/clean.sh fds/Utilities/test_mpi/mpi_intel_osx
-  plink %osx_logon% %linux_svn_root%/smv/scripts/run_command.sh fds/Utilities/test_mpi/mpi_intel_osx make_test_mpi.sh
+  plink %plink_options% %linux_logon% %linux_svn_root%/smv/scripts/clean.sh fds/Utilities/test_mpi/mpi_intel_osx
+  plink %plink_options% %osx_logon% %linux_svn_root%/smv/scripts/run_command.sh fds/Utilities/test_mpi/mpi_intel_osx make_test_mpi.sh
   pause
   goto eof
 )
