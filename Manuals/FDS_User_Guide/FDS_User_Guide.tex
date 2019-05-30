@@ -2521,7 +2521,7 @@ In an LES calculation, the convective heat transfer coefficient, $h$, is based o
 \be \dq_{\rm c}'' = h \, (T_{\rm g} - T_{\rm w}) \quad \hbox{W/m}^2 \quad ; \quad
     h = \max \, \left[ \; C\, |T_{\rm g}-T_{\rm w}|^\ot \; ,
       \;  \frac{k}{L} \, \NU \; ,
-      \; \frac{k}{\dn/2}\right]  \quad  \si{W/(m^2.K)}
+      \; \frac{k}{\dn/2}\right]  \quad  \si{W/(m^2.K)}  \label{q_con}
 \ee
 where $C$ is a empirical coefficient for natural convection (1.52 for a horizontal plate and 1.31 for a vertical plane or cylinder)~\cite{Holman:1}, $L$ is a characteristic length related to the size of the physical obstruction, $k$ is the thermal conductivity of the gas, and $\dn$ is the gas phase cell size. The Nusselt number (Nu) depends on the geometric and flow characteristics. For many flow regimes, it has the form:
 \be
@@ -6675,7 +6675,7 @@ There are three ways of simulating wildland fire spread.
 Of these, the first two are physics-based; the third empirical.
 
 
-\subsection{Describing Vegetation with Lagrangian Particles}
+\subsection{Modeling Vegetation as Lagrangian Particles}
 \label{info:vegetation}
 \label{pine_needles}
 
@@ -6689,9 +6689,9 @@ First, the {\ct PART} line defines a class of solid particles that represent pin
 \end{lstlisting}
 {\ct STATIC=.TRUE.} specifies that the needles do not move, and {\ct SAMPLNIG\_FACTOR=1} specifies that each needle is to be shown in Smokeview. More importantly, this line specifies a drag coefficient for the needles based on wind tunnel measurements made at NIST~\cite{Falkenstein-Smith:2018}. The force per unit volume exerted by the vegetation is given by:
 \be
-   F = \frac{\rho}{2} \, C_{\rm d} \, C_{\rm s} \, \beta \, \sigma \, U^2
+   \bof_{\rm b} = \frac{\rho}{2} \, C_{\rm d} \, C_{\rm s} \, \beta \, \sigma \, \bu \, ||\bu||
 \ee
-where $\rho$ is the air density, $C_{\rm d}$ is the drag coefficient, $C_{\rm s}$ is the {\ct SHAPE\_FACTOR}, $\beta$ is the packing ratio (see below), $\sigma$ is the surface area to volume ratio (see below), and $U$ is the air velocity.
+where $\rho$ is the air density, $C_{\rm d}$ is the drag coefficient, $C_{\rm s}$ is the {\ct SHAPE\_FACTOR}, $\beta$ is the packing ratio (see below), $\sigma$ is the surface area to volume ratio (see below), and $\bu$ is the air velocity.
 
 The {\ct PART} line also tells Smokeview to visualize each needle as a tube that is 0.1~m long and 0.5~mm in diameter:
 \begin{lstlisting}
@@ -6758,6 +6758,46 @@ In the example, 1~kg of wet pine needles occupy 1~m$^3$. The number of particles
 \caption[Example of burning vegetation]{Evolution of vegetation mass in the {\ct pine\_needles} test case.}
 \label{pine_needles_fig}
 \end{figure}
+
+
+\subsection{Modeling Ground Vegetation as a Porous Boundary}
+\label{info:boundary_fuel_model}
+
+In many simulations of wildland fire, the ground vegetation is too thin to be resolved explicitly, as is done when using Lagrangian particles to represent the vegetation. In such cases, the ground vegetation can be modeled as a porous boundary consisting of a layer of dry vegetation, moisture and air, underneath of which is hard ground. The drag exerted by the vegetation is modeled using a special velocity boundary condition, and convective heat transfer is modeled via a source term in the one-dimensional heat conduction equation that is solved through the layer of vegetation and solid ground. Thermal radiation penetrates the vegetation layer via a 1-D radiative transport equation that is used for semi-transparent solids. 
+
+To invoke this {\em Boundary Fuel Model}, you need to generate a {\ct SURF} line similar to the following:
+\begin{lstlisting}
+&SURF ID = 'Ground Vegetation'
+      MATL_ID(1,1) = 'Dry Vegetation'
+      MATL_ID(2,1) = 'Soil'
+      MOISTURE_FRACTION(1) = 0.218
+      SURFACE_VOLUME_RATIO(1) = 3092.
+      PACKING_RATIO(1) = 0.01
+      HEAT_TRANSFER_COEFFICIENT = 50.
+      THICKNESS(1:2) = 0.076,0.1 /
+\end{lstlisting}
+The presence of the parameters {\ct PACKING\_RATIO} and {\ct SURFACE\_VOLUME\_RATIO} automatically trigger the Boundary Fuel Model. Note that the argument for each refers to the first layer; the second layer being Soil. The {\ct PACKING\_RATIO} directs FDS to automatically add {\ct AIR} as an additional material, so you must add the {\ct MATL} line:
+\begin{lstlisting}
+&MATL ID = 'AIR'
+      DENSITY = 1.2
+      CONDUCTIVITY = 0.026
+      SPECIFIC_HEAT = 1.01 /
+\end{lstlisting}
+The drag exerted on the wind flowing through the vegetation is imposed as a force term in the gas phase grid cell adjacent to the boundary:
+\be
+    \bof_{\rm b} = \frac{\rho}{2} \, C_{\rm s} \, \sigma \, \beta \, C_{\rm d} \, \frac{h_{\rm b}}{\dz} \, \bu ||\bu||
+\ee
+where $\rho$ is the density of the gas, $C_{\rm s}$ is the {\ct SHAPE\_FACTOR} of the subgrid-scale vegetation (0.25 by default), $\sigma$ is the surface area to volume ratio ({\ct SURFACE\_VOLUME\_RATIO}), $\beta$ is the {\ct PACKING\_RATIO}, $C_{\rm d}$ is the {\ct DRAG\_COEFFICIENT} (2.8 by default), $h_{\rm b}$ is the depth of the vegetation ({\ct THICKNESS(1)}), $\dz$ is the height of the grid cell, and $\bu$ is the gas velocity in the first grid cell.
+
+Thermal radiation is absorbed in depth according to a 1-D radiative transport solver. The absorption coefficient is given by:
+\be
+   \kappa = C_{\rm s} \, \sigma \, \beta
+\ee
+Thermal convection is not imposed at the interface between the gas phase and the vegetation layer, but rather is imposed via a source term in the 1-D heat conduction solver:
+\be
+   \langle \dq_{\rm c,b}''' \rangle = \sigma \, \beta \, \dq_{\rm c}''
+\ee
+where $\dq_{\rm c}''$ is given in Eq.~(\ref{q_con}) under the assumption that the subgrid-scale vegetation is cylindrical and the gas velocity and temperature are taken from the first gas phase grid cell adjacent to the boundary.
 
 
 
@@ -10579,11 +10619,12 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MATL\_MASS\_FRACTION(NL,NC)}       & Real Array      & Section~\ref{info:solid_pyrolysis}        &                     &                         \\ \hline
 {\ct MINIMUM\_LAYER\_THICKNESS}         & Real            & Section~\ref{info:solid_phase_stability}  & m                   & 1.E-6                   \\ \hline
 {\ct MLRPUA }                           & Real            & Section~\ref{info:gas_burner}             & \si{kg/(m^2.s)}     &                         \\ \hline
-{\ct MOISTURE\_FRACTION}                & Real            & Section~\ref{info:vegetation}             &                     & 0.                      \\ \hline
+{\ct MOISTURE\_FRACTION(:)}             & Real Array      & Section~\ref{info:vegetation}             &                     & 0.                      \\ \hline
 {\ct N\_LAYER\_CELLS\_MAX}              & Integer Array   & Section~\ref{info:solid_phase_stability}  &                     & 1000                    \\ \hline
 {\ct NET\_HEAT\_FLUX}                   & Real            & Section~\ref{info:convection}             & kW/m$^2$            &                         \\ \hline
 {\ct NO\_SLIP}                          & Logical         & Section~\ref{info:WALL_MODEL}             &                     & {\ct .FALSE.}           \\ \hline
 {\ct NPPC}                              & Integer         & Section~\ref{info:particle_flux}          &                     & 1                       \\ \hline
+{\ct PACKING\_RATIO(:) }                & Real Array      & Section~\ref{pine_needles}                &                     &                         \\ \hline
 {\ct PARTICLE\_MASS\_FLUX}              & Real            & Section~\ref{info:particle_flux}          & \si{kg/(m^2.s)}     &                         \\ \hline
 {\ct PARTICLE\_SURFACE\_DENSITY}        & Real            & Section~\ref{info:particle_flux}          & kg/m$^2$            &                         \\ \hline
 {\ct PART\_ID}                          & Character       & Section~\ref{info:particle_flux}          &                     &                         \\ \hline
@@ -10605,7 +10646,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SPEC\_ID}                          & Character       & Section~\ref{info:MASS_FLUX}              &                     &                         \\ \hline
 {\ct SPREAD\_RATE}                      & Real            & Section~\ref{info:spread}                 & m/s                 &                         \\ \hline
 {\ct STRETCH\_FACTOR(:) }               & Real            & Section~\ref{info:solid_phase_stability}  &                     & 2.                      \\ \hline
-{\ct SURFACE\_VOLUME\_RATIO }           & Real            & Section~\ref{pine_needles}                & 1/m                 &                         \\ \hline
+{\ct SURFACE\_VOLUME\_RATIO(:) }        & Real            & Section~\ref{pine_needles}                & 1/m                 &                         \\ \hline
 {\ct TAU\_EF}                           & Real            & Section~\ref{info:RAMP_Time}              & s                   & 1.                      \\ \hline
 {\ct TAU\_MF(:)}                        & Real            & Section~\ref{info:RAMP_Time}              & s                   & 1.                      \\ \hline
 {\ct TAU\_PART}                         & Real            & Section~\ref{info:RAMP_Time}              & s                   & 1.                      \\ \hline
