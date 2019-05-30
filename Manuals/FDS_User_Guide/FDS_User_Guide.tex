@@ -6675,7 +6675,7 @@ There are three ways of simulating wildland fire spread.
 Of these, the first two are physics-based; the third empirical.
 
 
-\subsection{Describing Vegetation with Lagrangian Particles}
+\subsection{Modeling Vegetation as Lagrangian Particles}
 \label{info:vegetation}
 \label{pine_needles}
 
@@ -6758,6 +6758,31 @@ In the example, 1~kg of wet pine needles occupy 1~m$^3$. The number of particles
 \caption[Example of burning vegetation]{Evolution of vegetation mass in the {\ct pine\_needles} test case.}
 \label{pine_needles_fig}
 \end{figure}
+
+
+\subsection{Modeling Ground Vegetation as a Porous Boundary}
+\label{info:boundary_fuel_model}
+
+In many simulations of wildland fire, the ground vegetation is too thin to be resolved explicitly, as is done when using Lagrangian particles to represent the vegetation. In such cases, the ground vegetation can be modeled as a porous boundary consisting of a layer of dry vegetation, moisture and air, underneath of which is hard ground. The drag exerted by the vegetation is modeled using a special velocity boundary condition, and convective heat transfer is modeled via a source term in the one-dimensional heat conduction equation that is solved through the layer of vegetation and solid ground. Thermal radiation penetrates the vegetation layer via a 1-D radiative transport equation that is used for semi-transparent solids. 
+
+To invoke this {\em Boundary Fuel Model}, you need to generate a {\ct SURF} line similar to the following:
+\begin{lstlisting}
+&SURF ID = 'Ground Vegetation'
+      MATL_ID(1,1) = 'Dry Vegetation'
+      MATL_ID(2,1) = 'Soil'
+      MOISTURE_FRACTION(1) = 0.218
+      SURFACE_VOLUME_RATIO(1) = 3092.
+      PACKING_RATIO(1) = 0.01
+      HEAT_TRANSFER_COEFFICIENT = 50.
+      THICKNESS(1:2) = 0.076,0.1 /
+\end{lstlisting}
+The presence of the parameters {\ct PACKING\_RATIO} and {\ct SURFACE\_VOLUME\_RATIO} automatically trigger the Boundary Fuel Model. Note that the argument for each refers to the first layer; the second layer being Soil. The {\ct PACKING\_RATIO} directs FDS to automatically add {\ct AIR} as an additional material, so you must add the {\ct MATL} line:
+\begin{lstlisting}
+&MATL ID = 'AIR'
+      DENSITY = 1.2
+      CONDUCTIVITY = 0.026
+      SPECIFIC_HEAT = 1.01 /
+\end{lstlisting}
 
 
 
@@ -10579,11 +10604,12 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MATL\_MASS\_FRACTION(NL,NC)}       & Real Array      & Section~\ref{info:solid_pyrolysis}        &                     &                         \\ \hline
 {\ct MINIMUM\_LAYER\_THICKNESS}         & Real            & Section~\ref{info:solid_phase_stability}  & m                   & 1.E-6                   \\ \hline
 {\ct MLRPUA }                           & Real            & Section~\ref{info:gas_burner}             & \si{kg/(m^2.s)}     &                         \\ \hline
-{\ct MOISTURE\_FRACTION}                & Real            & Section~\ref{info:vegetation}             &                     & 0.                      \\ \hline
+{\ct MOISTURE\_FRACTION(:)}             & Real Array      & Section~\ref{info:vegetation}             &                     & 0.                      \\ \hline
 {\ct N\_LAYER\_CELLS\_MAX}              & Integer Array   & Section~\ref{info:solid_phase_stability}  &                     & 1000                    \\ \hline
 {\ct NET\_HEAT\_FLUX}                   & Real            & Section~\ref{info:convection}             & kW/m$^2$            &                         \\ \hline
 {\ct NO\_SLIP}                          & Logical         & Section~\ref{info:WALL_MODEL}             &                     & {\ct .FALSE.}           \\ \hline
 {\ct NPPC}                              & Integer         & Section~\ref{info:particle_flux}          &                     & 1                       \\ \hline
+{\ct PACKING\_RATIO(:) }                & Real Array      & Section~\ref{pine_needles}                &                     &                         \\ \hline
 {\ct PARTICLE\_MASS\_FLUX}              & Real            & Section~\ref{info:particle_flux}          & \si{kg/(m^2.s)}     &                         \\ \hline
 {\ct PARTICLE\_SURFACE\_DENSITY}        & Real            & Section~\ref{info:particle_flux}          & kg/m$^2$            &                         \\ \hline
 {\ct PART\_ID}                          & Character       & Section~\ref{info:particle_flux}          &                     &                         \\ \hline
@@ -10605,7 +10631,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SPEC\_ID}                          & Character       & Section~\ref{info:MASS_FLUX}              &                     &                         \\ \hline
 {\ct SPREAD\_RATE}                      & Real            & Section~\ref{info:spread}                 & m/s                 &                         \\ \hline
 {\ct STRETCH\_FACTOR(:) }               & Real            & Section~\ref{info:solid_phase_stability}  &                     & 2.                      \\ \hline
-{\ct SURFACE\_VOLUME\_RATIO }           & Real            & Section~\ref{pine_needles}                & 1/m                 &                         \\ \hline
+{\ct SURFACE\_VOLUME\_RATIO(:) }        & Real            & Section~\ref{pine_needles}                & 1/m                 &                         \\ \hline
 {\ct TAU\_EF}                           & Real            & Section~\ref{info:RAMP_Time}              & s                   & 1.                      \\ \hline
 {\ct TAU\_MF(:)}                        & Real            & Section~\ref{info:RAMP_Time}              & s                   & 1.                      \\ \hline
 {\ct TAU\_PART}                         & Real            & Section~\ref{info:RAMP_Time}              & s                   & 1.                      \\ \hline
