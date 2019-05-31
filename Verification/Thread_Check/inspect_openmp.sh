@@ -68,14 +68,14 @@ fi
 export OMP_NUM_THREADS=2
 
 if [ "$showinput" == "1" ] ; then
-  echo inspxe-cl -collect ti3 -knob scope=normal \
+  echo inspxe-cl -collect ti2  \
           -result-dir $RESULT_DIR \
           -search-dir src=$GITROOT/fds/Source \
           -- $INSPECTAPP $case
   exit
 fi
 cd $CURDIR
-inspxe-cl -collect ti3 -knob scope=normal \
+inspxe-cl -collect ti2  \
           -result-dir $RESULT_DIR \
           -search-dir src=$GITROOT/fds/Source \
           -- $INSPECTAPP $case
