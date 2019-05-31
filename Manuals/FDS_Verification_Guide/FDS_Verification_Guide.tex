@@ -2207,7 +2207,7 @@ The enthalpy of the mixture at the outlet is $1 \times 1 \times (900+273.15) + 1
 \subsection{Combustion Chamber (\texorpdfstring{\textct{energy\_budget\_combustion}}{energy\_budget\_combustion})}
 \label{energy_budget_combustion}
 
-Methanol and air are mixed and burned within an adiabatic combustion chamber 1~m on each side. Because the internal energy of the system does not change, we expect that 
+Methanol and air are mixed and burned within an adiabatic combustion chamber 1~m on each side. Because the internal energy of the system does not change, we expect that
 \be
 \Delta h = V \, \Delta p
 \ee
@@ -2773,13 +2773,13 @@ This chapter contains examples that test the computations related to species con
 \section{Gas Properties (\texorpdfstring{\textct{species\_props}}{species\_props})}
 \label{gas_properties}
 
-This is a test of computing the gas properties of species mixtures. Three species are defined. The first species has a molecular weight of 10 g/m, a viscosity of 0.00001~\si{kg/(m.s)}, 
+This is a test of computing the gas properties of species mixtures. Three species are defined. The first species has a molecular weight of 10 g/m, a viscosity of 0.00001~\si{kg/(m.s)},
 a conductivity of 0.01~\si{W/(m.K)}, and a specific heat of 1~\si{kJ/(kg.K)}. The second species multiplies the first species' inputs by two (e.g. molecular weight of 20 g/m), and the third species multiplies the first species' inputs by three.
 
 \begin{figure}[ht]
 	\centering
 	\begin{tabular}{c}
-      \includegraphics[height=2.2in]{SCRIPT_FIGURES/spec_prop_mu} 
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/spec_prop_mu}
       \includegraphics[height=2.2in]{SCRIPT_FIGURES/spec_prop_k} \\
       \includegraphics[height=2.2in]{SCRIPT_FIGURES/spec_prop_cp}
    \end{tabular}
@@ -2791,7 +2791,7 @@ a conductivity of 0.01~\si{W/(m.K)}, and a specific heat of 1~\si{kJ/(kg.K)}. Th
 \label{methane_flame}
 
 A simple methane flame with 10~\% CO yield is burned inside a closed cavity for 5~s.
-The total mass of CO$_2$, H$_2$O and CO is recorde-d.
+The total mass of CO$_2$, H$_2$O and CO is recorded.
 The simulation is performed using the three alternative ways
 to define the combustion reaction: {\em simple chemistry}, {\em primitive species}, and {\em lumped species}. The
 same amount of each product species should be produced in each case. The following figure compares the
