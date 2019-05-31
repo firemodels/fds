@@ -2555,6 +2555,7 @@ SUBROUTINE INITIALIZE_DIAGNOSTIC_FILE(DT)
 USE RADCONS, ONLY: NRT,RSA,NRP,TIME_STEP_INCREMENT,PATH_LENGTH
 USE MATH_FUNCTIONS, ONLY : EVALUATE_RAMP
 USE MISC_FUNCTIONS, ONLY : WRITE_SUMMARY_INFO
+USE PHYSICAL_FUNCTIONS, ONLY: GET_VISCOSITY, GET_CONDUCTIVITY, GET_SPECIFIC_HEAT, GET_ENTHALPY
 USE SCRC, ONLY: SCARC_METHOD, SCARC_DISCRETIZATION, SCARC_MULTIGRID, SCARC_SMOOTH, SCARC_PRECON, &
                 SCARC_COARSE, SCARC_MULTIGRID_CYCLE, SCARC_MULTIGRID_COARSENING, &
                 SCARC_MULTIGRID_ITERATIONS, SCARC_MULTIGRID_ACCURACY, SCARC_MULTIGRID_INTERPOL, &
@@ -2562,6 +2563,7 @@ USE SCRC, ONLY: SCARC_METHOD, SCARC_DISCRETIZATION, SCARC_MULTIGRID, SCARC_SMOOT
 
 REAL(EB), INTENT(IN) :: DT
 INTEGER :: NM,I,NN,N,NR,NL,NS,ITMP, CELL_COUNT
+REAL(EB) ::ZZ_GET(1:N_TRACKED_SPECIES), MU_Z,K_Z,CP_ZN,H_Z
 CHARACTER(LABEL_LENGTH) :: QUANTITY,ODE_SOLVER,OUTFORM
 TYPE(SPECIES_MIXTURE_TYPE),POINTER :: SM=>NULL()
 
@@ -2686,6 +2688,8 @@ WRITE(LU_OUTPUT,'(//A)') ' Tracked (Lumped) Species Information'
 
 DO N=1,N_TRACKED_SPECIES
    SM=>SPECIES_MIXTURE(N)
+   ZZ_GET = 0._EB
+   ZZ_GET(N) = 1._EB
    WRITE(LU_OUTPUT,'(/3X,A)') TRIM(SM%ID)
    WRITE(LU_OUTPUT,'(A,F11.5)')   '   Molecular Weight (g/mol)         ',SM%MW
    WRITE(LU_OUTPUT,'(A,F8.3)')    '   Ambient Density (kg/m^3)         ',SM%MW*P_INF/(TMPA*R0)
@@ -2698,22 +2702,38 @@ DO N=1,N_TRACKED_SPECIES
    ENDDO
    ITMP = NINT(TMPA)
    WRITE(LU_OUTPUT,'(A)') ' '
-   WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '     Viscosity (kg/m/s) Ambient, ',ITMP,' K: ', MU_RSQMW_Z(ITMP,N)/RSQ_MW_Z(N)
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', MU_RSQMW_Z( 500,N)/RSQ_MW_Z(N)
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', MU_RSQMW_Z(1000,N)/RSQ_MW_Z(N)
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', MU_RSQMW_Z(1500,N)/RSQ_MW_Z(N)
-   WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '   Therm. Cond. (W/m/K) Ambient, ',ITMP,' K: ', K_RSQMW_Z(ITMP,N)/RSQ_MW_Z(N)
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', K_RSQMW_Z( 500,N)/RSQ_MW_Z(N)
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', K_RSQMW_Z(1000,N)/RSQ_MW_Z(N)
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', K_RSQMW_Z(1500,N)/RSQ_MW_Z(N)
-   WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '        Enthalpy (J/kg) Ambient, ',ITMP,' K: ', CPBAR_Z(ITMP,N)*TMPA
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', CPBAR_Z(500,N)*500._EB
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', CPBAR_Z(1000,N)*1000._EB
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', CPBAR_Z(1500,N)*1500._EB
-   WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '    Spec. Heat (J/kg/K) Ambient, ',ITMP,' K: ', CP_Z(ITMP,N)
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', CP_Z( 500,N)
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', CP_Z(1000,N)
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', CP_Z(1500,N)
+   CALL GET_VISCOSITY(ZZ_GET,MU_Z,TMPA)
+   WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '     Viscosity (kg/m/s) Ambient, ',ITMP,' K: ', MU_Z
+   CALL GET_VISCOSITY(ZZ_GET,MU_Z,500._EB)
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', MU_Z
+   CALL GET_VISCOSITY(ZZ_GET,MU_Z,1000._EB)
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', MU_Z
+   CALL GET_VISCOSITY(ZZ_GET,MU_Z,1500._EB)
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', MU_Z
+   CALL GET_CONDUCTIVITY(ZZ_GET,K_Z,TMPA)
+   WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '   Therm. Cond. (W/m/K) Ambient, ',ITMP,' K: ', K_Z
+   CALL GET_CONDUCTIVITY(ZZ_GET,K_Z,500._EB)
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', K_Z
+   CALL GET_CONDUCTIVITY(ZZ_GET,K_Z,1000._EB)
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', K_Z
+   CALL GET_CONDUCTIVITY(ZZ_GET,K_Z,1500._EB)
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', K_Z
+   CALL GET_ENTHALPY(ZZ_GET,H_Z,TMPA)
+   WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '        Enthalpy (J/kg) Ambient, ',ITMP,' K: ', H_Z
+   CALL GET_ENTHALPY(ZZ_GET,H_Z,500._EB)
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', H_Z
+   CALL GET_ENTHALPY(ZZ_GET,H_Z,1000._EB)
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', H_Z
+   CALL GET_ENTHALPY(ZZ_GET,H_Z,1500._EB)
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', H_Z
+   CALL GET_SPECIFIC_HEAT(ZZ_GET,CP_ZN,TMPA)
+   WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '    Spec. Heat (J/kg/K) Ambient, ',ITMP,' K: ', CP_ZN
+   CALL GET_SPECIFIC_HEAT(ZZ_GET,CP_ZN,500._EB)
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', CP_ZN
+   CALL GET_SPECIFIC_HEAT(ZZ_GET,CP_ZN,1000._EB)
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', CP_ZN
+   CALL GET_SPECIFIC_HEAT(ZZ_GET,CP_ZN,1500._EB)
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', CP_ZN
    WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '   Diff. Coeff. (m^2/s) Ambient, ',ITMP,' K: ', D_Z(ITMP,N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', D_Z( 500,N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', D_Z(1000,N)
