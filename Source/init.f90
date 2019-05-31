@@ -545,8 +545,11 @@ DO N=1,N_INIT
                 M%ZC(K) > IN%Z1 .AND. M%ZC(K) < IN%Z2) THEN
                M%TMP(I,J,K)            = IN%TEMPERATURE
                M%RHO(I,J,K)            = IN%DENSITY
+               M%RHOS(I,J,K)            = IN%DENSITY
                M%ZZ(I,J,K,1:N_TRACKED_SPECIES) = IN%MASS_FRACTION(1:N_TRACKED_SPECIES)
+               M%ZZS(I,J,K,1:N_TRACKED_SPECIES) = IN%MASS_FRACTION(1:N_TRACKED_SPECIES)
                IF (IN%ADJUST_DENSITY)     M%RHO(I,J,K) = M%RHO(I,J,K)*M%P_0(K)/P_INF
+               IF (IN%ADJUST_DENSITY)     M%RHOS(I,J,K) = M%RHOS(I,J,K)*M%P_0(K)/P_INF
                IF (IN%ADJUST_TEMPERATURE) M%TMP(I,J,K) = M%TMP(I,J,K)*M%P_0(K)/P_INF
                M%Q(I,J,K) = IN%HRRPUV
             ENDIF
