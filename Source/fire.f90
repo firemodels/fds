@@ -12,7 +12,7 @@ IMPLICIT NONE
 
 PRIVATE
 
-PUBLIC COMBUSTION,COMBUSTION_BC
+PUBLIC COMBUSTION,COMBUSTION_BC,CONDENSATION_EVAPORATION
 
 REAL(EB), DIMENSION(:,:,:), POINTER :: Q_OLD
 
@@ -1191,5 +1191,150 @@ ENDDO WALL_LOOP
 
 T_USED(10)=T_USED(10)+CURRENT_TIME()-TNOW
 END SUBROUTINE COMBUSTION_BC
+
+
+SUBROUTINE CONDENSATION_EVAPORATION(DT,NM)
+USE MATH_FUNCTIONS, ONLY : INTERPOLATE1D_UNIFORM
+USE PHYSICAL_FUNCTIONS, ONLY : GET_SPECIFIC_HEAT, GET_MASS_FRACTION_ALL
+USE COMPLEX_GEOMETRY, ONLY : IBM_CGSC, IBM_GASPHASE
+INTEGER, INTENT(IN):: NM
+REAL(EB), INTENT(IN):: DT
+INTEGER:: I,J,K, NS, NS2, Y_INDEX, Z_COND_INDEX
+REAL(EB), PARAMETER :: P_STP = 101325._EB
+REAL(EB):: Y_GAS, DHOR, H_V_B, H_V_A, H_V, H_V_N, MW_RATIO, MW_GAS, ZZ_GET(1:N_TRACKED_SPECIES), &
+           X_CLOUD, Y_CLOUD, CP, TMP_N, Y_N, Y_1, Y_2, Y_0, CE_SIGN, X_GUESS,Y_GUESS, Y_ALL(1:N_SPECIES), P_RATIO, Y_COND, &
+           T_BOIL_EFF, TMP_G, Y_NN, TMP_NN
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: Y_BIN, A_BIN
+TYPE (SPECIES_TYPE), POINTER :: SS=>NULL()
+TYPE (SPECIES_MIXTURE_TYPE), POINTER :: SM=>NULL()
+
+CALL POINT_TO_MESH(NM)
+
+SPEC_LOOP: DO NS = 1, N_TRACKED_SPECIES
+   SM => SPECIES_MIXTURE(NS)
+   IF (.NOT. SM%CONDENSATION_SMIX_INDEX > 0) CYCLE SPEC_LOOP
+   Z_COND_INDEX = SM%CONDENSATION_SMIX_INDEX
+   Y_INDEX = SM%SINGLE_SPEC_INDEX
+   SS => SPECIES(Y_INDEX)
+   CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%H_V,1),SS%H_V,SS%TMP_V,H_V_B)
+   IF (SM%AGGLOMERATION_INDEX > 0) THEN
+      ALLOCATE(Y_BIN(N_PARTICLE_BINS(SM%AGGLOMERATION_INDEX)))
+      ALLOCATE(A_BIN(N_PARTICLE_BINS(SM%AGGLOMERATION_INDEX)))
+   ENDIF
+
+   DO K = 1, KBAR
+      DO J = 1, JBAR
+         ILOOP: DO I = 1, IBAR
+            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE ILOOP
+            IF (CC_IBM) THEN
+               IF (CCVAR(I,J,K,IBM_CGSC) /= IBM_GASPHASE) CYCLE ILOOP
+            ENDIF
+            IF (ZZ(I,J,K,NS) < ZZ_MIN_GLOBAL .AND. ZZ(I,J,K,Z_COND_INDEX) < ZZ_MIN_GLOBAL) CYCLE ILOOP
+
+            DHOR = H_V_B*SS%MW/R0
+            P_RATIO = P_STP/PBAR(0,PRESSURE_ZONE(I,J,K))
+
+            TMP_G = TMP(I,J,K)
+            ! Boiling temperature at current background pressure
+            T_BOIL_EFF = MAX(0._EB,DHOR*SS%TMP_V/(DHOR-SS%TMP_V*LOG(1._EB/P_RATIO)+TWO_EPSILON_EB))
+
+            CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%H_V,1),SS%H_V,TMP_G,H_V)
+            H_V_A = 0.5_EB*(H_V+H_V_B)
+
+            ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(I,J,K,1:N_TRACKED_SPECIES)
+            CALL GET_MASS_FRACTION_ALL(ZZ_GET,Y_ALL)
+            Y_GAS = Y_ALL(Y_INDEX)
+            IF (SM%AGGLOMERATION_INDEX > 0) THEN
+               Y_BIN(1:N_PARTICLE_BINS(SM%AGGLOMERATION_INDEX)) = &
+                  ZZ_GET(Z_COND_INDEX:Z_COND_INDEX+N_PARTICLE_BINS(SM%AGGLOMERATION_INDEX)-1)
+               Y_COND = SUM(Y_BIN)
+               DO NS2=1,N_PARTICLE_BINS(SM%AGGLOMERATION_INDEX)
+                  A_BIN(NS2) = Y_BIN(NS2) / SPECIES_MIXTURE(Z_COND_INDEX+NS2-1)%MEAN_DIAMETER
+               ENDDO
+               A_BIN = A_BIN/SUM(A_BIN)
+            ELSE
+               Y_COND = ZZ_GET(Z_COND_INDEX)
+            ENDIF
+            Y_GAS = Y_GAS - Y_COND
+
+            ! Determine the ratio of molecular weights between the gas and droplet vapor
+
+            MW_GAS = 0._EB
+            IF (ABS(Y_GAS-1._EB) > TWO_EPSILON_EB) THEN
+               DO NS2=1,N_SPECIES
+                  IF (NS2==Y_INDEX) CYCLE
+                  MW_GAS = MW_GAS + Y_ALL(NS2)/SPECIES(NS2)%MW
+               ENDDO
+               IF (Y_COND > TWO_EPSILON_EB) &
+                  MW_GAS = MW_GAS + Y_COND/SS%MW
+               IF (MW_GAS<=TWO_EPSILON_EB) THEN
+                  MW_GAS=SPECIES_MIXTURE(1)%MW
+               ELSE
+                  MW_GAS = (1._EB-Y_GAS)/MW_GAS
+               ENDIF
+            ELSE
+               MW_GAS=SPECIES_MIXTURE(1)%MW
+            ENDIF
+            MW_RATIO = MW_GAS/SS%MW
+
+            DHOR     = H_V_A*SS%MW/R0
+            ! Compute equilibrium vapor mass fraction
+            X_CLOUD  = MIN(1._EB,P_RATIO*EXP(DHOR*(1._EB/T_BOIL_EFF-1._EB/TMP_G)))
+            Y_CLOUD  = X_CLOUD/(MW_RATIO + (1._EB-MW_RATIO)*X_CLOUD)
+            IF (Y_GAS < Y_CLOUD .AND. Y_COND < TWO_EPSILON_EB) CYCLE SPEC_LOOP
+            IF(Y_GAS > Y_CLOUD) THEN
+               Y_1 = 0._EB
+               Y_2 = Y_GAS
+               Y_N = 0.5_EB*(Y_1+Y_2)
+               CE_SIGN = 1._EB
+            ELSE
+               Y_1 = 0._EB
+               Y_2 = Y_COND
+               Y_N = 0.5_EB*(Y_1+Y_2)
+               CE_SIGN = -1._EB
+            ENDIF
+            Y_0 = Y_2
+            CALL GET_SPECIFIC_HEAT(ZZ_GET,CP,TMP_G)
+            TMP_N = TMP_G
+            EVAP_LOOP: DO
+               TMP_NN = TMP_N
+               TMP_N = (Y_0-Y_N)*H_V/CP*CE_SIGN+TMP_G
+               IF (ABS(TMP_N - TMP_NN)<1.E-4_EB) EXIT EVAP_LOOP
+               CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%H_V,1),SS%H_V,TMP_N,H_V_N)
+               H_V_A = 0.5_EB*(H_V_N+H_V_B)
+               X_GUESS  = MIN(1._EB,P_RATIO*EXP(DHOR*(1._EB/T_BOIL_EFF-1._EB/TMP_N)))
+               Y_GUESS  = X_GUESS/(MW_RATIO + (1._EB-MW_RATIO)*X_GUESS)
+               Y_NN = Y_N
+               IF ((Y_GUESS < Y_N .AND. CE_SIGN < 0._EB) .OR. (Y_GUESS > Y_N .AND. CE_SIGN > 0._EB)) THEN
+                  Y_1 = Y_N
+                  Y_N = 0.5_EB*(Y_N+Y_2)
+               ELSE
+                  Y_2 = Y_N
+                  Y_N = 0.5_EB*(Y_N+Y_1)
+               ENDIF
+               IF (ABS(Y_NN-Y_N)/Y_N < 1.E-3_EB) EXIT EVAP_LOOP
+            ENDDO EVAP_LOOP
+            IF (SM%AGGLOMERATION_INDEX > 0) THEN
+               IF (SUM(A_BIN )< TWO_EPSILON_EB) THEN
+                  M_DOT_PPP(I,J,K,Z_COND_INDEX) = M_DOT_PPP(I,J,K,Z_COND_INDEX) + RHO(I,J,K)*(Y_0-Y_N)/DT*CE_SIGN*0.5_EB
+               ELSE
+                  DO NS2=0,N_PARTICLE_BINS(SM%AGGLOMERATION_INDEX)-1
+                     M_DOT_PPP(I,J,K,Z_COND_INDEX+NS2) = M_DOT_PPP(I,J,K,Z_COND_INDEX+NS2) + &
+                                                         RHO(I,J,K)*(Y_0-Y_N)/DT*CE_SIGN*0.5_EB*A_BIN(NS2+1)
+                  ENDDO
+               ENDIF
+            ELSE
+               M_DOT_PPP(I,J,K,Z_COND_INDEX) = M_DOT_PPP(I,J,K,Z_COND_INDEX) + RHO(I,J,K)*(Y_0-Y_N)/DT*CE_SIGN*0.5_EB
+            ENDIF
+            D_SOURCE(I,J,K) = D_SOURCE(I,J,K) + (Y_0-Y_N)*H_V*CE_SIGN/(CP*TMP_G*DT)*0.5_EB
+            M_DOT_PPP(I,J,K,NS) = M_DOT_PPP(I,J,K,NS) - RHO(I,J,K)*(Y_0-Y_N)/DT*CE_SIGN*0.5_EB
+         ENDDO ILOOP
+      ENDDO
+   ENDDO
+   IF (ALLOCATED(Y_BIN)) DEALLOCATE(Y_BIN)
+   IF (ALLOCATED(A_BIN)) DEALLOCATE(A_BIN)
+ENDDO SPEC_LOOP
+
+END SUBROUTINE CONDENSATION_EVAPORATION
 
 END MODULE FIRE
