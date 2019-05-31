@@ -35,14 +35,14 @@ if "%linux_mpi_version%" == "INTEL" (
   set INTEL=i
 )
 if "%platform%" == "linux" (
-  plink %linux_logon% %linux_svn_root%/smv/scripts/run_command.sh fds/Build/Scripts clean.sh %INTEL%mpi_intel_linux_64_db
-  plink %linux_logon% %linux_svn_root%/smv/scripts/run_command.sh fds/Build/%INTEL%mpi_intel_linux_64_db make_fds.sh
+  plink %plink_options% %linux_logon% %linux_svn_root%/smv/scripts/run_command.sh fds/Build/Scripts clean.sh %INTEL%mpi_intel_linux_64_db
+  plink %plink_options% %linux_logon% %linux_svn_root%/smv/scripts/run_command.sh fds/Build/%INTEL%mpi_intel_linux_64_db make_fds.sh
   pause
   goto eof
 )
 if "%platform%" == "osx" (
-  plink %osx_logon% %linux_svn_root%/smv/scripts/run_command.sh fds/Build/Scripts clean.sh mpi_intel_osx_64_db
-  plink %osx_logon% %linux_svn_root%/smv/scripts/run_command.sh fds/Build/mpi_intel_osx_64_db make_fds.sh
+  plink %plink_options% %osx_logon% %linux_svn_root%/smv/scripts/run_command.sh fds/Build/Scripts clean.sh mpi_intel_osx_64_db
+  plink %plink_options% %osx_logon% %linux_svn_root%/smv/scripts/run_command.sh fds/Build/mpi_intel_osx_64_db make_fds.sh
   pause
   goto eof
 )
