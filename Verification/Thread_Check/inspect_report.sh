@@ -5,7 +5,7 @@ cd ../../..
 GITROOT=`pwd`
 cd $CURDIR
 
-RESULT_DIR=$CURDIR/inspect_results
+RESULT_DIR="inspect_results"
 REPORT_TYPE=problems
 showinput=
 
@@ -38,10 +38,21 @@ done
 
 # Report results from thread checker
 
-source /opt/intel/inspector/inspxe-vars.sh quiet
+source /opt/intel19/inspector_2019/inspxe-vars.sh quiet
+
+
 
 if [ "$showinput" == "1" ] ; then
-  echo inspxe-cl -report $REPORT_TYPE -result-dir $RESULT_DIR
+  find . -name "$RESULT_DIR*"|while read fname; 
+  do echo inspxe-cl -report $REPORT_TYPE -result-dir $fname
+  done
   exit
 fi
-inspxe-cl -report $REPORT_TYPE -result-dir $RESULT_DIR
+
+find . -name "$RESULT_DIR*"|while read fname;
+
+do
+echo $fname
+ inspxe-cl -report $REPORT_TYPE -report-all -result-dir $fname;
+sleep 3
+done
