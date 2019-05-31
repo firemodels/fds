@@ -2669,6 +2669,7 @@ SPEC_LOOP: DO N=1,N_SPECIES
          WRITE(LU_OUTPUT,'( 3X,A)') 'Gas Species'
       CASE (AEROSOL_SPECIES)
          WRITE(LU_OUTPUT,'( 3X,A)') 'Aerosol'
+         IF (SS%CONDENSABLE) WRITE(LU_OUTPUT,'( 3X,A)') 'Condensable Species'
    END SELECT
    WRITE(LU_OUTPUT,'(A,F11.5)')   '   Molecular Weight (g/mol)         ',SS%MW
    WRITE(LU_OUTPUT,'(A,F8.3)')    '   Ambient Density (kg/m^3)         ',SS%MW*P_INF/(TMPA*R0)
@@ -2827,18 +2828,19 @@ REACTION_LOOP: DO N=1,N_REACTIONS
 ENDDO REACTION_LOOP
 
 ! Print out information about agglomeration
-
-IF (AGGLOMERATION_INDEX>0) THEN
-   WRITE(LU_OUTPUT,'(//A)')    ' Agglomeration Information'
-   WRITE(LU_OUTPUT,'(/A,A)')   '     Agglomerating Species:         ',&
-                                     TRIM(SPECIES(SPECIES_MIXTURE(AGGLOMERATION_INDEX)%SINGLE_SPEC_INDEX)%ID)
-   WRITE(LU_OUTPUT,'(A,I0)')   '     Number of Particle Bins:       ',N_PARTICLE_BINS
-   WRITE(LU_OUTPUT,'(A,F9.3)') '     Particle Density (kg/m^3):     ',SPECIES_MIXTURE(AGGLOMERATION_INDEX)%DENSITY_SOLID
-   WRITE(LU_OUTPUT,'(A,F8.3)') '     Minimum Particle Diameter (um):',MIN_PARTICLE_DIAMETER*1.E6_EB
-   WRITE(LU_OUTPUT,'(A,F8.3)') '     Maximum Particle Diameter (um):',MAX_PARTICLE_DIAMETER*1.E6_EB
-   WRITE(LU_OUTPUT,'(A)')      '     Bin #  Bin Diameter (um)'
-   DO N=1,N_PARTICLE_BINS
-      WRITE(LU_OUTPUT,'(A,I3,A,F8.3)') '     ',N,'        ',2._EB*PARTICLE_RADIUS(N)*1.E6_EB
+IF (N_AGGLOMERATION_SPECIES > 0) THEN
+   DO NN=1,N_AGGLOMERATION_SPECIES
+      WRITE(LU_OUTPUT,'(//A)')    ' Agglomeration Information'
+      WRITE(LU_OUTPUT,'(/A,A)')   '     Agglomerating Species:         ',&
+                                        TRIM(SPECIES(AGGLOMERATION_SPEC_INDEX(NN))%ID)
+      WRITE(LU_OUTPUT,'(A,I0)')   '     Number of Particle Bins:       ',N_PARTICLE_BINS(NN)
+      WRITE(LU_OUTPUT,'(A,F9.3)') '     Particle Density (kg/m^3):     ',SPECIES(AGGLOMERATION_SPEC_INDEX(NN))%DENSITY_SOLID
+      WRITE(LU_OUTPUT,'(A,F8.3)') '     Minimum Particle Diameter (um):',MIN_PARTICLE_DIAMETER(NN)*1.E6_EB
+      WRITE(LU_OUTPUT,'(A,F8.3)') '     Maximum Particle Diameter (um):',MAX_PARTICLE_DIAMETER(NN)*1.E6_EB
+      WRITE(LU_OUTPUT,'(A)')      '     Bin #  Bin Diameter (um)'
+      DO N=1,N_PARTICLE_BINS(NN)
+         WRITE(LU_OUTPUT,'(A,I3,A,F8.3)') '     ',N,'        ',2._EB*PARTICLE_RADIUS(NN,N)*1.E6_EB
+      ENDDO
    ENDDO
 ENDIF
 
@@ -6058,8 +6060,12 @@ IND_SELECT: SELECT CASE(IND)
          GAS_PHASE_OUTPUT_RES = 0._EB
       ELSE
          ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(II,JJ,KK,1:N_TRACKED_SPECIES)
-         CALL GET_MASS_FRACTION_ALL(ZZ_GET,Y_ALL)
-         GAS_PHASE_OUTPUT_RES = RELATIVE_HUMIDITY(Y_ALL(H2O_INDEX),TMP(II,JJ,KK),PBAR(KK,PRESSURE_ZONE(II,JJ,KK)))
+         CALL GET_MASS_FRACTION(ZZ_GET,H2O_INDEX,Y_H2O)
+         IF (H2O_SMIX_INDEX > 0) THEN
+            IF (SPECIES_MIXTURE(H2O_SMIX_INDEX)%CONDENSATION_SMIX_INDEX > 0) &
+               Y_H2O = Y_H2O - ZZ_GET(SPECIES_MIXTURE(H2O_SMIX_INDEX)%CONDENSATION_SMIX_INDEX)
+         ENDIF
+         GAS_PHASE_OUTPUT_RES = RELATIVE_HUMIDITY(Y_H2O,TMP(II,JJ,KK),PBAR(KK,PRESSURE_ZONE(II,JJ,KK)))
       ENDIF
    CASE(22)  ! HS
       GAS_PHASE_OUTPUT_RES = HS(II,JJ,KK)
@@ -6590,7 +6596,7 @@ IND_SELECT: SELECT CASE(IND)
    CASE(132) ! REAC SOURCE TERM
       GAS_PHASE_OUTPUT_RES = 0._EB
       IF (Z_INDEX>0) THEN
-         GAS_PHASE_OUTPUT_RES = REAC_SOURCE_TERM(II,JJ,KK,Z_INDEX)
+      GAS_PHASE_OUTPUT_RES = REAC_SOURCE_TERM(II,JJ,KK,Z_INDEX)
       ELSEIF (Y_INDEX>0) THEN
          GAS_PHASE_OUTPUT_RES = DOT_PRODUCT(Z2Y(Y_INDEX,1:N_TRACKED_SPECIES),REAC_SOURCE_TERM(II,JJ,KK,1:N_TRACKED_SPECIES))
       ENDIF
@@ -7297,10 +7303,6 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
          SOLID_PHASE_OUTPUT = SUM(ONE_D%LAYER_THICKNESS)
       ELSE
          SOLID_PHASE_OUTPUT = 0._EB
-      ENDIF
-
-      IF (SURFACE(SURF_INDEX)%VEGETATION) THEN     !surface vegetation height
-         SOLID_PHASE_OUTPUT = WC%VEG_HEIGHT
       ENDIF
 
    CASE(25,26) ! SURFACE DENSITY, NORMALIZED MASS

@@ -2313,4 +2313,104 @@ DO WHILE (NP >= 3 .AND. IP .LE. NPOLY)
 END DO
 END SUBROUTINE POLY2TRI
 
+#ifdef pp_OFFSET_GEOM
+!  ------------------ OFFSET_GEOM ------------------------
+
+SUBROUTINE OFFSET_GEOM(VERTS_IN, NVERTS_IN, TRIS_IN, NTRIS_IN, MESH, OFFSET, &
+                       VERTS_OUT, NVERTS_OUT, TRIS_OUT, NTRIS_OUT)
+INTEGER,  INTENT(IN) :: NVERTS_IN, NTRIS_IN
+REAL(EB), INTENT(IN), TARGET :: VERTS_IN(3*NVERTS_IN)
+REAL(EB), INTENT(IN) :: OFFSET(3), MESH(6)
+INTEGER,  INTENT(IN), TARGET :: TRIS_IN(3*NTRIS_IN)
+
+INTEGER, INTENT(OUT) :: NVERTS_OUT, NTRIS_OUT
+REAL(EB), INTENT(OUT), TARGET, ALLOCATABLE, DIMENSION(:) :: VERTS_OUT
+INTEGER,  INTENT(OUT), TARGET, ALLOCATABLE, DIMENSION(:) :: TRIS_OUT
+
+INTEGER :: I, I_OUT
+REAL(EB), POINTER, DIMENSION(:) :: V1, V2, V3, VIN, VOUT
+REAL(EB) :: VERT_CENTROID_OFFSET(3)
+INTEGER :: KEEP_VERT(NVERTS_IN), KEEP_TRI(NTRIS_IN), MAP_VERT(NVERTS_IN)
+INTEGER, POINTER, DIMENSION(:) :: TIN, TOUT
+INTEGER, POINTER, DIMENSION(:) :: TRI
+
+! find nodes that are in the mesh
+
+NTRIS_OUT = 0
+KEEP_VERT(1:NVERTS_IN) = 0
+DO I = 1, NTRIS_IN
+   TRI(1:3) => TRIS_IN(3*I-2:3*I)
+   V1(1:3) => VERTS_IN(3*TRI(1)-2:3*TRI(1))
+   V2(1:3) => VERTS_IN(3*TRI(2)-2:3*TRI(2))
+   V3(1:3) => VERTS_IN(3*TRI(3)-2:3*TRI(3))
+   VERT_CENTROID_OFFSET = (V1+V2+V3)/3.0_EB + OFFSET
+   KEEP_TRI(I) = 0
+
+   ! only keep triangle if the offset centroid is in the mesh
+   
+   IF(VERT_CENTROID_OFFSET(1)<MESH(1).OR.VERT_CENTROID_OFFSET(1)>MESH(2))CYCLE
+   IF(VERT_CENTROID_OFFSET(2)<MESH(3).OR.VERT_CENTROID_OFFSET(2)>MESH(4))CYCLE
+   IF(VERT_CENTROID_OFFSET(3)<MESH(5).OR.VERT_CENTROID_OFFSET(3)>MESH(6))CYCLE
+   ! add a test to keep or reject based upon a SURF - ie whether it is a terrain geometry
+
+   ! its in the mesh, so keep the triangle and the vertices
+
+   KEEP_TRI(I) = 1
+   KEEP_VERT(TRI(1)) = 1
+   KEEP_VERT(TRI(2)) = 1
+   KEEP_VERT(TRI(3)) = 1
+   NTRIS_OUT = NTRIS_OUT + 1
+END DO
+
+! count vertices that are kept and generate a mapping from all input vertices to 'kept' vertices
+
+NVERTS_OUT = 0
+DO I = 1, NVERTS_IN
+   IF(KEEP_VERT(I).EQ.1)THEN
+      NVERTS_OUT = NVERTS_OUT + 1
+      MAP_VERT(I) = NVERTS_OUT
+   ENDIF
+END DO
+
+! only proceed if there is at least one triangle in the mesh
+
+IF(NVERTS_OUT>0 .AND. NTRIS_OUT > 0)THEN
+   ALLOCATE(TRIS_OUT(3*NTRIS_OUT))
+   ALLOCATE(VERTS_OUT(3*NVERTS_OUT))
+ELSE
+   NVERTS_OUT = 0
+   NTRIS_OUT = 0
+   RETURN
+ENDIF
+
+! offset the vertices that are kept
+
+I_OUT = 0
+DO I = 1, NVERTS_IN
+   IF(KEEP_VERT(I) .EQ. 1)THEN
+      I_OUT = I_OUT + 1
+      VIN => VERTS_IN(3*I-2:3*I)
+      VOUT => VERTS_OUT(3*I_OUT-2:3*I_OUT)
+      VOUT = VIN + OFFSET
+   ENDIF
+END DO
+
+! map vertices for triangles that are kept
+
+I_OUT = 0
+DO I = 1, NTRIS_IN
+   IF(KEEP_TRI(I) .EQ. 1)THEN
+      I_OUT = I_OUT + 1
+      TIN => TRIS_IN(3*I-2:3*I)
+      TOUT => TRIS_OUT(3*I_OUT-2:3*I_OUT)
+      TOUT(1) = MAP_VERT(TIN(1))
+      TOUT(2) = MAP_VERT(TIN(2))
+      TOUT(3) = MAP_VERT(TIN(3))
+   ENDIF
+END DO
+
+END SUBROUTINE OFFSET_GEOM
+#endif
+
 END MODULE BOXTETRA_ROUTINES
+

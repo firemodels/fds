@@ -2006,13 +2006,13 @@ REAL(EB), POINTER, DIMENSION(:) :: FILM_THICKNESS=>NULL(),TMP_WALL_INTERIM=>NULL
 REAL(EB) :: R_DROP,NUSSELT,K_AIR,H_V,H_V_REF, H_L,H_V2,&
             RVC,WGT,Q_CON_GAS,Q_CON_WALL,Q_RAD,H_HEAT,H_MASS,SH_FAC_GAS,SH_FAC_WALL,NU_FAC_GAS,NU_FAC_WALL,&
             PR_AIR,M_VAP,M_VAP_MAX,MU_AIR,H_SOLID,Q_DOT_RAD,DEN_ADD,AREA_ADD,&
-            Y_DROP,Y_GAS,Y_GAS_NEW,LENGTH,U2,V2,W2,VEL,TMP_DROP_NEW,TMP_WALL,H_WALL,&
+            Y_DROP,Y_COND,Y_GAS,Y_GAS_NEW,LENGTH,U2,V2,W2,VEL,TMP_DROP_NEW,TMP_WALL,H_WALL,&
             SC_AIR,D_AIR,DHOR,SHERWOOD,X_DROP,M_DROP,RHO_G,MW_RATIO,MW_DROP,FTPR,&
             C_DROP,M_GAS,A_DROP,TMP_G,TMP_DROP,TMP_MELT,TMP_BOIL,MINIMUM_FILM_THICKNESS,RE_L,OMRAF,Q_FRAC,Q_TOT,DT_SUBSTEP,&
             CP,H_NEW,ZZ_AIR(1:N_TRACKED_SPECIES),ZZ_GET(1:N_TRACKED_SPECIES),ZZ_GET2(1:N_TRACKED_SPECIES),&
             M_GAS_NEW,MW_GAS,DELTA_H_G,TMP_G_I,H_G_OLD,H_S_G_OLD,H_D_OLD,C_GAS_DROP,C_GAS_AIR,&
             TMP_G_NEW,DT_SUM,DCPDT,X_EQUIL,Y_EQUIL,Y_ALL(1:N_SPECIES),H_S_B,H_S,C_DROP2,&
-            T_BOIL_EFF,P_RATIO,RAYLEIGH,GR,RHOCBAR,MCBAR,LEWIS,THETA,&
+            T_BOIL_EFF,RAYLEIGH,GR,RHOCBAR,MCBAR,LEWIS,THETA,&
             M_GAS_OLD,TMP_G_OLD,NU_LIQUID,H1,H2,TMP_FILM,CP_BAR_2,CP_AIR,R_AIR,RHO_AIR,Y_AIR,B_NUMBER, H_V_B, H_V_A, DH_V_A_DT
 REAL(EB), PARAMETER :: RUN_AVG_FAC=0.5_EB
 INTEGER :: IP,II,JJ,KK,IW,N_LPC,NS,ITMP,ITMP2,ITCOUNT,Y_INDEX,Z_INDEX,I_BOIL,I_MELT,I_FUEL,NMAT
@@ -2082,7 +2082,6 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
    TMP_BOIL = SS%TMP_V
    MW_DROP  = SS%MW
    CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%H_V,1),SS%H_V,SS%H_V_REFERENCE_TEMPERATURE,H_V_REF)
-   CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%H_V,1),SS%H_V,TMP_BOIL,H_V_B)
    I_MELT   = INT(TMP_MELT)
    FILM_THICKNESS => WALL_WORK2
    FILM_THICKNESS =  0._EB
@@ -2117,16 +2116,19 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
       JJ = LP%ONE_D%JJG
       KK = LP%ONE_D%KKG
       RVC = RDX(II)*RRN(II)*RDY(JJ)*RDZ(KK)
-      DHOR = H_V_REF*MW_DROP/R0
-      P_RATIO = P_STP/PBAR(0,PRESSURE_ZONE(II,JJ,KK))
-      ! Boiling temperature at current background pressure
-      T_BOIL_EFF = MAX(0._EB,DHOR*TMP_BOIL/(DHOR-TMP_BOIL*LOG(1._EB/P_RATIO)+TWO_EPSILON_EB))
+      CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%H_V,1),SS%H_V,TMP_BOIL,H_V_B)
+      DHOR = H_V_B*MW_DROP/R0
+      ! Boiling temperature at current background pressure and update H_V_B
+      T_BOIL_EFF = MAX(0._EB,DHOR*TMP_BOIL/(DHOR-TMP_BOIL*LOG(PBAR(0,PRESSURE_ZONE(II,JJ,KK))/P_STP)+TWO_EPSILON_EB))
+      CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%H_V,1),SS%H_V,T_BOIL_EFF,H_V_B)
       I_BOIL   = INT(T_BOIL_EFF)
       ! Determine how many sub-time step iterations are needed and then iterate over the time step.
 
       DT_SUBSTEP = DT/REAL(N_INITIAL_PARTICLE_SUBSTEPS,EB)
       DT_SUM = 0._EB
       WGT    = LP%PWT
+
+      Y_COND = 0._EB
 
       TIME_ITERATION_LOOP: DO WHILE (DT_SUM < DT)
 
@@ -2137,6 +2139,9 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
             ZZ_GET(1:N_TRACKED_SPECIES) = ZZ_INTERIM(II,JJ,KK,1:N_TRACKED_SPECIES)
             CALL GET_MASS_FRACTION_ALL(ZZ_GET,Y_ALL)
             Y_GAS = Y_ALL(Y_INDEX)
+            IF (SPECIES_MIXTURE(Z_INDEX)%CONDENSATION_SMIX_INDEX > 0) &
+               Y_COND = ZZ_GET(SPECIES_MIXTURE(Z_INDEX)%CONDENSATION_SMIX_INDEX)
+            Y_GAS = Y_GAS - Y_COND
             TMP_G  = MAX(TMPMIN,TMP_INTERIM(II,JJ,KK))
             RHO_G  = RHO_INTERIM(II,JJ,KK)
 
@@ -2152,11 +2157,12 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                CALL SHUTDOWN(MESSAGE)
                RETURN
             ENDIF
+
             H_V_A = 0.5_EB*(H_V+H_V_B)
-            IF (INT(TMP_DROP) < INT(TMP_BOIL)) THEN
+            IF (INT(TMP_DROP) < INT(T_BOIL_EFF)) THEN
                DH_V_A_DT = 0.5_EB*(SS%H_V(INT(TMP_DROP)+1) - SS%H_V(INT(TMP_DROP)))
             ELSE
-               DH_V_A_DT = 0.5_EB*(SS%H_V(INT(TMP_BOIL)) - SS%H_V(INT(TMP_BOIL)-1))
+               DH_V_A_DT = 0.5_EB*(SS%H_V(INT(T_BOIL_EFF)) - SS%H_V(INT(T_BOIL_EFF)-1))
             ENDIF
 
             M_GAS  = RHO_G/RVC
@@ -2205,6 +2211,8 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                   IF (NS==Y_INDEX) CYCLE
                   MW_GAS = MW_GAS + Y_ALL(NS)/SPECIES(NS)%MW
                ENDDO
+               IF (Y_COND > TWO_EPSILON_EB) &
+                  MW_GAS = MW_GAS + Y_COND/SPECIES(Y_INDEX)%MW
                IF (MW_GAS<=TWO_EPSILON_EB) THEN
                   MW_GAS=SPECIES_MIXTURE(1)%MW
                ELSE
@@ -2258,8 +2266,9 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                DHOR     = H_V_A*MW_DROP/R0
                ZZ_GET(1:N_TRACKED_SPECIES) = ZZ_INTERIM(II,JJ,KK,1:N_TRACKED_SPECIES)
                ! Compute equilibrium PARTICLE vapor mass fraction, Y_DROP, and its derivative w.r.t. PARTICLE temperature
-               X_DROP  = MIN(1._EB,P_RATIO*EXP(DHOR*(1._EB/TMP_BOIL-1._EB/TMP_DROP)))
+               X_DROP  = MIN(1._EB,EXP(DHOR*(1._EB/T_BOIL_EFF-1._EB/TMP_DROP)))
                Y_DROP  = X_DROP/(MW_RATIO + (1._EB-MW_RATIO)*X_DROP)
+
                ! Compute effective Z at the film temperature location LC Eq (19). Skip if no evaporation will occur.
                IF (Y_DROP > Y_GAS) THEN
                   B_NUMBER = (Y_DROP - Y_GAS) / MAX(1.E-8_EB,1._EB-Y_DROP)
@@ -2290,7 +2299,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                ! Compute temperature deriviative of the vapor mass fraction
 
                DYDT = (MW_RATIO/(X_DROP*(1._EB-MW_RATIO)+MW_RATIO)**2) * &
-                      (DHOR*X_DROP/TMP_DROP**2+(1._EB/TMP_BOIL-1._EB/TMP_DROP)*DH_V_A_DT*MW_DROP/R0)
+                      (DHOR*X_DROP/TMP_DROP**2+(1._EB/T_BOIL_EFF-1._EB/TMP_DROP)*DH_V_A_DT*MW_DROP/R0)
 
                ! Set variables for heat transfer on solid
 
@@ -2550,7 +2559,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
 
                CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%H_V,1),SS%H_V,TMP_DROP_NEW,H_V2)
                DHOR     = 0.5_EB*(H_V2+H_V_B)*MW_DROP/R0
-               X_EQUIL  = MIN(1._EB,P_RATIO*EXP(DHOR*(1._EB/TMP_BOIL-1._EB/TMP_DROP_NEW)))
+               X_EQUIL  = MIN(1._EB,EXP(DHOR*(1._EB/T_BOIL_EFF-1._EB/TMP_DROP_NEW)))
                Y_EQUIL  = X_EQUIL/(MW_RATIO + (1._EB-MW_RATIO)*X_EQUIL)
 
                ! Limit drop temperature decrease
