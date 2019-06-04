@@ -2923,7 +2923,7 @@ ELSEIF (SF%INTERNAL_RADIATION .AND. (SF%NUMBER_FSK_POINTS == 0)) THEN
          ENDDO
          IF (VOLSUM>0._EB) KAPPA_S(I) = 2._EB*KAPPA_S(I)/(RDX_S(I)*VOLSUM)    ! kappa = 2*dx*kappa
       ELSE
-         KAPPA_S(I) = SF%KAPPA_S(SF%LAYER_INDEX(I))
+         KAPPA_S(I) = 2._EB*SF%KAPPA_S(SF%LAYER_INDEX(I))/RDX_S(I)
       ENDIF
    ENDDO
    ! solution inwards
