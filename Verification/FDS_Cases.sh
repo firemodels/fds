@@ -674,6 +674,7 @@ $QFDS -d Vegetation vege_pressure-drop_sphere_MPUV2pt0.fds
 $QFDS -d Vegetation vege_pressure-drop_sphere_MPUV30pt0.fds
 
 $QFDS -d WUI dragon_5a.fds
+$QFDS -p 2 -d WUI ground_vegetation.fds
 $QFDS -d WUI pine_needles.fds
 $QFDS -d WUI random_walk_1.fds
 $QFDS -d WUI random_walk_2.fds

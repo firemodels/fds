@@ -6724,20 +6724,13 @@ The length of each needle is specified directly, but its diameter is specified v
       HEAT_OF_REACTION = 1000
       MATL_ID  = 'CHAR' /
 
-&MATL ID = 'MOISTURE'
-      DENSITY = 1000.
-      CONDUCTIVITY = 0.1
-      SPECIFIC_HEAT = 4.184
-      REFERENCE_TEMPERATURE = 100.
-      NU_SPEC = 1.0
-      SPEC_ID = 'WATER VAPOR'
-      HEAT_OF_REACTION = 2500. /
-
 &MATL ID = 'CHAR'
       DENSITY = 200.
       CONDUCTIVITY = 1.0
       SPECIFIC_HEAT = 1.6 /
 \end{lstlisting}
+Note that if you specify a {\ct MOISTURE\_FRACTION} on the {\ct SURF} line, FDS will automatically add a {\ct MATL} line for {\ct 'MOISTURE'}.
+
 Each {\ct MATL} line must include the {\ct DENSITY}, {\ct CONDUCTIVITY} and {\ct SPECIFIC\_HEAT} of that component. If the material component undergoes a reaction, there needs to be either a {\ct REACTION\_TEMPERATURE} or more detailed kinetic parameters. Material components that react need stoichiometric coefficients {\ct NU\_SPEC} and {\ct NU\_MATL} to designate how much of the material mass is converted to a gas {\ct SPEC}ies and how much to a solid {\ct MAT}eria{\ct L}. In this case, {\ct 'CELLULOSE'} is the gas-phase fuel specified on the {\ct REAC} line. The gas species {\ct 'WATER VAPOR'} is defined by a {\ct SPEC} line. Even though water vapor is included in the combustion products, you still need to explicitly specify {\ct 'WATER VAPOR'} as the gasified form of the moisture in the pine needles.
 
 Finally, the pine needles are introduced into the simulation via the {\ct INIT} line:
@@ -6763,7 +6756,7 @@ In the example, 1~kg of wet pine needles occupy 1~m$^3$. The number of particles
 \subsection{Modeling Ground Vegetation as a Porous Boundary}
 \label{info:boundary_fuel_model}
 
-In many simulations of wildland fire, the ground vegetation is too thin to be resolved explicitly, as is done when using Lagrangian particles to represent the vegetation. In such cases, the ground vegetation can be modeled as a porous boundary consisting of a layer of dry vegetation, moisture and air, underneath of which is hard ground. The drag exerted by the vegetation is modeled using a special velocity boundary condition, and convective heat transfer is modeled via a source term in the one-dimensional heat conduction equation that is solved through the layer of vegetation and solid ground. Thermal radiation penetrates the vegetation layer via a 1-D radiative transport equation that is used for semi-transparent solids. 
+In many simulations of wildland fire, the ground vegetation is too thin to be resolved explicitly, as is done when using Lagrangian particles to represent the vegetation. In such cases, the ground vegetation can be modeled as a porous boundary consisting of a layer of dry vegetation, moisture and air, underneath of which is hard ground. The drag exerted by the vegetation is modeled using a special velocity boundary condition, and convective heat transfer is modeled via a source term in the one-dimensional heat conduction equation that is solved through the layer of vegetation and solid ground. Thermal radiation penetrates the vegetation layer via a 1-D radiative transport equation that is used for semi-transparent solids.
 
 To invoke this {\em Boundary Fuel Model}, you need to generate a {\ct SURF} line similar to the following:
 \begin{lstlisting}
@@ -6773,16 +6766,17 @@ To invoke this {\em Boundary Fuel Model}, you need to generate a {\ct SURF} line
       MOISTURE_FRACTION(1) = 0.218
       SURFACE_VOLUME_RATIO(1) = 3092.
       PACKING_RATIO(1) = 0.01
-      HEAT_TRANSFER_COEFFICIENT = 50.
       THICKNESS(1:2) = 0.076,0.1 /
 \end{lstlisting}
-The presence of the parameters {\ct PACKING\_RATIO} and {\ct SURFACE\_VOLUME\_RATIO} automatically trigger the Boundary Fuel Model. Note that the argument for each refers to the first layer; the second layer being Soil. The {\ct PACKING\_RATIO} directs FDS to automatically add {\ct AIR} as an additional material, so you must add the {\ct MATL} line:
+The presence of the parameters {\ct PACKING\_RATIO} and {\ct SURFACE\_VOLUME\_RATIO} automatically trigger the Boundary Fuel Model. Note that the argument for each refers to the first layer; the second layer being Soil. If you specify a {\ct PACKING\_RATIO}, FDS will automatically add {\ct AIR} as an additional material, and you do not need to add it yourself unless you want to modify the default {\ct MATL} line:
 \begin{lstlisting}
 &MATL ID = 'AIR'
       DENSITY = 1.2
       CONDUCTIVITY = 0.026
       SPECIFIC_HEAT = 1.01 /
 \end{lstlisting}
+The same is true for water---if you specify {\ct MOISTURE\_FRACTION}, FDS will automatically add the {\ct MATL} line for {\ct 'MOISTURE'}. 
+
 The drag exerted on the wind flowing through the vegetation is imposed as a force term in the gas phase grid cell adjacent to the boundary:
 \be
     \bof_{\rm b} = \frac{\rho}{2} \, C_{\rm s} \, \sigma \, \beta \, C_{\rm d} \, \frac{h_{\rm b}}{\dz} \, \bu ||\bu||
@@ -6800,6 +6794,23 @@ Thermal convection is not imposed at the interface between the gas phase and the
 where $\dq_{\rm c}''$ is given in Eq.~(\ref{q_con}) under the assumption that the subgrid-scale vegetation is cylindrical and the gas velocity and temperature are taken from the first gas phase grid cell adjacent to the boundary.
 
 
+\subsection{Comparing the Particle and Boundary Fuel Models of Vegetation}
+\label{ground_vegetation}
+
+For the purpose of comparing the two methods of representing ground vegetation, either as particles or a porous boundary, consider the simple test case called {\ct WUI/ground\_vegetation.fds}. In this case, two 3~m long channels contain $A=1$~m$^2$ of generic ground vegetation with a packing ratio, $\beta=0.01$, dry density, $\rho_{\rm dry}=400$~kg/m$^3$, height, $h_{\rm b}=0.075$~m, char yield, $y_{\rm char}=0.25$, moisture fraction, $M=0.1$. The ceiling of the channel is set to 700~$^\circ$C and the lateral walls are periodic, mimicking an infinitely wide fire front. No wind is imposed in this example. The total amount of combustibles is:
+\be
+   \beta \, \rho_{\rm dry} \, h_{\rm b} \, (1-y_{\rm char}) \, A = 0.225 \; \hbox{kg}
+\ee
+Notice that the moisture fraction is not used to determine the combustible load---the packing ratio is based on the dry fuel load.
+
+Figure~\ref{ground_vegetation_fig} displays the heat release rate (left) and cumulative mass consumption (right) of the two calculations.
+
+\begin{figure}[ht]
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ground_vegetation_HRR}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ground_vegetation_Mass}
+\caption[Results of the {\ct ground\_vegetation} test case]{(Left) Heat release rate of the two ground vegetation simulations. (Right) Cumulative mass consumption of the two cases.}
+\label{ground_vegetation_fig}
+\end{figure}
 
 \FloatBarrier
 
