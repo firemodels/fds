@@ -10,7 +10,7 @@ REPORT_TYPE=problems
 showinput=
 
 function usage {
-echo "inspect_report.sh -h -R report-type -v output command]"
+echo "inspect_report.sh -h -R report-type -n directory-set -v output command]"
 echo "Report results from thread checker"
 echo ""
 echo "Options"
@@ -18,10 +18,12 @@ echo "-h - display this message"
 echo "-R report-type - type of report: problems or observations"
 echo "   [default: $REPORT_TYPE]"
 echo "-v - list command used to report thread checking results"
+echo "-n directory-set - prefix of directories with Inspector results"
+echo "   [default: $RESULT_DIR]" 
 exit
 }
 
-while getopts 'd:hr:R:v' OPTION
+while getopts 'd:hr:R:n:v' OPTION
 do
 case $OPTION in
   h)
@@ -32,6 +34,9 @@ case $OPTION in
    ;;
   v)
    showinput=1
+   ;;
+  n)
+   RESULT_DIR="$OPTARG"
    ;;
 esac
 done
@@ -49,7 +54,7 @@ if [ "$showinput" == "1" ] ; then
   exit
 fi
 
-find . -name "$RESULT_DIR*"|while read fname;
+find . -maxdepth 1 -name "$RESULT_DIR*"|while read fname;
 
 do
 echo $fname
