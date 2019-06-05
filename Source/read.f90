@@ -6232,16 +6232,18 @@ READ_MATL_LOOP: DO N=1,N_MATL
       CALL SET_MATL_DEFAULTS
       SELECT CASE(MATL_NAME(N))
          CASE('MOISTURE')
-            DENSITY          = 1000._EB
-            CONDUCTIVITY     = 0.62_EB
-            SPECIFIC_HEAT    = 4.184_EB
-            A                = 600000._EB
-            E                = 48200._EB
-            N_T              = -0.5_EB
-            SPEC_ID          = 'WATER VAPOR'
-            NU_SPEC          = 1._EB
-            HEAT_OF_REACTION = 2259._EB
+            ID                  = 'MOISTURE'
+            DENSITY             = 1000._EB
+            CONDUCTIVITY        = 0.62_EB
+            SPECIFIC_HEAT       = 4.184_EB
+            A(1)                = 600000._EB
+            E(1)                = 48200._EB
+            N_T(1)              = -0.5_EB
+            SPEC_ID(1,1)        = 'WATER VAPOR'
+            NU_SPEC(1,1)        = 1._EB
+            HEAT_OF_REACTION(1) = 2259._EB
          CASE('AIR')
+            ID               = 'AIR'
             DENSITY          = 1.2_EB
             CONDUCTIVITY     = 0.026_EB
             SPECIFIC_HEAT    = 1.01_EB
