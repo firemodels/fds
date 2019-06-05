@@ -6535,7 +6535,7 @@ FDS contains a separate pyrolysis model that was developed specifically for vege
 \be
  {\rm Char} + \nu_{\rm O_2, char} \, {\rm O_2} \rightarrow (1+ \nu_{\rm O_2,char} - \chi_{\rm ash}) \, {\rm CO_2} + \chi_{\rm ash} \, {\rm Ash}
 \ee
-$M$ is the vegetation {\em moisture content} determined on a dry weight basis. $M$ is related to the vegetation mass fraction of water, $Y_{\rm w}$, via the relation:
+$M$ is the vegetation {\em moisture content} or {\em moisture fraction} determined on a dry weight basis. $M$ is related to the vegetation mass fraction of water, $Y_{\rm w}$, via the relation:
 \be
   Y_{\rm w} = \frac{M}{1+M}
 \ee
@@ -6606,13 +6606,6 @@ Figure~\ref{vege_inputs} includes sample input lines demonstrating how the veget
 
 \begin{figure}[p]
 \begin{lstlisting}
-&SURF ID = 'vegetation'
-      MATL_ID = 'DRY VEGETATION'
-      MOISTURE_FRACTION = 0.1
-      SURFACE_VOLUME_RATIO = 3000.
-      LENGTH = 0.05
-      GEOMETRY = 'CYLINDRICAL' /
-
 &MATL ID = 'MOISTURE'
       DENSITY = 1000.
       CONDUCTIVITY = 0.6
@@ -6657,7 +6650,7 @@ Figure~\ref{vege_inputs} includes sample input lines demonstrating how the veget
       CONDUCTIVITY = 0.1
       SPECIFIC_HEAT_RAMP = '...' /
 \end{lstlisting}
-\caption[Input parameters describing vegetation]{Input parameters describing vegetation.}
+\caption[Material parameters describing vegetation]{Input parameters describing vegetation.}
 \label{vege_inputs}
 \end{figure}
 
@@ -6669,13 +6662,13 @@ There are three ways of simulating wildland fire spread.
 
 \begin{enumerate}
 \item {\bf Particle Method:} The vegetation is represented by a collection of Lagrangian particles that are heated via convection and radiation.
-\item {\bf Boundary Fuel Model:} Ground vegetation is modeled as a special kind of ``solid surface'' with a thickness equal to the height of the vegetation.
+\item {\bf Boundary Fuel Model:} Ground vegetation is modeled like a porous solid with a thickness equal to the height of the vegetation.
 \item {\bf Level Set Method:} The fire front propagates using purely empirical rules.
 \end{enumerate}
 Of these, the first two are physics-based; the third empirical.
 
 
-\subsection{Modeling Vegetation as Lagrangian Particles}
+\subsection{Lagrangian Particle Model}
 \label{info:vegetation}
 \label{pine_needles}
 
@@ -6729,9 +6722,9 @@ The length of each needle is specified directly, but its diameter is specified v
       CONDUCTIVITY = 1.0
       SPECIFIC_HEAT = 1.6 /
 \end{lstlisting}
-Note that if you specify a {\ct MOISTURE\_FRACTION} on the {\ct SURF} line, FDS will automatically add a {\ct MATL} line for {\ct 'MOISTURE'}.
+Note that if you specify a {\ct MOISTURE\_FRACTION} on the {\ct SURF} line, FDS will automatically add a {\ct MATL} line for {\ct 'MOISTURE'} as it is written in Fig.~\ref{vege_inputs}.
 
-Each {\ct MATL} line must include the {\ct DENSITY}, {\ct CONDUCTIVITY} and {\ct SPECIFIC\_HEAT} of that component. If the material component undergoes a reaction, there needs to be either a {\ct REACTION\_TEMPERATURE} or more detailed kinetic parameters. Material components that react need stoichiometric coefficients {\ct NU\_SPEC} and {\ct NU\_MATL} to designate how much of the material mass is converted to a gas {\ct SPEC}ies and how much to a solid {\ct MAT}eria{\ct L}. In this case, {\ct 'CELLULOSE'} is the gas-phase fuel specified on the {\ct REAC} line. The gas species {\ct 'WATER VAPOR'} is defined by a {\ct SPEC} line. Even though water vapor is included in the combustion products, you still need to explicitly specify {\ct 'WATER VAPOR'} as the gasified form of the moisture in the pine needles.
+Each {\ct MATL} line must include the {\ct DENSITY}, {\ct CONDUCTIVITY} and {\ct SPECIFIC\_HEAT} of that component. If the material component undergoes a reaction, there needs to be either a {\ct REACTION\_TEMPERATURE} or more detailed kinetic parameters like the ones listed in Fig.~\ref{vege_inputs}. Material components that react need stoichiometric coefficients {\ct NU\_SPEC} and {\ct NU\_MATL} to designate how much of the material mass is converted to a gas {\ct SPEC}ies and how much to a solid {\ct MAT}eria{\ct L}. In this case, {\ct 'CELLULOSE'} is the gas-phase fuel specified on the {\ct REAC} line. The gas species {\ct 'WATER VAPOR'} is defined by a {\ct SPEC} line. Even though water vapor is included in the combustion products, you still need to explicitly specify {\ct 'WATER VAPOR'} as the gasified form of the moisture in the pine needles.
 
 Finally, the pine needles are introduced into the simulation via the {\ct INIT} line:
 \begin{lstlisting}
@@ -6753,7 +6746,7 @@ In the example, 1~kg of wet pine needles occupy 1~m$^3$. The number of particles
 \end{figure}
 
 
-\subsection{Modeling Ground Vegetation as a Porous Boundary}
+\subsection{Boundary Fuel Model}
 \label{info:boundary_fuel_model}
 
 In many simulations of wildland fire, the ground vegetation is too thin to be resolved explicitly, as is done when using Lagrangian particles to represent the vegetation. In such cases, the ground vegetation can be modeled as a porous boundary consisting of a layer of dry vegetation, moisture and air, underneath of which is hard ground. The drag exerted by the vegetation is modeled using a special velocity boundary condition, and convective heat transfer is modeled via a source term in the one-dimensional heat conduction equation that is solved through the layer of vegetation and solid ground. Thermal radiation penetrates the vegetation layer via a 1-D radiative transport equation that is used for semi-transparent solids.
@@ -6768,7 +6761,7 @@ To invoke this {\em Boundary Fuel Model}, you need to generate a {\ct SURF} line
       PACKING_RATIO(1) = 0.01
       THICKNESS(1:2) = 0.076,0.1 /
 \end{lstlisting}
-The presence of the parameters {\ct PACKING\_RATIO} and {\ct SURFACE\_VOLUME\_RATIO} automatically trigger the Boundary Fuel Model. Note that the argument for each refers to the first layer; the second layer being Soil. If you specify a {\ct PACKING\_RATIO}, FDS will automatically add {\ct AIR} as an additional material, and you do not need to add it yourself unless you want to modify the default {\ct MATL} line:
+The presence of the parameters {\ct PACKING\_RATIO} and {\ct SURFACE\_VOLUME\_RATIO} automatically trigger the Boundary Fuel Model. Note that the argument for each refers to the first layer; the second layer being {\ct Soil}. If you specify a {\ct PACKING\_RATIO}, FDS will automatically add {\ct AIR} as an additional material, and you do not need to add it yourself unless you want to modify the default {\ct MATL} line:
 \begin{lstlisting}
 &MATL ID = 'AIR'
       DENSITY = 1.2
@@ -6797,19 +6790,36 @@ where $\dq_{\rm c}''$ is given in Eq.~(\ref{q_con}) under the assumption that th
 \subsection{Comparing the Particle and Boundary Fuel Models of Vegetation}
 \label{ground_vegetation}
 
-For the purpose of comparing the two methods of representing ground vegetation, either as particles or a porous boundary, consider the simple test case called {\ct WUI/ground\_vegetation.fds}. In this case, two 3~m long channels contain $A=1$~m$^2$ of generic ground vegetation with a packing ratio, $\beta=0.01$, dry density, $\rho_{\rm dry}=400$~kg/m$^3$, height, $h_{\rm b}=0.075$~m, char yield, $y_{\rm char}=0.25$, moisture fraction, $M=0.1$. The ceiling of the channel is set to 700~$^\circ$C and the lateral walls are periodic, mimicking an infinitely wide fire front. No wind is imposed in this example. The total amount of combustibles is:
+For the purpose of comparing the two methods of representing ground vegetation, either as particles or a porous boundary, consider the simple test cases in the sample folder named {\ct WUI} (Wildland-Urban Interface) under the heading {\ct ground\_vegetation}.
+
+\subsubsection{Combustible Load}
+\label{ground_vegetation_load}
+
+In the first case, {\ct WUI/ground\_vegetation\_load.fds}, two 3~m long channels contain $A=1$~m$^2$ of generic ground vegetation with a packing ratio, $\beta=0.01$, dry density, $\rho_{\rm dry}=400$~kg/m$^3$, height, $h_{\rm b}=0.075$~m, char yield, $y_{\rm char}=0.25$, moisture fraction, $M=0.1$. The ceiling of the channel is set to 700~$^\circ$C and the lateral walls are periodic, mimicking an infinitely wide fire front. No wind is imposed in this example. The total amount of combustibles is:
 \be
    \beta \, \rho_{\rm dry} \, h_{\rm b} \, (1-y_{\rm char}) \, A = 0.225 \; \hbox{kg}
 \ee
 Notice that the moisture fraction is not used to determine the combustible load---the packing ratio is based on the dry fuel load.
 
-Figure~\ref{ground_vegetation_fig} displays the heat release rate (left) and cumulative mass consumption (right) of the two calculations.
+Figure~\ref{ground_vegetation_load_fig} displays the heat release rate (left) and cumulative mass consumption (right) of the two calculations.
 
 \begin{figure}[ht]
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/ground_vegetation_HRR}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/ground_vegetation_Mass}
-\caption[Results of the {\ct ground\_vegetation} test case]{(Left) Heat release rate of the two ground vegetation simulations. (Right) Cumulative mass consumption of the two cases.}
-\label{ground_vegetation_fig}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ground_vegetation_load_HRR}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ground_vegetation_load_Mass}
+\caption[Results of the {\ct ground\_vegetation\_load} test case]{(Left) Heat release rate of the two ground vegetation simulations. (Right) Cumulative mass consumption of the two cases.}
+\label{ground_vegetation_load_fig}
+\end{figure}
+
+\subsubsection{Vegetation Drag}
+\label{ground_vegetation_drag}
+
+In this next example, ground vegetation with the same properties as the previous example lines the floor of two wind tunnels that are 8~m long, 1~m wide, and 0.5~m tall. The height of the vegetation is 2.5~cm, and the grid size in the simulation is 5~cm. The tunnel walls and ceiling are free-slip. Particles model the vegetation in one tunnel; the Boundary Fuel Model is applied in the other. A 2~m/s wind is imposed, and the pressure upstream of the vegetation is recorded. The tunnel is open downstream, where the pressure is ambient. The upstream pressure ought to be similar, as shown in Fig.~\ref{ground_vegetation_drag_fig}.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ground_vegetation_drag}
+\caption[Results of the {\ct ground\_vegetation\_drag} test case]{Pressure upwind of a 6~m wide strip of ground vegetation.}
+\label{ground_vegetation_drag_fig}
 \end{figure}
 
 \FloatBarrier
