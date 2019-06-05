@@ -49,7 +49,7 @@ source /opt/intel19/inspector_2019/inspxe-vars.sh quiet
 
 if [ "$showinput" == "1" ] ; then
   find . -name "$RESULT_DIR*"|while read fname; 
-  do echo inspxe-cl -report $REPORT_TYPE -result-dir $fname
+  do echo inspxe-cl -report $REPORT_TYPE -report-all -result-dir $fname
   done
   exit
 fi
