@@ -665,18 +665,12 @@ $QFDS -d Turbulence sem_atm_leddy_p2.fds
 $QFDS -d Turbulence sem_ramp_leddy_p2.fds
 $QFDS -d Turbulence ramp_prof_u_z.fds
 
-$QFDS -d Vegetation radiation_gas-veg_consistency_gas.fds
-$QFDS -d Vegetation radiation_gas-veg_consistency_veg.fds
-$QFDS -d Vegetation vege_mass_conservation.fds
-$QFDS -d Vegetation vege_pressure-drop_cylinder_MPUV2pt0.fds
-$QFDS -d Vegetation vege_pressure-drop_cylinder_MPUV30pt0.fds
-$QFDS -d Vegetation vege_pressure-drop_sphere_MPUV2pt0.fds
-$QFDS -d Vegetation vege_pressure-drop_sphere_MPUV30pt0.fds
-
 $QFDS -d WUI dragon_5a.fds
 $QFDS -p 2 -d WUI ground_vegetation_drag.fds
 $QFDS -p 2 -d WUI ground_vegetation_load.fds
 $QFDS -d WUI pine_needles.fds
+$QFDS -d WUI radiation_gas-veg_consistency_gas.fds
+$QFDS -d WUI radiation_gas-veg_consistency_veg.fds
 $QFDS -d WUI random_walk_1.fds
 $QFDS -d WUI random_walk_2.fds
 $QFDS -p 6 -d WUI vegetation_absorb.fds
