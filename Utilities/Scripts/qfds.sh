@@ -213,6 +213,8 @@ use_inspect=
 use_advise=
 use_vtune=
 use_intel_mpi=1
+iinspectresdir=
+iinspectargs=
 vtuneresdir=
 vtuneargs=
 use_config=""
@@ -247,7 +249,7 @@ commandline=`echo $* | sed 's/-V//' | sed 's/-v//'`
 
 #*** read in parameters from command line
 
-while getopts 'Ac:Cd:D:e:Ef:hHiILm:MNn:o:O:p:Pq:rsStT:vVw:a:' OPTION
+while getopts 'Ac:Cd:D:e:Ef:hHiILm:MNn:o:O:p:Pq:rsStT:vVw:a:x:' OPTION
 do
 case $OPTION  in
   A) # used by timing scripts to identify benchmark cases
@@ -378,6 +380,11 @@ case $OPTION  in
   w)
    walltime="$OPTARG"
    ;;
+  x)
+  iinspectresdir="$OPTARG"
+   use_inspect=1
+   ;;
+   
 esac
 done
 shift $(($OPTIND-1))
@@ -449,6 +456,9 @@ else
   fi
   if [ "$use_inspect" == "1" ]; then
     DB=_inspect
+    if [ "$iinspectresdir" != "" ]; then
+    iinspectargs="inspxe-cl -collect ti2 -knob stack-depth=32 -result-dir $iinspectresdir --"
+    fi
   fi
   if [ "$use_advise" == "1" ]; then
     DB=_advise
@@ -781,6 +791,13 @@ source /opt/intel19/vtune_amplifier_2019/amplxe-vars.sh quiet
 EOF
 fi
 
+if [ "$use_inspect" == "1" ]; then
+cat << EOF >> $scriptfile
+source /opt/intel19/inspector_2019/inspxe-vars.sh quiet
+EOF
+fi
+
+
 if [ "$use_intel_mpi" == "1" ]; then
 cat << EOF >> $scriptfile
 export I_MPI_DEBUG=5
@@ -831,9 +848,15 @@ echo "          Host: \`hostname\`"
 EOF
 if [ "$OPENMPCASES" == "" ]; then
 if [ "$vtuneresdir" == "" ]; then
+if [ "$iinspectresdir" == "" ]; then
 cat << EOF >> $scriptfile
 $MPIRUN $exe $in $OUT2ERROR
 EOF
+else
+cat << EOF >> $scriptfile
+$MPIRUN $iinspectargs $exe $in $OUT2ERROR
+EOF
+fi
 else
 cat << EOF >> $scriptfile
 $MPIRUN $vtuneargs $exe $in $OUT2ERROR
@@ -841,12 +864,20 @@ EOF
 fi
 else
 for i in `seq 1 $OPENMPCASES`; do
-if ["$vtuneresdir" == ""]; then
+if [ "$vtuneresdir" == ""]; then
+if [ "$iinspectresdir" == "" ]; then
 cat << EOF >> $scriptfile
 
 export OMP_NUM_THREADS=${nthreads[$i]}
 $MPIRUN $exe ${files[$i]} $OUT2ERROR
 EOF
+else
+cat << EOF >> $scriptfile
+
+export OMP_NUM_THREADS=${nthreads[$i]}
+$MPIRUN $iinspectargs $exe ${files[$i]} $OUT2ERROR
+EOF
+fi
 else
 cat << EOF >> $scriptfile
 
