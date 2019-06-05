@@ -1,4 +1,4 @@
-&HEAD CHID='ground_vegetation', FYI='Comparison of boundary models' /
+&HEAD CHID='ground_vegetation_load', FYI='Comparison of boundary models' /
 
 &TIME T_END=180. /
 
