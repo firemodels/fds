@@ -213,6 +213,8 @@ use_inspect=
 use_advise=
 use_vtune=
 use_intel_mpi=1
+vtuneresdir=
+vtuneargs=
 use_config=""
 # the mac doesn't have Intel MPI
 if [ "`uname`" == "Darwin" ]; then
@@ -245,11 +247,15 @@ commandline=`echo $* | sed 's/-V//' | sed 's/-v//'`
 
 #*** read in parameters from command line
 
-while getopts 'Ac:Cd:D:e:Ef:hHiILm:MNn:o:O:p:Pq:rsStT:vVw:' OPTION
+while getopts 'Ac:Cd:D:e:Ef:hHiILm:MNn:o:O:p:Pq:rsStT:vVw:a:' OPTION
 do
 case $OPTION  in
   A) # used by timing scripts to identify benchmark cases
    DUMMY=1
+   ;;
+  a)
+   vtuneresdir="$OPTARG"
+   use_vtune=1
    ;;
   c)
    use_config="$OPTARG"
@@ -449,6 +455,9 @@ else
   fi
   if [ "$use_vtune" == "1" ]; then
     DB=_vtune
+    if [ "$vtuneresdir" != "" ]; then
+    vtuneargs="amplxe-cl -collect hpc-performance -result-dir $vtuneresdir --"
+    fi
   fi
   if [ "$use_intel_mpi" == "1" ]; then
     if [ "$exe" == "" ]; then
@@ -766,6 +775,12 @@ export OMP_NUM_THREADS=$n_openmp_threads
 EOF
 fi
 
+if [ "$use_vtune" == "1" ]; then
+cat << EOF >> $scriptfile
+source /opt/intel19/vtune_amplifier_2019/amplxe-vars.sh quiet
+EOF
+fi
+
 if [ "$use_intel_mpi" == "1" ]; then
 cat << EOF >> $scriptfile
 export I_MPI_DEBUG=5
@@ -815,16 +830,30 @@ echo "     Directory: \`pwd\`"
 echo "          Host: \`hostname\`"
 EOF
 if [ "$OPENMPCASES" == "" ]; then
+if [ "$vtuneresdir" == "" ]; then
 cat << EOF >> $scriptfile
 $MPIRUN $exe $in $OUT2ERROR
 EOF
 else
+cat << EOF >> $scriptfile
+$MPIRUN $vtuneargs $exe $in $OUT2ERROR
+EOF
+fi
+else
 for i in `seq 1 $OPENMPCASES`; do
+if ["$vtuneresdir" == ""]; then
 cat << EOF >> $scriptfile
 
 export OMP_NUM_THREADS=${nthreads[$i]}
 $MPIRUN $exe ${files[$i]} $OUT2ERROR
 EOF
+else
+cat << EOF >> $scriptfile
+
+export OMP_NUM_THREADS=${nthreads[$i]}
+$MPIRUN $vtuneargs $exe ${files[$i]} $OUT2ERROR
+EOF
+fi
 done
 fi
 if [ "$queue" == "none" ]; then

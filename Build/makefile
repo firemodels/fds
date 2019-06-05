@@ -237,7 +237,7 @@ impi_intel_linux_64_advise : obj = fds_impi_intel_linux_64_advise
 impi_intel_linux_64_advise : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
-impi_intel_linux_64_vtune : FFLAGS = -g -m64 -O2 -debug inline-debug-info -D TBB_USE_THREADING_TOOLS -parallel-source-info=2 $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL)
+impi_intel_linux_64_vtune : FFLAGS = -g -m64 -O2 -debug inline-debug-info -parallel-source-info=2 $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL)
 impi_intel_linux_64_vtune : LFLAGSMKL = $(LFLAGSMKL_INTEL)
 impi_intel_linux_64_vtune : LFLAGS = -shared-intel
 impi_intel_linux_64_vtune : FCOMPL = mpiifort
