@@ -1300,20 +1300,27 @@ END IF
 SCALE=0.5_EB*SCALE
 END IF
 !                               FORWARD SUBSTITUTION
-
+!$omp parallel
+!$omp do schedule(dynamic, 4)
 DO  J = 1,M
   FT(1,J) = SCALE*F(1,J)*FCTRD(1,J)
   DO  I = 2,L
     FT(I,J) = (SCALE*F(I,J)-A(I)*FT(I-1,J))*FCTRD(I,J)
   END DO
 END DO
+!$omp end do
+
+!$omp barrier
 
 !                               BACKWARD SUBSTITUTION
+!$omp do schedule(dynamic,4)
 DO  J = 1,M
   DO  I = L - 1,1,-1
     FT(I,J) = FT(I,J) - C(I)*FCTRD(I,J)*FT(I+1,J)
   END DO
 END DO
+!$omp end do
+!$omp end parallel
 
 IF (LP==1) THEN
 
