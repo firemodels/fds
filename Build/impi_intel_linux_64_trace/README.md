@@ -16,11 +16,13 @@ export VT_CONFIG=<Full path to FDS repo>/Build/impi_intel_linux_64_trace/fds_tra
 ```
 to your PBS script.
 
-Make sure that the job only runs a handful of time steps, as there's no need to make the trace file bigger than it already is. The default trace file name is `fds_trace.stf`, and once the job is finished, start the Trace Analyzer:
+Make sure that the job only runs a handful of time steps, as there's no need to make the trace file bigger than it already is. The default trace file name is `fds_trace.stf`, and once the job is finished, you can start the Trace Analyzer:
 ```
 traceanalyzer fds_trace.stf &
 ```
-The most important graphic in the Trace Analyzer is the timeline. Get this from the `Charts` menu, `Event Timeline`. You will first see the entire timeline, but you can click and drag over shorter time intervals to see details. You will also notice that the first time you use the Trace Analyzer, everything is either colored red (MPI) or blue (Application). Go to the chart in the lower left corner and right click on the `Groups`, and choose to ungroup them. You should see the modules and subroutines you've chosen to trace. Keep ungrouping until you get down to the subroutine level. If you right-click again, you can choose to color the various routines, making it much easier to visualize. Your chosen color scheme will be saved in a file called `itarc` in your home directory.
+If you get an error message, it is probably because you cannot open an X11 window on your computer. To do so, download the free program called `Xming`, start it by double-clicking, then add to your PuTTY session `Connection --> SSH --> X11 --> Enable X11 forwarding`. When you open up a linux command prompt, type `xeyes &` and if a pair of mouse-following googly eyes pop up, you're in business.
+
+The most important graphic in the Trace Analyzer is the timeline. Get this from the `Charts` menu, `Event Timeline`. You will first see the entire timeline, but you can click and drag over shorter time intervals to see details. You will also notice that the first time you use the Trace Analyzer, everything is either colored red (MPI) or blue (Application). Go to the chart in the lower left corner and right click on the `Groups`, and choose to ungroup them. You should see the modules and subroutines you've chosen to trace. Keep ungrouping until you get down to the subroutine level. If you right-click again, you can choose to color the various routines, making it much easier to visualize. Your chosen color scheme will be saved in a file called `.itarc` in your home directory.
 
 
  ### Creating a new configuration file
