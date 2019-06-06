@@ -2092,7 +2092,8 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
          IF (CORRECTOR) TSI = T      - ONE_D%T_IGN
       ENDIF
 
-      IF (ONE_D%U_NORMAL_S<=0._EB) THEN
+      IF (ONE_D%U_NORMAL_S<0._EB) THEN  ! If there is a non-zero velocity into the domain, assign appropriate species 
+                                        ! mass fractions to the face
          DO N=2,N_TRACKED_SPECIES
             ZZ_GET(N) = SPECIES_MIXTURE(N)%ZZ0 + EVALUATE_RAMP(TSI,SF%TAU(N),SF%RAMP_INDEX(N))* &
                            (SF%MASS_FRACTION(N)-SPECIES_MIXTURE(N)%ZZ0)

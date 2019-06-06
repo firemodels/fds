@@ -16,7 +16,7 @@ The [Intel Inspector](https://software.intel.com/en-us/node/622387) can help det
 
 From firemodels/fds/Verification/Thread_Check, you can get inspect_report.sh. This script can handle the multiple files generated in any Inspector run with more than one process.
 
-Alternatively, you can download the gui version of [Intel Inspector], and use it on the inspxe files in the created directories.
+Alternatively, you can download the gui version of [Intel Inspector](https://software.intel.com/en-us/inspector), and use it on the inspxe files in the created directories.
 
 ## Intel Cluster Checker
 
