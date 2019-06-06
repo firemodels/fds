@@ -255,6 +255,15 @@ impi_intel_linux_64_inspect : obj = fds_impi_intel_linux_64_inspect
 impi_intel_linux_64_inspect : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
+impi_intel_linux_64_trace : FFLAGS = -m64 -tcollect -O1 -traceback -no-wrap-margin $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL)
+impi_intel_linux_64_trace : LFLAGSMKL = $(LFLAGSMKL_INTEL)
+impi_intel_linux_64_trace : LFLAGS = -static-intel
+impi_intel_linux_64_trace : FCOMPL = mpiifort
+impi_intel_linux_64_trace : FOPENMPFLAGS = -qopenmp -qopenmp-link static -liomp5
+impi_intel_linux_64_trace : obj = fds_impi_intel_linux_64_dv
+impi_intel_linux_64_trace : setup $(obj_mpi)
+	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
+
 mpi_intel_linux_64_inspect : FFLAGS = -g -O0 -check none -no-wrap-margin $(GITINFO) $(OPENMPI_COMPINFO) $(FFLAGSMKL_OPENMPI)
 mpi_intel_linux_64_inspect : LFLAGSMKL = $(LFLAGSMKL_OPENMPI)
 mpi_intel_linux_64_inspect : LFLAGS = -static-intel
