@@ -260,7 +260,7 @@ impi_intel_linux_64_trace : LFLAGSMKL = $(LFLAGSMKL_INTEL)
 impi_intel_linux_64_trace : LFLAGS = -static-intel
 impi_intel_linux_64_trace : FCOMPL = mpiifort
 impi_intel_linux_64_trace : FOPENMPFLAGS = -qopenmp -qopenmp-link static -liomp5
-impi_intel_linux_64_trace : obj = fds_impi_intel_linux_64_dv
+impi_intel_linux_64_trace : obj = fds_impi_intel_linux_64_trace
 impi_intel_linux_64_trace : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
