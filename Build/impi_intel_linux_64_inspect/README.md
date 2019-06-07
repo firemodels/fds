@@ -22,7 +22,7 @@ Alternatively, you can download the gui version of [Intel Inspector](https://sof
 
 The Intel Cluster Checker is a diagnostic tool that checks the overall health of your compute cluster. To use it, first consult the [User's Guide](https://software.intel.com/en-us/cluster-checker-user-guide-2019-beta). In brief, do the following:
 
-   1. Install Intel Cluster Checker and run `source /opt/intel19/clck/2019b/bin/clckvars.sh`. Your path might be slightly different.
+   1. Install Intel Cluster Checker and run `source /opt/intel19/clck_latest/clckvars.sh`. Your path might be slightly different.
    2. Create a `nodefile`, which is just a text file with a list of the cluster node names, one per line.
    3. Run `clck -f nodefile`
 
