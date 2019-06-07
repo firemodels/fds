@@ -3181,7 +3181,6 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Tech Guide: Sum over the materials, alpha
                ENDIF
                CALL GET_VISCOSITY(ZZ_GET,MU_AIR,TMP(IIG,JJG,KKG))
                U_TANG = SQRT(2._EB*KRES(IIG,JJG,KKG))
-            !  RE_L   = RHO(IIG,JJG,KKG)*U_TANG*2._EB*SF%THICKNESS/MU_AIR
                RE_L   = RHO(IIG,JJG,KKG)*U_TANG*2._EB*(2._EB/SF%SURFACE_VOLUME_RATIO(SF%LAYER_INDEX(I_INDEX)))/MU_AIR
                REACTION_RATE = REACTION_RATE * &
                                RHO(IIG,JJG,KKG)*Y_O2*SIGMA_BETA*(1._EB+ML%BETA_CHAR(J)*SQRT(RE_L))/(RHO_S0*ML%NU_O2(J))
