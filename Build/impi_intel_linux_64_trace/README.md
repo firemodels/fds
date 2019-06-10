@@ -10,6 +10,8 @@
  ```
 The main consideration in tracing FDS is that the trace file can become enormous if you run a long job and trace each and every function and subroutine call. To prevent this, there is a configuration file called `fds_trace.conf` in this directory that contains a list of the main subroutines called in FDS. Only these subroutines are traced, keeping the trace file to a reasonable size and enabling you to more easily visualize the work flow. 
 
+ To output trace information, use the -r flag when invoking qfds.sh.
+
  To use the configuration file, add the `-c <filepath>/<configfilename>.conf` flag to qfds.sh. If using a custom script, add
 ```
 export VT_CONFIG=<Full path to FDS repo>/Build/impi_intel_linux_64_trace/fds_trace.conf
