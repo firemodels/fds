@@ -61,18 +61,6 @@
 &RAMP ID='c_v', T= 20., F=1.184 /
 &RAMP ID='c_v', T=800., F=4.070 /
  
-&MATL ID                 = 'MOISTURE'
-      VEGETATION         = .TRUE.
-      DENSITY            = 997.
-      CONDUCTIVITY       = 0.6
-      SPECIFIC_HEAT      = 4.22
-      A                  = 600000.
-      E                  = 48200.
-      N_T                = -0.5
-      SPEC_ID            = 'WATER VAPOR'
-      NU_SPEC            = 1.0
-      HEAT_OF_REACTION   = 2259. /
-
 &MATL ID                 = 'CHAR'
       VEGETATION         = .TRUE.
       DENSITY            = 300.
