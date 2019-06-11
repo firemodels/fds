@@ -224,6 +224,12 @@ ELSE
             CALL DUMP_MMS(NM,FN_MMS,T)
             MMS_TIMER=HUGE_EB
          ENDIF
+      CASE(21,22,23)
+         IF (T>=MMS_TIMER .AND. NM==1) THEN
+            WRITE(FN_MMS,'(A,A)') TRIM(CHID),'_mms.csv'
+            CALL DUMP_ROTCUBE_MMS(NM,FN_MMS,T)
+            MMS_TIMER=HUGE_EB
+         ENDIF
       CASE(9)
          IF (T>=UVW_CLOCK_CBC(MESHES(NM)%IUVW)) THEN
             WRITE(FN_SPEC,'(A,A,I3.3,A)') TRIM(CHID),'_spec_',MESHES(NM)%IUVW,'.csv'
@@ -6512,6 +6518,9 @@ IND_SELECT: SELECT CASE(IND)
       IF (IND==112 .OR. IND==115 .OR. IND==118) FLOW_INDEX = 2  ! MASS FLOW
       IF (IND==113 .OR. IND==116 .OR. IND==119) FLOW_INDEX = 3  ! HEAT FLOW
       FLOW = 0._EB
+      VEL  = 0._EB
+      AREA = 0._EB
+      HMFAC= 0._EB
       DO K=SDV%K1,SDV%K2
          DO J=SDV%J1,SDV%J2
             DO I=SDV%I1,SDV%I2
@@ -7334,13 +7343,13 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
                EXIT
             ENDIF
          ENDDO
-         IF (OPT_LP_INDEX>0) THEN
+         IF (PRESENT(OPT_LP_INDEX)) THEN
             SOLID_PHASE_OUTPUT = SURFACE_DENSITY(NM,0,LAGRANGIAN_PARTICLE_INDEX=OPT_LP_INDEX,MATL_INDEX=M_INDEX)
          ELSE
             SOLID_PHASE_OUTPUT = SURFACE_DENSITY(NM,0,WALL_INDEX=IWX,MATL_INDEX=M_INDEX)
          ENDIF
       ELSE
-         IF (OPT_LP_INDEX>0) THEN
+         IF (PRESENT(OPT_LP_INDEX)) THEN
             SOLID_PHASE_OUTPUT = SURFACE_DENSITY(NM,0,LAGRANGIAN_PARTICLE_INDEX=OPT_LP_INDEX)
          ELSE
             SOLID_PHASE_OUTPUT = SURFACE_DENSITY(NM,0,WALL_INDEX=IWX)
@@ -9574,6 +9583,225 @@ CLOSE(LU_UVW)
 
 END SUBROUTINE DUMP_UVW
 
+
+SUBROUTINE DUMP_ROTCUBE_MMS(NM,FN_MMS,T)
+
+! Dump rotated cube MMS data file.
+
+USE COMP_FUNCTIONS, ONLY: GET_FILE_NUMBER
+USE COMPLEX_GEOMETRY, ONLY : IBM_CGSC, IBM_FGSC, IBM_GASPHASE
+
+INTEGER, INTENT(IN) :: NM
+REAL(EB), INTENT(IN) :: T
+CHARACTER(80), INTENT(IN) :: FN_MMS
+
+! Local variables:
+INTEGER  :: I,J,K,LU_MMS,IMIN,JMIN,KMIN,IMAX,JMAX,KMAX,NTOT_U,NTOT_W,NTOT_C,AXIS,ICC,ICF,JCC,JCF
+
+CALL POINT_TO_MESH(NM)
+
+IMIN=1
+JMIN=1
+KMIN=1
+IMAX=IBAR
+JMAX=JBAR
+KMAX=KBAR
+
+NTOT_U = 0
+NTOT_W = 0
+NTOT_C = 0
+
+LU_MMS = GET_FILE_NUMBER()
+OPEN(UNIT=LU_MMS,FILE=TRIM(FN_MMS),FORM='FORMATTED',STATUS='UNKNOWN')
+
+! First count total number of entries for U velocities (regular gas + cut-faces), W velocities and
+! cell centered variables (regular gas + cut-cells)
+IF (CC_IBM) THEN
+   ! PERIODIC_TEST=21,22,23
+   ! U velocities:
+   DO K=KMIN,KMAX
+      DO J=JMIN,JMAX
+         DO I=IMIN,IMAX
+            IF(FCVAR(I,J,K,IBM_FGSC,IAXIS) /= IBM_GASPHASE) CYCLE
+            NTOT_U = NTOT_U + 1
+         ENDDO
+      ENDDO
+   ENDDO
+   ! W velocities:
+   DO K=KMIN,KMAX
+      DO J=JMIN,JMAX
+         DO I=IMIN,IMAX
+            IF(FCVAR(I,J,K,IBM_FGSC,KAXIS) /= IBM_GASPHASE) CYCLE
+            NTOT_W = NTOT_W + 1
+         ENDDO
+      ENDDO
+   ENDDO
+   ! Now Gasphase cut-faces for both U and W:
+   DO ICF=1,MESHES(NM)%N_CUTFACE_MESH
+      IF (CUT_FACE(ICF)%STATUS /= IBM_GASPHASE) CYCLE
+      AXIS = CUT_FACE(ICF)%IJK(KAXIS+1)
+      SELECT CASE(AXIS)
+      CASE(IAXIS)
+         NTOT_U = NTOT_U + CUT_FACE(ICF)%NFACE
+      CASE(KAXIS)
+         NTOT_W = NTOT_W + CUT_FACE(ICF)%NFACE
+      END SELECT
+   ENDDO
+
+   ! Now cell centered variables:
+   DO K=KMIN,KMAX
+      DO J=JMIN,JMAX
+         DO I=IMIN,IMAX
+            IF(CCVAR(I,J,K,IBM_CGSC) /= IBM_GASPHASE) CYCLE
+            NTOT_C = NTOT_C + 1
+         ENDDO
+      ENDDO
+   ENDDO
+   DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+      NTOT_C = NTOT_C + CUT_CELL(ICC)%NCELL
+   ENDDO
+
+   WRITE(LU_MMS,'(I8,A,I8,A,I8,A,E22.15,A,E22.15,A,E22.15)') &
+   NTOT_U,',',NTOT_W,',',NTOT_C,',',T,',',DX(1),',',DZ(1)
+
+   ! Write velocities:
+   ! U velocities:
+   DO K=KMIN,KMAX
+      DO J=JMIN,JMAX
+         DO I=IMIN,IMAX
+            IF(FCVAR(I,J,K,IBM_FGSC,IAXIS) /= IBM_GASPHASE) CYCLE
+            WRITE(LU_MMS,'(I8,A,E22.15,A,E22.15,A,E22.15,A,E22.15,A,E22.15,A,E22.15)') &
+            0,',',X(I),',',ZC(K),',',DY(J)*DZ(K),',',U(I,J,K),',',0._EB,',',0._EB
+         ENDDO
+      ENDDO
+   ENDDO
+   ! Now Gasphase cut-faces for U:
+   DO ICF=1,MESHES(NM)%N_CUTFACE_MESH
+      IF (CUT_FACE(ICF)%STATUS /= IBM_GASPHASE) CYCLE
+      AXIS = CUT_FACE(ICF)%IJK(KAXIS+1)
+      SELECT CASE(AXIS)
+      CASE(IAXIS)
+         DO JCF=1,CUT_FACE(ICF)%NFACE
+           WRITE(LU_MMS,'(I8,A,E22.15,A,E22.15,A,E22.15,A,E22.15,A,E22.15,A,E22.15)') &
+           1,',',CUT_FACE(ICF)%XYZCEN(IAXIS,JCF),',',CUT_FACE(ICF)%XYZCEN(KAXIS,JCF),',', &
+           CUT_FACE(ICF)%AREA(JCF),',',CUT_FACE(ICF)%VEL(JCF),',',0._EB,',',0._EB
+         ENDDO
+      END SELECT
+   ENDDO
+   ! W velocities:
+   DO K=KMIN,KMAX
+      DO J=JMIN,JMAX
+         DO I=IMIN,IMAX
+            IF(FCVAR(I,J,K,IBM_FGSC,KAXIS) /= IBM_GASPHASE) CYCLE
+            WRITE(LU_MMS,'(I8,A,E22.15,A,E22.15,A,E22.15,A,E22.15,A,E22.15,A,E22.15)') &
+            0,',',XC(I),',',Z(K),',',DY(J)*DX(I),',',W(I,J,K),',',0._EB,',',0._EB
+         ENDDO
+      ENDDO
+   ENDDO
+   ! Now Gasphase cut-faces for W:
+   DO ICF=1,MESHES(NM)%N_CUTFACE_MESH
+      IF (CUT_FACE(ICF)%STATUS /= IBM_GASPHASE) CYCLE
+      AXIS = CUT_FACE(ICF)%IJK(KAXIS+1)
+      SELECT CASE(AXIS)
+      CASE(KAXIS)
+         DO JCF=1,CUT_FACE(ICF)%NFACE
+           WRITE(LU_MMS,'(I8,A,E22.15,A,E22.15,A,E22.15,A,E22.15,A,E22.15,A,E22.15)') &
+           1,',',CUT_FACE(ICF)%XYZCEN(IAXIS,JCF),',',CUT_FACE(ICF)%XYZCEN(KAXIS,JCF),',', &
+           CUT_FACE(ICF)%AREA(JCF),',',CUT_FACE(ICF)%VEL(JCF),',',0._EB,',',0._EB
+         ENDDO
+      END SELECT
+   ENDDO
+
+   ! Now cell centered variables:
+   DO K=KMIN,KMAX
+      DO J=JMIN,JMAX
+         DO I=IMIN,IMAX
+            IF(CCVAR(I,J,K,IBM_CGSC) /= IBM_GASPHASE) CYCLE
+            WRITE(LU_MMS,'(I8,A,E22.15,A,E22.15,A,E22.15,A,E22.15,A,E22.15,A,E22.15)') &
+            0,',',XC(I),',',ZC(K),',',DY(J)*DX(I)*DZ(K),',',ZZ(I,J,K,2),',',H(I,J,K),',', &
+            RHO(I,J,K)*(H(I,J,K)-KRES(I,J,K))
+         ENDDO
+      ENDDO
+   ENDDO
+   DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+      DO JCC=1,CUT_CELL(ICC)%NCELL
+         WRITE(LU_MMS,'(I8,A,E22.15,A,E22.15,A,E22.15,A,E22.15,A,E22.15,A,E22.15)') &
+         1,',',CUT_CELL(ICC)%XYZCEN(IAXIS,JCC),',',CUT_CELL(ICC)%XYZCEN(KAXIS,JCC),',',&
+         CUT_CELL(ICC)%VOLUME(JCC),',',CUT_CELL(ICC)%ZZ(2,JCC),',',CUT_CELL(ICC)%H(JCC),',',&
+         CUT_CELL(ICC)%RHO(JCC)*(CUT_CELL(ICC)%H(JCC)-KRES(I,J,K))
+      ENDDO
+   ENDDO
+
+ELSE
+   ! PERIODIC_TEST=21 for OBST.
+   ! U velocities:
+   DO K=KMIN,KMAX
+      DO J=JMIN,JMAX
+         DO I=IMIN,IMAX
+            IF(SOLID(CELL_INDEX(I,J,K)) .OR. SOLID(CELL_INDEX(I+1,J,K))) CYCLE
+            NTOT_U = NTOT_U + 1
+         ENDDO
+      ENDDO
+   ENDDO
+   ! W velocities:
+   DO K=KMIN,KMAX
+      DO J=JMIN,JMAX
+         DO I=IMIN,IMAX
+            IF(SOLID(CELL_INDEX(I,J,K)) .OR. SOLID(CELL_INDEX(I+1,J,K+1))) CYCLE
+            NTOT_W = NTOT_W + 1
+         ENDDO
+      ENDDO
+   ENDDO
+   ! Now cell centered variables:
+   DO K=KMIN,KMAX
+      DO J=JMIN,JMAX
+         DO I=IMIN,IMAX
+            IF(SOLID(CELL_INDEX(I,J,K))) CYCLE
+            NTOT_C = NTOT_C + 1
+         ENDDO
+      ENDDO
+   ENDDO
+
+   WRITE(LU_MMS,'(I8,A,I8,A,I8,A,E22.15,A,E22.15,A,E22.15)') &
+   NTOT_U,',',NTOT_W,',',NTOT_C,',',T,',',DX(1),',',DZ(1)
+
+   ! U velocities:
+   DO K=KMIN,KMAX
+      DO J=JMIN,JMAX
+         DO I=IMIN,IMAX
+            IF(SOLID(CELL_INDEX(I,J,K)) .OR. SOLID(CELL_INDEX(I+1,J,K))) CYCLE
+            WRITE(LU_MMS,'(I8,A,E22.15,A,E22.15,A,E22.15,A,E22.15,A,E22.15,A,E22.15)') &
+            0,',',X(I),',',ZC(K),',',DY(J)*DZ(K),',',U(I,J,K),',',0._EB,',',0._EB
+         ENDDO
+      ENDDO
+   ENDDO
+   ! W velocities:
+   DO K=KMIN,KMAX
+      DO J=JMIN,JMAX
+         DO I=IMIN,IMAX
+            IF(SOLID(CELL_INDEX(I,J,K)) .OR. SOLID(CELL_INDEX(I+1,J,K+1))) CYCLE
+            WRITE(LU_MMS,'(I8,A,E22.15,A,E22.15,A,E22.15,A,E22.15,A,E22.15,A,E22.15)') &
+            0,',',XC(I),',',Z(K),',',DY(J)*DX(I),',',W(I,J,K),',',0._EB,',',0._EB
+         ENDDO
+      ENDDO
+   ENDDO
+   ! Now cell centered variables:
+   DO K=KMIN,KMAX
+      DO J=JMIN,JMAX
+         DO I=IMIN,IMAX
+            IF(SOLID(CELL_INDEX(I,J,K))) CYCLE
+            WRITE(LU_MMS,'(I8,A,E22.15,A,E22.15,A,E22.15,A,E22.15,A,E22.15,A,E22.15)') &
+            0,',',XC(I),',',ZC(K),',',DY(J)*DX(I)*DZ(K),',',ZZ(I,J,K,2),',',H(I,J,K),',', &
+            RHO(I,J,K)*(H(I,J,K)-KRES(I,J,K))
+         ENDDO
+      ENDDO
+   ENDDO
+
+ENDIF
+
+CLOSE(LU_MMS)
+
+END SUBROUTINE DUMP_ROTCUBE_MMS
 
 SUBROUTINE DUMP_MMS(NM,FN_MMS,T)
 
