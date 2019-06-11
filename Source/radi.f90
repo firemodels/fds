@@ -1458,7 +1458,8 @@ IF (UPDATE_INTENSITY) THEN
 
 ENDIF
 
-! Save source term for the energy equation (QR = -DIV Q). Done only in one-band (gray gas) case.
+! Save source term for the energy equation (QR = -DIV Q) for the one-band (gray gas) case. 
+! QR for wide-band model is saved elsewhere.
 
 IF (.NOT. WIDE_BAND_MODEL) THEN
    QR = KAPPA_GAS*UII - KFST4_GAS
