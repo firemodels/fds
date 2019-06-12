@@ -1192,7 +1192,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                      ENDDO
                   ENDDO
 
-                  !$OMP PARALLEL DO SCHEDULE(dynamic, 2) &
+                  !$OMP PARALLEL DO SCHEDULE(GUIDED) &
                   !$OMP& PRIVATE(I, J, K, AY1, AX, VC1, AZ1, IC, ILXU, ILYU, &
                   !$OMP& ILZU, VC, AY, AZ, IW, A_SUM, AIU_SUM, RAP, AFX, AFY, AFZ, &
                   !$OMP& AFX_AUX, AFY_AUX, AFZ_AUX, ILXU_AUX, ILYU_AUX, ILZU_AUX, &
