@@ -1216,7 +1216,7 @@ SUBROUTINE FSH05S(L,M,N,LDIMF,MDIMF,LDIMG,F,G)
 ! |                                                                    |
 ! +--------------------------------------------------------------------+
 
-
+!USE advisor_annotate
 
 INTEGER                       :: L
 INTEGER                       :: M
@@ -1232,6 +1232,8 @@ INTEGER :: K, J, I
 !                               DIMENSION L X M X N INTO THE ARRAY F OF
 !                               DIMENSION LDIMF X MDIMF X N.
 
+!CALL annotate_site_begin("3 layer")
+!CALL annotate_iteration_task("tripleloop")
 DO  K = 1,N
   DO  J = 1,M
     DO  I = 1,L
@@ -1239,6 +1241,7 @@ DO  K = 1,N
     END DO
   END DO
 END DO
+!CALL annotate_site_end
 RETURN
 END SUBROUTINE FSH05S
 
@@ -2097,6 +2100,7 @@ SUBROUTINE VSCOSQ(F,L,M,N,LDIMF,FT,C1,C2,C3,C4,WORK)
 
 !     PACKAGE VFFTPAK, VERSION 1, JUNE 1989
 
+!USE advisor_annotate
 
 INTEGER                   :: L
 INTEGER                       :: M
@@ -2120,21 +2124,30 @@ INTEGER :: I, J, JBY2
 IF (TPOSE) THEN
    CALL VSCSQ1(L,M,N,LDIMF,F,FT,C1,C2)
 ELSE
+  !CALL annotate_site_begin("VCOS")
+  
    DO  I=1,LDIMF*N
+    !call annotate_iteration_task("VCOSLOOP1")
       FT(I,1)=F(I,1)
    END DO
+  ! CALL annotate_site_end
    IF (MOD(M,2)==0) THEN
       DO  I=1,LDIMF*N
          FT(I,M)=-F(I,M)
       END DO
    END IF
+  ! CALL annotate_site_begin("VCOS2")
+   
       DO  J=2,M-1,2
+       ! CALL annotate_iteration_task("VCOSLOOP2")
          JBY2=J/2
          DO  I=1,LDIMF*N
             FT(I,J)   =  F(I,J+1)*C1(JBY2)+F(I,J)*C2(JBY2)
             FT(I,J+1) = -F(I,J+1)*C2(JBY2)+F(I,J)*C1(JBY2)
          END DO
+        
       END DO
+     ! CALL annotate_site_end
 END IF
 
 !     REAL(EB),PERIODIC SYNTHESIS
@@ -3822,7 +3835,7 @@ SUBROUTINE VRFTB1 (M,N,C,MDIMC,CH,WA,FAC)
 !     PACKAGE VFFTPAK, VERSION 1, JUNE 1989
 
 
-
+!USE advisor_annotate
 INTEGER                       :: M
 INTEGER                       :: N
 INTEGER   :: MDIMC
@@ -3836,7 +3849,10 @@ NF = INT(FAC(2))
 NA = 0
 L1 = 1
 IW = 1
+!CALL annotate_site_begin("VRFTB1 Loop")
+
 DO  K1=1,NF
+  !CALL annotate_iteration_task("Full VRFTB1")
   IP = INT(FAC(K1+2))
   L2 = IP*L1
   IDO = N/L2
@@ -3883,6 +3899,8 @@ DO  K1=1,NF
   115    L1 = L2
   IW = IW+(IP-1)*IDO
 END DO
+
+!CALL annotate_site_end
 OUTARY=.TRUE.
 IF (NOCOPY) THEN
   SCALE=SCALE*SQRT(1.0_EB/REAL(N,EB))
@@ -4151,6 +4169,8 @@ TR11=COS(ARG)
 TI11=SIN(ARG)
 TR12=COS(2._EB*ARG)
 TI12=SIN(2._EB*ARG)
+!$OMP PARALLEL
+!$OMP DO COLLAPSE(2) SCHEDULE(STATIC)
 DO  K=1,L1
   DO  M=1,MP
     CH(M,1,K,1) = CC(M,1,1,K)+2._EB*CC(M,IDO,2,K)+2._EB*CC(M,IDO,4,K)
@@ -4164,8 +4184,12 @@ DO  K=1,L1
         +TR12*2._EB*CC(M,IDO,4,K))+(TI11*2._EB*CC(M,1,3,K) +TI12*2._EB*CC(M,1,5,K))
   END DO
 END DO
+!$OMP END DO
+!$OMP END PARALLEL
 IF (IDO == 1) RETURN
 IDP2 = IDO+2
+!$OMP PARALLEL
+!$OMP DO SCHEDULE(MONOTONIC: STATIC)
 DO  K=1,L1
   DO  I=3,IDO,2
     IC = IDP2-I
@@ -4234,6 +4258,8 @@ DO  K=1,L1
     END DO
   END DO
 END DO
+!$OMP END DO
+!$OMP END PARALLEL
 RETURN
 END SUBROUTINE VRADB5
 
