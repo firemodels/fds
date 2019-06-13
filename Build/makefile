@@ -228,7 +228,7 @@ mpi_intel_linux_64_db : obj = fds_mpi_intel_linux_64_db
 mpi_intel_linux_64_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
-impi_intel_linux_64_advise : FFLAGS = -g -m64 -O2 -ldl -traceback -no-wrap-margin -I/opt/intel19/advisor_2019/include/intel64  $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL)
+impi_intel_linux_64_advise : FFLAGS = -g -m64 -O2 -ipo -ldl -traceback -no-wrap-margin -I/opt/intel19/advisor_2019/include/intel64  $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL)
 impi_intel_linux_64_advise : LFLAGSMKL = $(LFLAGSMKL_INTEL) -ladvisor -L/opt/intel19/advisor_2019/lib64
 impi_intel_linux_64_advise : LFLAGS = -shared-intel 
 impi_intel_linux_64_advise : FCOMPL = mpiifort
@@ -237,7 +237,7 @@ impi_intel_linux_64_advise : obj = fds_impi_intel_linux_64_advise
 impi_intel_linux_64_advise : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
-impi_intel_linux_64_vtune : FFLAGS = -g -m64 -O2 -ldl -debug inline-debug-info -parallel-source-info=2 $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL)
+impi_intel_linux_64_vtune : FFLAGS = -g -m64 -O2 -ipo -ldl -debug inline-debug-info -parallel-source-info=2 $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL)
 impi_intel_linux_64_vtune : LFLAGSMKL = $(LFLAGSMKL_INTEL)
 impi_intel_linux_64_vtune : LFLAGS = -shared-intel
 impi_intel_linux_64_vtune : FCOMPL = mpiifort
