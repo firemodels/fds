@@ -230,7 +230,7 @@ mpi_intel_linux_64_db : setup $(obj_mpi)
 
 impi_intel_linux_64_advise : FFLAGS = -g -m64 -O2 -ipo -ldl -traceback -no-wrap-margin -I/opt/intel19/advisor_2019/include/intel64  $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL)
 impi_intel_linux_64_advise : LFLAGSMKL = $(LFLAGSMKL_INTEL) -ladvisor -L/opt/intel19/advisor_2019/lib64
-impi_intel_linux_64_advise : LFLAGS = -shared-intel 
+impi_intel_linux_64_advise : LFLAGS = -shared-intel
 impi_intel_linux_64_advise : FCOMPL = mpiifort
 impi_intel_linux_64_advise : FOPENMPFLAGS = -qopenmp -qopenmp-link static -liomp5
 impi_intel_linux_64_advise : obj = fds_impi_intel_linux_64_advise
@@ -376,6 +376,13 @@ mpi_gnu_osx_64_db : obj = fds_mpi_gnu_osx_64_db
 mpi_gnu_osx_64_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
+mpi_gnu_osx_64_dv : FFLAGS = -m64 -O1 -fbacktrace -std=f2008 -ffpe-summary=none -fall-intrinsics $(GITINFOGNU) $(GNU_COMPINFO) $(FFLAGSMKL_GNU_CUSTOM)
+mpi_gnu_osx_64_dv : LFLAGSMKL = $(LFLAGSMKL_GNU_CUSTOM)
+mpi_gnu_osx_64_dv : FCOMPL = mpifort
+mpi_gnu_osx_64_dv : FOPENMPFLAGS =
+mpi_gnu_osx_64_dv : obj = fds_mpi_gnu_osx_64_dv
+mpi_gnu_osx_64_dv : setup $(obj_mpi)
+	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
 # *** Object Dependencies ***
 
