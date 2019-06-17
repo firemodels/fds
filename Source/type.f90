@@ -374,7 +374,7 @@ END TYPE IBM_CUTEDGE_TYPE
 TYPE IBM_RCEDGE_TYPE
    INTEGER,  DIMENSION(MAX_DIM+1)                  ::     IJK  ! [ i j k X1AXIS]
    INTEGER :: IE
-   ! Fields related to IBM_USE_OUTER_PLANE=.FALSE.:
+   ! Fields related to IBM_PLANE_INTERPOLATION=.FALSE.:
    ! Here: VIND=IAXIS:KAXIS, EP=1:INT_N_EXT_PTS,
    ! INT_VEL_IND = 1; INT_VELS_IND = 2; INT_FV_IND = 3; INT_DHDX_IND = 4; N_INT_FVARS = 4;
    ! INT_NPE_LO = INT_NPE(LOW,VIND,EP,IFACE); INT_NPE_LO = INT_NPE(HIGH,VIND,EP,IEDGE).
@@ -418,7 +418,7 @@ TYPE IBM_CUTFACE_TYPE
    REAL(EB) :: VELN_CRF, VELD_CRF, DHDX_CRF, FN_CRF, VELNP1_CRF, VELINT_CRF
    INTEGER,  ALLOCATABLE, DIMENSION(:,:,:)                         ::      CELL_LIST ! [RC_TYPE I J K ]
 
-   ! Fields related to IBM_USE_OUTER_PLANE=.TRUE.:
+   ! Fields related to IBM_PLANE_INTERPOLATION=.TRUE.:
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)            ::    IJK_CARTCEN ! [ I J K ]
    REAL(EB), ALLOCATABLE, DIMENSION(:)              :: XYZ_BP_CARTCEN ! [x y z] location of bnd pt.
    INTEGER,  ALLOCATABLE, DIMENSION(:)              ::  INBFC_CARTCEN ! Inbound face BP belongs to.
@@ -435,10 +435,10 @@ TYPE IBM_CUTFACE_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)            ::FV_CFCEN,DHDX1_CFCEN
    INTEGER,  ALLOCATABLE, DIMENSION(:,:,:)          :: NOMIND_CFCEN
 
-   ! Fields related to IBM_USE_OUTER_PLANE=.FALSE.:
+   ! Fields related to IBM_PLANE_INTERPOLATION=.FALSE.:
    ! Here: VIND=IAXIS:KAXIS, EP=1:INT_N_EXT_PTS,
    ! INT_VEL_IND = 1; INT_VELS_IND = 2; INT_FV_IND = 3; INT_DHDX_IND = 4; N_INT_FVARS = 4;
-   ! INT_NPE_LO = INT_NPE(LOW,VIND,EP,IFACE); INT_NPE_LO = INT_NPE(HIGH,VIND,EP,IFACE).
+   ! INT_NPE_LO = INT_NPE(LOW,VIND,EP,IFACE); INT_NPE_HI = INT_NPE(HIGH,VIND,EP,IFACE).
    ! IFACE = 0, undelying Cartesian face, IFACE=1:NFACE GASPHASE cut-faces.
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: INT_IJK        ! (IAXIS:KAXIS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
    REAL(EB), ALLOCATABLE, DIMENSION(:)        :: INT_COEF       ! (INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
@@ -501,6 +501,8 @@ TYPE IBM_CUTCELL_TYPE
                                                                           ! and scalars.
    REAL(EB), ALLOCATABLE, DIMENSION(:)                       ::      H,HS ! Pressure H containers.
    REAL(EB), ALLOCATABLE, DIMENSION(:)                       ::  RTRM,R_H_G,RHO_0,WVEL
+
+   ! Fields related to IBM_PLANE_INTERPOLATION=.TRUE.:
    INTEGER,  DIMENSION(MAX_DIM,MAX_INTERP_POINTS_PLANE)      ::    IJK_CARTCEN ! [ I J K ]
    REAL(EB), DIMENSION(MAX_DIM)                              :: XYZ_BP_CARTCEN ! [x y z] location of bnd pt.
    INTEGER,  DIMENSION(3)                                    ::  INBFC_CARTCEN ! Inbound face BP belongs to.
@@ -515,6 +517,18 @@ TYPE IBM_CUTCELL_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)                     ::H_CCCEN       ! Stencil H values.
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)                     ::RHO_0_CCCEN,W_CCCEN
    INTEGER,  ALLOCATABLE, DIMENSION(:,:,:)                   :: NOMIND_CCCEN
+
+   ! Fields related to IBM_PLANE_INTERPOLATION=.FALSE.:
+   ! Here: VIND=0, EP=1:INT_N_EXT_PTS
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: INT_IJK        ! (IAXIS:KAXIS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
+   REAL(EB), ALLOCATABLE, DIMENSION(:)        :: INT_COEF       ! (INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: INT_XYZBF,INT_NOUT ! (IAXIS:KAXIS,0:NCELL)
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: INT_INBFC      ! (1:3,0:NCELL)
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:,:,:)  :: INT_NPE        ! (LOW:HIGH,0,EP,0:NCELL)
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: INT_XN,INT_CN  ! (0:INT_N_EXT_PTS,0:NCELL)  ! 0 is interpolation point.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: INT_CCVARS      ! (1:N_INT_CCVARS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: INT_NOMIND     ! (LOW_IND:HIGH_IND,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
+
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)                     :: DEL_RHO_D_DEL_Z, U_DOT_DEL_RHO_Z
    LOGICAL,  ALLOCATABLE, DIMENSION(:)                       :: USE_CC_VOL
    INTEGER :: NOMICC(2)=0
@@ -573,7 +587,7 @@ TYPE IBM_RCVEL_TYPE
    INTEGER,  DIMENSION(MAX_DIM+1)                                  ::            IJK ! [ I J K x1axis]
    INTEGER,  DIMENSION(MAX_DIM+1,LOW_IND:HIGH_IND,MAX_RCVEL_NCFACE)::      CELL_LIST ! [RC_TYPE I J K ]
 
-   ! Fields related to IBM_USE_OUTER_PLANE=.TRUE.
+   ! Fields related to IBM_PLANE_INTERPOLATION=.TRUE.
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)            ::    IJK_CARTCEN ! [ I J K ]
    REAL(EB), ALLOCATABLE, DIMENSION(:)              :: XYZ_BP_CARTCEN ! [x y z] location of bnd pt.
    INTEGER,  ALLOCATABLE, DIMENSION(:)              ::  INBFC_CARTCEN ! Inbound face BP belongs to.
@@ -586,7 +600,7 @@ TYPE IBM_RCVEL_TYPE
 
    REAL(EB) :: VELINT
 
-   ! Fields related to IBM_USE_OUTER_PLANE=.FALSE.:
+   ! Fields related to IBM_PLANE_INTERPOLATION=.FALSE.:
    ! Here: VIND=IAXIS:KAXIS, EP=1:INT_N_EXT_PTS,
    ! INT_VEL_IND = 1; INT_VELS_IND = 2; INT_FV_IND = 3; INT_DHDX_IND = 4; N_INT_FVARS = 4;
    ! INT_NPE_LO = INT_NPE(LOW,VIND,EP,IFACE); INT_NPE_LO = INT_NPE(HIGH,VIND,EP,IFACE).
