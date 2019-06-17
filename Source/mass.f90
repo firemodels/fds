@@ -337,6 +337,13 @@ CASE(.TRUE.) PREDICTOR_STEP
 
    IF (CC_IBM) CALL SET_EXIMADVFLX_3D(NM,UU,VV,WW)
    IF (CHECK_MASS_CONSERVE) CALL SET_DOMAINADVFLX_3D(UU,VV,WW,PREDICTOR)
+   IF (STORE_SPECIES_FLUX) THEN
+      DO N=1,N_TOTAL_SCALARS
+         ADV_FX(:,:,:,N) = FX(:,:,:,N)*UU(:,:,:)
+         ADV_FY(:,:,:,N) = FY(:,:,:,N)*VV(:,:,:)
+         ADV_FZ(:,:,:,N) = FZ(:,:,:,N)*WW(:,:,:)
+      ENDDO
+   ENDIF
 
    ! Add gas production source term
 
@@ -491,6 +498,13 @@ CASE(.FALSE.) PREDICTOR_STEP
 
    IF (CC_IBM) CALL SET_EXIMADVFLX_3D(NM,UU,VV,WW)
    IF (CHECK_MASS_CONSERVE) CALL SET_DOMAINADVFLX_3D(UU,VV,WW,PREDICTOR)
+   IF (STORE_SPECIES_FLUX) THEN
+      DO N=1,N_TOTAL_SCALARS
+         ADV_FX(:,:,:,N) = 0.5_EB*( ADV_FX(:,:,:,N) + FX(:,:,:,N)*UU(:,:,:) )
+         ADV_FY(:,:,:,N) = 0.5_EB*( ADV_FY(:,:,:,N) + FY(:,:,:,N)*VV(:,:,:) )
+         ADV_FZ(:,:,:,N) = 0.5_EB*( ADV_FZ(:,:,:,N) + FZ(:,:,:,N)*WW(:,:,:) )
+      ENDDO
+   ENDIF
 
    ! Manufactured solution
 
