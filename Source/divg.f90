@@ -265,6 +265,20 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
 
    IF (CC_IBM) CALL SET_EXIMDIFFLX_3D(NM,RHO_D_DZDX,RHO_D_DZDY,RHO_D_DZDZ)
 
+   ! Store diffusive flux for output
+
+   IF (STORE_SPECIES_FLUX) THEN
+      IF (PREDICTOR) THEN
+         DIF_FX(:,:,:,N) = 0.5_EB*( DIF_FXS(:,:,:,N) + RHO_D_DZDX(:,:,:,N) )
+         DIF_FY(:,:,:,N) = 0.5_EB*( DIF_FYS(:,:,:,N) + RHO_D_DZDY(:,:,:,N) )
+         DIF_FZ(:,:,:,N) = 0.5_EB*( DIF_FZS(:,:,:,N) + RHO_D_DZDZ(:,:,:,N) )
+      ELSE
+         DIF_FXS(:,:,:,N) = RHO_D_DZDX(:,:,:,N)
+         DIF_FYS(:,:,:,N) = RHO_D_DZDY(:,:,:,N)
+         DIF_FZS(:,:,:,N) = RHO_D_DZDZ(:,:,:,N)
+      ENDIF
+   ENDIF
+
    ! Diffusive heat flux
 
    SPECIES_LOOP: DO N=1,N_TOTAL_SCALARS

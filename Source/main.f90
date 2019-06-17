@@ -431,7 +431,7 @@ IF (.NOT.RESTART) THEN
       CALL UPDATE_GLOBAL_OUTPUTS(T,DT,NM)
       CALL DUMP_MESH_OUTPUTS(T,DT,NM)
    ENDDO
-IF (MYID==0 .AND. VERBOSE) WRITE(LU_ERR,'(A)') ' Called DUMP_MESH_OUTPUTS'
+   IF (MYID==0 .AND. VERBOSE) WRITE(LU_ERR,'(A)') ' Called DUMP_MESH_OUTPUTS'
 ENDIF
 
 ! If there are zones and HVAC pass PSUM
@@ -821,6 +821,7 @@ MAIN_LOOP: DO
    ENDIF
 
    ! Flux average final velocity to cutfaces. Interpolate H to cut-cells from regular fluid cells.
+
    IF (CC_IBM) CALL CCIBM_END_STEP(T,DT,DIAGNOSTICS)
 
    ! Force normal components of velocity to match at interpolated boundaries
