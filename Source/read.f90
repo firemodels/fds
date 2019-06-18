@@ -170,8 +170,8 @@ ENDIF
 IF (FN_INPUT(1:2)=='-V' .OR. FN_INPUT(1:2)=='-v') THEN
    IF (MYID==0) THEN
       CALL MPI_GET_LIBRARY_VERSION(MPILIBVERSION,MPILIBLENGTH,IERR)
-      WRITE(LU_ERR,'(A,A)') ' FDS revision       : ',TRIM(GITHASH_PP)
-      WRITE(LU_ERR,'(A,A)') ' MPI library version: ',TRIM(MPILIBVERSION)
+      WRITE(LU_ERR,'(A,A)') 'FDS revision       : ',TRIM(GITHASH_PP)
+      WRITE(LU_ERR,'(A,A)') 'MPI library version: ',TRIM(MPILIBVERSION)
    ENDIF
    STOP ! this routine is only called before MPI is initialized so safe to STOP here
 ENDIF
