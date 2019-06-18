@@ -58,7 +58,7 @@ CALL GET_INPUT_FILE
 IF (FN_INPUT(1:1)==' ') THEN
    IF (MYID==0) THEN
       CALL WRITE_SUMMARY_INFO(LU_ERR)
-      WRITE(LU_ERR,'(/A)')  ' Consult FDS Users Guide Chapter, Running FDS, for further instructions.'
+      WRITE(LU_ERR,'(A)')  ' Consult FDS Users Guide Chapter, Running FDS, for further instructions.'
    ENDIF
    STOP_STATUS = VERSION_STOP ; RETURN
 ENDIF
@@ -70,6 +70,8 @@ IF (.NOT.EX) THEN
    IF (MYID==0) WRITE(LU_ERR,'(A,A,A)') "ERROR: The file, ", TRIM(FN_INPUT),", does not exist in the current directory"
    STOP_STATUS = VERSION_STOP ; RETURN
 ENDIF
+
+IF (MYID==0) WRITE(LU_ERR,'(A)') ' Reading input file ...'
 
 ! Allocate the global orientation vector
 
@@ -145,6 +147,8 @@ CALL READ_RADF    ; IF (STOP_STATUS==SETUP_STOP) RETURN
 ! Close the input file, and never open it again
 
 CLOSE (LU_INPUT)
+
+IF (MYID==0 .AND. VERBOSE) WRITE(LU_ERR,'(A)') ' Input file read'
 
 ! Set QUANTITY ambient values
 

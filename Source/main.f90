@@ -102,9 +102,7 @@ CALL GET_INFO (REVISION,REVISION_DATE,COMPILE_DATE)
 
 ! Read input from CHID.fds file and stop the code if any errors are found
 
-IF (MYID==0) WRITE(LU_ERR,'(A)') ' Reading input file ...'
 CALL READ_DATA(DT)
-IF (MYID==0 .AND. VERBOSE) WRITE(LU_ERR,'(A)') ' Input file read'
 
 CALL STOP_CHECK(1)
 
