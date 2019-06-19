@@ -6838,6 +6838,19 @@ The results are shown in Fig.~\ref{ground_vegetation_radi_fig}. The Lagrangian p
 \label{ground_vegetation_radi_fig}
 \end{figure}
 
+\subsubsection{Vegetation Convective Heating}
+\label{ground_vegetation_conv}
+
+In this next example, two small wind tunnels blowing air at 2~m/s and 300~$^\circ$C contain small amounts of vegetation modeled using either Lagrangian particles or the Boundary Fuel Model. The tunnel walls are {\ct ADIABATIC} boundaries so that the air temperature remains fixed. In one tunnel, two particles of different sizes occupy adjacent grid cells that abut the solid floor. In the other tunnel, two adjacent patches on the floor represent the equivalent amount of vegetation via the Boundary Fuel Model. The resulting vegetation temperatures are shown in Fig.~\ref{ground_vegetation_conv_fig}.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ground_vegetation_conv_temp}
+\caption[Results of the {\ct ground\_vegetation\_conv} test case]{Temperature of convectively heated vegetation of two different sizes.}
+\label{ground_vegetation_conv_fig}
+\end{figure}
+
+
 \FloatBarrier
 
 \subsection{Firebrands}
