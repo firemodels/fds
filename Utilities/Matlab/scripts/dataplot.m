@@ -149,13 +149,13 @@ for i=2:n_plots
     % Check to see if g line has been activated in configuration file
     gtest = strcmp(parameters(strcmp(headers,'switch_id')),'g'); % used to ignore scatplot
 
-    % remove this plot from drange if gtest
-    if (gtest)
-        drange(drange_index)=[];
-        drange_index=drange_index-1;
-    end
-
     if any(itest) && (dtest || otest || ftest || gtest)
+
+        % remove this plot from drange if gtest
+        if (gtest)
+            drange(drange_index)=[];
+            drange_index=drange_index-1;
+        end
 
         if ~ftest
             if exist('K')
