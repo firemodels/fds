@@ -1,0 +1,115 @@
+&HEAD CHID='ground_vegetation_load', FYI='Comparison of boundary models' /
+
+&TIME T_END=180. /
+
+&MESH IJK=60,20,20, XB=0.0,3.0,-0.5,0.5,0.0,1.0 /
+&MESH IJK=60,20,20, XB=0.0,3.0,-0.5,0.5,1.5,2.5 /
+
+&VENT MB='XMIN', SURF_ID='OPEN' /
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='YMIN', SURF_ID='MIRROR' /
+&VENT MB='YMAX', SURF_ID='MIRROR' /
+&VENT MB='ZMAX', SURF_ID='HOT' /
+
+&VENT SURF_ID='GROUND', XB=0.0,1.0,-0.5,0.5,0,0 /
+&VENT SURF_ID='GRASS',  XB=1.0,2.0,-0.5,0.5,0,0 /
+&VENT SURF_ID='GROUND', XB=2.0,3.0,-0.5,0.5,0,0 /
+
+&VENT SURF_ID='GROUND', XB=0.0,3.0,-0.5,0.5,1.5,1.5 /
+
+ WIND SPEED=1. /
+
+&SURF ID='HOT', TMP_FRONT=700., EMISSIVITY=1., HEAT_TRANSFER_COEFFICIENT=0. /
+
+&MATL ID = 'SOIL'
+      CONDUCTIVITY = 0.25             
+      SPECIFIC_HEAT = 2.                   
+      DENSITY = 1300. /
+
+&SURF ID = 'GROUND'
+      MATL_ID = 'SOIL'
+      COLOR = 'BROWN'
+      THICKNESS = 0.1 /
+
+&SURF ID = 'GRASS'
+      MATL_ID = 'Dry Grass','SOIL' 
+      MOISTURE_FRACTION(1) = 0.1
+      PACKING_RATIO(1) = 0.01
+      COLOR = 'FOREST GREEN'
+      DRAG_COEFFICIENT = 2.8
+      SHAPE_FACTOR   = 0.15
+      SURFACE_VOLUME_RATIO(1) = 3092. 
+      THICKNESS(1:2) = 0.075,0.1 /
+
+&SURF ID = 'Blade of Grass'
+      MATL_ID = 'Dry Grass'
+      MOISTURE_FRACTION = 0.1
+      SURFACE_VOLUME_RATIO = 3092.
+      LENGTH = 0.02
+      GEOMETRY = 'CYLINDRICAL' /
+
+&PART ID             = 'Blade of Grass'
+      DRAG_COEFFICIENT = 2.8
+      SHAPE_FACTOR   = 0.15
+      COLOR          = 'FOREST GREEN'
+      SURF_ID        = 'Blade of Grass'
+      QUANTITIES     = 'PARTICLE TEMPERATURE','PARTICLE MASS'
+      STATIC         = .TRUE. /
+
+&INIT PART_ID              = 'Blade of Grass'
+      XB                   = 1.0,2.0,-0.5,0.5,1.5,1.575
+      N_PARTICLES_PER_CELL = 1
+      CELL_CENTERED        = .TRUE.
+      PACKING_RATIO        = 0.01 /
+
+&REAC FUEL='WOOD FUEL VAPOR'
+      FYI='Ritchie, et al., 5th IAFSS, C_3.4 H_6.2 O_2.5'
+      SOOT_YIELD = 0.02
+      O          = 2.5
+      C          = 3.4
+      H          = 6.2
+      HEAT_OF_COMBUSTION = 17260. /
+
+&SPEC ID='WATER VAPOR' /
+
+&MATL ID                 = 'Dry Grass'
+      DENSITY            = 400.
+      CONDUCTIVITY       = 0.1
+      SPECIFIC_HEAT      = 1.5
+      A                  = 36300.
+      E                  = 60300.
+      MATL_ID            = 'Char' 
+      NU_MATL            = 0.25
+      SPEC_ID            = 'WOOD FUEL VAPOR'
+      NU_SPEC            = 0.75
+      HEAT_OF_REACTION   = 711. /
+ 
+&MATL ID                 = 'Char'
+      DENSITY            = 300.
+      CONDUCTIVITY       = 0.05
+      SPECIFIC_HEAT      = 1.4 /
+
+&DUMP DT_HRR=1, DT_PROF=5. /
+
+&DEVC ID='HRR 1',  XB=0.0,3.0,-0.5,0.5,0.0,1.0, QUANTITY='HRRPUV', SPATIAL_STATISTIC='VOLUME INTEGRAL' /
+&DEVC ID='HRR 2',  XB=0.0,3.0,-0.5,0.5,1.5,2.5, QUANTITY='HRRPUV', SPATIAL_STATISTIC='VOLUME INTEGRAL' /
+&DEVC ID='Mass 1', XB=0.0,3.0,-0.5,0.5,0.0,1.0, QUANTITY='HRRPUV', SPATIAL_STATISTIC='VOLUME INTEGRAL', TEMPORAL_STATISTIC='TIME INTEGRAL', CONVERSION_FACTOR=5.79E-5 /
+&DEVC ID='Mass 2', XB=0.0,3.0,-0.5,0.5,1.5,2.5, QUANTITY='HRRPUV', SPATIAL_STATISTIC='VOLUME INTEGRAL', TEMPORAL_STATISTIC='TIME INTEGRAL', CONVERSION_FACTOR=5.79E-5 /
+
+&SLCF PBY= 0.0, QUANTITY='TEMPERATURE', VECTOR=.TRUE. /
+&SLCF PBY= 0.0, QUANTITY='TEMPERATURE', CELL_CENTERED=.TRUE. /
+&SLCF PBY= 0.0, QUANTITY='HRRPUV',      CELL_CENTERED=.TRUE. /
+
+&BNDF QUANTITY='WALL TEMPERATURE', CELL_CENTERED=.TRUE. /
+&BNDF QUANTITY='GAUGE HEAT FLUX', CELL_CENTERED=.TRUE. /
+&BNDF QUANTITY='BURNING RATE', CELL_CENTERED=.TRUE. /
+
+&PROF XYZ=1.50,0.001,0.0, IOR=3, QUANTITY='TEMPERATURE' /
+&PROF XYZ=1.50,0.001,0.0, IOR=3, QUANTITY='DENSITY' /
+&PROF XYZ=1.50,0.001,0.0, IOR=3, QUANTITY='Dry Grass' /
+&PROF XYZ=1.50,0.001,0.0, IOR=3, QUANTITY='MOISTURE' /
+&PROF XYZ=1.50,0.001,0.0, IOR=3, QUANTITY='AIR' /
+&PROF XYZ=1.50,0.001,0.0, IOR=3, QUANTITY='Char' /
+
+&TAIL /
+

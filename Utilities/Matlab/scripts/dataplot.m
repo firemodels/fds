@@ -149,13 +149,13 @@ for i=2:n_plots
     % Check to see if g line has been activated in configuration file
     gtest = strcmp(parameters(strcmp(headers,'switch_id')),'g'); % used to ignore scatplot
 
-    % remove this plot from drange if gtest
-    if (gtest)
-        drange(drange_index)=[];
-        drange_index=drange_index-1;
-    end
-
     if any(itest) && (dtest || otest || ftest || gtest)
+
+        % remove this plot from drange if gtest
+        if (gtest)
+            drange(drange_index)=[];
+            drange_index=drange_index-1;
+        end
 
         if ~ftest
             if exist('K')
@@ -208,7 +208,8 @@ for i=2:n_plots
                 % Clear flag for stat_x_y metric
                 using_stat_x_y = 0;
                 using_stat_x_y_check_zero = 0;
-                indices = find(d1_Comp_Start<=M(:,d1_Ind_Col) & M(:,d1_Ind_Col)<=d1_Comp_End);
+                indices = find(d1_Comp_Start    <=M(:,d1_Ind_Col)    & M(:,d1_Ind_Col)   <=d1_Comp_End & ...
+                               d1_Dep_Comp_Start<=M(:,d1_Dep_Col(1)) & M(:,d1_Dep_Col(1))<=d1_Dep_Comp_End);
                 if strcmp(Metric,'max')
                     Save_Measured_Metric(i,j,1) = max(M(indices,d1_Dep_Col))-d1_Initial_Value;
                 elseif strcmp(Metric,'min')
@@ -222,6 +223,9 @@ for i=2:n_plots
                         Save_Measured_Metric(i,1,1) = max(M(indices,d1_Dep_Col))-d1_Initial_Value;
                         using_stat_x_y_check_zero = 1;
                     end
+                elseif strcmp(Metric,'slope')
+                    p = polyfit(M(indices,d1_Ind_Col),M(indices,d1_Dep_Col),1);
+                    Save_Measured_Metric(i,j,1) = p(1);
                 elseif strcmp(Metric,'mean')
                     Save_Measured_Metric(i,j,1) = abs(mean(M(indices,d1_Dep_Col))-d1_Initial_Value);
                 % If mean_x_y is specified for a plot with multiple curves,
@@ -274,6 +278,7 @@ for i=2:n_plots
                 if ~ftest
                     if strcmp(Plot_Type,'linear')
                         K(j) = plot(X,Y,char(style(j))); hold on
+                        if strcmp(Metric,'slope') plot([0 10000],[p(2),p(2)+10000*p(1)],'r-'); end
                     elseif strcmp(Plot_Type,'loglog')
                         K(j) = loglog(X,Y,char(style(j))); hold on
                     elseif strcmp(Plot_Type,'semilogx')
@@ -320,7 +325,8 @@ for i=2:n_plots
                 % Clear flag for stat_x_y metric
                 using_stat_x_y = 0;
                 using_stat_x_y_check_zero = 0;
-                indices = find(d2_Comp_Start<=M(:,d2_Ind_Col) & M(:,d2_Ind_Col)<=d2_Comp_End);
+                indices = find(d2_Comp_Start    <=M(:,d2_Ind_Col)    & M(:,d2_Ind_Col)   <=d2_Comp_End & ...
+                               d2_Dep_Comp_Start<=M(:,d2_Dep_Col(1)) & M(:,d2_Dep_Col(1))<=d2_Dep_Comp_End);
 
                 M_Ind = M(indices,d2_Ind_Col);
                 M_Dep = sum(M(indices,d2_Dep_Col),2);
@@ -338,6 +344,9 @@ for i=2:n_plots
                         Save_Predicted_Metric(i,1,1) = max(M_Dep)-d2_Initial_Value;
                         using_stat_x_y_check_zero = 1;
                     end
+                elseif strcmp(Metric,'slope')
+                    p = polyfit(M(indices,d2_Ind_Col),M(indices,d2_Dep_Col),1);
+                    Save_Predicted_Metric(i,j,1) = p(1);
                 elseif strcmp(Metric,'mean')
                     Save_Predicted_Metric(i,j,1) = abs(mean(M_Dep)-d2_Initial_Value);
                 % If mean_x_y is specified for a plot with multiple curves,
@@ -395,6 +404,7 @@ for i=2:n_plots
                 if ~ftest
                     if strcmp(Plot_Type,'linear')
                         K(length(S1)+j) = plot(X,Y,char(style(j)));
+                        if strcmp(Metric,'slope') plot([0 10000],[p(2),p(2)+10000*p(1)],'r--'); end
                     elseif strcmp(Plot_Type,'loglog')
                         K(length(S1)+j) = loglog(X,Y,char(style(j)));
                     elseif strcmp(Plot_Type,'semilogx')
@@ -406,6 +416,7 @@ for i=2:n_plots
                 else
                     if strcmp(Plot_Type,'linear')
                         K(length(K_save)+j) = plot(X,Y,char(style(j)));
+                        if strcmp(Metric,'slope') plot([0 10000],[p(2),p(2)+10000*p(1)],'r--'); end
                     elseif strcmp(Plot_Type,'loglog')
                         K(length(K_save)+j) = loglog(X,Y,char(style(j)));
                     elseif strcmp(Plot_Type,'semilogx')

@@ -2521,7 +2521,7 @@ In an LES calculation, the convective heat transfer coefficient, $h$, is based o
 \be \dq_{\rm c}'' = h \, (T_{\rm g} - T_{\rm w}) \quad \hbox{W/m}^2 \quad ; \quad
     h = \max \, \left[ \; C\, |T_{\rm g}-T_{\rm w}|^\ot \; ,
       \;  \frac{k}{L} \, \NU \; ,
-      \; \frac{k}{\dn/2}\right]  \quad  \si{W/(m^2.K)}
+      \; \frac{k}{\dn/2}\right]  \quad  \si{W/(m^2.K)}  \label{q_con}
 \ee
 where $C$ is a empirical coefficient for natural convection (1.52 for a horizontal plate and 1.31 for a vertical plane or cylinder)~\cite{Holman:1}, $L$ is a characteristic length related to the size of the physical obstruction, $k$ is the thermal conductivity of the gas, and $\dn$ is the gas phase cell size. The Nusselt number (Nu) depends on the geometric and flow characteristics. For many flow regimes, it has the form:
 \be
@@ -3339,160 +3339,6 @@ When using 3D mass transport, view the fuel gas density inside the solid using
 
 All the above also work as {\ct DEVC} output, which does not require {\ct CELL\_CENTERED=T}.
 
-
-\clearpage
-
-\section{Thermal Degradation Model for Vegetation}
-
-FDS contains a separate pyrolysis model that was developed specifically for vegetation~\cite{Porterie:2006,Morvan:CF2004,Houssami:2016}. The solid-phase thermal degradation process consists of three reactions:
-
-\vspace{\baselineskip}
-
-\noindent 1. Endothermic drying
-\be
- {\rm Wet\ Vegetation} \rightarrow \frac{M}{1+M} \, {\rm H_2O} + \frac{1}{1+M} \, {\rm Dry\ Vegetation}
-\ee
-
-\noindent 2. Endothermic pyrolysis
-\be
- {\rm Dry\ Vegetation} \rightarrow \chi_{\rm char} \, {\rm Char} + (1-\chi_{\rm char}) \, {\rm Fuel\ Gas}
-\ee
-
-\noindent 3. Exothermic char oxidation
-\be
- {\rm Char} + \nu_{\rm O_2, char} \, {\rm O_2} \rightarrow (1+ \nu_{\rm O_2,char} - \chi_{\rm ash}) \, {\rm CO_2} + \chi_{\rm ash} \, {\rm Ash}
-\ee
-$M$ is the vegetation {\em moisture content} determined on a dry weight basis. $M$ is related to the vegetation mass fraction of water, $Y_{\rm w}$, via the relation:
-\be
-  Y_{\rm w} = \frac{M}{1+M}
-\ee
-$\chi_{\rm char}$ is the mass fraction of dry vegetation that is converted to char during pyrolysis;  $\nu_{\rm O_2,char}$ is the stoichiometric coefficient of oxygen;  and $\chi_{\rm ash}$ is the mass fraction of char that is converted to ash during char oxidation.
-
-In the equations to follow, the subscript b denotes bulk quantities that are resolved on the computational grid. For example, the mass of dry vegetation per unit volume is denoted $\rho_{\rm b,dry}$ (kg/m$^{3}$).  In the notation of Mell~et~al.~\cite{Mell:2009}, $\rho_{\rm b,dry}=\langle m^{\prime\prime\prime}_{\rm dry}\rangle_{V_{\rm b}}$ where the angled brackets denote the explicit LES filtering over the grid cell volume $V_{\rm b}$. The initial total mass of vegetation per unit volume is $\rho_{\rm b,0}$.
-
-The Arrhenius rate equations for drying, pyrolysis, and char oxidation are:
-\begin{eqnarray}
-  r_{\rm H_2O} &=& \left( \frac{\rho_{\rm b, H_2O}}{\rho_{\rm b,0}} \right)   \, A_{\rm H_2O} \, T_{\rm v}^{-\frac{1}{2}} \exp \left(-\frac{E_{\rm H_2O}}{R \, T_{\rm v}} \right)  \\[.1in]
-  r_{\rm pyr}  &=& \left( \frac{\rho_{\rm b,dry}}{\rho_{\rm b,0}}   \right)   \, A_{\rm pyr} \, \exp \left({-\frac{E_{\rm pyr}}{R \, T_{\rm v}}} \right)  \\[.1in]
-  r_{\rm char} &=& \left( \frac{\rho_{\rm b,char}}{\rho_{\rm b,0}}  \right)^0 \, A_{\rm char} \,  \exp \left( -\frac{E_{\rm char}}{R \, T_{\rm v}} \right) \,
-  \frac{ \rho_{\rm g}\, Y_{\rm O_2}\, \sigma_{\rm v}\, \beta_{\rm v}\, (1+\beta_{\rm char}\sqrt{\RE_{\rm v}}) }{\nu_{\rm O_2,char} \, \rho_{\rm b,0}}
-\end{eqnarray}
-where $T_{\rm v}$ is the temperature of the vegetation. The default values of the kinetic constants are given in Table~\ref{tab:veg_kinetics}. The Reynolds number is $\RE_{\rm v} = \rho_{\rm g} D_{\rm v} / \mu $ with $D_{\rm v} = 4/\sigma_{\rm v}$ for a cylinder, where $\sigma_{\rm v}$ is the surface area to volume ratio of the cylinder. $\beta_{\rm v}$ is the {\em packing ratio}; that is, the ratio of the vegetation volume to the overall volume containing the vegetation. The term containing $\RE_{\rm v}$ is included to account for the oxygen blowing effects on char oxidation and the constant $\beta_{\rm char}$ is equal to 0.2 by default, which is the value used by Porterie~et~al.~\cite{Porterie:2006}.
-
-\begin{table}[!ht]
-\caption[Default vegetation kinetic constants]{Default vegetation kinetic constants (from Porterie et al.~\cite{Porterie:2006})}
-\vspace{0.1in}
-\label{tab:veg_kinetics}
-\begin{center}
-\begin{tabular}{|l|l|}
-\hline
-Constant                        &   Default Value  \\ \hline \hline
-$A_{\rm H_2O}$ ($\sqrt{K}$/s )  & 600,000          \\ \hline
-$E_{\rm H_2O}$ (J/mol)          & 48,200           \\ \hline
-$A_{\rm pyr}$ (1/s)             & 36,300           \\ \hline
-$E_{\rm pyr}$ (J/mol)           & 60,300           \\ \hline
-$A_{\rm char}$ (m/s)            & 430              \\ \hline
-$E_{\rm char}$ (J/mol)          & 74,800           \\ \hline
-$\nu_{\rm O_2,char}$            & 1.65             \\ \hline
-\end{tabular}
-\end{center}
-\end{table}
-
-The equation governing the temperature of a thermally thin fuel element is
-\be
-\label{eq:Tv_thermally_thin}
-\rho_{\rm b}\ c_{\rm p,v} \frac{dT_{\rm v}}{dt} = -\rho_{\rm b,0} \left( \Delta{\rm h_{vap}}\ r_{\rm H_2O} + \Delta {\rm h_{pyr}}\ r_{\rm pyr} + \alpha_{\rm char}\ \Delta{\rm h_{char}}\ r_{\rm char} + \langle \nabla \cdot{\mathbf{q}}^{\prime\prime}_{\rm c,b}\rangle_{\rm V_b} + \langle \nabla \cdot{\mathbf{q}}^{\prime\prime}_{\rm r,b}\rangle_{\rm V_b} \right)
-\ee
-The first three terms on the right-hand-side are, respectively, endothermic drying, endothermic pyrolysis, exothermic char oxidation. The non-dimensional weighting parameter, $\alpha_{\rm char}$, is the fraction of the heat generated by heterogeneous char oxidation that is deposited in the fuel element and (1-$\alpha_{\rm char}$) in the gas phase. By default, $\alpha_{\rm char}$ = 0.5, which has been used by others (e.g., Porterie~et~al.~\cite{Porterie:2006}). The fourth and fifth terms on the right-hand-side of Eq.~(\ref{eq:Tv_thermally_thin}) are the bulk contributions of convective and radiative heat transfer, respectively~\cite{Mell:2009}. The heats in Eq.~(\ref{eq:Tv_thermally_thin}) are $\Delta{\rm h_{vap}} = 2259$~kJ/kg;  $\Delta{\rm h_{pyr}} = 418$~kJ/kg~\cite{Morvan:CF2001}; $\Delta{\rm h_{char}} = -32000$~kJ/kg~\cite{Dahale:2013}.
-
-In the condensed phase model, the bulk density and specific heat have contributions from dry virgin vegetative fuel, char, ash, and moisture:
-\begin{eqnarray}
-\rho_{\rm b} &=& \rho_{\rm b,dry} + \rho_{\rm b,char} + \rho_{\rm b,ash} + \rho_{\rm b,H_2O} \\[.1in]
-{\rm c_{\rm p,v}} &=& \frac{\rho_{\rm b,dry}\ {\rm c_{p,dry}} + \rho_{\rm b,char}\ {\rm c_{p,char}} + \rho_{\rm b,ash}\ {\rm c_{p,ash}} + \rho_{\rm b,H_2O}\ {\rm c_{p,H_2O}}}{\rho_{\rm b}}
-\end{eqnarray}
-where, initially, $\rho_{\rm b,H_2O} = M_{\rm dw}\ \rho_{\rm b, dry}$. The specific heats (J kg$^{-1}$ K$^{-1}$) in the equations above are
-\begin{eqnarray}
-c_{\rm p, dry} &=& 10 + 3.7 \, T_{\rm v}~~~ ({\rm Ritchie~et~al.~\cite{Ritchie:1}})  \\[.1in]
-c_{\rm p, char} &=& 420 + 2.09 \, T_{\rm v} + 6.85 \times 10^{-4} \, T^2_{\rm v} ~~~({\rm Park~et~al.~ 2010}) \\[.1in]
-c_{\rm p, ash} &=& 1244 \, (T_{\rm v} / 300)^{0.315}~~~({\rm Lautenberger~et~al.~\cite{GPyro:FSJ}}) \\[.1in]
-c_{\rm p,H_2O} &=& 4190
-\end{eqnarray}
-The rate of change of the total vegetative fuel mass is
-\be
-\frac{\d}{\d t} \left( \frac{\rho_{\rm b}}{\rho_{\rm b,0}} \right) = -r_{\rm H_2O} - (1 - \chi_{\rm char}) \, r_{\rm pyr} - (1-\chi_{\rm ash}) \, r_{\rm char}
-\ee
-The rate of change for the components of the vegetative mass during thermal degradation are:
-\begin{eqnarray}
-\frac{\d}{\d t} \left( \frac{\rho_{\rm b,H_2O}}{\rho_{\rm b,0}} \right) &=& -r_{\rm H_2O} \\[.1in]
-\frac{\d}{\d t} \left( \frac{\rho_{\rm b,dry}}{\rho_{\rm b,0}} \right) &=& -r_{\rm dry}  \\[.1in]
-\frac{\d}{\d t} \left( \frac{\rho_{\rm b,char}}{\rho_{\rm b,0}} \right) &=& -\chi_{\rm char}\ r_{\rm pyr} - r_{\rm char}
-\end{eqnarray}
-Gaseous products created during the thermal degradation process are water vapor (during drying), fuel vapor (during pyrolysis), and CO$_2$ (during char oxidation). The source terms (kg m$^{-3}$ s$^{-1}$) for these species are, respectively, $\rho_{\rm b,0} \, r_{\rm H_2O}$, $(1-\chi_{\rm char}) \, \rho_{\rm b,0} \, r_{\rm pyr}$, and  $(1+\nu_{\rm O_2,char} - \chi_{\rm ash}) \, \rho_{\rm b,0} \, r_{\rm char}$. In addition, the char oxidation process consumes oxygen in the gas phase at a rate of $-\nu_{\rm O_2,char} \, \rho_{\rm b,0} \, r_{\rm char}$.
-
-Figure~\ref{vege_inputs} includes sample input lines demonstrating how the vegetation model can be applied to particles that represent pine needles that are 1~mm in diameter and 5~cm long. Note that each {\ct MATL} line contains the flag {\ct VEGETATION=.TRUE.} to indicate that the special vegetation model is to be invoked. All parameters described above must be explicitly specified in the input file---there are no hard-wired default values.
-
-\begin{figure}[p]
-\begin{lstlisting}
-&PART ID='pine needles', SURF_ID='vegetation', STATIC=.TRUE. /
-
-&SURF ID = 'vegetation'
-      MATL_ID = 'WET VEGETATION'
-      THICKNESS = 0.0005
-      LENGTH = 0.05
-      GEOMETRY = 'CYLINDRICAL' /
-
-&MATL ID = 'WET VEGETATION'
-      VEGETATION = .TRUE.
-      DENSITY = 586.
-      CONDUCTIVITY = 0.1
-      SPECIFIC_HEAT = 2.0
-      A = 600000.
-      E = 48200.
-      N_T = -0.5
-      NU_SPEC = 0.123
-      SPEC_ID = 'WATER VAPOR'
-      NU_MATL = 0.877
-      MATL_ID = 'DRY VEGETATION'
-      HEAT_OF_REACTION = 2259. /
-
-&MATL ID = 'DRY VEGETATION'
-      VEGETATION = .TRUE.
-      DENSITY = 514.
-      CONDUCTIVITY = 0.1
-      SPECIFIC_HEAT = 2.0
-      A = 36300.
-      E = 60300.
-      NU_MATL = 0.26
-      MATL_ID = 'CHAR'
-      NU_SPEC = 0.74
-      SPEC_ID = 'CELLULOSE'
-      HEAT_OF_REACTION = 418. /
-
-&MATL ID = 'CHAR'
-      VEGETATION = .TRUE.
-      DENSITY  = 134.
-      CONDUCTIVITY = 0.1
-      SPECIFIC_HEAT = 2.0
-      N_S = 0.
-      NU_O2 = 1.65
-      BETA_CHAR = 0.2
-      A = 430.
-      E = 74800.
-      NU_MATL = 0.5
-      MATL_ID  = 'ASH'
-      NU_SPEC = 2.15
-      SPEC_ID = 'CARBON DIOXIDE'
-      HEAT_OF_REACTION= -32000. /
-
-&MATL ID = 'ASH'
-      VEGETATION = .TRUE.
-      DENSITY = 67.
-      CONDUCTIVITY = 0.1
-      SPECIFIC_HEAT = 2.0 /
-\end{lstlisting}
-\caption[Input parameters describing vegetation]{Input parameters describing vegetation.}
-\label{vege_inputs}
-\end{figure}
 
 
 
@@ -6669,7 +6515,160 @@ where $ \Delta z$ is the distance from the leak point to the neutral plane.  Usi
 
 \clearpage
 
-\section{Describing Vegetation with Lagrangian Particles}
+\section{Thermal Degradation Model for Vegetation}
+
+FDS contains a separate pyrolysis model that was developed specifically for vegetation~\cite{Porterie:2006,Morvan:CF2004,Houssami:2016}. The solid-phase thermal degradation process consists of three reactions:
+
+\vspace{\baselineskip}
+
+\noindent 1. Endothermic moisture evaporation
+\be
+ {\rm Wet\ Vegetation} \rightarrow \frac{M}{1+M} \, {\rm H_2O} + \frac{1}{1+M} \, {\rm Dry\ Vegetation}
+\ee
+
+\noindent 2. Endothermic pyrolysis of dry vegetation
+\be
+ {\rm Dry\ Vegetation} \rightarrow \chi_{\rm char} \, {\rm Char} + (1-\chi_{\rm char}) \, {\rm Fuel\ Gas}
+\ee
+
+\noindent 3. Exothermic char oxidation
+\be
+ {\rm Char} + \nu_{\rm O_2, char} \, {\rm O_2} \rightarrow (1+ \nu_{\rm O_2,char} - \chi_{\rm ash}) \, {\rm CO_2} + \chi_{\rm ash} \, {\rm Ash}
+\ee
+$M$ is the vegetation {\em moisture content} or {\em moisture fraction} determined on a dry weight basis. $M$ is related to the mass fraction of water via the relation:
+\be
+  Y_{\rm H_2O} = \frac{M}{1+M}
+\ee
+$\chi_{\rm char}$ is the mass fraction of dry vegetation that is converted to char during pyrolysis;  $\nu_{\rm O_2,char}$ is the stoichiometric coefficient of oxygen, based on the assumption that the char is mainly carbon;  and $\chi_{\rm ash}$ is the mass fraction of char that is converted to ash during char oxidation.
+
+In the referenced papers~\cite{Porterie:2006,Morvan:CF2004,Houssami:2016}, the reaction rates are written in terms of ``bulk'' quantities. For example,  in the paper by Mell et al.~\cite{Mell:2009}, the mass of dry vegetation per unit volume is denoted $\langle m^{\prime\prime\prime}_{\rm dry}\rangle_{V_{\rm b}}$, where the angled brackets denote the explicit LES filtering over the grid cell volume $V_{\rm b}$. However, in FDS the reaction rates are written in terms of the component densities of the composite solid:
+\be
+   \rho_{\rm s} = \rho_{\rm s,dry} + \rho_{\rm s,H_2O} + \rho_{\rm s,char} + \rho_{\rm s,ash}
+\ee
+The initial total density is denoted $\rho_{\rm s}(0)$.
+
+The reaction rates for evaporation of H$_2$O, pyrolysis of the dry vegetation, and char oxidation are:
+\begin{eqnarray}
+  r_{\rm H_2O} &=& \left( \frac{\rho_{\rm s, H_2O}}{\rho_{\rm s}(0)} \right)   \, A_{\rm H_2O} \, T^{-\frac{1}{2}} \exp \left(  -\frac{E_{\rm H_2O}}{R \, T} \right)  \\[.1in]
+  r_{\rm pyr}  &=& \left( \frac{\rho_{\rm s,dry}}{\rho_{\rm s}(0)}   \right)   \, A_{\rm pyr} \,                   \exp \left(  -\frac{E_{\rm pyr}}{R \, T}  \right)   \\[.1in]
+  r_{\rm char} &=& \left( \frac{\rho_{\rm s,char}}{\rho_{\rm s}(0)}  \right)^0 \, A_{\rm char} \,                  \exp \left(  -\frac{E_{\rm char}}{R \, T} \right) \,
+  \frac{ \rho \, Y_{\rm O_2} \, \sigma \, \left( 1+\beta_{\rm char}\sqrt{\RE} \right) }{\nu_{\rm O_2,char} \, \rho_{\rm s}(0)}
+\end{eqnarray}
+where $T$ is the temperature of the vegetation. The default values of the kinetic constants are given in Table~\ref{tab:veg_kinetics}. The Reynolds number is $\RE = \rho U D_{\rm v} / \mu $ where $\rho$ is the gas density, $U$ is the gas velocity, and $D_{\rm v} = 4/\sigma$ for a cylinder, where $\sigma$ is the surface area to volume ratio. The term containing $\RE$ is included to account for the oxygen blowing effects on char oxidation and the constant $\beta_{\rm char}$ is equal to 0.2 by default, which is the value used by Porterie~et~al.~\cite{Porterie:2006}.
+
+\begin{table}[!ht]
+\caption[Default vegetation kinetic constants]{Default vegetation kinetic constants (from Porterie et al.~\cite{Porterie:2006})}
+\vspace{0.1in}
+\label{tab:veg_kinetics}
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+Constant                        &   Default Value  \\ \hline \hline
+$A_{\rm H_2O}$ ($\sqrt{K}$/s )  & 600,000          \\ \hline
+$E_{\rm H_2O}$ (J/mol)          & 48,200           \\ \hline
+$A_{\rm pyr}$ (1/s)             & 36,300           \\ \hline
+$E_{\rm pyr}$ (J/mol)           & 60,300           \\ \hline
+$A_{\rm char}$ (m/s)            & 430              \\ \hline
+$E_{\rm char}$ (J/mol)          & 74,800           \\ \hline
+$\nu_{\rm O_2,char}$            & 1.65             \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+The equation governing the temperature of the solid is
+\be
+\label{eq:Tv_thermally_thin}
+\rho_{\rm s} \, c \, \frac{\partial T}{\partial t} = -\rho_{\rm s}(0) \left( \Delta{h_{\rm H_2O}}\ r_{\rm H_2O} + \Delta {h_{\rm pyr}}\ r_{\rm pyr} + \alpha_{\rm char}\ \Delta{h_{\rm char}}\ r_{\rm char} \right) + \nabla \cdot{\mathbf{\dot{q}}}''_{\rm c}  +  \nabla \cdot{\mathbf{\dot{q}}}''_{\rm r}
+\ee
+The non-dimensional weighting parameter, $\alpha_{\rm char}$, is the fraction of the heat generated by heterogeneous char oxidation that is deposited in the fuel element and $(1-\alpha_{\rm char})$ in the gas phase. By default, $\alpha_{\rm char} = 0.5$, which has been used by others (e.g., Porterie~et~al.~\cite{Porterie:2006}). The fourth and fifth terms on the right-hand-side of Eq.~(\ref{eq:Tv_thermally_thin}) are the contributions of convective and radiative heat transfer, respectively~\cite{Mell:2009}. The heats of reaction in Eq.~(\ref{eq:Tv_thermally_thin}) are $\Delta{h_{\rm H_2O}} = 2259$~kJ/kg;  $\Delta{h_{\rm pyr}} = 418$~kJ/kg~\cite{Morvan:CF2001}; $\Delta{h_{\rm char}} = -32000$~kJ/kg~\cite{Dahale:2013}. The specific heat of the composite solid is given by
+\be
+c = \frac{\sum \rho_{\rm s,\alpha} \, c_\alpha}{\rho_{\rm s}}
+\ee
+Suggested values for the specific heats, in units of kJ/(kg$\cdot$ K), as functions of temperature (K) are listed here:
+\begin{eqnarray}
+c_{\rm dry}  &=& 0.01 + 0.0037 \, T ~~~ ({\rm Ritchie~et~al.~\cite{Ritchie:1}})  \\[.1in]
+c_{\rm char} &=& 0.42 + 0.002 \, T + 6.85 \times 10^{-7} \, T^2 ~~~({\rm Park~et~al.~ 2010}) \\[.1in]
+c_{\rm ash}  &=& 1.244 \, (T / 300)^{0.315}~~~({\rm Lautenberger~et~al.~\cite{GPyro:FSJ}}) \\[.1in]
+c_{\rm H_2O} &=& 4.19
+\end{eqnarray}
+The rate of change of the total mass is
+\be
+\frac{\partial}{\partial t} \left( \frac{\rho_{\rm s}}{\rho_{\rm s}(0)} \right) = -r_{\rm H_2O} - (1 - \chi_{\rm char}) \, r_{\rm pyr} - (1-\chi_{\rm ash}) \, r_{\rm char}
+\ee
+The rate of change for the components of the vegetative mass during thermal degradation are:
+\begin{eqnarray}
+\dod{}{t} \left( \frac{\rho_{\rm s,H_2O}}{\rho_{\rm s}(0)} \right) &=& -r_{\rm H_2O} \\[.1in]
+\dod{}{t} \left( \frac{\rho_{\rm s,dry}}{\rho_{\rm s}(0)}  \right) &=& -r_{\rm pyr}  \\[.1in]
+\dod{}{t} \left( \frac{\rho_{\rm s,char}}{\rho_{\rm s}(0)} \right) &=& -\chi_{\rm char}\ r_{\rm pyr} - r_{\rm char}
+\end{eqnarray}
+Gaseous products created during the thermal degradation process are water vapor (during evaporation), fuel vapor (during pyrolysis), and CO$_2$ (during char oxidation). The source terms (kg m$^{-3}$ s$^{-1}$) for these species are, respectively, $\rho_{\rm s}(0) \, r_{\rm H_2O}$, $(1-\chi_{\rm char}) \, \rho_{\rm s}(0) \, r_{\rm pyr}$, and  $(1+\nu_{\rm O_2,char} - \chi_{\rm ash}) \, \rho_{\rm s}(0) \, r_{\rm char}$. In addition, the char oxidation process consumes oxygen in the gas phase at a rate of $-\nu_{\rm O_2,char} \, \rho_{\rm s}(0) \, r_{\rm char}$.
+
+Figure~\ref{vege_inputs} includes sample input lines demonstrating how the vegetation model can be applied to particles that represent pine needles that are 1~mm in diameter and 5~cm long. Note that the {\ct MATL} line for char contains the flag {\ct VEGETATION=.TRUE.} to indicate that the special vegetation model is to be invoked. All parameters described above must be explicitly specified in the input file---there are no hard-wired default values.
+
+\begin{figure}[ht]
+\begin{lstlisting}
+&MATL ID = 'MOISTURE'
+      DENSITY = 1000.
+      CONDUCTIVITY = 0.6
+      SPECIFIC_HEAT = 4.190
+      A = 600000.
+      E = 48200.
+      N_T = -0.5
+      NU_SPEC = 1.
+      SPEC_ID = 'WATER VAPOR'
+      HEAT_OF_REACTION = 2259. /
+
+&MATL ID = 'DRY VEGETATION'
+      DENSITY = 400.
+      CONDUCTIVITY = 0.1
+      SPECIFIC_HEAT_RAMP = '...'
+      A = 36300.
+      E = 60300.
+      NU_MATL = 0.26
+      MATL_ID = 'CHAR'
+      NU_SPEC = 0.74
+      SPEC_ID = 'CELLULOSE'
+      HEAT_OF_REACTION = 418. /
+
+&MATL ID = 'CHAR'
+      VEGETATION = .TRUE.
+      DENSITY  = 300.
+      CONDUCTIVITY = 0.05
+      SPECIFIC_HEAT_RAMP = '...'
+      N_S = 0.
+      NU_O2 = 1.65
+      BETA_CHAR = 0.2
+      A = 430.
+      E = 74800.
+      NU_MATL = 0.1
+      MATL_ID  = 'ASH'
+      NU_SPEC = 0.9
+      SPEC_ID = 'CARBON DIOXIDE'
+      HEAT_OF_REACTION= -32000. /
+
+&MATL ID = 'ASH'
+      DENSITY = 67.
+      CONDUCTIVITY = 0.1
+      SPECIFIC_HEAT_RAMP = '...' /
+\end{lstlisting}
+\caption[Material parameters describing vegetation]{Input parameters describing vegetation.}
+\label{vege_inputs}
+\end{figure}
+
+
+
+\section{Wildland Fire Spread}
+
+There are three ways of simulating wildland fire spread.
+
+\begin{enumerate}
+\item {\bf Particle Method:} The vegetation is represented by a collection of Lagrangian particles that are heated via convection and radiation.
+\item {\bf Boundary Fuel Model:} Ground vegetation is modeled like a porous solid with a thickness equal to the height of the vegetation.
+\item {\bf Level Set Method:} The fire front propagates using purely empirical rules.
+\end{enumerate}
+Of these, the first two are physics-based; the third empirical.
+
+
+\subsection{Lagrangian Particle Model}
 \label{info:vegetation}
 \label{pine_needles}
 
@@ -6683,9 +6682,9 @@ First, the {\ct PART} line defines a class of solid particles that represent pin
 \end{lstlisting}
 {\ct STATIC=.TRUE.} specifies that the needles do not move, and {\ct SAMPLNIG\_FACTOR=1} specifies that each needle is to be shown in Smokeview. More importantly, this line specifies a drag coefficient for the needles based on wind tunnel measurements made at NIST~\cite{Falkenstein-Smith:2018}. The force per unit volume exerted by the vegetation is given by:
 \be
-   F = \frac{\rho}{2} \, C_{\rm d} \, C_{\rm s} \, \beta \, \sigma \, U^2
+   \bof_{\rm b} = \frac{\rho}{2} \, C_{\rm d} \, C_{\rm s} \, \beta \, \sigma \, \bu \, ||\bu||
 \ee
-where $\rho$ is the air density, $C_{\rm d}$ is the drag coefficient, $C_{\rm s}$ is the {\ct SHAPE\_FACTOR}, $\beta$ is the packing ratio (see below), $\sigma$ is the surface area to volume ratio (see below), and $U$ is the air velocity.
+where $\rho$ is the air density, $C_{\rm d}$ is the drag coefficient, $C_{\rm s}$ is the {\ct SHAPE\_FACTOR}, $\beta$ is the packing ratio (see below), $\sigma$ is the surface area to volume ratio (see below), and $\bu$ is the air velocity.
 
 The {\ct PART} line also tells Smokeview to visualize each needle as a tube that is 0.1~m long and 0.5~mm in diameter:
 \begin{lstlisting}
@@ -6718,21 +6717,14 @@ The length of each needle is specified directly, but its diameter is specified v
       HEAT_OF_REACTION = 1000
       MATL_ID  = 'CHAR' /
 
-&MATL ID = 'MOISTURE'
-      DENSITY = 1000.
-      CONDUCTIVITY = 0.1
-      SPECIFIC_HEAT = 4.184
-      REFERENCE_TEMPERATURE = 100.
-      NU_SPEC = 1.0
-      SPEC_ID = 'WATER VAPOR'
-      HEAT_OF_REACTION = 2500. /
-
 &MATL ID = 'CHAR'
       DENSITY = 200.
       CONDUCTIVITY = 1.0
       SPECIFIC_HEAT = 1.6 /
 \end{lstlisting}
-Each {\ct MATL} line must include the {\ct DENSITY}, {\ct CONDUCTIVITY} and {\ct SPECIFIC\_HEAT} of that component. If the material component undergoes a reaction, there needs to be either a {\ct REACTION\_TEMPERATURE} or more detailed kinetic parameters. Material components that react need stoichiometric coefficients {\ct NU\_SPEC} and {\ct NU\_MATL} to designate how much of the material mass is converted to a gas {\ct SPEC}ies and how much to a solid {\ct MAT}eria{\ct L}. In this case, {\ct 'CELLULOSE'} is the gas-phase fuel specified on the {\ct REAC} line. The gas species {\ct 'WATER VAPOR'} is defined by a {\ct SPEC} line. Even though water vapor is included in the combustion products, you still need to explicitly specify {\ct 'WATER VAPOR'} as the gasified form of the moisture in the pine needles.
+Note that if you specify a {\ct MOISTURE\_FRACTION} on the {\ct SURF} line, FDS will automatically add a {\ct MATL} line for {\ct 'MOISTURE'} as it is written in Fig.~\ref{vege_inputs}.
+
+Each {\ct MATL} line must include the {\ct DENSITY}, {\ct CONDUCTIVITY} and {\ct SPECIFIC\_HEAT} of that component. If the material component undergoes a reaction, there needs to be either a {\ct REACTION\_TEMPERATURE} or more detailed kinetic parameters like the ones listed in Fig.~\ref{vege_inputs}. Material components that react need stoichiometric coefficients {\ct NU\_SPEC} and {\ct NU\_MATL} to designate how much of the material mass is converted to a gas {\ct SPEC}ies and how much to a solid {\ct MAT}eria{\ct L}. In this case, {\ct 'CELLULOSE'} is the gas-phase fuel specified on the {\ct REAC} line. The gas species {\ct 'WATER VAPOR'} is defined by a {\ct SPEC} line. Even though water vapor is included in the combustion products, you still need to explicitly specify {\ct 'WATER VAPOR'} as the gasified form of the moisture in the pine needles.
 
 Finally, the pine needles are introduced into the simulation via the {\ct INIT} line:
 \begin{lstlisting}
@@ -6754,6 +6746,120 @@ In the example, 1~kg of wet pine needles occupy 1~m$^3$. The number of particles
 \end{figure}
 
 
+\subsection{Boundary Fuel Model}
+\label{info:boundary_fuel_model}
+
+In many simulations of wildland fire, the ground vegetation is too thin to be resolved explicitly, as is done when using Lagrangian particles to represent the vegetation. In such cases, the ground vegetation can be modeled as a porous boundary consisting of a layer of dry vegetation, moisture and air, underneath of which is hard ground. The drag exerted by the vegetation is modeled using a special velocity boundary condition, and convective heat transfer is modeled via a source term in the one-dimensional heat conduction equation that is solved through the layer of vegetation and solid ground. Thermal radiation penetrates the vegetation layer via a 1-D radiative transport equation that is used for semi-transparent solids.
+
+To invoke this {\em Boundary Fuel Model}, you need to generate a {\ct SURF} line similar to the following:
+\begin{lstlisting}
+&SURF ID = 'Ground Vegetation'
+      MATL_ID(1,1) = 'Dry Vegetation'
+      MATL_ID(2,1) = 'Soil'
+      MOISTURE_FRACTION(1) = 0.218
+      SURFACE_VOLUME_RATIO(1) = 3092.
+      PACKING_RATIO(1) = 0.01
+      THICKNESS(1:2) = 0.076,0.1 /
+\end{lstlisting}
+The presence of the parameters {\ct PACKING\_RATIO} and {\ct SURFACE\_VOLUME\_RATIO} automatically trigger the Boundary Fuel Model. Note that the argument for each refers to the first layer; the second layer being {\ct Soil}. If you specify a {\ct PACKING\_RATIO}, FDS will automatically add {\ct AIR} as an additional material, and you do not need to add it yourself unless you want to modify the default {\ct MATL} line:
+\begin{lstlisting}
+&MATL ID = 'AIR'
+      DENSITY = 1.2
+      CONDUCTIVITY = 0.026
+      SPECIFIC_HEAT = 1.01 /
+\end{lstlisting}
+The same is true for water---if you specify {\ct MOISTURE\_FRACTION}, FDS will automatically add the {\ct MATL} line for {\ct 'MOISTURE'}.
+
+The drag exerted on the wind flowing through the vegetation is imposed as a force term in the gas phase grid cell adjacent to the boundary:
+\be
+    \bof_{\rm b} = \frac{\rho}{2} \, C_{\rm s} \, \sigma \, \beta \, C_{\rm d} \, \frac{h_{\rm b}}{\dz} \, \bu ||\bu||
+\ee
+where $\rho$ is the density of the gas, $C_{\rm s}$ is the {\ct SHAPE\_FACTOR} of the subgrid-scale vegetation (0.25 by default), $\sigma$ is the surface area to volume ratio ({\ct SURFACE\_VOLUME\_RATIO}), $\beta$ is the {\ct PACKING\_RATIO}, $C_{\rm d}$ is the {\ct DRAG\_COEFFICIENT} (2.8 by default), $h_{\rm b}$ is the depth of the vegetation ({\ct THICKNESS(1)}), $\dz$ is the height of the grid cell, and $\bu$ is the gas velocity in the first grid cell.
+
+Thermal radiation is absorbed in depth according to a 1-D radiative transport solver. The absorption coefficient is given by:
+\be
+   \kappa = C_{\rm s} \, \sigma \, \beta
+\ee
+Thermal convection is not imposed at the interface between the gas phase and the vegetation layer, but rather is imposed via a source term in the 1-D heat conduction solver:
+\be
+   \langle \dq_{\rm c,b}''' \rangle = \sigma \, \beta \, \dq_{\rm c}''
+\ee
+where $\dq_{\rm c}''$ is given in Eq.~(\ref{q_con}) under the assumption that the subgrid-scale vegetation is cylindrical and the gas velocity and temperature are taken from the first gas phase grid cell adjacent to the boundary.
+
+
+\subsection{Comparing the Particle and Boundary Fuel Models of Vegetation}
+\label{ground_vegetation}
+
+For the purpose of comparing the two methods of representing ground vegetation, either as particles or a porous boundary, consider the simple test cases in the sample folder named {\ct WUI} (Wildland-Urban Interface) under the heading {\ct ground\_vegetation}.
+
+\subsubsection{Combustible Load}
+\label{ground_vegetation_load}
+
+In the first case, {\ct WUI/ground\_vegetation\_load.fds}, two 3~m long channels contain $A=1$~m$^2$ of generic ground vegetation with a packing ratio, $\beta=0.01$, dry density, $\rho_{\rm dry}=400$~kg/m$^3$, height, $h_{\rm b}=0.075$~m, char yield, $y_{\rm char}=0.25$, moisture fraction, $M=0.1$. The ceiling of the channel is set to 700~$^\circ$C and the lateral walls are periodic, mimicking an infinitely wide fire front. No wind is imposed in this example. The total amount of combustibles is:
+\be
+   \beta \, \rho_{\rm dry} \, h_{\rm b} \, (1-y_{\rm char}) \, A = 0.225 \; \hbox{kg}
+\ee
+Notice that the moisture fraction is not used to determine the combustible load---the packing ratio is based on the dry fuel load.
+
+Figure~\ref{ground_vegetation_load_fig} displays the heat release rate (left) and cumulative mass consumption (right) of the two calculations.
+
+\begin{figure}[ht]
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ground_vegetation_load_HRR}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ground_vegetation_load_Mass}
+\caption[Results of the {\ct ground\_vegetation\_load} test case]{(Left) Heat release rate of the two ground vegetation simulations. (Right) Cumulative mass consumption of the two cases.}
+\label{ground_vegetation_load_fig}
+\end{figure}
+
+\subsubsection{Vegetation Drag}
+\label{ground_vegetation_drag}
+
+In this next example, ground vegetation with the same properties as the previous example lines the floor of two wind tunnels that are 8~m long, 1~m wide, and 0.5~m tall. The height of the vegetation is 2.5~cm, and the grid size in the simulation is 5~cm. The tunnel walls and ceiling are free-slip. Particles model the vegetation in one tunnel; the Boundary Fuel Model is applied in the other. A 2~m/s wind is imposed, and the pressure upstream of the vegetation is recorded. The tunnel is open downstream, where the pressure is ambient. The upstream pressure ought to be similar, as shown in Fig.~\ref{ground_vegetation_drag_fig}.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ground_vegetation_drag}
+\caption[Results of the {\ct ground\_vegetation\_drag} test case]{Pressure upwind of a 6~m wide strip of ground vegetation.}
+\label{ground_vegetation_drag_fig}
+\end{figure}
+
+\subsubsection{Vegetation Radiation Absorption}
+\label{ground_vegetation_radi}
+
+In this next example, ground vegetation lines the floors of two unit cubes with hot ceilings and cold floors. The walls are {\ct MIRROR} boundaries so that the ceiling and floor can be taken as infinitely wide parallel plates. The height of the vegetation is $\delta=0.05$~m, and the grid size in the simulation is 5~cm.  Particles model the vegetation in one cube; the Boundary Fuel Model is applied in the other. The surface area to volume ratio of the vegetation, $\sigma_{\rm v}=3092$~m$^{-1}$, the packing ratio, $\beta=0.02$, and the shape factor, $C_{\rm s}$=0.25. The ceiling temperature, $T_{\rm c}=993$~K; the floor temperature, $T_{\rm f}=293$~K. The emissivity of both surfaces is 1. The radiation absorption coefficient, $\kappa \equiv C_{\rm s} \sigma_{\rm v} \beta=15.46$~m$^{-1}$, and the expected heat flux to the floor is:
+\be
+   \dq'' = \sigma (T_{\rm c}^4-T_{\rm f}^4) \, {\rm e}^{- 2 \kappa \delta} = 10.7 \; \hbox{kW/m}^2
+\ee
+The results are shown in Fig.~\ref{ground_vegetation_radi_fig}. The Lagrangian particles that represent the vegetation only occupy a single layer of grid cells; thus, the radiation absorption calculation for particles is not expected to be accurate.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ground_vegetation_radi_HF}
+\caption[Results of the {\ct ground\_vegetation\_radi} test case]{Heat flux penetrating a patch of ground vegetation.}
+\label{ground_vegetation_radi_fig}
+\end{figure}
+
+\subsubsection{Vegetation Convective Heating}
+\label{ground_vegetation_conv}
+
+In this next example, two small wind tunnels blowing hot air at $U=2$~m/s and $T_{\rm air}=300$~$^\circ$C contain small amounts of vegetation modeled using either Lagrangian particles or the Boundary Fuel Model. The tunnel walls are {\ct ADIABATIC} so that the air temperature remains fixed. In one tunnel, two cylindrical particles of different diameters ($\sigma_{\rm v,A}=3000$~m$^{-1}$ and $\sigma_{\rm v,B}=1500$~m$^{-1}$)  occupy adjacent grid cells that abut the solid floor. In the other tunnel, two adjacent patches on the floor represent the equivalent amount of vegetation via the Boundary Fuel Model. The initial vegetation temperature is $T_0=20$~$^\circ$C. Radiation heat transfer is turned off. The expected temperature increase with time is found by solving:
+\be
+   \rho_{\rm s} \, c_{\rm s} \, \frac{\d T}{\d t} = \sigma_{\rm v} \, h \, (T_{\rm air} - T)  \quad ; \quad   h= \frac{k_{\rm air}}{D} \, 0.683 \, \RE^{0.466} \, \PR^{0.333}  \quad ; \quad  \RE = \frac{\rho_{\rm air} U D}{\mu_{\rm air}} \quad ; \quad \PR=0.7
+\ee
+where the solid density $\rho_{\rm s}=400$~kg/m$^3$, specific heat $c_{\rm s}=1.5$~kJ/(kg$\cdot$K), $\rho_{\rm air}\approx 0.60$~kg/m$^3$, $\mu_{\rm air}\approx 3 \times 10^{-5}$~kg/(m$\cdot$s), $k_{\rm air}\approx 4 \times 10^{-5}$~kW/(m$\cdot$K), $D=4/\sigma_{\rm v}$. The solution is:
+\be
+   T(t) = T_{\rm air} - (T_{\rm air}-T_0) \, \exp \left(- \frac{h \, \sigma}{\rho_{\rm s} \, c_{\rm s}} \right) \; ^\circ\hbox{C}
+\ee
+The resulting vegetation temperatures are shown in Fig.~\ref{ground_vegetation_conv_fig}.
+
+\begin{figure}[ht]
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ground_vegetation_conv_temp_A}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ground_vegetation_conv_temp_B}
+\caption[Results of the {\ct ground\_vegetation\_conv} test case]{Temperature of convectively heated vegetation of two different sizes. (Left) $\sigma_{\rm v}=3000$~m$^{-1}$. (Right) $\sigma_{\rm v}=1500$~m$^{-1}$.}
+\label{ground_vegetation_conv_fig}
+\end{figure}
+
+
+\FloatBarrier
 
 \subsection{Firebrands}
 \label{info:firebrands}
@@ -9100,6 +9206,9 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct ADD\_Z}$^1$                                & Avg.~Droplet Diameter                             & $\mu$m         & D,I,P,S      \\ \hline
 {\ct ADT}$^2$                                   & Avg.~Droplet Temperature                          & $^\circ$C      & D,I,P,S      \\ \hline
 {\ct ADT\_Z}$^1$                                & Avg.~Droplet Temperature                          & $^\circ$C      & D,I,P,S      \\ \hline
+%{\ct ADVECTIVE MASS FLUX X}                     & $\overline{\rho Y_\alpha} u$                        & kg/s/m$^2$     & D,I,P,S      \\ \hline
+%{\ct ADVECTIVE MASS FLUX Y}                     & $\overline{\rho Y_\alpha} v$                        & kg/s/m$^2$     & D,I,P,S      \\ \hline
+%{\ct ADVECTIVE MASS FLUX Z}                     & $\overline{\rho Y_\alpha} w$                        & kg/s/m$^2$     & D,I,P,S      \\ \hline
 {\ct ASSUMED GAS TEMPERATURE}                   & Section~\ref{solid_phase_verification}            & $^\circ$C      & D,I,P,S      \\ \hline
 {\ct C\_SMAG}                                   & Smagorinsky coefficient                           &                & D,I,P,S      \\ \hline
 {\ct AUTO IGNITION TEMPERATURE}$^5$             & Section \ref{info:ignition}                       & $^\circ$C      & D,I,P,S      \\ \hline
@@ -9116,6 +9225,9 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct CHEMISTRY SUBITERATIONS}                   & Section~\ref{info:chem_integration}               &                & D,S          \\ \hline
 {\ct COMBUSTION EFFICIENCY}                     & $\min(\delta t/\tau_{\mathrm{mix}},1)$, if $\dq'''>0$, else 0 &    & D,I,P,S      \\ \hline
 {\ct DIFFUSIVITY}$^1$                           & Species diffusivity                               & m$^2$/s        & D,I,P,S      \\ \hline
+%{\ct DIFFUSIVE MASS FLUX X}                     & $\rho D_\alpha \partial Y_\alpha/\partial x$       & kg/s/m$^2$     & D,I,P,S      \\ \hline
+%{\ct DIFFUSIVE MASS FLUX Y}                     & $\rho D_\alpha \partial Y_\alpha/\partial y$       & kg/s/m$^2$     & D,I,P,S      \\ \hline
+%{\ct DIFFUSIVE MASS FLUX Z}                     & $\rho D_\alpha \partial Y_\alpha/\partial z$       & kg/s/m$^2$     & D,I,P,S      \\ \hline
 {\ct DISSIPATION RATE}                          & $\mu / \rho \times $ {\ct STRAIN RATE}            & m$^2$/s$^3$    & D,I,P,S      \\ \hline
 {\ct EMISSIVITY}                                & Surface emissivity (usually constant)             &                & B,D          \\ \hline
 {\ct EXTINCTION}                                & Section~\ref{info:extinct_out}                    &                & D,S          \\ \hline
@@ -9149,13 +9261,17 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct RADIAL VELOCITY}                           & $(u,v)\cdot(x,y)/\sqrt{x^2+y^2}$                  & m/s            & D,I,P,S      \\ \hline
 {\ct RADIATION LOSS}                            & $\nabla \cdot \bq_r''$                            & kW/m$^3$       & D,I,P,S      \\ \hline
 {\ct RANDOM NUMBER}                             & Uniform random variable over [0,1]                &                & D            \\ \hline
-{\ct STRAIN RATE}                               & $2(S_{ij}S_{ij}-1/3(\nabla\cdot\mathbf{u})^2)$    & 1/s            & D,I,P,S      \\ \hline
+{\ct REAC SOURCE TERM}$^1$                      & $\dot{m}_\alpha^{\prime\prime\prime}$             & kg-$\alpha$/m$^3$  & D,I,P,S      \\ \hline
+{\ct STRAIN RATE}                               & $2(S_{ij}S_{ij}-1/3(\nabla\cdot\mathbf{u})^2)$          & 1/s            & D,I,P,S      \\ \hline
 {\ct STRAIN RATE X}                             & $\partial w/\partial y + \partial v/\partial z$   & 1/s            & D,I,P,S      \\ \hline
 {\ct STRAIN RATE Y}                             & $\partial u/\partial z + \partial w/\partial x$   & 1/s            & D,I,P,S      \\ \hline
 {\ct STRAIN RATE Z}                             & $\partial v/\partial x + \partial u/\partial y$   & 1/s            & D,I,P,S      \\ \hline
 {\ct SUBGRID KINETIC ENERGY}                    & Section~\ref{info:meshquality}                    & \si{m^2/s^2}   & D,S          \\ \hline
 {\ct SUM LUMPED MASS FRACTIONS}                 & $\sum_i Z_i$ (should be 1)                        &                & D,S          \\ \hline
 {\ct SUM PRIMITIVE MASS FRACTIONS}              & $\sum_\alpha Y_\alpha$ (should be 1)              &                & D,S          \\ \hline
+%{\ct TOTAL MASS FLUX X} & $\overline{\rho Y_\alpha} u + \rho D_\alpha \partial Y_\alpha/\partial x$ & kg/s/m$^2$     & D,I,P,S      \\ \hline
+%{\ct TOTAL MASS FLUX Y} & $\overline{\rho Y_\alpha} v + \rho D_\alpha \partial Y_\alpha/\partial y$ & kg/s/m$^2$     & D,I,P,S      \\ \hline
+%{\ct TOTAL MASS FLUX Z} & $\overline{\rho Y_\alpha} w + \rho D_\alpha \partial Y_\alpha/\partial z$ & kg/s/m$^2$     & D,I,P,S      \\ \hline
 {\ct VELOCITY ERROR}                            & Section~\ref{info:PRES}                           &                & B            \\ \hline
 {\ct VISCOUS WALL UNITS}                        & Section~\ref{info:yplus}                          &                & B,D          \\ \hline
 {\ct VN}                                        & Section~\ref{info:TIMING}                         &                & D,I,P,S      \\ \hline
@@ -9525,6 +9641,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct SMOKE3D\_QUANTITY}             & Character    & Section~\ref{info:SMOKE3D}             &           &                                \\ \hline
 {\ct SMOKE3D\_SPEC\_ID}             & Character    & Section~\ref{info:SMOKE3D}             &           &                                \\ \hline
 {\ct STATUS\_FILES}                 & Logical      & Section~\ref{info:DUMP}                &           & {\ct .FALSE.}                  \\ \hline
+%{\ct STORE\_SPECIES\_FLUX}          & Logical      & Section~\ref{info:DUMP}                &           & {\ct .FALSE.}                  \\ \hline
 {\ct SUPPRESS\_DIAGNOSTICS}         & Logical      & Section~\ref{info:monitoring_progress} &           & {\ct .FALSE.}                  \\ \hline
 {\ct UVW\_TIMER}                    & Real Vector (10)  & Section~\ref{info:velo_restart}   &  s        &                                \\ \hline
 {\ct VELOCITY\_ERROR\_FILE}         & Logical      & Section~\ref{info:TIMING}              &           & {\ct .FALSE.}                  \\ \hline
@@ -10570,11 +10687,12 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MATL\_MASS\_FRACTION(NL,NC)}       & Real Array      & Section~\ref{info:solid_pyrolysis}        &                     &                         \\ \hline
 {\ct MINIMUM\_LAYER\_THICKNESS}         & Real            & Section~\ref{info:solid_phase_stability}  & m                   & 1.E-6                   \\ \hline
 {\ct MLRPUA }                           & Real            & Section~\ref{info:gas_burner}             & \si{kg/(m^2.s)}     &                         \\ \hline
-{\ct MOISTURE\_FRACTION}                & Real            & Section~\ref{info:vegetation}             &                     & 0.                      \\ \hline
+{\ct MOISTURE\_FRACTION(:)}             & Real Array      & Section~\ref{info:vegetation}             &                     & 0.                      \\ \hline
 {\ct N\_LAYER\_CELLS\_MAX}              & Integer Array   & Section~\ref{info:solid_phase_stability}  &                     & 1000                    \\ \hline
 {\ct NET\_HEAT\_FLUX}                   & Real            & Section~\ref{info:convection}             & kW/m$^2$            &                         \\ \hline
 {\ct NO\_SLIP}                          & Logical         & Section~\ref{info:WALL_MODEL}             &                     & {\ct .FALSE.}           \\ \hline
 {\ct NPPC}                              & Integer         & Section~\ref{info:particle_flux}          &                     & 1                       \\ \hline
+{\ct PACKING\_RATIO(:) }                & Real Array      & Section~\ref{pine_needles}                &                     &                         \\ \hline
 {\ct PARTICLE\_MASS\_FLUX}              & Real            & Section~\ref{info:particle_flux}          & \si{kg/(m^2.s)}     &                         \\ \hline
 {\ct PARTICLE\_SURFACE\_DENSITY}        & Real            & Section~\ref{info:particle_flux}          & kg/m$^2$            &                         \\ \hline
 {\ct PART\_ID}                          & Character       & Section~\ref{info:particle_flux}          &                     &                         \\ \hline
@@ -10596,7 +10714,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SPEC\_ID}                          & Character       & Section~\ref{info:MASS_FLUX}              &                     &                         \\ \hline
 {\ct SPREAD\_RATE}                      & Real            & Section~\ref{info:spread}                 & m/s                 &                         \\ \hline
 {\ct STRETCH\_FACTOR(:) }               & Real            & Section~\ref{info:solid_phase_stability}  &                     & 2.                      \\ \hline
-{\ct SURFACE\_VOLUME\_RATIO }           & Real            & Section~\ref{pine_needles}                & 1/m                 &                         \\ \hline
+{\ct SURFACE\_VOLUME\_RATIO(:) }        & Real            & Section~\ref{pine_needles}                & 1/m                 &                         \\ \hline
 {\ct TAU\_EF}                           & Real            & Section~\ref{info:RAMP_Time}              & s                   & 1.                      \\ \hline
 {\ct TAU\_MF(:)}                        & Real            & Section~\ref{info:RAMP_Time}              & s                   & 1.                      \\ \hline
 {\ct TAU\_PART}                         & Real            & Section~\ref{info:RAMP_Time}              & s                   & 1.                      \\ \hline

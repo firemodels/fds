@@ -224,6 +224,12 @@ ELSE
             CALL DUMP_MMS(NM,FN_MMS,T)
             MMS_TIMER=HUGE_EB
          ENDIF
+      CASE(21,22,23)
+         IF (T>=MMS_TIMER .AND. NM==1) THEN
+            WRITE(FN_MMS,'(A,A)') TRIM(CHID),'_mms.csv'
+            CALL DUMP_ROTCUBE_MMS(NM,FN_MMS,T)
+            MMS_TIMER=HUGE_EB
+         ENDIF
       CASE(9)
          IF (T>=UVW_CLOCK_CBC(MESHES(NM)%IUVW)) THEN
             WRITE(FN_SPEC,'(A,A,I3.3,A)') TRIM(CHID),'_spec_',MESHES(NM)%IUVW,'.csv'
@@ -2555,6 +2561,7 @@ SUBROUTINE INITIALIZE_DIAGNOSTIC_FILE(DT)
 USE RADCONS, ONLY: NRT,RSA,NRP,TIME_STEP_INCREMENT,PATH_LENGTH
 USE MATH_FUNCTIONS, ONLY : EVALUATE_RAMP
 USE MISC_FUNCTIONS, ONLY : WRITE_SUMMARY_INFO
+USE PHYSICAL_FUNCTIONS, ONLY: GET_VISCOSITY, GET_CONDUCTIVITY, GET_SPECIFIC_HEAT, GET_ENTHALPY
 USE SCRC, ONLY: SCARC_METHOD, SCARC_DISCRETIZATION, SCARC_MULTIGRID, SCARC_SMOOTH, SCARC_PRECON, &
                 SCARC_COARSE, SCARC_MULTIGRID_CYCLE, SCARC_MULTIGRID_COARSENING, &
                 SCARC_MULTIGRID_ITERATIONS, SCARC_MULTIGRID_ACCURACY, SCARC_MULTIGRID_INTERPOL, &
@@ -2562,6 +2569,7 @@ USE SCRC, ONLY: SCARC_METHOD, SCARC_DISCRETIZATION, SCARC_MULTIGRID, SCARC_SMOOT
 
 REAL(EB), INTENT(IN) :: DT
 INTEGER :: NM,I,NN,N,NR,NL,NS,ITMP, CELL_COUNT
+REAL(EB) ::ZZ_GET(1:N_TRACKED_SPECIES), MU_Z,K_Z,CP_ZN,H_Z
 CHARACTER(LABEL_LENGTH) :: QUANTITY,ODE_SOLVER,OUTFORM
 TYPE(SPECIES_MIXTURE_TYPE),POINTER :: SM=>NULL()
 
@@ -2669,6 +2677,7 @@ SPEC_LOOP: DO N=1,N_SPECIES
          WRITE(LU_OUTPUT,'( 3X,A)') 'Gas Species'
       CASE (AEROSOL_SPECIES)
          WRITE(LU_OUTPUT,'( 3X,A)') 'Aerosol'
+         IF (SS%CONDENSABLE) WRITE(LU_OUTPUT,'( 3X,A)') 'Condensable Species'
    END SELECT
    WRITE(LU_OUTPUT,'(A,F11.5)')   '   Molecular Weight (g/mol)         ',SS%MW
    WRITE(LU_OUTPUT,'(A,F8.3)')    '   Ambient Density (kg/m^3)         ',SS%MW*P_INF/(TMPA*R0)
@@ -2685,6 +2694,8 @@ WRITE(LU_OUTPUT,'(//A)') ' Tracked (Lumped) Species Information'
 
 DO N=1,N_TRACKED_SPECIES
    SM=>SPECIES_MIXTURE(N)
+   ZZ_GET = 0._EB
+   ZZ_GET(N) = 1._EB
    WRITE(LU_OUTPUT,'(/3X,A)') TRIM(SM%ID)
    WRITE(LU_OUTPUT,'(A,F11.5)')   '   Molecular Weight (g/mol)         ',SM%MW
    WRITE(LU_OUTPUT,'(A,F8.3)')    '   Ambient Density (kg/m^3)         ',SM%MW*P_INF/(TMPA*R0)
@@ -2697,22 +2708,38 @@ DO N=1,N_TRACKED_SPECIES
    ENDDO
    ITMP = NINT(TMPA)
    WRITE(LU_OUTPUT,'(A)') ' '
-   WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '     Viscosity (kg/m/s) Ambient, ',ITMP,' K: ', MU_RSQMW_Z(ITMP,N)/RSQ_MW_Z(N)
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', MU_RSQMW_Z( 500,N)/RSQ_MW_Z(N)
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', MU_RSQMW_Z(1000,N)/RSQ_MW_Z(N)
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', MU_RSQMW_Z(1500,N)/RSQ_MW_Z(N)
-   WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '   Therm. Cond. (W/m/K) Ambient, ',ITMP,' K: ', K_RSQMW_Z(ITMP,N)/RSQ_MW_Z(N)
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', K_RSQMW_Z( 500,N)/RSQ_MW_Z(N)
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', K_RSQMW_Z(1000,N)/RSQ_MW_Z(N)
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', K_RSQMW_Z(1500,N)/RSQ_MW_Z(N)
-   WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '        Enthalpy (J/kg) Ambient, ',ITMP,' K: ', CPBAR_Z(ITMP,N)*TMPA
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', CPBAR_Z(500,N)*500._EB
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', CPBAR_Z(1000,N)*1000._EB
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', CPBAR_Z(1500,N)*1500._EB
-   WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '    Spec. Heat (J/kg/K) Ambient, ',ITMP,' K: ', CP_Z(ITMP,N)
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', CP_Z( 500,N)
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', CP_Z(1000,N)
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', CP_Z(1500,N)
+   CALL GET_VISCOSITY(ZZ_GET,MU_Z,TMPA)
+   WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '     Viscosity (kg/m/s) Ambient, ',ITMP,' K: ', MU_Z
+   CALL GET_VISCOSITY(ZZ_GET,MU_Z,500._EB)
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', MU_Z
+   CALL GET_VISCOSITY(ZZ_GET,MU_Z,1000._EB)
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', MU_Z
+   CALL GET_VISCOSITY(ZZ_GET,MU_Z,1500._EB)
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', MU_Z
+   CALL GET_CONDUCTIVITY(ZZ_GET,K_Z,TMPA)
+   WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '   Therm. Cond. (W/m/K) Ambient, ',ITMP,' K: ', K_Z
+   CALL GET_CONDUCTIVITY(ZZ_GET,K_Z,500._EB)
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', K_Z
+   CALL GET_CONDUCTIVITY(ZZ_GET,K_Z,1000._EB)
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', K_Z
+   CALL GET_CONDUCTIVITY(ZZ_GET,K_Z,1500._EB)
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', K_Z
+   CALL GET_ENTHALPY(ZZ_GET,H_Z,TMPA)
+   WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '        Enthalpy (J/kg) Ambient, ',ITMP,' K: ', H_Z
+   CALL GET_ENTHALPY(ZZ_GET,H_Z,500._EB)
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', H_Z
+   CALL GET_ENTHALPY(ZZ_GET,H_Z,1000._EB)
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', H_Z
+   CALL GET_ENTHALPY(ZZ_GET,H_Z,1500._EB)
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', H_Z
+   CALL GET_SPECIFIC_HEAT(ZZ_GET,CP_ZN,TMPA)
+   WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '    Spec. Heat (J/kg/K) Ambient, ',ITMP,' K: ', CP_ZN
+   CALL GET_SPECIFIC_HEAT(ZZ_GET,CP_ZN,500._EB)
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', CP_ZN
+   CALL GET_SPECIFIC_HEAT(ZZ_GET,CP_ZN,1000._EB)
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', CP_ZN
+   CALL GET_SPECIFIC_HEAT(ZZ_GET,CP_ZN,1500._EB)
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', CP_ZN
    WRITE(LU_OUTPUT,'(A,I4,A,ES9.2)')  '   Diff. Coeff. (m^2/s) Ambient, ',ITMP,' K: ', D_Z(ITMP,N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', D_Z( 500,N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', D_Z(1000,N)
@@ -2827,18 +2854,19 @@ REACTION_LOOP: DO N=1,N_REACTIONS
 ENDDO REACTION_LOOP
 
 ! Print out information about agglomeration
-
-IF (AGGLOMERATION_INDEX>0) THEN
-   WRITE(LU_OUTPUT,'(//A)')    ' Agglomeration Information'
-   WRITE(LU_OUTPUT,'(/A,A)')   '     Agglomerating Species:         ',&
-                                     TRIM(SPECIES(SPECIES_MIXTURE(AGGLOMERATION_INDEX)%SINGLE_SPEC_INDEX)%ID)
-   WRITE(LU_OUTPUT,'(A,I0)')   '     Number of Particle Bins:       ',N_PARTICLE_BINS
-   WRITE(LU_OUTPUT,'(A,F9.3)') '     Particle Density (kg/m^3):     ',SPECIES_MIXTURE(AGGLOMERATION_INDEX)%DENSITY_SOLID
-   WRITE(LU_OUTPUT,'(A,F8.3)') '     Minimum Particle Diameter (um):',MIN_PARTICLE_DIAMETER*1.E6_EB
-   WRITE(LU_OUTPUT,'(A,F8.3)') '     Maximum Particle Diameter (um):',MAX_PARTICLE_DIAMETER*1.E6_EB
-   WRITE(LU_OUTPUT,'(A)')      '     Bin #  Bin Diameter (um)'
-   DO N=1,N_PARTICLE_BINS
-      WRITE(LU_OUTPUT,'(A,I3,A,F8.3)') '     ',N,'        ',2._EB*PARTICLE_RADIUS(N)*1.E6_EB
+IF (N_AGGLOMERATION_SPECIES > 0) THEN
+   DO NN=1,N_AGGLOMERATION_SPECIES
+      WRITE(LU_OUTPUT,'(//A)')    ' Agglomeration Information'
+      WRITE(LU_OUTPUT,'(/A,A)')   '     Agglomerating Species:         ',&
+                                        TRIM(SPECIES(AGGLOMERATION_SPEC_INDEX(NN))%ID)
+      WRITE(LU_OUTPUT,'(A,I0)')   '     Number of Particle Bins:       ',N_PARTICLE_BINS(NN)
+      WRITE(LU_OUTPUT,'(A,F9.3)') '     Particle Density (kg/m^3):     ',SPECIES(AGGLOMERATION_SPEC_INDEX(NN))%DENSITY_SOLID
+      WRITE(LU_OUTPUT,'(A,F8.3)') '     Minimum Particle Diameter (um):',MIN_PARTICLE_DIAMETER(NN)*1.E6_EB
+      WRITE(LU_OUTPUT,'(A,F8.3)') '     Maximum Particle Diameter (um):',MAX_PARTICLE_DIAMETER(NN)*1.E6_EB
+      WRITE(LU_OUTPUT,'(A)')      '     Bin #  Bin Diameter (um)'
+      DO N=1,N_PARTICLE_BINS(NN)
+         WRITE(LU_OUTPUT,'(A,I3,A,F8.3)') '     ',N,'        ',2._EB*PARTICLE_RADIUS(NN,N)*1.E6_EB
+      ENDDO
    ENDDO
 ENDIF
 
@@ -5861,7 +5889,7 @@ DEVICE_LOOP: DO N=1,N_DEVC
    ! Create a smoothed output
 
    IF (DV%SMOOTHED_VALUE < -1.E9_EB) DV%SMOOTHED_VALUE = DV%INSTANT_VALUE
-   DV%SMOOTHED_VALUE = DV%SMOOTHED_VALUE*DV%SMOOTHING_FACTOR + DV%VALUE_1*(1._EB-DV%SMOOTHING_FACTOR)
+   DV%SMOOTHED_VALUE = DV%SMOOTHED_VALUE*DV%SMOOTHING_FACTOR + DV%INSTANT_VALUE*(1._EB-DV%SMOOTHING_FACTOR)
 
    ! Do not start summing time devices if this is the start of the simulation
 
@@ -6058,8 +6086,12 @@ IND_SELECT: SELECT CASE(IND)
          GAS_PHASE_OUTPUT_RES = 0._EB
       ELSE
          ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(II,JJ,KK,1:N_TRACKED_SPECIES)
-         CALL GET_MASS_FRACTION_ALL(ZZ_GET,Y_ALL)
-         GAS_PHASE_OUTPUT_RES = RELATIVE_HUMIDITY(Y_ALL(H2O_INDEX),TMP(II,JJ,KK),PBAR(KK,PRESSURE_ZONE(II,JJ,KK)))
+         CALL GET_MASS_FRACTION(ZZ_GET,H2O_INDEX,Y_H2O)
+         IF (H2O_SMIX_INDEX > 0) THEN
+            IF (SPECIES_MIXTURE(H2O_SMIX_INDEX)%CONDENSATION_SMIX_INDEX > 0) &
+               Y_H2O = Y_H2O - ZZ_GET(SPECIES_MIXTURE(H2O_SMIX_INDEX)%CONDENSATION_SMIX_INDEX)
+         ENDIF
+         GAS_PHASE_OUTPUT_RES = RELATIVE_HUMIDITY(Y_H2O,TMP(II,JJ,KK),PBAR(KK,PRESSURE_ZONE(II,JJ,KK)))
       ENDIF
    CASE(22)  ! HS
       GAS_PHASE_OUTPUT_RES = HS(II,JJ,KK)
@@ -6486,6 +6518,9 @@ IND_SELECT: SELECT CASE(IND)
       IF (IND==112 .OR. IND==115 .OR. IND==118) FLOW_INDEX = 2  ! MASS FLOW
       IF (IND==113 .OR. IND==116 .OR. IND==119) FLOW_INDEX = 3  ! HEAT FLOW
       FLOW = 0._EB
+      VEL  = 0._EB
+      AREA = 0._EB
+      HMFAC= 0._EB
       DO K=SDV%K1,SDV%K2
          DO J=SDV%J1,SDV%J2
             DO I=SDV%I1,SDV%I2
@@ -6516,11 +6551,15 @@ IND_SELECT: SELECT CASE(IND)
                      CASE(1)
                         HMFAC = 1._EB
                      CASE(2)
+                        Y_SPECIES =1._EB
                         Y_SPECIES2=1._EB
-                        ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(IP,JP,KP,1:N_TRACKED_SPECIES)
                         IF (Z_INDEX > 0) THEN
-                           Y_SPECIES2 = ZZ_GET(Z_INDEX)
+                           Y_SPECIES  = ZZ(I ,J ,K ,Z_INDEX)
+                           Y_SPECIES2 = ZZ(IP,JP,KP,Z_INDEX)
                         ELSEIF (Y_INDEX > 0) THEN
+                           ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(I ,J ,K ,1:N_TRACKED_SPECIES)
+                           CALL GET_MASS_FRACTION(ZZ_GET,Y_INDEX,Y_SPECIES )
+                           ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(IP,JP,KP,1:N_TRACKED_SPECIES)
                            CALL GET_MASS_FRACTION(ZZ_GET,Y_INDEX,Y_SPECIES2)
                         ENDIF
                         HMFAC = 0.5_EB*(Y_SPECIES*RHO(I,J,K)+Y_SPECIES2*RHO(IP,JP,KP))
@@ -6584,7 +6623,12 @@ IND_SELECT: SELECT CASE(IND)
       GAS_PHASE_OUTPUT_RES = CHEM_SUBIT(II,JJ,KK)
 
    CASE(132) ! REAC SOURCE TERM
+      GAS_PHASE_OUTPUT_RES = 0._EB
+      IF (Z_INDEX>0) THEN
       GAS_PHASE_OUTPUT_RES = REAC_SOURCE_TERM(II,JJ,KK,Z_INDEX)
+      ELSEIF (Y_INDEX>0) THEN
+         GAS_PHASE_OUTPUT_RES = DOT_PRODUCT(Z2Y(Y_INDEX,1:N_TRACKED_SPECIES),REAC_SOURCE_TERM(II,JJ,KK,1:N_TRACKED_SPECIES))
+      ENDIF
 
    CASE(133) ! SUM LUMPED MASS FRACTIONS
       GAS_PHASE_OUTPUT_RES = SUM(ZZ(II,JJ,KK,1:N_TRACKED_SPECIES))
@@ -7100,7 +7144,7 @@ IND_SELECT: SELECT CASE(IND)
       ENDIF
    CASE(525)  ! TRI CORRECTION
       IF (TRI_MODEL) THEN
-         GAS_PHASE_OUTPUT_RES = TRI_COR(II,JJ,KK)
+         GAS_PHASE_OUTPUT_RES = TRI_COR(II,JJ,KK,1)
       ELSE
          GAS_PHASE_OUTPUT_RES = 1._EB
       ENDIF
@@ -7109,6 +7153,96 @@ IND_SELECT: SELECT CASE(IND)
          GAS_PHASE_OUTPUT_RES = TMP_FLAME(II,JJ,KK) - TMPM
       ELSE
          GAS_PHASE_OUTPUT_RES = TMP(II,JJ,KK) - TMPM
+      ENDIF
+   CASE(527)  ! FLAME INDEX
+      IF (FLAME_INDEX_MODEL) THEN
+         GAS_PHASE_OUTPUT_RES = FLAME_INDEX(II,JJ,KK)
+      ELSE
+         GAS_PHASE_OUTPUT_RES = -1._EB
+      ENDIF
+   CASE(528)  ! ADVECTIVE MASS FLUX X
+      GAS_PHASE_OUTPUT_RES = 0._EB
+      IF (STORE_SPECIES_FLUX) THEN
+         IF (Z_INDEX>0) THEN
+            GAS_PHASE_OUTPUT_RES = ADV_FX(II,JJ,KK,Z_INDEX)
+         ELSEIF (Y_INDEX>0) THEN
+            GAS_PHASE_OUTPUT_RES = DOT_PRODUCT( Z2Y(Y_INDEX,1:N_TRACKED_SPECIES), ADV_FX(II,JJ,KK,1:N_TRACKED_SPECIES) )
+         ENDIF
+      ENDIF
+   CASE(529)  ! ADVECTIVE MASS FLUX Y
+      GAS_PHASE_OUTPUT_RES = 0._EB
+      IF (STORE_SPECIES_FLUX) THEN
+         IF (Z_INDEX>0) THEN
+            GAS_PHASE_OUTPUT_RES = ADV_FY(II,JJ,KK,Z_INDEX)
+         ELSEIF (Y_INDEX>0) THEN
+            GAS_PHASE_OUTPUT_RES = DOT_PRODUCT( Z2Y(Y_INDEX,1:N_TRACKED_SPECIES), ADV_FY(II,JJ,KK,1:N_TRACKED_SPECIES) )
+         ENDIF
+      ENDIF
+   CASE(530)  ! ADVECTIVE MASS FLUX Z
+      GAS_PHASE_OUTPUT_RES = 0._EB
+      IF (STORE_SPECIES_FLUX) THEN
+         IF (Z_INDEX>0) THEN
+            GAS_PHASE_OUTPUT_RES = ADV_FZ(II,JJ,KK,Z_INDEX)
+         ELSEIF (Y_INDEX>0) THEN
+            GAS_PHASE_OUTPUT_RES = DOT_PRODUCT( Z2Y(Y_INDEX,1:N_TRACKED_SPECIES), ADV_FZ(II,JJ,KK,1:N_TRACKED_SPECIES) )
+         ENDIF
+      ENDIF
+   CASE(531)  ! DIFFUSIVE MASS FLUX X
+      GAS_PHASE_OUTPUT_RES = 0._EB
+      IF (STORE_SPECIES_FLUX) THEN
+         IF (Z_INDEX>0) THEN
+            GAS_PHASE_OUTPUT_RES = DIF_FX(II,JJ,KK,Z_INDEX)
+         ELSEIF (Y_INDEX>0) THEN
+            GAS_PHASE_OUTPUT_RES = DOT_PRODUCT( Z2Y(Y_INDEX,1:N_TRACKED_SPECIES), DIF_FX(II,JJ,KK,1:N_TRACKED_SPECIES) )
+         ENDIF
+      ENDIF
+   CASE(532)  ! DIFFUSIVE MASS FLUX Y
+      GAS_PHASE_OUTPUT_RES = 0._EB
+      IF (STORE_SPECIES_FLUX) THEN
+         IF (Z_INDEX>0) THEN
+            GAS_PHASE_OUTPUT_RES = DIF_FY(II,JJ,KK,Z_INDEX)
+         ELSEIF (Y_INDEX>0) THEN
+            GAS_PHASE_OUTPUT_RES = DOT_PRODUCT( Z2Y(Y_INDEX,1:N_TRACKED_SPECIES), DIF_FY(II,JJ,KK,1:N_TRACKED_SPECIES) )
+         ENDIF
+      ENDIF
+   CASE(533)  ! DIFFUSIVE MASS FLUX Z
+      GAS_PHASE_OUTPUT_RES = 0._EB
+      IF (STORE_SPECIES_FLUX) THEN
+         IF (Z_INDEX>0) THEN
+            GAS_PHASE_OUTPUT_RES = DIF_FZ(II,JJ,KK,Z_INDEX)
+         ELSEIF (Y_INDEX>0) THEN
+            GAS_PHASE_OUTPUT_RES = DOT_PRODUCT( Z2Y(Y_INDEX,1:N_TRACKED_SPECIES), DIF_FZ(II,JJ,KK,1:N_TRACKED_SPECIES) )
+         ENDIF
+      ENDIF
+   CASE(534)  ! TOTAL MASS FLUX X
+      GAS_PHASE_OUTPUT_RES = 0._EB
+      IF (STORE_SPECIES_FLUX) THEN
+         IF (Z_INDEX>0) THEN
+            GAS_PHASE_OUTPUT_RES = ADV_FX(II,JJ,KK,Z_INDEX) + DIF_FX(II,JJ,KK,Z_INDEX)
+         ELSEIF (Y_INDEX>0) THEN
+            GAS_PHASE_OUTPUT_RES = DOT_PRODUCT( Z2Y(Y_INDEX,1:N_TRACKED_SPECIES),&
+                                      (ADV_FX(II,JJ,KK,1:N_TRACKED_SPECIES) + DIF_FX(II,JJ,KK,1:N_TRACKED_SPECIES)) )
+         ENDIF
+      ENDIF
+   CASE(535)  ! TOTAL MASS FLUX Y
+      GAS_PHASE_OUTPUT_RES = 0._EB
+      IF (STORE_SPECIES_FLUX) THEN
+         IF (Z_INDEX>0) THEN
+            GAS_PHASE_OUTPUT_RES = ADV_FY(II,JJ,KK,Z_INDEX) + DIF_FY(II,JJ,KK,Z_INDEX)
+         ELSEIF (Y_INDEX>0) THEN
+            GAS_PHASE_OUTPUT_RES = DOT_PRODUCT( Z2Y(Y_INDEX,1:N_TRACKED_SPECIES),&
+                                      (ADV_FY(II,JJ,KK,1:N_TRACKED_SPECIES) + DIF_FY(II,JJ,KK,1:N_TRACKED_SPECIES)) )
+         ENDIF
+      ENDIF
+   CASE(536)  ! TOTAL MASS FLUX Z
+      GAS_PHASE_OUTPUT_RES = 0._EB
+      IF (STORE_SPECIES_FLUX) THEN
+         IF (Z_INDEX>0) THEN
+            GAS_PHASE_OUTPUT_RES = ADV_FZ(II,JJ,KK,Z_INDEX) + DIF_FZ(II,JJ,KK,Z_INDEX)
+         ELSEIF (Y_INDEX>0) THEN
+            GAS_PHASE_OUTPUT_RES = DOT_PRODUCT( Z2Y(Y_INDEX,1:N_TRACKED_SPECIES),&
+                                      (ADV_FZ(II,JJ,KK,1:N_TRACKED_SPECIES) + DIF_FZ(II,JJ,KK,1:N_TRACKED_SPECIES)) )
+         ENDIF
       ENDIF
 
 END SELECT IND_SELECT
@@ -7284,10 +7418,6 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
          SOLID_PHASE_OUTPUT = 0._EB
       ENDIF
 
-      IF (SURFACE(SURF_INDEX)%VEGETATION) THEN     !surface vegetation height
-         SOLID_PHASE_OUTPUT = WC%VEG_HEIGHT
-      ENDIF
-
    CASE(25,26) ! SURFACE DENSITY, NORMALIZED MASS
       SF => SURFACE(SURF_INDEX)
       IF (DV%MATL_ID/='null') THEN
@@ -7297,9 +7427,17 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
                EXIT
             ENDIF
          ENDDO
-         SOLID_PHASE_OUTPUT = SURFACE_DENSITY(NM,0,WALL_INDEX=IWX,MATL_INDEX=M_INDEX)
+         IF (PRESENT(OPT_LP_INDEX)) THEN
+            SOLID_PHASE_OUTPUT = SURFACE_DENSITY(NM,0,LAGRANGIAN_PARTICLE_INDEX=OPT_LP_INDEX,MATL_INDEX=M_INDEX)
+         ELSE
+            SOLID_PHASE_OUTPUT = SURFACE_DENSITY(NM,0,WALL_INDEX=IWX,MATL_INDEX=M_INDEX)
+         ENDIF
       ELSE
-         SOLID_PHASE_OUTPUT = SURFACE_DENSITY(NM,0,WALL_INDEX=IWX)
+         IF (PRESENT(OPT_LP_INDEX)) THEN
+            SOLID_PHASE_OUTPUT = SURFACE_DENSITY(NM,0,LAGRANGIAN_PARTICLE_INDEX=OPT_LP_INDEX)
+         ELSE
+            SOLID_PHASE_OUTPUT = SURFACE_DENSITY(NM,0,WALL_INDEX=IWX)
+         ENDIF
       ENDIF
       IF (INDX==26) SOLID_PHASE_OUTPUT = SOLID_PHASE_OUTPUT/SF%SURFACE_DENSITY
 
@@ -9529,6 +9667,225 @@ CLOSE(LU_UVW)
 
 END SUBROUTINE DUMP_UVW
 
+
+SUBROUTINE DUMP_ROTCUBE_MMS(NM,FN_MMS,T)
+
+! Dump rotated cube MMS data file.
+
+USE COMP_FUNCTIONS, ONLY: GET_FILE_NUMBER
+USE COMPLEX_GEOMETRY, ONLY : IBM_CGSC, IBM_FGSC, IBM_GASPHASE
+
+INTEGER, INTENT(IN) :: NM
+REAL(EB), INTENT(IN) :: T
+CHARACTER(80), INTENT(IN) :: FN_MMS
+
+! Local variables:
+INTEGER  :: I,J,K,LU_MMS,IMIN,JMIN,KMIN,IMAX,JMAX,KMAX,NTOT_U,NTOT_W,NTOT_C,AXIS,ICC,ICF,JCC,JCF
+
+CALL POINT_TO_MESH(NM)
+
+IMIN=1
+JMIN=1
+KMIN=1
+IMAX=IBAR
+JMAX=JBAR
+KMAX=KBAR
+
+NTOT_U = 0
+NTOT_W = 0
+NTOT_C = 0
+
+LU_MMS = GET_FILE_NUMBER()
+OPEN(UNIT=LU_MMS,FILE=TRIM(FN_MMS),FORM='FORMATTED',STATUS='UNKNOWN')
+
+! First count total number of entries for U velocities (regular gas + cut-faces), W velocities and
+! cell centered variables (regular gas + cut-cells)
+IF (CC_IBM) THEN
+   ! PERIODIC_TEST=21,22,23
+   ! U velocities:
+   DO K=KMIN,KMAX
+      DO J=JMIN,JMAX
+         DO I=IMIN,IMAX
+            IF(FCVAR(I,J,K,IBM_FGSC,IAXIS) /= IBM_GASPHASE) CYCLE
+            NTOT_U = NTOT_U + 1
+         ENDDO
+      ENDDO
+   ENDDO
+   ! W velocities:
+   DO K=KMIN,KMAX
+      DO J=JMIN,JMAX
+         DO I=IMIN,IMAX
+            IF(FCVAR(I,J,K,IBM_FGSC,KAXIS) /= IBM_GASPHASE) CYCLE
+            NTOT_W = NTOT_W + 1
+         ENDDO
+      ENDDO
+   ENDDO
+   ! Now Gasphase cut-faces for both U and W:
+   DO ICF=1,MESHES(NM)%N_CUTFACE_MESH
+      IF (CUT_FACE(ICF)%STATUS /= IBM_GASPHASE) CYCLE
+      AXIS = CUT_FACE(ICF)%IJK(KAXIS+1)
+      SELECT CASE(AXIS)
+      CASE(IAXIS)
+         NTOT_U = NTOT_U + CUT_FACE(ICF)%NFACE
+      CASE(KAXIS)
+         NTOT_W = NTOT_W + CUT_FACE(ICF)%NFACE
+      END SELECT
+   ENDDO
+
+   ! Now cell centered variables:
+   DO K=KMIN,KMAX
+      DO J=JMIN,JMAX
+         DO I=IMIN,IMAX
+            IF(CCVAR(I,J,K,IBM_CGSC) /= IBM_GASPHASE) CYCLE
+            NTOT_C = NTOT_C + 1
+         ENDDO
+      ENDDO
+   ENDDO
+   DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+      NTOT_C = NTOT_C + CUT_CELL(ICC)%NCELL
+   ENDDO
+
+   WRITE(LU_MMS,'(I8,A,I8,A,I8,A,E22.15,A,E22.15,A,E22.15)') &
+   NTOT_U,',',NTOT_W,',',NTOT_C,',',T,',',DX(1),',',DZ(1)
+
+   ! Write velocities:
+   ! U velocities:
+   DO K=KMIN,KMAX
+      DO J=JMIN,JMAX
+         DO I=IMIN,IMAX
+            IF(FCVAR(I,J,K,IBM_FGSC,IAXIS) /= IBM_GASPHASE) CYCLE
+            WRITE(LU_MMS,'(I8,A,E22.15,A,E22.15,A,E22.15,A,E22.15,A,E22.15,A,E22.15)') &
+            0,',',X(I),',',ZC(K),',',DY(J)*DZ(K),',',U(I,J,K),',',0._EB,',',0._EB
+         ENDDO
+      ENDDO
+   ENDDO
+   ! Now Gasphase cut-faces for U:
+   DO ICF=1,MESHES(NM)%N_CUTFACE_MESH
+      IF (CUT_FACE(ICF)%STATUS /= IBM_GASPHASE) CYCLE
+      AXIS = CUT_FACE(ICF)%IJK(KAXIS+1)
+      SELECT CASE(AXIS)
+      CASE(IAXIS)
+         DO JCF=1,CUT_FACE(ICF)%NFACE
+           WRITE(LU_MMS,'(I8,A,E22.15,A,E22.15,A,E22.15,A,E22.15,A,E22.15,A,E22.15)') &
+           1,',',CUT_FACE(ICF)%XYZCEN(IAXIS,JCF),',',CUT_FACE(ICF)%XYZCEN(KAXIS,JCF),',', &
+           CUT_FACE(ICF)%AREA(JCF),',',CUT_FACE(ICF)%VEL(JCF),',',0._EB,',',0._EB
+         ENDDO
+      END SELECT
+   ENDDO
+   ! W velocities:
+   DO K=KMIN,KMAX
+      DO J=JMIN,JMAX
+         DO I=IMIN,IMAX
+            IF(FCVAR(I,J,K,IBM_FGSC,KAXIS) /= IBM_GASPHASE) CYCLE
+            WRITE(LU_MMS,'(I8,A,E22.15,A,E22.15,A,E22.15,A,E22.15,A,E22.15,A,E22.15)') &
+            0,',',XC(I),',',Z(K),',',DY(J)*DX(I),',',W(I,J,K),',',0._EB,',',0._EB
+         ENDDO
+      ENDDO
+   ENDDO
+   ! Now Gasphase cut-faces for W:
+   DO ICF=1,MESHES(NM)%N_CUTFACE_MESH
+      IF (CUT_FACE(ICF)%STATUS /= IBM_GASPHASE) CYCLE
+      AXIS = CUT_FACE(ICF)%IJK(KAXIS+1)
+      SELECT CASE(AXIS)
+      CASE(KAXIS)
+         DO JCF=1,CUT_FACE(ICF)%NFACE
+           WRITE(LU_MMS,'(I8,A,E22.15,A,E22.15,A,E22.15,A,E22.15,A,E22.15,A,E22.15)') &
+           1,',',CUT_FACE(ICF)%XYZCEN(IAXIS,JCF),',',CUT_FACE(ICF)%XYZCEN(KAXIS,JCF),',', &
+           CUT_FACE(ICF)%AREA(JCF),',',CUT_FACE(ICF)%VEL(JCF),',',0._EB,',',0._EB
+         ENDDO
+      END SELECT
+   ENDDO
+
+   ! Now cell centered variables:
+   DO K=KMIN,KMAX
+      DO J=JMIN,JMAX
+         DO I=IMIN,IMAX
+            IF(CCVAR(I,J,K,IBM_CGSC) /= IBM_GASPHASE) CYCLE
+            WRITE(LU_MMS,'(I8,A,E22.15,A,E22.15,A,E22.15,A,E22.15,A,E22.15,A,E22.15)') &
+            0,',',XC(I),',',ZC(K),',',DY(J)*DX(I)*DZ(K),',',ZZ(I,J,K,2),',',H(I,J,K),',', &
+            RHO(I,J,K)*(H(I,J,K)-KRES(I,J,K))
+         ENDDO
+      ENDDO
+   ENDDO
+   DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+      DO JCC=1,CUT_CELL(ICC)%NCELL
+         WRITE(LU_MMS,'(I8,A,E22.15,A,E22.15,A,E22.15,A,E22.15,A,E22.15,A,E22.15)') &
+         1,',',CUT_CELL(ICC)%XYZCEN(IAXIS,JCC),',',CUT_CELL(ICC)%XYZCEN(KAXIS,JCC),',',&
+         CUT_CELL(ICC)%VOLUME(JCC),',',CUT_CELL(ICC)%ZZ(2,JCC),',',CUT_CELL(ICC)%H(JCC),',',&
+         CUT_CELL(ICC)%RHO(JCC)*(CUT_CELL(ICC)%H(JCC)-KRES(I,J,K))
+      ENDDO
+   ENDDO
+
+ELSE
+   ! PERIODIC_TEST=21 for OBST.
+   ! U velocities:
+   DO K=KMIN,KMAX
+      DO J=JMIN,JMAX
+         DO I=IMIN,IMAX
+            IF(SOLID(CELL_INDEX(I,J,K)) .OR. SOLID(CELL_INDEX(I+1,J,K))) CYCLE
+            NTOT_U = NTOT_U + 1
+         ENDDO
+      ENDDO
+   ENDDO
+   ! W velocities:
+   DO K=KMIN,KMAX
+      DO J=JMIN,JMAX
+         DO I=IMIN,IMAX
+            IF(SOLID(CELL_INDEX(I,J,K)) .OR. SOLID(CELL_INDEX(I+1,J,K+1))) CYCLE
+            NTOT_W = NTOT_W + 1
+         ENDDO
+      ENDDO
+   ENDDO
+   ! Now cell centered variables:
+   DO K=KMIN,KMAX
+      DO J=JMIN,JMAX
+         DO I=IMIN,IMAX
+            IF(SOLID(CELL_INDEX(I,J,K))) CYCLE
+            NTOT_C = NTOT_C + 1
+         ENDDO
+      ENDDO
+   ENDDO
+
+   WRITE(LU_MMS,'(I8,A,I8,A,I8,A,E22.15,A,E22.15,A,E22.15)') &
+   NTOT_U,',',NTOT_W,',',NTOT_C,',',T,',',DX(1),',',DZ(1)
+
+   ! U velocities:
+   DO K=KMIN,KMAX
+      DO J=JMIN,JMAX
+         DO I=IMIN,IMAX
+            IF(SOLID(CELL_INDEX(I,J,K)) .OR. SOLID(CELL_INDEX(I+1,J,K))) CYCLE
+            WRITE(LU_MMS,'(I8,A,E22.15,A,E22.15,A,E22.15,A,E22.15,A,E22.15,A,E22.15)') &
+            0,',',X(I),',',ZC(K),',',DY(J)*DZ(K),',',U(I,J,K),',',0._EB,',',0._EB
+         ENDDO
+      ENDDO
+   ENDDO
+   ! W velocities:
+   DO K=KMIN,KMAX
+      DO J=JMIN,JMAX
+         DO I=IMIN,IMAX
+            IF(SOLID(CELL_INDEX(I,J,K)) .OR. SOLID(CELL_INDEX(I+1,J,K+1))) CYCLE
+            WRITE(LU_MMS,'(I8,A,E22.15,A,E22.15,A,E22.15,A,E22.15,A,E22.15,A,E22.15)') &
+            0,',',XC(I),',',Z(K),',',DY(J)*DX(I),',',W(I,J,K),',',0._EB,',',0._EB
+         ENDDO
+      ENDDO
+   ENDDO
+   ! Now cell centered variables:
+   DO K=KMIN,KMAX
+      DO J=JMIN,JMAX
+         DO I=IMIN,IMAX
+            IF(SOLID(CELL_INDEX(I,J,K))) CYCLE
+            WRITE(LU_MMS,'(I8,A,E22.15,A,E22.15,A,E22.15,A,E22.15,A,E22.15,A,E22.15)') &
+            0,',',XC(I),',',ZC(K),',',DY(J)*DX(I)*DZ(K),',',ZZ(I,J,K,2),',',H(I,J,K),',', &
+            RHO(I,J,K)*(H(I,J,K)-KRES(I,J,K))
+         ENDDO
+      ENDDO
+   ENDDO
+
+ENDIF
+
+CLOSE(LU_MMS)
+
+END SUBROUTINE DUMP_ROTCUBE_MMS
 
 SUBROUTINE DUMP_MMS(NM,FN_MMS,T)
 

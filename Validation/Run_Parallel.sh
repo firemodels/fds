@@ -38,6 +38,7 @@ cd Turbulent_Jet;  ./Run_All.sh $OPTIONS; cd ..
 cd UL_NFPRF;  ./Run_All.sh $OPTIONS; cd ..
 cd UL_NIJ_Houses;  ./Run_All.sh $OPTIONS; cd ..
 cd UMD_Line_Burner;  ./Run_All.sh $OPTIONS; cd ..
+cd USFS_Catchpole;  ./Run_All.sh $OPTIONS; cd ..
 cd USN_Hangars;  ./Run_All.sh $OPTIONS; cd ..
 cd UWO_Wind_Tunnel;  ./Run_All.sh $OPTIONS; cd ..
 cd VTT;  ./Run_All.sh $OPTIONS; cd ..

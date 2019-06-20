@@ -2207,7 +2207,7 @@ The enthalpy of the mixture at the outlet is $1 \times 1 \times (900+273.15) + 1
 \subsection{Combustion Chamber (\texorpdfstring{\textct{energy\_budget\_combustion}}{energy\_budget\_combustion})}
 \label{energy_budget_combustion}
 
-Methanol and air are mixed and burned within an adiabatic combustion chamber 1~m on each side. Because the internal energy of the system does not change, we expect that 
+Methanol and air are mixed and burned within an adiabatic combustion chamber 1~m on each side. Because the internal energy of the system does not change, we expect that
 \be
 \Delta h = V \, \Delta p
 \ee
@@ -2770,7 +2770,23 @@ The comparison of FDS and the exact solution is shown in Fig.~\ref{radiation_gas
 
 This chapter contains examples that test the computations related to species concentrations, gas properties and combustion.
 
+\section{Gas Properties (\texorpdfstring{\textct{species\_props}}{species\_props})}
+\label{gas_properties}
+\label{species_props}
 
+This is a test of computing the gas properties of species mixtures. Three species are defined. The first species has a molecular weight of 10 g/m, a viscosity of 0.00001~\si{kg/(m.s)},
+a conductivity of 0.01~\si{W/(m.K)}, and a specific heat of 1~\si{kJ/(kg.K)}. The second species multiplies the first species' inputs by two (e.g. molecular weight of 20 g/m), and the third species multiplies the first species' inputs by three. Five mixtures are tested: pure species 1; pure species 3; equal volume fractions of species 1 and species 2; equal volume fractions of all species; and volume fractions of 0.6, 0.3, and 0.1 respectively for the three species.
+
+\begin{figure}[ht]
+	\centering
+	\begin{tabular}{c}
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/spec_prop_mu}
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/spec_prop_k} \\
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/spec_prop_cp}
+   \end{tabular}
+   \caption[Results of the {\ct species\_props} cases]{Results of the {\ct species\_props} cases.}
+   \label{fig_species_props}
+\end{figure}
 
 \section{Product Yields (\texorpdfstring{\textct{methane\_flame}}{methane\_flame})}
 \label{methane_flame}
@@ -3459,7 +3475,7 @@ This verification test consists of two test cases. The second case, {\ct aerosol
 \subsection{Turbulent Deposition of Aerosols (\texorpdfstring{\textct{aerosol\_turbulent\_deposition}}{aerosol\_turbulent\_deposition})}
 	\label{aerosol_turbulent_deposition}
 
-This verification test consists of three tunnel like geometries 10~cm on side with adiabatic, free-slip walls. One end of the tunnel is {\ct OPEN} and the other end has a constant inlet velocity of 0.001 m/s, 0.1 m/s, or 1 m/s. The tunnels are filled with two gas species each having a molecular weight of 28.8~g/mol, a viscosity of 0.00002~\si{kg/(m.s}, a thermal conductivity of 0.025~\si{W/(m.K}, and specific heat of 1~\si{kJ/(kg.K}, and zero diffusivity. One of the gas species is defined as an aerosol with a diameter of 100~$\mu$m, a solid phase density of 2000~kg/m$^3$, and a solid phase conductivity of 1~\si{W/(m.K}. The initial mass fraction of the aerosol is 0.00001. {\ct STRATIFICATION}, {\ct NOISE}, and all aerosol behaviors except for {\ct TURBULENT\_DEPOSITION} are turned off. Turbulent deposition is computed using a correlation based open the wall friction velocity and the wall dimensionless stopping distance. The correlation has three parts, and the selected velocities test each part. Since the inlet condition is a constant velocity with a constant aerosol mass fraction, the first wall cell after the inlet will see a uniform settling rate over time.
+This verification test consists of three tunnel like geometries 10~cm on side with adiabatic, free-slip walls. One end of the tunnel is {\ct OPEN} and the other end has a constant inlet velocity of 0.001 m/s, 0.1 m/s, or 1 m/s. The tunnels are filled with two gas species each having a molecular weight of 28.8~g/mol, a viscosity of 0.00002~\si{kg/(m.s)}, a thermal conductivity of 0.025~\si{W/(m.K)}, and specific heat of 1~\si{kJ/(kg.K)}, and zero diffusivity. One of the gas species is defined as an aerosol with a diameter of 100~$\mu$m, a solid phase density of 2000~kg/m$^3$, and a solid phase conductivity of 1~\si{W/(m.K}. The initial mass fraction of the aerosol is 0.00001. {\ct STRATIFICATION}, {\ct NOISE}, and all aerosol behaviors except for {\ct TURBULENT\_DEPOSITION} are turned off. Turbulent deposition is computed using a correlation based open the wall friction velocity and the wall dimensionless stopping distance. The correlation has three parts, and the selected velocities test each part. Since the inlet condition is a constant velocity with a constant aerosol mass fraction, the first wall cell after the inlet will see a uniform settling rate over time.
 
 \begin{figure}[ht]
 	\centering

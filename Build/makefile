@@ -228,8 +228,8 @@ mpi_intel_linux_64_db : obj = fds_mpi_intel_linux_64_db
 mpi_intel_linux_64_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
-impi_intel_linux_64_advise : FFLAGS = -ladvisor -g -m64 -O2 -ldl -traceback -no-wrap-margin -I/opt/intel19/advisor_2019/include/intel64 -L/opt/intel19/advisor_2019/lib64 $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL)
-impi_intel_linux_64_advise : LFLAGSMKL = $(LFLAGSMKL_INTEL)
+impi_intel_linux_64_advise : FFLAGS = -g -m64 -O2 -ipo -ldl -traceback -no-wrap-margin -I/opt/intel19/advisor_2019/include/intel64  $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL)
+impi_intel_linux_64_advise : LFLAGSMKL = $(LFLAGSMKL_INTEL) -ladvisor -L/opt/intel19/advisor_2019/lib64
 impi_intel_linux_64_advise : LFLAGS = -shared-intel
 impi_intel_linux_64_advise : FCOMPL = mpiifort
 impi_intel_linux_64_advise : FOPENMPFLAGS = -qopenmp -qopenmp-link static -liomp5
@@ -237,22 +237,31 @@ impi_intel_linux_64_advise : obj = fds_impi_intel_linux_64_advise
 impi_intel_linux_64_advise : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
-impi_intel_linux_64_vtune : FFLAGS = -g -m64 -O2 -debug inline-debug-info -D TBB_USE_THREADING_TOOLS -parallel-source-info=2 $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL)
+impi_intel_linux_64_vtune : FFLAGS = -g -m64 -O2 -ipo -ldl -debug inline-debug-info -parallel-source-info=2 $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL)
 impi_intel_linux_64_vtune : LFLAGSMKL = $(LFLAGSMKL_INTEL)
 impi_intel_linux_64_vtune : LFLAGS = -shared-intel
 impi_intel_linux_64_vtune : FCOMPL = mpiifort
-impi_intel_linux_64_vtune : FOPENMPFLAGS = -qopenmp -qopenmp-link dynamic -liomp5
+impi_intel_linux_64_vtune : FOPENMPFLAGS = -qopenmp -qopenmp-link=dynamic -liomp5
 impi_intel_linux_64_vtune : obj = fds_impi_intel_linux_64_vtune
 impi_intel_linux_64_vtune : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
-impi_intel_linux_64_inspect : FFLAGS = -tcollect -m64 -mt_mpi -check none -warn all -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -stand:f08 -no-wrap-margin $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL)
+impi_intel_linux_64_inspect : FFLAGS = -m64 -mt_mpi -check none -warn all -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -stand:f08 -no-wrap-margin $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL)
 impi_intel_linux_64_inspect : LFLAGSMKL = $(LFLAGSMKL_INTEL)
 impi_intel_linux_64_inspect : LFLAGS = -shared-intel
 impi_intel_linux_64_inspect : FCOMPL = mpiifort
-impi_intel_linux_64_inspect : FOPENMPFLAGS = -qopenmp -qopenmp-link static -liomp5
+impi_intel_linux_64_inspect : FOPENMPFLAGS = -qopenmp -qopenmp-link dynamic -liomp5
 impi_intel_linux_64_inspect : obj = fds_impi_intel_linux_64_inspect
 impi_intel_linux_64_inspect : setup $(obj_mpi)
+	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
+
+impi_intel_linux_64_trace : FFLAGS = -m64 -tcollect -O1 -traceback -no-wrap-margin $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL)
+impi_intel_linux_64_trace : LFLAGSMKL = $(LFLAGSMKL_INTEL)
+impi_intel_linux_64_trace : LFLAGS = -static-intel
+impi_intel_linux_64_trace : FCOMPL = mpiifort
+impi_intel_linux_64_trace : FOPENMPFLAGS = -qopenmp -qopenmp-link static -liomp5
+impi_intel_linux_64_trace : obj = fds_impi_intel_linux_64_trace
+impi_intel_linux_64_trace : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
 mpi_intel_linux_64_inspect : FFLAGS = -g -O0 -check none -no-wrap-margin $(GITINFO) $(OPENMPI_COMPINFO) $(FFLAGSMKL_OPENMPI)
@@ -367,6 +376,13 @@ mpi_gnu_osx_64_db : obj = fds_mpi_gnu_osx_64_db
 mpi_gnu_osx_64_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
+mpi_gnu_osx_64_dv : FFLAGS = -m64 -O1 -fbacktrace -std=f2008 -ffpe-summary=none -fall-intrinsics $(GITINFOGNU) $(GNU_COMPINFO) $(FFLAGSMKL_GNU_CUSTOM)
+mpi_gnu_osx_64_dv : LFLAGSMKL = $(LFLAGSMKL_GNU_CUSTOM)
+mpi_gnu_osx_64_dv : FCOMPL = mpifort
+mpi_gnu_osx_64_dv : FOPENMPFLAGS =
+mpi_gnu_osx_64_dv : obj = fds_mpi_gnu_osx_64_dv
+mpi_gnu_osx_64_dv : setup $(obj_mpi)
+	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
 # *** Object Dependencies ***
 

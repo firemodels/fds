@@ -101,6 +101,42 @@ $QFDS -d Complex_Geometry geom_bad_non_manifold_vert.fds
 $QFDS -d Complex_Geometry geom_bad_open_surface.fds
 $QFDS -d Complex_Geometry geom_bad_self_intersection.fds
 
+$QFDS -d Complex_Geometry rotated_cube_0deg_32_exp.fds
+$QFDS -d Complex_Geometry rotated_cube_0deg_32_imp.fds
+$QFDS -d Complex_Geometry rotated_cube_0deg_32_obs.fds
+$QFDS -d Complex_Geometry rotated_cube_0deg_64_exp.fds
+$QFDS -d Complex_Geometry rotated_cube_0deg_64_imp.fds
+$QFDS -d Complex_Geometry rotated_cube_0deg_64_obs.fds
+$QFDS -d Complex_Geometry rotated_cube_0deg_128_exp.fds
+$QFDS -d Complex_Geometry rotated_cube_0deg_128_imp.fds
+$QFDS -d Complex_Geometry rotated_cube_0deg_128_obs.fds
+$QFDS -d Complex_Geometry rotated_cube_0deg_256_exp.fds
+$QFDS -d Complex_Geometry rotated_cube_0deg_256_imp.fds
+$QFDS -d Complex_Geometry rotated_cube_0deg_256_obs.fds
+$QFDS -o 4 -d Complex_Geometry rotated_cube_0deg_384_exp.fds
+$QFDS -o 4 -d Complex_Geometry rotated_cube_0deg_384_imp.fds
+$QFDS -o 4 -d Complex_Geometry rotated_cube_0deg_384_obs.fds
+$QFDS -d Complex_Geometry rotated_cube_27deg_32_exp.fds
+$QFDS -d Complex_Geometry rotated_cube_27deg_32_imp.fds
+$QFDS -d Complex_Geometry rotated_cube_27deg_64_exp.fds
+$QFDS -d Complex_Geometry rotated_cube_27deg_64_imp.fds
+$QFDS -d Complex_Geometry rotated_cube_27deg_128_exp.fds
+$QFDS -d Complex_Geometry rotated_cube_27deg_128_imp.fds
+$QFDS -d Complex_Geometry rotated_cube_27deg_256_exp.fds
+$QFDS -d Complex_Geometry rotated_cube_27deg_256_imp.fds
+$QFDS -o 4 -d Complex_Geometry rotated_cube_27deg_384_exp.fds
+$QFDS -o 4 -d Complex_Geometry rotated_cube_27deg_384_imp.fds
+$QFDS -d Complex_Geometry rotated_cube_45deg_32_exp.fds
+$QFDS -d Complex_Geometry rotated_cube_45deg_32_imp.fds
+$QFDS -d Complex_Geometry rotated_cube_45deg_64_exp.fds
+$QFDS -d Complex_Geometry rotated_cube_45deg_64_imp.fds
+$QFDS -d Complex_Geometry rotated_cube_45deg_128_exp.fds
+$QFDS -d Complex_Geometry rotated_cube_45deg_128_imp.fds
+$QFDS -d Complex_Geometry rotated_cube_45deg_256_exp.fds
+$QFDS -d Complex_Geometry rotated_cube_45deg_256_imp.fds
+$QFDS -o 4 -d Complex_Geometry rotated_cube_45deg_384_exp.fds
+$QFDS -o 4 -d Complex_Geometry rotated_cube_45deg_384_imp.fds
+                                                                        
 $QFDS -d Controls activate_vents.fds
 $QFDS -d Controls control_test.fds
 $QFDS -d Controls control_test_2.fds
@@ -513,6 +549,7 @@ $QFDS -d Species hrrpuv_reac_arrhenius.fds
 $QFDS -d Species ramp_chi_r.fds
 $QFDS -d Species bound_test_1.fds
 $QFDS -d Species bound_test_2.fds
+$QFDS -d Species species_props.fds
 
 $QFDS -d Sprinklers_and_Sprays activate_sprinklers.fds
 $QFDS -d Sprinklers_and_Sprays bucket_test_1.fds
@@ -664,16 +701,14 @@ $QFDS -d Turbulence sem_atm_leddy_p2.fds
 $QFDS -d Turbulence sem_ramp_leddy_p2.fds
 $QFDS -d Turbulence ramp_prof_u_z.fds
 
-$QFDS -d Vegetation radiation_gas-veg_consistency_gas.fds
-$QFDS -d Vegetation radiation_gas-veg_consistency_veg.fds
-$QFDS -d Vegetation vege_mass_conservation.fds
-$QFDS -d Vegetation vege_pressure-drop_cylinder_MPUV2pt0.fds
-$QFDS -d Vegetation vege_pressure-drop_cylinder_MPUV30pt0.fds
-$QFDS -d Vegetation vege_pressure-drop_sphere_MPUV2pt0.fds
-$QFDS -d Vegetation vege_pressure-drop_sphere_MPUV30pt0.fds
-
 $QFDS -d WUI dragon_5a.fds
+$QFDS -p 2 -d WUI ground_vegetation_conv.fds
+$QFDS -p 2 -d WUI ground_vegetation_drag.fds
+$QFDS -p 2 -d WUI ground_vegetation_load.fds
+$QFDS -p 2 -d WUI ground_vegetation_radi.fds
 $QFDS -d WUI pine_needles.fds
+$QFDS -d WUI radiation_gas-veg_consistency_gas.fds
+$QFDS -d WUI radiation_gas-veg_consistency_veg.fds
 $QFDS -d WUI random_walk_1.fds
 $QFDS -d WUI random_walk_2.fds
 $QFDS -p 6 -d WUI vegetation_absorb.fds

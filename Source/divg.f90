@@ -265,6 +265,24 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
 
    IF (CC_IBM) CALL SET_EXIMDIFFLX_3D(NM,RHO_D_DZDX,RHO_D_DZDY,RHO_D_DZDZ)
 
+   ! Store diffusive flux for output
+
+   IF (STORE_SPECIES_FLUX) THEN
+      IF (PREDICTOR) THEN
+         DO N=1,N_TOTAL_SCALARS
+            DIF_FX(:,:,:,N) = 0.5_EB*( DIF_FXS(:,:,:,N) - RHO_D_DZDX(:,:,:,N) )
+            DIF_FY(:,:,:,N) = 0.5_EB*( DIF_FYS(:,:,:,N) - RHO_D_DZDY(:,:,:,N) )
+            DIF_FZ(:,:,:,N) = 0.5_EB*( DIF_FZS(:,:,:,N) - RHO_D_DZDZ(:,:,:,N) )
+         ENDDO
+      ELSE
+         DO N=1,N_TOTAL_SCALARS
+            DIF_FXS(:,:,:,N) = -RHO_D_DZDX(:,:,:,N)
+            DIF_FYS(:,:,:,N) = -RHO_D_DZDY(:,:,:,N)
+            DIF_FZS(:,:,:,N) = -RHO_D_DZDZ(:,:,:,N)
+         ENDDO
+      ENDIF
+   ENDIF
+
    ! Diffusive heat flux
 
    SPECIES_LOOP: DO N=1,N_TOTAL_SCALARS
@@ -648,7 +666,8 @@ CONST_GAMMA_IF_2: IF (.NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
       CALL SPECIES_ADVECTION ! Compute u dot grad rho Z_n
 
       SM  => SPECIES_MIXTURE(N)
-      !$OMP PARALLEL DO PRIVATE(H_S) SCHEDULE(guided)
+      !$OMP PARALLEL DO SIMD PRIVATE(H_S) SCHEDULE(guided)
+
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
@@ -659,7 +678,7 @@ CONST_GAMMA_IF_2: IF (.NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
             ENDDO
          ENDDO
       ENDDO
-      !$OMP END PARALLEL DO
+      !$OMP END PARALLEL DO SIMD
 
       IF (CC_IBM) CALL SET_EXIMRHOZZLIM_3D(NM,N) ! WORK2,WORK3,WORK4: flux limited \bar{rho Za} on EXIM faces.
 
@@ -669,7 +688,8 @@ ENDIF CONST_GAMMA_IF_2
 
 ! Add contribution of reactions
 
-IF (N_REACTIONS > 0 .OR. N_LP_ARRAY_INDICES>0 .OR. ANY(SPECIES_MIXTURE%DEPOSITING)) THEN
+IF (N_REACTIONS > 0 .OR. N_LP_ARRAY_INDICES>0 .OR. ANY(SPECIES_MIXTURE%DEPOSITING) .OR. &
+    ANY(SPECIES_MIXTURE%CONDENSATION_SMIX_INDEX>0)) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
