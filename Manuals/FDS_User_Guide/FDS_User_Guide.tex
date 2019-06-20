@@ -6841,12 +6841,20 @@ The results are shown in Fig.~\ref{ground_vegetation_radi_fig}. The Lagrangian p
 \subsubsection{Vegetation Convective Heating}
 \label{ground_vegetation_conv}
 
-In this next example, two small wind tunnels blowing air at 2~m/s and 300~$^\circ$C contain small amounts of vegetation modeled using either Lagrangian particles or the Boundary Fuel Model. The tunnel walls are {\ct ADIABATIC} boundaries so that the air temperature remains fixed. In one tunnel, two particles of different sizes occupy adjacent grid cells that abut the solid floor. In the other tunnel, two adjacent patches on the floor represent the equivalent amount of vegetation via the Boundary Fuel Model. The resulting vegetation temperatures are shown in Fig.~\ref{ground_vegetation_conv_fig}.
+In this next example, two small wind tunnels blowing hot air at $U=2$~m/s and $T_{\rm air}=300$~$^\circ$C contain small amounts of vegetation modeled using either Lagrangian particles or the Boundary Fuel Model. The tunnel walls are {\ct ADIABATIC} so that the air temperature remains fixed. In one tunnel, two cylindrical particles of different diameters ($\sigma_{\rm v,A}=3000$~m$^{-1}$ and $\sigma_{\rm v,B}=1500$~m$^{-1}$)  occupy adjacent grid cells that abut the solid floor. In the other tunnel, two adjacent patches on the floor represent the equivalent amount of vegetation via the Boundary Fuel Model. The initial vegetation temperature is $T_0=20$~$^\circ$C. Radiation heat transfer is turned off. The expected temperature increase with time is found by solving:
+\be
+   \rho_{\rm s} \, c_{\rm s} \, \frac{\d T}{\d t} = \sigma_{\rm v} \, h \, (T_{\rm air} - T)  \quad ; \quad   h= \frac{k_{\rm air}}{D} \, 0.683 \, \RE^{0.466} \, \PR^{0.333}  \quad ; \quad  \RE = \frac{\rho_{\rm air} U D}{\mu_{\rm air}} \quad ; \quad \PR=0.7
+\ee
+where the solid density $\rho_{\rm s}=400$~kg/m$^3$, specific heat $c_{\rm s}=1.5$~kJ/(kg$\cdot$K), $\rho_{\rm air}\approx 0.60$~kg/m$^3$, $\mu_{\rm air}\approx 3 \times 10^{-5}$~kg/(m$\cdot$s), $k_{\rm air}\approx 4 \times 10^{-5}$~kW/(m$\cdot$K), $D=4/\sigma_{\rm v}$. The solution is:
+\be
+   T(t) = T_{\rm air} - (T_{\rm air}-T_0) \, \exp \left(- \frac{h \, \sigma}{\rho_{\rm s} \, c_{\rm s}} \right) \; ^\circ\hbox{C}
+\ee
+The resulting vegetation temperatures are shown in Fig.~\ref{ground_vegetation_conv_fig}.
 
 \begin{figure}[ht]
-\centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/ground_vegetation_conv_temp}
-\caption[Results of the {\ct ground\_vegetation\_conv} test case]{Temperature of convectively heated vegetation of two different sizes.}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ground_vegetation_conv_temp_A}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ground_vegetation_conv_temp_B}
+\caption[Results of the {\ct ground\_vegetation\_conv} test case]{Temperature of convectively heated vegetation of two different sizes. (Left) $\sigma_{\rm v}=3000$~m$^{-1}$. (Right) $\sigma_{\rm v}=1500$~m$^{-1}$.}
 \label{ground_vegetation_conv_fig}
 \end{figure}
 
