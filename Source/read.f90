@@ -18,7 +18,7 @@ USE MPI
 IMPLICIT NONE
 PRIVATE
 
-PUBLIC READ_DATA,READ_STOP
+PUBLIC READ_DATA,READ_STOP,VERSION_INFO
 
 CHARACTER(LABEL_LENGTH) :: ID,MB,ODE_SOLVER
 CHARACTER(MESSAGE_LENGTH) :: MESSAGE,FYI
@@ -52,16 +52,6 @@ CALL DEFINE_OUTPUT_QUANTITIES
 ! Get the name of the input file by reading the command line argument
 
 CALL GET_INPUT_FILE
-
-! If no input file is given, just print out the version number and stop
-
-IF (FN_INPUT(1:1)==' ') THEN
-   IF (MYID==0) THEN
-      CALL WRITE_SUMMARY_INFO(LU_ERR)
-      WRITE(LU_ERR,'(A)')  ' Consult FDS Users Guide Chapter, Running FDS, for further instructions.'
-   ENDIF
-   STOP_STATUS = VERSION_STOP ; RETURN
-ENDIF
 
 ! Stop FDS if the input file cannot be found in the current directory
 
@@ -159,6 +149,34 @@ CALL SET_QUANTITIES_AMBIENT
 IF (AUTO_IGNITION_TEMPERATURE>0._EB) AUTO_IGNITION_TEMPERATURE = AUTO_IGNITION_TEMPERATURE + TMPM
 
 END SUBROUTINE READ_DATA
+
+SUBROUTINE VERSION_INFO
+INTEGER :: MPILIBLENGTH,IERR
+CHARACTER(LEN=MPI_MAX_LIBRARY_VERSION_STRING) :: MPILIBVERSION
+
+! Get the name of the input file by reading the command line argument
+
+CALL GET_INPUT_FILE
+
+! If no input file is given, just print out the version number and stop
+
+IF (FN_INPUT(1:1)==' ') THEN
+   IF (MYID==0) THEN
+      CALL WRITE_SUMMARY_INFO(LU_ERR)
+      WRITE(LU_ERR,'(A)')  ' Consult FDS Users Guide Chapter, Running FDS, for further instructions.'
+   ENDIF
+   STOP ! this routine is only called before MPI is initialized so safe to STOP here
+ENDIF
+IF (FN_INPUT(1:2)=='-V' .OR. FN_INPUT(1:2)=='-v') THEN
+   IF (MYID==0) THEN
+      CALL MPI_GET_LIBRARY_VERSION(MPILIBVERSION,MPILIBLENGTH,IERR)
+      WRITE(LU_ERR,'(A,A)') 'FDS revision       : ',TRIM(GITHASH_PP)
+      WRITE(LU_ERR,'(A,A)') 'MPI library version: ',TRIM(MPILIBVERSION)
+   ENDIF
+   STOP ! this routine is only called before MPI is initialized so safe to STOP here
+ENDIF
+
+END SUBROUTINE VERSION_INFO
 
 SUBROUTINE READ_CATF
 

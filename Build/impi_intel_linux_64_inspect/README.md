@@ -1,16 +1,12 @@
-# Intel Optimization Tools
-
-This folder contains a few configuration files that work with the Intel Inspector. This tool is mainly useful on Linux, with multiple processes and threads.
-
 ## Intel Inspector
 
-The [Intel Inspector](https://software.intel.com/en-us/node/622387) can help detect improperly coded OpenMP directives.
+This folder contains a few configuration files that work with the [Intel Inspector](https://software.intel.com/en-us/node/622387), a tool that can help detect improperly coded OpenMP directives.
 
 ### Recommended Setup
 
 For useful analysis capabilities, using inspxe-gui on the platform used for collection is ideal. By doing so, Inspector can have direct access to relevant source files, and thus give more useful results that do not require investigation with a secondary code viewer. 
 
-To setup, use inspxe-gui before collecting data. X11 forwarding is necessary if logging in to a remote cluster. Inside the GUI, use the new project option to create a project for FDS, selecting the 'inspect' version's executable as the target, the 'inspect' version's folder for binary files, and firemodels/fds/Source for source files. To use the project, place collection results, obtained later, into the generated project folder.
+To setup, use inspxe-gui before collecting data. X11 forwarding is necessary if logging in to a remote cluster. Inside the GUI, use the new project option to create a project for FDS, selecting the `inspect` version's executable as the target, the 'inspect' version's folder for binary files, and firemodels/fds/Source for source files. To use the project, place collection results, obtained later, into the generated project folder.
 
 ### Collection
 
@@ -25,12 +21,4 @@ What these commands do is run the command line version of Inspector (inspxe-cl) 
 From firemodels/fds/Verification/Thread_Check, you can get inspect_report.sh. This script can handle the multiple files generated in any Inspector run with more than one process.
 
 Alternatively, you can use the recommended inspxe-gui. With results placed/generated in the project folder, Inspector can display the results in a convenient GUI, instead of necessitating parsing the output on the command line.
-
-## Intel Cluster Checker
-
-The Intel Cluster Checker is a diagnostic tool that checks the overall health of your compute cluster. To use it, first consult the [User's Guide](https://software.intel.com/en-us/cluster-checker-user-guide-2019-beta). In brief, do the following:
-
-   1. Install Intel Cluster Checker and run `source /opt/intel19/clck_latest/clckvars.sh`. Your path might be slightly different.
-   2. Create a `nodefile`, which is just a text file with a list of the cluster node names, one per line.
-   3. Run `clck -f nodefile`
 
