@@ -2,7 +2,7 @@
 
 This folder contains a few configuration files that work with the [Intel Inspector](https://software.intel.com/en-us/node/622387), a tool that can help detect improperly coded OpenMP directives.
 
-### Required setup
+### Required Setup
 1. Source inspxe-vars.sh, from the installation folder for Inspector. For example:
 ```
 source /opt/intel19/inspector_2019/inspxe-vars.sh
