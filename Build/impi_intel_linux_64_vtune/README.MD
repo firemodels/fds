@@ -1,4 +1,4 @@
-#Intel VTune Amplifier
+## Intel VTune Amplifier
 
 This folder contains the optimal build for Intel VTune Amplifier, which can locate hotspots and the performance of both parallel and serial code. This helps for targeting optimizations.
 
