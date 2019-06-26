@@ -1,6 +1,6 @@
 &HEAD CHID='Single_Story_Gas_2' /
 
-&TIME T_END=2400. /
+&TIME T_END=1800. /
 
 &MISC SIMULATION_MODE='SVLES' /
 
