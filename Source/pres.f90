@@ -1568,11 +1568,8 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
          ! Row number:
          IROW = CCVAR(IIG,JJG,KKG,UNKH) - UNKH_IND(NM_START) ! Local numeration.
-         IF (IROW <= 0 .AND. CC_IBM) THEN
-            CALL GET_CC_IROW(IIG,JJG,KKG,IROW)
-            IF (IROW <= 0) CYCLE
-         ENDIF
-
+         IF (IROW <= 0 .AND. CC_IBM) CALL GET_CC_IROW(IIG,JJG,KKG,IROW)
+         IF (IROW <= 0) CYCLE
          ! Add to F_H:
          F_H(IROW) = F_H(IROW) + VAL
 
