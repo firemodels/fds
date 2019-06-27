@@ -1,364 +1,350 @@
 &HEAD CHID='Two_Story_Gas_1'/
-&TIME T_END=2400.0/
+
+&TIME T_END=1800.0/
 
 &MISC SIMULATION_MODE='SVLES' /
 
-&MESH IJK=32,31,32, XB=-0.5,2.7,-1.0,2.1,-0.2,3.0, MULT_ID='mesh' / 
-&MULT ID='mesh', DX=3.2, DY=3.1, DZ=3.2 , I_UPPER=4, J_UPPER=3, K_UPPER=1 /
+&MESH IJK=32,31,32, XB=-0.5,2.7,-1.0,2.1,-0.4,2.8, MULT_ID='mesh' / 
+&MULT ID='mesh', DX=3.2, DY=3.1, DZ=3.2, I_UPPER=4, J_UPPER=3, K_UPPER=1 /
 
-&DEVC ID='FRONT DOOR TIMER', QUANTITY='TIME', XYZ=-0.5,-1.0,-0.2, SETPOINT=600.0, INITIAL_STATE=.TRUE./
-&DEVC ID='BR3 WINDOW TIMER', QUANTITY='TIME', XYZ=-0.5,-1.0,-0.2, SETPOINT=900.0, INITIAL_STATE=.TRUE./
+&DEVC ID='FRONT DOOR TIMER', QUANTITY='TIME', XYZ=-0.5,-1.0,-0.2, SETPOINT= 600.0, INITIAL_STATE=.TRUE./
+&DEVC ID='BR3 WINDOW TIMER', QUANTITY='TIME', XYZ=-0.5,-1.0,-0.2, SETPOINT= 900.0, INITIAL_STATE=.TRUE./
 &DEVC ID='BR4 WINDOW TIMER', QUANTITY='TIME', XYZ=-0.5,-1.0,-0.2, SETPOINT=1200.0, INITIAL_STATE=.TRUE./
 
-&REAC FUEL = 'N-HEPTANE', SOOT_YIELD = 0.037 /
+&REAC FUEL='METHANE', SOOT_YIELD=0.001 /
 
 &SURF ID='BURNER', HRRPUA=694., COLOR='ORANGE', RAMP_Q='burner' /
-&RAMP ID='burner', T=   0., F=0. /
-&RAMP ID='burner', T=   5., F=1. /
+&RAMP ID='burner', T=    0., F=0. /
+&RAMP ID='burner', T=    5., F=1. /
 &RAMP ID='burner', T= 1500., F=1. /
 &RAMP ID='burner', T= 1505., F=0. /
-&OBST XB= 11.4,12.0,8.4,9.0,0.4,0.6, SURF_IDS='BURNER','WALL','WALL' /
 
-&MATL ID = 'GYPSUM BOARD' 
-      CONDUCTIVITY  = 0.28
-      SPECIFIC_HEAT = 1.00
-      DENSITY       = 810./
+&OBST XB=11.4,12.0,8.4,9.0,0.4,0.6, SURF_IDS='BURNER','WALL','WALL' /
 
-&SURF ID='WALL',
-      RGB=200,200,200,
-      DEFAULT=.TRUE.,
-      THICKNESS=0.0127/
+&MATL ID = 'GYPSUM BOARD'
+      SPECIFIC_HEAT = 1.1
+      CONDUCTIVITY = 0.16
+      DENSITY = 700. /
 
-&SURF ID='EXT WALL',
-      COLOR='WHITE',
-      LEAK_PATH = 1,0,
-      THICKNESS=0.0127/
+&SURF ID = 'WALL'
+      COLOR = 'GRAY 80'
+      MATL_ID = 'GYPSUM BOARD'
+      DEFAULT = .TRUE.
+      THICKNESS = 0.0127/
 
-&SURF ID='WINDOW',
-      RGB=153,255,255,
-      THICKNESS=0.05/
+&SURF ID = 'WINDOW'
+      COLOR = 'LIGHT BLUE'
+      MATL_ID = 'GYPSUM BOARD'
+      THICKNESS = 0.05/
 
-&SURF ID='CARPET',
-      RGB=153,102,0,
-      THICKNESS=0.004/
+&SURF ID = 'DOOR'
+      COLOR = 'BLUE'
+      LEAK_PATH = 1,0
+      MATL_ID = 'GYPSUM BOARD'
+      THICKNESS = 0.05/
 
-&VENT SURF_ID='OPEN', MB='ZMAX'/ Mesh Vent: MESH [ZMAX]
-&VENT SURF_ID='OPEN', MB='XMIN'/ Mesh Vent: MESH [XMIN]
-&VENT SURF_ID='OPEN', MB='XMAX'/ Mesh Vent: MESH [XMAX]
-&VENT SURF_ID='OPEN', MB='YMIN'/ Mesh Vent: MESH [YMIN]
-&VENT SURF_ID='OPEN', MB='YMAX'/ Mesh Vent: MESH [YMAX]
+&SURF ID = 'CARPET'
+      COLOR = 'BROWN'
+      MATL_ID = 'GYPSUM BOARD'
+      THICKNESS = 0.004/
 
-*** Leakge - Total of 0.18 m2 leakage area ***
+&VENT SURF_ID='OPEN', MB='ZMAX' / 
+&VENT SURF_ID='OPEN', MB='XMIN' /
+&VENT SURF_ID='OPEN', MB='XMAX' /
+&VENT SURF_ID='OPEN', MB='YMIN' /
+&VENT SURF_ID='OPEN', MB='YMAX' /
 
-&HOLE XB=2.7,2.9,10.3,10.4,2.9,3.0 / Leakage - 0.02 m2
-&HOLE XB=2.7,2.9,10.3,10.4,0.1,0.2 / Leakage - 0.02 m2
-&HOLE XB=4.5,4.7,0.0,0.1,2.9,3.0 / Leakage - 0.02 m2
-&HOLE XB=4.5,4.7,0.0,0.1,2.9,3.0 / Leakage - 0.02 m2
-&HOLE XB=13.3,13.5,10.3,10.4,0.1,0.2 / Leakage - 0.02 m2
-&HOLE XB=13.3,13.5,0.0,0.1,0.1,0.2 / Leakage - 0.02 m2
-&HOLE XB=13.3,13.5,0.0,0.1,2.9,3.0 / Leakage - 0.02 m2
-&HOLE XB=9.0,9.2,0.0,0.1,3.8,3.9 / Leakage - 0.02 m2
-&HOLE XB=9.0,9.2,10.3,10.4,3.8,3.9 / Leakage - 0.02 m2
+&OBST XB=7.4,8.3,   0.0,0.1,   0.1,2.2,  TRANSPARENCY=0.4, SURF_ID='DOOR', DEVC_ID='FRONT DOOR TIMER'/ 01-Front Door-S
+&OBST XB=13.2,14.1, 10.3,10.4, 0.7,2.2,  TRANSPARENCY=0.4, SURF_ID='WINDOW'/ 01-Den Window
+&OBST XB=9.6,11.4,  10.3,10.4, 0.7,2.2,  TRANSPARENCY=0.4, SURF_ID='WINDOW'/ 01-Family Room Window-E
+&OBST XB=6.9,8.7,   10.3,10.4, 0.7,2.2,  TRANSPARENCY=0.4, SURF_ID='WINDOW'/ 01-Family Room Window-W
+&OBST XB=4.3,6.1,   10.3,10.4, 0.1,2.2,  TRANSPARENCY=0.4, SURF_ID='DOOR'/ 01-Kitchen Door
+&OBST XB=0.3,1.2,   10.3,10.4, 1.3,2.1,  TRANSPARENCY=0.4, SURF_ID='WINDOW'/ 01-Kitchen Window-N
+&OBST XB=1.1,2.0,   0.0,0.1,   0.7,2.2,  TRANSPARENCY=0.4, SURF_ID='WINDOW'/ 01-Laundry Window-S
+&OBST XB=3.7,5.6,   0.0,0.1,   0.7,2.2,  TRANSPARENCY=0.4, SURF_ID='WINDOW'/ 01-DR Window-S
+&OBST XB=15.2,15.3, 1.8,3.6,   0.7,2.2,  TRANSPARENCY=0.4, SURF_ID='WINDOW'/ 01-LR Window-E
+&OBST XB=0.0,0.1,   9.1,10.1,  1.3,2.2,  TRANSPARENCY=0.4, SURF_ID='WINDOW'/ 01-Kitchen Window-W
+&OBST XB=12.1,14.0, 0.0,0.1,   0.7,2.2,  TRANSPARENCY=0.4, SURF_ID='WINDOW'/ 01-LR Window-S
+&OBST XB=13.2,14.1, 10.3,10.4, 3.8,5.4,  TRANSPARENCY=0.4, SURF_ID='WINDOW'/ 02-B2 Window-N
+&OBST XB=3.3,5.1,   10.3,10.4, 3.8,5.4,  TRANSPARENCY=0.4, SURF_ID='WINDOW'/ 02-Master BR Window-N
+&OBST XB=1.1,2.0,   0.0,0.1,   3.8,5.3,  TRANSPARENCY=0.4, SURF_ID='WINDOW'/ 02-Master Bath Window-S
+&OBST XB=12.2,14.0, 0.0,0.1,   3.8,5.3,  TRANSPARENCY=0.4, SURF_ID='WINDOW', DEVC_ID='BR3 WINDOW TIMER'/ 02-B3 Window-S
+&OBST XB=3.7,5.6,   0.0,0.1,   3.8,5.3,  TRANSPARENCY=0.4, SURF_ID='WINDOW', DEVC_ID='BR4 WINDOW TIMER'/ 02-B4 Window-S
 
-*** WINDOWS AND DOORS ***
+&OBST XB=10.1,11.2,  3.5,3.5,  0.1,2.1 / 01-Stairs Door
+&OBST XB=1.0,1.1,    3.7,4.4,  0.1,2.1 / 01-Kitchen Pantry Door
 
-&OBST XB=7.4,8.3,   0.0,0.1,   0.1,2.2, RGB=153,153,153, TRANSPARENCY=0.4, SURF_ID='WINDOW', DEVC_ID='FRONT DOOR TIMER'/ 01-Front Door-S
-&OBST XB=13.2,14.1, 10.3,10.4, 0.7,2.2, RGB=153,153,153, TRANSPARENCY=0.4, SURF_ID='WINDOW'/ 01-Den Window
-&OBST XB=9.6,11.4,  10.3,10.4, 0.7,2.2, RGB=153,153,153, TRANSPARENCY=0.4, SURF_ID='WINDOW'/ 01-Family Room Window-E
-&OBST XB=6.9,8.7,   10.3,10.4, 0.7,2.2, RGB=153,153,153, TRANSPARENCY=0.4, SURF_ID='WINDOW'/ 01-Family Room Window-W
-&OBST XB=4.3,6.1,   10.3,10.4, 0.1,2.2, RGB=153,153,153, TRANSPARENCY=0.4, SURF_ID='WINDOW'/ 01-Kitchen Door
-&OBST XB=0.3,1.2,   10.3,10.4, 1.3,2.1, RGB=153,153,153, TRANSPARENCY=0.4, SURF_ID='WINDOW'/ 01-Kitchen Window-N
-&OBST XB=1.1,2.0,   0.0,0.1,   0.7,2.2, RGB=153,153,153, TRANSPARENCY=0.4, SURF_ID='WINDOW'/ 01-Laundry Window-S
-&OBST XB=3.7,5.6,   0.0,0.1,   0.7,2.2, RGB=153,153,153, TRANSPARENCY=0.4, SURF_ID='WINDOW'/ 01-DR Window-S
-&OBST XB=15.2,15.3, 1.8,3.6,   0.7,2.2, RGB=153,153,153, TRANSPARENCY=0.4, SURF_ID='WINDOW'/ 01-LR Window-E
-&OBST XB=0.0,0.1,   9.1,10.1,  1.3,2.2, RGB=153,153,153, TRANSPARENCY=0.4, SURF_ID='WINDOW'/ 01-Kitchen Window-W
-&OBST XB=12.1,14.0, 0.0,0.1,   0.7,2.2, RGB=153,153,153, TRANSPARENCY=0.4, SURF_ID='WINDOW'/ 01-LR Window-S
-&OBST XB=13.2,14.1, 10.3,10.4, 3.8,5.4, RGB=153,153,153, TRANSPARENCY=0.4, SURF_ID='WINDOW'/ 02-B2 Window-N
-&OBST XB=3.3,5.1,   10.3,10.4, 3.8,5.4, RGB=153,153,153, TRANSPARENCY=0.4, SURF_ID='WINDOW'/ 02-Master BR Window-N
-&OBST XB=1.1,2.0,   0.0,0.1,   3.8,5.3, RGB=153,153,153, TRANSPARENCY=0.4, SURF_ID='WINDOW'/ 02-Master Bath Window-S
-&OBST XB=12.2,14.0, 0.0,0.1,   3.8,5.3, RGB=153,153,153, TRANSPARENCY=0.4, SURF_ID='WINDOW', DEVC_ID='BR3 WINDOW TIMER'/ 02-B3 Window-S
-&OBST XB=3.7,5.6,   0.0,0.1,   3.8,5.3, RGB=153,153,153, TRANSPARENCY=0.4, SURF_ID='WINDOW', DEVC_ID='BR4 WINDOW TIMER'/ 02-B4 Window-S
+&OBST XB=9.0,10.1,  3.2,3.4,  0.1,0.3, / 01-Lower Stairs
+&OBST XB=9.0,10.1,  3.1,3.2,  0.1,0.5, / 01-Lower Stairs
+&OBST XB=9.0,10.1,  3.0,3.1,  0.1,0.5, / 01-Lower Stairs
+&OBST XB=9.0,10.1,  2.9,3.0,  0.1,0.5, / 01-Lower Stairs
+&OBST XB=9.0,10.1,  2.8,2.9,  0.1,0.7, / 01-Lower Stairs
+&OBST XB=9.0,10.1,  2.7,2.8,  0.1,0.7, / 01-Lower Stairs
+&OBST XB=9.0,10.1,  2.6,2.7,  0.1,0.8, / 01-Lower Stairs
+&OBST XB=9.0,10.1,  2.9,3.0,  0.1,0.7, / 01-Lower Stairs
+&OBST XB=9.0,10.1,  2.4,2.6,  0.1,0.8, / 01-Lower Stairs
+&OBST XB=9.0,10.1,  2.3,2.4,  0.1,1.0, / 01-Lower Stairs
+&OBST XB=9.0,10.1,  2.2,2.3,  0.1,1.0, / 01-Lower Stairs
+&OBST XB=9.0,10.1,  2.1,2.2,  0.1,1.2, / 01-Lower Stairs
+&OBST XB=9.0,10.1,  2.0,2.1,  0.1,1.2, / 01-Lower Stairs
+&OBST XB=9.0,10.1,  1.9,2.0,  0.1,1.2, / 01-Lower Stairs
+&OBST XB=9.0,10.1,  1.7,1.9,  0.1,1.4, / 01-Lower Stairs
+&OBST XB=9.0,10.1,  1.6,1.7,  0.1,1.4, / 01-Lower Stairs
+&OBST XB=9.0,10.1,  3.4,3.5,  0.1,0.3, / 01-Lower Stairs
+&OBST XB=9.0,10.1,  2.4,2.5,  0.1,1.0, / 01-Lower Stairs
 
-&OBST XB=10.1,11.2,  3.5,3.5,  0.1,2.1, COLOR='GRAY', SURF_ID='INERT'/ 01-Stairs Door
-&OBST XB=1.0,1.1,    3.7,4.4,  0.1,2.1, COLOR='GRAY', SURF_ID='INERT'/ 01-Kitchen Pantry Door
+&OBST XB=10.1,11.2, 1.7,1.9,  0.1,1.8, / 02-Upper Stairs
+&OBST XB=10.1,11.2, 1.9,2.0,  0.1,2.0, / 02-Upper Stairs
+&OBST XB=10.1,11.2, 2.0,2.2,  0.1,2.0, / 02-Upper Stairs
+&OBST XB=10.1,11.2, 2.2,2.3,  0.1,2.1, / 02-Upper Stairs
+&OBST XB=10.1,11.2, 2.3,2.4,  0.1,2.1, / 02-Upper Stairs
+&OBST XB=10.1,11.2, 2.4,2.5,  0.1,2.1, / 02-Upper Stairs
+&OBST XB=10.1,11.2, 2.5,2.6,  0.1,2.3, / 02-Upper Stairs
+&OBST XB=10.1,11.2, 2.6,2.7,  0.1,2.3, / 02-Upper Stairs
+&OBST XB=10.1,11.2, 2.7,2.9,  0.1,2.5, / 02-Upper Stairs
+&OBST XB=10.1,11.2, 2.9,3.0,  0.1,2.5, / 02-Upper Stairs
+&OBST XB=10.1,11.2, 3.0,3.1,  0.1,2.7, / 02-Upper Stairs
+&OBST XB=10.1,11.2, 3.1,3.2,  0.1,2.7, / 02-Upper Stairs
+&OBST XB=10.1,11.2, 3.2,3.5,  0.1,2.8, / 02-Upper Stairs
+&OBST XB=10.1,11.2, 1.6,1.7,  0.1,1.8, / 02-Upper Stairs
+&OBST XB=10.1,11.2, 2.4,2.5,  0.1,2.3, / 02-Upper Stairs
+&OBST XB=10.1,11.2, 2.9,3.0,  0.1,2.7, / 02-Upper Stairs
+&OBST XB=10.1,11.2, 3.2,3.5,  0.1,2.9, / 02-Upper Stairs
+&OBST XB=9.0,11.2,  0.1,1.7,  0.1,1.6, / Stairs Sub Landing
 
-&OBST XB=9.0,10.1,  3.2,3.4,  0.1,0.3, RGB=127,95,0, SURF_ID='INERT'/ 01-Lower Stairs
-&OBST XB=9.0,10.1,  3.1,3.2,  0.1,0.5, RGB=127,95,0, SURF_ID='INERT'/ 01-Lower Stairs
-&OBST XB=9.0,10.1,  3.0,3.1,  0.2,0.5, RGB=127,95,0, SURF_ID='INERT'/ 01-Lower Stairs
-&OBST XB=9.0,10.1,  2.9,3.0,  0.3,0.5, RGB=127,95,0, SURF_ID='INERT'/ 01-Lower Stairs
-&OBST XB=9.0,10.1,  2.8,2.9,  0.3,0.7, RGB=127,95,0, SURF_ID='INERT'/ 01-Lower Stairs
-&OBST XB=9.0,10.1,  2.7,2.8,  0.4,0.7, RGB=127,95,0, SURF_ID='INERT'/ 01-Lower Stairs
-&OBST XB=9.0,10.1,  2.6,2.7,  0.5,0.8, RGB=127,95,0, SURF_ID='INERT'/ 01-Lower Stairs
-&OBST XB=9.0,10.1,  2.9,3.0,  0.6,0.7, RGB=127,95,0, SURF_ID='INERT'/ 01-Lower Stairs
-&OBST XB=9.0,10.1,  2.4,2.6,  0.6,0.8, RGB=127,95,0, SURF_ID='INERT'/ 01-Lower Stairs
-&OBST XB=9.0,10.1,  2.3,2.4,  0.7,1.0, RGB=127,95,0, SURF_ID='INERT'/ 01-Lower Stairs
-&OBST XB=9.0,10.1,  2.2,2.3,  0.8,1.0, RGB=127,95,0, SURF_ID='INERT'/ 01-Lower Stairs
-&OBST XB=9.0,10.1,  2.1,2.2,  0.8,1.2, RGB=127,95,0, SURF_ID='INERT'/ 01-Lower Stairs
-&OBST XB=9.0,10.1,  2.0,2.1,  0.9,1.2, RGB=127,95,0, SURF_ID='INERT'/ 01-Lower Stairs
-&OBST XB=9.0,10.1,  1.9,2.0,  1.0,1.2, RGB=127,95,0, SURF_ID='INERT'/ 01-Lower Stairs
-&OBST XB=9.0,10.1,  1.7,1.9,  1.1,1.4, RGB=127,95,0, SURF_ID='INERT'/ 01-Lower Stairs
-&OBST XB=9.0,10.1,  1.6,1.7,  1.2,1.4, RGB=127,95,0, SURF_ID='INERT'/ 01-Lower Stairs
-&OBST XB=9.0,10.1,  3.4,3.5,  0.3,0.3, RGB=127,95,0, SURF_ID='INERT'/ 01-Lower Stairs
-&OBST XB=9.0,10.1,  2.4,2.5,  1.0,1.0, RGB=127,95,0, SURF_ID='INERT'/ 01-Lower Stairs
-
-&OBST XB=10.1,11.2, 1.7,1.9,  1.6,1.8, RGB=127.0,95.0,0.0, SURF_ID='INERT'/ 02-Upper Stairs
-&OBST XB=10.1,11.2, 1.9,2.0,  1.6,2.0, RGB=127.0,95.0,0.0, SURF_ID='INERT'/ 02-Upper Stairs
-&OBST XB=10.1,11.2, 2.0,2.2,  1.7,2.0, RGB=127.0,95.0,0.0, SURF_ID='INERT'/ 02-Upper Stairs
-&OBST XB=10.1,11.2, 2.2,2.3,  1.8,2.1, RGB=127.0,95.0,0.0, SURF_ID='INERT'/ 02-Upper Stairs
-&OBST XB=10.1,11.2, 2.3,2.4,  1.9,2.1, RGB=127.0,95.0,0.0, SURF_ID='INERT'/ 02-Upper Stairs
-&OBST XB=10.1,11.2, 2.4,2.5,  2.0,2.1, RGB=127.0,95.0,0.0, SURF_ID='INERT'/ 02-Upper Stairs
-&OBST XB=10.1,11.2, 2.5,2.6,  2.0,2.3, RGB=127.0,95.0,0.0, SURF_ID='INERT'/ 02-Upper Stairs
-&OBST XB=10.1,11.2, 2.6,2.7,  2.1,2.3, RGB=127.0,95.0,0.0, SURF_ID='INERT'/ 02-Upper Stairs
-&OBST XB=10.1,11.2, 2.7,2.9,  2.2,2.5, RGB=127.0,95.0,0.0, SURF_ID='INERT'/ 02-Upper Stairs
-&OBST XB=10.1,11.2, 2.9,3.0,  2.3,2.5, RGB=127.0,95.0,0.0, SURF_ID='INERT'/ 02-Upper Stairs
-&OBST XB=10.1,11.2, 3.0,3.1,  2.4,2.7, RGB=127.0,95.0,0.0, SURF_ID='INERT'/ 02-Upper Stairs
-&OBST XB=10.1,11.2, 3.1,3.2,  2.5,2.7, RGB=127.0,95.0,0.0, SURF_ID='INERT'/ 02-Upper Stairs
-&OBST XB=10.1,11.2, 3.2,3.5,  2.6,2.8, RGB=127.0,95.0,0.0, SURF_ID='INERT'/ 02-Upper Stairs
-&OBST XB=10.1,11.2, 1.6,1.7,  1.8,1.8, RGB=127.0,95.0,0.0, SURF_ID='INERT'/ 02-Upper Stairs
-&OBST XB=10.1,11.2, 2.4,2.5,  2.3,2.3, RGB=127.0,95.0,0.0, SURF_ID='INERT'/ 02-Upper Stairs
-&OBST XB=10.1,11.2, 2.9,3.0,  2.7,2.7, RGB=127.0,95.0,0.0, SURF_ID='INERT'/ 02-Upper Stairs
-&OBST XB=10.1,11.2, 3.2,3.5,  2.8,2.9, RGB=127.0,95.0,0.0, SURF_ID='INERT'/ 02-Upper Stairs
-&OBST XB=9.0,11.2,  0.1,1.7,  1.3,1.6, RGB=127,95,0, SURF_ID='INERT'/ Stairs Sub Landing
-
-&OBST XB=10.1,10.1,  3.4,3.5,  0.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall-Between Stairs
-&OBST XB=10.1,10.1,  1.6,3.4,  0.1,2.9, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall-Between Stairs
-&OBST XB=6.2,6.3,    0.1,1.3,  0.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall Downstairs
-&OBST XB=6.2,7.0,    1.3,1.4,  0.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall Downstairs
-&OBST XB=6.9,7.0,    0.1,0.5,  0.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall Downstairs
-&OBST XB=6.9,7.0,    1.0,1.3,  0.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall Downstairs
-&OBST XB=8.9,9.0,    3.4,3.6,  0.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall Downstairs
-&OBST XB=8.9,9.0,    0.1,3.4,  0.1,2.8, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall Downstairs
-&OBST XB=11.2,11.3,  0.1,3.5,  0.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall Downstairs
-&OBST XB=13.8,15.2,  5.3,5.3,  0.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall Downstairs
-&OBST XB=1.0,1.1,    2.6,3.7,  0.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall Downstairs
-&OBST XB=1.0,1.1,    4.4,5.3,  0.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall Downstairs
-&OBST XB=1.0,1.1,    3.7,4.4,  2.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall Downstairs
-&OBST XB=2.3,2.4,    2.6,3.1,  0.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall Downstairs
-&OBST XB=2.3,2.4,    4.2,5.4,  0.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall Downstairs
-&OBST XB=3.0,3.1,    0.1,4.5,  0.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall Downstairs
-&OBST XB=5.0,5.1,    4.6,5.4,  0.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall Downstairs
-&OBST XB=0.1,1.3,    2.5,2.6,  0.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall Downstairs
-&OBST XB=0.1,1.0,    5.3,5.3,  0.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall Downstairs
-&OBST XB=1.3,2.1,    2.5,2.6,  2.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall Downstairs
-&OBST XB=2.0,3.0,    0.1,0.1,  0.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall Downstairs
-&OBST XB=2.1,3.0,    2.5,2.6,  0.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall Downstairs
-&OBST XB=2.4,5.1,    4.5,4.6,  0.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall Downstairs
-&OBST XB=6.2,6.2,    0.1,1.4,  0.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall Downstairs
-&OBST XB=12.0,12.1,  7.1,10.3, 0.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall Downstairs
-&OBST XB=12.0,12.2,  6.9,7.0,  0.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall Downstairs
-&OBST XB=12.1,12.3,  6.8,6.9,  0.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall Downstairs
-&OBST XB=12.2,12.4,  6.7,6.8,  2.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall Downstairs
-&OBST XB=12.3,12.5,  6.6,6.7,  2.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall Downstairs
-&OBST XB=12.4,12.6,  6.5,6.6,  2.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall Downstairs
-&OBST XB=12.5,12.7,  6.4,6.5,  2.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall Downstairs
-&OBST XB=12.6,12.8,  6.3,6.4,  2.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall Downstairs
-&OBST XB=12.7,12.9,  6.2,6.3,  2.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall Downstairs
-&OBST XB=12.8,12.9,  6.1,6.2,  2.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall Downstairs
-&OBST XB=12.9,13.0,  6.1,6.2,  0.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall Downstairs
-&OBST XB=12.9,13.1,  6.0,6.1,  0.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall Downstairs
-&OBST XB=13.0,13.2,  5.9,6.0,  0.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall Downstairs
-&OBST XB=13.1,13.3,  5.8,5.9,  0.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall Downstairs
-&OBST XB=13.2,13.4,  5.7,5.8,  0.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall Downstairs
-&OBST XB=13.3,13.5,  5.6,5.7,  0.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall Downstairs
-&OBST XB=13.4,13.5,  5.8,5.9,  0.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall Downstairs
-&OBST XB=13.4,13.6,  5.5,5.6,  0.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall Downstairs
-&OBST XB=13.5,13.6,  5.9,6.0,  0.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall Downstairs
-&OBST XB=13.5,13.7,  5.4,5.5,  0.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall Downstairs
-&OBST XB=13.6,13.7,  5.3,5.4,  0.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall Downstairs
-&OBST XB=13.6,14.0,  6.0,6.1,  0.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall Downstairs
-&OBST XB=13.8,15.2,  5.3,5.4,  0.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall Downstairs
-&OBST XB=14.8,15.2,  6.0,6.1,  0.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall Downstairs
-&OBST XB=8.9,9.0,    0.1,3.4,  2.8,2.9, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall Downstairs
-&OBST XB=0.1,1.1,    5.3,5.4,  0.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall Downstairs
+&OBST XB=10.1,10.1,  3.4,3.5,  0.1,2.6 / 01-Int-Wall-Between Stairs
+&OBST XB=10.1,10.1,  1.6,3.4,  0.1,2.9 / 01-Int-Wall-Between Stairs
+&OBST XB=6.2,6.3,    0.1,1.3,  0.1,2.6 / 01-Int-Wall Downstairs
+&OBST XB=6.2,7.0,    1.3,1.4,  0.1,2.6 / 01-Int-Wall Downstairs
+&OBST XB=6.9,7.0,    0.1,0.5,  0.1,2.6 / 01-Int-Wall Downstairs
+&OBST XB=6.9,7.0,    1.0,1.3,  0.1,2.6 / 01-Int-Wall Downstairs
+&OBST XB=8.9,9.0,    3.4,3.6,  0.1,2.6 / 01-Int-Wall Downstairs
+&OBST XB=8.9,9.0,    0.1,3.4,  0.1,2.8 / 01-Int-Wall Downstairs
+&OBST XB=11.2,11.3,  0.1,3.5,  0.1,2.6 / 01-Int-Wall Downstairs
+&OBST XB=13.8,15.2,  5.3,5.3,  0.1,2.6 / 01-Int-Wall Downstairs
+&OBST XB=1.0,1.1,    2.6,3.7,  0.1,2.6 / 01-Int-Wall Downstairs
+&OBST XB=1.0,1.1,    4.4,5.3,  0.1,2.6 / 01-Int-Wall Downstairs
+&OBST XB=1.0,1.1,    3.7,4.4,  2.1,2.6 / 01-Int-Wall Downstairs
+&OBST XB=2.3,2.4,    2.6,3.1,  0.1,2.6 / 01-Int-Wall Downstairs
+&OBST XB=2.3,2.4,    4.2,5.4,  0.1,2.6 / 01-Int-Wall Downstairs
+&OBST XB=3.0,3.1,    0.1,4.5,  0.1,2.6 / 01-Int-Wall Downstairs
+&OBST XB=5.0,5.1,    4.6,5.4,  0.1,2.6 / 01-Int-Wall Downstairs
+&OBST XB=0.1,1.3,    2.5,2.6,  0.1,2.6 / 01-Int-Wall Downstairs
+&OBST XB=0.1,1.0,    5.3,5.3,  0.1,2.6 / 01-Int-Wall Downstairs
+&OBST XB=1.3,2.1,    2.5,2.6,  2.1,2.6 / 01-Int-Wall Downstairs
+&OBST XB=2.0,3.0,    0.1,0.1,  0.1,2.6 / 01-Int-Wall Downstairs
+&OBST XB=2.1,3.0,    2.5,2.6,  0.1,2.6 / 01-Int-Wall Downstairs
+&OBST XB=2.4,5.1,    4.5,4.6,  0.1,2.6 / 01-Int-Wall Downstairs
+&OBST XB=6.2,6.2,    0.1,1.4,  0.1,2.6 / 01-Int-Wall Downstairs
+&OBST XB=12.0,12.1,  7.1,10.3, 0.1,2.6 / 01-Int-Wall Downstairs
+&OBST XB=12.0,12.2,  6.9,7.0,  0.1,2.6 / 01-Int-Wall Downstairs
+&OBST XB=12.1,12.3,  6.8,6.9,  0.1,2.6 / 01-Int-Wall Downstairs
+&OBST XB=12.2,12.4,  6.7,6.8,  2.1,2.6 / 01-Int-Wall Downstairs
+&OBST XB=12.3,12.5,  6.6,6.7,  2.1,2.6 / 01-Int-Wall Downstairs
+&OBST XB=12.4,12.6,  6.5,6.6,  2.1,2.6 / 01-Int-Wall Downstairs
+&OBST XB=12.5,12.7,  6.4,6.5,  2.1,2.6 / 01-Int-Wall Downstairs
+&OBST XB=12.6,12.8,  6.3,6.4,  2.1,2.6 / 01-Int-Wall Downstairs
+&OBST XB=12.7,12.9,  6.2,6.3,  2.1,2.6 / 01-Int-Wall Downstairs
+&OBST XB=12.8,12.9,  6.1,6.2,  2.1,2.6 / 01-Int-Wall Downstairs
+&OBST XB=12.9,13.0,  6.1,6.2,  0.1,2.6 / 01-Int-Wall Downstairs
+&OBST XB=12.9,13.1,  6.0,6.1,  0.1,2.6 / 01-Int-Wall Downstairs
+&OBST XB=13.0,13.2,  5.9,6.0,  0.1,2.6 / 01-Int-Wall Downstairs
+&OBST XB=13.1,13.3,  5.8,5.9,  0.1,2.6 / 01-Int-Wall Downstairs
+&OBST XB=13.2,13.4,  5.7,5.8,  0.1,2.6 / 01-Int-Wall Downstairs
+&OBST XB=13.3,13.5,  5.6,5.7,  0.1,2.6 / 01-Int-Wall Downstairs
+&OBST XB=13.4,13.5,  5.8,5.9,  0.1,2.6 / 01-Int-Wall Downstairs
+&OBST XB=13.4,13.6,  5.5,5.6,  0.1,2.6 / 01-Int-Wall Downstairs
+&OBST XB=13.5,13.6,  5.9,6.0,  0.1,2.6 / 01-Int-Wall Downstairs
+&OBST XB=13.5,13.7,  5.4,5.5,  0.1,2.6 / 01-Int-Wall Downstairs
+&OBST XB=13.6,13.7,  5.3,5.4,  0.1,2.6 / 01-Int-Wall Downstairs
+&OBST XB=13.6,14.0,  6.0,6.1,  0.1,2.6 / 01-Int-Wall Downstairs
+&OBST XB=13.8,15.2,  5.3,5.4,  0.1,2.6 / 01-Int-Wall Downstairs
+&OBST XB=14.8,15.2,  6.0,6.1,  0.1,2.6 / 01-Int-Wall Downstairs
+&OBST XB=8.9,9.0,    0.1,3.4,  2.8,2.9 / 01-Int-Wall Downstairs
+&OBST XB=0.1,1.1,    5.3,5.4,  0.1,2.6 / 01-Int-Wall Downstairs
 &OBST XB=6.1,6.7,    7.8,10.3, 1.0,1.1, RGB=245,206,158, SURF_ID='WALL'/ K-Counter Top
 &OBST XB=6.2,6.7,    7.8,10.3, 0.1,1.0, RGB=245,206,158, SURF_ID='WALL'/ K-Counter
-&OBST XB=15.2,15.3,  1.8,3.6,   0.1,0.7, SURF_ID='EXT WALL'/ 01-E-Ext-Wall
-&OBST XB=15.2,15.3,  0.0,1.8,   0.1,2.6, SURF_ID='EXT WALL'/ 01-E-Ext-Wall
-&OBST XB=15.2,15.3,  3.6,5.3,   0.1,2.6, SURF_ID='EXT WALL'/ 01-E-Ext-Wall
-&OBST XB=15.2,15.3,  1.8,3.6,   2.2,2.6, SURF_ID='EXT WALL'/ 01-E-Ext-Wall
-&OBST XB=15.2,15.3,  5.3,10.4,  0.1,2.6, SURF_ID='EXT WALL'/ 01-E-Ext-Wall
-&OBST XB=6.1,6.9,    10.3,10.4, 0.1,2.6, SURF_ID='EXT WALL'/ 01-N-Ext-Wall
-&OBST XB=6.9,8.7,    10.3,10.4, 2.2,2.6, SURF_ID='EXT WALL'/ 01-N-Ext-Wall
-&OBST XB=6.9,8.7,    10.3,10.4, 0.1,0.7, SURF_ID='EXT WALL'/ 01-N-Ext-Wall
-&OBST XB=8.7,9.6,    10.3,10.4, 0.1,2.6, SURF_ID='EXT WALL'/ 01-N-Ext-Wall
-&OBST XB=9.6,11.4,   10.3,10.4, 0.1,0.7, SURF_ID='EXT WALL'/ 01-N-Ext-Wall
-&OBST XB=9.6,11.4,   10.3,10.4, 2.2,2.6, SURF_ID='EXT WALL'/ 01-N-Ext-Wall
-&OBST XB=11.4,13.2,  10.3,10.4, 0.1,2.6, SURF_ID='EXT WALL'/ 01-N-Ext-Wall
-&OBST XB=13.2,14.1,  10.3,10.4, 0.1,0.7, SURF_ID='EXT WALL'/ 01-N-Ext-Wall
-&OBST XB=13.2,14.1,  10.3,10.4, 2.2,2.6, SURF_ID='EXT WALL'/ 01-N-Ext-Wall
-&OBST XB=14.1,15.2,  10.3,10.4, 0.1,2.6, SURF_ID='EXT WALL'/ 01-N-Ext-Wall
-&OBST XB=0.0,0.3,    10.3,10.4, 0.1,2.6, SURF_ID='EXT WALL'/ 01-N-Ext-Wall
-&OBST XB=0.3,1.2,    10.3,10.4, 0.1,1.3, SURF_ID='EXT WALL'/ 01-N-Ext-Wall
-&OBST XB=0.3,1.2,    10.3,10.4, 2.1,2.6, SURF_ID='EXT WALL'/ 01-N-Ext-Wall
-&OBST XB=1.2,4.3,    10.3,10.4, 0.1,2.6, SURF_ID='EXT WALL'/ 01-N-Ext-Wall
-&OBST XB=4.3,6.1,    10.3,10.4, 2.2,2.6, SURF_ID='EXT WALL'/ 01-N-Ext-Wall
-&OBST XB=0.0,0.1,    0.1,5.3,   0.1,2.6, SURF_ID='EXT WALL'/ 01-W-Ext-Wall
-&OBST XB=0.0,0.1,    9.1,10.1,  0.1,1.3, SURF_ID='EXT WALL'/ 01-W-Ext-Wall
-&OBST XB=0.0,0.1,    5.3,9.1,   0.1,2.6, SURF_ID='EXT WALL'/ 01-W-Ext-Wall
-&OBST XB=0.0,0.1,    10.1,10.3, 0.1,2.6, SURF_ID='EXT WALL'/ 01-W-Ext-Wall
-&OBST XB=0.0,0.1,    9.1,10.1,  2.2,2.6, SURF_ID='EXT WALL'/ 01-W-Ext-Wall
-&OBST XB=6.2,6.3,    4.6,5.3,   0.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall Center Col. Picture
-&OBST XB=6.9,7.0,    4.6,5.3,   0.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall Center Col. Picture
-&OBST XB=6.2,7.0,    4.5,4.6,   0.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall Center Col. Picture
-&OBST XB=6.2,7.0,    5.3,5.4,   0.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall Center Col. Picture
-&OBST XB=10.1,10.2,  3.5,3.6,   0.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall of Stairs Door
-&OBST XB=10.2,11.2,  3.5,3.6,   2.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall of Stairs Door
-&OBST XB=11.2,11.2,  3.5,3.6,   0.1,2.1, COLOR='WHITE', SURF_ID='WALL'/ 01-Int-Wall of Stairs Door
-&OBST XB=11.2,11.3,  3.5,3.6,   0.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-col
-&OBST XB=12.0,12.1,  7.0,7.1,   0.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-col
-&OBST XB=6.2,7.0,    3.5,3.6,   0.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-col
-&OBST XB=6.2,7.0,    3.8,3.9,   0.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-col
-&OBST XB=6.2,6.3,    3.5,3.9,   0.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-col
-&OBST XB=6.9,7.0,    3.5,3.9,   0.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-col
-&OBST XB=13.7,13.8,  5.3,5.4,   0.1,2.6, COLOR='WHITE', SURF_ID='WALL'/ 01-col
-&OBST XB=6.2,7.4,    0.0,0.1,   0.1,2.6, SURF_ID='EXT WALL'/ 01-S-Ext-Wall
-&OBST XB=7.4,8.3,    0.0,0.1,   2.2,2.6, SURF_ID='EXT WALL'/ 01-S-Ext-Wall
-&OBST XB=8.3,12.1,   0.0,0.1,   0.1,2.6, SURF_ID='EXT WALL'/ 01-S-Ext-Wall
-&OBST XB=12.1,14.0,  0.0,0.1,   0.1,0.7, SURF_ID='EXT WALL'/ 01-S-Ext-Wall
-&OBST XB=12.1,14.0,  0.0,0.1,   2.2,2.6, SURF_ID='EXT WALL'/ 01-S-Ext-Wall
-&OBST XB=14.0,15.2,  0.0,0.1,   0.1,2.6, SURF_ID='EXT WALL'/ 01-S-Ext-Wall
-&OBST XB=0.0,1.1,    0.0,0.1,   0.1,2.6, SURF_ID='EXT WALL'/ 01-S-Ext-Wall
-&OBST XB=1.1,2.0,    0.0,0.1,   0.1,0.7, SURF_ID='EXT WALL'/ 01-S-Ext-Wall
-&OBST XB=1.1,2.0,    0.0,0.1,   2.2,2.6, SURF_ID='EXT WALL'/ 01-S-Ext-Wall
-&OBST XB=2.0,3.7,    0.0,0.1,   0.1,2.6, SURF_ID='EXT WALL'/ 01-S-Ext-Wall
-&OBST XB=3.7,5.6,    0.0,0.1,   0.1,0.7, SURF_ID='EXT WALL'/ 01-S-Ext-Wall
-&OBST XB=3.7,5.6,    0.0,0.1,   2.2,2.6, SURF_ID='EXT WALL'/ 01-S-Ext-Wall
-&OBST XB=5.6,6.2,    0.0,0.1,   0.1,2.6, SURF_ID='EXT WALL'/ 01-S-Ext-Wall
-&OBST XB=0.0,0.1,    0.1,5.3,   2.6,2.8, SURF_ID='EXT WALL'/ 02-W-Ext-Wall
-&OBST XB=0.0,0.1,    0.1,5.3,   2.8,5.7, SURF_ID='EXT WALL'/ 02-W-Ext-Wall
-&OBST XB=0.0,0.1,    5.3,10.3,  2.6,2.8, SURF_ID='EXT WALL'/ 02-W-Ext-Wall
-&OBST XB=0.0,0.1,    5.3,10.3,  2.8,5.7, SURF_ID='EXT WALL'/ 02-W-Ext-Wall
-&OBST XB=11.4,11.5,  6.5,6.6,   2.9,5.7, SURF_ID='EXT WALL'/ 02-Int-Wall-B2 West Wall
-&OBST XB=11.5,11.6,  6.6,6.7,   2.9,5.7, SURF_ID='EXT WALL'/ 02-Int-Wall-B2 West Wall
-&OBST XB=11.6,11.7,  6.7,6.8,   2.9,5.7, SURF_ID='EXT WALL'/ 02-Int-Wall-B2 West Wall
-&OBST XB=11.7,11.8,  6.8,6.9,   2.9,5.7, SURF_ID='EXT WALL'/ 02-Int-Wall-B2 West Wall
-&OBST XB=11.8,11.9,  6.9,7.0,   2.9,5.7, SURF_ID='EXT WALL'/ 02-Int-Wall-B2 West Wall
-&OBST XB=11.9,12.0,  7.0,7.1,   2.9,5.7, SURF_ID='EXT WALL'/ 02-Int-Wall-B2 West Wall
-&OBST XB=12.0,12.1,  7.1,10.3,  2.9,5.7, SURF_ID='EXT WALL'/ 02-Int-Wall-B2 West Wall
-&OBST XB=6.2,11.4,   10.3,10.4, 2.8,5.7, SURF_ID='EXT WALL'/ 02-N-Ext-Wall
-&OBST XB=11.4,13.2,  10.3,10.4, 2.8,5.7, SURF_ID='EXT WALL'/ 02-N-Ext-Wall
-&OBST XB=13.2,14.1,  10.3,10.4, 2.8,3.8, SURF_ID='EXT WALL'/ 02-N-Ext-Wall
-&OBST XB=13.2,14.1,  10.3,10.4, 5.4,5.7, SURF_ID='EXT WALL'/ 02-N-Ext-Wall
-&OBST XB=14.1,15.2,  10.3,10.4, 2.8,5.7, SURF_ID='EXT WALL'/ 02-N-Ext-Wall
-&OBST XB=6.2,15.2,   10.3,10.4, 2.6,2.8, SURF_ID='EXT WALL'/ 02-N-Ext-Wall
-&OBST XB=0.0,6.2,    10.3,10.4, 2.6,2.8, SURF_ID='EXT WALL'/ 02-N-Ext-Wall
-&OBST XB=0.0,3.3,    10.3,10.4, 2.8,5.7, SURF_ID='EXT WALL'/ 02-N-Ext-Wall
-&OBST XB=3.3,5.1,    10.3,10.4, 2.8,3.8, SURF_ID='EXT WALL'/ 02-N-Ext-Wall
-&OBST XB=3.3,5.1,    10.3,10.4, 5.4,5.7, SURF_ID='EXT WALL'/ 02-N-Ext-Wall
-&OBST XB=5.1,6.2,    10.3,10.4, 2.8,5.7, COLOR='WHITE', SURF_ID='EXT WALL'/ 02-N-Ext-Wall
-&OBST XB=6.2,15.2,   0.0,0.1,   2.6,2.8, SURF_ID='EXT WALL'/ 02-S-Ext-Wall
-&OBST XB=0.0,6.2,    0.0,0.1,   2.6,2.8, SURF_ID='EXT WALL'/ 02-S-Ext-Wall
-&OBST XB=6.2,12.2,   0.0,0.1,   2.8,5.7, SURF_ID='EXT WALL'/ 02-S-Ext-Wall
-&OBST XB=12.2,14.0,  0.0,0.1,   2.8,3.8, SURF_ID='EXT WALL'/ 02-S-Ext-Wall
-&OBST XB=12.2,14.0,  0.0,0.1,   5.3,5.7, SURF_ID='EXT WALL'/ 02-S-Ext-Wall
-&OBST XB=14.0,15.2,  0.0,0.1,   2.8,5.7, SURF_ID='EXT WALL'/ 02-S-Ext-Wall
-&OBST XB=0.0,1.1,    0.0,0.1,   2.8,5.7, SURF_ID='EXT WALL'/ 02-S-Ext-Wall
-&OBST XB=1.1,2.0,    0.0,0.1,   2.8,3.8, SURF_ID='EXT WALL'/ 02-S-Ext-Wall
-&OBST XB=1.1,2.0,    0.0,0.1,   5.3,5.7, SURF_ID='EXT WALL'/ 02-S-Ext-Wall
-&OBST XB=2.0,3.7,    0.0,0.1,   2.8,5.7, SURF_ID='EXT WALL'/ 02-S-Ext-Wall
-&OBST XB=3.7,5.6,    0.0,0.1,   2.8,3.8, SURF_ID='EXT WALL'/ 02-S-Ext-Wall
-&OBST XB=3.7,5.6,    0.0,0.1,   5.3,5.7, SURF_ID='EXT WALL'/ 02-S-Ext-Wall
-&OBST XB=5.6,6.2,    0.0,0.1,   2.8,5.7, SURF_ID='EXT WALL'/ 02-S-Ext-Wall
-&OBST XB=6.3,10.3,   5.4,5.4,   2.9,3.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Railing Above FR
-&OBST XB=10.3,10.4,  5.5,5.5,   2.9,3.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Railing Above FR
-&OBST XB=10.4,10.5,  5.6,5.6,   2.9,3.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Railing Above FR
-&OBST XB=10.5,10.6,  5.7,5.7,   2.9,3.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Railing Above FR
-&OBST XB=10.6,10.7,  5.8,5.8,   2.9,3.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Railing Above FR
-&OBST XB=10.7,10.8,  5.9,5.9,   2.9,3.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Railing Above FR
-&OBST XB=10.8,10.9,  6.0,6.0,   2.9,3.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Railing Above FR
-&OBST XB=10.9,11.0,  6.1,6.1,   2.9,3.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Railing Above FR
-&OBST XB=11.0,11.1,  6.2,6.2,   2.9,3.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Railing Above FR
-&OBST XB=11.1,11.2,  6.3,6.3,   2.9,3.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Railing Above FR
-&OBST XB=11.2,11.3,  6.4,6.4,   2.9,3.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Railing Above FR
-&OBST XB=11.3,11.4,  6.5,6.5,   2.9,3.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Railing Above FR
-&OBST XB=10.3,10.3,  5.4,5.5,   2.9,3.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Railing Above FR
-&OBST XB=10.4,10.4,  5.5,5.6,   2.9,3.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Railing Above FR
-&OBST XB=10.5,10.5,  5.6,5.7,   2.9,3.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Railing Above FR
-&OBST XB=10.6,10.6,  5.7,5.8,   2.9,3.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Railing Above FR
-&OBST XB=10.7,10.7,  5.8,5.9,   2.9,3.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Railing Above FR
-&OBST XB=10.8,10.8,  5.9,6.0,   2.9,3.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Railing Above FR
-&OBST XB=10.9,10.9,  6.0,6.1,   2.9,3.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Railing Above FR
-&OBST XB=11.0,11.0,  6.1,6.2,   2.9,3.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Railing Above FR
-&OBST XB=11.1,11.1,  6.2,6.3,   2.9,3.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Railing Above FR
-&OBST XB=11.2,11.2,  6.3,6.4,   2.9,3.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Railing Above FR
-&OBST XB=11.3,11.3,  6.4,6.5,   2.9,3.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Railing Above FR
-&OBST XB=6.2,6.3,    5.3,10.3,  2.9,5.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Int-Wall Upstairs West Half
-&OBST XB=6.2,6.3,    0.1,3.5,   2.9,5.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Int-Wall Upstairs West Half
-&OBST XB=6.2,7.0,    3.5,3.6,   2.9,5.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Int-Wall Upstairs West Half
-&OBST XB=6.9,7.0,    0.1,3.6,   2.9,5.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Int-Wall Upstairs West Half
-&OBST XB=6.2,6.3,    5.3,5.3,   2.9,5.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Int-Wall Upstairs West Half
-&OBST XB=0.1,1.2,    3.4,3.5,   2.9,5.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Int-Wall Upstairs West Half
-&OBST XB=2.1,2.2,    4.5,5.3,   2.9,5.7, SURF_ID='EXT WALL'/ 02-Int-Wall Upstairs West Half
-&OBST XB=2.1,2.3,    4.4,4.5,   2.9,5.7, SURF_ID='EXT WALL'/ 02-Int-Wall Upstairs West Half
-&OBST XB=2.2,2.3,    4.3,4.4,   2.9,5.7, SURF_ID='EXT WALL'/ 02-Int-Wall Upstairs West Half
-&OBST XB=2.3,2.4,    4.2,4.4,   4.9,5.7, SURF_ID='EXT WALL'/ 02-Int-Wall Upstairs West Half
-&OBST XB=2.4,2.5,    4.1,4.2,   4.9,5.7, SURF_ID='EXT WALL'/ 02-Int-Wall Upstairs West Half
-&OBST XB=2.5,2.6,    4.0,4.1,   4.9,5.7, SURF_ID='EXT WALL'/ 02-Int-Wall Upstairs West Half
-&OBST XB=2.6,2.7,    3.9,4.0,   4.9,5.7, SURF_ID='EXT WALL'/ 02-Int-Wall Upstairs West Half
-&OBST XB=2.7,2.8,    3.8,3.9,   4.9,5.7, SURF_ID='EXT WALL'/ 02-Int-Wall Upstairs West Half
-&OBST XB=2.8,2.9,    3.7,3.8,   4.9,5.7, SURF_ID='EXT WALL'/ 02-Int-Wall Upstairs West Half
-&OBST XB=2.9,3.0,    3.6,3.7,   2.9,5.7, SURF_ID='EXT WALL'/ 02-Int-Wall Upstairs West Half
-&OBST XB=3.0,3.1,    0.1,3.5,   2.9,5.7, SURF_ID='EXT WALL'/ 02-Int-Wall Upstairs West Half
-&OBST XB=3.0,5.3,    3.5,3.6,   2.9,5.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Int-Wall Upstairs West Half
-&OBST XB=5.1,5.2,    3.6,4.0,   2.9,5.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Int-Wall Upstairs West Half
-&OBST XB=5.1,5.2,    4.8,5.3,   2.9,5.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Int-Wall Upstairs West Half
-&OBST XB=5.1,5.2,    4.0,4.8,   4.9,5.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Int-Wall Upstairs West Half
-&OBST XB=5.3,6.1,    3.5,3.6,   4.9,5.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Int-Wall Upstairs West Half
-&OBST XB=6.1,6.2,    3.5,3.6,   2.9,5.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Int-Wall Upstairs West Half
-&OBST XB=0.1,1.3,    5.1,5.1,   2.9,5.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Int-Wall Upstairs West Half
-&OBST XB=1.3,2.0,    5.1,5.1,   4.9,5.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Int-Wall Upstairs West Half
-&OBST XB=2.0,2.1,    5.1,5.1,   2.9,5.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Int-Wall Upstairs West Half
-&OBST XB=5.2,6.2,    5.3,5.3,   2.9,5.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Int-Wall Upstairs West Half
-&OBST XB=6.2,6.2,    0.1,0.5,   2.9,5.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Int-Wall Upstairs West Half
-&OBST XB=6.2,6.2,    2.3,3.5,   2.9,5.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Int-Wall Upstairs West Half
-&OBST XB=6.2,6.2,    0.5,2.3,   5.1,5.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Int-Wall Upstairs West Half
-&OBST XB=0.1,2.2,    6.1,6.2,   2.9,5.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Int-Wall Upstairs West Half
-&OBST XB=2.1,2.2,    5.3,6.1,   2.9,5.7, SURF_ID='EXT WALL'/ 02-Int-Wall Upstairs West Half
-&OBST XB=2.1,2.2,    6.2,6.3,   2.9,5.7, SURF_ID='EXT WALL'/ 02-Int-Wall Upstairs West Half
-&OBST XB=2.1,2.2,    7.1,10.3,  2.9,5.7, SURF_ID='EXT WALL'/ 02-Int-Wall Upstairs West Half
-&OBST XB=2.1,2.2,    6.3,7.1,   4.9,5.7, SURF_ID='EXT WALL'/ 02-Int-Wall Upstairs West Half
-&OBST XB=5.1,6.2,    5.3,5.4,   2.9,5.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Int-Wall Upstairs West Half
-&OBST XB=6.2,6.2,    5.4,10.3,  2.9,5.7, SURF_ID='EXT WALL'/ 02-Int-Wall Upstairs West Half
-&OBST XB=15.2,15.3,  0.0,5.3,   2.6,2.8, SURF_ID='EXT WALL'/ 02-E-Ext-Wall
-&OBST XB=15.2,15.3,  5.3,10.4,  2.8,5.7, SURF_ID='EXT WALL'/ 02-E-Ext-Wall
-&OBST XB=15.2,15.3,  5.3,10.4,  2.6,2.8, SURF_ID='EXT WALL'/ 02-E-Ext-Wall
-&OBST XB=15.2,15.3,  0.0,5.3,   2.8,5.7, SURF_ID='EXT WALL'/ 02-E-Ext-Wall
-&OBST XB=11.5,11.6,  6.4,6.5,   2.9,5.7, SURF_ID='EXT WALL'/ 02-Int-Wall-B2 S-Bath 2-B3
-&OBST XB=11.6,11.7,  6.3,6.4,   4.9,5.7, SURF_ID='EXT WALL'/ 02-Int-Wall-B2 S-Bath 2-B3
-&OBST XB=11.7,11.8,  6.2,6.3,   4.9,5.7, SURF_ID='EXT WALL'/ 02-Int-Wall-B2 S-Bath 2-B3
-&OBST XB=11.8,11.9,  6.1,6.2,   4.9,5.7, SURF_ID='EXT WALL'/ 02-Int-Wall-B2 S-Bath 2-B3
-&OBST XB=11.9,12.0,  6.0,6.1,   4.9,5.7, SURF_ID='EXT WALL'/ 02-Int-Wall-B2 S-Bath 2-B3
-&OBST XB=12.0,12.1,  5.9,6.0,   4.9,5.7, SURF_ID='EXT WALL'/ 02-Int-Wall-B2 S-Bath 2-B3
-&OBST XB=12.1,12.2,  5.8,5.9,   4.9,5.7, SURF_ID='EXT WALL'/ 02-Int-Wall-B2 S-Bath 2-B3
-&OBST XB=12.2,12.5,  5.7,5.8,   2.9,5.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Int-Wall-B2 S-Bath 2-B3
-&OBST XB=12.3,12.4,  5.3,5.5,   2.9,5.7, SURF_ID='EXT WALL'/ 02-Int-Wall-B2 S-Bath 2-B3
-&OBST XB=12.3,12.4,  5.6,5.7,   2.9,5.7, SURF_ID='EXT WALL'/ 02-Int-Wall-B2 S-Bath 2-B3
-&OBST XB=12.3,15.2,  5.5,5.6,   2.9,5.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Int-Wall-B2 S-Bath 2-B3
-&OBST XB=12.4,12.6,  5.8,5.9,   2.9,5.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Int-Wall-B2 S-Bath 2-B3
-&OBST XB=12.5,12.7,  5.9,6.0,   2.9,5.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Int-Wall-B2 S-Bath 2-B3
-&OBST XB=12.6,12.8,  6.0,6.1,   2.9,5.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Int-Wall-B2 S-Bath 2-B3
-&OBST XB=12.7,13.0,  6.1,6.2,   2.9,5.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Int-Wall-B2 S-Bath 2-B3
-&OBST XB=12.9,13.0,  5.6,6.1,   2.9,5.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Int-Wall-B2 S-Bath 2-B3
-&OBST XB=11.5,11.5,  6.5,6.6,   2.9,5.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Int-Wall-B2 S-Bath 2-B3
-&OBST XB=11.2,11.3,  0.1,3.5,   2.9,5.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Int-Wall-B2 S-Bath 2-B3
-&OBST XB=11.2,11.4,  3.5,3.6,   2.9,5.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Int-Wall-B2 S-Bath 2-B3
-&OBST XB=11.4,12.2,  3.5,3.6,   4.9,5.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Int-Wall-B2 S-Bath 2-B3
-&OBST XB=12.2,12.4,  3.5,3.6,   2.9,5.7, SURF_ID='EXT WALL'/ 02-Int-Wall-B2 S-Bath 2-B3
-&OBST XB=12.3,12.4,  3.3,3.5,   2.9,5.7, SURF_ID='EXT WALL'/ 02-Int-Wall-B2 S-Bath 2-B3
-&OBST XB=12.3,12.4,  3.6,4.1,   2.9,5.7, SURF_ID='EXT WALL'/ 02-Int-Wall-B2 S-Bath 2-B3
-&OBST XB=12.3,12.4,  4.8,5.3,   2.9,5.7, SURF_ID='EXT WALL'/ 02-Int-Wall-B2 S-Bath 2-B3
-&OBST XB=12.3,12.4,  4.1,4.8,   4.9,5.7, SURF_ID='EXT WALL'/ 02-Int-Wall-B2 S-Bath 2-B3
-&OBST XB=12.3,15.2,  3.2,3.3,   2.9,5.7, SURF_ID='EXT WALL'/ 02-Int-Wall-B2 S-Bath 2-B3
-&OBST XB=13.2,13.3,  3.3,3.9,   2.9,5.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Int-Wall-B2 S-Bath 2-B3
-&OBST XB=13.2,15.2,  3.9,4.0,   2.9,5.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Int-Wall-B2 S-Bath 2-B3
-&OBST XB=10.1,10.1,  1.8,2.0,   2.9,3.0, COLOR='WHITE', SURF_ID='WALL'/ 02-Int-Wall-Between Stairs
-&OBST XB=10.1,10.1,  2.0,2.2,   2.9,3.1, COLOR='WHITE', SURF_ID='WALL'/ 02-Int-Wall-Between Stairs
-&OBST XB=10.1,10.1,  2.2,2.4,   2.9,3.2, COLOR='WHITE', SURF_ID='WALL'/ 02-Int-Wall-Between Stairs
-&OBST XB=10.1,10.1,  2.4,2.6,   2.9,3.3, COLOR='WHITE', SURF_ID='WALL'/ 02-Int-Wall-Between Stairs
-&OBST XB=10.1,10.1,  2.6,2.8,   2.9,3.4, COLOR='WHITE', SURF_ID='WALL'/ 02-Int-Wall-Between Stairs
-&OBST XB=10.1,10.1,  2.8,3.0,   2.9,3.5, COLOR='WHITE', SURF_ID='WALL'/ 02-Int-Wall-Between Stairs
-&OBST XB=10.1,10.1,  3.0,3.2,   2.9,3.6, COLOR='WHITE', SURF_ID='WALL'/ 02-Int-Wall-Between Stairs
-&OBST XB=10.1,10.1,  3.2,3.4,   2.9,3.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Int-Wall-Between Stairs
+&OBST XB=15.2,15.3,  1.8,3.6,   0.1,0.7 / 01-E-Ext-Wall
+&OBST XB=15.2,15.3,  0.0,1.8,   0.1,2.6 / 01-E-Ext-Wall
+&OBST XB=15.2,15.3,  3.6,5.3,   0.1,2.6 / 01-E-Ext-Wall
+&OBST XB=15.2,15.3,  1.8,3.6,   2.2,2.6 / 01-E-Ext-Wall
+&OBST XB=15.2,15.3,  5.3,10.4,  0.1,2.6 / 01-E-Ext-Wall
+&OBST XB=6.1,6.9,    10.3,10.4, 0.1,2.6 / 01-N-Ext-Wall
+&OBST XB=6.9,8.7,    10.3,10.4, 2.2,2.6 / 01-N-Ext-Wall
+&OBST XB=6.9,8.7,    10.3,10.4, 0.1,0.7 / 01-N-Ext-Wall
+&OBST XB=8.7,9.6,    10.3,10.4, 0.1,2.6 / 01-N-Ext-Wall
+&OBST XB=9.6,11.4,   10.3,10.4, 0.1,0.7 / 01-N-Ext-Wall
+&OBST XB=9.6,11.4,   10.3,10.4, 2.2,2.6 / 01-N-Ext-Wall
+&OBST XB=11.4,13.2,  10.3,10.4, 0.1,2.6 / 01-N-Ext-Wall
+&OBST XB=13.2,14.1,  10.3,10.4, 0.1,0.7 / 01-N-Ext-Wall
+&OBST XB=13.2,14.1,  10.3,10.4, 2.2,2.6 / 01-N-Ext-Wall
+&OBST XB=14.1,15.2,  10.3,10.4, 0.1,2.6 / 01-N-Ext-Wall
+&OBST XB=0.0,0.3,    10.3,10.4, 0.1,2.6 / 01-N-Ext-Wall
+&OBST XB=0.3,1.2,    10.3,10.4, 0.1,1.3 / 01-N-Ext-Wall
+&OBST XB=0.3,1.2,    10.3,10.4, 2.1,2.6 / 01-N-Ext-Wall
+&OBST XB=1.2,4.3,    10.3,10.4, 0.1,2.6 / 01-N-Ext-Wall
+&OBST XB=4.3,6.1,    10.3,10.4, 2.2,2.6 / 01-N-Ext-Wall
+&OBST XB=0.0,0.1,    0.1,5.3,   0.1,2.6 / 01-W-Ext-Wall
+&OBST XB=0.0,0.1,    9.1,10.1,  0.1,1.3 / 01-W-Ext-Wall
+&OBST XB=0.0,0.1,    5.3,9.1,   0.1,2.6 / 01-W-Ext-Wall
+&OBST XB=0.0,0.1,    10.1,10.3, 0.1,2.6 / 01-W-Ext-Wall
+&OBST XB=0.0,0.1,    9.1,10.1,  2.2,2.6 / 01-W-Ext-Wall
+&OBST XB=6.2,7.0,    4.5,5.4,   0.1,2.6 / 01-Int-Wall Center Col. Picture
+&OBST XB=10.1,10.2,  3.5,3.6,   0.1,2.6 / 01-Int-Wall of Stairs Door
+&OBST XB=10.2,11.2,  3.5,3.6,   2.1,2.6 / 01-Int-Wall of Stairs Door
+&OBST XB=11.2,11.2,  3.5,3.6,   0.1,2.1 / 01-Int-Wall of Stairs Door
+&OBST XB=11.2,11.3,  3.5,3.6,   0.1,2.6 / 01-col
+&OBST XB=12.0,12.1,  7.0,7.1,   0.1,2.6 / 01-col
+&OBST XB=6.2,7.0,    3.5,3.9,   0.1,2.6 / 01-col
+&OBST XB=13.7,13.8,  5.3,5.4,   0.1,2.6 / 01-col
+&OBST XB=6.2,7.4,    0.0,0.1,   0.1,2.6 / 01-S-Ext-Wall
+&OBST XB=7.4,8.3,    0.0,0.1,   2.2,2.6 / 01-S-Ext-Wall
+&OBST XB=8.3,12.1,   0.0,0.1,   0.1,2.6 / 01-S-Ext-Wall
+&OBST XB=12.1,14.0,  0.0,0.1,   0.1,0.7 / 01-S-Ext-Wall
+&OBST XB=12.1,14.0,  0.0,0.1,   2.2,2.6 / 01-S-Ext-Wall
+&OBST XB=14.0,15.2,  0.0,0.1,   0.1,2.6 / 01-S-Ext-Wall
+&OBST XB=0.0,1.1,    0.0,0.1,   0.1,2.6 / 01-S-Ext-Wall
+&OBST XB=1.1,2.0,    0.0,0.1,   0.1,0.7 / 01-S-Ext-Wall
+&OBST XB=1.1,2.0,    0.0,0.1,   2.2,2.6 / 01-S-Ext-Wall
+&OBST XB=2.0,3.7,    0.0,0.1,   0.1,2.6 / 01-S-Ext-Wall
+&OBST XB=3.7,5.6,    0.0,0.1,   0.1,0.7 / 01-S-Ext-Wall
+&OBST XB=3.7,5.6,    0.0,0.1,   2.2,2.6 / 01-S-Ext-Wall
+&OBST XB=5.6,6.2,    0.0,0.1,   0.1,2.6 / 01-S-Ext-Wall
+&OBST XB=0.0,0.1,    0.1,5.3,   2.6,2.8 / 02-W-Ext-Wall
+&OBST XB=0.0,0.1,    0.1,5.3,   2.8,5.7 / 02-W-Ext-Wall
+&OBST XB=0.0,0.1,    5.3,10.3,  2.6,2.8 / 02-W-Ext-Wall
+&OBST XB=0.0,0.1,    5.3,10.3,  2.8,5.7 / 02-W-Ext-Wall
+&OBST XB=11.4,11.5,  6.5,6.6,   2.9,5.7 / 02-Int-Wall-B2 West Wall
+&OBST XB=11.5,11.6,  6.6,6.7,   2.9,5.7 / 02-Int-Wall-B2 West Wall
+&OBST XB=11.6,11.7,  6.7,6.8,   2.9,5.7 / 02-Int-Wall-B2 West Wall
+&OBST XB=11.7,11.8,  6.8,6.9,   2.9,5.7 / 02-Int-Wall-B2 West Wall
+&OBST XB=11.8,11.9,  6.9,7.0,   2.9,5.7 / 02-Int-Wall-B2 West Wall
+&OBST XB=11.9,12.0,  7.0,7.1,   2.9,5.7 / 02-Int-Wall-B2 West Wall
+&OBST XB=12.0,12.1,  7.1,10.3,  2.9,5.7 / 02-Int-Wall-B2 West Wall
+&OBST XB=6.2,11.4,   10.3,10.4, 2.8,5.7 / 02-N-Ext-Wall
+&OBST XB=11.4,13.2,  10.3,10.4, 2.8,5.7 / 02-N-Ext-Wall
+&OBST XB=13.2,14.1,  10.3,10.4, 2.8,3.8 / 02-N-Ext-Wall
+&OBST XB=13.2,14.1,  10.3,10.4, 5.4,5.7 / 02-N-Ext-Wall
+&OBST XB=14.1,15.2,  10.3,10.4, 2.8,5.7 / 02-N-Ext-Wall
+&OBST XB=6.2,15.2,   10.3,10.4, 2.6,2.8 / 02-N-Ext-Wall
+&OBST XB=0.0,6.2,    10.3,10.4, 2.6,2.8 / 02-N-Ext-Wall
+&OBST XB=0.0,3.3,    10.3,10.4, 2.8,5.7 / 02-N-Ext-Wall
+&OBST XB=3.3,5.1,    10.3,10.4, 2.8,3.8 / 02-N-Ext-Wall
+&OBST XB=3.3,5.1,    10.3,10.4, 5.4,5.7 / 02-N-Ext-Wall
+&OBST XB=5.1,6.2,    10.3,10.4, 2.8,5.7 / 02-N-Ext-Wall
+&OBST XB=6.2,15.2,   0.0,0.1,   2.6,2.8 / 02-S-Ext-Wall
+&OBST XB=0.0,6.2,    0.0,0.1,   2.6,2.8 / 02-S-Ext-Wall
+&OBST XB=6.2,12.2,   0.0,0.1,   2.8,5.7 / 02-S-Ext-Wall
+&OBST XB=12.2,14.0,  0.0,0.1,   2.8,3.8 / 02-S-Ext-Wall
+&OBST XB=12.2,14.0,  0.0,0.1,   5.3,5.7 / 02-S-Ext-Wall
+&OBST XB=14.0,15.2,  0.0,0.1,   2.8,5.7 / 02-S-Ext-Wall
+&OBST XB=0.0,1.1,    0.0,0.1,   2.8,5.7 / 02-S-Ext-Wall
+&OBST XB=1.1,2.0,    0.0,0.1,   2.8,3.8 / 02-S-Ext-Wall
+&OBST XB=1.1,2.0,    0.0,0.1,   5.3,5.7 / 02-S-Ext-Wall
+&OBST XB=2.0,3.7,    0.0,0.1,   2.8,5.7 / 02-S-Ext-Wall
+&OBST XB=3.7,5.6,    0.0,0.1,   2.8,3.8 / 02-S-Ext-Wall
+&OBST XB=3.7,5.6,    0.0,0.1,   5.3,5.7 / 02-S-Ext-Wall
+&OBST XB=5.6,6.2,    0.0,0.1,   2.8,5.7 / 02-S-Ext-Wall
+&OBST XB=6.3,10.3,   5.4,5.4,   2.9,3.7 / 02-Railing Above FR
+&OBST XB=10.3,10.4,  5.5,5.5,   2.9,3.7 / 02-Railing Above FR
+&OBST XB=10.4,10.5,  5.6,5.6,   2.9,3.7 / 02-Railing Above FR
+&OBST XB=10.5,10.6,  5.7,5.7,   2.9,3.7 / 02-Railing Above FR
+&OBST XB=10.6,10.7,  5.8,5.8,   2.9,3.7 / 02-Railing Above FR
+&OBST XB=10.7,10.8,  5.9,5.9,   2.9,3.7 / 02-Railing Above FR
+&OBST XB=10.8,10.9,  6.0,6.0,   2.9,3.7 / 02-Railing Above FR
+&OBST XB=10.9,11.0,  6.1,6.1,   2.9,3.7 / 02-Railing Above FR
+&OBST XB=11.0,11.1,  6.2,6.2,   2.9,3.7 / 02-Railing Above FR
+&OBST XB=11.1,11.2,  6.3,6.3,   2.9,3.7 / 02-Railing Above FR
+&OBST XB=11.2,11.3,  6.4,6.4,   2.9,3.7 / 02-Railing Above FR
+&OBST XB=11.3,11.4,  6.5,6.5,   2.9,3.7 / 02-Railing Above FR
+&OBST XB=10.3,10.3,  5.4,5.5,   2.9,3.7 / 02-Railing Above FR
+&OBST XB=10.4,10.4,  5.5,5.6,   2.9,3.7 / 02-Railing Above FR
+&OBST XB=10.5,10.5,  5.6,5.7,   2.9,3.7 / 02-Railing Above FR
+&OBST XB=10.6,10.6,  5.7,5.8,   2.9,3.7 / 02-Railing Above FR
+&OBST XB=10.7,10.7,  5.8,5.9,   2.9,3.7 / 02-Railing Above FR
+&OBST XB=10.8,10.8,  5.9,6.0,   2.9,3.7 / 02-Railing Above FR
+&OBST XB=10.9,10.9,  6.0,6.1,   2.9,3.7 / 02-Railing Above FR
+&OBST XB=11.0,11.0,  6.1,6.2,   2.9,3.7 / 02-Railing Above FR
+&OBST XB=11.1,11.1,  6.2,6.3,   2.9,3.7 / 02-Railing Above FR
+&OBST XB=11.2,11.2,  6.3,6.4,   2.9,3.7 / 02-Railing Above FR
+&OBST XB=11.3,11.3,  6.4,6.5,   2.9,3.7 / 02-Railing Above FR
+&OBST XB=6.2,6.3,    5.3,10.3,  2.9,5.7 / 02-Int-Wall Upstairs West Half
+&OBST XB=6.2,6.3,    0.1,3.5,   2.9,5.7 / 02-Int-Wall Upstairs West Half
+&OBST XB=6.2,7.0,    3.5,3.6,   2.9,5.7 / 02-Int-Wall Upstairs West Half
+&OBST XB=6.9,7.0,    0.1,3.6,   2.9,5.7 / 02-Int-Wall Upstairs West Half
+&OBST XB=6.2,6.3,    5.3,5.3,   2.9,5.7 / 02-Int-Wall Upstairs West Half
+&OBST XB=0.1,1.2,    3.4,3.5,   2.9,5.7 / 02-Int-Wall Upstairs West Half
+&OBST XB=2.1,2.2,    4.5,5.3,   2.9,5.7 / 02-Int-Wall Upstairs West Half
+&OBST XB=2.1,2.3,    4.4,4.5,   2.9,5.7 / 02-Int-Wall Upstairs West Half
+&OBST XB=2.2,2.3,    4.3,4.4,   2.9,5.7 / 02-Int-Wall Upstairs West Half
+&OBST XB=2.3,2.4,    4.2,4.4,   4.9,5.7 / 02-Int-Wall Upstairs West Half
+&OBST XB=2.4,2.5,    4.1,4.2,   4.9,5.7 / 02-Int-Wall Upstairs West Half
+&OBST XB=2.5,2.6,    4.0,4.1,   4.9,5.7 / 02-Int-Wall Upstairs West Half
+&OBST XB=2.6,2.7,    3.9,4.0,   4.9,5.7 / 02-Int-Wall Upstairs West Half
+&OBST XB=2.7,2.8,    3.8,3.9,   4.9,5.7 / 02-Int-Wall Upstairs West Half
+&OBST XB=2.8,2.9,    3.7,3.8,   4.9,5.7 / 02-Int-Wall Upstairs West Half
+&OBST XB=2.9,3.0,    3.6,3.7,   2.9,5.7 / 02-Int-Wall Upstairs West Half
+&OBST XB=3.0,3.1,    0.1,3.5,   2.9,5.7 / 02-Int-Wall Upstairs West Half
+&OBST XB=3.0,5.3,    3.5,3.6,   2.9,5.7 / 02-Int-Wall Upstairs West Half
+&OBST XB=5.1,5.2,    3.6,4.0,   2.9,5.7 / 02-Int-Wall Upstairs West Half
+&OBST XB=5.1,5.2,    4.8,5.3,   2.9,5.7 / 02-Int-Wall Upstairs West Half
+&OBST XB=5.1,5.2,    4.0,4.8,   4.9,5.7 / 02-Int-Wall Upstairs West Half
+&OBST XB=5.3,6.1,    3.5,3.6,   4.9,5.7 / 02-Int-Wall Upstairs West Half
+&OBST XB=6.1,6.2,    3.5,3.6,   2.9,5.7 / 02-Int-Wall Upstairs West Half
+&OBST XB=0.1,1.3,    5.1,5.1,   2.9,5.7 / 02-Int-Wall Upstairs West Half
+&OBST XB=1.3,2.0,    5.1,5.1,   4.9,5.7 / 02-Int-Wall Upstairs West Half
+&OBST XB=2.0,2.1,    5.1,5.1,   2.9,5.7 / 02-Int-Wall Upstairs West Half
+&OBST XB=5.2,6.2,    5.3,5.3,   2.9,5.7 / 02-Int-Wall Upstairs West Half
+&OBST XB=6.2,6.2,    0.1,0.5,   2.9,5.7 / 02-Int-Wall Upstairs West Half
+&OBST XB=6.2,6.2,    2.3,3.5,   2.9,5.7 / 02-Int-Wall Upstairs West Half
+&OBST XB=6.2,6.2,    0.5,2.3,   5.1,5.7 / 02-Int-Wall Upstairs West Half
+&OBST XB=0.1,2.2,    6.1,6.2,   2.9,5.7 / 02-Int-Wall Upstairs West Half
+&OBST XB=2.1,2.2,    5.3,6.1,   2.9,5.7 / 02-Int-Wall Upstairs West Half
+&OBST XB=2.1,2.2,    6.2,6.3,   2.9,5.7 / 02-Int-Wall Upstairs West Half
+&OBST XB=2.1,2.2,    7.1,10.3,  2.9,5.7 / 02-Int-Wall Upstairs West Half
+&OBST XB=2.1,2.2,    6.3,7.1,   4.9,5.7 / 02-Int-Wall Upstairs West Half
+&OBST XB=5.1,6.2,    5.3,5.4,   2.9,5.7 / 02-Int-Wall Upstairs West Half
+&OBST XB=6.2,6.2,    5.4,10.3,  2.9,5.7 / 02-Int-Wall Upstairs West Half
+&OBST XB=15.2,15.3,  0.0,5.3,   2.6,2.8 / 02-E-Ext-Wall
+&OBST XB=15.2,15.3,  5.3,10.4,  2.8,5.7 / 02-E-Ext-Wall
+&OBST XB=15.2,15.3,  5.3,10.4,  2.6,2.8 / 02-E-Ext-Wall
+&OBST XB=15.2,15.3,  0.0,5.3,   2.8,5.7 / 02-E-Ext-Wall
+&OBST XB=11.5,11.6,  6.4,6.5,   2.9,5.7 / 02-Int-Wall-B2 S-Bath 2-B3
+&OBST XB=11.6,11.7,  6.3,6.4,   4.9,5.7 / 02-Int-Wall-B2 S-Bath 2-B3
+&OBST XB=11.7,11.8,  6.2,6.3,   4.9,5.7 / 02-Int-Wall-B2 S-Bath 2-B3
+&OBST XB=11.8,11.9,  6.1,6.2,   4.9,5.7 / 02-Int-Wall-B2 S-Bath 2-B3
+&OBST XB=11.9,12.0,  6.0,6.1,   4.9,5.7 / 02-Int-Wall-B2 S-Bath 2-B3
+&OBST XB=12.0,12.1,  5.9,6.0,   4.9,5.7 / 02-Int-Wall-B2 S-Bath 2-B3
+&OBST XB=12.1,12.2,  5.8,5.9,   4.9,5.7 / 02-Int-Wall-B2 S-Bath 2-B3
+&OBST XB=12.2,12.5,  5.7,5.8,   2.9,5.7 / 02-Int-Wall-B2 S-Bath 2-B3
+&OBST XB=12.3,12.4,  5.3,5.5,   2.9,5.7 / 02-Int-Wall-B2 S-Bath 2-B3
+&OBST XB=12.3,12.4,  5.6,5.7,   2.9,5.7 / 02-Int-Wall-B2 S-Bath 2-B3
+&OBST XB=12.3,15.2,  5.5,5.6,   2.9,5.7 / 02-Int-Wall-B2 S-Bath 2-B3
+&OBST XB=12.4,12.6,  5.8,5.9,   2.9,5.7 / 02-Int-Wall-B2 S-Bath 2-B3
+&OBST XB=12.5,12.7,  5.9,6.0,   2.9,5.7 / 02-Int-Wall-B2 S-Bath 2-B3
+&OBST XB=12.6,12.8,  6.0,6.1,   2.9,5.7 / 02-Int-Wall-B2 S-Bath 2-B3
+&OBST XB=12.7,13.0,  6.1,6.2,   2.9,5.7 / 02-Int-Wall-B2 S-Bath 2-B3
+&OBST XB=12.9,13.0,  5.6,6.1,   2.9,5.7 / 02-Int-Wall-B2 S-Bath 2-B3
+&OBST XB=11.5,11.5,  6.5,6.6,   2.9,5.7 / 02-Int-Wall-B2 S-Bath 2-B3
+&OBST XB=11.2,11.3,  0.1,3.5,   2.9,5.7 / 02-Int-Wall-B2 S-Bath 2-B3
+&OBST XB=11.2,11.4,  3.5,3.6,   2.9,5.7 / 02-Int-Wall-B2 S-Bath 2-B3
+&OBST XB=11.4,12.2,  3.5,3.6,   4.9,5.7 / 02-Int-Wall-B2 S-Bath 2-B3
+&OBST XB=12.2,12.4,  3.5,3.6,   2.9,5.7 / 02-Int-Wall-B2 S-Bath 2-B3
+&OBST XB=12.3,12.4,  3.3,3.5,   2.9,5.7 / 02-Int-Wall-B2 S-Bath 2-B3
+&OBST XB=12.3,12.4,  3.6,4.1,   2.9,5.7 / 02-Int-Wall-B2 S-Bath 2-B3
+&OBST XB=12.3,12.4,  4.8,5.3,   2.9,5.7 / 02-Int-Wall-B2 S-Bath 2-B3
+&OBST XB=12.3,12.4,  4.1,4.8,   4.9,5.7 / 02-Int-Wall-B2 S-Bath 2-B3
+&OBST XB=12.3,15.2,  3.2,3.3,   2.9,5.7 / 02-Int-Wall-B2 S-Bath 2-B3
+&OBST XB=13.2,13.3,  3.3,3.9,   2.9,5.7 / 02-Int-Wall-B2 S-Bath 2-B3
+ OBST XB=13.2,15.2,  3.9,4.0,   2.9,5.7 / 02-Int-Wall-B2 S-Bath 2-B3
+&OBST XB=10.1,10.1,  1.8,2.0,   2.9,3.0 / 02-Int-Wall-Between Stairs
+&OBST XB=10.1,10.1,  2.0,2.2,   2.9,3.1 / 02-Int-Wall-Between Stairs
+&OBST XB=10.1,10.1,  2.2,2.4,   2.9,3.2 / 02-Int-Wall-Between Stairs
+&OBST XB=10.1,10.1,  2.4,2.6,   2.9,3.3 / 02-Int-Wall-Between Stairs
+&OBST XB=10.1,10.1,  2.6,2.8,   2.9,3.4 / 02-Int-Wall-Between Stairs
+&OBST XB=10.1,10.1,  2.8,3.0,   2.9,3.5 / 02-Int-Wall-Between Stairs
+&OBST XB=10.1,10.1,  3.0,3.2,   2.9,3.6 / 02-Int-Wall-Between Stairs
+&OBST XB=10.1,10.1,  3.2,3.4,   2.9,3.7 / 02-Int-Wall-Between Stairs
 &OBST XB=6.2,7.0,      0.1,3.4,    2.6,2.8, SURF_ID='CARPET'/ 02-Floor
 &OBST XB=6.2,10.1,     3.4,3.5,    2.6,2.8, SURF_ID='CARPET'/ 02-Floor
 &OBST XB=6.2,15.2,     3.5,5.3,    2.6,2.8, SURF_ID='CARPET'/ 02-Floor
@@ -411,60 +397,71 @@
 &OBST XB=0.1,6.2,      0.1,5.3,    2.8,2.9, SURF_ID='CARPET'/ 02-Floor
 &OBST XB=0.1,6.2,      5.3,10.3,   2.6,2.8, SURF_ID='CARPET'/ 02-Floor
 &OBST XB=0.1,6.2,      5.3,10.3,   2.8,2.9, SURF_ID='CARPET'/ 02-Floor
-&OBST XB=7.0,10.1,     3.4,3.4,    2.9,3.7, COLOR='WHITE', SURF_ID='WALL'/ 02-Railing Above Stairs
-&OBST XB=0.0,15.3,     0.0,10.4,   5.7,5.8, COLOR='INVISIBLE', SURF_ID='EXT WALL'/ Roof
-&OBST XB=2.3,2.4,      4.3,4.3,    2.9,4.9, COLOR='GRAY', SURF_ID='INERT'/ 02- Master Bath Door
-&OBST XB=2.4,2.5,      4.2,4.2,    2.9,4.9, COLOR='GRAY', SURF_ID='INERT'/ 02- Master Bath Door
-&OBST XB=2.5,2.6,      4.1,4.1,    2.9,4.9, COLOR='GRAY', SURF_ID='INERT'/ 02- Master Bath Door
-&OBST XB=2.6,2.7,      4.0,4.0,    2.9,4.9, COLOR='GRAY', SURF_ID='INERT'/ 02- Master Bath Door
-&OBST XB=2.7,2.8,      3.9,3.9,    2.9,4.9, COLOR='GRAY', SURF_ID='INERT'/ 02- Master Bath Door
-&OBST XB=2.8,2.9,      3.7,3.7,    2.9,4.9, COLOR='GRAY', SURF_ID='INERT'/ 02- Master Bath Door
-&OBST XB=2.3,2.3,      4.3,4.4,    2.9,4.9, COLOR='GRAY', SURF_ID='INERT'/ 02- Master Bath Door
-&OBST XB=2.4,2.4,      4.2,4.3,    2.9,4.9, COLOR='GRAY', SURF_ID='INERT'/ 02- Master Bath Door
-&OBST XB=2.5,2.5,      4.1,4.2,    2.9,4.9, COLOR='GRAY', SURF_ID='INERT'/ 02- Master Bath Door
-&OBST XB=2.6,2.6,      4.0,4.1,    2.9,4.9, COLOR='GRAY', SURF_ID='INERT'/ 02- Master Bath Door
-&OBST XB=2.7,2.7,      3.9,4.0,    2.9,4.9, COLOR='GRAY', SURF_ID='INERT'/ 02- Master Bath Door
-&OBST XB=2.8,2.8,      3.7,3.9,    2.9,4.9, COLOR='GRAY', SURF_ID='INERT'/ 02- Master Bath Door
-&OBST XB=12.3,12.3,    4.1,4.8,    2.9,4.9, COLOR='GRAY', SURF_ID='INERT'/ 02-Bath 2 Door
-&OBST XB=11.6,11.7,    6.4,6.4,    2.9,4.9, COLOR='GRAY', SURF_ID='INERT'/ 02-B2 Door
-&OBST XB=11.7,11.8,    6.3,6.3,    2.9,4.9, COLOR='GRAY', SURF_ID='INERT'/ 02-B2 Door
-&OBST XB=11.8,11.9,    6.2,6.2,    2.9,4.9, COLOR='GRAY', SURF_ID='INERT'/ 02-B2 Door
-&OBST XB=11.9,12.0,    6.1,6.1,    2.9,4.9, COLOR='GRAY', SURF_ID='INERT'/ 02-B2 Door
-&OBST XB=12.0,12.1,    6.0,6.0,    2.9,4.9, COLOR='GRAY', SURF_ID='INERT'/ 02-B2 Door
-&OBST XB=12.1,12.2,    5.9,5.9,    2.9,4.9, COLOR='GRAY', SURF_ID='INERT'/ 02-B2 Door
-&OBST XB=11.7,11.7,    6.3,6.4,    2.9,4.9, COLOR='GRAY', SURF_ID='INERT'/ 02-B2 Door
-&OBST XB=11.8,11.8,    6.2,6.3,    2.9,4.9, COLOR='GRAY', SURF_ID='INERT'/ 02-B2 Door
-&OBST XB=11.9,11.9,    6.1,6.2,    2.9,4.9, COLOR='GRAY', SURF_ID='INERT'/ 02-B2 Door
-&OBST XB=12.0,12.0,    6.0,6.1,    2.9,4.9, COLOR='GRAY', SURF_ID='INERT'/ 02-B2 Door
-&OBST XB=12.1,12.1,    5.9,6.0,    2.9,4.9, COLOR='GRAY', SURF_ID='INERT'/ 02-B2 Door
-&OBST XB=12.2,12.2,    5.8,5.9,    2.9,4.9, COLOR='GRAY', SURF_ID='INERT'/ 02-B2 Door
-&OBST XB=1.3,2.0,      5.1,5.1,    2.9,4.9, COLOR='GRAY', SURF_ID='INERT'/ 02-Master Bath Toilet Door
-&OBST XB=2.1,2.1,      6.3,7.1,    2.9,4.9, COLOR='GRAY', SURF_ID='INERT'/ 02-MB WIC Door
-&OBST XB=0.0,6.9,      5.3,5.4,     0.0,0.1, COLOR='GRAY 60', SURF_ID='INERT'/ Obstruction
-&OBST XB=0.0,7.0,      0.0,3.6,     0.0,0.1, COLOR='GRAY 60', SURF_ID='INERT'/ Obstruction
-&OBST XB=0.0,7.0,      3.6,5.3,     0.0,0.1, COLOR='GRAY 60', SURF_ID='CARPET'/ Obstruction
-&OBST XB=6.9,7.0,      5.3,5.4,     0.0,0.1, SURF_ID='CARPET'/ Obstruction
-&OBST XB=0.0,6.9,      5.4,10.4,    0.0,0.1, COLOR='GRAY 60', SURF_ID='INERT'/ Obstruction
-&OBST XB=6.9,7.0,      5.4,10.4,    0.0,0.1, SURF_ID='CARPET'/ Obstruction
-&OBST XB=7.0,8.9,      0.0,3.6,     0.0,0.1, COLOR='GRAY 60', SURF_ID='INERT'/ Obstruction
-&OBST XB=7.0,15.3,     3.6,5.3,     0.0,0.1, COLOR='GRAY 60', SURF_ID='CARPET'/ Obstruction
-&OBST XB=7.0,15.3,     5.3,5.4,     0.0,0.1, SURF_ID='CARPET'/ Obstruction
-&OBST XB=8.9,15.3,     0.0,3.6,     0.0,0.1, SURF_ID='CARPET'/ Obstruction
-&OBST XB=7.0,15.3,     5.4,10.4,    0.0,0.1, SURF_ID='CARPET'/ Obstruction
+&OBST XB=7.0,10.1,     3.4,3.4,    2.9,3.7 / 02-Railing Above Stairs
+&OBST XB=0.0,15.3,     0.0,10.4,   5.7,5.8, COLOR='INVISIBLE' / Roof
+&OBST XB=2.3,2.4,      4.3,4.3,    2.9,4.9, COLOR='GRAY 40' / 02- Master Bath Door
+&OBST XB=2.4,2.5,      4.2,4.2,    2.9,4.9, COLOR='GRAY 40' / 02- Master Bath Door
+&OBST XB=2.5,2.6,      4.1,4.1,    2.9,4.9, COLOR='GRAY 40' / 02- Master Bath Door
+&OBST XB=2.6,2.7,      4.0,4.0,    2.9,4.9, COLOR='GRAY 40' / 02- Master Bath Door
+&OBST XB=2.7,2.8,      3.9,3.9,    2.9,4.9, COLOR='GRAY 40' / 02- Master Bath Door
+&OBST XB=2.8,2.9,      3.7,3.7,    2.9,4.9, COLOR='GRAY 40' / 02- Master Bath Door
+&OBST XB=2.3,2.3,      4.3,4.4,    2.9,4.9, COLOR='GRAY 40' / 02- Master Bath Door
+&OBST XB=2.4,2.4,      4.2,4.3,    2.9,4.9, COLOR='GRAY 40' / 02- Master Bath Door
+&OBST XB=2.5,2.5,      4.1,4.2,    2.9,4.9, COLOR='GRAY 40' / 02- Master Bath Door
+&OBST XB=2.6,2.6,      4.0,4.1,    2.9,4.9, COLOR='GRAY 40' / 02- Master Bath Door
+&OBST XB=2.7,2.7,      3.9,4.0,    2.9,4.9, COLOR='GRAY 40' / 02- Master Bath Door
+&OBST XB=2.8,2.8,      3.7,3.9,    2.9,4.9, COLOR='GRAY 40' / 02- Master Bath Door
+&OBST XB=12.3,12.3,    4.1,4.8,    2.9,4.9, COLOR='GRAY 40' / 02-Bath 2 Door
+&OBST XB=11.6,11.7,    6.4,6.4,    2.9,4.9, COLOR='GRAY 40' / 02-B2 Door
+&OBST XB=11.7,11.8,    6.3,6.3,    2.9,4.9, COLOR='GRAY 40' / 02-B2 Door
+&OBST XB=11.8,11.9,    6.2,6.2,    2.9,4.9, COLOR='GRAY 40' / 02-B2 Door
+&OBST XB=11.9,12.0,    6.1,6.1,    2.9,4.9, COLOR='GRAY 40' / 02-B2 Door
+&OBST XB=12.0,12.1,    6.0,6.0,    2.9,4.9, COLOR='GRAY 40' / 02-B2 Door
+&OBST XB=12.1,12.2,    5.9,5.9,    2.9,4.9, COLOR='GRAY 40' / 02-B2 Door
+&OBST XB=11.7,11.7,    6.3,6.4,    2.9,4.9, COLOR='GRAY 40' / 02-B2 Door
+&OBST XB=11.8,11.8,    6.2,6.3,    2.9,4.9, COLOR='GRAY 40' / 02-B2 Door
+&OBST XB=11.9,11.9,    6.1,6.2,    2.9,4.9, COLOR='GRAY 40' / 02-B2 Door
+&OBST XB=12.0,12.0,    6.0,6.1,    2.9,4.9, COLOR='GRAY 40' / 02-B2 Door
+&OBST XB=12.1,12.1,    5.9,6.0,    2.9,4.9, COLOR='GRAY 40' / 02-B2 Door
+&OBST XB=12.2,12.2,    5.8,5.9,    2.9,4.9, COLOR='GRAY 40' / 02-B2 Door
+ OBST XB=1.3,2.0,      5.1,5.1,    2.9,4.9, COLOR='GRAY 40' / 02-Master Bath Toilet Door
+&OBST XB=2.1,2.1,      6.3,7.1,    2.9,4.9, COLOR='GRAY 40' / 02-MB WIC Door
+
+&OBST XB=0.0,15.3,     0.0,10.4,   0.0,0.1, COLOR='FOREST GREEN' / Floor Slab
+
+&ZONE XYZ=1.5,1.0,0.5, 4.5,1.0,0.5, 7.5,1.0,0.5, 10.5,1.0,1.8, 13.5,1.0,0.5,
+          1.5,3.0,0.5, 4.5,3.0,0.5, 7.5,3.0,0.5, 10.5,4.4,1.8, 13.5,3.0,0.5,
+          1.5,7.0,0.5, 4.5,7.0,0.5, 7.5,7.0,0.5, 10.5,7.0,1.8, 13.5,7.0,0.5,
+          1.5,9.0,0.5, 4.5,9.0,0.5, 7.5,9.0,0.5, 10.5,9.0,1.8, 13.5,9.0,0.5,  
+          12.2,7.5,0.5, 12.2,9.0,0.5, 11.6,1.0,0.5, 9.0,1.0,0.5, 3.5,5.0,0.5, 2.6,5.0,0.5, 2.9,1.0,0.5, 2.9,3.0,0.5, 2.9,2.4,0.5
+          10.7,2.8,2.6, 9.05,1.0,2.3  
+                       4.5,1.0,3.5, 7.5,1.0,3.5, 10.5,1.0,3.5, 13.5,1.0,3.5,
+          2.3,4.8,3.5, 4.5,3.0,3.5, 7.5,3.0,3.5, 10.5,3.0,3.5, 13.5,2.3,3.5,
+          2.3,7.0,3.5, 4.5,7.0,3.5, 7.5,7.0,3.5, 10.5,7.0,3.5,              
+          2.3,9.0,3.5, 4.5,9.0,3.5, 7.5,9.0,3.5, 10.5,9.0,3.5,
+          11.7,1.0,3.5, 6.0,1.0,3.5, 6.0,7.0,3.5, 6.0,9.0,3.5, 5.5,5.25,3.5, LEAK_AREA(0)=0.18  /
+
+&ZONE XYZ=0.7,1.0,3.2, 0.7,3.0,3.2, 0.7,5.6,3.2, 2.9,1.0,3.2, 2.9,3.0,3.2 /
+&ZONE XYZ=0.7,7.0,3.2, 0.7,9.0,3.2 /
+&ZONE XYZ=6.5,1.0,3.2, 6.5,3.0,3.2 /
+&ZONE XYZ=14.5,4.0,3.2, 14.5,5.4,3.2 /
+&ZONE XYZ=14.5,7.0,3.2, 14.5,9.0,3.2, 12.3,6.6,3.2, 12.3,9.0,3.2 /
+
+&DUMP DT_HRR=15., DT_DEVC=15., SIG_FIGS=4, SIG_FIGS_EXP=2 /
 
 &PROP ID='THCP', BEAD_DIAMETER=5.0E-4, BEAD_EMISSIVITY=0.9/
 
-&DEVC XB=0.75,0.75,5.55,5.55,0.405,2.195 ID='10PT', QUANTITY='PRESSURE', POINTS=3, TIME_HISTORY=.TRUE. / Kitchen
-&DEVC XB=13.15,13.15,1.85,1.85,0.46,2.59 ID='10TC', PROP_ID='THCP', QUANTITY='THERMOCOUPLE', POINTS=8, TIME_HISTORY=.TRUE. / LR
-&DEVC XB=8.65,8.65,4.15,4.15,0.46,2.59 ID='11TC', PROP_ID='THCP', QUANTITY='THERMOCOUPLE', POINTS=8, TIME_HISTORY=.TRUE. / Under Hall
-&DEVC XB=8.45,8.45,1.95,1.95,5.69,1.12 ID='12TC', PROP_ID='THCP', QUANTITY='THERMOCOUPLE', POINTS=16, TIME_HISTORY=.TRUE. / FOYER
-&DEVC XB=4.75,4.75,2.25,2.25,0.46,2.59 ID='13TC', PROP_ID='THCP', QUANTITY='THERMOCOUPLE', POINTS=8, TIME_HISTORY=.TRUE. / DR
-&DEVC XB=1.55,1.55,1.35,1.35,0.46,2.59 ID='14TC', PROP_ID='THCP', QUANTITY='THERMOCOUPLE', POINTS=8, TIME_HISTORY=.TRUE. / Laundry Room
-&DEVC XB=2.55,2.55,7.9,7.9,0.46,2.59 ID='15TC', PROP_ID='THCP', QUANTITY='THERMOCOUPLE', POINTS=8, TIME_HISTORY=.TRUE. / Kitchen
-&DEVC XB=7.85,7.85,0.05,0.05,0.45,1.85 ID='1BDPT', QUANTITY='THERMOCOUPLE', POINTS=5, TIME_HISTORY=.TRUE. / Front Door
-&DEVC XB=7.85,7.85,0.05,0.05,0.45,1.85 ID='1BDPV', QUANTITY='V-VELOCITY', CONVERSION_FACTOR=-1.0, POINTS=5, TIME_HISTORY=.TRUE. / Front Door
-&DEVC XB=2.35,2.35,4.85,4.85,3.565,5.395 ID='1PT', QUANTITY='PRESSURE', POINTS=3, TIME_HISTORY=.TRUE. / MBR
-&DEVC XB=3.91,3.91,5.97,5.97,5.69,3.53 ID='1TC', PROP_ID='THCP', QUANTITY='THERMOCOUPLE', POINTS=8, TIME_HISTORY=.TRUE. / MBR
+&DEVC XB=0.75,0.75,5.55,5.55,0.405,2.195, ID='10PT', QUANTITY='PRESSURE', POINTS=3, TIME_HISTORY=.TRUE. / Kitchen
+&DEVC XB=13.15,13.15,1.85,1.85,0.46,2.59, ID='10TC', PROP_ID='THCP', QUANTITY='THERMOCOUPLE', POINTS=8, TIME_HISTORY=.TRUE. / LR
+&DEVC XB= 8.65, 8.65,4.15,4.15,0.46,2.59, ID='11TC', PROP_ID='THCP', QUANTITY='THERMOCOUPLE', POINTS=8, TIME_HISTORY=.TRUE. / Under Hall
+&DEVC XB= 8.45, 8.45,1.95,1.95,5.69,1.12, ID='12TC', PROP_ID='THCP', QUANTITY='THERMOCOUPLE', POINTS=16, TIME_HISTORY=.TRUE. / FOYER
+&DEVC XB= 4.75, 4.75,2.25,2.25,0.46,2.59, ID='13TC', PROP_ID='THCP', QUANTITY='THERMOCOUPLE', POINTS=8, TIME_HISTORY=.TRUE. / DR
+&DEVC XB= 1.55, 1.55,1.35,1.35,0.46,2.59, ID='14TC', PROP_ID='THCP', QUANTITY='THERMOCOUPLE', POINTS=8, TIME_HISTORY=.TRUE. / Laundry Room
+&DEVC XB= 2.55, 2.55,7.90,7.90,0.46,2.59, ID='15TC', PROP_ID='THCP', QUANTITY='THERMOCOUPLE', POINTS=8, TIME_HISTORY=.TRUE. / Kitchen
+&DEVC XB= 7.85, 7.85,0.05,0.05,0.45,1.85, ID='1BDPT', QUANTITY='THERMOCOUPLE', POINTS=5, TIME_HISTORY=.TRUE. / Front Door
+&DEVC XB =7.85, 7.85,0.05,0.05,0.45,1.85, ID='1BDPV', QUANTITY='V-VELOCITY', CONVERSION_FACTOR=-1.0, POINTS=5, TIME_HISTORY=.TRUE. / Front Door
+&DEVC XB= 2.35, 2.35,4.85,4.85,3.56,5.39, ID='1PT', QUANTITY='PRESSURE', POINTS=3, TIME_HISTORY=.TRUE. / MBR
+&DEVC XB= 3.91, 3.91,5.97,5.97,5.69,3.53, ID='1TC', PROP_ID='THCP', QUANTITY='THERMOCOUPLE', POINTS=8, TIME_HISTORY=.TRUE. / MBR
 &DEVC XB=13.65,13.65,10.35,10.35,4.07,5.13 ID='2BDPT', QUANTITY='THERMOCOUPLE', POINTS=5, TIME_HISTORY=.TRUE. / BR2
 &DEVC XB=13.65,13.65,10.35,10.35,4.07,5.13 ID='2BDPV', QUANTITY='V-VELOCITY', POINTS=5, TIME_HISTORY=.TRUE. / BR2
 &DEVC XB=13.35,13.35,5.75,5.75,3.565,5.395 ID='2PT', QUANTITY='PRESSURE', POINTS=3, TIME_HISTORY=.TRUE. / BR2
@@ -490,5 +487,12 @@
 &DEVC XB=8.95,8.95,8.25,8.25,5.69,1.12 ID='8TC', PROP_ID='THCP', QUANTITY='THERMOCOUPLE', POINTS=16, TIME_HISTORY=.TRUE. / FAMILY ROOM CENTER
 &DEVC XB=11.65,11.65,10.15,10.15,1.125,5.395 ID='9PT', QUANTITY='PRESSURE', POINTS=3, TIME_HISTORY=.TRUE. / FR
 &DEVC XB=13.65,13.65,7.95,7.95,0.46,2.59 ID='9TC', PROP_ID='THCP', QUANTITY='THERMOCOUPLE', POINTS=8, TIME_HISTORY=.TRUE. / Den
+
+&SLCF PBZ=2.5, QUANTITY='TEMPERATURE', CELL_CENTERED=.TRUE. /
+&SLCF PBZ=5.6, QUANTITY='TEMPERATURE', CELL_CENTERED=.TRUE. /
+&SLCF PBZ=2.5, QUANTITY='PRESSURE ZONE', CELL_CENTERED=.TRUE. /
+&SLCF PBZ=5.6, QUANTITY='PRESSURE ZONE', CELL_CENTERED=.TRUE. /
+&SLCF PBZ=2.5, QUANTITY='PRESSURE', CELL_CENTERED=.TRUE. /
+&SLCF PBZ=5.6, QUANTITY='PRESSURE', CELL_CENTERED=.TRUE. /
 
 &TAIL /
