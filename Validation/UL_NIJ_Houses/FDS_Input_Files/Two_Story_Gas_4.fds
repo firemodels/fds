@@ -14,24 +14,26 @@
 
 &REAC FUEL='METHANE', SOOT_YIELD=0.001 /
 
-&SURF ID='BURNER', HRRPUA=694., COLOR='ORANGE', RAMP_Q='burner' /
+&SURF ID='BURNER', HRRPUA=1388., COLOR='ORANGE', RAMP_Q='burner' /
 &RAMP ID='burner', T=    0., F=0. /
 &RAMP ID='burner', T=    5., F=1. /
-&RAMP ID='burner', T= 1500., F=1. /
-&RAMP ID='burner', T= 1505., F=0. /
+&RAMP ID='burner', T= 1200., F=1. /
+&RAMP ID='burner', T= 1205., F=0. /
 
 &OBST XB=11.4,12.0,8.4,9.0,0.4,0.6, SURF_IDS='BURNER','WALL','WALL' /
 
-&MATL ID = 'GYPSUM BOARD'
-      SPECIFIC_HEAT = 1.1
-      CONDUCTIVITY = 0.16
-      DENSITY = 700. /
+&MATL ID='GYPSUM BOARD'
+      FYI='Sheetrock UltraLight Panels',
+      SPECIFIC_HEAT=1.0
+      CONDUCTIVITY=0.16
+      DENSITY=480.0 /
 
-&SURF ID = 'WALL'
-      COLOR = 'GRAY 80'
-      MATL_ID = 'GYPSUM BOARD'
-      DEFAULT = .TRUE.
-      THICKNESS = 0.0127/
+&SURF ID='WALL',
+      COLOR='GRAY 80'
+      DEFAULT=.TRUE.
+      MATL_ID='GYPSUM BOARD'
+      BACKING='VOID'
+      THICKNESS=0.013 /
 
 &SURF ID = 'WINDOW'
       COLOR = 'LIGHT BLUE'
