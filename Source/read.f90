@@ -61,7 +61,7 @@ IF (.NOT.EX) THEN
    STOP_STATUS = VERSION_STOP ; RETURN
 ENDIF
 
-IF (MYID==0) WRITE(LU_ERR,'(A)') ' Reading input file ...'
+IF (MYID==0) WRITE(LU_ERR,'(/A/)') ' Reading FDS input file ...'
 
 ! Allocate the global orientation vector
 
