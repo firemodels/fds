@@ -746,23 +746,11 @@ Note: Reports of specific bugs, problems, feature requests, and enhancements sho
 
 \section{Naming the Input File}
 
-The operation of FDS is based on a single ASCII\footnote{ASCII -- American Standard Code
-for Information Interchange. There are 256 characters that make up the standard ASCII text.} text file containing parameters organized into
-{\em namelist}\footnote{A {\em namelist} is a Fortran input record.} groups.
-The input file provides FDS  with all of the necessary information to
-describe the scenario.
-The input file is saved with a name such as {\ct job\_name.fds},
-where {\ct job\_name} is any character string that helps to identify
-the simulation. If this same string is repeated under the {\ct HEAD} namelist group within the
-input file, then all of the output files associated with the calculation will then have this common prefix name.
+The operation of FDS is based on a single ASCII\footnote{ASCII -- American Standard Code for Information Interchange. There are 256 characters that make up the standard ASCII text.} text file containing parameters organized into {\em namelist}\footnote{A {\em namelist} is a Fortran input record.} groups. The input file provides FDS  with all of the necessary information to describe the scenario. The input file is saved with a name such as {\ct job\_name.fds}, where {\ct job\_name} is any character string that helps to identify the simulation. If this same string is repeated under the {\ct HEAD} namelist group within the input file, then all of the output files associated with the calculation will then have this common prefix name.
 
-There should be no blank spaces in the job name. Instead use the underscore
-character to represent a space.  Using an underscore characters instead of a space also applies
-to the general practice of naming directories on your system.
+There should be no blank spaces in the job name. Instead use the underscore character to represent a space.  Using an underscore characters instead of a space also applies to the general practice of naming directories on your system.
 
-Be aware that FDS will simply over-write the output files of a given case if its assigned
-name is the same. This is convenient when developing an input file because you save on disk space. Just be careful
-not to overwrite a calculation that you want to keep.
+Be aware that FDS will simply over-write the output files of a given case if its assigned name is the same. This is convenient when developing an input file because you save on disk space. Just be careful not to overwrite a calculation that you want to keep.
 
 
 
@@ -952,25 +940,18 @@ Then FDS will proceed to run the case defined by the concatenated input file gen
 
 \chapter{Setting the Bounds of Time and Space}
 
-This chapter describes global input parameters that affect the general scope of the simulation, like
-the simulation time and the size and extent of the computational domain. Essentially, these parameters
-establish the spatial and temporal coordinate systems that are used by all other components of the simulation, which is
-why these parameters are usually listed at the top of the input file and why they are described here first.
+This chapter describes global input parameters that affect the general scope of the simulation, like the simulation time and the size and extent of the computational domain. Essentially, these parameters establish the spatial and temporal coordinate systems that are used by all other components of the simulation, which is why these parameters are usually listed at the top of the input file and why they are described here first.
 
 
 \section{Naming the Job: The \texorpdfstring{{\tt HEAD}}{HEAD} Namelist Group (Table \ref{tbl:HEAD})}
 \label{info:HEAD}
 
-The first thing to do when setting up an input file is to give the
-job a name.  The name of the job is important because often a project
-involves numerous simulations in which case the names of the individual
-simulations should be meaningful and help to organize the project.  The namelist group {\ct HEAD} contains
-two parameters, as in this example:
+The first thing to do when setting up an input file is to give the job a name.  The name of the job is important because often a project involves numerous simulations in which case the names of the individual simulations should be meaningful and help to organize the project.  The namelist group {\ct HEAD} contains two parameters, as in this example:
 \begin{lstlisting}
 &HEAD CHID='WTC_05', TITLE='WTC Phase 1, Test 5' /
 \end{lstlisting}
 \begin{description}
-\item {\ct CHID} stands for \emph{Character ID}, it is a string of 40 characters or less used to tag the output files. If, for example, {\ct CHID='WTC\_05'}, it is convenient to name the input data file {\ct WTC\_05.fds} so that the input file can be associated with the output files. No periods or spaces are allowed in {\ct CHID} because the output files are tagged with suffixes that are meaningful to certain computer operating systems.  If {\ct CHID} is not specified, then it will be set to the name of the input file minus everything at and beyond the first period.
+\item {\ct CHID} stands for \emph{Character ID}, it is a string of 50 characters or less used to tag the output files. If, for example, {\ct CHID='WTC\_05'}, it is convenient to name the input data file {\ct WTC\_05.fds} so that the input file can be associated with the output files. No periods or spaces are allowed in {\ct CHID} because the output files are tagged with suffixes that are meaningful to certain computer operating systems.  If {\ct CHID} is not specified, then it will be set to the name of the input file minus everything at and beyond the first period.
 \item {\ct TITLE} is a string of 256 characters or less that describes the simulation. It is simply a descriptive text that is passed to various output files.
 \end{description}
 
@@ -978,9 +959,7 @@ two parameters, as in this example:
 \section{Simulation Time: The \texorpdfstring{{\tt TIME}}{TIME} Namelist Group (Table \ref{tbl:TIME})}
 \label{info:TIME}
 
-{\ct TIME} is the name of a group of parameters that define the time
-duration of the simulation and the initial time step used to advance
-the solution of the discretized equations.
+{\ct TIME} is the name of a group of parameters that define the time duration of the simulation and the initial time step used to advance the solution of the discretized equations.
 
 \subsection{Basics}
 \label{info:TIME_Basics}

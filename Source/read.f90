@@ -61,7 +61,7 @@ IF (.NOT.EX) THEN
    STOP_STATUS = VERSION_STOP ; RETURN
 ENDIF
 
-IF (MYID==0) WRITE(LU_ERR,'(A)') ' Reading input file ...'
+IF (MYID==0) WRITE(LU_ERR,'(/A/)') ' Reading FDS input file ...'
 
 ! Allocate the global orientation vector
 
@@ -425,7 +425,7 @@ HEAD_LOOP: DO
 ENDDO HEAD_LOOP
 13 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
 
-CLOOP: DO I=1,39
+CLOOP: DO I=1,CHID_LENGTH-1
    IF (CHID(I:I)=='.') THEN ; CALL SHUTDOWN('ERROR: No periods allowed in CHID') ; RETURN ; ENDIF
    IF (CHID(I:I)==' ') EXIT CLOOP
 ENDDO CLOOP
