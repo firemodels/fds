@@ -831,6 +831,22 @@ In December 2018, three fire experiments were conducted in a compartment approxi
 \label{NIST_E119_Compartment_Drawing_3}
 \end{sidewaysfigure}
 
+\section{Hasemi LocFire Column Experiment}
+\label{Hasemi_LocFire_Column_Description}
+Kamikawa et al.~\cite{Kamikawa:SiF06} reported four localized fire tests (cases) on a square steel column (STKR400, 0.1 m $\times$ 0.1 m, 3.2 mm thick and 1.6 m tall) located just beside a 0.3 m square, 0.25 m high diffusion burner. Propane was used as the fuel and a constant heat release rate of 52.5 kW was used in all cases. A new column specimen was used for each test. Temperature distributions of the column side surfaces were measured by K-type (chromel-alumel) thermocouples (0.65 mm bead diameter) fixed on column side surfaces with spot-welded steel foil. Drawing of the temperature measurement points is shown in Fig.~\ref{Hasemi_LocFire_Column_Drawing}. 
+
+For all cases, the column was fixed at the bottom. For case 1, no mechanical load was applied and the column was free to expand. For other cases, the horizontal displacement at the column top was retrained. Horizontal and vertical displacements were also measured. Only case 1 is considered here. 
+
+\subsubsection{Modeling Notes}
+
+The simulations of the Hasemi LocFire Column experiment is performed with mixed grid cells and 72 meshes. Two grid cells of 3.2 mm and 6.4 mm were used. The calculations are sped up by a factor of 10 using {\ct TIME\_SHRINK\_FACTOR=10}, whereby a 60~min experiment is simulated in 6~min of real time because the heat release rate is held steady for the experiment. The specific heats of all solid materials are reduced by a factor of 10 automatically to account for the change in time scale. 
+
+\begin{figure}[p]
+\includegraphics[width=\textwidth]{FIGURES/Hasemi_LocFire_Column/Hasemi_LocFire_Column_thermocouples}
+\caption{Temperature measurement points in Hasemi LocFire Column experiments.}
+\label{Hasemi_LocFire_Column_Drawing}
+\end{figure}
+
 \FloatBarrier
 
 \section{NIST Douglas Firs}
