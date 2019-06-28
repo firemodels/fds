@@ -1426,12 +1426,21 @@ SORT_QUEUE: DO
          END SELECT
       ENDDO
 
-      ! If an obstruction is found, assign its cells the current ZONE, just in case the obstruction is removed
+      ! If an obstruction is found and it has DEVC, CTRL, or is consumable, assign its cells the current ZONE
+      ! just in case the obstruction is removed. If the obstruction is on the boundary also assign the boundary values.
 
       IC = M%CELL_INDEX(II,JJ,KK)
       IF (M%SOLID(IC) .AND. M%OBST_INDEX_C(IC)>0) THEN
          OB => M%OBSTRUCTION(M%OBST_INDEX_C(IC))
-         M%PRESSURE_ZONE(OB%I1+1:OB%I2,OB%J1+1:OB%J2,OB%K1+1:OB%K2) = I_ZONE
+         IF (TRIM(OB%CTRL_ID) /='null' .OR. TRIM(OB%DEVC_ID)/='null' .OR. OB%CONSUMABLE) THEN
+            M%PRESSURE_ZONE(OB%I1+1:OB%I2,OB%J1+1:OB%J2,OB%K1+1:OB%K2) = I_ZONE
+            IF (OB%I1+1==1) M%PRESSURE_ZONE(0:0,OB%J1+1:OB%J2,OB%K1+1:OB%K2) = I_ZONE
+            IF (OB%I2==M%IBAR) M%PRESSURE_ZONE(M%IBP1:M%IBP1,OB%J1+1:OB%J2,OB%K1+1:OB%K2) = I_ZONE
+            IF (OB%J1+1==1) M%PRESSURE_ZONE(OB%I1+1:OB%I2,0:0,OB%K1+1:OB%K2) = I_ZONE
+            IF (OB%J2==M%JBAR) M%PRESSURE_ZONE(OB%I1+1:OB%I2,M%JBP1:M%JBP1,OB%K1+1:OB%K2) = I_ZONE
+            IF (OB%K1+1==1) M%PRESSURE_ZONE(OB%I1+1:OB%I2,OB%J1+1:OB%J2,0:0) = I_ZONE
+            IF (OB%K2==M%KBAR) M%PRESSURE_ZONE(OB%I1+1:OB%I2,OB%J1+1:OB%J2,M%KBP1:M%KBP1) = I_ZONE
+         ENDIF
          CYCLE SEARCH_LOOP
       ENDIF
 
@@ -1449,7 +1458,6 @@ SORT_QUEUE: DO
          Q_K(Q_N) = KK
          M%PRESSURE_ZONE(II,JJ,KK) = I_ZONE
       ENDIF
-
    ENDDO SEARCH_LOOP
 
 END DO SORT_QUEUE
