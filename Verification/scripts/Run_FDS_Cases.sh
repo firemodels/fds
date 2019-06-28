@@ -11,7 +11,6 @@ if [ ! -e .verification_script_dir ]; then
 fi
 
 QUEUE=batch
-QUEUEBENCH=batch
 DEBUG=
 SINGLE=
 nthreads=1
@@ -118,7 +117,7 @@ cd $SVNROOT
 export SVNROOT=`pwd`
 cd $CURDIR
 
-while getopts 'bB:c:CdD:e:D:Fghj:JL:m:o:Oq:Q:r:RsS:tw:W' OPTION
+while getopts 'bB:c:CdD:e:D:Fghj:JL:m:o:Oq:r:RsS:tw:W' OPTION
 do
 case $OPTION in
   b)
@@ -174,9 +173,6 @@ case $OPTION in
    ;;
   q)
    QUEUE="$OPTARG"
-   ;;
-  Q)
-   QUEUEBENCH="$OPTARG"
    ;;
   r)
    resource_manager="$OPTARG"
@@ -250,10 +246,6 @@ fi
 export BASEDIR=`pwd`
 
 export QFDS="$QFDSSH $walltime -n $nthreads $INTEL2 -e $FDSMPI $QUEUE $OOPT $POPT" 
-if [ "$QUEUEBENCH" != "" ]; then
-   QUEUEBENCH="-q $QUEUEBENCH"
-   export QFDS="$QFDSSH $walltime -n $nthreads $INTEL2 -e $FDSMPI $QUEUEBENCH $OOPT $POPT" 
-fi
 
 cd ..
 if [ "$BENCHMARK" == "1" ]; then
