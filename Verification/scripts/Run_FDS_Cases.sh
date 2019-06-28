@@ -36,6 +36,7 @@ POPT=
 INTEL=i
 INTEL2="-I"
 GEOMCASES=1
+INSPECTCASES=
 WAIT=
 EXE=
 CHECKCASES=
@@ -70,6 +71,7 @@ echo "     default: PBS"
 echo "     other options: SLURM"
 echo "-R - run only regular (non-benchmark) cases"
 echo "-s - stop FDS runs"
+echo "-t - run thread checking cases"
 echo "-w time - walltime request for a batch job"
 echo "     default: empty"
 echo "     format for PBS: hh:mm:ss, format for SLURM: dd-hh:mm:ss"
@@ -116,7 +118,7 @@ cd $SVNROOT
 export SVNROOT=`pwd`
 cd $CURDIR
 
-while getopts 'bB:c:CdD:e:D:Fghj:JL:m:o:Oq:Q:r:RsS:w:W' OPTION
+while getopts 'bB:c:CdD:e:D:Fghj:JL:m:o:Oq:Q:r:RsS:tw:W' OPTION
 do
 case $OPTION in
   b)
@@ -187,6 +189,9 @@ case $OPTION in
    ;;
   s)
    export STOPFDS=1
+   ;;
+  t)
+   INSPECTCASES=1
    ;;
   w)
    walltime="-w $OPTARG"
@@ -280,6 +285,15 @@ if [ "$GEOMCASES" == "1" ]; then
   ./GEOM_Cases.sh
   if [ "$CHECKCASES" == "" ]; then
     echo FDS geometry cases submitted
+  fi
+fi
+
+cd $CURDIR
+cd ..
+if [ "$INSPECTCASES" == "1" ]; then
+  ./INSPECT_Cases.sh
+  if [ "$CHECKCASES" == "" ]; then
+    echo FDS thread checking cases submitted
   fi
 fi
 
