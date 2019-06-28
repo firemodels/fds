@@ -71,7 +71,7 @@ echo "     default: PBS"
 echo "     other options: SLURM"
 echo "-R - run only regular (non-benchmark) cases"
 echo "-s - stop FDS runs"
-echo "-t - run thread checking cases"
+echo "-t - run only thread checking cases"
 echo "-w time - walltime request for a batch job"
 echo "     default: empty"
 echo "     format for PBS: hh:mm:ss, format for SLURM: dd-hh:mm:ss"
@@ -191,6 +191,10 @@ case $OPTION in
    export STOPFDS=1
    ;;
   t)
+   BENCHMARK=
+   GEOMCASES=
+   REGULAR=
+   RERUN=
    INSPECTCASES=1
    ;;
   w)
@@ -269,6 +273,11 @@ fi
 export QFDS="$QFDSSH $walltime -n $nthreads $INTEL2 -e $FDSMPI $QUEUE $OOPT $POPT" 
 if [ "$CHECKCASES" == "1" ]; then
   export QFDS="$SVNROOT/fds/Utilities/Scripts/Check_FDS_Cases.sh"
+fi
+
+export QFDS="$QFDSSH $walltime -n $nthreads $INTEL2 -e $FDSMPI $QUEUE $OOPT $POPT" 
+if [ "$INSPECTCASES" == "1" ]; then
+   export QFDS="$QFDSSH $walltime -n $nthreads $INTEL2 $QUEUE $OOPT $POPT" 
 fi
 
 cd $CURDIR
