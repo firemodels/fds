@@ -5,9 +5,9 @@
 export SVNROOT=`pwd`/../..
 source $SVNROOT/Validation/Common_Run_All.sh
 
-#$QFDS $DEBUG $QUEUE -p 12 -n 12 -d $INDIR Single_Story_Gas_1.fds
-#$QFDS $DEBUG $QUEUE -p 12 -n 12 -d $INDIR Single_Story_Gas_2.fds
-#$QFDS $DEBUG $QUEUE -p 12 -n 12 -d $INDIR Single_Story_Gas_5.fds
+$QFDS $DEBUG $QUEUE -p 12 -n 12 -d $INDIR Single_Story_Gas_1.fds
+$QFDS $DEBUG $QUEUE -p 12 -n 12 -d $INDIR Single_Story_Gas_2.fds
+$QFDS $DEBUG $QUEUE -p 12 -n 12 -d $INDIR Single_Story_Gas_5.fds
 $QFDS $DEBUG $QUEUE -p 40 -n 8  -d $INDIR Two_Story_Gas_1.fds
 $QFDS $DEBUG $QUEUE -p 40 -n 8  -d $INDIR Two_Story_Gas_4.fds
 $QFDS $DEBUG $QUEUE -p 40 -n 8  -d $INDIR Two_Story_Gas_6.fds
