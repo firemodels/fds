@@ -49,6 +49,7 @@ echo "Runs FDS verification suite"
 echo ""
 echo "Options"
 echo "-b - run only benchmark cases"
+echo "-C - check that cases ran (used by firebot)"
 echo "-d - use debug version of FDS"
 echo "-D n - delay the submission of each case by n seconds"
 echo "-e exe - run using exe"
@@ -246,12 +247,12 @@ fi
 export BASEDIR=`pwd`
 
 export QFDS="$QFDSSH $walltime -n $nthreads $INTEL2 -e $FDSMPI $QUEUE $OOPT $POPT" 
+if [ "$CHECKCASES" == "1" ]; then
+  export QFDS="$SVNROOT/fds/Utilities/Scripts/Check_FDS_Cases.sh"
+fi
 
 cd ..
 if [ "$BENCHMARK" == "1" ]; then
-  if [ "$CHECKCASES" == "1" ]; then
-    export QFDS="$SVNROOT/fds/Utilities/Scripts/Check_FDS_Cases.sh"
-  fi
   if [ "$SINGLE" == "" ]; then
     ./FDS_Benchmark_Cases.sh
   else
