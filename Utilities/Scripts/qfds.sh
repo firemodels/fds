@@ -864,7 +864,7 @@ EOF
 fi
 else
 for i in `seq 1 $OPENMPCASES`; do
-if [ "$vtuneresdir" != "" ]; then
+if [ "$vtuneresdir" == "" ]; then
 if [ "$iinspectresdir" == "" ]; then
 cat << EOF >> $scriptfile
 
