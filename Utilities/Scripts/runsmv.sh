@@ -46,7 +46,7 @@ fi
 
 fulldir=$BASEDIR/$dir
 echo ""
-echo "--- generating images for: $in.smv"
+echo "--- generating images for: $in.smv, `date`"
 
 scriptfile=$scratchdir/script.$$
 
