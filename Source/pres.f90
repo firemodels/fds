@@ -232,7 +232,7 @@ SELECT CASE(IPS)
          ENDDO
       ENDIF
       IF (.NOT.CYLINDRICAL) THEN
-         !$OMP PARALLEL DO PRIVATE(TRM1, TRM2, TRM3, TRM4) SCHEDULE(STATIC)
+         !$OMP PARALLEL DO SIMD PRIVATE(TRM1, TRM2, TRM3, TRM4) SCHEDULE(STATIC) 
          DO K=1,KBAR
             DO J=1,JBAR
                DO I=1,IBAR
@@ -244,7 +244,7 @@ SELECT CASE(IPS)
                ENDDO
             ENDDO
          ENDDO
-         !$OMP END PARALLEL DO
+         !$OMP END PARALLEL DO SIMD
 
       ENDIF
 
