@@ -11,7 +11,6 @@ if [ ! -e .verification_script_dir ]; then
 fi
 
 QUEUE=batch
-QUEUEBENCH=batch
 DEBUG=
 SINGLE=
 nthreads=1
@@ -36,6 +35,7 @@ POPT=
 INTEL=i
 INTEL2="-I"
 GEOMCASES=1
+INSPECTCASES=
 WAIT=
 EXE=
 CHECKCASES=
@@ -49,6 +49,7 @@ echo "Runs FDS verification suite"
 echo ""
 echo "Options"
 echo "-b - run only benchmark cases"
+echo "-C - check that cases ran (used by firebot)"
 echo "-d - use debug version of FDS"
 echo "-D n - delay the submission of each case by n seconds"
 echo "-e exe - run using exe"
@@ -70,6 +71,7 @@ echo "     default: PBS"
 echo "     other options: SLURM"
 echo "-R - run only regular (non-benchmark) cases"
 echo "-s - stop FDS runs"
+echo "-t - run only thread checking cases"
 echo "-w time - walltime request for a batch job"
 echo "     default: empty"
 echo "     format for PBS: hh:mm:ss, format for SLURM: dd-hh:mm:ss"
@@ -116,7 +118,7 @@ cd $SVNROOT
 export SVNROOT=`pwd`
 cd $CURDIR
 
-while getopts 'bB:c:CdD:e:D:Fghj:JL:m:o:Oq:Q:r:RsS:w:W' OPTION
+while getopts 'bB:c:CdD:e:D:Fghj:JL:m:o:Oq:r:RsS:tw:W' OPTION
 do
 case $OPTION in
   b)
@@ -173,9 +175,6 @@ case $OPTION in
   q)
    QUEUE="$OPTARG"
    ;;
-  Q)
-   QUEUEBENCH="$OPTARG"
-   ;;
   r)
    resource_manager="$OPTARG"
    ;;
@@ -187,6 +186,13 @@ case $OPTION in
    ;;
   s)
    export STOPFDS=1
+   ;;
+  t)
+   BENCHMARK=
+   GEOMCASES=
+   REGULAR=
+   RERUN=
+   INSPECTCASES=1
    ;;
   w)
    walltime="-w $OPTARG"
@@ -241,16 +247,12 @@ fi
 export BASEDIR=`pwd`
 
 export QFDS="$QFDSSH $walltime -n $nthreads $INTEL2 -e $FDSMPI $QUEUE $OOPT $POPT" 
-if [ "$QUEUEBENCH" != "" ]; then
-   QUEUEBENCH="-q $QUEUEBENCH"
-   export QFDS="$QFDSSH $walltime -n $nthreads $INTEL2 -e $FDSMPI $QUEUEBENCH $OOPT $POPT" 
+if [ "$CHECKCASES" == "1" ]; then
+  export QFDS="$SVNROOT/fds/Utilities/Scripts/Check_FDS_Cases.sh"
 fi
 
 cd ..
 if [ "$BENCHMARK" == "1" ]; then
-  if [ "$CHECKCASES" == "1" ]; then
-    export QFDS="$SVNROOT/fds/Utilities/Scripts/Check_FDS_Cases.sh"
-  fi
   if [ "$SINGLE" == "" ]; then
     ./FDS_Benchmark_Cases.sh
   else
@@ -264,6 +266,11 @@ fi
 export QFDS="$QFDSSH $walltime -n $nthreads $INTEL2 -e $FDSMPI $QUEUE $OOPT $POPT" 
 if [ "$CHECKCASES" == "1" ]; then
   export QFDS="$SVNROOT/fds/Utilities/Scripts/Check_FDS_Cases.sh"
+fi
+
+export QFDS="$QFDSSH $walltime -n $nthreads $INTEL2 -e $FDSMPI $QUEUE $OOPT $POPT" 
+if [ "$INSPECTCASES" == "1" ]; then
+   export QFDS="$QFDSSH $walltime -n $nthreads $INTEL2 $QUEUE $OOPT $POPT" 
 fi
 
 cd $CURDIR
@@ -280,6 +287,15 @@ if [ "$GEOMCASES" == "1" ]; then
   ./GEOM_Cases.sh
   if [ "$CHECKCASES" == "" ]; then
     echo FDS geometry cases submitted
+  fi
+fi
+
+cd $CURDIR
+cd ..
+if [ "$INSPECTCASES" == "1" ]; then
+  ./INSPECT_Cases.sh
+  if [ "$CHECKCASES" == "" ]; then
+    echo FDS thread checking cases submitted
   fi
 fi
 
