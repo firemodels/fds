@@ -7322,7 +7322,7 @@ CONTAINS
     INTEGER, DIMENSION(10) :: HERDING_LIST_IHUMAN
     REAL(EB), DIMENSION(10) :: HERDING_LIST_P2PDIST
     INTEGER :: HERDING_LIST_N
-    REAL(EB) :: HERDING_LIST_P2PMAX, R_HERD_HR, DOT_HERD_HR
+    REAL(EB) :: HERDING_LIST_P2PMAX, R_HERD_HR, DOT_HERD_HR, Other_TPRE
     !
     REAL(EB) :: D_HUMANS_MIN, D_WALLS_MIN
     REAL(EB) :: TNOW
@@ -7812,6 +7812,14 @@ CONTAINS
                             HERDING_LIST_DOORS(ABS(HRE%I_Target)) = HERDING_LIST_DOORS(ABS(HRE%I_Target)) + &
                                  W0_HERDING -((W0_HERDING-WR_HERDING)/R_HERD_HR)*P2P_DIST
                          END DO Other_Agent_Loop_2
+                         
+                         Other_TPRE = 0.0_EB
+			                   Other_Agent_Loop_3: DO IE = 1, HERDING_LIST_N
+                            HRE => HUMAN(HERDING_LIST_IHUMAN(IE))
+			                      Other_TPRE = Other_TPRE + HRE%TPRE
+			                   END DO Other_Agent_Loop_3
+			                   Other_TPRE = Other_TPRE/REAL(HERDING_LIST_N)
+                         
                          DO II = 1, N_DOORS+N_EXITS
                             IF (HERDING_LIST_DOORS(II)>0.0_EB) THEN
                                ! Make it symmetrical with respect the doors.
@@ -7833,9 +7841,11 @@ CONTAINS
                                EVEL = HERDING_LIST_DOORS(II)
                             END IF
                          END DO
-                         IF (I_TMP /= 0 .AND. HR%I_Door_Mode == 0) THEN
+                         IF (I_TMP /= 0) THEN
                             ! Found a door using herding algorithm, start to move after one second.
-                            HR%TPRE = DT_GROUP_DOOR
+                            ! HR%TPRE = DT_GROUP_DOOR
+                            ! Merge one's TPRE with others' TPRE
+                            HR%TPRE = 0.5*HR%TPRE + 0.5*Other_TPRE
                             HR%TDET = MIN(T,HR%TDET)
                          END IF
                          IF (HR%I_DoorAlgo == 4) THEN
