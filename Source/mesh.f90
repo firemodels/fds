@@ -177,6 +177,10 @@ TYPE MESH_TYPE
    REAL(EB) :: VEG_CLOCK_BC !surf veg
 !rm <-
 
+   ! New level set
+
+   REAL(EB), POINTER,DIMENSION(:,:) :: PHI_NLS
+
    ! Embedded Mesh
 
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: SCALAR_SAVE1,SCALAR_SAVE2,SCALAR_SAVE3
@@ -313,6 +317,10 @@ REAL(EB), POINTER,DIMENSION(:,:) :: LS_Z_TERRAIN
 INTEGER, POINTER :: N_TERRAIN_SLCF
 REAL(EB), POINTER :: VEG_CLOCK_BC  !surf veg
 !rm <-
+
+! New level set
+
+REAL(EB), POINTER,DIMENSION(:,:) :: PHI_NLS
 
 ! Embedded Mesh
 
@@ -692,6 +700,8 @@ N_TERRAIN_SLCF=>M%N_TERRAIN_SLCF
 VEG_CLOCK_BC  =>M%VEG_CLOCK_BC !surf veg
 LS_Z_TERRAIN  =>M%LS_Z_TERRAIN !terrain height for level set fire spread
 !rm <-
+! new level set method
+PHI_NLS =>M%PHI_NLS
 
 END SUBROUTINE POINT_TO_MESH
 
