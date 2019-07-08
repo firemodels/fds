@@ -263,14 +263,14 @@ if [ "$BENCHMARK" == "1" ]; then
   fi
 fi
 
-export QFDS="$QFDSSH $walltime -n $nthreads $INTEL2 -e $FDSMPI $QUEUE $OOPT $POPT" 
 if [ "$CHECKCASES" == "1" ]; then
   export QFDS="$SVNROOT/fds/Utilities/Scripts/Check_FDS_Cases.sh"
-fi
-
-export QFDS="$QFDSSH $walltime -n $nthreads $INTEL2 -e $FDSMPI $QUEUE $OOPT $POPT" 
-if [ "$INSPECTCASES" == "1" ]; then
-   export QFDS="$QFDSSH $walltime -n $nthreads $INTEL2 $QUEUE $OOPT $POPT" 
+else
+  if [ "$INSPECTCASES" == "1" ]; then
+    export QFDS="$QFDSSH $walltime -n $nthreads $INTEL2 $QUEUE $OOPT $POPT" 
+  else
+    export QFDS="$QFDSSH $walltime -n $nthreads $INTEL2 -e $FDSMPI $QUEUE $OOPT $POPT" 
+  fi
 fi
 
 cd $CURDIR
