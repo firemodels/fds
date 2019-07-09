@@ -73,7 +73,7 @@ REAL(EB), ALLOCATABLE, DIMENSION(:)       :: REAL_BUFFER_1
 REAL(EB), ALLOCATABLE, DIMENSION(:,:)     :: REAL_BUFFER_2,REAL_BUFFER_3,REAL_BUFFER_5,REAL_BUFFER_6,REAL_BUFFER_8,&
                                              REAL_BUFFER_11,REAL_BUFFER_12,REAL_BUFFER_13,REAL_BUFFER_14
 
-! output version info if fds is invoked without any arguments 
+! output version info if fds is invoked without any arguments
 ! (this must be done before MPI is initialized)
 
 CALL VERSION_INFO
@@ -617,6 +617,7 @@ MAIN_LOOP: DO
             RK2_PREDICTOR_LS = .TRUE.
             CALL LEVEL_SET_FIRESPREAD(T,DT,1)
          ENDIF
+         IF (NEW_VEG_LEVEL_SET) CALL LEVEL_SET_FIRESPREAD_NEW(NM)
       ENDDO COMPUTE_WALL_BC_LOOP_A
 
       ! If there are pressure ZONEs, exchange integrated quantities mesh to mesh for use in the divergence calculation
@@ -755,6 +756,7 @@ MAIN_LOOP: DO
          RK2_PREDICTOR_LS = .FALSE.
          CALL LEVEL_SET_FIRESPREAD(T,DT,1)
       ENDIF
+      IF (NEW_VEG_LEVEL_SET) CALL LEVEL_SET_FIRESPREAD_NEW(NM)
    ENDDO COMPUTE_WALL_BC_2A
 
    DO ITER=1,RADIATION_ITERATIONS
