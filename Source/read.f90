@@ -6624,7 +6624,7 @@ INTEGER :: NPPC,N,IOS,NL,NN,NNN,N_LIST,N_LIST2,INDEX_LIST(MAX_MATERIALS_TOTAL),L
 INTEGER ::  N_LAYER_CELLS_MAX(MAX_LAYERS)
 REAL(EB) :: VEGETATION_LSET_IGNITE_TIME,VEG_LSET_QCON,VEG_LSET_ROS_HEAD,VEG_LSET_ROS_FLANK,VEG_LSET_ROS_BACK, &
             VEG_LSET_WIND_EXP,VEG_LSET_BETA,VEG_LSET_HT,VEG_LSET_SIGMA,VEG_LSET_ELLIPSE_HEAD
-LOGICAL :: VEG_LEVEL_SET_SPREAD,&
+LOGICAL :: VEG_LEVEL_SET_SPREAD,VEG_LSET_BURNED,&
            DEFAULT,EVAC_DEFAULT,VEG_LSET_ELLIPSE,VEG_LSET_TAN2,TGA_ANALYSIS,COMPUTE_EMISSIVITY,COMPUTE_EMISSIVITY_BACK,&
            HT3D
 
@@ -6646,7 +6646,7 @@ NAMELIST /SURF/ ADIABATIC,AREA_ADJUST,&
                 TGA_ANALYSIS,TGA_FINAL_TEMPERATURE,TGA_HEATING_RATE,THICKNESS,&
                 TMP_BACK,TMP_FRONT,TMP_INNER,TRANSPARENCY,&
                 VEGETATION_LSET_IGNITE_TIME,&
-                VEG_LSET_QCON,VEG_LEVEL_SET_SPREAD,&
+                VEG_LSET_BURNED,VEG_LSET_QCON,VEG_LEVEL_SET_SPREAD,&
                 VEG_LSET_ROS_BACK,VEG_LSET_ROS_FLANK,VEG_LSET_ROS_HEAD,VEG_LSET_WIND_EXP,&
                 VEG_LSET_SIGMA,VEG_LSET_HT,VEG_LSET_BETA,VEG_LSET_ELLIPSE,VEG_LSET_TAN2,VEG_LSET_ELLIPSE_HEAD,&
                 VEL,VEL_BULK,VEL_GRAD,VEL_T,VOLUME_FLOW,WIDTH,XYZ,Z0,ZETA_FRONT,&
@@ -6856,17 +6856,22 @@ READ_SURF_LOOP: DO N=0,N_SURF
    ENDIF
 
    ! Level set vegetation fire spread specific
-   SF%VEG_LSET_SPREAD    = VEG_LEVEL_SET_SPREAD
-   SF%VEG_LSET_ROS_HEAD  = VEG_LSET_ROS_HEAD !head fire rate of spread m/s
-   SF%VEG_LSET_ELLIPSE_HEAD = VEG_LSET_ELLIPSE_HEAD !no-wind, no-slope ros for elliptical model in level set
-   SF%VEG_LSET_ROS_FLANK = VEG_LSET_ROS_FLANK !flank fire rate of spread
-   SF%VEG_LSET_ROS_BACK  = VEG_LSET_ROS_BACK !back fire rate of spread
-   SF%VEG_LSET_WIND_EXP  = VEG_LSET_WIND_EXP !exponent on wind cosine in ROS formula
-   SF%VEG_LSET_SIGMA     = VEG_LSET_SIGMA * 0.01 !SAV for Farsite emulation in LSET converted to 1/cm
-   SF%VEG_LSET_HT        = VEG_LSET_HT
-   SF%VEG_LSET_BETA      = VEG_LSET_BETA
-   SF%VEG_LSET_ELLIPSE   = VEG_LSET_ELLIPSE
-   SF%VEG_LSET_TAN2      = VEG_LSET_TAN2
+
+   SF%VEG_LSET_SPREAD       = VEG_LEVEL_SET_SPREAD
+   SF%VEG_LSET_ROS_HEAD     = VEG_LSET_ROS_HEAD     ! head fire rate of spread m/s
+   SF%VEG_LSET_ELLIPSE_HEAD = VEG_LSET_ELLIPSE_HEAD ! no-wind, no-slope ros for elliptical model in level set
+   SF%VEG_LSET_ROS_FLANK    = VEG_LSET_ROS_FLANK    ! flank fire rate of spread
+   SF%VEG_LSET_ROS_BACK     = VEG_LSET_ROS_BACK     ! back fire rate of spread
+   SF%VEG_LSET_WIND_EXP     = VEG_LSET_WIND_EXP     ! exponent on wind cosine in ROS formula
+   SF%VEG_LSET_SIGMA        = VEG_LSET_SIGMA * 0.01 ! SAV for Farsite emulation in LSET converted to 1/cm
+   SF%VEG_LSET_HT           = VEG_LSET_HT
+   SF%VEG_LSET_BETA         = VEG_LSET_BETA
+   SF%VEG_LSET_ELLIPSE      = VEG_LSET_ELLIPSE
+   SF%VEG_LSET_TAN2         = VEG_LSET_TAN2
+
+   ! New level set
+
+   SF%VEG_LSET_BURNED       = VEG_LSET_BURNED
 
    ! Boundary Vegetation specific
 
@@ -7618,6 +7623,9 @@ VEG_LSET_BETA                = 0.0_EB
 VEG_LSET_SIGMA               = 0.0_EB
 VEG_LSET_QCON                = 0.0_EB
 
+! new level set
+VEG_LSET_BURNED              = .FALSE.
+
 END SUBROUTINE SET_SURF_DEFAULTS
 
 END SUBROUTINE READ_SURF
@@ -7890,6 +7898,7 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
    SF%T_IGN = T_BEGIN
    IF (SF%TMP_IGN<5000._EB)                     SF%T_IGN = HUGE(T_END)
    IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) SF%T_IGN = HUGE(T_END)
+   IF (SF%VEG_LSET_SPREAD)                      SF%T_IGN = HUGE(T_END)
 
    ! Species Arrays and Method of Mass Transfer (SPECIES_BC_INDEX)
 
@@ -10800,6 +10809,11 @@ MESH_LOOP_1: DO NM=1,NMESHES
 
                ! Parameters for specified spread of a fire over a VENT
 
+               IF (ALL(XYZ<-9.99E5_EB) .AND. SPREAD_RATE>0._EB) THEN
+                  XYZ(1)=0.5_EB*(XB1+XB2)
+                  XYZ(2)=0.5_EB*(XB3+XB4)
+                  XYZ(3)=0.5_EB*(XB5+XB6)
+               ENDIF
                VT%X0 = XYZ(1)
                VT%Y0 = XYZ(2)
                VT%Z0 = XYZ(3)
