@@ -10802,7 +10802,7 @@ MESH_LOOP_1: DO NM=1,NMESHES
 
                ! Parameters for specified spread of a fire over a VENT
 
-               IF (ALL(XYZ<-9.99E5_EB) .AND. SPREAD_RATE>0._EB) THEN
+               IF (ALL(XYZ<-1.E5_EB) .AND. SPREAD_RATE>0._EB) THEN
                   XYZ(1)=0.5_EB*(XB1+XB2)
                   XYZ(2)=0.5_EB*(XB3+XB4)
                   XYZ(3)=0.5_EB*(XB5+XB6)
