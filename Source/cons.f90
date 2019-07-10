@@ -286,6 +286,7 @@ REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: DSUM,USUM,PSUM
 
 LOGICAL  :: VEG_LEVEL_SET,VEG_LEVEL_SET_COUPLED,VEG_LEVEL_SET_UNCOUPLED
 LOGICAL  :: RK2_PREDICTOR_LS,LSET_ELLIPSE,LSET_TAN2
+REAL(EB), PARAMETER :: PHI_MIN_LS=-1._EB, PHI_MAX_LS=1._EB
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: FLUX0_LS,FLUX1_LS,HEAD_WIDTH,PHI_LS,PHI0_LS,PHI_TEMP,PHI1_LS,ROS_BACKU, &
                                          ROS_HEAD,ROS_HEAD_U0_INFW,ROS_HEAD_U_INFW,ROS_FLANK, &
                                          SR_X_LS,SR_Y_LS,U_LS,V_LS,Z_LS,DZTDX,DZTDY,MAG_ZT, &
@@ -318,6 +319,7 @@ LOGICAL :: OMESH_PARTICLES=.FALSE.
 INTEGER :: MOMENTUM_INTERPOLATION_METHOD=0
 
 ! Soot oxidation
+
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: NU_SOOT_OX
 
 ! Agglomeration model
@@ -390,6 +392,7 @@ LOGICAL :: CC_SLIPIBM_VELO=.FALSE.
 
 ! Threshold factor for volume of cut-cells respect to volume of Cartesian cells:
 ! Currently used in the thermo div definition of cut-cells.
+
 REAL(EB) :: CCVOL_LINK=0.15_EB
 LOGICAL  :: GET_CUTCELLS_VERBOSE=.FALSE.
 
@@ -410,6 +413,7 @@ INTEGER, PARAMETER :: EDG2 = 2
 INTEGER, PARAMETER :: EDG3 = 3
 
 ! Allocation increment parameters:
+
 INTEGER, PARAMETER :: IBM_ALLOC_DVERT = 10
 INTEGER, PARAMETER :: IBM_ALLOC_DELEM = 10
 
@@ -421,9 +425,11 @@ INTEGER, PARAMETER :: IBM_MAX_WSTRIANG_TRI =  1  ! Up to 1 wstriangle per BODINT
                                                  ! aligned with X1PLN plane.)
 
 ! Outer Geometric entity to use for interpolation to velocity/stress normal probe external points:
+
 LOGICAL :: IBM_PLANE_INTERPOLATION=.FALSE. ! If .TRUE. use external plane, if .FALSE. use external cubic volume.
 
 ! CELL_INDEX counter related to GEOMS.
+
 INTEGER, ALLOCATABLE, DIMENSION(:)   :: CELL_COUNT_CC
 INTEGER, ALLOCATABLE, DIMENSION(:,:) :: N_EDGES_DIM_CC
 
