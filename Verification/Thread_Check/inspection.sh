@@ -7,7 +7,7 @@ RESULT_DIR=$CURDIR/inspect_results
 PROCESSES=1
 QFDS="$GITROOT/fds/Utilities/Scripts/qfds.sh"
 QUEUE=
-PREFIX=
+
 
 function usage {
   echo "Usage: inspect_openmp.sh [-v] casename.fds"
@@ -27,7 +27,7 @@ then
 fi
 
 showinput=
-while getopts 'hd:vp:q:x:' OPTION
+while getopts 'hd:vp:q:' OPTION
 do
 case $OPTION  in
   h)
@@ -45,9 +45,6 @@ case $OPTION  in
   q)
    QUEUE=$OPTARG
    ;;
-  x)
-   PREFIX=$OPTARG
-   ;;
 esac
 done
 shift $(($OPTIND-1))
@@ -60,8 +57,8 @@ $QFDS -q $QUEUE -p $PROCESSES -o 4 -x $RESULT_DIR $case
 sleep 5
 
 
-while [[ `qstat -a | awk '{print $2" "$4}' | grep $(whoami) | grep '$PREFIX${case%.fds}'` != '' ]]; do
-        echo "Waiting for case to complete." >> $CURDIR/monitor.txt
+while [[ `qstat -a | awk '{print $2" "$4}' | grep $(whoami) | grep "inspector"` != '' ]]; do
+        echo "Waiting for case to complete." 
         sleep 240
 done
 
