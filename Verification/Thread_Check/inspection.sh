@@ -52,7 +52,7 @@ $QFDS -p $PROCESSES -o 4 -x $RESULT_DIR $case
 sleep 5
 
 
-while [[ `qstat -a | awk '{print $2" "$4}' | grep $(whoami) | grep race` != '' ]]; do
+while [[ `qstat -a | awk '{print $2" "$4}' | grep $(whoami) | grep '${case%.fds}'` != '' ]]; do
         echo "Waiting for case to complete." >> $CURDIR/monitor.txt
         sleep 240
 done
