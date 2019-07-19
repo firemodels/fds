@@ -7,6 +7,7 @@ RESULT_DIR=$CURDIR/inspect_results
 PROCESSES=1
 QFDS="$GITROOT/fds/Utilities/Scripts/qfds.sh"
 QUEUE=
+PREFIX=
 
 function usage {
   echo "Usage: inspect_openmp.sh [-v] casename.fds"
@@ -26,7 +27,7 @@ then
 fi
 
 showinput=
-while getopts 'hd:vp:q:' OPTION
+while getopts 'hd:vp:q:x:' OPTION
 do
 case $OPTION  in
   h)
@@ -43,6 +44,10 @@ case $OPTION  in
    ;;
   q)
    QUEUE=$OPTARG
+   ;;
+  x)
+   PREFIX=$OPTARG
+   ;;
 esac
 done
 shift $(($OPTIND-1))
@@ -51,11 +56,11 @@ case=$1
 # Perform OpenMP thread checking (detect deadlocks and data races)
 
 cd $CURDIR
-$QFDS -p $PROCESSES -o 4 -x $RESULT_DIR $case
+$QFDS -q $QUEUE -p $PROCESSES -o 4 -x $RESULT_DIR $case
 sleep 5
 
 
-while [[ `qstat -a | awk '{print $2" "$4}' | grep $(whoami) | grep '${case%.fds}'` != '' ]]; do
+while [[ `qstat -a | awk '{print $2" "$4}' | grep $(whoami) | grep '$PREFIX${case%.fds}'` != '' ]]; do
         echo "Waiting for case to complete." >> $CURDIR/monitor.txt
         sleep 240
 done
