@@ -457,7 +457,7 @@ else
   if [ "$use_inspect" == "1" ]; then
     DB=_inspect
     if [ "$iinspectresdir" != "" ]; then
-    iinspectargs="inspxe-cl -collect ti2 -knob stack-depth=32 -result-dir $iinspectresdir --"
+    iinspectargs="inspxe-cl -collect ti2 -knob stack-depth=32 -s-f $FDSROOT/fds/Build/impi_intel_linux_64_inspect/suppressions/default.sup  -result-dir $iinspectresdir --"
     fi
   fi
   if [ "$use_advise" == "1" ]; then
