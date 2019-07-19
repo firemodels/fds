@@ -6,6 +6,7 @@ cd $CURDIR
 RESULT_DIR=$CURDIR/inspect_results
 PROCESSES=1
 QFDS="$GITROOT/fds/Utilities/Scripts/qfds.sh"
+QUEUE=
 
 function usage {
   echo "Usage: inspect_openmp.sh [-v] casename.fds"
@@ -25,7 +26,7 @@ then
 fi
 
 showinput=
-while getopts 'hd:vp:' OPTION
+while getopts 'hd:vp:q:' OPTION
 do
 case $OPTION  in
   h)
@@ -40,6 +41,8 @@ case $OPTION  in
   p)
    PROCESSES=$OPTARG
    ;;
+  q)
+   QUEUE=$OPTARG
 esac
 done
 shift $(($OPTIND-1))
