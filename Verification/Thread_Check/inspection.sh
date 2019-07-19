@@ -65,10 +65,10 @@ while [[ `qstat -a | awk '{print $2" "$4}' | grep $(whoami) | grep '$PREFIX${cas
         sleep 240
 done
 
-if [[ `grep -i -E 'warning|remark|problem|error' $CURDIR/${case%.fds}.err | grep -v '0 new problem(s) found' | grep -v 'Warning: One or more threads in the application accessed the stack of another thread'` == "" ]]
+if [[ `grep -i -E 'warning|remark|problem|error' ${case%.fds}.err | grep -v '0 new problem(s) found' | grep -v 'Warning: One or more threads in the application accessed the stack of another thread'` == "" ]]
    then
-      echo "Inspector Clean" >> $CURDIR/monitor.txt
+      echo "Inspector Clean" 
    else
-      echo "Inspector found errors, use Inspector to analyze results." >> $CURDIR/monitor.txt
+      echo "Inspector found errors, use Inspector to analyze results." 
     
    fi
