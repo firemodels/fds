@@ -1316,10 +1316,10 @@ REAL(EB), INTENT(IN) :: XX,YY,ZZ
 REAL(EB) :: XI,YJ,ZK
 INTEGER, INTENT(IN) :: NM,I_ZONE
 INTEGER, INTENT(OUT) :: I_ZONE_OVERLAP
-INTEGER :: NN,IOR,IC,II,JJ,KK,III,JJJ,KKK,Q_N,IIO,JJO,KKO,NOM
+INTEGER :: NN,IOR,IC,IC_OLD,II,JJ,KK,III,JJJ,KKK,Q_N
 INTEGER, ALLOCATABLE, DIMENSION(:) :: Q_I,Q_J,Q_K
-TYPE (MESH_TYPE), POINTER :: M=>NULL()
-TYPE (OBSTRUCTION_TYPE), POINTER :: OB=>NULL()
+TYPE (MESH_TYPE), POINTER :: M
+TYPE (OBSTRUCTION_TYPE), POINTER :: OB
 
 M=>MESHES(NM)
 I_ZONE_OVERLAP = 0
@@ -1359,53 +1359,46 @@ SORT_QUEUE: DO
    III = Q_I(Q_N)
    JJJ = Q_J(Q_N)
    KKK = Q_K(Q_N)
-   IC  = M%CELL_INDEX(III,JJJ,KKK)
    Q_N = Q_N - 1
 
    SEARCH_LOOP: DO IOR=-3,3
 
       IF (IOR==0) CYCLE SEARCH_LOOP
 
+      IC  = M%CELL_INDEX(III,JJJ,KKK)
+
       SELECT CASE(IOR)
          CASE(-1)
-            IF (III==0) CYCLE SEARCH_LOOP
+            IF (III==1) CYCLE SEARCH_LOOP
             II = III-1
             JJ = JJJ
             KK = KKK
          CASE( 1)
-            IF (III==M%IBP1) CYCLE SEARCH_LOOP
+            IF (III==M%IBAR) CYCLE SEARCH_LOOP
             II = III+1
             JJ = JJJ
             KK = KKK
          CASE(-2)
-            IF (JJJ==0) CYCLE SEARCH_LOOP
+            IF (JJJ==1) CYCLE SEARCH_LOOP
             II = III
             JJ = JJJ-1
             KK = KKK
          CASE( 2)
-            IF (JJJ==M%JBP1) CYCLE SEARCH_LOOP
+            IF (JJJ==M%JBAR) CYCLE SEARCH_LOOP
             II = III
             JJ = JJJ+1
             KK = KKK
          CASE(-3)
-            IF (KKK==0) CYCLE SEARCH_LOOP
+            IF (KKK==1) CYCLE SEARCH_LOOP
             II = III
             JJ = JJJ
             KK = KKK-1
          CASE( 3)
-            IF (KKK==M%KBP1) CYCLE SEARCH_LOOP
+            IF (KKK==M%KBAR) CYCLE SEARCH_LOOP
             II = III
             JJ = JJJ
             KK = KKK+1
       END SELECT
-
-      ! If the cell is outside the computational domain, check if it is in another mesh
-
-      IF (II<1 .OR. II>M%IBAR .OR. JJ<1 .OR. JJ>M%JBAR .OR. KK<1 .OR. KK>M%KBAR) THEN
-         CALL SEARCH_OTHER_MESHES(M%XC(II),M%YC(JJ),M%ZC(KK),NOM,IIO,JJO,KKO)
-         IF (NOM>0) M%PRESSURE_ZONE(II,JJ,KK) = I_ZONE
-         CYCLE SEARCH_LOOP
-      ENDIF
 
       ! Look for thin obstructions bordering the current cell
 
@@ -1427,41 +1420,34 @@ SORT_QUEUE: DO
          END SELECT
       ENDDO
 
-      ! If an obstruction is found and it has DEVC, CTRL, or is consumable, assign its cells the current ZONE
-      ! just in case the obstruction is removed. If the obstruction is on the boundary also assign the boundary values.
+      ! If the last cell was solid and the current cell is not solid, stop the current directional march.
 
+      IC_OLD = IC
       IC = M%CELL_INDEX(II,JJ,KK)
-      IF (M%SOLID(IC) .AND. M%OBST_INDEX_C(IC)>0) THEN
-         OB => M%OBSTRUCTION(M%OBST_INDEX_C(IC))
-         IF (TRIM(OB%CTRL_ID) /='null' .OR. TRIM(OB%DEVC_ID)/='null' .OR. OB%CONSUMABLE) THEN
-            M%PRESSURE_ZONE(OB%I1+1:OB%I2,OB%J1+1:OB%J2,OB%K1+1:OB%K2) = I_ZONE
-            IF (OB%I1+1==1) M%PRESSURE_ZONE(0:0,OB%J1+1:OB%J2,OB%K1+1:OB%K2) = I_ZONE
-            IF (OB%I2==M%IBAR) M%PRESSURE_ZONE(M%IBP1:M%IBP1,OB%J1+1:OB%J2,OB%K1+1:OB%K2) = I_ZONE
-            IF (OB%J1+1==1) M%PRESSURE_ZONE(OB%I1+1:OB%I2,0:0,OB%K1+1:OB%K2) = I_ZONE
-            IF (OB%J2==M%JBAR) M%PRESSURE_ZONE(OB%I1+1:OB%I2,M%JBP1:M%JBP1,OB%K1+1:OB%K2) = I_ZONE
-            IF (OB%K1+1==1) M%PRESSURE_ZONE(OB%I1+1:OB%I2,OB%J1+1:OB%J2,0:0) = I_ZONE
-            IF (OB%K2==M%KBAR) M%PRESSURE_ZONE(OB%I1+1:OB%I2,OB%J1+1:OB%J2,M%KBP1:M%KBP1) = I_ZONE
-         ENDIF
-         CYCLE SEARCH_LOOP
-      ENDIF
 
-      ! If the neighboring cell is not solid, assign the pressure zone
+      IF (M%SOLID(IC_OLD) .AND. .NOT.M%SOLID(IC)) CYCLE SEARCH_LOOP
+
+      ! If the current cell is not solid, but it is assigned another ZONE index, mark it as an overlap error and return
 
       IF (.NOT.M%SOLID(IC) .AND. M%PRESSURE_ZONE(II,JJ,KK)>0 .AND.  M%PRESSURE_ZONE(II,JJ,KK)/=I_ZONE) THEN
          I_ZONE_OVERLAP = M%PRESSURE_ZONE(II,JJ,KK)
          RETURN
       ENDIF
 
-      IF (.NOT.M%SOLID(IC) .AND. M%PRESSURE_ZONE(II,JJ,KK)<1) THEN
+      ! If the current cell is unassigned, assign the cell the ZONE index, I_ZONE, and then add this cell to the
+      ! queue so that further searches might originate from it.
+
+      IF (M%PRESSURE_ZONE(II,JJ,KK)<1) THEN
+         M%PRESSURE_ZONE(II,JJ,KK) = I_ZONE
          Q_N      = Q_N+1
          Q_I(Q_N) = II
          Q_J(Q_N) = JJ
          Q_K(Q_N) = KK
-         M%PRESSURE_ZONE(II,JJ,KK) = I_ZONE
       ENDIF
+
    ENDDO SEARCH_LOOP
 
-END DO SORT_QUEUE
+ENDDO SORT_QUEUE
 
 DEALLOCATE(Q_I)
 DEALLOCATE(Q_J)
