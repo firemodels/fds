@@ -9,6 +9,11 @@
 &MESH 	IJK= 6,6,6,
 	XB = 9.0,12.0,-1.5,1.5,0.0,3.0 / n = 2 (z)
 
+&ZONE XYZ=0.0,0.0,0.1 /
+&ZONE XYZ=3.0,0.0,0.1 /
+&ZONE XYZ=6.0,0.0,0.1 /
+&ZONE XYZ=10.,0.0,0.1 /
+
 &SURF ID='HOT'
       DEFAULT=.TRUE.
       TMP_FRONT = 1000.
