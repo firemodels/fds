@@ -11757,7 +11757,7 @@ READ_ZONE_LOOP: DO N=1,N_ZONE-N_EVAC_ZONE
    P_ZONE(N)%EVACUATION = .FALSE.
    P_ZONE(N)%PERIODIC = PERIODIC
 
-   IF (XYZ(1,1)>-999999._EB) THEN  ! Process the XYZ input
+   IF (XYZ(1,1)>-999999._EB) THEN  ! Process the first XYZ point. The rest are ignored.
       P_ZONE(N)%X = XYZ(1,1)
       P_ZONE(N)%Y = XYZ(2,1)
       P_ZONE(N)%Z = XYZ(3,1)
