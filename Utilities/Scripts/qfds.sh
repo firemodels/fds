@@ -147,16 +147,7 @@ fi
 
 #*** define resource manager that is used
 
-if [ "$RESOURCE_MANAGER" == "SLURM" ]; then
-  if [ "$SLURM_MEM" != "" ]; then
-    SLURM_MEM="#SBATCH --mem=$SLURM_MEM"
-  fi
-  if [ "$SLURM_MEMPERCPU" != "" ]; then
-    SLURM_MEM="#SBATCH --mem-per-cpu=$SLURM_MEMPERCPU"
-  fi
-else
-  RESOURCE_MANAGER="TORQUE"
-fi
+
 
 #*** determine platform
 
@@ -218,6 +209,7 @@ iinspectargs=
 vtuneresdir=
 vtuneargs=
 use_config=""
+RESOURCE_MANAGER="TORQUE"
 # the mac doesn't have Intel MPI
 if [ "`uname`" == "Darwin" ]; then
   use_intel_mpi=
@@ -249,7 +241,7 @@ commandline=`echo $* | sed 's/-V//' | sed 's/-v//'`
 
 #*** read in parameters from command line
 
-while getopts 'Ac:Cd:D:e:Ef:hHiILm:MNn:o:O:p:Pq:rsStT:vVw:a:x:' OPTION
+while getopts 'Ac:Cd:D:e:Ef:hHiILm:MNn:o:O:p:Pq:rsStT:vVw:a:x:R:' OPTION
 do
 case $OPTION  in
   A) # used by timing scripts to identify benchmark cases
@@ -339,6 +331,16 @@ case $OPTION  in
   r)
    trace="-trace"
    ;;
+  R)
+   RESOURCE_MANAGER="$OPTARG"
+   if [ "$RESOURCE_MANAGER" == "SLURM" ]; then
+     if [ "$SLURM_MEM" != "" ]; then
+      SLURM_MEM="#SBATCH --mem=$SLURM_MEM"
+     fi
+     if [ "$SLURM_MEMPERCPU" != "" ]; then
+      SLURM_MEM="#SBATCH --mem-per-cpu=$SLURM_MEMPERCPU"
+     fi
+   fi
   s)
    stopjob=1
    ;;
