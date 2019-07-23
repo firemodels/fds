@@ -341,6 +341,7 @@ case $OPTION  in
       SLURM_MEM="#SBATCH --mem-per-cpu=$SLURM_MEMPERCPU"
      fi
    fi
+   ;;
   s)
    stopjob=1
    ;;
