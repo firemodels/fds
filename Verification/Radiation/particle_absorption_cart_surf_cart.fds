@@ -22,6 +22,10 @@ MESN 3 has 3 particles with cartesian geometry and split in 2 with upward and do
 &MESH IJK=3,3,3, XB=4,7,0,3,0,3 / 
 &MESH IJK=3,3,3, XB=8,11,0,3,0,3 / 
 
+&ZONE XYZ=0.1,0.1,0.1 /
+&ZONE XYZ=4.1,0.1,0.1 /
+&ZONE XYZ=8.1,0.1,0.1 /
+
 &TIME T_END=.01 DT = 0.00001 /
 
 &MISC GVEC=0,0,0, PR=100., Y_CO2_INFTY=0.,HUMIDITY=0./  
