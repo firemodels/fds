@@ -1,4 +1,4 @@
-&HEAD CHID='race_test_4' /
+&HEAD CHID='inspector_test' /
 
 &MESH IJK=14,18,32, XB=-0.85,-0.15,-0.45, 0.45, 0.00, 1.60 /
 &MESH IJK=14,18,32, XB= 0.85, 0.15,-0.45, 0.45, 0.00, 1.60 /
@@ -7,9 +7,7 @@
 &MESH IJK= 6, 6,32, XB=-0.15, 0.15,-0.45,-0.15, 0.00, 1.60 /
 &MESH IJK= 6, 6,32, XB=-0.15, 0.15, 0.15, 0.45, 0.00, 1.60 /
 
-&ZONE XYZ=-0.8,-0.4,0.1 /
-
-&TIME T_END=10. /
+&TIME T_END=1.2 /
 
 &REAC FUEL='N-HEXANE'
       CO_YIELD=0.100

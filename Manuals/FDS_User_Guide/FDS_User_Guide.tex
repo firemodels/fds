@@ -3943,19 +3943,15 @@ FDS assumes pressure to be composed of a ``background'' component, $\bp(z,t)$, p
 
 A pressure zone can be any region within the computational domain that is separated from the rest of the domain, or the exterior, by solid obstructions. There is currently no algorithm within FDS to identify these zones based solely on your specified obstructions. Consequently, it is necessary that you identify these zones explicitly in the input file. The basic syntax for a pressure {\ct ZONE} is:
 \begin{lstlisting}
-&ZONE XB=0.3,1.2,0.4,2.9,0.3,4.5 /
+&ZONE XYZ=1.2,3.4,5.6 /
 \end{lstlisting}
-This means that the rectangular region, $0.3<x<1.2$, $0.4<y<2.9$, $0.3<z<4.5$, is assumed to be within a sealed compartment. There can be multiple {\ct ZONE}s declared. The indices of the zones, which are required for the specification of leaks and fans, are determined simply by the order in which they are specified in the input file. By default, the exterior of the computational domain is Zone~0. If there are no {\ct OPEN} boundaries, the entire computational domain will be assumed to be Zone~1.
+The parameter {\ct XYZ}\footnote{Past versions of FDS also made use of the sextuplet {\ct XB} to specify a pressure zone. This parameter still works, but {\ct XYZ} is preferred.} specifies a single point $(1.2,3.4,5.6)$ that is within a sealed compartment, and it is not embedded within a solid obstruction. There can be multiple {\ct ZONE}s declared. The indices of the zones, which are required for the specification of leaks and fans, are determined simply by the order in which they are specified in the input file. By default, the exterior of the computational domain is Zone~0. If there are no {\ct OPEN} boundaries, the entire computational domain will be assumed to be Zone~1.
 
-There are several restrictions to assigning pressure zones. First, the declared pressure zones must be completely within a region of the domain that is bordered by solid obstructions. If the sealed region is not rectangular, FDS will extend the specified {\ct ZONE} boundaries to conform to the non-rectangular region. It is possible to ``break'' pressure zones by removing obstructions between them. An example of how to break pressure zones is given below. Second, pressure zones can span multiple meshes, but it is recommended that you check the pressure in each mesh to ensure consistency. Also, if the {\ct ZONE} does span multiple meshes, make sure that the specified rectangular coordinates do so as well. This allows FDS to determine the actual extent of the {\ct ZONE} independently for each mesh. If the pressure zone has a non-rectangular shape such that it winds its way in and out of multiple meshes and you cannot create a single rectangular region to span it, you may use a series of points, one in each mesh touched by the pressure zone:
-\begin{lstlisting}
-&ZONE XYZ=1.0,2.0,2.3, 3.1,4.2,5.6, ... /
-\end{lstlisting}
-Each point should be clear of solid obstructions. A search algorithm will determine all other grid cells within the particular mesh belonging to that pressure zone.
+There are several restrictions to assigning pressure zones. First, the declared pressure zones must be completely within a region of the domain that is bordered by solid obstructions. It is possible to ``break'' pressure zones by removing obstructions between them. An example of how to break pressure zones is given below. Second, pressure zones can span multiple meshes, but it is recommended that you check the pressure in each mesh to ensure consistency. If the {\ct ZONE} does span multiple meshes, you do {\em not}\footnote{Past versions of FDS required you to specify a separate {\ct XYZ} point for each mesh spanned by the pressure zone. This is no longer required.} need to add multiple {\ct XYZ} points for each mesh. A search algorithm will determine all other grid cells belonging to that pressure zone.
 
-Note that if you plan to have one zone open up to another via the removal of an obstruction, make sure that the coordinates of the two zones abut (i.e., touch) even if one of the zones includes the solid obstruction that separates them. FDS recognizes that a zone boundary has been removed when two adjacent cells belonging to two different zones have no solid obstruction between them. It is recommended that you extend at least one of the zone boundaries {\em into} the solid obstruction separating the two zones. That way, when the obstruction is removed, the newly created gas phase cells will be assigned to one or the other zone and it will become obvious that two adjacent gas phase cells are of two different zones, at which point the zones will merge and no longer have distinct background pressures.
+Note that if you remove a solid obstruction (like a door or window) separating two pressure zones, FDS will merge the two zones into one such that the background pressure within each remains nearly the same.
 
-For the special case where a zone has periodic boundaries ({\ct SURF\_ID='PERIODIC'} on {\ct VENT}), you must add {\ct PERIODIC=.TRUE.} on the {\ct ZONE} line.
+For the special case where a pressure zone has periodic boundaries ({\ct SURF\_ID='PERIODIC'} on {\ct VENT}), you must add {\ct PERIODIC=.TRUE.} on the {\ct ZONE} line.
 
 
 \subsubsection{Example Case: Pressure Rise in a Compartment}
@@ -3986,16 +3982,9 @@ In this example, three simple compartments are initially isolated from each othe
 figure on the right uses 1~s, the default.}
 \label{zone_break}
 \end{figure}
-Notice that the pressures do not come to equilibrium instantaneously. Rather, the {\ct PRESSURE\_RELAX\_TIME} (on the {\ct PRES} line) is applied to bring the zones
-into equilibrium over a specified period of time. This is done for several reasons. First, in reality doors and windows do not magically disappear as they do in FDS. It takes
-a finite amount of time to fully open them, and the slowing of the pressure increase/decrease is a simple way to simulate the effect.
-Second, relatively large pressure differences between zones wreak havoc with flow solvers, especially ones like FDS that
-use a low Mach number approximation. To maintain numerical stability, FDS gradually brings the pressures into equilibrium. This second point ought to be seen as a warning.
+Notice that the pressures do not come to equilibrium instantaneously. Rather, the {\ct PRESSURE\_RELAX\_TIME} (on the {\ct PRES} line) is applied to bring the zones into equilibrium over a specified period of time. This is done for several reasons. First, in reality doors and windows do not magically disappear as they do in FDS. It takes a finite amount of time to fully open them, and the slowing of the pressure increase/decrease is a simple way to simulate the effect. Second, relatively large pressure differences between zones wreak havoc with flow solvers, especially ones like FDS that use a low Mach number approximation. To maintain numerical stability, FDS gradually brings the pressures into equilibrium. This second point ought to be seen as a warning.
 
-Since pressure zones are defined using {\ct XB}, it might not be possible to define a complexly shaped set of pressure zones using just the {\ct ZONE} inputs.  A work around for this is to define the complex zone as a series of zones in the same manner you would divide a domain into multiple meshes.  The check for merged pressure zones only works if two zones were initially isolated at the start of the calculation (there must have been a wall that was removed). Therefore, define an obstruction at the boundary of the zones that is removed after the first time step.
-
-Do not use FDS to study the sudden rupture of pressure vessels! Its low Mach number formulation does not allow for high speed, compressible effects that
-are very important in such analyses. The zone breaking functionality described in this example is only intended to be used for relatively small pressure differences (<0.1~atm) between compartments. Real buildings cannot withstand substantially larger pressures anyway.
+Do not use FDS to study the sudden rupture of pressure vessels! Its low Mach number formulation does not allow for high speed, compressible effects that are very important in such analyses. The zone breaking functionality described in this example is only intended to be used for relatively small pressure differences (<0.1~atm) between compartments. Real buildings cannot withstand substantially larger pressures anyway.
 
 \subsubsection{Example Case: Irregularly Shaped Zone}
 \label{zone_shape}
@@ -4029,8 +4018,8 @@ entirely surrounded by solid obstructions. For example, the interior of a closed
 
 The pressure zone leakage approach is intended to capture the bulk leakage that occurs through walls. This approach assumes that the amount of leaking gas is very small, and that it will exchange sufficient heat as it moves through a wall to be at the same temperature as the wall surface. With this approach the pressure between the source and destination zones is used to compute a leakage flow via the HVAC model. That flow is then uniformly imposed over all surfaces designated as part of the leakage path. The first step is to define pressure zones, leakage areas, and a description of the surfaces through which leaking occurs:
 \begin{lstlisting}
-&ZONE XB=..., LEAK_AREA(0)=0.0001 /
-&ZONE XB=..., LEAK_AREA(1)=0.0002, LEAK_AREA(0)=0.0003 /
+&ZONE XYZ=..., LEAK_AREA(0)=0.0001 /
+&ZONE XYZ=..., LEAK_AREA(1)=0.0002, LEAK_AREA(0)=0.0003 /
 &SURF ID='LEAKY EXTERIOR WALL',..., LEAK_PATH=1,0 /
 &SURF ID='LEAKY INTERIOR WALL',..., LEAK_PATH=1,2 /
 \end{lstlisting}
@@ -4038,7 +4027,7 @@ The first line designates a region of the computational domain to be Pressure Zo
 
 The volume flow, $\dot{V}$, through a leak of area $A_{\rm L}$ is given by
 \be  \dot{V}_{\rm leak} = A_{\rm L} \; \hbox{sign} (\Delta p) \; \sqrt{2 \frac{ | \Delta p |}{\rho_\infty}} \ee
-where $\Delta p$ is the pressure difference between the adjacent compartments (in units of Pa) and $\rho_\infty$ is the ambient density (in units of kg/m$^3$). The discharge coefficient normally seen in this type of formula is assumed to be 1.
+where $\Delta p$ is the pressure difference between the adjacent compartments (in units of Pa) and $\rho_\infty$ is the ambient density (in units of kg/m$^3$). The discharge coefficient normally seen in this type of formula is assumed to be~1.
 
 In a typical building as the interior pressure rises, the leakage area will grow as small gaps, cracks, and other leakage paths open up. Leakage tests performed according to test standards such as ASTM~E~779 provide two additional data points to quantify this behavior. These are the {\ct LEAK\_PRESSURE\_EXPONENT} and the {\ct LEAK\_REFERENCE\_PRESSURE}. The use of these additional inputs are shown in the equation below as $n$ and $\Delta p_{\rm ref}$ respectively where $A_{\rm L,ref}$ is given by {\ct LEAK\_AREA}.
 \be  A_{\rm L} = A_{\rm L,ref} \left( \frac{\Delta p}{\Delta p_{\rm ref}} \right)^{n-0.5} \ee

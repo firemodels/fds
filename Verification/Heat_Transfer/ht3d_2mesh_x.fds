@@ -5,6 +5,8 @@ MESH IJK=20,10,10, XB=-1,1,-.5,.5,-.5,.5/ single mesh equivalent
 &MESH IJK=10,10,10, XB=-1,0,-.5,.5,-.5,.5/
 &MESH IJK=10,10,10, XB= 0,1,-.5,.5,-.5,.5/
 
+&ZONE XYZ=-0.9,-0.4,-0.4 /
+
 &TIME T_END=100/ VN=0.5
 
 &MISC NOISE=F/
