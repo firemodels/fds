@@ -207,6 +207,13 @@ CALL MPI_INITIALIZATION_CHORES(3)
 
 CALL MPI_INITIALIZATION_CHORES(4)
 
+! Initial complex geometry CC setup
+
+IF (CC_IBM) THEN
+   CALL CCIBM_SET_DATA(.TRUE.) ! Define Cartesian cell types (used to define pressure zones), cut-cells, cfaces.
+   CALL STOP_CHECK(1)
+ENDIF
+
 ! Initialize PRESSURE_ZONEs
 
 SETUP_PRESSURE_ZONES_INDEX = 0
@@ -223,7 +230,7 @@ DO WHILE (ANY(SETUP_PRESSURE_ZONES_INDEX==0))
 ENDDO
 
 IF (MYID==0 .AND. VERBOSE) WRITE(LU_ERR,'(A)') ' Completed SETUP_PRESSURE_ZONES'
- 
+
 ! Allocate and initialize OMESH arrays to hold "other mesh" data for a given mesh
 
 DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
@@ -270,10 +277,10 @@ DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    CALL INIT_TURB_ARRAYS(NM)
 ENDDO
 
-! Initial complex geometry CC setup
+! Final complex geometry CC setup
 
 IF (CC_IBM) THEN
-   CALL CCIBM_SET_DATA
+   CALL CCIBM_SET_DATA(.FALSE.) ! Interpolation Stencils, Scalar transport MATVEC data, cface RDNs.
    CALL STOP_CHECK(1)
 ENDIF
 
