@@ -1114,7 +1114,9 @@ ELSE
       WC  => WALL(IW)
       EWC => EXTERNAL_WALL(IW)
       NOM = EWC%NOM
+      IF (EVACUATION_ONLY(NM)) CYCLE WALL_LOOP
       IF (NOM>0) THEN
+         IF (EVACUATION_ONLY(NOM)) CYCLE WALL_LOOP
          II  = WC%ONE_D%II
          JJ  = WC%ONE_D%JJ
          KK  = WC%ONE_D%KK
