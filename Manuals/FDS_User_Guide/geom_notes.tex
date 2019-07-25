@@ -243,13 +243,13 @@ One may specify a {\ct N\_LEVEL}\ parameter which defines the number of times th
 A {\ct GEOM} namelist defining a cylinder geometry with centroid at {\ct CYLINDER\_ORIGIN}$=(0,0,0)$, axis {\ct CYLINDER\_AXIS}$=(1.,0,0)$, length {\ct CYLINDER\_LENGTH}$=2.$ and radius {\ct CYLINDER\_RADIUS}$=0.5$ is given by
 
 \begin{verbatim}
-&GEOM ID='cylinder', SURF_ID='S1', 
-              CYLINDER_LENGTH=2., 
-              CYLINDER_RADIUS=.5, 
-              CYLINDER_ORIGIN=0.,0.,0., 
-              CYLINDER_AXIS=1.,0.,0., 
-              CYLINDER_NSEG_AXIS=6, 
-              CYLINDER_NSEG_THETA=48 /             
+&GEOM ID='cylinder', SURF_ID='S1',
+              CYLINDER_LENGTH=2.,
+              CYLINDER_RADIUS=.5,
+              CYLINDER_ORIGIN=0.,0.,0.,
+              CYLINDER_AXIS=1.,0.,0.,
+              CYLINDER_NSEG_AXIS=6,
+              CYLINDER_NSEG_THETA=48 /
  \end{verbatim}
 
 where the cylinder is discretized using 6 segments along its axis and 48 segments across its circumference.
@@ -261,8 +261,8 @@ A {\ct GEOM}\ namelist defining a 2D terrain elevation is given by
 \begin{verbatim}
 &GEOM ID='terrain'
       SURF_ID='S1'
-      IJK=ivals,jvals, XB=xmin,xmax,ymin,ymax, 
-      EXTEND_TERRAIN=etlog, ZVAL_HORIZON=zvhr, 
+      IJK=ivals,jvals, XB=xmin,xmax,ymin,ymax,
+      EXTEND_TERRAIN=etlog, ZVAL_HORIZON=zvhr,
       ZVALS=...
 /
 \end{verbatim}
@@ -287,7 +287,7 @@ vertices and triangular faces.
 Generating well-formed complex geometries is a time-consuming and error-prone process.
 Several third-party pre-processing tools are provided by the FDS-SMV community for automatically translating CAD files to {\ct GEOM}\ namelists.
 
-These tools should always enforce quality checks on the triangulated surfaces and produce well-formed {\ct GEOM}\ namelists. 
+These tools should always enforce quality checks on the triangulated surfaces and produce well-formed {\ct GEOM}\ namelists.
 Links to these tools can be found at the project home page at https://pages.nist.gov/fds-smv/.
 
 
@@ -402,8 +402,8 @@ For example, in the following {\ct GEOM}\ namelist,
 
 \subsection{Reading Geometry node locations and connectivity data from binary}
 
-In cases where geometries have very large numbers of nodes and surface triangles, it can be more efficient at setup time to read this data from an FDS produced binary file. This binary file can be obtained running the case in setup only mode ({\ct T\_END=0.0}). 
-Consider the chair geometry defined in the previous section. When a geometry is read by FDS, the {\ct XYZ} and face connectivity data {\ct FACES} is automatically written into a binary file with name {\ct CHID\_GEOM\_ID.bingeom} on the run directory (here, {\ct GEOM\_ID='chair'}). 
+In cases where geometries have very large numbers of nodes and surface triangles, it can be more efficient at setup time to read this data from an FDS produced binary file. This binary file can be obtained running the case in setup only mode ({\ct T\_END=0.0}).
+Consider the chair geometry defined in the previous section. When a geometry is read by FDS, the {\ct XYZ} and face connectivity data {\ct FACES} is automatically written into a binary file with name {\ct CHID\_GEOM\_ID.bingeom} on the run directory (here, {\ct GEOM\_ID='chair'}).
 
 Then, the next time the case is run, the geometry line can be modified to:
 {\small
@@ -417,9 +417,9 @@ Then, the next time the case is run, the geometry line can be modified to:
 }
 
 where {\ct READ\_BINARY=.TRUE.} instructs FDS to read nodes and faces from the binary geometry file.
-Note we have deleted the {\ct VERTS, FACES} arrays from the input line. 
+Note we have deleted the {\ct VERTS, FACES} arrays from the input line.
 This manner of loading large geometries avoids the testing and reading of all lines related to these arrays on the FDS input file.
-It is particularly efficient in large parallel calculations, where parallel file systems are used.  
+It is particularly efficient in large parallel calculations, where parallel file systems are used.
 
 
 %\subsection{Grouping Objects}
@@ -1922,10 +1922,10 @@ Similar expressions are used for velocity components on other directions (i.e. $
 
 \subsubsection{Dynamic Velocity estimation for wall modeled IBM:}
 
-In this section we describe a scheme to dynamically define the value of $\hat{u}_d^{n+1}$ making use of an equilibrium wall model solution and simplified boundary layer equations along a local streamwise direction. 
+In this section we describe a scheme to dynamically define the value of $\hat{u}_d^{n+1}$ making use of an equilibrium wall model solution and simplified boundary layer equations along a local streamwise direction.
 
 \bigskip
-\noindent 
+\noindent
 \textbf{Boundary conforming grids:}
 \bigskip
 
@@ -1977,7 +1977,7 @@ Once the stress at the wall $\tau_w$ is computed, it is used in the right hand s
 
 
 \bigskip
-\noindent 
+\noindent
 \textbf{Momentum equations along a local streamwise direction}
 \bigskip
 
@@ -1993,7 +1993,7 @@ The simplified equations used in a streamwise - wall normal local coordinate sys
 where $\hat{\mathbf{s}},\hat{\mathbf{n}}$ are the streamwise and normal unit vectors, and $u_{\hat{\mathbf{s}}},u_{\hat{\mathbf{n}}}$ are the corresponding velocity components. Also, $p$ is the pressure field, $\tau_{sn}$ is the shear stress in local coordinates and $g_s$ is the gravity acceleration along the streamwise direction.
 
 \bigskip
-\noindent 
+\noindent
 \textbf{Geometry not conforming to fluid mesh:}
 \bigskip
 
@@ -2012,7 +2012,7 @@ For cases where the geometry does not conform to the fluid mesh, as depicted in 
 We note the previous steps can be gathered in four general tasks: interpolation, wall function estimation of wall stress, integration in local coordinate system, and recomputation of $\hat{u}_d^{n+1}$ on the gas cut-face (inertial reference frame).
 
 \bigskip
-\noindent 
+\noindent
 \textbf{Interpolation of variables to external point:}
 \bigskip
 
@@ -2021,11 +2021,11 @@ The first task, interpolation, requires the following operations \textit{for eac
 \begin{itemize}
    \item Define external point $e_x$ in the normal direction crossing through the gas cut-face centroid $d$.
    \item Use an interpolation stencil composed of fluid points to interpolate velocity components and gradients from staggered locations to $e_x$ (i.e. equation~\eqref{eq:interpu}).
-   \item Use an interpolation stencil to interpolate total viscosity to point $e_x$ from Cartesian cell centroids. Similar operation to obtain a pressure gradient.   
+   \item Use an interpolation stencil to interpolate total viscosity to point $e_x$ from Cartesian cell centroids. Similar operation to obtain a pressure gradient.
 \end{itemize}
 %
 
-We describe the trilinear interpolation of one velocity component to the external point $e_x$, masked to a stencil of admissible fluid points.  
+We describe the trilinear interpolation of one velocity component to the external point $e_x$, masked to a stencil of admissible fluid points.
 The first step is to locate the point $e_x$ within the cuboid space defined by  eight $u$ velocity component collocation points $\mathbf{x}_k$, $k=1,..,8$, in the fluid grid. The interpolation coefficients from these to $e_x$ are noted as $\phi_k(\mathbf{x}_{ex}-\mathbf{x}_k)$. Consider the $\mathbf{x}_k$ collocation points defining the vertices of a box with coordinates $[x_{lo},x_{hi}] \times [ y_{lo},y_{hi}] \times [z_{lo} , z_{hi}]$, and the normalized coordinates $\xi,\eta,\zeta$:
 %
 \begin{equation}
@@ -2035,7 +2035,7 @@ The first step is to locate the point $e_x$ within the cuboid space defined by  
 Then, $\phi_k(\mathbf{x}_{ex}-\mathbf{x}_k)$ takes the form:
 %
 \begin{eqnarray}
-    \phi_k(\mathbf{x}_{ex}-\mathbf{x}_k) = 
+    \phi_k(\mathbf{x}_{ex}-\mathbf{x}_k) =
     \left[ \frac{x_{k}-x_{lo}}{x_{hi}-x_{lo}} \xi + \frac{x_{hi}-x_{k}}{x_{hi}-x_{lo}} (1-\xi) \right] \times \nonumber \\
     \left[ \frac{y_{k}-y_{lo}}{y_{hi}-y_{lo}} \eta + \frac{y_{hi}-y_{k}}{y_{hi}-y_{lo}} (1-\eta) \right] \times \nonumber \\
     \left[ \frac{z_{k}-z_{lo}}{z_{hi}-z_{lo}} \zeta + \frac{z_{hi}-z_{k}}{z_{hi}-z_{lo}} (1-\zeta) \right] \; \; \; \; \;
@@ -2063,11 +2063,11 @@ where $\mathbf{u}_{ex}^n=\mathbf{u}_{ex,abs}^n-\mathbf{u}_{B}^n$ is the known re
 The streamwise velocity component is defined by the product $\hat{\mathbf{s}} = \hat{\mathbf{t}} \times \hat{\mathbf{n}}$ and streamwise and normal velocity components  $u_{\hat{\mathbf{s}},ex}^n= \mathbf{u}_{ex}^n \cdot \hat{\mathbf{s}}$, $u_{\hat{\mathbf{n}},ex}^n= \mathbf{u}_{ex}^n \cdot \hat{\mathbf{n}}$. The local component in the $\hat{\mathbf{t}}$ direction is zero by construction.
 
 \bigskip
-\noindent 
+\noindent
 \textbf{Wall function estimation of wall stress $\tau_w$:}
- 
-With the local streamwise velocity component, as well as fluid properties $\rho, \mu$ and the distance $\delta_{ex}$ from boundary to the $ex$ point, we are equipped to compute the wall function iteration described for boundary conforming grids. From this iteration, values of $\tau_w$, $y^+$ and $u_\tau$ and $u_{\hat{\mathbf{s}},d}^n$ can be computed. The last variable is the velocity at time step $n$ in point $d$, and along the streamwise direction. 
- 
+
+With the local streamwise velocity component, as well as fluid properties $\rho, \mu$ and the distance $\delta_{ex}$ from boundary to the $ex$ point, we are equipped to compute the wall function iteration described for boundary conforming grids. From this iteration, values of $\tau_w$, $y^+$ and $u_\tau$ and $u_{\hat{\mathbf{s}},d}^n$ can be computed. The last variable is the velocity at time step $n$ in point $d$, and along the streamwise direction.
+
 \bigskip
 \noindent
 \textbf{Cut-face centroid velocity $\hat{u}_d^{n+1}$ update from local momentum equations}
@@ -2076,7 +2076,7 @@ With the local streamwise velocity component, as well as fluid properties $\rho,
 We discretize equations \eqref{eq:blcont}-\eqref{eq:blmom} in the following form:
 %
 \begin{eqnarray}
-   u_{\hat{\mathbf{n}},d}^{n+1} &=& \mathbf{u}_{B}^n \cdot \hat{\mathbf{n}} + \delta_d \left(  \left( \nabla \cdot \mathbf{u} \right)^{th}  
+   u_{\hat{\mathbf{n}},d}^{n+1} &=& \mathbf{u}_{B}^n \cdot \hat{\mathbf{n}} + \delta_d \left(  \left( \nabla \cdot \mathbf{u} \right)^{th}
    - \frac{\partial u_{\hat{\mathbf{s}}} }{\partial s} |_{d}^n \right) \label{eq:un} \\
    RHS_{u_{\hat{\mathbf{s}},d}} &=&  u_{\hat{\mathbf{s}},d}^n  \frac{\partial u_{\hat{\mathbf{s}}} }{\partial s} |_{d}^n  +
    u_{\hat{\mathbf{n}},d}^{n+1} \frac{\partial u_{\hat{\mathbf{s}}} }{\partial n} |_{d}^n +
@@ -2084,7 +2084,7 @@ We discretize equations \eqref{eq:blcont}-\eqref{eq:blmom} in the following form
    u_{\hat{\mathbf{s}},d}^{n+1} &=& u_{\hat{\mathbf{s}},d}^{n}+\mathbf{u}_{B}^n \cdot \hat{\mathbf{s}} - \Delta t RHS_{u_{\hat{\mathbf{s}},d}} \label{eq:us}
 \end{eqnarray}
 %
-In equations~\eqref{eq:un}-\eqref{eq:us} we compute: 
+In equations~\eqref{eq:un}-\eqref{eq:us} we compute:
 %
 \begin{eqnarray}
    \frac{\partial u_{\hat{\mathbf{s}}} }{\partial s} |_{d}^n &\simeq& \frac{ \delta_d}{ \delta_{ex}} \frac{\partial u_{\hat{\mathbf{s}}} }{\partial s} |_{ex}^n \\
@@ -2111,7 +2111,7 @@ and, being $[ \tau ]_{ex}^n$ the stress tensor at $e_x$ evaluated from interpola
 
 The target velocity on the cut-face centroid, assumed in the $i$ Cartesian direction is:
 %
-\begin{equation} 
+\begin{equation}
    u_d^{n+1} = u_{\hat{\mathbf{n}},d}^{n+1} (\hat{\mathbf{n}} \cdot \hat{\mathbf{e}}_i) + u_{\hat{\mathbf{s}},d}^{n+1} (\hat{\mathbf{s}} \cdot \hat{\mathbf{e}}_i) + (\mathbf{u}_{B}^{n+1} \cdot \hat{\mathbf{t}})(\hat{\mathbf{t}} \cdot \hat{\mathbf{e}}_i)
 \end{equation}
 %
@@ -3033,9 +3033,9 @@ There is more noise on the fixed geometry case $h=\Delta z_{10}/11$, because the
 %
 %We look first at the canonical case of isothermal flow around a sphere of diameter $D$, for Reynolds numbers up to $Re=300$. This flow is steady for Reynolds numbers up to $Re \simeq 270$ where it transitions to an oscillatory state.
 %
-%The first set of steady cases are defined in a domain of size $[-3.7D,12.5D]$ in the streamwise $x$ direction, and $[-2.7D,2.7D]$ in the cross stream directions $y$ and $z$. A resolution of 40 cubic cells in $D$ is defined around the sphere and on the wake region up to $4.4D$. A coarser resolution of 20 cells in $D$ is defined in the far field. 
+%The first set of steady cases are defined in a domain of size $[-3.7D,12.5D]$ in the streamwise $x$ direction, and $[-2.7D,2.7D]$ in the cross stream directions $y$ and $z$. A resolution of 40 cubic cells in $D$ is defined around the sphere and on the wake region up to $4.4D$. A coarser resolution of 20 cells in $D$ is defined in the far field.
 %In figure~\ref{}a, the streamwise velocity curves along the axis of the sphere and from its center downstream are shown. The zero crossings of these curves on the fluid region define the length $x_s$ of the recirculation bubble behind the sphere.
-%In figure~\ref{}b, $x_s$ is compared against results reported by Johnson and Patel~\cite{}. The agreement is very good, with a difference of the order of $10\%$ at $Re=50$ and $5\%$ on the other $Re=100,150,200$ data points.  
+%In figure~\ref{}b, $x_s$ is compared against results reported by Johnson and Patel~\cite{}. The agreement is very good, with a difference of the order of $10\%$ at $Re=50$ and $5\%$ on the other $Re=100,150,200$ data points.
 %
 %% Figs steady:
 %%\begin{figure}
@@ -3046,7 +3046,7 @@ There is more noise on the fixed geometry case $h=\Delta z_{10}/11$, because the
 %
 %% Something on the force coefficients for steady.
 %
-%For the case of $Re=300$, the domain size defined is $[4D,14D]$ in the streamwise $x$ direction, and $[-3D,3D]$ in the cross stream directions. The blockage ratio for the sphere is in this case $2.18\%$. Tomboulides and Orzag~\cite{} provide an estimated laminar boundary layer thickness $\delta \simeq 0.065D$. We define a marginal resolution of $60$ cubic cells on $D$ on the sphere surface and in the wake region up to a downstream distance of $11D$. The Strouhal number from the streamwise velocity signal at $x=3.93D$ computed at oscillatory state is XXX, in excellent agreement with the the value of $St=0.136$ and $0.137$ provided in references~\cite{},\cite{} (computed from force coefficients). In figures~\ref{}a,b, mean and RMS streamwise velocity as function of axis positions downstream of the sphere are shown. Close agreement with reference~\cite{} is found. Lower RMS peaks on the near wake are noted on the current computation, likely consequence of a marginal resolution behind the sphere. 
+%For the case of $Re=300$, the domain size defined is $[4D,14D]$ in the streamwise $x$ direction, and $[-3D,3D]$ in the cross stream directions. The blockage ratio for the sphere is in this case $2.18\%$. Tomboulides and Orzag~\cite{} provide an estimated laminar boundary layer thickness $\delta \simeq 0.065D$. We define a marginal resolution of $60$ cubic cells on $D$ on the sphere surface and in the wake region up to a downstream distance of $11D$. The Strouhal number from the streamwise velocity signal at $x=3.93D$ computed at oscillatory state is XXX, in excellent agreement with the the value of $St=0.136$ and $0.137$ provided in references~\cite{},\cite{} (computed from force coefficients). In figures~\ref{}a,b, mean and RMS streamwise velocity as function of axis positions downstream of the sphere are shown. Close agreement with reference~\cite{} is found. Lower RMS peaks on the near wake are noted on the current computation, likely consequence of a marginal resolution behind the sphere.
 %
 %
 %% Figs Re=300:
@@ -3074,6 +3074,20 @@ A sphere with a radius of 1~m and a surface temperature of $T=773.15$~K is cente
 \end{figure}
 
 
+\subsection{Leaking Sphere}
+\label{sphere_leak}
+
+A hollow sphere with an inner radius of 1~m has a small cube within it that is blowing air into the sphere at a rate of $\dot{V}=0.008$~m$^3$/s. The sphere is assigned a leakage area of $A=0.0001$~m$^2$. It is expected that the pressure rise within the sphere shall be
+\be
+   \Delta p = \frac{\rho_\infty}{2} \left( \frac{\dot{V}}{A} \right)^2 \approx 3840 \; \hbox{Pa}
+\ee   
+as shown in Fig.~\ref{sphere_leak_fig}.
+\begin{figure}[ht]
+\centering
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/sphere_leak}
+\caption[The {\ct sphere\_leak} test case]{Pressure rise in a leaking sphere.}
+\label{sphere_leak_fig}
+\end{figure}
 
 %\subsection{Flow around heated curved pipe or something like that}
 
