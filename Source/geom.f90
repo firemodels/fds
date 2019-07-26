@@ -32074,7 +32074,7 @@ END SUBROUTINE LINE_INTERSECT_COORDPLANE
 SUBROUTINE IBM_INIT_GEOM
 
 ! Local Variables:
-INTEGER :: IG, IVERT, IWSEL, INOD, IEDGE, NVERT, NWSEL, NWSEDG, IEDLIST, IX
+INTEGER :: IG, IWSEL, INOD, IEDGE, NVERT, NWSEL, NWSEDG, IEDLIST, IX
 INTEGER :: WSELEM(NOD1:NOD3),SEG(NOD1:NOD2)
 REAL(EB):: XYZV(MAX_DIM,NODS_WSEL), V12(MAX_DIM), V23(MAX_DIM), V31(MAX_DIM), WSNORM(MAX_DIM)
 REAL(EB):: X12(MAX_DIM), X23(MAX_DIM), X31(MAX_DIM), SQAREA(MAX_DIM), INT2
@@ -32082,10 +32082,7 @@ REAL(EB):: MGNRM, XCEN
 REAL(EB):: GEOMEPSSQ ! Local epsilon for GEOM quality check
 LOGICAL :: INLIST
 
-INTEGER :: TOT_ELVERT
-LOGICAL :: FLG_LOHI
-INTEGER, ALLOCATABLE, DIMENSION(:)  :: NELVERT,ISTVERT,EDGE_RNK
-INTEGER, ALLOCATABLE, DIMENSION(:,:):: EDGES2,EDGE_FACES2
+INTEGER, ALLOCATABLE, DIMENSION(:,:):: EDGES2
 
 LOGICAL, PARAMETER :: OPTIMIZE_SEG_DEF = .TRUE.
 
@@ -32241,102 +32238,9 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
 
    NWSEDG = 0
    OPTIMIZE_SEG_DEF_COND : IF (OPTIMIZE_SEG_DEF) THEN
-
-   ! Populate NELVERT with the number of elements associated per node:
-   ALLOCATE(NELVERT(NVERT));  NELVERT(:) = 0
-   ALLOCATE(ISTVERT(NVERT));  ISTVERT(:) = 0
-   DO IWSEL=1,NWSEL
-      NELVERT(GEOMETRY(IG)%FACES(NODS_WSEL*(IWSEL-1)+1:NODS_WSEL*IWSEL)) = &
-      NELVERT(GEOMETRY(IG)%FACES(NODS_WSEL*(IWSEL-1)+1:NODS_WSEL*IWSEL)) + 2
-      ! +2 to have max number of verts in allocation, even though might mean
-      ! non manifold.
-   ENDDO
-   DO IVERT=2,NVERT
-      ISTVERT(IVERT) = ISTVERT(IVERT-1) + NELVERT(IVERT-1)
-   ENDDO
-
-   ! First pass build unique list of segments per VERTEX where:
-   ! SEG_IJ = [ni nj] with ni < nj
-   TOT_ELVERT = SUM(NELVERT(1:NVERT))
-   ALLOCATE(EDGES2(NOD1:NOD2,TOT_ELVERT)); EDGES2(:,:)      = 0
-   ALLOCATE(EDGE_FACES2(   5,TOT_ELVERT)); EDGE_FACES2(:,:) = 0
-   ALLOCATE(EDGE_RNK(        TOT_ELVERT)); EDGE_RNK(:)      = 0
-   NELVERT(:) = 0 ! Reset NELVERT.
-
-   DO IWSEL=1,NWSEL
-      WSELEM(NOD1:NOD3) = GEOMETRY(IG)%FACES(NODS_WSEL*(IWSEL-1)+1:NODS_WSEL*IWSEL)
-
-      DO IEDGE=EDG1,EDG3
-         SEG(NOD1:NOD2) = (/ MINVAL(WSELEM(NOD1:NOD2)), MAXVAL(WSELEM(NOD1:NOD2)) /)
-         FLG_LOHI = .TRUE.; IF(SEG(NOD2) /= WSELEM(NOD2)) FLG_LOHI = .FALSE.
-
-         IF(NELVERT(SEG(NOD2)) == 0) THEN
-            NELVERT(SEG(NOD2)) = NELVERT(SEG(NOD2)) + 1
-            GEOMETRY(IG)%FACE_EDGES(IEDGE,IWSEL) = ISTVERT(SEG(NOD2)) + NELVERT(SEG(NOD2))
-            EDGES2(NOD1:NOD2,GEOMETRY(IG)%FACE_EDGES(IEDGE,IWSEL)) = SEG(NOD1:NOD2)
-            EDGE_FACES2(1,GEOMETRY(IG)%FACE_EDGES(IEDGE,IWSEL)) = &
-            EDGE_FACES2(1,GEOMETRY(IG)%FACE_EDGES(IEDGE,IWSEL)) + 1
-            IF(FLG_LOHI) THEN
-                EDGE_FACES2(2,GEOMETRY(IG)%FACE_EDGES(IEDGE,IWSEL))   = IWSEL
-                EDGE_FACES2(3,GEOMETRY(IG)%FACE_EDGES(IEDGE,IWSEL))   = IEDGE
-            ELSE
-                EDGE_FACES2(4,GEOMETRY(IG)%FACE_EDGES(IEDGE,IWSEL))   = IWSEL
-                EDGE_FACES2(5,GEOMETRY(IG)%FACE_EDGES(IEDGE,IWSEL))   = IEDGE
-            ENDIF
-            WSELEM=CSHIFT(WSELEM,1)
-            CYCLE ! IEDGE
-         ENDIF
-
-         INLIST = .FALSE.
-         DO IEDLIST=ISTVERT(SEG(NOD2))+1,ISTVERT(SEG(NOD2))+NELVERT(SEG(NOD2))
-            ! Here SEG(NOD2) is by construction the same as
-            ! EDGES2(NOD2,IEDLIST), search only NOD1 component.
-            IF(SEG(NOD1) == EDGES2(NOD1,IEDLIST)) THEN
-               INLIST = .TRUE.
-               EXIT ! IEDLIST
-            ENDIF
-         ENDDO
-         IF(INLIST) THEN
-            GEOMETRY(IG)%FACE_EDGES(IEDGE,IWSEL) = IEDLIST
-         ELSE
-            NELVERT(SEG(NOD2)) = NELVERT(SEG(NOD2)) + 1
-            GEOMETRY(IG)%FACE_EDGES(IEDGE,IWSEL) = ISTVERT(SEG(NOD2)) + NELVERT(SEG(NOD2))
-            EDGES2(NOD1:NOD2,GEOMETRY(IG)%FACE_EDGES(IEDGE,IWSEL)) = SEG(NOD1:NOD2)
-         ENDIF
-
-         EDGE_FACES2(1,GEOMETRY(IG)%FACE_EDGES(IEDGE,IWSEL)) = &
-         EDGE_FACES2(1,GEOMETRY(IG)%FACE_EDGES(IEDGE,IWSEL)) + 1
-         IF(FLG_LOHI) THEN
-             EDGE_FACES2(2,GEOMETRY(IG)%FACE_EDGES(IEDGE,IWSEL))   = IWSEL
-             EDGE_FACES2(3,GEOMETRY(IG)%FACE_EDGES(IEDGE,IWSEL))   = IEDGE
-         ELSE
-             EDGE_FACES2(4,GEOMETRY(IG)%FACE_EDGES(IEDGE,IWSEL))   = IWSEL
-             EDGE_FACES2(5,GEOMETRY(IG)%FACE_EDGES(IEDGE,IWSEL))   = IEDGE
-         ENDIF
-
-         WSELEM=CSHIFT(WSELEM,1)
-      ENDDO
-   ENDDO
-
-   ! Second pass get segments ranking:
-   DO IVERT=1,NVERT
-      DO IEDLIST=ISTVERT(IVERT)+1,ISTVERT(IVERT)+NELVERT(IVERT)
-          NWSEDG = NWSEDG + 1
-          EDGE_RNK(IEDLIST) = NWSEDG
-          GEOMETRY(IG)%EDGES(NOD1:NOD2,NWSEDG) = EDGES2(NOD1:NOD2,IEDLIST)
-          GEOMETRY(IG)%EDGE_FACES(1:5,NWSEDG)  = EDGE_FACES2(1:5,IEDLIST)
-      ENDDO
-   ENDDO
-
-   ! Third pass populate FACE_EDGES data:
-   DO IWSEL=1,NWSEL
-      DO IEDGE=EDG1,EDG3
-         IEDLIST = EDGE_RNK(GEOMETRY(IG)%FACE_EDGES(IEDGE,IWSEL))
-         GEOMETRY(IG)%FACE_EDGES(IEDGE,IWSEL) = IEDLIST
-      ENDDO
-   ENDDO
-
-   DEALLOCATE(NELVERT,ISTVERT,EDGES2,EDGE_FACES2,EDGE_RNK)
+   IX = SIZE(GEOMETRY(IG)%FACES,DIM=1)
+   CALL GET_GEOM_EDGES(NVERT,NWSEL,IX,GEOMETRY(IG)%FACES,NWSEDG,GEOMETRY(IG)%EDGES,&
+                       GEOMETRY(IG)%FACE_EDGES,GEOMETRY(IG)%EDGE_FACES)
 
    ! Perform manifoldness tests:
    ALLOCATE(EDGES2(2,NWSEDG)); EDGES2=0
@@ -32528,6 +32432,122 @@ ENDDO GEOMETRY_LOOP
 
 RETURN
 END SUBROUTINE IBM_INIT_GEOM
+
+! ------------------------ GET_GEOM_EDGES ---------------------------------------
+
+SUBROUTINE GET_GEOM_EDGES(NVERT,NWSEL,SIZEFC,FACES,NWSEDG,EDGES,FACE_EDGES,EDGE_FACES)
+
+INTEGER, INTENT(IN) :: NVERT,NWSEL,SIZEFC
+INTEGER, INTENT(IN) :: FACES(1:SIZEFC)
+INTEGER, INTENT(OUT):: NWSEDG,EDGES(NOD1:NOD2,3*NWSEL),FACE_EDGES(EDG1:EDG3,NWSEL),EDGE_FACES(5,3*NWSEL)
+
+! Local Variables:
+INTEGER :: IWSEL,IVERT,IEDGE,TOT_ELVERT,IEDLIST,WSELEM(NOD1:NOD3),SEG(NOD1:NOD2)
+LOGICAL :: INLIST
+LOGICAL :: FLG_LOHI
+INTEGER, ALLOCATABLE, DIMENSION(:)  :: NELVERT,ISTVERT,EDGE_RNK
+INTEGER, ALLOCATABLE, DIMENSION(:,:):: EDGES2,EDGE_FACES2
+
+NWSEDG = 0
+
+! Populate NELVERT with the number of elements associated per node:
+ALLOCATE(NELVERT(NVERT));  NELVERT(:) = 0
+ALLOCATE(ISTVERT(NVERT));  ISTVERT(:) = 0
+DO IWSEL=1,NWSEL
+   NELVERT(FACES(NODS_WSEL*(IWSEL-1)+1:NODS_WSEL*IWSEL)) = &
+   NELVERT(FACES(NODS_WSEL*(IWSEL-1)+1:NODS_WSEL*IWSEL)) + 2
+   ! +2 to have max number of verts in allocation, even though might mean
+   ! non manifold.
+ENDDO
+DO IVERT=2,NVERT
+   ISTVERT(IVERT) = ISTVERT(IVERT-1) + NELVERT(IVERT-1)
+ENDDO
+
+! First pass build unique list of segments per VERTEX where:
+! SEG_IJ = [ni nj] with ni < nj
+TOT_ELVERT = SUM(NELVERT(1:NVERT))
+ALLOCATE(EDGES2(NOD1:NOD2,TOT_ELVERT)); EDGES2(:,:)      = 0
+ALLOCATE(EDGE_FACES2(   5,TOT_ELVERT)); EDGE_FACES2(:,:) = 0
+ALLOCATE(EDGE_RNK(        TOT_ELVERT)); EDGE_RNK(:)      = 0
+NELVERT(:) = 0 ! Reset NELVERT.
+
+DO IWSEL=1,NWSEL
+   WSELEM(NOD1:NOD3) = FACES(NODS_WSEL*(IWSEL-1)+1:NODS_WSEL*IWSEL)
+
+   DO IEDGE=EDG1,EDG3
+      SEG(NOD1:NOD2) = (/ MINVAL(WSELEM(NOD1:NOD2)), MAXVAL(WSELEM(NOD1:NOD2)) /)
+      FLG_LOHI = .TRUE.; IF(SEG(NOD2) /= WSELEM(NOD2)) FLG_LOHI = .FALSE.
+
+      IF(NELVERT(SEG(NOD2)) == 0) THEN
+         NELVERT(SEG(NOD2)) = NELVERT(SEG(NOD2)) + 1
+         FACE_EDGES(IEDGE,IWSEL) = ISTVERT(SEG(NOD2)) + NELVERT(SEG(NOD2))
+         EDGES2(NOD1:NOD2,FACE_EDGES(IEDGE,IWSEL)) = SEG(NOD1:NOD2)
+         EDGE_FACES2(1,FACE_EDGES(IEDGE,IWSEL)) = &
+         EDGE_FACES2(1,FACE_EDGES(IEDGE,IWSEL)) + 1
+         IF(FLG_LOHI) THEN
+             EDGE_FACES2(2,FACE_EDGES(IEDGE,IWSEL))   = IWSEL
+             EDGE_FACES2(3,FACE_EDGES(IEDGE,IWSEL))   = IEDGE
+         ELSE
+             EDGE_FACES2(4,FACE_EDGES(IEDGE,IWSEL))   = IWSEL
+             EDGE_FACES2(5,FACE_EDGES(IEDGE,IWSEL))   = IEDGE
+         ENDIF
+         WSELEM=CSHIFT(WSELEM,1)
+         CYCLE ! IEDGE
+      ENDIF
+
+      INLIST = .FALSE.
+      DO IEDLIST=ISTVERT(SEG(NOD2))+1,ISTVERT(SEG(NOD2))+NELVERT(SEG(NOD2))
+         ! Here SEG(NOD2) is by construction the same as
+         ! EDGES2(NOD2,IEDLIST), search only NOD1 component.
+         IF(SEG(NOD1) == EDGES2(NOD1,IEDLIST)) THEN
+            INLIST = .TRUE.
+            EXIT ! IEDLIST
+         ENDIF
+      ENDDO
+      IF(INLIST) THEN
+         FACE_EDGES(IEDGE,IWSEL) = IEDLIST
+      ELSE
+         NELVERT(SEG(NOD2)) = NELVERT(SEG(NOD2)) + 1
+         FACE_EDGES(IEDGE,IWSEL) = ISTVERT(SEG(NOD2)) + NELVERT(SEG(NOD2))
+         EDGES2(NOD1:NOD2,FACE_EDGES(IEDGE,IWSEL)) = SEG(NOD1:NOD2)
+      ENDIF
+
+      EDGE_FACES2(1,FACE_EDGES(IEDGE,IWSEL)) = &
+      EDGE_FACES2(1,FACE_EDGES(IEDGE,IWSEL)) + 1
+      IF(FLG_LOHI) THEN
+          EDGE_FACES2(2,FACE_EDGES(IEDGE,IWSEL))   = IWSEL
+          EDGE_FACES2(3,FACE_EDGES(IEDGE,IWSEL))   = IEDGE
+      ELSE
+          EDGE_FACES2(4,FACE_EDGES(IEDGE,IWSEL))   = IWSEL
+          EDGE_FACES2(5,FACE_EDGES(IEDGE,IWSEL))   = IEDGE
+      ENDIF
+
+      WSELEM=CSHIFT(WSELEM,1)
+   ENDDO
+ENDDO
+
+! Second pass get segments ranking:
+DO IVERT=1,NVERT
+   DO IEDLIST=ISTVERT(IVERT)+1,ISTVERT(IVERT)+NELVERT(IVERT)
+       NWSEDG = NWSEDG + 1
+       EDGE_RNK(IEDLIST) = NWSEDG
+       EDGES(NOD1:NOD2,NWSEDG) = EDGES2(NOD1:NOD2,IEDLIST)
+       EDGE_FACES(1:5,NWSEDG)  = EDGE_FACES2(1:5,IEDLIST)
+   ENDDO
+ENDDO
+
+! Third pass populate FACE_EDGES data:
+DO IWSEL=1,NWSEL
+   DO IEDGE=EDG1,EDG3
+      IEDLIST = EDGE_RNK(FACE_EDGES(IEDGE,IWSEL))
+      FACE_EDGES(IEDGE,IWSEL) = IEDLIST
+   ENDDO
+ENDDO
+
+DEALLOCATE(NELVERT,ISTVERT,EDGES2,EDGE_FACES2,EDGE_RNK)
+
+RETURN
+END SUBROUTINE GET_GEOM_EDGES
 
 ! ------------------------- GET_X2_VERTVAR --------------------------------------
 
@@ -38957,7 +38977,7 @@ REAL(EB), ALLOCATABLE, DIMENSION(:) :: DAZIM,DELEV,ZVALS,TFACES
 REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:) :: VERTS
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: DSCALE,DXYZ0,DXYZ
 INTEGER, ALLOCATABLE, DIMENSION(:) :: SURF_ID_IND
-INTEGER, ALLOCATABLE, TARGET, DIMENSION(:) :: FACES,VOLUS,OFACES,SURFS
+INTEGER, ALLOCATABLE, TARGET, DIMENSION(:) :: FACES,VOLUS,OFACES,SURFS,SURFS2
 LOGICAL, ALLOCATABLE, DIMENSION(:) :: IS_EXTERNAL,DEFAULT_COMPONENT_ONLY
 
 REAL(EB) :: AZIM,ELEV,SCALE(3),XYZ0(3),XYZ(3),AZIM_DOT,ELEV_DOT,SCALE_DOT(3),XYZ_DOT(3),GROTATE,GROTATE_DOT,GAXIS(3),&
@@ -38986,17 +39006,22 @@ INTEGER :: IJF, IJB, IJE, NM
 INTEGER, ALLOCATABLE, DIMENSION(:) :: B_IND,E_IND,F_IND
 REAL(EB) :: XLOW,XHI,YLOW,YHI,ZLOW,ZHI,DELX,DELY
 
-LOGICAL :: EXTEND_TERRAIN
+LOGICAL :: IS_TERRAIN,EXTEND_TERRAIN
 REAL(EB):: ZVAL_HORIZON, ZVAL_FACTOR
 
 LOGICAL, PARAMETER :: TERRAIN_NEW_WAY = .TRUE.
+
+INTEGER :: N_EDGES,N_BEDGES,N_FACES_ORIG
+INTEGER, ALLOCATABLE, DIMENSION(:,:) :: EDGES,FACE_EDGES,EDGE_FACES,BOUND_EDGES,BOUND_EDGES2
+INTEGER, ALLOCATABLE, DIMENSION(:) :: NBND_EDGE,COUNTED_EDGES
+REAL(EB) :: X_CEN,Y_CEN,ZMIN2
 
 NAMELIST /GEOM/ AUTO_TEXTURE,BNDF_GEOM,BINARY_DIR,BINARY_NAME,CYLINDER_ORIGIN,CYLINDER_AXIS,&
                 CYLINDER_RADIUS,CYLINDER_LENGTH,CYLINDER_NSEG_THETA,CYLINDER_NSEG_AXIS,&
                 EXTEND_TERRAIN,FACES,ID,IJK,MOVE_ID,MATL_ID,N_LAT,N_LEVELS,N_LONG,PROP_ID,&
                 READ_BINARY,SPHERE_ORIGIN,SPHERE_RADIUS,SPHERE_TYPE,SURF_ID,SURF_IDS,SURF_ID6,&
                 TEXTURE_MAPPING,TEXTURE_ORIGIN,TEXTURE_SCALE,&
-                VERTS,VOLUS,XB,ZMIN,ZVALS,ZVAL_HORIZON
+                VERTS,VOLUS,XB,ZMIN,ZVALS,ZVAL_HORIZON,IS_TERRAIN
 
 ! first pass - determine max number of ZVALS, VERTS, FACES, VOLUS and IDS over all &GEOMs
 
@@ -39190,6 +39215,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
       ENDIF
    ENDIF READ_BIN_COND
 
+   N_FACES_ORIG = N_FACES
 
    !--- setup a 2D surface (terrain) object (ZVALS keyword )
 
@@ -39226,9 +39252,14 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
                YHI  = MAX(YHI ,MESHES(NM)%YF)
             ENDDO
          ENDIF
+         ! Move Low Z position of terrain to less that number od cutcells, s.t. they don't get computed on the bottom.
+         ZMIN2= 1.E10_EB
+         DO NM=1,NMESHES
+            ZMIN2 = MIN( ZMIN2 , MESHES(NM)%ZS-REAL(NGUARD,EB)/REAL(MESHES(NM)%KBAR,EB)*(MESHES(NM)%ZF-MESHES(NM)%ZS) )
+         ENDDO
          ZHI  = MAXVAL(ZVALS(1:N_ZVALS))
          ZLOW = MINVAL(ZVALS(1:N_ZVALS))
-         ZLOW = MIN(REAL(FLOOR(ZLOW-0.1_EB*(ZHI-ZLOW)),EB),ZMIN)
+         ZLOW = MIN(REAL(FLOOR(ZLOW-0.1_EB*(ZHI-ZLOW)),EB),ZMIN,ZMIN2)
 
          ZVAL_FACTOR = 1._EB
          IF(ZVAL_HORIZON > MAX_VAL) ZVAL_FACTOR = 0._EB ! Not defined, use boundary polygon heights.
@@ -39474,7 +39505,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
 
          DEALLOCATE(B_IND,E_IND,F_IND)
 
-      ELSE
+      ELSE ! TERRAIN_NEW_WAY
 
          ! OLD WAY of computing:
          ALLOCATE(G%ZVALS(N_ZVALS),STAT=IZERO)
@@ -39598,6 +39629,162 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
          N_VOLUS=IJ - 1
          N_FACES=0
       ENDIF
+
+   ELSEIF(IS_TERRAIN) THEN ZVALS_IF
+
+      GEOM_TYPE = TERRAIN_GEOM_TYPE
+
+      ! First get EDGES arrays to find edges attached to only one face:
+      I = SIZE(FACES,DIM=1)
+      ALLOCATE(EDGES(NOD1:NOD2,3*N_FACES),FACE_EDGES(EDG1:EDG3,N_FACES),EDGE_FACES(5,3*N_FACES))
+      CALL GET_GEOM_EDGES(N_VERTS,N_FACES,I,FACES,N_EDGES,EDGES,FACE_EDGES,EDGE_FACES)
+
+      ! FIND SET OF EDGES:
+      ALLOCATE(NBND_EDGE(1:N_EDGES)); NBND_EDGE(1:N_EDGES) = 2 - EDGE_FACES(1,1:N_EDGES) ! 0 if interior edge, 1 bnd.
+      N_BEDGES = SUM(NBND_EDGE(1:N_EDGES))
+      ALLOCATE(BOUND_EDGES(2,N_BEDGES),BOUND_EDGES2(2,N_BEDGES)); BOUND_EDGES = 0; BOUND_EDGES2 = 0
+      ALLOCATE(COUNTED_EDGES(1:N_BEDGES)); COUNTED_EDGES = 0
+      ! Reorder Edges in counter-clockwise (x-y plane) direction:
+      ! First copy edges in correct counter-clockwise outside node order:
+      J=0
+      DO I=1,N_EDGES
+         IF(NBND_EDGE(I)/=1) CYCLE
+         J=J+1
+         IF(EDGE_FACES(2,I)>0) THEN
+            BOUND_EDGES(NOD1:NOD2,J) = EDGES( (/ NOD1,NOD2 /) , I )
+         ELSEIF(EDGE_FACES(4,I)>0) THEN
+            BOUND_EDGES(NOD1:NOD2,J) = EDGES( (/ NOD2,NOD1 /) , I )
+         ENDIF
+      ENDDO
+
+      ! Then reorder-copy edges:
+      J = 1; I = 1
+      BOUND_EDGES2(NOD1:NOD2,J) = BOUND_EDGES(NOD1:NOD2,I); COUNTED_EDGES(I) = 1
+      DO J=2,N_BEDGES
+         DO I=1,N_BEDGES
+            IF(COUNTED_EDGES(I)==1) CYCLE
+            IF(BOUND_EDGES2(NOD2,J-1)==BOUND_EDGES(NOD1,I)) THEN ! Found new edge:
+               BOUND_EDGES2(NOD1:NOD2,J) = BOUND_EDGES(NOD1:NOD2,I); COUNTED_EDGES(I) = 1
+               EXIT
+            ENDIF
+         ENDDO
+         IF(I>N_BEDGES) THEN ! Error
+          WRITE(MESSAGE,'(A,A,A,I8,A)') 'ERROR: For terrain GEOM ',TRIM(ID),&
+                                       ' unconnected boundary edge at node number,',BOUND_EDGES2(NOD2,J-1),'.'
+          CALL SHUTDOWN(MESSAGE); RETURN
+         ENDIF
+      ENDDO
+      DO I=1,N_BEDGES
+         IF (COUNTED_EDGES(I) /= 1) THEN
+            WRITE(MESSAGE,'(A,A,A,2I8,A)') 'ERROR: For terrain GEOM ',TRIM(ID),&
+                                          ' unconnected boundary edge at nodes,',BOUND_EDGES(NOD1:NOD2,I),'.'
+            CALL SHUTDOWN(MESSAGE); RETURN
+         ENDIF
+      ENDDO
+      ! Here all edges are counted and SUM(COUNTED_EDGES(1:N_BEDGES)==N_BEDGES):
+      BOUND_EDGES(NOD1:NOD2,1:N_BEDGES) = BOUND_EDGES2(NOD1:NOD2,1:N_BEDGES);
+      DEALLOCATE(NBND_EDGE,COUNTED_EDGES,BOUND_EDGES2)
+
+      IF (EXTEND_TERRAIN) THEN
+         ! Find XLOW,XHI,YLOW,YHI for the set of NM meshes defined:
+         XLOW = 1.E10_EB
+         XHI  =-1.E10_EB
+         YLOW = 1.E10_EB
+         YHI  =-1.E10_EB
+         DO NM=1,NMESHES
+            XLOW = MIN(XLOW,MESHES(NM)%XS)
+            XHI  = MAX(XHI ,MESHES(NM)%XF)
+            YLOW = MIN(YLOW,MESHES(NM)%YS)
+            YHI  = MAX(YHI ,MESHES(NM)%YF)
+         ENDDO
+      ENDIF
+      ! Move Low Z position of terrain to less that number od cutcells, s.t. they don't get computed on the bottom.
+      ZMIN2= 1.E10_EB
+      DO NM=1,NMESHES
+         ZMIN2 = MIN( ZMIN2 , MESHES(NM)%ZS-REAL(NGUARD,EB)/REAL(MESHES(NM)%KBAR,EB)*(MESHES(NM)%ZF-MESHES(NM)%ZS) )
+      ENDDO
+      ZHI  = MAXVAL(VERTS(3*1:3:3*N_VERTS))
+      ZLOW = MINVAL(VERTS(3*1:3:3*N_VERTS))
+      ZLOW = MIN(REAL(FLOOR(ZLOW-0.1_EB*(ZHI-ZLOW)),EB),ZMIN,ZMIN2)
+
+      ZVAL_FACTOR = 1._EB
+      IF(ZVAL_HORIZON > MAX_VAL) ZVAL_FACTOR = 0._EB ! Not defined, use boundary polygon heights.
+
+      N_VOLUS = 0
+
+      ALLOCATE(B_IND(N_BEDGES+1)); B_IND=-1
+      ALLOCATE(E_IND(N_BEDGES+1)); E_IND=-1
+      ALLOCATE(F_IND(N_BEDGES+1)); F_IND=-1
+
+      B_IND(1:N_BEDGES) = BOUND_EDGES(NOD1,1:N_BEDGES); B_IND(N_BEDGES+1) = B_IND(1) ! Last equal to first
+
+      ! All vertices in counter-clockwise dir are in BOUND_EDGES(NOD1,1:N_BEDGES)
+      ! IF EXTEND_TERRAIN, of this vertex list find the 4 points SW, SE, NW, NE closest to the boundary of the domain.
+      IF (EXTEND_TERRAIN) THEN
+
+         ! To do.
+
+      ELSE
+
+         ! Add the floor F_IND Vertices:
+         IJ = N_VERTS + 1
+         X_CEN = 0
+         Y_CEN = 0
+         DO I=1,N_BEDGES
+            VERTS(3*IJ-2) = VERTS(3*B_IND(I)-2)
+            VERTS(3*IJ-1) = VERTS(3*B_IND(I)-1)
+            VERTS(3*IJ)   = ZLOW
+            F_IND(I)      = IJ
+            X_CEN = X_CEN + VERTS(3*B_IND(I)-2)
+            Y_CEN = Y_CEN + VERTS(3*B_IND(I)-1)
+            IJ = IJ + 1
+         ENDDO
+         F_IND(N_BEDGES+1) = F_IND(1) ! Last lower point equal to the first.
+
+         ! Add center point:
+         VERTS(3*IJ-2) = X_CEN / REAL(N_BEDGES,EB)
+         VERTS(3*IJ-1) = Y_CEN / REAL(N_BEDGES,EB)
+         VERTS(3*IJ)   = ZLOW
+         IJ = IJ + 1
+
+         ! Add side faces:
+         IJF = N_FACES + 1
+         DO I=1,N_BEDGES
+            I1 = F_IND(I)
+            I2 = F_IND(I+1)
+            I3 = B_IND(I+1)
+            I4 = B_IND(I)
+
+            FACES(3*IJF-2) = I1
+            FACES(3*IJF-1) = I2
+            FACES(3*IJF) = I3
+            IJF = IJF + 1
+
+            FACES(3*IJF-2) = I1
+            FACES(3*IJF-1) = I3
+            FACES(3*IJF) = I4
+            IJF = IJF + 1
+         ENDDO
+
+         ! Add bottom faces:
+         DO I=1,N_BEDGES
+            I1 = F_IND(I)
+            I2 = IJ - 1 ! ZLOW center vert.
+            I3 = F_IND(I+1)
+
+            FACES(3*IJF-2) = I1
+            FACES(3*IJF-1) = I2
+            FACES(3*IJF) = I3
+            IJF = IJF + 1
+         ENDDO
+
+      ENDIF
+
+      N_VERTS      = IJ  - 1
+      N_FACES      = IJF - 1
+
+      DEALLOCATE(B_IND,E_IND,F_IND,BOUND_EDGES)
+
    ENDIF ZVALS_IF
 
    !--- setup a block object (XB keyword )
@@ -40062,6 +40249,17 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
       ELSE
          SURFS(:) = 0 ! All external faces point to default surf ID.
       ENDIF
+   ELSEIF(IS_TERRAIN) THEN
+      ! Finally Enhance SURFS to accomodate new faces.
+      ALLOCATE(SURFS2(N_FACES));
+      ! Here define what SURF to assign to added faces.
+      IF(SURF_INDEX_PER_FACE) THEN
+         SURFS2(:) = 1 ! All external faces point to only entry SURF_ID(1).
+      ELSE
+         SURFS2(:) = 0 ! All external faces point to default surf ID.
+      ENDIF
+      SURFS2(1:N_FACES_ORIG) = SURFS(1:N_FACES_ORIG)
+      CALL MOVE_ALLOC(FROM=SURFS2,TO=SURFS)
    ENDIF
 
    N_FACES_IF: IF (N_FACES>0) THEN
@@ -40724,6 +40922,7 @@ SUBROUTINE SET_GEOM_DEFAULTS
    IJK = 2 ! minimize number of triangles by default
    IS_GEOMETRY_DYNAMIC = .FALSE.
    EXTEND_TERRAIN = .FALSE.
+   IS_TERRAIN = .FALSE.
    ZVAL_HORIZON = 1.001_EB*MAX_VAL
 
    AZIM = 0.0_EB
