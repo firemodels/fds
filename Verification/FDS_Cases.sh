@@ -55,6 +55,7 @@ $QFDS -d Complex_Geometry sphere_helium_1mesh.fds
 $QFDS -p 3 -d Complex_Geometry sphere_helium_3meshes.fds
 $QFDS -p 3 -d Complex_Geometry sphere_helium_conserve_3meshes.fds
 $QFDS -d Complex_Geometry sphere_radiate.fds
+$QFDS -d Complex_Geometry sphere_leak.fds
 $QFDS -d Complex_Geometry saad_CC_explicit_512_cfl_p25.fds
 $QFDS -d Complex_Geometry saad_CC_explicit_512_cfl_p125.fds
 $QFDS -d Complex_Geometry saad_CC_explicit_512_cfl_p0625.fds
