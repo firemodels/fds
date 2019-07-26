@@ -11749,15 +11749,7 @@ IF (SEALED .AND. N_ZONE==0) THEN
    READ_ZONE_LINES = .FALSE.
 ENDIF
 
-IF (ANY(EVACUATION_SKIP)) THEN
-   IF (READ_ZONE_LINES) THEN
-      N_ZONE = N_ZONE + N_EVAC_ZONE
-   ELSE
-      ! Check this: Should this be same as above, i.e., n_zone + n_evac_zone
-      ! old: N_ZONE = N_EVAC_ZONE
-      N_ZONE = N_ZONE + N_EVAC_ZONE ! If this works, the inner IF can be deleted
-   ENDIF
-END IF
+IF (ANY(EVACUATION_SKIP)) N_ZONE = N_ZONE + N_EVAC_ZONE
 
 ! Make sure that there are no leak paths to undefined pressure ZONEs
 
