@@ -120,6 +120,7 @@ function usage {
   echo " -s   - stop job"
   echo " -S   - use startup files to set the environment, do not load modules"
   echo " -r   - append trace flag to the mpiexec call generated"
+  echo " -R   - select resource manager. Currently only responds to input 'SLURM', with default TORQUE, but allows for future expansion"
   echo " -t   - used for timing studies, run a job alone on a node (reserving $NCORES_COMPUTENODE cores)"
   echo " -T type - run dv (development), db (debug), inspect, advise, or vtune version of fds"
   echo "           if -T is not specified then the release version of fds is used"
