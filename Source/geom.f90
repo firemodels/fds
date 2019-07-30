@@ -325,7 +325,6 @@ TYPE BODINT_PLANE_TYPE
    INTEGER,  ALLOCATABLE, DIMENSION(:,:) :: SGLS ! (1:NSGLS,NOD1) connectivity list for single node elements.
    INTEGER,  ALLOCATABLE, DIMENSION(:,:) :: SEGS ! (1:NSEGS,NOD1:NOD2) connectivity list for segments.
    INTEGER,  ALLOCATABLE, DIMENSION(:,:) :: TRIS ! (1:NTRIS,NOD1:NOD3) connectivity list for triangle elements.
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:) :: INDSGL ! Wet surface triangles associated with single node elems.
    INTEGER,  ALLOCATABLE, DIMENSION(:,:) :: INDSEG ! Wet surface triangles associated with intersection segments.
    INTEGER,  ALLOCATABLE, DIMENSION(:,:) :: INDTRI ! Wet surface triangles associated with intersection triangles.
    LOGICAL,  ALLOCATABLE, DIMENSION(:)   :: X2ALIGNED ! For segments.
@@ -30472,7 +30471,7 @@ REAL(EB),INTENT(IN) :: X1PLN, DX2_MIN, DX3_MIN, PLNORMAL(MAX_DIM)
 LOGICAL, INTENT(IN) :: TRI_ONPLANE_ONLY
 
 ! Local variables:
-INTEGER :: IG, IBIN, IWSEL, IWSELDUM, IEDGE, ISGL, ISEG, ITRI, NINDTRI, EDGE_TRI
+INTEGER :: IG, IBIN, IWSEL, IWSELDUM, IEDGE, ISGL, ISEG, ITRI, EDGE_TRI
 REAL(EB):: LEDGE, XYZV(MAX_DIM,NODS_WSEL)
 INTEGER :: ELEM(NODS_WSEL), IND_P(NODS_WSEL), NTRIS, NSEGS
 REAL(EB):: DOT1, DOT2, DOT3
@@ -30535,7 +30534,6 @@ IF (FIRST_CALL) THEN
    IF ( ALLOCATED(BODINT_PLANE%SGLS) )      DEALLOCATE(BODINT_PLANE%SGLS)
    IF ( ALLOCATED(BODINT_PLANE%SEGS) )      DEALLOCATE(BODINT_PLANE%SEGS)
    IF ( ALLOCATED(BODINT_PLANE%TRIS) )      DEALLOCATE(BODINT_PLANE%TRIS)
-   IF ( ALLOCATED(BODINT_PLANE%INDSGL) )    DEALLOCATE(BODINT_PLANE%INDSGL)
    IF ( ALLOCATED(BODINT_PLANE%INDSEG) )    DEALLOCATE(BODINT_PLANE%INDSEG)
    IF ( ALLOCATED(BODINT_PLANE%INDTRI) )    DEALLOCATE(BODINT_PLANE%INDTRI)
    IF ( ALLOCATED(BODINT_PLANE%X2ALIGNED) ) DEALLOCATE(BODINT_PLANE%X2ALIGNED)
@@ -30550,7 +30548,6 @@ IF (FIRST_CALL) THEN
    ALLOCATE(BODINT_PLANE%     SGLS(NOD1,                   IBM_MAX_NSGLS))
    ALLOCATE(BODINT_PLANE%     SEGS(NOD1:NOD2,              IBM_MAX_NSEGS))
    ALLOCATE(BODINT_PLANE%     TRIS(NOD1:NOD3,              IBM_MAX_NTRIS))
-   ALLOCATE(BODINT_PLANE%   INDSGL(IBM_MAX_WSTRIANG_SGL+2, IBM_MAX_NSGLS))
    ALLOCATE(BODINT_PLANE%   INDSEG(IBM_MAX_WSTRIANG_SEG+2, IBM_MAX_NSEGS))
    ALLOCATE(BODINT_PLANE%   INDTRI(IBM_MAX_WSTRIANG_TRI+1, IBM_MAX_NTRIS))
    ALLOCATE(BODINT_PLANE%X2ALIGNED(IBM_MAX_NSEGS))
@@ -30805,15 +30802,6 @@ MAIN_GEOM_LOOP : DO IG=1,N_GEOMETRY
                ISGL = BODINT_PLANE%NSGLS + 1
                BODINT_PLANE % NSGLS = ISGL
                BODINT_PLANE % SGLS(NOD1,ISGL) = IND_P(NOD1)
-               BODINT_PLANE % INDSGL(1:2,ISGL) = (/ 1, IWSEL /)
-               BODINT_PLANE % INDSGL(IBM_MAX_WSTRIANG_SGL+2,ISGL) = IG
-            ELSE
-               NINDTRI = BODINT_PLANE % INDSGL(1,ISGL) + 1
-               !IF (NINDTRI > IBM_MAX_WSTRIANG_SGL) THEN
-               !   print*, "Error GET_BODINT_PLANE: number of triangles per node > IBM_MAX_WSTRIANG_SGL."
-               !ENDIF
-               BODINT_PLANE % INDSGL(1,ISGL) = NINDTRI
-               BODINT_PLANE % INDSGL(NINDTRI+1,ISGL) = IWSEL
             ENDIF
 
             CYCLE ! Next WSELEM
@@ -30842,15 +30830,6 @@ MAIN_GEOM_LOOP : DO IG=1,N_GEOMETRY
                ISGL = BODINT_PLANE%NSGLS + 1
                BODINT_PLANE % NSGLS = ISGL
                BODINT_PLANE % SGLS(NOD1,ISGL) = IND_P(NOD1)
-               BODINT_PLANE % INDSGL(1:2,ISGL) = (/ 1, IWSEL /)
-               BODINT_PLANE % INDSGL(IBM_MAX_WSTRIANG_SGL+2,ISGL) = IG
-            ELSE
-               NINDTRI = BODINT_PLANE % INDSGL(1,ISGL) + 1
-               !IF (NINDTRI > IBM_MAX_WSTRIANG_SGL) THEN
-               !   print*, "Error GET_BODINT_PLANE: number of triangles per node > IBM_MAX_WSTRIANG_SGL."
-               !ENDIF
-               BODINT_PLANE % INDSGL(1,ISGL) = NINDTRI
-               BODINT_PLANE % INDSGL(NINDTRI+1,ISGL) = IWSEL
             ENDIF
 
             CYCLE ! Next WSELEM
@@ -30879,15 +30858,6 @@ MAIN_GEOM_LOOP : DO IG=1,N_GEOMETRY
                ISGL = BODINT_PLANE%NSGLS + 1
                BODINT_PLANE % NSGLS = ISGL
                BODINT_PLANE % SGLS(NOD1,ISGL) = IND_P(NOD1)
-               BODINT_PLANE % INDSGL(1:2,ISGL) = (/ 1, IWSEL /)
-               BODINT_PLANE % INDSGL(IBM_MAX_WSTRIANG_SGL+2,ISGL) = IG
-            ELSE
-               NINDTRI = BODINT_PLANE % INDSGL(1,ISGL) + 1
-               !IF (NINDTRI > IBM_MAX_WSTRIANG_SGL) THEN
-               !   print*, "Error GET_BODINT_PLANE: number of triangles per node > IBM_MAX_WSTRIANG_SGL."
-               !ENDIF
-               BODINT_PLANE % INDSGL(1,ISGL) = NINDTRI
-               BODINT_PLANE % INDSGL(NINDTRI+1,ISGL) = IWSEL
             ENDIF
 
             CYCLE ! Next WSELEM
@@ -39011,10 +38981,13 @@ REAL(EB):: ZVAL_HORIZON, ZVAL_FACTOR
 
 LOGICAL, PARAMETER :: TERRAIN_NEW_WAY = .TRUE.
 
-INTEGER :: N_EDGES,N_BEDGES,N_FACES_ORIG
+INTEGER :: N_EDGES,N_BEDGES,N_FACES_ORIG,ICPT,CLOSE_PT(NOD1:NOD4+1)
 INTEGER, ALLOCATABLE, DIMENSION(:,:) :: EDGES,FACE_EDGES,EDGE_FACES,BOUND_EDGES,BOUND_EDGES2
 INTEGER, ALLOCATABLE, DIMENSION(:) :: NBND_EDGE,COUNTED_EDGES
-REAL(EB) :: X_CEN,Y_CEN,ZMIN2
+REAL(EB) :: X_CEN,Y_CEN,ZMIN2,CORNER_PT(IAXIS:JAXIS,NOD1:NOD4+1),DIST,DISTI
+REAL(EB), PARAMETER :: VERXY(IAXIS:JAXIS,NOD1:NOD4) = &
+                       RESHAPE((/0._EB,1._EB,-1._EB,0._EB,0._EB,-1._EB,1._EB,0._EB/),(/ 2, 4 /))
+
 
 NAMELIST /GEOM/ AUTO_TEXTURE,BNDF_GEOM,BINARY_DIR,BINARY_NAME,CYLINDER_ORIGIN,CYLINDER_AXIS,&
                 CYLINDER_RADIUS,CYLINDER_LENGTH,CYLINDER_NSEG_THETA,CYLINDER_NSEG_AXIS,&
@@ -39712,9 +39685,9 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
 
       N_VOLUS = 0
 
-      ALLOCATE(B_IND(N_BEDGES+1)); B_IND=-1
-      ALLOCATE(E_IND(N_BEDGES+1)); E_IND=-1
-      ALLOCATE(F_IND(N_BEDGES+1)); F_IND=-1
+      ALLOCATE(B_IND(2*N_BEDGES+1)); B_IND=-1
+      ALLOCATE(E_IND(2*N_BEDGES+1)); E_IND=-1
+      ALLOCATE(F_IND(2*N_BEDGES+1)); F_IND=-1
 
       B_IND(1:N_BEDGES) = BOUND_EDGES(NOD1,1:N_BEDGES); B_IND(N_BEDGES+1) = B_IND(1) ! Last equal to first
 
@@ -39722,7 +39695,133 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
       ! IF EXTEND_TERRAIN, of this vertex list find the 4 points SW, SE, NW, NE closest to the boundary of the domain.
       IF (EXTEND_TERRAIN) THEN
 
-         ! To do.
+         B_IND(N_BEDGES+1:2*N_BEDGES) = B_IND(1:N_BEDGES)
+         B_IND(2*N_BEDGES+1)          = B_IND(1)
+
+         ! Find the 4 points closest to SE, NE, NW, SW corners.
+         CORNER_PT(IAXIS:JAXIS,NOD1)  = (/ XHI , YLOW /) ! SE
+         CORNER_PT(IAXIS:JAXIS,NOD2)  = (/ XHI , YHI  /) ! NE
+         CORNER_PT(IAXIS:JAXIS,NOD3)  = (/ XLOW, YHI  /) ! NW
+         CORNER_PT(IAXIS:JAXIS,NOD4)  = (/ XLOW, YLOW /) ! SW
+         CORNER_PT(IAXIS:JAXIS,NOD4+1)= CORNER_PT(IAXIS:JAXIS,NOD1) ! SE
+         CLOSE_PT(:) = 0
+         DO ICPT=NOD1,NOD4
+            ! Search in B_IND vertices which is closest:
+            DIST=1.E10_EB
+            DO I=1,N_BEDGES
+               DISTI = SQRT( ( CORNER_PT(IAXIS,ICPT)-VERTS(3*B_IND(I)-2) )**2._EB + &
+                             ( CORNER_PT(JAXIS,ICPT)-VERTS(3*B_IND(I)-1) )**2._EB )
+               IF(DISTI >= DIST) CYCLE
+               CLOSE_PT(ICPT) = I
+               DIST = DISTI
+            ENDDO
+        ENDDO
+         DO ICPT=NOD2,NOD4
+            IF(CLOSE_PT(ICPT) < CLOSE_PT(ICPT-1)) CLOSE_PT(ICPT) = CLOSE_PT(ICPT) + N_BEDGES ! Pad corner nodes.
+         ENDDO
+         CLOSE_PT(NOD4+1) = CLOSE_PT(NOD1) + N_BEDGES
+
+         ! These points are mapped to domain external corners, rest of the points are mapped to corresponding domain
+         ! External boundaries.
+         IJ = N_VERTS + 1
+         DO ICPT=NOD1,NOD4
+            IJE = CLOSE_PT(ICPT+1) - CLOSE_PT(ICPT);
+            IF (IJE <= 0) THEN
+               WRITE(MESSAGE,'(A,A,A,I8,A)') 'ERROR: For terrain GEOM ',TRIM(ID),&
+                             ' same boundary vertex ',B_IND(CLOSE_PT(ICPT)),' closest to 2 domain corners.'
+               CALL SHUTDOWN(MESSAGE); RETURN
+            ENDIF
+            DISTI = SQRT( ( CORNER_PT(IAXIS,ICPT+1)-CORNER_PT(IAXIS,ICPT) )**2._EB + &
+                          ( CORNER_PT(JAXIS,ICPT+1)-CORNER_PT(JAXIS,ICPT) )**2._EB ) / REAL(IJE,EB)
+            ! Place points in extended domain:
+            J = 0
+            DO I=CLOSE_PT(ICPT),CLOSE_PT(ICPT+1)-1
+               VERTS(3*IJ-2) = CORNER_PT(IAXIS,ICPT) + DISTI*VERXY(IAXIS,ICPT)*REAL(J,EB)
+               VERTS(3*IJ-1) = CORNER_PT(JAXIS,ICPT) + DISTI*VERXY(JAXIS,ICPT)*REAL(J,EB)
+               VERTS(3*IJ)   = (1._EB-ZVAL_FACTOR)*VERTS(3*B_IND(I)) + ZVAL_FACTOR*ZVAL_HORIZON
+               E_IND(I) = IJ
+               IJ = IJ  + 1
+               J  = J   + 1
+            ENDDO
+         ENDDO
+         E_IND(CLOSE_PT(NOD4+1)) =  E_IND(CLOSE_PT(NOD1))
+
+         ! Add the floor F_IND Vertices:
+         X_CEN = 0
+         Y_CEN = 0
+         DO ICPT=NOD1,NOD4
+            DO I=CLOSE_PT(ICPT),CLOSE_PT(ICPT+1)-1
+               VERTS(3*IJ-2) = VERTS(3*E_IND(I)-2)
+               VERTS(3*IJ-1) = VERTS(3*E_IND(I)-1)
+               VERTS(3*IJ)   = ZLOW
+               F_IND(I)      = IJ
+               X_CEN = X_CEN + VERTS(3*E_IND(I)-2)
+               Y_CEN = Y_CEN + VERTS(3*E_IND(I)-1)
+               IJ = IJ + 1
+            ENDDO
+         ENDDO
+         F_IND(CLOSE_PT(NOD4+1)) =  F_IND(CLOSE_PT(NOD1))
+
+         ! Add center point:
+         VERTS(3*IJ-2) = X_CEN / REAL(N_BEDGES,EB)
+         VERTS(3*IJ-1) = Y_CEN / REAL(N_BEDGES,EB)
+         VERTS(3*IJ)   = ZLOW
+         IJ = IJ + 1
+
+         ! Add extend faces:
+         IJF = N_FACES + 1
+         DO ICPT=NOD1,NOD4
+            DO I=CLOSE_PT(ICPT),CLOSE_PT(ICPT+1)-1
+            I1 = E_IND(I)
+            I2 = E_IND(I+1)
+            I3 = B_IND(I+1)
+            I4 = B_IND(I)
+
+            FACES(3*IJF-2) = I1
+            FACES(3*IJF-1) = I2
+            FACES(3*IJF) = I3
+            IJF = IJF + 1
+
+            FACES(3*IJF-2) = I1
+            FACES(3*IJF-1) = I3
+            FACES(3*IJF) = I4
+            IJF = IJF + 1
+            ENDDO
+         ENDDO
+
+         ! Add side faces:
+         DO ICPT=NOD1,NOD4
+            DO I=CLOSE_PT(ICPT),CLOSE_PT(ICPT+1)-1
+             I1 = F_IND(I)
+             I2 = F_IND(I+1)
+             I3 = E_IND(I+1)
+             I4 = E_IND(I)
+
+             FACES(3*IJF-2) = I1
+             FACES(3*IJF-1) = I2
+             FACES(3*IJF) = I3
+             IJF = IJF + 1
+
+             FACES(3*IJF-2) = I1
+             FACES(3*IJF-1) = I3
+             FACES(3*IJF) = I4
+             IJF = IJF + 1
+             ENDDO
+          ENDDO
+
+          ! Add bottom faces:
+          DO ICPT=NOD1,NOD4
+             DO I=CLOSE_PT(ICPT),CLOSE_PT(ICPT+1)-1
+                I1 = F_IND(I)
+                I2 = IJ - 1 ! ZLOW center vert.
+                I3 = F_IND(I+1)
+
+                FACES(3*IJF-2) = I1
+                FACES(3*IJF-1) = I2
+                FACES(3*IJF) = I3
+                IJF = IJF + 1
+             ENDDO
+          ENDDO
 
       ELSE
 
