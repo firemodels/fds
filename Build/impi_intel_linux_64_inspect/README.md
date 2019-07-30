@@ -29,7 +29,7 @@ mpiexec -np 1 inspxe-cl -collect ti2 -- $HOME/firemodels/fds/Build/impi_intel_li
 
 One optional knob we use is: `-knob stack-depth=32` This ensures that, regardless of how many calls are made by a function, even deep errors can be found. You can find more options [here](https://software.intel.com/en-us/inspector-user-guide-linux-inspxe-cl-actions-options-and-arguments)
 
-Alternatively, using `qfds.sh -x [result_directory]` will run ti2 with a stack depth of 32, automatically. 
+Alternatively, using `qfds.sh -x [result_directory]` will run ti2 with a stack depth of 32, automatically. `inspection.sh [case]` from fds/Verification/Thread_Check is another automation script, which reports successes and failures to stdout. Note that, as a result, this should likely be run in the background with &, and its output redirected. 
 
 ### Analysis
 
