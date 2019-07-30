@@ -53,7 +53,7 @@ case=$1
 # Perform OpenMP thread checking (detect deadlocks and data races)
 
 cd $CURDIR
-$QFDS -q $QUEUE -p $PROCESSES -o 4 -x $RESULT_DIR $case
+$QFDS -q $QUEUE -p $PROCESSES -o 4 -x $RESULT_DIR -f $GITROOT $case
 sleep 5
 
 
