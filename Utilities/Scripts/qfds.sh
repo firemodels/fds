@@ -714,7 +714,7 @@ else
 
   if [ "$RESOURCE_MANAGER" == "SLURM" ]; then
     QSUB="sbatch -p $queue --ignore-pbs"
-    MPIRUN='srun'
+    MPIRUN='mpiexec'
   fi
 fi
 
