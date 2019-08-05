@@ -26,6 +26,7 @@ cd NIST_Composite_Beam;  ./Run_All.sh $OPTIONS; cd ..
 cd NIST_Douglas_Firs;  ./Run_All.sh $OPTIONS; cd ..
 cd NIST_FSE_2008;  ./Run_All.sh $OPTIONS; cd ..
 cd NIST_NRC_Corner_Effects;  ./Run_All.sh $OPTIONS; cd ..
+cd NIST_Pool_Fires;  ./Run_All.sh $OPTIONS; cd ..
 cd NIST_RSE_1994;  ./Run_All.sh $OPTIONS; cd ..
 cd NIST_RSE_2007;  ./Run_All.sh $OPTIONS; cd ..
 cd NIST_Vent_Study;  ./Run_All.sh $OPTIONS; cd ..
