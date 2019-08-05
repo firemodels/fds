@@ -3,51 +3,43 @@
 This folder contains a few configuration files that work with the [Intel Inspector](https://software.intel.com/en-us/node/622387), a tool that can help detect improperly coded OpenMP directives.
 
 ### Required Setup
-1. Source inspxe-vars.sh, from the installation folder for Inspector. For example:
+
+1. Run the setup script `inspxe-vars.sh` that is located in the installation folder for the Intel compiler. For example:
 ```
 source /opt/intel19/inspector_2019/inspxe-vars.sh
 ```
-2. Compile the `inspect` version of FDS using the script `make_fds.sh` in this directory. The relevant compiler options are listed [here](https://software.intel.com/en-us/inspector-user-guide-linux-building-applications).
+2. Compile a specially instrumented FDS executable using the script `make_fds.sh` in this directory. The relevant compiler options are listed [here](https://software.intel.com/en-us/inspector-user-guide-linux-building-applications). Consult the `makefile` to see what options are used for FDS.
 
 3. For threading error analysis, you must use at least 2 OpenMP threads.
-### Recommended Steps
 
-For useful analysis capabilities, using inspxe-gui on the platform used for collection is ideal. By doing so, Inspector can have direct access to relevant source files, and thus give more useful results that do not require investigation with a secondary code viewer. 
+### Collection Procedure
 
-To setup, use inspxe-gui before collecting data. X11 forwarding is necessary if logging in to a remote cluster. Inside the GUI, use the new project option to create a project for FDS, selecting the 'inspect' version's executable as the target, the 'inspect' version's folder for binary files, and firemodels/fds/Source for source files. To use the project, place collection results, obtained later, into the generated project folder.
+Intel Inspector can be run from the command line or via a graphical user interface (GUI). To invoke the GUI, first add X11 forwarding to your PuTTY (or equivalent) session if logging into a remote linux cluster. Then type `inspxe-gui` to open the GUI. Inside the GUI, use the new project option to create a project for FDS, selecting `fds_impi_intel_linux_64_inspect` as the target, the current directory for binary files, and `firemodels/fds/Source` for source files. To use the project, place collection results, obtained later, into the generated project folder.
 
-### Collection
-
-The base command used on one's platform to run FDS is a proper starting point. `mpiexec fds [test case]` is a common input, and thus we'll use it for the model here.
-
-Before the fds executable in the run command, such as between mpiexec and the executable, place `inspxe-cl -collect <analysis-type> (optional options) -- `. Most frequently, analysis-type can be ti2. ti2 is a balanced analysis for threading errors, identifying more errors than ti1 in less time than ti3. If you need to use another analysis type, you can read more [here](https://software.intel.com/en-us/inspector-user-guide-linux-threading-error-analysis-types)
-
-Thus, a possible input could be:
+To run Inspector from the command line, type the following:
 ```
 mpiexec -np 1 inspxe-cl -collect ti2 -- $HOME/firemodels/fds/Build/impi_intel_linux_64_inspect/fds_impi_intel_linux_64_inspect simple_test.fds
 ```
+The analysis-type, `ti2`, generates a reasonably balanced analysis for threading errors, identifying more errors than `ti1` in less time than `ti3`. If you need to use another analysis type, you can read more [here](https://software.intel.com/en-us/inspector-user-guide-linux-threading-error-analysis-types). 
 
-One optional knob we use is: `-knob stack-depth=32` This ensures that, regardless of how many calls are made by a function, even deep errors can be found. You can find more options [here](https://software.intel.com/en-us/inspector-user-guide-linux-inspxe-cl-actions-options-and-arguments)
+The one option we use is `-knob stack-depth=32`. This ensures that, regardless of how many calls are made by a function, even deep errors can be found. You can find more options [here](https://software.intel.com/en-us/inspector-user-guide-linux-inspxe-cl-actions-options-and-arguments).
 
-Alternatively, using `qfds.sh -x [result_directory]` will run ti2 with a stack depth of 32, automatically. `inspection.sh [case]` from fds/Verification/Thread_Check is another automation script, which reports successes and failures to stdout. Note that, as a result, this should likely be run in the background with &, and its output redirected. 
+Rather than issuing the `mpiexec` call at the command line, you can invoke `qfds.sh -x [result_directory] ...` which will run a `ti2` analysis with a stack depth of 32, automatically. The script `inspection.sh [case_name.fds]` in `fds/Verification/Thread_Check` is another automated script which reports successes and failures to stdout. You can run this script in the background by adding &, and redirect the output to a file. 
 
-### Analysis
+### Analysis Procedure using the Command Line option
 
-#### Command Line
-
-To gather data from the command line, use:
+To analyze the results using command line formm of Inspector, type:
 ```
 inspxe-cl -report <report_type> -r <result_dir>
 ```
+This will display results according to `report_type` to standard out. `problems` is a suitable `report_type`, but you can find them all [here](https://software.intel.com/en-us/inspector-user-guide-linux-report).
 
-This will display results according to report_type to standard out. `problems` tends to be a suitable method, but you can find them all [here](https://software.intel.com/en-us/inspector-user-guide-linux-report)
-
-Alternatively firemodels/fds/Verification/Thread_Check, you can get inspect_report.sh. This script can handle the multiple files generated in any Inspector run with more than one process.
+Alternatively, `fds/Verification/Thread_Check` contains a script called `inspect_report.sh`. This script can handle the multiple files generated in any Inspector run with more than one process.
 ```
 ./inspect_report.sh -n <directory_prefix>
 ```
 
-#### Graphical User Interface
+### Analysis Procedure using the Graphical User Interface
 
-Alternatively, you can use the recommended inspxe-gui. It can be run directly on a inspxe file, or, if a project was created, the result directories can be generated/placed in the project's folder, and viewed by clicking the names of the results on the left.
+Alternatively, you can open the GUI via `inspxe-gui`. It can be run directly on a `inspxe` file, or, if a project was created, the result directories can be generated/placed in the project's folder, and viewed by clicking the names of the results on the left.
 
