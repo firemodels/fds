@@ -8,7 +8,7 @@ This folder contains a few configuration files that work with the [Intel Inspect
 ```
 source /opt/intel19/inspector_2019/inspxe-vars.sh
 ```
-2. Compile the `inspect` version of FDS using the script `make_fds.sh` in this directory. The relevant compiler options are listed [here](https://software.intel.com/en-us/inspector-user-guide-linux-building-applications).
+2. Compile a specially instrumented FDS executable using the script `make_fds.sh` in this directory. The relevant compiler options are listed [here](https://software.intel.com/en-us/inspector-user-guide-linux-building-applications). Consult the `makefile` to see what options are used for FDS.
 
 3. For threading error analysis, you must use at least 2 OpenMP threads.
 
@@ -24,11 +24,11 @@ The analysis-type, `ti2`, generates a reasonably balanced analysis for threading
 
 The one option we use is `-knob stack-depth=32`. This ensures that, regardless of how many calls are made by a function, even deep errors can be found. You can find more options [here](https://software.intel.com/en-us/inspector-user-guide-linux-inspxe-cl-actions-options-and-arguments).
 
-An alternative to issuing the `mpiexec` call at the command line, you can invoke `qfds.sh -x [result_directory]` which will run a `ti2` with a stack depth of 32, automatically. `inspection.sh [case_name.fds]` in `fds/Verification/Thread_Check` is another automated script, which reports successes and failures to stdout. Note that, as a result, this should likely be run in the background with &, and its output redirected. 
+Rather than issuing the `mpiexec` call at the command line, you can invoke `qfds.sh -x [result_directory] ...` which will run a `ti2` analysis with a stack depth of 32, automatically. The script `inspection.sh [case_name.fds]` in `fds/Verification/Thread_Check` is another automated script which reports successes and failures to stdout. You can run this script in the background by adding &, and redirect the output to a file. 
 
 ### Analysis Procedure using the Command Line option
 
-To analyze the results of the analysis using command line formm of Inspector, type:
+To analyze the results using command line formm of Inspector, type:
 ```
 inspxe-cl -report <report_type> -r <result_dir>
 ```
@@ -39,7 +39,7 @@ Alternatively, `fds/Verification/Thread_Check` contains a script called `inspect
 ./inspect_report.sh -n <directory_prefix>
 ```
 
-#### Analysis Procedure using the Graphical User Interface
+### Analysis Procedure using the Graphical User Interface
 
-Alternatively, you can use the recommended `inspxe-gui`. It can be run directly on a inspxe file, or, if a project was created, the result directories can be generated/placed in the project's folder, and viewed by clicking the names of the results on the left.
+Alternatively, you can open the GUI via `inspxe-gui`. It can be run directly on a `inspxe` file, or, if a project was created, the result directories can be generated/placed in the project's folder, and viewed by clicking the names of the results on the left.
 
