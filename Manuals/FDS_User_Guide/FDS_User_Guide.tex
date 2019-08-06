@@ -1621,6 +1621,13 @@ If multiple meshes are involved, it is assumed that the {\ct CSVF} lines are pro
 &CSVF UVWFILE='CHID_t001_m002.csv' /
 &MISC PROJECTION=.TRUE. /
 \end{lstlisting}
+The above approach is deprecated because it may be cumbersome if a large number of meshes is needed.  To overcome this issue, you may set {\ct PER\_MESH=T}, which will append the mesh number and {\ct .csv} to the {\ct UVWFILE} string.  For example, if you had 16 meshes you can use
+\begin{lstlisting}
+&CSVF UVWFILE='CHID_t001_m', PER_MESH=T /
+&MISC PROJECTION=.TRUE. /
+\end{lstlisting}
+and FDS will read {\ct CHID\_t001\_m001.csv} through {\ct CHID\_t001\_m016.csv} in the order of the {\ct MESH} lines (note that a {\ct MULT} line for the meshes may also be used).  Note that the the {\ct UVWFILE} string should contain the ``{\ct m}'' (if it exists) as this is not automatically appended.
+
 It is recommended that you also specify {\ct PROJECTION=.TRUE.} on {\ct MISC} if the specified velocity field does not satisfy the divergence constraint to machine precision on a staggered grid (this may not even be true if an analytical solution to the Navier-Stokes equations is sampled at the staggered velocity component locations).
 
 
@@ -9432,7 +9439,8 @@ properties be specified as well. Simply prescribing as many properties as possib
 \multicolumn{5}{|c|}{{\ct CSVF} (Comma Delimited Output Files)} \\
 \hline \hline
 \endhead
-%{\ct CSVFILE}         & Character      & Section~\ref{info:??}                &            &     \\ \hline
+%{\ct CSVFILE}         & Character      & Section~\ref{info:??}                &            &        \\ \hline
+{\ct PER\_MESH}       & Logical        & Section~\ref{info:velo_restart}      &            & .FALSE. \\ \hline
 {\ct UVWFILE}         & Character      & Section~\ref{info:velo_restart}      &            &     \\ \hline
 \end{longtable}
 
