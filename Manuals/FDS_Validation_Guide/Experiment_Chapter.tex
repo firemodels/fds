@@ -1016,7 +1016,7 @@ All of the fires were fueled by one or more 30.5~cm (1~ft) square natural gas bu
 
 \subsection{Wall and Corner Effects}
 
-Six large compartment experiments were conducted in July, 2017, where four natural gas burners were positioned (1) in a corner and (2) against a wall, and then moved outward in stages until the corner or wall effect became negligible. The quad burner was 60~cm by 60~cm and the burner surface was 54~cm above the floor. The corner fire was located in the southwest corner of the large compartment. The wall fire was centered on the south (long) wall.
+Six large compartment experiments~\cite{McGrattan:TN1984} were conducted in July, 2017, where four natural gas burners were positioned (1) in a corner and (2) against a wall, and then moved outward in stages until the corner or wall effect became negligible. The quad burner was 60~cm by 60~cm and the burner surface was 54~cm above the floor. The corner fire was located in the southwest corner of the large compartment. The wall fire was centered on the south (long) wall.
 
 The experiments began with the quad burner in the corner or against the wall for the first 30~min. At 30~min, the burner was moved so that its edge(s) was 10~cm away from the wall(s). It remained for 15~min, after which it was moved to 20~cm, 30~cm, 50~cm, 100~cm, and 160~cm, each time remaining 15~min for a total experiment time of 2~h.
 
@@ -1148,10 +1148,24 @@ Test   & Cabinet    & Front Door & Top Vents        & Upper Side Vents          
 \end{table}
 
 
-
-
-
 \FloatBarrier
+
+
+\section{NIST Pool Fire Experiments}
+\label{NIST_Pool_Fires_Description}
+
+Falkenstein-Smith et al. measured the time-averaged centerline species concentrations within the flaming region of three liquid fuel fires---acetone, ethanol, and methanol~\cite{Falkenstein-Smith:2019}. The dimensions of the circular burner were similar to Weckman's methanol experiment described in Section~\ref{Waterloo_Methanol_Description}.
+
+The measurements were made using a gas chromatograph/mass spectrometer system (GC/MSD). The volume fraction of each species was calculated via the number of moles identified by the GC/MSD at each centerline point. Soot mass fractions were measured during the gas sampling process.
+
+\subsubsection{Modeling Notes}
+
+The pool fires are modeled at three different grid resolutions---2~cm, 1~cm, and 0.5~cm. The mass loss rate of the fuel is specified.
+
+A two-step reaction mechanism is implemented. In the first reaction, fuel is converted to CO, soot, H$_2$, and H$_2$O. In the second reaction, the CO, soot, and H$_2$ are converted to CO$_2$ and H$_2$O. Both reactions employ fast kinetics, but proceed in series, not in parallel.
+
+The radiative fraction is not specified, but rather predicted using the computed temperature and radiative properties computed by RadCal.
+
 
 \section{NIST Smoke Alarm Experiments}
 \label{NIST_Smoke_Alarm_Description}
