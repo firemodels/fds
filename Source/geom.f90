@@ -38991,11 +38991,6 @@ TYPE(GEOMETRY_TYPE), POINTER :: GIN=>NULL(), GOUT=>NULL()
 
 NAMELIST /TRNF/ GEOM_ID, ID, Z_OFFSET
 
-IF (N_GEOMETRY == 0) THEN
-   WRITE(MESSAGE,'(A)') 'ERROR: A &TRNF namelist requires at least one &GEOM namelist to transform'
-   CALL SHUTDOWN(MESSAGE); RETURN
-ENDIF
-
 ! first pass - count number of &TRNF lines
 
 N_TRNF=0
@@ -39009,6 +39004,11 @@ COUNT_TRNF_LOOP: DO
 ENDDO COUNT_TRNF_LOOP
 11 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
 IF (N_TRNF==0) RETURN
+
+IF (N_GEOMETRY == 0) THEN
+   WRITE(MESSAGE,'(A)') 'ERROR: A &TRNF namelist requires at least one &GEOM namelist to transform'
+   CALL SHUTDOWN(MESSAGE); RETURN
+ENDIF
 
 ! Allocate GEOMETRY_TRNF and TRANSFORM arrays
 
