@@ -1584,6 +1584,7 @@ When specifying an initial density it is important to recognize the order in whi
 This example is a case where we have over-defined the problem. Since the temperature is computed from the equation of state using the specified density, the specified temperature will not, in general, satisfy the equation of state, and FDS will overwrite the specified temperature.
 
 \section{Heat Release Rate Per Unit Volume (HRRPUV)}
+\label{info:init_hrrpuv}
 
 The {\ct INIT} line may also be used to specify a volumetric heat source term. For example,
 \begin{lstlisting}
@@ -1591,6 +1592,15 @@ The {\ct INIT} line may also be used to specify a volumetric heat source term. F
 \end{lstlisting}
 indicates that the region bounded by {\ct XB} shall generate 1000~kW/m$^3$. This feature is mainly useful for diagnostics, or to model a fire in a very simple way.
 
+You may specify a time ramp for volumetric heat source via {\ct RAMP\_Q}.  For example,
+\begin{lstlisting}
+&RAMP ID='q1', T=0,  F=0/
+&RAMP ID='q1', T=60, F=1/
+&INIT XB=0.0,0.1,0.0,0.025,0.0,0.1, HRRPUV=1000., RAMP_Q='q1' /
+\end{lstlisting}
+ramps the heat source up from 0 to 1000~kW/m$^3$ linearly over 60 seconds.
+
+The volumetric heat source may be applied both to the gas phase and a solid using 3D heat transfer (see Sec.~\ref{sec:heat_sources}).
 
 \section{Velocity Field}
 \label{info:velo_restart}
@@ -2801,6 +2811,8 @@ You can also use {\ct INTERNAL\_HEAT\_SOURCE} in \si{kW/m^3} on the {\ct OBST} l
 &SURF ID='SPHERE', HT3D=.TRUE./
 &OBST XB=..., HT3D=.TRUE., MATL_ID='orange', SURF_ID='SPHERE', INTERNAL_HEAT_SOURCE=200./
 \end{lstlisting}
+
+Both {\ct HRRPUV} and {\ct INTERNAL\_HEAT\_SOURCE} may be use a time ramp via {\ct RAMP\_Q} on their respective {\ct INIT} or {\ct OBST} lines.
 
 \subsubsection*{Internal Radiation}
 \label{sec:radiation_parameters}
@@ -9783,6 +9795,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct PART\_ID}                    & Character         & Section~\ref{info:initial_droplets}           &                &               \\ \hline
 {\ct PARTICLE\_WEIGHT\_FACTOR}    & Real              & Section~\ref{info:initial_droplets}           &                & 1.            \\ \hline
 {\ct RADIUS}                      & Real              & Section~\ref{info:initial_droplets}           & m              &               \\ \hline
+{\ct RAMP\_Q}                     & Character         & Section~\ref{info:init_hrrpuv}                &                &               \\ \hline
 {\ct SHAPE}                       & Character         & Section~\ref{info:initial_droplets}           &                & {\ct 'BLOCK'} \\ \hline
 {\ct SPEC\_ID(N)}                 & Character Array   & Section~\ref{info:INIT}                       &                &               \\ \hline
 {\ct TEMPERATURE}                 & Real              & Section~\ref{info:INIT}                       & \si{\degree C} & {\ct TMPA}    \\ \hline
