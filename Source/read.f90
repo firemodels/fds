@@ -13647,6 +13647,7 @@ MESH_LOOP: DO NM=1,NMESHES
             WRITE(MESSAGE,'(A,A,A)') "ERROR: The &TRNF namelist, ",TRIM(TRNF_ID)," does not exist"
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
+         SLICETYPE = 'TRANSFORM_GEOM'
          GEOM_INDEX=TRANSFORM(TRNF_INDEX,1)%GEOM_INDEX
       ENDIF
 
