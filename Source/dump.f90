@@ -3039,19 +3039,19 @@ IF (N_DEVC>0) THEN
    DO N=1,N_DEVC
       DV => DEVICE(N)
       IF (DV%Y_INDEX>0) THEN
-         WRITE(LU_OUTPUT,'(I6,A,3F9.2,A,A,A,A,A,A,A,A)') N,' Coords:',DV%X,DV%Y,DV%Z, &
+         WRITE(LU_OUTPUT,'(I6,A,3F14.6,A,A,A,A,A,A,A,A)') N,' Coords:',DV%X,DV%Y,DV%Z, &
             ', Make: ',TRIM(PROPERTY(DV%PROP_INDEX)%ID), ', ID: ',TRIM(DV%ID), ', Quantity: ',TRIM(DV%QUANTITY), &
             ', Species: ',TRIM(SPECIES(DV%Y_INDEX)%ID)
       ELSEIF (DV%Z_INDEX>=0) THEN
-         WRITE(LU_OUTPUT,'(I6,A,3F9.2,A,A,A,A,A,A,A,A)') N,' Coords:',DV%X,DV%Y,DV%Z, &
+         WRITE(LU_OUTPUT,'(I6,A,3F14.6,A,A,A,A,A,A,A,A)') N,' Coords:',DV%X,DV%Y,DV%Z, &
             ', Make: ',TRIM(PROPERTY(DV%PROP_INDEX)%ID), ', ID: ',TRIM(DV%ID), ', Quantity: ',TRIM(DV%QUANTITY), &
             ', Species: ',TRIM(SPECIES_MIXTURE(DV%Z_INDEX)%ID)
       ELSEIF (DV%PART_CLASS_INDEX>0) THEN
-         WRITE(LU_OUTPUT,'(I6,A,3F9.2,A,A,A,A,A,A,A,A)') N,' Coords:',DV%X,DV%Y,DV%Z, &
+         WRITE(LU_OUTPUT,'(I6,A,3F14.6,A,A,A,A,A,A,A,A)') N,' Coords:',DV%X,DV%Y,DV%Z, &
             ', Make: ',TRIM(PROPERTY(DV%PROP_INDEX)%ID), ', ID: ',TRIM(DV%ID), ', Quantity: ',TRIM(DV%QUANTITY), &
             ', Particle Class: ',TRIM(LAGRANGIAN_PARTICLE_CLASS(DV%PART_CLASS_INDEX)%ID)
       ELSE
-         WRITE(LU_OUTPUT,'(I6,A,3F9.2,A,A,A,A,A,A)') N,' Coords:',DV%X,DV%Y,DV%Z, &
+         WRITE(LU_OUTPUT,'(I6,A,3F14.6,A,A,A,A,A,A)') N,' Coords:',DV%X,DV%Y,DV%Z, &
             ', Make: ',TRIM(PROPERTY(DV%PROP_INDEX)%ID), ', ID: ',TRIM(DV%ID), ', Quantity: ',TRIM(DV%QUANTITY)
       ENDIF
    ENDDO
@@ -5718,6 +5718,8 @@ DEVICE_LOOP: DO N=1,N_DEVC
                                                  DV%VELO_INDEX,DV%PIPE_INDEX,DV%PROP_INDEX,DV%REAC_INDEX,DV%MATL_INDEX,T,DT,NM)
 
             CASE DEFAULT GAS_STATS_SELECT
+
+               print *,DV%ID,SDV%I1,SDV%I2,SDV%J1,SDV%J2,SDV%K1,SDV%K2
 
                K_DEVICE_CELL_LOOP: DO K=SDV%K1,SDV%K2
                   J_DEVICE_CELL_LOOP: DO J=SDV%J1,SDV%J2
