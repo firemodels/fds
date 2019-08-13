@@ -5719,8 +5719,6 @@ DEVICE_LOOP: DO N=1,N_DEVC
 
             CASE DEFAULT GAS_STATS_SELECT
 
-               print *,DV%ID,SDV%I1,SDV%I2,SDV%J1,SDV%J2,SDV%K1,SDV%K2
-
                K_DEVICE_CELL_LOOP: DO K=SDV%K1,SDV%K2
                   J_DEVICE_CELL_LOOP: DO J=SDV%J1,SDV%J2
                      I_DEVICE_CELL_LOOP: DO I=SDV%I1,SDV%I2
