@@ -8548,6 +8548,8 @@ For a gas phase scalar quantity defined at the center of each grid cell, $\phi_{
 \be \frac{1}{N} \; \sum_{ijk} \phi_{ijk}  \ee
 over the cells that are included in the specified volume bounded by {\ct XB}. Note that this statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the coordinate parameters, {\ct XB}, which can extend into multiple meshes.
 
+If you are interested in the average value over a plane, give the {\ct XB} volume a small thickness to either side of the plane location encompassing the storage locations of the values of interest.  For example, scalars like temperatures live at the cell center, so locate the plane at the cell center and add a small delta to either side of that plane for the {\ct XB}.
+
 \subsubsection{Volume-Weighted Mean}
 
 For a gas phase scalar quantity, $\phi(x,y,z)$, {\ct SPATIAL\_STATISTIC='VOLUME MEAN'} produces the discrete analog of
