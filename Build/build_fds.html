@@ -21,6 +21,9 @@ function build_fds(args){
 function build_fds_debug(args){
   MyObject.Run(get_fullpath("Scripts/webBUILDfdsdebug.bat ",args));
 }
+function build_fds_dv(args){
+  MyObject.Run(get_fullpath("Scripts/webBUILDfdsdv.bat ",args));
+}
 function build_test(args){
   MyObject.Run(get_fullpath("Scripts/webBUILDtest.bat ",args));
 }
@@ -48,6 +51,17 @@ function build_test(args){
 </td>
 <td>
 <button onclick="build_fds('osx')">release</button>
+</td>
+</tr>
+<tr align="center">
+<td>
+<button onclick="build_fds_dv('windows')">development</button>
+</td>
+<td>
+<button onclick="build_fds_dv('linux')">development</button>
+</td>
+<td>
+<button onclick="build_fds_dv('osx')">development</button>
 </td>
 </tr>
 <tr align="center">

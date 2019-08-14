@@ -19,8 +19,8 @@ goto:eof
 
 call %envfile%
 echo.
-echo  Building FDS for %platform%
-Title Building FDS for %platform%
+echo  debug Building FDS for %platform%
+Title debug Building FDS for %platform%
 
 %svn_drive%
 
