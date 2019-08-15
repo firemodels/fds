@@ -12,7 +12,7 @@
 %
 %            Q       contains the data
 %            Time    contains the time points
-function [Q,Time]=slread(fname,Tstart,Tend,Tstep)
+function [Q,Time]=sl3d_read(fname,Tstart,Tend,Tstep)
 
 if (nargin<4),Tstep = Tend-Tstart; end
 
