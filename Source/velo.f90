@@ -2064,7 +2064,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
    ALTERED_GRADIENT = .FALSE.
 
    ! Loop over all possible orientations of edge and reassign velocity gradients if appropriate
-   
+
    SIGN_LOOP: DO I_SGN=-1,1,2
       ORIENTATION_LOOP: DO IS=1,3
 
