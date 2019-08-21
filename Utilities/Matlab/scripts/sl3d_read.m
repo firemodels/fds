@@ -14,7 +14,7 @@
 %            Time    contains the time points
 function [Q,Time]=sl3d_read(fname,Tstart,Tend,Tstep)
 
-if (nargin<4),Tstep = Tend-Tstart; end
+if nargin<4; Tstep = Tend-Tstart; end
 
 Time = 0;
 
@@ -48,29 +48,33 @@ st = 1;
 
 while Time < Tstart
 
-r4b(fid);
-Time(st) = fread(fid,1,'float32');
-r4b(fid);
+    % disp(['reading Time ' num2str(st)])
 
-r4b(fid);
-Q_tmp = fread(fid,[Isize,Jsize*Ksize],'float32')';
-Q(:,:,:,st) = reshape(Q_tmp,[Isize,Jsize,Ksize]);
-r4b(fid);
+    r4b(fid);
+    Time(st) = fread(fid,1,'float32');
+    r4b(fid);
+
+    r4b(fid);
+    Q_tmp = fread(fid,[Isize*Jsize*Ksize],'float32')';
+    Q(:,:,:,st) = reshape(Q_tmp,[Isize,Jsize,Ksize]);
+    r4b(fid);
 
 end
 
 while Time < Tend,
 
-st = st + 1;
+    st = st + 1;
 
-r4b(fid);
-Time(st) = fread(fid,1,'float32');
-r4b(fid);
+    % disp(['reading Time ' num2str(st)])
 
-r4b(fid);
-Q_tmp = fread(fid,[Isize,Jsize*Ksize],'float32')';
-Q(:,:,:,st) = reshape(Q_tmp,[Isize,Jsize,Ksize]);
-r4b(fid);
+    r4b(fid);
+    Time(st) = fread(fid,1,'float32');
+    r4b(fid);
+
+    r4b(fid);
+    Q_tmp = fread(fid,[Isize*Jsize*Ksize],'float32')';
+    Q(:,:,:,st) = reshape(Q_tmp,[Isize,Jsize,Ksize]);
+    r4b(fid);
 
 end
 
