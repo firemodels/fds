@@ -366,15 +366,10 @@ LOGICAL :: USE_OPENMP               = .FALSE.
 
 INTEGER :: N_CSVF=0
 
-! Complex geometry (experimental-OLD)
-
-INTEGER :: IMMERSED_BOUNDARY_METHOD=1,N_GEOM=0,N_VERT=0,N_FACE=0,N_VOLU=0
-INTEGER, PARAMETER :: ICOMPLEX=5
-INTEGER, ALLOCATABLE, DIMENSION(:) :: INT_FACE_VALS_ARRAY,INT_SURF_VALS_ARRAY
-INTEGER, ALLOCATABLE, DIMENSION(:) :: INT_VOLS_VALS_ARRAY,INT_MATL_VALS_ARRAY
-REAL(FB), ALLOCATABLE, DIMENSION(:) :: FB_REAL_FACE_VALS_ARRAY,FB_REAL_VERT_ARRAY
-REAL(EB) :: DT_BNDC=1.E10_EB,DT_GEOC=1.E10_EB
-LOGICAL :: CUTCELLS ! if true call routine for generating cutcell list (for debugging)
+! ! Complex geometry (experimental-OLD)
+!
+INTEGER :: N_FACE=0,N_GEOM=0
+REAL(EB):: DT_BNDC=1.E10_EB
 
 ! Complex Geometry parameters (experimental-NEW)
 
@@ -422,12 +417,6 @@ INTEGER, PARAMETER :: IBM_ALLOC_DELEM = 10
 INTEGER, PARAMETER :: IBM_MAX_WSTRIANG_SEG =  2  ! Up to two wstriangles related to a segment.
 INTEGER, PARAMETER :: IBM_MAX_WSTRIANG_TRI =  1  ! Up to 1 wstriangle per BODINT_PLANE triangle (i.e. surface triangle
                                                  ! aligned with X1PLN plane.)
-
-! Outer Geometric entity to use for interpolation to velocity/stress normal probe external points:
-
-LOGICAL :: IBM_PLANE_INTERPOLATION=.FALSE. ! If .TRUE. use external plane, if .FALSE. use external cubic volume.
-
-! CELL_INDEX counter related to GEOMS.
 
 INTEGER, ALLOCATABLE, DIMENSION(:)   :: CELL_COUNT_CC
 INTEGER, ALLOCATABLE, DIMENSION(:,:) :: N_EDGES_DIM_CC
