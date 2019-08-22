@@ -418,24 +418,6 @@ TYPE IBM_CUTFACE_TYPE
    REAL(EB) :: VELN_CRF, VELD_CRF, DHDX_CRF, FN_CRF, VELNP1_CRF, VELINT_CRF
    INTEGER,  ALLOCATABLE, DIMENSION(:,:,:)                         ::      CELL_LIST ! [RC_TYPE I J K ]
 
-   ! Fields related to IBM_PLANE_INTERPOLATION=.TRUE.:
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:)            ::    IJK_CARTCEN ! [ I J K ]
-   REAL(EB), ALLOCATABLE, DIMENSION(:)              :: XYZ_BP_CARTCEN ! [x y z] location of bnd pt.
-   INTEGER,  ALLOCATABLE, DIMENSION(:)              ::  INBFC_CARTCEN ! Inbound face BP belongs to.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)              ::INTCOEF_CARTCEN ! Interpo coefficients.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)              ::VEL_CARTCEN,VELS_CARTCEN  ! Stencil velocity values.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)              :: FV_CARTCEN,DHDX1_CARTCEN ! Stencil FV and DHDX1.
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:)            :: NOMIND_CARTCEN
-
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:,:)          ::    IJK_CFCEN ! [ I J K ]
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)            :: XYZ_BP_CFCEN ! [x y z] location of bnd pt.
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:)            ::  INBFC_CFCEN ! Inbound face BP belongs to.
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)            ::INTCOEF_CFCEN ! Interpo coefficients.
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)            ::VEL_CFCEN,VELS_CFCEN ! Stencil velocity values.
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)            ::FV_CFCEN,DHDX1_CFCEN
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:,:)          :: NOMIND_CFCEN
-
-   ! Fields related to IBM_PLANE_INTERPOLATION=.FALSE.:
    ! Here: VIND=IAXIS:KAXIS, EP=1:INT_N_EXT_PTS,
    ! INT_VEL_IND = 1; INT_VELS_IND = 2; INT_FV_IND = 3; INT_DHDX_IND = 4; N_INT_FVARS = 4;
    ! INT_NPE_LO = INT_NPE(LOW,VIND,EP,IFACE); INT_NPE_HI = INT_NPE(HIGH,VIND,EP,IFACE).
@@ -501,23 +483,6 @@ TYPE IBM_CUTCELL_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:)                       ::      H,HS ! Pressure H containers.
    REAL(EB), ALLOCATABLE, DIMENSION(:)                       ::  RTRM,R_H_G,RHO_0,WVEL
 
-   ! Fields related to IBM_PLANE_INTERPOLATION=.TRUE.:
-   INTEGER,  DIMENSION(MAX_DIM,MAX_INTERP_POINTS_PLANE)      ::    IJK_CARTCEN ! [ I J K ]
-   REAL(EB), DIMENSION(MAX_DIM)                              :: XYZ_BP_CARTCEN ! [x y z] location of bnd pt.
-   INTEGER,  DIMENSION(3)                                    ::  INBFC_CARTCEN ! Inbound face BP belongs to.
-   REAL(EB), DIMENSION(MAX_INTERP_POINTS_PLANE+1)            ::INTCOEF_CARTCEN ! Interpo coefficients.
-   REAL(EB), DIMENSION(MAX_INTERP_POINTS_PLANE+1)            ::H_CARTCEN=0._EB       ! Stencil H values.
-   REAL(EB), DIMENSION(MAX_INTERP_POINTS_PLANE+1)            ::RHO_0_CARTCEN=0._EB,W_CARTCEN=0._EB
-   INTEGER,  DIMENSION(LOW_IND:HIGH_IND,MAX_INTERP_POINTS_PLANE)   :: NOMIND_CARTCEN
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:,:)                   ::    IJK_CCCEN ! [ I J K ]
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)                     :: XYZ_BP_CCCEN ! [x y z] location of bnd pt.
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:)                     ::  INBFC_CCCEN ! Inbound face BP belongs to.
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)                     ::INTCOEF_CCCEN ! Interpo coefficients.
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)                     ::H_CCCEN       ! Stencil H values.
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)                     ::RHO_0_CCCEN,W_CCCEN
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:,:)                   :: NOMIND_CCCEN
-
-   ! Fields related to IBM_PLANE_INTERPOLATION=.FALSE.:
    ! Here: VIND=0, EP=1:INT_N_EXT_PTS
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: INT_IJK        ! (IAXIS:KAXIS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
    REAL(EB), ALLOCATABLE, DIMENSION(:)        :: INT_COEF       ! (INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
@@ -585,21 +550,8 @@ TYPE IBM_RCVEL_TYPE
    INTEGER :: NCFACE, IWC=0
    INTEGER,  DIMENSION(MAX_DIM+1)                                  ::            IJK ! [ I J K x1axis]
    INTEGER,  DIMENSION(MAX_DIM+1,LOW_IND:HIGH_IND,MAX_RCVEL_NCFACE)::      CELL_LIST ! [RC_TYPE I J K ]
-
-   ! Fields related to IBM_PLANE_INTERPOLATION=.TRUE.
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:)            ::    IJK_CARTCEN ! [ I J K ]
-   REAL(EB), ALLOCATABLE, DIMENSION(:)              :: XYZ_BP_CARTCEN ! [x y z] location of bnd pt.
-   INTEGER,  ALLOCATABLE, DIMENSION(:)              ::  INBFC_CARTCEN ! Inbound face BP belongs to.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)              ::INTCOEF_CARTCEN ! Interpo coefficients.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)              ::VEL_CARTCEN,VELS_CARTCEN
-                                                                     ! Stencil velocity values.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)              :: FV_CARTCEN,DHDX1_CARTCEN
-                                                                     ! Stencil FV and DHDX1.
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:)            :: NOMIND_CARTCEN
-
    REAL(EB) :: VELINT
 
-   ! Fields related to IBM_PLANE_INTERPOLATION=.FALSE.:
    ! Here: VIND=IAXIS:KAXIS, EP=1:INT_N_EXT_PTS,
    ! INT_VEL_IND = 1; INT_VELS_IND = 2; INT_FV_IND = 3; INT_DHDX_IND = 4; N_INT_FVARS = 4;
    ! INT_NPE_LO = INT_NPE(LOW,VIND,EP,IFACE); INT_NPE_LO = INT_NPE(HIGH,VIND,EP,IFACE).
@@ -614,22 +566,6 @@ TYPE IBM_RCVEL_TYPE
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: INT_NOMIND     ! (LOW_IND:HIGH_IND,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
 
 END TYPE IBM_RCVEL_TYPE
-
-! Regular Cartesian cells interpolation type:
-INTEGER, PARAMETER :: MAX_RCELL_NINTCELL = 26
-TYPE IBM_RCELL_TYPE
-   INTEGER :: NCCELL
-   INTEGER,  DIMENSION(MAX_DIM)                          ::            IJK ! [ I J K]
-   INTEGER,  DIMENSION(MAX_RCELL_NINTCELL)               ::      CELL_LIST ! [RC_TYPE I J K ]
-   INTEGER,  DIMENSION(MAX_DIM,MAX_INTERP_POINTS_PLANE)  ::    IJK_CARTCEN ! [ I J K ]
-   REAL(EB), DIMENSION(MAX_DIM)                          :: XYZ_BP_CARTCEN ! [x y z] location of bnd pt.
-   INTEGER,  DIMENSION(3)                                ::  INBFC_CARTCEN ! Inbound face BP belongs to.
-   REAL(EB), DIMENSION(MAX_INTERP_POINTS_PLANE+1)        ::INTCOEF_CARTCEN ! Interpo coefficients.
-   REAL(EB), DIMENSION(MAX_INTERP_POINTS_PLANE+1)        ::H_CARTCEN=0._EB       ! Stencil H values.
-   REAL(EB), DIMENSION(MAX_INTERP_POINTS_PLANE+1)        ::RHO_0_CARTCEN=0._EB,W_CARTCEN=0._EB
-   INTEGER,  DIMENSION(LOW_IND:HIGH_IND,MAX_INTERP_POINTS_PLANE)   :: NOMIND_CARTCEN
-   REAL(EB) :: HINT
-END TYPE IBM_RCELL_TYPE
 
 TYPE CSVF_TYPE
     CHARACTER(255) :: CSVFILE,UVWFILE
