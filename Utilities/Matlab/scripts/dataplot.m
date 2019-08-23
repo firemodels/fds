@@ -158,8 +158,14 @@ for i=2:n_plots
         end
 
         if ~ftest
-            if exist('K')
-                clear K
+            if exist('K1')
+                clear K1
+            end
+            if exist('K2')
+                clear K2
+            end
+            if exist('d1_Key')
+                clear d1_Key
             end
             if exist('d2_Key')
                 clear d2_Key
@@ -168,7 +174,9 @@ for i=2:n_plots
             figure
         else
             hold on
-            K_save = K;
+            K1_save = K1;
+            K2_save = K2;
+            d1_Key_save = d1_Key;
             d2_Key_save = d2_Key;
         end
         set(gca,'Units',Plot_Units)
@@ -277,16 +285,30 @@ for i=2:n_plots
                 end
                 if ~ftest
                     if strcmp(Plot_Type,'linear')
-                        K(j) = plot(X,Y,char(style(j))); hold on
+                        K1(j) = plot(X,Y,char(style(j))); hold on
                         if strcmp(Metric,'slope') plot([0 10000],[p(2),p(2)+10000*p(1)],'r-'); end
                     elseif strcmp(Plot_Type,'loglog')
-                        K(j) = loglog(X,Y,char(style(j))); hold on
+                        K1(j) = loglog(X,Y,char(style(j))); hold on
                     elseif strcmp(Plot_Type,'semilogx')
-                        K(j) = semilogx(X,Y,char(style(j))); hold on
+                        K1(j) = semilogx(X,Y,char(style(j))); hold on
                     elseif strcmp(Plot_Type,'semilogy')
-                        K(j) = semilogy(X,Y,char(style(j))); hold on
+                        K1(j) = semilogy(X,Y,char(style(j))); hold on
                     end
-                    set(K(j),'linewidth',Line_Width)
+                    set(K1(j),'linewidth',Line_Width)
+                else
+                    if ~strcmp(char(style(j)),'blank')
+                       if strcmp(Plot_Type,'linear')
+                           K1(length(K1_save)+j) = plot(X,Y,char(style(j))); hold on
+                           if strcmp(Metric,'slope') plot([0 10000],[p(2),p(2)+10000*p(1)],'r-'); end
+                       elseif strcmp(Plot_Type,'loglog')
+                           K1(length(K1_save)+j) = loglog(X,Y,char(style(j))); hold on
+                       elseif strcmp(Plot_Type,'semilogx')
+                           K1(length(K1_save)+j) = semilogx(X,Y,char(style(j))); hold on
+                       elseif strcmp(Plot_Type,'semilogy')
+                           K1(length(K1_save)+j) = semilogy(X,Y,char(style(j))); hold on
+                       end
+                       set(K1(length(K1_save)+j),'linewidth',Line_Width)
+                    end
                 end
             end
         catch
@@ -403,30 +425,31 @@ for i=2:n_plots
                 end
                 if ~ftest
                     if strcmp(Plot_Type,'linear')
-                        K(length(S1)+j) = plot(X,Y,char(style(j)));
+                        K2(j) = plot(X,Y,char(style(j)));
                         if strcmp(Metric,'slope') plot([0 10000],[p(2),p(2)+10000*p(1)],'r--'); end
                     elseif strcmp(Plot_Type,'loglog')
-                        K(length(S1)+j) = loglog(X,Y,char(style(j)));
+                        K2(j) = loglog(X,Y,char(style(j)));
                     elseif strcmp(Plot_Type,'semilogx')
-                        K(length(S1)+j) = semilogx(X,Y,char(style(j)));
+                        K2(j) = semilogx(X,Y,char(style(j)));
                     elseif strcmp(Plot_Type,'semilogy')
-                        K(length(S1)+j) = semilogy(X,Y,char(style(j)));
+                        K2(j) = semilogy(X,Y,char(style(j)));
                     end
-                    set(K(length(S1)+j),'linewidth',Line_Width)
+                    set(K2(j),'linewidth',Line_Width)
                 else
-                    if strcmp(Plot_Type,'linear')
-                        K(length(K_save)+j) = plot(X,Y,char(style(j)));
-                        if strcmp(Metric,'slope') plot([0 10000],[p(2),p(2)+10000*p(1)],'r--'); end
-                    elseif strcmp(Plot_Type,'loglog')
-                        K(length(K_save)+j) = loglog(X,Y,char(style(j)));
-                    elseif strcmp(Plot_Type,'semilogx')
-                        K(length(K_save)+j) = semilogx(X,Y,char(style(j)));
-                    elseif strcmp(Plot_Type,'semilogy')
-                        K(length(K_save)+j) = semilogy(X,Y,char(style(j)));
+                    if ~strcmp(char(style(j)),'blank')
+                       if strcmp(Plot_Type,'linear')
+                           K2(length(K2_save)+j) = plot(X,Y,char(style(j)));
+                           if strcmp(Metric,'slope') plot([0 10000],[p(2),p(2)+10000*p(1)],'r--'); end
+                       elseif strcmp(Plot_Type,'loglog')
+                           K2(length(K2_save)+j) = loglog(X,Y,char(style(j)));
+                       elseif strcmp(Plot_Type,'semilogx')
+                           K2(length(K2_save)+j) = semilogx(X,Y,char(style(j)));
+                       elseif strcmp(Plot_Type,'semilogy')
+                           K2(length(K2_save)+j) = semilogy(X,Y,char(style(j)));
+                       end
+                       set(K2(length(K2_save)+j),'linewidth',Line_Width)
                     end
-                    set(K(length(K_save)+j),'linewidth',Line_Width)
                 end
-
             end
         catch
             display(['Error: Problem with dataplot row ', num2str(i), ' (', Dataname,...
@@ -467,7 +490,7 @@ for i=2:n_plots
             set(gca,'FontSize',Label_Font_Size)
 
             % Inserts title, skips if 'f' switch (avoids overplotting)
-            if ~ftest
+          % if ~ftest
                 if strcmp(Flip_Axis,'no')
                     xlabel(Ind_Title,'Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
                     ylabel(Dep_Title,'Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
@@ -481,15 +504,24 @@ for i=2:n_plots
                     text(X_Title_Position,Y_Title_Position,...
                         Plot_Title,'FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
                 end
-            end
+          % end
 
             if size(Key_Position)>0
                 if ~ftest
-                    legend_handle = legend(K,[parsepipe(d1_Key),parsepipe(d2_Key)],'Location',Key_Position);
+                    legend_handle = legend([K1 K2],[parsepipe(d1_Key),parsepipe(d2_Key)],'Location',Key_Position);
                 else
                     % this allows us to handle multiple lines on the same plot
-                    legend_handle = legend(K,[parsepipe(d1_Key),parsepipe(d2_Key_save),parsepipe(d2_Key)],'Location',Key_Position);
-                    d2_Key = [d2_Key_save,'|',d2_Key];
+                    if ~strcmp(d1_Key,'blank')
+                       d1_Key = [d1_Key_save,'|',d1_Key];
+                    else
+                       d1_Key = d1_Key_save;
+                    end
+                    if ~strcmp(d2_Key,'blank')
+                       d2_Key = [d2_Key_save,'|',d2_Key];
+                    else
+                       d2_Key = d2_Key_save;
+                    end
+                    legend_handle = legend([K1 K2],[parsepipe(d1_Key),parsepipe(d2_Key)],'Location',Key_Position);
                 end
                 if strcmp(Key_Position,'EastOutside')
                    set(legend_handle,'Units',Paper_Units)
