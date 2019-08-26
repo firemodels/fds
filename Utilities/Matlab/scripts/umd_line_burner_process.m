@@ -15,7 +15,7 @@ Lf_z   = Lf_min:Lf_dz:Lf_max;
 Lf_fac = 0.98;
 Lf_dt  = 10;
 
-outdir = '../../../out/UMD_Line_Burner/FDS_Output_Files/';
+outdir = '../../../out/UMD_Line_Burner/';
 
 fuel_name    = {'methane','propane'};
 res_name     = {'1p25cm','p625cm','p3125cm'};

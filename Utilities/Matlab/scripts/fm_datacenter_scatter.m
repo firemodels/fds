@@ -3,7 +3,7 @@
 
 % Generate fds summary data for scatterplots
 
-outdir = '../../../out/FM_FPRF_Datacenter/FDS_Output_Files/';
+outdir = '../../../out/FM_FPRF_Datacenter/';
 expdir = '../../../exp/FM_FPRF_Datacenter/';
 
 [exp_data] = csvread([expdir,'/fm_exp.csv'],1);

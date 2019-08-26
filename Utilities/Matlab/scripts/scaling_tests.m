@@ -9,7 +9,7 @@ close all
 
 plot_style
 
-outdir = '../../../out/MPI_Scaling_Tests/FDS_Output_Files/';
+outdir = '../../../out/MPI_Scaling_Tests/';
 
 M(1) = importdata([outdir,'strong_scaling_test_001_cpu.csv'],',',1);
 M(2) = importdata([outdir,'strong_scaling_test_008_cpu.csv'],',',1);
@@ -88,7 +88,7 @@ close all
 clear all
 plot_style
 
-outdir = '../../../out/MPI_Scaling_Tests/FDS_Output_Files/';
+outdir = '../../../out/MPI_Scaling_Tests/';
 
 M(1)  = importdata([outdir,'weak_scaling_test_001_cpu.csv'],',',1);
 M(2)  = importdata([outdir,'weak_scaling_test_002_cpu.csv'],',',1);

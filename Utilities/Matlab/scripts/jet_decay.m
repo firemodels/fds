@@ -5,7 +5,7 @@
 close all
 clear all
 
-outdir = '../../../out/Turbulent_Jet/FDS_Output_Files/';
+outdir = '../../../out/Turbulent_Jet/';
 
 % gather FDS results
 

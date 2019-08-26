@@ -6,7 +6,7 @@ close all
 clear all
 
 expdir = '../../../exp/BRE_Spray/';
-outdir = '../../../out/BRE_Spray/FDS_Output_Files/';
+outdir = '../../../out/BRE_Spray/';
 inpdir = '../../Validation/BRE_Spray/FDS_Input_Files/';
 
 % load experimental data and FDS prediction
@@ -182,7 +182,7 @@ print(gcf,'-dpdf','../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/BRE_LEMTA_S
 %add LEMTA data base to BRE data base
 
 expdir = '../../../exp/LEMTA_Spray/';
-outdir = '../../../out/LEMTA_Spray/FDS_Output_Files/';
+outdir = '../../../out/LEMTA_Spray/';
 inpdir = '../../Validation/LEMTA_Spray/FDS_Input_Files/';
 
 % load experimental data and FDS prediction

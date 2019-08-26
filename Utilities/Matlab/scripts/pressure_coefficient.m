@@ -7,7 +7,7 @@ clear all
 
 plot_style
 
-res_dir = '../../../out/Wind_Engineering/FDS_Output_Files/';
+res_dir = '../../../out/Wind_Engineering/';
 exp_dir = '../../../exp/Wind_Engineering/';
 plt_dir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Wind_Engineering/';
 

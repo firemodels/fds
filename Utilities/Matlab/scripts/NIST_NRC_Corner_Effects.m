@@ -4,7 +4,7 @@
 %
 % Reads the _devc.csv file and writes output in a form appropriate for dataplot.m
 
-outdir = '../../../out/NIST_NRC_Corner_Effects/FDS_Output_Files/';
+outdir = '../../../out/NIST_NRC_Corner_Effects/';
 
 casename{1}  = 'corner_200_kW';
 casename{2}  = 'corner_300_kW';

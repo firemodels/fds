@@ -8,7 +8,7 @@ clear all
 close all
 
 expdir = '../../../exp/Backward_Facing_Step/';
-datdir = '../../../out/Backward_Facing_Step/FDS_Output_Files/';
+datdir = '../../../out/Backward_Facing_Step/';
 pltdir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Backward_Facing_Step/';
 
 rkappa = 1/.41;
