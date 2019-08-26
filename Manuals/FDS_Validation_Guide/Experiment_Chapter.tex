@@ -1166,15 +1166,38 @@ As part of a Nuclear Regulatory Commission (NRC) research project to assess fire
 \section{NIST Pool Fire Experiments}
 \label{NIST_Pool_Fires_Description}
 
-Falkenstein-Smith et al. measured the time-averaged centerline species concentrations within the flaming region of three liquid fuel fires---acetone, ethanol, and methanol~\cite{Falkenstein-Smith:2019}. The dimensions of the circular burner were similar to Weckman's methanol experiment described in Section~\ref{Waterloo_Methanol_Description}.
+The NIST Pool Fire Experiments include temperature, species concentration, and heat flux measurements of 30~cm and 100~cm diameter circular liquid fuel fires. 
 
-The measurements were made using a gas chromatograph/mass spectrometer system (GC/MSD). The volume fraction of each species was calculated via the number of moles identified by the GC/MSD at each centerline point. Soot mass fractions were measured during the gas sampling process.
+The 30~cm burner is 15~cm deep and has a wall thickness of 1.6~mm. The burner is fitted with legs such that the burner rim is positioned 30~cm above the floor. The bottom of the burner is maintained at a constant temperature by flowing tap water (nominally 20~$^\circ$C) through a 3~cm section on the bottom of the fuel pan. The dimensions of the circular burner are similar to Weckman's methanol experiment described in Section~\ref{Waterloo_Methanol_Description}.
+
+The 100~cm burner is also 15~cm deep, has a wall thickness of 1.6~mm, and is water-cooled.
+
+\subsubsection{Temperature Measurements}
+
+Hamins and Lock~\cite{Hamins:TN1928} made mean and rms centerline and radial gas temperature measurements for a 30~cm methanol pool fire. The radial measurements were made at heights of 3, 30, 40, 50, and 60~cm.
+
+Sung et al.~\cite{Sung:TN2019} made mean and rms centerline and radial gas temperature measurements for a 100~cm methanol pool fire. The radial measurements were made at heights of 20, 60, 100, 140, and 180~cm.
+
+\subsubsection{Gas Species Measurements}
+
+Falkenstein-Smith et al. measured the time-averaged centerline species concentrations within the flaming region of three liquid fuel fires---acetone, ethanol, and methanol~\cite{Falkenstein-Smith:2019}. The measurements were made using a gas chromatograph/mass spectrometer system (GC/MSD). The volume fraction of each species was calculated via the number of moles identified by the GC/MSD at each centerline point. Soot mass fractions were measured during the gas sampling process.
+
+\subsubsection{Heat Flux Measurements}
+
+Radiative and total heat flux measurements were made at various locations for the 30~cm and 100~cm methanol pool fires.
+\begin{itemize}
+\item Kim et al.~\cite{Kim:FSJ2019} made total heat flux measurements along a radial profile extending 1.5~m outwards from the center of the 30~cm methanol fire.
+\item Hamins et al.~\cite{Hamins:CST1994} made radiative heat flux measurements along a radial profile extending from the pool center to the outer rim of the 30~cm methanol fire.
+\item Klassen et al.~\cite{Klassen:GCR1994} and Kim et al.~\cite{Kim:FSJ2019} made radiative heat flux measurements along a radial profile extending outwards from the outer rim of the 30~cm methanol fire.
+\item Kim et al.~\cite{Kim:FSJ2019} made total heat flux measurements along a vertical profile 60~cm from the center of the 30~cm methanol fire.
+\item Sung et al.~\cite{Sung:TN2019} made total heat flux measurements along a radial profile extending from outer rim to 2~m, and at various heights and distances from center of the 100~cm methanol fire.
+\end{itemize}
 
 \subsubsection{Modeling Notes}
 
-The pool fires are modeled at three different grid resolutions---2~cm, 1~cm, and 0.5~cm. The mass loss rate of the fuel is specified.
+The 30~cm pool fires are modeled at three different grid resolutions---2~cm, 1~cm, and 0.5~cm. The 100~cm pool fires are modeled at 4~cm, 2~cm, and 1~cm resolution. The mass loss rate of the fuel is specified.
 
-A two-step reaction mechanism is implemented. In the first reaction, fuel is converted to CO, soot, H$_2$, and H$_2$O. In the second reaction, the CO, soot, and H$_2$ are converted to CO$_2$ and H$_2$O. Both reactions employ fast kinetics, but proceed in series, not in parallel.
+A two-step reaction mechanism is implemented. In the first reaction, fuel is converted to CO, soot, H$_2$, and H$_2$O. In the second reaction, the CO, soot, and H$_2$ are converted to CO$_2$ and H$_2$O. Both reactions employ fast kinetics, but proceed in series, not in parallel. The relative amounts of CO, soot, and H$_2$ produced in the first step are still subjects of study, and for the moment have been estimated based on measured results. For example, the methanol fire produces no measurable soot and thus all of the carbon in the fuel molecule is assumed to produce CO in the first step.
 
 The radiative fraction is not specified, but rather predicted using the computed temperature and radiative properties computed by RadCal.
 
