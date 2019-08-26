@@ -37,6 +37,6 @@ echo Validation Guide Figures Copied
 #echo Verification Results Copied
 
 # Copy Validation Results
-#rsync -v -r --include '*/' --include 'FDS_Output_Files/*_git.txt' --include 'FDS_Output_Files/*.csv' --exclude '*' $FIREBOTVAL/* $BASEDIR/../Validation/
+#rsync -v -r --include '*/' --include '*_git.txt' --include '*.csv' --exclude '*' $FIREBOTVAL/* $BASEDIR/../Validation/
 #echo Validation Results Copied
 
