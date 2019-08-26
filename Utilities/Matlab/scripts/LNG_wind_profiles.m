@@ -8,7 +8,7 @@
 clear all
 close all
 
-outdir = '../../../out/LNG_Dispersion/FDS_Output_Files/';
+outdir = '../../../out/LNG_Dispersion/';
 expdir = '../../../exp/LNG_Dispersion/';
 pltdir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/LNG_Dispersion/';
 

@@ -4,7 +4,7 @@
 %
 % Reads and transposes line data at various times in simulation
 
-outdir = '../../../out/LNG_Dispersion/FDS_Output_Files/';
+outdir = '../../../out/LNG_Dispersion/';
 expdir = '../../../exp/LNG_Dispersion/';
 
 label = {'Burro3','Burro7','Burro8','Burro9'...

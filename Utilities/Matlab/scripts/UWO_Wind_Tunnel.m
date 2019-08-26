@@ -4,7 +4,7 @@
 %
 % Reads and transposes line data for UWO Wind Tunnel cases
 
-outdir = '../../../out/UWO_Wind_Tunnel/FDS_Output_Files/';
+outdir = '../../../out/UWO_Wind_Tunnel/';
 expdir = '../../../exp/UWO_Wind_Tunnel/';
 
 H = cell(2,5);

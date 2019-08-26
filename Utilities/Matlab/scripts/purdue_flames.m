@@ -6,7 +6,7 @@ close all
 clear all
 
 expdir = '../../../exp/Purdue_Flames/';
-outdir = '../../../out/Purdue_Flames/FDS_Output_Files/';
+outdir = '../../../out/Purdue_Flames/';
 pltdir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Purdue_Flames/';
 
 M = importdata([outdir,'7p1_cm_methane_4mm_line.csv']);
