@@ -26,7 +26,7 @@ EXP_Dir = '../../../exp/';
 OUT_Dir = '../../../out/';
 Manuals_Dir = '../../Manuals/';
 
-datadir = [OUT_Dir,'McCaffrey_Plume/FDS_Output_Files/'];
+datadir = [OUT_Dir,'McCaffrey_Plume/'];
 plotdir = [Manuals_Dir,'FDS_Validation_Guide/SCRIPT_FIGURES/McCaffrey_Plume/'];
 
 resolution = {'Coarse','Medium','Fine'};

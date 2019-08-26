@@ -18,7 +18,7 @@ for i=1:length(list_dir)
             for j=1:length(list_files)
                 if ~strcmp(list_files(j).name(1),'.') % ignore hidden files
                     k=k+1;
-                    output_dir{k} = ['../../../out/',list_dir(i).name,'/FDS_Output_Files/'];
+                    output_dir{k} = ['../../../out/',list_dir(i).name,'/'];
                     input_file{k} = list_files(j).name;
                 end
             end

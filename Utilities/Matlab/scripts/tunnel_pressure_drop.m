@@ -15,7 +15,7 @@
 close all
 clear all
 
-datadir = '../../../out/Moody_Chart/FDS_Output_Files/';
+datadir = '../../../out/Moody_Chart/';
 pltdir = '../../Manuals/FDS_User_Guide/SCRIPT_FIGURES/';
 
 plot_style

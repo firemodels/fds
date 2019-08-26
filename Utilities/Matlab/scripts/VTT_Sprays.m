@@ -2,7 +2,7 @@
 
 plot_style
 
-outdir = '../../../out/VTT_Sprays/FDS_Output_Files/';
+outdir = '../../../out/VTT_Sprays/';
 expdir = '../../../exp/VTT_Sprays/';
 
 files = dir(strcat([outdir,'*_line.csv']));

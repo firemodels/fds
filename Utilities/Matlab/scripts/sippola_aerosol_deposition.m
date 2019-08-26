@@ -7,7 +7,7 @@
 
 clear all
 
-outdir = '../../../out/Sippola_Aerosol_Deposition/FDS_Output_Files/';
+outdir = '../../../out/Sippola_Aerosol_Deposition/';
 
 filename = {'Sippola_Test_01_devc.csv', 'Sippola_Test_02_devc.csv' ...
             'Sippola_Test_03_devc.csv', 'Sippola_Test_04_devc.csv' ...

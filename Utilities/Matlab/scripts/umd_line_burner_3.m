@@ -10,7 +10,7 @@ clear all
 plot_style
 
 expdir = '../../../exp/Submodules/macfp-db/Extinction/UMD_Line_Burner/Experimental_Data/';
-outdir = '../../../out/UMD_Line_Burner/FDS_Output_Files/';
+outdir = '../../../out/UMD_Line_Burner/';
 pltdir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/UMD_Line_Burner/';
 
 exp_fname    = {'CH4_A_Data.csv','C3H8_A_Data.csv'};
