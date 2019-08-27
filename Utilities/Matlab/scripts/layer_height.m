@@ -11,7 +11,7 @@ clear all
 list_dir = dir('../../Validation/*');
 k = 0;
 for i=1:length(list_dir)
-    Output_Directory = (['../../../out/',list_dir(i).name,'/FDS_Output_Files']);
+    Output_Directory = (['../../../out/',list_dir(i).name]);
     if exist(Output_Directory)
         list_files = dir([Output_Directory,'/*HGL.input']);
         if size(list_files)>0
