@@ -7,7 +7,7 @@
 close all
 clear all
 
-outdir = '../../../out/FM_Burner/FDS_Output_Files/';
+outdir = '../../../out/FM_Burner/';
 
 fuel_name    = {'C2H4','C3H6','C3H8','CH4'};
 res_name     = {'1p0cm'};

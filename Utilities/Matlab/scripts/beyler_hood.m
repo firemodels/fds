@@ -6,7 +6,7 @@ close all
 clear all
 
 expdir = '../../../exp/Beyler_Hood/';
-outdir = '../../../out/Beyler_Hood/FDS_Output_Files/';
+outdir = '../../../out/Beyler_Hood/';
 
 % load experimental data and FDS prediction
 [exp_data] = csvread([expdir,'Beyler_Hood_data_lr.csv'],2);

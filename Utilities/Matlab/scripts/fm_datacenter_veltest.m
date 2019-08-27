@@ -5,7 +5,7 @@
 % Generate velocity comparison plots for the FM datacenter flow mapping tests
 
 expdir = '../../../exp/FM_FPRF_Datacenter/';
-outdir = '../../../out/FM_FPRF_Datacenter/FDS_Output_Files/';
+outdir = '../../../out/FM_FPRF_Datacenter/';
 
 % High flow test
 [exp_data] = csvread([expdir,'fm_datacenter_veltest_high.csv'],1);

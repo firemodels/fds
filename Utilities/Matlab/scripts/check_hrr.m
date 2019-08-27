@@ -9,7 +9,7 @@ clear all
 
 plot_style
 
-outdir = '../../../out/Heskestad_Flame_Height/FDS_Output_Files/';
+outdir = '../../../out/Heskestad_Flame_Height/';
 M = csvread([outdir,'box_height.csv'],1,0);
 Qs = M(:,1);
 Q = M(:,2);

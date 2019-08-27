@@ -6,7 +6,7 @@ close all
 clear all
 
 expdir = '../../../exp/Cup_Burner/';
-outdir = '../../../out/Cup_Burner/FDS_Output_Files/';
+outdir = '../../../out/Cup_Burner/';
 
 plot_style
 

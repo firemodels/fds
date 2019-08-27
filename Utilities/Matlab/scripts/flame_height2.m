@@ -5,7 +5,7 @@
 close all
 clear all
 
-outdir = '../../../out/Heskestad_Flame_Height/FDS_Output_Files/';
+outdir = '../../../out/Heskestad_Flame_Height/';
 expdir = '../../../exp/Heskestad_Flame_Height/';
 
 % list of line files

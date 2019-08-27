@@ -3,6 +3,8 @@
 &MULT ID='mesh multiplier', DX=0.2, DY=0.2, DZ=0.2, I_UPPER=8, J_UPPER=7, K_UPPER=5 /
 &MESH IJK=20,20,20, XB=0.0,0.2,0.0,0.2,0.0,0.2, MULT_ID='mesh multiplier' /
 
+&ZONE XYZ=0.99,0.99,0.99 /
+
 &TIME T_END=0.2, DT=0.002 /
 
 &SPEC ID='WATER VAPOR' /

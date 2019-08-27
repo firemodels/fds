@@ -8,7 +8,7 @@ close all
 clear all
 
 expdir = '../../../exp/Sandia_Plumes/';
-outdir = '../../../out/Sandia_Plumes/FDS_Output_Files/';
+outdir = '../../../out/Sandia_Plumes/';
 pltdir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Sandia_Plumes/';
 
 % plot velocity signal and power spectrum

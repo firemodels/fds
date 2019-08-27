@@ -10,7 +10,7 @@ clear all
 % Set global reaction rate parameters
 
 expdir = '../../../exp/CHRISTIFIRE/';
-outdir = '../../../out/CHRISTIFIRE/FDS_Output_Files/';
+outdir = '../../../out/CHRISTIFIRE/';
 
 skip_case = 0;
 if ~exist([outdir,'CHRISTIFIRE_S701_tga_N2_v1_devc.csv'])

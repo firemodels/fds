@@ -11,7 +11,7 @@ close all;
 % and post processing scripts
 %------------------------------------------------
 
-outdir = '../../../out/NIST_RSE_1994/FDS_Output_Files/';
+outdir = '../../../out/NIST_RSE_1994/';
 
 %------------------------------------------------
 % Read in FDS output files

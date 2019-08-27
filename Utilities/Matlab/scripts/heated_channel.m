@@ -17,7 +17,7 @@ plot_style
 
 % plot the DNS results
 
-outdir='../../../out/Heated_Channel_Flow/FDS_Output_Files/';
+outdir='../../../out/Heated_Channel_Flow/';
 expdir='../../../exp/Heated_Channel_Flow/';
 
 M = importdata([expdir,'heated_channel_dns_data.csv'],',',1);

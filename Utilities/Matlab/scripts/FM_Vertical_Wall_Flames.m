@@ -4,7 +4,7 @@
 %
 % Reads the _devc.csv file and writes output in a form appropriate for dataplot.m
 
-outdir = '../../../out/FM_Vertical_Wall_Flames/FDS_Output_Files/';
+outdir = '../../../out/FM_Vertical_Wall_Flames/';
 
 nts = 32;
 
