@@ -1,9 +1,11 @@
 % Floyd
 % 8-28-2012
-% Beyler_hood.m
+% beyler_hood.m
 
 close all
 clear all
+
+disp('beyler_hood ...')
 
 expdir = '../../../exp/Beyler_Hood/';
 outdir = '../../../out/Beyler_Hood/';

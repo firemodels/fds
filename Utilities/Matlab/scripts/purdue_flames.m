@@ -5,6 +5,8 @@
 close all
 clear all
 
+disp('purdue_flames ...')
+
 expdir = '../../../exp/Purdue_Flames/';
 outdir = '../../../out/Purdue_Flames/';
 pltdir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Purdue_Flames/';
