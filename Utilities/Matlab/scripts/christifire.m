@@ -7,6 +7,8 @@
 close all
 clear all
 
+disp('christifire ...')
+
 % Set global reaction rate parameters
 
 expdir = '../../../exp/CHRISTIFIRE/';

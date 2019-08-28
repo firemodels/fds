@@ -7,6 +7,8 @@ function main()
 clear all
 close all
 
+disp('backward_facing_step ...')
+
 expdir = '../../../exp/Backward_Facing_Step/';
 datdir = '../../../out/Backward_Facing_Step/';
 pltdir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Backward_Facing_Step/';

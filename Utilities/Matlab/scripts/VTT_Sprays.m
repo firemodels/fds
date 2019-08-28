@@ -1,4 +1,8 @@
 % Topi Sikanen
+% Oct 25, 2013
+% VTT_Sprays.m
+
+disp('VTT_Sprays ...')
 
 plot_style
 
