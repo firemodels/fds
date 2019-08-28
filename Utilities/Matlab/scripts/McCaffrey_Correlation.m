@@ -12,15 +12,11 @@ plot_style
 
 hfig1=figure(1);
 set(hfig1,'Visible',Figure_Visibility)
-% reset(gcf)
-% reset(gca)
 set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 hfig2=figure(2);
 set(hfig2,'Visible',Figure_Visibility)
-% reset(gcf)
-% reset(gca)
 set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
