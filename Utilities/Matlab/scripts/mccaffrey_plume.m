@@ -4,6 +4,8 @@
 
 % first call McCaffrey_Correlation.m to make data plots
 
+disp('mccaffrey_plume ...')
+
 McCaffrey_Correlation
 McCaffrey_Surface_Temp
 

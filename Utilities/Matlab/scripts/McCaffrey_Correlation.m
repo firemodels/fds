@@ -10,15 +10,13 @@ pltdir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/McCaffrey_Plume/';
 
 plot_style
 
-figure(1)
-reset(gcf)
-reset(gca)
+hfig1=figure(1);
+set(hfig1,'Visible',Figure_Visibility)
 set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
-figure(2)
-reset(gcf)
-reset(gca)
+hfig2=figure(2);
+set(hfig2,'Visible',Figure_Visibility)
 set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
@@ -77,19 +75,23 @@ end
 h1 = zeros(1,length(chid)+1);
 h2 = zeros(1,length(chid)+1);
 
-figure(1); h1(end)=loglog(zq,vq,'b--','linewidth',2); hold on
-figure(2); h2(end)=loglog(zq,Tq,'r--','linewidth',2); hold on
+set(0, 'CurrentFigure', hfig1);
+h1(end)=loglog(zq,vq,'b--','linewidth',2); hold on
+set(0, 'CurrentFigure', hfig2);
+h2(end)=loglog(zq,Tq,'r--','linewidth',2); hold on
 
 for i=1:length(chid)
     V = importdata([expdir,chid{i},'_V.csv'],',',1);
     T = importdata([expdir,chid{i},'_T.csv'],',',1);
-    figure(1); h1(i)=loglog(V.data(:,1),V.data(:,2),mark{i});
-    figure(2); h2(i)=loglog(T.data(:,1),T.data(:,2),mark{i});
+    set(0, 'CurrentFigure', hfig1);
+    h1(i)=loglog(V.data(:,1),V.data(:,2),mark{i});
+    set(0, 'CurrentFigure', hfig2);
+    h2(i)=loglog(T.data(:,1),T.data(:,2),mark{i});
 end
 
 % format and print velocity correlation
 
-figure(1)
+set(0, 'CurrentFigure', hfig1);
 
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
@@ -120,7 +122,7 @@ print(gcf,'-dpdf',[pltdir,'McCaffrey_Velocity_Correlation'])
 
 % format and print temperature correlation
 
-figure(2)
+set(0, 'CurrentFigure', hfig2);
 
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
