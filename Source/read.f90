@@ -12183,9 +12183,12 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
          OVERLAPPING_X = .TRUE.
          OVERLAPPING_Y = .TRUE.
          OVERLAPPING_Z = .TRUE.
-         IF (XB(1)>=M%XF .OR. XB(2)<=M%XS) OVERLAPPING_X = .FALSE.
-         IF (XB(3)>=M%YF .OR. XB(4)<=M%YS) OVERLAPPING_Y = .FALSE.
-         IF (XB(5)>=M%ZF .OR. XB(6)<=M%ZS) OVERLAPPING_Z = .FALSE.
+         IF (XB(1)==XB(2) .AND. (XB(1)> M%XF .OR. XB(2)< M%XS)) OVERLAPPING_X = .FALSE.
+         IF (XB(1)/=XB(2) .AND. (XB(1)>=M%XF .OR. XB(2)<=M%XS)) OVERLAPPING_X = .FALSE.
+         IF (XB(3)==XB(4) .AND. (XB(3)> M%YF .OR. XB(4)< M%YS)) OVERLAPPING_Y = .FALSE.
+         IF (XB(3)/=XB(4) .AND. (XB(3)>=M%YF .OR. XB(4)<=M%YS)) OVERLAPPING_Y = .FALSE.
+         IF (XB(5)==XB(6) .AND. (XB(5)> M%ZF .OR. XB(6)< M%ZS)) OVERLAPPING_Z = .FALSE.
+         IF (XB(5)/=XB(6) .AND. (XB(5)>=M%ZF .OR. XB(6)<=M%ZS)) OVERLAPPING_Z = .FALSE.
          IF (OVERLAPPING_X .AND. OVERLAPPING_Y .AND. OVERLAPPING_Z) THEN
             BAD = .FALSE.
             IF (PROCESS(NM)==MYID) MESH_DEVICE(NM) = 1
