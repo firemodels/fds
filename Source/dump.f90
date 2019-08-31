@@ -5894,7 +5894,7 @@ DEVICE_LOOP: DO N=1,N_DEVC
          DV%TMP_UP = DV%VALUE_3/(DV%Z2-DV%Z1-DV%Z_INT)  ! This is Z_INT from previous time step
       ENDIF
       DV%Z_INT   = (DV%VALUE_1+DV%VALUE_2*DV%TMP_LOW**2-2._EB*DV%TMP_LOW*(DV%Z2-DV%Z1))
-      IF (ABS(DV%Z_INT)<=TWO_EPSILON_EB) THEN
+      IF (DV%Z_INT<=TWO_EPSILON_EB) THEN
          DV%Z_INT = DV%Z2-DV%Z1
       ELSE
          DV%Z_INT = DV%TMP_LOW*(DV%VALUE_1*DV%VALUE_2-(DV%Z2-DV%Z1)**2)/DV%Z_INT
