@@ -21,6 +21,9 @@ function build_fds(args){
 function build_fds_debug(args){
   MyObject.Run(get_fullpath("Scripts/webBUILDfdsdebug.bat ",args));
 }
+function build_fds_dv(args){
+  MyObject.Run(get_fullpath("Scripts/webBUILDfdsdv.bat ",args));
+}
 function build_test(args){
   MyObject.Run(get_fullpath("Scripts/webBUILDtest.bat ",args));
 }
@@ -33,47 +36,28 @@ function build_test(args){
 <a href="../../smv/Build/build_guides.html"><font size=5>Guides</font></a>
 
 <hr size="1">
+<h3>For Bundle</h3>
 
-<h3>FDS</h3>
-<p><table border=on>
+<table border=on>
 
-<tr><th>Windows</th><th>Linux</th><th>OSX</th></tr>
+<tr><th></th><th>Windows</th><th>Linux</th><th>OSX</th></tr>
 
 <tr align="center">
+<th>FDS release</th>
 <td>
-<button onclick="build_fds('windows')">release</button>
+<button onclick="build_fds('windows')">Build</button>
 </td>
 <td>
-<button onclick="build_fds('linux')">release</button>
+<button onclick="build_fds('linux')">Build</button>
 </td>
 <td>
-<button onclick="build_fds('osx')">release</button>
-</td>
-</tr>
-<tr align="center">
-<td>
-<button onclick="build_fds_debug('windows')">debug</button>
-</td>
-<td>
-<button onclick="build_fds_debug('linux')">debug</button>
-</td>
-<td>
-<button onclick="build_fds_debug('osx')">debug</button>
+<button onclick="build_fds('osx')">Build</button>
 </td>
 </tr>
 
-</table>
 
-<h3>Test MPI Utility</h3>
-
-<p><table border=on>
-
-<tr>
-<th>Windows</th>
-<th>Linux</th>
-<th>OSX</th>
-</tr>
 <tr align="center">
+<th>Test MPI Utility</th>
 <td><button onclick="build_test('windows')">Build</button></td>
 <td><button onclick="build_test('linux')">Build</button></td>
 <td><button onclick="build_test('osx')">Build</button></td>
@@ -81,6 +65,36 @@ function build_test(args){
 </table>
 
 <h3>Other</h3>
+
+<p><table border=on>
+
+<tr><th>FDS</th><th>Windows</th><th>Linux</th><th>OSX</th></tr>
+
+<tr align="center">
+<th>dev</th>
+<td>
+<button onclick="build_fds_dv('windows')">Build</button>
+</td>
+<td>
+<button onclick="build_fds_dv('linux')">Build</button>
+</td>
+<td>
+<button onclick="build_fds_dv('osx')">Build</button>
+</td>
+</tr>
+<tr align="center">
+<th>dbg</th>
+<td>
+<button onclick="build_fds_debug('windows')">Build</button>
+</td>
+<td>
+<button onclick="build_fds_debug('linux')">Build</button>
+</td>
+<td>
+<button onclick="build_fds_debug('osx')">Build</button>
+</td>
+</tr>
+</table>
 
 <ul>
 <li><button onclick="run_script('\\fds\\Build\\Scripts\\webEDIT_build_fds.bat')">Edit this page</button>
