@@ -13,10 +13,10 @@ VPATH = ../Source
 
 ifeq ($(shell echo "check_quotes"),"check_quotes")
 # windows
-  GIT_HASH := $(shell ..\..\Utilities\Scripts\githash)
-  GIT_STAT := $(shell ..\..\Utilities\Scripts\gitstat)
-  GIT_DATE := $(shell ..\..\Utilities\Scripts\gitlog)
-  GIT_BRANCH := $(shell ..\..\Utilities\Scripts\gitbranch)
+  GIT_HASH := $(shell ..\Scripts\githash)
+  GIT_STAT := $(shell ..\Scripts\gitstat)
+  GIT_DATE := $(shell ..\Scripts\gitlog)
+  GIT_BRANCH := $(shell ..\Scripts\gitbranch)
   BUILD_DATE := $(shell date /t) $(shell time /t)
 else
 # linux/osx
@@ -43,13 +43,13 @@ GITINFOPGI=-Mpreprocess $(GITINFO_BASE) -DBUILDDATE_PP=\""$(BUILD_DATE)\""
 
 ifeq ($(shell echo "check_quotes"),"check_quotes")
 # windows
-  INTELMPI_COMPVERSION := $(shell ..\..\Utilities\Scripts\intel_compversion)
-  GNU_COMPVERSION := $(shell ..\..\Utilities\Scripts\gnu_compversion)
+  INTELMPI_COMPVERSION := $(shell ..\Scripts\intel_compversion)
+  GNU_COMPVERSION := $(shell ..\Scripts\gnu_compversion)
 else
 # linux/osx
-  INTELMPI_COMPVERSION := $(shell ../../Utilities/Scripts/intelmpi_compversion.sh)
-  OPENMPI_COMPVERSION := $(shell ../../Utilities/Scripts/openmpi_compversion.sh)
-  GNU_COMPVERSION := $(shell ../../Utilities/Scripts/gnu_compversion.sh)
+  INTELMPI_COMPVERSION := $(shell ../Scripts/intelmpi_compversion.sh)
+  OPENMPI_COMPVERSION := $(shell ../Scripts/openmpi_compversion.sh)
+  GNU_COMPVERSION := $(shell ../Scripts/gnu_compversion.sh)
 endif
 
 INTELMPI_COMPINFO=-DCOMPVER_PP=\"$(INTELMPI_COMPVERSION)\"
@@ -65,7 +65,7 @@ LFLAGSMKL_CUSTOM =
 ifdef MKLROOT # This assumes the MKL library is available.
 ifeq ($(shell echo "check_quotes"),"check_quotes")
 # windows
-ifeq ($(shell ..\..\Utilities\Scripts\havemkl),1)
+ifeq ($(shell ..\Scripts\havemkl),1)
 # Use cluster_sparse_solver with intelmpi blacs
   FFLAGSMKL_INTEL = -DWITH_MKL /I"$(MKLROOT)"\include
   LFLAGSMKL_INTEL = "$(MKLROOT)"\lib\intel64\mkl_intel_lp64.lib "$(MKLROOT)"\lib\intel64\mkl_intel_thread.lib "$(MKLROOT)"\lib\intel64\mkl_core.lib "$(MKLROOT)"\lib\intel64\mkl_blacs_intelmpi_lp64.lib

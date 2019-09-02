@@ -18,6 +18,6 @@ BOTROOT=`pwd`
 cd $SVNROOT/smv
 SMVROOT=`pwd`
 
-grep $script $FDSROOT/Build/*/*.sh $FDSROOT/Manuals/*/*.sh $FDSROOT/Utilities/Scripts/*.sh $FDSROOT/Verification/scripts/*.sh
+grep $script $FDSROOT/Build/*.html $FDSROOT/Build/*/*.sh $FDSROOT/Manuals/*/*.sh $FDSROOT/Utilities/Scripts/*.sh $FDSROOT/Verification/scripts/*.sh
 grep $script $BOTROOT/Bundle/fds/scripts/*.sh $BOTROOT/Bundle/smv/scripts/*.sh $BOTROOT/Firebot/*.sh $BOTROOT/Smokebot/*.sh $BOTROOT/Scripts/*.sh
-grep $script $SMVROOT/scripts/*.sh $SMVROOT/Build/*/*.sh $SMVROOT/Utilities/Scripts/*.sh $SMVROOT/Verification/scripts/*.sh
+grep $script $SMVROOT/Build/build*.html $SMVROOT/scripts/*.sh $SMVROOT/Build/*/*.sh $SMVROOT/Utilities/Scripts/*.sh $SMVROOT/Verification/scripts/*.sh

@@ -249,7 +249,7 @@ export BASEDIR=`pwd`
 
 export QFDS="$QFDSSH $walltime -n $nthreads $INTEL2 -e $FDSMPI $QUEUE $OOPT $POPT" 
 if [ "$CHECKCASES" == "1" ]; then
-  export QFDS="$SVNROOT/fds/Utilities/Scripts/Check_FDS_Cases.sh"
+  export QFDS="$SVNROOT/fds/Verification/scripts/Check_FDS_Cases.sh"
 fi
 
 cd ..
@@ -265,7 +265,7 @@ if [ "$BENCHMARK" == "1" ]; then
 fi
 
 if [ "$CHECKCASES" == "1" ]; then
-  export QFDS="$SVNROOT/fds/Utilities/Scripts/Check_FDS_Cases.sh"
+  export QFDS="$SVNROOT/fds/Verification/scripts/Check_FDS_Cases.sh"
 else
   export QFDS="$QFDSSH $walltime -n $nthreads $INTEL2 -e $FDSMPI $QUEUE $OOPT $POPT" 
 fi
