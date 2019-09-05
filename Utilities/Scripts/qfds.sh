@@ -242,7 +242,7 @@ commandline=`echo $* | sed 's/-V//' | sed 's/-v//'`
 
 #*** read in parameters from command line
 
-while getopts 'Ac:Cd:D:e:Ef:hHiILm:MNn:o:O:p:Pq:rsStT:vVw:a:x:R:' OPTION
+while getopts 'Aa:c:Cd:D:e:Ef:hHiILm:Mn:o:O:p:Pq:R:rsStT:vVw:x:' OPTION
 do
 case $OPTION  in
   A) # used by timing scripts to identify benchmark cases
