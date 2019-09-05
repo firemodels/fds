@@ -286,6 +286,11 @@ IF (.NOT.OVERWRITE) THEN
    ENDIF
 ENDIF
 
+! Runtime diagnostic CSV File
+
+LU_STEPS = GET_FILE_NUMBER()
+FN_STEPS = TRIM(CHID)//'_steps.csv'
+
 ! Mass and HRR Files
 
 IF (MASS_FILE) THEN
@@ -820,6 +825,17 @@ ELSE
    ENDIF
 ENDIF
 IF (N_ZONE>0) DEALLOCATE(P_ZONE_ID)
+
+! Open runtime diagnostics CSV file
+IF (APPEND) THEN
+   INQUIRE(FILE=FN_STEPS,EXIST=EX)
+   IF (EX) OPEN(LU_STEPS,FILE=FN_STEPS,FORM='FORMATTED',STATUS='OLD',POSITION='APPEND')
+ELSE
+   OPEN(LU_STEPS,FILE=FN_STEPS,FORM='FORMATTED',STATUS='REPLACE')
+   WRITE(LU_STEPS,'(A,",",A,",",A,",",A)') '','','s','s'
+   WRITE(LU_STEPS,'(A,",",A,",",A,",",A)') 'Time Step','Wall Time','Step Size','Simulation Time'
+ENDIF
+
 
 ! Open species mass file
 
@@ -1558,6 +1574,10 @@ ENDIF
 WRITE(LU_SMV,'(/A)') 'CSVF'
 WRITE(LU_SMV,'(1X,A)') 'hrr'
 WRITE(LU_SMV,'(1X,A)') TRIM(FN_HRR)
+
+WRITE(LU_SMV,'(/A)') 'CSVF'
+WRITE(LU_SMV,'(1X,A)') 'steps'
+WRITE(LU_SMV,'(1X,A)') TRIM(FN_STEPS)
 
 DO I=1,N_DEVC_FILES
    WRITE(LU_SMV,'(/A)') 'CSVF'
@@ -3602,6 +3622,10 @@ IF (TRIM(PRES_METHOD) == 'SCARC' .OR. TRIM(PRES_METHOD) == 'USCARC') THEN
                                               ', convergence rate  ',SCARC_CAPPA
 ENDIF
 WRITE(LU_OUTPUT,'(7X,A)') '---------------------------------------------------------------'
+
+! Write runtime diagnostics to the steps CSV file.
+CALL GET_DATE_ISO_8601(DATE)
+WRITE(LU_STEPS,'(I7,",",A,",",E12.3,",",F10.5)') ICYC,TRIM(DATE),DT,T
 
 DO NM=1,NMESHES
    IF (EVACUATION_ONLY(NM)) CYCLE
@@ -9239,6 +9263,8 @@ INQUIRE(UNIT=LU_SMV,OPENED=OPN)
 IF (OPN) FLUSH(LU_SMV)
 INQUIRE(UNIT=LU_OUTPUT,OPENED=OPN)
 IF (OPN) FLUSH(LU_OUTPUT)
+INQUIRE(UNIT=LU_STEPS,OPENED=OPN)
+IF (OPN) FLUSH(LU_STEPS)
 
 DO N=1,N_DEVC_FILES
    INQUIRE(UNIT=LU_DEVC(N),OPENED=OPN)
