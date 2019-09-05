@@ -1,6 +1,6 @@
 ## OpenMPI Build scripts
 
-This directory contains scripts used to build OpenMPI for the OSX version of fds.  Scripts using Intel and Gnu compilers  are found in `intel` and `gnu` directories. 
+This directory contains scripts used to build OpenMPI for the OSX version of fds.  Scripts using Intel and Gnu compilers  are found in the `Utilities/openmpi/intel` and `Utilities/openmpi/gnu` directories of this repo. 
 
 The current version of FDS was built with 
 [OpenMPI version 3.1.2](https://www.open-mpi.org/software/ompi/v3.1/)
