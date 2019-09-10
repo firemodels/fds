@@ -76,20 +76,19 @@
 &RAMP ID='cp_dry_veg', T= 1000., F=4.81 /
 
 &MATL ID                 = 'CHAR'
-      VEGETATION         = .TRUE.
       DENSITY            = 300.
       CONDUCTIVITY       = 0.052
       SPECIFIC_HEAT_RAMP = 'cp_char'
       N_S                = 0.
-      NU_O2              = 1.65
+      NU_O2_CHAR         = 1.65
       BETA_CHAR          = 0.2
       A                  = 430.
       E                  = 74800.
+      SPEC_ID            = 'PRODUCTS','AIR'
+      NU_SPEC            = 8.18,-7.2
       MATL_ID            = 'ASH'
       NU_MATL            = 0.02
-      SPEC_ID            = 'PRODUCTS'
-      NU_SPEC            = 0.98
-      HEAT_OF_REACTION   = -32370. /
+      HEAT_OF_REACTION   = -32000. /
 
 &RAMP ID='cp_char', T=   27, F=0.715 /
 &RAMP ID='cp_char', T= 1724, F=2.04 /

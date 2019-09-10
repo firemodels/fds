@@ -1057,7 +1057,7 @@ The figures below contain predictions of the burning rate of various plastics in
 \centering
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_NRC_Parallel_Panels/PMMA_60_kW} \\
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_NRC_Parallel_Panels/PBT_60_kW} \\
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_NRC_Parallel_Panels/PVC_60_kW} 
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_NRC_Parallel_Panels/PVC_60_kW}
 \caption[NIST/NRC Parallel Panels experiments]{NIST/NRC Parallel Panels experiments.}
 \label{NIST_NRC_PP_HRR}
 \end{figure}
@@ -1065,15 +1065,15 @@ The figures below contain predictions of the burning rate of various plastics in
 
 \clearpage
 
-\section{Wildland Fire Spread (CSIRO Grassland Fires)}
+\section{Wildland Fire Burning and Spread Rates}
 \label{WUI}
 
-The following sections present examples of fire spread through vegetation, both small and full-scale. A summary plot is presented in Fig.~\ref{RoS_Summary}.
+The following sections present examples of fire spread through vegetation, both small and full-scale. Summary plots of burning and spread rates are presented in Figs.~\ref{Burning_Rate} and \ref{RoS_Summary}.
 
 
 \subsection{CSIRO Grassland Fires}
 
-This section presents the results for simulations of two of the CSIRO Grassland Fire experiments. For details of the experiments and simulations, see Section~\ref{CSIRO_Grassland_Fires_Description}. The first experiment, C064, was conducted on a 100~m by 100~m plot; the second, F19, was conducted on a 200~m by 200~m plot. The results of the simulations are shown in Fig.~\ref{CSIRO}. The fire front in the FDS simulations is defined as the location of the maximum gas temperature in a 1~m wide, 1~m tall strip along the centerline of the grass field. The experimental points were determined from aerial photography.
+This section presents the rate of spread for simulations of two of the CSIRO Grassland Fire experiments. For details of the experiments and simulations, see Section~\ref{CSIRO_Grassland_Fires_Description}. The first experiment, C064, was conducted on a 100~m by 100~m plot; the second, F19, was conducted on a 200~m by 200~m plot. The results of the simulations are shown in Fig.~\ref{CSIRO}. The fire front in the FDS simulations is defined as the location of the maximum gas temperature in a 1~m wide, 1~m tall strip along the centerline of the grass field. The experimental points were determined from aerial photography.
 
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -1767,31 +1767,38 @@ Figures~\ref{USFS_Catchpole_008} through \ref{USFS_Catchpole_354} present the re
 \end{figure}
 
 
+
+
+
 \clearpage
 
-\subsection{Summary of Wildfire Spread}
-\label{Rate of Spread}
+\subsection{USFS/Corsica Fire Spread Experiments}
+\label{USFS_Corsica_Results}
 
+A description of the experiments and modeling strategy can be found in Section~\ref{USFS_Corsica_Description}. Comparisons of the measured and predicted heat release rates for six bench-scale (1~m by 2~m) fires spreading over pine needles are shown below.
 
-\begin{figure}[!h]
-\centering
-\begin{tabular}{l}
-\includegraphics[height=4in]{SCRIPT_FIGURES/ScatterPlots/FDS_Rate_of_Spread}
-\end{tabular}
-\caption[Summary, Wildfire Rate of Spread]
-{Summary, Wildfire Rate of Spread.}
-\label{RoS_Summary}
+\begin{figure}[!ht]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Corsica/Test_1_0_HRR} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Corsica/Test_1_20_HRR} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Corsica/Test_2_0_HRR} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Corsica/Test_2_20_HRR} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Corsica/Test_3_0_HRR} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/USFS_Corsica/Test_3_20_HRR}
+\end{tabular*}
+\caption[HRR, USFS/Corsica experiments]{HRR, USFS/Corsica experiments.}
+\label{USFS_Corsica}
 \end{figure}
 
 
+
+
 \clearpage
 
-
-
-\section{Burning Trees (NIST Douglas Firs)}
+\subsection{Burning Trees (NIST Douglas Firs)}
 \label{Douglas_Firs}
 
-This section contains a description and results of three Douglas fir tree fire simulations. Measured properties of the trees are listed in Table~\ref{Properties_Trees}. Generic vegetation properties are listed in Table~\ref{Assumed_Properties_Trees}. These assumed properties are typically for wood or cellulosic fuels. The moisture is modeled as water. The vegetation is assumed to be composed primarily of cellulose. Reference~\cite{Mell:2009} provides an estimate of the distribution of mass for the foliage, roundwood less than 3~mm in diameter, roundwood 3~mm to 6~mm, and roundwood 6~mm to 10~mm. For the 2~m trees, the distribution is approximately 64~\%, 11~\%, 10~\%, and 15~\%, respectively. For the 5~m trees, it is 60~\%, 17~\%, 12~\%, and 11~\%, respectively.
+A description of the experiments and modeling assumptions are given in Section~\ref{NIST_Douglas_Firs_Description}.
 
 Snapshots of the simulation of the 2~m tall, 14~\% moisture tree are shown in Fig.~\ref{tree_snaps}. The computational domain in this case is 2~m by 2~m by 4~m. The grid cells are 5~cm cubes. The pine needles are represented by 130,000 Lagrangian particles with a cylindrical geometry, or about 25 simulated needles per grid cell. The radius of the cylinder is derived from the measured surface area to volume ratio. Each simulated pine needle or segment of roundwood represents many more actual needles or segments. The weighting factor is determined from the estimated bulk mass per unit volume. The results of the simulations are shown in Fig.~\ref{NIST_Douglas_Fir_MLR}.
 
@@ -1803,44 +1810,7 @@ Snapshots of the simulation of the 2~m tall, 14~\% moisture tree are shown in Fi
 \label{tree_snaps}
 \end{figure}
 
-\begin{table}[ht]
-\begin{center}
-\caption[Measured properties for the NIST Douglas fir trees]{Measured properties for the NIST Douglas fir trees~\cite{Mell:2009}.}
-\label{Properties_Trees}
-\begin{tabular}{|l|c|c|c|c|}
-\hline
-Property                                & Units         & Case 1        & Case 2        & Case 3     \\ \hline \hline
-Replicate Experiments                   & --            & 6             & 3             & 3          \\ \hline
-Avg.~Crown Height                       & m             & 1.9           & 1.9           & 4.2        \\ \hline
-Avg.~Base Height                        & m             & 0.15          & 0.15          & 0.3        \\ \hline
-Avg.~Base Width                         & m             & 1.7           & 1.7           & 2.9        \\ \hline
-Foliage Surface Area to Volume Ratio    & m$^{-1}$      & 3940          & 3940          & 3940       \\ \hline
-Avg.~Initial Mass                       & kg            & 9.7           & 13.5          & 57.9       \\ \hline
-Avg.~Moisture Fraction                  & \%            & 14            & 49            & 26         \\ \hline
-Assumed Bulk Mass per Unit Volume       & kg/m$^3$      & 3.2           & 4.6           & 2.7        \\ \hline
-\end{tabular}
-\end{center}
-\end{table}
 
-\begin{table}
-\begin{center}
-\caption[Assumed properties for the vegetation]{Assumed properties for the vegetation. Note that the Pyrolysis Temperature is taken to be the temperature at which the mass loss rate peaks in the TGA experiments of Morvan and Dupuy~\cite{Morvan:CF2004}.}
-\label{Assumed_Properties_Trees}
-\begin{tabular}{|l|c|c|c|}
-\hline
-Property                        & Units                 & Value                     & Reference                             \\ \hline \hline
-Chemical Composition            & --                    & C$_6$H$_{10}$O$_5$        & Assumption, Cellulose                 \\ \hline
-Heat of Combustion              & kJ/kg                 & 17700                     & \cite{Susott:FS1982}                  \\ \hline
-Soot Yield                      & kg/kg                 & 0.015                     & \cite{SFPE:Tewarson}                  \\ \hline
-Char Yield                      & kg/kg                 & 0.26                      & \cite{Susott:FS1982}                  \\ \hline
-Specific Heat                   & kJ/(kg$\cdot$K)       & 1.2                       & Various sources                       \\ \hline
-Conductivity                    & W/(m$\cdot$K)         & 2                         & Assumption                            \\ \hline
-Density                         & kg/m$^3$              & 514                       & \cite{Rothermel:1972}                 \\ \hline
-Heat of Pyrolysis               & kJ/kg                 & 418                       & \cite{Morvan:CF2004}                  \\ \hline
-Pyrolyis Temperature            & $^\circ$C             & 200                       & \cite{Morvan:CF2004}                  \\ \hline
-\end{tabular}
-\end{center}
-\end{table}
 
 \newpage
 
@@ -1858,16 +1828,28 @@ Pyrolyis Temperature            & $^\circ$C             & 200                   
 \clearpage
 
 
-\section{Summary of Burning Rates}
-\label{Burning Rate}
+\section{Summary of Burning and Spread Rates}
 
-\begin{figure}[ht]
-\begin{center}
+
+\begin{figure}[!ht]
+\centering
 \begin{tabular}{c}
 \includegraphics[height=4.0in]{SCRIPT_FIGURES/ScatterPlots/FDS_Burning_Rates}
 \end{tabular}
-\end{center}
 \caption[Summary of burning rate predictions]{Summary of burning rate predictions.}
+\label{Burning_Rate}
+\end{figure}
+
+
+
+\begin{figure}[!ht]
+\centering
+\begin{tabular}{c}
+\includegraphics[height=4in]{SCRIPT_FIGURES/ScatterPlots/FDS_Rate_of_Spread}
+\end{tabular}
+\caption[Summary, Wildfire Rate of Spread]
+{Summary, Wildfire Rate of Spread.}
+\label{RoS_Summary}
 \end{figure}
 
 
