@@ -6505,7 +6505,7 @@ where $ \Delta z$ is the distance from the leak point to the neutral plane.  Usi
 \section{Thermal Degradation Model for Vegetation}
 \label{vegetation_model}
 
-FDS contains a separate pyrolysis model that was developed specifically for vegetation~\cite{Porterie:2006,Morvan:CF2004,Houssami:2016}. The solid-phase thermal degradation process consists of three reactions:
+FDS contains an optional pyrolysis model that was developed specifically for vegetation~\cite{Porterie:2006,Morvan:CF2004,Houssami:2016}. The solid-phase thermal degradation process consists of three reactions:
 
 \vspace{\baselineskip}
 
@@ -6523,7 +6523,7 @@ FDS contains a separate pyrolysis model that was developed specifically for vege
 \be
  {\rm Char} + \nu_{\rm O_2, char} \, {\rm O_2} \rightarrow (1+ \nu_{\rm O_2,char} - \chi_{\rm ash}) \, {\rm CO_2} + \chi_{\rm ash} \, {\rm Ash}
 \ee
-$M$ is the vegetation {\em moisture content} or {\em moisture fraction} determined on a dry weight basis. $M$ is related to the mass fraction of water via the relation:
+$M$ is the vegetation {\em moisture content} or {\em moisture fraction} determined on a dry weight basis. $M$ is related to the mass fraction of water within the solid via the relation:
 \be
   Y_{\rm H_2O} = \frac{M}{1+M}
 \ee
