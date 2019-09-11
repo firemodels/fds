@@ -1,4 +1,4 @@
-&HEAD CHID='NIST_NRC_03',TITLE='NIST/NRC Test 3, FDS v5' /
+&HEAD CHID='NIST_NRC_03',TITLE='NIST/NRC Test 3' /
 
 &MESH IJK=100,36,32, XB=0.0,21.7,0.0,7.04,0.0,3.82 /
 &TRNX IDERIV=0,CC=10.8,PC=10.8 /
@@ -141,8 +141,8 @@
 &RAMP ID='k_mar',T=538.,F=0.12 /
 &RAMP ID='c_mar',T= 93.,F=1.172 /
 &RAMP ID='c_mar',T=205.,F=1.255 /
-&RAMP ID='c_mar',T=316.,F=1.339 /   
-&RAMP ID='c_mar',T=425.,F=1.423 /   
+&RAMP ID='c_mar',T=316.,F=1.339 /
+&RAMP ID='c_mar',T=425.,F=1.423 /
 
 &MATL ID            = 'STEEL'
       FYI           = 'Quintiere, Fire Behavior'
@@ -160,13 +160,13 @@
       FYI           = 'Quintiere, Fire Behavior'
       CONDUCTIVITY  = 0.48
       SPECIFIC_HEAT = 0.84
-      DENSITY       = 1440. /   
+      DENSITY       = 1440. /
 
 &MATL ID            = 'YELLOW PINE'
       FYI           = 'Quintiere, Fire Behavior'
       CONDUCTIVITY  = 0.14
       SPECIFIC_HEAT = 2.85
-      DENSITY       = 640.  /   
+      DENSITY       = 640.  /
 
 &SURF ID='PVC CONTROL',      MATL_ID='PVC', LENGTH=0.2, THICKNESS=0.005,  GEOMETRY='CYLINDRICAL' /
 &SURF ID='PVC CONTROL TRAY', MATL_ID='PVC', LENGTH=0.2, THICKNESS=0.01, WIDTH=0.2 /
