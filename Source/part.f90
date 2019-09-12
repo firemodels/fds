@@ -2489,7 +2489,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                         IF (Y_DROP <= Y_GAS) THEN
                            H_MASS = 0._EB
                         ELSE
-                           SHERWOOD  = 2._EB + NU_FAC_GAS*SQRT(RE_L)
+                           SHERWOOD  = 2._EB + SH_FAC_GAS*SQRT(RE_L)
                            H_MASS = SHERWOOD*D_AIR/LENGTH
                         ENDIF
                      CASE(0) ! Shazin M0, Eq 106 + 109 with B_T=B_M
@@ -2500,7 +2500,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                         ELSE
                            NUSSELT  = 2._EB + NU_FAC_GAS*SQRT(RE_L)*LOG(1._EB+B_NUMBER)/B_NUMBER
                            H_HEAT   = NUSSELT*K_AIR/LENGTH
-                           SHERWOOD  = 2._EB + NU_FAC_GAS*SQRT(RE_L)*LOG(1._EB+B_NUMBER)/(Y_DROP-Y_GAS)
+                           SHERWOOD  = 2._EB + SH_FAC_GAS*SQRT(RE_L)*LOG(1._EB+B_NUMBER)/(Y_DROP-Y_GAS)
                            H_MASS = SHERWOOD*D_AIR/LENGTH
                         ENDIF
                      CASE(1) ! Shazin M1, Eq 106 + 109 with eq 102.
@@ -2509,7 +2509,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                            H_HEAT   = NUSSELT*K_AIR/LENGTH
                            H_MASS = 0._EB
                         ELSE
-                           SHERWOOD  = 2._EB + NU_FAC_GAS*SQRT(RE_L)*LOG(1._EB+B_NUMBER)/(Y_DROP-Y_GAS)
+                           SHERWOOD  = 2._EB + SH_FAC_GAS*SQRT(RE_L)*LOG(1._EB+B_NUMBER)/(Y_DROP-Y_GAS)
                            H_MASS = SHERWOOD*D_AIR/LENGTH
                            LEWIS = K_AIR / (RHO_AIR * D_AIR * CP_AIR)
                            ZZ_GET(1:N_TRACKED_SPECIES) = 0._EB
@@ -2528,7 +2528,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                            H_HEAT   = NUSSELT*K_AIR/LENGTH
                            H_MASS = 0._EB
                         ELSE
-                           SHERWOOD  = 2._EB + NU_FAC_GAS*SQRT(RE_L)*LOG(1._EB+B_NUMBER)/((Y_DROP-Y_GAS)*F_B(B_NUMBER))
+                           SHERWOOD  = 2._EB + SH_FAC_GAS*SQRT(RE_L)*LOG(1._EB+B_NUMBER)/((Y_DROP-Y_GAS)*F_B(B_NUMBER))
                            H_MASS = SHERWOOD*D_AIR/LENGTH
                            LEWIS = K_AIR / (RHO_AIR * D_AIR * CP_AIR)
                            ZZ_GET(1:N_TRACKED_SPECIES) = 0._EB
