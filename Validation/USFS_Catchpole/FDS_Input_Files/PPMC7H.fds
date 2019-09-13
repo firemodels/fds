@@ -67,7 +67,7 @@
 
 &PART ID             = 'Regular Excelsior' 
       DRAG_COEFFICIENT = 2.8
-      SHAPE_FACTOR   = 0.15
+      SHAPE_FACTOR   = 0.25
       COLOR          = 'GREEN'
       SURF_ID        = 'Regular Excelsior' 
       QUANTITIES     = 'PARTICLE TEMPERATURE','PARTICLE MASS'
@@ -87,7 +87,7 @@
 
 &PART ID             = 'NO BURN FUEL' 
       DRAG_COEFFICIENT = 2.8
-      SHAPE_FACTOR   = 0.15
+      SHAPE_FACTOR   = 0.25
       COLOR          = 'OLIVE'
       SURF_ID        = 'NO BURN FUEL' 
       QUANTITIES     = 'PARTICLE TEMPERATURE','PARTICLE MASS'
@@ -101,30 +101,14 @@
       PACKING_RATIO        = 0.021 /
 
 &MATL ID                 = 'NO BURN FUEL'
-      VEGETATION         = .TRUE.
       DENSITY            = 510.
       CONDUCTIVITY       = 0.11
       SPECIFIC_HEAT_RAMP = 'cp_dry_veg' /
 
-&MATL ID                 = 'MOISTURE'
-      VEGETATION         = .TRUE.
-      DENSITY            = 997.
-      CONDUCTIVITY_RAMP  = 'k_water'
-      SPECIFIC_HEAT_RAMP = 'c_water'
-      N_REACTIONS        = 1
-      A                  = 600000.
-      E                  = 48200.
-      N_T                = -0.5
-      SPEC_ID            = 'WATER VAPOR'
-      NU_SPEC            = 1.0
-      HEAT_OF_REACTION   = 2259. /
-
 &MATL ID                 = 'Dry Regular Excelsior'
-      VEGETATION         = .TRUE.
       DENSITY            = 510.
       CONDUCTIVITY       = 0.11
       SPECIFIC_HEAT_RAMP = 'cp_dry_veg'
-      N_REACTIONS        = 1
       A                  = 36300.
       E                  = 60300.
       MATL_ID            = 'Regular Excelsior Char' 
@@ -134,45 +118,24 @@
       HEAT_OF_REACTION   = 609. /
  
 &MATL ID                 = 'Regular Excelsior Char'
-      VEGETATION         = .TRUE.
       DENSITY            = 300.
       CONDUCTIVITY       = 0.052
       SPECIFIC_HEAT_RAMP = 'cp_char'
-      N_REACTIONS        = 1
       N_S                = 0.
-      NU_O2              = 1.65
+      NU_O2_CHAR         = 1.65
       BETA_CHAR          = 0.2
       A                  = 430.
       E                  = 74800. 
       MATL_ID            = 'Regular Excelsior Ash'
-      NU_MATL            = 0.0227273 
-      SPEC_ID            = 'PRODUCTS'
-      NU_SPEC            = 0.9965 
+      NU_MATL            = 0.02
+      SPEC_ID            = 'PRODUCTS','AIR'
+      NU_SPEC            = 8.18,-7.2
       HEAT_OF_REACTION   = -32370. /
 
 &MATL ID            = 'Regular Excelsior Ash'
-      VEGETATION    = .TRUE.
       DENSITY       = 67.
       CONDUCTIVITY  = 0.1
       SPECIFIC_HEAT = 2.0 /
-
-&RAMP ID='k_water', T= 0.,    F=0.569 /
-&RAMP ID='k_water', T= 26.85, F=0.613 /
-&RAMP ID='k_water', T= 51.85, F=0.645 /
-&RAMP ID='k_water', T= 76.85, F=0.668 /
-&RAMP ID='k_water', T= 100.,  F=0.680 /
-
-&RAMP ID='c_water', T= 0.,    F=4.217 /
-&RAMP ID='c_water', T= 6.85,  F=4.198 /
-&RAMP ID='c_water', T= 16.85, F=4.184 /
-&RAMP ID='c_water', T= 26.85, F=4.179 /
-&RAMP ID='c_water', T= 36.85, F=4.178 /
-&RAMP ID='c_water', T= 46.85, F=4.180 /
-&RAMP ID='c_water', T= 56.85, F=4.184 /
-&RAMP ID='c_water', T= 66.85, F=4.188 /
-&RAMP ID='c_water', T= 76.85, F=4.195 /
-&RAMP ID='c_water', T= 86.85, F=4.203 /
-&RAMP ID='c_water', T= 100.,  F=4.217 /
 
 &RAMP ID='cp_dry_veg', T= 0.,    F=1.16 /
 &RAMP ID='cp_dry_veg', T= 1000., F=5.027 /
