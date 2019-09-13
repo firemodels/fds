@@ -1918,6 +1918,8 @@ PARTICLE_LOOP: DO IP=1,NLP
       ONE_D%MASSFLUX(1:N_TRACKED_SPECIES)      = ONE_D%MASSFLUX(1:N_TRACKED_SPECIES)     *AREA_SCALING
       ONE_D%MASSFLUX_SPEC(1:N_TRACKED_SPECIES) = ONE_D%MASSFLUX_SPEC(1:N_TRACKED_SPECIES)*AREA_SCALING
       ONE_D%MASSFLUX_MATL(1:SF%N_MATL)         = ONE_D%MASSFLUX_MATL(1:SF%N_MATL)        *AREA_SCALING
+      ONE_D%Q_DOT_G_PP                         = ONE_D%Q_DOT_G_PP                        *AREA_SCALING
+      ONE_D%Q_DOT_O2_PP                        = ONE_D%Q_DOT_O2_PP                       *AREA_SCALING
    ENDIF
 
    ! Add evaporated particle species to gas phase and compute resulting contribution to the divergence
