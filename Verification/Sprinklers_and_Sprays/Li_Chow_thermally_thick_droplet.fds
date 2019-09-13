@@ -2,7 +2,7 @@
 
 &MESH IJK=11,11,30, XB=0.0,1.1,0.0,1.1,0.0,3.0 /
 
-&TIME T_END=16, DT=0.0005 /
+&TIME T_END=16, DT=0.001 /
 
 &DUMP NFRAMES=40/
 
@@ -27,7 +27,6 @@
 &SURF ID           = 'MY DROPLET'
       MATL_ID      = 'WATER'
       COLOR        = 'BLUE'
-      BACKING      = 'INSULATED'
       GEOMETRY     = 'SPHERICAL'
       THICKNESS    = 5.E-5
       TMP_INNER    = 10.
