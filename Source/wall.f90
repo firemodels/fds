@@ -3024,9 +3024,9 @@ WALL_ITERATE: DO
       TRIDIAGONAL_SOLVER_2: DO I=NWP-1,1,-1
          CCS(I) = (CCS(I) - AAS(I)*CCS(I+1))/DDT(I)
       ENDDO TRIDIAGONAL_SOLVER_2
-      TMP_W_NEW(1:NWP) = MAX(TMPMIN,CCS(1:NWP))
-      TMP_W_NEW(0)     = MAX(TMPMIN,TMP_W_NEW(1)  *RFACF2+QDXKF)
-      TMP_W_NEW(NWP+1) = MAX(TMPMIN,TMP_W_NEW(NWP)*RFACB2+QDXKB)
+      TMP_W_NEW(1:NWP) = MIN(TMPMAX,MAX(TMPMIN,CCS(1:NWP)))
+      TMP_W_NEW(0)     =            MAX(TMPMIN,TMP_W_NEW(1)  *RFACF2+QDXKF)  ! Ghost value, allow it to be large
+      TMP_W_NEW(NWP+1) =            MAX(TMPMIN,TMP_W_NEW(NWP)*RFACB2+QDXKB)  ! Ghost value, allow it to be large
       IF (STEPCOUNT==1) THEN
          TOLERANCE = MAXVAL(ABS((TMP_W_NEW-ONE_D%TMP(0:NWP+1))/ONE_D%TMP(0:NWP+1)), &
             ONE_D%TMP(0:NWP+1)>0._EB) ! returns a negative number, if all TMP_S == 0.
