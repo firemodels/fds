@@ -1081,7 +1081,7 @@ END SUBROUTINE VOLUME_INIT_PARTICLE
 SUBROUTINE INITIALIZE_SINGLE_PARTICLE
 
 REAL(EB) :: X1,X2,AREA,LENGTH,SCALE_FACTOR,RADIUS,MPUA,LP_VOLUME
-INTEGER :: N
+INTEGER :: N,I
 TYPE (ONE_D_M_AND_E_XFER_TYPE), POINTER :: ONE_D=>NULL()
 
 SF => SURFACE(LPC%SURF_INDEX)
@@ -1220,6 +1220,11 @@ ELSEIF (LPC%LIQUID_DROPLET) THEN
 ENDIF
 
 ONE_D%TMP(0:SF%N_CELLS_INI+1) = LPC%TMP_INITIAL
+IF (SF%THERMALLY_THICK .AND. SF%TMP_INNER(1)>0._EB) THEN
+   DO I=0,SF%N_CELLS_INI+1
+      ONE_D%TMP(I) = SF%TMP_INNER(SF%LAYER_INDEX(I))
+   ENDDO
+ENDIF
 ONE_D%TMP_F = ONE_D%TMP(1)
 
 ! Check if fire spreads radially over this surface type, and if so, set T_IGN appropriately
@@ -1469,7 +1474,7 @@ PARTICLE_LOOP: DO IP=1,NLP
                ENDIF
             ENDDO
             ICF = ICF_MIN
-            ! If the CFACE normal points up, force the particle to follow the contour. If the normal points down, 
+            ! If the CFACE normal points up, force the particle to follow the contour. If the normal points down,
             ! put the particle back into the gas phase.
             IF (DOT_PRODUCT(CFACE(ICF)%NVEC,GVEC)>0._EB) THEN  ! normal points down
                LP%CFACE_INDEX = 0
@@ -2387,7 +2392,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
 
                ! Compute thermal and transport properties except D at film temperature
                CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z(:,Z_INDEX),1),D_Z(:,Z_INDEX),TMP_DROP,D_AIR)
-               
+
                TMP_FILM = TMP_DROP + EVAP_FILM_FAC*(TMP_G - TMP_DROP) ! LC Eq.(18)
                CALL GET_VISCOSITY(ZZ_AIR,MU_AIR,TMP_FILM)
                CALL GET_CONDUCTIVITY(ZZ_AIR,K_AIR,TMP_FILM)
