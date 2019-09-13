@@ -128,7 +128,8 @@ for j=2:length(Q);
     clear Measured_Metric
     clear Predicted_Metric
 
-    figure
+    f1=figure;
+    set(f1,'Visible',Figure_Visibility)
     set(gca,'PlotBoxAspectRatio',[1 1 1])
     set(gca,'Units','inches')
     set(gca,'Position',[Scat_Plot_X Scat_Plot_Y Scat_Plot_Width Scat_Plot_Height])
