@@ -2,6 +2,9 @@
 % 6-06-2012
 % dataplot.m
 %
+% Detailed instructions can be found here:
+% https://github.com/firemodels/fds/wiki/Using-the-Matlab-script-dataplot.m
+%
 % [saved_data, drange] = dataplot(Dataplot_Inputs_File, EXP_Dir, OUT_Dir, Manuals_Dir, [drange])
 %
 % Output:
