@@ -4,8 +4,8 @@
 
 &TIME T_END= 600. /
 
-&MESH IJK=40,30,20, XB=-0.2,0.2,-0.6,-0.3,0.0,0.20, MULT_ID='mesh' /
-&MULT ID='mesh', DX=0.4, DY=0.3, DZ=0.2, I_UPPER=5, J_UPPER=3, K_UPPER=3 /
+&MESH IJK=40,30,20, XB=-0.2,0.6,-0.6,-0.0,0.0,0.40, MULT_ID='mesh' /
+&MULT ID='mesh', DX=0.8, DY=0.6, DZ=0.4, I_UPPER=2, J_UPPER=1, K_UPPER=1 /
 
 &VENT MB='XMIN', SURF_ID='OPEN' /
 &VENT MB='XMAX', SURF_ID='OPEN' /
@@ -14,22 +14,17 @@
 &VENT XB=0.0,2.0,-0.6,0.6,0.0,0.0, SURF_ID='SUBSTRATE' /
 &VENT MB='ZMAX', SURF_ID='OPEN' /
 
-&MATL ID	         = 'FIRE BOARD'
-      FYI                = 'KAOWOOL M TEMPERATURE BOARD'        
-      CONDUCTIVITY_RAMP  = 'k_KAOWOOL'              
-      SPECIFIC_HEAT      = 1.1                   
-      DENSITY            =  272.                  
-      EMISSIVITY         = 0.80 /
-&RAMP ID='k_KAOWOOL', T=  20., F=0.06 /
-&RAMP ID='k_KAOWOOL', T= 260., F=0.06 /
-&RAMP ID='k_KAOWOOL', T= 538., F=0.10 /
-&RAMP ID='k_KAOWOOL', T= 816., F=0.15 /
-&RAMP ID='k_KAOWOOL', T=1093., F=0.22 /
+&MATL ID	    = 'CONCRETE'
+      FYI           = 'Autoclaved aerate concrete'        
+      CONDUCTIVITY  = 0.14             
+      SPECIFIC_HEAT = 1.0                   
+      DENSITY       =  7700.                  
+      EMISSIVITY    = 0.80 /
 
 &SURF ID        = 'SUBSTRATE'
-      MATL_ID   = 'FIRE BOARD' 
-      COLOR     = 'FIREBRICK'
-      THICKNESS = 0.013 /
+      MATL_ID   = 'CONCRETE' 
+      COLOR     = 'GRAY'
+      THICKNESS = 0.04 /
 
 &REAC FUEL='WOOD FUEL VAPOR'
       SOOT_YIELD = 0.02
@@ -50,7 +45,7 @@
 
 &PART ID             = 'Needles' 
       DRAG_COEFFICIENT = 2.8
-      SHAPE_FACTOR   = 0.15
+      SHAPE_FACTOR   = 0.25
       COLOR          = 'GREEN'
       SURF_ID        = 'Pine Needles' 
       QUANTITIES     = 'PARTICLE TEMPERATURE','PARTICLE MASS'
@@ -75,23 +70,23 @@
       HEAT_OF_REACTION   = 418. /
  
 &MATL ID                 = 'Char'
-      VEGETATION         = .TRUE.
-      DENSITY            = 300.
+      DENSITY            = 138.
       CONDUCTIVITY       = 0.052
       SPECIFIC_HEAT_RAMP = 'cp_char'
       N_S                = 0.
-      NU_O2              = 1.65
+      NU_O2_CHAR              = 1.65
       BETA_CHAR          = 0.2
       A                  = 215.
       E                  = 74800. 
       MATL_ID            = 'Ash'
       NU_MATL            = 0.11 
-      SPEC_ID            = 'PRODUCTS'
-      NU_SPEC            = 0.89 
-      HEAT_OF_REACTION   = -32740. /
+      ALPHA_CHAR         = 1.0
+      SPEC_ID            = 'PRODUCTS','AIR'
+      NU_SPEC            = 8.09,-7.2
+      HEAT_OF_REACTION   = -32000. /
 
 &MATL ID            = 'Ash'
-      DENSITY       = 67.
+      DENSITY       = 15.
       CONDUCTIVITY  = 0.1
       SPECIFIC_HEAT = 2.0 /
 
@@ -110,7 +105,7 @@
 
 &VENT XB=-0.05,0.0,-0.5,0.5,0,0, SURF_ID='IGN FIRE' /
 
-&DUMP DT_PART=1, DT_DEVC=1, DT_HRR=1, DT_SLCF=1, DT_BNDF=1 /
+&DUMP DT_PART=1, DT_DEVC=10, DT_HRR=10, DT_SLCF=1, DT_BNDF=1 /
 
 &SLCF PBY= 0.0, QUANTITY='TEMPERATURE', VECTOR=.TRUE. /
 &SLCF PBY= 0.0, QUANTITY='TEMPERATURE', CELL_CENTERED=.TRUE. /
