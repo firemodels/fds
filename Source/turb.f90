@@ -1465,7 +1465,6 @@ SELECT CASE(SURF_GEOMETRY_INDEX)
       ELSE
          NUSSELT = 0.989_EB*RE**0.330_EB*PR_ONTH
       ENDIF
-
    CASE (SURF_SPHERICAL)
       ! Incropera and DeWitt, 3rd, 1990, Eq. 7.59
       NUSSELT = 2._EB + 0.6_EB*SQRT(RE)*PR_ONTH
