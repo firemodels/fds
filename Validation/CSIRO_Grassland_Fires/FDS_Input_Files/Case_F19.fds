@@ -9,7 +9,7 @@
 
 &WIND SPEED=4.8, DIRECTION=270., L=-500., Z_0=0.03 /
 
-&REAC FUEL='CELLULOSE', C=6, H=10, O=5, SOOT_YIELD=0.02 /
+&REAC FUEL='CELLULOSE', C=6, H=10, O=5, SOOT_YIELD=0.02, HEAT_OF_COMBUSTION=15600. /
 
 &SPEC ID='WATER VAPOR' /
 
@@ -54,7 +54,6 @@
       NU_MATL            = 0.2
       SPEC_ID            = 'CELLULOSE'
       NU_SPEC            = 0.8
-      HEAT_OF_COMBUSTION = 15600.
       HEAT_OF_REACTION   = 416. /
 
 &RAMP ID='c_v', T= 20., F=1.184 /
