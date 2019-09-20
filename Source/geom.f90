@@ -25366,6 +25366,10 @@ WRITE(LU_ERR,"(/A)") ' Computational Geometry: Sanity tests for cut-cell region'
 WRITE(LU_ERR,"(A,E11.4,A,E11.4,A,E11.4)") &
 ' GEOM Surf  Area=',AREA_GEOM,', InBoundary Cut-faces Area=',CF_AREA_INB, &
 ', Relative Difference=',(AREA_GEOM-CF_AREA_INB)/(AREA_GEOM+GEOMEPS)
+WRITE(LU_SETCC,"(/A)") ' Computational Geometry: Sanity tests for cut-cell region'
+WRITE(LU_SETCC,"(A,E11.4,A,E11.4,A,E11.4)") &
+' GEOM Surf  Area=',AREA_GEOM,', InBoundary Cut-faces Area=',CF_AREA_INB, &
+', Relative Difference=',(AREA_GEOM-CF_AREA_INB)/(AREA_GEOM+GEOMEPS)
 ENDIF
 
 ! Allreduce Cut-cell, GASPHASE volumes:
@@ -25394,6 +25398,9 @@ IF (GET_CUTCELLS_VERBOSE .AND. (MYID == 0)) THEN
 WRITE(LU_ERR,"(A,E11.4,A,E11.4,A,E11.4)") &
 ' GEOM Gas Volume=',DM_VOLUME-VOLUME_GEOM,', Cut/Regl Gas cells Volume=',GP_VOLUME+CC_VOLUME_INB, &
 ', Relative Difference=',((DM_VOLUME-VOLUME_GEOM)-(GP_VOLUME+CC_VOLUME_INB))/(DM_VOLUME-VOLUME_GEOM)
+WRITE(LU_SETCC,"(A,E11.4,A,E11.4,A,E11.4)") &
+' GEOM Gas Volume=',DM_VOLUME-VOLUME_GEOM,', Cut/Regl Gas cells Volume=',GP_VOLUME+CC_VOLUME_INB, &
+', Relative Difference=',((DM_VOLUME-VOLUME_GEOM)-(GP_VOLUME+CC_VOLUME_INB))/(DM_VOLUME-VOLUME_GEOM)
 ENDIF
 
 IF (GET_CUTCELLS_VERBOSE .AND. (MYID == 0)) THEN
@@ -25405,6 +25412,17 @@ IF (GET_CUTCELLS_VERBOSE .AND. (MYID == 0)) THEN
    WRITE(LU_ERR,"(A,3E12.4)") &
    ' Cut/Regl Gas cells Centroid =',CCGP_XYZCEN(IAXIS:KAXIS)
    WRITE(LU_ERR,"(A,3E12.4)") &
+   ' Centroid Relative Difference=',CCGP_XYZCEN(IAXIS:KAXIS)-&
+   (DM_XYZCEN(IAXIS:KAXIS)*DM_VOLUME - XYZCEN_GEOM(IAXIS:KAXIS)*VOLUME_GEOM) / &
+   (DM_VOLUME-VOLUME_GEOM)
+   WRITE(LU_SETCC,"(A,3E12.4)") &
+   ' GEOM Centroid               =',XYZCEN_GEOM(IAXIS:KAXIS)
+   WRITE(LU_SETCC,"(A,3E12.4)") &
+   ' DOMAIN-GEOM Centroid        =',(DM_XYZCEN(IAXIS:KAXIS)*DM_VOLUME - XYZCEN_GEOM(IAXIS:KAXIS)*VOLUME_GEOM) / &
+   (DM_VOLUME-VOLUME_GEOM)
+   WRITE(LU_SETCC,"(A,3E12.4)") &
+   ' Cut/Regl Gas cells Centroid =',CCGP_XYZCEN(IAXIS:KAXIS)
+   WRITE(LU_SETCC,"(A,3E12.4)") &
    ' Centroid Relative Difference=',CCGP_XYZCEN(IAXIS:KAXIS)-&
    (DM_XYZCEN(IAXIS:KAXIS)*DM_VOLUME - XYZCEN_GEOM(IAXIS:KAXIS)*VOLUME_GEOM) / &
    (DM_VOLUME-VOLUME_GEOM)
@@ -25428,6 +25446,7 @@ IF (GET_CUTCELLS_VERBOSE) THEN
       DO SURF_INDEX=0,N_SURF
          IF (GEOM_SURF(SURF_INDEX)>0) &
          WRITE(LU_ERR,"(A,1E14.6)") ' SURF_ID = '//TRIM(SURFACE(SURF_INDEX)%ID)//', Area : ',GEOM_AREA_SURF(SURF_INDEX)
+         WRITE(LU_SETCC,"(A,1E14.6)")' SURF_ID = '//TRIM(SURFACE(SURF_INDEX)%ID)//', Area : ',GEOM_AREA_SURF(SURF_INDEX)
       ENDDO
    ENDIF
    DEALLOCATE(GEOM_AREA_SURF, GEOM_SURF)
