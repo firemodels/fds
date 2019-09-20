@@ -42,6 +42,7 @@ $RUNSMV -d Scalar_Analytical_Solution shunn3_256
 $RUNSMV -d Scalar_Analytical_Solution soborot_charm_square_wave_64
 $RUNSMV -d Complex_Geometry sphere_radiate
 $RUNSMV -d Complex_Geometry sphere_helium_conserve_3meshes
+$RUNSMV -d Complex_Geometry cone_1mesh
 $RUNSMV -d Sprinklers_and_Sprays cascade
 $RUNSMV -d Turbulence csmag_64
 $RUNSMV -d Turbulence dsmag_64
