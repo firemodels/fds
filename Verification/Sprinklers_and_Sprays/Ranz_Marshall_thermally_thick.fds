@@ -26,7 +26,7 @@ from Ranz and Marshall "Evaporation from drops - Part II" Chemical Engineering P
       GEOMETRY     = 'SPHERICAL'
       THICKNESS    = 524.4E-6
       TMP_INNER    = 9.11
-      CELL_SIZE_FACTOR = 0.02
+      CELL_SIZE_FACTOR = 0.15
       MINIMUM_LAYER_THICKNESS = 5.E-6
       HEAT_TRANSFER_MODEL = 'BLOWING SPHERE' /
 
