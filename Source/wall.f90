@@ -2650,6 +2650,8 @@ PYROLYSIS_PREDICTED_IF: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
 
       IF (MATERIAL(SF%MATL_INDEX(1))%PYROLYSIS_MODEL/=PYROLYSIS_LIQUID .OR. I<2) THEN
 
+         ! Note: in the PYROLYSIS_LIQUID model only the first layer of cells (I=1) evaporates
+
          ! Send the array of component densities, ONE_D%MATL_COMP(N)%RHO(I), into the PYROLYSIS routine
 
          DO NN=1,SF%N_MATL
@@ -2678,7 +2680,6 @@ PYROLYSIS_PREDICTED_IF: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
          DO N=1,SF%N_MATL
             ONE_D%MASSFLUX_MATL(N)  = ONE_D%MASSFLUX_MATL(N)  + M_DOT_S_PPP(N)*GEOM_FACTOR
          ENDDO
-
       ENDIF
 
       ! Compute regrid factors
@@ -2740,7 +2741,7 @@ PYROLYSIS_PREDICTED_IF: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
 
    R_S_NEW(NWP) = 0._EB
    DO I=NWP-1,0,-1
-      R_S_NEW(I) = ( R_S_NEW(I+1)**I_GRAD + (R_S(I)**I_GRAD-R_S(I+1)**I_GRAD)*REGRID_FACTOR(I+1) )**(1./REAL(I_GRAD))
+      R_S_NEW(I) = ( R_S_NEW(I+1)**I_GRAD + (R_S(I)**I_GRAD-R_S(I+1)**I_GRAD)*REGRID_FACTOR(I+1) )**(1./REAL(I_GRAD,EB))
    ENDDO
 
    X_S_NEW(0) = 0._EB
@@ -3005,7 +3006,7 @@ WALL_ITERATE: DO
          CCS(I) = TMP_W_NEW(I) - AAS(I)*(TMP_W_NEW(I+1)-TMP_W_NEW(I)) + BBS(I)*(TMP_W_NEW(I)-TMP_W_NEW(I-1)) &
                   + DT2_BC*Q_S(I)/RHOCBAR(I)
       ENDDO
-      IF ( (.NOT.RADIATION) .OR. SF%INTERNAL_RADIATION ) THEN
+      IF ( .NOT.RADIATION .OR. SF%INTERNAL_RADIATION ) THEN
          RFACF = 0.25_EB*ONE_D%HEAT_TRANS_COEF
          RFACB = 0.25_EB*HTCB
       ELSE
@@ -3014,7 +3015,7 @@ WALL_ITERATE: DO
       ENDIF
       RFACF2 = (DXKF-RFACF)/(DXKF+RFACF)
       RFACB2 = (DXKB-RFACB)/(DXKB+RFACB)
-      IF ( (.NOT. RADIATION) .OR. SF%INTERNAL_RADIATION ) THEN
+      IF ( .NOT.RADIATION .OR. SF%INTERNAL_RADIATION ) THEN
          QDXKF = (ONE_D%HEAT_TRANS_COEF*(ONE_D%TMP_G    - 0.5_EB*ONE_D%TMP_F) + Q_WATER_F)/(DXKF+RFACF)
          QDXKB = (HTCB*                 (      TMP_BACK - 0.5_EB*ONE_D%TMP_B) + Q_WATER_B)/(DXKB+RFACB)
       ELSE
@@ -3040,16 +3041,15 @@ WALL_ITERATE: DO
       TMP_W_NEW(1:NWP) = MIN(TMPMAX,MAX(TMPMIN,CCS(1:NWP)))
       TMP_W_NEW(0)     =            MAX(TMPMIN,TMP_W_NEW(1)  *RFACF2+QDXKF)  ! Ghost value, allow it to be large
       TMP_W_NEW(NWP+1) =            MAX(TMPMIN,TMP_W_NEW(NWP)*RFACB2+QDXKB)  ! Ghost value, allow it to be large
+
       IF (STEPCOUNT==1) THEN
-         TOLERANCE = MAXVAL(ABS((TMP_W_NEW-ONE_D%TMP(0:NWP+1))/ONE_D%TMP(0:NWP+1)), &
-            ONE_D%TMP(0:NWP+1)>0._EB) ! returns a negative number, if all TMP_S == 0.
-         IF (TOLERANCE<0.0_EB) &
-         TOLERANCE = MAXVAL(ABS((TMP_W_NEW-ONE_D%TMP(0:NWP+1))/TMP_W_NEW), &
-            TMP_W_NEW>0._EB)
-         IF (TOLERANCE > 0.2_EB) THEN
+         ! returns a negative number, if all TMP_S == 0
+         TOLERANCE = MAXVAL(ABS((TMP_W_NEW-ONE_D%TMP(0:NWP+1))/ONE_D%TMP(0:NWP+1)), ONE_D%TMP(0:NWP+1)>0._EB)
+         IF (TOLERANCE<0.0_EB) TOLERANCE = MAXVAL(ABS((TMP_W_NEW-ONE_D%TMP(0:NWP+1))/TMP_W_NEW), TMP_W_NEW>0._EB)
+         IF (TOLERANCE>0.2_EB) THEN
             STEPCOUNT = MIN(200,STEPCOUNT * (INT(TOLERANCE/0.2_EB) + 1))
             ITERATE=.TRUE.
-            DT2_BC=DT_BC/REAL(STEPCOUNT)
+            DT2_BC=DT_BC/REAL(STEPCOUNT,EB)
             TMP_W_NEW = ONE_D%TMP(0:NWP+1)
          ENDIF
       ENDIF
@@ -3063,7 +3063,7 @@ WALL_ITERATE: DO
       ONE_D%TMP_F  = MIN(TMPMAX,MAX(TMPMIN,ONE_D%TMP_F))
       ONE_D%TMP_B  = MIN(TMPMAX,MAX(TMPMIN,ONE_D%TMP_B))
    ENDDO SUB_TIME
-   IF (.NOT. ITERATE) EXIT WALL_ITERATE
+   IF (.NOT.ITERATE) EXIT WALL_ITERATE
 ENDDO WALL_ITERATE
 
 ONE_D%TMP(0:NWP+1) = TMP_W_NEW
@@ -3120,11 +3120,12 @@ REAL(EB), DIMENSION(:), INTENT(OUT) :: M_DOT_G_PPP_ADJUST(N_TRACKED_SPECIES),M_D
                                        M_DOT_S_PPP(MAX_MATERIALS)
 REAL(EB), INTENT(OUT) :: Q_DOT_G_PPP,Q_DOT_O2_PPP
 INTEGER, INTENT(IN), DIMENSION(:) :: MATL_INDEX(N_MATS)
-INTEGER :: N,NN,J,NS,SMIX_INDEX
+INTEGER :: N,NN,J,NS,SMIX_INDEX,NWP
 TYPE(MATERIAL_TYPE), POINTER :: ML
 TYPE(SURFACE_TYPE), POINTER :: SF
 REAL(EB) :: DTMP,REACTION_RATE,Y_O2,X_O2,Q_DOT_S_PPP,MW_G,X_G,X_W,D_AIR,H_MASS,RE_L,SHERWOOD,MFLUX,MU_AIR,SC_AIR,U_TANG,&
-            RHO_DOT,RDN,B_NUMBER,Y_DROP,Y_GAS,TMP_G,TMP_FILM,Y_AIR,R_AIR,RHO_AIR,LENGTH,SH_FAC_GAS,U2,V2,W2,VEL,MW_RATIO
+            RHO_DOT,RDN,B_NUMBER,Y_DROP,Y_GAS,TMP_G,TMP_FILM,Y_AIR,R_AIR,RHO_AIR,LENGTH,SH_FAC_GAS,U2,V2,W2,VEL,MW_RATIO,&
+            DR,R_S_0,R_S_1
 
 Q_DOT_S_PPP = 0._EB
 Q_DOT_G_PPP = 0._EB
@@ -3155,7 +3156,11 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Tech Guide: Sum over the materials, alpha
                H_MASS = SF%HM_FIXED
             ELSEIF (SIM_MODE==DNS_MODE) THEN
                CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z(:,SMIX_INDEX),1),D_Z(:,SMIX_INDEX),TMP_G,D_AIR)
-               H_MASS = 2._EB*D_AIR*(RDX(IIG)*RDY(JJG)*RDZ(KKG))**ONTH
+               SELECT CASE(ABS(IOR))
+                  CASE(1); H_MASS = 2._EB*D_AIR*RDX(IIG)
+                  CASE(2); H_MASS = 2._EB*D_AIR*RDY(JJG)
+                  CASE(3); H_MASS = 2._EB*D_AIR*RDZ(KKG)
+               END SELECT
             ELSE
                SELECT CASE(SF%GEOMETRY)
                   CASE DEFAULT
@@ -3187,7 +3192,7 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Tech Guide: Sum over the materials, alpha
                      ENDIF
                      CALL GET_VISCOSITY(ZZ_AIR,MU_AIR,TMP_FILM)
                      CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_AIR,R_AIR)
-                     CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z(:,SMIX_INDEX),1),D_Z(:,SMIX_INDEX),TMP_FILM,D_AIR)
+                     CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z(:,SMIX_INDEX),1),D_Z(:,SMIX_INDEX),TMP_F,D_AIR)
                      RHO_AIR = PBAR(0,PRESSURE_ZONE(IIG,JJG,KKG))/(R_AIR*TMP_FILM)
                      SC_AIR = MU_AIR/(RHO_AIR*D_AIR)
                      SH_FAC_GAS = 0.6_EB*SC_AIR**ONTH
@@ -3202,11 +3207,21 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Tech Guide: Sum over the materials, alpha
                      ENDIF
                END SELECT
             ENDIF
-            MFLUX = MAX(0._EB,SPECIES_MIXTURE(SMIX_INDEX)%MW/R0/TMP_F*H_MASS*LOG((X_G-1._EB)/(X_W-1._EB)))  ! Tech Guide: (7.46)
+            MFLUX = MAX(0._EB,SPECIES_MIXTURE(SMIX_INDEX)%MW/R0/TMP_F*H_MASS*LOG((X_G-1._EB)/(X_W-1._EB)))  ! Tech Guide: (7.48)
             MFLUX = MFLUX * PBAR(KKG,PRESSURE_ZONE(IIG,JJG,KKG))
 
             IF (DX_S(1)>TWO_EPSILON_EB) THEN
-               RHO_DOT = MIN(MFLUX/DX_S(1),ML%RHO_S/DT_BC)  ! kg/m3/s
+               SELECT CASE(SF%GEOMETRY)
+                  CASE DEFAULT
+                     RHO_DOT = MIN(MFLUX/DX_S(1),ML%RHO_S/DT_BC)  ! kg/m3/s
+                  CASE(SURF_SPHERICAL)
+                     MFLUX = MAX(0._EB,H_MASS*RHO_AIR*(Y_DROP - Y_GAS))
+                     NWP = SUM(ONE_D%N_LAYER_CELLS(1:SF%N_LAYERS))
+                     R_S_0 = SF%INNER_RADIUS + ONE_D%X(NWP) - ONE_D%X(0)
+                     R_S_1 = SF%INNER_RADIUS + ONE_D%X(NWP) - ONE_D%X(1)
+                     DR = (R_S_0**3-R_S_1**3)/(3._EB*R_S_0**2)
+                     RHO_DOT = MIN(MFLUX/DR,ML%RHO_S/DT_BC)
+               END SELECT
             ELSE
                ! handle case with 3D pyrolysis
                SELECT CASE(IOR)
