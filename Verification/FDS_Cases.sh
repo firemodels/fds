@@ -590,7 +590,7 @@ $QFDS -d Sprinklers_and_Sprays water_evaporation_2.fds
 $QFDS -d Sprinklers_and_Sprays water_evaporation_3.fds
 $QFDS -d Sprinklers_and_Sprays water_evaporation_4.fds
 $QFDS -d Sprinklers_and_Sprays water_evaporation_5.fds
-$QFDS -d Sprinklers_and_Sprays Ranz_Marshall_thermally_thick_droplet.fds
+$QFDS -d Sprinklers_and_Sprays Ranz_Marshall_thermally_thick.fds
 $QFDS -d Sprinklers_and_Sprays water_evaporation_6.fds
 $QFDS -d Sprinklers_and_Sprays water_evaporation_7.fds
 $QFDS -d Sprinklers_and_Sprays water_evaporation_8.fds
