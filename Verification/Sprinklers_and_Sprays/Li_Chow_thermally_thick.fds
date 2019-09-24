@@ -1,4 +1,4 @@
-&HEAD CHID='Li_Chow_thermally_thick_droplet',TITLE='Inputs based on Fig 6 Li Chow Fire Tech 44 351-381 2008' /
+&HEAD CHID='Li_Chow_thermally_thick',TITLE='Inputs based on Fig 6 Li Chow Fire Tech 44 351-381 2008' /
 
 &MESH IJK=11,11,30, XB=0.0,1.1,0.0,1.1,0.0,3.0 /
 
