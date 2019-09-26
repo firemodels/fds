@@ -2556,6 +2556,10 @@ For some verification and validation cases, it is useful to employ a special cor
 \ee
 where $\hbox{Nu}$ is the Nusselt number, $k$ is the thermal conductivity of the gas, $D$ is the diameter of the cylinder, Ra is the Rayleigh number, Pr is the Prandtl number, $T_{\rm s}$ is the surface temperature, $T_\infty$ is the ambient or surrounding gas temperature, $g$ is the acceleration of gravity, $\nu=\mu/\rho$ is the kinematic viscosity of the gas, and $\alpha=k/(\rho c_p)$ is the thermal diffusivity. To specify this heat transfer model for a particular surface, set {\ct HEAT\_TRANSFER\_MODEL} equal to {\ct 'FREE HORIZONTAL CYLINDER'} on the {\ct SURF} line.
 
+\subsubsection{Heat Transfer with Blowing}
+
+During pyrolysis of a solid or evaporation of a liquid the mass transfer off the surface generats a blowing velocity that alters the thermal and momentum boundary layers, thus affecting the heat and mass transfer coefficients.  For a surface with blowing, consider using the correlations discussed in Sazhin \cite{Sazhin:2006} with the Spalding mass transfer corrections \cite{Spalding:1}.  These may be activated by setting {\ct GEOMETRY = 'BLOWING PLATE'} and {\ct HEAT\_TRANSFER\_MODEL = 'BLOWING PLATE'} on the {\ct SURF} line.
+
 
 \subsection{Special Topic: Adiabatic Surfaces}
 \label{info:adiabatic}
@@ -5808,6 +5812,11 @@ The {\ct GEOMETRY} options for solid particles are {\ct 'SPHERICAL'}, {\ct 'CYLI
 By default, the {\ct GEOMETRY} is {\ct 'CARTESIAN'}, in which case you need to provide the {\ct LENGTH} and {\ct WIDTH} of the rectangular plate. It is assumed that the plate is symmetric front and back (note this means you should set {\ct BACKING='INSULATED'} on the {\ct SURF} line). You need only specify the layers that make up the half-thickness. The array {\ct THICKNESS(N)} indicates the thickness(es) of each layer of the plate, not the total thickness of the plate itself. If the plate is composed of only one material component, the specified {\ct THICKNESS} is taken as the half-thickness of the plate.
 
 For  {\ct 'CYLINDRICAL'} or {\ct 'SPHERICAL'} particles, specify the {\ct INNER\_RADIUS} and {\ct THICKNESS} of the individual layers. Alternatively, you can just specify the {\ct RADIUS} if the cylinder or sphere is solid and has only one material component. The default value of {\ct INNER\_RADIUS} is 0~m, which means that the radius of the cylinder or sphere is the sum of the {\ct THICKNESS} values. Remember that the layers are to be listed starting at the surface, not the center. For {\ct 'CYLINDRICAL'} particles, specify a {\ct LENGTH} as well.
+
+\subsubsection{Thermally Thick Droplet Model}
+\label{info:themally_thick_droplet}
+
+Note that if the {\ct GEOMETRY} is set to {\ct 'SPHERICAL'} and a {\ct BOILING\_TEMPERATURE} is specified, thus invoking the liquid pyrolysis model, then the mass transfer relationships will follow those of an evaporating droplet.  The difference between this model and the default droplet model is that in this case the internal droplet temperature will be solved for using the 1D conduction solver.  Usually, the {\ct CELL\_SIZE\_FACTOR} needs to be decreased to get sufficient resolution inside the drop---you should double check the number of solid phase nodes by examining the {\ct CHID.out} file.  Also, you should set {\ct HEAT\_TRANSFER\_MODEL = 'BLOWING SPHERE'} on the {\ct SURF} line.
 
 \subsubsection{Particles with Periodic Boundary Conditions}
 \label{info:periodic-particles}

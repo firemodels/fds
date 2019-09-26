@@ -185,7 +185,7 @@ Liquid droplets can represent either discrete airborne spheres or elements of th
 Over the course of a time step of the gas phase solver, the droplets in a given grid cell evaporate to form the gas species $\alpha$. The evaporation rate is a function of the liquid equilibrium vapor mass fraction, $Y_{\rm \alpha,\ell}$, the local gas phase vapor mass fraction, $Y_{\rm \alpha,g}$, the (assumed uniform) droplet temperature, $T_{\rm p}$, and the local gas temperature, $T_{\rm g}$. The subscript ``g'' refers to the average of the quantity in the cell occupied by the droplet. The subscript ``p'' refers to the liquid droplet. If the droplet is attached to a solid, $T_{\rm s}$ is the surface temperature. The mass and energy transfer between the gas and the liquid can be described by the following set of equations~\cite{Cheremisinoff:1}
 \begin{align}
 \frac{\d m_{\rm p}}{\d t} & = - A_{\rm p,s} \, h_{\rm m} \, \rho_{\rm g} \, (Y_{\alpha,\ell} - Y_{\rm \alpha, g}) \label{droplet_mass} \\[0.2in]
-\rho_{\rm g} V \frac{d Y_{\rm \alpha, g}}{\d t} & = -\frac{\d m_{\rm p}}{\d t}  \label{droplet_gas_fraction} \\[0.2in]
+\rho_{\rm g} V \frac{\d Y_{\rm \alpha, g}}{\d t} & = -\frac{\d m_{\rm p}}{\d t}  \label{droplet_gas_fraction} \\[0.2in]
 \frac{\d T_{\rm p}}{\d t} & = \frac{1}{m_{\rm p} \, c_{\rm p}}  \left[ \dq_{\rm r} + A_{\rm p,s} \, h  \, (T_{\rm g}-T_{\rm p}) + \frac{\d m_{\rm p}}{\d t} \; h_{\rm v} \right]  \label{droplet_temp}  \\[0.2in]
 \frac{\d T_{\rm g}}{\d t} & = \frac{1}{m_{\rm g} \, c_{\rm g}}  \left[A_{\rm p,s} \, h  \, (T_{\rm p}-T_{\rm g}) - \frac{\d m_{\rm p}}{\d t} \; (h_{\rm v}+h_{\rm l}) \right]  \label{droplet_gas_temp}
 \end{align}
@@ -195,19 +195,38 @@ The droplet is taken to be a pure liquid of species $\alpha$ (usually, either wa
       Y_{\rm \alpha,\ell} = \frac{X_{\rm \alpha,\ell}}{X_{\rm \alpha,\ell} \, (1-W_{\rm a}/W_{\alpha}) + W_{\rm a}/W_{\alpha}}  \label{clausius_clapeyron} \ee
 where $X_{\alpha,\ell}$ is the equilibrium vapor {\em volume} fraction, $W_{\alpha}$ is the molecular weight of the gaseous species $\alpha$, $W_{\rm a}$ is the molecular weight of air, $R$ is the universal gas constant, and $T_{\rm b}$ is the boiling temperature of the liquid at standard atmospheric pressure.
 
-Mass and heat transfer between liquid and gas are described with analogous empirical correlations. The mass transfer coefficient, $h_{\rm m}$, is described by the empirical relationships~\cite{Incropera:1}:
+Mass and heat transfer between liquid and gas are described with analogous empirical correlations. The mass transfer coefficient, $h_{\rm m}$, is described by the empirical relationships~\cite{Sazhin:2006}:
 \be
-   h_{\rm m} = \frac{\SH \; D_{\rm \ell g}}{L} \quad ; \quad \SH = \left\{ \begin{array}{ll} 2 + 0.6 \; \RE_D^\ha \;           \SC^\ot & \hbox{droplet} \\ [0.1in]
-                                                                                 0.037 \;   \RE_L^{\frac{4}{5}} \; \SC^\ot & \hbox{film}     \end{array} \right.
+   h_{\rm m} = \frac{\SH \, D_{\rm \ell g}}{L} \, \frac{B_M}{Y_{\alpha,\ell} - Y_{\rm \alpha, g}}
 \ee
-$\SH$ is the Sherwood number, $D_{\rm \ell g}$ is the binary diffusion coefficient between the liquid vapor and the surrounding gas (usually assumed air), $L$ is a length scale equal to either the droplet diameter or 1~m for a surface film, $\RE_D$ is the Reynolds number of the droplet (based on the diameter, $D$, and the relative air-droplet velocity), $\RE_L$ is the Reynolds number based on the length scale $L$, and $\SC$ is the Schmidt number ($\nu/D_{\rm \ell g}$, assumed 0.6 for all cases).
+\be
+   \SH = \frac{\ln(1+B_M)}{B_M} {\SH}_0
+\ee
+\be
+   {\SH}_0 = \left\{ \begin{array}{ll}
+     2 + 0.6   \, \RE_D^\ha           \, \SC^\ot & \hbox{droplet} \\
+         0.037 \, \RE_L^{\frac{4}{5}} \, \SC^\ot & \hbox{film}
+   \end{array} \right.
+\ee
+\be
+   B_M = \frac{Y_{\alpha,\ell} - Y_{\rm \alpha, g}}{1-Y_{\alpha,\ell}}
+\ee
+where $B_M$ is the Spalding mass transfer number \cite{Spalding:1}, $\SH_0$ is the low mass flux Sherwood number, $\SH$ is the Sherwood number with blowing, $D_{\rm \ell g}$ is the binary diffusion coefficient between the liquid vapor and the surrounding gas (usually assumed air), $L$ is a length scale equal to either the droplet diameter or 1~m for a surface film, $\RE_D$ is the Reynolds number of the droplet (based on the diameter, $D$, and the relative air-droplet velocity), $\RE_L$ is the Reynolds number based on the length scale $L$, and $\SC$ is the Schmidt number ($\nu/D_{\rm \ell g}$, assumed 0.6 for all cases).  Note that the mass transfer coefficient, $h_m$, is formulated so that the mass flux model given by Eq.~(\ref{droplet_mass}) recovers Eq.~(108) of Sazhin \cite{Sazhin:2006} but still works within the implicit time update.
 
-An analogous relationship exists for the heat transfer coefficient~\cite{Incropera:1}:
+An analogous relationship exists for the heat transfer coefficient~\cite{Sazhin:2006}:
 \be
-   h = \frac{\NU \; k}{L} \quad ; \quad \NU = \left\{ \begin{array}{ll} 2 + 0.6 \; \RE_D^\ha \; \PR^\ot           & \hbox{gas-droplet} \\ [0.1in]
-                                                                         0.037 \;   \RE_L^{\frac{4}{5}} \; \PR^\ot & \hbox{gas-film}     \end{array} \right.
+   h = \frac{\NU \, k}{L}
 \ee
-$\NU$ is the Nusselt number, $k$ is the thermal conductivity of the gas, and $\PR$ is the Prandtl number (assumed 0.7 for all cases). In cases where the droplet is actually a portion of the liquid film attached to a solid surface, half of the droplet mass is heated or cooled by the solid surface and half is heated or cooled by the gas.
+\be
+   \NU = \frac{\ln(1+B_M)}{B_M} {\NU}_0
+\ee
+\be
+   \NU_0 = \left\{ \begin{array}{ll}
+     2 + 0.6   \, \RE_D^\ha           \, \PR^\ot & \hbox{droplet} \\
+         0.037 \, \RE_L^{\frac{4}{5}} \, \PR^\ot & \hbox{film}
+   \end{array} \right.
+\ee
+where $\NU_0$ is the low mass flux Nusselt number, $\NU$ is the Nusselt number with blowing, $k$ is the thermal conductivity of the gas, and $\PR$ is the Prandtl number (assumed 0.7 for all cases). In cases where the droplet is actually a portion of the liquid film attached to a solid surface, half of the droplet mass is heated or cooled by the solid surface and half is heated or cooled by the gas.
 
 The exchange of mass and energy between liquid droplets and the surrounding gases (or solid surfaces) is computed droplet by droplet. After the temperature of each droplet is computed, the
 appropriate amount of vaporized liquid is added to the given mesh cell, and the cell gas temperature is reduced slightly based on the energy lost to the droplet.
