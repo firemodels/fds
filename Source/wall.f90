@@ -1900,7 +1900,7 @@ PARTICLE_LOOP: DO IP=1,NLP
    AREA_SCALING = 1._EB
    IF (LPC%DRAG_LAW /= SCREEN_DRAG .AND. LPC%DRAG_LAW /= POROUS_DRAG) THEN
       SELECT CASE(SF%GEOMETRY)
-         CASE(SURF_CARTESIAN)
+         CASE(SURF_CARTESIAN,SURF_BLOWING_PLATE)
             ONE_D%AREA = 2._EB*SF%LENGTH*SF%WIDTH
          CASE(SURF_CYLINDRICAL)
             ONE_D%AREA = TWOPI*RADIUS*SF%LENGTH
@@ -1967,7 +1967,7 @@ PARTICLE_LOOP: DO IP=1,NLP
 
    CALC_LP_MASS:IF (SF%THERMALLY_THICK) THEN
       SELECT CASE (SF%GEOMETRY)
-         CASE (SURF_CARTESIAN)
+         CASE (SURF_CARTESIAN,SURF_BLOWING_PLATE)
             LP%MASS = 2._EB*SF%LENGTH*SF%WIDTH*SF%THICKNESS*SURFACE_DENSITY(NM,1,LAGRANGIAN_PARTICLE_INDEX=IP)
           CASE (SURF_CYLINDRICAL)
             LP%MASS = SF%LENGTH*PI*(SF%INNER_RADIUS+SF%THICKNESS)**2*SURFACE_DENSITY(NM,1,LAGRANGIAN_PARTICLE_INDEX=IP)
@@ -2495,7 +2495,7 @@ ONE_D%Q_CON_F = ONE_D%HEAT_TRANS_COEF*DTMP
 ! Exponents for cylindrical or spherical coordinates
 
 SELECT CASE(SF%GEOMETRY)
-   CASE(SURF_CARTESIAN)   ; I_GRAD = 1
+   CASE(SURF_CARTESIAN,SURF_BLOWING_PLATE)   ; I_GRAD = 1
    CASE(SURF_CYLINDRICAL) ; I_GRAD = 2
    CASE(SURF_SPHERICAL)   ; I_GRAD = 3
 END SELECT
@@ -3125,7 +3125,7 @@ TYPE(MATERIAL_TYPE), POINTER :: ML
 TYPE(SURFACE_TYPE), POINTER :: SF
 REAL(EB) :: DTMP,REACTION_RATE,Y_O2,X_O2,Q_DOT_S_PPP,MW_G,X_G,X_W,D_AIR,H_MASS,RE_L,SHERWOOD,MFLUX,MU_AIR,SC_AIR,U_TANG,&
             RHO_DOT,RDN,B_NUMBER,Y_DROP,Y_GAS,TMP_G,TMP_FILM,Y_AIR,R_AIR,RHO_AIR,LENGTH,SH_FAC_GAS,U2,V2,W2,VEL,MW_RATIO,&
-            DR,R_S_0,R_S_1
+            DR,R_S_0,R_S_1,SH_FAC_WALL
 
 Q_DOT_S_PPP = 0._EB
 Q_DOT_G_PPP = 0._EB
@@ -3162,7 +3162,7 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Tech Guide: Sum over the materials, alpha
                   CASE(3); H_MASS = 2._EB*D_AIR*RDZ(KKG)
                END SELECT
             ELSE
-               SELECT CASE(SF%GEOMETRY)
+               GEOMETRY_SELECT_1: SELECT CASE(SF%GEOMETRY)
                   CASE DEFAULT
                      CALL GET_VISCOSITY(ZZ_GET,MU_AIR,TMP_G)
                      U_TANG   = SQRT(2._EB*KRES(IIG,JJG,KKG))
@@ -3170,7 +3170,7 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Tech Guide: Sum over the materials, alpha
                      SC_AIR   = 0.6_EB ! NU_AIR/D_AIR (Incropera & DeWitt, Chap 7, External Flow)
                      SHERWOOD = 0.037_EB*SC_AIR**ONTH*RE_L**0.8_EB
                      H_MASS   = SHERWOOD*MU_AIR/(RHO(IIG,JJG,KKG)*SC*SF%CONV_LENGTH)
-                  CASE(SURF_SPHERICAL)
+                  CASE(SURF_SPHERICAL,SURF_BLOWING_PLATE)
                      ! This section is using the mass transfer model from part
                      U2 = 0.5_EB*(U(IIG,JJG,KKG)+U(IIG-1,JJG,KKG))
                      V2 = 0.5_EB*(V(IIG,JJG,KKG)+V(IIG,JJG-1,KKG))
@@ -3195,19 +3195,38 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Tech Guide: Sum over the materials, alpha
                      CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z(:,SMIX_INDEX),1),D_Z(:,SMIX_INDEX),TMP_F,D_AIR)
                      RHO_AIR = PBAR(0,PRESSURE_ZONE(IIG,JJG,KKG))/(R_AIR*TMP_FILM)
                      SC_AIR = MU_AIR/(RHO_AIR*D_AIR)
-                     SH_FAC_GAS = 0.6_EB*SC_AIR**ONTH
-                     LENGTH = 2._EB*R_DROP
-                     RE_L = RHO_AIR*VEL*LENGTH/MU_AIR
-                     ! Shazin M0, Eq 106 + 109 with B_T=B_M
-                     IF (Y_DROP <= Y_GAS) THEN
-                        H_MASS = 0._EB
-                     ELSE
-                        SHERWOOD  = 2._EB + SH_FAC_GAS*SQRT(RE_L)*LOG(1._EB+B_NUMBER)/(Y_DROP-Y_GAS)
-                        H_MASS = SHERWOOD*D_AIR/LENGTH
-                     ENDIF
-               END SELECT
+                     SELECT CASE(SF%GEOMETRY)
+                        CASE(SURF_SPHERICAL)
+                           SH_FAC_GAS = 0.6_EB*SC_AIR**ONTH
+                           LENGTH = 2._EB*R_DROP
+                           RE_L = RHO_AIR*VEL*LENGTH/MU_AIR
+                           ! Shazin M0, Eq 106 + 109 with B_T=B_M
+                           IF (Y_DROP <= Y_GAS) THEN
+                              H_MASS = 0._EB
+                           ELSE
+                              SHERWOOD  = ( 2._EB + SH_FAC_GAS*SQRT(RE_L) )*LOG(1._EB+B_NUMBER)/(Y_DROP-Y_GAS)
+                              H_MASS = SHERWOOD*D_AIR/LENGTH
+                           ENDIF
+                        CASE(SURF_BLOWING_PLATE)
+                           SH_FAC_WALL = 0.037_EB*SC_AIR**ONTH
+                           LENGTH = SF%CONV_LENGTH
+                           RE_L = RHO_AIR*VEL*LENGTH/MU_AIR
+                           ! Shazin M0, Eq 106 + 109 with B_T=B_M
+                           IF (Y_DROP <= Y_GAS) THEN
+                              H_MASS = 0._EB
+                           ELSE
+                              SHERWOOD  = ( SH_FAC_WALL*RE_L**0.8_EB )*LOG(1._EB+B_NUMBER)/(Y_DROP-Y_GAS)
+                              H_MASS = SHERWOOD*D_AIR/LENGTH
+                           ENDIF
+                     END SELECT
+               END SELECT GEOMETRY_SELECT_1
             ENDIF
-            MFLUX = MAX(0._EB,SPECIES_MIXTURE(SMIX_INDEX)%MW/R0/TMP_F*H_MASS*LOG((X_G-1._EB)/(X_W-1._EB)))  ! Tech Guide: (7.48)
+            SELECT CASE(SF%GEOMETRY)
+               CASE DEFAULT
+                  MFLUX = MAX(0._EB,SPECIES_MIXTURE(SMIX_INDEX)%MW/R0/TMP_F*H_MASS*LOG((X_G-1._EB)/(X_W-1._EB))) ! (7.48)
+               CASE(SURF_SPHERICAL,SURF_BLOWING_PLATE)
+                  MFLUX = MAX(0._EB,SPECIES_MIXTURE(SMIX_INDEX)%MW/R0/TMP_F*H_MASS*(Y_DROP-Y_GAS)) ! (8.24)
+            END SELECT
             MFLUX = MFLUX * PBAR(KKG,PRESSURE_ZONE(IIG,JJG,KKG))
 
             IF (DX_S(1)>TWO_EPSILON_EB) THEN
@@ -3215,7 +3234,6 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Tech Guide: Sum over the materials, alpha
                   CASE DEFAULT
                      RHO_DOT = MIN(MFLUX/DX_S(1),ML%RHO_S/DT_BC)  ! kg/m3/s
                   CASE(SURF_SPHERICAL)
-                     MFLUX = MAX(0._EB,H_MASS*RHO_AIR*(Y_DROP - Y_GAS))
                      NWP = SUM(ONE_D%N_LAYER_CELLS(1:SF%N_LAYERS))
                      R_S_0 = SF%INNER_RADIUS + ONE_D%X(NWP) - ONE_D%X(0)
                      R_S_1 = SF%INNER_RADIUS + ONE_D%X(NWP) - ONE_D%X(1)
@@ -3327,7 +3345,7 @@ INTEGER, INTENT(IN), OPTIONAL :: WALL_INDEX,PARTICLE_INDEX,CFACE_INDEX
 INTEGER  :: ITMP,GEOMETRY_INDEX,SMIX_INDEX,IIG,JJG,KKG
 REAL(EB) :: RE,H_NATURAL,H_FORCED,NUSSELT,FRICTION_VELOCITY,YPLUS,ZSTAR,DN,TMP_FILM,MU_G,K_G,CP_G,ZZ_GET(1:N_TRACKED_SPECIES),RA,&
             MW_G,X_G,X_W,TMP_G,MW_RATIO,Y_DROP,Y_GAS,B_NUMBER,Y_AIR,ZZ_AIR(1:N_TRACKED_SPECIES),MU_AIR,K_AIR,CP_AIR,R_AIR,RHO_AIR,&
-            NU_FAC_GAS,LENGTH,R_DROP,VREL,U2,V2,W2,U_SURF,V_SURF,W_SURF
+            NU_FAC_GAS,NU_FAC_WALL,LENGTH,R_DROP,VREL,U2,V2,W2,U_SURF,V_SURF,W_SURF
 TYPE(SURFACE_TYPE), POINTER :: SFX
 TYPE(WALL_TYPE), POINTER :: WCX
 TYPE(ONE_D_M_AND_E_XFER_TYPE), POINTER :: ONE_DX
@@ -3443,8 +3461,8 @@ HTC_MODEL_SELECT: SELECT CASE(SFX%HEAT_TRANSFER_MODEL)
       NUSSELT = MAX(1._EB,SFX%C_FORCED_CONSTANT+SFX%C_FORCED_RE*RE**SFX%C_FORCED_RE_EXP*PR_AIR**SFX%C_FORCED_PR_EXP)
       H_FORCED = NUSSELT*K_G/SFX%CONV_LENGTH
       CALL NATURAL_CONVECTION_MODEL(H_NATURAL,DELTA_TMP,SFX%C_VERTICAL,SFX%C_HORIZONTAL,SFX%GEOMETRY,ONE_DX%IOR,K_G,DN)
-   CASE(H_BLOWING_SPHERE)
-      ! Copied from Shazin M0 in part (need to organize this code better)
+   CASE(H_BLOWING_SPHERE,H_BLOWING_PLATE)
+      ! Copied from Shazin M0 in part (need to organize this code better, create separate subroutine)
       IIG=ONE_D%IIG
       JJG=ONE_D%JJG
       KKG=ONE_D%KKG
@@ -3479,16 +3497,30 @@ HTC_MODEL_SELECT: SELECT CASE(SFX%HEAT_TRANSFER_MODEL)
       CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_AIR,R_AIR)
       PR_AIR = MU_AIR*CP_AIR/K_AIR
       RHO_AIR = PBAR(0,PRESSURE_ZONE(IIG,JJG,KKG))/(R_AIR*TMP_FILM)
-      NU_FAC_GAS = 0.6_EB*PR_AIR**ONTH
-      LENGTH = 2._EB*R_DROP
-      RE = RHO_AIR*VREL*LENGTH/MU_AIR
-      IF (Y_DROP <= Y_GAS) THEN
-         NUSSELT  = 2._EB + NU_FAC_GAS*SQRT(RE)
-         H_FORCED = NUSSELT*K_AIR/LENGTH
-      ELSE
-         NUSSELT  = 2._EB + NU_FAC_GAS*SQRT(RE)*LOG(1._EB+B_NUMBER)/B_NUMBER
-         H_FORCED = NUSSELT*K_AIR/LENGTH
-      ENDIF
+      SELECT CASE(SFX%HEAT_TRANSFER_MODEL)
+         CASE(H_BLOWING_SPHERE)
+            NU_FAC_GAS = 0.6_EB*PR_AIR**ONTH
+            LENGTH = 2._EB*R_DROP
+            RE = RHO_AIR*VREL*LENGTH/MU_AIR
+            IF (Y_DROP <= Y_GAS) THEN
+               NUSSELT  = 2._EB + NU_FAC_GAS*SQRT(RE)
+               H_FORCED = NUSSELT*K_AIR/LENGTH
+            ELSE
+               NUSSELT  = ( 2._EB + NU_FAC_GAS*SQRT(RE) )*LOG(1._EB+B_NUMBER)/B_NUMBER
+               H_FORCED = NUSSELT*K_AIR/LENGTH
+            ENDIF
+         CASE(H_BLOWING_PLATE)
+            NU_FAC_WALL = 0.037_EB*PR_AIR**ONTH
+            LENGTH = SFX%CONV_LENGTH
+            RE = RHO_AIR*VREL*LENGTH/MU_AIR
+            IF (Y_DROP <= Y_GAS) THEN
+               NUSSELT  = NU_FAC_WALL*RE**0.8_EB
+               H_FORCED = NUSSELT*K_AIR/LENGTH
+            ELSE
+               NUSSELT  = ( NU_FAC_WALL*RE**0.8_EB )*LOG(1._EB+B_NUMBER)/B_NUMBER
+               H_FORCED = NUSSELT*K_AIR/LENGTH
+            ENDIF
+      END SELECT
       H_NATURAL = 0._EB
 END SELECT HTC_MODEL_SELECT
 
