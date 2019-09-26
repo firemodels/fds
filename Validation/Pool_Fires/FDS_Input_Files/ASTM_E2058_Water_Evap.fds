@@ -24,7 +24,9 @@ SFPE 4th Ed. Figure 3-4.24. pg 3-132
       THICKNESS           = 0.013845833,0.01
       EXTERNAL_FLUX       = 50
       CELL_SIZE_FACTOR    = 0.1
-      CONVECTION_LENGTH_SCALE = 0.025/
+      CONVECTION_LENGTH_SCALE = 0.025
+      HEAT_TRANSFER_MODEL = 'BLOWING PLATE'
+      GEOMETRY            = 'BLOWING PLATE'/
 
 &MATL ID                     = 'WATER'
       EMISSIVITY             = 0.95
@@ -32,10 +34,10 @@ SFPE 4th Ed. Figure 3-4.24. pg 3-132
       SPEC_ID                = 'WATER VAPOR'
       NU_SPEC                = 1
       HEAT_OF_REACTION       = 2260
-      CONDUCTIVITY           = 0.58
+      CONDUCTIVITY           = 2.51
       SPECIFIC_HEAT          = 4.181
       BOILING_TEMPERATURE    = 100.
-      ABSORPTION_COEFFICIENT = 1345 /
+      ABSORPTION_COEFFICIENT = 140. /
 
 &MATL ID = 'PYREX GLASS'
       DENSITY = 2200
