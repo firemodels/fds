@@ -2529,7 +2529,7 @@ SELECT CASE(SF%BACKING)
    CASE(VOID)  ! Non-insulated backing to an ambient void
 
       IF (SF%TMP_BACK>0._EB) THEN
-         TMP_BACK = SF%TMP_BACK
+         TMP_BACK = TMP_0(KK) + EVALUATE_RAMP(T-T_BEGIN,0._EB,SF%RAMP_T_B_INDEX)*(SF%TMP_BACK-TMP_0(KK))
       ELSE
          TMP_BACK = TMP_0(KK)
       ENDIF
