@@ -11,6 +11,7 @@ Smoke Concentration,Measured Density (mg/m^3),Predicted Density (mg/m^3),1,600,0
 Compartment Over-Pressure,Measured Pressure Rise (Pa),Predicted Pressure Rise (Pa),1,2000,0.03 0.95,EastOutside,1.5,23,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Compartment_Pressure
 Target Temperature,Measured Temperature Rise (\circC),Predicted Temperature Rise (\circC),1,1300,0.03 0.95,EastOutside,1.5,7,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Target_Temperature
 Surface Temperature,Measured Temperature Rise (\circC),Predicted Temperature Rise (\circC),1,2000,0.03 0.95,EastOutside,1.5,7,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Surface_Temperature
+Liquid Pool Surface Temperature,Measured Temperature Rise (\circC),Predicted Temperature Rise (\circC),1,500,0.03 0.95,EastOutside,1.5,7,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Liquid_Pool_Surface_Temperature
 Target Heat Flux,Measured Heat Flux (kW/m^2),Predicted Heat Flux (kW/m^2),0.1,200,0.03 0.95,EastOutside,1.5,11,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Target_Heat_Flux
 Surface Heat Flux,Measured Heat Flux (kW/m^2),Predicted Heat Flux (kW/m^2),0.1,200,0.03 0.95,EastOutside,1.5,11,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Surface_Heat_Flux
 Velocity,Measured Velocity (m/s),Predicted Velocity (m/s),0.1,10,0.03 0.95,EastOutside,1.5,8,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Velocity

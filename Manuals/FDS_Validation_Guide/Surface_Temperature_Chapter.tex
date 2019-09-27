@@ -45,7 +45,7 @@ Figures~\ref{NIST_CB_UDT_3-4} through \ref{NIST_CB_UDT_5-6} display the under-su
  &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Composite_Beam/Test_3_Sec_4_Under_Deck_Temps} \\
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Composite_Beam/Test_4_Sec_4_Under_Deck_Temps} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Composite_Beam/Test_5_Sec_4_Under_Deck_Temps} 
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Composite_Beam/Test_5_Sec_4_Under_Deck_Temps}
 \end{tabular*}
 \caption[NIST Composite Beam, under-deck temperatures, Sections 3 and 4]{NIST Composite Beam, under-deck temperatures, Sections 3 and 4.}
 \label{NIST_CB_UDT_3-4}
@@ -771,7 +771,7 @@ A ``target'' refers to any object that is not a wall, ceiling, or floor. In the 
 
 A brief description of the experiments is given in Section~\ref{NIST_Composite_Beam_Description}. The compartment interior dimensions are 12.4~m long, running east-west, 1.9~m wide, and 3.77~m high. Four experiments with fires were performed, labeled as Tests~2-5. Test~1 did not include a fire.
 
-Figure~\ref{NIST_CB_Beam} displays the steel temperature at Sections 1, 3-8 for Test~5 only. TCC11 is the upper flange temperature. TCC12, TCC13, and TCC14 are the web temperatures, and TCC15 is the lower flange temperature. 
+Figure~\ref{NIST_CB_Beam} displays the steel temperature at Sections 1, 3-8 for Test~5 only. TCC11 is the upper flange temperature. TCC12, TCC13, and TCC14 are the web temperatures, and TCC15 is the lower flange temperature.
 
 Figure~\ref{NIST_CB_Plates} displays the plate thermometer temperatures at three locations. PT1 is mounted on the east wall facing west. PT2 is mounted just north of the beam at mid-span, pointing north. PT3 is also mounted at mid-span, just below the beam and facing downward.
 
@@ -795,7 +795,7 @@ Figure~\ref{NIST_CB_Plates} displays the plate thermometer temperatures at three
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Composite_Beam/Test_4_Plates} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Composite_Beam/Test_5_Plates} 
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Composite_Beam/Test_5_Plates}
 \end{tabular*}
 \caption[NIST Composite Beam, beam temperatures]{NIST Composite Beam, beam temperatures.}
 \label{NIST_CB_Plates}
@@ -807,7 +807,7 @@ Figure~\ref{NIST_CB_Plates} displays the plate thermometer temperatures at three
 
 A brief description of the experiments is given in Section~\ref{NIST_E119_Compartment_Description}. The compartment interior dimensions are 10.8~m long, running east-west, 7.0~m wide, and 3.8~m high. Three fire experiments were performed, labeled as Tests~1-3.
 
-Figure~\ref{NIST_E119_Compartment_Plates} displays the plate thermometer temperatures at three locations.  Locations of PT1 through PT3 were shown in Fig.~\ref{NIST_E119_Compartment_Drawing_1}. 
+Figure~\ref{NIST_E119_Compartment_Plates} displays the plate thermometer temperatures at three locations.  Locations of PT1 through PT3 were shown in Fig.~\ref{NIST_E119_Compartment_Drawing_1}.
 
 \newpage
 
@@ -815,7 +815,7 @@ Figure~\ref{NIST_E119_Compartment_Plates} displays the plate thermometer tempera
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_E119_Compartment/Test_1_Plates} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_E119_Compartment/Test_2_Plates} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_E119_Compartment/Test_3_Plates} 
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_E119_Compartment/Test_3_Plates}
 \end{tabular*}
 \caption[NIST E119 Compartment, Plate temperatures]{NIST E119 Compartment, Plate temperatures.}
 \label{NIST_E119_Compartment_Plates}
@@ -1960,3 +1960,59 @@ In addition to comparing the peak temperature predictions and measurements for e
 %\end{tabular*}
 %\label{Lattimer_Wall_TC_0}
 %\end{figure}
+
+\clearpage
+
+\section{Liquid Pool Surface Temperature}
+\label{sec:Liquid_Pool_Surf_Temp}
+
+This section presents results for liquid pool surface temperatures for a water pan evaporating under a constant heat flux and for a set of pool fire simulations presented in \cite{Sikanen:2016}.  The first simulation deals with the evaporation of water in ASTM E2058 fire propagation apparatus, reported in \cite{SFPE:Tewarson}, using the ``M1K2'' model described in \cite{Sikanen:2016}. The pool fires are assumed to burn in a 1 m by 1 m square tray, and the fuel layer is 10 cm thick.  Further details of the setup and mass loss rate comparisons are shown in Sec.~\ref{sec:Liquid_Pool_Fires_MLR}.
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Pool_Fires/ASTM_E2058_Sat_Temp}
+\caption{ASTM E2058 water evaporation 50 kW/m$^2$, surface temperature.}
+\label{ASTM_E2058_Water_Evap}
+\end{figure}
+
+\newpage
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Pool_Fires/acetone_1_m_Tsurf} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Pool_Fires/benzene_1_m_Tsurf} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Pool_Fires/butane_1_m_Tsurf} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Pool_Fires/ethanol_1_m_Tsurf} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Pool_Fires/heptane_1_m_Tsurf} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Pool_Fires/methanol_1_m_Tsurf}
+\end{tabular*}
+\caption{Pool fire experiments, surface temperatures.}
+\label{Pool_Fire_Surf_Temp}
+\end{figure}
+
+\clearpage
+
+\subsection{Summary of Liquid Pool Surface Temperature Predictions}
+\label{sec:Liquid_Pool_Surf_Temp}
+
+Figure~\ref{Summary_Liquid_Pool_Surface_Temperature} summarizes the temperature predictions for liquid pool surface temperatures under high heat flux conditions such as pool fires.
+
+\begin{figure}[h!]
+\begin{center}
+\begin{tabular}{c}
+\includegraphics[height=4in]{SCRIPT_FIGURES/ScatterPlots/FDS_Liquid_Pool_Surface_Temperature}
+\end{tabular}
+\end{center}
+\caption[Summary of liquid pool surface temperature predictions]
+{Summary of liquid pool surface temperature predictions.}
+\label{Summary_Liquid_Pool_Surface_Temperature}
+\end{figure}
+
+
+
+
+
+
+
+
+
