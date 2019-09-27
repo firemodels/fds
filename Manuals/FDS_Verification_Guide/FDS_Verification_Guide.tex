@@ -5004,19 +5004,17 @@ Figure~\ref{water_evaporation_4_plot}, left, displays the time history of the en
 \label{water_evaporation_4_plot}
 \end{figure}
 
-%\subsection{Case 5}
-%\label{water_evaporation_5}
+\subsection{Case 5}
+\label{water_evaporation_5}
 
-%This test involves a single evaporating water droplet in relatively dry air. The comparison is made with an actual measurement~\cite{Ranz} where a 1~mm water droplet
-%shrinks to approximately 0.3~mm in approximately 10~min (see Fig.~\ref{water_evaporation_5_plot}, right).
-%As opposed to the other cases above, this case tests the predicted rate of evaporation, not the final steady state.
+This test involves a single evaporating water droplet in relatively dry air. The comparison is made with an actual measurement~\cite{Ranz} where a 1~mm water droplet shrinks to approximately 0.3~mm in approximately 10~min (see Fig.~\ref{water_evaporation_5_plot}). As opposed to the other cases above, this case tests the predicted rate of evaporation, not the final steady state.  In the plot, FDS results for the thermally thin (isothermal) droplet model are compared with the liquid evaporation model for thermally thick sphere (\textct{Ranz\_Marshall\_thermally\_thick} test case) using about 10 cells along the radius of the droplet.
 
-%\begin{figure}[h!]
-%\centering
-%\includegraphics[height=2.2in]{SCRIPT_FIGURES/water_evaporation_5_diameter}
-%\caption[Sample case \textct{water\_evaporation\_5}]{Output of \textct{water\_evaporation\_5} test case.}
-%\label{water_evaporation_5_plot}
-%\end{figure}
+\begin{figure}[h!]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/water_evaporation_5}
+\caption[Sample case \textct{water\_evaporation\_5}]{Output of \textct{water\_evaporation\_5} test case.}
+\label{water_evaporation_5_plot}
+\end{figure}
 
 \subsection{Case 6}
 \label{water_evaporation_6}
@@ -5061,7 +5059,7 @@ The sum of all the terms, \textct{Q\_TOTAL}, is expected to be zero. The three o
 \subsection{Case 8}
 \label{water_evaporation_8}
 
-In this case, we compare FDS predictions against a 1D spherical heat transfer model evaporation using the FDS properties for water and air. This case replicates Fig.~6 of the Li and Chow paper in Ref.~\cite{LiChow:2008}.  The simulation consists of an injection of a 100~$\mu$m droplet at 10~$^\circ$C into 60~$^\circ$C air with an initial water vapor mass fraction of 10~\%. The initial speed of the droplet is 3 m/s in the negative $z$ direction (downward with gravity turned on).  Results for droplet position are shown on the left in Fig.~\ref{water_evaporation_8_plots}.  Results for the droplet diameter are shown on the right.
+In this case, we compare FDS predictions against a 1D spherical heat transfer model evaporation using the FDS properties for water and air. This case replicates Fig.~6 of the Li and Chow paper in Ref.~\cite{LiChow:2008}.  The simulation consists of an injection of a 100~$\mu$m droplet at 10~$^\circ$C into 60~$^\circ$C air with an initial water vapor mass fraction of 10~\%. The initial speed of the droplet is 3 m/s in the negative $z$ direction (downward with gravity turned on).  Two sets of FDS results are shown for droplet position (left in Fig.~\ref{water_evaporation_8_plots}) and droplet diameter (right).  The circle markers show results from the FDS thermally thin (isothermal) droplet model. The squares show results using the liquid pyrolysis model for a blowing sphere and the thermally thick (spherically symmetric) heat transfer solution using about 10 cells along the radius of the droplet.
 
 \begin{figure}[h!]
 \noindent
@@ -5480,8 +5478,8 @@ h_{\mbox{\tiny CFD}} = c_p \frac{V(T_{\mbox{\tiny left}}}{2} \rho_{\mbox{\tiny l
 \chapter{Unstructured Geometry}
 
 This section describes some of the test cases used to verify that FDS and Smokeview are computing
-and visualizing unstructured geometric objects correctly. Also here , the behavior of the different 
-algorithms used to include unstructured geometries whithin FDS is tested. Several test cases that showcase 
+and visualizing unstructured geometric objects correctly. Also here , the behavior of the different
+algorithms used to include unstructured geometries whithin FDS is tested. Several test cases that showcase
 and test the use of the \&GEOM line are presented, followed by accuracy and conservation tests.
 
 
@@ -5753,7 +5751,7 @@ Figure \ref{fig:geom_arch} was created using VERTS and FACES keywords.
 
 \subsection{Cut-cell definition around immersed cone: split cells, piercing and alignment}
 \label{cone_test}
-We test the computational geometry algorithm on its treatment of degenerate cases~\cite{Berger:2017}, namely, split cells within a cartesian cell, cartesian cell piercing, and body surface-grid alignment. These cases are expected to be found in general. A cone of base diameter $D_B$ and height $H=4D_B$ is placed centered in a Cartesian domain of size $x=[-1.5D_B:1.5D_B]$, $y=[-1.5D_B:1.5D_B]$, $z=[-2D_B:6D_B]$, as shown in figure~\ref{Fig:cone_cut_cells}a. The cone is composed of 316 vertices and 628 triangles. A single Cartesian mesh is used with $n_x=5$, $n_y=5$ and $n_z=12$ cells in each corresponding direction. 
+We test the computational geometry algorithm on its treatment of degenerate cases~\cite{Berger:2017}, namely, split cells within a cartesian cell, cartesian cell piercing, and body surface-grid alignment. These cases are expected to be found in general. A cone of base diameter $D_B$ and height $H=4D_B$ is placed centered in a Cartesian domain of size $x=[-1.5D_B:1.5D_B]$, $y=[-1.5D_B:1.5D_B]$, $z=[-2D_B:6D_B]$, as shown in figure~\ref{Fig:cone_cut_cells}a. The cone is composed of 316 vertices and 628 triangles. A single Cartesian mesh is used with $n_x=5$, $n_y=5$ and $n_z=12$ cells in each corresponding direction.
 
 A center column of cartesian cells and corresponding cut-cells is shown in figure~\ref{Fig:cone_cut_cells}b. The proposed method correctly defines cut-faces and polyhedrons in three situations, namely: Solid piercing a cartesian cell, split cut-cells, and cells defined from the cone base aligned with grid plane $z=0$.
 
@@ -5762,12 +5760,12 @@ A center column of cartesian cells and corresponding cut-cells is shown in figur
 \begin{figure}[h]
       \centering
       \includegraphics[trim = 80mm 10mm 80mm 10mm, clip,
-      width=0.325\linewidth]{./SCRIPT_FIGURES/cone_1mesh_a.png} 
+      width=0.325\linewidth]{./SCRIPT_FIGURES/cone_1mesh_a.png}
       \includegraphics[trim = 80mm 10mm 80mm 10mm, clip,
-      width=0.325\linewidth]{./SCRIPT_FIGURES/cone_1mesh_b.png} 
-      \put(-310,240){(a)}    
+      width=0.325\linewidth]{./SCRIPT_FIGURES/cone_1mesh_b.png}
+      \put(-310,240){(a)}
       \put(-120,240){(b)}
-      \put(-30,185){$\leftarrow$  pierced cell}    
+      \put(-30,185){$\leftarrow$  pierced cell}
       \put(-30,90){$\leftarrow$  split cells}
       \put(-30,40){$\leftarrow$ aligned face}
       \caption{Polyhedra computation around immersed cone: (a) problem setup and grid on a $y$ plane. (b) Cut-cells on mid cell column along $z$ direction: \textit{(pierced cell)} cut-cell formed by cartesian cell pierced by object; \textit{(split cells)} cartesian cell complement of body defines 4 split cells; and \textit{(aligned face)} cut-cell of same size of regular cell contains boundary cut-faces aligned with $z=0$ grid plane.}
@@ -5777,7 +5775,7 @@ A center column of cartesian cells and corresponding cut-cells is shown in figur
 
 Three integral conservation tests are defined for a completely immersed geometry problem. These are namely, relative difference of areas computed from the surface triangulation or from the computed boundary cut-faces $|A_{B,\tau}-A_{B,CF}|/A_{B,\tau}$; relative difference of $G$ region volumes computed from the body triangulation and from the cut-cells and $G$ region regular cells $|V_{GB}-V_{GRC}|/V_{GB}$; and finally, difference on the $G$ region centroid computed from body centroid or cut-cells and $G$ cells centroids $|\mathbf{x}_{GB}-\mathbf{x}_{GRC}|_\infty$. See Appendix~\ref{info:constests} for a formal definition of these tests.
 
-The results of the three tests on this cone problem can be seen on table~\ref{tab:cone_res}. We note that cone area and $G$ region volume computed either through the solid triangulation or through the polyhedra produced by the method match up to relative values of $10^{-15}$, commensurate with the floating point tolerance $\epsilon=10^{-12}L_z$ used. In practice, this level of correspondence guarantees conservation as far as the volume mesh is concerned. The centroid of the $G$ region computed through the two different avenues matches up to $10^{-16}D_B$, and is an excellent integral test of the proposed method to compute both cut-face and cut-cell centroids. Note that centroids along $x$ and $y$ direction are not zero, due to the asymmetry of the geometry triangulation employed.   
+The results of the three tests on this cone problem can be seen on table~\ref{tab:cone_res}. We note that cone area and $G$ region volume computed either through the solid triangulation or through the polyhedra produced by the method match up to relative values of $10^{-15}$, commensurate with the floating point tolerance $\epsilon=10^{-12}L_z$ used. In practice, this level of correspondence guarantees conservation as far as the volume mesh is concerned. The centroid of the $G$ region computed through the two different avenues matches up to $10^{-16}D_B$, and is an excellent integral test of the proposed method to compute both cut-face and cut-cell centroids. Note that centroids along $x$ and $y$ direction are not zero, due to the asymmetry of the geometry triangulation employed.
 
 %
 \begin{table}[h]
@@ -5796,7 +5794,7 @@ The results of the three tests on this cone problem can be seen on table~\ref{ta
     \texttt{0.1856E-15} \\
     \hline
   \end{tabular}
-  \caption{Computation results for conservation tests on polyhedrons defined on immersed cone problem.} 
+  \caption{Computation results for conservation tests on polyhedrons defined on immersed cone problem.}
   \label{tab:cone_res}
 \end{table}
 %
@@ -5983,11 +5981,11 @@ That is, if $\alpha=\arctan(1)$,  the periodicity length increases to $L_x=L_y=\
 \end{figure}
 
 
-Although the different orientation angles correspond to different periodicity lengths and domain sizes all cases were run with $N=\{32,64,128,256,384\}$ points in each direction for accuracy testing. The different inclination angles and grids were run with explicit and implicit time integration for scalars in the cut-cell region. The cases with zero inclination were also run with the $\&$OBST functionality for comparison. Calculations were run at constant $CFL=0.1$ and errors were computed on the solution at the first time level after $t=0.95$. The cases input files are found on \texttt{/Complex\_Geometry/rotated\_cube\_*deg\_*\_*.fds}. 
+Although the different orientation angles correspond to different periodicity lengths and domain sizes all cases were run with $N=\{32,64,128,256,384\}$ points in each direction for accuracy testing. The different inclination angles and grids were run with explicit and implicit time integration for scalars in the cut-cell region. The cases with zero inclination were also run with the $\&$OBST functionality for comparison. Calculations were run at constant $CFL=0.1$ and errors were computed on the solution at the first time level after $t=0.95$. The cases input files are found on \texttt{/Complex\_Geometry/rotated\_cube\_*deg\_*\_*.fds}.
 
-Overall the error norm behaves as $\mathcal{O}(\Delta x)$ for the scalar transport equation in cases where the cube is inclined. This is expected as the diffusive flux differences used are of this spatial accuracy. Note that for the non inclined cases of figure~\ref{fig:rotcube_cc_0deg_accuracy_order} the scalar $Z$ presents better accuracy, simply because the two point centroid to centroid difference coincides with a central difference. Note that the Godunov flux limited interpolation does not have a detrimental effect in accuracy, simply because advective fluxes reduce to zero at the boundary. 
-The $\mathcal{O}(\Delta x^2)$ accuracy in $Z$ is also seen for $\&$OBSTs in the right figure of~\ref{fig:rotcube_cc_0deg_accuracy_order}, which use central differences for diffusive fluxes. 
-For the $\&$OBSTs where the momentum equations are solved on velocity points next to the surface, velocities behave as $\mathcal{O}(\Delta x^2)$, in accordance to the discretization schemes used (right figure~\ref{fig:rotcube_cc_0deg_accuracy_order}). The immersed boundary velocity reconstruction on cut-faces provides spatial accuracies between $\mathcal{O}(\Delta x)$ and $\mathcal{O}(\Delta x^2)$ in $L_2$ norm across the different inclination angles, which are inline with what is expected for immersed boundary methods of this type. Note that pressure spatial accuracy is $\mathcal{O}(\Delta x)$ across all tests, consistent with the fractional step projection method used by FDS.    
+Overall the error norm behaves as $\mathcal{O}(\Delta x)$ for the scalar transport equation in cases where the cube is inclined. This is expected as the diffusive flux differences used are of this spatial accuracy. Note that for the non inclined cases of figure~\ref{fig:rotcube_cc_0deg_accuracy_order} the scalar $Z$ presents better accuracy, simply because the two point centroid to centroid difference coincides with a central difference. Note that the Godunov flux limited interpolation does not have a detrimental effect in accuracy, simply because advective fluxes reduce to zero at the boundary.
+The $\mathcal{O}(\Delta x^2)$ accuracy in $Z$ is also seen for $\&$OBSTs in the right figure of~\ref{fig:rotcube_cc_0deg_accuracy_order}, which use central differences for diffusive fluxes.
+For the $\&$OBSTs where the momentum equations are solved on velocity points next to the surface, velocities behave as $\mathcal{O}(\Delta x^2)$, in accordance to the discretization schemes used (right figure~\ref{fig:rotcube_cc_0deg_accuracy_order}). The immersed boundary velocity reconstruction on cut-faces provides spatial accuracies between $\mathcal{O}(\Delta x)$ and $\mathcal{O}(\Delta x^2)$ in $L_2$ norm across the different inclination angles, which are inline with what is expected for immersed boundary methods of this type. Note that pressure spatial accuracy is $\mathcal{O}(\Delta x)$ across all tests, consistent with the fractional step projection method used by FDS.
 
 % Figures for accuracy 27deg:
 \begin{figure}[ht]
@@ -6075,7 +6073,7 @@ A sphere with a radius of 1~m and a surface temperature of $T=773.15$~K is cente
 A hollow sphere with an inner radius of 1~m has a small cube within it that is blowing air into the sphere at a rate of $\dot{V}=0.008$~m$^3$/s. The sphere is assigned a leakage area of $A=0.0001$~m$^2$. It is expected that the pressure rise within the sphere shall be
 \be
    \Delta p = \frac{\rho_\infty}{2} \left( \frac{\dot{V}}{A} \right)^2 \approx 3840 \; \hbox{Pa}
-\ee   
+\ee
 as shown in Fig.~\ref{sphere_leak_fig}.
 \begin{figure}[ht]
 \centering
@@ -6221,16 +6219,16 @@ Sprinklers\_and\_Sprays & \ref{particle_drag}             & particle\_drag\_U50\
 \chapter{Unstructured Geometry integral conservation tests}
 \label{info:constests}
 
-Consider an immersed body $B$, with surface defined by $N_\tau$ triangles, completely immersed in a domain $\Omega$ divided in $M$ cartesian mesh blocks. 
+Consider an immersed body $B$, with surface defined by $N_\tau$ triangles, completely immersed in a domain $\Omega$ divided in $M$ cartesian mesh blocks.
 Three geometry conservation tests can be defined for the polyhedra definition around this body:
 %
 \begin{enumerate}
-    
-    \item Surface area: 
+
+    \item Surface area:
     The total body $B$ surface area can be computed from the triangulation $A_{B,\tau}=\sum_{i_\tau=1}^{N_\tau}{A_{i_\tau}}$, where $N_\tau$ is the number of triangles in the surface and $A_{i_\tau}$ their areas. It can also be calculated from the boundary cut-face areas computed by the cut-cell definition algorithm,  $A_{B,CF}=\sum_{icf=1}^{N_{bcf}}{A_{icf}}$, where $N_{bcf}$ is the number of cut-faces that have been computed on the body surface. These two areas should match.
     \newline
-    
-    \item Gas ($G$) region volume: 
+
+    \item Gas ($G$) region volume:
     This is the volume of region $\Omega-\Omega_B$. It can be computed from the solid volume $V_B$ and the domain volume $V_\Omega$ as $V_{GB}=V_\Omega-V_B$. Here:
     %
     \begin{equation}
@@ -6240,7 +6238,7 @@ Three geometry conservation tests can be defined for the polyhedra definition ar
     where $L_{x,nm}$, $L_{y,nm}$ and $L_{z,nm}$ are the $nm$ mesh sizes in each cartesian direction ($M=1$, $L_{x,1}=3D_B$, $L_{y,1}=3D_B$ and $L_{z,1}=8D_B$ in the cone problem of section~\ref{cone_test}). The discrete volume of the solid can be computed from the triangulation applying the divergence theorem to a field $\mathbf{F}_v=x \mathbf{\hat{i}}$, such that $\nabla \cdot \mathbf{\hat{F}}_v=1$, to the surface triangles:
     %
     \begin{equation}
-      V_B = \int_{\Omega _{B}} \nabla \cdot \mathbf{F}_v \; dV = 
+      V_B = \int_{\Omega _{B}} \nabla \cdot \mathbf{F}_v \; dV =
       \int_{\partial \Omega _{B}}  \mathbf{F}_v \cdot \hat{n} \; dA =
       \sum_{i=1}^{N_\tau}{(\mathbf{\hat{i}} \cdot \mathbf{\hat{n}}_i) x_{ci} A_i}
       \label{eq:Vb}
@@ -6257,41 +6255,41 @@ Three geometry conservation tests can be defined for the polyhedra definition ar
     where $N_{rg}$ the number of regular cells in the $G$ region, and $\Delta x,\Delta y,\Delta z$ the uniform grid cell sizes. The  $N_{cc}$ cut-cell volumes $V_{icc}$ are computed in similar manner to equation~\eqref{eq:Vb}:
     %
     \begin{equation}
-    V_{icc} = \int_{\partial \Omega _{icc}}  \mathbf{F}_v \cdot \hat{n} \; dA = 
+    V_{icc} = \int_{\partial \Omega _{icc}}  \mathbf{F}_v \cdot \hat{n} \; dA =
     \sum_{icf=1}^{ncf} (\mathbf{\hat{i}} \cdot \mathbf{\hat{n}}_{icf}) \int_{\Omega _{icf}} x \; dA
     \label{eq:vol2}
     \end{equation}
     %
     where $ncf$ is the number of faces (cut-face or regular) which are boundary of cut-cell $icc$.
-    
+
     In this test $V_{GB}$ and $V_{GRC}$ should agree.
-    \newline 
-    
+    \newline
+
     \item $G$ region centroid location:
     The centroid of the $G$ region can be computed from cut-cells and regular $G$ cells as:
     %
     \begin{equation}
-       \mathbf{x}_{GRC} = \frac{1}{V_{GRC}} 
-       \left[  \sum_{icc=1}^{N_{cc}}{\mathbf{x}_{c(icc)}V_{icc}} +  \sum_{irg=1}^{N_{rg}}{\mathbf{x}_{c(irg)} \Delta x \Delta y \Delta z} \right] 
+       \mathbf{x}_{GRC} = \frac{1}{V_{GRC}}
+       \left[  \sum_{icc=1}^{N_{cc}}{\mathbf{x}_{c(icc)}V_{icc}} +  \sum_{irg=1}^{N_{rg}}{\mathbf{x}_{c(irg)} \Delta x \Delta y \Delta z} \right]
     \end{equation}
     %
     Where $\mathbf{x}_{c(irg)}$ is the cell center location for regular cell $irg$, and the scalar components in each coordinate direction  $\{\mathbf{\hat{i}},\mathbf{\hat{j}},\mathbf{\hat{k}}\}$ of cut-cell centroids $\mathbf{x}_{c(icc)}$ are obtained from:
     %
     \begin{equation}
     x_{ci(icc)} = \frac{1}{V_{icc}} \int_{\Omega _{icc}} \nabla \cdot \mathbf{F}_{c(i)} \; dV =
-    \frac{1}{V_{icc}} \int_{\partial \Omega _{icc}} \mathbf{F}_{c(i)} \cdot \hat{n} \; dA = 
-  \frac{1}{2V_{icc}} \sum_{icf=1}^{ncf} (\mathbf{\hat{e}}_i \cdot \mathbf{\hat{n}}_{icf}) \int_{\Omega _{icf}} x_i^2 \; dA 
+    \frac{1}{V_{icc}} \int_{\partial \Omega _{icc}} \mathbf{F}_{c(i)} \cdot \hat{n} \; dA =
+  \frac{1}{2V_{icc}} \sum_{icf=1}^{ncf} (\mathbf{\hat{e}}_i \cdot \mathbf{\hat{n}}_{icf}) \int_{\Omega _{icf}} x_i^2 \; dA
     \label{eq:xcen}
     \end{equation}
     %
     where $\mathbf{F}_{c(i)}=1/2 x_i^2 \mathbf{\hat{e}}_i$. Here, $x_i=\{x,y,z\}$ and $\mathbf{\hat{e}}_i=\{\mathbf{\hat{i}},\mathbf{\hat{j}},\mathbf{\hat{k}}\}$.
-    
+
     The centroid of the domain $\Omega$ is:
     \begin{equation}
         \mathbf{x}_\Omega = \frac{1}{V_\Omega} \sum_{nm=1}^M  \mathbf{x}_{nm} V_{nm}
     \end{equation}
     where $\mathbf{x}_{nm}=\mathbf{x}_{low,nm}+\frac{1}{2} \left( L_{x,nm},L_{y,nm},L_{z,nm} \right)$, where $\mathbf{x}_{low,nm}$ is the vector of low boundary coordinates for mesh $nm$. In the single mesh cone problem (section~\ref{cone_test}) $\mathbf{x}_{low,1}= \left( -1.5D_B,-1.5D_B,-2D_B \right)$.
-    
+
     Also, the centroid $\mathbf{x}_B$ of the discretized solid can be computed applying equation~\eqref{eq:xcen} to the surface triangulation $\tau$, in same manner to what was done for cut-faces. From domain and solid the centroid of the $G$ region can be obtained as:
     %
     \begin{equation}
@@ -6299,7 +6297,7 @@ Three geometry conservation tests can be defined for the polyhedra definition ar
     \end{equation}
     %
     Consistency of the computed centroids requires that $\mathbf{x}_{GRC}$ and $\mathbf{x}_{GB}$ should correspond.
-    
+
 \end{enumerate}
 
 
