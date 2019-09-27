@@ -2661,7 +2661,7 @@ The back side emissivity of the surface can be controlled by specifying {\ct EMI
 \subsection{Initial and Back Side Temperature}
 \label{info:TMP_INNER}
 
-By default, the initial temperature of the solid material is set to ambient ({\ct TMPA} on the {\ct MISC} line). Use {\ct TMP\_INNER} on the {\ct SURF} line to specify a different initial temperature of the solid. The layers of the surface can have different initial temperatures. Also, the back side temperature boundary condition of a solid can be set using the parameter {\ct TMP\_BACK} on the {\ct SURF} line. {\ct TMP\_BACK} is not the actual back side surface temperature, but rather the gas temperature to which the back side surface is exposed. This parameter has no meaning for surfaces with {\ct BACKING='EXPOSED'} or {\ct BACKING='INSULATED'}.
+By default, the initial temperature of the solid material is set to ambient ({\ct TMPA} on the {\ct MISC} line). Use {\ct TMP\_INNER} on the {\ct SURF} line to specify a different initial temperature of the solid. The layers of the surface can have different initial temperatures. Also, the back side temperature boundary condition of a solid can be set using the parameter {\ct TMP\_BACK} on the {\ct SURF} line. {\ct TMP\_BACK} is not the actual back side surface temperature, but rather the gas temperature to which the back side surface is exposed. This parameter requires that {\ct BACKING='VOID'}. A {\ct RAMP} for {\ct TMP\_BACK} can be specified with {\ct RAMP\_T\_B}.
 
 As an alternative to {\ct TMP\_INNER} one can also use {\ct RAMP\_T\_I} to specify the name of a {\ct RAMP} containing a depth vs. temperature profile for the surface.
 
@@ -10708,6 +10708,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RAMP\_PART}                        & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
 {\ct RAMP\_Q}                           & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
 {\ct RAMP\_T}                           & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
+{\ct RAMP\_T\_B}                        & Character       & Section~\ref{info:TMP_INNER}              &                     &                         \\ \hline
 {\ct RAMP\_T\_I}                        & Character       & Section~\ref{info:TMP_INNER}              &                     &                         \\ \hline
 {\ct RAMP\_V}                           & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
 {\ct RAMP\_V\_X}                        & Character       & Section~\ref{info:RAMP_Vel_Prof}          &                     &                         \\ \hline
