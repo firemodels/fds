@@ -13,6 +13,7 @@ cd Bouchair_Solar_Chimney;  ./Run_All.sh $OPTIONS; cd ..
 cd CSIRO_Grassland_Fires;  ./Run_All.sh $OPTIONS; cd ..
 cd DelCo_Trainers;  ./Run_All.sh $OPTIONS; cd ..
 cd FAA_Cargo_Compartments;  ./Run_All.sh $OPTIONS; cd ..
+cd FM_Burner;  ./Run_All.sh $OPTIONS; cd ..
 cd FM_FPRF_Datacenter;  ./Run_All.sh $OPTIONS; cd ..
 cd FM_SNL;  ./Run_All.sh $OPTIONS; cd ..
 cd FM_Vertical_Wall_Flames;  ./Run_All.sh $OPTIONS; cd ..
