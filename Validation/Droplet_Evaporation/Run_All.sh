@@ -17,5 +17,5 @@ $QFDS $DEBUG $QUEUE -d $INDIR kolaitis_heptane_1.fds
 $QFDS $DEBUG $QUEUE -d $INDIR kolaitis_heptane_2.fds
 $QFDS $DEBUG $QUEUE -d $INDIR maqua_acetone.fds
 $QFDS $DEBUG $QUEUE -d $INDIR maqua_ethanol.fds
-$QFDS $DEBUG $QUEUE -d $INDIR tafflin_43p9.fds
-$QFDS $DEBUG $QUEUE -d $INDIR tafflin_56p6.fds
+$QFDS $DEBUG $QUEUE -d $INDIR taflin_43p9.fds
+$QFDS $DEBUG $QUEUE -d $INDIR taflin_56p6.fds
