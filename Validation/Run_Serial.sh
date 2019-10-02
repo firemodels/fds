@@ -12,6 +12,7 @@ cd Bryant_Doorway; ./Run_All.sh $OPTIONS; cd ..
 cd CAROLFIRE; ./Run_All.sh $OPTIONS; cd ..
 cd CHRISTIFIRE; ./Run_All.sh $OPTIONS; cd ..
 cd Cup_Burner; ./Run_All.sh $OPTIONS; cd ..
+cd Droplet_Evaporation; ./Run_All.sh $OPTIONS; cd ..
 cd FAA_Polymers; ./Run_All.sh $OPTIONS; cd ..
 cd Fleury_Heat_Flux; ./Run_All.sh $OPTIONS; cd ..
 cd FM_Parallel_Panels; ./Run_All.sh $OPTIONS; cd ..

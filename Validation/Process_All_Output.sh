@@ -17,7 +17,7 @@ PROCESS()
     else
       if [ $nout -gt 0 ] ; then
       status="processing output"
-      ./Process_Output.sh 
+      ./Process_Output.sh
       fi
     fi
   fi
@@ -49,6 +49,7 @@ PROCESS CHRISTIFIRE
 PROCESS CSIRO_Grassland_Fires
 PROCESS Cup_Burner
 PROCESS DelCo_Trainers
+PROCESS Droplet_Evaporation
 PROCESS FAA_Cargo_Compartments
 PROCESS FAA_Polymers
 PROCESS Fleury_Heat_Flux

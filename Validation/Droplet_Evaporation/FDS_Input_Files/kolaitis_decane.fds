@@ -2,7 +2,7 @@
 
 &MESH IJK=5,5,20, XB=0,1,0,1,0,4 /
 
-&TIME T_END=100., DT=0.01 /
+&TIME T_END=95., DT=0.01 /
 
 &DUMP NFRAMES=100/
 
