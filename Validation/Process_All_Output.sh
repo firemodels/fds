@@ -71,6 +71,7 @@ PROCESS MPI_Scaling_Tests
 PROCESS NBS_Multi-Room
 PROCESS NIST_Composite_Beam
 PROCESS NIST_Douglas_Firs
+PROCESS NIST_E119_Compartment
 PROCESS NIST_FSE_2008
 PROCESS NIST_He_2009
 PROCESS NIST_NRC
@@ -88,11 +89,13 @@ PROCESS Pool_Fires
 PROCESS PRISME
 PROCESS Purdue_Flames
 PROCESS Restivo_Experiment
+PROCESS Sandia_Jets
 PROCESS Sandia_Plumes
 PROCESS Sippola_Aerosol_Deposition
 PROCESS Smyth_Slot_Burner
 PROCESS SP_AST
 PROCESS Steckler_Compartment
+PROCESS SWJTU_Tunnels
 PROCESS Turbulent_Jet
 PROCESS UL_NFPRF
 PROCESS UL_NIJ_Houses
