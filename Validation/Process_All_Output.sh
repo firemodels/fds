@@ -89,7 +89,6 @@ PROCESS Pool_Fires
 PROCESS PRISME
 PROCESS Purdue_Flames
 PROCESS Restivo_Experiment
-PROCESS Sandia_Jets
 PROCESS Sandia_Plumes
 PROCESS Sippola_Aerosol_Deposition
 PROCESS Smyth_Slot_Burner
