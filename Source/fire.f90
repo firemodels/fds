@@ -1239,6 +1239,7 @@ SPEC_LOOP: DO NS = 1, N_TRACKED_SPECIES
             IF (CC_IBM) THEN
                IF (CCVAR(I,J,K,IBM_CGSC) /= IBM_GASPHASE) CYCLE ILOOP
             ENDIF
+
             IF (ZZ(I,J,K,NS) < ZZ_MIN_GLOBAL .AND. ZZ(I,J,K,Z_COND_INDEX) < ZZ_MIN_GLOBAL) CYCLE ILOOP
 
             DHOR = H_V_B*SS%MW/R0
@@ -1291,7 +1292,7 @@ SPEC_LOOP: DO NS = 1, N_TRACKED_SPECIES
             ! Compute equilibrium vapor mass fraction
             X_CLOUD  = MIN(1._EB,P_RATIO*EXP(DHOR*(1._EB/T_BOIL_EFF-1._EB/TMP_G)))
             Y_CLOUD  = X_CLOUD/(MW_RATIO + (1._EB-MW_RATIO)*X_CLOUD)
-            IF (Y_GAS < Y_CLOUD .AND. Y_COND < TWO_EPSILON_EB) CYCLE SPEC_LOOP
+            IF (Y_GAS < Y_CLOUD .AND. Y_COND < TWO_EPSILON_EB) CYCLE ILOOP
             IF(Y_GAS > Y_CLOUD) THEN
                Y_1 = 0._EB
                Y_2 = Y_GAS
