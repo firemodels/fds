@@ -4341,8 +4341,21 @@ It is possible to rotate and/or translate various objects within an FDS simulati
 &MOVE ID='spin', ROTATION_ANGLE=45., X0=2., Y0=3., Z0=4., AXIS=1,0,0 /
 \end{lstlisting}
 causes an object to be rotated 45$^\circ$ about the direction vector ({\ct AXIS}) (1,0,0) emanating from the point $(x_0,y_0,z_0)$. You may also translate the object in the three coordinate directions using the parameters {\ct DX}, {\ct DY}, {\ct DZ}, each in meters.
+It is also possible to rotate, scale and translate an object using a $3 \times 4$ transformation matrix. The equation that describes the transformation for a point $p$ with coordinates $x,y,z$ is:
+%
+\begin{equation}
+\left\{ \begin{array}{c} x' \\ y' \\ z' \\ \end{array} \right\} = 
+\left[ \begin{array}{cccc} i_1 & j_1 & k_1 & a_1 \\ i_2 & j_2 & k_2 & a_2 \\ i_3 & j_3 & k_3 & a_3 \\ \end{array} \right]
+\left\{ \begin{array}{c} x \\ y \\ z \\ 1 \\ \end{array} \right\} 
+\end{equation}
+%
+where the primes refer to the new location of point $p$. In that case the previous {\ct MOVE} line is defined as:
+\begin{lstlisting}
+&MOVE ID='My Move', T34 = i1,i2,i3, j1,j2,j3, k1,k2,k3, a1,a2,a3 /
+\end{lstlisting}
+where $(i_1,i_2,i_3)$, $(j_1,j_2,j_3)$ and $(k_1,k_2,k_3)$ are the orthogonal basis vectors for the rotation and scaling operations, and $(a_1,a_2,a_3)$ is the translation vector. Note that if {\ct T34} is defined, it takes precedence over all other transformation parameters.
 
-Currently, this feature only applies to point and line devices, and in future shall be applied to non-rectangular immersed objects.
+Currently, the move feature only applies to point and line devices, and in future shall be applied to non-rectangular immersed objects.
 
 
 

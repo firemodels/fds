@@ -399,6 +399,7 @@ For example, in the following {\ct GEOM}\ namelist,
 
 
 \subsection{Reading Geometry node locations and connectivity data from binary}
+\label{subsec:readbin}
 
 In cases where geometries have very large numbers of nodes and surface triangles, it can be more efficient at setup time to read this data from an FDS produced binary file. This binary file can be obtained running the case in setup only mode ({\ct T\_END=0.0}).
 Consider the chair geometry defined in the previous section. When a geometry is read by FDS, the {\ct XYZ} and face connectivity data {\ct FACES} is automatically written into a binary file with name {\ct CHID\_GEOM\_ID.bingeom} on the run directory (here, {\ct GEOM\_ID='chair'}).
@@ -417,7 +418,7 @@ Then, the next time the case is run, the geometry line can be modified to:
 where {\ct READ\_BINARY=.TRUE.} instructs FDS to read nodes and faces from the binary geometry file.
 Note we have deleted the {\ct VERTS, FACES} arrays from the input line.
 This manner of loading large geometries avoids the testing and reading of all lines related to these arrays on the FDS input file.
-It is particularly efficient in large parallel calculations, where parallel file systems are used.
+It is particularly efficient in large parallel calculations, where parallel file systems are used. See section~\ref{inout:bingeom} for more information on geometry I/O binary format.
 
 
 %\subsection{Grouping Objects}
@@ -549,20 +550,42 @@ It is particularly efficient in large parallel calculations, where parallel file
 
 \section{File Formats}
 
-\subsection{Unstructured Geometry}
+\subsection{FDS GEOM I/O binary format}
+\label{inout:bingeom}
+
+The binary format for geometries read by FDS as described in section~\ref{subsec:readbin} is the following. Binary files read by the FDS released precompiled bundles must have \textit{little endian} endianness.
+%
+\begin{lstlisting}
+
+WRITE(LU_BINGEOM) INTEGER_ONE
+WRITE(LU_BINGEOM) N_VERTS,N_FACES,N_SURF_ID,N_VOLUS
+WRITE(LU_BINGEOM) VERTS(1:3*N_VERTS)
+WRITE(LU_BINGEOM) FACES(1:3*N_FACES)
+WRITE(LU_BINGEOM) SURFS(1:N_FACES)
+WRITE(LU_BINGEOM) VOLUS(1:4*N_VOLUS)
+
+\end{lstlisting}
+
+where:
+
+\begin{itemize}
+  \item {\ct INTEGER\_ONE} Integer equal to one, used to test that the endianness of the binary being read is \textit{little endian}.
+  \item {\ct N\_VERTS,N\_FACES,N\_SURF\_ID,N\_VOLUS} number of vertices, triangles, surface types and volumes on the geometry.
+  \item {\ct VERTS} one dimensional array with $x,y,z$ positions of the {\ct N\_VERTS} vertices.
+  \item {\ct FACES} one dimensional array with the $n_1,n_2,n_3$ node connectivities of the {\ct N\_FACES} triangles.
+  \item {\ct SURFS} one dimensional array with {\ct SURF\_ID}s of the {\ct N\_FACES} triangles.
+  \item {\ct VOLUS} one dimensional array with $n_1,n_2,n_3,n_4$ node connectivities of the {\ct N\_VOLUS} tetrahedrons. This array is currently unused in FDS and left for 3D solid heat transfer in the future.
+\end{itemize}
+
+
+\subsection{SMV Unstructured Geometry}
 \label{out:GEOMETRY}
 
-(add to FDS user's guide 20.13 when ready)
-
-Immersed geometric objects (generalized obstructions) are stored using a file format described below.
+Immersed geometric objects are stored for SMV reading using a file format described below.
 These objects are defined in terms of vertices, triangles and tetrahedrons.
 A vertex is represented as an $(x,y,z)$ coordinate (three floating point values).
-A triangle is represented as three vertex (integer) indices.
-A tetrahedron is represented
-as four vertex (integer) indices.
-The file format allows one to specify objects that change with time.
-Static geometry is defined once and displayed by Smokeview unchanged at each time step. An associated file format used to store data  on the geometric object is described in the next section.
-Dynamic geometry is defined at each time step.
+A triangle is represented as three vertex (integer) indices. A tetrahedron is represented as four vertex (integer) indices.
+An associated file format used to store data  on the geometric object is described in the next section.
 These files are written out from {\ct dump.f90} using lines equivalent to the following:
 
 \begin{lstlisting}
@@ -604,7 +627,7 @@ ENDIF
 \item {\ct FACE1, FACE2, FACE3}\ are the vertex indices for each face (triangle).
     The indices range from 1 to the
     number of vertices.
-\item {\ct VOL1, VOL2, VOL3, VOL4}\ are the verrtex indices for each volume (tetrahedron).  The indices are numbered from 1 to the number of vertices.
+\item {\ct VOL1, VOL2, VOL3, VOL4}\ are the vertex indices for each volume (tetrahedron).  The indices are numbered from 1 to the number of vertices.
 \item {\ct SURF}\ are the SURF indices for each face.
 \item {\ct MATL}\ are the MATL indices for each volume.
 \end{itemize}
