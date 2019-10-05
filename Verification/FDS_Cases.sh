@@ -553,6 +553,8 @@ $QFDS -d Species ramp_chi_r.fds
 $QFDS -d Species bound_test_1.fds
 $QFDS -d Species bound_test_2.fds
 $QFDS -d Species species_props.fds
+$QFDS -d Species condensation_1.fds
+$QFDS -d Species condensation_2.fds
 
 $QFDS -d Sprinklers_and_Sprays activate_sprinklers.fds
 $QFDS -d Sprinklers_and_Sprays bucket_test_1.fds
