@@ -3569,6 +3569,19 @@ This pair of verification cases test the condensation and evaporation of water v
 	\label{fig:condensation_gas}
 \end{figure}
 
+\subsection{Radiation for Condensed Phase (\texorpdfstring{\textct{condesnation\_3}} {condensation\_3})}
+\label{condensation_radiation}
+This verification case tests that the radiation absorption of condensed vapor is equilvalent to the absorption of an equivalent set of Lagrangian particles. The case contains two 1~m$^3$ boxes filled with dry air at 0~$^\circ$C. One box is initialized with an 0.001 mass fraction of condensed water vapor with a droplet size of 1 micron. The other box is filled with one particle per cell with the same diameter and total mass of dropletsf. One wall of each box is set to 1000~$^\circ$C. The radiative heat flux on the opposite face should be the same in both cases.
+
+\begin{figure}[ht]
+\centering
+\begin{tabular}{c}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/condensation_3}
+\end{tabular}
+\caption[Radiative heat flux for the \textct{condensation\_3} case]{Radiative heat flux for the \textct{condensation\_3} case}
+\label{fig:condensation_3}
+\end{figure}
+
 \chapter{Heat Conduction}
 
 This chapter contains examples that test the one-dimensional heat conduction solver in FDS.
