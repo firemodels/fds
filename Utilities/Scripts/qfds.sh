@@ -585,7 +585,7 @@ fi
 
 if [ "$use_intel_mpi" == "1" ]; then
   if [ "$use_installed" == "1" ]; then
-    MPIRUNEXE=$fdsdir/mpiexec
+    MPIRUNEXE=$fdsdir/INTEL/mpi/intel64/bin/mpiexec
     if [ ! -e $MPIRUNEXE ]; then
       echo "$MPIRUNEXE not found"
       echo "Run aborted"

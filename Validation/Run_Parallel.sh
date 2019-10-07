@@ -13,6 +13,7 @@ cd Bouchair_Solar_Chimney;  ./Run_All.sh $OPTIONS; cd ..
 cd CSIRO_Grassland_Fires;  ./Run_All.sh $OPTIONS; cd ..
 cd DelCo_Trainers;  ./Run_All.sh $OPTIONS; cd ..
 cd FAA_Cargo_Compartments;  ./Run_All.sh $OPTIONS; cd ..
+cd FM_Burner;  ./Run_All.sh $OPTIONS; cd ..
 cd FM_FPRF_Datacenter;  ./Run_All.sh $OPTIONS; cd ..
 cd FM_SNL;  ./Run_All.sh $OPTIONS; cd ..
 cd FM_Vertical_Wall_Flames;  ./Run_All.sh $OPTIONS; cd ..
@@ -24,6 +25,7 @@ cd Moody_Chart; ./Run_All.sh $OPTIONS; cd ..
 cd NBS_Multi-Room;  ./Run_All.sh $OPTIONS; cd ..
 cd NIST_Composite_Beam;  ./Run_All.sh $OPTIONS; cd ..
 cd NIST_Douglas_Firs;  ./Run_All.sh $OPTIONS; cd ..
+cd NIST_E119_Compartment;  ./Run_All.sh $OPTIONS; cd ..
 cd NIST_FSE_2008;  ./Run_All.sh $OPTIONS; cd ..
 cd NIST_NRC_Corner_Effects;  ./Run_All.sh $OPTIONS; cd ..
 cd NIST_NRC_Parallel_Panels;  ./Run_All.sh $OPTIONS; cd ..
@@ -36,6 +38,7 @@ cd Pool_Fires;  ./Run_All.sh $OPTIONS; cd ..
 cd Purdue_Flames;  ./Run_All.sh $OPTIONS; cd ..
 cd Sandia_Plumes;  ./Run_All.sh $OPTIONS; cd ..
 cd Smyth_Slot_Burner;  ./Run_All.sh $OPTIONS; cd ..
+cd SWJTU_Tunnels;  ./Run_All.sh $OPTIONS; cd ..
 cd Turbulent_Jet;  ./Run_All.sh $OPTIONS; cd ..
 cd UL_NFPRF;  ./Run_All.sh $OPTIONS; cd ..
 cd UL_NIJ_Houses;  ./Run_All.sh $OPTIONS; cd ..

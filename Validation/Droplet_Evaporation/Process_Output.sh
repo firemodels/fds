@@ -5,7 +5,6 @@ DIR=`basename $CUR`
  
 DDIR=Current_Results
 WDIR=$PDIR/$DIR
-#cp $DDIR/*devc.csv $WDIR
-cp $DDIR/*line.csv $WDIR
+cp $DDIR/*devc.csv $WDIR
 cp $DDIR/*git.txt $WDIR
 

@@ -2949,7 +2949,11 @@ MATL_LOOP: DO N=1,N_MATL
       ENDDO
       WRITE(LU_OUTPUT,'(A,ES9.2)')'        A (1/s)    : ',ML%A(NR)
       WRITE(LU_OUTPUT,'(A,ES9.2)')'        E (J/mol): ',ML%E(NR)/1000.
-      WRITE(LU_OUTPUT,'(A,ES9.2)')'        H_R (kJ/kg): ',ML%H_R(NR)/1000.
+      IF (ML%H_R_I(NR)>0) THEN
+         WRITE(LU_OUTPUT,'(A,ES9.2)')'        H_R (kJ/kg): ',EVALUATE_RAMP(TMPA,0._EB,ML%H_R_I(NR))/1000._EB
+      ELSE
+         WRITE(LU_OUTPUT,'(A,ES9.2)')'        H_R (kJ/kg): ',ML%H_R(NR)/1000._EB
+      ENDIF
       WRITE(LU_OUTPUT,'(A,F8.2)') '        N_S        : ',ML%N_S(NR)
       IF (ML%N_O2(NR)>0._EB) THEN
       WRITE(LU_OUTPUT,'(A,F8.2)') '        N_O2       : ',ML%N_O2(NR)
@@ -2968,7 +2972,11 @@ MATL_LOOP: DO N=1,N_MATL
       WRITE(LU_OUTPUT,'(A,A,A,F8.2)')'        ',SPECIES_MIXTURE(NS)%ID,': ',ML%NU_GAS(NS,1)
       ENDDO
       WRITE(LU_OUTPUT,'(A,F8.2)') '        Boiling temperature (C): ',ML%TMP_BOIL-TMPM
-      WRITE(LU_OUTPUT,'(A,ES9.2)')'        H_R (kJ/kg)            : ',ML%H_R(1)/1000.
+      IF (ML%H_R_I(1) > 0) THEN
+         WRITE(LU_OUTPUT,'(A,ES9.2)')'        H_R (kJ/kg)            : ',EVALUATE_RAMP(TMPA,0._EB,ML%H_R_I(1))/1000._EB
+      ELSE
+         WRITE(LU_OUTPUT,'(A,ES9.2)')'        H_R (kJ/kg)            : ',ML%H_R(1)/1000._EB
+      ENDIF
    ENDIF
 ENDDO MATL_LOOP
 
@@ -3014,7 +3022,7 @@ SURFLOOP: DO N=0,N_SURF
       DO I=0,SF%N_CELLS_INI
          WRITE(LU_OUTPUT,'(15X,I6, I7, F16.7)') I,SF%LAYER_INDEX(MAX(I,1)), SF%X_S(I)
       ENDDO
-      IF (SF%GEOMETRY==SURF_CARTESIAN) THEN
+      IF (SF%GEOMETRY==SURF_CARTESIAN .OR. SF%GEOMETRY==SURF_BLOWING_PLATE) THEN
          IF (SF%BACKING==VOID)      WRITE(LU_OUTPUT,'(A)') '     Backing to void'
          IF (SF%BACKING==INSULATED) WRITE(LU_OUTPUT,'(A)') '     Insulated Backing'
          IF (SF%BACKING==EXPOSED)   WRITE(LU_OUTPUT,'(A)') '     Exposed Backing'

@@ -5,6 +5,8 @@
 export SVNROOT=`pwd`/../..
 source $SVNROOT/Validation/Common_Run_All.sh
 
-$QFDS $DEBUG -p 16 $QUEUE -d $INDIR Sandia_Propane_Jet.fds
+$QFDS -p 6  $DEBUG $QUEUE -d $INDIR Hasemi_1D_9.fds
+$QFDS -p 18 $DEBUG $QUEUE -d $INDIR Hasemi_1D_21.fds
+$QFDS -p 54 $DEBUG $QUEUE -d $INDIR Hasemi_1D_33.fds
 
 echo FDS cases submitted

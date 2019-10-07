@@ -1213,7 +1213,7 @@ INTEGER:: I,J,K, NS, NS2, Y_INDEX, Z_COND_INDEX
 REAL(EB), PARAMETER :: P_STP = 101325._EB
 REAL(EB):: Y_GAS, DHOR, H_V_B, H_V_A, H_V, H_V_N, MW_RATIO, MW_GAS, ZZ_GET(1:N_TRACKED_SPECIES), &
            X_CLOUD, Y_CLOUD, CP, TMP_N, Y_N, Y_1, Y_2, Y_0, CE_SIGN, X_GUESS,Y_GUESS, Y_ALL(1:N_SPECIES), P_RATIO, Y_COND, &
-           T_BOIL_EFF, TMP_G, Y_NN, TMP_NN
+           T_BOIL_EFF, TMP_G, Y_NN, TMP_NN,D_AIR,H_MASS,N_PART,B_NUMBER,DY_LIM
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: Y_BIN, A_BIN
 TYPE (SPECIES_TYPE), POINTER :: SS=>NULL()
 TYPE (SPECIES_MIXTURE_TYPE), POINTER :: SM=>NULL()
@@ -1227,10 +1227,10 @@ SPEC_LOOP: DO NS = 1, N_TRACKED_SPECIES
    Y_INDEX = SM%SINGLE_SPEC_INDEX
    SS => SPECIES(Y_INDEX)
    CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%H_V,1),SS%H_V,SS%TMP_V,H_V_B)
-   IF (SM%AGGLOMERATION_INDEX > 0) THEN
-      ALLOCATE(Y_BIN(N_PARTICLE_BINS(SM%AGGLOMERATION_INDEX)))
-      ALLOCATE(A_BIN(N_PARTICLE_BINS(SM%AGGLOMERATION_INDEX)))
-   ENDIF
+!   IF (SM%AGGLOMERATION_INDEX > 0) THEN
+!      ALLOCATE(Y_BIN(N_PARTICLE_BINS(SM%AGGLOMERATION_INDEX)))
+!      ALLOCATE(A_BIN(N_PARTICLE_BINS(SM%AGGLOMERATION_INDEX)))
+!   ENDIF
 
    DO K = 1, KBAR
       DO J = 1, JBAR
@@ -1239,6 +1239,7 @@ SPEC_LOOP: DO NS = 1, N_TRACKED_SPECIES
             IF (CC_IBM) THEN
                IF (CCVAR(I,J,K,IBM_CGSC) /= IBM_GASPHASE) CYCLE ILOOP
             ENDIF
+
             IF (ZZ(I,J,K,NS) < ZZ_MIN_GLOBAL .AND. ZZ(I,J,K,Z_COND_INDEX) < ZZ_MIN_GLOBAL) CYCLE ILOOP
 
             DHOR = H_V_B*SS%MW/R0
@@ -1254,17 +1255,17 @@ SPEC_LOOP: DO NS = 1, N_TRACKED_SPECIES
             ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(I,J,K,1:N_TRACKED_SPECIES)
             CALL GET_MASS_FRACTION_ALL(ZZ_GET,Y_ALL)
             Y_GAS = Y_ALL(Y_INDEX)
-            IF (SM%AGGLOMERATION_INDEX > 0) THEN
-               Y_BIN(1:N_PARTICLE_BINS(SM%AGGLOMERATION_INDEX)) = &
-                  ZZ_GET(Z_COND_INDEX:Z_COND_INDEX+N_PARTICLE_BINS(SM%AGGLOMERATION_INDEX)-1)
-               Y_COND = SUM(Y_BIN)
-               DO NS2=1,N_PARTICLE_BINS(SM%AGGLOMERATION_INDEX)
-                  A_BIN(NS2) = Y_BIN(NS2) / SPECIES_MIXTURE(Z_COND_INDEX+NS2-1)%MEAN_DIAMETER
-               ENDDO
-               A_BIN = A_BIN/SUM(A_BIN)
-            ELSE
+!            IF (SM%AGGLOMERATION_INDEX > 0) THEN
+!               Y_BIN(1:N_PARTICLE_BINS(SM%AGGLOMERATION_INDEX)) = &
+!                  ZZ_GET(Z_COND_INDEX:Z_COND_INDEX+N_PARTICLE_BINS(SM%AGGLOMERATION_INDEX)-1)
+!               Y_COND = SUM(Y_BIN)
+!               DO NS2=1,N_PARTICLE_BINS(SM%AGGLOMERATION_INDEX)
+!                  A_BIN(NS2) = Y_BIN(NS2) / SPECIES_MIXTURE(Z_COND_INDEX+NS2-1)%MEAN_DIAMETER
+!               ENDDO
+!               A_BIN = A_BIN/SUM(A_BIN)
+!            ELSE
                Y_COND = ZZ_GET(Z_COND_INDEX)
-            ENDIF
+!            ENDIF
             Y_GAS = Y_GAS - Y_COND
 
             ! Determine the ratio of molecular weights between the gas and droplet vapor
@@ -1291,17 +1292,20 @@ SPEC_LOOP: DO NS = 1, N_TRACKED_SPECIES
             ! Compute equilibrium vapor mass fraction
             X_CLOUD  = MIN(1._EB,P_RATIO*EXP(DHOR*(1._EB/T_BOIL_EFF-1._EB/TMP_G)))
             Y_CLOUD  = X_CLOUD/(MW_RATIO + (1._EB-MW_RATIO)*X_CLOUD)
-            IF (Y_GAS < Y_CLOUD .AND. Y_COND < TWO_EPSILON_EB) CYCLE SPEC_LOOP
+            IF (Y_GAS < Y_CLOUD .AND. Y_COND < TWO_EPSILON_EB) CYCLE ILOOP
+            IF (Y_CLOUD < Y_GAS .AND. ZZ(I,J,K,NS) < TWO_EPSILON_EB) CYCLE ILOOP
             IF(Y_GAS > Y_CLOUD) THEN
                Y_1 = 0._EB
                Y_2 = Y_GAS
                Y_N = 0.5_EB*(Y_1+Y_2)
                CE_SIGN = 1._EB
+               DY_LIM = 0.5_EB*ZZ(I,J,K,NS)
             ELSE
                Y_1 = 0._EB
                Y_2 = Y_COND
                Y_N = 0.5_EB*(Y_1+Y_2)
                CE_SIGN = -1._EB
+               DY_LIM = 0.5_EB*Y_COND
             ENDIF
             Y_0 = Y_2
             CALL GET_SPECIFIC_HEAT(ZZ_GET,CP,TMP_G)
@@ -1324,20 +1328,28 @@ SPEC_LOOP: DO NS = 1, N_TRACKED_SPECIES
                ENDIF
                IF (ABS(Y_NN-Y_N)/Y_N < 1.E-3_EB) EXIT EVAP_LOOP
             ENDDO EVAP_LOOP
-            IF (SM%AGGLOMERATION_INDEX > 0) THEN
-               IF (SUM(A_BIN )< TWO_EPSILON_EB) THEN
-                  M_DOT_PPP(I,J,K,Z_COND_INDEX) = M_DOT_PPP(I,J,K,Z_COND_INDEX) + RHO(I,J,K)*(Y_0-Y_N)/DT*CE_SIGN*0.5_EB
-               ELSE
-                  DO NS2=0,N_PARTICLE_BINS(SM%AGGLOMERATION_INDEX)-1
-                     M_DOT_PPP(I,J,K,Z_COND_INDEX+NS2) = M_DOT_PPP(I,J,K,Z_COND_INDEX+NS2) + &
-                                                         RHO(I,J,K)*(Y_0-Y_N)/DT*CE_SIGN*0.5_EB*A_BIN(NS2+1)
-                  ENDDO
-               ENDIF
-            ELSE
-               M_DOT_PPP(I,J,K,Z_COND_INDEX) = M_DOT_PPP(I,J,K,Z_COND_INDEX) + RHO(I,J,K)*(Y_0-Y_N)/DT*CE_SIGN*0.5_EB
-            ENDIF
-            D_SOURCE(I,J,K) = D_SOURCE(I,J,K) + (Y_0-Y_N)*H_V*CE_SIGN/(CP*TMP_G*DT)*0.5_EB
-            M_DOT_PPP(I,J,K,NS) = M_DOT_PPP(I,J,K,NS) - RHO(I,J,K)*(Y_0-Y_N)/DT*CE_SIGN*0.5_EB
+
+            ! Limit based on evaporation rate (assume condensation has same mass transfer number)
+            D_AIR = D_Z(NINT(TMP_G),NS)
+            H_MASS = 2._EB*D_AIR/SM%MEAN_DIAMETER
+            N_PART = Y_COND * RHO(I,J,K) / (FOTHPI* SS%DENSITY_LIQUID * (0.5_EB*SM%MEAN_DIAMETER)**3)
+            N_PART = MAX(1.E7_EB,N_PART) !1E7 is 10 nucleation sites per cm^3
+            B_NUMBER = LOG(1._EB + ABS(Y_CLOUD - Y_GAS) / MAX(0.001_EB, (1._EB - Y_CLOUD)))
+            Y_N = Y_0 - MIN(MIN(DY_LIM,Y_0-Y_N), H_MASS * N_PART * 4._EB*PI * (0.5_EB*SM%MEAN_DIAMETER)**2 * B_NUMBER * DT)
+!            IF (SM%AGGLOMERATION_INDEX > 0) THEN
+!               IF (SUM(A_BIN )< TWO_EPSILON_EB) THEN
+!                  M_DOT_PPP(I,J,K,Z_COND_INDEX) = M_DOT_PPP(I,J,K,Z_COND_INDEX) + RHO(I,J,K)*(Y_0-Y_N)/DT*CE_SIGN*0.3_EB
+!               ELSE
+!                  DO NS2=0,N_PARTICLE_BINS(SM%AGGLOMERATION_INDEX)-1
+!                     M_DOT_PPP(I,J,K,Z_COND_INDEX+NS2) = M_DOT_PPP(I,J,K,Z_COND_INDEX+NS2) + &
+!                                                         RHO(I,J,K)*(Y_0-Y_N)/DT*CE_SIGN*0.3_EB*A_BIN(NS2+1)
+!                  ENDDO
+!               ENDIF
+!            ELSE
+               M_DOT_PPP(I,J,K,Z_COND_INDEX) = M_DOT_PPP(I,J,K,Z_COND_INDEX) + RHO(I,J,K)*(Y_0-Y_N)/DT*CE_SIGN
+!            ENDIF
+            D_SOURCE(I,J,K) = D_SOURCE(I,J,K) + (Y_0-Y_N)*H_V*CE_SIGN/(CP*TMP_G*DT)
+            M_DOT_PPP(I,J,K,NS) = M_DOT_PPP(I,J,K,NS) - RHO(I,J,K)*(Y_0-Y_N)/DT*CE_SIGN
          ENDDO ILOOP
       ENDDO
    ENDDO

@@ -3552,6 +3552,36 @@ This verification case checks the routine for oxidizing soot on a surface. The c
 	\label{fig:soot_oxidation}
 \end{figure}
 
+\section{Condensation}
+\subsection{Condensation and Evaporation in the Gas Phase\\(\texorpdfstring{\textct{condesnation\_1} and \textct{condensation\_2}}{condensation\_1 and condensation\_2})}
+	\label{condensation_evpaporation}
+This pair of verification cases test the condensation and evaporation of water vapor. Both cases use 1~m$^3$ box. Case \textct{condensation\_1} has an initial temperature of 200~$^\circ$C and contains an initial mass fraction of condensed water vapor of 0.01~kg/kg. At equilibirum all the condensed vapor will evaporate resulting in a temperature drop of 27~$^\circ$C and a pressure drop of 5800~Pa. Case \textct{condensation\_2} has an initial temperature of -100~$^\circ$C and contains an initial mass fraction of water vapor of 0.01~kg/kg. At equilibirum 99.9~\% of the vapor will condense resulting in a temperature rise of 36~$^\circ$C and a pressure rise of 21,000~Pa.
+
+\begin{figure}[ht]
+	\centering
+	\begin{tabular}{c}
+		\includegraphics[height=2.2in]{SCRIPT_FIGURES/condensation_1_T}
+		\includegraphics[height=2.2in]{SCRIPT_FIGURES/condensation_1_P} \\
+		\includegraphics[height=2.2in]{SCRIPT_FIGURES/condensation_2_T}
+		\includegraphics[height=2.2in]{SCRIPT_FIGURES/condensation_2_P}
+	\end{tabular}
+	\caption[Results of the \textct{condensation\_1} (top) and \textct{condensation\_2} (bottom) cases]{Temperature change (left) and pressure change (right) due to the evaporation (top) and condensation (bottom) of water vapor for the \textct{condensation\_1} (top) and \textct{condensation\_2} (bottom) cases.}
+	\label{fig:condensation_gas}
+\end{figure}
+
+\subsection{Radiation for Condensed Phase (\texorpdfstring{\textct{condesnation\_3}} {condensation\_3})}
+\label{condensation_radiation}
+This verification case tests that the radiation absorption of condensed vapor is equilvalent to the absorption of an equivalent set of Lagrangian particles. The case contains two 1~m$^3$ boxes filled with dry air at 0~$^\circ$C. One box is initialized with an 0.001 mass fraction of condensed water vapor with a droplet size of 1 micron. The other box is filled with one particle per cell with the same diameter and total mass of dropletsf. One wall of each box is set to 1000~$^\circ$C. The radiative heat flux on the opposite face should be the same in both cases.
+
+\begin{figure}[ht]
+\centering
+\begin{tabular}{c}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/condensation_3}
+\end{tabular}
+\caption[Radiative heat flux for the \textct{condensation\_3} case]{Radiative heat flux for the \textct{condensation\_3} case}
+\label{fig:condensation_3}
+\end{figure}
+
 \chapter{Heat Conduction}
 
 This chapter contains examples that test the one-dimensional heat conduction solver in FDS.
@@ -5004,19 +5034,17 @@ Figure~\ref{water_evaporation_4_plot}, left, displays the time history of the en
 \label{water_evaporation_4_plot}
 \end{figure}
 
-%\subsection{Case 5}
-%\label{water_evaporation_5}
+\subsection{Case 5}
+\label{water_evaporation_5}
 
-%This test involves a single evaporating water droplet in relatively dry air. The comparison is made with an actual measurement~\cite{Ranz} where a 1~mm water droplet
-%shrinks to approximately 0.3~mm in approximately 10~min (see Fig.~\ref{water_evaporation_5_plot}, right).
-%As opposed to the other cases above, this case tests the predicted rate of evaporation, not the final steady state.
+This test involves a single evaporating water droplet in relatively dry air. The comparison is made with an actual measurement~\cite{Ranz} where a 1~mm water droplet shrinks to approximately 0.3~mm in approximately 10~min (see Fig.~\ref{water_evaporation_5_plot}). As opposed to the other cases above, this case tests the predicted rate of evaporation, not the final steady state.  In the plot, FDS results for the thermally thin (isothermal) droplet model are compared with the liquid evaporation model for thermally thick sphere (\textct{Ranz\_Marshall\_thermally\_thick} test case) using about 10 cells along the radius of the droplet.
 
-%\begin{figure}[h!]
-%\centering
-%\includegraphics[height=2.2in]{SCRIPT_FIGURES/water_evaporation_5_diameter}
-%\caption[Sample case \textct{water\_evaporation\_5}]{Output of \textct{water\_evaporation\_5} test case.}
-%\label{water_evaporation_5_plot}
-%\end{figure}
+\begin{figure}[h!]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/water_evaporation_5}
+\caption[Sample case \textct{water\_evaporation\_5}]{Output of \textct{water\_evaporation\_5} test case.}
+\label{water_evaporation_5_plot}
+\end{figure}
 
 \subsection{Case 6}
 \label{water_evaporation_6}
@@ -5061,7 +5089,7 @@ The sum of all the terms, \textct{Q\_TOTAL}, is expected to be zero. The three o
 \subsection{Case 8}
 \label{water_evaporation_8}
 
-In this case, we compare FDS predictions against a 1D spherical heat transfer model evaporation using the FDS properties for water and air. This case replicates Fig.~6 of the Li and Chow paper in Ref.~\cite{LiChow:2008}.  The simulation consists of an injection of a 100~$\mu$m droplet at 10~$^\circ$C into 60~$^\circ$C air with an initial water vapor mass fraction of 10~\%. The initial speed of the droplet is 3 m/s in the negative $z$ direction (downward with gravity turned on).  Results for droplet position are shown on the left in Fig.~\ref{water_evaporation_8_plots}.  Results for the droplet diameter are shown on the right.
+In this case, we compare FDS predictions against a 1D spherical heat transfer model evaporation using the FDS properties for water and air. This case replicates Fig.~6 of the Li and Chow paper in Ref.~\cite{LiChow:2008}.  The simulation consists of an injection of a 100~$\mu$m droplet at 10~$^\circ$C into 60~$^\circ$C air with an initial water vapor mass fraction of 10~\%. The initial speed of the droplet is 3 m/s in the negative $z$ direction (downward with gravity turned on).  Two sets of FDS results are shown for droplet position (left in Fig.~\ref{water_evaporation_8_plots}) and droplet diameter (right).  The circle markers show results from the FDS thermally thin (isothermal) droplet model. The squares show results using the liquid pyrolysis model for a blowing sphere and the thermally thick (spherically symmetric) heat transfer solution using about 10 cells along the radius of the droplet.
 
 \begin{figure}[h!]
 \noindent
@@ -5472,20 +5500,624 @@ h_{\mbox{\tiny CFD}} = c_p \frac{V(T_{\mbox{\tiny left}}}{2} \rho_{\mbox{\tiny l
 \label{fig_HVAC_mass_transport_energy}
 \end{figure}
 
-%\chapter{Unstructured Geometry}
+
+
+% Unstructured geometry verification tests:
+\ifcompgeom
+
+\chapter{Unstructured Geometry}
+
+This section describes some of the test cases used to verify that FDS and Smokeview are computing
+and visualizing unstructured geometric objects correctly. Also here , the behavior of the different
+algorithms used to include unstructured geometries whithin FDS is tested. Several test cases that showcase
+and test the use of the \&GEOM line are presented, followed by accuracy and conservation tests.
+
+
+\section{Verification of setup checks on broken geometries}
+
+This subsection describes some of the test cases used to verify that FDS correctly enforces on geometries
+the quality rules described in Section \texttt{User Guide : Triangulated Surfaces quality}.
+
+The following verification cases contain specific broken geometries in an otherwise correctly
+formatted FDS input file:
+
+\begin{itemize}
+  \item {\ct geom\_bad\_inconsistent\_normals.fds}: a cube with only one face normal inverted;
+  \item {\ct geom\_bad\_inverted\_normals.fds}: a cube with all face normals inverted;
+  \item {\ct geom\_bad\_non\_manifold\_edge.fds}: a cube and a box sharing the same non manifold edge;
+  \item {\ct geom\_bad\_non\_manifold\_vert.fds}: two cubes sharing the same non manifold vertex; % FIXME currently not enforced
+  \item {\ct geom\_bad\_open\_surface.fds}: a cube missing one face, that is an open surface;
+  \item {\ct geom\_bad\_self\_intersection.fds}: a cube whose faces were extruded to obtain a simple self-intersection;
+  \item {\ct geom\_bad\_intersection.fds}: two intersecting cubes. % FIXME remove when boolean ops available
+\end{itemize}
+
+To allow Firebot to consider the test successful if it catches the error condition,
+each of the above input files contain the following parameter in the {\ct MISC}\ line:
+
+{\ct POSITIVE\_ERROR\_TEST = .TRUE.}\
+
+The effect of this parameter is replacing the {\ct ERROR}\ label of the message with a {\ct SUCCESS}\ label.
+
+After Firebot is run, the {\ct geom\_positive\_errors.m}\ Matlab script checks the existence
+of the planned error condition in the {\ct CHID.err}\ file, reporting in cases where the condition
+is not met.
+
+\section{Simple geometry and properties definitions}
+
+\subsection{geom\_simple.fds}
+Figure \ref{fig:geom_simple} was created using the following GEOM namelist.
+The {\ct VERTS}\ keyword is used to specify 3 vertices and the {\ct FACES}\ keyword
+is used to specify the indices of the triangular face.
+
+{\small
+\begin{verbatim}
+&GEOM ID='geom1',
+VERTS=0.0,0.0,0.0,1.0,0.5,0.0,1.0,1.0,1.0,
+FACES=1,2,3,
+SURF_ID='surf1'/
+\end{verbatim}
+}
+
+\begin{figure}
+\begin{center}
+\begin{tabular}{c}
+ \includegraphics[width=4.0in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_simple.png}
+  \end{tabular}
+\end{center}
+ \caption{A triangle created using 3 vertices and 1 face. Case: geom\_simple}
+\label{fig:geom_simple}
+\end{figure}
+
+
+\subsection{geom\_obst.fds}
+Figure \ref{fig:geom_obst} was created using the following GEOM namelist.
+The {\ct XB}\ keyword is used the same way to specify a block as on
+a {\ct OBST}\ or {\ct VENT}\ line.
+
+{\scriptsize
+\begin{verbatim}
+&GEOM ID='obst',SURF_ID='surf1', XB=-0.6,0.6,-0.6,0.6,-0.2,0.2,AZIM=90.0,ELEV=30.0 /
+\end{verbatim}
+}
+
+\begin{figure}
+\begin{center}
+\begin{tabular}{c}
+ \includegraphics[height=2.75in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_obst.png}
+  \end{tabular}
+\end{center}
+ \caption{A block generated using the {\ct XB}\ keyword.  The block is refined automatically to be consistent with the underlying grid resolution. Case: geom\_obst.fds}
+\label{fig:geom_obst}
+\end{figure}
+
+\subsection{geom\_sphere1a.fds,...,geom\_sphere3f.fds}
+Figure \ref{fig:geom_sphere} was created using {\ct LEVEL=n}\
+in the following GEOM namelist
+where {\ct n}\ ranges from 0 to 5.
+
+{\scriptsize
+\begin{verbatim}
+&GEOM ID='sphere',SURF_ID='surf1',SPHERE_RADIUS=0.5,N_LEVELS=n,SPHERE_ORIGIN=0.0,0.0,0.0 /
+\end{verbatim}
+}
+
+The {\ct N\_LEVELS}\ keyword is used
+to specify the resolution of the sphere, larger {\ct N\_LEVELS}\ values result
+in a more highly resolved sphere.{\ct LEVEL=0} produces a 20 sided sphere approximation, an icosahedron .
+{\ct LEVEL=n} produces a sphere approximation with four times as many triangles as the
+sphere produced with {\ct LEVEL=n-1}.
+The {\ct SPHERE\_RADIUS}\ and {\ct SPHERE\_ORIGIN}\ keywords are used to specify
+the size and location of the sphere.  This discretization technique results in equilateral triangles at each recursion level {(\em check to make sure this statement is true - when verified remove this comment)}.
+
+\begin{figure}
+\begin{center}
+\begin{tabular}{cc}
+ \includegraphics[width=3.5in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_sphere1a.png}&
+ \includegraphics[width=3.5in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_sphere1b.png}\\
+ LEVEL=0&LEVEL=1\\
+ \includegraphics[width=3.5in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_sphere1c.png}&
+ \includegraphics[width=3.5in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_sphere1d.png}\\
+ LEVEL=2&LEVEL=3\\
+ \includegraphics[width=3.5in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_sphere1e.png}&
+ \includegraphics[width=3.5in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_sphere1f.png}\\
+ LEVEL=4&LEVEL=5\\
+  \end{tabular}
+\end{center}
+ \caption{Recursive sphere discretizations.  A sphere at a given level is
+ obtained by splitting each triangle from the previous level into four parts and renormalizing added vertices. Cases: geom\_sphere1a.fds,...,geom\_sphere1f.fds}
+\label{fig:geom_sphere}
+\end{figure}
+
+Figure \ref{fig:geom_sphere2a} was created by using {\ct N\_LAT}\ and {\ct N\_LONG}\ keywords in a {\ct GEOM}\ namelist
+to split a sphere in latitudinal (north/south) and longitudinal (east/west) directions respectively. The minimum values of {\ct N\_LAT}\ and {\ct N\_LONG} permitted are 3 and 6.  This discretization technique results in triangles with high aspect ratios near the poles at higher discretization levels.
+
+\begin{figure}
+\begin{center}
+\begin{tabular}{cc}
+ \includegraphics[width=3.5in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_sphere3a.png}&
+ \includegraphics[width=3.5in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_sphere3b.png}\\
+ N\_LAT=3,N\_LONG=6&N\_LAT=6,N\_LONG=12\\
+ \includegraphics[width=3.5in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_sphere3c.png}&
+ \includegraphics[width=3.5in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_sphere3d.png}\\
+ N\_LAT=12,N\_LONG=24&N\_LAT=24,N\_LONG=48\\
+ \includegraphics[width=3.5in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_sphere3e.png}&
+ \includegraphics[width=3.5in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_sphere3f.png}\\
+ N\_LAT=48,N\_LONG=96&N\_LAT=96,N\_LONG=192\\
+  \end{tabular}
+\end{center}
+ \caption{Latitude/Longitude sphere discretizations.  Spheres are
+ split in longitudinal (east/west) and latitudinal (north/south) directions using the {\ct N\_LAT}\ and {\ct N\_LONG} keywords. Cases: geom\_sphere3a.fds,...,geom\_sphere3f.fds}
+\label{fig:geom_sphere2a}
+\end{figure}
+
+%\geominput{geom_terrain.fds}
+\subsection{geom\_terrain.fds}
+Figure \ref{fig:geom_terrain} was created using the {\ct ZVALS}\ keyword.
+
+\begin{figure}
+\begin{center}
+\begin{tabular}{c}
+ \includegraphics[height=2.75in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_terrain.png}
+  \end{tabular}
+\end{center}
+ \caption{Elevations are defined on a rectangular array of grid points using the {\ct ZVALUES}\ keyword.  Case: gridgeom\_terrain.fds}
+\label{fig:geom_terrain}
+\end{figure}
+
+\subsection{geom\_texture.fds}
+Figure \ref{fig:geom_texture} was created using the following SURF and GEOM namelists.
+The {\ct TEXTURE\_MAP}\ keyword on the {\ct SURF}\ is used to specify the name of the image
+file used to texture map the geometric object.
+
+{\small
+\begin{verbatim}
+&SURF ID='surf1',TEXTURE_MAP='nistleft.jpg',TEXTURE_WIDTH=0.6,
+                 TEXTURE_HEIGHT=0.2,COLOR='BLUE' /
+
+&GEOM ID='texture',
+VERTS=0.0,0.0,0.0, 1.0,0.0,0.0, 1.0,1.0,0.0,
+FACES=1,2,3,SURF_ID='surf1'/
+\end{verbatim}
+}
+
+\begin{figure}
+\begin{center}
+\begin{tabular}{c}
+ \includegraphics[width=4.0in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_texture.png}
+  \end{tabular}
+\end{center}
+ \caption{A texture is applied to a triangle. Case: geom\_texture.fds}
+\label{fig:geom_texture}
+\end{figure}
+
+\subsection{geom\_texture2.fds}
+Figure \ref{fig:geom_texture2} was created using the following SURF and GEOM namelists.
+The {\ct TEXTURE\_MAP}\ keyword on the {\ct SURF}\ is used to specify the name of the image
+file used to texture map the geometric object. This example has two textures.
+
+{\small
+\begin{verbatim}
+&SURF ID='surf1' TEXTURE_MAP='nistleft.jpg',
+      TEXTURE_WIDTH=0.6,TEXTURE_HEIGHT=0.2,COLOR='BLUE' /
+&SURF ID='surf2',TEXTURE_MAP='grass.jpg',
+      TEXTURE_WIDTH=0.6,TEXTURE_HEIGHT=0.2,COLOR='GREEN' /
+
+&GEOM ID='texture',
+VERTS=0.0,0.0,0.0, 1.0,0.0,0.0, 1.0,1.0,0.0,
+FACES=1,2,3,SURF_ID='surf1'/
+
+&GEOM ID='texture2',
+VERTS=0.0,0.0,0.0, 1.0,1.0,0.0, 0.0,1.0,0.0,
+FACES=1,2,3,SURF_ID='surf2'/
+\end{verbatim}
+}
+
+\begin{figure}
+\begin{center}
+\begin{tabular}{c}
+ \includegraphics[width=4.0in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_texture2.png}
+  \end{tabular}
+\end{center}
+ \caption{Two texture maps are applied to two separate triangles.  Case: geom\_texture2.fds}
+\label{fig:geom_texture2}
+\end{figure}
+
+\subsection{geom\_texture3a.fds, geom\_texture3b.fds, geom\_texture4a.fds, geom\_texture4b.fds}
+The spheres in Figure \ref{fig:geom_texture3} were created using SURF and GEOM namelists similar to the following.
+
+{\small
+\begin{verbatim}
+&SURF ID='surf1',TEXTURE_MAP='sphere_cover_03.png'COLOR='BLUE',
+      TEXTURE_WIDTH=1.0,TEXTURE_HEIGHT=1.0/
+
+&GEOM ID='sphere1',SURF_ID='surf1',
+      N_LAT=50,N_LONG=50,SPHERE_RADIUS=0.25,SPHERE_ORIGIN=0.25,0.5,0.5,
+      TEXTURE_ORIGIN=0.25,0.5,0.5,TEXTURE_MAPPING='SPHERICAL' /
+
+&GEOM ID='sphere2',SURF_ID='surf3',
+      N_LEVELS=3,SPHERE_RADIUS=0.25,SPHERE_ORIGIN=0.75,0.5,0.5,
+      TEXTURE_ORIGIN=0.75,0.5,0.5,TEXTURE_MAPPING='SPHERICAL' /
+\end{verbatim}
+}
+
+The {\ct TEXTURE\_MAP}\ keyword is used to specify the name of the image
+file applied to the geometric object. The {\ct SPHERICAL}\ setting indicates that that the texture map image
+is applied to the object using spherical coordinates.
+
+
+
+\begin{figure}
+\begin{center}
+\begin{tabular}{cc}
+ \includegraphics[width=3.5in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_texture3a.png}&
+ \includegraphics[width=3.5in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_texture3b.png}\\
+ \includegraphics[width=3.5in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_texture4a.png}&
+ \includegraphics[width=3.5in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_texture4b.png}\\
+ lat/long discretization&recursive discretization
+  \end{tabular}
+\end{center}
+ \caption{Texture maps applied to spheres discretized using two different methods.
+ The two sphere on the left are discretized by splitting the sphere along longitudinal (east/west) and latitudinal (north/south) directions.
+ The two spheres on the right are discretized recursively starting with an icosahedron ( 20 sided polyhedron).  Texture maps applied to the top two sphere have 8 segments. Texture map applied to the bottom two spheres have 5 segments.  Cases: geom\_texture3a.fds, geom\_texture3b.fds, geom\_texture4a.fds, geom\_texture4b.fds}
+\label{fig:geom_texture3}
+\end{figure}
+
+\subsection{geom\_arch.fds}
+Figure \ref{fig:geom_arch} was created using VERTS and FACES keywords.
+
+\begin{figure}
+\begin{center}
+\begin{tabular}{c}
+ \includegraphics[width=4.0in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_arch.png}
+  \end{tabular}
+\end{center}
+ \caption{An arch structure created with FACES and VERTS keywords.
+ Case: geom\_arch.fds . }
+\label{fig:geom_arch}
+\end{figure}
+
+
+\section{Computational geometry}
+
+\subsection{Cut-cell definition around immersed cone: split cells, piercing and alignment}
+\label{cone_test}
+We test the computational geometry algorithm on its treatment of degenerate cases~\cite{Berger:2017}, namely, split cells within a cartesian cell, cartesian cell piercing, and body surface-grid alignment. These cases are expected to be found in general. A cone of base diameter $D_B$ and height $H=4D_B$ is placed centered in a Cartesian domain of size $x=[-1.5D_B:1.5D_B]$, $y=[-1.5D_B:1.5D_B]$, $z=[-2D_B:6D_B]$, as shown in figure~\ref{Fig:cone_cut_cells}a. The cone is composed of 316 vertices and 628 triangles. A single Cartesian mesh is used with $n_x=5$, $n_y=5$ and $n_z=12$ cells in each corresponding direction.
+
+A center column of cartesian cells and corresponding cut-cells is shown in figure~\ref{Fig:cone_cut_cells}b. The proposed method correctly defines cut-faces and polyhedrons in three situations, namely: Solid piercing a cartesian cell, split cut-cells, and cells defined from the cone base aligned with grid plane $z=0$.
+
+
+ %Figure:
+\begin{figure}[h]
+      \centering
+      \includegraphics[trim = 80mm 10mm 80mm 10mm, clip,
+      width=0.325\linewidth]{./SCRIPT_FIGURES/cone_1mesh_a.png}
+      \includegraphics[trim = 80mm 10mm 80mm 10mm, clip,
+      width=0.325\linewidth]{./SCRIPT_FIGURES/cone_1mesh_b.png}
+      \put(-310,240){(a)}
+      \put(-120,240){(b)}
+      \put(-30,185){$\leftarrow$  pierced cell}
+      \put(-30,90){$\leftarrow$  split cells}
+      \put(-30,40){$\leftarrow$ aligned face}
+      \caption{Polyhedra computation around immersed cone: (a) problem setup and grid on a $y$ plane. (b) Cut-cells on mid cell column along $z$ direction: \textit{(pierced cell)} cut-cell formed by cartesian cell pierced by object; \textit{(split cells)} cartesian cell complement of body defines 4 split cells; and \textit{(aligned face)} cut-cell of same size of regular cell contains boundary cut-faces aligned with $z=0$ grid plane.}
+	\label{Fig:cone_cut_cells}
+\end{figure}
+
+
+Three integral conservation tests are defined for a completely immersed geometry problem. These are namely, relative difference of areas computed from the surface triangulation or from the computed boundary cut-faces $|A_{B,\tau}-A_{B,CF}|/A_{B,\tau}$; relative difference of $G$ region volumes computed from the body triangulation and from the cut-cells and $G$ region regular cells $|V_{GB}-V_{GRC}|/V_{GB}$; and finally, difference on the $G$ region centroid computed from body centroid or cut-cells and $G$ cells centroids $|\mathbf{x}_{GB}-\mathbf{x}_{GRC}|_\infty$. See Appendix~\ref{info:constests} for a formal definition of these tests.
+
+The results of the three tests on this cone problem can be seen on table~\ref{tab:cone_res}. We note that cone area and $G$ region volume computed either through the solid triangulation or through the polyhedra produced by the method match up to relative values of $10^{-15}$, commensurate with the floating point tolerance $\epsilon=10^{-12}L_z$ used. In practice, this level of correspondence guarantees conservation as far as the volume mesh is concerned. The centroid of the $G$ region computed through the two different avenues matches up to $10^{-16}D_B$, and is an excellent integral test of the proposed method to compute both cut-face and cut-cell centroids. Note that centroids along $x$ and $y$ direction are not zero, due to the asymmetry of the geometry triangulation employed.
+
 %
-%%\section{Fluid-Structure Interaction}
-%
-%\section{Cut-cell Algorithm (\texorpdfstring\textct{tri\_cube\_cut\_cell\_test}{tri\_cube\_cut\_cell\_test})}
-%
-%A cut-cell algorithm is developed for calculating the intersection area between a triangle and a bounding box (e.g., Cartesian grid cell). It is difficult to directly calculate the intersection area, because the intersection shape is generally an irregular polygon. The area calculation can be divided into three steps. The first step is to obtain the points that the triangle-determined plane intersects with the bounding box edges. These points are sorted to give an intermediate polygon. Note that this intermediate polygon is in the same plane as the blue-edge triangle. The second step is to determine all vertices of the final intersection polygon, by checking whether the triangle edges are intersecting with the edges of the intermediate polygon. Lastly, the area can be easily calculated for the final polygon, which is always convex in this study.
-%
-%\IfFileExists{SCRIPT_FIGURES/cutcell_area.tex}{\input{SCRIPT_FIGURES/cutcell_area.tex}}{\typeout{Error: Missing file SCRIPT_FIGURES/cutcell_area.tex}}
-%
-% Twelve examples in which different triangles intersect with a bounding box are summarized in Table \ref{tab_cutcell_areas}.  NXP represents the vertices of the intersection polygon, whose area is calculated as shown. Examples (1) through (4) and (6) through (8) have a regular triangle intersection. Examples (5) and (9) have a point and line intersection, both with zero area. Examples (10), (11), and (12) are more complicated cases. The intersection polygon has six (6), seven (7), and nine (9) vertices, respectively.
+\begin{table}[h]
+  \begin{tabular}{c|c|c}
+    \hline \hline
+      $A_{B,\tau}$ & $A_{B,CF}$ & $\frac{|A_{B,\tau}-A_{B,CF} |}{A_{B,\tau}}$ \\ \hline
+       \texttt{0.7104E+01} & \texttt{0.7104E+01} & \texttt{0.6252E-15} \\
+    \hline \hline
+      $V_{GB}$ & $V_{GRC}$ & $\frac{|V_{GB}-V_{GRC}|}{V_{GB}}$ \\  \hline
+      \texttt{0.7096E+02} & \texttt{0.7096E+02} & \texttt{0.2212E-14} \\
+    \hline \hline
+    $\mathbf{x}_{GB}$ & $\mathbf{x}_{GRC}$ & $|\mathbf{x}_{GB}-\mathbf{x}_{GRC}|_\infty$ \\
+    \hline \hline
+    \texttt{(-0.306E-6,0.586E-6,0.202E+1)} &
+    \texttt{(-0.306E-6,0.586E-6,0.202E+1)} &
+    \texttt{0.1856E-15} \\
+    \hline
+  \end{tabular}
+  \caption{Computation results for conservation tests on polyhedrons defined on immersed cone problem.}
+  \label{tab:cone_res}
+\end{table}
 %
 
 
+\section{Cut-cell method for scalar transport - Immersed Boundary method}
+
+\subsection{Temporal Error analysis for variable density projection}
+
+\label{sec:saad_cc_temporal_error}
+
+This case is a variation of problem~\ref{sec:saad_temporal_error} for a domain that includes an imposed cut-cell region, where the cut-cells have same geometry as regular cells. The problem allows us to verify the temporal accuracy of our scalar transport implementation for cut-cells. The problem is defined by the advection of a non-reacting mixture of two fluids with different densities (10:1 ratio) in one cartesian direction. Zero diffusivity is prescribed. For the problem definition and temporal error computation details, we refer the reader to problem~\ref{sec:saad_temporal_error}.
+The domain is defined by a mesh containing $N_x=512$ cells in the $x$ direction, where the domain $x=[-1,1]$. Also, four cells are defined in the $y$ direction as required by the FFT Poisson solver. Note that the problem defined is one-dimensional in $x$.
+On this domain, cut-cells with same shape and size of regular cells are defined in the space $x=[-0.5,0.5]$. The test verifies that the implementation details of this cut-cell region does not affect the temporal order of accuracy seen on the default verification case of section~\ref{sec:saad_temporal_error}.
+
+\title{Temporal order of accuracy}
+
+Six cases are defined for this test:
+%
+\begin{enumerate}
+ \item[a]  Three correspond to default FDS DNS flux limiter and default explicit Strong Stability Preserving Runge Kutta (SSPRK2) time integration in cells not covered by cut-cells, plus Godunov flux limiter and explicit SSPRK2 time integration in cut-cell region, for CFL numbers $0.25$, $0.125$, $0.0625$. These cases are defined in {\ct /Complex\_Geometry/saad\_CC\_explicit\_*.fds}.
+
+  \item[b] The other three cases correspond to default flux limiter and time integration in cells not covered by cut-cells, plus Godunov flux limiter and implicit time integration in cut-cell region for the same CFL numbers. The implicit integration on the cut-cell region is done applying an Backward Euler step in the predictor, and Trapezoidal Rule on the corrector step. The imposition of boundary conditions for the implicit region in domain and explicit-implicit (EXIM) boundaries follows the technical notes in section \texttt{sec:exim\_scalar\_transport} of the Technical Reference Guide. These cases are defined in {\ct /Complex\_Geometry/saad\_CC\_implicit\_*.fds}.
+
+\end{enumerate}
+%
+
+Same procedure as explained in section~\ref{sec:saad_temporal_error} is used to define the temporal order of accuracy $p$. As noted there, this procedure filters out the spatial error from the computed temporal convergence. Initial and final fields for temperature and mixture fraction for the smallest integration time step are shown in the top figures of Fig.~\ref{fig:saad_cc_temporal_order}. Fields advect to the right with unitary velocity. The two bottom figures show the order $p$ computed point wise in the $x$ direction for explicit and implicit time integration on the cut-cell region. Deviations from $p \simeq 2$ are dependent on the formula used to compute $p$, as explained in section~\ref{sec:saad_temporal_error}.
+The $l_2$ norm of $p$ computed pointwise for explicit integration in cut-cells is \input{../FDS_Verification_Guide/SCRIPT_FIGURES/saad_CC_explicit_l2_norm}\!, and for implicit time integration of scalars on these is  \input{../FDS_Verification_Guide/SCRIPT_FIGURES/saad_CC_implicit_l2_norm}\!.
+
+% Figure Saad_CC:
+\begin{figure}[ht]
+\centering
+\includegraphics[width=.49\textwidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/saad_CC_explicit_Z.pdf}
+\includegraphics[width=.49\textwidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/saad_CC_explicit_rho.pdf}
+\includegraphics[width=.49\textwidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/saad_CC_explicit_temporal_order_rho.pdf}
+\includegraphics[width=.49\textwidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/saad_CC_implicit_temporal_order_rho.pdf}
+\caption[The {\ct saad CC} temporal order test case]{Temporal order for a variable-density projection on domain including cut-cell region.  (Upper-left) Initial and final field for mixture fraction, explicit time integration on cut-cells.  (Upper-right) Initial and final field for density, explicit time integration on cut-cells.  (Lower-left) $p$ computed pointwise for density at final time, explicit integration on cut-cells. (Lower-right) $p$ computed pointwise for density at final time, implicit time integration on cut-cells.  Fluctuations are due to degenerate points in the formula for $p$.}\label{fig:saad_cc_temporal_order}
+\end{figure}
+
+
+\subsection{Variable-Density manufactured solution}
+
+\label{sec:shunn_cc_mms}
+
+
+We set to test the manufactured solution test case~\ref{sec:shunn_mms} for scalar transport, including an internal region of the two dimensional domain where cut-cells with same shape and size as regular Cartesian cells are artificially defined. This problem allows us to check the overall accuracy (spatial+temporal) of the cut-cell implementation for scalar transport for both explicit and implicit integration on the cut-cell region.
+The parameters of the test follow the ones defined by Shunn et al.~\cite{Shunn:2012} and described in section~\ref{sec:shunn_mms}.
+
+The treatment of sources for scalar transport and momentum equations due to the manufactured solution is essentially the same as defined in section~\ref{sec:shunn_mms}. Therefore, source terms from manufactured solution are treated following the base SSPRK2 integration method defined in FDS.
+The domain is defined on a square of length ($L=2$ m), with periodicity prescribed in its boundaries. A smaller square of length ($L=1$ m) centered on the previous is filled with cut-cells of regular cell geometry. See figure~\texttt{fig:smokeview\_fig}.
+
+
+% Plot of a slice of temperature on the whole domain with the cut-cell edges showing the cut-cell region:
+% Figure:
+
+
+Simulations were performed for $N = \{32, 64, 128, 256, 384\}$, where $N$ is the number of cells in each direction, using an adaptive time step satisfying a CFL number of 0.25. The scalar transport equations for both species defined on section~\ref{sec:shunn_mms}, are solved using the GODUNOV flux limiter and centered interpolation. Figure~\ref{fig:shunn_cc_accuracy_order}, presents the $L_2$ error norm defined on the whole domain (regular+cut-cells) at time $t = 0.9$ as a function of grid spacing, $\Delta x = L/N$. Both explicit and implicit time integration in the cut-cell region produce second-order accurate solutions for density, mixture fraction, and velocity, when centered interpolation is used to define the advective mass flux. As expected, these variables exhibit asymptotic first order accuracy when the GODUNOV flux limiter is used. Note that central differences are used on the diffusive terms of these equations, rendering a second order accurate approximation of diffusion on these regular shaped cells. The pressure $H$ is, in same fashion as seen on section~\ref{sec:shunn_mms}, first order accurate. This is consistent with the projection scheme used for time integration of velocities used by FDS.
+
+
+% Figure Shunn_CC:
+\begin{figure}[ht]
+\centering
+\includegraphics[width=.49\textwidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/shunn_cc_exp_cen_mms_convergence.pdf}
+\includegraphics[width=.49\textwidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/shunn_cc_exp_gdv_mms_convergence.pdf}
+\includegraphics[width=.49\textwidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/shunn_cc_imp_cen_mms_convergence.pdf}
+\includegraphics[width=.49\textwidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/shunn_cc_imp_gdv_mms_convergence.pdf}
+\caption[The {\ct Shunn CC} accuracy order test case]{Overall accuracy for manufactured solution variable-density projection on domain including cut-cell region. The $L_2$ error defined on the whole domain at time $t = 0.9$ s is plotted as a function of grid spacing for $N=\{32,64,128,256,384\}$ points in each direction. Two flux limiting options for scalar advection are used: centered interpolation and Godunov.  (Upper-left) Convergence for explicit scalar time integration and centered interpolation for advection.  (Upper-right) Convergence for explicit scalar time integration and Godunov flux limiter.  (Lower-left) Convergence for implicit scalar time integration (Backward Euler step in predictor and Trapezoidal rule in corrector step), and  centered interpolation for advection. (Lower-right) Convergence for implicit scalar time integration and Godunov flux limiter.  }\label{fig:shunn_cc_accuracy_order}
+\end{figure}
+
+
+\subsection{Immersed boundary method on manufactured solution around rotated cube}
+
+\label{sec:rotcube_cc_mms}
+
+Consider the solution of the following constant density, incompressible flow, momentum and scalar transport equations:
+%
+\begin{eqnarray}
+  \frac{\partial \rho \mathbf{u}(\mathbf{x},t)}{\partial t} &=& -\left[ \mathbf{F_v}(\mathbf{u},\mathbf{x},t) + \boldsymbol{\nabla} p(\mathbf{x},t) + \mathbf{fe_v}(\mathbf{u},p) \right] \label{eq:mmsMom} \\
+  \frac{\partial \rho Z}{\partial t} &=& -\left[  F_z(\mathbf{u},\mathbf{x},t) +  fe_Z(\mathbf{u},Z)   \right]
+  \label{eq:mmsZ}
+\end{eqnarray}
+%
+which are extended by the manufactured solution (MMS) sources $\mathbf{fe_v}(\mathbf{u},p)$ and $fe_Z(\mathbf{u},Z)$ respectively. The vectors $\mathbf{F_v}=-\mu \nabla^2(\mathbf{u}) + \nabla \cdot \left( \rho \mathbf{u} \otimes \mathbf{u} \right)$ and $F_z= \nabla \cdot \left( \rho Z \mathbf{u} - \rho D_z \nabla Z \right) $ contain the corresponding advection and diffusion operators.
+
+Now, consider in figure~\ref{Fig:ManuSoln}, a local set of fixed axes $x',y'$ and a manufactured solution defined on the fluid region $\Omega - \Omega_1$ of the form:
+%
+\begin{eqnarray}
+   u'(\mathbf{x}_{Bp}',t) &=& -\sin(t) \; \sin(kx')^2 \; \sin(2ky') \label{eq:upmf} \\
+   v'(\mathbf{x}_{Bp}',t) &=&   \sin(t) \; \sin(2kx') \; \sin(ky')^2 \label{eq:vpmf} \\
+   p(\mathbf{x}_{Bp}',t) &=& \frac{\sin(t)}{4} \left( 2+\cos(2kx') \right) \left( 2+\cos(2ky') \right) - \sin(t) \label{eq:pmf} \\
+   Z(\mathbf{x}_{Bp}',t) &=& \frac{A_Z \sin(t)}{3} \left[ \left( 1-\cos(2k(x'-\frac{\pi}{2})) \right)
+                                                                                   \left( 1-\cos(2k(y'-\frac{\pi}{2})) \right) - 1 \right] + Z_{mean} \label{eq:qmf}
+\end{eqnarray}
+%
+which is similar on velocities and pressure to the functions given in reference~\cite{E:CMS2003}.  These functions imply zero initial conditions, a divergence free velocity field and the following
+%
+\begin{equation}
+   u'(\mathbf{x}',t)=v'(\mathbf{x}',t)=0, \; \; \frac{\partial p}{\partial n} = \frac{\partial Z}{\partial n}=0, \; \;
+   for \; \; kx'=ky'= m \pi \; ; \; m \in \mathbb{N}
+\end{equation}
+%
+which can be used as \textit{no-slip wall} conditions in square boundaries defined by the integer $m$. Indeed, one could be interested in the flow field inside the square boundaries, or outside.
+
+ The MMS sources $\mathbf{fe_v'}$ and $fe_Z'$ are computed analytically as functions of $(\mathbf{x'},t)$ replacing definitions~\eqref{eq:upmf}-\eqref{eq:qmf} in the governing equations~\eqref{eq:mmsMom}-\eqref{eq:mmsZ} and computing symbolically the corresponding terms. See the Matlab script \texttt{Utilities/Matlab/scripts/source\_mms\_rotcube.m} in the fds repository for said sources derivations.
+
+
+
+We take values $m=0,1$ and wavenumber $k=1$, and consider the external flow to the resulting square immersed body, as seen in figure~\ref{Fig:ManuSoln}. The velocity field function inside the immersed object $\Omega_1$ (i.e. solid region) is assumed zero at all times, consistent with the fixed rigid body hypothesis.
+%
+% figure
+\begin{figure}[h]
+      \centering
+      \includegraphics[trim = 40mm 20mm 40mm 20mm, clip,
+       width=0.6\linewidth]{../../../fig/fds/RotCube_ManuSolnSketch.png}
+      \caption{Reference frames for Eulerian ($E$) and immersed body local system ($B$), and vectors relating a generic point $p$ on the fluid region $\Omega-\Omega_1$.}
+	\label{Fig:ManuSoln}
+\end{figure}
+%
+An angular parameter $\alpha$ defines the orientation of the local axes $x',y'$ respect to the Eulerian frame coordinates $x,y$. The center of $\Omega_1$ in the Eulerian frame is situated in position $\mathbf{x}_{Ec}=(\pi,\pi)$. The rotation matrix from Eulerian $E$ to local frame $B$ coordinates is
+%
+\begin{equation}
+  [\mathbf{T}_{BE}] = \left[ \begin{array}{c c}
+                                          \cos(\alpha) & \sin(\alpha) \\
+                                         -\sin(\alpha)  & \cos(\alpha) \end{array} \right]
+\end{equation}
+%
+In the local system, the center of the square in local coordinates is given by $\mathbf{x}_{Bc}'=(\pi/2,\pi/2)$. Then, the location of a general point $p$ in the local system is:
+%
+\begin{equation}
+    \mathbf{x}_{Bp}'= \mathbf{x}_{Bc}' +\mathbf{x}_{cp}'
+\end{equation}
+%
+The same point $p$ location can be defined in terms of the $E$ frame as $\mathbf{x}_{Ep}= \mathbf{x}_{Ec} +\mathbf{x}_{cp}$ (Eulerian coordinates). Then
+%
+\begin{equation}
+    \mathbf{x}_{cp}'=[\mathbf{T}_{BE}] \mathbf{x}_{cp}=[\mathbf{T}_{BE}] \left( \mathbf{x}_{Ep} - \mathbf{x}_{Ec} \right)
+\end{equation}
+%
+and finally
+%
+\begin{equation}
+    \mathbf{x}_{Bp}'= \mathbf{x}_{Bc}' +[\mathbf{T}_{BE}] \left( \mathbf{x}_{Ep} - \mathbf{x}_{Ec} \right)
+\end{equation}
+%
+This last equation is employed to translate a given point $\mathbf{x}_{Ep}$ in the Eulerian frame (with Eulerian frame coordinates $x,y$) to the local frame coordinates where equations~\eqref{eq:upmf}-\eqref{eq:qmf} are defined. This transformation is used to define the initial conditions in the local frame, for points collocated in the Eulerian frame aligned fluid grid. It is also used to compute the source terms $\mathbf{fe_v'}$ and $fe_Z'$ in local coordinates at different time levels.
+To transform  $\mathbf{fe_v'}$ and $fe_Z'$ to their Eulerian counterparts used in the numerical integration we use:
+%
+\begin{eqnarray}
+  \mathbf{fe_v} &=& [\mathbf{T}_{BE}]^T \mathbf{fe_v'} \\
+  fe_Z &=& fe_Z'
+\end{eqnarray}
+%
+
+Similarly, the manufactured variables can be defined at the final time to define error norms. The velocity components of interest are the ones defined in the Eulerian frame, and can be readily computed as
+%
+\begin{equation}
+  \left\{ \begin{array}{c}  u \\ v \end{array} \right\}_p = [\mathbf{T}_{BE}]^T \left\{ \begin{array}{c}  u' \\ v' \end{array} \right\}_p
+\end{equation}
+%
+We assume periodic boundary conditions on $\partial \Omega$. Then, the size of the domain $\Omega$ depends on the periodicity lengths for a rotated flow field.
+When $\alpha=0$, a domain $\Omega$ of size $L_x=L_y=2\pi$ centered in $\mathbf{x}_{Ec}$ is sufficient for application of periodic boundary conditions. Then, for $\alpha=\arctan(1/r)$, $r=1,2,3,...$ the periodicity lengths on the Eulerian reference frame are $L_x=L_y=2\pi \sqrt{1+r^2}$.
+That is, if $\alpha=\arctan(1)$,  the periodicity length increases to $L_x=L_y=\sqrt{8} \pi$. If $\alpha=\arctan(1/2)$, $L_x=L_y=\sqrt{20} \pi$.
+%See figures~\ref{}a-c.
+
+% Figures showing each case with the geom and velocity field to show rotation:
+
+
+% Figures rotcube_cc:
+\begin{figure}[ht]
+\centering
+\includegraphics[trim = 5mm 2mm 7mm 2mm, clip, width=.365\textwidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/rotated_cube_0deg_exp_mms_connvergence.pdf}
+\includegraphics[trim = 30mm 2mm 7mm 2mm, clip, width=.305\textwidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/rotated_cube_0deg_imp_mms_connvergence.pdf}
+\includegraphics[trim = 30mm 2mm 7mm 2mm, clip, width=.305\textwidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/rotated_cube_0deg_obs_mms_connvergence.pdf}
+\caption[The {\ct Rotated Cube CC} accuracy order test case]{Zero degree rotation. The $L_2$ error defined on the whole domain at time $t = 0.95$ s is plotted as a function of grid spacing for $N=\{32,64,128,256,384\}$ points in each direction.}\label{fig:rotcube_cc_0deg_accuracy_order}
+\end{figure}
+
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=.49\textwidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/rotated_cube_27deg_exp_mms_connvergence.pdf}
+\includegraphics[width=.49\textwidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/rotated_cube_27deg_imp_mms_connvergence.pdf}
+\caption[The {\ct Rotated Cube CC} accuracy order test case]{$\simeq27$ degree rotation. The $L_2$ error defined on the whole domain at time $t = 0.95$ s is plotted as a function of grid spacing for $N=\{32,64,128,256,384\}$ points in each direction.}\label{fig:rotcube_cc_27deg_accuracy_order}
+\end{figure}
+
+
+Although the different orientation angles correspond to different periodicity lengths and domain sizes all cases were run with $N=\{32,64,128,256,384\}$ points in each direction for accuracy testing. The different inclination angles and grids were run with explicit and implicit time integration for scalars in the cut-cell region. The cases with zero inclination were also run with the $\&$OBST functionality for comparison. Calculations were run at constant $CFL=0.1$ and errors were computed on the solution at the first time level after $t=0.95$. The cases input files are found on \texttt{/Complex\_Geometry/rotated\_cube\_*deg\_*\_*.fds}.
+
+Overall the error norm behaves as $\mathcal{O}(\Delta x)$ for the scalar transport equation in cases where the cube is inclined. This is expected as the diffusive flux differences used are of this spatial accuracy. Note that for the non inclined cases of figure~\ref{fig:rotcube_cc_0deg_accuracy_order} the scalar $Z$ presents better accuracy, simply because the two point centroid to centroid difference coincides with a central difference. Note that the Godunov flux limited interpolation does not have a detrimental effect in accuracy, simply because advective fluxes reduce to zero at the boundary.
+The $\mathcal{O}(\Delta x^2)$ accuracy in $Z$ is also seen for $\&$OBSTs in the right figure of~\ref{fig:rotcube_cc_0deg_accuracy_order}, which use central differences for diffusive fluxes.
+For the $\&$OBSTs where the momentum equations are solved on velocity points next to the surface, velocities behave as $\mathcal{O}(\Delta x^2)$, in accordance to the discretization schemes used (right figure~\ref{fig:rotcube_cc_0deg_accuracy_order}). The immersed boundary velocity reconstruction on cut-faces provides spatial accuracies between $\mathcal{O}(\Delta x)$ and $\mathcal{O}(\Delta x^2)$ in $L_2$ norm across the different inclination angles, which are inline with what is expected for immersed boundary methods of this type. Note that pressure spatial accuracy is $\mathcal{O}(\Delta x)$ across all tests, consistent with the fractional step projection method used by FDS.
+
+% Figures for accuracy 27deg:
+\begin{figure}[ht]
+\centering
+\includegraphics[width=.49\textwidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/rotated_cube_45deg_exp_mms_connvergence.pdf}
+\includegraphics[width=.49\textwidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/rotated_cube_45deg_imp_mms_connvergence.pdf}
+\caption[The {\ct Rotated Cube CC} accuracy order test case]{$45$ degree rotation. The $L_2$ error defined on the whole domain at time $t = 0.95$ s is plotted as a function of grid spacing for $N=\{32,64,128,256,384\}$ points in each direction.}\label{fig:rotcube_cc_45deg_accuracy_order}
+\end{figure}
+
+
+
+\subsection{Poiseuille flow in channel created by two GEOMs}
+
+\label{sec:poiseuille_cc}
+
+Consider a gas with density $\rho=1.165$ kg/m$^3$, and molecular viscosity $\mu=0.025$ kg/m/s, being advected through a 2D channel of height $H=1$ m and length $L=10$ m, by means of a constant force field along the channel direction $F_x=1$ N/m$^3$. This force field is equivalent to a pressure drop $dp/dx=-1$ Pa/m. The analytical solution for the friction factor in this laminar flow is:
+%
+\begin{equation}
+   f_{an} = 24/Re_H
+\end{equation}
+%
+where in our case $Re_H= \rho \overline{u} H/ \mu \simeq 155$, being the analytical value for the bulk velocity $\overline{u}=3.\hat{3}$ m/s. The (Moody) friction factor formula for pressure losses is:
+%
+\begin{equation}
+   \Delta p / L = f \frac{L}{H}  \frac{1}{2} \rho \overline{u}^2
+\end{equation}
+%
+which can be used to compute the simulation error in $f$, as a function of the mean velocity evaluated on the numerical mesh. To evaluate the solution quality of the CC-IBM scheme we consider three sets of test cases. See figure~\ref{Fig:PoiseSketch}.
+%
+% figure
+\begin{figure}[h]
+      \centering
+      \includegraphics[trim = 60mm 34mm 60mm 42mm, clip,
+       width=0.75\linewidth]{../../../fig/fds/Poiseuille_cc_Sketch.png}
+      \caption{Poiseuille flow created by two geometries $\Omega_1, \Omega_2$: Location of channel walls respect to Cartesian grid lines (in blue).}
+	\label{Fig:PoiseSketch}
+\end{figure}
+%
+We define as $h$ the distance from the lower geometry wall to the closest grid line within it. The we consider discretizations with ${10,20,40,80}$ cells along the $z$ direction and cases: grid aligned $h=0$, grid dependent $h=\Delta z /3$, and fixed $h=\Delta z_{10}/11$, where $\Delta z_{10}$ is the wall normal cell size in the coarsest discretization used.
+
+Friction factor errors computed as $|f-f_{an}|$ are shown in figures~\ref{Fig:PoiseConvg}a,b. Second order convergence of this error measure in all cases can be seen.
+There is more noise on the fixed geometry case $h=\Delta z_{10}/11$, because the cut-cell size ratios and interpolation coefficients are changing from grid to grid. These error fluctuations are not seen when $h=\Delta z /3$, and cut-cells keep same sizes and interpolation coefficients respect to the Cartesian grids.
+%
+% figure
+\begin{figure}[h]
+      \centering
+      \includegraphics[trim = 5mm 0mm 5mm 0mm, clip,
+       width=0.49\linewidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/geom_poiseuille_convergence_theta0a.pdf}
+      \includegraphics[trim = 5mm 0mm 5mm 0mm, clip,
+       width=0.49\linewidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/geom_poiseuille_convergence_theta0na.pdf}
+      \caption{Poiseuille flow created by two geometries: Convergence trends on friction factor (Moody) for $h=0$, grid dependent $h=\Delta z/3$ and fixed $h=\Delta z_{10}/11$. Fluctuations on the friction factor error in the last case are produced by changes in cut-cell aspect ratios and velocity interpolation stencils as grids are refined.}
+      \label{Fig:PoiseConvg}
+\end{figure}
+%
+
+
+\subsection{Conservation test of isothermal helium plume around sphere}
+
+
+
+\section{Geometry tests involving heat and mass transfer}
+
+
+\subsection{Conservation tests of heat flux and mass flux specified from sphere surface}
+
+%\subsection{Flow around heated curved pipe or something like that}
+%\subsection{Consistency test for OBST and GEOM of flow around heated cubes}
+
+
+\subsection{Radiating Sphere}
+\label{sphere_radiate}
+
+A sphere with a radius of 1~m and a surface temperature of $T=773.15$~K is centered in a box that is 4~m on a side with a surface temperature of 0~K. The emissivity of all surfaces is 1, and there is no convective heat transfer to or from any surface. The heat flux from the hot sphere to the nearest cold wall surface 1~m away is expected to be $\sigma T^4/4=5.065$~kW/m$^2$. The results are shown in Fig.~\ref{sphere_radiate_fig}.
+\begin{figure}[ht]
+\includegraphics[width=3.2in]{../FDS_User_Guide/SCRIPT_FIGURES/sphere_radiate.png}
+\includegraphics[width=3.2in]{../FDS_User_Guide/SCRIPT_FIGURES/sphere_radiate.pdf}
+\caption[The {\ct sphere\_radiate} test case]{Left: a radiating hot sphere. Right: heat flux to the nearest wall surface.}
+\label{sphere_radiate_fig}
+\end{figure}
+
+
+\subsection{Leaking Sphere}
+\label{sphere_leak}
+
+A hollow sphere with an inner radius of 1~m has a small cube within it that is blowing air into the sphere at a rate of $\dot{V}=0.008$~m$^3$/s. The sphere is assigned a leakage area of $A=0.0001$~m$^2$. It is expected that the pressure rise within the sphere shall be
+\be
+   \Delta p = \frac{\rho_\infty}{2} \left( \frac{\dot{V}}{A} \right)^2 \approx 3840 \; \hbox{Pa}
+\ee
+as shown in Fig.~\ref{sphere_leak_fig}.
+\begin{figure}[ht]
+\centering
+\includegraphics[width=3.2in]{../FDS_User_Guide/SCRIPT_FIGURES/sphere_leak.pdf}
+\caption[The {\ct sphere\_leak} test case]{Pressure rise in a leaking sphere.}
+\label{sphere_leak_fig}
+\end{figure}
+
+
+\section{Geometry tests involving fire}
+
+
+
+\fi
 
 
 
@@ -5611,5 +6243,96 @@ Sprinklers\_and\_Sprays & \ref{particle_drag}             & particle\_drag\_U50\
 \end{tabular}
 \end{landscape}
 
+% Unstructured geometry Appendix:
+\ifcompgeom
+
+\chapter{Unstructured Geometry integral conservation tests}
+\label{info:constests}
+
+Consider an immersed body $B$, with surface defined by $N_\tau$ triangles, completely immersed in a domain $\Omega$ divided in $M$ cartesian mesh blocks.
+Three geometry conservation tests can be defined for the polyhedra definition around this body:
+%
+\begin{enumerate}
+
+    \item Surface area:
+    The total body $B$ surface area can be computed from the triangulation $A_{B,\tau}=\sum_{i_\tau=1}^{N_\tau}{A_{i_\tau}}$, where $N_\tau$ is the number of triangles in the surface and $A_{i_\tau}$ their areas. It can also be calculated from the boundary cut-face areas computed by the cut-cell definition algorithm,  $A_{B,CF}=\sum_{icf=1}^{N_{bcf}}{A_{icf}}$, where $N_{bcf}$ is the number of cut-faces that have been computed on the body surface. These two areas should match.
+    \newline
+
+    \item Gas ($G$) region volume:
+    This is the volume of region $\Omega-\Omega_B$. It can be computed from the solid volume $V_B$ and the domain volume $V_\Omega$ as $V_{GB}=V_\Omega-V_B$. Here:
+    %
+    \begin{equation}
+       V_\Omega=\sum_{nm=1}^M {V_{nm}} \: \: ; \: \: V_{nm}=L_{x,nm} L_{y,nm} L_{z,nm}
+    \end{equation}
+    %
+    where $L_{x,nm}$, $L_{y,nm}$ and $L_{z,nm}$ are the $nm$ mesh sizes in each cartesian direction ($M=1$, $L_{x,1}=3D_B$, $L_{y,1}=3D_B$ and $L_{z,1}=8D_B$ in the cone problem of section~\ref{cone_test}). The discrete volume of the solid can be computed from the triangulation applying the divergence theorem to a field $\mathbf{F}_v=x \mathbf{\hat{i}}$, such that $\nabla \cdot \mathbf{\hat{F}}_v=1$, to the surface triangles:
+    %
+    \begin{equation}
+      V_B = \int_{\Omega _{B}} \nabla \cdot \mathbf{F}_v \; dV =
+      \int_{\partial \Omega _{B}}  \mathbf{F}_v \cdot \hat{n} \; dA =
+      \sum_{i=1}^{N_\tau}{(\mathbf{\hat{i}} \cdot \mathbf{\hat{n}}_i) x_{ci} A_i}
+      \label{eq:Vb}
+    \end{equation}
+    %
+    where $x_{ci}$ is the $i$th triangle centroid position in the $x$ direction, and $A_i$ its area.
+    The $G$ region volume can also be computed from the sum of cut-cells and regular $G$ cells volumes over all $M$ cartesian meshes:
+    %
+    \begin{equation}
+       V_{GRC} = \sum_{icc=1}^{N_{cc}}{V_{icc}} + N_{rg} \Delta x \Delta y \Delta z
+       \label{}
+    \end{equation}
+    %
+    where $N_{rg}$ the number of regular cells in the $G$ region, and $\Delta x,\Delta y,\Delta z$ the uniform grid cell sizes. The  $N_{cc}$ cut-cell volumes $V_{icc}$ are computed in similar manner to equation~\eqref{eq:Vb}:
+    %
+    \begin{equation}
+    V_{icc} = \int_{\partial \Omega _{icc}}  \mathbf{F}_v \cdot \hat{n} \; dA =
+    \sum_{icf=1}^{ncf} (\mathbf{\hat{i}} \cdot \mathbf{\hat{n}}_{icf}) \int_{\Omega _{icf}} x \; dA
+    \label{eq:vol2}
+    \end{equation}
+    %
+    where $ncf$ is the number of faces (cut-face or regular) which are boundary of cut-cell $icc$.
+
+    In this test $V_{GB}$ and $V_{GRC}$ should agree.
+    \newline
+
+    \item $G$ region centroid location:
+    The centroid of the $G$ region can be computed from cut-cells and regular $G$ cells as:
+    %
+    \begin{equation}
+       \mathbf{x}_{GRC} = \frac{1}{V_{GRC}}
+       \left[  \sum_{icc=1}^{N_{cc}}{\mathbf{x}_{c(icc)}V_{icc}} +  \sum_{irg=1}^{N_{rg}}{\mathbf{x}_{c(irg)} \Delta x \Delta y \Delta z} \right]
+    \end{equation}
+    %
+    Where $\mathbf{x}_{c(irg)}$ is the cell center location for regular cell $irg$, and the scalar components in each coordinate direction  $\{\mathbf{\hat{i}},\mathbf{\hat{j}},\mathbf{\hat{k}}\}$ of cut-cell centroids $\mathbf{x}_{c(icc)}$ are obtained from:
+    %
+    \begin{equation}
+    x_{ci(icc)} = \frac{1}{V_{icc}} \int_{\Omega _{icc}} \nabla \cdot \mathbf{F}_{c(i)} \; dV =
+    \frac{1}{V_{icc}} \int_{\partial \Omega _{icc}} \mathbf{F}_{c(i)} \cdot \hat{n} \; dA =
+  \frac{1}{2V_{icc}} \sum_{icf=1}^{ncf} (\mathbf{\hat{e}}_i \cdot \mathbf{\hat{n}}_{icf}) \int_{\Omega _{icf}} x_i^2 \; dA
+    \label{eq:xcen}
+    \end{equation}
+    %
+    where $\mathbf{F}_{c(i)}=1/2 x_i^2 \mathbf{\hat{e}}_i$. Here, $x_i=\{x,y,z\}$ and $\mathbf{\hat{e}}_i=\{\mathbf{\hat{i}},\mathbf{\hat{j}},\mathbf{\hat{k}}\}$.
+
+    The centroid of the domain $\Omega$ is:
+    \begin{equation}
+        \mathbf{x}_\Omega = \frac{1}{V_\Omega} \sum_{nm=1}^M  \mathbf{x}_{nm} V_{nm}
+    \end{equation}
+    where $\mathbf{x}_{nm}=\mathbf{x}_{low,nm}+\frac{1}{2} \left( L_{x,nm},L_{y,nm},L_{z,nm} \right)$, where $\mathbf{x}_{low,nm}$ is the vector of low boundary coordinates for mesh $nm$. In the single mesh cone problem (section~\ref{cone_test}) $\mathbf{x}_{low,1}= \left( -1.5D_B,-1.5D_B,-2D_B \right)$.
+
+    Also, the centroid $\mathbf{x}_B$ of the discretized solid can be computed applying equation~\eqref{eq:xcen} to the surface triangulation $\tau$, in same manner to what was done for cut-faces. From domain and solid the centroid of the $G$ region can be obtained as:
+    %
+    \begin{equation}
+      \mathbf{x}_{GB}=\frac{1}{V_{GB}} \left[ \mathbf{x}_\Omega V_\Omega - \mathbf{x}_B V_B \right]
+    \end{equation}
+    %
+    Consistency of the computed centroids requires that $\mathbf{x}_{GRC}$ and $\mathbf{x}_{GB}$ should correspond.
+
+\end{enumerate}
+
+
+
+
+\fi
 
 \end{document}

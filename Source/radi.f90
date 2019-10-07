@@ -425,6 +425,10 @@ MAKE_KAPPA_ARRAYS: IF (.NOT.SOLID_PHASE_ONLY .AND. ANY(SPECIES%RADCAL_ID/='null'
       Z2RADCAL_SPECIES = 0._EB
 
       DO NS=1,N_TRACKED_SPECIES
+         IF (SPECIES_MIXTURE(NS)%EVAPORATION_SMIX_INDEX>0) THEN
+            CALL MEAN_CROSS_SECTIONS(-NS)
+            CYCLE !No gas absorption for the liquid phase
+         ENDIF
          DO NS2=1,N_SPECIES
             IF (SPECIES(NS2)%RADCAL_INDEX > 0) THEN
                IF (SPECIES(NS2)%RADCAL_ID/='SOOT') THEN
@@ -683,6 +687,7 @@ USE MIEV
 USE MATH_FUNCTIONS, ONLY : INTERPOLATE1D, EVALUATE_RAMP
 USE TRAN, ONLY : GET_IJK
 USE COMPLEX_GEOMETRY, ONLY : IBM_IDRA,IBM_CGSC,IBM_SOLID
+USE PHYSICAL_FUNCTIONS, ONLY : GET_VOLUME_FRACTION
 USE MPI
 REAL(EB) :: T, RAP, AX, AXU, AXD, AY, AYU, AYD, AZ, VC, RU, RD, RP, &
             ILXU, ILYU, ILZU, QVAL, BBF, BBFA, NCSDROP, RSA_RAT,EFLUX, &
@@ -698,7 +703,7 @@ REAL(EB) :: XID,YJD,ZKD,AREA_VOLUME_RATIO,DLF,DLA(3),TSI,TMP_EXTERIOR,DUMMY
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_GET
 INTEGER :: IID,JJD,KKD,IP
 LOGICAL :: UPDATE_INTENSITY, UPDATE_QRW2
-REAL(EB), POINTER, DIMENSION(:,:,:) :: IL,UIIOLD,KAPPA_PART,KFST4_GAS,KFST4_PART,EXTCOE,SCAEFF,IL_UP
+REAL(EB), POINTER, DIMENSION(:,:,:) :: IL,UIIOLD,KAPPA_PART,KFST4_GAS,KFST4_PART,EXTCOE,SCAEFF,SCAEFF_G,IL_UP
 REAL(EB), POINTER, DIMENSION(:)     :: OUTRAD_W,INRAD_W,OUTRAD_F,INRAD_F
 INTEGER, INTENT(IN) :: NM,RAD_ITER
 TYPE (OMESH_TYPE), POINTER :: M2
@@ -724,6 +729,7 @@ KAPPA_PART => WORK5
 SCAEFF     => WORK6
 KFST4_PART => WORK7
 IL_UP      => WORK8
+SCAEFF_G   => WORK9
 OUTRAD_W   => WALL_WORK1
 INRAD_W    => WALL_WORK2
 IF (CC_IBM) THEN
@@ -777,6 +783,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
    KFST4_GAS  = 0._EB
    KFST4_PART = 0._EB
    SCAEFF = 0._EB
+   SCAEFF_G = 0._EB
 
    ! Calculate fraction on ambient black body radiation
 
@@ -786,8 +793,8 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
       ! Computing the temperature coefficient in the WSGG model at ambient temperature
       Z_ARRAY(1:N_TRACKED_SPECIES) = SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0     ! Mass frac of the tracked species in ambient
       R_MIXTURE = RSUM0                                                           ! Specific gas constant of ambient
-      MOL_RAT = GET_VOLUME_FRACTION('WATER VAPOR',Z_ARRAY,R_MIXTURE)/&
-         (GET_VOLUME_FRACTION('CARBON DIOXIDE',Z_ARRAY,R_MIXTURE)+TWO_EPSILON_EB) ! Molar ratio
+      MOL_RAT = GET_VOLUME_FRACTION(H2O_INDEX,Z_ARRAY,R_MIXTURE)/&
+         (GET_VOLUME_FRACTION(CO2_INDEX,Z_ARRAY,R_MIXTURE)+TWO_EPSILON_EB) ! Molar ratio
       BBFA = A_WSGG(TMPA,MOL_RAT,IBND)
    ELSE
       BBFA = BLACKBODY_FRACTION(WL_LOW(IBND),WL_HIGH(IBND),TMPA)
@@ -891,16 +898,15 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                Z_ARRAY(1:N_TRACKED_SPECIES) = ZZ(I,J,K,1:N_TRACKED_SPECIES)                  ! Mass frac of the tracked species
                R_MIXTURE = RSUM(I,J,K)                                                       ! Specific gas constant of the mixture
-               MOL_RAT = GET_VOLUME_FRACTION('WATER VAPOR',Z_ARRAY,R_MIXTURE)/&
-                  (GET_VOLUME_FRACTION('CARBON DIOXIDE',Z_ARRAY,R_MIXTURE)+TWO_EPSILON_EB)   ! Molar ratio
+               MOL_RAT = GET_VOLUME_FRACTION(H2O_INDEX,Z_ARRAY,R_MIXTURE)/&
+                  (GET_VOLUME_FRACTION(CO2_INDEX,Z_ARRAY,R_MIXTURE)+TWO_EPSILON_EB)   ! Molar ratio
                TOTAL_P = PBAR(K,PRESSURE_ZONE(I,J,K)) + RHO(I,J,K)*(H(I,J,K)-KRES(I,J,K))    ! Total pressure
-               PARTIAL_P = TOTAL_P*(GET_VOLUME_FRACTION('WATER VAPOR',Z_ARRAY,R_MIXTURE) + &
-                  GET_VOLUME_FRACTION('CARBON DIOXIDE',Z_ARRAY,R_MIXTURE))/P_STP             ! Partial press of the CO2-H2O mixture
+               PARTIAL_P = TOTAL_P*(GET_VOLUME_FRACTION(H2O_INDEX,Z_ARRAY,R_MIXTURE) + &
+                  GET_VOLUME_FRACTION(CO2_INDEX,Z_ARRAY,R_MIXTURE))/P_STP             ! Partial press of the CO2-H2O mixture
                BBF = A_WSGG(TMP(I,J,K),MOL_RAT,IBND)                                         ! Temp coefficient for the jth gas
                KAPPA_GAS(I,J,K) = KAPPA_WSGG(MOL_RAT,PARTIAL_P,IBND) + &
-                  KAPPA_SOOT(GET_VOLUME_FRACTION('SOOT',Z_ARRAY,R_MIXTURE),TMP(I,J,K))       ! Absorp coeff for the jth gas
+                  KAPPA_SOOT(GET_VOLUME_FRACTION(SOOT_INDEX,Z_ARRAY,R_MIXTURE),TMP(I,J,K))       ! Absorp coeff for the jth gas
                KFST4_GAS(I,J,K) = BBF*KAPPA_GAS(I,J,K)*FOUR_SIGMA*TMP(I,J,K)**4._EB
-
                IF (CHI_R(I,J,K)*Q(I,J,K)>QR_CLIP) THEN ! Precomputation of quantities for the RTE source term correction
                      VOL = R(I)*DX(I)*DY(J)*DZ(K)
                      RAD_Q_SUM = RAD_Q_SUM + (BBF*CHI_R(I,J,K)*Q(I,J,K) + &
@@ -974,13 +980,44 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
 
    ENDIF WIDE_BAND_MODEL_IF
 
+   ! Compute the added contribution of any condensed speices
+   IF (ANY(SPECIES_MIXTURE%EVAPORATION_SMIX_INDEX > 0)) THEN
+
+      IF (NUMBER_SPECTRAL_BANDS==1) THEN
+         BBF = 1._EB
+      ELSE
+         BBF = BLACKBODY_FRACTION(WL_LOW(IBND),WL_HIGH(IBND),RADTMP)
+      ENDIF
+
+      SLOOP: DO N = 1, N_TRACKED_SPECIES
+         IF (SPECIES_MIXTURE(N)%EVAPORATION_SMIX_INDEX <= 0) CYCLE SLOOP
+         DO K=1,KBAR
+            DO J=1,JBAR
+               DO I=1,IBAR
+                  IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+                  IF (ZZ(I,J,K,N) < TWO_EPSILON_EB) CYCLE
+                  NCSDROP = 1.5_EB*ZZ(I,J,K,N)*RHO(I,J,K)/ &
+                            (SPECIES(SPECIES_MIXTURE(N)%SINGLE_SPEC_INDEX)%DENSITY_LIQUID*SPECIES_MIXTURE(N)%MEAN_DIAMETER)
+                  CALL INTERPOLATE1D(SPECIES_MIXTURE(N)%R50,SPECIES_MIXTURE(N)%WQABS(:,IBND),&
+                                     0.5_EB*SPECIES_MIXTURE(N)%MEAN_DIAMETER,QVAL)
+                  KAPPA_GAS(I,J,K) = KAPPA_GAS(I,J,K) + NCSDROP*QVAL
+                  KFST4_GAS(I,J,K) = KFST4_GAS(I,J,K) + BBF*NCSDROP*QVAL*FOUR_SIGMA*TMP(I,J,K)**4
+                  CALL INTERPOLATE1D(SPECIES_MIXTURE(N)%R50,SPECIES_MIXTURE(N)%WQSCA(:,IBND),&
+                                     0.5_EB*SPECIES_MIXTURE(N)%MEAN_DIAMETER,QVAL)
+                  SCAEFF_G(I,J,K) = SCAEFF_G(I,J,K) + NCSDROP*QVAL
+               ENDDO
+            ENDDO
+         ENDDO
+      ENDDO SLOOP
+   ENDIF
+
    ! Turbulence-Radiation Interaction (TRI) model (under construction)
 
    IF (TRI_MODEL) KFST4_GAS = KFST4_GAS * TRI_COR(:,:,:,IBND)
 
    ! Calculate extinction coefficient
 
-   EXTCOE = KAPPA_GAS + KAPPA_PART + SCAEFF*RSA_RAT
+   EXTCOE = KAPPA_GAS + KAPPA_PART + (SCAEFF+SCAEFF_G)*RSA_RAT
 
    ! Update intensity field
 
@@ -1004,8 +1041,8 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
             IF (WSGG_MODEL) THEN
                Z_ARRAY(1:N_TRACKED_SPECIES) = ZZ(WALL(IW)%ONE_D%IIG,WALL(IW)%ONE_D%JJG,WALL(IW)%ONE_D%KKG,1:N_TRACKED_SPECIES)
                R_MIXTURE = RSUM(WALL(IW)%ONE_D%IIG,WALL(IW)%ONE_D%JJG,WALL(IW)%ONE_D%KKG)
-               MOL_RAT = GET_VOLUME_FRACTION('WATER VAPOR',Z_ARRAY,R_MIXTURE)/&
-                  (GET_VOLUME_FRACTION('CARBON DIOXIDE',Z_ARRAY,R_MIXTURE) + TWO_EPSILON_EB)
+               MOL_RAT = GET_VOLUME_FRACTION(H2O_INDEX,Z_ARRAY,R_MIXTURE)/&
+                  (GET_VOLUME_FRACTION(CO2_INDEX,Z_ARRAY,R_MIXTURE) + TWO_EPSILON_EB)
                BBF = A_WSGG(WALL(IW)%ONE_D%TMP_F,MOL_RAT,IBND) ! Temperature coefficient for the jth gray gas in the boundary
             ENDIF                                              ! (use information of the cell adjacent to the boundary)
             SF  => SURFACE(WALL(IW)%SURF_INDEX)
@@ -1199,7 +1236,8 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                      A_SUM = AXD + AYD + AZ
                      RAP = 1._EB/(A_SUM + EXTCOE(I,J,K)*VC*RSA(N))
                      IL(I,J,K) = MAX(0._EB, RAP * (AIU_SUM + VC*RSA(N)*RFPI* &
-                                 ( KFST4_GAS(I,J,K) + KFST4_PART(I,J,K) + RSA_RAT*SCAEFF(I,J,K)*UIIOLD(I,J,K) ) ) )
+                                 ( KFST4_GAS(I,J,K) + KFST4_PART(I,J,K) + RSA_RAT*&
+                                 (SCAEFF(I,J,K)+SCAEFF_G(I,J,K))*UIIOLD(I,J,K) ) ) )
                      IF (SOLID_PARTICLES) IL_UP(I,J,K) = MAX(0._EB,AIU_SUM/A_SUM)
                   ENDDO CILOOP
                ENDDO CKLOOP
@@ -1225,7 +1263,8 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                      A_SUM = AX + AZ
                      RAP = 1._EB/(A_SUM + EXTCOE(I,J,K)*VC*RSA(N))
                      IL(I,J,K) = MAX(0._EB, RAP * (AIU_SUM + VC*RSA(N)*RFPI* &
-                                    (KFST4_GAS(I,J,K) + KFST4_PART(I,J,K) + RSA_RAT*SCAEFF(I,J,K)*UIIOLD(I,J,K) ) ) )
+                                    (KFST4_GAS(I,J,K) + KFST4_PART(I,J,K) + RSA_RAT* &
+                                    (SCAEFF(I,J,K)+SCAEFF_G(I,J,K))*UIIOLD(I,J,K) ) ) )
                      IF (SOLID_PARTICLES) IL_UP(I,J,K) = MAX(0._EB,AIU_SUM/A_SUM)
                   ENDDO I2LOOP
                ENDDO K2LOOP
@@ -1330,7 +1369,8 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                      IF (SOLID_PARTICLES) IL_UP(I,J,K) = MAX(0._EB,AIU_SUM/A_SUM)
                      RAP = 1._EB/(A_SUM + EXTCOE(I,J,K)*VC*RSA(N))
                      IL(I,J,K) = MAX(0._EB, RAP * (AIU_SUM + VC*RSA(N)*RFPI* &
-                                     ( KFST4_GAS(I,J,K) + KFST4_PART(I,J,K) + RSA_RAT*SCAEFF(I,J,K)*UIIOLD(I,J,K) ) ) )
+                                     ( KFST4_GAS(I,J,K) + KFST4_PART(I,J,K) + RSA_RAT*&
+                                     (SCAEFF(I,J,K)+SCAEFF_G(I,J,K))*UIIOLD(I,J,K) ) ) )
                   ENDDO SLICE_LOOP
                   !$OMP END PARALLEL DO
 
@@ -1799,30 +1839,6 @@ REAL(EB) FUNCTION KAPPA_SOOT(FVS,TTMP)
    KAPPA_SOOT = 1232.4_EB*SOOT_DENSITY*FVS*(1._EB+4.8E-4_EB*(TTMP-2000._EB))
 
 END FUNCTION KAPPA_SOOT
-
-
-!=======================================================
-!Function to get the volume fraction of a given species
-!=======================================================
-REAL(EB) FUNCTION GET_VOLUME_FRACTION(SPECIES_NAME,ZZ_ARRAY,R_MIX)
-
-USE MESH_POINTERS
-USE PHYSICAL_FUNCTIONS, ONLY: GET_MASS_FRACTION
-CHARACTER(*), INTENT(IN) :: SPECIES_NAME
-INTEGER :: NS
-REAL(EB), INTENT(IN) :: R_MIX,ZZ_ARRAY(:)
-REAL(EB) :: MASS_FRACTION,RCON
-
-SPECIES_LOOP: DO NS = 1, N_SPECIES
-   IF (TRIM(SPECIES_NAME)==TRIM(SPECIES(NS)%ID)) THEN
-      CALL GET_MASS_FRACTION(ZZ_ARRAY,NS,MASS_FRACTION)
-      RCON = SPECIES(NS)%RCON
-      GET_VOLUME_FRACTION = RCON*MASS_FRACTION/R_MIX
-      EXIT SPECIES_LOOP
-   ENDIF
-ENDDO SPECIES_LOOP
-
-END FUNCTION GET_VOLUME_FRACTION
 
 
 END MODULE RAD

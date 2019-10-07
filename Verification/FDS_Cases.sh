@@ -137,7 +137,9 @@ $QFDS -d Complex_Geometry rotated_cube_45deg_256_exp.fds
 $QFDS -d Complex_Geometry rotated_cube_45deg_256_imp.fds
 $QFDS -o 4 -d Complex_Geometry rotated_cube_45deg_384_exp.fds
 $QFDS -o 4 -d Complex_Geometry rotated_cube_45deg_384_imp.fds
-                                                                        
+
+$QFDS -d Complex_Geometry cone_1mesh.fds
+
 $QFDS -d Controls activate_vents.fds
 $QFDS -d Controls control_test.fds
 $QFDS -d Controls control_test_2.fds
@@ -551,6 +553,9 @@ $QFDS -d Species ramp_chi_r.fds
 $QFDS -d Species bound_test_1.fds
 $QFDS -d Species bound_test_2.fds
 $QFDS -d Species species_props.fds
+$QFDS -d Species condensation_1.fds
+$QFDS -d Species condensation_2.fds
+$QFDS -d Species condensation_3.fds
 
 $QFDS -d Sprinklers_and_Sprays activate_sprinklers.fds
 $QFDS -d Sprinklers_and_Sprays bucket_test_1.fds
@@ -588,9 +593,11 @@ $QFDS -d Sprinklers_and_Sprays water_evaporation_2.fds
 $QFDS -d Sprinklers_and_Sprays water_evaporation_3.fds
 $QFDS -d Sprinklers_and_Sprays water_evaporation_4.fds
 $QFDS -d Sprinklers_and_Sprays water_evaporation_5.fds
+$QFDS -d Sprinklers_and_Sprays Ranz_Marshall_thermally_thick.fds
 $QFDS -d Sprinklers_and_Sprays water_evaporation_6.fds
 $QFDS -d Sprinklers_and_Sprays water_evaporation_7.fds
 $QFDS -d Sprinklers_and_Sprays water_evaporation_8.fds
+$QFDS -d Sprinklers_and_Sprays Li_Chow_thermally_thick.fds
 $QFDS -d Sprinklers_and_Sprays water_fuel_sprays.fds
 $QFDS -d Sprinklers_and_Sprays screen_drag_1.fds
 $QFDS -d Sprinklers_and_Sprays screen_drag_2.fds

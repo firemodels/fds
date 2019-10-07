@@ -2556,6 +2556,10 @@ For some verification and validation cases, it is useful to employ a special cor
 \ee
 where $\hbox{Nu}$ is the Nusselt number, $k$ is the thermal conductivity of the gas, $D$ is the diameter of the cylinder, Ra is the Rayleigh number, Pr is the Prandtl number, $T_{\rm s}$ is the surface temperature, $T_\infty$ is the ambient or surrounding gas temperature, $g$ is the acceleration of gravity, $\nu=\mu/\rho$ is the kinematic viscosity of the gas, and $\alpha=k/(\rho c_p)$ is the thermal diffusivity. To specify this heat transfer model for a particular surface, set {\ct HEAT\_TRANSFER\_MODEL} equal to {\ct 'FREE HORIZONTAL CYLINDER'} on the {\ct SURF} line.
 
+\subsubsection{Heat Transfer with Blowing}
+
+During pyrolysis of a solid or evaporation of a liquid the mass transfer off the surface generats a blowing velocity that alters the thermal and momentum boundary layers, thus affecting the heat and mass transfer coefficients.  For a surface with blowing, consider using the correlations discussed in Sazhin \cite{Sazhin:2006} with the Spalding mass transfer corrections \cite{Spalding:1}.  These may be activated by setting {\ct GEOMETRY} and {\ct HEAT\_TRANSFER\_MODEL} to {\ct 'BLOWING PLATE'} or {\ct 'BLOWING SPHERE'} as appropriate on the {\ct SURF} line.  Note that for the {\ct 'BLOWING SPHERE'} the time dependent {\ct THICKNESS} of the surface is used in computing the Reynolds number.  For {\ct 'BLOWING PLATE'} the length scale for the Reynolds number is the usual {\ct CONVECTION\_LENGTH\_SCALE} set on the {\ct SURF} line.
+
 
 \subsection{Special Topic: Adiabatic Surfaces}
 \label{info:adiabatic}
@@ -2657,7 +2661,7 @@ The back side emissivity of the surface can be controlled by specifying {\ct EMI
 \subsection{Initial and Back Side Temperature}
 \label{info:TMP_INNER}
 
-By default, the initial temperature of the solid material is set to ambient ({\ct TMPA} on the {\ct MISC} line). Use {\ct TMP\_INNER} on the {\ct SURF} line to specify a different initial temperature of the solid. The layers of the surface can have different initial temperatures. Also, the back side temperature boundary condition of a solid can be set using the parameter {\ct TMP\_BACK} on the {\ct SURF} line. {\ct TMP\_BACK} is not the actual back side surface temperature, but rather the gas temperature to which the back side surface is exposed. This parameter has no meaning for surfaces with {\ct BACKING='EXPOSED'} or {\ct BACKING='INSULATED'}.
+By default, the initial temperature of the solid material is set to ambient ({\ct TMPA} on the {\ct MISC} line). Use {\ct TMP\_INNER} on the {\ct SURF} line to specify a different initial temperature of the solid. The layers of the surface can have different initial temperatures. Also, the back side temperature boundary condition of a solid can be set using the parameter {\ct TMP\_BACK} on the {\ct SURF} line. {\ct TMP\_BACK} is not the actual back side surface temperature, but rather the gas temperature to which the back side surface is exposed. This parameter requires that {\ct BACKING='VOID'}. A {\ct RAMP} for {\ct TMP\_BACK} can be specified with {\ct RAMP\_T\_B}.
 
 As an alternative to {\ct TMP\_INNER} one can also use {\ct RAMP\_T\_I} to specify the name of a {\ct RAMP} containing a depth vs. temperature profile for the surface.
 
@@ -4337,8 +4341,21 @@ It is possible to rotate and/or translate various objects within an FDS simulati
 &MOVE ID='spin', ROTATION_ANGLE=45., X0=2., Y0=3., Z0=4., AXIS=1,0,0 /
 \end{lstlisting}
 causes an object to be rotated 45$^\circ$ about the direction vector ({\ct AXIS}) (1,0,0) emanating from the point $(x_0,y_0,z_0)$. You may also translate the object in the three coordinate directions using the parameters {\ct DX}, {\ct DY}, {\ct DZ}, each in meters.
+It is also possible to rotate, scale and translate an object using a $3 \times 4$ transformation matrix. The equation that describes the transformation for a point $p$ with coordinates $x,y,z$ is:
+%
+\begin{equation}
+\left\{ \begin{array}{c} x' \\ y' \\ z' \\ \end{array} \right\} = 
+\left[ \begin{array}{cccc} i_1 & j_1 & k_1 & a_1 \\ i_2 & j_2 & k_2 & a_2 \\ i_3 & j_3 & k_3 & a_3 \\ \end{array} \right]
+\left\{ \begin{array}{c} x \\ y \\ z \\ 1 \\ \end{array} \right\} 
+\end{equation}
+%
+where the primes refer to the new location of point $p$. In that case the previous {\ct MOVE} line is defined as:
+\begin{lstlisting}
+&MOVE ID='My Move', T34 = i1,i2,i3, j1,j2,j3, k1,k2,k3, a1,a2,a3 /
+\end{lstlisting}
+where $(i_1,i_2,i_3)$, $(j_1,j_2,j_3)$ and $(k_1,k_2,k_3)$ are the orthogonal basis vectors for the rotation and scaling operations, and $(a_1,a_2,a_3)$ is the translation vector. Note that if {\ct T34} is defined, it takes precedence over all other transformation parameters.
 
-Currently, this feature only applies to point and line devices, and in future shall be applied to non-rectangular immersed objects.
+Currently, the move feature only applies to point and line devices, and in future shall be applied to non-rectangular immersed objects.
 
 
 
@@ -5808,6 +5825,11 @@ The {\ct GEOMETRY} options for solid particles are {\ct 'SPHERICAL'}, {\ct 'CYLI
 By default, the {\ct GEOMETRY} is {\ct 'CARTESIAN'}, in which case you need to provide the {\ct LENGTH} and {\ct WIDTH} of the rectangular plate. It is assumed that the plate is symmetric front and back (note this means you should set {\ct BACKING='INSULATED'} on the {\ct SURF} line). You need only specify the layers that make up the half-thickness. The array {\ct THICKNESS(N)} indicates the thickness(es) of each layer of the plate, not the total thickness of the plate itself. If the plate is composed of only one material component, the specified {\ct THICKNESS} is taken as the half-thickness of the plate.
 
 For  {\ct 'CYLINDRICAL'} or {\ct 'SPHERICAL'} particles, specify the {\ct INNER\_RADIUS} and {\ct THICKNESS} of the individual layers. Alternatively, you can just specify the {\ct RADIUS} if the cylinder or sphere is solid and has only one material component. The default value of {\ct INNER\_RADIUS} is 0~m, which means that the radius of the cylinder or sphere is the sum of the {\ct THICKNESS} values. Remember that the layers are to be listed starting at the surface, not the center. For {\ct 'CYLINDRICAL'} particles, specify a {\ct LENGTH} as well.
+
+\subsubsection{Thermally Thick Droplet Model}
+\label{info:themally_thick_droplet}
+
+Note that if the {\ct GEOMETRY} is set to {\ct 'SPHERICAL'} and a {\ct BOILING\_TEMPERATURE} is specified, thus invoking the liquid pyrolysis model, then the mass transfer relationships will follow those of an evaporating droplet.  The difference between this model and the default droplet model is that in this case the internal droplet temperature will be solved for using the 1D conduction solver.  Usually, the {\ct CELL\_SIZE\_FACTOR} needs to be decreased to get sufficient resolution inside the drop---you should double check the number of solid phase nodes by examining the {\ct CHID.out} file.  Also, you should set {\ct HEAT\_TRANSFER\_MODEL = 'BLOWING SPHERE'} on the {\ct SURF} line.
 
 \subsubsection{Particles with Periodic Boundary Conditions}
 \label{info:periodic-particles}
@@ -9862,41 +9884,42 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct MATL} (Material Properties)} \\
 \hline \hline
 \endhead
-{\ct A(:)}                          & Real array    & Section~\ref{info:solid_pyrolysis}    &    1/s            &        \\ \hline
-{\ct ABSORPTION\_COEFFICIENT}       & Real          & Section~\ref{info:thermal_properties} &    1/m            & 50000. \\ \hline
-{\ct ALLOW\_SHRINKING}              & Logical       & Section~\ref{info:shrink_swell}       &                   & {\ct.TRUE.} \\ \hline
-{\ct ALLOW\_SWELLING}               & Logical       & Section~\ref{info:shrink_swell}       &                   & {\ct.TRUE.} \\ \hline
-{\ct ALPHA\_CHAR(:)}                & Real array    & Section~\ref{vegetation_model}        & kg/kg             & 1.     \\ \hline
-{\ct BETA\_CHAR(:)}                 & Real array    & Section~\ref{vegetation_model}        & kg/kg             & 0.2     \\ \hline
-{\ct BOILING\_TEMPERATURE}          & Real          & Section~\ref{info:liquid_fuels}       & $^\circ$C         & 5000.  \\ \hline
-{\ct CONDUCTIVITY}                  & Real          & Section~\ref{info:thermal_properties} & \si{W/(m.K)}      & 0.     \\ \hline
-{\ct CONDUCTIVITY\_RAMP}            & Character     & Section~\ref{info:thermal_properties} &                   &        \\ \hline
-{\ct DENSITY}                       & Real          & Section~\ref{info:thermal_properties} & kg/m$^3$          & 0.     \\ \hline
-{\ct DIFFUSIVITY\_SPEC(:)}          & Real          & Section~\ref{info:pyro3d}             & \si{m^2/2}        &        \\ \hline
-{\ct E(:)}                          & Real array    & Section~\ref{info:solid_pyrolysis}    & J/mol             &        \\ \hline
-{\ct EMISSIVITY    }                & Real          & Section~\ref{info:thermal_properties} &                   & 0.9    \\ \hline
-{\ct GAS\_DIFFUSION\_DEPTH(:) }     & Real array    & Section~\ref{info:solid_pyrolysis}    & m                 & 0.001  \\ \hline
-{\ct HEATING\_RATE(:)}              & Real array    & Section~\ref{info:solid_pyrolysis}    & $^\circ$C/min     & 5.     \\ \hline
-{\ct HEAT\_OF\_COMBUSTION(:,:)}     & Real array    & Section~\ref{info:solid_pyrolysis}    & kJ/kg             &        \\ \hline
-{\ct HEAT\_OF\_REACTION(:)}         & Real array    & Section~\ref{info:solid_pyrolysis}    & kJ/kg             & 0.     \\ \hline
-{\ct ID     }                       & Character     & Section~\ref{info:SURF_MATL_Basics}   &                   &        \\ \hline
-{\ct MATL\_ID(:,:)}                 & Character     & Section~\ref{info:solid_pyrolysis}    &                   &        \\ \hline
-{\ct NU\_O2\_CHAR(:)}               & Real array    & Section~\ref{vegetation_model}        & kg/kg             & 0.     \\ \hline
-{\ct NU\_MATL(:,:)}                 & Real array    & Section~\ref{info:solid_pyrolysis}    & kg/kg             & 0.     \\ \hline
-{\ct NU\_SPEC(:,:)}                 & Real array    & Section~\ref{info:solid_pyrolysis}    & kg/kg             & 0.     \\ \hline
-{\ct N\_REACTIONS}                  & Integer       & Section~\ref{info:solid_pyrolysis}    &                   & 0      \\ \hline
-{\ct N\_O2(:)}                      & Real array    & Section~\ref{info:solid_pyrolysis}    &                   & 0.     \\ \hline
-{\ct N\_S(:)}                       & Real array    & Section~\ref{info:solid_pyrolysis}    &                   & 1.     \\ \hline
-{\ct N\_T(:)}                       & Real array    & Section~\ref{info:solid_pyrolysis}    &                   & 0.     \\ \hline
-{\ct PCR(:)}                        & Logical array & Section~\ref{info:solid_pyrolysis}    &                   & {\ct.FALSE.}\\ \hline
-{\ct PYROLYSIS\_RANGE(:)}           & Real array    & Section~\ref{info:solid_pyrolysis}    & $^\circ$C         & 80.    \\ \hline
-{\ct REFERENCE\_RATE(:)}            & Real array    & Section~\ref{info:solid_pyrolysis}    & 1/s               &        \\ \hline
-{\ct REFERENCE\_TEMPERATURE(:)}     & Real array    & Section~\ref{info:solid_pyrolysis}    & $^\circ$C         &        \\ \hline
-{\ct SPECIFIC\_HEAT}                & Real          & Section~\ref{info:thermal_properties} & \si{kJ/(kg.K)}    & 0.     \\ \hline
-{\ct SPECIFIC\_HEAT\_RAMP}          & Character     & Section~\ref{info:thermal_properties} &                   &        \\ \hline
-{\ct SPEC\_ID(:,:)}                 & Character     & Section~\ref{info:solid_pyrolysis}    &                   &        \\ \hline
-{\ct THRESHOLD\_SIGN(:)}            & Real array    & Section~\ref{info:solid_pyrolysis}    &                   & 1.0    \\ \hline
-{\ct THRESHOLD\_TEMPERATURE(:)}     & Real array    & Section~\ref{info:solid_pyrolysis}    & $^\circ$C         & -273.15 \\ \hline
+{\ct A(:)}                          & Real array      & Section~\ref{info:solid_pyrolysis}    &    1/s            &        \\ \hline
+{\ct ABSORPTION\_COEFFICIENT}       & Real            & Section~\ref{info:thermal_properties} &    1/m            & 50000. \\ \hline
+{\ct ALLOW\_SHRINKING}              & Logical         & Section~\ref{info:shrink_swell}       &                   & {\ct.TRUE.} \\ \hline
+{\ct ALLOW\_SWELLING}               & Logical         & Section~\ref{info:shrink_swell}       &                   & {\ct.TRUE.} \\ \hline
+{\ct ALPHA\_CHAR(:)}                & Real array      & Section~\ref{vegetation_model}        & kg/kg             & 1.     \\ \hline
+{\ct BETA\_CHAR(:)}                 & Real array      & Section~\ref{vegetation_model}        & kg/kg             & 0.2     \\ \hline
+{\ct BOILING\_TEMPERATURE}          & Real            & Section~\ref{info:liquid_fuels}       & $^\circ$C         & 5000.  \\ \hline
+{\ct CONDUCTIVITY}                  & Real            & Section~\ref{info:thermal_properties} & \si{W/(m.K)}      & 0.     \\ \hline
+{\ct CONDUCTIVITY\_RAMP}            & Character       & Section~\ref{info:thermal_properties} &                   &        \\ \hline
+{\ct DENSITY}                       & Real            & Section~\ref{info:thermal_properties} & kg/m$^3$          & 0.     \\ \hline
+{\ct DIFFUSIVITY\_SPEC(:)}          & Real            & Section~\ref{info:pyro3d}             & \si{m^2/2}        &        \\ \hline
+{\ct E(:)}                          & Real array      & Section~\ref{info:solid_pyrolysis}    & J/mol             &        \\ \hline
+{\ct EMISSIVITY    }                & Real            & Section~\ref{info:thermal_properties} &                   & 0.9    \\ \hline
+{\ct GAS\_DIFFUSION\_DEPTH(:) }     & Real array      & Section~\ref{info:solid_pyrolysis}    & m                 & 0.001  \\ \hline
+{\ct HEATING\_RATE(:)}              & Real array      & Section~\ref{info:solid_pyrolysis}    & $^\circ$C/min     & 5.     \\ \hline
+{\ct HEAT\_OF\_COMBUSTION(:,:)}     & Real array      & Section~\ref{info:solid_pyrolysis}    & kJ/kg             &        \\ \hline
+{\ct HEAT\_OF\_REACTION(:)}         & Real array      & Section~\ref{info:solid_pyrolysis}    & kJ/kg             & 0.     \\ \hline
+{\ct HEAT\_OF\_REACTION\_RAMP(:)}  & Character array & Section~\ref{info:solid_pyrolysis}    &                   &        \\ \hline
+{\ct ID     }                       & Character       & Section~\ref{info:SURF_MATL_Basics}   &                   &        \\ \hline
+{\ct MATL\_ID(:,:)}                 & Character       & Section~\ref{info:solid_pyrolysis}    &                   &        \\ \hline
+{\ct NU\_O2\_CHAR(:)}               & Real array      & Section~\ref{vegetation_model}        & kg/kg             & 0.     \\ \hline
+{\ct NU\_MATL(:,:)}                 & Real array      & Section~\ref{info:solid_pyrolysis}    & kg/kg             & 0.     \\ \hline
+{\ct NU\_SPEC(:,:)}                 & Real array      & Section~\ref{info:solid_pyrolysis}    & kg/kg             & 0.     \\ \hline
+{\ct N\_REACTIONS}                  & Integer         & Section~\ref{info:solid_pyrolysis}    &                   & 0      \\ \hline
+{\ct N\_O2(:)}                      & Real array      & Section~\ref{info:solid_pyrolysis}    &                   & 0.     \\ \hline
+{\ct N\_S(:)}                       & Real array      & Section~\ref{info:solid_pyrolysis}    &                   & 1.     \\ \hline
+{\ct N\_T(:)}                       & Real array      & Section~\ref{info:solid_pyrolysis}    &                   & 0.     \\ \hline
+{\ct PCR(:)}                        & Logical array   & Section~\ref{info:solid_pyrolysis}    &                   & {\ct.FALSE.}\\ \hline
+{\ct PYROLYSIS\_RANGE(:)}           & Real array      & Section~\ref{info:solid_pyrolysis}    & $^\circ$C         & 80.    \\ \hline
+{\ct REFERENCE\_RATE(:)}            & Real array      & Section~\ref{info:solid_pyrolysis}    & 1/s               &        \\ \hline
+{\ct REFERENCE\_TEMPERATURE(:)}     & Real array      & Section~\ref{info:solid_pyrolysis}    & $^\circ$C         &        \\ \hline
+{\ct SPECIFIC\_HEAT}                & Real            & Section~\ref{info:thermal_properties} & \si{kJ/(kg.K)}    & 0.     \\ \hline
+{\ct SPECIFIC\_HEAT\_RAMP}          & Character       & Section~\ref{info:thermal_properties} &                   &        \\ \hline
+{\ct SPEC\_ID(:,:)}                 & Character       & Section~\ref{info:solid_pyrolysis}    &                   &        \\ \hline
+{\ct THRESHOLD\_SIGN(:)}            & Real array      & Section~\ref{info:solid_pyrolysis}    &                   & 1.0    \\ \hline
+{\ct THRESHOLD\_TEMPERATURE(:)}     & Real array      & Section~\ref{info:solid_pyrolysis}    & $^\circ$C         & -273.15 \\ \hline
 \end{longtable}
 
 \vspace{\baselineskip}
@@ -10699,6 +10722,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RAMP\_PART}                        & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
 {\ct RAMP\_Q}                           & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
 {\ct RAMP\_T}                           & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
+{\ct RAMP\_T\_B}                        & Character       & Section~\ref{info:TMP_INNER}              &                     &                         \\ \hline
 {\ct RAMP\_T\_I}                        & Character       & Section~\ref{info:TMP_INNER}              &                     &                         \\ \hline
 {\ct RAMP\_V}                           & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
 {\ct RAMP\_V\_X}                        & Character       & Section~\ref{info:RAMP_Vel_Prof}          &                     &                         \\ \hline

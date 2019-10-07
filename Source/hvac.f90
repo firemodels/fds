@@ -783,7 +783,7 @@ NODE_LOOP: DO NN = 1, N_DUCTNODES
          ENDDO NODE_VENT_LOOP
       ENDDO MESH_LOOP
       IF (.NOT. FOUND) THEN
-         WRITE(MESSAGE,'(A,A,A,A)') 'Cannot find VENT_ID: ',TRIM(DN%VENT_ID),' for Ductnode: ',TRIM(DN%ID)
+         WRITE(MESSAGE,'(A,A,A,A)') 'ERROR: Cannot find VENT_ID: ',TRIM(DN%VENT_ID),' for Ductnode: ',TRIM(DN%ID)
          CALL SHUTDOWN(MESSAGE); RETURN
       ENDIF
    ENDIF

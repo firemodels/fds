@@ -1105,7 +1105,7 @@ IF (LPC%SOLID_PARTICLE) THEN
                  ABS(ORIENTATION_VECTOR(3,LPC%ORIENTATION_INDEX))*DX(ONE_D%IIG)*DY(ONE_D%JJG)) * &
                  LAGRANGIAN_PARTICLE_CLASS(LP%CLASS_INDEX)%FREE_AREA_FRACTION
          SELECT CASE (SF%GEOMETRY)
-            CASE (SURF_CARTESIAN)
+            CASE (SURF_CARTESIAN,SURF_BLOWING_PLATE)
                LP%ONE_D%AREA = AREA
                IF (SF%THERMALLY_THICK) THEN
                   DO N=1,SF%N_LAYERS
@@ -1221,12 +1221,12 @@ ELSEIF (LPC%LIQUID_DROPLET) THEN
 
 ENDIF
 
-ONE_D%TMP(0:SF%N_CELLS_INI+1) = LPC%TMP_INITIAL
 IF (SF%THERMALLY_THICK .AND. SF%TMP_INNER(1)>0._EB) THEN
    DO I=0,SF%N_CELLS_INI+1
       ONE_D%TMP(I) = SF%TMP_INNER(SF%LAYER_INDEX(I))
    ENDDO
 ENDIF
+IF (LPC%TMP_INITIAL>0._EB) ONE_D%TMP(0:SF%N_CELLS_INI+1) = LPC%TMP_INITIAL
 ONE_D%TMP_F = ONE_D%TMP(1)
 
 ! Check if fire spreads radially over this surface type, and if so, set T_IGN appropriately
@@ -2480,9 +2480,9 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                      SELECT CASE(EVAP_MODEL)
                         CASE(-1) ! Ranz Marshall
                            H_MASS   = MAX(2._EB,SHERWOOD)*D_AIR/LENGTH
-                        CASE(0:1) !Shazin M0 - M1, see next code block for Refs
+                        CASE(0:1) !Sazhin M0 - M1, see next code block for Refs
                            H_MASS   = MAX(2._EB,SHERWOOD)*D_AIR/LENGTH*LOG(1._EB+B_NUMBER)/B_NUMBER
-                        CASE(2) !Shazin M2, see next code block for Refs
+                        CASE(2) !Sazhin M2, see next code block for Refs
                            H_MASS   = MAX(2._EB,SHERWOOD)*D_AIR/LENGTH*LOG(1._EB+B_NUMBER)/(B_NUMBER*F_B(B_NUMBER))
                      END SELECT
                   ENDIF
@@ -2494,31 +2494,35 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                         NUSSELT  = 2._EB + NU_FAC_GAS*SQRT(RE_L)
                         H_HEAT   = NUSSELT*K_AIR/LENGTH
                         IF (Y_DROP <= Y_GAS) THEN
-                           H_MASS = 0._EB
+                           H_MASS   = 0._EB
                         ELSE
-                           SHERWOOD  = 2._EB + SH_FAC_GAS*SQRT(RE_L)
-                           H_MASS = SHERWOOD*D_AIR/LENGTH
+                           SHERWOOD = 2._EB + SH_FAC_GAS*SQRT(RE_L)
+                           H_MASS   = SHERWOOD*D_AIR/LENGTH
                         ENDIF
-                     CASE(0) ! Shazin M0, Eq 106 + 109 with B_T=B_M
+                     CASE(0) ! Sazhin M0, Eq 106 + 109 with B_T=B_M
                         IF (Y_DROP <= Y_GAS) THEN
                            NUSSELT  = 2._EB + NU_FAC_GAS*SQRT(RE_L)
                            H_HEAT   = NUSSELT*K_AIR/LENGTH
-                           H_MASS = 0._EB
+                           H_MASS   = 0._EB
                         ELSE
-                           NUSSELT  = 2._EB + NU_FAC_GAS*SQRT(RE_L)*LOG(1._EB+B_NUMBER)/B_NUMBER
+                           NUSSELT  = ( 2._EB + NU_FAC_GAS*SQRT(RE_L) )*LOG(1._EB+B_NUMBER)/B_NUMBER
                            H_HEAT   = NUSSELT*K_AIR/LENGTH
-                           SHERWOOD  = 2._EB + SH_FAC_GAS*SQRT(RE_L)*LOG(1._EB+B_NUMBER)/(Y_DROP-Y_GAS)
-                           H_MASS = SHERWOOD*D_AIR/LENGTH
+                           SHERWOOD = ( 2._EB + SH_FAC_GAS*SQRT(RE_L) )*LOG(1._EB+B_NUMBER)/(Y_DROP-Y_GAS)
+                           H_MASS   = SHERWOOD*D_AIR/LENGTH
+                           ! above we save a divide and multiply of B_NUMBER
+                           ! the full model corresponding to Sazhin (108) and (109) would be
+                           ! SH = SH_0 * LOG(1+B_M)/B_M
+                           ! H_MASS = SH * D/L * B_M/(Y_D-Y_G)
                         ENDIF
-                     CASE(1) ! Shazin M1, Eq 106 + 109 with eq 102.
+                     CASE(1) ! Sazhin M1, Eq 106 + 109 with eq 102.
                         IF (Y_DROP <= Y_GAS) THEN
                            NUSSELT  = 2._EB + NU_FAC_GAS*SQRT(RE_L)
                            H_HEAT   = NUSSELT*K_AIR/LENGTH
-                           H_MASS = 0._EB
+                           H_MASS   = 0._EB
                         ELSE
-                           SHERWOOD  = 2._EB + SH_FAC_GAS*SQRT(RE_L)*LOG(1._EB+B_NUMBER)/(Y_DROP-Y_GAS)
-                           H_MASS = SHERWOOD*D_AIR/LENGTH
-                           LEWIS = K_AIR / (RHO_AIR * D_AIR * CP_AIR)
+                           SHERWOOD = ( 2._EB + SH_FAC_GAS*SQRT(RE_L) )*LOG(1._EB+B_NUMBER)/(Y_DROP-Y_GAS)
+                           H_MASS   = SHERWOOD*D_AIR/LENGTH
+                           LEWIS    = K_AIR / (RHO_AIR * D_AIR * CP_AIR)
                            ZZ_GET(1:N_TRACKED_SPECIES) = 0._EB
                            ZZ_GET(Z_INDEX) = 1._EB
                            CALL GET_SPECIFIC_HEAT(ZZ_AIR,C_GAS_DROP,TMP_FILM)
@@ -2526,18 +2530,18 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                            CALL GET_SPECIFIC_HEAT(ZZ_AIR,C_GAS_AIR,TMP_FILM)
                            THETA = C_GAS_DROP/C_GAS_AIR/LEWIS
                            B_NUMBER = (1._EB+B_NUMBER)**THETA-1._EB
-                           NUSSELT  = 2._EB + NU_FAC_GAS*SQRT(RE_L)*LOG(1._EB+B_NUMBER)/B_NUMBER
+                           NUSSELT  = ( 2._EB + NU_FAC_GAS*SQRT(RE_L) )*LOG(1._EB+B_NUMBER)/B_NUMBER
                            H_HEAT   = NUSSELT*K_AIR/LENGTH
                         ENDIF
-                     CASE(2) ! Shazin M2, Eq 116 and 117 with eq 106,109, and 102.
+                     CASE(2) ! Sazhin M2, Eq 116 and 117 with eq 106, 109, and 102.
                         IF (Y_DROP <= Y_GAS) THEN
                            NUSSELT  = 2._EB + NU_FAC_GAS*SQRT(RE_L)
                            H_HEAT   = NUSSELT*K_AIR/LENGTH
-                           H_MASS = 0._EB
+                           H_MASS   = 0._EB
                         ELSE
-                           SHERWOOD  = 2._EB + SH_FAC_GAS*SQRT(RE_L)*LOG(1._EB+B_NUMBER)/((Y_DROP-Y_GAS)*F_B(B_NUMBER))
-                           H_MASS = SHERWOOD*D_AIR/LENGTH
-                           LEWIS = K_AIR / (RHO_AIR * D_AIR * CP_AIR)
+                           SHERWOOD = ( 2._EB + SH_FAC_GAS*SQRT(RE_L) )*LOG(1._EB+B_NUMBER)/((Y_DROP-Y_GAS)*F_B(B_NUMBER))
+                           H_MASS   = SHERWOOD*D_AIR/LENGTH
+                           LEWIS    = K_AIR / (RHO_AIR * D_AIR * CP_AIR)
                            ZZ_GET(1:N_TRACKED_SPECIES) = 0._EB
                            ZZ_GET(Z_INDEX) = 1._EB
                            CALL GET_SPECIFIC_HEAT(ZZ_AIR,C_GAS_DROP,TMP_FILM)
@@ -2545,7 +2549,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                            CALL GET_SPECIFIC_HEAT(ZZ_AIR,C_GAS_AIR,TMP_FILM)
                            THETA = C_GAS_DROP/C_GAS_AIR/LEWIS
                            B_NUMBER = (1._EB+B_NUMBER)**THETA-1._EB
-                           NUSSELT  = 2._EB + NU_FAC_GAS*SQRT(RE_L)*LOG(1._EB+B_NUMBER)/(B_NUMBER*F_B(B_NUMBER))
+                           NUSSELT  = ( 2._EB + NU_FAC_GAS*SQRT(RE_L) )*LOG(1._EB+B_NUMBER)/(B_NUMBER*F_B(B_NUMBER))
                            H_HEAT   = NUSSELT*K_AIR/LENGTH
                         ENDIF
                   END SELECT
@@ -2882,7 +2886,7 @@ SUM_PART_QUANTITIES: IF (N_LP_ARRAY_INDICES > 0) THEN
             SF => SURFACE(LPC%SURF_INDEX)
             R_DROP = MAXVAL(LP%ONE_D%X(0:SF%N_CELLS_MAX))
             SELECT CASE(SF%GEOMETRY)
-               CASE(SURF_CARTESIAN)
+               CASE(SURF_CARTESIAN,SURF_BLOWING_PLATE)
                   A_DROP = 2._EB*SF%LENGTH*SF%WIDTH
                CASE(SURF_CYLINDRICAL)
                   A_DROP = 2._EB*SF%LENGTH*R_DROP
