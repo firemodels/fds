@@ -3125,7 +3125,7 @@ TYPE(MATERIAL_TYPE), POINTER :: ML
 TYPE(SURFACE_TYPE), POINTER :: SF
 REAL(EB) :: DTMP,REACTION_RATE,Y_O2,X_O2,Q_DOT_S_PPP,MW_G,X_G,X_W,D_AIR,H_MASS,RE_L,SHERWOOD,MFLUX,MU_AIR,SC_AIR,U_TANG,&
             RHO_DOT,RDN,B_NUMBER,Y_DROP,Y_GAS,TMP_G,TMP_FILM,Y_AIR,R_AIR,RHO_AIR,LENGTH,SH_FAC_GAS,U2,V2,W2,VEL,MW_RATIO,&
-            DR,R_S_0,R_S_1,SH_FAC_WALL,H_R
+            DR,R_S_0,R_S_1,SH_FAC_WALL,H_R,DN
 
 Q_DOT_S_PPP = 0._EB
 Q_DOT_G_PPP = 0._EB
@@ -3177,10 +3177,6 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Tech Guide: Sum over the materials, alpha
                      H_MASS   = SHERWOOD*MU_AIR/(RHO(IIG,JJG,KKG)*SC*SF%CONV_LENGTH)
                   CASE(SURF_SPHERICAL,SURF_BLOWING_PLATE)
                      ! This section is using the mass transfer model from part
-                     U2 = 0.5_EB*(U(IIG,JJG,KKG)+U(IIG-1,JJG,KKG))
-                     V2 = 0.5_EB*(V(IIG,JJG,KKG)+V(IIG,JJG-1,KKG))
-                     W2 = 0.5_EB*(W(IIG,JJG,KKG)+W(IIG,JJG,KKG-1))
-                     VEL = SQRT((U2-LPU)**2+(V2-LPV)**2+(W2-LPW)**2)
                      TMP_FILM = TMP_F + EVAP_FILM_FAC*(TMP_G - TMP_F) ! LC Eq.(18)
                      MW_RATIO = MW_G/SPECIES_MIXTURE(SMIX_INDEX)%MW
                      Y_DROP  = X_W/(MW_RATIO + (1._EB-MW_RATIO)*X_W)
@@ -3202,26 +3198,33 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Tech Guide: Sum over the materials, alpha
                      SC_AIR = MU_AIR/(RHO_AIR*D_AIR)
                      SELECT CASE(SF%GEOMETRY)
                         CASE(SURF_SPHERICAL)
+                           U2 = 0.5_EB*(U(IIG,JJG,KKG)+U(IIG-1,JJG,KKG))
+                           V2 = 0.5_EB*(V(IIG,JJG,KKG)+V(IIG,JJG-1,KKG))
+                           W2 = 0.5_EB*(W(IIG,JJG,KKG)+W(IIG,JJG,KKG-1))
+                           VEL = SQRT((U2-LPU)**2+(V2-LPV)**2+(W2-LPW)**2)
                            SH_FAC_GAS = 0.6_EB*SC_AIR**ONTH
                            LENGTH = 2._EB*R_DROP
                            RE_L = RHO_AIR*VEL*LENGTH/MU_AIR
-                           ! Shazin M0, Eq 106 + 109 with B_T=B_M
                            IF (Y_DROP <= Y_GAS) THEN
                               H_MASS = 0._EB
                            ELSE
                               SHERWOOD  = ( 2._EB + SH_FAC_GAS*SQRT(RE_L) )*LOG(1._EB+B_NUMBER)/(Y_DROP-Y_GAS)
                               H_MASS = SHERWOOD*D_AIR/LENGTH
                            ENDIF
-                        CASE(SURF_BLOWING_PLATE)
+                        CASE(SURF_BLOWING_PLATE) !!! UNDER CONSTRUCTION !!!
+                           VEL = SQRT(2._EB*KRES(IIG,JJG,KKG))
                            SH_FAC_WALL = 0.037_EB*SC_AIR**ONTH
-                           LENGTH = SF%CONV_LENGTH
-                           RE_L = RHO_AIR*VEL*LENGTH/MU_AIR
-                           ! Shazin M0, Eq 106 + 109 with B_T=B_M
+                           SELECT CASE(ABS(IOR))
+                              CASE(1); DN = 0.5_EB*DX(IIG)
+                              CASE(2); DN = 0.5_EB*DY(JJG)
+                              CASE(3); DN = 0.5_EB*DZ(KKG)
+                           END SELECT
+                           RE_L = RHO_AIR*VEL*SF%CONV_LENGTH/MU_AIR
                            IF (Y_DROP <= Y_GAS) THEN
                               H_MASS = 0._EB
                            ELSE
-                              SHERWOOD  = ( SH_FAC_WALL*RE_L**0.8_EB )*LOG(1._EB+B_NUMBER)/(Y_DROP-Y_GAS)
-                              H_MASS = SHERWOOD*D_AIR/LENGTH
+                              SHERWOOD  = MAX( 1._EB, ( SH_FAC_WALL*RE_L**0.8_EB )*LOG(1._EB+B_NUMBER)/(Y_DROP-Y_GAS) )
+                              H_MASS = SHERWOOD*D_AIR/DN
                            ENDIF
                      END SELECT
                END SELECT GEOMETRY_SELECT_1
