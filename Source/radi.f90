@@ -907,7 +907,6 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                KAPPA_GAS(I,J,K) = KAPPA_WSGG(MOL_RAT,PARTIAL_P,IBND) + &
                   KAPPA_SOOT(GET_VOLUME_FRACTION(SOOT_INDEX,Z_ARRAY,R_MIXTURE),TMP(I,J,K))       ! Absorp coeff for the jth gas
                KFST4_GAS(I,J,K) = BBF*KAPPA_GAS(I,J,K)*FOUR_SIGMA*TMP(I,J,K)**4._EB
-
                IF (CHI_R(I,J,K)*Q(I,J,K)>QR_CLIP) THEN ! Precomputation of quantities for the RTE source term correction
                      VOL = R(I)*DX(I)*DY(J)*DZ(K)
                      RAD_Q_SUM = RAD_Q_SUM + (BBF*CHI_R(I,J,K)*Q(I,J,K) + &
@@ -983,6 +982,13 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
 
    ! Compute the added contribution of any condensed speices
    IF (ANY(SPECIES_MIXTURE%EVAPORATION_SMIX_INDEX > 0)) THEN
+
+      IF (NUMBER_SPECTRAL_BANDS==1) THEN
+         BBF = 1._EB
+      ELSE
+         BBF = BLACKBODY_FRACTION(WL_LOW(IBND),WL_HIGH(IBND),RADTMP)
+      ENDIF
+
       SLOOP: DO N = 1, N_TRACKED_SPECIES
          IF (SPECIES_MIXTURE(N)%EVAPORATION_SMIX_INDEX <= 0) CYCLE SLOOP
          DO K=1,KBAR
@@ -990,13 +996,14 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                DO I=1,IBAR
                   IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                   IF (ZZ(I,J,K,N) < TWO_EPSILON_EB) CYCLE
-                  NCSDROP = 6._EB*ZZ(I,J,K,N)*RHO(I,J,K)/&
+                  NCSDROP = 1.5_EB*ZZ(I,J,K,N)*RHO(I,J,K)/ &
                             (SPECIES(SPECIES_MIXTURE(N)%SINGLE_SPEC_INDEX)%DENSITY_LIQUID*SPECIES_MIXTURE(N)%MEAN_DIAMETER)
-                  NCSDROP = AVG_DROP_AREA(I,J,K,ARRAY_INDEX)
-                  CALL INTERPOLATE1D(LPC%R50,LPC%WQABS(:,IBND),0.5_EB*SPECIES_MIXTURE(N)%MEAN_DIAMETER,QVAL)
+                  CALL INTERPOLATE1D(SPECIES_MIXTURE(N)%R50,SPECIES_MIXTURE(N)%WQABS(:,IBND),&
+                                     0.5_EB*SPECIES_MIXTURE(N)%MEAN_DIAMETER,QVAL)
                   KAPPA_GAS(I,J,K) = KAPPA_GAS(I,J,K) + NCSDROP*QVAL
                   KFST4_GAS(I,J,K) = KFST4_GAS(I,J,K) + BBF*NCSDROP*QVAL*FOUR_SIGMA*TMP(I,J,K)**4
-                  CALL INTERPOLATE1D(LPC%R50,LPC%WQSCA(:,IBND),0.5_EB*SPECIES_MIXTURE(N)%MEAN_DIAMETER,QVAL)
+                  CALL INTERPOLATE1D(SPECIES_MIXTURE(N)%R50,SPECIES_MIXTURE(N)%WQSCA(:,IBND),&
+                                     0.5_EB*SPECIES_MIXTURE(N)%MEAN_DIAMETER,QVAL)
                   SCAEFF_G(I,J,K) = SCAEFF_G(I,J,K) + NCSDROP*QVAL
                ENDDO
             ENDDO
