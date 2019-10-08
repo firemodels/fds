@@ -878,7 +878,7 @@ In 2009, Mell et~al. measured the burning rate of individual Douglas fir trees o
 
 \subsubsection{Modeling Notes}
 
-The trees are modeled as a collection of cylindrical Lagrangian particles. Mell~et~al.~\cite{Mell:2009} group the particles into three size classes. The pyrolysis model assigned to the particles is described in the FDS User's Guide~\cite{FDS_Users_Guide}, chapter ``Earth, Wind and Fire,'' section ``Thermal Degradation Model for Vegetation.'' 
+The trees are modeled as a collection of cylindrical Lagrangian particles. Mell~et~al.~\cite{Mell:2009} group the particles into three size classes. The pyrolysis model assigned to the particles is described in the FDS User's Guide~\cite{FDS_Users_Guide}, chapter ``Earth, Wind and Fire,'' section ``Thermal Degradation Model for Vegetation.''
 
 Measured properties of the trees are listed in Table~\ref{Properties_Trees}. Generic vegetation properties are listed in Table~\ref{Assumed_Properties_Trees}. These assumed properties are typically for wood or cellulosic fuels. The moisture is modeled as water. The vegetation is assumed to be composed primarily of cellulose. Reference~\cite{Mell:2009} provides an estimate of the distribution of mass for the foliage, roundwood less than 3~mm in diameter, roundwood 3~mm to 6~mm, and roundwood 6~mm to 10~mm. For the 2~m trees, the distribution is approximately 64~\%, 11~\%, 10~\%, and 15~\%, respectively. For the 5~m trees, it is 60~\%, 17~\%, 12~\%, and 11~\%, respectively.
 
@@ -2206,7 +2206,7 @@ Perez-Ramirez et al.~at the University of Corsica, France, and Mell at the U.S. 
 
 The pine needles are modeled as a collection of cylindrical Lagrangian particles. The pyrolysis model assigned to the particles is described in the FDS User's Guide~\cite{FDS_Users_Guide}, chapter ``Earth, Wind and Fire,'' section ``Thermal Degradation Model for Vegetation.''
 
-The test parameters are given in Table~\ref{Corsica_Parameters}. 
+The test parameters are given in Table~\ref{Corsica_Parameters}.
 
 \begin{table}[ht!]
 \begin{center}
@@ -2468,6 +2468,7 @@ Table~\ref{Test_Parameters} presents a summary of all the experiments described 
 Arup Tunnel         & 5344          & 1.6           & 7     & 1.5               & 0.8                 & 0.0           & 1.1         & 43          & 0.0 -- 1.1            & N/A                   \\ \hline
 ATF Corridors       & 50 -- 500     & 0.5           & 2.4   & 0.3 -- 3.3        & 0.3 -- 0.9          & 0.0 -- 0.1    & 0.8         & 7.1         & 0.8 -- 6.0            & N/A                   \\ \hline
 Beyler Hood         & 8 -- 30       & 0.2           & 0.5   & 0.5 -- 1.1        & 0.7 -- 1.3          & 0.2 -- 1.7    & 2.0         & 2.0         & N/A                   & N/A                   \\ \hline
+Bittern Sprinklers  & 150           & 0.5           & 2.4   & 0.8               & 0.5                 & 0.04          & 1.7         & 3.3         & 0.8                   & N/A                   \\ \hline
 Bryant Doorway      & 34 -- 511     & 0.3           & 2.4   & 0.5 -- 6.9        & 0.2 -- 1.0          & 0.0 -- 0.2    & 1.0         & 2.1         & 0.6 -- 0.8            & N/A                   \\ \hline
 DelCo Trainers      & 440 -- 1190   & 0.7 -- 1.2    & 2.4   & 0.7 -- 1.0        & 0.8 -- 1.1          & 0.1 -- 0.3    & 1.5         & 2.5         & 0.4 -- 3.8            & N/A                   \\ \hline
 FAA Cargo           & 5             & 0.1           & 1.4   & 1.4               & 0.2                 & 0.2           & 2.3         & 4.8         & 0.1 -- 4.8            & N/A                   \\ \hline
@@ -2480,6 +2481,7 @@ Heskestad           & $10^2-10^7$   & 1.1           & Open  & $10^{-1}-10^4$    
 LLNL Enclosure      & 50 -- 400     & 0.6           & 4.5   & 0.2 -- 1.5        & 0.1 -- 0.4          & 0.1 -- 0.4    & 0.9         & 1.3         & 0.3 -- 1.0            & N/A                   \\ \hline
 McCaffrey Plume     & 14 -- 57      & 0.3           & Open  & 0.2 -- 0.8        & Open                & Open          & Open        & Open        & N/A                   & N/A                   \\ \hline
 NBS Multi-Room      & 110           & 0.3           & 2.4   & 1.5               & 0.5                 & 0.0           & 1.0         & 5.1         & N/A                   & N/A                   \\ \hline
+NIST Composite Beam & 4000          & 1.4           & 3.7   & 0.5               & 0.7                 & 0.6           & 0.5         & 3.5         & N/A                   & N/A                   \\ \hline
 NIST FSE            & 100 -- 2500   & 0.6 -- 1.1    & 2.4   & 0.5 -- 1.8        & 0.4 -- 1.7          & 0.2 -- 5.9    & 1.0         & 1.5         & 0.4 -- 0.8            & N/A                   \\ \hline
 NIST/NRC            & 350 -- 2200   & 1.0           & 3.8   & 0.3 -- 2.0        & 0.3 -- 1.0          & 0.0 -- 0.3    & 1.9         & 5.7         & 0.3 -- 2.1            & 2.0 -- 4.0            \\ \hline
 NIST/NRC Cabinet    & 200 -- 400    & 0.3 -- 0.5    & 2.1   & 0.3 -- 3.7        & 0.2 -- 0.9          & 1.3 -- 12     & 0.3         & 0.4         & N/A                   & 1.2 -- 2.0            \\ \hline
