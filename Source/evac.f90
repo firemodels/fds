@@ -992,8 +992,21 @@ CONTAINS
        ! There are fire grids ==> save fed and evac flow fields
        ! Simple chemistry need always REAC line, non-simple chemistry does not need this
        I_EVAC = 16*1 + 8*0 + 4*0 + 2*1 + 1*1
+       WRITE(LU_ERR,    '(A,A)')  ' FDS+Evac pressure method : ', TRIM(PRES_METHOD)
+       IF (TRIM(PRES_METHOD) .NE. 'FFT') THEN
+          WRITE(LU_ERR,'(A)') ' FDS+Evac WARNING: FDS+Evac was developed for FFT solver'
+          WRITE(LU_ERR,'(A)') '                   Verify results for other pressure solvers'
+          WRITE(LU_ERR,'(A)') '                   The FED file is only saved for later use'
+          I_EVAC = 16*1 + 8*0 + 4*0 + 2*1 + 1*0  ! I_EVAC=16 => do only fire calculation, save fed info
+       END IF
     ELSE
        ! There are no fire meshes
+       WRITE(LU_ERR,'(A,A)')  ' FDS+Evac pressure method : ', TRIM(PRES_METHOD)
+       IF (TRIM(PRES_METHOD) .NE. 'FFT') THEN
+          WRITE(LU_ERR,    '(A)') ' FDS+Evac ERROR: FDS+Evac was developed for FFT solver'
+          WRITE(MESSAGE, '(A,A)') ' ERROR: Evacuation only and pressure solver is: ',TRIM(PRES_METHOD)
+          CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
+       END IF
        IF (EVACUATION_MC_MODE) THEN
           ! MC-mode: Try to read EFF file if exists on the hard disk
           IF (EVACUATION_DRILL) THEN
