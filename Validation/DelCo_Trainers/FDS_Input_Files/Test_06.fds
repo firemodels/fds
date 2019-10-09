@@ -5,8 +5,8 @@
 
 &MISC TMPA=32. /
 
-&ZONE XB= 0.0,11.0, 3.0, 6.1, 0.0, 2.4, LEAK_AREA(0)=0.024 /
-&ZONE XB= 3.8, 7.2, 0.0, 2.9, 0.0, 2.4 /
+&ZONE XYZ=1.5,2.0,1.0, LEAK_AREA(0)=0.024 /
+&ZONE XYZ=5.0,2.0,1.0 /
 
 &TIME T_END=1680. / 
 
@@ -66,15 +66,15 @@
 &SURF ID='BURNER', MASS_FLUX(1)=0.0238, SPEC_ID(1)='PROPANE', COLOR='RED', RAMP_MF(1)='burner', TMP_FRONT=500. /
 
 &RAMP ID='burner', T=   0., F=0.0 /
-&RAMP ID='burner', T=   1., F=1.0 /
+&RAMP ID='burner', T=   5., F=1.0 /
 &RAMP ID='burner', T= 300., F=1.0 /
 &RAMP ID='burner', T= 301., F=0.0 /
 &RAMP ID='burner', T= 570., F=0.0 /
-&RAMP ID='burner', T= 571., F=1.0 /
+&RAMP ID='burner', T= 575., F=1.0 /
 &RAMP ID='burner', T= 840., F=1.0 /
 &RAMP ID='burner', T= 841., F=0.0 /
 &RAMP ID='burner', T=1080., F=0.0 /
-&RAMP ID='burner', T=1081., F=0.99 /
+&RAMP ID='burner', T=1085., F=0.99 /
 &RAMP ID='burner', T=1350., F=0.99 /
 &RAMP ID='burner', T=1351., F=0.0 /
 
