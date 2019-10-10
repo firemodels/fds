@@ -4344,9 +4344,9 @@ causes an object to be rotated 45$^\circ$ about the direction vector ({\ct AXIS}
 It is also possible to rotate, scale and translate an object using a $3 \times 4$ transformation matrix. The equation that describes the transformation for a point $p$ with coordinates $x,y,z$ is:
 %
 \begin{equation}
-\left\{ \begin{array}{c} x' \\ y' \\ z' \\ \end{array} \right\} = 
+\left\{ \begin{array}{c} x' \\ y' \\ z' \\ \end{array} \right\} =
 \left[ \begin{array}{cccc} i_1 & j_1 & k_1 & a_1 \\ i_2 & j_2 & k_2 & a_2 \\ i_3 & j_3 & k_3 & a_3 \\ \end{array} \right]
-\left\{ \begin{array}{c} x \\ y \\ z \\ 1 \\ \end{array} \right\} 
+\left\{ \begin{array}{c} x \\ y \\ z \\ 1 \\ \end{array} \right\}
 \end{equation}
 %
 where the primes refer to the new location of point $p$. In that case the previous {\ct MOVE} line is defined as:
@@ -6164,25 +6164,21 @@ If you do not want to introduce the particles right at the start of the simulati
 Modeling fire suppression by water has three principal components: transporting the water droplets through the air, tracking the water along the solid surface, and predicting the reduction of the burning rate. This section addresses the latter two.
 
 
-\subsection{Velocity on Solid Surfaces}
+\subsection{Droplet Movement on Solid Surfaces}
 \label{info:surface_droplets}
+\label{cascade}
 
-When a droplet strikes a solid surface\footnote{If you do not want droplets to accumulate on solid surfaces, set {\ct ALLOW\_SURFACE\_PARTICLES=.FALSE.} on the {\ct MISC} line. It is normally {\ct .TRUE.}}, it sticks and is reassigned a new speed and direction. If the surface is horizontal, the direction is randomly chosen. If vertical, the direction is downwards. The rate at which the droplets move over the horizontal and vertical surfaces is difficult to quantify. The parameters {\ct HORIZONTAL\_VELOCITY} and {\ct VERTICAL\_VELOCITY} on the {\ct PART} line allow you to control the rate at which droplets move horizontally or vertically (downward). The defaults are 0.2~m/s and 0.5~m/s, respectively.
+When a droplet strikes a solid surface\footnote{If you do not want droplets to accumulate on solid surfaces, set {\ct ALLOW\_SURFACE\_PARTICLES=.FALSE.} on the {\ct MISC} line. It is normally {\ct .TRUE.}}, it sticks and is reassigned a new speed and direction. If the surface is horizontal, the direction is randomly chosen. If vertical, the direction is downwards. The parameters {\ct HORIZONTAL\_VELOCITY} and {\ct VERTICAL\_VELOCITY} on the {\ct PART} line allow you to control the speed at which droplets move horizontally or vertically (downward). The defaults are 0.2~m/s and 0.5~m/s, respectively.
 
-There are some applications, like the suppression of racked storage commodities, where it is useful to allow water droplets to move horizontally along the underside of a solid object. It is difficult to model this phenomenon precisely because it involves surface tension, surface porosity and absorption, and complicated geometry. However, a way to capture some of the effect is to set {\ct ALLOW\_UNDERSIDE\_PARTICLES=.TRUE.} on the {\ct MISC} line. It is normally false. Also, note that when droplets hit obstructions, the vertical direction is assumed to coincide with the $z$ axis, regardless of any change to the gravity vector, {\ct GVEC}.
+There are some applications, like the suppression of racked storage commodity fires, where it is useful to allow water droplets to move horizontally along the underside of a solid object. It is difficult to model this phenomenon precisely because it involves surface tension, surface porosity and absorption, and complicated geometry. However, a way to capture some of the effect is to set {\ct ALLOW\_UNDERSIDE\_PARTICLES=.TRUE.} on the {\ct MISC} line. It is normally false. Also, note that when droplets hit obstructions, the vertical direction is assumed to coincide with the $z$ axis, regardless of any change to the gravity vector, {\ct GVEC}.
 
-A useful sample case to demonstrate various features of droplet motion on solid obstructions is the test case called {\ct cascade.fds}. Figure~\ref{cascade} shows a stream of water droplets impinging on the top of a box followed by the cascading of water droplets over the top edge.
+A useful sample case to demonstrate various features of droplet motion on solid obstructions is the test case called {\ct Sprinklers\_and\_Sprays/cascade.fds}. The image to the left in Fig.~\ref{cascade_image} shows 1~L of water droplets cascading down the sides of an array of boxes. The plot to the right checks that the total water mass is conserved. Note that some of the water evaporates into the compartment that initially has zero humidity.
 
 \begin{figure}[ht]
-\begin{center}
-\begin{tabular}{lcr}
-\includegraphics[height=3in]{SCRIPT_FIGURES/cascade_1} &
-\includegraphics[height=3in]{SCRIPT_FIGURES/cascade_2} &
-\includegraphics[height=3in]{SCRIPT_FIGURES/cascade_3}
-\end{tabular}
-\end{center}
-\caption[Example of water cascading over solid obstructions]{Smokeview rendering of the {\ct cascade} test case.}
-\label{cascade}
+\includegraphics[height=3in]{SCRIPT_FIGURES/cascade_image}
+\includegraphics[height=3in]{SCRIPT_FIGURES/cascade}
+\caption[Results of the {\ct cascade} test case]{(Left) Smokeview rendering of the {\ct cascade} test case, demonstrating that water droplets move randomly at 0.2~m/s over horizontal surfaces, and descend uniformly at 0.5~m/s over vertical surfaces. The plot at the right demonstrates that water mass is conserved in the simulation.}
+\label{cascade_image}
 \end{figure}
 
 
@@ -9760,7 +9756,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MASS\_FLOW  }              & Real              & Section~\ref{info:HVACduct}                                                   &  kg/s         &                \\ \hline
 {\ct MAX\_FLOW}                 & Real              & Section ~\ref{info:HVACfan}                                                   &  m$^3$/s      &                \\ \hline
 {\ct MAX\_PRESSURE}             & Real              & Section ~\ref{info:HVACfan}                                                   &  Pa           &                \\ \hline
-{\ct N\_CELLS}                  & Integer           & Section~\ref{info:hvacmasstransport}                                          &               &{\ct LENGTH}\(/0.1\)  \\ \hline
+{\ct N\_CELLS}                  & Integer           & Section~\ref{info:hvacmasstransport}                                          &               & 10*{\ct LENGTH} \\ \hline
 {\ct NODE\_ID}                  & Char.~Doublet     & Section~\ref{info:HVACduct}                                                   &               &                \\ \hline
 {\ct PERIMETER}                 & Real              & Section~\ref{info:HVACduct}                                                   &  m            &                \\ \hline
 {\ct RAMP\_ID}                  & Character         & Sections ~\ref{info:HVACduct}, \ref{info:HVACfilter}, \ref{info:HVACfan}      &               &                \\ \hline

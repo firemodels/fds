@@ -1623,6 +1623,7 @@ PARTICLE_LOOP: DO IP=1,NLP
                   LP%U = 0._EB
                   LP%V = 0._EB
                   LP%W = -LPC%VERTICAL_VELOCITY
+                  LP%SPLAT = .FALSE.
                CASE (-3) DIRECTION
                   IF (.NOT.ALLOW_UNDERSIDE_PARTICLES) THEN
                      LP%U = 0._EB
@@ -1654,31 +1655,29 @@ PARTICLE_LOOP: DO IP=1,NLP
 
       ! If the droplet was attached to a solid WALL (LP%ONE_D%IOR/=0), but now it is not, change its course. If the droplet was
       ! dripping down a vertical surface (IOR=+-1,2), make it go under the solid and then move upward to (possibly) stick
-      ! to the underside or drip off. If the droplet moves off an upward facing horizontal surface (IOR=3), reverse its course
-      ! and drop it down the side of the solid obstruction. If the droplet moves off a downward facing horizontal obstruction
-      ! (IOR=-3), do nothing and let it continue free-falling.
+      ! to the underside or drip off. If the droplet moves off an upward or downward facing horizontal surface (IOR=+-3), reverse
+      ! its course and drop it down the side of the solid obstruction. 
 
       LP%WALL_INDEX = WALL_INDEX(IC_NEW,-LP%ONE_D%IOR)
 
-      IF (LP%WALL_INDEX>0 .AND. WALL(LP%WALL_INDEX)%BOUNDARY_TYPE/=SOLID_BOUNDARY) THEN
+      IF (WALL(LP%WALL_INDEX)%BOUNDARY_TYPE/=SOLID_BOUNDARY) THEN
          SELECT CASE(LP%ONE_D%IOR)
             CASE( 1)
                LP%X = LP%X - 0.2_EB*DX(LP%ONE_D%IIG)
-               LP%W = -LP%W
+               LP%W = -2._EB*LP%W
             CASE(-1)
                LP%X = LP%X + 0.2_EB*DX(LP%ONE_D%IIG)
-               LP%W = -LP%W
+               LP%W = -2._EB*LP%W
             CASE( 2)
                LP%Y = LP%Y - 0.2_EB*DY(LP%ONE_D%JJG)
-               LP%W = -LP%W
+               LP%W = -2._EB*LP%W
             CASE(-2)
                LP%Y = LP%Y + 0.2_EB*DY(LP%ONE_D%JJG)
-               LP%W = -LP%W
-            CASE( 3)
+               LP%W = -2._EB*LP%W
+            CASE(-3,3)
                LP%U = -LP%U
                LP%V = -LP%V
                LP%Z =  LP%Z - 0.2_EB*DZ(LP%ONE_D%KKG)
-            CASE(-3)
          END SELECT
          LP%ONE_D%IOR = 0
          LP%WALL_INDEX = 0
