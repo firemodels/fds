@@ -4,17 +4,7 @@ SETVIEWPOINT
  view 1
 LOADFILE
  cascade.prt5
-PARTCLASSCOLOR
- Uniform color
 SETTIMEVAL
- 11.905306
+ 20.
 RENDERONCE
- cascade_1
-SETTIMEVAL
- 14.837711
-RENDERONCE
- cascade_2
-SETTIMEVAL
- 41.895817
-RENDERONCE
- cascade_3
+ cascade_image
