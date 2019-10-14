@@ -7616,7 +7616,7 @@ ELSE
 ENDIF
 SPEC_ID                 = 'null'
 SPREAD_RATE             = -1._EB
-STRETCH_FACTOR          = -1._EB
+STRETCH_FACTOR          = 2._EB
 TAU_MF                  = TAU_DEFAULT
 TAU_Q                   = TAU_DEFAULT
 TAU_V                   = TAU_DEFAULT
@@ -7819,7 +7819,7 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
       ENDDO
    ENDIF
 
-   ! Determine if the surface is combustible/burning. If it is, set the STRETCH_FACTOR to 1 unless user says otherwise.
+   ! Determine if the surface is combustible/burning.
 
    SF%PYROLYSIS_MODEL = PYROLYSIS_NONE
    BURNING  = .FALSE.
@@ -7829,7 +7829,6 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
          ML => MATERIAL(NNN)
          IF (ML%PYROLYSIS_MODEL/=PYROLYSIS_NONE) THEN
             SF%PYROLYSIS_MODEL = PYROLYSIS_PREDICTED
-            IF (SF%PACKING_RATIO(NL)<0._EB .AND. SF%STRETCH_FACTOR(NL)<0._EB) SF%STRETCH_FACTOR(NL) = 1._EB
             IF (N_REACTIONS>0) THEN
                IF (REACTION(1)%FUEL_SMIX_INDEX>=0) THEN
                   IF (ANY(ML%NU_SPEC(REACTION(1)%FUEL_SMIX_INDEX,:)>0._EB))  THEN
@@ -7840,7 +7839,6 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
             ENDIF
          ENDIF
       ENDDO
-      IF (SF%STRETCH_FACTOR(NL)<0._EB) SF%STRETCH_FACTOR(NL) = 2._EB
    ENDDO
 
    IF (SF%HRRPUA>0._EB .OR. SF%MLRPUA>0._EB) THEN
