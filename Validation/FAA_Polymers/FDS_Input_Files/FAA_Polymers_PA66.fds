@@ -27,7 +27,7 @@ coupling -- just a fixed external heat flux of 50 kW/m2.
       HEAT_OF_REACTION=55.
       SPECIFIC_HEAT = 2.54 
       CONDUCTIVITY = 0.34 /
-	  
+
 &MATL ID='Liq'
       ABSORPTION_COEFFICIENT=3920.
       N_REACTIONS=1
@@ -40,7 +40,7 @@ coupling -- just a fixed external heat flux of 50 kW/m2.
       HEAT_OF_REACTION=1390.
       SPECIFIC_HEAT = 2.54 
       CONDUCTIVITY = 0.34 /
-	  
+
 &MATL ID='FOIL'
       CONDUCTIVITY=250.
       SPECIFIC_HEAT=0.91
@@ -54,12 +54,13 @@ coupling -- just a fixed external heat flux of 50 kW/m2.
       DENSITY=120.0
       EMISSIVITY=1
       ABSORPTION_COEFFICIENT=50000/
-	 
+
 &SURF ID='PA66 SLAB'
       COLOR='BLACK'
       MATL_ID='PA66','FOIL','FOAMGLAS'
       THICKNESS=0.0068,0.0000343,0.0254
-	  HEAT_TRANSFER_COEFFICIENT=0.
+      STRETCH_FACTOR=1.
+      HEAT_TRANSFER_COEFFICIENT=0.
       EXTERNAL_FLUX=50 /  External Flux is ONLY for this simple demo exercise
 
 &VENT XB=-0.05,0.05,-0.05,0.05,0.0,0.0, SURF_ID = 'PA66 SLAB' /

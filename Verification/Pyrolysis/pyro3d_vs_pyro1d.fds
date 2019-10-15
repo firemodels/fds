@@ -40,6 +40,7 @@ No in-depth radiation absorption.
       THICKNESS=0.01
       HEAT_TRANSFER_COEFFICIENT=0.
       EXTERNAL_FLUX=50
+      STRETCH_FACTOR=1.
       BACKING='INSULATED' /
 
 &MATL ID='BLACKPMMA 3D'

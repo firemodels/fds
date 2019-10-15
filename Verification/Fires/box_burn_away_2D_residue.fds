@@ -38,6 +38,7 @@ The gas species is mixture fraction fuel.
       COLOR                = 'TOMATO 3'
       MATL_ID              = 'FOAM'
       THICKNESS            = 0.1
+      STRETCH_FACTOR       = 1.0
       BURN_AWAY            = .TRUE.
       BACKING              = 'EXPOSED' / 
 

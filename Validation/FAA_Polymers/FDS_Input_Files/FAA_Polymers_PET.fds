@@ -17,7 +17,7 @@ coupling -- just a fixed external heat flux of 50 kW/m2.
       N_REACTIONS=1
       A(1) = 1
       E(1) = 0
-	  THRESHOLD_TEMPERATURE(1)=253.
+      THRESHOLD_TEMPERATURE(1)=253.
       EMISSIVITY=0.903
       DENSITY=1380.
       NU_MATL=1.
@@ -38,7 +38,7 @@ coupling -- just a fixed external heat flux of 50 kW/m2.
       HEAT_OF_REACTION=1800.
       SPECIFIC_HEAT = 2.01
       CONDUCTIVITY = 0.29 /
-	  
+
 &MATL ID='FOIL'
       CONDUCTIVITY=250.
       SPECIFIC_HEAT=0.91
@@ -56,8 +56,9 @@ coupling -- just a fixed external heat flux of 50 kW/m2.
 &SURF ID='PET SLAB'
       COLOR='BLACK'
       MATL_ID='PET','FOIL','FOAMGLAS'
-	  HEAT_TRANSFER_COEFFICIENT=0.
+      HEAT_TRANSFER_COEFFICIENT=0.
       THICKNESS=0.00662,.0000343,0.0254
+      STRETCH_FACTOR=1.
       EXTERNAL_FLUX=50 /  External Flux is ONLY for this simple demo exercise
 
 &VENT XB=-0.05,0.05,-0.05,0.05,0.0,0.0, SURF_ID = 'PET SLAB' /
