@@ -38,6 +38,7 @@
       COLOR='BLACK'
       MATL_ID='PBTGF','FOAMGLAS'
       THICKNESS=0.004,0.01
+      STRETCH_FACTOR=1.
       HEAT_TRANSFER_COEFFICIENT=0.
       EXTERNAL_FLUX=52 /  External Flux is ONLY for this simple demo exercise
 

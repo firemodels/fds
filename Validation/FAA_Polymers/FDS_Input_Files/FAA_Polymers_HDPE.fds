@@ -35,6 +35,7 @@ coupling -- just a fixed external heat flux of 50 kW/m2.
       COLOR='BLACK'
       MATL_ID='HDPE','FOAMGLAS'
       THICKNESS=0.009,0.01
+      STRETCH_FACTOR=1.
       HEAT_TRANSFER_COEFFICIENT=0.
       EXTERNAL_FLUX=52 /  External Flux is ONLY for this simple demo exercise
 
