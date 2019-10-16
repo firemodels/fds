@@ -1,4 +1,4 @@
-&HEAD CHID='FAA_B747_geom_1p25cm', TITLE='Guo et al. (2018) Modeling of Hidden Fire in Aircraft Overhead Area'/
+&HEAD CHID='FAA_B747_front11kw_1p25cm', TITLE='Guo et al. (2018) Modeling of Hidden Fire in Aircraft Overhead Area'/
 
 ! Mult Mesh, 288 Meshes:
 &MULT ID='mesh multiplier', DX=0.84, DY=0.3, DZ=1.0, I_UPPER=7, J_UPPER=17, K_UPPER=1 /
@@ -24,7 +24,7 @@
       COLOR='GRAY 80',
       ADIABATIC=.TRUE./
 
-&OBST ID='Burner', XB=1.11,1.29,1.87,2.05,0.0,0.2, RGB=240,0,0, SURF_IDS='Burner','INERT','INERT'/
+&OBST ID='Burner', XB=1.09,1.27,1.85,2.03,0.0,0.2, RGB=240,0,0, SURF_IDS='Burner','INERT','INERT'/
 
 &VENT MB='YMIN', SURF_ID='OPEN' /
 &VENT MB='YMAX', SURF_ID='OPEN' /
