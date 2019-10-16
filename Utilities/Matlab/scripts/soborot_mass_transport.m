@@ -275,6 +275,17 @@ H(3)=loglog(dx,[e_godunov_16 e_godunov_32 e_godunov_64 e_godunov_128],'ksq-');
 H(4)=loglog(dx,[e_superbee_16 e_superbee_32 e_superbee_64 e_superbee_128],'k*-');
 H(5)=loglog(dx,[e_charm_16 e_charm_32 e_charm_64 e_charm_128],'ko-');
 
+% trap square wave error
+if e_godunov_128>4.2e-02
+    display(['Error: soborot_godunov_square_wave_128 out of tolerance'])
+end
+if e_charm_128>1.4e-02
+    display(['Error: soborot_charm_square_wave_128 out of tolerance'])
+end
+if e_superbee_128>8.7e-03
+    display(['Error: soborot_superbee_square_wave_128 out of tolerance'])
+end
+
 axis([min(dx) .1 min(dx) max(dx.^.5)])
 xlabel('Grid Spacing (m)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 ylabel('L2 Error','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
@@ -500,6 +511,17 @@ H(2)=loglog(dx,dx.^2,'k--');
 H(3)=loglog(dx,[e_charm_16 e_charm_32 e_charm_64 e_charm_128],'ko-');
 H(4)=loglog(dx,[e_superbee_16 e_superbee_32 e_superbee_64 e_superbee_128],'k*-');
 H(5)=loglog(dx,[e_mp5_16 e_mp5_32 e_mp5_64 e_mp5_128],'ksq-');
+
+% trap cosine wave error
+if e_charm_128>2.9e-04
+    display(['Error: soborot_godunov_square_wave_128 out of tolerance'])
+end
+if e_superbee_128>6.4e-04
+    display(['Error: soborot_charm_square_wave_128 out of tolerance'])
+end
+if e_mp5_128>7.9e-05
+    display(['Error: soborot_superbee_square_wave_128 out of tolerance'])
+end
 
 axis([min(dx) .1 min(dx.^2) max(dx)])
 xlabel('Grid Spacing (m)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
