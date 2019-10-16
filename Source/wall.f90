@@ -2112,6 +2112,10 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
          ONE_D%ZZ_F(1:N_TRACKED_SPECIES) = ONE_D%ZZ_G(1:N_TRACKED_SPECIES)
       ENDIF
 
+      IF (PERIODIC_TEST==12 .AND. (TRIM(SF%ID)=='inlet')) THEN
+         ONE_D%ZZ_F(2) = 1._EB
+         ONE_D%ZZ_F(1) = 1._EB - ONE_D%ZZ_F(2)
+      ENDIF
       IF (PERIODIC_TEST==13 .AND. (TRIM(SF%ID)=='inlet')) THEN
          ONE_D%ZZ_F(2) = 0.5_EB*(1._EB + COS(4._EB*PI*XC(ONE_D%II)))
          ONE_D%ZZ_F(1) = 1._EB - ONE_D%ZZ_F(2)
