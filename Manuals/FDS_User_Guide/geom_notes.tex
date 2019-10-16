@@ -127,14 +127,14 @@ ERROR: GEOM ID='Cube': Non manifold geometry at edge: ...
 	\centering
 	\begin{minipage}{.45\textwidth}
 		\centering
-		\includegraphics[width=1\textwidth]{../../../fig/fds/GEOM_oriented_surface.png}
+		\includegraphics[width=1\textwidth]{../../../fig/fds/Geometry_Figures/GEOM_oriented_surface.png}
 		\caption{\textbf{Good {\ct GEOM}:} consistent normals on a manifold orientable surface}
 		\label{figure:GEOM_oriented_surface}
 	\end{minipage}%
 	\hfill
 	\begin{minipage}{.45\textwidth}
 		\centering
-		\includegraphics[width=1\textwidth]{../../../fig/fds/GEOM_ok_surface_2.png}
+		\includegraphics[width=1\textwidth]{../../../fig/fds/Geometry_Figures/GEOM_ok_surface_2.png}
 		\caption{\textbf{Good {\ct GEOM}:} a well formed triangulated surface}
 		\label{figure:GEOM_ok_surface_2}
 	\end{minipage}%
@@ -144,14 +144,14 @@ ERROR: GEOM ID='Cube': Non manifold geometry at edge: ...
 	\centering
 	\begin{minipage}{.45\textwidth}
 		\centering
-		\includegraphics[width=1\textwidth]{../../../fig/fds/GEOM_non_manifold_vert.png}
+		\includegraphics[width=1\textwidth]{../../../fig/fds/Geometry_Figures/GEOM_non_manifold_vert.png}
 		\caption{\textbf{Bad {\ct GEOM}:} the vertex shared by the two cubes is not manifold, because it is connected to two rings of faces, that cannot be continuously deformed to a single disk. The other vertices are manifold.}
 		\label{figure:GEOM_non_manifold_vert}
 	\end{minipage}%
 	\hfill
 	\begin{minipage}{.45\textwidth}
 		\centering
-		\includegraphics[width=1\textwidth]{../../../fig/fds/GEOM_non_manifold_edge.png}
+		\includegraphics[width=1\textwidth]{../../../fig/fds/Geometry_Figures/GEOM_non_manifold_edge.png}
 		\caption{\textbf{Bad {\ct GEOM}:} the edge shared by the two cubes is not manifold, because more than two faces are incident on it. The other edges are manifold.\newline}
 		\label{figure:GEOM_non_manifold_edge}
 	\end{minipage}%
@@ -161,14 +161,14 @@ ERROR: GEOM ID='Cube': Non manifold geometry at edge: ...
 	\centering
 	\begin{minipage}{.45\textwidth}
 		\centering
-		\includegraphics[width=1\textwidth]{../../../fig/fds/GEOM_open_surface.png}
+		\includegraphics[width=1\textwidth]{../../../fig/fds/Geometry_Figures/GEOM_open_surface.png}
 		\caption{\textbf{Bad {\ct GEOM}:} FDS cannot differentiate the internal volume from the rest of the domain, because the triangulated surface is open}
 		\label{figure:GEOM_open_surface}
 	\end{minipage}%
 	\hfill
 	\begin{minipage}{.45\textwidth}
 		\centering
-		\includegraphics[width=1\textwidth]{../../../fig/fds/GEOM_open_thick_surface.png}
+		\includegraphics[width=1\textwidth]{../../../fig/fds/Geometry_Figures/GEOM_open_thick_surface.png}
 		\caption{\textbf{Good {\ct GEOM}:} by adding a thickness FDS can differentiate the internal volume from the rest of the domain\newline}
 		\label{figure:GEOM_open_thick_surface}
 \end{minipage}%
@@ -176,7 +176,7 @@ ERROR: GEOM ID='Cube': Non manifold geometry at edge: ...
 
 \begin{figure}
 	\centering
-	\includegraphics[width=.5\textwidth]{../../../fig/fds/GEOM_self_intersecting.png}
+	\includegraphics[width=.5\textwidth]{../../../fig/fds/Geometry_Figures/GEOM_self_intersecting.png}
 	\caption{\textbf{Bad {\ct GEOM}:} This volume is self-intersecting}
 	\label{figure:GEOM_self_intersecting}
 \end{figure}
@@ -1147,9 +1147,9 @@ where the last term in parenthesis is the average value of $ \mathbf{J_{d \alpha
 \begin{figure}[h]
       %\centering
       \includegraphics[trim = 60mm 40mm 60mm 30mm, clip,
-       width=0.49\linewidth]{../../../fig/fds/CellsFVDiscretization.png}
+       width=0.49\linewidth]{../../../fig/fds/Geometry_Figures/CellsFVDiscretization.png}
       \includegraphics[trim = 60mm 40mm 60mm 30mm, clip,
-       width=0.49\linewidth]{../../../fig/fds/CellsFVHiXBc.png}
+       width=0.49\linewidth]{../../../fig/fds/Geometry_Figures/CellsFVHiXBc.png}
       \put(-350,-10){(a)}
       \put(-120,-10){(b)}
       \caption{Finite volume discretization in 2D: (a) Control volume of staggered cell $i,j$ individualized also by single index $ii$.  (b) Low $x$ boundary cell. In face $(\mathbf{ILO_f},j)$, corresponding to $\partial \Omega$, boundary conditions are derived.}
@@ -1330,9 +1330,9 @@ We assume (see figure~\ref{Fig:FVdiscCC}a) the cut-cell definition algorithm has
 \begin{figure}[h]
       %\centering
       \includegraphics[trim = 65mm 50mm 70mm 40mm, clip,
-       width=0.49\linewidth]{../../../fig/fds/CutCellsSketch.png}
+       width=0.49\linewidth]{../../../fig/fds/Geometry_Figures/CutCellsSketch.png}
       \includegraphics[trim = 65mm 40mm 50mm 30mm, clip,
-       width=0.49\linewidth]{../../../fig/fds/CutCellsBCSketch.png}
+       width=0.49\linewidth]{../../../fig/fds/Geometry_Figures/CutCellsBCSketch.png}
       \put(-350,-10){(a)}
       \put(-120,-10){(b)}
       \caption{Cut-cell FV discretization in 2D: (a) \texttt{GASPHASE} Cut-cell  $ii$ is bounded by: $\mathbf{1,2}$ \texttt{INBOUNDARY} faces, $\mathbf{3,6}$ \texttt{GASPHASE} cut-faces, and $\mathbf{4,5}$  \texttt{GASPHASE} regular faces.  (b) Geometrical elements used in the discretization of the diffusive term for \texttt{GASPHASE} cut-face $\mathbf{3}$, and \texttt{INBOUNDARY} face $\mathbf{1}$.}
@@ -1645,7 +1645,7 @@ We define another way to handle the small cell-problem in a robust manner using 
 \begin{figure}[h]
       \centering
       \includegraphics[trim = 65mm 55mm 70mm 40mm, clip,
-       width=0.49\linewidth]{../../../fig/fds/DomainsEXIM.png}
+       width=0.49\linewidth]{../../../fig/fds/Geometry_Figures/DomainsEXIM.png}
       \caption{Explicit-implicit integration of \texttt{GASPHASE} region including cut-cells. The regular grid in $\Omega_{EX}$ is integrated explicitly, while a band region $\Omega_{IM}$ of three cells including cut-cells surrounding the solid is integrated implicitly. Fluxes computed explicitly in the boundary $\Gamma_{EXIM}$ are used as boundary condition for the implicit solve.}
 	\label{Fig:DOMEXIM}
 \end{figure}
@@ -1935,7 +1935,7 @@ Similar expressions are used for velocity components on other directions (i.e. $
 \begin{figure}[h]
       \centering
       \includegraphics[trim = 30mm 22mm 40mm 22mm, clip,
-       width=0.75\linewidth]{../../../fig/fds/CutCellsIBSketchNormal.png}
+       width=0.75\linewidth]{../../../fig/fds/Geometry_Figures/CutCellsIBSketchNormal.png}
       \caption{Velocity interpolation along normal through cut-face centroid $d$: \texttt{GASPHASE} cut-cells,  corresponding \texttt{GASPHASE} regular and cut-faces (in red), and underlying Eulerian staggered mesh are shown. Velocity points used for linear IB interpolation to cut-face centroids (in red) are shown. }
 	\label{Fig:IBCart}
 \end{figure}
@@ -3007,7 +3007,7 @@ We take values $m=0,1$ and wavenumber $k=1$, and consider the external flow to t
 \begin{figure}[h]
       \centering
       \includegraphics[trim = 40mm 20mm 40mm 20mm, clip,
-       width=0.6\linewidth]{../../../fig/fds/RotCube_ManuSolnSketch.png}
+       width=0.6\linewidth]{../../../fig/fds/Geometry_Figures/RotCube_ManuSolnSketch.png}
       \caption{Reference frames for Eulerian ($E$) and immersed body local system ($B$), and vectors relating a generic point $p$ on the fluid region $\Omega-\Omega_1$.}
 	\label{Fig:ManuSoln}
 \end{figure}
@@ -3106,7 +3106,7 @@ which can be used to compute the simulation error in $f$, as a function of the m
 \begin{figure}[h]
       \centering
       \includegraphics[trim = 60mm 34mm 60mm 42mm, clip,
-       width=0.75\linewidth]{../../../fig/fds/Poiseuille_cc_Sketch.png}
+       width=0.75\linewidth]{../../../fig/fds/Geometry_Figures/Poiseuille_cc_Sketch.png}
       \caption{Poiseuille flow created by two geometries $\Omega_1, \Omega_2$: Location of channel walls respect to Cartesian grid lines (in blue).}
 	\label{Fig:PoiseSketch}
 \end{figure}
