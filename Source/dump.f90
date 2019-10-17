@@ -5390,13 +5390,13 @@ QUANTITY_LOOP: DO IQ=1,NQT
          SLICE_MIN = QQ(I1,J1,K1,1)
          SLICE_MAX = SLICE_MIN
          DO K = K1, K2
-         DO J = J1, J2
-         DO I = I1, I2
-            SLICE_MIN = MIN(SLICE_MIN,QQ(I,J,K,1))
-            SLICE_MAX = MAX(SLICE_MAX,QQ(I,J,K,1))
-         END DO
-         END DO
-         END DO
+            DO J = J1, J2
+               DO I = I1, I2
+                  SLICE_MIN = MIN(SLICE_MIN,QQ(I,J,K,1))
+                  SLICE_MAX = MAX(SLICE_MAX,QQ(I,J,K,1))
+               ENDDO
+            ENDDO
+         ENDDO
          IQ2 = IQ + N_SLCF_MAX
          OPEN(LU_SLCF(IQ2,NM),FILE=FN_SLCF(IQ2,NM),FORM='FORMATTED',STATUS='OLD',POSITION='APPEND')
          WRITE(LU_SLCF(IQ2,NM),'(ES13.6,1X,ES13.6,1X,ES13.6)') STIME, SLICE_MIN, SLICE_MAX
