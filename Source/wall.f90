@@ -3235,11 +3235,11 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Tech Guide: Sum over the materials, alpha
             ENDIF
             SELECT CASE(SF%GEOMETRY)
                CASE DEFAULT
-                  MFLUX = MAX(0._EB,SPECIES_MIXTURE(SMIX_INDEX)%MW/R0/TMP_F*H_MASS*LOG((X_G-1._EB)/(X_W-1._EB))) ! (7.48)
+                  MFLUX = MAX(0._EB,SPECIES_MIXTURE(SMIX_INDEX)%MW/R0/TMP_F*H_MASS*LOG((X_G-1._EB)/(X_W-1._EB))) &
+                          * PBAR(KKG,PRESSURE_ZONE(IIG,JJG,KKG)) ! (7.48)
                CASE(SURF_SPHERICAL,SURF_BLOWING_PLATE)
-                  MFLUX = MAX(0._EB,SPECIES_MIXTURE(SMIX_INDEX)%MW/R0/TMP_F*H_MASS*(Y_DROP-Y_GAS)) ! (8.24)
+                  MFLUX = MAX(0._EB,H_MASS*RHO_AIR*(Y_DROP - Y_GAS)) ! (8.24)
             END SELECT
-            MFLUX = MFLUX * PBAR(KKG,PRESSURE_ZONE(IIG,JJG,KKG))
 
             IF (DX_S(1)>TWO_EPSILON_EB) THEN
                SELECT CASE(SF%GEOMETRY)
