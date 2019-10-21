@@ -1,0 +1,46 @@
+&HEAD CHID='box_burn_away7', TITLE='Test BURN_AWAY feature' / 
+
+A thin FOAM slab is evaporated away by the high thermal radiation
+from HOT surfaces. The mass of the slab is 0.4^2 m2 * 0.01 m * 20 kg/m3 = 0.032 kg.
+This should be compared to the final value of fuel density volume integral, 
+computed by the first DEVC.
+
+&MESH IJK=10,10,10 XB=0.0,1.0,0.0,1.0,0.0,1.0 /
+
+&TIME T_END=20. DT=0.01 /
+
+&MATL ID                   = 'FOAM'
+      HEAT_OF_REACTION     = 1000.
+      CONDUCTIVITY         = 0.2
+      SPECIFIC_HEAT        = 1.0
+      DENSITY              = 20.
+      NU_SPEC              = 1.
+      SPEC_ID              = 'METHANE'
+      REFERENCE_TEMPERATURE= 300. /
+
+&SURF ID                   = 'FOAM SLAB'
+      COLOR                = 'TOMATO 3'
+      MATL_ID              = 'FOAM'
+      THICKNESS            = 0.01
+      BURN_AWAY            = .TRUE. /
+
+&SURF ID='HOT', TMP_FRONT=600., HEAT_TRANSFER_COEFFICIENT=0., DEFAULT=.TRUE. /
+
+&REAC FUEL='METHANE', AUTO_IGNITION_TEMPERATURE=15000. /
+
+&DUMP SMOKE3D=.FALSE., DT_DEVC=0.1 /
+
+&OBST XB=0.30,0.70,0.30,0.70,0.30,0.30, SURF_ID='FOAM SLAB' /
+
+&BNDF QUANTITY='WALL TEMPERATURE' /
+&BNDF QUANTITY='BURNING RATE' /
+&BNDF QUANTITY='NET HEAT FLUX' /
+
+&SLCF PBY=0.5, QUANTITY='TEMPERATURE' /
+&SLCF PBY=0.5, QUANTITY='MASS FRACTION',SPEC_ID='METHANE' /
+
+&DEVC XB=0,1,0,1,0,1, QUANTITY='DENSITY', SPEC_ID='METHANE', SPATIAL_STATISTIC='VOLUME INTEGRAL' ID='Mass fuel'/
+
+&TAIL /
+
+
