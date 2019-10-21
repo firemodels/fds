@@ -2194,7 +2194,7 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
          ONE_D%RHO_F = PBAR_P(KK,ONE_D%PRESSURE_ZONE)/(RSUM0*ONE_D%TMP_F)
          ONE_D%ZZ_F(1) = 1._EB
          UN = MFT/ONE_D%RHO_F
-      ELSEIF (.NOT.SOLID(CELL_INDEX(II,JJ,KK))) THEN  ! this is a thin obstruction
+      ELSEIF (PRESENT(WALL_INDEX) .AND. .NOT.SOLID(CELL_INDEX(II,JJ,KK))) THEN  ! this is a thin obstruction
          UN = 0._EB
          ONE_D%ZZ_F(:) = ONE_D%ZZ_G(:)
          IF (CORRECTOR) THEN  ! calculate the mass production rate of gases in the adjacent gas cell
