@@ -2190,12 +2190,33 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
 
       ! Compute the cell face value of the species mass fraction to get the right mass flux
 
-      RHO_F_PREVIOUS = ONE_D%RHO_F
-      IF (N_TRACKED_SPECIES==1) THEN
+      IF (N_TRACKED_SPECIES==1) THEN  ! there is just the background species
          ONE_D%RHO_F = PBAR_P(KK,ONE_D%PRESSURE_ZONE)/(RSUM0*ONE_D%TMP_F)
          ONE_D%ZZ_F(1) = 1._EB
          UN = MFT/ONE_D%RHO_F
+      ELSEIF (.NOT.SOLID(CELL_INDEX(II,JJ,KK))) THEN  ! this is a thin obstruction
+         UN = 0._EB
+         ONE_D%ZZ_F(:) = ONE_D%ZZ_G(:)
+         IF (CORRECTOR) THEN  ! calculate the mass production rate of gases in the adjacent gas cell
+            RVC = RDX(IIG)*RRN(IIG)*RDY(JJG)*RDZ(KKG)
+            ZZ_GET(1:N_TRACKED_SPECIES) = ONE_D%ZZ_G(1:N_TRACKED_SPECIES)
+            CALL GET_SPECIFIC_HEAT(ZZ_GET,CP,ONE_D%TMP_G)
+            H_G = CP*ONE_D%TMP_G
+            DO NS=1,N_TRACKED_SPECIES
+               IF (ABS(ONE_D%MASSFLUX(NS))<=TWO_EPSILON_EB) CYCLE
+               MW_RATIO = SPECIES_MIXTURE(NS)%RCON/ONE_D%RSUM_G
+               M_DOT_PPP_SINGLE = ONE_D%MASSFLUX(NS)*ONE_D%AREA*RVC
+               ZZ_GET = 0._EB
+               ZZ_GET(NS) = 1._EB
+               CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR,ONE_D%TMP_G)
+               CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR2,ONE_D%TMP_F)
+               DELTA_H_G = CPBAR2*ONE_D%TMP_F-CPBAR*ONE_D%TMP_G
+               D_SOURCE(IIG,JJG,KKG) = D_SOURCE(IIG,JJG,KKG) + M_DOT_PPP_SINGLE*(MW_RATIO + DELTA_H_G/H_G)/ONE_D%RHO_G
+               M_DOT_PPP(IIG,JJG,KKG,NS) = M_DOT_PPP(IIG,JJG,KKG,NS) + M_DOT_PPP_SINGLE
+            ENDDO
+         ENDIF
       ELSE
+         RHO_F_PREVIOUS = ONE_D%RHO_F
          DO ITER=1,3
             UN = MFT/ONE_D%RHO_F
             SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
