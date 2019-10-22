@@ -1895,9 +1895,9 @@ Obstructions may be created or removed during a simulation. See Section~\ref{inf
 
 \subsection{Thin Obstructions}
 
-Obstructions can have zero thickness. Often, thin sheets, like a window, form a barrier, but if the numerical mesh is coarse relative to the thickness of the barrier, the obstruction might be unnecessarily large if it is assumed to be one layer of mesh cells thick. All faces of an obstruction are shifted to the closest mesh cell. If the obstruction is very thin, the two faces may be approximated on the same cell face. FDS and Smokeview render this obstruction as a thin sheet, but it is allowed to have thermally thick boundary conditions. This feature is fragile, especially in terms of burning and blowing gas. A thin sheet obstruction can only have one velocity vector on its face, thus a gas cannot be injected reliably from a thin obstruction because whatever is pushed from one side is necessarily pulled from the other. For full functionality, the obstruction should be specified to be at least one mesh cell thick. Thin sheet obstructions work fine as flow barriers, but other features are fragile and should be used with caution. To prevent FDS from allowing thin sheet obstructions, set {\ct THICKEN\_OBSTRUCTIONS=.TRUE.} on the {\ct MISC} line, or {\ct THICKEN=.TRUE.} on each {\ct OBST} line for which the thin sheet assumption is not allowed.
+An obstruction that is relatively thin compared to the gas phase numerical grid spacing is approximated as an infinitely thin sheet. These obstructions, like window panes, form a flow and (partial) radiation barrier, but if the numerical mesh is coarse relative to its thickness, the obstruction might be unnecessarily large if it is assumed to be one layer of mesh cells thick. Smokeview renders this obstruction as a thin sheet, but it is allowed to have thermally-thick boundary conditions. This obstruction\footnote{Prior to FDS 6.7.2, thin obstructions were not allowed to burn. That restriction has been eliminated.} has the drawback that it is not possible to specify a normal velocity component on its surface. A thin sheet obstruction can only have one velocity vector on its face, thus a gas cannot be injected or extracted reliably from a thin obstruction because whatever is pushed from one side is necessarily pulled from the other. If you want to create a simple fan, for example, the obstruction should be specified to be at least one mesh cell thick. To prevent FDS from allowing thin sheet obstructions, set {\ct THICKEN\_OBSTRUCTIONS=.TRUE.} on the {\ct MISC} line, or {\ct THICKEN=.TRUE.} on each {\ct OBST} line for which the thin sheet assumption is not allowed.
 
-Obstructions that are too small relative to the underlying numerical mesh are rejected. Be careful when testing cases on coarse meshes.
+Obstructions that are too small relative to the underlying numerical mesh are rejected. That is, if at least two of the three obstruction dimensions are less than half of the corresponding cell dimensions, the obstruction is ignored.
 
 \subsection{Overlapping Obstructions}
 
@@ -3242,6 +3242,7 @@ The burnout time of a liquid fuel is calculated automatically based on the liqui
 \label{box_burn_away4}
 \label{box_burn_away5}
 \label{box_burn_away6}
+\label{box_burn_away7}
 \label{box_burn_away_2D}
 \label{box_burn_away_2D_residue}
 
@@ -3266,6 +3267,8 @@ except for the fourth case, where the amount of released gas is affected by the 
 \ee
 The same case is tested in two dimensions ({\ct box\_burn\_away\_2D} and {\ct box\_burn\_away\_2D\_residue}). In the latter case, only half of the mass is converted to fuel, leaving behind a residue that is 50~\% of the original mass. The box is forced to burn away by setting the {\ct BULK\_DENSITY} to 10~kg/m$^3$. This is the {\em combustible} mass. These two cases exhibit a fictitious increase in solid mass when new unburned surfaces are exposed as entire mesh cells disappear. The increased mass is just an artifact of reporting the residual solid mass as the product of surface density and surface area. Both the final solid mass and the gaseous degradation products should match the expected values at the end of the simulation.
 
+Finally, the test case {\ct box\_burn\_away7} shown in Fig.~\ref{box_burn_away_2D_fig} demonstrates that it is possible to burn and make disappear a thin, zero-cell thick obstruction. Versions of FDS prior to 6.7.2 did not allow this to happen. In the test case, a 0.4~m by 0.4~m by 0.01~m thin slab with a density of 20~kg/m$^3$ is heated and evaporates away, creating 0.032~kg of fuel gas.
+
 \begin{figure}[p]
 	\begin{tabular*}{\textwidth}{lr}
 		\includegraphics[width=3.2in]{SCRIPT_FIGURES/box_burn_away1} &
@@ -3284,8 +3287,9 @@ The same case is tested in two dimensions ({\ct box\_burn\_away\_2D} and {\ct bo
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/box_burn_away_2D} &
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/box_burn_away_2D_residue} \\
+\multicolumn{2}{c}{\includegraphics[width=3.2in]{SCRIPT_FIGURES/box_burn_away7}}
 \end{tabular*}
-\caption[Results of the {\ct box\_burn\_away\_2D} test cases]{Output of {\ct box\_burn\_away\_2D} test cases.}
+\caption[Results of the {\ct box\_burn\_away\_2D} and {\ct box\_burn\_away7} test cases]{Output of {\ct box\_burn\_away\_2D} and {\ct box\_burn\_away7} test cases.}
 \label{box_burn_away_2D_fig}
 \end{figure}
 
