@@ -7882,7 +7882,7 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
          ! convention here is: inflow is positive (adds mass to domain), outflow is negative (subtracts mass)
          SOLID_PHASE_OUTPUT = Y_SPECIES*ONE_D%RHO_F*UN - RHO_D_DYDN
       ENDIF
-   CASE(65) ! WALL PRESSURE (takes optional IOR or ORIENTATION vector)
+   CASE(65) ! WALL PRESSURE (takes optional FORCE_DIRECTION vector)
       IF (PRESENT(OPT_WALL_INDEX)) THEN
          IIG = ONE_D%IIG
          JJG = ONE_D%JJG
@@ -7944,12 +7944,12 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
       IF(FROM_BNDF) RETURN
 
       IF (ASSOCIATED(DV)) THEN
-         IF (NORM2(DV%OVEC)>TWO_EPSILON_EB) THEN
-            SOLID_PHASE_OUTPUT = -DOT_PRODUCT(PVEC,DV%OVEC)
+         IF (NORM2(DV%DFVEC)>TWO_EPSILON_EB) THEN
+            SOLID_PHASE_OUTPUT = -DOT_PRODUCT(PVEC,DV%DFVEC)
          ENDIF
       ENDIF
 
-   CASE(66) ! VISCOUS STRESS WALL (takes optional IOR or ORIENTATION vector)
+   CASE(66) ! VISCOUS STRESS WALL (takes optional FORCE_DIRECTION vector)
       IF (PRESENT(OPT_WALL_INDEX)) THEN
          SELECT CASE(ONE_D%IOR)
             ! note: VEL_T does not follow a right hand rule, see user guide
@@ -8020,14 +8020,14 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
      IF(FROM_BNDF) RETURN
 
       IF (ASSOCIATED(DV)) THEN
-         IF (NORM2(DV%OVEC)>TWO_EPSILON_EB) THEN
-            SOLID_PHASE_OUTPUT = DOT_PRODUCT(FVEC,DV%OVEC)
+         IF (NORM2(DV%DFVEC)>TWO_EPSILON_EB) THEN
+            SOLID_PHASE_OUTPUT = DOT_PRODUCT(FVEC,DV%DFVEC)
             ! print *,'FO: ', SOLID_PHASE_OUTPUT
             ! print *
          ENDIF
       ENDIF
 
-   CASE(67) ! WALL PRESSURE TEST (takes optional IOR or ORIENTATION vector)
+   CASE(67) ! WALL PRESSURE TEST (takes optional FORCE_DIRECTION vector)
       IF (PRESENT(OPT_WALL_INDEX)) THEN
          SELECT CASE(ONE_D%IOR)
             CASE( 1); NVEC=(/ 1._EB,0._EB,0._EB/)
@@ -8055,8 +8055,8 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
       IF(FROM_BNDF) RETURN
 
       IF (ASSOCIATED(DV)) THEN
-         IF (NORM2(DV%OVEC)>TWO_EPSILON_EB) THEN
-            SOLID_PHASE_OUTPUT = -DOT_PRODUCT(PVEC,DV%OVEC)
+         IF (NORM2(DV%DFVEC)>TWO_EPSILON_EB) THEN
+            SOLID_PHASE_OUTPUT = -DOT_PRODUCT(PVEC,DV%DFVEC)
          ENDIF
       ENDIF
 
