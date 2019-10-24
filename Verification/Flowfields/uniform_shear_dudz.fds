@@ -21,7 +21,7 @@
 &BNDF QUANTITY='VISCOUS STRESS WALL', CELL_CENTERED=T /
 
 ! By default 'VISCOUS STRESS WALL' gives the force component in the streamwise direction.
-! If a force integral in a specific direction is required, say x, add ORIENTATION=1,0,0.
+! If a force integral in a specific direction is required, say x, add FORCE_DIRECTION=1,0,0.
 &DEVC XB=0,1,0,1,0,0, QUANTITY='VISCOUS STRESS WALL', SURF_ID='bot', STATISTICS='SURFACE INTEGRAL', ID='FMU_bot'/
 &DEVC XB=0,1,0,1,1,1, QUANTITY='VISCOUS STRESS WALL', SURF_ID='top', STATISTICS='SURFACE INTEGRAL', ID='FMU_top'/
 
