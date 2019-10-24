@@ -8750,6 +8750,24 @@ $p_\infty$ is the ambient, or ``free stream'' pressure, and $\rho_\infty$ is the
 Thus, you can either paint values of $C_p$ at all surface points, or create a single time history of $C_p$ using a single device at a single point.
 
 
+\subsubsection{Wall pressure, viscous stresses and integrated forces}
+\label{info:distributed_forces}
+
+If you desire to output the pressure on a point in the wall or viscous stress along the stream-wise direction next to it, you can set devices in the form:
+
+\begin{lstlisting}
+&DEVC ID='WallPressure 1', XYZ=..., IOR=..., QUANTITY='WALL PRESSURE', SURF_ID='MySurf' /
+&DEVC ID='WallStress 1', XYZ=..., IOR=..., QUANTITY='VISCOUS STRESS WALL ', SURF_ID='MySurf' /
+\end{lstlisting}
+
+The corresponding distributed forces at said point, projected in a specified direction, can be obtained adding the field {\ct FORCE\_DIRECTION}. This namelist parameter must define a vector in such direction. You can also integrate these distributed forces to obtain total pressure and viscous forces on a surface. As an example, if you desire to compute total forces on faces with {\ct SURF\_ID='MySurf'}, within a volume {\ct XB=xlo,xhi,ylo,yhi,zlo,zhi} in the $x$ direction, you can add:
+
+\begin{lstlisting}
+&DEVC ID='Pressure Force X', XB=xlo,xhi,ylo,yhi,zlo,zhi, QUANTITY='WALL PRESSURE', SURF_ID='MySurf', SPATIAL_STATISTIC='SURFACE INTEGRAL', FORCE_DIRECTION=1.,0.,0. /
+&DEVC ID='Viscous Force X', XB=xlo,xhi,ylo,yhi,zlo,zhi, QUANTITY='VISCOUS STRESS WALL ', SURF_ID='MySurf', SPATIAL_STATISTIC='SURFACE INTEGRAL', FORCE_DIRECTION=1.,0.,0. /
+\end{lstlisting}
+
+
 \subsection{Dry Volume and Mass Fractions}
 \label{info:dry}
 
@@ -9285,6 +9303,7 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 %{\ct TOTAL MASS FLUX Y} & $\overline{\rho Y_\alpha} v + \rho D_\alpha \partial Y_\alpha/\partial y$ & kg/s/m$^2$     & D,I,P,S      \\ \hline
 %{\ct TOTAL MASS FLUX Z} & $\overline{\rho Y_\alpha} w + \rho D_\alpha \partial Y_\alpha/\partial z$ & kg/s/m$^2$     & D,I,P,S      \\ \hline
 {\ct VELOCITY ERROR}                            & Section~\ref{info:PRES}                           &                & B            \\ \hline
+{\ct VISCOUS STRESS WALL}                  & Section~\ref{info:distributed_forces}        &    Pa       &  B,D        \\ \hline
 {\ct VISCOUS WALL UNITS}                        & Section~\ref{info:yplus}                          &                & B,D          \\ \hline
 {\ct VN}                                        & Section~\ref{info:TIMING}                         &                & D,I,P,S      \\ \hline
 {\ct VN MAX}                                    & Section~\ref{info:TIMING}                         &                & D            \\ \hline
@@ -9293,6 +9312,7 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct VORTICITY Z}                               & $\partial v/\partial x - \partial u/\partial y$   & 1/s            & D,I,P,S      \\ \hline
 %{\ct WALL CELL BOUNDARY TYPE}                   & Index of {\ct WC\%BOUNDARY\_TYPE} for debug       &                & B            \\ \hline
 %{\ct WALL CELL THERMAL BOUNDARY TYPE}           & Index of {\ct SF\%THERMAL\_BC\_INDEX} for debug   &                & B            \\ \hline
+{\ct WALL PRESSURE}                           & Section~\ref{info:distributed_forces} &     Pa                       & B,D         \\ \hline
 {\ct WALL VISCOSITY}                            & Near-wall viscosity, $\mu_w$                      & \si{kg/(m.s)}  & B,D          \\ \hline
 {\ct WAVELET ERROR}$^3$                         & Section~\ref{info:meshquality}                    &                & S            \\ \hline
 \end{longtable}
@@ -9552,6 +9572,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct DUCT\_ID}              & Character       & Section~\ref{info:HVAC}                                         &       &               \\ \hline
 {\ct EVACUATION}            & Logical         & Reference~\cite{FDS_Evac_Users_Guide}                           &       & {\ct .FALSE.} \\ \hline
 {\ct FLOWRATE}              & Real            & Section~\ref{info:aspiration_detector}                          & kg/s  & 0             \\ \hline
+{\ct FORCE\_DIRECTION} & Real(3)     & Section~\ref{info:distributed_forces}                            &          &           \\ \hline
 {\ct HIDE\_COORDINATES}     & Logical         & Section~\ref{info:line_file}                                    &       & {\ct .FALSE.} \\ \hline
 {\ct ID}                    & Character       & Section~\ref{info:DEVC}                                         &       &               \\ \hline
 {\ct INITIAL\_STATE}        & Logical         & Section~\ref{info:basic_control}                                &       & {\ct .FALSE.} \\ \hline
