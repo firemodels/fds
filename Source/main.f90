@@ -73,6 +73,10 @@ REAL(EB), ALLOCATABLE, DIMENSION(:)       :: REAL_BUFFER_1
 REAL(EB), ALLOCATABLE, DIMENSION(:,:)     :: REAL_BUFFER_2,REAL_BUFFER_3,REAL_BUFFER_5,REAL_BUFFER_6,REAL_BUFFER_8,&
                                              REAL_BUFFER_11,REAL_BUFFER_12,REAL_BUFFER_13,REAL_BUFFER_14
 
+! Initialize OpenMP
+
+CALL OPENMP_INIT
+
 ! output version info if fds is invoked without any arguments
 ! (this must be done before MPI is initialized)
 
@@ -89,10 +93,6 @@ CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
 IF (MYID==0) WRITE(LU_ERR,'(/A/)') ' Starting FDS ...'
 WRITE(LU_ERR,'(A,I6,A,A)') ' MPI Process ',MYID,' started on ',PNAME(1:PNAMELEN)
 CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
-
-! Initialize OpenMP
-
-CALL OPENMP_INIT
 
 ! Check that MPI processes and OpenMP threads are working properly
 
