@@ -7990,7 +7990,12 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
       VEL_CELL = (/U_CELL,V_CELL,W_CELL/) ! (/1._EB,0._EB,0._EB/) ! test
 
       ! velocity vector of the surface
-      VEL_WALL = -ONE_D%U_NORMAL*NVEC + SF%VEL_T(1)*TVEC1 + SF%VEL_T(2)*TVEC2
+      IF(SF%VELOCITY_BC_INDEX == FREE_SLIP_BC) THEN
+         ! U_NORMAL velocity in Normal direction, same tangential velocities as VEL_CELL:
+         VEL_WALL = -ONE_D%U_NORMAL*NVEC + ( VEL_CELL - DOT_PRODUCT(VEL_CELL,NVEC)*NVEC )
+      ELSE
+         VEL_WALL = -ONE_D%U_NORMAL*NVEC + SF%VEL_T(1)*TVEC1 + SF%VEL_T(2)*TVEC2
+      ENDIF
 
       RHO_WALL = ONE_D%RHO_F
 
