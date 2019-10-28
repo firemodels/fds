@@ -3158,6 +3158,7 @@ Q_DOT_O2_PPP = 0._EB
 M_DOT_S_PPP = 0._EB
 M_DOT_G_PPP_ADJUST = 0._EB
 M_DOT_G_PPP_ACTUAL = 0._EB
+SF => SURFACE(SURF_INDEX)
 
 MATERIAL_LOOP: DO N=1,N_MATS  ! Tech Guide: Sum over the materials, alpha
 
@@ -3170,7 +3171,6 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Tech Guide: Sum over the materials, alpha
 
          CASE (PYROLYSIS_LIQUID)
 
-            SF => SURFACE(SURF_INDEX)
             SMIX_INDEX = MAXLOC(ML%NU_GAS(:,1),1)
             ZZ_GET(1:N_TRACKED_SPECIES) = MAX(0._EB,ZZ(IIG,JJG,KKG,1:N_TRACKED_SPECIES))
             CALL GET_MOLECULAR_WEIGHT(ZZ_GET,MW_G)
@@ -3325,7 +3325,6 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Tech Guide: Sum over the materials, alpha
 
          CASE (PYROLYSIS_VEGETATION)
 
-            SF => SURFACE(SURF_INDEX)
             ! Tech Guide: r_alpha,beta (1/s)
             REACTION_RATE = ML%A(J)*(RHO_S(N)/RHO_S0)**ML%N_S(J)*EXP(-ML%E(J)/(R0*TMP_S))
             ! power term
@@ -3345,6 +3344,12 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Tech Guide: Sum over the materials, alpha
 
       END SELECT
 
+      ! Optional limiting of fuel burnout time
+
+      IF (SF%MINIMUM_BURNOUT_TIME<1.E5_EB) RHO_DOT = MIN(RHO_DOT,RHO_S0/SF%MINIMUM_BURNOUT_TIME)
+
+      ! Compute new component density, RHO_S(N)
+
       RHO_S(N) = MAX( 0._EB , RHO_S(N) - DT_BC*RHO_DOT )  ! Tech Guide: rho_s,alpha_new = rho_s,alpha_old-dt*rho_s(0)*r_alpha,beta
       DO NN=1,N_MATS  ! Loop over other materials, looking for the residue (alpha' represents the other materials)
          ! Tech Guide: rho_s,alpha'_new = rho_s,alpha'_old + rho_s(0)*nu_alpha',alpha,beta*r_alpha,beta
@@ -3352,11 +3357,15 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Tech Guide: Sum over the materials, alpha
          M_DOT_S_PPP(NN) = M_DOT_S_PPP(NN) + ML%NU_RESIDUE(MATL_INDEX(NN),J)*RHO_DOT  ! (m_dot_alpha')'''
       ENDDO
 
+      ! Optional variable heat of reaction
+
       IF (ML%H_R_I(J) >0) THEN
          H_R = EVALUATE_RAMP(TMP_S,0._EB,ML%H_R_I(J))
       ELSE
          H_R = ML%H_R(J)
       ENDIF
+
+      ! Calculate various energy and mass source terms
 
       Q_DOT_S_PPP = Q_DOT_S_PPP - RHO_DOT * ML%ALPHA_CHAR(J)*H_R  ! Tech Guide: q_dot_s,c'''
       Q_DOT_G_PPP = Q_DOT_G_PPP - RHO_DOT * (1._EB-ML%ALPHA_CHAR(J))*H_R
