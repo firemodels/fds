@@ -6675,7 +6675,7 @@ There are three ways of simulating wildland fire spread.
 \item {\bf Boundary Fuel Model:} Ground vegetation is modeled like a porous solid with a thickness equal to the height of the vegetation.
 \item {\bf Level Set Method:} The fire front propagates using purely empirical rules.
 \end{enumerate}
-Of these, the first two are physics-based; the third empirical.
+The Particle Method and Boundary Fuel Model require thermo-physical properties of the vegetative fuels and the fire spread rate is {\em predicted} by the model. The Level Set Method relies on a set of experimentally-determined spread rates for different types of vegetation and wind speeds.
 
 
 \subsection{Lagrangian Particle Model}
@@ -6795,6 +6795,16 @@ Thermal convection is not imposed at the interface between the gas phase and the
    \langle \dq_{\rm c,b}''' \rangle = \sigma \, \beta \, \dq_{\rm c}''
 \ee
 where $\dq_{\rm c}''$ is given in Eq.~(\ref{q_con}) under the assumption that the subgrid-scale vegetation is cylindrical and the gas velocity and temperature are taken from the first gas phase grid cell adjacent to the boundary.
+
+
+\subsection{Burnout Time}
+\label{veg_burnout_time}
+
+For scenarios where the fire's rate of spread (ROS) is relatively slow and the numerical grid is relatively coarse, the spatial resolution may be inadequate. Consider the simple relationship between the ROS, the width of the fire front, $W$, and the average burn duration of a particular patch of vegetation, $\Delta t_{\rm b}$:
+\be
+   W = {\rm ROS} \times \Delta t_{\rm b}
+\ee
+The more grid cells spanning the front width, the better resolved the simulation. In badly resolved simulations, the time required for the fire to spread the width of a grid cell may be comparable or longer than the burnout time, $\Delta t_{\rm b}$. In such cases, it is necessary to specify an effective ``burnout time'' that accounts for the unresolved burning occurring at sub-grid scales. This parameter, {\ct MINIMUM\_BURNOUT\_TIME} (s), is specified on the {\ct SURF} line that provides parameters for the vegetation. By default, it has a very large value, meaning that it is ignored unless specified.
 
 
 \subsection{Comparing the Particle and Boundary Fuel Models of Vegetation}
@@ -9124,7 +9134,7 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct LOWER TEMPERATURE}                         & Section~\ref{info:layerheight}                & $^\circ$C      & D            \\ \hline
 {\ct MASS FLOW}                                 & Section~\ref{info:flows}                      & kg/s           & D            \\ \hline
 {\ct MASS FLOW WALL}                            & Section~\ref{info:flows}                      & kg/s           & D            \\ \hline
-{\ct MASS FLUX}$^1$                             & Section~\ref{info:wallflux}                   & \si{kg/(m$^2$.s)} & B,D       \\ \hline
+{\ct MASS FLUX}$^{1,4}$                         & Section~\ref{info:wallflux}                   & \si{kg/(m$^2$.s)} & B,D       \\ \hline
 {\ct MASS FLUX WALL}$^1$                        & Section~\ref{info:wallflux}                   & \si{kg/(m$^2$.s)} & B,D       \\ \hline
 {\ct MASS FLUX X}$^1$                           & $\rho u Y_\alpha$                             & \si{kg/(m$^2$.s)} & D,I,P,S   \\ \hline
 {\ct MASS FLUX Y}$^1$                           & $\rho v Y_\alpha$                             & \si{kg/(m$^2$.s)} & D,I,P,S   \\ \hline
@@ -9168,13 +9178,13 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct SOLID CELL Q\_S}                           & Section~\ref{info:pyro3d}                     & kW/m$^3$       & D,I,P,S      \\ \hline
 {\ct SOLID CELL VOLUME RATIO}                   & Section~\ref{info:pyro3d}                     & m$^3$/m$^3$    & D,I,P,S      \\ \hline
 {\ct SOLID CONDUCTIVITY}                        & Section~\ref{info:DEPTH}                      & \si{W/(m.K)}   & D            \\ \hline
-{\ct SOLID DENSITY}                             & Section~\ref{info:DEPTH}                      & kg/m$^3$       & D            \\ \hline
+{\ct SOLID DENSITY}$^4$                         & Section~\ref{info:DEPTH}                      & kg/m$^3$       & D            \\ \hline
 {\ct SOLID SPECIFIC HEAT}                       & Section~\ref{info:DEPTH}                      & \si{kJ/(kg.K)} & D            \\ \hline
 {\ct SPECIFIC ENTHALPY}                         & Section~\ref{info:enthalpy}                   & kJ/kg          & D,I,P,S      \\ \hline
 {\ct SPECIFIC HEAT}                             & $c_p$                                         & \si{kJ/(kg.K)} & D,I,P,S      \\ \hline
 {\ct SPECIFIC SENSIBLE ENTHALPY}                & Section~\ref{info:enthalpy}                   & kJ/kg          & D,I,P,S      \\ \hline
 {\ct SPRINKLER LINK TEMPERATURE}                & Section~\ref{info:sprinklers}                 & $^\circ$C      & D            \\ \hline
-{\ct SURFACE DENSITY}                           & Section~\ref{info:material_components}        & kg/m$^2$       & B,D          \\ \hline
+{\ct SURFACE DENSITY}$^4$                       & Section~\ref{info:material_components}        & kg/m$^2$       & B,D          \\ \hline
 {\ct SURFACE DEPOSITION}$^1$                    & Section~\ref{info:deposition}                 & kg/m$^2$       & B,D          \\ \hline
 {\ct TEMPERATURE}                               & Section~\ref{info:THERMOCOUPLE}               & $^\circ$C      & D,I,P,S      \\ \hline
 {\ct THERMOCOUPLE}                              & Section~\ref{info:THERMOCOUPLE}               & $^\circ$C      & D            \\ \hline
@@ -9393,6 +9403,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 \hline \hline
 \endhead
 {\ct CELL\_CENTERED}             & Logical     & Section \ref{info:BNDF}                 &           & {\ct .FALSE.}   \\ \hline
+{\ct MATL\_ID}                   & Character   & Section \ref{info:outputquantities}     &           &                 \\ \hline
 {\ct PART\_ID}                   & Character   & Section \ref{info:outputquantities}     &           &                 \\ \hline
 {\ct PROP\_ID}                   & Character   & Section \ref{info:BNDF}                 &           &                 \\ \hline
 {\ct QUANTITY}                   & Character   & Section \ref{info:outputquantities}     &           &                 \\ \hline
@@ -10706,7 +10717,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct GEOMETRY}                          & Character       & Section~\ref{info:GEOMETRY}               &                     & {\ct 'CARTESIAN'}       \\ \hline
 {\ct HEAT\_OF\_VAPORIZATION}            & Real            & Section~\ref{info:specified_burning}      & kJ/kg               &                         \\ \hline
 {\ct HEAT\_TRANSFER\_COEFFICIENT}       & Real            & Section~\ref{info:convection}             & \si{W/(m^2.K)}      &                         \\ \hline
-{\ct \footnotesize HEAT\_TRANSFER\_COEFFICIENT\_BACK} & Real            & Section~\ref{info:convection}             & \si{W/(m^2.K)}      &                         \\ \hline
+{\ct \footnotesize 
+     HEAT\_TRANSFER\_COEFFICIENT\_BACK} & Real            & Section~\ref{info:convection}             & \si{W/(m^2.K)}      &                         \\ \hline
 {\ct HEAT\_TRANSFER\_MODEL}             & Character       & Section~\ref{info:convection}             &                     &                         \\ \hline
 {\ct HRRPUA}                            & Real            & Section~\ref{info:gas_burner}             & \si{kW/m^2}         &                         \\ \hline
 {\ct HT3D}                              & Logical         & Section~\ref{info:ht3d}                   &                     & {\ct .FALSE.}           \\ \hline
@@ -10724,6 +10736,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MASS\_TRANSFER\_COEFFICIENT}       & Real            & Section~\ref{info:liquid_fuels}           & m/s                 &                         \\ \hline
 {\ct MATL\_ID(NL,NC)}                   & Char.~Array     & Section~\ref{info:solid_pyrolysis}        &                     &                         \\ \hline
 {\ct MATL\_MASS\_FRACTION(NL,NC)}       & Real Array      & Section~\ref{info:solid_pyrolysis}        &                     &                         \\ \hline
+{\ct MINIMUM\_BURNOUT\_TIME}            & Real            & Section~\ref{veg_burnout_time}            & s                   & 1000000                 \\ \hline
 {\ct MINIMUM\_LAYER\_THICKNESS}         & Real            & Section~\ref{info:solid_phase_stability}  & m                   & 1.E-6                   \\ \hline
 {\ct MLRPUA }                           & Real            & Section~\ref{info:gas_burner}             & \si{kg/(m^2.s)}     &                         \\ \hline
 {\ct MOISTURE\_FRACTION(:)}             & Real Array      & Section~\ref{info:vegetation}             &                     & 0.                      \\ \hline
