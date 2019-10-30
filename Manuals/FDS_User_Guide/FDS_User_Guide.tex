@@ -7336,8 +7336,13 @@ Creation or removal at a predetermined time can be performed using a {\ct DEVC} 
 \end{lstlisting}
 At the start of the simulation, the purple obstruction is present with a red block embedded in it. This red block is actually a {\ct HOLE} whose initial state is {\ct .FALSE.}, i.e., the hole is filled. Also at the start of the simulation, there is a pink obstruction that is visible. At 1~s the red block disappears. At 2~s the empty hole in the purple obstruction is filled with a green block. This hole was initially true, i.e. empty.  The blue obstruction appears at 3~s because its initial state is false, meaning that it does not exist initially. The pink obstruction disappears at 4~s because its initial state is true and this state changes at 4~s. At 5~s a yellow obstruction appears with one empty hole and one embedded gray block.  At 6~s the gray block disappears because it is a hole that was initially false and therefore was filled with the gray block when its parent obstruction (yellow) was created.  Also at 6~s the hole originally present in the yellow obstruction is filled with a black block because it was a hole that was initially empty and then filled when its {\ct DEVC} changed state.  {\em You should always try a simple example first before embarking on a complicated creation/removal scheme for obstructions and holes.}
 
-To learn how to create and remove obstructions multiple times, see Section~\ref{info:CUSTOM} for information about the custom control feature.
-
+To create and remove obstructions multiple times, either set {\ct LATCH=.FALSE.} together with a cycling math function (see Sec.~\ref{info:FUNCTION_TYPE}), as shown below, or use the {\ct 'CUSTOM'} control feature (see Sec.~\ref{info:CUSTOM}).  The following uses {\ct TIME} as the input to a {\ct SIN} math function .  The sign of the {\ct DEVC} value toggles the state of the {\ct OBST}.
+\begin{lstlisting}
+&DEVC ID='t1', XYZ=..., QUANTITY='TIME', TIME_AVERAGED=F/
+&CTRL ID='s1', FUNCTION_TYPE='SIN', INPUT_ID='t1'/
+&DEVC ID='timer', XYZ=..., QUANTITY='CONTROL VALUE', CTRL_ID='s1', SETPOINT=0, LATCH=F/
+&OBST XB=..., DEVC_ID='timer'/
+\end{lstlisting}
 
 
 \subsection{Activating and Deactivating Vents}
@@ -10717,7 +10722,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct GEOMETRY}                          & Character       & Section~\ref{info:GEOMETRY}               &                     & {\ct 'CARTESIAN'}       \\ \hline
 {\ct HEAT\_OF\_VAPORIZATION}            & Real            & Section~\ref{info:specified_burning}      & kJ/kg               &                         \\ \hline
 {\ct HEAT\_TRANSFER\_COEFFICIENT}       & Real            & Section~\ref{info:convection}             & \si{W/(m^2.K)}      &                         \\ \hline
-{\ct \footnotesize 
+{\ct \footnotesize
      HEAT\_TRANSFER\_COEFFICIENT\_BACK} & Real            & Section~\ref{info:convection}             & \si{W/(m^2.K)}      &                         \\ \hline
 {\ct HEAT\_TRANSFER\_MODEL}             & Character       & Section~\ref{info:convection}             &                     &                         \\ \hline
 {\ct HRRPUA}                            & Real            & Section~\ref{info:gas_burner}             & \si{kW/m^2}         &                         \\ \hline
