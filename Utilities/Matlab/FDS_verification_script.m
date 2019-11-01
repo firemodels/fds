@@ -93,7 +93,6 @@ disp('saad_cc_mms_temporal_error...');    saad_cc_mms_temporal_error
 disp('shunn_mms_temporal_error...');      shunn_mms_temporal_error
 disp('scaling_tests...');                 scaling_tests
 disp('hvac_mass_transport...');           hvac_mass_transport
-disp('vegetation...');                    vegetation
 disp('particle_size_distribution...');    particle_size_distribution
 disp('mass_balance...');                  mass_balance
 disp('ht3d_cond...');                     ht3d_cond
