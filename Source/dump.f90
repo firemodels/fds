@@ -3861,6 +3861,17 @@ DO K=1,KBAR
    ENDDO
 ENDDO
 
+! for 2D cases ignore ghost cell values in J=0 and J=JBAR+1 planes
+! when constructing isosurfaces
+IF ( JBAR==1 ) THEN
+   DO K=1,KBAR
+      DO I=1,IBAR
+         B(I,0,K) = 0._EB
+         B(I,JBAR+1,K) = 0._EB
+      ENDDO
+   ENDDO
+ENDIF
+
 ! Create an array, S, that is the reciprocal of the sum of the B values.
 
 S => WORK2
