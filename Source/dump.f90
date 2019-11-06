@@ -3829,6 +3829,7 @@ SUBROUTINE DUMP_ISOF(T,DT,NM)
 
 ! Write out isosurface data to file(s).
 
+USE TURBULENCE, ONLY: FILL_EDGES
 REAL(EB), INTENT(IN) :: T,DT
 INTEGER, INTENT(IN) :: NM
 REAL(EB) :: SUM
@@ -3860,17 +3861,6 @@ DO K=1,KBAR
       ENDDO
    ENDDO
 ENDDO
-
-! for 2D cases ignore ghost cell values in J=0 and J=JBAR+1 planes
-! when constructing isosurfaces
-IF ( JBAR==1 ) THEN
-   DO K=1,KBAR
-      DO I=1,IBAR
-         B(I,0,K) = 0._EB
-         B(I,JBAR+1,K) = 0._EB
-      ENDDO
-   ENDDO
-ENDIF
 
 ! Create an array, S, that is the reciprocal of the sum of the B values.
 
@@ -3906,6 +3896,16 @@ ISOF_LOOP: DO N=1,N_ISOF
       ENDDO
    ENDDO
 
+   ! Mirror QUANTITY into ghost cells
+
+   QUANTITY(0   ,0:JBP1,0:KBP1) = QUANTITY(1   ,0:JBP1,0:KBP1)
+   QUANTITY(IBP1,0:JBP1,0:KBP1) = QUANTITY(IBAR,0:JBP1,0:KBP1)
+   QUANTITY(0:IBP1,0   ,0:KBP1) = QUANTITY(0:IBP1,1   ,0:KBP1)
+   QUANTITY(0:IBP1,JBP1,0:KBP1) = QUANTITY(0:IBP1,JBAR,0:KBP1)
+   QUANTITY(0:IBP1,0:JBP1,0   ) = QUANTITY(0:IBP1,0:JBP1,1   )
+   QUANTITY(0:IBP1,0:JBP1,KBP1) = QUANTITY(0:IBP1,0:JBP1,KBAR)
+   CALL FILL_EDGES(QUANTITY)
+
    ! Average the data (which is assumed to be cell-centered) at cell corners
 
    DO K=0,KBAR
@@ -3921,11 +3921,11 @@ ISOF_LOOP: DO N=1,N_ISOF
 
    ! Fill up QUANTITY2 and QQ2 arrays if the isosurface is colored with a second quantity
 
-   IF ( IS%INDEX2 /= -1 ) THEN
+   INDEX2_IF: IF ( IS%INDEX2 /= -1 ) THEN
       HAVE_ISO2 = 1
       QUANTITY2 => WORK4
 
-   ! Fill up the dummy array QUANTITY2 with the appropriate gas phase output
+      ! Fill up the dummy array QUANTITY2 with the appropriate gas phase output
 
       DO K=0,KBP1
          DO J=0,JBP1
@@ -3935,7 +3935,17 @@ ISOF_LOOP: DO N=1,N_ISOF
          ENDDO
       ENDDO
 
-   ! Average the data (which is assumed to be cell-centered) at cell corners
+      ! Mirror QUANTITY into ghost cells
+
+      QUANTITY2(0   ,0:JBP1,0:KBP1) = QUANTITY2(1   ,0:JBP1,0:KBP1)
+      QUANTITY2(IBP1,0:JBP1,0:KBP1) = QUANTITY2(IBAR,0:JBP1,0:KBP1)
+      QUANTITY2(0:IBP1,0   ,0:KBP1) = QUANTITY2(0:IBP1,1   ,0:KBP1)
+      QUANTITY2(0:IBP1,JBP1,0:KBP1) = QUANTITY2(0:IBP1,JBAR,0:KBP1)
+      QUANTITY2(0:IBP1,0:JBP1,0   ) = QUANTITY2(0:IBP1,0:JBP1,1   )
+      QUANTITY2(0:IBP1,0:JBP1,KBP1) = QUANTITY2(0:IBP1,0:JBP1,KBAR)
+      CALL FILL_EDGES(QUANTITY2)
+
+      ! Average the data (which is assumed to be cell-centered) at cell corners
 
       DO K=0,KBAR
          DO J=0,JBAR
@@ -3947,7 +3957,8 @@ ISOF_LOOP: DO N=1,N_ISOF
             ENDDO
          ENDDO
       ENDDO
-   ENDIF
+
+   ENDIF INDEX2_IF
 
    CALL ISO_TO_FILE(LU_ISOF(N,NM),LU_ISOF2(N,NM),NM,IBAR,JBAR,KBAR,STIME,QQ,QQ2,HAVE_ISO2,&
         IS%VALUE(1:IS%N_VALUES), IS%N_VALUES, IBLK, IS%SKIP, IS%DELTA, XPLT, IBP1, YPLT, JBP1, ZPLT, KBP1)
