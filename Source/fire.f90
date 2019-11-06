@@ -1204,20 +1204,21 @@ END SUBROUTINE COMBUSTION_BC
 
 
 SUBROUTINE CONDENSATION_EVAPORATION(DT,NM)
-USE MATH_FUNCTIONS, ONLY : INTERPOLATE1D_UNIFORM
+USE MATH_FUNCTIONS, ONLY : INTERPOLATE1D_UNIFORM, EVALUATE_RAMP
 USE PHYSICAL_FUNCTIONS, ONLY : GET_SPECIFIC_HEAT, GET_MASS_FRACTION_ALL, GET_VISCOSITY, GET_MOLECULAR_WEIGHT
 USE COMPLEX_GEOMETRY, ONLY : IBM_CGSC, IBM_GASPHASE
 INTEGER, INTENT(IN):: NM
 REAL(EB), INTENT(IN):: DT
-INTEGER:: I,J,K, NS, NS2, Y_INDEX, Z_COND_INDEX, IW, AWM_INDEX
-REAL(EB), PARAMETER :: P_STP = 101325._EB
-REAL(EB):: Y_GAS, DHOR, H_V_B, H_V_A, H_V, H_V_N, MW_RATIO, MW_GAS, ZZ_GET(1:N_TRACKED_SPECIES), ZZ_W(1:N_TRACKED_SPECIES),&
-           X_CLOUD, Y_CLOUD, CP, TMP_N, Y_N, Y_1, Y_2, Y_0, CE_SIGN, X_GUESS,Y_GUESS, Y_ALL(1:N_SPECIES), P_RATIO, Y_COND, &
-           T_BOIL_EFF, TMP_G, Y_NN, D_AIR,H_MASS,N_PART,DY_LIM,X_WALL,Y_WALL,TMP_W, M_WALL, M_WALL2, RVC, B_NUMBER, &
-           MU_AIR,RHO_W, MW_W
+INTEGER:: I,J,K, NS, NS2, Y_INDEX, Z_COND_INDEX, IW, AWM_INDEX, NMAT
+REAL(EB), PARAMETER :: P_STP = 101325._EB, ALPHA=2.12_EB
+REAL(EB):: Y_GAS, DHOR, H_V_B, H_V_A, H_V, H_V_N, MW_RATIO, MW_GAS, ZZ_GET(1:N_TRACKED_SPECIES),&
+           X_CLOUD, Y_CLOUD, CP, TMP_N, Y_N, Y_1, Y_2, X_GUESS,Y_GUESS, Y_ALL(1:N_SPECIES), P_RATIO, Y_COND, &
+           T_BOIL_EFF, RHO_G, TMP_G, TMP_W, Y_NN, D_AIR,H_MASS,N_PART,X_WALL,Y_WALL, M_WALL, M_WALL2, RVC, B_NUMBER, &
+           MU_AIR, TMP_N2, M_DOT, M_VAP, Y_PLUS, Y_S_PLUS, GAMMA, SC, RHOCBAR, MCBAR
 REAL(EB), POINTER, DIMENSION(:,:,:) :: RHO_INTERIM,TMP_INTERIM
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZ_INTERIM
 TYPE (SPECIES_TYPE), POINTER :: SS=>NULL()
+TYPE (SURFACE_TYPE), POINTER :: SF=>NULL()
 TYPE (SPECIES_MIXTURE_TYPE), POINTER :: SM=>NULL()
 TYPE(WALL_TYPE), POINTER :: WC
 !TYPE(CFACE_TYPE), POINTER :: CFA
@@ -1235,7 +1236,7 @@ TMP_INTERIM = TMP
 DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    WALL(IW)%ONE_D%Q_CONDENSE = 0._EB
 ENDDO
-
+!WRITE(*,*) 'Z0',ZZ_INTERIM(1,5,5,1),ZZ_INTERIM(1,5,5,2),ZZ_INTERIM(1,5,5,3)
 SPEC_LOOP: DO NS = 1, N_TRACKED_SPECIES
    SM => SPECIES_MIXTURE(NS)
    IF (.NOT. SM%CONDENSATION_SMIX_INDEX > 0) CYCLE SPEC_LOOP
@@ -1256,11 +1257,11 @@ SPEC_LOOP: DO NS = 1, N_TRACKED_SPECIES
 
             ZZ_GET(1:N_TRACKED_SPECIES) = ZZ_INTERIM(I,J,K,1:N_TRACKED_SPECIES)
             IF (ZZ_GET(NS) < ZZ_MIN_GLOBAL .AND. ZZ_GET(Z_COND_INDEX) < ZZ_MIN_GLOBAL) CYCLE ILOOP
-
             DHOR = H_V_B*SS%MW/R0
             P_RATIO = P_STP/PBAR(0,PRESSURE_ZONE(I,J,K))
 
             TMP_G = TMP(I,J,K)
+            RHO_G = RHO(I,J,K)
             ! Boiling temperature at current background pressure
             T_BOIL_EFF = MAX(0._EB,DHOR*SS%TMP_V/(DHOR-SS%TMP_V*LOG(1._EB/P_RATIO)+TWO_EPSILON_EB))
 
@@ -1297,34 +1298,31 @@ SPEC_LOOP: DO NS = 1, N_TRACKED_SPECIES
             ! Compute equilibrium vapor mass fraction
             X_CLOUD  = MIN(1._EB,P_RATIO*EXP(DHOR*(1._EB/T_BOIL_EFF-1._EB/TMP_G)))
             Y_CLOUD  = X_CLOUD/(MW_RATIO + (1._EB-MW_RATIO)*X_CLOUD)
-            IF (Y_GAS < Y_CLOUD .AND. Y_COND < ZZ_MIN_GLOBAL) CYCLE ILOOP
-            IF (Y_CLOUD < Y_GAS .AND. ZZ(I,J,K,NS) < ZZ_MIN_GLOBAL) CYCLE ILOOP
-            IF(Y_GAS > Y_CLOUD) THEN
-               Y_1 = 0._EB
+            RVC = RDX(I)*RRN(I)*RDY(J)*RDZ(K)
+            IF (Y_GAS > Y_CLOUD) THEN
+               IF (ZZ_INTERIM(I,J,K,NS) < ZZ_MIN_GLOBAL) CYCLE ILOOP
+               Y_1 = MAX(Y_CLOUD,Y_GAS-ZZ_INTERIM(I,J,K,NS))
                Y_2 = Y_GAS
                Y_N = 0.5_EB*(Y_1+Y_2)
-               CE_SIGN = 1._EB
-               DY_LIM = 0.5_EB*ZZ(I,J,K,NS)
             ELSE
-               Y_1 = 0._EB
-               Y_2 = Y_COND
+               IF (Y_COND < ZZ_MIN_GLOBAL) CYCLE ILOOP
+               Y_1 = Y_GAS
+               Y_2 = MIN(Y_CLOUD,Y_GAS+Y_COND)
                Y_N = 0.5_EB*(Y_1+Y_2)
-               CE_SIGN = -1._EB
-               DY_LIM = 0.5_EB*Y_COND
             ENDIF
-            Y_0 = Y_2
+
             CALL GET_SPECIFIC_HEAT(ZZ_GET,CP,TMP_G)
             TMP_N = TMP_G
             EVAP_LOOP: DO
-               TMP_INTERIM(I,J,K) = TMP_N
-               TMP_N = (Y_0-Y_N)*H_V/CP*CE_SIGN+TMP_G
-               IF (ABS(TMP_N - TMP_INTERIM(I,J,K))<1.E-2_EB) EXIT EVAP_LOOP
+               TMP_N2 = TMP_N
+               TMP_N = (Y_GAS-Y_N)*H_V/CP+TMP_G
+               IF (ABS(TMP_N - TMP_N2)<1.E-2_EB) EXIT EVAP_LOOP
                CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%H_V,1),SS%H_V,TMP_N,H_V_N)
                H_V_A = 0.5_EB*(H_V_N+H_V_B)
                X_GUESS  = MIN(1._EB,P_RATIO*EXP(DHOR*(1._EB/T_BOIL_EFF-1._EB/TMP_N)))
                Y_GUESS  = X_GUESS/(MW_RATIO + (1._EB-MW_RATIO)*X_GUESS)
                Y_NN = Y_N
-               IF ((Y_GUESS < Y_N .AND. CE_SIGN < 0._EB) .OR. (Y_GUESS > Y_N .AND. CE_SIGN > 0._EB)) THEN
+               IF (Y_GUESS >= Y_N) THEN
                   Y_1 = Y_N
                   Y_N = 0.5_EB*(Y_N+Y_2)
                ELSE
@@ -1337,23 +1335,30 @@ SPEC_LOOP: DO NS = 1, N_TRACKED_SPECIES
             ! Limit based on evaporation rate (assume condensation has same mass transfer number)
             D_AIR = D_Z(NINT(TMP_G),NS)
             H_MASS = 2._EB*D_AIR/SM%MEAN_DIAMETER
-            N_PART = Y_COND * RHO(I,J,K) / (FOTHPI* SS%DENSITY_LIQUID * (0.5_EB*SM%MEAN_DIAMETER)**3)
+            N_PART = Y_COND * RHO_G / (FOTHPI* SS%DENSITY_LIQUID * (0.5_EB*SM%MEAN_DIAMETER)**3)
             N_PART = MAX(1.E7_EB,N_PART) !1E7 is 10 nucleation sites per cm^3
             B_NUMBER = LOG(1._EB + ABS(Y_CLOUD - Y_GAS) / MAX(0.001_EB, (1._EB - Y_CLOUD)))
-            Y_N = Y_0 - MIN(MIN(DY_LIM,Y_0-Y_N), H_MASS * N_PART * 4._EB*PI * (0.5_EB*SM%MEAN_DIAMETER)**2 * B_NUMBER * DT)
-
-            ZZ_INTERIM(I,J,K,NS) = ZZ_INTERIM(I,J,K,NS)+(Y_0-Y_N)*CE_SIGN
-            ZZ_INTERIM(I,J,K,Z_COND_INDEX) = ZZ_INTERIM(I,J,K,Z_COND_INDEX)-(Y_0-Y_N)*CE_SIGN
-            TMP_INTERIM(I,J,K) = TMP_INTERIM(I,J,K) + (Y_0-Y_N)*H_V/CP*CE_SIGN
-            M_DOT_PPP(I,J,K,Z_COND_INDEX) = M_DOT_PPP(I,J,K,Z_COND_INDEX) + RHO(I,J,K)*(Y_0-Y_N)/DT*CE_SIGN
-            D_SOURCE(I,J,K) = D_SOURCE(I,J,K) + (Y_0-Y_N)*H_V*CE_SIGN/(CP*TMP_G*DT)
-            M_DOT_PPP(I,J,K,NS) = M_DOT_PPP(I,J,K,NS) - RHO(I,J,K)*(Y_0-Y_N)/DT*CE_SIGN
+            Y_1 = ZZ_INTERIM(I,J,K,NS)
+            IF (Y_GAS < Y_CLOUD) THEN
+               ZZ_INTERIM(I,J,K,NS) = ZZ_INTERIM(I,J,K,NS) + &
+                                      MIN(Y_N-Y_GAS,H_MASS*N_PART*4._EB*PI*(0.5_EB*SM%MEAN_DIAMETER)**2*B_NUMBER*DT/RHO_G)
+            ELSE
+               ZZ_INTERIM(I,J,K,NS) = ZZ_INTERIM(I,J,K,NS) - &
+                                      MIN(Y_GAS-Y_N,H_MASS*N_PART*4._EB*PI*(0.5_EB*SM%MEAN_DIAMETER)**2*B_NUMBER*DT/RHO_G)
+            ENDIF
+            Y_2 = ZZ_INTERIM(I,J,K,NS)
+            ZZ_INTERIM(I,J,K,Z_COND_INDEX) = ZZ_INTERIM(I,J,K,Z_COND_INDEX)-(Y_2-Y_1)
+            TMP_INTERIM(I,J,K) = TMP_INTERIM(I,J,K) + (Y_2-Y_1)*H_V/CP
+            M_DOT_PPP(I,J,K,NS) = M_DOT_PPP(I,J,K,NS) + RHO_G*(Y_2-Y_1)/DT
+            M_DOT_PPP(I,J,K,Z_COND_INDEX) = M_DOT_PPP(I,J,K,Z_COND_INDEX) - RHO_G*(Y_2-Y_1)/DT
+            D_SOURCE(I,J,K) = D_SOURCE(I,J,K) - (Y_2-Y_1)*H_V/(CP*TMP_G*DT)
          ENDDO ILOOP
       ENDDO
    ENDDO
+!WRITE(*,*) 'Z0a',ZZ_INTERIM(1,5,5,1),ZZ_INTERIM(1,5,5,2),ZZ_INTERIM(1,5,5,3)
+   ! Solid Phase
 
    AWM_INDEX = SS%AWM_INDEX
-   ! Solid Phase
    WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       WC=>WALL(IW)
       IF (WC%BOUNDARY_TYPE /= SOLID_BOUNDARY .OR. WC%NODE_INDEX > 0) CYCLE WALL_LOOP
@@ -1361,9 +1366,8 @@ SPEC_LOOP: DO NS = 1, N_TRACKED_SPECIES
       I = ONE_D%IIG
       J = ONE_D%JJG
       K = ONE_D%KKG
-      IF (ONE_D%TMP_F < 340._EB) WRITE(*,*) I,J,K,NS,Y_INDEX,AWM_INDEX,ZZ_INTERIM(I,J,K,NS),ONE_D%AWM_AEROSOL(AWM_INDEX)
-      IF (ONE_D%AWM_AEROSOL(AWM_INDEX) < TWO_EPSILON_EB .AND. ZZ_INTERIM(I,J,K,NS) < ZZ_MIN_GLOBAL) CYCLE WALL_LOOP
 
+      IF (ONE_D%AWM_AEROSOL(AWM_INDEX) < TWO_EPSILON_EB .AND. ZZ_INTERIM(I,J,K,NS) < ZZ_MIN_GLOBAL) CYCLE WALL_LOOP
 
       DHOR = H_V_B*SS%MW/R0
       P_RATIO = P_STP/PBAR(0,PRESSURE_ZONE(I,J,K))
@@ -1373,9 +1377,15 @@ SPEC_LOOP: DO NS = 1, N_TRACKED_SPECIES
 
       CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%H_V,1),SS%H_V,ONE_D%TMP_F,H_V)
       H_V_A = 0.5_EB*(H_V+H_V_B)
-      IF (ONE_D%TMP_F < 340._EB) WRITE(*,*) 'TB HV',T_BOIL_EFF,H_V_A
-      ! Determine the ratio of molecular weights between the gas and droplet vapor
+
+      TMP_G = TMP_INTERIM(I,J,K)
+      RHO_G = RHO_INTERIM(I,J,K)
+      TMP_W = ONE_D%TMP_F
+!      IF (TMP_W < 300._EB) WRITE(*,*) 'IJK',I,J,K
+!      IF (TMP_W < 300._EB) WRITE(*,*) 'TRT',TMP_G,RHO_G,TMP_W
       ZZ_GET(1:N_TRACKED_SPECIES) = ZZ_INTERIM(I,J,K,1:N_TRACKED_SPECIES)
+
+      ! Determine the ratio of molecular weights between the gas and droplet vapor
       CALL GET_MASS_FRACTION_ALL(ZZ_GET,Y_ALL)
       Y_GAS = Y_ALL(Y_INDEX)
       Y_COND = ZZ_GET(Z_COND_INDEX)
@@ -1396,45 +1406,66 @@ SPEC_LOOP: DO NS = 1, N_TRACKED_SPECIES
          MW_GAS=SPECIES_MIXTURE(1)%MW
       ENDIF
       MW_RATIO = MW_GAS/SS%MW
-      Y_GAS = Y_GAS - ZZ_INTERIM(I,J,K,Z_COND_INDEX)
+      Y_GAS = Y_GAS - Y_COND
       DHOR = H_V_A*SS%MW/R0
 
       ! Compute equilibrium vapor mass fraction
-      X_WALL  = MIN(1._EB,P_RATIO*EXP(DHOR*(1._EB/T_BOIL_EFF-1._EB/ONE_D%TMP_F)))
+      X_WALL  = MIN(1._EB,P_RATIO*EXP(DHOR*(1._EB/T_BOIL_EFF-1._EB/TMP_W)))
       Y_WALL  = X_WALL/(MW_RATIO + (1._EB-MW_RATIO)*X_WALL)
-      IF (ZZ_INTERIM(I,J,K,NS) < Y_WALL .AND. ONE_D%AWM_AEROSOL(AWM_INDEX) < TWO_EPSILON_EB) CYCLE WALL_LOOP
-      IF (Y_WALL < Y_GAS .AND. ZZ_INTERIM(I,J,K,NS) < ZZ_MIN_GLOBAL) CYCLE WALL_LOOP
       M_WALL = ONE_D%AWM_AEROSOL(AWM_INDEX) * ONE_D%AREA
       RVC = RDX(I)*RRN(I)*RDY(J)*RDZ(K)
+!      IF (TMP_W < 300._EB) WRITE(*,*) 'Y',Y_GAS,Y_WALL
       IF(Y_GAS > Y_WALL) THEN
-         Y_1 = 0._EB
+         IF (ZZ_GET(NS) < ZZ_MIN_GLOBAL) CYCLE WALL_LOOP
+         Y_1 = MAX(Y_WALL,Y_GAS-ZZ_GET(NS))
          Y_2 = Y_GAS
          Y_N = 0.5_EB*(Y_1+Y_2)
-         CE_SIGN = -1._EB
-         DY_LIM = 0.5_EB*ZZ_INTERIM(I,J,K,NS)*RHO_INTERIM(I,J,K)/RVC
       ELSE
-         Y_1 = 0._EB
-         Y_2 = MIN(Y_WALL, (Y_GAS*RHO(I,J,K)+M_WALL*RVC)/(RHO_INTERIM(I,J,K)+M_WALL*RVC))
+         IF (ONE_D%AWM_AEROSOL(AWM_INDEX) < TWO_EPSILON_EB) CYCLE WALL_LOOP
+         Y_1 = Y_GAS
+         Y_2 = MIN(Y_WALL, (Y_GAS*RHO_G+M_WALL*RVC)/(RHO_G+M_WALL*RVC))
          Y_N = 0.5_EB*(Y_1+Y_2)
-         CE_SIGN = 1._EB
-         DY_LIM = 0.5_EB*M_WALL
       ENDIF
+!      IF (TMP_W < 300._EB) WRITE(*,*) 'Y2',Y_1,Y_2
+      
+      ! Compute mdot PaperCFD4NRS-2016
+      CALL GET_VISCOSITY(ZZ_GET,MU_AIR,TMP_G)
+      D_AIR = D_Z(NINT(TMP_G),NS)
+!      IF (TMP_W < 300._EB) WRITE(*,*) 'STUFF',D_AIR,MU_AIR,ONE_D%U_TAU,ONE_D%RDN,RHO_G
+      Y_PLUS = RHO_G*ONE_D%U_TAU*2._EB/(ONE_D%RDN*MU_AIR)
+      SC = MU_AIR/(RHO_G*D_AIR)
+      GAMMA = 0.01_EB*(SC*Y_PLUS)**4/(1._EB+5._EB*SC**3*Y_PLUS)
+!      IF (TMP_W < 300._EB) WRITE(*,*) 'STUFF1',Y_PLUS,SC,GAMMA
+      Y_S_PLUS = SC*Y_PLUS*EXP(-GAMMA)+(ALPHA*LOG(Y_PLUS)+1.1_EB)*EXP(-1._EB/GAMMA)
+      M_DOT = RHO_G*ONE_D%U_TAU*(Y_GAS-Y_WALL)/Y_S_PLUS
+!      IF (TMP_W < 300._EB) WRITE(*,*) 'STUFF2',Y_S_PLUS,M_DOT
 
-      Y_0 = Y_2
+      ! Find equlibrium
       IF (SURFACE(WC%SURF_INDEX)%THERMAL_BC_INDEX==THERMALLY_THICK) THEN
-         CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%C_P_L,1),SS%C_P_L,ONE_D%TMP_F,CP)
-         TMP_N = ONE_D%TMP_F
+         SF=>SURFACE(WC%SURF_INDEX)
+         RHOCBAR = 0._EB
+         DO NMAT=1,SF%N_MATL
+            IF (ONE_D%MATL_COMP(NMAT)%RHO(1)<=TWO_EPSILON_EB) CYCLE
+            IF (MATERIAL(SF%MATL_INDEX(NMAT))%C_S>0._EB) THEN
+               RHOCBAR = RHOCBAR + ONE_D%MATL_COMP(NMAT)%RHO(1)*MATERIAL(SF%MATL_INDEX(NMAT))%C_S
+            ELSE
+               RHOCBAR = RHOCBAR + ONE_D%MATL_COMP(NMAT)%RHO(1)*&
+                  EVALUATE_RAMP(TMP_W,0._EB,-NINT(MATERIAL(SF%MATL_INDEX(NMAT))%C_S))
+            ENDIF
+         ENDDO
+         MCBAR = RHOCBAR*ONE_D%AREA*(ONE_D%X(1)-ONE_D%X(0))
+
+         TMP_N = TMP_W
          EVAP_LOOP_2: DO
-            TMP_W = TMP_N
-            M_WALL2 = M_WALL+(Y_0-  Y_N)*RHO_INTERIM(I,J,K)/RVC/(Y_N-1._EB)*CE_SIGN
-            TMP_N = (M_WALL2-M_WALL)*H_V/(CP*M_WALL2)+TMP_W
-            IF (ABS(TMP_N - TMP_W)<1.E-2_EB) EXIT EVAP_LOOP_2
+            TMP_N2 = TMP_N
+            TMP_N = TMP_W - ((Y_GAS-Y_N)*RHO_G/RVC)*H_V/MCBAR
+            IF (ABS(TMP_N2- TMP_N)<1.E-2_EB) EXIT EVAP_LOOP_2
             CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%H_V,1),SS%H_V,TMP_N,H_V_N)
             H_V_A = 0.5_EB*(H_V_N+H_V_B)
             X_GUESS  = MIN(1._EB,P_RATIO*EXP(DHOR*(1._EB/T_BOIL_EFF-1._EB/TMP_N)))
             Y_GUESS  = X_GUESS/(MW_RATIO + (1._EB-MW_RATIO)*X_GUESS)
             Y_NN = Y_N
-            IF ((Y_GUESS < Y_N .AND. CE_SIGN < 0._EB) .OR. (Y_GUESS > Y_N .AND. CE_SIGN > 0._EB)) THEN
+            IF (Y_GUESS > Y_N) THEN
                Y_1 = Y_N
                Y_N = 0.5_EB*(Y_N+Y_2)
             ELSE 
@@ -1443,34 +1474,39 @@ SPEC_LOOP: DO NS = 1, N_TRACKED_SPECIES
             ENDIF
             IF (ABS(Y_NN-Y_N)/Y_N < 1.E-3_EB) EXIT EVAP_LOOP_2
          ENDDO EVAP_LOOP_2
+      ELSE
+         IF (Y_GAS > Y_WALL) THEN
+            Y_N = Y_1
+         ELSE
+            Y_N = Y_2
+         ENDIF
       ENDIF
-
+!      IF (TMP_W < 300._EB) WRITE(*,*) 'Y_N',Y_N
       ! Limit based on evaporation rate (assume condensation has same mass transfer number)
-      ZZ_W(1:N_TRACKED_SPECIES) = ZZ_INTERIM(I,J,K,1:N_TRACKED_SPECIES)
-      ZZ_W(NS) = MAX(0._EB,ZZ_INTERIM(I,J,K,NS) + Y_WALL - Y_GAS)
-      ZZ_W = ZZ_W / SUM(ZZ_W)
-      D_AIR = D_Z(NINT(ONE_D%TMP_F),NS)
-      CALL GET_VISCOSITY(ZZ_W,MU_AIR,TMP_INTERIM(I,J,K))
-      CALL GET_MOLECULAR_WEIGHT(ZZ_W,MW_W)
-      RHO_W = MW_W * PBAR(0,PRESSURE_ZONE(I,J,K)) / (R0 * TMP(I,J,K))
-
-      H_MASS = 0.155_EB*D_AIR**TWTH*(RHO_W+RHO_INTERIM(I,J,K))*(ABS(RHO_W-RHO_INTERIM(I,J,K))/MU_AIR)**ONTH / &
-               ABS(TMP_INTERIM(I,J,K)-ONE_D%TMP_F)*LOG((1._EB-Y_WALL)/MAX(0.001_EB,(1._EB-Y_GAS)))
-      Y_N = Y_0 - MIN(MIN(DY_LIM,Y_0-Y_N), H_MASS * ONE_D%AREA * DT * (TMP_INTERIM(I,J,K) - ONE_D%TMP_F))
-
-      M_WALL2 = M_WALL+(Y_0-Y_N)*RHO_INTERIM(I,J,K)/RVC/(Y_N-1._EB)*CE_SIGN
-
-      ZZ_INTERIM(I,J,K,:) = ZZ_INTERIM(I,J,K,:) * RHO_INTERIM(I,J,K) / RVC
-      ZZ_INTERIM(I,J,K,NS) = ZZ_INTERIM(I,J,K,NS) + M_WALL - M_WALL2
-      D_SOURCE(I,J,K) = D_SOURCE(I,J,K) + (M_WALL2 - M_WALL)*(MW_RATIO*RVC/RHO_INTERIM(I,J,K))/DT
-      M_DOT_PPP(I,J,K,NS) = M_DOT_PPP(I,J,K,NS) - RHO_INTERIM(I,J,K)*(M_WALL2 - M_WALL)/DT
-      RHO_INTERIM(I,J,K) = SUM(ZZ_INTERIM(I,J,K,:))*RVC
+!      IF (TMP_W < 300._EB) WRITE(*,*) 'Z1',ZZ_INTERIM(I,J,K,1),ZZ_INTERIM(I,J,K,2),ZZ_INTERIM(I,J,K,3)
+      ZZ_INTERIM(I,J,K,:) = ZZ_INTERIM(I,J,K,:) * RHO_G
+      IF (Y_GAS > Y_WALL) THEN
+   !      IF (TMP_W < 300._EB) WRITE(*,*) 'MVA',(Y_GAS-Y_N)*RHO_G/(RVC*(1._EB-Y_N)),M_DOT*ONE_D%AREA*DT
+         M_VAP = -MIN((Y_GAS-Y_N)*RHO_G/(RVC*(1._EB-Y_N)),M_DOT*ONE_D%AREA*DT)
+      ELSE
+   !      IF (TMP_W < 300._EB) WRITE(*,*) 'MVB',(Y_N-Y_GAS)*RHO_G/(RVC*(1._EB-Y_N)),M_DOT*ONE_D%AREA*DT
+         M_VAP = MIN((Y_N-Y_GAS)*RHO_G/(RVC*(1._EB-Y_N)),M_DOT*ONE_D%AREA*DT)
+      ENDIF
+!      IF (TMP_W < 300._EB) WRITE(*,*) 'M_VAP',M_VAP
+      ZZ_INTERIM(I,J,K,NS) = ZZ_INTERIM(I,J,K,NS)+M_VAP*RVC
+      RHO_INTERIM(I,J,K) = SUM(ZZ_INTERIM(I,J,K,:))
+      ZZ_INTERIM(I,J,K,:) = ZZ_INTERIM(I,J,K,:)/RHO_INTERIM(I,J,K)
+!      IF (TMP_W < 300._EB) WRITE(*,*) 'Z2',ZZ_INTERIM(I,J,K,1),ZZ_INTERIM(I,J,K,2),ZZ_INTERIM(I,J,K,3)
+      M_WALL2 = M_WALL - M_VAP
+      D_SOURCE(I,J,K) = D_SOURCE(I,J,K) + M_VAP*MW_RATIO*RVC/(RHO_G*DT)
+      M_DOT_PPP(I,J,K,NS) = M_DOT_PPP(I,J,K,NS) + M_VAP*RVC
       ZZ_INTERIM(I,J,K,:) = ZZ_INTERIM(I,J,K,:)/SUM(ZZ_INTERIM(I,J,K,:))
-
+!      IF (TMP_W < 300._EB) WRITE(*,*) 'DMZ',D_SOURCE(I,J,K), M_DOT_PPP(I,J,K,NS), ZZ_INTERIM(I,J,K,NS)
       ONE_D%AWM_AEROSOL(AWM_INDEX) = M_WALL2/ONE_D%AREA 
-      ONE_D%Q_CONDENSE = (M_WALL2 - M_WALL) * H_V/ONE_D%AREA
+!     IF (TMP_W < 300._EB)  WRITE(*,*) 'QC',H_V,M_VAP,ONE_D%AREA,DT
+      ONE_D%Q_CONDENSE = -M_VAP * H_V/(ONE_D%AREA*DT)
+!      IF (TMP_W < 300._EB) WRITE(*,*) 'W',M_WALL2,M_WALL, ONE_D%AWM_AEROSOL(AWM_INDEX),ONE_D%Q_CONDENSE 
    ENDDO WALL_LOOP
-
 ENDDO SPEC_LOOP
 
 END SUBROUTINE CONDENSATION_EVAPORATION
