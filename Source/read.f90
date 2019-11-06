@@ -3636,6 +3636,7 @@ RADCAL_ID                   = 'null'
 MASS_EXTINCTION_COEFFICIENT = -1._EB  ! m2/kg
 MASS_FRACTION               =  0._EB
 MASS_FRACTION_0             = -1._EB
+MASS_FRACTION_COND_0        = 0._EB
 MEAN_DIAMETER               =  -1._EB
 THERMOPHORETIC_DIAMETER     =  0.03E-6_EB
 MW                          =  0._EB
