@@ -46,6 +46,7 @@ PROCESS BRE_Spray
 PROCESS Bryant_Doorway
 PROCESS CAROLFIRE
 PROCESS CHRISTIFIRE
+PROCESS Crown_Fires
 PROCESS CSIRO_Grassland_Fires
 PROCESS Cup_Burner
 PROCESS DelCo_Trainers
@@ -93,6 +94,7 @@ PROCESS Sandia_Plumes
 PROCESS Sippola_Aerosol_Deposition
 PROCESS Smyth_Slot_Burner
 PROCESS SP_AST
+PROCESS SP_Wood_Cribs
 PROCESS Steckler_Compartment
 PROCESS SWJTU_Tunnels
 PROCESS Turbulent_Jet
