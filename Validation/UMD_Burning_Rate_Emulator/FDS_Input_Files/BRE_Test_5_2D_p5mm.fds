@@ -16,7 +16,7 @@
 ! Stoichiometric mixture fraction for pure C2H4 is Z_stoich = 0.0876.
 ! Stoichiometric mixture fraction for 50% C2H4/50% N2 is Z_stoich = 0.1610.
 
-&HEAD CHID='BRE_Test_5_2D', TITLE='NASA Burnig Rate Emulator Test 5'/
+&HEAD CHID='BRE_Test_5_2D_p5mm', TITLE='NASA Burnig Rate Emulator Test 5'/
 
 &MESH IJK=160,1,240, XB=0,0.080,-0.0005,0.0005,-0.04,0.080, CYLINDRICAL=T/
 

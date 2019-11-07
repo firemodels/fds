@@ -5,11 +5,18 @@
 export SVNROOT=`pwd`/../..
 source $SVNROOT/Validation/Common_Run_All.sh
 
-$QFDS $DEBUG $QUEUE -d $INDIR BRE_Test_1_2D.fds
-$QFDS $DEBUG $QUEUE -d $INDIR BRE_Test_2_2D.fds
-$QFDS $DEBUG $QUEUE -d $INDIR BRE_Test_3_2D.fds
-$QFDS $DEBUG $QUEUE -d $INDIR BRE_Test_4_2D.fds
-$QFDS $DEBUG $QUEUE -d $INDIR BRE_Test_5_2D.fds
-$QFDS $DEBUG $QUEUE -d $INDIR BRE_Test_6_2D.fds
+$QFDS $DEBUG $QUEUE -d $INDIR BRE_Test_1_2D_1mm.fds
+$QFDS $DEBUG $QUEUE -d $INDIR BRE_Test_2_2D_1mm.fds
+$QFDS $DEBUG $QUEUE -d $INDIR BRE_Test_3_2D_1mm.fds
+$QFDS $DEBUG $QUEUE -d $INDIR BRE_Test_4_2D_1mm.fds
+$QFDS $DEBUG $QUEUE -d $INDIR BRE_Test_5_2D_1mm.fds
+$QFDS $DEBUG $QUEUE -d $INDIR BRE_Test_6_2D_1mm.fds
+
+$QFDS $DEBUG $QUEUE -d $INDIR BRE_Test_1_2D_p5mm.fds
+$QFDS $DEBUG $QUEUE -d $INDIR BRE_Test_2_2D_p5mm.fds
+$QFDS $DEBUG $QUEUE -d $INDIR BRE_Test_3_2D_p5mm.fds
+$QFDS $DEBUG $QUEUE -d $INDIR BRE_Test_4_2D_p5mm.fds
+$QFDS $DEBUG $QUEUE -d $INDIR BRE_Test_5_2D_p5mm.fds
+$QFDS $DEBUG $QUEUE -d $INDIR BRE_Test_6_2D_p5mm.fds
 
 echo FDS cases submitted
