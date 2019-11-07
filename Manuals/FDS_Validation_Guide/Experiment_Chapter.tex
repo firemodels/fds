@@ -247,9 +247,9 @@ The term ``crown fire'' refers to a wildfire that spreads from the ground surfac
 
 \subsubsection{Modeling Notes}
 
-It is not possible to compare directly the model simulations with the observed fires because of lack of information about the number, spacing, and height of the trees; and the depth, mass, and composition of the ground cover. Instead, Ziegler~et~al.~\cite{Ziegler:thesis,Ziegler:FEM2017,Ziegler:Data2019,Hoffman:FT2016} developed tree maps based on various forests found in the western region of the U.S. The maps contain the location and rough dimensions of each tree in a 4~ha area. Eight maps were developed based on four specific locations and pre- or post-treated conditions. In addition, Ziegler~et~al. suggest that the moisture content of the trees is approximately 100~\%, and the ground cover 5~\%. The simulated fires are ignited along a strip, and the rate of spread is calculated based on the position of peak temperature. 
+It is not possible to compare directly the model simulations with the observed fires because of lack of information about the number, spacing, and height of the trees; and the depth, mass, and composition of the ground cover. Instead, Ziegler~et~al.~\cite{Ziegler:thesis,Ziegler:FEM2017,Ziegler:Data2019,Hoffman:FT2016} developed tree maps based on various forests found in the western region of the U.S. The maps contain the location and rough dimensions of each tree in a 4~ha area. Eight maps were developed based on four specific locations and pre- or post-treated conditions. In addition, Ziegler~et~al. suggest that the moisture content of the trees is approximately 100~\%, and the ground cover 5~\%. The simulated fires are ignited along a strip, and the rate of spread is calculated based on the position of peak temperature.
 
-The simulations are performed with a numerical grid that has a resolution of 1~m by 1~m by 0.5~m near the ground, and the vertical dimension increases gradually with height. Because of this relatively coarse resolution, the burning rate of the vegetation is limited to ensure that any given patch of surface vegetation or volume of canopy vegetation cannot burn completely in less than 30~s. 
+The simulations are performed with a numerical grid that has a resolution of 1~m by 1~m by 0.5~m near the ground, and the vertical dimension increases gradually with height. Because of this relatively coarse resolution, the burning rate of the vegetation is limited to ensure that any given patch of surface vegetation or volume of canopy vegetation cannot burn completely in less than 30~s.
 
 
 
@@ -1271,7 +1271,7 @@ Sung et al.~\cite{Sung:TN2019} made mean and rms centerline and radial gas tempe
 
 \subsubsection{Gas Species Measurements}
 
-Falkenstein-Smith et al. measured the time-averaged centerline species concentrations within the flaming region of three liquid fuel fires---acetone, ethanol, and methanol~\cite{Falkenstein-Smith:2019}. The measurements were made using a gas chromatograph/mass spectrometer system (GC/MSD). The volume fraction of each species was calculated via the number of moles identified by the GC/MSD at each centerline point. Soot mass fractions were measured during the gas sampling process.
+Falkenstein-Smith et al. measured the time-averaged centerline species concentrations within the flaming region of three liquid fuel fires---acetone, ethanol, and methanol~\cite{Falkenstein-Smith:2019}. The measurements were made using a gas chromatograph/mass spectrometer system (GC/MSD). The volume fraction of each species was calculated via the number of moles identified by the GC/MSD at each centerline point. Soot mass fractions were measured during the gas sampling process. Similar measurements were made for a 37~cm diameter methane burner with a measured fuel flow rate of 0.69~g/s and an estimated HRR of 34.5~kW.
 
 \subsubsection{Heat Flux Measurements}
 
@@ -1609,7 +1609,78 @@ A second series of experiments involving plate thermometers was carried out in 2
 
 A third series of experiments involving plate thermometers was conducted in 2015~\cite{Sjostrom:SP2016}. A simple compartment with a single door was constructed and instrumented primarily with plate thermometers. The compartment was 2.7~m long, 1.8~m wide, and 1.8~m tall, with a 0.6~m by 1.5~m door centered on one of the short walls. The PTs were affixed to the walls. The 12 experiments were conducted with four different wall linings. In Series~A, the compartment was lined with a 10~cm thick light concrete block. In Series~B, the compartment was lined with a 5~cm thick layer of insulation backed by a 3~mm thick plate of steel. In Series~C, the compartment was lined with an uninsulated 3~mm thick steel plate. In Series~D, the compartment was lined with a 3~mm thick steel plate backed by a 5~cm thick layer of insulation (the opposite of Series~B). The fires were fueled by a 0.3~m by 0.3~m propane burner located in the center of the room except for Test~A3, where it was centered on the back wall. For most of the experiments, the heat release rate was 1000~kW, except for A2 and C1, which were 500~kW, and A4 and C3, which employed linear ramp-ups to 1250~kW.
 
-\FloatBarrier
+
+\section{SP Wood Crib Experiments}
+\label{SP_Wood_Cribs_Description}
+
+Hansen and Ingason burned piles of reduced-scale wood pallets in a reduced-scale wind tunnel to develop a simple model that predicts the heat release rate of multiple objects separated by varying distances~\cite{Hansen:FSJ2012}. The tunnel was 10~m long with a rectangular cross section 0.6~m wide by 0.4~m tall. Four piles of 1:4 scale pallets were placed at various positions in the tunnel. Each pile of 5 pallets was 0.3~m long, 0.2~m wide and 0.18~m tall. The fire was ignited on the windward side of the upwind pile with a 3~cm by 3~cm by 2.4~cm block of fiberboard soaked in 9~mL of heptane. The HRR was measured, along with temperature, heat flux, and oxygen concentration at various locations.
+
+\subsubsection{Modeling Notes}
+
+The piles of pallets are modeled as an array of Lagrangian particles in lieu of solid obstructions so that a relatively coarse grid of 4~cm can be used. The simulations have previously been performed with partially resolved obstructions~\cite{Janardhan:FT2019}, but such simulations cannot be performed on relatively coarse grids.
+
+The modeling strategy is very similar to that used for vegetation in wildfire simulations. The wood planks are characterized as a homogenous collection of flat disks with a surface area to volume ratio $\sigma=460$~m$^{-1}$ and a packing ratio $\beta=0.42$. The packing ratio is the bulk crib mass per unit volume divided by the density of the wood, $m'''/\rho_{\rm wood}$. The average mass of a pile of pallets is 1.7~kg.
+
+The radiation absorption coefficient is taken as $\kappa=C_{\rm s} \sigma \beta$, where the shape factor, or ratio of plate surface area to projected area, is $C_{\rm s}=0.25$. The absorption coefficient, $\kappa$, also appears in the formula for wind drag, where the pressure drop, $\Delta p$, over a distance, $L$, is given by $\Delta p / L = 0.5 \rho C_{\rm d} \kappa u^2$. The drag coefficient, $C_{\rm d}=2.8$, was measured by Falkenstein-Smith~et~al.~\cite{Falkenstein-Smith:2018} in a study of vegetation. Its application to wood cribs has not been validated.
+
+The wood is assumed to pyrolyze according to the following reaction scheme:
+\begin{eqnarray}
+ {\rm Wet\ Wood} & \rightarrow & \frac{M}{1+M} \, {\rm H_2O} + \frac{1}{1+M} \, {\rm Dry\ Wood} \\[.1in]
+ {\rm Dry\ Wood} & \rightarrow & \chi_{\rm char} \, {\rm Char} + (1-\chi_{\rm char}) \, {\rm Fuel\ Gas} \\[.1in]
+ {\rm Char} + \nu_{\rm O_2, char} \, {\rm O_2} & \rightarrow & (1+ \nu_{\rm O_2,char} - \chi_{\rm ash}) \, {\rm CO_2} + \chi_{\rm ash} \, {\rm Ash} 
+\end{eqnarray}
+The reaction rates are given by:
+\begin{eqnarray}
+  r_{\rm H_2O} &=& \left( \frac{\rho_{\rm s,H_2O}}{\rho_{\rm s,0}} \right)        \, A_{\rm H_2O} \, T^{-\frac{1}{2}} \exp \left(  -\frac{E_{\rm H_2O}}{R \, T} \right) \label{r_H2O} \\[.1in]
+  r_{\rm wood} &=& \left( \frac{\rho_{\rm s,wood}}{\rho_{\rm s,0}} \right)^{1.69} \, A_{\rm wood} \,                  \exp \left(  -\frac{E_{\rm wood}}{R \, T} \right)   \\[.1in]
+  r_{\rm char} &=& \left( \frac{\rho_{\rm s,char}}{\rho_{\rm s,0}} \right)^0      \, A_{\rm char} \,                  \exp \left(  -\frac{E_{\rm char}}{R \, T} \right) \,
+  \frac{ \rho \, Y_{\rm O_2} \, \sigma \, \left( 1+\beta_{\rm char}\sqrt{\RE} \right) }{\nu_{\rm O_2,char} \, \rho_{\rm s,0} } \label{r_char}
+\end{eqnarray}
+The equation governing the temperature of the solid is
+\be
+\rho_{\rm s} \, c \, \frac{\partial T}{\partial t} = -\rho_{\rm s,0} \left( \Delta{h_{\rm H_2O}}\ r_{\rm H_2O} + \Delta {h_{\rm wood}}\ r_{\rm wood} +  \Delta{h_{\rm char}}\ r_{\rm char} \right) + \nabla \cdot{\mathbf{\dot{q}}}''_{\rm c}  +  \nabla \cdot{\mathbf{\dot{q}}}''_{\rm r}
+\ee
+The parameters for the pyrolysis model are listed in Table~\ref{Pine_Properties}.
+
+\begin{table}[p]
+\caption[Parameters for SP Wood Cribs simulations]{Parameters for SP Wood Cribs simulations.}
+\begin{center}
+\begin{tabular}{|l|c|c|l|}
+\hline
+Property                &      Units    &      Value                         & Reference    \\ \hline \hline 
+$M$                     &               & 0.016                              & \\ \hline
+$\rho_{\rm H_2O}$       &     kg/m$^3$  & 1000                               & \\ \hline
+$c_{\rm H_2O}$          &    kJ/kg/K    & 4.184                              & \\ \hline
+$k_{\rm H_2O}$          &      W/m/K    & 0.62                               & \\ \hline
+$A_{\rm H_2O}$          & $\sqrt{K}$/s  & 600000                             & \\ \hline
+$E_{\rm H_2O}$          & J/mol         & 48200                              & \\ \hline
+$\Delta h_{\rm H_2O}$   & kJ/kg         & 2259                               & \\ \hline \hline
+$\rho_{\rm wood}$       &     kg/m$^3$  & 370                                & \\ \hline
+$c_{\rm wood}$          &    kJ/kg/K    & $0.90+0.00235(T-20)$               & \\ \hline
+$k_{\rm wood}$          &      W/m/K    & $0.096+0.00035(T-20)$              & \\ \hline
+$\epsilon_{\rm wood}$   &               & 0.95                               & \\ \hline
+$A_{\rm wood}$          & s$^{-1}$      & 141300                             & \\ \hline
+$E_{\rm wood}$          & J/mol         & 90730                              & \\ \hline
+$\Delta h_{\rm wood}$   & kJ/kg         & 250                                & \\ \hline \hline
+$\rho_{\rm char}$       &     kg/m$^3$  & 135                                & \\ \hline
+$c_{\rm char}$          &    kJ/kg/K    & $0.80+0.00615(T-20)$               & \\ \hline
+$k_{\rm char}$          &      W/m/K    & $0.11+0.000308(T-20)$              & \\ \hline
+$\epsilon_{\rm char}$   &               & 1.0                                & \\ \hline
+$A_{\rm char}$          & s$^{-1}$      & 430                                & \\ \hline
+$E_{\rm char}$          & J/mol         & 74800                              & \\ \hline
+$\chi_{\rm char}$       & g/g           & 0.20                               & \\ \hline
+$\beta_{\rm char}$      &               & 0.20                               & \\ \hline
+$\nu_{\rm O_2, char}$   & g/g           & 1.65                               & \\ \hline
+$\Delta h_{\rm char}$   & kJ/kg         & -32000                             & \\ \hline \hline
+$\chi_{\rm ash}$        & g/g           & 0.02                               & \\ \hline
+$\rho_{\rm ash}$        &     kg/m$^3$  & 67                                 & \\ \hline
+$c_{\rm ash}$           &    kJ/kg/K    & 2.0                                & \\ \hline
+$k_{\rm char}$          &      W/m/K    & 0.1                                & \\ \hline \hline
+$\Delta h$              &      kJ/kg    & 18100                              & \\ \hline
+\end{tabular}
+\end{center}
+\label{Pine_Properties}
+\end{table}
 
 
 \section{Steckler Compartment Experiments}
