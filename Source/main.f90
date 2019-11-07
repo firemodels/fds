@@ -3479,14 +3479,6 @@ IF (T>=MINT_CLOCK) THEN
    T_LAST_DUMP_MASS = T
 ENDIF
 
-! Dump out momentum info into CHID_mom.csv
-
-IF (T>=MOM_CLOCK) THEN
-   IF (MYID==0) CALL DUMP_MOMENTUM(T,DT)
-   MOM_CLOCK = MOM_CLOCK + DT_MOM
-   T_LAST_DUMP_MOM = T
-ENDIF
-
 ! Dump device info into CHID_devc.csv
 
 IF (T>=DEVC_CLOCK .AND. N_DEVC>0) THEN
