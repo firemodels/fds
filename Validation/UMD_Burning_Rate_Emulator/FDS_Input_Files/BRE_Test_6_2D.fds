@@ -1,0 +1,57 @@
+! Reference: A. Markan, H. R. Baum, P. B. Sunderland, J. G. Quintiere, J. L. de Ris,
+! Transient ellipsoidal combustion model for a porous burner in microgravity. Comb. and Flame,
+! 212:93-106, 2020.
+!
+! See Markan et al., Table 1, for a key to the Test No. series.
+!
+! Test No.   D (mm)   Fuel       X_O2 (Y_O2)     p(atm)   mdot" (g/m2-s)  T_s (C)
+! -------------------------------------------------------------------------------
+! 1          25       C2H4       0.30 (0.3287)   0.5      3.53             34.5
+! 2          25       C2H4       0.26 (0.2864)   0.81     3.46             32.9
+! 3          25       C2H4       0.21 (0.2329)   1.0      4.65             32.7
+! 4          50       50% C2H4   0.30 (0.3287)   0.7      6.14             80.7
+! 5          50       C2H4       0.26 (0.2864)   0.81     3.47             89.0
+! 6          50       C2H4       0.21 (0.2329)   1.0      3.41            135.3
+!
+! Stoichiometric mixture fraction for pure C2H4 is Z_stoich = 0.0876.
+! Stoichiometric mixture fraction for 50% C2H4/50% N2 is Z_stoich = 0.1610.
+
+&HEAD CHID='BRE_Test_6_2D', TITLE='NASA Burnig Rate Emulator Test 6'/
+
+&MESH IJK=160,1,240, XB=0,0.080,-0.0005,0.0005,-0.04,0.080, CYLINDRICAL=T/
+
+MULT ID='m1', DX=0.02,DZ=0.02, I_UPPER=3,K_UPPER=5/
+MESH IJK=40,1,40, XB=0,0.02,-0.0005,0.0005,-0.04,-0.02, MULT_ID='m1', CYLINDRICAL=T/
+
+&TIME T_END=5.2/
+
+&MISC SIMULATION_MODE='DNS', GVEC(3)=0., P_INF=101325, STRATIFICATION=F,
+      Y_O2_INFTY=0.2329, Y_CO2_INFTY=0., HUMIDITY=0., TMPA=25/
+
+PRES VELOCITY_TOLERANCE=1.E-6, MAX_PRESSURE_ITERATIONS=100/
+
+&COMB RADIATIVE_FRACTION=0.0 /
+
+&REAC FUEL='ETHYLENE' /
+
+&SURF ID='burner', MASS_FLUX=3.41E-03, SPEC_ID='ETHYLENE', TMP_FRONT=135.3, COLOR='RED'/
+
+&OBST XB=0,0.025,-0.0005,0.0005,-0.04,0, SURF_IDS='burner','INERT','INERT'/
+
+&VENT PBZ=-0.040, SURF_ID='OPEN'/
+&VENT PBZ=0.080, SURF_ID='OPEN'/
+&VENT PBX=0.080, SURF_ID='OPEN'/
+
+&SLCF PBY=0, QUANTITY='VELOCITY', VECTOR=T/
+&SLCF PBY=0, QUANTITY='TEMPERATURE', CELL_CENTERED=T/
+&SLCF PBY=0, QUANTITY='MIXTURE FRACTION', CELL_CENTERED=T/
+
+&ISOF QUANTITY='MIXTURE FRACTION', VALUE(1)=0.0876/
+
+&DEVC XYZ=0.000,0,0.0001, IOR=3, QUANTITY='CONVECTIVE HEAT FLUX', ID='qconv0mm'/
+&DEVC XYZ=0.016,0,0.0001, IOR=3, QUANTITY='CONVECTIVE HEAT FLUX', ID='qconv16mm'/
+
+&DEVC XYZ=0.000,0,0.0001, IOR=3, QUANTITY='RADIATIVE HEAT FLUX', ID='qrad0mm'/
+&DEVC XYZ=0.016,0,0.0001, IOR=3, QUANTITY='RADIATIVE HEAT FLUX', ID='qrad16mm'/
+
+&TAIL /
