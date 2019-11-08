@@ -6538,18 +6538,34 @@ FDS contains an optional pyrolysis model that was developed specifically for veg
 
 \noindent 2. Endothermic pyrolysis of dry vegetation
 \be
- {\rm Dry\ Vegetation} \rightarrow \chi_{\rm char} \, {\rm Char} + (1-\chi_{\rm char}) \, {\rm Fuel\ Gas}
+ {\rm Dry\ Vegetation} \rightarrow \chi_{\rm char} \, {\rm Char} + (1-\chi_{\rm char}) \, {\rm Fuel\ Gas} 
 \ee
 
 \noindent 3. Exothermic char oxidation
 \be
+ \label{char_reaction}
  {\rm Char} + \nu_{\rm O_2, char} \, {\rm O_2} \rightarrow (1+ \nu_{\rm O_2,char} - \chi_{\rm ash}) \, {\rm CO_2} + \chi_{\rm ash} \, {\rm Ash}
 \ee
 $M$ is the vegetation {\em moisture content} or {\em moisture fraction} determined on a dry weight basis. $M$ is related to the mass fraction of water within the solid via the relation:
 \be
   Y_{\rm H_2O} = \frac{M}{1+M}
 \ee
-$\chi_{\rm char}$ is the mass fraction of dry vegetation that is converted to char during pyrolysis. It is specified with the parameter {\ct NU\_MATL} on the {\ct MATL} line describing the dry vegetation. The character string {\ct MATL\_ID} on the same {\ct MATL} line indicates the name of the char.  $\nu_{\rm O_2,char}$ ({\ct NU\_O2} on the {\ct MATL} line that defines the char properties) is the mass of oxygen required per unit mass of char consumed. $\chi_{\rm ash}$ ({\ct NU\_MATL} on the {\ct MATL} line describing the char) is the mass fraction of char that is converted to ash during char oxidation.
+$\chi_{\rm char}$ is the mass fraction of dry vegetation that is converted to char during pyrolysis. It is specified with the parameter {\ct NU\_MATL} on the {\ct MATL} line describing the dry vegetation. The character string {\ct MATL\_ID} on the same {\ct MATL} line indicates the name of the char.  $\nu_{\rm O_2,char}$ ({\ct NU\_O2\_CHAR} on the {\ct MATL} line that defines the char properties) is the mass of oxygen required per unit mass of char consumed. $\chi_{\rm ash}$ ({\ct NU\_MATL} on the {\ct MATL} line describing the char) is the mass fraction of char that is converted to ash during char oxidation.
+
+The char reaction, Eq.~(\ref{char_reaction}), is usually modified in FDS when the default ``simple chemistry'' model is used; that is, the one-step, mixing-controlled reaction for the lumped species Fuel, Air, and Products. In this case, O$_2$ and CO$_2$ are not explicitly calculated, but rather are implicitly defined in terms of the lumped species, {\ct AIR} and {\ct PRODUCTS}, which are defined based on the stoichiometry of the reaction. Equation~(\ref{char_reaction}) cannot be written in terms of the lumped species, but a close approximation is as follows:
+\be
+ {\rm Char} + \frac{\nu_{\rm O_2, char}}{Y_{{\rm O_2},\infty}} \, {\rm Air} \rightarrow \left( 1+ \frac{\nu_{\rm O_2, char}}{Y_{{\rm O_2},\infty}} - \chi_{\rm ash} \right) \, {\rm Products} + \chi_{\rm ash} \, {\rm Ash}
+\ee
+In the input file, this reaction is specified by the following parameters on the {\ct MATL} line that defines the char:
+\begin{lstlisting}
+&MATL ID                 = 'char'
+      ...
+      MATL_ID            = 'ash'
+      NU_MATL            = 0.02
+      SPEC_ID            = 'PRODUCTS','AIR'
+      NU_SPEC            = 8.15,-7.17 /
+\end{lstlisting}
+What this means is that the decomposition of 1~g of char requires 7.17~g of Air and produces 8.15~g of Products and 0.02~g of Ash. The Products in this case are the products of the single step gas phase reaction, not just CO$_2$. The discrepancy is minor, and the alternative to using this approximation is to explicitly track all gas species and apply Eq.~(\ref{char_reaction}) directly. 
 
 In the referenced papers~\cite{Porterie:2006,Morvan:CF2004,Houssami:2016}, the reaction rates are written in terms of ``bulk'' quantities. For example,  in the paper by Mell et al.~\cite{Mell:2009}, the mass of dry vegetation per unit volume is denoted $\langle m^{\prime\prime\prime}_{\rm dry}\rangle_{V_{\rm b}}$, where the angled brackets denote the explicit LES filtering over the grid cell volume $V_{\rm b}$. However, in FDS the reaction rates are written in terms of the component densities of the composite solid:
 \be
@@ -6645,14 +6661,13 @@ Figure~\ref{vege_inputs} includes sample input lines demonstrating how the veget
       SPECIFIC_HEAT_RAMP = '...'
       N_S = 0.
       NU_O2_CHAR = 1.65
-      ALPHA_CHAR = 0.5
       BETA_CHAR = 0.2
       A = 430.
       E = 74800.
-      NU_MATL = 0.1
-      MATL_ID  = 'ASH'
-      NU_SPEC = 0.9
-      SPEC_ID = 'CARBON DIOXIDE'
+      MATL_ID = 'ASH'
+      NU_MATL = 0.10
+      SPEC_ID = 'PRODUCTS','AIR'
+      NU_SPEC = 8.07,-7.17
       HEAT_OF_REACTION= -32000. /
 
 &MATL ID = 'ASH'
