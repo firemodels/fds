@@ -1613,7 +1613,7 @@ A third series of experiments involving plate thermometers was conducted in 2015
 \section{SP Wood Crib Experiments}
 \label{SP_Wood_Cribs_Description}
 
-Hansen and Ingason burned piles of reduced-scale wood pallets in a reduced-scale wind tunnel to develop a simple model that predicts the heat release rate of multiple objects separated by varying distances~\cite{Hansen:FSJ2012}. The tunnel was 10~m long with a rectangular cross section 0.6~m wide by 0.4~m tall. Four piles of 1:4 scale pallets were placed at various positions in the tunnel. Each pile of 5 pallets was 0.3~m long, 0.2~m wide and 0.18~m tall. The fire was ignited on the windward side of the upwind pile with a 3~cm by 3~cm by 2.4~cm block of fiberboard soaked in 9~mL of heptane. The HRR was measured, along with temperature, heat flux, and oxygen concentration at various locations.
+Hansen and Ingason burned piles of reduced-scale wood pallets in a reduced-scale wind tunnel to develop a simple model that predicts the heat release rate of multiple objects separated by varying distances~\cite{Hansen:2010,Hansen:FSJ2012}. The tunnel was 10~m long with a rectangular cross section 0.6~m wide by 0.4~m tall. Four piles of 1:4 scale pallets were placed at various positions in the tunnel. Each pile of 5 pallets was 0.3~m long, 0.2~m wide and 0.18~m tall. The fire was ignited on the windward side of the upwind pile with a 3~cm by 3~cm by 2.4~cm block of fiberboard soaked in 9~mL of heptane. The HRR was measured, along with temperature, heat flux, and oxygen concentration at various locations.
 
 \subsubsection{Modeling Notes}
 
@@ -1623,7 +1623,7 @@ The modeling strategy is very similar to that used for vegetation in wildfire si
 
 The radiation absorption coefficient is taken as $\kappa=C_{\rm s} \sigma \beta$, where the shape factor, or ratio of plate surface area to projected area, is $C_{\rm s}=0.25$. The absorption coefficient, $\kappa$, also appears in the formula for wind drag, where the pressure drop, $\Delta p$, over a distance, $L$, is given by $\Delta p / L = 0.5 \rho C_{\rm d} \kappa u^2$. The drag coefficient, $C_{\rm d}=2.8$, was measured by Falkenstein-Smith~et~al.~\cite{Falkenstein-Smith:2018} in a study of vegetation. Its application to wood cribs has not been validated.
 
-The wood is assumed to pyrolyze according to the following reaction scheme:
+The wood is assumed to pyrolyze, forming C$_{3.4}$H$_{6.2}$O$_{2.5}$~\cite{Ritchie:1}, according to the following reaction scheme:
 \begin{eqnarray}
  {\rm Wet\ Wood} & \rightarrow & \frac{M}{1+M} \, {\rm H_2O} + \frac{1}{1+M} \, {\rm Dry\ Wood} \\[.1in]
  {\rm Dry\ Wood} & \rightarrow & \chi_{\rm char} \, {\rm Char} + (1-\chi_{\rm char}) \, {\rm Fuel\ Gas} \\[.1in]
@@ -1647,36 +1647,36 @@ The parameters for the pyrolysis model are listed in Table~\ref{Pine_Properties}
 \begin{center}
 \begin{tabular}{|l|c|c|l|}
 \hline
-Property                &      Units    &      Value                         & Reference    \\ \hline \hline 
-$M$                     &               & 0.016                              & \\ \hline
-$\rho_{\rm H_2O}$       &     kg/m$^3$  & 1000                               & \\ \hline
-$c_{\rm H_2O}$          &    kJ/kg/K    & 4.184                              & \\ \hline
-$k_{\rm H_2O}$          &      W/m/K    & 0.62                               & \\ \hline
-$A_{\rm H_2O}$          & $\sqrt{K}$/s  & 600000                             & \\ \hline
-$E_{\rm H_2O}$          & J/mol         & 48200                              & \\ \hline
-$\Delta h_{\rm H_2O}$   & kJ/kg         & 2259                               & \\ \hline \hline
-$\rho_{\rm wood}$       &     kg/m$^3$  & 370                                & \\ \hline
-$c_{\rm wood}$          &    kJ/kg/K    & $0.90+0.00235(T-20)$               & \\ \hline
-$k_{\rm wood}$          &      W/m/K    & $0.096+0.00035(T-20)$              & \\ \hline
-$\epsilon_{\rm wood}$   &               & 0.95                               & \\ \hline
-$A_{\rm wood}$          & s$^{-1}$      & 141300                             & \\ \hline
-$E_{\rm wood}$          & J/mol         & 90730                              & \\ \hline
-$\Delta h_{\rm wood}$   & kJ/kg         & 250                                & \\ \hline \hline
-$\rho_{\rm char}$       &     kg/m$^3$  & 135                                & \\ \hline
-$c_{\rm char}$          &    kJ/kg/K    & $0.80+0.00615(T-20)$               & \\ \hline
-$k_{\rm char}$          &      W/m/K    & $0.11+0.000308(T-20)$              & \\ \hline
-$\epsilon_{\rm char}$   &               & 1.0                                & \\ \hline
-$A_{\rm char}$          & s$^{-1}$      & 430                                & \\ \hline
-$E_{\rm char}$          & J/mol         & 74800                              & \\ \hline
-$\chi_{\rm char}$       & g/g           & 0.20                               & \\ \hline
-$\beta_{\rm char}$      &               & 0.20                               & \\ \hline
-$\nu_{\rm O_2, char}$   & g/g           & 1.65                               & \\ \hline
-$\Delta h_{\rm char}$   & kJ/kg         & -32000                             & \\ \hline \hline
-$\chi_{\rm ash}$        & g/g           & 0.02                               & \\ \hline
-$\rho_{\rm ash}$        &     kg/m$^3$  & 67                                 & \\ \hline
-$c_{\rm ash}$           &    kJ/kg/K    & 2.0                                & \\ \hline
-$k_{\rm char}$          &      W/m/K    & 0.1                                & \\ \hline \hline
-$\Delta h$              &      kJ/kg    & 18100                              & \\ \hline
+Property                &      Units    &      Value                         & Reference                      \\ \hline \hline 
+$M$                     &               & 0.016                              & \cite{Hansen:2010}             \\ \hline
+$\rho_{\rm H_2O}$       &     kg/m$^3$  & 1000                               & \cite{Porterie:2000PhysFluids} \\ \hline
+$c_{\rm H_2O}$          &    kJ/kg/K    & 4.184                              & \cite{Porterie:2000PhysFluids} \\ \hline
+$k_{\rm H_2O}$          &      W/m/K    & 0.62                               & \cite{Porterie:2000PhysFluids} \\ \hline
+$A_{\rm H_2O}$          & $\sqrt{K}$/s  & 600000                             & \cite{Porterie:2000PhysFluids} \\ \hline
+$E_{\rm H_2O}$          & J/mol         & 48200                              & \cite{Porterie:2000PhysFluids} \\ \hline
+$\Delta h_{\rm H_2O}$   & kJ/kg         & 2259                               & \cite{Porterie:2000PhysFluids} \\ \hline \hline
+$\rho_{\rm wood}$       &     kg/m$^3$  & 370                                &                                \\ \hline
+$c_{\rm wood}$          &    kJ/kg/K    & $0.90+0.00235(T-20)$               &                                \\ \hline
+$k_{\rm wood}$          &      W/m/K    & $0.10+0.00035(T-20)$               &                                \\ \hline
+$\epsilon_{\rm wood}$   &               & 0.95                               & \cite{Ritchie:1}               \\ \hline
+$A_{\rm wood}$          & s$^{-1}$      & 141300                             &                                \\ \hline
+$E_{\rm wood}$          & J/mol         & 90730                              &                                \\ \hline
+$\Delta h_{\rm wood}$   & kJ/kg         & 250                                &                                \\ \hline \hline
+$\rho_{\rm char}$       &     kg/m$^3$  & 135                                &                                \\ \hline
+$c_{\rm char}$          &    kJ/kg/K    & $0.80+0.00615(T-20)$               &                                \\ \hline
+$k_{\rm char}$          &      W/m/K    & $0.11+0.000308(T-20)$              &                                \\ \hline
+$\epsilon_{\rm char}$   &               & 1.0                                & Assumption                     \\ \hline
+$A_{\rm char}$          & s$^{-1}$      & 430                                & \cite{Porterie:2000PhysFluids} \\ \hline
+$E_{\rm char}$          & J/mol         & 74800                              & \cite{Porterie:2000PhysFluids} \\ \hline
+$\chi_{\rm char}$       & g/g           & 0.20                               & Assumption                     \\ \hline
+$\beta_{\rm char}$      &               & 0.20                               & \cite{Porterie:2006}           \\ \hline
+$\nu_{\rm O_2, char}$   & g/g           & 1.65                               & \cite{Porterie:2006}           \\ \hline
+$\Delta h_{\rm char}$   & kJ/kg         & -32800                             & \cite{SFPE}                    \\ \hline \hline
+$\chi_{\rm ash}$        & g/g           & 0.02                               & Assumption                     \\ \hline
+$\rho_{\rm ash}$        &     kg/m$^3$  & 67                                 & Assumption                     \\ \hline
+$c_{\rm ash}$           &    kJ/kg/K    & 2.0                                & Assumption                     \\ \hline
+$k_{\rm char}$          &      W/m/K    & 0.1                                & Assumption                     \\ \hline \hline
+$\Delta h$              &      kJ/kg    & 18100                              & \cite{Hansen:2010}             \\ \hline
 \end{tabular}
 \end{center}
 \label{Pine_Properties}
