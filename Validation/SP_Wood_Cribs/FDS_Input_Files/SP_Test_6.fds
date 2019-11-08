@@ -1,5 +1,7 @@
 &HEAD CHID='SP_Test_6', TITLE='SP small-scale pallets in a tunnel' /
 
+&MISC TMPA=22. /
+
 &MESH XB=0.0,1.0,0.0,0.6,0.0,0.4, IJK=25,15,10, MULT_ID='mesh' /
 &MULT ID='mesh', DX=1.0, I_UPPER=9 /
 
@@ -47,7 +49,7 @@
       MATL_ID = 'PINE'
       COLOR = 'BROWN'
       BACKING = 'INSULATED'
-      MOISTURE_FRACTION = 0.016
+      MOISTURE_FRACTION = 0.02
       SURFACE_VOLUME_RATIO = 460.
       GEOMETRY = 'CARTESIAN'
       LENGTH = 0.01
