@@ -12,14 +12,12 @@ outdir = '../../../out/Crown_Fires/';
 file_name = dir([outdir,'*_devc.csv']);
 n_files = length(file_name);
 
-wind_speed = [13.4 2.2 4 9 13.4 2.2 4 9 13.4 2.2 4 9 13.4 2.2 4 9 ...
-              13.4 2.2 4 9 13.4 2.2 4 9 13.4 2.2 4 9 13.4 2.2 4 9];
-
 for i=1:n_files;
 
    M = importdata([outdir file_name(i).name],',',2);
    indices = find(700<=M.data(:,2) & M.data(:,2)<=900 & M.data(:,1)>30 & M.data(:,1)<300);
 
+   wind_speed(i) = mean(M.data(indices,3));
    p = polyfit(M.data(indices,1),M.data(indices,2),1); 
    slope(i) = p(1);
 
