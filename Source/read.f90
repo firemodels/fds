@@ -11831,7 +11831,7 @@ ENDDO
 
 ! If the whole domain lacks on OPEN or PERIODIC boundary, assume it to be one big pressure zone
 
-IF (SEALED .AND. N_ZONE==0 .AND. NMESHES>1) THEN
+IF (SEALED .AND. N_ZONE==0 .AND. (NMESHES-COUNT(EVACUATION_ONLY))>1) THEN
    WRITE(MESSAGE,'(A)')  'ERROR: The domain appears sealed. Specify one or more pressure ZONEs.'
    CALL SHUTDOWN(MESSAGE) ; RETURN
 ENDIF
