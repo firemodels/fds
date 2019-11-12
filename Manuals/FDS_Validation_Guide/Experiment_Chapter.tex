@@ -243,13 +243,15 @@ Petra Andersson and Patrick Van Hees of the Swedish National Testing and Researc
 \section{Crown Fires}
 \label{Crown_Fires_Description}
 
-The term ``crown fire'' refers to a wildfire that spreads from the ground surface into the tree canopy. Alexander and Cruz~\cite{Alexander:CJFR2006} compiled a data set of 57 crown fires that occurred in the U.S. and Canada between 1965 and 2003. For each fire, the relative humidity, ambient temperature, and dominant vegetation type are reported, along with estimated values for the vegetation moisture content, crown bulk density (CBD), and open 10~m wind speed. The vegetation consists mainly of coniferous trees, like pines and spruces, and dry undergrowth and ground cover, i.e. scrub brush and dry pine needles. The reported relative humidity ranges between 5~\% and 50~\%, the estimated moisture content ranges between 5~\% and 10~\%, the estimated CBD ranges between 0.1~kg/m$^3$ and 0.2~kg/m$^3$, the estimated wind speed ranges between 10~km/h and 50~km/h, and the observed rate of spread ranges between 10~m/min and 110~m/min.
+The term ``crown fire'' refers to a wildfire that spreads from the ground surface into the tree canopy. Alexander and Cruz~\cite{Alexander:CJFR2006} compiled a data set of 57 crown fires that occurred in the U.S. and Canada between 1965 and 2003. For each fire, the relative humidity, ambient temperature, and dominant vegetation type are reported, along with estimated values for the vegetation moisture content, {\em canopy}\footnote{Note the difference between {\em canopy} bulk density and {\em crown} bulk density, both of which are abbreviated CBD. The former is the bulk density over the entire forested area, whereas the latter refers to the bulk density within the crown of an individual tree.} bulk density, and open 10~m wind speed. The vegetation consists mainly of coniferous trees, like pines and spruces, and dry undergrowth and ground cover, i.e. scrub brush and dry pine needles. The reported relative humidity ranges between 5~\% and 50~\%, the estimated moisture content ranges between 5~\% and 10~\%, the estimated {\em canopy} bulk density ranges between 0.1~kg/m$^3$ and 0.2~kg/m$^3$, the estimated wind speed ranges between 10~km/h and 50~km/h, and the observed rate of spread ranges between 10~m/min and 110~m/min.
 
 \subsubsection{Modeling Notes}
 
-It is not possible to compare directly the model simulations with the observed fires because of lack of information about the number, spacing, and height of the trees; and the depth, mass, and composition of the ground cover. Instead, Ziegler~et~al.~\cite{Ziegler:thesis,Ziegler:FEM2017,Ziegler:Data2019,Hoffman:FT2016} developed tree maps based on various forests found in the western region of the U.S. The maps contain the location and rough dimensions of each tree in a 4~ha area. Eight maps were developed based on four specific locations and pre- or post-treated conditions. In addition, Ziegler~et~al. suggest that the moisture content of the trees is approximately 100~\%, and the ground cover 5~\%. The simulated fires are ignited along a strip, and the rate of spread is calculated based on the position of peak temperature.
+It is not possible to compare directly the model simulations with the observed fires because of lack of information about the number, spacing, and height of the trees; and the depth, mass, and composition of the ground cover. Instead, Ziegler~et~al.~\cite{Ziegler:thesis,Ziegler:FEM2017,Ziegler:Data2019,Hoffman:FT2016} developed tree maps based on various forests found in the western region of the U.S. The maps contain the location and rough dimensions of each tree in a 4~ha area. Eight maps were developed based on four specific locations and pre- or post-treated conditions. In addition, Ziegler~et~al.~suggest that the moisture content of the trees is approximately 100~\%, and the ground cover 5~\%. The {\em crown} bulk density for all simulations is 1.2~kg/m$^3$, and the surface density is 0.72~kg/m$^2$ with a depth of 6~cm. The simulated fires are ignited along a strip, and the rate of spread is calculated based on the position of peak temperature.
 
 The simulations are performed with a numerical grid that has a resolution of 1~m by 1~m by 0.5~m near the ground, and the vertical dimension increases gradually with height. Because of this relatively coarse resolution, the burning rate of the vegetation is limited to ensure that any given patch of surface vegetation or volume of canopy vegetation cannot burn completely in less than 30~s.
+
+ 
 
 
 
@@ -307,7 +309,7 @@ Heat of Pyrolysis               & kJ/kg                 & 418                   
 Pyrolyis Temperature            & $^\circ$C             & 200                       & \cite{Morvan:CF2004}                  \\ \hline \hline
 Obukhov Length                  & m                     & -500                      & Assumption                            \\ \hline
 Aerodynamic Roughness Length    & m                     & 0.03                      & Assumption                            \\ \hline
-Drag Coefficient                & --                    & 2.6                       & \cite{Falkenstein-Smith:2018}         \\ \hline \hline
+Drag Coefficient                & --                    & 2.8                       & \cite{Falkenstein-Smith:2018}         \\ \hline \hline
 Soil Specific Heat              & kJ/(kg$\cdot$K)       & 2.0                       & \cite{Farouki:1981}                   \\ \hline
 Soil Conductivity               & W/(m$\cdot$K)         & 0.25                      & \cite{Farouki:1981}                   \\ \hline
 Soil Density                    & kg/m$^3$              & 1300                      & \cite{Farouki:1981}                   \\ \hline
@@ -1627,7 +1629,7 @@ The wood is assumed to pyrolyze, forming C$_{3.4}$H$_{6.2}$O$_{2.5}$~\cite{Ritch
 \begin{eqnarray}
  {\rm Wet\ Wood} & \rightarrow & \frac{M}{1+M} \, {\rm H_2O} + \frac{1}{1+M} \, {\rm Dry\ Wood} \\[.1in]
  {\rm Dry\ Wood} & \rightarrow & \chi_{\rm char} \, {\rm Char} + (1-\chi_{\rm char}) \, {\rm Fuel\ Gas} \\[.1in]
- {\rm Char} + \nu_{\rm O_2, char} \, {\rm O_2} & \rightarrow & (1+ \nu_{\rm O_2,char} - \chi_{\rm ash}) \, {\rm CO_2} + \chi_{\rm ash} \, {\rm Ash} 
+ {\rm Char} + \nu_{\rm O_2, char} \, {\rm O_2} & \rightarrow & (1+ \nu_{\rm O_2,char} - \chi_{\rm ash}) \, {\rm CO_2} + \chi_{\rm ash} \, {\rm Ash}
 \end{eqnarray}
 The reaction rates are given by:
 \begin{eqnarray}
@@ -1647,7 +1649,7 @@ The parameters for the pyrolysis model are listed in Table~\ref{Pine_Properties}
 \begin{center}
 \begin{tabular}{|l|c|c|l|}
 \hline
-Property                &      Units    &      Value                         & Reference                      \\ \hline \hline 
+Property                &      Units    &      Value                         & Reference                      \\ \hline \hline
 $M$                     &               & 0.016                              & \cite{Hansen:2010}             \\ \hline
 $\rho_{\rm H_2O}$       &     kg/m$^3$  & 1000                               & \cite{Porterie:2000PhysFluids} \\ \hline
 $c_{\rm H_2O}$          &    kJ/kg/K    & 4.184                              & \cite{Porterie:2000PhysFluids} \\ \hline
@@ -2295,15 +2297,16 @@ The test parameters are given in Table~\ref{Corsica_Parameters}.
 
 \begin{table}[ht!]
 \begin{center}
-\begin{tabular}{|l|c||c|c|c|c|}
+\begin{tabular}{|c|c|c|c|c|c|}
 \hline
-Eexperiment  & Dry Fuel Loading (kg/m$^2$)  	& Slope ($^\circ$)	& Dry Mass per Volume (kg/m$^3$) & Packing Ratio & Bed Depth (cm)	\\ \hline \hline
-1\_0         & 0.6                          	& 0             	& 17                             & 0.033         & 3.5          	\\ \hline
-2\_0         & 0.9                          	& 0             	& 16                             & 0.031         & 5.5          	\\ \hline
-3\_0         & 1.2                          	& 0             	& 18                             & 0.035         & 6.5          	\\ \hline
-1\_20        & 0.6                          	& 20             	& 17                             & 0.033         & 3.5          	\\ \hline
-2\_20        & 0.9                          	& 20             	& 16                             & 0.031         & 5.5          	\\ \hline
-3\_20        & 1.2                          	& 20             	& 18                             & 0.035         & 7.5          	\\ \hline
+Exp.         & Dry Fuel Loading    & Slope 	   & Dry Mass per Volume  & Packing & Bed Depth	    \\ 
+No.          & (kg/m$^2$)          & (deg.)    & (kg/m$^3$)           & Ratio   & (cm)          \\ \hline \hline
+1\_0         & 0.6                 & 0         & 17                   & 0.033   & 3.5          	\\ \hline
+2\_0         & 0.9                 & 0         & 16                   & 0.031   & 5.5          	\\ \hline
+3\_0         & 1.2                 & 0         & 18                   & 0.035   & 6.5          	\\ \hline
+1\_20        & 0.6                 & 20        & 17                   & 0.033   & 3.5          	\\ \hline
+2\_20        & 0.9                 & 20        & 16                   & 0.031   & 5.5          	\\ \hline
+3\_20        & 1.2                 & 20        & 18                   & 0.035   & 7.5          	\\ \hline
 \end{tabular}
 \end{center}
 \caption[Test matrix for the USFS/Corsica Experiments]
