@@ -966,7 +966,7 @@ The results are shown in Fig.~\ref{christifire_cone_results_other_fluxes}.
 
 \section{Wood Cribs}
 
-A common combustible used in fire research and testing is a wood crib; that is, a uniform array of wooden dowels of nearly square cross section. However, a stack of wooden pallets can be viewed as a wood crib as well. Whatever its form, these cribs tend to burn at a consistent and predictable rate, making them ideal for fire testing. 
+A common combustible used in fire research and testing is a wood crib; that is, a uniform array of wooden dowels of nearly square cross section. However, a stack of wooden pallets can be viewed as a wood crib as well. Whatever its form, these cribs tend to burn at a consistent and predictable rate, making them ideal for fire testing.
 
 \subsection{SP Wood Crib Experiments}
 
@@ -981,7 +981,7 @@ Figures~\ref{SP_Wood_Cribs_HRR_1} and \ref{SP_Wood_Cribs_HRR_2} display the meas
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/SP_Wood_Cribs/Test_3_HRR} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/SP_Wood_Cribs/Test_4_HRR} \\
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/SP_Wood_Cribs/Test_5_HRR} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/SP_Wood_Cribs/Test_6_HRR} 
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/SP_Wood_Cribs/Test_6_HRR}
 \end{tabular*}
 \caption[SP Wood Cribs heat release rates, Tests 1-6]{SP Wood Cribs heat release rates, Tests 1-6.}
 \label{SP_Wood_Cribs_HRR_1}
@@ -1069,7 +1069,6 @@ Methanol &  796  &  2.48   & 0.20  &   1099  & 20934  & 0.16 & 0.001 & 0.001 & 6
 \clearpage
 
 \subsection{Waterloo Methanol Pool Fire}
-\label{Heat Release Rate}
 
 Figure~\ref{Waterloo_HRR} displays the measured and predicted heat release rates (HRR) a 30~cm diameter methanol pool fire experiment conducted by Weckman at the University of Waterloo~\cite{Weckman:CF1996}. The experimental result came after at least 10~min of burning, whereas the model is only run for 1~min.
 
@@ -1919,19 +1918,29 @@ Snapshots of the simulation of the 2~m tall, 14~\% moisture tree are shown in Fi
 \end{figure}
 
 
-\clearpage
+\newpage
 
 
 \section{Summary of Burning and Spread Rates}
 \label{Burning Rate}
+\label{Heat Release Rate}
 \label{Liquid Pool Burning Rate}
 \label{Rate of Spread}
+
+\begin{figure}[!ht]
+\centering
+\begin{tabular}{c}
+\includegraphics[height=3.5in]{SCRIPT_FIGURES/ScatterPlots/FDS_Heat_Release_Rates}
+\end{tabular}
+\caption[Summary of heat release rate predictions]{Summary of heat release rate predictions.}
+\label{Heat_Release_Rate}
+\end{figure}
 
 
 \begin{figure}[!ht]
 \centering
 \begin{tabular}{c}
-\includegraphics[height=4.0in]{SCRIPT_FIGURES/ScatterPlots/FDS_Burning_Rates}
+\includegraphics[height=3.5in]{SCRIPT_FIGURES/ScatterPlots/FDS_Burning_Rates}
 \end{tabular}
 \caption[Summary of burning rate predictions]{Summary of burning rate predictions.}
 \label{Burning_Rate}
@@ -1941,7 +1950,7 @@ Snapshots of the simulation of the 2~m tall, 14~\% moisture tree are shown in Fi
 \begin{figure}[!ht]
 \centering
 \begin{tabular}{c}
-\includegraphics[height=4.0in]{SCRIPT_FIGURES/ScatterPlots/FDS_Liquid_Pool_Burning_Rates}
+\includegraphics[height=3.5in]{SCRIPT_FIGURES/ScatterPlots/FDS_Liquid_Pool_Burning_Rates}
 \end{tabular}
 \caption[Summary of liquid pool burning rate predictions]{Summary of liquid pool burning rate predictions.}
 \label{Liquid_Pool_Burning_Rate}
@@ -1951,7 +1960,7 @@ Snapshots of the simulation of the 2~m tall, 14~\% moisture tree are shown in Fi
 \begin{figure}[!ht]
 \centering
 \begin{tabular}{c}
-\includegraphics[height=4in]{SCRIPT_FIGURES/ScatterPlots/FDS_Rate_of_Spread}
+\includegraphics[height=3.5in]{SCRIPT_FIGURES/ScatterPlots/FDS_Rate_of_Spread}
 \end{tabular}
 \caption[Summary, Wildfire Rate of Spread]
 {Summary, Wildfire Rate of Spread.}
