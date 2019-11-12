@@ -1344,7 +1344,6 @@ SPEC_LOOP: DO NS = 1, N_TRACKED_SPECIES
             N_PART = Y_COND * RHO_G / (FOTHPI* SS%DENSITY_LIQUID * (0.5_EB*SM%MEAN_DIAMETER)**3)
             N_PART = MAX(1.E7_EB,N_PART) !1E7 is 10 nucleation sites per cm^3
             B_NUMBER = LOG(1._EB + ABS(Y_CLOUD - Y_GAS) / MAX(0.001_EB, (1._EB - Y_CLOUD)))
-!IF(I==2 .AND. J==2 .AND. K==2) WRITE(*,*) ABS(Y_N-Y_GAS),H_MASS*N_PART*4._EB*PI*(0.5_EB*SM%MEAN_DIAMETER)**2*B_NUMBER*DT/RHO_G,H_MASS,N_PART
             Y_1 = ZZ_INTERIM(I,J,K,NS)
             IF (Y_GAS < Y_CLOUD) THEN
                ZZ_INTERIM(I,J,K,NS) = ZZ_INTERIM(I,J,K,NS) + &
