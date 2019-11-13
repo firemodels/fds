@@ -5412,7 +5412,7 @@ Note: The sign of {\ct NU} corresponds to whether that species is consumed (-) o
 
 If soot deposition is being computed, the soot present on surfaces can undergo oxidation if the local temperature is high enough and oxygen is present. Soot oxidation is enabled with the logical flag {\ct SOOT\_OXIDATION} on the {\ct MISC} input. Oxidation is computed as a single step, Arrhenius reaction using the soot surface density and the local oxygen mole fraction. The reaction uses a rate constant of $4.7 \times 10^{12}$ and an activation energy of 211~kJ/mol. These values are based upon work performed by Hartman, Beyler, Riahi, and Beyler~\cite{Hartman_2012}.
 
-Soot oxidation cannot be used with simple chemistry; you must use primitve species. See the {\ct soot\_oxidation\_wall} example case in the Verification Guide.
+Soot oxidation cannot be used with simple chemistry; you must use primitive species. See the {\ct soot\_oxidation\_wall} example case in the Verification Guide.
 
 \section{Special Topic: Aerosol Agglomeration}
 \label{info:agglomeration}
@@ -6533,28 +6533,28 @@ FDS contains an optional pyrolysis model that was developed specifically for veg
 
 \noindent 1. Endothermic moisture evaporation
 \be
- {\rm Wet\ Vegetation} \rightarrow \frac{M}{1+M} \, {\rm H_2O} + \frac{1}{1+M} \, {\rm Dry\ Vegetation}
+ {\rm Wet\ Vegetation} \rightarrow \nu_{\rm H_2O} \, {\rm H_2O} + (1-\nu_{\rm H_2O}) \, {\rm Dry\ Vegetation} \quad ; \quad \nu_{\rm H_2O} = \frac{M}{1+M}
 \ee
 
 \noindent 2. Endothermic pyrolysis of dry vegetation
 \be
- {\rm Dry\ Vegetation} \rightarrow \chi_{\rm char} \, {\rm Char} + (1-\chi_{\rm char}) \, {\rm Fuel\ Gas} 
+ {\rm Dry\ Vegetation} \rightarrow \nu_{\rm char} \, {\rm Char} + (1-\nu_{\rm char}) \, {\rm Fuel\ Gas}
 \ee
 
 \noindent 3. Exothermic char oxidation
 \be
  \label{char_reaction}
- {\rm Char} + \nu_{\rm O_2, char} \, {\rm O_2} \rightarrow (1+ \nu_{\rm O_2,char} - \chi_{\rm ash}) \, {\rm CO_2} + \chi_{\rm ash} \, {\rm Ash}
+ {\rm Char} + \nu_{\rm O_2, char} \, {\rm O_2} \rightarrow (1+ \nu_{\rm O_2,char} - \nu_{\rm ash}) \, {\rm CO_2} + \nu_{\rm ash} \, {\rm Ash}
 \ee
 $M$ is the vegetation {\em moisture content} or {\em moisture fraction} determined on a dry weight basis. $M$ is related to the mass fraction of water within the solid via the relation:
 \be
   Y_{\rm H_2O} = \frac{M}{1+M}
 \ee
-$\chi_{\rm char}$ is the mass fraction of dry vegetation that is converted to char during pyrolysis. It is specified with the parameter {\ct NU\_MATL} on the {\ct MATL} line describing the dry vegetation. The character string {\ct MATL\_ID} on the same {\ct MATL} line indicates the name of the char.  $\nu_{\rm O_2,char}$ ({\ct NU\_O2\_CHAR} on the {\ct MATL} line that defines the char properties) is the mass of oxygen required per unit mass of char consumed. $\chi_{\rm ash}$ ({\ct NU\_MATL} on the {\ct MATL} line describing the char) is the mass fraction of char that is converted to ash during char oxidation.
+$\nu_{\rm char}$ is the mass fraction of dry vegetation that is converted to char during pyrolysis. It is specified with the parameter {\ct NU\_MATL} on the {\ct MATL} line describing the dry vegetation. The character string {\ct MATL\_ID} on the same {\ct MATL} line indicates the name of the char.  $\nu_{\rm O_2,char}$ ({\ct NU\_O2\_CHAR} on the {\ct MATL} line that defines the char properties) is the mass of oxygen required per unit mass of char consumed. $\nu_{\rm ash}$ ({\ct NU\_MATL} on the {\ct MATL} line describing the char) is the mass fraction of char that is converted to ash during char oxidation.
 
 The char reaction, Eq.~(\ref{char_reaction}), is usually modified in FDS when the default ``simple chemistry'' model is used; that is, the one-step, mixing-controlled reaction for the lumped species Fuel, Air, and Products. In this case, O$_2$ and CO$_2$ are not explicitly calculated, but rather are implicitly defined in terms of the lumped species, {\ct AIR} and {\ct PRODUCTS}, which are defined based on the stoichiometry of the reaction. Equation~(\ref{char_reaction}) cannot be written in terms of the lumped species, but a close approximation is as follows:
 \be
- {\rm Char} + \frac{\nu_{\rm O_2, char}}{Y_{{\rm O_2},\infty}} \, {\rm Air} \rightarrow \left( 1+ \frac{\nu_{\rm O_2, char}}{Y_{{\rm O_2},\infty}} - \chi_{\rm ash} \right) \, {\rm Products} + \chi_{\rm ash} \, {\rm Ash}
+ {\rm Char} + \frac{\nu_{\rm O_2, char}}{Y_{{\rm O_2},\infty}} \, {\rm Air} \rightarrow \left( 1+ \frac{\nu_{\rm O_2, char}}{Y_{{\rm O_2},\infty}} - \nu_{\rm ash} \right) \, {\rm Products} + \nu_{\rm ash} \, {\rm Ash}
 \ee
 In the input file, this reaction is specified by the following parameters on the {\ct MATL} line that defines the char:
 \begin{lstlisting}
@@ -6565,7 +6565,7 @@ In the input file, this reaction is specified by the following parameters on the
       SPEC_ID            = 'PRODUCTS','AIR'
       NU_SPEC            = 8.15,-7.17 /
 \end{lstlisting}
-What this means is that the decomposition of 1~g of char requires 7.17~g of Air and produces 8.15~g of Products and 0.02~g of Ash. The Products in this case are the products of the single step gas phase reaction, not just CO$_2$. The discrepancy is minor, and the alternative to using this approximation is to explicitly track all gas species and apply Eq.~(\ref{char_reaction}) directly. 
+What this means is that the decomposition of 1~g of char requires 7.17~g of Air and produces 8.15~g of Products and 0.02~g of Ash. The Products in this case are the products of the single step gas phase reaction, not just CO$_2$. The discrepancy is minor, and the alternative to using this approximation is to explicitly track all gas species and apply Eq.~(\ref{char_reaction}) directly.
 
 In the referenced papers~\cite{Porterie:2006,Morvan:CF2004,Houssami:2016}, the reaction rates are written in terms of ``bulk'' quantities. For example,  in the paper by Mell et al.~\cite{Mell:2009}, the mass of dry vegetation per unit volume is denoted $\langle m^{\prime\prime\prime}_{\rm dry}\rangle_{V_{\rm b}}$, where the angled brackets denote the explicit LES filtering over the grid cell volume $V_{\rm b}$. However, in FDS the reaction rates are written in terms of the component densities of the composite solid:
 \be
@@ -6618,15 +6618,15 @@ c_{\rm H_2O} &=& 4.19
 \end{eqnarray}
 The rate of change of the total mass is
 \be
-\frac{\partial}{\partial t} \left( \frac{\rho_{\rm s}}{\rho_{\rm s}(0)} \right) = -r_{\rm H_2O} - (1 - \chi_{\rm char}) \, r_{\rm pyr} - (1-\chi_{\rm ash}) \, r_{\rm char}
+\frac{\partial}{\partial t} \left( \frac{\rho_{\rm s}}{\rho_{\rm s}(0)} \right) = -r_{\rm H_2O} - (1 - \nu_{\rm char}) \, r_{\rm pyr} - (1-\nu_{\rm ash}) \, r_{\rm char}
 \ee
 The rate of change for the components of the vegetative mass during thermal degradation are:
 \begin{eqnarray}
 \dod{}{t} \left( \frac{\rho_{\rm s,H_2O}}{\rho_{\rm s}(0)} \right) &=& -r_{\rm H_2O} \\[.1in]
 \dod{}{t} \left( \frac{\rho_{\rm s,dry}}{\rho_{\rm s}(0)}  \right) &=& -r_{\rm pyr}  \\[.1in]
-\dod{}{t} \left( \frac{\rho_{\rm s,char}}{\rho_{\rm s}(0)} \right) &=& -\chi_{\rm char}\ r_{\rm pyr} - r_{\rm char}
+\dod{}{t} \left( \frac{\rho_{\rm s,char}}{\rho_{\rm s}(0)} \right) &=& -\nu_{\rm char}\ r_{\rm pyr} - r_{\rm char}
 \end{eqnarray}
-Gaseous products created during the thermal degradation process are water vapor (during evaporation), fuel vapor (during pyrolysis), and CO$_2$ (during char oxidation). The source terms (kg m$^{-3}$ s$^{-1}$) for these species are, respectively, $\rho_{\rm s}(0) \, r_{\rm H_2O}$, $(1-\chi_{\rm char}) \, \rho_{\rm s}(0) \, r_{\rm pyr}$, and  $(1+\nu_{\rm O_2,char} - \chi_{\rm ash}) \, \rho_{\rm s}(0) \, r_{\rm char}$. In addition, the char oxidation process consumes oxygen in the gas phase at a rate of $-\nu_{\rm O_2,char} \, \rho_{\rm s}(0) \, r_{\rm char}$.
+Gaseous products created during the thermal degradation process are water vapor (during evaporation), fuel vapor (during pyrolysis), and CO$_2$ (during char oxidation). The source terms (kg m$^{-3}$ s$^{-1}$) for these species are, respectively, $\rho_{\rm s}(0) \, r_{\rm H_2O}$, $(1-\nu_{\rm char}) \, \rho_{\rm s}(0) \, r_{\rm pyr}$, and  $(1+\nu_{\rm O_2,char} - \nu_{\rm ash}) \, \rho_{\rm s}(0) \, r_{\rm char}$. In addition, the char oxidation process consumes oxygen in the gas phase at a rate of $-\nu_{\rm O_2,char} \, \rho_{\rm s}(0) \, r_{\rm char}$.
 
 Figure~\ref{vege_inputs} includes sample input lines demonstrating how the vegetation model can be applied to particles that represent pine needles that are 1~mm in diameter and 5~cm long. Note that the specification of the parameter {\ct NU\_O2\_CHAR} on the {\ct MATL} line for char indicates that the special vegetation model is to be invoked. All parameters described above must be explicitly specified in the input file---there are no hard-wired default values.
 
