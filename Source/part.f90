@@ -2325,8 +2325,6 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                   IF (NS==Y_INDEX) CYCLE
                   MW_GAS = MW_GAS + Y_ALL(NS)/SPECIES(NS)%MW
                ENDDO
-               IF (Y_COND > TWO_EPSILON_EB) &
-                  MW_GAS = MW_GAS + Y_COND/SPECIES(Y_INDEX)%MW
                IF (MW_GAS<=TWO_EPSILON_EB) THEN
                   MW_GAS=SPECIES_MIXTURE(1)%MW
                ELSE
@@ -2336,6 +2334,9 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                MW_GAS=SPECIES_MIXTURE(1)%MW
             ENDIF
             MW_RATIO = MW_GAS/MW_DROP
+
+            ! Get actual MW of current gas for D_SOURCE
+            CALL GET_MOLECULAR_WEIGHT(ZZ_GET,MW_GAS)
 
             ! Decide whether to evporate the entire droplet or only part of it
 
@@ -2354,7 +2355,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S_B,TMP_DROP)
                CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,TMP_G)
                DELTA_H_G = H_S_B - H_S
-               D_SOURCE(II,JJ,KK) = D_SOURCE(II,JJ,KK) + (MW_RATIO*M_VAP/M_GAS + (M_VAP*DELTA_H_G)/H_S_G_OLD) * WGT / DT
+               D_SOURCE(II,JJ,KK) = D_SOURCE(II,JJ,KK) + (MW_GAS/MW_DROP*M_VAP/M_GAS + (M_VAP*DELTA_H_G)/H_S_G_OLD) * WGT / DT
                M_DOT_PPP(II,JJ,KK,Z_INDEX) = M_DOT_PPP(II,JJ,KK,Z_INDEX) + M_VAP*RVC*WGT/DT
                LP%M_DOT = M_VAP/DT
 
@@ -2797,7 +2798,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,TMP_G)
                DELTA_H_G = H_S_B - H_S
                D_SOURCE(II,JJ,KK) = D_SOURCE(II,JJ,KK) + &
-                                    (MW_RATIO*M_VAP/M_GAS + (M_VAP*DELTA_H_G - Q_CON_GAS)/H_S_G_OLD) * WGT / DT
+                                    (MW_GAS/MW_DROP*M_VAP/M_GAS + (M_VAP*DELTA_H_G - Q_CON_GAS)/H_S_G_OLD) * WGT / DT
                M_DOT_PPP(II,JJ,KK,Z_INDEX) = M_DOT_PPP(II,JJ,KK,Z_INDEX) + M_VAP*RVC*WGT/DT
                LP%M_DOT = M_VAP/DT
 
