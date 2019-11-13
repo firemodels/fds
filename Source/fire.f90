@@ -1250,7 +1250,6 @@ SPEC_LOOP: DO NS = 1, N_TRACKED_SPECIES
    DO K = 1, KBAR
       DO J = 1, JBAR
          ILOOP: DO I = 1, IBAR
-            CYCLE
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE ILOOP
             IF (CC_IBM) THEN
                IF (CCVAR(I,J,K,IBM_CGSC) /= IBM_GASPHASE) CYCLE ILOOP
@@ -1337,7 +1336,7 @@ SPEC_LOOP: DO NS = 1, N_TRACKED_SPECIES
             D_AIR = D_Z(NINT(TMP_G),NS)
             H_MASS = 2._EB*D_AIR/SM%MEAN_DIAMETER
             N_PART = Y_COND * RHO_G / (FOTHPI* SS%DENSITY_LIQUID * (0.5_EB*SM%MEAN_DIAMETER)**3)
-            N_PART = MAX(1.E7_EB,N_PART) !1E7 is 10 nucleation sites per cm^3
+            N_PART = MAX(NUCLEATION_SITES,N_PART)
             B_NUMBER = LOG(1._EB + ABS(Y_CLOUD - Y_GAS) / MAX(0.001_EB, (1._EB - Y_CLOUD)))
             Y_1 = ZZ_INTERIM(I,J,K,NS)
             IF (Y_GAS < Y_CLOUD) THEN
