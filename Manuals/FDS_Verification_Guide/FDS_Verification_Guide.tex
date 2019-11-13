@@ -3511,7 +3511,7 @@ Figure~\ref{fig:deposition_mass} shows the time evolution of soot in the gas pha
 
 This verification case consists of two test cases.
 
-The first case to be discussed consists of a box 10~cm on side with adiabatic, free-slip side walls. The box is filled with two gas species each having a molecular weight of 28.8~g/mol, a viscosity of 0.00002~\si{kg/(m.s}, a thermal conductivity of 0.025~\si{W/(m.K}, and specific heat of 1~\si{kJ/(kg.K}, and zero diffusivity. One of the gas species is defined as an aerosol with two particle size bins with a minimum diameter of 1~$\mu$m and a maximum diameter of 10~$\mu$m, a solid phase density of 2000~kg/m$^3$, and a solid phase conductivity of 1~\si{W/(m.K}. The initial mass fraction of the first size bin of the aerosol is 0.00001. {\ct STRATIFICATION}, {\ct NOISE}, and all aerosol behaviors except for {\ct AGGLOMERATION} are turned off. In this case the only mechanisms operating are Brownian and gravitational agglomeration. The case is run for 60 s.
+The first case to be discussed consists of a box 10~cm on side with adiabatic, free-slip side walls. The box is filled with two gas species each having a molecular weight of 28.8~g/mol, a viscosity of 0.00002~\si{kg/(m.s)}, a thermal conductivity of 0.025~\si{W/(m.K)}, and specific heat of 1~\si{kJ/(kg.K)}, and zero diffusivity. One of the gas species is defined as an aerosol with two particle size bins with a minimum diameter of 1~$\mu$m and a maximum diameter of 10~$\mu$m, a solid phase density of 2000~kg/m$^3$, and a solid phase conductivity of 1~\si{W/(m.K)}. The initial mass fraction of the first size bin of the aerosol is 0.00001. {\ct STRATIFICATION}, {\ct NOISE}, and all aerosol behaviors except for {\ct AGGLOMERATION} are turned off. In this case the only mechanisms operating are Brownian and gravitational agglomeration. The case is run for 60 s.
 
 \begin{figure}[ht]
 	\centering
@@ -3568,6 +3568,21 @@ This pair of verification cases test the condensation and evaporation of water v
 	\caption[Results of the \textct{condensation\_1} (top) and \textct{condensation\_2} (bottom) cases]{Temperature change (left) and pressure change (right) due to the evaporation (top) and condensation (bottom) of water vapor for the \textct{condensation\_1} (top) and \textct{condensation\_2} (bottom) cases.}
 	\label{fig:condensation_gas}
 \end{figure}
+
+\subsection{Condensation and Evaporation in the Solid Phase\\(\texorpdfstring{\textct{wall\_cond}}{wall\_cond})}
+	\label{condensation_evaporation}
+This verification cases tests the condenensation and evaporation of water vapor onto and from solid surfaces. The case uses 1~m$^3$ box. The case has an initial temperature of 100~$^\circ$C and contains an initial mass fraction of water vapor of 0.05~kg/kg. The walls are 1~mm thick with a density of 1000~kg/m$^3$, a specific heat of 1~\si{kJ/(kg.K)}, and a conductivity of 100~\si{W/(m.K)}. At equilibirum the wall and gas temperature will be equal at 32~$^\circ$C and the pressure drop will be -20000~Pa. Note that \textct{NUCLEATION\_SITES} on \textct{MISC} was set to zero to turn off condensation in the gas phase.
+
+\begin{figure}[ht]
+	\centering
+	\begin{tabular}{c}
+		\includegraphics[height=2.2in]{SCRIPT_FIGURES/wall_cond_T}
+		\includegraphics[height=2.2in]{SCRIPT_FIGURES/wall_cond_P}
+	\end{tabular}
+	\caption[Results of the \textct{wall\_cond}  case]{Temperature (left) and pressure change (right) for the \textct{wall\_cond} case.}
+	\label{fig:condensation_gas}
+\end{figure}
+
 
 \subsection{Radiation for Condensed Phase (\texorpdfstring{\textct{condesnation\_3}} {condensation\_3})}
 \label{condensation_radiation}
