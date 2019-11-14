@@ -2801,6 +2801,14 @@ The default {\ct SURF} for an {\ct OBST} is {\ct 'INERT'}, which is a Dirichlet 
 \end{lstlisting}
 The exception to this rule is that an {\ct EXTERNAL\_FLUX} may be applied together with {\ct {HT3D=.TRUE.}} on {\ct SURF}.  The user should make sure that the {\ct {SURF}} does not also have an associated {\ct {MATL\_ID}}, which implements the 1D heat conduction model.
 
+\subsubsection*{Specifying an Initial Temperature}
+\label{sec:init_tmp}
+
+If an initial temperature other than ambient is desired inside the solid, use an {\ct INIT} line per the following example:
+\begin{lstlisting}
+&INIT XB=-.1,.1,-.1,.1,-.1,.1, TEMPERATURE=100./
+\end{lstlisting}
+
 \subsubsection*{Internal Heat Sources}
 \label{sec:heat_sources}
 
