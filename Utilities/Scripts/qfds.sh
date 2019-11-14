@@ -587,9 +587,14 @@ if [ "$use_intel_mpi" == "1" ]; then
   if [ "$use_installed" == "1" ]; then
     MPIRUNEXE=$fdsdir/INTEL/mpi/intel64/bin/mpiexec
     if [ ! -e $MPIRUNEXE ]; then
-      echo "$MPIRUNEXE not found"
-      echo "Run aborted"
-      ABORT=y
+      MPIRUNEXE=$fdsdir/INTEL/bin/mpiexec
+      if [ ! -e $MPIRUNEXE ]; then
+        echo "Intel mpiexec not found at:"
+        echo "$fdsdir/INTEL/mpi/intel64/bin/mpiexec or"
+        echo "$fdsdir/bin/mpiexec"
+        echo "Run aborted"
+        ABORT=y
+      fi
     fi
   else
     if [ "$I_MPI_ROOT" == "" ]; then
@@ -598,10 +603,14 @@ if [ "$use_intel_mpi" == "1" ]; then
     else
       MPIRUNEXE=$I_MPI_ROOT/intel64/bin/mpiexec
       if [ ! -e $MPIRUNEXE ]; then
-        echo "Intel mpiexec, $MPIRUNEXE, not found at:"
-        echo "$MPIRUNEXE"
-        ABORTRUN=y
-        echo "Run aborted"
+        MPIRUNEXE=$I_MPI_ROOT/bin/mpiexec
+        if [ ! -e $MPIRUNEXE ]; then
+          echo "Intel mpiexec not found at:"
+          echo "$I_MPI_ROOT/intel64/bin/mpiexec or"
+          echo "$I_MPI_ROOT/bin/mpiexec"
+          ABORTRUN=y
+          echo "Run aborted"
+        fi
       fi
     fi
   fi
