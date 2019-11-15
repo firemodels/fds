@@ -4883,7 +4883,9 @@ Modeling suppression of a fire due to the introduction of a suppression agent li
 
 The {\ct EXTINCTION\_MODEL} is specified on the {\ct COMB} line\footnote{To eliminate any gas phase suppression, set {\ct SUPPRESSION=.FALSE.} on the {\ct COMB} line.}. The {\ct EXTINCTION\_MODEL} called \linebreak[4]{\ct 'EXTINCTION~1'} is the default in Simple Very Large Eddy Simulation (SVLES) mode, whereas \linebreak[4]{\ct 'EXTINCTION~2'} is used in all other modes. The difference between the two models is that for \linebreak[4]{\ct 'EXTINCTION~1'}, only the cell temperature and oxygen concentration are considered because detailed thermophysical gas species properties are not invoked, as they are in the {\ct 'EXTINCTION~2'} model.
 
-The \linebreak[3]{\ct CRITICAL\_FLAME\_TEMPERATURE} (CFT) is based on the {\em oxygen index (OI)} concept discussed in Beyler's chapter in the SFPE Handbook~\cite{SFPE:Beyler}. The oxygen index is the volume fraction of oxygen in the oxidizer stream when extinguishment occurs. The adiabatic flame temperature of a stoichiometric mixture of fuel and oxygen at this limiting oxygen concentration, $T_{\rm OI}$, is taken as the CFT. Values for the CFT ($T_{\rm OI}$) are listed in Table~\ref{tab:CFT}. Both extinction models make use of the CFT. The {\ct 'EXTINCTION~1'} model also uses the {\ct LOWER\_OXYGEN\_LIMIT}, which is sometimes referred to as the {\em lower oxygen index}. It is the oxygen volume fraction at the left end of the solid line in Fig.~\ref{fig:extinct}.
+The \linebreak[3]{\ct CRITICAL\_FLAME\_TEMPERATURE} (CFT) is based on the {\em oxygen index (OI)} concept discussed in Beyler's chapter in the SFPE Handbook~\cite{SFPE:Beyler}. The oxygen index is the volume fraction of oxygen in the oxidizer stream when extinguishment occurs. The adiabatic flame temperature of a stoichiometric mixture of fuel and oxygen at this limiting oxygen concentration, $T_{\rm OI}$, is taken as the CFT. Values for the CFT ($T_{\rm OI}$) are listed in Table~\ref{tab:CFT}. Both extinction models make use of the CFT. 
+
+The {\ct 'EXTINCTION~1'} model also uses the {\ct LOWER\_OXYGEN\_LIMIT}, which is sometimes referred to as the {\em lower oxygen index}. It is the oxygen volume fraction at the left end of the solid line in Fig.~\ref{fig:extinct}. Another parameter for the {\ct 'EXTINCTION~1'} model is {\ct FREE\_BURN\_TEMPERATURE} whose default value is 600~$^\circ$C. Above this temperature, combustion is not suppressed. The default value is indicative of flashover.
 
 For unlisted fuels, you can set the CFT on the {\ct REAC} line or simply accept the default value, 1427~\si{\degreeCelsius} (1700~K). If you know the oxygen index $X_{\rm OI}$, for a particular fuel, the CFT be calculated from the following equation:
 \begin{align}
@@ -4949,7 +4951,7 @@ The FDS predictions based on the {\ct 'EXTINCTION~2'} model (right) confirm that
 
 By default, FDS employs either the {\ct 'EXTINCTION 1'} or {\ct 'EXTINCTION 2'} model to determine if combustion is viable. If local extinction occurs, the unburned fuel gas can re-ignite if it mixes with sufficient oxygen elsewhere in the domain, even if this re-ignition might not happen in reality because the temperature might be too low to sustain combustion. To prevent spurious re-ignition from happening, you can set the {\ct AUTO\_IGNITION\_TEMPERATURE} (AIT) on the {\ct REAC} line or the {\ct COMB} line, in \si{\degree C}, below which combustion will not occur.  For most fuels of interest, the AIT may be found in Beyler's chapter of the SFPE Handbook~\cite{SFPE:Beyler}. The default AIT is $-273 \; ^\circ$C, meaning that fuel and oxygen will burn when mixed providing that either of the extinction models allows combustion to occur.
 
-The value of AIT may need to be lowered for cases where the grid size is greater than 10~cm. The purpose of AIT is simply to prevent fuel and oxygen from spontaneously igniting, which is the default behavior of FDS. If an AIT is specified, then some form of heat/ignition source must be present to start the fire.
+The value of AIT may need to be lowered for cases where the grid size is greater than 10~cm. The purpose of AIT is simply to prevent fuel and oxygen from spontaneously igniting, which is the default behavior of FDS. If an AIT is specified, then you must also specify some form of heat/ignition source must be present to start the fire; or you can specify the real sextuplet {\ct AIT\_EXCLUSION\_ZONE} on either the {\ct COMB} or {\ct REAC} line to designate a volume in which ignition occurs spontaneously even when the AIT is enforced everywhere else.
 
 
 
@@ -9498,23 +9500,24 @@ properties be specified as well. Simply prescribing as many properties as possib
 \multicolumn{5}{|c|}{{\ct COMB} (General combustion parameters)} \\
 \hline \hline
 \endhead
-{\ct AUTO\_IGNITION\_TEMPERATURE}               & Real          & Section~\ref{info:ignition}                           & $^\circ$C     &  -273 $^\circ$C      \\ \hline
-{\ct CHECK\_REALIZABILITY}                      & Logical       & Section~\ref{info:chem_integration}                   &               & {\ct .FALSE.}        \\ \hline
-{\ct EXTINCTION\_MODEL}                         & Character     & Section~\ref{info:extinction}                         &               & {\ct 'EXTINCTION 2'} \\ \hline
-{\ct FIXED\_MIX\_TIME}                          & Real          & Section~\ref{info:turbulent_combustion}               &  s            &                      \\ \hline
-{\ct FUEL\_C\_TO\_CO\_FRACTION}                 & Real          & Section~\ref{info:two-step_simple_chemistry}          &               &  2/3                 \\ \hline
-{\ct FUEL\_H\_TO\_H2\_FRACTION}                 & Real          & Section~\ref{info:two-step_simple_chemistry}          &               &  0                   \\ \hline
-%{\ct HRRPUV\_MAX\_SMV}                          & Real          & Section~\ref{}                                        &  kW/m$^3$     & 1200                 \\ \hline
-{\ct INITIAL\_UNMIXED\_FRACTION}                & Real          & Section~\ref{info:turbulent_combustion}               &               & 1.0                  \\ \hline
-{\ct LAMINAR\_FLAME\_SPEED}                     & Real          & $s_L$, Section~\ref{info:ignition}                    & m/s           & 0.4                  \\ \hline
-{\ct MAX\_CHEMISTRY\_SUBSTEPS}                  & Integer       & Section~\ref{info:chem_integration}                   &               & 20                   \\ \hline
-{\ct N\_FIXED\_CHEMISTRY\_SUBSTEPS}             & Integer       & Section~\ref{info:chem_integration}                   &               & -1                   \\ \hline
-{\ct N\_SIMPLE\_CHEMISTRY\_REACTIONS}           & Integer       & Section~\ref{info:two-step_simple_chemistry}          &               & 1                    \\ \hline
-{\ct ODE\_SOLVER}                               & Character     & Section~\ref{info:chem_integration}                   &               &                      \\ \hline
-{\ct RICHARDSON\_ERROR\_TOLERANCE}              & Real          & Section~\ref{info:chem_integration}                   &               & 1.0 E-6              \\ \hline
-{\ct SUPPRESSION}                               & Logical       & Section~\ref{info:extinction}                         &               & {\ct .TRUE.}         \\ \hline
-{\ct TAU\_CHEM}                                 & Real          & Section~\ref{info:turbulent_combustion}               &               & 1.E-10               \\ \hline
-{\ct TAU\_FLAME}                                & Real          & Section~\ref{info:turbulent_combustion}               &               & 1.E10                \\ \hline
+{\ct AIT\_EXCLUSION\_ZONE(6)}                   & Real Sextuplet & Section~\ref{info:ignition}                           & m             &                      \\ \hline
+{\ct AUTO\_IGNITION\_TEMPERATURE}               & Real           & Section~\ref{info:ignition}                           & $^\circ$C     &  -273 $^\circ$C      \\ \hline
+{\ct CHECK\_REALIZABILITY}                      & Logical        & Section~\ref{info:chem_integration}                   &               & {\ct .FALSE.}        \\ \hline
+{\ct EXTINCTION\_MODEL}                         & Character      & Section~\ref{info:extinction}                         &               & {\ct 'EXTINCTION 2'} \\ \hline
+{\ct FIXED\_MIX\_TIME}                          & Real           & Section~\ref{info:turbulent_combustion}               &  s            &                      \\ \hline
+{\ct FREE\_BURN\_TEMPERATURE}                   & Real           & Section~\ref{info:extinction}                         & $^\circ$C     &  600                 \\ \hline
+{\ct FUEL\_C\_TO\_CO\_FRACTION}                 & Real           & Section~\ref{info:two-step_simple_chemistry}          &               &  2/3                 \\ \hline
+{\ct FUEL\_H\_TO\_H2\_FRACTION}                 & Real           & Section~\ref{info:two-step_simple_chemistry}          &               &  0                   \\ \hline
+{\ct INITIAL\_UNMIXED\_FRACTION}                & Real           & Section~\ref{info:turbulent_combustion}               &               & 1.0                  \\ \hline
+{\ct MAX\_CHEMISTRY\_SUBSTEPS}                  & Integer        & Section~\ref{info:chem_integration}                   &               & 20                   \\ \hline
+{\ct N\_FIXED\_CHEMISTRY\_SUBSTEPS}             & Integer        & Section~\ref{info:chem_integration}                   &               & -1                   \\ \hline
+{\ct N\_SIMPLE\_CHEMISTRY\_REACTIONS}           & Integer        & Section~\ref{info:two-step_simple_chemistry}          &               & 1                    \\ \hline
+{\ct ODE\_SOLVER}                               & Character      & Section~\ref{info:chem_integration}                   &               &                      \\ \hline
+{\ct RADIATIVE\_FRACTION}                       & Real           & Section~\ref{info:CHI_R}                              &               &                      \\ \hline
+{\ct RICHARDSON\_ERROR\_TOLERANCE}              & Real           & Section~\ref{info:chem_integration}                   &               & 1.0 E-6              \\ \hline
+{\ct SUPPRESSION}                               & Logical        & Section~\ref{info:extinction}                         &               & {\ct .TRUE.}         \\ \hline
+{\ct TAU\_CHEM}                                 & Real           & Section~\ref{info:turbulent_combustion}               &               & 1.E-10               \\ \hline
+{\ct TAU\_FLAME}                                & Real           & Section~\ref{info:turbulent_combustion}               &               & 1.E10                \\ \hline
 \end{longtable}
 
 \vspace{\baselineskip}
@@ -9557,10 +9560,8 @@ properties be specified as well. Simply prescribing as many properties as possib
 \hline
 \multicolumn{5}{|c|}{{\ct CTRL} (Control Function Parameters)} \\
 \hline \hline
-\endhead
-{\ct CONSTANT}            & Real       & Section~\ref{info:CONTROL_MATH}         &    &                        \\ \hline
-%{\ct CYCLES}             & Integer     & Number of times to cycle output             &    &                    \\ \hline
-%{\ct CYCLE\_TIME}        & Real        & Periodicity                                 & s  &                    \\ \hline
+\endhead   
+{\ct CONSTANT}           & Real        & Section~\ref{info:CONTROL_MATH}         &    &                        \\ \hline
 {\ct DELAY}              & Real        & Section~\ref{info:dry_pipe}             & s  &  0.                    \\ \hline
 {\ct DIFFERENTIAL\_GAIN} & Real        & Section~\ref{info:CONTROL_PID}          &    &  0.                    \\ \hline
 {\ct EVACUATION}         & Logical     & Reference~\cite{FDS_Evac_Users_Guide}   &    & {\ct .FALSE.}          \\ \hline
@@ -9611,7 +9612,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct DUCT\_ID}              & Character       & Section~\ref{info:HVAC}                                         &       &               \\ \hline
 {\ct EVACUATION}            & Logical         & Reference~\cite{FDS_Evac_Users_Guide}                           &       & {\ct .FALSE.} \\ \hline
 {\ct FLOWRATE}              & Real            & Section~\ref{info:aspiration_detector}                          & kg/s  & 0             \\ \hline
-{\ct FORCE\_DIRECTION} & Real(3)     & Section~\ref{info:distributed_forces}                            &          &           \\ \hline
+{\ct FORCE\_DIRECTION}      & Real(3)         & Section~\ref{info:distributed_forces}                           &       &               \\ \hline
 {\ct HIDE\_COORDINATES}     & Logical         & Section~\ref{info:line_file}                                    &       & {\ct .FALSE.} \\ \hline
 {\ct ID}                    & Character       & Section~\ref{info:DEVC}                                         &       &               \\ \hline
 {\ct INITIAL\_STATE}        & Logical         & Section~\ref{info:basic_control}                                &       & {\ct .FALSE.} \\ \hline
@@ -9619,10 +9620,11 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct IOR}                   & Integer         & Section~\ref{info:DEVC}                                         &       &               \\ \hline
 {\ct LATCH}                 & Logical         & Section~\ref{info:basic_control}                                &       & {\ct .TRUE.}  \\ \hline
 {\ct MATL\_ID}              & Character       & Section~\ref{info:material_components}                          &       &               \\ \hline
+%{\ct MOVE\_ID}              & Character       & Section~\ref{}                                                  &       &               \\ \hline
 {\ct N\_INTERVALS}          & Integer         & Section~\ref{info:time_integral}                                &       & 10            \\ \hline
 {\ct NODE\_ID}              & Character(2)    & Section~\ref{info:HVAC}                                         &       &               \\ \hline
-{\ct NO\_UPDATE\_DEVC\_ID}  & Character       & Section~\ref{info:freeze_device}                                &       &               \\ \hline
 {\ct NO\_UPDATE\_CTRL\_ID}  & Character       & Section~\ref{info:freeze_device}                                &       &               \\ \hline
+{\ct NO\_UPDATE\_DEVC\_ID}  & Character       & Section~\ref{info:freeze_device}                                &       &               \\ \hline
 {\ct ORIENTATION}           & Real Triplet    & Section~\ref{info:DEVC}                                         &       & 0,0,-1        \\ \hline
 {\ct ORIENTATION\_NUMBER}   & Integer         & Section~\ref{info:part_output}                                  &       & 1             \\ \hline
 {\ct OUTPUT}                & Logical         & Section~\ref{info:out:DEVC}                                     &       & {\ct .TRUE.}  \\ \hline
@@ -10570,39 +10572,40 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct REAC} (Reaction Parameters)} \\
 \hline \hline
 \endhead
-{\ct A}                                   & Real        & Section~\ref{info:finite}                 &                   &                   \\ \hline
-{\ct AUTO\_IGNITION\_TEMPERATURE}         & Real        & Section~\ref{info:ignition}               & $^\circ$C         & -273 $^\circ$C    \\ \hline
-{\ct C}                                   & Real        & Section~\ref{info:simple_chemistry}       &                   & 0                 \\ \hline
-{\ct CHECK\_ATOM\_BALANCE}                & Logical     & Section~\ref{info:REAC_Diagnostics}       &                   & {\ct .TRUE.}      \\ \hline
-{\ct CO\_YIELD}                           & Real        & Section~\ref{info:simple_chemistry}       & kg/kg             & 0                 \\ \hline
-{\ct CRITICAL\_FLAME\_TEMPERATURE}        & Real        & Section~\ref{info:extinction}             &   $^\circ$C       & 1427              \\ \hline
-{\ct E}                                   & Real        & Section~\ref{info:finite}                 &   J/mol           &                   \\ \hline
-{\ct EPUMO2}                              & Real        & Section~\ref{info:heat_of_combustion}     &   kJ/kg           & 13100             \\ \hline
-{\ct EQUATION}                            & Character   & Section~\ref{info:EQUATION}               &                   &                   \\ \hline
-{\ct FORMULA}                             & Character   & Section~\ref{info:simple_chemistry}       &                   &                   \\ \hline
-{\ct FUEL}                                & Character   & Section~\ref{info:simple_chemistry}       &                   &                   \\ \hline
-{\ct FUEL\_RADCAL\_ID}                    & Character   & Section~\ref{info:simple_chemistry}       &                   &                   \\ \hline
-{\ct H}                                   & Real        & Section~\ref{info:simple_chemistry}       &                   & 0                 \\ \hline
-{\ct HEAT\_OF\_COMBUSTION}                & Real        & Section~\ref{info:heat_of_combustion}     & kJ/kg             &                   \\ \hline
-{\ct HOC\_COMPLETE}                       & Real        & Section~\ref{info:hoc_complete}           & kJ/kg             &                   \\ \hline
-{\ct ID}                                  & Character   & Section~\ref{info:simple_chemistry}       &                   &                   \\ \hline
-{\ct IDEAL}                               & Logical     & Section~\ref{info:simple_chemistry}       &                   & {\ct .FALSE.}     \\ \hline
-{\ct LOWER\_OXYGEN\_LIMIT}                & Real        & Section~\ref{info:extinction}             & mol/mol           &                   \\ \hline
-{\ct N}                                   & Real        & Section~\ref{info:simple_chemistry}       &                   & 0                 \\ \hline
-{\ct NU(:)}                               & Real Array  & Section~\ref{info:finite}                 &                   &                   \\ \hline
-{\ct N\_S(:)}                             & Real Array  & Section~\ref{info:finite}                 &                   &                   \\ \hline
-{\ct N\_T}                                & Real        & Section~\ref{info:finite}                 &                   &                   \\ \hline
-{\ct O}                                   & Real        & Section~\ref{info:simple_chemistry}       &                   & 0                 \\ \hline
-{\ct PRIORITY}                            & Integer     & Section~\ref{info:priority}               &                   & 1                 \\ \hline
-{\ct RADIATIVE\_FRACTION}                 & Real        & Section~\ref{info:CHI_R}                  &                   &                   \\ \hline
-{\ct RAMP\_CHI\_R}                        & Character   & Section~\ref{info:CHI_R}                  &                   &                   \\ \hline
-{\ct REAC\_ATOM\_ERROR}                   & Real        & Section~\ref{info:REAC_Diagnostics}       & atoms             & 1.E-5             \\ \hline
-{\ct REAC\_MASS\_ERROR}                   & Real        & Section~\ref{info:REAC_Diagnostics}       & kg/kg             & 1.E-4             \\ \hline
-{\ct SOOT\_H\_FRACTION}                   & Real        & Section~\ref{info:simple_chemistry}       &                   & 0.1               \\ \hline
-{\ct SOOT\_YIELD}                         & Real        & Section~\ref{info:simple_chemistry}       & kg/kg             & 0.0               \\ \hline
-{\ct SPEC\_ID\_N\_S(:)}                   & Char.~Array & Section~\ref{info:finite}                 &                   &                   \\ \hline
-{\ct SPEC\_ID\_NU(:)}                     & Char.~Array & Section~\ref{info:finite}                 &                   &                   \\ \hline
-{\ct THIRD\_BODY}                         & Logical     & Section~\ref{info:finite}                 &                   & {\ct .FALSE.}     \\ \hline
+{\ct A}                                   & Real           & Section~\ref{info:finite}                 &                   &                   \\ \hline
+{\ct AIT\_EXCLUSION\_ZONE(6)}             & Real Sextuplet & Section~\ref{info:ignition}               & m                 &                   \\ \hline
+{\ct AUTO\_IGNITION\_TEMPERATURE}         & Real           & Section~\ref{info:ignition}               & $^\circ$C         & -273 $^\circ$C    \\ \hline
+{\ct C}                                   & Real           & Section~\ref{info:simple_chemistry}       &                   & 0                 \\ \hline
+{\ct CHECK\_ATOM\_BALANCE}                & Logical        & Section~\ref{info:REAC_Diagnostics}       &                   & {\ct .TRUE.}      \\ \hline
+{\ct CO\_YIELD}                           & Real           & Section~\ref{info:simple_chemistry}       & kg/kg             & 0                 \\ \hline
+{\ct CRITICAL\_FLAME\_TEMPERATURE}        & Real           & Section~\ref{info:extinction}             &   $^\circ$C       & 1427              \\ \hline
+{\ct E}                                   & Real           & Section~\ref{info:finite}                 &   J/mol           &                   \\ \hline
+{\ct EPUMO2}                              & Real           & Section~\ref{info:heat_of_combustion}     &   kJ/kg           & 13100             \\ \hline
+{\ct EQUATION}                            & Character      & Section~\ref{info:EQUATION}               &                   &                   \\ \hline
+{\ct FORMULA}                             & Character      & Section~\ref{info:simple_chemistry}       &                   &                   \\ \hline
+{\ct FUEL}                                & Character      & Section~\ref{info:simple_chemistry}       &                   &                   \\ \hline
+{\ct FUEL\_RADCAL\_ID}                    & Character      & Section~\ref{info:simple_chemistry}       &                   &                   \\ \hline
+{\ct H}                                   & Real           & Section~\ref{info:simple_chemistry}       &                   & 0                 \\ \hline
+{\ct HEAT\_OF\_COMBUSTION}                & Real           & Section~\ref{info:heat_of_combustion}     & kJ/kg             &                   \\ \hline
+{\ct HOC\_COMPLETE}                       & Real           & Section~\ref{info:hoc_complete}           & kJ/kg             &                   \\ \hline
+{\ct ID}                                  & Character      & Section~\ref{info:simple_chemistry}       &                   &                   \\ \hline
+{\ct IDEAL}                               & Logical        & Section~\ref{info:simple_chemistry}       &                   & {\ct .FALSE.}     \\ \hline
+{\ct LOWER\_OXYGEN\_LIMIT}                & Real           & Section~\ref{info:extinction}             & mol/mol           &                   \\ \hline
+{\ct N}                                   & Real           & Section~\ref{info:simple_chemistry}       &                   & 0                 \\ \hline
+{\ct NU(:)}                               & Real Array     & Section~\ref{info:finite}                 &                   &                   \\ \hline
+{\ct N\_S(:)}                             & Real Array     & Section~\ref{info:finite}                 &                   &                   \\ \hline
+{\ct N\_T}                                & Real           & Section~\ref{info:finite}                 &                   &                   \\ \hline
+{\ct O}                                   & Real           & Section~\ref{info:simple_chemistry}       &                   & 0                 \\ \hline
+{\ct PRIORITY}                            & Integer        & Section~\ref{info:priority}               &                   & 1                 \\ \hline
+{\ct RADIATIVE\_FRACTION}                 & Real           & Section~\ref{info:CHI_R}                  &                   &                   \\ \hline
+{\ct RAMP\_CHI\_R}                        & Character      & Section~\ref{info:CHI_R}                  &                   &                   \\ \hline
+{\ct REAC\_ATOM\_ERROR}                   & Real           & Section~\ref{info:REAC_Diagnostics}       & atoms             & 1.E-5             \\ \hline
+{\ct REAC\_MASS\_ERROR}                   & Real           & Section~\ref{info:REAC_Diagnostics}       & kg/kg             & 1.E-4             \\ \hline
+{\ct SOOT\_H\_FRACTION}                   & Real           & Section~\ref{info:simple_chemistry}       &                   & 0.1               \\ \hline
+{\ct SOOT\_YIELD}                         & Real           & Section~\ref{info:simple_chemistry}       & kg/kg             & 0.0               \\ \hline
+{\ct SPEC\_ID\_N\_S(:)}                   & Char.~Array    & Section~\ref{info:finite}                 &                   &                   \\ \hline
+{\ct SPEC\_ID\_NU(:)}                     & Char.~Array    & Section~\ref{info:finite}                 &                   &                   \\ \hline
+{\ct THIRD\_BODY}                         & Logical        & Section~\ref{info:finite}                 &                   & {\ct .FALSE.}     \\ \hline
 \end{longtable}
 
 \vspace{\baselineskip}
