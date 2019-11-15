@@ -9307,6 +9307,7 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct H}                                         & $\cH=|\bu|^2/2 + \tp/\rho    $                    & (m/s)$^2$      & D,I,P,S      \\ \hline
 {\ct HEAT TRANSFER COEFFICIENT}                 & Convective heat transfer                          & \si{W/(m^2.K)} & B,D          \\ \hline
 {\ct HRRPUL}                                    & $\int \dq''' \, \d x \, \d y$                     & kW/m           & D            \\ \hline
+{\ct HRRPUV REAC}$^6$                           & $\dq'''$ for {\ct REAC\_ID}                       & kW/m$^3$       & D,S          \\ \hline
 {\ct IDEAL GAS PRESSURE}                        & $\bar{p}=\rho R T / \overline{W}$                 & Pa             & D,I,P,S      \\ \hline
 {\ct INTEGRATED INTENSITY}                      & $U=\int I \, \d \bs$                              & kW/m$^2$       & D,I,P,S      \\ \hline
 {\ct KINETIC ENERGY}                            & $(u^2+v^2+w^2)/2$                                 & (m/s)$^2$      & D,I,P,S      \\ \hline
@@ -9323,7 +9324,7 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct PARTICLE RADIATION LOSS}                   & $\nabla \cdot \bq_r''$ due to Lagrangian particles& kW/m$^3$       & D,I,P,S      \\ \hline
 {\ct PDPA}                                      & Droplet diagnostics                               &                & D            \\ \hline
 {\ct PRESSURE ITERATIONS}                       & Number of pressure iterations                     &                & D            \\ \hline
-{\ct Q CRITERION} & $\frac{1}{2} [\mathrm{trace}(\nabla \mathbf{u})^2 - \mathrm{trace}( (\nabla \mathbf{u})^2)]$ & 1/s$^2$ & D,I,P,S \\ \hline
+{\ct Q CRITERION}                               & $\frac{1}{2} [\mathrm{trace}(\nabla \mathbf{u})^2 - \mathrm{trace}( (\nabla \mathbf{u})^2)]$ & 1/s$^2$ & D,I,P,S \\ \hline
 {\ct QABS}$^2$                                  & Absorption efficiency of droplets                 &                & D,I,P,S      \\ \hline
 {\ct QABS\_Z}$^1$                               & Absorption efficiency of droplets                 &                & D,I,P,S      \\ \hline
 {\ct QSCA}$^2$                                  & Scattering efficiency of droplets                 &                & D,I,P,S      \\ \hline
@@ -9331,7 +9332,7 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct RADIAL VELOCITY}                           & $(u,v)\cdot(x,y)/\sqrt{x^2+y^2}$                  & m/s            & D,I,P,S      \\ \hline
 {\ct RADIATION LOSS}                            & $\nabla \cdot \bq_r''$                            & kW/m$^3$       & D,I,P,S      \\ \hline
 {\ct RANDOM NUMBER}                             & Uniform random variable over [0,1]                &                & D            \\ \hline
-{\ct REAC SOURCE TERM}$^1$                      & $\dot{m}_\alpha^{\prime\prime\prime}$             & kg-$\alpha$/m$^3$  & D,I,P,S      \\ \hline
+{\ct REAC SOURCE TERM}$^1$                      & $\dot{m}_\alpha^{\prime\prime\prime}$             & kg/m$^3$       & D,I,P,S      \\ \hline
 {\ct STRAIN RATE}                               & $2(S_{ij}S_{ij}-1/3(\nabla\cdot\mathbf{u})^2)$          & 1/s            & D,I,P,S      \\ \hline
 {\ct STRAIN RATE X}                             & $\partial w/\partial y + \partial v/\partial z$   & 1/s            & D,I,P,S      \\ \hline
 {\ct STRAIN RATE Y}                             & $\partial u/\partial z + \partial w/\partial x$   & 1/s            & D,I,P,S      \\ \hline
@@ -9363,7 +9364,8 @@ $^1$ \hspace{0.05in} \= Requires the specification of a gas species using {\ct S
 $^2$                 \> Requires the specification of a particle name using {\ct PART\_ID}. \\
 $^3$                 \> Requires specification of an additional scalar using {\ct QUANTITY2}. \\
 $^4$                 \> Allows for an optional {\ct MATL\_ID}. \\
-$^5$                 \> Allows for an optional {\ct REAC\_ID}.  Default is Reaction 1.
+$^5$                 \> Allows for an optional {\ct REAC\_ID}.  Default is Reaction 1. \\
+$^6$                 \> Requires {\ct REAC\_ID}.
 \end{tabbing}
 
 
@@ -9635,17 +9637,19 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct QUANTITY}              & Character       & Section~\ref{info:DEVC}                                         &       &               \\ \hline
 {\ct QUANTITY2}             & Character       & Section~\ref{info:line_file}                                    &       &               \\ \hline
 {\ct QUANTITY\_RANGE}       & Real(2)         & Section~\ref{info:statistics}                                   &       & -1.E50,1.E50  \\ \hline
+{\ct REAC\_ID}              & Character       & Section~\ref{info:oddoutputquantities}                          &       &               \\ \hline
 {\ct RELATIVE}              & Logical         & Section~\ref{info:out:DEVC}                                     &       & {\ct .FALSE.} \\ \hline
 {\ct R\_ID}                 & Character       & Section~\ref{info:line_file}                                    &       &               \\ \hline
 {\ct ROTATION}              & Real            & Section~\ref{info:DEVC}                                         & deg.  & 0             \\ \hline
 {\ct SETPOINT}              & Real            & Section~\ref{info:basic_control}                                &       &               \\ \hline
-{\ct SPATIAL\_STATISTIC}    & Character       & Section~\ref{info:statistics}                                   &       &               \\ \hline
-{\ct STATISTICS\_START}     & Real            & Section~\ref{info:rmscovcorr}                                   & s     & {\ct T\_BEGIN}\\ \hline
-{\ct STATISTICS\_END}       & Real            & Section~\ref{info:rmscovcorr}                                   & s     & {\ct T\_BEGIN}\\ \hline
 {\ct SMOOTHING\_FACTOR}     & Real            & Section~\ref{info:basic_control}                                &       & 0             \\ \hline
+{\ct SPATIAL\_STATISTIC}    & Character       & Section~\ref{info:statistics}                                   &       &               \\ \hline
 {\ct SPEC\_ID}              & Character       & Section~\ref{info:outputquantities}                             &       &               \\ \hline
+{\ct STATISTICS\_END}       & Real            & Section~\ref{info:rmscovcorr}                                   & s     & {\ct T\_BEGIN}\\ \hline
+{\ct STATISTICS\_START}     & Real            & Section~\ref{info:rmscovcorr}                                   & s     & {\ct T\_BEGIN}\\ \hline
 {\ct SURF\_ID}              & Character       & Section~\ref{info:statistics}                                   &       &               \\ \hline
 {\ct TEMPORAL\_STATISTIC}   & Character       & Section~\ref{info:statistics}                                   &       &               \\ \hline
+{\ct TIME\_AVERAGED}        & Logical         & Section~\ref{info:out:DEVC}                                     &       &               \\ \hline
 {\ct TIME\_HISTORY}         & Logical         & Section~\ref{info:line_file}                                    &       &               \\ \hline
 {\ct TIME\_PERIOD}          & Real            & Section~\ref{info:time_integral}                                & s     &               \\ \hline
 {\ct TRIP\_DIRECTION}       & Integer         & Section~\ref{info:basic_control}                                &       &  1            \\ \hline
@@ -9682,9 +9686,8 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct CLIP\_RESTART\_FILES}          & Logical      & Section~\ref{info:restart}             &           & {\ct .TRUE.}                   \\ \hline
 {\ct COLUMN\_DUMP\_LIMIT}           & Logical      & Section~\ref{info:out:DEVC}            &           & {\ct .FALSE.}                  \\ \hline
 {\ct CTRL\_COLUMN\_LIMIT}           & Integer      & Section~\ref{info:out:DEVC}            &           & 254                            \\ \hline
-%{\ct CUT\_CELL\_DATA\_FILE}        & Character    & Section~\ref{??}                       &           &                                \\ \hline
 {\ct DEVC\_COLUMN\_LIMIT}           & Integer      & Section~\ref{info:out:DEVC}            &           & 254                            \\ \hline
-%{\ct DT\_BNDE}                      & Real         & Section~\ref{info:DUMP}                &  s        & $2\,\Delta t${\ct /NFRAMES}    \\ \hline
+{\ct DT\_BNDE}                      & Real         & Section~\ref{info:DUMP}                &  s        & $2\,\Delta t${\ct /NFRAMES}    \\ \hline
 {\ct DT\_BNDF}                      & Real         & Section~\ref{info:DUMP}                &  s        & $2\,\Delta t${\ct /NFRAMES}    \\ \hline
 {\ct DT\_CPU}                       & Real         & Section~\ref{out:CPU}                  &  s        & 1000000                        \\ \hline
 {\ct DT\_CTRL}                      & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
