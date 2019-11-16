@@ -1012,7 +1012,8 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT_BC_HT3D)>TWO_EPSILON_EB )
                         WC%ONE_D%HEAT_TRANS_COEF = HEAT_TRANSFER_COEFFICIENT(DTMP,SF%H_FIXED,SURF_INDEX,WALL_INDEX=IW)
                         HTC = WC%ONE_D%HEAT_TRANS_COEF
                         IF (RADIATION) THEN
-                           QEXTRA = HTC*DTMP + WC%ONE_D%Q_RAD_IN - WC%ONE_D%EMISSIVITY*SIGMA*TMP_OTHER**4 - QNET + WC%ONE_D%Q_CONDENSE
+                           QEXTRA = HTC*DTMP + WC%ONE_D%Q_RAD_IN - WC%ONE_D%EMISSIVITY*SIGMA*TMP_OTHER**4 - QNET + &
+                                    WC%ONE_D%Q_CONDENSE
                            FDERIV = -HTC - 4._EB*WC%ONE_D%EMISSIVITY*SIGMA*TMP_OTHER**3
                         ELSE
                            QEXTRA = HTC*DTMP - QNET  + WC%ONE_D%Q_CONDENSE
