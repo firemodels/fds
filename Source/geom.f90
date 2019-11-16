@@ -36165,7 +36165,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
 
       ! count FACES
       DO I = 1, MAX_FACES
-         IF (ANY(FACES(4*(I-1)+1:4*(I-1)+3)==0)) EXIT
+         IF (ALL(FACES(4*(I-1)+1:4*(I-1)+3)==0)) EXIT
          N_FACES = N_FACES+1
       ENDDO
       ! Get number of SURF_IDs defined for the GEOM:
@@ -37478,8 +37478,20 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
       CALL ChkMemErr('READ_GEOM','G%FACES',IZERO)
       G%FACES(1:3*N_FACES) = FACES(1:3*N_FACES)
 
-      IF ( ANY(FACES(1:3*N_FACES)<1 .OR. FACES(1:3*N_FACES)>N_VERTS) ) THEN
-         CALL SHUTDOWN('ERROR: problem with GEOM, vertex index out of bounds')
+      ! Check FACES for out of bounds indexes:
+      I = MINVAL(FACES(1:3*N_FACES)); II= MINLOC(FACES(1:3*N_FACES),DIM=1)
+      IF (I < 1) THEN
+         WRITE(MESSAGE,'(3A,I8,A,I8,A)') 'ERROR: Out of Bounds. GEOM: ',TRIM(ID), ', FACE=',&
+         II/3+1,', has vertex index ',I,' less than 1.'
+         CALL SHUTDOWN(MESSAGE)
+         RETURN
+      ENDIF
+      I = MAXVAL(FACES(1:3*N_FACES)); II= MAXLOC(FACES(1:3*N_FACES),DIM=1)
+      IF (I > N_VERTS) THEN
+         WRITE(MESSAGE,'(3A,I8,A,I8,A,I8,A)') 'ERROR: Out of Bounds. GEOM: ',TRIM(ID), ', FACE=',&
+         II/3+1,', has vertex index ',I,', higher than number of vertices defined ',N_VERTS,'.'
+         CALL SHUTDOWN(MESSAGE)
+         RETURN
       ENDIF
 
       ALLOCATE(G%TFACES(6*N_FACES),STAT=IZERO)
