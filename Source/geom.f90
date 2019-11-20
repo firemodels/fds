@@ -29242,33 +29242,39 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
 
       ! Check that face edges are not too small
       IF ((V12(IAXIS)**2._EB + V12(JAXIS)**2._EB + V12(KAXIS)**2._EB ) < GEOMEPSSQ) THEN
-        IF (POSITIVE_ERROR_TEST) THEN
-          WRITE(LU_ERR,'(A,A,A)')  "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
-        ELSE
-          WRITE(LU_ERR,'(A,A,A)')  "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+        IF (MYID==0) THEN
+           IF (POSITIVE_ERROR_TEST) THEN
+             WRITE(LU_ERR,'(A,A,A)')  "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+           ELSE
+             WRITE(LU_ERR,'(A,A,A)')  "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+           ENDIF
+           WRITE(LU_ERR,'(A,3F12.3)') "  Edge length too small at:", XYZV(IAXIS:KAXIS,NOD2)
+           WRITE(LU_ERR,'(A,I8,A,I8,A)')  "  Check that Vertices:",WSELEM(NOD1),', ',WSELEM(NOD2),' are not equal.'
         ENDIF
-        WRITE(LU_ERR,'(A,3F12.3)') "  Edge length too small at:", XYZV(IAXIS:KAXIS,NOD2)
-        WRITE(LU_ERR,'(A,I8,A,I8,A)')  "  Check that Vertices:",WSELEM(NOD1),', ',WSELEM(NOD2),' are not equal.'
         CALL SHUTDOWN("") ; RETURN
       ENDIF
       IF ((V23(IAXIS)**2._EB + V23(JAXIS)**2._EB + V23(KAXIS)**2._EB ) < GEOMEPSSQ) THEN
-        IF (POSITIVE_ERROR_TEST) THEN
-          WRITE(LU_ERR,'(A,A,A)')  "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
-        ELSE
-          WRITE(LU_ERR,'(A,A,A)')  "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
-        ENDIF
-        WRITE(LU_ERR,'(A,3F12.3)') "  Edge length too small at:", XYZV(IAXIS:KAXIS,NOD3)
-        WRITE(LU_ERR,'(A,I8,A,I8,A)')  "  Check that Vertices:",WSELEM(NOD2),', ',WSELEM(NOD3),' are not equal.'
+        IF (MYID==0) THEN
+           IF (POSITIVE_ERROR_TEST) THEN
+             WRITE(LU_ERR,'(A,A,A)')  "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+           ELSE
+             WRITE(LU_ERR,'(A,A,A)')  "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+           ENDIF
+           WRITE(LU_ERR,'(A,3F12.3)') "  Edge length too small at:", XYZV(IAXIS:KAXIS,NOD3)
+           WRITE(LU_ERR,'(A,I8,A,I8,A)')  "  Check that Vertices:",WSELEM(NOD2),', ',WSELEM(NOD3),' are not equal.'
+        END IF
         CALL SHUTDOWN("") ; RETURN
       ENDIF
       IF ((V31(IAXIS)**2._EB + V31(JAXIS)**2._EB + V31(KAXIS)**2._EB ) < GEOMEPSSQ) THEN
-        IF (POSITIVE_ERROR_TEST) THEN
-          WRITE(LU_ERR,'(A,A,A)')  "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
-        ELSE
-          WRITE(LU_ERR,'(A,A,A)')  "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+        IF (MYID==0) THEN
+           IF (POSITIVE_ERROR_TEST) THEN
+             WRITE(LU_ERR,'(A,A,A)')  "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+           ELSE
+             WRITE(LU_ERR,'(A,A,A)')  "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+           ENDIF
+           WRITE(MESSAGE,'(A,3F12.3)') "  Edge length too small at:", XYZV(IAXIS:KAXIS,NOD1)
+           WRITE(LU_ERR,'(A,I8,A,I8,A)')  "  Check that Vertices:",WSELEM(NOD1),', ',WSELEM(NOD3),' are not equal.'
         ENDIF
-        WRITE(MESSAGE,'(A,3F12.3)') "  Edge length too small at:", XYZV(IAXIS:KAXIS,NOD1)
-        WRITE(LU_ERR,'(A,I8,A,I8,A)')  "  Check that Vertices:",WSELEM(NOD1),', ',WSELEM(NOD3),' are not equal.'
         CALL SHUTDOWN("") ; RETURN
       END IF
 
@@ -29283,13 +29289,15 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
 
       ! Check that face area is not too small
       IF(MGNRM < GEOMEPSSQ) THEN
-        IF (POSITIVE_ERROR_TEST) THEN
-          WRITE(LU_ERR,'(A,A,A)')  "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
-        ELSE
-          WRITE(LU_ERR,'(A,A,A)')  "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+        IF (MYID==0) THEN
+           IF (POSITIVE_ERROR_TEST) THEN
+             WRITE(LU_ERR,'(A,A,A)')  "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+           ELSE
+             WRITE(LU_ERR,'(A,A,A)')  "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+           ENDIF
+           WRITE(LU_ERR,'(A,3F12.3)') "  Face area too small at:", XYZV(IAXIS:KAXIS,NOD1)
+           WRITE(LU_ERR,*) '  Face IWSEL=', IWSEL, ', Connectivity=', WSELEM(NOD1:NOD3),', Norm Cross=', MGNRM
         ENDIF
-        WRITE(LU_ERR,'(A,3F12.3)') "  Face area too small at:", XYZV(IAXIS:KAXIS,NOD1)
-        WRITE(LU_ERR,*) '  Face IWSEL=', IWSEL, ', Connectivity=', WSELEM(NOD1:NOD3),', Norm Cross=', MGNRM
         CALL SHUTDOWN("") ; RETURN
       ENDIF
 
@@ -29314,14 +29322,16 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
 
    ! In the broken case where GEOM normals are wrong, GEOM_VOLUME can become too small
    IF(GEOMETRY(IG)%GEOM_VOLUME < GEOMEPSSQ) THEN
-     IF (POSITIVE_ERROR_TEST) THEN
-       WRITE(LU_ERR,'(A,A,A)')  "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
-     ELSE
-       WRITE(LU_ERR,'(A,A,A)')  "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+     IF (MYID==0) THEN
+        IF (POSITIVE_ERROR_TEST) THEN
+          WRITE(LU_ERR,'(A,A,A)')  "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+        ELSE
+          WRITE(LU_ERR,'(A,A,A)')  "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+        ENDIF
+        WRITE(LU_ERR,'(A)') "  Geometry volume too small."
+        WRITE(LU_ERR,'(A)') "  Face normals are probably pointing in the wrong direction. "
+        WRITE(LU_ERR,'(A)') "  Check they point towards the gas phase."
      ENDIF
-     WRITE(LU_ERR,'(A)') "  Geometry volume too small."
-     WRITE(LU_ERR,'(A)') "  Face normals are probably pointing in the wrong direction. "
-     WRITE(LU_ERR,'(A)') "  Check they point towards the gas phase."
      CALL SHUTDOWN("") ; RETURN
    ENDIF
 
@@ -29357,39 +29367,46 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
          SEG(NOD1:NOD2) = GEOMETRY(IG)%EDGES(NOD1:NOD2,IWSEL)
          XYZV(IAXIS:KAXIS,NOD1) = GEOMETRY(IG)%VERTS(MAX_DIM*(SEG(NOD1)-1)+1:MAX_DIM*SEG(NOD1))
          XYZV(IAXIS:KAXIS,NOD2) = GEOMETRY(IG)%VERTS(MAX_DIM*(SEG(NOD2)-1)+1:MAX_DIM*SEG(NOD2))
-         IF (POSITIVE_ERROR_TEST) THEN
-           WRITE(LU_ERR,'(A,A,A)') "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
-         ELSE
-           WRITE(LU_ERR,'(A,A,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+         IF (MYID==0) THEN
+            IF (POSITIVE_ERROR_TEST) THEN
+              WRITE(LU_ERR,'(A,A,A)') "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+            ELSE
+              WRITE(LU_ERR,'(A,A,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+            ENDIF
+            WRITE(LU_ERR,'(A,I8,A,3F12.3,A,I8,A,3F12.3,A)') "  Open surface at edge with nodes: NOD1",SEG(NOD1),&
+            " (", XYZV(IAXIS:KAXIS,NOD1), "), NOD2",SEG(NOD2)," (", XYZV(IAXIS:KAXIS,NOD2), ")"
          ENDIF
-         WRITE(LU_ERR,'(A)') "  Non manifold geometry, open surface at edge:"
-         WRITE(LU_ERR,'(A,3F12.3,A,3F12.3,A)') "  (", XYZV(IAXIS:KAXIS,NOD1), ")-(", XYZV(IAXIS:KAXIS,NOD2), ")"
          CALL SHUTDOWN("") ; RETURN
 
       ELSEIF(SUM(EDGES2(1:2,IWSEL)) > 2) THEN ! More than two faces share this edge:
          SEG(NOD1:NOD2) = GEOMETRY(IG)%EDGES(NOD1:NOD2,IWSEL)
          XYZV(IAXIS:KAXIS,NOD1) = GEOMETRY(IG)%VERTS(MAX_DIM*(SEG(NOD1)-1)+1:MAX_DIM*SEG(NOD1))
          XYZV(IAXIS:KAXIS,NOD2) = GEOMETRY(IG)%VERTS(MAX_DIM*(SEG(NOD2)-1)+1:MAX_DIM*SEG(NOD2))
-         IF (POSITIVE_ERROR_TEST) THEN
-           WRITE(LU_ERR,'(A,A,A)') "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
-         ELSE
-           WRITE(LU_ERR,'(A,A,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+         IF (MYID==0) THEN
+            IF (POSITIVE_ERROR_TEST) THEN
+              WRITE(LU_ERR,'(A,A,A)') "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+            ELSE
+              WRITE(LU_ERR,'(A,A,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+            ENDIF
+            WRITE(LU_ERR,'(A,I8,A,3F12.3,A,I8,A,3F12.3,A)') "  More than two triangles share edge with nodes: NOD1",&
+            SEG(NOD1)," (", XYZV(IAXIS:KAXIS,NOD1), "), NOD2",SEG(NOD2)," (", XYZV(IAXIS:KAXIS,NOD2), ")"
          ENDIF
-         WRITE(LU_ERR,'(A)') "  Non manifold geometry, more than two triangles share edge:"
-         WRITE(LU_ERR,'(A,3F12.3,A,3F12.3,A)') "  (", XYZV(IAXIS:KAXIS,NOD1), ")-(", XYZV(IAXIS:KAXIS,NOD2), ")"
          CALL SHUTDOWN("") ; RETURN
 
       ELSEIF(ANY(EDGES2(1:2,IWSEL) > 1)) THEN ! half edge counted more than once, opposite normals on triangles
          SEG(NOD1:NOD2) = GEOMETRY(IG)%EDGES(NOD1:NOD2,IWSEL)
          XYZV(IAXIS:KAXIS,NOD1) = GEOMETRY(IG)%VERTS(MAX_DIM*(SEG(NOD1)-1)+1:MAX_DIM*SEG(NOD1))
          XYZV(IAXIS:KAXIS,NOD2) = GEOMETRY(IG)%VERTS(MAX_DIM*(SEG(NOD2)-1)+1:MAX_DIM*SEG(NOD2))
-         IF (POSITIVE_ERROR_TEST) THEN
-           WRITE(LU_ERR,'(A,A,A)') "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
-         ELSE
-           WRITE(LU_ERR,'(A,A,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+         IF (MYID==0) THEN
+            IF (POSITIVE_ERROR_TEST) THEN
+              WRITE(LU_ERR,'(A,A,A)') "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+            ELSE
+              WRITE(LU_ERR,'(A,A,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+            ENDIF
+            WRITE(LU_ERR,'(A,I8,A,3F12.3,A,I8,A,3F12.3,A)') &
+            " Opposite normals on triangles sharing edge with nodes: NOD1",&
+            SEG(NOD1)," (", XYZV(IAXIS:KAXIS,NOD1), "), NOD2",SEG(NOD2)," (", XYZV(IAXIS:KAXIS,NOD2), ")"
          ENDIF
-         WRITE(LU_ERR,'(A)') "  Non manifold geometry, opposite normals on triangles that share edge:"
-         WRITE(LU_ERR,'(A,3F12.3,A,3F12.3,A)') "  (", XYZV(IAXIS:KAXIS,NOD1), ")-(", XYZV(IAXIS:KAXIS,NOD2), ")"
          CALL SHUTDOWN("") ; RETURN
 
       ENDIF
@@ -29420,13 +29437,16 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
                  (SEG(NOD2) == GEOMETRY(IG)%EDGES(NOD2,IEDLIST)) ) THEN
                XYZV(IAXIS:KAXIS,NOD1) = GEOMETRY(IG)%VERTS(MAX_DIM*(WSELEM(NOD1)-1)+1:MAX_DIM*WSELEM(NOD1))
                XYZV(IAXIS:KAXIS,NOD2) = GEOMETRY(IG)%VERTS(MAX_DIM*(WSELEM(NOD2)-1)+1:MAX_DIM*WSELEM(NOD2))
-               IF (POSITIVE_ERROR_TEST) THEN
-                 WRITE(LU_ERR,'(A,A,A)') "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
-               ELSE
-                 WRITE(LU_ERR,'(A,A,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+               IF (MYID==0) THEN
+                  IF (POSITIVE_ERROR_TEST) THEN
+                    WRITE(LU_ERR,'(A,A,A)') "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+                  ELSE
+                    WRITE(LU_ERR,'(A,A,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+                  ENDIF
+                  WRITE(LU_ERR,'(A,I8,A,3F12.3,A,I8,A,3F12.3,A)') &
+                  "  Non manifold geometry in adjacent faces at edge with nodes: NOD1",&
+                  WSELEM(NOD1)," (", XYZV(IAXIS:KAXIS,NOD1), "), NOD2",WSELEM(NOD2)," (", XYZV(IAXIS:KAXIS,NOD2), ")"
                ENDIF
-               WRITE(LU_ERR,'(A)') "  Non manifold geometry or inconsistent normals in adjacent faces at edge:"
-               WRITE(LU_ERR,'(A,3F12.3,A,3F12.3,A)') "  (", XYZV(IAXIS:KAXIS,NOD1), ")-(", XYZV(IAXIS:KAXIS,NOD2), ")"
                CALL SHUTDOWN("") ; RETURN
             ENDIF
             ! Check if opposite halfedge already in list.
@@ -29442,13 +29462,15 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
             IF (GEOMETRY(IG)%EDGE_FACES(1,IEDLIST) == 2) THEN
                XYZV(IAXIS:KAXIS,NOD1) = GEOMETRY(IG)%VERTS(MAX_DIM*(WSELEM(NOD1)-1)+1:MAX_DIM*WSELEM(NOD1))
                XYZV(IAXIS:KAXIS,NOD2) = GEOMETRY(IG)%VERTS(MAX_DIM*(WSELEM(NOD2)-1)+1:MAX_DIM*WSELEM(NOD2))
-               IF (POSITIVE_ERROR_TEST) THEN
-                 WRITE(LU_ERR,'(A,A,A)') "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
-               ELSE
-                 WRITE(LU_ERR,'(A,A,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+               IF (MYID==0) THEN
+                  IF (POSITIVE_ERROR_TEST) THEN
+                    WRITE(LU_ERR,'(A,A,A)') "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+                  ELSE
+                    WRITE(LU_ERR,'(A,A,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+                  ENDIF
+                  WRITE(LU_ERR,'(A,I8,A,3F12.3,A,I8,A,3F12.3,A)') "  Non manifold geometry at edge with nodes: NOD1",&
+                  WSELEM(NOD1)," (", XYZV(IAXIS:KAXIS,NOD1), "), NOD2",WSELEM(NOD2)," (", XYZV(IAXIS:KAXIS,NOD2), ")"
                ENDIF
-               WRITE(LU_ERR,'(A)') "  Non manifold geometry at edge:"
-               WRITE(LU_ERR,'(A,3F12.3,A,3F12.3,A)') "  (", XYZV(IAXIS:KAXIS,NOD1), ")-(", XYZV(IAXIS:KAXIS,NOD2), ")"
                CALL SHUTDOWN("") ; RETURN
             ENDIF
             ! Couple halfedge with its pair
@@ -29478,13 +29500,15 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
       IF (GEOMETRY(IG)%EDGE_FACES(1,IEDLIST) == 1) THEN
          XYZV(IAXIS:KAXIS,NOD1) = GEOMETRY(IG)%VERTS(MAX_DIM*(WSELEM(NOD1)-1)+1:MAX_DIM*WSELEM(NOD1))
          XYZV(IAXIS:KAXIS,NOD2) = GEOMETRY(IG)%VERTS(MAX_DIM*(WSELEM(NOD2)-1)+1:MAX_DIM*WSELEM(NOD2))
-         IF (POSITIVE_ERROR_TEST) THEN
-           WRITE(LU_ERR,'(A,A,A)') "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
-         ELSE
-           WRITE(LU_ERR,'(A,A,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+         IF (MYID==0) THEN
+            IF (POSITIVE_ERROR_TEST) THEN
+              WRITE(LU_ERR,'(A,A,A)') "SUCCESS: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+            ELSE
+              WRITE(LU_ERR,'(A,A,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
+            ENDIF
+            WRITE(LU_ERR,'(A,I8,A,3F12.3,A,I8,A,3F12.3,A)') "  Open geometry at edge with nodes: NOD1",&
+            WSELEM(NOD1)," (", XYZV(IAXIS:KAXIS,NOD1), "), NOD2",WSELEM(NOD2)," (", XYZV(IAXIS:KAXIS,NOD2), ")"
          ENDIF
-         WRITE(LU_ERR,'(A)') "  Open geometry at edge:"
-         WRITE(LU_ERR,'(A,3F12.3,A,3F12.3,A)') "  (", XYZV(IAXIS:KAXIS,NOD1), ")-(", XYZV(IAXIS:KAXIS,NOD2), ")"
          CALL SHUTDOWN("") ; RETURN
       ENDIF
    ENDDO

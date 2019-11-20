@@ -2240,7 +2240,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
       I_BOIL   = INT(T_BOIL_EFF)
       ! Determine how many sub-time step iterations are needed and then iterate over the time step.
 
-      DT_SUBSTEP = DT/REAL(N_INITIAL_PARTICLE_SUBSTEPS,EB)
+      DT_SUBSTEP = DT
       DT_SUM = 0._EB
       WGT    = LP%PWT
 
