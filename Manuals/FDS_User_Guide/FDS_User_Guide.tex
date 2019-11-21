@@ -1554,9 +1554,10 @@ Make sure that you specify all species (components of {\ct MASS\_FRACTION(N)}) o
       MASS_FRACTION(1)=0.21, SPEC_ID(1)='OXYGEN',
       MASS_FRACTION(2)=0.06, SPEC_ID(2)='PROPANE' /
 \end{lstlisting}
-Here, within the region whose bounds are given by the sextuplet {\ct XB}, the initial mass fractions of oxygen and propane will be initialized to 0.21 and 0.06, respectively. You must specify the gas species using the {\ct SPEC} namelist group. See Section~\ref{info:SPEC} for details.
+Here, within the region whose bounds are given by the sextuplet {\ct XB}, the initial mass fractions of oxygen and propane will be initialized to 0.21 and 0.06, respectively. You must specify the gas species using the {\ct SPEC} namelist group. See Section~\ref{info:SPEC} for details.  Note that {\ct VOLUME\_FRACTION} can be substituted for {\ct MASS\_FRACTION}.
 
-{\ct VOLUME\_FRACTION} can be substituted for {\ct MASS\_FRACTION}.
+You may use the shortcut {\ct DB='WHOLE DOMAIN'} in place of {\ct XB}, which is equivalent to specifying the values of $xmin$, $xmax$, etc., as domain boundaries with {\ct XB}.
+
 
 \section{Temperature}
 
@@ -1997,8 +1998,7 @@ An easy way to specify an entire external wall is to replace {\ct XB} with
 {\ct 'XMAX'}, {\ct 'XMIN'}, {\ct 'YMAX'}, {\ct 'YMIN'}, {\ct 'ZMAX'} or
 {\ct 'ZMIN'} denoting the planes $x=\hbox{\ct XMAX}$, $x=\hbox{\ct XMIN}$,
 $y=\hbox{\ct YMAX}$, $y=\hbox{\ct YMIN}$, $z=\hbox{\ct ZMAX}$
-or $z=\hbox{\ct ZMIN}$, respectively.
-Like an obstruction, the boundary condition index of a vent is specified
+or $z=\hbox{\ct ZMIN}$, respectively. Like an obstruction, the boundary condition index of a vent is specified
 with {\ct SURF\_ID}, indicating which of the listed {\ct SURF} lines to
 apply. If the default boundary condition is desired, then {\ct SURF\_ID} need not be set.
 
@@ -2010,6 +2010,8 @@ wall or an open boundary. Check the geometry in Smokeview to assure that
 the {\ct VENT}s are properly specified. Use color as much as
 possible to double-check the set-up.  More detail on color in
 Section~\ref{info:colors} and Table \ref{tab:colors}. Also, the parameter {\ct OUTLINE=.TRUE.} on the {\ct VENT} line causes the {\ct VENT} to be drawn as an outline in Smokeview.
+
+A safer option for multi-mesh calculations might be to use {\ct DB} (Domain Boundary), which takes the same options as {\ct MB} but applies the {\ct SURF\_ID} to the domain boundary.
 
 
 \subsection{Special Vents}
@@ -7934,7 +7936,7 @@ There is a second optional format. If you specify {\ct FORMAT\_INDEX=2} on the {
 \section{Animated Planar Slices: The \texorpdfstring{{\tt SLCF}}{SLCF} Namelist Group}
 \label{info:SLCF}
 
-The {\ct SLCF} (``slice file'') namelist group parameters (Table~\ref{tbl:SLCF}) allows you to record various gas phase quantities at more than a single point. A ``slice'' refers to a subset of the whole domain. It can be a line, plane, or volume, depending on the values of {\ct XB}. The sextuplet {\ct XB} indicates the boundaries of the ``slice'' plane. {\ct XB} is prescribed as in the {\ct OBST} or {\ct VENT} groups, with the possibility that 0, 2, or 4 out of the 6 values be the same to indicate a volume, plane or line, respectively. A handy trick is to specify, for example, {\ct PBY=5.3} instead of {\ct XB} if it is desired that the entire plane $y=5.3$ slicing through the domain be saved. {\ct PBX} and {\ct PBZ} control planes perpendicular to the $x$ and $z$ axes, respectively.
+The {\ct SLCF} (``slice file'') namelist group parameters (Table~\ref{tbl:SLCF}) allows you to record various gas phase quantities at more than a single point. A ``slice'' refers to a subset of the whole domain. It can be a line, plane, or volume, depending on the values of {\ct XB}. The sextuplet {\ct XB} indicates the boundaries of the ``slice'' plane. {\ct XB} is prescribed as in the {\ct OBST} or {\ct VENT} groups, with the possibility that 0, 2, or 4 out of the 6 values be the same to indicate a volume, plane or line, respectively. A handy trick is to specify, for example, {\ct PBY=5.3} instead of {\ct XB} if it is desired that the entire plane $y=5.3$ slicing through the domain be saved. {\ct PBX} and {\ct PBZ} control planes perpendicular to the $x$ and $z$ axes, respectively.  An alternative way to specify a slice plane through the middle of the domain is using {\ct DB} with values of {\ct 'XMID'}, {\ct 'YMID'}, or {\ct 'ZMID'}.
 
 By default, 1-D and 2-D slice files are saved {\ct NFRAMES} times per simulation. You can control the frequency of output with {\ct DT\_SLCF} on the {\ct DUMP} line. If the ``slice'' is a 3-D volume, then its output frequency is controlled by the parameter {\ct DT\_SL3D}.  By default, FDS sets {\ct DT\_SL3D=(T\_END-T\_BEGIN)/5}.  You may specify a different value of {\ct DT\_SL3D} on {\ct DUMP}.  Note that 3-D slice files can become extremely large if {\ct DT\_SL3D} is small.
 
@@ -8625,6 +8627,8 @@ A useful feature of a device ({\ct DEVC}) is to specify an output quantity along
 causes FDS to write out the maximum gas phase temperature over the volume bounded by {\ct XB}. Note that it does not compute the maximum over the entire computational domain, just the specified volume. Other {\ct SPATIAL\_STATISTIC}'s are discussed below.  Note that some are appropriate for gas phase output quantities, some for solid phase, and some for both.
 
 For solid phase output quantities, like heat fluxes and surface temperatures, the specification of a {\ct SURF\_ID} along with the appropriate statistic limits the calculation to only those surfaces. You can further limit the search by using the sextuplet of coordinates {\ct XB} to force FDS to only compute statistics for surface cells within the given volume. Be careful to account for the fact that the solid surface might shift to conform to the underlying numerical grid. Note that you do not (and should not) specify an orientation via the parameter {\ct IOR} when using a spatial statistic. {\ct IOR} is only needed to find a specific point on the solid surface.
+
+Note that a shortcut for specifying the six {\ct XB} values on the {\ct DEVC} line is to instead use {\ct DB='WHOLE DOMAIN'} ({\ct DB} stands for ``Domain Boundary'').
 
 
 \subsubsection{Minimum or Maximum Value}
@@ -9646,6 +9650,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct CONVERSION\_FACTOR}    & Real            & Section~\ref{info:out:DEVC}                                     &       & 1             \\ \hline
 {\ct COORD\_FACTOR}         & Real            & Section~\ref{info:line_file}                                    &       & 1             \\ \hline
 {\ct CTRL\_ID}              & Character       & Section~\ref{info:RAMPDEVC}                                     &       &               \\ \hline
+{\ct DB}                    & Character       & Section~\ref{info:statistics}                                   &       &               \\ \hline
 {\ct DELAY}                 & Real            & Section~\ref{info:aspiration_detector}                          & s     & 0             \\ \hline
 {\ct DEPTH}                 & Real            & Section~\ref{info:material_components}                          & m     & 0             \\ \hline
 {\ct DEVC\_ID}              & Character       & Sections~\ref{info:aspiration_detector} and \ref{info:RAMPDEVC} &       &               \\ \hline
@@ -9702,7 +9707,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct XYZ\_UNITS}            & Character       & Section~\ref{info:line_file}                                    &       &  {\ct 'm'}    \\ \hline
 \end{longtable}
 
-% Undocumented: CELL_L (JF), DB (RJM), GHOST_CELL_IOR (??), MOVE_ID (KM)
+% Undocumented: CELL_L (JF), GHOST_CELL_IOR (??), MOVE_ID (KM)
 
 \vspace{\baselineskip}
 
@@ -9907,6 +9912,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \endhead
 {\ct CELL\_CENTERED}              & Logical           & Section~\ref{info:initial_droplets}           &                & {\ct .FALSE.} \\ \hline
 {\ct CTRL\_ID}                    & Character         & Section~\ref{info:initial_droplets}           &                &               \\ \hline
+{\ct DB}                          & Character         & Section~\ref{info:INIT}                       &                &               \\ \hline
 {\ct DENSITY}                     & Real              & Section~\ref{info:INIT}                       & kg/m$^3$       & Ambient       \\ \hline
 {\ct DEVC\_ID}                    & Character         & Section~\ref{info:initial_droplets}           &                &               \\ \hline
 {\ct DIAMETER}                    & Real              & Section~\ref{info:initial_droplets}           & \si{\micro m}  &               \\ \hline
@@ -9939,7 +9945,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct XYZ(3)}                      & Real Array        & Section~\ref{info:initial_droplets}           & m              &               \\ \hline
 \end{longtable}
 
-% Undocumented: DB (RJM), PATH_RAMP (JF,RJM)
+% Undocumented: PATH_RAMP (JF,RJM)
 
 \vspace{\baselineskip}
 
@@ -10676,6 +10682,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hline \hline
 \endhead
 {\ct CELL\_CENTERED}    & Logical           & Section~\ref{info:SLCF}                   &           & {\ct .FALSE.}     \\ \hline
+{\ct DB}                & Character         & Section~\ref{info:SLCF}                   &           &                   \\ \hline
 {\ct EVACUATION}        & Logical           & Reference~\cite{FDS_Evac_Users_Guide}     &           & {\ct .FALSE.}     \\ \hline
 {\ct MAXIMUM\_VALUE}    & Real              & Reference~\cite{Smokeview_Users_Guide}    &           &                   \\ \hline
 {\ct MESH\_NUMBER}      & Integer           & Section~\ref{info:SLCF}                   &           &                   \\ \hline
@@ -10687,11 +10694,11 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct REAC\_ID}          & Character         & See {\ct QUANTITY=`HRRPUV REAC`}          &           &                   \\ \hline
 {\ct SPEC\_ID}          & Character         & Section~\ref{info:outputquantities}       &           &                   \\ \hline
 {\ct VECTOR}            & Logical           & Section~\ref{info:SLCF}                   &           & {\ct .FALSE.}     \\ \hline
-{\ct VELO\_INDEX}       & Integer           & Section~\ref{info:velocity}               &           &  0                \\ \hline
+{\ct VELO\_INDEX}       & Integer           & Section~\ref{info:velocity}               &           & 0                 \\ \hline
 {\ct XB(6)}             & Real Array        & Section~\ref{info:SLCF}                   & m         &                   \\ \hline
 \end{longtable}
 
-% Undocumented: AGL_SLICE, DB (RJM), FACE_CENTERED, FIRE_LINE, ID, IOR, LEVEL_SET_FIRE_LINE, MATL_ID, PROP_ID, SLICETYPE, SMV_OFFSET, TRNF_ID
+% Undocumented: AGL_SLICE, FACE_CENTERED, FIRE_LINE, ID, IOR, LEVEL_SET_FIRE_LINE, MATL_ID, PROP_ID, SLICETYPE, SMV_OFFSET, TRNF_ID
 
 \vspace{\baselineskip}
 
@@ -10980,6 +10987,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \endhead
 {\ct COLOR    }             & Character         & Section~\ref{info:colors}                                 &               &                     \\ \hline
 {\ct CTRL\_ID }             & Character         & Section~\ref{info:activate_deactivate}                    &               &                     \\ \hline
+{\ct DB    }                & Character         & Section~\ref{info:VENT_Basics}                            &               &                     \\ \hline
 {\ct DEVC\_ID }             & Character         & Section~\ref{info:activate_deactivate}                    &               &                     \\ \hline
 {\ct DYNAMIC\_PRESSURE}     & Real              & Section~\ref{info:pressure_boundary}                      & Pa            & 0.                  \\ \hline
 {\ct EVACUATION    }        & Logical           & Reference~\cite{FDS_Evac_Users_Guide}                     &               &  {\ct .FALSE.}      \\ \hline
@@ -11011,7 +11019,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct XYZ(3) }               & Real Array        & Section~\ref{info:spread}                                 & m             &                     \\ \hline
 \end{longtable}
 
-% Undocumented: DB (RJM), SLCF_ID (RJM)
+% Undocumented: SLCF_ID (RJM)
 
 \vspace{\baselineskip}
 
