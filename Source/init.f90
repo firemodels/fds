@@ -286,14 +286,6 @@ IF (N_LP_ARRAY_INDICES>0 .OR. N_REACTIONS>0 .OR. ANY(SPECIES_MIXTURE%DEPOSITING)
    M%M_DOT_PPP=0._EB
 ENDIF
 
-! Allocate unstructured geometry divergence
-
-IF (N_FACE > 0) THEN
-   ALLOCATE(M%D_GEOMETRY(0:IBP1,0:JBP1,0:KBP1),STAT=IZERO)
-   CALL ChkMemErr('INIT','D_GEOMETRY',IZERO)
-   M%D_GEOMETRY = 0._EB
-ENDIF
-
 ! If radiation absorption desired allocate arrays
 
 IF (.NOT.EVACUATION_ONLY(NM)) THEN
@@ -555,23 +547,6 @@ M%WORK4 = 0._EB
 M%WORK5 = 0._EB
 M%WORK6 = 0._EB
 IF (.NOT.EVACUATION_ONLY(NM)) M%WORK7 = 0._EB
-
-! Immersed Boundary Method
-
-IF (N_FACE>0) THEN
-   ALLOCATE(M%U_MASK(0:M%IBP1,0:M%JBP1,0:M%KBP1),STAT=IZERO)
-   CALL ChkMemErr('INIT','U_MASK',IZERO)
-   ALLOCATE(M%V_MASK(0:M%IBP1,0:M%JBP1,0:M%KBP1),STAT=IZERO)
-   CALL ChkMemErr('INIT','V_MASK',IZERO)
-   ALLOCATE(M%W_MASK(0:M%IBP1,0:M%JBP1,0:M%KBP1),STAT=IZERO)
-   CALL ChkMemErr('INIT','W_MASK',IZERO)
-   ALLOCATE(M%P_MASK(0:M%IBP1,0:M%JBP1,0:M%KBP1),STAT=IZERO)
-   CALL ChkMemErr('INIT','P_MASK',IZERO)
-   M%U_MASK=1
-   M%V_MASK=1
-   M%W_MASK=1
-   M%P_MASK=1
-ENDIF
 
 ! Allocate ONE_D data storage array and compute the dimensions of its components
 
