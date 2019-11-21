@@ -9450,9 +9450,15 @@ of a {\ct DUCT\_ID}, and quantities for a node require the specification of a {\
 This appendix lists all of the input parameters for FDS in separate tables grouped by namelist, these tables are in alphabetical order along with the parameters within them. This is intended to be used as a quick reference and does not replace reading the detailed description of the parameters in the main body of this guide. See Table \ref{tbl:namelistgroups} for a cross-reference of relevant sections and the tables in this appendix. The reason for this statement is that many of the listed parameters are mutually exclusive -- specifying more than one can cause the program to either fail or run in an unpredictable manner. Also, some of the parameters trigger the code to work in a certain mode when specified. For example, specifying the thermal conductivity of a solid surface triggers the code to assume the material to be thermally-thick, mandating that other
 properties be specified as well. Simply prescribing as many properties as possible from a handbook is bad practice. Only prescribe those parameters which are necessary to describe the desired scenario. Note that you may use the character string {\ct FYI} on any namelist line to make a note or comment.
 
-% define namelists to be ignored by compare_namelists.sh verification script
+% Define namelists to be ignored by compare_namelists.sh verification script.
+% All namelist keywords are ignored.
+
 % ignorenamelists: CORR, DOOR, EDEV, ENTR, EVAC, EVHO, EVSS, EXIT, PERS, STRS
 % ignorenamelists: TRNY, TRNZ
+
+% Define individual namelist keywords to be ignored by compare_namelists.sh 
+% verification script.  Only some not all of the namelist keywords are ignored.
+
 % ignorenamelistkw: /CLIP/FYI, /TIME/FYI
 
 \section{\texorpdfstring{{\tt BNDF}}{BNDF} (Boundary File Parameters)}
