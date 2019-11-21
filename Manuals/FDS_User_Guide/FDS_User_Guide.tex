@@ -9781,7 +9781,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct WRITE\_XYZ}                    & Logical      & Section~\ref{info:PL3D}                &           & {\ct .FALSE.}                  \\ \hline
 \end{longtable}
 
-% Undocumented: DT_GEOM, DT_RADF, GEOM_DIAG, GET_CUTCELLS_VERBOSE, MMS_TIMER (RJM), STORE_SPECIES_FLUX (RJM), T_RADF_BEGIN, T_RADF_END
+% Undocumented: DT_RADF, GET_CUTCELLS_VERBOSE(MV, debug), MMS_TIMER (RJM), STORE_SPECIES_FLUX (RJM), T_RADF_BEGIN, T_RADF_END
 
 \noindent
 $\Delta t$={\ct T\_END-T\_BEGIN}
@@ -10186,9 +10186,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct Y\_O2\_INFTY}                                  & Real         & Section~\ref{info:simple_chemistry}     &  kg/kg     &                   \\ \hline
 \end{longtable}
 
-% Undocumented: AEROSOL_AL2O3, AEROSOL_SCRUBBING, CC_IBM, CCVOL_LINK, CC_SLIPIBM, CC_ZEROIBM_VELO, CHECK_MASS_CONSERVE, COMPUTE_CUTCELLS_ONLY, CONSTANT_H_SOLID, DO_IMPLICIT_CCREGION, ENTHALPY_TRANSPORT (RJM),
-% EVAP_MODEL, EXTERNAL_BOUNDARY_CORRECTION, HT3D_TEST (RJM), MAXIMUM_GEOMETRY_FACES, MAXIMUM_GEOMETRY_ZVALS, NEW_VEG_LEVEL_SET, NUCLEATION_SITES, PERIODIC_TEST (RJM),
-% POSITIVE_ERROR_TEST, PROCESS_CUTCELLS, PROFILING, QFAN_BETA_TEST, SLIP_CONDITION, TENSOR_DIFFUSIVITY (RJM), TERRAIN_CASE, TERRAIN_IMAGE, TURB_INIT_CLOCK (RJM),
+% Undocumented: AEROSOL_AL2O3, AEROSOL_SCRUBBING, CC_IBM(MV), CCVOL_LINK(MV), CC_SLIPIBM_VELO(MV,debug), CC_ZEROIBM_VELO(MV,debug), CHECK_MASS_CONSERVE(MV), COMPUTE_CUTCELLS_ONLY(MV), CONSTANT_H_SOLID, DO_IMPLICIT_CCREGION(MV), ENTHALPY_TRANSPORT (RJM),
+% EVAP_MODEL, EXTERNAL_BOUNDARY_CORRECTION, HT3D_TEST (RJM), MAXIMUM_GEOMETRY_FACES(MV), MAXIMUM_GEOMETRY_ZVALS(MV), NEW_VEG_LEVEL_SET, NUCLEATION_SITES, PERIODIC_TEST (RJM),
+% POSITIVE_ERROR_TEST, PROFILING, QFAN_BETA_TEST, SLIP_CONDITION(RJM), TENSOR_DIFFUSIVITY (RJM), TERRAIN_CASE, TERRAIN_IMAGE, TURB_INIT_CLOCK (RJM),
 % UVW_FILE (RJM), VEG_LEVEL_SET_COUPLED, VEG_LEVEL_SET_UNCOUPLED, WIND_ONLY
 
 \vspace{\baselineskip}
@@ -10208,12 +10208,13 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct MOVE} (Coordinate Transformation Parameters)} \\
 \hline \hline
 \endhead
-{\ct AXIS(3)}         & Real Array       & Axis of rotation                                &        & (0,0,1)                    \\ \hline
+{\ct AXIS(3)}         & Real Array       & Axis of rotation                                &        & (0.,0.,1.)                    \\ \hline
 {\ct DX}              & Real             & Translation in the $x$ direction                & m      & 0.                         \\ \hline
 {\ct DY}              & Real             & Translation in the $y$ direction                & m      & 0.                         \\ \hline
 {\ct DZ}              & Real             & Translation in the $z$ direction                & m      & 0.                         \\ \hline
 {\ct ID }             & Character        & Identification tag                              &        &                            \\ \hline
 {\ct ROTATION\_ANGLE} & Real             & Angle of rotation about {\ct AXIS}              & deg.   & 0.                         \\ \hline
+{\ct T34}            & Real Array    & $3 \times 4$ Transformation Matrix  &        & 0.                    \\ \hline
 {\ct X0}              & Real             & $x$ origin                                      & m      & 0.                         \\ \hline
 {\ct Y0}              & Real             & $y$ origin                                      & m      & 0.                         \\ \hline
 {\ct Z0}              & Real             & $z$ origin                                      & m      & 0.                         \\ \hline
@@ -10293,6 +10294,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct HT3D}                    & Logical         & Section~\ref{info:ht3d}                 &           & {\ct .FALSE.} \\ \hline
 {\ct ID }                     & Character       & Section~\ref{info:OBST_Basics}          &           &               \\ \hline
 {\ct INTERNAL\_HEAT\_SOURCE}  & Real            & Section~\ref{sec:heat_sources}          & kW/m$^3$  &               \\ \hline
+{\ct LENGTH}                  & Real            & Section~\ref{info:multobst}             & m         &               \\ \hline
 {\ct MATL\_ID}                & Character       & Section~\ref{sec:ht_only}               &           &               \\ \hline
 {\ct MESH\_ID}                & Character       & Reference~\cite{FDS_Evac_Users_Guide}   &           &               \\ \hline
 {\ct MULT\_ID }               & Character       & Section~\ref{info:MULT}                 &           &               \\ \hline
@@ -10312,13 +10314,15 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SURF\_ID6(6)}            & Char.~Array     & Section~\ref{info:OBST_Basics}          &           &               \\ \hline
 {\ct SURF\_IDS(3)}            & Char.~Array     & Section~\ref{info:OBST_Basics}          &           &               \\ \hline
 {\ct TEXTURE\_ORIGIN(3)}      & Real Array      & Section~\ref{info:texture_map}          & m         & (0.,0.,0.)    \\ \hline
+{\ct THETA}                  & Real            & Section~\ref{info:multobst}             & deg.         &               \\ \hline
 {\ct THICKEN}                 & Logical         & Section~\ref{info:OBST_Basics}          &           & {\ct .FALSE.} \\ \hline
 {\ct TRANSPARENCY}            & Real            & Section~\ref{info:OBST_Basics}          &           &  1            \\ \hline
+{\ct WIDTH}                  & Real            & Section~\ref{info:multobst}             & m         &               \\ \hline
 {\ct XB(6) }                  & Real Array      & Section~\ref{info:OBST_Basics}          & m         &               \\ \hline
 {\ct XYZ(3) }                 & Real Array      & Section~\ref{info:multobst}             & m         & (0.,0.,0.)    \\ \hline
 \end{longtable}
 
-% Undocumented: LENGTH, NOTERRAIN, THETA, WIDTH
+% Undocumented: NOTERRAIN
 
 
 \vspace{\baselineskip}
@@ -10710,7 +10714,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct XB(6)}             & Real Array        & Section~\ref{info:SLCF}                   & m         &                   \\ \hline
 \end{longtable}
 
-% Undocumented: AGL_SLICE, FACE_CENTERED, FIRE_LINE, ID, IOR, LEVEL_SET_FIRE_LINE, MATL_ID, PROP_ID, SLICETYPE, SMV_OFFSET, TRNF_ID
+% Undocumented: AGL_SLICE(MV,GF), FACE_CENTERED(MV,GF), FIRE_LINE, ID, IOR, LEVEL_SET_FIRE_LINE, MATL_ID, PROP_ID, SLICETYPE(MV,GF), SMV_OFFSET, TRNF_ID
 
 \vspace{\baselineskip}
 
