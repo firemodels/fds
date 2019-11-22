@@ -1054,12 +1054,6 @@ ENDDO
 
 IF (SOLID_PYRO3D .AND. .NOT.SOLID_MT3D) CALL ASSIGN_HT3D_WALL_INDICES(NM)
 
-! New level set method for firespread
-
-IF (NEW_VEG_LEVEL_SET) THEN
-   ALLOCATE(M%PHI_NLS(0:M%IBP1,0:M%JBP1),STAT=IZERO)
-   CALL ChkMemErr('INIT','PHI_NLS',IZERO)
-ENDIF
 ENDIF NOT_EVAC_IF_3
 
 END SUBROUTINE INITIALIZE_MESH_VARIABLES_1
@@ -2682,12 +2676,6 @@ IF (WC%SURF_INDEX==TGA_SURF_INDEX) TGA_WALL_INDEX = IW
 DO NSLICE = 1, M%N_TERRAIN_SLCF
    IF (IOR==3) M%K_AGL_SLICE(I,J,NSLICE) = M%K_AGL_SLICE(I,J,NSLICE) + WC%ONE_D%KKG
 ENDDO
-
-! Fill arrays containing K index and physical height of terrain for use in level set firespread
-
-IF (VEG_LEVEL_SET .AND. IOR==3) THEN
-  M%LS_Z_TERRAIN(WC%ONE_D%IIG,WC%ONE_D%JJG) = M%Z(WC%ONE_D%KKG-1)
-ENDIF
 
 ! Do not assign normal velocities at boundaries of evacuation meshes
 
