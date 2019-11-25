@@ -3522,10 +3522,6 @@ IF (N_GEOM>0 .AND. T>=BNDC_CLOCK) THEN
    BNDC_CLOCK = BNDC_CLOCK + DT_BNDC
 ENDIF
 
-IF (N_BNDE>0 .AND. T>=BNDE_CLOCK) THEN
-   !IF (MYID==0) CALL DUMP_BNDE(T)
-   BNDE_CLOCK = BNDE_CLOCK + DT_BNDE
-ENDIF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 ! Dump out Evac info
