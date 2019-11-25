@@ -9336,6 +9336,12 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 %{\ct DIFFUSIVE MASS FLUX Y}                     & $\rho D_\alpha \partial Y_\alpha/\partial y$       & kg/s/m$^2$     & D,I,P,S      \\ \hline
 %{\ct DIFFUSIVE MASS FLUX Z}                     & $\rho D_\alpha \partial Y_\alpha/\partial z$       & kg/s/m$^2$     & D,I,P,S      \\ \hline
 {\ct DISSIPATION RATE}                          & $\mu / \rho \times $ {\ct STRAIN RATE}            & m$^2$/s$^3$    & D,I,P,S      \\ \hline
+%{\ct DUDT}                                      & $\partial u/\partial t$                           & m/s$^2$        & D,I,P,S      \\ \hline
+%{\ct DVDT}                                      & $\partial v/\partial t$                           & m/s$^2$        & D,I,P,S      \\ \hline
+%{\ct DWDT}                                      & $\partial w/\partial t$                           & m/s$^2$        & D,I,P,S      \\ \hline
+%{\ct DHDX}                                      & $\partial H/\partial x$                           & m/s$^2$        & D,I,P,S      \\ \hline
+%{\ct DHDY}                                      & $\partial H/\partial y$                           & m/s$^2$        & D,I,P,S      \\ \hline
+%{\ct DHDZ}                                      & $\partial H/\partial z$                           & m/s$^2$        & D,I,P,S      \\ \hline
 {\ct EMISSIVITY}                                & Surface emissivity (usually constant)             &                & B,D          \\ \hline
 {\ct EXTINCTION}                                & Section~\ref{info:extinct_out}                    &                & D,S          \\ \hline
 {\ct F\_X, F\_Y, F\_Z}                          & Momentum terms, $F_x$, $F_y$, $F_z$               & m/s$^2$        & D,I,P,S      \\ \hline
@@ -9381,7 +9387,7 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 %{\ct TOTAL MASS FLUX Y} & $\overline{\rho Y_\alpha} v + \rho D_\alpha \partial Y_\alpha/\partial y$ & kg/s/m$^2$     & D,I,P,S      \\ \hline
 %{\ct TOTAL MASS FLUX Z} & $\overline{\rho Y_\alpha} w + \rho D_\alpha \partial Y_\alpha/\partial z$ & kg/s/m$^2$     & D,I,P,S      \\ \hline
 {\ct VELOCITY ERROR}                            & Section~\ref{info:PRES}                           &                & B            \\ \hline
-{\ct VISCOUS STRESS WALL}                  & Section~\ref{info:distributed_forces}        &    Pa       &  B,D        \\ \hline
+{\ct VISCOUS STRESS WALL}                       & Section~\ref{info:distributed_forces}        &    Pa       &  B,D        \\ \hline
 {\ct VISCOUS WALL UNITS}                        & Section~\ref{info:yplus}                          &                & B,D          \\ \hline
 {\ct VN}                                        & Section~\ref{info:TIMING}                         &                & D,I,P,S      \\ \hline
 {\ct VN MAX}                                    & Section~\ref{info:TIMING}                         &                & D            \\ \hline
@@ -9390,7 +9396,7 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct VORTICITY Z}                               & $\partial v/\partial x - \partial u/\partial y$   & 1/s            & D,I,P,S      \\ \hline
 %{\ct WALL CELL BOUNDARY TYPE}                   & Index of {\ct WC\%BOUNDARY\_TYPE} for debug       &                & B            \\ \hline
 %{\ct WALL CELL THERMAL BOUNDARY TYPE}           & Index of {\ct SF\%THERMAL\_BC\_INDEX} for debug   &                & B            \\ \hline
-{\ct WALL PRESSURE}                           & Section~\ref{info:distributed_forces} &     Pa                       & B,D         \\ \hline
+{\ct WALL PRESSURE}                             & Section~\ref{info:distributed_forces} &     Pa                       & B,D         \\ \hline
 {\ct WALL VISCOSITY}                            & Near-wall viscosity, $\mu_w$                      & \si{kg/(m.s)}  & B,D          \\ \hline
 {\ct WAVELET ERROR}$^3$                         & Section~\ref{info:meshquality}                    &                & S            \\ \hline
 \end{longtable}
