@@ -381,10 +381,12 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       V_LS(IIG,JJG) = V(IIG,JJG,KKG)
 
       ! AU grassland ROS for infinite head and 6% moisutre
+
       UMAG     = SQRT(U_LS(IIG,JJG)**2 + V_LS(IIG,JJG)**2)
       ROS_HEAD(IIG,JJG)  = SF%VEG_LSET_ROS_HEAD*(0.165_EB + 0.534_EB*UMAG)*0.523_EB
 
       ! Use assumed ellipse shape of fireline as in Farsite
+
       IF_ELLIPSE_COUPLED: IF (SF%VEG_LSET_ELLIPSE) THEN
 
          ROS_HEAD(IIG,JJG) = SF%VEG_LSET_ELLIPSE_HEAD
