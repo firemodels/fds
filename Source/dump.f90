@@ -203,11 +203,7 @@ ELSE
       ENDDO
    ENDIF
    IF (T>=UVW_TIMER(MESHES(NM)%IUVW)) THEN
-      IF (NMESHES>1) THEN
-         WRITE(FN_UVW,'(A,A,I3.3,A,I3.3,A)') TRIM(CHID),'_uvw_t',MESHES(NM)%IUVW,'_m',NM,'.csv'
-      ELSE
-         WRITE(FN_UVW,'(A,A,I3.3,A)') TRIM(CHID),'_uvw_',MESHES(NM)%IUVW,'.csv'
-      ENDIF
+      WRITE(FN_UVW,'(A,A,I3.3,A,I3.3,A)') TRIM(CHID),'_uvw_t',MESHES(NM)%IUVW,'_m',NM,'.csv'
       CALL DUMP_UVW(NM,FN_UVW)
       MESHES(NM)%IUVW = MESHES(NM)%IUVW + 1
    ENDIF
@@ -415,8 +411,7 @@ MESH_LOOP: DO NM=1,NMESHES
 
    LU_XYZ(NM)  = GET_FILE_NUMBER()
    LU_PL3D(NM) = GET_FILE_NUMBER()
-   IF (NMESHES >1) WRITE(FN_XYZ(NM),'(A,A,I4.4,A)') TRIM(CHID),'_',NM,'.xyz'
-   IF (NMESHES==1) WRITE(FN_XYZ(NM),'(A,A)')        TRIM(CHID),       '.xyz'
+   WRITE(FN_XYZ(NM),'(A,A,I4.4,A)') TRIM(CHID),'_',NM,'.xyz'
 
    ! Iso Surface Files
 
@@ -429,10 +424,8 @@ MESH_LOOP: DO NM=1,NMESHES
       IF (RESTART) LU_ISOF(N,NM) = ABS(LU_ISOF(N,NM))
       LU_ISOF2(N,NM) = -GET_FILE_NUMBER()
       IF (RESTART) LU_ISOF2(N,NM) = ABS(LU_ISOF2(N,NM))
-      IF (NMESHES >1) WRITE(FN_ISOF(N,NM),'(A,A,I4.4,A,I2.2,A)') TRIM(CHID),'_',NM,'_',N,'.iso'
-      IF (NMESHES==1) WRITE(FN_ISOF(N,NM),'(A,A,I2.2,A)')        TRIM(CHID),'_',N,'.iso'
-      IF (NMESHES >1) WRITE(FN_ISOF2(N,NM),'(A,A,I4.4,A,I2.2,A)') TRIM(CHID),'_',NM,'_',N,'.viso'
-      IF (NMESHES==1) WRITE(FN_ISOF2(N,NM),'(A,A,I2.2,A)')        TRIM(CHID),'_',N,'.viso'
+      WRITE(FN_ISOF(N,NM), '(A,A,I4.4,A,I2.2,A)') TRIM(CHID),'_',NM,'_',N,'.iso'
+      WRITE(FN_ISOF2(N,NM),'(A,A,I4.4,A,I2.2,A)') TRIM(CHID),'_',NM,'_',N,'.viso'
    ENDDO
 
    ! Allocate unit numbers and file names for 3d smoke files
@@ -443,12 +436,10 @@ MESH_LOOP: DO NM=1,NMESHES
       IF (SMOKE3D_QUANTITY_INDEX(N)==0) CYCLE
       LU_SMOKE3D(N,NM) = -GET_FILE_NUMBER()
       IF (RESTART) LU_SMOKE3D(N,NM) = ABS(LU_SMOKE3D(N,NM))
-      IF (NMESHES >1) WRITE(FN_SMOKE3D(N,NM),  '(A,A,I4.4,A,I2.2,A)') TRIM(CHID),'_',NM,'_',N,'.s3d'
-      IF (NMESHES==1) WRITE(FN_SMOKE3D(N,NM),  '(A,A,I2.2,A)')        TRIM(CHID),'_',N,'.s3d'
+      WRITE(FN_SMOKE3D(N,NM),  '(A,A,I4.4,A,I2.2,A)') TRIM(CHID),'_',NM,'_',N,'.s3d'
       LU_SMOKE3D(N+4,NM) = -GET_FILE_NUMBER()
       IF (RESTART) LU_SMOKE3D(N+4,NM) = ABS(LU_SMOKE3D(N+4,NM))
-      IF (NMESHES >1) WRITE(FN_SMOKE3D(N+4,NM),'(A,A,I4.4,A,I2.2,A)') TRIM(CHID),'_',NM,'_',N,'.s3d.sz'
-      IF (NMESHES==1) WRITE(FN_SMOKE3D(N+4,NM),'(A,A,I2.2,A)')        TRIM(CHID),'_',N,'.s3d.sz'
+      WRITE(FN_SMOKE3D(N+4,NM),'(A,A,I4.4,A,I2.2,A)') TRIM(CHID),'_',NM,'_',N,'.s3d.sz'
    ENDDO
 
    ! Slice Files
@@ -457,34 +448,20 @@ MESH_LOOP: DO NM=1,NMESHES
       LU_SLCF(N,NM) = GET_FILE_NUMBER()
       LU_SLCF_GEOM(N,NM) = GET_FILE_NUMBER()
       LU_SLCF(N+N_SLCF_MAX,NM) = GET_FILE_NUMBER()
-      IF (NMESHES>1) THEN
-         IF (M%N_SLCF <100) CFORM = '(A,A,I4.4,A,I2.2,A)'
-         IF (M%N_SLCF>=100) CFORM = '(A,A,I4.4,A,I3.3,A)'
-         WRITE(FN_SLCF(N,NM),CFORM) TRIM(CHID),'_',NM,'_',N,'.sf'
-         WRITE(FN_SLCF_GEOM(N,NM),CFORM) TRIM(CHID),'_',NM,'_',N,'.gsf'
-         WRITE(FN_SLCF(N+N_SLCF_MAX,NM),CFORM) TRIM(CHID),'_',NM,'_',N,'.sf.bnd'
-      ELSE
-         IF (M%N_SLCF <100) CFORM = '(A,A,I2.2,A)'
-         IF (M%N_SLCF>=100) CFORM = '(A,A,I3.3,A)'
-         WRITE(FN_SLCF(N,NM),CFORM) TRIM(CHID),'_',N,'.sf'
-         WRITE(FN_SLCF_GEOM(N,NM),CFORM) TRIM(CHID),'_',N,'.gsf'
-         WRITE(FN_SLCF(N+N_SLCF_MAX,NM),CFORM) TRIM(CHID),'_',N,'.sf.bnd'
-      ENDIF
+      IF (M%N_SLCF <100) CFORM = '(A,A,I4.4,A,I2.2,A)'
+      IF (M%N_SLCF>=100) CFORM = '(A,A,I4.4,A,I3.3,A)'
+      WRITE(FN_SLCF(N,NM),CFORM) TRIM(CHID),'_',NM,'_',N,'.sf'
+      WRITE(FN_SLCF_GEOM(N,NM),CFORM) TRIM(CHID),'_',NM,'_',N,'.gsf'
+      WRITE(FN_SLCF(N+N_SLCF_MAX,NM),CFORM) TRIM(CHID),'_',NM,'_',N,'.sf.bnd'
    ENDDO
 
    ! Radiation Files
 
    DO N=1,M%N_RADF
       LU_RADF(N,NM) = GET_FILE_NUMBER()
-      IF (NMESHES>1) THEN
-         IF (M%N_RADF <100) CFORM = '(A,A,I4.4,A,I2.2,A)'
-         IF (M%N_RADF>=100) CFORM = '(A,A,I4.4,A,I3.3,A)'
-         WRITE(FN_RADF(N,NM),CFORM) TRIM(CHID),'_radf_',NM,'_',N,'.txt'
-      ELSE
-         IF (M%N_RADF <100) CFORM = '(A,A,I2.2,A)'
-         IF (M%N_RADF>=100) CFORM = '(A,A,I3.3,A)'
-         WRITE(FN_RADF(N,NM),CFORM) TRIM(CHID),'_radf_',N,'.txt'
-      ENDIF
+      IF (M%N_RADF <100) CFORM = '(A,A,I4.4,A,I2.2,A)'
+      IF (M%N_RADF>=100) CFORM = '(A,A,I4.4,A,I3.3,A)'
+      WRITE(FN_RADF(N,NM),CFORM) TRIM(CHID),'_radf_',NM,'_',N,'.txt'
    ENDDO
 
    ! Boundary Files
@@ -511,11 +488,7 @@ MESH_LOOP: DO NM=1,NMESHES
    IF (TERRAIN_CASE) THEN
       DO N=1,N_BNDF
          LU_BNDF_SLCF(N,NM) = GET_FILE_NUMBER()
-         IF (NMESHES>1) THEN
-            WRITE(FN_BNDF_SLCF(N,NM),'(A,A,I4.4,A,I2.2,A)') TRIM(CHID),'_',NM,'_',N,'_bf.sf'
-         ELSE
-            WRITE(FN_BNDF_SLCF(N,NM),'(A,A,I2.2,A)') TRIM(CHID),'_',N,'_bf.sf'
-         ENDIF
+         WRITE(FN_BNDF_SLCF(N,NM),'(A,A,I4.4,A,I2.2,A)') TRIM(CHID),'_',NM,'_',N,'_bf.sf'
       ENDDO
    ENDIF
 
@@ -524,13 +497,8 @@ MESH_LOOP: DO NM=1,NMESHES
    IF (PARTICLE_FILE .AND. .NOT.EVACUATION_ONLY(NM)) THEN
       LU_PART(NM) = GET_FILE_NUMBER()
       LU_PART(NM+NMESHES) = GET_FILE_NUMBER()
-      IF (NMESHES>1) THEN
-         WRITE(FN_PART(NM),'(A,I4.4,A)') TRIM(CHID)//'_',NM,'.prt5'
-         WRITE(FN_PART(NM+NMESHES),'(A,I4.4,A)') TRIM(CHID)//'_',NM,'.prt5.bnd'
-      ELSE
-         WRITE(FN_PART(NM),'(A,A)') TRIM(CHID),'.prt5'
-         WRITE(FN_PART(NM+NMESHES),'(A,A)') TRIM(CHID),'.prt5.bnd'
-      ENDIF
+      WRITE(FN_PART(NM),'(A,I4.4,A)') TRIM(CHID)//'_',NM,'.prt5'
+      WRITE(FN_PART(NM+NMESHES),'(A,I4.4,A)') TRIM(CHID)//'_',NM,'.prt5.bnd'
    ENDIF
 
    ! Particle Files for Evacuation
@@ -539,14 +507,9 @@ MESH_LOOP: DO NM=1,NMESHES
       IF (EMESH_INDEX(NM)>0) THEN
          LU_PART(NM) = GET_FILE_NUMBER()
          LU_PART(NM+NMESHES) = GET_FILE_NUMBER()
-         IF (NMESHES>1) THEN
-            WRITE(FN_PART(NM),'(A,I4.4,A)') TRIM(CHID)//'_',NM,'.prt5'
-            WRITE(FN_PART(NM+NMESHES),'(A,I4.4,A)') TRIM(CHID)//'_',NM,'.prt5.bnd'
-         ELSE
-            WRITE(FN_PART(NM),'(A,A)') TRIM(CHID),'.prt5'
-            WRITE(FN_PART(NM+NMESHES),'(A,A)') TRIM(CHID),'.prt5.bnd'
-         ENDIF
-      END IF
+         WRITE(FN_PART(NM),'(A,I4.4,A)') TRIM(CHID)//'_',NM,'.prt5'
+         WRITE(FN_PART(NM+NMESHES),'(A,I4.4,A)') TRIM(CHID)//'_',NM,'.prt5.bnd'
+      ENDIF
    ENDIF
 
    ! Restart Files
@@ -1969,16 +1932,6 @@ DO N=1,N_DEVC
             ORIENTATION_VECTOR(2,DV%ORIENTATION_INDEX),ORIENTATION_VECTOR(3,DV%ORIENTATION_INDEX),STATE_INDEX,0,' % ',TRIM(PY%ID)
    ENDIF
 ENDDO
-
-! Write out level set slice file name (placeholder)
-
-IF (VEG_LEVEL_SET) THEN
-   WRITE(LU_SMV,'(A,5X,2I3)') 'SLCT ',1,1 !terrain slice assumes one mesh and puts level set data on terrain
-   WRITE(LU_SMV,'(A)') TRIM(CHID)//'_lsfs.sf'
-   WRITE(LU_SMV,'(A)') 'phifield'
-   WRITE(LU_SMV,'(A)') 'phifield'
-   WRITE(LU_SMV,'(A)') '-'
-ENDIF
 
 ENDIF MASTER_NODE_IF
 
