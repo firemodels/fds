@@ -492,27 +492,17 @@ MESH_LOOP: DO NM=1,NMESHES
    DO N=1,N_BNDF
       LU_BNDF(N,NM) = GET_FILE_NUMBER()
       LU_BNDF(N+N_BNDF,NM) = GET_FILE_NUMBER()
-      IF(CC_IBM) THEN
+      IF (CC_IBM) THEN
          LU_BNDF_GEOM(N,NM) = GET_FILE_NUMBER()
          LU_BNDG(N,NM) = GET_FILE_NUMBER()
          LU_BNDG(N+N_BNDF,NM) = GET_FILE_NUMBER()
       ENDIF
-      IF (NMESHES>1) THEN
-         WRITE(FN_BNDF(N,NM),'(A,A,I4.4,A,I2.2,A)') TRIM(CHID),'_',NM,'_',N,'.bf'
-         WRITE(FN_BNDF(N+N_BNDF,NM),'(A,A,I4.4,A,I2.2,A)') TRIM(CHID),'_',NM,'_',N,'.bf.bnd'
-         IF (CC_IBM) THEN
-            WRITE(FN_BNDF_GEOM(N,NM),'(A,A,I4.4,A,I2.2,A)') TRIM(CHID),'_',NM,'_',N,'.gbf'
-            WRITE(FN_BNDG(N,NM),'(A,A,I4.4,A,I2.2,A)') TRIM(CHID),'_',NM,'_',N,'.be'
-            WRITE(FN_BNDG(N+N_BNDF,NM),'(A,A,I4.4,A,I2.2,A)') TRIM(CHID),'_',NM,'_',N,'.be.bnd'
-         ENDIF
-      ELSE
-         WRITE(FN_BNDF(N,NM),'(A,A,I2.2,A)') TRIM(CHID),'_',N,'.bf'
-         WRITE(FN_BNDF(N+N_BNDF,NM),'(A,A,I2.2,A)') TRIM(CHID),'_',N,'.bf.bnd'
-         IF (CC_IBM) THEN
-            WRITE(FN_BNDF_GEOM(N,NM),'(A,A,I4.4,A,I2.2,A)') TRIM(CHID),'_',N,'.gbf'
-            WRITE(FN_BNDG(N,NM),'(A,A,I4.4,A,I2.2,A)') TRIM(CHID),'_',N,'.be'
-            WRITE(FN_BNDG(N+N_BNDF,NM),'(A,A,I4.4,A,I2.2,A)') TRIM(CHID),'_',N,'.be.bnd'
-         ENDIF
+      WRITE(FN_BNDF(N,NM),'(A,A,I4.4,A,I2.2,A)') TRIM(CHID),'_',NM,'_',N,'.bf'
+      WRITE(FN_BNDF(N+N_BNDF,NM),'(A,A,I4.4,A,I2.2,A)') TRIM(CHID),'_',NM,'_',N,'.bf.bnd'
+      IF (CC_IBM) THEN
+         WRITE(FN_BNDF_GEOM(N,NM),'(A,A,I4.4,A,I2.2,A)') TRIM(CHID),'_',NM,'_',N,'.gbf'
+         WRITE(FN_BNDG(N,NM),'(A,A,I4.4,A,I2.2,A)') TRIM(CHID),'_',NM,'_',N,'.be'
+         WRITE(FN_BNDG(N+N_BNDF,NM),'(A,A,I4.4,A,I2.2,A)') TRIM(CHID),'_',NM,'_',N,'.be.bnd'
       ENDIF
    ENDDO
 
@@ -1993,6 +1983,7 @@ ENDIF
 ENDIF MASTER_NODE_IF
 
 ! Write out FN_BNDG, FN_BNDF_GEOM to .smv file:
+
 IF (CC_IBM) THEN
    DO N = 1, N_BNDF
       BF => BOUNDARY_FILE(N)
@@ -2009,10 +2000,9 @@ IF (CC_IBM) THEN
             IF(G%GEOM_BOX(HIGH_IND,KAXIS) < MESHES(I)%ZS) CYCLE
             FOUND_GEOM=.TRUE.
          ENDDO
-         IF(FOUND_GEOM)THEN
+         IF (FOUND_GEOM) THEN
             WRITE(LU_SMV,'(/A)') 'BGEOM 0'
             WRITE(LU_SMV,'(1X,A)') FN_BNDF_GEOM(N,I)
-
             WRITE(LU_SMV,'(/A,2I6)') 'BNDE',I,1
             WRITE(LU_SMV,'(1X,A)') FN_BNDG(N,I)
             WRITE(LU_SMV,'(1X,A)') FN_BNDF_GEOM(N,I)
@@ -4130,7 +4120,6 @@ USE COMPLEX_GEOMETRY
    NVERTS = NVERTS + NVERTS_CUTCELLS
 END SUBROUTINE GET_GEOMSIZES
 
-! ---------------------------- GET_GEOMINFO ----------------------------------------
 
 SUBROUTINE GET_GEOMINFO(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NVERTS_CUTCELLS,NFACES,NFACES_CUTCELLS,VERTS,FACES,LOCATIONS)
 USE COMPLEX_GEOMETRY
@@ -4186,13 +4175,13 @@ USE COMPLEX_GEOMETRY
             DO J=1,NJ-1
                IS_SOLID = SOLID(CELL_INDEX(SLICE,J+J1,K+K1))
                IFACE = IFACE + 1
-               IF (IS_SOLID)LOCATIONS(IFACE) = 1 + 16 ! triangle is in a solid so tag with 1
+               IF (IS_SOLID) LOCATIONS(IFACE) = 1 + 16 ! triangle is in a solid so tag with 1
                FACES(3*IFACE-2) = IJK(  J,  K,NJ)
                FACES(3*IFACE-1) = IJK(J+1,  K,NJ)
                FACES(3*IFACE)   = IJK(J+1,K+1,NJ)
 
                IFACE = IFACE + 1
-               IF (IS_SOLID)LOCATIONS(IFACE) = 1 + 4 ! triangle is in a solid so tag with 1
+               IF (IS_SOLID) LOCATIONS(IFACE) = 1 + 4 ! triangle is in a solid so tag with 1
                FACES(3*IFACE-2) = IJK(  J,  K,NJ)
                FACES(3*IFACE-1) = IJK(J+1,K+1,NJ)
                FACES(3*IFACE)   = IJK(  J,K+1,NJ)
@@ -4213,13 +4202,13 @@ USE COMPLEX_GEOMETRY
             DO I=1,NI-1
                IS_SOLID = SOLID(CELL_INDEX(I+I1,SLICE,K+K1))
                IFACE = IFACE + 1
-               IF (IS_SOLID)LOCATIONS(IFACE) = 1 + 16
+               IF (IS_SOLID) LOCATIONS(IFACE) = 1 + 16
                FACES(3*IFACE-2) = IJK(  I,  K,NI)
                FACES(3*IFACE-1) = IJK(I+1,  K,NI)
                FACES(3*IFACE)   = IJK(I+1,K+1,NI)
 
                IFACE = IFACE + 1
-               IF (IS_SOLID)LOCATIONS(IFACE) = 1 + 4
+               IF (IS_SOLID) LOCATIONS(IFACE) = 1 + 4
                FACES(3*IFACE-2) = IJK(  I,  K,NI)
                FACES(3*IFACE-1) = IJK(I+1,K+1,NI)
                FACES(3*IFACE)   = IJK(  I,K+1,NI)
@@ -4947,13 +4936,12 @@ ENDIF
 
 END SUBROUTINE GET_GEOMVALS
 
-! ---------------------------- DUMP_SLICE_GEOM ----------------------------------------
 
 SUBROUTINE DUMP_SLICE_GEOM(FUNIT,SLICETYPE,HEADER,STIME,I1,I2,J1,J2,K1,K2)
+
 CHARACTER(*), INTENT(IN) :: SLICETYPE
 INTEGER, INTENT(IN) :: FUNIT, HEADER, I1, I2, J1, J2, K1, K2
 REAL(FB) :: STIME
-
 INTEGER :: I
 INTEGER, PARAMETER :: ONE_INTEGER=1, ZERO_INTEGER=0, FIRST_FRAME_STATIC=1, NVOLS=0, VERSION=2
 INTEGER :: NVERTS, NVERTS_CUTCELLS, NFACES, NFACES_CUTCELLS
@@ -4962,6 +4950,7 @@ REAL(FB), ALLOCATABLE, DIMENSION(:) :: VERTS
 INTEGER, ALLOCATABLE, DIMENSION(:) :: FACES, LOCATIONS
 
 CALL GET_GEOMSIZES(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NVERTS_CUTCELLS,NFACES,NFACES_CUTCELLS)
+
 IF (NVERTS>0 .AND. NFACES>0) THEN
    ALLOCATE(VERTS(3*NVERTS))
    ALLOCATE(FACES(3*NFACES))
@@ -4996,7 +4985,6 @@ IF (NVERTS>0 .AND. NFACES>0) THEN
 ENDIF
 END SUBROUTINE DUMP_SLICE_GEOM
 
-! ---------------------------- DUMP_SLICE_GEOM_DATA ----------------------------------------
 
 SUBROUTINE DUMP_SLICE_GEOM_DATA(NM,FUNIT_DATA,FUNIT_BOUNDS,CC_FACE_CENTERED,CC_CELL_CENTERED,SLICETYPE, &
                                 HEADER,STIME,I1,I2,J1,J2,K1,K2,IND,Y_INDEX,Z_INDEX,DEBUG)
@@ -5695,9 +5683,9 @@ DEVICE_LOOP: DO N=1,N_DEVC
 
             CASE('null') GAS_STATS_SELECT
 
-               I = MIN( IBP1, MAX(0, DV%I + DV%GHOST_CELL_IOR(1) ) )
-               J = MIN( JBP1, MAX(0, DV%J + DV%GHOST_CELL_IOR(2) ) )
-               K = MIN( KBP1, MAX(0, DV%K + DV%GHOST_CELL_IOR(3) ) )
+               I = MIN( IBP1, MAX(0, DV%I) )
+               J = MIN( JBP1, MAX(0, DV%J) )
+               K = MIN( KBP1, MAX(0, DV%K) )
                SDV%VALUE_1 = GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,DV%PART_CLASS_INDEX,DV%VELO_INDEX,&
                                               DV%PIPE_INDEX,DV%PROP_INDEX,DV%REAC_INDEX,DV%MATL_INDEX,T,DT,NM)
 
@@ -9109,6 +9097,7 @@ STIME = T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR
 CALL WRITE_GEOM(STIME)
 
 END SUBROUTINE DUMP_GEOM
+
 
 SUBROUTINE DUMP_BNDF_TO_SLCF(T,NM)
 
