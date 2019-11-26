@@ -9476,7 +9476,11 @@ properties be specified as well. Simply prescribing as many properties as possib
 % ignorenamelists: TRNY, TRNZ
 
 % ignore namelist/keyword combinations
-% ignorenamelistkw: /CLIP/FYI, /TIME/FYI, /PRES/SCARC_METHOD, /PRES/SCARC_KRYLOV, /PRES/SCARC_MULTIGRID, /PRES/SCARC_SMOOTH, /PRES/SCARC_PRECON
+% ignorenamelistkw: /BNDF/STATISTICS
+% ignorenamelistkw: /DEVC/STATISTICS, /DUMP/DT_DEVC_LINE, /DUMP/T_DEVC_LINE_END
+% ignorenamelistkw: /INIT/NUMBER_INITIAL_PARTICLES
+% ignorenamelistkw: /MISC/DNS, /MISC/RADIATION, /MISC/RESEARCH_MODE, /MISC/STRATIFICATION, /MISC/SUPPRESSION, /MISC/SURF_DEFAULT
+% ignorenamelistkw: /PRES/SCARC_METHOD, /PRES/SCARC_KRYLOV, /PRES/SCARC_MULTIGRID, /PRES/SCARC_SMOOTH, /PRES/SCARC_PRECON
 % ignorenamelistkw: /PRES/SCARC_COARSE, /PRES/SCARC_INITIAL, /PRES/SCARC_STORAGE, /PRES/SCARC_ACCURACY, /PRES/SCARC_DEBUG 
 % ignorenamelistkw: /PRES/SCARC_MULTIGRID_CYCLE, /PRES/SCARC_MULTIGRID_LEVEL, /PRES/SCARC_MULTIGRID_COARSENING  
 % ignorenamelistkw: /PRES/SCARC_MULTIGRID_ITERATIONS, /PRES/SCARC_MULTIGRID_ACCURACY   
@@ -9484,9 +9488,13 @@ properties be specified as well. Simply prescribing as many properties as possib
 % ignorenamelistkw: /PRES/SCARC_SMOOTH_ITERATIONS, /PRES/SCARC_SMOOTH_ACCURACY,  /PRES/SCARC_SMOOTH_OMEGA
 % ignorenamelistkw: /PRES/SCARC_PRECON_ITERATIONS, /PRES/SCARC_PRECON_ACCURACY, /PRES/SCARC_PRECON_OMEGA
 % ignorenamelistkw: /PRES/SCARC_COARSE_ITERATIONS, /PRES/SCARC_COARSE_ACCURACY
+% ignorenamelistkw: /PROP/BEAD_DENSITY, /PROP/BEAD_DIAMETER, /PROP/BEAD_EMISSIVITY, /PROP/BEAD_HEAT_TRANSFER_COEFFICIENT, /PROP/BEAD_SPECIFIC_HEAT, /PROP/DROPLET_VELOCITY
+% ignorenamelistkw: /SURF/EXTERNAL_FLUX_RAMP, /SURF/TAU_EXTERNAL_FLUX, /SURF/VOLUME_FLUX
+% ignorenamelistkw: /TIME/TWFIN
+% ignorenamelistkw: /WIND/MEAN_FORCING, /WIND/OBUKHOV_LENGTH, /WIND/REFERENCE_HEIGHT, /WIND/REFERENCE_TEMPERATURE
 
 % ignore keywords that appear on any namelist
-% ignoreallkw: FYI, ID
+% ignoreallkw: FYI
 %--------------------------------------------------------------------
 
 \section{\texorpdfstring{{\tt BNDF}}{BNDF} (Boundary File Parameters)}
