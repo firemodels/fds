@@ -4,7 +4,6 @@
 # RESOURCE_MANAGER - SLURM or TORQUE (default TORQUE)
 
 #*** environment variables used by the bots
-# JOBPREFIX        - prefix job title with $JOBPREFIX eg. FB_ or  SB_
 # BACKGROUND_PROG  - defines location of background program
 #                    ( if the 'none' queue is also specified)
 # SCRIPTFILES      - outputs the name of the script file to $SCRIPTFILES
@@ -111,6 +110,7 @@ function usage {
   echo "    [default: $FDSROOT]"
   echo " -i use installed fds"
   echo " -I use Intel MPI version of fds"
+  echo " -j prefix - specify a job prefix"
   echo " -L use Open MPI version of fds"
   echo " -m m - reserve m processes per node [default: 1]"
   echo " -M   -  add --mca plm_rsh_agent /usr/bin/ssh to mpirun command "
@@ -242,7 +242,7 @@ commandline=`echo $* | sed 's/-V//' | sed 's/-v//'`
 
 #*** read in parameters from command line
 
-while getopts 'Aa:c:Cd:D:e:Ef:hHiILm:Mn:o:O:p:Pq:R:rsStT:vVw:x:' OPTION
+while getopts 'Aa:c:Cd:D:e:Ef:hHiIj:Lm:Mn:o:O:p:Pq:R:rsStT:vVw:x:' OPTION
 do
 case $OPTION  in
   A) # used by timing scripts to identify benchmark cases
@@ -287,6 +287,9 @@ case $OPTION  in
    ;;
   I)
    use_intel_mpi=1
+   ;;
+  j)
+   JOBPREFIX="$OPTARG"
    ;;
   L)
    use_intel_mpi=
