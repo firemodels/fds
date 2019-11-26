@@ -7870,6 +7870,11 @@ This directs FDS to just add 20 devices to the on-going list, saving you from ha
 
 By default, when you specify multiple {\ct POINTS} on a {\ct DEVC} line and you do not specify {\ct TIME\_HISTORY=T}, a running average of the specified {\ct QUANTITY} is saved at each point location and written to the file with suffix {\ct \_line.csv} with the accumulated values at the time {\ct STATISTICS\_END}. However, you can apply any other {\ct TEMPORAL\_STATISTIC} and compute, for example, the root-mean-square ({\ct 'RMS'}), minimum ({\ct 'MIN'}), or maximum ({\ct 'MAX'}) value over the specified time interval.
 
+\subsubsection{Moving a Linear Array of Devices}
+\label{info:MOVE_ID}
+
+It is possible to translate and/or rotate a linear array of devices using parameters on a {\ct MOVE} line (see Section~\ref{info:MOVE}). To specify these parameters, use the character string {\ct MOVE\_ID} on the {\ct DEVC} line.
+
 
 \subsection{Quantities at Certain Depth}
 \label{info:DEPTH}
@@ -8340,11 +8345,11 @@ Data is saved within rectangular blocks of cells using one or more input lines o
 \begin{lstlisting}
 &RADF XB=..., I_STEP=2, J_STEP=3, K_STEP=1 /
 \end{lstlisting}
-This line directs FDS to write out the radiation intensity, $I_{ijk}^l$, for each cell with indices $ijk$ that is bounded by {\ct XB} and for each solid angle $l$. You can skip cells using the parameters {\ct I\_STEP}, {\ct J\_STEP}, and {\ct K\_STEP}, each of which default to 1. The print outs are done every {\ct DT\_RADF}~s starting at {\ct T\_RADF\_BEGIN} and ending at {\ct T\_RADF\_END}, where these three parameters are listed on the {\ct DUMP} line. By default, {\ct T\_RADF\_BEGIN} is set to the start time of the simulation, {\ct T\_BEGIN}, and {\ct T\_RADF\_END} is set to {\ct T\_END}. The time interval, {\ct DT\_RADF}, is the end time minus the start time divided by 5, by default.
+This line directs FDS to write out the radiation intensity, $I_{ijk}^l$ (W/m$^2$/sr), for each cell with indices $ijk$ that is bounded by {\ct XB} and for each solid angle $l$. You can skip cells using the parameters {\ct I\_STEP}, {\ct J\_STEP}, and {\ct K\_STEP}, each of which default to 1. The print outs are done every {\ct DT\_RADF}~s starting at {\ct T\_RADF\_BEGIN} and ending at {\ct T\_RADF\_END}, where these three parameters are listed on the {\ct DUMP} line. By default, {\ct T\_RADF\_BEGIN} is set to the start time of the simulation, {\ct T\_BEGIN}, and {\ct T\_RADF\_END} is set to {\ct T\_END}. The time interval, {\ct DT\_RADF}, is the end time minus the start time divided by 5, by default.
 
-Each output file is in text, not binary, format. The format of the file is shown in Fig.~\ref{radf_file_format}. {\ct NSTEPS} is the number of {\ct TIMES} that data is written out. {\ct NP} is the number of points within the block designated by {\ct XB} on the {\ct RADF} line of the input file. {\ct XYZ\_INTENSITIES} are the coordinates of the {\ct NP} points. {\ct NI} is the number of solid angles, which are listed under {\ct XYZ\_DIRECTIONS}. A direction vector is a normalized form of the discretized solid angle vector, $(D^l_x,D^l_y,D^l_z)$, that is described in the Radiation chapter of the FDS Technical Reference Guide, Volume 1~\cite{FDS_Math_Guide}.
+Each output file is in text, not binary, format (for example, {\ct CHID\_radf\_n.txt}). The format of the file is shown in Fig.~\ref{radf_file_format}. {\ct NSTEPS} is the number of {\ct TIMES} that data is written out. {\ct NP} is the number of points within the block designated by {\ct XB} on the {\ct RADF} line of the input file. {\ct XYZ\_INTENSITIES} are the coordinates of the {\ct NP} points. {\ct NI} is the number of solid angles, which are listed under {\ct XYZ\_DIRECTIONS}. A direction vector is a normalized form of the discretized solid angle vector, $(D^l_x,D^l_y,D^l_z)$, that is described in the Radiation chapter of the FDS Technical Reference Guide, Volume 1~\cite{FDS_Math_Guide}.
 
-Each {\ct TIME} the intensities are written out, each cell in the designated block will list its temperature in degrees~K, a placeholder value of 0, and then the intensities at the {\ct NI} solid angles in units of W/m$^2$.
+Each {\ct TIME} the intensities are written out, each cell in the designated block will list its temperature in degrees~K, a placeholder value of 0, and then the intensities at the {\ct NI} solid angles in units of W/m$^2$/sr.
 
 \begin{figure}[p]
 \begin{lstlisting}
@@ -9471,7 +9476,14 @@ properties be specified as well. Simply prescribing as many properties as possib
 % ignorenamelists: TRNY, TRNZ
 
 % ignore namelist/keyword combinations
-% ignorenamelistkw: /CLIP/FYI, /TIME/FYI
+% ignorenamelistkw: /CLIP/FYI, /TIME/FYI, /PRES/SCARC_METHOD , /PRES/SCARC_KRYLOV , /PRES/SCARC_MULTIGRID, /PRES/SCARC_SMOOTH  , /PRES/SCARC_PRECON
+% ignorenamelistkw: /PRES/SCARC_COARSE , /PRES/SCARC_INITIAL, /PRES/SCARC_STORAGE  , /PRES/SCARC_ACCURACY, /PRES/SCARC_DEBUG 
+% ignorenamelistkw: /PRES/SCARC_MULTIGRID_CYCLE, /PRES/SCARC_MULTIGRID_LEVEL , /PRES/SCARC_MULTIGRID_COARSENING  
+% ignorenamelistkw: /PRES/SCARC_MULTIGRID_ITERATIONS  , /PRES/SCARC_MULTIGRID_ACCURACY   
+% ignorenamelistkw: /PRES/SCARC_KRYLOV_ITERATIONS     , /PRES/SCARC_KRYLOV_ACCURACY
+% ignorenamelistkw: /PRES/SCARC_SMOOTH_ITERATIONS     , /PRES/SCARC_SMOOTH_ACCURACY,  /PRES/SCARC_SMOOTH_OMEGA
+% ignorenamelistkw: /PRES/SCARC_PRECON_ITERATIONS     , /PRES/SCARC_PRECON_ACCURACY, /PRES/SCARC_PRECON_OMEGA
+% ignorenamelistkw: /PRES/SCARC_COARSE_ITERATIONS     , /PRES/SCARC_COARSE_ACCURACY
 
 % ignore keywords that appear on any namelist
 % ignoreallkw: FYI, ID
@@ -9685,6 +9697,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct IOR}                   & Integer         & Section~\ref{info:DEVC}                                         &       &               \\ \hline
 {\ct LATCH}                 & Logical         & Section~\ref{info:basic_control}                                &       & {\ct .TRUE.}  \\ \hline
 {\ct MATL\_ID}              & Character       & Section~\ref{info:material_components}                          &       &               \\ \hline
+{\ct MOVE\_ID}              & Character       & Section~\ref{info:MOVE_ID}                                      &       &               \\ \hline
 {\ct N\_INTERVALS}          & Integer         & Section~\ref{info:time_integral}                                &       & 10            \\ \hline
 {\ct NODE\_ID}              & Character(2)    & Section~\ref{info:HVAC}                                         &       &               \\ \hline
 {\ct NO\_UPDATE\_CTRL\_ID}  & Character       & Section~\ref{info:freeze_device}                                &       &               \\ \hline
@@ -9725,7 +9738,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct XYZ\_UNITS}            & Character       & Section~\ref{info:line_file}                                    &       &  {\ct 'm'}    \\ \hline
 \end{longtable}
 
-% Undocumented: CELL_L (JF), GHOST_CELL_IOR (??), MOVE_ID (KM)
+% Undocumented: CELL_L (JF)
 
 \vspace{\baselineskip}
 
@@ -9761,8 +9774,9 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct DT\_PART}                      & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
 {\ct DT\_PL3D}                      & Real         & Section~\ref{info:DUMP}                &  s        & 1.E10                          \\ \hline
 {\ct DT\_PROF}                      & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
+{\ct DT\_RADF}                      & Real         & Section~\ref{info:RADF}                &  s        & $\Delta t/5$                   \\ \hline
 {\ct DT\_RESTART}                   & Real         & Section~\ref{info:DUMP}                &  s        & 1000000.                       \\ \hline
-{\ct DT\_SL3D}                      & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /5}             \\ \hline
+{\ct DT\_SL3D}                      & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t/5$                   \\ \hline
 {\ct DT\_SLCF}                      & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
 {\ct EB\_PART\_FILE}                & Logical      & Section~\ref{out:PART}                 &           & {\ct .FALSE.}                  \\ \hline
 {\ct FLUSH\_FILE\_BUFFERS}          & Logical      & Section~\ref{info:DUMP}                &           & {\ct .TRUE.}                   \\ \hline
@@ -9781,12 +9795,14 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct SMOKE3D\_SPEC\_ID}             & Character    & Section~\ref{info:SMOKE3D}             &           &                                \\ \hline
 {\ct STATUS\_FILES}                 & Logical      & Section~\ref{info:DUMP}                &           & {\ct .FALSE.}                  \\ \hline
 {\ct SUPPRESS\_DIAGNOSTICS}         & Logical      & Section~\ref{info:monitoring_progress} &           & {\ct .FALSE.}                  \\ \hline
+{\ct T\_RADF\_BEGIN}                & Real         & Section~\ref{info:RADF}                &  s        & {\ct T\_BEGIN}                 \\ \hline
+{\ct T\_RADF\_END}                  & Real         & Section~\ref{info:RADF}                &  s        & {\ct T\_END}                   \\ \hline
 {\ct UVW\_TIMER}                    & Real Vector (10)  & Section~\ref{info:velo_restart}   &  s        &                                \\ \hline
 {\ct VELOCITY\_ERROR\_FILE}         & Logical      & Section~\ref{info:TIMING}              &           & {\ct .FALSE.}                  \\ \hline
 {\ct WRITE\_XYZ}                    & Logical      & Section~\ref{info:PL3D}                &           & {\ct .FALSE.}                  \\ \hline
 \end{longtable}
 
-% Undocumented: DT_RADF, GET_CUTCELLS_VERBOSE(MV, debug), MMS_TIMER (RJM), STORE_SPECIES_FLUX (RJM), T_RADF_BEGIN, T_RADF_END
+% Undocumented: GET_CUTCELLS_VERBOSE(MV, debug), MMS_TIMER (RJM), STORE_SPECIES_FLUX (RJM)
 
 \noindent
 $\Delta t$={\ct T\_END-T\_BEGIN}
@@ -10191,10 +10207,11 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct Y\_O2\_INFTY}                                  & Real         & Section~\ref{info:simple_chemistry}     &  kg/kg     &                   \\ \hline
 \end{longtable}
 
-% Undocumented: AEROSOL_AL2O3, AEROSOL_SCRUBBING, CC_IBM(MV), CCVOL_LINK(MV), CC_SLIPIBM_VELO(MV,debug), CC_ZEROIBM_VELO(MV,debug), CHECK_MASS_CONSERVE(MV), COMPUTE_CUTCELLS_ONLY(MV), CONSTANT_H_SOLID, DO_IMPLICIT_CCREGION(MV), ENTHALPY_TRANSPORT (RJM),
-% EVAP_MODEL, EXTERNAL_BOUNDARY_CORRECTION, HT3D_TEST (RJM), MAXIMUM_GEOMETRY_FACES(MV), MAXIMUM_GEOMETRY_ZVALS(MV), NEW_VEG_LEVEL_SET, NUCLEATION_SITES, PERIODIC_TEST (RJM),
-% POSITIVE_ERROR_TEST, PROFILING, QFAN_BETA_TEST, SLIP_CONDITION(RJM), TENSOR_DIFFUSIVITY (RJM), TERRAIN_CASE, TERRAIN_IMAGE, TURB_INIT_CLOCK (RJM),
-% UVW_FILE (RJM), VEG_LEVEL_SET_COUPLED, VEG_LEVEL_SET_UNCOUPLED
+% Undocumented: AEROSOL_AL2O3, AEROSOL_SCRUBBING, CC_IBM(MV), CCVOL_LINK(MV), CC_SLIPIBM_VELO(MV,debug), CC_ZEROIBM_VELO(MV,debug), CHECK_MASS_CONSERVE(MV), COMPUTE_CUTCELLS_ONLY(MV), 
+% CONSTANT_H_SOLID, DO_IMPLICIT_CCREGION (MV), ENTHALPY_TRANSPORT (RJM),
+% EVAP_MODEL, EXTERNAL_BOUNDARY_CORRECTION, HT3D_TEST (RJM), MAXIMUM_GEOMETRY_FACES(MV), MAXIMUM_GEOMETRY_ZVALS(MV), NUCLEATION_SITES, PERIODIC_TEST (RJM),
+% POSITIVE_ERROR_TEST, PROFILING, QFAN_BETA_TEST, SLIP_CONDITION(RJM), TENSOR_DIFFUSIVITY (RJM), TERRAIN_CASE (KM), TERRAIN_IMAGE (KM), TURB_INIT_CLOCK (RJM),
+% UVW_FILE (RJM)
 
 \vspace{\baselineskip}
 
@@ -10219,7 +10236,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct DZ}              & Real             & Translation in the $z$ direction                & m      & 0.                         \\ \hline
 {\ct ID }             & Character        & Identification tag                              &        &                            \\ \hline
 {\ct ROTATION\_ANGLE} & Real             & Angle of rotation about {\ct AXIS}              & deg.   & 0.                         \\ \hline
-{\ct T34}            & Real Array    & $3 \times 4$ Transformation Matrix  &        & 0.                    \\ \hline
+{\ct T34}             & Real Array       & $3 \times 4$ Transformation Matrix              &        & 0.                         \\ \hline
 {\ct X0}              & Real             & $x$ origin                                      & m      & 0.                         \\ \hline
 {\ct Y0}              & Real             & $y$ origin                                      & m      & 0.                         \\ \hline
 {\ct Z0}              & Real             & $z$ origin                                      & m      & 0.                         \\ \hline
@@ -10319,15 +10336,15 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SURF\_ID6(6)}            & Char.~Array     & Section~\ref{info:OBST_Basics}          &           &               \\ \hline
 {\ct SURF\_IDS(3)}            & Char.~Array     & Section~\ref{info:OBST_Basics}          &           &               \\ \hline
 {\ct TEXTURE\_ORIGIN(3)}      & Real Array      & Section~\ref{info:texture_map}          & m         & (0.,0.,0.)    \\ \hline
-{\ct THETA}                  & Real            & Section~\ref{info:multobst}             & deg.         &               \\ \hline
+{\ct THETA}                   & Real            & Section~\ref{info:multobst}             & deg.         &               \\ \hline
 {\ct THICKEN}                 & Logical         & Section~\ref{info:OBST_Basics}          &           & {\ct .FALSE.} \\ \hline
 {\ct TRANSPARENCY}            & Real            & Section~\ref{info:OBST_Basics}          &           &  1            \\ \hline
-{\ct WIDTH}                  & Real            & Section~\ref{info:multobst}             & m         &               \\ \hline
+{\ct WIDTH}                   & Real            & Section~\ref{info:multobst}             & m         &               \\ \hline
 {\ct XB(6) }                  & Real Array      & Section~\ref{info:OBST_Basics}          & m         &               \\ \hline
 {\ct XYZ(3) }                 & Real Array      & Section~\ref{info:multobst}             & m         & (0.,0.,0.)    \\ \hline
 \end{longtable}
 
-% Undocumented: NOTERRAIN
+% Undocumented: NOTERRAIN (KM)
 
 
 \vspace{\baselineskip}
@@ -10433,14 +10450,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \end{longtable}
 
 % Undocumented: LAPLACE_PRESSURE_CORRECTION
-%               SCARC_METHOD , SCARC_KRYLOV , SCARC_MULTIGRID, SCARC_SMOOTH  , SCARC_PRECON,
-%               SCARC_COARSE , SCARC_INITIAL, SCARC_STORAGE  , SCARC_ACCURACY, SCARC_DEBUG ,
-%               SCARC_MULTIGRID_CYCLE, SCARC_MULTIGRID_LEVEL , SCARC_MULTIGRID_COARSENING  ,
-%               SCARC_MULTIGRID_ITERATIONS  , SCARC_MULTIGRID_ACCURACY   ,
-%               SCARC_KRYLOV_ITERATIONS     , SCARC_KRYLOV_ACCURACY      ,
-%               SCARC_SMOOTH_ITERATIONS     , SCARC_SMOOTH_ACCURACY      , SCARC_SMOOTH_OMEGA,
-%               SCARC_PRECON_ITERATIONS     , SCARC_PRECON_ACCURACY      , SCARC_PRECON_OMEGA,
-%               SCARC_COARSE_ITERATIONS     , SCARC_COARSE_ACCURACY
+
 
 \vspace{\baselineskip}
 
@@ -10719,7 +10729,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct XB(6)}             & Real Array        & Section~\ref{info:SLCF}                   & m         &                   \\ \hline
 \end{longtable}
 
-% Undocumented: AGL_SLICE(MV,GF), FACE_CENTERED(MV,GF), FIRE_LINE, ID, IOR, LEVEL_SET_FIRE_LINE, MATL_ID, PROP_ID, SLICETYPE(MV,GF), SMV_OFFSET, TRNF_ID
+% Undocumented: AGL_SLICE(KM), FACE_CENTERED(MV,GF), ID, IOR, MATL_ID, PROP_ID, SLICETYPE(MV,GF), SMV_OFFSET, TRNF_ID (KM)
 
 \vspace{\baselineskip}
 
@@ -10908,8 +10918,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \end{longtable}
 
 % Undocumented: AREA_ADJUST, FSK_A, FSK_K, FSK_W, IMPERMEABLE, N_CELLS_MAX
-%               VEG_LSET_QCON, VEG_LEVEL_SET_SPREAD, VEG_LSET_ROS_BACK, VEG_LSET_ROS_FLANK, VEG_LSET_ROS_HEAD, VEG_LSET_WIND_EXP,
-%               VEG_LSET_SIGMA, VEG_LSET_HT, VEG_LSET_BETA, VEG_LSET_ELLIPSE, VEG_LSET_TAN2, VEG_LSET_ELLIPSE_HEAD
+%       KM=>    VEG_LSET_QCON, VEG_LEVEL_SET_SPREAD, VEG_LSET_ROS_BACK, VEG_LSET_ROS_FLANK, VEG_LSET_ROS_HEAD, VEG_LSET_WIND_EXP,
+%       KM=>    VEG_LSET_SIGMA, VEG_LSET_HT, VEG_LSET_BETA, VEG_LSET_ELLIPSE, VEG_LSET_TAN2, VEG_LSET_ELLIPSE_HEAD
 
 \vspace{\baselineskip}
 
