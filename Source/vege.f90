@@ -485,8 +485,14 @@ ENDIF
 ! Define wall cell value for the purpose of writing to a BNDF file
 
 IF (.NOT.PREDICTOR) THEN
-   DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-      WALL(IW)%ONE_D%PHI_LS = PHI_LS(WALL(IW)%ONE_D%IIG,WALL(IW)%ONE_D%JJG)
+   DO JJG=1,JBAR
+      DO IIG=1,IBAR
+         IF (KT(IIG,JJG)<1) CYCLE
+         IC = CELL_INDEX(IIG,JJG,KT(IIG,JJG))
+         IW = WALL_INDEX(IC,-3)
+         IF (PHI_LS(IIG,JJG)>=0._EB .AND. WALL(IW)%ONE_D%T_IGN>1.E5_EB) WALL(IW)%ONE_D%T_IGN = T
+         WALL(IW)%ONE_D%PHI_LS = PHI_LS(IIG,JJG)
+      ENDDO
    ENDDO
 ENDIF
  
