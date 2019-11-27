@@ -379,19 +379,27 @@ Therefore, if $\bar{p}$ is constant and uniform then $\rho h_s$ is constant and 
 %The mean of the distribution becomes $M_{1}$ and the centered variance becomes $M_{2}-M_{1}^{2}$. To implement subgrid statistics in FDS, we would either need to transport the unmixed fraction or develop a model for the subgrid variance. Since scalar transport is expensive, a first approach is to develop a model to approximate the subgrid variance. If the variance is known, QMOM can then be used to solve for the initial unmixed fraction.
 
 
-\chapter{Absorption Coefficients of Gaseous Fuels}
+\chapter{Gas Phase Absorption Coefficients}
 \label{absorption_coefficients}
 
-For the calculation of the gray or band-mean absorption coefficients, $\kappa_n$, a narrow-band model, RADCAL~\cite{RadCal}, has been
-implemented in FDS. RADCAL computes the spectral properties of the radiation participating species at discrete values of the spectrum (expressed either in wavenumber $\om$ or in wavelength $\la$) and temperature,
+The instantaneous absorption coefficient $\kappa_n$ of the gas mixture at location $\bx$ is calculated as a weighted sum of individual gases' gray or band-mean absorption coefficients $\kappa_{n,i}$
+\begin{equation}
+\kappa_{n}(\bx) = \sum_i Y_i(\bx) \kappa_{n,i}(Y_i(\bx),T(\bx))
+\end{equation}
+
+For the calculation of $\kappa_{n,i}(Y_i,T)$, a narrow-band model, RADCAL~\cite{RadCal}, has been
+implemented in FDS. During the initialization stage, RADCAL is used to generate tables of mean absorption coefficients for each individual species in mass fraction range $0 \leq Y_i \leq 1$ and temperature range 270 K $ \leq T \leq $ 2470 K. During the simulation, the local value of $\kappa_n$ is found from the nearest temperature value (lookup) and by interpolating the concentration value.
+
+RADCAL computes the spectral properties of the radiation participating species at discrete values of the spectrum (expressed either in wavenumber $\om$ or in wavelength $\la$) and temperature, 
 and returns two alternative mean absorption coefficients for each spectral band, $n$. The first coefficient is the Planck mean coefficient \cite{Tien:1968}
 \begin{equation}
-\kappa_n(P,T) = \dfrac{\pi}{\sigma T^4}
+\kappa_{n,i,{\rm P}}(P,T) = \dfrac{\pi}{\sigma T^4}
 \displaystyle\int_{\la_{\min}}^{\la_{\max}}{I_{\rm b,\la}(T)
-\displaystyle\sum_i 100 \, \bar{\kappa}_i(\la,T) \, P_i \; \d \la}
+100 \, \bar{\kappa}_i(\la,T) \, P_i \; \d \la}
 \end{equation}
-where $\la$ is the wavelength, expressed in units of ${\rm \mu m}$, $P_i$ is the partial pressure of participating species $i$, in units of ${\rm atm}$, and $\bar{\kappa}_i$ is the spectral absorption coefficient of participating species $i$, in units of ${\rm atm^{-1}cm^{-1}}$. Note that the temperature used in the calculation of $\kappa_n$ is the local gas temperature; thus, $\kappa_n(P,T)$ is a function of the gas phase temperature and partial pressure and is independent of the pathlength. Its units are 1/m.
-The factor $100$ is introduced to convert $\bar{\kappa}_i$ from ${\rm atm^{-1}cm^{-1}}$ to ${\rm atm^{-1}m^{-1}}$
+where $\la$ is the wavelength, expressed in units of ${\rm \mu m}$, $P_i$ is the partial pressure of participating species $i$, in units of ${\rm atm}$, and $\bar{\kappa}_i$ is the spectral absorption coefficient of participating species $i$, in units of ${\rm atm^{-1}cm^{-1}}$. Note that the temperature used in the calculation of $\kappa_n$ is the local gas temperature; thus, $\kappa_{n,i,{\rm P}}(P,T)$ is a function of the gas phase temperature and partial pressure and is independent of the pathlength. Its units are 1/m.
+The factor $100$ is introduced to convert $\bar{\kappa}_i$ from ${\rm atm^{-1}cm^{-1}}$ to ${\rm atm^{-1}m^{-1}}$.
+RADCAL can do these calculations for mixtures of several species, but in FDS, it is used for a single species at the time.
 
 The source term $I_{\rm b,\la}(T)$ is the {\em Planck blackbody distribution law} which expresses the equilibrium rate of radiant energy emitted from a blackbody at temperature, $T$, and as function of wavelength, $\la$. Formally, the monochromatic blackbody radiant energy emitted at a wavelength $\la$ is given by \cite{Penner:1959}
 \be \label{eq:Planck_law}
@@ -400,18 +408,26 @@ I_{\rm b,\la}(T)\d \la = \dfrac{2 \, h \, c^2 \, \la^{-5}}{\exp\left(\dfrac{h \,
 Here, $h$ is the Planck constant ($6.626 \times 10^{-34}$~J$\cdot$s), $c$ is the speed of light in vacuum ($2.998 \times 10^8$~m/s), and $k_{\rm B}$ is the Boltzmann constant ($1.381 \times 10^{-23}$~J/K) \cite{Mohr:2012}.
 $I_{\rm b,\la}(T)$ is in units of $\rm{W/m^{2}/str/m}$; the wavelengths are converted from $\rm{\mu m}$ to $\rm{m}$.
 
-The second coefficient is the so-called {\em path mean} or {\em effective} absorption coefficient, $\kappa_{{\rm e},n}(T)$ which is defined according to the following equation
+The second coefficient is the so-called {\em path mean} or {\em effective} absorption coefficient, $\kappa_{n,i,{\rm e}}(P,T,L)$ which is defined according to the following equation
 \be
-   \int_{\la_{\rm min}}^{\la_{\rm max}}I(\la,L,T,T_{\rm rad}) \; \d \la = \frac{\sigma}{\pi}
-       \left[\left(1-{\rm e}^{-\kappa_{{\rm e},n}(T)\, L}\right) \, T^4 + {\rm e}^{-\kappa_{{\rm e},n}(T) \, L} \, T_{\rm rad}^4\right]
+   \underbrace{\int_{\la_{\rm min}}^{\la_{\rm max}}I(\la,L,T,T_{\rm rad}) \; \d \la}_{I_{\rm tot}}
+   = \frac{\sigma}{\pi}
+    \left[\left(1-{\rm e}^{-\kappa_{n,i,{\rm e}}\, L}\right) \, T^4 + {\rm e}^{-\kappa_{n,i,{\rm e}} \, L} \, T_{\rm rad}^4\right]
+    \label{RADCAL_kappamean_def}
 \ee
-where $L$ is the path length and $T_{\rm rad}$ is the effective temperature of flame radiation. RADCAL calculates the left hand integral by calculating the intensity leaving a uniform gas layer of equivalent thickness $L$, bounded by a black wall at temperature $T_{\rm rad}$, for a large number of narrow spectral bands.  By default in FDS, the pathlength, $L$, is 10~cm. It can also be specified by the user. If $T=T_{\rm rad}$ the intensity does not depend on $\kappa_{{\rm e},n}$. The value $\kappa_{{\rm e},n}(T_{\rm rad})$ is therefore interpolated from the neighboring temperatures.
+where $L$ is the path length and $T_{\rm rad}$ is the effective temperature of flame radiation. RADCAL calculates the left hand integral by calculating the intensity leaving a uniform gas layer of equivalent thickness $L$, bounded by a black wall at temperature $T_{\rm rad}$, for a large number of narrow spectral bands. Solving from equation~\ref{RADCAL_kappamean_def} gives
+\be
+  \kappa_{n,i,{\rm e}}(P,T,L) = -\frac{1}{L}\ln\left(\frac{I_{\rm tot}-I_b(T)}{I_b(T_{\rm rad})-I_b(T)}\right)
+\ee
+where $I_b(T) = \sigma T^4/\pi$.
+
+By default in FDS, the pathlength, $L$, is 10~cm. It can also be specified by the user. If $T=T_{\rm rad}$ the intensity does not depend on $\kappa_{n,i,{\rm e}}$, and the value $\kappa_{n,i,{\rm e}}(T_{\rm rad})$ is therefore interpolated from the neighboring temperatures.
 
 In cases with only one band ($N$=1), the smaller of the two absorption coefficients is used:
 \be
-   \kappa_n=\min \Big( \kappa_n(P,T),\kappa_{{\rm e},n}(T) \Big)
+   \kappa_{n,i}=\min \Big( \kappa_{n,i,{\rm P}}(P,T),\kappa_{n,i,{\rm e}}(P,T,L) \Big)
 \ee
-If $N>1$ or $L=0$, $\kappa_n=\kappa_n(P,T)$. Note that the spectral data within RADCAL are used whenever the gas mixture contains water vapor, fuel or combustion products, regardless of the number of radiation bands $N$.
+If $N>1$ or $L=0$, $\kappa_{n,i}=\kappa_{n,i,{\rm P}}$. Note that the spectral data within RADCAL are used whenever the gas mixture contains water vapor, fuel or combustion products, regardless of the number of radiation bands $N$. 
 
 \textbf{Note on wavenumber, wavelength, and frequency}: some confusion might arise when dealing with the various quantities describing the wave nature of radiation. These quantities are wavenumber $\om$, wavelength $\la$, and frequency denoted here $\nu$. Most users may be familiar with the frequency $\nu$, in units of \textit{hertz}, ${\rm Hz}$, representing the number of cycles per second. While this unit is preferred for radiation waves of low energy such as radio waves, wavelength and wavenumber are preferred for waves of higher energy. Wavenumber and wavelength are related to frequency through \cite{Penner:1959}
 \be
