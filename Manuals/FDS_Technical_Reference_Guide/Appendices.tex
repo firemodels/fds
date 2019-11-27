@@ -382,9 +382,9 @@ Therefore, if $\bar{p}$ is constant and uniform then $\rho h_s$ is constant and 
 \chapter{Gas Phase Absorption Coefficients}
 \label{absorption_coefficients}
 
-The instantaneous absorption coefficient $\kappa_n$ of the gas mixture at location $\bx$ is calculated as a weighted sum of individual gases' gray or band-mean absorption coefficients $\kappa_{n,i}$
+The instantaneous absorption coefficient $\kappa_n$ of the gas mixture at location $\bx$ is calculated as a sum (superposition) of individual gases' gray or band-mean absorption coefficients $\kappa_{n,i}$ 
 \begin{equation}
-\kappa_{n}(\bx) = \sum_i Y_i(\bx) \kappa_{n,i}(Y_i(\bx),T(\bx))
+\kappa_{n}(\bx) = \sum_i \kappa_{n,i}(Y_i(\bx),T(\bx))
 \end{equation}
 
 For the calculation of $\kappa_{n,i}(Y_i,T)$, a narrow-band model, RADCAL~\cite{RadCal}, has been
@@ -393,11 +393,11 @@ implemented in FDS. During the initialization stage, RADCAL is used to generate 
 RADCAL computes the spectral properties of the radiation participating species at discrete values of the spectrum (expressed either in wavenumber $\om$ or in wavelength $\la$) and temperature, 
 and returns two alternative mean absorption coefficients for each spectral band, $n$. The first coefficient is the Planck mean coefficient \cite{Tien:1968}
 \begin{equation}
-\kappa_{n,i,{\rm P}}(P,T) = \dfrac{\pi}{\sigma T^4}
+\kappa_{n,i,{\rm P}}(Y_i,T) = \dfrac{\pi}{\sigma T^4}
 \displaystyle\int_{\la_{\min}}^{\la_{\max}}{I_{\rm b,\la}(T)
 100 \, \bar{\kappa}_i(\la,T) \, P_i \; \d \la}
 \end{equation}
-where $\la$ is the wavelength, expressed in units of ${\rm \mu m}$, $P_i$ is the partial pressure of participating species $i$, in units of ${\rm atm}$, and $\bar{\kappa}_i$ is the spectral absorption coefficient of participating species $i$, in units of ${\rm atm^{-1}cm^{-1}}$. Note that the temperature used in the calculation of $\kappa_n$ is the local gas temperature; thus, $\kappa_{n,i,{\rm P}}(P,T)$ is a function of the gas phase temperature and partial pressure and is independent of the pathlength. Its units are 1/m.
+where $\la$ is the wavelength, expressed in units of ${\rm \mu m}$, $P_i=Y_i/(Y_i + (1-Y_i)W_i/W_{\rm N_2})$ is the partial pressure of participating species $i$, in units of ${\rm atm}$, and $\bar{\kappa}_i$ is the spectral absorption coefficient of participating species $i$, in units of ${\rm atm^{-1}cm^{-1}}$. Note that the temperature used in the calculation of $\kappa_n$ is the local gas temperature; thus, $\kappa_{n,i,{\rm P}}(P,T)$ is a function of the gas phase temperature and partial pressure and is independent of the pathlength. Its units are 1/m.
 The factor $100$ is introduced to convert $\bar{\kappa}_i$ from ${\rm atm^{-1}cm^{-1}}$ to ${\rm atm^{-1}m^{-1}}$.
 RADCAL can do these calculations for mixtures of several species, but in FDS, it is used for a single species at the time.
 
@@ -408,16 +408,16 @@ I_{\rm b,\la}(T)\d \la = \dfrac{2 \, h \, c^2 \, \la^{-5}}{\exp\left(\dfrac{h \,
 Here, $h$ is the Planck constant ($6.626 \times 10^{-34}$~J$\cdot$s), $c$ is the speed of light in vacuum ($2.998 \times 10^8$~m/s), and $k_{\rm B}$ is the Boltzmann constant ($1.381 \times 10^{-23}$~J/K) \cite{Mohr:2012}.
 $I_{\rm b,\la}(T)$ is in units of $\rm{W/m^{2}/str/m}$; the wavelengths are converted from $\rm{\mu m}$ to $\rm{m}$.
 
-The second coefficient is the so-called {\em path mean} or {\em effective} absorption coefficient, $\kappa_{n,i,{\rm e}}(P,T,L)$ which is defined according to the following equation
+The second coefficient is the so-called {\em path mean} or {\em effective} absorption coefficient, $\kappa_{n,i,{\rm e}}(Y_i,T,L)$ which is defined according to the following equation
 \be
-   \underbrace{\int_{\la_{\rm min}}^{\la_{\rm max}}I(\la,L,T,T_{\rm rad}) \; \d \la}_{I_{\rm tot}}
+   \underbrace{\int_{\la_{\rm min}}^{\la_{\rm max}}I(\la,L,Y_i,T,T_{\rm rad}) \; \d \la}_{I_{\rm tot}}
    = \frac{\sigma}{\pi}
     \left[\left(1-{\rm e}^{-\kappa_{n,i,{\rm e}}\, L}\right) \, T^4 + {\rm e}^{-\kappa_{n,i,{\rm e}} \, L} \, T_{\rm rad}^4\right]
     \label{RADCAL_kappamean_def}
 \ee
 where $L$ is the path length and $T_{\rm rad}$ is the effective temperature of flame radiation. RADCAL calculates the left hand integral by calculating the intensity leaving a uniform gas layer of equivalent thickness $L$, bounded by a black wall at temperature $T_{\rm rad}$, for a large number of narrow spectral bands. Solving from equation~\ref{RADCAL_kappamean_def} gives
 \be
-  \kappa_{n,i,{\rm e}}(P,T,L) = -\frac{1}{L}\ln\left(\frac{I_{\rm tot}-I_b(T)}{I_b(T_{\rm rad})-I_b(T)}\right)
+  \kappa_{n,i,{\rm e}}(Y_i,T,L) = -\frac{1}{L}\ln\left(\frac{I_{\rm tot}-I_b(T)}{I_b(T_{\rm rad})-I_b(T)}\right)
 \ee
 where $I_b(T) = \sigma T^4/\pi$.
 
@@ -425,7 +425,7 @@ By default in FDS, the pathlength, $L$, is 10~cm. It can also be specified by th
 
 In cases with only one band ($N$=1), the smaller of the two absorption coefficients is used:
 \be
-   \kappa_{n,i}=\min \Big( \kappa_{n,i,{\rm P}}(P,T),\kappa_{n,i,{\rm e}}(P,T,L) \Big)
+   \kappa_{n,i}=\min \Big( \kappa_{n,i,{\rm P}}(Y_i,T),\kappa_{n,i,{\rm e}}(Y_i,T,L) \Big)
 \ee
 If $N>1$ or $L=0$, $\kappa_{n,i}=\kappa_{n,i,{\rm P}}$. Note that the spectral data within RADCAL are used whenever the gas mixture contains water vapor, fuel or combustion products, regardless of the number of radiation bands $N$. 
 
