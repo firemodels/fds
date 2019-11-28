@@ -1,7 +1,7 @@
 RENDERDIR
  ../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES
 LOADFILE
- ns2d_64_02.sf
+ ns2d_64_0001_02.sf
 SETTIMEVAL
  0.0
 RENDERONCE

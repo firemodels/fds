@@ -1,7 +1,7 @@
 RENDERDIR
  ../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES
 LOADFILE
- symmetry_test_2_01.sf
+ symmetry_test_2_0001_01.sf
 SETTIMEVAL
  3.99
 RENDERONCE
