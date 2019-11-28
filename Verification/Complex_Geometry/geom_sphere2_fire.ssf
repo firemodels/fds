@@ -9,13 +9,13 @@ ZSCENECLIP
 SCENECLIP
  0
 LOADFILE
- geom_sphere2_fire_01.s3d
+ geom_sphere2_fire_0001_01.s3d
 LOADFILE
- geom_sphere2_fire_02.s3d
+ geom_sphere2_fire_0001_02.s3d
 LOADFILE
- geom_sphere2_fire_01.be
+ geom_sphere2_fire_0001_01.be
 LOADVFILE
- geom_sphere2_fire_01.sf
+ geom_sphere2_fire_0001_01.sf
 SETTIMEVAL
  0.000000
 RENDERONCE
