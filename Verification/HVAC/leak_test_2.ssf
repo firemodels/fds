@@ -1,7 +1,7 @@
 RENDERDIR
  ../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES
 LOADVFILE
- leak_test_2_06.sf
+ leak_test_2_0001_06.sf
 SETTIMEVAL
  11.0
 RENDERONCE

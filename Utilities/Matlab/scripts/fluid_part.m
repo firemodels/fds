@@ -24,16 +24,16 @@ if ~exist([ddir,'fluid_part_mom_z_devc.csv'])
     skip_case = 1;
 end
 
-if ~exist([ddir,'fluid_part_mom_x.prt5'])
-    display(['Error: File ' [ddir,'fluid_part_mom_x.prt5'] ' does not exist. Skipping case.'])
+if ~exist([ddir,'fluid_part_mom_x_0001.prt5'])
+    display(['Error: File ' [ddir,'fluid_part_mom_x_0001.prt5'] ' does not exist. Skipping case.'])
     skip_case = 1;
 end
-if ~exist([ddir,'fluid_part_mom_y.prt5'])
-    display(['Error: File ' [ddir,'fluid_part_mom_y.prt5'] ' does not exist. Skipping case.'])
+if ~exist([ddir,'fluid_part_mom_y_0001.prt5'])
+    display(['Error: File ' [ddir,'fluid_part_mom_y_0001.prt5'] ' does not exist. Skipping case.'])
     skip_case = 1;
 end
-if ~exist([ddir,'fluid_part_mom_z.prt5'])
-    display(['Error: File ' [ddir,'fluid_part_mom_z.prt5'] ' does not exist. Skipping case.'])
+if ~exist([ddir,'fluid_part_mom_z_0001.prt5'])
+    display(['Error: File ' [ddir,'fluid_part_mom_z_0001.prt5'] ' does not exist. Skipping case.'])
     skip_case = 1;
 end
 
@@ -76,9 +76,9 @@ v_p = 4/3*pi*(d_p/2)^3;   % volume of a single droplet, m^3
 m_p = rho_p*v_p;          % mass of single droplet, kg
 pwt = mpv*v_xb/(n*m_p);   % particle weight factor
 
-[STIME_X, XP_X, YP_X, ZP_X, QP_X] = read_prt5([ddir,'fluid_part_mom_x.prt5'],'real*4');
-[STIME_Y, XP_Y, YP_Y, ZP_Y, QP_Y] = read_prt5([ddir,'fluid_part_mom_y.prt5'],'real*4');
-[STIME_Z, XP_Z, YP_Z, ZP_Z, QP_Z] = read_prt5([ddir,'fluid_part_mom_z.prt5'],'real*4');
+[STIME_X, XP_X, YP_X, ZP_X, QP_X] = read_prt5([ddir,'fluid_part_mom_x_0001.prt5'],'real*4');
+[STIME_Y, XP_Y, YP_Y, ZP_Y, QP_Y] = read_prt5([ddir,'fluid_part_mom_y_0001.prt5'],'real*4');
+[STIME_Z, XP_Z, YP_Z, ZP_Z, QP_Z] = read_prt5([ddir,'fluid_part_mom_z_0001.prt5'],'real*4');
 
 P_X = zeros(1,numel(STIME_X));
 for i=1:numel(STIME_X)
