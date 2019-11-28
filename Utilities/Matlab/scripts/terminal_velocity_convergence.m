@@ -9,24 +9,24 @@ repository = '../../Verification/Sprinklers_and_Sprays/';
 
 skip_case = 0;
 
-if ~exist([repository, 'terminal_velocity_dt_1_0.prt5'])
-    display(['Error: File ' [repository, 'terminal_velocity_dt_1_0.prt5'] ' does not exist. Skipping case.'])
+if ~exist([repository, 'terminal_velocity_dt_1_0_0001.prt5'])
+    display(['Error: File ' [repository, 'terminal_velocity_dt_1_0_0001.prt5'] ' does not exist. Skipping case.'])
     skip_case = 1;
 end
-if ~exist([repository, 'terminal_velocity_dt_0_1.prt5'])
-    display(['Error: File ' [repository, 'terminal_velocity_dt_0_1.prt5'] ' does not exist. Skipping case.'])
+if ~exist([repository, 'terminal_velocity_dt_0_1_0001.prt5'])
+    display(['Error: File ' [repository, 'terminal_velocity_dt_0_1_0001.prt5'] ' does not exist. Skipping case.'])
     skip_case = 1;
 end
-if ~exist([repository, 'terminal_velocity_dt_0_01.prt5'])
-    display(['Error: File ' [repository, 'terminal_velocity_dt_0_01.prt5'] ' does not exist. Skipping case.'])
+if ~exist([repository, 'terminal_velocity_dt_0_01_0001.prt5'])
+    display(['Error: File ' [repository, 'terminal_velocity_dt_0_01_0001.prt5'] ' does not exist. Skipping case.'])
     skip_case = 1;
 end
-if ~exist([repository, 'terminal_velocity_dt_0_001.prt5'])
-    display(['Error: File ' [repository, 'terminal_velocity_dt_0_001.prt5'] ' does not exist. Skipping case.'])
+if ~exist([repository, 'terminal_velocity_dt_0_001_0001.prt5'])
+    display(['Error: File ' [repository, 'terminal_velocity_dt_0_001_0001.prt5'] ' does not exist. Skipping case.'])
     skip_case = 1;
 end
-if ~exist([repository, 'terminal_velocity_dt_0_0001.prt5'])
-    display(['Error: File ' [repository, 'terminal_velocity_dt_0_0001.prt5'] ' does not exist. Skipping case.'])
+if ~exist([repository, 'terminal_velocity_dt_0_0001_0001.prt5'])
+    display(['Error: File ' [repository, 'terminal_velocity_dt_0_0001_0001.prt5'] ' does not exist. Skipping case.'])
     skip_case = 1;
 end
 
@@ -53,24 +53,24 @@ errvec = [];
 Linf = [];
 vtexact = sqrt(g / K);
 zexact = @(t) -log(cosh(sqrt(g * K) * t)) / K;
-[STIME, XP, YP, ZP, QP] = read_prt5([repository, 'terminal_velocity_dt_1_0.prt5'],'real*8');
+[STIME, XP, YP, ZP, QP] = read_prt5([repository, 'terminal_velocity_dt_1_0_0001.prt5'],'real*8');
 dtvec = [1.0 0.1 0.01 0.001 0.0001];
 errvec(1) = abs(abs(QP(length(QP))) - vtexact);
 Linf(1) = norm(ZP' - zexact(STIME), Inf);
 %errtvec(1) = abs(ZP(find(abs(STIME - ttest) < eps, 1))' - zexact(ttest));
-[STIME, XP, YP, ZP, QP] = read_prt5([repository, 'terminal_velocity_dt_0_1.prt5'],'real*8');
+[STIME, XP, YP, ZP, QP] = read_prt5([repository, 'terminal_velocity_dt_0_1_0001.prt5'],'real*8');
 errvec(2) = abs(abs(QP(length(QP))) - vtexact);
 Linf(2) = norm(ZP' - zexact(STIME), Inf);
 %errtvec(2) = abs(ZP(find(abs(STIME - ttest) < eps, 1))' - zexact(ttest));
-[STIME, XP, YP, ZP, QP] = read_prt5([repository, 'terminal_velocity_dt_0_01.prt5'],'real*8');
+[STIME, XP, YP, ZP, QP] = read_prt5([repository, 'terminal_velocity_dt_0_01_0001.prt5'],'real*8');
 errvec(3) = abs(abs(QP(length(QP))) - vtexact);
 Linf(3) = norm(ZP' - zexact(STIME), Inf);
 %errtvec(3) = abs(ZP(find(abs(STIME - ttest) < eps, 1))' - zexact(ttest));
-[STIME, XP, YP, ZP, QP] = read_prt5([repository, 'terminal_velocity_dt_0_001.prt5'],'real*8');
+[STIME, XP, YP, ZP, QP] = read_prt5([repository, 'terminal_velocity_dt_0_001_0001.prt5'],'real*8');
 errvec(4) = abs(abs(QP(length(QP))) - vtexact);
 Linf(4) = norm(ZP' - zexact(STIME), Inf);
 %errtvec(4) = abs(ZP(find(abs(STIME - ttest) < eps, 1))' - zexact(ttest));
-[STIME, XP, YP, ZP, QP] = read_prt5([repository, 'terminal_velocity_dt_0_0001.prt5'],'real*8');
+[STIME, XP, YP, ZP, QP] = read_prt5([repository, 'terminal_velocity_dt_0_0001_0001.prt5'],'real*8');
 errvec(5) = abs(abs(QP(length(QP))) - vtexact);
 Linf(5) = norm(ZP' - zexact(STIME), Inf);
 %errtvec(6) = abs(ZP(find(abs(STIME - ttest) < eps, 1))' - zexact(ttest));
