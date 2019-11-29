@@ -12,70 +12,70 @@ disp('christifire ...')
 % Set global reaction rate parameters
 
 expdir = '../../../exp/CHRISTIFIRE/';
-outdir = '../../../out/CHRISTIFIRE/FDS_Output_Files/';
+outdir = '../../../out/CHRISTIFIRE/';
 
 skip_case = 0;
-if ~exist([outdir 'CHRISTIFIRE_S701_tga_N2_v1_devc.csv'])
+if ~exist([outdir,'CHRISTIFIRE_S701_tga_N2_v1_devc.csv'])
     display('Error: File CHRISTIFIRE_S701_tga_N2_v1_devc.csv does not exist. Skipping case.')
     skip_case = 1;
 end
-if ~exist([outdir 'CHRISTIFIRE_S701_tga_N2_v2_devc.csv'])
+if ~exist([outdir,'CHRISTIFIRE_S701_tga_N2_v2_devc.csv'])
     display('Error: File CHRISTIFIRE_S701_tga_N2_v2_devc.csv does not exist. Skipping case.')
     skip_case = 1;
 end
-if ~exist([outdir 'CHRISTIFIRE_S701_tga_air_v1_devc.csv'])
+if ~exist([outdir,'CHRISTIFIRE_S701_tga_air_v1_devc.csv'])
     display('Error: File CHRISTIFIRE_S701_tga_air_v1_devc.csv does not exist. Skipping case.')
     skip_case = 1;
 end
-if ~exist([outdir 'CHRISTIFIRE_S701_tga_air_v2_devc.csv'])
+if ~exist([outdir,'CHRISTIFIRE_S701_tga_air_v2_devc.csv'])
     display('Error: File CHRISTIFIRE_S701_tga_air_v2_devc.csv does not exist. Skipping case.')
     skip_case = 1;
 end
-if ~exist([outdir 'CHRISTIFIRE_S701_mcc_v1_devc.csv'])
+if ~exist([outdir,'CHRISTIFIRE_S701_mcc_v1_devc.csv'])
     display('Error: File CHRISTIFIRE_S701_mcc_v1_devc.csv does not exist. Skipping case.')
     skip_case = 1;
 end
-if ~exist([outdir 'CHRISTIFIRE_S701_mcc_v2_devc.csv'])
+if ~exist([outdir,'CHRISTIFIRE_S701_mcc_v2_devc.csv'])
     display('Error: File CHRISTIFIRE_S701_mcc_v2_devc.csv does not exist. Skipping case.')
     skip_case = 1;
 end
-if ~exist([outdir 'CHRISTIFIRE_I701_tga_N2_v1_devc.csv'])
+if ~exist([outdir,'CHRISTIFIRE_I701_tga_N2_v1_devc.csv'])
     display('Error: File CHRISTIFIRE_I701_tga_N2_v1_devc.csv does not exist. Skipping case.')
     skip_case = 1;
 end
-if ~exist([outdir 'CHRISTIFIRE_I701_tga_N2_v2_devc.csv'])
+if ~exist([outdir,'CHRISTIFIRE_I701_tga_N2_v2_devc.csv'])
     display('Error: File CHRISTIFIRE_I701_tga_N2_v2_devc.csv does not exist. Skipping case.')
     skip_case = 1;
 end
-if ~exist([outdir 'CHRISTIFIRE_I701_mcc_v1_devc.csv'])
+if ~exist([outdir,'CHRISTIFIRE_I701_mcc_v1_devc.csv'])
     display('Error: File CHRISTIFIRE_I701_mcc_v1_devc.csv does not exist. Skipping case.')
     skip_case = 1;
 end
-if ~exist([outdir 'CHRISTIFIRE_I701_mcc_v2_devc.csv'])
+if ~exist([outdir,'CHRISTIFIRE_I701_mcc_v2_devc.csv'])
     display('Error: File CHRISTIFIRE_I701_mcc_v2_devc.csv does not exist. Skipping case.')
     skip_case = 1;
 end
-if ~exist([outdir 'CHRISTIFIRE_C701_cone_25_v1_devc.csv'])
+if ~exist([outdir,'CHRISTIFIRE_C701_cone_25_v1_devc.csv'])
     display('Error: File CHRISTIFIRE_C701_cone_25_v1_devc.csv does not exist. Skipping case.')
     skip_case = 1;
 end
-if ~exist([outdir 'CHRISTIFIRE_C701_cone_50_v1_devc.csv'])
+if ~exist([outdir,'CHRISTIFIRE_C701_cone_50_v1_devc.csv'])
     display('Error: File CHRISTIFIRE_C701_cone_50_v1_devc.csv does not exist. Skipping case.')
     skip_case = 1;
 end
-if ~exist([outdir 'CHRISTIFIRE_C701_cone_75_v1_devc.csv'])
+if ~exist([outdir,'CHRISTIFIRE_C701_cone_75_v1_devc.csv'])
     display('Error: File CHRISTIFIRE_C701_cone_75_v1_devc.csv does not exist. Skipping case.')
     skip_case = 1;
 end
-if ~exist([outdir 'CHRISTIFIRE_C701_cone_25_v2_devc.csv'])
+if ~exist([outdir,'CHRISTIFIRE_C701_cone_25_v2_devc.csv'])
     display('Error: File CHRISTIFIRE_C701_cone_25_v2_devc.csv does not exist. Skipping case.')
     skip_case = 1;
 end
-if ~exist([outdir 'CHRISTIFIRE_C701_cone_50_v2_devc.csv'])
+if ~exist([outdir,'CHRISTIFIRE_C701_cone_50_v2_devc.csv'])
     display('Error: File CHRISTIFIRE_C701_cone_50_v2_devc.csv does not exist. Skipping case.')
     skip_case = 1;
 end
-if ~exist([outdir 'CHRISTIFIRE_C701_cone_75_v2_devc.csv'])
+if ~exist([outdir,'CHRISTIFIRE_C701_cone_75_v2_devc.csv'])
     display('Error: File CHRISTIFIRE_C701_cone_75_v2_devc.csv does not exist. Skipping case.')
     skip_case = 1;
 end
