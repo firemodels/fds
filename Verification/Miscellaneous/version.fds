@@ -1,0 +1,7 @@
+&HEAD CHID='version',TITLE='Generate version info' /
+
+&MESH IJK=16,16,32, XB=0.0,1.6,0.0,1.6,0.0,3.2 /
+
+&TIME T_END=0. / 
+
+&TAIL /
