@@ -13,7 +13,6 @@ echo "-g - make geom figures"
 echo "-h - display this message"
 echo "-p path - specify path of the smokeview executable"
 echo "-r - use release version of smokeview"
-echo "-s size - use 32 or 64 bit (default) version of smokeview"
 echo "-S host - make pictures on host"
 echo "-t - use test version of smokeview"
 echo "-X - do not start / stop separate X-server"
@@ -39,7 +38,7 @@ SSH=
 GEOMFIGURES=1
 FDSFIGURES=1
 
-while getopts 'dghp:rs:S:tX' OPTION
+while getopts 'dghp:rS:tX' OPTION
 do
 case $OPTION  in
   d)
@@ -57,14 +56,6 @@ case $OPTION  in
    ;;
   r)
    TEST=
-  ;;
-  s)
-   SIZE="$OPTARG"
-   if [ $SIZE -eq 64 ] ; then
-     SIZE=_64
-   else
-     SIZE=_32
-   fi
   ;;
   S)
    SSH="ssh $OPTARG"
