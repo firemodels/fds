@@ -2,7 +2,7 @@ RENDERDIR
  ../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES
 
 LOADFILE
- shunn3_256_04.sf
+ shunn3_256_0001_04.sf
 
 SETTIMEVAL
  0.0
@@ -24,7 +24,7 @@ RENDERONCE
 UNLOADALL
 
 LOADFILE
- shunn3_256_06.sf
+ shunn3_256_0001_06.sf
 
 SETTIMEVAL
  0.0
@@ -46,7 +46,7 @@ RENDERONCE
 UNLOADALL
 
 LOADFILE
- shunn3_256_02.sf
+ shunn3_256_0001_02.sf
 
 SETTIMEVAL
  0.0

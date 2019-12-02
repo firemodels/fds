@@ -1,11 +1,11 @@
 RENDERDIR
  ..\..\Manuals\FDS_User_Guide\SCRIPT_FIGURES
 LOADFILE
- geom_sphere_fire_01.s3d
+ geom_sphere_fire_0001_01.s3d
 LOADFILE
- geom_sphere_fire_02.s3d
+ geom_sphere_fire_0001_02.s3d
 LOADFILE
- geom_sphere_fire_01.be
+ geom_sphere_fire_0001_01.be
 RENDERCLIP
  1 0 154 0 60
 SETTIMEVAL

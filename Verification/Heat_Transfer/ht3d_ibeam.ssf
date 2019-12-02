@@ -5,7 +5,7 @@ ht3d_ibeam.ini
 SETVIEWPOINT
 view 1
 LOADFILE
-ht3d_ibeam_01.bf
+ht3d_ibeam_0001_01.bf
 SETTIMEVAL
  3600 
 RENDERONCE

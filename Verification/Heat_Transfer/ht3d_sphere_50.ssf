@@ -5,9 +5,9 @@ ht3d_sphere_50.ini
 SETVIEWPOINT
 view 1
 LOADFILE
-ht3d_sphere_50_03.sf
+ht3d_sphere_50_0001_03.sf
 LOADFILE
-ht3d_sphere_50_05.sf
+ht3d_sphere_50_0001_05.sf
 SETTIMEVAL
 165
 RENDERONCE

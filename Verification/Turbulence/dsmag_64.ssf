@@ -5,11 +5,11 @@ dsmag_64.ini
 SETVIEWPOINT
 view 2
 LOADFILE
-dsmag_64_13.sf
+dsmag_64_0001_13.sf
 LOADFILE
-dsmag_64_14.sf
+dsmag_64_0001_14.sf
 LOADFILE
-dsmag_64_15.sf
+dsmag_64_0001_15.sf
 SETTIMEVAL
  0.300000
 RENDERONCE

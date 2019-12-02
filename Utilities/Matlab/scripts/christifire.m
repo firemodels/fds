@@ -20,23 +20,23 @@ if ~exist([outdir,'CHRISTIFIRE_S701_tga_N2_v1_devc.csv'])
     skip_case = 1;
 end
 if ~exist([outdir,'CHRISTIFIRE_S701_tga_N2_v2_devc.csv'])
-    display('Error: File CHRISTIFIRE_S701_tga_N2_v1_devc.csv does not exist. Skipping case.')
+    display('Error: File CHRISTIFIRE_S701_tga_N2_v2_devc.csv does not exist. Skipping case.')
     skip_case = 1;
 end
 if ~exist([outdir,'CHRISTIFIRE_S701_tga_air_v1_devc.csv'])
-    display('Error: File CHRISTIFIRE_S701_tga_N2_v1_devc.csv does not exist. Skipping case.')
+    display('Error: File CHRISTIFIRE_S701_tga_air_v1_devc.csv does not exist. Skipping case.')
     skip_case = 1;
 end
 if ~exist([outdir,'CHRISTIFIRE_S701_tga_air_v2_devc.csv'])
-    display('Error: File CHRISTIFIRE_S701_tga_N2_v1_devc.csv does not exist. Skipping case.')
+    display('Error: File CHRISTIFIRE_S701_tga_air_v2_devc.csv does not exist. Skipping case.')
     skip_case = 1;
 end
 if ~exist([outdir,'CHRISTIFIRE_S701_mcc_v1_devc.csv'])
-    display('Error: File CHRISTIFIRE_S701_tga_N2_v1_devc.csv does not exist. Skipping case.')
+    display('Error: File CHRISTIFIRE_S701_mcc_v1_devc.csv does not exist. Skipping case.')
     skip_case = 1;
 end
 if ~exist([outdir,'CHRISTIFIRE_S701_mcc_v2_devc.csv'])
-    display('Error: File CHRISTIFIRE_S701_tga_N2_v1_devc.csv does not exist. Skipping case.')
+    display('Error: File CHRISTIFIRE_S701_mcc_v2_devc.csv does not exist. Skipping case.')
     skip_case = 1;
 end
 if ~exist([outdir,'CHRISTIFIRE_I701_tga_N2_v1_devc.csv'])
@@ -44,15 +44,15 @@ if ~exist([outdir,'CHRISTIFIRE_I701_tga_N2_v1_devc.csv'])
     skip_case = 1;
 end
 if ~exist([outdir,'CHRISTIFIRE_I701_tga_N2_v2_devc.csv'])
-    display('Error: File CHRISTIFIRE_I701_tga_N2_v1_devc.csv does not exist. Skipping case.')
+    display('Error: File CHRISTIFIRE_I701_tga_N2_v2_devc.csv does not exist. Skipping case.')
     skip_case = 1;
 end
 if ~exist([outdir,'CHRISTIFIRE_I701_mcc_v1_devc.csv'])
-    display('Error: File CHRISTIFIRE_I701_tga_N2_v1_devc.csv does not exist. Skipping case.')
+    display('Error: File CHRISTIFIRE_I701_mcc_v1_devc.csv does not exist. Skipping case.')
     skip_case = 1;
 end
 if ~exist([outdir,'CHRISTIFIRE_I701_mcc_v2_devc.csv'])
-    display('Error: File CHRISTIFIRE_I701_tga_N2_v1_devc.csv does not exist. Skipping case.')
+    display('Error: File CHRISTIFIRE_I701_mcc_v2_devc.csv does not exist. Skipping case.')
     skip_case = 1;
 end
 if ~exist([outdir,'CHRISTIFIRE_C701_cone_25_v1_devc.csv'])
@@ -102,11 +102,11 @@ set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 plot(S_tga_N2(:,1),S_tga_N2(:,2),'k');
 hold on
-plot(S_tga_air_v1(:,2),S_tga_air_v1(:,4)./max(S_tga_air_v1(:,4)).*100, ...
-    S_tga_air_v2(:,2),S_tga_air_v2(:,4)./max(S_tga_air_v2(:,4)).*100)
+plot(S_tga_N2_v1(:,2),S_tga_N2_v1(:,4)./max(S_tga_N2_v1(:,4)).*100, ...
+    S_tga_N2_v2(:,2),S_tga_N2_v2(:,4)./max(S_tga_N2_v2(:,4)).*100)
 plot(S_tga_air(:,1),S_tga_air(:,2),'k--')
-plot(S_tga_N2_v1(:,2),S_tga_N2_v1(:,4)./max(S_tga_N2_v1(:,4)).*100, '--', ...
-    S_tga_N2_v2(:,2),S_tga_N2_v2(:,4)./max(S_tga_N2_v2(:,4)).*100, '--')
+plot(S_tga_air_v1(:,2),S_tga_air_v1(:,4)./max(S_tga_air_v1(:,4)).*100, '--', ...
+    S_tga_air_v2(:,2),S_tga_air_v2(:,4)./max(S_tga_air_v2(:,4)).*100, '--')
 
 xlabel('Temperature (\circC)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 ylabel('Mass (%)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
