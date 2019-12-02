@@ -7262,6 +7262,8 @@ READ_SURF_LOOP: DO N=0,N_SURF
             IF (MATL_NAME(NNN)==NAME_LIST(N_LIST)) THEN
                INDEX_LIST(N_LIST) = NNN
                SF%LAYER_MATL_INDEX(NL,NN) = NNN
+print '(A,1x,3I3,2ES13.4)','read:max_layers,max_materials,n_matl,matl_frac,matl_rho_s', &
+    max_layers,max_materials,n_matl,sf%layer_matl_frac(nl,nn),material(nnn)%rho_s 
                SF%LAYER_DENSITY(NL) = SF%LAYER_DENSITY(NL)+SF%LAYER_MATL_FRAC(NL,NN)/MATERIAL(NNN)%RHO_S
                EMISSIVITY = EMISSIVITY + &
                   MATERIAL(NNN)%EMISSIVITY*SF%LAYER_MATL_FRAC(NL,NN)/MATERIAL(NNN)%RHO_S ! volume based
