@@ -3,8 +3,8 @@
 This directory contains a webpage template, `index_template.html`, for summarizing the results  of a firebot run. 
 The summary consists of png images created by firebot for the FDS user and verification guides
 and links to all of the guides created by firebot.
-The summary may viewed (after firebot is run) by opening the web page `index.html`
-found in this directory.
+The summary may viewed by opening the web page `index.html`
+found in this directory after firebot is run.
 This summary pages may also be viewd from other computers if the -w option is invoked when running firebot.  
 At NIST, firebot is run using `-w /var/www/html/firebot` and then accessed using the URL http://blaze.el.nist.gov/firebot
 
