@@ -14,4 +14,4 @@ Many but not all of these images are displayed in the `index.html`
 web page. To display other images, add desired links to `index_template.html` and rerun firebot.
 In addition to copying image files and guides, 
 firebot copies `index_template.html` to `index.html` while adding the current date and FDS and SMV repo revisions.
-Note, firebot does not write to index.html directly to avoid modifying a file that is in the fds repo.
+Note, firebot does not write to index_template.html directly to avoid modifying a file that is in the fds repo.
