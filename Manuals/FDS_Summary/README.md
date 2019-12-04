@@ -1,6 +1,6 @@
 # FDS Summary Web Page
 
-This directory contains a webpage template for summarizing the results  of a firebot run. 
+This directory contains a webpage template, `index_template.html`, for summarizing the results  of a firebot run. 
 The summary consists of png images created by firebot for the FDS user and verification guides
 and links to all of the guides created by firebot.
 The summary may viewed (after firebot is run) by opening the web page `index.html`
