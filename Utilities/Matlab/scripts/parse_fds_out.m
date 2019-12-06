@@ -35,9 +35,9 @@ while 1
 
     if (I_Heat_of_Combustion>0)
         if strcmp(tline,'   Fuel                                           Heat of Combustion (kJ/kg)')
-            disp(tline)
-            tline = fgetl(fid) % read the FUEL line
-            C = strsplit(tline)
+            % disp(tline)
+            tline = fgetl(fid); % read the FUEL line
+            C = strsplit(tline);
             Vals(I_Heat_of_Combustion)=abs(str2num(C{end}));
         end
     end
