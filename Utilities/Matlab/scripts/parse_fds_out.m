@@ -17,8 +17,6 @@ Vals = zeros(1,length(varargin));
 I_Stoich_Coef        = find(strcmp(varargin,'stoich coef'));
 I_Heat_of_Combustion = find(strcmp(varargin,'heat of combustion'));
 
-% find mass stoich coefficient
-
 fid = fopen(filename,'r+');
 
 while 1
