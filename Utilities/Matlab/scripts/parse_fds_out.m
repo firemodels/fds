@@ -29,7 +29,7 @@ while 1
             tline = fgetl(fid); % dummy read
             tline = fgetl(fid); % read the AIR line
             C = strsplit(tline);
-            Vals(I_Stoich_Coef)=abs(str2num(C{4}));
+            Vals(I_Stoich_Coef)=abs(str2num(C{end}));
         end
     end
 
@@ -38,7 +38,7 @@ while 1
             % disp(tline)
             tline = fgetl(fid); % read the FUEL line
             C = strsplit(tline);
-            Vals(I_Heat_of_Combustion)=abs(str2num(C{3}));
+            Vals(I_Heat_of_Combustion)=abs(str2num(C{end}));
         end
     end
 
