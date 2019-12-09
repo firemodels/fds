@@ -39,7 +39,7 @@ while 1
         if strfind(tline,'Total Elapsed Wall Clock Time')
             % disp(tline)
             C = strsplit(tline);
-            Vals(I_Time_Step_Wall_Clock_Time)=abs(str2num(C{end}));
+            Vals(I_Total_Elapsed_Wall_Clock_Time)=abs(str2num(C{end}));
         end
     end
 
