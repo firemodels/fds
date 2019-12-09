@@ -9200,6 +9200,7 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct INCIDENT HEAT FLUX}                        & Section~\ref{info:heat_flux}                  & kW/m$^2$       & B,D          \\ \hline
 {\ct INSIDE WALL TEMPERATURE}                   & Section~\ref{info:DEPTH}                      & $^\circ$C      & D            \\ \hline
 {\ct INSIDE WALL DEPTH}                         & Section~\ref{info:DEPTH}                      & m              & D            \\ \hline
+{\ct INTERNAL ENERGY}                           & $\rho h - \bar{p}$                            & kJ/m$^3$       & D,I,P,S      \\ \hline
 {\ct ITERATION}                                 & Section~\ref{info:TIMING}                     &                & D            \\ \hline
 {\ct LAYER HEIGHT}                              & Section~\ref{info:layerheight}                & m              & D            \\ \hline
 {\ct LINK TEMPERATURE}                          & Section~\ref{info:heat_detectors}             & $^\circ$C      & D            \\ \hline
@@ -9481,9 +9482,9 @@ properties be specified as well. Simply prescribing as many properties as possib
 % ignorenamelistkw: /INIT/NUMBER_INITIAL_PARTICLES
 % ignorenamelistkw: /MISC/DNS, /MISC/RADIATION, /MISC/RESEARCH_MODE, /MISC/STRATIFICATION, /MISC/SUPPRESSION, /MISC/SURF_DEFAULT
 % ignorenamelistkw: /PRES/SCARC_METHOD, /PRES/SCARC_KRYLOV, /PRES/SCARC_MULTIGRID, /PRES/SCARC_SMOOTH, /PRES/SCARC_PRECON
-% ignorenamelistkw: /PRES/SCARC_COARSE, /PRES/SCARC_INITIAL, /PRES/SCARC_STORAGE, /PRES/SCARC_ACCURACY, /PRES/SCARC_DEBUG 
-% ignorenamelistkw: /PRES/SCARC_MULTIGRID_CYCLE, /PRES/SCARC_MULTIGRID_LEVEL, /PRES/SCARC_MULTIGRID_COARSENING  
-% ignorenamelistkw: /PRES/SCARC_MULTIGRID_ITERATIONS, /PRES/SCARC_MULTIGRID_ACCURACY   
+% ignorenamelistkw: /PRES/SCARC_COARSE, /PRES/SCARC_INITIAL, /PRES/SCARC_STORAGE, /PRES/SCARC_ACCURACY, /PRES/SCARC_DEBUG
+% ignorenamelistkw: /PRES/SCARC_MULTIGRID_CYCLE, /PRES/SCARC_MULTIGRID_LEVEL, /PRES/SCARC_MULTIGRID_COARSENING
+% ignorenamelistkw: /PRES/SCARC_MULTIGRID_ITERATIONS, /PRES/SCARC_MULTIGRID_ACCURACY
 % ignorenamelistkw: /PRES/SCARC_KRYLOV_ITERATIONS, /PRES/SCARC_KRYLOV_ACCURACY
 % ignorenamelistkw: /PRES/SCARC_SMOOTH_ITERATIONS, /PRES/SCARC_SMOOTH_ACCURACY,  /PRES/SCARC_SMOOTH_OMEGA
 % ignorenamelistkw: /PRES/SCARC_PRECON_ITERATIONS, /PRES/SCARC_PRECON_ACCURACY, /PRES/SCARC_PRECON_OMEGA
@@ -10215,7 +10216,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct Y\_O2\_INFTY}                                  & Real         & Section~\ref{info:simple_chemistry}     &  kg/kg     &                   \\ \hline
 \end{longtable}
 
-% Undocumented: AEROSOL_AL2O3, AEROSOL_SCRUBBING, CC_IBM(MV), CCVOL_LINK(MV), CC_SLIPIBM_VELO(MV,debug), CC_ZEROIBM_VELO(MV,debug), CHECK_MASS_CONSERVE(MV), COMPUTE_CUTCELLS_ONLY(MV), 
+% Undocumented: AEROSOL_AL2O3, AEROSOL_SCRUBBING, CC_IBM(MV), CCVOL_LINK(MV), CC_SLIPIBM_VELO(MV,debug), CC_ZEROIBM_VELO(MV,debug), CHECK_MASS_CONSERVE(MV), COMPUTE_CUTCELLS_ONLY(MV),
 % CONSTANT_H_SOLID, DO_IMPLICIT_CCREGION (MV), ENTHALPY_TRANSPORT (RJM),
 % EVAP_MODEL, EXTERNAL_BOUNDARY_CORRECTION, HT3D_TEST (RJM), MAXIMUM_GEOMETRY_FACES(MV), MAXIMUM_GEOMETRY_ZVALS(MV), NUCLEATION_SITES, PERIODIC_TEST (RJM),
 % POSITIVE_ERROR_TEST, PROFILING, QFAN_BETA_TEST, SLIP_CONDITION(RJM), TENSOR_DIFFUSIVITY (RJM), TERRAIN_CASE (KM), TERRAIN_IMAGE (KM), TURB_INIT_CLOCK (RJM),
