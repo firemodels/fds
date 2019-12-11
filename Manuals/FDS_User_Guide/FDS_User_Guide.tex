@@ -4575,8 +4575,10 @@ If a reverse chemical reaction is specified using {\ct REVERSE=.TRUE.} on a {\ct
 
 The only instance where detailed liquid properties are needed is when defining a liquid droplet for a species not listed in Table~\ref{tab:gasspecies}. The necessary properties are described in Section~\ref{thermal_part_props}.
 
+\subsubsection{Prandtl Number}
 
-
+The Prandtl number for a gas species can be specified using {\ct PR\_GAS} on {\ct SPEC}. If no value is given, the default value of {\ct PR} on {\ct MISC} will be used. If
+{\ct PR\_GAS} is defined for a known species, it will override the existing value.
 
 \subsection{Air}
 
