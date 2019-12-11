@@ -1537,11 +1537,11 @@ IF (MYID==0) THEN
          WRITE(MESSAGE,'(A)') 'STOP: FDS completed successfully'
          IF (STATUS_FILES) CLOSE(LU_NOTREADY,STATUS='DELETE')
       CASE(INSTABILITY_STOP)
-         WRITE(MESSAGE,'(A)') 'STOP: Numerical Instability'
+         WRITE(MESSAGE,'(A)') 'ERROR: Numerical Instability - FDS stopped'
       CASE(USER_STOP)
          WRITE(MESSAGE,'(A)') 'STOP: FDS stopped by user'
       CASE(SETUP_STOP)
-         WRITE(MESSAGE,'(A)') 'STOP: FDS was improperly set-up'
+         WRITE(MESSAGE,'(A)') 'ERROR: FDS was improperly set-up - FDS stopped'
       CASE(SETUP_ONLY_STOP)
          WRITE(MESSAGE,'(A)') 'STOP: Set-up only'
       CASE(CTRL_STOP)
@@ -1551,7 +1551,7 @@ IF (MYID==0) THEN
       CASE(LEVELSET_STOP)
          WRITE(MESSAGE,'(A)') 'STOP: Level set analysis only'
       CASE(REALIZABILITY_STOP)
-         WRITE(MESSAGE,'(A)') 'STOP: Unrealizable mass density'
+         WRITE(MESSAGE,'(A)') 'ERROR: Unrealizable mass density - FDS stopped'
       CASE DEFAULT
          WRITE(MESSAGE,'(A)') 'null'
    END SELECT
