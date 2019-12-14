@@ -12,6 +12,10 @@ global GEOM MESHES IBM_IDCF IBM_GS LOW_IND HIGH_IND MAX_DIM
 global BODINT_PLANE IBM_INBOUNDCF
 global CELLRT
 
+global basedir
+
+global ISPCELL SPCELL_LIST
+
 ierr=1;
 
 INDVERTBOD(1:3)  = [ 1, 2, 6 ];
@@ -22,6 +26,8 @@ SEG_FLAG=zeros(1,IBM_MAXCEELEM_FACE);
 
 % Define which cells are cut-cell, and which are solid:
 if (BNDINT_FLAG)
+   MESHES(NM).N_SPCELL=0;
+   MESHES(NM).SPCELL_LIST=[0 0 0]';
    IJK_COUNT = zeros(IEND,JEND,KEND); 
    ILO = ILO_CELL; IHI = IHI_CELL;
    JLO = JLO_CELL; JHI = JHI_CELL;
@@ -58,7 +64,7 @@ for K=KLO:KHI
 
          % Test for cell with INB edges:
          % If outcell2 is true -> no INB Edges associated with this cell:
-         OUTCELL2 = (MESHES(NM).CCVAR(I,J,K,IBM_IDCE) <= 0);
+         OUTCELL2 = 1; %(MESHES(NM).CCVAR(I,J,K,IBM_IDCE) <= 0);
 
          % Drop if outcell1 & outcell2
          if (OUTCELL1 && OUTCELL2)
@@ -618,48 +624,49 @@ for K=KLO:KHI
                             num2str(I) ',' num2str(J) ',' num2str(K) ',' num2str(NCUTFACE) ',' ...
                             num2str(MESHES(NM).CUT_FACE(NCUTFACE).NFACE)])
                       CYCLE_CELL=true;
-                      break
-%                       WRITE(LU_ERR,*) "Cannot build boundary cut faces in cell (NM,I,J,K):",NM,I,J,K
-%                       WRITE(LU_ERR,*) "Located in position:",XCELL(I),YCELL(J),ZCELL(K)
-%                       WRITE(LU_ERR,*) "Check for Geometry surface inconsistencies at said location."
-% #ifdef DEBUG_SET_CUTCELLS
-%                       WRITE(LU_ERR,*) 'Cartesian CELL:',BNDINT_FLAG,MESHES(NM).CCVAR(I,J,K,IBM_CGSC),IBM_CUTCFE,I,J,K
-%                       OPEN(UNIT=33,FILE="./Cartcell_cutfaces.dat", STATUS='REPLACE')
-%                       % Info pertaining to the Cartesian Cell:
-%                       WRITE(33,*) 'I,J,K:'
-%                       WRITE(33,*) I,J,K,GEOMEPS
-%                       WRITE(33,*) 'XC(I),DX(I),YC(J),DY(J),ZC(K),DZ(K):'
-%                       WRITE(33,*) XCELL(I),DXCELL(I) % MESHES(NM).XC(I),MESHES(NM).DX(I)
-%                       WRITE(33,*) YCELL(J),DYCELL(J) % MESHES(NM).YC(J),MESHES(NM).DY(J)
-%                       WRITE(33,*) ZCELL(K),DZCELL(K) % MESHES(NM).ZC(K),MESHES(NM).DZ(K)
-%                       WRITE(33,*) 'NVERT,NSEG,NSEG_FACE,COUNTR,NSEG_LEFT:'
-%                       WRITE(33,*) NVERT,NSEG,NSEG_FACE,COUNTR,NSEG_LEFT
-%                       WRITE(33,*) 'XYZVERT(IAXIS:KAXIS,1:NVERT):'
-%                       for IDUM=1,NVERT
-%                          WRITE(33,*) IDUM,XYZVERT(IAXIS:KAXIS,IDUM)
-%                       end
-%                       WRITE(33,*) 'SEG_CELL(NOD1:NOD2,1:NSEG),SEG_CELL(3:6,1:NSEG):'
-%                       for IDUM=1,NSEG
-%                          WRITE(33,*) IDUM,SEG_CELL(NOD1:NOD2,IDUM),SEG_CELL(3:6,IDUM)
-%                       end
-%                       WRITE(33,*) 'SEG_FACE(NOD1:NOD2,1:NSEG_FACE):'
-%                       for IDUM=1,NSEG_FACE
-%                          WRITE(33,*) IDUM,SEG_FACE(NOD1:NOD2,IDUM)
-%                       end
-%                       WRITE(33,*) 'SEG_FACE2(NOD1:NOD21:COUNTR):'
-%                       for IDUM=1,COUNTR
-%                          WRITE(33,*) IDUM,SEG_FACE2(NOD1:NOD2,IDUM)
-%                       end
-%                       WRITE(33,*) 'ICF,BOD_TRI:'
-%                       WRITE(33,*) ICF,NBODTRI
-%                       for IDUM=1,NBODTRI
-%                          WRITE(33,*) BOD_TRI(1:2,IDUM)
-%                       end
-%                       CLOSE(33)
-%                       CALL DEBUG_WAIT
-% #else
-%                       CALL SHUTDOWN(""); RETURN
-% #endif
+                      MESHES(NM).N_SPCELL = MESHES(NM).N_SPCELL + 1;
+                      MESHES(NM).SPCELL_LIST(IAXIS:KAXIS,MESHES(NM).N_SPCELL) = [I J K]';
+                      
+
+                      
+                        file=[basedir '/Cartcell_cutfaces_' num2str(I) '_' num2str(J) '_' num2str(K) '.dat'];
+                        disp(['Writing file : ' file]) 
+                        [fid]=fopen(file,'w');
+
+                        % Info pertaining to the Cartesian Cell:
+                        fprintf(fid,'I,J,K:\n');
+                        fprintf(fid,'%d  %d  %d  %0.6g\n',I,J,K,GEOMEPS);
+                        fprintf(fid,'XC(I),DX(I),YC(J),DY(J),ZC(K),DZ(K)\n');
+                        fprintf(fid,'%12.8f %12.8f\n',[XCELL(I) DXCELL(I)]); % MESHES(NM).XC(I),MESHES(NM).DX(I)
+                        fprintf(fid,'%12.8f %12.8f\n',[YCELL(J) DYCELL(J)]); % MESHES(NM).YC(J),MESHES(NM).DY(J)
+                        fprintf(fid,'%12.8f %12.8f\n',[ZCELL(K) DZCELL(K)]); % MESHES(NM).ZC(K),MESHES(NM).DZ(K)
+                        fprintf(fid,'NVERT,NSEG,NSEG_FACE,COUNTR,NSEG_LEFT:\n');
+                        fprintf(fid,'%d %d %d %d %d\n',[NVERT,NSEG,NSEG_FACE,COUNTR,NSEG_LEFT]);
+                        fprintf(fid,'XYZVERT(IAXIS:KAXIS,1:NVERT):\n');
+                        for IDUM=1:NVERT
+                           fprintf(fid,'%d %12.8f %12.8f %12.8f\n',[IDUM XYZVERT(IAXIS:KAXIS,IDUM)']);
+                        end
+                        fprintf(fid,'SEG_CELL(NOD1:NOD2,1:NSEG),SEG_CELL(3:6,1:NSEG):\n');
+                        for IDUM=1:NSEG
+                           fprintf(fid,'%d %d %d %d %d %d %d\n',[IDUM SEG_CELL(NOD1:NOD2,IDUM)' SEG_CELL(3:6,IDUM)']);
+                        end
+                        fprintf(fid,'SEG_FACE(NOD1:NOD2,1:NSEG_FACE):\n');
+                        for IDUM=1:NSEG_FACE
+                           fprintf(fid,'%d %d %d\n',[IDUM SEG_FACE(NOD1:NOD2,IDUM)']);
+                        end
+                        fprintf(fid,'SEG_FACE2(NOD1:NOD21:COUNTR):\n');
+                        for IDUM=1:COUNTR
+                           fprintf(fid,'%d %d %d\n',[IDUM SEG_FACE2(NOD1:NOD2,IDUM)']);
+                        end
+                        fprintf(fid,'ICF,BOD_TRI:\n');
+                        fprintf(fid,'%d %d\n',[ICF NBODTRI]);
+                        for IDUM=1:NBODTRI
+                           fprintf(fid,'%d %d\n',BOD_TRI(1:2,IDUM)');
+                        end
+                        fclose(fid);
+                        disp(['File written.']) 
+                    break
+
                end
 
             end
