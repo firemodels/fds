@@ -11,8 +11,11 @@ clc
 IAXIS = 1; JAXIS = 2; KAXIS = 3;
 NOD1  = 1; NOD2  = 2; NOD3  = 3;
 
-basedir='/Users/mnv/Documents/FIREMODELS_FORK/fds/test/';
-file='Cartcell_cutfaces.dat';
+basedir='/Users/mnv/Documents/FIREMODELS_FORK/fds/GEOM_Intersection/';
+file='Cartcell_cutfaces_29_30_29.dat';
+file='Cartcell_cutfaces_36_26_12.dat';
+file='Cartcell_cutfaces_41_26_33.dat';
+file='Cartcell_cutfaces_48_30_16.dat';
 
 % Load cartesian cell cut-faces intersection data:
 [fid]=fopen([basedir file],'r');
@@ -74,15 +77,15 @@ fclose(fid);
 
 % Now make the plot:
 % Load Geometry:
-geom_vert_file='GEOMETRY_0001_VERTS.dat';
-geom_face_file='GEOMETRY_0001_FACES.dat';
-XYZ=load([basedir geom_vert_file]);
-WSELEM=load([basedir geom_face_file]);
+%geom_vert_file='two_spheres_geometry_0001_verts.dat';
+%geom_face_file='two_spheres_geometry_0001_faces.dat';
+%XYZ=load([basedir geom_vert_file]);
+%WSELEM=load([basedir geom_face_file]);
 
 figure
 hold on
 % Geometry:
-[hg]=trisurf(WSELEM,XYZ(:,IAXIS),XYZ(:,JAXIS),XYZ(:,KAXIS));
+%[hg]=trisurf(WSELEM(:,1:3),XYZ(:,IAXIS),XYZ(:,JAXIS),XYZ(:,KAXIS));
 xlabel('X')
 ylabel('Y')
 zlabel('Z')
