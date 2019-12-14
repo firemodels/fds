@@ -16,7 +16,7 @@
       HEAT_OF_COMBUSTION=4.636E4/
 
 &SURF ID='Burner',
-      FYI='11 kW',
+      FYI='5.5 kW',
       COLOR='RED',
       HRRPUA=171.7/
 
