@@ -9,7 +9,7 @@ if [ -e "$AUXUSER" ]; then
   cp $AUXUSER .
 else
   echo "***warning: $AUXUSER does not exist. Build the FDS User's"
-  echo "            guide before building the Verification guide"
+  echo "            Guide before building the FDS Verification Guide"
 fi
 
 clean_build=1
