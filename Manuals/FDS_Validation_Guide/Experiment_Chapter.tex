@@ -251,7 +251,7 @@ It is not possible to compare directly the model simulations with the observed f
 
 The simulations are performed with a numerical grid that has a resolution of 1~m by 1~m by 0.5~m near the ground, and the vertical dimension increases gradually with height. Because of this relatively coarse resolution, the burning rate of the vegetation is limited to ensure that any given patch of surface vegetation or volume of canopy vegetation cannot burn completely in less than 30~s.
 
- 
+
 
 
 
@@ -262,7 +262,7 @@ In July and August of 1986, the Commonwealth Scientific and Industrial Research 
 
 \subsubsection{Modeling Notes}
 
-Two of these experiments are simulated with FDS by Mell~et~al.~\cite{Mell:IJWF2007}. The grass is modeled as a collection of cylindrical Lagrangian particles. The pyrolysis model assigned to the particles is described in the FDS User's Guide~\cite{FDS_Users_Guide}, chapter ``Earth, Wind and Fire,'' section ``Thermal Degradation Model for Vegetation.''
+Two of these experiments are simulated with FDS by Mell~et~al.~\cite{Mell:IJWF2007}. The grass is modeled as a collection of cylindrical Lagrangian particles. The pyrolysis model assigned to the particles is described in the FDS User's Guide~\cite{FDS_Users_Guide}, chapter ``Earth, Wind and Fire,'' Section~\ref{vegetation_model}, ``Thermal Degradation Model for Vegetation.''
 
 Measured properties for the specific types of grasses burned in the two experiments are listed in Table~\ref{Properties_Grasses}. Properties that were not measured are listed in Table~\ref{Assumed_Properties_Grasses}. These assumed properties are typically for wood or cellulosic fuels. The moisture is modeled as water. The grass is assumed to be composed primarily of cellulose.
 
@@ -894,7 +894,7 @@ In 2009, Mell et~al. measured the burning rate of individual Douglas fir trees o
 
 \subsubsection{Modeling Notes}
 
-The trees are modeled as a collection of cylindrical Lagrangian particles. Mell~et~al.~\cite{Mell:2009} group the particles into three size classes. The pyrolysis model assigned to the particles is described in the FDS User's Guide~\cite{FDS_Users_Guide}, chapter ``Earth, Wind and Fire,'' section ``Thermal Degradation Model for Vegetation.''
+The trees are modeled as a collection of cylindrical Lagrangian particles. Mell~et~al.~\cite{Mell:2009} group the particles into three size classes. The pyrolysis model assigned to the particles is described in the FDS User's Guide~\cite{FDS_Users_Guide}, chapter ``Earth, Wind and Fire,'' Section~\ref{vegetation_model}, ``Thermal Degradation Model for Vegetation.''
 
 Measured properties of the trees are listed in Table~\ref{Properties_Trees}. Generic vegetation properties are listed in Table~\ref{Assumed_Properties_Trees}. These assumed properties are typically for wood or cellulosic fuels. The moisture is modeled as water. The vegetation is assumed to be composed primarily of cellulose. Reference~\cite{Mell:2009} provides an estimate of the distribution of mass for the foliage, roundwood less than 3~mm in diameter, roundwood 3~mm to 6~mm, and roundwood 6~mm to 10~mm. For the 2~m trees, the distribution is approximately 64~\%, 11~\%, 10~\%, and 15~\%, respectively. For the 5~m trees, it is 60~\%, 17~\%, 12~\%, and 11~\%, respectively.
 
@@ -1633,10 +1633,10 @@ The wood is assumed to pyrolyze, forming C$_{3.4}$H$_{6.2}$O$_{2.5}$~\cite{Ritch
 \end{eqnarray}
 The reaction rates are given by:
 \begin{eqnarray}
-  r_{\rm H_2O} &=& \left( \frac{\rho_{\rm s,H_2O}}{\rho_{\rm s,0}} \right)        \, A_{\rm H_2O} \, T^{-\frac{1}{2}} \exp \left(  -\frac{E_{\rm H_2O}}{R \, T} \right) \label{r_H2O} \\[.1in]
+  r_{\rm H_2O} &=& \left( \frac{\rho_{\rm s,H_2O}}{\rho_{\rm s,0}} \right)        \, A_{\rm H_2O} \, T^{-\frac{1}{2}} \exp \left(  -\frac{E_{\rm H_2O}}{R \, T} \right)  \\[.1in]
   r_{\rm wood} &=& \left( \frac{\rho_{\rm s,wood}}{\rho_{\rm s,0}} \right)^{1.69} \, A_{\rm wood} \,                  \exp \left(  -\frac{E_{\rm wood}}{R \, T} \right)   \\[.1in]
   r_{\rm char} &=& \left( \frac{\rho_{\rm s,char}}{\rho_{\rm s,0}} \right)^0      \, A_{\rm char} \,                  \exp \left(  -\frac{E_{\rm char}}{R \, T} \right) \,
-  \frac{ \rho \, Y_{\rm O_2} \, \sigma \, \left( 1+\beta_{\rm char}\sqrt{\RE} \right) }{\nu_{\rm O_2,char} \, \rho_{\rm s,0} } \label{r_char}
+  \frac{ \rho \, Y_{\rm O_2} \, \sigma \, \left( 1+\beta_{\rm char}\sqrt{\RE} \right) }{\nu_{\rm O_2,char} \, \rho_{\rm s,0} }
 \end{eqnarray}
 The equation governing the temperature of the solid is
 \be
@@ -2281,7 +2281,7 @@ The U.S. Forest Service and collaborators from the University of New South Wales
 
 \subsubsection{Modeling Notes}
 
-The vegetation is modeled as a collection of cylindrical Lagrangian particles. The pyrolysis model assigned to the particles is described in the FDS User's Guide~\cite{FDS_Users_Guide}, chapter ``Earth, Wind and Fire,'' section ``Thermal Degradation Model for Vegetation.''
+The vegetation is modeled as a collection of cylindrical Lagrangian particles. The pyrolysis model assigned to the particles is described in the FDS User's Guide~\cite{FDS_Users_Guide}, chapter ``Earth, Wind and Fire,'' Section~\ref{vegetation_model}, ``Thermal Degradation Model for Vegetation.'' The parameters for each experiment are listed in a table in Ref.~\cite{Catchpole:CST1998}.
 
 
 \section{USFS/Corsica Experiments}
@@ -2291,15 +2291,15 @@ Perez-Ramirez et al.~at the University of Corsica, France, and Mell at the U.S. 
 
 \subsubsection{Modeling Notes}
 
-The pine needles are modeled as a collection of cylindrical Lagrangian particles. The pyrolysis model assigned to the particles is described in the FDS User's Guide~\cite{FDS_Users_Guide}, chapter ``Earth, Wind and Fire,'' section ``Thermal Degradation Model for Vegetation.''
+The pine needles are modeled as a collection of cylindrical Lagrangian particles. The pyrolysis model assigned to the particles is described in the FDS User's Guide~\cite{FDS_Users_Guide}, chapter ``Earth, Wind and Fire,'' Section~\ref{vegetation_model} ``Thermal Degradation Model for Vegetation.''
 
-The test parameters are given in Table~\ref{Corsica_Parameters}.
+The test parameters for these experiments are given in Table~\ref{Corsica_Parameters}.
 
 \begin{table}[ht!]
 \begin{center}
 \begin{tabular}{|c|c|c|c|c|c|}
 \hline
-Exp.         & Dry Fuel Loading    & Slope 	   & Dry Mass per Volume  & Packing & Bed Depth	    \\ 
+Exp.         & Dry Fuel Loading    & Slope 	   & Dry Mass per Volume  & Packing & Bed Depth	    \\
 No.          & (kg/m$^2$)          & (deg.)    & (kg/m$^3$)           & Ratio   & (cm)          \\ \hline \hline
 1\_0         & 0.6                 & 0         & 17                   & 0.033   & 3.5          	\\ \hline
 2\_0         & 0.9                 & 0         & 16                   & 0.031   & 5.5          	\\ \hline
