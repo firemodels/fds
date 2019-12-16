@@ -521,7 +521,7 @@ much from the version 2.5.0.  Just some bugs are corrected.
 \noindent The version 2.5.0 of the evacuation module does not differ
 much from the version 2.4.1.  Just some bugs are corrected and some
 old user input are disabled.  This version does not support anymore
-FDS 5 style evacuation inputs.  Now just the main evacuation meshes
+FDS 5 style evacuation inputs, and \Timtt{EVAC\_FDS6=.FALSE.} is not supported anymore.  Now just the main evacuation meshes
 are defined by the user and no ``outflow'' vents are defined.  The
 \Timtt{STRS} namelist for the staircases is more automatic, it defines
 its own mesh(es) automatically.
@@ -625,7 +625,7 @@ boundary of a agent crowd).  If ``straight towards door'' would mean
 turning towards a high left (or right) density then the flow field is
 used instead.
 
-If \Timtt{EVAC\_FDS6=.TRUE.} is given then the user should not give
+When writing an input file for FDS6, the user should not give
 any additional evacuation flow fields nor vents.  There are two basic
 levels in the evacuation meshes.  One is the main evacuation mesh
 location at the $z$-level given by the \Timtt{XB} on the mesh line.
@@ -1780,7 +1780,7 @@ last two rows have no preference.  This is because the agents are
 unaware of the exits that are unfamiliar and invisible and, thus,
 can not select these exits.  The last column shows the colours used in
 Smokeview to show the status of the agents, if this colouring option
-is chosen by the user.}\label{Table_pref_order}
+is chosen by the user (COLOR_METHOD=5, see Section 8.7).}\label{Table_pref_order}
 \vspace{12pt}
 \begin{tabular}{c|c|c|c|c} \hline \hline
 Preference&Visible&Familiar&Disturbing conditions\\ \hline 
@@ -1851,7 +1851,7 @@ exits but are not so willing to use special emergency exits.
 \noindent The active agent type is very similar to the conservative
 agent type.  The difference is that active agents observe their
 environment actively to find the fastest exit route.  Hence, active
-agents prefer all visible exits similarly regardless if the exits are
+agents prefer all visible exits similarly regardless of whether the exits are
 familiar or not.  Detection and reaction times are like those of
 conservative agents and lost active agents are treated similarly to
 lost conservative agents.  Heterogeneous crowds contain more and less
@@ -1879,9 +1879,7 @@ are heading towards an exit, they start to follow these other agents.
 A herding agent will remain still even after detecting the fire and
 its reaction time has passed if it has not been able to select any
 exit either by being familiar with it or by observing other agents.
-If the nearest neighbors of a herding agent are heading towards some
-exit then the herding agent starts to follow these agents almost
-immediately regardless of its detection and reaction times.  If there
+If there
 are available familiar exits at a given floor for a herding agent then
 it behaves like a conservative agent, i.e., the familiar route
 behavior overrides the herding behavior.
@@ -1946,7 +1944,7 @@ linear function.
 
 \noindent The third new agent type is the follower agents, which are
 somewhere between conservative agents and herding agents.  Follower
-agents use the same door selection procedure than the conservative
+agents use the same door selection procedure as the conservative
 agents, but they also see where the nearest neighbor agents in front
 of them are heading and include those exit doors in their list of
 possible exit doors.  A follower agent will add the target exit door
@@ -3814,7 +3812,7 @@ parameters.  The units of the input numbers are the standard SI units
 if not stated otherwise.
 
 
-Note, that the FDS+Evac is still under construction and so is this
+Note, that the FDS+Evac is still under development and so is this
 manual.  See the example FDS+Evac calculations and read through the
 example input files on the FDS+Evac web page.  These example input
 files contain many comment lines, which explain all the major features
@@ -3843,7 +3841,7 @@ are listed below:
 \item The evacuation meshes are two dimensional, \emph{i.e.}, they
   should have \Timtt{IJK=N${}_x$,N${}_y$,1} on the \Timtt{MESH}
   namelists, where N${}_x$ and N${}_y$ are the number of cells in the
-  $x$ and $y$ directions, respectively.  An unique \Timtt{ID} string
+  $x$ and $y$ directions, respectively.  A unique \Timtt{ID} string
   should be given to all evacuation meshes.
 %
 \item In addition to the user defined meshes, there is automatically
@@ -3897,7 +3895,7 @@ are listed below:
   in the evacuation geometry where no door nor exit is defined.
 %
 \item Check your \Timtt{EVAC} namelists that you are not trying to put
-  too many agents on a too small area.  Typical diameter of an agent
+  too many agents in a small area.  Typical diameter of an agent
   is somewhere between 0.5--0.6~m, so you can not put more than about
   four persons per square meter.  If you are trying to populate the
   floor denser, the programme will stop after the initialisation
@@ -4718,7 +4716,7 @@ should not use the default values.
 
 \section{The \Timtt{EVHO} Namelist Group}\label{Sec_EvhoNML}
 
-\noindent Specifies a place where no agents are generated by the
+\noindent Specify a place where no agents are initially generated by the
 \Timtt{EVAC} namelists.
 %
 \begin{description}
@@ -4726,7 +4724,7 @@ should not use the default values.
 \item[\Timtt{ID}] ID string of the hole.  One can refer to this hole
   by its name.
 %
-\item[\Timtt{XB}] Defines a rectangle, where the agents are not put,
+\item[\Timtt{XB}] Define a rectangle area, where the agents are not initially generated,
   $z$ should belong to a main evacuation mesh.  If \Timtt{XB}
   intersects many evacuation meshes then the keyword \Timts{MESH\_ID}
   should be given.
