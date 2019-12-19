@@ -525,7 +525,7 @@ for IWSSEG=1:BODINT_PLANE.NSEGS
            (SEGNODS(NOD2) == CEELEM(NOD2,ISEG)) && ... % same inod2
            (BODINT_PLANE.INDSEG(4,IWSSEG) == INDSEG(4,ISEG)) )     % same ibod
 
-         if (ANY(BODINT_PLANE.INDSEG(2:3,IWSSEG) == INDSEG(2,ISEG)))
+         if (any(BODINT_PLANE.INDSEG(2:3,IWSSEG) == INDSEG(2,ISEG)))
             % Edge already in list, Use SS Edge INDSEG:
             INDSEG(1:4,ISEG) = BODINT_PLANE.INDSEG(1:4,IWSSEG);
             INLIST = true;

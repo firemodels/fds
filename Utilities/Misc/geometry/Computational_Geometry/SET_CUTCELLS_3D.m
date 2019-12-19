@@ -14,6 +14,7 @@ global BODINT_PLANE
 global IBM_N_CRS IBM_SVAR_CRS 
 global X1NOC X2NOC X3NOC TRANS
 
+global X1LO_CELL X1HI_CELL
 global FACERT CELLRT
 
 ierr=1;
@@ -123,7 +124,7 @@ for NM=1:NMESHES
       ZFACE(KHI_FACE+IGC)=ZFACE(KHI_FACE+IGC-1)+DZCELL(KHI_CELL+IGC);
    end
 
-   CELLRT=zeros(IEND,JEND,KEND);
+   CELLRT=zeros(IEND,JEND,KEND); % false
    
    % Here Allocation of crossings, cut-edges, faces and cells..
    
@@ -152,6 +153,8 @@ for NM=1:NMESHES
           X3FACE = zeros(1,KEND); DX3FACE = zeros(1,KEND);
           X3FACE = ZFACE; DX3FACE = DZFACE;
 
+          X1LO_CELL = ILO_CELL-CCGUARD; X1HI_CELL = IHI_CELL+CCGUARD;
+    
           % x2 cell center parameters:
           X2LO_CELL = JLO_CELL-CCGUARD; X2HI_CELL = JHI_CELL+CCGUARD;
           X2CELL = zeros(1,JEND); DX2CELL=zeros(1,JEND);
@@ -184,6 +187,8 @@ for NM=1:NMESHES
           X3FACE = zeros(1,IEND); DX3FACE = zeros(1,IEND);
           X3FACE = XFACE; DX3FACE = DXFACE;
 
+          X1LO_CELL = JLO_CELL-CCGUARD; X1HI_CELL = JHI_CELL+CCGUARD;
+          
           % x2 cell center parameters:
           X2LO_CELL = KLO_CELL-CCGUARD; X2HI_CELL = KHI_CELL+CCGUARD;
           X2CELL = zeros(1,KEND); DX2CELL = zeros(1,KEND);
@@ -215,6 +220,8 @@ for NM=1:NMESHES
           X2FACE = XFACE; DX2FACE = DXFACE;
           X3FACE = zeros(1,JEND); DX3FACE = zeros(1,JEND);
           X3FACE = YFACE; DX3FACE = DYFACE;
+
+          X1LO_CELL = KLO_CELL-CCGUARD; X1HI_CELL = KHI_CELL+CCGUARD;
 
           % x2 cell center parameters:
           X2LO_CELL = ILO_CELL-CCGUARD; X2HI_CELL = IHI_CELL+CCGUARD;
@@ -251,11 +258,11 @@ for NM=1:NMESHES
                DX2_MIN = min(DX2CELL(X2LO_CELL:X2HI_CELL));
                DX3_MIN = min(DX3CELL(X3LO_CELL:X3HI_CELL));
                TRI_ONPLANE_ONLY = false;
-               
+               RAYTRACE_X2_ONLY = false;
                FACERT(:,:) = 0;
                
                [ierr,BODINT_PLANE]=GET_BODINT_PLANE(X1AXIS,X1PLN,INDX1(X1AXIS),PLNORMAL,X2AXIS,...
-                                   X3AXIS,DX2_MIN,DX3_MIN,TRI_ONPLANE_ONLY);
+                                   X3AXIS,DX2_MIN,DX3_MIN,TRI_ONPLANE_ONLY,RAYTRACE_X2_ONLY);
                
                % Test that there is an intersection:
                if ((BODINT_PLANE.NSGLS+BODINT_PLANE.NSEGS+BODINT_PLANE.NTRIS) == 0); continue; end
@@ -266,7 +273,7 @@ for NM=1:NMESHES
                if ((X3FACE(X3LO)-max(BODINT_PLANE.XYZ(X3AXIS,1:BODINT_PLANE.NNODS))) > GEOMEPS); continue; end
                if ((min(BODINT_PLANE.XYZ(X3AXIS,1:BODINT_PLANE.NNODS))-X3FACE(X3HI)) > GEOMEPS); continue; end
 
-               if (plot_cutedges && X1AXIS==JAXIS); CUT_EDGE_START = MESHES(NM).N_CUTEDGE_MESH; end                
+               if (plot_cutedges && X1AXIS==KAXIS); CUT_EDGE_START = MESHES(NM).N_CUTEDGE_MESH; end                
                
                % For plane normal to X1AXIS, shoot rays along X2AXIS on all X3AXIS gridline
                % locations, get intersection data: Loop x3 axis locations
@@ -311,7 +318,7 @@ for NM=1:NMESHES
                % intersections with grid line vertices:
                [ierr]=GET_BODX3_INTERSECTIONS(X2AXIS,X3AXIS,X2LO,X2HI);
 
-               if (plot_cutedges && X1AXIS==JAXIS) 
+               if (plot_cutedges && X1AXIS==KAXIS) 
                    [ierr]=plot_bodintplane(BODINT_PLANE,false);
                    grid off
                    box on
@@ -331,7 +338,7 @@ for NM=1:NMESHES
                                     X2LO,X2HI,X3LO,X3HI,X2LO_CELL,X2HI_CELL, ...
                                     X3LO_CELL,X3HI_CELL,INDX1,X1PLN);
                
-               if (plot_cutedges && X1AXIS==JAXIS) 
+               if (plot_cutedges && X1AXIS==KAXIS) 
                   CUT_EDGE_END = MESHES(NM).N_CUTEDGE_MESH;
                   for KK=X3LO:X3HI
                       plot([X2FACE(X2LO) X2FACE(X2HI)],[X3FACE(KK) X3FACE(KK)],':k')
