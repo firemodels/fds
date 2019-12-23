@@ -11,6 +11,7 @@ $QFDS -d Aerosols aerosol_gravitational_deposition_2.fds
 $QFDS -d Aerosols aerosol_thermophoretic_deposition.fds
 $QFDS -d Aerosols aerosol_thermophoretic_deposition_2.fds
 $QFDS -d Aerosols aerosol_turbulent_deposition.fds
+$QFDS -d Aerosols aerosol_scrubbing.fds
 $QFDS -d Aerosols propane_flame_deposition.fds
 $QFDS -d Aerosols propane_flame_deposition_gravitational.fds
 $QFDS -d Aerosols propane_flame_deposition_none.fds
