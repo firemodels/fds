@@ -3535,6 +3535,22 @@ In the second case three pairs of small (3~mm by 3~mm) vents are placed on oppos
 	\label{fig:agglomeration_2}
 \end{figure}
 
+
+\subsection{Scrubbing of Aerosols (\texorpdfstring{\textct{aerosol\_scrubbing}}{aerosol\_scrubbing})}
+\label{aerosol_scrubbing}
+
+This verification case tests the scrubbing of aerosols by droplet. The case consists of a box that is 0.4~m on a side with 4 cells in each direction. The box is initially filled with pure water vapor with a soot mass fraction of 0.0001. The soot has a mean diameter of 1~$\mu$m. The calculation is initialized with a 100~$\mu$m droplet in every cell with an initial downward velocity of 0.1~m/s. Gravity and drag is disabled so the drops do not change velocity. The drops are given an initial weight so that the total projected area is 25~\% of the cell area. Since every cell always has a single drop of the same diameter and velocity, the result is a constant decay of the soot mass fraction with a decay constant of 0.0000666. After 5000~s, the case should predict a 28~\% drop in soot mass fraction. 
+
+\begin{figure}[ht]
+	\centering
+	\begin{tabular}{c}
+		\includegraphics[height=2.2in]{SCRIPT_FIGURES/aerosol_scrubbing}
+	\end{tabular}
+	\caption[Gas phase soot mass fractions the \textct{aerosol\_scrubbing} cases]{Time evolution of soot mass fraction in the gas for the \textct{aerosol\_scrubbing} case.}
+	\label{fig:scrubbing}
+\end{figure}
+
+
 \subsection{Oxidation of Soot on Surfaces (\texorpdfstring{\textct{soot\_oxidation\_wall}}{soot\_oxidation\_wall})}
 \label{soot_oxidation_wall}
 
