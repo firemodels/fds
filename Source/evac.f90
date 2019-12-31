@@ -398,7 +398,7 @@ MODULE EVAC
        ALPHA_HAWK, DELTA_HAWK, EPSILON_HAWK, THETA_HAWK, A_HAWK_T_START, T_STOP_HD_GAME, &
        F_MIN_FALL, F_MAX_FALL, D_OVERLAP_FALL, TAU_FALL_DOWN, A_FAC_FALLEN, TIME_FALL_DOWN, PROB_FALL_DOWN, &
        T_ASET_HAWK, T_0_HAWK, T_ASET_TFAC_HAWK, MAX_INITIAL_OVERLAP, TIME_INIT_NERVOUSNESS, &
-       SMOKE_SPEED_ALPHA, SMOKE_SPEED_BETA, CROWBAR_DT_READ, NASH_CLOSE_ENOUGH
+       SMOKE_SPEED_ALPHA, SMOKE_SPEED_BETA, CROWBAR_DT_READ, NASH_CLOSE_ENOUGH, HERDING_TPRE_PROB
   INTEGER, DIMENSION(3) :: DEAD_RGB
   !
   REAL(EB), DIMENSION(:), ALLOCATABLE :: Tsteps
@@ -577,7 +577,7 @@ CONTAINS
          T_ASET_HAWK, T_0_HAWK, T_ASET_TFAC_HAWK, &
          MAXIMUM_V0_FACTOR, MAX_INITIAL_OVERLAP, TIME_INIT_NERVOUSNESS, &
          SMOKE_SPEED_ALPHA, SMOKE_SPEED_BETA, SMOKE_KS_SPEED_FUNCTION, FED_ACTIVITY, &
-         CROWBAR_DT_READ, MASS_OF_AGENT, DISCARD_SMOKE_INFO
+         CROWBAR_DT_READ, MASS_OF_AGENT, DISCARD_SMOKE_INFO, HERDING_TPRE_PROB
     !Issue1547: Added new output keyword for the PERS namelist, here the new output
     !Issue1547: keyword OUTPUT_NERVOUSNES is added to the namelist. Also the user input
     !Issue1547: for the social force MAXIMUM_V0_FACTOR is added to the namelist.
@@ -1523,6 +1523,7 @@ CONTAINS
                              ! If =1.0 then this is done everytime, when the agents chooses a door
                              ! and this is done every TAU_CHANGE_DOOR second on the average.
       I_HERDING_TYPE  = 0    ! Herding agents: >1 do not move if no door (0 default ffield)
+      HERDING_TPRE_PROB = 0.0_EB
       ! Hawk - Dove game: Just an academic exercise at this moment, works only for a simple geometries.
       ! Hawk - Dove game parameters: If C_HAWK < 0 then no game is played, i.e., normal FDS+Evac
       ! Hawk - Dove game: Only rational agents play (AGENT_TYPE=1 on EVAC/ENTR namelist)
@@ -7861,7 +7862,12 @@ CONTAINS
                             !             <0: came out of a door/entr (-inode) and did not find a new target on this floor
                             ! Found a door using herding algorithm, start to move after one second.
                             ! Merge one's TPRE with others' TPRE
-                            HR%TPRE = DT_GROUP_DOOR
+                            IF (HERDING_TPRE_PROB > TWO_EPSILON_EB) THEN
+                               !HR%TPRE = 0.5_EB*HR%TPRE + 0.5_EB*Other_TPRE
+                               HR%TPRE = (1.0_EB-HERDING_TPRE_PROB)*HR%TPRE + HERDING_TPRE_PROB*Other_TPRE
+                            ELSE
+                               HR%TPRE = DT_GROUP_DOOR ! Original FDS+Evac
+                            END IF
                             HR%TDET = MIN(T,HR%TDET)
                          END IF
                          IF (HR%I_DoorAlgo == 4) THEN
