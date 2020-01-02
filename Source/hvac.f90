@@ -1325,7 +1325,7 @@ END SUBROUTINE RHSNODE
 
 
 SUBROUTINE LHSNODE(NETWORK_INDEX)
-! Populates LHS matrix with nodal conservation data 
+! Populates LHS matrix with nodal conservation data
 USE GLOBAL_CONSTANTS
 INTEGER, INTENT(IN)::NETWORK_INDEX
 INTEGER :: NN,ND, ARRAYLOC1,ARRAYLOC2
