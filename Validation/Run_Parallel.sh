@@ -37,6 +37,7 @@ cd NRCC_Smoke_Tower;  ./Run_All.sh $OPTIONS; cd ..
 cd Pool_Fires;  ./Run_All.sh $OPTIONS; cd ..
 cd Purdue_Flames;  ./Run_All.sh $OPTIONS; cd ..
 cd Sandia_Plumes;  ./Run_All.sh $OPTIONS; cd ..
+cd Setcom;  ./Run_All.sh $OPTIONS; cd ..
 cd Smyth_Slot_Burner;  ./Run_All.sh $OPTIONS; cd ..
 cd SWJTU_Tunnels;  ./Run_All.sh $OPTIONS; cd ..
 cd Turbulent_Jet;  ./Run_All.sh $OPTIONS; cd ..
