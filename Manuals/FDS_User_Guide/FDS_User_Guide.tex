@@ -5470,6 +5470,11 @@ Aerosol particles will, over time, collide with one another and stick together t
       N_BINS=10,LUMPED_COMPONENT_ONLY=.TRUE./
 \end{lstlisting}
 
+\section{Special Topic: Aerosol Scrubbing}
+\label{info:scrubbing}
+
+Water sprays can remove aerosols from the air. For example, rain can lower the concentrations pollen and other particulates in the air. This behavior can be modeled with FDS by setting {\ct AEROSOL\_SCRUBBING=.TRUE.} on {\ct MISC}. Setting this turns on an aerosol scrubbing model that removes aerosols from the gas phase. Once removed the mass is no longer tracked; i.e. the scrubbing model simply acts as a sink for aerosols.
+
 \chapter{Radiation}
 
 \section{Basic Radiation Parameters: The \texorpdfstring{{\tt RADI}}{RADI} Namelist Group}
@@ -10138,6 +10143,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct MISC} (Miscellaneous Parameters)} \\
 \hline \hline
 \endhead
+{\ct AEROSOL\_SCRUBBING}                            & Logical      & Section~\ref{info:scrubbing}            &            & {\ct .FALSE.}     \\ \hline
 {\ct AGGLOMERATION}                                 & Logical      & Section~\ref{info:agglomeration}        &            & {\ct .TRUE.}      \\ \hline
 {\ct \footnotesize ALLOW\_SURFACE\_PARTICLES}       & Logical      & Section~\ref{info:surface_droplets}     &            & {\ct .TRUE.}      \\ \hline
 {\ct \footnotesize ALLOW\_UNDERSIDE\_PARTICLES}     & Logical      & Section~\ref{info:surface_droplets}     &            & {\ct .FALSE.}     \\ \hline
@@ -10223,7 +10229,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 % CONSTANT_H_SOLID, DO_IMPLICIT_CCREGION (MV), ENTHALPY_TRANSPORT (RJM),
 % EVAP_MODEL, EXTERNAL_BOUNDARY_CORRECTION, HT3D_TEST (RJM), MAXIMUM_GEOMETRY_FACES(MV), MAXIMUM_GEOMETRY_ZVALS(MV), NUCLEATION_SITES, PERIODIC_TEST (RJM),
 % POSITIVE_ERROR_TEST, PROFILING, QFAN_BETA_TEST, SLIP_CONDITION(RJM), TENSOR_DIFFUSIVITY (RJM), TERRAIN_CASE (KM), TERRAIN_IMAGE (KM), TURB_INIT_CLOCK (RJM),
-% UVW_FILE (RJM)
+% UVW_FILE (RJM), STORE_DIVERGENCE_CORRECTION (RJM)
 
 \vspace{\baselineskip}
 
