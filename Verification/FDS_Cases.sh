@@ -185,6 +185,7 @@ $QFDS -d Fires box_burn_away1_pyro3d_vs_pyro1d.fds
 $QFDS -d Fires box_burn_away1_pyro3d_transport.fds
 $QFDS -d Fires couch.fds
 $QFDS -p 2 -d Fires couch2.fds
+$QFDS -d Fires fire_const_gamma.fds
 $QFDS -d Fires fire_whirl_pool.fds
 $QFDS -d Fires spray_burner.fds
 $QFDS -d Fires HoC_Ideal.fds
@@ -192,7 +193,7 @@ $QFDS -d Fires HoC_NonIdeal.fds
 $QFDS -d Fires tmp_lower_limit_simple.fds
 $QFDS -d Fires tmp_lower_limit_default.fds
 $QFDS -d Fires tmp_lower_limit_dt_p001.fds
-$QFDS -d Fires fire_const_gamma.fds
+$QFDS -d Fires tunnel_const_gamma.fds
 $QFDS -p 8 -d Fires circular_burner.fds
 
 $QFDS -d Flowfields divergence_test_1.fds
