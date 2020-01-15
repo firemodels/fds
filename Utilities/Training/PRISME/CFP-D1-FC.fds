@@ -1,0 +1,228 @@
+&HEAD CHID='CFP-D1-FC', TITLE='PRISME-3 blind simulation of CFP-D1 test for step#2_1' / 
+
+&MESH IJK=51,30,20, XB=0.0,5.1,0.0,3.0,0.0,1.9, MULT_ID='mesh' /
+&MULT ID='mesh', DX=5.1, DY=3.0, DZ=1.9, I_UPPER=1, J_UPPER=1, K_UPPER=1 /  Eight meshes, 10 cm resolution
+
+&TIME T_BEGIN=-30., T_END=3600. /
+&DUMP DT_DEVC=10., DT_HRR=10., NFRAMES=3630 /
+
+&MISC TMPA=20. /
+
+Combustion
+
+&REAC FUEL='PE/PVC'
+      C = 2.
+      H = 3.5
+      N = 1.25
+      HEAT_OF_COMBUSTION = 26000.
+      SOOT_YIELD = 0.007
+      CO_YIELD = 0.04 /  PE/PVC is C_2 H_3.5 Cl_0.5. Cl is 35 g/mol; N is 14 g/mol. N_1.25 is a surrogate for Cl_0.5.
+
+Cables and Fire
+
+&SURF ID = 'BURNER'
+      HRRPUA = 888.9
+      RAMP_Q = 'burner'
+      COLOR = 'ORANGE' /
+&RAMP ID='burner', T=  0., F=0. /  Burner is on for 12 min
+&RAMP ID='burner', T=  1., F=1. /
+&RAMP ID='burner', T=720., F=1. /
+&RAMP ID='burner', T=725., F=0. /
+
+&OBST XB=0.5,0.8,2.8,3.1,0.6,0.7, SURF_IDS='BURNER','STEEL','STEEL' /  80 kW burner
+
+&MATL ID='cable material'
+      DENSITY = 1814.
+      CONDUCTIVITY = 0.2
+      SPECIFIC_HEAT = 1.5 /  Bulk thermal properties of cables based on THIEF model. Density is calculated: 0.570 kg/m / (0.01 m)^2 / pi = 1814 kg/m3
+
+&SURF ID='non-burning cables'
+      COLOR = 'BLACK'
+      THICKNESS = 0.01
+      GEOMETRY = 'CYLINDRICAL'
+      MATL_ID = 'cable material' /  This SURF is applied to the underside of the cable slabs. It is intended to provide a reasonable thermal boundary condition of the cable "slabs".
+
+&SURF ID = 'burning cables'
+      COLOR = 'RED'
+      THICKNESS = 0.01
+      GEOMETRY = 'CYLINDRICAL'
+      MATL_ID = 'cable material'
+      HRRPUA = 160.
+      RAMP_Q = 'cables' /
+
+&RAMP ID='cables', T=   0., F=0. /
+&RAMP ID='cables', T=   1., F=1. /
+&RAMP ID='cables', T=2305., F=1. /
+&RAMP ID='cables', T=2306., F=0. /  The burnout time of cables: (32 cables) * (0.7 kg plastic/kg cable) * (0.5 kg burned/kg plastic) * (0.570 kg cable/m) * (26000 kJ/kg) / (0.45 m * 160 kW/m2) = 2305 s
+
+&OBST XB=0.4,0.9,1.8,4.2,0.9,1.0, SURF_ID='non-burning cables', MULT_ID='obst' /  Trays are actually 0.45 m wide
+&MULT ID='obst', DZ=0.3, K_UPPER=4 /
+
+&VENT XB=0.4,0.9,2.8,3.1,1.0,1.0, SURF_ID='burning cables', DEVC_ID='Tray A clock' /
+&VENT XB=0.4,0.9,2.7,3.2,1.3,1.3, SURF_ID='burning cables', DEVC_ID='Tray B clock' /
+&VENT XB=0.4,0.9,2.6,3.3,1.6,1.6, SURF_ID='burning cables', DEVC_ID='Tray C clock' /
+&VENT XB=0.4,0.9,2.5,3.4,1.9,1.9, SURF_ID='burning cables', DEVC_ID='Tray D clock' /
+&VENT XB=0.4,0.9,2.4,3.5,2.2,2.2, SURF_ID='burning cables', DEVC_ID='Tray E clock' /
+
+&VENT XB=0.4,0.9,1.8,2.8,1.0,1.0, SURF_ID='burning cables', DEVC_ID='Tray A clock', XYZ=0.65,2.8,1.0, SPREAD_RATE=0.00056 /  2 m/h, mid-range of suggested FLASH-CAT values
+&VENT XB=0.4,0.9,1.8,2.7,1.3,1.3, SURF_ID='burning cables', DEVC_ID='Tray B clock', XYZ=0.65,2.7,1.3, SPREAD_RATE=0.00056 /
+&VENT XB=0.4,0.9,1.8,2.6,1.6,1.6, SURF_ID='burning cables', DEVC_ID='Tray C clock', XYZ=0.65,2.6,1.6, SPREAD_RATE=0.00056 /
+&VENT XB=0.4,0.9,1.8,2.5,1.9,1.9, SURF_ID='burning cables', DEVC_ID='Tray D clock', XYZ=0.65,2.5,1.9, SPREAD_RATE=0.00056 /
+&VENT XB=0.4,0.9,1.8,2.4,2.2,2.2, SURF_ID='burning cables', DEVC_ID='Tray E clock', XYZ=0.65,2.4,2.2, SPREAD_RATE=0.00056 /
+
+&VENT XB=0.4,0.9,3.1,4.2,1.0,1.0, SURF_ID='burning cables', DEVC_ID='Tray A clock', XYZ=0.65,3.1,1.0, SPREAD_RATE=0.00056 /
+&VENT XB=0.4,0.9,3.2,4.2,1.3,1.3, SURF_ID='burning cables', DEVC_ID='Tray B clock', XYZ=0.65,3.2,1.3, SPREAD_RATE=0.00056 /
+&VENT XB=0.4,0.9,3.3,4.2,1.6,1.6, SURF_ID='burning cables', DEVC_ID='Tray C clock', XYZ=0.65,3.3,1.6, SPREAD_RATE=0.00056 /
+&VENT XB=0.4,0.9,3.4,4.2,1.9,1.9, SURF_ID='burning cables', DEVC_ID='Tray D clock', XYZ=0.65,3.4,1.9, SPREAD_RATE=0.00056 /
+&VENT XB=0.4,0.9,3.5,4.2,2.2,2.2, SURF_ID='burning cables', DEVC_ID='Tray E clock', XYZ=0.65,3.5,2.2, SPREAD_RATE=0.00056 /
+
+&DEVC ID='Tray A clock', XYZ=0.65,2.95,0.90, QUANTITY='TIME', SETPOINT= 30. /  Bottom tray ignites in 30 s, next 60 s, etc. This is a sped-up FLASH-CAT sequence because the initial fire is so large.
+&DEVC ID='Tray B clock', XYZ=0.65,2.95,1.20, QUANTITY='TIME', SETPOINT= 60. /
+&DEVC ID='Tray C clock', XYZ=0.65,2.95,1.50, QUANTITY='TIME', SETPOINT= 90. /
+&DEVC ID='Tray D clock', XYZ=0.65,2.95,1.80, QUANTITY='TIME', SETPOINT=120. /
+&DEVC ID='Tray E clock', XYZ=0.65,2.95,2.10, QUANTITY='TIME', SETPOINT=150. /
+
+Construction Materials
+
+&SURF ID                 = 'STEEL'
+      BACKING            = 'VOID'
+      COLOR              = 'GRAY 20'
+      MATL_ID            = 'STEEL'
+      THICKNESS          = 0.005 /
+
+&SURF ID = 'CEILING'
+      COLOR = 'GRAY 50'
+      THICKNESS = 0.0127, 0.013,0.13,0.3
+      MATL_ID = 'Monalite','Board 607','AIR','CONCRETE' /
+
+&SURF ID = 'WALLS'
+      COLOR = 'GRAY 20'
+      DEFAULT = .TRUE.
+      LEAK_PATH = 1,0
+      THICKNESS = 0.05,0.015,0.30
+      MATL_ID = 'CONCRETE','AIR','CONCRETE' /
+
+&MATL ID = 'STEEL'
+      DENSITY = 7850.
+      CONDUCTIVITY = 45.8
+      SPECIFIC_HEAT = 0.46 /
+
+&MATL ID = 'Monalite'
+      DENSITY = 970.
+      CONDUCTIVITY = 0.22
+      SPECIFIC_HEAT = 0.970
+      EMISSIVITY = 0.9 /
+
+&MATL ID = 'Board 607'
+      DENSITY = 350.
+      CONDUCTIVITY = 0.08
+      SPECIFIC_HEAT = 0.840
+      EMISSIVITY = 0.8 /
+
+&MATL ID = 'AIR'
+      DENSITY = 1.2 
+      CONDUCTIVITY = 0.026
+      SPECIFIC_HEAT = 1.01
+      ABSORPTION_COEFFICIENT = 1. /  Thermal radiation passes through AIR gap in walls and ceiling.
+
+&MATL ID = 'CONCRETE'
+      DENSITY= 2430
+      CONDUCTIVITY= 1.5
+      SPECIFIC_HEAT= 0.736
+      EMISSIVITY= 0.9 /
+
+Separation Wall and Doorway
+
+&OBST XB=4.9,5.2,0.0,6.0,0.0,3.8 /
+&HOLE XB=4.8,5.3,2.6,3.4,0.0,2.2 /
+
+Ceiling
+
+&VENT PBZ=3.8, SURF_ID='CEILING' /  The ceiling is lower because of extra insulation layers.
+
+Leakage
+
+&ZONE LEAK_AREA(0)=0.913E-4 /  30 m3/h / 3600 s/h = A * sqrt(2*50 Pa/1.2 kg/m3)  Area of leakage to achieve an inward leakage of 30 m3/h at a pressure of -50 Pa.
+
+Ventilation
+
+&OBST XB= 7.5, 7.9, 5.2, 5.6, 3.3, 3.8, SURF_ID='STEEL' /
+&VENT XB= 7.9, 7.9, 5.2, 5.6, 3.3, 3.8, SURF_ID='HVAC', ID='R1_I', COLOR='BLUE' /  Inlet duct
+
+&OBST XB= 2.3, 2.7, 0.4, 0.8, 3.3, 3.8, SURF_ID='STEEL' /
+&VENT XB= 2.7, 2.7, 0.4, 0.8, 3.3, 3.8, SURF_ID='HVAC', ID='R2_O', COLOR='ORANGE' /  Exhaust duct
+
+Supply Ventilation
+
+&HVAC TYPE_ID='NODE', ID='N0', DUCT_ID='D1', AMBIENT=.TRUE., XYZ=0,0,3.5 /
+&HVAC TYPE_ID='NODE', ID='N1', DUCT_ID='D1','D2', XYZ=0,0,3.5 /
+&HVAC TYPE_ID='NODE', ID='N2', DUCT_ID='D2', VENT_ID='R1_I' /
+
+&HVAC TYPE_ID='DUCT', ID='D1', NODE_ID='N0','N1', DIAMETER=0.40, LOSS= 0.0, 0.0, LENGTH=1.0, FAN_ID='INFLOW' /  This duct is just the fan housing with no loss assumed.
+&HVAC TYPE_ID='DUCT', ID='D2', NODE_ID='N1','N2', DIAMETER=0.40, LOSS=19.58,19.58, LENGTH=1.0 /   LOSS is calculated: 2 * (620 1/m4) * ((0.2 m)^2 pi)^2 = 19.58  or k=2*R*A^2
+
+Exhaust Ventilation
+
+&HVAC TYPE_ID='NODE', ID='N3', DUCT_ID='D3', VENT_ID='R2_O' /
+&HVAC TYPE_ID='NODE', ID='N4', DUCT_ID='D3','D4', XYZ=0,0,3.5 /
+&HVAC TYPE_ID='NODE', ID='N5', DUCT_ID='D4', AMBIENT=.TRUE., XYZ=0,0,3.5 /
+
+&HVAC TYPE_ID='DUCT', ID='D3', NODE_ID='N3','N4', DIAMETER=0.40, LOSS=19.90,19.90, LENGTH=1.0 /  LOSS is calculated: 2 * (630 1/m4) * ((0.2 m)^2 pi)^2 = 19.90  or k=2*R*A^2
+&HVAC TYPE_ID='DUCT', ID='D4', NODE_ID='N4','N5', DIAMETER=0.40, LOSS= 0.0, 0.0, LENGTH=1.0, FAN_ID='OUTFLOW' /
+
+Fans
+
+&HVAC TYPE_ID='FAN', ID='INFLOW',  MAX_PRESSURE=1200., MAX_FLOW=1.603 /  Assume a quadratic fan: (Vdot/MAX_FLOW)^2 = 1 - (Delta p/MAX_PRESSURE)    Vdot=3650 m3/h=1.0139 m3/s; Delta p = 720 Pa
+&HVAC TYPE_ID='FAN', ID='OUTFLOW', MAX_PRESSURE=1200., MAX_FLOW=1.841 /  Assume a quadratic fan: (Vdot/MAX_FLOW)^2 = 1 - (Delta p/MAX_PRESSURE)    Vdot=3680 m3/h=1.0222 m3/s; Delta p = 830 Pa
+
+Output
+
+&SLCF PBY=3.1, QUANTITY='TEMPERATURE', VECTOR=.TRUE. /
+&SLCF PBZ=3.6, QUANTITY='TEMPERATURE', VECTOR=.TRUE. /
+&SLCF PBZ=3.6, QUANTITY='PRESSURE' /
+
+&BNDF QUANTITY='WALL TEMPERATURE' /
+&BNDF QUANTITY='BURNING RATE' /
+
+HRR
+
+&DEVC XB=0.00,5.00,0.00,6.00,0.00,3.80, QUANTITY='HRRPUV', SPATIAL_STATISTIC='VOLUME INTEGRAL', ID='HRR' /
+
+MLR
+
+&DEVC XB=0,4,0,6,0,3.8, SURF_ID='burning cables', QUANTITY='BURNING RATE', SPATIAL_STATISTIC='SURFACE INTEGRAL', ID='MLR', CONVERSION_FACTOR=1000., UNITS='g/s' /
+
+Relative Pressure
+
+&DEVC XYZ=4.40,5.50,0.50, QUANTITY='PRESSURE', ID='P_L1', RELATIVE=.TRUE. /
+
+Ventilation Flowrates
+
+&DEVC QUANTITY='DUCT VOLUME FLOW', DUCT_ID='D2', ID='DADM_L2', CONVERSION_FACTOR=3600., UNITS='m3/h' /
+&DEVC QUANTITY='DUCT VOLUME FLOW', DUCT_ID='D3', ID='DEXT_L1', CONVERSION_FACTOR=3600., UNITS='m3/h' /
+
+Gas temperature Room 1
+
+&DEVC XB=0.00,4.90,0.00,6.00,0.00,3.80, QUANTITY='TEMPERATURE', ID='TG_L1', SPATIAL_STATISTIC='MEAN' /
+&DEVC XYZ=3.75,1.50,1.05, QUANTITY='TEMPERATURE', ID='TG_L1_SE_105' /
+&DEVC XYZ=3.75,1.50,2.05, QUANTITY='TEMPERATURE', ID='TG_L1_SE_205' /
+&DEVC XYZ=3.75,1.50,3.80, QUANTITY='TEMPERATURE', ID='TG_L1_SE_380' /
+
+Wall Temperatures
+
+&DEVC XYZ=0.00,3.00,3.50, QUANTITY='WALL TEMPERATURE', IOR= 1, ID='TP_L1_WC_350' /
+
+Gas concentrations in the fire room
+
+&DEVC XB=0.00,4.90,0.00,6.00,0.00,3.80, QUANTITY='VOLUME FRACTION', SPEC_ID='OXYGEN', DRY=.TRUE., ID='O2_MEAN',      CONVERSION_FACTOR=100., UNITS='%', SPATIAL_STATISTIC='MEAN' /
+&DEVC XYZ=3.75,1.50,0.70,               QUANTITY='VOLUME FRACTION', SPEC_ID='OXYGEN', DRY=.TRUE., ID='O2_L1_BAS',    CONVERSION_FACTOR=100., UNITS='%' /
+&DEVC XYZ=3.75,1.50,2.20,               QUANTITY='VOLUME FRACTION', SPEC_ID='OXYGEN', DRY=.TRUE., ID='O2_L1_MILIEU', CONVERSION_FACTOR=100., UNITS='%' /
+&DEVC XYZ=3.75,1.50,3.20,               QUANTITY='VOLUME FRACTION', SPEC_ID='OXYGEN', DRY=.TRUE., ID='O2_L1_HAUT',   CONVERSION_FACTOR=100., UNITS='%' /
+
+&DEVC XB=0.00,4.90,0.00,6.00,0.00,3.80, QUANTITY='VOLUME FRACTION', SPEC_ID='CARBON DIOXIDE', DRY=.TRUE., ID='CO2_MEAN',      CONVERSION_FACTOR=100., UNITS='%', SPATIAL_STATISTIC='MEAN' /
+&DEVC XYZ=3.75,1.50,0.70,               QUANTITY='VOLUME FRACTION', SPEC_ID='CARBON DIOXIDE', DRY=.TRUE., ID='CO2_L1_BAS',    CONVERSION_FACTOR=100., UNITS='%' /
+&DEVC XYZ=3.75,1.50,2.20,               QUANTITY='VOLUME FRACTION', SPEC_ID='CARBON DIOXIDE', DRY=.TRUE., ID='CO2_L1_MILIEU', CONVERSION_FACTOR=100., UNITS='%' /
+&DEVC XYZ=3.75,1.50,3.20,               QUANTITY='VOLUME FRACTION', SPEC_ID='CARBON DIOXIDE', DRY=.TRUE., ID='CO2_L1_HAUT',   CONVERSION_FACTOR=100., UNITS='%' /
+
+&TAIL /
+
