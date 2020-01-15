@@ -5,10 +5,13 @@ global MAX_DIM CCGUARD GEOMEPS TRANS MESHES
 global XFACE DXFACE YFACE DYFACE ZFACE DZFACE
 global ILO_FACE IHI_FACE JLO_FACE JHI_FACE KLO_FACE KHI_FACE
 global ILO_CELL IHI_CELL JLO_CELL JHI_CELL KLO_CELL KHI_CELL
-global IBM_IDCE IBM_GS IBM_INBOUNDCC IBM_MAX_WSTRIANG_SEG
+global IBM_IDCE IBM_GS IBM_INBOUNDCC IBM_MAX_WSTRIANG_SEG IBM_UNDEFINED
+
+global CELLRT EDGE_START
 
 ierr=1;
 
+EDGE_START= MESHES(NM).N_CUTEDGE_MESH + 1;
 
 % BODINT_CELL:
 for IG=1:N_GEOMETRY
@@ -164,8 +167,8 @@ for IG=1:N_GEOMETRY
          SVAR2 = BODINT_CELL.SVAR(IEDGE+1,IWSEDG);
 
          % Location of midpoint of cut-edge:
-         SVAR12 = 0.5 * (SVAR1+SVAR2);
-
+         SVAR12 = 0.5 * (SVAR1+SVAR2);         
+         
          % Define Cartesian cell this cut-edge belongs:
          % Optimized for UG version:
          XPOS = XYZ1(IAXIS) + SVAR12*STANI(IAXIS);
@@ -257,6 +260,95 @@ for IG=1:N_GEOMETRY
 
    end
 end
+
+AXIS = [ IAXIS IAXIS JAXIS JAXIS KAXIS KAXIS];
+IADD = [   -1    0     0     0     0     0  ];
+JADD = [    0    0    -1     0     0     0  ];
+KADD = [    0    0     0     0    -1     0  ];
+
+% Now filter out IBM_INBOUNDCC cut-edges that lay within the SOLID:
+for CEI=EDGE_START:MESHES(NM).N_CUTEDGE_MESH 
+    
+    
+   % Here we have cut-edges on the cell belonging to two or more bodies:
+   I = MESHES(NM).CUT_EDGE(CEI).IJK(IAXIS);
+   J = MESHES(NM).CUT_EDGE(CEI).IJK(JAXIS);
+   K = MESHES(NM).CUT_EDGE(CEI).IJK(KAXIS);
+   
+   % First cut-edges in the cell:
+   NEDGE=MESHES(NM).CUT_EDGE(CEI).NEDGE;
+   TWOBOD_EDG=false;
+   if (NEDGE > 0); IG1=MESHES(NM).CUT_EDGE(CEI).INDSEG(4,1); end
+   for IEDGE=2:NEDGE
+       if (MESHES(NM).CUT_EDGE(CEI).INDSEG(4,IEDGE) ~= IG1)
+           TWOBOD_EDG=true;
+           break
+       end
+   end
+   
+   % Low-High x,y,z face Edges:
+   for IFCELL=1:6
+      CEI2 = MESHES(NM).FCVAR(I+IADD(IFCELL),J+JADD(IFCELL),K+KADD(IFCELL),IBM_IDCE,AXIS(IFCELL));
+      if (CEI2 < 1); continue; end
+      flg = false;
+      for IEDGE=1:MESHES(NM).CUT_EDGE(CEI2).NEDGE
+         if (MESHES(NM).CUT_EDGE(CEI2).INDSEG(4,IEDGE) ~= IG1)
+            TWOBOD_EDG=true;
+            flg=true;
+            break
+         end
+      end
+      if(flg); break; end
+   end
+   if(~TWOBOD_EDG); continue; end   
+         
+   % Here we have cut-edges on the cell belonging to two or more bodies:
+   I = MESHES(NM).CUT_EDGE(CEI).IJK(IAXIS);
+   J = MESHES(NM).CUT_EDGE(CEI).IJK(JAXIS);
+   K = MESHES(NM).CUT_EDGE(CEI).IJK(KAXIS);
+   % First discard if CELLRT=true, we won't be using cut-edges:
+   if (CELLRT(I,J,K)); continue; end
+   
+   % Now figure out which edges are inside other SOLIDS:
+   % Ray tracing in either X, Y or Z directions:
+   % 1. For the segment center point P provide:
+   %    a. Its coordinates P={xp,yp,zp}.
+   %    b. Direction X1 for Ray shooting (IAXIS,JAXIS,KAXIS).
+   SOLID_EDGE(1:NEDGE) = false;
+   for IEDGE=1:NEDGE
+       
+      % No body associated with segment. Might not be needed.
+      IG = MESHES(NM).CUT_EDGE(CEI).INDSEG(4,IEDGE);
+      if( IG < 1); continue; end
+      
+      SEG(NOD1:NOD2)  = MESHES(NM).CUT_EDGE(CEI).CEELEM(NOD1:NOD2,IEDGE);
+      XP(IAXIS:KAXIS) = 0.5*(MESHES(NM).CUT_EDGE(CEI).XYZVERT(IAXIS:KAXIS,SEG(NOD1)) + ...
+                             MESHES(NM).CUT_EDGE(CEI).XYZVERT(IAXIS:KAXIS,SEG(NOD2)));
+      % Direction NP:
+      NP(IAXIS:KAXIS) = 0.;
+      for I_NP=1:MESHES(NM).CUT_EDGE(CEI).INDSEG(1,IEDGE)
+          ITRI = MESHES(NM).CUT_EDGE(CEI).INDSEG(1+I_NP,IEDGE);
+          NP(IAXIS:KAXIS) = NP(IAXIS:KAXIS) + GEOM(IG).FACES_NORMAL(IAXIS:KAXIS,ITRI)';
+      end
+      [val,X2AXIS] = max(abs(NP(IAXIS:KAXIS)));
+      
+      [SOLID_EDGE(IEDGE)]=GET_IS_SOLID_3D(X2AXIS,XP,I,J,K);
+   end
+   % Now drop SEGS with SOLID_EDGE(IEDGE)=true:
+   COUNT = 0;
+   for IEDGE=1:NEDGE
+       if(SOLID_EDGE(IEDGE)); continue; end
+       COUNT=COUNT+1;
+       MESHES(NM).CUT_EDGE(CEI).CEELEM(NOD1:NOD2,COUNT) = ...
+       MESHES(NM).CUT_EDGE(CEI).CEELEM(NOD1:NOD2,IEDGE);
+       MESHES(NM).CUT_EDGE(CEI).INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,COUNT) = ...
+       MESHES(NM).CUT_EDGE(CEI).INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,IEDGE);
+   end
+   MESHES(NM).CUT_EDGE(CEI).NEDGE = COUNT;
+   MESHES(NM).CUT_EDGE(CEI).CEELEM(NOD1:NOD2,COUNT+1:NEDGE)=IBM_UNDEFINED;
+   MESHES(NM).CUT_EDGE(CEI).INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,COUNT+1:NEDGE)=IBM_UNDEFINED;
+end
+
 
 ierr=0;
 

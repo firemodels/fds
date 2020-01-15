@@ -12,6 +12,11 @@ global GEOM MESHES IBM_IDCF IBM_GS LOW_IND HIGH_IND MAX_DIM
 global BODINT_PLANE IBM_INBOUNDCF
 global CELLRT
 
+global X1FACE X2FACE X3FACE DX1FACE DX2FACE DX3FACE DX1CELL DX2CELL DX3CELL
+global X2LO X2HI X3LO X3HI 
+global X1CELL X2CELL X3CELL X2LO_CELL X2HI_CELL X3LO_CELL X3HI_CELL
+
+
 global basedir
 
 global ISPCELL SPCELL_LIST
@@ -169,8 +174,9 @@ end
                DX2_MIN = min(DX2CELL(X2LO_CELL:X2HI_CELL));
                DX3_MIN = min(DX3CELL(X3LO_CELL:X3HI_CELL));
                TRI_ONPLANE_ONLY = true;
+               RAYTRACE_X2_ONLY =false;
                [ierr,BODINT_PLANE]=GET_BODINT_PLANE(X1AXIS,X1PLN,IJK(X1AXIS),PLNORMAL,X2AXIS,...
-                                                    X3AXIS,DX2_MIN,DX3_MIN,TRI_ONPLANE_ONLY);
+                                                    X3AXIS,DX2_MIN,DX3_MIN,TRI_ONPLANE_ONLY,RAYTRACE_X2_ONLY);
                % Test that there is an intersection:
                if ((BODINT_PLANE.NTRIS) == 0); continue; end
 
@@ -482,6 +488,30 @@ for K=KLO:KHI
             end
          end
 
+         
+         % Drop segments that are unconnected:
+         VERT_SEGS = zeros(1,NVERT);
+         for IDUM = 1:NSEG    
+         VERT_SEGS(SEG_CELL(NOD1,IDUM)) = VERT_SEGS(SEG_CELL(NOD1,IDUM))+1;
+         VERT_SEGS(SEG_CELL(NOD2,IDUM)) = VERT_SEGS(SEG_CELL(NOD2,IDUM))+1;
+         end
+         SEG_CELL2 = SEG_CELL;
+         COUNT = 0;
+         for IDUM = 1:NSEG
+         if(VERT_SEGS(SEG_CELL2(NOD1,IDUM)) > 1 && VERT_SEGS(SEG_CELL2(NOD2,IDUM)) > 1)
+             COUNT = COUNT + 1;
+             SEG_CELL(:,COUNT) = SEG_CELL2(:,IDUM);
+             continue
+         end
+         end
+         NSEG = COUNT;
+         
+         % There still might be segments laying on the SOLID phase within
+         % the cell when there are two or more GEOMs present on this cell.
+         % Dealt with in GET_CARTCELL_CUTEDGES.         
+         
+         
+         
          % Now obtain body-triangle combinations present:
          BOD_TRI = IBM_UNDEFINED;
          NBODTRI = 0;

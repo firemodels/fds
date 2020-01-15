@@ -10,6 +10,7 @@ global GEOMEPS MAX_DIM
 global X2NOC X3NOC
 global X1FACE X2FACE DX2FACE X3FACE DX3FACE
 global FACERT CELLRT
+%global X1LO_CELL X1HI_CELL
 
 ierr=1;
 
@@ -24,7 +25,7 @@ for KK2=X3LO_CELL:X3HI_CELL
        INDJF=INDXI(XJAXIS);
        INDKF=INDXI(XKAXIS);
        
-       CELLRT(INDIF,INDJF,INDKF) = 1;
+       CELLRT(INDIF,INDJF,INDKF) = true;
        
        % High cell indexes:
        INDXI(IAXIS:KAXIS) = [ INDX1(X1AXIS)+1, JJ2, KK2 ]; % Local x1,x2,x3
@@ -32,7 +33,7 @@ for KK2=X3LO_CELL:X3HI_CELL
        INDJF=INDXI(XJAXIS);
        INDKF=INDXI(XKAXIS);
        
-       CELLRT(INDIF,INDJF,INDKF) = 1;
+       CELLRT(INDIF,INDJF,INDKF) = true;           
 
     end
 end

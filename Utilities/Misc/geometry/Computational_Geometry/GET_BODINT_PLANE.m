@@ -1,17 +1,18 @@
 function [ierr,BODINT_PLANE]=GET_BODINT_PLANE(X1AXIS,X1PLN,INDX1,PLNORMAL,X2AXIS,...
-                             X3AXIS,DX2_MIN,DX3_MIN,TRI_ONPLANE_ONLY)
+                             X3AXIS,DX2_MIN,DX3_MIN,TRI_ONPLANE_ONLY,RAYTRACE_X2_ONLY)
                          
 global N_GEOMETRY GEOM IAXIS JAXIS KAXIS IBM_SOLID IBM_GASPHASE
 global GEOMEPS LOW_IND HIGH_IND NODS_WSEL MAX_DIM NOD1 NOD2 NOD3 EDG1 EDG2 EDG3
 global IBM_MAX_WSTRIANG_SEG DELTA_SEGBIN
 global IBM_DELTA_NBCROSS
 
-global X2LO X2LO_CELL X2HI_CELL X2FACE DX2FACE
-global X3LO X3LO_CELL X3HI_CELL X3FACE DX3FACE
+global X2LO X2HI X2LO_CELL X2HI_CELL X2FACE DX2FACE
+global X3LO X3HI X3LO_CELL X3HI_CELL X3FACE DX3FACE
 
 global FACERT CELLRT
 global X2NOC X3NOC
 
+global X3LO_RT X3HI_RT
 
 ierr = 1;
 
@@ -32,14 +33,26 @@ BODINT_PLANE.SEGTYPE = [];
 BODINT_PLANE.SGLS    = [];
 BODINT_PLANE.TRIS    = [];
 
-
-
 for IG=1:N_GEOMETRY
     for IWSEL=1:GEOM(IG).N_FACES
        
        % Test low-high vertices of triangle along x1axis vs plane (O(NT) operation):
        if( (GEOM(IG).FACECUBE( LOW_IND,X1AXIS,IWSEL)-X1PLN) > GEOMEPS); continue; end
        if( (X1PLN-GEOM(IG).FACECUBE(HIGH_IND,X1AXIS,IWSEL)) > GEOMEPS); continue; end
+               
+       if (RAYTRACE_X2_ONLY)
+         if( (X3LO_RT-GEOM(IG).FACECUBE(HIGH_IND,X3AXIS,IWSEL)) > GEOMEPS); continue; end
+         if( (GEOM(IG).FACECUBE( LOW_IND,X3AXIS,IWSEL)-X3HI_RT) > GEOMEPS); continue; end
+       else
+         LO_X2_TEST = (X2FACE(X2LO)-GEOM(IG).FACECUBE(HIGH_IND,X2AXIS,IWSEL)) > GEOMEPS;
+         LO_X3_TEST = (X3FACE(X3LO)-GEOM(IG).FACECUBE(HIGH_IND,X3AXIS,IWSEL)) > GEOMEPS;
+         if(  LO_X2_TEST && LO_X3_TEST ); continue; end
+         HI_X2_TEST = (GEOM(IG).FACECUBE( LOW_IND,X2AXIS,IWSEL)-X2FACE(X2HI)) > GEOMEPS;
+         if(  HI_X2_TEST && LO_X3_TEST ); continue; end
+         HI_X3_TEST = (GEOM(IG).FACECUBE( LOW_IND,X3AXIS,IWSEL)-X3FACE(X3HI)) > GEOMEPS;
+         if(  LO_X2_TEST && HI_X3_TEST ); continue; end
+         if(  HI_X2_TEST && HI_X3_TEST ); continue; end
+       end
        
        WSELEM(NOD1:NOD3) = GEOM(IG).FACES(NODS_WSEL*(IWSEL-1)+1:NODS_WSEL*IWSEL);
        % Triangles NODES coordinates:
@@ -804,11 +817,29 @@ BODINT_PLANE.SEGS(NOD1:NOD2,1:ISEG_NEW) = SEGAUX(NOD1:NOD2,1:ISEG_NEW);
 BODINT_PLANE.INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,1:ISEG_NEW) = INDSEGAUX(1:IBM_MAX_WSTRIANG_SEG+2,1:ISEG_NEW);
 BODINT_PLANE.SEGTYPE(NOD1:NOD2,1:ISEG_NEW) = SEGTYPEAUX(NOD1:NOD2,1:ISEG_NEW);
 
+if (BODINT_PLANE.NSEGS == 0); return; end
+
 % Segments Crossings fields:
-% Initialize nbcross with segment nodes locations:
 BODINT_PLANE.NBCROSS = zeros(1,BODINT_PLANE.NSEGS);
 BODINT_PLANE.SVAR    = -ones(IBM_DELTA_NBCROSS,BODINT_PLANE.NSEGS);
+BODINT_PLANE.BOX = zeros(HIGH_IND, MAX_DIM);
+BODINT_PLANE.BOX(LOW_IND, X2AXIS) = min(BODINT_PLANE.XYZ(X2AXIS,1:BODINT_PLANE.NNODS));
+BODINT_PLANE.BOX(HIGH_IND,X2AXIS) = max(BODINT_PLANE.XYZ(X2AXIS,1:BODINT_PLANE.NNODS));
+BODINT_PLANE.BOX(LOW_IND, X3AXIS) = min(BODINT_PLANE.XYZ(X3AXIS,1:BODINT_PLANE.NNODS));
+BODINT_PLANE.BOX(HIGH_IND,X3AXIS) = max(BODINT_PLANE.XYZ(X3AXIS,1:BODINT_PLANE.NNODS));
+if (RAYTRACE_X2_ONLY)
+   AXIS = X3AXIS;
+   BODINT_PLANE.TBAXIS(AXIS).DELBIN = BODINT_PLANE.BOX(HIGH_IND,AXIS)-BODINT_PLANE.BOX(LOW_IND,AXIS);
+   BODINT_PLANE.TBAXIS(AXIS).N_BINS = 1;
+   IBIN=1;
+   BODINT_PLANE.TBAXIS(AXIS).TRIBIN(IBIN).X_LOW  = BODINT_PLANE.BOX( LOW_IND,AXIS);
+   BODINT_PLANE.TBAXIS(AXIS).TRIBIN(IBIN).X_HIGH = BODINT_PLANE.BOX(HIGH_IND,AXIS);
+   BODINT_PLANE.TBAXIS(AXIS).TRIBIN(IBIN).NTL    = BODINT_PLANE.NSEGS;
+   BODINT_PLANE.TBAXIS(AXIS).TRIBIN(IBIN).TRI_LIST=[1:BODINT_PLANE.NSEGS];
+   return; 
+end
 
+% Initialize nbcross with segment nodes locations:
 % Add segment ends as crossings:
 SEGS_NODE=zeros(1,BODINT_PLANE.NNODS);
 MEAN_SLEN=0.;
@@ -852,17 +883,9 @@ for ISEG=1:BODINT_PLANE.NSEGS
    BODINT_PLANE.SVAR(NBCROSS,ISEG) = SBOD;
 
 end
-if (BODINT_PLANE.NSEGS == 0)
-   return
-end
 
 % Spread Segments in BINs in the x2-x3 directions:
-BODINT_PLANE.BOX = zeros(HIGH_IND, MAX_DIM);
 MEAN_SLEN = MEAN_SLEN / BODINT_PLANE.NSEGS;
-BODINT_PLANE.BOX(LOW_IND, X2AXIS) = min(BODINT_PLANE.XYZ(X2AXIS,1:BODINT_PLANE.NNODS));
-BODINT_PLANE.BOX(HIGH_IND,X2AXIS) = max(BODINT_PLANE.XYZ(X2AXIS,1:BODINT_PLANE.NNODS));
-BODINT_PLANE.BOX(LOW_IND, X3AXIS) = min(BODINT_PLANE.XYZ(X3AXIS,1:BODINT_PLANE.NNODS));
-BODINT_PLANE.BOX(HIGH_IND,X3AXIS) = max(BODINT_PLANE.XYZ(X3AXIS,1:BODINT_PLANE.NNODS));
 VAXIS = [ X2AXIS, X3AXIS ];
 for I = 1:2
    AXIS = VAXIS(I);
@@ -895,16 +918,6 @@ for I = 1:2
       end
    end
 end
-
-% disp(' ')
-% disp(['X1AXIS, X1PLN, NSEGS=' num2str(X1AXIS) ', ' num2str(X1PLN) ', ' num2str(BODINT_PLANE.NSEGS)])
-% TTL = 0;
-% for IBIN=1:BODINT_PLANE.TBAXIS(AXIS).N_BINS
-%    NTL = BODINT_PLANE.TBAXIS(AXIS).TRIBIN(IBIN).NTL;
-%    TTL = TTL + NTL;
-%    disp(['IBIN, NTL=' num2str(IBIN) ', ' num2str(NTL)])
-% end
-% disp(['Total counted SEGS in N_BINS=' num2str(TTL)])
 
 % Add Segments intersections:
 for IBIN=1:BODINT_PLANE.TBAXIS(AXIS).N_BINS
@@ -972,48 +985,52 @@ for IBIN=1:BODINT_PLANE.TBAXIS(AXIS).N_BINS
                end
                BODINT_PLANE.SVAR(IBCR,ISEGV(ISX)) = SBOD;
                BODINT_PLANE.NBCROSS(ISEGV(ISX))   = NBCROSS;
-               
+
                % Here we have an intersection inside a segment, note it in
                % FACERT:
                if (ISX==EDG1)
                    % X2AXIS, X3AXIS location of intersection:
                    XY(IAXIS:JAXIS) = P1(IAXIS:JAXIS) + SBOD*D1(IAXIS:JAXIS)/norm(D1(IAXIS:JAXIS));
-                   
-                   XPOS = XY(IAXIS);
-                   if (X2NOC==0)
-                       JJ2  = floor((XPOS-X2FACE(X2LO))/DX2FACE(X2LO)) + X2LO_CELL;
-                       if ((JJ2 < X2LO_CELL) || (JJ2 > X2HI_CELL)); continue; end
-                   else
-                       FOUND_SEG=false;
-                       for JJ2=X2LO_CELL:X2HI_CELL
-                           % Check if XPOS is within this segment JJ2:
-                           if ((XPOS-X2FACE(JJ2-1)) >= 0. && (X2FACE(JJ2)-XPOS) > 0.)
-                               FOUND_SEG=true;
-                               break
-                           end
+               else
+                   % X2AXIS, X3AXIS location of intersection:
+                   XY(IAXIS:JAXIS) = P2(IAXIS:JAXIS) + SBOD*D2(IAXIS:JAXIS)/norm(D2(IAXIS:JAXIS));
+               end                                 
+               XPOS = XY(IAXIS);
+               if (X2NOC==0)
+                   JJ2  = floor((XPOS-X2FACE(X2LO))/DX2FACE(X2LO)) + X2LO_CELL;
+                   if ((JJ2 < X2LO_CELL) || (JJ2 > X2HI_CELL)); continue; end
+               else
+                   FOUND_SEG=false;
+                   for JJ2=X2LO_CELL:X2HI_CELL
+                       % Check if XPOS is within this segment JJ2:
+                       if ((XPOS-X2FACE(JJ2-1)) >= 0. && (X2FACE(JJ2)-XPOS) > 0.)
+                           FOUND_SEG=true;
+                           break
                        end
-                       if (~FOUND_SEG); continue; end
                    end
-                   XPOS = XY(JAXIS);
-                   if (X3NOC==0)
-                       KK2  = floor((XPOS-X3FACE(X3LO))/DX3FACE(X3LO)) + X3LO_CELL;
-                       if ((KK2 < X3LO_CELL) || (KK2 > X3HI_CELL)); continue; end
-                   else
-                       FOUND_SEG=false;
-                       for KK2=X3LO_CELL:X3HI_CELL
-                           % Check if XPOS is within this segment KK2:
-                           if ((XPOS-X3FACE(KK2-1)) >= 0. && (X3FACE(KK2)-XPOS) > 0.)
-                               FOUND_SEG=true;
-                               break
-                           end
-                       end
-                       if (~FOUND_SEG); continue; end
-                   end
-                   
-                   % Here JJ2 and KK2 have the face containing the
-                   % intersection:
-                   FACERT(JJ2,KK2) = 1;
+                   if (~FOUND_SEG); continue; end
                end
+               XPOS = XY(JAXIS);
+               if (X3NOC==0)
+                   KK2  = floor((XPOS-X3FACE(X3LO))/DX3FACE(X3LO)) + X3LO_CELL;
+                   if ((KK2 < X3LO_CELL) || (KK2 > X3HI_CELL)); continue; end
+               else
+                   FOUND_SEG=false;
+                   for KK2=X3LO_CELL:X3HI_CELL
+                       % Check if XPOS is within this segment KK2:
+                       if ((XPOS-X3FACE(KK2-1)) >= 0. && (X3FACE(KK2)-XPOS) > 0.)
+                           FOUND_SEG=true;
+                           break
+                       end
+                   end
+                   if (~FOUND_SEG); continue; end
+               end
+               
+               % Here JJ2 and KK2 have the face containing the
+               % intersection:
+               FACERT(JJ2,KK2) = 1;
+               
+%            end
                
            end
          end
