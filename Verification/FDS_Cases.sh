@@ -560,6 +560,7 @@ $QFDS -d Species condensation_1.fds
 $QFDS -d Species condensation_2.fds
 $QFDS -d Species condensation_3.fds
 $QFDS -d Species wall_cond.fds
+$QFDS -d Species humidity.fds
 
 $QFDS -d Sprinklers_and_Sprays activate_sprinklers.fds
 $QFDS -d Sprinklers_and_Sprays bucket_test_1.fds
