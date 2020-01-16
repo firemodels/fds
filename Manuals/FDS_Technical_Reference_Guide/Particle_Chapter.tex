@@ -198,7 +198,7 @@ where $X_{\alpha,\ell}$ is the equilibrium vapor {\em volume} fraction, $W_{\alp
 Mass and heat transfer between liquid and gas are described with analogous empirical correlations. The mass transfer coefficient, $h_{\rm m}$, is described by the empirical relationships~\cite{Sazhin:2006}:
 \be
    h_{\rm m} = \frac{\SH \, D_{\rm \ell g}}{L} \, \frac{B_M}{Y_{\alpha,\ell} - Y_{\rm \alpha, g}}
-\ee
+\label{eq:h_m_vap}\ee
 \be
    \SH = \frac{\ln(1+B_M)}{B_M} {\SH}_0
 \ee
@@ -210,7 +210,7 @@ Mass and heat transfer between liquid and gas are described with analogous empir
 \ee
 \be
    B_M = \frac{Y_{\alpha,\ell} - Y_{\rm \alpha, g}}{1-Y_{\alpha,\ell}}
-\ee
+\label{eq:B_M_vap}\ee
 where $B_M$ is the Spalding mass transfer number \cite{Spalding:1}, $\SH_0$ is the low mass flux Sherwood number, $\SH$ is the Sherwood number with blowing, $D_{\rm \ell g}$ is the binary diffusion coefficient between the liquid vapor and the surrounding gas (usually assumed air), $L$ is a length scale equal to either the droplet diameter or 1~m for a surface film, $\RE_D$ is the Reynolds number of the droplet (based on the diameter, $D$, and the relative air-droplet velocity), $\RE_L$ is the Reynolds number based on the length scale $L$, and $\SC$ is the Schmidt number ($\nu/D_{\rm \ell g}$, assumed 0.6 for all cases).  Note that the mass transfer coefficient, $h_m$, is formulated so that the mass flux model given by Eq.~(\ref{droplet_mass}) recovers Eq.~(108) of Sazhin \cite{Sazhin:2006} but still works within the implicit time update.
 
 An analogous relationship exists for the heat transfer coefficient~\cite{Sazhin:2006}:
@@ -264,6 +264,7 @@ where $n$ represents the sub-time step in the integration of the droplet mass an
 In practice, the filtered mass and energy source term contributions to the velocity divergence constraint are collected in a single term denoted {\ct D\_SOURCE} within the code,
 \begin{equation}
 D_{\si{\tiny SOURCE}} = \frac{1}{\rho} \sum_\alpha \frac{\overline{W}}{W_\alpha} \, \dot{m}_{{\rm b},\alpha}^{\ppp} + \frac{1}{\rho c_p T} \left( \dot{q}_{\rm b}^{\ppp} - \sum_\alpha \dot{m}_{{\rm b},\alpha}^{\ppp} \, \int_{T_{\rm b}}^T c_{p,\alpha} \d T'  \right)
+\label{eq:D_SOURCE_vap}
 \end{equation}
 which is embedded in Eq.~(\ref{eqn_fdsD1}).
 
