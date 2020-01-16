@@ -34,3 +34,4 @@ Atmospheric Dispersion,Measured Concentration (%),Predicted Concentration (%),0.
 Minimum Extinguishing Concentration,Measured MEC (mol/mol),Predicted MEC (mol/mol),0.05,1,0.03 0.95,,1,6,no,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Minimum_Extinguishing_Concentration
 Plume Height,Empirical Plume Height (m),Predicted Plume Height (m),10,1000,0.03 0.96,,1,-1,no,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Plume_Height
 Rate of Spread,Measured Rate of Spread (m/s),Predicted Rate of Spread (m/s),0.001,3,0.03 0.96,EastOutside,1.6,10,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Rate_of_Spread
+Condensation,Measured Heat Flux (kW/m^2),Predicted Heat Flux (kW/m^2),0,12,0.03 0.96,EastOutside,2,12,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Condensation
