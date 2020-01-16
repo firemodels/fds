@@ -1531,6 +1531,32 @@ centerline of the room, and two horizontal arrays located 8.4~cm above the floor
 
 The Fire Laboratory for Accreditation of Models by Experimentation (FLAME) facility \cite{OHern:2005,Blanchat:2001} at Sandia National Laboratories in Albuquerque, New Mexico, is designed specifically for validating models of buoyant fire plumes.  The plume source is 1 m in diameter surrounded by a 0.5 m steel `ground plane'. PIV/PLIF techniques are used to obtain instantaneous joint scalar and velocity fields.  O'Hern et al.~\cite{OHern:2005} studied a turbulent buoyant helium plume in the FLAME facility. Earlier work to model this experiment has been performed by DesJardin et al.~\cite{DesJardin:2004}. Tieszen et al.~\cite{Tieszen:2004,Tieszen:2002} studied methane and hydrogen pool fires.
 
+\section{SETCOM Wall Condensation Experiments}
+\label{SETCOM_Cond_Description}
+The Separate Effect Test for Condensation Modeling (SETCOM) facility is located in J\"{u}lich, Germany \cite{setcom_cfd}. The facility is a recirculating duct containing a flow conditioning section for establishing temperature and humidity and a test section for performing condensation experiments. The condensation section contains a 4~m or 5~m long, water-cooled, aluminum plate for its floor with the remaining walls adiabatic. The condensation section can be tilted from horizontal to vertical to investigate the effects of orientation on condensation. A set of five experiments were performed using the 4~m test section that measured the condensation heat flux from hot, high humidity air. Temperature, humidity, and flow rate were varied. 
+
+\subsection{Modeling notes}
+Prior to running the validation cases, a set of five scoping simulations were run with no condensation. These simulations used a short length of the test section with {\ct PERIODIC} boundary conditions. These cases were used to determine the rms velocity as a function of the mean velocity. 
+
+The condensation simulations included a 4~m portion of duct upstream to allow for flow development, and a 1 m portion of duct downstream to avoid boundary effects on the test section. The upstream boundary condition was set with the conditions shown in the table below along with synthetic eddy method inputs using the rms velocity determine from the scoping simulations. The outlet was defined as an {\ct OPEN} boundary. The experiments measured temperature 1.5~cm into the aluminum plate along the plate centerline. The test measured condensation heat transfer was used with the inside plate temperature to derive the plate surface temperature. The condensation plate {\ct TMP\_FRONT} was set to derived temperature as a function of length along the plate.
+
+\begin{table}[h]
+	\caption{Summary of SETCOM condensation experiments selected for model validation.}
+	\begin{center}
+		\begin{tabular}{|c|c|c|c|}
+			\hline
+			Test      &  Air Speed        &  Temperature          &  Humidity             \\
+			No.       &  (m/s)            &  ($^{\circ}$C)        &  (\%)                 \\ \hline \hline
+			1         &  0.8              &  86                   &  69                   \\ \hline
+			2         &  1.8              &  84                   &  57                   \\ \hline
+			3         &  3.7              &  79                   &  59                   \\ \hline
+			4         &  4.2              &  78                   &  71                   \\ \hline
+			5         &  5.2              &  75                   &  71                   \\ \hline
+		\end{tabular}
+	\end{center}
+	\label{SETCOM_condensation_Summary}
+\end{table}
+
 \section{Sippola Aerosol Deposition Experiments}
 \label{Sippola_Aerosol_Deposition_Description}
 
