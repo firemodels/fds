@@ -31,6 +31,7 @@ addpath 'scripts'
 
 % Scripts that run prior to dataplot
 
+NIST_deposition_gauge
 flame_height
 NIST_RSE
 sippola_aerosol_deposition
