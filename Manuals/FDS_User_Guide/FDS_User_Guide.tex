@@ -5475,6 +5475,19 @@ Aerosol particles will, over time, collide with one another and stick together t
 
 Water sprays can remove aerosols from the air. For example, rain can lower the concentrations pollen and other particulates in the air. This behavior can be modeled with FDS by setting {\ct AEROSOL\_SCRUBBING=.TRUE.} on {\ct MISC}. Setting this turns on an aerosol scrubbing model that removes aerosols from the gas phase. Once removed the mass is no longer tracked; i.e. the scrubbing model simply acts as a sink for aerosols.
 
+\section{Special Topic: Vapor Condensation}
+\label{info:condensation}
+
+If a species with liquid properties, e.g. {\ct WATER VAPOR}, is defined with {\ct AEROSOL=.TRUE.}, then FDS will predict condensation for that species. FDS creates a second species called {\ct ID\_COND}. For example if the species is {\ct WATER VAPOR}, then the second species will be called {\ct WATER VAPOR\_COND}. This second species will be an aerosol species that tracks the condensed phase. The particle diameter for the condensed vapor is given by {\ct MEAN\_DIAMETER}, the condensed species specific heat will use the {\ct SPECIFIC\_HEAT\_LIQUID} liquid values, and the particle density will use {\ct DENSITY\_LIQUID} rather than {\ct DENSITY\_SOLID}. The initial mass fraction of condensed phase can be defined with {\ct MASS\_FRACTION\_COND\_0}. For example, the input below defines {\ct WATER VAPOR} as a condensable species with an initial vapor mass fraction of 0.1 and an initial condensate mass fraction of 0.05.
+
+
+\begin{lstlisting}
+&SPEC ID='WATER VAPOR', AEROSOL=.TRUE.,MEAN_DIAMETER=1.E-6,
+      MASS_FRRACTION_0=0.1,MASS_FRACTION_COND=0.05/
+\end{lstlisting}
+
+Condensation can occur in both gas cells and on wall cells. The heat transfer to a wall due to condensation can be output with the {\ct QUANTITY} of {\ct CONDENSATION HEAT FLUX}. The amount of vapor that condenses can be output with the {\ct QUANTITY} of {\ct SURFACE DEPOSITION} using the condensed phase {\ct SPEC\_ID}.
+
 \chapter{Radiation}
 
 \section{Basic Radiation Parameters: The \texorpdfstring{{\tt RADI}}{RADI} Namelist Group}
@@ -9185,6 +9198,7 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct CONDUCTIVITY}                              & Thermal conductivity                          & \si{W/(m.K)}   & D,I,P,S      \\ \hline
 {\ct CONTROL}                                   & Section~\ref{info:CTRL}                       &                & D            \\ \hline
 {\ct CONTROL VALUE}                             & Section~\ref{info:CTRL}                       &                & D            \\ \hline
+{\ct CONDENSATION HEAT FLUX}                    & Section~\ref{info:condensation}               & kW/m$^2$       & B,D          \\ \hline
 {\ct CONVECTIVE HEAT FLUX}                      & Section~\ref{info:heat_flux}                  & kW/m$^2$       & B,D          \\ \hline
 {\ct CPUA}$^2$                                  & Section~\ref{info:part_output}                & kW/m$^2$       & B,D          \\ \hline
 {\ct CPUA\_Z}$^1$                               & Section~\ref{info:part_output}                & kW/m$^2$       & B,D          \\ \hline
@@ -10787,6 +10801,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MASS\_EXTINCTION\_COEFFICIENT} & Real              & Section~\ref{info:alternative_smoke}    &                   & 0             \\ \hline
 {\ct MASS\_FRACTION(:)}             & Real Array        & Section~\ref{info:lumped}               &                   & 0             \\ \hline
 {\ct MASS\_FRACTION\_0}             & Real              & Section~\ref{info:SPEC_Basics}          &                   & 0             \\ \hline
+{\ct MASS\_FRACTION\_COND\_0}       & Real              & Section~\ref{info:condensation}         &                   & 0             \\ \hline
 {\ct MAX\_DIAMETER}                 & Real              & Section~\ref{info:agglomeration}        &    m              &               \\ \hline
 {\ct MEAN\_DIAMETER}                & Real              & Section~\ref{info:deposition}           & m                 & 1.E-6         \\ \hline
 {\ct MELTING\_TEMPERATURE}          & Real              & Section~\ref{thermal_part_props}        & $^\circ$C         &               \\ \hline
