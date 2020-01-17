@@ -715,7 +715,7 @@ TYPE(LAGRANGIAN_PARTICLE_TYPE), POINTER :: LP
 CHARACTER(20) :: FORMT
 
 !Variables added for the WSGG model
-REAL(EB) :: MOL_RAT,PARTIAL_P,R_MIXTURE,TOTAL_P
+REAL(EB) :: X_H2O, X_CO2, MOL_RAT,PARTIAL_P,R_MIXTURE,TOTAL_P
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: Z_ARRAY
 ALLOCATE(Z_ARRAY(N_TRACKED_SPECIES))
 
@@ -898,13 +898,13 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                Z_ARRAY(1:N_TRACKED_SPECIES) = ZZ(I,J,K,1:N_TRACKED_SPECIES)                  ! Mass frac of the tracked species
                R_MIXTURE = RSUM(I,J,K)                                                       ! Specific gas constant of the mixture
-               MOL_RAT = GET_VOLUME_FRACTION(H2O_INDEX,Z_ARRAY,R_MIXTURE)/&
-                  (GET_VOLUME_FRACTION(CO2_INDEX,Z_ARRAY,R_MIXTURE)+TWO_EPSILON_EB)   ! Molar ratio
+               X_H2O = GET_VOLUME_FRACTION(H2O_INDEX,Z_ARRAY,R_MIXTURE)
+               X_CO2 = GET_VOLUME_FRACTION(CO2_INDEX,Z_ARRAY,R_MIXTURE)
+               MOL_RAT = X_H2O/(X_CO2 + TWO_EPSILON_EB)                                      ! Molar ratio
                TOTAL_P = PBAR(K,PRESSURE_ZONE(I,J,K)) + RHO(I,J,K)*(H(I,J,K)-KRES(I,J,K))    ! Total pressure
-               PARTIAL_P = TOTAL_P*(GET_VOLUME_FRACTION(H2O_INDEX,Z_ARRAY,R_MIXTURE) + &
-                  GET_VOLUME_FRACTION(CO2_INDEX,Z_ARRAY,R_MIXTURE))/P_STP             ! Partial press of the CO2-H2O mixture
+               PARTIAL_P = TOTAL_P*(X_H2O + X_CO2)/P_STP                                     ! Partial press of the CO2-H2O mixture
                BBF = A_WSGG(TMP(I,J,K),MOL_RAT,IBND)                                         ! Temp coefficient for the jth gas
-               KAPPA_GAS(I,J,K) = KAPPA_WSGG(MOL_RAT,PARTIAL_P,IBND) + &
+               KAPPA_GAS(I,J,K) = KAPPA_WSGG(X_H2O, X_CO2,MOL_RAT,PARTIAL_P,IBND) + &
                   KAPPA_SOOT(GET_VOLUME_FRACTION(SOOT_INDEX,Z_ARRAY,R_MIXTURE),TMP(I,J,K))       ! Absorp coeff for the jth gas
                KFST4_GAS(I,J,K) = BBF*KAPPA_GAS(I,J,K)*FOUR_SIGMA*TMP(I,J,K)**4._EB
                IF (CHI_R(I,J,K)*Q(I,J,K)>QR_CLIP) THEN ! Precomputation of quantities for the RTE source term correction
@@ -1682,41 +1682,46 @@ END FUNCTION GET_KAPPA
 !==================================================================================
 !Function to compute the absorption coefficient according to Bordbar et al. (2014)
 !==================================================================================
-REAL(EB) FUNCTION KAPPA_WSGG(MOL_RATIO,PARTIAL_PRESSURE,JWSGG)
+REAL(EB) FUNCTION KAPPA_WSGG(X_H2O, X_CO2, MOL_RATIO,PARTIAL_PRESSURE,JWSGG)
 
 INTEGER, INTENT(IN) :: JWSGG
 INTEGER :: NN
-REAL(EB), INTENT(IN) :: MOL_RATIO,PARTIAL_PRESSURE
+REAL(EB), INTENT(IN) :: X_H2O, X_CO2, MOL_RATIO,PARTIAL_PRESSURE
 REAL(EB) :: WSGG_D_ARRAY(1:4,0:4),WSGG_KAPPAP_ARRAY(1:5),SUM_KAPPA
+
+! If no CO2 or H2O, return zero
+
+IF ((X_H2O<=TWO_EPSILON_EB) .AND. (X_CO2<=TWO_EPSILON_EB)) THEN 
+   KAPPA_WSGG = 0._EB
+   RETURN
+ENDIF
 
 !-------------------------------------------------------------------------
 !Compute the absorption coefficient within three intervals of molar ratio
 !-------------------------------------------------------------------------
-IF (MOL_RATIO < 0.01_EB) THEN               !Only CO2
-   !Mounting the kappa_p array
-   WSGG_KAPPAP_ARRAY(1:5) = (/ 3.388079E-2_EB, 4.544269E-1_EB, 4.680226_EB, 1.038439E2_EB, 0._EB /)
 
+IF (MOL_RATIO < 0.01_EB) THEN               !Only CO2
+   !Fill in the kappa_p array
+   WSGG_KAPPAP_ARRAY(1:5) = (/ 3.388079E-2_EB, 4.544269E-1_EB, 4.680226_EB, 1.038439E2_EB, 0._EB /)
    !Getting the pressure-based absorption coefficient for the gray gas and transparent windows
    SUM_KAPPA = WSGG_KAPPAP_ARRAY(JWSGG)
 
 ELSEIF (MOL_RATIO > 4._EB) THEN               !Only H2O
-   !Mounting the kappa_p array
-   WSGG_KAPPAP_ARRAY(1:5) = (/ 7.703541E-2_EB, 8.242941E-1_EB, 6.854761_EB, 6.593653E1_EB, 0._EB /)
 
+   !Fill in the kappa_p array
+   WSGG_KAPPAP_ARRAY(1:5) = (/ 7.703541E-2_EB, 8.242941E-1_EB, 6.854761_EB, 6.593653E1_EB, 0._EB /)
    !Getting the pressure-based absorption coefficient for the gray gas and transparent windows
    SUM_KAPPA = WSGG_KAPPAP_ARRAY(JWSGG)
 
 ELSE                                          !CO2-H2O mixture
-   !Mounting the d's array
+   !Fill in the d's array
    WSGG_D_ARRAY(1,0:4) = (/ 0.0340429_EB,  0.0652305_EB, -0.0463685_EB,  0.0138684_EB, -0.0014450_EB /)
    WSGG_D_ARRAY(2,0:4) = (/ 0.3509457_EB,  0.7465138_EB, -0.5293090_EB,  0.1594423_EB, -0.0166326_EB /)
    WSGG_D_ARRAY(3,0:4) = (/ 4.5707400_EB,  2.1680670_EB, -1.4989010_EB,  0.4917165_EB, -0.0542999_EB /)
    WSGG_D_ARRAY(4,0:4) = (/ 109.81690_EB, -50.923590_EB,  23.432360_EB, -5.1638920_EB,  0.4393889_EB /)
-
    !Pressure-based absorption coefficient of the transparent windows
    IF (JWSGG==5) THEN
       SUM_KAPPA = 0._EB
-
    !Pressure-based absorption coefficient of the gray gases
    ELSE
       SUM_KAPPA = 0._EB
@@ -1729,7 +1734,6 @@ ENDIF
 KAPPA_WSGG = SUM_KAPPA*PARTIAL_PRESSURE
 
 END FUNCTION KAPPA_WSGG
-
 
 !===================================================================================
 !Function to compute the temperature coefficient according to Bordbar et al. (2014)
