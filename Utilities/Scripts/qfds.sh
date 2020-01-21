@@ -6,8 +6,6 @@
 #*** environment variables used by the bots
 # BACKGROUND_PROG  - defines location of background program
 #                    ( if the 'none' queue is also specified)
-# SCRIPTFILES      - outputs the name of the script file to $SCRIPTFILES
-#                    ( used to kill jobs )
 
 # ---------------------------- stop_fds_if_requested ----------------------------------
 
@@ -120,7 +118,11 @@ function usage {
   echo " -s   - stop job"
   echo " -S   - use startup files to set the environment, do not load modules"
   echo " -r   - append trace flag to the mpiexec call generated"
-  echo " -R   - select resource manager. Currently only responds to input 'SLURM', with default TORQUE, but allows for future expansion"
+  echo " -R   - select resource manager. [default: $RESOURCE_MANAGER ]"
+  echo "        this parameter may also be set by adding"
+  echo "        export RESOURCE_MANAGER TORQUE or"
+  echo "        export RESOURCE_MANAGER SLURM"
+  echo "        to your startup file (usually .bashrc)"
   echo " -t   - used for timing studies, run a job alone on a node (reserving $NCORES_COMPUTENODE cores)"
   echo " -T type - run dv (development), db (debug), inspect, advise, or vtune version of fds"
   echo "           if -T is not specified then the release version of fds is used"
@@ -968,10 +970,6 @@ fi
 
 #*** run script
 
-chmod +x $scriptfile
-if [ "$SCRIPTFILES" != "" ]; then
-  echo $(basename "$scriptfile") >> $SCRIPTFILES
-fi
 $SLEEP
 $QSUB $scriptfile
 if [ "$queue" != "none" ]; then
