@@ -210,7 +210,9 @@ iinspectargs=
 vtuneresdir=
 vtuneargs=
 use_config=""
-RESOURCE_MANAGER="TORQUE"
+if [ "$RESOURCE_MANAGER" != "SLURM" ]; then
+  RESOURCE_MANAGER="TORQUE"
+fi
 # the mac doesn't have Intel MPI
 if [ "`uname`" == "Darwin" ]; then
   use_intel_mpi=
