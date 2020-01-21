@@ -366,8 +366,8 @@ ALLOCATE(FN_ISOF(N_ISOF,NMESHES))
 ALLOCATE(LU_ISOF(N_ISOF,NMESHES))
 ALLOCATE(FN_ISOF2(N_ISOF,NMESHES))
 ALLOCATE(LU_ISOF2(N_ISOF,NMESHES))
-ALLOCATE(FN_SLCF(2*N_SLCF_MAX,NMESHES))
-ALLOCATE(LU_SLCF(2*N_SLCF_MAX,NMESHES))
+ALLOCATE(FN_SLCF(3*N_SLCF_MAX,NMESHES))
+ALLOCATE(LU_SLCF(3*N_SLCF_MAX,NMESHES))
 ALLOCATE(FN_SLCF_GEOM(N_SLCF_MAX,NMESHES))
 ALLOCATE(LU_SLCF_GEOM(N_SLCF_MAX,NMESHES))
 ALLOCATE(FN_GEOM(1)) ! later each geometry group may have a separate file
@@ -450,14 +450,16 @@ MESH_LOOP: DO NM=1,NMESHES
    ! Slice Files
 
    DO N=1,M%N_SLCF
-      LU_SLCF(N,NM) = GET_FILE_NUMBER()
-      LU_SLCF_GEOM(N,NM) = GET_FILE_NUMBER()
-      LU_SLCF(N+N_SLCF_MAX,NM) = GET_FILE_NUMBER()
+      LU_SLCF(N,NM)              = GET_FILE_NUMBER() ! slice file
+      LU_SLCF_GEOM(N,NM)         = GET_FILE_NUMBER()
+      LU_SLCF(N+N_SLCF_MAX,NM)   = GET_FILE_NUMBER() ! bounds for slice file
+      LU_SLCF(N+2*N_SLCF_MAX,NM) = GET_FILE_NUMBER() ! run length encoded slice file
       IF (M%N_SLCF <100) CFORM = '(A,A,I4.4,A,I2.2,A)'
       IF (M%N_SLCF>=100) CFORM = '(A,A,I4.4,A,I3.3,A)'
       WRITE(FN_SLCF(N,NM),CFORM) TRIM(CHID),'_',NM,'_',N,'.sf'
       WRITE(FN_SLCF_GEOM(N,NM),CFORM) TRIM(CHID),'_',NM,'_',N,'.gsf'
       WRITE(FN_SLCF(N+N_SLCF_MAX,NM),CFORM) TRIM(CHID),'_',NM,'_',N,'.sf.bnd'
+      WRITE(FN_SLCF(N+2*N_SLCF_MAX,NM),CFORM) TRIM(CHID),'_',NM,'_',N,'.sf.rle'
    ENDDO
 
    ! Radiation Files
@@ -1019,13 +1021,27 @@ DO N=1,M%N_SLCF
 
    ! write out slice file info to .sf files
 
-      OPEN(LU_SLCF(N,NM),FILE=FN_SLCF(N,NM),FORM='UNFORMATTED',STATUS='REPLACE')
-      OPEN(LU_SLCF(N+N_SLCF_MAX,NM),FILE=FN_SLCF(N + N_SLCF_MAX,NM),FORM='FORMATTED',STATUS='REPLACE')
+      OPEN(LU_SLCF(N,NM),             FILE=FN_SLCF(N,NM),               FORM='UNFORMATTED',STATUS='REPLACE')
+      OPEN(LU_SLCF(N+N_SLCF_MAX,NM),  FILE=FN_SLCF(N + N_SLCF_MAX,NM),  FORM='FORMATTED',  STATUS='REPLACE')
       WRITE(LU_SLCF(N,NM)) SL%SMOKEVIEW_LABEL(1:30)
       WRITE(LU_SLCF(N,NM)) SL%SMOKEVIEW_BAR_LABEL(1:30)
       WRITE(LU_SLCF(N,NM)) OUTPUT_QUANTITY(SL%INDEX)%UNITS(1:30)
+      IF (SL%RLE) THEN
+         OPEN(LU_SLCF(N+2*N_SLCF_MAX,NM),FILE=FN_SLCF(N + 2*N_SLCF_MAX,NM),FORM='UNFORMATTED',STATUS='REPLACE')
+
+  ! endian
+  ! completion (0/1)
+  ! fileversion (compressed format)
+  ! version_local  (slicef version)
+  ! global min max (used to perform conversion)
+  ! i1,i2,j1,j2,k1,k2
+         WRITE(LU_SLCF(N+2*N_SLCF_MAX,NM))1                       ! endian
+         WRITE(LU_SLCF(N+2*N_SLCF_MAX,NM))1,1,1                   ! completion, file version, slice version
+         WRITE(LU_SLCF(N+2*N_SLCF_MAX,NM))SL%VAL_MIN,SL%VAL_MAX   ! global min, global max
+      ENDIF
       IF (.NOT.SL%TERRAIN_SLICE) THEN
-         WRITE(LU_SLCF(N,NM)) SL%I1,SL%I2,SL%J1,SL%J2,SL%K1,SL%K2
+         WRITE(LU_SLCF(N,NM))              SL%I1,SL%I2,SL%J1,SL%J2,SL%K1,SL%K2
+         IF(SL%RLE)WRITE(LU_SLCF(N+2*N_SLCF_MAX,NM)) SL%I1,SL%I2,SL%J1,SL%J2,SL%K1,SL%K2
          WRITE(SLICEPARMS,'(A,I6,I6,I6,I6,I6,I6)') ' &',SL%I1,SL%I2,SL%J1,SL%J2,SL%K1,SL%K2
       ELSE
          NTSL = NTSL + 1
@@ -1033,7 +1049,11 @@ DO N=1,M%N_SLCF
          IF (SL%I2 == IBP1) M%K_AGL_SLICE(IBP1,SL%J1:SL%J2,NTSL) = M%K_AGL_SLICE(IBP1-1,SL%J1:SL%J2,NTSL)
          IF (SL%J1 == 0)    M%K_AGL_SLICE(SL%I1:SL%I2,0,NTSL)    = M%K_AGL_SLICE(SL%I1:SL%I2,1,NTSL)
          IF (SL%J2 == JBP1) M%K_AGL_SLICE(SL%I1:SL%I2,JBP1,NTSL) = M%K_AGL_SLICE(SL%I1:SL%I2,JBP1-1,NTSL)
-         WRITE(LU_SLCF(N,NM)) SL%I1,SL%I2,SL%J1,SL%J2,M%K_AGL_SLICE(SL%I1,SL%J1,NTSL),M%K_AGL_SLICE(SL%I1,SL%J1,NTSL)
+         WRITE(LU_SLCF(N,NM))              SL%I1,SL%I2,SL%J1,SL%J2,M%K_AGL_SLICE(SL%I1,SL%J1,NTSL),M%K_AGL_SLICE(SL%I1,SL%J1,NTSL)
+         IF (SL%RLE) THEN
+            WRITE(LU_SLCF(N+2*N_SLCF_MAX,NM)) SL%I1,SL%I2,SL%J1,SL%J2,&
+                                              M%K_AGL_SLICE(SL%I1,SL%J1,NTSL),M%K_AGL_SLICE(SL%I1,SL%J1,NTSL)
+         ENDIF
          WRITE(SLICEPARMS,'(A,I6,I6,I6,I6,I6,I6)') ' &',SL%I1,SL%I2,SL%J1,SL%J2,&
                             M%K_AGL_SLICE(SL%I1,SL%J1,NTSL),M%K_AGL_SLICE(SL%I1,SL%J1,NTSL)
       ENDIF
@@ -1091,6 +1111,7 @@ DO N=1,M%N_SLCF
 
       CLOSE(LU_SLCF(N,NM))
       CLOSE(LU_SLCF(N+N_SLCF_MAX,NM))
+      IF(SL%RLE)CLOSE(LU_SLCF(N+2*N_SLCF_MAX,NM))
    ENDIF
 ENDDO
 
@@ -5004,7 +5025,7 @@ USE TRAN, ONLY : GET_IJK
 INTEGER, INTENT(IN) :: NM,IFRMT
 REAL(EB), INTENT(IN) :: T,DT
 REAL(EB) :: BSUM,TT
-INTEGER :: I,J,K,NQT,I1,I2,J1,J2,K1,K2,ITM,ITM1,IQ,IQ2,IQQ,IND,IND2,II1,II2,JJ1,JJ2,KK1,KK2, &
+INTEGER :: I,J,K,NQT,I1,I2,J1,J2,K1,K2,ITM,ITM1,IQ,IQ2,IQ3,IQQ,IND,IND2,II1,II2,JJ1,JJ2,KK1,KK2, &
            IC,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,PROP_INDEX,REAC_INDEX,MATL_INDEX,NOM,IIO,JJO,KKO
 INTEGER :: KTS,NTSL
 REAL(EB), POINTER, DIMENSION(:,:,:) :: B,S,QUANTITY
@@ -5013,6 +5034,9 @@ REAL(FB) :: ZERO,STIME
 LOGICAL :: PLOT3D,SLCF3D
 LOGICAL :: AGL_TERRAIN_SLICE,CC_CELL_CENTERED,CC_FACE_CENTERED
 REAL(FB) :: SLICE_MIN, SLICE_MAX
+INTEGER :: NX, NY, NZ
+INTEGER :: IFACT, JFACT, KFACT
+REAL(FB), ALLOCATABLE, DIMENSION(:) :: QQ_PACK
 
 ! Return if there are no slices to process and this is not a Plot3D dump
 
@@ -5266,6 +5290,34 @@ QUANTITY_LOOP: DO IQ=1,NQT
          WRITE(LU_SLCF(IQ,NM)) STIME
          WRITE(LU_SLCF(IQ,NM)) (((QQ(I,J,K,1),I=I1,I2),J=J1,J2),K=K1,K2)
          CLOSE(LU_SLCF(IQ,NM))
+
+         IF (SL%RLE) THEN
+            IQ3 = IQ + 2*N_SLCF_MAX
+            OPEN(LU_SLCF(IQ3,NM),FILE=FN_SLCF(IQ3,NM),FORM='UNFORMATTED',STATUS='OLD',POSITION='APPEND')
+            NX = I2 + 1 - I1
+            NY = J2 + 1 - J1
+            NZ = K2 + 1 - K1
+            IF (NX*NY*NZ>0) THEN
+               ALLOCATE(QQ_PACK(NX*NY*NZ))
+              ! QQ_PACK = PACK(QQ(I1:I2,J1:J2,K1:K2,1),MASK=.TRUE.)
+
+!    #define IJK(i,j,k) ((i)*ny*nz + (j)*nz +(k)) how C/C++ expects to see the data  
+               DO K = K1, K2
+                  KFACT = (K-K1)
+                  DO J = J1, J2
+                     JFACT = (J-J1)*NZ
+                     DO I = I1, I2
+                        IFACT = (I - I1)*NY*NZ
+                        QQ_PACK(1+IFACT+JFACT+KFACT) = QQ(I,J,K,1)
+                     END DO
+                  END DO
+               END DO
+
+               CALL SLICE_TO_RLEFILE(LU_SLCF(IQ3,NM), STIME, NX, NY, NZ, QQ_PACK, SL%VAL_MIN, SL%VAL_MAX)
+               DEALLOCATE(QQ_PACK)
+            ENDIF
+            CLOSE(LU_SLCF(IQ3,NM))
+         ENDIF
 
          SLICE_MIN = QQ(I1,J1,K1,1)
          SLICE_MAX = SLICE_MIN
@@ -9247,6 +9299,8 @@ IF (ANY(EVACUATION_ONLY)) THEN
          IF (OPN) FLUSH(LU_SLCF(N,NM))
          INQUIRE(UNIT=LU_SLCF(N+N_SLCF_MAX,NM),OPENED=OPN)
          IF (OPN) FLUSH(LU_SLCF(N+N_SLCF_MAX,NM))
+         INQUIRE(UNIT=LU_SLCF(N+2*N_SLCF_MAX,NM),OPENED=OPN)
+         IF (OPN) FLUSH(LU_SLCF(N+2*N_SLCF_MAX,NM))
       ENDDO
    ENDDO
 
@@ -9278,6 +9332,8 @@ DO N=1,MESHES(NM)%N_SLCF
    IF (OPN) FLUSH(LU_SLCF(N,NM))
    INQUIRE(UNIT=LU_SLCF(N+N_SLCF_MAX,NM),OPENED=OPN)
    IF (OPN) FLUSH(LU_SLCF(N+N_SLCF_MAX,NM))
+   INQUIRE(UNIT=LU_SLCF(N+2*N_SLCF_MAX,NM),OPENED=OPN)
+   IF (OPN) FLUSH(LU_SLCF(N+2*N_SLCF_MAX,NM))
 ENDDO
 
 DO N=1,N_ISOF
