@@ -27076,14 +27076,14 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             ADDMAT = 0._EB;
             SELECT CASE(ABS(VT%IOR))
             CASE(IAXIS)
-               ADDMAT(IAXIS,LOW_IND)  = -DX(VT%I1)
-               ADDMAT(IAXIS,HIGH_IND) =  DX(VT%I2)
+               ADDMAT(IAXIS,LOW_IND)  = -(XF_MAX-XS_MIN) ! -DX(VT%I1) Set normal size to 2 times domain size.
+               ADDMAT(IAXIS,HIGH_IND) =  (XF_MAX-XS_MIN) !  DX(VT%I2)
             CASE(JAXIS)
-               ADDMAT(JAXIS,LOW_IND)  = -DY(VT%J1)
-               ADDMAT(JAXIS,HIGH_IND) =  DY(VT%J2)
+               ADDMAT(JAXIS,LOW_IND)  = -(YF_MAX-YS_MIN) ! -DY(VT%J1)
+               ADDMAT(JAXIS,HIGH_IND) =  (YF_MAX-YS_MIN) !  DY(VT%J2)
             CASE(KAXIS)
-               ADDMAT(KAXIS,LOW_IND)  = -DZ(VT%K1)
-               ADDMAT(KAXIS,HIGH_IND) =  DZ(VT%K2)
+               ADDMAT(KAXIS,LOW_IND)  = -(ZF_MAX-ZS_MIN) ! -DZ(VT%K1)
+               ADDMAT(KAXIS,HIGH_IND) =  (ZF_MAX-ZS_MIN) !  DZ(VT%K2)
             END SELECT
             IF(MESHES(NM)%CFACE(CFACE_INDEX_LOCAL)%X < X(VT%I1)+ADDMAT(IAXIS,LOW_IND )) CYCLE
             IF(MESHES(NM)%CFACE(CFACE_INDEX_LOCAL)%X > X(VT%I2)+ADDMAT(IAXIS,HIGH_IND)) CYCLE
