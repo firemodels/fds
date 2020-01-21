@@ -5475,6 +5475,19 @@ Aerosol particles will, over time, collide with one another and stick together t
 
 Water sprays can remove aerosols from the air. For example, rain can lower the concentrations pollen and other particulates in the air. This behavior can be modeled with FDS by setting {\ct AEROSOL\_SCRUBBING=.TRUE.} on {\ct MISC}. Setting this turns on an aerosol scrubbing model that removes aerosols from the gas phase. Once removed the mass is no longer tracked; i.e. the scrubbing model simply acts as a sink for aerosols.
 
+\section{Special Topic: Vapor Condensation}
+\label{info:condensation}
+
+If a species with liquid properties, e.g. {\ct WATER VAPOR}, is defined with {\ct AEROSOL=.TRUE.}, then FDS will predict condensation for that species. FDS creates a second species called {\ct ID\_COND}. For example if the species is {\ct WATER VAPOR}, then the second species will be called {\ct WATER VAPOR\_COND}. This second species will be an aerosol species that tracks the condensed phase. The particle diameter for the condensed vapor is given by {\ct MEAN\_DIAMETER}, the condensed species specific heat will use the {\ct SPECIFIC\_HEAT\_LIQUID} liquid values, and the particle density will use {\ct DENSITY\_LIQUID} rather than {\ct DENSITY\_SOLID}. The initial mass fraction of condensed phase can be defined with {\ct MASS\_FRACTION\_COND\_0}. For example, the input below defines {\ct WATER VAPOR} as a condensable species with an initial vapor mass fraction of 0.1 and an initial condensate mass fraction of 0.05.
+
+
+\begin{lstlisting}
+&SPEC ID='WATER VAPOR', AEROSOL=.TRUE.,MEAN_DIAMETER=1.E-6,
+      MASS_FRRACTION_0=0.1,MASS_FRACTION_COND=0.05/
+\end{lstlisting}
+
+Condensation can occur in both gas cells and on wall cells. The heat transfer to a wall due to condensation can be output with the {\ct QUANTITY} of {\ct CONDENSATION HEAT FLUX}. The amount of vapor that condenses can be output with the {\ct QUANTITY} of {\ct SURFACE DEPOSITION} using the condensed phase {\ct SPEC\_ID}.
+
 \chapter{Radiation}
 
 \section{Basic Radiation Parameters: The \texorpdfstring{{\tt RADI}}{RADI} Namelist Group}
@@ -9185,6 +9198,7 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct CONDUCTIVITY}                              & Thermal conductivity                          & \si{W/(m.K)}   & D,I,P,S      \\ \hline
 {\ct CONTROL}                                   & Section~\ref{info:CTRL}                       &                & D            \\ \hline
 {\ct CONTROL VALUE}                             & Section~\ref{info:CTRL}                       &                & D            \\ \hline
+{\ct CONDENSATION HEAT FLUX}                    & Section~\ref{info:condensation}               & kW/m$^2$       & B,D          \\ \hline
 {\ct CONVECTIVE HEAT FLUX}                      & Section~\ref{info:heat_flux}                  & kW/m$^2$       & B,D          \\ \hline
 {\ct CPUA}$^2$                                  & Section~\ref{info:part_output}                & kW/m$^2$       & B,D          \\ \hline
 {\ct CPUA\_Z}$^1$                               & Section~\ref{info:part_output}                & kW/m$^2$       & B,D          \\ \hline
@@ -9431,40 +9445,42 @@ $^6$                 \> Requires {\ct REAC\_ID}.
 \section{Summary of HVAC Output Quantities}
 \label{info:hvacoutputquantities}
 
-Table~\ref{tab:hvacoutput} summarizes the various Output Quantities for HVAC systems.  Quantities for a duct require the specification
-of a {\ct DUCT\_ID}, and quantities for a node require the specification of a {\ct NODE\_ID}.  Mass and volume fraction outputs also require the specification of a {\ct SPEC\_ID}.
+Table~\ref{tab:hvacoutput} summarizes the various Output Quantities for HVAC systems.  HVAC output quantities do not require an {\ct XYZ} or {\ct XB}. Quantities for a duct require the specification 
+of a {\ct DUCT\_ID}, and quantities for a node require the specification of a {\ct NODE\_ID}.  Mass and volume fraction outputs also require the specification of a {\ct SPEC\_ID}. Fan
+ and aircoil outputs require the {\ct DUCT\_ID} of the duct they are located in. Filter outputs require the {\ct NODE\_ID} of the node they are located in. The quantity {\ct NODE PRESSSURE DIFFERENCE} requires that one specify both elements of the array {\ct NODE\_ID}, and the pressure difference is calculated by subtracting the first node from the second.
+ Note that HVAC output quantities can only be used with a {\ct DEVC}.
 
-\begin{longtable}{|l|l|l|@{\extracolsep{\fill}}}
+\begin{longtable}{|l|l|l|l|@{\extracolsep{\fill}}}
 \caption[HVAC output quantities]{Summary of HVAC output quantities.}
 \label{tab:hvacoutput} \\
 \hline
-{\ct QUANTITY}                                  & Symbol                                    & Units           \\
+{\ct QUANTITY}                                  & Symbol                                    & Units            & File Type   \\
 \hline \hline
 \endfirsthead
 \caption[]{Summary of HVAC output quantities (continued).} \\
 \hline
-{\ct QUANTITY}                                  & Symbol                                    & Units           \\
+{\ct QUANTITY}                                  & Symbol                                    & Units            & File Type   \\
 \hline \hline
 \endhead
-{\ct AIRCOIL HEAT EXCHANGE}                     & Heat exchange rate for an aircoil         &  kW                   \\ \hline
-{\ct DUCT DENSITY}                              & Density of the flow in a duct             &  kg/m$^3$             \\ \hline
-{\ct DUCT ENERGY FLOW}                          & Energy flow in a duct                     &  kW                   \\ \hline
-{\ct DUCT MASS FLOW}                            & Mass flow in a duct                       &  kg/s                 \\ \hline
-{\ct DUCT MASS FRACTION}                        & Mass fraction of a species in a duct      &  kg/kg                \\ \hline
-{\ct DUCT TEMPERATURE}                          & Temperature of the flow in a duct         & $^\circ$C             \\ \hline
-{\ct DUCT VELOCITY}                             & Velocity of a duct                        &  m/s                  \\ \hline
-{\ct DUCT VOLUME FLOW}                          & Volumetric flow in a duct                 &  m$^3$/s              \\ \hline
-{\ct DUCT VOLUME FRACTION}                      & Volume fraction of a species in a duct    &  mol/mol              \\ \hline
-{\ct FAN PRESSURE}                              & Pressure output of a fan in a duct        &  Pa                   \\ \hline
-{\ct FILTER LOADING}                            & Loading of a species in a filter          &  kg                   \\ \hline
-{\ct FILTER LOSS}                               & Flow loss through a filter                &                       \\ \hline
-{\ct NODE DENSITY}                              & Density of the flow through a node        &  kg/m$^3$             \\ \hline
-{\ct NODE ENTHALPY}                             & Enthalpy of a node                        &  kJ/kg                \\ \hline
-{\ct NODE MASS FRACTION}                        & Mass fraction of a species in a node      &  kg/kg                \\ \hline
-{\ct NODE PRESSURE}                             & Pressure of a node                        &       Pa              \\ \hline
-{\ct NODE PRESSURE DIFFERENCE}                  & Pressure difference between two nodes     &       Pa              \\ \hline
-{\ct NODE TEMPERATURE}                          & Temperature of the flow though a node     & $^\circ$C             \\ \hline
-{\ct NODE VOLUME FRACTION}                      & Volume fraction of a species in a node    &  mol/mol              \\ \hline
+{\ct AIRCOIL HEAT EXCHANGE}                     & Heat exchange rate for an aircoil         &  kW                & D   \\ \hline
+{\ct DUCT DENSITY}                              & Density of the flow in a duct             &  kg/m$^3$          & D   \\ \hline
+{\ct DUCT ENERGY FLOW}                          & Energy flow in a duct                     &  kW                & D   \\ \hline
+{\ct DUCT MASS FLOW}                            & Mass flow in a duct                       &  kg/s              & D   \\ \hline
+{\ct DUCT MASS FRACTION}                        & Mass fraction of a species in a duct      &  kg/kg             & D   \\ \hline
+{\ct DUCT TEMPERATURE}                          & Temperature of the flow in a duct         & $^\circ$C          & D   \\ \hline
+{\ct DUCT VELOCITY}                             & Velocity of a duct                        &  m/s               & D   \\ \hline
+{\ct DUCT VOLUME FLOW}                          & Volumetric flow in a duct                 &  m$^3$/s           & D   \\ \hline
+{\ct DUCT VOLUME FRACTION}                      & Volume fraction of a species in a duct    &  mol/mol           & D   \\ \hline
+{\ct FAN PRESSURE}                              & Pressure output of a fan in a duct        &  Pa                & D   \\ \hline
+{\ct FILTER LOADING}                            & Loading of a species in a filter          &  kg                & D   \\ \hline
+{\ct FILTER LOSS}                               & Flow loss through a filter                &                    & D   \\ \hline
+{\ct NODE DENSITY}                              & Density of the flow through a node        &  kg/m$^3$          & D   \\ \hline
+{\ct NODE ENTHALPY}                             & Enthalpy of a node                        &  kJ/kg             & D   \\ \hline
+{\ct NODE MASS FRACTION}                        & Mass fraction of a species in a node      &  kg/kg             & D   \\ \hline
+{\ct NODE PRESSURE}                             & Pressure of a node                        &       Pa           & D   \\ \hline
+{\ct NODE PRESSURE DIFFERENCE}                  & Pressure difference between two nodes     &       Pa           & D   \\ \hline
+{\ct NODE TEMPERATURE}                          & Temperature of the flow though a node     & $^\circ$C          & D   \\ \hline
+{\ct NODE VOLUME FRACTION}                      & Volume fraction of a species in a node    &  mol/mol           & D   \\ \hline
 \end{longtable}
 
 
@@ -10785,6 +10801,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MASS\_EXTINCTION\_COEFFICIENT} & Real              & Section~\ref{info:alternative_smoke}    &                   & 0             \\ \hline
 {\ct MASS\_FRACTION(:)}             & Real Array        & Section~\ref{info:lumped}               &                   & 0             \\ \hline
 {\ct MASS\_FRACTION\_0}             & Real              & Section~\ref{info:SPEC_Basics}          &                   & 0             \\ \hline
+{\ct MASS\_FRACTION\_COND\_0}       & Real              & Section~\ref{info:condensation}         &                   & 0             \\ \hline
 {\ct MAX\_DIAMETER}                 & Real              & Section~\ref{info:agglomeration}        &    m              &               \\ \hline
 {\ct MEAN\_DIAMETER}                & Real              & Section~\ref{info:deposition}           & m                 & 1.E-6         \\ \hline
 {\ct MELTING\_TEMPERATURE}          & Real              & Section~\ref{thermal_part_props}        & $^\circ$C         &               \\ \hline

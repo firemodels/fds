@@ -1336,6 +1336,44 @@ SDC39     &  Mattress     &  Bedroom        &  200              &  180         &
 
 \FloatBarrier
 
+\section{NIST Soot Deposition Gauge}
+\label{NIST_SDG_Description}
+
+A series of tests were performed as part of an effort to develop a gauge capable of making real time measurements of soot deposition \cite{NIST_SDG}. The test apparatus consisted of a hot plate and cold plate measuring 8 cm wide by 41~cm long and separated by 1~cm. The hot plate was electrically heated and the cold plate was water cooled. A laminar diffusion flame burner using propene as the fuel was used to generate soot. A portion of the effluent from the burner was sent through the test apparatus. In addition to tests using the new gauge, a series of gravimetric tests were performed using 47~mm diameter pieces of aluminum foil attached to the cold plate in four locations. Tests with the aluminum foil used nominal flowrates of 2.5, 5.0, and 10.0 SLPM and nominal temperature differences of 100~$^{\circ}$C and 200~$^{\circ}$C. The test channel was mounted vertically to avoid gravitational settling and with the laminar flow speeds the device essentially creates only thermophoretic deposition. Four replicate tests were performed for the 2.5 and 5.0 SLPM flowrates and three for the 10.0 SLPM flowrate. A summary of the 22 tests modeled is given in the table below.
+
+\begin{table}[h!]
+	\caption{Experiment Details for Gravimetric Measurements of Soot Deposition}
+	\begin{center}
+		\begin{tabular}{|c|c|c|c|}
+			\hline
+		Test no. & Flow Speed & $\Delta$T & Inlet Soot Conc.  \\
+		         & (SLPM)     & (K)       & (mg/m$^3$)        \\ \hline \hline
+		1        & 2.5        &  94       &  67.6             \\ \hline
+		2        & 2.5        &  94       &  69.2             \\ \hline
+		3        & 2.5        &  96       &  64.2             \\ \hline
+		4        & 2.5        &  96       &  64.2             \\ \hline
+		5        & 5.0        &  96       &  65.5             \\ \hline
+		6        & 5.0        &  95       &  62.7             \\ \hline
+		7        & 5.0        &  92       &  61.9             \\ \hline
+		8        & 5.0        &  94       &  68.4             \\ \hline
+		9        & 10.0       &  97       &  25.9             \\ \hline
+		10       & 10.0       &  98       &  27.4             \\ \hline
+		11       & 10.0       &  99       &  25.5             \\ \hline
+		12       & 2.5        &  187      &  60.2             \\ \hline
+		13       & 2.5        &  190      &  61.5             \\ \hline
+		14       & 2.5        &  189      &  64.2             \\ \hline
+		15       & 2.5        &  187      &  59.1             \\ \hline
+		16       & 5.0        &  188      &  59.7             \\ \hline
+		17       & 5.0        &  186      &  58.5             \\ \hline
+		18       & 5.0        &  187      &  60.7             \\ \hline
+		19       & 5.0        &  187      &  55.5             \\ \hline
+		20       & 10.0       &  191      &  23.5             \\ \hline
+		22       & 10.0       &  188      &  24.4             \\ \hline
+		21       & 10.0       &  189      &  22.6             \\ \hline
+		\end{tabular}
+	\end{center}
+	\label{tab:NIST_SDG}
+\end{table}
 
 \section{NIST Vent Study}
 \label{NIST_Vent_Description}
@@ -1530,6 +1568,32 @@ centerline of the room, and two horizontal arrays located 8.4~cm above the floor
 \label{Sandia_Plume_Description}
 
 The Fire Laboratory for Accreditation of Models by Experimentation (FLAME) facility \cite{OHern:2005,Blanchat:2001} at Sandia National Laboratories in Albuquerque, New Mexico, is designed specifically for validating models of buoyant fire plumes.  The plume source is 1 m in diameter surrounded by a 0.5 m steel `ground plane'. PIV/PLIF techniques are used to obtain instantaneous joint scalar and velocity fields.  O'Hern et al.~\cite{OHern:2005} studied a turbulent buoyant helium plume in the FLAME facility. Earlier work to model this experiment has been performed by DesJardin et al.~\cite{DesJardin:2004}. Tieszen et al.~\cite{Tieszen:2004,Tieszen:2002} studied methane and hydrogen pool fires.
+
+\section{SETCOM Wall Condensation Experiments}
+\label{SETCOM_Cond_Description}
+The Separate Effect Test for Condensation Modeling (SETCOM) facility is located in J\"{u}lich, Germany \cite{setcom_cfd}. The facility is a recirculating duct containing a flow conditioning section for establishing temperature and humidity and a test section for performing condensation experiments. The condensation section contains a 4~m or 5~m long, water-cooled, aluminum plate for its floor with the remaining walls adiabatic. The condensation section can be tilted from horizontal to vertical to investigate the effects of orientation on condensation. A set of five experiments were performed using the 4~m test section that measured the condensation heat flux from hot, high humidity air. Temperature, humidity, and flow rate were varied. 
+
+\subsection{Modeling notes}
+Prior to running the validation cases, a set of five scoping simulations were run with no condensation. These simulations used a short length of the test section with {\ct PERIODIC} boundary conditions. These cases were used to determine the rms velocity as a function of the mean velocity. 
+
+The condensation simulations included a 4~m portion of duct upstream to allow for flow development, and a 1 m portion of duct downstream to avoid boundary effects on the test section. The upstream boundary condition was set with the conditions shown in the table below along with synthetic eddy method inputs using the rms velocity determine from the scoping simulations. The outlet was defined as an {\ct OPEN} boundary. The experiments measured temperature 1.5~cm into the aluminum plate along the plate centerline. The test measured condensation heat transfer was used with the inside plate temperature to derive the plate surface temperature. The condensation plate {\ct TMP\_FRONT} was set to derived temperature as a function of length along the plate.
+
+\begin{table}[h]
+	\caption{Summary of SETCOM condensation experiments selected for model validation.}
+	\begin{center}
+		\begin{tabular}{|c|c|c|c|}
+			\hline
+			Test      &  Air Speed        &  Temperature          &  Humidity             \\
+			No.       &  (m/s)            &  ($^{\circ}$C)        &  (\%)                 \\ \hline \hline
+			1         &  0.8              &  86                   &  69                   \\ \hline
+			2         &  1.8              &  84                   &  57                   \\ \hline
+			3         &  3.7              &  79                   &  59                   \\ \hline
+			4         &  4.2              &  78                   &  71                   \\ \hline
+			5         &  5.2              &  75                   &  71                   \\ \hline
+		\end{tabular}
+	\end{center}
+	\label{SETCOM_condensation_Summary}
+\end{table}
 
 \section{Sippola Aerosol Deposition Experiments}
 \label{Sippola_Aerosol_Deposition_Description}

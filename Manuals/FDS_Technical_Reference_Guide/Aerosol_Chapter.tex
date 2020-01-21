@@ -1,0 +1,243 @@
+%!TEX root = FDS_Technical_Reference_Guide.tex
+
+\typeout{new file: Solid_Chapter.tex}
+
+\chapter{Aerosols} \label{Aerosols}
+\label{chapter:aerosol}
+
+A gas species in FDS can be defined as an aerosol species. This enables a series of aerosol behaviors that includes deposition, settling, spray scrubbing, and condensation (for liquid aerosols). This chapter describes the aerosol behaviors in FDS.
+
+\section{Aerosol Deposition}
+
+By default, FDS assumes that soot is transported just like all other gaseous species. That is, the soot particles are small enough that their settling velocity is small compared to the fire-driven flows of the gas containing the soot. Near surfaces, however, other mechanisms can affect the soot, which results in its deposition onto surfaces. The removal of soot via deposition can impact the visibility for egress and the time for smoke detectors to activate. In forensic fire reconstructions, the amount of soot deposited on surfaces can be correlated to post-fire observations. The deposition of particulates is also important for computing the dispersion characteristics of aerosol toxicants like ash, radionuclides, or other particulate matter.
+
+However, there is an option to treat any gas phase species as an aerosol that can be deposited on surfaces. Aerosol deposition is determined by applying an empirical deposition velocity to aerosols near surfaces. There are a number of phenomena that cause deposition: thermophoresis (where temperature gradients push the aerosol towards or away from the surface), gravitational settling, diffusive deposition (where the aerosols move along the boundary layer concentration
+gradient), and turbulent deposition (essentially impact deposition due to a turbulent boundary layer). Other phenomena, such as electrical fields, can also result in deposition but are not considered in FDS due to their relatively small contribution in compartment fire scenarios.
+
+The total aerosol deposition velocity to surfaces, $u_{\rm dep}$, is determined by assuming the deposition phenomena are independent, computing a deposition velocity for each mechanism, and then summing them~\cite{Bixler:1}
+\be
+u_{\rm dep} = u_{\rm g}+u_{\rm th}+u_{\rm dt}
+\ee
+where $u_{\rm g}$ is the gravitational settling velocity (for cells near upward-facing surfaces), $u_{\rm th}$ is the thermophoretic velocity, and $u_{\rm dt}$ is the combined diffusion-turbulence velocity. If the aerosol is located in a gas-phase cell adjacent to a wall, then the aerosol (represented by the subscript $\alpha$) is removed from the gas-phase and deposited onto the surface by imposing the following boundary condition
+\be
+\dot m_{\rm dep,\alpha}'' = \rho Y_\alpha \, u_{\rm dep}
+\ee
+Using this boundary condition, the aerosol surface density that accumulates on surfaces is tracked, and the amount
+of aerosol that deposits to a surface is removed from the adjacent gas-phase cell.
+Note that the subscript $\alpha$ refers to a species that contains soot or aerosol, whereas the subscript `a'
+in the remainder of the section refers to the condensed phase soot or aerosol properties, such as mass or density.
+
+\subsection{Gravitational Settling}
+
+The gravitational settling velocity is given by~\cite{Davies_Charles}
+\be
+u_{\rm g} = g m_{\rm a} \frac{\text{Cn}}{6 \pi \, \chi_{\rm d} \, \mu \, r_{\rm a}}
+\ee
+where $m_{\rm a}$ is the particle mass, $\chi_{\rm d}$ is a shape factor, $\mu$ is the dynamic viscosity of air,
+$r_a$ is the particle radius, and Cn is the Cunningham slip correction factor given by~\cite{Davies_Charles}
+\be
+\text{Cn} = 1 + 1.257 \; \text{Kn} + 0.4 \; \text{Kn} \; \mathrm{e}^{-1.1/\text{Kn}}
+\ee
+where Kn is the particle Knudsen number given by the ratio of the mean free path of the gas
+to the particle radius. Kn is computed as~\cite{Sippola:1}
+\be
+\text{Kn} = \frac{\lambda}{r_{\rm a}}
+\ee
+where $\lambda$ is the mean free path of gas molecules which is computed as~\cite{Jennings_S_G}
+\be
+\lambda = \mu_g \; \sqrt {\frac {\pi}{2 \; p \; \rho_g} }
+\ee
+For each aerosol species in the gas phase, a gravitational settling velocity is calculated
+and imposed on the convective term in the species transport
+equation~(Eq.~\ref{species}). This approach is similar to the drift flux model
+for smoke transport described in Hu et al.~\cite{Hu:1}. The gravitational settling velocity
+is also included in the total deposition velocity to deposit aerosols onto upward-facing flat surfaces,
+as described above.
+
+
+\subsection{Thermophoretic Deposition}
+
+The thermophoretic velocity is computed as
+\be
+u_{\rm th} = \frac{K_{\rm th} \nu}{T_{\rm g}} \; \frac{\d T}{\d x}
+\ee
+This requires the wall temperature gradient, which is only resolved in a DNS simulation.
+For an LES simulation, the temperature gradient is computed from the wall heat transfer coefficient.
+\be
+\frac{\d T}{\d x} = \frac{h \left( T_{\rm g} - T_{\rm w} \right)}{k_{\rm g}}
+\ee
+$K_{\rm th}$ is the thermophoretic velocity coefficient and is calculated using the following correlation~\cite{Brock:1}
+\be
+K_{\rm th} = \frac{2 \, C_{\rm s} \left(\alpha + C_{\rm t} \; \text{Kn} \right) \; \text{Cn}}{\left(1 + 3 \, C_{\rm m} \; \text{Kn} \right) \left(1 + 2 \, \alpha + 2 \, C_{\rm t} \, \text{Kn} \right) }
+\ee
+where $C_{\rm s}=1.17$ is the thermal slip coefficient, $\alpha$ is the ratio of the gas
+conductivity to the particle conductivity, $C_{\rm m}=1.14$ is the momentum accommodation
+coefficient, and $C_{\rm t}=2.18$ is the thermal accommodation coefficient.
+
+For each aerosol species in the gas phase, a thermophoretic velocity is calculated and imposed on the convective term in the species transport equation~(Eq.~\ref{species}). This approach follows the drift flux model
+for smoke transport described in Hu et al.~\cite{Hu:1}.
+
+\subsection{Turbulent Deposition}
+
+The diffusion-turbulence deposition velocity depends upon the flow regime
+(diffusion, diffusion-impaction, or inertia-moderated). The deposition velocity
+for these regimes is given below~\cite{McCoy_Hanratty}.
+\be
+u_{\rm dt} = \left\{ \begin{array}{r@{\quad \quad}l}
+	0.086 \; \text{Sc}^{-0.7} \; u_{\tau}        &  \tau^+ < 0.2 \\
+	3.5 \times 10^{-4} \; {\tau^+}^2 \; u_{\tau} &  0.2 < \tau^+ < 22.9 \\
+	0.17 \; u_{\tau}                             &  \tau^+ > 22.9
+\end{array} \right.
+\ee
+where Sc is the particle Schmidt number, or the ratio of the kinematic viscosity to the
+Brownian diffusion coefficient of the particle ($\nu/D_{\rm B}$), $u_{\tau}$ is the wall friction velocity
+computed by the wall model, and $\tau^+$ is the dimensionless stopping distance given by~\cite{Ludwig_ICONE}
+\be
+\tau^+=\frac{\rho_{\rm a} \, (2 r_{\rm a})^2}{18 \, \mu^2}  \; u_{\tau}^2 \; \rho_{\rm g}
+\ee
+
+\newpage
+\section{Aerosol Agglomeration}
+
+Agglomeration is the process via which small aerosol particles become larger aerosol particles due to collisions that cause the smaller particles to stick together and become larger particles. The FDS implemenation of aerosol agglomeration is based on the agglomeration model in VICTORIA~\cite{NRC:VICTORIA}, a US NRC software package for modeling radioactive aerosol transport during severe accidents. The agglomeration mechanisms in FDS include Brownian, graviational, and turbulent (sheer and inertial). The agglomeration is governed by the equation below.
+\be
+\frac{\d N}{\d t} = \frac{1}{2} \int_{0}^{m} \Phi (\omega,m-\omega) N(\omega) N(m-\omega) \d \omega - N(m) \int_{0}^{\infty} \Phi (\omega,m) N(\omega) \d \omega - R(m) + S(m)
+\ee
+In the above equation $\Phi$ is an agglomeration kernel, $N(m)$ is the number density of particles of size $m$, $R$ is a removal term (e.g. outflow, oxidation), and $S$ is a source term (e.g. from combustion). The equation states that the rate of formation of particles of size $m$ is the rate that two particles whose combined size is $m$ collide, minus the rate at which particles of size $m$ collide with other particles and become a larger size, minus removal of particles of size $m$, and plus the generation of particles of size $m$. The selected approach for solving the agglomeration equation is to bin the particle sizes into multiple bins and transform the integrals over particle size into summations over particle bins. By defining the maximum, $m_{max}$, and minimum, $m_{min}$, particle mass and the number of bins, $M$, one can define the average bin mass, $x$, as shown below~\cite{Higgins_Davidson}.
+\be
+s = \left( \frac{m_{max}}{m_{min}} \right) ^{1/M} \; , \; m_i =s \; m_{i-1} \; , \; x_i = \frac{2 m_i}{1+s}
+\ee
+Using this binning, the agglomeration equation becomes:
+\be
+\frac{\d N_i}{\d t} = \sum_{k=1}^{M} \sum_{j=k}^{M} \left( 1- \frac{1}{2} \delta_{j,k} \right) \eta \Phi(j,k) N_j N_k - N_i \sum_{k=1}^M \Phi(j,k) N_k - R_i + S_i
+\ee
+where $\eta$, shown below, is a function for apportioning mass between adjacent particle bins.
+\be
+\eta = \begin{cases}
+	\frac{x_{i+1}-m_i}{x_{i+1}-x_i} & x_i< m_i \leq x_{i+1} \\
+	\frac{m_i-x_{i-1}}{x_i-x_{i-1}} & x_{i-1}< m_i \leq x_i
+\end{cases}
+\ee
+The agglomeration kernel is given by the sum of the Brownian (Br), gravitational (Gr), shear (Sh), and inertial (In) agglomeration  terms.
+\be
+\Phi (m,\omega)= \Phi_{\rm Br}(m,\omega) + \Phi_{\rm Gr}(m,\omega) + \sqrt{\Phi_{\rm Sh}(m,\omega)^2 + \Phi_{\rm In}(m,\omega)^2}
+\ee
+Browian agglomeration occurs when the random walks of particles brings them into contact with one another. It is computed as~\cite{NRC:VICTORIA}:
+\be
+\Phi_{\rm Br}= 4 \pi k_{\rm b} T \left({\rm B} (m) + {\rm B} (\omega) \right) \left(r_m+r_{\omega} \right) {\rm Fu} (m,\omega)
+\ee
+where Fu is the Fuchs factor and B is the particle mobility.
+\be
+{\rm B}(m) = \frac {\rm Cn}{6 \pi \mu r_m}
+\ee
+\be \frac{1}{{\rm Fu}(m,\omega)} = \left( \epsilon_s \frac{r_m + r_{\omega}}{k_{\rm b} T \left({\rm B}(m) + {\rm B}(\omega) \right)} \sqrt {\frac{8 k_{\rm b} T}{\pi} \left(\frac{1}{m}+\frac{1}{\omega} \right)} \right)^{-1} +
+\left( 1+\frac{2 \sqrt{(\tilde{a}_m^2+\tilde{a}_{\omega}^2)}}{r_m+r_{\omega}} \right)^{-1}
+\ee
+\be
+\tilde{a}_m = \frac { \left(r_m + a_m \right)^3 - \left(r_m^2 + a_m^2 \right)^{3/2}} {3 r_m a_m} - r_m
+\ee
+\be
+a_m= {\rm B} (m) \sqrt{ \frac{2 k_{\rm b} T m} {\pi}}
+\ee
+Gravitational agglomeration results from heavier particle falling onto larger particles. The efficiency of these collisions are governed by a sticking factor, $\epsilon_{\rm S}$ assumed to be one, and a collision efficiency, $\epsilon_{\rm PK}$~\cite{NRC:VICTORIA}
+\be
+\Phi_{\rm Gr} (m,\omega) = \epsilon_{\rm S} \epsilon_{\rm PK}(m,\omega) \left(r_m+r_{\omega} \right)^2 \left| u_g(m)-u_g(\omega) \right|
+\ee
+\be
+\epsilon_{\rm PK}(m,\omega) = \frac {{\rm min} \left(r_m,r_{\omega} \right)^2}{2 \left( r_m+r_{\omega} \right)^2}
+\ee
+\be
+u_g(m) = g m {\rm B}(m)
+\ee
+Shear agglomeration results from particles of different speeds moving along streamlines that bring them into contact with one another~\cite{NRC:VICTORIA}.
+\be
+\Phi_{\rm Sh} (m,\omega) = \epsilon_{\rm S} \epsilon_{\rm PK}(m,\omega) \chi_{\rm C}^3 \left(r_m+r_{\omega} \right)^3 \sqrt{ \frac{8 \rho \pi \epsilon} {15 \mu} }
+\ee
+where $\chi_{\rm C}$ is a shape factor, assumed to be one, and $\epsilon$ is the turbulent kinetic energy dissipation rate.
+
+Inertial agglomeration results from particles departing from the flow streamlines due to their inertia and coming into contact with other particles~\cite{NRC:VICTORIA}.
+\be
+\Phi_{\rm In} (m,\omega) = \epsilon_{\rm S} \epsilon_{\rm PK}(m,\omega) \chi_{\rm C}^2 \left(r_m+r_{\omega} \right)^2 \left( \frac{512 \rho \pi^3 \epsilon^3} {15 \mu} \right) ^{1/4} \frac{\left| u_g(m)-u_g(\omega) \right|}{g}
+\ee
+
+\newpage
+\section{Aerosol Scrubbing}
+
+Scrubbing is the removal of aerosols from the gas phase. In FDS, aerosols can be scrubbed by water sprays. The correlations used to define the scrubbing efficiency are based on the containment spray scrubbing model in MELCOR~/ref{MELCOR}. The rate of aerosol scrubbing in a grid cell is based on the volume of the grid cell swept by a droplet over a timestep and the removal efficiency, $\epsilon$, for that droplet. The fraction of a grid cell's volume swept during a time step, $F$, is determined by the projected surface area of the droplet and its velocity: 
+\be
+F = \frac {\min \left(C \pi r^2_p (\delta x_i \delta y_j \delta z_k)^{2/3} \right) u_p \Delta t_p } {\delta x_i \delta y_j \delta z_k}
+\ee
+where $r_p$ is the droplet radius, $C$ is the weighting factor for the droplet, $u_p$ is the droplet velocity, and $\Delta t_p$ is the time step for the current path segment of the droplet (droplet movement may be evaluated using a smaller time steps than the global time step, $\Delta t$ if the droplet will cross a cell boundary over the global time step).
+
+The removal efficiency is given by the product sum of an interception efficiency, $\epsilon_{in}$ and an impaction efficiency, $\epsilon_{in}$. Both result from summing viscous, $vis$, and potential flow, $pot$, behaviors.
+\be
+\epsilon_{in,vis} = (1+l)^2 \left(1-\frac{3}{2(1+l)}+\frac{1}{2(1+l)^3} \right)
+\ee
+\be
+\epsilon_{in,pot} = (1+l)^2 - (1+l)
+\ee
+\be
+\epsilon_{im,vis} = \left\{ \begin{array}{ll}
+	0  & Stk \leq 1.214  \\[0.1in]
+	\left(1+\frac{0.75 \ln (2 Stk) }{Stk-1.214} \right)^{-2} & Stk > 1.214
+\end{array} \right.  \\[0.1in]
+\ee
+\be
+\epsilon_{im,pot} = \left\{ \begin{array}{ll}
+	0  & Stk \leq 0.0834  \\[0.1in]
+	\left(\frac{Stk}{Stk+0.5} \right)^2 & Stk > 0.2
+\end{array} \right.  \\[0.1in]
+\ee
+Where $Stk$ is the Stokes number. For other values of $Stk$, $\epsilon_{im,pot}$ is interpolated. The viscous and potential values are combined as:
+\be
+\epsilon_x = \frac{\epsilon_{x,vis}+\epsilon_{x,pot} (\RE_D/60)}{1+(\RE_D/60)}
+\ee
+The total efficiency is given as:
+\be
+\epsilon = 1-(1-\epsilon_{in})(1-\epsilon_{im})
+\ee
+The rate of removal is then given by:
+\be
+\lambda = \frac{F \epsilon Y_a \rho}{\Delta t}
+\ee
+
+\newpage
+\section{Aerosol Condensation}
+
+If a gas species with liquid properties is defined as an aerosol, FDS will compute condensation and evaporation for that species. This is accomplished by defining two tracked species: one non-aerosol species for the gas phase, and a second aerosol species for the condensed phase. Condensation and evaporation will be computed both in the gas and on any solid surface in the domain.
+
+\subsection{Gas Condensation}
+If a condensable vapor species is present in a gas cell, a check is made on the equilibrium vapor fraction of the cell using Eq.~(\ref{clausius_clapeyron}) where $T_p$ is assumed to be the cell temperature. If the mass fraction in the cell exceeds the equilibrium fraction then condensation will occur. If the mass fraction in the cell is less than the equilibrium mass fraction, then evaporation will occur.
+
+The evaporation rate is computed using the mass transfer coefficient as defined in Eq~(\ref{eq:h_m_vap}) through Eq~(\ref{eq:B_M_vap}). The surface area for evaporation is determined by the total number of condensed water droplets in the cell which is computed from the mass of water vapor present and the user defined particle diameter for the aerosol species.
+
+The condensation rate is computed assuming the same mass transfer coefficient as evaporation. Since it is possible that there is no existing droplets to condense on, a cell with no existing condensed vapor uses an assumed concentration of nucleation sites/cm$^3$ that are assumed to have the same diameter as the condensed species.
+
+The total mass evaporated or condensed is added to the bulk mass source terms, $\dot{m}_{{\rm b},\alpha}^{\ppp}$, for the condensed and vapor phase species. The bulk energy source term, $\dot{q}_{\rm b}^{\ppp}$, is taken as the mass source term multiplied by the heat of vaporization, $h_v$ where condensation results in positive energy source term and evaporation results in a negative energy source term.
+
+The contribution to divergence is added to the {\ct D\_SOURCE} term following Eq~(\ref{eq:D_SOURCE_vap}). Since the condensed and vapor phases have the same molecular weight, the first term in the equation is zero.
+
+For the condensed phase, the radiation absorption is computed following Section~\ref{droplet-radiation}.
+
+\subsection{Wall Condensation}
+Condensation and evaporation for a wall cell follows a similar process to a gas cell. The process begins with an equilibrium vapor check where $T_b$ is assumed to be the wall temperature. The rate of evaporation and condensation is based on a wall function \cite{setcom_cfd}.
+\be
+Y^+_{\alpha}= \frac{\rho u\_{\tau}}{\dot{m}_{{\rm dep},\alpha}^{\pp}} \left( Y_{\alpha}-Y_{\alpha,\ell} \right) 
+\ee
+\be
+y^+ = \frac{\rho u_{\tau} \delta n /2} {\mu}
+\ee
+\be
+Y^+_{\alpha}= \mbox{Sc}_t y^ + e^{-\Gamma} + (2.12 \ln(y^+) + (3.85 \mbox{Sc}_t^{1/3}-1.3)^2+2.12 \ln(\mbox{Sc}_t)) e^{-1/ \Gamma}
+\ee
+\be
+\Gamma = \frac{0.01 \mbox{Sc}_t y^+)^4}{1+5\mbox{Sc}_t^3 y^+}
+\ee
+
+
+The total mass evaporated or condensed is added to the deposition wall mass source terms, $\dot{m}_{{\rm dep},\alpha}^{\pp}$. The energy required is added to a wall condensation energy source term that accounts for the heat of vaporization and the enthalpy change going from the gas temperature to the wall temperature.
+\be
+\dot{q}_{{\rm dep},\alpha}^{\pp} = \dot{m}_{{\rm dep},\alpha}^{\pp} (h_v(T_w)+h_{s,\alpha}(T_g)-h_{s,\alpha}(T_w))
+\ee
+For the {\ct D\_SOURCE} term only the first term in Eq~(\ref{eq:D_SOURCE_vap}) applies since all the phase change energy comes from the wall cell.
+

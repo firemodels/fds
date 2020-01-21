@@ -1,0 +1,13 @@
+﻿&HEAD CHID='humidity', TITLE='test humidity'/
+
+&MESH IJK=  4, 4, 4, XB = 0.0, 1.0,  0.0, 1.0, 0.0, 1.0 /
+
+&TIME T_END=1. /
+
+&MISC TMPA=70.,HUMIDITY=30/
+
+&DEVC QUANTITY='MASS FRACTION',SPEC_ID='WATER VAPOR',XYZ=0.5,0.5,0.5,ID='H2Ov'/
+
+&TAIL /
+
+
