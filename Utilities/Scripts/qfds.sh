@@ -704,7 +704,6 @@ fi
 
 stop_fds_if_requested
 
-#QSUB="qsub -k eo -q $queue"
 QSUB="qsub -q $queue"
 
 #*** use the queue none and the program background on systems
@@ -972,6 +971,7 @@ fi
 
 $SLEEP
 $QSUB $scriptfile
+cp $scriptfile ./${infile}.qfds
 if [ "$queue" != "none" ]; then
   cat $scriptfile > $scriptlog
   echo "#$QSUB $scriptfile" >> $scriptlog
