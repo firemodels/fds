@@ -14,7 +14,6 @@ QUEUE=batch
 DEBUG=
 SINGLE=
 nthreads=1
-resource_manager=
 walltime=
 RUNOPTION=
 CURDIR=`pwd`
@@ -43,8 +42,7 @@ RERUN=
 DELAY=
 
 function usage {
-echo "Run_FDS_Cases.sh [ -d -h -m max_iterations -o nthreads -q queue_name "
-echo "                   -s -r resource_manager ]"
+echo "Run_FDS_Cases.sh [ -d -h -m max_iterations -o nthreads -q queue_name -s "
 echo "Runs FDS verification suite"
 echo ""
 echo "Options"
@@ -63,12 +61,7 @@ echo "-m max_iterations - stop FDS runs after a specifed number of iterations (d
 echo "     example: an option of 10 would cause FDS to stop after 10 iterations"
 echo "-o nthreads - run FDS with a specified number of threads [default: $nthreads]"
 echo "-O - use OpenMPI version of FDS"
-echo "-q queue_name - run cases using the queue queue_name"
-echo "     default: batch"
-echo "     other options: fire70s, vis"
-echo "-r resource_manager - run cases using the resource manager"
-echo "     default: PBS"
-echo "     other options: SLURM"
+echo "-q queue_name - run cases using the queue queue_name [default: batch]"
 echo "-R - run only regular (non-benchmark) cases"
 echo "-s - stop FDS runs"
 echo "-t - run only thread checking cases"
@@ -118,7 +111,7 @@ cd $SVNROOT
 export SVNROOT=`pwd`
 cd $CURDIR
 
-while getopts 'bB:c:CdD:e:D:Fghj:JL:m:o:Oq:r:RsS:tw:W' OPTION
+while getopts 'bB:c:CdD:e:D:Fghj:JL:m:o:Oq:RsS:tw:W' OPTION
 do
 case $OPTION in
   b)
@@ -175,9 +168,6 @@ case $OPTION in
   q)
    QUEUE="$OPTARG"
    ;;
-  r)
-   resource_manager="$OPTARG"
-   ;;
   R)
    BENCHMARK=
    GEOMCASES=1
@@ -233,11 +223,6 @@ fi
 
 export QFDSSH="$SVNROOT/fds/Utilities/Scripts/qfds.sh $RUNOPTION $DELAY"
 
-if [ "$resource_manager" == "SLURM" ]; then
-   export RESOURCE_MANAGER="SLURM"
-else
-   export RESOURCE_MANAGER="PBS"
-fi
 if [ "$QUEUE" != "" ]; then
    if [ "$QUEUE" == "none" ]; then
       echo 0 > $QFDS_COUNT
