@@ -11577,11 +11577,6 @@ INIT_LOOP: DO N=1,N_INIT_READ+N_INIT_RESERVED
                         '. Must have N_PARTICLES=1 when specifying a PATH_RAMP.'
                      CALL SHUTDOWN(MESSAGE) ; RETURN
                   ENDIF
-                  IF (.NOT. LPC%MASSLESS_TRACER) THEN
-                     WRITE(MESSAGE,'(A,I0,A,A,A)') 'ERROR: Problem with INIT number ',N,'. Particle class ',TRIM(PART_ID), &
-                        ' is not not a MASSLESS_TRACER.'
-                     CALL SHUTDOWN(MESSAGE) ; RETURN
-                  ENDIF
                   IF (TRIM(PATH_RAMP(1))/='null') THEN
                      CALL GET_RAMP_INDEX(PATH_RAMP(1),'TIME',IN%PATH_RAMP_INDEX(1))
                      IF (IN%PATH_RAMP_INDEX(1)==0) THEN

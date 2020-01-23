@@ -937,7 +937,7 @@ VOLUME_INSERT_LOOP: DO IB=1,N_INIT
       ELSE
          PWT0 = IN%PARTICLE_WEIGHT_FACTOR
       ENDIF
-   
+
       DO IIP=1,MIN(MAXIMUM_PARTICLES,N_INSERT)
          IP = LP_INDEX_LOOKUP(IIP)
          LP => LAGRANGIAN_PARTICLE(IP)
@@ -951,9 +951,9 @@ VOLUME_INSERT_LOOP: DO IB=1,N_INIT
       ENDDO
 
    ENDIF
-   
+
    DEALLOCATE(LP_INDEX_LOOKUP)
-   
+
    IN%ALREADY_INSERTED(NM) = .TRUE.
 
 ENDDO VOLUME_INSERT_LOOP
@@ -1659,7 +1659,7 @@ PARTICLE_LOOP: DO IP=1,NLP
       ! If the droplet was attached to a solid WALL (LP%ONE_D%IOR/=0), but now it is not, change its course. If the droplet was
       ! dripping down a vertical surface (IOR=+-1,2), make it go under the solid and then move upward to (possibly) stick
       ! to the underside or drip off. If the droplet moves off an upward or downward facing horizontal surface (IOR=+-3), reverse
-      ! its course and drop it down the side of the solid obstruction. 
+      ! its course and drop it down the side of the solid obstruction.
 
       LP%WALL_INDEX = WALL_INDEX(IC_NEW,-LP%ONE_D%IOR)
 
@@ -1750,41 +1750,42 @@ WBAR = AFILL2(W,IIX,JJY,KKG_OLD-1,X_WGT,Y_WGT,(Z_OLD-Z(KKG_OLD-1))*RDZ(KKG_OLD))
 
 ! If the particle is massless, just move it and go on to the next particle
 
+IF (LP%PATH_PARTICLE) THEN
+   ! If the particle has a path, just follow the path and return
+   IF (INITIALIZATION(LP%INIT_INDEX)%PATH_RAMP_INDEX(1) > 0) &
+      LP%X = EVALUATE_RAMP(T,0._EB,INITIALIZATION(LP%INIT_INDEX)%PATH_RAMP_INDEX(1))
+   IF (INITIALIZATION(LP%INIT_INDEX)%PATH_RAMP_INDEX(2) > 0) &
+      LP%Y = EVALUATE_RAMP(T,0._EB,INITIALIZATION(LP%INIT_INDEX)%PATH_RAMP_INDEX(2))
+   IF (INITIALIZATION(LP%INIT_INDEX)%PATH_RAMP_INDEX(3) > 0) &
+      LP%Z = EVALUATE_RAMP(T,0._EB,INITIALIZATION(LP%INIT_INDEX)%PATH_RAMP_INDEX(3))
+   RETURN
+ENDIF
+
 TRACER_IF: IF (LPC%MASSLESS_TRACER .OR. LP%PWT<=TWO_EPSILON_EB) THEN
-   IF (LP%PATH_PARTICLE) THEN
-   ! If the particle has a path, just follow the path
-      IF (INITIALIZATION(LP%INIT_INDEX)%PATH_RAMP_INDEX(1) > 0) &
-         LP%X = EVALUATE_RAMP(T,0._EB,INITIALIZATION(LP%INIT_INDEX)%PATH_RAMP_INDEX(1))
-      IF (INITIALIZATION(LP%INIT_INDEX)%PATH_RAMP_INDEX(2) > 0) &
-         LP%Y = EVALUATE_RAMP(T,0._EB,INITIALIZATION(LP%INIT_INDEX)%PATH_RAMP_INDEX(2))
-      IF (INITIALIZATION(LP%INIT_INDEX)%PATH_RAMP_INDEX(3) > 0) &
-         LP%Z = EVALUATE_RAMP(T,0._EB,INITIALIZATION(LP%INIT_INDEX)%PATH_RAMP_INDEX(3))
+   IF (LPC%TURBULENT_DISPERSION) THEN
+      DD_X = RSC * (MU(IIG_OLD+1,JJG_OLD,KKG_OLD) - MU(IIG_OLD-1,JJG_OLD,KKG_OLD)) * &
+             RDXN(IIG_OLD-1)*RDXN(IIG_OLD)/(RDXN(IIG_OLD-1) + RDXN(IIG_OLD))
+      DD_Y = RSC * (MU(IIG_OLD,JJG_OLD+1,KKG_OLD) - MU(IIG_OLD,JJG_OLD-1,KKG_OLD)) * &
+             RDYN(JJG_OLD-1)*RDYN(JJG_OLD)/(RDYN(JJG_OLD-1) + RDYN(JJG_OLD))
+      DD_Z = RSC * (MU(IIG_OLD,JJG_OLD,KKG_OLD+1) - MU(IIG_OLD,JJG_OLD,KKG_OLD-1)) * &
+             RDZN(KKG_OLD-1)*RDZN(KKG_OLD)/(RDZN(KKG_OLD-1) + RDZN(KKG_OLD))
+      LP%U = UBAR + DD_X/RHO(IIG_OLD,JJG_OLD,KKG_OLD)
+      LP%V = VBAR + DD_Y/RHO(IIG_OLD,JJG_OLD,KKG_OLD)
+      LP%W = WBAR + DD_Z/RHO(IIG_OLD,JJG_OLD,KKG_OLD)
+      DD   = SQRT(2._EB*MU(IIG_OLD,JJG_OLD,KKG_OLD)/RHO(IIG_OLD,JJG_OLD,KKG_OLD)*RSC*DT_P)
+      ! generate pairs of standard Gaussian random variables
+      CALL BOX_MULLER(DW_X,DW_Y)
+      CALL BOX_MULLER(DW_Z,DW_X)
+      LP%X = X_OLD + LP%U*DT_P + DD*DW_X
+      LP%Y = Y_OLD + LP%V*DT_P + DD*DW_Y
+      LP%Z = Z_OLD + LP%W*DT_P + DD*DW_Z
    ELSE
-      IF (LPC%TURBULENT_DISPERSION) THEN
-         DD_X = RSC * (MU(IIG_OLD+1,JJG_OLD,KKG_OLD) - MU(IIG_OLD-1,JJG_OLD,KKG_OLD)) * &
-                RDXN(IIG_OLD-1)*RDXN(IIG_OLD)/(RDXN(IIG_OLD-1) + RDXN(IIG_OLD))
-         DD_Y = RSC * (MU(IIG_OLD,JJG_OLD+1,KKG_OLD) - MU(IIG_OLD,JJG_OLD-1,KKG_OLD)) * &
-                RDYN(JJG_OLD-1)*RDYN(JJG_OLD)/(RDYN(JJG_OLD-1) + RDYN(JJG_OLD))
-         DD_Z = RSC * (MU(IIG_OLD,JJG_OLD,KKG_OLD+1) - MU(IIG_OLD,JJG_OLD,KKG_OLD-1)) * &
-                RDZN(KKG_OLD-1)*RDZN(KKG_OLD)/(RDZN(KKG_OLD-1) + RDZN(KKG_OLD))
-         LP%U = UBAR + DD_X/RHO(IIG_OLD,JJG_OLD,KKG_OLD)
-         LP%V = VBAR + DD_Y/RHO(IIG_OLD,JJG_OLD,KKG_OLD)
-         LP%W = WBAR + DD_Z/RHO(IIG_OLD,JJG_OLD,KKG_OLD)
-         DD   = SQRT(2._EB*MU(IIG_OLD,JJG_OLD,KKG_OLD)/RHO(IIG_OLD,JJG_OLD,KKG_OLD)*RSC*DT_P)
-         ! generate pairs of standard Gaussian random variables
-         CALL BOX_MULLER(DW_X,DW_Y)
-         CALL BOX_MULLER(DW_Z,DW_X)
-         LP%X = X_OLD + LP%U*DT_P + DD*DW_X
-         LP%Y = Y_OLD + LP%V*DT_P + DD*DW_Y
-         LP%Z = Z_OLD + LP%W*DT_P + DD*DW_Z
-      ELSE
-         LP%U = UBAR
-         LP%V = VBAR
-         LP%W = WBAR
-         LP%X = X_OLD + LP%U*DT_P
-         LP%Y = Y_OLD + LP%V*DT_P
-         LP%Z = Z_OLD + LP%W*DT_P
-      ENDIF
+      LP%U = UBAR
+      LP%V = VBAR
+      LP%W = WBAR
+      LP%X = X_OLD + LP%U*DT_P
+      LP%Y = Y_OLD + LP%V*DT_P
+      LP%Z = Z_OLD + LP%W*DT_P
    ENDIF
    RETURN
 ENDIF TRACER_IF
