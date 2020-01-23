@@ -959,6 +959,7 @@ fi
   if [[ "$MODULES" != "" ]] && [[ "$MODULES_OUT" == "" ]]; then
     echo "            Modules:$MODULES"
   fi
+  echo "   Resource Manager:$RESOURCE_MANAGER"
   echo "              Queue:$queue"
   echo "              Nodes:$nodes"
   echo "          Processes:$n_mpi_processes"
