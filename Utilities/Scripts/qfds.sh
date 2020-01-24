@@ -656,7 +656,6 @@ outerr=$fulldir/$infile.err
 outlog=$fulldir/$infile.log
 stopfile=$fulldir/$infile.stop
 scriptlog=$fulldir/$infile.slog
-qfdsfile=$fulldir/$infile.qfds
 in_full_file=$fulldir/$in
 
 #*** make sure various files exist before running the case
@@ -974,9 +973,7 @@ fi
 #*** run script
 
 $SLEEP
-cp $scriptfile $qfdsfile
 $QSUB $scriptfile
-cp $scriptfile ./${infile}.qfds
 if [ "$queue" != "none" ]; then
   cat $scriptfile > $scriptlog
   echo "#$QSUB $scriptfile" >> $scriptlog
