@@ -1037,7 +1037,7 @@ DO N=1,M%N_SLCF
   ! i1,i2,j1,j2,k1,k2
          WRITE(LU_SLCF(N+2*N_SLCF_MAX,NM))1                       ! endian
          WRITE(LU_SLCF(N+2*N_SLCF_MAX,NM))1,1,1                   ! completion, file version, slice version
-         WRITE(LU_SLCF(N+2*N_SLCF_MAX,NM))SL%VAL_MIN,SL%VAL_MAX   ! global min, global max
+         WRITE(LU_SLCF(N+2*N_SLCF_MAX,NM))SL%RLE_MIN,SL%RLE_MAX   ! global min, global max
       ENDIF
       IF (.NOT.SL%TERRAIN_SLICE) THEN
          WRITE(LU_SLCF(N,NM))              SL%I1,SL%I2,SL%J1,SL%J2,SL%K1,SL%K2
@@ -5299,9 +5299,8 @@ QUANTITY_LOOP: DO IQ=1,NQT
             NZ = K2 + 1 - K1
             IF (NX*NY*NZ>0) THEN
                ALLOCATE(QQ_PACK(NX*NY*NZ))
-              ! QQ_PACK = PACK(QQ(I1:I2,J1:J2,K1:K2,1),MASK=.TRUE.)
 
-!    #define IJK(i,j,k) ((i)*ny*nz + (j)*nz +(k)) how C/C++ expects to see the data  
+!    #define IJK(i,j,k) ((i)*ny*nz + (j)*nz +(k)) how C/C++ expects to see the data (PACK doesn't work)
                DO K = K1, K2
                   KFACT = (K-K1)
                   DO J = J1, J2
@@ -5313,7 +5312,7 @@ QUANTITY_LOOP: DO IQ=1,NQT
                   END DO
                END DO
 
-               CALL SLICE_TO_RLEFILE(LU_SLCF(IQ3,NM), STIME, NX, NY, NZ, QQ_PACK, SL%VAL_MIN, SL%VAL_MAX)
+               CALL SLICE_TO_RLEFILE(LU_SLCF(IQ3,NM), STIME, NX, NY, NZ, QQ_PACK, SL%RLE_MIN, SL%RLE_MAX)
                DEALLOCATE(QQ_PACK)
             ENDIF
             CLOSE(LU_SLCF(IQ3,NM))
@@ -5826,7 +5825,7 @@ DEVICE_LOOP: DO N=1,N_DEVC
    ELSEIF (DV%NO_UPDATE_CTRL_INDEX>0) THEN
       IF (CONTROL(DV%NO_UPDATE_CTRL_INDEX)%CURRENT_STATE) CYCLE DEVICE_LOOP
    ENDIF
-   
+
    ! Zero out VALUE of the device before the temporal window
 
    IF (T<DV%STATISTICS_START) THEN
