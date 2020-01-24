@@ -14,11 +14,13 @@ Here is a link to [contributing](https://github.com/firemodels/fds/blob/master/C
 
 Here are some other useful links:
 
-[FDS-SMV Downloads](https://github.com/firemodels/fds/releases)
+[FDS-SMV Downloads (includes Release Documentation)](https://github.com/firemodels/fds/releases)
 
 [Smokeview Downloads](https://github.com/firemodels/smv/releases)
 
 [Discussion Forum](https://groups.google.com/forum/#!forum/fds-smv)
+
+[Documentation Nightly Builds](https://drive.google.com/drive/folders/0B_wB1pJL2bFQUlJwMmNfaHlqME0)
 
 [FDS Issues](https://github.com/firemodels/fds/issues)
 
