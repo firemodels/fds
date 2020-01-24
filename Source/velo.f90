@@ -2248,7 +2248,9 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
          ! If there is a solid wall separating the two adjacent wall cells, cycle out of the loop.
 
-         IF (WALL(IWMI)%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. WALL(IWPI)%BOUNDARY_TYPE==SOLID_BOUNDARY) CYCLE ORIENTATION_LOOP
+         IF ((WALL(IWMI)%BOUNDARY_TYPE==SOLID_BOUNDARY .AND. SURFACE(WALL(IWM)%SURF_INDEX)%VELOCITY_BC_INDEX/=FREE_SLIP_BC) .OR. &
+             (WALL(IWPI)%BOUNDARY_TYPE==SOLID_BOUNDARY .AND. SURFACE(WALL(IWP)%SURF_INDEX)%VELOCITY_BC_INDEX/=FREE_SLIP_BC)) &
+            CYCLE ORIENTATION_LOOP
 
          ! If only one adjacent wall cell is defined, use its properties.
 
