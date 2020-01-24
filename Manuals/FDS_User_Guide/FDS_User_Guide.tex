@@ -1259,7 +1259,6 @@ Table~\ref{tbl:SIMULATION_MODE} indicates the value of various parameters for ea
 \begin{tabular}{|l|c|c|c|c|c|}
 \hline
 Key Parameter                          & Section                        & {\ct 'DNS'} & {\ct 'LES'}  & {\ct 'VLES'}  & {\ct 'SVLES'}  \\ \hline \hline
-{\ct BAROCLINIC}                       & \ref{baroclinic_torque}        & T           & T            & T             & F              \\ \hline
 {\ct CFL\_VELOCITY\_NORM}              & \ref{info:CFL}                 & 1           & 1            & 0             & 3              \\ \hline
 {\ct CHECK\_VN}                        & \ref{info:VN}                  & T           & T            & T             & F              \\ \hline
 {\ct CONSTANT\_SPECIFIC\_HEAT\_RATIO}  & \ref{info:Enthalpy}            & F           & F            & F             & T              \\ \hline
@@ -1312,50 +1311,7 @@ lines with a {\ct T}.
 
 Note that in a case with sprinklers, changing {\ct GVEC} will change how droplets move in the gas but not how droplets move on solid sufaces. On solid surfaces droplet movement will always consider down to be the negative-z direction.
 
-\section{Special Topic: The Baroclinic Vorticity}
-\label{baroclinic_torque}
 
-The pressure term in the momentum transport equation solved by FDS is decomposed as follows:
-\be
-   \frac{1}{\rho} \nabla \tp = \nabla \left( \frac{\tp}{\rho}\right) - \tp \, \nabla \left(\frac{1}{\rho} \right)
-\ee
-The pressure term is written like this so that a separable elliptic partial differential equation can be solved for the ``total'' pressure, $\cH \equiv |\bu|^2/2 + \tp/\rho$, using a direct solver. The second term is calculated based on the pressure field from the previous time step, a slight approximation necessary to render the pressure equation separable. This term is sometimes referred to as the baroclinic torque, and it is responsible for generating vorticity due to the non-alignment of pressure and density gradients. In versions of FDS prior to 6, the inclusion of the baroclinic torque term was found to sometimes cause numerical instabilities. If it is suspected that the term is responsible for numerical problems, it can be removed by setting {\ct BAROCLINIC=.FALSE.} on the {\ct MISC} line. For example, in the simple helium plume test case below, neglecting the baroclinic torque changes the puffing behavior noticeably. In other applications, however, its effect is less significant. For further discussion of its effect, see Ref.~\cite{Xin:JSS2005}.
-
-
-
-\subsubsection{Example Case: Flowfields/helium\_2d\_isothermal}
-\label{helium_2d_isothermal}
-
-This case demonstrates the use of baroclinic correction for an axially-symmetric helium plume. Note that the governing equations solved in FDS are written in terms of a three dimensional Cartesian coordinate system. However, a two dimensional Cartesian or two dimensional cylindrical (axially-symmetric) calculation can be performed by setting the number of cells in the $y$ direction to 1. An example of an axially-symmetric helium plume is shown in Fig.~\ref{helium_plume}.
-
-\begin{figure}[ht]
-\noindent
-\begin{minipage}{1.1in}
-\includegraphics[height=2in]{SCRIPT_FIGURES/helium_2d_isothermal}
-\end{minipage}
-\hfill
-\begin{minipage}{5.5in}
-\begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
-&HEAD CHID='helium_2d_isothermal',TITLE='Axisymmetric Helium Plume' /
-&MESH IJK=72,1,144 XB=0.00,0.08,-0.001,0.001,0.00,0.16, CYLINDRICAL=.TRUE. /
-&TIME T_END=5.0 /
-&MISC DNS=.TRUE. /
-&RADI RADIATION=.FALSE. /
-&SPEC ID='HELIUM'  /
-&SURF ID='HELIUM', VEL=-0.673, SPEC_ID(1)='HELIUM',MASS_FRACTION(1)=1.0, TAU_MF(1)=0.3 /
-&VENT MB='XMAX' ,SURF_ID='OPEN' /
-&VENT MB='ZMAX' ,SURF_ID='OPEN' /
-&OBST XB= 0.0,0.036,-0.001,0.001,0.00,0.02, SURF_IDS='HELIUM','INERT','INERT' /
-&DUMP PLOT3D_QUANTITY(1)='PRESSURE',
-            PLOT3D_QUANTITY(5)='MASS FRACTION',PLOT3D_SPEC_ID(5)='HELIUM' /
-&SLCF PBY=0.000,QUANTITY='DENSITY', VECTOR=.TRUE. /
-&SLCF PBY=0.000,QUANTITY='VOLUME FRACTION', SPEC_ID='HELIUM' /
-&TAIL /
-\end{lstlisting}
-\end{minipage}
-\caption[Snapshot of the {\ct helium\_2d\_isothermal} test case]{Simulation of a helium plume.}
-\label{helium_plume}
-\end{figure}
 
 \section{Special Topic: Large Eddy Simulation Parameters}
 \label{info:LES}
@@ -1649,7 +1605,7 @@ It is recommended that you also specify {\ct PROJECTION=.TRUE.} on {\ct MISC} if
 
 Normally, you need not set any parameters related to the solution of the Poisson equation for pressure. However, there are circumstances when you might need to change default numerical values. This is done through the {\ct PRES} namelist group (Table~\ref{tbl:PRES}).
 
-\section{Accuracy of the Pressure Solver}
+\section{Accuracy of the Pressure Solver on Multiple Meshes}
 \label{pressure_solver}
 
 FDS uses a low-Mach number formulation of the Navier-Stokes equations. One of the consequences of this is that the speed of sound is assumed infinite, and that the pressure throughout the computational domain is affected, instantaneously, by local changes in the flow field. A simple example of this is when air is pushed through a tunnel. If the tunnel has forced flow at one end and an opening at the other, the volume flow at the opening is the same as that which is forced at the other end. Without any heat addition, the air is assumed incompressible. Information is passed through the tunnel instantaneously in the model via a solution of a linear system of equations for the pressure. For a single mesh, the solution of this Poisson equation for the pressure is very accurate. However, for multiple meshes, there is potentially a delay in information passing throughout the domain because by default the Poisson equation is solved on each individual mesh, without any influence from the larger computational domain. The details of the numerical approach can be found in the FDS Technical Reference Guide.
@@ -1661,6 +1617,51 @@ If either the error in the normal component of the velocity at a mesh interface 
 By default, FDS will suspend the pressure iterations if the error does not drop below \linebreak[4]{\ct ITERATION\_SUSPEND\_FACTOR} (0.95, by default) of its previous value. If you do not want FDS to suspend the pressure iteration, set {\ct SUSPEND\_PRESSURE\_ITERATIONS} to {\ct .FALSE.} on the {\ct PRES} line. This will be done automatically if you change the default values of {\ct VELOCITY\_TOLERANCE} or \linebreak[4]{\ct MAX\_PRESSURE\_ITERATIONS}.
 
 If {\ct .TRUE.}, the parameter {\ct CHECK\_POISSON} tells FDS to check that the left-hand and right-hand sides of the Poisson equation for $H$ are equivalent (see the FDS Tech Guide \cite{FDS_Math_Guide}).  The error is printed to the {\ct CHID.out} file.
+
+\section{Baroclinic Vorticity}
+\label{baroclinic_torque}
+
+The pressure term in the momentum transport equation solved by FDS is decomposed as follows:
+\be
+   \frac{1}{\rho} \nabla \tp = \nabla \left( \frac{\tp}{\rho}\right) - \tp \, \nabla \left(\frac{1}{\rho} \right)
+\ee
+The pressure term is written like this so that a separable elliptic partial differential equation can be solved for the ``total'' pressure, $\cH \equiv |\bu|^2/2 + \tp/\rho$, using a direct solver. The second term is calculated based on the pressure field from the previous time step, a slight approximation necessary to render the pressure equation separable. This term is sometimes referred to as the baroclinic torque, and it is responsible for generating vorticity due to the non-alignment of pressure and density gradients. In versions of FDS prior to 6, the inclusion of the baroclinic torque term was found to sometimes cause numerical instabilities. If it is suspected that the term is responsible for numerical problems, it can be removed by setting {\ct BAROCLINIC=.FALSE.} on the {\ct MISC} line. For example, in the simple helium plume test case below, neglecting the baroclinic torque changes the puffing behavior noticeably. In other applications, however, its effect is less significant. For further discussion of its effect, see Ref.~\cite{Xin:JSS2005}.
+
+
+
+\subsubsection{Example Case: Flowfields/helium\_2d\_isothermal}
+\label{helium_2d_isothermal}
+
+This case demonstrates the use of baroclinic correction for an axially-symmetric helium plume. Note that the governing equations solved in FDS are written in terms of a three dimensional Cartesian coordinate system. However, a two dimensional Cartesian or two dimensional cylindrical (axially-symmetric) calculation can be performed by setting the number of cells in the $y$ direction to 1. An example of an axially-symmetric helium plume is shown in Fig.~\ref{helium_plume}.
+
+\begin{figure}[ht]
+\noindent
+\begin{minipage}{1.1in}
+\includegraphics[height=2in]{SCRIPT_FIGURES/helium_2d_isothermal}
+\end{minipage}
+\hfill
+\begin{minipage}{5.5in}
+\begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+&HEAD CHID='helium_2d_isothermal',TITLE='Axisymmetric Helium Plume' /
+&MESH IJK=72,1,144 XB=0.00,0.08,-0.001,0.001,0.00,0.16, CYLINDRICAL=.TRUE. /
+&TIME T_END=5.0 /
+&MISC SIMULATION_MODE='DNS' /
+&RADI RADIATION=.FALSE. /
+&SPEC ID='HELIUM'  /
+&SURF ID='HELIUM', VEL=-0.673, SPEC_ID(1)='HELIUM',MASS_FRACTION(1)=1.0, TAU_MF(1)=0.3 /
+&VENT MB='XMAX' ,SURF_ID='OPEN' /
+&VENT MB='ZMAX' ,SURF_ID='OPEN' /
+&OBST XB= 0.0,0.036,-0.001,0.001,0.00,0.02, SURF_IDS='HELIUM','INERT','INERT' /
+&DUMP PLOT3D_QUANTITY(1)='PRESSURE',
+            PLOT3D_QUANTITY(5)='MASS FRACTION',PLOT3D_SPEC_ID(5)='HELIUM' /
+&SLCF PBY=0.000,QUANTITY='DENSITY', VECTOR=.TRUE. /
+&SLCF PBY=0.000,QUANTITY='VOLUME FRACTION', SPEC_ID='HELIUM' /
+&TAIL /
+\end{lstlisting}
+\end{minipage}
+\caption[Snapshot of the {\ct helium\_2d\_isothermal} test case]{Simulation of a helium plume.}
+\label{helium_plume}
+\end{figure}
 
 
 \section{Optional Pressure Solver}
@@ -1713,13 +1714,7 @@ One strategy for reducing the computational cost associated with a tightened tol
 \label{dancing_eddies_overlap}
 \end{figure}
 
-\subsubsection{Special Case: True Periodic Boundaries}
-\label{sec:true_periodic_boundaries}
 
-In Section \ref{sec:periodic}, we discuss how to set periodic boundaries.  By default, in order to handle the most general case of a periodic domain with multiple meshes (imagine a periodic channel divided into several meshes), FDS treats the pressure boundary condition as what we call an ``interpolated boundary.''  This means that the matrix for the pressure Poisson equation is arranged for Dirichlet boundary conditions (the value of the solution is specified at the boundary).  This can lead to small errors in the solution and sometimes it is desirable to use the true periodic matrix for the Poisson equation.  But with the current solver (Fishpak) this is only possible for a single mesh.  If you want to implement true periodic boundaries for a single mesh case, set the appropriate \verb=FISHPAK_BC= value to zero on the \verb=PRES= line.  For example,
-\begin{lstlisting}
-&PRES FISHPAK_BC(1:3)=0,0,0 /
-\end{lstlisting}
 
 
 
@@ -2053,8 +2048,10 @@ designate that the simulation is periodic in the $x$-direction. For multi-mesh d
 &VENT PBX=0, SURF_ID='PERIODIC' /
 &VENT PBX=1, SURF_ID='PERIODIC' /
 \end{lstlisting}
-For additional information related to periodic boundaries and the pressure solver see Section~\ref{sec:true_periodic_boundaries}.
-
+By default, in order to handle the most general case of a periodic domain with multiple meshes (imagine a periodic channel divided into several meshes), FDS treats the pressure boundary condition as what we call an ``interpolated boundary.''  This means that the matrix for the pressure Poisson equation is arranged for Dirichlet boundary conditions (the value of the solution is specified at the boundary).  This can lead to small errors in the solution and sometimes it is desirable to use the true periodic matrix for the Poisson equation.  But with the current solver (Fishpak) this is only possible for a single mesh.  If you want to implement true periodic boundaries for a single mesh case, set the appropriate \verb=FISHPAK_BC= value to zero on the \verb=PRES= line.  For example,
+\begin{lstlisting}
+&PRES FISHPAK_BC(1:3)=0,0,0 /
+\end{lstlisting}
 Periodic vents may not be used to connect offset vents or vents in different coordinate directions.  For such cases, you must employ HVAC capabilities (see Section~\ref{info:HVAC}).
 
 Note that, by default, particles are not recycled at periodic boundaries.  See Section~\ref{info:periodic-particles} if periodic particles are desired.
@@ -9445,7 +9442,7 @@ $^6$                 \> Requires {\ct REAC\_ID}.
 \section{Summary of HVAC Output Quantities}
 \label{info:hvacoutputquantities}
 
-Table~\ref{tab:hvacoutput} summarizes the various Output Quantities for HVAC systems.  HVAC output quantities do not require an {\ct XYZ} or {\ct XB}. Quantities for a duct require the specification 
+Table~\ref{tab:hvacoutput} summarizes the various Output Quantities for HVAC systems.  HVAC output quantities do not require an {\ct XYZ} or {\ct XB}. Quantities for a duct require the specification
 of a {\ct DUCT\_ID}, and quantities for a node require the specification of a {\ct NODE\_ID}.  Mass and volume fraction outputs also require the specification of a {\ct SPEC\_ID}. Fan
  and aircoil outputs require the {\ct DUCT\_ID} of the duct they are located in. Filter outputs require the {\ct NODE\_ID} of the node they are located in. The quantity {\ct NODE PRESSSURE DIFFERENCE} requires that one specify both elements of the array {\ct NODE\_ID}, and the pressure difference is calculated by subtracting the first node from the second.
  Note that HVAC output quantities can only be used with a {\ct DEVC}.
@@ -10165,7 +10162,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct \footnotesize ALLOW\_UNDERSIDE\_PARTICLES}     & Logical      & Section~\ref{info:surface_droplets}     &            & {\ct .FALSE.}     \\ \hline
 {\ct \footnotesize ASSUMED\_GAS\_TEMPERATURE}       & Real         & Section~\ref{solid_phase_verification}  & $^\circ$C  &                   \\ \hline
 {\ct \footnotesize ASSUMED\_GAS\_TEMPERATURE\_RAMP} & Character    & Section~\ref{solid_phase_verification}  &            &                   \\ \hline
-{\ct BAROCLINIC}                                    & Logical      & Section~\ref{baroclinic_torque}         &            & {\ct .TRUE.}      \\ \hline
 {\ct BNDF\_DEFAULT}                                 & Logical      & Section~\ref{info:BNDF}                 &            & {\ct .TRUE.}      \\ \hline
 {\ct C\_DEARDORFF}                                  & Real         & Section~\ref{info:LES}                  &            & 0.1               \\ \hline
 {\ct CFL\_MAX}                                      & Real         & Section~\ref{info:CFL}                  &            & 1.0               \\ \hline
@@ -10471,16 +10467,17 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct PRES} (Pressure Solver Parameters)} \\
 \hline \hline
 \endhead
-{\ct CHECK\_POISSON}                & Logical       & Section~\ref{pressure_solver}           &               & {\ct .FALSE.}             \\ \hline
-{\ct FISHPAK\_BC(3)}                & Integer Array & Section~\ref{dancing_eddies}            &               &                           \\ \hline
-{\ct ITERATION\_SUSPEND\_FACTOR}    & Real          & Section~\ref{pressure_solver}           & s             & 0.95                      \\ \hline
-{\ct MAX\_PRESSURE\_ITERATIONS}     & Integer       & Section~\ref{pressure_solver}           &               & 10                        \\ \hline
-{\ct PRESSURE\_RELAX\_TIME}         & Real          & Section~\ref{background_pressure}       & s             & 1.                        \\ \hline
-{\ct PRESSURE\_TOLERANCE}           & Real          & Section~\ref{pressure_solver}           & s$^{-2}$      &                           \\ \hline
-{\ct RELAXATION\_FACTOR}            & Real          & Section~\ref{background_pressure}       &               & 1.                        \\ \hline
-{\ct SOLVER}                        & Character     & Section~\ref{optional_pressure_solver}  &               & {\ct 'FFT'}               \\ \hline
-{\ct SUSPEND\_PRESSURE\_ITERATIONS} & Logical       & Section~\ref{pressure_solver}           &               & {\ct .TRUE.}              \\ \hline
-{\ct VELOCITY\_TOLERANCE}           & Real          & Section~\ref{pressure_solver}           & m/s           &                           \\ \hline
+{\ct BAROCLINIC}                    & Logical       & Section~\ref{baroclinic_torque}             &               & {\ct .TRUE.}              \\ \hline
+{\ct CHECK\_POISSON}                & Logical       & Section~\ref{pressure_solver}               &               & {\ct .FALSE.}             \\ \hline
+{\ct FISHPAK\_BC(3)}                & Integer Array & Section~\ref{sec:periodic}                  &               &                           \\ \hline
+{\ct ITERATION\_SUSPEND\_FACTOR}    & Real          & Section~\ref{pressure_solver}               & s             & 0.95                      \\ \hline
+{\ct MAX\_PRESSURE\_ITERATIONS}     & Integer       & Section~\ref{pressure_solver}               &               & 10                        \\ \hline
+{\ct PRESSURE\_RELAX\_TIME}         & Real          & Section~\ref{background_pressure}           & s             & 1.                        \\ \hline
+{\ct PRESSURE\_TOLERANCE}           & Real          & Section~\ref{pressure_solver}               & s$^{-2}$      &                           \\ \hline
+{\ct RELAXATION\_FACTOR}            & Real          & Section~\ref{background_pressure}           &               & 1.                        \\ \hline
+{\ct SOLVER}                        & Character     & Section~\ref{optional_pressure_solver}      &               & {\ct 'FFT'}               \\ \hline
+{\ct SUSPEND\_PRESSURE\_ITERATIONS} & Logical       & Section~\ref{pressure_solver}               &               & {\ct .TRUE.}              \\ \hline
+{\ct VELOCITY\_TOLERANCE}           & Real          & Section~\ref{pressure_solver}               & m/s           &                           \\ \hline
 \end{longtable}
 
 % Undocumented: LAPLACE_PRESSURE_CORRECTION
