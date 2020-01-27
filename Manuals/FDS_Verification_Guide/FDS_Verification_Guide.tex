@@ -18,7 +18,7 @@
 {\input{../Bibliography/gitrevision}}
 {\newcommand{\gitrevision}{unknown} }
 
-\externaldocument{FDS_User_Guide}
+\externaldocument[UG-]{FDS_User_Guide}
 
 \begin{document}
 
@@ -1378,6 +1378,7 @@ The initial conditions and final results are shown in Fig.~\ref{fig:bound_test_2
 
 \subsection{Isothermal Helium Wave (\texorpdfstring{\textct{helium\_1d\_isothermal}}{helium\_1d\_isothermal})}
 \label{helium_1d_isothermal}
+\label{helium_2d_isothermal}
 
 This is a test of isothermal advection and mixing of gases with different molecular weights using the default algorithm.  A companion case using a simplified algorithm for {\ct CONSTANT\_SPECIFIC\_HEAT\_RATIO} is given below in Sec.~\ref{helium_1d_const_gamma}.  In the present case, a wave of helium propagates in one dimension down the length of a square duct with frictionless walls.  The initial and inlet temperatures are 25 \si{\degreeCelsius} and should remain so throughout the course of the simulation. In Fig.~\ref{fig_helium_1d_isothermal} we plot the simulation results for temperature, sensible enthalpy, and velocity.  The temperature should remain constant at 25 \si{\degreeCelsius}.  The sensible enthalpy, which is referenced to 25 \si{\degreeCelsius}, should remain at 0 \si{kJ/m^3}.  And the velocity should level off at 1 m/s and hold steady.  This output is checked to make sure that no boundary effects manage to pollute the simulation.
 
@@ -6352,15 +6353,15 @@ The use of computer software for safety purposes is sometimes regulated under a 
 \begin{tabular}{|l|c|l|l|l|}
 \hline
 Folder                  & Reference                       & Input File                                 & FDS Output File                                  & Expected Results File \\ \hline \hline
-Controls                & \ref{activate_vents}            & activate\_vents.fds                        & activate\_vents\_ctrl.csv                        & activate\_vents.csv \\ \hline
+Controls                & \ref{UG-activate_vents}         & activate\_vents.fds                        & activate\_vents\_ctrl.csv                        & activate\_vents.csv \\ \hline
 Pressure\_Effects       & \ref{isentropic2}               & isentropic2.fds                            & insentropic2\_devc.csv                           & isentropic2.csv \\ \hline
 Energy\_Budget          & \ref{energy_budget_tmix}        & energy\_budget\_tmix.fds                   & energy\_budget\_tmix\_devc.csv                   & energy\_budget\_tmix.csv \\ \hline
 Energy\_Budget          & \ref{energy_budget_walls}       & energy\_budget\_cold\_walls.fds            & energy\_budget\_cold\_walls\_hrr.csv             & energy\_budget\_cold\_walls.csv \\ \hline
-Fires                   & \ref{spray_burner}              & spray\_burner.fds                          & spray\_burner\_hrr.csv                           & spray\_burner.csv \\ \hline
+Fires                   & \ref{UG-spray_burner}           & spray\_burner.fds                          & spray\_burner\_hrr.csv                           & spray\_burner.csv \\ \hline
 Heat\_Transfer          & \ref{heat_conduction_kc}        & heat\_conduction\_kc.fds                   & heat\_conduction\_kc\_devc.csv                   & heat\_conduction\_kc.csv \\ \hline
 HVAC                    & \ref{ashrae7}                   & ashrae7\_table.fds                         & ashrae7\_table\_devc.csv                         & ashrae7\_exp.csv \\ \hline
-Pressure\_Solver        & \ref{duct_flow}                 & duct\_flow.fds                             & duct\_flow\_devc.csv                             & duct\_flow.csv \\ \hline
-Pressure\_Solver        & \ref{duct_flow}                 & duct\_flow\_uglmat.fds           & duct\_flow\_uglmat\_devc.csv                    & duct\_flow.csv \\ \hline
+Pressure\_Solver        & \ref{UG-duct_flow}              & duct\_flow.fds                             & duct\_flow\_devc.csv                             & duct\_flow.csv \\ \hline
+Pressure\_Solver        & \ref{UG-duct_flow}              & duct\_flow\_uglmat.fds           & duct\_flow\_uglmat\_devc.csv                    & duct\_flow.csv \\ \hline
 Pyrolysis               & \ref{enthalpy}                  & enthalpy.fds                               & enthalpy\_devc.csv                               & enthalpy.csv \\ \hline
 Pyrolysis               & \ref{shrink_swell}              & shrink\_swell.fds                          & shrink\_swell\_devc.csv                          & shrink\_swell.csv \\ \hline
 Radiation               & \ref{radiation_shield}          & radiation\_shield.fds                      & radiation\_shield\_devc.csv                      & radiation\_shield.csv \\ \hline
