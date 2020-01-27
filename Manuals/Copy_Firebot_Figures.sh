@@ -1,9 +1,10 @@
 #!/bin/bash
 
-#uncomment following line to use ssh to copy figures (use when you can't cross mount directories containing firebot)
-#USE_SSH=1
-
 USE_SSH=
+
+# uncomment following USE_SSH line to use ssh to copy figures 
+# use when you can't cross mount directories containing firebot
+USE_SSH=1
 
 # blaze
 HOST=blaze.el.nist.gov
@@ -12,6 +13,8 @@ HOSTDIR=/home2/smokevis2/firebot/FireModels_clone/fds/
 # burn
 #HOST=burn.el.nist.gov
 #HOSTDIR=/home4/firebot/FireModels_clone/fds/
+
+# shouldn't have to change lines below
 
 if [ "$USE_SSH" == "" ]; then
   CP=cp
