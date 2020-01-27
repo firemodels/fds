@@ -3412,6 +3412,7 @@ Compare your results to measurements made in a bench-scale device, like the cone
 
 \subsection{Simulating Bench-scale Measurements like the TGA, DSC, and MCC}
 \label{info:TGA_DSC_MCC}
+\label{tga_analysis}
 
 There are a number of techniques to measure the thermo-physical properties of a solid material. Most of these involve heating a very small sample at a relatively slow, linear rate. In this way, thermal conduction is minimized and the sample can be considered thermally-thin. FDS has a special feature that mimics thermogravimetric analysis (TGA), differential scanning calorimetry (DSC), and micro-combustion calorimetry (MCC) measurements. To use it, set up your input file as you normally would. Then, add the flag {\ct TGA\_ANALYSIS=.TRUE.} to the {\ct SURF} line you want to analyze. You can only analyze one {\ct SURF} line at a time. Optionally, you can specify {\ct TGA\_HEATING\_RATE} (K/min) and {\ct TGA\_FINAL\_TEMPERATURE} ($^\circ$C) to indicate the linear heating rate and the final temperature of the sample. The default values are 5~K/min and 800~$^\circ$C. The initial temperature is {\ct TMPA}. Note that this feature is only appropriate for a {\ct SURF} line that describes a thermally-thick sample consisting of a single layer with multiple reacting components. For example, the following {\ct SURF} line describes a material that consists of three components:
 \begin{lstlisting}
@@ -5037,6 +5038,7 @@ For complex fuel molecules that contain only C, H, N, and O the simple chemistry
 \end{lstlisting}
 
 \paragraph{Non-Simple Chemistry Compatible Fuels}
+\label{pvc_combustion}
 
 Fires, however, often involve fuels that do not just consist of C, H, N, and O. For example, chlorine is commonly found in building and household materials, and because
 of its propensity to form the acid gas HCl, you may want to account for it in the basic reaction scheme. Suppose the predominant fuel in the fire is polyvinyl chloride (PVC). Regardless of its detailed polymeric structure, it can be regarded as C$_2$H$_3$Cl for the purpose of modeling. Assuming that all of the Cl in the fuel is converted into HCl, you can derive a single-step reaction mechanism using appropriate soot and CO yields for the specified fuel. In this example, the SFPE Handbook~\cite{SFPE:Tewarson} is used to find soot and CO yields for PVC; 0.172 and 0.063, respectively. For a given species, $\alpha$, its stoichiometric coefficient, $\nu_\alpha$, can be found from its yield, $y_\alpha$, and its molecular weight, $W_\alpha$, according to the formula:
@@ -5082,12 +5084,12 @@ Since this is not a simple chemistry problem, either the enthalpy of formation o
 &REAC FUEL='PVC', HEAT_OF_COMBUSTION=16400, SPEC_ID_NU='PVC','AIR','PRODUCTS',
       NU=-1,-1,1, FIXED_MIX_TIME=0.1 /
 \end{lstlisting}
-Note that the sign of {\ct NU} corresponds to whether that species is consumed (-) or produced (+). Figure~\ref{pvc_combustion} displays the mass fractions of the product species for the sample case {\ct PVC\_Combustion}. Also note that the values for {\ct NU} reflect the composition of the species as defined on the {\ct SPEC} lines. If, for example, the PVC {\ct SPEC} was defined as {\ct CH1.5Cl0.5}, then the {\ct REAC} would require {\ct NU=-2,-1,1}. A fixed turbulent mixing time of 0.1~s is used for this example only because the reactants are initially mixed within a chamber with no imposed flow. Normally, this parameter is not necessary.
+Note that the sign of {\ct NU} corresponds to whether that species is consumed (-) or produced (+). Figure~\ref{pvc_combustion_fig} displays the mass fractions of the product species for the sample case {\ct PVC\_Combustion}. Also note that the values for {\ct NU} reflect the composition of the species as defined on the {\ct SPEC} lines. If, for example, the PVC {\ct SPEC} was defined as {\ct CH1.5Cl0.5}, then the {\ct REAC} would require {\ct NU=-2,-1,1}. A fixed turbulent mixing time of 0.1~s is used for this example only because the reactants are initially mixed within a chamber with no imposed flow. Normally, this parameter is not necessary.
 
 \begin{figure}[ht]
 \centering \includegraphics[height=2.2in]{SCRIPT_FIGURES/pvc_combustion_spec}
 \caption[Results of the {\ct pvc\_combustion} test case]{Product species mass fractions for model PVC example.}
-\label{pvc_combustion}
+\label{pvc_combustion_fig}
 \end{figure}
 
 
@@ -5804,7 +5806,7 @@ For calculating the absorption of thermal radiation by particles, FDS uses a run
 
 \subsection{Size Distribution}
 \label{info:particle_size}
-\label{droplet_distributions_2}
+\label{droplet_distributions}
 
 The size distribution of liquid droplets is specified using a cumulative volume fraction (CVF)\footnote{The CVF indicates the fraction of total mass carried by droplets less than the given diameter.} indicated by the character string {\ct DISTRIBUTION} on the {\ct PART} line. The default is \linebreak[3] {\ct 'ROSIN-RAMMLER-LOGNORMAL'}:
 \be F(D) = \left\{
@@ -5814,7 +5816,7 @@ The size distribution of liquid droplets is specified using a cumulative volume 
    1 - \exp \left( -0.693 \left(\frac{D}{D_{\rm v,0.5}}\right)^\gamma \right)      & (D > D_{\rm v,0.5})
    \end{array} \right.
 \ee
-Alternatively, you can specify {\ct 'LOGNORMAL'} or {\ct 'ROSIN-RAMMLER'} alone rather than the combination of the two. Figure~\ref{droplet_distributions} displays the possible size distributions. Notice that the {\ct 'LOGNORMAL'} and \linebreak[4]{\ct 'ROSIN-RAMMLER'} distributions have undesirable attributes at opposite tails, which is why the combination of the two is commonly used. Figure~\ref{droplet_distributions} also shows a comparison between the prescribed distribution and the actual realized distribution of droplet sizes. The dashed lines show the measured droplet size distributions, while the solid lines show the prescribed sampling distributions. The sampled distributions are measured with the {\ct PDPA\_HISTOGRAM} function. Sample size of 10000 droplets was used.
+Alternatively, you can specify {\ct 'LOGNORMAL'} or {\ct 'ROSIN-RAMMLER'} alone rather than the combination of the two. Figure~\ref{droplet_distributions_fig} displays the possible size distributions. Notice that the {\ct 'LOGNORMAL'} and \linebreak[4]{\ct 'ROSIN-RAMMLER'} distributions have undesirable attributes at opposite tails, which is why the combination of the two is commonly used. Figure~\ref{droplet_distributions_fig} also shows a comparison between the prescribed distribution and the actual realized distribution of droplet sizes. The dashed lines show the measured droplet size distributions, while the solid lines show the prescribed sampling distributions. The sampled distributions are measured with the {\ct PDPA\_HISTOGRAM} function. Sample size of 10000 droplets was used.
 
 The median volumetric diameter, $D_{\rm v,0.5}$, is specified via the parameter {\ct DIAMETER} ($\mu$m) on the {\ct PART} line. You must specify the {\ct DIAMETER} in cases where the droplets evaporate (in which case you also need to specify a {\ct SPEC\_ID} to indicate the gas species generated by the evaporating droplets). The width of the lognormal distribution, $\sigma$, is specified with {\ct SIGMA\_D} on the {\ct PART} line. The width of the Rosin-Rammler distribution, $\gamma$, is specified with {\ct GAMMA\_D} (default 2.4). Note that in the combined distribution, the parameter, $\sigma$, is calculated $\sigma=2/(\sqrt{2\pi} \, (\ln\,2) \; \gamma)=1.15/\gamma$ which ensures that the two functions are smoothly joined at $D = D_{\rm v,0.5}$. You can also add a value for {\ct SIGMA\_D} to the {\ct PART} line if you want to over-ride this feature. The larger the value of $\gamma$, the narrower the droplet size is
 distributed about the median value.
@@ -5827,7 +5829,7 @@ distributed about the median value.
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/droplet_distributions_4}
 \end{tabular}
 \caption[Droplet size distributions]{Droplet size distributions. The first three plots are based on a specified CVF (black curves) from which the CNF (red curves) is derived. The fourth plot (lower right) is an example of a specified CNF from which the CVF is derived. The solid lines show the prescribed sampling distribution, while the dashed lines show the actual sampled droplet size distribution, measured with the {\ct PDPA\_HISTOGRAM} functionality.}
-\label{droplet_distributions}
+\label{droplet_distributions_fig}
 \end{figure}
 
 
@@ -5839,7 +5841,7 @@ You can specify your own cumulative number fraction (CNF)\footnote{The CNF indic
 ...
 &RAMP ID='my CNF', T=2000., F=1.000000 /
 \end{lstlisting}
-Note that the {\ct RAMP} variable {\ct T} indicates the diameter and is given in micrometers. The fourth plot in Fig.~\ref{droplet_distributions} is an example of where the CNF is specified and the CVF is calculated from it. It is essentially the reverse of what is shown in the first plot, where the CVF is specified and the CNF is calculated from it.
+Note that the {\ct RAMP} variable {\ct T} indicates the diameter and is given in micrometers. The fourth plot in Fig.~\ref{droplet_distributions_fig} is an example of where the CNF is specified and the CVF is calculated from it. It is essentially the reverse of what is shown in the first plot, where the CVF is specified and the CNF is calculated from it.
 
 As droplets are created in the simulation, their diameters are randomly chosen based on the given distribution. You can prevent excessively large droplets from being chosen by specifying a {\ct MAXIMUM\_DIAMETER}, which is assigned an infinitely large value by default. Droplets less than a specified {\ct MINIMUM\_DIAMETER} are assumed to evaporate in a single time step. The default value is 0.005 times the value of {\ct DIAMETER}. The droplet diameter range is divided into a series of bins\footnote{By default, the range of particle sizes is divided into six bins, and the sampled particles are divided among these bins. This ensures that a reasonable number of particles are assigned to the entire spectrum of sizes. To change the default number of bins, set {\ct N\_STRATA} on the {\ct PART} line.}. To avoid very small particle weights, the distribution is clipped at the cumulative fractions of {\ct CNF\_CUTOFF} and (1 - {\ct CNF\_CUTOFF}).  Note that {\ct CNF\_CUTOFF} is set on the {\ct MISC} line. The default value of {\ct CNF\_CUTOFF} is 0.005.
 
@@ -7772,6 +7774,7 @@ This is similar functionality to the {\ct CUSTOM} control function, but it allow
 
 \subsection{Freezing the Output Value, Example Case: hrr\_freeze}
 \label{info:freeze_device}
+\label{hrr_freeze}
 
 There are occasions where you may want the value of a {\ct RAMP} to stop updating.  For example, if you are simulating a growing fire in a room with sprinklers, you may wish to stop the fire from growing when a sprinkler over the fire activates.  This type of action can be accomplished by changing the input of the {\ct RAMP} to a {\ct DEVC} (see the previous section) and then giving that {\ct DEVC} either a {\ct NO\_UPDATE\_DEVC\_ID} or a {\ct NO\_UPDATE\_CTRL\_ID}.  When the specified controller changes its state to {\ct .TRUE.} it will cause the {\ct DEVC} to stop updating its value.  Since the {\ct DEVC} is being used as the independent variable to a {\ct RAMP}, the {\ct RAMP} will have its output remain the same.  This is shown in the example below.  A fire is given a linear {\ct RAMP} from 0 to 1000~kW/m$^2$ over 50~s. Rather than using the simulation time, the {\ct RAMP} uses a {\ct DEVC} for the time.  The timer is set to freeze when another {\ct DEVC} measuring time reaches 200~$^\circ$C.  Figure~\ref{freeze_hrr} shows the result of these inputs in the test case {\ct hrr\_freeze} where it can be seen that the pyrolysis rate stops increasing once the gas temperature reaches 200~$^\circ$C.
 \begin{lstlisting}
@@ -8343,7 +8346,7 @@ In fact, FDS creates a Lagrangian particle that records the AST at the desired l
 \subsubsection{Example: AST vs. Surface Temperature}
 \label{adiabatic_surface_temperature}
 
-The test case called {\ct adiabatic\_surface\_temperature.fds} in the {\ct Radiation} folder simulates a 0.1~mm steel plate being heated by a thermal plume. The plate is perfectly insulated ({\ct BACKING='INSULATED'} on the {\ct SURF} line) and its steady-state temperature should be equivalent to its adiabatic surface temperature or AST. The left plot of Fig.~\ref{adiabatic_surface_temperature} shows the plate temperature rising towards the AST, much as an actual plate thermometer would. The right plot simply shows the AST calculated using the {\ct QUANTITY} {\ct 'ADIABATIC SURFACE TEMPERATURE'} applied via a {\ct DEVC} at the plate surface, and the AST calculated using the {\ct QUANTITY} {\ct 'ADIABATIC SURFACE TEMPERATURE GAS'} applied via a {\ct DEVC} positioned just in front of the plate. The idea of the latter device would be to record the AST even if the plate were not actually represented in the simulation. For these two recordings of the AST to be identical, the plate {\ct SURF}ace conditions and the AST-Gas {\ct PROP}erties must both include the same explicitly-defined {\ct HEAT\_TRANSFER\_COEFFICIENT} and {\ct EMISSIVITY}.
+The test case called {\ct adiabatic\_surface\_temperature.fds} in the {\ct Radiation} folder simulates a 0.1~mm steel plate being heated by a thermal plume. The plate is perfectly insulated ({\ct BACKING='INSULATED'} on the {\ct SURF} line) and its steady-state temperature should be equivalent to its adiabatic surface temperature or AST. The left plot of Fig.~\ref{adiabatic_surface_temperature_fig} shows the plate temperature rising towards the AST, much as an actual plate thermometer would. The right plot simply shows the AST calculated using the {\ct QUANTITY} {\ct 'ADIABATIC SURFACE TEMPERATURE'} applied via a {\ct DEVC} at the plate surface, and the AST calculated using the {\ct QUANTITY} {\ct 'ADIABATIC SURFACE TEMPERATURE GAS'} applied via a {\ct DEVC} positioned just in front of the plate. The idea of the latter device would be to record the AST even if the plate were not actually represented in the simulation. For these two recordings of the AST to be identical, the plate {\ct SURF}ace conditions and the AST-Gas {\ct PROP}erties must both include the same explicitly-defined {\ct HEAT\_TRANSFER\_COEFFICIENT} and {\ct EMISSIVITY}.
 
 \begin{figure}[ht]
 \includegraphics[width=3in]{SCRIPT_FIGURES/adiabatic_surface_temperature}
@@ -9992,7 +9995,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MULT\_ID }                   & Character         & Section~\ref{info:MULT}                       &                &               \\ \hline
 {\ct N\_PARTICLES}                & Integer           & Section~\ref{info:initial_droplets}           &                & 0             \\ \hline
 {\ct N\_PARTICLES\_PER\_CELL}     & Integer           & Section~\ref{info:initial_droplets}           &                & 0             \\ \hline
-{\ct PACKING\_RATIO}              & Real              & Section~\ref{pine_needles}                    &                &               \\ \hline
+{\ct PACKING\_RATIO}              & Real              & Section~\ref{pine_needles}                 &                &               \\ \hline
 {\ct PART\_ID}                    & Character         & Section~\ref{info:initial_droplets}           &                &               \\ \hline
 {\ct PARTICLE\_WEIGHT\_FACTOR}    & Real              & Section~\ref{info:initial_droplets}           &                & 1.            \\ \hline
 {\ct RADIUS}                      & Real              & Section~\ref{info:initial_droplets}           & m              &               \\ \hline
@@ -10897,7 +10900,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct NET\_HEAT\_FLUX}                                     & Real            & Section~\ref{info:convection}             & kW/m$^2$            &                         \\ \hline
 {\ct NO\_SLIP}                                            & Logical         & Section~\ref{info:WALL_MODEL}             &                     & {\ct .FALSE.}           \\ \hline
 {\ct NPPC}                                                & Integer         & Section~\ref{info:particle_flux}          &                     & 1                       \\ \hline
-{\ct PACKING\_RATIO(:) }                                  & Real Array      & Section~\ref{pine_needles}                &                     &                         \\ \hline
+{\ct PACKING\_RATIO(:) }                                  & Real Array      & Section~\ref{pine_needles}             &                     &                         \\ \hline
 {\ct PARTICLE\_MASS\_FLUX}                                & Real            & Section~\ref{info:particle_flux}          & \si{kg/(m^2.s)}     &                         \\ \hline
 {\ct PARTICLE\_SURFACE\_DENSITY}                          & Real            & Section~\ref{info:particle_flux}          & kg/m$^2$            &                         \\ \hline
 {\ct PART\_ID}                                            & Character       & Section~\ref{info:particle_flux}          &                     &                         \\ \hline
@@ -10921,7 +10924,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SPEC\_ID}                                            & Character       & Section~\ref{info:MASS_FLUX}              &                     &                         \\ \hline
 {\ct SPREAD\_RATE}                                        & Real            & Section~\ref{info:spread}                 & m/s                 &                         \\ \hline
 {\ct STRETCH\_FACTOR(:) }                                 & Real            & Section~\ref{info:solid_phase_stability}  &                     & 2.                      \\ \hline
-{\ct SURFACE\_VOLUME\_RATIO(:) }                          & Real            & Section~\ref{pine_needles}                & 1/m                 &                         \\ \hline
+{\ct SURFACE\_VOLUME\_RATIO(:) }                          & Real            & Section~\ref{pine_needles}             & 1/m                 &                         \\ \hline
 {\ct TAU\_EF}                                             & Real            & Section~\ref{info:RAMP_Time}              & s                   & 1.                      \\ \hline
 {\ct TAU\_MF(:)}                                          & Real Array      & Section~\ref{info:RAMP_Time}              & s                   & 1.                      \\ \hline
 {\ct TAU\_PART}                                           & Real            & Section~\ref{info:RAMP_Time}              & s                   & 1.                      \\ \hline
