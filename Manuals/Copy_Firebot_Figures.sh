@@ -6,11 +6,11 @@ USE_SSH=
 # use when you can't cross mount directories containing firebot
 #USE_SSH=1
 
-# blaze
+# set firebot host to blaze (comment burn entry)
 HOST=blaze.el.nist.gov
 HOSTDIR=/home2/smokevis2/firebot/FireModels_clone/fds/
 
-# burn
+# set firebot host to burn (comment blaze entry))
 #HOST=burn.el.nist.gov
 #HOSTDIR=/home4/firebot/FireModels_clone/fds/
 
