@@ -4,7 +4,7 @@ USE_SSH=
 
 # uncomment following USE_SSH line to use ssh to copy figures 
 # use when you can't cross mount directories containing firebot
-USE_SSH=1
+#USE_SSH=1
 
 # blaze
 HOST=blaze.el.nist.gov
