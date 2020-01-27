@@ -6206,7 +6206,7 @@ Note that the {\ct DIAMETER} ($\mu$m) on the {\ct INIT} line is only valid for l
 
 \begin{figure}[ht]
 \centering
-\includegraphics[scale=0.55]{SCRIPT_FIGURES/bucket_test_3}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/bucket_test_3}
 \caption[Results of the {\ct bucket\_test\_3} case]{Accumulated water collected at the floor in the {\ct bucket\_test\_3} case.}
 \label{bucket_test_3_fig}
 \end{figure}
@@ -6222,6 +6222,31 @@ If you want to delay the insertion of droplets, you can use either a {\ct DEVC\_
 
 If you do not want to introduce the particles right at the start of the simulation, use {\ct T\_INSERT} (s) to insert the particle(s) at some later time.
 
+\subsubsection{Controlled Particle Movement}
+\label{info:path_ramp}
+
+Particles can either be static, massless tracers (go with the flow), massive droplets or thermally thick solids (experience drag), or have its position controlled by a {\ct PATH\_RAMP}.  A scenario where this might be useful is when you have a heat or mass source that changes position in time.  Or, you might want a {\ct DEVC} measurement location to change with time; the {\ct DEVC} can be linked to a particle through an {\ct INIT} line with a {\ct PATH\_RAMP}, as we will discuss next.
+
+The {\ct INIT} parameter {\ct PATH\_RAMP(1:3)} is a list of three character strings for the ramp IDs associated with the $x$, $y$, and $z$ positions of a particle.  We use the volume insert method for the particle, with {\ct N\_PARTICLES=1}.  An example may be found in the verification case {\ct part\_path\_ramp\_jog.fds} in the {\ct fds/Verification/Miscellaneous/} directory.  The output of the example is shown in Fig.~\ref{fig:part_path_ramp_jog}.  The basics that are needed to implement the path ramp are the following:
+
+\begin{lstlisting}
+&RAMP ID='PART RAMP X', T=0,  F=0/ start position at X=0 m at Time=0 s
+&RAMP ID='PART RAMP X', T=10, F=5/ move linearly to  X=5 m at Time=10 s
+! define a particle class as a mass source
+&PART ID='MASS SOURCE', SAMPLING_FACTOR=1, SURF_ID=..., PROP_ID=.../
+! initialize the particle position and assign path ramp
+&INIT ID='JOG', XB=..., PART_ID='MASS SOURCE',
+      PATH_RAMP(1)='PART RAMP X', N_PARTICLES=1 /
+! monitor the position (or other quantities) using a device
+&DEVC QUANTITY='PARTICLE X', INIT_ID='JOG', ID='X', TIME_AVERAGED=F /
+\end{lstlisting}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/part_path_ramp_jog}
+\caption[Results of the {\ct part\_path\_ramp\_jog} case]{Particle path for {\ct part\_path\_ramp\_jog} case.}
+\label{fig:part_path_ramp_jog}
+\end{figure}
 
 \clearpage
 
@@ -9998,6 +10023,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct PACKING\_RATIO}              & Real              & Section~\ref{pine_needles}                 &                &               \\ \hline
 {\ct PART\_ID}                    & Character         & Section~\ref{info:initial_droplets}           &                &               \\ \hline
 {\ct PARTICLE\_WEIGHT\_FACTOR}    & Real              & Section~\ref{info:initial_droplets}           &                & 1.            \\ \hline
+{\ct PATH\_RAMP(3)}               & Character         & Section~\ref{info:path_ramp}                  &                &               \\ \hline
 {\ct RADIUS}                      & Real              & Section~\ref{info:initial_droplets}           & m              &               \\ \hline
 {\ct RAMP\_Q}                     & Character         & Section~\ref{info:init_hrrpuv}                &                &               \\ \hline
 {\ct SHAPE}                       & Character         & Section~\ref{info:initial_droplets}           &                & {\ct 'BLOCK'} \\ \hline
