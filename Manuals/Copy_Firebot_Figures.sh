@@ -1,20 +1,26 @@
 #!/bin/bash
 
-USE_SSH=1
+#uncomment following line to use ssh to copy figures (use when you can't cross mount directories containing firebot)
+#USE_SSH=1
 
-#uncomment following line to use regular copies (assumes that firebot directories are cross mounted on this computer)
-#USE_SSH=
+USE_SSH=
+
+# blaze
+HOST=blaze.el.nist.gov
+HOSTDIR=/home2/smokevis2/firebot/FireModels_clone/fds/
+
+# burn
+#HOST=burn.el.nist.gov
+#HOSTDIR=/home4/firebot/FireModels_clone/fds/
 
 if [ "$USE_SSH" == "" ]; then
   CP=cp
-  export FIREBOTROOT=/home2/smokevis2/firebot/FireModels_clone/fds/ # blaze firebot
-  #FIREBOTROOT=/home4/firebot/FireModels_clone/fds/                 # burn firebot
+  export FIREBOTROOT=$HOSTDIR
 fi
 
 if [ "$USE_SSH" == "1" ]; then
   CP="scp -q"
-  export FIREBOTROOT=blaze.el.nist.gov:/home2/smokevis2/firebot/FireModels_clone/fds/ # blaze firebot
-  #FIREBOTROOT=burn.el.nist.gov:/home4/firebot/FireModels_clone/fds/                  # burn firebot
+  export FIREBOTROOT=$HOST:$HOSTDIR
 fi
 
 export FIREBOTMANS=$FIREBOTROOT/Manuals/
