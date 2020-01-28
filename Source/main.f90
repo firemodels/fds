@@ -2935,6 +2935,14 @@ SNODE = PROCESS(NOM)
                LP%STORAGE_INDEX = STORAGE_INDEX_SAVE
                M4%PARTICLE_STORAGE(IPC)%LOGICALS(:,STORAGE_INDEX_SAVE) = M2%ADOPT_PARTICLE_STORAGE(IPC)%LOGICALS(:,CNT)
                CALL GET_IJK(LP%X,LP%Y,LP%Z,NOM,XI,YJ,ZK,LP%ONE_D%IIG,LP%ONE_D%JJG,LP%ONE_D%KKG)
+               IF (LP%INIT_INDEX>0) THEN
+                  DO NN=1,N_DEVC
+                     IF (DEVICE(NN)%INIT_ID==INITIALIZATION(LP%INIT_INDEX)%ID) THEN
+                        DEVICE(NN)%LP_TAG = LP%TAG
+                        DEVICE(NN)%PART_CLASS_INDEX = IPC
+                     ENDIF
+                  ENDDO
+               ENDIF
             ENDDO
             M4%NLP = M4%NLP + M2%N_PART_ADOPT(IPC)
          ENDDO
