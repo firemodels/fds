@@ -6238,6 +6238,7 @@ If you do not want to introduce the particles right at the start of the simulati
 
 \subsubsection{Controlled Particle Movement}
 \label{info:path_ramp}
+\label{part_path_ramp_jog}
 
 Particles can either be static, massless tracers (go with the flow), massive droplets or thermally thick solids (experience drag), or have its position controlled by a {\ct PATH\_RAMP}.  A scenario where this might be useful is when you have a heat or mass source that changes position in time.  Or, you might want a {\ct DEVC} measurement location to change with time; the {\ct DEVC} can be linked to a particle through an {\ct INIT} line with a {\ct PATH\_RAMP}, as we will discuss next.
 
@@ -6262,7 +6263,6 @@ The {\ct INIT} parameter {\ct PATH\_RAMP(1:3)} is a list of three character stri
 \label{fig:part_path_ramp_jog}
 \end{figure}
 
-\clearpage
 
 \section{Special Topic: Suppression by Water}
 \label{info:suppression}
