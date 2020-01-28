@@ -19,6 +19,7 @@ cd FM_SNL;  ./Run_All.sh $OPTIONS; cd ..
 cd FM_Vertical_Wall_Flames;  ./Run_All.sh $OPTIONS; cd ..
 cd Harrison_Spill_Plumes;  ./Run_All.sh $OPTIONS; cd ..
 cd Heated_Channel_Flow;  ./Run_All.sh $OPTIONS; cd ..
+cd Juelich_SETCOM;  ./Run_All.sh $OPTIONS; cd ..
 cd LNG_Dispersion;  ./Run_All.sh $OPTIONS; cd ..
 cd McCaffrey_Plume;  ./Run_All.sh $OPTIONS; cd ..
 cd Moody_Chart; ./Run_All.sh $OPTIONS; cd ..
@@ -38,7 +39,6 @@ cd NRCC_Smoke_Tower;  ./Run_All.sh $OPTIONS; cd ..
 cd Pool_Fires;  ./Run_All.sh $OPTIONS; cd ..
 cd Purdue_Flames;  ./Run_All.sh $OPTIONS; cd ..
 cd Sandia_Plumes;  ./Run_All.sh $OPTIONS; cd ..
-cd Setcom;  ./Run_All.sh $OPTIONS; cd ..
 cd Smyth_Slot_Burner;  ./Run_All.sh $OPTIONS; cd ..
 cd SWJTU_Tunnels;  ./Run_All.sh $OPTIONS; cd ..
 cd Turbulent_Jet;  ./Run_All.sh $OPTIONS; cd ..
