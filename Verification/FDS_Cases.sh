@@ -372,6 +372,7 @@ $QFDS -p 8 -d Pressure_Solver duct_flow_uglmat.fds
 $QFDS -p 8 -d Pressure_Solver duct_flow_uscarc.fds
 $QFDS -p 5 -d Pressure_Solver hallways.fds
 $QFDS -p 8 -d Pressure_Solver tunnel_demo.fds
+$QFDS -p 8 -d Pressure_Solver tunnel_demo_glmat.fds
 $QFDS -d Pressure_Solver pressure_iteration2d_1mesh.fds
 $QFDS -p 8 -d Pressure_Solver pressure_iteration2d_default.fds
 $QFDS -p 8 -d Pressure_Solver pressure_iteration2d_tight.fds
