@@ -1603,29 +1603,103 @@ It is recommended that you also specify {\ct PROJECTION=.TRUE.} on {\ct MISC} if
 \chapter{Pressure}
 \label{info:PRES}
 
-Normally, you need not set any parameters related to the solution of the Poisson equation for pressure. However, there are circumstances when you might need to change default numerical values. This is done through the {\ct PRES} namelist group (Table~\ref{tbl:PRES}).
+Normally, you need not set any parameters related to the solution of the Poisson equation for pressure. However, there are circumstances when you might need to change default numerical values. This is done through the {\ct PRES} namelist group (Table~\ref{tbl:PRES}). 
+
+A unique feature of FDS, which distinguishes it from other CFD models, is that it employs a low Mach number approximation of the Navier-Stokes equations. For low speed flow simulations, it can be assumed that sound waves and pressure disturbances travel infinitely fast, rather than at the speed of sound, which is approximately 340~m/s at ambient temperature and pressure. Typical compartment fires induce flows of a few tens of meters per second, much less than the sound speed. However, for a simulation of a fire within a 1000~m tunnel, say, the propagation time of disturbances is a few seconds. If the tunnel has forced flow at one end and an opening at the other, it would take a few seconds for the pressure pulse from the fan to reach the opposite end. However, in the low Mach number formulation, the pulse reaches the other end instantaneously.
+
+In FDS, the pressure, $p(\bx,t)$, a function of space and time, is decomposed into a ``background'' component, $\overline{p}(z,t)$, and a perturbation, $\tp(\bx,t)$. The background pressure is a function only of time and the vertical spatial coordinate, $z$, which accounts for the ambient stratification of the atmosphere. For a typical compartment fire simulation that is open to the atmosphere, $\overline{p}$ is essentially constant. The perturbation pressure drives the fire-induced flow field.
+
+The equation for $\tp$ is an elliptic partial differential equation (PDE) that is formed by taking the divergence of the momentum equation, which contains the forcing term $\nabla \tp / \rho$. Ideally, this PDE would be of the form:
+\be
+   \nabla \cdot \left( \frac{1}{\rho} \right) \nabla \tp = \; \cdots
+\ee
+The discretized form of this PDE, that is, its approximation on a numerical grid, is a linear system of equations, $\mathbf{A} \mathbf{\tp} = \mathbf{b}$, where $\mathbf{A}$ is a sparse (i.e. mostly zeros) matrix, $\mathbf{\tp}$ is a vector whose number of elements equals the number of grid cells in the computational domain, and $\mathbf{b}$ is a vector representing the various discretized terms of the momentum equation. The CPU and memory requirements necessary to solve this huge system of equations could easily dwarf all other parts of the simulation. There are two remedies to this problem. First, the pressure field is solved within each individual mesh of the domain, and the individual pressure fields are ``stitched'' together using multiple iterations of the solver. Second, the matrix $\mathbf{A}$, representing the operator $\nabla \cdot (1/\rho) \nabla$ is simplified by replacing the variable density $\rho(\bx,t)$ by its ambient value so that the matrix $\mathbf{A}$ need not be recomputed at each time step, and a very fast and efficient solver using fast Fourier transforms (FFT) can be used.
+
+In the next two sections, these simplifications of the Poisson equation will be discussed, along with parameters that you might need to set to increase the accuracy of the solution for certain applications.
+
 
 \section{Accuracy of the Pressure Solver on Multiple Meshes}
 \label{pressure_solver}
 
-FDS uses a low-Mach number formulation of the Navier-Stokes equations. One of the consequences of this is that the speed of sound is assumed infinite, and that the pressure throughout the computational domain is affected, instantaneously, by local changes in the flow field. A simple example of this is when air is pushed through a tunnel. If the tunnel has forced flow at one end and an opening at the other, the volume flow at the opening is the same as that which is forced at the other end. Without any heat addition, the air is assumed incompressible. Information is passed through the tunnel instantaneously in the model via a solution of a linear system of equations for the pressure. For a single mesh, the solution of this Poisson equation for the pressure is very accurate. However, for multiple meshes, there is potentially a delay in information passing throughout the domain because by default the Poisson equation is solved on each individual mesh, without any influence from the larger computational domain. The details of the numerical approach can be found in the FDS Technical Reference Guide.
-
-Another limitation of the pressure solver is that at solid surfaces that are not part of the boundary of the computational domain, the pressure solver enforces a no-flux boundary condition. However, it is not perfect, and it is possible to have a non-zero normal velocity at a solid surface. For most applications, this velocity is so small that it has a negligible effect on the solution.
+For a single mesh, the solution of the simplified (i.e. separable) form of the Poisson equation for the pressure can be solved relatively quickly and accurately (i.e. to machine precision) using an FFT-based solver. However, for multiple meshes of varying grid resolution and configuration, it is not possible to use the fast solver for the global solution of the Poisson equation. Instead, the fast solver is employed mesh by mesh in parallel, and the pressure field on each mesh is forced to match at the mesh boundaries through repeated solves on the individual meshes. It is prohibitively time-consuming to iterate the global pressure solution to the same level of accuracy as the local pressure solutions. The inaccuracy of the global pressure solution is manifested in a slight mismatch in the normal component of velocity at the mesh boundaries. An error tolerance is specified for this mismatch in velocity. These small errors in the normal component of velocity also appear within an individual mesh at solid, internal boundaries. The fast, FFT-based solver can only enforce exact no-flux conditions at exterior boundaries of the mesh.
 
 If either the error in the normal component of the velocity at a mesh interface or at a solid boundary is large, you can reduce it by making more than the default number of calls to the pressure solver at each time step. To do so, specify {\ct VELOCITY\_TOLERANCE} on the {\ct PRES} line to be the maximum allowable normal velocity component on the solid boundary or the largest error at a mesh interface. It is in units of m/s. If you set this, experiment with different values, and monitor the number of pressure iterations required at each time step to achieve your desired tolerance. The default value is $\dx/2$, where $\dx$ is the characteristic grid cell size. The number of iterations are written out to the file {\ct CHID.out}. If you use a value that is too small, the CPU time required might be prohibitive. The maximum number of iterations for each half of the time step is given by {\ct MAX\_PRESSURE\_ITERATIONS}, also on the {\ct PRES} line. Its default value is 10.
 
 By default, FDS will suspend the pressure iterations if the error does not drop below \linebreak[4]{\ct ITERATION\_SUSPEND\_FACTOR} (0.95, by default) of its previous value. If you do not want FDS to suspend the pressure iteration, set {\ct SUSPEND\_PRESSURE\_ITERATIONS} to {\ct .FALSE.} on the {\ct PRES} line. This will be done automatically if you change the default values of {\ct VELOCITY\_TOLERANCE} or \linebreak[4]{\ct MAX\_PRESSURE\_ITERATIONS}.
 
-If {\ct .TRUE.}, the parameter {\ct CHECK\_POISSON} tells FDS to check that the left-hand and right-hand sides of the Poisson equation for $H$ are equivalent (see the FDS Tech Guide \cite{FDS_Math_Guide}).  The error is printed to the {\ct CHID.out} file.
+To verify the accuracy of the pressure solution on each mesh, set {\ct CHECK\_POISSON} to {\ct .TRUE.} on the {\ct PRES} line, instructing FDS to check that the left-hand and right-hand sides of the Poisson equation are equivalent (see the FDS Tech Guide \cite{FDS_Math_Guide}).  The error is printed to the {\ct CHID.out} file. Note that this verifies the accuracy of the {\em local}, not the global, pressure solution. To check the accuracy of the global pressure solution, see Section~\ref{tunnel_demo}.
+
+
+\subsection{Optional Pressure Solver}
+\label{optional_pressure_solver}
+
+The default Poisson solver in FDS ({\ct SOLVER='FFT'} on the {\ct PRES} line) is based on the package of linear algebra routines called CrayFishpak. For non-overlapping, non-stretched meshes at the same refinement level covering a single connected domain (single pressure zone), you can specify {\ct SOLVER='UGLMAT'} on the {\ct PRES} line to solve the global Poisson equation over the entire domain. The solver used is the Intel\textsuperscript{\textregistered} MKL Sparse Cluster Solver. When using {\ct 'UGLMAT'}, the unknown values of the pressure live only in gas-phase cells, allowing for the normal components of velocity at a solid surface to be computed exactly (no velocity penetration error).  Strictly speaking, in this mode, FDS is no longer using an ``immersed boundary method'' for flow obstructions---the pressure solution is now ``unstructured.'' If you specify {\ct SOLVER='GLMAT'}, the pressure is solved in both solid and gas cells using an immersed boundary method for flow obstructions, the same as the default FFT solver.  This mode will reproduce the exact same pressure solution as a single mesh FFT solve.  That is, velocity errors at any mesh boundaries will be eliminated. As UGLMAT and GLMAT are based on Intel\textsuperscript{\textregistered} MKL parallel LU decomposition solver, they require computation and storage of global factorization matrices. Depending on the size of the problem, these operations can be expensive in terms of both CPU time and memory. Our tests find it suitable for problems with up to a million cells on a multi-core workstation with 64~GB of RAM. Note that currently a single discretization matrix is built for all gas cells defined on the model, therefore the solver is not meant to be used in cases of multiple sealed compartments and pressure zones.
+
+
+\subsection{Example Case: Pressure\_Solver/duct\_flow}
+\label{duct_flow}
+
+To demonstrate how to improve the accuracy of the pressure solver, consider the flow of air through a square duct that crosses several meshes. In the sample input file, {\ct duct\_flow.fds}, air is pushed through a 1 m$^2$ duct at 1~m/s. With no thermal expansion, the volume flow into the duct ought to equal the volume flow out of the duct. Figure~\ref{duct_flow_fig} displays the computed inflow and outflow as a function of time and the number of pressure iterations required. The default pressure solution strategy uses block-wise direct FFT solves combined with a direct forcing immersed boundary method to model flow obstructions.  Hence, there are two sources of pressure error: one at a mesh interface and one at a solid boundary.  The default pressure iteration scheme tries to drive both sources of error to the specified (or default) velocity tolerance. In the {\ct duct\_flow} case, the {\ct VELOCITY\_TOLERANCE} has been set to 0.001~m/s with {\ct MAX\_PRESSURE\_ITERATIONS} set to 1000 and the grid cell size is 0.2~m.  For the default scheme (FFT + IBM), the outflow does not match the inflow exactly because of inaccuracies at the solid and mesh boundaries.  We have also included the results using the UGLMAT solver with an unstructured pressure matrix, which allows the flow solver to enforce the impermeability condition (zero normal component of velocity) at a solid boundary.
+\begin{lstlisting}
+&PRES SOLVER='UGLMAT' /
+\end{lstlisting}
+As seen in Fig.~\ref{duct_flow_fig}, the volume flow matches perfectly and the number of required pressure iterations is one.  Whether this pressure solver strategy is most efficient depends on the problem and the required error tolerance.  In this particular case, the UGLMAT case runs about 25 \% faster than the default FFT case, and it is more accurate. The reason is that a tight tolerance has been specified and the FFT solver is forced to iterate tens or hundreds of times per time step. When run with default error tolerances, the FFT solver is faster, but less accurate, than the GLMAT solvers.
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[width=3in]{SCRIPT_FIGURES/duct_flow}
+\includegraphics[width=3in]{SCRIPT_FIGURES/duct_flow_iterations}
+\end{center}
+\caption[Results of the {\ct duct\_flow} test case]{(Left) Volume flow into and out of a square duct. (Right) The number of pressure iterations as a function of time.}
+\label{duct_flow_fig}
+\end{figure}
+
+
+\subsection{Example Case: Pressure\_Solver/dancing\_eddies}
+\label{dancing_eddies}
+
+In this example, air is pushed through a 30~cm long, two-dimensional channel at 0.5~m/s. A plate obstruction normal to the flow creates a Karman vortex street. The computational domain is divided into 4 meshes. Three simulations are performed: one in which the {\ct VELOCITY\_TOLERANCE} is set to the default value, one in which it is set to a relatively small value, and one in which the {\ct SOLVER='UGLMAT'} is used. Figure~\ref{dancing_eddies_figure} shows the downstream pressure histories for these cases compared to a simulation that uses only one mesh. The case with the tighter tolerance produces a better match to the single mesh solution, but at a higher computational cost---about a factor of 2.5 .  The {\ct SOLVER='UGLMAT'} case takes just a little longer than the default---by a factor of 1.25---but the error is machine precision.  These cases used MPI for domain decomposition, but only a single OpenMP thread.  Note, however, that the UGLMAT solver is threaded, whereas currently the FFT solver (FDS default) is not.
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[width=3in]{SCRIPT_FIGURES/dancing_eddies_default}
+\includegraphics[width=3in]{SCRIPT_FIGURES/dancing_eddies_tight}
+\includegraphics[width=3in]{SCRIPT_FIGURES/dancing_eddies_uglmat}
+\includegraphics[width=\textwidth]{SCRIPT_FIGURES/dancing_eddies}
+\end{center}
+\caption[Results of the {\ct dancing\_eddies} test cases]{(Top) Comparison of pressure traces in the channel for three different settings of {\ct VELOCITY\_TOLERANCE}, the default value (upper-left), a tighter tolerance (upper-right), machine precision from the UGLMAT solver with a single iteration (middle). (Bottom) A contour plot of the pressure after 2~s with the default tolerance.}
+\label{dancing_eddies_figure}
+\end{figure}
+
+One strategy for reducing the computational cost associated with a tightened tolerance on the normal velocity at mesh boundaries is to overlap the meshes. The idea is described in detail for a non-structured mesh in Ref.~\cite{Grinberg:JCP2010}. The basic idea is that a slight overlap of meshes can lead to faster convergence of the pressure solver towards the desired level of accuracy. In the {\ct dancing\_eddies} test case, the case called {\ct dancing\_eddies\_tight} is rerun as {\ct dancing\_eddies\_tight\_overlap} where each mesh is extended an additional 10 grid cells in the longitudinal direction. This increases the work by approximately a factor of 85/75, but it reduces the number of iterations. Figure~\ref{dancing_eddies_overlap} shows the reduction in the number of pressure iterations (left) and the CPU time (right).  It can be seen that the overlap strategy does not ultimately reduce the CPU cost, whereas the UGLMAT solver reduces the cost by a factor of 0.5 by using a single iteration as shown on the left plot.
+
+\begin{figure}[ht]
+\includegraphics[width=3in]{SCRIPT_FIGURES/dancing_eddies_iterations}
+\includegraphics[width=3in]{SCRIPT_FIGURES/dancing_eddies_tight_overlap}
+\caption[Reduction of pressure iterations in the {\ct dancing\_eddies} test cases]{The number of pressure iterations (left) and the total CPU time (right) for overlapped and non-overlapped meshes.}
+\label{dancing_eddies_overlap}
+\end{figure}
+
+
 
 \section{Baroclinic Vorticity}
 \label{baroclinic_torque}
 
-The pressure term in the momentum transport equation solved by FDS is decomposed as follows:
+The second challenge in solving the Poisson equation for pressure is that the matrix of the linear system of equations that is formed when discretizing it does not have constant coefficients because the density, $\rho(\bx,t)$, changes with each new time step. To get around this problem, the pressure term in the momentum equation is decomposed as follows:
 \be
-   \frac{1}{\rho} \nabla \tp = \nabla \left( \frac{\tp}{\rho}\right) - \tp \, \nabla \left(\frac{1}{\rho} \right)
+   \frac{1}{\rho} \nabla \tp = \nabla \left( \frac{\tp}{\rho}\right) - \tp \, \nabla \left(\frac{1}{\rho} \right) \label{p_decomp}
 \ee
-The pressure term is written like this so that a separable elliptic partial differential equation can be solved for the ``total'' pressure, $\cH \equiv |\bu|^2/2 + \tp/\rho$, using a direct solver. The second term is calculated based on the pressure field from the previous time step, a slight approximation necessary to render the pressure equation separable. This term is sometimes referred to as the baroclinic torque, and it is responsible for generating vorticity due to the non-alignment of pressure and density gradients. In versions of FDS prior to 6, the inclusion of the baroclinic torque term was found to sometimes cause numerical instabilities. If it is suspected that the term is responsible for numerical problems, it can be removed by setting {\ct BAROCLINIC=.FALSE.} on the {\ct MISC} line. For example, in the simple helium plume test case below, neglecting the baroclinic torque changes the puffing behavior noticeably. In other applications, however, its effect is less significant. For further discussion of its effect, see Ref.~\cite{Xin:JSS2005}.
+which leads to a Poisson equation that can be solved efficiently:
+\be
+   \nabla^2 \left( \frac{\tp^{n,k}}{\rho^n} \right) = \nabla \cdot \tp^{n,k-1} \, \nabla \left(\frac{1}{\rho^n} \right) + \; \cdots  \label{sepeq}
+\ee
+The superscript $n$ represents the time step. The superscript $k$ indicates that this equation is solved multiple times per time step, and $k$ indicates the iteration number. With each iteration, the old and new values of $\tp$ are driven closer together. The iterations continue\footnote{Keep in mind that the pressure equation iterations continue until three criteria are satisfied. The first deals with the decomposition of the pressure term, the second deals with the normal component of velocity at internal solid surfaces, and the third deals with the mismatch of normal velocity components at mesh interfaces.} until the maximum value of the error term
+\be
+  \epsilon^k = \max_{ijk} \left| \nabla \cdot \left( \frac{1}{\rho^n} \right) \nabla \tp^{n,k} - \nabla^2 \left( \frac{\tp^{n,k}}{\rho^n} \right) + \nabla \cdot \tp^{n,k-1} \, \nabla \left(\frac{1}{\rho^n} \right) \right|
+\ee
+drops below the value of {\ct PRESSURE\_TOLERANCE} which is specified on the {\ct PRES} line. Its default value is $20/\dx^2$~s$^{-2}$, where $\dx$ is the characteristic grid cell size.
+
+The lagged pressure term on the right hand side of Eq.~(\ref{sepeq}) is sometimes referred to as the baroclinic torque, and it is responsible for generating vorticity due to the non-alignment of pressure and density gradients. In versions of FDS prior to 6, the inclusion of the baroclinic torque term was found to sometimes cause numerical instabilities. If it is suspected that the term is responsible for numerical problems, it can be removed by setting {\ct BAROCLINIC=.FALSE.} on the {\ct MISC} line. For example, in the simple helium plume test case below, neglecting the baroclinic torque changes the puffing behavior noticeably. In other applications, however, its effect is less significant. For further discussion of its effect, see Ref.~\cite{Xin:JSS2005}.
 
 
 
@@ -1664,95 +1738,32 @@ This case demonstrates the use of baroclinic correction for an axially-symmetric
 \end{figure}
 
 
-\section{Optional Pressure Solver}
-\label{optional_pressure_solver}
-
-The default linear solver in FDS is the CrayFishpak FFT solver ({\ct SOLVER='FFT'}).  For non-overlapping, non-stretched meshes at the same refinement level covering a single connected domain (single pressure zone), the solver may be changed to {\ct SOLVER='UGLMAT'} on {\ct PRES}. UGLMAT enables the solution of the Poisson equation from the global discretization matrix. The solver used in this mode is the Intel\textsuperscript{\textregistered} MKL Sparse Cluster Solver. When using {\ct SOLVER='UGLMAT'}, the unknown values of the pseudo-pressure, $H$, live only in gas-phase cells.  This allows for the normal components of velocity of a solid surface to be computed exactly (no velocity penetration error).  Strictly speaking, in this mode, FDS is no longer using an ``immersed boundary method'' for flow obstructions---the pressure solution is now ``unstructured''. If the solver is defined as {\ct SOLVER='GLMAT'}, the pressure is solved in both solid and gas cells using an immersed boundary method for flow obstructions, as usual for FDS.  This mode will reproduce the exact same pressure solution as a single mesh FFT solve.  That is, velocity errors at any mesh boundaries will be eliminated. As UGLMAT and GLMAT are based on Intel\textsuperscript{\textregistered} MKL parallel LU decomposition solver, they require computation and storage of global factorization matrices. Depending on the size of the problem, these operations can be taxing on computing resources. Our tests find it suitable for problems with up to a million cells on a multicore workstation with 64 GB of RAM memory. Note that currently a single discretization matrix is built for all gas cells defined on the model, therefore the solver is not meant to be used in cases of multiple sealed compartments and pressure zones.
-
-
-\subsubsection{Example Case: Pressure\_Solver/duct\_flow}
-\label{duct_flow}
-
-To demonstrate how to improve the accuracy of the pressure solver, consider the flow of air through a square duct that crosses several meshes. In the sample input file, {\ct duct\_flow.fds}, air is pushed through a 1 m$^2$ duct at 1~m/s. With no thermal expansion, the volume flow into the duct ought to equal the volume flow out of the duct. Figure~\ref{duct_flow_fig} displays the computed inflow and outflow as a function of time and the number of pressure iterations required. The default pressure solution strategy uses block-wise direct FFT solves combined with a direct forcing immersed boundary method to model flow obstructions.  Hence, there are two sources of pressure error: one at a mesh interface and one at a solid boundary.  The default pressure iteration scheme tries to drive both sources of error to the specified (or default) velocity tolerance. In the {\ct duct\_flow} case, the {\ct VELOCITY\_TOLERANCE} has been set to 0.001~m/s with {\ct MAX\_PRESSURE\_ITERATIONS} set to 1000 and the grid cell size is 0.2~m.  For the default scheme (FFT + IBM), the outflow does not match the inflow exactly because of inaccuracies at the solid and mesh boundaries.  We have also included the results using the UGLMAT solver with an unstructured pressure matrix, which allows the flow solver to enforce the impermeability condition (zero normal component of velocity) at a solid boundary.
-\begin{lstlisting}
-&PRES SOLVER='UGLMAT' /
-\end{lstlisting}
-As seen in Fig.~\ref{duct_flow_fig}, the volume flow matches perfectly and the number of required pressure iterations is one.  Whether this pressure solver strategy is most efficient likely depends on the problem and the required error tolerance.  In this particular case, the UGLMAT case runs about 25 \% faster than the default FFT case, and it is more accurate---easy choice.
-
-\begin{figure}[ht]
-\begin{center}
-\includegraphics[width=3in]{SCRIPT_FIGURES/duct_flow}
-\includegraphics[width=3in]{SCRIPT_FIGURES/duct_flow_iterations}
-\end{center}
-\caption[Results of the {\ct duct\_flow} test case]{(Left) Volume flow into and out of a square duct. (Right) The number of pressure iterations as a function of time.}
-\label{duct_flow_fig}
-\end{figure}
-
-
-\subsubsection{Example Case: Pressure\_Solver/dancing\_eddies}
-\label{dancing_eddies}
-
-In this example, air is pushed through a 30~cm long, two-dimensional channel at 0.5~m/s. A plate obstruction normal to the flow creates a Karman vortex street. The computational domain is divided into 4 meshes. Three simulations are performed: one in which the {\ct VELOCITY\_TOLERANCE} is set to the default value, one in which it is set to a relatively small value, and one in which the {\ct SOLVER='UGLMAT'} is used. Figure~\ref{dancing_eddies_figure} shows the downstream pressure histories for these cases compared to a simulation that uses only one mesh. The case with the tighter tolerance produces a better match to the single mesh solution, but at a higher computational cost---about a factor of 2.5 .  The {\ct SOLVER='UGLMAT'} case takes just a little longer than the default---by a factor of 1.25---but the error is machine precision.  These cases used MPI for domain decomposition, but only a single OpenMP thread.  Note, however, that the UGLMAT solver is threaded, whereas currently the FFT solver (FDS default) is not.
-
-\begin{figure}[ht]
-\begin{center}
-\includegraphics[width=3in]{SCRIPT_FIGURES/dancing_eddies_default}
-\includegraphics[width=3in]{SCRIPT_FIGURES/dancing_eddies_tight}
-\includegraphics[width=3in]{SCRIPT_FIGURES/dancing_eddies_uglmat}
-\includegraphics[width=\textwidth]{SCRIPT_FIGURES/dancing_eddies}
-\end{center}
-\caption[Results of the {\ct dancing\_eddies} test cases]{(Top) Comparison of pressure traces in the channel for three different settings of {\ct VELOCITY\_TOLERANCE}, the default value (upper-left), a tighter tolerance (upper-right), machine precision from the UGLMAT solver with a single iteration (middle). (Bottom) A contour plot of the pressure after 2~s with the default tolerance.}
-\label{dancing_eddies_figure}
-\end{figure}
-
-One strategy for reducing the computational cost associated with a tightened tolerance on the normal velocity at mesh boundaries is to overlap the meshes. The idea is described in detail for a non-structured mesh in Ref.~\cite{Grinberg:JCP2010}. The basic idea is that a slight overlap of meshes can lead to faster convergence of the pressure solver towards the desired level of accuracy. In the {\ct dancing\_eddies} test case, the case called {\ct dancing\_eddies\_tight} is rerun as {\ct dancing\_eddies\_tight\_overlap} where each mesh is extended an additional 10 grid cells in the longitudinal direction. This increases the work by approximately a factor of 85/75, but it reduces the number of iterations. Figure~\ref{dancing_eddies_overlap} shows the reduction in the number of pressure iterations (left) and the CPU time (right).  It can be seen that the overlap strategy does not ultimately reduce the CPU cost, whereas the UGLMAT solver reduces the cost by a factor of 0.5 by using a single iteration as shown on the left plot.
-
-\begin{figure}[ht]
-\includegraphics[width=3in]{SCRIPT_FIGURES/dancing_eddies_iterations}
-\includegraphics[width=3in]{SCRIPT_FIGURES/dancing_eddies_tight_overlap}
-\caption[Reduction of pressure iterations in the {\ct dancing\_eddies} test cases]{The number of pressure iterations (left) and the total CPU time (right) for overlapped and non-overlapped meshes.}
-\label{dancing_eddies_overlap}
-\end{figure}
-
 
 
 
 
 \section{Pressure Considerations in Long Tunnels}
 \label{tunnel_demo}
+\label{tunnel_demo_glmat}
 
-A common application of FDS is tunnel fires, but simulations of fires in long, relatively tight tunnels can have spurious fluctuations in the pressure field that can lead to numerical instabilities. The root cause of the problem is the way that FDS solves the equation for the pressure, $\tp$ (the tilde indicates that this is the {\em perturbation} pressure, or pressure above background). To solve for $\tp$, an elliptic PDE is formed by taking the divergence of the momentum equation, which contains the term $\nabla \tp / \rho$. Ideally, this PDE would be of the form:
-\be
-   \nabla \cdot \left( \frac{1}{\rho^n} \right) \nabla \tp^{n} = \; \cdots
-\ee
-where $n$ indicates the current time step. However, this equation cannot be solved efficiently because the matrix of the linear system of equations that is formed when discretizing it does not have constant coefficients because the density, $\rho^n$, changes with each new time step, $n$. To get around this problem, the pressure term in the momentum equation is decomposed as follows:
-\be
-   \frac{1}{\rho} \nabla \tp = \nabla \left( \frac{\tp}{\rho}\right) - \tp \, \nabla \left(\frac{1}{\rho} \right) \label{p_decomp}
-\ee
-which leads to a Poisson equation that can be solved efficiently:
-\be
-   \nabla^2 \left( \frac{\tp^{n,k}}{\rho^n} \right) = \nabla \cdot \tp^{n,k-1} \, \nabla \left(\frac{1}{\rho^n} \right) + \; \cdots
-\ee
-The superscript $k$ indicates that this equation is solved multiple times, and $k$ indicates the iteration. With each iteration, the old and new values of $\tp$ are driven closer together. The iterations continue\footnote{Keep in mind that the pressure equation iterations continue until three criteria are satisfied. The first deals with the decomposition of the pressure term, the second deals with the normal component of velocity at internal solid surfaces, and the third deals with the mismatch of normal velocity components at mesh interfaces.} until the maximum value of the error term
-\be
-  \epsilon^k = \max_{ijk} \left| \nabla \cdot \left( \frac{1}{\rho^n} \right) \nabla \tp^{n,k} - \nabla^2 \left( \frac{\tp^{n,k}}{\rho^n} \right) + \nabla \cdot \tp^{n,k-1} \, \nabla \left(\frac{1}{\rho^n} \right) \right|
-\ee
-drops below the value of {\ct PRESSURE\_TOLERANCE} which is specified on the {\ct PRES} line. Its default value is $20/\dx^2$~s$^{-2}$, where $\dx$ is the characteristic grid cell size.
-
-If a numerical instability occurs in a simulation involving a tunnel, you might try the following remedies:
+A common application of FDS is tunnel fires, but simulations of fires in long, relatively tight tunnels can have spurious fluctuations in the pressure field that can lead to numerical instabilities. If a numerical instability occurs in a simulation involving a tunnel, you might try the following remedies:
 \begin{enumerate}
-\item Reduce the value of {\ct PRESSURE\_TOLERANCE} on the {\ct PRES} line to alleviate the mismatch between old and new pressure fields.
-\item If you are using multiple meshes, reduce the value of {\ct VELOCITY\_TOLERANCE} on the {\ct PRES} line to force a tighter match of velocities at the mesh boundaries. The default value of {\ct VELOCITY\_TOLERANCE} (with units of m/s) is one-half the grid cell size (with units of m). You may also want to increase the value of {\ct MAX\_PRESSURE\_ITERATIONS} which has a default value of 10.
-\item Create {\ct OPEN} vents at various points along the length of the tunnel, near or at the floor. This models natural leakage in the tunnel, and alleviates wild oscillations in pressure.
+\item Reduce the value of {\ct PRESSURE\_TOLERANCE} on the {\ct PRES} line to alleviate the mismatch between old and new pressure fields. The default value is $20/\dx^2$. A good value to try would be 1/5 to 1/10 of the default value.
+\item If you are using multiple meshes, reduce the value of {\ct VELOCITY\_TOLERANCE} on the {\ct PRES} line to force a tighter match of velocities at the mesh boundaries. The default value of {\ct VELOCITY\_TOLERANCE} (with units of m/s) is $\dx/2$. You may also want to increase the value of {\ct MAX\_PRESSURE\_ITERATIONS} which has a default value of 10. Try 50 as a starting point, and monitor the number of pressure iterations per time step in the {\ct CHID.out} file.
+\item Create {\ct OPEN} vents at various points along the length of the tunnel, near or at the floor. This models natural leakage in the tunnel, and alleviates, to some extent, wild oscillations in pressure. Note that even if the pressure equation is solved perfectly over the entire domain, the low Mach number assumption will still lead to fictitiously large fluctuations in pressure. The {\ct OPEN} boundaries can help relieve these pressure oscillations.
 \end{enumerate}
-A simple test case, {\ct Pressure\_Solver/tunnel\_demo.fds}, demonstrates some of the issues discussed in this section. An 8~MW fire is situated in a 4~m by 4~m by 128~m long tunnel that is sloped 10$^\circ$, closed at the lower end and open at the upper end. The tunnel is divided into 8 meshes, all the same size, with a uniform grid of 20~cm. The case runs for a relatively short amount of time, and a diagnostic file\footnote{Caution: the velocity error file can be quite large. Use it only for relatively short simulations only.} containing information about the velocity and pressure errors is printed out. This file is generated by setting {\ct VELOCITY\_ERROR\_FILE} to {\ct .TRUE.} on the {\ct DUMP} line. The name of the file is {\ct tunnel\_demo\_pressit.csv}. Column~1 of the file is the time step iteration. Column~2 is the pressure iteration within the time step. Column~3 is the total number of pressure iterations for the entire simulation. Columns~4-7 contain the mesh and cell indices where the maximum velocity error occurs, which is listed in Column~8\footnote{The velocity error is the maximum value of the difference between normal velocity components at mesh interfaces or at solid internal boundaries.}. Columns~9-12 contain the mesh and cell indices where the maximum pressure error occurs, which is listed in Column~13.
+Two simple test cases, {\ct Pressure\_Solver/tunnel\_demo.fds} and {\ct tunnel\_demo\_glmat.fds}, demonstrate some of the issues discussed in this section. The first case uses the default FFT-based pressure solver; the second uses GLMAT. An 8~MW fire is situated in a 4~m by 4~m by 128~m long tunnel that is sloped 10$^\circ$, closed at the lower end and open at the upper end. The tunnel is divided into 8 meshes, all the same size, with a uniform grid of 20~cm. The cases run for a relatively short amount of time, and diagnostic files\footnote{Caution: the velocity error file can be quite large. Use it only for relatively short simulations only.} containing information about the velocity and pressure errors are printed out. These file are generated by setting {\ct VELOCITY\_ERROR\_FILE} to {\ct .TRUE.} on the {\ct DUMP} line. The names of the files are {\ct tunnel\_demo\_pressit.csv} and {\ct tunnel\_demo\_glmat\_pressit.csv}. Column~1 of these files is the time step iteration. Column~2 is the pressure iteration within the time step. Column~3 is the total number of pressure iterations for the entire simulation. Columns~4-7 contain the mesh and cell indices where the maximum velocity error occurs, which is listed in Column~8\footnote{The velocity error is the maximum value of the difference between normal velocity components at mesh interfaces or at solid internal boundaries.}. Columns~9-12 contain the mesh and cell indices where the maximum pressure error occurs, which is listed in Column~13.
 
-Figure~\ref{tunnel_demo_fig} shows the velocity and pressure errors over a short span of the simulation. For each quantity, there is a default error tolerance which may or may not be reached depending on whether or not the {\ct MAX\_PRESSURE\_ITERATIONS} (default 10) has been reached, or whether or not the error is reduced by at least 25~\% over the previous iteration. In some situations, the error decreases slowly, and these criteria have been added to avoid excessive iterations that lead to little improvement in accuracy. The errors shown in Fig.~\ref{tunnel_demo_fig} are relatively large because fires in long, closed enclosures like tunnels can generate large fluctuations in pressure that challenge both the multiple mesh capability and the pressure solving algorithm discussed above.
+Figure~\ref{tunnel_demo_fig} shows the velocity and pressure errors for the two cases over a short span of the simulation. For each quantity, there is a default error tolerance which may or may not be reached depending on whether or not the {\ct MAX\_PRESSURE\_ITERATIONS} (default 10) has been reached, or whether or not the error is reduced by at least 25~\% over the previous iteration. In some situations, the error decreases slowly, and these criteria have been added to avoid excessive iterations that lead to little improvement in accuracy. The errors shown in Fig.~\ref{tunnel_demo_fig} are relatively large because fires in long, closed enclosures like tunnels can generate large fluctuations in pressure that challenge both the multiple mesh capability and the pressure solving algorithm discussed above. Note that the simulation using the GLMAT solver has no velocity error in this case because it solves the Poisson equation directly over the entire domain, not mesh by mesh. However, this simulation still requires iterations of the pressure solver to drive the solution closer to the true solution of the inseparable Poisson equation.
 
 \begin{figure}[ht]
-\includegraphics[width=3in]{SCRIPT_FIGURES/tunnel_demo_velocity}
-\includegraphics[width=3in]{SCRIPT_FIGURES/tunnel_demo_pressure}
-\caption[Convergence test for the {\ct tunnel\_demo} test case]{Reduction in velocity and pressure error due to iteration of the pressure solver.}
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=3in]{SCRIPT_FIGURES/tunnel_demo_velocity} &
+\includegraphics[width=3in]{SCRIPT_FIGURES/tunnel_demo_pressure} \\
+\includegraphics[width=3in]{SCRIPT_FIGURES/tunnel_demo_glmat_velocity} &
+\includegraphics[width=3in]{SCRIPT_FIGURES/tunnel_demo_glmat_pressure}
+\end{tabular*}
+\caption[Convergence test for the {\ct tunnel\_demo} test cases]{Reduction in velocity and pressure error due to iteration of the pressure solver. The top two plots are the result of the FFT-based solver; the lower two GLMAT.}
 \label{tunnel_demo_fig}
 \end{figure}
 
@@ -1788,15 +1799,6 @@ While reasonable grid resolution is important, as you can see, the wall models i
 Also, note that a roughness of 0.1 mm is used here only for completeness in testing the code.  While this is indeed the value one finds in the literature for the roughness of concrete, a real-world tunnel may have geometric features along the walls that are unresolved by the grid and may act as roughness elements.  These elements should be considered when specifying the roughness in FDS.
 
 
-\section{Breaking Pressure Zones}
-\label{background_pressure}
-
-There are two parameters on the {\ct PRES} line that control iterative procedures related to the coupling of velocity and pressure. One is
-called {\ct RELAXATION\_FACTOR} and its default value is 1. When there is an error in the normal component of velocity at a solid boundary, this
-parameter dictates that the correction be applied in 1 time step. If its value were 0.5, the correction would be applied in 2 time steps.
-
-A similar parameter is the {\ct PRESSURE\_RELAX\_TIME}. It controls the rate at which the pressures in adjacent compartments are brought into equilibrium following a
-breach. Its default value is 1~s, meaning that equilibrium is achieved in roughly a second.
 
 
 
@@ -4107,6 +4109,18 @@ Pressure will continue to rise due to the fire until the pressure relief due to 
 \end{tabular*}
 \caption[Results of the {\ct door\_crack} test case]{Output of {\ct door\_crack} test case. Symbols are expected values.}
 \end{figure}
+
+
+\subsection{Breaking Pressure Zones}
+\label{background_pressure}
+
+There are two parameters on the {\ct PRES} line that control iterative procedures related to the coupling of velocity and pressure. One is
+called {\ct RELAXATION\_FACTOR} and its default value is 1. When there is an error in the normal component of velocity at a solid boundary, this
+parameter dictates that the correction be applied in 1 time step. If its value were 0.5, the correction would be applied in 2 time steps.
+
+A similar parameter is the {\ct PRESSURE\_RELAX\_TIME}. It controls the rate at which the pressures in adjacent compartments are brought into equilibrium following a
+breach. Its default value is 1~s, meaning that equilibrium is achieved in roughly a second.
+
 
 
 
@@ -8959,7 +8973,7 @@ There are several useful {\ct DEVC} {\ct QUANTITY}'s that can help monitor the p
 \end{description}
 In addition, the following flags can be useful in monitoring the performance of an MPI calculation. They are typically used for debugging.
 \begin{description}
-\item[{\ct VELOCITY\_ERROR\_FILE}] If set to {\ct .TRUE.} on the {\ct DUMP} line, this parameter will cause FDS to create a file with a time history of the maximum error associated with the normal component of velocity at solid or interpolated boundaries.
+\item[{\ct VELOCITY\_ERROR\_FILE}] If set to {\ct .TRUE.} on the {\ct DUMP} line, this parameter will cause FDS to create a file with a time history of the maximum error associated with the normal component of velocity at solid or interpolated boundaries. See Section~\ref{tunnel_demo} for a description of this file.
 \item[{\ct MPI\_TIMEOUT}] The amount of time, in seconds, to wait for messages sent via MPI (Message Passing Interface) before timing out. This parameter is set on the {\ct MISC} line. The default value is 10~s. This parameter is only useful in forcing a job with deadlocked messages to finish and print out information about the lost message. It is very unlikely to solve a deadlock problem.
 \end{description}
 
