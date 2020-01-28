@@ -55,7 +55,11 @@ if strcmp(Stats_Output, 'Verification')
     m = sortrows(output_stats(2:rows,:),1);
     for i_row = 1:rows-1
         case_name = strrep(m{i_row, 3}, '_', '\_');
-        case_name_section = ['\ref{',m{i_row,3},'}'];
+        if m{i_row,14}(1:14)=='FDS_User_Guide'
+           case_name_section = ['\ref{UG-',m{i_row,3},'}'];
+        else
+           case_name_section = ['\ref{',m{i_row,3},'}'];
+        end
         expected_quantity = strrep(m{i_row, 5}, '_', '\_');
         expected_value = m{i_row, 6};
         predicted_quantity = strrep(m{i_row, 7}, '_', '\_');
