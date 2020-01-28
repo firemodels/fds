@@ -194,6 +194,7 @@ $QFDS -d Fires tmp_lower_limit_simple.fds
 $QFDS -d Fires tmp_lower_limit_default.fds
 $QFDS -d Fires tmp_lower_limit_dt_p001.fds
 $QFDS -d Fires tunnel_const_gamma.fds
+$QFDS -d Fires tunnel_linear_cp.fds
 $QFDS -p 8 -d Fires circular_burner.fds
 
 $QFDS -d Flowfields divergence_test_1.fds
@@ -334,7 +335,7 @@ $QFDS -d Miscellaneous obst_sphere_mass_flux.fds
 $QFDS -d Miscellaneous obst_cylinder_mass_flux.fds
 $QFDS -d Miscellaneous obst_cone_mass_flux.fds
 $QFDS -d Miscellaneous obst_box_mass_flux.fds
-$QFDS -p 2 -d Miscellaneous part_path_ramp_jog.fds
+$QFDS -d Miscellaneous part_path_ramp_jog.fds
 
 $QFDS -d NS_Analytical_Solution ns2d_16.fds
 $QFDS -d NS_Analytical_Solution ns2d_16_nupt1.fds
