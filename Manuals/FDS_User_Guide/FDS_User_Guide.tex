@@ -1225,11 +1225,13 @@ There are a number of special output quantities that provide local measures of g
 \chapter{Global Simulation Parameters}
 \label{info:MISC}
 
-{\ct MISC} is the namelist group of input parameters that do not fall into any one category (Table~\ref{tbl:MISC}). They are typically global in extent, like the ambient temperature. Only one {\ct MISC} line should be entered in the data file. For example, the input line
+{\ct MISC} is the namelist group of input parameters that do not fall into any one category (Table~\ref{tbl:MISC}). They are typically global in extent, like the ambient temperature. For example, the input line
 \begin{lstlisting}
 &MISC TMPA=25. /
 \end{lstlisting}
 sets the ambient temperature at 25~$^\circ$C. The following sections describe the various miscellaneous parameters.
+
+It is good practice to use only one {\ct MISC} line in the data file.  Using multiple {\ct MISC} lines is possible, but be careful about not over writing a parameter.  The last parameter read will take precedence.
 
 \section{Ambient Conditions}
 \label{info:MISC_Basics}
