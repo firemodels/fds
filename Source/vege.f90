@@ -16,8 +16,7 @@ REAL(EB) :: UMAG,UMF_TMP
 REAL(EB) :: ROS_BACKS,ROS_HEADS
 REAL(EB) :: B_ROTH,BETA_OP_ROTH,C_ROTH,E_ROTH
 REAL(EB), POINTER, DIMENSION(:,:) :: PHI_LS_P
-REAL(EB), PARAMETER :: PHI_MIN_LS=-1._EB, PHI_MAX_LS=1._EB
-INTEGER, POINTER, DIMENSION(:,:) :: KT
+REAL(EB), PARAMETER :: PHI_LS_MIN=-1._EB, PHI_LS_MAX=1._EB
 
 CONTAINS
 
@@ -30,7 +29,6 @@ REAL(EB) :: DZT_DUM,SR_MAX,UMAX_LS,VMAX_LS
 REAL(EB) :: G_EAST,G_WEST,G_SOUTH,G_NORTH
 REAL(EB) :: PHX,PHY,MAG_PHI
 REAL(EB) :: PHI_W_X,PHI_W_Y,MAG_PHI_S,UMF_X,UMF_Y
-REAL(EB), POINTER, DIMENSION(:,:) :: ZT
 TYPE (MESH_TYPE),    POINTER :: M
 TYPE (WALL_TYPE),    POINTER :: WC
 TYPE (SURFACE_TYPE), POINTER :: SF
@@ -40,16 +38,15 @@ CALL POINT_TO_MESH(NM)
 
 M => MESHES(NM)
 
-! Pointers to terrain height, ZT, and K index of first non-solid cell above terrain, KT
+! Terrain height, Z_LS, and K index of first non-solid cell above terrain, KT
 
-ALLOCATE(M%LS_Z_TERRAIN(0:IBP1,0:JBP1),STAT=IZERO) ; CALL ChkMemErr('READ','LS_Z_TERRAIN',IZERO) ; M%LS_Z_TERRAIN = 0._EB
-ALLOCATE(M%LS_K_TERRAIN(0:IBP1,0:JBP1),STAT=IZERO) ; CALL ChkMemErr('READ','LS_K_TERRAIN',IZERO) ; M%LS_K_TERRAIN = 0
+ALLOCATE(M%Z_LS(0:IBP1,0:JBP1),STAT=IZERO) ; CALL ChkMemErr('READ','Z_LS',IZERO) ; Z_LS => M%Z_LS ; Z_LS = 0._EB
+ALLOCATE(M%K_LS(0:IBP1,0:JBP1),STAT=IZERO) ; CALL ChkMemErr('READ','K_LS',IZERO) ; K_LS => M%K_LS ; K_LS = 0
 ALLOCATE(M%LS_SURF_INDEX(0:IBP1,0:JBP1),STAT=IZERO) ; CALL ChkMemErr('READ','LS_SURF_INDEX',IZERO) ; M%LS_SURF_INDEX = 0
 
 IF (CC_IBM) THEN
-   ALLOCATE(M%LS_KLO_TERRAIN(0:IBP1,0:JBP1),STAT=IZERO) ; CALL ChkMemErr('READ','LS_K_TERRAIN',IZERO)
+   ALLOCATE(M%LS_KLO_TERRAIN(0:IBP1,0:JBP1),STAT=IZERO) ; CALL ChkMemErr('READ','LS_KLO_TERRAIN',IZERO)
    M%LS_KLO_TERRAIN = 2*KBP1+1 ! Number larger that KBP1.
-   ! Define M%LS_Z_TERRAIN(1:IBAR,1:JBAR), M%LS_K_TERRAIN(1:IBAR,1:JBAR), M%LS_SURF_INDEX(1:IBAR,1:JBAR)
    DO ICF=1,M%N_CUTFACE_MESH
       IF(CUT_FACE(ICF)%STATUS /= 2) CYCLE ! IBM_INBOUNDARY == 2
       ! Location of CFACE with largest AREA, to define SURF_INDEX:
@@ -57,13 +54,12 @@ IF (CC_IBM) THEN
       CFA => CFACE( CUT_FACE(ICF)%CFACE_INDEX(IW) )
       IF(CFA%NVEC(KAXIS)>-TWO_EPSILON_EB .AND. CFA%BOUNDARY_TYPE==SOLID_BOUNDARY ) THEN
          ! Area averaged Z height of CFACES within this cut-cell (containing IBM_INBOUNDARY CFACES):
-         M%LS_Z_TERRAIN(CFA%ONE_D%IIG,CFA%ONE_D%JJG) = DOT_PRODUCT(CUT_FACE(ICF)%XYZCEN(KAXIS,1:CUT_FACE(ICF)%NFACE), &
+         Z_LS(CFA%ONE_D%IIG,CFA%ONE_D%JJG) = DOT_PRODUCT(CUT_FACE(ICF)%XYZCEN(KAXIS,1:CUT_FACE(ICF)%NFACE), &
                                                                    CUT_FACE(ICF)%  AREA(1:CUT_FACE(ICF)%NFACE))     / &
                                                                SUM(CUT_FACE(ICF)% AREA(1:CUT_FACE(ICF)%NFACE))
          IF(CFA%ONE_D%KKG < M%LS_KLO_TERRAIN(CFA%ONE_D%IIG,CFA%ONE_D%JJG)) &
          M%LS_KLO_TERRAIN(CFA%ONE_D%IIG,CFA%ONE_D%JJG) = CFA%ONE_D%KKG
-         IF(CFA%ONE_D%KKG > M%LS_K_TERRAIN(CFA%ONE_D%IIG,CFA%ONE_D%JJG)) &
-         M%LS_K_TERRAIN(CFA%ONE_D%IIG,CFA%ONE_D%JJG) = CFA%ONE_D%KKG
+         IF (CFA%ONE_D%KKG > K_LS(CFA%ONE_D%IIG,CFA%ONE_D%JJG)) K_LS(CFA%ONE_D%IIG,CFA%ONE_D%JJG) = CFA%ONE_D%KKG
          M%LS_SURF_INDEX(CFA%ONE_D%IIG,CFA%ONE_D%JJG)= CFA%SURF_INDEX
       ENDIF
    ENDDO
@@ -73,16 +69,14 @@ ELSE
    DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       WC => WALL(IW)
       IF (WC%ONE_D%IOR==3 .AND. WC%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
-         M%LS_Z_TERRAIN(WC%ONE_D%IIG,WC%ONE_D%JJG) = M%Z(WC%ONE_D%KKG-1)
-         M%LS_K_TERRAIN(WC%ONE_D%IIG,WC%ONE_D%JJG) = WC%ONE_D%KKG
+         Z_LS(WC%ONE_D%IIG,WC%ONE_D%JJG) = Z(WC%ONE_D%KKG-1)
+         K_LS(WC%ONE_D%IIG,WC%ONE_D%JJG) = WC%ONE_D%KKG
          M%LS_SURF_INDEX(WC%ONE_D%IIG,WC%ONE_D%JJG)= WC%SURF_INDEX
       ENDIF
    ENDDO
 
 ENDIF
 
-ZT => M%LS_Z_TERRAIN
-KT => M%LS_K_TERRAIN
 LS_SURF_INDEX => M%LS_SURF_INDEX
 
 ! Allocate some work arrays
@@ -171,10 +165,10 @@ GRADIENT_ILOOP: DO I = 1,IBAR
       IF (J==1) JM1 = J
       IF (J==IBAR) JP1 = J
 
-      G_EAST  = 0.5_EB*( ZT(I,J) + ZT(IP1,J) )
-      G_WEST  = 0.5_EB*( ZT(I,J) + ZT(IM1,J) )
-      G_NORTH = 0.5_EB*( ZT(I,J) + ZT(I,JP1) )
-      G_SOUTH = 0.5_EB*( ZT(I,J) + ZT(I,JM1) )
+      G_EAST  = 0.5_EB*( Z_LS(I,J) + Z_LS(IP1,J) )
+      G_WEST  = 0.5_EB*( Z_LS(I,J) + Z_LS(IM1,J) )
+      G_NORTH = 0.5_EB*( Z_LS(I,J) + Z_LS(I,JP1) )
+      G_SOUTH = 0.5_EB*( Z_LS(I,J) + Z_LS(I,JM1) )
 
       DZTDX(I,J) = (G_EAST-G_WEST)   * RDX(I)
       DZTDY(I,J) = (G_NORTH-G_SOUTH) * RDY(J)
@@ -190,8 +184,8 @@ ENDDO GRADIENT_ILOOP
 ! Fill arrays for the horizontal component of the velocity arrays.
 ! Initialize level set scalar array PHI
 
-PHI_LS  = PHI_MIN_LS
-PHI1_LS = PHI_MIN_LS
+PHI_LS  = PHI_LS_MIN
+PHI1_LS = PHI_LS_MIN
 
 DO JJG=1,JBAR
    DO IIG=1,IBAR
@@ -202,15 +196,12 @@ DO JJG=1,JBAR
 
       ! Ignite landscape at user specified location if ignition is at time zero
 
-      IF (SF%VEG_LSET_IGNITE_T == 0.0_EB) PHI_LS(IIG,JJG) = PHI_MAX_LS
+      IF (SF%VEG_LSET_IGNITE_T == 0.0_EB) PHI_LS(IIG,JJG) = PHI_LS_MAX
 
       ! Wind field
 
-      U_LS(IIG,JJG) = U(IIG,JJG,KT(IIG,JJG))
-      V_LS(IIG,JJG) = V(IIG,JJG,KT(IIG,JJG))
-
-
-      UMAG = SQRT(U_LS(IIG,JJG)**2 + V_LS(IIG,JJG)**2)
+      U_LS(IIG,JJG) = 0.5_EB*(U(IIG-1,JJG,K_LS(IIG,JJG))+U(IIG,JJG,K_LS(IIG,JJG)))
+      V_LS(IIG,JJG) = 0.5_EB*(V(IIG,JJG-1,K_LS(IIG,JJG))+V(IIG,JJG,K_LS(IIG,JJG)))
 
       ROS_HEAD(IIG,JJG)  = SF%VEG_LSET_ROS_HEAD
       ROS_FLANK(IIG,JJG) = SF%VEG_LSET_ROS_FLANK
@@ -234,13 +225,13 @@ DO JJG=1,JBAR
 
          ! Find wind at ~6.1 m height for Farsite
          KWIND = 0
-         DO KDUM = KT(IIG,JJG),KBAR
-            IF (ZC(KDUM)-ZC(KT(IIG,JJG)) >= 6.1_EB) KWIND = KDUM
+         DO KDUM = K_LS(IIG,JJG),KBAR
+            IF (ZC(KDUM)-ZC(K_LS(IIG,JJG)) >= 6.1_EB) KWIND = KDUM
          ENDDO
          IF (ZC(KBAR) < 6.1_EB) KWIND=1
 
-         U_LS(IIG,JJG) = U(IIG,JJG,KWIND)
-         V_LS(IIG,JJG) = V(IIG,JJG,KWIND)
+         U_LS(IIG,JJG) = 0.5_EB*(U(IIG-1,JJG,KWIND)+U(IIG,JJG,KWIND))
+         V_LS(IIG,JJG) = 0.5_EB*(V(IIG,JJG-1,KWIND)+V(IIG,JJG,KWIND))
 
          ! Wind at midflame height (UMF). From Andrews 2012, USDA FS Gen Tech Rep. RMRS-GTR-266 (with added SI conversion)
 
@@ -328,7 +319,6 @@ ENDDO
 
 UMAX_LS  = MAXVAL(ABS(U_LS))
 VMAX_LS  = MAXVAL(ABS(V_LS))
-UMAG     = SQRT(UMAX_LS**2 + VMAX_LS**2)
 
 WRITE(LU_OUTPUT,*)'ROS_HEAD max ',MAXVAL(ROS_HEAD)
 WRITE(LU_OUTPUT,*)'LSET_ELLIPSE ',LSET_ELLIPSE
@@ -357,12 +347,20 @@ INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T,DT
 INTEGER :: IIG,IW,JJG
 INTEGER :: KDUM,KWIND,IIO,JJO,N_INT_CELLS,NOM,IC,II,JJ,IOR,ICF,IKT
-REAL(EB) :: UMF_TMP,PHX,PHY,MAG_PHI,PHI_W_X,PHI_W_Y,UMF_X,UMF_Y,PHI_LS_OTHER
+REAL(EB) :: UMF_TMP,PHX,PHY,MAG_PHI,PHI_W_X,PHI_W_Y,UMF_X,UMF_Y,PHI_LS_OTHER,U_LS_OTHER,V_LS_OTHER,Z_LS_OTHER
 TYPE (ONE_D_M_AND_E_XFER_TYPE), POINTER :: ONE_D
 TYPE (EXTERNAL_WALL_TYPE), POINTER :: EWC
 TYPE (SURFACE_TYPE), POINTER :: SF
 
 CALL POINT_TO_MESH(NM)
+
+! Point to the appropriate PHI_LS for PREDICTOR or CORRECTOR part of time step
+
+IF (PREDICTOR) THEN
+   PHI_LS_P => PHI_LS
+ELSE
+   PHI_LS_P => PHI1_LS
+ENDIF
 
 ! Fetch values of PHI_LS at boundary from other meshes
 
@@ -378,6 +376,16 @@ DO JJ=1,JBAR
    JJG=JJ ; II=IBP1 ; IIG=IBAR ; IOR=1
    CALL FILL_BOUNDARY_VALUES
 ENDDO
+DO JJ=1,JBAR
+   JJG=JJ  ; IOR=-1
+   DO II=1,IBAR
+      IIG=II
+      IOR = -3
+      CALL FILL_BOUNDARY_VALUES
+      IOR =  3
+      CALL FILL_BOUNDARY_VALUES
+   ENDDO
+ENDDO
 
 ! Loop over terrain surface cells and update level set field
 
@@ -390,15 +398,15 @@ DO JJG=1,JBAR
 
       ! Ignite landscape at user specified location(s) and time(s)
 
-      IF (SF%VEG_LSET_IGNITE_T > 0.0_EB .AND. SF%VEG_LSET_IGNITE_T < DT)  PHI_LS(IIG,JJG) = PHI_MAX_LS
-      IF (SF%VEG_LSET_IGNITE_T >= T .AND. SF%VEG_LSET_IGNITE_T <= T + DT) PHI_LS(IIG,JJG) = PHI_MAX_LS
+      IF (SF%VEG_LSET_IGNITE_T > 0.0_EB .AND. SF%VEG_LSET_IGNITE_T < DT)  PHI_LS(IIG,JJG) = PHI_LS_MAX
+      IF (SF%VEG_LSET_IGNITE_T >= T .AND. SF%VEG_LSET_IGNITE_T <= T + DT) PHI_LS(IIG,JJG) = PHI_LS_MAX
 
       ! Variable update when level set is coupled to CFD computation
 
       IF_CFD_COUPLED: IF (VEG_LEVEL_SET_COUPLED) THEN
 
-         U_LS(IIG,JJG) = U(IIG,JJG,KT(IIG,JJG))
-         V_LS(IIG,JJG) = V(IIG,JJG,KT(IIG,JJG))
+         U_LS(IIG,JJG) = 0.5_EB*(U(IIG-1,JJG,K_LS(IIG,JJG))+U(IIG,JJG,K_LS(IIG,JJG)))
+         V_LS(IIG,JJG) = 0.5_EB*(V(IIG,JJG-1,K_LS(IIG,JJG))+V(IIG,JJG,K_LS(IIG,JJG)))
 
          ! AU grassland ROS for infinite head and 6% moisutre
 
@@ -413,14 +421,14 @@ DO JJG=1,JBAR
 
             ! Find wind at ~6.1 m height for Farsite
             KWIND = 0
-            DO KDUM = KT(IIG,JJG),KBAR
-              IF(ZC(KDUM)-ZC(KT(IIG,JJG)) >= 6.1_EB) THEN
+            DO KDUM = K_LS(IIG,JJG),KBAR
+              IF(ZC(KDUM)-ZC(K_LS(IIG,JJG)) >= 6.1_EB) THEN
                KWIND = KDUM
                ENDIF
             ENDDO
 
-            U_LS(IIG,JJG) = U(IIG,JJG,KWIND)
-            V_LS(IIG,JJG) = V(IIG,JJG,KWIND)
+            U_LS(IIG,JJG) = 0.5_EB*(U(IIG-1,JJG,KWIND)+U(IIG,JJG,KWIND))
+            V_LS(IIG,JJG) = 0.5_EB*(V(IIG,JJG-1,KWIND)+V(IIG,JJG,KWIND))
 
             ! Wind at midflame height (UMF). From Andrews 2012, USDA FS Gen Tech Rep. RMRS-GTR-266 (with added SI conversion)
             UMF_TMP = 1.83_EB / LOG((20.0_EB + 1.18_EB * SF%VEG_LSET_HT) /(0.43_EB * SF%VEG_LSET_HT))
@@ -492,7 +500,7 @@ ENDDO
 ! Runge-Kutta Scheme
 
 CALL LEVEL_SET_SPREAD_RATE
-CALL LEVEL_SET_ADVECT_FLUX
+CALL LEVEL_SET_ADVECT_FLUX(NM)
 
 IF (PREDICTOR) THEN
    PHI1_LS(1:IBAR,1:JBAR) = PHI_LS(1:IBAR,1:JBAR) - DT*FLUX0_LS(1:IBAR,1:JBAR)
@@ -507,7 +515,7 @@ IF (.NOT.PREDICTOR) THEN
    IF (CC_IBM) THEN
       DO JJG=1,JBAR
          DO IIG=1,IBAR
-            DO IKT=MESHES(NM)%LS_KLO_TERRAIN(IIG,JJG),KT(IIG,JJG)
+            DO IKT=MESHES(NM)%LS_KLO_TERRAIN(IIG,JJG),K_LS(IIG,JJG)
                ! Loop over all CFACEs corresponding to IIG,JJG and set ONE_D%T_IGN and ONE_D%PHI_LS as below
                ICF = CCVAR(IIG,JJG,IKT,3); IF(ICF<1) CYCLE  ! IBM_IDCF = 3 CUT_FCE container for this cell.
                DO IW=1,CUT_FACE(ICF)%NFACE ! All IBM_INBOUNDARY CFACES on this cell.
@@ -521,8 +529,8 @@ IF (.NOT.PREDICTOR) THEN
    ELSE
       DO JJG=1,JBAR
          DO IIG=1,IBAR
-            IF (KT(IIG,JJG)<1) CYCLE
-            IC = CELL_INDEX(IIG,JJG,KT(IIG,JJG))
+            IF (K_LS(IIG,JJG)<1) CYCLE
+            IC = CELL_INDEX(IIG,JJG,K_LS(IIG,JJG))
             IW = WALL_INDEX(IC,-3)
             ONE_D => WALL(IW)%ONE_D
             IF (PHI_LS(IIG,JJG)>=0._EB .AND. ONE_D%T_IGN>1.E5_EB) ONE_D%T_IGN = T
@@ -539,27 +547,57 @@ SUBROUTINE FILL_BOUNDARY_VALUES
 
 ! Grab boundary values of PHI_LS from MPI storage arrays
 
-IC = CELL_INDEX(IIG,JJG,KT(IIG,JJG))
+IF (IOR==3) THEN  ! get the CELL_INDEX of the grid cell adjacent to the exterior boundary of the current mesh
+   IC = CELL_INDEX(IIG,JJG,KBAR)
+ELSEIF (IOR==-3) THEN
+   IC = CELL_INDEX(IIG,JJG,1)
+ELSE
+   IC = CELL_INDEX(IIG,JJG,1)
+ENDIF
 IW = WALL_INDEX(IC,IOR)
 EWC=>EXTERNAL_WALL(IW)
 NOM = EWC%NOM
-IF (NOM==0) RETURN
+IF (NOM==0) RETURN  ! there is no other mesh adjacent to the boundary
+
 PHI_LS_OTHER = 0._EB
+U_LS_OTHER = 0._EB
+V_LS_OTHER = 0._EB
+Z_LS_OTHER = 0._EB
 DO JJO=EWC%JJO_MIN,EWC%JJO_MAX
    DO IIO=EWC%IIO_MIN,EWC%IIO_MAX
       IF (PREDICTOR) THEN
-         PHI_LS_OTHER = PHI_LS_OTHER + OMESH(NOM)%PHI1_LS(IIO,JJO)
-      ELSE
          PHI_LS_OTHER = PHI_LS_OTHER + OMESH(NOM)%PHI_LS(IIO,JJO)
+      ELSE
+         PHI_LS_OTHER = PHI_LS_OTHER + OMESH(NOM)%PHI1_LS(IIO,JJO)
       ENDIF
+      U_LS_OTHER = U_LS_OTHER + OMESH(NOM)%U_LS(IIO,JJO)
+      V_LS_OTHER = V_LS_OTHER + OMESH(NOM)%V_LS(IIO,JJO)
+      Z_LS_OTHER = Z_LS_OTHER + OMESH(NOM)%Z_LS(IIO,JJO)
    ENDDO
 ENDDO
 N_INT_CELLS = (EWC%IIO_MAX-EWC%IIO_MIN+1) * (EWC%JJO_MAX-EWC%JJO_MIN+1)
-IF (PREDICTOR) THEN
-   PHI1_LS(II,JJ) = PHI_LS_OTHER/REAL(N_INT_CELLS,EB)
-ELSE
-   PHI_LS(II,JJ) = PHI_LS_OTHER/REAL(N_INT_CELLS,EB)
-ENDIF
+
+SELECT CASE(IOR)
+   CASE(-2:2) 
+      PHI_LS_P(II,JJ) = PHI_LS_OTHER/REAL(N_INT_CELLS,EB)
+    ! U_LS(II,JJ) = U_LS_OTHER/REAL(N_INT_CELLS,EB)
+    ! V_LS(II,JJ) = V_LS_OTHER/REAL(N_INT_CELLS,EB)
+    ! Z_LS(II,JJ) = Z_LS_OTHER/REAL(N_INT_CELLS,EB)
+   CASE(3)  ! only grab a PHI_LS value from the other mesh if the (II,JJ) cell of the current mesh has no terrain surface
+      IF (.NOT.SURFACE(LS_SURF_INDEX(II,JJ))%VEG_LSET_SPREAD .AND. SOLID(CELL_INDEX(II,JJ,KBAR))) THEN
+         PHI_LS_P(II,JJ) = PHI_LS_OTHER/REAL(N_INT_CELLS,EB)
+         U_LS(II,JJ) = U_LS_OTHER/REAL(N_INT_CELLS,EB)
+         V_LS(II,JJ) = V_LS_OTHER/REAL(N_INT_CELLS,EB)
+         Z_LS(II,JJ) = Z_LS_OTHER/REAL(N_INT_CELLS,EB)
+      ENDIF
+   CASE(-3)  ! only grab a PHI_LS value from the other mesh if the (II,JJ) cell of the current mesh has no terrain surface
+      IF (.NOT.SURFACE(LS_SURF_INDEX(II,JJ))%VEG_LSET_SPREAD .AND. .NOT.SOLID(CELL_INDEX(II,JJ,1))) THEN
+         PHI_LS_P(II,JJ) = PHI_LS_OTHER/REAL(N_INT_CELLS,EB)
+         U_LS(II,JJ) = U_LS_OTHER/REAL(N_INT_CELLS,EB)
+         V_LS(II,JJ) = V_LS_OTHER/REAL(N_INT_CELLS,EB)
+         Z_LS(II,JJ) = Z_LS_OTHER/REAL(N_INT_CELLS,EB)
+      ENDIF
+END SELECT
 
 END SUBROUTINE FILL_BOUNDARY_VALUES
 
@@ -775,12 +813,12 @@ ENDDO FLUX_ILOOP
 END SUBROUTINE LEVEL_SET_SPREAD_RATE
 
 
-SUBROUTINE LEVEL_SET_ADVECT_FLUX
+SUBROUTINE LEVEL_SET_ADVECT_FLUX(NM)
 
 ! Use the spread rate [SR_X_LS,SR_Y_LS] to compute the limited scalar gradient
 ! and take dot product with spread rate vector to get advective flux
 
-INTEGER :: I,IM1,IP1,IP2,J,JM1,JP1,JP2
+INTEGER :: I,IM1,IP1,IP2,J,JM1,JP1,JP2,NM
 REAL(EB), DIMENSION(:) :: Z(4)
 REAL(EB), POINTER, DIMENSION(:,:) :: FLUX_LS_P,F_X,F_Y
 REAL(EB) :: DPHIDX,DPHIDY,SR_X_AVG,SR_Y_AVG
