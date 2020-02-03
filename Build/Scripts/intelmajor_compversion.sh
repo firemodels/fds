@@ -19,11 +19,16 @@ is_file_installed()
   exit
 }
 
-ifort_installed=`is_file_installed ifort `
+ifort_installed=`is_file_installed ifort`
 if [ $ifort_installed -eq 0 ]; then
-  echo 0
+  echo "0"
   exit
 fi
 
-IFORTMAJORVERSION=`ifort -v |&  awk '{print $3}' | awk -F'.' '{print $1}'`
-echo "\"$IFORTMAJORVERSION\""
+MAJORVERSION=`ifort -v |&  awk '{print $3}' | awk -F'.' '{print $1}'`
+MINORVERSION=`ifort -v |&  awk '{print $3}' | awk -F'.' '{print $2}'`
+if [[ "$MAJORVERSION" == "19" ]] && [[ "$MINORVERSION" != "0" ]]; then
+  echo "20"
+else
+  echo "\"$MAJORVERSION\""
+fi
