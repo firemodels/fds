@@ -251,6 +251,9 @@ impi_intel_linux_64_vtune : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
 impi_intel_linux_64_inspect : FFLAGS = -m64 -mt_mpi -check none -warn all -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -stand:f08 -no-wrap-margin $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL)
+ifeq ($(shell expr $(INTELMAJOR_COMPVERSION) \> 19), 1)
+impi_intel_linux_64_inspect : FFLAGS += -warn noexternals
+endif
 impi_intel_linux_64_inspect : LFLAGSMKL = $(LFLAGSMKL_INTEL)
 impi_intel_linux_64_inspect : LFLAGS = -shared-intel
 impi_intel_linux_64_inspect : FCOMPL = mpiifort
