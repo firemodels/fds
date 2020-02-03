@@ -8993,10 +8993,12 @@ MESH_LOOP: DO NM=1,NMESHES
          ENDIF
          IF (ORIENTATION(1)==0._EB .AND. &
              ORIENTATION(2)==0._EB .AND. &
-             ORIENTATION(3)==1._EB) THEN
+             ORIENTATION(3)==1._EB .AND. &
+             NMESHES==1                  ) THEN
             OBST_SHAPE_AREA_ADJUST = .TRUE.
          ELSE
-            WRITE (LU_ERR,'(A)') 'WARNING: AREA_ADJUST not applied to reoriented SHAPE. Check MASS FLUX if applicable.'
+            OBST_SHAPE_AREA_ADJUST = .FALSE.
+            WRITE (LU_ERR,'(A)') 'WARNING: AREA_ADJUST not applied to reoriented SHAPE or SHAPE that spans multiple MESHES.'
          ENDIF
       ENDIF
 
