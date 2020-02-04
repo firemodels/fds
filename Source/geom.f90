@@ -41027,7 +41027,6 @@ IMPLICIT NONE
 
 REAL(EB), INTENT(IN) :: X_IN(3),H,RADIUS,ROTMAT(3,3),XB(6)
 REAL(EB) :: X(3),U(3),V(3),DUX(2),Z0,ZH,R2,DIST_SQUARED
-INTEGER :: II,JJ,KK
 
 INTERSECT_CYLINDER_AABB=.FALSE.
 
@@ -41037,24 +41036,18 @@ ZH = X(3) + H            ! upper cap in new reference frame
 
 ! transform vertices and test against end caps, then radius
 R2 = RADIUS*RADIUS
-DO KK=5,6
-   DO JJ=3,4
-      DO II=1,2
-         V = (/XB(II),XB(JJ),XB(KK)/)
-         U = MATMUL(ROTMAT,V)
-         IF (U(3)>=Z0 .AND. U(3)<=ZH) THEN
-            ! vertex is within end-cap range, now test against radius
-            ! in new frame the distance from vertex to cylinder axis only requires the 1st and 2nd vector components
-            DUX = U(1:2) - X(1:2)
-            DIST_SQUARED = DOT_PRODUCT(DUX,DUX)
-            IF (DIST_SQUARED < R2+TWO_EPSILON_EB) THEN
-               INTERSECT_CYLINDER_AABB = .TRUE.
-               RETURN
-            ENDIF
-         ENDIF
-      ENDDO
-   ENDDO
-ENDDO
+V = (/0.5_EB*(XB(1)+XB(2)),0.5_EB*(XB(3)+XB(4)),0.5_EB*(XB(5)+XB(6))/)
+U = MATMUL(ROTMAT,V)
+IF (U(3)>=Z0 .AND. U(3)<=ZH) THEN
+   ! centroid is within end-cap range, now test against radius
+   ! in new frame the distance from centroid to cylinder axis only requires the 1st and 2nd vector components
+   DUX = U(1:2) - X(1:2)
+   DIST_SQUARED = DOT_PRODUCT(DUX,DUX)
+   IF (DIST_SQUARED < R2+TWO_EPSILON_EB) THEN
+      INTERSECT_CYLINDER_AABB = .TRUE.
+      RETURN
+   ENDIF
+ENDIF
 
 RETURN
 END FUNCTION INTERSECT_CYLINDER_AABB
