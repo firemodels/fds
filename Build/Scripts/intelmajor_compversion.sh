@@ -25,8 +25,10 @@ if [ $ifort_installed -eq 0 ]; then
   exit
 fi
 
-MAJORVERSION=`ifort -v |&  awk '{print $3}' | awk -F'.' '{print $1}'`
-MINORVERSION=`ifort -v |&  awk '{print $3}' | awk -F'.' '{print $2}'`
+ifort -v >& version.out  
+MAJORVERSION=`cat version.out | awk '{print $3}' | awk -F'.' '{print $1}'`
+MINORVERSION=`cat version.out | awk '{print $3}' | awk -F'.' '{print $2}'`
+rm version.out
 if [[ "$MAJORVERSION" == "19" ]] && [[ "$MINORVERSION" != "0" ]]; then
   echo "20"
 else
