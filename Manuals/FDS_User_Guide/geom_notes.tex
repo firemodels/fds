@@ -1127,7 +1127,7 @@ where $V_{i,j}$ is the volume of cell $(i,j)$. These cell averaged quantities (d
 \subsubsection*{FV spatial discretization of Diffusive term} \label{Sec:FVdiff}
 
 \subsubsection*{Ficks Law of diffusion}
-Consider Fick's law governing the diffusive flux of quantity $\rho Y_\alpha$, $ \mathbf{J_{d \alpha}} = - \rho \: D_\alpha \boldsymbol{\nabla} Y_\alpha$. This expression is used in explicit integration of species transport. For cell $ii$, the first right hand side term of equation~\eqref{eq:intcons} is
+Consider Fick's law governing the diffusive flux of quantity $\rho Y_\alpha$, $ \mathbf{J_{d \alpha}} = - \rho \: D_\alpha \boldsymbol{\nabla} Y_\alpha$. This expression is used in explicit integration of species transport. For cell $ii$, the first right hand side term of equation~\eqref{eq:intconvdiff} is
 %
 \begin{equation}
   \int_{\Omega_{ii}} { \boldsymbol{\nabla} \cdot \left(  \mathbf{J_{d \alpha}} \right)  } d \Omega =
@@ -1175,7 +1175,7 @@ of opposite sign and same magnitude, as required by conservation.
 
 \subsubsection*{Constant density diffusive flux for implicit time integration}
 
-Now consider $ \mathbf{J_{d \alpha}'} = - D_\alpha \boldsymbol{\nabla} \left(\rho Y_\alpha \right)$, used in implicit integration of species transport. For cell $ii$, the first right hand side term of equation~\eqref{eq:intcons} is
+Now consider $ \mathbf{J_{d \alpha}'} = - D_\alpha \boldsymbol{\nabla} \left(\rho Y_\alpha \right)$, used in implicit integration of species transport. For cell $ii$, the first right hand side term of equation~\eqref{eq:intconvdiff} is
 %
 \begin{equation}
   \int_{\Omega_{ii}} { \boldsymbol{\nabla} \cdot \left(  \mathbf{J_{d \alpha}'} \right)  } d \Omega =
