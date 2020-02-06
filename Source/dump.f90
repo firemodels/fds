@@ -644,6 +644,8 @@ IF (N_HISTOGRAM>0) THEN
    DO N=1,N_DEVC
       DV => DEVICE(N)
       PY => PROPERTY(DV%PROP_INDEX)
+      IF (.NOT.PY%HISTOGRAM) CYCLE
+      NN = NN+1
       IF (DV%QUANTITY/='PDPA') THEN
          LAB = DV%QUANTITY
          UNITS = DV%UNITS
@@ -663,24 +665,29 @@ IF (N_HISTOGRAM>0) THEN
                UNITS="mu-m"
          END SELECT
       ENDIF
-      IF (PY%HISTOGRAM) THEN
-         NN = NN+1
-         IF (PY%HISTOGRAM_NORMALIZE) THEN
-            IF (DV%HIDE_COORDINATES) THEN
-               HISTOGRAM_LABEL(NN) = TRIM(DV%ID)
-               HISTOGRAM_UNITS(NN) = '1/'//TRIM(UNITS)
+      IF (PY%HISTOGRAM_NORMALIZE) THEN
+         IF (DV%HIDE_COORDINATES) THEN
+            HISTOGRAM_LABEL(NN) = TRIM(DV%ID)
+            IF (PY%HISTOGRAM_CUMULATIVE) THEN
+               HISTOGRAM_UNITS(NN) = '--'
             ELSE
-               HISTOGRAM_LABEL(NN) = TRIM(LAB)//','//TRIM(DV%ID)
-               HISTOGRAM_UNITS(NN) = TRIM(UNITS)//',1/'//TRIM(UNITS)
+               HISTOGRAM_UNITS(NN) = '1/'//TRIM(UNITS)
             ENDIF
          ELSE
-            IF (DV%HIDE_COORDINATES) THEN
-               HISTOGRAM_LABEL(NN) = TRIM(DV%ID)
-               HISTOGRAM_UNITS(NN) = '#'
+            HISTOGRAM_LABEL(NN) = TRIM(LAB)//','//TRIM(DV%ID)
+            IF (PY%HISTOGRAM_CUMULATIVE) THEN
+               HISTOGRAM_UNITS(NN) = TRIM(UNITS)//',--'
             ELSE
-               HISTOGRAM_LABEL(NN) = TRIM(LAB)//','//TRIM(DV%ID)
-               HISTOGRAM_UNITS(NN) = TRIM(UNITS)//',#'
+               HISTOGRAM_UNITS(NN) = TRIM(UNITS)//',1/'//TRIM(UNITS)
             ENDIF
+         ENDIF
+      ELSE
+         IF (DV%HIDE_COORDINATES) THEN
+            HISTOGRAM_LABEL(NN) = TRIM(DV%ID)
+            HISTOGRAM_UNITS(NN) = '#'
+         ELSE
+            HISTOGRAM_LABEL(NN) = TRIM(LAB)//','//TRIM(DV%ID)
+            HISTOGRAM_UNITS(NN) = TRIM(UNITS)//',#'
          ENDIF
       ENDIF
    ENDDO
@@ -8445,7 +8452,7 @@ IF (N_HISTOGRAM>0) THEN
          DO NN =1,MAX_HISTOGRAM_NBINS
             IF (NN>PY%HISTOGRAM_NBINS) EXIT
             VALUE = DV%HISTOGRAM_COUNTS(NN)
-            CUMSUM = CUMSUM + VALUE
+            CUMSUM = CUMSUM + VALUE*DD
             DI=PY%HISTOGRAM_LIMITS(1)+(REAL(NN,EB)-0.5_EB)*DD
             IF (PY%HISTOGRAM_CUMULATIVE) VALUE = CUMSUM
             IF (PY%HISTOGRAM_NORMALIZE .AND. CONST>TWO_EPSILON_EB) VALUE = VALUE / CONST
