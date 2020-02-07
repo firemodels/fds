@@ -764,6 +764,7 @@ if [ "$queue" != "none" ]; then
 #SBATCH -n $n_mpi_processes
 ####SBATCH --nodes=$nodes
 #SBATCH --cpus-per-task=$n_openmp_threads
+#SBATCH --ntasks-per-node=$ppn
 $SLURM_MEM
 EOF
     if [ "$walltimestring_slurm" != "" ]; then
