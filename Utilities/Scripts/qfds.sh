@@ -654,6 +654,7 @@ fulldir=`pwd`
 
 outerr=$fulldir/$infile.err
 outlog=$fulldir/$infile.log
+qlog=$fulldir/$infile.qlog
 stopfile=$fulldir/$infile.stop
 scriptlog=$fulldir/$infile.slog
 in_full_file=$fulldir/$in
@@ -866,6 +867,8 @@ fi
 cat << EOF >> $scriptfile
 echo "     Directory: \`pwd\`"
 echo "          Host: \`hostname\`"
+echo "----------------" >> $qlog
+echo "started running at \`date\`" >> $qlog
 EOF
 if [ "$OPENMPCASES" == "" ]; then
 if [ "$vtuneresdir" == "" ]; then
@@ -908,6 +911,9 @@ EOF
 fi
 done
 fi
+cat << EOF >> $scriptfile
+echo "finished running at \`date\`" >> $qlog
+EOF
 if [ "$queue" == "none" ]; then
 cat << EOF >> $scriptfile
 rm -f $scriptfile
@@ -923,22 +929,22 @@ if [ "$showinput" == "1" ]; then
 fi
 
 #*** output info to screen
-
+echo "submitted at `date`"                          > $qlog
 if [ "$queue" != "none" ]; then
 if [ "$OPENMPCASES" == "" ]; then
-  echo "         Input file:$in"
+  echo "         Input file:$in"             | tee -a $qlog
 else
-  echo "         Input files:"
+  echo "         Input files:"               | tee -a $qlog
 for i in `seq 1 $OPENMPCASES`; do
-  echo "            ${files[$i]}"
+  echo "            ${files[$i]}"            | tee -a $qlog
 done
 fi
-  echo "         Executable:$exe"
+  echo "         Executable:$exe"            | tee -a $qlog
   if [ "$OPENMPI_PATH" != "" ]; then
-    echo "            OpenMPI:$OPENMPI_PATH"
+    echo "            OpenMPI:$OPENMPI_PATH" | tee -a $qlog
   fi
   if [ "$use_intel_mpi" != "" ]; then
-    echo "           Intel MPI"
+    echo "           Intel MPI"              | tee -a $qlog
   fi
 
 #*** output currently loaded modules and modules when fds was built if the
@@ -948,32 +954,32 @@ fi
   if [ "$FDS_MODULE_OPTION" == "" ]; then
     if [[ "$FDS_LOADED_MODULES" != "" ]] && [[ "$CURRENT_LOADED_MODULES" != "" ]]; then
       if [ "$FDS_LOADED_MODULES" != "$CURRENT_LOADED_MODULES" ]; then
-        echo "  Modules(when run):$CURRENT_LOADED_MODULES"
-        echo "Modules(when built):$FDS_LOADED_MODULES"
+        echo "  Modules(when run):$CURRENT_LOADED_MODULES" | tee -a $qlog
+        echo "Modules(when built):$FDS_LOADED_MODULES"     | tee -a $qlog
         MODULES_OUT=1
       fi
     fi
   fi
 
 #*** otherwise output modules used when fds is run
-
   if [[ "$MODULES" != "" ]] && [[ "$MODULES_OUT" == "" ]]; then
-    echo "            Modules:$MODULES"
+    echo "            Modules:$MODULES"                    | tee -a $qlog
   fi
-  echo "   Resource Manager:$RESOURCE_MANAGER"
-  echo "              Queue:$queue"
-  echo "              Nodes:$nodes"
-  echo "          Processes:$n_mpi_processes"
-  echo " Processes per node:$n_mpi_processes_per_node"
+  echo "   Resource Manager:$RESOURCE_MANAGER"             | tee -a $qlog
+  echo "              Queue:$queue"                        | tee -a $qlog
+  echo "              Nodes:$nodes"                        | tee -a $qlog
+  echo "          Processes:$n_mpi_processes"              | tee -a $qlog
+  echo " Processes per node:$n_mpi_processes_per_node"     | tee -a $qlog
   if test $n_openmp_threads -gt 1 ; then
-    echo "Threads per process:$n_openmp_threads"
+    echo "Threads per process:$n_openmp_threads"           | tee -a $qlog
   fi
 fi
 
 #*** run script
 
 $SLEEP
-$QSUB $scriptfile
+echo 
+$QSUB $scriptfile | tee -a $qlog
 if [ "$queue" != "none" ]; then
   cat $scriptfile > $scriptlog
   echo "#$QSUB $scriptfile" >> $scriptlog
