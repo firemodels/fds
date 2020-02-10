@@ -330,8 +330,10 @@ case $OPTION  in
    fi
    n_mpi_process=1
    benchmark="yes"
-   if [ "$NCORES_COMPUTENODE" != "" ]; then
-     n_mpi_processes_per_node="$NCORES_COMPUTENODE"
+   if [ "$RESOURCE_MANAGER" == "TORQUE" ]; then
+     if [ "$NCORES_COMPUTENODE" != "" ]; then
+       n_mpi_processes_per_node="$NCORES_COMPUTENODE"
+     fi
    fi
    ;;
   p)
@@ -342,9 +344,11 @@ case $OPTION  in
    OPENMPTEST="1"
    benchmark="yes"
    n_mpi_process=1
-   if [ "$NCORES_COMPUTENODE" != "" ]; then
-     n_mpi_processes_per_node="$NCORES_COMPUTENODE"
-   fi
+   if [ "$RESOURCE_MANAGER" == "TORQUE" ]; then
+     if [ "$NCORES_COMPUTENODE" != "" ]; then
+       n_mpi_processes_per_node="$NCORES_COMPUTENODE"
+     fi
+   fi  
    ;;
   q)
    queue="$OPTARG"
@@ -360,8 +364,10 @@ case $OPTION  in
    ;;
   t)
    benchmark="yes"
-   if [ "$NCORES_COMPUTENODE" != "" ]; then
-     n_mpi_processes_per_node="$NCORES_COMPUTENODE"
+   if [ "$RESOURCE_MANAGER" == "TORQUE" ]; then
+     if [ "$NCORES_COMPUTENODE" != "" ]; then
+       n_mpi_processes_per_node="$NCORES_COMPUTENODE"
+     fi
    fi
    ;;
   T)
@@ -765,6 +771,15 @@ if [ "$queue" != "none" ]; then
 ####SBATCH --nodes=$nodes
 #SBATCH --cpus-per-task=$n_openmp_threads
 #SBATCH --ntasks-per-node=$ppn
+EOF
+
+if [ "$benchmark" == "yes" ]; then
+cat << EOF >> $scriptfile
+#SBATCH --exclusive
+EOF
+fi
+
+cat << EOF >> $scriptfile
 $SLURM_MEM
 EOF
     if [ "$walltimestring_slurm" != "" ]; then
