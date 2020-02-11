@@ -7020,6 +7020,36 @@ The amount expected on the floor is approximately 0.024~kg.
 \end{figure}
 
 
+\FloatBarrier
+
+\subsection{Level Set Model for Wildland Fire Spread}
+\label{info:level_set}
+
+For simulations of wildland fires that span large areas that cannot be gridded at fine enough resolution to predict fire spread, there is an empirical model based on level sets for which you can specify the fire spread rate in three directions with respect to the prevailing wind direction. To invoke this model, you need a {\ct SURF} line as follows:
+\begin{lstlisting}
+&SURF ID='Ground Vegetation' 
+      TEXTURE_MAP='my_terrain.png'
+      VEG_LSET_SPREAD = T
+      VEG_LSET_ROS_HEAD = 1.5
+      VEG_LSET_ROS_FLANK = 0.5
+      VEG_LSET_ROS_BACK = 0.15
+      HRRPUA = 200.
+      RAMP_Q = 'fire' /
+\end{lstlisting}
+The parameter {\ct VEG\_LSET\_SPREAD} simply invokes the level set spread model when set to true. The parameters {\ct VEG\_LSET\_ROS\_XXX} are coefficients in empirical expressions for the rate of spread in the windward ({\ct HEAD}), leeward ({\ct BACK}), and lateral ({\ct FLANK}) directions. 
+
+When the fire front arrives at a given surface cell, it begins to burn with a heat release per unit area given by {\ct HRRPUA} in kW/m$^2$. The local heat release rate is typically ramped up and down using {\ct RAMP\_Q}. The local burning rate and duration are function of the vegetation mass per unit area. 
+
+The fire is initiated by specifying a small area to be ignited at a particular time:
+\begin{lstlisting}
+&SURF ID='Ignited Area', VEG_LSET_IGNITE_TIME=1., COLOR='RED' /
+&VENT XB=..., SURF_ID='Ignited Area', GEOM=T /
+\end{lstlisting}
+These lines indicate that a patch of terrain specified using {\ct XB} on the {\ct VENT} line ignites at 1~s, i.e. just after the start of the simulation. The logical parameter {\ct GEOM} is needed to tell FDS that the terrain geometry is an immersed boundary and does not conform exactly with the numerical grid. The coordinates given by {\ct XB} designate a horizontal patch at the lowest level of the computational domain, and this plane is then projected upwards until it cuts through the actual domain.
+
+
+
+
 
 
 \chapter{Devices and Control Logic}
@@ -8881,7 +8911,7 @@ Here again you must add a {\ct QUANTITY2} to the device line.
 \subsection{Histograms}
 \label{info:histograms}
 
-It is sometimes useful to compile probability distribution functions (PDFs) or histograms of various output quantities. Suppose, for example, you are monitoring the temperature at two locations, and in addition to plots of the time histories, you want a PDF as well. Do something like following: 
+It is sometimes useful to compile probability distribution functions (PDFs) or histograms of various output quantities. Suppose, for example, you are monitoring the temperature at two locations, and in addition to plots of the time histories, you want a PDF as well. Do something like following:
 \begin{lstlisting}
 &DEVC XYZ=..., QUANTITY='TEMPERATURE', ID='T_1', PROP_ID='hist', HIDE_COORDINATES=F /
 &DEVC XYZ=..., QUANTITY='TEMPERATURE', ID='T_2', PROP_ID='hist', HIDE_COORDINATES=T /
@@ -10988,7 +11018,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SPEC\_ID}                                            & Character       & Section~\ref{info:MASS_FLUX}              &                     &                         \\ \hline
 {\ct SPREAD\_RATE}                                        & Real            & Section~\ref{info:spread}                 & m/s                 &                         \\ \hline
 {\ct STRETCH\_FACTOR(:) }                                 & Real            & Section~\ref{info:solid_phase_stability}  &                     & 2.                      \\ \hline
-{\ct SURFACE\_VOLUME\_RATIO(:) }                          & Real            & Section~\ref{pine_needles}             & 1/m                 &                         \\ \hline
+{\ct SURFACE\_VOLUME\_RATIO(:) }                          & Real            & Section~\ref{pine_needles}                & 1/m                 &                         \\ \hline
 {\ct TAU\_EF}                                             & Real            & Section~\ref{info:RAMP_Time}              & s                   & 1.                      \\ \hline
 {\ct TAU\_MF(:)}                                          & Real Array      & Section~\ref{info:RAMP_Time}              & s                   & 1.                      \\ \hline
 {\ct TAU\_PART}                                           & Real            & Section~\ref{info:RAMP_Time}              & s                   & 1.                      \\ \hline
@@ -11006,6 +11036,20 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct TMP\_FRONT}                                          & Real            & Section~\ref{info:specified_temperature}  & $^\circ$C           & 20.                     \\ \hline
 {\ct TMP\_INNER(:)}                                       & Real Array      & Section~\ref{info:TMP_INNER}              & $^\circ$C           & 20.                     \\ \hline
 {\ct TRANSPARENCY}                                        & Real            & Section~\ref{info:colors}                 &                     & 1.                      \\ \hline
+{\ct VEG\_LSET\_BETA}                                     & Real            & Section~\ref{info:level_set}              &                     & 0.                      \\ \hline
+{\ct VEG\_LSET\_COUPLED}                                  & Logical         & Section~\ref{info:level_set}              &                     & {\ct .TRUE.}            \\ \hline
+{\ct VEG\_LSET\_ELLIPSE}                                  & Logical         & Section~\ref{info:level_set}              &                     & {\ct .FALSE.}           \\ \hline
+{\ct VEG\_LSET\_ELLIPSE\_HEAD}                            & Real            & Section~\ref{info:level_set}              & m/s                 & 0.                      \\ \hline
+{\ct VEG\_LSET\_HT}                                       & Real            & Section~\ref{info:level_set}              &                     & 0.                      \\ \hline
+{\ct VEG\_LSET\_IGNITE\_TIME}                             & Real            & Section~\ref{info:level_set}              & s                   &                         \\ \hline
+{\ct VEG\_LSET\_QCON}                                     & Real            & Section~\ref{info:level_set}              & kW/m$^2$            & 0.                      \\ \hline
+{\ct VEG\_LSET\_ROS\_BACK}                                & Real            & Section~\ref{info:level_set}              & m/s                 & 0.                      \\ \hline
+{\ct VEG\_LSET\_ROS\_FLANK}                               & Real            & Section~\ref{info:level_set}              & m/s                 & 0.                      \\ \hline
+{\ct VEG\_LSET\_ROS\_HEAD}                                & Real            & Section~\ref{info:level_set}              & m/s                 & 0.                      \\ \hline
+{\ct VEG\_LSET\_SPREAD}                                   & Logical         & Section~\ref{info:level_set}              &                     & {\ct .FALSE.}           \\ \hline
+{\ct VEG\_LSET\_SIGMA}                                    & Real            & Section~\ref{info:level_set}              &                     & 0.                      \\ \hline
+{\ct VEG\_LSET\_TAN2}                                     & Real            & Section~\ref{info:level_set}              &                     &                         \\ \hline
+{\ct VEG\_LSET\_WIND\_EXP}                                & Real            & Section~\ref{info:level_set}              &                     & 1.                      \\ \hline
 {\ct VEL    }                                             & Real            & Section~\ref{info:Velocity_BC}            & m/s                 &                         \\ \hline
 {\ct VEL\_BULK}                                           & Real            & Section~\ref{info:profiles}               & m/s                 &                         \\ \hline
 {\ct VEL\_GRAD}                                           & Real            & Section~\ref{info:vel_grad}               & 1/s                 &                         \\ \hline
@@ -11016,9 +11060,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct Z0 }                                                 & Real            & Section~\ref{info:stratification}         & m                   & 10.                     \\ \hline
 \end{longtable}
 
-% Undocumented: AREA_ADJUST, FSK_A, FSK_K, FSK_W, IMPERMEABLE, N_CELLS_MAX
-%       KM=>    VEG_LSET_QCON, VEG_LEVEL_SET_SPREAD, VEG_LSET_ROS_BACK, VEG_LSET_ROS_FLANK, VEG_LSET_ROS_HEAD, VEG_LSET_WIND_EXP,
-%       KM=>    VEG_LSET_SIGMA, VEG_LSET_HT, VEG_LSET_BETA, VEG_LSET_ELLIPSE, VEG_LSET_TAN2, VEG_LSET_ELLIPSE_HEAD
+% Undocumented: FSK_A, FSK_K, FSK_W, IMPERMEABLE
+
 
 \vspace{\baselineskip}
 
