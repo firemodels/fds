@@ -556,7 +556,7 @@ MAIN_LOOP: DO
 
    ! Clip final time step
 
-   IF ((T+DT)>T_END) DT = T_END-T+TWO_EPSILON_EB
+   IF ((T+DT+DT_END_FILL)>T_END) DT = MAX(T_END-T+TWO_EPSILON_EB,DT_END_MINIMUM)
 
    ! Determine when to dump out diagnostics to the .out file
 
@@ -3600,11 +3600,11 @@ IF (T>=DEVC_CLOCK .AND. N_DEVC>0) THEN
       DEVICE_LOOP: DO N=1,N_DEVC
          DV => DEVICE(N)
          IF (T>DV%STATISTICS_END) CYCLE
-         IF (DV%NO_UPDATE_DEVC_INDEX>0) THEN 
+         IF (DV%NO_UPDATE_DEVC_INDEX>0) THEN
             IF (DEVICE(DV%NO_UPDATE_DEVC_INDEX)%CURRENT_STATE) CYCLE DEVICE_LOOP
          ELSEIF (DV%NO_UPDATE_CTRL_INDEX>0) THEN
             IF (CONTROL(DV%NO_UPDATE_CTRL_INDEX)%CURRENT_STATE) CYCLE DEVICE_LOOP
-         ENDIF        
+         ENDIF
          DV%VALUE = 0._EB
          DV%TIME_INTERVAL = 0._EB
       ENDDO DEVICE_LOOP
