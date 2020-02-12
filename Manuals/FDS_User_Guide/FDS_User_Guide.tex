@@ -986,6 +986,8 @@ At the end of the first part of the explicit predictor-corrector time update, th
 
 The diagnostic output file called {\ct CHID.out} contains information about the time step and CFL number in each mesh. However, for simulations that involve dozens or hundreds of meshes, it can be difficult to assess the global time step information. For detailed information about the time step, there is an optional output file called {\ct CHID\_cfl.csv} that contains, for every time step, the time~(s), time step size~(s), maximum CFL number, the mesh and mesh indices where the maximum CFL value occurs, the six velocity components on the six faces of the grid cell where the maximum CFL number occurs, and the divergence~(1/s), viscosity~(kg/m/s), and HRRPUV~(kW/m$^3$) where the maximum CFL occurs. Also listed is the maximum VN (Von Neumann) number and the mesh and cell indices were it occurs. To output this file, set {\ct CFL\_FILE} to {\ct .TRUE.} on the {\ct DUMP} line. It is normally set to {\ct .FALSE.}
 
+In some special circumstances it may be necessary to control the final time step of the calculation.  By default, FDS sets the last time step to be {\ct T\_END - T} where {\ct T} is the current time.  Because of floating point arithmetic, this final time step may be very small and cause unintended consequences.  You can control this final time step in two ways, using the parameters {\ct DT\_END\_MINIMUM} or {\ct DT\_END\_FILL} (you should not need both).  Using {\ct DT\_END\_MINIMUM} has the effect of setting a minimum for the final time step and so {\ct T\_END} is not strictly observed (hence our default {\ct DT\_END\_MINIMUM} is roughly the machine epsilon).  The final simulation time will be {\ct T + DT\_END\_MINIMUM}.  Alternatively, you could set {\ct DT\_END\_FILL} to some value (should be less than the last time step).  Then if {\ct T+DT+DT\_END\_FILL > T\_END}, where {\ct DT} is the computed stable time step (or specified time step), FDS will recompute the time step to be {\ct DT = T\_END - T}.  If you set one of these parameters, double check the {\ct CHID.out} file to make sure the expected behavior has been observed.
+
 
 \subsection{Special Topic: Steady-State Applications}
 \label{info:steady_state}
@@ -7027,7 +7029,7 @@ The amount expected on the floor is approximately 0.024~kg.
 
 For simulations of wildland fires that span large areas that cannot be gridded at fine enough resolution to predict fire spread, there is an empirical model based on level sets for which you can specify the fire spread rate in three directions with respect to the prevailing wind direction. To invoke this model, you need a {\ct SURF} line as follows:
 \begin{lstlisting}
-&SURF ID='Ground Vegetation' 
+&SURF ID='Ground Vegetation'
       TEXTURE_MAP='my_terrain.png'
       VEG_LSET_SPREAD = T
       VEG_LSET_ROS_HEAD = 1.5
@@ -7036,9 +7038,9 @@ For simulations of wildland fires that span large areas that cannot be gridded a
       HRRPUA = 200.
       RAMP_Q = 'fire' /
 \end{lstlisting}
-The parameter {\ct VEG\_LSET\_SPREAD} simply invokes the level set spread model when set to true. The parameters {\ct VEG\_LSET\_ROS\_XXX} are coefficients in empirical expressions for the rate of spread in the windward ({\ct HEAD}), leeward ({\ct BACK}), and lateral ({\ct FLANK}) directions. 
+The parameter {\ct VEG\_LSET\_SPREAD} simply invokes the level set spread model when set to true. The parameters {\ct VEG\_LSET\_ROS\_XXX} are coefficients in empirical expressions for the rate of spread in the windward ({\ct HEAD}), leeward ({\ct BACK}), and lateral ({\ct FLANK}) directions.
 
-When the fire front arrives at a given surface cell, it begins to burn with a heat release per unit area given by {\ct HRRPUA} in kW/m$^2$. The local heat release rate is typically ramped up and down using {\ct RAMP\_Q}. The local burning rate and duration are function of the vegetation mass per unit area. 
+When the fire front arrives at a given surface cell, it begins to burn with a heat release per unit area given by {\ct HRRPUA} in kW/m$^2$. The local heat release rate is typically ramped up and down using {\ct RAMP\_Q}. The local burning rate and duration are function of the vegetation mass per unit area.
 
 The fire is initiated by specifying a small area to be ignited at a particular time:
 \begin{lstlisting}
@@ -11104,6 +11106,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hline \hline
 \endhead
 {\ct DT}                        & Real       & Section~\ref{info:TIME_Control}           & s           &                 \\ \hline
+{\ct DT\_END\_FILL}             & Real       & Section~\ref{info:TIME_Control}           & s           & 0.              \\ \hline
+{\ct DT\_END\_MINIMUM}          & Real       & Section~\ref{info:TIME_Control}           & s           &  {\ct 2.*EPSILON}  \\ \hline
 {\ct EVAC\_DT\_FLOWFIELD}       & Real       & Reference~\cite{FDS_Evac_Users_Guide}     & s           &  0.01           \\ \hline
 {\ct EVAC\_DT\_STEADY\_STATE}   & Real       & Reference~\cite{FDS_Evac_Users_Guide}     & s           &  0.05           \\ \hline
 {\ct LIMITING\_DT\_RATIO}       & Real       & Section~\ref{info:Errors}                 &             &  0.0001         \\ \hline
