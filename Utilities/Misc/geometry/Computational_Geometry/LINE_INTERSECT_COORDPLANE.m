@@ -28,8 +28,8 @@ end
 
 % Non parallel case:
 TLINE = -PLNEQ/DENOM;  % Coordinate along the line LNC.
-XYZ_INT(IAXIS:KAXIS) = LNC(IAXIS:KAXIS,NOD1)' + TLINE*DIRV(IAXIS:KAXIS); % Intersection point.
-XYZ_INT(X1AXIS) = X1PLN; % Force X1AXIS coordinate to be the planes value.
+XYZ_INT(IAXIS:KAXIS,1) = LNC(IAXIS:KAXIS,NOD1)' + TLINE*DIRV(IAXIS:KAXIS); % Intersection point.
+XYZ_INT(X1AXIS,1) = X1PLN; % Force X1AXIS coordinate to be the planes value.
 INTFLG = true;
 
 return

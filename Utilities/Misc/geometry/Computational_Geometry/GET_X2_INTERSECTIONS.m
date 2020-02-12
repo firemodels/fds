@@ -202,7 +202,7 @@ end
 if ( IBM_N_CRS == 0 ); return; end
 
 % Collapse crossings to single SVARs:
-[ierr2]=COLLAPSE_CROSSINGS(X1AXIS,X2AXIS,X3AXIS,X3RAY,X1PLN,1);
+[ierr2]=COLLAPSE_CROSSINGS(BODINT_PLANE,X1AXIS,X2AXIS,X3AXIS,X3RAY,X1PLN,1);
 
 ierr = 0;
 

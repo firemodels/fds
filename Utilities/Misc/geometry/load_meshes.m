@@ -102,9 +102,11 @@ for NM=1:NMESHES
    MESHES(NM).N_CUTCELL_MESH = 0;
    
    MESHES(NM).N_GCCUTFACE_MESH = 0;
+   MESHES(NM).N_GCCUTCELL_MESH = 0;
    
    TRANS(NM).NOC(IAXIS:KAXIS)= 0;
    
+   MESHES(NM).N_SPCELL = 0;
 end
 
 fclose(fid);

@@ -1,18 +1,20 @@
 function [ierr,BODINT_PLANE]=GET_BODINT_PLANE(X1AXIS,X1PLN,INDX1,PLNORMAL,X2AXIS,...
-                             X3AXIS,DX2_MIN,DX3_MIN,TRI_ONPLANE_ONLY,RAYTRACE_X2_ONLY)
+                             X3AXIS,DX2_MIN,DX3_MIN,X2LO,X2HI,X3LO,X3HI,X2FACE,X3FACE,TRI_ONPLANE_ONLY,RAYTRACE_X2_ONLY)
                          
 global N_GEOMETRY GEOM IAXIS JAXIS KAXIS IBM_SOLID IBM_GASPHASE
 global GEOMEPS LOW_IND HIGH_IND NODS_WSEL MAX_DIM NOD1 NOD2 NOD3 EDG1 EDG2 EDG3
 global IBM_MAX_WSTRIANG_SEG DELTA_SEGBIN
 global IBM_DELTA_NBCROSS
 
-global X2LO X2HI X2LO_CELL X2HI_CELL X2FACE DX2FACE
-global X3LO X3HI X3LO_CELL X3HI_CELL X3FACE DX3FACE
+global X2LO_CELL X2HI_CELL DX2FACE
+global X3LO_CELL X3HI_CELL DX3FACE
 
 global FACERT CELLRT
 global X2NOC X3NOC
 
 global X3LO_RT X3HI_RT
+
+global BODINT_PLANE3
 
 ierr = 1;
 
@@ -109,10 +111,6 @@ for IG=1:N_GEOMETRY
 
             [XYZ_INT1,INTFLG]=LINE_INTERSECT_COORDPLANE(X1AXIS,X1PLN,PLNORMAL,LN1);
 
-            %if (~ INTFLG)
-            %  print*, "Error GET_BODINT_PLANE: No intersection on LN1, typical 1."
-            %end
-
             % Index to XYZ_INT1:
             [IND_P(NOD1),BODINT_PLANE]=GET_BODINT_NODE_INDEX(BODINT_PLANE,X2AXIS,X3AXIS,XYZ_INT1);
 
@@ -121,10 +119,6 @@ for IG=1:N_GEOMETRY
             LN2(IAXIS:KAXIS,NOD2) = XYZV(IAXIS:KAXIS,NOD3);
 
             [XYZ_INT2,INTFLG]=LINE_INTERSECT_COORDPLANE(X1AXIS,X1PLN,PLNORMAL,LN2);
-
-            %if (~ INTFLG)
-            %  print*, "Error GET_BODINT_PLANE: No intersection on LN2, typical 1."
-            %end
 
             % Index to XYZ_INT2:
             [IND_P(NOD2),BODINT_PLANE]=GET_BODINT_NODE_INDEX(BODINT_PLANE,X2AXIS,X3AXIS,XYZ_INT2);
@@ -153,10 +147,6 @@ for IG=1:N_GEOMETRY
 
               [XYZ_INT1,INTFLG]=LINE_INTERSECT_COORDPLANE(X1AXIS,X1PLN,PLNORMAL,LN1);
 
-              %if (~ INTFLG)
-              %  print*, "Error GET_BODINT_PLANE: No intersection on LN1, typical 2."
-              %end
-
               % Index to XYZ_INT1:
               [IND_P(NOD1),BODINT_PLANE]=GET_BODINT_NODE_INDEX(BODINT_PLANE,X2AXIS,X3AXIS,XYZ_INT1);
 
@@ -165,10 +155,6 @@ for IG=1:N_GEOMETRY
               LN2(IAXIS:KAXIS,NOD2) = XYZV(IAXIS:KAXIS,NOD3);
 
               [XYZ_INT2,INTFLG]=LINE_INTERSECT_COORDPLANE(X1AXIS,X1PLN,PLNORMAL,LN2);
-
-              %if (~ INTFLG)
-              %  print*, "Error GET_BODINT_PLANE: No intersection on LN2, typical 2."
-              %end
 
               % Index to XYZ_INT2:
               [IND_P(NOD2),BODINT_PLANE]=GET_BODINT_NODE_INDEX(BODINT_PLANE,X2AXIS,X3AXIS,XYZ_INT2);
@@ -197,10 +183,6 @@ for IG=1:N_GEOMETRY
 
               [XYZ_INT1,INTFLG]=LINE_INTERSECT_COORDPLANE(X1AXIS,X1PLN,PLNORMAL,LN1);
 
-              %if (~ INTFLG)
-              %  print*, "Error GET_BODINT_PLANE: No intersection on LN1, typical 3."
-              %end
-
               % Index to XYZ_INT1:
               [IND_P(NOD1),BODINT_PLANE]=GET_BODINT_NODE_INDEX(BODINT_PLANE,X2AXIS,X3AXIS,XYZ_INT1);
 
@@ -209,10 +191,6 @@ for IG=1:N_GEOMETRY
               LN2(IAXIS:KAXIS,NOD2) = XYZV(IAXIS:KAXIS,NOD3);
 
               [XYZ_INT2,INTFLG]=LINE_INTERSECT_COORDPLANE(X1AXIS,X1PLN,PLNORMAL,LN2);
-
-              %if (~ INTFLG)
-              %  print*, "Error GET_BODINT_PLANE: No intersection on LN2, typical 2."
-              %end
 
               % Index to XYZ_INT2:
               [IND_P(NOD2),BODINT_PLANE]=GET_BODINT_NODE_INDEX(BODINT_PLANE,X2AXIS,X3AXIS,XYZ_INT2);
@@ -336,10 +314,6 @@ for IG=1:N_GEOMETRY
 
             [XYZ_INT2,INTFLG]=LINE_INTERSECT_COORDPLANE(X1AXIS,X1PLN,PLNORMAL,LN2);
 
-            %if (~ INTFLG)
-            %  print*, "Error GET_BODINT_PLANE: No intersection on LN2, Case C 1."
-            %end
-
             % Index to XYZ_INT2:
             [IND_P(NOD2),BODINT_PLANE]=GET_BODINT_NODE_INDEX(BODINT_PLANE,X2AXIS,X3AXIS,XYZ_INT2);
 
@@ -373,10 +347,6 @@ for IG=1:N_GEOMETRY
 
             [XYZ_INT2,INTFLG]=LINE_INTERSECT_COORDPLANE(X1AXIS,X1PLN,PLNORMAL,LN2);
 
-            %if (~ INTFLG)
-            %  print*, "Error GET_BODINT_PLANE: No intersection on LN2, Case C 2."
-            %end
-
             % Index to XYZ_INT2:
             [IND_P(NOD2),BODINT_PLANE]=GET_BODINT_NODE_INDEX(BODINT_PLANE,X2AXIS,X3AXIS,XYZ_INT2);
 
@@ -409,10 +379,6 @@ for IG=1:N_GEOMETRY
             LN2(IAXIS:KAXIS,NOD2) = XYZV(IAXIS:KAXIS,NOD2);
 
             [XYZ_INT2,INTFLG]=LINE_INTERSECT_COORDPLANE(X1AXIS,X1PLN,PLNORMAL,LN2);
-
-            %if (~ INTFLG)
-            %  print*, "Error GET_BODINT_PLANE: No intersection on LN2, Case C 3."
-            %end
 
             % Index to XYZ_INT2:
             [IND_P(NOD2),BODINT_PLANE]=GET_BODINT_NODE_INDEX(BODINT_PLANE,X2AXIS,X3AXIS,XYZ_INT2);
@@ -464,7 +430,8 @@ for IG=1:N_GEOMETRY
             %    break
             % end
             if ( (BODINT_PLANE.SEGS(NOD1,ISEG) == SEG(NOD1)) && ...
-                 (BODINT_PLANE.SEGS(NOD2,ISEG) == SEG(NOD2)) )
+                 (BODINT_PLANE.SEGS(NOD2,ISEG) == SEG(NOD2)) && ...
+                 (BODINT_PLANE.INDSEG(4,ISEG)  == IG))
                INLIST = true;
                break
             end
@@ -518,7 +485,8 @@ for IG=1:N_GEOMETRY
             %    break
             % end
             if ( (BODINT_PLANE.SEGS(NOD1,ISEG) == SEG(NOD1)) && ...
-                 (BODINT_PLANE.SEGS(NOD2,ISEG) == SEG(NOD2)) )
+                 (BODINT_PLANE.SEGS(NOD2,ISEG) == SEG(NOD2)) && ...
+                 (BODINT_PLANE.INDSEG(4,ISEG)  == IG))
                INLIST = true;
                break
             end
@@ -572,7 +540,8 @@ for IG=1:N_GEOMETRY
             %    break
             % end
             if ( (BODINT_PLANE.SEGS(NOD1,ISEG) == SEG(NOD1)) && ...
-                 (BODINT_PLANE.SEGS(NOD2,ISEG) == SEG(NOD2)) )
+                 (BODINT_PLANE.SEGS(NOD2,ISEG) == SEG(NOD2)) && ...
+                 (BODINT_PLANE.INDSEG(4,ISEG)  == IG))
                INLIST = true;
                break
             end
@@ -604,6 +573,7 @@ for IG=1:N_GEOMETRY
        
     end
 end    
+
 
 % Next step is to Test triangles sides normals on plane against the obtained
 % segments normals. If two identical segments found contain oposite
@@ -1029,9 +999,7 @@ for IBIN=1:BODINT_PLANE.TBAXIS(AXIS).N_BINS
                % Here JJ2 and KK2 have the face containing the
                % intersection:
                FACERT(JJ2,KK2) = 1;
-               
-%            end
-               
+                              
            end
          end
          
@@ -1083,7 +1051,6 @@ for INOD = 1:BODINT_PLANE.NNODS
     FACERT(JJ2,KK2) = 1;
     
 end
-
 
 
 ierr=0;
