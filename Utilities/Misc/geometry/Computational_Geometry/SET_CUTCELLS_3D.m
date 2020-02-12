@@ -1,9 +1,9 @@
 function [ierr]=SET_CUTCELLS_3D(basedir,casename,plot_cutedges)
 
 global NMESHES MESHES NGUARD CCGUARD GEOMEPS IAXIS JAXIS KAXIS NOD1 NOD2
-global X1FACE X2FACE X3FACE DX1FACE DX2FACE DX3FACE DX1CELL DX2CELL DX3CELL
+global X1FACE X2FACE X3FACE DX1FACE DX2FACE DX3FACE DX2CELL DX3CELL
 global X2LO X2HI X3LO X3HI 
-global X1CELL X2CELL X3CELL X2LO_CELL X2HI_CELL X3LO_CELL X3HI_CELL
+global X2CELL X3CELL X2LO_CELL X2HI_CELL X3LO_CELL X3HI_CELL
 global ILO_FACE IHI_FACE ILO_CELL IHI_CELL
 global JLO_FACE JHI_FACE JLO_CELL JHI_CELL
 global KLO_FACE KHI_FACE KLO_CELL KHI_CELL
@@ -11,9 +11,8 @@ global XCELL DXCELL XFACE DXFACE
 global YCELL DYCELL YFACE DYFACE
 global ZCELL DZCELL ZFACE DZFACE
 global BODINT_PLANE
-global IBM_N_CRS IBM_SVAR_CRS 
+global IBM_N_CRS IBM_SVAR_CRS IBM_IS_CRS
 global X1NOC X2NOC X3NOC TRANS
-
 global X1LO_CELL X1HI_CELL
 global FACERT CELLRT
 
@@ -127,7 +126,8 @@ for NM=1:NMESHES
    CELLRT=zeros(IEND,JEND,KEND); % false
    
    % Here Allocation of crossings, cut-edges, faces and cells..
-   
+   disp(['Calculation of intersections and cut-edges by grid plane ...'])
+   tic    
    for X1AXIS=IAXIS:KAXIS
 
        switch(X1AXIS)
@@ -262,7 +262,7 @@ for NM=1:NMESHES
                FACERT(:,:) = 0;
                
                [ierr,BODINT_PLANE]=GET_BODINT_PLANE(X1AXIS,X1PLN,INDX1(X1AXIS),PLNORMAL,X2AXIS,...
-                                   X3AXIS,DX2_MIN,DX3_MIN,TRI_ONPLANE_ONLY,RAYTRACE_X2_ONLY);
+                                   X3AXIS,DX2_MIN,DX3_MIN,X2LO,X2HI,X3LO,X3HI,X2FACE,X3FACE,TRI_ONPLANE_ONLY,RAYTRACE_X2_ONLY);
                
                % Test that there is an intersection:
                if ((BODINT_PLANE.NSGLS+BODINT_PLANE.NSEGS+BODINT_PLANE.NTRIS) == 0); continue; end
@@ -293,7 +293,7 @@ for NM=1:NMESHES
                         continue
                      end
                   end
-
+            
                   % Now for this ray, set vertex types in MESHES(NM)%VERTVAR(:,:,:,IBM_VGSC):
                   [ierr]=GET_X2_VERTVAR(X1AXIS,X2LO,X2HI,NM,I,KK);
 
@@ -365,10 +365,14 @@ for NM=1:NMESHES
       end % K index
     
    end % X1AXIS_LOOP
-
+   toc
+   
+   disp('Into GET_CARTCELL_CUTEDGES ...')
+   tic
    % Now Define the INBOUNDARY cut-edge inside Cartesian cells:
    [ierr]=GET_CARTCELL_CUTEDGES(NM,ISTR,IEND,JSTR,JEND,KSTR,KEND);
-
+   toc
+   
    % 1. Cartesian GASPHASE cut-faces:
    % Loops for IAXIS, JAXIS, KAXIS faces: For FCVAR i,j,k, axis
    % - Define Cartesian Boundary Edges indexes.
@@ -376,18 +380,29 @@ for NM=1:NMESHES
    % - From FCVAR(i,j,k,IDCE,axis) figure out entries in CUT_EDGE (INBOUNDCF segs).
    % - Reorder Edges, figure out if there are disjoint areas present.
    % - Load into CUT_FACE <=> FCVAR(i,j,k,IDCF,axis).
+   disp('Into GET_CARTFACE_CUTFACES ...')
+   tic   
    [ierr]=GET_CARTFACE_CUTFACES(NM,ISTR,IEND,JSTR,JEND,KSTR,KEND,true);
-
+   toc
+   
    % 2. INBOUNDARY cut-faces:
+   disp('Into GET_CARTCELL_CUTFACES ...')
+   tic   
    [ierr]=GET_CARTCELL_CUTFACES(NM,ISTR,IEND,JSTR,JEND,KSTR,KEND,true);
+   toc
 
    % Guard-cell Cartesian GASPHASE and INBOUNDARY cut-faces:
+   disp('Into Guard cell GET_CARTFACE_CUTFACES, GET_CARTCELL_CUTFACES ...')
+   tic   
    [ierr]=GET_CARTFACE_CUTFACES(NM,ISTR,IEND,JSTR,JEND,KSTR,KEND,false);
    [ierr]=GET_CARTCELL_CUTFACES(NM,ISTR,IEND,JSTR,JEND,KSTR,KEND,false);
+   toc
 
    % Finally: Definition of cut-cells:
-   %[ierr]=GET_CARTCELL_CUTCELLS(NM);
-   
+   disp('Into GET_CARTCELL_CUTCELLS ...')
+   tic   
+   [ierr]=GET_CARTCELL_CUTCELLS(NM);
+   toc
 end
 
 ierr=0;

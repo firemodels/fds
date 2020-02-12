@@ -1,0 +1,105 @@
+function [IS_SOLID]=GET_IS_SOLID_3D(X2AXIS,XP,I,J,K)
+
+global CCGUARD IAXIS JAXIS KAXIS NOD1 NOD2
+global X1FACE DX1FACE DX2FACE DX3FACE DX1CELL DX2CELL DX3CELL
+global GEOMEPS
+global X1CELL X2CELL X3CELL X2LO_CELL X2HI_CELL X3LO_CELL X3HI_CELL
+global ILO_FACE IHI_FACE ILO_CELL IHI_CELL
+global JLO_FACE JHI_FACE JLO_CELL JHI_CELL
+global KLO_FACE KHI_FACE KLO_CELL KHI_CELL
+global XCELL DXCELL XFACE DXFACE 
+global YCELL DYCELL YFACE DYFACE
+global ZCELL DZCELL ZFACE DZFACE
+global IBM_N_CRS IBM_SVAR_CRS 
+
+global X1LO_CELL X1HI_CELL
+
+
+global X3LO_RT X3HI_RT
+
+switch(X2AXIS)
+    case(JAXIS)
+        
+        X1AXIS = IAXIS;
+        
+        PLNORMAL = [ 1., 0., 0.];
+        ILO = ILO_FACE-CCGUARD;  IHI = IHI_FACE+CCGUARD;
+        JLO = JLO_FACE;  JHI = JLO_FACE;
+        KLO = KLO_FACE;  KHI = KLO_FACE;
+        
+        % x2, x3 axes parameters:
+        X2AXIS = JAXIS; X2LO = JLO_FACE-CCGUARD; X2HI = JHI_FACE+CCGUARD;
+        X3AXIS = KAXIS; X3LO = KLO_FACE-CCGUARD; X3HI = KHI_FACE+CCGUARD;
+                
+        % Face coordinates in x1,x2,x3 axes:
+        X2FACE = YFACE;
+        X3FACE = ZFACE;
+        
+        DX2_MIN = min(DYCELL(JLO_CELL-CCGUARD:JHI_CELL+CCGUARD));
+        DX3_MIN = min(DZCELL(KLO_CELL-CCGUARD:KHI_CELL+CCGUARD));
+        
+    case(KAXIS)
+        
+        X1AXIS = JAXIS;
+        
+        PLNORMAL = [ 0., 1., 0.];
+        ILO = ILO_FACE;  IHI = ILO_FACE;
+        JLO = JLO_FACE-CCGUARD;  JHI = JHI_FACE+CCGUARD;
+        KLO = KLO_FACE;  KHI = KLO_FACE;
+        
+        % x2, x3 axes parameters:
+        X2AXIS = KAXIS; X2LO = KLO_FACE-CCGUARD; X2HI = KHI_FACE+CCGUARD;
+        X3AXIS = IAXIS; X3LO = ILO_FACE-CCGUARD; X3HI = IHI_FACE+CCGUARD;
+                
+        % Face coordinates in x1,x2,x3 axes:
+        X2FACE = ZFACE;
+        X3FACE = XFACE;
+ 
+        DX2_MIN = min(DZCELL(KLO_CELL-CCGUARD:KHI_CELL+CCGUARD));
+        DX3_MIN = min(DXCELL(ILO_CELL-CCGUARD:IHI_CELL+CCGUARD));
+        
+    case(IAXIS)
+        
+        X1AXIS = KAXIS;
+        
+        PLNORMAL = [ 0., 0., 1.];
+        ILO = ILO_FACE;  IHI = ILO_FACE;
+        JLO = JLO_FACE;  JHI = JLO_FACE;
+        KLO = KLO_FACE-CCGUARD;  KHI = KHI_FACE+CCGUARD;
+        
+        % x2, x3 axes parameters:
+        X2AXIS = IAXIS; X2LO = ILO_FACE-CCGUARD; X2HI = IHI_FACE+CCGUARD;
+        X3AXIS = JAXIS; X3LO = JLO_FACE-CCGUARD; X3HI = JHI_FACE+CCGUARD;
+        
+        % Face coordinates in x1,x2,x3 axes:
+        X2FACE = XFACE;
+        X3FACE = YFACE;
+        
+        DX2_MIN = min(DXCELL(ILO_CELL-CCGUARD:IHI_CELL+CCGUARD));
+        DX3_MIN = min(DYCELL(JLO_CELL-CCGUARD:JHI_CELL+CCGUARD));
+
+end
+
+% Which Plane?
+INDX1(IAXIS:KAXIS) = [ I, J, K ];
+X1PLN = XP(X1AXIS);
+X3RAY = XP(X3AXIS);
+
+% Get intersection of body on plane defined by X1PLN, normal to X1AXIS:
+TRI_ONPLANE_ONLY = false;
+RAYTRACE_X2_ONLY = true;
+X3LO_RT = X3RAY - 10*GEOMEPS;
+X3HI_RT = X3RAY + 10*GEOMEPS;
+[ierr,BODINT_PLANE2]=GET_BODINT_PLANE(X1AXIS,X1PLN,INDX1,PLNORMAL,X2AXIS,...
+                    X3AXIS,DX2_MIN,DX3_MIN,X2LO,X2HI,X3LO,X3HI,X2FACE,X3FACE,TRI_ONPLANE_ONLY,RAYTRACE_X2_ONLY);
+                
+if(BODINT_PLANE2.NSEGS==0)
+    IS_SOLID=0;
+    return
+end
+
+XY   = [XP(X2AXIS) X3RAY];    
+NVEC = [1. 0.];
+[IS_SOLID] = GET_IS_SOLID_PT(BODINT_PLANE2,X1AXIS,X2AXIS,X3AXIS,XY,NVEC,X1PLN);
+
+return
