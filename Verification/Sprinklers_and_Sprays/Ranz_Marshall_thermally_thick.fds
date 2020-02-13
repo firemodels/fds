@@ -2,7 +2,7 @@ A test for evaluating the rate of evaporation for one single droplet in an ambie
 Comparison of the droplet diameter versus time with experimental data extracted
 from Ranz and Marshall "Evaporation from drops - Part II" Chemical Engineering Progress, 48(4):173-180 (1952)
 
-&HEAD CHID='Ranz_Marshall_thermally_thick' /
+&HEAD CHID='Ranz_Marshall_thermally_thick', TITLE='For comparison with water_evaporation_5.fds' /
 
 &MESH IJK=9,9,9, XB=0.,1.0,0.,1.0,0.0,1.0 /
 
@@ -35,10 +35,25 @@ from Ranz and Marshall "Evaporation from drops - Part II" Chemical Engineering P
       DENSITY                = 1000.
       SPEC_ID                = 'WATER VAPOR'
       NU_SPEC                = 1
-      HEAT_OF_REACTION       = 2380
-      CONDUCTIVITY           = 0.58
-      SPECIFIC_HEAT          = 4.181
+      HEAT_OF_REACTION_RAMP  = 'hv_H2O'
+      CONDUCTIVITY_RAMP      = 'k_H2O'
+      SPECIFIC_HEAT_RAMP     = 'c_H2O'
       BOILING_TEMPERATURE    = 100. /
+
+! Ramps defined to match water_evaporation_5.fds
+
+&RAMP ID='hv_H2O', T=0.,   F=2500./
+&RAMP ID='hv_H2O', T=50.,  F=2390./
+&RAMP ID='hv_H2O', T=100., F=2270./
+
+&RAMP ID='c_H2O', T=0.,   F=4.23/
+&RAMP ID='c_H2O', T=50.,  F=4.18/
+&RAMP ID='c_H2O', T=100., F=4.22/
+
+&RAMP ID='k_H2O', T=25.,   F=1.99E-02/
+&RAMP ID='k_H2O', T=227.,  F=3.46E-02/
+&RAMP ID='k_H2O', T=727.,  F=8.21E-02/
+&RAMP ID='k_H2O', T=1227., F=1.37E-01/
 
 &PART ID='water_drops', SURF_ID='MY DROPLET', STATIC=.TRUE., SAMPLING_FACTOR=1 /
 

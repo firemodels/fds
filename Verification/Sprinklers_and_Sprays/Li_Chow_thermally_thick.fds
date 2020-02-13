@@ -1,4 +1,6 @@
-&HEAD CHID='Li_Chow_thermally_thick',TITLE='Inputs based on Fig 6 Li Chow Fire Tech 44 351-381 2008' /
+Inputs based on Fig 6 Li Chow Fire Tech 44 351-381 2008
+
+&HEAD CHID='Li_Chow_thermally_thick', TITLE='For comparison with water_evaporation_8.fds' /
 
 &MESH IJK=11,11,30, XB=0.0,1.1,0.0,1.1,0.0,3.0 /
 
@@ -32,7 +34,7 @@
       GEOMETRY     = 'SPHERICAL'
       THICKNESS    = 5.E-5
       TMP_INNER    = 10.
-      CELL_SIZE_FACTOR = 0.01
+      CELL_SIZE_FACTOR = 0.1
       MINIMUM_LAYER_THICKNESS = 1.E-10
       HEAT_TRANSFER_MODEL = 'BLOWING SPHERE' /
 
@@ -41,10 +43,25 @@
       DENSITY                = 1000.
       SPEC_ID                = 'WATER VAPOR'
       NU_SPEC                = 1
-      HEAT_OF_REACTION       = 2380
-      CONDUCTIVITY           = 0.58
-      SPECIFIC_HEAT          = 4.181
+      HEAT_OF_REACTION_RAMP  = 'hv_H2O'
+      CONDUCTIVITY_RAMP      = 'k_H2O'
+      SPECIFIC_HEAT_RAMP     = 'c_H2O'
       BOILING_TEMPERATURE    = 100. /
+
+! Ramps defined to match water_evaporation_8.out
+
+&RAMP ID='hv_H2O', T=0.,   F=2500./
+&RAMP ID='hv_H2O', T=50.,  F=2390./
+&RAMP ID='hv_H2O', T=100., F=2270./
+
+&RAMP ID='c_H2O', T=0.,   F=4.23/
+&RAMP ID='c_H2O', T=50.,  F=4.18/
+&RAMP ID='c_H2O', T=100., F=4.22/
+
+&RAMP ID='k_H2O', T=60.,   F=2.22E-02/
+&RAMP ID='k_H2O', T=227.,  F=3.46E-02/
+&RAMP ID='k_H2O', T=727.,  F=8.21E-02/
+&RAMP ID='k_H2O', T=1227., F=1.37E-01/
 
 &PART ID='droplet', SURF_ID='MY DROPLET',
       SAMPLING_FACTOR=1,
