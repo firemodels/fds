@@ -9019,19 +9019,17 @@ you can specify the logical parameter {\ct DRY} on a {\ct DEVC} line that report
 \label{info:soot}
 
 Currently there are three different device options for outputting aerosol concentration (e.g., soot concentration) from FDS. It is important to recognize what each device is outputting so that the proper selection can be made.
-
 \begin{lstlisting}
 &DEVC ID='MF_SOOT', XYZ=..., QUANTITY='MASS FRACTION', SPEC_ID='SOOT'/
 &DEVC ID='VF_SOOT', XYZ=..., QUANTITY='VOLUME FRACTION', SPEC_ID='SOOT'/
 &DEVC ID='SOOT_VF', XYZ=..., QUANTITY='AEROSOL VOLUME FRACTION', SPEC_ID='SOOT'/
 \end{lstlisting}
-
-\noindent Specifying a {\ct DEVC} with a {\ct 'MASS FRACTION'} and a {\ct SPEC\_ID} of {\ct SOOT} will output the mass fraction of soot in the gas phase. The quantity {\ct 'VOLUME FRACTION'} and a {\ct SPEC\_ID} of {\ct SOOT} will output the volume fraction of soot in the gas phase treating the soot as if it were an ideal gas. The quantity {\ct 'AEROSOL VOLUME FRACTION'} and a {\ct SPEC\_ID} of {\ct SOOT} will output the volume fraction of soot as if it were a solid particle in the computational cell based on the following equation,
-
+Specifying a {\ct DEVC} with a {\ct 'MASS FRACTION'} and a {\ct SPEC\_ID} of {\ct SOOT} will output the mass fraction of soot in the gas phase. The quantity {\ct 'VOLUME FRACTION'} and a {\ct SPEC\_ID} of {\ct SOOT} will output the volume fraction of soot in the gas phase treating the soot as if it were an ideal gas. The quantity {\ct 'AEROSOL VOLUME FRACTION'} and a {\ct SPEC\_ID} of {\ct 'SOOT'} will output the volume fraction of soot as if it were a solid particle in the computational cell based on the following equation,
 \begin{equation}\label{eq:soot_volume_fraction}
 f_v = \rho Y_{\rm a} / \rho_{\rm a}
 \end{equation}
-\noindent where $\rho$ is the local density, $Y_{\rm a}$ is the local mass fraction of the aerosol, and $\rho_{\rm a}$ is density of the aerosol defined using the {\ct SPEC} input {\ct DENSITY\_SOLID}, which defaults to 1800~(kg/m$^3$) for soot.
+\noindent where $\rho$ is the local density, $Y_{\rm a}$ is the local mass fraction of the aerosol, and $\rho_{\rm a}$ is density of the aerosol defined using the {\ct SPEC} input {\ct DENSITY\_SOLID}, which defaults to 1800~kg/m$^3$ for soot.
+
 
 \subsection{Gas Velocity}
 \label{info:velocity}
@@ -9326,7 +9324,7 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct BACK WALL TEMPERATURE}                     & Section~\ref{info:BACK}                       & $^\circ$C      & B,D          \\ \hline
 {\ct BURNING RATE}                              & Mass loss rate of fuel                        & \si{kg/(m$^2$.s)} & B,D       \\ \hline
 {\ct CHAMBER OBSCURATION}                       & Section~\ref{info:smoke_detector}             & \%/m           & D            \\ \hline
-{\ct CHI\_R}                                    & Section~\ref{info:CHI_R}             &                & D,I,S        \\ \hline
+{\ct CHI\_R}                                    & Section~\ref{info:CHI_R}                      &                & D,I,S        \\ \hline
 {\ct CONDUCTIVITY}                              & Thermal conductivity                          & \si{W/(m.K)}   & D,I,P,S      \\ \hline
 {\ct CONTROL}                                   & Section~\ref{info:CTRL}                       &                & D            \\ \hline
 {\ct CONTROL VALUE}                             & Section~\ref{info:CTRL}                       &                & D            \\ \hline
@@ -9636,7 +9634,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 % ignorenamelistkw: /BNDF/STATISTICS
 % ignorenamelistkw: /DEVC/STATISTICS, /DUMP/DT_DEVC_LINE, /DUMP/T_DEVC_LINE_END
 % ignorenamelistkw: /INIT/NUMBER_INITIAL_PARTICLES
-% ignorenamelistkw: /MISC/DNS, /MISC/RADIATION, /MISC/RESEARCH_MODE, /MISC/STRATIFICATION, /MISC/SUPPRESSION, /MISC/SURF_DEFAULT
+% ignorenamelistkw: /MISC/DNS, /MISC/RADIATION, /MISC/RESEARCH_MODE, /MISC/STRATIFICATION, /MISC/SUPPRESSION, /MISC/SURF_DEFAULT, /MISC/BAROCLINIC
 % ignorenamelistkw: /PRES/SCARC_METHOD, /PRES/SCARC_KRYLOV, /PRES/SCARC_MULTIGRID, /PRES/SCARC_SMOOTH, /PRES/SCARC_PRECON
 % ignorenamelistkw: /PRES/SCARC_COARSE, /PRES/SCARC_INITIAL, /PRES/SCARC_STORAGE, /PRES/SCARC_ACCURACY, /PRES/SCARC_DEBUG
 % ignorenamelistkw: /PRES/SCARC_MULTIGRID_CYCLE, /PRES/SCARC_MULTIGRID_LEVEL, /PRES/SCARC_MULTIGRID_COARSENING
@@ -10900,7 +10898,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct XB(6)}             & Real Array        & Section~\ref{info:SLCF}                   & m         &                   \\ \hline
 \end{longtable}
 
-% Undocumented: FACE_CENTERED(MV,GF), ID, IOR, MATL_ID, PROP_ID, SLICETYPE(MV,GF), SMV_OFFSET, TRNF_ID (MV)
+% Undocumented: FACE_CENTERED(MV,GF), ID, IOR, MATL_ID (RJM), PROP_ID, SLICETYPE(MV,GF), SMV_OFFSET, TRNF_ID (MV)
 
 \vspace{\baselineskip}
 
