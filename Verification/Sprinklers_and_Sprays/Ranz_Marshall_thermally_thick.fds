@@ -26,7 +26,7 @@ from Ranz and Marshall "Evaporation from drops - Part II" Chemical Engineering P
       GEOMETRY     = 'SPHERICAL'
       THICKNESS    = 524.4E-6
       TMP_INNER    = 9.11
-      CELL_SIZE_FACTOR = 0.1
+      CELL_SIZE_FACTOR = 0.01
       MINIMUM_LAYER_THICKNESS = 5.E-6
       HEAT_TRANSFER_MODEL = 'BLOWING SPHERE' /
 
@@ -35,9 +35,9 @@ from Ranz and Marshall "Evaporation from drops - Part II" Chemical Engineering P
       DENSITY                = 1000.
       SPEC_ID                = 'WATER VAPOR'
       NU_SPEC                = 1
-      HEAT_OF_REACTION_RAMP  = 'hv_H2O'
-      CONDUCTIVITY_RAMP      = 'k_H2O'
+      CONDUCTIVITY           = 0.609
       SPECIFIC_HEAT_RAMP     = 'c_H2O'
+      HEAT_OF_REACTION_RAMP  = 'hv_H2O'
       BOILING_TEMPERATURE    = 100. /
 
 ! Ramps defined to match water_evaporation_5.fds
@@ -49,11 +49,6 @@ from Ranz and Marshall "Evaporation from drops - Part II" Chemical Engineering P
 &RAMP ID='c_H2O', T=0.,   F=4.23/
 &RAMP ID='c_H2O', T=50.,  F=4.18/
 &RAMP ID='c_H2O', T=100., F=4.22/
-
-&RAMP ID='k_H2O', T=25.,   F=1.99E-02/
-&RAMP ID='k_H2O', T=227.,  F=3.46E-02/
-&RAMP ID='k_H2O', T=727.,  F=8.21E-02/
-&RAMP ID='k_H2O', T=1227., F=1.37E-01/
 
 &PART ID='water_drops', SURF_ID='MY DROPLET', STATIC=.TRUE., SAMPLING_FACTOR=1 /
 
