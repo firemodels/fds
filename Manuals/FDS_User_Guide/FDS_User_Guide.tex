@@ -8948,6 +8948,26 @@ The histogram output file contains two-columns for each device. The first column
 
 
 
+\subsection{Complex Terrain and Related Quantities}
+\label{info:complex_terrain}
+
+Complex terrain for wind and wildland fire simulations can be generated either by using an array of rectangular {\ct OBST}stacles or an immersed boundary {\ct GEOM}etry. Visualizing output data on or just above complex terrain can be done in a few different ways. 
+
+The first method is via a ``slice'' file that conforms to the terrain. The following line illustrates how to do it:
+\begin{lstlisting}
+&SLCF AGL_SLICE=10., QUANTITY='TEMPERATURE' /
+\end{lstlisting}
+Instead of specifying a plane on which to draw contours of gas temperature, you specify that the contour is to be located 10~m Above Ground Level (AGL). This works for both a scalar quantity or {\ct VECTOR=T}.
+
+The second method of visualizing data on complex terrain is via a boundary ({\ct BNDF}) file. Specify a solid phase output quantity as you normally would, for example:
+\begin{lstlisting}
+&SLCF QUANTITY='WALL TEMPERATURE' /
+\end{lstlisting}
+and add {\ct TERRAIN\_CASE=T} to the {\ct MISC} line. This will create two boundary files---one of which is the conventional one, and one will be listed as a ``slice'' file that conforms to the terrain.
+
+If {\ct TERRAIN\_CASE=T}, you may also specify an image file (.png) to overlay on the terrain via \linebreak[4]{\ct TERRAIN\_IMAGE}, also on the {\ct MISC} line.
+
+
 \subsection{Wind and the Pressure Coefficient}
 \label{info:pressure_coefficient}
 
@@ -8958,7 +8978,7 @@ In the field of wind engineering, a commonly used quantity is known as the {\ct 
 $p_\infty$ is the ambient, or ``free stream'' pressure, and $\rho_\infty$ is the ambient density.  The parameter $U$ is the free-stream wind speed, given as {\ct CHARACTERISTIC\_VELOCITY} on the {\ct PROP} line
 \begin{lstlisting}
 &BNDF QUANTITY='PRESSURE COEFFICIENT', PROP_ID='U' /
-&DEVC ID='pressure tap', XYZ=..., IOR=2, QUANTITY='PRESSURE COEFFICIENT', PROP_ID='U' /
+&DEVC ID='Cp', XYZ=..., IOR=2, QUANTITY='PRESSURE COEFFICIENT', PROP_ID='U' /
 &PROP ID='U', CHARACTERISTIC_VELOCITY=3.4 /
 \end{lstlisting}
 Thus, you can either paint values of $C_p$ at all surface points, or create a single time history of $C_p$ using a single device at a single point.
@@ -8968,17 +8988,17 @@ Thus, you can either paint values of $C_p$ at all surface points, or create a si
 \label{info:distributed_forces}
 
 If you desire to output the pressure on a point in the wall or viscous stress along the stream-wise direction next to it, you can set devices in the form:
-
 \begin{lstlisting}
-&DEVC ID='WallPressure 1', XYZ=..., IOR=..., QUANTITY='WALL PRESSURE', SURF_ID='MySurf' /
-&DEVC ID='WallStress 1', XYZ=..., IOR=..., QUANTITY='VISCOUS STRESS WALL ', SURF_ID='MySurf' /
+&DEVC ID='WP', XYZ=..., IOR=..., QUANTITY='WALL PRESSURE', SURF_ID='MySurf' /
+&DEVC ID='WS', XYZ=..., IOR=..., QUANTITY='VISCOUS STRESS WALL ', SURF_ID='MySurf' /
 \end{lstlisting}
-
-The corresponding distributed forces at said point, projected in a specified direction, can be obtained adding the field {\ct FORCE\_DIRECTION}. This namelist parameter must define a vector in such direction. You can also integrate these distributed forces to obtain total pressure and viscous forces on a surface. As an example, if you desire to compute total forces on faces with {\ct SURF\_ID='MySurf'}, within a volume {\ct XB=xlo,xhi,ylo,yhi,zlo,zhi} in the $x$ direction, you can add:
-
+The corresponding distributed forces at said point, projected in a specified direction, can be obtained adding the vector triplet {\ct FORCE\_DIRECTION}. You can also integrate these distributed forces to obtain total pressure and viscous forces on a surface. As an example, if you want to compute total forces on faces with {\ct SURF\_ID='MySurf'}, within a volume {\ct XB} in the $x$ direction, add:
 \begin{lstlisting}
-&DEVC ID='Pressure Force X', XB=xlo,xhi,ylo,yhi,zlo,zhi, QUANTITY='WALL PRESSURE', SURF_ID='MySurf', SPATIAL_STATISTIC='SURFACE INTEGRAL', FORCE_DIRECTION=1.,0.,0. /
-&DEVC ID='Viscous Force X', XB=xlo,xhi,ylo,yhi,zlo,zhi, QUANTITY='VISCOUS STRESS WALL ', SURF_ID='MySurf', SPATIAL_STATISTIC='SURFACE INTEGRAL', FORCE_DIRECTION=1.,0.,0. /
+&DEVC ID='PFx', XB=..., QUANTITY='WALL PRESSURE', SURF_ID='MySurf', 
+      SPATIAL_STATISTIC='SURFACE INTEGRAL', FORCE_DIRECTION=1.,0.,0. /
+&DEVC ID='VFx', XB=..., QUANTITY='VISCOUS STRESS WALL ', 
+      SURF_ID='MySurf', SPATIAL_STATISTIC='SURFACE INTEGRAL', 
+      FORCE_DIRECTION=1.,0.,0. /
 \end{lstlisting}
 
 
@@ -10338,6 +10358,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SOLID\_PHASE\_ONLY}                            & Logical      & Section~\ref{solid_phase_verification}  &            & {\ct .FALSE.}     \\ \hline
 {\ct SOOT\_OXIDATION}                               & Logical      & Section~\ref{info:deposition}           &            & {\ct .FALSE.}     \\ \hline
 {\ct TAU\_DEFAULT}                                  & Real         & Section~\ref{info:RAMP_Time}            & s          & 1.                \\ \hline
+{\ct TERRAIN\_CASE}                                 & Logical      & Section~\ref{info:complex_terrain}      &            & {\ct .FALSE.}     \\ \hline
+{\ct TERRAIN\_IMAGE}                                & Character    & Section~\ref{info:complex_terrain}      &            &                   \\ \hline
 {\ct TEXTURE\_ORIGIN(3)}                            & Real Triplet & Section~\ref{info:texture_map}          & m          & (0.,0.,0.)        \\ \hline
 {\ct THERMOPHORETIC\_DEPOSITION}                    & Logical      & Section~\ref{info:deposition}           &            & {\ct .TRUE.}      \\ \hline
 {\ct THERMOPHORETIC\_SETTLING}                      & Logical      & Section~\ref{info:deposition}           &            & {\ct .TRUE.}      \\ \hline
@@ -10356,7 +10378,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 % Undocumented: AEROSOL_AL2O3, AEROSOL_SCRUBBING, CC_IBM(MV), CCVOL_LINK(MV), CC_SLIPIBM_VELO(MV,debug), CC_ZEROIBM_VELO(MV,debug), CHECK_MASS_CONSERVE(MV), COMPUTE_CUTCELLS_ONLY(MV),
 % CONSTANT_H_SOLID, DO_IMPLICIT_CCREGION (MV), ENTHALPY_TRANSPORT (RJM),
 % EVAP_MODEL, EXTERNAL_BOUNDARY_CORRECTION, HT3D_TEST (RJM), MAXIMUM_GEOMETRY_FACES(MV), MAXIMUM_GEOMETRY_ZVALS(MV), NUCLEATION_SITES, PERIODIC_TEST (RJM),
-% POSITIVE_ERROR_TEST, PROFILING, QFAN_BETA_TEST, SLIP_CONDITION(RJM), TENSOR_DIFFUSIVITY (RJM), TERRAIN_CASE (KM), TERRAIN_IMAGE (KM), TURB_INIT_CLOCK (RJM),
+% POSITIVE_ERROR_TEST, PROFILING, QFAN_BETA_TEST, SLIP_CONDITION(RJM), TENSOR_DIFFUSIVITY (RJM), TURB_INIT_CLOCK (RJM),
 % UVW_FILE (RJM), STORE_DIVERGENCE_CORRECTION (RJM)
 
 \vspace{\baselineskip}
@@ -10860,6 +10882,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct SLCF} (Slice File Parameters)} \\
 \hline \hline
 \endhead
+{\ct AGL\_SLICE}        & Real              & Section~\cite{info:complex_terrain}       & m         &                   \\ \hline
 {\ct CELL\_CENTERED}    & Logical           & Section~\ref{info:SLCF}                   &           & {\ct .FALSE.}     \\ \hline
 {\ct DB}                & Character         & Section~\ref{info:SLCF}                   &           &                   \\ \hline
 {\ct EVACUATION}        & Logical           & Reference~\cite{FDS_Evac_Users_Guide}     &           & {\ct .FALSE.}     \\ \hline
@@ -10877,7 +10900,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct XB(6)}             & Real Array        & Section~\ref{info:SLCF}                   & m         &                   \\ \hline
 \end{longtable}
 
-% Undocumented: AGL_SLICE(KM), FACE_CENTERED(MV,GF), ID, IOR, MATL_ID, PROP_ID, SLICETYPE(MV,GF), SMV_OFFSET, TRNF_ID (KM)
+% Undocumented: FACE_CENTERED(MV,GF), ID, IOR, MATL_ID, PROP_ID, SLICETYPE(MV,GF), SMV_OFFSET, TRNF_ID (MV)
 
 \vspace{\baselineskip}
 
