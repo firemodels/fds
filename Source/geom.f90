@@ -24523,6 +24523,8 @@ REAL(EB):: MIN_CC_VOL, MAX_CC_VOL
 
 LOGICAL, ALLOCATABLE, DIMENSION(:) :: CC_COMPUTE_MESH, CC_COMPUTE_MESH_AUX
 
+REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: GEOM_ZMAX_AUX
+
 REAL(EB) :: TNOW
 
 LOGICAL :: WRITE_CFACE_STATS = .FALSE.
@@ -24879,6 +24881,9 @@ MAIN_MESH_LOOP : DO NM=1,NMESHES
    MESHES(NM)%CCVAR = 0
    MESHES(NM)%CCVAR(:,:,:,IBM_CGSC) = IBM_GASPHASE
 
+   ! When TERRAIN_CASE = TRUE, allocate GEOM_ZMAX for the mesh:
+   IF (TERRAIN_CASE) ALLOCATE(GEOM_ZMAX_AUX(ISTR:IEND,JSTR:JEND)); GEOM_ZMAX_AUX = -1._EB/GEOMEPS
+
    ! Write Mesh number allocation if GET_CUTCELLS_VERBOSE:
    IF(GET_CUTCELLS_VERBOSE) THEN
       WRITE(LU_SETCC,'(A)') ' '
@@ -25094,6 +25099,10 @@ MAIN_MESH_LOOP : DO NM=1,NMESHES
                      ENDIF
                   ENDIF
 
+                  ! Highest Z crossing for I,J=KK,INDX1(X1AXIS) location, clip at ZF+DZ(KBAR):
+                  IF(TERRAIN_CASE .AND. X2AXIS==KAXIS .AND. IBM_N_CRS>0) &
+                  GEOM_ZMAX_AUX(KK,INDX1(X1AXIS)) = MIN(X2FACE(KBP1),IBM_SVAR_CRS(IBM_N_CRS))
+
                   ! Now for this ray, set vertex types in MESHES(NM)%VERTVAR(:,:,:,IBM_VGSC):
                   CALL GET_X2_VERTVAR(X1AXIS,X2LO,X2HI,NM,I,KK)
 
@@ -25169,6 +25178,19 @@ MAIN_MESH_LOOP : DO NM=1,NMESHES
    ! IF ( (NM>=LOWER_MESH_INDEX) .AND. (NM<=UPPER_MESH_INDEX) ) CALL GET_REGULAR_CUTCELL_EDGES_BC(NM)
 
    ENDIF SNAP_IF
+
+   ! Case of terrain, populate GEOM_ZMAX:
+   IF (TERRAIN_CASE) THEN
+      IF(ALLOCATED(MESHES(NM)%GEOM_ZMAX)) DEALLOCATE(MESHES(NM)%GEOM_ZMAX)
+      ALLOCATE(MESHES(NM)%GEOM_ZMAX(0:IBAR,0:JBAR))
+      DO J=0,JBAR
+         DO I=0,IBAR
+            ! Clip at ZS-DZ(1):
+            MESHES(NM)%GEOM_ZMAX(I,J) = MAX(ZFACE(-1),GEOM_ZMAX_AUX(I,J))
+         ENDDO
+      ENDDO
+      DEALLOCATE(GEOM_ZMAX_AUX)
+   ENDIF
 
    ! Deallocate arrays:
    ! Face centered positions and cell sizes:
