@@ -8951,7 +8951,7 @@ The histogram output file contains two-columns for each device. The first column
 \subsection{Complex Terrain and Related Quantities}
 \label{info:complex_terrain}
 
-Complex terrain for wind and wildland fire simulations can be generated either by using an array of rectangular {\ct OBST}stacles or an immersed boundary {\ct GEOM}etry. Visualizing output data on or just above complex terrain can be done in a few different ways. 
+Complex terrain for wind and wildland fire simulations can be generated either by using an array of rectangular {\ct OBST}stacles or an immersed boundary {\ct GEOM}etry. Visualizing output data on or just above complex terrain can be done in a few different ways.
 
 The first method is via a ``slice'' file that conforms to the terrain. The following line illustrates how to do it:
 \begin{lstlisting}
@@ -8994,10 +8994,10 @@ If you desire to output the pressure on a point in the wall or viscous stress al
 \end{lstlisting}
 The corresponding distributed forces at said point, projected in a specified direction, can be obtained adding the vector triplet {\ct FORCE\_DIRECTION}. You can also integrate these distributed forces to obtain total pressure and viscous forces on a surface. As an example, if you want to compute total forces on faces with {\ct SURF\_ID='MySurf'}, within a volume {\ct XB} in the $x$ direction, add:
 \begin{lstlisting}
-&DEVC ID='PFx', XB=..., QUANTITY='WALL PRESSURE', SURF_ID='MySurf', 
+&DEVC ID='PFx', XB=..., QUANTITY='WALL PRESSURE', SURF_ID='MySurf',
       SPATIAL_STATISTIC='SURFACE INTEGRAL', FORCE_DIRECTION=1.,0.,0. /
-&DEVC ID='VFx', XB=..., QUANTITY='VISCOUS STRESS WALL ', 
-      SURF_ID='MySurf', SPATIAL_STATISTIC='SURFACE INTEGRAL', 
+&DEVC ID='VFx', XB=..., QUANTITY='VISCOUS STRESS WALL ',
+      SURF_ID='MySurf', SPATIAL_STATISTIC='SURFACE INTEGRAL',
       FORCE_DIRECTION=1.,0.,0. /
 \end{lstlisting}
 
@@ -10880,7 +10880,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct SLCF} (Slice File Parameters)} \\
 \hline \hline
 \endhead
-{\ct AGL\_SLICE}        & Real              & Section~\cite{info:complex_terrain}       & m         &                   \\ \hline
+{\ct AGL\_SLICE}        & Real              & Section~\ref{info:complex_terrain}        & m         &                   \\ \hline
 {\ct CELL\_CENTERED}    & Logical           & Section~\ref{info:SLCF}                   &           & {\ct .FALSE.}     \\ \hline
 {\ct DB}                & Character         & Section~\ref{info:SLCF}                   &           &                   \\ \hline
 {\ct EVACUATION}        & Logical           & Reference~\cite{FDS_Evac_Users_Guide}     &           & {\ct .FALSE.}     \\ \hline
