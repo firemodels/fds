@@ -11277,7 +11277,7 @@ INIT_LOOP: DO N=1,N_INIT_READ+N_INIT_RESERVED
       IF (IOS==1) EXIT INIT_LOOP
       CALL SET_INIT_DEFAULTS
       READ(LU_INPUT,INIT)
-      IF(ANY(MASS_FRACTION>0._EB) .AND. ANY(VOLUME_FRACTION>0._EB)) THEN
+      IF (ANY(MASS_FRACTION>=0._EB) .AND. ANY(VOLUME_FRACTION>=0._EB)) THEN
          WRITE(MESSAGE,'(A,I0,A)') 'ERROR: INIT line ', N, ". Do not specify both MASS_FRACTION and VOLUME_FRACTION."
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
@@ -11430,7 +11430,8 @@ INIT_LOOP: DO N=1,N_INIT_READ+N_INIT_RESERVED
             IN%PACKING_RATIO = PACKING_RATIO
             IF (DENSITY > 0._EB) RHOMAX = MAX(RHOMAX,IN%DENSITY)
 
-            SPEC_INIT_IF:IF (ANY(MASS_FRACTION > 0._EB)) THEN
+            SPEC_INIT_IF: IF (ANY(MASS_FRACTION>=0._EB)) THEN
+
                IF (SPEC_ID(1)=='null') THEN
                   WRITE(MESSAGE,'(A,I0,A,A)') 'ERROR: Problem with INIT number ',N,'. SPEC_ID must be used with MASS_FRACTION'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
@@ -11438,8 +11439,8 @@ INIT_LOOP: DO N=1,N_INIT_READ+N_INIT_RESERVED
                DO NS=1,MAX_SPECIES
                   IF (SPEC_ID(NS)=='null') EXIT
                   DO NS2=1,N_TRACKED_SPECIES
-                     IF (NS2>0 .AND. TRIM(SPEC_ID(NS))==TRIM(SPECIES_MIXTURE(NS2)%ID)) THEN
-                        IN%MASS_FRACTION(NS2)=MASS_FRACTION(NS)
+                     IF (TRIM(SPEC_ID(NS))==TRIM(SPECIES_MIXTURE(NS2)%ID)) THEN
+                        IN%MASS_FRACTION(NS2) = MASS_FRACTION(NS)
                         EXIT
                      ENDIF
                      IF (NS2==N_TRACKED_SPECIES)  THEN
@@ -11454,8 +11455,8 @@ INIT_LOOP: DO N=1,N_INIT_READ+N_INIT_RESERVED
                   WRITE(MESSAGE,'(A,I0,A,A)') 'ERROR: Problem with INIT number ',N,'. Sum of specified mass fractions > 1'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
                ENDIF
-               IF (IN%MASS_FRACTION(1) <=TWO_EPSILON_EB) THEN
-                  IN%MASS_FRACTION(1) = 1._EB-SUM(IN%MASS_FRACTION(2:N_TRACKED_SPECIES))
+               IF (IN%MASS_FRACTION(1)<=TWO_EPSILON_EB) THEN
+                  IN%MASS_FRACTION(1) = 1._EB - SUM(IN%MASS_FRACTION(2:N_TRACKED_SPECIES))
                ELSE
                   WRITE(MESSAGE,'(A,I0,A,A)') 'ERROR: Problem with INIT number ',N,&
                                                 '. Cannot specify background species for MASS_FRACTION'
@@ -11464,20 +11465,20 @@ INIT_LOOP: DO N=1,N_INIT_READ+N_INIT_RESERVED
                ZZ_GET(1:N_TRACKED_SPECIES) = IN%MASS_FRACTION(1:N_TRACKED_SPECIES)
                CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,RR_SUM)
 
-            ELSEIF (ANY(VOLUME_FRACTION>0._EB)) THEN SPEC_INIT_IF
-               IF (SUM(VOLUME_FRACTION) > 1._EB) THEN
-                  WRITE(MESSAGE,'(A,I0,A,A)') 'ERROR: Problem with INIT number ',N,'. Sum of specified volume fractions > 1'
-                  CALL SHUTDOWN(MESSAGE) ; RETURN
-               ENDIF
+            ELSEIF (ANY(VOLUME_FRACTION>=0._EB)) THEN SPEC_INIT_IF
+
                IF (SPEC_ID(1)=='null') THEN
                   WRITE(MESSAGE,'(A,I0,A,A)') 'ERROR: Problem with INIT number ',N,'. SPEC_ID must be used with VOLUME_FRACTION'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
                ENDIF
                DO NS=1,MAX_SPECIES
-                  IF (SPEC_ID(NS)=='null') EXIT
+                  IF (SPEC_ID(NS)=='null') THEN
+                     VOLUME_FRACTION(NS) = 0._EB
+                     EXIT
+                  ENDIF
                   DO NS2=1,N_TRACKED_SPECIES
-                     IF (NS2>0 .AND. TRIM(SPEC_ID(NS))==TRIM(SPECIES_MIXTURE(NS2)%ID)) THEN
-                        MASS_FRACTION(NS2)=VOLUME_FRACTION(NS)*SPECIES_MIXTURE(NS2)%MW
+                     IF (TRIM(SPEC_ID(NS))==TRIM(SPECIES_MIXTURE(NS2)%ID)) THEN
+                        MASS_FRACTION(NS2) = VOLUME_FRACTION(NS)*SPECIES_MIXTURE(NS2)%MW
                         EXIT
                      ENDIF
                      IF (NS2==N_TRACKED_SPECIES)  THEN
@@ -11487,21 +11488,21 @@ INIT_LOOP: DO N=1,N_INIT_READ+N_INIT_RESERVED
                      ENDIF
                   ENDDO
                ENDDO
-               IF (MASS_FRACTION(1) <=TWO_EPSILON_EB) THEN
-                  MASS_FRACTION(1) = (1._EB-SUM(VOLUME_FRACTION))*SPECIES_MIXTURE(1)%MW
+               IF (MASS_FRACTION(1)<=TWO_EPSILON_EB) THEN
+                  MASS_FRACTION(1) = (1._EB - SUM(VOLUME_FRACTION))*SPECIES_MIXTURE(1)%MW
                ELSE
                   WRITE(MESSAGE,'(A,I0,A,A)') 'ERROR: Problem with INIT number ',N,&
                                                 '. Cannot specify background species for VOLUME_FRACTION'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
                ENDIF
-               MASS_FRACTION(1:N_TRACKED_SPECIES) = MASS_FRACTION(1:N_TRACKED_SPECIES)/SUM(MASS_FRACTION(1:N_TRACKED_SPECIES))
-               IN%MASS_FRACTION(1:N_TRACKED_SPECIES) = MASS_FRACTION(1:N_TRACKED_SPECIES)
+               IN%MASS_FRACTION(1:N_TRACKED_SPECIES) = MASS_FRACTION(1:N_TRACKED_SPECIES)/SUM(MASS_FRACTION(1:N_TRACKED_SPECIES))
                ZZ_GET(1:N_TRACKED_SPECIES) = IN%MASS_FRACTION(1:N_TRACKED_SPECIES)
                CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,RR_SUM)
 
             ELSE SPEC_INIT_IF
-                  IN%MASS_FRACTION(1:N_TRACKED_SPECIES) = SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0
-                  RR_SUM = RSUM0
+
+               IN%MASS_FRACTION(1:N_TRACKED_SPECIES) = SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0
+               RR_SUM = RSUM0
 
             ENDIF SPEC_INIT_IF
 
@@ -11679,7 +11680,7 @@ DZ                        =  0._EB
 HEIGHT                    = -1._EB
 HRRPUV                    =  0._EB
 ID                        = 'null'
-MASS_FRACTION             =  0._EB
+MASS_FRACTION             = -1._EB
 MASS_PER_TIME             = -1._EB
 MASS_PER_VOLUME           = -1._EB
 PACKING_RATIO             = -1._EB
@@ -11697,7 +11698,7 @@ TEMPERATURE               = -1000._EB
 T_INSERT                  = T_BEGIN
 UNIFORM                   = .FALSE.
 UVW                       = 0._EB
-VOLUME_FRACTION           =  0._EB
+VOLUME_FRACTION           = -1._EB
 DB                        = 'null'
 XB(1)                     = -1000000._EB
 XB(2)                     =  1000000._EB
