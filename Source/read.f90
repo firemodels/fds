@@ -1,3 +1,6 @@
+#ifndef GITHASH_PP
+#define GITHASH_PP "unknown"
+#endif
 MODULE READ_INPUT
 
 USE PRECISION_PARAMETERS
