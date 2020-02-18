@@ -969,7 +969,6 @@ IF (TERRAIN_CASE) THEN
    DO J=0,M%JBAR
       DO I=0,M%IBAR
          Z_TERRAIN(I,J) = REAL(0.25_EB*(M%Z_LS(I,J)+M%Z_LS(I+1,J)+M%Z_LS(I,J+1)+M%Z_LS(I+1,J+1)),FB)
-if (nm==19 .and. j==12) write(0,*) i,Z_TERRAIN(I,J)
       ENDDO
    ENDDO
    WRITE(LU_TERRAIN(NM)) REAL(M%ZS-1._EB,FB)
