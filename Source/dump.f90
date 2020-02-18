@@ -977,7 +977,7 @@ IF (TERRAIN_CASE) THEN
       DO I=0,M%IBAR
          IF (OUT_OF_MESH(I,J)) THEN
             IF (OUT_OF_MESH(MIN(M%IBAR,I+1),J) .AND. OUT_OF_MESH(MAX(0,I-1),J) .AND. &
-                OUT_OF_MESH(I,MIN(M%JBAR,J+1)) .AND. OUT_OF_MESH(I,MAX(0,J-1))) Z_TERRAIN(I,J) = -999._EB
+                OUT_OF_MESH(I,MIN(M%JBAR,J+1)) .AND. OUT_OF_MESH(I,MAX(0,J-1))) Z_TERRAIN(I,J) = ZS_MIN -1._EB
          ENDIF
       ENDDO
    ENDDO

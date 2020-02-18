@@ -11729,6 +11729,22 @@ The data values written out in this file correspond to the geometry written out 
 \end{itemize}
 
 
+\section{Terrain Data Files}
+\label{out:TERRAIN_DATA}
+
+For simulations involving outdoor terrain, files of the form {\ct CHID\_NM.ter} are created for each mesh with some terrain cutting through. The write statements are:
+\begin{lstlisting}
+WRITE(LU_TERRAIN(NM)) REAL(ZS_MIN-1._EB,FB)
+WRITE(LU_TERRAIN(NM)) M%IBP1,M%JBP1
+WRITE(LU_TERRAIN(NM)) (M%XPLT(I),I=0,M%IBAR)
+WRITE(LU_TERRAIN(NM)) (M%YPLT(J),J=0,M%JBAR)
+WRITE(LU_TERRAIN(NM)) ((Z_TERRAIN(I,J),J=0,M%JBAR),I=0,M%IBAR)
+\end{lstlisting}
+{\ct NM} is the mesh number, {\ct M} is a pointer to the variables of the mesh {\ct NM}, {\ct ZS\_MIN} is the lowest $z$ value of the entire domain, {\ct IBP1} and {\ct JBP1} are the number of horizontal grid cells in the mesh plus 1, {\ct XPLT} and {\ct YPLT} are the four byte ({\ct FB}) coordinates, and {\ct Z\_TERRAIN(I,J)} is the elevation at the point with indices {\ct (I,J)}. All real numbers are four bytes. The elevations are defined at cell corners.
+
+
+
+
 
 \backmatter
 \nopart %To Fix TOC in PDF output.
