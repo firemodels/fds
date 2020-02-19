@@ -5,8 +5,8 @@ Ranz and Marshall "Evaporation from drops - Part II" Chemical Engineering Progre
 
 &MESH IJK=4,4,4, XB=0.,10.0,0.,10.0,0.0,10.0 /
 
-&TIME T_END = 1000.,DT=0.01/
-&DUMP NFRAMES=1000/
+&TIME T_END = 712.,DT=0.01/
+&DUMP NFRAMES=712/
 
 &MISC NOISE=F, TMPA = 24.9, P_INF = 98791.9, HUMIDITY= 0, STRATIFICATION=F, Y_CO2_INFTY=0. /
 
@@ -27,8 +27,6 @@ Ranz and Marshall "Evaporation from drops - Part II" Chemical Engineering Progre
 &VENT MB='YMAX',SURF_ID='OPEN'/
 &VENT MB='ZMIN',SURF_ID='OPEN'/
 &VENT MB='ZMAX',SURF_ID='OPEN'/
-
-&SLCF PBY=5,QUANTITY='VELOCITY',CELL_CENTERED=.TRUE./
 
 &DEVC XYZ=5,5,5,QUANTITY='PARTICLE TEMPERATURE', INIT_ID='droplet', ID='T'/
 &DEVC XYZ=5,5,5,QUANTITY='PARTICLE DIAMETER', INIT_ID='droplet', ID='D',UNITS='m',CONVERSION_FACTOR=1E-6/
