@@ -50,13 +50,23 @@ Inputs based on Fig 6 Li Chow Fire Tech 44 351-381 2008
 
 ! Ramps defined to match water_evaporation_8.out liquid properties
 
-&RAMP ID='hv_H2O', T=0.,   F=2500./
-&RAMP ID='hv_H2O', T=50.,  F=2390./
-&RAMP ID='hv_H2O', T=100., F=2270./
+&RAMP ID='hv_H2O', T=0.,   F=2500.72/
+&RAMP ID='hv_H2O', T=5.,  F=2489.04/
+&RAMP ID='hv_H2O', T=10., F=2477.39/
+&RAMP ID='hv_H2O', T=15., F=2465.78/
+&RAMP ID='hv_H2O', T=20., F=2454.19/
+&RAMP ID='hv_H2O', T=25., F=2442.59/
+&RAMP ID='hv_H2O', T=30., F=2431.00/
+&RAMP ID='hv_H2O', T=100., F=2269.09/
 
-&RAMP ID='c_H2O', T=0.,   F=4.23/
-&RAMP ID='c_H2O', T=50.,  F=4.18/
-&RAMP ID='c_H2O', T=100., F=4.22/
+&RAMP ID='c_H2O', T=0.,   F=4.227/
+&RAMP ID='c_H2O', T=5.,  F=4.198/
+&RAMP ID='c_H2O', T=10., F=4.185/
+&RAMP ID='c_H2O', T=15., F=4.182/
+&RAMP ID='c_H2O', T=20., F=4.182/
+&RAMP ID='c_H2O', T=25., F=4.183/
+&RAMP ID='c_H2O', T=30., F=4.183/
+&RAMP ID='c_H2O', T=100., F=4.217/
 
 &PART ID='droplet', SURF_ID='MY DROPLET',
       SAMPLING_FACTOR=1,
