@@ -11469,7 +11469,7 @@ INIT_LOOP: DO N=1,N_INIT_READ+N_INIT_RESERVED
                CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,RR_SUM)
 
             ELSEIF (ANY(VOLUME_FRACTION>=0._EB)) THEN SPEC_INIT_IF
-
+               MASS_FRACTION = 0._EB 
                IF (SPEC_ID(1)=='null') THEN
                   WRITE(MESSAGE,'(A,I0,A,A)') 'ERROR: Problem with INIT number ',N,'. SPEC_ID must be used with VOLUME_FRACTION'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
@@ -11493,6 +11493,7 @@ INIT_LOOP: DO N=1,N_INIT_READ+N_INIT_RESERVED
                      ENDIF
                   ENDDO
                ENDDO
+
                IF (MASS_FRACTION(1)<=TWO_EPSILON_EB) THEN
                   MASS_FRACTION(1) = (1._EB - SUM(VOLUME_FRACTION(1:NS3)))*SPECIES_MIXTURE(1)%MW
                ELSE
