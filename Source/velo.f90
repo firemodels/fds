@@ -959,7 +959,13 @@ MEAN_FORCING_X: IF (MEAN_FORCING(1)) THEN
          DO I=0,IBAR
             IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
             IF (.NOT.MEAN_FORCING_CELL(I+1,J,K)) CYCLE
-            FVX(I,J,K) = FVX(I,J,K) - DU_FORCING
+            IF (APPLY_SPONGE_LAYER(1) .AND. I<SPONGE_CELLS) THEN
+               FVX(I,J,K) = FVX(I,J,K) - (UBAR-UU(I,J,K))/DT_LOC
+            ELSEIF (APPLY_SPONGE_LAYER(-1) .AND. I>IBAR-SPONGE_CELLS) THEN
+               FVX(I,J,K) = FVX(I,J,K) - (UBAR-UU(I,J,K))/DT_LOC
+            ELSE
+               FVX(I,J,K) = FVX(I,J,K) - DU_FORCING
+            ENDIF
          ENDDO
       ENDDO
    ENDDO
@@ -993,7 +999,13 @@ MEAN_FORCING_Y: IF (MEAN_FORCING(2)) THEN
          DO I=1,IBAR
             IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
             IF (.NOT.MEAN_FORCING_CELL(I,J+1,K)) CYCLE
-            FVY(I,J,K) = FVY(I,J,K) - DV_FORCING
+            IF (APPLY_SPONGE_LAYER(2) .AND. J<SPONGE_CELLS) THEN
+               FVY(I,J,K) = FVY(I,J,K) - (VBAR-VV(I,J,K))/DT_LOC
+            ELSEIF (APPLY_SPONGE_LAYER(-2) .AND. J>JBAR-SPONGE_CELLS) THEN
+               FVY(I,J,K) = FVY(I,J,K) - (VBAR-VV(I,J,K))/DT_LOC
+            ELSE
+               FVY(I,J,K) = FVY(I,J,K) - DV_FORCING
+            ENDIF
          ENDDO
       ENDDO
    ENDDO
@@ -1027,7 +1039,13 @@ MEAN_FORCING_Z: IF (MEAN_FORCING(3)) THEN
          DO I=1,IBAR
             IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
             IF (.NOT.MEAN_FORCING_CELL(I,J,K+1)) CYCLE
-            FVZ(I,J,K) = FVZ(I,J,K) - DW_FORCING
+            IF (APPLY_SPONGE_LAYER(3) .AND. K<SPONGE_CELLS) THEN
+               FVZ(I,J,K) = FVZ(I,J,K) - (WBAR-WW(I,J,K))/DT_LOC
+            ELSEIF (APPLY_SPONGE_LAYER(-3) .AND. K>KBAR-SPONGE_CELLS) THEN
+               FVZ(I,J,K) = FVZ(I,J,K) - (WBAR-WW(I,J,K))/DT_LOC
+            ELSE
+               FVZ(I,J,K) = FVZ(I,J,K) - DW_FORCING
+            ENDIF
          ENDDO
       ENDDO
    ENDDO

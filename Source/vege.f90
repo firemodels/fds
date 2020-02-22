@@ -611,6 +611,9 @@ N_INT_CELLS = (EWC%IIO_MAX-EWC%IIO_MIN+1) * (EWC%JJO_MAX-EWC%JJO_MIN+1)
 SELECT CASE(IOR)
    CASE(-2:2) 
       PHI_LS_P(II,JJ) = PHI_LS_OTHER/REAL(N_INT_CELLS,EB)
+      U_LS(II,JJ)     = U_LS_OTHER/REAL(N_INT_CELLS,EB)
+      V_LS(II,JJ)     = V_LS_OTHER/REAL(N_INT_CELLS,EB)
+      Z_LS(II,JJ)     = Z_LS_OTHER/REAL(N_INT_CELLS,EB)
    CASE(3)  ! only grab a PHI_LS value from the other mesh if the (II,JJ) cell of the current mesh has no terrain surface
       SOLID_CELL = .FALSE.
       IF (CC_IBM) THEN
