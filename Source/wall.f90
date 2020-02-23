@@ -2659,7 +2659,6 @@ PYROLYSIS_PREDICTED_IF: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
    ONE_D%Q_DOT_G_PP                         = 0._EB
    ONE_D%Q_DOT_O2_PP                        = 0._EB
 
-print '(A,1x,1I3)','wall:nwp',nwp
    POINT_LOOP1: DO I=1,NWP
 
       RHO_S0 = SF%LAYER_DENSITY(LAYER_INDEX(I))
@@ -3353,7 +3352,6 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Tech Guide: Sum over the materials, alpha
       ! Optional limiting of fuel burnout time
 
       IF (SF%MINIMUM_BURNOUT_TIME<1.E5_EB) RHO_DOT = MIN(RHO_DOT,RHO_S0/SF%MINIMUM_BURNOUT_TIME)
-print '(A,1x,6ES13.5)','rho_s0,depth,burnout_time,dxs(1:3)',rho_s0,depth,sF%MINIMUM_BURNOUT_TIME,DX_S(1:3)
 
       ! Compute new component density, RHO_S(N)
 
