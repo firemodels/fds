@@ -744,7 +744,7 @@ FLUX_ILOOP: DO I=1,IBAR
 
   
          ! Denominator used in spread rate equation from Richards, Intnl. J. Num. Methods Eng. 1990 
-         ! and in LS vs Farsite paper, Bova et al., Intnl. J. Wildland Fire, 25(2):229-241, 2015 
+         ! and in LS vs Farsite paper, Bova et al., Intnl. J. Wildland Fire, 25(2):229-241, 2015  
          AROS  = XSF*COS_THETA - YSF*SIN_THETA
          BROS  = XSF*SIN_THETA + YSF*COS_THETA
          DENOM = A_ELPS2*BROS**2 + B_ELPS2*AROS**2
