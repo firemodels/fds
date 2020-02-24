@@ -26,8 +26,8 @@ cd NIST_NRC; ./Run_All.sh $OPTIONS; cd ..
 cd NRCC_Facade; ./Run_All.sh $OPTIONS; cd ..
 cd NRL_HAI; ./Run_All.sh $OPTIONS; cd ..
 cd PRISME; ./Run_All.sh $OPTIONS; cd ..
+cd Ranz_Marshall; ./Run_All.sh $OPTIONS; cd ..
 cd Restivo_Experiment; ./Run_All.sh $OPTIONS; cd ..
-cd Sippola_Aerosol_Deposition; ./Run_All.sh $OPTIONS; cd ..
 cd SP_AST; ./Run_All.sh $OPTIONS; cd ..
 cd Steckler_Compartment; ./Run_All.sh $OPTIONS; cd ..
 cd UL_NIST_Vents; ./Run_All.sh $OPTIONS; cd ..
