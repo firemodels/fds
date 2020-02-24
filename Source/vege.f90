@@ -694,10 +694,6 @@ FLUX_ILOOP: DO I=1,IBAR
       IF (MAG_F > 0._EB) THEN   !components of unit vector normal to PHI contours
          NORMAL_FIRELINE(1) = -DPHIDX/MAG_F
          NORMAL_FIRELINE(2) = -DPHIDY/MAG_F
-!        ! Lagrangian normal approximation from Rehm and Mcdermott 2009
-!        ! For elliptical front calculation
-!        XSF = (DPHIDY / MAG_F )
-!        YSF = (-DPHIDX / MAG_F)
          XSF =  DPHIDY
          YSF = -DPHIDX
          GRAD_SLOPE_DOT_NORMAL_FIRELINE = DZTDX(I,J)*(DPHIDY/MAG_F) + DZTDY(I,J)*(-DPHIDY/MAG_F)
@@ -749,33 +745,16 @@ FLUX_ILOOP: DO I=1,IBAR
          BROS  = XSF*SIN_THETA + YSF*COS_THETA
          DENOM = A_ELPS2*BROS**2 + B_ELPS2*AROS**2
 
-         ! A_ELPS and B_ELPS are *opposite* in notation from Farsite and Richards
-!        A_ELPS =  0.5_EB * (ROS_TMP + ROS_TMP/HB)
-!        A_ELPS2 = A_ELPS**2
-!        B_ELPS =  A_ELPS / LB !0.5_EB * (ROS_TMP + ROS_TMP/HB) / LB
-!        B_ELPS2=  B_ELPS**2
-!        C_ELPS =  A_ELPS - (ROS_TMP/HB)
-
-         ! Denominator used in spread rate equation from Richards 1990 (also in Farsite)
-!        DENOM = B_ELPS2 * (YSF * COS_THETA + XSF * SIN_THETA)**2 + &
-!                A_ELPS2 * (XSF * COS_THETA - YSF * SIN_THETA)**2
-
          IF (DENOM > 0._EB) THEN
             DENOM = 1._EB / SQRT(DENOM)
          ELSE
             DENOM = 0._EB
          ENDIF
 
-!       This is with A_ELPS2 and B_ELPS2 notation consistent with Finney and Richards and in 
-!       Bova et al. 2015 IJWF 2015
-        SR_X_LS(I,J) = DENOM * ( A_ELPS2*COS_THETA*BROS - B_ELPS2*SIN_THETA*AROS) + C_ELPS*SIN_THETA
-        SR_Y_LS(I,J) = DENOM * (-A_ELPS2*SIN_THETA*BROS - B_ELPS2*COS_THETA*AROS) + C_ELPS*COS_THETA
-
-!        SR_X_LS(I,J) = DENOM * (B_ELPS2 * COS_THETA * (XSF * SIN_THETA + YSF * COS_THETA) -&
-!                       A_ELPS2 * SIN_THETA * (XSF * COS_THETA - YSF * SIN_THETA)) + C_ELPS * SIN_THETA
-
-!        SR_Y_LS(I,J) = DENOM * (-B_ELPS2 * SIN_THETA * (XSF * SIN_THETA + YSF * COS_THETA) -&
-!                       A_ELPS2 * COS_THETA * (XSF * COS_THETA - YSF * SIN_THETA)) + C_ELPS * COS_THETA
+!        This is with A_ELPS2 and B_ELPS2 notation consistent with Finney and Richards and in 
+!        Bova et al. 2015 IJWF 2015
+         SR_X_LS(I,J) = DENOM * ( A_ELPS2*COS_THETA*BROS - B_ELPS2*SIN_THETA*AROS) + C_ELPS*SIN_THETA
+         SR_Y_LS(I,J) = DENOM * (-A_ELPS2*SIN_THETA*BROS - B_ELPS2*COS_THETA*AROS) + C_ELPS*COS_THETA
 
          ! Project spread rates from slope to horizontal plane
 
