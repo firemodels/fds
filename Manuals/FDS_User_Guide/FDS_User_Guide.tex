@@ -9644,6 +9644,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 % ignorenamelistkw: /PRES/SCARC_PRECON_ITERATIONS, /PRES/SCARC_PRECON_ACCURACY, /PRES/SCARC_PRECON_OMEGA
 % ignorenamelistkw: /PRES/SCARC_COARSE_ITERATIONS, /PRES/SCARC_COARSE_ACCURACY
 % ignorenamelistkw: /PROP/BEAD_DENSITY, /PROP/BEAD_DIAMETER, /PROP/BEAD_EMISSIVITY, /PROP/BEAD_HEAT_TRANSFER_COEFFICIENT, /PROP/BEAD_SPECIFIC_HEAT, /PROP/DROPLET_VELOCITY
+% ignorenamelistkw: /SLCF/RLE_MIN, /SLCF/RLE_MAX, /SLCF/SLICETYPE
 % ignorenamelistkw: /SURF/EXTERNAL_FLUX_RAMP, /SURF/TAU_EXTERNAL_FLUX, /SURF/VOLUME_FLUX
 % ignorenamelistkw: /TIME/TWFIN
 % ignorenamelistkw: /WIND/MEAN_FORCING, /WIND/OBUKHOV_LENGTH, /WIND/REFERENCE_HEIGHT, /WIND/REFERENCE_TEMPERATURE
@@ -10892,9 +10893,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct QUANTITY}          & Character         & Section~\ref{info:outputquantities}       &           &                   \\ \hline
 {\ct QUANTITY2}         & Character         & Section~\ref{info:outputquantities}       &           &                   \\ \hline
 {\ct REAC\_ID}          & Character         & See {\ct QUANTITY=`HRRPUV REAC`}          &           &                   \\ \hline
-%{\ct RLE\_MIN}          & Real              &                                           &           &                   \\ \hline
-%{\ct RLE\_MAX}          & Real              &                                           &           &                   \\ \hline
-%{\ct SLICETYPE}         & Character         &                                           &           &                   \\ \hline
 {\ct SPEC\_ID}          & Character         & Section~\ref{info:outputquantities}       &           &                   \\ \hline
 {\ct VECTOR}            & Logical           & Section~\ref{info:SLCF}                   &           & {\ct .FALSE.}     \\ \hline
 {\ct VELO\_INDEX}       & Integer           & Section~\ref{info:velocity}               &           & 0                 \\ \hline
