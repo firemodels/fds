@@ -10,7 +10,9 @@ cd ATF_Corridors;  ./Run_All.sh $OPTIONS; cd ..
 cd Atmospheric_Dispersion;  ./Run_All.sh $OPTIONS; cd ..
 cd Backward_Facing_Step;  ./Run_All.sh $OPTIONS; cd ..
 cd Bouchair_Solar_Chimney;  ./Run_All.sh $OPTIONS; cd ..
+cd Crown_Fires;  ./Run_All.sh $OPTIONS; cd ..
 cd CSIRO_Grassland_Fires;  ./Run_All.sh $OPTIONS; cd ..
+cd CSTB_Tunnel;  ./Run_All.sh $OPTIONS; cd ..
 cd DelCo_Trainers;  ./Run_All.sh $OPTIONS; cd ..
 cd FAA_Cargo_Compartments;  ./Run_All.sh $OPTIONS; cd ..
 cd FM_Burner;  ./Run_All.sh $OPTIONS; cd ..
@@ -46,6 +48,7 @@ cd UL_NFPRF;  ./Run_All.sh $OPTIONS; cd ..
 cd UL_NIJ_Houses;  ./Run_All.sh $OPTIONS; cd ..
 cd UMD_Line_Burner;  ./Run_All.sh $OPTIONS; cd ..
 cd USFS_Catchpole;  ./Run_All.sh $OPTIONS; cd ..
+cd USFS_Corsica;  ./Run_All.sh $OPTIONS; cd ..
 cd USN_Hangars;  ./Run_All.sh $OPTIONS; cd ..
 cd UWO_Wind_Tunnel;  ./Run_All.sh $OPTIONS; cd ..
 cd VTT;  ./Run_All.sh $OPTIONS; cd ..
