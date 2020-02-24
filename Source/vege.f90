@@ -658,7 +658,7 @@ REAL(EB) :: COS_THETA_WIND,COS_THETA_SLOPE,COS_THETA_WIND_H,COS_THETA_WIND_B, &
 REAL(EB) :: ROS_BACKS,ROS_HEADS
 REAL(EB) :: RAD_TO_DEGREE,DEGREES_SLOPE,SLOPE_FACTOR
 REAL(EB) :: COS_THETA,SIN_THETA,XSF,YSF,UMF_DUM
-REAL(EB) :: A_ELPS,A_ELPS2,B_ELPS2,B_ELPS,C_ELPS,DENOM,ROS_TMP,LB,LBD,HB
+REAL(EB) :: AROS,A_ELPS,A_ELPS2,BROS,B_ELPS2,B_ELPS,C_ELPS,DENOM,ROS_TMP,LB,LBD,HB
 REAL(EB), DIMENSION(:) :: NORMAL_FIRELINE(2)
 
 RAD_TO_DEGREE = 90._EB/ASIN(1._EB)
@@ -694,10 +694,8 @@ FLUX_ILOOP: DO I=1,IBAR
       IF (MAG_F > 0._EB) THEN   !components of unit vector normal to PHI contours
          NORMAL_FIRELINE(1) = -DPHIDX/MAG_F
          NORMAL_FIRELINE(2) = -DPHIDY/MAG_F
-         ! Lagrangian normal approximation from Rehm and Mcdermott 2009
-         ! For elliptical front calculation
-         XSF = (DPHIDY / MAG_F )
-         YSF = (-DPHIDX / MAG_F)
+         XSF =  DPHIDY
+         YSF = -DPHIDX
          GRAD_SLOPE_DOT_NORMAL_FIRELINE = DZTDX(I,J)*(DPHIDY/MAG_F) + DZTDY(I,J)*(-DPHIDY/MAG_F)
       ELSE
         NORMAL_FIRELINE = 0._EB
@@ -733,16 +731,18 @@ FLUX_ILOOP: DO I=1,IBAR
          ! Head to back ratio based on LB
          HB = (LB + LBD) / (LB - LBD)
 
-         ! A_ELPS and B_ELPS are *opposite* in notation from Farsite and Richards
-         A_ELPS =  0.5_EB * (ROS_TMP + ROS_TMP/HB)
-         A_ELPS2 = A_ELPS**2
-         B_ELPS =  A_ELPS / LB !0.5_EB * (ROS_TMP + ROS_TMP/HB) / LB
-         B_ELPS2=  B_ELPS**2
-         C_ELPS =  A_ELPS - (ROS_TMP/HB)
+         ! A_ELPS and B_ELPS notation is consistent with Farsite and Richards 
+         B_ELPS =  0.5_EB * (ROS_TMP + ROS_TMP/HB)
+         B_ELPS2 = B_ELPS**2
+         A_ELPS =  B_ELPS / LB
+         A_ELPS2=  A_ELPS**2
+         C_ELPS =  B_ELPS - (ROS_TMP/HB)
 
-         ! Denominator used in spread rate equation from Richards 1990 (also in Farsite)
-         DENOM = B_ELPS2 * (YSF * COS_THETA + XSF * SIN_THETA)**2 + &
-                 A_ELPS2 * (XSF * COS_THETA - YSF * SIN_THETA)**2
+         ! Denominator used in spread rate equation from Richards, Intnl. J. Num. Methods Eng. 1990 
+         ! and in LS vs Farsite paper, Bova et al., Intnl. J. Wildland Fire, 25(2):229-241, 2015  
+         AROS  = XSF*COS_THETA - YSF*SIN_THETA
+         BROS  = XSF*SIN_THETA + YSF*COS_THETA
+         DENOM = A_ELPS2*BROS**2 + B_ELPS2*AROS**2
 
          IF (DENOM > 0._EB) THEN
             DENOM = 1._EB / SQRT(DENOM)
@@ -750,11 +750,10 @@ FLUX_ILOOP: DO I=1,IBAR
             DENOM = 0._EB
          ENDIF
 
-         SR_X_LS(I,J) = DENOM * (B_ELPS2 * COS_THETA * (XSF * SIN_THETA + YSF * COS_THETA) -&
-                        A_ELPS2 * SIN_THETA * (XSF * COS_THETA - YSF * SIN_THETA)) + C_ELPS * SIN_THETA
-
-         SR_Y_LS(I,J) = DENOM * (-B_ELPS2 * SIN_THETA * (XSF * SIN_THETA + YSF * COS_THETA) -&
-                        A_ELPS2 * COS_THETA * (XSF * COS_THETA - YSF * SIN_THETA)) + C_ELPS * COS_THETA
+!        This is with A_ELPS2 and B_ELPS2 notation consistent with Finney and Richards and in 
+!        Bova et al. 2015 IJWF 2015
+         SR_X_LS(I,J) = DENOM * ( A_ELPS2*COS_THETA*BROS - B_ELPS2*SIN_THETA*AROS) + C_ELPS*SIN_THETA
+         SR_Y_LS(I,J) = DENOM * (-A_ELPS2*SIN_THETA*BROS - B_ELPS2*COS_THETA*AROS) + C_ELPS*COS_THETA
 
          ! Project spread rates from slope to horizontal plane
 
