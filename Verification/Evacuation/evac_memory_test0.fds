@@ -27,7 +27,7 @@
       SMOKE3D=.TRUE.,
       DT_PART=1.0,
       DT_HRR= 1.0
-      DT_SLCF=1000.0,
+      DT_SLCF=1.0,
       DT_PL3D=1000.0,
       DT_ISOF=1000.0 /
 
