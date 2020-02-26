@@ -1,7 +1,7 @@
-&HEAD CHID='wind_example',  TITLE='Test of z-profile mean velocity ramp for one-way WRF coupling with FDS' /
+&HEAD CHID='wind_example_32',  TITLE='Test of z-profile mean velocity ramp for one-way WRF coupling with FDS' /
 
-&MESH IJK=100,100,10, XB=-500.,0.,-500.,0.,0.,50., MULT_ID='mesh' /
-&MULT ID='mesh', DX=500., DY=500., DZ=50., I_UPPER=1, J_UPPER=1, K_UPPER=1 /
+&MESH IJK=50,50,10, XB=-500.,-250.,-500.,-250.,0.,50., MULT_ID='mesh' /
+&MULT ID='mesh', DX=250., DY=250., DZ=50., I_UPPER=3, J_UPPER=3, K_UPPER=1 /
 
 &TIME T_BEGIN=-5., T_END=120. /
 
