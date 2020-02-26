@@ -7,7 +7,7 @@
 
 &WIND SPEED=5., RAMP_DIRECTION='theta', Z_0=0.01, L=-100. /
 
-&REAC RADIATION=F /
+&RADI RADIATION=F /
 
 &RAMP ID='theta', T= 0., F=270. /
 &RAMP ID='theta', T=50., F=-90. /
