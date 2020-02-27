@@ -295,7 +295,7 @@ for i=2:n_plots
                 if ~ftest
                     if strcmp(Plot_Type,'linear')
                         K1(j) = plot(X,Y,char(style(j))); hold on
-                        if strcmp(Metric,'slope') plot([0 10000],[p(2),p(2)+10000*p(1)],'r-'); end
+                        if strcmp(Metric,'slope') plot([d1_Comp_Start d1_Comp_End],[p(1)*d1_Comp_Start+p(2),p(1)*d1_Comp_End+p(2)],char(style(j))); end
                     elseif strcmp(Plot_Type,'loglog')
                         K1(j) = loglog(X,Y,char(style(j))); hold on
                     elseif strcmp(Plot_Type,'semilogx')
@@ -308,7 +308,7 @@ for i=2:n_plots
                     if ~strcmp(char(style(j)),'blank')
                        if strcmp(Plot_Type,'linear')
                            K1(length(K1_save)+j) = plot(X,Y,char(style(j))); hold on
-                           if strcmp(Metric,'slope') plot([0 10000],[p(2),p(2)+10000*p(1)],'r-'); end
+                           if strcmp(Metric,'slope') plot([d1_Comp_Start d1_Comp_End],[p(1)*d1_Comp_Start+p(2),p(1)*d1_Comp_End+p(2)],char(style(j))); end
                        elseif strcmp(Plot_Type,'loglog')
                            K1(length(K1_save)+j) = loglog(X,Y,char(style(j))); hold on
                        elseif strcmp(Plot_Type,'semilogx')
@@ -435,7 +435,7 @@ for i=2:n_plots
                 if ~ftest
                     if strcmp(Plot_Type,'linear')
                         K2(j) = plot(X,Y,char(style(j)));
-                        if strcmp(Metric,'slope') plot([0 10000],[p(2),p(2)+10000*p(1)],'r--'); end
+                        if strcmp(Metric,'slope') plot([d2_Comp_Start d2_Comp_End],[p(1)*d2_Comp_Start+p(2),p(1)*d2_Comp_End+p(2)],char(style(j))); end
                     elseif strcmp(Plot_Type,'loglog')
                         K2(j) = loglog(X,Y,char(style(j)));
                     elseif strcmp(Plot_Type,'semilogx')
@@ -448,7 +448,7 @@ for i=2:n_plots
                     if ~strcmp(char(style(j)),'blank')
                        if strcmp(Plot_Type,'linear')
                            K2(length(K2_save)+j) = plot(X,Y,char(style(j)));
-                           if strcmp(Metric,'slope') plot([0 10000],[p(2),p(2)+10000*p(1)],'r--'); end
+                           if strcmp(Metric,'slope') plot([d2_Comp_Start d2_Comp_End],[p(1)*d2_Comp_Start+p(2),p(1)*d2_Comp_End+p(2)],char(style(j))); end
                        elseif strcmp(Plot_Type,'loglog')
                            K2(length(K2_save)+j) = loglog(X,Y,char(style(j)));
                        elseif strcmp(Plot_Type,'semilogx')
