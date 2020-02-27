@@ -51,7 +51,7 @@ fi
 
 
 joblist=/tmp/joblist.$$
-qstat -a | awk '{ print $1" "$2"}' | grep `whoami` | sort -u > $joblist
+qstat -a | awk '{ print $1" "$2 }' | grep `whoami` | sort -u > $joblist
 for job_id in `seq $begin $end`; do
    njobs=`grep $job_id $joblist | wc -l`
    if [ "$njobs" != "0" ]; then
