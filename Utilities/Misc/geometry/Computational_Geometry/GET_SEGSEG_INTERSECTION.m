@@ -59,14 +59,14 @@ if( (1.+GEOMEPS) > SMIN ) % SMIN between P1 and P1+D1
     if ( (0.-GEOMEPS) < SMAX) % SMAX greater that P1
        if (0. < SMIN) % SMIN higher that P1
            SVARV(NOD1,EDG1) = SMIN*SLENV(EDG1); % First crossing on P1-P1+D1
-           if (SMIN==S1) % SMIN is P2
+           if (abs(SMIN-S1) < GEOMEPS/2.) % SMIN is P2
                SVARV(NOD1,EDG2)=0.; % First crossing in P2-P2+D2
            else % SMIN is P2+D2
                SVARV(NOD2,EDG2)=1.*SLENV(EDG2); % Second crossing in P2-P2+D2
            end
        else % SMIN lower than P1
            SVARV(NOD1,EDG1) = 0.; % First crossing in P1-P1+D1
-           if (SMIN==S1) % SMIN os P2
+           if (abs(SMIN-S1) < GEOMEPS/2.) % SMIN os P2
                SVARV(NOD1,EDG2)=-SMIN*SLENV(EDG1); % First crossing in P2-P2-D2
            else
                SVARV(NOD2,EDG2)=SMAX*SLENV(EDG1);
@@ -74,14 +74,14 @@ if( (1.+GEOMEPS) > SMIN ) % SMIN between P1 and P1+D1
        end
        if (1. > SMAX)
            SVARV(NOD2,EDG1) = SMAX*SLENV(EDG1);
-           if(SMAX==S1) % SMAX is P2
+           if(abs(SMAX-S1) < GEOMEPS/2.) % SMAX is P2
                SVARV(NOD1,EDG2)=0.*SLENV(EDG2);
            else
                SVARV(NOD2,EDG2)=1.*SLENV(EDG2);
            end
        else
            SVARV(NOD2,EDG1) = 1.*SLENV(EDG1);
-           if(SMAX==S1) % SMAX is P2
+           if(abs(SMAX-S1) < GEOMEPS/2.) % SMAX is P2
                SVARV(NOD1,EDG2)=(SMAX-1.)*SLENV(EDG1);
            else
                SVARV(NOD2,EDG2)=(1.-SMIN)*SLENV(EDG1);
@@ -93,7 +93,7 @@ if( (1.+GEOMEPS) > SMIN ) % SMIN between P1 and P1+D1
     else
        % SMAX = 0.
        SVARV(NOD1,EDG1) = 0.;
-       if(SMAX==S1)
+       if(abs(SMAX-S1) < GEOMEPS/2.)
            SVARV(NOD1,EDG2) = 0.;
        else
            SVARV(NOD1,EDG2) = 1.*SLENV(EDG2);
@@ -104,7 +104,7 @@ if( (1.+GEOMEPS) > SMIN ) % SMIN between P1 and P1+D1
 else
     % SMIN = 1.
     SVARV(NOD1,EDG1) = 1.*SLENV(EDG1);
-    if(SMIN==S1)
+    if(abs(SMIN-S1) < GEOMEPS/2.)
         SVARV(NOD1,EDG2) = 0.;
     else
         SVARV(NOD1,EDG2) = 1.*SLENV(EDG2);

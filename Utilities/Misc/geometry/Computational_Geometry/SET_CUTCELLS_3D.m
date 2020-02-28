@@ -1,6 +1,6 @@
 function [ierr]=SET_CUTCELLS_3D(basedir,casename,plot_cutedges)
 
-global NMESHES MESHES NGUARD CCGUARD GEOMEPS IAXIS JAXIS KAXIS NOD1 NOD2
+global NMESHES MESHES NGUARD CCGUARD GEOMEPS IAXIS JAXIS KAXIS NOD1 NOD2 MAX_DIM
 global X1FACE X2FACE X3FACE DX1FACE DX2FACE DX3FACE DX2CELL DX3CELL
 global X2LO X2HI X3LO X3HI 
 global X2CELL X3CELL X2LO_CELL X2HI_CELL X3LO_CELL X3HI_CELL
@@ -11,10 +11,11 @@ global XCELL DXCELL XFACE DXFACE
 global YCELL DYCELL YFACE DYFACE
 global ZCELL DZCELL ZFACE DZFACE
 global BODINT_PLANE
-global IBM_N_CRS IBM_SVAR_CRS IBM_IS_CRS
+global IBM_N_CRS IBM_SVAR_CRS IBM_IS_CRS IBM_INBOUNDARY IBM_GASPHASE IBM_CGSC
 global X1NOC X2NOC X3NOC TRANS
 global X1LO_CELL X1HI_CELL
 global FACERT CELLRT
+global N_GEOMETRY GEOM
 
 ierr=1;
 
@@ -294,7 +295,7 @@ for NM=1:NMESHES
                      end
                   end
             
-                  % Now for this ray, set vertex types in MESHES(NM)%VERTVAR(:,:,:,IBM_VGSC):
+                  % Now for this ray, set vertex types in MESHES(NM).VERTVAR(:,:,:,IBM_VGSC):
                   [ierr]=GET_X2_VERTVAR(X1AXIS,X2LO,X2HI,NM,I,KK);
 
                   % Now define Crossings on Cartesian Edges and Body segments:
@@ -332,7 +333,7 @@ for NM=1:NMESHES
                % After these loops all segments should contain points from Node1,
                % cross 1, cross 2, ..., Node2, in ascending sbod order.
                % Time to generate the body IBM_INBOUNDARY edges on faces and add
-               % to MESHES(NM)%CUT_EDGE:
+               % to MESHES(NM).CUT_EDGE:
                [ierr]=GET_CARTFACE_CUTEDGES(X1AXIS,X2AXIS,X3AXIS,            ...
                                     XIAXIS,XJAXIS,XKAXIS,NM,                 ...
                                     X2LO,X2HI,X3LO,X3HI,X2LO_CELL,X2HI_CELL, ...
@@ -404,6 +405,115 @@ for NM=1:NMESHES
    [ierr]=GET_CARTCELL_CUTCELLS(NM);
    toc
 end
+
+
+% Loop over geometry:
+SLEN_GEOM = 0.; AREA_GEOM = 0.; VOLUME_GEOM = 0.; XYZCEN_GEOM(IAXIS:KAXIS) = 0.;
+for IG=1:N_GEOMETRY
+
+   % Add length of wet surface edges:
+   for IEDGE=1:GEOM(IG).N_EDGES
+      SEG(NOD1:NOD2)  = GEOM(IG).EDGES(NOD1:NOD2,IEDGE);
+      DV(IAXIS:KAXIS) = GEOM(IG).VERTS(MAX_DIM*(SEG(NOD2)-1)+1:MAX_DIM*SEG(NOD2)) - ...
+                        GEOM(IG).VERTS(MAX_DIM*(SEG(NOD1)-1)+1:MAX_DIM*SEG(NOD1));
+      SLEN = sqrt( DV(IAXIS)^2. + DV(JAXIS)^2. + DV(KAXIS)^2. );
+      SLEN_GEOM = SLEN_GEOM + SLEN;
+   end
+
+   % Add to wet surface Areas:
+   for IFACE=1:GEOM(IG).N_FACES
+      if ( GEOM(IG).FACES_AREA(IFACE) < GEOMEPS ) 
+         disp(['GEOM FACE=' num2str(IFACE) ', AREA=' ,num2str(GEOM(IG).FACES_AREA(IFACE))])
+      end
+   end
+   AREA_GEOM = AREA_GEOM + GEOM(IG).GEOM_AREA;
+
+   % Add to GEOMETRY volume:
+   VOLUME_GEOM = VOLUME_GEOM + GEOM(IG).GEOM_VOLUME;
+
+   % Add to XYZCEN for geometries:
+   XYZCEN_GEOM(IAXIS:KAXIS)= XYZCEN_GEOM(IAXIS:KAXIS) + GEOM(IG).GEOM_VOLUME * GEOM(IG).GEOM_XYZCEN(IAXIS:KAXIS);
+end
+if(N_GEOMETRY > 0); XYZCEN_GEOM(IAXIS:KAXIS)=XYZCEN_GEOM(IAXIS:KAXIS)/VOLUME_GEOM; end
+
+% Loop over meshes:
+NCUTFACE_INB = 0;
+CF_AREA_INB=0.;
+CC_VOLUME_INB=0.;
+GP_VOLUME=0.;
+DM_VOLUME = 0.;
+DM_XYZCEN(IAXIS:KAXIS) = 0.;
+CCGP_XYZCEN(IAXIS:KAXIS) = 0.;
+for NM=1:NMESHES
+
+   ILO_CELL = MESHES(NM).ILO_CELL;  % First internal cell index. See notes.
+   IHI_CELL = MESHES(NM).IHI_CELL;  % Last internal cell index.
+   JLO_CELL = MESHES(NM).JLO_CELL;  % First internal cell index. See notes.
+   JHI_CELL = MESHES(NM).JHI_CELL;  % Last internal cell index.
+   KLO_CELL = MESHES(NM).KLO_CELL;  % First internal cell index. See notes.
+   KHI_CELL = MESHES(NM).KHI_CELL;  % Last internal cell index.
+
+   for ICF1 = 1:MESHES(NM).N_CUTFACE_MESH
+     if (MESHES(NM).CUT_FACE(ICF1).STATUS == IBM_INBOUNDARY) 
+        NFACE = MESHES(NM).CUT_FACE(ICF1).NFACE;
+        CF_AREA_INB = CF_AREA_INB + sum(MESHES(NM).CUT_FACE(ICF1).AREA(1:NFACE));
+     end
+   end
+
+   for ICC1 = 1:MESHES(NM).N_CUTCELL_MESH
+      NCELL = MESHES(NM).CUT_CELL(ICC1).NCELL;
+      for ICC2=1:NCELL
+         CCGP_XYZCEN(IAXIS:KAXIS) = CCGP_XYZCEN(IAXIS:KAXIS) + MESHES(NM).CUT_CELL(ICC1).VOLUME(ICC2) * ...
+                                                               MESHES(NM).CUT_CELL(ICC1).XYZCEN(IAXIS:KAXIS,ICC2)';
+         if ( MESHES(NM).CUT_CELL(ICC1).VOLUME(ICC2) < -GEOMEPS)
+             disp(['Cut-cell=' num2str([ICC1,ICC2])  ', VOL=' num2str(MESHES(NM).CUT_CELL(ICC1).VOLUME(ICC2))])
+         end
+      end
+      CC_VOLUME_INB = CC_VOLUME_INB + sum(MESHES(NM).CUT_CELL(ICC1).VOLUME(1:NCELL));
+   end
+
+   % Regular gasphase cells:
+   for K=KLO_CELL:KHI_CELL
+      for J=JLO_CELL:JHI_CELL
+         for I=ILO_CELL:IHI_CELL
+
+            if ( MESHES(NM).CCVAR(I,J,K,IBM_CGSC) == IBM_GASPHASE) 
+              SLEN = MESHES(NM).DX(I)*MESHES(NM).DY(J)*MESHES(NM).DZ(K);
+              GP_VOLUME = GP_VOLUME + SLEN;
+              CCGP_XYZCEN(IAXIS) = CCGP_XYZCEN(IAXIS) + SLEN * MESHES(NM).XC(I);
+              CCGP_XYZCEN(JAXIS) = CCGP_XYZCEN(JAXIS) + SLEN * MESHES(NM).YC(J);
+              CCGP_XYZCEN(KAXIS) = CCGP_XYZCEN(KAXIS) + SLEN * MESHES(NM).ZC(K);
+            end
+         end
+      end
+   end
+
+   % Domain volume:
+   SLEN = (MESHES(NM).XF-MESHES(NM).XS)*(MESHES(NM).YF-MESHES(NM).YS)*(MESHES(NM).ZF-MESHES(NM).ZS);
+   DM_VOLUME = DM_VOLUME + SLEN;
+   % Domain Centroid:
+   DM_XYZCEN(IAXIS) = DM_XYZCEN(IAXIS) + SLEN * 0.5*(MESHES(NM).XF+MESHES(NM).XS);
+   DM_XYZCEN(JAXIS) = DM_XYZCEN(JAXIS) + SLEN * 0.5*(MESHES(NM).YF+MESHES(NM).YS);
+   DM_XYZCEN(KAXIS) = DM_XYZCEN(KAXIS) + SLEN * 0.5*(MESHES(NM).ZF+MESHES(NM).ZS);
+end
+
+disp(' Computational Geometry: Sanity tests for cut-cell region')
+disp([' GEOM Surf  Area=' num2str(AREA_GEOM,'%11.4e') ', InBoundary Cut-faces Area=' num2str(CF_AREA_INB,'%11.4e') ...
+', Relative Difference=' num2str((AREA_GEOM-CF_AREA_INB)/(AREA_GEOM+GEOMEPS),'%11.4e')])
+
+CCGP_XYZCEN(IAXIS:KAXIS) = CCGP_XYZCEN(IAXIS:KAXIS) / (CC_VOLUME_INB+GP_VOLUME);
+DM_XYZCEN(IAXIS:KAXIS)   = DM_XYZCEN(IAXIS:KAXIS)   / DM_VOLUME;
+
+disp([' GEOM Gas Volume=' num2str(DM_VOLUME-VOLUME_GEOM,'%11.4e') ', Cut/Regl Gas cells Volume=' ...
+      num2str(GP_VOLUME+CC_VOLUME_INB,'%11.4e') ', Relative Difference=' ...
+      num2str(((DM_VOLUME-VOLUME_GEOM)-(GP_VOLUME+CC_VOLUME_INB))/(DM_VOLUME-VOLUME_GEOM),'%11.4e')])
+
+disp([' GEOM Centroid               =' num2str(XYZCEN_GEOM(IAXIS:KAXIS),'%12.4e')])
+disp([' DOMAIN-GEOM Centroid        =' ...
+num2str((DM_XYZCEN(IAXIS:KAXIS)*DM_VOLUME - XYZCEN_GEOM(IAXIS:KAXIS)*VOLUME_GEOM)/(DM_VOLUME-VOLUME_GEOM),'%12.4e')])
+disp([' Cut/Regl Gas cells Centroid =' num2str(CCGP_XYZCEN(IAXIS:KAXIS),'%12.4e')])
+disp([' Centroid Relative Difference=' num2str(CCGP_XYZCEN(IAXIS:KAXIS)-...
+(DM_XYZCEN(IAXIS:KAXIS)*DM_VOLUME - XYZCEN_GEOM(IAXIS:KAXIS)*VOLUME_GEOM)/(DM_VOLUME-VOLUME_GEOM),'%12.4e')])
 
 ierr=0;
 

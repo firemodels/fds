@@ -1,9 +1,11 @@
 function [GEOM,N_GEOM]=load_geometries(basedir,casename);
 
 global MAX_DIM IAXIS JAXIS KAXIS NOD1 NOD2 NOD3 NOD4 LOW_IND HIGH_IND NODS_WSEL
-global EDG1 EDG2 EDG3
+global EDG1 EDG2 EDG3 GEOMEPS
 
-N_GEOM=load([basedir casename '_num_geometries.dat']);
+FGEOM=load([basedir casename '_num_geometries.dat']);
+N_GEOM=FGEOM(1);
+GEOMEPS=FGEOM(2);
 for IG=1:N_GEOM
    GEOM(IG).XYZ    =load([basedir casename '_geometry_' num2str(IG,'%4.4d') '_verts.dat']); 
    GEOM(IG).WSELEM =load([basedir casename '_geometry_' num2str(IG,'%4.4d') '_faces.dat']); 
@@ -84,14 +86,22 @@ for IG=1:N_GEOM
 
          
          WSELEM=wshift('1D',WSELEM,1);
-
+         
       end
    end
 
-   GEOM(IG).N_EDGES = NWSEDG;
    
+   
+   
+   GEOM(IG).N_EDGES = NWSEDG;
    GEOM(IG).FACES_NORMAL = zeros(MAX_DIM,GEOM(IG).N_FACES);
    GEOM(IG).FACES_AREA   = zeros(1,GEOM(IG).N_FACES);
+   GEOM(IG).GEOM_VOLUME    = 0.;
+   GEOM(IG).GEOM_AREA      = 0.;
+   GEOM(IG).GEOM_XYZCEN(:) = 0.;
+
+   % Compute normal, area and volume:
+   SQAREA(IAXIS:KAXIS) = 0.;
    for IWSEL=1:GEOM(IG).N_FACES
 
       WSELEM(NOD1:NOD3) = GEOM(IG).FACES(NODS_WSEL*(IWSEL-1)+1:NODS_WSEL*IWSEL);
@@ -117,11 +127,30 @@ for IG=1:N_GEOM
       % Assign to GEOM:
       GEOM(IG).FACES_NORMAL(IAXIS:KAXIS,IWSEL) = WSNORM(IAXIS:KAXIS) * MGNRM^(-1.);
       GEOM(IG).FACES_AREA(IWSEL) = MGNRM/2.;
+     
+      % Total Area and Volume for GEOMETRY(IG).
+      GEOM(IG).GEOM_AREA  = GEOM(IG).GEOM_AREA  + GEOM(IG).FACES_AREA(IWSEL);
+      GEOM(IG).GEOM_VOLUME= GEOM(IG).GEOM_VOLUME+ ... % Divergence theorem with F = x i, assumes we have a volume.
+      GEOM(IG).FACES_NORMAL(IAXIS,IWSEL)*XCEN*GEOM(IG).FACES_AREA(IWSEL);
+
+      % Define Centroid:
+      X12(IAXIS:KAXIS) = 0.5*(XYZV(IAXIS:KAXIS,NOD1) + XYZV(IAXIS:KAXIS,NOD2))';
+      X23(IAXIS:KAXIS) = 0.5*(XYZV(IAXIS:KAXIS,NOD2) + XYZV(IAXIS:KAXIS,NOD3))';
+      X31(IAXIS:KAXIS) = 0.5*(XYZV(IAXIS:KAXIS,NOD3) + XYZV(IAXIS:KAXIS,NOD1))';
+      
+      % dot(i,nc) int(x^2)dA, dot(j,nc) int(y^2)dA, dot(k,nc) int(z^2)dA
+      for IX=IAXIS:KAXIS
+         INT2 = (X12(IX)^2. + X23(IX)^2. + X31(IX)^2.) / 3.;
+         SQAREA(IX) = SQAREA(IX) + GEOM(IG).FACES_NORMAL(IX,IWSEL)*INT2*GEOM(IG).FACES_AREA(IWSEL); % Midpt rule.
+      end
+
    
    end 
    
-   
-   
+   % Geometry Centroid:
+   for IX=IAXIS:KAXIS
+      GEOM(IG).GEOM_XYZCEN(IX) = SQAREA(IX) / (2. * GEOM(IG).GEOM_VOLUME);
+   end
    
 end
 

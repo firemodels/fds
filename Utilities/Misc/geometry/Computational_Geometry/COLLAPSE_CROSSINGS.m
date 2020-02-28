@@ -45,7 +45,6 @@ end
 % Computation of IBM_BDNUM_CRS_AUX requires knowledge of how many different
 % bodies reach an intersection:
 BODNUM = zeros(1,IBM_MAXCROSS_X2);
-COUNTED= zeros(1,IBM_MAXCROSS_X2);
 for IDCR=1:CRS_NUM(IBM_N_CRS)
     
     % Load body numbers:

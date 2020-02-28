@@ -217,7 +217,6 @@ for IG=1:N_GEOMETRY
             if (~FOUND_SEG); continue; end
          end
 
-
          % CCVAR edge number:
          if ( MESHES(NM).CCVAR(II2,JJ2,KK2,IBM_IDCE) > 0 ) % There is already
                                                                 % an entry in CUT_EDGE.
@@ -303,10 +302,7 @@ for CEI=EDGE_START:MESHES(NM).N_CUTEDGE_MESH
    if(~TWOBOD_EDG); continue; end   
          
    % Here we have cut-edges on the cell belonging to two or more bodies:
-   I = MESHES(NM).CUT_EDGE(CEI).IJK(IAXIS);
-   J = MESHES(NM).CUT_EDGE(CEI).IJK(JAXIS);
-   K = MESHES(NM).CUT_EDGE(CEI).IJK(KAXIS);
-   % First discard if CELLRT=true, we won't be using cut-edges:
+   % First discard if CELLRT=true, we won't be using cut-edges:    
    if (CELLRT(I,J,K)); continue; end
    
    % Now figure out which edges are inside other SOLIDS:
@@ -348,7 +344,6 @@ for CEI=EDGE_START:MESHES(NM).N_CUTEDGE_MESH
    MESHES(NM).CUT_EDGE(CEI).CEELEM(NOD1:NOD2,COUNT+1:NEDGE)=IBM_UNDEFINED;
    MESHES(NM).CUT_EDGE(CEI).INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,COUNT+1:NEDGE)=IBM_UNDEFINED;
 end
-
 
 ierr=0;
 

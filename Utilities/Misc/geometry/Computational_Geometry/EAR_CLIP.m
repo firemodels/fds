@@ -1,13 +1,13 @@
-function [NFACE, CCELEM, BODTRI] = EAR_CLIP(NSEG,NVERT,SEG_CELL,XYZVERT,...
+function [NFACE, CFELEM, BODTRI] = EAR_CLIP(NSEG,NVERT,SEG_CELL,XYZVERT,...
                                             INDIF,INDJF,INDKF,NPOLY,ILO_POLY,NSG_POLY)
 
-global IAXIS KAXIS
+global IAXIS JAXIS KAXIS
 global NOD1 NOD2 NOD3
 global GEOMEPS GEOM
 
 pltflg = false; 
 
-if(pltflg)
+if(pltflg) %&& INDIF==32+6 && INDJF==27+6 && INDKF==22+6
     figure
     subplot(1,2,1)
     hold on
@@ -139,7 +139,7 @@ for IPOLY=1:NPOLY
                     end
                     
                     NFACE = NFACE + 1;
-                    CCELEM(1:4,NFACE) = [3 CONN]';
+                    CFELEM(1:4,NFACE) = [3 CONN]';
                     BODTRI(:,NFACE)   = [BOD TRI]';
                     SEG_CELL2(:,ISEG) = [SEG_CELL2(1,ISEG) SEG_CELL2(2,ISEG1) 1 TRI 0 BOD]';
                     
@@ -163,7 +163,7 @@ for IPOLY=1:NPOLY
 
 end
 
-if(pltflg)
+if(pltflg) % && INDIF==32+6 && INDJF==27+6 && INDKF==22+6
     subplot(1,2,2)
     hold on
     for ISEG=1:NSEG
@@ -177,9 +177,9 @@ if(pltflg)
     end
     % Plot faces:
     for ICF=1:NFACE
-        XYZFC(:,NOD1)=XYZVERT(:,CCELEM(2,ICF));
-        XYZFC(:,NOD2)=XYZVERT(:,CCELEM(3,ICF));
-        XYZFC(:,NOD3)=XYZVERT(:,CCELEM(4,ICF));
+        XYZFC(:,NOD1)=XYZVERT(:,CFELEM(2,ICF));
+        XYZFC(:,NOD2)=XYZVERT(:,CFELEM(3,ICF));
+        XYZFC(:,NOD3)=XYZVERT(:,CFELEM(4,ICF));
         IG         =BODTRI(1,ICF);
         [hp]=patch(XYZFC(IAXIS,:),XYZFC(JAXIS,:),XYZFC(KAXIS,:),colr(IG,1:3));
         set(hp,'FaceAlpha',0.1)
