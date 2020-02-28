@@ -3,11 +3,11 @@ clear all
 clc
 
 % Declarations, call set constants:
-global MAX_DIM IAXIS JAXIS KAXIS NOD1 NOD2 NOD3 NOD4
+global MAX_DIM IAXIS JAXIS KAXIS NOD1 NOD2 NOD3 NOD4 
 global NMESHES MESHES BODINT_PLANE
 global IBM_N_CRS IBM_SVAR_CRS IBM_IS_CRS IBM_IS_CRS2 IBM_SEG_CRS IBM_SEG_TAN IBM_BDNUM_CRS IBM_BDNUM_CRS_AUX IBM_IS_CRS2_AUX
 global NM N_GEOMETRY GEOM IBM_INBOUNDARY IBM_INBOUNDCC IBM_INBOUNDCF IBM_CGSC IBM_CUTCFE
-global IBM_IDCF IBM_IDCE IBM_FGSC IBM_GASPHASE
+global IBM_IDCF IBM_IDCE IBM_FGSC IBM_IDCC IBM_GASPHASE
 global XCELL DXCELL XFACE DXFACE 
 global YCELL DYCELL YFACE DYFACE
 global ZCELL DZCELL ZFACE DZFACE
@@ -43,6 +43,7 @@ tstart = tic;
 [ierr]=SET_CUTCELLS_3D(basedir,casename,plot_cutedges);
 toc(tstart)
 
+
 figure
 hold on
 axis equal; box on;
@@ -68,7 +69,7 @@ for ICF=1:MESHES(NM).N_CUTFACE_MESH
        else
        [hp]=patch(XYZVERT(IAXIS,CFELEM),XYZVERT(JAXIS,CFELEM),XYZVERT(KAXIS,CFELEM),'b');
        end
-       %set(hp,'FaceAlpha',0.3) %,'EdgeAlpha',0.4) % .4  
+       set(hp,'FaceAlpha',0.3) %,'EdgeAlpha',0.4) % .4  
        
 %        X0 = 1/NELEM*sum(XYZVERT(IAXIS,CFELEM));
 %        Y0 = 1/NELEM*sum(XYZVERT(JAXIS,CFELEM));
@@ -108,6 +109,7 @@ for ICF=1:MESHES(NM).N_CUTFACE_MESH
 
 end
 
+return
 
 % Plot special cells:
 % disp(['N_SPCELL=' num2str(MESHES(NM).N_SPCELL)])

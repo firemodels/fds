@@ -13,7 +13,6 @@ global FACERT CELLRT
 
 ierr=1;
 
-
 % Segment by segment define the INBOUNDARY MESHES(NM).IBM_CUT_EDGES between crossings
 % and individualize the Cartesian face they belong to.    
 for ISEG=1:BODINT_PLANE.NSEGS
@@ -484,7 +483,6 @@ end
 for KK2=X3LO_CELL:X3HI_CELL
     for JJ2=X2LO_CELL:X2HI_CELL 
        if(~FACERT(JJ2,KK2)); continue; end
-       
        % Low cell indexes:
        INDXI(IAXIS:KAXIS) = [ INDX1(X1AXIS), JJ2, KK2 ]; % Local x1,x2,x3
        INDIF=INDXI(XIAXIS);
