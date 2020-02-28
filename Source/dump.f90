@@ -966,7 +966,7 @@ IF (TERRAIN_CASE) THEN
    DO J=0,M%JBAR
       DO I=0,M%IBAR
          IF (CC_IBM) THEN
-            Z_TERRAIN(I,J) = M%GEOM_ZMAX(I,J)
+            Z_TERRAIN(I,J) = REAL(M%GEOM_ZMAX(I,J),FB)
          ELSE
             Z_TERRAIN(I,J) = REAL(0.25_EB*(M%Z_LS(I,J)+M%Z_LS(I+1,J)+M%Z_LS(I,J+1)+M%Z_LS(I+1,J+1)),FB)
          ENDIF
@@ -977,7 +977,7 @@ IF (TERRAIN_CASE) THEN
       DO I=0,M%IBAR
          IF (OUT_OF_MESH(I,J)) THEN
             IF (OUT_OF_MESH(MIN(M%IBAR,I+1),J) .AND. OUT_OF_MESH(MAX(0,I-1),J) .AND. &
-                OUT_OF_MESH(I,MIN(M%JBAR,J+1)) .AND. OUT_OF_MESH(I,MAX(0,J-1))) Z_TERRAIN(I,J) = ZS_MIN - 2._EB
+                OUT_OF_MESH(I,MIN(M%JBAR,J+1)) .AND. OUT_OF_MESH(I,MAX(0,J-1))) Z_TERRAIN(I,J) = REAL(ZS_MIN-2._EB,FB)
          ENDIF
       ENDDO
    ENDDO
