@@ -1191,7 +1191,7 @@ IF (LPC%SOLID_PARTICLE) THEN
 
          IF (SF%THERMALLY_THICK) THEN
             SELECT CASE (SF%GEOMETRY)
-               CASE (SURF_CARTESIAN)
+               CASE (SURF_CARTESIAN,SURF_BLOWING_PLATE)
                   DO N=1,SF%N_LAYERS
                      LP%MASS = LP%MASS + 2._EB*SF%LENGTH*SF%WIDTH*SF%LAYER_THICKNESS(N)*SCALE_FACTOR*SF%LAYER_DENSITY(N)
                   ENDDO
@@ -2668,7 +2668,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
 
                T_BOIL_EFF = SS%TMP_V
                CALL GET_EQUIL_DATA(MW_DROP,TMP_DROP,PBAR(KK,PRESSURE_ZONE(II,JJ,KK)),H_V2,H_V_A,T_BOIL_EFF,X_EQUIL,&
-                                   H_V_LOWER=LBOUND(SS%H_V,1),H_V_DATA=SS%H_V)               
+                                   H_V_LOWER=LBOUND(SS%H_V,1),H_V_DATA=SS%H_V)
                Y_EQUIL  = X_EQUIL/(MW_RATIO + (1._EB-MW_RATIO)*X_EQUIL)
 
                ! Limit drop temperature decrease
