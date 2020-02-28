@@ -316,7 +316,7 @@ TYPE TRIBIN_TYPE
    INTEGER :: NTL
    INTEGER, ALLOCATABLE, DIMENSION(:) :: TRI_LIST
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: XYZV
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: FACECUBE
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: FACECUBE
 END TYPE TRIBIN_TYPE
 
 TYPE TBAXIS_TYPE
@@ -379,7 +379,7 @@ END TYPE IBM_EDGECROSS_TYPE
 
 ! Cartesian Edge Cut-Edges data structure:
 TYPE IBM_CUTEDGE_TYPE
-   INTEGER :: NVERT, NEDGE, STATUS            ! Local Vertices, cut-edges and status of this Cartesian edge.
+   INTEGER :: NVERT, NEDGE, NEDGE1, STATUS         ! Local Vertices, cut-edges and status of this Cartesian edge.
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)           :: XYZVERT  ! Locations of vertices.
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)           ::  CEELEM  ! Cut-Edge connectivities.
    INTEGER,  DIMENSION(MAX_DIM+2)                  ::     IJK  ! [ i j k X2AXIS cetype]
