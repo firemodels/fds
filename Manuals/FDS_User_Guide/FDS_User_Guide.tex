@@ -4993,8 +4993,10 @@ The FDS predictions based on the {\ct 'EXTINCTION~2'} model (right) confirm that
 
 By default, FDS employs either the {\ct 'EXTINCTION 1'} or {\ct 'EXTINCTION 2'} model to determine if combustion is viable. If local extinction occurs, the unburned fuel gas can re-ignite if it mixes with sufficient oxygen elsewhere in the domain, even if this re-ignition might not happen in reality because the temperature might be too low to sustain combustion. To prevent spurious re-ignition from happening, you can set the {\ct AUTO\_IGNITION\_TEMPERATURE} (AIT) on the {\ct REAC} line or the {\ct COMB} line, in \si{\degree C}, below which combustion will not occur.  For most fuels of interest, the AIT may be found in Beyler's chapter of the SFPE Handbook~\cite{SFPE:Beyler}. The default AIT is $-273 \; ^\circ$C, meaning that fuel and oxygen will burn when mixed providing that either of the extinction models allows combustion to occur.
 
-The value of AIT may need to be lowered for cases where the grid size is greater than 10~cm. The purpose of AIT is simply to prevent fuel and oxygen from spontaneously igniting, which is the default behavior of FDS. If an AIT is specified, then you must also specify some form of heat/ignition source must be present to start the fire; or you can specify the real sextuplet {\ct AIT\_EXCLUSION\_ZONE} on either the {\ct COMB} or {\ct REAC} line to designate a volume in which ignition occurs spontaneously even when the AIT is enforced everywhere else.
-
+The value of AIT may need to be lowered for cases where the grid size is greater than 10~cm. The purpose of AIT is simply to prevent fuel and oxygen from spontaneously igniting, which is the default behavior of FDS. If an AIT is specified, then you must also specify some form of heat/ignition source must be present to start the fire; or you can specify the real sextuplet {\ct AIT\_EXCLUSION\_ZONE} on either the {\ct COMB} or {\ct REAC} line to designate a volume in which ignition occurs spontaneously even when the AIT is enforced everywhere else. Note that you can specify multiple exclusion zones as follows:
+\begin{lstlisting}
+&REAC ..., AIT_EXCLUSION_ZONE(1:6,1)=..., AIT_EXCLUSION_ZONE(1:6,2)=... /
+\end{lstlisting}
 
 
 \section{Complex Stoichiometry}
@@ -9746,7 +9748,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 \multicolumn{5}{|c|}{{\ct COMB} (General combustion parameters)} \\
 \hline \hline
 \endhead
-{\ct AIT\_EXCLUSION\_ZONE(6)}         & Real Arra  & Section~\ref{info:ignition}                  & m         &                      \\ \hline
+{\ct AIT\_EXCLUSION\_ZONE(6,:)}       & Real Array & Section~\ref{info:ignition}                  & m         &                      \\ \hline
 {\ct AUTO\_IGNITION\_TEMPERATURE}     & Real       & Section~\ref{info:ignition}                  & $^\circ$C &  -273 $^\circ$C      \\ \hline
 {\ct CHECK\_REALIZABILITY}            & Logical    & Section~\ref{info:chem_integration}          &           & {\ct .FALSE.}        \\ \hline
 {\ct EXTINCTION\_MODEL}               & Character  & Section~\ref{info:extinction}                &           & {\ct 'EXTINCTION 2'} \\ \hline
@@ -10836,7 +10838,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hline \hline
 \endhead
 {\ct A}                                   & Real           & Section~\ref{info:finite}                 &                   &                   \\ \hline
-{\ct AIT\_EXCLUSION\_ZONE(6)}             & Real Sextuplet & Section~\ref{info:ignition}               & m                 &                   \\ \hline
+{\ct AIT\_EXCLUSION\_ZONE(6,:)}           & Real Array     & Section~\ref{info:ignition}               & m                 &                   \\ \hline
 {\ct AUTO\_IGNITION\_TEMPERATURE}         & Real           & Section~\ref{info:ignition}               & $^\circ$C         & -273 $^\circ$C    \\ \hline
 {\ct C}                                   & Real           & Section~\ref{info:simple_chemistry}       &                   & 0                 \\ \hline
 {\ct CHECK\_ATOM\_BALANCE}                & Logical        & Section~\ref{info:REAC_Diagnostics}       &                   & {\ct .TRUE.}      \\ \hline
