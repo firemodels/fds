@@ -15,7 +15,7 @@
 
 &SPEC ID='WATER VAPOR' /
 
-&REAC FUEL       = 'N-HEPTANE', AUTO_IGNITION_TEMPERATURE=-273., AIT_EXCLUSION_ZONE=3.4,3.6,1.8,2.2,0.8,1.1
+&REAC FUEL       = 'N-HEPTANE'
       FYI        = 'Heptane, C_7 H_16'
       CO_YIELD   = 0.006
       SOOT_YIELD = 0.015 /
