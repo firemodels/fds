@@ -21,7 +21,6 @@ global basedir
 
 global ISPCELL SPCELL_LIST
 
-
 plotflg = false;
 
 ierr=1;
@@ -318,7 +317,6 @@ end
                            INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,COUNT+1:FNEDGE)=IBM_UNDEFINED;
                            FNEDGE = COUNT;
                      
-                           
                            % Here ADD nodes and vertices to what is already
                            % there:
                            if (CEI == 0) % We need a new entry in CUT_EDGE
@@ -412,7 +410,6 @@ else
    JLO = JLO_CELL-CCGUARD; JHI = JHI_CELL+CCGUARD;
    KLO = KLO_CELL-CCGUARD; KHI = KHI_CELL+CCGUARD;
 end
-
 % Loop on Cartesian cells, define cut cells and solid cells IBM_CGSC:
 for K=KLO:KHI
    for J=JLO:JHI
@@ -676,6 +673,7 @@ for K=KLO:KHI
             NSEG_LEFT = NSEG_FACE - 1;
             CTR = 0;
             % Infinite Loop:
+            CYCLE_CELL=false;
             while(1)
                for ISEG_FACE=1:NSEG_FACE
 
@@ -705,7 +703,6 @@ for K=KLO:KHI
                CTR = CTR + 1;
 
                % Plot cell and cut-faces if there is no convergence:
-               CYCLE_CELL=false;
                if ( CTR > NSEG_FACE^3 )
                    
                       %disp(['Error GET_CARTCELL_CUTFACES: ctr > nseg_face^3 ,' num2str(BNDINT_FLAG) ',' ...
@@ -933,15 +930,13 @@ for K=KLO:KHI
              if (BNDINT_FLAG)
                 MESHES(NM).N_CUTFACE_MESH = NCUTFACE;
              else
-                MESHES(NM).N_GCCUTFACE_MESH = MESHES(NM).N_GCCUTFACE_MESH + 1;
+                MESHES(NM).N_GCCUTFACE_MESH = MESHES(NM).N_GCCUTFACE_MESH - 1;
              end
 
          end
       end % I
    end % J
 end % K
-
-
 
 % Now process special cells of type CELLRT=T:
 % Loop on Cartesian cells, define cut cells and solid cells IBM_CGSC:
@@ -950,19 +945,9 @@ for K=KLO:KHI
       for I=ILO:IHI
 
          if ( MESHES(NM).CCVAR(I,J,K,IBM_CGSC) ~= IBM_CUTCFE ); continue; end
-
          if (~CELLRT(I,J,K)); continue; end; % Special cell with bod-bod or self intersection.
-
          if (IJK_COUNT(I,J,K)); continue; end; IJK_COUNT(I,J,K)=true;
          
-         % Face type of bounding Cartesian faces:
-         FSID_XYZ(LOW_IND ,IAXIS) = MESHES(NM).FCVAR(I-FCELL  ,J,K,IBM_FGSC,IAXIS);
-         FSID_XYZ(HIGH_IND,IAXIS) = MESHES(NM).FCVAR(I-FCELL+1,J,K,IBM_FGSC,IAXIS);
-         FSID_XYZ(LOW_IND ,JAXIS) = MESHES(NM).FCVAR(I,J-FCELL  ,K,IBM_FGSC,JAXIS);
-         FSID_XYZ(HIGH_IND,JAXIS) = MESHES(NM).FCVAR(I,J-FCELL+1,K,IBM_FGSC,JAXIS);
-         FSID_XYZ(LOW_IND ,KAXIS) = MESHES(NM).FCVAR(I,J,K-FCELL  ,IBM_FGSC,KAXIS);
-         FSID_XYZ(HIGH_IND,KAXIS) = MESHES(NM).FCVAR(I,J,K-FCELL+1,IBM_FGSC,KAXIS);
-
          % Start cut-cell INB cut-faces computation:
          % Loop local arrays to cell:
          NSEG      = 0;
@@ -1037,6 +1022,7 @@ for K=KLO:KHI
                end
             end
          end
+
          % Drop segments that are unconnected:
          VERT_SEGS = zeros(1,NVERT);
          for IDUM = 1:NSEG    
@@ -1060,7 +1046,6 @@ for K=KLO:KHI
          % 1. Define closed 3D polyline:
          [IFLG,NPOLY,ILO_POLY,NSG_POLY,NSEG,SEG_CELL,SEG_POS]=GET_CLOSED_POLYLINES(NSEG,SEG_CELL,SEG_POS);
 
-         
          % Figure:
          if (plotflg || (IFLG ~=0))
          scrsz = get(groot,'ScreenSize');
@@ -1113,7 +1098,6 @@ for K=KLO:KHI
              SEG_CELL
              XYZVERT
          end
-         
          if (plotflg || (IFLG ~=0))
          a=0.01;
          subplot(1,3,2)
@@ -1218,7 +1202,7 @@ for K=KLO:KHI
              pause
              close
          end
-         
+
          % This is a cut-face, allocate space:
          NCUTFACE = MESHES(NM).N_CUTFACE_MESH + MESHES(NM).N_GCCUTFACE_MESH + 1;
          if (BNDINT_FLAG)
@@ -1236,7 +1220,7 @@ for K=KLO:KHI
          % Assign surf-index: Depending on GEOMETRY:
          NCF = 0;
          for ICF=1:NFACE
-            IBOD = BOD_TRI(1); ITRI = BOD_TRI(2);
+            IBOD = BOD_TRI(1,ICF); ITRI = BOD_TRI(2,ICF);
  
             % Area properties for special cfaces:            
             % Computed from the cross product:
@@ -1246,6 +1230,7 @@ for K=KLO:KHI
                   XYZVERT(IAXIS:KAXIS,CFELEM(1+NOD1,ICF));  
             NORMTRI(IAXIS:KAXIS) = cross(D12',D23'); 
             NNORM                = norm(NORMTRI);
+            if (NNORM < 2.*GEOMEPS^2.); continue; end
             NORMTRI(IAXIS:KAXIS) = NORMTRI(IAXIS:KAXIS) / NNORM;
                                 
             % First test if INB face is on Cartesian face and pointing
@@ -1295,7 +1280,7 @@ for K=KLO:KHI
             
             MESHES(NM).CUT_FACE(NCUTFACE).AREA(NCF) = AREA;
             MESHES(NM).CUT_FACE(NCUTFACE).XYZCEN(IAXIS:KAXIS,NCF) = ACEN(IAXIS:KAXIS)';
-
+            
             % Fields for cut-cell volume/centroid computation:
             % dot(i,nc)*int(x)dA:
             MESHES(NM).CUT_FACE(NCUTFACE).INXAREA(NCF)   = INXAREA;
@@ -1322,9 +1307,6 @@ for K=KLO:KHI
       end % I
    end % J
 end % K
-
-
-%if (~BNDINT_FLAG) DEALLOCATE(IJK_COUNT)
 
 
 ierr=0;

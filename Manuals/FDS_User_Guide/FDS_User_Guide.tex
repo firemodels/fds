@@ -5000,8 +5000,10 @@ The FDS predictions based on the {\ct 'EXTINCTION~2'} model (right) confirm that
 
 By default, FDS employs either the {\ct 'EXTINCTION 1'} or {\ct 'EXTINCTION 2'} model to determine if combustion is viable. If local extinction occurs, the unburned fuel gas can re-ignite if it mixes with sufficient oxygen elsewhere in the domain, even if this re-ignition might not happen in reality because the temperature might be too low to sustain combustion. To prevent spurious re-ignition from happening, you can set the {\ct AUTO\_IGNITION\_TEMPERATURE} (AIT) on the {\ct REAC} line or the {\ct COMB} line, in \si{\degree C}, below which combustion will not occur.  For most fuels of interest, the AIT may be found in Beyler's chapter of the SFPE Handbook~\cite{SFPE:Beyler}. The default AIT is $-273 \; ^\circ$C, meaning that fuel and oxygen will burn when mixed providing that either of the extinction models allows combustion to occur.
 
-The value of AIT may need to be lowered for cases where the grid size is greater than 10~cm. The purpose of AIT is simply to prevent fuel and oxygen from spontaneously igniting, which is the default behavior of FDS. If an AIT is specified, then you must also specify some form of heat/ignition source must be present to start the fire; or you can specify the real sextuplet {\ct AIT\_EXCLUSION\_ZONE} on either the {\ct COMB} or {\ct REAC} line to designate a volume in which ignition occurs spontaneously even when the AIT is enforced everywhere else.
-
+The value of AIT may need to be lowered for cases where the grid size is greater than 10~cm. The purpose of AIT is simply to prevent fuel and oxygen from spontaneously igniting, which is the default behavior of FDS. If an AIT is specified, then you must also specify some form of heat/ignition source must be present to start the fire; or you can specify the real sextuplet {\ct AIT\_EXCLUSION\_ZONE} on either the {\ct COMB} or {\ct REAC} line to designate a volume in which ignition occurs spontaneously even when the AIT is enforced everywhere else. Note that you can specify multiple exclusion zones as follows:
+\begin{lstlisting}
+&REAC ..., AIT_EXCLUSION_ZONE(1:6,1)=..., AIT_EXCLUSION_ZONE(1:6,2)=... /
+\end{lstlisting}
 
 
 \section{Complex Stoichiometry}
@@ -6462,7 +6464,7 @@ The side boundaries of the domain can be set either to {\ct 'OPEN'} or {\ct 'PER
 \subsubsection{Example Wind Simulation}
 \label{wind_example}
 
-An input file called {\ct wind\_example.fds} in the {\ct Atmospheric\_Effects} folder provides an example of a wind simulation. The computational domain is a flat landscape that is 1~km by 1~km by 100~m high. There are various rectangular blocks scattered about to represent buildings. The wind speed varies with height as shown in the first plot of Fig.~\ref{wind_profiles}. The wind also turns a full 360$^\circ$ in 50~s, starting and ending in the westerly direction (270$^\circ$). This turn of the wind is not realistic, but this case is intended to test the ramp and mean forcing functionality. The plots in Fig.~\ref{wind_example_fig} display some results of the simulation. On the left is a plot showing the mean velocity components of the simulated wind field compared to the specified (ideal) values. Notice that the simulated wind field lags the specified field by roughly 1~s because the relaxation parameter {\ct DT\_MEAN\_FORCING} is set to 1~s by default. The right hand plot of Fig.~\ref{wind_example_fig} displays the specified vertical wind speed profile compared to the simulation after the wind has turned full circle. The two profiles should be roughly aligned to indicate that the lateral boundary conditions of the mean forcing scheme are working properly.
+The input files called {\ct wind\_example.fds} and {\ct wind\_example\_32.fds} in the samples folder called \linebreak[4]{\ct Atmospheric\_Effects} demonstrate wind functionality. The first case uses 8 meshes; the second 32. The computational domain is a flat landscape that is 1~km by 1~km by 100~m high. There are various rectangular blocks scattered about to represent buildings. The wind speed varies with height as shown in the right hand plot of Fig.~\ref{wind_profiles}. The wind also turns a full 360$^\circ$ in 50~s, starting and ending in the westerly direction (270$^\circ$). This turn of the wind is not realistic, but this case is intended to test the ramp and mean forcing functionality. The plots in Fig.~\ref{wind_example_fig} display some results of the simulation. On the left is a plot showing the mean velocity components of the simulated wind field compared to the specified components. Notice that the simulated wind field lags the specified field by roughly 1~s because the relaxation parameter {\ct DT\_MEAN\_FORCING} is set to 1~s by default. The right hand plot of Fig.~\ref{wind_example_fig} displays the specified vertical wind speed profile compared to the computed time average profile. The two profiles should be the same because FDS is ``forcing'' the simulated vertical wind speed profile averaged over the entire domain to match the user-specified profile.
 
 \begin{figure}[ht]
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/wind_example_time}
@@ -6518,15 +6520,21 @@ There is no sense of ``indoor'' or ``outdoor'' in an FDS simulation; there are o
 \subsection{The Mean Forcing Concept}
 \label{info:SPONGE_CELLS}
 
-The process of steering the solution of the mass, momentum, and energy equations to match wind speed and direction gathered at random weather stations is known as \emph{data assimilation}~\cite{Kalnay:2003}. FDS uses a relatively simple data assimilation technique, a method known as \emph{nudging}, where you add a mean forcing term to the momentum equation to ``nudge'' the flow in the direction of the specified wind.  Currently, FDS can only affect the mean flow velocities. If you specify a wind {\ct SPEED} on the {\ct WIND} line, FDS will automatically drive the mean velocity components toward the desired values by adding a forcing term to the momentum equation:
+The process of steering the solution of the mass, momentum, and energy equations to match wind speed and direction gathered at random weather stations is known as \emph{data assimilation}~\cite{Kalnay:2003}. FDS uses a relatively simple data assimilation technique, a method known as \emph{nudging}, where you add a forcing term to the momentum equation to ``nudge'' the flow in the direction of the specified wind. When you specify a wind {\ct SPEED} on the {\ct WIND} line, FDS automatically drives the mean velocity components toward the desired values by adding a forcing term to the momentum equation. For example, the $u$ component equation is modified as follows:
 \be
-   \dod{u_i}{t} + \ldots = \frac{u_{i,{\rm spec}}(z,t)-\overline{u_i}}{\tau}
+   \dod{u}{t} + \ldots = \frac{u_0(z,t)-\overline{u}(z,t)}{\tau} \label{mean_forcing_u}
 \ee
-Here, $u_i$ is the computed velocity component, $u_{i,{\rm spec}}$ is the specified wind field component that can vary with height and time, and $\overline{u_i}$ is the average of the computed velocity component at the height $z$. The relaxation time scale, $\tau$, is an input parameter called {\ct DT\_MEAN\_FORCING} whose default value is 1~s. The shorter this time scale, the faster the flow field will ``catch up'' to the mean wind, but at the expense of possibly washing out important flow structures. Try several values of this time scale for your particular simulation to determine what is appropriate for your case. There is no firm guidance in the atmospheric modeling literature.
+Here, $u(\bx,t)$ is the computed velocity component, $u_0$ is the specified wind field component that can vary with height and time, and $\overline{u}$ is the average of the computed velocity component at the height $z$. The relaxation time scale, $\tau$, is an input parameter called {\ct DT\_MEAN\_FORCING} whose default value is 1~s. The shorter this time scale, the faster the flow field will ``catch up'' to the mean wind, but at the expense of possibly washing out important flow structures. Try several values of this time scale for your particular simulation to determine what is appropriate for your case. There is no firm guidance in the atmospheric modeling literature.
 
 Note that if instead of specifying the wind {\ct SPEED}, you specify its components, {\ct U0} and {\ct V0} (rarely would you use {\ct W0}), FDS will {\em not} automatically assert mean forcing, but rather just initialize the flow field to these constant values of velocity. If you want to override this behavior, you can direct FDS to assert meaning forcing in all coordinate directions by setting {\ct MEAN\_FORCING=.TRUE.}, or you can assert mean forcing in the $x$, $y$, or $z$ directions using {\ct MEAN\_FORCING(N)=.TRUE.} where {\ct N} is set to 1, 2, or 3, respectively.
 
 When simulating a wind with {\ct OPEN} boundaries, you might notice spurious velocity patterns at the downstream edge of the computational domain. These are artifacts related to the mean forcing function and the application of open boundary conditions at the external faces of the domain. To reduce spurious artifacts at external open wind boundaries, FDS forces both the normal and tangential components of the velocity towards that of the mean wind field at the side and top boundaries, which is why you should ensure that your obstructions are reasonably far from the boundaries. Some suggest that the top, upstream, and lateral boundaries extend outward 5 times the characteristic height of the buildings, and the downstream boundary extend 15 times the height. It is also suggested that the cross sectional area of obstructions be less than 3~\% of the total cross sectional area. However, these recommendations might be overly restrictive. It is suggested that you investigate different domain dimensions to ensure that they do not affect the outcome of your simulation. If you see spurious flow activity at external boundaries, consider increasing the ``sponge layer'' that FDS automatically builds around the exterior lateral boundaries. There is a parameter called {\ct SPONGE\_CELLS}, which is the number of grid cells at the exterior boundary where FDS aggressively forces the velocity to conform with the mean wind field. Within the domain interior, the ``nudging'' or mean forcing is less aggressive. The default value of {\ct SPONGE\_CELLS} is 3, meaning that aggressive forcing is employed in the nearest 3 grid cells adjacent to the $x$ and $y$ exterior boundaries.
+
+You can output any of the three components of the wind velocity profile averaged over the entire domain (for example, $\overline{u}$ in Eq.~(\ref{mean_forcing_u})), using the input line:
+\begin{lstlisting}
+&DEVC XB=..., POINTS=20, QUANTITY='U MEAN FORCING', Z_ID='z', ID='u' /
+\end{lstlisting}
+The parameter {\ct XB} consists of six coordinates $(x_1,x_2,y_1,y_2,z_1,z_2)$. Only the $z$ values matter, but $x_1$ and $x_2$ should be the same and within the domain. The same is true for the $y$ values. The output, written to the {\ct CHID\_line.csv} file, is a vertical profile of the given velocity component averaged over a time period controlled by {\ct STATISTICS\_START} and {\ct STATISTICS\_END}. The default values are ({\ct T\_END}$-${\ct T\_BEGIN})/2 and {\ct T\_END}, respectively.
 
 
 
@@ -6911,9 +6919,9 @@ In the example, 1~kg of wet pine needles occupy 1~m$^3$. The number of particles
 \subsection{Boundary Fuel Model}
 \label{info:boundary_fuel_model}
 
-In many simulations of wildland fire, the ground vegetation is too thin to be resolved explicitly, as is done when using Lagrangian particles to represent the vegetation. In such cases, the ground vegetation can be modeled as a porous boundary consisting of a layer of dry vegetation, moisture and air, underneath of which is hard ground. The drag exerted by the vegetation is modeled using a special velocity boundary condition, and convective heat transfer is modeled via a source term in the one-dimensional heat conduction equation that is solved through the layer of vegetation and solid ground. Thermal radiation penetrates the vegetation layer via a 1-D radiative transport equation that is used for semi-transparent solids.
+In many simulations of wildland fire, the ground vegetation layer is too thin to be resolved explicitly, as is done when using Lagrangian particles to represent the vegetation. In such cases, the ground vegetation can be modeled as a porous boundary consisting of a layer of dry vegetation, moisture, and air, underneath of which is hard ground~\cite{Perez-Ramirez:FT2017}. The drag exerted by the vegetation is modeled using a special velocity boundary condition, and convective heat transfer is modeled via a source term in the one-dimensional heat conduction equation that is solved through the layer of vegetation and solid ground. Thermal radiation penetrates the vegetation layer via a 1-D radiative transport equation that is used for semi-transparent solids.
 
-To invoke this {\em Boundary Fuel Model}, you need to generate a {\ct SURF} line similar to the following:
+To invoke this {\em Boundary Fuel Model}, create a {\ct SURF} line similar to the following:
 \begin{lstlisting}
 &SURF ID = 'Ground Vegetation'
       MATL_ID(1,1) = 'Dry Vegetation'
@@ -9556,6 +9564,9 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 %{\ct TOTAL MASS FLUX X} & $\overline{\rho Y_\alpha} u + \rho D_\alpha \partial Y_\alpha/\partial x$ & kg/s/m$^2$     & D,I,P,S      \\ \hline
 %{\ct TOTAL MASS FLUX Y} & $\overline{\rho Y_\alpha} v + \rho D_\alpha \partial Y_\alpha/\partial y$ & kg/s/m$^2$     & D,I,P,S      \\ \hline
 %{\ct TOTAL MASS FLUX Z} & $\overline{\rho Y_\alpha} w + \rho D_\alpha \partial Y_\alpha/\partial z$ & kg/s/m$^2$     & D,I,P,S      \\ \hline
+{\ct U MEAN FORCING}                            & Section~\ref{info:SPONGE_CELLS}                   &  m/s           & D            \\ \hline
+{\ct V MEAN FORCING}                            & Section~\ref{info:SPONGE_CELLS}                   &  m/s           & D            \\ \hline
+{\ct W MEAN FORCING}                            & Section~\ref{info:SPONGE_CELLS}                   &  m/s           & D            \\ \hline
 {\ct VELOCITY ERROR}                            & Section~\ref{info:PRES}                           &                & B            \\ \hline
 {\ct VISCOUS STRESS WALL}                       & Section~\ref{info:distributed_forces}        &    Pa       &  B,D        \\ \hline
 {\ct VISCOUS WALL UNITS}                        & Section~\ref{info:yplus}                          &                & B,D          \\ \hline
@@ -9656,6 +9667,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 % ignorenamelistkw: /PRES/SCARC_PRECON_ITERATIONS, /PRES/SCARC_PRECON_ACCURACY, /PRES/SCARC_PRECON_OMEGA
 % ignorenamelistkw: /PRES/SCARC_COARSE_ITERATIONS, /PRES/SCARC_COARSE_ACCURACY
 % ignorenamelistkw: /PROP/BEAD_DENSITY, /PROP/BEAD_DIAMETER, /PROP/BEAD_EMISSIVITY, /PROP/BEAD_HEAT_TRANSFER_COEFFICIENT, /PROP/BEAD_SPECIFIC_HEAT, /PROP/DROPLET_VELOCITY
+% ignorenamelistkw: /SLCF/RLE_MIN, /SLCF/RLE_MAX, /SLCF/SLICETYPE
 % ignorenamelistkw: /SURF/EXTERNAL_FLUX_RAMP, /SURF/TAU_EXTERNAL_FLUX, /SURF/VOLUME_FLUX
 % ignorenamelistkw: /TIME/TWFIN
 % ignorenamelistkw: /WIND/MEAN_FORCING, /WIND/OBUKHOV_LENGTH, /WIND/REFERENCE_HEIGHT, /WIND/REFERENCE_TEMPERATURE
@@ -9748,7 +9760,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 \multicolumn{5}{|c|}{{\ct COMB} (General combustion parameters)} \\
 \hline \hline
 \endhead
-{\ct AIT\_EXCLUSION\_ZONE(6)}         & Real Arra  & Section~\ref{info:ignition}                  & m         &                      \\ \hline
+{\ct AIT\_EXCLUSION\_ZONE(6,:)}       & Real Array & Section~\ref{info:ignition}                  & m         &                      \\ \hline
 {\ct AUTO\_IGNITION\_TEMPERATURE}     & Real       & Section~\ref{info:ignition}                  & $^\circ$C &  -273 $^\circ$C      \\ \hline
 {\ct CHECK\_REALIZABILITY}            & Logical    & Section~\ref{info:chem_integration}          &           & {\ct .FALSE.}        \\ \hline
 {\ct EXTINCTION\_MODEL}               & Character  & Section~\ref{info:extinction}                &           & {\ct 'EXTINCTION 2'} \\ \hline
@@ -10838,7 +10850,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hline \hline
 \endhead
 {\ct A}                                   & Real           & Section~\ref{info:finite}                 &                   &                   \\ \hline
-{\ct AIT\_EXCLUSION\_ZONE(6)}             & Real Sextuplet & Section~\ref{info:ignition}               & m                 &                   \\ \hline
+{\ct AIT\_EXCLUSION\_ZONE(6,:)}           & Real Array     & Section~\ref{info:ignition}               & m                 &                   \\ \hline
 {\ct AUTO\_IGNITION\_TEMPERATURE}         & Real           & Section~\ref{info:ignition}               & $^\circ$C         & -273 $^\circ$C    \\ \hline
 {\ct C}                                   & Real           & Section~\ref{info:simple_chemistry}       &                   & 0                 \\ \hline
 {\ct CHECK\_ATOM\_BALANCE}                & Logical        & Section~\ref{info:REAC_Diagnostics}       &                   & {\ct .TRUE.}      \\ \hline
@@ -10904,9 +10916,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct QUANTITY}          & Character         & Section~\ref{info:outputquantities}       &           &                   \\ \hline
 {\ct QUANTITY2}         & Character         & Section~\ref{info:outputquantities}       &           &                   \\ \hline
 {\ct REAC\_ID}          & Character         & See {\ct QUANTITY=`HRRPUV REAC`}          &           &                   \\ \hline
-%{\ct RLE\_MIN}          & Real              &                                           &           &                   \\ \hline
-%{\ct RLE\_MAX}          & Real              &                                           &           &                   \\ \hline
-%{\ct SLICETYPE}         & Character         &                                           &           &                   \\ \hline
 {\ct SPEC\_ID}          & Character         & Section~\ref{info:outputquantities}       &           &                   \\ \hline
 {\ct VECTOR}            & Logical           & Section~\ref{info:SLCF}                   &           & {\ct .FALSE.}     \\ \hline
 {\ct VELO\_INDEX}       & Integer           & Section~\ref{info:velocity}               &           & 0                 \\ \hline

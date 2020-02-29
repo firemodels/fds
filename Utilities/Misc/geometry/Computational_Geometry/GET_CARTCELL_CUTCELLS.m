@@ -373,6 +373,7 @@ for K=KLO:KHI
          CTVAL2       = 0;
          MAXSEG       = max(FACE_CELL(1,1:NFACE_CELL));
          THRES        = (MAXSEG*NFACE_CELL)^2;
+         CYCLE_CELL   =false;
          % Now double infinite loops:
          while(1)
             CTVAL        = 0;
@@ -440,6 +441,8 @@ for K=KLO:KHI
                CTVAL = CTVAL + 1;
                if CTVAL > THRES
                    disp(['Inner Stuck cell = ' num2str(I) ',' num2str(J) ',' num2str(K)])
+                   CYCLE_CELL=true;
+                   break
                end
 
             end
@@ -464,10 +467,12 @@ for K=KLO:KHI
                       ', NFACE_CELL=' num2str(NFACE_CELL) ', NUM_FACE=' num2str(NUM_FACE)])
                 FACECELL_NUM(1:NFACE_CELL)
                 FACE_LIST(:,1:NFACE_CELL)'
-                pause
+                CYCLE_CELL=true;
+                pause(1)
             end
-
+            if(CYCLE_CELL); break; end
          end
+         if(CYCLE_CELL); break; end
 
          % Create CCELEM array:
          NCELL = max(FACECELL_NUM(:));
