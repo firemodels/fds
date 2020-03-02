@@ -136,6 +136,10 @@ TYPE MESH_TYPE
    ! Array with maximum height (Z) of geometry intersections with vertical grid lines in the mesh.
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: GEOM_ZMAX
 
+   ! Arrays for special cut-cells:
+   INTEGER :: N_SPCELL=0
+   INTEGER, ALLOCATABLE, DIMENSION(:,:) :: SPCELL_LIST
+
    !---------------------- END: CC_IBM mesh Arrays ------------------------------------------
 
    INTEGER :: N_WALL_CELLS,N_WALL_CELLS_DIM,N_INTERNAL_WALL_CELLS,N_EXTERNAL_WALL_CELLS,WALL_COUNTER,WALL_COUNTER_HT3D
