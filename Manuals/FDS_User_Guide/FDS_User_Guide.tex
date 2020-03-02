@@ -4701,6 +4701,13 @@ The logical parameter {\ct LUMPED\_COMPONENT\_ONLY} indicates that the species i
 When defining a lumped species, either {\ct MASS\_FRACTION} or {\ct VOLUME\_FRACTION} must be used to define the component species. The addition of lumped species to FDS has changed the meaning of {\ct SPEC\_ID} on some FDS inputs.  For {\ct INIT},
 {\ct MATL}, {\ct PART}, and {\ct SURF}, {\ct SPEC\_ID} refers to either a tracked primitive species or a lumped species.  For outputs and devices, {\ct DEVC}, that require a {\ct SPEC\_ID}, the {\ct SPEC\_ID} input can refer to either a tracked primitive species, a lumped species, or a lumped species component that is not tracked.  For {\ct REAC} see the discussion on specifying reactions in Chapter~\ref{info:REAC}.
 
+It is possible to create a separately tracked copy of a lumped species by using {\ct COPY\_LUMPED}. For example, if in Example 2 above one added the line:
+
+\begin{lstlisting}
+&SPEC ID='AIR2', COPY_LUMPED=.TRUE., SPEC_ID='AIR'/
+\end{lstlisting}
+then FDS would create a copy of the {\ct AIR} lumped species called {\ct AIR2}.
+
 \subsection{Combining Lumped and Primitive Species}
 
 There are cases where you may wish to have a single primitive species be both part of a lumped species and also a separately tracked species.  For example, when using simple chemistry, Section~\ref{info:simple_chemistry}, FDS will include water vapor in the product species and in the air background species.  If you also wish to have sprinklers in the simulation, then you will need to track water vapor from the sprinklers separately from that in the air or products.  This is simply done by adding the line:
@@ -5441,6 +5448,8 @@ If you have multiple reactions with widely ranging time-scales, you might want t
 
 It is possible within FDS to model the deposition of smoke and aerosols onto solid surfaces. The aerosol deposition model is invoked by defining a species with the parameter {\ct AEROSOL=.TRUE.} on the {\ct SPEC} line along with the parameters {\ct DENSITY\_SOLID}, {\ct CONDUCTIVITY\_SOLID}, and {\ct MEAN\_DIAMETER}. By default, with {\ct AEROSOL=.TRUE.}, FDS will compute all of the aerosol deposition mechanisms discussed in the Technical Reference Guide~\cite{FDS_Math_Guide}. For diagnostic purposes, each surface deposition mechanism can be selectively disabled by using the logical parameters {\ct GRAVITATIONAL\_DEPOSITION}, {\ct THERMOPHORETIC\_DEPOSITION}, and {\ct TURBULENT\_DEPOSITION}. All surface deposition can be disabled by the logical parameter {\ct DEPOSITION}. In the gas phase, aerosol transport is affected by gravity and temperature gradients. These effects can be selectively disabled with {\ct GRAVITATIONAL\_SETTLING} and {\ct THERMOPHORETIC\_SETTLING}. All the deposition parameters are on the {\ct MISC} line.  The deposition velocity at the wall can be output using the solid phase output {\ct QUANTITY} called {\ct 'DEPOSITION VELOCITY'}.
 
+The parameter {\ct THERMOPHORETIC\_DIAMETER} can be used to define a particle diameter to use in lieu of the {\ct MEAN\_DIAMETER} when computing the thermophoretic force. This may be appropriate for flaky or string like aerosol particles when the thermophoretic force can operate on each of the primary particles composing the larger aerosol.
+
 \subsection{Example Case: Soot Deposition from a Propane Flame}
 
 The {\ct propane\_flame\_deposition} example shows how to define a reaction that invokes the aerosol deposition model in FDS. The fuel is propane with a specified soot yield of 0.05. Note that this is a fabricated soot yield that is used only for demonstration and verification purposes. The reaction is given by:
@@ -5774,6 +5783,9 @@ If the {\ct SPEC\_ID} is not listed in Table~\ref{tab:gasspecies} with a ``Y'' i
 \item[{\ct ENTHALPY\_OF\_FORMATION}] The heat of formation of the gas (kJ/mol).
 \item[{\ct HEAT\_OF\_VAPORIZATION}] Latent heat of vaporization of the liquid, $h_{\rm v}$ (kJ/kg).
 \item[{\ct H\_V\_REFERENCE\_TEMPERATURE}] The temperature corresponding to the {\ct HEAT\_OF\_VAPORIZATION} ($^\circ$C).
+\item[{\ct VISCOSITY\_LIQUID}] The viscosity of the liquid ()\si{kg/m.s}).
+\item[{\ct CONDUCTIVTY\_LIQUID}] The conductivity of the liquid (\si{W/(m.K)}).
+\item[{\ct BETA\_LIQUID}] The coefficient of thermal expansion of the liquid (1/K).
 \end{description}
 Note that FDS will adjust the liquid enthalpy so that the following relationship holds:
 \be
@@ -10931,8 +10943,11 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \endhead
 {\ct AEROSOL}                       & Logical           & Section~\ref{info:deposition}           &                   & {\ct .FALSE.} \\ \hline
 {\ct BACKGROUND}                    & Logical           & Section~\ref{info:SPEC}                 &                   & {\ct .FALSE.} \\ \hline
+{\ct BETA\_LIQUID}                  & Real              & Section~\ref{thermal_part_props}        & 1/K               &               \\ \hline
 {\ct CONDUCTIVITY}                  & Real              & Section~\ref{gas_species_props}         & \si{W/(m.K)}      &               \\ \hline
+{\ct CONDUCTIVITY\_LIQUID}          & Real              & Section~\ref{thermal_part_props}        & \si{W/(m.K)}      &               \\ \hline
 {\ct CONDUCTIVITY\_SOLID}           & Real              & Section~\ref{info:deposition}           & \si{W/(m.K)}      &  0.26         \\ \hline
+{\ct COPY\_LUMPED}                  & Logical           & Section~\ref{info:lumped}               &                   & {\ct .FALSE.} \\ \hline
 {\ct DENSITY\_LIQUID}               & Real              & Section~\ref{thermal_part_props}        & kg/m$^3$          &               \\ \hline
 {\ct DENSITY\_SOLID}                & Real              & Section~\ref{info:deposition}           & kg/m$^3$          &  1800.        \\ \hline
 {\ct DIFFUSIVITY}                   & Real              & Section~\ref{gas_species_props}         & m$^2$/s           &               \\ \hline
@@ -10970,12 +10985,12 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SPEC\_ID(:)}                   & Char.~Array       & Section~\ref{info:lumped}               &                   &               \\ \hline
 {\ct SPECIFIC\_HEAT}                & Real              & Section~\ref{gas_species_props}         & \si{kJ/(kg.K)}    &               \\ \hline
 {\ct SPECIFIC\_HEAT\_LIQUID}        & Real              & Section~\ref{thermal_part_props}        & \si{kJ/(kg.K)}    &               \\ \hline
+{\ct THERMOPHORETIC\_DIAMETER}      & Real              & Section~\ref{info:deposition}           & m                 &               \\ \hline
 {\ct VAPORIZATION\_TEMPERATURE}     & Real              & Section~\ref{thermal_part_props}        & $^\circ$C         &               \\ \hline
 {\ct VISCOSITY}                     & Real              & Section~\ref{gas_species_props}         & \si{kg/(m.s)}     &               \\ \hline
+{\ct VISCOSITY\_LIQUID}             & Real              & Section~\ref{thermal_part_props}        & \si{kg/(m.s)}     &               \\ \hline
 {\ct VOLUME\_FRACTION(:)}           & Real Array        & Section~\ref{info:lumped}               &                   &               \\ \hline
 \end{longtable}
-
-% Undocumented: BETA_LIQUID, CONDUCTIVITY_LIQUID, COPY_LUMPED, MASS_FRACTION_COND_0, THERMOPHORETIC_DIAMETER, VISCOSITY_LIQUID
 
 \vspace{\baselineskip}
 
