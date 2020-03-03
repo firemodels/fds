@@ -25,9 +25,11 @@ if(abs(NVEC(IAXIS)) > abs(NVEC(JAXIS))) % Do X2 ray
    XAXIS=X3AXIS;
 
    DELBIN = BODINT_PLANE2.TBAXIS(XAXIS).DELBIN;
-   ILO_BIN= max(1,ceil( (XRAY-GEOMEPS-BODINT_PLANE2.BOX(LOW_IND,XAXIS))/DELBIN ));
+   AVAL   = (XRAY-GEOMEPS-BODINT_PLANE2.BOX(LOW_IND,XAXIS))/DELBIN;
+   ILO_BIN= max(1,ceil(sign(AVAL)*min(2*BODINT_PLANE2.TBAXIS(XAXIS).N_BINS,abs(AVAL))));
+   AVAL   = (XRAY+GEOMEPS-BODINT_PLANE2.BOX(LOW_IND,XAXIS))/DELBIN;
    IHI_BIN= min(BODINT_PLANE2.TBAXIS(XAXIS).N_BINS, ...
-                ceil( (XRAY+GEOMEPS-BODINT_PLANE2.BOX(LOW_IND,XAXIS))/DELBIN ));
+            ceil(sign(AVAL)*min(2*BODINT_PLANE2.TBAXIS(XAXIS).N_BINS,abs(AVAL))));
    for IBIN=ILO_BIN:IHI_BIN
       if (XRAY < BODINT_PLANE2.TBAXIS(XAXIS).TRIBIN(IBIN).X_LOW-GEOMEPS); continue; end
       if (XRAY > BODINT_PLANE2.TBAXIS(XAXIS).TRIBIN(IBIN).X_HIGH+GEOMEPS); continue; end
@@ -63,8 +65,8 @@ if(abs(NVEC(IAXIS)) > abs(NVEC(JAXIS))) % Do X2 ray
          ISSEG(LOW_IND:HIGH_IND) = BODINT_PLANE2.SEGTYPE(LOW_IND:HIGH_IND,ISEG);
 
          % For x2, in local x2-x3 coords e2=(1,0):
-         GAM(LOW_IND) = (1 + sign(NOMLI(IAXIS))) / 2; % (1+SIGN(DOT_PRODUCT(NOMLI,e2)))/2;
-         GAM(HIGH_IND)= (1 - sign(NOMLI(IAXIS))) / 2; % (1-SIGN(DOT_PRODUCT(NOMLI,e2)))/2;
+         GAM(LOW_IND) = (1 + sign(NOMLI(IAXIS))) / 2; % (1+sign(DOT_PRODUCT(NOMLI,e2)))/2;
+         GAM(HIGH_IND)= (1 - sign(NOMLI(IAXIS))) / 2; % (1-sign(DOT_PRODUCT(NOMLI,e2)))/2;
 
          % Test if whole segment is in ray, if so add segment nodes as crossings:
          if ( (abs(DOT1)+abs(DOT2)) == 0. )
@@ -141,9 +143,11 @@ else % Do X3 ray
    XAXIS=X2AXIS;
     
    DELBIN = BODINT_PLANE2.TBAXIS(XAXIS).DELBIN;
-   ILO_BIN= max(1,ceil( (XRAY-GEOMEPS-BODINT_PLANE2.BOX(LOW_IND,XAXIS))/DELBIN ));
+   AVAL   = (XRAY-GEOMEPS-BODINT_PLANE2.BOX(LOW_IND,XAXIS))/DELBIN;
+   ILO_BIN= max(1,ceil(sign(AVAL)*min(2*BODINT_PLANE2.TBAXIS(XAXIS).N_BINS,abs(AVAL))));
+   AVAL   = (XRAY+GEOMEPS-BODINT_PLANE2.BOX(LOW_IND,XAXIS))/DELBIN;
    IHI_BIN= min(BODINT_PLANE2.TBAXIS(XAXIS).N_BINS, ...
-                ceil( (XRAY+GEOMEPS-BODINT_PLANE2.BOX(LOW_IND,XAXIS))/DELBIN ));
+            ceil(sign(AVAL)*min(2*BODINT_PLANE2.TBAXIS(XAXIS).N_BINS,abs(AVAL))));
    for IBIN=ILO_BIN:IHI_BIN
       if (XRAY < BODINT_PLANE2.TBAXIS(XAXIS).TRIBIN(IBIN).X_LOW-GEOMEPS); continue; end
       if (XRAY > BODINT_PLANE2.TBAXIS(XAXIS).TRIBIN(IBIN).X_HIGH+GEOMEPS); continue; end
@@ -179,8 +183,8 @@ else % Do X3 ray
          ISSEG(LOW_IND:HIGH_IND) = BODINT_PLANE2.SEGTYPE(LOW_IND:HIGH_IND,ISEG);         
          
          % For x3, in local x2-x3 coords e2=(0,1):
-         GAM(LOW_IND) = (1 + sign(NOMLI(JAXIS))) / 2; % (1+SIGN(DOT_PRODUCT(NOMLI,e2)))/2;
-         GAM(HIGH_IND)= (1 - sign(NOMLI(JAXIS))) / 2; % (1-SIGN(DOT_PRODUCT(NOMLI,e2)))/2;
+         GAM(LOW_IND) = (1 + sign(NOMLI(JAXIS))) / 2; % (1+sign(DOT_PRODUCT(NOMLI,e2)))/2;
+         GAM(HIGH_IND)= (1 - sign(NOMLI(JAXIS))) / 2; % (1-sign(DOT_PRODUCT(NOMLI,e2)))/2;
 
          % Test if whole segment is in ray, if so add segment nodes as crossings:
          if ( (abs(DOT1)+abs(DOT2)) == 0. )
