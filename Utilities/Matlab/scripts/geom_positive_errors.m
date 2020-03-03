@@ -19,10 +19,10 @@ infile{1} = '../../Verification/Complex_Geometry/geom_bad_inconsistent_normals.e
 errstring{1} = 'Face normals are probably pointing in the wrong direction';
 
 infile{2} = '../../Verification/Complex_Geometry/geom_bad_open_surface.err';
-errstring{2} = 'Open surface at edge';
+errstring{2} = 'Open geometry at edge';
 
 infile{3} = '../../Verification/Complex_Geometry/geom_bad_non_manifold_edge.err';
-errstring{3} = 'More than two triangles share edge';
+errstring{3} = 'Non manifold geometry in adjacent faces at edge';
 
 infile{4} = '../../Verification/Complex_Geometry/geom_bad_inverted_normals.err';
 errstring{4} = 'Face normals are probably pointing in the wrong direction';
