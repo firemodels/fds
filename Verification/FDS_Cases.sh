@@ -25,7 +25,7 @@ $QFDS -d Atmospheric_Effects lapse_rate.fds
 $QFDS -p  8 -d Atmospheric_Effects wind_example.fds
 $QFDS -p 32 -n 8 -d Atmospheric_Effects wind_example_32.fds
 
-$QFDS -d Complex_Geometry geom_bad_intersection.fds
+$QFDS -d Complex_Geometry geom_intersection.fds
 $QFDS -d Complex_Geometry geom_bad_inverted_normals.fds
 $QFDS -d Complex_Geometry geom_simple.fds
 #$QFDS -d Complex_Geometry geom_azim.fds
@@ -102,7 +102,7 @@ $QFDS -d Complex_Geometry geom_bad_inconsistent_normals.fds
 $QFDS -d Complex_Geometry geom_bad_non_manifold_edge.fds
 $QFDS -d Complex_Geometry geom_bad_non_manifold_vert.fds
 $QFDS -d Complex_Geometry geom_bad_open_surface.fds
-$QFDS -d Complex_Geometry geom_bad_self_intersection.fds
+$QFDS -d Complex_Geometry geom_self_intersection.fds
 
 $QFDS -d Complex_Geometry rotated_cube_0deg_32_exp.fds
 $QFDS -d Complex_Geometry rotated_cube_0deg_32_imp.fds

@@ -2317,8 +2317,6 @@ formatted FDS input file:
   \item {\ct geom\_bad\_non\_manifold\_edge.fds}: a cube and a box sharing the same non manifold edge;
   \item {\ct geom\_bad\_non\_manifold\_vert.fds}: two cubes sharing the same non manifold vertex; % FIXME currently not enforced
   \item {\ct geom\_bad\_open\_surface.fds}: a cube missing one face, that is an open surface;
-  \item {\ct geom\_bad\_self\_intersection.fds}: a cube whose faces were extruded to obtain a simple self-intersection;
-  \item {\ct geom\_bad\_intersection.fds}: two intersecting cubes. % FIXME remove when boolean ops available
 \end{itemize}
 
 To allow Firebot to consider the test successful if it catches the error condition,
@@ -2328,8 +2326,8 @@ each of the above input files contain the following parameter in the {\ct MISC}\
 
 The effect of this parameter is replacing the {\ct ERROR}\ label of the message with a {\ct SUCCESS}\ label.
 
-After Firebot is run, the {\ct geom\_positive\_errors.m}\ Matlab script checks the existance
-of the planned error condition in the {\ct CHID.err}\ file, reporting insuccess if the condition
+After Firebot is run, the {\ct geom\_positive\_errors.m}\ Matlab script checks the existence
+of the planned error condition in the {\ct CHID.err}\ file, reporting an issue if the condition
 is not met.
 
 \subsection{geom\_simple.fds}
