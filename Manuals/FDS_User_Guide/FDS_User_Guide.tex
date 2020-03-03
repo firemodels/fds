@@ -640,7 +640,7 @@ In the strong study demonstrated here, a single mesh of dimension 180 by 160 by 
 \label{fig:scaling_tests}
 \end{figure}
 
-\subsubsection{OpenMP Efficiency}
+\subsection{OpenMP Efficiency}
 
 To confirm the speedup provided by OpenMP, a series of test cases\footnote{The input files are available in the \href{https://github.com/firemodels/fds/tree/master/Verification/Timing_Benchmarks}{FDS GitHub repository}.} are run for two mesh sizes ($64^3$ and $128^3$), varying the number of OpenMP threads.  The setup is a simple channel flow carrying two extra species to mimic the scalar transport performed in typical fire problems. The results are shown in Fig.~\ref{fig:openmp_timing_benchmarks}.  Generally, users can expect a factor of 2 speedup using 4~cores (default setting).
 
@@ -2563,7 +2563,7 @@ where $\hbox{Nu}$ is the Nusselt number, $k$ is the thermal conductivity of the 
 
 \subsubsection{Heat Transfer with Blowing}
 
-During pyrolysis of a solid or evaporation of a liquid the mass transfer off the surface generats a blowing velocity that alters the thermal and momentum boundary layers, thus affecting the heat and mass transfer coefficients.  For a surface with blowing, consider using the correlations discussed in Sazhin \cite{Sazhin:2006} with the Spalding mass transfer corrections \cite{Spalding:1}.  These may be activated by setting {\ct GEOMETRY} and {\ct HEAT\_TRANSFER\_MODEL} to {\ct 'BLOWING PLATE'} or {\ct 'BLOWING SPHERE'} as appropriate on the {\ct SURF} line.  Note that for the {\ct 'BLOWING SPHERE'} the time dependent {\ct THICKNESS} of the surface is used in computing the Reynolds number.  For {\ct 'BLOWING PLATE'} the length scale for the Reynolds number is the usual {\ct CONVECTION\_LENGTH\_SCALE} set on the {\ct SURF} line.
+During pyrolysis of a solid or evaporation of a liquid the mass transfer off the surface generats a blowing velocity that alters the thermal and momentum boundary layers, thus affecting the heat and mass transfer coefficients.  For a surface with blowing, consider using the correlations discussed in Sazhin \cite{Sazhin:2006} with the Spalding mass transfer corrections \cite{Spalding:1}.  These may be activated by setting {\ct HEAT\_TRANSFER\_MODEL} to {\ct 'BLOWING PLATE'} or {\ct 'BLOWING SPHERE'} as appropriate on the {\ct SURF} line.  Note that for the {\ct 'BLOWING SPHERE'} the time dependent {\ct THICKNESS} of the surface is used in computing the Reynolds number.  For {\ct 'BLOWING PLATE'} the length scale for the Reynolds number is the usual {\ct CONVECTION\_LENGTH\_SCALE} set on the {\ct SURF} line.
 
 
 \subsection{Special Topic: Adiabatic Surfaces}
@@ -3221,6 +3221,19 @@ For a liquid fuel, the thermal properties are similar to those of a solid materi
 The inclusion of {\ct BOILING\_TEMPERATURE} on the {\ct MATL} line tells FDS to use its liquid pyrolysis model. It also automatically sets {\ct N\_REACTIONS=1}, that is, the only ``reaction'' is the phase change from liquid to gaseous fuel. Thus, {\ct HEAT\_OF\_REACTION} in this case is the latent heat of vaporization. The thermal conductivity, density and specific heat are used to compute the loss of heat into the liquid via conduction using the same one-dimensional heat transfer equation that is used for solids. Obviously, the convection of the liquid is important, but is not considered in the model. The {\ct ABSORPTION\_COEFFICIENT} denotes the absorption in depth of thermal radiation into the liquid. Liquids do not just absorb radiation at the surface, but rather over a thin layer near the surface. Its effect on the burning rate can be significant.
 
 In this example, {\ct 'ETHANOL'} is a {\em known} species; that is, it is listed in Table~\ref{tab:gasspecies}. For this reason, you only need to specify its CO and soot yield. If it is not known, then you must furnish additional information. Section~\ref{user_defined_gas_species_props} contains details, but in brief, only the molecular weight of the gas species is of relevance for the liquid pool evaporation model.
+
+\subsubsection{Heat and Mass Transfer with Blowing}
+
+To invoke the heat and mass transfer relationships from \cite{Sazhin:2006} for a flat plate, set {\ct GEOMETRY} and {\ct HEAT\_TRANSFER\_MODEL} to {\ct `BLOWING PLATE`} on the {\ct SURF} line.  For example,
+
+\begin{lstlisting}
+&SURF ID        = 'ETHANOL POOL'
+      COLOR     = 'YELLOW'
+      MATL_ID   = 'ETHANOL LIQUID'
+      THICKNESS = 0.1
+      GEOMETRY  = 'BLOWING PLATE'
+      HEAT_TRANSFER_MODEL = 'BLOWING PLATE' /
+\end{lstlisting}
 
 
 \subsection{Fuel Burnout}
