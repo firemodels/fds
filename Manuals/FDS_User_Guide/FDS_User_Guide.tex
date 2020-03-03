@@ -986,6 +986,8 @@ At the end of the first part of the explicit predictor-corrector time update, th
 
 The diagnostic output file called {\ct CHID.out} contains information about the time step and CFL number in each mesh. However, for simulations that involve dozens or hundreds of meshes, it can be difficult to assess the global time step information. For detailed information about the time step, there is an optional output file called {\ct CHID\_cfl.csv} that contains, for every time step, the time~(s), time step size~(s), maximum CFL number, the mesh and mesh indices where the maximum CFL value occurs, the six velocity components on the six faces of the grid cell where the maximum CFL number occurs, and the divergence~(1/s), viscosity~(kg/m/s), and HRRPUV~(kW/m$^3$) where the maximum CFL occurs. Also listed is the maximum VN (Von Neumann) number and the mesh and cell indices were it occurs. To output this file, set {\ct CFL\_FILE} to {\ct .TRUE.} on the {\ct DUMP} line. It is normally set to {\ct .FALSE.}
 
+\subsubsection{The Final Time Step}
+
 In some special circumstances it may be necessary to control the final time step of the calculation.  By default, FDS sets the last time step to be {\ct T\_END - T} where {\ct T} is the current time.  Because of floating point arithmetic, this final time step may be very small and cause unintended consequences.  You can control this final time step in two ways, using the parameters {\ct DT\_END\_MINIMUM} or {\ct DT\_END\_FILL} (you should not need both).  Using {\ct DT\_END\_MINIMUM} has the effect of setting a minimum for the final time step and so {\ct T\_END} is not strictly observed (hence our default {\ct DT\_END\_MINIMUM} is roughly the machine epsilon).  The final simulation time will be {\ct T + DT\_END\_MINIMUM}.  Alternatively, you could set {\ct DT\_END\_FILL} to some value (should be less than the last time step).  Then if {\ct T+DT+DT\_END\_FILL > T\_END}, where {\ct DT} is the computed stable time step (or specified time step), FDS will recompute the time step to be {\ct DT = T\_END - T}.  If you set one of these parameters, double check the {\ct CHID.out} file to make sure the expected behavior has been observed.
 
 
@@ -11185,7 +11187,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hline \hline
 \endhead
 {\ct DT}                        & Real       & Section~\ref{info:TIME_Control}           & s           &                 \\ \hline
-{\ct DT\_END\_FILL}             & Real       & Section~\ref{info:TIME_Control}           & s           & 0.              \\ \hline
+{\ct DT\_END\_FILL}             & Real       & Section~\ref{info:TIME_Control}           & s           & $1.0 \times 10^{-6}$  \\ \hline
 {\ct DT\_END\_MINIMUM}          & Real       & Section~\ref{info:TIME_Control}           & s           &  {\ct 2.*EPSILON}  \\ \hline
 {\ct EVAC\_DT\_FLOWFIELD}       & Real       & Reference~\cite{FDS_Evac_Users_Guide}     & s           &  0.01           \\ \hline
 {\ct EVAC\_DT\_STEADY\_STATE}   & Real       & Reference~\cite{FDS_Evac_Users_Guide}     & s           &  0.05           \\ \hline
