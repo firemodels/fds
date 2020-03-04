@@ -1340,7 +1340,6 @@ TYPE (SURFACE_TYPE), POINTER :: SF
 TYPE(ONE_D_M_AND_E_XFER_TYPE), POINTER :: ONE_D
 REAL(EB), POINTER, DIMENSION(:,:,:) :: NDPC=>NULL()
 REAL(EB), PARAMETER :: ONTHHALF=0.5_EB**ONTH, B_1=1.7321_EB
-REAL(EB), PARAMETER :: SURFACE_PARTICLE_DIAMETER=0.001_EB ! All PARTICLEs adjusted to this size when on solid (m)
 
 CALL POINT_TO_MESH(NM)
 
@@ -1620,7 +1619,7 @@ PARTICLE_LOOP: DO IP=1,NLP
             ! Adjust the size of the PARTICLE and weighting factor
 
             IF (LPC%LIQUID_DROPLET) THEN
-               R_D = MIN(0.5_EB*SURFACE_PARTICLE_DIAMETER,LP%PWT**ONTH*R_D)
+               R_D = MIN(0.5_EB*LPC%SURFACE_DIAMETER,LP%PWT**ONTH*R_D)
                LP%PWT = LP%PWT*(R_D_0/R_D)**3
                LP%ONE_D%X(1) = R_D
                LP%ONE_D%LAYER_THICKNESS(1) = R_D
