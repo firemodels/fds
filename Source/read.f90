@@ -5003,7 +5003,7 @@ USE DEVICE_VARIABLES, ONLY : PROPERTY_TYPE
 USE RADCONS, ONLY : MIE_NDG
 INTEGER :: SAMPLING_FACTOR,N,NN,ILPC,IPC,RGB(3),N_STRATA,N_LAGRANGIAN_CLASSES_READ
 REAL(EB) :: DIAMETER, GAMMA_D,AGE,INITIAL_TEMPERATURE,HEAT_OF_COMBUSTION, &
-            VERTICAL_VELOCITY,HORIZONTAL_VELOCITY,MAXIMUM_DIAMETER,MINIMUM_DIAMETER,SIGMA_D, &
+            VERTICAL_VELOCITY,HORIZONTAL_VELOCITY,MAXIMUM_DIAMETER,MINIMUM_DIAMETER,SURFACE_DIAMETER,SIGMA_D, &
             SURFACE_TENSION,BREAKUP_RATIO,BREAKUP_GAMMA_D,BREAKUP_SIGMA_D,&
             DENSE_VOLUME_FRACTION,REAL_REFRACTIVE_INDEX,COMPLEX_REFRACTIVE_INDEX,RUNNING_AVERAGE_FACTOR,&
             EMBER_DENSITY_THRESHOLD,EMBER_VELOCITY_THRESHOLD,PRIMARY_BREAKUP_LENGTH,PRIMARY_BREAKUP_DRAG_REDUCTION_FACTOR
@@ -5027,7 +5027,7 @@ NAMELIST /PART/ AGE,BREAKUP,BREAKUP_CNF_RAMP_ID,BREAKUP_DISTRIBUTION,BREAKUP_GAM
                 PRIMARY_BREAKUP_DRAG_REDUCTION_FACTOR,PRIMARY_BREAKUP_LENGTH,PROP_ID,QUANTITIES,&
                 QUANTITIES_SPEC_ID,RADIATIVE_PROPERTY_TABLE,REAL_REFRACTIVE_INDEX,RGB,RUNNING_AVERAGE_FACTOR,&
                 SAMPLING_FACTOR,SECOND_ORDER_PARTICLE_TRANSPORT,SHAPE_FACTOR,SIGMA_D,SPEC_ID,STATIC,&
-                SURFACE_TENSION,SURF_ID,TURBULENT_DISPERSION,VERTICAL_VELOCITY
+                SURFACE_DIAMETER,SURFACE_TENSION,SURF_ID,TURBULENT_DISPERSION,VERTICAL_VELOCITY
 
 ! Determine total number of PART lines in the input file
 
@@ -5299,6 +5299,7 @@ READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
    LPC%SPEC_ID            = SPEC_ID
    LPC%SURF_ID            = SURF_ID
    LPC%SURF_INDEX         = -1
+   LPC%SURFACE_DIAMETER   = SURFACE_DIAMETER*1.E-6_EB
    LPC%SURFACE_TENSION    = SURFACE_TENSION
    LPC%ADJUST_EVAPORATION  = 1._EB   ! If H_O_C>0. this parameter will have to be reset later
    LPC%VERTICAL_VELOCITY   = VERTICAL_VELOCITY
@@ -5430,11 +5431,11 @@ DENSE_VOLUME_FRACTION    = 1.E-5_EB     ! Limiting volume fraction for drag redu
 DEVC_ID                  = 'null'
 INITIAL_TEMPERATURE      = TMPA - TMPM  ! C
 HEAT_OF_COMBUSTION       = -1._EB       ! kJ/kg
-DIAMETER                 = -1._EB       !
+DIAMETER                 = -1._EB
 MAXIMUM_DIAMETER         = 1.E9_EB      ! microns, sets the largest particle generated when using a size distribution
 MINIMUM_DIAMETER         = -1._EB       ! microns, sets the smallest particle generated when using a size distribution
-                                        ! For a monodisperse distribution, this also sets the evaporation size limit; otherwise, it is
-                                        ! 5 % of the particle volume defined by this parameter.
+                                        ! For a monodisperse distribution, this also sets the evaporation size limit; 
+                                        ! otherwise, it is 5 % of the particle volume defined by this parameter.
 MONODISPERSE             = .FALSE.
 N_STRATA                 = 6
 GAMMA_D                  = 2.4_EB
@@ -5452,6 +5453,7 @@ RADIATIVE_PROPERTY_TABLE = 'null'
 RGB                      = -1
 SPEC_ID                  = 'null'
 SURF_ID                  = 'null'
+SURFACE_DIAMETER         = 1000._EB
 SURFACE_TENSION          = 72.8E-3_EB  ! N/m, applies for water
 COLOR                    = 'null'
 SAMPLING_FACTOR          = -1
