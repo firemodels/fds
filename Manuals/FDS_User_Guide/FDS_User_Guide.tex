@@ -5766,9 +5766,9 @@ Massless tracer particles may also be useful in modeling dispersion of a tracer 
 
 Lagrangian particles that are not just massless tracers fall into two main categories -- liquid droplets or solid particles. This section describes the former; and the next, the latter.
 
-To define an evaporating liquid droplet, you must specify the name of the gas species created by evaporation via the {\ct SPEC\_ID} on the {\ct PART} line:
+To define an evaporating liquid droplet, you must specify the name of the gas species created by evaporation via the {\ct SPEC\_ID} on the {\ct PART} line.  For example,
 \begin{lstlisting}
-&PART ID='my droplets', SPEC_ID='my gas species', ... /
+&PART ID='my droplets', SPEC_ID='WATER VAPOR', ... /
 \end{lstlisting}
 By specifying a {\ct SPEC\_ID}, you are implicitly invoking the droplet evaporation model. Alternatively, if you specify a {\ct SURF\_ID}, you are designating a solid particle that behaves according to the given {\ct SURF} line. Solid particles are described in Section~\ref{info:PART_SURF}.
 
@@ -5806,6 +5806,10 @@ Note that FDS will adjust the liquid enthalpy so that the following relationship
 \be
    h_{\rm gas}(T_{\rm boil}) = h_{\rm liquid}(T_{\rm boil}) + h_{\rm v}
 \ee
+
+\subsubsection{Custom Liquid/Gas Species}
+
+Note that only one gas species can be used in the droplet evaporation model because the model does not consider a distillation curve for evaporation.  However, custom properties can be assigned to a {\ct SPEC}.  In addition to the liquid properties mentioned above, see Sec.~\ref{user_defined_gas_species_props} on user-defined gas properties.
 
 
 \subsubsection{Fuel Liquid/Gas Species}
