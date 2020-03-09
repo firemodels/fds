@@ -1474,8 +1474,8 @@ PARTICLE_LOOP: DO IP=1,NLP
       ! Determine if the particle is near a CFACE, and if so, change its trajectory
 
       CFACE_SEARCH: IF (CC_IBM) THEN
-         IF (CCVAR(LP%ONE_D%IIG,LP%ONE_D%JJG,LP%ONE_D%KKG,IBM_CGSC)==IBM_CUTCFE) THEN  ! Current grid cell has CFACEs
-            INDCF = CCVAR(LP%ONE_D%IIG,LP%ONE_D%JJG,LP%ONE_D%KKG,IBM_IDCF)
+         INDCF = CCVAR(LP%ONE_D%IIG,LP%ONE_D%JJG,LP%ONE_D%KKG,IBM_IDCF)
+         IF ( INDCF > 0 ) THEN  ! Current grid cell has CFACEs
             DIST2_MIN = 1.E6_EB
             DO IFACE=1,CUT_FACE(INDCF)%NFACE  ! Loop through CFACEs and find the one closest to the particle
                ICF = CUT_FACE(INDCF)%CFACE_INDEX(IFACE)
@@ -1514,9 +1514,9 @@ PARTICLE_LOOP: DO IP=1,NLP
             ENDIF
             CYCLE PARTICLE_LOOP
          ELSEIF (CCVAR(LP%ONE_D%IIG,LP%ONE_D%JJG,LP%ONE_D%KKG,IBM_CGSC)==IBM_SOLID) THEN  ! Move particle out of solid
-            LP%X = X_OLD
-            LP%Y = Y_OLD
-            LP%Z = Z_OLD
+            LP%X = X_OLD; LP%ONE_D%IIG = IIG_OLD
+            LP%Y = Y_OLD; LP%ONE_D%JJG = JJG_OLD
+            LP%Z = Z_OLD; LP%ONE_D%KKG = KKG_OLD
             LP%U = 0._EB
             LP%V = 0._EB
             LP%W = 0._EB
@@ -2408,7 +2408,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
 
                SOLID_OR_GAS_PHASE_2: IF (LP%ONE_D%IOR/=0 .AND. (LP%WALL_INDEX>0 .OR. LP%CFACE_INDEX>0)) THEN
 
-                  ! Compute mcbap = rho_w a_w cp_w dx_w for first wall cell for limiting convective heat transfer
+                  ! Compute mcbar = rho_w a_w cp_w dx_w for first wall cell for limiting convective heat transfer
 
                   IF (SF%THERMALLY_THICK) THEN
                      RHOCBAR = 0._EB
@@ -2649,7 +2649,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                   TMP_DROP_NEW = T_BOIL_EFF
                ENDIF EVAP_ALL
 
-               IF (LP%WALL_INDEX>0 .OR. LP%CFACE_INDEX>0) TMP_WALL_NEW = TMP_WALL-Q_CON_WALL/MCBAR
+               IF (LP%ONE_D%IOR/=0 .AND. (LP%WALL_INDEX>0 .OR. LP%CFACE_INDEX>0)) TMP_WALL_NEW=TMP_WALL-Q_CON_WALL/MCBAR
                M_DROP = M_DROP - M_VAP
 
                ! Add fuel evaporation rate to running counter and adjust mass of evaporated fuel to account for different
