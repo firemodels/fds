@@ -1330,7 +1330,7 @@ REAL(EB), INTENT(IN) :: T,DT
 INTEGER, INTENT(IN) :: NM
 REAL     :: RN
 REAL(EB) :: XI,YJ,ZK,R_D,R_D_0,X_OLD,Y_OLD,Z_OLD,X_TRY,Y_TRY,Z_TRY,THETA,THETA_RN,STEP_FRACTION(-3:3),DT_CFL,DT_P,&
-            STEP_FRACTION_PREVIOUS,DELTA
+            STEP_FRACTION_PREVIOUS,DELTA,PVEC_L
 LOGICAL :: HIT_SOLID,CC_IBM_GASPHASE
 INTEGER :: IP,IC_NEW,IIG_OLD,JJG_OLD,KKG_OLD,IIG_TRY,JJG_TRY,KKG_TRY,IW,IC_OLD,IOR_HIT,&
            N_ITER,ITER,I_COORD,IC_TRY
@@ -1340,6 +1340,9 @@ TYPE (SURFACE_TYPE), POINTER :: SF
 TYPE(ONE_D_M_AND_E_XFER_TYPE), POINTER :: ONE_D
 REAL(EB), POINTER, DIMENSION(:,:,:) :: NDPC=>NULL()
 REAL(EB), PARAMETER :: ONTHHALF=0.5_EB**ONTH, B_1=1.7321_EB
+LOGICAL :: TEST_POS
+INTEGER :: DIND, MADD(3,3)
+INTEGER, PARAMETER :: EYE3(1:3,1:3)=RESHAPE( (/1,0,0, 0,1,0, 0,0,1 /), (/3,3/) )
 
 CALL POINT_TO_MESH(NM)
 
@@ -1475,6 +1478,11 @@ PARTICLE_LOOP: DO IP=1,NLP
 
       CFACE_SEARCH: IF (CC_IBM) THEN
          INDCF = CCVAR(LP%ONE_D%IIG,LP%ONE_D%JJG,LP%ONE_D%KKG,IBM_IDCF)
+         IF ( INDCF < 1 .AND. CCVAR(LP%ONE_D%IIG,LP%ONE_D%JJG,LP%ONE_D%KKG,IBM_CGSC)==IBM_SOLID) THEN
+            ! Search for cut-cell in the direction of -GVEC:
+            DIND = MAXLOC(ABS(GVEC(1:3)),DIM=1); MADD(1:3,1:3) = -INT(SIGN(1._EB,GVEC(DIND)))*EYE3
+            INDCF = CCVAR(LP%ONE_D%IIG+MADD(1,DIND),LP%ONE_D%JJG+MADD(2,DIND),LP%ONE_D%KKG+MADD(3,DIND),IBM_IDCF)
+         ENDIF
          IF ( INDCF > 0 ) THEN  ! Current grid cell has CFACEs
             DIST2_MIN = 1.E6_EB
             DO IFACE=1,CUT_FACE(INDCF)%NFACE  ! Loop through CFACEs and find the one closest to the particle
@@ -1488,7 +1496,9 @@ PARTICLE_LOOP: DO IP=1,NLP
             ICF = ICF_MIN
             ! If the CFACE normal points up, force the particle to follow the contour. If the normal points down,
             ! put the particle back into the gas phase.
-            IF (DOT_PRODUCT(CFACE(ICF)%NVEC,GVEC)>0._EB) THEN  ! normal points down
+            P_VECTOR = (/LP%X-CFACE(ICF)%X,LP%Y-CFACE(ICF)%Y,LP%Z-CFACE(ICF)%Z/)
+            TEST_POS = DOT_PRODUCT(CFACE(ICF)%NVEC,P_VECTOR) > TWO_EPSILON_EB
+            IF (DOT_PRODUCT(CFACE(ICF)%NVEC,GVEC)>0._EB .OR. TEST_POS) THEN  ! normal points down
                LP%CFACE_INDEX = 0
                LP%ONE_D%IOR = 0
             ELSE  ! normal points up
@@ -1496,16 +1506,31 @@ PARTICLE_LOOP: DO IP=1,NLP
                LP%ONE_D%IOR = 1
                CALL CROSS_PRODUCT(VEL_VECTOR_1,CFACE(ICF)%NVEC,GVEC)
                CALL CROSS_PRODUCT(VEL_VECTOR_2,VEL_VECTOR_1,CFACE(ICF)%NVEC)
-               VEL_VECTOR_1 = VEL_VECTOR_2/NORM2(VEL_VECTOR_2)
+               IF(NORM2(VEL_VECTOR_2) > TWO_EPSILON_EB) THEN
+                  VEL_VECTOR_1 = VEL_VECTOR_2/NORM2(VEL_VECTOR_2)
+               ELSE ! Normal in exact oposite direction to GVEC, random direction of motion on CFACE plane.
+                  CALL RANDOM_NUMBER(VEL_VECTOR_2); VEL_VECTOR_2 = VEL_VECTOR_2 - 0.5_EB
+                  IF (NORM2(VEL_VECTOR_2)>TWO_EPSILON_EB) THEN
+                     VEL_VECTOR_1=VEL_VECTOR_2/NORM2(VEL_VECTOR_2)
+                     CALL CROSS_PRODUCT(VEL_VECTOR_2,CFACE(ICF)%NVEC,VEL_VECTOR_1)
+                     CALL CROSS_PRODUCT(VEL_VECTOR_1,VEL_VECTOR_2,CFACE(ICF)%NVEC)
+                  ELSE ! Just do horizontal case.
+                     CALL RANDOM_NUMBER(RN)
+                     THETA_RN = TWOPI*REAL(RN,EB)
+                     VEL_VECTOR_1(1) = COS(THETA_RN)
+                     VEL_VECTOR_1(2) = SIN(THETA_RN)
+                     VEL_VECTOR_1(3) = 0._EB
+                  ENDIF
+               ENDIF
                LP%U = VEL_VECTOR_1(1)*LPC%HORIZONTAL_VELOCITY
                LP%V = VEL_VECTOR_1(2)*LPC%HORIZONTAL_VELOCITY
                LP%W = VEL_VECTOR_1(3)*LPC%HORIZONTAL_VELOCITY
                ! If the particle is inside the solid, move it to the surface in the normal direction.
-               P_VECTOR = (/LP%X-CFACE(ICF)%X,LP%Y-CFACE(ICF)%Y,LP%Z-CFACE(ICF)%Z/)
-               IF (NORM2(P_VECTOR)>TWO_EPSILON_EB) THEN
-                  THETA = ACOS(DOT_PRODUCT(CFACE(ICF)%NVEC,P_VECTOR/NORM2(P_VECTOR)))
+               PVEC_L = NORM2(P_VECTOR)
+               IF (PVEC_L>TWO_EPSILON_EB) THEN
+                  THETA = ACOS(DOT_PRODUCT(CFACE(ICF)%NVEC,P_VECTOR/PVEC_L))
                   IF (THETA>PIO2) THEN
-                     DELTA = SIN(THETA-0.5_EB*PI)
+                     DELTA = PVEC_L*SIN(THETA-0.5_EB*PI)
                      LP%X = LP%X + DELTA*CFACE(ICF)%NVEC(1)
                      LP%Y = LP%Y + DELTA*CFACE(ICF)%NVEC(2)
                      LP%Z = LP%Z + DELTA*CFACE(ICF)%NVEC(3)
@@ -1513,13 +1538,6 @@ PARTICLE_LOOP: DO IP=1,NLP
                ENDIF
             ENDIF
             CYCLE PARTICLE_LOOP
-         ELSEIF (CCVAR(LP%ONE_D%IIG,LP%ONE_D%JJG,LP%ONE_D%KKG,IBM_CGSC)==IBM_SOLID) THEN  ! Move particle out of solid
-            LP%X = X_OLD; LP%ONE_D%IIG = IIG_OLD
-            LP%Y = Y_OLD; LP%ONE_D%JJG = JJG_OLD
-            LP%Z = Z_OLD; LP%ONE_D%KKG = KKG_OLD
-            LP%U = 0._EB
-            LP%V = 0._EB
-            LP%W = 0._EB
          ELSE
             LP%ONE_D%IOR = 0
          ENDIF
