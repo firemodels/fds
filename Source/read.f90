@@ -5434,7 +5434,7 @@ HEAT_OF_COMBUSTION       = -1._EB       ! kJ/kg
 DIAMETER                 = -1._EB
 MAXIMUM_DIAMETER         = 1.E9_EB      ! microns, sets the largest particle generated when using a size distribution
 MINIMUM_DIAMETER         = -1._EB       ! microns, sets the smallest particle generated when using a size distribution
-                                        ! For a monodisperse distribution, this also sets the evaporation size limit; 
+                                        ! For a monodisperse distribution, this also sets the evaporation size limit;
                                         ! otherwise, it is 5 % of the particle volume defined by this parameter.
 MONODISPERSE             = .FALSE.
 N_STRATA                 = 6
@@ -10633,17 +10633,17 @@ MESH_LOOP_1: DO NM=1,NMESHES
          XB(6) = ZF
          SELECT CASE (DB)
             CASE('XMIN')
-                XB(1:2) = XS_MIN
+                XB(1:2) = XS_MIN+TWO_EPSILON_EB
             CASE('XMAX')
-                XB(1:2) = XF_MAX
+                XB(1:2) = XF_MAX-TWO_EPSILON_EB
             CASE('YMIN')
-                XB(3:4) = YS_MIN
+                XB(3:4) = YS_MIN+TWO_EPSILON_EB
             CASE('YMAX')
-                XB(3:4) = YF_MAX
+                XB(3:4) = YF_MAX-TWO_EPSILON_EB
             CASE('ZMIN')
-                XB(5:6) = ZS_MIN
+                XB(5:6) = ZS_MIN+TWO_EPSILON_EB
             CASE('ZMAX')
-                XB(5:6) = ZF_MAX
+                XB(5:6) = ZF_MAX-TWO_EPSILON_EB
             CASE DEFAULT
                WRITE(MESSAGE,'(A,I0,A)') 'ERROR: DB specified for VENT',NN,' is not XMIN, XMAX, YMIN, YMAX, ZMIN, or ZMAX'
                CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
@@ -11491,7 +11491,7 @@ INIT_LOOP: DO N=1,N_INIT_READ+N_INIT_RESERVED
                CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,RR_SUM)
 
             ELSEIF (ANY(VOLUME_FRACTION>=0._EB)) THEN SPEC_INIT_IF
-               MASS_FRACTION = 0._EB 
+               MASS_FRACTION = 0._EB
                IF (SPEC_ID(1)=='null') THEN
                   WRITE(MESSAGE,'(A,I0,A,A)') 'ERROR: Problem with INIT number ',N,'. SPEC_ID must be used with VOLUME_FRACTION'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
