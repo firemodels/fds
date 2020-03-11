@@ -5309,7 +5309,7 @@ QUANTITY_LOOP: DO IQ=1,NQT
       IQQ = 1
    ENDIF
 
-   IF (.NOT.AGL_TERRAIN_SLICE .AND. .NOT.CC_CELL_CENTERED .AND. .NOT.CC_FACE_CENTERED) THEN
+   IF (.NOT.CC_CELL_CENTERED .AND. .NOT.CC_FACE_CENTERED) THEN
 
    ! node centered slice
 
@@ -5330,7 +5330,7 @@ QUANTITY_LOOP: DO IQ=1,NQT
 
    !  or cell centered or terrain-following (treated as cell centered) slice
 
-   ELSE IF (AGL_TERRAIN_SLICE .OR. CC_CELL_CENTERED) THEN
+   ELSE IF (CC_CELL_CENTERED) THEN
       DO K=KK1,KK2
          DO J=JJ1,JJ2
             DO I=II1,II2

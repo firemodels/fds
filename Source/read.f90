@@ -7652,9 +7652,9 @@ VEG_LSET_ROS_BACK       = 0.0_EB
 VEG_LSET_WIND_EXP       = 1.0_EB
 VEG_LSET_ELLIPSE        = .FALSE.
 VEG_LSET_TAN2           = .FALSE.
-VEG_LSET_HT             = 0.0_EB
-VEG_LSET_BETA           = 0.0_EB
-VEG_LSET_SIGMA          = 0.0_EB
+VEG_LSET_HT             = 1.0_EB
+VEG_LSET_BETA           = 0.01_EB
+VEG_LSET_SIGMA          = 5000.0_EB
 VEG_LSET_QCON           = 0.0_EB
 
 END SUBROUTINE SET_SURF_DEFAULTS
