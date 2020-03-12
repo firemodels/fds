@@ -1498,33 +1498,27 @@ PARTICLE_LOOP: DO IP=1,NLP
             ! put the particle back into the gas phase.
             P_VECTOR = (/LP%X-CFACE(ICF)%X,LP%Y-CFACE(ICF)%Y,LP%Z-CFACE(ICF)%Z/)
             TEST_POS = DOT_PRODUCT(CFACE(ICF)%NVEC,P_VECTOR) > TWO_EPSILON_EB
-            IF (DOT_PRODUCT(CFACE(ICF)%NVEC,GVEC)>0._EB .OR. TEST_POS) THEN  ! normal points down
+            IF (DOT_PRODUCT(CFACE(ICF)%NVEC,GVEC)>0._EB .OR. TEST_POS) THEN  ! normal points down; drop it
                LP%CFACE_INDEX = 0
                LP%ONE_D%IOR = 0
-            ELSE  ! normal points up
-               LP%CFACE_INDEX = ICF
-               LP%ONE_D%IOR = 1
+            ELSE  ! normal points up; determine direction for particle to move
                CALL CROSS_PRODUCT(VEL_VECTOR_1,CFACE(ICF)%NVEC,GVEC)
                CALL CROSS_PRODUCT(VEL_VECTOR_2,VEL_VECTOR_1,CFACE(ICF)%NVEC)
-               IF(NORM2(VEL_VECTOR_2) > TWO_EPSILON_EB) THEN
+               IF (NORM2(VEL_VECTOR_2) > TWO_EPSILON_EB) THEN  ! the surface is tilted; particles go down slope
                   VEL_VECTOR_1 = VEL_VECTOR_2/NORM2(VEL_VECTOR_2)
-               ELSE ! Normal in exact oposite direction to GVEC, random direction of motion on CFACE plane.
-                  CALL RANDOM_NUMBER(VEL_VECTOR_2); VEL_VECTOR_2 = VEL_VECTOR_2 - 0.5_EB
-                  IF (NORM2(VEL_VECTOR_2)>TWO_EPSILON_EB) THEN
-                     VEL_VECTOR_1=VEL_VECTOR_2/NORM2(VEL_VECTOR_2)
-                     CALL CROSS_PRODUCT(VEL_VECTOR_2,CFACE(ICF)%NVEC,VEL_VECTOR_1)
-                     CALL CROSS_PRODUCT(VEL_VECTOR_1,VEL_VECTOR_2,CFACE(ICF)%NVEC)
-                  ELSE ! Just do horizontal case.
-                     CALL RANDOM_NUMBER(RN)
-                     THETA_RN = TWOPI*REAL(RN,EB)
-                     VEL_VECTOR_1(1) = COS(THETA_RN)
-                     VEL_VECTOR_1(2) = SIN(THETA_RN)
-                     VEL_VECTOR_1(3) = 0._EB
-                  ENDIF
+                  LP%U = VEL_VECTOR_1(1)*LPC%HORIZONTAL_VELOCITY
+                  LP%V = VEL_VECTOR_1(2)*LPC%HORIZONTAL_VELOCITY
+                  LP%W = VEL_VECTOR_1(3)*LPC%HORIZONTAL_VELOCITY
+               ELSEIF (LP%ONE_D%IOR==0) THEN  ! surface is flat and particle has no direction, particles given random direction
+                  CALL RANDOM_NUMBER(RN)
+                  THETA_RN = TWOPI*REAL(RN,EB)
+                  VEL_VECTOR_1(1) = COS(THETA_RN)
+                  VEL_VECTOR_1(2) = SIN(THETA_RN)
+                  VEL_VECTOR_1(3) = 0._EB
+                  LP%U = VEL_VECTOR_1(1)*LPC%HORIZONTAL_VELOCITY
+                  LP%V = VEL_VECTOR_1(2)*LPC%HORIZONTAL_VELOCITY
+                  LP%W = VEL_VECTOR_1(3)*LPC%HORIZONTAL_VELOCITY
                ENDIF
-               LP%U = VEL_VECTOR_1(1)*LPC%HORIZONTAL_VELOCITY
-               LP%V = VEL_VECTOR_1(2)*LPC%HORIZONTAL_VELOCITY
-               LP%W = VEL_VECTOR_1(3)*LPC%HORIZONTAL_VELOCITY
                ! If the particle is inside the solid, move it to the surface in the normal direction.
                PVEC_L = NORM2(P_VECTOR)
                IF (PVEC_L>TWO_EPSILON_EB) THEN
@@ -1536,9 +1530,11 @@ PARTICLE_LOOP: DO IP=1,NLP
                      LP%Z = LP%Z + DELTA*CFACE(ICF)%NVEC(3)
                   ENDIF
                ENDIF
+               LP%CFACE_INDEX = ICF
+               LP%ONE_D%IOR = 1
             ENDIF
             CYCLE PARTICLE_LOOP
-         ELSE
+         ELSEIF (CCVAR(LP%ONE_D%IIG,LP%ONE_D%JJG,LP%ONE_D%KKG,IBM_CGSC)/=IBM_GASPHASE) THEN
             LP%ONE_D%IOR = 0
          ENDIF
       ENDIF CFACE_SEARCH
