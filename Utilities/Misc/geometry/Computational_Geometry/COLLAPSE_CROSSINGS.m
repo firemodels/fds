@@ -64,9 +64,24 @@ for IDCR=1:CRS_NUM(IBM_N_CRS)
     % Now assign IBM_BDNUM_CRS_AUX(IDCR):
     SBOD = 0;
     for IUBD=1:NUBD
+        % Drop extra intersections (same intersection type, same body):
+        USE_INT_POINT(IND_CRS(LOW_IND,IDCR)+1:IND_CRS(LOW_IND,IDCR)+IND_CRS(HIGH_IND,IDCR)) = true;
+        for ICRS1=IND_CRS(LOW_IND,IDCR)+1:IND_CRS(LOW_IND,IDCR)+IND_CRS(HIGH_IND,IDCR)
+            if (~USE_INT_POINT(ICRS1)); continue; end % Don't use collapsed point as pivot.
+            % Collapse GS or SG points:
+            for ICRS2 = IND_CRS(LOW_IND,IDCR)+1 : IND_CRS(LOW_IND,IDCR)+IND_CRS(HIGH_IND,IDCR)
+                if ( (ICRS2==ICRS1) || ~USE_INT_POINT(ICRS2) ); continue; end % Don't use pivot, or collapsed point.
+                if ( (IBM_IS_CRS2(LOW_IND ,ICRS1) == IBM_IS_CRS2(LOW_IND ,ICRS2)) && ...
+                     (IBM_IS_CRS2(HIGH_IND,ICRS1) == IBM_IS_CRS2(HIGH_IND,ICRS2)) && ...
+                      BODNUM(ICRS1) == BODNUM(ICRS2))
+                    USE_INT_POINT(ICRS2) = false;
+                end
+            end
+        end
         IBDNUM=0;
         for IDCR2=IND_CRS(LOW_IND,IDCR)+1:IND_CRS(LOW_IND,IDCR)+IND_CRS(HIGH_IND,IDCR)
             if(BODNUM(IDCR2) ~= UBOD(IUBD)); continue; end
+            if(~USE_INT_POINT(IDCR2)); continue; end
             IBDNUM = IBDNUM + IBM_BDNUM_CRS(IDCR2);
         end
         if(IBDNUM ~= 0); SBOD = SBOD + sign(IBDNUM); end
@@ -138,7 +153,7 @@ for IDCR=1:CRS_NUM(IBM_N_CRS)
                 x(1,:) = [X3RAY X1PLN -2 ];
                 x(2,:) = [X3RAY X1PLN  2 ];
             end
-            plot3(x(:,IAXIS),x(:,JAXIS),x(:,KAXIS),'--k','LineWidth',2)            
+            plot3(x(:,IAXIS),x(:,JAXIS),x(:,KAXIS),'--k','LineWidth',2)
             pause
          end
       end
@@ -179,8 +194,8 @@ for IDCR=1:CRS_NUM(IBM_N_CRS)
       ALGN_CROSS = true;
       break
    end
-   if ( ALGN_CROSS ); continue; end 
-   
+   if ( ALGN_CROSS ); continue; end
+
    % Now figure out the type of crossing:
    NOT_COUNTED = true;
    NCRS_REMAIN = IND_CRS(HIGH_IND,IDCR);
@@ -192,11 +207,12 @@ for IDCR=1:CRS_NUM(IBM_N_CRS)
          
          if (~USE_INT_POINT(ICRS1)); continue; end % Don't use collapsed point as pivot.
 
-         % Collapse GS or SG points:
+         % Collapse GS or SG points discriminating by body:
          for ICRS2 = IND_CRS(LOW_IND,IDCR)+1 : IND_CRS(LOW_IND,IDCR)+IND_CRS(HIGH_IND,IDCR)
             if ( (ICRS2==ICRS1) || ~USE_INT_POINT(ICRS2) ); continue; end % Don't use pivot, or collapsed point.
             if ( (IBM_IS_CRS2(LOW_IND ,ICRS1) == IBM_IS_CRS2(LOW_IND ,ICRS2)) && ...
-                 (IBM_IS_CRS2(HIGH_IND,ICRS1) == IBM_IS_CRS2(HIGH_IND,ICRS2)) ) 
+                 (IBM_IS_CRS2(HIGH_IND,ICRS1) == IBM_IS_CRS2(HIGH_IND,ICRS2)) && ...
+                 (BODNUM(ICRS1) == BODNUM(ICRS2)) ) 
                 USE_INT_POINT(ICRS2) = false;
             end
          end
@@ -220,7 +236,6 @@ for IDCR=1:CRS_NUM(IBM_N_CRS)
       
       if (IND_LEFT  ~= 0); IND_LEFT = sign(IND_LEFT); end
       if (IND_RIGHT ~= 0); IND_RIGHT = sign(IND_RIGHT); end
-
             
       if (IDCR>1 && IBM_BDNUM_CRS_AUX(IDCR-1) > 0 && IBM_BDNUM_CRS_AUX(IDCR) > 0)  % Test if we are inside an Object.
          IBM_IS_CRS2_AUX(LOW_IND:HIGH_IND,IBM_N_CRS_AUX) = IBM_SOLID; % GS or SG.
