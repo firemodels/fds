@@ -26839,16 +26839,16 @@ MESH_LOOP_2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                ! IF FTY_LO == IBM_SOLID    and FTY_HI == IBM_SOLID, do not assign.
                IF (FTY_LO==IBM_SOLID .AND. FTY_HI==IBM_SOLID) CYCLE
 
-               ! If FTY_LO == IBM_CUTCFE and FTY_HI /= IBM_CUTCFE assign all CFACES of this cell to
+               ! If FTY_LO == IBM_CUTCFE and FTY_HI == IBM_GASPHASE assign all CFACES of this cell to
                ! RAD_CFACE(ICF_LO)%ASSIGNED_CFACES_RADI.
-               IF ( (FTY_LO==IBM_CUTCFE   .AND. FTY_HI/=IBM_CUTCFE) ) THEN
+               IF ( (FTY_LO==IBM_CUTCFE   .AND. FTY_HI==IBM_GASPHASE) ) THEN
                   CALL ASSIGN_CFACE_CARTFCS(NM,LOW_IND,X1LO,X1HI,X1AXIS,ICF,ICR_LO,ICR_HI)
                   CYCLE
                ENDIF
 
-               ! If FTY_LO /= IBM_CUTCFE and FTY_HI == IBM_CUTCFE assign all CFACES of this cell to
+               ! If FTY_LO == IBM_GASPHASE and FTY_HI == IBM_CUTCFE assign all CFACES of this cell to
                ! RAD_CFACE(ICF_HI)%ASSIGNED_CFACES_RADI
-               IF ( (FTY_LO/=IBM_CUTCFE .AND. FTY_HI==IBM_CUTCFE  ) ) THEN
+               IF ( (FTY_LO==IBM_GASPHASE .AND. FTY_HI==IBM_CUTCFE  ) ) THEN
                   CALL ASSIGN_CFACE_CARTFCS(NM,HIGH_IND,X1LO,X1HI,X1AXIS,ICF,ICR_LO,ICR_HI)
                   CYCLE
                ENDIF
@@ -26857,7 +26857,9 @@ MESH_LOOP_2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                !    (FTY_LO == IBM_GASPHASE and FTY_HI == IBM_GASPHASE) assign CFACES with centriods on low
                ! X1AXIS side of cell to RAD_CFACE(ICF_LO)%ASSIGNED_CFACES_RADI, and CFACE with centroids
                ! on high X1AXIS side to RAD_CFACE(ICF_HI)%ASSIGNED_CFACES_RADI.
-               IF ( (FTY_LO==IBM_CUTCFE   .AND. FTY_HI==IBM_CUTCFE  ) .OR. &
+               IF ( (FTY_LO==IBM_CUTCFE   .AND. FTY_HI==IBM_SOLID   ) .OR. &
+                    (FTY_LO==IBM_SOLID    .AND. FTY_HI==IBM_CUTCFE  ) .OR. &
+                    (FTY_LO==IBM_CUTCFE   .AND. FTY_HI==IBM_CUTCFE  ) .OR. &
                     (FTY_LO==IBM_GASPHASE .AND. FTY_HI==IBM_GASPHASE)       ) THEN
                   CALL ASSIGN_CFACE_CARTFCS(NM,0,X1LO,X1HI,X1AXIS,ICF,ICR_LO,ICR_HI)
                   CYCLE
@@ -26993,6 +26995,7 @@ ICR2(LOW_IND:HIGH_IND) = (/ ICR_LO, ICR_HI /)
 ! First count how many CFACES each Cartesian face on the X1AXIS will receive.
 ! A CFACE is assigned to the cartesian face that lays closer to its centroid in the X1AXIS direction.
 DO IFACE=1,CUT_FACE(ICF)%NFACE
+   IF(ABS(MESHES(NM)%CFACE(CUT_FACE(ICF)%CFACE_INDEX(IFACE))%NVEC(X1AXIS)) < GEOMEPS) CYCLE
    IF(ABS(CUT_FACE(ICF)%XYZCEN(X1AXIS,IFACE)-X1LO) < DX1O2) THEN
       NCFACE(LOW_IND)  = NCFACE(LOW_IND)  + 1
    ELSE
@@ -27024,6 +27027,7 @@ ENDDO
 
 ! Add to RAD_CFACE ICR_LO, ICR_HI:
 DO IFACE=1,CUT_FACE(ICF)%NFACE
+   IF(ABS(MESHES(NM)%CFACE(CUT_FACE(ICF)%CFACE_INDEX(IFACE))%NVEC(X1AXIS)) < GEOMEPS) CYCLE
    IF(ABS(CUT_FACE(ICF)%XYZCEN(X1AXIS,IFACE)-X1LO) < DX1O2) THEN
       IND = LOW_IND
    ELSE
