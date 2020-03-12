@@ -28957,7 +28957,7 @@ ENDDO
 ! bodies reach an intersection:
 BODNUM(:) = 0
 ALLOCATE(UBOD(N_GEOMETRY)); UBOD=0
-DO IDCR=1,CRS_NUM(IBM_N_CRS)
+IDCR_DO_1 : DO IDCR=1,CRS_NUM(IBM_N_CRS)
     ! Load body numbers:
     DO IDCR2=IND_CRS(LOW_IND,IDCR)+1,IND_CRS(LOW_IND,IDCR)+IND_CRS(HIGH_IND,IDCR)
        ISEG=IBM_SEG_CRS(IDCR2)
@@ -28974,9 +28974,24 @@ DO IDCR=1,CRS_NUM(IBM_N_CRS)
     ! Now assign IBM_BDNUM_CRS_AUX(IDCR):
     SBOD = 0
     DO IUBD=1,NUBD
+       ! Drop extra intersections (same intersection type, same body):
+       USE_INT_POINT(IND_CRS(LOW_IND,IDCR)+1:IND_CRS(LOW_IND,IDCR)+IND_CRS(HIGH_IND,IDCR)) = .TRUE.
+       DO ICRS1=IND_CRS(LOW_IND,IDCR)+1,IND_CRS(LOW_IND,IDCR)+IND_CRS(HIGH_IND,IDCR)
+          IF (.NOT.USE_INT_POINT(ICRS1)) CYCLE ! Don't use collapsed point as pivot.
+          ! Collapse GS or SG points:
+          DO ICRS2 = IND_CRS(LOW_IND,IDCR)+1 , IND_CRS(LOW_IND,IDCR)+IND_CRS(HIGH_IND,IDCR)
+             IF ( (ICRS2==ICRS1) .OR. .NOT.USE_INT_POINT(ICRS2) ) CYCLE ! Don't use pivot, or collapsed point.
+             IF ((IBM_IS_CRS2(LOW_IND ,ICRS1) == IBM_IS_CRS2(LOW_IND ,ICRS2)) .AND. &
+                 (IBM_IS_CRS2(HIGH_IND,ICRS1) == IBM_IS_CRS2(HIGH_IND,ICRS2)) .AND. &
+                 (BODNUM(ICRS1) == BODNUM(ICRS2))) THEN
+                 USE_INT_POINT(ICRS2) = .FALSE.
+             ENDIF
+          ENDDO
+       ENDDO
        IBDNUM=0
        DO IDCR2=IND_CRS(LOW_IND,IDCR)+1,IND_CRS(LOW_IND,IDCR)+IND_CRS(HIGH_IND,IDCR)
           IF (BODNUM(IDCR2) /= UBOD(IUBD)) CYCLE
+          IF ( .NOT.USE_INT_POINT(IDCR2) ) CYCLE
           IBDNUM = IBDNUM + IBM_BDNUM_CRS(IDCR2)
        ENDDO
        IF (IBDNUM /= 0) SBOD = SBOD + SIGN(1,IBDNUM)
@@ -28986,7 +29001,7 @@ DO IDCR=1,CRS_NUM(IBM_N_CRS)
     ELSE
         IBM_BDNUM_CRS_AUX(IDCR) = IBM_BDNUM_CRS_AUX(IDCR-1) + SBOD
     ENDIF
-ENDDO
+ENDDO IDCR_DO_1
 DEALLOCATE(UBOD)
 
 
@@ -28994,11 +29009,11 @@ DEALLOCATE(UBOD)
 ! Loop over different crossings:
 LEFT_MEDIA = IBM_GASPHASE ! Here we could change the initial LEFT_MEDIA to IBM_SOLID if needed. Would require adding
                           ! IBM_BDNUM_CRS(LOW_IND,0) = 1, i.e crossed into SOLID at x2 -> -Inf.
-DO IDCR=1,CRS_NUM(IBM_N_CRS)
+IDCR_DO_2 : DO IDCR=1,CRS_NUM(IBM_N_CRS)
 
    IBM_N_CRS_AUX = IBM_N_CRS_AUX + 1
    ! Case of single crossing with new svar:
-   IF ( IND_CRS(HIGH_IND,IDCR) == 1 ) THEN
+   SNGL_CRS_IF : IF ( IND_CRS(HIGH_IND,IDCR) == 1 ) THEN
 
       ICRS =IND_CRS(LOW_IND,IDCR) + 1
 
@@ -29043,7 +29058,7 @@ DO IDCR=1,CRS_NUM(IBM_N_CRS)
 
       CYCLE
 
-   ENDIF
+   ENDIF SNGL_CRS_IF
 
    ! Case of several crossings with new svar:
    DROP_SS_GG = .FALSE.
@@ -29074,7 +29089,7 @@ DO IDCR=1,CRS_NUM(IBM_N_CRS)
    ! Now figure out the type of crossing:
    NOT_COUNTED = .TRUE.
    NCRS_REMAIN = IND_CRS(HIGH_IND,IDCR)
-   IF (DROP_SS_GG) THEN
+   DROP_SS_GG_IF : IF (DROP_SS_GG) THEN
 
       ! Points of the same type are collapsed:
       USE_INT_POINT(IND_CRS(LOW_IND,IDCR)+1:IND_CRS(LOW_IND,IDCR)+IND_CRS(HIGH_IND,IDCR)) = .TRUE.
@@ -29083,7 +29098,8 @@ DO IDCR=1,CRS_NUM(IBM_N_CRS)
          DO ICRS2 = IND_CRS(LOW_IND,IDCR)+1, IND_CRS(LOW_IND,IDCR)+IND_CRS(HIGH_IND,IDCR)
             IF( (ICRS2==ICRS1) .OR. .NOT.USE_INT_POINT(ICRS2) ) CYCLE ! Don't use pivot, or collapsed point.
             IF( (IBM_IS_CRS2(LOW_IND ,ICRS1) == IBM_IS_CRS2(LOW_IND ,ICRS2)) .AND. &
-                (IBM_IS_CRS2(HIGH_IND,ICRS1) == IBM_IS_CRS2(HIGH_IND,ICRS2)) ) USE_INT_POINT(ICRS2) = .FALSE.
+                (IBM_IS_CRS2(HIGH_IND,ICRS1) == IBM_IS_CRS2(HIGH_IND,ICRS2)) .AND. &
+                (BODNUM(ICRS1) == BODNUM(ICRS2)) ) USE_INT_POINT(ICRS2) = .FALSE.
          ENDDO
       ENDDO
 
@@ -29162,9 +29178,9 @@ DO IDCR=1,CRS_NUM(IBM_N_CRS)
 
       LEFT_MEDIA = IBM_IS_CRS2_AUX(HIGH_IND,IBM_N_CRS_AUX)
 
-   ENDIF
+   ENDIF DROP_SS_GG_IF
 
-ENDDO
+ENDDO IDCR_DO_2
 
 ! Copy final results:
 IBM_N_CRS    = IBM_N_CRS_AUX
