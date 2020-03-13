@@ -5233,6 +5233,20 @@ In this case, we compare FDS predictions against a 1D spherical heat transfer mo
 \end{figure}
 
 
+\section{Water Droplets on Solid Surfaces}
+
+\subsection{Basic Flow and Mass Conservation (\texorpdfstring{{\textct{geom\_sprk\_mass}}}{geom\_sprk\_mass}) }
+\label{geom_sprk_mass}
+
+In the test case called {\ct Sprinklers\_and\_Sprays/geom\_sprk\_mass.fds}, two identical sprinklers pour water on two identical obstructions, one of which is created using the traditional {\ct OBST} input parameters, the other is created using the immersed boundary {\ct GEOM} parameters. The objective is simply to ensure that the droplets behave the same way in both cases. The sprinklers operate for 4~s, each discharging 10.5~L of water. The {\ct HORIZONTAL\_VELOOCITY} of the droplets on the solid surfaces is set to a low value of 0.05~m/s to allow for all of the water to pool before dripping over the edge. Figure~\ref{geom_sprk_mass_fig} displays the accumulated mass of water on each obstruction as a function of time, demonstrating equivalent behavior by both types of solid obstructions.
+\begin{figure}[h!]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/geom_sprk_mass} 
+\caption[The {\ct geom\_sprk\_mass} test case]{Mass of water pooled on two solid obstructions.}
+\label{geom_sprk_mass_fig}
+\end{figure}
+
+
 \section{Flow Rate and Pipe Networks (\texorpdfstring{{\textct{flow\_rate\_2}}}{flow\_rate\_2}) }
 \label{flow_rate_2}
 
