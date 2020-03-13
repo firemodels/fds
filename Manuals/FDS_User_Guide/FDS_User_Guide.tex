@@ -7086,29 +7086,51 @@ The amount expected on the floor is approximately 0.024~kg.
 \subsection{Level Set Model for Wildland Fire Spread}
 \label{info:level_set}
 
-For simulations of wildland fires that span large areas that cannot be gridded at fine enough resolution to predict fire spread, there is an empirical model based on level sets for which you can specify the fire spread rate in three directions with respect to the prevailing wind direction. To invoke this model, you need a {\ct SURF} line as follows:
+For simulations of wildland fires spanning large areas that cannot be gridded at fine enough resolution to predict fire spread directly, there is an empirical model based on level sets for which you can specify the fire spread rate in three directions with respect to the prevailing wind direction~\cite{Bova:IJWF2015}. The methodology used in FDS reproduces (in an Eulerian framework) the approach used in the Lagrangian-based fire front-tracking model FARSITE~\cite{Finney:FARSITE}. This approach makes use of the Rothermel~\cite{Rothermel:1972} surface fire spread rate formulae and the assumption that a surface fire spreading from a point under certain wind, slope and vegetation conditions does so with an ellipse-shaped fire front with, for a given wind speed, a fixed length-to-breadth ratio~\cite{Richards:1990}.
+
+To invoke this model, you need a {\ct SURF} line as follows:
 \begin{lstlisting}
-&SURF ID='Ground Vegetation'
-      TEXTURE_MAP='my_terrain.png'
-      VEG_LSET_SPREAD = T
-      VEG_LSET_ROS_HEAD = 1.5
-      VEG_LSET_ROS_FLANK = 0.5
-      VEG_LSET_ROS_BACK = 0.15
+&SURF ID = 'Old Chamise (15)'
+      VEG_LSET_SPREAD = .TRUE.
+      VEG_LSET_COUPLED = .TRUE.
+      VEG_LSET_ELLIPSE_HEAD  = 0.007
+      VEG_LSET_SIGMA = 3344.
+      VEG_LSET_BETA = 0.0041
+      VEG_LSET_HT = 0.91
       HRRPUA = 200.
       RAMP_Q = 'fire' /
 \end{lstlisting}
-The parameter {\ct VEG\_LSET\_SPREAD} simply invokes the level set spread model when set to true. The parameters {\ct VEG\_LSET\_ROS\_XXX} are coefficients in empirical expressions for the rate of spread in the windward ({\ct HEAD}), leeward ({\ct BACK}), and lateral ({\ct FLANK}) directions.
-
-When the fire front arrives at a given surface cell, it begins to burn with a heat release per unit area given by {\ct HRRPUA} in kW/m$^2$. The local heat release rate is typically ramped up and down using {\ct RAMP\_Q}. The local burning rate and duration are function of the vegetation mass per unit area.
+The parameter {\ct VEG\_LSET\_SPREAD} simply invokes the level set spread model when set to true. The parameter {\ct VEG\_LSET\_COUPLED=T} directs FDS to use the local wind field in its calculation of the fire front trajectory. {\ct VEG\_LSET\_ELLIPSE\_HEAD} is the no-wind, no-slope rate of spread (ROS) for the given fuel model. {\ct VEG\_LSET\_SIGMA} (m$^{-1}$) and {\ct VEG\_LSET\_BETA} are the surface to volume ratio ($\sigma$) and packing ratio ($\beta$) of the underlying vegetation. {\ct VEG\_LSET\_HT} (m) is the height of the vegetation. When the fire front arrives at a given surface cell, it begins to burn with a heat release per unit area given by {\ct HRRPUA} in kW/m$^2$. The local heat release rate is typically ramped up and down using {\ct RAMP\_Q}. The local burning rate and duration are function of the vegetation mass per unit area.
 
 The fire is initiated by specifying a small area to be ignited at a particular time:
 \begin{lstlisting}
 &SURF ID='Ignited Area', VEG_LSET_IGNITE_TIME=1., COLOR='RED' /
-&VENT XB=..., SURF_ID='Ignited Area', GEOM=T /
+&VENT XB=..., SURF_ID='Ignited Area' /
 \end{lstlisting}
-These lines indicate that a patch of terrain specified using {\ct XB} on the {\ct VENT} line ignites at 1~s, i.e. just after the start of the simulation. The logical parameter {\ct GEOM} is needed to tell FDS that the terrain geometry is an immersed boundary and does not conform exactly with the numerical grid. The coordinates given by {\ct XB} designate a horizontal patch at the lowest level of the computational domain, and this plane is then projected upwards until it cuts through the actual domain.
+These lines indicate that a patch of terrain specified using {\ct XB} on the {\ct VENT} line ignites at 1~s, i.e. just after the start of the simulation. If the terrain is constructed using the immersed boundary framework {\ct GEOM}, add the logical parameter {\ct GEOM} to the {\ct VENT} line to indicate that the terrain geometry is an immersed boundary and does not conform exactly with the numerical grid. In such a case, the coordinates given by {\ct XB} designate a horizontal patch at the lowest level of the computational domain, and this plane is then projected upwards until it cuts through the terrain surface.
 
+\subsubsection{Simple Test Cases}
 
+Bova et al.~\cite{Bova:IJWF2015} compare the level set calculation that has been implemented in FDS with the identical algorithm in the U.S. Forest Service FARSITE model. The three contour plots in Fig.~\ref{Bova_fig} match those in Figs.~1(a), 1(b), and 4(a) in the paper. The FDS input files, {\ct WUI/Bova\_1a.fds}, {\ct WUI/Bova\_1b.fds}, and {\ct WUI/Bova\_4a.fds} all have the same {\ct SURF} line that defines the vegetation. Note that in these examples, there is no actual fire nor does the level set calculation depend on the local wind field. The purpose of the exercise is simply to test the level set algorithm.
+\begin{lstlisting}
+&SURF ID = 'Custom Grass'
+      VEG_LSET_SPREAD = .TRUE.
+      VEG_LSET_COUPLED = .FALSE.
+      VEG_LSET_ELLIPSE_HEAD  = 0.04
+      VEG_LSET_SIGMA = 11400.
+      VEG_LSET_BETA = 0.0012
+      VEG_LSET_HT = 0.51 /
+\end{lstlisting}
+
+\begin{figure}[p]
+\begin{center}
+\includegraphics[height=2.7in]{SCRIPT_FIGURES/Bova_1a} \\
+\includegraphics[height=2.7in]{SCRIPT_FIGURES/Bova_1b} \\
+\includegraphics[height=2.7in]{SCRIPT_FIGURES/Bova_4a}
+\end{center}
+\caption[Level set test cases]{Level set test cases from Bova et al.~\cite{Bova:IJWF2015}, Figs.~1(a), 1(b), and 4(a).}
+\label{Bova_fig}
+\end{figure}
 
 
 
@@ -7414,7 +7436,7 @@ The same smoke detector model is used that was described above, but now, the spe
 \subsection{Beam Detection Systems}
 \label{info:beam_detector}
 
-A beam detector can be defined by specifying the endpoints, {\ct (x1,y1,z1) and (x2,y2,z2)}, of the beam and the total percent obscuration at which the detector activates.  The two endpoints must lie in the same mesh.  FDS determines which mesh cells lie along the linear path defined by the two endpoints.  The beam detector response is evaluated as
+A beam detector can be defined by specifying the endpoints, {\ct (x1,y1,z1) and (x2,y2,z2)}, of the beam and the total percent obscuration at which the detector activates. FDS determines which mesh cells lie along the linear path defined by the two endpoints.  The beam detector response is evaluated as
 \be
   \hbox{Obscuration}  = \left(1 - \exp \left( -K_{\rm m} \sum_{i=1}^N {\rho_{{\rm s},i}\; \Delta x_i} \right)  \right) \times 100  \; \; \hbox{\%}
 \ee

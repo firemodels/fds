@@ -719,6 +719,9 @@ $QFDS -d Turbulence sem_atm_leddy_p2.fds
 $QFDS -d Turbulence sem_ramp_leddy_p2.fds
 $QFDS -d Turbulence ramp_prof_u_z.fds
 
+$QFDS -d WUI Bova_1a.fds
+$QFDS -d WUI Bova_1b.fds
+$QFDS -d WUI Bova_4a.fds
 $QFDS -d WUI dragon_5a.fds
 $QFDS -p 2 -d WUI ground_vegetation_conv.fds
 $QFDS -p 2 -d WUI ground_vegetation_drag.fds
