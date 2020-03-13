@@ -2531,7 +2531,11 @@ The test cases called {\ct Miscellaneous/layer\_1mesh.fds} and {\ct layer\_4mesh
 
 There are numerous examples in the heat transfer literature of exact solutions, for simple configurations of hot and cold objects, of the radiation transport equation. This chapter presents a number of these examples, plus others aimed at assessing the influence of absorptive media.
 
-\section{Radiation View Factors (\texorpdfstring{\textct{plate\_view\_factor}}{plate\_view\_factor}) }
+\section{Radiation View Factors}
+
+The examples in this section test the basic radiation transport solver against exact solutions derived for simple geometric shapes.
+
+\subsection{Hot Plate (\texorpdfstring{\textct{plate\_view\_factor}}{plate\_view\_factor}) }
 \label{plate_view_factor}
 
 These verification cases test the computation of radiative heat flux from a hot plate to a target surface 1~m away in different coordinate systems. The radiating surface is at 1000~\si{\degree C} and has an emissivity of 1.0.  The exact values are calculated using the analytical expressions for the view factors.
@@ -2549,6 +2553,20 @@ A comparison of exact values and FDS predictions at three different angular reso
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/plate_view_factor}
 \caption[The {\ct plate\_view\_factor} test case]{Convergence study showing increased accuracy of radiative transport equation with increasing number of angles.}
 \label{fig_plate_view_factor}
+\end{figure}
+
+\subsection{Plates at a Right Angle (\texorpdfstring{\textct{geom\_rad}}{geom\_rad}) }
+\label{geom_rad}
+
+In this case, two flat rectangular obstructions (0.98~m by 0.98~m, $A=0.9604$~m$^2$) abut at a right angle. The view factor $F_{12}=0.20004$. The vertical plate has a surface temperature of $T_{\rm hot}=1273.15$~K and the horizontal plate has a temperature of $T_{\rm cold}=293.15$~K. The emissivity of each surface is 1, and the convective heat transfer coefficient is assumed to be 0. Two cases are considered. The first is where the plates are input as conventional rectangular {\ct OBST}s, and the second where the plates are immersed boundary {\ct GEOM}s. There should be no difference in the total energy radiated from hot to cold plates, Fig.~\ref{geom_rad_fig} (left), or the incident heat flux in the center of the cold plate, Fig.~\ref{geom_rad_fig} (right). The exact solution for the integrated incident (i.e. incoming) heat flux to the surface of the cold plate is $F_{12} \sigma T_{\rm hot}^4 A= 28.62$~kW. The purpose of this exercise is to ensure that both types of obstructions behave the same way.
+
+\begin{figure}[!ht]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/geom_rad_energy} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/geom_rad_flux}
+\end{tabular*}
+\caption[Results of the {\ct geom\_rad} test case]{A hot wall radiates onto a cold floor. At left is the total rate of energy transfer, and at right is the heat flux to the center of the floor.}
+\label{geom_rad_fig}
 \end{figure}
 
 
