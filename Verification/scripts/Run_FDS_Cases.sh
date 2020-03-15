@@ -16,6 +16,9 @@ SINGLE=
 nthreads=1
 walltime=
 RUNOPTION=
+if [ "$USE_MAX_CORES" != "" ]; then
+   RUNOPTION=-N
+fi
 CURDIR=`pwd`
 QFDS_COUNT=/tmp/qfds_count_`whoami`
 if [ "$BACKGROUND_PROG" == "" ]; then
