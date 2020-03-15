@@ -16,7 +16,7 @@ SINGLE=
 nthreads=1
 walltime=
 RUNOPTION=
-if [ "$USE_MAX_CORES" == "1" ]; then
+if [ "$USE_MAX_CORES" != "" ]; then
    RUNOPTION=-N
 fi
 CURDIR=`pwd`
