@@ -455,6 +455,7 @@ $QFDS -d Radiation particle_absorption_cart_surf_cyl.fds
 $QFDS -d Radiation particle_absorption_cart_surf_sph.fds
 $QFDS -d Radiation emissivity.fds
 $QFDS -p 2 -d Radiation geom_rad.fds
+$QFDS -p 8 -d Radiation geom_rad_2.fds
 $QFDS -d Radiation hot_spheres.fds
 $QFDS -d Radiation part_attenuation.fds
 $QFDS -d Radiation plate_view_factor_2D_30.fds

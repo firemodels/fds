@@ -2569,6 +2569,18 @@ In this case, two flat rectangular obstructions (0.98~m by 0.98~m, $A=0.9604$~m$
 \label{geom_rad_fig}
 \end{figure}
 
+\subsection{Plates at a Right Angle, Part 2 (\texorpdfstring{\textct{geom\_rad\_2}}{geom\_rad\_2}) }
+\label{geom_rad_2}
+
+The case in the previous section is repeated, only now the two plates are not aligned with the Cartesian grid. Figure~\ref{geom_rad_2_fig} displays the comparison of exact and computed solutions for the integrated incident heat flux to the cold plate. 
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/geom_rad_2_energy}
+\caption[Results of the {\ct geom\_rad\_2} test case]{The heat flux from a hot plate to a cold plate at a right angle.}
+\label{geom_rad_2_fig}
+\end{figure}
+
 
 
 \section{Radiation inside a Box (\texorpdfstring{\textct{radiation\_box}}{radiation\_box}) }
@@ -5259,7 +5271,7 @@ In this case, we compare FDS predictions against a 1D spherical heat transfer mo
 In the test case called {\ct Sprinklers\_and\_Sprays/geom\_sprk\_mass.fds}, two identical sprinklers pour water on two identical obstructions, one of which is created using the traditional {\ct OBST} input parameters, the other is created using the immersed boundary {\ct GEOM} parameters. The objective is simply to ensure that the droplets behave the same way in both cases. The sprinklers operate for 4~s, each discharging 10.5~L of water. The {\ct HORIZONTAL\_VELOOCITY} of the droplets on the solid surfaces is set to a low value of 0.05~m/s to allow for all of the water to pool before dripping over the edge. Figure~\ref{geom_sprk_mass_fig} displays the accumulated mass of water on each obstruction as a function of time, demonstrating equivalent behavior by both types of solid obstructions.
 \begin{figure}[h!]
 \centering
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/geom_sprk_mass} 
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/geom_sprk_mass}
 \caption[The {\ct geom\_sprk\_mass} test case]{Mass of water pooled on two solid obstructions.}
 \label{geom_sprk_mass_fig}
 \end{figure}
