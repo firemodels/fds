@@ -2862,7 +2862,7 @@ PYROLYSIS_PREDICTED_IF: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
             LAYER_INDEX(0:NWP+1),MF_FRAC(1:NWP),SF%INNER_RADIUS)
       ENDIF
       R_S(0) = SF%INNER_RADIUS + ONE_D%X(NWP) - ONE_D%X(0)
-      DO I=0,NWP
+      DO I=1,NWP
          R_S(I) = SF%INNER_RADIUS + ONE_D%X(NWP) - ONE_D%X(I)
          Q_S(I) = Q_S(I)/(R_S(I)**I_GRAD-R_S(I-1)**I_GRAD)
       ENDDO
@@ -3038,15 +3038,19 @@ WALL_ITERATE: DO
       RFACF2 = (DXKF-RFACF)/(DXKF+RFACF)
       RFACB2 = (DXKB-RFACB)/(DXKB+RFACB)
       IF ( .NOT.RADIATION .OR. SF%INTERNAL_RADIATION ) THEN
-         QDXKF = (DXKF*(TMP_W_NEW(1)-ONE_D%TMP_F)+   ONE_D%HEAT_TRANS_COEF*(ONE_D%TMP_G    - 0.5_EB*ONE_D%TMP_F) + Q_WATER_F)/&
+         QDXKF = (DXKF*(TMP_W_NEW(1)-TMP_W_NEW(0)) + &
+                 ONE_D%HEAT_TRANS_COEF*(ONE_D%TMP_G    - 0.5_EB*ONE_D%TMP_F) + Q_WATER_F) / &
                  (DXKF+RFACF)
-         QDXKB = (DXKB*(TMP_W_NEW(NWP)-ONE_D%TMP_B)+ HTCB*                 (      TMP_BACK - 0.5_EB*ONE_D%TMP_B) + Q_WATER_B)/&
+         QDXKB = (DXKB*(TMP_W_NEW(NWP)-TMP_W_NEW(NWP+1)) + &
+                 HTCB*                 (      TMP_BACK - 0.5_EB*ONE_D%TMP_B) + Q_WATER_B) / &
                  (DXKB+RFACB)
       ELSE
-         QDXKF = (DXKF*(TMP_W_NEW(1)-ONE_D%TMP_F)+ ONE_D%HEAT_TRANS_COEF*(ONE_D%TMP_G -    0.5_EB*ONE_D%TMP_F) + ONE_D%Q_RAD_IN + &
+         QDXKF = (DXKF*(TMP_W_NEW(1)-TMP_W_NEW(0)) + &
+                 ONE_D%HEAT_TRANS_COEF*(ONE_D%TMP_G -    0.5_EB*ONE_D%TMP_F) + ONE_D%Q_RAD_IN + &
                  3._EB*ONE_D%EMISSIVITY*SIGMA*ONE_D%TMP_F**4 + Q_WATER_F) /(DXKF+RFACF)
-         QDXKB = (DXKB*(TMP_W_NEW(NWP)-ONE_D%TMP_B)+      HTCB*          (      TMP_BACK - 0.5_EB*ONE_D%TMP_B) + Q_RAD_IN_B + &
-                 3._EB*E_WALLB*SIGMA*ONE_D%TMP_B**4 + Q_WATER_B) /(DXKB+RFACB)
+         QDXKB = (DXKB*(TMP_W_NEW(NWP)-TMP_W_NEW(NWP+1)) +  &
+                 HTCB*                 (      TMP_BACK - 0.5_EB*ONE_D%TMP_B) + Q_RAD_IN_B + &
+                 3._EB*E_WALLB*         SIGMA*ONE_D%TMP_B**4 + Q_WATER_B) /(DXKB+RFACB)
       ENDIF
       CCS(1)   = CCS(1)   - BBS(1)  *QDXKF
       CCS(NWP) = CCS(NWP) - AAS(NWP)*QDXKB
