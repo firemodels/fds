@@ -1,3 +1,6 @@
+!> \brief FDS is a computational fluid dynamics (CFD) code designed to model
+!> fire and other thermal phenomena.
+
 PROGRAM FDS
 
 ! Fire Dynamics Simulator, Main Program, Multiple CPU version.

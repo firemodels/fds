@@ -40,6 +40,10 @@ WRITE(DATE,'(I4.4,"-",I2.2,"-",I2.2,"T",I2.2,":",I2.2,":",I2.2,".",I3.3,SP,I3.2,
 
 END SUBROUTINE GET_DATE_ISO_8601
 
+
+!> \brief Return the current time and date
+!> \param DATE A character string containing the date and time of day
+
 SUBROUTINE GET_DATE(DATE)
 
 INTEGER :: DATE_TIME(8)
@@ -80,9 +84,11 @@ WRITE(DATE,'(A,I3,A,I4,2X,I2.2,A,I2.2,A,I2.2)') TRIM(MONTH),DATE_TIME(3),', ',DA
 END SUBROUTINE GET_DATE
 
 
-SUBROUTINE SHUTDOWN(MESSAGE,PROCESS_0_ONLY)
+!> \brief Stop the code gracefully after writing a message.
+!> \param MESSAGE Character string containing an explanation for shutting down.
+!> \param PROCESS_0_ONLY If .TRUE., only MPI process 0 should write the message.
 
-! Stops the code gracefully after writing a message
+SUBROUTINE SHUTDOWN(MESSAGE,PROCESS_0_ONLY)
 
 USE GLOBAL_CONSTANTS, ONLY: MYID,LU_ERR,CHID,SETUP_STOP,STOP_STATUS,N_MPI_PROCESSES
 CHARACTER(*) MESSAGE
@@ -102,13 +108,13 @@ STOP_STATUS = SETUP_STOP
 END SUBROUTINE SHUTDOWN
 
 
-SUBROUTINE SYSTEM_MEM_USAGE(VALUE_RSS)
+!> This routine returns the memory used by the given process at the time of the call. It only works on a Linux machine because
+!> it searches for the system file called '/proc/PID/status' and reads the VmRSS value (kB).
+!> The DEVC output QUANTITY 'RAM' outputs this value in units of MB.
+!> Normally, this routine just returns 0 because it is non-standard Fortran and we have disconnected the GETPID call.
+!> To invoke it, uncomment the GETPID statement, and the 'USE IFPORT' statement if compiling with Intel Fortran.
 
-! This routine returns the memory used by the given process at the time of the call. It only works on a Linux machine because
-! it searches for the system file called '/proc/PID/status' and reads the VmRSS value (kB).
-! The DEVC output QUANTITY 'RAM' outputs this value in units of MB.
-! Normally, this routine just returns 0 because it is non-standard Fortran and we have disconnected the GETPID call.
-! To invoke it, uncomment the GETPID statement, and the 'USE IFPORT' statement if compiling with Intel Fortran.
+SUBROUTINE SYSTEM_MEM_USAGE(VALUE_RSS)
 
 !USE IFPORT  ! Intel Fortran extension library. This is needed for GETPID.
 INTEGER, INTENT(OUT) :: VALUE_RSS
@@ -146,11 +152,16 @@ CLOSE(1000)
 END SUBROUTINE SYSTEM_MEM_USAGE
 
 
-SUBROUTINE GET_INPUT_FILE ! Read the argument after the command
+!> \brief Read the name of the FDS input file, which is the first argument after the fds command itself.
+!> \param FN_INPUT Name of the input file
+
+SUBROUTINE GET_INPUT_FILE
 USE GLOBAL_CONSTANTS, ONLY: FN_INPUT
 IF (FN_INPUT=='null') CALL GET_COMMAND_ARGUMENT(1,FN_INPUT)
 END SUBROUTINE GET_INPUT_FILE
 
+
+!> \brief Assign a unique integer to be used as a file logical unit.
 
 INTEGER FUNCTION GET_FILE_NUMBER()
 USE GLOBAL_CONSTANTS, ONLY: MYID,FILE_COUNTER
@@ -159,9 +170,12 @@ GET_FILE_NUMBER = FILE_COUNTER(MYID)
 END FUNCTION GET_FILE_NUMBER
 
 
-SUBROUTINE CHECKREAD(NAME,LU,IOS)
+!> Look through the FDS input file for the given namelist variable and then stop at that line.
+!> \param NAME The four character namelist variable
+!> \parma LU Logical unit of the FDS input file
+!> \param IOS Error code
 
-! Look for the namelist variable NAME and then stop at that line.
+SUBROUTINE CHECKREAD(NAME,LU,IOS)
 
 USE GLOBAL_CONSTANTS, ONLY: INPUT_FILE_LINE_NUMBER,STOP_STATUS,SETUP_STOP,MYID,LU_ERR
 INTEGER :: II
@@ -200,9 +214,11 @@ ENDDO READLOOP
 END SUBROUTINE CHECKREAD
 
 
-SUBROUTINE SCAN_INPUT_FILE(LU,IOS,TEXT)
+!> \brief Look for odd or illegal characters in the input file.
+!> \param LU Logical Unit of FDS input file
+!> \param IOS Error code, 0 means the bad text was found, 1 means it was not.
 
-! Look for odd or illegal characters in the input file.
+SUBROUTINE SCAN_INPUT_FILE(LU,IOS,TEXT)
 
 INTEGER, INTENT(OUT) :: IOS
 INTEGER, INTENT(IN) :: LU
@@ -221,6 +237,11 @@ ENDDO READLOOP
 10 RETURN
 END SUBROUTINE SCAN_INPUT_FILE
 
+
+!> \brief Look for TEXT in the input file.
+!> \param LU Logical Unit of the FDS input file
+!> \param TEXT Character string to search for
+!> \param FOUND T if the TEXT is found; F if it is not
 
 SUBROUTINE SEARCH_INPUT_FILE(LU,TEXT,FOUND)
 
@@ -248,9 +269,12 @@ ENDDO READLOOP
 END SUBROUTINE SEARCH_INPUT_FILE
 
 
-SUBROUTINE APPEND_FILE(LU,N_TEXT_LINES,T)
+!> \brief Read through a comma-delimited output file and stop when the time, T, exceeds the last time read
+!> \param LU Logical Unit of the file to be appended
+!> \param N_TEXT_LINES Number of header lines in the file
+!> \param T The time at which to append the data
 
-! Read through a file and stop when T exceeds the last time read
+SUBROUTINE APPEND_FILE(LU,N_TEXT_LINES,T)
 
 USE GLOBAL_CONSTANTS, ONLY: CLIP_RESTART_FILES
 INTEGER, INTENT(IN) :: LU,N_TEXT_LINES
