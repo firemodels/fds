@@ -13,23 +13,23 @@
 #undef WITH_SCARC_STANDALONE
 
 
-! ================================================================================================================
-! MODULE 'SCARC_GLOBAL_CONSTANTS': 
-! Global SCARC parameters
-! ================================================================================================================
+!  ================================================================================================================
+!  MODULE 'SCARC_GLOBAL_CONSTANTS': 
+!> Global SCARC parameters
+!  ================================================================================================================
 MODULE SCARC_GLOBAL_CONSTANTS
 USE PRECISION_PARAMETERS
 IMPLICIT NONE
 
-INTEGER, PARAMETER :: NSCARC_ACCURACY_ABSOLUTE       =  1, &    ! absolute accuracy must be reached
-                      NSCARC_ACCURACY_RELATIVE       =  2       ! relative accuracy must be reached
+INTEGER, PARAMETER :: NSCARC_ACCURACY_ABSOLUTE       =  1, &    !< absolute accuracy must be reached.
+                      NSCARC_ACCURACY_RELATIVE       =  2       !< relative accuracy must be reached.
                    
-INTEGER, PARAMETER :: NSCARC_BUFFER_INT0             =  0, &    ! Point to RECV_INT0 buffer
-                      NSCARC_BUFFER_INT1             =  1, &    ! Point to RECV_INT1 buffer
-                      NSCARC_BUFFER_REAL0            =  2, &    ! Point to RECV_REAL0 buffer
-                      NSCARC_BUFFER_REAL1            =  3, &    ! Point to RECV_REAL1 buffer
-                      NSCARC_BUFFER_REAL2            =  4, &    ! Point to RECV_REAL2 buffer
-                      NSCARC_BUFFER_REAL7            =  5       ! Point to RECV_REAL7 buffer
+INTEGER, PARAMETER :: NSCARC_BUFFER_INT0             =  0, &    !< Point to RECV_INT0 buffer.
+                      NSCARC_BUFFER_INT1             =  1, &    !< Point to RECV_INT1 buffer.
+                      NSCARC_BUFFER_REAL0            =  2, &    !< Point to RECV_REAL0 buffer.
+                      NSCARC_BUFFER_REAL1            =  3, &    !< Point to RECV_REAL1 buffer.
+                      NSCARC_BUFFER_REAL2            =  4, &    !< Point to RECV_REAL2 buffer.
+                      NSCARC_BUFFER_REAL7            =  5       !< Point to RECV_REAL7 buffer.
 
 INTEGER, PARAMETER :: NSCARC_CELL_GASPHASE           =  1, &    ! gasphase cell
                       NSCARC_CELL_SOLID              =  2       ! solid cell

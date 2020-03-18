@@ -1,6 +1,7 @@
-MODULE VELO
+!> \brief Collection of velocity routines.  
+!> Computes the velocity flux terms, baroclinic torque correction terms, and performs the CFL check.
 
-! Module computes the velocity flux terms, baroclinic torque correction terms, and performs the CFL Check
+MODULE VELO
 
 USE PRECISION_PARAMETERS
 USE GLOBAL_CONSTANTS
@@ -16,6 +17,13 @@ PUBLIC VELOCITY_PREDICTOR,VELOCITY_CORRECTOR,NO_FLUX,BAROCLINIC_CORRECTION,MATCH
 
 CONTAINS
 
+
+!> \brief Compute the viscosity of the gas.
+!> \callergraph
+!> \callgraph
+!> \param T Current time (s).
+!> \param NM Mesh number.
+!> \param APPLY_TO_ESTIMATED_VARIABLES Flag indicating \f$\mu(T,\mathbf{u})\f$ or \f$\mu(T^*,\mathbf{u}^*)\f$
 
 SUBROUTINE COMPUTE_VISCOSITY(T,NM,APPLY_TO_ESTIMATED_VARIABLES)
 
@@ -562,6 +570,12 @@ END SUBROUTINE COMPUTE_STRAIN_RATE
 
 END SUBROUTINE COMPUTE_VISCOSITY
 
+
+!> \brief Compute boundary values of the viscosity, MU.
+!> \param NM Mesh number.
+!> \param APPLY_TO_ESTIMATED_VARIABLES Flag indicating \f$\mu(T,\mathbf{u})\f$ or \f$\mu(T^*,\mathbf{u}^*)\f$
+!> \callergraph
+!> \callgraph
 
 SUBROUTINE VISCOSITY_BC(NM,APPLY_TO_ESTIMATED_VARIABLES)
 
