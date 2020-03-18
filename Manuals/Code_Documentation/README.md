@@ -1,6 +1,6 @@
 ## Code Documentation using Doxygen
 
-This directory contains a configuration file, `Doxyfile`, for use with the code documentation program [Doxygen](www.doxygen.nl). Assuming that Doxygen is installed on your system, type:
+This directory contains a configuration file, `Doxyfile`, for use with the code documentation program [Doxygen](doxygen.nl). Assuming that Doxygen is installed on your system, type:
 ```
 doxygen Doxyfile
 ```
