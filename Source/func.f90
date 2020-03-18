@@ -7,19 +7,26 @@
 #ifndef BUILDDATE_PP
 #define BUILDDATE_PP "unknown"
 #endif
-MODULE COMP_FUNCTIONS
 
-! I/O + OS functions
+!> \brief A collection of utility routines used throughout FDS.
+
+MODULE COMP_FUNCTIONS
 
 USE PRECISION_PARAMETERS
 IMPLICIT NONE
 
 CONTAINS
 
-REAL(EB) FUNCTION CURRENT_TIME()  ! Returns the wall clock time in seconds.
+
+!> \brief Returns the wall clock time in seconds.
+
+REAL(EB) FUNCTION CURRENT_TIME()
 USE MPI
 CURRENT_TIME = MPI_WTIME()
 END FUNCTION CURRENT_TIME
+
+!> \brief Return the current time and date in ISO_8601 format.
+!> \param DATE A character string containing the date and time of day.
 
 SUBROUTINE GET_DATE_ISO_8601(DATE)
 
@@ -108,7 +115,9 @@ STOP_STATUS = SETUP_STOP
 END SUBROUTINE SHUTDOWN
 
 
-!> This routine returns the memory used by the given process at the time of the call. It only works on a Linux machine because
+!> \brief Return current system memory usage.
+!>
+!> Return the memory used by the given process at the time of the call. It only works on a Linux machine because
 !> it searches for the system file called '/proc/PID/status' and reads the VmRSS value (kB).
 !> The DEVC output QUANTITY 'RAM' outputs this value in units of MB.
 !> Normally, this routine just returns 0 because it is non-standard Fortran and we have disconnected the GETPID call.
@@ -153,7 +162,6 @@ END SUBROUTINE SYSTEM_MEM_USAGE
 
 
 !> \brief Read the name of the FDS input file, which is the first argument after the fds command itself.
-!> \param FN_INPUT Name of the input file
 
 SUBROUTINE GET_INPUT_FILE
 USE GLOBAL_CONSTANTS, ONLY: FN_INPUT
@@ -170,9 +178,9 @@ GET_FILE_NUMBER = FILE_COUNTER(MYID)
 END FUNCTION GET_FILE_NUMBER
 
 
-!> Look through the FDS input file for the given namelist variable and then stop at that line.
+!> \brief Look through the FDS input file for the given namelist variable and then stop at that line.
 !> \param NAME The four character namelist variable
-!> \parma LU Logical unit of the FDS input file
+!> \param LU Logical unit of the FDS input file
 !> \param IOS Error code
 
 SUBROUTINE CHECKREAD(NAME,LU,IOS)
@@ -214,9 +222,10 @@ ENDDO READLOOP
 END SUBROUTINE CHECKREAD
 
 
-!> \brief Look for odd or illegal characters in the input file.
-!> \param LU Logical Unit of FDS input file
+!> \brief Look for odd or illegal characters in the FDS input file.
+!> \param LU Logical Unit of FDS input file.
 !> \param IOS Error code, 0 means the bad text was found, 1 means it was not.
+!> \param TEXT Illegal character found in FDS input file.
 
 SUBROUTINE SCAN_INPUT_FILE(LU,IOS,TEXT)
 
@@ -238,7 +247,7 @@ ENDDO READLOOP
 END SUBROUTINE SCAN_INPUT_FILE
 
 
-!> \brief Look for TEXT in the input file.
+!> \brief Look for a certain TEXT string in the input file.
 !> \param LU Logical Unit of the FDS input file
 !> \param TEXT Character string to search for
 !> \param FOUND T if the TEXT is found; F if it is not
@@ -269,7 +278,7 @@ ENDDO READLOOP
 END SUBROUTINE SEARCH_INPUT_FILE
 
 
-!> \brief Read through a comma-delimited output file and stop when the time, T, exceeds the last time read
+!> \brief Read through a comma-delimited output file and stop when the time, T, exceeds the last time read.
 !> \param LU Logical Unit of the file to be appended
 !> \param N_TEXT_LINES Number of header lines in the file
 !> \param T The time at which to append the data
@@ -300,8 +309,10 @@ RETURN
 END SUBROUTINE APPEND_FILE
 
 
+!> \brief Reorder an input sextuple XB if needed.
+!> \param XB User-specified real sextuplet.
+
 SUBROUTINE CHECK_XB(XB)
-! Reorder an input sextuple XB if needed
 REAL(EB) :: DUMMY,XB(6)
 INTEGER  :: I
 DO I=1,5,2
@@ -314,12 +325,18 @@ ENDDO
 END SUBROUTINE CHECK_XB
 
 
-SUBROUTINE CHANGE_UNITS(QUANTITY,UNITS,SPATIAL_STATISTIC,TEMPORAL_STATISTIC,MYID,LU_ERR)
+!> \brief Change the units of the output quantity if it is an integrated quantity.
+!> \param QUANTITY Name of output quantity.
+!> \param UNITS Quantity units to be changed.
+!> \param SPATIAL_STATISTIC Type of spatial integration.
+!> \param TEMPORAL_STATISTIC Type of time integration.
+!> \param LU_ERR Logical Unit of error output file.
 
-! Change the units of the DEVC output if it is an integrated quantity
+SUBROUTINE CHANGE_UNITS(QUANTITY,UNITS,SPATIAL_STATISTIC,TEMPORAL_STATISTIC,LU_ERR)
 
+USE GLOBAL_CONSTANTS, ONLY: MYID
 CHARACTER(LABEL_LENGTH), INTENT(IN) :: QUANTITY,SPATIAL_STATISTIC,TEMPORAL_STATISTIC
-INTEGER, INTENT(IN) :: MYID,LU_ERR
+INTEGER, INTENT(IN) :: LU_ERR
 CHARACTER(LABEL_LENGTH), INTENT(INOUT) :: UNITS
 CHARACTER(LABEL_LENGTH) :: NEW_UNITS
 CHARACTER(MESSAGE_LENGTH) :: MESSAGE
