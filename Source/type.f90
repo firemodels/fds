@@ -1,3 +1,5 @@
+!> \brief A collection of major derived types used in FDS.
+
 MODULE TYPES
 
 ! Definitions of various derived data types
@@ -9,10 +11,19 @@ USE GLOBAL_CONSTANTS, ONLY : NULL_BOUNDARY,NEUMANN,MAX_SPECIES, &
 IMPLICIT NONE
 
 TYPE LAGRANGIAN_PARTICLE_CLASS_TYPE
-   CHARACTER(LABEL_LENGTH) :: ID,SPEC_ID,DEVC_ID='null',CTRL_ID='null',QUANTITIES(10),SMOKEVIEW_BAR_LABEL(10),&
-                    SURF_ID='null',PROP_ID='null',&
-                    RADIATIVE_PROPERTY_TABLE_ID='null',CNF_RAMP_ID='null',DISTRIBUTION='ROSIN-RAMMLER-LOGNORMAL',&
-                    BREAKUP_DISTRIBUTION='ROSIN-RAMMLER-LOGNORMAL',BREAKUP_CNF_RAMP_ID='null'
+   CHARACTER(LABEL_LENGTH) :: ID                                               !< Name of particle class.
+   CHARACTER(LABEL_LENGTH) :: SPEC_ID                                          !< Name of evaporating gas species.
+   CHARACTER(LABEL_LENGTH) :: DEVC_ID='null'                                   !< Name of controlling device.
+   CHARACTER(LABEL_LENGTH) :: CTRL_ID='null'                                   !< Name of control function.
+   CHARACTER(LABEL_LENGTH) :: QUANTITIES(10)                                   !< Names of output quantities.
+   CHARACTER(LABEL_LENGTH) :: SMOKEVIEW_BAR_LABEL(10)
+   CHARACTER(LABEL_LENGTH) :: SURF_ID='null'
+   CHARACTER(LABEL_LENGTH) :: PROP_ID='null'
+   CHARACTER(LABEL_LENGTH) :: RADIATIVE_PROPERTY_TABLE_ID='null'
+   CHARACTER(LABEL_LENGTH) :: CNF_RAMP_ID='null'
+   CHARACTER(LABEL_LENGTH) :: DISTRIBUTION='ROSIN-RAMMLER-LOGNORMAL'
+   CHARACTER(LABEL_LENGTH) :: BREAKUP_DISTRIBUTION='ROSIN-RAMMLER-LOGNORMAL'
+   CHARACTER(LABEL_LENGTH) :: BREAKUP_CNF_RAMP_ID='null'
    CHARACTER(60) :: SMOKEVIEW_LABEL(10),QUANTITIES_SPEC_ID(10)
    REAL(EB) :: HEAT_OF_COMBUSTION,ADJUST_EVAPORATION, &
                LIFETIME,DIAMETER,MINIMUM_DIAMETER,MAXIMUM_DIAMETER,GAMMA,KILL_RADIUS,KILL_MASS, &
