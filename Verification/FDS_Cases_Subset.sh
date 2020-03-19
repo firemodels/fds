@@ -22,7 +22,7 @@ $QFDS -d HVAC HVAC_mass_transport_combine.fds
 $QFDS -d HVAC leak_test.fds
 
 $QFDS -d Sprinklers_and_Sprays bucket_test_1.fds
-$QFDS -d Sprinklers_and_Sprays casecade.fds
+$QFDS -d Sprinklers_and_Sprays cascade.fds
 $QFDS -d Sprinklers_and_Sprays terminal_velocity_dt_0_001.fds
 $QFDS -d Sprinklers_and_Sprays water_evaporation_1.fds
 $QFDS -d Sprinklers_and_Sprays water_evaporation_6.fds
