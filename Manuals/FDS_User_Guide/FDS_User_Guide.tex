@@ -6356,15 +6356,19 @@ Here $\dm_{\rm f,0}''(t)$ is the user-specified burning rate per unit area when 
 \be
 k(t) = \hbox{\ct E\_COEFFICIENT} \; m_{\rm w}''(t) \quad          \si{1/s}
 \ee
-The parameter {\ct E\_COEFFICIENT} must be obtained experimentally, and it is expressed in units of \si{m$^2$/(kg.s)}. Usually, this type of suppression algorithm is invoked when the fuel is complicated, like a cartoned commodity.  The example case {\ct e\_coefficient} demonstrates the use of this parameter.  A sprinkler is placed over a burner defined with an {\ct E\_COEFFICIENT} as shown below.  The sprinkler is set to operate at 5~s.  Figure~\ref{e_coef_fig} shows the heat release rate and burning rate. Note that expected value is computed using the sprinkler flow rate and the FDS results are delayed slightly by the time it takes for droplets to reach and accumulate on the burning surface.
+The parameter {\ct E\_COEFFICIENT} must be obtained experimentally, and it is expressed in units of \si{m$^2$/(kg.s)}. Usually, this type of suppression algorithm is invoked when the fuel is complicated, like a cartoned commodity.  The simple example case {\ct Sprinklers\_and\_Sprays/e\_coefficient.fds} demonstrates the use of this parameter.  A water nozzle is placed over a 0.6~m by 0.6~m gas burner defined with the {\ct SURF} line shown below.  The nozzle discharges 0.1~L of water in 0.1 s, 10~s after ignition of the fire. The water's mass per unit area is $0.1/0.36 \approx 0.278$~kg/m$^2$.  Figure~\ref{e_coef_fig} shows the heat release rate of the fire, decreasing from 36~kW to 0~kW in approximately 20~s. There are two cases considered---one where the burner and rim are constructed of conventional {\ct OBST}s and one where the burner is formed using immersed boundary {\ct GEOM}s.
 \begin{lstlisting}
-&SURF ID='FUEL', HRRPUA=100., E_COEFFICIENT=4. /
+&SURF ID='FUEL', HRRPUA=100., E_COEFFICIENT=1. /
 \end{lstlisting}
+The expected HRR curve is:
+\be 
+   \dot{Q}(t) = 36 \, {\rm e}^{-0.278 \, (t-10.4)} \quad \hbox{kW} 
+\ee
 
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/e_coefficient_q} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/e_coefficient_br}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/e_coefficient_obst} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/e_coefficient_geom}
 \end{tabular*}
 \caption[Results of the {\ct e\_coefficient} test case]{Output of the  {\ct e\_coefficient} test case.}
 \label{e_coef_fig}
