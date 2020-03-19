@@ -15,9 +15,9 @@ $QFDS -d Detectors beam_detector.fds
 $QFDS -d Detectors smoke_detector.fds
 
 $QFDS -d HVAC ashrae7_quadratic.fds
-$QFDS -d HVAC_aircoil.fds
-$QFDS -d HVAC_energy_pressure.fds
-$QFDS -d HVAC_filter.fds
+$QFDS -d HVAC HVAC_aircoil.fds
+$QFDS -d HVAC HVAC_energy_pressure.fds
+$QFDS -d HVAC HVAC_filter.fds
 $QFDS -d HVAC HVAC_mass_transport_combine.fds
 $QFDS -d HVAC leak_test.fds
 
