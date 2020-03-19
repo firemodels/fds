@@ -124,6 +124,7 @@ case $OPTION in
    GEOMCASES=
    REGULAR=
    RERUN=
+   SUBSET=
    ;;
   C)
    CHECKCASES="1"
@@ -143,12 +144,14 @@ case $OPTION in
    GEOMCASES=
    REGULAR=
    RERUN=1
+   SUBSET=
    ;;
   g)
    BENCHMARK=
    GEOMCASES=1
    REGULAR=
    RERUN=
+   SUBSET=
    ;;
   h)
    usage;
@@ -178,12 +181,18 @@ case $OPTION in
    GEOMCASES=1
    REGULAR=1
    RERUN=
+   SUBSET=
    ;;
   s)
    export STOPFDS=1
    ;;
   S)
+   BENCHMARK=
+   GEOMCASES=
+   REGULAR=
+   RERUN=
    SUBSET=1
+   ;;
   t)
    BENCHMARK=
    GEOMCASES=
@@ -191,6 +200,7 @@ case $OPTION in
    RERUN=
    INSPECTCASES=1
    DEBUG=_inspect
+   SUBSET=
    ;;
   w)
    walltime="-w $OPTARG"
@@ -264,17 +274,22 @@ fi
 
 cd $CURDIR
 cd ..
-if [ "$REGULAR" == "1" ]; then
-  if [ "$SUBSET" == "" ]; then
-  ./FDS_Cases.sh
-  else
-  ./FDS_Cases_Subset.sh
-  LABEL="A subset of"
-  endif
-  if [ "$CHECKCASES" == "" ]; then
-    echo $LABEL FDS non-benchmark cases submitted
-  fi
+if [ "$SUBSET" == "1" ]; then
+   ./FDS_Cases_Subset.sh
+   if [ "$CHECKCASES" == "" ]; then
+      echo A subset of FDS non-benchmark cases submitted
+   fi
 fi
+
+cd $CURDIR
+cd ..
+if [ "$REGULAR" == "1" ]; then
+    ./FDS_Cases.sh
+   if [ "$CHECKCASES" == "" ]; then
+      echo FDS non-benchmark cases submitted
+   fi
+fi
+
 cd $CURDIR
 cd ..
 if [ "$GEOMCASES" == "1" ]; then
