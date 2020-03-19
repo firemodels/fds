@@ -3009,16 +3009,16 @@ ELSEIF (SF%INTERNAL_RADIATION .AND. (SF%NUMBER_FSK_POINTS == 0)) THEN
 ENDIF
 
 ! Update the 1-D heat transfer equation
-
 DT2_BC = DT_BC
 STEPCOUNT = 1
+ONE_D%Q_CON_F = 0._EB
 ALLOCATE(TMP_W_NEW(0:NWP+1),STAT=IZERO)
 TMP_W_NEW(0:NWP+1) = ONE_D%TMP(0:NWP+1)
+DXKF   = K_S(0)/DXF
+DXKB   = K_S(NWP)/DXB
 WALL_ITERATE: DO
    ITERATE=.FALSE.
    SUB_TIME: DO N=1,STEPCOUNT
-      DXKF   = 0.5_EB*K_S(0)/DXF
-      DXKB   = 0.5_EB*K_S(NWP)/DXB
       DO I=1,NWP
          BBS(I) = -0.5_EB*DT2_BC*K_S(I-1)*RDXN_S(I-1)*RDX_S(I)/RHOCBAR(I) ! DT_BC->DT2_BC
          AAS(I) = -0.5_EB*DT2_BC*K_S(I)  *RDXN_S(I)  *RDX_S(I)/RHOCBAR(I)
@@ -3038,19 +3038,13 @@ WALL_ITERATE: DO
       RFACF2 = (DXKF-RFACF)/(DXKF+RFACF)
       RFACB2 = (DXKB-RFACB)/(DXKB+RFACB)
       IF ( .NOT.RADIATION .OR. SF%INTERNAL_RADIATION ) THEN
-         QDXKF = (DXKF*(TMP_W_NEW(1)-TMP_W_NEW(0)) + &
-                 ONE_D%HEAT_TRANS_COEF*(ONE_D%TMP_G    - 0.5_EB*ONE_D%TMP_F) + Q_WATER_F) / &
-                 (DXKF+RFACF)
-         QDXKB = (DXKB*(TMP_W_NEW(NWP)-TMP_W_NEW(NWP+1)) + &
-                 HTCB*                 (      TMP_BACK - 0.5_EB*ONE_D%TMP_B) + Q_WATER_B) / &
-                 (DXKB+RFACB)
+         QDXKF = (ONE_D%HEAT_TRANS_COEF*(ONE_D%TMP_G    - 0.5_EB*ONE_D%TMP_F) + Q_WATER_F)/(DXKF+RFACF)
+         QDXKB = (HTCB*                 (      TMP_BACK - 0.5_EB*ONE_D%TMP_B) + Q_WATER_B)/(DXKB+RFACB)
       ELSE
-         QDXKF = (DXKF*(TMP_W_NEW(1)-TMP_W_NEW(0)) + &
-                 ONE_D%HEAT_TRANS_COEF*(ONE_D%TMP_G -    0.5_EB*ONE_D%TMP_F) + ONE_D%Q_RAD_IN + &
+         QDXKF = (ONE_D%HEAT_TRANS_COEF*(ONE_D%TMP_G - 0.5_EB*ONE_D%TMP_F) + ONE_D%Q_RAD_IN + &
                  3._EB*ONE_D%EMISSIVITY*SIGMA*ONE_D%TMP_F**4 + Q_WATER_F) /(DXKF+RFACF)
-         QDXKB = (DXKB*(TMP_W_NEW(NWP)-TMP_W_NEW(NWP+1)) +  &
-                 HTCB*                 (      TMP_BACK - 0.5_EB*ONE_D%TMP_B) + Q_RAD_IN_B + &
-                 3._EB*E_WALLB*         SIGMA*ONE_D%TMP_B**4 + Q_WATER_B) /(DXKB+RFACB)
+         QDXKB = (HTCB*(TMP_BACK - 0.5_EB*ONE_D%TMP_B) + Q_RAD_IN_B + 3._EB*E_WALLB*SIGMA*ONE_D%TMP_B**4 + Q_WATER_B) &
+                 /(DXKB+RFACB)
       ENDIF
       CCS(1)   = CCS(1)   - BBS(1)  *QDXKF
       CCS(NWP) = CCS(NWP) - AAS(NWP)*QDXKB
@@ -3069,7 +3063,9 @@ WALL_ITERATE: DO
       TMP_W_NEW(1:NWP) = MIN(TMPMAX,MAX(TMPMIN,CCS(1:NWP)))
       TMP_W_NEW(0)     =            MAX(TMPMIN,TMP_W_NEW(1)  *RFACF2+QDXKF)  ! Ghost value, allow it to be large
       TMP_W_NEW(NWP+1) =            MAX(TMPMIN,TMP_W_NEW(NWP)*RFACB2+QDXKB)  ! Ghost value, allow it to be large
-
+      ! Determine convective heat flux at the wall
+      ONE_D%Q_CON_F  = ONE_D%Q_CON_F  + ONE_D%HEAT_TRANS_COEF * &
+         (ONE_D%TMP_G - 0.5_EB * (ONE_D%TMP_F + 0.5_EB*(TMP_W_NEW(0)+TMP_W_NEW(1))) ) / REAL(STEPCOUNT,EB)
       IF (STEPCOUNT==1) THEN
          ! returns a negative number, if all TMP_S == 0
          TOLERANCE = MAXVAL(ABS((TMP_W_NEW-ONE_D%TMP(0:NWP+1))/ONE_D%TMP(0:NWP+1)), ONE_D%TMP(0:NWP+1)>0._EB)
@@ -3079,6 +3075,7 @@ WALL_ITERATE: DO
             ITERATE=.TRUE.
             DT2_BC=DT_BC/REAL(STEPCOUNT,EB)
             TMP_W_NEW = ONE_D%TMP(0:NWP+1)
+            ONE_D%Q_CON_F= 0._EB
          ENDIF
       ENDIF
       IF (NWP == 1) THEN
@@ -3101,10 +3098,6 @@ DEALLOCATE(TMP_W_NEW)
 
 IF (ONE_D%T_IGN>T  .AND. ONE_D%TMP_F>=SF%TMP_IGN) ONE_D%T_IGN = T
 IF (SF%TMP_IGN<5000._EB .AND. ONE_D%TMP_F<SF%TMP_EXT .AND. ONE_D%T_IGN<T) ONE_D%T_IGN = HUGE(1._EB)
-
-! Determine convective heat flux at the wall
-
-ONE_D%Q_CON_F = ONE_D%HEAT_TRANS_COEF * (ONE_D%TMP_G - 0.5_EB * (ONE_D%TMP_F + ONE_D%TMP_F_OLD) )
 
 END SUBROUTINE SOLID_HEAT_TRANSFER_1D
 
