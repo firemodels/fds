@@ -1,6 +1,14 @@
 #!/bin/bash
 
 $QFDS -d Complex_Geometry geom_obst.fds
+$QFDS -d Complex_Geometry geom_intersection.fds
+$QFDS -d Complex_Geometry geom_bad_inverted_normals.fds
+$QFDS -d Complex_Geometry geom_simple.fds
+$QFDS -d Complex_Geometry geom_arch.fds
+$QFDS -d Complex_Geometry sphere_helium_1mesh.fds
+$QFDS -d Complex_Geometry sphere_radiate.fds
+$QFDS -d Complex_Geometry geom_self_intersection.fds
+$QFDS -d Complex_Geometry cone_1mesh.fds
 
 $QFDS -d Aerosols aerosol_scrubbing.fds
 $QFDS -d Aerosols aerosol_agglomeration.fds
