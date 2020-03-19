@@ -1,6 +1,6 @@
-MODULE WALL_ROUTINES
+!> \brief Collection of routines to compute boundary conditions
 
-! Compute the wall boundary conditions
+MODULE WALL_ROUTINES
 
 USE PRECISION_PARAMETERS
 USE GLOBAL_CONSTANTS
@@ -27,9 +27,13 @@ LOGICAL :: CALL_HT_1D
 CONTAINS
 
 
-SUBROUTINE WALL_BC(T,DT,NM)
+!> \brief Main control routine for applying boundary conditions.
+!>
+!> \param T Current time (s)
+!> \param DT Current time step (s)
+!> \param NM Mesh number
 
-! This is the main control routine for this module
+SUBROUTINE WALL_BC(T,DT,NM)
 
 USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
 USE SOOT_ROUTINES, ONLY: DEPOSITION_BC
@@ -67,11 +71,13 @@ T_USED(6)=T_USED(6)+CURRENT_TIME()-TNOW
 END SUBROUTINE WALL_BC
 
 
-SUBROUTINE THERMAL_BC(T,DT,NM)
+!> \brief Thermal boundary conditions for all boundaries.
+!>
+!> \detail One dimensional heat transfer and pyrolysis is done in PYROLYSIS.
+!> Note also that gas phase values are assigned here to be used for all subsequent BCs.
+!> \callgraph
 
-! Thermal boundary conditions for all boundaries.
-! One dimensional heat transfer and pyrolysis is done in PYROLYSIS.
-! Note also that gas phase values are assigned here to be used for all subsequent BCs.
+SUBROUTINE THERMAL_BC(T,DT,NM)
 
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 USE PHYSICAL_FUNCTIONS, ONLY : GET_SPECIFIC_GAS_CONSTANT,GET_SPECIFIC_HEAT,GET_VISCOSITY,&
@@ -185,6 +191,14 @@ ENDIF
 
 CONTAINS
 
+
+!> \brief Calculate the surface temperature TMP_F
+!>
+!> \details Calculate the surface temperature TMP_F of either a rectangular WALL
+!> cell, or an immersed CFACE cell, or a Lagrangian particle.
+!> \param WALL_INDEX Optional WALL cell index
+!> \param CFACE_INDEX Optional immersed boundary (CFACE) index
+!> \param PARTICLE_INDEX Optional Lagrangian particle index
 
 SUBROUTINE CALCULATE_TMP_F(WALL_INDEX,CFACE_INDEX,PARTICLE_INDEX)
 
@@ -1772,9 +1786,9 @@ END SUBROUTINE CRANK_TEST_1
 END SUBROUTINE THERMAL_BC
 
 
-SUBROUTINE DIFFUSIVITY_BC
+!> \brief Calculate the term RHO_D_F=RHO*D at the wall.
 
-! Calculate the term RHO_D_F=RHO*D at the wall
+SUBROUTINE DIFFUSIVITY_BC
 
 INTEGER :: IW,ICF
 
@@ -1829,9 +1843,13 @@ END SUBROUTINE CALCULATE_RHO_D_F
 END SUBROUTINE DIFFUSIVITY_BC
 
 
-SUBROUTINE SPECIES_BC(T,DT,NM)
+!> \brief Compute the species mass fractions at the boundary, ZZ_F.
+!>
+!> \param T Current time (s)
+!> \param DT Current time step (s)
+!> \param NM Mesh number
 
-! Compute the species mass fractions at the boundary, ZZ_F
+SUBROUTINE SPECIES_BC(T,DT,NM)
 
 USE PHYSICAL_FUNCTIONS, ONLY: GET_SENSIBLE_ENTHALPY,GET_SPECIFIC_HEAT,SURFACE_DENSITY, &
                               GET_SPECIFIC_GAS_CONSTANT
@@ -3102,31 +3120,36 @@ IF (SF%TMP_IGN<5000._EB .AND. ONE_D%TMP_F<SF%TMP_EXT .AND. ONE_D%T_IGN<T) ONE_D%
 END SUBROUTINE SOLID_HEAT_TRANSFER_1D
 
 
+!> \brief Calculate the solid phase reaction. Return heat and mass generation rates per unit volume.
+!>
+!> \param N_MATS Number of material components in the solid
+!> \param MATL_INDEX(1:N_MATS) Indices of the material components from the master material list
+!> \param SURF_INDEX Index of surface, used only for liquids
+!> \param IIG I index of nearest gas phase cell
+!> \param JJG J index of nearest gas phase cell
+!> \param KKG K index of nearest gas phase cell
+!> \param TMP_S Solid interior temperature (K)
+!> \param TMP_F Solid surface temperature (K)
+!> \param IOR Index of orientation of the surface with the liquid droplet, if appropropriate (0 for gas phase droplet)
+!> \param RHO_S(1:N_MATS) Array of component densities (kg/m3)
+!> \param RHO_S0 Original solid density (kg/m3)
+!> \param DEPTH Distance from surface (m)
+!> \param DT_BC Time step used by the solid phase solver (s)
+!> \param M_DOT_G_PPP_ADJUST(1:N_TRACKED_SPECIES) Adjusted mass generation rate per unit volume of the gas species
+!> \param M_DOT_G_PPP_ACTUAL(1:N_TRACKED_SPECIES) Actual mass generation rate per unit volume of the gas species
+!> \param M_DOT_S_PPP(1:N_MATS) Mass generation/depletion rate per unit volume of solid components (kg/m3/s)
+!> \param Q_DOT_S_PPP Heat release rate per unit volume (W/m3)
+!> \param Q_DOT_G_PPP Heat release rate per unit volume in grid cell abutting surface (W/m3)
+!> \param Q_DOT_O2_PPP Heat release rate per unit volume due to char oxidation in grid cell abutting surface (W/m3)
+!> \param I_INDEX (OPTIONAL) Interior grid node in solid
+!> \param R_DROP (OPTIONAL) Radius of liquid droplet
+!> \param LPU (OPTIONAL) x component of droplet velocity (m/s)
+!> \param LPV (OPTIONAL) y component of droplet velocity (m/s)
+!> \param LPW (OPTIONAL) z component of droplet velocity (m/s)
+
 SUBROUTINE PYROLYSIS(N_MATS,MATL_INDEX,SURF_INDEX,IIG,JJG,KKG,TMP_S,TMP_F,IOR,RHO_S,RHO_S0,DEPTH,DT_BC,&
                      M_DOT_G_PPP_ADJUST,M_DOT_G_PPP_ACTUAL,M_DOT_S_PPP,Q_DOT_S_PPP,Q_DOT_G_PPP,Q_DOT_O2_PPP,&
                      I_INDEX,R_DROP,LPU,LPV,LPW)
-
-! Calculate the solid phase reaction. Return heat and mass generation rates per unit volume.
-
-! N_MATS = Number of MATerialS
-! MATL_INDEX(1:N_MATS) = Indices of the materials from the master material list.
-! SURF_INDEX = Index of surface, used only for liquids
-! (IIG,JJG,KKG) = Indices of nearest gas phase cell
-! TMP_S = Solid temperature (K)
-! TMP_F = Solid surface temperature (K)
-! IOR = Index of orientation for liquid evaporation model
-! RHO_S(1:N_MATS) = Array of component densities (kg/m3)
-! RHO_S0 = Original solid density (kg/m3)
-! DEPTH = Distance from surface (m)
-! DT_BC = Time step used by the solid phase solver (s)
-! M_DOT_G_PPP_ADJUST(1:N_TRACKED_SPECIES) = Adjusted mass generation rate per unit volume of the gas species
-! M_DOT_G_PPP_ACTUAL(1:N_TRACKED_SPECIES) = Actual mass generation rate per unit volume of the gas species
-! M_DOT_S_PPP(1:N_MATS) = Mass generation/depletion rate per unit volume of solid components (kg/m3/s)
-! Q_DOT_S_PPP = Heat release rate per unit volume (W/m3)
-! Q_DOT_G_PPP = Heat release rate per unit volume in grid cell abutting surface (W/m3)
-! I_INDEX (OPTIONAL) = ???
-! R_DROP (OPTIONAL) = Radius of liquid droplet
-! (LPU,LPV,LPW) (OPTIONAL) = Velocity components of droplet
 
 USE PHYSICAL_FUNCTIONS, ONLY: GET_MASS_FRACTION,GET_MOLECULAR_WEIGHT,GET_VISCOSITY,GET_SPECIFIC_HEAT,GET_CONDUCTIVITY,&
                               GET_SPECIFIC_GAS_CONSTANT, GET_MASS_FRACTION_ALL,GET_MW_RATIO,GET_EQUIL_DATA
