@@ -43,6 +43,7 @@ EXE=
 CHECKCASES=
 RERUN=
 DELAY=
+SUBSET=
 
 function usage {
 echo "Run_FDS_Cases.sh [ -d -h -m max_iterations -o nthreads -q queue_name -s "
@@ -67,6 +68,7 @@ echo "-O - use OpenMPI version of FDS"
 echo "-q queue_name - run cases using the queue queue_name [default: batch]"
 echo "-R - run only regular (non-benchmark) cases"
 echo "-s - stop FDS runs"
+echo "-S - run cases in FDS_Cases_Subset.sh"
 echo "-t - run only thread checking cases"
 echo "-w time - walltime request for a batch job"
 echo "     default: empty"
@@ -114,7 +116,7 @@ cd $SVNROOT
 export SVNROOT=`pwd`
 cd $CURDIR
 
-while getopts 'bB:c:CdD:e:D:Fghj:JL:m:o:Oq:RsS:tw:W' OPTION
+while getopts 'bCdD:e:Fghj:Jm:o:Oq:RsStw:W' OPTION
 do
 case $OPTION in
   b)
@@ -180,6 +182,8 @@ case $OPTION in
   s)
    export STOPFDS=1
    ;;
+  S)
+   SUBSET=1
   t)
    BENCHMARK=
    GEOMCASES=
@@ -261,9 +265,14 @@ fi
 cd $CURDIR
 cd ..
 if [ "$REGULAR" == "1" ]; then
+  if [ "$SUBSET" == "" ]; then
   ./FDS_Cases.sh
+  else
+  ./FDS_Cases_Subset.sh
+  LABEL="A subset of"
+  endif
   if [ "$CHECKCASES" == "" ]; then
-    echo FDS non-benchmark cases submitted
+    echo $LABEL FDS non-benchmark cases submitted
   fi
 fi
 cd $CURDIR
