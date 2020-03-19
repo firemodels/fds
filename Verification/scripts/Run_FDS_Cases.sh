@@ -43,6 +43,7 @@ EXE=
 CHECKCASES=
 RERUN=
 DELAY=
+SUBSET=
 
 function usage {
 echo "Run_FDS_Cases.sh [ -d -h -m max_iterations -o nthreads -q queue_name -s "
@@ -67,6 +68,7 @@ echo "-O - use OpenMPI version of FDS"
 echo "-q queue_name - run cases using the queue queue_name [default: batch]"
 echo "-R - run only regular (non-benchmark) cases"
 echo "-s - stop FDS runs"
+echo "-S - run cases in FDS_Cases_Subset.sh"
 echo "-t - run only thread checking cases"
 echo "-w time - walltime request for a batch job"
 echo "     default: empty"
@@ -114,7 +116,7 @@ cd $SVNROOT
 export SVNROOT=`pwd`
 cd $CURDIR
 
-while getopts 'bB:c:CdD:e:D:Fghj:JL:m:o:Oq:RsS:tw:W' OPTION
+while getopts 'bCdD:e:Fghj:Jm:o:Oq:RsStw:W' OPTION
 do
 case $OPTION in
   b)
@@ -122,6 +124,7 @@ case $OPTION in
    GEOMCASES=
    REGULAR=
    RERUN=
+   SUBSET=
    ;;
   C)
    CHECKCASES="1"
@@ -141,12 +144,14 @@ case $OPTION in
    GEOMCASES=
    REGULAR=
    RERUN=1
+   SUBSET=
    ;;
   g)
    BENCHMARK=
    GEOMCASES=1
    REGULAR=
    RERUN=
+   SUBSET=
    ;;
   h)
    usage;
@@ -176,9 +181,17 @@ case $OPTION in
    GEOMCASES=1
    REGULAR=1
    RERUN=
+   SUBSET=
    ;;
   s)
    export STOPFDS=1
+   ;;
+  S)
+   BENCHMARK=
+   GEOMCASES=
+   REGULAR=
+   RERUN=
+   SUBSET=1
    ;;
   t)
    BENCHMARK=
@@ -187,6 +200,7 @@ case $OPTION in
    RERUN=
    INSPECTCASES=1
    DEBUG=_inspect
+   SUBSET=
    ;;
   w)
    walltime="-w $OPTARG"
@@ -260,12 +274,22 @@ fi
 
 cd $CURDIR
 cd ..
-if [ "$REGULAR" == "1" ]; then
-  ./FDS_Cases.sh
-  if [ "$CHECKCASES" == "" ]; then
-    echo FDS non-benchmark cases submitted
-  fi
+if [ "$SUBSET" == "1" ]; then
+   ./FDS_Cases_Subset.sh
+   if [ "$CHECKCASES" == "" ]; then
+      echo A subset of FDS non-benchmark cases submitted
+   fi
 fi
+
+cd $CURDIR
+cd ..
+if [ "$REGULAR" == "1" ]; then
+    ./FDS_Cases.sh
+   if [ "$CHECKCASES" == "" ]; then
+      echo FDS non-benchmark cases submitted
+   fi
+fi
+
 cd $CURDIR
 cd ..
 if [ "$GEOMCASES" == "1" ]; then
