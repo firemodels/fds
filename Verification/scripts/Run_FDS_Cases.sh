@@ -50,6 +50,7 @@ CHECKCASES=
 RERUN=
 DELAY=
 SUBSET=
+FIREBOT_LITE=
 
 function usage {
 echo "Run_FDS_Cases.sh [ -d -h -m max_iterations -o nthreads -q queue_name -s "
@@ -193,11 +194,7 @@ case $OPTION in
    export STOPFDS=1
    ;;
   S)
-   BENCHMARK=
-   GEOMCASES=
-   REGULAR=
-   RERUN=
-   SUBSET=1
+   FIREBOT_LITE=1
    ;;
   t)
    BENCHMARK=
@@ -216,6 +213,14 @@ case $OPTION in
    ;;
 esac
 done
+
+if [ "$FIREBOT_LITE" != "" ]; then
+   BENCHMARK=
+   GEOMCASES=
+   REGULAR=
+   RERUN=
+   SUBSET=1
+fi
 
 if [ "$JOBPREFIX" == "" ]; then
   JOBPREFIX=FB_
