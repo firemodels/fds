@@ -5492,14 +5492,14 @@ This case starts with the same input as \textct{leak\_test}.  A second leakage v
    \label{fig_HVAC_leak_fan}
 \end{figure}
 
-\subsection{Leakage through Immersed Boundary (\texorpdfstring{\textct{leak\_test\_3}}{leak\_test\_3})}
+\subsection{Leakage through Immersed Boundary Wall (\texorpdfstring{\textct{leak\_test\_3}}{leak\_test\_3})}
 \label{leak_test_3}
 
-This case is intended to ensure that an immersed boundary obstruction ({\ct GEOM}) handles leakage in the same way as a simple grid-conforming obstruction ({\ct OBST}). Two rooms are separated by a wall specified via either an {\ct OBST} line or a {\ct GEOM} line. Air is pumped into the room on one side of the wall at a rate of $\dot{V}=0.02$~m$^3$/s, and the wall is assigned a leakage area $A_{\rm L}=0.001$~m$^2$. The room on the other side of the wall leaks to the outside through a hole of equal area. The pressure rise in rooms 1 and 2, $p_1$ and $p_2$, are found by solving:
+This case is intended to ensure that an immersed boundary obstruction ({\ct GEOM}) handles leakage in the same way as a simple grid-conforming obstruction ({\ct OBST}). Two rooms are separated by a wall specified via either an {\ct OBST} line or a {\ct GEOM} line. Air is pumped into the room on one side of the wall at a rate of $\dot{V}=0.02$~m$^3$/s, and the wall is assigned a leakage area $A_{\rm L}=0.001$~m$^2$. The room on the other side of the wall leaks to the outside through a hole of equal area. The pressure rise in rooms 1 and 2, $\Delta p_1$ and $\Delta p_2$, are found by solving:
 \be
-   \dot{V} = A_{\rm L} \sqrt{ \frac{2 |p_1-p_2|}{\rho_0} } \quad ; \quad \dot{V} = A_{\rm L} \sqrt{ \frac{2 |p_2|}{\rho_0} }
+   \dot{V} = A_{\rm L} \sqrt{ \frac{2 |\Delta p_1-\Delta p_2|}{\rho_0} } \quad ; \quad \dot{V} = A_{\rm L} \sqrt{ \frac{2 |\Delta p_2|}{\rho_0} }
 \ee
-The solution is that $p_1=480$~Pa and $p_2=240$~Pa, as shown in Fig.~\ref{fig_leak_test_3}.
+The solution is that $\Delta p_1=480$~Pa and $\Delta p_2=240$~Pa, as shown in Fig.~\ref{fig_leak_test_3}.
 
 
 \begin{figure}[ht]
@@ -5511,6 +5511,22 @@ The solution is that $p_1=480$~Pa and $p_2=240$~Pa, as shown in Fig.~\ref{fig_le
    \label{fig_leak_test_3}
 \end{figure}
 
+\subsection{Leakage through Immersed Boundary Compartment (\texorpdfstring{\textct{leak\_test\_4}}{leak\_test\_4})}
+\label{leak_test_4}
+
+This case is intended to ensure that a simple compartment constructed of immersed boundary obstructions ({\ct GEOM}) handles leakage in the same way as a simple grid-conforming compartment. Air is pumped into the compartment via a small rotated cube inside at a rate of $\dot{V}=0.024$~m$^3$/s, and the walls are assigned a total leakage area $A_{\rm L}=0.001$~m$^2$. The pressure rise, $\Delta p$ is found by solving:
+\be
+   \dot{V} = A_{\rm L} \sqrt{ \frac{2 |\Delta p|}{\rho_0} } \quad ; \quad \rho_0=1.195 \; \hbox{kg/m}^3
+\ee
+The solution is that $\Delta p=344.16$~Pa, as shown in Fig.~\ref{fig_leak_test_4}.
+
+
+\begin{figure}[ht]
+  \centering
+      \scalebox{1.0}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/leak_test_4} } 
+   \caption[The \textct{leak\_test\_4} test case]{Pressure rise in a compartment constructed of immersed boundary obstructions.}
+   \label{fig_leak_test_4}
+\end{figure}
 
 
 \subsection{Multiple Zone, Multiple Mesh Leakage (\texorpdfstring{\textct{zone\_shape\_2}}{zone\_shape\_2})}
