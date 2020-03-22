@@ -144,10 +144,6 @@ if [ "$FIREMODELS" != "" ]; then
   FDSROOT=$FIREMODELS
 fi
 
-#*** define resource manager that is used
-
-
-
 #*** determine platform
 
 platform="linux"
@@ -211,12 +207,18 @@ use_config=""
 
 # determine which resource manager is running (or none)
 
-missing_slurm=`srun -V |& tail -1 | grep "not found" | wc -l`
+STATUS_FILE=status_file.$$
+srun -V >& $STATUS_FILE
+missing_slurm=`cat $STATUS_FILE | tail -1 | grep "not found" | wc -l`
+rm -f $STATUS_FILE
+
 RESOURCE_MANAGER="NONE"
 if [ $missing_slurm -eq 0 ]; then
   RESOURCE_MANAGER="SLURM"
 else
-  missing_torque=`echo | qmgr -n |& tail -1 | grep "not found" | wc -l`
+  echo | qmgr -n >& $STATUS_FILE
+  missing_torque=`cat $STATUS_FILE | tail -1 | grep "not found" | wc -l`
+  rm -f $STATUS_FILE
   if [ $missing_torque -eq 0 ]; then
     RESOURCE_MANAGER="TORQUE"
   fi
@@ -1005,7 +1007,12 @@ fi
 
 $SLEEP
 echo 
-$QSUB $scriptfile | tee -a $qlog
+chmod +x $scriptfile
+if [ "$queue" != "none" ]; then
+  $QSUB $scriptfile | tee -a $qlog
+else
+  $QSUB $scriptfile
+fi
 if [ "$queue" != "none" ]; then
   cat $scriptfile > $scriptlog
   echo "#$QSUB $scriptfile" >> $scriptlog
