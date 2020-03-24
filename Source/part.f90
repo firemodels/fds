@@ -1479,11 +1479,28 @@ PARTICLE_LOOP: DO IP=1,NLP
       CFACE_SEARCH: IF (CC_IBM) THEN
          INDCF = CCVAR(LP%ONE_D%IIG,LP%ONE_D%JJG,LP%ONE_D%KKG,IBM_IDCF)
          IF ( INDCF < 1 .AND. CCVAR(LP%ONE_D%IIG,LP%ONE_D%JJG,LP%ONE_D%KKG,IBM_CGSC)==IBM_SOLID) THEN
-            ! Search for cut-cell in the direction of -GVEC:
-            DIND = MAXLOC(ABS(GVEC(1:3)),DIM=1); MADD(1:3,1:3) = -INT(SIGN(1._EB,GVEC(DIND)))*EYE3
-            INDCF = CCVAR(LP%ONE_D%IIG+MADD(1,DIND),LP%ONE_D%JJG+MADD(2,DIND),LP%ONE_D%KKG+MADD(3,DIND),IBM_IDCF)
+            ! Kinematics of a surface particle moving on Horizontal GEOM surface and passing to IBM_SOLID cell.
+            ! Bounce back on random direction, maintaining CFACE_INDEX:
+            IF(LP%CFACE_INDEX /= 0 .AND. ABS(LP%W)<TWO_EPSILON_EB) THEN
+               CALL RANDOM_NUMBER(RN)
+               DIST2_MIN = (1._EB-SIGN(1._EB,LP%V))*PI/2._EB
+               IF(ABS(LP%U) > TWO_EPSILON_EB) DIST2_MIN = ATAN2(LP%V,LP%U)
+               THETA_RN = PI*(REAL(RN,EB)+0.5_EB)+DIST2_MIN
+               VEL_VECTOR_1(1) = COS(THETA_RN)
+               VEL_VECTOR_1(2) = SIN(THETA_RN)
+               VEL_VECTOR_1(3) = 0._EB
+               LP%X=X_OLD; LP%Y=Y_OLD; LP%Z=Z_OLD
+               LP%U = VEL_VECTOR_1(1)*LPC%HORIZONTAL_VELOCITY
+               LP%V = VEL_VECTOR_1(2)*LPC%HORIZONTAL_VELOCITY
+               LP%W = VEL_VECTOR_1(3)*LPC%HORIZONTAL_VELOCITY
+               CYCLE PARTICLE_LOOP
+            ELSE
+               ! Search for cut-cell in the direction of -GVEC:
+               DIND = MAXLOC(ABS(GVEC(1:3)),DIM=1); MADD(1:3,1:3) = -INT(SIGN(1._EB,GVEC(DIND)))*EYE3
+               INDCF = CCVAR(LP%ONE_D%IIG+MADD(1,DIND),LP%ONE_D%JJG+MADD(2,DIND),LP%ONE_D%KKG+MADD(3,DIND),IBM_IDCF)
+            ENDIF
          ENDIF
-         IF ( INDCF > 0 ) THEN  ! Current grid cell has CFACEs
+         INDCF_POS : IF ( INDCF > 0 ) THEN  ! Current grid cell has CFACEs
             DIST2_MIN = 1.E6_EB
             DO IFACE=1,CUT_FACE(INDCF)%NFACE  ! Loop through CFACEs and find the one closest to the particle
                ICF = CUT_FACE(INDCF)%CFACE_INDEX(IFACE)
@@ -1497,28 +1514,48 @@ PARTICLE_LOOP: DO IP=1,NLP
             ! If the CFACE normal points up, force the particle to follow the contour. If the normal points down,
             ! put the particle back into the gas phase.
             P_VECTOR = (/LP%X-CFACE(ICF)%X,LP%Y-CFACE(ICF)%Y,LP%Z-CFACE(ICF)%Z/)
-            TEST_POS = DOT_PRODUCT(CFACE(ICF)%NVEC,P_VECTOR) > TWO_EPSILON_EB
-            IF (DOT_PRODUCT(CFACE(ICF)%NVEC,GVEC)>0._EB .OR. TEST_POS) THEN  ! normal points down; drop it
+            TEST_POS = .FALSE.; IF(LP%CFACE_INDEX == 0) TEST_POS = DOT_PRODUCT(CFACE(ICF)%NVEC,P_VECTOR) > TWO_EPSILON_EB
+            CFACE_ATTACH : IF (DOT_PRODUCT(CFACE(ICF)%NVEC,GVEC)>0._EB .OR. TEST_POS) THEN  ! normal points down or particle in gas phase;
+               ! Let particle move freely:
                LP%CFACE_INDEX = 0
                LP%ONE_D%IOR = 0
-            ELSE  ! normal points up; determine direction for particle to move
+            ELSE  CFACE_ATTACH ! normal points up; determine direction for particle to move
                CALL CROSS_PRODUCT(VEL_VECTOR_1,CFACE(ICF)%NVEC,GVEC)
                CALL CROSS_PRODUCT(VEL_VECTOR_2,VEL_VECTOR_1,CFACE(ICF)%NVEC)
-               IF (NORM2(VEL_VECTOR_2) > TWO_EPSILON_EB) THEN  ! the surface is tilted; particles go down slope
+               CFACE_SLOPE : IF (NORM2(VEL_VECTOR_2) > TWO_EPSILON_EB .AND. ABS(LP%W) > TWO_EPSILON_EB) THEN  ! the surface is tilted;
+                                                                                                              ! particles go down slope
                   VEL_VECTOR_1 = VEL_VECTOR_2/NORM2(VEL_VECTOR_2)
                   LP%U = VEL_VECTOR_1(1)*LPC%HORIZONTAL_VELOCITY
                   LP%V = VEL_VECTOR_1(2)*LPC%HORIZONTAL_VELOCITY
                   LP%W = VEL_VECTOR_1(3)*LPC%HORIZONTAL_VELOCITY
-               ELSEIF (LP%ONE_D%IOR==0) THEN  ! surface is flat and particle has no direction, particles given random direction
+               ELSEIF (LP%ONE_D%IOR==0) THEN  CFACE_SLOPE ! surface is flat and particle has no direction, coming from gasphase,
+                                                          ! particle is given random direction
                   CALL RANDOM_NUMBER(RN)
                   THETA_RN = TWOPI*REAL(RN,EB)
-                  VEL_VECTOR_1(1) = COS(THETA_RN)
-                  VEL_VECTOR_1(2) = SIN(THETA_RN)
-                  VEL_VECTOR_1(3) = 0._EB
-                  LP%U = VEL_VECTOR_1(1)*LPC%HORIZONTAL_VELOCITY
-                  LP%V = VEL_VECTOR_1(2)*LPC%HORIZONTAL_VELOCITY
-                  LP%W = VEL_VECTOR_1(3)*LPC%HORIZONTAL_VELOCITY
-               ENDIF
+                  VEL_VECTOR_1(IAXIS) = COS(THETA_RN)
+                  VEL_VECTOR_1(JAXIS) = SIN(THETA_RN)
+                  VEL_VECTOR_1(KAXIS) = 0._EB
+                  LP%U = VEL_VECTOR_1(IAXIS)*LPC%HORIZONTAL_VELOCITY
+                  LP%V = VEL_VECTOR_1(JAXIS)*LPC%HORIZONTAL_VELOCITY
+                  LP%W = VEL_VECTOR_1(KAXIS)*LPC%HORIZONTAL_VELOCITY
+               ELSEIF (LP%CFACE_INDEX /= 0 .AND. ABS(LP%W)<TWO_EPSILON_EB) THEN CFACE_SLOPE
+                  ! Particle moving in horizontal direction and assumed crossing into solid.
+                  ! Bounce back on random direction, maintaining CFACE_INDEX:
+                  IF (DOT_PRODUCT( (/ LP%U, LP%V /) ,CFACE(ICF)%NVEC(IAXIS:JAXIS))<-TWO_EPSILON_EB)THEN
+                     CALL RANDOM_NUMBER(RN)
+                     DIST2_MIN = (1._EB-SIGN(1._EB,LP%V))*PI/2._EB
+                     IF(ABS(LP%U) > TWO_EPSILON_EB) DIST2_MIN = ATAN2(LP%V,LP%U)
+                     THETA_RN = PI*(REAL(RN,EB)+0.5_EB)+DIST2_MIN
+                     VEL_VECTOR_1(1) = COS(THETA_RN)
+                     VEL_VECTOR_1(2) = SIN(THETA_RN)
+                     VEL_VECTOR_1(3) = 0._EB
+                     LP%X=X_OLD; LP%Y=Y_OLD; LP%Z=Z_OLD
+                     LP%U = VEL_VECTOR_1(1)*LPC%HORIZONTAL_VELOCITY
+                     LP%V = VEL_VECTOR_1(2)*LPC%HORIZONTAL_VELOCITY
+                     LP%W = VEL_VECTOR_1(3)*LPC%HORIZONTAL_VELOCITY
+                     CYCLE PARTICLE_LOOP
+                  ENDIF
+               ENDIF CFACE_SLOPE
                ! If the particle is inside the solid, move it to the surface in the normal direction.
                PVEC_L = NORM2(P_VECTOR)
                IF (PVEC_L>TWO_EPSILON_EB) THEN
@@ -1532,11 +1569,11 @@ PARTICLE_LOOP: DO IP=1,NLP
                ENDIF
                LP%CFACE_INDEX = ICF
                LP%ONE_D%IOR = 1
-            ENDIF
+            ENDIF CFACE_ATTACH
             CYCLE PARTICLE_LOOP
-         ELSEIF (CCVAR(LP%ONE_D%IIG,LP%ONE_D%JJG,LP%ONE_D%KKG,IBM_CGSC)/=IBM_GASPHASE) THEN
+         ELSEIF (CCVAR(LP%ONE_D%IIG,LP%ONE_D%JJG,LP%ONE_D%KKG,IBM_CGSC)/=IBM_GASPHASE) THEN INDCF_POS
             LP%ONE_D%IOR = 0
-         ENDIF
+         ENDIF INDCF_POS
       ENDIF CFACE_SEARCH
 
       ! If the particle crosses a cell boundary, determine its new status and check if it has hit a solid.
@@ -2206,7 +2243,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
          ENDDO
       ENDIF
    ENDDO
-   
+
    DO IW = 1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       WALL(IW)%ONE_D%WORK2 = 0._EB  ! FILM_THICKNESS
    ENDDO
@@ -2248,7 +2285,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
       LP  => LAGRANGIAN_PARTICLE(IP)
       LPC => LAGRANGIAN_PARTICLE_CLASS(LP%CLASS_INDEX)
       RUN_AVG_FAC = LPC%RUNNING_AVERAGE_FACTOR_WALL
-      OMRAF = 1._EB - RUN_AVG_FAC  
+      OMRAF = 1._EB - RUN_AVG_FAC
       IF (LPC%Z_INDEX/=Z_INDEX)     CYCLE PARTICLE_LOOP
       IF (.NOT.LPC%LIQUID_DROPLET)  CYCLE PARTICLE_LOOP
 
@@ -2880,7 +2917,7 @@ SUM_PART_QUANTITIES: IF (N_LP_ARRAY_INDICES > 0) THEN
       LPC => LAGRANGIAN_PARTICLE_CLASS(N_LPC)
       IF (LPC%MASSLESS_TRACER .OR. LPC%MASSLESS_TARGET) CYCLE PART_CLASS_SUM_LOOP
       RUN_AVG_FAC = LPC%RUNNING_AVERAGE_FACTOR_WALL
-      OMRAF = 1._EB - RUN_AVG_FAC  
+      OMRAF = 1._EB - RUN_AVG_FAC
 
       DROP_DEN = 0._EB
       DROP_TMP = 0._EB
