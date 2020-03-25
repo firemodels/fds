@@ -1515,15 +1515,15 @@ PARTICLE_LOOP: DO IP=1,NLP
             ! put the particle back into the gas phase.
             P_VECTOR = (/LP%X-CFACE(ICF)%X,LP%Y-CFACE(ICF)%Y,LP%Z-CFACE(ICF)%Z/)
             TEST_POS = .FALSE.; IF(LP%CFACE_INDEX == 0) TEST_POS = DOT_PRODUCT(CFACE(ICF)%NVEC,P_VECTOR) > TWO_EPSILON_EB
-            CFACE_ATTACH : IF (DOT_PRODUCT(CFACE(ICF)%NVEC,GVEC)>0._EB .OR. TEST_POS) THEN  ! normal points down or particle in gas phase;
-               ! Let particle move freely:
+            CFACE_ATTACH : IF (DOT_PRODUCT(CFACE(ICF)%NVEC,GVEC)>0._EB .OR. TEST_POS) THEN
+               ! Normal points down or particle in gas phase. Let particle move freely:
                LP%CFACE_INDEX = 0
                LP%ONE_D%IOR = 0
             ELSE  CFACE_ATTACH ! normal points up; determine direction for particle to move
                CALL CROSS_PRODUCT(VEL_VECTOR_1,CFACE(ICF)%NVEC,GVEC)
                CALL CROSS_PRODUCT(VEL_VECTOR_2,VEL_VECTOR_1,CFACE(ICF)%NVEC)
-               CFACE_SLOPE : IF (NORM2(VEL_VECTOR_2) > TWO_EPSILON_EB .AND. ABS(LP%W) > TWO_EPSILON_EB) THEN  ! the surface is tilted;
-                                                                                                              ! particles go down slope
+               CFACE_SLOPE : IF (NORM2(VEL_VECTOR_2) > TWO_EPSILON_EB .AND. ABS(LP%W) > TWO_EPSILON_EB) THEN
+                  ! The surface is tilted; particles go down slope:
                   VEL_VECTOR_1 = VEL_VECTOR_2/NORM2(VEL_VECTOR_2)
                   LP%U = VEL_VECTOR_1(1)*LPC%HORIZONTAL_VELOCITY
                   LP%V = VEL_VECTOR_1(2)*LPC%HORIZONTAL_VELOCITY
