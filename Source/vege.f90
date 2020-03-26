@@ -1065,6 +1065,8 @@ SELECT CASE(ROTHERMEL_FUEL_INDEX)
       svd1=4921.      ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921. 
       mx=0.25         ; depth=0.9144   ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
 END SELECT
+
+SF%VEG_LSET_HT = depth
       
 ! Auxiliary functions
    
@@ -1085,6 +1087,7 @@ swml = swlh*mlh + swlw*mlw
 ! Characteristic surface-to-volume ratio [R(71,72)]
 
 sigma = s2wt/swt
+SF%VEG_LSET_SIGMA = sigma
    
 ! Mean bulk density [R(74)]
    
@@ -1093,6 +1096,7 @@ rhob = (w0d1 + w0d2 + w0d3 + w0lh + w0lw)/depth
 ! Mean packing ratio [R(31,73)]
    
 beta = rhob/rhop
+SF%VEG_LSET_BETA = beta
    
 ! Optimal packing ratio [R(37)]
    
