@@ -249,7 +249,7 @@ DO JJG=1,JBAR
 
       IF_ELLIPSE_UNCOUPLED: IF (SF%VEG_LSET_ELLIPSE) THEN
 
-         ROS_HEAD(IIG,JJG) = SF%VEG_LSET_ELLIPSE_HEAD
+         ROS_HEAD(IIG,JJG) = SF%VEG_LSET_ROS
          SF%VEG_LSET_HT = MAX(0.001_EB,SF%VEG_LSET_HT)
 
          ! If any surfaces set to ellipse, then elliptical model used for all surfaces
@@ -400,7 +400,7 @@ DO JJG=1,JBAR
 
          IF_ELLIPSE_COUPLED: IF (SF%VEG_LSET_ELLIPSE) THEN
 
-            ROS_HEAD(IIG,JJG) = SF%VEG_LSET_ELLIPSE_HEAD
+            ROS_HEAD(IIG,JJG) = SF%VEG_LSET_ROS
 
             ! Find wind at ~6.1 m height for Farsite
             KWIND = 0
@@ -976,5 +976,225 @@ ENDIF
 SCALAR_FACE_VALUE_LS = ZUP + 0.5_EB * B * ( ZDWN - ZUP )
 
 END FUNCTION SCALAR_FACE_VALUE_LS
+
+
+!> \brief Calculate the Rothermel no-wind, no-slope rate of spread.
+!> 
+!>
+!> \details The Rothermel model as described in Bachmann's thesis.
+
+REAL(EB) FUNCTION ROS_NO_WIND_NO_SLOPE(ROTHERMEL_FUEL_INDEX)
+
+INTEGER, INTENT(IN) :: ROTHERMEL_FUEL_INDEX
+REAL(EB) :: w0d1, w0d2, w0d3, w0lh, w0lw, md1, md2, md3, mlh, mlw, svd1, svd2, svd3, svlh, svlw, depth, rhop, heat, st, se, mx
+REAL(EB) :: swd1, swd2, swd3, swlh, swlw, swd, swl, swt, s2wt, sw2d, sw2l, swmd, swml, sigma, rhob, beta, &
+            betaOpt, wnd, wnl, hnd1, hnd2, hnd3, hnlh, hnlw, hnd, hnl, bigW, hnmd, mfdead, mxlive, rml, rmd, etaMd, etaMl, etaM, &
+            etas, gammaMax, bigA, gamma, bigIr, xi, epsd1, epsd2, epsd3, epslh, epslw, bigQd1, bigQd2, &
+            bigQd3, bigQlh, bigQlw, hskz, hsk
+               
+SELECT CASE(ROTHERMEL_FUEL_INDEX)
+   CASE(1)  ! 'Short Grass'
+      w0d1=0.1659     ; w0d2=0.        ; w0d3=0.        ; w0lh=0.        ; w0lw=0. 
+      md1=0.03        ; md2=0.04       ; md3=0.05       ; mlh=0.70       ; mlw=0.70
+      svd1=11483.     ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921. 
+      mx=0.12         ; depth=0.3048   ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
+   CASE(2)  ! 'Timbergrass'
+      w0d1=0.448      ; w0d2=0.224     ; w0d3=0.112     ; w0lh=0.112     ; w0lw=0. 
+      md1=0.03        ; md2=0.04       ; md3=0.05       ; mlh=0.70       ; mlw=0.70
+      svd1=9842.      ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921. 
+      mx=0.15         ; depth=0.3048   ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
+   CASE(3)  ! 'Tall Grass'
+      w0d1=0.675      ; w0d2=0.        ; w0d3=0.        ; w0lh=0.        ; w0lw=0. 
+      md1=0.03        ; md2=0.04       ; md3=0.05       ; mlh=0.70       ; mlw=0.70
+      svd1=4921.      ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921. 
+      mx=0.25         ; depth=0.762    ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
+   CASE(4)  ! 'Chaparral'
+      w0d1=1.123      ; w0d2=0.899     ; w0d3=0.448     ; w0lh=1.123     ; w0lw=0. 
+      md1=0.03        ; md2=0.04       ; md3=0.05       ; mlh=0.70       ; mlw=0.70
+      svd1=6562.      ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921. 
+      mx=0.20         ; depth=1.829    ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
+   CASE(5)  ! 'Brush'
+      w0d1=0.224      ; w0d2=0.112     ; w0d3=0.        ; w0lh=0.        ; w0lw=0.448
+      md1=0.03        ; md2=0.04       ; md3=0.05       ; mlh=0.70       ; mlw=0.70
+      svd1=6562.      ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921. 
+      mx=0.20         ; depth=0.6096   ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
+   CASE(6)  ! 'Dormant Brush'
+      w0d1=0.336      ; w0d2=0.56      ; w0d3=0.448     ; w0lh=0.        ; w0lw=0.   
+      md1=0.03        ; md2=0.04       ; md3=0.05       ; mlh=0.70       ; mlw=0.70
+      svd1=5741.      ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921. 
+      mx=0.25         ; depth=0.762    ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
+   CASE(7)  ! 'Southern Rough'
+      w0d1=0.255      ; w0d2=0.419     ; w0d3=0.336     ; w0lh=0.        ; w0lw=0.083
+      md1=0.03        ; md2=0.04       ; md3=0.05       ; mlh=0.70       ; mlw=0.70
+      svd1=5741.      ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921. 
+      mx=0.40         ; depth=0.762    ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
+   CASE(8)  ! 'Closed Timber Litter'
+      w0d1=0.336      ; w0d2=0.224     ; w0d3=0.56      ; w0lh=0.        ; w0lw=0.   
+      md1=0.03        ; md2=0.04       ; md3=0.05       ; mlh=0.70       ; mlw=0.70
+      svd1=6562.      ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921. 
+      mx=0.30         ; depth=0.06096  ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
+   CASE(9)  ! ID='Hardwood Litter'
+      w0d1=0.655      ; w0d2=0.092     ; w0d3=0.034     ; w0lh=0.        ; w0lw=0.   
+      md1=0.03        ; md2=0.04       ; md3=0.05       ; mlh=0.70       ; mlw=0.70
+      svd1=8202.      ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921. 
+      mx=0.25         ; depth=0.06096  ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
+   CASE(10)  ! 'Timber'
+      w0d1=0.675      ; w0d2=0.448     ; w0d3=1.123     ; w0lh=0.        ; w0lw=0.448
+      md1=0.03        ; md2=0.04       ; md3=0.05       ; mlh=0.70       ; mlw=0.70
+      svd1=6562.      ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921. 
+      mx=0.25         ; depth=0.3048   ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
+   CASE(11)  ! 'Light Slash'
+      w0d1=0.336      ; w0d2=1.011     ; w0d3=1.235     ; w0lh=0.        ; w0lw=0.   
+      md1=0.03        ; md2=0.04       ; md3=0.05       ; mlh=0.70       ; mlw=0.70
+      svd1=4921.      ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921. 
+      mx=0.15         ; depth=0.3048   ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
+   CASE(12)  ! ID='Medium Slash'
+      w0d1=0.899      ; w0d2=3.145     ; w0d3=3.706     ; w0lh=0.        ; w0lw=0.   
+      md1=0.03        ; md2=0.04       ; md3=0.05       ; mlh=0.70       ; mlw=0.70
+      svd1=4921.      ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921. 
+      mx=0.20         ; depth=0.70104  ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
+   CASE(13)  ! 'Heavy Slash'
+      w0d1=1.571      ; w0d2=5.165     ; w0d3=6.288     ; w0lh=0.        ; w0lw=0.   
+      md1=0.03        ; md2=0.04       ; md3=0.05       ; mlh=0.70       ; mlw=0.70
+      svd1=4921.      ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921. 
+      mx=0.25         ; depth=0.9144   ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
+END SELECT
+      
+! Auxiliary functions
+   
+swd1 = svd1*w0d1  
+swd2 = svd2*w0d2 
+swd3 = svd3*w0d3  
+swlh = svlh*w0lh  
+swlw = svlw*w0lw 
+swd  = swd1 + swd2 + swd3  
+swl  = swlh + swlw  
+swt  = swd + swl  
+s2wt = svd1**2*w0d1 + svd2**2*w0d2 + svd3**2*w0d3 + svlh**2*w0lh + svlw**2*w0lw  
+sw2d = svd1*w0d1**2 + svd2*w0d2**2 + svd3*w0d3**2
+sw2l = svlh*w0lh**2 + svlw*w0lw**2  
+swmd = swd1*md1 + swd2*md2 + swd3*md3  
+swml = swlh*mlh + swlw*mlw
+   
+! Characteristic surface-to-volume ratio [R(71,72)]
+
+sigma = s2wt/swt
+   
+! Mean bulk density [R(74)]
+   
+rhob = (w0d1 + w0d2 + w0d3 + w0lh + w0lw)/depth
+  
+! Mean packing ratio [R(31,73)]
+   
+beta = rhob/rhop
+   
+! Optimal packing ratio [R(37)]
+   
+betaOpt = 8.8578*sigma**(-0.8189)
+   
+! Net fuel loading [R(60), adjusted by A.(p.88) and R(59)]
+   
+if (swd==0._eb) then
+   wnd = 0._eb
+else
+   wnd = (sw2d/swd)*(1. - st)
+endif
+
+if (swl==0._eb) then
+   wnl = 0._eb
+else
+   wnl = (sw2l/swl)*(1. - st)
+endif
+   
+! Mineral damping coefficient [R(62)]
+   
+etas = 0.174*se**(-0.19)
+   
+! Ratio of "fine" fuel loadings,dead/living [Albini,p.89]
+   
+hnd1 = 0.20482*w0d1*Exp(-452.76/svd1) 
+hnd2 = 0.20482*w0d2*exp(-452.76/svd2) 
+hnd3 = 0.20482*w0d3*exp(-452.76/svd3) 
+hnlh = 0.20482*w0lh*exp(-1640.42/svlh) 
+hnlw = 0.20482*w0lw*exp(-1640.42/svlw) 
+hnd = hnd1 + hnd2 + hnd3 
+hnl = hnlh + hnlw
+if (swl==0._eb) then
+   bigW = 0._eb
+else
+   bigW = hnd/hnl
+endif
+   
+! Moisture content of "fine" dead fuel [Albini,p.89]
+   
+hnmd   = hnd1*md1 + hnd2*md2 + hnd3*md3
+mfdead = hnmd/hnd
+   
+! Moisture of extinction of living fuel [R(88),Albini,p.89]
+   
+mxlive = 2.9*bigW*(1.0 - (mfdead/mx)) - 0.226
+   
+! Moisture ratios [R(65,66)]
+   
+if (swl==0._eb) then
+   rml = 0._eb
+else
+   rml = swml/(swl*mxlive)
+endif
+
+rmd = swmd/(swd*mx)
+   
+! Moisture damping coefficients [R(64)]
+   
+etaMd = 1.0 - (2.59*rmd) + (5.11*rmd**2) - (3.52*rmd**3) 
+etaMl = 1.0 - (2.59*rml) + (5.11*rml**2) - (3.52*rml**3) 
+etaM  = wnd*etaMd + wnl*etaMl
+   
+! Maximum reaction velocity [R(36,68)]
+   
+gammaMax = (0.16828*sigma**(1.5))/(29700 + 0.5997*sigma**(1.5))
+   
+! A [R(70),Albini p.88]
+   
+bigA = 340.53*sigma**(-0.7913)
+   
+! Potential reaction velocity [R(38)]
+   
+gamma = gammaMax*(beta/betaOpt)**(bigA)*exp(bigA*(1.0 - (beta/betaOpt)))
+   
+! Propagating flux ratio [R(42)]
+   
+xi = exp((0.792 + 0.37597*sqrt(sigma))*(beta + 0.1))/(192.0 + 0.0791*sigma)
+   
+! Effective heating number [R(14,77)]
+   
+epsd1 = exp(-452.76/svd1) 
+epsd2 = exp(-452.76/svd2) 
+epsd3 = exp(-452.76/svd3)
+epslh = exp(-452.76/svlh) 
+epslw = exp(-452.76/svlw)
+   
+! Heat of pre-ignition [R(12,78)]
+   
+bigQd1 = 581.5 + 2595.7*md1 
+bigQd2 = 581.5 + 2595.7*md2 
+bigQd3 = 581.5 + 2595.7*md3 
+bigQlh = 581.5 + 2595.7*mlh 
+bigQlw = 581.5 + 2595.7*mlw
+   
+! Heat sink [R(77)]
+   
+hskz = svd1*w0d1*epsd1*bigQd1 + svd2*w0d2*epsd2*bigQd2 + svd3*w0d3*epsd3*bigQd3 + svlh*w0lh*epslh*bigQlh + svlw*w0lw*epslw*bigQlw
+hsk  = rhob*hskz/swt
+   
+! Reaction intensity [R(27,58),Albini,p.89]
+   
+bigIr = gamma*heat*etas*etaM
+   
+! Rate of spread [R(52)] and the rate of spread in the absence of wind and with no slope.
+   
+ROS_NO_WIND_NO_SLOPE = (bigIr*xi)/hsk
+
+END FUNCTION ROS_NO_WIND_NO_SLOPE
 
 END MODULE VEGE
