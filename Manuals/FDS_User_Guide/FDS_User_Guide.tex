@@ -6361,8 +6361,8 @@ The parameter {\ct E\_COEFFICIENT} must be obtained experimentally, and it is ex
 &SURF ID='FUEL', HRRPUA=100., E_COEFFICIENT=1. /
 \end{lstlisting}
 The expected HRR curve is:
-\be 
-   \dot{Q}(t) = 36 \, {\rm e}^{-0.278 \, (t-10.4)} \quad \hbox{kW} 
+\be
+   \dot{Q}(t) = 36 \, {\rm e}^{-0.278 \, (t-10.4)} \quad \hbox{kW}
 \ee
 
 \begin{figure}[ht]
@@ -7090,21 +7090,21 @@ The amount expected on the floor is approximately 0.024~kg.
 \subsection{Level Set Model for Wildland Fire Spread}
 \label{info:level_set}
 
-For simulations of wildland fires spanning large areas that cannot be gridded at fine enough resolution to predict fire spread directly, there is an empirical model based on level sets for which you can specify the fire spread rate in three directions with respect to the prevailing wind direction~\cite{Bova:IJWF2015}. The methodology used in FDS reproduces (in an Eulerian framework) the approach used in the Lagrangian-based fire front-tracking model FARSITE~\cite{Finney:FARSITE}. This approach makes use of the Rothermel~\cite{Rothermel:1972} surface fire spread rate formulae and the assumption that a surface fire spreading from a point under certain wind, slope and vegetation conditions does so with an ellipse-shaped fire front with, for a given wind speed, a fixed length-to-breadth ratio~\cite{Richards:1990}.
+For simulations of wildland fires spanning large areas that cannot be gridded at fine enough resolution to predict fire spread using a physics-based model, there is an empirical model built into FDS based on level sets~\cite{Bova:IJWF2015}. The methodology used reproduces (in an Eulerian framework) the approach used in the Lagrangian-based fire front-tracking model FARSITE~\cite{Finney:FARSITE}. This approach makes use of the Rothermel-Albini~\cite{Rothermel:1972,Albini:1976} surface fire spread rate formulae and the assumption that a surface fire spreading from a point under certain wind, slope and vegetation conditions does so with an ellipse-shaped fire front with, for a given wind speed, a fixed length-to-breadth ratio~\cite{Richards:1990}.
 
 To invoke this model, you need a {\ct SURF} line as follows:
 \begin{lstlisting}
 &SURF ID = 'Old Chamise (15)'
       VEG_LSET_SPREAD = .TRUE.
       VEG_LSET_COUPLED = .TRUE.
-      VEG_LSET_ELLIPSE_HEAD  = 0.007
+      VEG_LSET_ROS = 0.007
       VEG_LSET_SIGMA = 3344.
       VEG_LSET_BETA = 0.0041
       VEG_LSET_HT = 0.91
       HRRPUA = 200.
       RAMP_Q = 'fire' /
 \end{lstlisting}
-The parameter {\ct VEG\_LSET\_SPREAD} simply invokes the level set spread model when set to true. The parameter {\ct VEG\_LSET\_COUPLED=T} directs FDS to use the local wind field in its calculation of the fire front trajectory. {\ct VEG\_LSET\_ELLIPSE\_HEAD} is the no-wind, no-slope rate of spread (ROS) for the given fuel model. {\ct VEG\_LSET\_SIGMA} (m$^{-1}$) and {\ct VEG\_LSET\_BETA} are the surface to volume ratio ($\sigma$) and packing ratio ($\beta$) of the underlying vegetation. {\ct VEG\_LSET\_HT} (m) is the height of the vegetation. When the fire front arrives at a given surface cell, it begins to burn with a heat release per unit area given by {\ct HRRPUA} in kW/m$^2$. The local heat release rate is typically ramped up and down using {\ct RAMP\_Q}. The local burning rate and duration are function of the vegetation mass per unit area.
+The parameter {\ct VEG\_LSET\_SPREAD} simply invokes the level set spread model when set to true. The parameter {\ct VEG\_LSET\_COUPLED=T} directs FDS to use the local wind field in its calculation of the fire front trajectory. {\ct VEG\_LSET\_ROS} is the no-wind, no-slope rate of spread (ROS) for the given fuel model. {\ct VEG\_LSET\_SIGMA} (m$^{-1}$) and {\ct VEG\_LSET\_BETA} are the surface to volume ratio ($\sigma$) and packing ratio ($\beta$) of the underlying vegetation. {\ct VEG\_LSET\_HT} (m) is the height of the vegetation. When the fire front arrives at a given surface cell, it begins to burn with a heat release per unit area given by {\ct HRRPUA} in kW/m$^2$. The local heat release rate is typically ramped up and down using {\ct RAMP\_Q}. The local burning rate and duration are function of the vegetation mass per unit area.
 
 The fire is initiated by specifying a small area to be ignited at a particular time:
 \begin{lstlisting}
@@ -7113,6 +7113,35 @@ The fire is initiated by specifying a small area to be ignited at a particular t
 \end{lstlisting}
 These lines indicate that a patch of terrain specified using {\ct XB} on the {\ct VENT} line ignites at 1~s, i.e. just after the start of the simulation. If the terrain is constructed using the immersed boundary framework {\ct GEOM}, add the logical parameter {\ct GEOM} to the {\ct VENT} line to indicate that the terrain geometry is an immersed boundary and does not conform exactly with the numerical grid. In such a case, the coordinates given by {\ct XB} designate a horizontal patch at the lowest level of the computational domain, and this plane is then projected upwards until it cuts through the terrain surface.
 
+\begin{sidewaystable}[p]
+\small
+\caption[Rothermel wildland fuel models]{Parameters corresponding to the 13 Rothermel-Albini fuel models~\cite{Rothermel:1972,Albini:1976}.}
+\label{tbl:Rothermel}
+\centering
+\begin{tabular}{@{\extracolsep{\fill}}|c|l|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+   &                       &                              \multicolumn{6}{|c|}{Dead Fuels}                           &               \multicolumn{4}{|c|}{Live Fuels}                   &         &                  & No-Wind, \\ \cline{3-12}
+   &  Fuel                 & \multicolumn{2}{|c|}{Fine} & \multicolumn{2}{|c|}{Medium} & \multicolumn{2}{|c|}{Large} & \multicolumn{2}{|c|}{Woody} & \multicolumn{2}{|c|}{Herbaceous}   & Fuel    & $M_{\rm x,dead}$ & No-Slope \\ \cline{3-12}
+   &  Type                 & $\sigma$  & $m''$          & $\sigma$  & $m''$           & $\sigma$  & $m''$           & $\sigma$  & $m''$            & $\sigma$  & $m''$                  & Depth   &                  & RoS      \\
+   &                       & m$^{-1}$  & (kg/m$^2$)     & m$^{-1}$  & (kg/m$^2$)      & m$^{-1}$  & (kg/m$^2$)      & m$^{-1}$  & (kg/m$^2$)       & m$^{-1}$  & (kg/m$^2$)             & (m)     &                  & (m/s) \\ \hline \hline
+1  &  Short Grass          & 11500     & 0.17           & ---       & ---             & ---       & ---             & ---       & ---              & ---       & ---                    & 0.30    & 0.12  &   0.030        \\ \hline
+2  &  Timbergrass          & 9840      & 0.45           & 358       & 0.22            & 98        & 0.11            & 4920      & 0.70             & 4920      & 0.70                   & 0.30    & 0.15  &   0.017        \\ \hline
+3  &  Tall Grass           & 4920      & 0.68           & ---       & ---             & ---       & ---             & ---       & ---              & ---       & ---                    & 0.76    & 0.25  &   0.034        \\ \hline
+4  &  Chaparral            & 6560      & 1.12           & 358       & 0.90            & 98        & 0.45            & ---       & ---              & 4920      & 1.12                   & 1.83    & 0.20  &   0.035        \\ \hline
+5  &  Brush                & 6560      & 0.22           & 358       & 0.11            & ---       & ---             & 4920      & 0.45             & ---       & ---                    & 0.61    & 0.20  &   0.010        \\ \hline
+6  &  Dormant Brush        & 5740      & 0.34           & 358       & 0.56            & 98        & 0.45            & ---       & ---              & ---       & ---                    & 0.76    & 0.25  &   0.013        \\ \hline
+7  &  Southern Rough       & 5740      & 0.26           & 358       & 0.42            & 98        & 0.34            & 4920      & 0.08             & ---       & ---                    & 0.76    & 0.40  &   0.010        \\ \hline
+8  &  Closed Timber Litter & 6560      & 0.34           & 358       & 0.22            & 98        & 0.56            & ---       & ---              & ---       & ---                    & 0.06    & 0.30  &   0.002        \\ \hline
+9  &  Hardwood Litter      & 8200      & 0.66           & 358       & 0.09            & 98        & 0.03            & ---       & ---              & ---       & ---                    & 0.06    & 0.25  &   0.006        \\ \hline
+10  &  Timber              & 6560      & 0.68           & 358       & 0.45            & 98        & 1.12            & 4920      & 0.45             & ---       & ---                    & 0.30    & 0.25  &   0.007        \\ \hline
+11  &  Light Slash         & 4920      & 0.34           & 358       & 1.01            & 98        & 1.24            & ---       & ---              & ---       & ---                    & 0.30    & 0.15  &   0.004        \\ \hline
+12  &  Medium Slash        & 4920      & 0.90           & 358       & 3.15            & 98        & 3.71            & ---       & ---              & ---       & ---                    & 0.70    & 0.20  &   0.010        \\ \hline
+13  &  Heavy Slash         & 4920      & 1.57           & 358       & 5.17            & 98        & 6.29            & ---       & ---              & ---       & ---                    & 0.91    & 0.25  &   0.014        \\ \hline
+\end{tabular}
+\flushleft
+For all models, the total mineral content $S_{\rm t}=0.056$, the effective mineral content $S_{\rm e}=0.01$, the heat of combustion $\Delta H=18600$~kW/kg, density $\rho_{\rm p}=510$~kg/m$^3$, moisture content of fine, medium, and large dead vegetation, $M_{\rm d,1}=0.03$, $M_{\rm d,2}=0.04$, $M_{\rm d,3}=0.05$, moisture content of live woody and herbaceous vegetation $M_{\rm l,w}=M_{\rm l,h}= 0.70$.
+\end{sidewaystable}
+
 \subsubsection{Simple Test Cases}
 
 Bova et al.~\cite{Bova:IJWF2015} compare the level set calculation that has been implemented in FDS with the identical algorithm in the U.S. Forest Service FARSITE model. The three contour plots in Fig.~\ref{Bova_fig} match those in Figs.~1(a), 1(b), and 4(a) in the paper. The FDS input files, {\ct WUI/Bova\_1a.fds}, {\ct WUI/Bova\_1b.fds}, and {\ct WUI/Bova\_4a.fds} all have the same {\ct SURF} line that defines the vegetation. Note that in these examples, there is no actual fire nor does the level set calculation depend on the local wind field. The purpose of the exercise is simply to test the level set algorithm.
@@ -7120,7 +7149,7 @@ Bova et al.~\cite{Bova:IJWF2015} compare the level set calculation that has been
 &SURF ID = 'Custom Grass'
       VEG_LSET_SPREAD = .TRUE.
       VEG_LSET_COUPLED = .FALSE.
-      VEG_LSET_ELLIPSE_HEAD  = 0.04
+      VEG_LSET_ROS = 0.04
       VEG_LSET_SIGMA = 11400.
       VEG_LSET_BETA = 0.0012
       VEG_LSET_HT = 0.51 /
@@ -11154,8 +11183,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct TRANSPARENCY}                                        & Real            & Section~\ref{info:colors}                 &                     & 1.                      \\ \hline
 {\ct VEG\_LSET\_BETA}                                     & Real            & Section~\ref{info:level_set}              &                     & 0.                      \\ \hline
 {\ct VEG\_LSET\_COUPLED}                                  & Logical         & Section~\ref{info:level_set}              &                     & {\ct .TRUE.}            \\ \hline
-{\ct VEG\_LSET\_ELLIPSE}                                  & Logical         & Section~\ref{info:level_set}              &                     & {\ct .FALSE.}           \\ \hline
-{\ct VEG\_LSET\_ELLIPSE\_HEAD}                            & Real            & Section~\ref{info:level_set}              & m/s                 & 0.                      \\ \hline
+{\ct VEG\_LSET\_ELLIPSE}                                  & Logical         & Section~\ref{info:level_set}              &                     & {\ct .TRUE.}            \\ \hline
+{\ct VEG\_LSET\_ROS}                                      & Real            & Section~\ref{info:level_set}              & m/s                 & 0.                      \\ \hline
 {\ct VEG\_LSET\_HT}                                       & Real            & Section~\ref{info:level_set}              &                     & 0.                      \\ \hline
 {\ct VEG\_LSET\_IGNITE\_TIME}                             & Real            & Section~\ref{info:level_set}              & s                   &                         \\ \hline
 {\ct VEG\_LSET\_QCON}                                     & Real            & Section~\ref{info:level_set}              & kW/m$^2$            & 0.                      \\ \hline
