@@ -15,11 +15,9 @@
 
 &SURF ID = 'Custom grass'
             DEFAULT = T
-            VEG_LSET_ELLIPSE = T
             VEG_LSET_SPREAD = .TRUE.
             VEG_LSET_COUPLED = .FALSE.
-            VEG_LSET_ELLIPSE_HEAD  = 0.04
-            VEG_LSET_WIND_EXP = 1
+            VEG_LSET_ROS = 0.04
             VEG_LSET_SIGMA = 11400.
             VEG_LSET_BETA = 0.0012
             VEG_LSET_HT = 0.51
