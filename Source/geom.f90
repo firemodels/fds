@@ -29468,7 +29468,7 @@ LOGICAL :: INLIST
 
 INTEGER, ALLOCATABLE, DIMENSION(:,:):: EDGES2
 
-LOGICAL, PARAMETER :: OPTIMIZE_SEG_DEF = .FALSE. !.TRUE.
+LOGICAL, PARAMETER :: OPTIMIZE_SEG_DEF = .TRUE.
 
 
 REAL(EB) :: CPUTIME_START, CPUTIME
@@ -29660,7 +29660,7 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
             ELSE
               WRITE(LU_ERR,'(A,A,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
             ENDIF
-            WRITE(LU_ERR,'(A,I8,A,3F12.3,A,I8,A,3F12.3,A)') "  Open surface at edge with nodes: NOD1",SEG(NOD1),&
+            WRITE(LU_ERR,'(A,I8,A,3F12.3,A,I8,A,3F12.3,A)') "  Open geometry at edge with nodes: NOD1",SEG(NOD1),&
             " (", XYZV(IAXIS:KAXIS,NOD1), "), NOD2",SEG(NOD2)," (", XYZV(IAXIS:KAXIS,NOD2), ")"
          ENDIF
          CALL SHUTDOWN("") ; RETURN
@@ -29675,7 +29675,7 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
             ELSE
               WRITE(LU_ERR,'(A,A,A)') "ERROR: GEOM ID='", TRIM(GEOMETRY(IG)%ID), "':"
             ENDIF
-            WRITE(LU_ERR,'(A,I8,A,3F12.3,A,I8,A,3F12.3,A)') "  More than two triangles share edge with nodes: NOD1",&
+            WRITE(LU_ERR,'(A,I8,A,3F12.3,A,I8,A,3F12.3,A)') "  Non manifold geometry in adjacent faces at edge with nodes: NOD1",&
             SEG(NOD1)," (", XYZV(IAXIS:KAXIS,NOD1), "), NOD2",SEG(NOD2)," (", XYZV(IAXIS:KAXIS,NOD2), ")"
          ENDIF
          CALL SHUTDOWN("") ; RETURN
