@@ -26,14 +26,24 @@ SUBROUTINE INITIALIZE_LEVEL_SET_FIRESPREAD_1(NM)
 
 USE COMPLEX_GEOMETRY, ONLY : IBM_IDCF
 INTEGER, INTENT(IN) :: NM
-INTEGER :: ICF,IW,I,J
+INTEGER :: ICF,IW,I,J,SURF_INDEX
 TYPE (MESH_TYPE),    POINTER :: M
 TYPE (WALL_TYPE),    POINTER :: WC
 TYPE (CFACE_TYPE),   POINTER :: CFA
+TYPE (SURFACE_TYPE), POINTER :: SF
 
 CALL POINT_TO_MESH(NM)
 
 M => MESHES(NM)
+
+! Loop through all SURFace types and find level set cases that need a calculated RoS
+
+DO SURF_INDEX=0,N_SURF
+   SF => SURFACE(SURF_INDEX)
+   IF (SF%VEG_LSET_SPREAD .AND. SF%VEG_LSET_FUEL_INDEX>0) THEN
+      SF%VEG_LSET_ROS = ROS_NO_WIND_NO_SLOPE(SF%VEG_LSET_FUEL_INDEX,SURF_INDEX)
+   ENDIF
+ENDDO
 
 ! Level set values (Phi). PHI1_LS is the first-order accurate estimate at the next time step.
 
@@ -983,79 +993,75 @@ END FUNCTION SCALAR_FACE_VALUE_LS
 !>
 !> \details The Rothermel model as described in Bachmann's thesis.
 
-REAL(EB) FUNCTION ROS_NO_WIND_NO_SLOPE(ROTHERMEL_FUEL_INDEX)
+REAL(EB) FUNCTION ROS_NO_WIND_NO_SLOPE(ROTHERMEL_FUEL_INDEX,SURF_INDEX)
 
-INTEGER, INTENT(IN) :: ROTHERMEL_FUEL_INDEX
+INTEGER, INTENT(IN) :: ROTHERMEL_FUEL_INDEX,SURF_INDEX
 REAL(EB) :: w0d1, w0d2, w0d3, w0lh, w0lw, md1, md2, md3, mlh, mlw, svd1, svd2, svd3, svlh, svlw, depth, rhop, heat, st, se, mx
 REAL(EB) :: swd1, swd2, swd3, swlh, swlw, swd, swl, swt, s2wt, sw2d, sw2l, swmd, swml, sigma, rhob, beta, &
             betaOpt, wnd, wnl, hnd1, hnd2, hnd3, hnlh, hnlw, hnd, hnl, bigW, hnmd, mfdead, mxlive, rml, rmd, etaMd, etaMl, etaM, &
             etas, gammaMax, bigA, gamma, bigIr, xi, epsd1, epsd2, epsd3, epslh, epslw, bigQd1, bigQd2, &
             bigQd3, bigQlh, bigQlw, hskz, hsk
+TYPE(SURFACE_TYPE), POINTER :: SF
+
+SF => SURFACE(SURF_INDEX)
+
+md1 = SF%VEG_LSET_M1
+md2 = SF%VEG_LSET_M10
+md3 = SF%VEG_LSET_M100
+mlw = SF%VEG_LSET_MLW
+mlh = SF%VEG_LSET_MLH
                
 SELECT CASE(ROTHERMEL_FUEL_INDEX)
    CASE(1)  ! 'Short Grass'
       w0d1=0.1659     ; w0d2=0.        ; w0d3=0.        ; w0lh=0.        ; w0lw=0. 
-      md1=0.03        ; md2=0.04       ; md3=0.05       ; mlh=0.70       ; mlw=0.70
       svd1=11483.     ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921. 
       mx=0.12         ; depth=0.3048   ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
    CASE(2)  ! 'Timbergrass'
       w0d1=0.448      ; w0d2=0.224     ; w0d3=0.112     ; w0lh=0.112     ; w0lw=0. 
-      md1=0.03        ; md2=0.04       ; md3=0.05       ; mlh=0.70       ; mlw=0.70
       svd1=9842.      ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921. 
       mx=0.15         ; depth=0.3048   ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
    CASE(3)  ! 'Tall Grass'
       w0d1=0.675      ; w0d2=0.        ; w0d3=0.        ; w0lh=0.        ; w0lw=0. 
-      md1=0.03        ; md2=0.04       ; md3=0.05       ; mlh=0.70       ; mlw=0.70
       svd1=4921.      ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921. 
       mx=0.25         ; depth=0.762    ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
    CASE(4)  ! 'Chaparral'
       w0d1=1.123      ; w0d2=0.899     ; w0d3=0.448     ; w0lh=1.123     ; w0lw=0. 
-      md1=0.03        ; md2=0.04       ; md3=0.05       ; mlh=0.70       ; mlw=0.70
       svd1=6562.      ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921. 
       mx=0.20         ; depth=1.829    ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
    CASE(5)  ! 'Brush'
       w0d1=0.224      ; w0d2=0.112     ; w0d3=0.        ; w0lh=0.        ; w0lw=0.448
-      md1=0.03        ; md2=0.04       ; md3=0.05       ; mlh=0.70       ; mlw=0.70
       svd1=6562.      ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921. 
       mx=0.20         ; depth=0.6096   ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
    CASE(6)  ! 'Dormant Brush'
       w0d1=0.336      ; w0d2=0.56      ; w0d3=0.448     ; w0lh=0.        ; w0lw=0.   
-      md1=0.03        ; md2=0.04       ; md3=0.05       ; mlh=0.70       ; mlw=0.70
       svd1=5741.      ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921. 
       mx=0.25         ; depth=0.762    ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
    CASE(7)  ! 'Southern Rough'
       w0d1=0.255      ; w0d2=0.419     ; w0d3=0.336     ; w0lh=0.        ; w0lw=0.083
-      md1=0.03        ; md2=0.04       ; md3=0.05       ; mlh=0.70       ; mlw=0.70
       svd1=5741.      ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921. 
       mx=0.40         ; depth=0.762    ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
    CASE(8)  ! 'Closed Timber Litter'
       w0d1=0.336      ; w0d2=0.224     ; w0d3=0.56      ; w0lh=0.        ; w0lw=0.   
-      md1=0.03        ; md2=0.04       ; md3=0.05       ; mlh=0.70       ; mlw=0.70
       svd1=6562.      ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921. 
       mx=0.30         ; depth=0.06096  ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
    CASE(9)  ! ID='Hardwood Litter'
       w0d1=0.655      ; w0d2=0.092     ; w0d3=0.034     ; w0lh=0.        ; w0lw=0.   
-      md1=0.03        ; md2=0.04       ; md3=0.05       ; mlh=0.70       ; mlw=0.70
       svd1=8202.      ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921. 
       mx=0.25         ; depth=0.06096  ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
    CASE(10)  ! 'Timber'
       w0d1=0.675      ; w0d2=0.448     ; w0d3=1.123     ; w0lh=0.        ; w0lw=0.448
-      md1=0.03        ; md2=0.04       ; md3=0.05       ; mlh=0.70       ; mlw=0.70
       svd1=6562.      ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921. 
       mx=0.25         ; depth=0.3048   ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
    CASE(11)  ! 'Light Slash'
       w0d1=0.336      ; w0d2=1.011     ; w0d3=1.235     ; w0lh=0.        ; w0lw=0.   
-      md1=0.03        ; md2=0.04       ; md3=0.05       ; mlh=0.70       ; mlw=0.70
       svd1=4921.      ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921. 
       mx=0.15         ; depth=0.3048   ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
    CASE(12)  ! ID='Medium Slash'
       w0d1=0.899      ; w0d2=3.145     ; w0d3=3.706     ; w0lh=0.        ; w0lw=0.   
-      md1=0.03        ; md2=0.04       ; md3=0.05       ; mlh=0.70       ; mlw=0.70
       svd1=4921.      ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921. 
       mx=0.20         ; depth=0.70104  ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
    CASE(13)  ! 'Heavy Slash'
       w0d1=1.571      ; w0d2=5.165     ; w0d3=6.288     ; w0lh=0.        ; w0lw=0.   
-      md1=0.03        ; md2=0.04       ; md3=0.05       ; mlh=0.70       ; mlw=0.70
       svd1=4921.      ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921. 
       mx=0.25         ; depth=0.9144   ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
 END SELECT
