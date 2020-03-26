@@ -419,9 +419,9 @@ TYPE IBM_RCEDGE_TYPE
 END TYPE IBM_RCEDGE_TYPE
 
 ! Cartesian Faces Cut-Faces data structure:
-INTEGER, PARAMETER :: IBM_MAXVERTS_FACE  =1024 ! Size definition parameter. Max number of vertices per Cartesian Face.
-INTEGER, PARAMETER :: IBM_MAXCEELEM_FACE =1024 ! Size definition parameter. Max segments per face.
-INTEGER, PARAMETER :: IBM_MAXCFELEM_FACE =1024 ! Size definition parameter. Max number of cut faces per Cartesian Face.
+INTEGER, PARAMETER :: IBM_MAXVERTS_FACE  =3072 ! Size definition parameter. Max number of vertices per Cartesian Face.
+INTEGER, PARAMETER :: IBM_MAXCEELEM_FACE =3072 ! Size definition parameter. Max segments per face.
+INTEGER, PARAMETER :: IBM_MAXCFELEM_FACE =3072 ! Size definition parameter. Max number of cut faces per Cartesian Face.
 INTEGER, PARAMETER :: IBM_MAXVERT_CUTFACE=  24 ! Size definition parameter.
 INTEGER, PARAMETER :: MAX_INTERP_POINTS_PLANE = 4
 TYPE IBM_CUTFACE_TYPE
@@ -488,8 +488,8 @@ TYPE CFACE_TYPE
 END TYPE CFACE_TYPE
 
 ! Cartesian Cells Cut-Cells data structure:
-INTEGER, PARAMETER :: IBM_MAXVERTS_CELL   =1024
-INTEGER, PARAMETER :: IBM_NPARAM_CCFACE   =  5 ! [face_type side iaxis cei icf]
+INTEGER, PARAMETER :: IBM_MAXVERTS_CELL   =3072
+INTEGER, PARAMETER :: IBM_NPARAM_CCFACE   =   5 ! [face_type side iaxis cei icf]
 
 TYPE IBM_CUTCELL_TYPE
    INTEGER :: NCELL, NFACE_CELL
