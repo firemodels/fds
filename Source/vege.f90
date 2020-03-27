@@ -681,15 +681,15 @@ ENDIF
 
 SR_X_LS = 0.0_EB ; SR_Y_LS = 0.0_EB
 
-FLUX_ILOOP: DO I=1,IBAR
+FLUX_ILOOP: DO J=1,JBAR
 
-   IM1=I-1
-   IP1=I+1
+   JM1 = J-1
+   JP1 = J+1
 
-   DO J = 1,JBAR
+   DO I=1,IBAR
 
-      JM1=J-1
-      JP1=J+1
+      IM1 = I-1
+      IP1 = I+1
 
       F_EAST  = 0.5_EB*( PHI_LS_P(I,J) + PHI_LS_P(IP1,J) )
       F_WEST  = 0.5_EB*( PHI_LS_P(I,J) + PHI_LS_P(IM1,J) )
