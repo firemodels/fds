@@ -4399,14 +4399,14 @@ Note that {\ct V} indicates the velocity component normal to the surface.  You c
 {\ct T} does not need to be directly related to the FDS mesh.  The velocity points will be interpolated linearly by the ramp function.  In fact, this functionality is convenient for taking experimental data directly as a boundary condition to FDS.  You basically just need to list {\ct T} and {\ct F} from the data (you can set {\ct VEL=-1} if you want).  The results for this particular case are included under the heading ``Backward Facing Step'' in the FDS Validation Guide~\cite{FDS_Validation_Guide}. In this problem, the step height is $h=0.0098$ m, and the specification of the inlet profile is critical to correctly matching the reattachment point downstream of the step.
 
 
-\section{Rotation and Translation}
+\section{Scaling, Rotation and Translation}
 \label{info:MOVE}
 
-It is possible to rotate and/or translate various objects within an FDS simulation using the namelist group called {\ct MOVE}. For example, the line
+It is possible to scale, rotate and/or translate various objects within an FDS simulation using the namelist group called {\ct MOVE}. For example, the line
 \begin{lstlisting}
 &MOVE ID='spin', ROTATION_ANGLE=45., X0=2., Y0=3., Z0=4., AXIS=1,0,0 /
 \end{lstlisting}
-causes an object to be rotated 45$^\circ$ about the direction vector ({\ct AXIS}) (1,0,0) emanating from the point $(x_0,y_0,z_0)$. You may also translate the object in the three coordinate directions using the parameters {\ct DX}, {\ct DY}, {\ct DZ}, each in meters.
+causes an object to be rotated 45$^\circ$ about the direction vector ({\ct AXIS}) (1,0,0) emanating from the point $(x_0,y_0,z_0)$. You can scale the object in its original unrotated axes respect to $(x_0,y_0,z_0)$, by either defining the factor {\ct SCALE}$>0.$ for scaling in every direction, or factors {\ct SCALEX, SCALEY, SCALEZ}  for different scaling by direction. You may also translate the object in the three coordinate directions using the parameters {\ct DX}, {\ct DY}, {\ct DZ}, each in meters.
 It is also possible to rotate, scale and translate an object using a $3 \times 4$ transformation matrix. The equation that describes the transformation for a point $p$ with coordinates $x,y,z$ is:
 %
 \begin{equation}
@@ -10517,7 +10517,11 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct MOVE} (Coordinate Transformation Parameters)} \\
 \hline \hline
 \endhead
-{\ct AXIS(3)}         & Real Array       & Axis of rotation                                &        & (0.,0.,1.)                    \\ \hline
+{\ct AXIS(3)}         & Real Array  & Axis of rotation                                         &        & (0.,0.,1.)                    \\ \hline
+{\ct SCALE}         & Real            & Scaling in all directions                            &          & 1.                         \\ \hline
+{\ct SCALEX}      & Real            & Scaling in the unrotated $x$ direction      &          & 1.                         \\ \hline
+{\ct SCALEY}      & Real            & Scaling in the unrotated $y$ direction      &          & 1.                         \\ \hline
+{\ct SCALEZ}      & Real            & Scaling in the unrotated $z$ direction      &          & 1.                         \\ \hline
 {\ct DX}              & Real             & Translation in the $x$ direction                & m      & 0.                         \\ \hline
 {\ct DY}              & Real             & Translation in the $y$ direction                & m      & 0.                         \\ \hline
 {\ct DZ}              & Real             & Translation in the $z$ direction                & m      & 0.                         \\ \hline
