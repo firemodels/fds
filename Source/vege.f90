@@ -1087,7 +1087,7 @@ swml = swlh*mlh + swlw*mlw
 ! Characteristic surface-to-volume ratio [R(71,72)]
 
 sigma = s2wt/swt
-SF%VEG_LSET_SIGMA = sigma
+SF%VEG_LSET_SIGMA = sigma*0.01  ! Convert from 1/m to 1/cm
    
 ! Mean bulk density [R(74)]
    
