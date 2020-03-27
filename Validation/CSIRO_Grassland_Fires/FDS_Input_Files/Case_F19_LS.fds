@@ -1,0 +1,52 @@
+&HEAD CHID='Case_F19_LS', TITLE='Australian Grassland Fire Experiment, Case F19' /
+
+&MESH IJK=48,48,8, XB=-20.0,220.0,-120.0,120.0,0.0,40.0 /
+
+&TIME T_END=180. / 
+
+&MISC TMPA=34. /
+
+&WIND SPEED=4.8, DIRECTION=270., L=-500., Z_0=0.03 /
+
+&REAC FUEL='CELLULOSE', C=6, H=10, O=5, SOOT_YIELD=0.02, HEAT_OF_COMBUSTION=15600. /
+
+&SURF ID='IGNITION', VEG_LSET_IGNITE_TIME=0. /
+&SURF ID='LINE',
+      VEG_LSET_ELLIPSE          = T
+      VEG_LSET_ROS              = 1
+      HRRPUA                    = 200.
+      RAMP_Q                    = 'fire' /
+
+&VENT XB=-5.0,0.0, -5., 5.,0.,0., SURF_ID='IGNITION' /
+&VENT XB=-5.0,0.0,-90.,-5.,0.,0., SURF_ID='LINE' /
+&VENT XB=-5.0,0.0,  5.,90.,0.,0., SURF_ID='LINE' /
+&VENT XB= 0.0,200.0,-100.,100.,0.,0., SURF_ID='Tall Grass' /
+
+&VENT MB='XMIN', SURF_ID='OPEN' /
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='YMIN', SURF_ID='OPEN' /
+&VENT MB='YMAX', SURF_ID='OPEN' /
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+
+&SURF ID                        = 'Tall Grass'
+      VEG_LSET_ELLIPSE          = T
+      VEG_LSET_FUEL_INDEX       = 3
+      VEG_LSET_M1               = 0.058
+      HRRPUA                    = 440.
+      RAMP_Q                    = 'fire' /
+&RAMP ID='fire', T= 0., F=0. /
+&RAMP ID='fire', T= 1., F=1. /
+&RAMP ID='fire', T= 9., F=1. /
+&RAMP ID='fire', T=10., F=0. /
+
+&DUMP DT_HRR=1., DT_DEVC=1., SIG_FIGS=4, SIG_FIGS_EXP=2 /
+
+&SLCF PBY=1., QUANTITY='TEMPERATURE', VECTOR=.TRUE. /
+&SLCF PBZ=2., QUANTITY='VELOCITY', VECTOR=.TRUE. /
+&SLCF AGL_SLICE=0.1, QUANTITY='LEVEL SET VALUE' /
+
+&BNDF QUANTITY='BURNING RATE' /
+
+&DEVC ID='x', QUANTITY='TEMPERATURE', SPATIAL_STATISTIC='MAXLOC X', XB=-20,220,-5,0,0,5 /
+
+&TAIL /
