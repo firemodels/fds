@@ -1,17 +1,64 @@
-MODULE MESH_VARIABLES
+!> \brief Variables that are defined on each mesh.
 
-! Data structure for mesh-dependent variables
+MODULE MESH_VARIABLES
 
 USE PRECISION_PARAMETERS
 USE TYPES
 IMPLICIT NONE
 
+!> \brief Derived type containing the bulk of the variables defined on each mesh.
+!>
+!> \details The variables listed in this module are defined on each mesh that is
+!> owned by a given MPI process. For example, MESHES(NM)%U(I,J,K) is the \f$u\f$
+!> component of velocity at the forward \f$x\f$ face of grid cell (I,J,K) and
+!> mesh NM.
+
 TYPE MESH_TYPE
 
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: &
-            U,V,W,US,VS,WS,DDDT,D,DS,H,HS,H_PRIME,KRES,FVX,FVY,FVZ,FVX_B,FVY_B,FVZ_B,RHO,RHOS, &
-            MU,MU_DNS,TMP,Q,KAPPA_GAS,CHI_R,QR,QR_W,UII,RSUM,D_SOURCE,U_OLD,V_OLD,W_OLD, &
-            CSD2,CHEM_SUBIT,MIX_TIME,STRAIN_RATE,D_Z_MAX,Q_DOT_PPP_S,PR_T,TMP_FLAME,FLAME_INDEX
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: U  !< Velocity component at current time step. U(I,J,K) is \f$u_{ijk}^n\f$.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: V  !< Velocity component at current time step. V(I,J,K) is \f$v_{ijk}^n\f$.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: W  !< Velocity component at current time step. W(I,J,K) is \f$w_{ijk}^n\f$.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: US !< Velocity component estimated at next time step. US(I,J,K) is \f$u_{ijk}^*\f$.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: VS !< Velocity component estimated at next time step. VS(I,J,K) is \f$v_{ijk}^*\f$.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: WS !< Velocity component estimated at next time step. WS(I,J,K) is \f$w_{ijk}^*\f$.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: DDDT    !< \f$\partial D/\partial t\f$ where \f$D\f$ is the divergence, D(I,J,K).
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: D       !< Divergence at current time step. D(I,J,K) is \f$D_{ijk}^n\f$.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: DS      !< Divergence estimate next time step. DS(I,J,K) is \f$D_{ijk}^*\f$.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: H       !< H(I,J,K) is \f$ \tilde{p}_{ijk}/\rho_{ijk} + |\mathbf{u}|^2_{ijk}/2 \f$.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: HS      !< H estimated at next tine step.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: H_PRIME !< Experimental pressure correction.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: KRES    !< Resolved kinetic energy, \f$ |\mathbf{u}|^2_{ijk}/2 \f$.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: FVX     !< Momentum equation flux terms, \f$ F_{{\rm A},x,ijk} \f$. 
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: FVY     !< Momentum equation flux terms, \f$ F_{{\rm A},y,ijk} \f$.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: FVZ     !< Momentum equation flux terms, \f$ F_{{\rm A},z,ijk} \f$.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: FVX_B   !< Momentum equation flux terms, \f$ F_{{\rm B},x,ijk} \f$.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: FVY_B   !< Momentum equation flux terms, \f$ F_{{\rm B},y,ijk} \f$.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: FVZ_B   !< Momentum equation flux terms, \f$ F_{{\rm B},z,ijk} \f$.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: RHO     !< Density (kg/m3) at current time step. RHO(I,J,K) is \f$ \rho_{ijk}^n \f$.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: RHOS    !< Density (kg/m3) at next time step. RHOS(I,J,K) is \f$ \rho_{ijk}^* \f$.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: MU      !< Turbulent viscosity (kg/m/s).
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: MU_DNS  !< Laminar viscosity (kg/m/s).
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: TMP     !< Gas temperature (K). TMP(I,J,K) is \f$ T_{ijk} \f$.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: Q       !< Heat release rate per unit volume, \f$ \dot{q}_{ijk}''' \f$.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: KAPPA_GAS !< Radiation absorption coefficient by gas, \f$ \kappa_{ijk} \f$.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: CHI_R   !< Radiative fraction, \f$ \chi_{{\rm r},ijk} \f$.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: QR      !< Radiation source term, \f$ -\nabla \cdot \dot{\mathbf{q}}_{\rm r}'' \f$.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: QR_W    !< Radiation source term, particles and droplets.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: UII     !< Integrated intensity, \f$ U_{ijk}=\sum_{l=1}^N I_{ijk}^l\delta\Omega^l\f$
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: RSUM
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: D_SOURCE
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: U_OLD
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: V_OLD
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: W_OLD
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: CSD2
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: CHEM_SUBIT
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: MIX_TIME
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: STRAIN_RATE
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: D_Z_MAX
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: Q_DOT_PPP_S
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: PR_T
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: TMP_FLAME
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: FLAME_INDEX
 
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: ZZ,ZZS,REAC_SOURCE_TERM,DEL_RHO_D_DEL_Z,FX,FY,FZ, &
                                                 SCALAR_WORK1,SCALAR_WORK2,SCALAR_WORK3,SCALAR_WORK4, &
