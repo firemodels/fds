@@ -11785,6 +11785,11 @@ XB(5)                     = -1000000._EB
 XB(6)                     =  1000000._EB
 XYZ                       = -1000000._EB
 
+! For WFDS compatiblity
+CROWN_BASE_WIDTH          = -1._EB
+CROWN_BASE_HEIGHT         = -1._EB
+TREE_HEIGHT               = -1._EB
+
 END SUBROUTINE SET_INIT_DEFAULTS
 
 END SUBROUTINE READ_INIT
