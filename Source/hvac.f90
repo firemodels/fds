@@ -610,16 +610,19 @@ END SUBROUTINE READ_HVAC
 
 
 SUBROUTINE PROC_HVAC
+
 USE PHYSICAL_FUNCTIONS, ONLY: GET_ENTHALPY
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
+USE MPI
 !INTEGER :: I1,I2,J1,J2,K1,K2,IOR
-INTEGER :: N,ND,ND2,NM,NN,NF,NV
+INTEGER :: N,ND,ND2,NM,NN,NF,NV,IERR
 REAL(EB) :: TNOW,ZZ_GET(1:N_TRACKED_SPECIES),DUMMY=0._EB
 LOGICAL :: FOUND
 TYPE (LAGRANGIAN_PARTICLE_CLASS_TYPE),DIMENSION(:), POINTER:: TEMPALLOC=>NULL()
 TYPE(DUCTNODE_TYPE), POINTER :: DN=>NULL()
 TYPE(DUCT_TYPE), POINTER :: DU=>NULL()
 TYPE(SURFACE_TYPE), POINTER :: SF=>NULL()
+
 TNOW=CURRENT_TIME()
 
 IF (.NOT. HVAC_SOLVE) RETURN
@@ -733,6 +736,7 @@ DUCT_LOOP: DO ND = 1, N_DUCTS
 ENDDO DUCT_LOOP
 
 NODE_LOOP: DO NN = 1, N_DUCTNODES
+
    DN => DUCTNODE(NN)
    DO N = 1, NN
       IF (N==NN) CYCLE
@@ -742,7 +746,8 @@ NODE_LOOP: DO NN = 1, N_DUCTNODES
       ENDIF
    ENDDO
 
-   ! Initialises duct node species and RSUM with ambient/background
+   ! Initializes duct node species and RSUM with ambient/background
+
    ALLOCATE(DN%ZZ(N_TRACKED_SPECIES))
    DN%ZZ(1:N_TRACKED_SPECIES) = SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0
    ALLOCATE(DN%ZZ_OLD(N_TRACKED_SPECIES))
@@ -752,7 +757,8 @@ NODE_LOOP: DO NN = 1, N_DUCTNODES
    ZZ_GET(1:N_TRACKED_SPECIES) = DN%ZZ_V(1:N_TRACKED_SPECIES)
    DN%RSUM   = RSUM0
 
-   ! If node is LEAKAGE related then values are adopted as ambient/background
+   ! If node is LEAKAGE-related then values are adopted as ambient/background
+
    IF (DN%LEAKAGE) THEN
       DN%TMP  = TMPA
       DN%RHO  = RHOA
@@ -766,12 +772,17 @@ NODE_LOOP: DO NN = 1, N_DUCTNODES
       DN%RHO_V  = DN%RHO
       CYCLE NODE_LOOP
    ENDIF
+
+   ! If the duct node has a VENT associated with it, find it
+
    IF (DN%VENT_ID /= 'null') THEN
       ALLOCATE(DN%IN_MESH(NMESHES))
       DN%IN_MESH=.FALSE.
       FOUND = .FALSE.
+
       MESH_LOOP: DO NM = 1, NMESHES
-         IF (EVACUATION_ONLY(NM)) CYCLE
+         IF (EVACUATION_ONLY(NM)) CYCLE MESH_LOOP
+         IF (PROCESS(NM)/=MYID)   CYCLE MESH_LOOP  ! Only search meshes controlled by the current MPI process
          NODE_VENT_LOOP:DO NV = 1, MESHES(NM)%N_VENT
             IF(MESHES(NM)%VENTS(NV)%ID == DN%VENT_ID) THEN
                FOUND = .TRUE.
@@ -805,11 +816,16 @@ NODE_LOOP: DO NN = 1, N_DUCTNODES
             ENDIF
          ENDDO NODE_VENT_LOOP
       ENDDO MESH_LOOP
+
+      ! Check if any MPI process has FOUND the VENT
+
+      CALL MPI_ALLREDUCE(MPI_IN_PLACE,FOUND,INTEGER_ONE,MPI_LOGICAL,MPI_LOR,MPI_COMM_WORLD,IERR)
       IF (.NOT. FOUND) THEN
          WRITE(MESSAGE,'(A,A,A,A)') 'ERROR: Cannot find VENT_ID: ',TRIM(DN%VENT_ID),' for Ductnode: ',TRIM(DN%ID)
          CALL SHUTDOWN(MESSAGE); RETURN
       ENDIF
    ENDIF
+
    IF (DN%VENT .AND. DN%AMBIENT) THEN
       WRITE(MESSAGE,'(A,I5,A,A)') 'ERROR: DUCTNODE cannot be AMBIENT and have an assigned VENT_ID. Ductnode:',NN,&
                                   ', Ductnode ID:',TRIM(DN%ID)
@@ -852,6 +868,7 @@ NODE_LOOP: DO NN = 1, N_DUCTNODES
    ENDDO
 
    ! Initialize duct node properties
+
    IF (STRATIFICATION .AND. DN%XYZ(3) > -1.E9_EB) THEN
       DN%TMP = TMPA*EVALUATE_RAMP(DN%XYZ(3),DUMMY,I_RAMP_TMP0_Z)
       DN%P   = EVALUATE_RAMP(DN%XYZ(3),DUMMY,I_RAMP_P0_Z)

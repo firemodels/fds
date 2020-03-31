@@ -72,6 +72,7 @@ N_ORIENTATION_VECTOR = 0
 ALLOCATE(ORIENTATION_VECTOR(3,10))
 
 ! Set humidity data
+
 CALL CALC_H2O_HV
 
 ! Open the input file
@@ -647,6 +648,7 @@ ALLOCATE(EVACUATION_SKIP(NMESHES),STAT=IZERO) ; CALL ChkMemErr('READ','EVACUATIO
 EVACUATION_SKIP = .FALSE.
 ALLOCATE(EVACUATION_Z_OFFSET(NMESHES),STAT=IZERO) ; CALL ChkMemErr('READ','EVACUATION_Z_OFFSET',IZERO)
 EVACUATION_Z_OFFSET = 1.0_EB
+ALLOCATE(SEALED_MESH(NMESHES),STAT=IZERO) ; CALL ChkMemErr('READ','SEALED_MESH',IZERO) ; SEALED_MESH = .TRUE.
 
 ! Read in the Mesh lines from Input file
 
@@ -2119,6 +2121,12 @@ REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
 TMPA  = TMPA + TMPM
 TMPA4 = TMPA**4
 
+! Establish starting values for min/max temperature and density
+
+TMPMIN = MAX(1._EB , MIN(TMPA,TMPM)-10._EB)
+TMPMAX = 3000._EB
+RHOMAX = 0._EB
+
 ! Miscellaneous
 
 ASSUMED_GAS_TEMPERATURE = ASSUMED_GAS_TEMPERATURE + TMPM
@@ -2480,11 +2488,9 @@ IF (ANY(MEAN_FORCING)) THEN
    ENDDO
 ENDIF
 
-! Min and Max values of temperature
+! Min value of temperature
 
-TMPMIN = MAX(1._EB , MIN(TMPA,TMPM)-10._EB)
 IF (LAPSE_RATE < 0._EB) TMPMIN = MIN(TMPMIN,TMPA+LAPSE_RATE*(ZF_MAX-GROUND_LEVEL))
-TMPMAX = 3000._EB
 
 END SUBROUTINE READ_WIND
 
@@ -8854,6 +8860,7 @@ SUBROUTINE READ_OBST
 USE GEOMETRY_FUNCTIONS, ONLY: BLOCK_CELL
 USE COMPLEX_GEOMETRY, ONLY: INTERSECT_CONE_AABB,INTERSECT_CYLINDER_AABB,INTERSECT_SPHERE_AABB,INTERSECT_OBB_AABB,ROTATION_MATRIX
 USE MATH_FUNCTIONS, ONLY: GET_RAMP_INDEX
+USE MISC_FUNCTIONS, ONLY: PROCESS_MESH_NEIGHBORHOOD
 TYPE(OBSTRUCTION_TYPE), POINTER :: OB2=>NULL(),OBT=>NULL()
 TYPE(MULTIPLIER_TYPE), POINTER :: MR=>NULL()
 TYPE(OBSTRUCTION_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: TEMP_OBSTRUCTION
@@ -8861,7 +8868,7 @@ INTEGER :: NM,NOM,N_OBST_O,IC,N,NN,NNN,NNNN,NR,N_NEW_OBST,RGB(3),N_OBST_DIM,II,J
 CHARACTER(LABEL_LENGTH) :: ID,DEVC_ID,PROP_ID,SHAPE,SURF_ID,SURF_IDS(3),SURF_ID6(6),CTRL_ID,MULT_ID,MATL_ID,RAMP_Q
 CHARACTER(60) :: MESH_ID
 CHARACTER(25) :: COLOR
-LOGICAL :: EVACUATION_OBST,OVERLAY,PROCESS_OBSTS,IS_INTERSECT,PYRO3D_MASS_TRANSPORT
+LOGICAL :: EVACUATION_OBST,OVERLAY,IS_INTERSECT,PYRO3D_MASS_TRANSPORT
 REAL(EB) :: TRANSPARENCY,XB1,XB2,XB3,XB4,XB5,XB6,BULK_DENSITY,VOL_ADJUSTED,VOL_SPECIFIED,UNDIVIDED_INPUT_AREA(3),&
             INTERNAL_HEAT_SOURCE,HEIGHT,RADIUS,XYZ(3),ORIENTATION(3),AABB(6),ROTMAT(3,3),THETA,LENGTH,WIDTH,SHAPE_AREA(3)
 LOGICAL :: EMBEDDED,THICKEN,THICKEN_LOC,PERMIT_HOLE,ALLOW_VENT,EVACUATION,REMOVABLE,BNDF_FACE(-3:3),BNDF_OBST,OUTLINE,NOTERRAIN,&
@@ -8878,13 +8885,7 @@ MESH_LOOP: DO NM=1,NMESHES
 
    M => MESHES(NM)
 
-   PROCESS_OBSTS = .FALSE.
-   DO N=1,M%N_NEIGHBORING_MESHES
-      IF (MYID==PROCESS(M%NEIGHBORING_MESH(N))) PROCESS_OBSTS = .TRUE.
-   ENDDO
-   IF (MYID==PROCESS(NM) .OR. MYID==EVAC_PROCESS) PROCESS_OBSTS = .TRUE.
-
-   IF (.NOT.PROCESS_OBSTS) CYCLE MESH_LOOP
+   IF (.NOT.PROCESS_MESH_NEIGHBORHOOD(NM)) CYCLE MESH_LOOP
 
    CALL POINT_TO_MESH(NM)
 
@@ -9611,13 +9612,7 @@ MESH_LOOP_2: DO NM=1,NMESHES
 
    M => MESHES(NM)
 
-   PROCESS_OBSTS = .FALSE.
-   DO N=1,M%N_NEIGHBORING_MESHES
-      IF (MYID==PROCESS(M%NEIGHBORING_MESH(N))) PROCESS_OBSTS = .TRUE.
-   ENDDO
-   IF (MYID==PROCESS(NM) .OR. MYID==EVAC_PROCESS) PROCESS_OBSTS = .TRUE.
-
-   IF (.NOT.PROCESS_OBSTS) CYCLE MESH_LOOP_2
+   IF (.NOT.PROCESS_MESH_NEIGHBORHOOD(NM)) CYCLE MESH_LOOP_2
 
    CALL POINT_TO_MESH(NM)
 
@@ -9680,13 +9675,7 @@ MESH_LOOP_3: DO NM=1,NMESHES
 
    M => MESHES(NM)
 
-   PROCESS_OBSTS = .FALSE.
-   DO N=1,M%N_NEIGHBORING_MESHES
-      IF (MYID==PROCESS(M%NEIGHBORING_MESH(N))) PROCESS_OBSTS = .TRUE.
-   ENDDO
-   IF (MYID==PROCESS(NM) .OR. MYID==EVAC_PROCESS) PROCESS_OBSTS = .TRUE.
-
-   IF (.NOT.PROCESS_OBSTS) CYCLE MESH_LOOP_3
+   IF (.NOT.PROCESS_MESH_NEIGHBORHOOD(NM)) CYCLE MESH_LOOP_3
 
    CALL POINT_TO_MESH(NM)
 
@@ -10475,6 +10464,7 @@ USE GEOMETRY_FUNCTIONS, ONLY : BLOCK_CELL,CIRCLE_CELL_INTERSECTION_AREA
 USE DEVICE_VARIABLES, ONLY : DEVICE
 USE CONTROL_VARIABLES, ONLY : CONTROL
 USE MATH_FUNCTIONS, ONLY: GET_RAMP_INDEX
+USE MISC_FUNCTIONS, ONLY: PROCESS_MESH_NEIGHBORHOOD
 
 INTEGER :: N,NN,NM,NNN,N_VENT_O,IOR,I1,I2,J1,J2,K1,K2,RGB(3),N_EDDY,N_VENT_NEW,II,JJ,KK,OBST_INDEX
 REAL(EB) :: SPREAD_RATE,TRANSPARENCY,XYZ(3),TMP_EXTERIOR,DYNAMIC_PRESSURE,XB1,XB2,XB3,XB4,XB5,XB6, &
@@ -10492,6 +10482,9 @@ NAMELIST /VENT/ COLOR,CTRL_ID,DB,DEVC_ID,DYNAMIC_PRESSURE,EVACUATION,FYI,GEOM,ID
 MESH_LOOP_1: DO NM=1,NMESHES
 
    M=>MESHES(NM)
+
+   IF (.NOT.PROCESS_MESH_NEIGHBORHOOD(NM)) CYCLE MESH_LOOP_1
+
    CALL POINT_TO_MESH(NM)
 
    REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
@@ -10535,62 +10528,34 @@ MESH_LOOP_1: DO NM=1,NMESHES
    ENDDO COUNT_VENT_LOOP
    3 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
 
+   ! Special circumstances where VENTs are implied, not explicitly included in input file
+
    IF (EVACUATION_ONLY(NM)) CALL DEFINE_EVACUATION_VENTS(NM,1)
 
    IF (TWO_D)                         N_VENT = N_VENT + 2
-   IF (CYLINDRICAL .AND. M%XS<=TWO_EPSILON_EB) N_VENT = N_VENT + 1
+   IF (CYLINDRICAL .AND.   XS<=TWO_EPSILON_EB) N_VENT = N_VENT + 1
    IF (EVACUATION_ONLY(NM))           N_VENT = N_VENT + 2
 
-   ALLOCATE(M%VENTS(N_VENT),STAT=IZERO)
-   CALL ChkMemErr('READ','VENTS',IZERO)
-   VENTS=>M%VENTS
+   ! Allocate the derived type variable VENTS that holds all vent info
+
+   ALLOCATE(M%VENTS(N_VENT),STAT=IZERO) ; CALL ChkMemErr('READ','VENTS',IZERO) ; VENTS=>M%VENTS
+
+   ! Rewind the input file and read all possible vents, N_VENT_O
 
    N_VENT_O = N_VENT
    N        = 0
-
    REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
+
    READ_VENT_LOOP: DO NN=1,N_VENT_O
 
-      IOR     = 0
-      MB      = 'null'
-      DB      = 'null'
-      PBX     = -1.E6_EB
-      PBY     = -1.E6_EB
-      PBZ     = -1.E6_EB
-      SURF_ID = 'null'
-      COLOR   = 'null'
-      MESH_ID = 'null'
-      MULT_ID = 'null'
-      OBST_ID = 'null'
-      ID      = 'null'
-      RGB     =-1
-      TRANSPARENCY = 1._EB
-      DYNAMIC_PRESSURE = 0._EB
-      PRESSURE_RAMP = 'null'
-      XYZ     = -1.E6_EB
-      SPREAD_RATE = -1._EB
-      TMP_EXTERIOR = -1000.
-      TMP_EXTERIOR_RAMP = 'null'
-      TEXTURE_ORIGIN = -999._EB
-      OUTLINE      = .FALSE.
-      DEVC_ID  = 'null'
-      CTRL_ID  = 'null'
-      EVACUATION = .FALSE.
-      N_EDDY=0
-      L_EDDY=0._EB
-      L_EDDY_IJ=0._EB
-      VEL_RMS=0._EB
-      REYNOLDS_STRESS=0._EB
-      UVW = -1.E12_EB
-      RADIUS = -1._EB
-      WIND = .FALSE.
-      GEOM = .FALSE.
+      CALL SET_VENT_DEFAULTS
 
+      MB = 'null'
       IF (NN==N_VENT_O-2 .AND. CYLINDRICAL .AND. XS<=TWO_EPSILON_EB) MB='XMIN'
-      IF (NN==N_VENT_O-1 .AND. TWO_D)                        MB='YMIN'
-      IF (NN==N_VENT_O   .AND. TWO_D)                        MB='YMAX'
-      IF (NN==N_VENT_O-1 .AND. EVACUATION_ONLY(NM))          MB='ZMIN'
-      IF (NN==N_VENT_O   .AND. EVACUATION_ONLY(NM))          MB='ZMAX'
+      IF (NN==N_VENT_O-1 .AND. TWO_D)                                MB='YMIN'
+      IF (NN==N_VENT_O   .AND. TWO_D)                                MB='YMAX'
+      IF (NN==N_VENT_O-1 .AND. EVACUATION_ONLY(NM))                  MB='ZMIN'
+      IF (NN==N_VENT_O   .AND. EVACUATION_ONLY(NM))                  MB='ZMAX'
 
       IF (MB=='null') THEN
          EVACUATION_VENT = .FALSE.
@@ -10599,30 +10564,25 @@ MESH_LOOP_1: DO NM=1,NMESHES
             CALL CHECKREAD('VENT',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
             IF (IOS==1) EXIT READ_VENT_LOOP
             READ(LU_INPUT,VENT,END=37)    ! Read in info for VENT N
-         END IF EVACUATION_VENTS
+         ENDIF EVACUATION_VENTS
       ELSE
          SURF_ID = 'MIRROR'
       ENDIF
 
       IF (MESH_ID/='null' .AND. MESH_ID/=MESH_NAME(NM))  CYCLE READ_VENT_LOOP
 
+      ! Special cases where VENT is specified with PBX, PBY, PBZ, MB, or DB
+
       IF (PBX>-1.E5_EB .OR. PBY>-1.E5_EB .OR. PBZ>-1.E5_EB) THEN
          IF (MULT_ID/='null') THEN
             WRITE(MESSAGE,'(A,I0,A)') 'ERROR: MULT_ID cannot be applied to VENT',NN,' because it uses PBX, PBY or PBZ.'
             CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
          ENDIF
-         XB(1) = XS
-         XB(2) = XF
-         XB(3) = YS
-         XB(4) = YF
-         XB(5) = ZS
-         XB(6) = ZF
+         XB = (/XS,XF,YS,YF,ZS,ZF/)
          IF (PBX>-1.E5_EB) XB(1:2) = PBX
          IF (PBY>-1.E5_EB) XB(3:4) = PBY
          IF (PBZ>-1.E5_EB) XB(5:6) = PBZ
-      ENDIF
-
-      IF (MB/='null') THEN
+      ELSEIF (MB/='null') THEN
          IF (NMESHES>1 .AND. SURF_ID=='PERIODIC') THEN
             WRITE(MESSAGE,'(A,I0,A)') 'ERROR: Use PBX,PBY,PBZ or XB for VENT',NN,' multi-mesh PERIODIC boundary'
             CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
@@ -10631,55 +10591,31 @@ MESH_LOOP_1: DO NM=1,NMESHES
             WRITE(MESSAGE,'(A,I0,A)') 'ERROR: MULT_ID cannot be applied to VENT',NN,' because it uses MB.'
             CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
          ENDIF
-         XB(1) = XS
-         XB(2) = XF
-         XB(3) = YS
-         XB(4) = YF
-         XB(5) = ZS
-         XB(6) = ZF
+         XB = (/XS,XF,YS,YF,ZS,ZF/)
          SELECT CASE (MB)
-            CASE('XMIN')
-                XB(2) = XS
-            CASE('XMAX')
-                XB(1) = XF
-            CASE('YMIN')
-                XB(4) = YS
-            CASE('YMAX')
-                XB(3) = YF
-            CASE('ZMIN')
-                XB(6) = ZS
-            CASE('ZMAX')
-                XB(5) = ZF
+            CASE('XMIN') ; XB(2) = XS
+            CASE('XMAX') ; XB(1) = XF
+            CASE('YMIN') ; XB(4) = YS
+            CASE('YMAX') ; XB(3) = YF
+            CASE('ZMIN') ; XB(6) = ZS
+            CASE('ZMAX') ; XB(5) = ZF
             CASE DEFAULT
                WRITE(MESSAGE,'(A,I0,A)') 'ERROR: MB specified for VENT',NN,' is not XMIN, XMAX, YMIN, YMAX, ZMIN, or ZMAX'
                CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
          END SELECT
-      ENDIF
-
-      IF (DB/='null') THEN
+      ELSEIF (DB/='null') THEN
          IF (MULT_ID/='null') THEN
             WRITE(MESSAGE,'(A,I0,A)') 'ERROR: MULT_ID cannot be applied to VENT',NN,' because it uses DB.'
             CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
          ENDIF
-         XB(1) = XS
-         XB(2) = XF
-         XB(3) = YS
-         XB(4) = YF
-         XB(5) = ZS
-         XB(6) = ZF
+         XB = (/XS,XF,YS,YF,ZS,ZF/)
          SELECT CASE (DB)
-            CASE('XMIN')
-                XB(1:2) = XS_MIN+TWO_EPSILON_EB
-            CASE('XMAX')
-                XB(1:2) = XF_MAX-TWO_EPSILON_EB
-            CASE('YMIN')
-                XB(3:4) = YS_MIN+TWO_EPSILON_EB
-            CASE('YMAX')
-                XB(3:4) = YF_MAX-TWO_EPSILON_EB
-            CASE('ZMIN')
-                XB(5:6) = ZS_MIN+TWO_EPSILON_EB
-            CASE('ZMAX')
-                XB(5:6) = ZF_MAX-TWO_EPSILON_EB
+            CASE('XMIN') ; XB(1:2) = XS_MIN+TWO_EPSILON_EB
+            CASE('XMAX') ; XB(1:2) = XF_MAX-TWO_EPSILON_EB
+            CASE('YMIN') ; XB(3:4) = YS_MIN+TWO_EPSILON_EB
+            CASE('YMAX') ; XB(3:4) = YF_MAX-TWO_EPSILON_EB
+            CASE('ZMIN') ; XB(5:6) = ZS_MIN+TWO_EPSILON_EB
+            CASE('ZMAX') ; XB(5:6) = ZF_MAX-TWO_EPSILON_EB
             CASE DEFAULT
                WRITE(MESSAGE,'(A,I0,A)') 'ERROR: DB specified for VENT',NN,' is not XMIN, XMAX, YMIN, YMAX, ZMIN, or ZMAX'
                CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
@@ -11127,7 +11063,12 @@ MESH_LOOP_2: DO NM=1,NMESHES
          END SELECT
       ENDIF
 
+      ! Note if the domain is sealed 
+
+      IF (VT%BOUNDARY_TYPE==OPEN_BOUNDARY .OR. VT%BOUNDARY_TYPE==PERIODIC_BOUNDARY) SEALED_MESH(NM) = .FALSE.
+
       ! Check UVW
+
       IF (ABS(VT%UVW(ABS(VT%IOR))) < TWO_EPSILON_EB) THEN
          WRITE(MESSAGE,'(A,I0,A)')  'ERROR: VENT ',VT%ORDINAL, ' cannot have normal component of UVW equal to 0'
          CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
@@ -11203,6 +11144,45 @@ MESH_LOOP_2: DO NM=1,NMESHES
 ENDDO MESH_LOOP_2
 
 CONTAINS
+
+
+SUBROUTINE SET_VENT_DEFAULTS
+
+COLOR             = 'null'
+CTRL_ID           = 'null'
+DB                = 'null'
+DEVC_ID           = 'null'
+DYNAMIC_PRESSURE  = 0._EB
+EVACUATION        = .FALSE.
+GEOM              = .FALSE.
+ID                = 'null'
+IOR               = 0
+L_EDDY            = 0._EB
+L_EDDY_IJ         = 0._EB
+MESH_ID           = 'null'
+MULT_ID           = 'null'
+N_EDDY            = 0
+OBST_ID           = 'null'
+OUTLINE           = .FALSE.
+PBX               = -1.E6_EB
+PBY               = -1.E6_EB
+PBZ               = -1.E6_EB
+PRESSURE_RAMP     = 'null'
+RADIUS            = -1._EB
+REYNOLDS_STRESS   = 0._EB
+RGB               = -1
+SPREAD_RATE       = -1._EB
+SURF_ID           = 'null'
+TEXTURE_ORIGIN    = -999._EB
+TMP_EXTERIOR      = -1000.
+TMP_EXTERIOR_RAMP = 'null'
+TRANSPARENCY      = 1._EB
+UVW               = -1.E12_EB
+VEL_RMS           = 0._EB
+WIND              = .FALSE.
+XYZ               = -1.E6_EB
+
+END SUBROUTINE SET_VENT_DEFAULTS
 
   SUBROUTINE DEFINE_EVACUATION_VENTS(NM,IMODE)
     !
@@ -11826,13 +11806,15 @@ ENDDO
 
 END SUBROUTINE PROC_INIT
 
+
 SUBROUTINE READ_ZONE
 
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: LEAK_AREA, LEAK_REFERENCE_PRESSURE, LEAK_PRESSURE_EXPONENT
 REAL(EB) :: XYZ(3,N_ZONE_POINTS)
-INTEGER  :: N,NM,NN,N_EVAC_ZONE,N_EVAC_MESH,NM_EVAC
-LOGICAL :: SEALED,READ_ZONE_LINES,PERIODIC
+INTEGER  :: N,NM,NN,N_EVAC_ZONE,N_EVAC_MESH,NM_EVAC,IERR
+LOGICAL :: READ_ZONE_LINES,PERIODIC
 CHARACTER(LABEL_LENGTH) :: ID
+INTEGER, ALLOCATABLE, DIMENSION(:) :: COUNTS,DISPLS
 NAMELIST /ZONE/ ID,LEAK_AREA,LEAK_PRESSURE_EXPONENT,LEAK_REFERENCE_PRESSURE,PERIODIC,XB,XYZ
 
 ALLOCATE (LEAK_AREA(0:MAX_LEAK_PATHS))
@@ -11855,28 +11837,28 @@ COUNT_ZONE_LOOP: DO
 ENDDO COUNT_ZONE_LOOP
 11 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
 
-! Check to see if there are any OPEN vents. If there are not, and there are no declared pressure ZONEs, assume the whole domain
-
-SEALED = .TRUE.
+! Number of evacuation zones = number of main evacuation meshes with flow fields
 
 N_EVAC_ZONE = 0
 DO NM=1,NMESHES
-   IF (.NOT.EVACUATION_ONLY(NM)) THEN
-      M => MESHES(NM)
-      DO N=1,M%N_VENT
-         VT => M%VENTS(N)
-         IF (VT%BOUNDARY_TYPE==OPEN_BOUNDARY)     SEALED = .FALSE.
-         IF (VT%BOUNDARY_TYPE==PERIODIC_BOUNDARY) SEALED = .FALSE.
-      ENDDO
-   ELSE
-      ! Number of evacuation zones = number of main evacuation meshes with flow fields
-      IF (EVACUATION_SKIP(NM)) N_EVAC_ZONE = N_EVAC_ZONE + 1
-   END IF
+   IF (EVACUATION_ONLY(NM) .AND. EVACUATION_SKIP(NM)) N_EVAC_ZONE = N_EVAC_ZONE + 1
 ENDDO
 
-! If the whole domain lacks on OPEN or PERIODIC boundary, assume it to be one big pressure zone
+! If all of the meshes are sealed and no ZONEs are declared, stop with an ERROR
 
-IF (SEALED .AND. N_ZONE==0 .AND. (NMESHES-COUNT(EVACUATION_ONLY))>1) THEN
+ALLOCATE(COUNTS(0:N_MPI_PROCESSES-1)) ; COUNTS = 0
+ALLOCATE(DISPLS(0:N_MPI_PROCESSES-1)) ; DISPLS = 0
+DO N=0,N_MPI_PROCESSES-1
+   DO NM=1,NMESHES
+      IF (PROCESS(NM)==N) COUNTS(N) = COUNTS(N) + 1
+   ENDDO
+   IF (N>0) DISPLS(N) = COUNTS(N-1) + DISPLS(N-1)
+ENDDO
+
+IF (N_MPI_PROCESSES>1) &
+   CALL MPI_ALLGATHERV(MPI_IN_PLACE,COUNTS(MYID),MPI_LOGICAL,SEALED_MESH,COUNTS,DISPLS,MPI_LOGICAL,MPI_COMM_WORLD,IERR)
+
+IF (ALL(SEALED_MESH) .AND. N_ZONE==0 .AND. (NMESHES-COUNT(EVACUATION_ONLY))>1) THEN
    WRITE(MESSAGE,'(A)')  'ERROR: The domain appears sealed. Specify one or more pressure ZONEs.'
    CALL SHUTDOWN(MESSAGE) ; RETURN
 ENDIF
@@ -11884,7 +11866,7 @@ ENDIF
 ! If the whole domain lacks on OPEN or PERIODIC boundary, assume it to be one big pressure zone
 
 READ_ZONE_LINES = .TRUE.
-IF (SEALED .AND. N_ZONE==0) THEN
+IF (ALL(SEALED_MESH) .AND. N_ZONE==0) THEN
    N_ZONE = 1
    READ_ZONE_LINES = .FALSE.
 ENDIF
