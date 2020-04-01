@@ -14,7 +14,7 @@ PRIVATE
 
 PUBLIC COMBUSTION,COMBUSTION_BC,CONDENSATION_EVAPORATION
 
-REAL(EB), DIMENSION(:,:,:), POINTER :: Q_OLD
+REAL(EB), DIMENSION(:,:,:), POINTER :: Q_OLD, CHI_R_OLD
 
 CONTAINS
 
@@ -28,14 +28,14 @@ IF (EVACUATION_ONLY(NM)) RETURN
 
 TNOW=CURRENT_TIME()
 
+CALL POINT_TO_MESH(NM)
+
+Q     = 0._EB
+CHI_R = 0._EB
+
 ! Get Q from INIT line and possibly RAMP
 
-IF (INIT_HRRPUV) THEN
-   CALL INIT_Q(T,NM)
-   RETURN
-ENDIF
-
-CALL POINT_TO_MESH(NM)
+IF (INIT_HRRPUV) CALL INIT_Q(T,NM)
 
 ! Call combustion ODE solver
 
@@ -75,12 +75,15 @@ TYPE (REACTION_TYPE), POINTER :: RN
 TYPE (SPECIES_MIXTURE_TYPE), POINTER :: SM
 LOGICAL :: DO_REACTION,REALIZABLE
 
-Q_OLD => WORK2
-Q_OLD      = Q
-Q          = 0._EB
-Q_EXISTS   = .FALSE.
+Q_OLD    => WORK2
+Q_OLD    =  Q
+Q        =  0._EB
+Q_EXISTS =  .FALSE.
 
-CHI_R = 0._EB
+CHI_R_OLD => WORK3
+CHI_R_OLD =  CHI_R
+CHI_R     =  0._EB
+
 IF (REAC_SOURCE_CHECK) THEN
    REAC_SOURCE_TERM=0._EB
    Q_REAC=0._EB
@@ -155,6 +158,23 @@ DO K=1,KBAR
       ENDDO ILOOP
    ENDDO
 ENDDO
+
+DO K=1,KBAR
+   DO J=1,JBAR
+      ILOOP2: DO I=1,IBAR
+         ! Check to see if a reaction is possible
+         IF (SOLID(CELL_INDEX(I,J,K))) CYCLE ILOOP2
+         IF (CC_IBM) THEN
+            IF (CCVAR(I,J,K,IBM_CGSC) /= IBM_GASPHASE) CYCLE ILOOP2
+         ENDIF
+         IF (Q(I,J,K)+Q_OLD(I,J,K)<= TWO_EPSILON_EB) CYCLE ILOOP2
+         CHI_R(I,J,K) = (CHI_R(I,J,K)*Q(I,J,K)+CHI_R_OLD(I,J,K)*Q_OLD(I,J,K))/(Q(I,J,K) + Q_OLD(I,J,K))
+         Q(I,J,K) = Q(I,J,K) + Q_OLD(I,J,K)
+      ENDDO ILOOP2
+   ENDDO
+ENDDO
+
+
 
 IF (.NOT.Q_EXISTS) RETURN
 
@@ -1447,6 +1467,7 @@ DO N=1,N_INIT
                 M%YC(J) > IN%Y1 .AND. M%YC(J) < IN%Y2 .AND. &
                 M%ZC(K) > IN%Z1 .AND. M%ZC(K) < IN%Z2) THEN
                M%Q(I,J,K) = TIME_RAMP_FACTOR * IN%HRRPUV
+               M%CHI_R(I,J,K) = IN%CHI_R
             ENDIF
          ENDDO
       ENDDO
