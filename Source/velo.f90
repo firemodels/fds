@@ -1,4 +1,4 @@
-!> \brief Collection of velocity routines.  
+!> \brief Collection of velocity routines.
 !> Computes the velocity flux terms, baroclinic torque correction terms, and performs the CFL check.
 
 MODULE VELO
