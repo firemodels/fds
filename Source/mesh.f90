@@ -15,56 +15,81 @@ IMPLICIT NONE
 
 TYPE MESH_TYPE
 
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: U  !< Velocity component at current time step. U(I,J,K) is \f$u_{ijk}^n\f$.
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: V  !< Velocity component at current time step. V(I,J,K) is \f$v_{ijk}^n\f$.
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: W  !< Velocity component at current time step. W(I,J,K) is \f$w_{ijk}^n\f$.
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: US !< Velocity component estimated at next time step. US(I,J,K) is \f$u_{ijk}^*\f$.
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: VS !< Velocity component estimated at next time step. VS(I,J,K) is \f$v_{ijk}^*\f$.
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: WS !< Velocity component estimated at next time step. WS(I,J,K) is \f$w_{ijk}^*\f$.
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: DDDT    !< \f$\partial D/\partial t\f$ where \f$D\f$ is the divergence, D(I,J,K).
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: D       !< Divergence at current time step. D(I,J,K) is \f$D_{ijk}^n\f$.
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: DS      !< Divergence estimate next time step. DS(I,J,K) is \f$D_{ijk}^*\f$.
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: H       !< H(I,J,K) is \f$ \tilde{p}_{ijk}/\rho_{ijk} + |\mathbf{u}|^2_{ijk}/2 \f$.
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: HS      !< H estimated at next tine step.
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: H_PRIME !< Experimental pressure correction.
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: KRES    !< Resolved kinetic energy, \f$ |\mathbf{u}|^2_{ijk}/2 \f$.
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: FVX     !< Momentum equation flux terms, \f$ F_{{\rm A},x,ijk} \f$. 
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: FVY     !< Momentum equation flux terms, \f$ F_{{\rm A},y,ijk} \f$.
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: FVZ     !< Momentum equation flux terms, \f$ F_{{\rm A},z,ijk} \f$.
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: FVX_B   !< Momentum equation flux terms, \f$ F_{{\rm B},x,ijk} \f$.
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: FVY_B   !< Momentum equation flux terms, \f$ F_{{\rm B},y,ijk} \f$.
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: FVZ_B   !< Momentum equation flux terms, \f$ F_{{\rm B},z,ijk} \f$.
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: RHO     !< Density (kg/m3) at current time step. RHO(I,J,K) is \f$ \rho_{ijk}^n \f$.
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: RHOS    !< Density (kg/m3) at next time step. RHOS(I,J,K) is \f$ \rho_{ijk}^* \f$.
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: MU      !< Turbulent viscosity (kg/m/s).
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: MU_DNS  !< Laminar viscosity (kg/m/s).
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: TMP     !< Gas temperature (K). TMP(I,J,K) is \f$ T_{ijk} \f$.
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: Q       !< Heat release rate per unit volume, \f$ \dot{q}_{ijk}''' \f$.
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: KAPPA_GAS !< Radiation absorption coefficient by gas, \f$ \kappa_{ijk} \f$.
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: CHI_R   !< Radiative fraction, \f$ \chi_{{\rm r},ijk} \f$.
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: QR      !< Radiation source term, \f$ -\nabla \cdot \dot{\mathbf{q}}_{\rm r}'' \f$.
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: QR_W    !< Radiation source term, particles and droplets.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: U  !< Velocity component at current time step, \f$u_{ijk}^n\f$
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: V  !< Velocity component at current time step, \f$v_{ijk}^n\f$
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: W  !< Velocity component at current time step, \f$w_{ijk}^n\f$
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: US !< Velocity component estimated at next time step, \f$u_{ijk}^*\f$
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: VS !< Velocity component estimated at next time step, \f$v_{ijk}^*\f$
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: WS !< Velocity component estimated at next time step, \f$w_{ijk}^*\f$
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: DDDT    !< \f$(\partial D/\partial t)_{ijk}\f$ where \f$D_{ijk}\f$ is the divergence
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: D       !< Divergence at current time step, \f$D_{ijk}^n\f$
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: DS      !< Divergence estimate next time step, \f$D_{ijk}^*\f$
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: H       !< \f$ \tilde{p}_{ijk}/\rho_{ijk} + |\mathbf{u}|^2_{ijk}/2 \f$
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: HS      !< H estimated at next time step
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: H_PRIME !< Experimental pressure correction
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: KRES    !< Resolved kinetic energy, \f$ |\mathbf{u}|^2_{ijk}/2 \f$
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: FVX     !< Momentum equation flux terms, \f$ F_{{\rm A},x,ijk} \f$ 
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: FVY     !< Momentum equation flux terms, \f$ F_{{\rm A},y,ijk} \f$
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: FVZ     !< Momentum equation flux terms, \f$ F_{{\rm A},z,ijk} \f$
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: FVX_B   !< Momentum equation flux terms, \f$ F_{{\rm B},x,ijk} \f$
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: FVY_B   !< Momentum equation flux terms, \f$ F_{{\rm B},y,ijk} \f$
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: FVZ_B   !< Momentum equation flux terms, \f$ F_{{\rm B},z,ijk} \f$
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: RHO     !< Density (kg/m3) at current time step, \f$ \rho_{ijk}^n \f$
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: RHOS    !< Density (kg/m3) at next time step, \f$ \rho_{ijk}^* \f$
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: MU      !< Turbulent viscosity (kg/m/s), \f$ \mu_{{\rm t},ijk} \f$
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: MU_DNS  !< Laminar viscosity (kg/m/s)
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: TMP     !< Gas temperature, \f$ T_{ijk} \f$ (K)
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: Q       !< Heat release rate per unit volume, \f$ \dot{q}_{ijk}''' \f$
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: KAPPA_GAS !< Radiation absorption coefficient by gas, \f$ \kappa_{ijk} \f$
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: CHI_R   !< Radiative fraction, \f$ \chi_{{\rm r},ijk} \f$
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: QR      !< Radiation source term, \f$ -\nabla \cdot \dot{\mathbf{q}}_{\rm r}'' \f$
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: QR_W    !< Radiation source term, particles and droplets
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: UII     !< Integrated intensity, \f$ U_{ijk}=\sum_{l=1}^N I_{ijk}^l\delta\Omega^l\f$
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: RSUM
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: D_SOURCE
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: U_OLD
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: V_OLD
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: W_OLD
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: CSD2
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: CHEM_SUBIT
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: MIX_TIME
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: STRAIN_RATE
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: D_Z_MAX
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: Q_DOT_PPP_S
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: PR_T
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: TMP_FLAME
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: RSUM    !< \f$ R_0 \sum_\alpha Y_\alpha/W_\alpha \f$
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: D_SOURCE!< Source terms in the expression for the divergence
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: U_OLD   !< Value of \f$ u_{ijk} \f$ at the previous time step, used for output only
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: V_OLD   !< Value of \f$ v_{ijk} \f$ at the previous time step, used for output only
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: W_OLD   !< Value of \f$ w_{ijk} \f$ at the previous time step, used for output only
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: CSD2    !< \f$ C_s \Delta^2 \f$ in Smagorinsky turbulence expression
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: CHEM_SUBIT  !< Number of chemistry sub-iterations
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: MIX_TIME    !< Mixing-controlled combustion reaction time (s)
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: STRAIN_RATE !< Strain rate \f$ |S| \f$ (1/s)
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: D_Z_MAX     !< \f$ \max D_\alpha \f$
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: Q_DOT_PPP_S !< Heat release rate per unit volume in 3D pyrolysis model
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: PR_T        !< Turbulent Prandtl number (experimental)
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: TMP_FLAME   !< Flame temperature (K) (experimental)
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: FLAME_INDEX
 
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: ZZ,ZZS,REAC_SOURCE_TERM,DEL_RHO_D_DEL_Z,FX,FY,FZ, &
-                                                SCALAR_WORK1,SCALAR_WORK2,SCALAR_WORK3,SCALAR_WORK4, &
-                                                Q_REAC,AVG_DROP_DEN,AVG_DROP_TMP,AVG_DROP_RAD,AVG_DROP_AREA, &
-                                                M_DOT_PPP,M_DOT_G_PPP_S,RHO_ZZ_G_S,TRI_COR, &
-                                                ADV_FX,ADV_FY,ADV_FZ,DIF_FX,DIF_FY,DIF_FZ,DIF_FXS,DIF_FYS,DIF_FZS
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: ZZ               !< Lumped species, current time step, \f$ Z_{\alpha,ijk}^n \f$
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: ZZS              !< Lumped species, next time step, \f$ Z_{\alpha,ijk}^* \f$
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: REAC_SOURCE_TERM !< \f$ \dot{m}_{\alpha,ijk}''' \f$
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: DEL_RHO_D_DEL_Z  !< \f$ (\nabla \cdot \rho D_\alpha \nabla Z_\alpha)_{ijk} \f$
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: FX               !< \f$ \rho Z_{\alpha,ijk} \f$ at \f$ x \f$ face of cell
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: FY               !< \f$ \rho Z_{\alpha,ijk} \f$ at \f$ y \f$ face of cell
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: FZ               !< \f$ \rho Z_{\alpha,ijk} \f$ at \f$ z \f$ face of cell
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: SCALAR_WORK1     !< Work array
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: SCALAR_WORK2     !< Work array
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: SCALAR_WORK3     !< Work array
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: SCALAR_WORK4     !< Work array
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: Q_REAC           !< \f$ \dot{q}_{ijk}''' \f$ for a specified reaction
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: AVG_DROP_DEN     !< Droplet mass per unit volume for a certain droplet type
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: AVG_DROP_TMP     !< Average temperature for a certain droplet type
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: AVG_DROP_RAD     !< Average radius for a certain droplet type
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: AVG_DROP_AREA    !< Average area for a certain droplet type
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: M_DOT_PPP        !< Mass source term, \f$ \dot{m}_{\alpha,ijk}''' \f$
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: M_DOT_G_PPP_S    !< Mass source term, \f$ \dot{m}_{\alpha,ijk}''' \f$, 3D solid
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: RHO_ZZ_G_S
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: TRI_COR
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: ADV_FX
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: ADV_FY
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: ADV_FZ
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: DIF_FX
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: DIF_FY
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: DIF_FZ
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: DIF_FXS
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: DIF_FYS
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: DIF_FZS
+
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: U_EDGE_Y,U_EDGE_Z,V_EDGE_X,V_EDGE_Z,W_EDGE_X,W_EDGE_Y
 
    REAL(EB) :: POIS_PTB,POIS_ERR,LAPLACE_PTB,LAPLACE_ERR
