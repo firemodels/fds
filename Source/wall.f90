@@ -73,7 +73,7 @@ END SUBROUTINE WALL_BC
 
 !> \brief Thermal boundary conditions for all boundaries.
 !>
-!> \detail One dimensional heat transfer and pyrolysis is done in PYROLYSIS.
+!> \details One dimensional heat transfer and pyrolysis is done in PYROLYSIS.
 !> Note also that gas phase values are assigned here to be used for all subsequent BCs.
 !> \callgraph
 
@@ -3110,7 +3110,7 @@ END SUBROUTINE SOLID_HEAT_TRANSFER_1D
 !> \brief Calculate the solid phase reaction. Return heat and mass generation rates per unit volume.
 !>
 !> \param N_MATS Number of material components in the solid
-!> \param MATL_INDEX(1:N_MATS) Indices of the material components from the master material list
+!> \param MATL_INDEX (1:N_MATS) Indices of the material components from the master material list
 !> \param SURF_INDEX Index of surface, used only for liquids
 !> \param IIG I index of nearest gas phase cell
 !> \param JJG J index of nearest gas phase cell
@@ -3118,13 +3118,13 @@ END SUBROUTINE SOLID_HEAT_TRANSFER_1D
 !> \param TMP_S Solid interior temperature (K)
 !> \param TMP_F Solid surface temperature (K)
 !> \param IOR Index of orientation of the surface with the liquid droplet, if appropropriate (0 for gas phase droplet)
-!> \param RHO_S(1:N_MATS) Array of component densities (kg/m3)
+!> \param RHO_S (1:N_MATS) Array of component densities (kg/m3)
 !> \param RHO_S0 Original solid density (kg/m3)
 !> \param DEPTH Distance from surface (m)
 !> \param DT_BC Time step used by the solid phase solver (s)
-!> \param M_DOT_G_PPP_ADJUST(1:N_TRACKED_SPECIES) Adjusted mass generation rate per unit volume of the gas species
-!> \param M_DOT_G_PPP_ACTUAL(1:N_TRACKED_SPECIES) Actual mass generation rate per unit volume of the gas species
-!> \param M_DOT_S_PPP(1:N_MATS) Mass generation/depletion rate per unit volume of solid components (kg/m3/s)
+!> \param M_DOT_G_PPP_ADJUST (1:N_TRACKED_SPECIES) Adjusted mass generation rate per unit volume of the gas species
+!> \param M_DOT_G_PPP_ACTUAL (1:N_TRACKED_SPECIES) Actual mass generation rate per unit volume of the gas species
+!> \param M_DOT_S_PPP (1:N_MATS) Mass generation/depletion rate per unit volume of solid components (kg/m3/s)
 !> \param Q_DOT_S_PPP Heat release rate per unit volume (W/m3)
 !> \param Q_DOT_G_PPP Heat release rate per unit volume in grid cell abutting surface (W/m3)
 !> \param Q_DOT_O2_PPP Heat release rate per unit volume due to char oxidation in grid cell abutting surface (W/m3)
@@ -3147,8 +3147,8 @@ INTEGER, INTENT(IN), OPTIONAL :: I_INDEX
 REAL(EB), INTENT(IN) :: TMP_S,TMP_F,RHO_S0,DT_BC,DEPTH
 REAL(EB), INTENT(IN), OPTIONAL :: R_DROP,LPU,LPV,LPW
 REAL(EB), DIMENSION(:) :: RHO_S(N_MATS),ZZ_GET(1:N_TRACKED_SPECIES),ZZ_AIR(1:N_TRACKED_SPECIES),Y_ALL(1:N_SPECIES)
-REAL(EB), DIMENSION(:), INTENT(OUT) :: M_DOT_G_PPP_ADJUST(N_TRACKED_SPECIES),M_DOT_G_PPP_ACTUAL(N_TRACKED_SPECIES),&
-                                       M_DOT_S_PPP(MAX_MATERIALS)
+REAL(EB), DIMENSION(:), INTENT(OUT) :: M_DOT_G_PPP_ADJUST(N_TRACKED_SPECIES),M_DOT_G_PPP_ACTUAL(N_TRACKED_SPECIES)
+REAL(EB), DIMENSION(:), INTENT(OUT) :: M_DOT_S_PPP(MAX_MATERIALS)
 REAL(EB), INTENT(OUT) :: Q_DOT_G_PPP,Q_DOT_O2_PPP
 INTEGER, INTENT(IN), DIMENSION(:) :: MATL_INDEX(N_MATS)
 INTEGER :: N,NN,J,NS,SMIX_INDEX,NWP
