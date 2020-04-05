@@ -7121,7 +7121,7 @@ When the fire front arrives at a given surface cell, it begins to burn with a he
 
 \paragraph{Option 2}
 
-In this second option, you create your own custom fuel type as follows: 
+In this second option, you create your own custom fuel type as follows:
 \begin{lstlisting}
 &SURF ID = 'My Fuel'
       VEG_LSET_COUPLED = .TRUE.
@@ -8461,7 +8461,7 @@ produces a time history of the smoke layer height at $x=2$ and $y=3$ between $z=
 
 The output quantity {\ct THERMOCOUPLE} is the temperature of a modeled thermocouple. The thermocouple temperature lags the true gas temperature by an amount determined mainly by its bead size. It is found by solving the following equation for the thermocouple temperature, $T_{\rm TC}$~\cite{Welsh:1}
 \be
-   \rho_{\rm TC} \, c_{\rm TC} \, \frac{\d T_{\rm TC}}{\d t} = \epsilon_{\rm TC} \, (U/4 - \sigma T_{\rm TC}^4) + h(T_{\rm g} - T_{\rm TC}) = 0
+   \frac{D_{\rm TC}}{6} \, \rho_{\rm TC} \, c_{\rm TC} \, \frac{\d T_{\rm TC}}{\d t} = \epsilon_{\rm TC} \, (U/4 - \sigma T_{\rm TC}^4) + h(T_{\rm g} - T_{\rm TC})
    \label{TC}
 \ee
 where $\epsilon_{\rm TC}$ is the emissivity of the thermocouple, $U$ is the integrated radiative intensity, $T_{\rm g}$ is the true gas temperature, and $h$ is the heat transfer coefficient to a small sphere, $h=k \, \NU / D_{\rm TC}$. The bead {\ct DIAMETER}, {\ct EMISSIVITY}, {\ct DENSITY}, and {\ct SPECIFIC\_HEAT} are given on the associated {\ct PROP} line. To over-ride the calculated value of the heat transfer coefficient, set {\ct HEAT\_TRANSFER\_COEFFICIENT} on the {\ct PROP} line (\si{W/(m.K)}). The default value for the bead diameter is 0.001~m. The default emissivity is 0.85. The default values for the bead density and specific heat are that of nickel; 8908~kg/m$^3$ and 0.44~kJ/kg/K, respectively. See the discussion on heat transfer to a water droplet in the Technical Reference Guide for details of the convective heat transfer to a small sphere.
