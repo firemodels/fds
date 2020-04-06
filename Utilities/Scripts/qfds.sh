@@ -125,6 +125,7 @@ function usage {
   echo " -V   - show command line used to invoke qfds.sh"
   echo " -w time - walltime, where time is hh:mm for PBS and dd-hh:mm:ss for SLURM. [default: $walltime]"
   echo ""
+  echo " Resource manager: $RESOURCE_MANAGER"
   exit
 }
 
