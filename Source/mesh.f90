@@ -28,7 +28,7 @@ TYPE MESH_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: HS      !< H estimated at next time step
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: H_PRIME !< Experimental pressure correction
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: KRES    !< Resolved kinetic energy, \f$ |\mathbf{u}|^2_{ijk}/2 \f$
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: FVX     !< Momentum equation flux terms, \f$ F_{{\rm A},x,ijk}+F_{{\rm B},x,ijk} \f$ 
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: FVX     !< Momentum equation flux terms, \f$ F_{{\rm A},x,ijk}+F_{{\rm B},x,ijk} \f$
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: FVY     !< Momentum equation flux terms, \f$ F_{{\rm A},y,ijk}+F_{{\rm B},y,ijk} \f$
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: FVZ     !< Momentum equation flux terms, \f$ F_{{\rm A},z,ijk}+F_{{\rm B},z,ijk} \f$
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: FVX_B   !< Momentum equation flux terms, \f$ F_{{\rm B},x,ijk} \f$
@@ -186,7 +186,7 @@ TYPE MESH_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: R      !< Radial coordinate, \f$ r_i \f$, for CYLINDRICAL geometry
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: RC     !< Radial coordinate, cell center, \f$ (r_i+r_{i-1})/2 \f$
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: RRN    !< \f$ 2/(r_i+r_{i-1}) \f$
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: X      !< Position of forward x face of cell (I,J,K), \f$ x_i \f$ 
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: X      !< Position of forward x face of cell (I,J,K), \f$ x_i \f$
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: Y      !< Position of forward y face of cell (I,J,K), \f$ y_j \f$
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: Z      !< Position of forward z face of cell (I,J,K), \f$ z_k \f$
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: XC     !< x coordinate of cell center, \f$ (x_i+x_{i-1})/2 \f$
@@ -280,7 +280,7 @@ TYPE MESH_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: GEOM_ZMAX
 
    ! Arrays for special cut-cells:
-   INTEGER :: N_SPCELL=0
+   INTEGER :: N_SPCELL=0, N_SPCELL_CF=0
    INTEGER, ALLOCATABLE, DIMENSION(:,:) :: SPCELL_LIST
 
    !---------------------- END: CC_IBM mesh Arrays ------------------------------------------
