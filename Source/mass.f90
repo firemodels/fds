@@ -25,6 +25,7 @@ USE GLOBAL_CONSTANTS, ONLY: N_TOTAL_SCALARS,PREDICTOR,EVACUATION_ONLY,SOLID_PHAS
 
 INTEGER, INTENT(IN) :: NM
 REAL(EB) :: TNOW,ZZZ(1:4),GRAD_ZZ_FUEL(3),GRAD_ZZ_AIR(3),GZF_DOT_GZA
+REAL(EB), PARAMETER :: DUMMY=0._EB
 INTEGER  :: I,J,K,N,IOR,IW,IIG,JJG,KKG,II,JJ,KK
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP=>NULL()
 REAL(EB), POINTER, DIMENSION(:,:,:) :: RHO_Z_P=>NULL()
@@ -159,7 +160,7 @@ SPECIES_LOOP: DO N=1,N_TOTAL_SCALARS
                ! ///   II   ///  II+1  |  II+2  | ...
                !                       ^ WALL_INDEX(II+1,+1)
                IF ((UU(II+1,JJ,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II+1,JJ,KK),+1)>0)) THEN
-                  ZZZ(1:3) = (/WC%ONE_D%RHO_F*WC%ONE_D%ZZ_F(N),RHO_Z_P(II+1:II+2,JJ,KK)/)
+                  ZZZ(1:4) = (/WC%ONE_D%RHO_F*WC%ONE_D%ZZ_F(N),RHO_Z_P(II+1:II+2,JJ,KK),DUMMY/)
                   FX(II+1,JJ,KK,N) = SCALAR_FACE_VALUE(UU(II+1,JJ,KK),ZZZ,I_FLUX_LIMITER)
                ENDIF
             CASE(-1) OFF_WALL_SELECT_2
@@ -167,27 +168,27 @@ SPECIES_LOOP: DO N=1,N_TOTAL_SCALARS
                ! ... |  II-2  |  II-1  ///   II   ///
                !              ^ WALL_INDEX(II-1,-1)
                IF ((UU(II-2,JJ,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II-1,JJ,KK),-1)>0)) THEN
-                  ZZZ(2:4) = (/RHO_Z_P(II-2:II-1,JJ,KK),WC%ONE_D%RHO_F*WC%ONE_D%ZZ_F(N)/)
+                  ZZZ(1:4) = (/DUMMY,RHO_Z_P(II-2:II-1,JJ,KK),WC%ONE_D%RHO_F*WC%ONE_D%ZZ_F(N)/)
                   FX(II-2,JJ,KK,N) = SCALAR_FACE_VALUE(UU(II-2,JJ,KK),ZZZ,I_FLUX_LIMITER)
                ENDIF
             CASE( 2) OFF_WALL_SELECT_2
                IF ((VV(II,JJ+1,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ+1,KK),+2)>0)) THEN
-                  ZZZ(1:3) = (/WC%ONE_D%RHO_F*WC%ONE_D%ZZ_F(N),RHO_Z_P(II,JJ+1:JJ+2,KK)/)
+                  ZZZ(1:4) = (/WC%ONE_D%RHO_F*WC%ONE_D%ZZ_F(N),RHO_Z_P(II,JJ+1:JJ+2,KK),DUMMY/)
                   FY(II,JJ+1,KK,N) = SCALAR_FACE_VALUE(VV(II,JJ+1,KK),ZZZ,I_FLUX_LIMITER)
                ENDIF
             CASE(-2) OFF_WALL_SELECT_2
                IF ((VV(II,JJ-2,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ-1,KK),-2)>0)) THEN
-                  ZZZ(2:4) = (/RHO_Z_P(II,JJ-2:JJ-1,KK),WC%ONE_D%RHO_F*WC%ONE_D%ZZ_F(N)/)
+                  ZZZ(1:4) = (/DUMMY,RHO_Z_P(II,JJ-2:JJ-1,KK),WC%ONE_D%RHO_F*WC%ONE_D%ZZ_F(N)/)
                   FY(II,JJ-2,KK,N) = SCALAR_FACE_VALUE(VV(II,JJ-2,KK),ZZZ,I_FLUX_LIMITER)
                ENDIF
             CASE( 3) OFF_WALL_SELECT_2
                IF ((WW(II,JJ,KK+1)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK+1),+3)>0)) THEN
-                  ZZZ(1:3) = (/WC%ONE_D%RHO_F*WC%ONE_D%ZZ_F(N),RHO_Z_P(II,JJ,KK+1:KK+2)/)
+                  ZZZ(1:4) = (/WC%ONE_D%RHO_F*WC%ONE_D%ZZ_F(N),RHO_Z_P(II,JJ,KK+1:KK+2),DUMMY/)
                   FZ(II,JJ,KK+1,N) = SCALAR_FACE_VALUE(WW(II,JJ,KK+1),ZZZ,I_FLUX_LIMITER)
                ENDIF
             CASE(-3) OFF_WALL_SELECT_2
                IF ((WW(II,JJ,KK-2)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK-1),-3)>0)) THEN
-                  ZZZ(2:4) = (/RHO_Z_P(II,JJ,KK-2:KK-1),WC%ONE_D%RHO_F*WC%ONE_D%ZZ_F(N)/)
+                  ZZZ(1:4) = (/DUMMY,RHO_Z_P(II,JJ,KK-2:KK-1),WC%ONE_D%RHO_F*WC%ONE_D%ZZ_F(N)/)
                   FZ(II,JJ,KK-2,N) = SCALAR_FACE_VALUE(WW(II,JJ,KK-2),ZZZ,I_FLUX_LIMITER)
                ENDIF
          END SELECT OFF_WALL_SELECT_2
@@ -788,7 +789,7 @@ REAL(EB) FUNCTION SCALAR_FACE_VALUE(A,U,LIMITER)
 
 REAL(EB), INTENT(IN) :: A,U(4)
 INTEGER, INTENT(IN) :: LIMITER
-REAL(EB) :: R,B,DU_UP,DU_LOC,V(5)
+REAL(EB) :: R,B,DU_UP,DU_LOC,V(-2:2)
 
 ! This function computes the scalar value on a face.
 ! The scalar is denoted U, and the velocity is denoted A.
@@ -837,7 +838,7 @@ WIND_DIRECTION_IF: IF (A>0._EB) THEN
          SCALAR_FACE_VALUE = U(2) + 0.5_EB*B*DU_UP
       CASE(5) ! MP5, Suresh and Huynh (1997)
          V = (/2._EB*U(1)-U(2),U(1:4)/)
-         SCALAR_FACE_VALUE = MP5(V)
+         SCALAR_FACE_VALUE = MP5()
    END SELECT
 
 ELSE WIND_DIRECTION_IF
@@ -868,17 +869,15 @@ ELSE WIND_DIRECTION_IF
          SCALAR_FACE_VALUE = U(3) - 0.5_EB*B*DU_UP
       CASE(5) ! MP5, Suresh and Huynh (1997)
          V = (/2._EB*U(4)-U(3),U(4),U(3),U(2),U(1)/)
-         SCALAR_FACE_VALUE = MP5(V)
+         SCALAR_FACE_VALUE = MP5()
     END SELECT
 
 ENDIF WIND_DIRECTION_IF
 
-END FUNCTION SCALAR_FACE_VALUE
+CONTAINS
 
-
-REAL(EB) FUNCTION MP5(V)
+REAL(EB) FUNCTION MP5()
 USE MATH_FUNCTIONS, ONLY: MINMOD2,MINMOD4
-REAL(EB), INTENT(IN) :: V(-2:2)
 REAL(EB), PARAMETER :: B1 = 0.016666666666667_EB, B2 = 1.333333333333_EB, ALPHA=4._EB, EPSM=1.E-10_EB
 REAL(EB) :: VOR,VMP,DJM1,DJ,DJP1,DM4JPH,DM4JMH,VUL,VAV,VMD,VLC,VMIN,VMAX
 
@@ -904,6 +903,8 @@ ELSE
 ENDIF
 
 END FUNCTION MP5
+
+END FUNCTION SCALAR_FACE_VALUE
 
 
 END MODULE MASS
