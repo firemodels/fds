@@ -751,7 +751,7 @@ else
 
   if [ "$RESOURCE_MANAGER" == "SLURM" ]; then
     QSUB="sbatch -p $queue --ignore-pbs"
-    MPIRUN="srun -N $nodes -n $n_mpi_processes --ntasks-per-node $ppn"
+    MPIRUN="srun -N $nodes -n $n_mpi_processes --ntasks-per-node $n_mpi_processes_per_node"
   fi
 fi
 
@@ -783,7 +783,7 @@ if [ "$queue" != "none" ]; then
 #SBATCH -n $n_mpi_processes
 #SBATCH --nodes=$nodes
 #SBATCH --cpus-per-task=$n_openmp_threads
-#SBATCH --ntasks-per-node=$ppn
+#SBATCH --ntasks-per-node=$n_mpi_processes_per_node
 EOF
 
 if [ "$benchmark" == "yes" ]; then
