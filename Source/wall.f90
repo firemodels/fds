@@ -1187,18 +1187,18 @@ INIT_IF: IF (T_LOC<TWO_EPSILON_EB) THEN
                      IF (WALL_INDEX_HT3D(IC,OB%PYRO3D_IOR)>0) THEN
                         WC=>WALL(WALL_INDEX_HT3D(IC,OB%PYRO3D_IOR))
                         SF=>SURFACE(WC%SURF_INDEX)
-                        WC%ONE_D%MASSFLUX(1:N_TRACKED_SPECIES)      = 0._EB
-                        WC%ONE_D%MASSFLUX_SPEC(1:N_TRACKED_SPECIES) = 0._EB
-                        WC%ONE_D%MASSFLUX_MATL(1:SF%N_MATL)         = 0._EB
+                        WC%ONE_D%M_DOT_G_PP_ADJUST(1:N_TRACKED_SPECIES) = 0._EB
+                        WC%ONE_D%M_DOT_G_PP_ACTUAL(1:N_TRACKED_SPECIES) = 0._EB
+                        WC%ONE_D%M_DOT_S_PP(1:SF%N_MATL) = 0._EB
                      ENDIF
                   CASE(0)
                      DO IOR=-3,3
                         IF (WALL_INDEX_HT3D(IC,IOR)>0) THEN
                            WC=>WALL(WALL_INDEX_HT3D(IC,IOR))
                            SF=>SURFACE(WC%SURF_INDEX)
-                           WC%ONE_D%MASSFLUX(1:N_TRACKED_SPECIES)      = 0._EB
-                           WC%ONE_D%MASSFLUX_SPEC(1:N_TRACKED_SPECIES) = 0._EB
-                           WC%ONE_D%MASSFLUX_MATL(1:SF%N_MATL)         = 0._EB
+                           WC%ONE_D%M_DOT_G_PP_ADJUST(1:N_TRACKED_SPECIES) = 0._EB
+                           WC%ONE_D%M_DOT_G_PP_ACTUAL(1:N_TRACKED_SPECIES) = 0._EB
+                           WC%ONE_D%M_DOT_S_PP(1:SF%N_MATL) = 0._EB
                         ENDIF
                      ENDDO
                END SELECT IOR_SELECT
@@ -1282,16 +1282,12 @@ OBST_LOOP_2: DO N=1,N_OBST
             ELSE
                ! simple model (no transport): pyrolyzed mass is ejected via wall cell index WALL_INDEX_HT3D(IC,OB%PYRO3D_IOR)
                DO NS=1,N_TRACKED_SPECIES
-                  WC%ONE_D%MASSFLUX(NS)      = WC%ONE_D%MASSFLUX(NS)      + M_DOT_G_PPP_ADJUST(NS)*GEOM_FACTOR*TIME_FACTOR
-                  WC%ONE_D%MASSFLUX_SPEC(NS) = WC%ONE_D%MASSFLUX_SPEC(NS) + M_DOT_G_PPP_ACTUAL(NS)*GEOM_FACTOR*TIME_FACTOR
+                  WC%ONE_D%M_DOT_G_PP_ADJUST(NS) = WC%ONE_D%M_DOT_G_PP_ADJUST(NS) + M_DOT_G_PPP_ADJUST(NS)*GEOM_FACTOR*TIME_FACTOR
+                  WC%ONE_D%M_DOT_G_PP_ACTUAL(NS) = WC%ONE_D%M_DOT_G_PP_ACTUAL(NS) + M_DOT_G_PPP_ACTUAL(NS)*GEOM_FACTOR*TIME_FACTOR
                ENDDO
-               !! MASSFLUX_MATL should not be needed in 3D
-               ! DO NN=1,SF%N_MATL
-               !    WC%ONE_D%MASSFLUX_MATL(NN) = WC%ONE_D%MASSFLUX_MATL(NN) + M_DOT_S_PPP(NN)*GEOM_FACTOR*TIME_FACTOR
-               ! ENDDO
                ! If the fuel or water massflux is non-zero, set the ignition time
                IF (WC%ONE_D%T_IGN > T) THEN
-                  IF (SUM(WC%ONE_D%MASSFLUX(1:N_TRACKED_SPECIES)) > 0._EB) WC%ONE_D%T_IGN = T
+                  IF (SUM(WC%ONE_D%M_DOT_G_PP_ADJUST(1:N_TRACKED_SPECIES)) > 0._EB) WC%ONE_D%T_IGN = T
                ENDIF
             ENDIF
 
@@ -1675,21 +1671,22 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
       END SELECT
 
       SELECT CASE(IOR)
-         CASE( 1); WC%ONE_D%MASSFLUX(N) = -D_DRHOZDX(II,JJ,KK)
-         CASE(-1); WC%ONE_D%MASSFLUX(N) =  D_DRHOZDX(II-1,JJ,KK)
-         CASE( 2); WC%ONE_D%MASSFLUX(N) = -D_DRHOZDY(II,JJ,KK)
-         CASE(-2); WC%ONE_D%MASSFLUX(N) =  D_DRHOZDY(II,JJ-1,KK)
-         CASE( 3); WC%ONE_D%MASSFLUX(N) = -D_DRHOZDZ(II,JJ,KK)
-         CASE(-3); WC%ONE_D%MASSFLUX(N) =  D_DRHOZDZ(II,JJ,KK-1)
+         CASE( 1); WC%ONE_D%M_DOT_G_PP_ADJUST(N) = -D_DRHOZDX(II,JJ,KK)
+         CASE(-1); WC%ONE_D%M_DOT_G_PP_ADJUST(N) =  D_DRHOZDX(II-1,JJ,KK)
+         CASE( 2); WC%ONE_D%M_DOT_G_PP_ADJUST(N) = -D_DRHOZDY(II,JJ,KK)
+         CASE(-2); WC%ONE_D%M_DOT_G_PP_ADJUST(N) =  D_DRHOZDY(II,JJ-1,KK)
+         CASE( 3); WC%ONE_D%M_DOT_G_PP_ADJUST(N) = -D_DRHOZDZ(II,JJ,KK)
+         CASE(-3); WC%ONE_D%M_DOT_G_PP_ADJUST(N) =  D_DRHOZDZ(II,JJ,KK-1)
       END SELECT
 
       ! need to add ADJUST_BURN_RATE
-      WC%ONE_D%MASSFLUX_SPEC(N) = WC%ONE_D%MASSFLUX(N)
+
+      WC%ONE_D%M_DOT_G_PP_ACTUAL(N) = WC%ONE_D%M_DOT_G_PP_ADJUST(N)
 
       ! If the fuel or water massflux is non-zero, set the ignition time
 
       IF (WC%ONE_D%T_IGN > T) THEN
-         IF (ABS(WC%ONE_D%MASSFLUX(N)) > 0._EB) WC%ONE_D%T_IGN = T
+         IF (ABS(WC%ONE_D%M_DOT_G_PP_ADJUST(N)) > 0._EB) WC%ONE_D%T_IGN = T
       ENDIF
 
    ENDDO MT3D_WALL_LOOP
@@ -1926,11 +1923,11 @@ PARTICLE_LOOP: DO IP=1,NLP
    ! Here, correct the mass flux using the CURRENT radius.
 
    IF (CALL_HT_1D) THEN
-      ONE_D%MASSFLUX(1:N_TRACKED_SPECIES)      = ONE_D%MASSFLUX(1:N_TRACKED_SPECIES)     *AREA_SCALING
-      ONE_D%MASSFLUX_SPEC(1:N_TRACKED_SPECIES) = ONE_D%MASSFLUX_SPEC(1:N_TRACKED_SPECIES)*AREA_SCALING
-      ONE_D%MASSFLUX_MATL(1:SF%N_MATL)         = ONE_D%MASSFLUX_MATL(1:SF%N_MATL)        *AREA_SCALING
-      ONE_D%Q_DOT_G_PP                         = ONE_D%Q_DOT_G_PP                        *AREA_SCALING
-      ONE_D%Q_DOT_O2_PP                        = ONE_D%Q_DOT_O2_PP                       *AREA_SCALING
+      ONE_D%M_DOT_G_PP_ADJUST(1:N_TRACKED_SPECIES) = ONE_D%M_DOT_G_PP_ADJUST(1:N_TRACKED_SPECIES)*AREA_SCALING
+      ONE_D%M_DOT_G_PP_ACTUAL(1:N_TRACKED_SPECIES) = ONE_D%M_DOT_G_PP_ACTUAL(1:N_TRACKED_SPECIES)*AREA_SCALING
+      ONE_D%M_DOT_S_PP(1:SF%N_MATL)                = ONE_D%M_DOT_S_PP(1:SF%N_MATL)               *AREA_SCALING
+      ONE_D%Q_DOT_G_PP                             = ONE_D%Q_DOT_G_PP                            *AREA_SCALING
+      ONE_D%Q_DOT_O2_PP                            = ONE_D%Q_DOT_O2_PP                           *AREA_SCALING
    ENDIF
 
    ! Add evaporated particle species to gas phase and compute resulting contribution to the divergence
@@ -1942,10 +1939,10 @@ PARTICLE_LOOP: DO IP=1,NLP
    CALL GET_SPECIFIC_HEAT(ZZ_GET,CP,ONE_D%TMP_G)
    H_G = CP*ONE_D%TMP_G*M_GAS
    DO NS=1,N_TRACKED_SPECIES
-      IF (ABS(ONE_D%MASSFLUX(NS))<=TWO_EPSILON_EB) CYCLE
+      IF (ABS(ONE_D%M_DOT_G_PP_ADJUST(NS))<=TWO_EPSILON_EB) CYCLE
       MW_RATIO = SPECIES_MIXTURE(NS)%RCON/ONE_D%RSUM_G
-      M_DOT_PPP_SINGLE = LP%PWT*ONE_D%MASSFLUX(NS)*ONE_D%AREA
-      LP%M_DOT = ONE_D%MASSFLUX(NS)*ONE_D%AREA
+      M_DOT_PPP_SINGLE = LP%PWT*ONE_D%M_DOT_G_PP_ADJUST(NS)*ONE_D%AREA
+      LP%M_DOT = ONE_D%M_DOT_G_PP_ADJUST(NS)*ONE_D%AREA
       ZZ_GET=0._EB
       IF (NS>0) ZZ_GET(NS)=1._EB
       CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S_B,LP%ONE_D%TMP_F_OLD)
@@ -1971,8 +1968,8 @@ PARTICLE_LOOP: DO IP=1,NLP
 
    IF (CORRECTOR) THEN
       IF (I_FUEL>0) &
-      M_DOT(2,NM) = M_DOT(2,NM) +     ONE_D%MASSFLUX(I_FUEL)*ONE_D%AREA*LP%PWT
-      M_DOT(4,NM) = M_DOT(4,NM) + SUM(ONE_D%MASSFLUX)       *ONE_D%AREA*LP%PWT
+      M_DOT(2,NM) = M_DOT(2,NM) +     ONE_D%M_DOT_G_PP_ADJUST(I_FUEL)*ONE_D%AREA*LP%PWT
+      M_DOT(4,NM) = M_DOT(4,NM) + SUM(ONE_D%M_DOT_G_PP_ADJUST)       *ONE_D%AREA*LP%PWT
    ENDIF
 
    ! Calculate particle mass
@@ -2141,9 +2138,9 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
          ONE_D%ZZ_F(1:N_TRACKED_SPECIES) = ONE_D%ZZ_G(1:N_TRACKED_SPECIES)
          IF (PREDICTOR) ONE_D%U_NORMAL_S = 0._EB
          IF (CORRECTOR) ONE_D%U_NORMAL  = 0._EB
-         ONE_D%MASSFLUX(1:N_TRACKED_SPECIES) = 0._EB
-         ONE_D%MASSFLUX_SPEC(1:N_TRACKED_SPECIES) = 0._EB
-         ONE_D%MASSFLUX_MATL(1:SF%N_MATL) = 0._EB
+         ONE_D%M_DOT_G_PP_ADJUST(1:N_TRACKED_SPECIES) = 0._EB
+         ONE_D%M_DOT_G_PP_ACTUAL(1:N_TRACKED_SPECIES) = 0._EB
+         ONE_D%M_DOT_S_PP(1:SF%N_MATL) = 0._EB
          RETURN
       ENDIF
 
@@ -2162,10 +2159,10 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
                IF (PREDICTOR) TSI = T + DT - ONE_D%T_IGN
                IF (CORRECTOR) TSI = T      - ONE_D%T_IGN
             ENDIF
-            ONE_D%MASSFLUX_SPEC(N) = EVALUATE_RAMP(TSI,SF%TAU(N),SF%RAMP_INDEX(N))*SF%MASS_FLUX(N)
-            ONE_D%MASSFLUX(N)      = SF%ADJUST_BURN_RATE(N)*ONE_D%MASSFLUX_SPEC(N)*ONE_D%AREA_ADJUST
+            ONE_D%M_DOT_G_PP_ACTUAL(N) = EVALUATE_RAMP(TSI,SF%TAU(N),SF%RAMP_INDEX(N))*SF%MASS_FLUX(N)
+            ONE_D%M_DOT_G_PP_ADJUST(N) = SF%ADJUST_BURN_RATE(N)*ONE_D%M_DOT_G_PP_ACTUAL(N)*ONE_D%AREA_ADJUST
          ENDIF
-         MFT = MFT + ONE_D%MASSFLUX(N)
+         MFT = MFT + ONE_D%M_DOT_G_PP_ADJUST(N)
       ENDDO SUM_MASSFLUX_LOOP
 
       ! Apply user-specified mass flux variation
@@ -2181,8 +2178,8 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
       ! Apply water suppression coefficient (EW) at a WALL cell
 
       IF (ONE_D%K_SUPPRESSION>TWO_EPSILON_EB) THEN
-         ONE_D%MASSFLUX(1:N_TRACKED_SPECIES) = ONE_D%MASSFLUX(1:N_TRACKED_SPECIES)*EXP(-ONE_D%K_SUPPRESSION)
-         ONE_D%MASSFLUX_SPEC(1:N_TRACKED_SPECIES) = ONE_D%MASSFLUX_SPEC(1:N_TRACKED_SPECIES)*EXP(-ONE_D%K_SUPPRESSION)
+         ONE_D%M_DOT_G_PP_ADJUST(1:N_TRACKED_SPECIES) = ONE_D%M_DOT_G_PP_ADJUST(1:N_TRACKED_SPECIES)*EXP(-ONE_D%K_SUPPRESSION)
+         ONE_D%M_DOT_G_PP_ACTUAL(1:N_TRACKED_SPECIES) = ONE_D%M_DOT_G_PP_ACTUAL(1:N_TRACKED_SPECIES)*EXP(-ONE_D%K_SUPPRESSION)
       ENDIF
 
       ! Add total consumed mass to various summing arrays
@@ -2190,7 +2187,7 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
       CONSUME_MASS: IF (PRESENT(WALL_INDEX) .AND. CORRECTOR .AND. SF%THERMALLY_THICK .AND. .NOT.SF%THERMALLY_THICK_HT3D) THEN
          OB => OBSTRUCTION(WC%OBST_INDEX)
          DO N=1,N_TRACKED_SPECIES
-            OB%MASS = OB%MASS - ONE_D%MASSFLUX_SPEC(N)*DT*ONE_D%AREA
+            OB%MASS = OB%MASS - ONE_D%M_DOT_G_PP_ACTUAL(N)*DT*ONE_D%AREA
          ENDDO
       ENDIF CONSUME_MASS
 
@@ -2209,9 +2206,9 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
             CALL GET_SPECIFIC_HEAT(ZZ_GET,CP,ONE_D%TMP_G)
             H_G = CP*ONE_D%TMP_G
             DO NS=1,N_TRACKED_SPECIES
-               IF (ABS(ONE_D%MASSFLUX(NS))<=TWO_EPSILON_EB) CYCLE
+               IF (ABS(ONE_D%M_DOT_G_PP_ADJUST(NS))<=TWO_EPSILON_EB) CYCLE
                MW_RATIO = SPECIES_MIXTURE(NS)%RCON/ONE_D%RSUM_G
-               M_DOT_PPP_SINGLE = ONE_D%MASSFLUX(NS)*ONE_D%AREA*RVC
+               M_DOT_PPP_SINGLE = ONE_D%M_DOT_G_PP_ADJUST(NS)*ONE_D%AREA*RVC
                ZZ_GET = 0._EB
                ZZ_GET(NS) = 1._EB
                CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR,ONE_D%TMP_G)
@@ -2230,7 +2227,7 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
                DD = 2._EB*ONE_D%RHO_D_F(N)*ONE_D%RDN
                DENOM = DD + UN*ONE_D%RHO_F
                IF ( ABS(DENOM) > TWO_EPSILON_EB ) THEN
-                  ONE_D%ZZ_F(N) = ( ONE_D%MASSFLUX(N) + DD*ONE_D%ZZ_G(N) ) / DENOM
+                  ONE_D%ZZ_F(N) = ( ONE_D%M_DOT_G_PP_ADJUST(N) + DD*ONE_D%ZZ_G(N) ) / DENOM
                ELSE
                   ONE_D%ZZ_F(N) = ONE_D%ZZ_G(N)
                ENDIF
@@ -2405,7 +2402,7 @@ IF (MFT >= 0._EB) THEN
    IF (PREDICTOR) ONE_D%U_NORMAL_S = UN
    IF (CORRECTOR) ONE_D%U_NORMAL  = UN
 ELSE
-   ONE_D%MASSFLUX(1:N_TRACKED_SPECIES) = -NODE_ZZ_EX(ONE_D%NODE_INDEX,1:N_TRACKED_SPECIES)*MFT
+   ONE_D%M_DOT_G_PP_ADJUST(1:N_TRACKED_SPECIES) = -NODE_ZZ_EX(ONE_D%NODE_INDEX,1:N_TRACKED_SPECIES)*MFT
 ENDIF
 
 END SUBROUTINE CALC_HVAC_BC
@@ -2496,7 +2493,7 @@ ENDIF UNPACK_WALL_PARTICLE
 ! If the fuel has burned away, return
 
 IF (ONE_D%BURNAWAY) THEN
-   ONE_D%MASSFLUX(1:N_TRACKED_SPECIES) = 0._EB
+   ONE_D%M_DOT_G_PP_ADJUST(1:N_TRACKED_SPECIES) = 0._EB
    RETURN
 ENDIF
 
@@ -2656,12 +2653,12 @@ PYROLYSIS_PREDICTED_IF: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
 
    ! Set mass fluxes to 0 and CHANGE_THICKNESS to false.
 
-   ONE_D%MASSFLUX(1:N_TRACKED_SPECIES)      = 0._EB
-   ONE_D%MASSFLUX_SPEC(1:N_TRACKED_SPECIES) = 0._EB
-   ONE_D%MASSFLUX_MATL(1:SF%N_MATL)         = 0._EB
-   ONE_D%CHANGE_THICKNESS                   = .FALSE.
-   ONE_D%Q_DOT_G_PP                         = 0._EB
-   ONE_D%Q_DOT_O2_PP                        = 0._EB
+   ONE_D%M_DOT_G_PP_ADJUST(1:N_TRACKED_SPECIES) = 0._EB
+   ONE_D%M_DOT_G_PP_ACTUAL(1:N_TRACKED_SPECIES) = 0._EB
+   ONE_D%M_DOT_S_PP(1:SF%N_MATL)                = 0._EB
+   ONE_D%CHANGE_THICKNESS                       = .FALSE.
+   ONE_D%Q_DOT_G_PP                             = 0._EB
+   ONE_D%Q_DOT_O2_PP                            = 0._EB
 
    POINT_LOOP1: DO I=1,NWP
 
@@ -2697,12 +2694,12 @@ PYROLYSIS_PREDICTED_IF: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
          ONE_D%Q_DOT_G_PP = ONE_D%Q_DOT_G_PP + Q_DOT_G_PPP*GEOM_FACTOR
          ONE_D%Q_DOT_O2_PP = ONE_D%Q_DOT_O2_PP + Q_DOT_O2_PPP*GEOM_FACTOR
          Q_S(I) = Q_S(I)*(R_S(I)**I_GRAD-R_S(I-1)**I_GRAD)
-         DO NS = 1,N_TRACKED_SPECIES
-            ONE_D%MASSFLUX(NS)      = ONE_D%MASSFLUX(NS)      + M_DOT_G_PPP_ADJUST(NS)*GEOM_FACTOR
-            ONE_D%MASSFLUX_SPEC(NS) = ONE_D%MASSFLUX_SPEC(NS) + M_DOT_G_PPP_ACTUAL(NS)*GEOM_FACTOR
+         DO NS=1,N_TRACKED_SPECIES
+            ONE_D%M_DOT_G_PP_ADJUST(NS) = ONE_D%M_DOT_G_PP_ADJUST(NS) + M_DOT_G_PPP_ADJUST(NS)*GEOM_FACTOR
+            ONE_D%M_DOT_G_PP_ACTUAL(NS) = ONE_D%M_DOT_G_PP_ACTUAL(NS) + M_DOT_G_PPP_ACTUAL(NS)*GEOM_FACTOR
          ENDDO
          DO N=1,SF%N_MATL
-            ONE_D%MASSFLUX_MATL(N)  = ONE_D%MASSFLUX_MATL(N)  + M_DOT_S_PPP(N)*GEOM_FACTOR
+            ONE_D%M_DOT_S_PP(N)  = ONE_D%M_DOT_S_PP(N)  + M_DOT_S_PPP(N)*GEOM_FACTOR
          ENDDO
       ENDIF
 
@@ -2757,9 +2754,10 @@ PYROLYSIS_PREDICTED_IF: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
 
    ENDDO POINT_LOOP1
 
-   ! Adjust the MASSFLUX of a wall surface cell to account for non-alignment of the mesh.
+   ! Adjust the mass flux of a wall surface cell to account for non-alignment of the mesh.
 
-   IF (PRESENT(WALL_INDEX)) ONE_D%MASSFLUX(1:N_TRACKED_SPECIES) = ONE_D%MASSFLUX(1:N_TRACKED_SPECIES)*ONE_D%AREA_ADJUST
+   IF (PRESENT(WALL_INDEX)) ONE_D%M_DOT_G_PP_ADJUST(1:N_TRACKED_SPECIES) = &
+                            ONE_D%M_DOT_G_PP_ADJUST(1:N_TRACKED_SPECIES)*ONE_D%AREA_ADJUST
 
    ! Compute new coordinates if the solid changes thickness. Save new coordinates in X_S_NEW.
 
@@ -2777,7 +2775,7 @@ PYROLYSIS_PREDICTED_IF: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
    ! If the fuel or water massflux is non-zero, set the ignition time
 
    IF (ONE_D%T_IGN > T) THEN
-      IF (SUM(ONE_D%MASSFLUX(1:N_TRACKED_SPECIES)) > 0._EB) ONE_D%T_IGN = T
+      IF (SUM(ONE_D%M_DOT_G_PP_ADJUST(1:N_TRACKED_SPECIES)) > 0._EB) ONE_D%T_IGN = T
    ENDIF
 
    ! Re-generate grid for a wall changing thickness
@@ -2818,15 +2816,16 @@ PYROLYSIS_PREDICTED_IF: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
       ENDIF
 
       ! Shrinking wall has gone to zero thickness.
+
       IF (THICKNESS <=TWO_EPSILON_EB) THEN
          ONE_D%TMP(0:NWP+1) = MAX(TMPMIN,TMP_BACK)
          ONE_D%TMP_F        = MIN(TMPMAX,MAX(TMPMIN,TMP_BACK))
          ONE_D%TMP_B        = MIN(TMPMAX,MAX(TMPMIN,TMP_BACK))
          ONE_D%Q_CON_F        = 0._EB
-         ONE_D%MASSFLUX(1:N_TRACKED_SPECIES)  = 0._EB
-         ONE_D%MASSFLUX_SPEC(1:N_TRACKED_SPECIES) = 0._EB
-         ONE_D%MASSFLUX_MATL(1:SF%N_MATL) = 0._EB
-         ONE_D%N_LAYER_CELLS(1:SF%N_LAYERS)     = 0
+         ONE_D%M_DOT_G_PP_ADJUST(1:N_TRACKED_SPECIES) = 0._EB
+         ONE_D%M_DOT_G_PP_ACTUAL(1:N_TRACKED_SPECIES) = 0._EB
+         ONE_D%M_DOT_S_PP(1:SF%N_MATL) = 0._EB
+         ONE_D%N_LAYER_CELLS(1:SF%N_LAYERS) = 0
          ONE_D%BURNAWAY          = .TRUE.
          IF (I_OBST > 0) THEN
             IF (OBSTRUCTION(I_OBST)%CONSUMABLE) OBSTRUCTION(I_OBST)%MASS = -1.
@@ -2877,7 +2876,7 @@ ELSEIF (SF%PYROLYSIS_MODEL==PYROLYSIS_SPECIFIED) THEN PYROLYSIS_PREDICTED_IF
 
    ! Take off energy corresponding to specified burning rate
 
-   Q_S(1) = Q_S(1) - ONE_D%MASSFLUX(REACTION(1)%FUEL_SMIX_INDEX)*SF%H_V/DX_S(1)
+   Q_S(1) = Q_S(1) - ONE_D%M_DOT_G_PP_ADJUST(REACTION(1)%FUEL_SMIX_INDEX)*SF%H_V/DX_S(1)
 
 ENDIF PYROLYSIS_PREDICTED_IF
 
@@ -3737,13 +3736,14 @@ DO I=1,N_TGA
          ENDDO
       ENDIF
       IF (N_REACTIONS>0) THEN
-         HRR = ONE_D%MASSFLUX(REACTION(1)%FUEL_SMIX_INDEX)*0.001*REACTION(1)%HEAT_OF_COMBUSTION/(ONE_D%AREA_ADJUST*SURF_DEN_0)
+         HRR = ONE_D%M_DOT_G_PP_ADJUST(REACTION(1)%FUEL_SMIX_INDEX)*0.001*REACTION(1)%HEAT_OF_COMBUSTION/&
+                                                                                    (ONE_D%AREA_ADJUST*SURF_DEN_0)
       ELSE
          HRR = 0._EB
       ENDIF
       WRITE(LU_TGA,TCFORM) REAL(T_TGA,FB), REAL(ONE_D%TMP_F-TMPM,FB), (REAL(SURF_DEN(N)/SURF_DEN_0,FB),N=0,SF%N_MATL), &
-                           REAL(-SUM(ONE_D%MASSFLUX_MATL(1:SF%N_MATL))/SURF_DEN_0,FB), &
-                           (REAL(-ONE_D%MASSFLUX_MATL(N)/SURF_DEN_0,FB),N=1,SF%N_MATL), &
+                           REAL(-SUM(ONE_D%M_DOT_S_PP(1:SF%N_MATL))/SURF_DEN_0,FB), &
+                           (REAL(-ONE_D%M_DOT_S_PP(N)/SURF_DEN_0,FB),N=1,SF%N_MATL), &
                            REAL(HRR,FB), REAL(ONE_D%Q_CON_F*0.001_EB/SURF_DEN_0,FB)
    ENDIF
 ENDDO
