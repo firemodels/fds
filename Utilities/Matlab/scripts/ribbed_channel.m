@@ -28,7 +28,7 @@ D = importdata([datadir,'ribbed_channel_data.csv'],',',1);
 for ii=1:2
 
     for i=1:lnx
-        if ~exist([datadir,'ribbed_channel_',num2str(nx(i)),'_line.csv'])
+        if ~exist([datadir,'ribbed_channel',geom{ii},num2str(nx(i)),'_line.csv'])
             display(['Error: File ' [datadir,'ribbed_channel',geom{ii},num2str(nx(i)),'_line.csv'] ' does not exist. Skipping case.'])
             return
         end
