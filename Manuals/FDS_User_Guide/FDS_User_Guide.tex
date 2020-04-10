@@ -3296,7 +3296,7 @@ Simple examples demonstrating how solid fuels can be forced to disappear from th
 
 \paragraph{Case 1, 2D} ({\ct box\_burn\_away\_2D} and {\ct box\_burn\_away\_2D\_residue}) Case~1 is repeated in two dimensions. In the latter case, only half of the mass is converted to fuel, leaving behind a residue that is 50~\% of the original mass. The box is forced to burn away by setting the {\ct BULK\_DENSITY} to 10~kg/m$^3$. This is the {\em combustible} mass. These two cases exhibit a fictitious increase in solid mass when new unburned surfaces are exposed as entire mesh cells disappear. The increased mass is just an artifact of reporting the residual solid mass as the product of surface density and surface area. Both the final solid mass and the gaseous degradation products should match the expected values at the end of the simulation. The results are shown in Fig.~\ref{box_burn_away_2D_fig}.
 
-\paragraph{Case 2} ({\ct box\_burn\_away2}) This case is similar to Case~1, except that the solid material vaporizes to form an inert {\ct 'GAS'} with a molecular weight of 50~g/mol. 
+\paragraph{Case 2} ({\ct box\_burn\_away2}) This case is similar to Case~1, except that the solid material vaporizes to form an inert {\ct 'GAS'} with a molecular weight of 50~g/mol.
 
 \paragraph{Case 3} ({\ct box\_burn\_away3}) The pyrolysis rate is specified implicitly via {\ct HRRPUA}, even though the fuel gas does not burn.
 
@@ -5944,6 +5944,15 @@ In this case you should also specify the {\ct SURFACE\_TENSION} (N/m) of the liq
 \label{info:DENSE_VOLUME_FRACTION}
 
 If the local liquid droplet density is relatively high, as at a sprinkler or hose nozzle, the drag on individual droplets is reduced by wake effects. FDS includes a sub-model that accounts for drag reduction due to wake effects. This model is invoked if the local liquid volume fraction is greater than a threshold value called {\ct DENSE\_VOLUME\_FRACTION}, a parameter that is set on the {\ct PART} line. Setting this parameter to a relatively large number (1 is sufficient) turns off the wake reduction model. Its default value is $1\times 10^{-5}$.
+
+\subsection{Warning Messages Related to Droplets}
+\label{info:Droplet_Warnings}
+
+An important parameter for any simulation involving liquid droplets is {\ct PARTICLES\_PER\_SECOND} on the {\ct PROP} line, which is specified by the {\ct DEVC} line that includes the sprinkler or nozzle coordinates. The default value is 5000 particles per second. In some cases, this value might be too low, and you may want to raise it. The reason is that each liquid droplet that FDS explicitly tracks represents many, many more actual droplets, and the effect on the simulation of this one ``super drop'' may be relatively large. For example, a single droplet within a grid cell might decrease the gas temperature rapidly over the duration of just one time step---something that would not happen if there were many more droplets within the cell. You might even see within the output file named {\ct case\_name.err} warning messages like:
+\begin{lstlisting}
+WARNING Delta TMP_G. Mesh: 5 Particle: 3245
+\end{lstlisting}
+This means that during the temperature update of a particular grid cell in Mesh~5, the droplet whose index is 3245 caused the cell gas temperature ({\ct TMP\_G}) to change too rapidly. If you only see a few of these messages, it is not a problem given how many droplets and time steps there are. However, if you see these messages persistently, you might want to increase the {\ct PARTICLES\_PER\_SECOND} to reduce the likelihood that a single droplet will make such a dramatic change in a single time step.
 
 
 \clearpage
