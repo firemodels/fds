@@ -16,6 +16,12 @@ pdflatex -interaction nonstopmode FDS_Config_Management_Plan &> FDS_Config_Manag
 pdflatex -interaction nonstopmode FDS_Config_Management_Plan &> FDS_Config_Management_Plan.err
 pdflatex -interaction nonstopmode FDS_Config_Management_Plan &> FDS_Config_Management_Plan.err
 
+# make sure the guide exists
+if [ ! -e FDS_Config_Management_Plan.pdf ]; then
+  clean_build=0
+  echo "***error: the FDS Config Management Plan failed to build!"
+fi
+  
 # Scan and report any errors in the LaTeX build process
 if [[ `grep -E "Too many|Undefined control sequence|Error:|Fatal error|! LaTeX Error:|Paragraph ended before|Missing \\\$ inserted|Misplaced" -I FDS_Config_Management_Plan.err | grep -v "xpdf supports version 1.5"` == "" ]]
    then
