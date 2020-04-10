@@ -16,6 +16,12 @@ pdflatex -interaction nonstopmode FDS_Technical_Reference_Guide &> FDS_Technical
 pdflatex -interaction nonstopmode FDS_Technical_Reference_Guide &> FDS_Technical_Reference_Guide.err
 pdflatex -interaction nonstopmode FDS_Technical_Reference_Guide &> FDS_Technical_Reference_Guide.err
 
+# make sure the guide exists
+if [ ! -e FDS_Technical_Reference_Guide.pdf ]; then
+  clean_build=0
+  echo "***error: the FDS Technical Reference Guide failed to build!"
+fi
+
 # Scan and report any errors in the LaTeX build process
 if [[ `grep -E "Too many|Undefined control sequence|Error:|Fatal error|! LaTeX Error:|Paragraph ended before|Missing \\\$ inserted|Misplaced" -I FDS_Technical_Reference_Guide.err | grep -v "xpdf supports version 1.5"` == "" ]]
    then

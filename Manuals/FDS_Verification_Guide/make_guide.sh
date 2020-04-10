@@ -24,6 +24,12 @@ bibtex FDS_Verification_Guide &> FDS_Verification_Guide.err
 pdflatex -interaction nonstopmode FDS_Verification_Guide &> FDS_Verification_Guide.err
 pdflatex -interaction nonstopmode FDS_Verification_Guide &> FDS_Verification_Guide.err
 pdflatex -interaction nonstopmode FDS_Verification_Guide &> FDS_Verification_Guide.err
+
+if [ ! -e FDS_Verification_Guide.pdf ]; then
+  clean_build=0
+  echo "***error: the FDS Verification Guide failed to build!"
+fi
+
 if [ -e "$PDFUSER" ]; then
   cp $PDFUSER .
 fi
