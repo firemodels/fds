@@ -5,34 +5,64 @@ MODULE TYPES
 ! Definitions of various derived data types
 
 USE PRECISION_PARAMETERS
-USE GLOBAL_CONSTANTS, ONLY : NULL_BOUNDARY,NEUMANN,MAX_SPECIES, &
-    IAXIS,JAXIS,KAXIS,MAX_DIM,NOD1,NOD2,IBM_MAX_WSTRIANG_SEG,LOW_IND,HIGH_IND
+USE GLOBAL_CONSTANTS, ONLY : MAX_SPECIES,IAXIS,JAXIS,KAXIS,MAX_DIM,LOW_IND,HIGH_IND
 
 IMPLICIT NONE
 
 TYPE LAGRANGIAN_PARTICLE_CLASS_TYPE
-   CHARACTER(LABEL_LENGTH) :: ID                                               !< Name of particle class.
-   CHARACTER(LABEL_LENGTH) :: SPEC_ID                                          !< Name of evaporating gas species.
-   CHARACTER(LABEL_LENGTH) :: DEVC_ID='null'                                   !< Name of controlling device.
-   CHARACTER(LABEL_LENGTH) :: CTRL_ID='null'                                   !< Name of control function.
+
+   CHARACTER(LABEL_LENGTH) :: ID                                               !< Name of particle class
+   CHARACTER(LABEL_LENGTH) :: SPEC_ID='null'                                   !< Name of evaporating gas species
+   CHARACTER(LABEL_LENGTH) :: DEVC_ID='null'                                   !< Name of controlling device
+   CHARACTER(LABEL_LENGTH) :: CTRL_ID='null'                                   !< Name of control function
+   CHARACTER(LABEL_LENGTH) :: SURF_ID='null'                                   !< Name of SURFace type
+   CHARACTER(LABEL_LENGTH) :: PROP_ID='null'                                   !< Name of PROPerty type
+   CHARACTER(LABEL_LENGTH) :: RADIATIVE_PROPERTY_TABLE_ID='null'               !< Name of radiative property table
+   CHARACTER(LABEL_LENGTH) :: CNF_RAMP_ID='null'                     !< Cumulative Number Fraction (CNF) function
+   CHARACTER(LABEL_LENGTH) :: BREAKUP_CNF_RAMP_ID='null'             !< User-defined cumulative number fraction after break-up
+   CHARACTER(LABEL_LENGTH) :: DISTRIBUTION='ROSIN-RAMMLER-LOGNORMAL'           !< Droplet size distribution
+   CHARACTER(LABEL_LENGTH) :: BREAKUP_DISTRIBUTION='ROSIN-RAMMLER-LOGNORMAL'   !< Droplet size distribution after break-up
    CHARACTER(LABEL_LENGTH) :: QUANTITIES(10)                                   !< Names of output quantities.
-   CHARACTER(LABEL_LENGTH) :: SMOKEVIEW_BAR_LABEL(10)
-   CHARACTER(LABEL_LENGTH) :: SURF_ID='null'
-   CHARACTER(LABEL_LENGTH) :: PROP_ID='null'
-   CHARACTER(LABEL_LENGTH) :: RADIATIVE_PROPERTY_TABLE_ID='null'
-   CHARACTER(LABEL_LENGTH) :: CNF_RAMP_ID='null'
-   CHARACTER(LABEL_LENGTH) :: DISTRIBUTION='ROSIN-RAMMLER-LOGNORMAL'
-   CHARACTER(LABEL_LENGTH) :: BREAKUP_DISTRIBUTION='ROSIN-RAMMLER-LOGNORMAL'
-   CHARACTER(LABEL_LENGTH) :: BREAKUP_CNF_RAMP_ID='null'
-   CHARACTER(LABEL_LENGTH) :: SMOKEVIEW_LABEL(10),QUANTITIES_SPEC_ID(10)
-   REAL(EB) :: HEAT_OF_COMBUSTION,ADJUST_EVAPORATION, &
-               LIFETIME,DIAMETER,MINIMUM_DIAMETER,MAXIMUM_DIAMETER,GAMMA,KILL_RADIUS,KILL_MASS, &
-               TMP_INITIAL,SIGMA,VERTICAL_VELOCITY,HORIZONTAL_VELOCITY,DRAG_COEFFICIENT(3),SURFACE_DIAMETER,&
-               SURFACE_TENSION,BREAKUP_RATIO,BREAKUP_GAMMA,BREAKUP_SIGMA,DENSE_VOLUME_FRACTION, PERMEABILITY(3),&
-               REAL_REFRACTIVE_INDEX,COMPLEX_REFRACTIVE_INDEX,TOL_INT,DENSITY=-1._EB,FTPR,FREE_AREA_FRACTION,&
-               POROUS_VOLUME_FRACTION,MEAN_DROPLET_VOLUME=0._EB,RUNNING_AVERAGE_FACTOR,SHAPE_FACTOR,&
-               EMBER_DENSITY_THRESHOLD,EMBER_VELOCITY_THRESHOLD,&
-               PRIMARY_BREAKUP_TIME,PRIMARY_BREAKUP_DRAG_REDUCTION_FACTOR,RUNNING_AVERAGE_FACTOR_WALL
+   CHARACTER(LABEL_LENGTH) :: SMOKEVIEW_LABEL(10)                              !< Smokeview file label for output quantities
+   CHARACTER(LABEL_LENGTH) :: SMOKEVIEW_BAR_LABEL(10)                          !< Short Smokeview label for output quantities
+   CHARACTER(LABEL_LENGTH) :: QUANTITIES_SPEC_ID(10)                           !< SPECies IDs for output quantities
+
+   REAL(EB) :: HEAT_OF_COMBUSTION         !< Heat of Combustion (J/kg) of the evaporated gas
+   REAL(EB) :: ADJUST_EVAPORATION         !< LPC%HEAT_OF_COMBUSTION/RN(1)%HEAT_OF_COMBUSTION
+   REAL(EB) :: LIFETIME                   !< Time (s) after insertion when particle is to be removed
+   REAL(EB) :: DIAMETER                   !< Median volumetric diameter of the particles
+   REAL(EB) :: MINIMUM_DIAMETER           !< Minimum particle size below which particle evaporates completely
+   REAL(EB) :: MAXIMUM_DIAMETER           !< Maximum particle size in distribution
+   REAL(EB) :: GAMMA                      !< Parameter in Rosin-Rommler distribution
+   REAL(EB) :: KILL_RADIUS        
+   REAL(EB) :: TMP_INITIAL
+   REAL(EB) :: SIGMA
+   REAL(EB) :: VERTICAL_VELOCITY
+   REAL(EB) :: HORIZONTAL_VELOCITY
+   REAL(EB) :: DRAG_COEFFICIENT(3)
+   REAL(EB) :: SURFACE_DIAMETER
+   REAL(EB) :: SURFACE_TENSION
+   REAL(EB) :: BREAKUP_RATIO
+   REAL(EB) :: BREAKUP_GAMMA
+   REAL(EB) :: BREAKUP_SIGMA
+   REAL(EB) :: DENSE_VOLUME_FRACTION
+   REAL(EB) :: PERMEABILITY(3)
+   REAL(EB) :: REAL_REFRACTIVE_INDEX
+   REAL(EB) :: COMPLEX_REFRACTIVE_INDEX
+   REAL(EB) :: TOL_INT
+   REAL(EB) :: DENSITY=-1._EB
+   REAL(EB) :: FTPR
+   REAL(EB) :: FREE_AREA_FRACTION
+   REAL(EB) :: POROUS_VOLUME_FRACTION
+   REAL(EB) :: MEAN_DROPLET_VOLUME=0._EB
+   REAL(EB) :: RUNNING_AVERAGE_FACTOR
+   REAL(EB) :: SHAPE_FACTOR
+   REAL(EB) :: EMBER_DENSITY_THRESHOLD
+   REAL(EB) :: EMBER_VELOCITY_THRESHOLD
+   REAL(EB) :: PRIMARY_BREAKUP_TIME
+   REAL(EB) :: PRIMARY_BREAKUP_DRAG_REDUCTION_FACTOR
+   REAL(EB) :: RUNNING_AVERAGE_FACTOR_WALL
+
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: R_CNF,CNF,CVF,BREAKUP_R_CNF,BREAKUP_CNF,BREAKUP_CVF,W_CNF,R50,LAMBDA,SOLID_ANGLE
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: WQABS,WQSCA
    INTEGER :: SAMPLING,N_QUANTITIES,QUANTITIES_INDEX(10),QUANTITIES_Y_INDEX(10)=-1,QUANTITIES_Z_INDEX(10)=-1,ARRAY_INDEX=0,&
