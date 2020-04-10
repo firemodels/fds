@@ -15,6 +15,12 @@ bibtex geom_notes &> geom_notes.err
 pdflatex -interaction nonstopmode geom_notes &> geom_notes.err
 pdflatex -interaction nonstopmode geom_notes &> geom_notes.err
 
+# make sure the guide exists
+if [ ! -e geom_notes.pdf ]; then
+  clean_build=0
+  echo "***error: the geometry notes to build!"
+fi
+
 # Scan and report any errors in the LaTeX build process
 if [[ `grep -E "Undefined control sequence|Error:|Fatal error|! LaTeX Error:|Paragraph ended before|Missing \\\$ inserted|Misplaced" -I geom_notes.err | grep -v "xpdf supports version 1.5"` == "" ]]
    then
@@ -41,5 +47,5 @@ if [[ $clean_build == 0 ]]
    then
       :
    else
-      echo "FDS User Guide built successfully!"
+      echo "geometry notes built successfully!"
 fi    
