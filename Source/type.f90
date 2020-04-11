@@ -30,11 +30,11 @@ TYPE LAGRANGIAN_PARTICLE_CLASS_TYPE
    REAL(EB) :: HEAT_OF_COMBUSTION         !< Heat of Combustion (J/kg) of the evaporated gas
    REAL(EB) :: ADJUST_EVAPORATION         !< LPC%HEAT_OF_COMBUSTION/RN(1)%HEAT_OF_COMBUSTION
    REAL(EB) :: LIFETIME                   !< Time (s) after insertion when particle is to be removed
-   REAL(EB) :: DIAMETER                   !< Median volumetric diameter of the particles
-   REAL(EB) :: MINIMUM_DIAMETER           !< Minimum particle size below which particle evaporates completely
-   REAL(EB) :: MAXIMUM_DIAMETER           !< Maximum particle size in distribution
+   REAL(EB) :: DIAMETER                   !< Median volumetric diameter (m) of the particles
+   REAL(EB) :: MINIMUM_DIAMETER           !< Minimum particle diameter (m) in distribution
+   REAL(EB) :: MAXIMUM_DIAMETER           !< Maximum particle diameter (m) in distribution
    REAL(EB) :: GAMMA                      !< Parameter in Rosin-Rommler distribution
-   REAL(EB) :: KILL_RADIUS        
+   REAL(EB) :: KILL_RADIUS                !< Radius (m) below which particle is killed
    REAL(EB) :: TMP_INITIAL
    REAL(EB) :: SIGMA
    REAL(EB) :: VERTICAL_VELOCITY
@@ -51,9 +51,9 @@ TYPE LAGRANGIAN_PARTICLE_CLASS_TYPE
    REAL(EB) :: COMPLEX_REFRACTIVE_INDEX
    REAL(EB) :: TOL_INT
    REAL(EB) :: DENSITY=-1._EB
-   REAL(EB) :: FTPR
-   REAL(EB) :: FREE_AREA_FRACTION
-   REAL(EB) :: POROUS_VOLUME_FRACTION
+   REAL(EB) :: FTPR                       ! 4/3 * PI * SPECIES%DENSITIY_LIQUID (kg/m3)
+   REAL(EB) :: FREE_AREA_FRACTION         !< Parameter for SCREEN_DRAG model. Area fraction of cell available for flow
+   REAL(EB) :: POROUS_VOLUME_FRACTION     !< Parameter for porous media model. Volume fraction of cell available for flow
    REAL(EB) :: MEAN_DROPLET_VOLUME=0._EB
    REAL(EB) :: RUNNING_AVERAGE_FACTOR
    REAL(EB) :: SHAPE_FACTOR
@@ -783,7 +783,7 @@ TYPE INITIALIZATION_TYPE
    INTEGER  :: PART_INDEX=0,N_PARTICLES,LU_PARTICLE,PROF_INDEX=0,DEVC_INDEX=0,CTRL_INDEX=0,TABL_INDEX=0, &
                N_PARTICLES_PER_CELL=0,PATH_RAMP_INDEX(3)=0,RAMP_Q_INDEX=0
    LOGICAL :: ADJUST_DENSITY=.FALSE.,ADJUST_TEMPERATURE=.FALSE.,SINGLE_INSERTION=.TRUE., &
-              CELL_CENTERED=.FALSE.,UNIFORM=.FALSE.
+              CELL_CENTERED=.FALSE.,UNIFORM=.FALSE.,RTE_CORRECTION=.TRUE.
    LOGICAL, ALLOCATABLE, DIMENSION(:) :: ALREADY_INSERTED
    CHARACTER(LABEL_LENGTH) :: SHAPE,DEVC_ID,CTRL_ID,ID
 END TYPE INITIALIZATION_TYPE

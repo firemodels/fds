@@ -712,6 +712,7 @@ TYPE(VENTS_TYPE), POINTER :: VT
 TYPE(RAD_FILE_TYPE), POINTER :: RF
 TYPE(LAGRANGIAN_PARTICLE_CLASS_TYPE), POINTER :: LPC
 TYPE(LAGRANGIAN_PARTICLE_TYPE), POINTER :: LP
+TYPE(INITIALIZATION_TYPE), POINTER :: IN
 CHARACTER(20) :: FORMT
 
 !Variables added for the WSGG model
@@ -913,13 +914,35 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                KFST4_GAS(I,J,K) = BBF*KAPPA_GAS(I,J,K)*FOUR_SIGMA*TMP(I,J,K)**4._EB
                IF (CHI_R(I,J,K)*Q(I,J,K)>QR_CLIP) THEN ! Precomputation of quantities for the RTE source term correction
                      VOL = R(I)*DX(I)*DY(J)*DZ(K)
-                     RAD_Q_SUM = RAD_Q_SUM + (BBF*CHI_R(I,J,K)*Q(I,J,K) + &
-                                 KAPPA_GAS(I,J,K)*UIID(I,J,K,IBND))*VOL
+                     RAD_Q_SUM = RAD_Q_SUM + (BBF*CHI_R(I,J,K)*Q(I,J,K) + KAPPA_GAS(I,J,K)*UIID(I,J,K,IBND))*VOL
                      KFST4_SUM = KFST4_SUM + KFST4_GAS(I,J,K)*VOL
                ENDIF
             ENDDO
          ENDDO
       ENDDO
+
+      INIT_LOOPM1: DO N=1,N_INIT
+         IN => INITIALIZATION(N)
+         IF (.NOT. IN%RTE_CORRECTION) CYCLE INIT_LOOPM1
+         IF (IN%X1 > XC(IBP1) .OR. IN%X2 < XC(0) .OR. &
+             IN%Y1 > YC(JBP1) .OR. IN%Y2 < YC(0) .OR. &
+             IN%Z1 > ZC(KBP1) .OR. IN%Z2 < ZC(0)) CYCLE INIT_LOOPM1
+         DO K=0,KBP1
+            DO J=0,JBP1
+               DO I=0,IBP1
+                  IF (XC(I) > IN%X1 .AND. XC(I) < IN%X2 .AND. &
+                      YC(J) > IN%Y1 .AND. YC(J) < IN%Y2 .AND. &
+                      ZC(K) > IN%Z1 .AND. ZC(K) < IN%Z2) THEN
+                      IF (CHI_R(I,J,K)*Q(I,J,K)>QR_CLIP) THEN
+                         VOL = R(I)*DX(I)*DY(J)*DZ(K)
+                         RAD_Q_SUM = RAD_Q_SUM - (BBF*CHI_R(I,J,K)*Q(I,J,K) + KAPPA_GAS(I,J,K)*UIID(I,J,K,IBND))*VOL
+                         KFST4_SUM = KFST4_SUM - KFST4_GAS(I,J,K)*VOL
+                      ENDIF
+                  ENDIF
+               ENDDO
+            ENDDO
+         ENDDO
+      ENDDO INIT_LOOPM1
 
       !Correct the source term in the RTE based on user-specified RADIATIVE_FRACTION on REAC
 
@@ -927,12 +950,29 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
          DO J=1,JBAR
             DO I=1,IBAR
                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-               IF (CHI_R(I,J,K)*Q(I,J,K)>QR_CLIP) THEN
-                  KFST4_GAS(I,J,K) = KFST4_GAS(I,J,K)*RTE_SOURCE_CORRECTION_FACTOR
-               ENDIF
+               IF (CHI_R(I,J,K)*Q(I,J,K)>QR_CLIP) KFST4_GAS(I,J,K) = KFST4_GAS(I,J,K)*RTE_SOURCE_CORRECTION_FACTOR
             ENDDO
          ENDDO
       ENDDO
+
+      INIT_LOOP1: DO N=1,N_INIT
+         IN => INITIALIZATION(N)
+         IF (IN%RTE_CORRECTION) CYCLE INIT_LOOP1
+         IF (IN%X1 > XC(IBP1) .OR. IN%X2 < XC(0) .OR. &
+             IN%Y1 > YC(JBP1) .OR. IN%Y2 < YC(0) .OR. &
+             IN%Z1 > ZC(KBP1) .OR. IN%Z2 < ZC(0)) CYCLE INIT_LOOP1
+         DO K=0,KBP1
+            DO J=0,JBP1
+               DO I=0,IBP1
+                  IF (XC(I) > IN%X1 .AND. XC(I) < IN%X2 .AND. &
+                      YC(J) > IN%Y1 .AND. YC(J) < IN%Y2 .AND. &
+                      ZC(K) > IN%Z1 .AND. ZC(K) < IN%Z2) THEN
+                      IF (CHI_R(I,J,K)*Q(I,J,K)>QR_CLIP) KFST4_GAS(I,J,K) = CHI_R(I,J,K)*Q(I,J,K)+KAPPA_GAS(I,J,K)*UII(I,J,K)
+                  ENDIF
+               ENDDO
+            ENDDO
+         ENDDO
+      ENDDO INIT_LOOP1
 
    ELSE WIDE_BAND_MODEL_IF
 
@@ -956,9 +996,32 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
             ENDDO
          ENDDO
 
+         INIT_LOOP2: DO N=1,N_INIT
+            IN => INITIALIZATION(N)
+            IF (IN%RTE_CORRECTION) CYCLE INIT_LOOP2
+            IF (IN%X1 > XC(IBP1) .OR. IN%X2 < XC(0) .OR. &
+                IN%Y1 > YC(JBP1) .OR. IN%Y2 < YC(0) .OR. &
+                IN%Z1 > ZC(KBP1) .OR. IN%Z2 < ZC(0)) CYCLE INIT_LOOP2
+            DO K=0,KBP1
+               DO J=0,JBP1
+                  DO I=0,IBP1
+                     IF (XC(I) > IN%X1 .AND. XC(I) < IN%X2 .AND. &
+                         YC(J) > IN%Y1 .AND. YC(J) < IN%Y2 .AND. &
+                         ZC(K) > IN%Z1 .AND. ZC(K) < IN%Z2) THEN
+                        IF (CHI_R(I,J,K)*Q(I,J,K)>QR_CLIP) THEN
+                           VOL = R(I)*DX(I)*DY(J)*DZ(K)
+                           RAD_Q_SUM = RAD_Q_SUM - (CHI_R(I,J,K)*Q(I,J,K)+KAPPA_GAS(I,J,K)*UII(I,J,K))*VOL
+                           KFST4_SUM = KFST4_SUM - KFST4_GAS(I,J,K)*VOL
+                        ENDIF
+                     ENDIF
+                  ENDDO
+               ENDDO
+            ENDDO
+         ENDDO INIT_LOOP2
+
          ! Correct the source term in the RTE based on user-specified RADIATIVE_FRACTION on REAC
 
-         DO K=1,KBAR
+	 DO K=1,KBAR
             DO J=1,JBAR
                DO I=1,IBAR
                   IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
@@ -966,6 +1029,25 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                ENDDO
             ENDDO
          ENDDO
+
+	 INIT_LOOP3: DO N=1,N_INIT
+            IN => INITIALIZATION(N)
+            IF (IN%RTE_CORRECTION) CYCLE INIT_LOOP3
+            IF (IN%X1 > XC(IBP1) .OR. IN%X2 < XC(0) .OR. &
+                IN%Y1 > YC(JBP1) .OR. IN%Y2 < YC(0) .OR. &
+                IN%Z1 > ZC(KBP1) .OR. IN%Z2 < ZC(0)) CYCLE INIT_LOOP3
+            DO K=0,KBP1
+               DO J=0,JBP1
+                  DO I=0,IBP1
+                     IF (XC(I) > IN%X1 .AND. XC(I) < IN%X2 .AND. &
+                         YC(J) > IN%Y1 .AND. YC(J) < IN%Y2 .AND. &
+                         ZC(K) > IN%Z1 .AND. ZC(K) < IN%Z2) THEN
+                         IF (CHI_R(I,J,K)*Q(I,J,K)>QR_CLIP) KFST4_GAS(I,J,K) = CHI_R(I,J,K)*Q(I,J,K)+KAPPA_GAS(I,J,K)*UII(I,J,K)
+                     ENDIF
+                  ENDDO
+               ENDDO
+            ENDDO
+         ENDDO INIT_LOOP3
 
       ELSE RTE_SOURCE_CORRECTION_IF  ! OPTICALLY_THIN
 
