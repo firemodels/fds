@@ -63,7 +63,6 @@ TYPE LAGRANGIAN_PARTICLE_CLASS_TYPE
    REAL(EB) :: PRIMARY_BREAKUP_TIME       !< Time (s) after insertion when droplet breaks up
    REAL(EB) :: PRIMARY_BREAKUP_DRAG_REDUCTION_FACTOR   !< Drag reduction factor 
    REAL(EB) :: RUNNING_AVERAGE_FACTOR_WALL             !< Fraction of old value used in summations of droplets stuck to walls
->>>>>>> Stashed changes
 
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: R_CNF,CNF,CVF,BREAKUP_R_CNF,BREAKUP_CNF,BREAKUP_CVF,W_CNF,R50,LAMBDA,SOLID_ANGLE
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: WQABS,WQSCA
