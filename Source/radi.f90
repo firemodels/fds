@@ -1021,7 +1021,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
 
          ! Correct the source term in the RTE based on user-specified RADIATIVE_FRACTION on REAC
 
-	 DO K=1,KBAR
+         DO K=1,KBAR
             DO J=1,JBAR
                DO I=1,IBAR
                   IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
@@ -1030,7 +1030,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
             ENDDO
          ENDDO
 
-	 INIT_LOOP3: DO N=1,N_INIT
+         INIT_LOOP3: DO N=1,N_INIT
             IN => INITIALIZATION(N)
             IF (IN%RTE_CORRECTION) CYCLE INIT_LOOP3
             IF (IN%X1 > XC(IBP1) .OR. IN%X2 < XC(0) .OR. &
