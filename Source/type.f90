@@ -9,6 +9,8 @@ USE GLOBAL_CONSTANTS, ONLY : MAX_SPECIES,IAXIS,JAXIS,KAXIS,MAX_DIM,LOW_IND,HIGH_
 
 IMPLICIT NONE
 
+!> \brief Parameters associated with an entire class of Lagrangian particles
+
 TYPE LAGRANGIAN_PARTICLE_CLASS_TYPE
 
    CHARACTER(LABEL_LENGTH) :: ID                                               !< Name of particle class
@@ -28,40 +30,39 @@ TYPE LAGRANGIAN_PARTICLE_CLASS_TYPE
    CHARACTER(LABEL_LENGTH) :: QUANTITIES_SPEC_ID(10)                           !< SPECies IDs for output quantities
 
    REAL(EB) :: HEAT_OF_COMBUSTION         !< Heat of Combustion (J/kg) of the evaporated gas
-   REAL(EB) :: ADJUST_EVAPORATION         !< LPC%HEAT_OF_COMBUSTION/RN(1)%HEAT_OF_COMBUSTION
+   REAL(EB) :: ADJUST_EVAPORATION         !< LPC\%HEAT_OF_COMBUSTION/RN(1)\%HEAT_OF_COMBUSTION
    REAL(EB) :: LIFETIME                   !< Time (s) after insertion when particle is to be removed
    REAL(EB) :: DIAMETER                   !< Median volumetric diameter (m) of the particles
    REAL(EB) :: MINIMUM_DIAMETER           !< Minimum particle diameter (m) in distribution
    REAL(EB) :: MAXIMUM_DIAMETER           !< Maximum particle diameter (m) in distribution
    REAL(EB) :: GAMMA                      !< Parameter in Rosin-Rommler distribution
-   REAL(EB) :: KILL_RADIUS                !< Radius (m) below which particle is killed
-   REAL(EB) :: TMP_INITIAL
-   REAL(EB) :: SIGMA
-   REAL(EB) :: VERTICAL_VELOCITY
-   REAL(EB) :: HORIZONTAL_VELOCITY
-   REAL(EB) :: DRAG_COEFFICIENT(3)
-   REAL(EB) :: SURFACE_DIAMETER
-   REAL(EB) :: SURFACE_TENSION
-   REAL(EB) :: BREAKUP_RATIO
-   REAL(EB) :: BREAKUP_GAMMA
-   REAL(EB) :: BREAKUP_SIGMA
-   REAL(EB) :: DENSE_VOLUME_FRACTION
-   REAL(EB) :: PERMEABILITY(3)
-   REAL(EB) :: REAL_REFRACTIVE_INDEX
-   REAL(EB) :: COMPLEX_REFRACTIVE_INDEX
-   REAL(EB) :: TOL_INT
-   REAL(EB) :: DENSITY=-1._EB
-   REAL(EB) :: FTPR                       ! 4/3 * PI * SPECIES%DENSITIY_LIQUID (kg/m3)
-   REAL(EB) :: FREE_AREA_FRACTION         !< Parameter for SCREEN_DRAG model. Area fraction of cell available for flow
-   REAL(EB) :: POROUS_VOLUME_FRACTION     !< Parameter for porous media model. Volume fraction of cell available for flow
-   REAL(EB) :: MEAN_DROPLET_VOLUME=0._EB
-   REAL(EB) :: RUNNING_AVERAGE_FACTOR
-   REAL(EB) :: SHAPE_FACTOR
-   REAL(EB) :: EMBER_DENSITY_THRESHOLD
-   REAL(EB) :: EMBER_VELOCITY_THRESHOLD
-   REAL(EB) :: PRIMARY_BREAKUP_TIME
-   REAL(EB) :: PRIMARY_BREAKUP_DRAG_REDUCTION_FACTOR
-   REAL(EB) :: RUNNING_AVERAGE_FACTOR_WALL
+   REAL(EB) :: KILL_RADIUS                !< Radius (m) below which particle is killed (removed)
+   REAL(EB) :: TMP_INITIAL                !< Initial temperature (K) of the particles
+   REAL(EB) :: SIGMA                      !< Parameter in Rosin-Rammler distribution
+   REAL(EB) :: VERTICAL_VELOCITY          !< Speed (m/s) of liquid droplet stuck to a vertical surface
+   REAL(EB) :: HORIZONTAL_VELOCITY        !< Speed (m/s) of liquid droplet stuck to a horizontal surface
+   REAL(EB) :: DRAG_COEFFICIENT(3)        !< Drag coefficient in 3 coordinate directions
+   REAL(EB) :: SURFACE_DIAMETER           !< Effective liquid droplet diameter (m) on a solid surface
+   REAL(EB) :: SURFACE_TENSION            !< Surface tension (N/m) of liquid droplets
+   REAL(EB) :: BREAKUP_RATIO              !< Ratio of child Sauter mean to parent size in Bag breakup regime
+   REAL(EB) :: BREAKUP_GAMMA              !< Rosin-Rammler size distribution parameter for break-up distribution
+   REAL(EB) :: BREAKUP_SIGMA              !< Rosin-Rammler size distribution parameter for break-up distribution
+   REAL(EB) :: DENSE_VOLUME_FRACTION      !< Limiting volume fraction for drag reduction
+   REAL(EB) :: PERMEABILITY(3)            !< Parameter in porous media drag model, \f$K\f$ (\f$ {\rm m}^2 \f$)
+   REAL(EB) :: REAL_REFRACTIVE_INDEX      !< Radiative property of liquid droplet
+   REAL(EB) :: COMPLEX_REFRACTIVE_INDEX   !< Radiative property of liquid droplet
+   REAL(EB) :: DENSITY=-1._EB             !< Density of liquid droplet (kg/m\f$^3\f$)
+   REAL(EB) :: FTPR                       !< 4/3 * PI * SPECIES(N)\%DENSITY_LIQUID (kg/m3)
+   REAL(EB) :: FREE_AREA_FRACTION         !< Area fraction of cell open for flow in SCREEN_DRAG model
+   REAL(EB) :: POROUS_VOLUME_FRACTION     !< Volume fraction of cell open to flow in porous media model
+   REAL(EB) :: MEAN_DROPLET_VOLUME=0._EB  !< Mean droplet volume
+   REAL(EB) :: RUNNING_AVERAGE_FACTOR     !< Fraction of older value to use for particle statistics summations
+   REAL(EB) :: SHAPE_FACTOR               !< Ratio of particle cross sectional area to surface area
+   REAL(EB) :: EMBER_DENSITY_THRESHOLD    !< Density at which vegetative particle becomes a flying ember
+   REAL(EB) :: EMBER_VELOCITY_THRESHOLD   !< Velocity at which vegetative particle becomes a flying ember
+   REAL(EB) :: PRIMARY_BREAKUP_TIME       !< Time (s) after insertion when droplet breaks up
+   REAL(EB) :: PRIMARY_BREAKUP_DRAG_REDUCTION_FACTOR   !< Drag reduction factor 
+   REAL(EB) :: RUNNING_AVERAGE_FACTOR_WALL             !< Fraction of old value used in summations of droplets stuck to walls
 
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: R_CNF,CNF,CVF,BREAKUP_R_CNF,BREAKUP_CNF,BREAKUP_CVF,W_CNF,R50,LAMBDA,SOLID_ANGLE
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: WQABS,WQSCA
@@ -221,7 +222,7 @@ TYPE MATERIAL_TYPE
    REAL(EB), DIMENSION(MAX_REACTIONS) :: TMP_REF,TMP_THR,RATE_REF,THR_SIGN
    REAL(EB), DIMENSION(MAX_MATERIALS,MAX_REACTIONS) :: NU_RESIDUE=0._EB
    REAL(EB), DIMENSION(MAX_REACTIONS) :: A,E,H_R,N_S,N_T,N_O2,GAS_DIFFUSION_DEPTH,NU_O2_CHAR,ALPHA_CHAR,BETA_CHAR
-   REAL(EB), DIMENSION(MAX_REACTIONS) :: HEATING_RATE,PYROLYSIS_RANGE,TOL_INT
+   REAL(EB), DIMENSION(MAX_REACTIONS) :: HEATING_RATE,PYROLYSIS_RANGE
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: NU_GAS,ADJUST_BURN_RATE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: DIFFUSIVITY_GAS
    REAL(EB), DIMENSION(MAX_SPECIES,MAX_REACTIONS) :: NU_SPEC,HEAT_OF_COMBUSTION
