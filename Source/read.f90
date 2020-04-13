@@ -5263,23 +5263,25 @@ READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
    LPC%MEAN_DROPLET_VOLUME              = FOTHPI*(0.5_EB*LPC%DIAMETER)**3 ! recomputed for distributions
    LPC%MAXIMUM_DIAMETER                 = MAXIMUM_DIAMETER*1.E-6_EB
    IF (MINIMUM_DIAMETER<0._EB)     &
-      LPC%MINIMUM_DIAMETER              = 0.005_EB*DIAMETER
-   IF (KILL_DIAMETER<0._EB) THEN
-      IF (MONODISPERSE) THEN            ! Kill if volume of droplet <= 0.005*volume of droplet with DIAMETER or MINIMUM_DIAMETER
-         LPC%KILL_RADIUS                = (0.005_EB*(0.5_EB*DIAMETER)**3)**ONTH
+      LPC%MINIMUM_DIAMETER              = 0.005_EB*LPC%DIAMETER
+   LPC%KILL_RADIUS                      = 0.5_EB*KILL_DIAMETER*1.E-6
+   IF (LPC%LIQUID_DROPLET) THEN !Set KILL_RADIUS for SURF_ID in PROC_PART
+      IF (LPC%KILL_RADIUS<0._EB) THEN
+         IF (MONODISPERSE) THEN         ! Kill if volume of droplet <= 0.005*volume of droplet with DIAMETER or MINIMUM_DIAMETER
+            LPC%KILL_RADIUS             = (0.005_EB*(0.5_EB*LPC%DIAMETER)**3)**ONTH
+         ELSE
+            LPC%KILL_RADIUS             = (0.005_EB*(0.5_EB*LPC%MINIMUM_DIAMETER)**3)**ONTH
+         ENDIF
       ELSE
-         LPC%KILL_RADIUS                = (0.005_EB*(0.5_EB*LPC%MINIMUM_DIAMETER)**3)**ONTH
+         IF (.NOT. MONODISPERSE .AND. KILL_DIAMETER >= LPC%MINIMUM_DIAMETER) THEN
+            WRITE(MESSAGE,'(A,A)') 'KILL DIAMETER >= MINIMUM_DIAMETER for particle class ',LPC%ID
+            CALL SHUTDOWN(MESSAGE) ; RETURN
+         ENDIF         
+         IF (MONODISPERSE .AND. KILL_DIAMETER >= DIAMETER) THEN
+            WRITE(MESSAGE,'(A,A)') 'KILL DIAMETER >= DIAMETER for particle class ',LPC%ID
+            CALL SHUTDOWN(MESSAGE) ; RETURN
+         ENDIF         
       ENDIF
-   ELSE
-      IF (.NOT. MONODISPERSE .AND. KILL_DIAMETER >= LPC%MINIMUM_DIAMETER) THEN
-         WRITE(MESSAGE,'(A,A)') 'KILL DIAMETER >= MINIMUM_DIAMETER for particle class ',LPC%ID
-         CALL SHUTDOWN(MESSAGE) ; RETURN
-      ENDIF         
-      IF (MONODISPERSE .AND. KILL_DIAMETER >= DIAMETER) THEN
-         WRITE(MESSAGE,'(A,A)') 'KILL DIAMETER >= DIAMETER for particle class ',LPC%ID
-         CALL SHUTDOWN(MESSAGE) ; RETURN
-      ENDIF         
-      LPC%KILL_RADIUS                   = 0.5_EB*KILL_DIAMETER*1.E-6
    ENDIF
    LPC%MONODISPERSE                     = MONODISPERSE
    LPC%PERIODIC_X                       = PERIODIC_X
@@ -5572,6 +5574,7 @@ PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
                VOLUME = VOLUME + (R_O**3-R_I**3)
          END SELECT
       ENDDO
+      LPC%KILL_RADIUS = SF%MINIMUM_LAYER_THICKNESS  
       LPC%DENSITY = MASS/VOLUME
       LPC%FTPR = FOTH*PI*LPC%DENSITY
    ENDIF
