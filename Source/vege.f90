@@ -24,15 +24,26 @@ SUBROUTINE INITIALIZE_LEVEL_SET_FIRESPREAD_1(NM)
 ! Set up the major arrays, like the level set value PHI_LS, and determine terrain height on each 2D mesh, Z_LS(I,J).
 ! After this routine, go back to main, exchange Z_LS, and return for more initialization.
 
+USE COMPLEX_GEOMETRY, ONLY : IBM_IDCF
 INTEGER, INTENT(IN) :: NM
-INTEGER :: ICF,IW
+INTEGER :: ICF,IW,I,J,SURF_INDEX
 TYPE (MESH_TYPE),    POINTER :: M
 TYPE (WALL_TYPE),    POINTER :: WC
 TYPE (CFACE_TYPE),   POINTER :: CFA
+TYPE (SURFACE_TYPE), POINTER :: SF
 
 CALL POINT_TO_MESH(NM)
 
 M => MESHES(NM)
+
+! Loop through all SURFace types and find level set cases that need a calculated RoS
+
+DO SURF_INDEX=0,N_SURF
+   SF => SURFACE(SURF_INDEX)
+   IF (SF%VEG_LSET_SPREAD .AND. SF%VEG_LSET_FUEL_INDEX>0) THEN
+      SF%VEG_LSET_ROS = ROS_NO_WIND_NO_SLOPE(SF%VEG_LSET_FUEL_INDEX,SURF_INDEX)
+   ENDIF
+ENDDO
 
 ! Level set values (Phi). PHI1_LS is the first-order accurate estimate at the next time step.
 
@@ -41,8 +52,8 @@ ALLOCATE(M%PHI1_LS(0:IBP1,0:JBP1)); CALL ChkMemErr('VEGE:LEVEL SET','PHI1_LS',IZ
 
 ! Wind speed components in the center of the first gas phsae cell above the ground.
 
-ALLOCATE(M%U_LS(IBAR,JBAR)) ; CALL ChkMemErr('VEGE:LEVEL SET','U_LS',IZERO) ; U_LS => M%U_LS ; U_LS = 0._EB 
-ALLOCATE(M%V_LS(IBAR,JBAR)) ; CALL ChkMemErr('VEGE:LEVEL SET','V_LS',IZERO) ; V_LS => M%V_LS ; V_LS = 0._EB
+ALLOCATE(M%U_LS(0:IBP1,0:JBP1)) ; CALL ChkMemErr('VEGE:LEVEL SET','U_LS',IZERO) ; U_LS => M%U_LS ; U_LS = 0._EB 
+ALLOCATE(M%V_LS(0:IBP1,0:JBP1)) ; CALL ChkMemErr('VEGE:LEVEL SET','V_LS',IZERO) ; V_LS => M%V_LS ; V_LS = 0._EB
 
 ! Terrain height, Z_LS, and z index of the first gas cell above terrain, K_LS
 
@@ -52,23 +63,29 @@ ALLOCATE(M%LS_SURF_INDEX(0:IBP1,0:JBP1),STAT=IZERO) ; CALL ChkMemErr('READ','LS_
 LS_SURF_INDEX => M%LS_SURF_INDEX ; LS_SURF_INDEX = 0
 
 IF (CC_IBM) THEN
+
    ALLOCATE(M%LS_KLO_TERRAIN(0:IBP1,0:JBP1),STAT=IZERO) ; CALL ChkMemErr('READ','LS_KLO_TERRAIN',IZERO)
-   M%LS_KLO_TERRAIN = 2*KBP1+1 ! Number larger that KBP1.
+   LS_KLO_TERRAIN => M%LS_KLO_TERRAIN ; LS_KLO_TERRAIN = 2*KBP1+1 ! Number larger that KBP1.
    DO ICF=1,M%N_CUTFACE_MESH
-      IF(CUT_FACE(ICF)%STATUS /= 2) CYCLE ! IBM_INBOUNDARY == 2
+      IF (CUT_FACE(ICF)%STATUS /= 2) CYCLE ! IBM_INBOUNDARY == 2
       ! Location of CFACE with largest AREA, to define SURF_INDEX:
       IW  = MAXLOC(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE),DIM=1)
       CFA => CFACE( CUT_FACE(ICF)%CFACE_INDEX(IW) )
-      IF(CFA%NVEC(KAXIS)>-TWO_EPSILON_EB .AND. CFA%BOUNDARY_TYPE==SOLID_BOUNDARY ) THEN
+      IF (CFA%NVEC(KAXIS)>-TWO_EPSILON_EB .AND. CFA%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
          ! Area averaged Z height of CFACES within this cut-cell (containing IBM_INBOUNDARY CFACES):
          Z_LS(CFA%ONE_D%IIG,CFA%ONE_D%JJG) = DOT_PRODUCT(CUT_FACE(ICF)%XYZCEN(KAXIS,1:CUT_FACE(ICF)%NFACE), &
                                                                    CUT_FACE(ICF)%  AREA(1:CUT_FACE(ICF)%NFACE))     / &
                                                                SUM(CUT_FACE(ICF)% AREA(1:CUT_FACE(ICF)%NFACE))
-         IF(CFA%ONE_D%KKG < M%LS_KLO_TERRAIN(CFA%ONE_D%IIG,CFA%ONE_D%JJG)) &
-         M%LS_KLO_TERRAIN(CFA%ONE_D%IIG,CFA%ONE_D%JJG) = CFA%ONE_D%KKG
+         IF (CFA%ONE_D%KKG < LS_KLO_TERRAIN(CFA%ONE_D%IIG,CFA%ONE_D%JJG)) & 
+            LS_KLO_TERRAIN(CFA%ONE_D%IIG,CFA%ONE_D%JJG) = CFA%ONE_D%KKG
          IF (CFA%ONE_D%KKG > K_LS(CFA%ONE_D%IIG,CFA%ONE_D%JJG)) K_LS(CFA%ONE_D%IIG,CFA%ONE_D%JJG) = CFA%ONE_D%KKG
-         LS_SURF_INDEX(CFA%ONE_D%IIG,CFA%ONE_D%JJG)= CFA%SURF_INDEX
+         LS_SURF_INDEX(CFA%ONE_D%IIG,CFA%ONE_D%JJG) = CFA%SURF_INDEX
       ENDIF
+   ENDDO
+   DO J=1,JBAR
+      DO I=1,IBAR
+         IF (K_LS(I,J)==KBAR .AND. FCVAR(I,J,K_LS(I,J),IBM_IDCF,KAXIS)>0) LS_SURF_INDEX(I,J) = 0
+      ENDDO
    ENDDO
 
 ELSE
@@ -83,6 +100,16 @@ ELSE
    ENDDO
 
 ENDIF
+
+Z_LS(1:IBAR,   0) = 2._EB*Z_LS(1:IBAR,   1) - Z_LS(1:IBAR,   2)
+Z_LS(1:IBAR,JBP1) = 2._EB*Z_LS(1:IBAR,JBAR) - Z_LS(1:IBAR,JBM1)
+Z_LS(   0,1:JBAR) = 2._EB*Z_LS(   1,1:JBAR) - Z_LS(   2,1:JBAR)
+Z_LS(IBP1,1:JBAR) = 2._EB*Z_LS(IBAR,1:JBAR) - Z_LS(IBM1,1:JBAR)
+
+Z_LS(   0,   0) = Z_LS(   1,   1)
+Z_LS(IBP1,   0) = Z_LS(IBAR,   1)
+Z_LS(   0,JBP1) = Z_LS(   1,JBAR)
+Z_LS(IBP1,JBP1) = Z_LS(IBAR,JBAR)
 
 END SUBROUTINE INITIALIZE_LEVEL_SET_FIRESPREAD_1
 
@@ -159,7 +186,7 @@ ALLOCATE(M%PHI_W(IBAR,JBAR))    ; CALL ChkMemErr('VEGE:LEVEL SET','PHI_W',IZERO)
 
 ! UMF = wind speed at mean flame heights
 
-ALLOCATE(M%UMF(IBAR,JBAR))    ; CALL ChkMemErr('VEGE:LEVEL SET','UMF',IZERO) ; UMF => M%UMF
+ALLOCATE(M%UMF(IBAR,JBAR))    ; CALL ChkMemErr('VEGE:LEVEL SET','UMF',IZERO) ; M%UMF = 0._EB ; UMF => M%UMF
 ALLOCATE(M%THETA_ELPS(IBAR,JBAR))    ; CALL ChkMemErr('VEGE:LEVEL SET','THETA_ELPS',IZERO) ; THETA_ELPS => M%THETA_ELPS
 THETA_ELPS = 0.0_EB ! Normal to fireline
 
@@ -232,7 +259,7 @@ DO JJG=1,JBAR
 
       IF_ELLIPSE_UNCOUPLED: IF (SF%VEG_LSET_ELLIPSE) THEN
 
-         ROS_HEAD(IIG,JJG) = SF%VEG_LSET_ELLIPSE_HEAD
+         ROS_HEAD(IIG,JJG) = SF%VEG_LSET_ROS
          SF%VEG_LSET_HT = MAX(0.001_EB,SF%VEG_LSET_HT)
 
          ! If any surfaces set to ellipse, then elliptical model used for all surfaces
@@ -333,19 +360,6 @@ DO JJG=1,JBAR
    ENDDO
 ENDDO
 
-WRITE(LU_OUTPUT,*)'ROS_HEAD max ',MAXVAL(ROS_HEAD)
-WRITE(LU_OUTPUT,*)'LSET_ELLIPSE ',LSET_ELLIPSE
-
-! Flank rate not available when ellipse/farsite model is used
-
-IF (LSET_ELLIPSE) THEN
-   WRITE(LU_OUTPUT,*)'Phi_S max',MAXVAL(PHI_S)
-   WRITE(LU_OUTPUT,*)'Phi_W max',MAXVAL(PHI_W)
-   WRITE(LU_OUTPUT,*)'UMF max',MAXVAL(UMF)
-   WRITE(LU_OUTPUT,*)'Mag_zt max',MAXVAL(MAG_ZT)
-   WRITE(LU_OUTPUT,*)'SR_MAX',MAXVAL(ROS_HEAD) * (1._EB + MAXVAL(PHI_S) + MAXVAL(PHI_W))
-ENDIF
-
 END SUBROUTINE INITIALIZE_LEVEL_SET_FIRESPREAD_2
 
 
@@ -396,7 +410,7 @@ DO JJG=1,JBAR
 
          IF_ELLIPSE_COUPLED: IF (SF%VEG_LSET_ELLIPSE) THEN
 
-            ROS_HEAD(IIG,JJG) = SF%VEG_LSET_ELLIPSE_HEAD
+            ROS_HEAD(IIG,JJG) = SF%VEG_LSET_ROS
 
             ! Find wind at ~6.1 m height for Farsite
             KWIND = 0
@@ -484,8 +498,10 @@ CALL LEVEL_SET_ADVECT_FLUX
 
 IF (PREDICTOR) THEN
    PHI1_LS(1:IBAR,1:JBAR) = PHI_LS(1:IBAR,1:JBAR) - DT*FLUX0_LS(1:IBAR,1:JBAR)
+   PHI1_LS = MAX(PHI_LS_MIN,MIN(PHI_LS_MAX,PHI1_LS))
 ELSE
    PHI_LS(1:IBAR,1:JBAR) = PHI_LS(1:IBAR,1:JBAR) - 0.5_EB*DT*(FLUX0_LS(1:IBAR,1:JBAR) + FLUX1_LS(1:IBAR,1:JBAR))
+   PHI_LS = MAX(PHI_LS_MIN,MIN(PHI_LS_MAX,PHI_LS))
 ENDIF
 
 ! Loop over all cells and assign the value of PHI_LS to the appropriate WALL or
@@ -495,7 +511,7 @@ IF (.NOT.PREDICTOR) THEN
    IF (CC_IBM) THEN
       DO JJG=1,JBAR
          DO IIG=1,IBAR
-            DO IKT=MESHES(NM)%LS_KLO_TERRAIN(IIG,JJG),K_LS(IIG,JJG)
+            DO IKT=LS_KLO_TERRAIN(IIG,JJG),K_LS(IIG,JJG)
                ! Loop over all CFACEs corresponding to IIG,JJG and set ONE_D%T_IGN and ONE_D%PHI_LS as below
                ICF = CCVAR(IIG,JJG,IKT,3); IF(ICF<1) CYCLE  ! IBM_IDCF = 3 CUT_FCE container for this cell.
                DO IW=1,CUT_FACE(ICF)%NFACE ! All IBM_INBOUNDARY CFACES on this cell.
@@ -550,7 +566,7 @@ DO JJ=1,JBAR
    CALL FILL_BOUNDARY_VALUES
 ENDDO
 DO JJ=1,JBAR
-   JJG=JJ  ; IOR=-1
+   JJG=JJ
    DO II=1,IBAR
       IIG=II
       IOR = -3
@@ -564,9 +580,11 @@ CONTAINS
 
 SUBROUTINE FILL_BOUNDARY_VALUES
 
+USE COMPLEX_GEOMETRY, ONLY : IBM_CGSC,IBM_SOLID,IBM_CUTCFE
 INTEGER :: IW,IIO,JJO,N_INT_CELLS,NOM,IC
 REAL(EB) :: PHI_LS_OTHER,U_LS_OTHER,V_LS_OTHER,Z_LS_OTHER
 TYPE (EXTERNAL_WALL_TYPE), POINTER :: EWC
+LOGICAL :: SOLID_CELL
 
 ! Grab boundary values of PHI_LS from MPI storage arrays
 
@@ -603,18 +621,30 @@ N_INT_CELLS = (EWC%IIO_MAX-EWC%IIO_MIN+1) * (EWC%JJO_MAX-EWC%JJO_MIN+1)
 SELECT CASE(IOR)
    CASE(-2:2) 
       PHI_LS_P(II,JJ) = PHI_LS_OTHER/REAL(N_INT_CELLS,EB)
-    ! U_LS(II,JJ) = U_LS_OTHER/REAL(N_INT_CELLS,EB)
-    ! V_LS(II,JJ) = V_LS_OTHER/REAL(N_INT_CELLS,EB)
-    ! Z_LS(II,JJ) = Z_LS_OTHER/REAL(N_INT_CELLS,EB)
+      U_LS(II,JJ)     = U_LS_OTHER/REAL(N_INT_CELLS,EB)
+      V_LS(II,JJ)     = V_LS_OTHER/REAL(N_INT_CELLS,EB)
+      Z_LS(II,JJ)     = Z_LS_OTHER/REAL(N_INT_CELLS,EB)
    CASE(3)  ! only grab a PHI_LS value from the other mesh if the (II,JJ) cell of the current mesh has no terrain surface
-      IF (.NOT.SURFACE(LS_SURF_INDEX(II,JJ))%VEG_LSET_SPREAD .AND. SOLID(CELL_INDEX(II,JJ,KBAR))) THEN
+      SOLID_CELL = .FALSE.
+      IF (CC_IBM) THEN
+         IF (CCVAR(II,JJ,KBAR,IBM_CGSC)==IBM_SOLID .OR. CCVAR(II,JJ,KBAR,IBM_CGSC)==IBM_CUTCFE) SOLID_CELL = .TRUE.
+      ELSE
+         IF (SOLID(CELL_INDEX(II,JJ,KBAR))) SOLID_CELL = .TRUE.
+      ENDIF
+      IF (.NOT.SURFACE(LS_SURF_INDEX(II,JJ))%VEG_LSET_SPREAD .AND. SOLID_CELL) THEN
          PHI_LS_P(II,JJ) = PHI_LS_OTHER/REAL(N_INT_CELLS,EB)
          U_LS(II,JJ) = U_LS_OTHER/REAL(N_INT_CELLS,EB)
          V_LS(II,JJ) = V_LS_OTHER/REAL(N_INT_CELLS,EB)
          Z_LS(II,JJ) = Z_LS_OTHER/REAL(N_INT_CELLS,EB)
       ENDIF
    CASE(-3)  ! only grab a PHI_LS value from the other mesh if the (II,JJ) cell of the current mesh has no terrain surface
-      IF (.NOT.SURFACE(LS_SURF_INDEX(II,JJ))%VEG_LSET_SPREAD .AND. .NOT.SOLID(CELL_INDEX(II,JJ,1))) THEN
+      SOLID_CELL = .FALSE.
+      IF (CC_IBM) THEN
+         IF (CCVAR(II,JJ,1,IBM_CGSC)==IBM_SOLID .OR. CCVAR(II,JJ,1,IBM_CGSC)==IBM_CUTCFE) SOLID_CELL = .TRUE.
+      ELSE
+         IF (SOLID(CELL_INDEX(II,JJ,1))) SOLID_CELL = .TRUE.
+      ENDIF
+      IF (.NOT.SURFACE(LS_SURF_INDEX(II,JJ))%VEG_LSET_SPREAD .AND. .NOT.SOLID_CELL) THEN
          PHI_LS_P(II,JJ) = PHI_LS_OTHER/REAL(N_INT_CELLS,EB)
          U_LS(II,JJ) = U_LS_OTHER/REAL(N_INT_CELLS,EB)
          V_LS(II,JJ) = V_LS_OTHER/REAL(N_INT_CELLS,EB)
@@ -638,7 +668,7 @@ REAL(EB) :: COS_THETA_WIND,COS_THETA_SLOPE,COS_THETA_WIND_H,COS_THETA_WIND_B, &
 REAL(EB) :: ROS_BACKS,ROS_HEADS
 REAL(EB) :: RAD_TO_DEGREE,DEGREES_SLOPE,SLOPE_FACTOR
 REAL(EB) :: COS_THETA,SIN_THETA,XSF,YSF,UMF_DUM
-REAL(EB) :: A_ELPS,A_ELPS2,B_ELPS2,B_ELPS,C_ELPS,DENOM,ROS_TMP,LB,LBD,HB
+REAL(EB) :: AROS,A_ELPS,A_ELPS2,BROS,B_ELPS2,B_ELPS,C_ELPS,DENOM,ROS_TMP,LB,LBD,HB
 REAL(EB), DIMENSION(:) :: NORMAL_FIRELINE(2)
 
 RAD_TO_DEGREE = 90._EB/ASIN(1._EB)
@@ -651,15 +681,15 @@ ENDIF
 
 SR_X_LS = 0.0_EB ; SR_Y_LS = 0.0_EB
 
-FLUX_ILOOP: DO I=1,IBAR
+FLUX_ILOOP: DO J=1,JBAR
 
-   IM1=I-1
-   IP1=I+1
+   JM1 = J-1
+   JP1 = J+1
 
-   DO J = 1,JBAR
+   DO I=1,IBAR
 
-      JM1=J-1
-      JP1=J+1
+      IM1 = I-1
+      IP1 = I+1
 
       F_EAST  = 0.5_EB*( PHI_LS_P(I,J) + PHI_LS_P(IP1,J) )
       F_WEST  = 0.5_EB*( PHI_LS_P(I,J) + PHI_LS_P(IM1,J) )
@@ -674,10 +704,8 @@ FLUX_ILOOP: DO I=1,IBAR
       IF (MAG_F > 0._EB) THEN   !components of unit vector normal to PHI contours
          NORMAL_FIRELINE(1) = -DPHIDX/MAG_F
          NORMAL_FIRELINE(2) = -DPHIDY/MAG_F
-         ! Lagrangian normal approximation from Rehm and Mcdermott 2009
-         ! For elliptical front calculation
-         XSF = (DPHIDY / MAG_F )
-         YSF = (-DPHIDX / MAG_F)
+         XSF =  DPHIDY
+         YSF = -DPHIDX
          GRAD_SLOPE_DOT_NORMAL_FIRELINE = DZTDX(I,J)*(DPHIDY/MAG_F) + DZTDY(I,J)*(-DPHIDY/MAG_F)
       ELSE
         NORMAL_FIRELINE = 0._EB
@@ -713,16 +741,18 @@ FLUX_ILOOP: DO I=1,IBAR
          ! Head to back ratio based on LB
          HB = (LB + LBD) / (LB - LBD)
 
-         ! A_ELPS and B_ELPS are *opposite* in notation from Farsite and Richards
-         A_ELPS =  0.5_EB * (ROS_TMP + ROS_TMP/HB)
-         A_ELPS2 = A_ELPS**2
-         B_ELPS =  A_ELPS / LB !0.5_EB * (ROS_TMP + ROS_TMP/HB) / LB
-         B_ELPS2=  B_ELPS**2
-         C_ELPS =  A_ELPS - (ROS_TMP/HB)
+         ! A_ELPS and B_ELPS notation is consistent with Farsite and Richards 
+         B_ELPS =  0.5_EB * (ROS_TMP + ROS_TMP/HB)
+         B_ELPS2 = B_ELPS**2
+         A_ELPS =  B_ELPS / LB
+         A_ELPS2=  A_ELPS**2
+         C_ELPS =  B_ELPS - (ROS_TMP/HB)
 
-         ! Denominator used in spread rate equation from Richards 1990 (also in Farsite)
-         DENOM = B_ELPS2 * (YSF * COS_THETA + XSF * SIN_THETA)**2 + &
-                 A_ELPS2 * (XSF * COS_THETA - YSF * SIN_THETA)**2
+         ! Denominator used in spread rate equation from Richards, Intnl. J. Num. Methods Eng. 1990 
+         ! and in LS vs Farsite paper, Bova et al., Intnl. J. Wildland Fire, 25(2):229-241, 2015  
+         AROS  = XSF*COS_THETA - YSF*SIN_THETA
+         BROS  = XSF*SIN_THETA + YSF*COS_THETA
+         DENOM = A_ELPS2*BROS**2 + B_ELPS2*AROS**2
 
          IF (DENOM > 0._EB) THEN
             DENOM = 1._EB / SQRT(DENOM)
@@ -730,11 +760,10 @@ FLUX_ILOOP: DO I=1,IBAR
             DENOM = 0._EB
          ENDIF
 
-         SR_X_LS(I,J) = DENOM * (B_ELPS2 * COS_THETA * (XSF * SIN_THETA + YSF * COS_THETA) -&
-                        A_ELPS2 * SIN_THETA * (XSF * COS_THETA - YSF * SIN_THETA)) + C_ELPS * SIN_THETA
-
-         SR_Y_LS(I,J) = DENOM * (-B_ELPS2 * SIN_THETA * (XSF * SIN_THETA + YSF * COS_THETA) -&
-                        A_ELPS2 * COS_THETA * (XSF * COS_THETA - YSF * SIN_THETA)) + C_ELPS * COS_THETA
+!        This is with A_ELPS2 and B_ELPS2 notation consistent with Finney and Richards and in 
+!        Bova et al. 2015 IJWF 2015
+         SR_X_LS(I,J) = DENOM * ( A_ELPS2*COS_THETA*BROS - B_ELPS2*SIN_THETA*AROS) + C_ELPS*SIN_THETA
+         SR_Y_LS(I,J) = DENOM * (-A_ELPS2*SIN_THETA*BROS - B_ELPS2*COS_THETA*AROS) + C_ELPS*COS_THETA
 
          ! Project spread rates from slope to horizontal plane
 
@@ -957,5 +986,225 @@ ENDIF
 SCALAR_FACE_VALUE_LS = ZUP + 0.5_EB * B * ( ZDWN - ZUP )
 
 END FUNCTION SCALAR_FACE_VALUE_LS
+
+
+!> \brief Calculate the Rothermel no-wind, no-slope rate of spread.
+!> 
+!>
+!> \details The Rothermel model as described in Bachmann's thesis.
+
+REAL(EB) FUNCTION ROS_NO_WIND_NO_SLOPE(ROTHERMEL_FUEL_INDEX,SURF_INDEX)
+
+INTEGER, INTENT(IN) :: ROTHERMEL_FUEL_INDEX,SURF_INDEX
+REAL(EB) :: w0d1, w0d2, w0d3, w0lh, w0lw, md1, md2, md3, mlh, mlw, svd1, svd2, svd3, svlh, svlw, depth, rhop, heat, st, se, mx
+REAL(EB) :: swd1, swd2, swd3, swlh, swlw, swd, swl, swt, s2wt, sw2d, sw2l, swmd, swml, sigma, rhob, beta, &
+            betaOpt, wnd, wnl, hnd1, hnd2, hnd3, hnlh, hnlw, hnd, hnl, bigW, hnmd, mfdead, mxlive, rml, rmd, etaMd, etaMl, etaM, &
+            etas, gammaMax, bigA, gamma, bigIr, xi, epsd1, epsd2, epsd3, epslh, epslw, bigQd1, bigQd2, &
+            bigQd3, bigQlh, bigQlw, hskz, hsk
+TYPE(SURFACE_TYPE), POINTER :: SF
+
+SF => SURFACE(SURF_INDEX)
+
+md1 = SF%VEG_LSET_M1
+md2 = SF%VEG_LSET_M10
+md3 = SF%VEG_LSET_M100
+mlw = SF%VEG_LSET_MLW
+mlh = SF%VEG_LSET_MLH
+               
+SELECT CASE(ROTHERMEL_FUEL_INDEX)
+   CASE(1)  ! 'Short Grass'
+      w0d1=0.1659     ; w0d2=0.        ; w0d3=0.        ; w0lh=0.        ; w0lw=0. 
+      svd1=11483.     ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921. 
+      mx=0.12         ; depth=0.3048   ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
+   CASE(2)  ! 'Timbergrass'
+      w0d1=0.448      ; w0d2=0.224     ; w0d3=0.112     ; w0lh=0.112     ; w0lw=0. 
+      svd1=9842.      ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921. 
+      mx=0.15         ; depth=0.3048   ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
+   CASE(3)  ! 'Tall Grass'
+      w0d1=0.675      ; w0d2=0.        ; w0d3=0.        ; w0lh=0.        ; w0lw=0. 
+      svd1=4921.      ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921. 
+      mx=0.25         ; depth=0.762    ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
+   CASE(4)  ! 'Chaparral'
+      w0d1=1.123      ; w0d2=0.899     ; w0d3=0.448     ; w0lh=1.123     ; w0lw=0. 
+      svd1=6562.      ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921. 
+      mx=0.20         ; depth=1.829    ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
+   CASE(5)  ! 'Brush'
+      w0d1=0.224      ; w0d2=0.112     ; w0d3=0.        ; w0lh=0.        ; w0lw=0.448
+      svd1=6562.      ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921. 
+      mx=0.20         ; depth=0.6096   ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
+   CASE(6)  ! 'Dormant Brush'
+      w0d1=0.336      ; w0d2=0.56      ; w0d3=0.448     ; w0lh=0.        ; w0lw=0.   
+      svd1=5741.      ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921. 
+      mx=0.25         ; depth=0.762    ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
+   CASE(7)  ! 'Southern Rough'
+      w0d1=0.255      ; w0d2=0.419     ; w0d3=0.336     ; w0lh=0.        ; w0lw=0.083
+      svd1=5741.      ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921. 
+      mx=0.40         ; depth=0.762    ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
+   CASE(8)  ! 'Closed Timber Litter'
+      w0d1=0.336      ; w0d2=0.224     ; w0d3=0.56      ; w0lh=0.        ; w0lw=0.   
+      svd1=6562.      ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921. 
+      mx=0.30         ; depth=0.06096  ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
+   CASE(9)  ! ID='Hardwood Litter'
+      w0d1=0.655      ; w0d2=0.092     ; w0d3=0.034     ; w0lh=0.        ; w0lw=0.   
+      svd1=8202.      ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921. 
+      mx=0.25         ; depth=0.06096  ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
+   CASE(10)  ! 'Timber'
+      w0d1=0.675      ; w0d2=0.448     ; w0d3=1.123     ; w0lh=0.        ; w0lw=0.448
+      svd1=6562.      ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921. 
+      mx=0.25         ; depth=0.3048   ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
+   CASE(11)  ! 'Light Slash'
+      w0d1=0.336      ; w0d2=1.011     ; w0d3=1.235     ; w0lh=0.        ; w0lw=0.   
+      svd1=4921.      ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921. 
+      mx=0.15         ; depth=0.3048   ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
+   CASE(12)  ! ID='Medium Slash'
+      w0d1=0.899      ; w0d2=3.145     ; w0d3=3.706     ; w0lh=0.        ; w0lw=0.   
+      svd1=4921.      ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921. 
+      mx=0.20         ; depth=0.70104  ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
+   CASE(13)  ! 'Heavy Slash'
+      w0d1=1.571      ; w0d2=5.165     ; w0d3=6.288     ; w0lh=0.        ; w0lw=0.   
+      svd1=4921.      ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921. 
+      mx=0.25         ; depth=0.9144   ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
+END SELECT
+
+SF%VEG_LSET_HT = depth
+      
+! Auxiliary functions
+   
+swd1 = svd1*w0d1  
+swd2 = svd2*w0d2 
+swd3 = svd3*w0d3  
+swlh = svlh*w0lh  
+swlw = svlw*w0lw 
+swd  = swd1 + swd2 + swd3  
+swl  = swlh + swlw  
+swt  = swd + swl  
+s2wt = svd1**2*w0d1 + svd2**2*w0d2 + svd3**2*w0d3 + svlh**2*w0lh + svlw**2*w0lw  
+sw2d = svd1*w0d1**2 + svd2*w0d2**2 + svd3*w0d3**2
+sw2l = svlh*w0lh**2 + svlw*w0lw**2  
+swmd = swd1*md1 + swd2*md2 + swd3*md3  
+swml = swlh*mlh + swlw*mlw
+   
+! Characteristic surface-to-volume ratio [R(71,72)]
+
+sigma = s2wt/swt
+SF%VEG_LSET_SIGMA = sigma*0.01  ! Convert from 1/m to 1/cm
+   
+! Mean bulk density [R(74)]
+   
+rhob = (w0d1 + w0d2 + w0d3 + w0lh + w0lw)/depth
+  
+! Mean packing ratio [R(31,73)]
+   
+beta = rhob/rhop
+SF%VEG_LSET_BETA = beta
+   
+! Optimal packing ratio [R(37)]
+   
+betaOpt = 8.8578*sigma**(-0.8189)
+   
+! Net fuel loading [R(60), adjusted by A.(p.88) and R(59)]
+   
+if (swd==0._eb) then
+   wnd = 0._eb
+else
+   wnd = (sw2d/swd)*(1. - st)
+endif
+
+if (swl==0._eb) then
+   wnl = 0._eb
+else
+   wnl = (sw2l/swl)*(1. - st)
+endif
+   
+! Mineral damping coefficient [R(62)]
+   
+etas = 0.174*se**(-0.19)
+   
+! Ratio of "fine" fuel loadings,dead/living [Albini,p.89]
+   
+hnd1 = 0.20482*w0d1*Exp(-452.76/svd1) 
+hnd2 = 0.20482*w0d2*exp(-452.76/svd2) 
+hnd3 = 0.20482*w0d3*exp(-452.76/svd3) 
+hnlh = 0.20482*w0lh*exp(-1640.42/svlh) 
+hnlw = 0.20482*w0lw*exp(-1640.42/svlw) 
+hnd = hnd1 + hnd2 + hnd3 
+hnl = hnlh + hnlw
+if (swl==0._eb) then
+   bigW = 0._eb
+else
+   bigW = hnd/hnl
+endif
+   
+! Moisture content of "fine" dead fuel [Albini,p.89]
+   
+hnmd   = hnd1*md1 + hnd2*md2 + hnd3*md3
+mfdead = hnmd/hnd
+   
+! Moisture of extinction of living fuel [R(88),Albini,p.89]
+   
+mxlive = 2.9*bigW*(1.0 - (mfdead/mx)) - 0.226
+   
+! Moisture ratios [R(65,66)]
+   
+if (swl==0._eb) then
+   rml = 0._eb
+else
+   rml = swml/(swl*mxlive)
+endif
+
+rmd = swmd/(swd*mx)
+   
+! Moisture damping coefficients [R(64)]
+   
+etaMd = 1.0 - (2.59*rmd) + (5.11*rmd**2) - (3.52*rmd**3) 
+etaMl = 1.0 - (2.59*rml) + (5.11*rml**2) - (3.52*rml**3) 
+etaM  = wnd*etaMd + wnl*etaMl
+   
+! Maximum reaction velocity [R(36,68)]
+   
+gammaMax = (0.16828*sigma**(1.5))/(29700 + 0.5997*sigma**(1.5))
+   
+! A [R(70),Albini p.88]
+   
+bigA = 340.53*sigma**(-0.7913)
+   
+! Potential reaction velocity [R(38)]
+   
+gamma = gammaMax*(beta/betaOpt)**(bigA)*exp(bigA*(1.0 - (beta/betaOpt)))
+   
+! Propagating flux ratio [R(42)]
+   
+xi = exp((0.792 + 0.37597*sqrt(sigma))*(beta + 0.1))/(192.0 + 0.0791*sigma)
+   
+! Effective heating number [R(14,77)]
+   
+epsd1 = exp(-452.76/svd1) 
+epsd2 = exp(-452.76/svd2) 
+epsd3 = exp(-452.76/svd3)
+epslh = exp(-452.76/svlh) 
+epslw = exp(-452.76/svlw)
+   
+! Heat of pre-ignition [R(12,78)]
+   
+bigQd1 = 581.5 + 2595.7*md1 
+bigQd2 = 581.5 + 2595.7*md2 
+bigQd3 = 581.5 + 2595.7*md3 
+bigQlh = 581.5 + 2595.7*mlh 
+bigQlw = 581.5 + 2595.7*mlw
+   
+! Heat sink [R(77)]
+   
+hskz = svd1*w0d1*epsd1*bigQd1 + svd2*w0d2*epsd2*bigQd2 + svd3*w0d3*epsd3*bigQd3 + svlh*w0lh*epslh*bigQlh + svlw*w0lw*epslw*bigQlw
+hsk  = rhob*hskz/swt
+   
+! Reaction intensity [R(27,58),Albini,p.89]
+   
+bigIr = gamma*heat*etas*etaM
+   
+! Rate of spread [R(52)] and the rate of spread in the absence of wind and with no slope.
+   
+ROS_NO_WIND_NO_SLOPE = (bigIr*xi)/hsk
+
+END FUNCTION ROS_NO_WIND_NO_SLOPE
 
 END MODULE VEGE

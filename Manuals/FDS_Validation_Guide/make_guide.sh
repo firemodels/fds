@@ -24,6 +24,13 @@ bibtex FDS_Validation_Guide &> FDS_Validation_Guide.err
 pdflatex -interaction nonstopmode FDS_Validation_Guide &> FDS_Validation_Guide.err
 pdflatex -interaction nonstopmode FDS_Validation_Guide &> FDS_Validation_Guide.err
 pdflatex -interaction nonstopmode FDS_Validation_Guide &> FDS_Validation_Guide.err
+
+# make sure the guide exists
+if [ ! -e FDS_Validation_Guide.pdf ]; then
+  clean_build=0
+  echo "***error: the FDS Validation Guide failed to build!"
+fi
+
 if [ -e "$PDFUSER" ]; then
   cp $PDFUSER .
 fi

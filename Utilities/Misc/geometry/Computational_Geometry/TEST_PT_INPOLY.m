@@ -11,14 +11,14 @@ XY(IAXIS:JAXIS,NP+1) = XY(IAXIS:JAXIS,1);
 
 % Shift origin to XY1:
 for IP=1:NP+1
-    XY(IAXIS:JAXIS,IP) = XY(IAXIS:JAXIS,IP) - XY1(IAXIS:JAXIS);
+    XY(IAXIS:JAXIS,IP) = XY(IAXIS:JAXIS,IP) - XY1(IAXIS:JAXIS)';
 end
 
 % For each edge test against rays x=0, y=0:
 for IP=1:NP
    % Check if edges first point is vertex:
-   if ( (ABS(XY(IAXIS,IP)) < GEOMEPS) && ...
-        (ABS(XY(JAXIS,IP)) < GEOMEPS) )
+   if ( (abs(XY(IAXIS,IP)) < GEOMEPS) && ...
+        (abs(XY(JAXIS,IP)) < GEOMEPS) )
       PTSFLAG = true;
       return
    end

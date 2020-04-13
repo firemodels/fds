@@ -1,9 +1,8 @@
-function [ierr]=COLLAPSE_CROSSINGS(X1AXIS,X2AXIS,X3AXIS,X3RAY,X1PLN,ititle)
+function [ierr]=COLLAPSE_CROSSINGS(BODINT_PLANE2,X1AXIS,X2AXIS,X3AXIS,X3RAY,X1PLN,ititle)
 
-global IAXIS JAXIS GEOMEPS LOW_IND HIGH_IND
+global IAXIS JAXIS KAXIS GEOMEPS LOW_IND HIGH_IND
 global IBM_GASPHASE IBM_SOLID IBM_UNDEFINED
 global IBM_N_CRS IBM_MAXCROSS_X2
-global BODINT_PLANE
 global IBM_SVAR_CRS IBM_IS_CRS IBM_IS_CRS2 IBM_SEG_CRS IBM_SEG_TAN IBM_BDNUM_CRS IBM_IS_CRS2_AUX IBM_BDNUM_CRS_AUX
 global XAXIS
 
@@ -43,14 +42,67 @@ for ICRS=2:IBM_N_CRS
    IND_CRS(HIGH_IND,CRS_NUM(ICRS)) = IND_CRS(HIGH_IND,CRS_NUM(ICRS))+1;
 end
 
-IDCR=1;
-IBM_BDNUM_CRS_AUX(IDCR) = max(0,max(IBM_BDNUM_CRS(IND_CRS(LOW_IND,IDCR)+1:IND_CRS(LOW_IND,IDCR)+IND_CRS(HIGH_IND,IDCR)))) ...
-                         +min(0,min(IBM_BDNUM_CRS(IND_CRS(LOW_IND,IDCR)+1:IND_CRS(LOW_IND,IDCR)+IND_CRS(HIGH_IND,IDCR))));
-for IDCR=2:CRS_NUM(IBM_N_CRS)
-    IBM_BDNUM_CRS_AUX(IDCR) = IBM_BDNUM_CRS_AUX(IDCR-1) ...
-                             +max(0,max(IBM_BDNUM_CRS(IND_CRS(LOW_IND,IDCR)+1:IND_CRS(LOW_IND,IDCR)+IND_CRS(HIGH_IND,IDCR)))) ...
-                             +min(0,min(IBM_BDNUM_CRS(IND_CRS(LOW_IND,IDCR)+1:IND_CRS(LOW_IND,IDCR)+IND_CRS(HIGH_IND,IDCR))));
+% Computation of IBM_BDNUM_CRS_AUX requires knowledge of how many different
+% bodies reach an intersection:
+BODNUM = zeros(1,IBM_MAXCROSS_X2);
+for IDCR=1:CRS_NUM(IBM_N_CRS)
+    
+    % Load body numbers:
+    for IDCR2=IND_CRS(LOW_IND,IDCR)+1:IND_CRS(LOW_IND,IDCR)+IND_CRS(HIGH_IND,IDCR)
+       ISEG=IBM_SEG_CRS(IDCR2);
+       if(ISEG > 0); BODNUM(IDCR2)=BODINT_PLANE2.INDSEG(4,ISEG); end
+    end
+    
+    % Unique bodies:
+    NUBD = 0;
+    for IDCR2=IND_CRS(LOW_IND,IDCR)+1:IND_CRS(LOW_IND,IDCR)+IND_CRS(HIGH_IND,IDCR)
+        if ( BODNUM(IDCR2)<1 ); continue; end
+        if ((NUBD > 0) && any(UBOD(1:NUBD)==BODNUM(IDCR2))); continue; end        
+        NUBD = NUBD + 1;
+        UBOD(NUBD) = BODNUM(IDCR2);
+    end
+    % Now assign IBM_BDNUM_CRS_AUX(IDCR):
+    SBOD = 0;
+    for IUBD=1:NUBD
+        % Drop extra intersections (same intersection type, same body):
+        USE_INT_POINT(IND_CRS(LOW_IND,IDCR)+1:IND_CRS(LOW_IND,IDCR)+IND_CRS(HIGH_IND,IDCR)) = true;
+        for ICRS1=IND_CRS(LOW_IND,IDCR)+1:IND_CRS(LOW_IND,IDCR)+IND_CRS(HIGH_IND,IDCR)
+            if (~USE_INT_POINT(ICRS1)); continue; end % Don't use collapsed point as pivot.
+            % Collapse GS or SG points:
+            for ICRS2 = IND_CRS(LOW_IND,IDCR)+1 : IND_CRS(LOW_IND,IDCR)+IND_CRS(HIGH_IND,IDCR)
+                if ( (ICRS2==ICRS1) || ~USE_INT_POINT(ICRS2) ); continue; end % Don't use pivot, or collapsed point.
+                if ( (IBM_IS_CRS2(LOW_IND ,ICRS1) == IBM_IS_CRS2(LOW_IND ,ICRS2)) && ...
+                     (IBM_IS_CRS2(HIGH_IND,ICRS1) == IBM_IS_CRS2(HIGH_IND,ICRS2)) && ...
+                      BODNUM(ICRS1) == BODNUM(ICRS2))
+                    USE_INT_POINT(ICRS2) = false;
+                end
+            end
+        end
+        IBDNUM=0;
+        for IDCR2=IND_CRS(LOW_IND,IDCR)+1:IND_CRS(LOW_IND,IDCR)+IND_CRS(HIGH_IND,IDCR)
+            if(BODNUM(IDCR2) ~= UBOD(IUBD)); continue; end
+            if(~USE_INT_POINT(IDCR2)); continue; end
+            IBDNUM = IBDNUM + IBM_BDNUM_CRS(IDCR2);
+        end
+        if(IBDNUM ~= 0); SBOD = SBOD + sign(IBDNUM); end
+    end
+
+    if(IDCR == 1)
+        IBM_BDNUM_CRS_AUX(IDCR) = SBOD;     
+    else
+        IBM_BDNUM_CRS_AUX(IDCR) = IBM_BDNUM_CRS_AUX(IDCR-1) + SBOD;
+    end
 end
+
+% IDCR=1;
+% IBM_BDNUM_CRS_AUX(IDCR) = max(0,max(IBM_BDNUM_CRS(IND_CRS(LOW_IND,IDCR)+1:IND_CRS(LOW_IND,IDCR)+IND_CRS(HIGH_IND,IDCR)))) ...
+%                          +min(0,min(IBM_BDNUM_CRS(IND_CRS(LOW_IND,IDCR)+1:IND_CRS(LOW_IND,IDCR)+IND_CRS(HIGH_IND,IDCR))));
+% for IDCR=2:CRS_NUM(IBM_N_CRS)
+%     IBM_BDNUM_CRS_AUX(IDCR) = IBM_BDNUM_CRS_AUX(IDCR-1) ...
+%                              +max(0,max(IBM_BDNUM_CRS(IND_CRS(LOW_IND,IDCR)+1:IND_CRS(LOW_IND,IDCR)+IND_CRS(HIGH_IND,IDCR)))) ...
+%                              +min(0,min(IBM_BDNUM_CRS(IND_CRS(LOW_IND,IDCR)+1:IND_CRS(LOW_IND,IDCR)+IND_CRS(HIGH_IND,IDCR))));
+% end
+
 
 % This is where we merge intersections at same svar location (i.e. same CRS_NUM value):
 % Loop over different crossings:
@@ -76,9 +128,10 @@ for IDCR=1:CRS_NUM(IBM_N_CRS)
          else
             if(ititle==1)
             disp(['Error GET_X2INTERSECTIONS: IS_CRS(LOW_IND,ICRS) ~= LEFT_MEDIA, media continuity problem.'])
+            disp(['XAXIS=' num2str(XAXIS) ', IBM_N_CRS=' num2str(IBM_N_CRS)])
             elseif(ititle==2)
             disp(['Error GET_IS_SOLID_PT: IS_CRS(LOW_IND,ICRS) ~= LEFT_MEDIA, media continuity problem.'])            
-            disp(['XAXIS=' num2str(XAXIS)])
+            disp(['XAXIS=' num2str(XAXIS) ', IBM_N_CRS=' num2str(IBM_N_CRS)])
             end
             disp(['X1AXIS,X1PLN=' num2str(X1AXIS) ', ' num2str(X1PLN) ...
                 ', X2AXIS,X3AXIS=' num2str(X2AXIS) ', ' num2str(X3AXIS) ...
@@ -89,6 +142,18 @@ for IDCR=1:CRS_NUM(IBM_N_CRS)
             disp('IBM_SVAR_CRS_AUX, IBM_IS_CRS2_AUX')
             IBM_SVAR_CRS_AUX(1:IBM_N_CRS_AUX)
             IBM_IS_CRS2_AUX(1:2,1:IBM_N_CRS_AUX)
+            IBM_BDNUM_CRS_AUX(1:IBM_N_CRS_AUX)
+            if(X2AXIS==IAXIS)
+                x(1,:) = [-2 X3RAY X1PLN];
+                x(2,:) = [ 2 X3RAY X1PLN];
+            elseif(X2AXIS==JAXIS)
+                x(1,:) = [X1PLN -2 X3RAY ];
+                x(2,:) = [X1PLN  2 X3RAY ];
+            else
+                x(1,:) = [X3RAY X1PLN -2 ];
+                x(2,:) = [X3RAY X1PLN  2 ];
+            end
+            plot3(x(:,IAXIS),x(:,JAXIS),x(:,KAXIS),'--k','LineWidth',2)
             pause
          end
       end
@@ -120,7 +185,6 @@ for IDCR=1:CRS_NUM(IBM_N_CRS)
    IBM_SEG_CRS_AUX(IBM_N_CRS_AUX)              = IBM_SEG_CRS(ICRS);
    IBM_SEG_TAN_AUX(IAXIS:JAXIS,IBM_N_CRS_AUX)  = IBM_SEG_TAN(IAXIS:JAXIS,ICRS);
    
-   
    % Case of intersection inside segment aligned with SVAR location, i.e.
    % intersection among two bodies or self intersection:
    ALGN_CROSS=false;
@@ -130,8 +194,8 @@ for IDCR=1:CRS_NUM(IBM_N_CRS)
       ALGN_CROSS = true;
       break
    end
-   if ( ALGN_CROSS ); continue; end 
-   
+   if ( ALGN_CROSS ); continue; end
+
    % Now figure out the type of crossing:
    NOT_COUNTED = true;
    NCRS_REMAIN = IND_CRS(HIGH_IND,IDCR);
@@ -143,11 +207,12 @@ for IDCR=1:CRS_NUM(IBM_N_CRS)
          
          if (~USE_INT_POINT(ICRS1)); continue; end % Don't use collapsed point as pivot.
 
-         % Collapse GS or SG points:
+         % Collapse GS or SG points discriminating by body:
          for ICRS2 = IND_CRS(LOW_IND,IDCR)+1 : IND_CRS(LOW_IND,IDCR)+IND_CRS(HIGH_IND,IDCR)
             if ( (ICRS2==ICRS1) || ~USE_INT_POINT(ICRS2) ); continue; end % Don't use pivot, or collapsed point.
             if ( (IBM_IS_CRS2(LOW_IND ,ICRS1) == IBM_IS_CRS2(LOW_IND ,ICRS2)) && ...
-                 (IBM_IS_CRS2(HIGH_IND,ICRS1) == IBM_IS_CRS2(HIGH_IND,ICRS2)) ) 
+                 (IBM_IS_CRS2(HIGH_IND,ICRS1) == IBM_IS_CRS2(HIGH_IND,ICRS2)) && ...
+                 (BODNUM(ICRS1) == BODNUM(ICRS2)) ) 
                 USE_INT_POINT(ICRS2) = false;
             end
          end
@@ -171,7 +236,6 @@ for IDCR=1:CRS_NUM(IBM_N_CRS)
       
       if (IND_LEFT  ~= 0); IND_LEFT = sign(IND_LEFT); end
       if (IND_RIGHT ~= 0); IND_RIGHT = sign(IND_RIGHT); end
-
             
       if (IDCR>1 && IBM_BDNUM_CRS_AUX(IDCR-1) > 0 && IBM_BDNUM_CRS_AUX(IDCR) > 0)  % Test if we are inside an Object.
          IBM_IS_CRS2_AUX(LOW_IND:HIGH_IND,IBM_N_CRS_AUX) = IBM_SOLID; % GS or SG.
@@ -188,7 +252,7 @@ for IDCR=1:CRS_NUM(IBM_N_CRS)
          disp('Error GET_IS_SOLID_PT: DROP_SS_GG = true, Didn''t find left side continuity.')   
          disp(['XAXIS=' num2str(XAXIS)])
          end
-         disp(['BODINT_PLANE, NSGLS, NSEGS=',num2str(BODINT_PLANE.NSGLS)  ', ' num2str(BODINT_PLANE.NSEGS)])
+         disp(['BODINT_PLANE2, NSGLS, NSEGS=',num2str(BODINT_PLANE2.NSGLS)  ', ' num2str(BODINT_PLANE2.NSEGS)])
          disp(['X1AXIS,X1PLN=' num2str(X1AXIS) ', ' num2str(X1PLN) ...
                 ', X2AXIS,X3AXIS=' num2str(X2AXIS) ', ' num2str(X3AXIS) ...
                 ', RAY X3 POSITION=' num2str(X3RAY)])

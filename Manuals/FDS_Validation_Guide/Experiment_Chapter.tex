@@ -262,9 +262,13 @@ In July and August of 1986, the Commonwealth Scientific and Industrial Research 
 
 \subsubsection{Modeling Notes}
 
-Two of these experiments are simulated with FDS by Mell~et~al.~\cite{Mell:IJWF2007}. The grass is modeled as a collection of cylindrical Lagrangian particles. The pyrolysis model assigned to the particles is described in the FDS User's Guide~\cite{FDS_Users_Guide}, chapter ``Earth, Wind and Fire,'' Section~\ref{UG-vegetation_model}, ``Thermal Degradation Model for Vegetation.''
+Two of these experiments were originally simulated with FDS by Mell~et~al.~\cite{Mell:IJWF2007}. These simulations modeled the grass as a collection of cylindrical Lagrangian particles. The pyrolysis model assigned to the particles is described in the FDS User's Guide~\cite{FDS_Users_Guide}, chapter ``Earth, Wind and Fire,'' Section~\ref{UG-vegetation_model}, ``Thermal Degradation Model for Vegetation.''
+
+Now these two experiments are also simulated using the Boundary Fuel Model (BFM)~\cite{Perez-Ramirez:FT2017} and the Rothermel-Albini fire spread algorithm~\cite{Rothermel:1972,Albini:1976}. For the experiment labelled Case~C064, fuel index 1 (Short Grass) is used, with a modified moisture fraction of 0.063. For F19, fuel index 3 (Tall Grass) is used, with a modified moisture fraction of 0.058.
 
 Measured properties for the specific types of grasses burned in the two experiments are listed in Table~\ref{Properties_Grasses}. Properties that were not measured are listed in Table~\ref{Assumed_Properties_Grasses}. These assumed properties are typically for wood or cellulosic fuels. The moisture is modeled as water. The grass is assumed to be composed primarily of cellulose.
+
+
 
 \begin{figure}[ht]
 \includegraphics[width=\textwidth]{FIGURES/CSIRO_Grassland_Fires/Case_F19_0358.png}
@@ -272,7 +276,7 @@ Measured properties for the specific types of grasses burned in the two experime
 \label{F19}
 \end{figure}
 
-A snapshot of the simulation of Case~F19 is shown in Fig.~\ref{F19}. The computational domain in this case is 240~m by 240~m by 20~m. The grid cells are 0.5~m cubes. The domain is subdivided into 36 individual meshes and run in parallel. The grass is represented by 800,000 Lagrangian particles with a cylindrical geometry, or about 5 simulated blades per grid cell. The radius of the cylinder is derived from the measured surface area to volume ratio. Each simulated blade of grass represents many more actual blades of grass. The weighting factor is determined from the measured bulk mass per unit area. The fires in the experiments were ignited by two men carrying drip torches walking in opposite directions along the upwind boundary of the plot (the red strip in Fig.~\ref{F19}). In FDS, this action was modeled using a specified spread rate along the strip.
+A snapshot of the Lagrangian particle simulation of Case~F19 is shown in Fig.~\ref{F19}. The computational domain in this case is 240~m by 240~m by 20~m. The grid cells are 0.5~m cubes. The domain is subdivided into 36 individual meshes and run in parallel. The grass is represented 1 simulated blade per grid cell. The radius of the cylinder is derived from the measured surface area to volume ratio. Each simulated blade of grass represents many more actual blades of grass. The weighting factor is determined from the measured bulk mass per unit area. The fires in the experiments were ignited by two men carrying drip torches walking in opposite directions along the upwind boundary of the plot (the red strip in Fig.~\ref{F19}). In FDS, this action was modeled using a specified spread rate along the strip.
 
 \begin{table}[ht]
 \begin{center}
@@ -479,17 +483,28 @@ Rob Fleury, a master's degree student at the University of Canterbury in Christc
 \section{FM Burner Experiments}
 \label{FM_Burner_Description}
 
-A series of gas burner experiments was conducted by Zeng and Wang at FM Global in which the co-flow air stream was gradually diluted with nitrogen until flame extinction was achieved~\cite{Zeng:26ICDERS}. Numerical simulations were subsequently performed by Ren~et~al.~\cite{Ren:CS2018}. In the experiments, a 15.2~cm round steel burner was placed near the floor of a 1.22~m by 1.22~m by 1.83~m tall compartment. Four fuels were used: ethylene (C$_2$H$_4$), methane (CH$_4$), propane (C$_3$H$_8$), and propylene (C$_3$H$_6$). The heat release rate in each experiment was 10~kW with a 1~kW ring of pilot burners to stabilize the flame. At the start of each experiment, air was pumped through the floor at a rate sufficient to supply the fire with approximately 10 times the stoichiometric requirement. Subsequently, nitrogen was slowly added to the air stream until the fire was extinguished.
+A series of gas burner experiments was conducted by Zeng and Wang at FM Global in which the co-flow air stream was gradually diluted with nitrogen until flame extinction was achieved~\cite{Zeng:26ICDERS}. Numerical simulations were subsequently performed by Ren~et~al.~\cite{Ren:CS2018}. In the experiments, a cylindrical, water-cooled steel burner (15.2~cm O.D., 13.7~cm I.D.) was placed near the floor of a 1.22~m by 1.22~m by 1.83~m tall compartment. Four fuels were used: ethylene (C$_2$H$_4$), methane (CH$_4$), propane (C$_3$H$_8$), and propylene (C$_3$H$_6$). The heat release rate in each experiment was 10~kW with a 1~kW ring of pilot burners to stabilize the flame. At the start of each experiment, air was pumped through the floor at a rate sufficient to supply the fire with approximately 10 times the stoichiometric requirement. Subsequently, nitrogen was slowly added to the air stream until the fire was extinguished.
 
-In the same enclosure and using the same burner, Ren et. al~\cite{Ren:IAFSS2020} made high-frequency mean and rms temperature measurements along six radial profiles above a 15~kW ethylene fire. Soot measurements were made at the same locations. The co-flow air stream at the floor was set to 20.9~\%, 16.8~\%, and 15.2~\% oxygen volume fraction.
+In the same enclosure and using the same burner, Ren et. al~\cite{Ren:IAFSS2020} made high-frequency mean and rms temperature measurements along six radial profiles above a 15~kW ethylene fire. Soot measurements were made at similar locations. The co-flow air stream at the floor was set to 20.9~\%, 16.8~\%, and 15.2~\% oxygen volume fraction. Additional experiments were performed at 19~\%, 17~\%, and 15~\% oxygen in which global radiation measurements were made, including total radiative fraction and the vertical distribution of radiative emission.
 
 \subsubsection{Modeling Notes}
 
-The FDS simulations of these experiments are run for 65~s, in which time the oxygen concentration in the co-flow stream is ramped down linearly from 21~\% to 8~\%. The volume flow of the co-flow stream has been increased tenfold compared to the experiments to prevent a downwash of ambient air into the sealed compartment.
+The FDS simulations of the 10~kW ethylene, methane, propane and propylene fires are run for 65~s, in which time the oxygen concentration in the co-flow stream is ramped down linearly from 21~\% to 8~\%. The volume flow of the co-flow stream has been increased tenfold compared to the experiments to prevent a downwash of ambient air into the sealed compartment. The 15~kW ethylene fire simulations at the various fixed oxygen levels are performed for 20~s. For these simulations, the oxygen volume fraction is specified directly, as is the co-flow stream.
 
-The ethylene fire simulations at the three oxygen levels are performed for 20~s.
+The combustion and extinction are modeled using a two-step reaction scheme. In the first step, fuel is converted to CO, soot, and water vapor, and in the second step, the CO and soot are oxidized to form CO$_2$. Both reactions are fast, but the oxidation step follows the first reaction in serial. That is, in a given time step, all available oxygen first converts fuel to CO and Soot, assumed to be C$_{0.9}$H$_{0.1}$. Any leftover oxygen is then used to oxidize existing CO and Soot. There are two assumptions. First, it is assumed that 2/3 of the carbon in the fuel molecule is converted to CO, and 1/3 to Soot in the first reaction step. Second, the post-flame yields of Soot and CO are set to 0.043 and 0.013, respectively, based on Tewarson's measurements reported in the SFPE Handbook~\cite{SFPE:Tewarson}.
 
-The combustion scheme employed is very similar as that used for the UMD Line Burner experiments~\ref{UMD_Line_Burner_Description}.
+Under the assumption that Air contains 383~ppm CO$_2$ and water vapor corresponding to 40~\% humidity, the full two-step reaction scheme for ethylene is written in terms of ``lumped'' species as follows:
+\begin{eqnarray}
+\lefteqn{ \underbrace{\mathrm{ (C_2H_4) }}_\text{Fuel} \; + \;
+7.96 \; \underbrace{ \mathrm{\left( 0.208 \, O_2 + 0.783 \; N_2 + 0.0004 \, CO_2 + 0.009 \, H_2O \right)}}_\text{Air} \longrightarrow } \quad \quad \quad \quad \quad \quad \quad \nonumber \\
+& & 10.34 \, \underbrace{\mathrm{(0.130 \; CO +  0.197 \; H_2O + 0.071 \; Soot +  0.602\, N_2 + 0.0003 \, CO_2)}}_\text{Products 1}
+\end{eqnarray}
+\be
+(\text{Products 1}) + 0.58 \; (\text{Air}) \longrightarrow  1.45 \, \underbrace{\mathrm{(0.0009 \, CO + 0.0073 \, Soot + 0.126 \, CO_2 +  0.141 \; H_2O  + 0.725 \; N_2)}}_\text{Products 2}
+\ee
+For each of the four fuels simulated, it has been assumed that 2/3 of the carbon in the fuel molecule is converted to CO in the first step. However, there are only detailed measurements of radiative emission and soot volume fraction for ethylene. Thus, it is not clear how the carbon is distributed between the soot and CO in the early stages. For lighter sooting fuels like methane, the fraction of carbon allocated to CO approaches unity.
+
+The radiative fraction has been predicted rather than specified in all simulations.
 
 
 
@@ -1569,6 +1584,73 @@ The PRISME LEAK series consisted of experiments where smoke and heat flowed thro
 
 A turbulent buoyant diffusion flame is established on a diffuser burner with an exit diameter of 7.1 cm. The diverging angle of the burner is 7$^\circ$ such that the gaseous fuel (methane) is decelerated and forms a uniform velocity distribution at the burner exit \cite{Xin:CF2005}. The methane (CH4) mass flow rate (84.3 mg/s) The buoyant diffusion flame burns in a quiescent atmospheric pressure environment. The flame is surrounded by a screened enclosure to minimize flame disturbance. The Froude number of the flame is 0.109 and matches that of a 7.1 cm diameter liquid toluene pool fire \cite{Xin:CF2005,Zhou:CS1998}. The total heat release rate of the methane flame is 4.2 kW under the assumption of complete combustion, and the visible flame height is approximately 36 cm \cite{Xin:CF2005}. Measured and computed vertical and horizontal velocity, mixture fraction, and temperature values for this flame have been reported by Xin et al.~\cite{Xin:CF2005,Xin:PhD2002} and Zhou et al.~\cite{Zhou:CS1998,Zhou:PurduePhD1999}. The mean temperatures have been inferred from the measured species concentrations \cite{Xin:CF2005} by assuming an adiabatic flame. The interdependencies between species concentrations, temperature and specific heat have been ignored for determining the mean temperature.
 
+\section{Ranz Marshall Droplet Experiments}
+\label{Ranz_Marshall_Description}
+
+In 1952 Ranz and Marshall performed a set of droplet evaporation experiments that ultimately led to the development of the Ranz-Marshall Nusselt and Schmidt number correlations for droplet heat and mass transfer~\cite{Ranz}. The experiments documented in Figure 8 and Tables 1 to 4 in the paper have been modeled with FDS. For the experiment in Figure 8 of the Ranz and Marshall paper a 1043~$\mu$m water droplet was suspended in still dry air at an ambient temperature and pressure of 24.9$^\circ$C and 98792 Pa. The droplet diameter was measured over time. For the experiments in Tables 1 to 4 in the paper, droplets were suspended in a dry air stream. Experimental parameters included the type of fluid (water or benzene), the initial drop diameter, the ambient temperature, and the velocity of the air stream. The evaporation rate in the FDS simulations was determined by allowing the drop temperature to reach equilibrium and then using the time it took the drop to decrease in size to 350~$\mu$m (the minimum reported droplet size in Figure 8 of the paper). The table below summarizes the experiments.
+
+\begin{table}[h]
+	\caption{Summary of Ranz and Marshall droplet evaporation experiments.}
+	\begin{center}
+		\begin{tabular}{|c|c|c|c|c|c|c|}
+			\hline
+			Table   & Test   & Fluid  &  Diameter  &  Air Temperature & Pressure &  Velocity  \\
+			No.     & No.    &        & ($\mu$m)   &  ($^{\circ}$C)   &  (Pa)    &  (m/s)     \\ \hline \hline
+1 & 1 & Water & 954 & 19.9 & 99059 & 2.46 \\hline
+1 & 2 & Water & 954 & 24.6 & 98659 & 2.1 \\hline
+1 & 3 & Water & 954 & 24.9 & 98659 & 1.723 \\hline
+1 & 4 & Water & 954 & 25.3 & 98659 & 1.532 \\hline
+1 & 5 & Water & 954 & 25.4 & 98659 & 1.197 \\hline
+1 & 6 & Water & 954 & 24.3 & 98392 & 0.952 \\hline
+1 & 7 & Water & 954 & 24.4 & 98392 & 0.762 \\hline
+1 & 8 & Water & 954 & 24.5 & 98392 & 0.571 \\hline
+1 & 9 & Water & 954 & 24.5 & 98392 & 0.571 \\hline
+1 & 10 & Water & 954 & 24.6 & 98392 & 0.285 \\hline
+1 & 11 & Water & 954 & 24.7 & 98392 & 0.1513 \\hline
+1 & 12 & Water & 954 & 24.8 & 98392 & 0.1718 \\hline
+1 & 13 & Water & 954 & 24.9 & 98392 & 0.0841 \\hline
+1 & 14 & Water & 954 & 25.0 & 98392 & 0.0337 \\hline
+1 & 15 & Water & 954 & 23.2 & 98392 & 2.86 \\hline
+1 & 16 & Water & 954 & 23.6 & 99459 & 2.67 \\hline
+1 & 17 & Water & 954 & 23.7 & 99459 & 2.28 \\hline
+1 & 18 & Water & 954 & 24.0 & 99459 & 3.06 \\hline
+1 & 19 & Water & 954 & 24.9 & 98792 & 0 \\hline
+2 & 1 & Water & 950 & 90.0 & 98792 & 2.3 \\hline
+2 & 2 & Water & 950 & 77.5 & 98792 & 1.1 \\hline
+2 & 3 & Water & 950 & 78.7 & 98792 & 1.1 \\hline
+2 & 4 & Water & 950 & 78.7 & 98792 & 1.1 \\hline
+2 & 5 & Water & 950 & 84.0 & 98792 & 1.83 \\hline
+2 & 6 & Water & 950 & 82.5 & 98792 & 1.14 \\hline
+2 & 7 & Water & 950 & 83.0 & 98792 & 1.14 \\hline
+2 & 8 & Water & 950 & 66.4 & 98792 & 0.55 \\hline
+2 & 9 & Water & 950 & 71.4 & 98792 & 0.176 \\hline
+3 & 1 & Water & 850 & 115.0 & 98792 & 1.84 \\hline
+3 & 2 & Water & 710 & 115.0 & 98792 & 1.84 \\hline
+3 & 3 & Water & 560 & 85.0 & 98792 & 0.188 \\hline
+3 & 4 & Water & 460 & 85.0 & 98792 & 0.188 \\hline
+3 & 5 & Water & 960 & 221.0 & 98792 & 1.84 \\hline
+3 & 6 & Water & 580 & 221.0 & 98792 & 1.84 \\hline
+3 & 7 & Water & 880 & 193.0 & 98792 & 0.77 \\hline
+3 & 8 & Water & 600 & 193.0 & 98792 & 0.77 \\hline
+3 & 9 & Water & 1010 & 125.0 & 98792 & 0.21 \\hline
+4 & 1 & Benzene & 1100 & 24.4 & 97592 & 0.051 \\hline
+4 & 2 & Benzene & 1100 & 26.4 & 97592 & 0.153 \\hline
+4 & 3 & Benzene & 1100 & 27.1 & 98125 & 0.289 \\hline
+4 & 4 & Benzene & 1100 & 17.9 & 98525 & 0.748 \\hline
+4 & 5 & Benzene & 1100 & 17.5 & 98525 & 1.124 \\hline
+4 & 6 & Benzene & 1100 & 17.7 & 97725 & 1.5 \\hline
+4 & 7 & Benzene & 1100 & 20.7 & 97725 & 0.188 \\hline
+4 & 8 & Benzene & 1100 & 20.4 & 97725 & 0.283 \\hline
+4 & 9 & Benzene & 1100 & 19.9 & 97725 & 0.755 \\hline
+4 & 10 & Benzene & 1100 & 20.0 & 97725 & 1.13 \\hline
+4 & 11 & Benzene & 1100 & 20.2 & 97725 & 1.516 \\hline
+4 & 12 & Benzene & 1100 & 20.2 & 97725 & 1.9 \\hline
+4 & 13 & Benzene & 1100 & 20.4 & 97725 & 2.88 \\hline
+		\end{tabular}
+	\end{center}
+	\label{Ranz_Marshall_Summary}
+\end{table}
+
 \section{Restivo Compartment Air Flow Experiment}
 \label{Restivo_Description}
 
@@ -1615,7 +1697,7 @@ The condensation simulations included a 4~m portion of duct upstream to allow fo
 \section{Sippola Aerosol Deposition Experiments}
 \label{Sippola_Aerosol_Deposition_Description}
 
-Mark Sippola, a doctoral student at the University of California, Berkeley, measured aerosol deposition velocities for various sizes of monodisperse fluorescent particles and various air velocities in a duct \cite{Sippola:2002,Sippola:2010}. For the experiments considered here, the straight steel duct with smooth walls was square with dimensions of 15~cm by 15~cm. The particle diameters were 1~$\mu$m, 3~$\mu$m, 5~$\mu$m, 9~$\mu$m, and 16~$\mu$m. The air velocities in the duct were 2.2~m/s, 5.3~m/s, and 9.0~m/s. A total of twelve panels (20~cm by 10~cm) were cut from the duct section to measure the amount of particles deposited to the duct surfaces; four panels each from the duct ceiling, wall, and floor surfaces. Fluorescent measurement techniques and aerosol concentration measurements were used to calculate the deposition velocities of the particles to duct surfaces (ceiling, wall, and floor) at two straight duct sections where the turbulent flow profile was fully developed. The experiments are summarized in Table~\ref{Sippola_Aerosol_Deposition_Summary}.
+Mark Sippola, a doctoral student at the University of California, Berkeley, measured aerosol deposition velocities for various sizes of monodisperse fluorescent particles and various air velocities in a duct \cite{Sippola:2002,Sippola:2010}. The experimental facility consisted of a duct loop with a section for injecting fluorescent aerosol particles. The loop contained four measurement sections with two sections located after a long segment of straight duct such that fully-developed flow profiles existed. The experiments considered here include tests with measurements in the fully-developed flow test sections. Tests included 16 test for straight smooth steel duct and 15 tests in a straight duct lined with insulation. Based upon pressure drop measurements made in the duct, the roughness of the insulated duct was estimated as 1.5~mm. Both ducts had dimensions of 15~cm by 15~cm. The particle diameters were nominally 1~$\mu$m, 3~$\mu$m, 5~$\mu$m, 9~$\mu$m, and 16~$\mu$m. The air velocities in the duct were nominally 2.2~m/s, 5.3~m/s, and 9.0~m/s. In each test section, a total of twelve panels (20~cm by 10~cm) were cut from the duct section to measure the amount of particles deposited to the duct surfaces; four panels each from the duct ceiling, wall, and floor surfaces. Fluorescent measurement techniques and aerosol concentration measurements were used to calculate the deposition velocities of the particles to duct surfaces (ceiling, wall, and floor) in each of the two straight duct sections where the turbulent flow profile was fully developed. The experiments are summarized in Table~\ref{Sippola_Aerosol_Deposition_Summary}.
 
 \begin{table}[h]
 \caption{Summary of Sippola aerosol deposition experiments selected for model validation.}
@@ -1640,6 +1722,21 @@ No.       &  (m/s)            &  ($\mu$m)                   &  (kg/m$^3$)       
 14        &  8.8              &  5.4                        &  1210                         \\ \hline
 15        &  9.2              &  8.7                        &  1030                         \\ \hline
 16        &  9.1              &  15                         &  950                          \\ \hline
+17        &  2.2              &  1.0                        &  1350                         \\ \hline
+18        &  2.2              &  3.0                        &  1170                         \\ \hline
+19        &  2.2              &  5.3                        &  1190                         \\ \hline
+20        &  2.2              &  8.4                        &  1090                         \\ \hline
+21        &  2.2              &  13                         &  960                          \\ \hline
+22        &  5.3              &  1.0                        &  1350                         \\ \hline
+23        &  5.2              &  2.9                        &  1170                         \\ \hline
+24        &  5.2              &  4.9                        &  1190                         \\ \hline
+25        &  5.3              &  8.2                        &  1090                         \\ \hline
+26        &  5.3              &  13                         &  960                          \\ \hline
+27        &  8.9              &  1.0                        &  1350                         \\ \hline
+28        &  8.7              &  2.8                        &  1170                         \\ \hline
+29        &  8.8              &  5.0                        &  1190                         \\ \hline
+30        &  8.9              &  8.4                        &  1090                         \\ \hline
+31        &  8.9              &  13                         &  960                          \\ \hline
 \end{tabular}
 \end{center}
 \label{Sippola_Aerosol_Deposition_Summary}

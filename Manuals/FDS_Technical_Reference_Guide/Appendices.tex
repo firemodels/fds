@@ -1687,10 +1687,10 @@ r_{c,i}^I = \left\{
                    \sqrt{ ( r_i^3 - r_{i-1}^3)/(3 \, \delta r_i) } & I=2 \quad \hbox{(spherical)}
 \end{array} \right.
 \end{equation}
-The temperatures at the front and back surface of a Cartesian slab (or center of a cylinder or sphere) are determined from the boundary conditions. In any of the coordinate systems, the boundary condition at the front surface is
+The temperatures at the front and back surface of a Cartesian slab (or center of a cylinder or sphere) are determined from the boundary conditions. In any of the coordinate systems, the boundary condition at the front surface, using the Crank-Nicholson scheme, is
 \begin{equation}
 \label{bc_front}
- -k_{s,1} \frac{T_{s,1}^{n+1}-T_{s,0}^{n+1}}{\delta r_{\frac{1}{2}}}
+ -k_{s,1} \frac{T_{s,1}^{n+1}-T_{s,0}^{n+1}+T_{s,1}^{n}-T_{s,0}^{n}}{2 \delta r_{\frac{1}{2}}}
   =  \dot{q}_{c}''+\dot{q}_{r}''
 \end{equation}
 Note that $T_{s,0}$ does not represent the gas temperature, but rather it is used to establish the temperature gradient at the surface. Note also that the thermal conductivity is that of the first node. The convective heat flux is
@@ -1713,7 +1713,7 @@ which leads to approximation for the radiative flux
 Now the front boundary condition is
 \begin{equation}
 \label{bc_front_2}
-  -k_{s,1} \frac{T_{s,1}^{n+1}-T_{s,0}^{n+1}}{\delta r_{\frac{1}{2}}}
+  -k_{s,1} \frac{T_{s,1}^{n+1}-T_{s,0}^{n+1} + T_{s,1}^{n}-T_{s,0}^{n}}{2 \delta r_{\frac{1}{2}}}
   \approx h \, \left( T_g - \frac{1}{2} \left( T_{s,\frac{1}{2}}^n+T_{s,\frac{1}{2}}^{n+1} \right) \right) +
   \dot{q}_{r, in}'' - 4 \, \epsilon\sigma \, \left(T_{s,\frac{1}{2}}^n \right)^3 \, T_{s,\frac{1}{2}}^{n+1} + 3 \, \epsilon\sigma \, \left( T_{s,\frac{1}{2}}^n \right)^4
 \end{equation}
@@ -1725,8 +1725,8 @@ The wall surface temperature is defined:
 and therefore the boundary condition becomes
 \begin{equation}
 \label{bc_front_4}
-  -k_{s,1} \frac{T_{s,1}^{n+1}-T_{s,0}^{n+1}}{\delta r_{\frac{1}{2}}} + \left( \frac{h}{2} + 4 \, \epsilon\sigma \, \left( T_{s,\frac{1}{2}}^n \right)^3 \right) \frac{T_{s,1}^{n+1}+T_{s,0}^{n+1}}{2}
-  \approx h\, \left( T_g - \frac{1}{2}T_{s,\frac{1}{2}}^n \right) +
+  -k_{s,1} \frac{T_{s,1}^{n+1}-T_{s,0}^{n+1}}{2 \delta r_{\frac{1}{2}}} + \left( \frac{h}{2} + 4 \, \epsilon\sigma \, \left( T_{s,\frac{1}{2}}^n \right)^3 \right) \frac{T_{s,1}^{n+1}+T_{s,0}^{n+1}}{2}
+  \approx k_{s,1} \frac{T_{s,1}^{n}-T_{s,0}^{n}}{2 \delta r_{\frac{1}{2}}} + h\, \left( T_g - \frac{1}{2}T_{s,\frac{1}{2}}^n \right) +
   \dot{q}_{r, in}'' + 3 \, \epsilon\sigma \, \left( T_{s,\frac{1}{2}}^n \right)^4
 \end{equation}
 
@@ -1734,8 +1734,8 @@ and therefore the boundary condition becomes
 Rearranging terms, the temperature at node 0 becomes:
 \begin{equation}
 \label{T0}
-  T_{s,0}^{n+1} = \underbrace{\frac{\frac{k_{s,1}}{\delta r_{\frac{1}{2}}}- \left(\frac{1}{4}h+2\epsilon \sigma \left(T_{s,\frac{1}{2}}^n\right)^3 \right)}{\frac{k_{s,1}}{\delta r_{\frac{1}{2}}} + \left(\frac{1}{4}h+2\epsilon \sigma \left( T_{s,\frac{1}{2}}^n\right)^3 \right)}}_\textct{RFACF2} T_{s,1}^{n+1} +
- \underbrace{\frac{h \left(T_g-\frac{1}{2}T_{s,\frac{1}{2}}^n\right)+\dot{q}_{r,in}''+3\epsilon \sigma \left( T_{s,\frac{1}{2}}^n\right)^4}{\frac{k_{s,1}}{\delta r_{\frac{1}{2}}}+\left(\frac{1}{4}h+2\epsilon \sigma \left( T_{s,\frac{1}{2}}^n\right)^3 \right)}}_\textct{QDXKF}
+  T_{s,0}^{n+1} = \underbrace{\frac{\frac{k_{s,1}}{2 \delta r_{\frac{1}{2}}}- \left(\frac{1}{4}h+2\epsilon \sigma \left(T_{s,\frac{1}{2}}^n\right)^3 \right)}{\frac{k_{s,1}}{2 \delta r_{\frac{1}{2}}} + \left(\frac{1}{4}h+2\epsilon \sigma \left( T_{s,\frac{1}{2}}^n\right)^3 \right)}}_\textct{RFACF2} T_{s,1}^{n+1} +
+ \underbrace{\frac{\frac{k_{s,1}}{2 \delta r_{\frac{1}{2}}} \left(T_{s,1}^{n}-T_{s,0}^{n}  \right) + h \left(T_g-\frac{1}{2}T_{s,\frac{1}{2}}^n\right)+\dot{q}_{r,in}''+3\epsilon \sigma \left( T_{s,\frac{1}{2}}^n\right)^4}{\frac{k_{s,1}}{2 \delta r_{\frac{1}{2}}}+\left(\frac{1}{4}h+2\epsilon \sigma \left( T_{s,\frac{1}{2}}^n\right)^3 \right)}}_\textct{QDXKF}
 \end{equation}
 Note that \textct{RFACF2} and similar names are used in the actual source code to represent these quantities.
 In case of non-insulated backing in Cartesian geometry, the temperature of virtual node $N+1$ is calculated the same way.

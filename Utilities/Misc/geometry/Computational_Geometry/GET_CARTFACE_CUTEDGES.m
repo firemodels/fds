@@ -4,44 +4,17 @@ function [ierr]=GET_CARTFACE_CUTEDGES(X1AXIS,X2AXIS,X3AXIS,             ...
                                       X3LO_CELL,X3HI_CELL,INDX1,X1PLN)
 
 global IAXIS JAXIS KAXIS NOD1 NOD2 IBM_MAX_WSTRIANG_SEG LOW_IND HIGH_IND FCELL 
-global IBM_SOLID IBM_INBOUNDCF IBM_GG IBM_IDCE IBM_FGSC IBM_VGSC                                
+global IBM_INBOUNDCF IBM_GG IBM_IDCE                             
 global MESHES BODINT_PLANE
 global GEOMEPS MAX_DIM
 global X2NOC X3NOC
 global X1FACE X2FACE DX2FACE X3FACE DX3FACE
 global FACERT CELLRT
-%global X1LO_CELL X1HI_CELL
 
 ierr=1;
 
-% Note cells in CELLRT due to FCERT intersections in GET_BODINT_PLANE:
-for KK2=X3LO_CELL:X3HI_CELL
-    for JJ2=X2LO_CELL:X2HI_CELL 
-       if(~FACERT(JJ2,KK2)); continue; end
-       
-       % Low cell indexes:
-       INDXI(IAXIS:KAXIS) = [ INDX1(X1AXIS), JJ2, KK2 ]; % Local x1,x2,x3
-       INDIF=INDXI(XIAXIS);
-       INDJF=INDXI(XJAXIS);
-       INDKF=INDXI(XKAXIS);
-       
-       CELLRT(INDIF,INDJF,INDKF) = true;
-       
-       % High cell indexes:
-       INDXI(IAXIS:KAXIS) = [ INDX1(X1AXIS)+1, JJ2, KK2 ]; % Local x1,x2,x3
-       INDIF=INDXI(XIAXIS);
-       INDJF=INDXI(XJAXIS);
-       INDKF=INDXI(XKAXIS);
-       
-       CELLRT(INDIF,INDJF,INDKF) = true;           
-
-    end
-end
-
-
 % Segment by segment define the INBOUNDARY MESHES(NM).IBM_CUT_EDGES between crossings
-% and individualize the Cartesian face they belong to.
-% NCUTEDGEOLD   = MESHES(NM).N_CUTEDGE_MESH + 1
+% and individualize the Cartesian face they belong to.    
 for ISEG=1:BODINT_PLANE.NSEGS
 
    SEG(NOD1:NOD2)    = BODINT_PLANE.SEGS(NOD1:NOD2,ISEG);
@@ -147,11 +120,9 @@ for ISEG=1:BODINT_PLANE.NSEGS
                % If segment is inside the solid region mark cells surrounding face
                % to be treated in special manner (only if they happen to be type CUTCFE), 
                % then drop segment.
-               %if(FACERT(JJ2,KK2) == 1)
-                   XY(IAXIS:JAXIS) = [X2_1 X3_1] + SVAR12*STANI(IAXIS:JAXIS);
-                   [IS_SOLID] = GET_IS_SOLID_PT(X1AXIS,X2AXIS,X3AXIS,XY,SNORI,X1PLN);
-                   if (IS_SOLID); continue; end
-               %end   
+               XY(IAXIS:JAXIS) = [X2_1 X3_1] + SVAR12*STANI(IAXIS:JAXIS);
+               [IS_SOLID] = GET_IS_SOLID_PT(BODINT_PLANE,X1AXIS,X2AXIS,X3AXIS,XY,SNORI,X1PLN);
+               if (IS_SOLID); continue; end
                
                % Face indexes:
                INDXI(IAXIS:KAXIS) = [ INDX1(X1AXIS), JJ2, KK2 ]; % Local x1,x2,x3
@@ -171,6 +142,7 @@ for ISEG=1:BODINT_PLANE.NSEGS
                   MESHES(NM).CUT_EDGE(CEI).NVERT   = 0;
                   %CALL NEW_EDGE_ALLOC(NM,CEI,IBM_ALLOC_DVERT,IBM_ALLOC_DELEM)
                   MESHES(NM).CUT_EDGE(CEI).NEDGE   = 0;
+                  MESHES(NM).CUT_EDGE(CEI).NEDGE1  = 0;
                   MESHES(NM).CUT_EDGE(CEI).IJK(1:MAX_DIM+2) = [ INDIF, INDJF, INDKF, X1AXIS, CETYPE ];
                   MESHES(NM).CUT_EDGE(CEI).STATUS  = IBM_INBOUNDCF;
                end
@@ -216,7 +188,19 @@ for ISEG=1:BODINT_PLANE.NSEGS
                                BODINT_PLANE.INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,ISEG);
                MESHES(NM).CUT_EDGE(CEI).NVERT = NVERT;
                MESHES(NM).CUT_EDGE(CEI).NEDGE = NEDGE+1;
-
+               MESHES(NM).CUT_EDGE(CEI).NEDGE1= MESHES(NM).CUT_EDGE(CEI).NEDGE;
+               
+               % Test for Repeated edge -> If so note FACERT
+               for IDG=1:NEDGE
+                   if( ( MESHES(NM).CUT_EDGE(CEI).CEELEM(NOD1,IDG) == INOD1   && ...
+                         MESHES(NM).CUT_EDGE(CEI).CEELEM(NOD2,IDG) == INOD2 ) || ...
+                       ( MESHES(NM).CUT_EDGE(CEI).CEELEM(NOD1,IDG) == INOD2   && ...
+                         MESHES(NM).CUT_EDGE(CEI).CEELEM(NOD2,IDG) == INOD1 ) )
+                       FACERT(JJ2,KK2) = 1;
+                       break
+                   end
+               end
+      
             end
          end
          continue % Skips rest of iseg loop, for this ISEG.
@@ -292,11 +276,9 @@ for ISEG=1:BODINT_PLANE.NSEGS
                % If segment is inside the solid region mark cells surrounding face
                % to be treated in special manner (only if they happen to be type CUTCFE), 
                % then drop segment.
-               %if(FACERT(JJ2,KK2) == 1)
-                   XY(IAXIS:JAXIS) = [X2_1 X3_1] + SVAR12*STANI(IAXIS:JAXIS);
-                   [IS_SOLID] = GET_IS_SOLID_PT(X1AXIS,X2AXIS,X3AXIS,XY,SNORI,X1PLN);
-                   if (IS_SOLID); continue; end
-               %end
+               XY(IAXIS:JAXIS) = [X2_1 X3_1] + SVAR12*STANI(IAXIS:JAXIS);
+               [IS_SOLID] = GET_IS_SOLID_PT(BODINT_PLANE,X1AXIS,X2AXIS,X3AXIS,XY,SNORI,X1PLN);
+               if (IS_SOLID); continue; end
                
                % Face indexes:
                INDXI(IAXIS:KAXIS) = [ INDX1(X1AXIS), JJ2, KK2 ]; % Local x1,x2,x3
@@ -306,7 +288,7 @@ for ISEG=1:BODINT_PLANE.NSEGS
                               
                % Now the face is, FCVAR (x1axis):
                if (MESHES(NM).FCVAR(INDIF,INDJF,INDKF,IBM_IDCE,X1AXIS) > 0) % There is already
-                                                                                 % an entry in CUT_EDGE.
+                                                                            % an entry in CUT_EDGE.
                   CEI = MESHES(NM).FCVAR(INDIF,INDJF,INDKF,IBM_IDCE,X1AXIS);
                else % We need a new entry in CUT_EDGE
                   CEI      = MESHES(NM).N_CUTEDGE_MESH + 1;
@@ -316,6 +298,7 @@ for ISEG=1:BODINT_PLANE.NSEGS
                   MESHES(NM).CUT_EDGE(CEI).NVERT   = 0;
                   %CALL NEW_EDGE_ALLOC(NM,CEI,IBM_ALLOC_DVERT,IBM_ALLOC_DELEM)
                   MESHES(NM).CUT_EDGE(CEI).NEDGE   = 0;
+                  MESHES(NM).CUT_EDGE(CEI).NEDGE1  = 0;
                   MESHES(NM).CUT_EDGE(CEI).IJK(1:MAX_DIM+2) = [ INDIF, INDJF, INDKF, X1AXIS, CETYPE ];
                   MESHES(NM).CUT_EDGE(CEI).STATUS  = IBM_INBOUNDCF;
                end
@@ -361,7 +344,19 @@ for ISEG=1:BODINT_PLANE.NSEGS
                                BODINT_PLANE.INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,ISEG);
                MESHES(NM).CUT_EDGE(CEI).NVERT = NVERT;
                MESHES(NM).CUT_EDGE(CEI).NEDGE = NEDGE+1;
+               MESHES(NM).CUT_EDGE(CEI).NEDGE1= MESHES(NM).CUT_EDGE(CEI).NEDGE;
 
+               % Test for Repeated edge -> If so note FACERT
+               for IDG=1:NEDGE
+                   if( ( MESHES(NM).CUT_EDGE(CEI).CEELEM(NOD1,IDG) == INOD1   && ...
+                         MESHES(NM).CUT_EDGE(CEI).CEELEM(NOD2,IDG) == INOD2 ) || ...
+                       ( MESHES(NM).CUT_EDGE(CEI).CEELEM(NOD1,IDG) == INOD2   && ...
+                         MESHES(NM).CUT_EDGE(CEI).CEELEM(NOD2,IDG) == INOD1 ) )
+                       FACERT(JJ2,KK2) = 1;
+                       break
+                   end
+               end
+               
             end
          end
          continue % Skips rest of iseg loop, for this ISEG.
@@ -417,22 +412,19 @@ for ISEG=1:BODINT_PLANE.NSEGS
       % If segment is inside the solid region mark cells surrounding face
       % to be treated in special manner (only if they happen to be type CUTCFE),
       % then drop segment.
-      %if(FACERT(JJ2,KK2) == 1)
-      %    disp(['X1AXIS=' num2str(X1AXIS) ', X1PLN=' num2str(X1PLN) ', JJ2 KK2=' num2str([JJ2 KK2])])
-          XY(IAXIS:JAXIS) = [X2_1 X3_1] + SVAR12*STANI(IAXIS:JAXIS);
-          [IS_SOLID] = GET_IS_SOLID_PT(X1AXIS,X2AXIS,X3AXIS,XY,SNORI,X1PLN);
-          if (IS_SOLID); continue; end
-      %end               
+      XY(IAXIS:JAXIS) = [X2_1 X3_1] + SVAR12*STANI(IAXIS:JAXIS);
+      [IS_SOLID] = GET_IS_SOLID_PT(BODINT_PLANE,X1AXIS,X2AXIS,X3AXIS,XY,SNORI,X1PLN);
+      if (IS_SOLID); continue; end
       
       % Face indexes:
       INDXI(IAXIS:KAXIS) = [ INDX1(X1AXIS), JJ2, KK2 ]; % Local x1,x2,x3
       INDIF=INDXI(XIAXIS);
       INDJF=INDXI(XJAXIS);
       INDKF=INDXI(XKAXIS);
-               
+      
       % Now the face is, FCVAR (x1axis):
       if (MESHES(NM).FCVAR(INDIF,INDJF,INDKF,IBM_IDCE,X1AXIS) > 0) % There is already
-                                                                        % an entry in CUT_EDGE.
+                                                                   % an entry in CUT_EDGE.
          CEI = MESHES(NM).FCVAR(INDIF,INDJF,INDKF,IBM_IDCE,X1AXIS);
       else % We need a new entry in CUT_EDGE
          CEI      = MESHES(NM).N_CUTEDGE_MESH + 1;
@@ -442,6 +434,7 @@ for ISEG=1:BODINT_PLANE.NSEGS
          MESHES(NM).CUT_EDGE(CEI).NVERT   = 0;
          %CALL NEW_EDGE_ALLOC(NM,CEI,IBM_ALLOC_DVERT,IBM_ALLOC_DELEM)
          MESHES(NM).CUT_EDGE(CEI).NEDGE   = 0;
+         MESHES(NM).CUT_EDGE(CEI).NEDGE1  = 0;
          MESHES(NM).CUT_EDGE(CEI).IJK(1:MAX_DIM+2) = [ INDIF, INDJF, INDKF, X1AXIS, CETYPE ];
          MESHES(NM).CUT_EDGE(CEI).STATUS  = IBM_INBOUNDCF;
       end
@@ -470,11 +463,44 @@ for ISEG=1:BODINT_PLANE.NSEGS
                       BODINT_PLANE.INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,ISEG);
       MESHES(NM).CUT_EDGE(CEI).NVERT = NVERT;
       MESHES(NM).CUT_EDGE(CEI).NEDGE = NEDGE+1;
-
+      MESHES(NM).CUT_EDGE(CEI).NEDGE1= MESHES(NM).CUT_EDGE(CEI).NEDGE;
+      
+      % Test for Repeated edge -> If so note FACERT
+      for IDG=1:NEDGE
+          if( ( MESHES(NM).CUT_EDGE(CEI).CEELEM(NOD1,IDG) == INOD1   && ...
+                MESHES(NM).CUT_EDGE(CEI).CEELEM(NOD2,IDG) == INOD2 ) || ...
+              ( MESHES(NM).CUT_EDGE(CEI).CEELEM(NOD1,IDG) == INOD2   && ...
+                MESHES(NM).CUT_EDGE(CEI).CEELEM(NOD2,IDG) == INOD1 ) )
+              FACERT(JJ2,KK2) = 1;
+              break
+          end
+      end
    end
 
 end
 
+% Note cells in CELLRT due to FCERT intersections in GET_BODINT_PLANE:
+for KK2=X3LO_CELL:X3HI_CELL
+    for JJ2=X2LO_CELL:X2HI_CELL 
+       if(~FACERT(JJ2,KK2)); continue; end
+       % Low cell indexes:
+       INDXI(IAXIS:KAXIS) = [ INDX1(X1AXIS), JJ2, KK2 ]; % Local x1,x2,x3
+       INDIF=INDXI(XIAXIS);
+       INDJF=INDXI(XJAXIS);
+       INDKF=INDXI(XKAXIS);
+       
+       CELLRT(INDIF,INDJF,INDKF) = true;
+       
+       % High cell indexes:
+       INDXI(IAXIS:KAXIS) = [ INDX1(X1AXIS)+1, JJ2, KK2 ]; % Local x1,x2,x3
+       INDIF=INDXI(XIAXIS);
+       INDJF=INDXI(XJAXIS);
+       INDKF=INDXI(XKAXIS);
+       
+       CELLRT(INDIF,INDJF,INDKF) = true;           
+
+    end
+end
 
 ierr=0;
 

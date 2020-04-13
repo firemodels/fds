@@ -1155,12 +1155,16 @@ This section presents the rate of spread for simulations of crown fires. For a d
 
 This section presents the rate of spread for simulations of two of the CSIRO Grassland Fire experiments. For details of the experiments and simulations, see Section~\ref{CSIRO_Grassland_Fires_Description}. The first experiment, C064, was conducted on a 100~m by 100~m plot; the second, F19, was conducted on a 200~m by 200~m plot. The results of the simulations are shown in Fig.~\ref{CSIRO}. The fire front in the FDS simulations is defined as the location of the maximum gas temperature in a 1~m wide, 1~m tall strip along the centerline of the grass field. The experimental points were determined from aerial photography.
 
-\begin{figure}[ht]
+For each case, three simulations are performed---one using Lagrangian particles to represent the vegetation, one using the Boundary Fuel Model (BFM), and the other using Rothermel-Albini fuel models in a level set fire spread simulation.
+
+\begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/CSIRO_Grassland_Fires/Case_C064} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/CSIRO_Grassland_Fires/Case_F19}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/CSIRO_Grassland_Fires/Case_C064} & \includegraphics[height=2.2in]{SCRIPT_FIGURES/CSIRO_Grassland_Fires/Case_C064_BFM} \\
+\multicolumn{2}{c}{\includegraphics[height=2.2in]{SCRIPT_FIGURES/CSIRO_Grassland_Fires/Case_C064_LS} } \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/CSIRO_Grassland_Fires/Case_F19}  & \includegraphics[height=2.2in]{SCRIPT_FIGURES/CSIRO_Grassland_Fires/Case_F19_BFM} \\
+\multicolumn{2}{c}{\includegraphics[height=2.2in]{SCRIPT_FIGURES/CSIRO_Grassland_Fires/Case_F19_LS} } 
 \end{tabular*}
-\caption[Comparison measured and predicted fire front position for the CSIRO Grassland Fires]{Comparison measured and predicted fire front position for the CSIRO Grassland Fires.}
+\caption[Comparison of the measured and predicted fire front position for the CSIRO Grassland Fires]{Comparison of the measured and predicted fire front position for the CSIRO Grassland Fires using three different methods of fire spread.}
 \label{CSIRO}
 \end{figure}
 

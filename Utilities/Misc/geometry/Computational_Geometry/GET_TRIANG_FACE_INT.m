@@ -15,6 +15,7 @@ X2X3VERT      =zeros(JAXIS,DELTA_VERT);
 XYVERT        =zeros(JAXIS,DELTA_VERT);
 CEELEM        = IBM_UNDEFINED*ones(NOD2,IBM_MAXCEELEM_FACE);
 INDSEG        = IBM_UNDEFINED*ones(IBM_MAX_WSTRIANG_SEG+2,IBM_MAXCEELEM_FACE);
+ISTRIEDGE     = ones(1,IBM_MAXCEELEM_FACE);
 
 if ( CEI ~= 0 )
    NVERT = MESHES(NM).CUT_EDGE(CEI).NVERT;
@@ -31,6 +32,7 @@ if ( CEI ~= 0 )
    CEELEM(NOD1:NOD2,1:NEDGE) = MESHES(NM).CUT_EDGE(CEI).CEELEM(NOD1:NOD2,1:NEDGE);
    INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,1:NEDGE) = ...
    MESHES(NM).CUT_EDGE(CEI).INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,1:NEDGE);
+   MESHES(NM).CUT_EDGE(CEI).NEDGE1=NEDGE;
 end
 
 % Quick discard test:
@@ -338,8 +340,6 @@ for ITRI=1:BODINT_PLANE.NTRIS
                        (LOCTRI == INDSEG(3,ISEG)) )
                      INLIST = true;
                      break
-                  else
-                     disp('Error in GET_TRIANG_FACE_INT: Triangle not on 2 WS triang list INDSEG.')
                   end
             end
          end
@@ -544,10 +544,6 @@ for IWSSEG=1:BODINT_PLANE.NSEGS
 end
 
 % Populate XYVERT points array:
-% if (SIZE_X2X3VERT > SIZE(XYVERT,DIM=2))
-%    WRITE(LU_ERR,*) 'Error in GET_TRIANG_FACE_INT : SIZE_X2X3VERT in greater than SIZE(XYVERT,DIM=2).'
-%    CALL SHUTDOWN('Shutting down..')
-% end
 XYVERT= X2X3VERT;
 NVERT = NINTP;
 if (NVERT > 0); INB_FLG = true; end

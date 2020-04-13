@@ -644,7 +644,7 @@ DO NM=1,NMESHES
             WRITE(LU_RADF(N,NM),'(3F7.3)') DLX(NN)/NRM,DLY(NN)/NRM,DLZ(NN)/NRM
          ENDDO
       ELSE
-         OPEN(LU_RADF(N,NM),FILE=FN_RADF(N,NM),FORM='FORMATTED',STATUS='OLD')
+         OPEN(LU_RADF(N,NM),FILE=FN_RADF(N,NM),FORM='FORMATTED',STATUS='OLD',POSITION='APPEND')
       ENDIF
    ENDDO
 
@@ -704,7 +704,7 @@ REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_GET
 INTEGER :: IID,JJD,KKD,IP
 LOGICAL :: UPDATE_INTENSITY, UPDATE_QRW2
 REAL(EB), POINTER, DIMENSION(:,:,:) :: IL,UIIOLD,KAPPA_PART,KFST4_GAS,KFST4_PART,EXTCOE,SCAEFF,SCAEFF_G,IL_UP
-REAL(EB), POINTER, DIMENSION(:)     :: OUTRAD_W,INRAD_W,OUTRAD_F,INRAD_F
+REAL(EB), POINTER, DIMENSION(:)     :: OUTRAD_W,INRAD_W,OUTRAD_F,INRAD_F,IL_F
 INTEGER, INTENT(IN) :: NM,RAD_ITER
 TYPE (OMESH_TYPE), POINTER :: M2
 TYPE(SURFACE_TYPE), POINTER :: SF
@@ -712,11 +712,16 @@ TYPE(VENTS_TYPE), POINTER :: VT
 TYPE(RAD_FILE_TYPE), POINTER :: RF
 TYPE(LAGRANGIAN_PARTICLE_CLASS_TYPE), POINTER :: LPC
 TYPE(LAGRANGIAN_PARTICLE_TYPE), POINTER :: LP
+TYPE(INITIALIZATION_TYPE), POINTER :: IN
 CHARACTER(20) :: FORMT
 
 !Variables added for the WSGG model
 REAL(EB) :: X_H2O, X_CO2, MOL_RAT,PARTIAL_P,R_MIXTURE,TOTAL_P
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: Z_ARRAY
+
+REAL(EB) :: IL1
+INTEGER  :: ICC,ILO,IHI,JLO,JHI,KLO,KHI,X1
+
 ALLOCATE(Z_ARRAY(N_TRACKED_SPECIES))
 
 ALLOCATE( IJK_SLICE(3, IBAR*KBAR) )
@@ -734,8 +739,8 @@ OUTRAD_W   => WALL_WORK1
 INRAD_W    => WALL_WORK2
 IF (CC_IBM) THEN
    OUTRAD_F => FACE_WORK1
-   INRAD_F  => FACE_WORK2
-   INRAD_F  = 0._EB
+   INRAD_F  => FACE_WORK2; INRAD_F  = 0._EB
+   IL_F     => FACE_WORK3
 ENDIF
 
 ! Ratio of solid angle, used in scattering
@@ -909,13 +914,35 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                KFST4_GAS(I,J,K) = BBF*KAPPA_GAS(I,J,K)*FOUR_SIGMA*TMP(I,J,K)**4._EB
                IF (CHI_R(I,J,K)*Q(I,J,K)>QR_CLIP) THEN ! Precomputation of quantities for the RTE source term correction
                      VOL = R(I)*DX(I)*DY(J)*DZ(K)
-                     RAD_Q_SUM = RAD_Q_SUM + (BBF*CHI_R(I,J,K)*Q(I,J,K) + &
-                                 KAPPA_GAS(I,J,K)*UIID(I,J,K,IBND))*VOL
+                     RAD_Q_SUM = RAD_Q_SUM + (BBF*CHI_R(I,J,K)*Q(I,J,K) + KAPPA_GAS(I,J,K)*UIID(I,J,K,IBND))*VOL
                      KFST4_SUM = KFST4_SUM + KFST4_GAS(I,J,K)*VOL
                ENDIF
             ENDDO
          ENDDO
       ENDDO
+
+      INIT_LOOPM1: DO N=1,N_INIT
+         IN => INITIALIZATION(N)
+         IF (.NOT. IN%RTE_CORRECTION) CYCLE INIT_LOOPM1
+         IF (IN%X1 > XC(IBP1) .OR. IN%X2 < XC(0) .OR. &
+             IN%Y1 > YC(JBP1) .OR. IN%Y2 < YC(0) .OR. &
+             IN%Z1 > ZC(KBP1) .OR. IN%Z2 < ZC(0)) CYCLE INIT_LOOPM1
+         DO K=0,KBP1
+            DO J=0,JBP1
+               DO I=0,IBP1
+                  IF (XC(I) > IN%X1 .AND. XC(I) < IN%X2 .AND. &
+                      YC(J) > IN%Y1 .AND. YC(J) < IN%Y2 .AND. &
+                      ZC(K) > IN%Z1 .AND. ZC(K) < IN%Z2) THEN
+                      IF (CHI_R(I,J,K)*Q(I,J,K)>QR_CLIP) THEN
+                         VOL = R(I)*DX(I)*DY(J)*DZ(K)
+                         RAD_Q_SUM = RAD_Q_SUM - (BBF*CHI_R(I,J,K)*Q(I,J,K) + KAPPA_GAS(I,J,K)*UIID(I,J,K,IBND))*VOL
+                         KFST4_SUM = KFST4_SUM - KFST4_GAS(I,J,K)*VOL
+                      ENDIF
+                  ENDIF
+               ENDDO
+            ENDDO
+         ENDDO
+      ENDDO INIT_LOOPM1
 
       !Correct the source term in the RTE based on user-specified RADIATIVE_FRACTION on REAC
 
@@ -923,12 +950,29 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
          DO J=1,JBAR
             DO I=1,IBAR
                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-               IF (CHI_R(I,J,K)*Q(I,J,K)>QR_CLIP) THEN
-                  KFST4_GAS(I,J,K) = KFST4_GAS(I,J,K)*RTE_SOURCE_CORRECTION_FACTOR
-               ENDIF
+               IF (CHI_R(I,J,K)*Q(I,J,K)>QR_CLIP) KFST4_GAS(I,J,K) = KFST4_GAS(I,J,K)*RTE_SOURCE_CORRECTION_FACTOR
             ENDDO
          ENDDO
       ENDDO
+
+      INIT_LOOP1: DO N=1,N_INIT
+         IN => INITIALIZATION(N)
+         IF (IN%RTE_CORRECTION) CYCLE INIT_LOOP1
+         IF (IN%X1 > XC(IBP1) .OR. IN%X2 < XC(0) .OR. &
+             IN%Y1 > YC(JBP1) .OR. IN%Y2 < YC(0) .OR. &
+             IN%Z1 > ZC(KBP1) .OR. IN%Z2 < ZC(0)) CYCLE INIT_LOOP1
+         DO K=0,KBP1
+            DO J=0,JBP1
+               DO I=0,IBP1
+                  IF (XC(I) > IN%X1 .AND. XC(I) < IN%X2 .AND. &
+                      YC(J) > IN%Y1 .AND. YC(J) < IN%Y2 .AND. &
+                      ZC(K) > IN%Z1 .AND. ZC(K) < IN%Z2) THEN
+                      IF (CHI_R(I,J,K)*Q(I,J,K)>QR_CLIP) KFST4_GAS(I,J,K) = CHI_R(I,J,K)*Q(I,J,K)+KAPPA_GAS(I,J,K)*UII(I,J,K)
+                  ENDIF
+               ENDDO
+            ENDDO
+         ENDDO
+      ENDDO INIT_LOOP1
 
    ELSE WIDE_BAND_MODEL_IF
 
@@ -952,6 +996,29 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
             ENDDO
          ENDDO
 
+         INIT_LOOP2: DO N=1,N_INIT
+            IN => INITIALIZATION(N)
+            IF (IN%RTE_CORRECTION) CYCLE INIT_LOOP2
+            IF (IN%X1 > XC(IBP1) .OR. IN%X2 < XC(0) .OR. &
+                IN%Y1 > YC(JBP1) .OR. IN%Y2 < YC(0) .OR. &
+                IN%Z1 > ZC(KBP1) .OR. IN%Z2 < ZC(0)) CYCLE INIT_LOOP2
+            DO K=0,KBP1
+               DO J=0,JBP1
+                  DO I=0,IBP1
+                     IF (XC(I) > IN%X1 .AND. XC(I) < IN%X2 .AND. &
+                         YC(J) > IN%Y1 .AND. YC(J) < IN%Y2 .AND. &
+                         ZC(K) > IN%Z1 .AND. ZC(K) < IN%Z2) THEN
+                        IF (CHI_R(I,J,K)*Q(I,J,K)>QR_CLIP) THEN
+                           VOL = R(I)*DX(I)*DY(J)*DZ(K)
+                           RAD_Q_SUM = RAD_Q_SUM - (CHI_R(I,J,K)*Q(I,J,K)+KAPPA_GAS(I,J,K)*UII(I,J,K))*VOL
+                           KFST4_SUM = KFST4_SUM - KFST4_GAS(I,J,K)*VOL
+                        ENDIF
+                     ENDIF
+                  ENDDO
+               ENDDO
+            ENDDO
+         ENDDO INIT_LOOP2
+
          ! Correct the source term in the RTE based on user-specified RADIATIVE_FRACTION on REAC
 
          DO K=1,KBAR
@@ -962,6 +1029,25 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                ENDDO
             ENDDO
          ENDDO
+
+         INIT_LOOP3: DO N=1,N_INIT
+            IN => INITIALIZATION(N)
+            IF (IN%RTE_CORRECTION) CYCLE INIT_LOOP3
+            IF (IN%X1 > XC(IBP1) .OR. IN%X2 < XC(0) .OR. &
+                IN%Y1 > YC(JBP1) .OR. IN%Y2 < YC(0) .OR. &
+                IN%Z1 > ZC(KBP1) .OR. IN%Z2 < ZC(0)) CYCLE INIT_LOOP3
+            DO K=0,KBP1
+               DO J=0,JBP1
+                  DO I=0,IBP1
+                     IF (XC(I) > IN%X1 .AND. XC(I) < IN%X2 .AND. &
+                         YC(J) > IN%Y1 .AND. YC(J) < IN%Y2 .AND. &
+                         ZC(K) > IN%Z1 .AND. ZC(K) < IN%Z2) THEN
+                         IF (CHI_R(I,J,K)*Q(I,J,K)>QR_CLIP) KFST4_GAS(I,J,K) = CHI_R(I,J,K)*Q(I,J,K)+KAPPA_GAS(I,J,K)*UII(I,J,K)
+                     ENDIF
+                  ENDDO
+               ENDDO
+            ENDDO
+         ENDDO INIT_LOOP3
 
       ELSE RTE_SOURCE_CORRECTION_IF  ! OPTICALLY_THIN
 
@@ -1155,8 +1241,11 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
             ENDDO WALL_LOOP1
             !$OMP END PARALLEL DO
 
+            DLA = (/DLX(N),DLY(N),DLZ(N)/)
             CFACE_LOOP1: DO ICF=1,N_CFACE_CELLS
                IF (CFACE(ICF)%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE CFACE_LOOP1
+               DLF = DOT_PRODUCT(CFACE(ICF)%NVEC,DLA) ! face normal * radiation angle
+               IF (DLF<0._EB) CYCLE CFACE_LOOP1
                CFACE(ICF)%ONE_D%BAND(IBND)%ILW(N) = OUTRAD_F(ICF) + RPI*(1._EB-CFACE(ICF)%ONE_D%EMISSIVITY)*INRAD_F(ICF)
             ENDDO CFACE_LOOP1
 
@@ -1331,7 +1420,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                         IADD= -(1+ISTEP)/2
                         ICR = FCVAR(I+IADD,J,K,IBM_IDRA,IAXIS) ! List of CFACES assigned to upwind X face.
                         DO IFA=1,RAD_CFACE(ICR)%N_ASSIGNED_CFACES_RADI
-                           ICF=RAD_CFACE(ICR)%ASSIGNED_CFACES_RADI(IFA)
+                           ICF=RAD_CFACE(ICR)%ASSIGNED_CFACES_RADI(1,IFA)
                            IF (REAL(ISTEP,EB)*CFACE(ICF)%NVEC(IAXIS)>0._EB) THEN
                               AFX      = ABS(CFACE(ICF)%NVEC(IAXIS))*CFACE(ICF)%AREA/(DY(J)*DZ(K))
                               AFX_AUX  = AFX_AUX  + AFX
@@ -1342,7 +1431,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                         IADD= -(1+JSTEP)/2
                         ICR = FCVAR(I,J+IADD,K,IBM_IDRA,JAXIS) ! List of CFACES assigned to upwind Y face.
                         DO IFA=1,RAD_CFACE(ICR)%N_ASSIGNED_CFACES_RADI
-                           ICF=RAD_CFACE(ICR)%ASSIGNED_CFACES_RADI(IFA)
+                           ICF=RAD_CFACE(ICR)%ASSIGNED_CFACES_RADI(1,IFA)
                            IF (REAL(JSTEP,EB)*CFACE(ICF)%NVEC(JAXIS)>0._EB) THEN
                               AFY      = ABS(CFACE(ICF)%NVEC(JAXIS))*CFACE(ICF)%AREA/(DX(I)*DZ(K))
                               AFY_AUX  = AFY_AUX  + AFY
@@ -1353,7 +1442,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                         IADD= -(1+KSTEP)/2
                         ICR = FCVAR(I,J,K+IADD,IBM_IDRA,KAXIS) ! List of CFACES assigned to upwind Z face.
                         DO IFA=1,RAD_CFACE(ICR)%N_ASSIGNED_CFACES_RADI
-                           ICF=RAD_CFACE(ICR)%ASSIGNED_CFACES_RADI(IFA)
+                           ICF=RAD_CFACE(ICR)%ASSIGNED_CFACES_RADI(1,IFA)
                            IF (REAL(KSTEP,EB)*CFACE(ICF)%NVEC(KAXIS)>0._EB) THEN
                               AFZ      = ABS(CFACE(ICF)%NVEC(KAXIS))*CFACE(ICF)%AREA/(DX(I)*DY(J))
                               AFZ_AUX  = AFZ_AUX  + AFZ
@@ -1432,19 +1521,58 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
             !$OMP END DO
             !$OMP END PARALLEL
 
-            CFACE_LOOP2: DO ICF=1,N_CFACE_CELLS
-               IF (CFACE(ICF)%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE CFACE_LOOP2
-               DLA = (/DLX(N),DLY(N),DLZ(N)/)
-               DLF = DOT_PRODUCT(CFACE(ICF)%NVEC,DLA) ! face normal * radiation angle
-               IF (DLF>=0._EB) CYCLE CFACE_LOOP2      ! outgoing
-               II = CFACE(ICF)%ONE_D%II
-               JJ = CFACE(ICF)%ONE_D%JJ
-               KK = CFACE(ICF)%ONE_D%KK
-               INRAD_F(ICF) = INRAD_F(ICF) + DLF * CFACE(ICF)%ONE_D%BAND(IBND)%ILW(N) ! update incoming radiation,step 1
-               CFACE(ICF)%ONE_D%BAND(IBND)%ILW(N) = IL(II,JJ,KK)
-               INRAD_F(ICF) = INRAD_F(ICF) - DLF * CFACE(ICF)%ONE_D%BAND(IBND)%ILW(N) ! update incoming radiation,step 2
-            ENDDO CFACE_LOOP2
+            IF (CC_IBM) THEN
+               ! This loop reassigns to cut-cell cartesian cells the value of IL from the gas region in a simple manner.
+               CUT_CELL_DO : DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+                  K = CUT_CELL(ICC)%IJK(KAXIS); KLO=K-1; KHI=K+1
+                  J = CUT_CELL(ICC)%IJK(JAXIS); JLO=J-1; JHI=J+1
+                  I = CUT_CELL(ICC)%IJK(IAXIS); ILO=I-1; IHI=I+1
+                  ! Drop if cut-cell is same as cartesian cell.
+                  IF( SUM(CUT_CELL(ICC)%VOLUME(1:CUT_CELL(ICC)%NCELL)) > 0.99_EB*DX(I)*DY(J)*DZ(K) ) CYCLE CUT_CELL_DO
+                  IF (K==1    .OR. FCVAR(I,J,K-1,IBM_FGSC,KAXIS)==IBM_SOLID) KLO=K
+                  IF (K==KBAR .OR. FCVAR(I,J,K  ,IBM_FGSC,KAXIS)==IBM_SOLID) KHI=K
+                  IF (J==1    .OR. FCVAR(I,J-1,K,IBM_FGSC,JAXIS)==IBM_SOLID) JLO=J
+                  IF (J==JBAR .OR. FCVAR(I,J  ,K,IBM_FGSC,JAXIS)==IBM_SOLID) JHI=J
+                  IF (I==1    .OR. FCVAR(I-1,J,K,IBM_FGSC,IAXIS)==IBM_SOLID) ILO=I
+                  IF (I==IBAR .OR. FCVAR(I  ,J,K,IBM_FGSC,IAXIS)==IBM_SOLID) IHI=I
+                  IL1 = 0._EB
+                  DO KK=KLO,KHI
+                    DO JJ=JLO,JHI
+                      II_DO : DO II=ILO,IHI
+                        IF(CCVAR(II,JJ,KK,IBM_CGSC)/=IBM_GASPHASE) CYCLE II_DO
+                        IL1   = MAX(IL1,IL(II,JJ,KK))
+                      ENDDO II_DO
+                    ENDDO
+                  ENDDO
+                  IL(I,J,K) = MAX(IL(I,J,K),IL1)
+               ENDDO CUT_CELL_DO
 
+               IL_F= 0._EB
+               RAD_CFACE_DO : DO ICR=1,MESHES(NM)%N_RAD_CFACE_CELLS_DIM
+                  RCFACE_LOOP : DO IFA=1,RAD_CFACE(ICR)%N_ASSIGNED_CFACES_RADI
+                     ICF=RAD_CFACE(ICR)%ASSIGNED_CFACES_RADI(1,IFA)
+                     IF (CFACE(ICF)%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE RCFACE_LOOP
+                     II =RAD_CFACE(ICR)%ASSIGNED_CFACES_RADI(2,IFA); IF(II<1) II=1; IF(II>IBAR) II=IBAR
+                     JJ =RAD_CFACE(ICR)%ASSIGNED_CFACES_RADI(3,IFA); IF(JJ<1) JJ=1; IF(JJ>JBAR) JJ=JBAR
+                     KK =RAD_CFACE(ICR)%ASSIGNED_CFACES_RADI(4,IFA); IF(KK<1) KK=1; IF(KK>KBAR) KK=KBAR
+                     X1 =RAD_CFACE(ICR)%ASSIGNED_CFACES_RADI(5,IFA)
+                     IL_F(ICF) = IL_F(ICF) + IL(II,JJ,KK)*CFACE(ICF)%NVEC(X1)**2
+                  ENDDO RCFACE_LOOP
+               ENDDO RAD_CFACE_DO
+
+               DLA = (/DLX(N),DLY(N),DLZ(N)/)
+               CFACE_LOOP2: DO ICF=1,N_CFACE_CELLS
+                  IF (CFACE(ICF)%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE CFACE_LOOP2
+                  DLF = DOT_PRODUCT(CFACE(ICF)%NVEC,DLA) ! face normal * radiation angle
+                  IF (DLF>=0._EB) CYCLE CFACE_LOOP2      ! outgoing
+                  II = CFACE(ICF)%ONE_D%II
+                  JJ = CFACE(ICF)%ONE_D%JJ
+                  KK = CFACE(ICF)%ONE_D%KK
+                  INRAD_F(ICF) = INRAD_F(ICF) + DLF * CFACE(ICF)%ONE_D%BAND(IBND)%ILW(N) ! update incoming radiation,step 1
+                  CFACE(ICF)%ONE_D%BAND(IBND)%ILW(N) = IL_F(ICF)
+                  INRAD_F(ICF) = INRAD_F(ICF) - DLF * CFACE(ICF)%ONE_D%BAND(IBND)%ILW(N) ! update incoming radiation,step 2
+               ENDDO CFACE_LOOP2
+            ENDIF
 
             ! Calculate integrated intensity UIID
 
@@ -1691,7 +1819,7 @@ REAL(EB) :: WSGG_D_ARRAY(1:4,0:4),WSGG_KAPPAP_ARRAY(1:5),SUM_KAPPA
 
 ! If no CO2 or H2O, return zero
 
-IF ((X_H2O<=TWO_EPSILON_EB) .AND. (X_CO2<=TWO_EPSILON_EB)) THEN 
+IF ((X_H2O<=TWO_EPSILON_EB) .AND. (X_CO2<=TWO_EPSILON_EB)) THEN
    KAPPA_WSGG = 0._EB
    RETURN
 ENDIF

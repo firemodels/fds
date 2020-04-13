@@ -112,6 +112,8 @@ function usage {
   echo " -m m - reserve m processes per node [default: 1]"
   echo " -M   -  add --mca plm_rsh_agent /usr/bin/ssh to mpirun command "
   echo " -n n - number of MPI processes per node [default: 1]"
+  echo " -N   - run as many MPI processes on a node as possible"
+  echo "        MIN ( number of cores, number of mpi processes)"
   echo " -O n - run cases casea.fds, caseb.fds, ... using 1, ..., N OpenMP threads"
   echo "        where case is specified on the command line. N can be at most 9."
   echo " -s   - stop job"
@@ -123,6 +125,7 @@ function usage {
   echo " -V   - show command line used to invoke qfds.sh"
   echo " -w time - walltime, where time is hh:mm for PBS and dd-hh:mm:ss for SLURM. [default: $walltime]"
   echo ""
+  echo " Resource manager: $RESOURCE_MANAGER"
   exit
 }
 
@@ -141,10 +144,6 @@ FDSROOT=~/FDS-SMV
 if [ "$FIREMODELS" != "" ]; then
   FDSROOT=$FIREMODELS
 fi
-
-#*** define resource manager that is used
-
-
 
 #*** determine platform
 
@@ -186,7 +185,7 @@ if [ "$MPIRUN_MCA" != "" ]; then
 fi
 
 n_mpi_processes=1
-n_mpi_processes_per_node=-1
+n_mpi_processes_per_node=1
 if [ "$platform" == "linux" ]; then
 max_processes_per_node=`cat /proc/cpuinfo | grep cores | wc -l`
 else
@@ -209,12 +208,18 @@ use_config=""
 
 # determine which resource manager is running (or none)
 
-missing_slurm=`srun -V |& tail -1 | grep "not found" | wc -l`
+STATUS_FILE=status_file.$$
+srun -V >& $STATUS_FILE
+missing_slurm=`cat $STATUS_FILE | tail -1 | grep "not found" | wc -l`
+rm -f $STATUS_FILE
+
 RESOURCE_MANAGER="NONE"
 if [ $missing_slurm -eq 0 ]; then
   RESOURCE_MANAGER="SLURM"
 else
-  missing_torque=`echo | qmgr -n |& tail -1 | grep "not found" | wc -l`
+  echo | qmgr -n >& $STATUS_FILE
+  missing_torque=`cat $STATUS_FILE | tail -1 | grep "not found" | wc -l`
+  rm -f $STATUS_FILE
   if [ $missing_torque -eq 0 ]; then
     RESOURCE_MANAGER="TORQUE"
   fi
@@ -237,6 +242,7 @@ benchmark=no
 showinput=0
 exe=
 STARTUP=
+SET_MPI_PROCESSES_PER_NODE=
 if [ "$QFDS_STARTUP" != "" ]; then
   STARTUP=$QFDS_STARTUP
 fi
@@ -259,7 +265,7 @@ commandline=`echo $* | sed 's/-V//' | sed 's/-v//'`
 
 #*** read in parameters from command line
 
-while getopts 'Aa:c:Cd:D:e:Ef:hHiIj:Lm:Mn:o:O:p:Pq:rsStT:vVw:x:' OPTION
+while getopts 'Aa:c:Cd:D:e:Ef:hHiIj:Lm:Mn:No:O:p:Pq:rsStT:vVw:x:' OPTION
 do
 case $OPTION  in
   A) # used by timing scripts to identify benchmark cases
@@ -320,6 +326,9 @@ case $OPTION  in
   n)
    n_mpi_processes_per_node="$OPTARG"
    ;;
+  N)
+   SET_MPI_PROCESSES_PER_NODE=1
+   ;;
   o)
    n_openmp_threads="$OPTARG"
    ;;
@@ -330,8 +339,10 @@ case $OPTION  in
    fi
    n_mpi_process=1
    benchmark="yes"
-   if [ "$NCORES_COMPUTENODE" != "" ]; then
-     n_mpi_processes_per_node="$NCORES_COMPUTENODE"
+   if [ "$RESOURCE_MANAGER" == "TORQUE" ]; then
+     if [ "$NCORES_COMPUTENODE" != "" ]; then
+       n_mpi_processes_per_node="$NCORES_COMPUTENODE"
+     fi
    fi
    ;;
   p)
@@ -342,9 +353,11 @@ case $OPTION  in
    OPENMPTEST="1"
    benchmark="yes"
    n_mpi_process=1
-   if [ "$NCORES_COMPUTENODE" != "" ]; then
-     n_mpi_processes_per_node="$NCORES_COMPUTENODE"
-   fi
+   if [ "$RESOURCE_MANAGER" == "TORQUE" ]; then
+     if [ "$NCORES_COMPUTENODE" != "" ]; then
+       n_mpi_processes_per_node="$NCORES_COMPUTENODE"
+     fi
+   fi  
    ;;
   q)
    queue="$OPTARG"
@@ -360,8 +373,10 @@ case $OPTION  in
    ;;
   t)
    benchmark="yes"
-   if [ "$NCORES_COMPUTENODE" != "" ]; then
-     n_mpi_processes_per_node="$NCORES_COMPUTENODE"
+   if [ "$RESOURCE_MANAGER" == "TORQUE" ]; then
+     if [ "$NCORES_COMPUTENODE" != "" ]; then
+       n_mpi_processes_per_node="$NCORES_COMPUTENODE"
+     fi
    fi
    ;;
   T)
@@ -405,6 +420,13 @@ shift $(($OPTIND-1))
 if [ "$showcommandline" == "1" ]; then
   echo $0 $commandline
   exit
+fi
+
+if [ "$SET_MPI_PROCESSES_PER_NODE" == "1" ]; then
+   n_mpi_processes_per_node=$n_mpi_processes
+   if test $n_mpi_processes_per_node -gt $ncores ; then
+     n_mpi_processes_per_node=$ncores
+   fi
 fi
 
 #*** define input file
@@ -543,9 +565,6 @@ fi
 let "nodes=($n_mpi_processes-1)/$n_mpi_processes_per_node+1"
 if test $nodes -lt 1 ; then
   nodes=1
-fi
-if [ "$RESOURCE_MANAGER" == "SLURM" ]; then
-    nodes=""
 fi
 
 #*** define processes per node
@@ -732,7 +751,7 @@ else
 
   if [ "$RESOURCE_MANAGER" == "SLURM" ]; then
     QSUB="sbatch -p $queue --ignore-pbs"
-    MPIRUN='mpiexec'
+    MPIRUN="srun -N $nodes -n $n_mpi_processes --ntasks-per-node $n_mpi_processes_per_node"
   fi
 fi
 
@@ -762,9 +781,18 @@ if [ "$queue" != "none" ]; then
 #SBATCH -o $outlog
 #SBATCH -p $queue
 #SBATCH -n $n_mpi_processes
-####SBATCH --nodes=$nodes
+#SBATCH --nodes=$nodes
 #SBATCH --cpus-per-task=$n_openmp_threads
-#SBATCH --ntasks-per-node=$ppn
+#SBATCH --ntasks-per-node=$n_mpi_processes_per_node
+EOF
+
+if [ "$benchmark" == "yes" ]; then
+cat << EOF >> $scriptfile
+#SBATCH --exclusive
+EOF
+fi
+
+cat << EOF >> $scriptfile
 $SLURM_MEM
 EOF
     if [ "$walltimestring_slurm" != "" ]; then
@@ -980,7 +1008,12 @@ fi
 
 $SLEEP
 echo 
-$QSUB $scriptfile | tee -a $qlog
+chmod +x $scriptfile
+if [ "$queue" != "none" ]; then
+  $QSUB $scriptfile | tee -a $qlog
+else
+  $QSUB $scriptfile
+fi
 if [ "$queue" != "none" ]; then
   cat $scriptfile > $scriptlog
   echo "#$QSUB $scriptfile" >> $scriptlog
