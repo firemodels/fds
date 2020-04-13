@@ -2,8 +2,6 @@
 
 MODULE TYPES
 
-! Definitions of various derived data types
-
 USE PRECISION_PARAMETERS
 USE GLOBAL_CONSTANTS, ONLY : MAX_SPECIES,IAXIS,JAXIS,KAXIS,MAX_DIM,LOW_IND,HIGH_IND
 
@@ -64,17 +62,60 @@ TYPE LAGRANGIAN_PARTICLE_CLASS_TYPE
    REAL(EB) :: PRIMARY_BREAKUP_DRAG_REDUCTION_FACTOR   !< Drag reduction factor 
    REAL(EB) :: RUNNING_AVERAGE_FACTOR_WALL             !< Fraction of old value used in summations of droplets stuck to walls
 
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: R_CNF,CNF,CVF,BREAKUP_R_CNF,BREAKUP_CNF,BREAKUP_CVF,W_CNF,R50,LAMBDA,SOLID_ANGLE
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: WQABS,WQSCA
-   INTEGER :: SAMPLING,N_QUANTITIES,QUANTITIES_INDEX(10),QUANTITIES_Y_INDEX(10)=-1,QUANTITIES_Z_INDEX(10)=-1,ARRAY_INDEX=0,&
-              RGB(3),RADIATIVE_PROPERTY_INDEX=0,SURF_INDEX=0,DRAG_LAW=1,DEVC_INDEX=0,CTRL_INDEX=0,PROP_INDEX=-1,&
-              ORIENTATION_INDEX=0,N_ORIENTATION,Z_INDEX=-1,N_STRATA=6,NEAREST_RAD_ANGLE_INDEX=0, &
-              Y_INDEX=-1,CNF_RAMP_INDEX=-1,BREAKUP_CNF_RAMP_INDEX=-1,N_STORAGE_REALS,N_STORAGE_INTEGERS,N_STORAGE_LOGICALS
-   INTEGER,  ALLOCATABLE, DIMENSION(:) :: IL_CNF,IU_CNF
-   LOGICAL :: STATIC=.FALSE.,MASSLESS_TRACER=.FALSE.,MASSLESS_TARGET=.FALSE.,LIQUID_DROPLET=.FALSE.,SOLID_PARTICLE=.FALSE., &
-              MONODISPERSE=.FALSE.,TURBULENT_DISPERSION=.FALSE.,BREAKUP=.FALSE.,CHECK_DISTRIBUTION=.FALSE.,FUEL=.FALSE., &
-              PERIODIC_X=.FALSE.,PERIODIC_Y=.FALSE.,PERIODIC_Z=.FALSE.,&
-              SECOND_ORDER_PARTICLE_TRANSPORT=.FALSE.,DUCT_PARTICLE=.FALSE.,EMBER_PARTICLE=.FALSE.
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: R_CNF         !< Independent variable (radius) in particle size distribution
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: CNF           !< Cumulative Number Fraction particle size distribution
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: CVF           !< Cumulative Volume Fraction particle size distribution
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: BREAKUP_R_CNF !< R_CNF of new distribution after particle break-up
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: BREAKUP_CNF   !< CNF of new distribution after particle break-up
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: BREAKUP_CVF   !< CVF of new distribution after particle break-up
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: W_CNF         !< Weighting factor in particle size distribution
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: R50           !< Array of median particle diameters for Mie calculation
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: SOLID_ANGLE   !< Array of solid angles for particle with multiple orientations
+
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: WQABS
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: WQSCA
+
+   INTEGER :: SAMPLING_FACTOR             !< Reduce particle output by this factor
+   INTEGER :: N_QUANTITIES                !< Number of output quantities for this class of particles
+   INTEGER :: QUANTITIES_INDEX(10)        !< Array of indices of output quantities for this class of particles
+   INTEGER :: QUANTITIES_Y_INDEX(10)=-1   !< Array of species indices associated with the output quantities
+   INTEGER :: QUANTITIES_Z_INDEX(10)=-1   !< Array of species mixture indices associated with the output quantities
+   INTEGER :: ARRAY_INDEX=0               !< Array of indices corresponding to solid or liquid particles
+   INTEGER :: RGB(3)                      !< Color indices for default particle class color in Smokeview
+   INTEGER :: RADIATIVE_PROPERTY_INDEX=0  !< Index for this class of particles in radiative property table
+   INTEGER :: SURF_INDEX=0                !< Surface properties for solid particle
+   INTEGER :: DRAG_LAW=1                  !< Code indicating type of drag law
+   INTEGER :: DEVC_INDEX=0                !< Index of device that governs this class of particles
+   INTEGER :: CTRL_INDEX=0                !< Index of controller that governs this class of particles
+   INTEGER :: ORIENTATION_INDEX=0         !< Starting position of the particle class orientation vector within the master array
+   INTEGER :: N_ORIENTATION               !< Number of orientations (directions) corresponding to this class of particles
+   INTEGER :: Z_INDEX=-1                  !< Species mixture index for this class
+   INTEGER :: Y_INDEX=-1                  !< Species index for this class
+   INTEGER :: N_STRATA=6                  !< Number of bins in subdivision of size distribution
+   INTEGER :: NEAREST_RAD_ANGLE_INDEX=0   !< Index of the radiation angle nearest the given orientation vector
+   INTEGER :: CNF_RAMP_INDEX=-1           !< Ramp index for Cumulative Number Fraction function
+   INTEGER :: BREAKUP_CNF_RAMP_INDEX=-1   !< Ramp index for break-up Cumulative Number Fraction function
+   INTEGER :: N_STORAGE_REALS             !< Number of reals to store for this particle class
+   INTEGER :: N_STORAGE_INTEGERS          !< Number of integers to store for this particle class
+   INTEGER :: N_STORAGE_LOGICALS          !< Number of logicals to store for this particle class
+
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: STRATUM_INDEX_LOWER  !< Lower index of size distribution band
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: STRATUM_INDEX_UPPER  !< Upper index of size distribution band
+
+   LOGICAL :: STATIC=.FALSE.                !< Flag indicating if particles move or not
+   LOGICAL :: MASSLESS_TRACER=.FALSE.       !< Flag indicating if particles are just tracers for visualization
+   LOGICAL :: MASSLESS_TARGET=.FALSE.       !< Flag indicating if particles are just targets for an output quantity
+   LOGICAL :: LIQUID_DROPLET=.FALSE.        !< Flag indicating if particles are liquid droplets
+   LOGICAL :: SOLID_PARTICLE=.FALSE.        !< Flag indicating if particles are solid, not liquid
+   LOGICAL :: MONODISPERSE=.FALSE.          !< Flag indicating if particle size is monodisperse
+   LOGICAL :: TURBULENT_DISPERSION=.FALSE.  !< Flag indicating if subgrid-scale turbulence is applied
+   LOGICAL :: BREAKUP=.FALSE.               !< Flag indicating if paricles or droplets break-up
+   LOGICAL :: CHECK_DISTRIBUTION=.FALSE.    !< Flag indicating if diagnostic output on size distribution is specified
+   LOGICAL :: FUEL=.FALSE.                  !< Flag indicating if droplets evaporate into fuel gas
+   LOGICAL :: SECOND_ORDER_PARTICLE_TRANSPORT=.FALSE. !< Flag indicating second-order accurate particle position update
+   LOGICAL :: DUCT_PARTICLE=.FALSE.         !< Flag indicating if particles can pass through a duct
+   LOGICAL :: EMBER_PARTICLE=.FALSE.        !< Flag indicating if particles can become flying embers
+
 END TYPE LAGRANGIAN_PARTICLE_CLASS_TYPE
 
 TYPE (LAGRANGIAN_PARTICLE_CLASS_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: LAGRANGIAN_PARTICLE_CLASS

@@ -2533,8 +2533,8 @@ IMPLICIT NONE
 INTEGER, INTENT(IN) :: NM
 CHARACTER(80), INTENT(IN) :: FN_SPEC
 INTEGER :: NN(3),I,J,K,IM,II,JJ,KK
-REAL(EB),     POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL()
-COMPLEX(DPC), POINTER, DIMENSION(:,:,:) :: UUHT=>NULL(),VVHT=>NULL(),WWHT=>NULL(),KKHT=>NULL()
+REAL(EB),    POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL()
+COMPLEX(EB), POINTER, DIMENSION(:,:,:) :: UUHT=>NULL(),VVHT=>NULL(),WWHT=>NULL(),KKHT=>NULL()
 TYPE (MESH_TYPE), POINTER :: MM,M
 
 IF (NM>1) RETURN
@@ -2660,8 +2660,8 @@ END SUBROUTINE sandia_out
 SUBROUTINE complex_tke_f90(tkeht, upht, vpht, wpht, n)
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: n
-COMPLEX(DPC), INTENT(OUT) :: tkeht(n,n,n)
-COMPLEX(DPC), INTENT(IN) :: upht(n,n,n),vpht(n,n,n),wpht(n,n,n)
+COMPLEX(EB), INTENT(OUT) :: tkeht(n,n,n)
+COMPLEX(EB), INTENT(IN) :: upht(n,n,n),vpht(n,n,n),wpht(n,n,n)
 INTEGER i,j,k
 
 do k = 1,n
@@ -2681,7 +2681,7 @@ SUBROUTINE fft3d_f90(v, vht, nn)
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: nn(3)
 REAL(EB), INTENT(IN) :: v(nn(1),nn(2),nn(3))
-COMPLEX(DPC), INTENT(INOUT) :: vht(nn(1),nn(2),nn(3))
+COMPLEX(EB), INTENT(INOUT) :: vht(nn(1),nn(2),nn(3))
 
 ! This routine performs an FFT on the real array v and places the
 ! result in the complex array vht.
@@ -2697,7 +2697,7 @@ REAL(EB) :: z2(2*nn(1))
 do k = 1,nn(3)
    do j = 1,nn(2)
       do i = 1,nn(1)
-         vht(i,j,k) = cmplx(v(i,j,k),0.0_EB,kind=DPC)
+         vht(i,j,k) = cmplx(v(i,j,k),0.0_EB,kind=EB)
          !tke = tke + 0.5_EB*v(i,j,k)**2
       end do
    end do
@@ -2745,7 +2745,7 @@ SUBROUTINE spectrum_f90(vht, n, Lm, filename)
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: n
 CHARACTER(80), INTENT(IN) :: filename
-COMPLEX(DPC), INTENT(IN) :: vht(n,n,n)
+COMPLEX(EB), INTENT(IN) :: vht(n,n,n)
 REAL(EB), INTENT(IN) :: Lm
 
 ! This routine is copied from SNL and is intended to compute the
@@ -2960,7 +2960,7 @@ IMPLICIT NONE
 !     ieee audio transactions (june 1967), special issue on the fft.
 
       INTEGER, INTENT(IN) :: nn(3),ndim,isign,iform
-      COMPLEX(DPC), INTENT(INOUT) :: data3(nn(1),nn(2),nn(3))
+      COMPLEX(EB), INTENT(INOUT) :: data3(nn(1),nn(2),nn(3))
       REAL(EB), INTENT (INOUT) :: work(2*nn(1))
 
       INTEGER :: ifact(32),ntot,idim,np1,n,np2,m,ntwo,iif,idiv,iquot,irem,inon2,     &
@@ -3494,7 +3494,7 @@ IMPLICIT NONE
       do k=1,nn(3)
         do j=1,nn(2)
           do i=1,nn(1)
-            data3(i,j,k)=cmplx(data(n),data(n+1),kind=DPC)
+            data3(i,j,k)=cmplx(data(n),data(n+1),kind=EB)
             n=n+2
           enddo
         enddo
