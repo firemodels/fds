@@ -95,7 +95,7 @@ endif
 endif # OS test
 endif # MKLROOT test
 
-obj_mpi = prec.o cons.o devc.o data.o type.o mesh.o func.o gsmv.o  smvv.o irad.o turb.o soot.o\
+obj_mpi = prec.o cons.o devc.o type.o data.o mesh.o func.o gsmv.o smvv.o irad.o turb.o soot.o \
           ieva.o pois.o scrc.o evac.o geom.o radi.o part.o vege.o ctrl.o samr.o dump.o hvac.o mass.o \
           read.o wall.o fire.o divg.o velo.o pres.o init.o main.o
 
@@ -393,70 +393,72 @@ mpi_gnu_osx_64_dv : setup $(obj_mpi)
 
 # *** Object Dependencies ***
 
+prec.o : 
 cons.o : prec.o
-type.o : prec.o cons.o
 devc.o : prec.o
-pois.o : prec.o cons.o
-mesh.o : prec.o type.o
+type.o : prec.o cons.o
 data.o : prec.o func.o cons.o
+mesh.o : prec.o type.o
 func.o : prec.o cons.o type.o mesh.o devc.o
-turb.o : func.o prec.o cons.o mesh.o
-soot.o : prec.o mesh.o cons.o func.o turb.o
+gsmv.o : prec.o func.o cons.o mesh.o
 smvv.o : geom.o prec.o func.o
-ctrl.o : prec.o cons.o type.o mesh.o func.o
-samr.o : prec.o cons.o mesh.o turb.o
-gsmv.o : func.o prec.o cons.o mesh.o
-geom.o : gsmv.o func.o prec.o cons.o mesh.o turb.o
-scrc.o : prec.o cons.o mesh.o func.o pois.o geom.o
 irad.o : func.o prec.o cons.o type.o mesh.o
+turb.o : prec.o func.o cons.o mesh.o
+soot.o : prec.o mesh.o cons.o func.o turb.o
 ieva.o : func.o prec.o cons.o type.o mesh.o
-fire.o : func.o prec.o cons.o type.o mesh.o mass.o soot.o
-hvac.o : func.o prec.o cons.o type.o mesh.o ctrl.o
-wall.o : func.o prec.o cons.o type.o mesh.o hvac.o mass.o soot.o geom.o
-velo.o : func.o prec.o cons.o type.o mesh.o turb.o geom.o scrc.o
+pois.o : prec.o cons.o
+scrc.o : prec.o cons.o mesh.o func.o pois.o geom.o
 evac.o : func.o prec.o cons.o type.o mesh.o ieva.o data.o
-divg.o : func.o prec.o cons.o type.o mesh.o scrc.o evac.o mass.o
-mass.o : func.o prec.o cons.o type.o mesh.o turb.o soot.o geom.o
+geom.o : gsmv.o func.o prec.o cons.o mesh.o turb.o
 radi.o : func.o prec.o cons.o type.o mesh.o irad.o geom.o
-pres.o : func.o prec.o cons.o type.o mesh.o pois.o velo.o scrc.o geom.o
 part.o : func.o prec.o cons.o type.o mesh.o devc.o data.o geom.o soot.o
 vege.o : func.o prec.o cons.o type.o mesh.o geom.o
-read.o : func.o prec.o cons.o type.o mesh.o devc.o ctrl.o irad.o evac.o hvac.o scrc.o data.o geom.o mass.o soot.o
-init.o : func.o prec.o cons.o type.o mesh.o devc.o irad.o pois.o data.o evac.o pres.o geom.o
+ctrl.o : prec.o cons.o type.o mesh.o func.o
+samr.o : prec.o cons.o mesh.o turb.o
 dump.o : func.o prec.o cons.o type.o mesh.o devc.o evac.o smvv.o turb.o scrc.o data.o radi.o soot.o geom.o
+hvac.o : func.o prec.o cons.o type.o mesh.o ctrl.o
+mass.o : func.o prec.o cons.o type.o mesh.o turb.o soot.o geom.o
+read.o : func.o prec.o cons.o type.o mesh.o devc.o ctrl.o irad.o evac.o hvac.o scrc.o data.o geom.o mass.o soot.o
+wall.o : func.o prec.o cons.o type.o mesh.o hvac.o mass.o soot.o geom.o
+fire.o : func.o prec.o cons.o type.o mesh.o mass.o soot.o
+divg.o : func.o prec.o cons.o type.o mesh.o scrc.o evac.o mass.o
+velo.o : func.o prec.o cons.o type.o mesh.o turb.o geom.o scrc.o
+pres.o : func.o prec.o cons.o type.o mesh.o pois.o velo.o scrc.o geom.o
+init.o : func.o prec.o cons.o type.o mesh.o devc.o irad.o pois.o data.o evac.o pres.o geom.o
 main.o : func.o prec.o cons.o type.o mesh.o devc.o smvv.o mass.o divg.o velo.o wall.o fire.o irad.o ieva.o radi.o evac.o part.o vege.o dump.o read.o init.o pres.o pois.o ctrl.o turb.o hvac.o scrc.o data.o geom.o soot.o
 
+prec.obj : 
 cons.obj : prec.obj
-type.obj : prec.obj cons.obj
 devc.obj : prec.obj
-pois.obj : prec.obj cons.obj
-mesh.obj : prec.obj type.obj
+type.obj : prec.obj cons.obj
 data.obj : prec.obj func.obj cons.obj
+mesh.obj : prec.obj type.obj
 func.obj : prec.obj cons.obj type.obj mesh.obj devc.obj
-turb.obj : func.obj prec.obj cons.obj mesh.obj
-soot.obj : prec.obj mesh.obj cons.obj func.obj turb.obj
-smvv.obj : prec.obj func.obj geom.obj
-ctrl.obj : prec.obj cons.obj type.obj mesh.obj func.obj
-samr.obj : prec.obj cons.obj mesh.obj turb.obj
-gsmv.obj : func.obj prec.obj cons.obj mesh.obj
-geom.obj : gsmv.obj func.obj prec.obj cons.obj mesh.obj turb.obj
-scrc.obj : prec.obj cons.obj mesh.obj func.obj pois.obj geom.obj
+gsmv.obj : prec.obj func.obj cons.obj mesh.obj
+smvv.obj : geom.obj prec.obj func.obj
 irad.obj : func.obj prec.obj cons.obj type.obj mesh.obj
+turb.obj : prec.obj func.obj cons.obj mesh.obj
+soot.obj : prec.obj mesh.obj cons.obj func.obj turb.obj
 ieva.obj : func.obj prec.obj cons.obj type.obj mesh.obj
-fire.obj : func.obj prec.obj cons.obj type.obj mesh.obj mass.obj soot.obj
-hvac.obj : func.obj prec.obj cons.obj type.obj mesh.obj ctrl.obj
-wall.obj : func.obj prec.obj cons.obj type.obj mesh.obj hvac.obj mass.obj soot.obj geom.obj
-velo.obj : func.obj prec.obj cons.obj type.obj mesh.obj turb.obj geom.obj scrc.obj
+pois.obj : prec.obj cons.obj
+scrc.obj : prec.obj cons.obj mesh.obj func.obj pois.obj geom.obj
 evac.obj : func.obj prec.obj cons.obj type.obj mesh.obj ieva.obj data.obj
-divg.obj : func.obj prec.obj cons.obj type.obj mesh.obj scrc.obj evac.obj mass.obj
-mass.obj : func.obj prec.obj cons.obj type.obj mesh.obj turb.obj soot.obj geom.obj
+geom.obj : gsmv.obj func.obj prec.obj cons.obj mesh.obj turb.obj
 radi.obj : func.obj prec.obj cons.obj type.obj mesh.obj irad.obj geom.obj
-pres.obj : func.obj prec.obj cons.obj type.obj mesh.obj pois.obj velo.obj scrc.obj geom.obj
 part.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj data.obj geom.obj soot.obj
 vege.obj : func.obj prec.obj cons.obj type.obj mesh.obj geom.obj
-read.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj ctrl.obj irad.obj evac.obj hvac.obj scrc.obj data.obj geom.obj mass.obj soot.obj
-init.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj irad.obj pois.obj data.obj evac.obj pres.obj geom.obj
+ctrl.obj : prec.obj cons.obj type.obj mesh.obj func.obj
+samr.obj : prec.obj cons.obj mesh.obj turb.obj
 dump.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj evac.obj smvv.obj turb.obj scrc.obj data.obj radi.obj soot.obj geom.obj
+hvac.obj : func.obj prec.obj cons.obj type.obj mesh.obj ctrl.obj
+mass.obj : func.obj prec.obj cons.obj type.obj mesh.obj turb.obj soot.obj geom.obj
+read.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj ctrl.obj irad.obj evac.obj hvac.obj scrc.obj data.obj geom.obj mass.obj soot.obj
+wall.obj : func.obj prec.obj cons.obj type.obj mesh.obj hvac.obj mass.obj soot.obj geom.obj
+fire.obj : func.obj prec.obj cons.obj type.obj mesh.obj mass.obj soot.obj
+divg.obj : func.obj prec.obj cons.obj type.obj mesh.obj scrc.obj evac.obj mass.obj
+velo.obj : func.obj prec.obj cons.obj type.obj mesh.obj turb.obj geom.obj scrc.obj
+pres.obj : func.obj prec.obj cons.obj type.obj mesh.obj pois.obj velo.obj scrc.obj geom.obj
+init.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj irad.obj pois.obj data.obj evac.obj pres.obj geom.obj
 main.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj smvv.obj mass.obj divg.obj velo.obj wall.obj fire.obj irad.obj ieva.obj radi.obj evac.obj part.obj vege.obj dump.obj read.obj init.obj pres.obj pois.obj ctrl.obj turb.obj hvac.obj scrc.obj data.obj geom.obj soot.obj
 
 #*** Clean Target to remove Object and Module files ***

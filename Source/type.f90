@@ -3,7 +3,7 @@
 MODULE TYPES
 
 USE PRECISION_PARAMETERS
-USE GLOBAL_CONSTANTS, ONLY : MAX_SPECIES,IAXIS,JAXIS,KAXIS,MAX_DIM,LOW_IND,HIGH_IND
+USE GLOBAL_CONSTANTS, ONLY : IAXIS,JAXIS,KAXIS,MAX_DIM,LOW_IND,HIGH_IND
 
 IMPLICIT NONE
 
@@ -72,8 +72,8 @@ TYPE LAGRANGIAN_PARTICLE_CLASS_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: R50           !< Array of median particle diameters for Mie calculation
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: SOLID_ANGLE   !< Array of solid angles for particle with multiple orientations
 
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: WQABS
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: WQSCA
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: WQABS       !< Absorption efficiency factor array
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: WQSCA       !< Scattering efficiency factor array
 
    INTEGER :: SAMPLING_FACTOR             !< Reduce particle output by this factor
    INTEGER :: N_QUANTITIES                !< Number of output quantities for this class of particles
