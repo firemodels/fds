@@ -1400,10 +1400,6 @@ M%WALL_COUNTER = 0
 M%BC_CLOCK_HT3D     = T_BEGIN
 M%WALL_COUNTER_HT3D = 0
 
-! Set clock for boudary fuel vegetation model
-
-M%VEG_CLOCK_BC = T_BEGIN
-
 ! Allocate arrays for storing velocity boundary condition info
 
 N_EDGES_DIM = 4*(IBP1*JBP1+IBP1*KBP1+JBP1*KBP1)
