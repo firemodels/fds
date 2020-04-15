@@ -1,9 +1,13 @@
+!> \brief Derived variable types for devices
+
 MODULE DEVICE_VARIABLES
 
 USE PRECISION_PARAMETERS
 IMPLICIT NONE
 
 INTEGER, ALLOCATABLE, DIMENSION(:) :: DEVC_PIPE_OPERATING
+
+!> \brief Derived type storing inputs for the PROP namelist group 
 
 TYPE PROPERTY_TYPE
    REAL(EB) :: DENSITY,DIAMETER,EMISSIVITY,HEAT_TRANSFER_COEFFICIENT,SPECIFIC_HEAT,RTI, &
@@ -25,16 +29,45 @@ TYPE PROPERTY_TYPE
    INTEGER :: HISTOGRAM_NBINS=10,FED_ACTIVITY=2
 END TYPE PROPERTY_TYPE
 
+!> \brief Derived type storing location and value informaton for DEVICE\%SUBDEVICE
+
 TYPE SUBDEVICE_TYPE
-   REAL(EB) :: VALUE_1=0._EB,VALUE_2=0._EB,VALUE_3=0._EB,X1,X2,Y1,Y2,Z1,Z2
-   INTEGER :: MESH,I1=-1,I2=-1,J1=-1,J2=-1,K1=-1,K2=-1,N_PATH=0
+   !> !\{
+   !> Intermediate value used for computing device SPATIAL_STATISTIC or TEMPORAL_STATISTIC
+   REAL(EB) :: VALUE_1=0._EB,VALUE_2=0._EB,VALUE_3=0._EB
+   !> !\}
+   !> !\{
+   !> Subdevice point, line, or bounding box physical coordinate (m)
+   REAL(EB) :: X1,X2,Y1,Y2,Z1,Z2
+   !> !\}
+   INTEGER :: MESH !< Subdevice mesh location
+   !> !\{
+   !> Subdevice point, line, or bounding box grid index
+   INTEGER :: I1=-1,I2=-1,J1=-1,J2=-1,K1=-1,K2=-1
+   !> !\}
+   INTEGER :: N_PATH=0 !< Number of grid cells along subdevice path for TRANSMISSION or PATH OBSCURATION
+   !> !\{
+   !> Grid index for a grid cell along subdevice path for TRANSMISSION or PATH OBSCURATION
    INTEGER, ALLOCATABLE, DIMENSION(:) :: I_PATH,J_PATH,K_PATH
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: D_PATH
+   ! !\}
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: D_PATH 
+   !<Segment length in a grid cell along subdevice path for TRANSMISSION or PATH OBSCURATION
 END TYPE SUBDEVICE_TYPE
 
+!> \brief Derived type for a measurement device (DEVC)
+
 TYPE DEVICE_TYPE
-   TYPE(SUBDEVICE_TYPE), ALLOCATABLE, DIMENSION(:) :: SUBDEVICE
-   REAL(EB) :: T,X,Y,Z,X1,X2,Y1,Y2,Z1,Z2,INITIAL_VALUE=-1.E10_EB,INSTANT_VALUE,VALUE=0._EB,SMOOTHED_VALUE=-1.E10_EB, &
+   TYPE(SUBDEVICE_TYPE), ALLOCATABLE, DIMENSION(:) :: SUBDEVICE !<Array of subdevices
+   REAL(EB) :: T !< Used to track time shit for a DEVC that is part of an ASPIRATION detector.
+   !> !\{
+   !> Physical coordinate of a point DEVC
+   REAL(EB) :: X,Y,Z
+   !> !\}
+   !> !\{
+   !> Physical coordinates for DEVC spanning a line, plane, or volume
+   REAL(EB) :: X1,X2,Y1,Y2,Z1,Z2
+   !> !\}
+   REAL(EB) :: INITIAL_VALUE=-1.E10_EB,INSTANT_VALUE,VALUE=0._EB,SMOOTHED_VALUE=-1.E10_EB, &
                DEPTH,TMP_L,Y_C,OBSCURATION,DELAY,ROTATION,SMOOTHING_FACTOR=0._EB,VALUE_1,VALUE_2,VALUE_3,&
                SETPOINT, T_CHANGE=1.E6_EB,BYPASS_FLOWRATE,DT,TOTAL_FLOWRATE,FLOWRATE, &
                CONVERSION_ADDEND=0._EB,CONVERSION_FACTOR=1._EB,COORD_FACTOR=1._EB, &
@@ -66,44 +99,90 @@ END TYPE DEVICE_TYPE
 
 ! Device arrays
 
-INTEGER :: N_PROP,N_DEVC,N_DEVC_TIME,N_DEVC_LINE,MAX_DEVC_LINE_POINTS=1,N_HISTOGRAM=0,MAX_HISTOGRAM_NBINS=0
-CHARACTER(80), ALLOCATABLE, DIMENSION(:) :: TIME_DEVC_LABEL,TIME_DEVC_UNITS,LINE_DEVC_LABEL,LINE_DEVC_UNITS, &
-                                            HISTOGRAM_LABEL,HISTOGRAM_UNITS
-CHARACTER(80), ALLOCATABLE, DIMENSION(:,:) :: LINE_DEVC_VALUE,HISTOGRAM_VALUE
-REAL(EB), ALLOCATABLE, DIMENSION(:) :: TIME_DEVC_VALUE
-TYPE (PROPERTY_TYPE),  DIMENSION(:), ALLOCATABLE, TARGET :: PROPERTY
-TYPE (DEVICE_TYPE),  DIMENSION(:), ALLOCATABLE, TARGET :: DEVICE
+INTEGER :: N_PROP !< Number of PROP inputs
+INTEGER :: N_DEVC ! <Number of DEVC inputs 
+INTEGER :: N_DEVC_TIME !<Number of DEVC with DV\%QUANTITY='TIME'
+INTEGER :: N_DEVC_LINE !<Number of DEVC with DV\%POINTS > 0
+INTEGER :: MAX_DEVC_LINE_POINTS=1
+INTEGER :: N_HISTOGRAM=0
+INTEGER :: MAX_HISTOGRAM_NBINS=0
+CHARACTER(80), ALLOCATABLE, DIMENSION(:) :: TIME_DEVC_LABEL !<Label for each DEVC written to header of CHID_devc.csv
+CHARACTER(80), ALLOCATABLE, DIMENSION(:) :: TIME_DEVC_UNITS !<Units for each DEVC written to header of CHID_devc.csv
+CHARACTER(80), ALLOCATABLE, DIMENSION(:) :: LINE_DEVC_LABEL !<Label for each line DEVC written to header of CHID_line.csv
+CHARACTER(80), ALLOCATABLE, DIMENSION(:) :: LINE_DEVC_UNITS !<Units for each line DEVC written to header of CHID_line.csv
+CHARACTER(80), ALLOCATABLE, DIMENSION(:) :: HISTOGRAM_LABEL !<Label for each histogram written to header of CHID_hist.csv
+CHARACTER(80), ALLOCATABLE, DIMENSION(:) :: HISTOGRAM_UNITS !<Units for each histogram written to header of CHID_hist.csv
+CHARACTER(80), ALLOCATABLE, DIMENSION(:,:) :: LINE_DEVC_VALUE !Array of line DEVC values written to CHID_line.csv
+CHARACTER(80), ALLOCATABLE, DIMENSION(:,:) :: HISTOGRAM_VALUE !Array of histogram values written to CHID_hist.csv
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: TIME_DEVC_VALUE !<Array of DEVC values written to CHID_devc.csv
+TYPE (PROPERTY_TYPE),  DIMENSION(:), ALLOCATABLE, TARGET :: PROPERTY !< Array of all defined PROP inputs
+TYPE (DEVICE_TYPE),  DIMENSION(:), ALLOCATABLE, TARGET :: DEVICE !< Array of all defined DEVC inputs
 
 END MODULE DEVICE_VARIABLES
 
 
+!> \brief Derived types for evaluating control functions
 
 MODULE CONTROL_VARIABLES
-
-! Variables for evaluating control functions
 
 USE PRECISION_PARAMETERS
 
 IMPLICIT NONE
 
-TYPE CONTROL_TYPE
-   LOGICAL :: SPECIFIED_STATE=.FALSE.,INITIAL_STATE=.FALSE.,CURRENT_STATE=.FALSE.,PRIOR_STATE=.FALSE.,LATCH=.TRUE.,UPDATED=.FALSE.
-   LOGICAL :: EVACUATION=.FALSE.
-   INTEGER :: CONTROL_INDEX=0,N_INPUTS=0,RAMP_INDEX=0,MESH=1,N=1,ON_BOUND=0,TRIP_DIRECTION
-   INTEGER, ALLOCATABLE, DIMENSION (:) :: INPUT,INPUT_TYPE
-   REAL(EB) :: SETPOINT(2)=1.E30_EB, DELAY=0._EB, T_CHANGE=1000000._EB ,CONSTANT=-9.E30_EB,&
-               INSTANT_VALUE,PROPORTIONAL_GAIN,INTEGRAL_GAIN,DIFFERENTIAL_GAIN,PREVIOUS_VALUE=-9.E30_EB,INTEGRAL=0._EB,&
-               TARGET_VALUE = -9.E30_EB
-   CHARACTER(LABEL_LENGTH) :: ID='null',RAMP_ID='null',INPUT_ID(40)='null'
-END TYPE CONTROL_TYPE
-
-TYPE (CONTROL_TYPE),  DIMENSION(:), ALLOCATABLE, TARGET :: CONTROL
-
+!> !\{
+!> Parameter defining the type of control function for CONTROL\%CONTROL_INDEX
 INTEGER, PARAMETER :: AND_GATE=1, OR_GATE=2, XOR_GATE=3, X_OF_N_GATE=4, TIME_DELAY=5, DEADBAND=6, CYCLING=7, &
                       CUSTOM=8,KILL=9,CORE_DUMP=10,CF_SUM=11,CF_SUBTRACT=12,CF_MULTIPLY=13,CF_DIVIDE=14,CF_POWER=15,CF_PID=16,&
-                      CF_EXP=17,CF_LOG=18,CF_SIN=19,CF_COS=20,CF_ASIN=21,CF_ACOS=22,CF_MIN=23,CF_MAX=24, CF_ABS=25,&
-                      DEVICE_INPUT=1,CONTROL_INPUT=2,CONSTANT_INPUT=3
+                      CF_EXP=17,CF_LOG=18,CF_SIN=19,CF_COS=20,CF_ASIN=21,CF_ACOS=22,CF_MIN=23,CF_MAX=24, CF_ABS=25
+!> !\}
+!> !\{
+!> Parameter used to define the type of input for CONTROL\%INPUT_TYPE
+INTEGER, PARAMETER :: DEVICE_INPUT=1,CONTROL_INPUT=2,CONSTANT_INPUT=3
+!> !\} 
 
-INTEGER :: N_CTRL = 0, N_CTRL_FILES = 0
+INTEGER :: N_CTRL = 0 !< Length of CONTROL
+INTEGER :: N_CTRL_FILES = 0 !< Number of CHID_ctrl.csv output files
+
+!> \brief Derived type for a control function (CTRL)
+
+TYPE CONTROL_TYPE
+   LOGICAL :: INITIAL_STATE=.FALSE. !< Initial logical state of the control function assigned at the start of the calculation
+   LOGICAL :: CURRENT_STATE=.FALSE. !< Current timestep logical state of the control function
+   LOGICAL :: PRIOR_STATE=.FALSE.   !< Prior timestep logical state of the control function
+   LOGICAL :: LATCH=.TRUE.          !< Control function can only change state once
+   LOGICAL :: UPDATED=.FALSE.       !< Control function has been updatead in the current timestep
+   LOGICAL :: EVACUATION=.FALSE.    !< Control function is used by EVAC
+   INTEGER :: CONTROL_INDEX=0       !< Indicates the type of control function
+   INTEGER :: N_INPUTS=0            !< Number of inputs to the control function
+   INTEGER :: RAMP_INDEX=0          !< Index of a RAMP used for the CUSTOM control function
+   INTEGER :: MESH=1                !< Mesh location of the control function
+   INTEGER :: N=1                   
+   !< Number of inputs that must be true to change the INITIAL_STATE of an AT LEAST or ONLY functions
+   INTEGER :: ON_BOUND=0            
+   !< Negative indicates a DEADBAND INITIAL_STATE trips at the lower bound. Positive trips at the upper bound.
+   INTEGER :: TRIP_DIRECTION        
+   !< Negative indicates INITIAL_STATE trips when dropping below the SETPOINT. Positive is increase above SETPOINT.
+   INTEGER, ALLOCATABLE, DIMENSION (:) :: INPUT
+   !< Array of indices containing the device and control function inputs
+   INTEGER, ALLOCATABLE, DIMENSION (:) :: INPUT_TYPE
+   !< Array of inidicating if a specific input to a control function is a device and a control functon
+   REAL(EB) :: SETPOINT(2)=1.E30_EB
+   !<Setpoint for a control function. For a DEADBAND function contains the lower and upper bounds of the DEADBAND
+   REAL(EB) :: DELAY=0._EB !<Delay time (s) for a TIME_DELAY function
+   REAL(EB) :: T_CHANGE=1000000._EB !<Time the control function changed state
+   REAL(EB) :: CONSTANT=-9.E30_EB !<Value assigned to CONSTANT on a CTRL input
+   REAL(EB) :: INSTANT_VALUE !<Current mathematical value of the control function
+   REAL(EB) :: PROPORTIONAL_GAIN !<Proportional gain for a PID control function
+   REAL(EB) :: INTEGRAL_GAIN !<Intregal gain for a PID control function
+   REAL(EB) :: DIFFERENTIAL_GAIN !<Differential gain for a PID control function
+   REAL(EB) :: PREVIOUS_VALUE=-9.E30_EB !<Prior timestep value used in computing the time derivative term for a PID control function
+   REAL(EB) :: INTEGRAL=0._EB !<Current value of the time integral term for a PID control function
+   REAL(EB) :: TARGET_VALUE = -9.E30_EB !<Desired target used to compute error value for input to a PID control function
+   CHARACTER(LABEL_LENGTH) :: ID='null' !<Name of control function
+   CHARACTER(LABEL_LENGTH) :: RAMP_ID='null' !<Name of RAMP used for a CUSTOM control function
+   CHARACTER(LABEL_LENGTH) :: INPUT_ID(40)='null' !<Array of DEVC\%ID or CTRL\%ID 
+END TYPE CONTROL_TYPE
+
+TYPE (CONTROL_TYPE),  DIMENSION(:), ALLOCATABLE, TARGET :: CONTROL !< Array of all defined CTRL inputs
 
 END MODULE CONTROL_VARIABLES
