@@ -1,6 +1,6 @@
+!> Routines for evaluating control functions
+   
 MODULE CONTROL_FUNCTIONS
-
-! Routines for evaluating control functions
 
 USE PRECISION_PARAMETERS
 USE CONTROL_VARIABLES
@@ -11,9 +11,14 @@ IMPLICIT NONE
 
 CONTAINS
 
-SUBROUTINE UPDATE_CONTROLS(T,DT,CTRL_STOP_STATUS,RUN_START)
+!> Updates the state of all control functions followed by DEVC where QUANTITY is CONTROL or CONTROL VALUE   
+!>
+!> \param T Current time (s)
+!> \param DT Current time step (s)
+!> \param CTRL_STOP_STATUS Flag for a contorl function stopping the FDS calculation
+!> \param RUN_START Flag indicating subroutine call is during initialization
 
-! Update the value of all sensing DEVICEs and associated output quantities
+SUBROUTINE UPDATE_CONTROLS(T,DT,CTRL_STOP_STATUS,RUN_START)
 
 REAL(EB), INTENT(IN) :: T,DT
 INTEGER :: NC,N
@@ -63,9 +68,15 @@ ENDIF
 
 END SUBROUTINE UPDATE_CONTROLS
 
-RECURSIVE SUBROUTINE EVALUATE_CONTROL(T,ID,DT,CTRL_STOP_STATUS)
 
-! Update the value of all sensing DEVICEs and associated output quantities
+!> \brief Recursive function that updates a single control function
+!>
+!> \param T Current time (s)
+!> \param ID Index in the array CONTROL for the function being evaluated
+!> \param DT Current time step (s)
+!> \param CTRL_STOP_STATUS Flag for a control function stopping the FDS calculation
+
+RECURSIVE SUBROUTINE EVALUATE_CONTROL(T,ID,DT,CTRL_STOP_STATUS)
 
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 USE GLOBAL_CONSTANTS, ONLY: RESTART_CLOCK
