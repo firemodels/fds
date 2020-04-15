@@ -16,6 +16,9 @@ global X3LO_RT X3HI_RT
 
 global BODINT_PLANE3
 
+global XIAXIS XJAXIS XKAXIS
+
+
 ierr = 1;
 
 % Now allocate BODINT_PLANE:
@@ -422,33 +425,32 @@ for IG=1:N_GEOMETRY
             SEG(NOD1:NOD2) = [ IND_P(NOD2), IND_P(NOD1) ];
          end
          % Find if oriented segment is in list:
+         EDGE_TRI = GEOM(IG).FACE_EDGES(EDG1,IWSEL); % 1st edge: Ed1 NOD1-NOD2, Ed2 NOD2-NOD3, Ed3 NOD3-NOD1.
+         VEC3(1) = GEOM(IG).EDGE_FACES(1,EDGE_TRI);
+         VEC3(2) = GEOM(IG).EDGE_FACES(2,EDGE_TRI);
+         VEC3(3) = GEOM(IG).EDGE_FACES(4,EDGE_TRI);
          INLIST = false;
          for ISEG=1:BODINT_PLANE.NSEGS
-            % if ( ANY(BODINT_PLANE.SEGS(NOD1:NOD2,ISEG) == SEG(NOD1)) && &
-            %      ANY(BODINT_PLANE.SEGS(NOD1:NOD2,ISEG) == SEG(NOD2)) )
-            %    INLIST = true
-            %    break
-            % end
-            if ( (BODINT_PLANE.SEGS(NOD1,ISEG) == SEG(NOD1)) && ...
-                 (BODINT_PLANE.SEGS(NOD2,ISEG) == SEG(NOD2)) && ...
+            SEG_FLG = ((BODINT_PLANE.SEGS(NOD1,ISEG) == SEG(NOD1))  && ...
+                       (BODINT_PLANE.SEGS(NOD2,ISEG) == SEG(NOD2))) || ...
+                      ((BODINT_PLANE.SEGS(NOD1,ISEG) == SEG(NOD2))  && ...
+                       (BODINT_PLANE.SEGS(NOD2,ISEG) == SEG(NOD1)));
+            if (  SEG_FLG && ...
+                 (BODINT_PLANE.INDSEG(2,ISEG)  == VEC3(2))   && ...
+                 (BODINT_PLANE.INDSEG(3,ISEG)  == VEC3(3))   && ...
                  (BODINT_PLANE.INDSEG(4,ISEG)  == IG))
                INLIST = true;
                break
             end
-            % if ( (BODINT_PLANE.SEGS(NOD1,ISEG) == SEG(NOD2)) && &
-            %      (BODINT_PLANE.SEGS(NOD2,ISEG) == SEG(NOD1)) )
-            %    INLIST = true
-            %    break
-            % end
          end
          if (~INLIST)
             ISEG = BODINT_PLANE.NSEGS + 1;
             BODINT_PLANE.NSEGS = ISEG;
             BODINT_PLANE.SEGS(NOD1:NOD2,ISEG) = SEG;
-            EDGE_TRI = GEOM(IG).FACE_EDGES(EDG1,IWSEL); % 1st edge: Ed1 NOD1-NOD2, Ed2 NOD2-NOD3, Ed3 NOD3-NOD1.
-            VEC3(1) = GEOM(IG).EDGE_FACES(1,EDGE_TRI);
-            VEC3(2) = GEOM(IG).EDGE_FACES(2,EDGE_TRI);
-            VEC3(3) = GEOM(IG).EDGE_FACES(4,EDGE_TRI);
+%             EDGE_TRI = GEOM(IG).FACE_EDGES(EDG1,IWSEL); % 1st edge: Ed1 NOD1-NOD2, Ed2 NOD2-NOD3, Ed3 NOD3-NOD1.
+%             VEC3(1) = GEOM(IG).EDGE_FACES(1,EDGE_TRI);
+%             VEC3(2) = GEOM(IG).EDGE_FACES(2,EDGE_TRI);
+%             VEC3(3) = GEOM(IG).EDGE_FACES(4,EDGE_TRI);
             BODINT_PLANE.INDSEG(1:4,ISEG) = [ VEC3(1), VEC3(2), VEC3(3), IG ]';
          end
 
@@ -477,33 +479,32 @@ for IG=1:N_GEOMETRY
             SEG(NOD1:NOD2) = [ IND_P(NOD2), IND_P(NOD1) ];
          end
          % Find if oriented segment is in list:
+         EDGE_TRI = GEOM(IG).FACE_EDGES(EDG2,IWSEL); % 2nd edge: Ed1 NOD1-NOD2, Ed2 NOD2-NOD3, Ed3 NOD3-NOD1.
+         VEC3(1) = GEOM(IG).EDGE_FACES(1,EDGE_TRI);
+         VEC3(2) = GEOM(IG).EDGE_FACES(2,EDGE_TRI);
+         VEC3(3) = GEOM(IG).EDGE_FACES(4,EDGE_TRI);
          INLIST = false;
          for ISEG=1:BODINT_PLANE.NSEGS
-            % if ( ANY(BODINT_PLANE.SEGS(NOD1:NOD2,ISEG) == SEG(NOD1)) && &
-            %      ANY(BODINT_PLANE.SEGS(NOD1:NOD2,ISEG) == SEG(NOD2)) )
-            %    INLIST = true
-            %    break
-            % end
-            if ( (BODINT_PLANE.SEGS(NOD1,ISEG) == SEG(NOD1)) && ...
-                 (BODINT_PLANE.SEGS(NOD2,ISEG) == SEG(NOD2)) && ...
+            SEG_FLG = ((BODINT_PLANE.SEGS(NOD1,ISEG) == SEG(NOD1))  && ...
+                       (BODINT_PLANE.SEGS(NOD2,ISEG) == SEG(NOD2))) || ...
+                      ((BODINT_PLANE.SEGS(NOD1,ISEG) == SEG(NOD2))  && ...
+                       (BODINT_PLANE.SEGS(NOD2,ISEG) == SEG(NOD1)));
+            if (  SEG_FLG && ...
+                 (BODINT_PLANE.INDSEG(2,ISEG)  == VEC3(2))   && ...
+                 (BODINT_PLANE.INDSEG(3,ISEG)  == VEC3(3))   && ...
                  (BODINT_PLANE.INDSEG(4,ISEG)  == IG))
                INLIST = true;
                break
             end
-            % if ( (BODINT_PLANE.SEGS(NOD1,ISEG) == SEG(NOD2)) && &
-            %      (BODINT_PLANE.SEGS(NOD2,ISEG) == SEG(NOD1)) )
-            %    INLIST = true
-            %    break
-            % end
          end
          if (~INLIST)
             ISEG = BODINT_PLANE.NSEGS + 1;
             BODINT_PLANE.NSEGS = ISEG;
             BODINT_PLANE.SEGS(NOD1:NOD2,ISEG) = SEG;
-            EDGE_TRI = GEOM(IG).FACE_EDGES(EDG2,IWSEL); % 2nd edge: Ed1 NOD1-NOD2, Ed2 NOD2-NOD3, Ed3 NOD3-NOD1.
-            VEC3(1) = GEOM(IG).EDGE_FACES(1,EDGE_TRI);
-            VEC3(2) = GEOM(IG).EDGE_FACES(2,EDGE_TRI);
-            VEC3(3) = GEOM(IG).EDGE_FACES(4,EDGE_TRI);
+%             EDGE_TRI = GEOM(IG).FACE_EDGES(EDG2,IWSEL); % 2nd edge: Ed1 NOD1-NOD2, Ed2 NOD2-NOD3, Ed3 NOD3-NOD1.
+%             VEC3(1) = GEOM(IG).EDGE_FACES(1,EDGE_TRI);
+%             VEC3(2) = GEOM(IG).EDGE_FACES(2,EDGE_TRI);
+%             VEC3(3) = GEOM(IG).EDGE_FACES(4,EDGE_TRI);
             BODINT_PLANE.INDSEG(1:4,ISEG) = [ VEC3(1), VEC3(2), VEC3(3), IG ]';
          end
 
@@ -532,33 +533,32 @@ for IG=1:N_GEOMETRY
             SEG(NOD1:NOD2) = [ IND_P(NOD2), IND_P(NOD1) ];
          end
          % Find if oriented segment is in list:
+         EDGE_TRI = GEOM(IG).FACE_EDGES(EDG3,IWSEL); % 3rd edge: Ed1 NOD1-NOD2, Ed2 NOD2-NOD3, Ed3 NOD3-NOD1.
+         VEC3(1) = GEOM(IG).EDGE_FACES(1,EDGE_TRI);
+         VEC3(2) = GEOM(IG).EDGE_FACES(2,EDGE_TRI);
+         VEC3(3) = GEOM(IG).EDGE_FACES(4,EDGE_TRI);
          INLIST = false;
          for ISEG=1:BODINT_PLANE.NSEGS
-            % if ( ANY(BODINT_PLANE.SEGS(NOD1:NOD2,ISEG) == SEG(NOD1)) && &
-            %      ANY(BODINT_PLANE.SEGS(NOD1:NOD2,ISEG) == SEG(NOD2)) )
-            %    INLIST = true
-            %    break
-            % end
-            if ( (BODINT_PLANE.SEGS(NOD1,ISEG) == SEG(NOD1)) && ...
-                 (BODINT_PLANE.SEGS(NOD2,ISEG) == SEG(NOD2)) && ...
+            SEG_FLG = ((BODINT_PLANE.SEGS(NOD1,ISEG) == SEG(NOD1))  && ...
+                       (BODINT_PLANE.SEGS(NOD2,ISEG) == SEG(NOD2))) || ...
+                      ((BODINT_PLANE.SEGS(NOD1,ISEG) == SEG(NOD2))  && ...
+                       (BODINT_PLANE.SEGS(NOD2,ISEG) == SEG(NOD1)));
+            if (  SEG_FLG && ...
+                 (BODINT_PLANE.INDSEG(2,ISEG)  == VEC3(2))   && ...
+                 (BODINT_PLANE.INDSEG(3,ISEG)  == VEC3(3))   && ...
                  (BODINT_PLANE.INDSEG(4,ISEG)  == IG))
                INLIST = true;
                break
             end
-            % if ( (BODINT_PLANE.SEGS(NOD1,ISEG) == SEG(NOD2)) && &
-            %      (BODINT_PLANE.SEGS(NOD2,ISEG) == SEG(NOD1)) )
-            %    INLIST = true
-            %    break
-            % end
          end
          if (~INLIST)
             ISEG = BODINT_PLANE.NSEGS + 1;
             BODINT_PLANE.NSEGS = ISEG;
             BODINT_PLANE.SEGS(NOD1:NOD2,ISEG) = SEG;
-            EDGE_TRI = GEOM(IG).FACE_EDGES(EDG3,IWSEL); % 3rd edge: Ed1 NOD1-NOD2, Ed2 NOD2-NOD3, Ed3 NOD3-NOD1.
-            VEC3(1) = GEOM(IG).EDGE_FACES(1,EDGE_TRI);
-            VEC3(2) = GEOM(IG).EDGE_FACES(2,EDGE_TRI);
-            VEC3(3) = GEOM(IG).EDGE_FACES(4,EDGE_TRI);
+%             EDGE_TRI = GEOM(IG).FACE_EDGES(EDG3,IWSEL); % 3rd edge: Ed1 NOD1-NOD2, Ed2 NOD2-NOD3, Ed3 NOD3-NOD1.
+%             VEC3(1) = GEOM(IG).EDGE_FACES(1,EDGE_TRI);
+%             VEC3(2) = GEOM(IG).EDGE_FACES(2,EDGE_TRI);
+%             VEC3(3) = GEOM(IG).EDGE_FACES(4,EDGE_TRI);
             BODINT_PLANE.INDSEG(1:4,ISEG) = [ VEC3(1), VEC3(2), VEC3(3), IG ]';
          end
 
@@ -819,9 +819,11 @@ for ISEG=1:BODINT_PLANE.NSEGS
    % End nodes to cross:
    SEG(NOD1:NOD2) = BODINT_PLANE.SEGS(NOD1:NOD2,ISEG);
    
-   SEGS_NODE(SEG(NOD1)) = SEGS_NODE(SEG(NOD1))+1;
-   SEGS_NODE(SEG(NOD2)) = SEGS_NODE(SEG(NOD2))+1;
-
+   if(any(BODINT_PLANE.SEGTYPE(NOD1:NOD2,ISEG)~=IBM_GASPHASE))
+      SEGS_NODE(SEG(NOD1)) = SEGS_NODE(SEG(NOD1))+1;
+      SEGS_NODE(SEG(NOD2)) = SEGS_NODE(SEG(NOD2))+1;
+   end
+   
    XYZ1(IAXIS:KAXIS) = BODINT_PLANE.XYZ(IAXIS:KAXIS,SEG(NOD1));
    XYZ2(IAXIS:KAXIS) = BODINT_PLANE.XYZ(IAXIS:KAXIS,SEG(NOD2));
 
@@ -1037,11 +1039,82 @@ end
 
 % Loop nodes and test in SEG_NODES: if more than 2 segments end in the
 % node, note it in FACERT.
+MAX_SEG_NODE = max(SEGS_NODE(1:BODINT_PLANE.NNODS));
+ISEG_NODE    = zeros(MAX_SEG_NODE+1,BODINT_PLANE.NNODS);
+ANGS_NODE    = zeros(MAX_SEG_NODE  ,BODINT_PLANE.NNODS);
+for ISEG=1:BODINT_PLANE.NSEGS
+   % End nodes to cross:
+   if( any(BODINT_PLANE.SEGTYPE(NOD1:NOD2,ISEG)~=IBM_GASPHASE) )
+      SEG(NOD1:NOD2) = BODINT_PLANE.SEGS(NOD1:NOD2,ISEG);
+      DX2 = BODINT_PLANE.XYZ(X2AXIS,SEG(NOD2))-BODINT_PLANE.XYZ(X2AXIS,SEG(NOD1));
+      DX3 = BODINT_PLANE.XYZ(X3AXIS,SEG(NOD2))-BODINT_PLANE.XYZ(X3AXIS,SEG(NOD1));
+      for INOD=NOD1:NOD2
+         % Compute angle, for NOD2 the seg andgle is -ANG.
+         ANG=(NOD2-INOD)*atan2(DX3,DX2)+(INOD-NOD1)*atan2(-DX3,-DX2);
+         if(ANG < 0.); ANG=ANG+2*pi; end % Make angle from 0 to 2*pi.        
+         % Insert-add segment into ISEG_NODE depending on angle value:
+         NSN                          = ISEG_NODE(1,SEG(INOD));
+         ISEG_NODE(1      ,SEG(INOD)) = NSN+1;
+         FOUND=false;
+         ISEG2=1;
+         if(NSN>0)
+             for ISEG2=1:NSN
+                 if(ANGS_NODE(ISEG2,SEG(INOD)) > ANG)
+                     FOUND=true;
+                     break
+                 end
+             end
+         else
+            ISEG_NODE(ISEG2+1,SEG(INOD)) =  ISEG;
+            ANGS_NODE(ISEG2  ,SEG(INOD)) =   ANG;    
+            continue
+         end
+         if(FOUND)
+            for ISEG3=NSN+1:-1:ISEG2+1
+                ISEG_NODE(ISEG3+1,SEG(INOD)) = ISEG_NODE(ISEG3  ,SEG(INOD));
+                ANGS_NODE(ISEG3  ,SEG(INOD)) = ANGS_NODE(ISEG3-1,SEG(INOD));
+            end
+            ISEG_NODE(ISEG2+1,SEG(INOD)) =  ISEG;
+            ANGS_NODE(ISEG2  ,SEG(INOD)) =   ANG;    
+         else
+            ISEG_NODE(ISEG2+2,SEG(INOD)) =  ISEG;
+            ANGS_NODE(ISEG2+1,SEG(INOD)) =   ANG;    
+         end
+      end
+   end
+end
+
 for INOD = 1:BODINT_PLANE.NNODS
-    if(SEGS_NODE(INOD) < 3); continue; end
     
-    % X2AXIS, X3AXIS location of intersection:
-    XY(IAXIS:JAXIS) = [BODINT_PLANE.XYZ(X2AXIS,INOD) BODINT_PLANE.XYZ(X3AXIS,INOD)]; 
+   if(SEGS_NODE(INOD) < 3); continue; end
+      
+   % Test case of even number of segments:
+   if (mod(SEGS_NODE(INOD),2)==0) % Case of even number of segments.
+      % Test if circling around the node we have media discontinuity.
+      NSN=ISEG_NODE(1,INOD);
+      COUNT=0;
+      for ISEG=ISEG_NODE(2:NSN+1,INOD)'
+          COUNT=COUNT+1;
+          SEG = BODINT_PLANE.SEGS(NOD1:NOD2,ISEG);
+          if (INOD==SEG(NOD2))
+            CIRC_MED(COUNT) = BODINT_PLANE.SEGTYPE(NOD2,ISEG);
+          else
+            CIRC_MED(COUNT) = BODINT_PLANE.SEGTYPE(NOD1,ISEG);
+          end
+      end
+      CIRC_MED(COUNT+1) =  CIRC_MED(1);
+      CRS_FLG=false;
+      for COUNT=1:NSN
+          if(CIRC_MED(COUNT)==CIRC_MED(COUNT+1))
+              CRS_FLG=true;
+              break
+          end
+      end
+      if(~CRS_FLG); continue; end
+   end
+             
+   % X2AXIS, X3AXIS location of intersection:
+   XY(IAXIS:JAXIS) = [BODINT_PLANE.XYZ(X2AXIS,INOD) BODINT_PLANE.XYZ(X3AXIS,INOD)]; 
     
 
    XPOS = XY(IAXIS);

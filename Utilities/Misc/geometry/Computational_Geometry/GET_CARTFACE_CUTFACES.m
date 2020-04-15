@@ -10,6 +10,8 @@ global IBM_EGSC IBM_IDCE IBM_FGSC IBM_IDCF
 global IBM_MAXCEELEM_FACE IBM_MAXVERTS_FACE
 global IJK_COUNTED
 
+global SEG_FACE_F SEG_FACE2_F XYZVERT_F NFACE_F CFELEM_F NVERT_F
+
 ierr=1;
 
 
@@ -192,6 +194,8 @@ for IBNDINT=BNDINT_LOW:BNDINT_HIGH % 1,2 refers to block boundary faces, 3 to in
              SEG_FACE (NOD1:NOD2,1:IBM_MAXCEELEM_FACE)             = IBM_UNDEFINED;
              XYZVERT(IAXIS:KAXIS,1:IBM_MAXVERTS_FACE)              = 0.;
              ANGSEG(1:IBM_MAXCEELEM_FACE)                          = 0.;
+             BODNUM(1:IBM_MAXCEELEM_FACE)                          = 1000000000;
+             SEGTYPE(1:IBM_MAXCEELEM_FACE)                         = 0;
 
              % 1. Cartesian IBM_GASPHASE edges, cut-edges:
              % a. Make a list of segments:
@@ -410,6 +414,8 @@ for IBNDINT=BNDINT_LOW:BNDINT_HIGH % 1,2 refers to block boundary faces, 3 to in
                 NEDGE = MESHES(NM).CUT_EDGE(CEI).NEDGE;
                 for IEDGE=1:NEDGE
                    SEG(NOD1:NOD2) = MESHES(NM).CUT_EDGE(CEI).CEELEM(NOD1:NOD2,IEDGE);
+                   IBOD           = MESHES(NM).CUT_EDGE(CEI).INDSEG(4,IEDGE);
+                   STYPE          = MESHES(NM).CUT_EDGE(CEI).INDSEG(5,IEDGE);
 
                    % x,y,z of node 1:
                    XYZV(IAXIS:KAXIS) = MESHES(NM).CUT_EDGE(CEI).XYZVERT(IAXIS:KAXIS,SEG(NOD2));
@@ -420,14 +426,93 @@ for IBNDINT=BNDINT_LOW:BNDINT_HIGH % 1,2 refers to block boundary faces, 3 to in
                    [NVERT,INOD2,XYZVERT]=INSERT_FACE_VERT_LOC(IBM_MAXVERTS_FACE,XYZV,NVERT,XYZVERT);
 
                    % ADD segment:
-                   NSEG = NSEG + 1;
-                   SEG_FACE(NOD1:NOD2,NSEG) = [ INOD1, INOD2 ];
-                   DX3 = XYZVERT(X3AXIS,INOD2)-XYZVERT(X3AXIS,INOD1);
-                   DX2 = XYZVERT(X2AXIS,INOD2)-XYZVERT(X2AXIS,INOD1);
-                   ANGSEG(NSEG) = atan2(DX3,DX2);
+                   VEC(NOD1:NOD2) = [ INOD1, INOD2 ];
+
+                   % Insertion ADD segment:
+                   INLIST = false;
+                   for IDUM = 1:NSEG
+                       if( (SEG_FACE(NOD1,IDUM)==VEC(NOD1) && SEG_FACE(NOD2,IDUM)==VEC(NOD2)) )
+                           if (STYPE >=SEGTYPE(IDUM) && BODNUM(IDUM) > IBOD)
+                               BODNUM(IDUM)=IBOD;
+                               SEGTYPE(IDUM)=STYPE;
+                           end
+                           INLIST = true;
+                           break
+                       end
+                       if( (SEG_FACE(NOD2,IDUM)==VEC(NOD1) && SEG_FACE(NOD1,IDUM)==VEC(NOD2)) )
+                           if (STYPE >=SEGTYPE(IDUM) && BODNUM(IDUM) > IBOD)
+                               SEG_FACE(NOD1:NOD2,IDUM) = VEC(NOD1:NOD2)';
+                               BODNUM(IDUM)  =IBOD;
+                               SEGTYPE(IDUM) =STYPE;
+                           end
+                           INLIST = true;
+                           break
+                       end
+                   end
+                   if (~INLIST)
+                       NSEG = NSEG + 1;
+                       SEG_FACE(NOD1:NOD2,NSEG) = [ INOD1, INOD2 ];
+                       BODNUM(IDUM)             = IBOD;
+                       SEGTYPE(IDUM)            = STYPE;
+                       DX3 = XYZVERT(X3AXIS,INOD2)-XYZVERT(X3AXIS,INOD1);
+                       DX2 = XYZVERT(X2AXIS,INOD2)-XYZVERT(X2AXIS,INOD1);
+                       ANGSEG(NSEG) = atan2(DX3,DX2);
+
+                   end
 
                 end
              end
+
+
+             % Here expand SEG_FACE to contain all halfedges of STYPE=1:
+             COUNT=0;
+             SEG_FACEAUX (NOD1:NOD2,1:IBM_MAXCEELEM_FACE)             = IBM_UNDEFINED;
+             ANGSEGAUX(1:IBM_MAXCEELEM_FACE)                          = 0.;
+             for ISEG=1:NSEG
+                 COUNT=COUNT+1;
+                 SEG_FACEAUX (NOD1:NOD2,COUNT) = SEG_FACE(NOD1:NOD2,ISEG);
+                 ANGSEGAUX(COUNT) = ANGSEG(ISEG);
+                 if(SEGTYPE(ISEG)==1)
+                     COUNT=COUNT+1;
+                     SEG_FACEAUX (NOD1:NOD2,COUNT) = SEG_FACE(NOD2:-1:NOD1,ISEG);
+                     if(ANGSEG(ISEG) > 0.)
+                        ANGSEGAUX(COUNT) = ANGSEG(ISEG)-pi;
+                     else
+                        ANGSEGAUX(COUNT) = ANGSEG(ISEG)+pi;
+                     end
+                 end
+             end
+             SEG_FACE = SEG_FACEAUX;
+             ANGSEG   = ANGSEGAUX;
+             NSEG=COUNT;
+
+%              if(X1AXIS==JAXIS && INDI==25 && INDJ==21 && INDK==12)
+%                  disp(['1 Cartface cutface:' num2str([INDI INDJ INDK X1AXIS])])
+%                  figure
+%                  subplot(1,3,1)
+%                  hold on
+%                  a=0.001;
+%                  for ISEG=1:NSEG
+%                      XYZSEG(:,NOD1)=XYZVERT(:,SEG_FACE(NOD1,ISEG));
+%                      XYZSEG(:,NOD2)=XYZVERT(:,SEG_FACE(NOD2,ISEG));
+%                      plot3(XYZSEG(IAXIS,:),XYZSEG(JAXIS,:),XYZSEG(KAXIS,:),'r','Marker','o')
+%                  end
+%                  for IVERT=1:NVERT
+%                      text(XYZVERT(IAXIS,IVERT)+a,XYZVERT(JAXIS,IVERT)+a,...
+%                           XYZVERT(KAXIS,IVERT)+a,num2str(IVERT),'FontSize',10)
+%
+%                  end
+%                  xlabel('X')
+%                  ylabel('Y')
+%                  zlabel('Z')
+%                  axis equal
+%                  box on
+%                  view([45 45])
+%                  pause
+%
+%              end
+
+
 
              NOTDONE = true;
              while(NOTDONE)
@@ -463,6 +548,7 @@ for IBNDINT=BNDINT_LOW:BNDINT_HIGH % 1,2 refers to block boundary faces, 3 to in
                 SEG_FACE = SEG_FACEAUX;
                 ANGSEG   = ANGSEGAUX;
              end
+
 
              % Discard face with no conected edges:
              if ( NSEG == 0 )
@@ -501,6 +587,36 @@ for IBNDINT=BNDINT_LOW:BNDINT_HIGH % 1,2 refers to block boundary faces, 3 to in
                NODEDG_FACE(NEDI+1,INOD1) = ISEG;
              end
 
+%              if(X1AXIS==JAXIS && INDI==25 && INDJ==21 && INDK==12)
+%                  disp(['2 Cartface cutface:' num2str([INDI INDJ INDK X1AXIS])])
+%                  subplot(1,3,2)
+%                  hold on
+%                  a=0.001;
+%                  xlabel('X')
+%                  ylabel('Y')
+%                  zlabel('Z')
+%                  axis equal
+%                  box on
+%                  view([45 45])
+%
+%                  for ISEG=1:NSEG
+%                      XYZSEG(:,NOD1)=XYZVERT(:,SEG_FACE(NOD1,ISEG));
+%                      XYZSEG(:,NOD2)=XYZVERT(:,SEG_FACE(NOD2,ISEG));
+%                      plot3(XYZSEG(IAXIS,:),XYZSEG(JAXIS,:),XYZSEG(KAXIS,:),'r','Marker','o')
+%                      text(0.5*sum(XYZSEG(IAXIS,:))+a,0.5*sum(XYZSEG(JAXIS,:))+a,...
+%                           0.5*sum(XYZSEG(KAXIS,:))+a,num2str(ANGSEG(ISEG)),'FontSize',10)
+%                      pause
+%                  end
+%                  for IVERT=1:NVERT
+%                      text(XYZVERT(IAXIS,IVERT)+a,XYZVERT(JAXIS,IVERT)+a,...
+%                           XYZVERT(KAXIS,IVERT)+a,num2str(IVERT),'FontSize',10)
+%
+%                  end
+%                  pause
+%
+%              end
+
+
              % Now Reorder Segments, do tests:
              SEG_FACE2(NOD1:NOD3,1:IBM_MAXCEELEM_FACE) = IBM_UNDEFINED;  % [INOD1 INOD2 ICF]
              SEG_FLAG(1:IBM_MAXCEELEM_FACE) = true;
@@ -513,8 +629,8 @@ for IBNDINT=BNDINT_LOW:BNDINT_HIGH % 1,2 refers to block boundary faces, 3 to in
              SEG_FACE2(NOD1:NOD3,COUNT) = [ SEG_FACE(NOD1,NEWSEG), SEG_FACE(NOD2,NEWSEG), ICF ];
              SEG_FLAG(ISEG) = false;
              NSEG_LEFT      = NSEG - 1;
-             
-             
+
+
              % Infamous infinite loop:
              while(1)
 
@@ -571,7 +687,7 @@ for IBNDINT=BNDINT_LOW:BNDINT_HIGH % 1,2 refers to block boundary faces, 3 to in
                    end
                 end
 
-             end 
+             end
 
              % Load ordered nodes to CFELEM:
              NFACE = ICF;
@@ -600,6 +716,43 @@ for IBNDINT=BNDINT_LOW:BNDINT_HIGH % 1,2 refers to block boundary faces, 3 to in
              end
              CFELEM = CFELEM2;
              NFACE = NP;
+
+
+%              if(X1AXIS==JAXIS && INDI==25 && INDJ==21 && INDK==12)
+%                  disp(['3 Cartface cutface:' num2str([INDI INDJ INDK X1AXIS])])
+%                  subplot(1,3,3)
+%                  axis equal; box on;
+%                  view([45 45])
+%                  xlabel('X')
+%                  ylabel('Y')
+%                  zlabel('Z')
+%                  hold on
+%                  for JCF=1:NFACE
+%                      NELEM   = CFELEM(1,JCF)
+%                      CFELEM2 = CFELEM(2:NELEM+1,JCF);
+%                      [hp]=patch(XYZVERT(IAXIS,CFELEM2),XYZVERT(JAXIS,CFELEM2),XYZVERT(KAXIS,CFELEM2),'b','Marker','o');
+%                      set(hp,'FaceAlpha',0.3)
+%                      pause
+%                  end
+%                  a=0.0005;
+%                  for IVERT=1:NVERT
+%                      text(XYZVERT(IAXIS,IVERT)+a,XYZVERT(JAXIS,IVERT)+a,...
+%                           XYZVERT(KAXIS,IVERT)+a,num2str(IVERT),'FontSize',10)
+%                  end
+%                  pause
+%
+%              end
+%
+%
+%              if(INDI==12 && INDJ==12 && INDK==11 && X1AXIS==3)
+%                  disp(['Face=' num2str(MESHES(NM).N_CUTFACE_MESH + MESHES(NM).N_GCCUTFACE_MESH + 1)])
+%                  NVERT_F = NVERT;
+%                  NFACE_F = NFACE;
+%                  SEG_FACE_F = SEG_FACE;
+%                  SEG_FACE2_F = SEG_FACE2;
+%                  XYZVERT_F   = XYZVERT;
+%                  CFELEM_F    = CFELEM;
+%              end
 
              % Compute area and Centroid, in local x1, x2, x3 coords:
              AREAV(1:NFACE)                 = 0.;
@@ -696,6 +849,11 @@ for IBNDINT=BNDINT_LOW:BNDINT_HIGH % 1,2 refers to block boundary faces, 3 to in
 
                          % Area with hole, AREA1 has negative sign:
                          AREAH = AREA2 + AREA1;
+
+                         if(abs(AREAH) < GEOMEPS)
+                             FINFACE(ICF2) = ICF1;
+                             continue
+                         end
 
                          % Centroid with hole:
                          XYC2(1:2) = XYZCEN( [ JAXIS, KAXIS ] , ICF2 );  % [x2axis x3axis]
@@ -814,9 +972,9 @@ for IBNDINT=BNDINT_LOW:BNDINT_HIGH % 1,2 refers to block boundary faces, 3 to in
             end % JJ
          end % KK
       end % II
-   end 
+   end
 
-end 
+end
 
 if (BNDINT_FLAG)
    % Here we mark faces on the guard-cell region for the computaiton of grid aligned INBOUNDARY faces
@@ -947,7 +1105,7 @@ if (BNDINT_FLAG)
 
 else
    clear IJK_COUNTED
-   
+
 end
 
 ierr=0;

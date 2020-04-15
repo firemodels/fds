@@ -13,13 +13,15 @@ global BODINT_PLANE IBM_INBOUNDCF
 global CELLRT
 
 global X1FACE X2FACE X3FACE DX1FACE DX2FACE DX3FACE DX1CELL DX2CELL DX3CELL
-global X2LO X2HI X3LO X3HI 
+global X2LO X2HI X3LO X3HI
 global X1CELL X2CELL X3CELL X2LO_CELL X2HI_CELL X3LO_CELL X3HI_CELL
 
 
 global basedir
 
 global ISPCELL SPCELL_LIST
+
+global N_GEOMETRY
 
 plotflg = false;
 
@@ -35,7 +37,7 @@ SEG_FLAG=zeros(1,IBM_MAXCEELEM_FACE);
 if (BNDINT_FLAG)
    MESHES(NM).N_SPCELL=0;
    MESHES(NM).SPCELL_LIST=[0 0 0]';
-   IJK_COUNT = zeros(IEND,JEND,KEND); 
+   IJK_COUNT = zeros(IEND,JEND,KEND);
    IJK_COUNTF= zeros(IEND,JEND,KEND,MAX_DIM);
    ILO = ILO_CELL; IHI = IHI_CELL;
    JLO = JLO_CELL; JHI = JHI_CELL;
@@ -209,13 +211,13 @@ end
                   % Test that x1-x2-x3 obeys right hand rule:
                   VAL = (XYEL(IAXIS,NOD2)-XYEL(IAXIS,NOD1)) * (XYEL(JAXIS,NOD3)-XYEL(JAXIS,NOD1))- ...
                         (XYEL(JAXIS,NOD2)-XYEL(JAXIS,NOD1)) * (XYEL(IAXIS,NOD3)-XYEL(IAXIS,NOD1));
-                    
-                  if (VAL >= 0.)  
+
+                  if (VAL >= 0.)
                      BODINT_PLANE.X1NVEC(ITRI) = 1;
                   else
                      BODINT_PLANE.X1NVEC(ITRI) =-1;
                   end
-                     
+
                   % Transformation Matrix for this triangle in x2x3 plane:
                   if (BODINT_PLANE.X1NVEC(ITRI) < 0.) % Rotate node 2 and 3 locations
                      DUMMY(IAXIS:JAXIS)     = XYEL(IAXIS:JAXIS,NOD2)';
@@ -235,8 +237,8 @@ end
                   BODINT_PLANE.AINV(2,2,ITRI) =  A_COEF / DENOM;
 
                end
-            
-               
+
+
                % There are triangles aligned with this x1pln:
                % Run by Face:
                % First solid Faces: x1 Faces, Check where they lay:
@@ -264,7 +266,7 @@ end
 
                         % Triangle - face intersection vertices and edges:
                         [INB_FLG,FNVERT,XYVERT,FNEDGE,CEELEM,INDSEG]=GET_TRIANG_FACE_INT(X2AXIS,X3AXIS,FVERT,CEI,NM);
-                        
+
                         % XYvert to XYZvert:
                         if ( INB_FLG )
                            XYZVERTF = 0.;
@@ -275,14 +277,14 @@ end
                            % Test for edges inside SOLID Region:
                            SOLID_EDGE(1:FNEDGE) = false;
                            for IEDGE=1:FNEDGE
-                               
+
                                % No body associated with segment. Might not be needed.
                                IG = INDSEG(4,IEDGE);
-                               if( IG < 1); continue; end                        
-                               SEG(NOD1:NOD2)  = CEELEM(NOD1:NOD2,IEDGE); 
+                               if( IG < 1); continue; end
+                               SEG(NOD1:NOD2)  = CEELEM(NOD1:NOD2,IEDGE);
                                XP(IAXIS:KAXIS) = 0.5*(XYZVERTF(IAXIS:KAXIS,SEG(NOD1)) + ...
                                                       XYZVERTF(IAXIS:KAXIS,SEG(NOD2)));
-                               
+
                                % Direction NP:
                                NP(IAXIS:KAXIS) = 0.;
                                for I_NP=1:INDSEG(1,IEDGE)
@@ -292,17 +294,17 @@ end
                                end
                                NP = NP/norm(NP);
                                [val,XAXIS] = max(abs(NP(IAXIS:KAXIS)));
-                               
+
                                % Perturb XP in the average normal NP
                                % direction:
-                               if(INDSEG(1,IEDGE) > 1) 
+                               if(INDSEG(1,IEDGE) > 1)
                                    XP = XP + 10.*GEOMEPS*NP;
                                end
-                               
+
                                [SOLID_EDGE(IEDGE)]=GET_IS_SOLID_3D(XAXIS,XP,INDIF,INDJF,INDKF);
 
                            end
-                           
+
                            % Now drop SEGS with SOLID_EDGE(IEDGE)=true:
                            COUNT = 0;
                            for IEDGE=1:FNEDGE
@@ -316,7 +318,7 @@ end
                            CEELEM(NOD1:NOD2,COUNT+1:FNEDGE)=IBM_UNDEFINED;
                            INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,COUNT+1:FNEDGE)=IBM_UNDEFINED;
                            FNEDGE = COUNT;
-                     
+
                            % Here ADD nodes and vertices to what is already
                            % there:
                            if (CEI == 0) % We need a new entry in CUT_EDGE
@@ -347,11 +349,11 @@ end
                                     if (CEELEM(NOD2,IEDGE)==IVERT); CEELEM(NOD2,IEDGE)=INOD; end
                                  end
                               end
-                              
-                              
+
+
                               COUNT = NEDGE_OLD;
                               for IEDGE=1:FNEDGE
-                              
+
                                  % Here find if edge is already counted.
                                  FOUND=false;
                                  for IEOLD=1:NEDGE_OLD
@@ -366,17 +368,17 @@ end
                                  if (MESHES(NM).CUT_EDGE(CEI).INDSEG(4,IEOLD)    ~= INDSEG(4,IEDGE)); continue; end
                                  FOUND=true;
                                  end
-                                 if (FOUND); continue; end 
-                                 
+                                 if (FOUND); continue; end
+
                                  COUNT=COUNT+1;
                                  MESHES(NM).CUT_EDGE(CEI).CEELEM(NOD1:NOD2,COUNT) = CEELEM(NOD1:NOD2,IEDGE);
                                  MESHES(NM).CUT_EDGE(CEI).INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,COUNT)= ...
                                                           INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,IEDGE);
-                                                      
+
                               end
-                              
-                              
-                              
+
+
+
                               MESHES(NM).CUT_EDGE(CEI).NVERT = NVERT_AUX;
                               MESHES(NM).CUT_EDGE(CEI).NEDGE = COUNT;
                            end
@@ -385,7 +387,7 @@ end
                      end
                   end
                end
-               
+
             end % I
          end % J
       end % K
@@ -420,7 +422,7 @@ for K=KLO:KHI
          if (CELLRT(I,J,K)); continue; end; % Special cell with bod-bod or self intersection.
 
          if (IJK_COUNT(I,J,K)); continue; end; IJK_COUNT(I,J,K)=true;
-         
+
          % Face type of bounding Cartesian faces:
          FSID_XYZ(LOW_IND ,IAXIS) = MESHES(NM).FCVAR(I-FCELL  ,J,K,IBM_FGSC,IAXIS);
          FSID_XYZ(HIGH_IND,IAXIS) = MESHES(NM).FCVAR(I-FCELL+1,J,K,IBM_FGSC,IAXIS);
@@ -458,7 +460,7 @@ for K=KLO:KHI
                      SEG(NOD1:NOD2) = MESHES(NM).CUT_EDGE(CEI).CEELEM(NOD1:NOD2,IEDGE)';
                      STRI(1:IBM_MAX_WSTRIANG_SEG+2) = ...
                      MESHES(NM).CUT_EDGE(CEI).INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,IEDGE)';
-                 
+
                      % x,y,z of node 1:
                      XYZ(IAXIS:KAXIS) = MESHES(NM).CUT_EDGE(CEI).XYZVERT(IAXIS:KAXIS,SEG(NOD1))';
                      [NVERT,INOD1,XYZVERT]=INSERT_FACE_VERT_LOC(IBM_MAXVERTS_FACE,XYZ,NVERT,XYZVERT);
@@ -529,7 +531,11 @@ for K=KLO:KHI
                      EQUAL1 = SEG_CELL(INDVERTBOD(IEQ1),IDUM) == VEC(INDVERTBOD(IEQ1));
                      if (~EQUAL1); break; end
                   end
-                  if ( EQUAL1 )
+                  for IEQ2=1:3
+                     EQUAL2 = SEG_CELL(INDVERTBOD(IEQ2),IDUM) == VEC(INDVERTBOD2(IEQ2));
+                     if (~EQUAL2); break; end
+                  end
+                  if ( EQUAL1 || EQUAL2 )
                      if ( SEG_CELL(3,IDUM) > VEC(3) )
                         % for NOTHING:
                      elseif (SEG_CELL(3,IDUM) < VEC(3))
@@ -549,10 +555,11 @@ for K=KLO:KHI
             end
          end
 
-         
+
+
          % Drop segments that are unconnected:
          VERT_SEGS = zeros(1,NVERT);
-         for IDUM = 1:NSEG    
+         for IDUM = 1:NSEG
          VERT_SEGS(SEG_CELL(NOD1,IDUM)) = VERT_SEGS(SEG_CELL(NOD1,IDUM))+1;
          VERT_SEGS(SEG_CELL(NOD2,IDUM)) = VERT_SEGS(SEG_CELL(NOD2,IDUM))+1;
          end
@@ -566,7 +573,61 @@ for K=KLO:KHI
          end
          end
          NSEG = COUNT;
-                  
+
+
+%          if(I==25 && J==22 && K==8)
+%              disp('1 Found cell 25,22,8')
+%              SEG_CELL(1:NOD2+IBM_MAX_WSTRIANG_SEG+2,1:NSEG)
+%              XYZVERT(:,1:NVERT)'
+%              figure
+%              hold on
+%              a=0.001;
+%              colr = ['-or'; '-ob'; '-om'];
+%              for ISEG=1:NSEG
+%                  XYZSEG(:,NOD1)=XYZVERT(:,SEG_CELL(NOD1,ISEG));
+%                  XYZSEG(:,NOD2)=XYZVERT(:,SEG_CELL(NOD2,ISEG));
+%                  IG         =max(1,SEG_CELL(6,ISEG));
+%                  plot3(XYZSEG(IAXIS,:),XYZSEG(JAXIS,:),XYZSEG(KAXIS,:),colr(IG,1:3),'LineWidth',2)
+%                  text(0.5*(sum(XYZSEG(IAXIS,:)))+a,0.5*(sum(XYZSEG(JAXIS,:)))+a,...
+%                       0.5*(sum(XYZSEG(KAXIS,:)))+a,num2str(SEG_CELL(4,ISEG)),'FontSize',10)
+%              end
+%              for IVERT=1:NVERT
+%                  text(XYZVERT(IAXIS,IVERT)+a,XYZVERT(JAXIS,IVERT)+a,...
+%                       XYZVERT(KAXIS,IVERT)+a,num2str(IVERT),'FontSize',10)
+%
+%              end
+%              xlabel('X')
+%              ylabel('Y')
+%              zlabel('Z')
+%
+%              P(1,IAXIS:KAXIS) = [XFACE(I-1) YFACE(J-1) ZFACE(K-1)];
+%              P(2,IAXIS:KAXIS) = [XFACE(I  ) YFACE(J-1) ZFACE(K-1)];
+%              P(3,IAXIS:KAXIS) = [XFACE(I  ) YFACE(J  ) ZFACE(K-1)];
+%              P(4,IAXIS:KAXIS) = [XFACE(I-1) YFACE(J  ) ZFACE(K-1)];
+%              P(5,IAXIS:KAXIS) = [XFACE(I-1) YFACE(J-1) ZFACE(K  )];
+%              P(6,IAXIS:KAXIS) = [XFACE(I  ) YFACE(J-1) ZFACE(K  )];
+%              P(7,IAXIS:KAXIS) = [XFACE(I  ) YFACE(J  ) ZFACE(K  )];
+%              P(8,IAXIS:KAXIS) = [XFACE(I-1) YFACE(J  ) ZFACE(K  )];
+%
+%              FC(1,:) = [ 1 4 8 5 ];
+%              FC(2,:) = [ 2 3 7 6 ];
+%              FC(3,:) = [ 1 5 6 2 ];
+%              FC(4,:) = [ 4 8 7 3 ];
+%              FC(5,:) = [ 1 2 3 4 ];
+%              FC(6,:) = [ 5 6 7 8 ];
+%
+%              for IFC=1:6
+%                  [hp]=patch(P(FC(IFC,:),IAXIS),P(FC(IFC,:),JAXIS),P(FC(IFC,:),KAXIS),'r');
+%                  set(hp,'FaceAlpha',0.3)
+%              end
+%
+%              %axis equal
+%              box on
+%              view([45 45])
+%              pause
+%          end
+
+
          % Now obtain body-triangle combinations present:
          BOD_TRI = IBM_UNDEFINED;
          NBODTRI = 0;
@@ -648,7 +709,7 @@ for K=KLO:KHI
 
             IBOD = BOD_TRI(1,ICF);
             ITRI = BOD_TRI(2,ICF);
-            
+
             SEG_FACE  = IBM_UNDEFINED;
             NSEG_FACE = 0;
             for ISEG=1:NSEG
@@ -704,20 +765,20 @@ for K=KLO:KHI
 
                % Plot cell and cut-faces if there is no convergence:
                if ( CTR > NSEG_FACE^3 )
-                   
-                      %disp(['Error GET_CARTCELL_CUTFACES: ctr > nseg_face^3 ,' num2str(BNDINT_FLAG) ',' ...
-                      %      num2str(I) ',' num2str(J) ',' num2str(K) ',' num2str(NCUTFACE) ',' ...
-                      %      num2str(MESHES(NM).CUT_FACE(NCUTFACE).NFACE)])
+
+%                       disp(['Error GET_CARTCELL_CUTFACES: ctr > nseg_face^3 ,' num2str(BNDINT_FLAG) ',' ...
+%                            num2str(I) ',' num2str(J) ',' num2str(K) ',' num2str(NCUTFACE) ',' ...
+%                            num2str(MESHES(NM).CUT_FACE(NCUTFACE).NFACE)])
                       CYCLE_CELL=true;
                       MESHES(NM).N_SPCELL = MESHES(NM).N_SPCELL + 1;
                       MESHES(NM).SPCELL_LIST(IAXIS:KAXIS,MESHES(NM).N_SPCELL) = [I J K]';
-                      
 
-                      
+
+
 %                         file=[basedir '/Cartcell_cutfaces_' num2str(I) '_' num2str(J) '_' num2str(K) '.dat'];
-%                         %disp(['Writing file : ' file]) 
+%                         %disp(['Writing file : ' file])
 %                         [fid]=fopen(file,'w');
-% 
+%
 %                         % Info pertaining to the Cartesian Cell:
 %                         fprintf(fid,'I,J,K:\n');
 %                         fprintf(fid,'%d  %d  %d  %0.6g\n',I,J,K,GEOMEPS);
@@ -749,18 +810,18 @@ for K=KLO:KHI
 %                            fprintf(fid,'%d %d\n',BOD_TRI(1:2,IDUM)');
 %                         end
 %                         fclose(fid);
-%                         %disp(['File written.']) 
+%                         %disp(['File written.'])
                     break
 
                end
 
             end
             if(CYCLE_CELL); break; end
-            
+
             if ( COUNTR ~= NSEG_FACE)
                 disp('Building INBOUND faces: ~isequal(countr,nseg)')
             end
-            
+
             % Using triangles normal, reorder nodes as in right hand rule.
             NORMTRI(IAXIS:KAXIS) = GEOM(IBOD).FACES_NORMAL(IAXIS:KAXIS,ITRI);
 
@@ -911,12 +972,12 @@ for K=KLO:KHI
             MESHES(NM).CUT_FACE(NCUTFACE).SURF_INDEX(NCF) = GEOM(IBOD).SURFS(ITRI);
 
          end
-         
+
          if(CYCLE_CELL)
-             
+
              CELLRT(I,J,K) = 1;
              IJK_COUNT(I,J,K)=false;
-             
+
              MESHES(NM).CCVAR(I,J,K,IBM_IDCF) = IBM_UNDEFINED;
              MESHES(NM).CUT_FACE(NCUTFACE).NVERT  = 0;
              MESHES(NM).CUT_FACE(NCUTFACE).NFACE  = 0;
@@ -924,7 +985,7 @@ for K=KLO:KHI
              MESHES(NM).CUT_FACE(NCUTFACE).STATUS = IBM_UNDEFINED;
              MESHES(NM).CUT_FACE(NCUTFACE).XYZVERT=0;
              MESHES(NM).CUT_FACE(NCUTFACE).CEELEM=0;
-        
+
              % This is a cut-face, allocate space:
              NCUTFACE = NCUTFACE-1; %MESHES(NM).N_CUTFACE_MESH + MESHES(NM).N_GCCUTFACE_MESH + 1;
              if (BNDINT_FLAG)
@@ -947,7 +1008,7 @@ for K=KLO:KHI
          if ( MESHES(NM).CCVAR(I,J,K,IBM_CGSC) ~= IBM_CUTCFE ); continue; end
          if (~CELLRT(I,J,K)); continue; end; % Special cell with bod-bod or self intersection.
          if (IJK_COUNT(I,J,K)); continue; end; IJK_COUNT(I,J,K)=true;
-         
+
          % Start cut-cell INB cut-faces computation:
          % Loop local arrays to cell:
          NSEG      = 0;
@@ -977,7 +1038,7 @@ for K=KLO:KHI
                      SEG(NOD1:NOD2) = MESHES(NM).CUT_EDGE(CEI).CEELEM(NOD1:NOD2,IEDGE)';
                      STRI(1:IBM_MAX_WSTRIANG_SEG+2) = ...
                      MESHES(NM).CUT_EDGE(CEI).INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,IEDGE)';
-                 
+
                      % x,y,z of node 1:
                      XYZ(IAXIS:KAXIS) = MESHES(NM).CUT_EDGE(CEI).XYZVERT(IAXIS:KAXIS,SEG(NOD1))';
                      [NVERT,INOD1,XYZVERT]=INSERT_FACE_VERT_LOC(IBM_MAXVERTS_FACE,XYZ,NVERT,XYZVERT);
@@ -985,9 +1046,9 @@ for K=KLO:KHI
                      XYZ(IAXIS:KAXIS) = MESHES(NM).CUT_EDGE(CEI).XYZVERT(IAXIS:KAXIS,SEG(NOD2))';
                      [NVERT,INOD2,XYZVERT]=INSERT_FACE_VERT_LOC(IBM_MAXVERTS_FACE,XYZ,NVERT,XYZVERT);
 
-                     VEC(NOD1:NOD2) = (HIGH_IND-ILH)*[ INOD1, INOD2 ] + (ILH-LOW_IND)*[ INOD2, INOD1 ]; 
+                     VEC(NOD1:NOD2) = (HIGH_IND-ILH)*[ INOD1, INOD2 ] + (ILH-LOW_IND)*[ INOD2, INOD1 ];
                      VEC(NOD2+1:NOD2+IBM_MAX_WSTRIANG_SEG+2) = STRI(1:IBM_MAX_WSTRIANG_SEG+2);
-                     
+
                      % Insertion ADD segment:
                      INLIST = false;
                      for IDUM = 1:NSEG
@@ -1016,8 +1077,8 @@ for K=KLO:KHI
                          NSEG = NSEG + 1;
                          SEG_CELL(1:NOD2+IBM_MAX_WSTRIANG_SEG+2,NSEG) = VEC(1:NOD2+IBM_MAX_WSTRIANG_SEG+2);
                          SEG_POS(NSEG) = (2*ILH-3)*FAXIS;
-                     end               
-                     
+                     end
+
                   end
                end
             end
@@ -1025,7 +1086,7 @@ for K=KLO:KHI
 
          % Drop segments that are unconnected:
          VERT_SEGS = zeros(1,NVERT);
-         for IDUM = 1:NSEG    
+         for IDUM = 1:NSEG
          VERT_SEGS(SEG_CELL(NOD1,IDUM)) = VERT_SEGS(SEG_CELL(NOD1,IDUM))+1;
          VERT_SEGS(SEG_CELL(NOD2,IDUM)) = VERT_SEGS(SEG_CELL(NOD2,IDUM))+1;
          end
@@ -1039,58 +1100,90 @@ for K=KLO:KHI
          end
          end
          NSEG = COUNT;
-         
+
+%          if(I==36 && J==17 && K==24)
+%              disp('2 Found cell 36,17,24')
+%              SEG_CELL(1:NOD2+IBM_MAX_WSTRIANG_SEG+2,1:NSEG)
+%              XYZVERT(:,1:NVERT)'
+%              figure
+%              hold on
+%              a=0.001;
+%              colr = ['-or'; '-ob'; '-om';'-og';'-oc'];
+%              for ISEG=1:NSEG
+%                  XYZSEG(:,NOD1)=XYZVERT(:,SEG_CELL(NOD1,ISEG));
+%                  XYZSEG(:,NOD2)=XYZVERT(:,SEG_CELL(NOD2,ISEG));
+%                  IG         =max(1,SEG_CELL(6,ISEG));
+%                  plot3(XYZSEG(IAXIS,:),XYZSEG(JAXIS,:),XYZSEG(KAXIS,:),colr(IG,1:3),'LineWidth',2)
+%                  text(0.5*(sum(XYZSEG(IAXIS,:)))+a,0.5*(sum(XYZSEG(JAXIS,:)))+a,...
+%                       0.5*(sum(XYZSEG(KAXIS,:)))+a,num2str(SEG_CELL(4,ISEG)),'FontSize',10)
+%              end
+%              for IVERT=1:NVERT
+%                  text(XYZVERT(IAXIS,IVERT)+a,XYZVERT(JAXIS,IVERT)+a,...
+%                       XYZVERT(KAXIS,IVERT)+a,num2str(IVERT),'FontSize',10)
+%
+%              end
+%              xlabel('X')
+%              ylabel('Y')
+%              zlabel('Z')
+%              %axis equal
+%              box on
+%              view([45 45])
+%              pause
+%          end
+
+
          if(NSEG < 3 ); continue; end
 
          % Ear clipping algorithm by TRIANGLE and BODY:
          % 1. Define closed 3D polyline:
          [IFLG,NPOLY,ILO_POLY,NSG_POLY,NSEG,SEG_CELL,SEG_POS]=GET_CLOSED_POLYLINES(NSEG,SEG_CELL,SEG_POS);
 
+
          % Figure:
          if (plotflg || (IFLG ~=0))
          scrsz = get(groot,'ScreenSize');
          figure('Position',[1 scrsz(4)/2 scrsz(3)/2 scrsz(4)/2])
-         subplot(1,3,1)
+%          subplot(1,3,1)
          hold on
          colr = ['-or'; '-ob'; '-om'];
-         for ISEG=1:NSEG
-             XYZSEG(:,1)=XYZVERT(:,SEG_CELL(1,ISEG));
-             XYZSEG(:,2)=XYZVERT(:,SEG_CELL(2,ISEG));
-             IG         =SEG_CELL(6,ISEG);
-             plot3(XYZSEG(1,:),XYZSEG(2,:),XYZSEG(3,:),colr(IG,1:3),'LineWidth',2)  
-             
-             if(BNDINT_FLAG)
-             P(1,IAXIS:KAXIS) = [MESHES(NM).X(I-1) MESHES(NM).Y(J-1) MESHES(NM).Z(K-1)];
-             P(2,IAXIS:KAXIS) = [MESHES(NM).X(I  ) MESHES(NM).Y(J-1) MESHES(NM).Z(K-1)];
-             P(3,IAXIS:KAXIS) = [MESHES(NM).X(I  ) MESHES(NM).Y(J  ) MESHES(NM).Z(K-1)];
-             P(4,IAXIS:KAXIS) = [MESHES(NM).X(I-1) MESHES(NM).Y(J  ) MESHES(NM).Z(K-1)];
-             P(5,IAXIS:KAXIS) = [MESHES(NM).X(I-1) MESHES(NM).Y(J-1) MESHES(NM).Z(K  )];
-             P(6,IAXIS:KAXIS) = [MESHES(NM).X(I  ) MESHES(NM).Y(J-1) MESHES(NM).Z(K  )];
-             P(7,IAXIS:KAXIS) = [MESHES(NM).X(I  ) MESHES(NM).Y(J  ) MESHES(NM).Z(K  )];
-             P(8,IAXIS:KAXIS) = [MESHES(NM).X(I-1) MESHES(NM).Y(J  ) MESHES(NM).Z(K  )];
-             
-             FC(1,:) = [ 1 4 8 5 ];
-             FC(2,:) = [ 2 3 7 6 ];
-             FC(3,:) = [ 1 5 6 2 ];
-             FC(4,:) = [ 4 8 7 3 ];
-             FC(5,:) = [ 1 2 3 4 ];
-             FC(6,:) = [ 5 6 7 8 ];
-             
-             for IFC=1:6
-                 [hp]=patch(P(FC(IFC,:),IAXIS),P(FC(IFC,:),JAXIS),P(FC(IFC,:),KAXIS),'r');
-                 set(hp,'FaceAlpha',0.1)
-             end
-             end
-             
+%          for ISEG=1:NSEG
+%              XYZSEG(:,1)=XYZVERT(:,SEG_CELL(1,ISEG));
+%              XYZSEG(:,2)=XYZVERT(:,SEG_CELL(2,ISEG));
+%              IG         =SEG_CELL(6,ISEG);
+%              plot3(XYZSEG(1,:),XYZSEG(2,:),XYZSEG(3,:),colr(IG,1:3),'LineWidth',2)
+%
+%              if(BNDINT_FLAG)
+%              P(1,IAXIS:KAXIS) = [MESHES(NM).X(I-1) MESHES(NM).Y(J-1) MESHES(NM).Z(K-1)];
+%              P(2,IAXIS:KAXIS) = [MESHES(NM).X(I  ) MESHES(NM).Y(J-1) MESHES(NM).Z(K-1)];
+%              P(3,IAXIS:KAXIS) = [MESHES(NM).X(I  ) MESHES(NM).Y(J  ) MESHES(NM).Z(K-1)];
+%              P(4,IAXIS:KAXIS) = [MESHES(NM).X(I-1) MESHES(NM).Y(J  ) MESHES(NM).Z(K-1)];
+%              P(5,IAXIS:KAXIS) = [MESHES(NM).X(I-1) MESHES(NM).Y(J-1) MESHES(NM).Z(K  )];
+%              P(6,IAXIS:KAXIS) = [MESHES(NM).X(I  ) MESHES(NM).Y(J-1) MESHES(NM).Z(K  )];
+%              P(7,IAXIS:KAXIS) = [MESHES(NM).X(I  ) MESHES(NM).Y(J  ) MESHES(NM).Z(K  )];
+%              P(8,IAXIS:KAXIS) = [MESHES(NM).X(I-1) MESHES(NM).Y(J  ) MESHES(NM).Z(K  )];
+%
+%              FC(1,:) = [ 1 4 8 5 ];
+%              FC(2,:) = [ 2 3 7 6 ];
+%              FC(3,:) = [ 1 5 6 2 ];
+%              FC(4,:) = [ 4 8 7 3 ];
+%              FC(5,:) = [ 1 2 3 4 ];
+%              FC(6,:) = [ 5 6 7 8 ];
+%
+%              for IFC=1:6
+%                  [hp]=patch(P(FC(IFC,:),IAXIS),P(FC(IFC,:),JAXIS),P(FC(IFC,:),KAXIS),'r');
+%                  set(hp,'FaceAlpha',0.1)
+%              end
+%              end
+%
+%          end
+%          xlabel('X')
+%          ylabel('Y')
+%          zlabel('Z')
+%          axis equal
+%          box on
+%          view([45 45])
          end
-         xlabel('X')
-         ylabel('Y')
-         zlabel('Z')
-         axis equal
-         box on
-         view([45 45])
-         end
-         
+
          if(IFLG ~=0)
              disp(['IFLG ~=0, couldn''t close polyline, ' num2str(BNDINT_FLAG) ': ' ...
                     num2str(I) ', ' num2str(J) ', ' num2str(K)])
@@ -1099,19 +1192,20 @@ for K=KLO:KHI
              XYZVERT
          end
          if (plotflg || (IFLG ~=0))
-         a=0.01;
-         subplot(1,3,2)
+         a=0.02/3*(DXCELL(I)+DYCELL(J)+DZCELL(K));
+         subplot(1,2,1)
          hold on
+         [ierr]=plot_geometries(N_GEOMETRY,GEOM,0);
          colr = ['-or'; '-ob'; '-om'];
          for ISEG=1:NSEG
              XYZSEG(:,1)=XYZVERT(:,SEG_CELL(1,ISEG));
              XYZSEG(:,2)=XYZVERT(:,SEG_CELL(2,ISEG));
              IG         =max(1,SEG_CELL(6,ISEG));
-             plot3(XYZSEG(1,:),XYZSEG(2,:),XYZSEG(3,:),colr(IG,1:3),'LineWidth',2) 
-             
+             plot3(XYZSEG(1,:),XYZSEG(2,:),XYZSEG(3,:),colr(IG,1:3),'LineWidth',2)
+
              text(0.5*(sum(XYZSEG(IAXIS,:)))+a,0.5*(sum(XYZSEG(JAXIS,:)))+a,...
-                  0.5*(sum(XYZSEG(KAXIS,:)))+a,num2str(SEG_CELL(4,ISEG)),'FontSize',10)
-             
+                  0.5*(sum(XYZSEG(KAXIS,:)))+a,num2str(SEG_CELL(4,ISEG)),'FontSize',10,'Color','b')
+
              if(BNDINT_FLAG)
              P(1,IAXIS:KAXIS) = [MESHES(NM).X(I-1) MESHES(NM).Y(J-1) MESHES(NM).Z(K-1)];
              P(2,IAXIS:KAXIS) = [MESHES(NM).X(I  ) MESHES(NM).Y(J-1) MESHES(NM).Z(K-1)];
@@ -1121,33 +1215,34 @@ for K=KLO:KHI
              P(6,IAXIS:KAXIS) = [MESHES(NM).X(I  ) MESHES(NM).Y(J-1) MESHES(NM).Z(K  )];
              P(7,IAXIS:KAXIS) = [MESHES(NM).X(I  ) MESHES(NM).Y(J  ) MESHES(NM).Z(K  )];
              P(8,IAXIS:KAXIS) = [MESHES(NM).X(I-1) MESHES(NM).Y(J  ) MESHES(NM).Z(K  )];
-             
+
              FC(1,:) = [ 1 4 8 5 ];
              FC(2,:) = [ 2 3 7 6 ];
              FC(3,:) = [ 1 5 6 2 ];
              FC(4,:) = [ 4 8 7 3 ];
              FC(5,:) = [ 1 2 3 4 ];
              FC(6,:) = [ 5 6 7 8 ];
-             
+
              for IFC=1:6
                  [hp]=patch(P(FC(IFC,:),IAXIS),P(FC(IFC,:),JAXIS),P(FC(IFC,:),KAXIS),'r');
                  set(hp,'FaceAlpha',0.1)
              end
              end
-             
+
          end
          for IVERT=1:NVERT
              text(XYZVERT(IAXIS,IVERT)+a,XYZVERT(JAXIS,IVERT)+a,...
-                  XYZVERT(KAXIS,IVERT)+a,num2str(IVERT),'FontSize',10)
-             
+                  XYZVERT(KAXIS,IVERT)+a,num2str(IVERT),'FontSize',10,'Color','r')
+
          end
+         title(['I,J,K=' num2str(I) ', ' num2str(J) ', ' num2str(K)])
          xlabel('X')
          ylabel('Y')
          zlabel('Z')
          axis equal
          box on
-         view([45 45])         
-         subplot(1,3,3)
+         view([45 45])
+         subplot(1,2,2)
          hold on
          for FAXIS=IAXIS:KAXIS
             for ILH=LOW_IND:HIGH_IND
@@ -1159,7 +1254,7 @@ for K=KLO:KHI
                    case(KAXIS)
                        IADD=    0;  JADD=    0;  KADD=ILH-2;
                end
-                     
+
                % By segment: Add Vertices/Segments to local arrays:
                ICF = MESHES(NM).FCVAR(I+IADD,J+JADD,K+KADD,IBM_IDCF,FAXIS); %CEIB_XYZ(ILH,FAXIS);
                if ( ICF > 0 )
@@ -1167,24 +1262,24 @@ for K=KLO:KHI
                    XYZV  = MESHES(NM).CUT_FACE(ICF).XYZVERT;
                    for JCF=1:NFACE
                        NELEM  = MESHES(NM).CUT_FACE(ICF).CFELEM(1,JCF);
-                       CFELEM = MESHES(NM).CUT_FACE(ICF).CFELEM(2:NELEM+1,JCF);             
+                       CFELEM = MESHES(NM).CUT_FACE(ICF).CFELEM(2:NELEM+1,JCF);
                        [hp]=patch(XYZV(IAXIS,CFELEM),XYZV(JAXIS,CFELEM),XYZV(KAXIS,CFELEM),'r');
                        set(hp,'FaceAlpha',0.3)
                    end
                end
             end
-         end       
+         end
          xlabel('X')
          ylabel('Y')
          zlabel('Z')
          axis equal
          box on
          end
-         
+
          % 2. Define triangles by Body and triangle, all triangles generated
          %    point outside of solid region:
          [NFACE, CFELEM, BOD_TRI] = EAR_CLIP(NSEG,NVERT,SEG_CELL,XYZVERT,I,J,K,NPOLY,ILO_POLY,NSG_POLY);
-         
+
 
          if(plotflg || (IFLG ~=0))
              % Plot faces:
@@ -1216,23 +1311,23 @@ for K=KLO:KHI
          MESHES(NM).CUT_FACE(NCUTFACE).IJK(1:MAX_DIM+1) = [ I, J, K, 0 ]; % No axis = 0
          MESHES(NM).CUT_FACE(NCUTFACE).STATUS = IBM_INBOUNDARY;
          MESHES(NM).CUT_FACE(NCUTFACE).XYZVERT(IAXIS:KAXIS,1:NVERT) = XYZVERT(IAXIS:KAXIS,1:NVERT);
-         
+
          % Assign surf-index: Depending on GEOMETRY:
          NCF = 0;
          for ICF=1:NFACE
             IBOD = BOD_TRI(1,ICF); ITRI = BOD_TRI(2,ICF);
- 
-            % Area properties for special cfaces:            
+
+            % Area properties for special cfaces:
             % Computed from the cross product:
             D23 = XYZVERT(IAXIS:KAXIS,CFELEM(1+NOD3,ICF)) - ...
                   XYZVERT(IAXIS:KAXIS,CFELEM(1+NOD2,ICF));
             D12 = XYZVERT(IAXIS:KAXIS,CFELEM(1+NOD2,ICF)) - ...
-                  XYZVERT(IAXIS:KAXIS,CFELEM(1+NOD1,ICF));  
-            NORMTRI(IAXIS:KAXIS) = cross(D12',D23'); 
+                  XYZVERT(IAXIS:KAXIS,CFELEM(1+NOD1,ICF));
+            NORMTRI(IAXIS:KAXIS) = cross(D12',D23');
             NNORM                = norm(NORMTRI);
             if (NNORM < 2.*GEOMEPS^2.); continue; end
             NORMTRI(IAXIS:KAXIS) = NORMTRI(IAXIS:KAXIS) / NNORM;
-                                
+
             % First test if INB face is on Cartesian face and pointing
             % outside of Cartesian cell. If so drop:
             XYZ(IAXIS:KAXIS) = XYZVERT(IAXIS:KAXIS,CFELEM(1+NOD1,ICF))';
@@ -1251,7 +1346,7 @@ for K=KLO:KHI
                  (abs(ZFACE(K-FCELL  )-XYZ(KAXIS)) < GEOMEPS) ); continue; end % Low Face
             if ( (abs(NORMTRI(KAXIS)-1.) < GEOMEPS) && ...
                  (abs(ZFACE(K-FCELL+1)-XYZ(KAXIS)) < GEOMEPS) ); continue; end % High Face
-            
+
             % Area:
             AREA  = 0.5*NNORM;
 
@@ -1262,25 +1357,25 @@ for K=KLO:KHI
 
             % dot(i,nc) int(x)dA
             INXAREA = NORMTRI(IAXIS)*ACEN(IAXIS)*AREA; % Single Gauss pt integration.
-            
-            XC1(IAXIS:KAXIS) = 0.5*(XYZVERT(IAXIS:KAXIS,CFELEM(1+NOD2,ICF)) + ... 
+
+            XC1(IAXIS:KAXIS) = 0.5*(XYZVERT(IAXIS:KAXIS,CFELEM(1+NOD2,ICF)) + ...
                                     XYZVERT(IAXIS:KAXIS,CFELEM(1+NOD3,ICF)))'; % X23
-            XC2(IAXIS:KAXIS) = 0.5*(XYZVERT(IAXIS:KAXIS,CFELEM(1+NOD1,ICF)) + ... 
+            XC2(IAXIS:KAXIS) = 0.5*(XYZVERT(IAXIS:KAXIS,CFELEM(1+NOD1,ICF)) + ...
                                     XYZVERT(IAXIS:KAXIS,CFELEM(1+NOD3,ICF)))';
-            X12(IAXIS:KAXIS) = 0.5*(XYZVERT(IAXIS:KAXIS,CFELEM(1+NOD1,ICF)) + ... 
+            X12(IAXIS:KAXIS) = 0.5*(XYZVERT(IAXIS:KAXIS,CFELEM(1+NOD1,ICF)) + ...
                                     XYZVERT(IAXIS:KAXIS,CFELEM(1+NOD2,ICF)))';
             % dot(i,nc) int(x^2)dA, dot(j,nc) int(y^2)dA, dot(k,nc) int(z^2)dA
             SQAREA(IAXIS:KAXIS) = 0.;
             for IX=IAXIS:KAXIS
                 INT2 = (XC1(IX)^2. + XC2(IX)^2. + X12(IX)^2.) / 3.;
                 SQAREA(IX) = SQAREA(IX) + NORMTRI(IX)*INT2*AREA;  % Midpoint rule.
-            end 
-            
+            end
+
             NCF = NCF + 1;
-            
+
             MESHES(NM).CUT_FACE(NCUTFACE).AREA(NCF) = AREA;
             MESHES(NM).CUT_FACE(NCUTFACE).XYZCEN(IAXIS:KAXIS,NCF) = ACEN(IAXIS:KAXIS)';
-            
+
             % Fields for cut-cell volume/centroid computation:
             % dot(i,nc)*int(x)dA:
             MESHES(NM).CUT_FACE(NCUTFACE).INXAREA(NCF)   = INXAREA;
@@ -1289,21 +1384,21 @@ for K=KLO:KHI
             % dot(j,nc)*int(y^2)dA:
             MESHES(NM).CUT_FACE(NCUTFACE).JNYSQAREA(NCF) = SQAREA(JAXIS);
             % dot(k,nc)*int(z^2)dA:
-            MESHES(NM).CUT_FACE(NCUTFACE).KNZSQAREA(NCF) = SQAREA(KAXIS);     
-            
+            MESHES(NM).CUT_FACE(NCUTFACE).KNZSQAREA(NCF) = SQAREA(KAXIS);
+
             % Define Body-triangle reference:
             MESHES(NM).CUT_FACE(NCUTFACE).BODTRI(1:2,NCF)= [IBOD ITRI]';
 
             MESHES(NM).CUT_FACE(NCUTFACE).SURF_INDEX(NCF) = GEOM(IBOD).SURFS(ITRI);
 
             % All faces connectivities:
-            MESHES(NM).CUT_FACE(NCUTFACE).CFELEM(1:1+NOD3,NCF) = CFELEM(1:1+NOD3,ICF);  
-            
-         end           
+            MESHES(NM).CUT_FACE(NCUTFACE).CFELEM(1:1+NOD3,NCF) = CFELEM(1:1+NOD3,ICF);
+
+         end
 
          MESHES(NM).CUT_FACE(NCUTFACE).NFACE = NCF;
-        
-         
+
+
       end % I
    end % J
 end % K

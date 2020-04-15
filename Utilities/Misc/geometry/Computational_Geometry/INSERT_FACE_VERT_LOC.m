@@ -4,9 +4,9 @@ global IAXIS JAXIS KAXIS GEOMEPS
 
 
 for INOD=1:NVERT
-   if( abs(XYZV(IAXIS)-XYZVERT(IAXIS,INOD)) > GEOMEPS ); continue; end
-   if( abs(XYZV(JAXIS)-XYZVERT(JAXIS,INOD)) > GEOMEPS ); continue; end
-   if( abs(XYZV(KAXIS)-XYZVERT(KAXIS,INOD)) > GEOMEPS ); continue; end
+   if( abs(XYZV(IAXIS)-XYZVERT(IAXIS,INOD)) > 100*GEOMEPS ); continue; end
+   if( abs(XYZV(JAXIS)-XYZVERT(JAXIS,INOD)) > 100*GEOMEPS ); continue; end
+   if( abs(XYZV(KAXIS)-XYZVERT(KAXIS,INOD)) > 100*GEOMEPS ); continue; end
    return
 end
 NVERT = NVERT + 1;

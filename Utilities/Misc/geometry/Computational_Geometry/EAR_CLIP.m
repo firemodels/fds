@@ -7,19 +7,24 @@ global GEOMEPS GEOM
 
 pltflg = false; 
 
-if(pltflg) %&& INDIF==32+6 && INDJF==27+6 && INDKF==22+6
+ICHK = 36;
+JCHK = 17;
+KCHK = 24;
+
+if(pltflg && INDIF==ICHK && INDJF==JCHK && INDKF==KCHK)
+    disp(['NPOLY=' num2str(NPOLY)])
     figure
     subplot(1,2,1)
     hold on
-    a=0.01;
-    colr = ['-or'; '-ob'; '-om'];
+    a=0.0000001;
+    colr = ['-or'; '-ob'; '-om';'-og';'-oc'];
     for ISEG=1:NSEG
         XYZSEG(:,NOD1)=XYZVERT(:,SEG_CELL(NOD1,ISEG));
         XYZSEG(:,NOD2)=XYZVERT(:,SEG_CELL(NOD2,ISEG));
         IG         =max(1,SEG_CELL(6,ISEG));
         plot3(XYZSEG(IAXIS,:),XYZSEG(JAXIS,:),XYZSEG(KAXIS,:),colr(IG,1:3),'LineWidth',2)
         text(0.5*(sum(XYZSEG(IAXIS,:)))+a,0.5*(sum(XYZSEG(JAXIS,:)))+a,...
-            0.5*(sum(XYZSEG(KAXIS,:)))+a,num2str(SEG_CELL(4,ISEG)),'FontSize',10)
+             0.5*(sum(XYZSEG(KAXIS,:)))+a,num2str(SEG_CELL(4,ISEG)),'FontSize',10)
     end
     for IVERT=1:NVERT
         text(XYZVERT(IAXIS,IVERT)+a,XYZVERT(JAXIS,IVERT)+a,...
@@ -29,9 +34,10 @@ if(pltflg) %&& INDIF==32+6 && INDJF==27+6 && INDKF==22+6
     xlabel('X')
     ylabel('Y')
     zlabel('Z')
-    axis equal
+    %axis equal
     box on
     view([45 45])
+    pause
 end
 
 % Compute segments director unit vectors and normals:
@@ -46,6 +52,8 @@ end
 % segments with same triangle and body: 
 SEG_CELL2 = zeros(6,NSEG);
 NFACE     = 0;
+CFELEM    = [];
+BODTRI    = [];
 % Ear clipping algorithm by polyline:
 for IPOLY=1:NPOLY
     
@@ -163,17 +171,17 @@ for IPOLY=1:NPOLY
 
 end
 
-if(pltflg) % && INDIF==32+6 && INDJF==27+6 && INDKF==22+6
+if(pltflg && INDIF==ICHK && INDJF==JCHK && INDKF==KCHK)
     subplot(1,2,2)
     hold on
-    for ISEG=1:NSEG
+    for ISEG=1:NSGP
         if(SEG_FLAG(ISEG)); continue; end
         XYZSEG(:,NOD1)=XYZVERT(:,SEG_CELL2(NOD1,ISEG));
         XYZSEG(:,NOD2)=XYZVERT(:,SEG_CELL2(NOD2,ISEG));
         IG         =max(1,SEG_CELL2(6,ISEG));
         plot3(XYZSEG(IAXIS,:),XYZSEG(JAXIS,:),XYZSEG(KAXIS,:),'--k','LineWidth',2)
         text(0.5*(sum(XYZSEG(IAXIS,:)))+a,0.5*(sum(XYZSEG(JAXIS,:)))+a,...
-            0.5*(sum(XYZSEG(KAXIS,:)))+a,num2str(SEG_CELL(4,ISEG)),'FontSize',10)
+             0.5*(sum(XYZSEG(KAXIS,:)))+a,num2str(SEG_CELL(4,ISEG)),'FontSize',10)
     end
     % Plot faces:
     for ICF=1:NFACE
@@ -185,11 +193,12 @@ if(pltflg) % && INDIF==32+6 && INDJF==27+6 && INDKF==22+6
         set(hp,'FaceAlpha',0.1)
         text(1/3*(sum(XYZFC(IAXIS,:)))+a,1/3*(sum(XYZFC(JAXIS,:)))+a,...
              1/3*(sum(XYZFC(KAXIS,:)))+a,num2str(BODTRI(2,ICF)),'FontSize',10)
+        pause
     end
     xlabel('X')
     ylabel('Y')
     zlabel('Z')
-    axis equal
+    %axis equal
     box on
     view([45 45])
     pause

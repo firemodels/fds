@@ -103,6 +103,7 @@ while(1) % This exterior while loop defined closed polylines in the cell.
     SEG_CELL2(:,NEWSEG) = SEG_CELL(:,ISEG);
     SEG_POS2(NEWSEG) = SEG_POS(ISEG);
     COUNTED(ISEG) = true;
+    STNOD  = SEG_CELL2(NOD1,NEWSEG);
     PIVNOD = SEG_CELL2(NOD2,NEWSEG); % Pivot Vertex, used to find next segment.
     NSG_POLY(NPOLY) =  NSG_POLY(NPOLY) + 1;
     SEG_POLY(NEWSEG)  = NPOLY;
@@ -112,7 +113,7 @@ while(1) % This exterior while loop defined closed polylines in the cell.
         for ISEG=1:NSEG
             
             if(COUNTED(ISEG)); continue; end
-            
+
             if(SEG_CELL(NOD1,ISEG)==PIVNOD) % Found the next segment
                 FOUNDSEG = 1;
                 SEG_CELL2(:,NEWSEG) = SEG_CELL(:,ISEG);
@@ -134,6 +135,7 @@ while(1) % This exterior while loop defined closed polylines in the cell.
                 SEG_LEFT = SEG_LEFT - 1;
                 break
             end
+            
         end
         % Check if for this NEWSEG we didn't find an ISEG:
         if (~FOUNDSEG)
@@ -141,7 +143,7 @@ while(1) % This exterior while loop defined closed polylines in the cell.
         end
     end
     % Finally, test if polyline is closed:
-    if( SEG_CELL2(NOD2,ILO_POLY(NPOLY)+NSG_POLY(NPOLY)) ~= SEG_CELL2(NOD1,ILO_POLY(NPOLY)+1) )
+    if( SEG_CELL2(NOD2,ILO_POLY(NPOLY)+NSG_POLY(NPOLY)) ~= STNOD )
         disp('Polyline not closed')
         return % Return with IFLG = 1.
     end
@@ -173,6 +175,23 @@ for IPOLY=1:NPOLY
         SEG_CELL(:,ILO:IHI)= SEG_CELL2(:,ILO:IHI);
         SEG_POS(ILO:IHI)   = SEG_POS2(1,ILO:IHI);
     end
+end
+
+% Finally cycle segments to redefine polylines (case of two or more polys
+% sharing one point.
+STNOD=SEG_CELL(NOD1,1);
+NPOLY=1;
+COUNT=1;
+for ISEG=2:NSEG
+   COUNT=COUNT+1;
+   SEG_POLY(ISEG)=NPOLY;
+   if(SEG_CELL(NOD2,ISEG)==STNOD)
+       NSG_POLY(NPOLY) = COUNT;
+       if(ISEG==NSEG); break; end
+       NPOLY=NPOLY+1;
+       ILO_POLY(NPOLY) = ILO_POLY(NPOLY-1) + NSG_POLY(NPOLY-1);
+       COUNT=0; STNOD=SEG_CELL(NOD1,ISEG+1);
+   end
 end
 
 IFLG=0;

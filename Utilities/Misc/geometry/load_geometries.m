@@ -152,6 +152,29 @@ for IG=1:N_GEOM
       GEOM(IG).GEOM_XYZCEN(IX) = SQAREA(IX) / (2. * GEOM(IG).GEOM_VOLUME);
    end
    
+    % Check we don't have repeated nodes:
+    for IVERT=1:GEOM(IG).N_VERTS
+        DIFF=abs(GEOM(IG).XYZ(:,IAXIS)-GEOM(IG).XYZ(IVERT,IAXIS)) + ...
+             abs(GEOM(IG).XYZ(:,JAXIS)-GEOM(IG).XYZ(IVERT,JAXIS)) + ...
+             abs(GEOM(IG).XYZ(:,KAXIS)-GEOM(IG).XYZ(IVERT,KAXIS));
+        [vdf,idf]=find(DIFF < GEOMEPS);
+        if (length(vdf)>1)
+            disp(['Found same nodes: ' num2str([IVERT idf])])
+        end
+    end
+
+    % Check we don't have repeated faces:
+    for IFACE=1:GEOM(IG).N_FACES
+        DIFF=abs(GEOM(IG).WSELEM(:,NOD1)-GEOM(IG).WSELEM(IFACE,NOD1)) + ...
+             abs(GEOM(IG).WSELEM(:,NOD2)-GEOM(IG).WSELEM(IFACE,NOD2)) + ...
+             abs(GEOM(IG).WSELEM(:,NOD3)-GEOM(IG).WSELEM(IFACE,NOD3));
+        [vdf,idf]=find(DIFF < GEOMEPS);
+        if (length(vdf)>1)
+            disp(['Found same faces: ' num2str([IFACE idf])])
+        end
+    end
+   
+   
 end
 
 return
