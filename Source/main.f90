@@ -103,7 +103,6 @@ CALL CHECK_MPI
 
 ! Start wall clock timing
 
-INITIALIZATION_PHASE = .TRUE.
 WALL_CLOCK_START = CURRENT_TIME()
 CALL CPU_TIME(CPUTIME)
 CPU_TIME_START = CPUTIME
@@ -2489,8 +2488,11 @@ SENDING_MESH_LOOP: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       ! Exchange velocity/pressure info for ITERATE_PRESSURE
 
       IF (CODE==5 .AND. M3%NIC_S>0) THEN
-         IF (PREDICTOR) HP => M%H
-         IF (CORRECTOR) HP => M%HS
+         IF (PREDICTOR) THEN
+            HP => M%H
+         ELSE
+            HP => M%HS
+         ENDIF
          IF (RNODE/=SNODE) THEN
             PACK_REAL_SEND_PKG7: DO LL=1,M3%NIC_S
                SELECT CASE(M3%IOR_S(LL))
@@ -2516,8 +2518,11 @@ SENDING_MESH_LOOP: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             ENDDO PACK_REAL_SEND_PKG7
          ELSE
             M2=>MESHES(NOM)%OMESH(NM)
-            IF (PREDICTOR) HP2 => M2%H
-            IF (CORRECTOR) HP2 => M2%HS
+            IF (PREDICTOR) THEN
+               HP2 => M2%H
+            ELSE
+               HP2 => M2%HS
+            ENDIF
             M2%FVX(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX) = M%FVX(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)
             M2%FVY(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX) = M%FVY(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)
             M2%FVZ(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX) = M%FVZ(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)
@@ -2871,8 +2876,11 @@ SNODE = PROCESS(NOM)
       ! Unpack densities and species mass fractions following PREDICTOR exchange
 
       IF (CODE==5 .AND. M2%NIC_R>0 .AND. RNODE/=SNODE) THEN
-         IF (PREDICTOR) HP => M2%H
-         IF (CORRECTOR) HP => M2%HS
+         IF (PREDICTOR) THEN
+            HP => M2%H 
+         ELSE
+            HP => M2%HS
+         ENDIF
          UNPACK_REAL_RECV_PKG7: DO LL=1,M2%NIC_R
             SELECT CASE(M2%IOR_R(LL))
                CASE(-1) ; M2%FVX(M2%IIO_R(LL)-1,M2%JJO_R(LL)  ,M2%KKO_R(LL)  ) = M2%REAL_RECV_PKG7(3*LL-2)
