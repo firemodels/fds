@@ -1,4 +1,5 @@
 MODULE ISOSMOKE
+!> \brief Collection of routines to output data to smokeview.
 
 USE PRECISION_PARAMETERS
 
@@ -11,6 +12,8 @@ CONTAINS
 
 ! ----------------------- ISO_TO_FILE -------------------------
 
+
+!> \brief Routine to output compute an isosurface and output it to a file.
 
 SUBROUTINE ISO_TO_FILE(LU_ISO,LU_ISO2, NM,IBAR, JBAR, KBAR, T,VDATA, VDATA2, HAVE_ISO2, LEVELS, NLEVELS, IBLANK, SKIP, DELTA, &
                        XPLT, NX, YPLT, NY, ZPLT, NZ)
@@ -131,6 +134,9 @@ END SUBROUTINE ISO_TO_FILE
 
 ! ----------------------- COMPARE_VEC3 -------------------------
 
+!> \brief Routine to compare two 3-vectors.
+!> The integer 1 is returned if the two vectors are the same within DELTA.
+
 INTEGER FUNCTION COMPARE_VEC3(XI,XJ)
 REAL(FB), INTENT(IN), DIMENSION(3) :: XI, XJ
 REAL(FB) :: DELTA=0.0001_FB
@@ -142,6 +148,8 @@ COMPARE_VEC3 = 1
 END FUNCTION COMPARE_VEC3
 
 ! ----------------------- GET_MATCH -------------------------
+
+!> \brief Routine to find the index (if any) of a 3-vector that matches a given 3-vector.
 
 INTEGER FUNCTION GET_MATCH(IFROM,VERTS,ITOVERTS,NVERTS)
 
@@ -162,6 +170,8 @@ INTEGER FUNCTION GET_MATCH(IFROM,VERTS,ITOVERTS,NVERTS)
 END FUNCTION GET_MATCH
 
 ! ----------------------- REMOVE_DUPLICATE_ISO_VERTS -------------------------
+
+!> \brief Routine to remove dupicate isosurface vertices.
 
 SUBROUTINE REMOVE_DUPLICATE_ISO_VERTS(VERTS,NVERTS,TRIANGLES,NTRIANGLES)
 
@@ -204,6 +214,8 @@ DEALLOCATE(MAPVERTS)
 END SUBROUTINE REMOVE_DUPLICATE_ISO_VERTS
 
 ! ----------------------- ISO_TO_GEOM -------------------------
+
+!> \brief Routine to geneate an isosurface and store it in a geometry format (vertices/faces).
 
 SUBROUTINE ISO_TO_GEOM(VDATA, LEVEL, IBLANK_CELL, SKIP, XPLT, NX, YPLT, NY, ZPLT, NZ, &
                        XYZVERTS, NXYZVERTS, TRIANGLES, NTRIANGLES)
@@ -281,6 +293,8 @@ END SUBROUTINE ISO_TO_GEOM
 
 ! ----------------------- ISO_HEADER_OUT -------------------------
 
+!> \brief Routine to output the header portion of an isosurface file.
+
 SUBROUTINE ISO_HEADER_OUT(LU_ISO,ISO_LEVELS,NISO_LEVELS)
 
   INTEGER, INTENT(IN) :: NISO_LEVELS
@@ -300,6 +314,8 @@ SUBROUTINE ISO_HEADER_OUT(LU_ISO,ISO_LEVELS,NISO_LEVELS)
 END SUBROUTINE ISO_HEADER_OUT
 
 ! ----------------------- ISO_OUT_TIME -------------------------
+
+!> \brief Routine to output the time, number of vertices and faces to an isosurface file.
 
 SUBROUTINE ISO_OUT_TIME(LU_ISO,STIME,NVERTS,NTRIANGLES)
   INTEGER, INTENT(IN) :: LU_ISO
@@ -321,6 +337,8 @@ END SUBROUTINE ISO_OUT_TIME
 
 ! ----------------------- ISO_OUT_GEOM -------------------------
 
+!> \brief Routine to output the vertices and faces to an isosurface file.
+
 SUBROUTINE ISO_OUT_GEOM(LU_ISO,VERTS,NVERTS,TRIANGLES,SURFACES,NTRIANGLES)
   INTEGER, INTENT(IN) :: LU_ISO
   INTEGER, INTENT(IN) :: NVERTS,  NTRIANGLES
@@ -341,6 +359,8 @@ END SUBROUTINE ISO_OUT_GEOM
 
 ! ----------------------- ISO_OUT_VALS -------------------------
 
+!> \brief Routine to output the data values at vertices to an isosurface file.
+
 SUBROUTINE ISO_OUT_VALS(LU_ISO2,STIME,VALS,NVERTS)
   INTEGER, INTENT(IN) :: LU_ISO2
   REAL(FB), INTENT(IN) :: STIME
@@ -355,6 +375,8 @@ SUBROUTINE ISO_OUT_VALS(LU_ISO2,STIME,VALS,NVERTS)
 END SUBROUTINE ISO_OUT_VALS
 
 ! ----------------------- MERGE_GEOM -------------------------
+
+!> \brief Routine to combine two sets of vertices and surfaces into one. 
 
 SUBROUTINE MERGE_GEOM(  TRIS_TO,  SURFACES_TO,  NTRIS_TO,  NODES_TO,  NNODES_TO,&
                       TRIS_FROM,SURFACES_FROM,NTRIS_FROM,NODES_FROM,NNODES_FROM)
@@ -388,6 +410,8 @@ SUBROUTINE MERGE_GEOM(  TRIS_TO,  SURFACES_TO,  NTRIS_TO,  NODES_TO,  NNODES_TO,
 END SUBROUTINE MERGE_GEOM
 
 ! ----------------------- GETISOBOX -------------------------
+
+!> \brief Routine to determine the isosurface if any that passes through a grid cell. 
 
 SUBROUTINE GETISOBOX(X,Y,Z,VALS,LEVEL,XYZV_LOCAL,NXYZV,TRIS,NTRIS)
 
@@ -769,6 +793,8 @@ END SUBROUTINE GETISOBOX
 
 ! ----------------------- UPDATEISOSURFACE -------------------------
 
+!> \brief Routine to add the isosurface from a single grid cell to the global isosurface. 
+
 SUBROUTINE UPDATEISOSURFACE(XYZVERTS_BOX, NXYZVERTS_BOX, TRIS_BOX, NTRIS_BOX,  &
                             XYZVERTS, NXYZVERTS, NXYZVERTS_MAX, TRIANGLES, NTRIANGLES, NTRIANGLES_MAX)
   REAL(FB), INTENT(IN), DIMENSION(0:35) :: XYZVERTS_BOX
@@ -798,6 +824,8 @@ END SUBROUTINE UPDATEISOSURFACE
 
 ! ----------------------- REALLOCATE_I -------------------------
 
+!> \brief Routine to to change the size (usually increase) of an allocatable integer array. 
+
 SUBROUTINE REALLOCATE_I(VALS,OLDSIZE,NEWSIZE)
 
   INTEGER, DIMENSION(:), ALLOCATABLE :: VALS
@@ -817,6 +845,8 @@ SUBROUTINE REALLOCATE_I(VALS,OLDSIZE,NEWSIZE)
 END SUBROUTINE REALLOCATE_I
 
 ! ----------------------- REALLOCATE_F -------------------------
+
+!> \brief Routine to change the size (usually increase) of an allocatable floating point array. 
 
 SUBROUTINE REALLOCATE_F(VALS,OLDSIZE,NEWSIZE)
 
@@ -838,12 +868,16 @@ END SUBROUTINE REALLOCATE_F
 
 ! ----------------------- FMIX -------------------------
 
+!> \brief Routine to compute the linear combination of two values. 
+
 REAL(FB) FUNCTION FMIX(F,A,B)
   REAL(FB), INTENT(IN) :: F, A, B
   FMIX = (1.0_FB-F)*A + F*B
 END FUNCTION FMIX
 
 ! ----------------------- SMOKE3D_TO_FILE -------------------------
+
+!> \brief Routine to generate a run length encoded version of a slice file. 
 
 SUBROUTINE SLICE_TO_RLEFILE(LU_SLICE_RLE, TIME, NX, NY, NZ, VALS, RLE_MIN, RLE_MAX)
   INTEGER, INTENT(IN) :: NX, NY, NZ, LU_SLICE_RLE
@@ -886,6 +920,9 @@ SUBROUTINE SLICE_TO_RLEFILE(LU_SLICE_RLE, TIME, NX, NY, NZ, VALS, RLE_MIN, RLE_M
  END SUBROUTINE SLICE_TO_RLEFILE
 
  ! ----------------------- SMOKE3D_TO_FILE -------------------------
+
+!> \brief Routine to generate 3D smoke, HRRPUV, temperature and CO2 data, compress the data using run length encoding (RLE)
+!>  and output this data to smokeview. 
 
 SUBROUTINE SMOKE3D_TO_FILE(LU_SMOKE3D,LU_SMOKE3D_SIZE,TIME,DX,EXTCOEF,SMOKE_TYPE,VALS,NX,NY,NZ,HRRPUV_MAX_SMV,TEMP_MAX_SMV)
 
@@ -976,6 +1013,8 @@ SUBROUTINE SMOKE3D_TO_FILE(LU_SMOKE3D,LU_SMOKE3D_SIZE,TIME,DX,EXTCOEF,SMOKE_TYPE
  END SUBROUTINE SMOKE3D_TO_FILE
 
 ! ----------------------- RLE -------------------------
+
+!> \brief Routine to compress 3D smoke data using run length encoding (RLE).
 
 SUBROUTINE RLE(BUFFER_IN, NCHARS_IN, BUFFER_OUT, NCHARS_OUT)
 
