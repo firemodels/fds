@@ -1,18 +1,33 @@
-MODULE GLOBAL_CONSTANTS
+!> \brief Global constants, parameters, variables 
+!>
+!> \details Each MPI process stores a copy of the GLOBAL_CONSTANTS. It cannot be
+!> assumed that these values are same for each MPI process.
 
-! Module containing global constants, parameters, variables
+MODULE GLOBAL_CONSTANTS
 
 USE PRECISION_PARAMETERS
 IMPLICIT NONE
 
-! Indices for various modes of operation
-
-INTEGER, PARAMETER :: DNS_MODE=1,LES_MODE=2,VLES_MODE=3,SVLES_MODE=4                        ! Overall simulation type
-INTEGER, PARAMETER :: GAS_SPECIES=2,AEROSOL_SPECIES=3                                       ! For SPECIES%MODE
-INTEGER, PARAMETER :: EXPLICIT_EULER=1,RK2=2,RK3=3,RK2_RICHARDSON=4                         ! For COMBUSTION_ODE
-INTEGER, PARAMETER :: EXTINCTION_1=1,EXTINCTION_2=2                                         ! For EXTINCT_MOD
-INTEGER, PARAMETER :: NO_TURB_MODEL=0,CONSMAG=1,DYNSMAG=2,DEARDORFF=3,VREMAN=4,RNG=5,&
-                      WALE=6,MU_TURB_INTERP=7                                               ! Turbulence model
+INTEGER, PARAMETER :: DNS_MODE=1                 !< SIM_MODE is Direct Numerical Simulation
+INTEGER, PARAMETER :: LES_MODE=2                 !< SIM_MODE is Large Eddy Simulation
+INTEGER, PARAMETER :: VLES_MODE=3                !< SIM_MODE is Very Large Eddy Simulation
+INTEGER, PARAMETER :: SVLES_MODE=4               !< SIM_MODE is Simple Very Large Eddy Simulation
+INTEGER, PARAMETER :: GAS_SPECIES=2              !< Flag for SPECIES\%MODE indicating a gaseous species
+INTEGER, PARAMETER :: AEROSOL_SPECIES=3          !< Flag for SPECIES\%MODE indicating an aerosol species
+INTEGER, PARAMETER :: EXPLICIT_EULER=1           !< COMBUSTION_ODE_SOLVER is explicit first-order Euler
+INTEGER, PARAMETER :: RK2=2                      !< COMBUSTION_ODE_SOLVER is second-order Runge-Kutta
+INTEGER, PARAMETER :: RK3=3                      !< COMBUSTION_ODE_SOLVER is third-order Runge-Kutta
+INTEGER, PARAMETER :: RK2_RICHARDSON=4           !< COMBUSTION_ODE_SOLVER is second-order Runge-Kutta with Richardson extrapolation
+INTEGER, PARAMETER :: EXTINCTION_1=1             !< Flag for EXTINCT_MOD (EXTINCTION MODEL 1)
+INTEGER, PARAMETER :: EXTINCTION_2=2             !< Flag for EXTINCT_MOD (EXTINCTION MODEL 2)
+INTEGER, PARAMETER :: NO_TURB_MODEL=0            !< No turbulence model (DNS)
+INTEGER, PARAMETER :: CONSMAG=1                  !< Constant Smagorinsky turbulence model
+INTEGER, PARAMETER :: DYNSMAG=2                  !< Dynamic Smagorinsky turbulence model
+INTEGER, PARAMETER :: DEARDORFF=3                !< Deardorff turbulence model
+INTEGER, PARAMETER :: VREMAN=4                   !< Vreman turbulence model
+INTEGER, PARAMETER :: RNG=5                      !< ReNormalization Group turbulence model
+INTEGER, PARAMETER :: WALE=6                     !< Wall-Adapting Local Eddy viscosity turbulence model
+INTEGER, PARAMETER :: MU_TURB_INTERP=7           !< Flag for NEAR_WALL_TURB_MODEL that avoids jump in viscosity, \f$ \mu \f$
 INTEGER, PARAMETER :: CONVECTIVE_FLUX_BC=-1,NET_FLUX_BC=0,SPECIFIED_TEMPERATURE=1,&
                       NO_CONVECTION=2,THERMALLY_THICK=3,INFLOW_OUTFLOW=4,&
                       INTERPOLATED_BC=6,THERMALLY_THICK_HT3D=7
@@ -48,59 +63,113 @@ INTEGER, PARAMETER :: HVAC_BOUNDARY=42
 INTEGER, PARAMETER :: OBST_SPHERE_TYPE=1,OBST_CYLINDER_TYPE=2,OBST_CONE_TYPE=3,OBST_BOX_TYPE=4
 INTEGER :: N_SIMPLE_CHEMISTRY_REACTIONS=1
 
-! Species components of the lumped species
-
-INTEGER :: FUEL_INDEX=0,O2_INDEX=0,N2_INDEX=0,H2O_INDEX=0,CO2_INDEX=0,CO_INDEX=0,&
-           H2_INDEX=0,SOOT_INDEX=0,OTHER_INDEX=0                                            ! Lumped Species Sub-species
-REAL(EB) :: FUEL_C_TO_CO_FRACTION=0.6667_EB,FUEL_H_TO_H2_FRACTION=0._EB
-
-! Special lumped species
-
+INTEGER :: FUEL_INDEX=0,O2_INDEX=0,N2_INDEX=0,H2O_INDEX=0,CO2_INDEX=0,CO_INDEX=0,H2_INDEX=0,SOOT_INDEX=0
 INTEGER :: H2O_SMIX_INDEX = -1
-
-! Species components used in FED calculations
-
 INTEGER :: HCN_INDEX=0,NO_INDEX=0,NO2_INDEX=0
 
-! Passive scalars
+INTEGER :: ZETA_INDEX=0                    !< Index of the unmixed fuel fraction, ZETA
 
-INTEGER :: ZETA_INDEX=0
+INTEGER :: STOP_STATUS=NO_STOP             !< Indicator of whether and why to stop the job
+INTEGER :: INPUT_FILE_LINE_NUMBER=0        !< Indicator of what line in the input file is being read
 
-! Program Status Code
-
-INTEGER :: STOP_STATUS=NO_STOP,INPUT_FILE_LINE_NUMBER=0
+REAL(EB) :: FUEL_C_TO_CO_FRACTION=0.6667_EB !< Fraction of carbon atoms in the fuel that are converted to CO
+REAL(EB) :: FUEL_H_TO_H2_FRACTION=0._EB     !< Fraction of hydrogen atoms in the fuel that are converted to H2
 
 ! Miscellaneous logical constants
 
-LOGICAL :: RADIATION=.TRUE.,RADIATION_COMPLETED=.TRUE.,EXCHANGE_RADIATION=.FALSE.,KAPPA_ARRAY=.FALSE.,CYLINDRICAL,NOISE, &
-           PREDICTOR,CORRECTOR,INITIALIZATION_PHASE,APPEND,PARTICLE_FILE=.FALSE.,RESTART,SUPPRESSION=.TRUE., &
-           ACCUMULATE_WATER=.FALSE.,WRITE_XYZ=.FALSE., &
-           CHECK_POISSON=.FALSE.,TWO_D,SETUP_ONLY=.FALSE.,CHECK_MESH_ALIGNMENT=.FALSE.,SMOKE3D, &
-           STATUS_FILES=.FALSE.,LOCK_TIME_STEP=.FALSE.,RESTRICT_TIME_STEP=.TRUE.,  &
-           FLUSH_FILE_BUFFERS,CLIP_RESTART_FILES=.TRUE., &
-           COLUMN_DUMP_LIMIT=.FALSE.,MASS_FILE=.FALSE.,STRATIFICATION=.TRUE.,SOLID_PHASE_ONLY, &
-           AEROSOL_AL2O3=.FALSE.,SHARED_FILE_SYSTEM=.TRUE., &
-           FREEZE_VELOCITY=.FALSE.,BNDF_DEFAULT=.TRUE., &
-           SPATIAL_GRAVITY_VARIATION=.FALSE., &
-           PROJECTION=.FALSE.,CHECK_VN=.TRUE., &
-           SOLID_PARTICLES=.FALSE.,HVAC=.FALSE.,BAROCLINIC=.TRUE., &
-           GRAVITATIONAL_DEPOSITION=.TRUE.,GRAVITATIONAL_SETTLING=.TRUE.,THERMOPHORETIC_DEPOSITION=.TRUE.,&
-           THERMOPHORETIC_SETTLING=.TRUE.,TURBULENT_DEPOSITION=.TRUE., DEPOSITION=.TRUE., AEROSOL_SCRUBBING = .FALSE.,&
-           VELOCITY_ERROR_FILE=.FALSE.,CFL_FILE=.FALSE.,CONSTANT_SPECIFIC_HEAT_RATIO=.FALSE.,MEAN_FORCING(3)=.FALSE.,&
-           CHECK_HT=.FALSE.,PATCH_VELOCITY=.FALSE.,OVERWRITE=.TRUE.,INIT_HRRPUV=.FALSE.,INIT_HRRPUV_RAMP=.FALSE., &
-           TENSOR_DIFFUSIVITY=.FALSE.,SYNTHETIC_EDDY_METHOD=.FALSE.,UVW_RESTART=.FALSE.,&
-           PARTICLE_CFL=.FALSE.,IBM_FEM_COUPLING=.FALSE.,&
-           ENTHALPY_TRANSPORT=.TRUE.,CONSTANT_H_SOLID=.TRUE.,POTENTIAL_TEMPERATURE_CORRECTION=.FALSE.,&
-           RTE_SOURCE_CORRECTION=.TRUE.,LAPLACE_PRESSURE_CORRECTION=.FALSE.,&
-           CHECK_REALIZABILITY=.FALSE.,MIN_DEVICES_EXIST=.FALSE.,MAX_DEVICES_EXIST=.FALSE.,&
-           SUPPRESS_DIAGNOSTICS=.FALSE.,WRITE_GEOM_FIRST=.TRUE.,&
-           SIMPLE_CHEMISTRY=.FALSE.,FIRST_PASS,VERBOSE=.FALSE.,&
-           SOLID_HT3D=.FALSE.,SOLID_MT3D=.FALSE.,SOLID_PYRO3D=.FALSE.,HVAC_MASS_TRANSPORT=.FALSE., &
-           EXTERNAL_BOUNDARY_CORRECTION=.FALSE.,DUCT_HT=.FALSE.,DUCT_HT_INSERTED,PROCESS_ALL_MESHES=.FALSE.,&
-           STORE_Q_DOT_PPP_S=.FALSE.,STORE_OLD_VELOCITY=.FALSE.,QFAN_BETA_TEST=.FALSE.,&
-           USE_ATMOSPHERIC_INTERPOLATION=.FALSE.,POSITIVE_ERROR_TEST=.FALSE.,OBST_SHAPE_AREA_ADJUST=.FALSE.,&
-           TRI_MODEL=.FALSE.,FLAME_INDEX_MODEL=.FALSE.,STORE_SPECIES_FLUX=.FALSE.,CHAR_OXIDATION=.FALSE.,&
-           STORE_DIVERGENCE_CORRECTION=.FALSE.,PERIODIC_DOMAIN_X=.FALSE.,PERIODIC_DOMAIN_Y=.FALSE.,PERIODIC_DOMAIN_Z=.FALSE.
+LOGICAL :: RADIATION=.TRUE.                 !< Perform radiation transport
+LOGICAL :: RADIATION_COMPLETED=.TRUE.       !< A complete radiation update has completed
+LOGICAL :: EXCHANGE_RADIATION=.FALSE.       !< Do an MPI radiation exchange at this time step
+LOGICAL :: CYLINDRICAL=.FALSE.              !< Cylindrical domain option
+LOGICAL :: NOISE=.TRUE.                     !< Initialize velocity field with a small amount of divergence-free motion
+LOGICAL :: PREDICTOR                        !< The first half of the second-order accurate time-step
+LOGICAL :: CORRECTOR                        !< The second half of the second-order accurate time-step
+LOGICAL :: INITIALIZATION_PHASE=.TRUE.      !< The set-up phase before the time-stepping loop
+LOGICAL :: APPEND=.FALSE.                   !< For a RESTARTed calculation, APPEND the exising output files
+LOGICAL :: PARTICLE_FILE=.FALSE.            !< Indicates the existence of Lagrangian particles
+LOGICAL :: RESTART=.FALSE.                  !< Indicates if a former calculation is to be RESTARTed
+LOGICAL :: SUPPRESSION=.TRUE.               !< Indicates if gas-phase combustion extinction is modeled
+LOGICAL :: ACCUMULATE_WATER=.FALSE.         !< Indicates that integrated liquid outputs are specified
+LOGICAL :: WRITE_XYZ=.FALSE.                !< Indicates that a Plot3D geometry file is specified by user
+LOGICAL :: CHECK_POISSON=.FALSE.            !< Check the accuracy of the Poisson solver
+LOGICAL :: TWO_D=.FALSE.                    !< Perform a 2-D simulation
+LOGICAL :: SETUP_ONLY=.FALSE.               !< Indicates that the calculation should be stopped before time-stepping
+LOGICAL :: CHECK_MESH_ALIGNMENT=.FALSE.     !< Indicates that the user wants to check the mesh alignment and then stop
+LOGICAL :: SMOKE3D=.TRUE.                   !< Indicates that the 3D smoke and fire output is desired
+LOGICAL :: STATUS_FILES=.FALSE.             !< Produce an output file CHID.notready which is deleted if the simulation completes
+LOGICAL :: LOCK_TIME_STEP=.FALSE.           !< Do not allow time step to change for diagnostic purposes
+LOGICAL :: RESTRICT_TIME_STEP=.TRUE.        !< Do not let the time step increase above its intial value
+LOGICAL :: FLUSH_FILE_BUFFERS=.TRUE.        !< Periodically flush the output buffers during simulation for better Smokeviewing
+LOGICAL :: CLIP_RESTART_FILES=.TRUE.        !< Append RESTARTed output files at the time the former calculation terminated
+LOGICAL :: COLUMN_DUMP_LIMIT=.FALSE.        !< Limit the number of columns in output files
+LOGICAL :: MASS_FILE=.FALSE.                !< Output a comma-delimited file of gas species masses
+LOGICAL :: STRATIFICATION=.TRUE.            !< Assume that the atmosphere decreases in pressure with height
+LOGICAL :: SOLID_PHASE_ONLY=.FALSE.         !< Only perform a solid phase heat transfer and pyrolysis simulation
+LOGICAL :: AEROSOL_AL2O3=.FALSE.            !< Assume that the SOOT is Al_2 O_3
+LOGICAL :: SHARED_FILE_SYSTEM=.TRUE.        !< Assume that FDS is being run on computers with a shared file system
+LOGICAL :: FREEZE_VELOCITY=.FALSE.          !< Hold velocity fixed, do not perform a velocity update
+LOGICAL :: BNDF_DEFAULT=.TRUE.              !< Output boundary output files
+LOGICAL :: SPATIAL_GRAVITY_VARIATION=.FALSE.!< Assume gravity varies as a function of the \f$ x \f$ coordinate
+LOGICAL :: PROJECTION=.FALSE.               !< Apply the projection method for the divergence
+LOGICAL :: CHECK_VN=.TRUE.                  !< Check the Von Neumann number
+LOGICAL :: SOLID_PARTICLES=.FALSE.          !< Indicates the existence of solid particles
+LOGICAL :: HVAC=.FALSE.                     !< Perform an HVAC calculation
+LOGICAL :: BAROCLINIC=.TRUE.                !< Include the baroclinic terms in the momentum equation
+LOGICAL :: GRAVITATIONAL_DEPOSITION=.TRUE.  !< Allow aerosol gravitational deposition
+LOGICAL :: GRAVITATIONAL_SETTLING=.TRUE.    !< Allow aerosol gravitational settling
+LOGICAL :: THERMOPHORETIC_DEPOSITION=.TRUE. !< Allow aerosol thermophoretic deposition
+LOGICAL :: THERMOPHORETIC_SETTLING=.TRUE.   !< Allow aerosol thermophoretic settling
+LOGICAL :: TURBULENT_DEPOSITION=.TRUE.      !< Allow aerosol turbulent deposition
+LOGICAL :: DEPOSITION=.TRUE.                !< Allow aerosol deposition
+LOGICAL :: AEROSOL_SCRUBBING=.FALSE.        !< Allow aerosol scrubbing
+LOGICAL :: VELOCITY_ERROR_FILE=.FALSE.      !< Generate a diagnostic output file listing velocity and pressure errors
+LOGICAL :: CFL_FILE=.FALSE.                 !< Generate a diagnostic output file listing quantities related to CFL and VN
+LOGICAL :: CONSTANT_SPECIFIC_HEAT_RATIO=.FALSE. !< Assume that the ratio of specific heats is constant, \f$ \gamma=1.4 \f$
+LOGICAL :: MEAN_FORCING(3)=.FALSE.          !< Apply mean forcing to wind in each coordinate direction
+LOGICAL :: CHECK_HT=.FALSE.                 !< Apply heat transfer stability condition
+LOGICAL :: PATCH_VELOCITY=.FALSE.           !< Assume user-defined velocity patches
+LOGICAL :: OVERWRITE=.TRUE.                 !< Overwrite old output files
+LOGICAL :: INIT_HRRPUV=.FALSE.              !< Assume an initial spatial distribution of HRR per unit volume
+LOGICAL :: INIT_HRRPUV_RAMP=.FALSE.         !< Assume that initial spatial distribution of HRR per unit volume is ramped up or down
+LOGICAL :: TENSOR_DIFFUSIVITY=.FALSE.
+LOGICAL :: SYNTHETIC_EDDY_METHOD=.FALSE.
+LOGICAL :: UVW_RESTART=.FALSE.              !< Initialize velocity field with values from a file
+LOGICAL :: PARTICLE_CFL=.FALSE.             !< Include particle velocity as a constraint on time step
+LOGICAL :: IBM_FEM_COUPLING=.FALSE.
+LOGICAL :: ENTHALPY_TRANSPORT=.TRUE.
+LOGICAL :: CONSTANT_H_SOLID=.TRUE.
+LOGICAL :: POTENTIAL_TEMPERATURE_CORRECTION=.FALSE.
+LOGICAL :: RTE_SOURCE_CORRECTION=.TRUE.     !< Apply a correction to the radiation source term to achieve desired rad fraction
+LOGICAL :: LAPLACE_PRESSURE_CORRECTION=.FALSE.
+LOGICAL :: CHECK_REALIZABILITY=.FALSE.
+LOGICAL :: MIN_DEVICES_EXIST=.FALSE.
+LOGICAL :: MAX_DEVICES_EXIST=.FALSE.
+LOGICAL :: SUPPRESS_DIAGNOSTICS=.FALSE.     !< Do not print detailed mesh-specific output in the .out file
+LOGICAL :: WRITE_GEOM_FIRST=.TRUE.
+LOGICAL :: SIMPLE_CHEMISTRY=.FALSE.         !< Use simple chemistry combustion model
+LOGICAL :: FIRST_PASS                       !< The point in the time step before the CFL constraint is applied
+LOGICAL :: VERBOSE=.FALSE.                  !< Add extra output in the .err file
+LOGICAL :: SOLID_HT3D=.FALSE.
+LOGICAL :: SOLID_MT3D=.FALSE.
+LOGICAL :: SOLID_PYRO3D=.FALSE.
+LOGICAL :: HVAC_MASS_TRANSPORT=.FALSE.
+LOGICAL :: EXTERNAL_BOUNDARY_CORRECTION=.FALSE.
+LOGICAL :: DUCT_HT=.FALSE.
+LOGICAL :: DUCT_HT_INSERTED=.FALSE.
+LOGICAL :: STORE_Q_DOT_PPP_S=.FALSE.
+LOGICAL :: STORE_OLD_VELOCITY=.FALSE.
+LOGICAL :: QFAN_BETA_TEST=.FALSE.
+LOGICAL :: USE_ATMOSPHERIC_INTERPOLATION=.FALSE.
+LOGICAL :: POSITIVE_ERROR_TEST=.FALSE.
+LOGICAL :: OBST_SHAPE_AREA_ADJUST=.FALSE.
+LOGICAL :: TRI_MODEL=.FALSE.
+LOGICAL :: FLAME_INDEX_MODEL=.FALSE.
+LOGICAL :: STORE_SPECIES_FLUX=.FALSE.
+LOGICAL :: CHAR_OXIDATION=.FALSE.
+LOGICAL :: STORE_DIVERGENCE_CORRECTION=.FALSE.
+LOGICAL :: PERIODIC_DOMAIN_X=.FALSE.                !< The domain is periodic \f$ x \f$
+LOGICAL :: PERIODIC_DOMAIN_Y=.FALSE.                !< The domain is periodic \f$ y \f$
+LOGICAL :: PERIODIC_DOMAIN_Z=.FALSE.                !< The domain is periodic \f$ z \f$
 
 INTEGER :: BNDF_TIME_INTEGRALS=0
 
@@ -345,29 +414,21 @@ INTEGER :: I_FLUX_LIMITER=SUPERBEE_LIMITER,CFL_VELOCITY_NORM=0
 INTEGER, PARAMETER :: TRAPAZOID_QUADRATURE=0, SIMPSON_QUADRATURE=1, MIDPOINT_QUADRATURE=2
 INTEGER :: TEST_FILTER_QUADRATURE=TRAPAZOID_QUADRATURE
 
-! CPU and Wall Clock Timings
+INTEGER, PARAMETER :: N_TIMERS=14                   !< Number of subroutine timers
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: T_USED       !< Array of subroutine timings
+REAL(EB) :: WALL_CLOCK_START                        !< MPI_WTIME i.e. wall clock time when FDS starts
+REAL(EB) :: WALL_CLOCK_START_ITERATIONS=0._EB       !< MPI_WTIME i.e. wall clock time when main iteration loop starts
+REAL(EB) :: CPU_TIME_START                          !< CPU_TIME when FDS starts
 
-INTEGER, PARAMETER :: N_TIMERS=14
-REAL(EB), ALLOCATABLE, DIMENSION(:) :: T_USED
-REAL(EB) :: WALL_CLOCK_START,WALL_CLOCK_START_ITERATIONS=0._EB,CPU_TIME_START
+INTEGER :: OPENMP_AVAILABLE_THREADS = 1         !< OpenMP parameter
+INTEGER :: OPENMP_USED_THREADS      = 1         !< OpenMP parameter
+LOGICAL :: OPENMP_USER_SET_THREADS  = .FALSE.   !< OpenMP parameter
+LOGICAL :: USE_OPENMP               = .FALSE.   !< OpenMP parameter
 
-! OpenMP Specifications
+INTEGER :: N_CSVF=0  !< Number of external velocity (.csv) files
 
-INTEGER :: OPENMP_AVAILABLE_THREADS = 1
-INTEGER :: OPENMP_USED_THREADS      = 1
-LOGICAL :: OPENMP_USER_SET_THREADS  = .FALSE.
-LOGICAL :: USE_OPENMP               = .FALSE.
-
-! CSV specification
-
-INTEGER :: N_CSVF=0
-
-! ! Complex geometry (experimental-OLD)
-!
 INTEGER :: N_FACE=0,N_GEOM=0
 REAL(EB):: DT_BNDC=1.E10_EB
-
-! Complex Geometry parameters (experimental-NEW)
 
 LOGICAL :: CC_IBM=.FALSE.
 LOGICAL :: CHECK_MASS_CONSERVE =.FALSE.
@@ -389,7 +450,7 @@ LOGICAL  :: GET_CUTCELLS_VERBOSE=.FALSE.
 INTEGER, PARAMETER :: LOW_IND   = 1
 INTEGER, PARAMETER :: HIGH_IND  = 2
 
-INTEGER, PARAMETER :: MAX_DIM   = 3 ! Maximum number of spatial dimensions for a problem.
+INTEGER, PARAMETER :: MAX_DIM   = 3 !< Maximum number of spatial dimensions for a problem.
 INTEGER, PARAMETER :: IAXIS = 1
 INTEGER, PARAMETER :: JAXIS = 2
 INTEGER, PARAMETER :: KAXIS = 3
@@ -411,11 +472,8 @@ INTEGER :: MAXIMUM_GEOMETRY_ZVALS=100000, MAXIMUM_GEOMETRY_VOLUS=350000, &
 INTEGER, PARAMETER :: IBM_ALLOC_DVERT = 10
 INTEGER, PARAMETER :: IBM_ALLOC_DELEM = 10
 
-! Maximum number of wet surface triangles related to element
-
-INTEGER, PARAMETER :: IBM_MAX_WSTRIANG_SEG =  2  ! Up to two wstriangles related to a segment.
-INTEGER, PARAMETER :: IBM_MAX_WSTRIANG_TRI =  1  ! Up to 1 wstriangle per BODINT_PLANE triangle (i.e. surface triangle
-                                                 ! aligned with X1PLN plane.)
+INTEGER, PARAMETER :: IBM_MAX_WSTRIANG_SEG =  2  !< Up to two ws-triangles related to a segment
+INTEGER, PARAMETER :: IBM_MAX_WSTRIANG_TRI =  1  !< Up to 1 ws-triangle per BODINT_PLANE triangle
 
 INTEGER, ALLOCATABLE, DIMENSION(:)   :: CELL_COUNT_CC
 INTEGER, ALLOCATABLE, DIMENSION(:,:) :: N_EDGES_DIM_CC
@@ -427,18 +485,15 @@ INTEGER , ALLOCATABLE, DIMENSION(:) :: DUCT_NE,DUCTNODE_NE,DUCT_DR,DUCTNODE_DR
 REAL(EB) :: HVAC_PRES_RELAX=0.5_EB
 LOGICAL :: HVAC_SOLVE=.FALSE.,HVAC_LOCAL_PRESSURE=.TRUE.
 
-! Global array of orientation vectors
+REAL(EB), POINTER, DIMENSION(:,:) :: ORIENTATION_VECTOR !< Global array of orientation vectors
+INTEGER :: N_ORIENTATION_VECTOR                         !< Number of ORIENTATION_VECTORs
 
-REAL(EB), POINTER, DIMENSION(:,:) :: ORIENTATION_VECTOR
-INTEGER :: N_ORIENTATION_VECTOR
+INTEGER :: TGA_SURF_INDEX=-100             !< Surface properties to use for special TGA calculation
+INTEGER :: TGA_WALL_INDEX=-100             !< Wall index to use for special TGA calculation
+INTEGER :: TGA_PARTICLE_INDEX=-100         !< Particle index to use for special TGA calculation
+REAL(EB) :: TGA_HEATING_RATE=5._EB         !< Heat rate (K/min) to use for special TGA calculation
+REAL(EB) :: TGA_FINAL_TEMPERATURE=800._EB  !< Final Temperature (C) to use for special TGA calculation
 
-! Special TGA parameters
-
-INTEGER :: TGA_SURF_INDEX=-100,TGA_WALL_INDEX=-100,TGA_PARTICLE_INDEX=-100
-REAL(EB) :: TGA_HEATING_RATE=5._EB,TGA_FINAL_TEMPERATURE=800._EB
-
-! Parameter passed to smokeview (in .smv file) to control generation of blockage location data structures
-
-LOGICAL :: IBLANK_SMV=.TRUE.
+LOGICAL :: IBLANK_SMV=.TRUE.  !< Parameter passed to smokeview (in .smv file) to control generation of blockages
 
 END MODULE GLOBAL_CONSTANTS
