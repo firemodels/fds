@@ -1,0 +1,50 @@
+&HEAD CHID='geom_extruded_poly' TITLE='Test : Geometry from extruded simple polygon.' /
+
+&TIME T_END=20.0 /
+
+# Vents:
+&VENT MB='YMIN', SURF_ID='OPEN' /
+&VENT MB='YMAX', SURF_ID='OPEN' /
+&VENT MB='XMIN', SURF_ID='OPEN' /
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+
+&SURF ID='Poly1', COLOR='GREEN', TMP_FRONT=100 /
+
+&BNDF QUANTITY='WALL TEMPERATURE' /
+&SLCF PBY=-0.5, QUANTITY='TEMPERATURE' /
+
+! Mesh:
+&MESH ID='Domain' IJK=40,40,40, XB=-2.000,2.000,-2.000,2.000,0.000,4.000 /
+
+! Poly GEOMs:
+! Simple Polygon:
+#&GEOM ID='ExtPoly', SURF_ID='Poly1',
+#VERTS =
+#   -1.0, -1.0,  1.0,
+#    0.5, -1.0,  1.75,
+#    1.0, -1.0,  2.0,
+#    0.0,  0.0,  1.5,
+#    1.0,  1.0,  2.0,
+#   -1.0,  1.0,  1.0,
+#POLY = 1, 2, 4, 3, 5, 6, 
+#EXTRUDE=0.5 /
+
+! Another Simple Polygon:
+&GEOM ID='ExtPoly', SURF_ID='Poly1',
+VERTS =
+   -1.0,  0.0,  1.0,
+    0.0,  0.0,  1.5,
+    0.0,  0.5,  1.5,
+    0.5,  0.5,  1.75,
+    0.5, -0.5,  1.75,
+   -0.5, -0.5,  1.25,
+   -0.5, -1.0,  1.25,
+    1.0, -1.0,  2.0,
+    1.0,  1.0,  2.0,
+   -1.0,  1.0,  1.0,
+POLY = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+EXTRUDE=0.5 /
+
+
+&TAIL /
