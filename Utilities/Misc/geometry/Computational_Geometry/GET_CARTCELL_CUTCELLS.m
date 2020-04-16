@@ -4,14 +4,16 @@ global LOW_IND HIGH_IND NGUARD CCGUARD FCELL
 global IAXIS JAXIS KAXIS MAX_DIM
 global ILO_CELL IHI_CELL JLO_CELL JHI_CELL KLO_CELL KHI_CELL 
 global XFACE YFACE ZFACE
-global IBM_CGSC IBM_FGSC IBM_CUTCFE IBM_UNDEFINED IBM_GASPHASE IBM_IDCF IBM_IDCC
+global IBM_CGSC IBM_FGSC IBM_CUTCFE IBM_UNDEFINED IBM_GASPHASE IBM_SOLID IBM_IDCF IBM_IDCC
 global NOD1 NOD2 NOD3 NOD4 
-global MESHES
+global MESHES  GEOM
 global IBM_MAXVERTS_CELL IBM_NPARAM_CCFACE
 global DELTA_VERT DELTA_EDGE DELTA_FACE DELTA_CELL
 global IBM_FTYPE_RGGAS IBM_FTYPE_CFGAS IBM_FTYPE_CFINB
 global XCELL YCELL ZCELL DXCELL DYCELL DZCELL
 global GEOMEPS
+
+global CELLRT
 
 ierr=1;
 
@@ -198,6 +200,8 @@ for K=KLO:KHI
             end
          end
 
+         N_GAS_CFACES = NFACE_CELL;
+
          % Now add INBOUNDARY faces of the cell:
          CEI = MESHES(NM).CCVAR(I,J,K,IBM_IDCF);
          if ( CEI > 0 )
@@ -233,6 +237,38 @@ for K=KLO:KHI
             end
          end
 
+         
+%          if(I==36 && J==17 && K==24)
+%             figure
+%             hold on
+%             for JCF=1:NFACE_CELL
+%                NELEM  = FACE_CELL(1,JCF);
+%                CFELEM = FACE_CELL(2:NELEM+1,JCF);
+%            
+%                if(FACE_LIST(1,JCF)==IBM_FTYPE_CFINB)
+%                [hp]=patch(XYZVERT(IAXIS,CFELEM),XYZVERT(JAXIS,CFELEM),XYZVERT(KAXIS,CFELEM),'r');
+%                else
+%                [hp]=patch(XYZVERT(IAXIS,CFELEM),XYZVERT(JAXIS,CFELEM),XYZVERT(KAXIS,CFELEM),'b','Marker','o');
+%                end
+%                set(hp,'FaceAlpha',0.3) %,'EdgeAlpha',0.4) % .4    
+%             end 
+%             a=0.0005;
+%             for IVERT=1:NVERT_CELL
+%                 text(XYZVERT(IAXIS,IVERT)+a,XYZVERT(JAXIS,IVERT)+a,...
+%                      XYZVERT(KAXIS,IVERT)+a,num2str(IVERT),'FontSize',10)
+%                 
+%             end
+%             axis equal; box on;
+%             view([45 45])
+%             xlabel('X')
+%             ylabel('Y')
+%             zlabel('Z')
+%  
+%             XYZVERT(:,[20 22])
+%             pause
+%          end
+         
+         
 
          % Here we have in XYZvert all the vertices that define the
          % cut-cells within Cartesian cell I,J,K. We have the faces,
@@ -440,7 +476,7 @@ for K=KLO:KHI
                
                CTVAL = CTVAL + 1;
                if CTVAL > THRES
-                   disp(['Inner Stuck cell = ' num2str(I) ',' num2str(J) ',' num2str(K)])
+                   disp(['Inner Special cell = ' num2str(I) ',' num2str(J) ',' num2str(K)])
                    CYCLE_CELL=true;
                    break
                end
@@ -463,16 +499,136 @@ for K=KLO:KHI
             end
             CTVAL2 = CTVAL2 + 1;
             if CTVAL2 > THRES
-                disp(['Outer Stuck cell = ' num2str(I) ',' num2str(J) ',' num2str(K) ...
+                disp(['Outer Special cell = ' num2str(I) ',' num2str(J) ',' num2str(K) ...
                       ', NFACE_CELL=' num2str(NFACE_CELL) ', NUM_FACE=' num2str(NUM_FACE)])
-                FACECELL_NUM(1:NFACE_CELL)
-                FACE_LIST(:,1:NFACE_CELL)'
                 CYCLE_CELL=true;
-                pause(1)
             end
             if(CYCLE_CELL); break; end
          end
-         if(CYCLE_CELL); break; end
+
+         if(CYCLE_CELL)
+             CELLRT(I,J,K) = true;
+             MESHES(NM).N_SPCELL = MESHES(NM).N_SPCELL+1;
+             MESHES(NM).SPCELL_LIST(IAXIS:KAXIS,MESHES(NM).N_SPCELL) = [I J K]';
+             
+             IDCF = MESHES(NM).CCVAR(I,J,K,IBM_IDCF);
+             disp(['I,J,K,IDCF=' num2str([I J K IDCF])])
+             NIBFACE    = 0;
+             NFACE_CELL = N_GAS_CFACES + NIBFACE;
+             if (IDCF > 0)
+                 
+                 IBOD = 1; ITRI = 1;
+                 if (MESHES(NM).CUT_FACE(IDCF).NFACE > 0)
+                   IBOD = MESHES(NM).CUT_FACE(IDCF).BODTRI(1,1);
+                   ITRI = MESHES(NM).CUT_FACE(IDCF).BODTRI(2,1);
+                 end
+                 
+                 NIBFACE    = 0;
+                 XYZVERT    = zeros(KAXIS,IBM_MAXVERTS_CELL);
+                 NVERT_CELL = 0;
+                 CFELEM     = zeros(5,1);
+                 % Define from SOLID FACES CFACES for the cell:
+                 IED = I-FCELL; JED = J-FCELL; KED = K-FCELL;
+                 for MYAXIS=IAXIS:KAXIS
+                     switch(MYAXIS)
+                         case(IAXIS)
+                             XYZLH(IAXIS:KAXIS,NOD1,HIGH_IND) = [ XFACE(IED+1), YFACE(JED  ), ZFACE(KED  ) ]';
+                             XYZLH(IAXIS:KAXIS,NOD2,HIGH_IND) = [ XFACE(IED+1), YFACE(JED  ), ZFACE(KED+1) ]';
+                             XYZLH(IAXIS:KAXIS,NOD3,HIGH_IND) = [ XFACE(IED+1), YFACE(JED+1), ZFACE(KED+1) ]';
+                             XYZLH(IAXIS:KAXIS,NOD4,HIGH_IND) = [ XFACE(IED+1), YFACE(JED+1), ZFACE(KED  ) ]';
+                             XYZLH(IAXIS:KAXIS,NOD1,LOW_IND)  = [ XFACE(IED  ), YFACE(JED  ), ZFACE(KED  ) ]';
+                             XYZLH(IAXIS:KAXIS,NOD2,LOW_IND)  = [ XFACE(IED  ), YFACE(JED+1), ZFACE(KED  ) ]';
+                             XYZLH(IAXIS:KAXIS,NOD3,LOW_IND)  = [ XFACE(IED  ), YFACE(JED+1), ZFACE(KED+1) ]';
+                             XYZLH(IAXIS:KAXIS,NOD4,LOW_IND)  = [ XFACE(IED  ), YFACE(JED  ), ZFACE(KED+1) ]';
+                             AREAI    = DYCELL(J) * DZCELL(K);
+                         case(JAXIS)
+                             XYZLH(IAXIS:KAXIS,NOD1,HIGH_IND) = [ XFACE(IED  ), YFACE(JED+1), ZFACE(KED  ) ]';
+                             XYZLH(IAXIS:KAXIS,NOD2,HIGH_IND) = [ XFACE(IED+1), YFACE(JED+1), ZFACE(KED  ) ]';
+                             XYZLH(IAXIS:KAXIS,NOD3,HIGH_IND) = [ XFACE(IED+1), YFACE(JED+1), ZFACE(KED+1) ]';
+                             XYZLH(IAXIS:KAXIS,NOD4,HIGH_IND) = [ XFACE(IED  ), YFACE(JED+1), ZFACE(KED+1) ]';
+                             XYZLH(IAXIS:KAXIS,NOD1,LOW_IND)  = [ XFACE(IED  ), YFACE(JED  ), ZFACE(KED  ) ]';
+                             XYZLH(IAXIS:KAXIS,NOD2,LOW_IND)  = [ XFACE(IED  ), YFACE(JED  ), ZFACE(KED+1) ]';
+                             XYZLH(IAXIS:KAXIS,NOD3,LOW_IND)  = [ XFACE(IED+1), YFACE(JED  ), ZFACE(KED+1) ]';
+                             XYZLH(IAXIS:KAXIS,NOD4,LOW_IND)  = [ XFACE(IED+1), YFACE(JED  ), ZFACE(KED  ) ]';
+                             AREAI    = DXCELL(I) * DZCELL(K);
+                         case(KAXIS)
+                             XYZLH(IAXIS:KAXIS,NOD1,HIGH_IND) = [ XFACE(IED  ), YFACE(JED  ), ZFACE(KED+1) ]';
+                             XYZLH(IAXIS:KAXIS,NOD2,HIGH_IND) = [ XFACE(IED  ), YFACE(JED+1), ZFACE(KED+1) ]';
+                             XYZLH(IAXIS:KAXIS,NOD3,HIGH_IND) = [ XFACE(IED+1), YFACE(JED+1), ZFACE(KED+1) ]';
+                             XYZLH(IAXIS:KAXIS,NOD4,HIGH_IND) = [ XFACE(IED+1), YFACE(JED  ), ZFACE(KED+1) ]';
+                             XYZLH(IAXIS:KAXIS,NOD1,LOW_IND)  = [ XFACE(IED  ), YFACE(JED  ), ZFACE(KED  ) ]';
+                             XYZLH(IAXIS:KAXIS,NOD2,LOW_IND)  = [ XFACE(IED+1), YFACE(JED  ), ZFACE(KED  ) ]';
+                             XYZLH(IAXIS:KAXIS,NOD3,LOW_IND)  = [ XFACE(IED+1), YFACE(JED+1), ZFACE(KED  ) ]';
+                             XYZLH(IAXIS:KAXIS,NOD4,LOW_IND)  = [ XFACE(IED  ), YFACE(JED+1), ZFACE(KED  ) ]';
+                             AREAI    = DXCELL(I) * DYCELL(J);
+                     end                     
+                     
+                     for SIDE=LOW_IND:HIGH_IND
+                        if (FSID_XYZ(SIDE ,MYAXIS) ~= IBM_SOLID); continue; end
+                        NIBFACE = NIBFACE + 1;                       
+                        
+                        % Define vertices of CFACE and insert add to
+                        % MESHES(NM).CUT_FACE(IDCF).XYZVERT
+                        NP = 0; 
+                        XYZC(IAXIS:KAXIS) = 0.;
+                        for IP=NOD1:NOD4
+                           % xl,yl,zl
+                           XYZ(IAXIS:KAXIS) = XYZLH(IAXIS:KAXIS,IP,SIDE)';
+                           XYZC(IAXIS:KAXIS)= XYZC(IAXIS:KAXIS) + XYZ(IAXIS:KAXIS);
+                           [NVERT_CELL,INOD,XYZVERT]=INSERT_FACE_VERT_LOC(IBM_MAXVERTS_CELL,XYZ,NVERT_CELL,XYZVERT);
+                           NP = NP + 1;
+                           CFELEM(1)    = NP;
+                           CFELEM(NP+1) = INOD;
+                        end               
+                        
+                        % Define CFELEM connectivity, also CFACE area and
+                        % Centroid add to corresponding CUT_FACE(IDCF)
+                        % entries.
+                        MESHES(NM).CUT_FACE(IDCF).CFELEM(1:5,NIBFACE) = CFELEM(1:5)';
+                        MESHES(NM).CUT_FACE(IDCF).AREA(NIBFACE) = AREAI;
+                        MESHES(NM).CUT_FACE(IDCF).XYZCEN(IAXIS:KAXIS,NIBFACE) = 0.25*XYZC(IAXIS:KAXIS)';
+                        % Fields for cut-cell volume/centroid computation:
+                        % dot(i,nc)*int(x)dA:
+                        MESHES(NM).CUT_FACE(IDCF).INXAREA(NIBFACE)   = 0.;
+                        % dot(i,nc)*int(x^2)dA:
+                        MESHES(NM).CUT_FACE(IDCF).INXSQAREA(NIBFACE) = 0.;
+                        % dot(j,nc)*int(y^2)dA:
+                        MESHES(NM).CUT_FACE(IDCF).JNYSQAREA(NIBFACE) = 0.;
+                        % dot(k,nc)*int(z^2)dA:
+                        MESHES(NM).CUT_FACE(IDCF).KNZSQAREA(NIBFACE) = 0.;
+
+                        % Define Body-triangle reference: 
+                        MESHES(NM).CUT_FACE(IDCF).BODTRI(1:2,NIBFACE)= [ IBOD, ITRI ];
+
+                        % Assign surf-index: Depending on GEOMETRY:
+                        % Here we might just add the INERT SURF_ID:
+                        MESHES(NM).CUT_FACE(IDCF).SURF_INDEX(NIBFACE) = GEOM(IBOD).SURFS(ITRI);
+                        
+                        
+                        
+                        
+                        % Finally add to FACE_LIST from N_GAS_CFACES on:
+                        NFACE_CELL = N_GAS_CFACES + NIBFACE;
+                        FACE_LIST(1:IBM_NPARAM_CCFACE,NFACE_CELL) = [ IBM_FTYPE_CFINB, 0, 0, IDCF, NIBFACE ]';                    
+                        
+                     
+                     end
+                 end
+                 MESHES(NM).CUT_FACE(IDCF).NFACE = NIBFACE;             
+                 MESHES(NM).CUT_FACE(IDCF).XYZVERT(IAXIS:KAXIS,1:NVERT_CELL) = XYZVERT(IAXIS:KAXIS,1:NVERT_CELL);
+             end
+             
+             % Now define a coarse cut-cell (no INBOUNDARY cut-faces):
+             NCELL      = 1;
+             %NFACE_CELL = N_GAS_CFACES+NIBFACE;
+             CCELEM(1:NFACE_CELL+1) = [NFACE_CELL; [1:NFACE_CELL]'];
+             VOL = zeros(1,NCELL);
+             XYZCEN = zeros(KAXIS,NCELL);
+             VOL(NCELL) = DXCELL(I)*DYCELL(J)*DZCELL(K);
+             XYZCEN(IAXIS:KAXIS,NCELL) = [XCELL(I) YCELL(J) ZCELL(K)]';
+
+
+         else
 
          % Create CCELEM array:
          NCELL = max(FACECELL_NUM(:));
@@ -526,6 +682,8 @@ for K=KLO:KHI
             end
          end
 
+         end
+
          % Load into CUT_CELL data structure
          NCUTCELL = MESHES(NM).N_CUTCELL_MESH + MESHES(NM).N_GCCUTCELL_MESH + 1;
          if (IBNDINT==LOW_IND)
@@ -543,7 +701,7 @@ for K=KLO:KHI
          MESHES(NM).CUT_CELL(NCUTCELL).NCELL     = NCELL;
          MESHES(NM).CUT_CELL(NCUTCELL).NFACE_CELL= NFACE_CELL;
          NCFACE_CUTCELL = max(CCELEM(1,1:NCELL)) + 1;
-         %CALL NEW_CELL_ALLOC(NM,NCUTCELL,NCELL,NFACE_CELL,NCFACE_CUTCELL)
+         %CALL NEW_CELL_ALLOC(NM,NCUTCELL,NCELL,NFACE_CELL,NCFACE_CUTCELL)         
          MESHES(NM).CUT_CELL(NCUTCELL).CCELEM(1:NCFACE_CUTCELL,1:NCELL) = CCELEM(1:NCFACE_CUTCELL,1:NCELL);
          MESHES(NM).CUT_CELL(NCUTCELL).FACE_LIST(1:IBM_NPARAM_CCFACE,1:NFACE_CELL) = ...
          FACE_LIST(1:IBM_NPARAM_CCFACE,1:NFACE_CELL);

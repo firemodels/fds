@@ -25,6 +25,7 @@ $QFDS -d Atmospheric_Effects lapse_rate.fds
 $QFDS -p  8 -d Atmospheric_Effects wind_example.fds
 $QFDS -p 32 -n 8 -d Atmospheric_Effects wind_example_32.fds
 
+$QFDS -d Complex_Geometry geom_extruded_poly.fds
 $QFDS -d Complex_Geometry geom_intersection.fds
 $QFDS -d Complex_Geometry geom_bad_inverted_normals.fds
 $QFDS -d Complex_Geometry geom_simple.fds

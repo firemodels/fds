@@ -19,6 +19,10 @@ global basedir CELLRT
 
 global BODINT_PLANE3 GEOMEPS
 
+global XAXIS XRAY
+
+global SEG_FACE_F SEG_FACE2_F XYZVERT_F NFACE_F CFELEM_F NVERT_F
+
 plot_cutedges=false;
 
 [ierr]=SET_CONSTANTS();
@@ -26,7 +30,13 @@ plot_cutedges=false;
 % Case name and directory:
 addpath ../
 basedir = '/Users/mnv/Documents/FIREMODELS_FORK/fds/GEOM_Intersection/';
-casename= 'two_spheres';
+%casename='2A_V1_cat';
+%casename='geom_self_intersection';
+%casename='leak_test_4';
+%casename= 'geom_rad_2'; 
+%casename='geom_intersect'; 
+%casename='two_spheres';
+casename='geom_extruded_poly';
 
 % Load and plot Geometries:
 [GEOM,N_GEOMETRY]=load_geometries(basedir,casename);
@@ -51,7 +61,7 @@ view([45 45])
 xlabel('X')
 ylabel('Y')
 zlabel('Z')
-NM=1;
+ NM=1;
 a = MESHES(NM).DX(6)/2;
 % Plot Boundary cut-faces:
 for ICF=1:MESHES(NM).N_CUTFACE_MESH
@@ -109,10 +119,9 @@ for ICF=1:MESHES(NM).N_CUTFACE_MESH
 
 end
 
-return
 
-% Plot special cells:
-% disp(['N_SPCELL=' num2str(MESHES(NM).N_SPCELL)])
+% % Plot special cells:
+disp(['N_SPCELL=' num2str(MESHES(NM).N_SPCELL)])
 % for ICELL=1:MESHES(NM).N_SPCELL
 %     I=MESHES(NM).SPCELL_LIST(IAXIS,ICELL);
 %     J=MESHES(NM).SPCELL_LIST(JAXIS,ICELL);
@@ -171,6 +180,7 @@ return
 %    end
 % end
 
+return
 
 figure
 hold on
@@ -179,6 +189,12 @@ view([45 45])
 xlabel('X')
 ylabel('Y')
 zlabel('Z')
+
+% for ICC2=1:MESHES(NM).N_SPCELL    
+%    ICC = MESHES(NM).CCVAR(MESHES(NM).SPCELL_LIST(IAXIS,ICC2),...
+%                           MESHES(NM).SPCELL_LIST(JAXIS,ICC2),...
+%                           MESHES(NM).SPCELL_LIST(KAXIS,ICC2),IBM_IDCC);
+  
 for ICC=1:MESHES(NM).N_CUTCELL_MESH+MESHES(NM).N_GCCUTCELL_MESH
    I      = MESHES(NM).CUT_CELL(ICC).IJK(IAXIS);
    J      = MESHES(NM).CUT_CELL(ICC).IJK(JAXIS);

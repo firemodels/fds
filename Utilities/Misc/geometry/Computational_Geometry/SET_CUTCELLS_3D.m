@@ -2,12 +2,12 @@ function [ierr]=SET_CUTCELLS_3D(basedir,casename,plot_cutedges)
 
 global NMESHES MESHES NGUARD CCGUARD GEOMEPS IAXIS JAXIS KAXIS NOD1 NOD2 MAX_DIM
 global X1FACE X2FACE X3FACE DX1FACE DX2FACE DX3FACE DX2CELL DX3CELL
-global X2LO X2HI X3LO X3HI 
+global X2LO X2HI X3LO X3HI
 global X2CELL X3CELL X2LO_CELL X2HI_CELL X3LO_CELL X3HI_CELL
 global ILO_FACE IHI_FACE ILO_CELL IHI_CELL
 global JLO_FACE JHI_FACE JLO_CELL JHI_CELL
 global KLO_FACE KHI_FACE KLO_CELL KHI_CELL
-global XCELL DXCELL XFACE DXFACE 
+global XCELL DXCELL XFACE DXFACE
 global YCELL DYCELL YFACE DYFACE
 global ZCELL DZCELL ZFACE DZFACE
 global BODINT_PLANE
@@ -17,12 +17,16 @@ global X1LO_CELL X1HI_CELL
 global FACERT CELLRT
 global N_GEOMETRY GEOM
 
+global XIAXIS XJAXIS XKAXIS
+
 ierr=1;
 
 for NM=1:NMESHES
-    
+
+   disp(['SET_CUTCELLS_3D : Processing mesh ' num2str(NM)])
+
    IBAR = MESHES(NM).IBAR; JBAR = MESHES(NM).JBAR; KBAR = MESHES(NM).KBAR;
-    
+
    % Mesh sizes:
    NXB=IBAR;   NYB=JBAR;   NZB=KBAR;
 
@@ -125,10 +129,10 @@ for NM=1:NMESHES
    end
 
    CELLRT=zeros(IEND,JEND,KEND); % false
-   
+
    % Here Allocation of crossings, cut-edges, faces and cells..
    disp(['Calculation of intersections and cut-edges by grid plane ...'])
-   tic    
+   tic
    for X1AXIS=IAXIS:KAXIS
 
        switch(X1AXIS)
@@ -155,7 +159,7 @@ for NM=1:NMESHES
           X3FACE = ZFACE; DX3FACE = DZFACE;
 
           X1LO_CELL = ILO_CELL-CCGUARD; X1HI_CELL = IHI_CELL+CCGUARD;
-    
+
           % x2 cell center parameters:
           X2LO_CELL = JLO_CELL-CCGUARD; X2HI_CELL = JHI_CELL+CCGUARD;
           X2CELL = zeros(1,JEND); DX2CELL=zeros(1,JEND);
@@ -189,7 +193,7 @@ for NM=1:NMESHES
           X3FACE = XFACE; DX3FACE = DXFACE;
 
           X1LO_CELL = JLO_CELL-CCGUARD; X1HI_CELL = JHI_CELL+CCGUARD;
-          
+
           % x2 cell center parameters:
           X2LO_CELL = KLO_CELL-CCGUARD; X2HI_CELL = KHI_CELL+CCGUARD;
           X2CELL = zeros(1,KEND); DX2CELL = zeros(1,KEND);
@@ -234,18 +238,18 @@ for NM=1:NMESHES
           X3CELL = zeros(1,JEND); DX3CELL = zeros(1,JEND);
           X3CELL = YCELL; DX3CELL = DYCELL;
 
-       end 
+       end
 
        % Variable that states if raytracing is necessary to define segments
        % status in a cartesian face.
-       FACERT = zeros(X2HI_CELL,X3HI_CELL); 
-       
-       
+       FACERT = zeros(X2HI_CELL,X3HI_CELL);
+
+
        % Stretched grid vars:
        X1NOC=TRANS(NM).NOC(X1AXIS);
        X2NOC=TRANS(NM).NOC(X2AXIS);
-       X3NOC=TRANS(NM).NOC(X3AXIS);   
-       
+       X3NOC=TRANS(NM).NOC(X3AXIS);
+
        % Loop Coordinate Planes:
        for K=KLO:KHI
           for J=JLO:JHI
@@ -261,10 +265,10 @@ for NM=1:NMESHES
                TRI_ONPLANE_ONLY = false;
                RAYTRACE_X2_ONLY = false;
                FACERT(:,:) = 0;
-               
+
                [ierr,BODINT_PLANE]=GET_BODINT_PLANE(X1AXIS,X1PLN,INDX1(X1AXIS),PLNORMAL,X2AXIS,...
                                    X3AXIS,DX2_MIN,DX3_MIN,X2LO,X2HI,X3LO,X3HI,X2FACE,X3FACE,TRI_ONPLANE_ONLY,RAYTRACE_X2_ONLY);
-               
+
                % Test that there is an intersection:
                if ((BODINT_PLANE.NSGLS+BODINT_PLANE.NSEGS+BODINT_PLANE.NTRIS) == 0); continue; end
 
@@ -274,8 +278,8 @@ for NM=1:NMESHES
                if ((X3FACE(X3LO)-max(BODINT_PLANE.XYZ(X3AXIS,1:BODINT_PLANE.NNODS))) > GEOMEPS); continue; end
                if ((min(BODINT_PLANE.XYZ(X3AXIS,1:BODINT_PLANE.NNODS))-X3FACE(X3HI)) > GEOMEPS); continue; end
 
-               if (plot_cutedges && X1AXIS==KAXIS); CUT_EDGE_START = MESHES(NM).N_CUTEDGE_MESH; end                
-               
+               if (plot_cutedges && X1AXIS==JAXIS); CUT_EDGE_START = MESHES(NM).N_CUTEDGE_MESH; end
+
                % For plane normal to X1AXIS, shoot rays along X2AXIS on all X3AXIS gridline
                % locations, get intersection data: Loop x3 axis locations
                for KK=X3LO:X3HI
@@ -294,7 +298,7 @@ for NM=1:NMESHES
                         continue
                      end
                   end
-            
+
                   % Now for this ray, set vertex types in MESHES(NM).VERTVAR(:,:,:,IBM_VGSC):
                   [ierr]=GET_X2_VERTVAR(X1AXIS,X2LO,X2HI,NM,I,KK);
 
@@ -314,12 +318,12 @@ for NM=1:NMESHES
                   [ierr]=GET_BODX2_INTERSECTIONS(X2AXIS,X3AXIS,X3RAY);
 
                end % KK - x3 gridlines.
- 
+
                % Now for segments not aligned with x3, define
                % intersections with grid line vertices:
                [ierr]=GET_BODX3_INTERSECTIONS(X2AXIS,X3AXIS,X2LO,X2HI);
 
-               if (plot_cutedges && X1AXIS==KAXIS) 
+               if (plot_cutedges && X1AXIS==JAXIS)
                    [ierr]=plot_bodintplane(BODINT_PLANE,false);
                    grid off
                    box on
@@ -328,8 +332,8 @@ for NM=1:NMESHES
                    ylabel('X3')
                    axis([X2FACE(X2LO) X2FACE(X2HI) X3FACE(X3LO) X3FACE(X3HI)])
                    %CUT_EDGE_START = MESHES(NM).N_CUTEDGE_MESH;
-               end               
- 
+               end
+
                % After these loops all segments should contain points from Node1,
                % cross 1, cross 2, ..., Node2, in ascending sbod order.
                % Time to generate the body IBM_INBOUNDARY edges on faces and add
@@ -338,8 +342,8 @@ for NM=1:NMESHES
                                     XIAXIS,XJAXIS,XKAXIS,NM,                 ...
                                     X2LO,X2HI,X3LO,X3HI,X2LO_CELL,X2HI_CELL, ...
                                     X3LO_CELL,X3HI_CELL,INDX1,X1PLN);
-               
-               if (plot_cutedges && X1AXIS==KAXIS) 
+
+               if (plot_cutedges && X1AXIS==JAXIS)
                   CUT_EDGE_END = MESHES(NM).N_CUTEDGE_MESH;
                   for KK=X3LO:X3HI
                       plot([X2FACE(X2LO) X2FACE(X2HI)],[X3FACE(KK) X3FACE(KK)],':k')
@@ -359,21 +363,21 @@ for NM=1:NMESHES
                   end
                   pause
                   close(gcf)
-               end            
+               end
 
             end % I index
          end % J index
       end % K index
-    
+
    end % X1AXIS_LOOP
    toc
-   
+
    disp('Into GET_CARTCELL_CUTEDGES ...')
    tic
    % Now Define the INBOUNDARY cut-edge inside Cartesian cells:
    [ierr]=GET_CARTCELL_CUTEDGES(NM,ISTR,IEND,JSTR,JEND,KSTR,KEND);
    toc
-   
+
    % 1. Cartesian GASPHASE cut-faces:
    % Loops for IAXIS, JAXIS, KAXIS faces: For FCVAR i,j,k, axis
    % - Define Cartesian Boundary Edges indexes.
@@ -382,26 +386,29 @@ for NM=1:NMESHES
    % - Reorder Edges, figure out if there are disjoint areas present.
    % - Load into CUT_FACE <=> FCVAR(i,j,k,IDCF,axis).
    disp('Into GET_CARTFACE_CUTFACES ...')
-   tic   
+   tic
    [ierr]=GET_CARTFACE_CUTFACES(NM,ISTR,IEND,JSTR,JEND,KSTR,KEND,true);
    toc
-   
+
    % 2. INBOUNDARY cut-faces:
    disp('Into GET_CARTCELL_CUTFACES ...')
-   tic   
+   tic
    [ierr]=GET_CARTCELL_CUTFACES(NM,ISTR,IEND,JSTR,JEND,KSTR,KEND,true);
    toc
 
    % Guard-cell Cartesian GASPHASE and INBOUNDARY cut-faces:
    disp('Into Guard cell GET_CARTFACE_CUTFACES, GET_CARTCELL_CUTFACES ...')
-   tic   
+   tic
    [ierr]=GET_CARTFACE_CUTFACES(NM,ISTR,IEND,JSTR,JEND,KSTR,KEND,false);
    [ierr]=GET_CARTCELL_CUTFACES(NM,ISTR,IEND,JSTR,JEND,KSTR,KEND,false);
    toc
 
    % Finally: Definition of cut-cells:
+   % Reset:
+   CELLRT=zeros(IEND,JEND,KEND); % false
+   MESHES(NM).N_SPCELL_CF = MESHES(NM).N_SPCELL;
    disp('Into GET_CARTCELL_CUTCELLS ...')
-   tic   
+   tic
    [ierr]=GET_CARTCELL_CUTCELLS(NM);
    toc
 end
@@ -422,7 +429,7 @@ for IG=1:N_GEOMETRY
 
    % Add to wet surface Areas:
    for IFACE=1:GEOM(IG).N_FACES
-      if ( GEOM(IG).FACES_AREA(IFACE) < GEOMEPS ) 
+      if ( GEOM(IG).FACES_AREA(IFACE) < GEOMEPS )
          disp(['GEOM FACE=' num2str(IFACE) ', AREA=' ,num2str(GEOM(IG).FACES_AREA(IFACE))])
       end
    end
@@ -454,7 +461,7 @@ for NM=1:NMESHES
    KHI_CELL = MESHES(NM).KHI_CELL;  % Last internal cell index.
 
    for ICF1 = 1:MESHES(NM).N_CUTFACE_MESH
-     if (MESHES(NM).CUT_FACE(ICF1).STATUS == IBM_INBOUNDARY) 
+     if (MESHES(NM).CUT_FACE(ICF1).STATUS == IBM_INBOUNDARY)
         NFACE = MESHES(NM).CUT_FACE(ICF1).NFACE;
         CF_AREA_INB = CF_AREA_INB + sum(MESHES(NM).CUT_FACE(ICF1).AREA(1:NFACE));
      end
@@ -477,7 +484,7 @@ for NM=1:NMESHES
       for J=JLO_CELL:JHI_CELL
          for I=ILO_CELL:IHI_CELL
 
-            if ( MESHES(NM).CCVAR(I,J,K,IBM_CGSC) == IBM_GASPHASE) 
+            if ( MESHES(NM).CCVAR(I,J,K,IBM_CGSC) == IBM_GASPHASE)
               SLEN = MESHES(NM).DX(I)*MESHES(NM).DY(J)*MESHES(NM).DZ(K);
               GP_VOLUME = GP_VOLUME + SLEN;
               CCGP_XYZCEN(IAXIS) = CCGP_XYZCEN(IAXIS) + SLEN * MESHES(NM).XC(I);

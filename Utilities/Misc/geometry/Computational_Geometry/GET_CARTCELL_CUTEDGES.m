@@ -10,6 +10,7 @@ global IBM_IDCE IBM_GS IBM_INBOUNDCC IBM_MAX_WSTRIANG_SEG IBM_UNDEFINED
 global CELLRT EDGE_START
 
 ierr=1;
+ON =[ 3 1 2 ];
 
 EDGE_START= MESHES(NM).N_CUTEDGE_MESH + 1;
 
@@ -31,9 +32,11 @@ for IG=1:N_GEOMETRY
       XYZ1(IAXIS:KAXIS) = GEOM(IG).VERTS(MAX_DIM*(SEG(NOD1)-1)+1:MAX_DIM*SEG(NOD1));
       XYZ2(IAXIS:KAXIS) = GEOM(IG).VERTS(MAX_DIM*(SEG(NOD2)-1)+1:MAX_DIM*SEG(NOD2));
 
+      
       % Test if Segment lays on plane, If so drop, it was taken care of
       % previously: This is expensive think of switching to pointer X1FACEP.
       DROPSEG = false;
+      ADD_XSEG= zeros(1,3);
       for X1AXIS=IAXIS:KAXIS
          switch(X1AXIS)
            case(IAXIS)
@@ -64,11 +67,59 @@ for IG=1:N_GEOMETRY
                LSTR = max(X1LO,  floor((MINX-GEOMEPS-X1FACE(X1LO))/DX1FACE(X1LO)) + X1LO);
                LEND = min(X1HI,   ceil((MAXX+GEOMEPS-X1FACE(X1LO))/DX1FACE(X1LO)) + X1LO);
             end
+            X1X2 = XYZ2(IAXIS:KAXIS)-XYZ1(IAXIS:KAXIS); X1X2=X1X2/norm(X1X2);
+            T1 = GEOM(IG).EDGE_FACES(2,IWSEDG);
+            E1 = GEOM(IG).EDGE_FACES(3,IWSEDG);
+            ON1= GEOM(IG).FACES(3*(T1-1)+ON(E1));
+            X1T1_OPNOD = GEOM(IG).VERTS(3*(ON1-1)+X1AXIS);
+            T2 = GEOM(IG).EDGE_FACES(4,IWSEDG);
+            E2 = GEOM(IG).EDGE_FACES(5,IWSEDG);
+            ON2= GEOM(IG).FACES(3*(T2-1)+ON(E2));
+            X1T2_OPNOD = GEOM(IG).VERTS(3*(ON2-1)+X1AXIS);
+
+            X1O1 = GEOM(IG).VERTS(3*(ON1-1)+IAXIS:3*(ON1-1)+KAXIS)-XYZ1(IAXIS:KAXIS); X1O1 = X1O1/norm(X1O1);
+            X1O2 = GEOM(IG).VERTS(3*(ON2-1)+IAXIS:3*(ON2-1)+KAXIS)-XYZ1(IAXIS:KAXIS); X1O2 = X1O2/norm(X1O2);
+
             for IPLN=LSTR:LEND
-               X1PLN = X1FACE(IPLN);
-               DROPSEG=(    abs(X1PLN-MAXX) < GEOMEPS) || ...
+               X1PLN     = X1FACE(IPLN);
+               INPL_TEST = abs(X1PLN-MAXX) < GEOMEPS;               
+               if(INPL_TEST)                  
+                   % Test that nodes on seg triangles not part of SEG are on
+                   % on side of X1PLN, and both normals have component in -X1AXIS
+                   % dir.                   
+                   if (               (X1T1_OPNOD-X1PLN)<-GEOMEPS && ... % -X1AXIS
+                                      (X1T2_OPNOD-X1PLN)<-GEOMEPS )
+                       ANG_FLG1 = GEOM(IG).FACES_NORMAL(X1AXIS,T1)< GEOMEPS && ...
+                                  GEOM(IG).FACES_NORMAL(X1AXIS,T2)< GEOMEPS;
+                       ANG_FLG2 = GEOM(IG).FACES_NORMAL(X1AXIS,T2)> GEOMEPS && ...
+                                  X1O2(X1AXIS) < X1O1(X1AXIS);
+                       ANG_FLG3 = GEOM(IG).FACES_NORMAL(X1AXIS,T1)> GEOMEPS && ...
+                                  X1O1(X1AXIS) < X1O2(X1AXIS);
+                       if(ANG_FLG1 || ANG_FLG2 || ANG_FLG3)
+                          ADD_XSEG(X1AXIS)=-10*GEOMEPS;
+                          INPL_TEST = false;
+                       end
+                   end
+                   if (               (X1T1_OPNOD-X1PLN)> GEOMEPS && ...  % +X1AXIS
+                                      (X1T2_OPNOD-X1PLN)> GEOMEPS )
+                       ANG_FLG1 = GEOM(IG).FACES_NORMAL(X1AXIS,T1)>-GEOMEPS && ...
+                                  GEOM(IG).FACES_NORMAL(X1AXIS,T2)>-GEOMEPS;
+                       ANG_FLG2 = GEOM(IG).FACES_NORMAL(X1AXIS,T2)<-GEOMEPS && ...
+                                  X1O2(X1AXIS) > X1O1(X1AXIS);
+                       ANG_FLG3 = GEOM(IG).FACES_NORMAL(X1AXIS,T1)<-GEOMEPS && ...
+                                  X1O1(X1AXIS) > X1O2(X1AXIS);
+                       if(ANG_FLG1 || ANG_FLG2 || ANG_FLG3)
+                          ADD_XSEG(X1AXIS)= 10*GEOMEPS;
+                          INPL_TEST = false;
+                       end
+                   end
+               end
+
+               DROPSEG=(                     INPL_TEST || ...
                        ((X1FACE(X1LO)-MAXX) > GEOMEPS) || ...
-                       ((MAXX-X1FACE(X1HI)) > GEOMEPS);
+                       ((MAXX-X1FACE(X1HI)) > GEOMEPS));
+
+               
                if (DROPSEG); break; end
             end
          end
@@ -171,7 +222,7 @@ for IG=1:N_GEOMETRY
          
          % Define Cartesian cell this cut-edge belongs:
          % Optimized for UG version:
-         XPOS = XYZ1(IAXIS) + SVAR12*STANI(IAXIS);
+         XPOS = XYZ1(IAXIS) + SVAR12*STANI(IAXIS) + ADD_XSEG(IAXIS);
          if (TRANS(NM).NOC(IAXIS)==0)
             II2  = floor( (XPOS-XFACE(ILO_FACE))/DXFACE(ILO_FACE) ) + ILO_CELL;
             % Discard cut-edges on faces laying on x2hi and x3hi.
@@ -187,7 +238,7 @@ for IG=1:N_GEOMETRY
             if (~FOUND_SEG); continue; end
          end
 
-         XPOS = XYZ1(JAXIS) + SVAR12*STANI(JAXIS);
+         XPOS = XYZ1(JAXIS) + SVAR12*STANI(JAXIS)  + ADD_XSEG(JAXIS);
          if (TRANS(NM).NOC(JAXIS)==0)
             JJ2  = floor( (XPOS-YFACE(JLO_FACE))/DYFACE(JLO_FACE) ) + JLO_CELL;
             if ( (JJ2 < JLO_CELL-CCGUARD) || (JJ2 > JHI_CELL+CCGUARD) ); continue; end
@@ -202,7 +253,7 @@ for IG=1:N_GEOMETRY
             if (~FOUND_SEG); continue; end
          end
 
-         XPOS = XYZ1(KAXIS) + SVAR12*STANI(KAXIS);
+         XPOS = XYZ1(KAXIS) + SVAR12*STANI(KAXIS) + ADD_XSEG(KAXIS);
          if (TRANS(NM).NOC(KAXIS)==0)
             KK2  = floor( (XPOS-ZFACE(KLO_FACE))/DZFACE(KLO_FACE) ) + KLO_CELL;
             if ( (KK2 < KLO_CELL-CCGUARD) || (KK2 > KHI_CELL+CCGUARD) ); continue; end
