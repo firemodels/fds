@@ -7,14 +7,41 @@ IAXIS=1; JAXIS=2; KAXIS=3;
 NOD1 =1; NOD2 =2; NOD3 =3;
 
 NORM_EPS=10^-10;
-TWO_EPSILON_EPS=1.E-13;
+TWO_EPSILON_EB=1.E-13;
 
 % Input Data:
-N_VERTS      = 6;
+N_VERTS      = 10;
 N_POLY_VERTS = N_VERTS;
-VERTS   = [-1.0, -1.0, 1.0, .0, -1.0, 1.5, 0.0, 0.0, 1.5, 1.0, 0.0, 2.0, 1.0, 1.0, 2.0, -1.0, 1.0, 1.0]; 
-POLY    = [ 1, 2, 3, 4, 5, 6];
-EXTRUDE = -0.6;
+%VERTS   = [-1.0, -1.0, 1.0, .0, -1.0, 1.5, 0.0, 0.0, 1.5, 1.0, 0.0, 2.0, 1.0, 1.0, 2.0, -1.0, 1.0, 1.0]; 
+%POLY    = [ 1, 2, 3, 4, 5, 6];
+
+VERTS=[   -1.0,  0.0,  1.0, ...
+    0.0,  0.0,  1.5, ...
+    0.0,  0.5,  1.5, ...
+    0.5,  0.5,  1.75, ...
+    0.5, -0.5,  1.75, ...
+   -0.5, -0.5,  1.25, ...
+   -0.5, -1.0,  1.25, ...
+    1.0, -1.0,  2.0, ...
+    1.0,  1.0,  2.0, ...
+   -1.0,  1.0,  1.0];
+POLY = [1:10];
+
+EXTRUDE = 0.5;
+
+
+a=0.2;
+figure
+hold on
+xlabel('X')
+ylabel('Y')
+zlabel('Z')
+axis equal; view([45 45])
+box on
+for I=1:N_VERTS
+    plot3(VERTS(3*I-2),VERTS(3*I-1),VERTS(3*I),'-ok')
+    text(VERTS(3*I-2),VERTS(3*I-1),VERTS(3*I),num2str(I),'FontSize',14)
+end
 
 
 %% Start of routine: arguments N_VERTS,N_POLY_VERTS,VERTS,POLY,EXTRUDE
@@ -62,10 +89,22 @@ for I=1:N_POLY_VERTS
    V1 = PVERTS(3*I-2:3*I    ) - XYZCEN(IAXIS:KAXIS);
    V2 = PVERTS(3*I+1:3*(I+1)) - XYZCEN(IAXIS:KAXIS);
    N  = cross(V1,V2);
-   if(norm(N) > TWO_EPSILON_EPS); N = N/norm(N); end
+   if(norm(N) > TWO_EPSILON_EB); N = N/norm(N); end
    NVEC(IAXIS:KAXIS) = NVEC(IAXIS:KAXIS) + N(IAXIS:KAXIS);
 end
-if(norm(NVEC) > TWO_EPSILON_EPS); NVEC=NVEC/norm(NVEC); end
+if(norm(NVEC) > TWO_EPSILON_EB); NVEC=NVEC/norm(NVEC); end
+
+% Test all segments are in plane normal to NVEC:
+IP1 = 1;
+for I=1:N_POLY_VERTS
+   DV1(IAXIS:KAXIS) = PVERTS(3*I+1:3*(I+1))-PVERTS(3*I-2:3*I); DV1=DV1/norm(DV1);
+   if (abs(dot(DV1,NVEC)) > TWO_EPSILON_EB) 
+      if ( I<N_POLY_VERTS ); IP1=POLY(I+1); end
+      disp(['ERROR: For extruded Polygon GEOM : Segment joining nodes ' num2str(POLY(I)) '-' num2str(IP1) ...
+      ' Not in the plane of the polygon.'])
+      return
+   end
+end
 
 IS_CONVEX= true;
 NODE_FLG = ones(1,N_POLY_VERTS+1);
@@ -135,22 +174,48 @@ else % Simple polygon, ear clipping.
             V2 = VERT_LIST(IVP1);
             if(~NODE_EXISTS(IVP1)); break; end
             DV1(IAXIS:KAXIS) = PVERTS(3*V1-2:3*V1)-PVERTS(3*V0-2:3*V0); 
-            if (norm(DV1)>TWO_EPSILON_EPS)
+            if (norm(DV1)>TWO_EPSILON_EB)
                 DV1=DV1/norm(DV1);
             else
                 continue
             end
             DV2(IAXIS:KAXIS) = PVERTS(3*V2-2:3*V2)-PVERTS(3*V1-2:3*V1); 
-            if (norm(DV2)>TWO_EPSILON_EPS)
+            if (norm(DV2)>TWO_EPSILON_EB)
                 DV2=DV2/norm(DV2);
             else
                 continue
             end
-            if(NLIST==3 || dot(NVEC,cross(DV1,DV2))>NORM_EPS)
+            X(1,IAXIS:KAXIS) = VERTS(3*V0-2:3*V0);
+            X(2,IAXIS:KAXIS) = VERTS(3*V1-2:3*V1);
+            X(3,IAXIS:KAXIS) = VERTS(3*V2-2:3*V2);
+            NONODE_TRIANG=dot(NVEC,cross(DV1,DV2))>NORM_EPS;
+            if(NONODE_TRIANG)
+                for I=1:NVERTS2
+                    if(any( [V0,V1,V2] == I)); continue; end
+                    % Point in 3D triangle:
+                    [PTINT_FLG]=POINT_IN_TRIANGLE(PVERTS(3*I-2:3*I), PVERTS(3*V0-2:3*V0), PVERTS(3*V1-2:3*V1), PVERTS(3*V2-2:3*V2));
+                    if(PTINT_FLG) 
+                       NONODE_TRIANG=false;
+                       break
+                    end
+                end
+            end
+            if(NLIST==3 || NONODE_TRIANG)
                  N_FACES = N_FACES + 1;
                  FACES(3*N_FACES-2) = V0;
                  FACES(3*N_FACES-1) = V1;
                  FACES(3*N_FACES  ) = V2;
+                 
+                 
+                 disp(['Inner : Added face ' num2str(N_FACES)])
+                 X(1,IAXIS:KAXIS) = VERTS(3*FACES(3*N_FACES-2)-2:3*FACES(3*N_FACES-2));
+                 X(2,IAXIS:KAXIS) = VERTS(3*FACES(3*N_FACES-1)-2:3*FACES(3*N_FACES-1));
+                 X(3,IAXIS:KAXIS) = VERTS(3*FACES(3*N_FACES  )-2:3*FACES(3*N_FACES  ));
+                 [hp]=patch(X(:,IAXIS),X(:,JAXIS),X(:,KAXIS),'b');
+                 pause
+                 
+                 
+                 
                  if (NLIST == 3); EXIT_OUTER=true; break; end
                  NODE_EXISTS(IVERT) =false; 
                  if(IVERT==1); NODE_EXISTS(NLIST+1)=false; end
@@ -182,13 +247,13 @@ else % Simple polygon, ear clipping.
             V1 = VERT_LIST(IV  );
             V2 = VERT_LIST(IVP1);
             DV1(IAXIS:KAXIS) = PVERTS(3*V1-2:3*V1)-PVERTS(3*V0-2:3*V0);
-            if (norm(DV1)>TWO_EPSILON_EPS)
+            if (norm(DV1)>TWO_EPSILON_EB)
                 DV1=DV1/norm(DV1);
             else
                 continue
             end
             DV2(IAXIS:KAXIS) = PVERTS(3*V2-2:3*V2)-PVERTS(3*V1-2:3*V1);
-            if (norm(DV2)>TWO_EPSILON_EPS)
+            if (norm(DV2)>TWO_EPSILON_EB)
                 DV2=DV2/norm(DV2);
             else
                 continue
@@ -197,9 +262,19 @@ else % Simple polygon, ear clipping.
                VERT_DROPPED=true; NODE_EXISTS(I)=false;
                if (N_FACES < (NVERTS2-2)) 
                   N_FACES = N_FACES + 1;
-                  FACES(IFACE  ) = V0;
-                  FACES(IFACE+1) = V1;
-                  FACES(IFACE+2) = V2;
+                  FACES(3*N_FACES-2) = V0;
+                  FACES(3*N_FACES-1) = V1;
+                  FACES(3*N_FACES  ) = V2;
+                  
+                  
+                  disp(['VERT Dropped: Added face ' num2str(N_FACES)])
+                  X(1,IAXIS:KAXIS) = VERTS(3*FACES(3*N_FACES-2)-2:3*FACES(3*N_FACES-2));
+                  X(2,IAXIS:KAXIS) = VERTS(3*FACES(3*N_FACES-1)-2:3*FACES(3*N_FACES-1));
+                  X(3,IAXIS:KAXIS) = VERTS(3*FACES(3*N_FACES  )-2:3*FACES(3*N_FACES  ));
+                  [hp]=patch(X(:,IAXIS),X(:,JAXIS),X(:,KAXIS),'b');
+                  pause
+                  
+                  
                end
                if (NLIST == 3); EXIT_OUTER=true; break; end
             end
