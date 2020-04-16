@@ -1,30 +1,25 @@
 #ifndef GITHASH_PP
 #define GITHASH_PP "unknown"
 #endif
+
+!> \brief Routines for handling output
+
 MODULE DUMP
 
-! Create and write ("dump") to various output files
-
 USE PRECISION_PARAMETERS
-USE COMP_FUNCTIONS
 USE MESH_VARIABLES
 USE GLOBAL_CONSTANTS
-USE TRAN
-USE ISOSMOKE
 USE MESH_POINTERS
 USE DEVICE_VARIABLES
 USE CONTROL_VARIABLES
 USE OUTPUT_DATA
-USE SOOT_ROUTINES
 USE COMPLEX_GEOMETRY, ONLY : WRITE_GEOM,WRITE_GEOM_ALL,IBM_FGSC,IBM_IDCF,IBM_IDCC,IBM_FTYPE_RGGAS,IBM_FTYPE_CFGAS,IBM_FTYPE_CFINB,&
                              IBM_SOLID,FCELL,IBM_CGSC,IBM_CUTCFE,TRIANGULATE,IBM_VGSC,IBM_GASPHASE,ADD_Q_DOT_CUTCELLS,&
                              GET_PRES_CFACE,GET_PRES_CFACE_TEST,GET_UVWGAS_CFACE,GET_MUDNS_CFACE
-USE TYPES
 
 IMPLICIT NONE
 PRIVATE
 
-INTEGER, PARAMETER :: ONE_INTEGER=1,ZERO_INTEGER=0
 REAL(EB), POINTER, DIMENSION(:,:,:) :: WFX=>NULL(),WFY=>NULL(),WFZ=>NULL()
 INTEGER :: N_DEVC_FILES
 CHARACTER(80) :: TCFORM
@@ -59,6 +54,8 @@ PUBLIC ASSIGN_FILE_NAMES,INITIALIZE_GLOBAL_DUMPS,INITIALIZE_MESH_DUMPS,WRITE_STA
 CONTAINS
 
 
+!> \brief Call the subroutines that update device, heat release, and mass output
+
 SUBROUTINE UPDATE_GLOBAL_OUTPUTS(T,DT,NM)
 
 USE COMP_FUNCTIONS, ONLY : CURRENT_TIME
@@ -75,6 +72,8 @@ CALL UPDATE_DEVICES_1(T,DT,NM)
 T_USED(7) = T_USED(7) + CURRENT_TIME() - TNOW
 END SUBROUTINE UPDATE_GLOBAL_OUTPUTS
 
+
+!> \brief Call subroutines that output quantities associated with each mesh, like slice, boundary, and particle files
 
 SUBROUTINE DUMP_MESH_OUTPUTS(T,DT,NM)
 
@@ -245,11 +244,11 @@ T_USED(7) = T_USED(7) + CURRENT_TIME() - TNOW
 END SUBROUTINE DUMP_MESH_OUTPUTS
 
 
+!> \brief Assign names and logical units for all output files
+
 SUBROUTINE ASSIGN_FILE_NAMES
 
-! Assign names and logical units for all output files
-
-USE COMP_FUNCTIONS
+USE COMP_FUNCTIONS, ONLY: GET_FILE_NUMBER
 USE EVAC, ONLY : EMESH_INDEX
 INTEGER :: NM,I,N,NFM
 CHARACTER(LABEL_LENGTH) :: CFORM
@@ -586,11 +585,11 @@ ENDIF
 END SUBROUTINE ASSIGN_FILE_NAMES
 
 
+!> \brief Open and initialize all files that are not tied to a particular mesh
+
 SUBROUTINE INITIALIZE_GLOBAL_DUMPS(T,DT)
 
-! Open and initialize all files that are not tied to a particular mesh
-
-USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
+USE COMP_FUNCTIONS, ONLY: CURRENT_TIME,GET_FILE_NUMBER,APPEND_FILE
 USE PHYSICAL_FUNCTIONS, ONLY: GET_MASS_FRACTION_ALL,GET_MOLECULAR_WEIGHT
 USE CONTROL_VARIABLES
 REAL(EB) :: TNOW
@@ -865,11 +864,11 @@ UNSTRUCTURED_GEOMETRY: IF (N_FACE>0 .AND. N_GEOMETRY==0) THEN ! don't do anythin
       ELSE RESTART_GE
          OPEN(LU_GEOM(N),FILE=FN_GEOM(N),FORM='UNFORMATTED',STATUS='REPLACE')
          OPEN(LU_GEOM(N+1),FILE=FN_GEOM(N+1),FORM='UNFORMATTED',STATUS='REPLACE')
-         WRITE(LU_GEOM(N)) ONE_INTEGER
-         WRITE(LU_GEOM(N)) ZERO_INTEGER
-         WRITE(LU_GEOM(N)) ZERO_INTEGER ! floating point header
-         WRITE(LU_GEOM(N)) ZERO_INTEGER ! integer header
-         !WRITE(LU_GEOM(N)) ZERO_INTEGER, ZERO_INTEGER ! static vertices and faces
+         WRITE(LU_GEOM(N)) INTEGER_ONE
+         WRITE(LU_GEOM(N)) INTEGER_ZERO
+         WRITE(LU_GEOM(N)) INTEGER_ZERO ! floating point header
+         WRITE(LU_GEOM(N)) INTEGER_ZERO ! integer header
+         !WRITE(LU_GEOM(N)) INTEGER_ZERO, INTEGER_ZERO ! static vertices and faces
       ENDIF RESTART_GE
    ENDDO
 ENDIF UNSTRUCTURED_GEOMETRY
@@ -877,6 +876,8 @@ ENDIF UNSTRUCTURED_GEOMETRY
 T_USED(7) = T_USED(7) + CURRENT_TIME() - TNOW
 END SUBROUTINE INITIALIZE_GLOBAL_DUMPS
 
+
+!> \brief Open and write header info for output files associated with particular meshes, like slice, boundary, and particle
 
 SUBROUTINE INITIALIZE_MESH_DUMPS(NM)
 
@@ -1383,12 +1384,12 @@ PARTICLE_IF: IF ( (PARTICLE_FILE .AND. .NOT.EVACUATION_ONLY(NM)) .OR. (EVACUATIO
 
       OPEN(LU_PART(NM),FILE=FN_PART(NM),FORM='UNFORMATTED',STATUS='REPLACE')
       OPEN(LU_PART(NM+NMESHES),FILE=FN_PART(NM+NMESHES),FORM='FORMATTED',STATUS='REPLACE')
-      WRITE(LU_PART(NM)) ONE_INTEGER                ! The number ONE, to indicate file Endian-ness
+      WRITE(LU_PART(NM)) INTEGER_ONE                ! The number ONE, to indicate file Endian-ness
       WRITE(LU_PART(NM)) NINT(VERSION_NUMBER*100.)  ! FDS version number
       EVAC_ONLY2: IF (EVACUATION_ONLY(NM)) THEN
          WRITE(LU_PART(NM)) N_EVAC
          DO N=1,N_EVAC
-            WRITE(LU_PART(NM)) EVAC_N_QUANTITIES,ZERO_INTEGER  ! ZERO_INTEGER is a place holder for future INTEGER quantities
+            WRITE(LU_PART(NM)) EVAC_N_QUANTITIES,INTEGER_ZERO  ! INTEGER_ZERO is a place holder for future INTEGER quantities
             DO NN=1,EVAC_N_QUANTITIES
                WRITE(LU_PART(NM)) OUTPUT_QUANTITY(EVAC_QUANTITIES_INDEX(NN))%NAME(1:30)
                WRITE(LU_PART(NM)) OUTPUT_QUANTITY(EVAC_QUANTITIES_INDEX(NN))%UNITS(1:30)
@@ -1398,7 +1399,7 @@ PARTICLE_IF: IF ( (PARTICLE_FILE .AND. .NOT.EVACUATION_ONLY(NM)) .OR. (EVACUATIO
          WRITE(LU_PART(NM)) N_LAGRANGIAN_CLASSES
          DO N=1,N_LAGRANGIAN_CLASSES
             LPC => LAGRANGIAN_PARTICLE_CLASS(N)
-            WRITE(LU_PART(NM)) LPC%N_QUANTITIES,ZERO_INTEGER  ! ZERO_INTEGER is a place holder for future INTEGER quantities
+            WRITE(LU_PART(NM)) LPC%N_QUANTITIES,INTEGER_ZERO  ! INTEGER_ZERO is a place holder for future INTEGER quantities
             DO NN=1,LPC%N_QUANTITIES
                WRITE(LU_PART(NM)) LPC%SMOKEVIEW_LABEL(NN)(1:30)
                WRITE(LU_PART(NM)) OUTPUT_QUANTITY(LPC%QUANTITIES_INDEX(NN))%UNITS(1:30)
@@ -1429,12 +1430,15 @@ T_USED(7) = T_USED(7) + CURRENT_TIME() - TNOW
 END SUBROUTINE INITIALIZE_MESH_DUMPS
 
 
+!> \brief Write information into the Smokeview (.smv) file
+
 SUBROUTINE WRITE_SMOKEVIEW_FILE
 
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP,CROSS_PRODUCT
 USE MEMORY_FUNCTIONS, ONLY : CHKMEMERR
 USE COMP_FUNCTIONS, ONLY: SHUTDOWN
 USE GEOMETRY_FUNCTIONS, ONLY: INTERIOR
+USE TRAN, ONLY: TRAN_TYPE,TRANS
 USE EVAC, ONLY: N_DOORS, N_EXITS, N_ENTRYS, N_SSTANDS, EVAC_DOORS, EVAC_EXITS, EVAC_ENTRYS, EVAC_SSTANDS, &
      EVAC_EXIT_TYPE, EVAC_DOOR_TYPE, EVAC_ENTR_TYPE, EVAC_SSTAND_TYPE, NPC_EVAC, N_HOLES, &
      EVACUATION_TYPE, EVAC_HOLE_TYPE, EVAC_EVACS, EVAC_HOLES
@@ -1543,7 +1547,7 @@ CLOSE(LU_GIT)
 ! Indicate the "endian-ness" of the output files
 
 OPEN(LU_END,FILE=FN_END,FORM='UNFORMATTED',STATUS='REPLACE')
-WRITE(LU_END) ONE_INTEGER
+WRITE(LU_END) INTEGER_ONE
 CLOSE(LU_END)
 
 WRITE(LU_SMV,'(/A)') 'ENDF'
@@ -1974,7 +1978,7 @@ WRITE(LU_SMV,'(3F13.5)') (TEX_ORI(I),I=1,3)
 ! Write out threshold value for HRRPUV
 
 WRITE(LU_SMV,'(/A)') 'HRRPUVCUT'
-WRITE(LU_SMV,'(I6)') ONE_INTEGER
+WRITE(LU_SMV,'(I6)') INTEGER_ONE
 WRITE(LU_SMV,'(F13.5)') MIN(200._EB,20._EB/CHARACTERISTIC_CELL_SIZE)
 
 ! Write out RAMP info to .smv file
@@ -2488,9 +2492,20 @@ CLOSE(LU_SMV)
 CONTAINS
 
 
-SUBROUTINE DUMMY_VENTS(FI,N1,N2,IVV1,IVV2,JVV1,JVV2,N3,KVV1,KVV2)
+!> \brief For exterior mesh face, FI, create "dummy" vent patches for Smokeview
+!>
+!> \param FI Face Index, 1-6, where 1 refers to lower \f$ x \f$ mesh boundary, 2 upper, etc.
+!> \param N1 Number of cells in the first coordinate direction
+!> \param N2 Number of cells in the second coordinate direction
+!> \param IVV1 Lower indices of dummy vents for the first coordinate direction
+!> \param IVV2 Upper indices of dummy vents for the first coordinate direction
+!> \param JVV1 Lower indices of dummy vents for the second coordinate direction
+!> \param JVV2 Upper indices of dummy vents for the second coordinate direction
+!> \param N3 Index of the vent plane
+!> \param KVV1 Lower indices of dummy vents for the vent plane, KVV1=KVV2=N3
+!> \param KVV2 Upper indices of dummy vents for the vent plane, KVV1=KVV2=N3
 
-! For exterior mesh face, FI, create "dummy" vent patches for Smokeview
+SUBROUTINE DUMMY_VENTS(FI,N1,N2,IVV1,IVV2,JVV1,JVV2,N3,KVV1,KVV2)
 
 INTEGER, INTENT(IN) :: N1,N2,N3,FI
 INTEGER, INTENT(INOUT), DIMENSION(NDVDIM) :: IVV1,IVV2,JVV1,JVV2,KVV1,KVV2
@@ -2536,7 +2551,10 @@ ENDDO JLOOP
 END SUBROUTINE DUMMY_VENTS
 
 
+!> \brief Increase size of array holding mesh wire frame coordinates
+
 SUBROUTINE RE_ALLOCATE_SEGMENTS
+
 USE MEMORY_FUNCTIONS, ONLY : ChkMemErr
 TYPE(SEGMENT_TYPE), ALLOCATABLE, DIMENSION(:) :: DUMMY_SEGMENT
 INTEGER :: IZERO
@@ -2559,9 +2577,9 @@ END SUBROUTINE RE_ALLOCATE_SEGMENTS
 END SUBROUTINE WRITE_SMOKEVIEW_FILE
 
 
-SUBROUTINE WRITE_STATUS_FILES
+!> \brief Status files are used to indicate if FDS has completed
 
-! Status files are used to indicate how FDS ended
+SUBROUTINE WRITE_STATUS_FILES
 
 IF (STATUS_FILES) THEN
    OPEN(LU_NOTREADY,FILE=FN_NOTREADY,FORM='FORMATTED',STATUS='REPLACE')
@@ -2571,12 +2589,16 @@ ENDIF
 END SUBROUTINE WRITE_STATUS_FILES
 
 
+!> \brief Write out preliminary stuff to error file (unit 0)
+!> \param DT Time step size (s)
+
 SUBROUTINE INITIALIZE_DIAGNOSTIC_FILE(DT)
 
 USE RADCONS, ONLY: NRT,RSA,NRP,TIME_STEP_INCREMENT,PATH_LENGTH
 USE MATH_FUNCTIONS, ONLY : EVALUATE_RAMP
 USE MISC_FUNCTIONS, ONLY : WRITE_SUMMARY_INFO
 USE PHYSICAL_FUNCTIONS, ONLY: GET_VISCOSITY, GET_CONDUCTIVITY, GET_SPECIFIC_HEAT, GET_ENTHALPY
+USE SOOT_ROUTINES, ONLY: PARTICLE_RADIUS
 USE SCRC, ONLY: SCARC_METHOD, SCARC_GRID, SCARC_MATRIX, SCARC_MULTIGRID, SCARC_SMOOTH, SCARC_PRECON, &
                 SCARC_COARSE, SCARC_MULTIGRID_CYCLE, SCARC_MULTIGRID_COARSENING, &
                 SCARC_MULTIGRID_ITERATIONS, SCARC_MULTIGRID_ACCURACY, SCARC_MULTIGRID_INTERPOL, &
@@ -2587,8 +2609,6 @@ INTEGER :: NM,I,NN,N,NR,NL,NS,ITMP, CELL_COUNT
 REAL(EB) ::ZZ_GET(1:N_TRACKED_SPECIES), MU_Z,K_Z,CP_ZN,H_Z
 CHARACTER(LABEL_LENGTH) :: QUANTITY,ODE_SOLVER,OUTFORM
 TYPE(SPECIES_MIXTURE_TYPE),POINTER :: SM=>NULL()
-
-! Write out preliminary stuff to error file (unit 0)
 
 CALL WRITE_SUMMARY_INFO(LU_ERR)
 
@@ -3219,6 +3239,11 @@ WRITE(LU_OUTPUT,*)
 END SUBROUTINE INITIALIZE_DIAGNOSTIC_FILE
 
 
+!> \brief Dump data to a file for possible restart
+!> \param T Current time (s)
+!> \param DT Current time step size (s)
+!> \param NM Mesh number
+
 SUBROUTINE DUMP_RESTART(T,DT,NM)
 
 ! Dump data to a file for possible restart
@@ -3357,9 +3382,12 @@ CLOSE(LU_CORE(NM))
 END SUBROUTINE DUMP_RESTART
 
 
-SUBROUTINE READ_RESTART(T,DT,NM)
+!> \brief Read data from previous calculation
+!> \param T Current time (s)
+!> \param DT Current time step size (s)
+!> \param NM Mesh number
 
-! Read data from a previous calculation
+SUBROUTINE READ_RESTART(T,DT,NM)
 
 USE COMP_FUNCTIONS, ONLY: SHUTDOWN
 USE MEMORY_FUNCTIONS, ONLY: REALLOCATE,ALLOCATE_STORAGE
@@ -3525,13 +3553,15 @@ CLOSE(LU_RESTART(NM))
 END SUBROUTINE READ_RESTART
 
 
+!> \brief Write time step diagnostics to the .out and .err files
+!>
+!> \param T Current simulation time (s)
+!> \param DT Current time step size (s)
+
 SUBROUTINE WRITE_DIAGNOSTICS(T,DT)
 
-! Write cycle number, elapsed time since the last call,
-! current time for the physical system, and current number of
-! particles in the system.
-
 USE SCRC, ONLY: SCARC_CAPPA, SCARC_ITERATIONS, SCARC_RESIDUAL
+USE COMP_FUNCTIONS, ONLY : CURRENT_TIME,GET_DATE,GET_DATE_ISO_8601
 REAL(EB), INTENT(IN) :: T,DT
 INTEGER :: NM,II,JJ,KK
 CHARACTER(80) :: SIMPLE_OUTPUT,SIMPLE_OUTPUT_ERR
@@ -3653,9 +3683,12 @@ T_USED(7) = T_USED(7) + CURRENT_TIME() - TNOW
 END SUBROUTINE WRITE_DIAGNOSTICS
 
 
-SUBROUTINE DUMP_PART(T,NM)
+!> \brief Dump Lagrangian particle data to CHID.prt5
+!>
+!> \param T Current simulation time (s)
+!> \param NM Mesh number
 
-! Dump Lagrangian particle data to CHID.prt5
+SUBROUTINE DUMP_PART(T,NM)
 
 USE MEMORY_FUNCTIONS, ONLY: CHKMEMERR
 
@@ -3787,10 +3820,15 @@ ENDDO LAGRANGIAN_PARTICLE_CLASS_LOOP
 END SUBROUTINE DUMP_PART
 
 
+!> \brief Write out isosurface data to file(s).
+!>
+!> \param T Current simulation time (s)
+!> \param DT Current time step size (s)
+!> \param NM Mesh number
+
 SUBROUTINE DUMP_ISOF(T,DT,NM)
 
-! Write out isosurface data to file(s).
-
+USE ISOSMOKE, ONLY: ISO_TO_FILE
 USE TURBULENCE, ONLY: FILL_EDGES
 REAL(EB), INTENT(IN) :: T,DT
 INTEGER, INTENT(IN) :: NM
@@ -3853,7 +3891,7 @@ ISOF_LOOP: DO N=1,N_ISOF
    DO K=0,KBP1
       DO J=0,JBP1
          DO I=0,IBP1
-            QUANTITY(I,J,K) = GAS_PHASE_OUTPUT(I,J,K,IS%INDEX,0,IS%Y_INDEX,IS%Z_INDEX,0,IS%VELO_INDEX,0,0,0,0,T,DT,NM)
+            QUANTITY(I,J,K) = GAS_PHASE_OUTPUT(T,DT,NM,I,J,K,IS%INDEX,0,IS%Y_INDEX,IS%Z_INDEX,0,IS%VELO_INDEX,0,0,0,0)
          ENDDO
       ENDDO
    ENDDO
@@ -3892,7 +3930,7 @@ ISOF_LOOP: DO N=1,N_ISOF
       DO K=0,KBP1
          DO J=0,JBP1
             DO I=0,IBP1
-               QUANTITY2(I,J,K) = GAS_PHASE_OUTPUT(I,J,K,IS%INDEX2,0,IS%Y_INDEX2,IS%Z_INDEX2,0,IS%VELO_INDEX2,0,0,0,0,T,DT,NM)
+               QUANTITY2(I,J,K) = GAS_PHASE_OUTPUT(T,DT,NM,I,J,K,IS%INDEX2,0,IS%Y_INDEX2,IS%Z_INDEX2,0,IS%VELO_INDEX2,0,0,0,0)
             ENDDO
          ENDDO
       ENDDO
@@ -3930,10 +3968,15 @@ ENDDO ISOF_LOOP
 END SUBROUTINE DUMP_ISOF
 
 
+!> \brief Write out the SMOKE3D data to files
+!>
+!> \param T Current simulation time (s)
+!> \param DT Current time step size (s)
+!> \param NM Mesh number
+
 SUBROUTINE DUMP_SMOKE3D(T,DT,NM)
 
-! Write out the SMOKE3D data to files
-
+USE ISOSMOKE, ONLY: SMOKE3D_TO_FILE
 REAL(EB), INTENT(IN) :: T,DT
 INTEGER,  INTENT(IN) :: NM
 INTEGER  :: I,J,K,N
@@ -3971,7 +4014,7 @@ DATA_FILE_LOOP: DO N=1,4
    DO K=0,KBP1
       DO J=0,JBP1
          DO I=0,IBP1
-            FF(I,J,K)=GAS_PHASE_OUTPUT(I,J,K,SMOKE3D_QUANTITY_INDEX(N),0,SMOKE3D_Y_INDEX(N),SMOKE3D_Z_INDEX(N),0,0,0,0,0,0,T,DT,NM)
+            FF(I,J,K)=GAS_PHASE_OUTPUT(T,DT,NM,I,J,K,SMOKE3D_QUANTITY_INDEX(N),0,SMOKE3D_Y_INDEX(N),SMOKE3D_Z_INDEX(N),0,0,0,0,0,0)
          ENDDO
       ENDDO
    ENDDO
@@ -5012,7 +5055,7 @@ CHARACTER(*), INTENT(IN) :: SLICETYPE
 INTEGER, INTENT(IN) :: FUNIT, HEADER, I1, I2, J1, J2, K1, K2
 REAL(FB) :: STIME
 INTEGER :: I
-INTEGER, PARAMETER :: ONE_INTEGER=1, ZERO_INTEGER=0, FIRST_FRAME_STATIC=1, NVOLS=0, VERSION=2
+INTEGER, PARAMETER :: FIRST_FRAME_STATIC=1, NVOLS=0, VERSION=2
 INTEGER :: NVERTS, NVERTS_CUTCELLS, NFACES, NFACES_CUTCELLS
 REAL(FB), PARAMETER :: ZERO_FLOAT=0.0_FB
 REAL(FB), ALLOCATABLE, DIMENSION(:) :: VERTS
@@ -5031,9 +5074,9 @@ ELSE
 ENDIF
 
 IF (HEADER==1) THEN
-   WRITE(FUNIT) ONE_INTEGER
+   WRITE(FUNIT) INTEGER_ONE
    WRITE(FUNIT) VERSION
-   WRITE(FUNIT) ZERO_INTEGER, ZERO_INTEGER, FIRST_FRAME_STATIC
+   WRITE(FUNIT) INTEGER_ZERO, INTEGER_ZERO, FIRST_FRAME_STATIC
 ENDIF
 WRITE(FUNIT) STIME
 WRITE(FUNIT) NVERTS, NFACES, NVOLS
@@ -5046,7 +5089,7 @@ IF (NVERTS>0 .AND. NFACES>0) THEN
 ENDIF
 
 WRITE(FUNIT) ZERO_FLOAT
-WRITE(FUNIT) ZERO_INTEGER, ZERO_INTEGER, ZERO_INTEGER
+WRITE(FUNIT) INTEGER_ZERO, INTEGER_ZERO, INTEGER_ZERO
 IF (NVERTS>0 .AND. NFACES>0) THEN
       DEALLOCATE(VERTS)
       DEALLOCATE(FACES)
@@ -5065,7 +5108,7 @@ INTEGER, INTENT(IN) :: FUNIT_DATA,FUNIT_BOUNDS,HEADER,I1,I2,J1,J2,K1,K2,DEBUG, &
 REAL(FB), INTENT(IN):: STIME
 LOGICAL, INTENT(IN) :: CC_FACE_CENTERED,CC_CELL_CENTERED
 
-INTEGER, PARAMETER :: ONE_INTEGER=1, ZERO_INTEGER=0, VERSION=2
+INTEGER, PARAMETER :: VERSION=2
 INTEGER :: NVERTS,NVERTS_CUTCELLS,NFACES,NFACES_CUTCELLS
 INTEGER I
 REAL(FB), ALLOCATABLE, DIMENSION(:) :: VALS
@@ -5083,11 +5126,11 @@ ELSE
 ENDIF
 
 IF (HEADER==1) THEN
-   WRITE(FUNIT_DATA) ONE_INTEGER
+   WRITE(FUNIT_DATA) INTEGER_ONE
    WRITE(FUNIT_DATA) VERSION
 ENDIF
 WRITE(FUNIT_DATA) STIME
-WRITE(FUNIT_DATA) ZERO_INTEGER, ZERO_INTEGER, ZERO_INTEGER, NFACES
+WRITE(FUNIT_DATA) INTEGER_ZERO, INTEGER_ZERO, INTEGER_ZERO, NFACES
 IF (NVERTS>0 .AND. NFACES>0) THEN
    IF (DEBUG .EQ. 0) THEN
       WRITE(FUNIT_DATA) (VALS(I),I=1,NFACES)
@@ -5398,8 +5441,8 @@ DO ISIDE=LOW_IND,LOCAL_IND
       II = CUT_CELL(ICC)%IJK(IAXIS)
       JJ = CUT_CELL(ICC)%IJK(JAXIS)
       KK = CUT_CELL(ICC)%IJK(KAXIS)
-      VAL_LOC(ISIDE) = GAS_PHASE_OUTPUT(II,JJ,KK,&
-                       IND,IND2,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,PIPE_INDEX,PROP_INDEX,REAC_INDEX,MATL_INDEX,T,DT,NM)
+      VAL_LOC(ISIDE) = GAS_PHASE_OUTPUT(T,DT,NM,II,JJ,KK,&
+                       IND,IND2,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,PIPE_INDEX,PROP_INDEX,REAC_INDEX,MATL_INDEX)
 
       ! ! leave this here for a bit until we get a chance to modify GAS_PHASE_OUTPUT accordingly
       ! SELECT CASE(IND)
@@ -5518,13 +5561,19 @@ RETURN
 END SUBROUTINE GET_EXIMFACE_SCALAR_SLICE
 
 
-SUBROUTINE DUMP_SLCF(T,DT,NM,IFRMT)
+! \brief Write contour slices, Plot3D data, or 3d slices to a file
+!>
+!> \param T Current simulation time (s)
+!> \param DT Current time step size (s)
+!> \param NM Mesh number
+!> \param IFRMT Slice (IFRMT=0) or Plot3D (IFRMT=1) or 3D slice (IFRMT=2)
 
-! Write either Slice (IFRMT=0) or Plot3D (IFRMT=1) or 3D slice (IFRMT=2) to a file
+SUBROUTINE DUMP_SLCF(T,DT,NM,IFRMT)
 
 USE MEMORY_FUNCTIONS, ONLY: RE_ALLOCATE_STRINGS
 USE GEOMETRY_FUNCTIONS, ONLY: SEARCH_OTHER_MESHES
 USE TRAN, ONLY : GET_IJK
+USE ISOSMOKE, ONLY: SLICE_TO_RLEFILE
 INTEGER, INTENT(IN) :: NM,IFRMT
 REAL(EB), INTENT(IN) :: T,DT
 REAL(EB) :: BSUM,TT
@@ -5713,8 +5762,8 @@ QUANTITY_LOOP: DO IQ=1,NQT
       DO K=KK1,KK2
          DO J=JJ1,JJ2
             DO I=II1,II2
-               QUANTITY(I,J,K) = GAS_PHASE_OUTPUT(I,J,K,IND,IND2,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,PROP_INDEX,REAC_INDEX,&
-                                                  MATL_INDEX,T,DT,NM)
+               QUANTITY(I,J,K) = GAS_PHASE_OUTPUT(T,DT,NM,I,J,K,IND,IND2,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,&
+                                                  PROP_INDEX,REAC_INDEX,MATL_INDEX)
             ENDDO
          ENDDO
       ENDDO
@@ -5724,7 +5773,7 @@ QUANTITY_LOOP: DO IQ=1,NQT
          DO J=JJ1,JJ2
             DO K=KK1,KK2
                KTS = K_AGL_SLICE(I,J,NTSL)
-               QUANTITY(I,J,K) = GAS_PHASE_OUTPUT(I,J,KTS,IND,IND2,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0,0,0,T,DT,NM)
+               QUANTITY(I,J,K) = GAS_PHASE_OUTPUT(T,DT,NM,I,J,KTS,IND,IND2,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0,0,0)
             ENDDO
          ENDDO
       ENDDO
@@ -5999,11 +6048,16 @@ END FUNCTION EDGE_VALUE
 END SUBROUTINE DUMP_SLCF
 
 
+!> \brief Update the value of all sensing DEVICEs, any control function outputs, and associated output quantities
+!>
+!> \param T Current simulation time (s)
+!> \param DT Current time step size (s)
+!> \param NM Mesh number
+
 SUBROUTINE UPDATE_DEVICES_1(T,DT,NM)
 
-! Update the value of all sensing DEVICEs, any control function outputs, and associated output quantities
-
 USE MEMORY_FUNCTIONS, ONLY : GET_LAGRANGIAN_PARTICLE_INDEX
+USE TRAN, ONLY: GET_IJK
 REAL(EB), INTENT(IN) :: T,DT
 INTEGER, INTENT(IN) :: NM
 REAL(EB) :: VALUE,VOL,XI,YJ,ZK
@@ -6203,12 +6257,13 @@ DEVICE_LOOP: DO N=1,N_DEVC
                I = MIN( IBP1, MAX(0, DV%I) )
                J = MIN( JBP1, MAX(0, DV%J) )
                K = MIN( KBP1, MAX(0, DV%K) )
-               SDV%VALUE_1 = GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,DV%PART_CLASS_INDEX,DV%VELO_INDEX,&
-                                              DV%PIPE_INDEX,DV%PROP_INDEX,DV%REAC_INDEX,DV%MATL_INDEX,T,DT,NM)
+               SDV%VALUE_1 = GAS_PHASE_OUTPUT(T,DT,NM,I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,DV%PART_CLASS_INDEX,&
+                                              DV%VELO_INDEX,DV%PIPE_INDEX,DV%PROP_INDEX,DV%REAC_INDEX,DV%MATL_INDEX)
 
                IF (DV%OUTPUT2_INDEX>0) &
-                  SDV%VALUE_2 = GAS_PHASE_OUTPUT(DV%I,DV%J,DV%K,DV%OUTPUT2_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,DV%PART_CLASS_INDEX,&
-                                                 DV%VELO_INDEX,DV%PIPE_INDEX,DV%PROP_INDEX,DV%REAC_INDEX,DV%MATL_INDEX,T,DT,NM)
+                  SDV%VALUE_2 = GAS_PHASE_OUTPUT(T,DT,NM,DV%I,DV%J,DV%K,DV%OUTPUT2_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
+                                                 DV%PART_CLASS_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,DV%PROP_INDEX,&
+                                                 DV%REAC_INDEX,DV%MATL_INDEX)
 
             CASE DEFAULT GAS_STATS_SELECT
 
@@ -6228,8 +6283,8 @@ DEVICE_LOOP: DO N=1,N_DEVC
                                VOL=SUM(CUT_CELL(ICC)%VOLUME(1:CUT_CELL(ICC)%NCELL))
                             ENDIF
                         ENDIF
-                        VALUE = GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,DV%PART_CLASS_INDEX,DV%VELO_INDEX,&
-                                                 DV%PIPE_INDEX,DV%PROP_INDEX,DV%REAC_INDEX,DV%MATL_INDEX,T,DT,NM)
+                        VALUE = GAS_PHASE_OUTPUT(T,DT,NM,I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,DV%PART_CLASS_INDEX,&
+                                                 DV%VELO_INDEX,DV%PIPE_INDEX,DV%PROP_INDEX,DV%REAC_INDEX,DV%MATL_INDEX)
                         STATISTICS_SELECT: SELECT CASE(DV%SPATIAL_STATISTIC)
                            CASE('MAX','MAXLOC X','MAXLOC Y','MAXLOC Z')
                               IF (VALUE>SDV%VALUE_1) THEN
@@ -6312,9 +6367,12 @@ ENDDO DEVICE_LOOP
 END SUBROUTINE UPDATE_DEVICES_1
 
 
-SUBROUTINE UPDATE_DEVICES_2(T,DT)
+!> \brief Perform TEMPORAL_STATISTICs operations on the DEViCes
+!>
+!> \param T Current simulation time (s)
+!> \param DT Current time step size (s)
 
-! Perform temporal operations on the DEViCes
+SUBROUTINE UPDATE_DEVICES_2(T,DT)
 
 USE MATH_FUNCTIONS, ONLY: UPDATE_HISTOGRAM
 USE MPI
@@ -6504,11 +6562,27 @@ ENDDO DEVICE_LOOP
 END SUBROUTINE UPDATE_DEVICES_2
 
 
-REAL(EB) RECURSIVE FUNCTION GAS_PHASE_OUTPUT(II,JJ,KK,IND,IND2,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,PIPE_INDEX,PROP_INDEX, &
-   REAC_INDEX,MATL_INDEX,T,DT,NM) &
-   RESULT(GAS_PHASE_OUTPUT_RES)
+!> \brief Compute gas phase output quantities
+!>
+!> \param T Current simulation time (s)
+!> \param DT Current time step size (s)
+!> \param NM Current mesh
+!> \param II Cell index in \f$ x \f$ direction
+!> \param JJ Cell index in \f$ y \f$ direction
+!> \param KK Cell index in \f$ z \f$ direction
+!> \param IND Index of the output quantity
+!> \param IND2 Index of the sometimes needed second output quantity
+!> \param Y_INDEX Index of the primitive gas species
+!> \param Z_INDEX Index of the gas species mixture
+!> \param PART_INDEX Index of the Lagrangian particle class
+!> \param VELO_INDEX Index of the velocity component, x=1, y=2, z=3
+!> \param PIPE_INDEX Index of the pipe branch
+!> \param PROP_INDEX Index of the PROPerty group parameters
+!> \param REAC_INDEX Index of the REACtion
+!> \param MATL_INDEX Index of the Material
 
-! Compute Gas Phase Output Quantities
+REAL(EB) RECURSIVE FUNCTION GAS_PHASE_OUTPUT(T,DT,NM,II,JJ,KK,IND,IND2,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,PIPE_INDEX,&
+                                             PROP_INDEX,REAC_INDEX,MATL_INDEX) RESULT(GAS_PHASE_OUTPUT_RES)
 
 USE MEMORY_FUNCTIONS, ONLY: REALLOCATE
 USE MATH_FUNCTIONS, ONLY: INTERPOLATE1D,INTERPOLATE1D_UNIFORM,EVALUATE_RAMP,UPDATE_HISTOGRAM
@@ -6517,20 +6591,20 @@ USE PHYSICAL_FUNCTIONS, ONLY: GET_MASS_FRACTION,FED,FIC,GET_SPECIFIC_HEAT,GET_AV
                               LES_FILTER_WIDTH_FUNCTION,GET_VISCOSITY,GET_POTENTIAL_TEMPERATURE,GET_SPECIFIC_GAS_CONSTANT,&
                               SURFACE_DENSITY
 USE SCRC, ONLY: SCARC_ITERATIONS, SCARC_RESIDUAL, SCARC_CAPPA
+USE COMP_FUNCTIONS, ONLY : CURRENT_TIME,SHUTDOWN,SYSTEM_MEM_USAGE
 USE RADCONS, ONLY: WL_LOW, WL_HIGH, RADTMP
 USE RAD, ONLY: BLACKBODY_FRACTION
 USE MANUFACTURED_SOLUTIONS, ONLY: UF_MMS,WF_MMS,VD2D_MMS_P_3,VD2D_MMS_H_3
 
 REAL(EB), INTENT(IN) :: T,DT
-INTEGER, INTENT(IN) :: II,JJ,KK,IND,IND2,NM,VELO_INDEX,PIPE_INDEX,PROP_INDEX,REAC_INDEX,MATL_INDEX
+INTEGER, INTENT(IN) :: II,JJ,KK,IND,IND2,NM,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,PIPE_INDEX,PROP_INDEX,REAC_INDEX,MATL_INDEX
 REAL(EB) :: FLOW,HMFAC,H_TC,TMP_TC,RE_D,NUSSELT,AREA,VEL,K_G,MU_G,DUMMY,DROPLET_COOLING,&
             Q_SUM,TMP_G,UU,VV,WW,VEL2,Y_MF_INT,PATHLENGTH,EXT_COEF,MASS_EXT_COEF,ZZ_FUEL,ZZ_OX,&
             VELSR,WATER_VOL_FRAC,RHS,DT_C,DT_E,T_RATIO,Y_E_LAG, H_G,H_G_SUM,CPBAR,CP,ZZ_GET(1:N_TRACKED_SPECIES),RCON,&
             EXPON,Y_SPECIES,MEC,Y_SPECIES2,Y_H2O,R_Y_H2O,R_DN,SGN,Y_ALL(N_SPECIES),H_S,D_Z_N(0:5000),&
             DISSIPATION_RATE,S11,S22,S33,S12,S13,S23,DUDX,DUDY,DUDZ,DVDX,DVDY,DVDZ,DWDX,DWDY,DWDZ,ONTHDIV,SS,ETA,DELTA,R_DX2,&
             UVW,UODX,VODY,WODZ,XHAT,ZHAT,BBF,RHO2,RHO_S,GAMMA_LOC,VC,TIME_RAMP_FACTOR,VOL,PHI
-INTEGER :: N,I,J,K,NN,IL,III,JJJ,KKK,Y_INDEX,Z_INDEX,PART_INDEX,IP,JP,KP,FLOW_INDEX,IW,FED_ACTIVITY,&
-           IP1,JP1,KP1,IM1,JM1,KM1,IIM1,JJM1,KKM1,NR,NS,RAM
+INTEGER :: N,I,J,K,NN,IL,III,JJJ,KKK,IP,JP,KP,FLOW_INDEX,IW,FED_ACTIVITY,IP1,JP1,KP1,IM1,JM1,KM1,IIM1,JJM1,KKM1,NR,NS,RAM
 CHARACTER(MESSAGE_LENGTH) :: MESSAGE
 REAL(FB) :: RN
 REAL(EB), PARAMETER :: EPS=1.E-10_EB
@@ -6894,8 +6968,8 @@ IND_SELECT: SELECT CASE(IND)
       S23 = 0.5_EB*(DVDZ+DWDY)
       GAS_PHASE_OUTPUT_RES = SQRT(2._EB*(S11**2 + S22**2 + S33**2 + 2._EB*(S12**2 + S13**2 + S23**2)))
    CASE(85)  ! KOLMOGOROV LENGTH SCALE
-      SS = GAS_PHASE_OUTPUT(II,JJ,KK,84,IND2,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,PIPE_INDEX,PROP_INDEX,&
-                            REAC_INDEX,MATL_INDEX,T,DT,NM)
+      SS = GAS_PHASE_OUTPUT(T,DT,NM,II,JJ,KK,84,IND2,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,PIPE_INDEX,PROP_INDEX,&
+                            REAC_INDEX,MATL_INDEX)
       DISSIPATION_RATE = MU(II,JJ,KK)/RHO(II,JJ,KK)*SS**2
       GAS_PHASE_OUTPUT_RES = ((MU_DNS(II,JJ,KK)/RHO(II,JJ,KK))**3/(DISSIPATION_RATE+EPS))**0.25_EB
    CASE(86)  ! CELL REYNOLDS NUMBER
@@ -6903,14 +6977,14 @@ IND_SELECT: SELECT CASE(IND)
       JJJ = MAX(1,MIN(JJ,JBAR))
       KKK = MAX(1,MIN(KK,KBAR))
       DELTA = LES_FILTER_WIDTH_FUNCTION(DX(III),DY(JJJ),DZ(KKK))
-      ETA = GAS_PHASE_OUTPUT(II,JJ,KK,85,IND2,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,PIPE_INDEX,PROP_INDEX,&
-                             REAC_INDEX,MATL_INDEX,T,DT,NM)
+      ETA = GAS_PHASE_OUTPUT(T,DT,NM,II,JJ,KK,85,IND2,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,PIPE_INDEX,PROP_INDEX,&
+                             REAC_INDEX,MATL_INDEX)
       GAS_PHASE_OUTPUT_RES = DELTA/(ETA+EPS)
    CASE(87)  ! MOLECULAR VISCOSITY
       GAS_PHASE_OUTPUT_RES = MU_DNS(II,JJ,KK)
    CASE(88)  ! DISSIPATION RATE
-      SS = GAS_PHASE_OUTPUT(II,JJ,KK,84,IND2,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,PIPE_INDEX,PROP_INDEX,&
-                            REAC_INDEX,MATL_INDEX,T,DT,NM)
+      SS = GAS_PHASE_OUTPUT(T,DT,NM,II,JJ,KK,84,IND2,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,PIPE_INDEX,PROP_INDEX,&
+                            REAC_INDEX,MATL_INDEX)
       GAS_PHASE_OUTPUT_RES = MU(II,JJ,KK)/RHO(II,JJ,KK)*SS**2
    CASE(89)  ! KINEMATIC VISCOSITY
       GAS_PHASE_OUTPUT_RES = MU(II,JJ,KK)/RHO(II,JJ,KK)
@@ -7816,10 +7890,21 @@ END SELECT IND_SELECT
 END FUNCTION GAS_PHASE_OUTPUT
 
 
+!> \brief Compute solid phase device output quantities
+!>
+!> \param NM Mesh number
+!> \param INDX Output quantity index
+!> \param Y_INDEX Index of primitive gas species
+!> \param Z_INDEX Index of gas species mixture
+!> \param PART_INDEX Index of Lagrangian particle class
+!> \param OPT_WALL_INDEX Index of WALL boundary cell
+!> \param OPT_LP_INDEX Index of Lagrangian particle
+!> \param OPT_CFACE_INDEX Index of immersed boundary cell face
+!> \param OPT_BNDF_INDEX Index of boundary file
+!> \param OPT_DEVC_INDEX Index of device
+
 REAL(EB) FUNCTION SOLID_PHASE_OUTPUT(NM,INDX,Y_INDEX,Z_INDEX,PART_INDEX,OPT_WALL_INDEX,OPT_LP_INDEX,OPT_CFACE_INDEX,&
                                      OPT_BNDF_INDEX,OPT_DEVC_INDEX)
-
-! Compute Solid Phase DEVICE Output Quantities
 
 USE PHYSICAL_FUNCTIONS, ONLY: SURFACE_DENSITY,GET_MASS_FRACTION,GET_SENSIBLE_ENTHALPY
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
@@ -8929,9 +9014,10 @@ TENSOR_OUTPUT = RHOP*U_I*U_J + RHOP*(HP-KP) + TAU_IJ
 END FUNCTION TENSOR_OUTPUT
 
 
-SUBROUTINE DUMP_DEVICES(T)
+!> \brief Write out to CHID_devc.csv the DEViCe output quantities every DT_DEVC s
+!> \param T Current simulation time (s)
 
-! Write out to CHID_devc.csv the DEViCe output quantities every DT_DEVC s
+SUBROUTINE DUMP_DEVICES(T)
 
 REAL(EB), INTENT(IN) :: T
 REAL(EB) :: STIME,DI,DD,VALUE
@@ -9113,9 +9199,10 @@ ENDIF
 END SUBROUTINE DUMP_DEVICES
 
 
-SUBROUTINE DUMP_CONTROLS(T)
+!> \brief Write out to CHID_ctrl.csv the ConTRoL output quantities every DT_CTRL s
+!> \param T Current simulation time (s)
 
-! Write out to CHID_ctrl.csv the ConTRoL output quantities every DT_CTRL s
+SUBROUTINE DUMP_CONTROLS(T)
 
 USE CONTROL_VARIABLES
 REAL(EB), INTENT(IN) :: T
@@ -9139,9 +9226,11 @@ ENDDO
 END SUBROUTINE DUMP_CONTROLS
 
 
-SUBROUTINE DUMP_PROF(T,NM)
+!> \brief Write out to CHID_prof_nn.csv the PROFile data every DT_PROF s
+!> \param T Current simulation time (s)
+!> \param NM Mesh number
 
-! Write out to CHID_prof_nn.csv the PROFile data every DT_PROF s
+SUBROUTINE DUMP_PROF(T,NM)
 
 USE GEOMETRY_FUNCTIONS, ONLY: GET_WALL_NODE_WEIGHTS
 USE MEMORY_FUNCTIONS, ONLY: GET_LAGRANGIAN_PARTICLE_INDEX
@@ -9225,18 +9314,21 @@ ENDDO PROF_LOOP
 END SUBROUTINE DUMP_PROF
 
 
+!> \brief Integrate all the terms of the enthalpy transport equation over the entire domain.
+!>
+!> \param DT Current time step size (s)
+!> \param NM Mesh number
+!> \details
+!> Q_DOT(1,NM) = \f$ \int \dot{q}''' \, dV \f$
+!> Q_DOT(2,NM) = \f$ \int \nabla \cdot \mathbf{q}_{\rm r}'' \, dV \f$
+!> Q_DOT(3,NM) = \f$ \int \mathbf{u} \rho h_{\rm s} \cdot \, d\mathbf{S} \f$
+!> Q_DOT(4,NM) = \f$ \int k \nabla T \cdot d\mathbf{S} \f$
+!> Q_DOT(5,NM) = \f$ \int \sum_\alpha h_{{\rm s},\alpha} \rho D_\alpha \nabla Z_\alpha \cdot d\mathbf{S} \f$
+!> Q_DOT(6,NM) = \f$ \int dp/dt \, dV \f$
+!> Q_DOT(7,NM) = \f$ \sum \dot{q}_{\rm p} \f$
+!> Q_DOT(8,NM) = \f$ \int d(\rho h_{\rm s})/dt \, dV \f$
+
 SUBROUTINE UPDATE_HRR(DT,NM)
-
-! Integrate all the terms of the enthalpy transport equation over the entire domain.
-
-! Q_DOT(1,NM) = int qdot''' dV
-! Q_DOT(2,NM) = int del dot q_r'' dV
-! Q_DOT(3,NM) = int u rho h_s dot dS
-! Q_DOT(4,NM) = int k grad T dot dS
-! Q_DOT(5,NM) = int sum h_s rho D grad Z dot dS
-! Q_DOT(6,NM) = int dp/dt dV
-! Q_DOT(7,NM) = int q_part dV
-! Q_DOT(8,NM) = int d(rho h_s)/dt dV
 
 USE PHYSICAL_FUNCTIONS, ONLY : GET_SPECIFIC_HEAT,GET_SENSIBLE_ENTHALPY,GET_SENSIBLE_ENTHALPY_Z
 REAL(EB), INTENT(IN) :: DT
@@ -9402,9 +9494,11 @@ M_DOT_SUM(2,NM) = M_DOT_SUM(2,NM) + DT*SUM(M_DOT(3:4,NM))
 END SUBROUTINE UPDATE_HRR
 
 
-SUBROUTINE DUMP_HRR(T,DT)
+!> \brief Record HRR, etc, in the file CHID_hrr.csv
+!> \param T Current simulation time (s)
+!> \param DT Current time step size (s)
 
-! Record HRR, etc, in the file CHID_hrr.csv
+SUBROUTINE DUMP_HRR(T,DT)
 
 REAL(EB), INTENT(IN) :: T,DT
 REAL(FB) :: STIME
@@ -9447,9 +9541,11 @@ IF (N_ZONE>0) DEALLOCATE(P_ZONE_P)
 END SUBROUTINE DUMP_HRR
 
 
-SUBROUTINE UPDATE_MASS(DT,NM)
+!> \brief Compute the total masses of all gas species
+!> \param DT Current time step size (s)
+!> \param NM Mesh number
 
-! Compute the total masses of various gases
+SUBROUTINE UPDATE_MASS(DT,NM)
 
 USE PHYSICAL_FUNCTIONS, ONLY : GET_MASS_FRACTION_ALL
 REAL(EB) :: VC,Y_MF_INT(1:N_SPECIES),ZZ_GET(1:N_TRACKED_SPECIES)
@@ -9484,6 +9580,10 @@ MINT_SUM(:,NM) = MINT_SUM(:,NM) + DT*MINT(:,NM)
 END SUBROUTINE UPDATE_MASS
 
 
+!> \brief Write out the total mass of gas species to the CHID_mass.csv file
+!> \param T Current simulation time (s)
+!> \param DT Current time step size (s)
+
 SUBROUTINE DUMP_MASS(T,DT)
 
 REAL(EB), INTENT(IN) :: T,DT
@@ -9506,9 +9606,12 @@ WRITE(LU_MASS,TCFORM) STIME,(MINT_TOTAL(N),N=0,N_SPECIES)
 END SUBROUTINE DUMP_MASS
 
 
-SUBROUTINE DUMP_BNDF(T,DT,NM)
+! \brief Dump boundary quantities into CHID_nn.bf file
+!> \param T Current simulation time (s)
+!> \param DT Current time step size (s)
+!> \param NM Mesh number
 
-! Dump boundary quantities into CHID_nn.bf file
+SUBROUTINE DUMP_BNDF(T,DT,NM)
 
 REAL(EB), INTENT(IN) :: T,DT
 REAL(FB) :: STIME, BOUND_MIN, BOUND_MAX
@@ -9678,11 +9781,11 @@ FROM_BNDF = .FALSE.
 END SUBROUTINE DUMP_BNDF
 
 
+!> \brief Dump immersed boundary (IBM) quantities into CHID_nn.ge file
+!> \param T Current simulation time (s)
+
 SUBROUTINE DUMP_GEOM(T)
 
-!! under construction !!
-
-! Dump boundary quantities into CHID_nn.ge file
 REAL(EB), INTENT(IN) :: T
 REAL(EB) :: STIME
 
@@ -9693,9 +9796,11 @@ CALL WRITE_GEOM(STIME)
 END SUBROUTINE DUMP_GEOM
 
 
-SUBROUTINE DUMP_BNDF_TO_SLCF(T,NM)
+!> \brief Project boundary surface onto a plane and output as a slice file to CHID_nn_bf.sf file
+!> \param T Current simulation time (s)
+!> \param NM Mesh number
 
-! Project boundary surface onto a plane and output as a slice file to CHID_nn_bf.sf file
+SUBROUTINE DUMP_BNDF_TO_SLCF(T,NM)
 
 REAL(EB), INTENT(IN) :: T
 REAL(FB) :: STIME
@@ -9802,10 +9907,11 @@ FROM_BNDF = .FALSE.
 END SUBROUTINE DUMP_BNDF_TO_SLCF
 
 
+!> \brief Periodically purge output files
+
 SUBROUTINE FLUSH_GLOBAL_BUFFERS
 
-! Periodically purge output files
-
+USE COMP_FUNCTIONS, ONLY : CURRENT_TIME
 INTEGER :: N
 REAL(EB) :: TNOW
 
@@ -9850,10 +9956,11 @@ T_USED(7) = T_USED(7) + CURRENT_TIME() - TNOW
 END SUBROUTINE FLUSH_GLOBAL_BUFFERS
 
 
+!> \brief Periodically purge output files
+
 SUBROUTINE FLUSH_EVACUATION_BUFFERS
 
-! Periodically purge output files
-
+USE COMP_FUNCTIONS, ONLY : CURRENT_TIME
 USE EVAC, ONLY : EMESH_INDEX
 IMPLICIT NONE
 INTEGER :: NM,N
@@ -9897,10 +10004,12 @@ T_USED(7) = T_USED(7) + CURRENT_TIME() - TNOW
 END SUBROUTINE FLUSH_EVACUATION_BUFFERS
 
 
+!> \brief Periodically purge output files associated with mesh NM
+!> \param NM Mesh number
+
 SUBROUTINE FLUSH_LOCAL_BUFFERS(NM)
 
-! Periodically purge output files
-
+USE COMP_FUNCTIONS, ONLY : CURRENT_TIME
 INTEGER, INTENT(IN) :: NM
 INTEGER :: N
 REAL(EB) :: TNOW
@@ -9960,9 +10069,9 @@ T_USED(7) = T_USED(7) + CURRENT_TIME() - TNOW
 END SUBROUTINE FLUSH_LOCAL_BUFFERS
 
 
-SUBROUTINE TIMINGS
+!> \brief Print out detector activation times and total elapsed time into .out file.
 
-! Print out detector activation times and total elapsed time into .out file.
+SUBROUTINE TIMINGS
 
 USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
 REAL(EB) :: T_NOW
@@ -10003,9 +10112,9 @@ ENDIF
 END SUBROUTINE TIMINGS
 
 
-SUBROUTINE GET_LAYER_HEIGHT_INTEGRALS(II,JJ,K_LO,K_HI,Z_INT,Z_LO,I_1,I_2,I_3,TMP_LOW)
+! \brief Compute the integrals needed for layer height, average upper and lower layer temperatures
 
-! Compute the integrals needed for layer height, average upper and lower layer temperatures
+SUBROUTINE GET_LAYER_HEIGHT_INTEGRALS(II,JJ,K_LO,K_HI,Z_INT,Z_LO,I_1,I_2,I_3,TMP_LOW)
 
 INTEGER, INTENT(IN) :: II,JJ,K_LO,K_HI
 REAL(EB), INTENT(OUT) :: I_1,I_2,I_3,TMP_LOW
@@ -10029,6 +10138,9 @@ TMP_LOW = TMP(II,JJ,K_LO)
 
 END SUBROUTINE GET_LAYER_HEIGHT_INTEGRALS
 
+
+!> \brief Compute the mass flux (kg/m2/s) of particles needed by certain output quantities
+!> \param NM Mesh number
 
 SUBROUTINE COMPUTE_PARTICLE_FLUXES(NM)
 
@@ -10090,24 +10202,24 @@ REAL(EB) :: SS(4)
 ! wavelet error measure
 WAVELET_ERROR_MEASURE = 0._EB
 
-SS(1) = GAS_PHASE_OUTPUT(MAX(0,II-2),JJ,KK,              IND,0,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0,0,0,0._EB,DT,NM)
-SS(2) = GAS_PHASE_OUTPUT(MAX(0,II-1),JJ,KK,              IND,0,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0,0,0,0._EB,DT,NM)
-SS(3) = GAS_PHASE_OUTPUT(II,JJ,KK,                       IND,0,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0,0,0,0._EB,DT,NM)
-SS(4) = GAS_PHASE_OUTPUT(MIN(MESHES(NM)%IBP1,II+1),JJ,KK,IND,0,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0,0,0,0._EB,DT,NM)
+SS(1) = GAS_PHASE_OUTPUT(T_BEGIN,DT,NM,MAX(0,II-2),JJ,KK,              IND,0,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0,0,0)
+SS(2) = GAS_PHASE_OUTPUT(T_BEGIN,DT,NM,MAX(0,II-1),JJ,KK,              IND,0,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0,0,0)
+SS(3) = GAS_PHASE_OUTPUT(T_BEGIN,DT,NM,II,JJ,KK,                       IND,0,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0,0,0)
+SS(4) = GAS_PHASE_OUTPUT(T_BEGIN,DT,NM,MIN(MESHES(NM)%IBP1,II+1),JJ,KK,IND,0,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0,0,0)
 WAVELET_ERROR_MEASURE = WAVELET_ERROR(SS)
 
 IF (.NOT.TWO_D) THEN
-   SS(1) = GAS_PHASE_OUTPUT(II,MAX(0,JJ-2),KK,              IND,0,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0,0,0,0._EB,DT,NM)
-   SS(2) = GAS_PHASE_OUTPUT(II,MAX(0,JJ-1),KK,              IND,0,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0,0,0,0._EB,DT,NM)
-   SS(3) = GAS_PHASE_OUTPUT(II,JJ,KK,                       IND,0,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0,0,0,0._EB,DT,NM)
-   SS(4) = GAS_PHASE_OUTPUT(II,MIN(MESHES(NM)%JBP1,JJ+1),KK,IND,0,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0,0,0,0._EB,DT,NM)
+   SS(1) = GAS_PHASE_OUTPUT(T_BEGIN,DT,NM,II,MAX(0,JJ-2),KK,              IND,0,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0,0,0)
+   SS(2) = GAS_PHASE_OUTPUT(T_BEGIN,DT,NM,II,MAX(0,JJ-1),KK,              IND,0,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0,0,0)
+   SS(3) = GAS_PHASE_OUTPUT(T_BEGIN,DT,NM,II,JJ,KK,                       IND,0,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0,0,0)
+   SS(4) = GAS_PHASE_OUTPUT(T_BEGIN,DT,NM,II,MIN(MESHES(NM)%JBP1,JJ+1),KK,IND,0,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0,0,0)
    WAVELET_ERROR_MEASURE = MAX(WAVELET_ERROR_MEASURE,WAVELET_ERROR(SS))
 ENDIF
 
-SS(1) = GAS_PHASE_OUTPUT(II,JJ,MAX(0,KK-2),              IND,0,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0,0,0,0._EB,DT,NM)
-SS(2) = GAS_PHASE_OUTPUT(II,JJ,MAX(0,KK-1),              IND,0,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0,0,0,0._EB,DT,NM)
-SS(3) = GAS_PHASE_OUTPUT(II,JJ,KK,                       IND,0,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0,0,0,0._EB,DT,NM)
-SS(4) = GAS_PHASE_OUTPUT(II,JJ,MIN(MESHES(NM)%KBP1,KK+1),IND,0,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0,0,0,0._EB,DT,NM)
+SS(1) = GAS_PHASE_OUTPUT(T_BEGIN,DT,NM,II,JJ,MAX(0,KK-2),              IND,0,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0,0,0)
+SS(2) = GAS_PHASE_OUTPUT(T_BEGIN,DT,NM,II,JJ,MAX(0,KK-1),              IND,0,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0,0,0)
+SS(3) = GAS_PHASE_OUTPUT(T_BEGIN,DT,NM,II,JJ,KK,                       IND,0,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0,0,0)
+SS(4) = GAS_PHASE_OUTPUT(T_BEGIN,DT,NM,II,JJ,MIN(MESHES(NM)%KBP1,KK+1),IND,0,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0,0,0)
 WAVELET_ERROR_MEASURE = MAX(WAVELET_ERROR_MEASURE,WAVELET_ERROR(SS))
 
 END FUNCTION WAVELET_ERROR_MEASURE
@@ -10259,9 +10371,11 @@ ENDIF
 END FUNCTION SUBGRID_KINETIC_ENERGY
 
 
-SUBROUTINE DUMP_UVW(NM,FN_UVW)
+!> \brief Dump UVW file
+!> \param NM Mesh number
+!> \param FN_UVW File name
 
-! Dump UVW file
+SUBROUTINE DUMP_UVW(NM,FN_UVW)
 
 USE COMP_FUNCTIONS, ONLY: GET_FILE_NUMBER
 INTEGER  :: I,J,K,LU_UVW,IMIN,JMIN,KMIN,IMAX,JMAX,KMAX
@@ -10310,9 +10424,12 @@ CLOSE(LU_UVW)
 END SUBROUTINE DUMP_UVW
 
 
-SUBROUTINE DUMP_ROTCUBE_MMS(NM,FN_MMS,T)
+!> \brief Dump rotated cube MMS data file.
+!> \param NM Mesh number
+!> \param FN_MMS File name
+!> \param T Current simulation time (s)
 
-! Dump rotated cube MMS data file.
+SUBROUTINE DUMP_ROTCUBE_MMS(NM,FN_MMS,T)
 
 USE COMP_FUNCTIONS, ONLY: GET_FILE_NUMBER
 
@@ -10320,7 +10437,6 @@ INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T
 CHARACTER(80), INTENT(IN) :: FN_MMS
 
-! Local variables:
 INTEGER  :: I,J,K,LU_MMS,IMIN,JMIN,KMIN,IMAX,JMAX,KMAX,NTOT_U,NTOT_W,NTOT_C,AXIS,ICC,ICF,JCC,JCF
 
 CALL POINT_TO_MESH(NM)
@@ -10528,9 +10644,13 @@ CLOSE(LU_MMS)
 
 END SUBROUTINE DUMP_ROTCUBE_MMS
 
-SUBROUTINE DUMP_MMS(NM,FN_MMS,T)
 
-! Dump MMS file (manufactured solution raw data)
+!> \brief Dump MMS file (manufactured solution raw data)
+!> \param NM Mesh number
+!> \param FN_MMS File name
+!> \param T Current simulation time (s)
+
+SUBROUTINE DUMP_MMS(NM,FN_MMS,T)
 
 USE COMP_FUNCTIONS, ONLY: GET_FILE_NUMBER
 INTEGER  :: I,J,K,LU_MMS,IMIN,JMIN,KMIN,IMAX,JMAX,KMAX
@@ -10575,10 +10695,12 @@ CLOSE(LU_MMS)
 END SUBROUTINE DUMP_MMS
 
 
-SUBROUTINE EXTRAPOLATE_EXTREMA
+!> \brief Estimate extreme values based on a shortened time series
+!>
+!> \details Given DV%N_INTERVALS values of DV%TIME_MIN(MAX)_VALUE, extrapolate the MIN(MAX) for the DV%TIME_PERIOD, 
+!> which is typically longer than the statistical sampling duration DV%STATISTICS_END-DV%STATISTICS_START
 
-! Given DV%N_INTERVALS values of DV%TIME_MIN(MAX)_VALUE, extrapolate the MIN(MAX) for the DV%TIME_PERIOD, which is typically
-! longer than the statistical sampling duration DV%STATISTICS_END-DV%STATISTICS_START
+SUBROUTINE EXTRAPOLATE_EXTREMA
 
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: EXTREMA,YYY
 INTEGER :: I,J
@@ -10635,5 +10757,6 @@ DEALLOCATE(EXTREMA)
 DEALLOCATE(YYY)
 
 END SUBROUTINE EXTRAPOLATE_EXTREMA
+
 
 END MODULE DUMP
