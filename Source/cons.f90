@@ -498,3 +498,64 @@ REAL(EB) :: TGA_FINAL_TEMPERATURE=800._EB  !< Final Temperature (C) to use for s
 LOGICAL :: IBLANK_SMV=.TRUE.  !< Parameter passed to smokeview (in .smv file) to control generation of blockages
 
 END MODULE GLOBAL_CONSTANTS
+
+!> \brief Radiation parameters
+
+MODULE RADCONS
+
+USE PRECISION_PARAMETERS
+IMPLICIT NONE
+
+REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: DLN                !< Wall-normal matrix
+REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: ORIENTATION_FACTOR !< Fraction of radiation angle corresponding to a particular direction
+REAL(EB), ALLOCATABLE, DIMENSION(:)   :: BBFRAC             !< Fraction of blackbody radiation
+REAL(EB), ALLOCATABLE, DIMENSION(:)   :: WL_LOW             !< Lower wavelength limit of the spectral band
+REAL(EB), ALLOCATABLE, DIMENSION(:)   :: WL_HIGH            !< Upper wavelength limit of the spectral band
+REAL(EB), ALLOCATABLE, DIMENSION(:)   :: DLX                !< Mean x-component of the control angle vector
+REAL(EB), ALLOCATABLE, DIMENSION(:)   :: DLY                !< Mean y-component of the control angle vector
+REAL(EB), ALLOCATABLE, DIMENSION(:)   :: DLZ                !< Mean z-component of the control angle vector
+REAL(EB), ALLOCATABLE, DIMENSION(:)   :: DLB                !< Mean bottom component of RAYN vector (cylindrical case)
+REAL(EB), ALLOCATABLE, DIMENSION(:)   :: RSA                !< Array of solid angles
+
+INTEGER, ALLOCATABLE, DIMENSION(:,:)  :: DLM                !< Mirroring indices
+INTEGER, ALLOCATABLE, DIMENSION(:)    :: NRP                !< Number of radiation phi angles at each theta band
+
+REAL(EB) :: RADTMP                !< Radiation temperature (K) for absorption properties (Mie)
+REAL(EB) :: PATH_LENGTH           !< Mean path length for the gray gas absorption coefficient (m)
+REAL(EB) :: DGROUP_A
+REAL(EB) :: DGROUP_B
+REAL(EB) :: WEIGH_CYL             !< Weight factor for cylindrical coordinates where all intensities represent 2 angles
+REAL(EB) :: DPHI0                 !< Opening angle of the cylindrical domain
+REAL(EB) :: FOUR_SIGMA            !< \f$ 4\sigma \f$
+REAL(EB) :: RPI_SIGMA             !< \f$ \sigma/\pi \f$
+REAL(EB) :: LTSTEP                !< Maximum LAMBDA*T/NLAMBDAT
+REAL(EB) :: RTMPMAX               !< Maximum temperature (K) for tabulation of radiative properties
+REAL(EB) :: RTMPMIN               !< Minimum temperature (K) for tabulation of radiative properties
+REAL(EB) :: MIE_MINIMUM_DIAMETER  !< Minimum droplet size (micron) considered in Mie initialization
+REAL(EB) :: MIE_MAXIMUM_DIAMETER  !< Maximum droplet size (micron) considered in Mie initialization
+REAL(EB) :: SOOT_DENSITY          !< Density (kg/m3) of solid soot particles
+
+INTEGER :: TIME_STEP_INCREMENT    !< Frequency of calls to radiation solver
+INTEGER :: NMIEANG                !< Number of angle bins in forward scattering integration
+INTEGER :: NRDMIE                 !< Number of particle radii in Mie calculations
+INTEGER :: NLMBDMIE               !< Number of wavelengths in Mie calculations
+INTEGER :: MIE_NDG                !< Number of particle radii in WQABS and WQSCA arrays
+INTEGER :: NRT                    !< Number of radiation theta angles
+INTEGER :: NCO
+INTEGER :: UIIDIM
+INTEGER :: NLAMBDAT               !< Number of wavelength subdivisions
+INTEGER :: N_RADCAL_ARRAY_SIZE
+INTEGER :: RADCAL_SPECIES_INDEX(16)
+INTEGER :: N_KAPPA_T=44           !< Number of temperature points in absorption coefficient look-up table
+INTEGER :: N_KAPPA_Y=50           !< Number of species points in absorption coefficient look-up table
+
+LOGICAL :: WIDE_BAND_MODEL        !< Non-gray gas, wide band model
+LOGICAL :: WSGG_MODEL             !< Weighted Sum of Gray Gas model
+
+REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: Z2RADCAL_SPECIES
+REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: RADCAL_SPECIES2KAPPA
+CHARACTER(LABEL_LENGTH) :: RADCAL_SPECIES_ID(16)='NULL'
+
+END MODULE RADCONS
+
+
