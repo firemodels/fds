@@ -1,9 +1,9 @@
 close all
 clear all
-clc
+%clc
 
-global IAXIS JAXIS KAXIS NOD1 NOD2 NOD3
-IAXIS=1; JAXIS=2; KAXIS=3;
+global IAXIS JAXIS KAXIS NOD1 NOD2 NOD3 LOW_IND HIGH_IND
+IAXIS=1; JAXIS=2; KAXIS=3; LOW_IND=1; HIGH_IND=2;
 NOD1 =1; NOD2 =2; NOD3 =3;
 
 NORM_EPS=10^-10;
@@ -15,7 +15,7 @@ N_POLY_VERTS = N_VERTS;
 %VERTS   = [-1.0, -1.0, 1.0, .0, -1.0, 1.5, 0.0, 0.0, 1.5, 1.0, 0.0, 2.0, 1.0, 1.0, 2.0, -1.0, 1.0, 1.0]; 
 %POLY    = [ 1, 2, 3, 4, 5, 6];
 
-VERTS=[   -1.0,  0.0,  1.0, ...
+VERTS=[   -1.5,  0.0,  1.0, ...
     0.0,  0.0,  1.5, ...
     0.0,  0.5,  1.5, ...
     0.5,  0.5,  1.75, ...
@@ -27,7 +27,7 @@ VERTS=[   -1.0,  0.0,  1.0, ...
    -1.0,  1.0,  1.0];
 POLY = [1:10];
 
-EXTRUDE = 0.5;
+EXTRUDE = -0.5;
 
 
 a=0.2;
@@ -73,8 +73,16 @@ end
 
 % Define PVERTS:
 PVERTS = zeros(1,6*N_POLY_VERTS);
+MINMAX_POS( LOW_IND,IAXIS:KAXIS) = 1./NORM_EPS;
+MINMAX_POS(HIGH_IND,IAXIS:KAXIS) =-1./NORM_EPS;
 for I=1:N_POLY_VERTS
     PVERTS(3*I-2:3*I) = VERTS(3*POLY(I)-2:3*POLY(I));
+    MINMAX_POS( LOW_IND,IAXIS) = min(MINMAX_POS( LOW_IND,IAXIS),PVERTS(3*I-2));
+    MINMAX_POS( LOW_IND,JAXIS) = min(MINMAX_POS( LOW_IND,JAXIS),PVERTS(3*I-1));
+    MINMAX_POS( LOW_IND,KAXIS) = min(MINMAX_POS( LOW_IND,KAXIS),PVERTS(3*I  ));
+    MINMAX_POS(HIGH_IND,IAXIS) = max(MINMAX_POS(HIGH_IND,IAXIS),PVERTS(3*I-2));
+    MINMAX_POS(HIGH_IND,JAXIS) = max(MINMAX_POS(HIGH_IND,JAXIS),PVERTS(3*I-1));
+    MINMAX_POS(HIGH_IND,KAXIS) = max(MINMAX_POS(HIGH_IND,KAXIS),PVERTS(3*I  ));
 end
 PVERTS(3*(N_POLY_VERTS+1)-2:3*(N_POLY_VERTS+1)) = PVERTS(1:3);
 % Define average normal:
@@ -86,22 +94,23 @@ XYZCEN = XYZCEN/N_POLY_VERTS;
 
 NVEC = zeros(1,3);
 for I=1:N_POLY_VERTS
-   V1 = PVERTS(3*I-2:3*I    ) - XYZCEN(IAXIS:KAXIS);
+   V1 = PVERTS(3*I-2:3*I    ) - XYZCEN(IAXIS:KAXIS); 
    V2 = PVERTS(3*I+1:3*(I+1)) - XYZCEN(IAXIS:KAXIS);
    N  = cross(V1,V2);
-   if(norm(N) > TWO_EPSILON_EB); N = N/norm(N); end
    NVEC(IAXIS:KAXIS) = NVEC(IAXIS:KAXIS) + N(IAXIS:KAXIS);
 end
 if(norm(NVEC) > TWO_EPSILON_EB); NVEC=NVEC/norm(NVEC); end
 
-% Test all segments are in plane normal to NVEC:
-IP1 = 1;
+% Test all segments are in plane normal to NVEC, tolerance for distance to plane given by XYZCEN, NVEC is
+% 5% of the bounding box diagonal for the polygon:
+BBLEN = sqrt( (MINMAX_POS(HIGH_IND,IAXIS)-MINMAX_POS( LOW_IND,IAXIS))^2. + ...
+              (MINMAX_POS(HIGH_IND,JAXIS)-MINMAX_POS( LOW_IND,JAXIS))^2. + ...
+              (MINMAX_POS(HIGH_IND,KAXIS)-MINMAX_POS( LOW_IND,KAXIS))^2.);
+THLEN = 0.05 * BBLEN; % Threshold distance to polygon average plane.
 for I=1:N_POLY_VERTS
-   DV1(IAXIS:KAXIS) = PVERTS(3*I+1:3*(I+1))-PVERTS(3*I-2:3*I); DV1=DV1/norm(DV1);
-   if (abs(dot(DV1,NVEC)) > TWO_EPSILON_EB) 
-      if ( I<N_POLY_VERTS ); IP1=POLY(I+1); end
-      disp(['ERROR: For extruded Polygon GEOM : Segment joining nodes ' num2str(POLY(I)) '-' num2str(IP1) ...
-      ' Not in the plane of the polygon.'])
+   DV1(IAXIS:KAXIS) = PVERTS(3*I-2:3*I)-XYZCEN(IAXIS:KAXIS);
+   if (abs(dot(DV1,NVEC)) > THLEN)
+      disp(['ERROR: For extruded Polygon GEOM : Vertex ' num2str(POLY(I)) ' Not in the plane of the polygon.'])
       return
    end
 end
