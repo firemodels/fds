@@ -1,9 +1,5 @@
 @echo off
 
-:: $Date$ 
-:: $Revision$
-:: $Author$
-
 call %SVNROOT%\fds\Utilities\Scripts\getopts.bat %*
 
 set fulldir=%BASEDIR%/%dir%
