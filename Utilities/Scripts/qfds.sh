@@ -148,6 +148,14 @@ fi
 #*** determine platform
 
 platform="linux"
+if [ "$WINDIR" != "" ]; then
+  platform="win"
+  if [ "$I_MPI_ROOT" != "" ]; then
+    echo $I_MPI_ROOT | sed 's/\\/\//g' -  | sed 's/C:/\/C/g' -  > var.out.$$
+    I_MPI_ROOT=`head -1 var.out.$$`
+    rm var.out.$$
+  fi
+fi
 if [ "`uname`" == "Darwin" ] ; then
   platform="osx"
 fi
@@ -158,7 +166,11 @@ if [ "$platform" == "osx" ]; then
   queue=none
   ncores=`system_profiler SPHardwareDataType|grep Cores|awk -F' ' '{print $5}'`
 else
-  queue=batch
+  if [ "$platform" == "win" ]; then
+    queue=terminal
+  else
+    queue=batch
+  fi
   ncores=`grep processor /proc/cpuinfo | wc -l`
 fi
 if [ "$NCORES_COMPUTENODE" == "" ]; then
@@ -630,9 +642,9 @@ if [ "$use_intel_mpi" == "1" ]; then
       ABORTRUN=y
     else
       MPIRUNEXE=$I_MPI_ROOT/intel64/bin/mpiexec
-      if [ ! -e $MPIRUNEXE ]; then
-        MPIRUNEXE=$I_MPI_ROOT/bin/mpiexec
-        if [ ! -e $MPIRUNEXE ]; then
+      if [ ! -e "$MPIRUNEXE" ]; then
+        MPIRUNEXE="$I_MPI_ROOT/bin/mpiexec"
+        if [ ! -e "$MPIRUNEXE" ]; then
           echo "Intel mpiexec not found at:"
           echo "$I_MPI_ROOT/intel64/bin/mpiexec or"
           echo "$I_MPI_ROOT/bin/mpiexec"
@@ -746,6 +758,11 @@ if [ "$queue" == "none" ]; then
   QSUB="$BACKGROUND_PROG -u $BACKGROUND_LOAD -d $BACKGROUND_DELAY "
   USE_BACKGROUND=1
 else
+
+  if [ "$queue" == "terminal" ]; then
+    QSUB=
+    MPIRUN=
+  fi
 
 #*** setup for SLURM (alternative to torque)
 

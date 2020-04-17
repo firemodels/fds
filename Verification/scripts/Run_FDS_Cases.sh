@@ -10,7 +10,11 @@ if [ ! -e .verification_script_dir ]; then
    exit
 fi
 
-QUEUE=batch
+if [ "$WINDIR" == "" ]; then
+  QUEUE=batch
+else
+  QUEUE=terminal
+fi
 DEBUG=
 SINGLE=
 nthreads=1
@@ -232,7 +236,11 @@ size=_64
 if [ "`uname`" == "Darwin" ]; then
   PLATFORM=osx$size
 else
-  PLATFORM=linux$size
+  if [ "$WINDIR" != "" ]; then
+    PLATFORM=win$size
+  else
+    PLATFORM=linux$size
+  fi
 fi
 if [ "$OOPT" != "" ]; then
   OOPT="-O $OOPT"
