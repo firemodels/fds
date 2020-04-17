@@ -2,12 +2,13 @@ close all
 clear all
 %clc
 
-global IAXIS JAXIS KAXIS NOD1 NOD2 NOD3 LOW_IND HIGH_IND
+global IAXIS JAXIS KAXIS NOD1 NOD2 NOD3 EDG1 EDG2 LOW_IND HIGH_IND GEOMEPS
 IAXIS=1; JAXIS=2; KAXIS=3; LOW_IND=1; HIGH_IND=2;
-NOD1 =1; NOD2 =2; NOD3 =3;
+NOD1 =1; NOD2 =2; NOD3 =3; EDG1=1; EDG2=2;
 
 NORM_EPS=10^-10;
 TWO_EPSILON_EB=1.E-13;
+GEOMEPS=1.E-12;
 
 % Input Data:
 N_VERTS      = 10;
@@ -15,8 +16,10 @@ N_POLY_VERTS = N_VERTS;
 %VERTS   = [-1.0, -1.0, 1.0, .0, -1.0, 1.5, 0.0, 0.0, 1.5, 1.0, 0.0, 2.0, 1.0, 1.0, 2.0, -1.0, 1.0, 1.0]; 
 %POLY    = [ 1, 2, 3, 4, 5, 6];
 
+% 0.55,  0.0,  1.758,
+
 VERTS=[   -1.5,  0.0,  1.0, ...
-    0.0,  0.0,  1.5, ...
+    0.0,  0.0,  1.5,  ...
     0.0,  0.5,  1.5, ...
     0.5,  0.5,  1.75, ...
     0.5, -0.5,  1.75, ...
@@ -27,7 +30,7 @@ VERTS=[   -1.5,  0.0,  1.0, ...
    -1.0,  1.0,  1.0];
 POLY = [1:10];
 
-EXTRUDE = -0.5;
+EXTRUDE = 0.5;
 
 
 a=0.2;
@@ -115,6 +118,41 @@ for I=1:N_POLY_VERTS
    end
 end
 
+% Here project all points to average plane. Do seg-seg intersection tests:
+for I=1:N_POLY_VERTS
+   DV1 = PVERTS(3*I-2:3*I)-XYZCEN(IAXIS:KAXIS);
+   DV2 = DV1 - dot(DV1,NVEC)*NVEC;
+   PVERTS(3*(I+N_POLY_VERTS)-2:3*(I+N_POLY_VERTS)) = XYZCEN(IAXIS:KAXIS)+DV2;
+end
+% Define local coordinate system SVEC,PVEC,NVEC:
+if(abs(NVEC(IAXIS))>TWO_EPSILON_EB || abs(NVEC(JAXIS))>TWO_EPSILON_EB); PVEC=[NVEC(JAXIS),-NVEC(IAXIS),0.]; end
+if(abs(NVEC(IAXIS))<TWO_EPSILON_EB && abs(NVEC(JAXIS))<TWO_EPSILON_EB); PVEC=[NVEC(KAXIS),0.,-NVEC(IAXIS)]; end
+PVEC = PVEC/norm(PVEC);
+SVEC = cross(PVEC,NVEC);
+for I=N_POLY_VERTS+1:2*N_POLY_VERTS
+   IP1 = I + 1;
+   if (I==2*N_POLY_VERTS); IP1=N_POLY_VERTS+1; end
+   DV1 = PVERTS(3*I-2:3*I)-XYZCEN(IAXIS:KAXIS);
+   DV2 = PVERTS(3*IP1-2:3*IP1)-XYZCEN(IAXIS:KAXIS);
+   P1  = [dot(DV1,SVEC) dot(DV1,PVEC)];
+   D1  = [dot(DV2,SVEC) dot(DV2,PVEC)] - P1;
+   JEND=2*N_POLY_VERTS; if(I==N_POLY_VERTS+1); JEND=JEND-1; end
+   for J=I+2:JEND
+      JP1 = J + 1;
+      if (J==2*N_POLY_VERTS); JP1=N_POLY_VERTS+1; end
+      DV1 = PVERTS(3*J-2:3*J)-XYZCEN(IAXIS:KAXIS);
+      DV2 = PVERTS(3*JP1-2:3*JP1)-XYZCEN(IAXIS:KAXIS);
+      P2  = [dot(DV1,SVEC) dot(DV1,PVEC)];
+      D2  = [dot(DV2,SVEC) dot(DV2,PVEC)] - P2;
+      [SVARV,SLENV,INT_FLG]=GET_SEGSEG_INTERSECTION(P1,D1,P2,D2);
+      if(INT_FLG)
+          disp(['Error : Segments ' num2str([POLY(I-N_POLY_VERTS) POLY(IP1-N_POLY_VERTS)]) ' and ' ...
+                num2str([POLY(J-N_POLY_VERTS) POLY(JP1-N_POLY_VERTS)]) ' intersect in average POLY plane.'])
+          return
+      end
+   end
+end
+          
 IS_CONVEX= true;
 NODE_FLG = ones(1,N_POLY_VERTS+1);
 for I=1:N_POLY_VERTS
