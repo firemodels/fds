@@ -8054,15 +8054,19 @@ The namelist group {\ct DUMP} contains parameters (Table \ref{tbl:DUMP}) that co
 
 \section{Device Output: The \texorpdfstring{{\tt DEVC}}{DEVC} Namelist Group}
 
-Every device {\ct DEVC} contains a {\ct QUANTITY} that it monitors. Usually this {\ct QUANTITY} is written out to a comma-delimited spreadsheet file with the suffix {\ct \_devc.csv}. The quantities are listed in Table~\ref{tab:output}. Some quantities, such as {\ct MASS FLUX} and {\ct VOLUME FRACTION} and which are marked with an asterisk in Table~\ref{tab:output}, require a {\ct SPEC\_ID} to be specified also - refer to Section~\ref{info:outputquantities} for more details. There are two types of {\ct DEVC} output. The first is a time history of the given {\ct QUANTITY} over the course of the simulation. The second is a time-averaged profile consisting of a linear array of point devices. Each is explained below.
+Every device ({\ct DEVC}) contains a {\ct QUANTITY} that it monitors. Usually this {\ct QUANTITY} is written out to a comma-delimited spreadsheet file with the suffix {\ct \_devc.csv}. The quantities are listed in Table~\ref{tab:output}. Some quantities, such as {\ct MASS FLUX} and {\ct VOLUME FRACTION}, are marked with an asterisk in Table~\ref{tab:output} meaning that they require additional input, like a {\ct SPEC\_ID}, to be specified. Refer to Section~\ref{info:outputquantities} for more details.
+
+There are two types of {\ct DEVC} output. The first is a time history of the given {\ct QUANTITY} over the course of the simulation. The second is a time-averaged profile consisting of a linear array of point devices. Each is explained below.
 
 \subsection{Single Point Output}
 
-If you just want to record the time history of the temperature at a given point, add the line:
+If you just want to record the time history of the temperature at a given point, add a line like:
 \begin{lstlisting}
 &DEVC XYZ=6.7,2.9,2.1, QUANTITY='TEMPERATURE', ID='T-1' /
 \end{lstlisting}
-and a column will be added to the output file {\ct CHID\_devc.csv} under the label {\ct 'T-1'}. In this case, the {\ct ID} has no other role than as a column label in the output file. FDS reports the value of the {\ct QUANTITY} in the cell where the point {\ct XYZ} is located.
+and a column will be added to the output file {\ct CHID\_devc.csv} under the label {\ct 'T-1'}. FDS reports the value of the {\ct QUANTITY} in the cell containing the point {\ct XYZ}. Most scalar quantities, like {\ct TEMPERATURE}, are defined at cell centers and represent the average of that value over the entire cell. If you specify coordinates {\ct XYZ} that place the device on a cell boundary, halfway between two cell centers, FDS chooses the one that has the greater coordinate value. FDS does not take a weighted average among the nearest 8 cell centers. The reason is that some of these cell centers might be on the other side of a thin obstruction.
+
+In cases where the {\ct QUANTITY} is defined on a cell face, like {\ct 'U-VELOCITY'}, FDS chooses the nearest cell face and reports the corresponding value.
 
 \subsubsection{Devices on Solid Surfaces}
 
