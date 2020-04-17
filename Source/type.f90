@@ -120,31 +120,96 @@ END TYPE LAGRANGIAN_PARTICLE_CLASS_TYPE
 
 TYPE (LAGRANGIAN_PARTICLE_CLASS_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: LAGRANGIAN_PARTICLE_CLASS
 
-! The following derived types are used within the ONE_D_M_AND_E_XFER_TYPE
+
+!> \brief Solid material density for 1-D pyrolysis/conduction algorithm
 
 TYPE MATL_COMP_TYPE
-   REAL(EB), POINTER, DIMENSION(:) :: RHO
+   REAL(EB), POINTER, DIMENSION(:) :: RHO !< (1:NWP) Solid density (kg/m3)
 END TYPE MATL_COMP_TYPE
 
+
+!> \brief Radiation intensity at a boundary for a given wavelength band
+
 TYPE BAND_TYPE
-   REAL(EB), POINTER, DIMENSION(:) :: ILW
+   REAL(EB), POINTER, DIMENSION(:) :: ILW !< (1:NRA) Radiation intensity (W/m2/sr)
 END TYPE BAND_TYPE
 
 ! Note: If you change the number of scalar variables in ONE_D_M_AND_E_XFER_TYPE, adjust the numbers below
 
 INTEGER, PARAMETER :: N_ONE_D_SCALAR_REALS=32,N_ONE_D_SCALAR_INTEGERS=11,N_ONE_D_SCALAR_LOGICALS=2
 
+!> \brief Variables associated with a WALL, PARTICLE, or CFACE boundary cell
+
 TYPE ONE_D_M_AND_E_XFER_TYPE
-   REAL(EB), POINTER, DIMENSION(:) :: TMP,LAYER_THICKNESS,X,M_DOT_G_PP_ACTUAL,M_DOT_S_PP,M_DOT_G_PP_ADJUST,&
-                                      IL,ZZ_G,ZZ_F,RHO_D_F,RHO_D_DZDN_F,A_LP_MPUA,AWM_AEROSOL,LP_CPUA,LP_MPUA
-   TYPE(MATL_COMP_TYPE), ALLOCATABLE, DIMENSION(:) :: MATL_COMP
-   TYPE(BAND_TYPE), ALLOCATABLE, DIMENSION(:) :: BAND
-   INTEGER, POINTER, DIMENSION(:) :: N_LAYER_CELLS
-   INTEGER, POINTER :: ARRAY_INDEX,STORAGE_INDEX,II,JJ,KK,IIG,JJG,KKG,IOR,PRESSURE_ZONE,NODE_INDEX
-   REAL(EB), POINTER :: AREA,HEAT_TRANS_COEF,Q_CON_F,Q_RAD_IN,Q_RAD_OUT,EMISSIVITY,AREA_ADJUST,T_IGN,TMP_F,TMP_F_OLD,TMP_B,&
-                        U_NORMAL,U_NORMAL_S,U_NORMAL_0,RSUM_G,TMP_G,RHO_G,U_TANG,RHO_F,RDN,MU_G,K_G,U_TAU,Y_PLUS,Z_STAR,&
-                        PHI_LS,WORK1,WORK2,Q_DOT_G_PP,Q_DOT_O2_PP,Q_CONDENSE,K_SUPPRESSION
-   LOGICAL, POINTER :: BURNAWAY,CHANGE_THICKNESS
+
+   REAL(EB), POINTER, DIMENSION(:) :: TMP                 !< Temperature in center of each solid cell, \f$ T_{{\rm s},i} \f$
+   REAL(EB), POINTER, DIMENSION(:) :: LAYER_THICKNESS     !< (1:SF\%N_LAYERS) Thickness of layer (m)
+   REAL(EB), POINTER, DIMENSION(:) :: X                   !< (0:NWP) Depth (m), \f$ x_{{\rm s},i} \f$
+   REAL(EB), POINTER, DIMENSION(:) :: M_DOT_G_PP_ACTUAL   !< (1:N_TRACKED_SPECIES) Actual mass production rate per unit area
+   REAL(EB), POINTER, DIMENSION(:) :: M_DOT_S_PP          !< (1:SF\%N_MATL) Mass production rate of solid species
+   REAL(EB), POINTER, DIMENSION(:) :: M_DOT_G_PP_ADJUST   !< (1:N_TRACKED_SPECIES) Adjusted mass production rate per unit area
+   REAL(EB), POINTER, DIMENSION(:) :: IL                  !< (1:NSB) Radiance (W/m2/sr); output only
+   REAL(EB), POINTER, DIMENSION(:) :: ZZ_G                !< (1:N_TRACKED_SPECIES) Species mixture mass fraction in gas grid cell
+   REAL(EB), POINTER, DIMENSION(:) :: ZZ_F                !< (1:N_TRACKED_SPECIES) Species mixture mass fraction at surface
+   REAL(EB), POINTER, DIMENSION(:) :: RHO_D_F             !< (1:N_TRACKED_SPECIES) Diffusion at surface, \f$ \rho D_\alpha \f$
+   REAL(EB), POINTER, DIMENSION(:) :: RHO_D_DZDN_F        !< \f$ \rho D_\alpha \partial Z_\alpha / \partial n \f$
+   REAL(EB), POINTER, DIMENSION(:) :: A_LP_MPUA           !< Accumulated liquid droplet mass per unit area (kg/m2)
+   REAL(EB), POINTER, DIMENSION(:) :: AWM_AEROSOL         !< Accumulated aerosol mass per unit area (kg/m2)
+   REAL(EB), POINTER, DIMENSION(:) :: LP_CPUA             !< Liquid droplet cooling rate unit area (W/m2)
+   REAL(EB), POINTER, DIMENSION(:) :: LP_MPUA             !< Liquid droplet mass per unit area (kg/m2)
+
+   TYPE(MATL_COMP_TYPE), ALLOCATABLE, DIMENSION(:) :: MATL_COMP !< (1:SF\%N_MATL) Material component
+   TYPE(BAND_TYPE), ALLOCATABLE, DIMENSION(:) :: BAND           !< 1:NSB) Radiation wavelength band
+   INTEGER, POINTER, DIMENSION(:) :: N_LAYER_CELLS              !< (1:SF\%N_LAYERS) Number of cells in the layer
+
+   INTEGER, POINTER :: ARRAY_INDEX    !< WALL, LAGRANGIAN_PARTICLE, or CFACE index
+   INTEGER, POINTER :: STORAGE_INDEX  !< Index in the WALL, LP, or CFACE storate array
+   INTEGER, POINTER :: II             !< Ghost cell \f$ x \f$ index
+   INTEGER, POINTER :: JJ             !< Ghost cell \f$ y \f$ index
+   INTEGER, POINTER :: KK             !< Ghost cell \f$ z \f$ index
+   INTEGER, POINTER :: IIG            !< Gas cell \f$ x \f$ index
+   INTEGER, POINTER :: JJG            !< Gas cell \f$ y \f$ index
+   INTEGER, POINTER :: KKG            !< Gas cell \f$ z \f$ index
+   INTEGER, POINTER :: IOR            !< Index of orientation of the WALL cell
+   INTEGER, POINTER :: PRESSURE_ZONE  !< Pressure ZONE of the adjacent gas phase cell
+   INTEGER, POINTER :: NODE_INDEX     !< HVAC node index associated with surface
+
+   REAL(EB), POINTER :: AREA            !< Face area (m2)
+   REAL(EB), POINTER :: HEAT_TRANS_COEF !< Heat transfer coefficient (W/m2/K)
+   REAL(EB), POINTER :: Q_CON_F         !< Convective heat flux at surface (W/m2)
+   REAL(EB), POINTER :: Q_RAD_IN        !< Incoming radiative flux (W/m2)
+   REAL(EB), POINTER :: Q_RAD_OUT       !< Outgoing radiative flux (W/m2)
+   REAL(EB), POINTER :: EMISSIVITY      !< Surface emissivity
+   REAL(EB), POINTER :: AREA_ADJUST     !< Ratio of actual surface area to grid cell face area
+   REAL(EB), POINTER :: T_IGN           !< Ignition time (s)
+   REAL(EB), POINTER :: TMP_F           !< Surface temperature (K)
+   REAL(EB), POINTER :: TMP_F_OLD       !< Holding value for surface temperature (K)
+   REAL(EB), POINTER :: TMP_B           !< Back surface temperature (K)
+   REAL(EB), POINTER :: U_NORMAL        !< Normal component of velocity (m/s) at surface, start of time step
+   REAL(EB), POINTER :: U_NORMAL_S      !< Estimated normal component of velocity (m/s) at next time step
+   REAL(EB), POINTER :: U_NORMAL_0      !< Initial or specified normal component of velocity (m/s) at surface
+   REAL(EB), POINTER :: RSUM_G          !< \f$ R_0 \sum_\alpha Z_\alpha/W_\alpha \f$ in first gas phase cell
+   REAL(EB), POINTER :: TMP_G           !< Temperature (K) in adjacent gas phase cell
+   REAL(EB), POINTER :: RHO_G           !< Gas density (kg/m3) in adjacent gas phase cell
+   REAL(EB), POINTER :: U_TANG          !< Tangential velocity (m/s) near surface
+   REAL(EB), POINTER :: RHO_F           !< Gas density at the wall (kg/m3)
+   REAL(EB), POINTER :: RDN             !< \f$ 1/ \delta n \f$ at the surface (1/m)
+   REAL(EB), POINTER :: MU_G            !< Viscosity, \f$ \mu \f$, in adjacent gas phase cell
+   REAL(EB), POINTER :: K_G             !< Thermal conductivity, \f$ k \f$, in adjacent gas phase cell
+   REAL(EB), POINTER :: U_TAU           !< Friction velocity (m/s)
+   REAL(EB), POINTER :: Y_PLUS          !< Dimensionless boundary layer thickness unit
+   REAL(EB), POINTER :: Z_STAR          !< Dimensionless boundary layer unit
+   REAL(EB), POINTER :: PHI_LS          !< Level Set value for output only
+   REAL(EB), POINTER :: WORK1           !< Work array
+   REAL(EB), POINTER :: WORK2           !< Work array
+   REAL(EB), POINTER :: Q_DOT_G_PP      !< Heat release rate per unit area (W/m2)
+   REAL(EB), POINTER :: Q_DOT_O2_PP     !< Heat release rate per unit area (W/m2) due to oxygen consumption
+   REAL(EB), POINTER :: Q_CONDENSE      !< Heat release rate per unit area (W/m2) due to gas condensation
+   REAL(EB), POINTER :: K_SUPPRESSION   !< Suppression coefficent (m2/kg/s)
+
+   LOGICAL, POINTER :: BURNAWAY         !< Indicater if cell can burn away when fuel is exhausted
+   LOGICAL, POINTER :: CHANGE_THICKNESS !< Indicater if thickness of solid can change
+
 END TYPE ONE_D_M_AND_E_XFER_TYPE
 
 ! Note: If you change the number of scalar variables in LAGRANGIAN_PARTICLE_TYPE, adjust the numbers below
