@@ -812,8 +812,8 @@ NODE_LOOP: DO NN = 1, N_DUCTNODES
          NODE_VENT_LOOP:DO NV = 1, MESHES(NM)%N_VENT
             IF(MESHES(NM)%VENTS(NV)%ID == DN%VENT_ID) THEN
                FOUND = .TRUE.
-               IF (DN%MESH_INDEX > 0) THEN
-                  WRITE(MESSAGE,'(A,A)') 'ERROR: VENT for ductnode is split over more than one mesh for VENT ID:',&
+               IF (MESHES(NM)%VENTS(NV)%CTRL_INDEX > 0 .OR. MESHES(NM)%VENTS(NV)%DEVC_INDEX >0) THEN
+                  WRITE(MESSAGE,'(A,A)') 'ERROR: VENT for ductnode has a DEVC_ID or CTRL_ID, VENT ID:',&
                                           TRIM(MESHES(NM)%VENTS(NV)%ID)
                   CALL SHUTDOWN(MESSAGE); RETURN
                ENDIF
