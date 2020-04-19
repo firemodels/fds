@@ -3813,7 +3813,9 @@ If the node is connected to the FDS domain, then do not specify {\ct XYZ}.  FDS 
 \noindent
 A duct node must either have two or more ducts attached to it or it must have either {\ct AMBIENT=.TRUE.} or a specified {\ct VENT\_ID}.  When defining a {\ct VENT} as a component of an HVAC system you must set {\ct SURF\_ID} to {\ct 'HVAC'} and you must set the {\ct VENT\_ID}.
 
-It is permissible to have individual {\ct VENT} lines for an HVAC system span multiple meshes.
+It is permissible to have individual {\ct VENT} lines for an HVAC system span multiple meshes. 
+
+Note that a {\ct VENT} being used for an HVAC system should not have a {\ct CTRL\_ID} or {\ct DEVC\_ID}. If you need to turn on or off a {\ct VENT} connected to an HVAC system, use a damper in the duct connected to {\ct VENT}.
 
 \subsection{HVAC Fan Parameters}
 \label{info:HVACfan}
