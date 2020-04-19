@@ -223,6 +223,7 @@ DO NN=1,N_HVAC_READ
          DU%DIAMETER = DIAMETER
          DU%LENGTH = LENGTH
          DU%REVERSE = REVERSE
+         DU%DP_FAN = 0._EB
          ALLOCATE(DU%ZZ(N_TRACKED_SPECIES))
          DU%ZZ(1:N_TRACKED_SPECIES) = SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0
          ALLOCATE(DU%ZZ_OLD(N_TRACKED_SPECIES))
@@ -268,7 +269,6 @@ DO NN=1,N_HVAC_READ
                 DU%FAN_OPERATING = .TRUE.
             ENDIF
             IF (DU%FAN_OPERATING) DU%FAN_ON_TIME = T_BEGIN
-            IF (.NOT. DU%FAN_OPERATING) DU%DP_FAN = 0._EB
          ELSEIF (AIRCOIL_ID /='null') THEN
             IF (DU%DEVC_INDEX > 0) THEN
                 DU%COIL_OPERATING = DEVICE(DU%DEVC_INDEX)%INITIAL_STATE
@@ -1760,15 +1760,15 @@ ENDDO
 
 END SUBROUTINE LHS_SYSTEM
 
-!> \brief Updates the pressure rise imposde by a fan
+!> \brief Updates the pressure rise imposed by a fan
 !>
 !> \param T Current time (s)
-!> \param NNE Index indicating which HVAC network is being solved
+!> \param ND Index indicating duct where fan is located
 
-SUBROUTINE UPDATE_FAN(T,NNE)
+SUBROUTINE UPDATE_FAN(T,ND)
 USE MATH_FUNCTIONS, ONLY : EVALUATE_RAMP
-INTEGER :: FAN_ITER, ND
-INTEGER, INTENT(IN) :: NNE
+INTEGER :: FAN_ITER
+INTEGER, INTENT(IN) :: ND
 REAL(EB), INTENT(IN) :: T
 REAL(EB) :: DEL_P,VDOT
 REAL(EB) :: TSI,FLOW1,FLOW2,FUNC,FLOWGUESS
@@ -1776,59 +1776,55 @@ TYPE(DUCT_TYPE), POINTER::DU=>NULL()
 TYPE(FAN_TYPE), POINTER::FA=>NULL()
 TYPE(NETWORK_TYPE), POINTER :: NE=>NULL()
 
-NE =>NETWORK(NNE)
-DUCT_LOOP: DO ND = 1,NE%N_DUCTS
-   DU=> DUCT(NE%DUCT_INDEX(ND))
-   IF (DU%FAN_INDEX < 0) CYCLE DUCT_LOOP
+DU=> DUCT(ND)
 
-   FA=> FAN(DU%FAN_INDEX)
-   TSI = T - DU%FAN_ON_TIME
-   SELECT CASE (FA%FAN_TYPE)
-      CASE(1) ! Constant flow
-         DU%VEL(NEW) = FA%VOL_FLOW/DU%AREA*EVALUATE_RAMP(TSI,FA%TAU,FA%SPIN_INDEX)
-         IF (DU%REVERSE) DU%VEL(NEW)=-DU%VEL(NEW)
-         DU%VOLUME_FLOW = DU%VEL(NEW)*DU%AREA
-         RETURN
-      CASE(2) ! Quadratic
-         VDOT = (0.25_EB*DU%VEL(NEW)+0.25_EB*DU%VEL(PREVIOUS)+0.5_EB*DU%VEL(OLD))*DU%AREA
-         IF (DU%REVERSE) VDOT = -VDOT
-         VDOT = MAX(0._EB,MIN(VDOT,FA%MAX_FLOW))
-         DEL_P = FA%MAX_PRES - FA%MAX_PRES*(VDOT/FA%MAX_FLOW)**2
-         DEL_P = DEL_P*EVALUATE_RAMP(TSI,FA%TAU,FA%SPIN_INDEX)
-      CASE(3) !Fan curve
-         VDOT = 0.5*(DU%VEL(NEW)+DU%VEL(OLD))*DU%AREA
-         IF (DU%REVERSE) VDOT = -VDOT
-         DEL_P = EVALUATE_RAMP(VDOT,0._EB,FA%RAMP_INDEX)*EVALUATE_RAMP(TSI,FA%TAU,FA%SPIN_INDEX)
-      CASE(4) ! System curve-based quadratic fan BETA
-         ! Set initial bounds for bisect
-         FLOW1 = 0._EB
-         FLOW2 = FA%MAX_FLOW
-         FAN_ITER = 0
-         FAN_LOOP: DO
-            FAN_ITER = FAN_ITER + 1
-            FLOWGUESS = 0.5*(FLOW1+FLOW2)
-            IF (ABS(FLOWGUESS - FLOW1) < TWO_EPSILON_EB) EXIT FAN_LOOP
-            FUNC = FA%MAX_PRES/((DU%VEL_SYSTEM(2,DU%QFAN_N,2)-DU%VEL_SYSTEM(1,1,2))*DU%AREA)**2
-            FUNC = FUNC * (FLOWGUESS-DU%VEL_SYSTEM(1,1,2)*DU%AREA)**2
-            FUNC = FUNC - FA%MAX_PRES + FA%MAX_PRES*(FLOWGUESS/FA%MAX_FLOW)**2
-            IF (FUNC > 0) THEN
-               FLOW2 = FLOWGUESS
-            ELSE
-               FLOW1 = FLOWGUESS
-            ENDIF
-            IF (FAN_ITER > 100) THEN
-               FLOWGUESS = 0.5_EB*(FLOW1 + FLOW2)
-               EXIT FAN_LOOP
-            ENDIF
-         ENDDO FAN_LOOP
-         ! Output fan pressure equating to output flow rate
-         DEL_P = FA%MAX_PRES - FA%MAX_PRES*(FLOWGUESS/FA%MAX_FLOW)**2
-         DEL_P = DEL_P*EVALUATE_RAMP(TSI,FA%TAU,FA%SPIN_INDEX)
-   END SELECT
+FA=> FAN(DU%FAN_INDEX)
+TSI = T - DU%FAN_ON_TIME
+SELECT CASE (FA%FAN_TYPE)
+   CASE(1) ! Constant flow
+      DU%VEL(NEW) = FA%VOL_FLOW/DU%AREA*EVALUATE_RAMP(TSI,FA%TAU,FA%SPIN_INDEX)
+      IF (DU%REVERSE) DU%VEL(NEW)=-DU%VEL(NEW)
+      DU%VOLUME_FLOW = DU%VEL(NEW)*DU%AREA
+      RETURN
+   CASE(2) ! Quadratic
+      VDOT = (0.25_EB*DU%VEL(NEW)+0.25_EB*DU%VEL(PREVIOUS)+0.5_EB*DU%VEL(OLD))*DU%AREA
+      IF (DU%REVERSE) VDOT = -VDOT
+      VDOT = MAX(0._EB,MIN(VDOT,FA%MAX_FLOW))
+      DEL_P = FA%MAX_PRES - FA%MAX_PRES*(VDOT/FA%MAX_FLOW)**2
+      DEL_P = DEL_P*EVALUATE_RAMP(TSI,FA%TAU,FA%SPIN_INDEX)
+   CASE(3) !Fan curve
+      VDOT = 0.5*(DU%VEL(NEW)+DU%VEL(OLD))*DU%AREA
+      IF (DU%REVERSE) VDOT = -VDOT
+      DEL_P = EVALUATE_RAMP(VDOT,0._EB,FA%RAMP_INDEX)*EVALUATE_RAMP(TSI,FA%TAU,FA%SPIN_INDEX)
+   CASE(4) ! System curve-based quadratic fan BETA
+      ! Set initial bounds for bisect
+      FLOW1 = 0._EB
+      FLOW2 = FA%MAX_FLOW
+      FAN_ITER = 0
+      FAN_LOOP: DO
+         FAN_ITER = FAN_ITER + 1
+         FLOWGUESS = 0.5*(FLOW1+FLOW2)
+         IF (ABS(FLOWGUESS - FLOW1) < TWO_EPSILON_EB) EXIT FAN_LOOP
+         FUNC = FA%MAX_PRES/((DU%VEL_SYSTEM(2,DU%QFAN_N,2)-DU%VEL_SYSTEM(1,1,2))*DU%AREA)**2
+         FUNC = FUNC * (FLOWGUESS-DU%VEL_SYSTEM(1,1,2)*DU%AREA)**2
+         FUNC = FUNC - FA%MAX_PRES + FA%MAX_PRES*(FLOWGUESS/FA%MAX_FLOW)**2
+         IF (FUNC > 0) THEN
+            FLOW2 = FLOWGUESS
+         ELSE
+            FLOW1 = FLOWGUESS
+         ENDIF
+         IF (FAN_ITER > 100) THEN
+            FLOWGUESS = 0.5_EB*(FLOW1 + FLOW2)
+            EXIT FAN_LOOP
+         ENDIF
+      ENDDO FAN_LOOP
+      ! Output fan pressure equating to output flow rate
+      DEL_P = FA%MAX_PRES - FA%MAX_PRES*(FLOWGUESS/FA%MAX_FLOW)**2
+      DEL_P = DEL_P*EVALUATE_RAMP(TSI,FA%TAU,FA%SPIN_INDEX)
+END SELECT
 
-   IF (DU%REVERSE) DEL_P=-DEL_P
-   DU%DP_FAN(NEW) = DEL_P
-END DO DUCT_LOOP
+IF (DU%REVERSE) DEL_P=-DEL_P
+DU%DP_FAN(NEW) = DEL_P
 
 END SUBROUTINE UPDATE_FAN
 
@@ -2656,7 +2652,7 @@ NE => NETWORK(NNE)
 DO ND = 1,NE%N_DUCTS
    DU => DUCT(NE%DUCT_INDEX(ND))
    IF (DU%FAN_INDEX > 0 .AND. DU%FAN_OPERATING) THEN
-      CALL UPDATE_FAN(T,NNE)
+      CALL UPDATE_FAN(T,ND)
    ELSE 
       DU%DP_FAN = 0._EB
    ENDIF
