@@ -266,41 +266,113 @@ TYPE STORAGE_TYPE
    LOGICAL, ALLOCATABLE, DIMENSION(:,:) :: LOGICALS
 END TYPE STORAGE_TYPE
 
+
 ! Note: If you change the number of scalar variables in WALL_TYPE, adjust the numbers below
 
 INTEGER, PARAMETER :: N_WALL_SCALAR_REALS=7,N_WALL_SCALAR_INTEGERS=14,N_WALL_SCALAR_LOGICALS=0
 
+!> \brief Variables associated with a WALL cell
+
 TYPE WALL_TYPE
-   TYPE (ONE_D_M_AND_E_XFER_TYPE) :: ONE_D
-   REAL(EB), POINTER :: DUNDT,Q_LEAK,V_DEP,VEL_ERR_NEW,X,Y,Z
-   INTEGER, POINTER :: BACK_INDEX,BACK_MESH,BOUNDARY_TYPE,OBST_INDEX,PRESSURE_BC_INDEX,SURF_INDEX,&
-                       SURF_INDEX_ORIG,VENT_INDEX,WALL_INDEX,LAPLACE_BC_INDEX,JD11_INDEX,JD12_INDEX,JD21_INDEX,JD22_INDEX
+
+   TYPE (ONE_D_M_AND_E_XFER_TYPE) :: ONE_D     !< Derived type carrying most of the solid boundary conditions
+
+   REAL(EB), POINTER :: DUNDT                  !< \f$ \partial u_n / \partial t \f$
+   REAL(EB), POINTER :: Q_LEAK                 !< Heat production of leaking gas (W/m3)
+   REAL(EB), POINTER :: V_DEP                  !< Deposition velocity (m/s)
+   REAL(EB), POINTER :: VEL_ERR_NEW            !< Velocity mismatch at mesh or solid boundary (m/s)
+   REAL(EB), POINTER :: X                      !< \f$ x \f$ coordinate of boundary cell center
+   REAL(EB), POINTER :: Y                      !< \f$ y \f$ coordinate of boundary cell center
+   REAL(EB), POINTER :: Z                      !< \f$ z \f$ coordinate of boundary cell center
+
+   INTEGER, POINTER :: BACK_INDEX              !< WALL index of back side of obstruction or exterior wall cell
+   INTEGER, POINTER :: BACK_MESH               !< Mesh number on back side of obstruction or exterior wall cell
+   INTEGER, POINTER :: BOUNDARY_TYPE           !< Descriptor: SOLID, MIRROR, OPEN, INTERPOLATED, etc
+   INTEGER, POINTER :: OBST_INDEX              !< Index of the OBSTruction
+   INTEGER, POINTER :: PRESSURE_BC_INDEX       !< Poisson boundary condition, NEUMANN or DIRICHLET
+   INTEGER, POINTER :: SURF_INDEX              !< Index of the SURFace conditions
+   INTEGER, POINTER :: SURF_INDEX_ORIG         !< Original SURFace index for this cell
+   INTEGER, POINTER :: VENT_INDEX              !< Index of the VENT containing this cell
+   INTEGER, POINTER :: WALL_INDEX              !< Self-identifier
+   INTEGER, POINTER :: LAPLACE_BC_INDEX
+   INTEGER, POINTER :: JD11_INDEX
+   INTEGER, POINTER :: JD12_INDEX
+   INTEGER, POINTER :: JD21_INDEX
+   INTEGER, POINTER :: JD22_INDEX
+
 END TYPE WALL_TYPE
 
+
+!> \brief Variables associated with the external boundary of a mesh
+
 TYPE EXTERNAL_WALL_TYPE
-   INTEGER :: NOM,NIC_MIN,NIC_MAX,IIO_MIN,IIO_MAX,JJO_MIN,JJO_MAX,KKO_MIN,KKO_MAX
-   REAL(EB) :: AREA_RATIO
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: FVN, FVNS ! species advective flux at E-wall -> flxint(rho*Y_alpha)*U
-   ! where flxint(rho*Y_alpha) is the corresponding flux limited interpolation of rho*Y_alpha being used
-   ! in the code and U is the normal velocity. FVN -> based on variables at time level n, FVNS based on
-   ! predicted variables for step n -> n+1.
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHO_D_DZDN, RHO_D_DZDNS ! species diffusive flux at E-wall, as computed in divg.f90.
+   INTEGER :: NOM                                     !< Number of the adjacent (Other) Mesh
+   INTEGER :: NIC_MIN                                 !< Start of indices for the cell in the other mesh
+   INTEGER :: NIC_MAX                                 !< End of indices for the cell in the other mesh
+   INTEGER :: IIO_MIN                                 !< Minimum I index of adjacent cell in other mesh
+   INTEGER :: IIO_MAX                                 !< Maximum I index of adjacent cell in other mesh
+   INTEGER :: JJO_MIN                                 !< Minimum J index of adjacent cell in other mesh
+   INTEGER :: JJO_MAX                                 !< Maximum J index of adjacent cell in other mesh
+   INTEGER :: KKO_MIN                                 !< Minimum K index of adjacent cell in other mesh
+   INTEGER :: KKO_MAX                                 !< Maximum K index of adjacent cell in other mesh
+   REAL(EB) :: AREA_RATIO                             !< Ratio of face areas of adjoining cells
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: FVN         !< Flux-limited \f$ \int \rho Y_\alpha u_n \f$
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: FVNS        !< Estimated value of FVN at next time step
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHO_D_DZDN  !< Species diffusive flux as computed in divg.f90
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHO_D_DZDNS !< RHO_D_DZDN estimated at next time step
 END TYPE EXTERNAL_WALL_TYPE
 
+
+!> \brief Derived type used to hold back side wall properties
+
 TYPE EXPOSED_WALL_TYPE
-   REAL(EB) :: Q_RAD_IN,TMP_GAS
+   REAL(EB) :: Q_RAD_IN  !< Incoming radiation heat flux (W/m2)
+   REAL(EB) :: TMP_GAS   !< Gas temperature (K)
 END TYPE EXPOSED_WALL_TYPE
 
+
+!> \brief Variables associated with a single primitive gas species
+
 TYPE SPECIES_TYPE
-   REAL(EB) :: MW=0._EB,YY0=0._EB,RCON,MAXMASS,MASS_EXTINCTION_COEFFICIENT=0._EB,&
-               SPECIFIC_HEAT=-1._EB,REFERENCE_ENTHALPY=-1._EB,&
-               REFERENCE_TEMPERATURE,MU_USER=-1._EB,K_USER=-1._EB,D_USER=-1._EB,EPSK=-1._EB,SIG=-1._EB,PR_USER=-1._EB,&
-               FLD_LETHAL_DOSE=0._EB,FIC_CONCENTRATION=0._EB,&
-               SPECIFIC_HEAT_LIQUID=-1,DENSITY_LIQUID,HEAT_OF_VAPORIZATION=-1._EB,&
-               H_F,H_V_REFERENCE_TEMPERATURE=-1._EB,H_V_CORRECTOR=0._EB ,TMP_V=-1._EB,TMP_MELT=-1._EB,ATOMS(118)=0._EB,&
-               MEAN_DIAMETER=1.E-6_EB,CONDUCTIVITY_SOLID,DENSITY_SOLID,BETA_LIQUID,MU_LIQUID,K_LIQUID,PR_LIQUID, &
-               THERMOPHORETIC_DIAMETER=0.03E-6_EB
-   LOGICAL ::  ISFUEL=.FALSE.,LISTED=.FALSE.,AGGLOMERATING=.FALSE.,EXPLICIT_H_F=.FALSE.,CONDENSABLE=.FALSE.
+
+   REAL(EB) :: MW=0._EB                           !< Molecular weight (g/mol)
+   REAL(EB) :: YY0=0._EB                          !< Inital mass fraction
+   REAL(EB) :: RCON                               !< Gas constant divided by molecular weight, \f$ R_0/W \f$ (J/kg/K)
+   REAL(EB) :: MASS_EXTINCTION_COEFFICIENT=0._EB  !< Light extinction coefficient (m2/kg)
+   REAL(EB) :: SPECIFIC_HEAT=-1._EB               !< Specific heat input by user (J/kg/K)
+   REAL(EB) :: REFERENCE_ENTHALPY=-1._EB          !< Enthalpy at reference temperature (J/kg)
+   REAL(EB) :: REFERENCE_TEMPERATURE              !< Basis temperature (K) for sensible enthalpy calculation
+   REAL(EB) :: MU_USER=-1._EB                     !< User-specified viscosity (kg/m/s)
+   REAL(EB) :: K_USER=-1._EB                      !< User-specified thermal conductivity (W/m/K)
+   REAL(EB) :: D_USER=-1._EB                      !< User-specified diffusivity (m2/s)
+   REAL(EB) :: EPSK=-1._EB                        !< Lennard-Jones \f$ \epsilon/k \f$ (K)
+   REAL(EB) :: SIG=-1._EB                         !< Lennard_Jones hard-sphere diameter (Angstroms)
+   REAL(EB) :: PR_USER=-1._EB                     !< User-specified Prandtl number
+   REAL(EB) :: FLD_LETHAL_DOSE=0._EB
+   REAL(EB) :: FIC_CONCENTRATION=0._EB
+   REAL(EB) :: SPECIFIC_HEAT_LIQUID=-1            !< Liquid specific heat (J/kg/K)
+   REAL(EB) :: DENSITY_LIQUID                     !< Liquid density (kg/m3)
+   REAL(EB) :: HEAT_OF_VAPORIZATION=-1._EB        !< Heat of vaporization (J/kg)
+   REAL(EB) :: H_F                                !< Heat of fusion (J/kg)
+   REAL(EB) :: H_V_REFERENCE_TEMPERATURE=-1._EB   !< Heat of vaporization reference temperature (K)
+   REAL(EB) :: TMP_V=-1._EB                       !< Vaporization temperature (K)
+   REAL(EB) :: TMP_MELT=-1._EB                    !< Melting temperature (K)
+   REAL(EB) :: ATOMS(118)=0._EB                   !< Atom count for molecular formula
+   REAL(EB) :: MEAN_DIAMETER=1.E-6_EB             !< Diameter for aerosol (m)
+   REAL(EB) :: CONDUCTIVITY_SOLID                 !< Thermal conductivity of solid (W/m/K)
+   REAL(EB) :: DENSITY_SOLID                      !< Densith of solid (kg/m3)
+   REAL(EB) :: BETA_LIQUID                        !< Coefficient of thermal expansion of the liquid (1/K)
+   REAL(EB) :: MU_LIQUID                          !< Viscosity of the liquid (kg/m/s)
+   REAL(EB) :: K_LIQUID                           !< Conductivity of the liquid (W/m/K)
+   REAL(EB) :: PR_LIQUID                          !< Prandtl number of the liquid
+   REAL(EB) :: THERMOPHORETIC_DIAMETER=0.03E-6_EB !< For use in aerosol deposition (m)
+
+   LOGICAL ::  ISFUEL=.FALSE.                     !< Fuel species
+   LOGICAL ::  LISTED=.FALSE.                     !< Properties are known to FDS
+   LOGICAL ::  AGGLOMERATING=.FALSE.              !< Can form a particle or aerosol
+   LOGICAL ::  EXPLICIT_H_F=.FALSE.               !< Heat of Formation is explicitly specified
+   LOGICAL ::  CONDENSABLE=.FALSE.                !< Species can condense to liquid form
+
    CHARACTER(LABEL_LENGTH) :: ID,RAMP_CP,RAMP_CP_L,RAMP_K,RAMP_MU,RAMP_D,RADCAL_ID,RAMP_G_F,PROP_ID
    CHARACTER(FORMULA_LENGTH) :: FORMULA
    INTEGER :: MODE=2,RAMP_CP_INDEX=-1,RAMP_CP_L_INDEX=-1,RAMP_K_INDEX=-1,RAMP_MU_INDEX=-1,RAMP_D_INDEX=-1,RADCAL_INDEX=-1,&
