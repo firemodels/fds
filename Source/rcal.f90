@@ -242,10 +242,10 @@ END SUBROUTINE INIT_RADCAL
 
 !> \brief main computation routine for RADCAL
 !>
-!> \parma EFFECTIVE_ABSORPTION  Effective absorption coefficient (1/cm)
-!> \parma  PLANCK_MEAN_ABSORPTION : Planck mean absorption coefficient (1/cm)
-!> \parma  RADIANCE               : Total incident power (W/m2/sr)
-!> \parma  TOTAL_TRANSMISSIVITY   : Total transmissivity, computed only when TWALL > 0
+!> \param EFFECTIVE_ABSORPTION   Effective absorption coefficient (1/cm)
+!> \param PLANCK_MEAN_ABSORPTION Planck mean absorption coefficient (1/cm)
+!> \param RADIANCE               Total incident power (W/m2/sr)
+!> \param TOTAL_TRANSMISSIVITY   Total transmissivity, computed only when TWALL > 0
 
 SUBROUTINE SUB_RADCAL(EFFECTIVE_ABSORPTION,PLANCK_MEAN_ABSORPTION,RADIANCE,TOTAL_TRANSMISSIVITY)
 
@@ -607,13 +607,13 @@ END SUBROUTINE SUB_RADCAL
 !> \brief This function computes the collision broadening half-width at half-height
 !>
 !> \details Caculation procedes in accordance with the SLG Model, Table 5-18,  in NASA SP-3080.
-! Based on Eq 5-34 in NASA SP-3080.
+!> Based on Eq 5-34 in NASA SP-3080.
 !>
-!> \param GC Vector containing the collision broadening half-width at half-height
-! including foreign and self-broadening collision coefficients (1/cm)
+!> Return a vector containing the collision broadening half-width at half-height
+!> including foreign and self-broadening collision coefficients (1/cm)
 !> \param SPECIES_PRESSURE_ATM Species partial pressures (atm)
 !> \param PTOT Total pressure (atm)
-!> \parama AZOTEMP 273/local temperature
+!> \param AZOTEMP 273/local temperature
 
 FUNCTION COLLISION_BROADENING(SPECIES_PRESSURE_ATM,PTOT,AZOTEMP) RESULT(GC)
 
@@ -3314,8 +3314,8 @@ END FUNCTION PLANCK_WN
 !> \details Does not assume any regularity of x. Integration based on Simpson Rule over
 ! non regular abscissa based on Lagrangian interpolation using 3 points (quadratic interpolation).
 !>
-!> \parma Y array of y(x)
-!> \parma X array of x
+!> \param Y array of y(x)
+!> \param X array of x
 
 REAL(EB) FUNCTION INTEGRATION(X,Y)
 
