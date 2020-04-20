@@ -214,14 +214,48 @@ END TYPE ONE_D_M_AND_E_XFER_TYPE
 
 ! Note: If you change the number of scalar variables in LAGRANGIAN_PARTICLE_TYPE, adjust the numbers below
 
-INTEGER, PARAMETER :: N_PARTICLE_SCALAR_REALS=17,N_PARTICLE_SCALAR_INTEGERS=11,N_PARTICLE_SCALAR_LOGICALS=4
+INTEGER, PARAMETER :: N_PARTICLE_SCALAR_REALS=17,N_PARTICLE_SCALAR_INTEGERS=10,N_PARTICLE_SCALAR_LOGICALS=4
+
+!> \brief Variables assoicated with a single Lagrangian particle
 
 TYPE LAGRANGIAN_PARTICLE_TYPE
-   TYPE (ONE_D_M_AND_E_XFER_TYPE) :: ONE_D
-   LOGICAL, POINTER :: SHOW,SPLAT,EMBER,PATH_PARTICLE
-   REAL(EB), POINTER :: X,Y,Z,U,V,W,PWT,ACCEL_X,ACCEL_Y,ACCEL_Z,RE,MASS,T_INSERT,DX,DY,DZ,M_DOT
-   INTEGER, POINTER :: TAG,ARRAY_INDEX,STORAGE_INDEX,CLASS_INDEX,ORIENTATION_INDEX,WALL_INDEX,FACE_INDEX,DUCT_INDEX,&
-                       INIT_INDEX,DUCT_CELL_INDEX,CFACE_INDEX
+
+   TYPE (ONE_D_M_AND_E_XFER_TYPE) :: ONE_D  !< Most of the particle properties are contained within this derived type
+
+   LOGICAL, POINTER :: SHOW                 !< Show the particle in Smokeview
+   LOGICAL, POINTER :: SPLAT                !< The liquid droplet has hit a solid
+   LOGICAL, POINTER :: EMBER                !< The particle can break away and become a burning ember
+   LOGICAL, POINTER :: PATH_PARTICLE           
+
+   REAL(EB), POINTER :: X                   !< \f$ x \f$ coordinate of particle (m)
+   REAL(EB), POINTER :: Y                   !< \f$ y \f$ coordinate of particle (m)
+   REAL(EB), POINTER :: Z                   !< \f$ z \f$ coordinate of particle (m)
+   REAL(EB), POINTER :: U                   !< \f$ x \f$ velocity component of particle (m/s)
+   REAL(EB), POINTER :: V                   !< \f$ y \f$ velocity component of particle (m/s)
+   REAL(EB), POINTER :: W                   !< \f$ z \f$ velocity component of particle (m/s)
+   REAL(EB), POINTER :: PWT                 !< Weight factor of particle; i.e. the number of real particles it represents
+   REAL(EB), POINTER :: ACCEL_X             !< Contribution to acceleration of gas in \f$ x \f$ direction (m/s2)
+   REAL(EB), POINTER :: ACCEL_Y             !< Contribution to acceleration of gas in \f$ y \f$ direction (m/s2)
+   REAL(EB), POINTER :: ACCEL_Z             !< Contribution to acceleration of gas in \f$ z \f$ direction (m/s2)
+   REAL(EB), POINTER :: RE                  !< Reynolds number based on particle diameter
+   REAL(EB), POINTER :: MASS                !< Particle mass (kg)
+   REAL(EB), POINTER :: T_INSERT            !< Time when particle was inserted (s)
+   REAL(EB), POINTER :: DX                  !< Length scale used in POROUS_DRAG calculation (m)
+   REAL(EB), POINTER :: DY                  !< Length scale used in POROUS_DRAG calculation (m)
+   REAL(EB), POINTER :: DZ                  !< Length scale used in POROUS_DRAG calculation (m)
+   REAL(EB), POINTER :: M_DOT               !< Particle mass evaporation rate (kg/s)
+
+   INTEGER, POINTER :: TAG                  !< Unique integer identifier for the particle
+   INTEGER, POINTER :: ARRAY_INDEX          !< Index in the array of evaporating particles
+   INTEGER, POINTER :: STORAGE_INDEX        !< Index in the large storage array of all particles
+   INTEGER, POINTER :: CLASS_INDEX          !< LAGRANGIAN_PARTICLE_CLASS of particle
+   INTEGER, POINTER :: ORIENTATION_INDEX    !< Index in the array of all ORIENTATIONs
+   INTEGER, POINTER :: WALL_INDEX           !< If liquid droplet has stuck to a wall, this is the WALL cell index
+   INTEGER, POINTER :: DUCT_INDEX           !< Index of duct
+   INTEGER, POINTER :: INIT_INDEX           !< Index of INIT line
+   INTEGER, POINTER :: DUCT_CELL_INDEX      !< Index of duct cell
+   INTEGER, POINTER :: CFACE_INDEX          !< Index of immersed boundary CFACE that the droplet has attached to
+
 END TYPE LAGRANGIAN_PARTICLE_TYPE
 
 

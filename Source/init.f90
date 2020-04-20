@@ -2018,7 +2018,7 @@ DEVICE_LOOP: DO N=1,N_DEVC
 
    DV => DEVICE(N)
 
-   IF (DV%OUTPUT_INDEX>=0) CYCLE DEVICE_LOOP  ! Do not process gas phsae devices
+   IF (DV%QUANTITY_INDEX(1)>=0) CYCLE DEVICE_LOOP  ! Do not process gas phsae devices
 
    IF (DV%INIT_ID=='null') THEN ! Assume the device is tied to a WALL cell or CFACE
 
@@ -2033,7 +2033,7 @@ DEVICE_LOOP: DO N=1,N_DEVC
       IW  = 0
       ICF = 0
 
-      IF (TRIM(DV%QUANTITY)=='SOLID CELL TEMPERATURE') THEN
+      IF (TRIM(DV%QUANTITY(1))=='SOLID CELL TEMPERATURE') THEN
          ! For SOLID CELL TEMPERATURE (II,JJ,KK) should be inside SOLID,
          ! our task is to find the first gas phase cell (IIG,JJG,KKG) in direction IOR,
          ! currently assumes II and IIG, etc., are on the same mesh
@@ -2075,7 +2075,7 @@ DEVICE_LOOP: DO N=1,N_DEVC
 
    ! Make sure that thermally-thick output is appropriate
 
-   IF (OUTPUT_QUANTITY(DV%OUTPUT_INDEX)%INSIDE_SOLID) THEN
+   IF (OUTPUT_QUANTITY(DV%QUANTITY_INDEX(1))%INSIDE_SOLID) THEN
       IF (SURFACE(SURF_INDEX)%THERMAL_BC_INDEX /= THERMALLY_THICK) THEN
          WRITE(LU_ERR,'(A,I3,A)') 'ERROR: DEVC ',N,' must be associated with a heat-conducting surface'
          STOP_STATUS = SETUP_STOP
@@ -3147,7 +3147,7 @@ OBST_LOOP: DO N=1,N_OBST
    ! The evacuation flow field calculation is done before T_BEGIN
 
    IF (OB%DEVC_INDEX>0) THEN
-      IF (EVACUATION_SKIP(NM) .AND. DEVICE(OB%DEVC_INDEX)%QUANTITY=='TIME' .AND. DEVICE(OB%DEVC_INDEX)%SETPOINT<=T_BEGIN) &
+      IF (EVACUATION_SKIP(NM) .AND. DEVICE(OB%DEVC_INDEX)%QUANTITY(1)=='TIME' .AND. DEVICE(OB%DEVC_INDEX)%SETPOINT<=T_BEGIN) &
          T_TMP = T - EVAC_DT_FLOWFIELD*EVAC_TIME_ITERATIONS
    ENDIF
 
