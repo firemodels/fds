@@ -6287,7 +6287,7 @@ READ_MATL_LOOP: DO N=1,N_MATL
             ID               = 'AIR'
             DENSITY          = 1.2_EB
             CONDUCTIVITY     = 0.026_EB
-            SPECIFIC_HEAT    = 1.01_EB
+            SPECIFIC_HEAT    = 0.01_EB  ! Artifically low value because AIR does not absorb heat in the BOUNDARY_FUEL_MODEL
       END SELECT
    ENDIF
 
