@@ -78,7 +78,6 @@ REAL(EB) :: FUEL_H_TO_H2_FRACTION=0._EB     !< Fraction of hydrogen atoms in the
 ! Miscellaneous logical constants
 
 LOGICAL :: RADIATION=.TRUE.                 !< Perform radiation transport
-LOGICAL :: RADIATION_COMPLETED=.TRUE.       !< A complete radiation update has completed
 LOGICAL :: EXCHANGE_RADIATION=.FALSE.       !< Do an MPI radiation exchange at this time step
 LOGICAL :: CYLINDRICAL=.FALSE.              !< Cylindrical domain option
 LOGICAL :: NOISE=.TRUE.                     !< Initialize velocity field with a small amount of divergence-free motion
@@ -251,6 +250,7 @@ CHARACTER(LABEL_LENGTH) :: EXTINCTION_MODEL='null'
 
 ! Radiation parameters
 
+LOGICAL, ALLOCATABLE, DIMENSION(:) :: RADIATION_COMPLETED
 INTEGER :: NUMBER_SPECTRAL_BANDS=0,NUMBER_RADIATION_ANGLES=0,ANGLE_INCREMENT=0,RADIATION_ITERATIONS=1, &
            INITIAL_RADIATION_ITERATIONS,NUMBER_FSK_POINTS=1
 REAL(EB) :: RTE_SOURCE_CORRECTION_FACTOR=1._EB,RAD_Q_SUM=0._EB,KFST4_SUM=0._EB,QR_CLIP,C_MAX=100._EB,C_MIN=1._EB
