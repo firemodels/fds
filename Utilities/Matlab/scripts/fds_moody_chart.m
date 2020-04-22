@@ -78,36 +78,36 @@ dpdx = -100;
 [f,Re] = friction_factor_calc(dpdx,L,[outdir,'moody_dpdx=-100_N32_devc.csv'],mu);H(3)=loglog(Re,f,'ko');
 
 dpdx = -.0001;
-[f,Re] = friction_factor_calc(dpdx,L,[outdir,'z0=p0001_dpdx=-p0001_N8_devc.csv'],mu);loglog(Re,f,'bsq')
-[f,Re] = friction_factor_calc(dpdx,L,[outdir,'z0=p001_dpdx=-p0001_N8_devc.csv'],mu);loglog(Re,f,'rsq')
-[f,Re] = friction_factor_calc(dpdx,L,[outdir,'z0=p01_dpdx=-p0001_N8_devc.csv'],mu);loglog(Re,f,'gsq')
-[f,Re] = friction_factor_calc(dpdx,L,[outdir,'z0=p1_dpdx=-p0001_N8_devc.csv'],mu);loglog(Re,f,'msq')
+[f,Re] = friction_factor_calc(dpdx,L,[outdir,'s=p0001_dpdx=-p0001_N8_devc.csv'],mu);loglog(Re,f,'bsq')
+[f,Re] = friction_factor_calc(dpdx,L,[outdir,'s=p001_dpdx=-p0001_N8_devc.csv'],mu);loglog(Re,f,'rsq')
+[f,Re] = friction_factor_calc(dpdx,L,[outdir,'s=p01_dpdx=-p0001_N8_devc.csv'],mu);loglog(Re,f,'gsq')
+[f,Re] = friction_factor_calc(dpdx,L,[outdir,'s=p1_dpdx=-p0001_N8_devc.csv'],mu);loglog(Re,f,'msq')
 
 dpdx = -.01;
-[f,Re] = friction_factor_calc(dpdx,L,[outdir,'z0=p0001_dpdx=-p01_N8_devc.csv'],mu);loglog(Re,f,'bsq')
-[f,Re] = friction_factor_calc(dpdx,L,[outdir,'z0=p001_dpdx=-p01_N8_devc.csv'],mu);loglog(Re,f,'rsq')
-[f,Re] = friction_factor_calc(dpdx,L,[outdir,'z0=p01_dpdx=-p01_N8_devc.csv'],mu);loglog(Re,f,'gsq')
-[f,Re] = friction_factor_calc(dpdx,L,[outdir,'z0=p1_dpdx=-p01_N8_devc.csv'],mu);loglog(Re,f,'msq')
+[f,Re] = friction_factor_calc(dpdx,L,[outdir,'s=p0001_dpdx=-p01_N8_devc.csv'],mu);loglog(Re,f,'bsq')
+[f,Re] = friction_factor_calc(dpdx,L,[outdir,'s=p001_dpdx=-p01_N8_devc.csv'],mu);loglog(Re,f,'rsq')
+[f,Re] = friction_factor_calc(dpdx,L,[outdir,'s=p01_dpdx=-p01_N8_devc.csv'],mu);loglog(Re,f,'gsq')
+[f,Re] = friction_factor_calc(dpdx,L,[outdir,'s=p1_dpdx=-p01_N8_devc.csv'],mu);loglog(Re,f,'msq')
 
 dpdx = -1;
-[f,Re] = friction_factor_calc(dpdx,L,[outdir,'z0=p0001_dpdx=-1_N8_devc.csv'],mu);loglog(Re,f,'bsq')
-[f,Re] = friction_factor_calc(dpdx,L,[outdir,'z0=p001_dpdx=-1_N8_devc.csv'],mu);loglog(Re,f,'rsq')
-[f,Re] = friction_factor_calc(dpdx,L,[outdir,'z0=p01_dpdx=-1_N8_devc.csv'],mu);loglog(Re,f,'gsq')
-[f,Re] = friction_factor_calc(dpdx,L,[outdir,'z0=p1_dpdx=-1_N8_devc.csv'],mu);loglog(Re,f,'msq')
-[f,Re] = friction_factor_calc(dpdx,L,[outdir,'z0=p0001_dpdx=-1_N16_devc.csv'],mu);loglog(Re,f,'b^')
-[f,Re] = friction_factor_calc(dpdx,L,[outdir,'z0=p001_dpdx=-1_N16_devc.csv'],mu);loglog(Re,f,'r^')
-[f,Re] = friction_factor_calc(dpdx,L,[outdir,'z0=p01_dpdx=-1_N16_devc.csv'],mu);loglog(Re,f,'g^')
-[f,Re] = friction_factor_calc(dpdx,2*L,[outdir,'z0=p02_dpdx=-1_N16_devc.csv'],mu);H(4)=loglog(Re,f,'k>');loglog(Re,f,'g>');
+[f,Re] = friction_factor_calc(dpdx,L,[outdir,'s=p0001_dpdx=-1_N8_devc.csv'],mu);loglog(Re,f,'bsq')
+[f,Re] = friction_factor_calc(dpdx,L,[outdir,'s=p001_dpdx=-1_N8_devc.csv'],mu);loglog(Re,f,'rsq')
+[f,Re] = friction_factor_calc(dpdx,L,[outdir,'s=p01_dpdx=-1_N8_devc.csv'],mu);loglog(Re,f,'gsq')
+[f,Re] = friction_factor_calc(dpdx,L,[outdir,'s=p1_dpdx=-1_N8_devc.csv'],mu);loglog(Re,f,'msq')
+[f,Re] = friction_factor_calc(dpdx,L,[outdir,'s=p0001_dpdx=-1_N16_devc.csv'],mu);loglog(Re,f,'b^')
+[f,Re] = friction_factor_calc(dpdx,L,[outdir,'s=p001_dpdx=-1_N16_devc.csv'],mu);loglog(Re,f,'r^')
+[f,Re] = friction_factor_calc(dpdx,L,[outdir,'s=p01_dpdx=-1_N16_devc.csv'],mu);loglog(Re,f,'g^')
+[f,Re] = friction_factor_calc(dpdx,2*L,[outdir,'s=p02_dpdx=-1_N16_devc.csv'],mu);H(4)=loglog(Re,f,'k>');loglog(Re,f,'g>');
 
 dpdx = -100;
-[f,Re] = friction_factor_calc(dpdx,L,[outdir,'z0=p0001_dpdx=-100_N8_devc.csv'],mu);loglog(Re,f,'bsq')
-[f,Re] = friction_factor_calc(dpdx,L,[outdir,'z0=p001_dpdx=-100_N8_devc.csv'],mu);loglog(Re,f,'rsq')
-[f,Re] = friction_factor_calc(dpdx,L,[outdir,'z0=p01_dpdx=-100_N8_devc.csv'],mu);loglog(Re,f,'gsq')
-[f,Re] = friction_factor_calc(dpdx,L,[outdir,'z0=p1_dpdx=-100_N8_devc.csv'],mu);loglog(Re,f,'msq')
-[f,Re] = friction_factor_calc(dpdx,L,[outdir,'z0=p0001_dpdx=-100_N16_devc.csv'],mu);loglog(Re,f,'b^')
-[f,Re] = friction_factor_calc(dpdx,L,[outdir,'z0=p001_dpdx=-100_N16_devc.csv'],mu);loglog(Re,f,'r^')
-[f,Re] = friction_factor_calc(dpdx,L,[outdir,'z0=p01_dpdx=-100_N16_devc.csv'],mu);loglog(Re,f,'g^')
-[f,Re] = friction_factor_calc(dpdx,2*L,[outdir,'z0=p02_dpdx=-100_N16_devc.csv'],mu);loglog(Re,f,'g>')
+[f,Re] = friction_factor_calc(dpdx,L,[outdir,'s=p0001_dpdx=-100_N8_devc.csv'],mu);loglog(Re,f,'bsq')
+[f,Re] = friction_factor_calc(dpdx,L,[outdir,'s=p001_dpdx=-100_N8_devc.csv'],mu);loglog(Re,f,'rsq')
+[f,Re] = friction_factor_calc(dpdx,L,[outdir,'s=p01_dpdx=-100_N8_devc.csv'],mu);loglog(Re,f,'gsq')
+[f,Re] = friction_factor_calc(dpdx,L,[outdir,'s=p1_dpdx=-100_N8_devc.csv'],mu);loglog(Re,f,'msq')
+[f,Re] = friction_factor_calc(dpdx,L,[outdir,'s=p0001_dpdx=-100_N16_devc.csv'],mu);loglog(Re,f,'b^')
+[f,Re] = friction_factor_calc(dpdx,L,[outdir,'s=p001_dpdx=-100_N16_devc.csv'],mu);loglog(Re,f,'r^')
+[f,Re] = friction_factor_calc(dpdx,L,[outdir,'s=p01_dpdx=-100_N16_devc.csv'],mu);loglog(Re,f,'g^')
+[f,Re] = friction_factor_calc(dpdx,2*L,[outdir,'s=p02_dpdx=-100_N16_devc.csv'],mu);loglog(Re,f,'g>')
 
 text(1.3e8,2e-1,'{\it s/H}','Interpreter',Font_Interpreter,'FontSize',Key_Font_Size,'Fontname',Font_Name)
 text(1.3e8,1.2e-2,num2str(RR(2)),'Interpreter',Font_Interpreter,'FontSize',Key_Font_Size,'Fontname',Font_Name)
