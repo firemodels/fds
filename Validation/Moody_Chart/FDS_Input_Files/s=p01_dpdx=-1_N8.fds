@@ -1,4 +1,4 @@
-&HEAD CHID='z0=p01_dpdx=-1_N8', TITLE='LES of flow through a rough channel' /
+&HEAD CHID='s=p01_dpdx=-1_N8', TITLE='LES of flow through a rough channel' /
 
 &MESH IJK=64,8,8, XB=0,8,-.5,.5,0,1 /
 
