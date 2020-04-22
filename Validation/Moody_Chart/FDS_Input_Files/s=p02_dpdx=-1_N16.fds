@@ -1,10 +1,10 @@
-&HEAD CHID='z0=p02_dpdx=-100_N16', TITLE='LES of flow through a rough channel' /
+&HEAD CHID='s=p02_dpdx=-1_N16', TITLE='LES of flow through a rough channel' /
 
 &MESH IJK=128,16,16, XB=0,16,-1,1,0,2 /
 
-&TIME T_END=20.0 /
+&TIME T_END=100.0 /
 
-&WIND FORCE_VECTOR(1)=100.,STRATIFICATION=.FALSE. /
+&WIND FORCE_VECTOR(1)=1.,STRATIFICATION=.FALSE. /
 
 &DUMP NFRAMES=100, SIG_FIGS=4, SIG_FIGS_EXP=2 /
 
