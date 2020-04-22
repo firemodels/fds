@@ -57,6 +57,46 @@ $QFDS -p 80 -n 8 $DEBUG $QUEUE -d $INDIR tunnel_pressure_drop_c_20.fds
 $QFDS -p 80 -n 8 $DEBUG $QUEUE -d $INDIR tunnel_pressure_drop_d_20.fds
 $QFDS -p 80 -n 8 $DEBUG $QUEUE -d $INDIR tunnel_pressure_drop_e_20.fds
 
+$QFDS $DEBUG $QUEUE -d $INDIR geom_moody_dpdx=-0p01_N16.fds
+$QFDS $DEBUG $QUEUE -d $INDIR geom_moody_dpdx=-0p01_N32.fds
+$QFDS $DEBUG $QUEUE -d $INDIR geom_moody_dpdx=-0p01_N8.fds
+$QFDS $DEBUG $QUEUE -d $INDIR geom_moody_dpdx=-100_N16.fds
+$QFDS $DEBUG $QUEUE -d $INDIR geom_moody_dpdx=-100_N32.fds
+$QFDS $DEBUG $QUEUE -d $INDIR geom_moody_dpdx=-100_N8.fds
+$QFDS $DEBUG $QUEUE -d $INDIR geom_moody_dpdx=-1_N16.fds
+$QFDS $DEBUG $QUEUE -d $INDIR geom_moody_dpdx=-1_N32.fds
+$QFDS $DEBUG $QUEUE -d $INDIR geom_moody_dpdx=-1_N8.fds
+$QFDS $DEBUG $QUEUE -d $INDIR geom_poiseuille_N16_mu025.fds
+$QFDS $DEBUG $QUEUE -d $INDIR geom_poiseuille_N32_mu025.fds
+$QFDS $DEBUG $QUEUE -d $INDIR geom_poiseuille_N64_mu0125.fds
+$QFDS $DEBUG $QUEUE -d $INDIR geom_poiseuille_N64_mu025.fds
+$QFDS $DEBUG $QUEUE -d $INDIR geom_poiseuille_N8_mu025.fds
+
+$QFDS $DEBUG $QUEUE -d $INDIR geom_s=p0001_dpdx=-1_N8.fds
+$QFDS $DEBUG $QUEUE -d $INDIR geom_s=p001_dpdx=-1_N8.fds
+$QFDS $DEBUG $QUEUE -d $INDIR geom_s=p01_dpdx=-1_N8.fds
+$QFDS $DEBUG $QUEUE -d $INDIR geom_s=p1_dpdx=-1_N8.fds
+$QFDS $DEBUG $QUEUE -d $INDIR geom_s=p0001_dpdx=-1_N16.fds
+$QFDS $DEBUG $QUEUE -d $INDIR geom_s=p001_dpdx=-1_N16.fds
+$QFDS $DEBUG $QUEUE -d $INDIR geom_s=p01_dpdx=-1_N16.fds
+$QFDS $DEBUG $QUEUE -d $INDIR geom_s=p0001_dpdx=-100_N8.fds
+$QFDS $DEBUG $QUEUE -d $INDIR geom_s=p001_dpdx=-100_N8.fds
+$QFDS $DEBUG $QUEUE -d $INDIR geom_s=p01_dpdx=-100_N8.fds
+$QFDS $DEBUG $QUEUE -d $INDIR geom_s=p1_dpdx=-100_N8.fds
+$QFDS $DEBUG $QUEUE -d $INDIR geom_s=p0001_dpdx=-100_N16.fds
+$QFDS $DEBUG $QUEUE -d $INDIR geom_s=p001_dpdx=-100_N16.fds
+$QFDS $DEBUG $QUEUE -d $INDIR geom_s=p01_dpdx=-100_N16.fds
+$QFDS $DEBUG $QUEUE -d $INDIR geom_s=p0001_dpdx=-p0001_N8.fds
+$QFDS $DEBUG $QUEUE -d $INDIR geom_s=p0001_dpdx=-p01_N8.fds
+$QFDS $DEBUG $QUEUE -d $INDIR geom_s=p001_dpdx=-p0001_N8.fds
+$QFDS $DEBUG $QUEUE -d $INDIR geom_s=p001_dpdx=-p01_N8.fds
+$QFDS $DEBUG $QUEUE -d $INDIR geom_s=p01_dpdx=-p0001_N8.fds
+$QFDS $DEBUG $QUEUE -d $INDIR geom_s=p01_dpdx=-p01_N8.fds
+$QFDS $DEBUG $QUEUE -d $INDIR geom_s=p1_dpdx=-p0001_N8.fds
+$QFDS $DEBUG $QUEUE -d $INDIR geom_s=p1_dpdx=-p01_N8.fds
+$QFDS $DEBUG $QUEUE -d $INDIR geom_s=p02_dpdx=-1_N16.fds
+$QFDS $DEBUG $QUEUE -d $INDIR geom_s=p02_dpdx=-100_N16.fds
+
 echo FDS cases submitted
 
 
