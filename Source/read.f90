@@ -9677,9 +9677,6 @@ MESH_LOOP_3: DO NM=1,NMESHES
       OB%FDS_AREA(1)   = (Y(OB%J2)-Y(OB%J1))*(Z(OB%K2)-Z(OB%K1))
       OB%FDS_AREA(2)   = (X(OB%I2)-X(OB%I1))*(Z(OB%K2)-Z(OB%K1))
       OB%FDS_AREA(3)   = (X(OB%I2)-X(OB%I1))*(Y(OB%J2)-Y(OB%J1))
-      OB%DIMENSIONS(1) = OB%I2 - OB%I1
-      OB%DIMENSIONS(2) = OB%J2 - OB%J1
-      OB%DIMENSIONS(3) = OB%K2 - OB%K1
    ENDDO
 
    ! Create main blockage index array (ICA)
