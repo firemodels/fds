@@ -543,27 +543,78 @@ TYPE OMESH_TYPE
 
 END TYPE OMESH_TYPE
 
+
+!> \brief Variables associated with a rectangular OBSTruction
+
 TYPE OBSTRUCTION_TYPE
-   CHARACTER(LABEL_LENGTH) :: DEVC_ID='null',CTRL_ID='null',PROP_ID='null',MATL_ID='null',ID='null'
-   INTEGER, DIMENSION(-3:3) :: SURF_INDEX=0
-   LOGICAL, DIMENSION(-3:3) :: SHOW_BNDF=.TRUE.
-   INTEGER, DIMENSION(3) :: RGB=(/0,0,0/)
-   INTEGER, DIMENSION(3) :: DIMENSIONS=0
-   REAL(EB) :: TRANSPARENCY=1._EB,VOLUME_ADJUST=1._EB,BULK_DENSITY=-1._EB,INTERNAL_HEAT_SOURCE=0._EB
-   REAL(EB), DIMENSION(3) :: TEXTURE=0._EB
-   REAL(EB) :: X1=0._EB,X2=1._EB,Y1=0._EB,Y2=1._EB,Z1=0._EB,Z2=1._EB,MASS=1.E6_EB
-   REAL(EB), DIMENSION(3) :: FDS_AREA=-1._EB,INPUT_AREA=-1._EB,UNDIVIDED_INPUT_AREA=-1._EB,SHAPE_AREA=0._EB
-   INTEGER :: I1=-1,I2=-1,J1=-1,J2=-1,K1=-1,K2=-1,COLOR_INDICATOR=-1,TYPE_INDICATOR=-1,ORDINAL=0,SHAPE_TYPE=-1
-   INTEGER :: DEVC_INDEX=-1,CTRL_INDEX=-1,PROP_INDEX=-1,DEVC_INDEX_O=-1,CTRL_INDEX_O=-1,MATL_INDEX=-1,MULT_INDEX=-1,&
-              RAMP_Q_INDEX=0
-   LOGICAL :: HIDDEN=.FALSE.,PERMIT_HOLE=.TRUE.,ALLOW_VENT=.TRUE.,CONSUMABLE=.FALSE.,REMOVABLE=.FALSE., &
-              HOLE_FILLER=.FALSE.,NOTERRAIN=.FALSE.,OVERLAY=.TRUE.
+
+   CHARACTER(LABEL_LENGTH) :: DEVC_ID='null'  !< Name of controlling device
+   CHARACTER(LABEL_LENGTH) :: CTRL_ID='null'  !< Name of controller
+   CHARACTER(LABEL_LENGTH) :: PROP_ID='null'  !< Name of PROPerty type
+   CHARACTER(LABEL_LENGTH) :: MATL_ID='null'  !< Name of material type
+   CHARACTER(LABEL_LENGTH) :: ID='null'       !< Name of obstruction
+
+   INTEGER, DIMENSION(-3:3) :: SURF_INDEX=0   !< SURFace properties for each face
+   INTEGER, DIMENSION(3) :: RGB=(/0,0,0/)     !< Color indices for Smokeview
+
+   REAL(EB) :: TRANSPARENCY=1._EB             !< Transparency index for Smokeview, 0=invisible, 1=solid
+   REAL(EB) :: VOLUME_ADJUST=1._EB            !< Effective volume divided by user specified volume
+   REAL(EB) :: BULK_DENSITY=-1._EB            !< Mass per unit volume (kg/m3) of specified OBST
+   REAL(EB) :: INTERNAL_HEAT_SOURCE=0._EB     !< Energy generation rate per unit volume (W/m3)
+   REAL(EB) :: X1=0._EB                       !< Lower specified \f$ x \f$ boundary (m)
+   REAL(EB) :: X2=1._EB                       !< Upper specified \f$ x \f$ boundary (m)
+   REAL(EB) :: Y1=0._EB                       !< Lower specified \f$ y \f$ boundary (m)
+   REAL(EB) :: Y2=1._EB                       !< Upper specified \f$ y \f$ boundary (m)
+   REAL(EB) :: Z1=0._EB                       !< Lower specified \f$ z \f$ boundary (m)
+   REAL(EB) :: Z2=1._EB                       !< Upper specified \f$ z \f$ boundary (m)
+   REAL(EB) :: MASS=1.E6_EB                   !< Actual mass of the obstruction (kg)
+
+   REAL(EB), DIMENSION(3) :: INPUT_AREA=-1._EB           !< Specified area of x, y, and z faces (m2)
+   REAL(EB), DIMENSION(3) :: UNDIVIDED_INPUT_AREA=-1._EB !< Area of x, y, z faces (m2) unbroken by mesh boundaries
+   REAL(EB), DIMENSION(3) :: SHAPE_AREA=0._EB            !< Area of idealized top, sides, bottom (m2)
+   REAL(EB), DIMENSION(3) :: TEXTURE=0._EB               !< Origin of texture map (m)
+   REAL(EB), DIMENSION(3) :: FDS_AREA=-1._EB             !< Effective areas of x, y, and z faces (m2)
+
+   INTEGER :: I1=-1               !< Lower I node
+   INTEGER :: I2=-1               !< Upper I node
+   INTEGER :: J1=-1               !< Lower J node
+   INTEGER :: J2=-1               !< Upper J node
+   INTEGER :: K1=-1               !< Lower K node
+   INTEGER :: K2=-1               !< Upper K node
+   INTEGER :: COLOR_INDICATOR=-1  !< Coloring code: -3=use specified color, -2=invisible, -1=no color specified
+   INTEGER :: TYPE_INDICATOR=-1   !< Smokeview code: 2=outline, -1=solid
+   INTEGER :: ORDINAL=0           !< Order of OBST in input file
+   INTEGER :: SHAPE_TYPE=-1       !< Indicator of shape carved out of larger obstruction
+   INTEGER :: DEVC_INDEX=-1       !< Index of controlling device
+   INTEGER :: CTRL_INDEX=-1       !< Index of controlling controller
+   INTEGER :: PROP_INDEX=-1       !< Index of PROPerty type
+   INTEGER :: DEVC_INDEX_O=-1     !< Original DEVC_INDEX
+   INTEGER :: CTRL_INDEX_O=-1     !< Original CTRL_INDEX
+   INTEGER :: MATL_INDEX=-1       !< Index of material
+   INTEGER :: MULT_INDEX=-1       !< Index of multiplier function
+   INTEGER :: RAMP_Q_INDEX=0      !< Index of HRR ramp
+
+   LOGICAL, DIMENSION(-3:3) :: SHOW_BNDF=.TRUE. !< Show boundary quantities in Smokeview
+   LOGICAL :: HIDDEN=.FALSE.                    !< Hide obstruction in Smokeview and ignore in simulation
+   LOGICAL :: PERMIT_HOLE=.TRUE.                !< Allow the obstruction to have a hole cutout
+   LOGICAL :: ALLOW_VENT=.TRUE.                 !< Allow a VENT to sit on the OBST
+   LOGICAL :: CONSUMABLE=.FALSE.                !< The obstruction can burn away
+   LOGICAL :: REMOVABLE=.FALSE.                 !< The obstruction can be removed from the simulation
+   LOGICAL :: HOLE_FILLER=.FALSE.               !< The obstruction fills a HOLE
+   LOGICAL :: NOTERRAIN=.FALSE.                 !< The obstruction is not part of the terrain
+   LOGICAL :: OVERLAY=.TRUE.                    !< The obstruction can have another obstruction overlap a surface
 
    ! 3D pyrolysis:
-   LOGICAL :: PYRO3D=.FALSE.,MT3D=.FALSE.,HT3D=.FALSE.,PYRO3D_LIQUID=.FALSE.
-   INTEGER :: MATL_SURF_INDEX=-1,PYRO3D_IOR=0
+   LOGICAL :: PYRO3D=.FALSE.
+   LOGICAL :: MT3D=.FALSE.
+   LOGICAL :: HT3D=.FALSE.
+   LOGICAL :: PYRO3D_LIQUID=.FALSE.
+   INTEGER :: MATL_SURF_INDEX=-1
+   INTEGER :: PYRO3D_IOR=0
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: RHO
+
 END TYPE OBSTRUCTION_TYPE
+
 
 TYPE TRIBIN_TYPE
    REAL(EB):: X1_LOW, X1_HIGH
