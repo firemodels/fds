@@ -11959,43 +11959,43 @@ END SUBROUTINE CCIBM_INTERP_FACE_VEL
 
 ! --------------------------- CCIBM_VELOCITY_FLUX ------------------------------
 
-SUBROUTINE CCIBM_VELOCITY_FLUX(T,DT)
+SUBROUTINE CCIBM_VELOCITY_FLUX()
 
 USE TURBULENCE, ONLY : WALL_MODEL
 USE PHYSICAL_FUNCTIONS, ONLY: GET_VISCOSITY
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 USE MPI
 
-REAL(EB), INTENT(IN) :: T,DT
+! REAL(EB), INTENT(IN) :: T,DT
 
 ! Local Variables:
-REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,DP,RHOP,HP
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,DP,RHOP !,HP
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP
 INTEGER :: NM,I,J,K,ICF,IFACE,X1AXIS,NFACE,IW,EP,INPE,INT_NPE_LO,INT_NPE_HI,VIND
-REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: UVW_EP, MUF_EP, GRADP_EP
-REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: DUVW_EP
+REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: UVW_EP !, MUF_EP, GRADP_EP
+! REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: DUVW_EP
 INTEGER :: ICC,JCC,ICF1,ICF2,ICFA,ISIDE
 REAL(EB) :: U_VELO(MAX_DIM),U_SURF(MAX_DIM),U_RELA(MAX_DIM),&
             NN(MAX_DIM),SS(MAX_DIM),TT(MAX_DIM),VELN,&
             X1F,IDX,CCM1,CCP1,TMPV(-1:0),RHOV(-1:0),MUV(-1:0),DIVV(-1:0),NU,MU_FACE,RHO_FACE,PRFCT,&
             ZZ_GET(1:N_TRACKED_SPECIES),DXN_STRM_EP,DXN_STRM_FP,SLIP_FACTOR,SRGH,U_TAU,Y_PLUS,&
-            DUUDT,DVVDT,DWWDT,U_IBM,V_IBM,W_IBM,GRAV_COMP,&
-            VAL_EP,DUMEB,COEF,DCOEF(IAXIS:KAXIS),TNOW,MTIME,&
-            TAU_SN_EP,TAU_W,GRAV_SS,RHS,DIV_FACE,U_NORM_EP,U_ORTH_EP,U_STRM_EP,U_NORM_FP,U_STRM_FP,&
-            DPDS,DIV_EP
+            U_IBM,V_IBM,W_IBM,&
+            VAL_EP,DUMEB,COEF,TNOW,&
+            U_NORM_EP,U_ORTH_EP,U_STRM_EP,U_NORM_FP,U_STRM_FP
+            ! DUUDT,DVVDT,DWWDT,GRAV_COMP,DCOEF(IAXIS:KAXIS),MTIME,DPDS,DIV_EP,TAU_SN_EP,TAU_W,GRAV_SS,RHS,DIV_FACE,
 
-INTEGER ::  L,M,N,R,DAXIS
-REAL(EB) :: MU_EP,DUDS,DVDS,DWDS,DUDN,DVDN,DWDN,DUVD(MAX_DIM),DUSTRMDS_EP,DUSTRMDS_FP
-REAL(EB) :: DUSTRMDN_EP,DUSTRMDN_FP,AIJ(MAX_DIM,MAX_DIM),SIJ(MAX_DIM,MAX_DIM),&
-            TIJ(MAX_DIM,MAX_DIM),TBAR_IJ(MAX_DIM,MAX_DIM)
+! INTEGER ::  L,M,N,R,DAXIS
+! REAL(EB) :: MU_EP,DUDS,DVDS,DWDS,DUDN,DVDN,DWDN,DUVD(MAX_DIM),DUSTRMDS_EP,DUSTRMDS_FP
+! REAL(EB) :: DUSTRMDN_EP,DUSTRMDN_FP,AIJ(MAX_DIM,MAX_DIM),SIJ(MAX_DIM,MAX_DIM),&
+!             TIJ(MAX_DIM,MAX_DIM),TBAR_IJ(MAX_DIM,MAX_DIM)
 
 IF ( FREEZE_VELOCITY ) RETURN
 IF (PERIODIC_TEST == 103 .OR. PERIODIC_TEST == 11 .OR. PERIODIC_TEST==7) RETURN
 
 TNOW = CURRENT_TIME()
 
-! Force T to be used var:
-MTIME=T
+! ! Force T to be used var:
+! MTIME=T
 
 ! First of all exchange fresh FV guard cell information
 IF (PREDICTOR) THEN
@@ -12016,7 +12016,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       DP => D
       RHOP => RHOS
       ZZP  => ZZS
-      HP => HS ! Previous substep H
+      ! HP => HS ! Previous substep H
       PRFCT = 0._EB
    ELSE
       UU => US
@@ -12025,12 +12025,11 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       DP => DS
       RHOP => RHO
       ZZP  =>  ZZ
-      HP => H ! Previous substep H
+      ! HP => H ! Previous substep H
       PRFCT = 1._EB
    ENDIF
 
-
-   IF (FORCE_GAS_FACE) THEN
+   FORCE_GAS_FACE_IF : IF (FORCE_GAS_FACE) THEN
       ! For mesh NM loop through CUT_FACE field and interpolate value of Un+1 approx
       ! to centroids:
       ! If PRES_ON_CARTESIAN=.FALSE. compute momentum flux forcing on cut-faces,
@@ -12057,13 +12056,13 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             CUT_FACE(ICF)%VELINT(1:NFACE) = 0._EB
          ELSE
             ALLOCATE(UVW_EP(IAXIS:KAXIS,0:INT_N_EXT_PTS,0:NFACE)); UVW_EP = 0._EB
-            ALLOCATE(DUVW_EP(IAXIS:KAXIS,IAXIS:KAXIS,0:INT_N_EXT_PTS,0:NFACE)); DUVW_EP = 0._EB
-            ALLOCATE(MUF_EP(IAXIS:KAXIS,0:INT_N_EXT_PTS,0:NFACE)); MUF_EP = 0._EB
-            ALLOCATE(GRADP_EP(IAXIS:KAXIS,0:INT_N_EXT_PTS,0:NFACE)); GRADP_EP = 0._EB
+            ! ALLOCATE(DUVW_EP(IAXIS:KAXIS,IAXIS:KAXIS,0:INT_N_EXT_PTS,0:NFACE)); DUVW_EP = 0._EB
+            ! ALLOCATE(MUF_EP(IAXIS:KAXIS,0:INT_N_EXT_PTS,0:NFACE)); MUF_EP = 0._EB
+            ! ALLOCATE(GRADP_EP(IAXIS:KAXIS,0:INT_N_EXT_PTS,0:NFACE)); GRADP_EP = 0._EB
             ! Interpolate Un+1 approx to External Points:
             IFACE_LOOP : DO IFACE=1,NFACE
 
-               DO EP=1,INT_N_EXT_PTS  ! External point for face IFACE
+               EXTERNAL_POINTS_LOOP : DO EP=1,INT_N_EXT_PTS  ! External point for face IFACE
                   DO VIND=IAXIS,KAXIS ! Velocity component U, V or W for external point EP
                      INT_NPE_LO = CUT_FACE(ICF)%INT_NPE(LOW_IND,VIND,EP,IFACE)
                      INT_NPE_HI = CUT_FACE(ICF)%INT_NPE(HIGH_IND,VIND,EP,IFACE)
@@ -12080,22 +12079,21 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                         ! Add to Velocity component VIND of EP:
                         UVW_EP(VIND,EP,IFACE) = UVW_EP(VIND,EP,IFACE) + COEF*VAL_EP
                         ! Now velocity derivatives:
-                        DCOEF(IAXIS:KAXIS) = CUT_FACE(ICF)%INT_DCOEF(IAXIS:KAXIS,INPE)
-                        DO DAXIS=IAXIS,KAXIS
-                           DUVW_EP(DAXIS,VIND,EP,IFACE) = DUVW_EP(DAXIS,VIND,EP,IFACE) + DCOEF(DAXIS)*VAL_EP
-                        ENDDO
-                        ! Now pressure Gradient:
-                        GRADP_EP(VIND,EP,IFACE)=GRADP_EP(VIND,EP,IFACE)+COEF*CUT_FACE(ICF)%INT_FVARS(INT_DPDX_IND,INPE)
-                        ! Now Face viscosities:
-                        MUF_EP(VIND,EP,IFACE)  = MUF_EP(VIND,EP,IFACE) + COEF*CUT_FACE(ICF)%INT_FVARS(INT_MU_IND,INPE)
-
+                        ! DCOEF(IAXIS:KAXIS) = CUT_FACE(ICF)%INT_DCOEF(IAXIS:KAXIS,INPE)
+                        ! DO DAXIS=IAXIS,KAXIS
+                        !    DUVW_EP(DAXIS,VIND,EP,IFACE) = DUVW_EP(DAXIS,VIND,EP,IFACE) + DCOEF(DAXIS)*VAL_EP
+                        ! ENDDO
+                        ! ! Now pressure Gradient:
+                        ! GRADP_EP(VIND,EP,IFACE)=GRADP_EP(VIND,EP,IFACE)+COEF*CUT_FACE(ICF)%INT_FVARS(INT_DPDX_IND,INPE)
+                        ! ! Now Face viscosities:
+                        ! MUF_EP(VIND,EP,IFACE)  = MUF_EP(VIND,EP,IFACE) + COEF*CUT_FACE(ICF)%INT_FVARS(INT_MU_IND,INPE)
                      ENDDO
                   ENDDO
                   IF (TWO_D) THEN
                      UVW_EP(JAXIS,EP,IFACE) = 0._EB
-                     DUVW_EP(JAXIS,IAXIS:KAXIS,EP,IFACE) = 0._EB
+                     ! DUVW_EP(JAXIS,IAXIS:KAXIS,EP,IFACE) = 0._EB
                   ENDIF
-               ENDDO
+               ENDDO EXTERNAL_POINTS_LOOP
                INT_N_EXT_PTS_IF: IF(INT_N_EXT_PTS==1) THEN
                   ! Transform External point velocities into local coordinate system, defined by the velocity vector in
                   ! the first external point, and the surface:
@@ -12112,7 +12110,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                         SRGH = SURFACE(CFACE(ICFA)%SURF_INDEX)%ROUGHNESS
                      ENDIF
                   ENDIF
-                  NN(IAXIS:KAXIS)     = CUT_FACE(ICF)%INT_NOUT(IAXIS:KAXIS,IFACE)
+                  NN(IAXIS:KAXIS) = CUT_FACE(ICF)%INT_NOUT(IAXIS:KAXIS,IFACE)
                   TT=0._EB
                   SS=0._EB
                   U_NORM_EP=0._EB
@@ -12120,7 +12118,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                   U_STRM_EP=0._EB
                   U_NORM_FP=0._EB
                   U_STRM_FP=0._EB
-                  GRAV_COMP=0._EB
+                  ! GRAV_COMP=0._EB
                   NN_IF: IF (NORM2(NN) > TWO_EPSILON_EB) THEN
                      U_SURF(IAXIS:KAXIS) = VELN*NN
                      U_RELA(IAXIS:KAXIS) = U_VELO(IAXIS:KAXIS)-U_SURF(IAXIS:KAXIS)
@@ -12165,104 +12163,102 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                               (1._EB-PRFCT)*CUT_CELL(ICC)%ZZS(1:N_TRACKED_SPECIES,JCC)
                               RHOV(ISIDE) = PRFCT *CUT_CELL(ICC)%RHO(JCC) + &
                                      (1._EB-PRFCT)*CUT_CELL(ICC)%RHOS(JCC)
-                              DIVV(ISIDE) = &
-                              (1._EB-PRFCT)*CUT_CELL(ICC)%D(JCC)/(CUT_CELL(ICC)%VOLUME(JCC)+TWO_EPSILON_EB) + &
-                                     PRFCT *CUT_CELL(ICC)%DS(JCC)/(CUT_CELL(ICC)%VOLUME(JCC)+TWO_EPSILON_EB)
+                              ! DIVV(ISIDE) = &
+                              ! (1._EB-PRFCT)*CUT_CELL(ICC)%D(JCC)/(CUT_CELL(ICC)%VOLUME(JCC)+TWO_EPSILON_EB) + &
+                              !        PRFCT *CUT_CELL(ICC)%DS(JCC)/(CUT_CELL(ICC)%VOLUME(JCC)+TWO_EPSILON_EB)
                            END SELECT
                            CALL GET_VISCOSITY(ZZ_GET,MUV(ISIDE),TMPV(ISIDE))
                         ENDDO
                         MU_FACE = CCM1* MUV(-1) + CCP1* MUV(0)
                         RHO_FACE= CCM1*RHOV(-1) + CCP1*RHOV(0)
-                        DIV_FACE= CCM1*DIVV(-1) + CCP1*DIVV(0)
+                        ! DIV_FACE= CCM1*DIVV(-1) + CCP1*DIVV(0)
                         NU      = MU_FACE/RHO_FACE
                         CALL WALL_MODEL(SLIP_FACTOR,U_TAU,Y_PLUS,U_STRM_EP,NU,DXN_STRM_EP,SRGH,DXN_STRM_FP,U_STRM_FP)
 
-                        ! Here we should have all comopnents to do one integration step of BL equations:
-                        ! The end result are normal and streamwise U_NORM2 and U_STRM2 components at the forcing point
-                        ! (cut-face centroid location).
-                        ! The forcing point is located at a CUT_FACE(ICF)%INT_XN(0,IFACE) distance from the boundary
-                        ! in the NOUT direction.
-                        ! ---------------------------------------------------------------------------------------------
+                        ! ! Here we should have all comopnents to do one integration step of BL equations:
+                        ! ! The end result are normal and streamwise U_NORM2 and U_STRM2 components at the forcing point
+                        ! ! (cut-face centroid location).
+                        ! ! The forcing point is located at a CUT_FACE(ICF)%INT_XN(0,IFACE) distance from the boundary
+                        ! ! in the NOUT direction.
+                        ! ! ---------------------------------------------------------------------------------------------
 
-                        ! Reduce distances to original value:
-                        DXN_STRM_EP = 0.5_EB*DXN_STRM_EP
-                        DXN_STRM_FP = 0.5_EB*DXN_STRM_FP
+                        ! ! Reduce distances to original value:
+                        ! DXN_STRM_EP = 0.5_EB*DXN_STRM_EP
+                        ! DXN_STRM_FP = 0.5_EB*DXN_STRM_FP
 
-                        ! Arbitrarily choosing X faces for MU face interpolation.
-                        MU_EP = MUF_EP(IAXIS,EP,IFACE)
+                        ! ! Arbitrarily choosing X faces for MU face interpolation.
+                        ! MU_EP = MUF_EP(IAXIS,EP,IFACE)
 
-                        ! Grad(ui) . SS:
-                        DUDS = DOT_PRODUCT(DUVW_EP(IAXIS:KAXIS,IAXIS,EP,IFACE),SS(IAXIS:KAXIS))
-                        DVDS = DOT_PRODUCT(DUVW_EP(IAXIS:KAXIS,JAXIS,EP,IFACE),SS(IAXIS:KAXIS))
-                        DWDS = DOT_PRODUCT(DUVW_EP(IAXIS:KAXIS,KAXIS,EP,IFACE),SS(IAXIS:KAXIS))
-                        DUVD = (/ DUDS, DVDS, DWDS /)
-                        DUSTRMDS_EP = DOT_PRODUCT(DUVD,SS)
-                        ! streamwise gradient of streamwise component at FP
-                        DUSTRMDS_FP = DXN_STRM_FP/DXN_STRM_EP*DUSTRMDS_EP ! Assumes linear variation of DUDS in height.
+                        ! ! Grad(ui) . SS:
+                        ! DUDS = DOT_PRODUCT(DUVW_EP(IAXIS:KAXIS,IAXIS,EP,IFACE),SS(IAXIS:KAXIS))
+                        ! DVDS = DOT_PRODUCT(DUVW_EP(IAXIS:KAXIS,JAXIS,EP,IFACE),SS(IAXIS:KAXIS))
+                        ! DWDS = DOT_PRODUCT(DUVW_EP(IAXIS:KAXIS,KAXIS,EP,IFACE),SS(IAXIS:KAXIS))
+                        ! DUVD = (/ DUDS, DVDS, DWDS /)
+                        ! DUSTRMDS_EP = DOT_PRODUCT(DUVD,SS)
+                        ! ! streamwise gradient of streamwise component at FP
+                        ! DUSTRMDS_FP = DXN_STRM_FP/DXN_STRM_EP*DUSTRMDS_EP ! Assumes linear variation of DUDS in height.
 
-                        ! Grad(ui) . NN:
-                        DUDN = DOT_PRODUCT(DUVW_EP(IAXIS:KAXIS,IAXIS,EP,IFACE),NN(IAXIS:KAXIS))
-                        DVDN = DOT_PRODUCT(DUVW_EP(IAXIS:KAXIS,JAXIS,EP,IFACE),NN(IAXIS:KAXIS))
-                        DWDN = DOT_PRODUCT(DUVW_EP(IAXIS:KAXIS,KAXIS,EP,IFACE),NN(IAXIS:KAXIS))
-                        DUVD = (/ DUDN, DVDN, DWDN /)
-                        DUSTRMDN_EP = DOT_PRODUCT(DUVD,SS)
-                        ! wall-normal gradient of streamwise component at FP
-                        DUSTRMDN_FP = DXN_STRM_FP/DXN_STRM_EP*DUSTRMDN_EP ! Assumes linear variation of DUDN in height.
+                        ! ! Grad(ui) . NN:
+                        ! DUDN = DOT_PRODUCT(DUVW_EP(IAXIS:KAXIS,IAXIS,EP,IFACE),NN(IAXIS:KAXIS))
+                        ! DVDN = DOT_PRODUCT(DUVW_EP(IAXIS:KAXIS,JAXIS,EP,IFACE),NN(IAXIS:KAXIS))
+                        ! DWDN = DOT_PRODUCT(DUVW_EP(IAXIS:KAXIS,KAXIS,EP,IFACE),NN(IAXIS:KAXIS))
+                        ! DUVD = (/ DUDN, DVDN, DWDN /)
+                        ! DUSTRMDN_EP = DOT_PRODUCT(DUVD,SS)
+                        ! ! wall-normal gradient of streamwise component at FP
+                        ! DUSTRMDN_FP = DXN_STRM_FP/DXN_STRM_EP*DUSTRMDN_EP ! Assumes linear variation of DUDN in height.
 
-                        ! dP/ds = Grad(P) . SS
-                        DPDS = 0._EB ! DOT_PRODUCT(GRADP_EP(IAXIS:KAXIS,EP,IFACE),SS(IAXIS:KAXIS))
+                        ! ! dP/ds = Grad(P) . SS
+                        ! DPDS = 0._EB ! DOT_PRODUCT(GRADP_EP(IAXIS:KAXIS,EP,IFACE),SS(IAXIS:KAXIS))
 
-                        ! Turbulent stress at external point
-                        ! Cosines to Local SS,TT,NN system:
-                        AIJ(IAXIS:KAXIS,IAXIS) = SS(IAXIS:KAXIS)
-                        AIJ(IAXIS:KAXIS,JAXIS) = TT(IAXIS:KAXIS)
-                        AIJ(IAXIS:KAXIS,KAXIS) = NN(IAXIS:KAXIS)
+                        ! ! Turbulent stress at external point
+                        ! ! Cosines to Local SS,TT,NN system:
+                        ! AIJ(IAXIS:KAXIS,IAXIS) = SS(IAXIS:KAXIS)
+                        ! AIJ(IAXIS:KAXIS,JAXIS) = TT(IAXIS:KAXIS)
+                        ! AIJ(IAXIS:KAXIS,KAXIS) = NN(IAXIS:KAXIS)
 
-                        ! Stress tensor in Eulerian coordinates for EP:
-                        SIJ(IAXIS,IAXIS) = DUVW_EP(IAXIS,IAXIS,EP,IFACE)
-                        SIJ(JAXIS,JAXIS) = DUVW_EP(JAXIS,JAXIS,EP,IFACE)
-                        SIJ(KAXIS,KAXIS) = DUVW_EP(KAXIS,KAXIS,EP,IFACE)
-                        DIV_EP = SIJ(IAXIS,IAXIS) + SIJ(JAXIS,JAXIS) + SIJ(KAXIS,KAXIS)
+                        ! ! Stress tensor in Eulerian coordinates for EP:
+                        ! SIJ(IAXIS,IAXIS) = DUVW_EP(IAXIS,IAXIS,EP,IFACE)
+                        ! SIJ(JAXIS,JAXIS) = DUVW_EP(JAXIS,JAXIS,EP,IFACE)
+                        ! SIJ(KAXIS,KAXIS) = DUVW_EP(KAXIS,KAXIS,EP,IFACE)
+                        ! DIV_EP = SIJ(IAXIS,IAXIS) + SIJ(JAXIS,JAXIS) + SIJ(KAXIS,KAXIS)
 
-                        SIJ(IAXIS,JAXIS) = 0.5_EB*(DUVW_EP(JAXIS,IAXIS,EP,IFACE)+DUVW_EP(IAXIS,JAXIS,EP,IFACE))
-                        SIJ(IAXIS,KAXIS) = 0.5_EB*(DUVW_EP(KAXIS,IAXIS,EP,IFACE)+DUVW_EP(IAXIS,KAXIS,EP,IFACE))
-                        SIJ(JAXIS,KAXIS) = 0.5_EB*(DUVW_EP(KAXIS,JAXIS,EP,IFACE)+DUVW_EP(JAXIS,KAXIS,EP,IFACE))
+                        ! SIJ(IAXIS,JAXIS) = 0.5_EB*(DUVW_EP(JAXIS,IAXIS,EP,IFACE)+DUVW_EP(IAXIS,JAXIS,EP,IFACE))
+                        ! SIJ(IAXIS,KAXIS) = 0.5_EB*(DUVW_EP(KAXIS,IAXIS,EP,IFACE)+DUVW_EP(IAXIS,KAXIS,EP,IFACE))
+                        ! SIJ(JAXIS,KAXIS) = 0.5_EB*(DUVW_EP(KAXIS,JAXIS,EP,IFACE)+DUVW_EP(JAXIS,KAXIS,EP,IFACE))
 
-                        TIJ(IAXIS,IAXIS) = -2._EB*MU_EP*(SIJ(IAXIS,IAXIS) - ONTH*DIV_EP)
-                        TIJ(JAXIS,JAXIS) = -2._EB*MU_EP*(SIJ(JAXIS,JAXIS) - ONTH*DIV_EP)
-                        TIJ(KAXIS,KAXIS) = -2._EB*MU_EP*(SIJ(KAXIS,KAXIS) - ONTH*DIV_EP)
-                        TIJ(IAXIS,JAXIS) = -2._EB*MU_EP*SIJ(IAXIS,JAXIS); TIJ(JAXIS,IAXIS) = TIJ(IAXIS,JAXIS)
-                        TIJ(IAXIS,KAXIS) = -2._EB*MU_EP*SIJ(IAXIS,KAXIS); TIJ(KAXIS,IAXIS) = TIJ(IAXIS,KAXIS)
-                        TIJ(JAXIS,KAXIS) = -2._EB*MU_EP*SIJ(JAXIS,KAXIS); TIJ(KAXIS,JAXIS) = TIJ(JAXIS,KAXIS)
-                        TBAR_IJ = 0._EB
-                        !GBAR_IJ = 0._EB
-                        DO L=1,3
-                           DO R=1,3
-                              DO M=1,3
-                                 DO N=1,3
-                                    TBAR_IJ(R,L) = TBAR_IJ(R,L) + AIJ(M,R)*AIJ(N,L)*TIJ(M,N)
-                                    !GBAR_IJ(R,L) = GBAR_IJ(R,L) + AIJ(M,R)*AIJ(N,L)*DUVW_EP(N,M,EP,IFACE)
-                                 ENDDO
-                              ENDDO
-                           ENDDO
-                        ENDDO
-                        TAU_SN_EP = TBAR_IJ(IAXIS,KAXIS)
+                        ! TIJ(IAXIS,IAXIS) = -2._EB*MU_EP*(SIJ(IAXIS,IAXIS) - ONTH*DIV_EP)
+                        ! TIJ(JAXIS,JAXIS) = -2._EB*MU_EP*(SIJ(JAXIS,JAXIS) - ONTH*DIV_EP)
+                        ! TIJ(KAXIS,KAXIS) = -2._EB*MU_EP*(SIJ(KAXIS,KAXIS) - ONTH*DIV_EP)
+                        ! TIJ(IAXIS,JAXIS) = -2._EB*MU_EP*SIJ(IAXIS,JAXIS); TIJ(JAXIS,IAXIS) = TIJ(IAXIS,JAXIS)
+                        ! TIJ(IAXIS,KAXIS) = -2._EB*MU_EP*SIJ(IAXIS,KAXIS); TIJ(KAXIS,IAXIS) = TIJ(IAXIS,KAXIS)
+                        ! TIJ(JAXIS,KAXIS) = -2._EB*MU_EP*SIJ(JAXIS,KAXIS); TIJ(KAXIS,JAXIS) = TIJ(JAXIS,KAXIS)
+                        ! TBAR_IJ = 0._EB
+                        ! !GBAR_IJ = 0._EB
+                        ! DO L=1,3
+                        !    DO R=1,3
+                        !       DO M=1,3
+                        !          DO N=1,3
+                        !             TBAR_IJ(R,L) = TBAR_IJ(R,L) + AIJ(M,R)*AIJ(N,L)*TIJ(M,N)
+                        !             !GBAR_IJ(R,L) = GBAR_IJ(R,L) + AIJ(M,R)*AIJ(N,L)*DUVW_EP(N,M,EP,IFACE)
+                        !          ENDDO
+                        !       ENDDO
+                        !    ENDDO
+                        ! ENDDO
+                        ! TAU_SN_EP = TBAR_IJ(IAXIS,KAXIS)
 
-                        TAU_W   = -RHO_FACE*U_TAU**2
-                        GRAV_SS = -DOT_PRODUCT(GVEC,SS)*(RHO_FACE-RHO_0(K))
+                        ! TAU_W   = -RHO_FACE*U_TAU**2
+                        ! GRAV_SS = -DOT_PRODUCT(GVEC,SS)*(RHO_FACE-RHO_0(K))
 
-                        ! Normal component of velocity at forcing point, U_NORM_FP = U_NORMAL + DXN_STRM_FP * ( DIV - DUDS )
-                        U_NORM_FP = VELN + DXN_STRM_FP * (DIV_FACE - DUSTRMDS_FP)
+                        ! ! Normal component of velocity at forcing point, U_NORM_FP = U_NORMAL + DXN_STRM_FP * ( DIV - DUDS )
+                        ! U_NORM_FP = VELN + DXN_STRM_FP * (DIV_FACE - DUSTRMDS_FP)
 
-                        ! All values evaluated at forcing point
-                        RHS =  U_STRM_FP*DUSTRMDS_FP + U_NORM_FP*DUSTRMDN_FP + &
-                        ( DPDS + (TAU_SN_EP-TAU_W)/DXN_STRM_EP + GRAV_SS )/RHO_FACE
+                        ! ! All values evaluated at forcing point
+                        ! RHS =  U_STRM_FP*DUSTRMDS_FP + U_NORM_FP*DUSTRMDN_FP + &
+                        ! ( DPDS + (TAU_SN_EP-TAU_W)/DXN_STRM_EP + GRAV_SS )/RHO_FACE
 
-                        ! Ustream at Forcing point for time level n+1:
-                        IF (PREDICTOR) U_STRM_FP = U_STRM_FP - DT*RHS
-                        IF (CORRECTOR) U_STRM_FP = U_STRM_FP - 0.5_EB*DT*RHS
-
-                        ! ---------------------------------------------------------------------------------------------
+                        ! ! Ustream at Forcing point for time level n+1:
+                        ! IF (PREDICTOR) U_STRM_FP = U_STRM_FP - DT*RHS
+                        ! IF (CORRECTOR) U_STRM_FP = U_STRM_FP - 0.5_EB*DT*RHS
 
                      ENDIF DXN_STRMFP_IF
                   ENDIF NN_IF
@@ -12279,7 +12275,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                ENDIF INT_N_EXT_PTS_IF
 
             ENDDO IFACE_LOOP
-            DEALLOCATE(UVW_EP,DUVW_EP,MUF_EP,GRADP_EP)
+            DEALLOCATE(UVW_EP) !,DUVW_EP,MUF_EP,GRADP_EP)
          ENDIF
 
          ! Project Un+1 approx to cut-face centroids in X1AXIS direction:
@@ -12295,13 +12291,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                                CUT_FACE(ICF)%VELINT(IFACE)
             ENDDO
             U_IBM = U_IBM/(DY(J)*DZ(K))
-            CUT_FACE(ICF)%VELINT_CRF = U_IBM
-
-            ! Compute Forcing:
-            IF (PREDICTOR) DUUDT = (U_IBM-U(I,J,K))/DT
-            IF (CORRECTOR) DUUDT = (2._EB*U_IBM-(U(I,J,K)+US(I,J,K)))/DT
-            ! FVX(I,J,K) = -RDXN(I)*(HP(I+1,J,K)-HP(I,J,K)) - DUUDT
-            FVX(I,J,K) = - DUUDT
+            CUT_FACE(ICF)%VELINT_CRF = U_IBM ! Store U_IBM for forcing in CCIBM_NO_FLUX
 
          CASE(JAXIS)
 
@@ -12313,13 +12303,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                                CUT_FACE(ICF)%VELINT(IFACE)
             ENDDO
             V_IBM = V_IBM/(DX(I)*DZ(K))
-            CUT_FACE(ICF)%VELINT_CRF = V_IBM
-
-            ! Compute Forcing:
-            IF (PREDICTOR) DVVDT = (V_IBM-V(I,J,K))/DT
-            IF (CORRECTOR) DVVDT = (2._EB*V_IBM-(V(I,J,K)+VS(I,J,K)))/DT
-            ! FVY(I,J,K) = -RDYN(J)*(HP(I,J+1,K)-HP(I,J,K)) - DVVDT
-            FVY(I,J,K) = - DVVDT
+            CUT_FACE(ICF)%VELINT_CRF = V_IBM ! Store V_IBM for forcing in CCIBM_NO_FLUX
 
          CASE(KAXIS)
 
@@ -12331,20 +12315,13 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                                CUT_FACE(ICF)%VELINT(IFACE)
             ENDDO
             W_IBM = W_IBM/(DX(I)*DY(J))
-            CUT_FACE(ICF)%VELINT_CRF = W_IBM
-
-            ! Compute Forcing:
-            IF (PREDICTOR) DWWDT = (W_IBM-W(I,J,K))/DT
-            IF (CORRECTOR) DWWDT = (2._EB*W_IBM-(W(I,J,K)+WS(I,J,K)))/DT
-            ! FVZ(I,J,K) = -RDZN(K)*(HP(I,J,K+1)-HP(I,J,K)) - DWWDT
-            FVZ(I,J,K) = - DWWDT
+            CUT_FACE(ICF)%VELINT_CRF = W_IBM ! Store W_IBM for forcing in CCIBM_NO_FLUX
 
          END SELECT
 
-
       ENDDO CUTFACE_LOOP
 
-   ENDIF ! FORCE_GAS_FACE
+   ENDIF FORCE_GAS_FACE_IF
 
 ENDDO MESH_LOOP
 
@@ -12395,20 +12372,17 @@ END SUBROUTINE GET_LOCAL_VELOCITY
 
 ! ------------------------------- CCIBM_NO_FLUX ---------------------------------
 
-SUBROUTINE CCIBM_NO_FLUX(DT,NM,PRESSURE_ITERATIONS)
+SUBROUTINE CCIBM_NO_FLUX(DT,NM)
 
 ! Force to zero velocities on faces of type IBM_SOLID.
 
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN):: DT
-INTEGER, INTENT(IN) :: PRESSURE_ITERATIONS
-
 
 ! Local Variables:
 REAL(EB), POINTER, DIMENSION(:,:,:) :: HP
 REAL(EB):: U_IBM,V_IBM,W_IBM,DUUDT,DVVDT,DWWDT,RFODT
-INTEGER :: I,J,K,II,JJ,KK,IOR,IW
-LOGICAL :: PRESSURE_ITERATION
+INTEGER :: I,J,K,II,JJ,KK,IOR,IW,ICF,X1AXIS
 TYPE(WALL_TYPE), POINTER :: WC
 TYPE(EXTERNAL_WALL_TYPE), POINTER :: EWC
 
@@ -12421,14 +12395,8 @@ RFODT = RELAXATION_FACTOR/DT
 
 CALL POINT_TO_MESH(NM)
 
-PRESSURE_ITERATION = .TRUE.; IF (PRESSURE_ITERATIONS == 1) PRESSURE_ITERATION = .FALSE.
-IF (PRESSURE_ITERATION) THEN
-   IF (PREDICTOR) HP => H  ! Current substep H
-   IF (CORRECTOR) HP => HS ! Current Substep H
-ELSE
-   IF (PREDICTOR) HP => HS ! Previous substep H
-   IF (CORRECTOR) HP => H  ! Previous substep H
-ENDIF
+IF (PREDICTOR) HP => H
+IF (CORRECTOR) HP => HS
 
 ! Force U velocities in IBM_SOLID faces to zero
 U_IBM = 0._EB ! Body doesn't move.
@@ -12439,7 +12407,7 @@ DO K=1,KBAR
          IF (PREDICTOR) DUUDT = (U_IBM-U(I,J,K))*RFODT
          IF (CORRECTOR) DUUDT = (2._EB*U_IBM-(U(I,J,K)+US(I,J,K)))*RFODT
          FVX(I,J,K) = -RDXN(I)*(HP(I+1,J,K)-HP(I,J,K)) - DUUDT
-         IF (.NOT. PRES_ON_WHOLE_DOMAIN) FVX(I,J,K) = - DUUDT ! This is because dH/Dx = 0 in unstructured cases
+         IF (.NOT. PRES_ON_WHOLE_DOMAIN) FVX(I,J,K) = - DUUDT ! This is because dH/dx = 0 in unstructured cases
                                                               ! and solid Cartesian faces.
       ENDDO
    ENDDO
@@ -12454,7 +12422,7 @@ DO K=1,KBAR
          IF (PREDICTOR) DVVDT = (V_IBM-V(I,J,K))*RFODT
          IF (CORRECTOR) DVVDT = (2._EB*V_IBM-(V(I,J,K)+VS(I,J,K)))*RFODT
          FVY(I,J,K) = -RDYN(J)*(HP(I,J+1,K)-HP(I,J,K)) - DVVDT
-         IF (.NOT. PRES_ON_WHOLE_DOMAIN) FVY(I,J,K) = - DVVDT ! This is because dH/Dx = 0 in unstructured cases
+         IF (.NOT. PRES_ON_WHOLE_DOMAIN) FVY(I,J,K) = - DVVDT ! This is because dH/dx = 0 in unstructured cases
                                                               ! and solid Cartesian faces.
       ENDDO
    ENDDO
@@ -12469,11 +12437,50 @@ DO K=0,KBAR
          IF (PREDICTOR) DWWDT = (W_IBM-W(I,J,K))*RFODT
          IF (CORRECTOR) DWWDT = (2._EB*W_IBM-(W(I,J,K)+WS(I,J,K)))*RFODT
          FVZ(I,J,K) = -RDZN(K)*(HP(I,J,K+1)-HP(I,J,K)) - DWWDT
-         IF (.NOT. PRES_ON_WHOLE_DOMAIN) FVZ(I,J,K) = - DWWDT ! This is because dH/Dx = 0 in unstructured cases
+         IF (.NOT. PRES_ON_WHOLE_DOMAIN) FVZ(I,J,K) = - DWWDT ! This is because dH/dx = 0 in unstructured cases
                                                               ! and solid Cartesian faces.
       ENDDO
    ENDDO
 ENDDO
+
+! Force velocity components in cut cell faces
+FORCE_GAS_FACE_IF: IF (FORCE_GAS_FACE) THEN
+   CUTFACE_LOOP : DO ICF=1,MESHES(NM)%N_CUTFACE_MESH
+
+      IF ( CUT_FACE(ICF)%STATUS /= IBM_GASPHASE) CYCLE CUTFACE_LOOP
+      IW = CUT_FACE(ICF)%IWC
+      IF ( (IW > 0) .AND. (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY   .OR. &
+                           WALL(IW)%BOUNDARY_TYPE==NULL_BOUNDARY    .OR. &
+                           WALL(IW)%BOUNDARY_TYPE==MIRROR_BOUNDARY) ) CYCLE CUTFACE_LOOP ! Here force Open boundaries.
+
+      I      = CUT_FACE(ICF)%IJK(IAXIS)
+      J      = CUT_FACE(ICF)%IJK(JAXIS)
+      K      = CUT_FACE(ICF)%IJK(KAXIS)
+      X1AXIS = CUT_FACE(ICF)%IJK(KAXIS+1)
+
+      SELECT CASE(X1AXIS)
+            CASE(IAXIS)
+               U_IBM = CUT_FACE(ICF)%VELINT_CRF
+               IF (PREDICTOR) DUUDT = (U_IBM-U(I,J,K))/DT
+               IF (CORRECTOR) DUUDT = (2._EB*U_IBM-(U(I,J,K)+US(I,J,K)))/DT
+               FVX(I,J,K) = -RDXN(I)*(HP(I+1,J,K)-HP(I,J,K)) - DUUDT
+
+            CASE(JAXIS)
+               V_IBM = CUT_FACE(ICF)%VELINT_CRF
+               IF (PREDICTOR) DVVDT = (V_IBM-V(I,J,K))/DT
+               IF (CORRECTOR) DVVDT = (2._EB*V_IBM-(V(I,J,K)+VS(I,J,K)))/DT
+               FVY(I,J,K) = -RDYN(J)*(HP(I,J+1,K)-HP(I,J,K)) - DVVDT
+
+            CASE(KAXIS)
+               W_IBM = CUT_FACE(ICF)%VELINT_CRF
+               IF (PREDICTOR) DWWDT = (W_IBM-W(I,J,K))/DT
+               IF (CORRECTOR) DWWDT = (2._EB*W_IBM-(W(I,J,K)+WS(I,J,K)))/DT
+               FVZ(I,J,K) = -RDZN(K)*(HP(I,J,K+1)-HP(I,J,K)) - DWWDT
+
+         END SELECT
+
+   ENDDO CUTFACE_LOOP
+ENDIF FORCE_GAS_FACE_IF
 
 ! Now set WALL_WORK(IW) to zero in EXTERNAL WALL CELLS of type IBM_SOLID:
 ! This Follows what is being done for external boundaries inside OBSTS (NULL_BOUNDARY).
@@ -12507,6 +12514,7 @@ ENDDO EWC_LOOP
 RETURN
 
 END SUBROUTINE CCIBM_NO_FLUX
+
 
 ! ------------------------- CCIBM_COMPUTE_VELOCITY_ERROR -------------------------
 
