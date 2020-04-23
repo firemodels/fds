@@ -59,7 +59,7 @@ TYPE LAGRANGIAN_PARTICLE_CLASS_TYPE
    REAL(EB) :: EMBER_DENSITY_THRESHOLD    !< Density at which vegetative particle becomes a flying ember
    REAL(EB) :: EMBER_VELOCITY_THRESHOLD   !< Velocity at which vegetative particle becomes a flying ember
    REAL(EB) :: PRIMARY_BREAKUP_TIME       !< Time (s) after insertion when droplet breaks up
-   REAL(EB) :: PRIMARY_BREAKUP_DRAG_REDUCTION_FACTOR   !< Drag reduction factor 
+   REAL(EB) :: PRIMARY_BREAKUP_DRAG_REDUCTION_FACTOR   !< Drag reduction factor
    REAL(EB) :: RUNNING_AVERAGE_FACTOR_WALL             !< Fraction of old value used in summations of droplets stuck to walls
 
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: R_CNF         !< Independent variable (radius) in particle size distribution
@@ -225,7 +225,7 @@ TYPE LAGRANGIAN_PARTICLE_TYPE
    LOGICAL, POINTER :: SHOW                 !< Show the particle in Smokeview
    LOGICAL, POINTER :: SPLAT                !< The liquid droplet has hit a solid
    LOGICAL, POINTER :: EMBER                !< The particle can break away and become a burning ember
-   LOGICAL, POINTER :: PATH_PARTICLE           
+   LOGICAL, POINTER :: PATH_PARTICLE
 
    REAL(EB), POINTER :: X                   !< \f$ x \f$ coordinate of particle (m)
    REAL(EB), POINTER :: Y                   !< \f$ y \f$ coordinate of particle (m)
@@ -815,29 +815,6 @@ TYPE IBM_EXIMFACE_TYPE
    REAL(EB) :: AREA,FN_H_S
    REAL(EB), DIMENSION(MAX_SPECIES)                                ::H_RHO_D_DZDN=0._EB,FN_ZZ=0._EB
 END TYPE IBM_EXIMFACE_TYPE
-
-! Velocity regular faces connected to cut-cell interpolation type:
-INTEGER, PARAMETER :: MAX_RCVEL_NCFACE = 5
-TYPE IBM_RCVEL_TYPE
-   INTEGER :: NCFACE, IWC=0
-   INTEGER,  DIMENSION(MAX_DIM+1)                                  ::            IJK ! [ I J K x1axis]
-   INTEGER,  DIMENSION(MAX_DIM+1,LOW_IND:HIGH_IND,MAX_RCVEL_NCFACE)::      CELL_LIST ! [RC_TYPE I J K ]
-   REAL(EB) :: VELINT
-
-   ! Here: VIND=IAXIS:KAXIS, EP=1:INT_N_EXT_PTS,
-   ! INT_VEL_IND = 1; INT_VELS_IND = 2; INT_FV_IND = 3; INT_DHDX_IND = 4; N_INT_FVARS = 4;
-   ! INT_NPE_LO = INT_NPE(LOW,VIND,EP,IFACE); INT_NPE_LO = INT_NPE(HIGH,VIND,EP,IFACE).
-   ! IFACE = 0 Cartesian GASPHASE face.
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: INT_IJK        ! (IAXIS:KAXIS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
-   REAL(EB), ALLOCATABLE, DIMENSION(:)        :: INT_COEF       ! (INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: INT_XYZBF, INT_NOUT ! (IAXIS:KAXIS,IFACE)
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: INT_INBFC      ! (1:3,IFACE)
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:,:,:)  :: INT_NPE        ! (LOW:HIGH,VIND,EP,IFACE)
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: INT_XN,INT_CN  ! (0:INT_N_EXT_PTS,IFACE) ! 0 is interpolation point.
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: INT_FVARS       ! (1:N_INT_FVARS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: INT_NOMIND     ! (LOW_IND:HIGH_IND,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
-
-END TYPE IBM_RCVEL_TYPE
 
 TYPE CSVF_TYPE
     CHARACTER(255) :: CSVFILE,UVWFILE
