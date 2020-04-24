@@ -16,7 +16,7 @@ h = 0.1;
 dx = 1./nx;
 fds_marker = {'r+-' 'c^-' 'g>-' 'k-'};
 fds_key = {'FDS {\it h/\deltax}=2' 'FDS {\it h/\deltax}=4' 'FDS {\it h/\deltax}=8' 'FDS {\it h/\deltax}=16'};
-geom = {'_' '_geom_'};
+geom = {'_'}; %  '_geom_'
 
 if ~exist([datadir,'ribbed_channel_data.csv'])
     display(['Error: File ' [datadir,'ribbed_channel_data.csv'] ' does not exist. Skipping case.'])
@@ -25,7 +25,7 @@ end
 
 D = importdata([datadir,'ribbed_channel_data.csv'],',',1);
 
-for ii=1:2
+for ii=1:length(geom)
 
     for i=1:lnx
         if ~exist([datadir,'ribbed_channel',geom{ii},num2str(nx(i)),'_line.csv'])
