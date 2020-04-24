@@ -1252,22 +1252,27 @@ ENDIF
 END SUBROUTINE WALE_VISCOSITY
 
 
-SUBROUTINE WALL_MODEL(SLIP_FACTOR,U_TAU,Y_PLUS,U,NU,DY,S,DY2,U_DY2)
+SUBROUTINE WALL_MODEL(SLIP_FACTOR,U_TAU,Y_PLUS,NU,S,Y_EXTERNAL_POINT,U_EXTERNAL_POINT,&
+                      Y_FORCING_POINT,U_FORCING_POINT,DUDY_FORCING_POINT)
 
 REAL(EB), INTENT(OUT) :: SLIP_FACTOR,U_TAU,Y_PLUS
-REAL(EB), INTENT(IN) :: U,NU,DY,S ! S is the roughness length scale (Pope's notation)
-REAL(EB), OPTIONAL, INTENT(IN)  :: DY2
-REAL(EB), OPTIONAL, INTENT(OUT) :: U_DY2
+! S is the "sandgrain" roughness length scale (Pope's notation)
+! Y_EP is the distance from the wall to the "external point" where the interpolated velocity lives; Y_EP=DN/2 for Cartesian grids
+! Y_FP is the distance from the wall to the "forcing point" where the forced velocity lives
+REAL(EB), INTENT(IN) :: NU,S,Y_EXTERNAL_POINT,U_EXTERNAL_POINT
+REAL(EB), OPTIONAL, INTENT(IN) :: Y_FORCING_POINT
+REAL(EB), OPTIONAL, INTENT(OUT) :: U_FORCING_POINT,DUDY_FORCING_POINT
 
 REAL(EB), PARAMETER :: RKAPPA=1._EB/0.41_EB ! 1/von Karman constant
 REAL(EB), PARAMETER :: B=5.2_EB,BTILDE_ROUGH=8.5_EB,BTILDE_MAX=9.5_EB ! see Pope (2000) pp. 294,297,298
 REAL(EB), PARAMETER :: S0=1._EB,S1=5.83_EB,S2=30._EB ! approx piece-wise function for Fig. 7.24, Pope (2000) p. 297
-REAL(EB), PARAMETER :: Y1=5._EB,Y2=30._EB
-REAL(EB), PARAMETER :: U1=5._EB,U2=RKAPPA*LOG(Y2)+B
+REAL(EB), PARAMETER :: Y1=5._EB
+REAL(EB), PARAMETER :: U1=5._EB
 REAL(EB), PARAMETER :: EPS=1.E-10_EB
+INTEGER, PARAMETER :: LAMINAR_SMOOTH=1,TURBULENT_SMOOTH=2,TURBULENT_ROUGH=3
 
-REAL(EB) :: Y_CELL_CENTER,TAU_W,BTILDE,DELTA_NU,S_PLUS,DUDY,Y_CELL_CENTER2,Y_PLUS2
-INTEGER :: ITER
+REAL(EB) :: U,Y_CELL_CENTER,TAU_W,BTILDE,DELTA_NU,S_PLUS,DUDY_WALL,DY
+INTEGER :: ITER,BOUNDARY_LAYER_CODE
 
 ! References:
 !
@@ -1275,13 +1280,16 @@ INTEGER :: ITER
 
 ! Step 1: compute laminar (DNS) stress, and initial guess for LES stress
 
-Y_CELL_CENTER = 0.5_EB*DY
-DUDY = ABS(U)/Y_CELL_CENTER
-TAU_W = NU*DUDY                         ! actually tau_w/rho
+DY = 2._EB*Y_EXTERNAL_POINT
+Y_CELL_CENTER = Y_EXTERNAL_POINT
+U = U_EXTERNAL_POINT
+DUDY_WALL = ABS(U)/Y_CELL_CENTER
+TAU_W = NU*DUDY_WALL                    ! actually tau_w/rho
 U_TAU = SQRT(ABS(TAU_W))                ! friction velocity
 DELTA_NU = NU/(U_TAU+EPS)               ! viscous length scale
 Y_PLUS = Y_CELL_CENTER/(DELTA_NU+EPS)
 SLIP_FACTOR = -1._EB
+BOUNDARY_LAYER_CODE = LAMINAR_SMOOTH
 
 ! Step 2: compute turbulent (LES) stress
 
@@ -1301,17 +1309,14 @@ LES_IF: IF (SIM_MODE/=DNS_MODE) THEN
             ! viscous sublayer
             TAU_W = ( U/Y_PLUS )**2
             U_TAU = SQRT(TAU_W)
-            DUDY = ABS(U)/Y_CELL_CENTER
-         ! ELSEIF (Y_PLUS < Y2) THEN
-         !   ! buffer layer
-         !   TAU_W = ( U/U_PLUS_BUFFER_SEMILOG(Y_PLUS) )**2
-         !   U_TAU = SQRT(TAU_W)
-         !   DUDY = 0.5_EB*(ABS(U)/Y_CELL_CENTER + U_TAU*RKAPPA/Y_CELL_CENTER)
+            DUDY_WALL = ABS(U)/Y_CELL_CENTER
+            BOUNDARY_LAYER_CODE = LAMINAR_SMOOTH
          ELSE
             ! log layer
             TAU_W = ( U/(RKAPPA*LOG(Y_PLUS)+B) )**2
             U_TAU = SQRT(TAU_W)
-            DUDY = U_TAU*RKAPPA/Y_CELL_CENTER
+            DUDY_WALL = U_TAU*RKAPPA/Y_CELL_CENTER
+            BOUNDARY_LAYER_CODE = TURBULENT_SMOOTH
          ENDIF
       ELSE
          ! rough wall
@@ -1325,7 +1330,8 @@ LES_IF: IF (SIM_MODE/=DNS_MODE) THEN
          Y_PLUS = Y_CELL_CENTER/S
          TAU_W = ( U/(RKAPPA*LOG(Y_PLUS)+BTILDE) )**2  ! Pope (2000) p. 297, Eq. (7.121)
          U_TAU = SQRT(TAU_W)
-         DUDY = U_TAU*RKAPPA/Y_CELL_CENTER
+         DUDY_WALL = U_TAU*RKAPPA/Y_CELL_CENTER
+         BOUNDARY_LAYER_CODE = TURBULENT_ROUGH
       ENDIF
 
       DELTA_NU = NU/(U_TAU+EPS)
@@ -1336,83 +1342,33 @@ LES_IF: IF (SIM_MODE/=DNS_MODE) THEN
    ! The stress is taken directly from U_TAU. SLIP_FACTOR is, however, still used to
    ! compute the velocity gradient at the wall that feeds into the wall vorticity.
    ! Since the gradients implied by the wall function can be large and lead to instabilities,
-   ! we bound the wall slip between no slip and free slip.
+   ! we bound the wall slip between no slip (-1) and free slip (1).
 
    ! The slip factor (SF) is based on the following approximation to the wall gradient
    ! (note that u0 is the ghost cell value of the streamwise velocity component and
    ! y is the wall-normal direction):
-   ! dudy = (u-u0)/dy = (u-SF*u)/dy = u/dy*(1-SF) => SF = 1 - dudy*dy/u
-   ! In this routine, dudy is sampled from the wall model at the location y_cell_center.
+   ! dudy_wall = (u-u0)/dy = (u-SF*u)/dy = u/dy*(1-SF) => SF = 1 - dudy_wall*dy/u
+   ! In this routine, dudy_wall is sampled from the wall model at the location y_cell_center.
 
-   SLIP_FACTOR = MAX(-1._EB,MIN(1._EB,1._EB-DUDY*DY/(ABS(U)+EPS))) ! -1.0 <= SLIP_FACTOR <= 1.0
+   SLIP_FACTOR = MAX(-1._EB,MIN(1._EB,1._EB-DUDY_WALL*DY/(ABS(U)+EPS))) ! -1.0 <= SLIP_FACTOR <= 1.0
 
 ENDIF LES_IF
 
-DY2_IF : IF (PRESENT(DY2)) THEN
-   IF (SIM_MODE==DNS_MODE) THEN
-      Y_CELL_CENTER2 = 0.5_EB*DY2
-      U_DY2 = Y_CELL_CENTER2/Y_CELL_CENTER * U ! Linear Variation of velocities is assumed.
-   ELSE
-      Y_CELL_CENTER2 = 0.5_EB*DY2
-      S_PLUS = S/(DELTA_NU+EPS) ! roughness in viscous units
-      IF (S_PLUS < S0) THEN
-         ! smooth wall
-         Y_PLUS2 = Y_CELL_CENTER2/(DELTA_NU+EPS)
-         IF (Y_PLUS2 < Y_WERNER_WENGLE) THEN
-            ! viscous sublayer
-            U_DY2 = Y_CELL_CENTER2/Y_CELL_CENTER * U ! Linear Variation of velocities is assumed.
-         ELSE
-            ! log layer
-            U_DY2   = U_TAU*(RKAPPA*LOG(Y_PLUS2)+B) ! U_TAU*U_PLUS2
-         ENDIF
-      ELSE
-         ! rough wall
-         IF (S_PLUS < S1) THEN
-            BTILDE = B + RKAPPA*LOG(S_PLUS) ! Pope (2000) p. 297, Eq. (7.122)
-         ELSE IF (S_PLUS < S2) THEN
-            BTILDE = BTILDE_MAX ! approximation from Fig. 7.24, Pope (2000) p. 297
-         ELSE
-            BTILDE = BTILDE_ROUGH ! fully rough
-         ENDIF
-         Y_PLUS2 = Y_CELL_CENTER2/S
-         U_DY2   = U_TAU*(RKAPPA*LOG(Y_PLUS2)+BTILDE) ! U_TAU*U_PLUS2 Pope (2000) p. 297, Eq. (7.121)
-      ENDIF
-   ENDIF
-ENDIF DY2_IF
+! complex geometry
 
-CONTAINS
-
-REAL(EB) FUNCTION U_PLUS_BUFFER_SEMILOG(YP)
-
-REAL(EB), INTENT(IN) :: YP
-REAL(EB), PARAMETER :: RKAPPA_BUFFER=(U2-U1)/(LOG(Y2)-LOG(Y1))
-REAL(EB), PARAMETER :: B_BUFFER=U1-RKAPPA_BUFFER*LOG(Y1)
-
-! semi-log fit connecting U1=Y1=5 to U2=RKAPPA*LOG(Y2)+B at Y2=30
-
-U_PLUS_BUFFER_SEMILOG = RKAPPA_BUFFER*LOG(YP)+B_BUFFER
-
-END FUNCTION U_PLUS_BUFFER_SEMILOG
-
-REAL(EB) FUNCTION U_PLUS_BUFFER_POLY4(YP)
-
-REAL(EB), INTENT(IN) :: YP
-REAL(EB) :: DYP
-REAL(EB), PARAMETER :: DYPLUS=25._EB
-REAL(EB), PARAMETER :: B1 = (U2-Y2)/DYPLUS**2
-REAL(EB), PARAMETER :: B2 = (RKAPPA/Y2-1._EB)/DYPLUS
-REAL(EB), PARAMETER :: B3 = (-RKAPPA/Y2**2)*0.5_EB
-REAL(EB), PARAMETER :: C3 = 6._EB*B1-3._EB*B2+B3
-REAL(EB), PARAMETER :: C2 = (4._EB*B1-B2 - 2._EB*C3)/DYPLUS
-REAL(EB), PARAMETER :: C1 = (B1-C3-DYPLUS*C2)/DYPLUS**2
-
-! Jung-il Choi, Yonsei University
-! 4th-order polynomial fit connecting U1=Y1=5 to U2=RKAPPA*LOG(Y2)+B at Y2=30
-
-DYP = YP-Y1
-U_PLUS_BUFFER_POLY4 = C1*DYP**4 + C2*DYP**3 + C3*DYP**2 + YP
-
-END FUNCTION U_PLUS_BUFFER_POLY4
+IF (PRESENT(Y_FORCING_POINT)) THEN
+   SELECT CASE(BOUNDARY_LAYER_CODE)
+      CASE(LAMINAR_SMOOTH)
+         DUDY_FORCING_POINT = U_TAU/DELTA_NU
+         U_FORCING_POINT = DUDY_FORCING_POINT * Y_FORCING_POINT
+      CASE(TURBULENT_SMOOTH)
+         DUDY_FORCING_POINT = U_TAU * RKAPPA / Y_FORCING_POINT
+         U_FORCING_POINT = U_TAU * (RKAPPA * LOG(Y_FORCING_POINT/DELTA_NU) + B)
+      CASE(TURBULENT_ROUGH)
+         DUDY_FORCING_POINT = U_TAU * RKAPPA / Y_FORCING_POINT
+         U_FORCING_POINT = U_TAU * (RKAPPA * LOG(Y_FORCING_POINT/S) + BTILDE)
+   END SELECT
+ENDIF
 
 END SUBROUTINE WALL_MODEL
 
@@ -1680,7 +1636,6 @@ INTEGER :: SUBIT
 ! Cartesian grid coordinate system orthonormal basis vectors
 REAL(EB), DIMENSION(2), PARAMETER :: XX=(/1._EB, 0._EB/),YY=(/0._EB, 1._EB/)
 
-
 ! streamwise unit vector
 SS = (/NN(2),-NN(1)/)
 
@@ -1730,7 +1685,7 @@ IF (SIM_MODE==DNS_MODE) THEN
 ELSE
    U_STRM_0 = U_STRM
    DO SUBIT=1,1
-      CALL WALL_MODEL(SLIP_COEF,DUMMY(1),DUMMY(2),U_STRM-U_STRM_WALL,MU*RRHO,DN,0._EB)
+      CALL WALL_MODEL(SLIP_COEF,DUMMY(1),DUMMY(2),MU*RRHO,0._EB,0.5_EB*DN,U_STRM-U_STRM_WALL)
       !IF (SLIP_COEF< -1._EB .OR. SLIP_COEF>-1._EB) THEN
       !   PRINT *,SUBIT,'WARNING: SLIP_COEF=',SLIP_COEF
       !ENDIF
@@ -1842,7 +1797,7 @@ IF (SIM_MODE==DNS_MODE) THEN
 ELSE
    U_STRM_0 = U_STRM
    DO SUBIT=1,1
-      CALL WALL_MODEL(SLIP_COEF,DUMMY(1),DUMMY(2),U_STRM,MU*RRHO,DN,ROUGHNESS)
+      CALL WALL_MODEL(SLIP_COEF,DUMMY(1),DUMMY(2),MU*RRHO,ROUGHNESS,0.5_EB*DN,U_STRM)
       !IF (SLIP_COEF<-100._EB .OR. SLIP_COEF>100._EB) THEN
       !   PRINT *,SUBIT,'WARNING: SLIP_COEF=',SLIP_COEF
       !ENDIF
@@ -1928,7 +1883,7 @@ TAUBAR_IJ(3,3) = -2._EB*MU*(U_NORM*2._EB/DN - ONTH*DIVU)
 IF (SIM_MODE==DNS_MODE) THEN
    TAUBAR_IJ(1,3) = MU*U_STRM*2._EB/DN
 ELSE
-   CALL WALL_MODEL(SLIP_COEF,U_TAU,Y_PLUS,U_STRM,MU/RHO,DN,ROUGHNESS)
+   CALL WALL_MODEL(SLIP_COEF,U_TAU,Y_PLUS,MU/RHO,ROUGHNESS,0.5_EB*DN,U_STRM)
    TAUBAR_IJ(1,3) = RHO*U_TAU**2
 ENDIF
 TAUBAR_IJ(3,1) = TAUBAR_IJ(1,3)
