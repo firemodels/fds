@@ -1928,7 +1928,7 @@ INTEGER, INTENT(IN) :: NM
 LOGICAL, INTENT(IN) :: APPLY_TO_ESTIMATED_VARIABLES
 REAL(EB) :: MUA,TSI,WGT,T_NOW,RAMP_T,OMW,MU_WALL,RHO_WALL,SLIP_COEF,VEL_T,UBAR,VBAR,WBAR, &
             UUP(2),UUM(2),DXX(2),MU_DUIDXJ(-2:2),DUIDXJ(-2:2),PROFILE_FACTOR,VEL_GAS,VEL_GHOST, &
-            MU_DUIDXJ_USE(2),DUIDXJ_USE(2),VEL_EDDY,U_TAU,Y_PLUS,WT1,WT2,DUMMY
+            MU_DUIDXJ_USE(2),DUIDXJ_USE(2),VEL_EDDY,U_TAU,Y_PLUS,DUMMY
 INTEGER :: I,J,K,NOM(2),IIO(2),JJO(2),KKO(2),IE,II,JJ,KK,IEC,IOR,IWM,IWP,ICMM,ICMP,ICPM,ICPP,IC,ICD,ICDO,IVL,I_SGN,IS, &
            VELOCITY_BC_INDEX,IIGM,JJGM,KKGM,IIGP,JJGP,KKGP,SURF_INDEXM,SURF_INDEXP,ITMP,ICD_SGN,ICDO_SGN, &
            BOUNDARY_TYPE_M,BOUNDARY_TYPE_P,IS2,IWPI,IWMI,VENT_INDEX
@@ -2414,25 +2414,9 @@ EDGE_LOOP: DO IE=1,N_EDGES
                      MU_WALL = MU_RSQMW_Z(ITMP,1)/RSQ_MW_Z(1)
                      RHO_WALL = 0.5_EB*( RHOP(IIGM,JJGM,KKGM) + RHOP(IIGP,JJGP,KKGP) )
                      CALL WALL_MODEL(SLIP_COEF,U_TAU,Y_PLUS,MU_WALL/RHO_WALL,SF%ROUGHNESS,0.5_EB*DXX(ICD),VEL_GAS-VEL_T)
-                     SELECT CASE(SLIP_CONDITION)
-                        CASE(0)
-                           SLIP_COEF = -1._EB
-                        CASE(1)
-                           SLIP_COEF = SLIP_COEF
-                        CASE(2)
-                           SLIP_COEF = 0.5_EB*(SLIP_COEF-1._EB)
-                        CASE(3)
-                           WT1 = MAX(0._EB,MIN(1._EB,(Y_PLUS-Y_WERNER_WENGLE)/(Y_PLUS+TWO_EPSILON_EB)))
-                           WT2 = 1._EB-WT1
-                           SLIP_COEF = WT1*SLIP_COEF-WT2
-                        CASE(4)
-                           IF ( ABS(0.5_EB*(WCM%ONE_D%U_NORMAL_S+WCP%ONE_D%U_NORMAL_S))>ABS(VEL_GAS-VEL_T) ) THEN
-                              SLIP_COEF = -1._EB
-                           ELSE
-                              SLIP_COEF = 0.5_EB*(SLIP_COEF-1._EB)
-                           ENDIF
-                     END SELECT
-                     VEL_GHOST = VEL_T + SLIP_COEF*(VEL_GAS-VEL_T)
+                     ! SLIP_COEF = -1, no slip, VEL_GHOST=-VEL_GAS
+                     ! SLIP_COEF =  1, free slip, VEL_GHOST=VEL_T
+                     VEL_GHOST = VEL_T + 0.5_EB*(SLIP_COEF-1._EB)*(VEL_GAS-VEL_T)
                      DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
                      MU_DUIDXJ(ICD_SGN) = RHO_WALL*U_TAU**2 * SIGN(1._EB,I_SGN*(VEL_GAS-VEL_T))
                      ALTERED_GRADIENT(ICD_SGN) = .TRUE.
