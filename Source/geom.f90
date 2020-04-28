@@ -11893,7 +11893,7 @@ STORE_FLG_CND : IF (STORE_FLG) THEN
                RHO_FACE= CCM1*RHOV(-1) + CCP1*RHOV(0)
                NU      = MU_FACE/RHO_FACE
                CALL WALL_MODEL(SLIP_FACTOR,U_TAU,Y_PLUS,NU,SRGH,0.5_EB*DXN_STRM,U_STRM,&
-                               ABS(DXN_STRM2),U_STRM2,DUSDN_FP)
+                               0.5_EB*ABS(DXN_STRM2),U_STRM2,DUSDN_FP)
 
                ! If Cartesian face centroid inside the solid (i.e. acts like ghost cell) recompute U_STRM2
                ! using slip factor:
