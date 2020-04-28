@@ -6,8 +6,8 @@
 # is then included in the FDS Validation Guide.
 MAKEGITENTRY(){
 DIR=$1
-gitrevisions=/tmp/gitrevisions.$$
-cat $FIREMODELS/out/$DIR/FDS_Output_Files/*git.txt 2> /dev/null | sort -u > $gitrevisions
+gitrevisions=$TEMPDIR/gitrevisions.$$
+cat $FIREMODELS/out/$DIR/*git.txt 2> /dev/null | sort -u > $gitrevisions
 gitrev=`head -1 $gitrevisions`
 if [ "$gitrev" != "" ] ; then
   gitrevshort=`echo $gitrev | awk -F - '{print $3}' | sed 's/^.\{1\}//'`
@@ -29,23 +29,32 @@ if [ "$gitrev" != "" ] ; then
   else
     gitdate2=`git show -s --format=%at $gitrevshort | head -1 | awk '{print $1}'`
   fi
-  echo "${DIR//_/\_}  & $gitdate & $gitrev & $gitdate2 \\\\ \hline"
+  echo "${DIR//_/\\_}  & $gitdate & $gitrev & $gitdate2 \\\\ \hline"
 fi
 rm $gitrevisions
 }
 
-
 CURRENT_DIR=`pwd`
-if [ "$FIREMODELS" == "" ] ; then
-   FIREMODELS=~/FDS-SMVfork
+
+#determine repo root 
+SCRIPTDIR=`dirname "$(readlink -f "$0")"`
+cd $SCRIPTDIR/../../..
+FIREMODELS=`pwd`
+cd $CURDIR
+
+TEMPDIR=$HOME/temp
+if [ ! -d $TEMPDIR ]; then
+   mkdir $TEMPDIR
 fi
+
 export FIREMODELS
 
+# the following is kept so older versions of firebot won't crash (ie firebot's that call this script using the -r parameter)
 while getopts 'r:' OPTION
 do
 case $OPTION  in
   r)
-   FIREMODELS="$OPTARG"
+   IGNORE="$OPTARG"
    ;;
 esac
 done
@@ -69,8 +78,8 @@ echo "\endhead" >> $OUTPUT_TEX_FILE
 
 # Table body
 maketable=$FIREMODELS/fds/Validation/Process_All_Output.sh
-CASELIST=/tmp/temp.out.$$
-TABLE_ENTRIES=/tmp/temp2.out.$$
+CASELIST=$TEMPDIR/temp.out.$$
+TABLE_ENTRIES=$TEMPDIR/temp2.out.$$
 grep PROCESS $maketable | awk 'BEGIN { FS = " " } ; { print $2 }' | awk '{if(NR>1)print}'> $CASELIST
 while read p; do
   MAKEGITENTRY   $p  >> $TABLE_ENTRIES

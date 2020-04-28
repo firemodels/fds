@@ -10,7 +10,7 @@ echo \newcommand^{\gitrevision^}^{%gitrevision%^} > ..\Bibliography\gitrevision.
 set AUXUSER=..\FDS_User_Guide\FDS_User_Guide.aux
 set PDFUSER=..\FDS_User_Guide\FDS_User_Guide.pdf
 
-if exist %AUXUSER% goto else1
+if not exist %AUXUSER% goto else1
   copy %AUXUSER%
   goto endif1
 :else1
@@ -26,10 +26,12 @@ echo pass 2
 pdflatex -interaction nonstopmode %paper% > %paper%.err
 echo pass 3
 pdflatex -interaction nonstopmode %paper% > %paper%.err
+echo pass 4
+pdflatex -interaction nonstopmode %paper% > %paper%.err
 
 if not exist %PDFUSER% goto endif2
-  copy %PDFUSER% 
-fi
+  copy %PDFUSER%
+:endif2
 
 find "! LaTeX Error:" %paper%.err
 find "Fatal error" %paper%.err

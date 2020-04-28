@@ -6,6 +6,12 @@
 &MESH XB= 4, 5, 0, 1, 0, 1 IJK=10,10,10 /
 &MESH XB= 6, 7, 0, 1, 0, 1 IJK=10,10,10 /
 
+&ZONE XYZ=-1.5,0.5,0.5 /
+&ZONE XYZ= 0.5,0.5,0.5 /
+&ZONE XYZ= 2.5,0.5,0.5 /
+&ZONE XYZ= 4.5,0.5,0.5 /
+&ZONE XYZ= 6.5,0.5,0.5 /
+
 &TIME T_END=2.0 /
 
 &DUMP DT_PL3D = 100. SMOKE3D = .FALSE./

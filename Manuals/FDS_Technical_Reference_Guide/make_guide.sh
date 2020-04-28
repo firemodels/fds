@@ -14,15 +14,22 @@ pdflatex -interaction nonstopmode FDS_Technical_Reference_Guide &> FDS_Technical
 bibtex FDS_Technical_Reference_Guide &> FDS_Technical_Reference_Guide.err
 pdflatex -interaction nonstopmode FDS_Technical_Reference_Guide &> FDS_Technical_Reference_Guide.err
 pdflatex -interaction nonstopmode FDS_Technical_Reference_Guide &> FDS_Technical_Reference_Guide.err
+pdflatex -interaction nonstopmode FDS_Technical_Reference_Guide &> FDS_Technical_Reference_Guide.err
+
+# make sure the guide exists
+if [ ! -e FDS_Technical_Reference_Guide.pdf ]; then
+  clean_build=0
+  echo "***error: the FDS Technical Reference Guide failed to build!"
+fi
 
 # Scan and report any errors in the LaTeX build process
-if [[ `grep -E "Undefined control sequence|Error:|Fatal error|! LaTeX Error:|Paragraph ended before|Missing \\\$ inserted|Misplaced" -I FDS_Technical_Reference_Guide.err | grep -v "xpdf supports version 1.5"` == "" ]]
+if [[ `grep -E "Too many|Undefined control sequence|Error:|Fatal error|! LaTeX Error:|Paragraph ended before|Missing \\\$ inserted|Misplaced" -I FDS_Technical_Reference_Guide.err | grep -v "xpdf supports version 1.5"` == "" ]]
    then
       # Continue along
       :
    else
       echo "LaTeX errors detected:"
-      grep -A 1 -E "Undefined control sequence|Error:|Fatal error|! LaTeX Error:|Paragraph ended before|Missing \\\$ inserted|Misplaced" -I FDS_Technical_Reference_Guide.err | grep -v "xpdf supports version 1.5"
+      grep -A 1 -E "Too many|Undefined control sequence|Error:|Fatal error|! LaTeX Error:|Paragraph ended before|Missing \\\$ inserted|Misplaced" -I FDS_Technical_Reference_Guide.err | grep -v "xpdf supports version 1.5"
       clean_build=0
 fi
 
@@ -42,7 +49,7 @@ if [[ $clean_build == 0 ]]
       :
    else
       echo "FDS Technical Reference Guide built successfully!"
-fi    
+fi
 
 if [ "$1" == "verbose" ]; then
    echo
@@ -62,10 +69,10 @@ if [ "$1" == "verbose" ]; then
    grep 'multiply-defined' $texfile.log
    grep 'Overfull \\hbox' $texfile.log
    grep 'Underfull \\hbox' $texfile.log
-   
+
    echo
    lacheck $texfile.tex
-   
+
    # for other options see http://tex.loria.fr/outils/ChkTeX.pdf
    # http://tex.stackexchange.com/questions/46740/is-there-a-way-to-make-chktex-ignore-tikz-code
    # Newer ChkTeX: http://www.nongnu.org/chktex/

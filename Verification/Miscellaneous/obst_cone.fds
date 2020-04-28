@@ -1,0 +1,21 @@
+&HEAD CHID='obst_cone', TITLE='Test of MULT/OBST cone'/
+
+&MESH IJK=50,50,50, XB=-0.125,0.125,-0.125,0.125,-0.125,0.125/
+
+&TIME T_END=0/
+
+&SURF ID='wall', DEFAULT=T, COLOR='INVISIBLE'/
+&SURF ID='shape', COLOR='FOREST GREEN'/
+
+&MULT ID='cube array', DX=0.005,DY=0.005,DZ=0.005, I_UPPER=41,J_UPPER=41,K_UPPER=41/
+
+&OBST XB=-0.105,-0.100,-0.105,-0.100,-0.105,-0.100
+      MULT_ID='cube array'
+      SURF_ID='shape'
+      SHAPE='CONE'
+      RADIUS=0.05
+      HEIGHT=0.2
+      XYZ=0,0,-0.1
+      ORIENTATION=0,0,1/
+
+&TAIL /

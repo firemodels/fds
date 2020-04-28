@@ -1,0 +1,363 @@
+&HEAD CHID='E119_Compartment_Test_3', TITLE='NIST E119 Compartment test 3'  / 
+
+&MESH IJK=24,40,40, XB=-0.6,0.6,0.0,2.0,0.0,2.0, MULT_ID='mesh' /
+&MULT ID='mesh', DX=1.2, DY=2.0, DZ=2.0, I_LOWER=-4, I_UPPER=4, J_LOWER=-2, J_UPPER=1, K_UPPER=1 /
+
+&TIME T_END=5400, TIME_SHRINK_FACTOR=10 /
+
+&COMB N_SIMPLE_CHEMISTRY_REACTIONS=2 /
+&REAC FUEL='METHANE' /
+
+&SURF ID='BURNER', HRRPUA=1666.7, COLOR='BROWN', RAMP_Q='fire' /
+&RAMP ID='fire', T=0     ,F=0.0 /
+&RAMP ID='fire', T=30    ,F=0.086 /
+&RAMP ID='fire', T=120   ,F=0.086 /
+&RAMP ID='fire', T=348   ,F=0.58  /
+&RAMP ID='fire', T=660   ,F=0.71  /
+&RAMP ID='fire', T=1200  ,F=0.783 /
+&RAMP ID='fire', T=1800  ,F=0.854 /
+&RAMP ID='fire', T=2400  ,F=0.895 /
+&RAMP ID='fire', T=3000  ,F=0.928 /
+&RAMP ID='fire', T=3600  ,F=0.9655/
+&RAMP ID='fire', T=4200  ,F=0.987 /
+&RAMP ID='fire', T=4520  ,F=1.0/
+&RAMP ID='fire', T=4521  ,F=0.0/
+
+&MATL ID='STEEL'
+      FYI='Eurocode 3,steel'
+      DENSITY=7850.
+      CONDUCTIVITY_RAMP='STEEL_K'
+      EMISSIVITY=0.7
+      SPECIFIC_HEAT_RAMP='STEEL_C'/
+&RAMP ID='STEEL_K', T=  20., F=53.334 /
+&RAMP ID='STEEL_K', T=  100., F=50.67 /
+&RAMP ID='STEEL_K', T=  200., F=47.34 /
+&RAMP ID='STEEL_K', T=  300., F=44.01 /
+&RAMP ID='STEEL_K', T=  400., F=40.68 /
+&RAMP ID='STEEL_K', T=  500., F=37.35 /
+&RAMP ID='STEEL_K', T=  600., F=34.02 /
+&RAMP ID='STEEL_K', T=  700., F=30.69 /
+&RAMP ID='STEEL_K', T=  800., F=27.3 /
+&RAMP ID='STEEL_K', T=  900., F=27.3 /
+&RAMP ID='STEEL_K', T=  1000., F=27.3 /
+&RAMP ID='STEEL_C', T=  20., F=0.43980176 /
+&RAMP ID='STEEL_C', T=  100., F=0.48762 /
+&RAMP ID='STEEL_C', T=  200., F=0.52976 /
+&RAMP ID='STEEL_C', T=  300., F=0.56474 /
+&RAMP ID='STEEL_C', T=  400., F=0.60588 /
+&RAMP ID='STEEL_C', T=  500., F=0.6665 /
+&RAMP ID='STEEL_C', T=  600., F=0.760217391 /
+&RAMP ID='STEEL_C', T=  700., F=1.008157895 /
+&RAMP ID='STEEL_C', T=  800., F=0.80326087 /
+&RAMP ID='STEEL_C', T=  900., F=0.65 /
+&RAMP ID='STEEL_C', T=  1000., F=0.65 /
+
+&MATL ID            = 'KAOWOOL'
+      FYI           = 'Morgan Advanced Materials product literature'
+      EMISSIVITY    = 0.7
+      DENSITY       = 96.
+      CONDUCTIVITY_RAMP = 'kao_k'
+      SPECIFIC_HEAT = 1.13 /
+&RAMP ID='kao_k', T=  20., F=0.03 /
+&RAMP ID='kao_k', T= 200., F=0.06 /
+&RAMP ID='kao_k', T= 400., F=0.11 /
+&RAMP ID='kao_k', T= 600., F=0.16 /
+&RAMP ID='kao_k', T= 800., F=0.23 /
+&RAMP ID='kao_k', T=1000., F=0.32 /
+
+&MATL ID            = 'GYP'
+      FYI           = 'gypsum board, type X, Manzello, SiF 08'
+      DENSITY       = 673.
+      CONDUCTIVITY  = 0.15
+      EMISSIVITY    = 0.7
+      SPECIFIC_HEAT = 1.089 /
+
+&MATL ID            = 'NWC'
+      FYI           = 'Eurocode 4, normal weight concrete'
+      DENSITY       = 2300.
+      CONDUCTIVITY  = 1.6
+      EMISSIVITY    = 0.7
+      SPECIFIC_HEAT = 1.0 /
+
+&SURF ID             = 'BEAM_LF'
+      FYI            = 'lower flange of beam, W1631'
+      COLOR          = 'GRAY 60'
+      MATL_ID        = 'STEEL'
+      THICKNESS      =  0.0112 /      
+
+&SURF ID             = 'BEAM_WEB'
+      FYI            = 'web of beam, W1631'
+      COLOR          = 'GRAY 60'
+      MATL_ID        = 'STEEL'
+      THICKNESS      = 0.007 /
+
+&SURF ID             = 'BEAM_UF'
+      FYI            = 'upper flange of beam, W1631'
+      COLOR          = 'GRAY 60'
+      MATL_ID        = 'STEEL'
+      THICKNESS      = 0.0112 /
+
+&SURF ID             = 'COLUMN_LF'
+      FYI            = 'left flange of column, W12106'
+      COLOR          = 'BLACK'
+      MATL_ID        = 'STEEL'
+      THICKNESS      = 0.0251 /
+
+&SURF ID             = 'COLUMN_WEB'
+      FYI            = 'web of column, W12106'
+      COLOR          = 'BLACK'
+      MATL_ID        = 'STEEL'
+      THICKNESS      = 0.0155 /
+
+&SURF ID             = 'COLUMN_RF'
+      FYI            = 'right flange of column, W12106'
+      COLOR          = 'BLACK'
+      MATL_ID        = 'STEEL'
+      THICKNESS      = 0.0251/
+
+&SURF ID             = 'COLUMN'
+      FYI            = 'burner seat'
+      COLOR          = 'BLACK'
+      MATL_ID        = 'STEEL'
+      THICKNESS      = 0.011 /
+
+&SURF ID             = 'WALL FRONT FACE'
+      FYI            = '3 layer gypsum board, steel sheet'
+      RGB            = 200,200,200
+      MATL_ID        = 'GYP','STEEL'
+      THICKNESS      = 0.048,0.00102/
+
+&SURF ID             = 'WALL BACK FACE'
+      RGB            = 100,100,100
+      MATL_ID        = 'STEEL','GYP'
+      THICKNESS      = 0.00102,0.048 /
+
+&SURF ID             = 'WALL KAOWOOL'
+      FYI            = '2 layer kaowool'
+      RGB            = 200,200,200
+      MATL_ID        = 'KAOWOOL'
+      THICKNESS      = 0.0508/2layer
+
+&SURF ID            = 'FLOOR'
+      FYI           = 'strong floor'
+      MATL_ID       = 'NWC'
+      RGB           = 100,100,100
+      THICKNESS     = 1.0 /
+
+&SURF ID            = 'CEILING BOTTOM'
+      FYI           = '2 layer kaowool, steel sheet'
+      MATL_ID       = 'KAOWOOL','STEEL'
+      COLOR         = 'SILVER'
+      THICKNESS     = 0.0508, 0.00081/
+
+&SURF ID            = 'CEILING TOP'
+      MATL_ID       = 'STEEL','KAOWOOL'
+      COLOR         = 'GRAY 50'
+      THICKNESS     = 0.00081,0.0508/
+
+&SURF ID            = 'UNEXPOSED'
+      COLOR         = 'GRAY 50'/
+
+&OBST XB=-5.08,-5.03,-2.48, 2.48, 0.00, 3.05, SURF_ID6='WALL BACK FACE','WALL FRONT FACE','UNEXPOSED','UNEXPOSED','UNEXPOSED','UNEXPOSED'/ W wall bottom
+&OBST XB=-5.08,-5.03,-2.48, 2.48, 2.72, 3.78, SURF_ID6='WALL KAOWOOL','WALL KAOWOOL','UNEXPOSED','UNEXPOSED','UNEXPOSED','UNEXPOSED'/  W wall top
+
+&OBST XB=-4.00, 4.00,-3.40,-3.35, 0.00, 4.27, SURF_ID6='UNEXPOSED','UNEXPOSED','WALL BACK FACE','WALL FRONT FACE','UNEXPOSED','UNEXPOSED'/  S wall
+
+&OBST XB=-4.00, 4.00, 3.51, 3.56, 0.00, 3.05, SURF_ID6='UNEXPOSED','UNEXPOSED','WALL FRONT FACE','WALL BACK FACE','UNEXPOSED','UNEXPOSED'/  N wall bottom
+&OBST XB=-4.00, 4.00, 3.51, 3.56, 2.72, 3.78, SURF_ID6='UNEXPOSED','UNEXPOSED','WALL KAOWOOL','WALL KAOWOOL','UNEXPOSED','UNEXPOSED'/  N wall top
+
+&OBST XB= 5.03, 5.08,-2.48, 2.48, 0.00, 3.05, SURF_ID6='WALL FRONT FACE','WALL BACK FACE','UNEXPOSED','UNEXPOSED','UNEXPOSED','UNEXPOSED'/ E wall bottom
+&OBST XB= 5.03, 5.08,-2.48, 2.48, 2.72, 3.78, SURF_ID6='WALL KAOWOOL','WALL KAOWOOL','UNEXPOSED','UNEXPOSED','UNEXPOSED','UNEXPOSED'/  E wall top
+
+&OBST XB=-5.08,-4.00,-2.48,-2.43, 0.00, 3.05, SURF_ID6='UNEXPOSED','UNEXPOSED','WALL BACK FACE','WALL FRONT FACE','UNEXPOSED','UNEXPOSED'/ WS corner1 bottom
+&OBST XB=-5.08,-4.00,-2.48,-2.43, 2.72, 3.78, SURF_ID6='UNEXPOSED','UNEXPOSED','WALL KAOWOOL','WALL KAOWOOL','UNEXPOSED','UNEXPOSED'/ WS corner1 top
+
+&OBST XB=-4.00,-3.95,-3.40,-2.43, 0.00, 3.05, SURF_ID6='WALL BACK FACE','WALL FRONT FACE','UNEXPOSED','UNEXPOSED','UNEXPOSED','UNEXPOSED'/ WS corner2 bottom
+&OBST XB=-4.00,-3.95,-3.40,-2.43, 2.72, 3.78, SURF_ID6='WALL KAOWOOL','WALL KAOWOOL','UNEXPOSED','UNEXPOSED','UNEXPOSED','UNEXPOSED'/ WS corner2 top
+
+&OBST XB= 4.00, 5.08,-2.48,-2.43, 0.00, 3.05, SURF_ID6='UNEXPOSED','UNEXPOSED','WALL BACK FACE','WALL FRONT FACE','UNEXPOSED','UNEXPOSED'/ ES corner1 bottom
+&OBST XB= 4.00, 5.08,-2.48,-2.43, 2.72, 3.78, SURF_ID6='UNEXPOSED','UNEXPOSED','WALL KAOWOOL','WALL KAOWOOL','UNEXPOSED','UNEXPOSED'/ ES corner1 top
+
+&OBST XB= 3.95, 4.00,-3.40,-2.43, 0.00, 3.05, SURF_ID6='WALL FRONT FACE','WALL BACK FACE','UNEXPOSED','UNEXPOSED','UNEXPOSED','UNEXPOSED'/ ES corner2 bottom
+&OBST XB= 3.95, 4.00,-3.40,-2.43, 2.72, 3.78, SURF_ID6='WALL KAOWOOL','WALL KAOWOOL','UNEXPOSED','UNEXPOSED','UNEXPOSED','UNEXPOSED'/ ES corner2 top
+
+&OBST XB=-5.08,-4.00, 2.48, 2.53, 0.00, 3.05, SURF_ID6='UNEXPOSED','UNEXPOSED','WALL FRONT FACE','WALL BACK FACE','UNEXPOSED','UNEXPOSED'/ WN corner1 bottom
+&OBST XB=-5.08,-4.00, 2.48, 2.53, 2.72, 3.78, SURF_ID6='UNEXPOSED','UNEXPOSED','WALL KAOWOOL','WALL KAOWOOL','UNEXPOSED','UNEXPOSED'/ WN corner1 top
+
+&OBST XB=-4.00,-3.95, 2.48, 3.56, 0.00, 3.05, SURF_ID6='WALL BACK FACE','WALL FRONT FACE','UNEXPOSED','UNEXPOSED','UNEXPOSED','UNEXPOSED'/ WN corner2 bottom
+&OBST XB=-4.00,-3.95, 2.48, 3.56, 2.72, 3.78, SURF_ID6='WALL KAOWOOL','WALL KAOWOOL','UNEXPOSED','UNEXPOSED','UNEXPOSED','UNEXPOSED'/ WN corner2 top
+
+&OBST XB= 4.00, 5.08, 2.48, 2.53, 0.00, 3.05, SURF_ID6='UNEXPOSED','UNEXPOSED','WALL FRONT FACE','WALL BACK FACE','UNEXPOSED','UNEXPOSED'/ EN corner1 bottom
+&OBST XB= 4.00, 5.08, 2.48, 2.53, 2.72, 3.78, SURF_ID6='UNEXPOSED','UNEXPOSED','WALL KAOWOOL','WALL KAOWOOL','UNEXPOSED','UNEXPOSED'/ EN corner1 top
+
+&OBST XB= 3.95, 4.00, 2.48, 3.56, 0.00, 3.05, SURF_ID6='WALL FRONT FACE','WALL BACK FACE','UNEXPOSED','UNEXPOSED','UNEXPOSED','UNEXPOSED'/ EN corner2 bottom
+&OBST XB= 3.95, 4.00, 2.48, 3.56, 2.72, 3.78, SURF_ID6='WALL KAOWOOL','WALL KAOWOOL','UNEXPOSED','UNEXPOSED','UNEXPOSED','UNEXPOSED'/ EN corner2 top
+
+&OBST XB=-5.08, 5.08,-3.40, 3.56, 3.78, 3.83, SURF_ID6='UNEXPOSED','UNEXPOSED','UNEXPOSED','UNEXPOSED','CEILING BOTTOM','CEILING TOP' / ceiling slab
+
+&HOLE XB=-3.00, -0.09, -3.5, -3.3, 1.016, 2.502 /  Ventilation opening
+&HOLE XB= 0.09,  3.00, -3.5, -3.3, 1.016, 2.502 /  Ventilation opening
+
+&HOLE XB=-3.00, -0.09,  3.4,  3.7, 1.01, 1.315 /  SLIT NORTH WALL
+&HOLE XB= 0.09,  3.00,  3.4,  3.7, 1.01, 1.315 /  SLIT NORTH WALL
+
+&OBST XB= -0.75, 0.75, -2.0,-1.0, 0.0, 0.15, SURF_IDS='BURNER','COLUMN','COLUMN' /  west south burner
+&OBST XB= -0.75, 0.75,  1.5, 2.5, 0.0, 0.15, SURF_IDS='BURNER','COLUMN','COLUMN' /  west north burner
+&OBST XB=  -3.5, -2.0, -0.5, 0.5, 0.0, 0.15, SURF_IDS='BURNER','COLUMN','COLUMN' /  east south burner
+&OBST XB=   2.0,  3.5, -0.5, 0.5, 0.0, 0.15, SURF_IDS='BURNER','COLUMN','COLUMN' /  east north burner
+
+&OBST XB=  -4.73, -4.73, -3.21,-2.89, 0.00, 4.79, SURF_ID='COLUMN_LF' /SW column, flange
+&OBST XB=  -4.73, -4.41, -3.05,-3.05, 0.00, 4.79, SURF_ID='COLUMN_WEB' /SW column web
+&OBST XB=  -4.41, -4.41, -3.21,-2.89, 0.00, 4.79, SURF_ID='COLUMN_RF' /SW column, flange
+
+&OBST XB=   4.41, 4.41,  -3.21,-2.89, 0.00, 4.79, SURF_ID='COLUMN_LF' /SE column, flange
+&OBST XB=   4.41, 4.73,  -3.05,-3.05, 0.00, 4.79, SURF_ID='COLUMN_WEB' /SE column web
+&OBST XB=   4.73, 4.73,  -3.21,-2.89, 0.00, 4.79, SURF_ID='COLUMN_RF' /SE column, flange
+
+&OBST XB=  -4.73, -4.73,  2.89, 3.21, 0.00, 4.79, SURF_ID='COLUMN_LF' /NW column, flange
+&OBST XB=  -4.73, -4.41,  3.05, 3.05, 0.00, 4.79, SURF_ID='COLUMN_WEB' /NW column web
+&OBST XB=  -4.41, -4.41,  2.89, 3.21, 0.00, 4.79, SURF_ID='COLUMN_RF' /NW column, flange
+
+&OBST XB=  4.41,  4.41,  2.89, 3.21, 0.00, 4.79, SURF_ID='COLUMN_LF' /NE column, flange
+&OBST XB=  4.41,  4.73,  3.05, 3.05, 0.00, 4.79, SURF_ID='COLUMN_WEB' /NE column web
+&OBST XB=  4.73,  4.73,  2.89, 3.21, 0.00, 4.79, SURF_ID='COLUMN_RF' /NE column, flange
+
+&OBST XB= -5.95, -5.95, -0.16, 0.16, 0.00, 4.79, SURF_ID='COLUMN_LF' /MW column, flange
+&OBST XB= -5.95, -5.63,  0.00, 0.00, 0.00, 4.79, SURF_ID='COLUMN_WEB' /MW column web
+&OBST XB= -5.63, -5.63, -0.16, 0.16, 0.00, 4.79, SURF_ID='COLUMN_RF' /MW column, flange
+
+&OBST XB=  5.63, 5.63,  -0.16, 0.16, 0.00, 4.79, SURF_ID='COLUMN_LF' /ME column, flange
+&OBST XB=  5.63, 5.95,   0.00, 0.00, 0.00, 4.79, SURF_ID='COLUMN_WEB' /ME column web
+&OBST XB=  5.95, 5.95,  -0.16, 0.16, 0.00, 4.79, SURF_ID='COLUMN_RF' /ME column, flange
+
+&OBST XB= -6.00, 6.00,   2.75, 2.89,  3.78, 3.78, SURF_ID='BEAM_UF' /
+&OBST XB= -6.00, 6.00,   2.82, 2.82,  3.38, 3.78, SURF_ID='BEAM_WEB'/
+&OBST XB= -6.00, 6.00,   2.75, 2.89,  3.38, 3.38, SURF_ID='BEAM_LF' /
+
+&OBST XB= -6.00, 6.00,   0.16, 0.30,  3.78, 3.78, SURF_ID='BEAM_UF' /
+&OBST XB= -6.00, 6.00,   0.23, 0.23,  3.38, 3.78, SURF_ID='BEAM_WEB'/
+&OBST XB= -6.00, 6.00,   0.16, 0.30,  3.38, 3.38, SURF_ID='BEAM_LF' /
+
+&OBST XB= -6.00, 6.00,  -2.89,-2.75,  3.78, 3.78, SURF_ID='BEAM_UF' /
+&OBST XB= -6.00, 6.00,  -2.82,-2.82,  3.38, 3.78, SURF_ID='BEAM_WEB'/
+&OBST XB= -6.00, 6.00,  -2.89,-2.75,  3.38, 3.38, SURF_ID='BEAM_LF' /
+
+DEVC ID='BEAMTC1',   QUANTITY='WALL TEMPERATURE', XYZ=  -2.16, -2.78, 3.38, IOR=3 /
+DEVC ID='BEAMTC2',   QUANTITY='WALL TEMPERATURE', XYZ=      0, -2.78, 3.38, IOR=3 /
+DEVC ID='BEAMTC3',   QUANTITY='WALL TEMPERATURE', XYZ=   2.16, -2.78, 3.38, IOR=3 /
+
+DEVC ID='BEAMTC4',   QUANTITY='WALL TEMPERATURE', XYZ=  -2.16,  0.19, 3.38, IOR=3 /
+DEVC ID='BEAMTC5',   QUANTITY='WALL TEMPERATURE', XYZ=      0,  0.19, 3.38, IOR=3 /
+DEVC ID='BEAMTC6',   QUANTITY='WALL TEMPERATURE', XYZ=   2.16,  0.19, 3.38, IOR=3 /
+
+DEVC ID='BEAMTC7',   QUANTITY='WALL TEMPERATURE', XYZ=  -2.16,  2.78, 3.38, IOR=3 /
+DEVC ID='BEAMTC8',   QUANTITY='WALL TEMPERATURE', XYZ=      0,  2.78, 3.38, IOR=3 /
+DEVC ID='BEAMTC9',   QUANTITY='WALL TEMPERATURE', XYZ=   2.16,  2.78, 3.38, IOR=3 /
+
+&VENT MB='XMIN', SURF_ID='OPEN' /
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='YMIN', SURF_ID='OPEN' /
+&VENT MB='YMAX', SURF_ID='OPEN' /
+&VENT PBZ=0.   , SURF_ID='FLOOR'/
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+
+&OBST XB=   4.52,  4.62, -0.05, 0.05, 3.22, 3.22, SURF_ID6='INERT','INERT','INERT','INERT','PLATE FRONT','PLATE BACK' /PT1
+&DEVC ID='PT1', XYZ=4.57, 0.00, 3.22,  QUANTITY='INSIDE WALL TEMPERATURE',DEPTH=0.00079, IOR=-3 /
+&DEVC ID='PT1_G', XYZ=4.5, 0.00, 3.22, QUANTITY='THERMOCOUPLE'/
+
+&OBST XB= -0.355,-0.255, -0.05, 0.05, 3.27, 3.27, SURF_ID6='INERT','INERT','INERT','INERT','PLATE FRONT','PLATE BACK' /PT2
+&DEVC ID='PT2', XYZ=-0.305, 0.00, 3.27,  QUANTITY='INSIDE WALL TEMPERATURE',DEPTH=0.00079, IOR=-3 /
+&DEVC ID='PT2_G', XYZ=-0.25, 0.00, 3.27, QUANTITY='THERMOCOUPLE'/
+
+&OBST XB= -0.05,  0.05,   -0.1, -0.1, 3.54, 3.62, SURF_ID6='INERT','INERT','PLATE FRONT','PLATE BACK','INERT','INERT' /PT3
+&DEVC ID='PT3', XYZ=0.00, -0.1, 3.58,  QUANTITY='INSIDE WALL TEMPERATURE',DEPTH=0.00079, IOR=-2 /
+&DEVC ID='PT3_G', XYZ= 0.1, -0.1, 3.58, QUANTITY='THERMOCOUPLE'/
+
+&SURF ID = 'PLATE FRONT'
+      COLOR = 'BLACK'
+      MATL_ID = 'INCONEL','CERABLANKET'
+      THICKNESS = 0.00079,0.0254 /
+
+&SURF ID = 'PLATE BACK'
+      COLOR = 'PINK'
+      MATL_ID = 'CERABLANKET','INCONEL'
+      THICKNESS = 0.0254,0.00079 /
+
+&MATL ID='CERABLANKET'
+      DENSITY=128.
+      CONDUCTIVITY_RAMP='k_ins'
+      SPECIFIC_HEAT = 1.13 /
+
+&RAMP ID='k_ins', T=  20., F=0.06 /
+&RAMP ID='k_ins', T= 260., F=0.06 /
+&RAMP ID='k_ins', T= 400., F=0.10 /
+&RAMP ID='k_ins', T= 600., F=0.15 /
+&RAMP ID='k_ins', T= 800., F=0.20 /
+&RAMP ID='k_ins', T=1000., F=0.27 /
+
+&MATL ID='INCONEL'
+      EMISSIVITY=0.90
+      DENSITY=8470.
+      CONDUCTIVITY_RAMP='k_inc'
+      SPECIFIC_HEAT_RAMP='c_inc' /
+
+&RAMP ID='k_inc', T= 20., F=14.9 /
+&RAMP ID='k_inc', T=100., F=15.9 /
+&RAMP ID='k_inc', T=200., F=17.3 /
+&RAMP ID='k_inc', T=300., F=19.0 /
+&RAMP ID='k_inc', T=400., F=20.5 /
+&RAMP ID='k_inc', T=500., F=22.1 /
+&RAMP ID='k_inc', T=600., F=23.9 /
+&RAMP ID='k_inc', T=700., F=25.7 /
+&RAMP ID='k_inc', T=800., F=27.5 /
+
+&RAMP ID='c_inc', T= 20., F=0.444 /
+&RAMP ID='c_inc', T=100., F=0.465 /
+&RAMP ID='c_inc', T=200., F=0.486 /
+&RAMP ID='c_inc', T=300., F=0.502 /
+&RAMP ID='c_inc', T=400., F=0.519 /
+&RAMP ID='c_inc', T=500., F=0.536 /
+&RAMP ID='c_inc', T=600., F=0.578 /
+&RAMP ID='c_inc', T=700., F=0.595 /
+&RAMP ID='c_inc', T=800., F=0.611 /
+&RAMP ID='c_inc', T=900., F=0.628 /
+
+&DEVC ID='HG1',  XYZ=4.57, -2.43, 3.1,  QUANTITY='GAUGE HEAT FLUX', IOR= 2 /
+&DEVC ID='HG2',  XYZ=3.38, -3.35, 3.1,  QUANTITY='GAUGE HEAT FLUX', IOR= 2 /
+&DEVC ID='HG3',  XYZ=-3.38, 3.51, 3.1,  QUANTITY='GAUGE HEAT FLUX', IOR= -2 /
+
+&DEVC ID='TC1',   QUANTITY='THERMOCOUPLE', XYZ= -3.38, -2.00, 3.475 /12inch below beam bottom
+&DEVC ID='TC2',   QUANTITY='THERMOCOUPLE', XYZ= -0.94, -2.00, 3.475 /
+&DEVC ID='TC3',   QUANTITY='THERMOCOUPLE', XYZ=  0.94, -2.00, 3.475 /
+&DEVC ID='TC4',   QUANTITY='THERMOCOUPLE', XYZ=  3.38, -2.00, 3.475 /
+&DEVC ID='TC5',   QUANTITY='THERMOCOUPLE', XYZ=  2.16, -0.91, 3.475 /
+&DEVC ID='TC6',   QUANTITY='THERMOCOUPLE', XYZ=  4.57, -0.91, 3.475 /
+&DEVC ID='TC7',   QUANTITY='THERMOCOUPLE', XYZ=  -4.57, 0.91, 3.475 /
+&DEVC ID='TC8',   QUANTITY='THERMOCOUPLE', XYZ=  -2.16, 0.91, 3.475 /
+&DEVC ID='TC9',   QUANTITY='THERMOCOUPLE', XYZ=  -3.38, 2.00, 3.475 /
+&DEVC ID='TC10',   QUANTITY='THERMOCOUPLE', XYZ= -0.94, 2.00, 3.475 /
+&DEVC ID='TC11',   QUANTITY='THERMOCOUPLE', XYZ=  0.94, 2.00, 3.475 /
+&DEVC ID='TC12',   QUANTITY='THERMOCOUPLE', XYZ=  3.38, 2.00, 3.475 / 
+
+&DEVC ID='T1_1',   QUANTITY='THERMOCOUPLE', XYZ=  -2.16, -2.00, 1.016 /TC tree 1
+&DEVC ID='T1_2',   QUANTITY='THERMOCOUPLE', XYZ=  -2.16, -2.00, 1.759 / 
+&DEVC ID='T1_3',   QUANTITY='THERMOCOUPLE', XYZ=  -2.16, -2.00, 2.502 /
+&DEVC ID='T1_4',   QUANTITY='THERMOCOUPLE', XYZ=  -2.16, -2.00, 3.022 /
+
+&DEVC ID='T2_1',   QUANTITY='THERMOCOUPLE', XYZ=   0.0, 0.91, 1.016 /TC tree 2
+&DEVC ID='T2_2',   QUANTITY='THERMOCOUPLE', XYZ=   0.0, 0.91, 1.759 / 
+&DEVC ID='T2_3',   QUANTITY='THERMOCOUPLE', XYZ=   0.0, 0.91, 2.502 /
+&DEVC ID='T2_4',   QUANTITY='THERMOCOUPLE', XYZ=   0.0, 0.91, 3.022 /
+
+&DUMP DT_DEVC=30., DT_HRR=30., SIG_FIGS=4, SIG_FIGS_EXP=2/
+
+&SLCF PBY=0.01, QUANTITY='TEMPERATURE',                                CELL_CENTERED=.TRUE. /
+&SLCF PBY=0.01, QUANTITY='VOLUME FRACTION', SPEC_ID='OXYGEN',          CELL_CENTERED=.TRUE. /
+&SLCF PBY=0.01, QUANTITY='VOLUME FRACTION', SPEC_ID='METHANE',         CELL_CENTERED=.TRUE. /
+&SLCF PBY=0.01, QUANTITY='VOLUME FRACTION', SPEC_ID='CARBON DIOXIDE',  CELL_CENTERED=.TRUE. /
+&SLCF PBY=0.01, QUANTITY='VOLUME FRACTION', SPEC_ID='CARBON MONOXIDE', CELL_CENTERED=.TRUE. /
+
+BNDF QUANTITY='WALL TEMPERATURE', CELL_CENTERED=.TRUE. /
+
+&TAIL /
+

@@ -20,6 +20,33 @@ export INDIR=Current_Results
 JOB_PREFIX=
 export STOPFDSMAXITER=
 DV=
+TCP=
+EXE=
+resource_manager=
+walltime=
+showcommandline=
+showscript=
+
+INTEL="-I"
+# the mac doesn't have Intel MPI
+if [ "`uname`" == "Darwin" ] ; then
+  INTEL=
+fi
+
+function get_full_path {
+  filepath=$1
+
+  if [[ $filepath == /* ]]; then
+    full_filepath=$filepath
+  else
+    dir_filepath=$(dirname  "${filepath}")
+    filename_filepath=$(basename  "${filepath}")
+    curdir=`pwd`
+    cd $dir_filepath
+    full_filepath=`pwd`/$filename_filepath
+    cd $curdir
+  fi
+}
 
 function usage {
 echo "Run_All.sh [ -b -h -o output_dir -q queue_name -s -x ]"
@@ -27,27 +54,43 @@ echo "Runs FDS validation set"
 echo ""
 echo "Options"
 echo "-b - use debug version of FDS"
+echo "-e exe - run using exe (full path to fds)."
+echo "      Note: environment must be defined to use this executable"
 echo "-h - display this message"
+echo "-I - run with Intel MPI version of fds"
 echo "-j job_prefix - specify job prefix"
 echo "-m n - run cases only n time steps"
 echo "-o output_dir - specify output directory"
 echo "     default: Current_Results"
+echo "-O - run with Open MPI version of fds"
 echo "-q queue_name - run cases using the queue queue_name"
 echo "     default: batch"
-echo "     other options: fire60s, fire70s, vis"
+echo "-r resource_manager - default: PBS, other options: SLURM"
 echo "-s - stop FDS runs"
 echo "-u - use development version of FDS"
+echo "-v - show script run by qfds.sh for each validation case"
+echo "-V - show qfds.sh command line for each validation case"
+echo "-w walltime - default: empty, PBS: hh:mm:ss, SLURM: dd-hh:mm:ss"
 echo "-x - do not copy FDS input files"
 echo "-y - overwrite existing files"
 exit
 }
 
 DEBUG=$OPENMP
-while getopts 'bhIj:m:o:q:suxy' OPTION
+while getopts 'be:EhIj:m:o:Oq:r:suvVw:xy' OPTION
 do
 case $OPTION in
   b)
    DEBUG="-b $OPENMP"
+   ;;
+  e)
+   EXE="$OPTARG"
+   INTEL=
+   DV=
+   DEBUG=
+   ;;
+  E)
+   TCP="-E "
    ;;
   h)
   usage;
@@ -55,20 +98,40 @@ case $OPTION in
   j)
    JOBPREFIX="-j $OPTARG"
    ;;
+  I)
+   INTEL="-I"
+   EXE=
+   ;;
   m)
    export STOPFDSMAXITER="$OPTARG"
    ;;
   o)
    INDIR="$OPTARG"
    ;;
+  O)
+   INTEL="-L"
+   EXE=
+   ;;
   q)
    QUEUE="$OPTARG"
+   ;;
+  r)
+   resource_manager="$OPTARG"
    ;;
   s)
    export STOPFDS=1
    ;;
   u)
-  DV="-u"
+  DV="-T dv"
+   ;;
+  V)
+  showcommandline="-V"
+   ;;
+  v)
+  showscript="-v"
+   ;;
+  w)
+   walltime="-w $OPTARG"
    ;;
   x)
    export DONOTCOPY=1
@@ -79,13 +142,24 @@ case $OPTION in
 esac
 done
 
-export QFDS="$SCRIPTDIR/qfds.sh -f $REPO $DV "
+if [ "$EXE" != "" ]; then
+  get_full_path $EXE
+  EXE="-e $full_filepath"
+fi
+
+export QFDS="$SCRIPTDIR/qfds.sh -f $REPO $walltime $showcommandline $showscript $DV $INTEL $EXE"
 
 if [ "$QUEUE" != "" ]; then
    QUEUE="-q $QUEUE"
 fi
 DEBUG="$DEBUG $JOBPREFIX"
+DEBUG="$DEBUG $TCP"
 
+if [ "$resource_manager" == "SLURM" ]; then
+   export RESOURCE_MANAGER="SLURM"
+else
+   export RESOURCE_MANAGER="PBS"
+fi
 ##############################################################
 
 # Skip if STOPFDS (-s option) is specified

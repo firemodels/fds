@@ -1,4 +1,4 @@
-&HEAD CHID='openmp_test64b', TITLE='General purpose input file to test FDS timings, SVN : 19308 $' /
+&HEAD CHID='openmp_test64b', TITLE='General purpose input file to test FDS timings' /
 
 REM DO NOT EDIT the .fds input files directly.  When making changes:
 REM 1. edit the template file, makecase.sh

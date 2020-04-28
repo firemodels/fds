@@ -161,7 +161,7 @@ On the following page there are eight plots comparing the predicted and measured
 
 \section{McCaffrey's Plume Correlation}
 
-The following plots show the results of simulations of McCaffrey's five fires at three grid resolutions, $D^*/\dx=[5,10,20]$ (note this resolution index is used to label the legend entries). The mesh cells are cubic and the spacing is uniform (no stretching).
+The following plots show the results of simulations of McCaffrey's five fires at three grid resolutions, nominally $D^*/\dx=[5,10,20]$ (respectively, coarse, medium, and fine resolution).
 
 \begin{figure}[h!]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -169,13 +169,28 @@ The following plots show the results of simulations of McCaffrey's five fires at
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/McCaffrey_Plume/McCaffrey_Plume_Velocity_22_kW} \\
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/McCaffrey_Plume/McCaffrey_Plume_Velocity_33_kW} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/McCaffrey_Plume/McCaffrey_Plume_Velocity_45_kW} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/McCaffrey_Plume/McCaffrey_Plume_Velocity_57_kW} &
+\multicolumn{2}{c}{\includegraphics[height=2.15in]{SCRIPT_FIGURES/McCaffrey_Plume/McCaffrey_Plume_Velocity_57_kW}}
 \end{tabular*}
-\caption{McCafrrey experiments, centerline plume velocity.}
+\caption{McCaffrey Plumes, centerline plume velocity.}
 \label{McCaffrey_Plume_Velocity}
 \end{figure}
 
 \clearpage
+
+Below we plot the same results but arranged in a different way.  The height dimension is scaled by the fire Froude number and each plot represents nominally the same resolution level.
+
+\begin{figure}[h!]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/McCaffrey_Plume/McCaffrey_Velocity_Correlation_Coarse} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/McCaffrey_Plume/McCaffrey_Velocity_Correlation_Medium} \\
+\multicolumn{2}{c}{\includegraphics[height=2.15in]{SCRIPT_FIGURES/McCaffrey_Plume/McCaffrey_Velocity_Correlation_Fine}}
+\end{tabular*}
+\caption{McCaffrey Plumes, centerline plume velocity, Froude scaling.}
+\label{McCaffrey_Plume_Velocity_Froude}
+\end{figure}
+
+\clearpage
+
 
 \section{PRISME DOOR Experiments}
 
@@ -324,6 +339,211 @@ Steckler et al.~\cite{Steckler:NBSIR_82-2520} mapped the doorway/window flows in
 \end{figure}
 
 
+\clearpage
+
+\section{UL/NIJ House Experiments}
+
+Details of the UL/NIJ Experiments are presented in Section~\ref{UL_NIJ_Description}.
+
+Velocity was measured at (typically) five vertical locations in the open windows and doorways of the two houses. The bi-directional probes were evenly spaced through the height of each opening.
+
+In the single story house, the velocity profiles in the front doorway and Window~E or F are used for comparison. In the two story house, the profiles in the front doorway and Windows~K, L or A are used.
+
+Note that this data has not been included in the summary scatter plot, Fig.~\ref{Steckler_Scatterplot} because it is too noisy to make precise comparisons. It is included here mainly for qualitative comparison.
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/UL_NIJ_Houses/UL_NIJ_Single_Story_Gas_1_BDP_1} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/UL_NIJ_Houses/UL_NIJ_Single_Story_Gas_1_BDP_6} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/UL_NIJ_Houses/UL_NIJ_Single_Story_Gas_2_BDP_1} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/UL_NIJ_Houses/UL_NIJ_Single_Story_Gas_2_BDP_6} \\
+\multicolumn{2}{c}{\includegraphics[height=2.15in]{SCRIPT_FIGURES/UL_NIJ_Houses/UL_NIJ_Single_Story_Gas_5_BDP_5}}
+\end{tabular*}
+\caption{UL/NIJ Experiments, Velocity, single story house, Tests 1, 2, and 5}
+\label{UL_NIJ_Vel_Ranch_123}
+\end{figure}
+
+\begin{figure}[p]
+\begin{center}
+\begin{tabular}{c}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/UL_NIJ_Houses/UL_NIJ_Two_Story_Gas_1_BDP_1} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/UL_NIJ_Houses/UL_NIJ_Two_Story_Gas_1_BDP_3} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/UL_NIJ_Houses/UL_NIJ_Two_Story_Gas_1_BDP_4}
+\end{tabular}
+\end{center}
+\caption{UL/NIJ Experiments, Velocity, two-story house, Test 1}
+\label{UL_NIJ_Vel_Colonial_1}
+\end{figure}
+
+\begin{figure}[p]
+\begin{center}
+\begin{tabular}{c}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/UL_NIJ_Houses/UL_NIJ_Two_Story_Gas_4_BDP_1} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/UL_NIJ_Houses/UL_NIJ_Two_Story_Gas_4_BDP_3} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/UL_NIJ_Houses/UL_NIJ_Two_Story_Gas_4_BDP_4}
+\end{tabular}
+\end{center}
+\caption{UL/NIJ Experiments, Velocity, two-story house, Test 4}
+\label{UL_NIJ_Vel_Colonial_4}
+\end{figure}
+
+\begin{figure}[p]
+\begin{center}
+\begin{tabular}{c}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/UL_NIJ_Houses/UL_NIJ_Two_Story_Gas_6_BDP_3} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/UL_NIJ_Houses/UL_NIJ_Two_Story_Gas_6_BDP_6} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/UL_NIJ_Houses/UL_NIJ_Two_Story_Gas_6_BDP_1}
+\end{tabular}
+\end{center}
+\caption{UL/NIJ Experiments, Velocity, two-story house, Test 6}
+\label{UL_NIJ_Vel_Colonial_6}
+\end{figure}
+
+
+\clearpage
+
+
+\section{Waterloo Methanol Pool Fire Experiment}
+\label{Waterloo_Methanol_Velocity}
+
+Figures~\ref{Water_Methanol_Vert_Vel_1} through \ref{Water_Methanol_Vert_Vel_3} display radial profiles of measured and predicted mean (left hand plots) and root mean square (right hand plots) values of the vertical velocity above a 30~cm diameter methanol pool fire. The root mean square of the vertical velocity is given by:
+\be
+   \left( \overline{w'w'} \right)^{1/2} = \sqrt{ \frac{ \sum_{i=1}^n (w_i-\overline{w})^2 }{n-1} }
+\ee
+where $w_i$ is the instantaneous value of the vertical velocity and $\overline{w}$ is the average value over 50~s. The profile heights range from 2~cm to 30~cm above the pool surface. Time resolved velocity measurements were performed using a two component laser doppler anemometer.
+
+Figures~\ref{Water_Methanol_Hori_Vel_1} through \ref{Water_Methanol_Hori_Vel_3} display radial profiles of measured and predicted mean (left hand plots) and root mean square (right hand plots) values of the horizontal velocity.
+
+Figures~\ref{Water_Methanol_upwp_1} through \ref{Water_Methanol_upwp_2} display radial profiles of measured and predicted estimates of the horizontal and vertical velocity covariance:
+\be
+   \overline{u'w'} = \frac{ \sum_{i=1}^n (u_i-\overline{u})(w_i-\overline{w}) }{n-1}
+\ee
+where $u_i$ and $w_i$ are instantaneous values of the horizontal and vertical components of velocity and $\overline{u}$ and $\overline{w}$ are 50~s time averages.
+
+The FDS results are shown at three grid resolutions, 0.5~cm, 1~cm, and 2~cm.
+
+
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_Vertical_Velocity_2_cm} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_RMS_Vertical_Velocity_2_cm} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_Vertical_Velocity_4_cm} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_RMS_Vertical_Velocity_4_cm} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_Vertical_Velocity_6_cm} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_RMS_Vertical_Velocity_6_cm} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_Vertical_Velocity_8_cm} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_RMS_Vertical_Velocity_8_cm}
+\end{tabular*}
+\caption[Waterloo Methanol, radial mean and rms vertical velocity, 2~cm to 8~cm above burner]
+{Waterloo Methanol, radial profiles of mean and rms vertical velocity, 2~cm to 8~cm above the burner.}
+\label{Water_Methanol_Vert_Vel_1}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_Vertical_Velocity_10_cm} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_RMS_Vertical_Velocity_10_cm} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_Vertical_Velocity_12_cm} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_RMS_Vertical_Velocity_12_cm} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_Vertical_Velocity_14_cm} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_RMS_Vertical_Velocity_14_cm} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_Vertical_Velocity_16_cm} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_RMS_Vertical_Velocity_16_cm}
+\end{tabular*}
+\caption[Waterloo Methanol, radial mean and rms vertical velocity, 10~cm to 16~cm above burner]
+{Waterloo Methanol, radial profiles of mean and rms vertical velocity, 10~cm to 16~cm above the burner.}
+\label{Water_Methanol_Vert_Vel_2}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_Vertical_Velocity_18_cm} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_RMS_Vertical_Velocity_18_cm} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_Vertical_Velocity_20_cm} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_RMS_Vertical_Velocity_20_cm} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_Vertical_Velocity_30_cm} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_RMS_Vertical_Velocity_30_cm}
+\end{tabular*}
+\caption[Waterloo Methanol, radial mean and rms vertical velocity, 18~cm to 30~cm above burner]
+{Waterloo Methanol, radial profiles of mean and rms vertical velocity, 18~cm to 30~cm above the burner.}
+\label{Water_Methanol_Vert_Vel_3}
+\end{figure}
+
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_Horizontal_Velocity_2_cm} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_RMS_Horizontal_Velocity_2_cm} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_Horizontal_Velocity_4_cm} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_RMS_Horizontal_Velocity_4_cm} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_Horizontal_Velocity_6_cm} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_RMS_Horizontal_Velocity_6_cm} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_Horizontal_Velocity_8_cm} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_RMS_Horizontal_Velocity_8_cm}
+\end{tabular*}
+\caption[Waterloo Methanol, radial mean and rms horizontal velocity, 2~cm to 8~cm above burner]
+{Waterloo Methanol, radial profiles of mean and rms horizontal velocity, 2~cm to 8~cm above the burner.}
+\label{Water_Methanol_Hori_Vel_1}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_Horizontal_Velocity_10_cm} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_RMS_Horizontal_Velocity_10_cm} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_Horizontal_Velocity_12_cm} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_RMS_Horizontal_Velocity_12_cm} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_Horizontal_Velocity_14_cm} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_RMS_Horizontal_Velocity_14_cm} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_Horizontal_Velocity_16_cm} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_RMS_Horizontal_Velocity_16_cm}
+\end{tabular*}
+\caption[Waterloo Methanol, radial mean and rms horizontal velocity, 10~cm to 16~cm above burner]
+{Waterloo Methanol, radial profiles of mean and rms horizontal velocity, 10~cm to 16~cm above the burner.}
+\label{Water_Methanol_Hori_Vel_2}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_Horizontal_Velocity_18_cm} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_RMS_Horizontal_Velocity_18_cm} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_Horizontal_Velocity_20_cm} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_RMS_Horizontal_Velocity_20_cm} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_Horizontal_Velocity_30_cm} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_RMS_Horizontal_Velocity_30_cm}
+\end{tabular*}
+\caption[Waterloo Methanol, radial mean and rms horizontal velocity, 18~cm to 30~cm above burner]
+{Waterloo Methanol, radial profiles of mean and rms horizontal velocity, 18~cm to 30~cm above the burner.}
+\label{Water_Methanol_Hori_Vel_3}
+\end{figure}
+
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_u_prime_w_prime_2_cm} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_u_prime_w_prime_4_cm} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_u_prime_w_prime_6_cm} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_u_prime_w_prime_8_cm} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_u_prime_w_prime_10_cm} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_u_prime_w_prime_12_cm}
+\end{tabular*}
+\caption[Waterloo Methanol, radial profiles of $\overline{u'w'}$, 2~cm to 12~cm above the burner]
+{Waterloo Methanol, radial profiles of $\overline{u'w'}$, 2~cm to 12~cm above the burner.}
+\label{Water_Methanol_upwp_1}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_u_prime_w_prime_14_cm} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_u_prime_w_prime_16_cm} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_u_prime_w_prime_18_cm} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_u_prime_w_prime_20_cm} \\
+\multicolumn{2}{c}{\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_u_prime_w_prime_30_cm}}
+\end{tabular*}
+\caption[Waterloo Methanol, radial profiles of $\overline{u'w'}$, 14~cm to 30~cm above the burner]
+{Waterloo Methanol, radial profiles of $\overline{u'w'}$, 14~cm to 30~cm above the burner.}
+\label{Water_Methanol_upwp_2}
+\end{figure}
 
 \clearpage
 

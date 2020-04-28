@@ -1,10 +1,10 @@
 @echo on
+set from=%1
 
 echo Setting up compiler environment
-call ..\..\Scripts\setup_intel_compilers.bat
-
-echo Setting up mpi environment
-call "%IFORT_COMPILER%\MPI\intel64\bin\mpivars.bat"
+call ..\..\..\Build\Scripts\setup_intel_compilers.bat
 
 make VPATH=".." -f "..\makefile" impi_intel_win
+if x%from% == xbot goto skip2
 pause
+:skip2

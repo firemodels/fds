@@ -21,7 +21,7 @@ coupling -- just a fixed external heat flux of 50 kW/m2.
       E(1) = 0
       EMISSIVITY=0.949
       DENSITY=1425.
-	  THRESHOLD_TEMPERATURE=165.
+      THRESHOLD_TEMPERATURE=165.
       NU_MATL=1.
       MATL_ID='Liq'
       HEAT_OF_REACTION=141.
@@ -54,12 +54,13 @@ coupling -- just a fixed external heat flux of 50 kW/m2.
       DENSITY=120.0
       EMISSIVITY=1
       ABSORPTION_COEFFICIENT=50000/
-	
+
 &SURF ID='POMSLAB'
       COLOR='BLACK'
       MATL_ID='POM','FOIL','FOAMGLAS'
       THICKNESS=0.0067,0.0000343,0.0254
-	  HEAT_TRANSFER_COEFFICIENT=0.
+      STRETCH_FACTOR=1.
+      HEAT_TRANSFER_COEFFICIENT=0.
       EXTERNAL_FLUX=50 /  External Flux is ONLY for this simple demo exercise
 
 &VENT XB=-0.05,0.05,-0.05,0.05,0.0,0.0, SURF_ID = 'POMSLAB' /

@@ -7,10 +7,12 @@
 close all
 clear all
 
+disp('christifire ...')
+
 % Set global reaction rate parameters
 
 expdir = '../../../exp/CHRISTIFIRE/';
-outdir = '../../../out/CHRISTIFIRE/FDS_Output_Files/';
+outdir = '../../../out/CHRISTIFIRE/';
 
 skip_case = 0;
 if ~exist([outdir,'CHRISTIFIRE_S701_tga_N2_v1_devc.csv'])
@@ -18,23 +20,23 @@ if ~exist([outdir,'CHRISTIFIRE_S701_tga_N2_v1_devc.csv'])
     skip_case = 1;
 end
 if ~exist([outdir,'CHRISTIFIRE_S701_tga_N2_v2_devc.csv'])
-    display('Error: File CHRISTIFIRE_S701_tga_N2_v1_devc.csv does not exist. Skipping case.')
+    display('Error: File CHRISTIFIRE_S701_tga_N2_v2_devc.csv does not exist. Skipping case.')
     skip_case = 1;
 end
 if ~exist([outdir,'CHRISTIFIRE_S701_tga_air_v1_devc.csv'])
-    display('Error: File CHRISTIFIRE_S701_tga_N2_v1_devc.csv does not exist. Skipping case.')
+    display('Error: File CHRISTIFIRE_S701_tga_air_v1_devc.csv does not exist. Skipping case.')
     skip_case = 1;
 end
 if ~exist([outdir,'CHRISTIFIRE_S701_tga_air_v2_devc.csv'])
-    display('Error: File CHRISTIFIRE_S701_tga_N2_v1_devc.csv does not exist. Skipping case.')
+    display('Error: File CHRISTIFIRE_S701_tga_air_v2_devc.csv does not exist. Skipping case.')
     skip_case = 1;
 end
 if ~exist([outdir,'CHRISTIFIRE_S701_mcc_v1_devc.csv'])
-    display('Error: File CHRISTIFIRE_S701_tga_N2_v1_devc.csv does not exist. Skipping case.')
+    display('Error: File CHRISTIFIRE_S701_mcc_v1_devc.csv does not exist. Skipping case.')
     skip_case = 1;
 end
 if ~exist([outdir,'CHRISTIFIRE_S701_mcc_v2_devc.csv'])
-    display('Error: File CHRISTIFIRE_S701_tga_N2_v1_devc.csv does not exist. Skipping case.')
+    display('Error: File CHRISTIFIRE_S701_mcc_v2_devc.csv does not exist. Skipping case.')
     skip_case = 1;
 end
 if ~exist([outdir,'CHRISTIFIRE_I701_tga_N2_v1_devc.csv'])
@@ -42,15 +44,15 @@ if ~exist([outdir,'CHRISTIFIRE_I701_tga_N2_v1_devc.csv'])
     skip_case = 1;
 end
 if ~exist([outdir,'CHRISTIFIRE_I701_tga_N2_v2_devc.csv'])
-    display('Error: File CHRISTIFIRE_I701_tga_N2_v1_devc.csv does not exist. Skipping case.')
+    display('Error: File CHRISTIFIRE_I701_tga_N2_v2_devc.csv does not exist. Skipping case.')
     skip_case = 1;
 end
 if ~exist([outdir,'CHRISTIFIRE_I701_mcc_v1_devc.csv'])
-    display('Error: File CHRISTIFIRE_I701_tga_N2_v1_devc.csv does not exist. Skipping case.')
+    display('Error: File CHRISTIFIRE_I701_mcc_v1_devc.csv does not exist. Skipping case.')
     skip_case = 1;
 end
 if ~exist([outdir,'CHRISTIFIRE_I701_mcc_v2_devc.csv'])
-    display('Error: File CHRISTIFIRE_I701_tga_N2_v1_devc.csv does not exist. Skipping case.')
+    display('Error: File CHRISTIFIRE_I701_mcc_v2_devc.csv does not exist. Skipping case.')
     skip_case = 1;
 end
 if ~exist([outdir,'CHRISTIFIRE_C701_cone_25_v1_devc.csv'])
@@ -100,11 +102,11 @@ set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 plot(S_tga_N2(:,1),S_tga_N2(:,2),'k');
 hold on
-plot(S_tga_air_v1(:,2),S_tga_air_v1(:,4)./max(S_tga_air_v1(:,4)).*100, ...
-    S_tga_air_v2(:,2),S_tga_air_v2(:,4)./max(S_tga_air_v2(:,4)).*100)
+plot(S_tga_N2_v1(:,2),S_tga_N2_v1(:,4)./max(S_tga_N2_v1(:,4)).*100, ...
+    S_tga_N2_v2(:,2),S_tga_N2_v2(:,4)./max(S_tga_N2_v2(:,4)).*100)
 plot(S_tga_air(:,1),S_tga_air(:,2),'k--')
-plot(S_tga_N2_v1(:,2),S_tga_N2_v1(:,4)./max(S_tga_N2_v1(:,4)).*100, '--', ...
-    S_tga_N2_v2(:,2),S_tga_N2_v2(:,4)./max(S_tga_N2_v2(:,4)).*100, '--')
+plot(S_tga_air_v1(:,2),S_tga_air_v1(:,4)./max(S_tga_air_v1(:,4)).*100, '--', ...
+    S_tga_air_v2(:,2),S_tga_air_v2(:,4)./max(S_tga_air_v2(:,4)).*100, '--')
 
 xlabel('Temperature (\circC)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 ylabel('Mass (%)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
@@ -130,6 +132,7 @@ addverstr(gca,git_file,'linear')
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'Units',Paper_Units);
+set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 plotname = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_S701_tga';

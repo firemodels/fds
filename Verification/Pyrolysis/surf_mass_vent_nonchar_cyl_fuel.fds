@@ -34,7 +34,7 @@
 	NU_SPEC		= 1.0
         SPEC_ID         = 'WOOD'
 	HEAT_OF_REACTION= 1000
-	HEAT_OF_COMBUSTION(1) = 12000/
+	HEAT_OF_COMBUSTION = 12000/
 	
 
 &VENT ID = 'Sample', SURF_ID = 'Wood', XB = -0.5,0.5,-0.5,0.5,0,0.0 /

@@ -12,7 +12,7 @@
 &HEAD CHID='reactionrate_lumped_two_air_2', TITLE='Lumped Species Reactions, AIR2 MASS_FRACTION_0=0' /
 &MESH IJK=4,1,4, XB=0.0,0.1,0.0,0.025,0.0,0.1 /
 &TIME T_END=1.0 DT=0.01 /
-&MISC INITIAL_UNMIXED_FRACTION=0.0, SUPPRESSION=.FALSE. /
+&COMB INITIAL_UNMIXED_FRACTION=0.0, SUPPRESSION=.FALSE. /
 
 !define primitive species and component species that define air and products
 &SPEC ID = 'PROPANE' /

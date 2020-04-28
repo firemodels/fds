@@ -1,6 +1,9 @@
 &HEAD CHID='divergence_test_1' /
 
-&MESH IJK=20,20,20, XB=0,1,0,1,0,1/
+&MESH IJK=20,20,20, XB=0,1,0,1,0,1, TRNY_ID='trny', TRNZ_ID='trnz' /
+
+&TRNY ID='trny', CC=0.5, PC=0.3 /
+&TRNZ ID='trnz', CC=0.7, PC=0.4 /
 
 &MISC STRATIFICATION=.FALSE., Y_CO2_INFTY=0.,HUMIDITY=0./ 
 

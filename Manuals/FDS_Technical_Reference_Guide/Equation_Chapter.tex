@@ -126,21 +126,18 @@ Note that $z$ is the spatial coordinate in the direction of gravity; thus, the s
 described in terms of the differences in the background pressures, eliminating the need to solve detailed flow equations within the ventilation ducts.
 
 The second consequence of the low Mach number approximation is that the internal energy, $e$, and enthalpy, $h$, may be related in terms of the thermodynamic (background) pressure: $h = e + \bp/\rho$.  The energy conservation equation may then be written in terms of the {\em sensible enthalpy}, $h_{\rm s}$:
-\be \dod{ }{t}(\rho h_{\rm s}) + \nabla\!\cdot (\rho h_{\rm s} \bu) = \DoD{\bp}{t} + \dq''' + \dq_{\rm b}'''
-        - \nabla\!\cdot \dbq'' \label{energy} \ee
-The term
-$\dq'''$ is the heat release rate per unit volume from a chemical reaction.
-The term $\dq_{\rm b}'''$ is the energy transferred to subgrid-scale droplets and particles.
-The term $\dbq''$ represents the conductive, diffusive, and radiative heat fluxes:
+\be \dod{ }{t}(\rho h_{\rm s}) + \nabla\!\cdot (\rho h_{\rm s} \bu) = \DoD{\bp}{t} + \dq''' + \dq_{\rm b}''' - \nabla\!\cdot \dbq'' \label{energy} 
+\ee
+The term $\dq'''$ is the heat release rate per unit volume from a chemical reaction. The term $\dq_{\rm b}'''$ is the energy transferred to subgrid-scale droplets and particles. The term $\dbq''$ represents the conductive, diffusive, and radiative heat fluxes:
 \be
-   \dbq'' = -k \nabla T - \sum_\alpha h_{\rm s,\alpha} \, \rho \, D_\alpha \nabla Z_\alpha + \dbq_{\rm r}''
+   \dbq'' = -k \nabla T - \sum_\alpha h_{\rm s,\alpha} \, \rho \, D_\alpha \nabla Z_\alpha + \dbq_{\rm r}''  \label{bqdot_def}
 \ee
 where $k$ is the thermal conductivity and $D_\alpha$ is the diffusivity of species $\alpha$.
 
 Eq.~(\ref{energy}) is not solved explicitly. Instead, the velocity divergence is factored out as follows:
 \be
 \label{eqn_simplediv1}
-\Div\mathbf{u} = \frac{1}{\rho h_{\rm s}} \left[ \DoD{}{t} (\bp-\rho h_{\rm s}) + \dq''' + \dq_{\rm r}''' + \dq_{\rm b}^\ppp - \Div \dot{\mathbf{q}}^\pp \right]
+\Div\mathbf{u} = \frac{1}{\rho h_{\rm s}} \left[ \DoD{}{t} (\bp-\rho h_{\rm s}) + \dq''' + \dq_{\rm b}^\ppp - \Div \dot{\mathbf{q}}^\pp \right]
 \ee
 The hydrodynamics solver guarantees that Eq.~(\ref{eqn_simplediv1}) is satisfied.  It follows that Eq.~(\ref{energy}) is also satisfied (energy is conserved).
 

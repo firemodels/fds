@@ -1,0 +1,23 @@
+&HEAD CHID='obst_rotbox', TITLE='Test of MULT/OBST rotated box'/
+
+&MESH IJK=50,50,50, XB=-0.125,0.125,-0.125,0.125,-0.125,0.125/
+
+&TIME T_END=0/
+
+&SURF ID='wall', DEFAULT=T, COLOR='INVISIBLE'/
+&SURF ID='shape', COLOR='GRAY'/
+
+&MULT ID='cube array', DX=0.005,DY=0.005,DZ=0.005, I_UPPER=41,J_UPPER=41,K_UPPER=41/
+
+&OBST XB=-0.105,-0.100,-0.105,-0.100,-0.105,-0.100
+      MULT_ID='cube array'
+      SURF_ID='shape'
+      SHAPE='BOX'
+      LENGTH=0.075
+      WIDTH=0.025
+      HEIGHT=0.05
+      XYZ=0,0,0.01
+      ORIENTATION=0.5,0,1
+      THETA = 45. /
+
+&TAIL /

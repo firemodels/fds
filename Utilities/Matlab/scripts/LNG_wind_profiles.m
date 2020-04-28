@@ -2,13 +2,13 @@
 % 12-14-2016
 % wind_profiles.m
 %
-% Atmospheric Boundary Layer profiles, based on M-O theory as described in 
+% Atmospheric Boundary Layer profiles, based on M-O theory as described in
 % "Falcon Series Data Report", GRI-89/0138, June 1990.
 
 clear all
 close all
 
-outdir = '../../../out/LNG_Dispersion/FDS_Output_Files/';
+outdir = '../../../out/LNG_Dispersion/';
 expdir = '../../../exp/LNG_Dispersion/';
 pltdir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/LNG_Dispersion/';
 
@@ -71,8 +71,13 @@ set(legend_handle,'Fontsize',Key_Font_Size);
 xlabel('Velocity (m/s)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 ylabel('Height (m)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 
+% add Git revision if file is available
+Git_Filename = [outdir,test{i},'_git.txt'];
+addverstr(gca,Git_Filename,'linear')
+
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'Units',Paper_Units);
+set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf',[pltdir,test{i},'_vel'])
@@ -93,8 +98,12 @@ set(legend_handle,'Fontsize',Key_Font_Size);
 xlabel('Temperature (\circC)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 ylabel('Height (m)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 
+% add Git revision if file is available
+addverstr(gca,Git_Filename,'linear')
+
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'Units',Paper_Units);
+set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf',[pltdir,test{i},'_tmp'])

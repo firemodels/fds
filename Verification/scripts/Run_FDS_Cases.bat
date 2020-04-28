@@ -3,6 +3,8 @@
 set curdir=%CD%
 set DEBUG=
 set rundebug=0
+set run_all=1
+set run_subset=0
 set size=_64
 
 set stopscript=0
@@ -19,11 +21,12 @@ set CURDIR="%CD%"
 cd ..
 set BASEDIR="%CD%"
 cd ..\..
-set SVNROOT="%CD%"
+set "SVNROOT=%CD%"
 cd %BASEDIR%\scripts
 set SCRIPT_DIR="%CD%"
 cd %BASEDIR%
-set TIME_FILE="%BASEDIR%\fds_case_times.txt"
+set "TIME_FILE=%BASEDIR%\fds_case_times.txt"
+set "waitfile=%BASEDIR%\waitfile.txt"
 
 ::*** uncomment following two lines to use OpenMP
 
@@ -42,28 +45,30 @@ set RUNTFDS_E=call %SVNROOT%\fds\Verification\scripts\erase_stop.bat
 
 :: program locations
 
-::set BACKGROUNDEXE=%SVNROOT%\smv\Build\background\intel_win%size%\background.exe
-set BACKGROUNDEXE=background.exe
-
 ::set SH2BAT=%SVNROOT%\smv\Build\sh2bat\intel_win_64\sh2bat
 set SH2BAT=sh2bat
 
-set FDSBASE=fds_mpi_win%size%%DEBUG%.exe
-set FDSEXE=%SVNROOT%\fds\Build\mpi_intel_win%size%%DEBUG%\%FDSBASE%
+set FDSBASE=fds_impi_win%size%%DEBUG%.exe
+set "FDSEXE=%SVNROOT%\fds\Build\impi_intel_win%size%%DEBUG%\%FDSBASE%"
 
 :: ---------- Ensure that various programs exists
 
-call :is_file_installed %BACKGROUNDEXE%|| exit /b 1
 call :is_file_installed %FDSEXE%|| exit /b 1
 call :is_file_installed %sh2bat%|| exit /b 1
 
-set "bg=%BACKGROUNDEXE% -u 60 -m 70 -d 5 "
-set FDS=%bg%%FDSEXE%
+set "FDS=%FDSEXE% "
 
 echo.
-echo Creating FDS verification case list
-cd %BASEDIR%
-%SH2BAT% FDS_Cases.sh FDS_Cases.bat
+echo Creating verification case list
+
+if "%run_all%" == "1" (
+  cd %BASEDIR%
+  %SH2BAT% FDS_Cases.sh FDS_Cases.bat
+)
+if "%run_subset%" == "1" (
+  cd %BASEDIR%
+  %SH2BAT% FDS_Cases_Subset.sh FDS_Cases_Subset.bat
+)
 
 if "%rundebug%" == "1" (
   SET QFDS=%RUNFDS_M%
@@ -75,25 +80,60 @@ if "%rundebug%" == "1" (
 
 :: create or erase stop files
 
-cd %BASEDIR%
-call FDS_Cases.bat
+if "%run_all%" == "1" (
+  cd %BASEDIR%
+  call FDS_Cases.bat
+)
+if "%run_subset%" == "1" (
+  cd %BASEDIR%
+  call FDS_Cases_Subset.bat
+)
 
-echo.
-echo Running FDS cases
-echo.
-
-echo "FDS test cases begin" >> %TIME_FILE%
+echo "test cases begin" >> %TIME_FILE%
 date /t >> %TIME_FILE%
 time /t >> %TIME_FILE%
 
 SET QFDS=%RUNFDS_R%
 SET RUNTFDS=%RUNTFDS_R%
 
-cd %BASEDIR%
-call FDS_Cases.bat
-call :wait_until_finished
+set MPIEXEC_PORT_RANGE=
+set MPICH_PORT_RANGE=
 
+call :stop_prog hydra_bstrap_proxy.exe
+call :stop_prog mpiexec.exe
+call :stop_prog %FDSBASE%
+
+if "%run_all%" == "1" (
+  echo.
+  echo Running FDS cases
+  echo.
+  cd %BASEDIR%
+  call FDS_Cases.bat
+)
+
+if "%run_subset%" == "1" (
+  echo.
+  echo Running a Subset of FDS cases
+  echo.
+  cd %BASEDIR%
+  call FDS_Cases_Subset.bat
+)
+
+call :wait_until_finished
 goto eof
+
+:: -------------------------------------------------------------
+:stop_prog
+:: -------------------------------------------------------------
+set prog=%1
+tasklist | grep %prog%  | wc -l > items.txt
+set /p nitems=<items.txt
+if %nitems% == 0 goto skip_kill
+  echo stopping %prog%
+  taskkill /f /im %prog% >Nul
+:skip_kill
+erase items.txt
+exit /b
 
 :: -------------------------------------------------------------
 :wait_until_finished
@@ -106,6 +146,7 @@ echo Number of cases running - %numexe%
 if %numexe% == 0 goto finished
 Timeout /t 30 >nul 
 goto loop1
+erase %waitfile%
 
 :finished
 exit /b
@@ -133,6 +174,11 @@ exit /b
    set stopscript=1
    exit /b
  )
+ if /I "%1" EQU "-subset" (
+   set valid=1
+   set run_all=0
+   set run_subset=1
+ )
  if /I "%1" EQU "-debug" (
    set valid=1
    set rundebug=1
@@ -154,8 +200,9 @@ exit /b
 :usage  
 echo Run_FDS_Cases [options]
 echo. 
-echo -help  - display this message
-echo -debug - run cases using debug version of FDS
+echo -help   - display this message
+echo -debug  - run cases using the debug version of FDS
+echo -subset - run a subset of FDS cases
 exit /b
 
 :eof

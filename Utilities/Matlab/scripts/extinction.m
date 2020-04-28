@@ -22,40 +22,46 @@ addpath('../../Verification/Extinction/')
 % (4) = carbon dioxide
 % (5) = water vapor
 %-------------
-T_crit = 1600;          % critical flame temperature [K]
+T_crit = 1780;          % critical flame temperature for methane, Beyler T(OI) [K]
+Y_O2_0 = 0.156;         % Beyler OI converted to a mass fraction
 mass = 0.1;             % mass [kg]
 volume = 0.001;         % volume [m^3]
-R = 8.3145;             % gas constnat [J/mol K]
+R = 8.3145;             % gas constant [J/mol K]
 
-seed = 0.05:0.1:.95;
+mult = 1.;
+seed = 0.0029:0.005744:0.0546;  % array of fuel mass fractions
+seed = seed/mult;
 for ii = 1:10
     for jj = 1:10
         fuel_seed(jj+10*(ii-1)) = seed(ii);
     end
 end
 
-seed2 = 300:175:2035;
+seed2 = 300:175:2035;  % array of temperatures (K)
 for ii = 1:10
     for jj = 1:10
         temp_seed(jj+10*(ii-1)) = seed2(jj);
     end
 end
 
-num_samp = 100;         % number of random input sets
+num_samp = 100;         % number of input sets
 ignite=zeros(num_samp,2);
 extinct_o2=zeros(num_samp,2);
+fds_ext_o2=zeros(num_samp,2);
 extinct_fuel=zeros(num_samp,2);
-
-for i=1:num_samp
-    phi_fuel(i) = fuel_seed(i); % initial mass fraction of fuel
-    phi(i,:) = [0.77*(1-fuel_seed(i)); fuel_seed(i); 0.23*(1-fuel_seed(i)); 0.0; 0.0];  % initial mass fraction
-    T0(i) = temp_seed(i); % initial temperature [K]
-end
 
 nu = [0; -1; -2; 1; 2]; % stoichiometric coefficients
 y_MW = [28.0134; 16.042460; 31.9988; 44.0095; 18.01528]; % [g/mol]
 y_hf = [0.0; -74873; 0.0; -393522; -241826]; % [J/mol]
 pres_0 = 1.013253421185575e+05; % initial presure [Pa]
+
+o2_mult = 4.*mult;
+
+for i=1:num_samp
+    phi_fuel(i) = fuel_seed(i); % initial mass fraction of fuel
+    phi(i,:) = [(1-(o2_mult+1)*fuel_seed(i)); fuel_seed(i); o2_mult*fuel_seed(i); 0.0; 0.0];  % initial mass fractions of all species
+    T0(i) = temp_seed(i); % initial temperature [K]
+end
 
 %-----------------------
 % Determine max change in species
@@ -205,64 +211,105 @@ end
 %-----------------------
 epsilon = 1e-10;
 
-if ~exist('extinction_devc.csv')
-    display('Error: File extinction_devc.csv does not exist. Skipping case.')
+fds_file{1} = 'extinction_1_devc.csv';
+fds_file{2} = 'extinction_2_devc.csv';
+
+X_ignite=zeros(num_samp,2);
+X_fds_ignite=zeros(num_samp,2);
+X_extinct_o2=zeros(num_samp,2);
+X_fds_ext_o2=zeros(num_samp,2);
+
+for ifile=2:-1:1
+
+if ~exist(fds_file{ifile})
+    display('Error: File ',fds_file{ifile},' does not exist. Skipping case.')
     return
 end
 
-extinction_2=importdata('extinction_devc.csv');
-extinct_2(:,:)=extinction_2.data; % data
+extinct=importdata(fds_file{ifile});
+extinct_1(:,:)=extinct.data; % data
 
 for i=1:100
-   hrr_ext(:,i) = extinct_2(:,4*i-2);
-   temp_ext(:,i) = extinct_2(:,4*i-1)+273.15;
-   o2_ext(:,i) = extinct_2(:,4*i);
-   fu_ext(:,i) = extinct_2(:,4*i+1);
+   hrr_ext(:,i) = extinct_1(:,4*i-2);
+   temp_ext(:,i) = extinct_1(:,4*i-1)+273.15;
+   o2_ext(:,i) = extinct_1(:,4*i);
+   fu_ext(:,i) = extinct_1(:,4*i+1);
 end
 
 for i=1:100
     if sum(hrr_ext(:,i)) > epsilon
         fds_ignite(i,:) = [temp_ext(1,i);o2_ext(1,i)];
+        fds_ext_o2(i,:) = [0 0];
     else
         fds_ext_o2(i,:) = [temp_ext(1,i);o2_ext(1,i)];
+        fds_ignite(i,:) = [0 0];
     end
 end
 
-%-----------------------
+clear hrr_ext temp_ext o2_ext fu_ext
+
 % Simple Extinction Model
-%-----------------------
 
-simple_o2 = [0.119 0];
-simple_temp = [273.15 1600];
+if ifile==2
+   simple_o2 = [Y_O2_0 0];
+   simple_temp = [293.15 T_crit];
+else
+   simple_o2 = [Y_O2_0 0.0939 0];
+   simple_temp = [293.15 873 873];
+end
 
+% Make the plot
 
-%-----------------------
-% Plotting
-%-----------------------
 figure
 plot_style
 set(gca,'Units',Plot_Units)
 set(gca,'Position',[Scat_Plot_X Scat_Plot_Y Scat_Plot_Width Scat_Plot_Height])
 
-h=plot(simple_temp,simple_o2,'k',ignite(:,1),ignite(:,2),'rs',fds_ignite(:,1),fds_ignite(:,2),'r+',extinct_o2(:,1),extinct_o2(:,2),'bo',fds_ext_o2(:,1),fds_ext_o2(:,2),'b*','LineWidth',0.5,'MarkerSize',4);
+tmpm = 273;
+X_simple_o2 = (simple_o2/32)./(simple_o2/32 + (1-simple_o2)/28);
+X_ignite(:,2) = (ignite(:,2)/32)./(ignite(:,2)/32 + (1-ignite(:,2))/28);
+X_fds_ignite(:,2) = (fds_ignite(:,2)/32)./(fds_ignite(:,2)/32 + (1-fds_ignite(:,2))/28);
+X_extinct_o2(:,2) = (extinct_o2(:,2)/32)./(extinct_o2(:,2)/32 + (1-extinct_o2(:,2))/28);
+X_fds_ext_o2(:,2) = (fds_ext_o2(:,2)/32)./(fds_ext_o2(:,2)/32 + (1-fds_ext_o2(:,2))/28);
+
+if ifile==1 % Modify expected behavior
+   for jj=1:num_samp
+      if extinct_o2(jj,1)-tmpm>600 && X_extinct_o2(jj,2)>0 ; 
+         X_ignite(jj,2)=X_extinct_o2(jj,2);  
+         X_extinct_o2(jj,2)=0; 
+         ignite(jj,1)=extinct_o2(jj,1);
+         extinct_o2(jj,1)=0;
+      end
+   end
+end
+
+h=plot(simple_temp-tmpm,X_simple_o2,'k',...
+       ignite(:,1)-tmpm,X_ignite(:,2),'rs',...
+       fds_ignite(:,1)-tmpm,X_fds_ignite(:,2),'r+',...
+       extinct_o2(:,1)-tmpm,X_extinct_o2(:,2),'bo',...
+       fds_ext_o2(:,1)-tmpm,X_fds_ext_o2(:,2),'b*',...
+       'LineWidth',0.5,'MarkerSize',4);
 set(h([1]),'LineWidth',1)
 set(h([2 4]),'MarkerSize',7)
-axis([273.15 1900 0 0.23])
+axis([0. 1700 0 0.21])
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Scat_Label_Font_Size)
-xlabel('Temperature (K)','Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size,'FontName',Font_Name)
-ylabel('Mass Fraction Oxygen','Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size,'FontName',Font_Name)
+xlabel('Temperature (\circC)','Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size,'FontName',Font_Name)
+ylabel('Oxygen Volume Fraction','Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size,'FontName',Font_Name)
 lh=legend('Simple Model','Expected Burning','FDS Burning','Expected Extinction','FDS Extinction','Location','NorthEast');
 set(lh,'FontSize',Key_Font_Size)
 
 % add Git if file is available
 
-git_file = 'extinction_git.txt';
+git_file = 'extinction_1_git.txt';
 addverstr(gca,git_file,'linear')
 
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'Units',Paper_Units);
+set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
 set(gcf,'Position',[0 0 Scat_Paper_Width Scat_Paper_Height]);
-print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/extinction');
+print(gcf,'-dpdf',['../../Manuals/FDS_User_Guide/SCRIPT_FIGURES/' 'extinction_' num2str(ifile,'%i')]);
+
+end

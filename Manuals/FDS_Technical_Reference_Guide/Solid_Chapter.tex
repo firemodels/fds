@@ -1,4 +1,4 @@
-% !TEX root = FDS_Technical_Reference_Guide.tex
+%!TEX root = FDS_Technical_Reference_Guide.tex
 
 \typeout{new file: Solid_Chapter.tex}
 
@@ -28,6 +28,7 @@ FDS offers the user these options for cases where the obstruction surface is not
 Section~\ref{matcoefs} describes the component-averaged material properties, $k_{\rm s}$ and $\rho_{\rm s} c_{\rm s}$. The source term, $\dq_{\rm s}'''$,
 consists of chemical reactions and radiative absorption:
 \be
+  \label{eq:solid_energy_source_term}
   \dq_{\rm s}'''=\dq_{\rm s,c}'''+\dq_{\rm s,r}'''
 \ee
 Section~\ref{pyrosection} describes the term $\dq_{\rm s,c}'''$, which is essentially the heat production (loss) rate given by the  pyrolysis models for different types of solid and liquid fuels. Section~\ref{inradsection} describes the term $\dq_{\rm s,r}'''$, the radiative absorption and emission in depth.
@@ -99,8 +100,10 @@ where $k$ is the thermal conductivity of the gas, $n$ is the spatial coordinate 
 \subsubsection{Empirical Natural/Forced Convection Model}
 
 In an LES calculation, the convective heat transfer coefficient, $h$, is based on a combination of natural and forced convection correlations:
-\be \dq_{\rm c}'' = h \, (T_{\rm g} - T_{\rm w}) \quad \hbox{W/m}^2 \quad ; \quad h =
-    \max \, \left[ \; C\, |T_{\rm g}-T_{\rm w}|^\ot \; , \;  \frac{k}{L} \, \NU \right]  \quad  \si{W/(m^2.K)}
+\be \dq_{\rm c}'' = h \, (T_{\rm g} - T_{\rm w}) \quad \hbox{W/m}^2 \quad ; \quad
+    h = \max \, \left[ \; C\, |T_{\rm g}-T_{\rm w}|^\ot \; , \;
+    \frac{k}{L} \, \NU \; , \;
+    \frac{k}{\dn/2} \right]  \quad  \si{W/(m^2.K)}
     \label{eq:qconv}
 \ee
 where $C$ is a empirical coefficient for natural convection (1.52 for a horizontal plate and 1.31 for a vertical plane or cylinder)~\cite{Holman:1}, $L$ is a characteristic length related to the size of the physical obstruction, and $k$ is the thermal conductivity of the gas. The Nusselt number (Nu) depends on the geometric and flow characteristics. For many flow regimes, it has the form:
@@ -131,7 +134,7 @@ where Pr and Pr$_{\rm t}$ are the molecular and turbulent Prandtl numbers  (Pr$_
 \label{eqn_friction_temperature}
 T_{\tau} \equiv \frac{\dot{q}_{\rm c}''}{{\rho}{c_p}{u_{\tau}}}
 \end{equation}
-where $\dot{q}_{\rm c}''$, $\rho$, and $c_p$ are the convective heat flux at the wall, the gas density, and the specific heat, respectively.
+where $\dot{q}_{\rm c}''$, $\rho$, $c_p$ and $u_{\tau}$  are the convective heat flux at the wall, the gas density, the specific heat, and the friction velocity, respectively.
 
 The second term, $B_T$, on the right hand side of Eq.~\ref{eqn_t_loglaw} is a function of the molecular Prandtl number and can be determined experimentally. Mathematically, this term is the integration constant stemming from the relation between velocity and temperature gradients. Physically, it represents the resistance to the heat and momentum transport close to the wall. FDS uses the experimental correlation proposed by Kader~\cite{Kader:1981}
 \begin{align}
@@ -175,7 +178,7 @@ where $\rho_{\rm s}$ is the density of the composite material and $Y_\alpha$ is 
 \ee
 and the volume fraction of component $\alpha$ is computed as
 \be
-  X_\alpha = \frac{\rho_{\rm s,\alpha}}{\rho_\alpha}  \left/ \sum_{\alpha'=1}^{N_{\rm m}}\frac{\rho_{\rm s,\alpha'}}{\rho_{\alpha'} }  \right.
+  X_\alpha = \frac{\rho_{\rm s,\alpha}}{\rho_\alpha}  \left/ \sum_{\beta=1}^{N_{\rm m}}\frac{\rho_{\rm s,\beta}}{\rho_{\beta} }  \right.
   \label{volfrac}
 \ee
 where $\rho_\alpha$ is the true density of material $\alpha$. Multi-component solids are defined by specifying the mass fractions, $Y_\alpha$, and densities, $\rho_\alpha$, of the individual components of the composite.
@@ -184,46 +187,111 @@ where $\rho_\alpha$ is the true density of material $\alpha$. Multi-component so
 \subsection{Solid Heat Transfer 3D (Beta)}
 \label{sec:ht3d}
 
-Three-dimensional heat conduction may be implemented in FDS by setting {\ct HT3D=.TRUE.} on an {\ct OBST} line.  However, {\ct HT3D} is not currently hooked up with the pyrolysis model.  It is mainly useful for structural fire analysis. This section discusses the mathematical model for this feature.
+This section describes the governing equations for heat transfer in the 3D solver, which may be implemented in FDS by setting {\ct HT3D=.TRUE.} on an {\ct OBST} line.  In-depth radiation may be treated using an optically thick approximation \cite{Modest:2003}, as discussed below.
 
-The governing equation solved in {\ct HT3D} is
+Let $k_{\mathrm{s}}$, $\rho_{\mathrm{s}}$, and $c_{\mathrm{s}}$ denote, respectively, the thermal conductivity, density, and specific heat of the solid. The thermal properties may be functions of temperature.  The mean temperature of an Eulerian cell in the solid phase is denoted $T_{\mathrm{s}}$.  The heat flux vector is $\dot{\mathbf{q}}''$ and the volumetric heat source, either specified or from chemical reaction, is denoted $\dot{q}_{\mathrm{s}}'''$.  The governing equation for heat transfer is
 \begin{equation}
-  \rho_{\rm s} c_{\rm s} \; \dod{T_{\rm s}}{t} = \dod{}{x_i} \left( k_{\rm s} \dod{T_{\rm s}}{x_i} \right)
+  \rho_{\mathrm{s}} c_{\mathrm{s}} \; \dod{T_{\mathrm{s}}}{t} = - \Div\dot{\mathbf{q}}'' + \dot{q}_{\mathrm{s}}'''
   \label{eq:3dheat}
 \end{equation}
-Notice that we do not presently account for volumetric heat sources. Thermal properties are treated the same as in the 1D heat conduction model.  Though the thermal properties may be ramped in time, the temporal variation in the properties is not accounted for in the energy equation (that is, $\rho_{\rm s}$ and $c_{\rm s}$ are pulled outside the time derivative and this commutative error is not repaired).
 
-Equation (\ref{eq:3dheat}) is discretized with a second-order finite-volume scheme for fluxes and time integrated with explicit Euler, with an update taking place during the {\ct CORRECTOR} step of the overall FDS time integration scheme.  The ``solid temperature'' is stored in the cell center using the {\ct TMP} array (which also houses the gas phase cell temperatures).  Thermal properties at face centers are taken as averages of the neighboring cell values. Intercell flux values are continuous.  In other words, the scheme is fully conservative.  The time step is chosen to be the minimum of the LES time step, $\delta t$, and the time step required for $\mathrm{VN}=0.25$ in order to satisfy accuracy and stability constraints.
+\subsubsection*{Heat Flux}
+\label{sec:heat_flux1}
+{}
+The intercell fluxes are continuous.  If the {\ct OBST} material properties of neighboring cells are the same, then thermal properties at face centers are taken as linear averages when computing the intercell flux. The intercell flux at time level $n$ may be obtained from either of the following (in practice the first relationship is used):
+\begin{equation}
+\label{eq:intercell_flux}
+\dot{q}_{x,i+\frac{1}{2}}'' = - \left. k_{\mathrm{s}} \dod{T_{\mathrm{s}}}{x} \right|_{i+\frac{1}{2}} \approx - k_{{\mathrm{s}},i} \frac{T_{{\mathrm{s}},i+\frac{1}{2}}^n - T_{{\mathrm{s}},i}^n}{\frac{1}{2}\delta x_i} = - k_{{\mathrm{s}},i+1} \frac{T_{{\mathrm{s}},i+1}^n - T_{{\mathrm{s}},i+\frac{1}{2}}^n}{\frac{1}{2}\delta x_{i+1}}
+\end{equation}
 
-For two-way coupling between the gas and solid phase (implemented by setting {\ct HT3D=.TRUE.} on {\ct SURF}), the boundary condition is continuity of heat flux and temperature.  On the gas phase side, the heat fluxes are due to convection and radiation, and on the solid phase side the heat flux is due to conduction.  The surface temperature links all these fluxes at an instant in time.  Let $T_{\rm w}$ denote the interface temperature between the gas and solid, the face temperature of the ``wall'' cell.  The flux continuity boundary condition implies
+If the neighboring cells have different material properties (consider the $x$ direction with cell indices $i$ and $i+1$), then the cell interface temperature, $T_{s,i+\frac{1}{2}}$, is computed using
+\begin{equation}
+\label{eq:interface_tmp}
+T_{{\mathrm{s}},i+\frac{1}{2}}^n = \frac{T_{{\mathrm{s}},i}^n + \left[\frac{k_{{\mathrm{s}},i+1}}{k_{{\mathrm{s}},i}} \frac{\delta x_i}{\delta x_{i+1}}\right] T_{{\mathrm{s}},i+1}^n}{1 + \left[\frac{k_{{\mathrm{s}},i+1}}{k_{{\mathrm{s}},i}} \frac{\delta x_i}{\delta x_{i+1}}\right]}
+\end{equation}
+which reduces to a simple linear average if $k_{{\mathrm{s}},i}=k_{{\mathrm{s}},i+1}$ and $\delta x_i=\delta x_{i+1}$.
+
+\subsubsection*{Heat Flux with Local Material Deformation}
+\label{sec:heat_flux2}
+
+As a material shrinks or swells, the distance between material points decreases or increases.  It is challenging to handle this behavior on a static Eulerian grid.  Consider the situation depicted in Fig.~\ref{fig:flux_deform} where the material is shrinking.  As the temperature points move closer, the effect is to increase the intercell heat flux.  The flux becomes
+\begin{equation}
+\label{eq:fluxdef}
+\dot{q}_{x,i+\frac{1}{2}}'' \approx - k_{i+\frac{1}{2}} \frac{ T_{s,i+1}-T_{s,i}}{\frac{1}{2}(\delta \tilde{x}_i + \delta \tilde{x}_{i+1})}
+\end{equation}
+
+\begin{figure}
+\centering
+\includegraphics[height=1.25in]{FIGURES/flux_deform}
+\caption{Diagram of intercell heat flux with a shrinking material.}
+\label{fig:flux_deform}
+\end{figure}
+
+\noindent Calculation of the cell volumes, $\delta \tilde{x}$, etc., for pyrolysis with material deformation is discussed below.
+
+\subsubsection*{Boundary Conditions}
+\label{sec:boundary_conditions}
+
+For two-way coupling between the gas and solid phase the boundary condition is continuity of heat flux and temperature.  On the gas phase side, the heat fluxes are due to convection and radiation, and on the solid phase side the heat flux is due to conduction.  The surface temperature links all these fluxes at an instant in time.  Let $T_{\mathrm{w}}$ denote the interface temperature between the gas and solid, the face temperature of the ``wall cell''.  The flux continuity boundary condition implies
 \begin{equation}
 \label{eq:fluxcontinuity}
-\dot{q}_{\rm r, in}'' - \dot{q}_{\rm r, out}'' + \dot{q}_{\rm c}'' = -k_{\rm s} \left. \frac{\partial T_{\rm s}}{\partial n} \right|_{\rm w}
+\dot{q}_{{\mathrm{r}}, in}'' - \dot{q}_{{\mathrm{r}}, out}'' + \dot{q}_{\mathrm{c}}'' = -k_{\mathrm{s}} \left. \frac{\partial T_{\mathrm{s}}}{\partial n} \right|_{\mathrm{w}}
 \end{equation}
-To obtain the surface temperature, we take $\dot{q}_{\rm r, in}''$ from Eq.~(\ref{RFluxIn1}), linearize $\dot{q}_{\rm r, out}''$, and use Eq.~(\ref{eq:qconv}) for $\dot{q}_{\rm c}''$. The flux condition may then be discretized as
+To obtain the surface temperature, we take $\dot{q}_{{\mathrm{r}}, in}''$ from the radiation solver, linearize $\dot{q}_{{\mathrm{r}}, out}''$, and use Newton's law of cooling for $\dot{q}_{\mathrm{c}}''$. The flux condition may then be discretized as
 \begin{equation}
 \label{eq:discflux}
-( \dot{q}_{\rm r, in}'' )^n - \varepsilon^n \sigma \, (T_{\rm w}^n)^3 \, T_{\rm w}^{n+1} + h^n (T_{\rm g}^n - T_{\rm w}^{n+1}) = -2 \, k_{\rm s}^n \, \frac{T_{\rm s}^n - T_{\rm w}^{n+1}}{\delta n}
+( \dot{q}_{{\mathrm{r}}, in}'' )^n + 3 \varepsilon^n \sigma \, (T_{\mathrm{w}}^n)^4 - 4 \varepsilon^n \sigma \, (T_{\mathrm{w}}^n)^3 \, T_{\mathrm{w}}^{n+1} + h^n (T_{\mathrm{g}}^n - T_{\mathrm{w}}^{n+1}) = -2 \, k_{\mathrm{s}}^n \, \frac{T_{\mathrm{s}}^n - T_{\mathrm{w}}^{n+1}}{\delta}
 \end{equation}
-which leads to our final result for the boundary temperature
+where $T_{\mathrm{g}}$ is the gas temperature in the first off-wall grid cell and $n$ indicates the time level in the simulation.  Our result for the updated boundary temperature is
 \begin{equation}
 \label{eq:tmpwall}
-T_{\rm w}^{n+1} = \frac{ ( \dot{q}_{\rm r, in}'' )^n + h^n \, T_{\rm g}^n + 2 \, k_{\rm s}^n \, T_{\rm s}^n/\delta n }{ \varepsilon^n \sigma \, (T_{\rm w}^n)^3 + h^n + 2 \, k_{\rm s}^n / \delta n}
+T_{\mathrm{w}}^{n+1} = \frac{ ( \dot{q}_{{\mathrm{r}}, in}'' )^n + 3 \varepsilon^n \sigma \, (T_{\mathrm{w}}^n)^4 + h^n \, T_{\mathrm{g}}^n + 2 \, k_{\mathrm{s}}^n \, T_{\mathrm{s}}^n/\delta }{ 4 \varepsilon^n \sigma \, (T_{\mathrm{w}}^n)^3 + h^n + 2 \, k_{\mathrm{s}}^n / \delta}
 \end{equation}
 
+\subsubsection*{Surface Heat Flux Internal Wall Model}
+
+In Eqs.~(\ref{eq:discflux}) and (\ref{eq:tmpwall}), the conductive heat flux into the wall is presumed to be resolved by a length scale, $\delta$.  In the 3D heat transfer model this length scale is \emph{not} taken to be the 3D cell spacing normal to the wall---the required 3D grid resolution would make the model intractable.  Instead, an internal wall model is employed.  To be consistent with the resolution of the 1D heat conduction model, the thermal penetration depth is taken to be
+\begin{equation}
+\label{eq:pendepth}
+\delta = \sqrt{\frac{ \tau \; k_{\mathrm{s}}}{\rho_{\mathrm{s}} c_{\mathrm{s}}}}
+\end{equation}
+where $\tau$ is a somewhat arbitrary time scale set to unity.
+
+% An alternate model for the thermal penetration depth that does not rely on an arbitrary time scale is
+% \begin{equation}
+% \label{eq:pendepth2}
+% \delta = \left( \frac{\rho_{\mathrm{s}} \alpha_{\mathrm{s}}^3}{\dot{q}_w''} \right)^{1/3}
+% \end{equation}
+% where $\alpha_{\mathrm{s}} = k_{\mathrm{s}}/( \rho_{\mathrm{s}} c_{\mathrm{s}} )$.  Equation (\ref{eq:pendepth2}) is iterative since $\dot{q}_w''$ depends on $\delta$ (but convergence is very fast).  This length scale tends to be smaller than the depth given by Eq.~(\ref{eq:pendepth}).  The appropriate choice of length scale may be problem dependent.  Determining robust guidelines for grid independence of solid phase calculations is still an open area of research.  Presently, Eq.~(\ref{eq:pendepth2}) must be implemented at the source code level (there is no user hook).
+
+\subsubsection*{Internal Radiation}
+\label{sec:radiation}
+
+The \emph{absorption coefficient} of the solid is denoted $\kappa_{\mathrm{s}}$.  If $\delta \times \kappa_{\mathrm{s}} \gg 1$, the material may be considered ``optically thick'' \cite{Modest:2003}.  This applies to many problems in pyrolysis.  The optically thick approximation implies a ``radiative conductivity'',
+\begin{equation}
+\label{eq:krad}
+k_{\mathrm{r}} = \frac{16 n_{\mathrm{s}}^2 \sigma T_{\mathrm{s}}^3}{3 \kappa_{\mathrm{s}}} \,\mbox{,}
+\end{equation}
+which may simply be added to the material conductivity in the solver. Note that increasing the solid conductivity reduces the surface temperature, per Eq.~(\ref{eq:fluxcontinuity}), consistent with the notion that the radiation is not absorbed at the surface. Here, $n_{\mathrm{s}}$ is the material refractive index and $\sigma$ is the Stefan-Boltzmann constant.
+
+
+\newpage
 \section{Pyrolysis Models}
 \label{pyrosection}
 
-This section describes how solid phase reactions and the chemical source term in the solid phase heat conduction equation, $\dot{q}_{s,c}'''$,  are modeled. This is commonly referred to as the ``pyrolysis model'', but it actually can represent any number of reactive processes, including evaporation, charring, and internal heating.
+This section describes how solid phase reactions and the chemical source term in the solid phase heat conduction equation, $\dot{q}_{\rm s,c}'''$ (see Eq.~(\ref{eq:solid_energy_source_term})),  are modeled. This is commonly referred to as the ``pyrolysis model'', but it actually can represent any number of reactive processes, including evaporation, charring, and internal heating.
 
 
 \subsection{Specified Heat Release Rate}
 
-Often the intent of a fire simulation is merely to predict the transport of smoke and heat from a {\em specified} fire. In other words, the heat release rate is a specified input, not something the model predicts. In these instances, the desired HRR is translated into a mass flux for fuel at a given solid surface, which can be thought of as the surface of a burner:
+Often the intent of a fire simulation is merely to predict the transport of smoke and heat from a {\em specified} fire. In other words, the heat release rate is a specified input, not something the model predicts. In these instances, the desired heat release rate is translated into a mass flux for fuel at a given solid surface, which can be thought of as the surface of a burner:
 \be
    \dm_{\rm f}'' = \frac{ f(t) \; \dq_{\rm user}''}{\Delta H_{\si{c}}}
 \ee
-Usually, the user specifies a desired heat release rate per unit area, $\dq_{\rm user}''$, plus a time ramp, $f(t)$, and the mass loss rate is computed accordingly.
+Usually, the user specifies a desired heat release rate per unit area, $\dq_{\rm user}''$, plus a time ramp, $f(t)$, and the gas phase heat of combustion, $\Delta H_{\si{c}}$. The mass flux of fuel from the surface to the gas, $\dm_{\rm f}''$, can then be computed. A special subset of this approach is where the user also specifies a heat of combustion, density, and thickness for the burning material. If the default simple chemistry model described in Section~\ref{sec:simplechemistry}, with its single combustion reaction, is being used and there are multiple materials burning, one or more materials might have a different heat of combustion, $\Delta H_{\si{c}{\rm ,solid}}$, than the gas-phase combustion reaction. To account for this, FDS adjusts $\dm_{\rm f}''$ so that the solid phase has the appropriate mass loss rate, $\dm_{\rm f,solid}''$.
+\be
+\dm_{\rm f,solid}'' = \dm_{\rm f}'' \frac{\Delta H_{\si{c}}}{\Delta H_{\si{c}{\rm ,solid}}}
+\ee
 
 \subsection{Solid Fuels}
 
@@ -285,6 +353,7 @@ S_\alpha = \sum_{\alpha'=1}^{N_{\rm m}} \sum_{\beta=1}^{N_{\rm r,\alpha'}}
 \ee
 where $\nu_{\alpha,\alpha' \beta}$ is the yield of component $\alpha$ from reaction $\beta$ of component $\alpha'$. The volumetric production rate of each gas species, $\gamma$, is
 \be
+\label{eq:pyrolyzate}
 \dot{m}_{\gamma}''' = \rho_{\rm s}(0)\; \sum_{\alpha=1}^{N_{\rm m}} \sum_{\beta=1}^{N_{\rm r,\alpha}}
     \nu_{\rm \gamma,\alpha \beta} \; r_{\alpha \beta}
 \ee
@@ -295,10 +364,12 @@ mass fluxes are given by\footnote{In cylindrical and spherical coordinates, the 
    \dm_\gamma'' =\frac{1}{R_{\rm out}^2} \int_{R_{\rm in}}^{R_{\rm out}} \dm_\gamma'''(x) \,r^2 \d r \;\;
 \ee}
 \be
-   \dm_\gamma'' = \int_0^L \dm_\gamma'''(x) \,\d x
+\label{eq:1dmassflux_solid}
+\dm_\gamma'' = \int_0^L \dm_\gamma'''(x) \,\d x
 \ee
 where $L$ is the thickness of the solid. The chemical source term in the heat conduction equation is
 \be
+\label{eq:qchem_solid}
 \dot{q}_{\rm s,c}'''(x) = -\rho_{\rm s}(0)\; \sum_{\alpha=1}^{N_{\rm m}} \sum_{\beta=1}^{N_{\rm r,\alpha}}  r_{\alpha \beta}(x) H_{\rm r,\alpha \beta}
 \ee
 where $H_{\rm r,\alpha \beta}$ is the heat of reaction.
@@ -328,7 +399,7 @@ where $h_{\rm v}$ is the heat of vaporization, $W_{\rm F}$ is the molecular weig
 \be
 \dot{m}'' = h_{\rm m} \; \frac{\bp_m W_{\rm F}}{\R T_{\rm g}} \; \ln \left(\frac{X_{\rm F,g}-1}{X_{\rm F,\ell}-1}\right) \quad ; \quad h_{\rm m}= \frac{\SH \, D_{\rm \ell,g}}{L}
 \ee
-where $\bp_m$ is the pressure, $T_{\rm g}$ is the temperature, and $X_{\rm F,g}$ is the volume fraction of fuel vapor in the grid cell adjacent to the pool surface. The Sherwood number is given by
+where $\bp_m$ is the pressure, $T_{\rm g}$ is the temperature, and $X_{\rm F,g}$ is the volume fraction of fuel vapor in the grid cell adjacent to the pool surface. The diffusivity of the liquid species in the gas phase is $D_{\rm \ell,g}$.  The Sherwood number is given by
 \be
 \SH=0.037~\SC^{\frac{1}{3}} \RE^{\frac{4}{5}} \quad ; \quad {\rm Sc}=0.6 \quad ; \quad \RE= \frac{\rho~||\bu||~L}{\mu}
 \ee
@@ -337,6 +408,7 @@ The Reynolds number is calculated based on conditions in the cell adjacent to th
 For simplicity, the liquid fuel itself is treated like a thermally-thick solid for the purpose of computing the heat conduction. There is no computation of the convection of the liquid within the pool.
 
 \subsection{Shrinking and Swelling Materials}
+\label{sec:shrink_swell}
 
 The layer thickness is updated according to the ratio of the instantaneous material density and the density of the material in its pure form. In case of several material components, the amount of swelling and shrinking is determined by the maximum and sum of these ratios, respectively. In each time step, the size of each condensed phase cell is multiplied by the following factor:
 \be
@@ -348,90 +420,115 @@ The layer thickness is updated according to the ratio of the instantaneous mater
 \ee
 Correspondingly, the densities are divided by the factor $\delta$ to conserve mass.
 
+\subsection{Solid Pyrolysis 3D (Beta)}
 
-\newpage
-\section{Aerosol Deposition}
+To begin our discussion of pyrolysis it is useful to start with definitions of the material mass density and volume.  We consider a solid composed of a mixture of material components $\alpha$.  The \emph{material density} (a property of the material) is
+\begin{equation}
+\label{eq:matden}
+\rho_\alpha \equiv \frac{m_\alpha}{V_\alpha}
+\end{equation}
+The \emph{bulk density} is
+\begin{equation}
+\label{eq:bulkden}
+\rho_{\mathrm{s},\alpha} \equiv \frac{m_\alpha}{V_{\mathrm{s}}}
+\end{equation}
+And the \emph{total solid density} is
+\begin{equation}
+\label{eq:totalsolidden}
+\rho_{\mathrm{s}} \equiv \sum_\alpha \rho_{\mathrm{s},\alpha}
+\end{equation}
 
-By default, FDS assumes that soot is transported just like all other gaseous species. That is, the soot particles are small enough that their settling velocity is small compared to the fire-driven flows of the gas containing the soot. Near surfaces, however, other mechanisms can affect the soot, which results in its deposition onto surfaces. The removal of soot via deposition can impact the visibility for egress and the time for smoke detectors to activate. In forensic fire reconstructions, the amount of soot deposited on surfaces can be correlated to post-fire observations. The deposition of particulates is also important for computing the dispersion characteristics of aerosol toxicants like ash, radionuclides, or other particulate matter.
+The reaction kinetics and heat source terms are the same in 1D and 3D.  The bulk density of material component $\alpha$ evolves by Eq.~(\ref{solid_species_conservation}) and the chemical heat source term is given by Eq.~(\ref{eq:qchem_solid}).
 
-However, there is an option to treat any gas phase species as an aerosol that can be deposited on surfaces. Aerosol deposition is determined by applying an empirical deposition velocity to aerosols near surfaces. There are a number of phenomena that cause deposition: thermophoresis (where temperature gradients push the aerosol towards or away from the surface), gravitational settling, diffusive deposition (where the aerosols move along the boundary layer concentration
-gradient), and turbulent deposition (essentially impact deposition due to a turbulent boundary layer). Other phenomena, such as electrical fields, can also result in deposition but are not considered in FDS due to their relatively small contribution in compartment fire scenarios.
+\subsubsection*{Local Material Deformation}
+\label{sec:locmatdef}
 
-The total aerosol deposition velocity to surfaces, $u_{\rm dep}$, is determined by assuming the deposition phenomena are independent, computing a deposition velocity for each mechanism, and then summing them~\cite{Bixler:1}
-\be
-u_{\rm dep} = u_{\rm g}+u_{\rm th}+u_{\rm dt}
-\ee
-where $u_{\rm g}$ is the gravitational settling velocity (for cells near upward-facing surfaces), $u_{\rm th}$ is the thermophoretic velocity, and $u_{\rm dt}$ is the combined diffusion-turbulence velocity. If the aerosol is located in a gas-phase cell adjacent to a wall, then the aerosol (represented by the subscript $\alpha$) is removed from the gas-phase and deposited onto the surface by imposing the following boundary condition
-\be
-\dot m_{\rm dep,\alpha}'' = \rho Y_\alpha \, u_{\rm dep}
-\ee
-Using this boundary condition, the aerosol surface density that accumulates on surfaces is tracked, and the amount
-of aerosol that deposits to a surface is removed from the adjacent gas-phase cell.
-Note that the subscript $\alpha$ refers to a species that contains soot or aerosol, whereas the subscript `a'
-in the remainder of the section refers to the condensed phase soot or aerosol properties, such as mass or density.
+A discussion about how the 1D model handles shrinking and swelling materials can be found in Sec.~\ref{sec:shrink_swell}.  In this section, we deal with the same issue in 3D.  One of the key differences in the 1D and 3D models is that the concept of ``thickness'' in the 1D model is not dependent at all on the 3D computational mesh.  In the 1D solver, the material shrinks from the bottom up, with the face of the solid stationary (until the cell potentially burns away).
 
-\subsection{Gravitational Settling}
+Conversely, in 3D the solid mass is tied to the Eulerian grid cell.  The grid cell itself cannot disappear.  Instead we track the solid volume relative to the local cell volume.  This volume ratio may be computed from the material densities as follows:
+\begin{equation}
+\label{eq:volratio}
+\phi_{\mathrm{s}} \equiv \frac{V_{\mathrm{s}}}{V_{\mathrm{cell}}} = \frac{\sum_\alpha V_\alpha}{V_{\mathrm{cell}}} = \sum_\alpha \frac{m_\alpha/\rho_\alpha}{m_\alpha/\rho_{\mathrm{s},\alpha}} = \sum_\alpha \frac{\rho_{\mathrm{s},\alpha}}{\rho_\alpha}
+\end{equation}
 
-The gravitational settling velocity is given by~\cite{Davies_Charles}
-\be
-u_{\rm g} = g m_{\rm a} \frac{\text{Cn}}{6 \pi \, \chi_{\rm d} \, \mu \, r_{\rm a}}
-\ee
-where $m_{\rm a}$ is the particle mass, $\chi_{\rm d}$ is a shape factor, $\mu$ is the dynamic viscosity of air,
-$r_a$ is the particle radius, and Cn is the Cunningham slip correction factor given by~\cite{Cunningham:1}
-\be
-\text{Cn} = 1 + 1.25 \; \text{Kn} + 0.41 \; \text{Kn} \; \mathrm{e}^{-0.88/\text{Kn}}
-\ee
-where Kn is the particle Knudsen number given by the ratio of the mean free path of the gas
-to the particle radius. The mean free path of a gas is proportional to its temperature,
-thus Kn is computed as~\cite{Sippola:1}
-\be
-\text{Kn} = \frac{\lambda}{r_{\rm a}} \frac{T_{\rm g}}{T_\infty}
-\ee
-where $\lambda$ is the mean free path of gas molecules and is 0.065 $\mu$m at a temperature of 25 $^\circ$C and atmospheric pressure.
+We presently consider two simple models for material deformation: isotropic and unidirectional.  The method is based on the definition $V_{\mathrm{s}}= \phi_{\mathrm{s}} V_{\mathrm{cell}}$, which is equivalent to $\prod_i \delta \tilde{x}_i = \phi_{\mathrm{s}} \prod_i \delta x_i$. For a 2D case, if the material deforms equally in both directions (isotropic) then the spacing used to compute heat fluxes is computed from
+\begin{align}
+\label{eq:dxdefiso}
+\delta \tilde{x} &= \phi_{\mathrm{s}}^{1/2} \delta x \nonumber\\
+\delta \tilde{y} &= \phi_{\mathrm{s}}^{1/2} \delta y
+\end{align}
 
-For each aerosol species in the gas phase, a gravitational settling velocity is calculated
-and imposed on the convective term (in the z-direction) in the species transport
-equation~(Eq.~\ref{species}). This approach is similar to the drift flux model
-for smoke transport described in Hu et al.~\cite{Hu:1}. The gravitational settling velocity
-is also included in the total deposition velocity to deposit aerosols onto upward-facing flat surfaces,
-as described above.
+If, on the other hand, we have a preferred direction for mass loss (such as in a cone calorimeter test), then the deformation is considered unidirectional.  The flux spacing is computed as (deformation in $x$)
+\begin{align}
+\label{eq:dxdefuni}
+\delta \tilde{x} &= \phi_{\mathrm{s}} \delta x \nonumber\\
+\delta \tilde{y} &= \delta y
+\end{align}
 
+\subsection{Mass Transport}
+\label{sec:mass_transport}
 
-\subsection{Thermophoretic Deposition}
+The movement of pyrolysis gas through the material to the solid surface is complicated to model in detail.  In many practical codes, mass transfer resistance is simply ignored.  Thus, any gas generated via pyrolysis is imagined to instantaneously appear at the solid surface as a mass flux boundary condition to the gas phase.  The 3D model allows both instantaneous transport and diffusive transport, which we discuss below.
 
-The thermophoretic velocity is computed as
-\be
-u_{\rm th} = \frac{K_{\rm th} \nu}{T_{\rm g}} \; \frac{\d T}{\d x}
-\ee
-This requires the wall temperature gradient, which is only resolved in a DNS simulation.
-For an LES simulation, the temperature gradient is computed from the wall heat transfer coefficient.
-\be
- \frac{\d T}{\d x} = \frac{h \left( T_{\rm g} - T_{\rm w} \right)}{k_{\rm g}}
-\ee
-$K_{\rm th}$ is the thermophoretic velocity coefficient and is calculated using the following correlation~\cite{Brock:1}
-\be
- K_{\rm th} = \frac{2 \, C_{\rm s} \left(\alpha + C_{\rm t} \; \text{Kn} \right) \; \text{Cn}}{\left(1 + 3 \, C_{\rm m} \; \text{Kn} \right) \left(1 + 2 \, \alpha + 2 \, C_{\rm t} \, \text{Kn} \right) }
-\ee
-where $C_{\rm s}=1.17$ is the thermal slip coefficient, $\alpha$ is the ratio of the gas
-conductivity to the particle conductivity, $C_{\rm m}=1.14$ is the momentum accommodation
-coefficient, and $C_{\rm t}=2.18$ is the thermal accommodation coefficient.
+\subsubsection*{Gas Generation}
+\label{eq:gas_generation}
 
-\subsection{Turbulent Deposition}
+Similar to Eq.~(\ref{eq:pyrolyzate}), in 3D the mass generation rate per unit volume of pyrolysis gas component $\gamma$ in cell $i,j,k$ is given by
+\begin{equation}
+\label{eq:massprod}
+\dot{m}_{\gamma,i,j,k}''' = \rho_{\mathrm{s}}(0)_{i,j,k} \sum_{\alpha=1}^{N_{\mathrm{m}}} \sum_{\beta=1}^{N_{\mathrm{r},\alpha}} \nu_{\gamma,\alpha\beta} r_{\alpha\beta,i,j,k}
+\end{equation}
 
-The diffusion-turbulence deposition velocity depends upon the flow regime
-(diffusion, diffusion-impaction, or inertia-moderated). The deposition velocity
-for these regimes is given below~\cite{McCoy_Hanratty}.
-\be
-u_{\rm dt} = \left\{ \begin{array}{r@{\quad \quad}l}
-         0.086 \; \text{Sc}^{-0.7} \; u_{\tau}        &  \tau^+ < 0.2 \\
-         3.5 \times 10^{-4} \; {\tau^+}^2 \; u_{\tau} &  0.2 < \tau^+ < 22.9 \\
-         0.17 \; u_{\tau}                             &  \tau^+ > 22.9
-         \end{array} \right.
-\ee
-where Sc is the particle Schmidt number, or the ratio of the kinematic viscosity to the
-Brownian diffusion coefficient of the particle ($\nu/D_{\rm B}$), $u_{\tau}$ is the wall friction velocity
-computed by the wall model, and $\tau^+$ is the dimensionless stopping distance given by~\cite{Ludwig_ICONE}
-\be
- \tau^+=\frac{\rho_{\rm a} \, (2 r_{\rm a})^2}{18 \, \mu^2}  \; u_{\tau}^2 \; \rho_{\rm g}
-\ee
+\subsubsection*{Instantaneous Transport}
+\label{sec:instantaneous_transport}
+
+Similar to the 1D model, instantaneous transport is the default mode of operation in the 3D model.  However, implementation is not as straight-forward in 3D since Eulerian cells more than one cell below the surface are not usually tied to a ``wall cell''.  In 3D, unless the user specifies otherwise, mass is ejected via the nearest wall cell and the deformation model is taken to be isotropic.  Alternatively, the user may specify the direction for mass ejection and the deformation model becomes unidirectional.
+
+For instantaneous transport, the mass flux at the solid surface for a given wall cell is the summation of the mass production in the column of solid cells tied to the wall cell.  For a column of cells in the $z$ direction tied to wall cell $w$, we have
+\begin{equation}
+\label{eq:mdotint}
+\dot{m}_{\gamma,w}'' = \sum_{k \in w} \dot{m}_{\gamma,i,j,k}''' \,\delta z_k
+\end{equation}
+This is the 3D discrete analog of Eq.~(\ref{eq:1dmassflux_solid}).
+
+\subsubsection*{Diffusive Transport}
+\label{sec:diffusive_transport}
+
+A less arbitrary way to assign the pyrolysis gas to a wall cell is to simply solve a transport equation.  While the physics is not so simple in reality, an isotropic diffusion model of transport has several advantages:  It is easy to implement.  It avoids any ad hoc assumptions applied in the instantaneous model.  It handles smoldering combustion and char oxidation naturally.  And finally, while the physics are not perfect, they are usually qualitatively correct and the implementation lends itself to improvement.
+
+The diffusive transport equation for gas component $\gamma$ is given by
+\begin{equation}
+\label{eq:diff}
+\frac{\partial \rho_\gamma}{\partial t} = - \Div\mathbf{J}_\gamma + \dot{m}_{\gamma}'''
+\end{equation}
+where the diffusive flux is modeled with Fick's law,
+\begin{equation}
+\label{eq:fick}
+\mathbf{J}_\gamma = - D_{\gamma} \tilde{\nabla} \rho_\gamma
+\end{equation}
+Note that the gradient operator is written in terms of a deformed space coordinate, in the same manner as the heat flux.  In the current implementation, the diffusivity is isotropic.  The default is the gas phase molecular value for component $\gamma$.  However, the user may adjust this value if needed.
+
+\subsubsection*{Transport Boundary Conditions}
+\label{sec:transport_bcs}
+
+Consider the flux between solid cell $i$ and gas phase cell $i+1$.  The surface is denoted by F for ``face value''. The mass flux at the solid surface is taken from
+\begin{equation}
+\label{eq:massflux_boundary}
+J_{\gamma,\mathrm{F}} = - D_{\gamma,\mathrm{F}} \frac{\rho_{\gamma,\mathrm{F}} - \rho_{\gamma,i}}{\frac{1}{2}\delta \tilde{x}_i}
+\end{equation}
+where
+\begin{equation}
+\label{eq:rhoF}
+\rho_{\gamma,\mathrm{F}} =
+\left\{\begin{array}{ll}
+0                          & \mbox{if $\gamma$ is fuel} \\
+\rho Y_{\gamma,\mathrm{F}} & \mbox{if $\gamma$ is oxidizer} \\
+\rho_{\gamma,i}            & \mbox{if boundary is impermeable, $J_{\gamma,\mathrm{F}}=0$}
+\end{array}\right.
+\end{equation}
+
+The boundary conditions in Eq.~(\ref{eq:rhoF}) provide qualitatively correct behavior for the pyrolysis gases (transport \emph{out} of the solid) while allowing diffusion of oxidizer into the solid.  Using $\rho Y_{\gamma,\mathrm{F}}$ for the fuel can lead to erratic behavior caused by diffusion of fuel back into the solid, which is not physical.  This ad hoc treatment of the boundary is a limitation of the diffusion model, but we note that the scheme is no worse than the instantaneous transport out of the solid used in most 1D models.
+
+It should be noted that $\rho Y_{\gamma,\mathrm{F}}$ is currently taken from the gas phase solver at the current time level.  The mass flux is therefore time lagged between the gas phase and solid phase solvers, unlike the surface temperature from Eq.~(\ref{eq:tmpwall}).  This is a potential source of error that will be addressed in future development.
+
 

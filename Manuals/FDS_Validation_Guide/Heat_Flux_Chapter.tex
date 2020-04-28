@@ -2,9 +2,9 @@
 
 \chapter{Heat Flux}
 
-Radiative heat transfer is included in FDS via the solution of the radiation transport equation for a gray gas, and in some limited cases using a wide band model.  The equation is solved using a technique similar to finite volume methods for convective transport, thus the name given to it is the Finite Volume Method (FVM).  Using approximately 100 discrete angles, the finite volume solver requires about 20~\% of the total CPU time of a calculation, a modest cost given the complexity of radiation heat transfer. The absorption coefficients of the gas-soot mixtures are computed using the RadCal narrow-band model. Liquid droplets can absorb and scatter thermal radiation. This is important in cases involving mist sprinklers, but also plays a role in all sprinkler cases. The absorption and scattering coefficients are based on Mie theory.
+This chapter contains a wide variety of heat flux measurements, ranging from less than a kW/m$^2$ from very small methane gas burners up to about 150~kW/m$^2$ in full-scale compartment fires. The results are broken up into two broad categories---heat flux to compartment walls, ceiling, and floor, and heat flux to ``targets''. A target is any object of interest in a fire simulation, like a steel beam or electrical cable.
 
-This chapter contains a wide variety of heat flux measurements, ranging from less than a kW/m$^2$ from very small methane gas burners up to about 150~kW/m$^2$ in full-scale compartment fires.
+There are also sections that look at special cases, like the heat flux measured at a liquid fuel surface, attenuation of thermal radiation by water sprays, and convective heat flux.
 
 
 \clearpage
@@ -52,7 +52,7 @@ Predicted and measured vertical heat flux profiles for three propane and three p
 
 Figure~\ref{FM_Vertical_Flame_Radiance} displays the measured and predicted outward flame radiance at heights of 66, 330, 594, and 990~mm above the base of the burner, for a range of burning rates. The radiance is defined as the radiant flux per unit solid angle in the outward normal direction. The radiance of an ideal black body at temperature $T$ is $\sigma T^4/\pi$.
 
-Figure~\ref{FM_Vertical_Flame_HF} displays the measured and predicted heat flux from propylene, ethane, ethylene, and methane wall fires. The fuel flow rates for propylene are 12.68, 17.05, and 22.37~g/m$^2$/s. 
+Figure~\ref{FM_Vertical_Flame_HF} displays the measured and predicted heat flux from propylene, ethane, ethylene, and methane wall fires. The fuel flow rates for propylene are 12.68, 17.05, and 22.37~g/m$^2$/s.
 
 \begin{figure}[h!]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -75,11 +75,27 @@ Figure~\ref{FM_Vertical_Flame_HF} displays the measured and predicted heat flux 
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Vertical_Wall_Flames/Propylene_HF_22p37} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Vertical_Wall_Flames/Ethane_HF} \\
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Vertical_Wall_Flames/Ethylene_HF} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Vertical_Wall_Flames/Methane_HF} 
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Vertical_Wall_Flames/Methane_HF}
 \end{tabular*}
 \caption[FM Vertical Wall Flame experiments, centerline heat flux]
 {Vertical profiles of heat flux to the burner surface for fuel flow rates of 12.68, 17.05, and 22.37~g/m$^2$/s.}
 \label{FM_Vertical_Flame_HF}
+\end{figure}
+
+\clearpage
+
+\subsection{NIST E119 Compartment}
+
+Heat flux gauges (Gardon, Model 64-20-18) were placed at three locations in the compartment, in water-cooled steel pipes of 25~mm inside diameter. Results are shown in Fig.~\ref{NIST_E119_Compartment_Wall_Flux}. Gauge locations are shown in Fig.~\ref{NIST_E119_Compartment_Drawing_1}.
+
+\begin{figure}[!h]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_E119_Compartment/Test_1_Wall_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_E119_Compartment/Test_2_Wall_Flux} \\
+\multicolumn{2}{c}{\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_E119_Compartment/Test_3_Wall_Flux}}
+\end{tabular*}
+\caption[NIST E119 Compartment, wall heat fluxes]{NIST E119 Compartment, wall heat fluxes.}
+\label{NIST_E119_Compartment_Wall_Flux}
 \end{figure}
 
 \clearpage
@@ -635,6 +651,9 @@ HCe4    &  2.56     & 0.35    & 3.82      &     $-z$     & Ceiling              
 \clearpage
 
 \section{Heat Flux to Targets}
+
+The heat flux measurements are broken up into two broad categories---heat flux to walls, floors, and ceiling, and heat flux to ``targets''. A target is any object of interest in a fire, like a steel beam or electrical cable. The following subsections consider heat flux to targets.
+
 
 \subsection{Fleury Experiments}
 
@@ -1193,8 +1212,7 @@ No.      & (m)      & (m)        & (kW)        &  (kg/s)               &  (kW/m$
 
 Cables in various types (power and control), and configurations (horizontal, vertical, in trays or free-hanging), were installed in
 the test compartment. For each of the four cable targets considered, measurements of the radiative and total heat flux were made with
-gauges positioned near the cables themselves.  The following pages display comparisons of these heat flux predictions and measurements for
-Control Cable B, Horizontal Cable Tray D, Power Cable F and Vertical Cable Tray G.
+gauges positioned near the cables themselves.  The following pages display comparisons of these heat flux predictions and measurements for Control Cable B, Horizontal Cable Tray D, Power Cable F and Vertical Cable Tray G.
 
 \newpage
 
@@ -1309,6 +1327,35 @@ Control Cable B, Horizontal Cable Tray D, Power Cable F and Vertical Cable Tray 
 \label{NIST_NRC_Cable_G_Flux_Open}
 \end{figure}
 
+
+\clearpage
+
+\subsection{NIST Pool Fires}
+
+Figure~\ref{NIST_Pool_Fire_Heat_Flux} displays measurements made by Hamins~et~al.~\cite{Hamins:CST1994,Kim:FSJ2019} of the radiative and total heat flux along a radial profile at the surface of a 30.5~cm diameter methanol pool fire originally studied by Weckman at the University of Waterloo~\cite{Weckman:CF1996}. Kim~et~al.~\cite{Kim:FSJ2019} measured radial and vertical profiles of total heat flux for this same fire, as shown in Fig.~\ref{NIST_Pool_Fire_Heat_Flux2}. Klassen~et~al.~\cite{Klassen:GCR1994} also made radial measurements.
+
+\begin{figure}[!ht]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Pool_Fires/Methanol_30_cm_radHF_radial} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Pool_Fires/Methanol_30_cm_HF_radial1}
+\end{tabular*}
+\caption[NIST Pool Fires, radial profile of radiative and total heat flux to liquid fuel surface]
+{NIST Pool Fires, radial profile of radiative and total heat flux to the surface of a 30~cm methanol fire.}
+\label{NIST_Pool_Fire_Heat_Flux}
+\end{figure}
+
+\begin{figure}[!ht]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Pool_Fires/Methanol_30_cm_HF_radial2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Pool_Fires/Methanol_30_cm_HF_vertical}
+\end{tabular*}
+\caption[NIST Pool Fires, radial and vertical profiles of total heat flux]
+{NIST Pool Fires, radial and vertical profiles of total heat flux from a 30~cm methanol fire.}
+\label{NIST_Pool_Fire_Heat_Flux2}
+\end{figure}
+
+
+
 \clearpage
 
 \subsection{WTC Experiments}
@@ -1370,6 +1417,31 @@ There were a variety of heat flux gauges installed in the test compartment. Most
 \label{NIST_WTC_Lower_Column_Flux}
 \end{figure}
 
+\clearpage
+
+\subsection{UMD Line Burner}
+
+In the UMD line burner experiments, radiative heat flux was measured at a distance of 1~m normal to the flame sheet.  In the FDS calculations the domain is extended to encompass the heat flux measurement location; two devices are placed at the 1~m distance on either side of the flame as shown in Fig.~\ref{fig_umd_integrated_intensity}. This figure also shows a slice contour of integrated radiation intensity to confirm the pattern is smooth.
+
+The radiative fraction and radiative heat flux as functions of oxygen volume fraction in the coflow have been measured by White~et~al.~\cite{White:2015}.  FDS does not employ a specified radiative fraction in these simulations. Rather it uses a three step reaction mechanism that produces CO and soot in the first step and the oxidation of these species in the second and third. The source of thermal radiation is the CO, CO$_2$, water vapor, and soot in the flame, as calculated by RadCal. Figure~\ref{fig_umd_chi_r} displays the measured and predicted global radiative fraction and heat flux.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[height=3in]{FIGURES/UMD_Line_Burner/integrated_intensity}
+\caption{UMD Line Burner contour of integrated radiation intensity.}
+\label{fig_umd_integrated_intensity}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/UMD_Line_Burner/methane_Chi_r} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/UMD_Line_Burner/methane_rad_heat_flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/UMD_Line_Burner/propane_Chi_r} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/UMD_Line_Burner/propane_rad_heat_flux}
+\end{tabular*}
+\caption[UMD Line Burner radiative fraction and radiative heat flux]{The plots on the left compare measured and predicted radiative fraction, and the plots on the right compare measured and predicted heat flux to a target 1~m away from the flame.}
+\label{fig_umd_chi_r}
+\end{figure}
 
 \clearpage
 
@@ -1385,6 +1457,7 @@ There were a variety of heat flux gauges installed in the test compartment. Most
 \caption[Summary of target heat flux predictions]
 {Summary of target heat flux predictions.}
 \end{figure}
+
 
 
 
@@ -1518,4 +1591,63 @@ The plots on the following pages compare the predicted air mass flow rates throu
 \end{figure}
 
 
+\clearpage
+
+\section{Radiation Source Term}
+
+\subsection{FM Burner Experiments}
+\label{FM_Burner_Heat_Flux_Distribution}
+
+Figure~\ref{FM_Burner_Vertical_Heat_Flux} displays mean and rms vertical profiles of the radiation emission, in units of kW/m, from a 15~kW, 13.7~cm (inner) diameter ethylene burner at ambient oxygen concentrations of 21~\%, 19~\%, 17~\%, and 15~\%. Figure~\ref{FM_Burner_Radiant_Fraction} displays the predicted total radiant fraction for the four ambient oxygen levels.
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Burner/Mean_Vertical_Radiation_Emission_20p9} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Burner/RMS_Vertical_Radiation_Emission_20p9} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Burner/Mean_Vertical_Radiation_Emission_19p0} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Burner/RMS_Vertical_Radiation_Emission_19p0} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Burner/Mean_Vertical_Radiation_Emission_16p8} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Burner/RMS_Vertical_Radiation_Emission_16p8} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Burner/Mean_Vertical_Radiation_Emission_15p2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Burner/RMS_Vertical_Radiation_Emission_15p2}
+\end{tabular*}
+\caption[FM Burner experiments, mean and rms vertical heat flux profiles]
+{FM Burner experiments, mean and rms vertical heat flux profiles.}
+\label{FM_Burner_Vertical_Heat_Flux}
+\end{figure}
+
+\begin{figure}[p]
+\begin{center}
+\begin{tabular}{c}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Burner/Radiant_Fraction_20p9} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Burner/Radiant_Fraction_19p0} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Burner/Radiant_Fraction_16p8} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Burner/Radiant_Fraction_15p2}
+\end{tabular}
+\end{center}
+\caption[FM Burner experiments, radiant fraction]
+{FM Burner experiments, radiant fraction for four oxygen levels.}
+\label{FM_Burner_Radiant_Fraction}
+\end{figure}
+
+
+
+\clearpage
+
+\section{Condensation Heat Flux}
+\label{Condensation}
+This section focuses on experiments involving condensation onto surfaces.
+
+\subsection{SETCOM Experiments}
+The following plot shows the results of modeling the SETCOM experiments.
+
+\begin{figure}[h!]
+	\begin{center}
+		\begin{tabular}{c}
+			\includegraphics[height=4in]{SCRIPT_FIGURES/ScatterPlots/FDS_Condensation}
+		\end{tabular}
+	\end{center}
+	\caption{Summary of SETCOM results.}
+	\label{SETCOM_summary}
+\end{figure}
 

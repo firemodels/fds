@@ -1,0 +1,50 @@
+&HEAD CHID='FAA_B747_front11kw_2cm', TITLE='Guo et al. (2018) Modeling of Hidden Fire in Aircraft Overhead Area'/
+
+! Mult Mesh, 144 Meshes:
+&MULT ID='mesh multiplier', DX=0.84, DY=0.6, DZ=1.0, I_UPPER=7, J_UPPER=8, K_UPPER=1 /
+&MESH IJK=42,30,50, XB=-0.01,0.83,0.01,0.61,0.0,1.0, MULT_ID='mesh multiplier' /
+
+&TIME T_END=300.0 /
+&DUMP DT_HRR=1.0, DT_DEVC=1.0 /
+&MISC P_INF=100000, TMPA=28., SIMULATION_MODE='LES' /
+
+&REAC ID='Reaction1',
+      FYI='RADIATIVE_FRACTION=0.30 by default for propane',
+      FUEL='PROPANE',
+      SOOT_YIELD=0.02,
+      CRITICAL_FLAME_TEMPERATURE=1327.0,
+      HEAT_OF_COMBUSTION=4.636E4/
+
+&SURF ID='Burner',
+      FYI='11 kW',
+      COLOR='RED',
+      HRRPUA=343.4/
+
+&SURF ID='ADIABATIC',
+      COLOR='GRAY 80',
+      ADIABATIC=.TRUE./
+
+&OBST ID='Burner', XB=1.09,1.27,1.85,2.03,0.0,0.2, RGB=240,0,0, SURF_IDS='Burner','INERT','INERT'/
+
+&VENT XB=-0.01,-0.01,0.01,5.41,0.0,2.0, SURF_ID='Insulation' /
+&VENT XB=6.71,6.71,1.85,3.55,0.0,1., SURF_ID='OPEN' /
+
+&SLCF QUANTITY='VELOCITY', PBY=2.01, VECTOR=T/
+&SLCF QUANTITY='VELOCITY', PBY=3.03, VECTOR=T/
+&SLCF QUANTITY='VELOCITY', PBX=1.25, VECTOR=T/
+&SLCF QUANTITY='VELOCITY', PBX=2.25, VECTOR=T/
+&SLCF QUANTITY='TEMPERATURE', PBY=2.01 /
+&SLCF QUANTITY='TEMPERATURE', PBY=3.03 /
+&SLCF QUANTITY='TEMPERATURE', PBY=3.53 /
+&SLCF QUANTITY='TEMPERATURE', PBX=1.25 /
+&SLCF QUANTITY='TEMPERATURE', PBX=2.25 /
+&SLCF QUANTITY='TEMPERATURE', PBX=3.25 /
+
+
+&CATF OTHER_FILES='../../../../cad/FAA_Cargo_Compartments/FAA_B747_geometry.dat' /
+&CATF OTHER_FILES='../../../../cad/FAA_Cargo_Compartments/FAA_B747_HorizBeams.dat' /
+&CATF OTHER_FILES='../../../../cad/FAA_Cargo_Compartments/FAA_B747_Columns.dat' /
+&CATF OTHER_FILES='../../../../cad/FAA_Cargo_Compartments/FAA_B747_thermocouples.dat' /
+
+
+&TAIL /

@@ -1,7 +1,7 @@
 &HEAD CHID='geom_texture' /
 
 &MESH IJK=10,10,10,XB=0.0,1.0,0.0,1.0,0.0,1.0 /
-
+&TIME T_END=0./
 &SURF ID='surf1'
       TEXTURE_MAP='nistleft.jpg'
       TEXTURE_WIDTH=0.6
@@ -9,4 +9,4 @@
 
 &GEOM ID='texture',
         VERTS=0.0,0.0,0.0, 1.0,0.0,0.0, 1.0,1.0,0.0,
-        FACES=1,2,3,SURF_ID='surf1'/
+        FACES=1,2,3,1,SURF_ID='surf1'/

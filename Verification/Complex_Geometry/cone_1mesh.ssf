@@ -1,0 +1,51 @@
+// put rendered files in specified directory
+
+LABEL
+  put rendered files in specified directory
+
+RENDERDIR
+ ..\..\Manuals\FDS_Verification_Guide\SCRIPT_FIGURES
+
+
+// render figure a 
+
+LABEL
+  Cone and Mesh
+
+LOADINIFILE
+ cone_1mesh_a.ini
+UNLOADALL
+SETTIMEVAL
+ 1.000000
+RENDERONCE
+ cone_1mesh_a
+
+
+// render figure b
+
+LABEL
+  Some cut-cells on cone
+
+LOADINIFILE
+ cone_1mesh_a.ini
+UNLOADALL
+SETTIMEVAL
+ 1.000000
+LOADSLICEM
+ Cut Cells(geometry)
+ 2 0.300000
+ 1
+SETVIEWPOINT
+ viewb
+KEYBOARD
+ o
+KEYBOARD
+ o
+KEYBOARD
+ g
+KEYBOARD
+ g
+KEYBOARD
+ g
+RENDERONCE
+ cone_1mesh_b

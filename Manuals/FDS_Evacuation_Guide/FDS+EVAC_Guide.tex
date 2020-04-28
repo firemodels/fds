@@ -3,9 +3,9 @@
 \usepackage{times} 
 \usepackage[pdftex]{graphicx}
 %
-% FDS version  6.5.3
+% FDS version  6.6.0
 % Evac version 2.5.2
-% March 2017
+% February 2018
 %
 \usepackage[T1]{fontenc}
 \usepackage[latin1]{inputenc}
@@ -155,7 +155,7 @@
       Technical Reference and User's Guide }
 
     { \normalfont\fontsize{14}{18}\selectfont\sffamily
-      (FDS 6.5.3, Evac 2.5.2, DRAFT) }
+      (FDS 6.6.0, Evac 2.5.2, DRAFT) }
 
     \vspace{15mm}
 
@@ -187,7 +187,7 @@
 the evacuation module, FDS+Evac, developed at VTT Technical Research
 Centre of Finland, which is fully embedded in Fire Dynamics Simulator
 (FDS).  This manual applies to the FDS+Evac version 2.5.2, which is
-embedded in the current FDS version 6.5.3 (GIT FDS6.5.3-937-gee70904).
+embedded in the current FDS version 6.6.0 (GIT FDS6.6.0-986-g47260e6).
 The most up to date version of this manual can be obtained from the
 FDS+Evac web page at
 \texttt{http://www.vtt.fi/}\linebreak[4]\texttt{fdsevac/}.
@@ -335,7 +335,7 @@ This page contains the most recent version of this combined Technical
 Reference and User's Guide of FDS+Evac and some examples on the use of
 FDS+Evac.  This web site is also used to store the validation and
 verification test cases including the input files.  This (printed)
-manual refers to FDS 6.5.3 + Evac 2.5.2 (GIT FDS6.5.3-937-gee70904).
+manual refers to FDS 6.6.0 + Evac 2.5.2 (GIT FDS6.6.0-986-g47260e6).
 
 
 \section{Features of Limited Functionality}\label{Sec_SpecFeatures}
@@ -521,7 +521,7 @@ much from the version 2.5.0.  Just some bugs are corrected.
 \noindent The version 2.5.0 of the evacuation module does not differ
 much from the version 2.4.1.  Just some bugs are corrected and some
 old user input are disabled.  This version does not support anymore
-FDS 5 style evacuation inputs.  Now just the main evacuation meshes
+FDS 5 style evacuation inputs, and \Timtt{EVAC\_FDS6=.FALSE.} is not supported anymore.  Now just the main evacuation meshes
 are defined by the user and no ``outflow'' vents are defined.  The
 \Timtt{STRS} namelist for the staircases is more automatic, it defines
 its own mesh(es) automatically.
@@ -625,7 +625,7 @@ boundary of a agent crowd).  If ``straight towards door'' would mean
 turning towards a high left (or right) density then the flow field is
 used instead.
 
-If \Timtt{EVAC\_FDS6=.TRUE.} is given then the user should not give
+When writing an input file for FDS6, the user should not give
 any additional evacuation flow fields nor vents.  There are two basic
 levels in the evacuation meshes.  One is the main evacuation mesh
 location at the $z$-level given by the \Timtt{XB} on the mesh line.
@@ -707,11 +707,9 @@ on the web page {\tt http://www.vtt.fi/fdsevac/}.
 
 \section{Type of the Model}
 
-\noindent FDS+Evac is a combined agent-based egress calculation model
-and a Computational Fluid Dynamics (CFD) model of fire-driven fluid
-flow, where the fire and egress parts are interacting.  FDS+Evac can
-also be used just to calculate the egress problem without any
-fire-driven fluid flow calculation, \emph{e.g.}, it can be used to
+\noindent FDS+Evac is a fire simulation tool combined with an evacuation module.  
+The fire simulation is based on a well-established Computational Fluid Dynamics 
+(CFD) model of fire-driven fluid flow, and the evacuation simulation is based on multi=agent modelling of pedestrian crowd.  The fire and evacuation components are interacting in several aspects, while each component can also be run independently.  In other words, FDS+Evac can also be used just to calculate the egress problem without any fire-driven fluid flow calculation, \emph{e.g.}, it can be used to
 simulate fire drills.  FDS+Evac models the egress of the agents using
 continuous space and time, but the building geometry is fitted to the
 underlying rectilinear mesh.  FDS+Evac uses simple rules and
@@ -845,14 +843,18 @@ modelled; only its hyperventilation factor is included.
 
 
 \textbf{Exit Route Selection:} The exit door selection algorithm is
-still a relatively simple one.  The user has more or less full control
-on the doors which different agents will be using.  In some
-applications this can be listed as a benefit of the model, but the
-requirements for user's responsibility and expertise should be
-recognised.  The present version of the programme has some ability to
-treat herding and follow others type behaviours, which will take some
-control from the model user to the programme itself.  But these new
-social type behaviours are not yet validated.
+still a relatively simple one.  Users specify the agent type and
+initialize how agents are familiar with each door and exit (i.e.,
+KNOWN_DOOR_PROB), and the algorithm will assign the proper door and
+exit for each agent.  The target door and exit are dynamically changed
+in egress simulation while the smoke condition in fire simulation is also
+taken into account.  This feature can be listed as a benefit of the model,
+but the requirements for user's responsibility and expertise should be
+recognised.  The present version of the programme includes some new models 
+to characterize herding and following type behaviours of agents.  Users 
+can partly control the model and algorithm by usng parameters in PERS namelist 
+(i.e., I_HERDING_TYPE, AGENT_TYPE), but these new models of social type 
+behaviours are not yet validated.
 
 
 \textbf{Detection and Reaction Times:} The pre-movement time of the
@@ -1680,12 +1682,12 @@ versions of FDS+Evac.
 \section{Exit Selection}\label{Sec_ExitSel}
 
 \noindent According to socio-psychological
-literature~\cite{Pan06,Proulx1993}, the familiarity of exit routes is
-an essential factor influencing decision making.  This is because the
-unknown factors related to unknown routes are considered to increase
-the threat.  As a result, evacuees prefer familiar exit routes even if
-there are faster unfamiliar routes available.  For this reason,
-emergency exits are used rarely in evacuations and fire drills.
+literature~\cite{Pan06,Proulx1993}, familiarity of exit routes is
+an essential factor influencing decision making of evacuees.  Because the
+unknown factors in unfamiliar paths are considered to increase the risk of safe egress, 
+evacuees usually prefer familiar exit routes even if there are faster unfamiliar routes available. 
+For this reason, emergency exits are used rarely in many of real-life evacuation 
+events because they are unfamiliar choices to evacuees.  
 
 
 Also a common observation from real life evacuations has been that
@@ -1713,15 +1715,10 @@ out.  Just one person was enough to trigger the use of an emergency
 exit.
 
 
-Many prescriptive fire codes implicitly assume that the total exit
-width of buildings is used in egress.  Herding behavior, as well as
-people's tendency to favor the familiar routes, may easily lead to
-outcomes that contradict with these assumptions.  The exit selection
-algorithm of FDS+Evac was modified so that these kinds of phenomena
-could be modeled.  Three new agent types were introduced in FDS+Evac
-so now there are four types: conservative type, active type, follower
-type, and herding type.  The conservative type is the original agent
-type in FDS+Evac.
+Many prescriptive fire codes implicitly assume that the total exit 
+capacities of buildings are evenly used in egress.  Herding behavior, 
+as well as people's tendency to favor the familiar routes, may easily lead to
+outcomes against these assumptions, and thus a common scenario is that some exits are overcrowded while others are underused.  In order to exhibit these kinds of phenomena the exit selection algorithm of FDS+Evac was modified and three new agent types were introduced.  So now there are four types of agents: conservative type, active type, herding type and follower type.  The conservative type is the original agent type used in the early version of FDS+Evac.  
 
 
 The exit selection algorithm of FDS+Evac is based on a game theoretic
@@ -1758,18 +1755,7 @@ selected their target exits using this algorithm.  This original agent
 type of FDS+Evac is the conservative agent type.
 
 
-The first new agent type is active agents, who use a different
-preference order for the exits than the conservative type.  Active
-agents regard all visible exits also to be in the same preference
-group as familiar exits.  The second new agent type is herding agents.
-Herding agents use only the familiar exits, if any given by the user.
-If there is no familiar exit at the current floor of the building then
-a herding agent looks its nearest neighbor agents and tries to follow
-them. The third new agent type is follower agents.  A follower agent
-looks its nearest neighbors in front of it and check if exit where the
-neighboring agents are going is better than the current exit choice of
-the follower agent, i.e., the follower agent treats its neighbors'
-target exit doors as familiar doors.
+The first new type of agents are active agents. Different from conservative agents, active agents use a new preference order to select exits.  Active agents regard all visible exits also to be in the same preference group as familiar exits. The second new type of agents are herding agents.  Herding agents only use the familiar exits given by users. If no familiar exit is given at the current floor, herding agents look several of their nearest neighbors and try to follow them. The third new type of agents are follower agents. Follower agents look several of their nearest neighbors in front of them and check if the neighbors' exit choices are better than their own choices, i.e., the follower agent treats its neighbors’ target exit doors as familiar doors, and uses the best door among all the choices. 
 
 
 The familiarity of each exit for each agent can be determined by the
@@ -1897,9 +1883,7 @@ are heading towards an exit, they start to follow these other agents.
 A herding agent will remain still even after detecting the fire and
 its reaction time has passed if it has not been able to select any
 exit either by being familiar with it or by observing other agents.
-If the nearest neighbors of a herding agent are heading towards some
-exit then the herding agent starts to follow these agents almost
-immediately regardless of its detection and reaction times.  If there
+If there
 are available familiar exits at a given floor for a herding agent then
 it behaves like a conservative agent, i.e., the familiar route
 behavior overrides the herding behavior.
@@ -2279,7 +2263,7 @@ see ``by own eyes'' that the programme is working as it should.
 %
 \begin{figure}[!tb]
   \centerline{\includegraphics[clip=true,
-  width=100mm]{FIGURES/Test_Fds653Evac252_FED}} 
+  width=100mm]{FIGURES/Test_Fds660Evac252_FED}} 
   \caption{A FED test.}\label{Fig_FED_Test}
 \end{figure}
 %
@@ -2305,7 +2289,7 @@ see ``by own eyes'' that the programme is working as it should.
 %
 \begin{figure}[!tb]
   \centerline{\includegraphics[clip=true,
-  width=100mm]{FIGURES/Fds653Evac252_Smoke_vs_Speed}}   
+  width=100mm]{FIGURES/Fds660Evac252_Smoke_vs_Speed}}   
   \caption{A smoke vs speed test.}\label{Fig_SmokeSpeedTest}
 \end{figure}
 %
@@ -2672,7 +2656,7 @@ will decrease specific flows slightly.
   \includegraphics[clip=true,
   width=50mm]{FIGURES/Collect_MainParametricStudies_Fds600Evac241_Tau} 
   \includegraphics[clip=true,
-  width=50mm]{FIGURES/Collect_MainParametricStudies_Fds600Evac241_B} }
+  width=50mm]{FIGURES/Collect_MainParametricStudies_Fds600Evac241_Bw} }
   \caption{Effects of different model parameters, $A_i$, $B_i$,
     $\lambda_i$, $v^0_i$, $\tau_i$, and $B_w$ on the specific flows
     through doors and corridors.  The corridor is 2.0~m wide, the
@@ -3020,8 +3004,8 @@ A speed reduction factor $\gtrsim$0.5 seems to produce more or less
 quite constant flow at the exit door, \emph{i.e.}, at these speed
 reduction values the stairs are feeding the front door fast enough.
 For the case with $\lambda_i$=0.3 the specific flow in FDS+Evac
-simulations is about 1.15~p/s/m and for the case with $\lambda_i$=0.5
-the flow is about 1.29~p/s/m at the final exit door (speed factor
+simulations is about 1.16~p/s/m and for the case with $\lambda_i$=0.5
+the flow is about 1.30~p/s/m at the final exit door (speed factor
 0.75).  The observed flow rate at the final exit door (width 1.07~m)
 was 1.35 p/s in the experiment.
 % Numbers are for fds6.5.3Evac2.5.2
@@ -3049,8 +3033,8 @@ $\gtrsim$0.7 seems to give a good agreement with the observations.
 Note that there exists some queuing at the final exit door opening to
 the street in the experiment and this is also seen in the simulation
 results, when the speed reduction parameter is not too low.  For the
-case with $\lambda_i$=0.3 the specific flow is about 1.19~p/s/m and
-for the case with $\lambda_i$=0.5 the flow is about 1.31~p/s/m at the
+case with $\lambda_i$=0.3 the specific flow is about 1.17~p/s/m and
+for the case with $\lambda_i$=0.5 the flow is about 1.30~p/s/m at the
 final exit door (speed factor 0.75).  Similar flows were also obtained
 when using the simple staircase model (type 1).  When a speed
 reduction factor $\gtrsim$0.7 is used seems to produce more or less
@@ -3216,7 +3200,7 @@ using FDS+Evac version 2.5.2.
   %
   \begin{figure}[!tb]
     \centerline{\includegraphics[clip=true,
-      width=100mm]{FIGURES/SportHall_Results_FDS653_Evac252}}
+      width=100mm]{FIGURES/SportHall_Results_FDS660_Evac252}}
     \caption{The comparison of FDS+Evac to Simulex in a sport hall
       case.  The average of five different simulations are shown for
       each case.}\label{Fig_SportResults}
@@ -3258,7 +3242,7 @@ using FDS+Evac version 2.5.2.
 %
 \begin{figure}[!b]
   \centerline{\includegraphics[clip=true,
-  width=100mm]{FIGURES/Office_Results_FDS653_Evac252}} 
+  width=100mm]{FIGURES/Office_Results_FDS660_Evac252}} 
   \caption{The comparison of FDS+Evac to Simulex in an open floor
     office case.}\label{Fig_OpenFloorResults} 
 \end{figure}
@@ -3331,8 +3315,8 @@ using FDS+Evac version 2.5.2.
   and standard input.  (An advanced user of these codes might be able
   to get different results by using some additional features.)  The
   results of FDS+Evac model look more realistic.  The calculated
-  specific flows (1/p/m) are: Simulex 0.47, Exodus 0.69, FDS+Evac 1.24
-  ($\lambda_i=0.3$), and 1.56 ($\lambda_i=0.5$).
+  specific flows (1/p/m) are: Simulex 0.47, Exodus 0.69, FDS+Evac 1.23
+  ($\lambda_i=0.3$), and 1.57 ($\lambda_i=0.5$).
   % Numbers are for fds6.5.3Evac2.5.2
   
   In Figure~\ref{Fig_AssemblyResults} also shown are the results of
@@ -3347,7 +3331,7 @@ using FDS+Evac version 2.5.2.
 %
 \begin{figure}[!tb]
   \centerline{\includegraphics[clip=true,
-  width=100mm]{FIGURES/AssSpace_Results_FDS653_Evac252}} 
+  width=100mm]{FIGURES/AssSpace_Results_FDS660_Evac252}} 
   \caption{The comparison of FDS+Evac to buildingExodus
     and Simulex in an assembly space.}\label{Fig_AssemblyResults}
 \end{figure}
@@ -6263,7 +6247,7 @@ of the programme.
   Association, Quincy, MA, 2003.
 %
 \bibitem{Frantzich03} Frantzich, H., and Nilsson, D., ``Utrymning
-  genom tät r\"ok: beteende och f\"orflyttning'', 75~p., Report 3126,
+  genom t\"at r\"ok: beteende och f\"orflyttning'', 75~p., Report 3126,
   Department of Fire Safety Engineering, Lund University, Sweden,
   2003.
 %

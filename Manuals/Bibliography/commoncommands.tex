@@ -27,6 +27,7 @@
 \usepackage{multirow}
 \usepackage{pdfsync}
 \usepackage{tikz}
+\usepackage{bm}
 \usepackage{pgfplots}
 %\pgfplotsset{compat=1.7}
 \usepackage{tocloft}
@@ -52,9 +53,8 @@
 \usepackage{upquote}
 \usepackage{moreverb}
 \usepackage{morefloats}
-
-% FDS Version String
-\newcommand{\fdsversion}{6.5.3}
+\usepackage[section]{placeins}
+\usepackage{scrextend}
 
 \newcommand{\nopart}{\expandafter\def\csname Parent-1\endcsname{}} % To fix table of contents in pdf.
 \newcommand{\ct}{\tt\small} % eventually will be deprecated due to http://www.tex.ac.uk/cgi-bin/texfaq2html?label=2letterfontcmd
@@ -126,6 +126,8 @@
 % }
 %\makeatother
 
+\captionsetup[figure]{font=small}
+
 \setlength{\textwidth}{6.5in}
 \setlength{\textheight}{9.0in}
 \setlength{\topmargin}{0.in}
@@ -145,10 +147,9 @@
 \begin{flushright}
 Kevin McGrattan \\
 Simo Hostikka \\
-Randall McDermott \\
 Jason Floyd \\
-Craig Weinschenk \\
-Kristopher Overholt
+Randall McDermott \\
+Marcos Vanella
 \end{flushright}
 }
 
@@ -167,21 +168,12 @@ VTT Technical Research Centre of Finland}
 \begin{flushright}
 Kevin McGrattan \\
 Randall McDermott \\
-{\em Fire Research Division \\
-Engineering Laboratory \\
-Gaithersburg, Maryland, USA} \\[.1in]
+Marcos Vanella \\
+{\em Fire Research Division, Engineering Laboratory, Gaithersburg, Maryland} \\[.1in]
 Simo Hostikka \\
-{\em Aalto University \\
-Espoo, Finland} \\[.1in]
+{\em Aalto University, Espoo, Finland} \\[.1in]
 Jason Floyd \\
-{\em JENSEN HUGHES \\
-Baltimore, Maryland, USA}\\[.1in]
-Craig Weinschenk \\
-{\em UL Firefighter Safety Research Institute \\
-Columbia, Maryland, USA}\\[.1in]
-Kristopher Overholt \\
-{\em Continuum Analytics \\
-Austin, Texas, USA}
+{\em Jensen Hughes, Rockville, Maryland}
 \end{flushright}
 }
 
@@ -193,7 +185,7 @@ U.S. Department of Commerce \\
 {\em Wilbur L. Ross, Jr., Secretary} \\
 \hspace{1in} \\
 National Institute of Standards and Technology \\
-{\em Kent Rochford, Acting Under Secretary of Commerce for Standards and Technology and Acting NIST Director}
+{\em Walter Copan, NIST Director and Undersecretary of Commerce for Standards and Technology}
 \end{flushright}
 }
 
@@ -351,6 +343,7 @@ http://dx.doi.org/10.6028/NIST.SP.#1
 \newcommand{\SC}{\hbox{Sc}}
 \newcommand{\SH}{\hbox{Sh}}
 \newcommand{\WE}{\hbox{We}}
+\newcommand{\OI}{\text{\tiny \hbox{OI}}}
 \newcommand{\COTWO}{\text{\tiny \hbox{CO}$_2$}}
 \newcommand{\HTWOO}{\text{\tiny \hbox{H}$_2$\hbox{O}}}
 \newcommand{\OTWO}{\text{\tiny \hbox{O}$_2$}}
@@ -402,7 +395,7 @@ http://dx.doi.org/10.6028/NIST.SP.#1
 \definecolor{COBALT}{rgb}{0.23922,0.34902,0.67059}
 \definecolor{CORAL}{rgb}{1.00000,0.49804,0.31373}
 \definecolor{CYAN}{rgb}{0.00000,1.00000,1.00000}
-\definecolor{DIMGRAY }{rgb}{0.41176,0.41176,0.41176}
+\definecolor{DIM GRAY }{rgb}{0.41176,0.41176,0.41176}
 \definecolor{EMERALD GREEN}{rgb}{0.00000,0.78824,0.34118}
 \definecolor{FIREBRICK}{rgb}{0.69804,0.13333,0.13333}
 \definecolor{FLESH}{rgb}{1.00000,0.49020,0.25098}
@@ -473,3 +466,7 @@ http://dx.doi.org/10.6028/NIST.SP.#1
 
 % Allow multi-line equations to span page breaks
 \allowdisplaybreaks
+
+% Conditional to activate Unstructured Geometry text:
+\newif\ifcompgeom
+%\compgeomtrue

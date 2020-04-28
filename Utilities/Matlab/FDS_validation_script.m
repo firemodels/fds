@@ -31,16 +31,21 @@ addpath 'scripts'
 
 % Scripts that run prior to dataplot
 
+NIST_deposition_gauge
 flame_height
-cat_mccaffrey
 NIST_RSE
 sippola_aerosol_deposition
 layer_height
-combine_csiro
-fm_datacenter_scatter
+NIST_NRC_Corner_Effects
+%fm_datacenter_scatter
 LNG_Dispersion
 LNG_wind_profiles
 FM_Vertical_Wall_Flames
+umd_line_burner_process
+UWO_Wind_Tunnel
+FM_Burner
+Crown_Fires
+ranz_marshall
 
 % Dataplot and scatplot options
 
@@ -53,14 +58,7 @@ Scatterplot_Inputs_File = 'FDS_validation_scatterplot_inputs.csv';
 % Statistics output options
 
 Stats_Output = 'Validation';
-Output_File = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_validation_scatterplot_output.csv';
-Statistics_Tex_Output = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/validation_statistics.tex';
-Histogram_Tex_Output = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/validation_histograms.tex';
-
-% Override the plot style options with NRC 1824 plot options
-
-NRC_Options = false;
-Append_To_Scatterplot_Title = '';
+Scatterplot_Dir = [pwd, '/../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/'];
 
 % Run dataplot and scatplot scripts
 
@@ -69,11 +67,7 @@ scatplot(saved_data, drange, ...
          'Manuals_Dir', Manuals_Dir, ...
          'Scatterplot_Inputs_File', Scatterplot_Inputs_File, ...
          'Stats_Output', Stats_Output, ...
-         'Output_File', Output_File, ...
-         'Statistics_Tex_Output', Statistics_Tex_Output, ...
-         'Histogram_Tex_Output', Histogram_Tex_Output, ...
-         'NRC_Options', NRC_Options, ...
-         'Append_To_Scatterplot_Title', Append_To_Scatterplot_Title)
+         'Scatterplot_Dir', Scatterplot_Dir)
 
 % Miscellaneous other scripts for special cases
 
@@ -82,15 +76,11 @@ beyler_hood
 sandia_helium_plume
 sandia_methane_fire
 spray_attenuation
-Cup_burner
 flame_height2
 purdue_flames
 christifire
-pressure_coefficient
 VTT_Sprays
 fm_datacenter_veltest
-umd_line_burner
-% umd_line_burner_2
-% waterloo_methanol
+mccaffrey_plume
 
 display('validation scripts completed successfully!')

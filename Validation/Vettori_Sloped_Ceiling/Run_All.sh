@@ -42,4 +42,41 @@ $QFDS $DEBUG $QUEUE -d $INDIR Vettori_Sloped_24OSW.fds
 $QFDS $DEBUG $QUEUE -d $INDIR Vettori_Sloped_24OSD.fds 
 $QFDS $DEBUG $QUEUE -d $INDIR Vettori_Sloped_24OSC.fds 
 
+# $QFDS $DEBUG $QUEUE -d $INDIR Vettori_Sloped_FSSW_geom.fds 
+# $QFDS $DEBUG $QUEUE -d $INDIR Vettori_Sloped_FSSD_geom.fds 
+# $QFDS $DEBUG $QUEUE -d $INDIR Vettori_Sloped_FSSC_geom.fds 
+# $QFDS $DEBUG $QUEUE -d $INDIR Vettori_Sloped_FSFW_geom.fds 
+# $QFDS $DEBUG $QUEUE -d $INDIR Vettori_Sloped_FSFD_geom.fds 
+# $QFDS $DEBUG $QUEUE -d $INDIR Vettori_Sloped_FSFC_geom.fds 
+# $QFDS $DEBUG $QUEUE -d $INDIR Vettori_Sloped_FOFW_geom.fds 
+# $QFDS $DEBUG $QUEUE -d $INDIR Vettori_Sloped_FOFD_geom.fds 
+# $QFDS $DEBUG $QUEUE -d $INDIR Vettori_Sloped_FOFC_geom.fds 
+# $QFDS $DEBUG $QUEUE -d $INDIR Vettori_Sloped_FOSW_geom.fds 
+# $QFDS $DEBUG $QUEUE -d $INDIR Vettori_Sloped_FOSD_geom.fds 
+# $QFDS $DEBUG $QUEUE -d $INDIR Vettori_Sloped_FOSC_geom.fds 
+# $QFDS $DEBUG $QUEUE -d $INDIR Vettori_Sloped_13SSW_geom.fds 
+# $QFDS $DEBUG $QUEUE -d $INDIR Vettori_Sloped_13SSD_geom.fds 
+# $QFDS $DEBUG $QUEUE -d $INDIR Vettori_Sloped_13SSC_geom.fds 
+# $QFDS $DEBUG $QUEUE -d $INDIR Vettori_Sloped_13SFW_geom.fds 
+# $QFDS $DEBUG $QUEUE -d $INDIR Vettori_Sloped_13SFD_geom.fds 
+# $QFDS $DEBUG $QUEUE -d $INDIR Vettori_Sloped_13SFC_geom.fds 
+# $QFDS $DEBUG $QUEUE -d $INDIR Vettori_Sloped_13OFW_geom.fds 
+# $QFDS $DEBUG $QUEUE -d $INDIR Vettori_Sloped_13OFD_geom.fds 
+# $QFDS $DEBUG $QUEUE -d $INDIR Vettori_Sloped_13OFC_geom.fds 
+# $QFDS $DEBUG $QUEUE -d $INDIR Vettori_Sloped_13OSW_geom.fds 
+# $QFDS $DEBUG $QUEUE -d $INDIR Vettori_Sloped_13OSD_geom.fds 
+# $QFDS $DEBUG $QUEUE -d $INDIR Vettori_Sloped_13OSC_geom.fds 
+# $QFDS $DEBUG $QUEUE -d $INDIR Vettori_Sloped_24SSW_geom.fds 
+# $QFDS $DEBUG $QUEUE -d $INDIR Vettori_Sloped_24SSD_geom.fds 
+# $QFDS $DEBUG $QUEUE -d $INDIR Vettori_Sloped_24SSC_geom.fds 
+# $QFDS $DEBUG $QUEUE -d $INDIR Vettori_Sloped_24SFW_geom.fds 
+# $QFDS $DEBUG $QUEUE -d $INDIR Vettori_Sloped_24SFD_geom.fds 
+# $QFDS $DEBUG $QUEUE -d $INDIR Vettori_Sloped_24SFC_geom.fds 
+# $QFDS $DEBUG $QUEUE -d $INDIR Vettori_Sloped_24OFW_geom.fds 
+# $QFDS $DEBUG $QUEUE -d $INDIR Vettori_Sloped_24OFD_geom.fds 
+# $QFDS $DEBUG $QUEUE -d $INDIR Vettori_Sloped_24OFC_geom.fds 
+# $QFDS $DEBUG $QUEUE -d $INDIR Vettori_Sloped_24OSW_geom.fds 
+# $QFDS $DEBUG $QUEUE -d $INDIR Vettori_Sloped_24OSD_geom.fds 
+# $QFDS $DEBUG $QUEUE -d $INDIR Vettori_Sloped_24OSC_geom.fds 
+
 echo FDS cases submitted

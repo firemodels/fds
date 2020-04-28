@@ -16,9 +16,11 @@
 {\input{../Bibliography/gitrevision}}
 {\newcommand{\gitrevision}{unknown} }
 
+\externaldocument[UG-]{FDS_User_Guide}
+
 \includeonly{Overview_Chapter,Survey_Chapter,Experiment_Chapter, Error_Chapter, HGL_Chapter, Plume_Chapter, Ceiling_Jet_Chapter,Velocity_Chapter, Species_Chapter,Pressure_Chapter, Surface_Temperature_Chapter, Heat_Flux_Chapter, Suppression_Chapter, Burning_Rate_Chapter, Wind_Chapter}
 
-%\includeonly{Ceiling_Jet_Chapter}
+%\includeonly{Experiment_Chapter,Suppression_Chapter}
 
 \begin{document}
 
@@ -44,7 +46,7 @@ Volume 3: Validation\\
 
 \vfill
 
-\headerD{1018-3}
+\headerD{1018}
 
 \vfill
 
@@ -75,11 +77,10 @@ Volume 3: Validation\\
 \authorsigs
 }
 
-\headerD{1018-3}
+\headerD{1018}
 
 \headerC{
 \flushright{\today \\
-FDS Version \fdsversion \\
 Revision:~\gitrevision}}
 
 
@@ -109,23 +110,12 @@ Revision:~\gitrevision}}
 
 \chapter{Preface}
 
-This is Volume 3 of the FDS Technical Reference Guide. Volume 1 describes the mathematical model and numerical method. Volume 2 documents past and
-present model verification work. Instructions for using FDS are contained in a separate User's Guide~\cite{FDS_Users_Guide}.
+This is Volume 3 of the FDS Technical Reference Guide. Volume 1 describes the mathematical model and numerical method. Volume 2 documents past and present model verification work. Instructions for using FDS are contained in a separate User's Guide~\cite{FDS_Users_Guide}.
 
-The FDS Technical Reference Guide is based in part on the ``Standard Guide for Evaluating the Predictive Capability of
-Deterministic Fire Models,'' ASTM~E~1355~\cite{ASTM:E1355}. ASTM~E~1355 defines {\em model evaluation} as ``the process of quantifying the accuracy
-of chosen results from a model when applied for a specific use.'' The model evaluation process consists of two main components: verification and
-validation. {\em Verification} is a process to check the correctness of the solution of the governing equations. Verification does not imply that the
-governing equations are appropriate; only that the equations are being solved correctly. {\em Validation} is a process to determine the
-appropriateness of the governing equations as a mathematical model of the physical phenomena of interest. Typically, validation involves comparing
-model results with experimental measurement. Differences that cannot be explained in terms of numerical errors in the model or uncertainty in the
-measurements are attributed to the assumptions and simplifications of the physical model.
+The FDS Technical Reference Guide is based in part on the ``Standard Guide for Evaluating the Predictive Capability of Deterministic Fire Models,'' ASTM~E~1355~\cite{ASTM:E1355}. ASTM~E~1355 defines {\em model evaluation} as ``the process of quantifying the accuracy of chosen results from a model when applied for a specific use.'' The model evaluation process consists of two main components: verification and validation. {\em Verification} is a process to check the correctness of the solution of the governing equations. Verification does not imply that the governing equations are appropriate; only that the equations are being solved correctly. {\em Validation} is a process to determine the appropriateness of the governing equations as a mathematical model of the physical phenomena of interest. Typically, validation involves comparing model results with experimental measurement. Differences that cannot be explained in terms of numerical errors in the model or uncertainty in the measurements are attributed to the assumptions and simplifications of the physical model.
 
-Evaluation is critical to establishing both the acceptable uses and limitations of a model. Throughout its development, FDS has undergone various
-forms of evaluation, both at NIST and beyond. This volume provides a survey of validation work conducted to date to evaluate FDS.
+Evaluation is critical to establishing both the acceptable uses and limitations of a model. Throughout its development, FDS has undergone various forms of evaluation, both at NIST and beyond. This volume provides a survey of validation work conducted to date to evaluate FDS.
 
-
-% \chapter{Disclaimer}
 \input{../Bibliography/disclaimer}
 
 
@@ -161,6 +151,8 @@ The following individuals and organizations played a role in the validation proc
 \item Paul Tyson, a student at the University of Ulster, Northern Ireland, contributed the input files and supporting documents for the NRCC Smoke Tower experiments.
 %\item The Wind Engineering chapter was developed with help from Scott Hemley (2012 NIST SURF student), Dilip Banerjee, Donghun Yeo, Marc Levitan, and Emil Simiu, all from the NIST Engineering Laboratory, Materials and Structural Systems Division.
 \item James White, a student at the University of Maryland, provided documentation and input files for the UMD Line Burner cases.
+\item Charlie Hopkin and Michael Spearpoint of Olsson Fire \& Risk provided the data and FDS input files for experiments conducted by Adam Bittern at the University of Christchurch, New Zealand.
+\item The simulations of liquefied natural gas (LNG) dispersion experiments that are described in this report were originally designed by Jeffrey Engerer and Anay Luketa of Sandia National Laboratories on behalf of the Pipeline and Hazardous Materials Safety Administration of the U.S. Department of Transportation.
 \end{itemize}
 
 
@@ -191,11 +183,13 @@ BRE \> British Research Establishment \\
 CAROLFIRE \> Cable Response to Live Fire Test Program \\
 CFAST \> Consolidated Model of Fire Growth and Smoke Transport \\
 CHRISTIFIRE \> Cable Heat Release, Ignition, and Spread in Fire Test Program \\
+CFT \> Critical Flame Temperature \\
 DNS \> Direct Numerical Simulation \\
 FAA \> Federal Aviation Administration \\
 FDS \> Fire Dynamics Simulator \\
 FLAME \> Fire Laboratory for Accreditation of Models by Experimentation \\
 FM \> Factory Mutual Global \\
+FSE \>  Full-Scale Enclosure \\
 HAI \> Hughes Associates, Inc. \\
 HDPE \> high density polyethylene \\
 HGL \> Hot Gas Layer \\
@@ -205,6 +199,8 @@ ISO \> International Standards Organization \\
 LEMTA \> Laboratoire d'Energ\a'{e}tique et de M\a'{e}chanique Th\a'{e}orique et Appliqu\a'{e}e \\
 LES \> Large Eddy Simulation \\
 LLNL \> Lawrence Livermore National Laboratory \\
+LNG \> Liquified Natural Gas \\
+MEC \> Minimum Extinguishing Concentration \\
 NBS \> National Bureau of Standards (former name of NIST) \\
 NFPRF \> National Fire Protection Research Foundation \\
 NIST \> National Institute of Standards and Technology \\
@@ -217,6 +213,7 @@ PMMA \> poly(methyl methacrylate) \\
 PRISME \> Propagation d'un incendie pour des sc\a'{e}narios multi-locaux \a'{e}l\a'{e}mentaires \\
 PVC \> Polyvinyl chloride \\
 RANS \> Reynolds Averaged Navier-Stokes \\
+RSE \> Reduced-Scale Enclosure \\
 SBI \>  Single Burning Item \\
 SNL \> Sandia National Laboratory \\
 SP \>  Statens Provningsanstalt (Technical Research Institute of Sweden) \\
@@ -262,7 +259,6 @@ WTC \> World Trade Center \\
 \include{Burning_Rate_Chapter}
 
 \include{Wind_Chapter}
-
 
 
 \chapter{Conclusion}

@@ -9,10 +9,10 @@ echo "Generates Smokeview figures from FDS verification suite"
 echo ""
 echo "Options"
 echo "-d - use debug version of smokeview"
+echo "-g - make geom figures"
 echo "-h - display this message"
 echo "-p path - specify path of the smokeview executable"
 echo "-r - use release version of smokeview"
-echo "-s size - use 32 or 64 bit (default) version of smokeview"
 echo "-S host - make pictures on host"
 echo "-t - use test version of smokeview"
 echo "-X - do not start / stop separate X-server"
@@ -35,12 +35,18 @@ TEST=
 SMV_PATH=""
 START_X=yes
 SSH=
+GEOMFIGURES=1
+FDSFIGURES=1
 
-while getopts 'dhp:rs:S:tX' OPTION
+while getopts 'dghp:rS:tX' OPTION
 do
 case $OPTION  in
   d)
    DEBUG=_db
+   ;;
+  g)
+   GEOMFIGURES=1
+   FDSFIGURES=
    ;;
   h)
    usage;
@@ -50,14 +56,6 @@ case $OPTION  in
    ;;
   r)
    TEST=
-  ;;
-  s)
-   SIZE="$OPTARG"
-   if [ $SIZE -eq 64 ] ; then
-     SIZE=_64
-   else
-     SIZE=_32
-   fi
   ;;
   S)
    SSH="ssh $OPTARG"
@@ -82,7 +80,7 @@ if [ "$SMV_PATH" == "" ]; then
 fi
 export SMV=$SMV_PATH/smokeview_$PLATFORM$TEST$SIZE$DEBUG
 export RUNSMV=$SVNROOT/fds/Utilities/Scripts/runsmv.sh
-export SMVBINDIR="-bindir $SVNROOT/smv/for_bundle/"
+export SMVBINDIR="-bindir $SVNROOT/bot/Bundle/smv/for_bundle/"
 export BASEDIR=`pwd`/..
 
 echo "erasing SCRIPT_FIGURES png files"
@@ -96,7 +94,13 @@ if [ "$START_X" == "yes" ]; then
   source $SVNROOT/fds/Utilities/Scripts/startXserver.sh 2>/dev/null
 fi
 cd $SVNROOT/fds/Verification
-./FDS_Pictures.sh
+if [ "$FDSFIGURES" == "1" ]; then
+  ./FDS_Pictures.sh
+fi
+if [ "$GEOMFIGURES" == "1" ]; then
+  export QFDS=$RUNSMV
+  ./GEOM_Pictures.sh
+fi
 if [ "$START_X" == "yes" ]; then
   source $SVNROOT/fds/Utilities/Scripts/stopXserver.sh 2>/dev/null
 fi

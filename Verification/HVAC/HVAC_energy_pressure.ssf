@@ -1,7 +1,7 @@
 RENDERDIR
  ../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/
 LOADFILE
-HVAC_energy_pressure_01.sf
+HVAC_energy_pressure_0001_01.sf
 SETTIMEVAL
  1.0
 RENDERONCE

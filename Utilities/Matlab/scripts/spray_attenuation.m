@@ -6,8 +6,10 @@ close all
 clear all
 
 expdir = '../../../exp/BRE_Spray/';
-outdir = '../../../out/BRE_Spray/FDS_Output_Files/';
+outdir = '../../../out/BRE_Spray/';
 inpdir = '../../Validation/BRE_Spray/FDS_Input_Files/';
+
+plot_style
 
 % load experimental data and FDS prediction
 
@@ -52,6 +54,10 @@ wmax = 6;
 dmin = 0;
 dmax = 800;
 
+hf(1)=figure(1); set(hf(1),'Visible',Figure_Visibility)
+hf(2)=figure(2); set(hf(2),'Visible',Figure_Visibility)
+hf(3)=figure(3); set(hf(3),'Visible',Figure_Visibility)
+
 for n = 1:3
 for p = 1:8
 
@@ -80,7 +86,7 @@ end
 
 % plot dv50
 
-hf(1)=figure(1);
+set(0, 'CurrentFigure', hf(1))
 subplot(1,3,n)
 d_ax(n) = gca;
 hd(n,1) = plot(1:8,exp_data(exp_rows(n,:),6),exp_marker{n});
@@ -91,7 +97,7 @@ set(hd(n,2),'MarkerFaceColor',fds_color{n});
 
 % plot w
 
-hf(2)=figure(2);
+set(0, 'CurrentFigure', hf(2))
 subplot(1,3,n)
 hw(n,1) = plot(1:8,exp_data(exp_rows(n,:),7),exp_marker{n});
 w_ax(n) = gca;
@@ -102,7 +108,7 @@ set(hw(n,2),'MarkerFaceColor',fds_color{n});
 
 % plot attenuation
 
-hf(3)=figure(3);
+set(0, 'CurrentFigure', hf(3))
 ha(n,1) = plot(exp_data(exp_rows(n,:),4),FDS_Attenuation(n,:),exp_marker{n});
 set(ha(n,1),'MarkerFaceColor',exp_color{n});
 hold on
@@ -119,8 +125,8 @@ end
 % Format the plots
 
 % d-plot
-figure(hf(1))
-plot_style
+set(0, 'CurrentFigure', hf(1))
+
 set(d_ax(1:3),'Units',Plot_Units)
 set(d_ax(1:3),'FontName',Font_Name)
 set(d_ax(1:3),'FontSize',Label_Font_Size)
@@ -142,14 +148,15 @@ ylabel(d_ax(1),'Mean diameter (\mum)','Interpreter',Font_Interpreter)
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'Units',Paper_Units);
+set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Height Paper_Height]);
 set(gcf,'Position',[0 0 Paper_Height Paper_Height]);
 print(gcf,'-dpdf','../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/BRE_LEMTA_Spray/BRE_Spray_Diameter');
 
 % w-plot
 
-figure(hf(2))
-plot_style
+set(0, 'CurrentFigure', hf(2))
+
 set(w_ax(1:3),'Units',Plot_Units)
 set(w_ax(1:3),'FontName',Font_Name)
 set(w_ax(1:3),'FontSize',Label_Font_Size)
@@ -171,6 +178,7 @@ ylabel(w_ax(1),'Mean W-velocity (m/s)','Interpreter',Font_Interpreter)
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'Units',Paper_Units);
+set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Height Paper_Height]);
 set(gcf,'Position',[0 0 Paper_Height Paper_Height]);
 print(gcf,'-dpdf','../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/BRE_LEMTA_Spray/BRE_Spray_W');
@@ -180,7 +188,7 @@ print(gcf,'-dpdf','../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/BRE_LEMTA_S
 %add LEMTA data base to BRE data base
 
 expdir = '../../../exp/LEMTA_Spray/';
-outdir = '../../../out/LEMTA_Spray/FDS_Output_Files/';
+outdir = '../../../out/LEMTA_Spray/';
 inpdir = '../../Validation/LEMTA_Spray/FDS_Input_Files/';
 
 % load experimental data and FDS prediction
@@ -225,15 +233,13 @@ exp_data(exp_rows(n,1:5),4);
 FDS_Attenuation(n,1:5);
 exp_marker{n};
 
-hf(3)=figure(3);
+set(0, 'CurrentFigure', hf(3))
 ha(n,1) = plot(exp_data(exp_rows(n,1:5),4),FDS_Attenuation(n,1:5),exp_marker{n});
 set(ha(n,1),'MarkerFaceColor',exp_color{n});
 hold on
 
 % Attenuation plot
 
-figure(hf(3))
-plot_style
 set(gca,'Units',Plot_Units)
 set(gca,'Position',[Scat_Plot_X Scat_Plot_Y Scat_Plot_Width Scat_Plot_Height])
 set(gca,'FontName',Font_Name)
@@ -248,6 +254,7 @@ set(hl(n),'FontSize',Key_Font_Size)
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'Units',Paper_Units);
+set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
 set(gcf,'Position',[0 0 Scat_Paper_Width Scat_Paper_Height]);
 print(gcf,'-dpdf','../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/BRE_LEMTA_Spray/BRE_LEMTA_Spray_Attenuation');

@@ -1,13 +1,15 @@
 &HEAD CHID='Restivo', TITLE='Restivo Forced Convection Study, h=2.243' /
 
-&MESH IJK=144,48,48, XB=0.0,9.0,0.0,3.0,0.0,3.0 /
+&MESH IJK=144,48,48, XB=0.0,9.0,0.0,3.0,0.0,3.0, TRNZ_ID='trnz' /
 
-&TRNZ IDERIV=1, CC=0.0, PC=0.5 /
-&TRNZ IDERIV=1, CC=3.0, PC=0.5 /
-&TRNZ IDERIV=2, CC=0.0, PC=0.0 /
-&TRNZ IDERIV=2, CC=3.0, PC=0.0 /
-&TRNZ IDERIV=0, CC=2.625, PC=2.832 /
-&TRNZ IDERIV=0, CC=0.750, PC=0.480 /
+&MISC SIMULATION_MODE='SVLES' /
+
+&TRNZ ID='trnz', IDERIV=1, CC=0.0, PC=0.5 /
+&TRNZ ID='trnz', IDERIV=1, CC=3.0, PC=0.5 /
+&TRNZ ID='trnz', IDERIV=2, CC=0.0, PC=0.0 /
+&TRNZ ID='trnz', IDERIV=2, CC=3.0, PC=0.0 /
+&TRNZ ID='trnz', IDERIV=0, CC=2.625, PC=2.832 /
+&TRNZ ID='trnz', IDERIV=0, CC=0.750, PC=0.480 /
 
 &TIME T_END=900. /
 

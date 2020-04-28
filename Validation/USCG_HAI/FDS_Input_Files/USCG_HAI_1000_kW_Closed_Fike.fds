@@ -15,7 +15,7 @@
 &REAC FUEL       = 'N-HEPTANE'
       FYI        = 'Heptane, C_7 H_16'
       CO_YIELD   = 0.006
-      SOOT_YIELD = 0.015, CRITICAL_FLAME_TEMPERATURE=1560. /
+      SOOT_YIELD = 0.015 /
 
 &OBST XB=2.00,5.00,0.75,1.75,0.00,1.50 /  Port Engine
 &OBST XB=2.00,5.00,3.25,4.25,0.00,1.50 /  Starboard Engine
@@ -95,6 +95,7 @@ Compartment HRR
 &DEVC XB=1.00,6.00,1.00,4.00,0.00,3.00, QUANTITY='HRRPUV', STATISTICS='VOLUME INTEGRAL', ID='HRR' /
 
 Spray Nozzles
+
 
 &DEVC XYZ=3.50,1.80,1.00, PROP_ID='Bete P54', QUANTITY='TIME', SETPOINT=-60., ORIENTATION=0.,1.,0., ID='fuel_nozzle' /
 

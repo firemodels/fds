@@ -1,8 +1,12 @@
 % Topi Sikanen
+% Oct 25, 2013
+% VTT_Sprays.m
+
+disp('VTT_Sprays ...')
 
 plot_style
 
-outdir = '../../../out/VTT_Sprays/FDS_Output_Files/';
+outdir = '../../../out/VTT_Sprays/';
 expdir = '../../../exp/VTT_Sprays/';
 
 files = dir(strcat([outdir,'*_line.csv']));
@@ -73,6 +77,7 @@ set(h,'FontSize', Key_Font_Size)
 
 set(gcf, 'Visible', Figure_Visibility);
 set(gcf, 'Units', Paper_Units);
+set(gcf, 'PaperUnits',Paper_Units);
 set(gcf, 'PaperSize', [Paper_Width Paper_Height]);
 set(gcf, 'Position', [0 0 Paper_Width Paper_Height]);
 
@@ -103,6 +108,7 @@ set(h,'FontSize', Key_Font_Size)
 
 set(gcf, 'Visible', Figure_Visibility);
 set(gcf, 'Units', Paper_Units);
+set(gcf, 'PaperUnits',Paper_Units);
 set(gcf, 'PaperSize', [Paper_Width Paper_Height]);
 set(gcf, 'Position', [0 0 Paper_Width Paper_Height]);
 
@@ -133,6 +139,7 @@ set(h,'FontSize', Key_Font_Size)
 
 set(gcf, 'Visible', Figure_Visibility);
 set(gcf, 'Units', Paper_Units);
+set(gcf, 'PaperUnits',Paper_Units);
 set(gcf, 'PaperSize', [Paper_Width Paper_Height]);
 set(gcf, 'Position', [0 0 Paper_Width Paper_Height]);
 
@@ -164,6 +171,7 @@ set(h,'FontSize', Key_Font_Size)
 
 set(gcf, 'Visible', Figure_Visibility);
 set(gcf, 'Units', Paper_Units);
+set(gcf, 'PaperUnits',Paper_Units);
 set(gcf, 'PaperSize', [Paper_Width Paper_Height]);
 set(gcf, 'Position', [0 0 Paper_Width Paper_Height]);
 
@@ -194,6 +202,7 @@ set(h,'FontSize', Key_Font_Size)
 
 set(gcf, 'Visible', Figure_Visibility);
 set(gcf, 'Units', Paper_Units);
+set(gcf, 'PaperUnits',Paper_Units);
 set(gcf, 'PaperSize', [Paper_Width Paper_Height]);
 set(gcf, 'Position', [0 0 Paper_Width Paper_Height]);
 
@@ -224,6 +233,7 @@ set(h,'FontSize', Key_Font_Size)
 
 set(gcf, 'Visible', Figure_Visibility);
 set(gcf, 'Units', Paper_Units);
+set(gcf, 'PaperUnits',Paper_Units);
 set(gcf, 'PaperSize', [Paper_Width Paper_Height]);
 set(gcf, 'Position', [0 0 Paper_Width Paper_Height]);
 

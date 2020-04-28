@@ -1,5 +1,4 @@
-# fds-smv
-Fire Dynamics Simulator and Smokeview
+## Fire Dynamics Simulator and Smokeview
 
 *Continuous Integration. Continuous Improvement.*
 
@@ -11,4 +10,21 @@ For more information, including a link to our discussion forum, please visit the
 
 Here is a link to our [Firebot Build Status](https://pages.nist.gov/fds-smv/firebot_status.html).
 
+Here is a link to [contributing](https://github.com/firemodels/fds/blob/master/CONTRIBUTING.md) to the FDS and Smokeview project.
+
+Here are some other useful links:
+
+[FDS-SMV Downloads (includes Release Documentation)](https://github.com/firemodels/fds/releases)
+
+[Smokeview Downloads](https://github.com/firemodels/smv/releases)
+
+[Discussion Forum](https://groups.google.com/forum/#!forum/fds-smv)
+
+[Documentation Nightly Builds](https://drive.google.com/drive/folders/0B_wB1pJL2bFQUlJwMmNfaHlqME0)
+
+[FDS Issues](https://github.com/firemodels/fds/issues)
+
+[Smokeview Issues](https://github.com/firemodels/smv/issues)
+
 Pull requests welcome!
+

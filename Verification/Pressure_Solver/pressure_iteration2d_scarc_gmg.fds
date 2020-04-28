@@ -1,0 +1,84 @@
+&HEAD CHID='pressure_iteration2d_scarc_gmg',TITLE='ScaRC-GMG for 2D-square with obstruction on 8 meshes' /
+
+&MESH IJK=8,1,16, XB=0.0,0.2,-0.01,0.01,0.0,0.4, MULT_ID='mesh' /
+&MULT ID='mesh', DX=0.2, DY=0.02, DZ=0.4, I_UPPER=3, J_UPPER=0, K_UPPER=1 /
+
+&MISC NOISE = .FALSE. 
+      DNS   = .TRUE./
+
+&PRES SOLVER                  = 'SCARC'
+      SCARC_METHOD            = 'MULTIGRID'
+      SCARC_MULTIGRID_LEVEL   =   3
+      SCARC_SMOOTH_ITERATIONS =   2           /
+
+&TIME T_END=0.5, DT=0.002 /
+
+&SURF ID='INFLOW1',VEL=-2.0, RAMP_V='IN1' /
+&SURF ID='INFLOW2',VEL=-2.0, RAMP_V='IN2' /
+
+&VENT XB=0.3,0.5,-0.01,0.01,0.0,0.0 SURF_ID='INFLOW1' /
+&VENT XB=0.0,0.0,-0.01,0.01,0.3,0.5 SURF_ID='INFLOW2' /
+
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+
+&OBST XB=0.3,0.5,-0.01,0.01,0.3,0.5, COLOR='BLUE' /
+
+&SLCF PBY=0.0,QUANTITY='VELOCITY',VECTOR=.TRUE. /
+&SLCF PBY=0.0,QUANTITY='PRESSURE' /
+&SLCF PBY=0.0,QUANTITY='H' /
+
+&DEVC XYZ=0.64,0.00,0.41, QUANTITY='U-VELOCITY',ID='u-vel'    /
+&DEVC XYZ=0.64,0.00,0.41, QUANTITY='W-VELOCITY',ID='w-vel'    /
+&DEVC XYZ=0.64,0.00,0.41, QUANTITY='PRESSURE'  ,ID='pres' /
+&DEVC XYZ=0.00,0.00,0.00, QUANTITY='MAXIMUM VELOCITY ERROR', ID='error' /
+&DEVC XYZ=0.00,0.00,0.00, QUANTITY='PRESSURE ITERATIONS', ID='iter' /
+&DEVC XYZ=0.00,0.00,0.00, QUANTITY='SCARC ITERATIONS',ID='scarc-iter' /
+&DEVC XYZ=0.00,0.00,0.00, QUANTITY='SCARC CONVERGENCE RATE',ID='scarc-rate' /
+&DEVC XYZ=0.00,0.00,0.00, QUANTITY='SCARC RESIDUAL',ID='scarc-res' /
+
+&RAMP ID='IN1', T=  0.00,  F=  0.00 /
+&RAMP ID='IN1', T=  0.05,  F=  0.31 /
+&RAMP ID='IN1', T=  0.10,  F=  0.59 /
+&RAMP ID='IN1', T=  0.15,  F=  0.81 /
+&RAMP ID='IN1', T=  0.20,  F=  0.95 /
+&RAMP ID='IN1', T=  0.25,  F=  1.00 /
+&RAMP ID='IN1', T=  0.30,  F=  0.95 /
+&RAMP ID='IN1', T=  0.35,  F=  0.81 /
+&RAMP ID='IN1', T=  0.40,  F=  0.59 /
+&RAMP ID='IN1', T=  0.45,  F=  0.31 /
+&RAMP ID='IN1', T=  0.50,  F=  0.00 /
+&RAMP ID='IN1', T=  0.55,  F=  0.31 /
+&RAMP ID='IN1', T=  0.60,  F=  0.59 /
+&RAMP ID='IN1', T=  0.65,  F=  0.81 /
+&RAMP ID='IN1', T=  0.70,  F=  0.95 /
+&RAMP ID='IN1', T=  0.75,  F=  1.00 /
+&RAMP ID='IN1', T=  0.80,  F=  0.95 /
+&RAMP ID='IN1', T=  0.85,  F=  0.81 /
+&RAMP ID='IN1', T=  0.90,  F=  0.59 /
+&RAMP ID='IN1', T=  0.95,  F=  0.31 /
+&RAMP ID='IN1', T=  1.00,  F=  0.00 /
+ 
+&RAMP ID='IN2', T=  0.00,  F=  1.00 /
+&RAMP ID='IN2', T=  0.05,  F=  0.95 /
+&RAMP ID='IN2', T=  0.10,  F=  0.81 /
+&RAMP ID='IN2', T=  0.15,  F=  0.59 /
+&RAMP ID='IN2', T=  0.20,  F=  0.31 /
+&RAMP ID='IN2', T=  0.25,  F=  0.00 /
+&RAMP ID='IN2', T=  0.30,  F=  0.31 /
+&RAMP ID='IN2', T=  0.35,  F=  0.59 /
+&RAMP ID='IN2', T=  0.40,  F=  0.81 /
+&RAMP ID='IN2', T=  0.45,  F=  0.95 /
+&RAMP ID='IN2', T=  0.50,  F=  1.00 /
+&RAMP ID='IN2', T=  0.55,  F=  0.95 /
+&RAMP ID='IN2', T=  0.60,  F=  0.81 /
+&RAMP ID='IN2', T=  0.65,  F=  0.59 /
+&RAMP ID='IN2', T=  0.70,  F=  0.31 /
+&RAMP ID='IN2', T=  0.75,  F=  0.00 /
+&RAMP ID='IN2', T=  0.80,  F=  0.31 /
+&RAMP ID='IN2', T=  0.85,  F=  0.59 /
+&RAMP ID='IN2', T=  0.90,  F=  0.81 /
+&RAMP ID='IN2', T=  0.95,  F=  0.95 /
+&RAMP ID='IN2', T=  1.00,  F=  1.00 /
+
+&TAIL /

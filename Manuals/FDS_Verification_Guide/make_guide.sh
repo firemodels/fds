@@ -9,7 +9,7 @@ if [ -e "$AUXUSER" ]; then
   cp $AUXUSER .
 else
   echo "***warning: $AUXUSER does not exist. Build the FDS User's"
-  echo "            guide before building the Verification guide"
+  echo "            Guide before building the FDS Verification Guide"
 fi
 
 clean_build=1
@@ -23,18 +23,25 @@ pdflatex -interaction nonstopmode FDS_Verification_Guide &> FDS_Verification_Gui
 bibtex FDS_Verification_Guide &> FDS_Verification_Guide.err
 pdflatex -interaction nonstopmode FDS_Verification_Guide &> FDS_Verification_Guide.err
 pdflatex -interaction nonstopmode FDS_Verification_Guide &> FDS_Verification_Guide.err
+pdflatex -interaction nonstopmode FDS_Verification_Guide &> FDS_Verification_Guide.err
+
+if [ ! -e FDS_Verification_Guide.pdf ]; then
+  clean_build=0
+  echo "***error: the FDS Verification Guide failed to build!"
+fi
+
 if [ -e "$PDFUSER" ]; then
   cp $PDFUSER .
 fi
 
 # Scan and report any errors in the LaTeX build process
-if [[ `grep -E "Undefined control sequence|Error:|Fatal error|! LaTeX Error:|Paragraph ended before|Missing \\\$ inserted|Misplaced" -I FDS_Verification_Guide.err | grep -v "xpdf supports version 1.5"` == "" ]]
+if [[ `grep -E "Too many|Undefined control sequence|Error:|Fatal error|! LaTeX Error:|Paragraph ended before|Missing \\\$ inserted|Misplaced" -I FDS_Verification_Guide.err | grep -v "xpdf supports version 1.5"` == "" ]]
    then
       # Continue along
       :
    else
       echo "LaTeX errors detected:"
-      grep -A 1 -E "Undefined control sequence|Error:|Fatal error|! LaTeX Error:|Paragraph ended before|Missing \\\$ inserted|Misplaced" -I FDS_Verification_Guide.err | grep -v "xpdf supports version 1.5"
+      grep -A 1 -E "Too many|Undefined control sequence|Error:|Fatal error|! LaTeX Error:|Paragraph ended before|Missing \\\$ inserted|Misplaced" -I FDS_Verification_Guide.err | grep -v "xpdf supports version 1.5"
       clean_build=0
 fi
 
@@ -54,4 +61,4 @@ if [[ $clean_build == 0 ]]
       :
    else
       echo "FDS Verification Guide built successfully!"
-fi    
+fi

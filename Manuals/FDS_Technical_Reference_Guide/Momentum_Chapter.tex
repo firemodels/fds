@@ -158,6 +158,34 @@ where $\bar{u}$ is the average value of $u$ at the grid cell center (representin
 \ee
 The terms $\hat{\bar{v}}$ and $\hat{\bar{w}}$ are defined similarly.  The model constant is set to the literature value $C_\nu=0.1$ \cite{Pope:2000}.  The constant value is also derived theoretically in Appendix \ref{app:lilly_analysis}.  The algebraic form of subgrid kinetic energy is based on the ideas presented in the scale-similarity model of Bardina et al.~\cite{Bardina:1980}. (Note that Deardorff \cite{Deardorff:1980} solved a transport equation for $k_{\rm sgs}$.)
 
+\subsubsection*{Corrections for atmospheric stratification}
+\label{sec:potential_temp_correction}
+
+A stably stratified atmosphere will suppress the generation of turbulent eddies and hence it will reduce turbulent transport in the vertical direction.  Deardorff \cite{Deardorff:1980} proposed a modification to the eddy length scale in the eddy viscosity to account for local stratification (temperature gradient in the vertical direction).  The model for the length scale is
+\begin{equation}
+\label{eq:eddy_length_stability_correction}
+\ell_s = 0.76 \, \sqrt{ k_{\rm sgs} } \, \left(\frac{g}{\theta_0} \frac{\partial \theta}{\partial z}\right)^{-1/2}
+\end{equation}
+where the potential temperature is \cite{Stull:2000}
+\begin{equation}
+\label{eq:potential_tmp}
+\theta = T \left(\frac{1\times 10^5}{p}\right)^{R/(\overline{W}c_p)}
+\end{equation}
+When the potential temperature gradient is positive the local fluid is stably stratified.  With the gradient in the demoninator, the length scale is reduced, causing a reduction in the eddy viscosity.  When {\ct POTENTIAL\_TEMPERATURE\_CORRECTION=.TRUE.} the turbulent viscosity is computed from
+\be
+  \label{eq:mut_theta_cor}
+  \mu_{\rm t} = \rho \, C_\nu \, \min(\ell_s,\Delta) \, \sqrt{ k_{\rm sgs} }
+\ee
+
+\subsubsection*{Dynamic turbulent Prandtl number}
+\label{sec:dyn_turb_Pr}
+
+The turbulent Prandtl number is the ratio of the kinematic turbulent visocity to the turbulent thermal diffusivity, $\mbox{Pr}_t = \nu_t/\alpha_t$.  This parameter should approach unity if the flow is fully resolved.  To achieve this, Deardorff \cite{Deardorff:1980} proposed to compute the turbulent Prandtl number as follows:
+\begin{equation}
+\mbox{Pr}_t = \left(1 + \left[ \frac{2 \ell_s}{\Delta}\right]\right)^{-1}
+\end{equation}
+Hence, if $\ell_s = \Delta$, $\mbox{Pr}_t = 1/3$, and if $\ell_s = 0$, $\mbox{Pr}_t = 1$.  This dynamic turbulent Prandtl number is applied automatically if {\ct POTENTIAL\_TEMPERATURE\_CORRECTION=.TRUE.}.
+
 \subsection{Vreman's Model}
 \label{sec:vreman}
 
@@ -264,9 +292,8 @@ collision integral, an empirical function of the
 temperature $T$. The thermal conductivity of species $\alpha$ is given by
 \be k_\alpha = \frac{\mu_\alpha \, c_{p,\alpha}}{\PR}  \quad [=] \quad \si{W/(m.K)} \ee
 Note that the default value of the Prandtl number $\PR$ is 0.7.  However, this is an input property that can be set by the user.
-The viscosity and thermal conductivity of a gas mixture are given by
-\be \mu_{\hbox{\tiny DNS}} = \sum_\alpha \; Y_\alpha \; \mu_\alpha  \quad ; \quad
-k_{\hbox{\tiny DNS}} = \sum_\alpha \; Y_\alpha \; k_\alpha  \ee
+The viscosity and thermal conductivity of a gas mixture are given by  ~\cite{Davidson:1993}
+\be \mu_{\hbox{\tiny DNS}} = \frac{\sum_\alpha \mu_\alpha \; X_\alpha \; M_\alpha ^{1/2}}{\sum_\alpha X_\alpha \; M_\alpha ^{1/2}}  \quad ; \quad k_{\hbox{\tiny DNS}} = \frac{\sum_\alpha k_\alpha \; X_\alpha \; M_\alpha ^{1/2}}{\sum_\alpha X_\alpha \; M_\alpha ^{1/2}}  \ee
 The binary diffusion coefficient of species $\alpha$
 diffusing into species $\beta$ is given by
 \be D_{\alpha \beta} = \frac{2.66\times 10^{-7} \, T^{3/2} }{W_{\alpha \beta}^\ha \, \sigma_{\alpha \beta}^2 \, \Omega_D }
@@ -291,7 +318,7 @@ This section explains how the momentum equation is written in finite difference 
 
 The momentum equation in conservative form is written:
 \be
-   \dod{(\rho \bu)}{t} + \nabla \cdot \rho \bu \bu + \nabla p = \rho \bg + \bof_b' + \nabla\!\cdot \btau_{ij}  \label{con_momentum}
+   \dod{(\rho \bu)}{t} + \nabla \cdot \rho \bu \bu + \nabla p = \rho \bg + \bof_b + \nabla\!\cdot \btau_{ij}  \label{con_momentum}
 \ee
 First, we start with the non-conservative form of the momentum equation introduced above (see Eq.~\ref{eqn_LES_5})
 \be
@@ -697,7 +724,7 @@ Note that this is the analog of the positive mass density constraint when the di
 
 \subsection{Heat Transfer Constraint}
 
-Note that the heat transfer coefficient, $h$, has units of W/(m$^2$\,K).  Thus, a velocity scale may be formed from $h/(\rho\, c_p)$.  Anytime we have a velocity scale to resolve, we have a CFL-type stability restriction.  Therefore, the heat transfer stability check loops over all wall cells to ensure $\delta t \le \delta x \,\rho \,c_p/h$.  This check is an option. It is not done by default.
+Note that the heat flux, $\dot{q}''_{\rm c}$, has units of \si{W/m$^2$}.  Thus, a velocity scale may be formed from $(\dot{q}''_{\rm c}/\rho_{\rm w})^{1/3}$, where $\rho_{\rm w}$ is the gas phase density at the wall. Anytime we have a velocity scale to resolve, we have a CFL-type stability restriction. Therefore, the heat transfer stability check loops over all wall cells to ensure $\delta t < (\delta x/2) / (\dot{q}''_{\rm c}/\rho_{\rm w})^{1/3}$.  This check is an option. It is not done by default.
 
 \subsection{Adjusting the Time Step}
 

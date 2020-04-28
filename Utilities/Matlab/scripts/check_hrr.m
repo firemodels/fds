@@ -9,7 +9,7 @@ clear all
 
 plot_style
 
-outdir = '../../../out/Heskestad_Flame_Height/FDS_Output_Files/';
+outdir = '../../../out/Heskestad_Flame_Height/';
 M = csvread([outdir,'box_height.csv'],1,0);
 Qs = M(:,1);
 Q = M(:,2);
@@ -55,6 +55,7 @@ Plot_Filename = 'Flame_Height_check_hrr';
 
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'Units',Paper_Units);
+set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 display(['Printing plot Flame_Height_check_hrr.pdf ...'])

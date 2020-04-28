@@ -2,7 +2,7 @@
 
 &MESH XB=0.00,1.44,0.00,0.96,0.00,0.96, IJK=48,32,32 /
 
-&TIME T_END=5. /
+&TIME T_END=4. /
 
 &REAC FUEL='N-HEPTANE' /
 

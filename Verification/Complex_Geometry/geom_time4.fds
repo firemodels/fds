@@ -12,7 +12,7 @@
         VERTS=0.0,0.0,0.0,
               1.0,0.0,0.0,
               1.0,0.0,1.0,
-        FACES=1,2,3,
+        FACES=1,2,3,1
         COMPONENT_ONLY=.TRUE.,SURF_ID='surf4'/
 
 &GEOM ID='blade1',GEOM_IDS(1)='blade',SURF_ID='surf1',COMPONENT_ONLY=.TRUE. /

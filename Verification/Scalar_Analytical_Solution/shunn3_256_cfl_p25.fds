@@ -1,4 +1,4 @@
-&HEAD CHID='shunn3_256_cfl_p25', TITLE='Shunn et al. (2012) JCP, Problem 3, FLUX_LIMITER=4, CHARM' /
+&HEAD CHID='shunn3_256_cfl_p25', TITLE='Shunn et al. (2012) JCP, Problem 3, FLUX_LIMITER=CHARM' /
 
 &MESH IJK=256,1,256, XB=-1,1,-0.05,0.05,-1,1/
 

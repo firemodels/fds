@@ -6,4 +6,4 @@ cd $DIR/../..
 GITROOT=`pwd`
 
 cd $GITROOT/Build/$dir
-rm -f *.o *.mod
+git clean -dxf

@@ -1,57 +1,42 @@
-MODULE VELO
+!> \brief Collection of velocity routines.
+!> Computes the velocity flux terms, baroclinic torque correction terms, and performs the CFL check.
 
-! Module computes the velocity flux terms, baroclinic torque correction terms, and performs the CFL Check
+MODULE VELO
 
 USE PRECISION_PARAMETERS
 USE GLOBAL_CONSTANTS
 USE MESH_POINTERS
-USE COMP_FUNCTIONS, ONLY: SECOND
+USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
 
 IMPLICIT NONE
 PRIVATE
 
-PUBLIC COMPUTE_VELOCITY_FLUX,VELOCITY_PREDICTOR,VELOCITY_CORRECTOR,NO_FLUX,BAROCLINIC_CORRECTION, &
-       MATCH_VELOCITY,MATCH_VELOCITY_FLUX,VELOCITY_BC,COMPUTE_VISCOSITY,VISCOSITY_BC
-PRIVATE VELOCITY_FLUX,VELOCITY_FLUX_CYLINDRICAL
+PUBLIC VELOCITY_PREDICTOR,VELOCITY_CORRECTOR,NO_FLUX,BAROCLINIC_CORRECTION,MATCH_VELOCITY,MATCH_VELOCITY_FLUX,&
+       VELOCITY_BC,COMPUTE_VISCOSITY,VISCOSITY_BC,VELOCITY_FLUX,VELOCITY_FLUX_CYLINDRICAL
 
 
 CONTAINS
 
 
-SUBROUTINE COMPUTE_VELOCITY_FLUX(T,DT,NM,FUNCTION_CODE)
+!> \brief Compute the viscosity of the gas.
+!> \callergraph
+!> \callgraph
+!> \param T Current time (s).
+!> \param NM Mesh number.
+!> \param APPLY_TO_ESTIMATED_VARIABLES Flag indicating \f$\mu(T,\mathbf{u})\f$ or \f$\mu(T^*,\mathbf{u}^*)\f$
 
-REAL(EB), INTENT(IN) :: T,DT
-REAL(EB) :: TNOW
-INTEGER, INTENT(IN) :: NM,FUNCTION_CODE
+SUBROUTINE COMPUTE_VISCOSITY(T,NM,APPLY_TO_ESTIMATED_VARIABLES)
 
-IF (SOLID_PHASE_ONLY .OR. FREEZE_VELOCITY) RETURN
-
-TNOW = SECOND()
-
-SELECT CASE(FUNCTION_CODE)
-   CASE(1)
-      IF (PREDICTOR .OR. COMPUTE_VISCOSITY_TWICE) CALL COMPUTE_VISCOSITY(T,NM)
-   CASE(2)
-      BAROCLINIC_TERMS_ATTACHED = .FALSE.
-      IF (PREDICTOR .OR. COMPUTE_VISCOSITY_TWICE) CALL VISCOSITY_BC(NM)
-      IF (.NOT.CYLINDRICAL) CALL VELOCITY_FLUX(T,DT,NM)
-      IF (     CYLINDRICAL) CALL VELOCITY_FLUX_CYLINDRICAL(T,NM)
-END SELECT
-
-T_USED(4) = T_USED(4) + SECOND() - TNOW
-END SUBROUTINE COMPUTE_VELOCITY_FLUX
-
-
-SUBROUTINE COMPUTE_VISCOSITY(T,NM)
-
-USE PHYSICAL_FUNCTIONS, ONLY: GET_VISCOSITY,LES_FILTER_WIDTH_FUNCTION,GET_POTENTIAL_TEMPERATURE
+USE PHYSICAL_FUNCTIONS, ONLY: GET_VISCOSITY,LES_FILTER_WIDTH_FUNCTION,GET_POTENTIAL_TEMPERATURE,TURBULENT_VISCOSITY_INTERP1D
 USE TURBULENCE, ONLY: VARDEN_DYNSMAG,TEST_FILTER,FILL_EDGES,WALL_MODEL,RNG_EDDY_VISCOSITY,WALE_VISCOSITY
 USE MATH_FUNCTIONS, ONLY:EVALUATE_RAMP
+USE COMPLEX_GEOMETRY, ONLY : CCREGION_COMPUTE_VISCOSITY
 REAL(EB), INTENT(IN) :: T
 INTEGER, INTENT(IN) :: NM
+LOGICAL, INTENT(IN) :: APPLY_TO_ESTIMATED_VARIABLES
 REAL(EB) :: ZZ_GET(1:N_TRACKED_SPECIES),NU_EDDY,DELTA,KSGS,U2,V2,W2,AA,A_IJ(3,3),BB,B_IJ(3,3),&
             DUDX,DUDY,DUDZ,DVDX,DVDY,DVDZ,DWDX,DWDY,DWDZ,MU_EFF,SLIP_COEF,VEL_GAS,VEL_T,RAMP_T,TSI,&
-            VDF,LS,THETA_0,THETA_1,THETA_2,DTDZBAR,WGT
+            VDF,LS,THETA_0,THETA_1,THETA_2,DTDZBAR,WGT,NU_2,NU_3,DX_1,DX_2,DX_3,T_NOW
 REAL(EB), PARAMETER :: RAPLUS=1._EB/26._EB, C_LS=0.76_EB
 INTEGER :: I,J,K,IIG,JJG,KKG,II,JJ,KK,IW,IOR
 REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP=>NULL(),UP=>NULL(),VP=>NULL(),WP=>NULL(), &
@@ -64,37 +49,47 @@ TYPE(SURFACE_TYPE), POINTER :: SF=>NULL()
 
 IF (EVACUATION_ONLY(NM)) RETURN ! No need to update viscosity, use initial one
 
+T_NOW = CURRENT_TIME()
+
 CALL POINT_TO_MESH(NM)
 
-IF (PREDICTOR) THEN
-   RHOP => RHO
-   UU   => U
-   VV   => V
-   WW   => W
-   ZZP  => ZZ
-ELSE
+IF (APPLY_TO_ESTIMATED_VARIABLES) THEN
    RHOP => RHOS
    UU   => US
    VV   => VS
    WW   => WS
    ZZP  => ZZS
+ELSE
+   RHOP => RHO
+   UU   => U
+   VV   => V
+   WW   => W
+   ZZP  => ZZ
 ENDIF
 
 ! Compute viscosity for DNS using primitive species
 
-!$OMP PARALLEL DO FIRSTPRIVATE(ZZ_GET) SCHEDULE(guided)
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=1,IBAR
-         IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-         ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K,1:N_TRACKED_SPECIES)
-         CALL GET_VISCOSITY(ZZ_GET,MU_DNS(I,J,K),TMP(I,J,K))
+IF (SIM_MODE==SVLES_MODE) THEN
+
+   MU_DNS = MU_AIR_0
+
+ELSE
+
+   !$OMP PARALLEL DO FIRSTPRIVATE(ZZ_GET) SCHEDULE(guided)
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+            ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K,1:N_TRACKED_SPECIES)
+            CALL GET_VISCOSITY(ZZ_GET,MU_DNS(I,J,K),TMP(I,J,K))
+         ENDDO
       ENDDO
    ENDDO
-ENDDO
-!$OMP END PARALLEL DO
+   !$OMP END PARALLEL DO
 
-CALL COMPUTE_STRAIN_RATE(NM)
+ENDIF
+
+CALL COMPUTE_STRAIN_RATE
 
 SELECT_TURB: SELECT CASE (TURB_MODEL)
 
@@ -187,6 +182,7 @@ SELECT_TURB: SELECT CASE (TURB_MODEL)
                   IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                   DELTA = LES_FILTER_WIDTH_FUNCTION(DX(I),DY(J),DZ(K))
                   KSGS = 0.5_EB*( (UP(I,J,K)-UP_HAT(I,J,K))**2 + (VP(I,J,K)-VP_HAT(I,J,K))**2 + (WP(I,J,K)-WP_HAT(I,J,K))**2 )
+
                   NU_EDDY = C_DEARDORFF*DELTA*SQRT(KSGS)
                   MU(I,J,K) = MU_DNS(I,J,K) + RHOP(I,J,K)*NU_EDDY
                ENDDO
@@ -195,7 +191,6 @@ SELECT_TURB: SELECT CASE (TURB_MODEL)
          !$OMP END PARALLEL DO
       ELSE POTENTIAL_TEMPERATURE_IF
          DTDZ => WORK7
-         DTDZ = 0._EB
          DO K=0,KBAR
             DO J=0,JBAR
                DO I=0,IBAR
@@ -219,6 +214,7 @@ SELECT_TURB: SELECT CASE (TURB_MODEL)
                   ENDIF
                   NU_EDDY = C_DEARDORFF*MIN(LS,DELTA)*SQRT(KSGS)
                   MU(I,J,K) = MU_DNS(I,J,K) + RHOP(I,J,K)*NU_EDDY
+                  PR_T(I,J,K) = 1._EB/(1._EB + (2._EB*MIN(LS,DELTA)/DELTA)) ! von Schoenberg Eq. (3.21)
                ENDDO
             ENDDO
          ENDDO
@@ -378,14 +374,14 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
                VEL_GAS = SQRT( 0.25_EB*( (UU(IIG,JJG,KKG)+UU(IIG-1,JJG,KKG))**2 + (VV(IIG,JJG,KKG)+VV(IIG,JJG-1,KKG))**2 ) )
          END SELECT
 
-         CALL WALL_MODEL(SLIP_COEF,WC%U_TAU,WC%Y_PLUS,VEL_GAS-VEL_T,&
-                         MU_DNS(IIG,JJG,KKG)/RHO(IIG,JJG,KKG),1._EB/WC%ONE_D%RDN,SURFACE(WC%SURF_INDEX)%ROUGHNESS)
+         CALL WALL_MODEL(SLIP_COEF,WC%ONE_D%U_TAU,WC%ONE_D%Y_PLUS,MU_DNS(IIG,JJG,KKG)/RHO(IIG,JJG,KKG),SF%ROUGHNESS,&
+                         0.5_EB/WC%ONE_D%RDN,VEL_GAS-VEL_T)
 
-         IF (LES) THEN
+         IF (SIM_MODE/=DNS_MODE) THEN
             DELTA = LES_FILTER_WIDTH_FUNCTION(DX(IIG),DY(JJG),DZ(KKG))
             SELECT CASE(NEAR_WALL_TURB_MODEL)
                CASE DEFAULT ! Constant Smagorinsky with Van Driest damping
-                  VDF = 1._EB-EXP(-WC%Y_PLUS*RAPLUS)
+                  VDF = 1._EB-EXP(-WC%ONE_D%Y_PLUS*RAPLUS)
                   NU_EDDY = (VDF*C_SMAGORINSKY*DELTA)**2*STRAIN_RATE(IIG,JJG,KKG)
                CASE(WALE)
                   ! compute velocity gradient tensor
@@ -402,6 +398,43 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
                   A_IJ(2,1)=DVDX; A_IJ(2,2)=DVDY; A_IJ(2,3)=DVDZ
                   A_IJ(3,1)=DWDX; A_IJ(3,2)=DWDY; A_IJ(3,3)=DWDZ
                   CALL WALE_VISCOSITY(NU_EDDY,A_IJ,DELTA)
+               CASE(MU_TURB_INTERP)
+                  !! Experimental !!
+                  ! avoids jump in viscosity model from bulk to near-wall cells
+                  DX_1 = 1._EB/WC%ONE_D%RDN
+                  SELECT CASE(IOR)
+                     CASE( 1)
+                        NU_2 = RHO(MIN(IIG+1,IBP1),JJG,KKG)*MU(MIN(IIG+1,IBP1),JJG,KKG)
+                        NU_3 = RHO(MIN(IIG+2,IBP1),JJG,KKG)*MU(MIN(IIG+2,IBP1),JJG,KKG)
+                        DX_2 = DX(MIN(IIG+1,IBP1))
+                        DX_3 = DX(MIN(IIG+2,IBP1))
+                     CASE(-1)
+                        NU_2 = RHO(MAX(IIG-1,0),JJG,KKG)*MU(MAX(IIG-1,0),JJG,KKG)
+                        NU_3 = RHO(MAX(IIG-2,0),JJG,KKG)*MU(MAX(IIG-2,0),JJG,KKG)
+                        DX_2 = DX(MAX(IIG-1,0))
+                        DX_3 = DX(MAX(IIG-2,0))
+                     CASE( 2)
+                        NU_2 = RHO(IIG,MIN(JJG+1,JBP1),KKG)*MU(IIG,MIN(JJG+1,JBP1),KKG)
+                        NU_3 = RHO(IIG,MIN(JJG+2,JBP1),KKG)*MU(IIG,MIN(JJG+2,JBP1),KKG)
+                        DX_2 = DY(MIN(JJG+1,JBP1))
+                        DX_3 = DY(MIN(JJG+2,JBP1))
+                     CASE(-2)
+                        NU_2 = RHO(IIG,MAX(JJG-1,0),KKG)*MU(IIG,MAX(JJG-1,0),KKG)
+                        NU_3 = RHO(IIG,MAX(JJG-2,0),KKG)*MU(IIG,MAX(JJG-2,0),KKG)
+                        DX_2 = DY(MAX(JJG-1,0))
+                        DX_3 = DY(MAX(JJG-2,0))
+                     CASE( 3)
+                        NU_2 = RHO(IIG,JJG,MIN(KKG+1,KBP1))*MU(IIG,JJG,MIN(KKG+1,KBP1))
+                        NU_3 = RHO(IIG,JJG,MIN(KKG+2,KBP1))*MU(IIG,JJG,MIN(KKG+2,KBP1))
+                        DX_2 = DZ(MIN(KKG+1,KBP1))
+                        DX_3 = DZ(MIN(KKG+2,KBP1))
+                     CASE(-3)
+                        NU_2 = RHO(IIG,JJG,MAX(KKG-1,0))*MU(IIG,JJG,MAX(KKG-1,0))
+                        NU_3 = RHO(IIG,JJG,MAX(KKG-2,0))*MU(IIG,JJG,MAX(KKG-2,0))
+                        DX_2 = DZ(MAX(KKG-1,0))
+                        DX_3 = DZ(MAX(KKG-2,0))
+                  END SELECT
+                  CALL TURBULENT_VISCOSITY_INTERP1D(NU_EDDY,NU_2,NU_3,DX_1,DX_2,DX_3)
             END SELECT
             IF (CELL_COUNTER(IIG,JJG,KKG)==0) MU(IIG,JJG,KKG) = 0._EB
             CELL_COUNTER(IIG,JJG,KKG) = CELL_COUNTER(IIG,JJG,KKG) + 1
@@ -422,6 +455,8 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
 ENDDO WALL_LOOP
 
+IF(CC_IBM) CALL CCREGION_COMPUTE_VISCOSITY(0._EB,NM)
+
 MU(   0,0:JBP1,   0) = MU(   1,0:JBP1,1)
 MU(IBP1,0:JBP1,   0) = MU(IBAR,0:JBP1,1)
 MU(IBP1,0:JBP1,KBP1) = MU(IBAR,0:JBP1,KBAR)
@@ -435,28 +470,27 @@ MU(IBP1,0,0:KBP1)    = MU(IBAR,   1,0:KBP1)
 MU(IBP1,JBP1,0:KBP1) = MU(IBAR,JBAR,0:KBP1)
 MU(0,JBP1,0:KBP1)    = MU(   1,JBAR,0:KBP1)
 
-END SUBROUTINE COMPUTE_VISCOSITY
+KRES(   0,0:JBP1,   0) = KRES(   1,0:JBP1,1)
+KRES(IBP1,0:JBP1,   0) = KRES(IBAR,0:JBP1,1)
+KRES(IBP1,0:JBP1,KBP1) = KRES(IBAR,0:JBP1,KBAR)
+KRES(   0,0:JBP1,KBP1) = KRES(   1,0:JBP1,KBAR)
+KRES(0:IBP1,   0,   0) = KRES(0:IBP1,   1,1)
+KRES(0:IBP1,JBP1,0)    = KRES(0:IBP1,JBAR,1)
+KRES(0:IBP1,JBP1,KBP1) = KRES(0:IBP1,JBAR,KBAR)
+KRES(0:IBP1,0,KBP1)    = KRES(0:IBP1,   1,KBAR)
+KRES(0,   0,0:KBP1)    = KRES(   1,   1,0:KBP1)
+KRES(IBP1,0,0:KBP1)    = KRES(IBAR,   1,0:KBP1)
+KRES(IBP1,JBP1,0:KBP1) = KRES(IBAR,JBAR,0:KBP1)
+KRES(0,JBP1,0:KBP1)    = KRES(   1,JBAR,0:KBP1)
 
+T_USED(4) = T_USED(4) + CURRENT_TIME() - T_NOW
 
-SUBROUTINE COMPUTE_STRAIN_RATE(NM)
+CONTAINS
 
-INTEGER, INTENT(IN) :: NM
-REAL(EB) :: DUDX,DUDY,DUDZ,DVDX,DVDY,DVDZ,DWDX,DWDY,DWDZ,S11,S22,S33,S12,S13,S23,ONTHDIV
-INTEGER :: I,J,K,IOR,IIG,JJG,KKG,IW,SURF_INDEX
-REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL()
-TYPE(WALL_TYPE), POINTER :: WC=>NULL()
+SUBROUTINE COMPUTE_STRAIN_RATE
 
-CALL POINT_TO_MESH(NM)
-
-IF (PREDICTOR) THEN
-   UU => U
-   VV => V
-   WW => W
-ELSE
-   UU => US
-   VV => VS
-   WW => WS
-ENDIF
+REAL(EB) :: S11,S22,S33,S12,S13,S23,ONTHDIV
+INTEGER :: SURF_INDEX
 
 SELECT CASE (TURB_MODEL)
    CASE DEFAULT
@@ -534,16 +568,27 @@ ENDDO WALL_LOOP
 
 END SUBROUTINE COMPUTE_STRAIN_RATE
 
+END SUBROUTINE COMPUTE_VISCOSITY
 
-SUBROUTINE VISCOSITY_BC(NM)
+
+!> \brief Compute boundary values of the viscosity, MU.
+!> \param NM Mesh number.
+!> \param APPLY_TO_ESTIMATED_VARIABLES Flag indicating \f$\mu(T,\mathbf{u})\f$ or \f$\mu(T^*,\mathbf{u}^*)\f$
+!> \callergraph
+!> \callgraph
+
+SUBROUTINE VISCOSITY_BC(NM,APPLY_TO_ESTIMATED_VARIABLES)
 
 ! Specify ghost cell values of the viscosity array MU
 
 INTEGER, INTENT(IN) :: NM
-REAL(EB) :: MU_OTHER,DP_OTHER,KRES_OTHER
+LOGICAL, INTENT(IN) :: APPLY_TO_ESTIMATED_VARIABLES
+REAL(EB) :: MU_OTHER,DP_OTHER,KRES_OTHER,T_NOW
 INTEGER :: II,JJ,KK,IW,IIO,JJO,KKO,NOM,N_INT_CELLS
 TYPE(WALL_TYPE),POINTER :: WC=>NULL()
 TYPE(EXTERNAL_WALL_TYPE),POINTER :: EWC=>NULL()
+
+T_NOW = CURRENT_TIME()
 
 CALL POINT_TO_MESH(NM)
 
@@ -565,10 +610,10 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
          DO IIO=EWC%IIO_MIN,EWC%IIO_MAX
             MU_OTHER = MU_OTHER + OMESH(NOM)%MU(IIO,JJO,KKO)
             KRES_OTHER = KRES_OTHER + OMESH(NOM)%KRES(IIO,JJO,KKO)
-            IF (PREDICTOR) THEN
-               DP_OTHER = DP_OTHER + OMESH(NOM)%D(IIO,JJO,KKO)
-            ELSE
+            IF (APPLY_TO_ESTIMATED_VARIABLES) THEN
                DP_OTHER = DP_OTHER + OMESH(NOM)%DS(IIO,JJO,KKO)
+            ELSE
+               DP_OTHER = DP_OTHER + OMESH(NOM)%D(IIO,JJO,KKO)
             ENDIF
          ENDDO
       ENDDO
@@ -579,49 +624,51 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
    DP_OTHER = DP_OTHER/REAL(N_INT_CELLS,EB)
    MU(II,JJ,KK) = MU_OTHER
    KRES(II,JJ,KK) = KRES_OTHER
-   IF (PREDICTOR) THEN
-      D(II,JJ,KK) = DP_OTHER
-   ELSE
+   IF (APPLY_TO_ESTIMATED_VARIABLES) THEN
       DS(II,JJ,KK) = DP_OTHER
+   ELSE
+      D(II,JJ,KK) = DP_OTHER
    ENDIF
 ENDDO WALL_LOOP
+
+T_USED(4) = T_USED(4) + CURRENT_TIME() - T_NOW
 
 END SUBROUTINE VISCOSITY_BC
 
 
-SUBROUTINE VELOCITY_FLUX(T,DT,NM)
+SUBROUTINE VELOCITY_FLUX(T,DT,NM,APPLY_TO_ESTIMATED_VARIABLES)
 
 ! Compute convective and diffusive terms of the momentum equations
 
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
-USE COMPLEX_GEOMETRY, ONLY: CCIBM_VELOCITY_FLUX
+USE COMPLEX_GEOMETRY, ONLY : ROTATED_CUBE_VELOCITY_FLUX,CCIBM_INTERP_FACE_VEL
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T,DT
+LOGICAL, INTENT(IN) :: APPLY_TO_ESTIMATED_VARIABLES
 REAL(EB) :: MUX,MUY,MUZ,UP,UM,VP,VM,WP,WM,VTRM,OMXP,OMXM,OMYP,OMYM,OMZP,OMZM,TXYP,TXYM,TXZP,TXZM,TYZP,TYZM, &
             DTXYDY,DTXZDZ,DTYZDZ,DTXYDX,DTXZDX,DTYZDY, &
             DUDX,DVDY,DWDZ,DUDY,DUDZ,DVDX,DVDZ,DWDX,DWDY, &
             VOMZ,WOMY,UOMY,VOMX,UOMZ,WOMX, &
             RRHO,GX(0:IBAR_MAX),GY(0:IBAR_MAX),GZ(0:IBAR_MAX),TXXP,TXXM,TYYP,TYYM,TZZP,TZZM,DTXXDX,DTYYDY,DTZZDZ, &
             DUMMY=0._EB
-REAL(EB) :: VEG_UMAG
 INTEGER :: I,J,K,IEXP,IEXM,IEYP,IEYM,IEZP,IEZM,IC,IC1,IC2
 REAL(EB), POINTER, DIMENSION(:,:,:) :: TXY=>NULL(),TXZ=>NULL(),TYZ=>NULL(),OMX=>NULL(),OMY=>NULL(),OMZ=>NULL(), &
                                        UU=>NULL(),VV=>NULL(),WW=>NULL(),RHOP=>NULL(),DP=>NULL()
 
 CALL POINT_TO_MESH(NM)
 
-IF (PREDICTOR) THEN
-   UU => U
-   VV => V
-   WW => W
-   DP => D
-   RHOP => RHO
-ELSE
+IF (APPLY_TO_ESTIMATED_VARIABLES) THEN
    UU => US
    VV => VS
    WW => WS
    DP => DS
    RHOP => RHOS
+ELSE
+   UU => U
+   VV => V
+   WW => W
+   DP => D
+   RHOP => RHO
 ENDIF
 
 TXY => WORK1
@@ -631,6 +678,8 @@ OMX => WORK4
 OMY => WORK5
 OMZ => WORK6
 
+! Define velocities on gas cut-faces underlaying Cartesian faces.
+IF (CC_IBM) CALL CCIBM_INTERP_FACE_VEL(DT,NM,.TRUE.)
 
 ! Compute vorticity and stress tensor components
 
@@ -870,16 +919,18 @@ IF (EVACUATION_ONLY(NM)) THEN
    RETURN
 END IF
 
+! Restore previous substep velocities to gas cut-faces underlaying Cartesian faces.
+IF (CC_IBM) CALL CCIBM_INTERP_FACE_VEL(DT,NM,.FALSE.)
+
 ! Additional force terms
 
-IF (ANY(MEAN_FORCING) .AND. .NOT.NEW_MOMENTUM_NUDGING)             CALL MOMENTUM_NUDGING           ! Mean forcing
-IF (ANY(MEAN_FORCING) .AND.      NEW_MOMENTUM_NUDGING)             CALL MOMENTUM_NUDGING_2         ! Test new mean forcing
+IF (ANY(MEAN_FORCING))             CALL MOMENTUM_NUDGING           ! Mean forcing
 IF (ANY(ABS(FVEC)>TWO_EPSILON_EB)) CALL DIRECT_FORCE               ! Direct force
 IF (ANY(ABS(OVEC)>TWO_EPSILON_EB)) CALL CORIOLIS_FORCE             ! Coriolis force
-IF (WFDS_BNDRYFUEL)                CALL VEGETATION_DRAG            ! Surface vegetation drag
-IF (PATCH_VELOCITY)                CALL PATCH_VELOCITY_FLUX(DT,NM) ! Specified patch velocity
-IF (CC_IBM)                        CALL CCIBM_VELOCITY_FLUX(DT,NM) ! Direct-forcing Immersed Boundary Method
-IF (PERIODIC_TEST==7)              CALL MMS_VELOCITY_FLUX(NM,T)    ! Source term in manufactured solution
+IF (PATCH_VELOCITY)                CALL PATCH_VELOCITY_FLUX        ! Specified patch velocity
+IF (PERIODIC_TEST==7)              CALL MMS_VELOCITY_FLUX          ! Source term in manufactured solution
+IF (PERIODIC_TEST==21 .OR. PERIODIC_TEST==22 .OR. PERIODIC_TEST==23) CALL ROTATED_CUBE_VELOCITY_FLUX(NM,T)
+
 
 CONTAINS
 
@@ -887,265 +938,134 @@ SUBROUTINE MOMENTUM_NUDGING
 
 ! Add a force vector to the momentum equation that moves the flow field towards the direction of the mean flow.
 
-REAL(EB) :: UBAR,VBAR,WBAR,INTEGRAL,SUM_VOLUME,VC,UMEAN,VMEAN,WMEAN,DU_FORCING,DV_FORCING,DW_FORCING,DT_LOC
+USE COMPLEX_GEOMETRY, ONLY : IBM_GASPHASE, IBM_FGSC
+REAL(EB) :: UBAR,VBAR,WBAR,VC,DU_FORCING,DV_FORCING,DW_FORCING,DT_LOC
+
+IF (ICYC==1) RETURN ! need one cycle to initialize forcing arrays
 
 DT_LOC = MAX(DT,DT_MEAN_FORCING)
 
 MEAN_FORCING_X: IF (MEAN_FORCING(1)) THEN
-   SELECT_RAMP_U: SELECT CASE(I_RAMP_U0_Z)
-      CASE(0) SELECT_RAMP_U
-         INTEGRAL = 0._EB
-         SUM_VOLUME = 0._EB
-         DO K=1,KBAR
-            DO J=1,JBAR
-               DO I=0,IBAR
-                  IC1 = CELL_INDEX(I,J,K)
-                  IC2 = CELL_INDEX(I+1,J,K)
-                  IF (SOLID(IC1)) CYCLE
-                  IF (SOLID(IC2)) CYCLE
-                  IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
-                  IF (.NOT.MEAN_FORCING_CELL(I+1,J,K)) CYCLE
-                  VC = DXN(I)*DY(J)*DZ(K)
-                  INTEGRAL = INTEGRAL + UU(I,J,K)*VC
-                  SUM_VOLUME = SUM_VOLUME + VC
-               ENDDO
+   PREDICTOR_IF_U: IF (PREDICTOR) THEN
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=0,IBAR
+               IC1 = CELL_INDEX(I,J,K)
+               IC2 = CELL_INDEX(I+1,J,K)
+               IF (SOLID(IC1)) CYCLE
+               IF (SOLID(IC2)) CYCLE
+               IF (CC_IBM) THEN
+                  IF (FCVAR(I,J,K,IBM_FGSC,IAXIS) /= IBM_GASPHASE) CYCLE ! If face not regular gasphase type cycle.
+               ENDIF
+               IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
+               IF (.NOT.MEAN_FORCING_CELL(I+1,J,K)) CYCLE
+               VC = DXN(I)*DY(J)*DZ(K)
+               MEAN_FORCING_SUM_U_VOL(K_MEAN_FORCING(K)) = MEAN_FORCING_SUM_U_VOL(K_MEAN_FORCING(K)) + UU(I,J,K)*VC
+               MEAN_FORCING_SUM_VOL_X(K_MEAN_FORCING(K)) = MEAN_FORCING_SUM_VOL_X(K_MEAN_FORCING(K)) +           VC
             ENDDO
          ENDDO
-         IF (SUM_VOLUME>TWO_EPSILON_EB) THEN
-            UMEAN = INTEGRAL/SUM_VOLUME
-         ELSE
-            UMEAN = 0._EB
-         ENDIF
-         UBAR = U0*EVALUATE_RAMP(T,DUMMY,I_RAMP_U0_T)
-         DU_FORCING = (UBAR-UMEAN)/DT_LOC
-         DO K=1,KBAR
-            DO J=1,JBAR
-               DO I=0,IBAR
-                  IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
-                  IF (.NOT.MEAN_FORCING_CELL(I+1,J,K)) CYCLE
-                  FVX(I,J,K) = FVX(I,J,K) - DU_FORCING
-               ENDDO
-            ENDDO
-         ENDDO
-      CASE(1:) SELECT_RAMP_U
-         K_LOOP_U: DO K=1,KBAR
-            INTEGRAL = 0._EB
-            SUM_VOLUME = 0._EB
-            DO J=1,JBAR
-               DO I=0,IBAR
-                  IC1 = CELL_INDEX(I,J,K)
-                  IC2 = CELL_INDEX(I+1,J,K)
-                  IF (SOLID(IC1)) CYCLE
-                  IF (SOLID(IC2)) CYCLE
-                  VC = DXN(I)*DY(J)*DZ(K)
-                  INTEGRAL = INTEGRAL + UU(I,J,K)*VC
-                  SUM_VOLUME = SUM_VOLUME + VC
-               ENDDO
-            ENDDO
-            IF (SUM_VOLUME>TWO_EPSILON_EB) THEN
-               UMEAN = INTEGRAL/SUM_VOLUME
-            ELSE
-               ! this can happen if all cells in a given row, k, are solid
-               UMEAN = 0._EB
-            ENDIF
-            UBAR = U0*EVALUATE_RAMP(T,DUMMY,I_RAMP_U0_T)*EVALUATE_RAMP(ZC(K),DUMMY,I_RAMP_U0_Z)
-            DU_FORCING = (UBAR-UMEAN)/DT_LOC
-            FVX(:,:,K) = FVX(:,:,K) - DU_FORCING
-         ENDDO K_LOOP_U
-   END SELECT SELECT_RAMP_U
-ENDIF MEAN_FORCING_X
-
-MEAN_FORCING_Y: IF (MEAN_FORCING(2)) THEN
-   SELECT_RAMP_V: SELECT CASE(I_RAMP_V0_Z)
-      CASE(0) SELECT_RAMP_V
-         INTEGRAL = 0._EB
-         SUM_VOLUME = 0._EB
-         DO K=1,KBAR
-            DO J=0,JBAR
-               DO I=1,IBAR
-                  IC1 = CELL_INDEX(I,J,K)
-                  IC2 = CELL_INDEX(I,J+1,K)
-                  IF (SOLID(IC1)) CYCLE
-                  IF (SOLID(IC2)) CYCLE
-                  IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
-                  IF (.NOT.MEAN_FORCING_CELL(I,J+1,K)) CYCLE
-                  VC = DX(I)*DYN(J)*DZ(K)
-                  INTEGRAL = INTEGRAL + VV(I,J,K)*VC
-                  SUM_VOLUME = SUM_VOLUME + VC
-               ENDDO
-            ENDDO
-         ENDDO
-         IF (SUM_VOLUME>TWO_EPSILON_EB) THEN
-            VMEAN = INTEGRAL/SUM_VOLUME
-         ELSE
-            VMEAN = 0._EB
-         ENDIF
-         VBAR = V0*EVALUATE_RAMP(T,DUMMY,I_RAMP_V0_T)
-         DV_FORCING = (VBAR-VMEAN)/DT_LOC
-         DO K=1,KBAR
-            DO J=0,JBAR
-               DO I=1,IBAR
-                  IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
-                  IF (.NOT.MEAN_FORCING_CELL(I,J+1,K)) CYCLE
-                  FVY(I,J,K) = FVY(I,J,K) - DV_FORCING
-               ENDDO
-            ENDDO
-         ENDDO
-      CASE(1:) SELECT_RAMP_V
-         K_LOOP_V: DO K=1,KBAR
-            INTEGRAL = 0._EB
-            SUM_VOLUME = 0._EB
-            DO J=0,JBAR
-               DO I=1,IBAR
-                  IC1 = CELL_INDEX(I,J,K)
-                  IC2 = CELL_INDEX(I,J+1,K)
-                  IF (SOLID(IC1)) CYCLE
-                  IF (SOLID(IC2)) CYCLE
-                  VC = DX(I)*DYN(J)*DZ(K)
-                  INTEGRAL = INTEGRAL + VV(I,J,K)*VC
-                  SUM_VOLUME = SUM_VOLUME + VC
-               ENDDO
-            ENDDO
-            IF (SUM_VOLUME>TWO_EPSILON_EB) THEN
-               VMEAN = INTEGRAL/SUM_VOLUME
-            ELSE
-               VMEAN = 0._EB
-            ENDIF
-            VBAR = V0*EVALUATE_RAMP(T,DUMMY,I_RAMP_V0_T)*EVALUATE_RAMP(ZC(K),DUMMY,I_RAMP_V0_Z)
-            DV_FORCING = (VBAR-VMEAN)/DT_LOC
-            FVY(:,:,K) = FVY(:,:,K) - DV_FORCING
-         ENDDO K_LOOP_V
-   END SELECT SELECT_RAMP_V
-ENDIF MEAN_FORCING_Y
-
-MEAN_FORCING_Z: IF (MEAN_FORCING(3)) THEN
-   SELECT_RAMP_W: SELECT CASE(I_RAMP_W0_Z)
-      CASE(0) SELECT_RAMP_W
-         INTEGRAL = 0._EB
-         SUM_VOLUME = 0._EB
-         DO K=0,KBAR
-            DO J=1,JBAR
-               DO I=1,IBAR
-                  IC1 = CELL_INDEX(I,J,K)
-                  IC2 = CELL_INDEX(I,J,K+1)
-                  IF (SOLID(IC1)) CYCLE
-                  IF (SOLID(IC2)) CYCLE
-                  IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
-                  IF (.NOT.MEAN_FORCING_CELL(I,J,K+1)) CYCLE
-                  VC = DX(I)*DY(J)*DZN(K)
-                  INTEGRAL = INTEGRAL + WW(I,J,K)*VC
-                  SUM_VOLUME = SUM_VOLUME + VC
-               ENDDO
-            ENDDO
-         ENDDO
-         IF (SUM_VOLUME>TWO_EPSILON_EB) THEN
-            WMEAN = INTEGRAL/SUM_VOLUME
-         ELSE
-            WMEAN = 0._EB
-         ENDIF
-         WBAR = W0*EVALUATE_RAMP(T,DUMMY,I_RAMP_W0_T)
-         DW_FORCING = (WBAR-WMEAN)/DT_LOC
-         DO K=0,KBAR
-            DO J=1,JBAR
-               DO I=1,IBAR
-                  IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
-                  IF (.NOT.MEAN_FORCING_CELL(I,J,K+1)) CYCLE
-                  FVZ(I,J,K) = FVZ(I,J,K) - DW_FORCING
-               ENDDO
-            ENDDO
-         ENDDO
-      CASE(1:)
-         K_LOOP_W: DO K=0,KBAR
-            INTEGRAL = 0._EB
-            SUM_VOLUME = 0._EB
-            DO J=1,JBAR
-               DO I=1,IBAR
-                  IC1 = CELL_INDEX(I,J,K)
-                  IC2 = CELL_INDEX(I,J,K+1)
-                  IF (SOLID(IC1)) CYCLE
-                  IF (SOLID(IC2)) CYCLE
-                  VC = DX(I)*DY(J)*DZN(K)
-                  INTEGRAL = INTEGRAL + WW(I,J,K)*VC
-                  SUM_VOLUME = SUM_VOLUME + VC
-               ENDDO
-            ENDDO
-            IF (SUM_VOLUME>TWO_EPSILON_EB) THEN
-               WMEAN = INTEGRAL/SUM_VOLUME
-            ELSE
-               WMEAN = 0._EB
-            ENDIF
-            WBAR = W0*EVALUATE_RAMP(T,DUMMY,I_RAMP_W0_T)*EVALUATE_RAMP(Z(K),DUMMY,I_RAMP_W0_Z)
-            DW_FORCING = (WBAR-WMEAN)/DT_LOC
-            FVZ(:,:,K) = FVZ(:,:,K) - DW_FORCING
-         ENDDO K_LOOP_W
-   END SELECT SELECT_RAMP_W
-ENDIF MEAN_FORCING_Z
-
-END SUBROUTINE MOMENTUM_NUDGING
-
-
-SUBROUTINE MOMENTUM_NUDGING_2
-
-! Same as MOMENTUM_NUDGING, but force term uses local velocity component.
-! Based on Yamada, T. Downscaling Mesoscale Meteorological Models for Computational Wind Engineering Applications,
-! Journal of Wind Engineering and Industrial Aerodynamics, Vol. 99, Issue 4, April 2011, pages 199-219.
-
-! Add a force vector to the momentum equation that moves the flow field towards the direction of the mean flow.
-
-REAL(EB) :: UBAR,VBAR,WBAR,DT_LOC,DIST
-
-MEAN_FORCING_X: IF (MEAN_FORCING(1)) THEN
+      ENDDO
+   ENDIF PREDICTOR_IF_U
    DO K=1,KBAR
       UBAR = U0*EVALUATE_RAMP(T,DUMMY,I_RAMP_U0_T)*EVALUATE_RAMP(ZC(K),DUMMY,I_RAMP_U0_Z)
+      DU_FORCING = (UBAR-U_MEAN_FORCING(K_MEAN_FORCING(K)))/DT_LOC
       DO J=1,JBAR
          DO I=0,IBAR
             IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
             IF (.NOT.MEAN_FORCING_CELL(I+1,J,K)) CYCLE
-
-            DIST = MIN( ABS(X(I)-XS_MIN), ABS(XF_MAX-X(I)), ABS(YC(J)-YS_MIN), ABS(YF_MAX-YC(J)) )
-            DT_LOC = MAX(DT, MIN(1._EB,DIST/MAX(SPONGE_LAYER_DISTANCE,TWO_EPSILON_EB)) * DT_MEAN_FORCING)
-
-            FVX(I,J,K) = FVX(I,J,K) - (UBAR-UU(I,J,K))/DT_LOC
+            IF (APPLY_SPONGE_LAYER(1) .AND. I<SPONGE_CELLS) THEN
+               FVX(I,J,K) = FVX(I,J,K) - (UBAR-UU(I,J,K))/DT_LOC
+            ELSEIF (APPLY_SPONGE_LAYER(-1) .AND. I>IBAR-SPONGE_CELLS) THEN
+               FVX(I,J,K) = FVX(I,J,K) - (UBAR-UU(I,J,K))/DT_LOC
+            ELSE
+               FVX(I,J,K) = FVX(I,J,K) - DU_FORCING
+            ENDIF
          ENDDO
       ENDDO
    ENDDO
 ENDIF MEAN_FORCING_X
 
 MEAN_FORCING_Y: IF (MEAN_FORCING(2)) THEN
+   PREDICTOR_IF_V: IF (PREDICTOR) THEN
+      DO K=1,KBAR
+         DO J=0,JBAR
+            DO I=1,IBAR
+               IC1 = CELL_INDEX(I,J,K)
+               IC2 = CELL_INDEX(I,J+1,K)
+               IF (SOLID(IC1)) CYCLE
+               IF (SOLID(IC2)) CYCLE
+               IF (CC_IBM) THEN
+                  IF (FCVAR(I,J,K,IBM_FGSC,JAXIS) /= IBM_GASPHASE) CYCLE
+               ENDIF
+               IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
+               IF (.NOT.MEAN_FORCING_CELL(I,J+1,K)) CYCLE
+               VC = DX(I)*DYN(J)*DZ(K)
+               MEAN_FORCING_SUM_V_VOL(K_MEAN_FORCING(K)) = MEAN_FORCING_SUM_V_VOL(K_MEAN_FORCING(K)) + VV(I,J,K)*VC
+               MEAN_FORCING_SUM_VOL_Y(K_MEAN_FORCING(K)) = MEAN_FORCING_SUM_VOL_Y(K_MEAN_FORCING(K)) +           VC
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDIF PREDICTOR_IF_V
    DO K=1,KBAR
       VBAR = V0*EVALUATE_RAMP(T,DUMMY,I_RAMP_V0_T)*EVALUATE_RAMP(ZC(K),DUMMY,I_RAMP_V0_Z)
+      DV_FORCING = (VBAR-V_MEAN_FORCING(K_MEAN_FORCING(K)))/DT_LOC
       DO J=0,JBAR
          DO I=1,IBAR
             IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
             IF (.NOT.MEAN_FORCING_CELL(I,J+1,K)) CYCLE
-
-            DIST = MIN( ABS(XC(I)-XS_MIN), ABS(XF_MAX-XC(I)), ABS(Y(J)-YS_MIN), ABS(YF_MAX-Y(J)) )
-            DT_LOC = MAX(DT, MIN(1._EB,DIST/MAX(SPONGE_LAYER_DISTANCE,TWO_EPSILON_EB)) * DT_MEAN_FORCING)
-
-            FVY(I,J,K) = FVY(I,J,K) - (VBAR-VV(I,J,K))/DT_LOC
+            IF (APPLY_SPONGE_LAYER(2) .AND. J<SPONGE_CELLS) THEN
+               FVY(I,J,K) = FVY(I,J,K) - (VBAR-VV(I,J,K))/DT_LOC
+            ELSEIF (APPLY_SPONGE_LAYER(-2) .AND. J>JBAR-SPONGE_CELLS) THEN
+               FVY(I,J,K) = FVY(I,J,K) - (VBAR-VV(I,J,K))/DT_LOC
+            ELSE
+               FVY(I,J,K) = FVY(I,J,K) - DV_FORCING
+            ENDIF
          ENDDO
       ENDDO
    ENDDO
 ENDIF MEAN_FORCING_Y
 
 MEAN_FORCING_Z: IF (MEAN_FORCING(3)) THEN
-   DO K=0,KBAR
-      WBAR = W0*EVALUATE_RAMP(T,DUMMY,I_RAMP_W0_T)*EVALUATE_RAMP(Z(K),DUMMY,I_RAMP_W0_Z)
+   PREDICTOR_IF_W: IF (PREDICTOR) THEN
+      DO K=1,KBM1
+         DO J=1,JBAR
+            DO I=1,IBAR
+               IC1 = CELL_INDEX(I,J,K)
+               IC2 = CELL_INDEX(I,J,K+1)
+               IF (SOLID(IC1)) CYCLE
+               IF (SOLID(IC2)) CYCLE
+               IF (CC_IBM) THEN
+                  IF (FCVAR(I,J,K,IBM_FGSC,KAXIS) /= IBM_GASPHASE) CYCLE
+               ENDIF
+               IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
+               IF (.NOT.MEAN_FORCING_CELL(I,J,K+1)) CYCLE
+               VC = DX(I)*DY(J)*DZN(K)
+               MEAN_FORCING_SUM_W_VOL(K_MEAN_FORCING(K)) = MEAN_FORCING_SUM_W_VOL(K_MEAN_FORCING(K)) + WW(I,J,K)*VC
+               MEAN_FORCING_SUM_VOL_Z(K_MEAN_FORCING(K)) = MEAN_FORCING_SUM_VOL_Z(K_MEAN_FORCING(K)) +           VC
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDIF PREDICTOR_IF_W
+   DO K=1,KBM1
+      WBAR = W0*EVALUATE_RAMP(T,DUMMY,I_RAMP_W0_T)*EVALUATE_RAMP(ZC(K),DUMMY,I_RAMP_W0_Z)
+      DW_FORCING = (WBAR-W_MEAN_FORCING(K_MEAN_FORCING(K)))/DT_LOC
       DO J=1,JBAR
          DO I=1,IBAR
             IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
             IF (.NOT.MEAN_FORCING_CELL(I,J,K+1)) CYCLE
-
-            DIST = MIN( ABS(XC(I)-XS_MIN), ABS(XF_MAX-XC(I)), ABS(YC(J)-YS_MIN), ABS(YF_MAX-YC(J)) )
-            DT_LOC = MAX(DT, MIN(1._EB,DIST/MAX(SPONGE_LAYER_DISTANCE,TWO_EPSILON_EB)) * DT_MEAN_FORCING)
-
-            FVZ(I,J,K) = FVZ(I,J,K) - (WBAR-WW(I,J,K))/DT_LOC
+            IF (APPLY_SPONGE_LAYER(3) .AND. K<SPONGE_CELLS) THEN
+               FVZ(I,J,K) = FVZ(I,J,K) - (WBAR-WW(I,J,K))/DT_LOC
+            ELSEIF (APPLY_SPONGE_LAYER(-3) .AND. K>KBAR-SPONGE_CELLS) THEN
+               FVZ(I,J,K) = FVZ(I,J,K) - (WBAR-WW(I,J,K))/DT_LOC
+            ELSE
+               FVZ(I,J,K) = FVZ(I,J,K) - DW_FORCING
+            ENDIF
          ENDDO
       ENDDO
    ENDDO
 ENDIF MEAN_FORCING_Z
 
-END SUBROUTINE MOMENTUM_NUDGING_2
+END SUBROUTINE MOMENTUM_NUDGING
 
 
 SUBROUTINE DIRECT_FORCE()
@@ -1274,56 +1194,11 @@ ENDDO
 END SUBROUTINE CORIOLIS_FORCE
 
 
-SUBROUTINE VEGETATION_DRAG()
-
-   VEG_DRAG(0,:) = VEG_DRAG(1,:)
-   K=1
-   DO J=1,JBAR
-      DO I=0,IBAR
-         VEG_UMAG = SQRT(UU(I,J,K)**2 + VV(I,J,K)**2 + WW(I,J,K)**2) ! VEG_UMAG=2._EB*KRES(I,J,K)
-         FVX(I,J,K) = FVX(I,J,K) + VEG_DRAG(I,J)*VEG_UMAG*UU(I,J,K)
-      ENDDO
-   ENDDO
-
-   VEG_DRAG(:,0) = VEG_DRAG(:,1)
-   DO J=0,JBAR
-      DO I=1,IBAR
-         VEG_UMAG = SQRT(UU(I,J,K)**2 + VV(I,J,K)**2 + WW(I,J,K)**2)
-         FVY(I,J,K) = FVY(I,J,K) + VEG_DRAG(I,J)*VEG_UMAG*VV(I,J,K)
-      ENDDO
-   ENDDO
-
-   DO J=1,JBAR
-      DO I=1,IBAR
-         VEG_UMAG = SQRT(UU(I,J,K)**2 + VV(I,J,K)**2 + WW(I,J,K)**2)
-         FVZ(I,J,K) = FVZ(I,J,K) + VEG_DRAG(I,J)*VEG_UMAG*WW(I,J,K)
-      ENDDO
-   ENDDO
-
-END SUBROUTINE VEGETATION_DRAG
-
-END SUBROUTINE VELOCITY_FLUX
-
-
-SUBROUTINE MMS_VELOCITY_FLUX(NM,T)
+SUBROUTINE MMS_VELOCITY_FLUX
 
 ! Shunn et al., JCP (2012) prob 3
 
 USE MANUFACTURED_SOLUTIONS, ONLY: VD2D_MMS_U_SRC_3,VD2D_MMS_V_SRC_3
-INTEGER, INTENT(IN) :: NM
-REAL(EB), INTENT(IN) :: T
-INTEGER :: I,J,K
-REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),WW=>NULL()
-
-CALL POINT_TO_MESH(NM)
-
-IF (PREDICTOR) THEN
-   UU=>U
-   WW=>W
-ELSE
-   UU=>US
-   WW=>WS
-ENDIF
 
 DO K=1,KBAR
    DO J=1,JBAR
@@ -1344,31 +1219,179 @@ ENDDO
 END SUBROUTINE MMS_VELOCITY_FLUX
 
 
-SUBROUTINE VELOCITY_FLUX_CYLINDRICAL(T,NM)
+SUBROUTINE PATCH_VELOCITY_FLUX
+
+! The user may specify a polynomial profile using the PROP and DEVC lines. This routine
+! specifies the source term in the momentum equation to drive the local velocity toward
+! this user-specified value, in much the same way as the immersed boundary method
+! (see IBM_VELOCITY_FLUX).
+
+USE DEVICE_VARIABLES, ONLY: DEVICE_TYPE,PROPERTY_TYPE,N_DEVC,DEVICE,PROPERTY
+USE TRAN, ONLY: GINV
+TYPE(DEVICE_TYPE), POINTER :: DV
+TYPE(PROPERTY_TYPE), POINTER :: PY
+INTEGER :: N,I1,I2,J1,J2,K1,K2
+REAL(EB), POINTER, DIMENSION(:,:,:) :: HP
+REAL(EB) :: VELP,DX0,DY0,DZ0
+
+IF (APPLY_TO_ESTIMATED_VARIABLES) THEN
+   HP => HS
+ELSE
+   HP => H
+ENDIF
+
+DEVC_LOOP: DO N=1,N_DEVC
+
+   DV=>DEVICE(N)
+   IF (DV%QUANTITY(1)/='VELOCITY PATCH') CYCLE DEVC_LOOP
+   IF (DV%PROP_INDEX<1)               CYCLE DEVC_LOOP
+   IF (.NOT.DEVICE(DV%DEVC_INDEX(1))%CURRENT_STATE) CYCLE DEVC_LOOP
+
+   IF (DV%X1 > XF .OR. DV%X2 < XS .OR. &
+       DV%Y1 > YF .OR. DV%Y2 < YS .OR. &
+       DV%Z1 > ZF .OR. DV%Z2 < ZS) CYCLE DEVC_LOOP
+
+   PY=>PROPERTY(DV%PROP_INDEX)
+
+   I_VEL_SELECT: SELECT CASE(PY%I_VEL)
+
+      CASE(1) I_VEL_SELECT
+
+         I1 = MAX(0,   NINT( GINV(DV%X1-XS,1,NM)*RDXI   )-1)
+         I2 = MIN(IBAR,NINT( GINV(DV%X2-XS,1,NM)*RDXI   )+1)
+         J1 = MAX(0,   NINT( GINV(DV%Y1-YS,2,NM)*RDETA  )-1)
+         J2 = MIN(JBAR,NINT( GINV(DV%Y2-YS,2,NM)*RDETA  )+1)
+         K1 = MAX(0,   NINT( GINV(DV%Z1-ZS,3,NM)*RDZETA )-1)
+         K2 = MIN(KBAR,NINT( GINV(DV%Z2-ZS,3,NM)*RDZETA )+1)
+
+         DO K=K1,K2
+            DO J=J1,J2
+               DO I=I1,I2
+
+                  IC1 = CELL_INDEX(I,J,K)
+                  IC2 = CELL_INDEX(I+1,J,K)
+                  IF (SOLID(IC1) .OR. SOLID(IC2)) CYCLE
+
+                  IF ( X(I)<DV%X1 .OR.  X(I)>DV%X2) CYCLE ! Inefficient but simple
+                  IF (YC(J)<DV%Y1 .OR. YC(J)>DV%Y2) CYCLE
+                  IF (ZC(K)<DV%Z1 .OR. ZC(K)>DV%Z2) CYCLE
+
+                  DX0 =  X(I)-DV%X
+                  DY0 = YC(J)-DV%Y
+                  DZ0 = ZC(K)-DV%Z
+                  VELP = PY%P0 + DX0*PY%PX(1) + 0.5_EB*(DX0*DX0*PY%PXX(1,1)+DX0*DY0*PY%PXX(1,2)+DX0*DZ0*PY%PXX(1,3)) &
+                               + DY0*PY%PX(2) + 0.5_EB*(DY0*DX0*PY%PXX(2,1)+DY0*DY0*PY%PXX(2,2)+DY0*DZ0*PY%PXX(2,3)) &
+                               + DZ0*PY%PX(3) + 0.5_EB*(DZ0*DX0*PY%PXX(3,1)+DZ0*DY0*PY%PXX(3,2)+DZ0*DZ0*PY%PXX(3,3))
+
+                  FVX(I,J,K) = -RDXN(I)*(HP(I+1,J,K)-HP(I,J,K)) - (VELP-UU(I,J,K))/DT
+               ENDDO
+            ENDDO
+         ENDDO
+
+      CASE(2) I_VEL_SELECT
+
+         I1 = MAX(0,   NINT( GINV(DV%X1-XS,1,NM)*RDXI   )-1)
+         I2 = MIN(IBAR,NINT( GINV(DV%X2-XS,1,NM)*RDXI   )+1)
+         J1 = MAX(0,   NINT( GINV(DV%Y1-YS,2,NM)*RDETA  )-1)
+         J2 = MIN(JBAR,NINT( GINV(DV%Y2-YS,2,NM)*RDETA  )+1)
+         K1 = MAX(0,   NINT( GINV(DV%Z1-ZS,3,NM)*RDZETA )-1)
+         K2 = MIN(KBAR,NINT( GINV(DV%Z2-ZS,3,NM)*RDZETA )+1)
+
+         DO K=K1,K2
+            DO J=J1,J2
+               DO I=I1,I2
+
+                  IC1 = CELL_INDEX(I,J,K)
+                  IC2 = CELL_INDEX(I,J+1,K)
+
+                  IF (SOLID(IC1) .OR. SOLID(IC2)) CYCLE
+
+                  IF (XC(I)<DV%X1 .OR. XC(I)>DV%X2) CYCLE
+                  IF ( Y(J)<DV%Y1 .OR.  Y(J)>DV%Y2) CYCLE
+                  IF (ZC(K)<DV%Z1 .OR. ZC(K)>DV%Z2) CYCLE
+
+                  DX0 = XC(I)-DV%X
+                  DY0 =  Y(J)-DV%Y
+                  DZ0 = ZC(K)-DV%Z
+                  VELP = PY%P0 + DX0*PY%PX(1) + 0.5_EB*(DX0*DX0*PY%PXX(1,1)+DX0*DY0*PY%PXX(1,2)+DX0*DZ0*PY%PXX(1,3)) &
+                               + DY0*PY%PX(2) + 0.5_EB*(DY0*DX0*PY%PXX(2,1)+DY0*DY0*PY%PXX(2,2)+DY0*DZ0*PY%PXX(2,3)) &
+                               + DZ0*PY%PX(3) + 0.5_EB*(DZ0*DX0*PY%PXX(3,1)+DZ0*DY0*PY%PXX(3,2)+DZ0*DZ0*PY%PXX(3,3))
+
+                  FVY(I,J,K) = -RDYN(J)*(HP(I,J+1,K)-HP(I,J,K)) - (VELP-VV(I,J,K))/DT
+               ENDDO
+            ENDDO
+         ENDDO
+
+      CASE(3) I_VEL_SELECT
+
+         I1 = MAX(0,   NINT( GINV(DV%X1-XS,1,NM)*RDXI   )-1)
+         I2 = MIN(IBAR,NINT( GINV(DV%X2-XS,1,NM)*RDXI   )+1)
+         J1 = MAX(0,   NINT( GINV(DV%Y1-YS,2,NM)*RDETA  )-1)
+         J2 = MIN(JBAR,NINT( GINV(DV%Y2-YS,2,NM)*RDETA  )+1)
+         K1 = MAX(0,   NINT( GINV(DV%Z1-ZS,3,NM)*RDZETA )-1)
+         K2 = MIN(KBAR,NINT( GINV(DV%Z2-ZS,3,NM)*RDZETA )+1)
+
+         DO K=K1,K2
+            DO J=J1,J2
+               DO I=I1,I2
+
+                  IC1 = CELL_INDEX(I,J,K)
+                  IC2 = CELL_INDEX(I,J,K+1)
+                  IF (SOLID(IC1) .OR. SOLID(IC2)) CYCLE
+
+                  IF (XC(I)<DV%X1 .OR. XC(I)>DV%X2) CYCLE
+                  IF (YC(J)<DV%Y1 .OR. YC(J)>DV%Y2) CYCLE
+                  IF ( Z(K)<DV%Z1 .OR.  Z(K)>DV%Z2) CYCLE
+
+                  DX0 = XC(I)-DV%X
+                  DY0 = YC(J)-DV%Y
+                  DZ0 =  Z(K)-DV%Z
+                  VELP = PY%P0 + DX0*PY%PX(1) + 0.5_EB*(DX0*DX0*PY%PXX(1,1)+DX0*DY0*PY%PXX(1,2)+DX0*DZ0*PY%PXX(1,3)) &
+                               + DY0*PY%PX(2) + 0.5_EB*(DY0*DX0*PY%PXX(2,1)+DY0*DY0*PY%PXX(2,2)+DY0*DZ0*PY%PXX(2,3)) &
+                               + DZ0*PY%PX(3) + 0.5_EB*(DZ0*DX0*PY%PXX(3,1)+DZ0*DY0*PY%PXX(3,2)+DZ0*DZ0*PY%PXX(3,3))
+
+                  FVZ(I,J,K) = -RDZN(K)*(HP(I,J,K)-HP(I,J,K+1)) - (VELP-WW(I,J,K))/DT
+               ENDDO
+            ENDDO
+         ENDDO
+
+   END SELECT I_VEL_SELECT
+
+ENDDO DEVC_LOOP
+
+END SUBROUTINE PATCH_VELOCITY_FLUX
+
+END SUBROUTINE VELOCITY_FLUX
+
+
+SUBROUTINE VELOCITY_FLUX_CYLINDRICAL(T,NM,APPLY_TO_ESTIMATED_VARIABLES)
 
 ! Compute convective and diffusive terms for 2D axisymmetric
 
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 REAL(EB) :: T,DMUDX
+LOGICAL, INTENT(IN) :: APPLY_TO_ESTIMATED_VARIABLES
 INTEGER :: I0
 INTEGER, INTENT(IN) :: NM
 REAL(EB) :: MUY,UP,UM,WP,WM,VTRM,DTXZDZ,DTXZDX,DUDX,DWDZ,DUDZ,DWDX,WOMY,UOMY,OMYP,OMYM,TXZP,TXZM, &
-            AH,RRHO,GX,GZ,TXXP,TXXM,TZZP,TZZM,DTXXDX,DTZZDZ,DUMMY=0._EB
+            AH,RRHO,GX,GZ,TXXP,TXXM,TZZP,TZZM,DTXXDX,DTZZDZ,DUMMY=0._EB,T_NOW
 INTEGER :: I,J,K,IEYP,IEYM,IC
 REAL(EB), POINTER, DIMENSION(:,:,:) :: TXZ=>NULL(),OMY=>NULL(),UU=>NULL(),WW=>NULL(),RHOP=>NULL(),DP=>NULL()
 
+T_NOW = CURRENT_TIME()
+
 CALL POINT_TO_MESH(NM)
 
-IF (PREDICTOR) THEN
-   UU => U
-   WW => W
-   DP => D
-   RHOP => RHO
-ELSE
+IF (APPLY_TO_ESTIMATED_VARIABLES) THEN
    UU => US
    WW => WS
    DP => DS
    RHOP => RHOS
+ELSE
+   UU => U
+   WW => W
+   DP => D
+   RHOP => RHO
 ENDIF
 
 TXZ => WORK2
@@ -1472,7 +1495,7 @@ DO K=0,KBAR
    ENDDO
 ENDDO
 
-! Adjust FVX and FVZ at solid, internal obstructions for no flux
+T_USED(4) = T_USED(4) + CURRENT_TIME() - T_NOW
 
 END SUBROUTINE VELOCITY_FLUX_CYLINDRICAL
 
@@ -1485,13 +1508,16 @@ USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: DT
 REAL(EB), POINTER, DIMENSION(:,:,:) :: HP=>NULL(),OM_HP=>NULL()
-REAL(EB) :: RFODT,H_OTHER,DUUDT,DVVDT,DWWDT,UN,TNOW,DHFCT
+REAL(EB) :: RFODT,H_OTHER,DUUDT,DVVDT,DWWDT,UN,T_NOW,DHFCT
 INTEGER  :: IC2,IC1,N,I,J,K,IW,II,JJ,KK,IOR,N_INT_CELLS,IIO,JJO,KKO,NOM
 TYPE (OBSTRUCTION_TYPE), POINTER :: OB=>NULL()
 TYPE (WALL_TYPE), POINTER :: WC=>NULL()
 TYPE (EXTERNAL_WALL_TYPE), POINTER :: EWC=>NULL()
+LOGICAL :: GLMAT_ON_WHOLE_DOMAIN
 
-TNOW=SECOND()
+IF (SOLID_PHASE_ONLY .OR. FREEZE_VELOCITY) RETURN
+
+T_NOW=CURRENT_TIME()
 CALL POINT_TO_MESH(NM)
 
 RFODT = RELAXATION_FACTOR/DT
@@ -1501,7 +1527,7 @@ IF (CORRECTOR) HP => HS
 
 ! Exchange H at interpolated boundaries
 
-NO_SCARC_IF: IF (PRES_METHOD /= 'SCARC') THEN
+NO_SCARC_IF: IF (TRIM(PRES_METHOD) /= 'SCARC' .AND. TRIM(PRES_METHOD) /= 'USCARC') THEN
 
    DO IW=1,N_EXTERNAL_WALL_CELLS
       WC=>WALL(IW)
@@ -1589,7 +1615,10 @@ OBST_LOOP: DO N=1,N_OBST
 
 ENDDO OBST_LOOP
 
-! Set FVX, FVY and FVZ to drive the normal velocity at solid boundaries towards the specified value (UW or UWS)
+! Set FVX, FVY and FVZ to drive the normal velocity at solid boundaries towards the specified value (U_NORMAL or U_NORMAL_S)
+! Logical to define not to apply pressure gradient on external mesh boundaries for GLMAT.
+
+GLMAT_ON_WHOLE_DOMAIN = (PRES_METHOD=='GLMAT') .AND. PRES_ON_WHOLE_DOMAIN
 
 WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
@@ -1610,13 +1639,14 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    KK  = WC%ONE_D%KK
    IOR = WC%ONE_D%IOR
 
+   DHFCT=1._EB
+   IF ( (.NOT. PRES_ON_WHOLE_DOMAIN) .OR. (GLMAT_ON_WHOLE_DOMAIN .AND.  IW<=N_EXTERNAL_WALL_CELLS) ) DHFCT=0._EB
+
    IF (NOM/=0 .OR. WC%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. WC%BOUNDARY_TYPE==NULL_BOUNDARY) THEN
-      DHFCT=1._EB
-      IF (.NOT. PRES_ON_WHOLE_DOMAIN) DHFCT=0._EB
       IF (PREDICTOR) THEN
-         UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UWS
+         UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%U_NORMAL_S
       ELSE
-         UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UW
+         UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%U_NORMAL
       ENDIF
       SELECT CASE(IOR)
          CASE( 1)
@@ -1683,7 +1713,8 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
 ENDDO WALL_LOOP
 
-T_USED(4)=T_USED(4)+SECOND()-TNOW
+T_USED(4)=T_USED(4)+CURRENT_TIME()-T_NOW
+
 END SUBROUTINE NO_FLUX
 
 
@@ -1695,7 +1726,7 @@ USE COMPLEX_GEOMETRY, ONLY : CCIBM_VELOCITY_NO_GRADH
 
 ! Estimates the velocity components at the next time step
 
-REAL(EB) :: TNOW,XHAT,ZHAT
+REAL(EB) :: T_NOW,XHAT,ZHAT
 INTEGER  :: I,J,K
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T,DT
@@ -1708,7 +1739,7 @@ IF (PERIODIC_TEST==4) THEN
    RETURN
 ENDIF
 
-TNOW=SECOND()
+T_NOW=CURRENT_TIME()
 CALL POINT_TO_MESH(NM)
 
 FREEZE_VELOCITY_IF: IF (FREEZE_VELOCITY) THEN
@@ -1717,32 +1748,32 @@ FREEZE_VELOCITY_IF: IF (FREEZE_VELOCITY) THEN
    WS = W
 ELSE FREEZE_VELOCITY_IF
 
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=0,IBAR
-         US(I,J,K) = U(I,J,K) - DT*( FVX(I,J,K) + RDXN(I)*(H(I+1,J,K)-H(I,J,K)) )
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=0,IBAR
+            US(I,J,K) = U(I,J,K) - DT*( FVX(I,J,K) + RDXN(I)*(H(I+1,J,K)-H(I,J,K)) )
+         ENDDO
       ENDDO
    ENDDO
-ENDDO
 
-DO K=1,KBAR
-   DO J=0,JBAR
-      DO I=1,IBAR
-         VS(I,J,K) = V(I,J,K) - DT*( FVY(I,J,K) + RDYN(J)*(H(I,J+1,K)-H(I,J,K)) )
+   DO K=1,KBAR
+      DO J=0,JBAR
+         DO I=1,IBAR
+            VS(I,J,K) = V(I,J,K) - DT*( FVY(I,J,K) + RDYN(J)*(H(I,J+1,K)-H(I,J,K)) )
+         ENDDO
       ENDDO
    ENDDO
-ENDDO
 
-DO K=0,KBAR
-   DO J=1,JBAR
-      DO I=1,IBAR
-         WS(I,J,K) = W(I,J,K) - DT*( FVZ(I,J,K) + RDZN(K)*(H(I,J,K+1)-H(I,J,K)) )
+   DO K=0,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            WS(I,J,K) = W(I,J,K) - DT*( FVZ(I,J,K) + RDZN(K)*(H(I,J,K+1)-H(I,J,K)) )
+         ENDDO
       ENDDO
    ENDDO
-ENDDO
 
-IF (PRES_METHOD == 'GLMAT') CALL WALL_VELOCITY_NO_GRADH(DT,.FALSE.)
-IF (CC_IBM)                 CALL CCIBM_VELOCITY_NO_GRADH(DT)
+   IF (PRES_METHOD == 'GLMAT' .OR. PRES_METHOD == 'USCARC') CALL WALL_VELOCITY_NO_GRADH(DT,.FALSE.)
+   IF (CC_IBM) CALL CCIBM_VELOCITY_NO_GRADH(DT,.FALSE.)
 
 ENDIF FREEZE_VELOCITY_IF
 
@@ -1779,7 +1810,8 @@ CALL CHECK_STABILITY(DT,DT_NEW,NM)
 
 IF (DT_NEW(NM)<DT_INITIAL*LIMITING_DT_RATIO .AND. (T+DT_NEW(NM)<(T_END-TWO_EPSILON_EB))) STOP_STATUS = INSTABILITY_STOP
 
-T_USED(4)=T_USED(4)+SECOND()-TNOW
+T_USED(4)=T_USED(4)+CURRENT_TIME()-T_NOW
+
 END SUBROUTINE VELOCITY_PREDICTOR
 
 
@@ -1791,7 +1823,7 @@ USE COMPLEX_GEOMETRY, ONLY : CCIBM_VELOCITY_NO_GRADH
 
 ! Correct the velocity components
 
-REAL(EB) :: TNOW,XHAT,ZHAT
+REAL(EB) :: T_NOW,XHAT,ZHAT
 INTEGER  :: I,J,K
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T,DT
@@ -1802,7 +1834,7 @@ IF (PERIODIC_TEST==4) THEN
    RETURN
 ENDIF
 
-TNOW=SECOND()
+T_NOW=CURRENT_TIME()
 CALL POINT_TO_MESH(NM)
 
 FREEZE_VELOCITY_IF: IF (FREEZE_VELOCITY) THEN
@@ -1811,34 +1843,45 @@ FREEZE_VELOCITY_IF: IF (FREEZE_VELOCITY) THEN
    W = WS
 ELSE FREEZE_VELOCITY_IF
 
-IF (PRES_METHOD == 'GLMAT') CALL WALL_VELOCITY_NO_GRADH(DT,.TRUE.) ! Store U velocities on OBST surfaces.
+   IF (STORE_OLD_VELOCITY) THEN
+      U_OLD = U
+      V_OLD = V
+      W_OLD = W
+   ENDIF
 
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=0,IBAR
-         U(I,J,K) = 0.5_EB*( U(I,J,K) + US(I,J,K) - DT*(FVX(I,J,K) + RDXN(I)*(HS(I+1,J,K)-HS(I,J,K))) )
+   IF (PRES_METHOD == 'GLMAT' .OR. PRES_METHOD == 'USCARC') THEN
+      CALL WALL_VELOCITY_NO_GRADH(DT,.TRUE.)                    ! Store U velocities on OBST surfaces.
+      IF (CC_IBM) CALL CCIBM_VELOCITY_NO_GRADH(DT,.TRUE.)       ! Store velocities on GEOM SOLID faces.
+   ENDIF
+
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=0,IBAR
+            U(I,J,K) = 0.5_EB*( U(I,J,K) + US(I,J,K) - DT*(FVX(I,J,K) + RDXN(I)*(HS(I+1,J,K)-HS(I,J,K))) )
+         ENDDO
       ENDDO
    ENDDO
-ENDDO
 
-DO K=1,KBAR
-   DO J=0,JBAR
-      DO I=1,IBAR
-         V(I,J,K) = 0.5_EB*( V(I,J,K) + VS(I,J,K) - DT*(FVY(I,J,K) + RDYN(J)*(HS(I,J+1,K)-HS(I,J,K))) )
+   DO K=1,KBAR
+      DO J=0,JBAR
+         DO I=1,IBAR
+            V(I,J,K) = 0.5_EB*( V(I,J,K) + VS(I,J,K) - DT*(FVY(I,J,K) + RDYN(J)*(HS(I,J+1,K)-HS(I,J,K))) )
+         ENDDO
       ENDDO
    ENDDO
-ENDDO
 
-DO K=0,KBAR
-   DO J=1,JBAR
-      DO I=1,IBAR
-         W(I,J,K) = 0.5_EB*( W(I,J,K) + WS(I,J,K) - DT*(FVZ(I,J,K) + RDZN(K)*(HS(I,J,K+1)-HS(I,J,K))) )
+   DO K=0,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            W(I,J,K) = 0.5_EB*( W(I,J,K) + WS(I,J,K) - DT*(FVZ(I,J,K) + RDZN(K)*(HS(I,J,K+1)-HS(I,J,K))) )
+         ENDDO
       ENDDO
    ENDDO
-ENDDO
 
-IF (PRES_METHOD == 'GLMAT') CALL WALL_VELOCITY_NO_GRADH(DT,.FALSE.)
-IF (CC_IBM)                 CALL CCIBM_VELOCITY_NO_GRADH(DT)
+   IF (PRES_METHOD == 'GLMAT' .OR. PRES_METHOD == 'USCARC') THEN
+      CALL WALL_VELOCITY_NO_GRADH(DT,.FALSE.)
+      IF (CC_IBM) CALL CCIBM_VELOCITY_NO_GRADH(DT,.FALSE.)
+   ENDIF
 
 ENDIF FREEZE_VELOCITY_IF
 
@@ -1869,25 +1912,27 @@ ENDIF
 
 IF (EVACUATION_ONLY(NM)) W = 0._EB
 
-T_USED(4)=T_USED(4)+SECOND()-TNOW
+T_USED(4)=T_USED(4)+CURRENT_TIME()-T_NOW
+
 END SUBROUTINE VELOCITY_CORRECTOR
 
 
-SUBROUTINE VELOCITY_BC(T,NM)
+SUBROUTINE VELOCITY_BC(T,NM,APPLY_TO_ESTIMATED_VARIABLES)
 
 ! Assert tangential velocity boundary conditions
 
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 USE TURBULENCE, ONLY: WALL_MODEL,WANNIER_FLOW
 REAL(EB), INTENT(IN) :: T
-REAL(EB) :: MUA,TSI,WGT,TNOW,RAMP_T,OMW,MU_WALL,RHO_WALL,SLIP_COEF,VEL_T,UBAR,VBAR,WBAR, &
+INTEGER, INTENT(IN) :: NM
+LOGICAL, INTENT(IN) :: APPLY_TO_ESTIMATED_VARIABLES
+REAL(EB) :: MUA,TSI,WGT,T_NOW,RAMP_T,OMW,MU_WALL,RHO_WALL,SLIP_COEF,VEL_T,UBAR,VBAR,WBAR, &
             UUP(2),UUM(2),DXX(2),MU_DUIDXJ(-2:2),DUIDXJ(-2:2),PROFILE_FACTOR,VEL_GAS,VEL_GHOST, &
-            MU_DUIDXJ_USE(2),DUIDXJ_USE(2),VEL_EDDY,U_TAU,Y_PLUS,WT1,WT2,TWOUN,DUMMY
+            MU_DUIDXJ_USE(2),DUIDXJ_USE(2),VEL_EDDY,U_TAU,Y_PLUS,DUMMY
 INTEGER :: I,J,K,NOM(2),IIO(2),JJO(2),KKO(2),IE,II,JJ,KK,IEC,IOR,IWM,IWP,ICMM,ICMP,ICPM,ICPP,IC,ICD,ICDO,IVL,I_SGN,IS, &
            VELOCITY_BC_INDEX,IIGM,JJGM,KKGM,IIGP,JJGP,KKGP,SURF_INDEXM,SURF_INDEXP,ITMP,ICD_SGN,ICDO_SGN, &
            BOUNDARY_TYPE_M,BOUNDARY_TYPE_P,IS2,IWPI,IWMI,VENT_INDEX
 LOGICAL :: ALTERED_GRADIENT(-2:2),PROCESS_EDGE,SYNTHETIC_EDDY_METHOD,HVAC_TANGENTIAL,INTERPOLATED_EDGE
-INTEGER, INTENT(IN) :: NM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL(),U_Y=>NULL(),U_Z=>NULL(), &
                                        V_X=>NULL(),V_Z=>NULL(),W_X=>NULL(),W_Y=>NULL(),RHOP=>NULL(),VEL_OTHER=>NULL()
 TYPE (SURFACE_TYPE), POINTER :: SF=>NULL()
@@ -1896,8 +1941,10 @@ TYPE (VENTS_TYPE), POINTER :: VT
 TYPE (WALL_TYPE), POINTER :: WCM,WCP
 
 IF (SOLID_PHASE_ONLY) RETURN
+IF (PERIODIC_TEST==12) RETURN
+IF (PERIODIC_TEST==13) RETURN
 
-TNOW = SECOND()
+T_NOW = CURRENT_TIME()
 
 ! Assign local names to variables
 
@@ -1905,7 +1952,7 @@ CALL POINT_TO_MESH(NM)
 
 ! Point to the appropriate velocity field
 
-IF (PREDICTOR) THEN
+IF (APPLY_TO_ESTIMATED_VARIABLES) THEN
    UU => US
    VV => VS
    WW => WS
@@ -1932,7 +1979,12 @@ IF (CORRECTOR) THEN
    V_Z = -1.E6_EB
    W_X = -1.E6_EB
    W_Y = -1.E6_EB
-   UVW_GHOST = -1.E6_EB
+   U_EDGE_Y = -1.E6_EB
+   U_EDGE_Z = -1.E6_EB
+   V_EDGE_X = -1.E6_EB
+   V_EDGE_Z = -1.E6_EB
+   W_EDGE_X = -1.E6_EB
+   W_EDGE_Y = -1.E6_EB
 ENDIF
 
 ! Set OME_E and TAU_E to very negative number
@@ -2081,7 +2133,9 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
          ! If there is a solid wall separating the two adjacent wall cells, cycle out of the loop.
 
-         IF (WALL(IWMI)%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. WALL(IWPI)%BOUNDARY_TYPE==SOLID_BOUNDARY) CYCLE ORIENTATION_LOOP
+         IF ((WALL(IWMI)%BOUNDARY_TYPE==SOLID_BOUNDARY .AND. SURFACE(WALL(IWM)%SURF_INDEX)%VELOCITY_BC_INDEX/=FREE_SLIP_BC) .OR. &
+             (WALL(IWPI)%BOUNDARY_TYPE==SOLID_BOUNDARY .AND. SURFACE(WALL(IWP)%SURF_INDEX)%VELOCITY_BC_INDEX/=FREE_SLIP_BC)) &
+            CYCLE ORIENTATION_LOOP
 
          ! If only one adjacent wall cell is defined, use its properties.
 
@@ -2111,37 +2165,8 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
             VENT_INDEX = MAX(WCM%VENT_INDEX,WCP%VENT_INDEX)
             VT => VENTS(VENT_INDEX)
-            IF (VT%IS_WIND_BOUNDARY .OR. ANY(MEAN_FORCING)) THEN
 
-               ! For a wind open boundary, determine the direction of the normal component of velocity
-
-               SELECT CASE(IEC)
-                  CASE(1)
-                     IF (JJ==0    .AND. IOR== 2) TWOUN = VV(II,JJ,KK) + VV(II,JJ,KK+1)
-                     IF (JJ==JBAR .AND. IOR==-2) TWOUN = VV(II,JJ,KK) + VV(II,JJ,KK+1)
-                     IF (KK==0    .AND. IOR== 3) TWOUN = WW(II,JJ,KK) + WW(II,JJ+1,KK)
-                     IF (KK==KBAR .AND. IOR==-3) TWOUN = WW(II,JJ,KK) + WW(II,JJ+1,KK)
-                  CASE(2)
-                     IF (II==0    .AND. IOR== 1) TWOUN = UU(II,JJ,KK) + UU(II,JJ,KK+1)
-                     IF (II==IBAR .AND. IOR==-1) TWOUN = UU(II,JJ,KK) + UU(II,JJ,KK+1)
-                     IF (KK==0    .AND. IOR== 3) TWOUN = WW(II,JJ,KK) + WW(II+1,JJ,KK)
-                     IF (KK==KBAR .AND. IOR==-3) TWOUN = WW(II,JJ,KK) + WW(II+1,JJ,KK)
-                  CASE(3)
-                     IF (II==0    .AND. IOR== 1) TWOUN = UU(II,JJ,KK) + UU(II,JJ+1,KK)
-                     IF (II==IBAR .AND. IOR==-1) TWOUN = UU(II,JJ,KK) + UU(II,JJ+1,KK)
-                     IF (JJ==0    .AND. IOR== 2) TWOUN = VV(II,JJ,KK) + VV(II+1,JJ,KK)
-                     IF (JJ==JBAR .AND. IOR==-2) TWOUN = VV(II,JJ,KK) + VV(II+1,JJ,KK)
-               END SELECT
-
-            ELSE
-
-               ! For non-wind case, always use free-slip tangential BCs
-
-               TWOUN = -REAL(IOR,EB)
-
-            ENDIF
-
-            FLOW_DIRECTION_IF: IF ( REAL(IOR,EB)*TWOUN < 0._EB ) THEN  ! For outflow, use zero gradient (free-slip) BCs
+            WIND_NO_WIND_IF: IF (.NOT.ANY(MEAN_FORCING)) THEN  ! For regular OPEN boundary, (free-slip) BCs
 
                SELECT CASE(IEC)
                   CASE(1)
@@ -2161,7 +2186,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
                      IF (JJ==JBAR .AND. IOR==-2) UU(II,JBP1,KK) = UU(II,JBAR,KK)
                END SELECT
 
-            ELSE FLOW_DIRECTION_IF  ! For inflow, use prescribed far-field velocity
+            ELSE WIND_NO_WIND_IF  ! For wind, use prescribed far-field velocity all around
 
                UBAR = U0*EVALUATE_RAMP(T,DUMMY,I_RAMP_U0_T)*EVALUATE_RAMP(ZC(KK),DUMMY,I_RAMP_U0_Z)
                VBAR = V0*EVALUATE_RAMP(T,DUMMY,I_RAMP_V0_T)*EVALUATE_RAMP(ZC(KK),DUMMY,I_RAMP_V0_Z)
@@ -2185,7 +2210,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
                      IF (JJ==JBAR .AND. IOR==-2) UU(II,JBP1,KK) = UBAR
                END SELECT
 
-            ENDIF FLOW_DIRECTION_IF
+            ENDIF WIND_NO_WIND_IF
 
             IF (IWM/=0 .AND. IWP/=0) THEN
                CYCLE EDGE_LOOP  ! Do no further processing of this edge if both cell faces are OPEN
@@ -2256,7 +2281,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
             ENDIF
             VELOCITY_BC_INDEX = SF%VELOCITY_BC_INDEX
             IF (WCM%VENT_INDEX==WCP%VENT_INDEX .AND. WCP%VENT_INDEX > 0) THEN
-               IF(VENTS(WCM%VENT_INDEX)%NODE_INDEX>0 .AND. WCM%ONE_D%UW >= 0._EB) VELOCITY_BC_INDEX=FREE_SLIP_BC
+               IF(VENTS(WCM%VENT_INDEX)%NODE_INDEX>0 .AND. WCM%ONE_D%U_NORMAL >= 0._EB) VELOCITY_BC_INDEX=FREE_SLIP_BC
             ENDIF
 
             ! Compute the viscosity in the two adjacent gas cells
@@ -2320,23 +2345,23 @@ EDGE_LOOP: DO IE=1,N_EDGES
                   TSI=T-SF%T_IGN
                ENDIF
                PROFILE_FACTOR = 1._EB
-               IF (HVAC_TANGENTIAL .AND. 0.5_EB*(WCM%ONE_D%UWS+WCP%ONE_D%UWS) > 0._EB) HVAC_TANGENTIAL = .FALSE.
+               IF (HVAC_TANGENTIAL .AND. 0.5_EB*(WCM%ONE_D%U_NORMAL_S+WCP%ONE_D%U_NORMAL_S) > 0._EB) HVAC_TANGENTIAL = .FALSE.
                IF (HVAC_TANGENTIAL) THEN
                   VEL_T = 0._EB
                   IEC_SELECT: SELECT CASE(IEC) ! edge orientation
                      CASE (1)
-                        IF (ICD==1) VEL_T = 0.5_EB*ABS((WCM%ONE_D%UWS+WCP%ONE_D%UWS)/VT%UVW(ABS(VT%IOR)))*VT%UVW(3)
-                        IF (ICD==2) VEL_T = 0.5_EB*ABS((WCM%ONE_D%UWS+WCP%ONE_D%UWS)/VT%UVW(ABS(VT%IOR)))*VT%UVW(2)
+                        IF (ICD==1) VEL_T = 0.5_EB*ABS((WCM%ONE_D%U_NORMAL_S+WCP%ONE_D%U_NORMAL_S)/VT%UVW(ABS(VT%IOR)))*VT%UVW(3)
+                        IF (ICD==2) VEL_T = 0.5_EB*ABS((WCM%ONE_D%U_NORMAL_S+WCP%ONE_D%U_NORMAL_S)/VT%UVW(ABS(VT%IOR)))*VT%UVW(2)
                      CASE (2)
-                        IF (ICD==1) VEL_T = 0.5_EB*ABS((WCM%ONE_D%UWS+WCP%ONE_D%UWS)/VT%UVW(ABS(VT%IOR)))*VT%UVW(1)
-                        IF (ICD==2) VEL_T = 0.5_EB*ABS((WCM%ONE_D%UWS+WCP%ONE_D%UWS)/VT%UVW(ABS(VT%IOR)))*VT%UVW(3)
+                        IF (ICD==1) VEL_T = 0.5_EB*ABS((WCM%ONE_D%U_NORMAL_S+WCP%ONE_D%U_NORMAL_S)/VT%UVW(ABS(VT%IOR)))*VT%UVW(1)
+                        IF (ICD==2) VEL_T = 0.5_EB*ABS((WCM%ONE_D%U_NORMAL_S+WCP%ONE_D%U_NORMAL_S)/VT%UVW(ABS(VT%IOR)))*VT%UVW(3)
                      CASE (3)
-                        IF (ICD==1) VEL_T = 0.5_EB*ABS((WCM%ONE_D%UWS+WCP%ONE_D%UWS)/VT%UVW(ABS(VT%IOR)))*VT%UVW(2)
-                        IF (ICD==2) VEL_T = 0.5_EB*ABS((WCM%ONE_D%UWS+WCP%ONE_D%UWS)/VT%UVW(ABS(VT%IOR)))*VT%UVW(1)
+                        IF (ICD==1) VEL_T = 0.5_EB*ABS((WCM%ONE_D%U_NORMAL_S+WCP%ONE_D%U_NORMAL_S)/VT%UVW(ABS(VT%IOR)))*VT%UVW(2)
+                        IF (ICD==2) VEL_T = 0.5_EB*ABS((WCM%ONE_D%U_NORMAL_S+WCP%ONE_D%U_NORMAL_S)/VT%UVW(ABS(VT%IOR)))*VT%UVW(1)
                   END SELECT IEC_SELECT
                ELSE
                   IF (SF%PROFILE/=0 .AND. SF%VEL>TWO_EPSILON_EB) &
-                     PROFILE_FACTOR = ABS(0.5_EB*(WCM%UW0+WCP%UW0)/SF%VEL)
+                     PROFILE_FACTOR = ABS(0.5_EB*(WCM%ONE_D%U_NORMAL_0+WCP%ONE_D%U_NORMAL_0)/SF%VEL)
                   RAMP_T = EVALUATE_RAMP(TSI,SF%TAU(TIME_VELO),SF%RAMP_INDEX(TIME_VELO))
                   IF (IEC==1 .OR. (IEC==2 .AND. ICD==2)) VEL_T = RAMP_T*(PROFILE_FACTOR*(SF%VEL_T(2) + VEL_EDDY))
                   IF (IEC==3 .OR. (IEC==2 .AND. ICD==1)) VEL_T = RAMP_T*(PROFILE_FACTOR*(SF%VEL_T(1) + VEL_EDDY))
@@ -2388,28 +2413,22 @@ EDGE_LOOP: DO IE=1,N_EDGES
                      ITMP = MIN(5000,NINT(0.5_EB*(TMP(IIGM,JJGM,KKGM)+TMP(IIGP,JJGP,KKGP))))
                      MU_WALL = MU_RSQMW_Z(ITMP,1)/RSQ_MW_Z(1)
                      RHO_WALL = 0.5_EB*( RHOP(IIGM,JJGM,KKGM) + RHOP(IIGP,JJGP,KKGP) )
-                     CALL WALL_MODEL(SLIP_COEF,U_TAU,Y_PLUS,VEL_GAS-VEL_T,MU_WALL/RHO_WALL,DXX(ICD),SF%ROUGHNESS)
-                     SELECT CASE(SLIP_CONDITION)
-                        CASE(0)
-                           SLIP_COEF = -1._EB
-                        CASE(1)
-                           SLIP_COEF = SLIP_COEF
-                        CASE(2)
-                           SLIP_COEF = 0.5_EB*(SLIP_COEF-1._EB)
-                        CASE(3)
-                           WT1 = MAX(0._EB,MIN(1._EB,(Y_PLUS-Y_WERNER_WENGLE)/(Y_PLUS+TWO_EPSILON_EB)))
-                           WT2 = 1._EB-WT1
-                           SLIP_COEF = WT1*SLIP_COEF-WT2
-                        CASE(4)
-                           IF ( ABS(0.5_EB*(WCM%ONE_D%UWS+WCP%ONE_D%UWS))>ABS(VEL_GAS-VEL_T) ) THEN
-                              SLIP_COEF = -1._EB
-                           ELSE
-                              SLIP_COEF = 0.5_EB*(SLIP_COEF-1._EB)
-                           ENDIF
-                     END SELECT
-                     VEL_GHOST = VEL_T + SLIP_COEF*(VEL_GAS-VEL_T)
+                     CALL WALL_MODEL(SLIP_COEF,U_TAU,Y_PLUS,MU_WALL/RHO_WALL,SF%ROUGHNESS,0.5_EB*DXX(ICD),VEL_GAS-VEL_T)
+                     ! SLIP_COEF = -1, no slip, VEL_GHOST=-VEL_GAS
+                     ! SLIP_COEF =  1, free slip, VEL_GHOST=VEL_T
+                     VEL_GHOST = VEL_T + 0.5_EB*(SLIP_COEF-1._EB)*(VEL_GAS-VEL_T)
                      DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
                      MU_DUIDXJ(ICD_SGN) = RHO_WALL*U_TAU**2 * SIGN(1._EB,I_SGN*(VEL_GAS-VEL_T))
+                     ALTERED_GRADIENT(ICD_SGN) = .TRUE.
+
+                  CASE (BOUNDARY_FUEL_MODEL_BC) BOUNDARY_CONDITION
+
+                     RHO_WALL = 0.5_EB*( RHOP(IIGM,JJGM,KKGM) + RHOP(IIGP,JJGP,KKGP) )
+                     VEL_T = SQRT(UU(IIGM,JJGM,KKGM)**2 + VV(IIGM,JJGM,KKGM)**2)
+                     VEL_GHOST = VEL_GAS
+                     DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
+                     MU_DUIDXJ(ICD_SGN) = I_SGN*0.5_EB*RHO_WALL*SF%DRAG_COEFFICIENT*SF%SHAPE_FACTOR*SF%LAYER_THICKNESS(1)*&
+                                          SF%PACKING_RATIO(1)*SF%SURFACE_VOLUME_RATIO(1)*VEL_GAS*VEL_T
                      ALTERED_GRADIENT(ICD_SGN) = .TRUE.
 
                END SELECT BOUNDARY_CONDITION
@@ -2586,7 +2605,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
 ENDDO EDGE_LOOP
 
-! Store cell node averages of the velocity components in UVW_GHOST for use in Smokeview only
+! Store cell edge velocity averages of the velocity components for use in Smokeview only
 
 IF (CORRECTOR) THEN
    DO K=0,KBAR
@@ -2594,18 +2613,19 @@ IF (CORRECTOR) THEN
          DO I=0,IBAR
             IC = CELL_INDEX(I,J,K)
             IF (IC==0) CYCLE
-            IF (U_Y(I,J,K)  >-1.E5_EB) UVW_GHOST(IC,1) = U_Y(I,J,K)
-            IF (U_Z(I,J,K)  >-1.E5_EB) UVW_GHOST(IC,1) = U_Z(I,J,K)
-            IF (V_X(I,J,K)  >-1.E5_EB) UVW_GHOST(IC,2) = V_X(I,J,K)
-            IF (V_Z(I,J,K)  >-1.E5_EB) UVW_GHOST(IC,2) = V_Z(I,J,K)
-            IF (W_X(I,J,K)  >-1.E5_EB) UVW_GHOST(IC,3) = W_X(I,J,K)
-            IF (W_Y(I,J,K)  >-1.E5_EB) UVW_GHOST(IC,3) = W_Y(I,J,K)
+            IF (U_Y(I,J,K)>-1.E5_EB) U_EDGE_Y(IC) = U_Y(I,J,K)
+            IF (U_Z(I,J,K)>-1.E5_EB) U_EDGE_Z(IC) = U_Z(I,J,K)
+            IF (V_X(I,J,K)>-1.E5_EB) V_EDGE_X(IC) = V_X(I,J,K)
+            IF (V_Z(I,J,K)>-1.E5_EB) V_EDGE_Z(IC) = V_Z(I,J,K)
+            IF (W_X(I,J,K)>-1.E5_EB) W_EDGE_X(IC) = W_X(I,J,K)
+            IF (W_Y(I,J,K)>-1.E5_EB) W_EDGE_Y(IC) = W_Y(I,J,K)
          ENDDO
       ENDDO
    ENDDO
 ENDIF
 
-T_USED(4)=T_USED(4)+SECOND()-TNOW
+T_USED(4)=T_USED(4)+CURRENT_TIME()-T_NOW
+
 END SUBROUTINE VELOCITY_BC
 
 
@@ -2615,7 +2635,7 @@ SUBROUTINE MATCH_VELOCITY(NM)
 
 INTEGER  :: NOM,II,JJ,KK,IOR,IW,IIO,JJO,KKO
 INTEGER, INTENT(IN) :: NM
-REAL(EB) :: UU_AVG,VV_AVG,WW_AVG,TNOW,DA_OTHER,UU_OTHER,VV_OTHER,WW_OTHER,NOM_CELLS
+REAL(EB) :: UU_AVG,VV_AVG,WW_AVG,T_NOW,DA_OTHER,UU_OTHER,VV_OTHER,WW_OTHER,NOM_CELLS
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL(),OM_UU=>NULL(),OM_VV=>NULL(),OM_WW=>NULL()
 TYPE (OMESH_TYPE), POINTER :: OM=>NULL()
 TYPE (MESH_TYPE), POINTER :: M2=>NULL()
@@ -2624,7 +2644,7 @@ TYPE (EXTERNAL_WALL_TYPE), POINTER :: EWC=>NULL()
 IF (SOLID_PHASE_ONLY) RETURN
 IF (EVACUATION_ONLY(NM)) RETURN
 
-TNOW = SECOND()
+T_NOW = CURRENT_TIME()
 
 ! Assign local variable names
 
@@ -2836,7 +2856,8 @@ EXTERNAL_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
 
 ENDDO EXTERNAL_WALL_LOOP
 
-T_USED(4)=T_USED(4)+SECOND()-TNOW
+T_USED(4)=T_USED(4)+CURRENT_TIME()-T_NOW
+
 END SUBROUTINE MATCH_VELOCITY
 
 
@@ -2846,7 +2867,7 @@ SUBROUTINE MATCH_VELOCITY_FLUX(NM)
 
 INTEGER  :: NOM,II,JJ,KK,IOR,IW,IIO,JJO,KKO
 INTEGER, INTENT(IN) :: NM
-REAL(EB) :: TNOW,DA_OTHER,FVX_OTHER,FVY_OTHER,FVZ_OTHER
+REAL(EB) :: T_NOW,DA_OTHER,FVX_OTHER,FVY_OTHER,FVZ_OTHER
 TYPE (OMESH_TYPE), POINTER :: OM
 TYPE (MESH_TYPE), POINTER :: M2
 TYPE (WALL_TYPE), POINTER :: WC
@@ -2856,7 +2877,7 @@ IF (NMESHES==1) RETURN
 IF (SOLID_PHASE_ONLY) RETURN
 IF (EVACUATION_ONLY(NM)) RETURN
 
-TNOW = SECOND()
+T_NOW = CURRENT_TIME()
 
 ! Assign local variable names
 
@@ -2989,7 +3010,8 @@ EXTERNAL_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
 
 ENDDO EXTERNAL_WALL_LOOP
 
-T_USED(4)=T_USED(4)+SECOND()-TNOW
+T_USED(4)=T_USED(4)+CURRENT_TIME()-T_NOW
+
 END SUBROUTINE MATCH_VELOCITY_FLUX
 
 
@@ -2997,24 +3019,26 @@ SUBROUTINE CHECK_STABILITY(DT,DT_NEW,NM)
 
 ! Checks the Courant and Von Neumann stability criteria, and if necessary, reduces the time step accordingly
 
-USE PHYSICAL_FUNCTIONS, ONLY: GET_SPECIFIC_HEAT
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: DT
-REAL(EB) :: UODX,VODY,WODZ,UVW,UVWMAX,R_DX2,MU_MAX,MUTRM,CP,ZZ_GET(1:N_TRACKED_SPECIES),PART_CFL,MU_TMP
+REAL(EB) :: UODX,VODY,WODZ,UVW,UVWMAX,R_DX2,MU_MAX,MUTRM,PART_CFL,MU_TMP, UVWMAX_TMP
 REAL(EB) :: DT_NEW(NMESHES)
-INTEGER  :: I,J,K,IW,IIG,JJG,KKG
+INTEGER  :: I,J,K,IW,IIG,JJG,KKG, ICFL_TMP, JCFL_TMP, KCFL_TMP
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
 REAL(EB), PARAMETER :: DT_EPS = 1.E-10_EB
 
 IF (EVACUATION_ONLY(NM)) RETURN
 
 UVWMAX = 0._EB
+UVWMAX_TMP = 0._EB
 VN     = 0._EB
 MUTRM  = 1.E-9_EB
 R_DX2  = 1.E-9_EB
 
 ! Determine max CFL number from all grid cells
+!$OMP PARALLEL PRIVATE(ICFL_TMP, JCFL_TMP, KCFL_TMP, UVWMAX_TMP, UODX, VODY, WODZ, UVW) SHARED(UVWMAX, ICFL, JCFL, KCFL)
 
+!$OMP DO SCHEDULE(STATIC)
 DO K=1,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
@@ -3028,16 +3052,25 @@ DO K=1,KBAR
             CASE(2) ; UVW = SQRT(UODX**2+VODY**2+WODZ**2) + ABS(DS(I,J,K))
             CASE(3) ; UVW = MAX(UODX,VODY,WODZ)
          END SELECT
-         IF (UVW>=UVWMAX) THEN
-            UVWMAX = UVW
-            ICFL = I
-            JCFL = J
-            KCFL = K
+         IF (UVW>=UVWMAX_TMP) THEN
+            UVWMAX_TMP = UVW
+            ICFL_TMP = I
+            JCFL_TMP = J
+            KCFL_TMP = K
          ENDIF
       ENDDO
    ENDDO
 ENDDO
-
+!$OMP END DO
+!$OMP CRITICAL
+IF(UVWMAX_TMP>UVWMAX) THEN
+   UVWMAX = UVWMAX_TMP
+   ICFL = ICFL_TMP
+   JCFL = JCFL_TMP
+   KCFL = KCFL_TMP
+ENDIF
+!$OMP END CRITICAL
+!$OMP END PARALLEL
 HEAT_TRANSFER_IF: IF (CHECK_HT) THEN
    WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       WC=>WALL(IW)
@@ -3045,9 +3078,7 @@ HEAT_TRANSFER_IF: IF (CHECK_HT) THEN
       IIG = WC%ONE_D%IIG
       JJG = WC%ONE_D%JJG
       KKG = WC%ONE_D%KKG
-      ZZ_GET(1:N_TRACKED_SPECIES) = ZZS(IIG,JJG,KKG,1:N_TRACKED_SPECIES)
-      CALL GET_SPECIFIC_HEAT(ZZ_GET,CP,TMP(IIG,JJG,KKG))
-      UVW = WC%ONE_D%HEAT_TRANS_COEF/(WC%ONE_D%RHO_F*CP) * WC%ONE_D%RDN
+      UVW = (ABS(WC%ONE_D%Q_CON_F)/WC%ONE_D%RHO_F)**ONTH * 2._EB*WC%ONE_D%RDN
       IF (UVW>=UVWMAX) THEN
          UVWMAX = UVW
          ICFL=IIG
@@ -3093,7 +3124,7 @@ ENDIF PARABOLIC_IF
 
 ! Adjust time step size if necessary
 
-IF ((CFL<CFL_MAX .AND. VN<VN_MAX .AND. PART_CFL<PARTICLE_CFL_MAX .AND. DRAG_CFL < DRAG_CFL_MAX) .OR. LOCK_TIME_STEP) THEN
+IF ((CFL<CFL_MAX .AND. VN<VN_MAX .AND. PART_CFL<PARTICLE_CFL_MAX) .OR. LOCK_TIME_STEP) THEN
    DT_NEW(NM) = DT
    IF (CFL<=CFL_MIN .AND. VN<VN_MIN .AND. PART_CFL<PARTICLE_CFL_MIN .AND. .NOT.LOCK_TIME_STEP) THEN
       SELECT CASE (RESTRICT_TIME_STEP)
@@ -3105,9 +3136,7 @@ IF ((CFL<CFL_MAX .AND. VN<VN_MAX .AND. PART_CFL<PARTICLE_CFL_MAX .AND. DRAG_CFL 
 ELSE
    DT_NEW(NM) = 0.9_EB*MIN( CFL_MAX/MAX(UVWMAX,DT_EPS)               , &
                             VN_MAX/(2._EB*R_DX2*MAX(MUTRM,DT_EPS))   , &
-                            PARTICLE_CFL_MAX/MAX(PART_UVWMAX,DT_EPS) , &
-                            DT*DRAG_CFL_MAX/MAX(DRAG_CFL,DT_EPS))
-   DRAG_CFL = 0._EB
+                            PARTICLE_CFL_MAX/MAX(PART_UVWMAX,DT_EPS))
    CHANGE_TIME_STEP_INDEX(NM) = -1
 ENDIF
 
@@ -3123,12 +3152,14 @@ REAL(EB), INTENT(IN) :: T
 INTEGER, INTENT(IN) :: NM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL(),RHOP=>NULL(),HP=>NULL(),RHMK=>NULL(),RRHO=>NULL()
 INTEGER  :: I,J,K,II,JJ,KK,IIG,JJG,KKG,IOR,IW
-REAL(EB) :: P_EXTERNAL,TSI,TIME_RAMP_FACTOR,DUMMY,UN,TNOW
+REAL(EB) :: P_EXTERNAL,TSI,TIME_RAMP_FACTOR,DUMMY,UN,T_NOW
 LOGICAL  :: INFLOW
 TYPE(VENTS_TYPE), POINTER :: VT=>NULL()
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
 
-TNOW=SECOND()
+IF (SOLID_PHASE_ONLY .OR. FREEZE_VELOCITY) RETURN
+
+T_NOW=CURRENT_TIME()
 CALL POINT_TO_MESH(NM)
 
 ! If the baroclinic torque term has been added to the momentum equation RHS, subtract it off.
@@ -3270,161 +3301,9 @@ ENDDO
 !$OMP END DO nowait
 !$OMP END PARALLEL
 
-T_USED(4) = T_USED(4) + SECOND() - TNOW
+T_USED(4) = T_USED(4) + CURRENT_TIME() - T_NOW
+
 END SUBROUTINE BAROCLINIC_CORRECTION
-
-
-! ----------------------------- PATCH_VELOCITY_FLUX -----------------------------------
-
-SUBROUTINE PATCH_VELOCITY_FLUX(DT,NM)
-
-! The user may specify a polynomial profile using the PROP and DEVC lines. This routine
-! specifies the source term in the momentum equation to drive the local velocity toward
-! this user-specified value, in much the same way as the immersed boundary method
-! (see IBM_VELOCITY_FLUX).
-
-USE DEVICE_VARIABLES, ONLY: DEVICE_TYPE,PROPERTY_TYPE,N_DEVC,DEVICE,PROPERTY
-USE TRAN, ONLY: GINV
-REAL(EB), INTENT(IN) :: DT
-TYPE(DEVICE_TYPE), POINTER :: DV=>NULL()
-TYPE(PROPERTY_TYPE), POINTER :: PY=>NULL()
-INTEGER, INTENT(IN):: NM
-INTEGER :: N,I,J,K,IC1,IC2,I1,I2,J1,J2,K1,K2
-REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL(),HP=>NULL()
-REAL(EB) :: VELP,DX0,DY0,DZ0
-
-IF (PREDICTOR) THEN
-   UU => U
-   VV => V
-   WW => W
-   HP => H
-ELSE
-   UU => US
-   VV => VS
-   WW => WS
-   HP => HS
-ENDIF
-
-DEVC_LOOP: DO N=1,N_DEVC
-
-   DV=>DEVICE(N)
-   IF (DV%QUANTITY/='VELOCITY PATCH') CYCLE DEVC_LOOP
-   IF (DV%PROP_INDEX<1)               CYCLE DEVC_LOOP
-   IF (.NOT.DEVICE(DV%DEVC_INDEX(1))%CURRENT_STATE) CYCLE DEVC_LOOP
-
-   IF (DV%X1 > XF .OR. DV%X2 < XS .OR. &
-       DV%Y1 > YF .OR. DV%Y2 < YS .OR. &
-       DV%Z1 > ZF .OR. DV%Z2 < ZS) CYCLE DEVC_LOOP
-
-   PY=>PROPERTY(DV%PROP_INDEX)
-
-   I_VEL_SELECT: SELECT CASE(PY%I_VEL)
-
-      CASE(1) I_VEL_SELECT
-
-         I1 = MAX(0,   NINT( GINV(DV%X1-XS,1,NM)*RDXI   )-1)
-         I2 = MIN(IBAR,NINT( GINV(DV%X2-XS,1,NM)*RDXI   )+1)
-         J1 = MAX(0,   NINT( GINV(DV%Y1-YS,2,NM)*RDETA  )-1)
-         J2 = MIN(JBAR,NINT( GINV(DV%Y2-YS,2,NM)*RDETA  )+1)
-         K1 = MAX(0,   NINT( GINV(DV%Z1-ZS,3,NM)*RDZETA )-1)
-         K2 = MIN(KBAR,NINT( GINV(DV%Z2-ZS,3,NM)*RDZETA )+1)
-
-         DO K=K1,K2
-            DO J=J1,J2
-               DO I=I1,I2
-
-                  IC1 = CELL_INDEX(I,J,K)
-                  IC2 = CELL_INDEX(I+1,J,K)
-                  IF (SOLID(IC1) .OR. SOLID(IC2)) CYCLE
-
-                  IF ( X(I)<DV%X1 .OR.  X(I)>DV%X2) CYCLE ! Inefficient but simple
-                  IF (YC(J)<DV%Y1 .OR. YC(J)>DV%Y2) CYCLE
-                  IF (ZC(K)<DV%Z1 .OR. ZC(K)>DV%Z2) CYCLE
-
-                  DX0 =  X(I)-DV%X
-                  DY0 = YC(J)-DV%Y
-                  DZ0 = ZC(K)-DV%Z
-                  VELP = PY%P0 + DX0*PY%PX(1) + 0.5_EB*(DX0*DX0*PY%PXX(1,1)+DX0*DY0*PY%PXX(1,2)+DX0*DZ0*PY%PXX(1,3)) &
-                               + DY0*PY%PX(2) + 0.5_EB*(DY0*DX0*PY%PXX(2,1)+DY0*DY0*PY%PXX(2,2)+DY0*DZ0*PY%PXX(2,3)) &
-                               + DZ0*PY%PX(3) + 0.5_EB*(DZ0*DX0*PY%PXX(3,1)+DZ0*DY0*PY%PXX(3,2)+DZ0*DZ0*PY%PXX(3,3))
-
-                  FVX(I,J,K) = -RDXN(I)*(HP(I+1,J,K)-HP(I,J,K)) - (VELP-UU(I,J,K))/DT
-               ENDDO
-            ENDDO
-         ENDDO
-
-      CASE(2) I_VEL_SELECT
-
-         I1 = MAX(0,   NINT( GINV(DV%X1-XS,1,NM)*RDXI   )-1)
-         I2 = MIN(IBAR,NINT( GINV(DV%X2-XS,1,NM)*RDXI   )+1)
-         J1 = MAX(0,   NINT( GINV(DV%Y1-YS,2,NM)*RDETA  )-1)
-         J2 = MIN(JBAR,NINT( GINV(DV%Y2-YS,2,NM)*RDETA  )+1)
-         K1 = MAX(0,   NINT( GINV(DV%Z1-ZS,3,NM)*RDZETA )-1)
-         K2 = MIN(KBAR,NINT( GINV(DV%Z2-ZS,3,NM)*RDZETA )+1)
-
-         DO K=K1,K2
-            DO J=J1,J2
-               DO I=I1,I2
-
-                  IC1 = CELL_INDEX(I,J,K)
-                  IC2 = CELL_INDEX(I,J+1,K)
-
-                  IF (SOLID(IC1) .OR. SOLID(IC2)) CYCLE
-
-                  IF (XC(I)<DV%X1 .OR. XC(I)>DV%X2) CYCLE
-                  IF ( Y(J)<DV%Y1 .OR.  Y(J)>DV%Y2) CYCLE
-                  IF (ZC(K)<DV%Z1 .OR. ZC(K)>DV%Z2) CYCLE
-
-                  DX0 = XC(I)-DV%X
-                  DY0 =  Y(J)-DV%Y
-                  DZ0 = ZC(K)-DV%Z
-                  VELP = PY%P0 + DX0*PY%PX(1) + 0.5_EB*(DX0*DX0*PY%PXX(1,1)+DX0*DY0*PY%PXX(1,2)+DX0*DZ0*PY%PXX(1,3)) &
-                               + DY0*PY%PX(2) + 0.5_EB*(DY0*DX0*PY%PXX(2,1)+DY0*DY0*PY%PXX(2,2)+DY0*DZ0*PY%PXX(2,3)) &
-                               + DZ0*PY%PX(3) + 0.5_EB*(DZ0*DX0*PY%PXX(3,1)+DZ0*DY0*PY%PXX(3,2)+DZ0*DZ0*PY%PXX(3,3))
-
-                  FVY(I,J,K) = -RDYN(J)*(HP(I,J+1,K)-HP(I,J,K)) - (VELP-VV(I,J,K))/DT
-               ENDDO
-            ENDDO
-         ENDDO
-
-      CASE(3) I_VEL_SELECT
-
-         I1 = MAX(0,   NINT( GINV(DV%X1-XS,1,NM)*RDXI   )-1)
-         I2 = MIN(IBAR,NINT( GINV(DV%X2-XS,1,NM)*RDXI   )+1)
-         J1 = MAX(0,   NINT( GINV(DV%Y1-YS,2,NM)*RDETA  )-1)
-         J2 = MIN(JBAR,NINT( GINV(DV%Y2-YS,2,NM)*RDETA  )+1)
-         K1 = MAX(0,   NINT( GINV(DV%Z1-ZS,3,NM)*RDZETA )-1)
-         K2 = MIN(KBAR,NINT( GINV(DV%Z2-ZS,3,NM)*RDZETA )+1)
-
-         DO K=K1,K2
-            DO J=J1,J2
-               DO I=I1,I2
-
-                  IC1 = CELL_INDEX(I,J,K)
-                  IC2 = CELL_INDEX(I,J,K+1)
-                  IF (SOLID(IC1) .OR. SOLID(IC2)) CYCLE
-
-                  IF (XC(I)<DV%X1 .OR. XC(I)>DV%X2) CYCLE
-                  IF (YC(J)<DV%Y1 .OR. YC(J)>DV%Y2) CYCLE
-                  IF ( Z(K)<DV%Z1 .OR.  Z(K)>DV%Z2) CYCLE
-
-                  DX0 = XC(I)-DV%X
-                  DY0 = YC(J)-DV%Y
-                  DZ0 =  Z(K)-DV%Z
-                  VELP = PY%P0 + DX0*PY%PX(1) + 0.5_EB*(DX0*DX0*PY%PXX(1,1)+DX0*DY0*PY%PXX(1,2)+DX0*DZ0*PY%PXX(1,3)) &
-                               + DY0*PY%PX(2) + 0.5_EB*(DY0*DX0*PY%PXX(2,1)+DY0*DY0*PY%PXX(2,2)+DY0*DZ0*PY%PXX(2,3)) &
-                               + DZ0*PY%PX(3) + 0.5_EB*(DZ0*DX0*PY%PXX(3,1)+DZ0*DY0*PY%PXX(3,2)+DZ0*DZ0*PY%PXX(3,3))
-
-                  FVZ(I,J,K) = -RDZN(K)*(HP(I,J,K)-HP(I,J,K+1)) - (VELP-WW(I,J,K))/DT
-               ENDDO
-            ENDDO
-         ENDDO
-
-   END SELECT I_VEL_SELECT
-
-ENDDO DEVC_LOOP
-
-END SUBROUTINE PATCH_VELOCITY_FLUX
 
 
 ! ------------------------ WALL_VELOCITY_NO_GRADH ---------------------------------
@@ -3439,24 +3318,24 @@ REAL(EB), INTENT(IN) :: DT
 LOGICAL, INTENT(IN) :: STORE_UN
 
 ! Local variables:
-INTEGER :: IIG,JJG,KKG,IOR,IW
+INTEGER :: IIG,JJG,KKG,IOR,IW,N_INTERNAL_WALL_CELLS_AUX
 REAL(EB) :: DHDN, VEL_N
 TYPE (WALL_TYPE), POINTER :: WC
 REAL(EB), SAVE, ALLOCATABLE, DIMENSION(:) :: UN_WALLS
 
+N_INTERNAL_WALL_CELLS_AUX=0
+IF (.NOT.PRES_ON_WHOLE_DOMAIN) N_INTERNAL_WALL_CELLS_AUX=N_INTERNAL_WALL_CELLS
 
-IF (PRES_ON_WHOLE_DOMAIN) RETURN
-
-STORE_UN_COND : IF ( STORE_UN ) THEN
+STORE_UN_COND : IF ( STORE_UN .AND. CORRECTOR) THEN
 
    ! These velocities from the beginning of step are needed for the velocity fix on wall cells at the corrector
    ! phase (i.e. the loops in VELOCITY_CORRECTOR will change U,V,W to wrong reults using (HP1-HP)/DX gradients,
    ! when the pressure solver in the GLMAT solver.
    IF(ALLOCATED(UN_WALLS)) DEALLOCATE(UN_WALLS)
-   ALLOCATE( UN_WALLS(1:N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS) )
+   ALLOCATE( UN_WALLS(1:N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS_AUX) )
    UN_WALLS(:) = 0._EB
 
-   STORE_LOOP : DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+   STORE_LOOP : DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS_AUX
 
       WC => WALL(IW)
       IIG   = WC%ONE_D%IIG
@@ -3489,7 +3368,7 @@ ENDIF STORE_UN_COND
 PREDICTOR_COND : IF (PREDICTOR) THEN
 
   ! Loop internal wall cells -> on OBST surfaces:
-  WALL_CELL_LOOP_1: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+  WALL_CELL_LOOP_1: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS_AUX
 
      WC => WALL(IW)
 
@@ -3522,7 +3401,7 @@ PREDICTOR_COND : IF (PREDICTOR) THEN
 ELSE ! Corrector
 
   ! Loop internal wall cells -> on OBST surfaces:
-  WALL_CELL_LOOP_2: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+  WALL_CELL_LOOP_2: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS_AUX
 
      WC => WALL(IW)
 

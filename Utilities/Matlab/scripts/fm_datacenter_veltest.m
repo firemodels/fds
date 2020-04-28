@@ -4,8 +4,10 @@
 
 % Generate velocity comparison plots for the FM datacenter flow mapping tests
 
+disp('fm_datacenter_veltest ...')
+
 expdir = '../../../exp/FM_FPRF_Datacenter/';
-outdir = '../../../out/FM_FPRF_Datacenter/FDS_Output_Files/';
+outdir = '../../../out/FM_FPRF_Datacenter/';
 
 % High flow test
 [exp_data] = csvread([expdir,'fm_datacenter_veltest_high.csv'],1);
@@ -56,6 +58,7 @@ addverstr(gca,git_file,'linear')
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'Units',Paper_Units);
+set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
 set(gcf,'Position',[0 0 Scat_Paper_Width Scat_Paper_Height]);
 plotname = ['../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_High_u'];
@@ -86,6 +89,7 @@ addverstr(gca,git_file,'linear')
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'Units',Paper_Units);
+set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
 set(gcf,'Position',[0 0 Scat_Paper_Width Scat_Paper_Height]);
 plotname = ['../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_High_v'];
@@ -116,6 +120,7 @@ addverstr(gca,git_file,'linear')
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'Units',Paper_Units);
+set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
 set(gcf,'Position',[0 0 Scat_Paper_Width Scat_Paper_Height]);
 plotname = ['../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_High_w'];
@@ -146,6 +151,7 @@ addverstr(gca,git_file,'linear')
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'Units',Paper_Units);
+set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
 set(gcf,'Position',[0 0 Scat_Paper_Width Scat_Paper_Height]);
 plotname = ['../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_High_vel'];
@@ -196,6 +202,7 @@ addverstr(gca,git_file,'linear')
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'Units',Paper_Units);
+set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
 set(gcf,'Position',[0 0 Scat_Paper_Width Scat_Paper_Height]);
 plotname = ['../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_Low_u'];
@@ -226,6 +233,7 @@ addverstr(gca,git_file,'linear')
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'Units',Paper_Units);
+set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
 set(gcf,'Position',[0 0 Scat_Paper_Width Scat_Paper_Height]);
 plotname = ['../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_Low_v'];
@@ -256,6 +264,7 @@ addverstr(gca,git_file,'linear')
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'Units',Paper_Units);
+set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
 set(gcf,'Position',[0 0 Scat_Paper_Width Scat_Paper_Height]);
 plotname = ['../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_Low_w'];
@@ -286,6 +295,7 @@ addverstr(gca,git_file,'linear')
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'Units',Paper_Units);
+set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
 set(gcf,'Position',[0 0 Scat_Paper_Width Scat_Paper_Height]);
 plotname = ['../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_Low_vel'];

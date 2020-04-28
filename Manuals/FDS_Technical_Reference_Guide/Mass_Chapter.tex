@@ -61,7 +61,7 @@ The species transport equations are solved using a predictor-corrector scheme. A
 \ee
 The quantity $\overline{\rho Z_\alpha}^{\rm FL}$ indicates a \emph{flux limiter} applied to the cell face value, as discussed below in Section \ref{sec_flux_limiters}. The mass source terms due to chemistry, evaporation, or pyrolysis are computed at the end of the previous time step and used in both the predictor and corrector steps. The mean chemical source term, $\dm_{\alpha}'''$, is discussed in Chapter~\ref{combustionsection}.  The bulk subgrid source term, $\dm_{\rm b,\alpha}'''$, is discussed in Chapters~\ref{chapter:solid_phase} and \ref{chapter:lagrangian_particles} on solid phase pyrolysis and Lagrangian particles, respectively.
 
-In DNS mode, the molecular diffusivity is based on mixture-averaged binary Fickian diffusion.  In LES mode (default) the diffusivity is taken from the molecular and turbulent viscosities divided by the turbulent Schmidt number.  That is, to save cost we approximate the molecular plus turbulent diffusivity by $(\mu + \mu_t)/\mbox{Sc}_t$.   The turbulent Schmidt number is constant with default value $\mbox{Sc}_t = 0.5$.  The model for the turbulent viscosity $\mu_t$ is discussed in Section \ref{section:turbulent_viscosity}.  Optionally, in LES mode, by setting \textct{RESEARCH\_MODE=.TRUE.} on \textct{MISC}, the molecular and turbulent transport coefficients are treated separately, $\rho D_\alpha + \mu_t/\mbox{Sc}_t$ (at added cost).  The same applies for the thermal diffusivity.
+In DNS mode, the molecular diffusivity is based on mixture-averaged binary Fickian diffusion.  In LES mode (default) the diffusivity is taken from the molecular and turbulent viscosities divided by the turbulent Schmidt number.  That is, to save cost we approximate the molecular plus turbulent diffusivity by $(\mu + \mu_t)/\mbox{Sc}_t$.   The turbulent Schmidt number is constant with default value $\mbox{Sc}_t = 0.5$.  The model for the turbulent viscosity $\mu_t$ is discussed in Section \ref{section:turbulent_viscosity}.  Optionally, by setting \textct{SIMULATION\_MODE='LES'} on \textct{MISC}, the molecular and turbulent transport coefficients are treated separately, $\rho D_\alpha + \mu_t/\mbox{Sc}_t$ (at added cost).  The same applies for the thermal diffusivity.
 
 The corrector step is as follows:
 \be \frac{(\rho Z_\alpha)_{ijk}^{n+1}-\ha\left[(\rho Z_\alpha)_{ijk}^n
@@ -129,11 +129,7 @@ The Central Difference, Godunov, and MINMOD limiters are included for completene
 \subsection{Time Splitting for Mass Source Terms}
 \label{sec_time_splitting}
 
-Following the corrector step of the transport scheme, source terms are applied to the scalars.  The source terms are typically related to particle evaporation or combustion, and these processes are computed at the end of the time step. In the case of combustion, the total mass of a grid cell is not changed; rather the species mass fractions change. For particle evaporation, mass is simply added to the cell, particle by particle, and the species mass fractions are adjusted accordingly:
-\be \label{eq:mass_source_terms}
-   (\rho Z_\alpha)_{ijk}^{n+1} = (\rho Z_\alpha)_{ijk}^{**} + \dt \left( \dm_{\alpha}''' + \dm_{\rm b,\alpha}''' \right)_{ijk}
-\ee
-The mean chemical source term, $\dm_{\alpha}'''$, is discussed in Chapter~\ref{combustionsection}.  The bulk subgrid source term, $\dm_{\rm b,\alpha}'''$, is discussed in Chapters~\ref{chapter:solid_phase} and \ref{chapter:lagrangian_particles} on solid phase pyrolysis and Lagrangian particles, respectively.
+Following the corrector step of the transport scheme, source terms are computed for the next time step.  The source terms are typically related to particle evaporation or combustion, and these processes are computed at the end of the time step. In the case of combustion, the total mass of a grid cell is not changed; rather the species mass fractions change. The mean chemical source term, $\dm_{\alpha}'''$, is discussed in Chapter~\ref{combustionsection}.  The bulk subgrid source term, $\dm_{\rm b,\alpha}'''$, is discussed in Chapters~\ref{chapter:solid_phase} and \ref{chapter:lagrangian_particles} on solid phase pyrolysis and Lagrangian particles, respectively.
 
 
 \subsection{Boundary Conditions for Temperature, Species Mass Fraction, and Density}
@@ -180,6 +176,7 @@ the meshes are being processed by separate computers. If two meshes abut each ot
 one mesh simply uses the density and species mass fractions of the adjacent mesh as the ``ghost'' cell values. However, in cases where the
 mesh cells are not the same size, the exchange of information must be done more carefully. Consider a case where two meshes meet:
 
+\begin{figure}[h!]
 \begin{picture}(200,110)(0,-10)
 \setlength{\unitlength}{0.02in}
 \put(120,10){\framebox(20,20){ }}
@@ -190,6 +187,9 @@ mesh cells are not the same size, the exchange of information must be done more 
 \thicklines
 \put(140,0){\line(0,1){60}}
 \end{picture}
+\caption{Mesh interface boundary with 2:1 refinement.}
+\label{fig:meshinterface}
+\end{figure}
 
 \noindent
 We want the total and species mass fluxes between meshes to be the same. Let the density in cell $(1,j',k')$ of Mesh 2 be denoted $\rho_{1,j'k'}^{(2)}$. Assume that this cell abuts two cells in Mesh 1. The densities in the two abutting cells of Mesh 1 are denoted $\rho_{I,jk}^{(1)}$. Note that $j$ and $k$ are not the same as $j'$ and $k'$. $I$ is the number of cells in the $x$ direction of Mesh 1. The ghost cell quantities in Mesh 1 have an $i$ index of $I+1$. The ghost cell quantities in Mesh 2 have an $i$ index of 0.
@@ -200,6 +200,95 @@ We want to assert mass conservation at the mesh interface:
 \ee
 To enforce this condition, we obtain $\rho_{{\rm w},jk}^{(1)}$ on Mesh 1 and $\rho_{{\rm w},j'k'}^{(2)}$ on Mesh 2 from a flux limiter (see Section \ref{sec_flux_limiters}) once data has been exchanged between meshes.  Since only one layer of ghost cells is exchanged, the second upwind data value is linearly extrapolated to maintain second-order accuracy of the interpolated face density.
 
+
+\subsubsection{Special Topic: Vertical Mesh Coarsening in Atmospheric Flows}
+
+In atmospheric flows, it may be beneficial to coarsen the mesh in the vertical direction.  Matching the heat flux at the mesh interface is not trivial due to the background pressure stratification and the relative coarse grid resolution usually applied to atmospheric flow calculations.  FDS does not explicitly match the flux.  Instead, it relies on the temperature gradient constructed from the interior ({\ct KKG}) and ghost cell ({\ct KK}) values to be equivalent (additionally, the interpolation of the transport coefficient at the mesh boundary must match, but this is less of a problem than the temperature gradient).  To further complicate matters, FDS always extracts the gas phase temperature value from the ideal gas law, given the cell species composition, density, and background pressure.
+
+\begin{equation}
+\label{eq:EOScode}
+T(z) = \frac{P(z) \overline{W}(z)}{\rho(z) \, R} = \frac{\mathtt{PBAR}(z)}{\mathtt{RHO}(z) \, \mathtt{RSUM}(z)}
+\end{equation}
+
+At {\ct INTERPOATED} boundaries with mesh coarsening (or refinement) the positions of the ghost cell values do not match positions of the interior gas phase cell values from the neighboring mesh.  This is depicted for our problem in Fig.~\ref{fig:vertmeshcoarsening}.  Let $\delta z^{(1)}_{kkg}$ denote the cell height for the interior gas phase cell on Mesh 1, for example.  To match the temperature gradient at the mesh interface we require
+
+\begin{equation}
+\label{eq:TMPatminterp}
+\frac{T^{(1)}_{kk} - T^{(1)}_{kkg}}{\mbox{$\frac{1}{2}$} \delta z^{(1)}_{kk} + \mbox{$\frac{1}{2}$}\delta z^{(1)}_{kkg}} = \frac{T^{(2)}_{kkg} - T^{(1)}_{kkg}}{\mbox{$\frac{1}{2}$} \delta z^{(2)}_{kkg} + \mbox{$\frac{1}{2}$}\delta z^{(1)}_{kkg}}
+\end{equation}
+
+Now, suppose we are filling ghost cell values for Mesh 1.  Our goal is to specify the ghost cell value of the density, $\rho^{(1)}_{kk}$, such that Eq.~(\ref{eq:TMPatminterp}) holds.  Plugging Eq.~(\ref{eq:EOScode}) into Eq.~(\ref{eq:TMPatminterp}), and defining
+\begin{equation}
+\label{eq:ddofactor}
+\mathtt{DDO} = \frac{\delta z^{(1)}_{kk} + \delta z^{(1)}_{kkg}}{\delta z^{(2)}_{kkg} + \delta z^{(1)}_{kkg}}
+\end{equation}
+we get
+\begin{equation}
+\label{eq:atmrhoghost}
+\rho^{(1)}_{kk} = \left. \left( \frac{P^{(1)}_{kk}}{\mathtt{RSUM}^{(1)}_{kk}} \right) \middle/ \left\{ \left(\frac{P^{(1)}_{kkg}}{\rho^{(1)}_{kkg}\,\mathtt{RSUM}^{(1)}_{kkg}}\right) + \mathtt{DDO}\left[ \left(\frac{P^{(2)}_{kkg}}{\rho^{(2)}_{kkg}\,\mathtt{RSUM}^{(2)}_{kkg}}\right) - \left(\frac{P^{(1)}_{kkg}}{\rho^{(1)}_{kkg}\,\mathtt{RSUM}^{(1)}_{kkg}}\right) \right] \right\} \right.
+\end{equation}
+A similar expression is obtained when viewing the interpolation from Mesh 2.
+
+Note that this interpolation may be thought of as a central difference for the temperature gradient.  The corresponding density variation is nonlinear.  The mass fluxes computed by the flux limiter scheme described above still match at the refined mesh interface and therefore do not require adjustment.
+
+This special treatment of the ghost cell density may be accessed in the source code by searching on the logical flag {\ct ATMOSPHERIC\_INTERPOLATION}.  By default, the procedure is invoked at vertical mesh refinement boundaries only if {\ct STRATIFICATION=.TRUE.} and if the vertical cell spacing {\ct DZ} on any mesh exceeds 2 m.  For smaller grid spacing the spurious temperature effect is not noticeable and it is deemed more appropriate to keep the temperature variation consistent with the flux limited interface density.  Setting the developer logical flag {\ct USE\_ATMOSPHERIC\_INTERPOLATION} on the {\ct WIND} line overrides the default behavior.
+
+\begin{figure}[h!]
+
+\begin{picture}(200,150)(0,-75)
+\setlength{\unitlength}{0.02in}
+
+\linethickness{0.25mm}
+\put(140,0){\framebox(40,40){ }}
+\put(140,-40){\framebox(40,40){ }}
+
+\linethickness{0.05mm}
+\put(140,-20){\framebox(20,20){ }}
+\put(160,-20){\framebox(20,20){ }}
+\put(140,-40){\framebox(20,20){ }}
+\put(160,-40){\framebox(20,20){ }}
+\put(140,0){\framebox(20,20){ }}
+\put(160,0){\framebox(20,20){ }}
+
+\put(150,10){\circle{2}}
+\put(150,-10){\circle*{2}}
+\put(170,10){\circle{2}}
+\put(170,-10){\circle*{2}}
+\put(160,20){\circle*{3}}
+\put(160,-20){\circle{3}}
+
+\put(100,-20){\makebox(0,0){Mesh 1}}
+\put(100, 20){\makebox(0,0){Mesh 2}}
+
+\put(125,0){\line(1,0){11}}
+\put(100,0){\makebox(0,0){Mesh Interface}}
+
+\put(174,-10){\line(1,0){21}}
+\put(225,-10){\makebox(0,0){\ct M(1)\%TMP(KKG)}}
+\put(253,-10){\vector(1,0){10}}
+\put(272,-10){\makebox(0,0){$T^{(1)}_{kkg}$}}
+\put(174,10){\line(1,0){21}}
+\put(223,10){\makebox(0,0){\ct M(1)\%TMP(KK)}}
+\put(253,10){\vector(1,0){10}}
+\put(272,10){\makebox(0,0){$T^{(1)}_{kk}$}}
+
+\put(170,-30){\line(1,0){17}}
+\put(216,-30){\makebox(0,0){\ct M(2)\%TMP(KK)}}
+\put(242,-30){\vector(1,0){10}}
+\put(261,-30){\makebox(0,0){$T^{(2)}_{kk}$}}
+
+\put(170,30){\line(1,0){17}}
+\put(218,30){\makebox(0,0){\ct M(2)\%TMP(KKG)}}
+\put(246,30){\vector(1,0){10}}
+\put(265,30){\makebox(0,0){$T^{(2)}_{kkg}$}}
+
+\put(170,-30){\line(-1,1){8}}
+\put(170,30){\line(-1,-1){8}}
+\end{picture}
+
+\caption{Vertical mesh coarsening.  Mesh 1 is the fine mesh.  Mesh 2 is the coarse mesh.  In this example, the coarsening ratio is 1:2.  Solid dots represent interior gas phase unknown values.  Open circles represent ghost cell values.}
+\label{fig:vertmeshcoarsening}
+\end{figure}
 
 \section{The Velocity Divergence}
 
@@ -218,7 +307,7 @@ P = \frac{1}{\overline{p}_m} - \frac{1}{\rho c_p T}
 and
 \begin{align}
 \label{eqn_fdsD1}
-D &= \frac{1}{\rho c_p T}\left[ \dot{q}^\ppp + \dot{q}_{\rm b}^\ppp + \dot{q}_{\rm r}^\ppp - \Div \dot{\mathbf{q}}^\pp - \mathbf{u} \cdot\nabla (\rho h_{\rm s}) + w \rho_0 g_z\right] \notag\\[.1in]
+D &= \frac{1}{\rho c_p T}\left[ \dot{q}^\ppp + \dot{q}_{\rm b}^\ppp - \Div \dot{\mathbf{q}}^\pp - \mathbf{u} \cdot\nabla (\rho h_{\rm s}) + w \rho_0 g_z\right] \notag\\[.1in]
 &+ \frac{1}{\rho} \sum_\alpha \left(\frac{\overline{W}}{W_\alpha} - \frac{h_{\rm s,\alpha}}{c_p T} \right) \bigg[ \Div (\rho D_\alpha \nabla Y_\alpha) - \mathbf{u} \cdot \nabla (\rho Y_\alpha) +\dot{m}_\alpha^\tripleprime  \bigg] \notag \\[.1in]
 &+ \frac{1}{\rho} \sum_\alpha \left(\frac{\overline{W}}{W_\alpha} - \frac{\int_{T_{\rm b}}^T c_{p,\alpha}(T') \, {\rm d}T'}{c_p T} \right) \, \dot{m}_{\rm b,\alpha}^\tripleprime
 \end{align}
@@ -226,7 +315,7 @@ D &= \frac{1}{\rho c_p T}\left[ \dot{q}^\ppp + \dot{q}_{\rm b}^\ppp + \dot{q}_{\
 \subsection{Mass and Energy Source Terms}
 \label{div_source_terms}
 
-The volumetric source terms in the divergence expression require extended discussion.  The heat release rate per unit volume, $\dq'''$, and the mass generation rate of species $\alpha$ per unit volume, $\dot{m}_\alpha'''$, are detailed in Chapter~\ref{chapter:combustion}, Combustion. The radiative source, $\dq_{\rm r}'''$, is discussed in Chapter~\ref{chapter:radiation}, Thermal Radiation.  The bulk heat source from Lagrangian particles, $\dq_{\rm b}'''$, which accounts for convective heat transfer and radiative absorption, is discussed in Chapter~\ref{chapter:lagrangian_particles}, Lagrangian Particles.  The bulk mass source from Lagrangian particles, $\dot{m}_{\rm b,\alpha}'''$, is also found in Chapter~\ref{chapter:lagrangian_particles}.
+The volumetric source terms in the divergence expression require extended discussion.  The heat release rate per unit volume, $\dq'''$, and the mass generation rate of species $\alpha$ per unit volume, $\dot{m}_\alpha'''$, are detailed in Chapter~\ref{chapter:combustion}, Combustion. The flux term, $\dot{\mathbf{q}}^\pp$, is defined in Eq.~(\ref{bqdot_def}). The radiative source term, $\dq_{\rm r}'''$, that is included in $\nabla \cdot \dot{\mathbf{q}}^\pp$ is discussed in Chapter~\ref{chapter:radiation}, Thermal Radiation.  The bulk heat source from Lagrangian particles, $\dq_{\rm b}'''$, which accounts for convective heat transfer and radiative absorption, is discussed in Chapter~\ref{chapter:lagrangian_particles}, Lagrangian Particles.  The bulk mass source from Lagrangian particles, $\dot{m}_{\rm b,\alpha}'''$, is also found in Chapter~\ref{chapter:lagrangian_particles}.
 
 The source terms are computed in the corrector stage of the time step, following the update of the density and species mass fractions. The terms in Eq.~(\ref{eqn_fdsD1}) involving $\dq_{\rm b}'''$, $\dot{m}_\alpha'''$, and $\dot{m}_{\rm b,\alpha}'''$ are stored in an array called {\ct D\_SOURCE} and applied in the construction of the divergence expression required for the corrected update of the velocity.
 

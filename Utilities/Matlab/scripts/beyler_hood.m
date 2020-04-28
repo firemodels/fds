@@ -1,12 +1,14 @@
 % Floyd
 % 8-28-2012
-% Beyler_hood.m
+% beyler_hood.m
 
 close all
 clear all
 
+disp('beyler_hood ...')
+
 expdir = '../../../exp/Beyler_Hood/';
-outdir = '../../../out/Beyler_Hood/FDS_Output_Files/';
+outdir = '../../../out/Beyler_Hood/';
 
 % load experimental data and FDS prediction
 [exp_data] = csvread([expdir,'Beyler_Hood_data_lr.csv'],2);
@@ -141,7 +143,7 @@ for f = 1:N_Fuels
       end
    end
 end
-Xmax = [0.25 0.2 0.2 0.2 0.07 0.04];
+Xmax = [0.25 0.25 0.2 0.10 0.10 0.02];
 for ns = 1:N_Species
    hf(ns)=figure(ns);
    %n = 0;
@@ -163,8 +165,8 @@ for ns = 1:N_Species
       end
    end
 
-   xmin = 0;
-   ymin = 0;
+   xmin = 0.;
+   ymin = 0.;
    xmax = Xmax(ns);
    ymax = xmax;
    plot([xmin xmax],[ymin ymax],'k-')
@@ -172,8 +174,8 @@ for ns = 1:N_Species
 
    set(gca,'PlotBoxAspectRatio',[1 1 1])
    set(gca,'FontName',Font_Name)
-   xtitle = ['Measured ' Species{ns} ' (volume fraction)'];
-   ytitle = ['Predicted ' Species{ns} ' (volume fraction)'];
+   xtitle = ['Measured ' Species{ns} ' (Mass Fraction)'];
+   ytitle = ['Predicted ' Species{ns} ' (Mass Fraction)'];
    xlabel(xtitle,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
    ylabel(ytitle,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
    lh=legend(hX,XLegendStr,'Location','NorthWest');
@@ -187,6 +189,7 @@ for ns = 1:N_Species
    % print to pdf
    set(gcf,'Visible',Figure_Visibility);
    set(gcf,'Units',Paper_Units);
+   set(gcf,'PaperUnits',Paper_Units);
    set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
    set(gcf,'Position',[0 0 Scat_Paper_Width Scat_Paper_Height]);
    plotname = ['../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Beyler_Hood/Beyler_Hood_' SaveName{ns}];

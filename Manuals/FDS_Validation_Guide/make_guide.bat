@@ -14,6 +14,8 @@ echo pass 2
 pdflatex -interaction nonstopmode %paper% > %paper%.err
 echo pass 3
 pdflatex -interaction nonstopmode %paper% > %paper%.err
+echo pass 4
+pdflatex -interaction nonstopmode %paper% > %paper%.err
 
 find "! LaTeX Error:" %paper%.err
 find "Fatal error" %paper%.err

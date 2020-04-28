@@ -26,7 +26,7 @@ coupling -- just a fixed external heat flux of 50 kW/m2.
       MATL_ID='Liq'
       SPECIFIC_HEAT = 2.68
       CONDUCTIVITY = 0.24/
-	  
+
 &MATL ID='Liq'
       ABSORPTION_COEFFICIENT=966
       A(1) = 1.60E23
@@ -62,6 +62,7 @@ coupling -- just a fixed external heat flux of 50 kW/m2.
       MATL_ID(3,1)='FOAMGLAS'
       HEAT_TRANSFER_COEFFICIENT=0.
       THICKNESS=0.0061,.0000343,0.0254
+      STRETCH_FACTOR=1.
       EXTERNAL_FLUX=50 /  External Flux is ONLY for this simple demo exercise
 
 &VENT XB=-0.05,0.05,-0.05,0.05,0.0,0.0, SURF_ID = 'PP SLAB' /

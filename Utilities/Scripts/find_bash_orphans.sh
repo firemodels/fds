@@ -12,10 +12,12 @@ SVNROOT=`pwd`
 cd $SVNROOT/fds
 FDSROOT=`pwd`
 
+cd $SVNROOT/bot
+BOTROOT=`pwd`
+
 cd $SVNROOT/smv
 SMVROOT=`pwd`
 
-echo looking for $script in FDS repo
-grep $script $FDSROOT/Build/*/*.sh $FDSROOT/Build/Scripts/*.sh $FDSROOT/bot/Firebot/*.sh $FDSROOT/Utilities/Scripts/*.sh $FDSROOT/Verification/scripts/*.sh
-echo looking for $script in SMV repo
-grep $script $SMVROOT/Build/*/*.sh $SMVROOT/Build/scripts/*.sh $SMVROOT/bot/Smokebot/*.sh $SMVROOT/Utilities/Scripts/*.sh $SMVROOT/Verification/scripts/*.sh
+grep $script $FDSROOT/Build/*.html $FDSROOT/Build/*/*.sh $FDSROOT/Manuals/*/*.sh $FDSROOT/Utilities/Scripts/*.sh $FDSROOT/Verification/scripts/*.sh
+grep $script $BOTROOT/Bundle/fds/scripts/*.sh $BOTROOT/Bundle/smv/scripts/*.sh $BOTROOT/Firebot/*.sh $BOTROOT/Smokebot/*.sh $BOTROOT/Scripts/*.sh
+grep $script $SMVROOT/Build/build*.html $SMVROOT/scripts/*.sh $SMVROOT/Build/*/*.sh $SMVROOT/Utilities/Scripts/*.sh $SMVROOT/Verification/scripts/*.sh

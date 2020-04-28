@@ -2,7 +2,7 @@
 
 \chapter{Ceiling Jets and Device Activation}
 
-FDS is a computational fluid dynamics (CFD) model and has no specific ceiling jet algorithm. Rather, temperatures throughout the fire compartment are computed directly from the governing conservation equations. Nevertheless, temperature measurements near the ceiling are useful in evaluating the model's ability to predict the activation times of sprinklers, smoke detectors, and other fire protection devices. The term ``ceiling jet'' is used loosely here -- it distinguishes a point temperature measurement near the ceiling from an average ``hot gas layer'' (HGL) temperature.
+FDS is a CFD-based fire model and has no specific ceiling jet algorithm. Rather, temperatures throughout the fire compartment are computed directly from the governing conservation equations. Nevertheless, temperature measurements near the ceiling are useful in evaluating the model's ability to predict the activation times of sprinklers, smoke detectors, and other fire protection devices. The term ``ceiling jet'' is used loosely here -- it distinguishes a point temperature measurement near the ceiling from an average ``hot gas layer'' (HGL) temperature.
 
 This chapter first presents comparisons of model predictions and temperature measurements near to the ceiling. Next, predicted sprinkler activation times and the total number of activations are compared with measurements. Finally, predicted smoke detector activation times are compared with measurements.
 
@@ -417,6 +417,35 @@ The near-ceiling thermocouples in Sectors 1 and 3 have been chosen to evaluate t
 
 \clearpage
 
+\subsection{NIST Composite Beam}
+
+A brief description of the experiments is given in Section~\ref{NIST_Composite_Beam_Description}. The compartment interior dimensions are 12.4~m long, running east-west, 1.9~m wide, and 3.77~m high. Four experiments with fires were performed, labeled as Tests~2-5. Test~1 did not include a fire.
+
+To measure the ceiling jet temperature in the compartment, stainless steel sheathed thermocouples (Omega~TJ36-CAXL-14U-24 and TJ36-CAXL-38U-24) were mounted 2.5~cm and 23~cm below the ceiling, extending through four holes drilled down through the concrete. Two TCs were located at each of the four positions. TCC9 and TCC10 were located 2.6~m west and 0.6~m north of the compartment center. TCC11 and TCC12 were located at the same location east of the center. TCC13 and TCC14 were located at the same relative location, south and east of the center. TCC15 and TCC16 were located west and south of the center.
+
+Because of the symmetry of the experimental configuration, TCC9, TCC11, TCC13, and TCC15, all 2.5~cm below the ceiling are duplicates; as are TCC10, TCC12, TCC14, and TCC16, located 23~cm below the ceiling.
+
+\newpage
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Composite_Beam/Test_2_TCC10-12-14-16} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Composite_Beam/Test_3_TCC10-12-14-16} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Composite_Beam/Test_4_TCC10-12-14-16} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Composite_Beam/Test_5_TCC10-12-14-16} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Composite_Beam/Test_2_TCC9-11-13-15} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Composite_Beam/Test_3_TCC9-11-13-15} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Composite_Beam/Test_4_TCC9-11-13-15} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Composite_Beam/Test_5_TCC9-11-13-15}
+\end{tabular*}
+\caption[NIST Composite Beam, ceiling jet temperatures]
+{NIST Composite Beam, ceiling jet temperatures.}
+\label{NIST_CB_cj}
+\end{figure}
+
+
+\clearpage
+
 \subsection{NIST Smoke Alarm Experiments}
 
 The primary purpose of the NIST Smoke Alarm Experiments was to measure smoke detector activation times in residential settings. In the single-story manufactured home tests that were selected for validation, five smoke detector measurement stations (Station A through Station E) were located in different areas of the manufactured home. Thermocouple trees were also located at each measurement station. The highest thermocouple in the tree can be compared to ceiling jet temperature predictions. The plots on the following page show the measured and predicted ceiling jet temperatures for the five measurement stations in each test.
@@ -486,9 +515,13 @@ has been chosen to evaluate the ceiling jet temperature prediction.
 
 \subsection{NIST/NRC Corner Effects Experiments}
 
-This set of experiments involved a 60~cm by 60~cm natural gas burner with heat release rates of 200~kW, 300~kW, and 400~kW. The burner was either set in a corner or against a wall. Two vertical thermocouple arrays were placed along the centerline of the room, each one-third of the room length from each respective short wall. The arrays each had 13 bare-bead thermocouples. The first was 2~cm below the ceiling, used to measure the ceiling jet temperature.
+The plots on the following pages compare ceiling jet temperatures at two locations in a large compartment where corner, wall, and cabinet effects experiments were conducted. The corner and wall experiments involved a 60~cm by 60~cm natural gas burner with heat release rates of 200~kW, 300~kW, and 400~kW. The burner was either set in a corner or against a wall. The cabinet experiments involved gas burners set in one of two mock steel cabinets, with a variety of heat release rates.
 
-\begin{figure}[!h]
+In all experiments, two vertical thermocouple arrays were placed along the centerline of the room, each one-third of the room length from each respective short wall. The arrays each had 13 bare-bead thermocouples. The first was 2~cm below the ceiling, used to measure the ceiling jet temperature.
+
+\newpage
+
+\begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC_Corner_Effects/corner_200_kW_Ceiling_Jet} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC_Corner_Effects/wall_200_kW_Ceiling_Jet} \\
@@ -498,8 +531,36 @@ This set of experiments involved a 60~cm by 60~cm natural gas burner with heat r
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC_Corner_Effects/wall_400_kW_Ceiling_Jet}
 \end{tabular*}
 \caption[NIST/NRC Corner Effects experiments, ceiling jet temperature]
-{NIST/NRC Corner Effects experiments, ceiling jet temperature.}
-\label{NIST_NRC_Corner_Ceiling_Jet}
+{NIST/NRC Corner Effects experiments, ceiling jet temperature, wall and corner tests.}
+\label{NIST_NRC_Corner_Ceiling_Jet_1}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC_Corner_Effects/cabinet_01_Ceiling_Jet} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC_Corner_Effects/cabinet_02_Ceiling_Jet} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC_Corner_Effects/cabinet_03_Ceiling_Jet} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC_Corner_Effects/cabinet_04_Ceiling_Jet} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC_Corner_Effects/cabinet_05_Ceiling_Jet} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC_Corner_Effects/cabinet_06_Ceiling_Jet}
+\end{tabular*}
+\caption[NIST/NRC Corner Effects experiments, ceiling jet temperature, large cabinet]
+{NIST/NRC Corner Effects experiments, ceiling jet temperature, large cabinet.}
+\label{NIST_NRC_Corner_Ceiling_Jet_2}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC_Corner_Effects/cabinet_07_Ceiling_Jet} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC_Corner_Effects/cabinet_08_Ceiling_Jet} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC_Corner_Effects/cabinet_09_Ceiling_Jet} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC_Corner_Effects/cabinet_10_Ceiling_Jet} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC_Corner_Effects/cabinet_11_Ceiling_Jet} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_NRC_Corner_Effects/cabinet_12_Ceiling_Jet}
+\end{tabular*}
+\caption[NIST/NRC Corner Effects experiments, ceiling jet temperature, medium-sized cabinet]
+{NIST/NRC Corner Effects experiments, ceiling jet temperature, medium-sized cabinet.}
+\label{NIST_NRC_Corner_Ceiling_Jet_3}
 \end{figure}
 
 
@@ -715,6 +776,27 @@ The primary purpose of the UL/NFPRF experiments was to measure sprinkler activat
 \end{tabular*}
 \caption{UL/NFPPRF experiments, ceiling jet, Series I, Tests 15-22.}
 \label{UL_NFPRF_jet_3}
+\end{figure}
+
+
+\clearpage
+
+\subsection{UL/NIJ House Experiments}
+
+The following plots compare the uppermost thermocouple measurements with corresponding model predictions for the ranch-style and colonial-style houses.
+
+
+\begin{figure}[!h]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/UL_NIJ_Houses/Single_Story_Gas_1_CJ_LR} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/UL_NIJ_Houses/Single_Story_Gas_2_CJ_LR} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/UL_NIJ_Houses/Single_Story_Gas_5_CJ_LR} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/UL_NIJ_Houses/Two_Story_Gas_1_CJ_LR} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/UL_NIJ_Houses/Two_Story_Gas_4_CJ_LR} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/UL_NIJ_Houses/Two_Story_Gas_6_CJ_LR} \\
+\end{tabular*}
+\caption{UL/NIJ Experiments, ceiling jet temperature}
+\label{UL_NIJ_CJ_1}
 \end{figure}
 
 
@@ -1187,7 +1269,7 @@ The second method of predicting smoke detector activation is to use an empirical
 \includegraphics[height=4.0in]{SCRIPT_FIGURES/ScatterPlots/FDS_Smoke_Detector_Activation_Time}
 \end{tabular}
 \end{center}
-\caption[Summary of smoke detector activation times (smoke detector model), NIST Smoke Alarms.]
+\caption[Summary of activation times, smoke detector model, NIST Smoke Alarms.]
 {Summary of smoke detector activation times (using smoke detector model), NIST Smoke Alarms.}
 \label{NIST_Smoke_Alarms_Scatterplot}
 \end{figure}

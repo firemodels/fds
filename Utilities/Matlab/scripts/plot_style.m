@@ -23,6 +23,7 @@
 %
 % set(gcf,'Visible',Figure_Visibility);
 % set(gcf,'Units',Paper_Units);
+% set(gcf,'PaperUnits',Paper_Units);
 % set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 % set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 % print(gcf,'-dpdf',plotname);
@@ -55,11 +56,11 @@ switch style
 
         Scat_Plot_Width      = 4.75;
         Scat_Plot_Height     = 4.75;
-        Scat_Plot_X          = 0.75;
+        Scat_Plot_X          = 1.00;
         Scat_Plot_Y          = 0.75;
         Subtitle_Text_Offset = 0.05;
 
-        VerStr_Scale_X   = 0.65;
+        VerStr_Scale_X   = 0.60;
         VerStr_Scale_Y   = 1.05;
 
         % Paper properties
@@ -104,7 +105,7 @@ switch style
         Scat_Plot_Y          = 0.75;
         Subtitle_Text_Offset = 0.05;
 
-        VerStr_Scale_X   = 0.65;
+        VerStr_Scale_X   = 0.60;
         VerStr_Scale_Y   = 1.05;
 
         % Paper properties

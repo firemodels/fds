@@ -173,21 +173,20 @@ END IF
 !                               SAVE PARAMETERS FOR H3CZSS IN SAVE ARRAY
 
 SAVE(2) = DX
-SAVE(3) = L
-SAVE(4) = LP
+SAVE(3) = REAL(L,EB)
+SAVE(4) = REAL(LP,EB)
 SAVE(5) = DY
-SAVE(6) = M
-SAVE(7) = MP
+SAVE(6) = REAL(M,EB)
+SAVE(7) = REAL(MP,EB)
 SAVE(8) = DZ
-SAVE(9) = N
-SAVE(10) = NP
+SAVE(9) = REAL(N,EB)
+SAVE(10) = REAL(NP,EB)
 SAVE(11) = ELMBDA
 
 RETURN
 END SUBROUTINE H3CZIS
 
-SUBROUTINE H3CZSS(BDXS,BDXF,BDYS,BDYF,BDZS,BDZF,LDIMF,MDIMF,F,  &
-    PERTRB,SAVE,W,H)
+SUBROUTINE H3CZSS(BDXS,BDXF,BDYS,BDYF,BDZS,BDZF,LDIMF,MDIMF,F,PERTRB,SAVE,W,H)
 
 ! +--------------------------------------------------------------------+
 ! |                                                                    |
@@ -216,14 +215,14 @@ IF (ABS(SAVE(1))>=TWO_EPSILON_EB) RETURN
 !                               INITIALIZATION SUBROUTINE H3CZIS.
 
 DX = SAVE(2)
-L = SAVE(3)
-LP = SAVE(4)
+L  = NINT(SAVE(3))
+LP = NINT(SAVE(4))
 DY = SAVE(5)
-M = SAVE(6)
-MP = SAVE(7)
+M  = NINT(SAVE(6))
+MP = NINT(SAVE(7))
 DZ = SAVE(8)
-N = SAVE(9)
-NP = SAVE(10)
+N  = NINT(SAVE(9))
+NP = NINT(SAVE(10))
 ELMBDA = SAVE(11)
 
 DLYRCP = 1._EB/DY
@@ -240,7 +239,7 @@ ID = IC + L
 IS = 12 + 4*L
 
 
-IF (PRES_METHOD /= 'SCARC') THEN
+IF (PRES_METHOD /= 'SCARC' .AND. PRES_METHOD /= 'USCARC') THEN
 
 !                               ENTER BOUNDARY DATA FOR X-BOUNDARIES
 
@@ -623,16 +622,16 @@ CALL FSH01S(IGRID,L,LP,M,MP,D,N,NP,LDIMFC,C2,SAVE(IA),SAVE(IB),  &
 
 !                               SAVE PARAMETERS FOR SUBROUTINE SOLVER
 
-SAVE(2) = L
-SAVE(3) = LP
-SAVE(4) = M
-SAVE(5) = MP
-SAVE(6) = N
-SAVE(7) = NP
-SAVE(8) = ICFZ
-SAVE(9) = IWSZ
-SAVE(10) = IZRT
-SAVE(11) = IGRID
+SAVE(2) = REAL(L,EB)
+SAVE(3) = REAL(LP,EB)
+SAVE(4) = REAL(M,EB)
+SAVE(5) = REAL(MP,EB)
+SAVE(6) = REAL(N,EB)
+SAVE(7) = REAL(NP,EB)
+SAVE(8) = REAL(ICFZ,EB)
+SAVE(9) = REAL(IWSZ,EB)
+SAVE(10) = REAL(IZRT,EB)
+SAVE(11) = REAL(IGRID,EB)
 
 RETURN
 END SUBROUTINE FSH00S
@@ -816,8 +815,8 @@ IF (L>1) THEN
       FCTRD(1,K,J) = 1._EB/ (B(1)+D(1)*CFY(J)+ZRT(K))
     END DO
   END DO
-  DO  I = 2,L
-    DO  K = 2,N
+  DO  K = 2,N
+    DO  I = 2,L
       DO  J = 2,M
         FCTRD(I,K,J) = 1._EB/ (B(I)+D(I)*CFY(J)+ZRT(K)-  &
             A(I)*C(I-1)*FCTRD(I-1,K,J))
@@ -978,13 +977,13 @@ INTEGER :: L, LP, M, MP, N, NP, IGRID, IA, IC, ICFY, ICFZ, IFCTRD, LDIMFC, IWSY,
 
 !                               RETRIEVE CONSTANTS FROM SAVE ARRAY
 
-L = SAVE(2)
-LP = SAVE(3)
-M = SAVE(4)
-MP = SAVE(5)
-N = SAVE(6)
-NP = SAVE(7)
-IGRID = SAVE(11)
+L  = NINT(SAVE(2))
+LP = NINT(SAVE(3))
+M  = NINT(SAVE(4))
+MP = NINT(SAVE(5))
+N  = NINT(SAVE(6))
+NP = NINT(SAVE(7))
+IGRID = NINT(SAVE(11))
 
 !                               ALLOCATION OF SAVE ARRAY
 IA = 12
@@ -1233,6 +1232,7 @@ INTEGER :: K, J, I
 !                               DIMENSION L X M X N INTO THE ARRAY F OF
 !                               DIMENSION LDIMF X MDIMF X N.
 
+
 DO  K = 1,N
   DO  J = 1,M
     DO  I = 1,L
@@ -1240,6 +1240,7 @@ DO  K = 1,N
     END DO
   END DO
 END DO
+
 RETURN
 END SUBROUTINE FSH05S
 
@@ -1301,20 +1302,27 @@ END IF
 SCALE=0.5_EB*SCALE
 END IF
 !                               FORWARD SUBSTITUTION
-
+!$omp parallel
+!$omp do schedule(dynamic, 4)
 DO  J = 1,M
   FT(1,J) = SCALE*F(1,J)*FCTRD(1,J)
   DO  I = 2,L
     FT(I,J) = (SCALE*F(I,J)-A(I)*FT(I-1,J))*FCTRD(I,J)
   END DO
 END DO
+!$omp end do
+
+!$omp barrier
 
 !                               BACKWARD SUBSTITUTION
+!$omp do schedule(dynamic,4)
 DO  J = 1,M
   DO  I = L - 1,1,-1
     FT(I,J) = FT(I,J) - C(I)*FCTRD(I,J)*FT(I+1,J)
   END DO
 END DO
+!$omp end do
+!$omp end parallel
 
 IF (LP==1) THEN
 
@@ -1520,7 +1528,7 @@ END DO
 404    CONTINUE
 END IF
 IF (M>3) THEN
-  450    CALL VRFFTF (LDIMX*N,MM1,XT,LDIMX*N,X,WSAVE)
+  CALL VRFFTF (LDIMX*N,MM1,XT,LDIMX*N,X,WSAVE)
   IF (OUTARY) THEN
     CALL VCOSTA(M,N*LDIMX,MM1,XT(1,M),X,XT)
   ELSE
@@ -1761,13 +1769,13 @@ REAL(EB)  FAC(15)
 REAL(EB)         C(MDIMC,N)
 INTEGER :: NF, NA, L2, IW, K1, KH, IP, L1, IDO, IDL1, IX2, IX3, IX4, J, I
 
-NF = FAC(2)
+NF = INT(FAC(2))
 NA = 1
 L2 = N
 IW = N
 DO  K1=1,NF
   KH = NF-K1
-  IP = FAC(KH+3)
+  IP = INT(FAC(KH+3))
   L1 = L2/IP
   IDO = N/L2
   IDL1 = IDO*L1
@@ -1850,10 +1858,9 @@ SUBROUTINE VRFTI1 (N,WA,FAC)
 !     PACKAGE VFFTPAK, VERSION 1, JUNE 1989
 
 
-INTEGER                       :: N
-REAL(EB)   FAC(15)
-REAL(EB)         WA(N)      , NTRYH(4)
-INTEGER :: NL, NF, J, NTRY, NQ, NR, I, IB, IS, NFM1, L1, K1, IP, LD, L2, IDO, IPM, II
+INTEGER :: N
+REAL(EB) :: FAC(15), WA(N)
+INTEGER :: NL, NF, J, NTRY, NQ, NR, I, IB, IS, NFM1, L1, K1, IP, LD, L2, IDO, IPM, II, NTRYH(4)
 REAL(EB) :: ARGH, TPI, ARGLD, FI, ARG
 DATA NTRYH(1),NTRYH(2),NTRYH(3),NTRYH(4)/4,2,3,5/
 
@@ -1892,7 +1899,7 @@ NFM1 = NF-1
 L1 = 1
 IF (NFM1 == 0) RETURN
 DO  K1=1,NFM1
-  IP = FAC(K1+2)
+  IP = INT(FAC(K1+2))
   LD = 0
   L2 = L1*IP
   IDO = N/L2
@@ -2093,6 +2100,7 @@ SUBROUTINE VSCOSQ(F,L,M,N,LDIMF,FT,C1,C2,C3,C4,WORK)
 !     PACKAGE VFFTPAK, VERSION 1, JUNE 1989
 
 
+
 INTEGER                   :: L
 INTEGER                       :: M
 INTEGER                       :: N
@@ -2115,21 +2123,30 @@ INTEGER :: I, J, JBY2
 IF (TPOSE) THEN
    CALL VSCSQ1(L,M,N,LDIMF,F,FT,C1,C2)
 ELSE
+  
+  
    DO  I=1,LDIMF*N
+    
       FT(I,1)=F(I,1)
    END DO
+  
    IF (MOD(M,2)==0) THEN
       DO  I=1,LDIMF*N
          FT(I,M)=-F(I,M)
       END DO
    END IF
+  
+   
       DO  J=2,M-1,2
+       
          JBY2=J/2
          DO  I=1,LDIMF*N
             FT(I,J)   =  F(I,J+1)*C1(JBY2)+F(I,J)*C2(JBY2)
             FT(I,J+1) = -F(I,J+1)*C2(JBY2)+F(I,J)*C1(JBY2)
          END DO
+        
       END DO
+     
 END IF
 
 !     REAL(EB),PERIODIC SYNTHESIS
@@ -2438,7 +2455,7 @@ REAL(EB) :: SQRT2I
 
 SQRT2I=SQRT(.5_EB)
 MODM = MOD(M,2)
-103 MP1 = M+1
+MP1 = M+1
 MS2 = M/2
 DO  I=1,LDIMX*N
   XT(I,1) = 0._EB
@@ -3296,7 +3313,6 @@ DO  M=1,MP
 END DO
 IF (IDO == 1) RETURN
 IDP2 = IDO+2
-!$OMP PARALLEL DO PRIVATE(ic) SCHEDULE(STATIC)
 DO  K=1,L1
    DO  I=3,IDO,2
       IC = IDP2-I
@@ -3326,7 +3342,6 @@ DO  K=1,L1
       END DO
    END DO
 END DO
-!$OMP END PARALLEL DO
 RETURN
 END SUBROUTINE VRADF3
 
@@ -3644,7 +3659,8 @@ DO  J=2,IPPH
   END DO
 END DO
 GO TO 121
-115 DO  J=2,IPPH
+115 CONTINUE
+DO  J=2,IPPH
   JC = IPP2-J
   DO  I=3,IDO,2
     DO  K=1,L1
@@ -3658,12 +3674,14 @@ GO TO 121
   END DO
 END DO
 GO TO 121
-119 DO  IK=1,IDL1
+119 CONTINUE
+DO  IK=1,IDL1
   DO  M=1,MP
     C2(M,IK,1) = CH2(M,IK,1)
   END DO
 END DO
-121 DO  J=2,IPPH
+121 CONTINUE
+DO  J=2,IPPH
   JC = IPP2-J
   DO  K=1,L1
     DO  M=1,MP
@@ -3703,9 +3721,9 @@ DO  L=2,IPPH
     END DO
   END DO
 END DO
-DO  J=2,IPPH
+DO  M=1,MP
   DO  IK=1,IDL1
-    DO  M=1,MP
+    DO  J=2,IPPH
       CH2(M,IK,1) = CH2(M,IK,1)+C2(M,IK,J)
     END DO
   END DO
@@ -3720,14 +3738,16 @@ DO  K=1,L1
   END DO
 END DO
 GO TO 135
-132 DO  I=1,IDO
+132 CONTINUE
+DO  I=1,IDO
   DO  K=1,L1
     DO  M=1,MP
       CC(M,I,1,K) = CH(M,I,K,1)
     END DO
   END DO
 END DO
-135 DO  J=2,IPPH
+135 CONTINUE
+DO  J=2,IPPH
   JC = IPP2-J
   J2 = J+J
   DO  K=1,L1
@@ -3755,7 +3775,8 @@ DO  J=2,IPPH
   END DO
 END DO
 RETURN
-141 DO  J=2,IPPH
+141 CONTINUE
+DO  J=2,IPPH
   JC = IPP2-J
   J2 = J+J
   DO  I=3,IDO,2
@@ -3823,12 +3844,15 @@ REAL(EB)    FAC(15)
 REAL(EB)    CH(M,N)
 INTEGER :: I, NF, NA, L1, IW, K1, IP, L2, IDO, IDL1, IX2, IX3, IX4, J
 
-NF = FAC(2)
+NF = INT(FAC(2))
 NA = 0
 L1 = 1
 IW = 1
+
+
 DO  K1=1,NF
-  IP = FAC(K1+2)
+  
+  IP = INT(FAC(K1+2))
   L2 = IP*L1
   IDO = N/L2
   IDL1 = IDO*L1
@@ -3874,6 +3898,8 @@ DO  K1=1,NF
   115    L1 = L2
   IW = IW+(IP-1)*IDO
 END DO
+
+
 OUTARY=.TRUE.
 IF (NOCOPY) THEN
   SCALE=SCALE*SQRT(1.0_EB/REAL(N,EB))
@@ -4142,6 +4168,7 @@ TR11=COS(ARG)
 TI11=SIN(ARG)
 TR12=COS(2._EB*ARG)
 TI12=SIN(2._EB*ARG)
+
 DO  K=1,L1
   DO  M=1,MP
     CH(M,1,K,1) = CC(M,1,1,K)+2._EB*CC(M,IDO,2,K)+2._EB*CC(M,IDO,4,K)
@@ -4155,8 +4182,10 @@ DO  K=1,L1
         +TR12*2._EB*CC(M,IDO,4,K))+(TI11*2._EB*CC(M,1,3,K) +TI12*2._EB*CC(M,1,5,K))
   END DO
 END DO
+
 IF (IDO == 1) RETURN
 IDP2 = IDO+2
+
 DO  K=1,L1
   DO  I=3,IDO,2
     IC = IDP2-I
@@ -4225,6 +4254,7 @@ DO  K=1,L1
     END DO
   END DO
 END DO
+
 RETURN
 END SUBROUTINE VRADB5
 
@@ -4269,14 +4299,16 @@ DO  K=1,L1
   END DO
 END DO
 GO TO 106
-103 DO  I=1,IDO
+103 CONTINUE
+DO  I=1,IDO
   DO  K=1,L1
     DO  M=1,MP
       CH(M,I,K,1) = CC(M,I,1,K)
     END DO
   END DO
 END DO
-106 DO  J=2,IPPH
+106 CONTINUE
+DO  J=2,IPPH
   JC = IPP2-J
   J2 = J+J
   DO  K=1,L1
@@ -4303,7 +4335,8 @@ DO  J=2,IPPH
   END DO
 END DO
 GO TO 116
-112 DO  J=2,IPPH
+112 CONTINUE
+DO  J=2,IPPH
   JC = IPP2-J
   DO  I=3,IDO,2
     IC = IDP2-I
@@ -4347,9 +4380,9 @@ DO  L=2,IPPH
     END DO
   END DO
 END DO
-DO  J=2,IPPH
+DO  M=1,MP
   DO  IK=1,IDL1
-    DO  M=1,MP
+    DO  J=2,IPPH
       CH2(M,IK,1) = CH2(M,IK,1)+CH2(M,IK,J)
     END DO
   END DO
@@ -4379,7 +4412,8 @@ DO  J=2,IPPH
   END DO
 END DO
 GO TO 132
-128 DO  J=2,IPPH
+128 CONTINUE
+DO  J=2,IPPH
   JC = IPP2-J
   DO  I=3,IDO,2
     DO  K=1,L1
@@ -4407,9 +4441,8 @@ DO  J=2,IP
   END DO
 END DO
 IF (NBD > L1) GO TO 139
-IS = -IDO
 DO  J=2,IP
-  IS = IS+IDO
+  IS = (J-2)*IDO
   IDIJ = IS
   DO  I=3,IDO,2
     IDIJ = IDIJ+2
@@ -4422,9 +4455,9 @@ DO  J=2,IP
   END DO
 END DO
 GO TO 143
-139 IS = -IDO
+139 CONTINUE
 DO  J=2,IP
-  IS = IS+IDO
+  IS = (J-2)*IDO
   DO  K=1,L1
     IDIJ = IS
     DO  I=3,IDO,2
@@ -4855,19 +4888,19 @@ END DO
 !                               SAVE PARAMETERS FOR HS3SPH IN SAVE ARRAY
 
 SAVE(2) = DR
-SAVE(3) = L
-SAVE(4) = LBDCND
+SAVE(3) = REAL(L,EB)
+SAVE(4) = REAL(LBDCND,EB)
 SAVE(5) = DT
-SAVE(6) = M
-SAVE(7) = MBDCND
+SAVE(6) = REAL(M,EB)
+SAVE(7) = REAL(MBDCND,EB)
 SAVE(8) = DP
-SAVE(9) = N
-SAVE(10) = NBDCND
+SAVE(9) = REAL(N,EB)
+SAVE(10) = REAL(NBDCND,EB)
 SAVE(12) = ELMBDA
 
-SAVE(-1) = KAPPA
-SAVE(-2) = NMAX
-SAVE(-3) = IKPWR
+SAVE(-1) = REAL(KAPPA,EB)
+SAVE(-2) = REAL(NMAX,EB)
+SAVE(-3) = REAL(IKPWR,EB)
 
 RETURN
 END SUBROUTINE H3CSIS
@@ -4905,25 +4938,21 @@ IF (ABS(SAVE(1))>=TWO_EPSILON_EB) RETURN
 !                               ARRAY WHERE THEY WERE STORED IN
 !                               INITIALIZATION SUBROUTINE H3CSIS.
 
-KAPPA = SAVE(-1)   ! EXTRA VARIABLES ADDED TO SAVE ARRAY
-NMAX  = SAVE(-2)
-IKPWR = SAVE(-3)
+KAPPA = NINT(SAVE(-1))   ! EXTRA VARIABLES ADDED TO SAVE ARRAY
+NMAX  = NINT(SAVE(-2))
+IKPWR = NINT(SAVE(-3))
 
-DR = SAVE(2)
-L = SAVE(3)
-LBDCND = SAVE(4)
-
-DT = SAVE(5)
-M = SAVE(6)
-
-MBDCND = SAVE(7)
-
-DP = SAVE(8)
-DPR = 1._EB/DP
-DPSQR = 2._EB/ (DP**2)
-N = SAVE(9)
-NBDCND = SAVE(10)
-
+DR     = SAVE(2)
+L      = NINT(SAVE(3))
+LBDCND = NINT(SAVE(4))
+DT     = SAVE(5)
+M      = NINT(SAVE(6))
+MBDCND = NINT(SAVE(7))
+DP     = SAVE(8)
+DPR    = 1._EB/DP
+DPSQR  = 2._EB/ (DP**2)
+N      = NINT(SAVE(9))
+NBDCND = NINT(SAVE(10))
 ELMBDA = SAVE(12)
 
 !                               ALLOCATE SAVE ARRAY
@@ -5143,9 +5172,9 @@ ISING = 1
 DO  I = 1,L
   W(I) = 0._EB
 END DO
-DO  K = 1,N
+DO  I = 1,L
   DO  J = 1,M
-    DO  I = 1,L
+    DO  K = 1,N
 !MCG              W(I) = W(I) + SAVE(ISM+J)*F(I,J,K)
       W(I) = W(I) + HY(J)*SAVE(ISM+J)*F(I,J,K)
     END DO
@@ -5266,7 +5295,6 @@ DO  J = 2,M
   END IF
 
 END DO
-110 CONTINUE
 
 IF (MDIMF<M) THEN
   IERROR = IERROR + 1
@@ -5349,12 +5377,11 @@ INTEGER :: L, M, N, NP, IGRID, IAL, IBL, ICL, IAM, ICM, ICFZ, IWSZ, IB, ICF, LEN
 !                               SOLVER BASED ON CYCLIC REDUCTION AND
 !                               FAST FOURIER TRANSFORMS
 
-L = SAVE(2)
-!     ML = SAVE(3)              THIS VARIABLE IS NEVER USED
-M = SAVE(4)
-N = SAVE(5)
-NP = SAVE(6)
-IGRID = SAVE(7)
+L  = NINT(SAVE(2))
+M  = NINT(SAVE(4))
+N  = NINT(SAVE(5))
+NP = NINT(SAVE(6))
+IGRID = NINT(SAVE(7))
 
 !                               ALLOCATE SAVE ARRAY
 
@@ -5473,7 +5500,7 @@ DO  K = 1,N
     CALL FSH17S(AM,CM,L,AL,BL,CL,L,FT(1,1,K), B(IB),COEF(ICF),W1,W2,F)
   END IF
   IB = IB + (KAPPA-2)*IKPWR + KAPPA + 6
-  ICF = ICF + (2*KAPPA-4.5)*IKPWR + KAPPA + 8
+  ICF = INT(ICF + (2*KAPPA-4.5)*IKPWR + KAPPA + 8)
 END DO
 IFWRD = 2
 
@@ -5957,17 +5984,16 @@ DO  K = 1,N
   CALL FSH08S(AM,CM,SAVE(IB),SAVE(ICF),W(M+N+1))
 
   IB = IB + (KAPPA-2)*IKPWR + KAPPA + 6
-  ICF = ICF + (2*KAPPA-4.5)*IKPWR + KAPPA + 8
+  ICF = INT(ICF + (2*KAPPA-4.5)*IKPWR + KAPPA + 8)
 END DO
 
 !                               SAVE QUANTITIES FOR USE IN SOLVERS
 
-SAVE(2) = L
-!     SAVE(3) = ML              THIS VARIABLE NEVER USED IN SOLVER
-SAVE(4) = M
-SAVE(5) = N
-SAVE(6) = NP
-SAVE(7) = IGRID
+SAVE(2) = REAL(L,EB)
+SAVE(4) = REAL(M,EB)
+SAVE(5) = REAL(N,EB)
+SAVE(6) = REAL(NP,EB)
+SAVE(7) = REAL(IGRID,EB)
 
 DO  I = 1,L
   SAVE(IAL+I-1) = AL(I)
@@ -6747,11 +6773,11 @@ END IF
 !                               SAVE PARAMETERS FOR H2CCSS IN SAVE ARRAY
 
 SAVE(2) = DX
-SAVE(3) = L
-SAVE(4) = LP
+SAVE(3) = REAL(L,EB)
+SAVE(4) = REAL(LP,EB)
 SAVE(5) = DY
-SAVE(6) = M
-SAVE(7) = MP
+SAVE(6) = REAL(M,EB)
+SAVE(7) = REAL(MP,EB)
 SAVE(8) = ELMBDA
 
 RETURN
@@ -6792,11 +6818,11 @@ IF (ABS(SAVE(1))>=TWO_EPSILON_EB) RETURN
 !                               INITIALIZATION SUBROUTINE H2CCIS.
 
 DX = SAVE(2)
-L = SAVE(3)
-LP = SAVE(4)
+L  = NINT(SAVE(3))
+LP = NINT(SAVE(4))
 DY = SAVE(5)
-M = SAVE(6)
-MP = SAVE(7)
+M  = NINT(SAVE(6))
+MP = NINT(SAVE(7))
 ELMBDA = SAVE(8)
 
 DLYRCP = 1._EB/DY
@@ -6811,7 +6837,7 @@ ID = IC + L
 IS = 9 + 4*L
 
 
-IF (PRES_METHOD /= 'SCARC') THEN
+IF (PRES_METHOD /= 'SCARC' .AND. PRES_METHOD /= 'USCARC') THEN
 
 !                               ENTER BOUNDARY DATA FOR X-BOUNDARIES
 
@@ -7056,10 +7082,10 @@ SUBROUTINE S2CFSS(LDIMF,F,SAVE,W)
 
 
 
-INTEGER                   :: LDIMF
-REAL(EB) SAVE(-3:*)
-REAL(EB) W(*)
-REAL(EB) F(LDIMF,*)
+INTEGER :: LDIMF
+REAL(EB) :: SAVE(-3:*)
+REAL(EB) :: W(*)
+REAL(EB) :: F(LDIMF,*)
 INTEGER :: M
 
 
@@ -7071,7 +7097,7 @@ IF (ABS(SAVE(1))>=TWO_EPSILON_EB) RETURN
 !                               DEBUG PRINTOUTS UNDER CONTROL OF
 !                               PARAMETER LVLPRN
 
-M = SAVE(4)
+M = NINT(SAVE(4))
 
 CALL FSH02S(LDIMF,M,F,SAVE,W)
 
@@ -7250,12 +7276,11 @@ END IF
 !                               SAVE PARAMETERS FOR H3CYSS IN SAVE ARRAY
 
 SAVE(2) = DR
-SAVE(3) = L
-SAVE(4) = LBDCND
-!     SAVE(5) = DRSQR           THIS PARAMETER IS NOT USED
+SAVE(3) = REAL(L,EB)
+SAVE(4) = REAL(LBDCND,EB)
 SAVE(6) = DZ
-SAVE(7) = N
-SAVE(8) = NP
+SAVE(7) = REAL(N,EB)
+SAVE(8) = REAL(NP,EB)
 SAVE(9) = DZSQR
 SAVE(10) = 1._EB/DZ
 SAVE(11) = ELMBDA
@@ -7300,19 +7325,15 @@ IF (ABS(SAVE(1))>=TWO_EPSILON_EB) RETURN
 !                               ARRAYWHERE THEY WERE STORED IN
 !                               INITIALIZATION SUBROUTINE H2CYIS.
 
-DR = SAVE(2)
-L = SAVE(3)
-LBDCND = SAVE(4)
-!     DRSQR = SAVE(5)      THESE TWO PARAMETERS ARE NOT USED
-!     DZ = SAVE(6)
-
-N = SAVE(7)
-NP = SAVE(8)
-DZSQR = SAVE(9)
-DZR = SAVE(10)
-
+DR     = SAVE(2)
+L      = NINT(SAVE(3))
+LBDCND = NINT(SAVE(4))
+N      = NINT(SAVE(7))
+NP     = NINT(SAVE(8))
+DZSQR  = SAVE(9)
+DZR    = SAVE(10)
 ELMBDA = SAVE(11)
-XMU = SAVE(12)
+XMU    = SAVE(12)
 
 !                               ALLOCATE SAVE ARRAY
 

@@ -1,49 +1,75 @@
+!> \brief Compute the HVAC mass and energy transport
+!> \details Module contains routines to read the HVAC namelist inputs, intialize the HVAC solver, and solve
+!> the flow for each timestep. Note that the HVAC solver is only called for the first MPI process. This requires
+!> that HVAC boundary conditions at VENTs be aggregated of MPI processes and that the HVAC solution 
+!> be shared with all MPI processes
+   
 MODULE HVAC_ROUTINES
-
-! Compute the HVAC mass and energy transport
 
 USE PRECISION_PARAMETERS
 USE GLOBAL_CONSTANTS
 USE MESH_POINTERS
 USE DEVICE_VARIABLES
 USE CONTROL_VARIABLES
-USE COMP_FUNCTIONS, ONLY: SECOND, CHECKREAD, SHUTDOWN
+USE COMP_FUNCTIONS, ONLY: CURRENT_TIME, CHECKREAD, SHUTDOWN
 USE MEMORY_FUNCTIONS, ONLY: ChkMemErr
 
 IMPLICIT NONE
 
-REAL(EB), ALLOCATABLE, DIMENSION(:,:):: NODE_AREA,NODE_AREA_EX,NODE_H,NODE_P,NODE_RHO,NODE_X,NODE_Y,NODE_Z,&
-                                        NODE_TMP,NODE_TMP_EX,DUCT_MF
-REAL(EB), ALLOCATABLE, DIMENSION(:,:,:):: NODE_ZZ,NODE_ZZ_EX
-REAL(EB) :: DT_HV
-INTEGER, ALLOCATABLE, DIMENSION(:,:) :: NODE_ZONE
-CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:,:) :: NODE_DUCT_A,DUCT_NODE_A
-CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: NODE_FILTER_A,DUCT_FAN_A,DUCT_AIRCOIL_A
-INTEGER :: LEAK_DUCTS = 0
-INTEGER, ALLOCATABLE, DIMENSION(:,:):: LEAK_PATH
-CHARACTER(255) :: MESSAGE
-REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: LHS
-REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHS,DPSTAR
-INTEGER :: ITER,ITER_MAX=10
+PRIVATE
+
+REAL(EB) :: DT_HV !< Size of subtimestep used in HVAC solver
+REAL(EB) :: DT_MT !< Size of subtimestep used in 1D mass+energy transport solver
+CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:,:) :: NODE_DUCT_A  !< Temporary array storing DUCT_ID inputs for NODEs
+CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:,:) :: DUCT_NODE_A  !< Temporary array storing NODE_ID inputs for DUCTs
+CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: NODE_FILTER_A  !< Temporary array storing FILTER_ID inputs for NODEs
+CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: DUCT_FAN_A     !< Temporary array storing FAN_ID inputs for DUCTs
+CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: DUCT_AIRCOIL_A !< Temporary array storing AIRCOIL_ID inputs for DUCTS
+INTEGER :: LEAK_DUCTS = 0 !< Number of ducts used for leakage
+INTEGER, ALLOCATABLE, DIMENSION(:,:):: LEAK_PATH !< Temporary array used to determine ducts to create for leakage paths
+CHARACTER(255) :: MESSAGE !< Stores ERROR or WARNING message written to LU_ERR
+REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: LHS !< Left hand side of HVAC solution array
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHS !< Right hand side of HVAC solution array
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: DPSTAR !< Array of extrapoloated presure for each ZONE.
+INTEGER :: ITER !< Current HVAC solver iterations
+INTEGER :: ITER_MAX=10  !< Maximum allowed solver iterations
+LOGICAL :: LOCALIZED_LEAKAGE_INIT  !< Flag indicating localized leakage ducts have been initialized
 
 PUBLIC HVAC_CALC,READ_HVAC,PROC_HVAC,HVAC_BC_IN,FIND_NETWORKS,COLLAPSE_HVAC_BC,SET_INIT_HVAC
 
+REAL(EB),PUBLIC, ALLOCATABLE, DIMENSION(:):: NODE_AREA_EX !< Contain sum of area over all MESHES of all VENTs assigned to each NODE
+REAL(EB),PUBLIC, ALLOCATABLE, DIMENSION(:):: NODE_TMP_EX
+!< Contains sum of area weighted temperature over all MESHES for all VENTs assigned to each NODE
+REAL(EB),PUBLIC, ALLOCATABLE, DIMENSION(:):: DUCT_MF !<Contains mass flow for each duct. Exchanged during MPI exchanges
+REAL(EB),PUBLIC, ALLOCATABLE, DIMENSION(:,:):: NODE_AREA !<Area of each NODE per MESH
+REAL(EB),PUBLIC, ALLOCATABLE, DIMENSION(:,:):: NODE_H !<Area weighted enthalpy of each NODE per MESH
+REAL(EB),PUBLIC, ALLOCATABLE, DIMENSION(:,:):: NODE_P !<Area weighed pressure of each NODE per MESH
+REAL(EB),PUBLIC, ALLOCATABLE, DIMENSION(:,:):: NODE_RHO !<Area weighted desnity of each NODE per MESH
+REAL(EB),PUBLIC, ALLOCATABLE, DIMENSION(:,:):: NODE_X !<Area weighted x position of each NODE per MESH
+REAL(EB),PUBLIC, ALLOCATABLE, DIMENSION(:,:):: NODE_Y !<Area weighted y position of each NODE per MESH
+REAL(EB),PUBLIC, ALLOCATABLE, DIMENSION(:,:):: NODE_Z !<Area weighted z position of each NODE per MESH
+REAL(EB),PUBLIC, ALLOCATABLE, DIMENSION(:,:):: NODE_TMP !<Area weighted temperature of each NODE per MESH
+REAL(EB),PUBLIC, ALLOCATABLE, DIMENSION(:,:):: NODE_ZZ_EX !<Area weighted tracked species mass fractions of each NODE per MESH
+!< Contains sum of area weighted tracked species mass fractions over all MPI processes for all VENTs assigned to each NODE
+REAL(EB),PUBLIC, ALLOCATABLE, DIMENSION(:,:,:):: NODE_ZZ
+!< Contains sum of area weighted tracked species mass fractions over all MPI processes for all VENTs assigned to each NODE
+INTEGER, PUBLIC, ALLOCATABLE, DIMENSION(:,:) :: NODE_ZONE !< Array of NODEs belonging to each ZONE
 CONTAINS
 
 
-SUBROUTINE READ_HVAC
+!> \brief Reads and processes the HVAC namelist inputs
 
-! Read and process HVAC networks
+SUBROUTINE READ_HVAC
 
 USE MATH_FUNCTIONS, ONLY: GET_RAMP_INDEX,GET_TABLE_INDEX
 USE MISC_FUNCTIONS, ONLY: SEARCH_CONTROLLER
 INTEGER , PARAMETER :: MAX_DUCTS = 20
-INTEGER :: IOS,IZERO,N_HVAC_READ,NS,N,ND,NN,I_AIRCOIL=0,I_DUCT=0,I_DUCTNODE=0,I_FAN=0 ,I_FILTER=0,N_CELLS
+INTEGER :: IOS,IZERO,N_HVAC_READ,NS,N,NC,ND,NN,I_AIRCOIL=0,I_DUCT=0,I_DUCTNODE=0,I_FAN=0 ,I_FILTER=0,N_CELLS
 REAL(EB) :: AREA,DIAMETER,XYZ(3),LOSS(MAX_DUCTS,MAX_DUCTS),VOLUME_FLOW,MAX_FLOW,MAX_PRESSURE,ROUGHNESS,LENGTH,TNOW,TAU_AC,&
             TAU_FAN,TAU_VF,FIXED_Q,CLEAN_LOSS,&
             COOLANT_MASS_FLOW,COOLANT_SPECIFIC_HEAT,COOLANT_TEMPERATURE,PERIMETER,MASS_FLOW
 REAL(EB) :: LOADING(MAX_SPECIES),EFFICIENCY(MAX_SPECIES),LOADING_MULTIPLIER(MAX_SPECIES)
-LOGICAL :: ROUND, SQUARE, DAMPER, REVERSE, AMBIENT,LEAK_ENTHALPY,INITIALIZED_HVAC_MASS_TRANSPORT
+LOGICAL :: ROUND, SQUARE, DAMPER, REVERSE, AMBIENT,LEAK_ENTHALPY,INITIALIZED_HVAC_MASS_TRANSPORT,QFAN_BETA=.FALSE.
 CHARACTER(LABEL_LENGTH) :: AIRCOIL_ID,CTRL_ID,DEVC_ID,DUCT_ID(MAX_DUCTS),DUCT_INTERP_TYPE,FAN_ID,FILTER_ID,ID,NODE_ID(2),RAMP_ID,&
                            RAMP_LOSS,SPEC_ID(MAX_SPECIES),SURF_ID,TYPE_ID,VENT_ID,VENT2_ID
 TYPE(DUCTNODE_TYPE), POINTER :: DN=>NULL()
@@ -51,16 +77,20 @@ TYPE(DUCT_TYPE), POINTER :: DU=>NULL()
 NAMELIST /HVAC/ AIRCOIL_ID,AMBIENT,AREA,CLEAN_LOSS,COOLANT_SPECIFIC_HEAT,COOLANT_MASS_FLOW,COOLANT_TEMPERATURE,CTRL_ID,&
                 DAMPER,DEVC_ID,DIAMETER,DUCT_ID,DUCT_INTERP_TYPE,&
                 EFFICIENCY,FAN_ID,FILTER_ID,FIXED_Q,ID,LEAK_ENTHALPY,LENGTH,LOADING,LOADING_MULTIPLIER,LOSS,&
-                MASS_FLOW,MAX_FLOW,MAX_PRESSURE,N_CELLS,NODE_ID,PERIMETER,&
+                MASS_FLOW,MAX_FLOW,MAX_PRESSURE,N_CELLS,NODE_ID,PERIMETER,QFAN_BETA,&
                 RAMP_ID,RAMP_LOSS,REVERSE,ROUGHNESS,SPEC_ID,SURF_ID,TAU_AC,TAU_FAN,TAU_VF,TYPE_ID,VENT_ID,VENT2_ID,VOLUME_FLOW,XYZ
 
-TNOW=SECOND()
+TNOW=CURRENT_TIME()
 
 N_HVAC_READ = 0
 
+LOCALIZED_LEAKAGE_INIT=.FALSE.
+
+IF (ALL(EVACUATION_ONLY)) RETURN
+
 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
 COUNT_HVAC_LOOP: DO
-   CALL CHECKREAD('HVAC',LU_INPUT,IOS)
+   CALL CHECKREAD('HVAC',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
    IF (IOS==1) EXIT COUNT_HVAC_LOOP
    READ(LU_INPUT,HVAC,END=15,ERR=16,IOSTAT=IOS)
    N_HVAC_READ = N_HVAC_READ + 1
@@ -88,6 +118,10 @@ COUNT_HVAC_LOOP: DO
       CASE ('LEAK')
          N_DUCTS = N_DUCTS + 1
          N_DUCTNODES = N_DUCTNODES + 2
+      CASE DEFAULT
+         WRITE(MESSAGE,'(A,I5,A,I5)') &
+            'ERROR: Invalid tyPE_ID provided for HVAC line number ',N_HVAC_READ+1,', input line number',INPUT_FILE_LINE_NUMBER
+         CALL SHUTDOWN(MESSAGE); RETURN     
    END SELECT
 ENDDO COUNT_HVAC_LOOP
 15 CONTINUE
@@ -106,7 +140,7 @@ IF (ANY(SURFACE%LEAK_PATH(1)>0).OR.ANY(SURFACE%LEAK_PATH(2)>0)) THEN
    N_DUCTNODES = N_DUCTNODES + 2 * LEAK_DUCTS
 ENDIF
 
-IF (N_HVAC_READ > 0) HVAC_SOLVE = .TRUE.
+IF (N_DUCTS > 0) HVAC_SOLVE = .TRUE.
 
 IF ((N_DUCTS > 0 .AND. N_DUCTNODES <= 0) .OR. (N_DUCTS <= 0 .AND. N_DUCTNODES > 0)) THEN
    WRITE(MESSAGE,'(A)') 'ERROR: Must have both DUCTs and DUCTNODEs in the input file'
@@ -118,11 +152,17 @@ CALL ChkMemErr('HVAC','DUCT',IZERO)
 ALLOCATE(DUCT_NE(N_DUCTS),STAT=IZERO)
 CALL ChkMemErr('HVAC','DUCT_NE',IZERO)
 DUCT_NE = 0
+ALLOCATE(DUCT_DR(N_DUCTS),STAT=IZERO)
+CALL ChkMemErr('HVAC','DUCT_DR',IZERO)
+DUCT_DR = 0
 ALLOCATE(DUCTNODE(N_DUCTNODES),STAT=IZERO)
 CALL ChkMemErr('HVAC','DUCTNODE',IZERO)
 ALLOCATE(DUCTNODE_NE(N_DUCTNODES),STAT=IZERO)
 CALL ChkMemErr('HVAC','DUCTNODE_NE',IZERO)
 DUCTNODE_NE = 0
+ALLOCATE(DUCTNODE_DR(N_DUCTNODES),STAT=IZERO)
+CALL ChkMemErr('HVAC','DUCTNODE_DR',IZERO)
+DUCTNODE_DR = 0
 ALLOCATE(FILTER(N_FILTERS),STAT=IZERO)
 CALL ChkMemErr('HVAC','FILTER',IZERO)
 ALLOCATE(FAN(N_FANS),STAT=IZERO)
@@ -183,8 +223,11 @@ DO NN=1,N_HVAC_READ
          DU%DIAMETER = DIAMETER
          DU%LENGTH = LENGTH
          DU%REVERSE = REVERSE
+         DU%DP_FAN = 0._EB
          ALLOCATE(DU%ZZ(N_TRACKED_SPECIES))
          DU%ZZ(1:N_TRACKED_SPECIES) = SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0
+         ALLOCATE(DU%ZZ_OLD(N_TRACKED_SPECIES))
+         DU%ZZ_OLD(1:N_TRACKED_SPECIES) = SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0
          DU%LOSS(1:2) = MAX(0._EB,LOSS(1:2,1))
          IF (CTRL_ID /='null' .AND. DEVC_ID /='null') THEN
             WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR: Can only specify one of CTRL_ID or DEVC_ID. Duct ID:',TRIM(ID),&
@@ -226,7 +269,6 @@ DO NN=1,N_HVAC_READ
                 DU%FAN_OPERATING = .TRUE.
             ENDIF
             IF (DU%FAN_OPERATING) DU%FAN_ON_TIME = T_BEGIN
-            IF (.NOT. DU%FAN_OPERATING) DU%DP_FAN = 0._EB
          ELSEIF (AIRCOIL_ID /='null') THEN
             IF (DU%DEVC_INDEX > 0) THEN
                 DU%COIL_OPERATING = DEVICE(DU%DEVC_INDEX)%INITIAL_STATE
@@ -252,7 +294,7 @@ DO NN=1,N_HVAC_READ
          IF (RAMP_ID /= 'null') CALL GET_RAMP_INDEX(RAMP_ID,'DUCT',DU%RAMP_INDEX)
          IF (RAMP_LOSS /= 'null') CALL GET_RAMP_INDEX(RAMP_LOSS,'DUCT',DU%RAMP_LOSS_INDEX)
          IF (HVAC_MASS_TRANSPORT) THEN
-            IF (N_CELLS > 0) THEN 
+            IF (N_CELLS > 0) THEN
                DU%N_CELLS = N_CELLS
             ELSE
                IF (DU%LENGTH <=0.1) THEN ! If duct is less than 10 cm, adopt two cells, else default to 10 cm cells
@@ -273,6 +315,20 @@ DO NN=1,N_HVAC_READ
                   WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR: DUCT_INTERP_TYPE is not correctly specified. Duct ID: ',TRIM(DU%ID)
                   CALL SHUTDOWN(MESSAGE); RETURN
             END SELECT
+            ALLOCATE(DU%RHO_C(DU%N_CELLS))
+            ALLOCATE(DU%TMP_C(DU%N_CELLS))
+            ALLOCATE(DU%CP_C(DU%N_CELLS))
+            ALLOCATE(DU%ZZ_C(DU%N_CELLS,N_TRACKED_SPECIES))
+            DO NC = 1,DU%N_CELLS ! Initialising as background here; required for DEVC output at t = 0 s
+               DU%ZZ_C(NC,1:N_TRACKED_SPECIES) = SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0
+            ENDDO
+            ALLOCATE(DU%RHO_C_OLD(DU%N_CELLS))
+            ALLOCATE(DU%TMP_C_OLD(DU%N_CELLS))
+            ALLOCATE(DU%CP_C_OLD(DU%N_CELLS))
+            ALLOCATE(DU%ZZ_C_OLD(DU%N_CELLS,N_TRACKED_SPECIES))
+            DO NC = 1,DU%N_CELLS ! Initialising as background here; required for DEVC output at t = 0 s
+               DU%ZZ_C_OLD(NC,1:N_TRACKED_SPECIES) = SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0
+            ENDDO
          ENDIF
 
          IF (SURF_ID/='null') THEN
@@ -367,7 +423,7 @@ DO NN=1,N_HVAC_READ
          IF (TAU_FAN < 0._EB) FAN(I_FAN)%SPIN_INDEX = TSQR_RAMP
          IF (RAMP_ID /= 'null') CALL GET_RAMP_INDEX(RAMP_ID,'FAN',FAN(I_FAN)%RAMP_INDEX)
          IF(( (MAX_FLOW<1.E6_EB .OR. MAX_PRESSURE<1.E6_EB) .AND. (VOLUME_FLOW<1.E6_EB .OR. RAMP_ID/='null')))THEN !.OR. &
-            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR: FAN can only be one of constant volume, quadratic or ramp. Fan ID:',TRIM(ID),& 
+            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR: FAN can only be one of constant volume, quadratic or ramp. Fan ID:',TRIM(ID),&
                                         ', HVAC line number:',NN
             CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
@@ -390,6 +446,10 @@ DO NN=1,N_HVAC_READ
             FAN(I_FAN)%FAN_TYPE = 3
          ELSE
             FAN(I_FAN)%FAN_TYPE = 2
+         ENDIF
+         IF(FAN(I_FAN)%FAN_TYPE == 2 .AND. QFAN_BETA .EQV. .TRUE.) THEN
+            FAN(I_FAN)%FAN_TYPE = 4
+            QFAN_BETA_TEST=.TRUE.
          ENDIF
 
       CASE('FILTER')
@@ -481,6 +541,7 @@ DO NN=1,N_HVAC_READ
          I_DUCT = I_DUCT + 1
          DU=> DUCT(I_DUCT)
          DU%ID   = ID
+         DU%LOCALIZED_LEAKAGE = .TRUE.
          IF (AREA <= 0._EB) THEN
             WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR: Leakage has no AREA. Leak ID:',TRIM(ID),', HVAC line number:',NN
             CALL SHUTDOWN(MESSAGE); RETURN
@@ -509,11 +570,13 @@ DO NN=1,N_HVAC_READ
    END SELECT
 ENDDO
 
-T_USED(13)=T_USED(13)+SECOND()-TNOW
+T_USED(13)=T_USED(13)+CURRENT_TIME()-TNOW
 
 RETURN
 
 CONTAINS
+
+!> \brief Sets the default values for the HVAC namelist
 
 SUBROUTINE SET_HVAC_DEFAULTS
 
@@ -555,9 +618,9 @@ SPEC_ID      = 'null'
 SQUARE       = .FALSE.
 SURF_ID      = 'null'
 TYPE_ID      = 'null'
-TAU_AC       = 1._EB
-TAU_FAN      = 1._EB
-TAU_VF       = 1._EB
+TAU_AC       = TAU_DEFAULT
+TAU_FAN      = TAU_DEFAULT
+TAU_VF       = TAU_DEFAULT
 VENT_ID      = 'null'
 VENT2_ID     = 'null'
 VOLUME_FLOW  = 1.E7_EB
@@ -570,21 +633,26 @@ END SUBROUTINE SET_HVAC_DEFAULTS
 END SUBROUTINE READ_HVAC
 
 
+!\brief Builds the HVAC network linking together the various types of HVAC inputs
+
 SUBROUTINE PROC_HVAC
-USE PHYSICAL_FUNCTIONS, ONLY: GET_AVERAGE_SPECIFIC_HEAT
+
+USE PHYSICAL_FUNCTIONS, ONLY: GET_ENTHALPY
+USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
+USE MPI
 !INTEGER :: I1,I2,J1,J2,K1,K2,IOR
-INTEGER :: N,ND,ND2,NM,NN,NF,NV
-REAL(EB) :: TNOW,ZZ_GET(1:N_TRACKED_SPECIES)
+INTEGER :: N,ND,ND2,NM,NN,NF,NV,IERR
+REAL(EB) :: TNOW,ZZ_GET(1:N_TRACKED_SPECIES),DUMMY=0._EB
+LOGICAL :: FOUND
 TYPE (LAGRANGIAN_PARTICLE_CLASS_TYPE),DIMENSION(:), POINTER:: TEMPALLOC=>NULL()
 TYPE(DUCTNODE_TYPE), POINTER :: DN=>NULL()
 TYPE(DUCT_TYPE), POINTER :: DU=>NULL()
 TYPE(SURFACE_TYPE), POINTER :: SF=>NULL()
-TNOW=SECOND()
 
-IF (LEAK_DUCTS > 0) THEN
-   HVAC_SOLVE = .TRUE.
-   CALL LEAKAGE_HVAC
-ENDIF
+TNOW=CURRENT_TIME()
+
+IF (.NOT. HVAC_SOLVE) RETURN
+IF (LEAK_DUCTS > 0) CALL LEAKAGE_HVAC
 
 DUCT_LOOP: DO ND = 1, N_DUCTS
    DU => DUCT(ND)
@@ -600,17 +668,45 @@ DUCT_LOOP: DO ND = 1, N_DUCTS
          CALL SHUTDOWN(MESSAGE); RETURN
       ENDIF
    ENDDO
-   DO NN = 1, N_DUCTNODES
-      IF(TRIM(DUCTNODE(NN)%ID) == TRIM(DUCT_NODE_A(ND,1))) DU%NODE_INDEX(1) = NN
-      IF(TRIM(DUCTNODE(NN)%ID) == TRIM(DUCT_NODE_A(ND,2))) DU%NODE_INDEX(2) = NN
-      IF (DU%NODE_INDEX(1) > 0 .AND. DU%NODE_INDEX(2) > 0) EXIT
-   ENDDO
+   NODELOOP_D: DO NN = 1, N_DUCTNODES
+      IF(TRIM(DUCTNODE(NN)%ID) == TRIM(DUCT_NODE_A(ND,1))) THEN
+         DU%NODE_INDEX(1) = NN
+         FOUND = .FALSE.
+         DN1_NAME: DO N=1,DUCTNODE(NN)%N_DUCTS
+            IF (TRIM(DU%ID)==TRIM(NODE_DUCT_A(NN,N))) THEN
+               FOUND = .TRUE.
+               EXIT DN1_NAME
+            ENDIF
+         ENDDO DN1_NAME
+         IF (.NOT. FOUND) THEN
+            WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR: Duct: ',TRIM(DU%ID),'. Node:',&
+                                      TRIM(DUCTNODE(NN)%ID),' does not contain the duct in its list of ducts.'
+            CALL SHUTDOWN(MESSAGE); RETURN
+         ENDIF
+      ENDIF
+      IF(TRIM(DUCTNODE(NN)%ID) == TRIM(DUCT_NODE_A(ND,2))) THEN
+         DU%NODE_INDEX(2) = NN
+         FOUND = .FALSE.
+         DN2_NAME: DO N=1,DUCTNODE(NN)%N_DUCTS
+            IF (TRIM(DU%ID)==TRIM(NODE_DUCT_A(NN,N))) THEN
+               FOUND = .TRUE.
+               EXIT DN2_NAME
+            ENDIF
+         ENDDO DN2_NAME
+         IF (.NOT. FOUND) THEN
+            WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR: Duct: ',TRIM(DU%ID),'. Node:',&
+                                      TRIM(DUCTNODE(NN)%ID),' does not contain the duct in its list of ducts.'
+            CALL SHUTDOWN(MESSAGE); RETURN
+         ENDIF
+      ENDIF
+      IF (DU%NODE_INDEX(1) > 0 .AND. DU%NODE_INDEX(2) > 0) EXIT NODELOOP_D
+   ENDDO NODELOOP_D
    IF (DU%NODE_INDEX(1) <= 0) THEN
-      WRITE(MESSAGE,'(A,I3,A,A)') 'ERROR: Duct node 1 not located. Duct:',ND,', Duct ID:',TRIM(DU%ID)
+      WRITE(MESSAGE,'(A,I3,A,A)') 'ERROR: First ductnode not located for duct:',ND,', Duct ID:',TRIM(DU%ID)
       CALL SHUTDOWN(MESSAGE); RETURN
    ENDIF
    IF (DU%NODE_INDEX(2) <= 0) THEN
-      WRITE(MESSAGE,'(A,I3,A,A)') 'ERROR: Duct node 2 not located. Duct:',ND,', Duct ID:',TRIM(DU%ID)
+      WRITE(MESSAGE,'(A,I3,A,A)') 'ERROR: Second ductnode not located for duct:',ND,', Duct ID:',TRIM(DU%ID)
       CALL SHUTDOWN(MESSAGE); RETURN
    ENDIF
    IF (DUCT_FAN_A(ND)/='null') THEN
@@ -666,6 +762,7 @@ DUCT_LOOP: DO ND = 1, N_DUCTS
 ENDDO DUCT_LOOP
 
 NODE_LOOP: DO NN = 1, N_DUCTNODES
+
    DN => DUCTNODE(NN)
    DO N = 1, NN
       IF (N==NN) CYCLE
@@ -675,36 +772,48 @@ NODE_LOOP: DO NN = 1, N_DUCTNODES
       ENDIF
    ENDDO
 
-   ! Initialises duct node species and RSUM with ambient/background
+   ! Initializes duct node species and RSUM with ambient/background
+
    ALLOCATE(DN%ZZ(N_TRACKED_SPECIES))
    DN%ZZ(1:N_TRACKED_SPECIES) = SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0
+   ALLOCATE(DN%ZZ_OLD(N_TRACKED_SPECIES))
+   DN%ZZ_OLD(1:N_TRACKED_SPECIES) = SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0
    ALLOCATE(DN%ZZ_V(N_TRACKED_SPECIES))
    DN%ZZ_V(1:N_TRACKED_SPECIES) = SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0
    ZZ_GET(1:N_TRACKED_SPECIES) = DN%ZZ_V(1:N_TRACKED_SPECIES)
    DN%RSUM   = RSUM0
 
-   ! If node is LEAKAGE related then values are adopted as ambient/background
+   ! If node is LEAKAGE-related then values are adopted as ambient/background
+
    IF (DN%LEAKAGE) THEN
       DN%TMP  = TMPA
       DN%RHO  = RHOA
       DN%P    = P_INF
       DN%P_OLD = DN%P
-      CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,DN%CP,TMPA)
+      CALL GET_ENTHALPY(ZZ_GET,DN%CP,TMPA)
+      DN%CP = DN%CP / TMPA
       DN%TMP_V  = DN%TMP
       DN%RSUM_V = DN%RSUM
       DN%CP_V   = DN%CP
       DN%RHO_V  = DN%RHO
       CYCLE NODE_LOOP
    ENDIF
+
+   ! If the duct node has a VENT associated with it, find it
+
    IF (DN%VENT_ID /= 'null') THEN
       ALLOCATE(DN%IN_MESH(NMESHES))
       DN%IN_MESH=.FALSE.
+      FOUND = .FALSE.
+
       MESH_LOOP: DO NM = 1, NMESHES
-         IF (EVACUATION_ONLY(NM)) CYCLE
+         IF (EVACUATION_ONLY(NM)) CYCLE MESH_LOOP
+         IF (PROCESS(NM)/=MYID)   CYCLE MESH_LOOP  ! Only search meshes controlled by the current MPI process
          NODE_VENT_LOOP:DO NV = 1, MESHES(NM)%N_VENT
             IF(MESHES(NM)%VENTS(NV)%ID == DN%VENT_ID) THEN
-               IF (DN%MESH_INDEX > 0) THEN
-                  WRITE(MESSAGE,'(A,A)') 'ERROR: VENT for ductnode is split over more than one mesh for VENT ID:',&
+               FOUND = .TRUE.
+               IF (MESHES(NM)%VENTS(NV)%CTRL_INDEX > 0 .OR. MESHES(NM)%VENTS(NV)%DEVC_INDEX >0) THEN
+                  WRITE(MESSAGE,'(A,A)') 'ERROR: VENT for ductnode has a DEVC_ID or CTRL_ID, VENT ID:',&
                                           TRIM(MESHES(NM)%VENTS(NV)%ID)
                   CALL SHUTDOWN(MESSAGE); RETURN
                ENDIF
@@ -733,7 +842,16 @@ NODE_LOOP: DO NN = 1, N_DUCTNODES
             ENDIF
          ENDDO NODE_VENT_LOOP
       ENDDO MESH_LOOP
+
+      ! Check if any MPI process has FOUND the VENT
+
+      CALL MPI_ALLREDUCE(MPI_IN_PLACE,FOUND,INTEGER_ONE,MPI_LOGICAL,MPI_LOR,MPI_COMM_WORLD,IERR)
+      IF (.NOT. FOUND) THEN
+         WRITE(MESSAGE,'(A,A,A,A)') 'ERROR: Cannot find VENT_ID: ',TRIM(DN%VENT_ID),' for Ductnode: ',TRIM(DN%ID)
+         CALL SHUTDOWN(MESSAGE); RETURN
+      ENDIF
    ENDIF
+
    IF (DN%VENT .AND. DN%AMBIENT) THEN
       WRITE(MESSAGE,'(A,I5,A,A)') 'ERROR: DUCTNODE cannot be AMBIENT and have an assigned VENT_ID. Ductnode:',NN,&
                                   ', Ductnode ID:',TRIM(DN%ID)
@@ -768,29 +886,32 @@ NODE_LOOP: DO NN = 1, N_DUCTNODES
          WRITE(MESSAGE,'(A,I5,A,I5,A,A)') 'ERROR: DUCT ',ND,' not found. Ductnode:',NN,', Ductnode ID:',TRIM(DN%ID)
          CALL SHUTDOWN(MESSAGE); RETURN
       ENDIF
+      IF (TRIM(DN%ID) /= TRIM(DUCT_NODE_A(DN%DUCT_INDEX(ND),1)) .AND. TRIM(DN%ID) /= TRIM(DUCT_NODE_A(DN%DUCT_INDEX(ND),2))) THEN
+         WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR: Duct: ',TRIM(DUCT(DN%DUCT_INDEX(ND))%ID),' does not contain Ductnode:',&
+                                       TRIM(DN%ID), 'in its list of ductnodes.'
+         CALL SHUTDOWN(MESSAGE); RETURN
+      ENDIF
    ENDDO
 
    ! Initialize duct node properties
+
    IF (STRATIFICATION .AND. DN%XYZ(3) > -1.E9_EB) THEN
-      DN%TMP  = TMPA + LAPSE_RATE*DN%XYZ(3)
-      IF (ABS(LAPSE_RATE)>TWO_EPSILON_EB) THEN
-         DN%P = P_INF*(DN%TMP/TMPA)**(GVEC(3)/RSUM0/LAPSE_RATE)
-      ELSE
-         DN%P = P_INF*EXP(GVEC(3)*(DN%XYZ(3)-GROUND_LEVEL)/(RSUM0*TMPA))
-      ENDIF
-      DN%RHO  =  DN%P/(DN%TMP*RSUM0)
+      DN%TMP = TMPA*EVALUATE_RAMP(DN%XYZ(3),DUMMY,I_RAMP_TMP0_Z)
+      DN%P   = EVALUATE_RAMP(DN%XYZ(3),DUMMY,I_RAMP_P0_Z)
+      DN%RHO = DN%P/(DN%TMP*RSUM0)
    ELSE
-      DN%TMP  = TMPA
-      DN%P    = P_INF
-      DN%RHO  = RHOA
+      DN%TMP = TMPA
+      DN%P   = P_INF
+      DN%RHO = RHOA
    ENDIF
    DN%P_OLD = DN%P
    IF (DN%VENT) DN%P = -1.E10_EB
    ZZ_GET(1:N_TRACKED_SPECIES) = DN%ZZ_V(1:N_TRACKED_SPECIES)
-   CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,DN%CP,DN%TMP)
+   CALL GET_ENTHALPY(ZZ_GET,DN%CP,DN%TMP)
+   DN%CP     = DN%CP / DN%TMP
+   DN%CP_V   = DN%CP
    DN%TMP_V  = DN%TMP
    DN%RSUM_V = DN%RSUM
-   DN%CP_V   = DN%CP
    DN%RHO_V  = DN%RHO
    IF(TRIM(NODE_FILTER_A(NN))/='null') THEN
       DO N = 1,N_FILTERS
@@ -813,11 +934,9 @@ IF (ALLOCATED(NODE_DUCT_A)) DEALLOCATE(NODE_DUCT_A)
 IF (ALLOCATED(NODE_FILTER_A)) DEALLOCATE(NODE_FILTER_A)
 IF (ALLOCATED(DUCT_FAN_A)) DEALLOCATE(DUCT_FAN_A)
 
-CALL DETERMINE_FIXED_ELEMENTS(0._EB)
-
 ALLOCATE(NODE_P(1:N_DUCTNODES,1:NMESHES))
 ALLOCATE(NODE_TMP(1:N_DUCTNODES,1:NMESHES))
-ALLOCATE(NODE_TMP_EX(1:N_DUCTNODES,1:NMESHES))
+ALLOCATE(NODE_TMP_EX(1:N_DUCTNODES))
 NODE_TMP_EX=0._EB
 ALLOCATE(NODE_RHO(1:N_DUCTNODES,1:NMESHES))
 ALLOCATE(NODE_H(1:N_DUCTNODES,1:NMESHES))
@@ -826,9 +945,9 @@ ALLOCATE(NODE_Y(1:N_DUCTNODES,1:NMESHES))
 ALLOCATE(NODE_Z(1:N_DUCTNODES,1:NMESHES))
 ALLOCATE(NODE_ZONE(1:N_DUCTNODES,1:NMESHES))
 ALLOCATE(NODE_AREA(1:N_DUCTNODES,1:NMESHES))
-ALLOCATE(NODE_AREA_EX(1:N_DUCTNODES,1:NMESHES))
+ALLOCATE(NODE_AREA_EX(1:N_DUCTNODES))
 ALLOCATE(NODE_ZZ(1:N_DUCTNODES,1:N_TRACKED_SPECIES,1:NMESHES))
-ALLOCATE(NODE_ZZ_EX(1:N_DUCTNODES,1:N_TRACKED_SPECIES,1:NMESHES))
+ALLOCATE(NODE_ZZ_EX(1:N_DUCTNODES,1:N_TRACKED_SPECIES))
 
 NODE_X = 0._EB
 NODE_Y = 0._EB
@@ -843,62 +962,141 @@ NODE_AREA_EX = 0._EB
 NODE_ZZ = 0._EB
 NODE_ZZ_EX = 0._EB
 
-ALLOCATE(DUCT_MF(1:N_DUCTS,1:NMESHES))
-DUCT_MF(1:N_DUCTS,1:NMESHES) = 0._EB
+CALL DETERMINE_FIXED_ELEMENTS(0._EB)
 
-T_USED(13)=T_USED(13)+SECOND()-TNOW
+ALLOCATE(DUCT_MF(1:N_DUCTS))
+DUCT_MF = 0._EB
+
+T_USED(13)=T_USED(13)+CURRENT_TIME()-TNOW
 
 RETURN
 
 END SUBROUTINE PROC_HVAC
 
+!> \brief Updates the HVAC calculation for a timestep
+!>
+!> \param T Current time (s)
+!> \param DT Current time step (s)
+!> \param FIRST_PASS Flag for the first call to the HVAC solver during a timestep, i.e. the first pressure iteration.
+
 SUBROUTINE HVAC_CALC(T,DT,FIRST_PASS)
-!Solve for flows in the HVAC networks
-INTEGER :: NNE,NN
+INTEGER :: NNE,NN,NR,ND
 REAL(EB), INTENT(IN) :: T,DT
 LOGICAL :: CHANGE=.TRUE.
 LOGICAL, SAVE :: INITIALIZED_HVAC_MASS_TRANSPORT
 LOGICAL, INTENT(IN):: FIRST_PASS
 TYPE(NETWORK_TYPE), POINTER:: NE=>NULL()
+TYPE(DUCTRUN_TYPE), POINTER :: DR=>NULL()
 
-! Sets time step, using user input DT_HVAC
-IF (DT_HVAC>0._EB) THEN
-   DT_HV = MAX(DT_HVAC,DT)
-ELSE
-   DT_HV = DT
-ENDIF
+DT_HV = DT
+DT_MT = DT
 
 IF (CORRECTOR) THEN
    DUCT%VEL(OLD) = DUCT%VEL(NEW)
-   DUCT%VEL(PREVIOUS) = DUCT%VEL(NEW)
-   DUCT%VEL(GUESS) = DUCT%VEL(NEW)
    DUCT%DP_FAN(OLD) = DUCT%DP_FAN(NEW)
    DO NN=1,N_DUCTNODES
       IF(DUCTNODE(NN)%FILTER_INDEX > 0) DUCTNODE(NN)%FILTER_LOADING(:,OLD)=DUCTNODE(NN)%FILTER_LOADING(:,NEW)
-      DUCTNODE(NN)%P_OLD = DUCTNODE(NN)%P
    ENDDO
    RETURN
 ENDIF
 
-IF (FIRST_PASS) THEN
-   IF (LEAK_DUCTS > 0) CALL ADJUST_LEAKAGE_AREA
-   CALL COLLAPSE_HVAC_BC
+FIRST_PASS_IF: IF (FIRST_PASS) THEN
+   CALL COLLAPSE_HVAC_BC(T)
+   IF (.NOT. INITIALIZED_HVAC_MASS_TRANSPORT) CALL FIND_DUCTRUNS ! short term hack to get to run once, requires changing post-BETA
    IF (.NOT. INITIALIZED_HVAC_MASS_TRANSPORT .AND. HVAC_MASS_TRANSPORT) CALL SET_INIT_HVAC_MASS_TRANSPORT
-   INITIALIZED_HVAC_MASS_TRANSPORT=.TRUE.
-   CALL FIND_NETWORKS(CHANGE,T)
-ENDIF
+   INITIALIZED_HVAC_MASS_TRANSPORT=.TRUE.   
+   DUCT%CP_D_OLD = DUCT%CP_D
+   DUCT%RHO_D_OLD = DUCT%RHO_D
+   DUCT%RSUM_D_OLD = DUCT%RSUM_D
+   DUCT%DP_FAN(OLD) = DUCT%DP_FAN(NEW)
+   WHERE (.NOT. DUCT%FIXED)
+      DUCT%VEL(OLD) = DUCT%VEL(NEW)
+      DUCT%VEL(PREVIOUS) = DUCT%VEL(NEW)
+      DUCT%VEL(GUESS) = DUCT%VEL(NEW)
+   END WHERE
+   DO ND=1,N_DUCTS
+      DUCT(ND)%ZZ_OLD = DUCT(ND)%ZZ
+      IF (HVAC_MASS_TRANSPORT) THEN
+         DUCT(ND)%CP_C_OLD = DUCT(ND)%CP_C
+         DUCT(ND)%RHO_C_OLD = DUCT(ND)%RHO_C
+         DUCT(ND)%TMP_C_OLD = DUCT(ND)%TMP_C
+         DUCT(ND)%ZZ_C_OLD = DUCT(ND)%ZZ_C
+      ENDIF
+   ENDDO
+   DUCTNODE(:)%RHO_OLD = DUCTNODE(:)%RHO
+   DUCTNODE(:)%CP_OLD = DUCTNODE(:)%CP
+   DUCTNODE(:)%P_OLD = DUCTNODE(:)%P
+   DUCTNODE(:)%TMP_OLD = DUCTNODE(:)%TMP
+   DUCTNODE(:)%RSUM_OLD = DUCTNODE(:)%RSUM
+   DO NN=1,N_DUCTNODES
+      DUCTNODE(NN)%ZZ_OLD = DUCTNODE(NN)%ZZ
+   ENDDO
+   IF (.NOT. LOCALIZED_LEAKAGE_INIT) THEN
+      IF (STRATIFICATION) CALL SET_LOCALIZED_LEAKAGE_AMBIENT
+      LOCALIZED_LEAKAGE_INIT = .TRUE.
+   ENDIF
+   IF (LEAK_DUCTS > 0) CALL ADJUST_LEAKAGE_AREA
+   CALL FIND_NETWORKS(CHANGE,T) ! calls determined fixed elements (which calls update fan for fixed fans)
+ELSE FIRST_PASS_IF !Not FIRST_PASS, reset variables to old solution
+   DUCT(:)%VEL(NEW) = DUCT(:)%VEL(OLD)
+   DUCT(:)%VEL(GUESS) = DUCT(:)%VEL(OLD)
+   DUCT(:)%VEL(PREVIOUS) = DUCT(:)%VEL(OLD)
+   DUCT(:)%CP_D = DUCT(:)%CP_D_OLD
+   DUCT(:)%RHO_D = DUCT(:)%RHO_D_OLD
+   DUCT(:)%RSUM_D = DUCT(:)%RSUM_D_OLD
+   DO ND=1,N_DUCTS
+      DUCT(ND)%ZZ = DUCT(ND)%ZZ_OLD
+      IF (HVAC_MASS_TRANSPORT) THEN
+         DUCT(ND)%CP_C = DUCT(ND)%CP_C_OLD
+         DUCT(ND)%RHO_C = DUCT(ND)%RHO_C_OLD
+         DUCT(ND)%TMP_C = DUCT(ND)%TMP_C_OLD
+         DUCT(ND)%ZZ_C = DUCT(ND)%ZZ_C_OLD
+      ENDIF
+   ENDDO
+   DUCTNODE(:)%RHO = DUCTNODE(:)%RHO_OLD
+   DO NN=1,N_DUCTNODES
+      DUCTNODE(NN)%ZZ_OLD = DUCTNODE(NN)%ZZ
+   ENDDO
+   DUCTNODE(:)%CP = DUCTNODE(:)%CP_OLD
+   DUCTNODE(:)%P = DUCTNODE(:)%P_OLD
+   DUCTNODE(:)%TMP = DUCTNODE(:)%TMP_OLD
+   DUCTNODE(:)%RSUM = DUCTNODE(:)%RSUM_OLD
+ENDIF FIRST_PASS_IF
 
 ITER = 0
-DO NNE = 1, N_NETWORKS
-   NE =>NETWORK(NNE)
-   CALL SET_GUESS(NNE,T)
-ENDDO
 
 IF (N_ZONE >0) ALLOCATE(DPSTAR(1:N_ZONE))
 
 CALL DPSTARCALC
 DUCTNODE%P = DUCTNODE%P - P_INF
 
+IF (QFAN_BETA_TEST) THEN
+   ! If a ductrun has a quadratic fan(s) and requires system curve steady state solution: allocate, zero, populate and solve matrices
+   ! BETA WARNING: system curve is calculated based on total ductrun, this ignores dampers opening and closing. Need to fix
+   DO NR = 1, N_DUCTRUNS
+      DR => DUCTRUN(NR)
+      IF (DR%N_QFANS > 0) THEN
+         ALLOCATE(DR%LHS_SYSTEM_1(DR%N_MATRIX_SYSTEM,DR%N_MATRIX_SYSTEM)) ! LHS of first point of system curve
+         ALLOCATE(DR%LHS_SYSTEM_2(DR%N_MATRIX_SYSTEM,DR%N_MATRIX_SYSTEM)) ! LHS of second point of system curve
+         ALLOCATE(DR%RHS_SYSTEM_1(DR%N_MATRIX_SYSTEM)) ! RHS of first point of system curve
+         ALLOCATE(DR%RHS_SYSTEM_2(DR%N_MATRIX_SYSTEM,DR%N_QFANS)) ! RHS of first point of system curve
+         DR%LHS_SYSTEM_1(:,:) = 0._EB
+         DR%LHS_SYSTEM_2(:,:) = 0._EB
+         DR%RHS_SYSTEM_1(:) = 0._EB
+         DR%RHS_SYSTEM_2(:,:) = 0._EB
+         CALL RHS_SYSTEM(NR)
+         CALL LHS_SYSTEM(NR)
+         CALL MATRIX_SYSTEM_SOLVE(NR)
+         ! Deallocate matrices used for solving steady state system curve
+         DEALLOCATE(DR%LHS_SYSTEM_1)
+         DEALLOCATE(DR%LHS_SYSTEM_2)
+         DEALLOCATE(DR%RHS_SYSTEM_1)
+         DEALLOCATE(DR%RHS_SYSTEM_2)
+      ENDIF
+   ENDDO
+ENDIF
+
+! Solution of the HVAC network
 DO NNE = 1, N_NETWORKS
    NE =>NETWORK(NNE)
    IF (NE%N_MATRIX > 0) THEN
@@ -908,6 +1106,7 @@ DO NNE = 1, N_NETWORKS
       DO WHILE (ITER < ITER_MAX)
          LHS = 0._EB
          RHS = 0._EB
+         CALL SET_GUESS(NNE,T)
          CALL SET_DONOR(NNE)
          CALL UPDATE_LOSS(T,DT,NNE)
          IF (N_AIRCOILS > 0) CALL COIL_UPDATE(T)
@@ -919,11 +1118,11 @@ DO NNE = 1, N_NETWORKS
          CALL HVAC_UPDATE(NNE,DT)
          CALL CONVERGENCE_CHECK(NNE)
          ITER = ITER + 1
-         IF (ITER < ITER_MAX) CALL SET_GUESS(NNE,T)
       ENDDO
       DEALLOCATE(LHS)
       DEALLOCATE(RHS)
    ELSE
+      CALL SET_GUESS(NNE,T)
       CALL SET_DONOR(NNE)
       IF (N_AIRCOILS > 0) CALL COIL_UPDATE(T)
       CALL HVAC_UPDATE(NNE,DT)
@@ -931,8 +1130,8 @@ DO NNE = 1, N_NETWORKS
 ENDDO
 
 DUCTNODE%P = DUCTNODE%P + P_INF
+IF (HVAC_MASS_TRANSPORT) CALL UPDATE_HVAC_MASS_TRANSPORT(DT_MT)
 
-IF (HVAC_MASS_TRANSPORT) CALL UPDATE_HVAC_MASS_TRANSPORT(DT)
 CALL UPDATE_NODE_BC
 
 IF (ALLOCATED(DPSTAR)) DEALLOCATE(DPSTAR)
@@ -940,6 +1139,9 @@ IF (ALLOCATED(DPSTAR)) DEALLOCATE(DPSTAR)
 
 END SUBROUTINE HVAC_CALC
 
+!> \brief Solves the HVAC matrix and extracts the solutions for duct velocity and node pressure.
+!>
+!> \param NNE Index indicating which HVAC network is being solved
 
 SUBROUTINE MATRIX_SOLVE(NNE)
 USE MATH_FUNCTIONS,ONLY : GAUSSJ
@@ -963,23 +1165,60 @@ ENDDO
 
 END SUBROUTINE MATRIX_SOLVE
 
+!> \brief Solves the HVAC matrix for a ductrun used when multiple fans exist within a single run of duct
+!>
+!> \param RN Index for the fan network being solved
+
+SUBROUTINE MATRIX_SYSTEM_SOLVE(RN)
+USE MATH_FUNCTIONS,ONLY : GAUSSJ
+INTEGER :: RN,IERR,ND,FN
+TYPE(DUCTRUN_TYPE), POINTER :: DR=>NULL()
+TYPE(DUCT_TYPE), POINTER :: DU=>NULL()
+
+DR =>DUCTRUN(RN)
+CALL GAUSSJ(DR%LHS_SYSTEM_1,DR%N_MATRIX_SYSTEM,DR%N_MATRIX_SYSTEM,DR%RHS_SYSTEM_1,1,1,IERR)
+
+DO FN = 1, DR%N_QFANS
+   CALL GAUSSJ(DR%LHS_SYSTEM_2,DR%N_MATRIX_SYSTEM,DR%N_MATRIX_SYSTEM,DR%RHS_SYSTEM_2(:,FN),1,1,IERR)
+ENDDO
+
+DO ND = 1,DR%N_DUCTS
+   DU=>DUCT(DR%DUCT_INDEX(ND))
+   IF (DU%FIXED .OR. DU%AREA < TWO_EPSILON_EB) CYCLE
+   DU%VEL_SYSTEM(1,1,1) = DU%VEL_SYSTEM(1,1,2) ! vel_system(sys#,fan#,old/new)
+   DU%VEL_SYSTEM(1,1,2) = DR%RHS_SYSTEM_1(DR%MATRIX_SYSTEM_INDEX(ND))
+   DO FN = 1, DR%N_QFANS
+      DU%VEL_SYSTEM(2,FN,1) = DU%VEL_SYSTEM(2,FN,2)
+      DU%VEL_SYSTEM(2,FN,2) = DR%RHS_SYSTEM_2(DR%MATRIX_SYSTEM_INDEX(ND),FN)
+   ENDDO
+ENDDO
+
+
+END SUBROUTINE MATRIX_SYSTEM_SOLVE
+
+!> \brief Iterates over the HVAC network updating node and duct quantities
+!> \details The routine loops over all ducts and nodes repeatedly. If a node has all of its upstream ducts updated
+!> or is a VENT inlet, then the node is updated along with its downstream ducts. The process is repeated until all ducts and
+!> nodes have been updated. Following this, ducts with 1D mass transport are then updated.
+!>
+!> \param DT Current time step (s)
+!> \param NNE Index indicating which HVAC network is being solved
 
 SUBROUTINE HVAC_UPDATE(NNE,DT)
 
-!Iterate duct network to update all ducts and nodes
-USE COMP_FUNCTIONS, ONLY: SECOND
-USE PHYSICAL_FUNCTIONS, ONLY : GET_AVERAGE_SPECIFIC_HEAT,GET_SPECIFIC_GAS_CONSTANT
+USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
+USE PHYSICAL_FUNCTIONS, ONLY : GET_AVERAGE_SPECIFIC_HEAT,GET_SPECIFIC_GAS_CONSTANT,GET_ENTHALPY
 REAL(EB) :: CP,CP2,CPTSUM,DCPDT,DU_DX,ETOT,MFLOW,MSUM,MTOT,TGUESS,TNOW,VFLOW,ZZ_GET(1:N_TRACKED_SPECIES),&
-            ZZSUM(1:N_TRACKED_SPECIES),ZZTOT(1:N_TRACKED_SPECIES)
+            ZZSUM(1:N_TRACKED_SPECIES),ZZTOT(1:N_TRACKED_SPECIES),HGAS,DT_CFL
 REAL(EB),INTENT(IN) :: DT
 INTEGER, INTENT(IN) :: NNE
-INTEGER :: NN,ND,NC,NS,ITMP,ITCOUNT
-LOGICAL :: CYCLE_FLAG
+INTEGER :: NN,ND,NC,NS,NSS,ITMP,ITCOUNT,N_SUBSTEPS,N_SUBSTEPS_DUCT
+LOGICAL :: CYCLE_FLAG,SUB_CYCLE_FLAG
 TYPE (DUCTNODE_TYPE), POINTER :: DN=>NULL(),DN2=>NULL()
 TYPE (DUCT_TYPE), POINTER :: DU=>NULL()
 TYPE (NETWORK_TYPE), POINTER :: NE=>NULL()
 
-TNOW=SECOND()
+TNOW=CURRENT_TIME()
 NE => NETWORK(NNE)
 DUCT%UPDATED = .FALSE.
 DO NN = 1,NE%N_DUCTNODES
@@ -995,160 +1234,198 @@ DO ND = 1,NE%N_DUCTS
    DUCT(NE%DUCT_INDEX(ND))%UPDATED = .FALSE.
 ENDDO
 
-ITER_LOOP: DO
-   CYCLE_FLAG = .FALSE.
-   DUCT_LOOP:DO ND = 1,NE%N_DUCTS
-      DU=>DUCT(NE%DUCT_INDEX(ND))
-      IF (DU%UPDATED) CYCLE DUCT_LOOP
-      CYCLE_FLAG = .TRUE.
-      IF (DU%VEL(NEW) > TWO_EPSILON_EB) THEN
-         DN => DUCTNODE(DU%NODE_INDEX(1))
-      ELSEIF (DU%VEL(NEW) < -TWO_EPSILON_EB) THEN
-         DN => DUCTNODE(DU%NODE_INDEX(2))
-      ELSE
-         DU%UPDATED = .TRUE.
-         DU%VEL(NEW) = 0._EB
-         DU%RHO_D = 0.5_EB*(DUCTNODE(DU%NODE_INDEX(1))%RHO+DUCTNODE(DU%NODE_INDEX(2))%RHO)
-         DU%TMP_D = 0.5_EB*(DUCTNODE(DU%NODE_INDEX(1))%TMP+DUCTNODE(DU%NODE_INDEX(2))%TMP)
-         CYCLE DUCT_LOOP
+! Outputs number of substeps required to maintain CFL for mass transport
+N_SUBSTEPS = 1
+DO ND = 1,NE%N_DUCTS
+   DU=>DUCT(NE%DUCT_INDEX(ND))
+   IF (DU%N_CELLS > 1 .AND. ABS(DU%VEL(NEW)) > 0._EB) THEN
+      DT_CFL = DU%LENGTH/ABS(DU%VEL(NEW)) ! relevant CFL is all mass leaving a duct within one DT
+      N_SUBSTEPS_DUCT = MAX(1,CEILING(DT/DT_CFL))
+      IF (N_SUBSTEPS_DUCT > N_SUBSTEPS) THEN
+         N_SUBSTEPS = N_SUBSTEPS_DUCT
       ENDIF
-      IF (DN%UPDATED) THEN
-         DU%RHO_D  = DN%RHO
-         DU%TMP_D  = DN%TMP
-         DU%CP_D   = DN%CP
-         DU%UPDATED = .TRUE.
-         DU%ZZ(:) = DN%ZZ(:)
-         ZZ_GET = DU%ZZ
-      ENDIF
-   ENDDO DUCT_LOOP
+   ENDIF
+ENDDO
+DT_MT = DT/REAL(N_SUBSTEPS,EB)
+SUB_CYCLE_FLAG = .TRUE.
 
-   NODE_LOOP:DO NN = 1,NE%N_DUCTNODES
-      DN=>DUCTNODE(NE%NODE_INDEX(NN))
-      IF(DN%UPDATED) CYCLE NODE_LOOP
-      CYCLE_FLAG = .TRUE.
-      MTOT = 0._EB
-      ETOT = 0._EB
-      ZZTOT = 0._EB
-      TGUESS = 0._EB
-      CPTSUM = 0
-      DO ND = 1,DN%N_DUCTS
-         DU => DUCT(DN%DUCT_INDEX(ND))
-         IF (DU%AREA<=TWO_EPSILON_EB) CYCLE
-         IF (DU%VEL(NEW)*DN%DIR(ND) <= TWO_EPSILON_EB) CYCLE
-         IF (.NOT. DU%UPDATED) CYCLE NODE_LOOP
-
-         MASS_TRANSPORT_IF: IF (DU%N_CELLS==1) THEN
-            ! Duct is not discretized
-            VFLOW = ABS(DU%VEL(NEW)*DU%AREA)
-            MTOT = MTOT + VFLOW * DU%RHO_D
-            ETOT = ETOT + VFLOW * DU%RHO_D * DU%TMP_D * DU%CP_D
-            TGUESS = TGUESS + VFLOW * DU%RHO_D * DU%TMP_D
-            IF (STRATIFICATION .AND. .NOT. DN%VENT ) THEN
-               IF (DU%NODE_INDEX(1)==NE%NODE_INDEX(NN)) THEN
-                  DN2=>DUCTNODE(DU%NODE_INDEX(2))
-               ELSE
-                  DN2=>DUCTNODE(DU%NODE_INDEX(1))
-               ENDIF
-               ETOT = ETOT + DU%RHO_D*VFLOW*GVEC(3)*(DN%XYZ(3)-DN2%XYZ(3))
-            ENDIF
-            ZZTOT = ZZTOT + VFLOW * DU%RHO_D * DU%ZZ
-         ELSE MASS_TRANSPORT_IF
-            ! Duct is discretized
-            MFLOW = ABS(DU%VEL(NEW)*DU%RHO_D)*DT
-            MSUM = 0
-            ZZSUM = 0
-            CPTSUM = 0
-            DU_DX = DU%LENGTH/REAL(DU%N_CELLS,EB)
-            IF (DU%VEL(NEW) > 0._EB) THEN
-               DO NC = DU%N_CELLS,1,-1
-                  IF (MSUM + DU%RHO_C(NC)*DU_DX > MFLOW) THEN
-                     DU_DX = (MFLOW - MSUM)/DU%RHO_C(NC)
-                     ZZSUM(:) = ZZSUM(:) + DU%RHO_C(NC)*DU%ZZ_C(NC,:)*DU_DX
-                     CPTSUM = CPTSUM + DU%RHO_C(NC)*DU%TMP_C(NC)*DU%CP_C(NC)*DU_DX
-                     EXIT
-                  ELSE
-                     MSUM = MSUM + DU%RHO_C(NC)*DU_DX
-                     ZZSUM(:) = ZZSUM(:) + DU%RHO_C(NC)*DU%ZZ_C(NC,:)*DU_DX
-                     CPTSUM = CPTSUM + DU%RHO_C(NC)*DU%TMP_C(NC)*DU%CP_C(NC)*DU_DX
-                  ENDIF
-               ENDDO
-            ELSE
-               DO NC = 1,DU%N_CELLS
-                  IF (MSUM + DU%RHO_C(NC)*DU_DX > MFLOW) THEN
-                     DU_DX = (MFLOW - MSUM)/DU%RHO_C(NC)
-                     ZZSUM(:) = ZZSUM(:) + DU%RHO_C(NC)*DU%ZZ_C(NC,:)*DU_DX
-                     CPTSUM = CPTSUM + DU%RHO_C(NC)*DU%TMP_C(NC)*DU%CP_C(NC)*DU_DX
-                     EXIT
-                  ELSE
-                     MSUM = MSUM + DU%RHO_C(NC)*DU_DX
-                     ZZSUM(:) = ZZSUM(:) + DU%RHO_C(NC)*DU%ZZ_C(NC,:)*DU_DX
-                     CPTSUM = CPTSUM + DU%RHO_C(NC)*DU%TMP_C(NC)*DU%CP_C(NC)*DU_DX
-                  ENDIF
-               ENDDO
-            ENDIF
-            ETOT = ETOT + CPTSUM * DU%AREA / DT
-            MTOT = MTOT + MFLOW * DU%AREA / DT
-            ZZTOT = ZZTOT + ZZSUM * DU%AREA / DT
-            TGUESS = TGUESS + MFLOW * DU%AREA / DT * DU%TMP_D
-         ENDIF MASS_TRANSPORT_IF
-         ETOT = ETOT + DU%COIL_Q
-      ENDDO
-
-      IF (DN%FILTER_INDEX > 0) THEN
-         MTOT = MTOT - SUM(DN%FILTER_LOADING(:,3))
-         ZZTOT = ZZTOT - DN%FILTER_LOADING(:,3)
-         ITMP = MIN(5000,NINT(DU%TMP_D))
-         DO NS = 1,N_TRACKED_SPECIES
-            ETOT = ETOT - CPBAR_Z(ITMP,NS)*DU%TMP_D*DN%FILTER_LOADING(NS,3)
-            !*** CHECK THIS
-            IF (STRATIFICATION .AND. .NOT. DN%VENT) ETOT = ETOT - DN%FILTER_LOADING(NS,3)*GVEC(3)*(DN%XYZ(3)-DN2%XYZ(3))
-         ENDDO
-      ENDIF
-
-      DN%UPDATED = .TRUE.
-      IF (ABS(MTOT)<=TWO_EPSILON_EB) CYCLE NODE_LOOP
-      ZZ_GET = 0._EB
-      DN%ZZ(:)  = ZZTOT/MTOT
-      ZZ_GET(1:N_TRACKED_SPECIES) = DN%ZZ(1:N_TRACKED_SPECIES)
-      CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,DN%RSUM)
-      ETOT = ETOT/ MTOT
-      TGUESS = TGUESS/MTOT
-      ITCOUNT = 0
-      CP_LOOP: DO
-         ITCOUNT = ITCOUNT + 1
-         CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CP,TGUESS)
-         IF (TGUESS>1._EB) THEN
-            CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CP2,TGUESS-1._EB)
-            DCPDT = CP - CP2
+SUBSTEP_LOOP: DO NSS = 1, N_SUBSTEPS
+   ITER_LOOP: DO
+      IF (NSS == N_SUBSTEPS) SUB_CYCLE_FLAG = .FALSE. ! Stops the final substep call of HVAC_MASS_... and UPDATE_NODE...
+      CYCLE_FLAG = .FALSE.
+      DUCT_LOOP:DO ND = 1,NE%N_DUCTS
+         DU=>DUCT(NE%DUCT_INDEX(ND))
+         IF (DU%UPDATED) CYCLE DUCT_LOOP
+         CYCLE_FLAG = .TRUE.
+         IF (DU%VEL(NEW) > TWO_EPSILON_EB) THEN
+            DN => DUCTNODE(DU%NODE_INDEX(1))
+         ELSEIF (DU%VEL(NEW) < -TWO_EPSILON_EB) THEN
+            DN => DUCTNODE(DU%NODE_INDEX(2))
          ELSE
-            CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CP2,TGUESS+1._EB)
-            DCPDT = CP2- CP
+            DU%UPDATED = .TRUE.
+            DU%VEL(NEW) = 0._EB
+            DU%RHO_D = 0.5_EB*(DUCTNODE(DU%NODE_INDEX(1))%RHO+DUCTNODE(DU%NODE_INDEX(2))%RHO)
+            DU%TMP_D = 0.5_EB*(DUCTNODE(DU%NODE_INDEX(1))%TMP+DUCTNODE(DU%NODE_INDEX(2))%TMP)
+            DU%CP_D = 0.5_EB*(DUCTNODE(DU%NODE_INDEX(1))%CP+DUCTNODE(DU%NODE_INDEX(2))%CP)
+            CYCLE DUCT_LOOP
+         ENDIF
+         IF (DN%UPDATED) THEN
+            DU%RHO_D  = DN%RHO
+            DU%TMP_D  = DN%TMP
+            DU%CP_D   = DN%CP
+            DU%UPDATED = .TRUE.
+            DU%ZZ(:) = DN%ZZ(:)
+            ZZ_GET = DU%ZZ
+         ENDIF
+      ENDDO DUCT_LOOP
+
+      NODE_LOOP:DO NN = 1,NE%N_DUCTNODES
+         DN=>DUCTNODE(NE%NODE_INDEX(NN))
+         IF(DN%UPDATED) CYCLE NODE_LOOP
+         CYCLE_FLAG = .TRUE.
+         MTOT = 0._EB
+         ETOT = 0._EB
+         ZZTOT = 0._EB
+         TGUESS = 0._EB
+         CPTSUM = 0
+         DO ND = 1,DN%N_DUCTS
+            DU => DUCT(DN%DUCT_INDEX(ND))
+            IF (DU%AREA<=TWO_EPSILON_EB) CYCLE
+            IF (DU%VEL(NEW)*DN%DIR(ND) <= TWO_EPSILON_EB) CYCLE
+            IF (.NOT. DU%UPDATED) CYCLE NODE_LOOP
+
+            MASS_TRANSPORT_IF: IF (DU%N_CELLS==1) THEN
+               ! Duct is not discretized
+               VFLOW = ABS(DU%VEL(NEW)*DU%AREA)
+               MTOT = MTOT + VFLOW * DU%RHO_D
+               ETOT = ETOT + VFLOW * DU%RHO_D * DU%TMP_D * DU%CP_D
+               TGUESS = TGUESS + VFLOW * DU%RHO_D * DU%TMP_D
+               IF (STRATIFICATION) THEN
+                  IF (DU%NODE_INDEX(1)==NE%NODE_INDEX(NN)) THEN
+                     DN2=>DUCTNODE(DU%NODE_INDEX(2))
+                  ELSE
+                     DN2=>DUCTNODE(DU%NODE_INDEX(1))
+                  ENDIF
+                  ETOT = ETOT + DU%RHO_D*VFLOW*GVEC(3)*(DN%XYZ(3)-DN2%XYZ(3))
+               ENDIF
+               ZZTOT = ZZTOT + VFLOW * DU%RHO_D * DU%ZZ
+            ELSE MASS_TRANSPORT_IF
+               ! Duct is discretized: we need to find the end of the lump of mass advected within a (sub)step
+               MFLOW = ABS(DU%VEL(NEW)*DU%RHO_D)*DT_MT ! Duct mass flow corrected for any substepping
+               MSUM = 0
+               ZZSUM = 0
+               CPTSUM = 0
+               DU_DX = DU%LENGTH/REAL(DU%N_CELLS,EB)
+               ! Sums cumulative mass, species and energy from the final cell, to locate end of advected lump of mass
+               IF (DU%VEL(NEW) > 0._EB) THEN
+                  DO NC = DU%N_CELLS,1,-1
+                     IF (MSUM + DU%RHO_C(NC)*DU_DX > MFLOW) THEN
+                        DU_DX = (MFLOW - MSUM)/DU%RHO_C(NC)
+                        ZZSUM(:) = ZZSUM(:) + DU%RHO_C(NC)*DU%ZZ_C(NC,:)*DU_DX
+                        CPTSUM = CPTSUM + DU%RHO_C(NC)*DU%TMP_C(NC)*DU%CP_C(NC)*DU_DX
+                        EXIT
+                     ELSE
+                        MSUM = MSUM + DU%RHO_C(NC)*DU_DX
+                        ZZSUM(:) = ZZSUM(:) + DU%RHO_C(NC)*DU%ZZ_C(NC,:)*DU_DX
+                        CPTSUM = CPTSUM + DU%RHO_C(NC)*DU%TMP_C(NC)*DU%CP_C(NC)*DU_DX
+                     ENDIF
+                  ENDDO                  
+               ELSE
+                  DO NC = 1,DU%N_CELLS
+                     IF (MSUM + DU%RHO_C(NC)*DU_DX > MFLOW) THEN
+                        DU_DX = (MFLOW - MSUM)/DU%RHO_C(NC)
+                        ZZSUM(:) = ZZSUM(:) + DU%RHO_C(NC)*DU%ZZ_C(NC,:)*DU_DX
+                        CPTSUM = CPTSUM + DU%RHO_C(NC)*DU%TMP_C(NC)*DU%CP_C(NC)*DU_DX
+                        EXIT
+                     ELSE
+                        MSUM = MSUM + DU%RHO_C(NC)*DU_DX
+                        ZZSUM(:) = ZZSUM(:) + DU%RHO_C(NC)*DU%ZZ_C(NC,:)*DU_DX
+                        CPTSUM = CPTSUM + DU%RHO_C(NC)*DU%TMP_C(NC)*DU%CP_C(NC)*DU_DX
+                     ENDIF
+                  ENDDO
+               ENDIF
+               ! Cumulative sums of energy, mass, species passing through duct node from ducts
+               ETOT = ETOT + CPTSUM * DU%AREA / DT_MT
+               MTOT = MTOT + MFLOW * DU%AREA / DT_MT
+               ZZTOT = ZZTOT + ZZSUM * DU%AREA / DT_MT
+               TGUESS = TGUESS + MFLOW * DU%AREA / DT_MT * DU%TMP_D
+            ENDIF MASS_TRANSPORT_IF
+            ETOT = ETOT + DU%COIL_Q
+         ENDDO
+
+         IF (DN%FILTER_INDEX > 0) THEN
+            MTOT = MTOT - SUM(DN%FILTER_LOADING(:,3))
+            ZZTOT = ZZTOT - DN%FILTER_LOADING(:,3)
+            ITMP = MIN(5000,NINT(DU%TMP_D))
+            DO NS = 1,N_TRACKED_SPECIES
+               ETOT = ETOT - CPBAR_Z(ITMP,NS)*DU%TMP_D*DN%FILTER_LOADING(NS,3)
+               !*** CHECK THIS
+               IF (STRATIFICATION .AND. .NOT. DN%VENT ) THEN
+                  IF (DU%NODE_INDEX(1)==NE%NODE_INDEX(NN)) THEN
+                     DN2=>DUCTNODE(DU%NODE_INDEX(2))
+                  ELSE
+                     DN2=>DUCTNODE(DU%NODE_INDEX(1))
+                  ENDIF
+                  ETOT = ETOT - DN%FILTER_LOADING(NS,3)*GVEC(3)*(DN%XYZ(3)-DN2%XYZ(3))
+               ENDIF
+            ENDDO
          ENDIF
 
-         DN%TMP =TGUESS+(ETOT-CP*TGUESS)/(CP+TGUESS*DCPDT)
+         DN%UPDATED = .TRUE.
+         IF (ABS(MTOT)<=TWO_EPSILON_EB) CYCLE NODE_LOOP
+         ZZ_GET = 0._EB
+         DN%ZZ(:)  = ZZTOT/MTOT
+         ZZ_GET(1:N_TRACKED_SPECIES) = DN%ZZ(1:N_TRACKED_SPECIES)
+         CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,DN%RSUM)
+         ETOT = ETOT/ MTOT
+         TGUESS = TGUESS/MTOT
+         ITCOUNT = 0
+         CP_LOOP: DO ! Newton method to find solution of T (and hence cpbar) from enthalpy
+            ITCOUNT = ITCOUNT + 1
+            CALL GET_ENTHALPY(ZZ_GET,HGAS,TGUESS)
+            CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CP,TGUESS)
+            IF (TGUESS>1._EB) THEN
+               CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CP2,TGUESS-1._EB)
+               DCPDT = CP - CP2
+            ELSE
+               CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CP2,TGUESS+1._EB)
+               DCPDT = CP2- CP
+            ENDIF
+            CP = HGAS / TGUESS
+            DN%TMP =TGUESS+(ETOT-HGAS)/(CP+TGUESS*DCPDT)
+            IF (ABS(DN%TMP - TGUESS) < TWO_EPSILON_EB) EXIT CP_LOOP
+            IF (ABS(DN%TMP - TGUESS)/DN%TMP < 0.0005_EB) EXIT CP_LOOP
+            IF (ITCOUNT > 10) THEN
+               DN%TMP = 0.5_EB*(DN%TMP+TGUESS)
+               EXIT CP_LOOP
+            ENDIF
+            TGUESS = MAX(0._EB,DN%TMP)
+         ENDDO CP_LOOP
 
-         IF (ABS(DN%TMP - TGUESS) < TWO_EPSILON_EB) EXIT CP_LOOP
-         IF ((DN%TMP - TGUESS)/DN%TMP < 0.0005_EB) EXIT CP_LOOP
-         IF (ITCOUNT > 10) THEN
-            DN%TMP = 0.5_EB*(DN%TMP+TGUESS)
-            EXIT CP_LOOP
-         ENDIF
-         TGUESS = MAX(0._EB,DN%TMP)
-      ENDDO CP_LOOP
+         CALL GET_ENTHALPY(ZZ_GET,HGAS,DN%TMP)
+         DN%CP = HGAS/DN%TMP
+         DN%RHO = (DN%P+P_INF)/(DN%RSUM*DN%TMP)
+      ENDDO NODE_LOOP
 
-      CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CP,DN%TMP)
-      DN%CP = CP
-      DN%RHO = (DN%P+P_INF)/(DN%RSUM*DN%TMP)
-   ENDDO NODE_LOOP
+      IF (.NOT. CYCLE_FLAG) EXIT ITER_LOOP
 
-   IF (.NOT. CYCLE_FLAG) EXIT ITER_LOOP
+   ENDDO ITER_LOOP
 
-ENDDO ITER_LOOP
+! If there are substeps remaining, we must advance mass transport and update node BCs to ensure we're conserving mass, energy
+   IF (SUB_CYCLE_FLAG) THEN
+      CALL UPDATE_HVAC_MASS_TRANSPORT(DT_MT)
+      CALL UPDATE_NODE_BC
+   ENDIF
 
-T_USED(13)=T_USED(13)+SECOND()-TNOW
+ENDDO SUBSTEP_LOOP
+
+T_USED(13)=T_USED(13)+CURRENT_TIME()-TNOW
 
 END SUBROUTINE HVAC_UPDATE
 
+!> \brief Builds the right hand side of the HVAC flow matrix for mass conservation at internal nodes
+!>
+!> \param NETWORK_INDEX Index indicating which HVAC network is being solved
 
 SUBROUTINE RHSNODE(NETWORK_INDEX)
 USE GLOBAL_CONSTANTS
@@ -1173,8 +1450,12 @@ ENDDO
 
 END SUBROUTINE RHSNODE
 
+!> \brief Builds the left hand side of the HVAC flow matrix for mass conservation at internal nodes
+!>
+!> \param NETWORK_INDEX Index indicating which HVAC network is being solved
 
 SUBROUTINE LHSNODE(NETWORK_INDEX)
+! Populates LHS matrix with nodal conservation data
 USE GLOBAL_CONSTANTS
 INTEGER, INTENT(IN)::NETWORK_INDEX
 INTEGER :: NN,ND, ARRAYLOC1,ARRAYLOC2
@@ -1197,6 +1478,7 @@ ENDDO
 
 END SUBROUTINE LHSNODE
 
+!> \brief Computes the extrapolated pressure for each ZONE
 
 SUBROUTINE DPSTARCALC
 
@@ -1209,17 +1491,20 @@ TYPE(P_ZONE_TYPE), POINTER::PZ=>NULL()
 DO IPZ = 1,N_ZONE
    PZ => P_ZONE(IPZ)
    IF (PZ%N_DUCTNODES==0) CYCLE
-   DPSTAR(IPZ) = P_ZONE(IPZ)%DPSTAR * DT_HV * 0.5_EB
+   DPSTAR(IPZ) = P_ZONE(IPZ)%DPSTAR * DT_HV
    DO NN = 1,PZ%N_DUCTNODES
       DN=>DUCTNODE(PZ%NODE_INDEX(NN))
       DU=>DUCT(DN%DUCT_INDEX(1))
-      DPSTAR(IPZ) = DPSTAR(IPZ)  - DN%DIR(1) * DU%AREA * DU%VEL(OLD) * DT_HV/PSUM(IPZ,1) * 0.25_EB
-      IF (DU%FIXED) DPSTAR(IPZ) = DPSTAR(IPZ)  + DN%DIR(1) * DU%AREA * DU%VEL(NEW) * DT_HV/PSUM(IPZ,1) *0.25_EB
+      DPSTAR(IPZ) = DPSTAR(IPZ)  - DN%DIR(1) * DU%AREA * DU%VEL(OLD) * DT_HV/PSUM(IPZ,1)
+      IF (DU%FIXED) DPSTAR(IPZ) = DPSTAR(IPZ)  + DN%DIR(1) * DU%AREA * DU%VEL(NEW) * DT_HV/PSUM(IPZ,1)
    ENDDO
 ENDDO
 
 END SUBROUTINE DPSTARCALC
 
+!> \brief Builds the right hand side of the HVAC flow matrix for momentum conservation in a duct
+!>
+!> \param NETWORK_INDEX Index indicating which HVAC network is being solved
 
 SUBROUTINE RHSDUCT(NETWORK_INDEX)
 
@@ -1255,26 +1540,30 @@ DO ND = 1, NE%N_DUCTS
    ELSEIF (DN%VENT .OR. DN%LEAKAGE) THEN
       HEAD = HEAD - DN%P
       IF (N_ZONE > 0) THEN
-         IPZ = DN%ZONE_INDEX
+         IPZ = DN%ZONE_INDEX  
          IF (IPZ > 0) HEAD = HEAD - DPSTAR(IPZ)
       ENDIF
    ENDIF
 
    XYZ = DN%XYZ - XYZ
-   IF(.NOT. DU%LEAKAGE) THEN
-     ! IF (STRATIFICATION) THEN
-
-    !     HEAD = HEAD + (DN%P+P_INF)*(1._EB-EXP(-(GVEC(1)*XYZ(1)+GVEC(2)*XYZ(2)+GVEC(3)*XYZ(3))/(DU%RSUM_D*DU%TMP_D)))
-    !  ELSE
+   IF (.NOT. DU%LEAKAGE) THEN
+      IF (STRATIFICATION) THEN
          HEAD = HEAD + (GVEC(1)*XYZ(1)+GVEC(2)*XYZ(2)+GVEC(3)*XYZ(3))*DU%RHO_D
-    !  ENDIF
+      ELSE
+         HEAD = HEAD + (GVEC(1)*XYZ(1)+GVEC(2)*XYZ(2)+GVEC(3)*XYZ(3))* &
+                       (DUCTNODE(DU%NODE_INDEX(1))%RHO - DUCTNODE(DU%NODE_INDEX(2))%RHO)
+      ENDIF
    ENDIF
-   RHS(ARRAYLOC) = DU%VEL(OLD)+DT_HV/DU%LENGTH*((HEAD+SUM(DU%DP_FAN)*0.5_EB)/DU%RHO_D - &
-                   0.125_EB*DU%TOTAL_LOSS*ABS(DU%VEL(GUESS)+DU%VEL(OLD))*DU%VEL(OLD))
+
+   RHS(ARRAYLOC) = DU%VEL(OLD)+DT_HV/DU%LENGTH*((HEAD+SUM(DU%DP_FAN)*0.5_EB)/DU%RHO_D + &
+                   0.5_EB*DU%TOTAL_LOSS*ABS(DU%VEL(PREVIOUS))*DU%VEL(GUESS))
 ENDDO
 
 END SUBROUTINE RHSDUCT
 
+!> \brief Builds the left hand side of the HVAC flow matrix for momentum conservation in a duct
+!>
+!> \param NETWORK_INDEX Index indicating which HVAC network is being solved
 
 SUBROUTINE LHSDUCT(NETWORK_INDEX)
 USE GLOBAL_CONSTANTS
@@ -1284,12 +1573,14 @@ TYPE(NETWORK_TYPE), POINTER::NE=>NULL()
 TYPE(DUCT_TYPE), POINTER::DU=>NULL(),DU2=>NULL()
 TYPE(DUCTNODE_TYPE), POINTER::DN=>NULL(),DN2=>NULL()
 TYPE(P_ZONE_TYPE), POINTER::PZ=>NULL()
+
 NE => NETWORK(NETWORK_INDEX)
+
 DUCT_LOOP: DO ND = 1, NE%N_DUCTS
    DU => DUCT(NE%DUCT_INDEX(ND))
    IF (DU%FIXED .OR. DU%AREA < TWO_EPSILON_EB) CYCLE DUCT_LOOP
    ARRAYLOC1 = NE%MATRIX_INDEX(DUCT_NE(NE%DUCT_INDEX(ND)))
-   LHS(ARRAYLOC1,ARRAYLOC1) = 1._EB+0.125_EB*DU%TOTAL_LOSS*ABS(DU%VEL(OLD)+DU%VEL(GUESS))*DT_HV/DU%LENGTH
+   LHS(ARRAYLOC1,ARRAYLOC1) = 1._EB+0.5_EB*DT_HV*DU%TOTAL_LOSS/DU%LENGTH*ABS(DU%VEL(PREVIOUS)+DU%VEL(GUESS))
    DN=>DUCTNODE(DU%NODE_INDEX(1))
    IF (.NOT. DN%VENT) THEN
       IF (.NOT. DN%AMBIENT .AND. .NOT. DN%LEAKAGE) THEN
@@ -1303,7 +1594,7 @@ DUCT_LOOP: DO ND = 1, NE%N_DUCTS
             DU2=>DUCT(DN2%DUCT_INDEX(1))
             IF (DU2%AREA < TWO_EPSILON_EB .OR. DU2%FIXED) CYCLE
             ARRAYLOC2 = NE%MATRIX_INDEX(DUCT_NE(DN2%DUCT_INDEX(1)))
-            LHS(ARRAYLOC1,ARRAYLOC2) = LHS(ARRAYLOC1,ARRAYLOC2) - 0.25_EB*DN2%DIR(1)*DU2%AREA*DT_HV**2 / &
+            LHS(ARRAYLOC1,ARRAYLOC2) = LHS(ARRAYLOC1,ARRAYLOC2) - DN2%DIR(1)*DU2%AREA*DT_HV**2 / &
                                        (PSUM(DN%ZONE_INDEX,1)*DU%RHO_D*DU%LENGTH)
          ENDDO
       ENDIF
@@ -1315,7 +1606,7 @@ DUCT_LOOP: DO ND = 1, NE%N_DUCTS
             DU2=>DUCT(DN2%DUCT_INDEX(1))
             IF (DU2%AREA < TWO_EPSILON_EB .OR. DU2%FIXED) CYCLE
             ARRAYLOC2 = NE%MATRIX_INDEX(DUCT_NE(DN2%DUCT_INDEX(1)))
-            LHS(ARRAYLOC1,ARRAYLOC2) = LHS(ARRAYLOC1,ARRAYLOC2) - 0.25_EB*DN2%DIR(1)*DU2%AREA*DT_HV**2 / &
+            LHS(ARRAYLOC1,ARRAYLOC2) = LHS(ARRAYLOC1,ARRAYLOC2) - DN2%DIR(1)*DU2%AREA*DT_HV**2 / &
                                        (PSUM(DN%ZONE_INDEX,1)*DU%RHO_D*DU%LENGTH)
          ENDDO
       ENDIF
@@ -1333,7 +1624,7 @@ DUCT_LOOP: DO ND = 1, NE%N_DUCTS
             DU2=>DUCT(DN2%DUCT_INDEX(1))
             IF (DU2%AREA < TWO_EPSILON_EB .OR. DU2%FIXED) CYCLE
             ARRAYLOC2 = NE%MATRIX_INDEX(DUCT_NE(DN2%DUCT_INDEX(1)))
-            LHS(ARRAYLOC1,ARRAYLOC2) = LHS(ARRAYLOC1,ARRAYLOC2) + 0.25_EB*DN2%DIR(1)*DU2%AREA*DT_HV**2 / &
+            LHS(ARRAYLOC1,ARRAYLOC2) = LHS(ARRAYLOC1,ARRAYLOC2) + DN2%DIR(1)*DU2%AREA*DT_HV**2 / &
                                        (PSUM(DN%ZONE_INDEX,1)*DU%RHO_D*DU%LENGTH)
          ENDDO
       ENDIF
@@ -1345,7 +1636,7 @@ DUCT_LOOP: DO ND = 1, NE%N_DUCTS
             DU2=>DUCT(DN2%DUCT_INDEX(1))
             IF (DU2%AREA < TWO_EPSILON_EB .OR. DU2%FIXED) CYCLE
             ARRAYLOC2 = NE%MATRIX_INDEX(DUCT_NE(DN2%DUCT_INDEX(1)))
-            LHS(ARRAYLOC1,ARRAYLOC2) = LHS(ARRAYLOC1,ARRAYLOC2) + 0.25_EB*DN2%DIR(1)*DU2%AREA*DT_HV**2 / &
+            LHS(ARRAYLOC1,ARRAYLOC2) = LHS(ARRAYLOC1,ARRAYLOC2) + DN2%DIR(1)*DU2%AREA*DT_HV**2 / &
                                        (PSUM(DN%ZONE_INDEX,1)*DU%RHO_D*DU%LENGTH)
          ENDDO
       ENDIF
@@ -1354,26 +1645,147 @@ ENDDO DUCT_LOOP
 
 END SUBROUTINE LHSDUCT
 
+!> \brief Populates right hand side of matrix for steady state solution of ductrun to output system curve
 
-SUBROUTINE UPDATE_FAN(T,DUCT_INDEX)
+SUBROUTINE RHS_SYSTEM(DUCTRUN_INDEX)
+
+USE GLOBAL_CONSTANTS
+INTEGER, INTENT(IN)::DUCTRUN_INDEX
+INTEGER :: ARRAYLOC, ND, FAN_COUNTER, IPZ
+REAL(EB) :: HEAD,FAN_PRES,XYZ(3)
+TYPE(DUCTRUN_TYPE), POINTER::DR=>NULL()
+TYPE(DUCT_TYPE), POINTER::DU=>NULL()
+TYPE(DUCTNODE_TYPE), POINTER::DN=>NULL()
+
+DR => DUCTRUN(DUCTRUN_INDEX)
+FAN_COUNTER = 1
+
+DO ND = 1, DR%N_DUCTS
+   DU => DUCT(DR%DUCT_INDEX(ND))
+   IF (DU%FIXED .OR. DU%AREA < TWO_EPSILON_EB) CYCLE ! duct fixed: has a fixed volume, mass or fan
+   HEAD = 0._EB
+   ARRAYLOC = DR%MATRIX_SYSTEM_INDEX(DUCT_DR(DR%DUCT_INDEX(ND)))
+   DN => DUCTNODE(DU%NODE_INDEX(1)) ! point to node 1, if fixed then need to add p1
+   IF (DN%AMBIENT) THEN
+      HEAD = DN%P
+   ELSEIF(DN%VENT .OR. DN%LEAKAGE) THEN
+      HEAD = DN%P
+      IF (N_ZONE > 0) THEN
+         IPZ = DN%ZONE_INDEX
+         IF (IPZ > 0) HEAD = HEAD + DPSTAR(IPZ) ! adds zone pressure
+      ENDIF
+   ENDIF
+   XYZ = DN%XYZ ! get location ready for delta z
+
+   DN => DUCTNODE(DU%NODE_INDEX(2)) ! point to node 2, if fixed then need to subtract p2
+   IF (DN%AMBIENT) THEN
+      HEAD = HEAD - DN%P
+   ELSEIF (DN%VENT .OR. DN%LEAKAGE) THEN
+      HEAD = HEAD - DN%P
+      IF (N_ZONE > 0) THEN
+         IPZ = DN%ZONE_INDEX
+         IF (IPZ > 0) HEAD = HEAD - DPSTAR(IPZ)
+      ENDIF
+   ENDIF
+
+   XYZ = DN%XYZ - XYZ ! get delta z
+
+   ! Add hydrostatic head
+   IF(.NOT. DU%LEAKAGE) THEN
+      HEAD = HEAD + (GVEC(1)*XYZ(1)+GVEC(2)*XYZ(2)+GVEC(3)*XYZ(3))*DU%RHO_D
+   ENDIF
+
+   ! Populate RHS_SYSTEM for each duct equation
+   DR%RHS_SYSTEM_1(ARRAYLOC) = HEAD
+   DR%RHS_SYSTEM_2(ARRAYLOC,:) = HEAD ! same head for all fan cases
+
+   ! Add pressure from fan, if there are multiple fans, each needs a system curve
+   FAN_PRES = 0._EB
+   IF (DU%FAN_INDEX > 0) THEN
+      FAN_PRES = FAN(DU%FAN_INDEX)%MAX_PRES
+      DR%RHS_SYSTEM_2(ND,FAN_COUNTER) = DR%RHS_SYSTEM_2(ND,FAN_COUNTER) + FAN_PRES
+      FAN_COUNTER = FAN_COUNTER + 1
+   ENDIF
+ENDDO
+
+END SUBROUTINE RHS_SYSTEM
+
+!> \brief Populates LHS matrix for steady state solution required to output system curve
+
+SUBROUTINE LHS_SYSTEM(DUCTRUN_INDEX)
+USE GLOBAL_CONSTANTS
+INTEGER, INTENT(IN)::DUCTRUN_INDEX
+INTEGER :: NN,ND,FN, ARRAYLOC1,ARRAYLOC2
+TYPE(DUCTRUN_TYPE), POINTER::DR=>NULL()
+TYPE(DUCT_TYPE), POINTER::DU=>NULL()
+TYPE(DUCTNODE_TYPE), POINTER::DN=>NULL()
+
+DR => DUCTRUN(DUCTRUN_INDEX)
+! Duct energy equations
+DUCT_LOOP: DO ND = 1, DR%N_DUCTS
+   DU => DUCT(DR%DUCT_INDEX(ND))
+   IF (DU%FIXED .OR. DU%AREA < TWO_EPSILON_EB) CYCLE DUCT_LOOP
+   ARRAYLOC1 = DR%MATRIX_SYSTEM_INDEX(DUCT_DR(DR%DUCT_INDEX(ND)))
+   ! Velocity coefficient
+   DR%LHS_SYSTEM_1(ARRAYLOC1,ARRAYLOC1) = 0.25_EB*DU%RHO_D*DU%TOTAL_LOSS*ABS(DU%VEL_SYSTEM(1,1,1) + DU%VEL_SYSTEM(1,1,2))
+   DO FN = 1, DR%N_QFANS
+      DR%LHS_SYSTEM_2(ARRAYLOC1,ARRAYLOC1) = 0.25_EB*DU%RHO_D*DU%TOTAL_LOSS*ABS(DU%VEL_SYSTEM(2,FN,1) + DU%VEL_SYSTEM(2,FN,2))
+   ENDDO
+   ! Pressure coefficients
+   ARRAYLOC2 = DR%MATRIX_SYSTEM_INDEX(DR%N_DUCTS+DUCTNODE_DR(DU%NODE_INDEX(1)))
+   IF (ARRAYLOC2 > 0) THEN
+      DR%LHS_SYSTEM_1(ARRAYLOC1,ARRAYLOC2) = -1._EB
+      DR%LHS_SYSTEM_2(ARRAYLOC1,ARRAYLOC2) = -1._EB
+   ENDIF
+   ARRAYLOC2 = DR%MATRIX_SYSTEM_INDEX(DR%N_DUCTS+DUCTNODE_DR(DU%NODE_INDEX(2)))
+   IF (ARRAYLOC2 > 0) THEN
+      DR%LHS_SYSTEM_1(ARRAYLOC1,ARRAYLOC2) = 1._EB
+      DR%LHS_SYSTEM_2(ARRAYLOC1,ARRAYLOC2) = 1._EB
+   ENDIF
+ENDDO DUCT_LOOP
+
+! Node conservation
+DO NN = 1, DR%N_DUCTNODES
+   DN => DUCTNODE(DR%NODE_INDEX(NN))
+   IF (DN%FIXED .OR. DN%VENT .OR. DN%LEAKAGE) CYCLE ! only internal nodes
+   ARRAYLOC1 = DR%MATRIX_SYSTEM_INDEX(DR%N_DUCTS+DUCTNODE_DR(DR%NODE_INDEX(NN)))
+   DO ND = 1,DN%N_DUCTS
+      DU => DUCT(DN%DUCT_INDEX(ND))
+      IF (DU%FIXED .OR. DU%AREA <=TWO_EPSILON_EB) CYCLE
+      ARRAYLOC2 = DR%MATRIX_SYSTEM_INDEX(DUCT_DR(DN%DUCT_INDEX(ND)))
+      DR%LHS_SYSTEM_1(ARRAYLOC1,ARRAYLOC2) = -DN%DIR(ND)*DU%RHO_D*DU%AREA
+      DR%LHS_SYSTEM_2(ARRAYLOC1,ARRAYLOC2) = -DN%DIR(ND)*DU%RHO_D*DU%AREA
+   END DO
+ENDDO
+
+END SUBROUTINE LHS_SYSTEM
+
+!> \brief Updates the pressure rise imposed by a fan
+!>
+!> \param T Current time (s)
+!> \param ND Index indicating duct where fan is located
+
+SUBROUTINE UPDATE_FAN(T,ND)
 USE MATH_FUNCTIONS, ONLY : EVALUATE_RAMP
-INTEGER, INTENT(IN) :: DUCT_INDEX
+INTEGER :: FAN_ITER
+INTEGER, INTENT(IN) :: ND
 REAL(EB), INTENT(IN) :: T
-REAL(EB) :: TSI
+REAL(EB) :: DEL_P,VDOT
+REAL(EB) :: TSI,FLOW1,FLOW2,FUNC,FLOWGUESS
 TYPE(DUCT_TYPE), POINTER::DU=>NULL()
 TYPE(FAN_TYPE), POINTER::FA=>NULL()
-REAL(EB) :: DEL_P,VDOT
 
-DU=> DUCT(DUCT_INDEX)
+DU=> DUCT(ND)
+
 FA=> FAN(DU%FAN_INDEX)
 TSI = T - DU%FAN_ON_TIME
 SELECT CASE (FA%FAN_TYPE)
-   CASE(1) !Constant flow
+   CASE(1) ! Constant flow
       DU%VEL(NEW) = FA%VOL_FLOW/DU%AREA*EVALUATE_RAMP(TSI,FA%TAU,FA%SPIN_INDEX)
       IF (DU%REVERSE) DU%VEL(NEW)=-DU%VEL(NEW)
       DU%VOLUME_FLOW = DU%VEL(NEW)*DU%AREA
       RETURN
-   CASE(2) !Quadratic
+   CASE(2) ! Quadratic
       VDOT = (0.25_EB*DU%VEL(NEW)+0.25_EB*DU%VEL(PREVIOUS)+0.5_EB*DU%VEL(OLD))*DU%AREA
       IF (DU%REVERSE) VDOT = -VDOT
       VDOT = MAX(0._EB,MIN(VDOT,FA%MAX_FLOW))
@@ -1383,6 +1795,31 @@ SELECT CASE (FA%FAN_TYPE)
       VDOT = 0.5*(DU%VEL(NEW)+DU%VEL(OLD))*DU%AREA
       IF (DU%REVERSE) VDOT = -VDOT
       DEL_P = EVALUATE_RAMP(VDOT,0._EB,FA%RAMP_INDEX)*EVALUATE_RAMP(TSI,FA%TAU,FA%SPIN_INDEX)
+   CASE(4) ! System curve-based quadratic fan BETA
+      ! Set initial bounds for bisect
+      FLOW1 = 0._EB
+      FLOW2 = FA%MAX_FLOW
+      FAN_ITER = 0
+      FAN_LOOP: DO
+         FAN_ITER = FAN_ITER + 1
+         FLOWGUESS = 0.5*(FLOW1+FLOW2)
+         IF (ABS(FLOWGUESS - FLOW1) < TWO_EPSILON_EB) EXIT FAN_LOOP
+         FUNC = FA%MAX_PRES/((DU%VEL_SYSTEM(2,DU%QFAN_N,2)-DU%VEL_SYSTEM(1,1,2))*DU%AREA)**2
+         FUNC = FUNC * (FLOWGUESS-DU%VEL_SYSTEM(1,1,2)*DU%AREA)**2
+         FUNC = FUNC - FA%MAX_PRES + FA%MAX_PRES*(FLOWGUESS/FA%MAX_FLOW)**2
+         IF (FUNC > 0) THEN
+            FLOW2 = FLOWGUESS
+         ELSE
+            FLOW1 = FLOWGUESS
+         ENDIF
+         IF (FAN_ITER > 100) THEN
+            FLOWGUESS = 0.5_EB*(FLOW1 + FLOW2)
+            EXIT FAN_LOOP
+         ENDIF
+      ENDDO FAN_LOOP
+      ! Output fan pressure equating to output flow rate
+      DEL_P = FA%MAX_PRES - FA%MAX_PRES*(FLOWGUESS/FA%MAX_FLOW)**2
+      DEL_P = DEL_P*EVALUATE_RAMP(TSI,FA%TAU,FA%SPIN_INDEX)
 END SELECT
 
 IF (DU%REVERSE) DEL_P=-DEL_P
@@ -1390,26 +1827,28 @@ DU%DP_FAN(NEW) = DEL_P
 
 END SUBROUTINE UPDATE_FAN
 
+!> \brief Averages gas properties at VENTs connected to HVAC system
+!>
+!> \param NM Current mesh
 
 SUBROUTINE HVAC_BC_IN(NM)
 
-! Average gas properties at VENTs connected to HVAC system
-
-USE PHYSICAL_FUNCTIONS, ONLY : GET_SPECIFIC_GAS_CONSTANT,GET_AVERAGE_SPECIFIC_HEAT
+USE PHYSICAL_FUNCTIONS, ONLY: GET_ENTHALPY
 INTEGER, INTENT(IN) :: NM
-INTEGER :: II,JJ,KK,IW,IOR,IZ1,IZ2
-REAL(EB) :: ZZ_GET(1:N_TRACKED_SPECIES),AREA,TNOW,P_AVE,CPBAR
+INTEGER :: II,JJ,KK,IW,IOR,IZ1,IZ2,ICF
+INTEGER, POINTER :: NODE_INDEX,VENT_INDEX
+REAL(EB) :: ZZ_GET(1:N_TRACKED_SPECIES),AREA,TNOW,P_AVE,HGAS
 REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP,UP,VP,WP,HP
 REAL(EB), POINTER, DIMENSION(:,:) :: PBARP
-TYPE (MESH_TYPE),POINTER :: M=>NULL()
-TYPE (SURFACE_TYPE), POINTER :: SF=>NULL()
-TYPE (WALL_TYPE), POINTER :: WC=>NULL()
+TYPE (SURFACE_TYPE), POINTER :: SF
+TYPE (WALL_TYPE), POINTER :: WC
+TYPE (CFACE_TYPE), POINTER :: CFA
+TYPE (ONE_D_M_AND_E_XFER_TYPE), POINTER :: ONE_D
 
 IF (EVACUATION_ONLY(NM)) RETURN
 
-TNOW=SECOND()
+TNOW=CURRENT_TIME()
 
-M => MESHES(NM)
 CALL POINT_TO_MESH(NM)
 
 NODE_X(:,NM) = 0._EB
@@ -1441,116 +1880,179 @@ ELSE
 ENDIF
 
 WALL_LOOP: DO IW = 1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-   WC=>WALL(IW)
+   WC => WALL(IW)
+   ONE_D => WC%ONE_D
    SF => SURFACE(WC%SURF_INDEX)
-   ZONE_LEAK_IF: IF (ALL(SF%LEAK_PATH < 0)) THEN
-      IF (WC%VENT_INDEX == 0) CYCLE WALL_LOOP
-      IF (VENTS(WC%VENT_INDEX)%NODE_INDEX < 0) CYCLE WALL_LOOP
-      WC%NODE_INDEX = VENTS(WC%VENT_INDEX)%NODE_INDEX
-      IOR = WC%ONE_D%IOR
-      II = WC%ONE_D%IIG
-      JJ = WC%ONE_D%JJG
-      KK = WC%ONE_D%KKG
-      AREA = WC%AW
-      IF (WC%ONE_D%PRESSURE_ZONE /= NODE_ZONE(WC%NODE_INDEX,NM)) THEN
-         IF (NODE_ZONE(WC%NODE_INDEX,NM) == 0) THEN
-            NODE_ZONE(WC%NODE_INDEX,NM) = WC%ONE_D%PRESSURE_ZONE
-         ELSE
-            WRITE(MESSAGE,'(A,A)') 'ERROR: DUCTNODE must lie with a single pressure zone. Node: ',TRIM(DUCTNODE(WC%NODE_INDEX)%ID)
-            CALL SHUTDOWN(MESSAGE); RETURN
-         ENDIF
-      ENDIF
-
-      NODE_AREA(WC%NODE_INDEX,NM) = NODE_AREA(WC%NODE_INDEX,NM) + AREA
-      NODE_RHO(WC%NODE_INDEX,NM) = NODE_RHO(WC%NODE_INDEX,NM) + AREA/RHOP(II,JJ,KK)
-      ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(II,JJ,KK,1:N_TRACKED_SPECIES)
-      NODE_ZZ(WC%NODE_INDEX,1:N_TRACKED_SPECIES,NM) = NODE_ZZ(WC%NODE_INDEX,1:N_TRACKED_SPECIES,NM) + &
-                                                      ZZ_GET(1:N_TRACKED_SPECIES)*AREA
-      CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR,TMP(II,JJ,KK))
-      NODE_TMP(WC%NODE_INDEX,NM) = NODE_TMP(WC%NODE_INDEX,NM) + TMP(II,JJ,KK)*AREA
-      NODE_H(WC%NODE_INDEX,NM) = NODE_H(WC%NODE_INDEX,NM) + CPBAR * TMP(II,JJ,KK) * AREA
-
-      SELECT CASE (IOR)
-         CASE (1)
-            P_AVE = PBARP(KK,WC%ONE_D%PRESSURE_ZONE)
-            NODE_X(WC%NODE_INDEX,NM) = NODE_X(WC%NODE_INDEX,NM) + X(II-1)*AREA
-            NODE_Y(WC%NODE_INDEX,NM) = NODE_Y(WC%NODE_INDEX,NM) + YC(JJ)*AREA
-            NODE_Z(WC%NODE_INDEX,NM) = NODE_Z(WC%NODE_INDEX,NM) + ZC(KK)*AREA
-         CASE(-1)
-            P_AVE = PBARP(KK,WC%ONE_D%PRESSURE_ZONE)
-            NODE_X(WC%NODE_INDEX,NM) = NODE_X(WC%NODE_INDEX,NM) + X(II)*AREA
-            NODE_Y(WC%NODE_INDEX,NM) = NODE_Y(WC%NODE_INDEX,NM) + YC(JJ)*AREA
-            NODE_Z(WC%NODE_INDEX,NM) = NODE_Z(WC%NODE_INDEX,NM) + ZC(KK)*AREA
-         CASE (2)
-            P_AVE = PBARP(KK,WC%ONE_D%PRESSURE_ZONE)
-            NODE_X(WC%NODE_INDEX,NM) = NODE_X(WC%NODE_INDEX,NM) + XC(II)*AREA
-            NODE_Y(WC%NODE_INDEX,NM) = NODE_Y(WC%NODE_INDEX,NM) + Y(JJ-1)*AREA
-            NODE_Z(WC%NODE_INDEX,NM) = NODE_Z(WC%NODE_INDEX,NM) + ZC(KK)*AREA
-         CASE(-2)
-            P_AVE = PBARP(KK,WC%ONE_D%PRESSURE_ZONE)
-            NODE_X(WC%NODE_INDEX,NM) = NODE_X(WC%NODE_INDEX,NM) + XC(II)*AREA
-            NODE_Y(WC%NODE_INDEX,NM) = NODE_Y(WC%NODE_INDEX,NM) + Y(JJ)*AREA
-            NODE_Z(WC%NODE_INDEX,NM) = NODE_Z(WC%NODE_INDEX,NM) + ZC(KK)*AREA
-         CASE (3)
-            P_AVE = 0.5_EB*(PBARP(KK-1,WC%ONE_D%PRESSURE_ZONE)+PBARP(KK,WC%ONE_D%PRESSURE_ZONE))
-            NODE_X(WC%NODE_INDEX,NM) = NODE_X(WC%NODE_INDEX,NM) + XC(II)*AREA
-            NODE_Y(WC%NODE_INDEX,NM) = NODE_Y(WC%NODE_INDEX,NM) + YC(JJ)*AREA
-            NODE_Z(WC%NODE_INDEX,NM) = NODE_Z(WC%NODE_INDEX,NM) + Z(KK-1)*AREA
-         CASE (-3)
-            P_AVE = 0.5_EB*(PBARP(KK,WC%ONE_D%PRESSURE_ZONE)+PBARP(KK+1,WC%ONE_D%PRESSURE_ZONE))
-            NODE_X(WC%NODE_INDEX,NM) = NODE_X(WC%NODE_INDEX,NM) + XC(II)*AREA
-            NODE_Y(WC%NODE_INDEX,NM) = NODE_Y(WC%NODE_INDEX,NM) + YC(JJ)*AREA
-            NODE_Z(WC%NODE_INDEX,NM) = NODE_Z(WC%NODE_INDEX,NM) + Z(KK)*AREA
-      END SELECT
-      NODE_P(WC%NODE_INDEX,NM) = NODE_P(WC%NODE_INDEX,NM) + (P_AVE+RHO(II,JJ,KK)*(HP(II,JJ,KK)-KRES(II,JJ,KK)))*AREA
-   ELSE ZONE_LEAK_IF
-      IF (ALL(SF%LEAK_PATH/=WC%ONE_D%PRESSURE_ZONE)) CYCLE WALL_LOOP
-      IF (SF%LEAK_PATH(1) == WC%ONE_D%PRESSURE_ZONE) THEN
-         IZ1 = SF%LEAK_PATH(1)
-         IZ2 = SF%LEAK_PATH(2)
-         WC%NODE_INDEX = DUCT(LEAK_PATH(MIN(IZ1,IZ2),MAX(IZ1,IZ2)))%NODE_INDEX(1)
-      ELSE
-         IZ1 = SF%LEAK_PATH(2)
-         IZ2 = SF%LEAK_PATH(1)
-         WC%NODE_INDEX = DUCT(LEAK_PATH(MIN(IZ1,IZ2),MAX(IZ1,IZ2)))%NODE_INDEX(2)
-      ENDIF
-      IF (NODE_ZONE(WC%NODE_INDEX,NM) == 0) NODE_ZONE(WC%NODE_INDEX,NM) = WC%ONE_D%PRESSURE_ZONE
-      IOR = WC%ONE_D%IOR
-      II = WC%ONE_D%IIG
-      JJ = WC%ONE_D%JJG
-      KK = WC%ONE_D%KKG
-      AREA = WC%AW
-
-      NODE_AREA(WC%NODE_INDEX,NM) = NODE_AREA(WC%NODE_INDEX,NM) + AREA
-      NODE_RHO(WC%NODE_INDEX,NM) = NODE_RHO(WC%NODE_INDEX,NM) + AREA/RHOP(II,JJ,KK)
-
-      ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(II,JJ,KK,1:N_TRACKED_SPECIES)
-      NODE_ZZ(WC%NODE_INDEX,1:N_TRACKED_SPECIES,NM) = NODE_ZZ(WC%NODE_INDEX,1:N_TRACKED_SPECIES,NM) + &
-                                                      ZZ_GET(1:N_TRACKED_SPECIES)*AREA
-      CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR,TMP(II,JJ,KK))
-      NODE_TMP(WC%NODE_INDEX,NM) = NODE_TMP(WC%NODE_INDEX,NM) + TMP(II,JJ,KK)*AREA
-      NODE_H(WC%NODE_INDEX,NM) = NODE_H(WC%NODE_INDEX,NM) + CPBAR * TMP(II,JJ,KK) * AREA
-
-      SELECT CASE (IOR)
-         CASE (3)
-            P_AVE = 0.5_EB*(PBARP(KK-1,WC%ONE_D%PRESSURE_ZONE)+PBARP(KK,WC%ONE_D%PRESSURE_ZONE))
-            NODE_Z(WC%NODE_INDEX,NM) = NODE_Z(WC%NODE_INDEX,NM) + Z(KK-1)*AREA
-         CASE (-3)
-            P_AVE = 0.5_EB*(PBARP(KK,WC%ONE_D%PRESSURE_ZONE)+PBARP(KK+1,WC%ONE_D%PRESSURE_ZONE))
-            NODE_Z(WC%NODE_INDEX,NM) = NODE_Z(WC%NODE_INDEX,NM) + Z(KK)*AREA
-         CASE DEFAULT
-            P_AVE = PBARP(KK,WC%ONE_D%PRESSURE_ZONE)
-            NODE_Z(WC%NODE_INDEX,NM) = NODE_Z(WC%NODE_INDEX,NM) + ZC(KK)*AREA
-      END SELECT
-      NODE_P(WC%NODE_INDEX,NM) = NODE_P(WC%NODE_INDEX,NM) + P_AVE*AREA
-   ENDIF ZONE_LEAK_IF
+   NODE_INDEX => ONE_D%NODE_INDEX
+   VENT_INDEX => WC%VENT_INDEX
+   CALL INITIALIZE_HVAC
 ENDDO WALL_LOOP
 
-T_USED(13)=T_USED(13)+SECOND()-TNOW
+CFACE_LOOP: DO ICF=1,N_CFACE_CELLS
+   CFA => CFACE(ICF)
+   ONE_D => CFA%ONE_D
+   SF => SURFACE(CFA%SURF_INDEX)
+   NODE_INDEX => ONE_D%NODE_INDEX
+   VENT_INDEX => CFA%VENT_INDEX
+   CALL INITIALIZE_HVAC
+ENDDO CFACE_LOOP
 
+T_USED(13)=T_USED(13)+CURRENT_TIME()-TNOW
+
+CONTAINS
+
+SUBROUTINE INITIALIZE_HVAC
+
+ZONE_LEAK_IF: IF (ALL(SF%LEAK_PATH < 0)) THEN
+
+   IF (VENT_INDEX == 0) RETURN
+   IF (VENTS(VENT_INDEX)%NODE_INDEX < 0) RETURN
+   NODE_INDEX = VENTS(VENT_INDEX)%NODE_INDEX
+   IOR = ONE_D%IOR
+   II = ONE_D%IIG
+   JJ = ONE_D%JJG
+   KK = ONE_D%KKG
+   AREA = ONE_D%AREA
+   IF (ONE_D%PRESSURE_ZONE /= NODE_ZONE(NODE_INDEX,NM)) THEN
+      IF (NODE_ZONE(NODE_INDEX,NM) == 0) THEN
+         NODE_ZONE(NODE_INDEX,NM) = ONE_D%PRESSURE_ZONE
+      ELSE
+         WRITE(MESSAGE,'(A,A)') 'ERROR: DUCTNODE must lie with a single pressure zone. Node: ',TRIM(DUCTNODE(NODE_INDEX)%ID)
+         CALL SHUTDOWN(MESSAGE); RETURN
+      ENDIF
+   ENDIF
+
+   NODE_AREA(NODE_INDEX,NM) = NODE_AREA(NODE_INDEX,NM) + AREA
+   NODE_RHO(NODE_INDEX,NM) = NODE_RHO(NODE_INDEX,NM) + AREA/RHOP(II,JJ,KK)
+   ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(II,JJ,KK,1:N_TRACKED_SPECIES)
+   NODE_ZZ(NODE_INDEX,1:N_TRACKED_SPECIES,NM) = NODE_ZZ(NODE_INDEX,1:N_TRACKED_SPECIES,NM) + &
+                                                   ZZ_GET(1:N_TRACKED_SPECIES)*AREA
+   CALL GET_ENTHALPY(ZZ_GET,HGAS,TMP(II,JJ,KK))
+   NODE_TMP(NODE_INDEX,NM) = NODE_TMP(NODE_INDEX,NM) + TMP(II,JJ,KK)*AREA
+   NODE_H(NODE_INDEX,NM) = NODE_H(NODE_INDEX,NM) + HGAS * AREA
+
+   SELECT CASE (IOR)
+      CASE (1)
+         NODE_X(NODE_INDEX,NM) = NODE_X(NODE_INDEX,NM) + X(II-1)*AREA
+         NODE_Y(NODE_INDEX,NM) = NODE_Y(NODE_INDEX,NM) + YC(JJ)*AREA
+         NODE_Z(NODE_INDEX,NM) = NODE_Z(NODE_INDEX,NM) + ZC(KK)*AREA
+      CASE(-1)
+         NODE_X(NODE_INDEX,NM) = NODE_X(NODE_INDEX,NM) + X(II)*AREA
+         NODE_Y(NODE_INDEX,NM) = NODE_Y(NODE_INDEX,NM) + YC(JJ)*AREA
+         NODE_Z(NODE_INDEX,NM) = NODE_Z(NODE_INDEX,NM) + ZC(KK)*AREA
+      CASE (2)
+         NODE_X(NODE_INDEX,NM) = NODE_X(NODE_INDEX,NM) + XC(II)*AREA
+         NODE_Y(NODE_INDEX,NM) = NODE_Y(NODE_INDEX,NM) + Y(JJ-1)*AREA
+         NODE_Z(NODE_INDEX,NM) = NODE_Z(NODE_INDEX,NM) + ZC(KK)*AREA
+      CASE(-2)
+         NODE_X(NODE_INDEX,NM) = NODE_X(NODE_INDEX,NM) + XC(II)*AREA
+         NODE_Y(NODE_INDEX,NM) = NODE_Y(NODE_INDEX,NM) + Y(JJ)*AREA
+         NODE_Z(NODE_INDEX,NM) = NODE_Z(NODE_INDEX,NM) + ZC(KK)*AREA
+      CASE (3)
+         NODE_X(NODE_INDEX,NM) = NODE_X(NODE_INDEX,NM) + XC(II)*AREA
+         NODE_Y(NODE_INDEX,NM) = NODE_Y(NODE_INDEX,NM) + YC(JJ)*AREA
+         NODE_Z(NODE_INDEX,NM) = NODE_Z(NODE_INDEX,NM) + Z(KK-1)*AREA
+      CASE (-3)
+         NODE_X(NODE_INDEX,NM) = NODE_X(NODE_INDEX,NM) + XC(II)*AREA
+         NODE_Y(NODE_INDEX,NM) = NODE_Y(NODE_INDEX,NM) + YC(JJ)*AREA
+         NODE_Z(NODE_INDEX,NM) = NODE_Z(NODE_INDEX,NM) + Z(KK)*AREA
+   END SELECT
+   IF (HVAC_LOCAL_PRESSURE) THEN
+      SELECT CASE (IOR)
+         CASE DEFAULT
+            P_AVE = PBARP(KK,ONE_D%PRESSURE_ZONE)
+         CASE (3)
+            P_AVE = 0.5_EB*(PBARP(KK-1,ONE_D%PRESSURE_ZONE)+PBARP(KK,ONE_D%PRESSURE_ZONE))
+         CASE (-3)
+            P_AVE = 0.5_EB*(PBARP(KK,ONE_D%PRESSURE_ZONE)+PBARP(KK+1,ONE_D%PRESSURE_ZONE))
+      END SELECT
+      NODE_P(NODE_INDEX,NM) = NODE_P(NODE_INDEX,NM) + (P_AVE+RHO(II,JJ,KK)*(HP(II,JJ,KK)-KRES(II,JJ,KK)))*AREA
+   ELSE
+      SELECT CASE (IOR)
+         CASE (1)
+            NODE_P(NODE_INDEX,NM) = NODE_P(NODE_INDEX,NM) + &
+                                       (PBARP(KK,ONE_D%PRESSURE_ZONE)-RHO(II,JJ,KK) * &
+                                       0.5_EB*(UP(II-1,JJ,KK)+ONE_D%U_NORMAL)**2 * &
+                                       SIGN(1._EB,UP(II-1,JJ,KK)+ONE_D%U_NORMAL))* AREA
+         CASE(-1)
+            NODE_P(NODE_INDEX,NM) = NODE_P(NODE_INDEX,NM) + &
+                                       (PBARP(KK,ONE_D%PRESSURE_ZONE)+RHO(II,JJ,KK) * &
+                                       0.5_EB*(UP(II,JJ,KK)-ONE_D%U_NORMAL)**2  * &
+                                       SIGN(1._EB,UP(II,JJ,KK)-ONE_D%U_NORMAL))*AREA
+         CASE (2)
+            NODE_P(NODE_INDEX,NM) = NODE_P(NODE_INDEX,NM) + &
+                                       (PBARP(KK,ONE_D%PRESSURE_ZONE)-RHO(II,JJ,KK) * &
+                                       0.5_EB*(VP(II,JJ-1,KK)+ONE_D%U_NORMAL)**2 * &
+                                       SIGN(1._EB,VP(II,JJ-1,KK)+ONE_D%U_NORMAL))*AREA
+         CASE(-2)
+            NODE_P(NODE_INDEX,NM) = NODE_P(NODE_INDEX,NM) + &
+                                       (PBARP(KK,ONE_D%PRESSURE_ZONE)+RHO(II,JJ,KK) * &
+                                       0.5_EB*(VP(II,JJ,KK)-ONE_D%U_NORMAL)**2 * &
+                                       SIGN(1._EB,VP(II,JJ,KK)-ONE_D%U_NORMAL))*AREA
+         CASE (3)
+            NODE_P(NODE_INDEX,NM) = NODE_P(NODE_INDEX,NM) + &
+                                       (PBARP(KK,ONE_D%PRESSURE_ZONE)-RHO(II,JJ,KK) * &
+                                       0.5_EB*(WP(II,JJ,KK-1)+ONE_D%U_NORMAL)**2 * &
+                                       SIGN(1._EB,WP(II,JJ,KK-1)+ONE_D%U_NORMAL))*AREA
+         CASE (-3)
+            NODE_P(NODE_INDEX,NM) = NODE_P(NODE_INDEX,NM) + &
+                                       (PBARP(KK,ONE_D%PRESSURE_ZONE)+RHO(II,JJ,KK) * &
+                                       0.5_EB*(WP(II,JJ,KK)-ONE_D%U_NORMAL)**2 * &
+                                       SIGN(1._EB,WP(II,JJ,KK)-ONE_D%U_NORMAL))*AREA
+      END SELECT
+   ENDIF
+
+ELSE ZONE_LEAK_IF
+
+   IF (ALL(SF%LEAK_PATH/=ONE_D%PRESSURE_ZONE)) RETURN
+   IF (SF%LEAK_PATH(1) == ONE_D%PRESSURE_ZONE) THEN
+      IZ1 = SF%LEAK_PATH(1)
+      IZ2 = SF%LEAK_PATH(2)
+      NODE_INDEX = DUCT(LEAK_PATH(MIN(IZ1,IZ2),MAX(IZ1,IZ2)))%NODE_INDEX(1)
+   ELSE
+      IZ1 = SF%LEAK_PATH(2)
+      IZ2 = SF%LEAK_PATH(1)
+      NODE_INDEX = DUCT(LEAK_PATH(MIN(IZ1,IZ2),MAX(IZ1,IZ2)))%NODE_INDEX(2)
+   ENDIF
+   IF (NODE_ZONE(NODE_INDEX,NM) == 0) NODE_ZONE(NODE_INDEX,NM) = ONE_D%PRESSURE_ZONE
+   IOR = ONE_D%IOR
+   II = ONE_D%IIG
+   JJ = ONE_D%JJG
+   KK = ONE_D%KKG
+   AREA = ONE_D%AREA
+
+   NODE_AREA(NODE_INDEX,NM) = NODE_AREA(NODE_INDEX,NM) + AREA
+   NODE_RHO(NODE_INDEX,NM) = NODE_RHO(NODE_INDEX,NM) + AREA/RHOP(II,JJ,KK)
+
+   ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(II,JJ,KK,1:N_TRACKED_SPECIES)
+   NODE_ZZ(NODE_INDEX,1:N_TRACKED_SPECIES,NM) = NODE_ZZ(NODE_INDEX,1:N_TRACKED_SPECIES,NM) + &
+                                                   ZZ_GET(1:N_TRACKED_SPECIES)*AREA
+   CALL GET_ENTHALPY(ZZ_GET,HGAS,TMP(II,JJ,KK))
+   NODE_TMP(NODE_INDEX,NM) = NODE_TMP(NODE_INDEX,NM) + TMP(II,JJ,KK)*AREA
+   NODE_H(NODE_INDEX,NM) = NODE_H(NODE_INDEX,NM) + HGAS * AREA
+
+   SELECT CASE (IOR)
+      CASE (3)
+         P_AVE = 0.5_EB*(PBARP(KK-1,ONE_D%PRESSURE_ZONE)+PBARP(KK,ONE_D%PRESSURE_ZONE))
+         NODE_Z(NODE_INDEX,NM) = NODE_Z(NODE_INDEX,NM) + Z(KK-1)*AREA
+      CASE (-3)
+         P_AVE = 0.5_EB*(PBARP(KK,ONE_D%PRESSURE_ZONE)+PBARP(KK+1,ONE_D%PRESSURE_ZONE))
+         NODE_Z(NODE_INDEX,NM) = NODE_Z(NODE_INDEX,NM) + Z(KK)*AREA
+      CASE DEFAULT
+         P_AVE = PBARP(KK,ONE_D%PRESSURE_ZONE)
+         NODE_Z(NODE_INDEX,NM) = NODE_Z(NODE_INDEX,NM) + ZC(KK)*AREA
+   END SELECT
+   NODE_P(NODE_INDEX,NM) = NODE_P(NODE_INDEX,NM) + P_AVE*AREA
+
+ENDIF ZONE_LEAK_IF
+
+END SUBROUTINE INITIALIZE_HVAC
 
 END SUBROUTINE HVAC_BC_IN
 
+!> \brief Determines what ducts are "fixed"; i.e. they have been given fixed volume or mass flow (including fixed volume fan)
+!>
+!> \param T Current time (s)
 
 SUBROUTINE DETERMINE_FIXED_ELEMENTS(T)
 USE MATH_FUNCTIONS,ONLY:EVALUATE_RAMP
@@ -1574,7 +2076,7 @@ DUCT_LOOP: DO ND=1,N_DUCTS
       CYCLE DUCT_LOOP
    ENDIF
    IF (DU%MASS_FLOW_INITIAL<1.E6_EB) THEN
-      IF (DU%MASS_FLOW_INITIAL >0._EB) THEN
+      IF (DU%MASS_FLOW_INITIAL > 0._EB) THEN
          DU%VOLUME_FLOW = DU%MASS_FLOW_INITIAL/DUCTNODE(DU%NODE_INDEX(1))%RHO*EVALUATE_RAMP(T,DU%TAU,DU%RAMP_INDEX)
       ELSE
          DU%VOLUME_FLOW = DU%MASS_FLOW_INITIAL/DUCTNODE(DU%NODE_INDEX(2))%RHO*EVALUATE_RAMP(T,DU%TAU,DU%RAMP_INDEX)
@@ -1595,7 +2097,6 @@ DUCT_LOOP: DO ND=1,N_DUCTS
       ENDIF
       IF (DU%FAN_OPERATING .AND. FAN(DU%FAN_INDEX)%FAN_TYPE==1) THEN
          DU%FIXED=.TRUE.
-         CALL UPDATE_FAN(T,ND)
       ELSEIF (.NOT. DU%FAN_OPERATING .AND. FAN(DU%FAN_INDEX)%FAN_TYPE==1) THEN
          DU%FIXED = .FALSE.
          DU%VOLUME_FLOW = 0._EB
@@ -1623,6 +2124,11 @@ ENDDO NODE_LOOP
 
 END SUBROUTINE DETERMINE_FIXED_ELEMENTS
 
+!> \brief Determines what HVAC components lies in different, isolated networks (i.e. not sharing a common pressure zone)
+!>
+!> \param CHANGEIN Flag to force revaluation of the duct networks. Otherwise done only if there area damper changes.
+!> \param T Current time (s)
+!> \param T Current time (s)
 
 SUBROUTINE FIND_NETWORKS(CHANGEIN,T)
 INTEGER:: NZ,NN,ND,DUCT_COUNTER(N_DUCTS),NODE_COUNTER(N_DUCTNODES),COUNTER,COUNTER2,ZONE_COUNTER(N_ZONE)
@@ -1782,11 +2288,11 @@ ENDIF
 
 END SUBROUTINE FIND_NETWORKS
 
+!> \brief Finds "duct runs"; being ductnodes and ducts directly (via HVAC components) connected to one another
 
 SUBROUTINE FIND_DUCTRUNS
-! Finds "duct runs"; being ductnodes and ducts directly (via HVAC components) connected to one another
 INTEGER :: NN,NR,NN2,NN3,NN4,ND,DUCT_COUNTER(N_DUCTS),NODE_COUNTER(N_DUCTNODES),&
-           NODE_CHECKED(N_DUCTNODES),CHKFLG,NODE_CONNECTED(N_DUCTNODES)
+           NODE_CHECKED(N_DUCTNODES),CHKFLG,NODE_CONNECTED(N_DUCTNODES),N_QFANS
 INTEGER, DIMENSION(:), ALLOCATABLE :: DUCTRUN_DCOUNTER,DUCTRUN_NCOUNTER
 
 ! Zeroing work arrays and initialising counters
@@ -1803,7 +2309,7 @@ NR = 1
 NODE_COUNTER(1) = NR
 NN = 1
 
-! Finds all connected ducts and nodes
+! Finds all connected ducts and nodes and hence number of ductruns
 L1:DO
    IF (NODE_CHECKED(NN) == 1) THEN
       NN = NN + 1
@@ -1849,7 +2355,7 @@ ALLOCATE(DUCTRUN(N_DUCTRUNS))
 DO NR=1, N_DUCTRUNS
    DUCTRUN(NR)%N_DUCTS=0
    DUCTRUN(NR)%N_DUCTNODES=0
-END DO
+ENDDO
 DO ND = 1, N_DUCTS
    DUCTRUN(DUCT_COUNTER(ND))%N_DUCTS = DUCTRUN(DUCT_COUNTER(ND))%N_DUCTS + 1
 ENDDO
@@ -1857,7 +2363,7 @@ DO NN = 1, N_DUCTNODES
    DUCTRUN(NODE_COUNTER(NN))%N_DUCTNODES = DUCTRUN(NODE_COUNTER(NN))%N_DUCTNODES + 1
 ENDDO
 
-! Allocates work arrays for duct and node indexing
+! Allocates work arrays for duct, node and fan indexing
 ALLOCATE(DUCTRUN_DCOUNTER(N_DUCTRUNS))
 DUCTRUN_DCOUNTER=0
 ALLOCATE(DUCTRUN_NCOUNTER(N_DUCTRUNS))
@@ -1871,17 +2377,47 @@ ENDDO
 DO ND = 1, N_DUCTS
    DUCTRUN_DCOUNTER(DUCT_COUNTER(ND)) = DUCTRUN_DCOUNTER(DUCT_COUNTER(ND)) + 1
    DUCTRUN(DUCT_COUNTER(ND))%DUCT_INDEX(DUCTRUN_DCOUNTER(DUCT_COUNTER(ND))) = ND
+   DUCT_DR(ND) = DUCTRUN_DCOUNTER(DUCT_COUNTER(ND))
 ENDDO
 DO NN = 1, N_DUCTNODES
    DUCTRUN_NCOUNTER(NODE_COUNTER(NN)) = DUCTRUN_NCOUNTER(NODE_COUNTER(NN)) + 1
    DUCTRUN(NODE_COUNTER(NN))%NODE_INDEX(DUCTRUN_NCOUNTER(NODE_COUNTER(NN))) = NN
+   DUCTNODE_DR(NN) = DUCTRUN_NCOUNTER(NODE_COUNTER(NN))
 ENDDO
+
+IF (QFAN_BETA_TEST) THEN
+   ! Populates number of quadratic fans and indexes them within DUCT
+   DO NR = 1, N_DUCTRUNS
+      N_QFANS = 0
+      DO ND = 1, DUCTRUN(NR)%N_DUCTS
+         IF (DUCT(DUCTRUN(NR)%DUCT_INDEX(ND))%FAN_INDEX > 0) THEN
+            IF (FAN(DUCT(DUCTRUN(NR)%DUCT_INDEX(ND))%FAN_INDEX)%FAN_TYPE == 4) THEN
+               N_QFANS = N_QFANS + 1
+               DUCT(DUCTRUN(NR)%DUCT_INDEX(ND))%QFAN_N = N_QFANS
+            ENDIF
+         ENDIF
+      ENDDO
+      DUCTRUN(NR)%N_QFANS = N_QFANS
+   ENDDO
+   ! Allocate and zero solution matrix indices and system curve velocities
+   DO NR = 1, N_DUCTRUNS
+      ALLOCATE(DUCTRUN(NR)%MATRIX_SYSTEM_INDEX(DUCTRUN(NR)%N_DUCTS+DUCTRUN(NR)%N_DUCTNODES))
+      DUCTRUN(NR)%MATRIX_SYSTEM_INDEX = 0
+      DO ND = 1, DUCTRUN(NR)%N_DUCTS
+         ALLOCATE(DUCT(DUCTRUN(NR)%DUCT_INDEX(ND))%VEL_SYSTEM(2,DUCTRUN(NR)%N_QFANS,2)) ! vel_system(sys#,fan#,old/new)
+         DUCT(DUCTRUN(NR)%DUCT_INDEX(ND))%VEL_SYSTEM(1,:,:) = 0._EB
+         DUCT(DUCTRUN(NR)%DUCT_INDEX(ND))%VEL_SYSTEM(2,:,:) = TWO_EPSILON_EB
+      ENDDO
+   ENDDO
+CALL SETUP_SOLUTION_SYSTEM_POINTERS
+ENDIF
 
 DEALLOCATE(DUCTRUN_DCOUNTER)
 DEALLOCATE(DUCTRUN_NCOUNTER)
 
 END SUBROUTINE FIND_DUCTRUNS
 
+!> \brief For each HVAC network the routine defines which ducts and nodes belowng to which element of the HVAC matrix
 
 SUBROUTINE SETUP_SOLUTION_POINTERS
 INTEGER:: NNE,NN,ND,COUNTER
@@ -1909,6 +2445,39 @@ ENDDO
 
 END SUBROUTINE SETUP_SOLUTION_POINTERS
 
+!> \brief For each ductrun the routine defines which ducts and nodes belowng to which element of the ductrun matrix
+
+SUBROUTINE SETUP_SOLUTION_SYSTEM_POINTERS
+INTEGER:: NR,NN,ND,COUNTER
+TYPE(DUCT_TYPE), POINTER :: DU=>NULL()
+TYPE(DUCTNODE_TYPE), POINTER :: DN=>NULL()
+TYPE(DUCTRUN_TYPE), POINTER :: DR=>NULL()
+
+DO NR = 1,N_DUCTRUNS
+   COUNTER = 0
+   DR => DUCTRUN(NR)
+   DO ND=1,DR%N_DUCTS
+      DU=>DUCT(DR%DUCT_INDEX(ND))
+      IF (DU%FIXED .OR. DU%AREA<=TWO_EPSILON_EB) CYCLE
+      COUNTER = COUNTER + 1
+      DR%MATRIX_SYSTEM_INDEX(ND)=COUNTER
+   ENDDO
+   DO NN=1,DR%N_DUCTNODES
+      DN=>DUCTNODE(DR%NODE_INDEX(NN))
+      IF (DN%FIXED .OR. DN%VENT) CYCLE
+      COUNTER = COUNTER + 1
+      DR%MATRIX_SYSTEM_INDEX(DR%N_DUCTS+NN)=COUNTER
+   ENDDO
+   DR%N_MATRIX_SYSTEM = COUNTER
+ENDDO
+
+END SUBROUTINE SETUP_SOLUTION_SYSTEM_POINTERS
+
+!> \brief Determines wall friction loss and assigns node losses to ducts
+!>
+!> \param T Current time (s)
+!> \param DT Current time step (s)
+!> \param NNE Index indicating which HVAC network is being solved
 
 SUBROUTINE UPDATE_LOSS(T,DT,NNE)
 USE PHYSICAL_FUNCTIONS,ONLY:GET_VISCOSITY
@@ -1931,23 +2500,23 @@ NODELOOP : DO NN=1,NE%N_DUCTNODES
   NODECLASS: IF (DN%FILTER_INDEX > 0) THEN
      CALL FILTER_UPDATE(DT,NE%NODE_INDEX(NN))
      IF (DUCT(DN%DUCT_INDEX(1))%AREA < TWO_EPSILON_EB .OR. DUCT(DN%DUCT_INDEX(2))%AREA < TWO_EPSILON_EB) CYCLE
-     IF(DUCT(DN%DUCT_INDEX(1))%VEL(GUESS)*DN%DIR(1) > 0._EB) THEN
+     IF(DUCT(DN%DUCT_INDEX(1))%VEL(PREVIOUS)*DN%DIR(1) > 0._EB) THEN
            DUCT(DN%DUCT_INDEX(1))%TOTAL_LOSS = DUCT(DN%DUCT_INDEX(1))%TOTAL_LOSS + &
               DN%FILTER_LOSS*DUCT(DN%DUCT_INDEX(1))%AREA/DUCT(DN%DUCT_INDEX(2))%AREA
      ELSE
         DUCT(DN%DUCT_INDEX(2))%TOTAL_LOSS = DUCT(DN%DUCT_INDEX(2))%TOTAL_LOSS + DN%FILTER_LOSS
      ENDIF
-  ELSEIF(DN%VENT) THEN NODECLASS
+  ELSEIF(DN%VENT .OR. DN%AMBIENT) THEN NODECLASS
      IF (DUCT(DN%DUCT_INDEX(1))%AREA < TWO_EPSILON_EB) CYCLE
-     IF(DUCT(DN%DUCT_INDEX(1))%VEL(GUESS)*DN%DIR(1) < 0._EB) THEN
+     IF(DUCT(DN%DUCT_INDEX(1))%VEL(PREVIOUS)*DN%DIR(1) < 0._EB) THEN
         DUCT(DN%DUCT_INDEX(1))%TOTAL_LOSS = DUCT(DN%DUCT_INDEX(1))%TOTAL_LOSS + DN%LOSS_ARRAY(1,2)
      ELSE
         DUCT(DN%DUCT_INDEX(1))%TOTAL_LOSS = DUCT(DN%DUCT_INDEX(1))%TOTAL_LOSS + DN%LOSS_ARRAY(2,1)
      ENDIF
   ELSEIF(DN%FILTER_INDEX <=0 .AND. DN%N_DUCTS==2) THEN
      IF (DUCT(DN%DUCT_INDEX(1))%AREA < TWO_EPSILON_EB .OR. DUCT(DN%DUCT_INDEX(2))%AREA < TWO_EPSILON_EB) CYCLE
-     IF(ABS(DUCT(DN%DUCT_INDEX(1))%VEL(GUESS)) > 1.E-6_EB) THEN
-        IF(DUCT(DN%DUCT_INDEX(1))%VEL(GUESS)*DN%DIR(1) > 0._EB) THEN
+     IF(ABS(DUCT(DN%DUCT_INDEX(1))%VEL(PREVIOUS)) > 1.E-6_EB) THEN
+        IF(DUCT(DN%DUCT_INDEX(1))%VEL(PREVIOUS)*DN%DIR(1) > 0._EB) THEN
            DUCT(DN%DUCT_INDEX(2))%TOTAL_LOSS = DUCT(DN%DUCT_INDEX(2))%TOTAL_LOSS + DN%LOSS_ARRAY(1,2)
         ELSE
            DUCT(DN%DUCT_INDEX(1))%TOTAL_LOSS = DUCT(DN%DUCT_INDEX(1))%TOTAL_LOSS + DN%LOSS_ARRAY(1,2)
@@ -1962,7 +2531,7 @@ NODELOOP : DO NN=1,NE%N_DUCTNODES
      NUM_OUT = 0
      DO ND=1,DN%N_DUCTS
         DU => DUCT(DN%DUCT_INDEX(ND))
-        IF (DU%VEL(GUESS)*DN%DIR(ND) < 0._EB .AND. ABS(DU%VEL(GUESS)) > 1.E-6_EB) NUM_OUT = NUM_OUT + 1
+        IF (DU%VEL(PREVIOUS)*DN%DIR(ND) < 0._EB .AND. ABS(DU%VEL(PREVIOUS)) > 1.E-6_EB) NUM_OUT = NUM_OUT + 1
      ENDDO
      IF (NUM_OUT==0) THEN
         DO ND=1,DN%N_DUCTS
@@ -1975,7 +2544,7 @@ NODELOOP : DO NN=1,NE%N_DUCTNODES
      ELSEIF (NUM_OUT==1) THEN
         DO ND=1,DN%N_DUCTS
            DU => DUCT(DN%DUCT_INDEX(ND))
-           IF (DU%VEL(GUESS)*DN%DIR(ND) < 0._EB .AND. ABS(DU%VEL(GUESS)) > 1.E-6_EB) THEN
+           IF (DU%VEL(PREVIOUS)*DN%DIR(ND) < 0._EB .AND. ABS(DU%VEL(PREVIOUS)) > 1.E-6_EB) THEN
               NUM_OUT = ND
               EXIT
            ENDIF
@@ -1988,7 +2557,7 @@ NODELOOP : DO NN=1,NE%N_DUCTNODES
      ELSEIF (NUM_OUT == DN%N_DUCTS - 1) THEN
         DO ND=1,DN%N_DUCTS
            DU => DUCT(DN%DUCT_INDEX(ND))
-           IF (DU%VEL(GUESS)*DN%DIR(ND) < 0._EB .AND. ABS(DU%VEL(GUESS)) > 1.E-6_EB) THEN
+           IF (DU%VEL(PREVIOUS)*DN%DIR(ND) < 0._EB .AND. ABS(DU%VEL(PREVIOUS)) > 1.E-6_EB) THEN
               CYCLE
            ELSE
               NUM_OUT = ND
@@ -2003,15 +2572,15 @@ NODELOOP : DO NN=1,NE%N_DUCTNODES
          LOSS_SUM = 0._EB
          DO ND=1,DN%N_DUCTS
             DU => DUCT(DN%DUCT_INDEX(ND))
-            IF(DU%VEL(GUESS)*DN%DIR(ND) > 0._EB)  LOSS_SUM = LOSS_SUM + DU%VEL(GUESS)*DN%DIR(ND)*DU%AREA
+            IF(DU%VEL(PREVIOUS)*DN%DIR(ND) > 0._EB)  LOSS_SUM = LOSS_SUM + DU%VEL(PREVIOUS)*DN%DIR(ND)*DU%AREA
          ENDDO
          DO ND=1,DN%N_DUCTS
             DU => DUCT(DN%DUCT_INDEX(ND))
-            IF (DU%VEL(GUESS)*DN%DIR(ND) < 0._EB .AND. ABS(DU%VEL(GUESS)) > 1.E-6_EB) THEN
+            IF (DU%VEL(PREVIOUS)*DN%DIR(ND) < 0._EB .AND. ABS(DU%VEL(PREVIOUS)) > 1.E-6_EB) THEN
                DO ND2=1,DN%N_DUCTS
                   DU2 => DUCT(DN%DUCT_INDEX(ND2))
-                  IF (DU2%VEL(GUESS)*DN%DIR(ND2) > 0._EB) DU%TOTAL_LOSS = DU%TOTAL_LOSS + &
-                                                          DU2%VEL(GUESS)*DN%DIR(ND2)*DU2%AREA*DN%LOSS_ARRAY(ND2,ND)/LOSS_SUM
+                  IF (DU2%VEL(PREVIOUS)*DN%DIR(ND2) > 0._EB) DU%TOTAL_LOSS = DU%TOTAL_LOSS + &
+                                                          DU2%VEL(PREVIOUS)*DN%DIR(ND2)*DU2%AREA*DN%LOSS_ARRAY(ND2,ND)/LOSS_SUM
                ENDDO
             ENDIF
          ENDDO
@@ -2021,16 +2590,16 @@ ENDDO NODELOOP
 
 DO ND = 1, NE%N_DUCTS
    DU => DUCT(NE%DUCT_INDEX(ND))
-   IF (DU%ROUGHNESS > -TWO_EPSILON_EB) THEN
+   IF (DU%ROUGHNESS > 0._EB) THEN
       ZZ_GET(1:N_TRACKED_SPECIES) = DU%ZZ(1:N_TRACKED_SPECIES)
       CALL GET_VISCOSITY(ZZ_GET,VISCOSITY,DU%TMP_D)
-      FRICTION_FACTOR = COMPUTE_FRICTION_FACTOR(DU%RHO_D,VISCOSITY,ABS(DU%VEL(GUESS)),DU%DIAMETER,DU%ROUGHNESS)
+      FRICTION_FACTOR = COMPUTE_FRICTION_FACTOR(DU%RHO_D,VISCOSITY,ABS(DU%VEL(PREVIOUS)),DU%DIAMETER,DU%ROUGHNESS)
    ELSE
       FRICTION_FACTOR = 0._EB
    ENDIF
-   IF (DU%VEL(GUESS)>0._EB) THEN
+   IF (DU%VEL(PREVIOUS)>0._EB) THEN
       LOSS_SUM = DU%LOSS(1) * EVALUATE_RAMP(T,0._EB,DU%RAMP_LOSS_INDEX)
-   ELSEIF (DU%VEL(GUESS)<0._EB) THEN
+   ELSEIF (DU%VEL(PREVIOUS)<0._EB) THEN
       LOSS_SUM = DU%LOSS(2) * EVALUATE_RAMP(T,0._EB,DU%RAMP_LOSS_INDEX)
    ELSE
       LOSS_SUM = 0.5_EB*(DU%LOSS(1)+DU%LOSS(2)) * EVALUATE_RAMP(T,0._EB,DU%RAMP_LOSS_INDEX)
@@ -2043,6 +2612,13 @@ ENDDO
 
 END SUBROUTINE UPDATE_LOSS
 
+!> \brief Calculates the friction factor for a duct
+!>
+!> \param RHO Gas density in duct (kg/m3)
+!> \param VISCOSITY Gas viscosity in duct (kg/m/s)
+!> \param VEL Duct velocity (m/s)
+!> \param DIAM Duct diameter (m)
+!> \param ROUGHNESS Duct absolute roughness (m)
 
 REAL(EB) FUNCTION COMPUTE_FRICTION_FACTOR(RHO,VISCOSITY,VEL,DIAM,ROUGHNESS)
 REAL(EB), INTENT(IN) :: RHO,VISCOSITY,VEL,DIAM,ROUGHNESS
@@ -2058,6 +2634,10 @@ RETURN
 
 END FUNCTION COMPUTE_FRICTION_FACTOR
 
+!> \brief Updates duct velocity previous and guess values and calls UPDATE_FAN
+!>
+!> \param T Current time (s)
+!> \param NNE Index indicating which HVAC network is being solved
 
 SUBROUTINE SET_GUESS(NNE,T)
 INTEGER, INTENT(IN) :: NNE
@@ -2071,22 +2651,28 @@ NE => NETWORK(NNE)
 DO ND = 1,NE%N_DUCTS
    DU => DUCT(NE%DUCT_INDEX(ND))
    IF (DU%FAN_INDEX > 0 .AND. DU%FAN_OPERATING) THEN
-      CALL UPDATE_FAN(T,NE%DUCT_INDEX(ND))
-   ELSEIF (DU%FAN_INDEX > 0 .AND. .NOT. DU%FAN_OPERATING) THEN
+      CALL UPDATE_FAN(T,ND)
+   ELSE 
       DU%DP_FAN = 0._EB
    ENDIF
-   IF (DU%FAN_INDEX > 0 .AND. .NOT. DU%FAN_OPERATING) DU%DP_FAN = 0._EB
    IF (DU%FIXED) THEN
-      DU%VEL(PREVIOUS)  = DU%VEL(GUESS)
+      DU%VEL(PREVIOUS)  = DU%VEL(NEW)
       DU%VEL(GUESS)     = DU%VEL(NEW)
-      CYCLE
+   ELSE
+      IF (SIGN(1._EB,DU%VEL(NEW))==SIGN(1._EB,DU%VEL(PREVIOUS))) THEN
+         DU%VEL(GUESS) = DU%VEL(NEW)
+      ELSE
+         DU%VEL(GUESS) = 0._EB
+      ENDIF
+      DU%VEL(PREVIOUS) = DU%VEL(NEW)
    ENDIF
-   DU%VEL(PREVIOUS)  = DU%VEL(GUESS)
-   DU%VEL(GUESS)     = DU%VEL(NEW)
 ENDDO
 
 END SUBROUTINE SET_GUESS
 
+!> \brief sets donor (upstream) values for ducts and nodes
+!>
+!> \param NNE Index indicating which HVAC network is being solved
 
 SUBROUTINE SET_DONOR(NNE)
 USE MATH_FUNCTIONS, ONLY : EVALUATE_RAMP
@@ -2116,16 +2702,17 @@ ENDDO NODELOOP
 DUCTLOOP: DO ND=1,NE%N_DUCTS
    DU=>DUCT(NE%DUCT_INDEX(ND))
    IF (DU%AREA < TWO_EPSILON_EB) CYCLE DUCTLOOP
-   IF (DU%FIXED .AND. DU%FAN_INDEX < 0) THEN
-      DU%VEL(PREVIOUS) = DU%VEL(NEW)
-      DU%VEL(GUESS) = DU%VEL(NEW)
-   ENDIF
-   IF (.NOT. DU%FIXED) THEN
-      DU%VEL(PREVIOUS) = DU%VEL(GUESS)
-      DU%VEL(GUESS) = DU%VEL(NEW)
-   ENDIF
+!   IF (DU%FIXED .AND. DU%FAN_INDEX < 0) THEN ! fixed volume flow fan set by user
+!      DU%VEL(PREVIOUS) = DU%VEL(NEW)
+!      DU%VEL(GUESS) = DU%VEL(NEW)
+!   ENDIF
+!   IF (.NOT. DU%FIXED) THEN ! no user set volume or mass flow
+!      DU%VEL(PREVIOUS) = DU%VEL(GUESS)
+!      DU%VEL(GUESS) = DU%VEL(NEW)
+!   ENDIF
    RHOLAST = DU%RHO_D
    TMPLAST = DU%TMP_D
+
    IF (ABS(DU%VEL(PREVIOUS))>0._EB) THEN
       IF (DU%VEL(PREVIOUS)>0._EB) THEN
          DN=>DUCTNODE(DU%NODE_INDEX(1))
@@ -2150,6 +2737,9 @@ ENDDO DUCTLOOP
 
 END SUBROUTINE SET_DONOR
 
+!> \brief Checks the current iteration for duct velocity convergence and conservation of mass at nodes
+!>
+!> \param NNE Index indicating which HVAC network is being solved
 
 SUBROUTINE CONVERGENCE_CHECK(NNE)
 INTEGER, INTENT(IN) :: NNE
@@ -2167,21 +2757,22 @@ DO ND=1,NE%N_DUCTS
    DU => DUCT(NE%DUCT_INDEX(ND))
    IF (DU%AREA < TWO_EPSILON_EB) CYCLE
    IF (ABS(DU%VEL(PREVIOUS)) < 1.E-5_EB .AND. ABS(DU%VEL(NEW)) < 1.E-5_EB) CYCLE
-   IF (DU%VEL(PREVIOUS) < 0._EB .EQV. DU%VEL(NEW) < 0._EB) THEN
-        IF (ABS(DU%VEL(PREVIOUS))<=TWO_EPSILON_EB) THEN
-           CONVERGED = .FALSE.
-           EXIT
-        ELSE
-         IF (ABS(1._EB-DU%VEL(NEW)/DU%VEL(PREVIOUS)) > 0.05_EB) THEN
+   IF (DU%VEL(PREVIOUS) < 0._EB .EQV. DU%VEL(NEW) < 0._EB) THEN ! check for flow reversal
+         IF (ABS(DU%VEL(PREVIOUS))<=TWO_EPSILON_EB) THEN
+            CONVERGED = .FALSE.
+            EXIT
+         ELSE
+            IF (ABS(1._EB-DU%VEL(NEW)/DU%VEL(PREVIOUS)) > 0.05_EB) THEN
             CONVERGED = .FALSE.
             CYCLE
+            ENDIF
          ENDIF
-        ENDIF
    ELSE
       CONVERGED = .FALSE.
    ENDIF
 ENDDO
-IF (.NOT. CONVERGED) RETURN
+
+IF (.NOT. CONVERGED) RETURN ! if velocity convergence passes, continue
 
 ! Check node mass conservation convergence
 DO NN=1,NE%N_DUCTNODES
@@ -2213,13 +2804,17 @@ IF (CONVERGED) ITER=ITER_MAX+1
 
 END SUBROUTINE CONVERGENCE_CHECK
 
+!> \brief Combines the mesh based arrays of HVAC boundary condtions to determine the HVAC solver boundary conditions
+!>
+!> \param T Current time (s)
 
-SUBROUTINE COLLAPSE_HVAC_BC
+SUBROUTINE COLLAPSE_HVAC_BC(T)
 
 ! Takes the MPI gathered mesh array of HVAC boundary conditions and updates the DUCTNODE boundary condition values.
-USE PHYSICAL_FUNCTIONS, ONLY : GET_SPECIFIC_GAS_CONSTANT,GET_AVERAGE_SPECIFIC_HEAT
+USE PHYSICAL_FUNCTIONS, ONLY : GET_SPECIFIC_GAS_CONSTANT,GET_ENTHALPY,GET_AVERAGE_SPECIFIC_HEAT
+REAL(EB), INTENT(IN) :: T
 INTEGER:: NN,NS,ITCOUNT,ZONE_TEST(NMESHES)
-REAL(EB) :: AREA,RHO_SUM,CPBAR,H_G,TMP_SUM,TMP_NEW,ZZ_GET(1:N_TRACKED_SPECIES),CPBAR2,DCPDT
+REAL(EB) :: AREA,RHO_SUM,CPBAR,H_G,TMP_SUM,TMP_NEW,ZZ_GET(1:N_TRACKED_SPECIES),CPBAR2,DCPDT,HGAS
 TYPE(DUCTNODE_TYPE), POINTER :: DN=>NULL(),DN2=>NULL()
 
 VENT_CUSTOM_AMBIENT: DO NN=1,N_DUCTNODES
@@ -2243,7 +2838,7 @@ VENT_CUSTOM_AMBIENT: DO NN=1,N_DUCTNODES
       ELSE
          DUCT(DN%DUCT_INDEX(1))%AREA = DUCT(DN%DUCT_INDEX(1))%AREA_INITIAL
       ENDIF
-      NODE_AREA_EX(NN,:) = AREA
+      NODE_AREA_EX(NN) = AREA
       DN%XYZ(1) = SUM(NODE_X(NN,:))/AREA
       DN%XYZ(2) = SUM(NODE_Y(NN,:))/AREA
       DN%XYZ(3) = SUM(NODE_Z(NN,:))/AREA
@@ -2273,7 +2868,12 @@ VENT_CUSTOM_AMBIENT: DO NN=1,N_DUCTNODES
             DN%P_OLD      = P_INF
             DN%RHO   =  DN%P/(DN%TMP*RSUM0)
          ENDIF
-         CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,DN%CP,DN%TMP)
+         CALL GET_ENTHALPY(ZZ_GET,HGAS,DN%TMP)
+         DN%CP = HGAS / DN%TMP
+      ENDIF
+
+      IF (DN%LEAKAGE) THEN
+         IF(ABS(T-T_BEGIN) < TWO_EPSILON_EB) DN%P_OLD = SUM(NODE_P(NN,:))/AREA
       ENDIF
 
       DN%P = HVAC_PRES_RELAX*(SUM(NODE_P(NN,:))/AREA)+(1._EB-HVAC_PRES_RELAX)*DN%P_OLD
@@ -2283,6 +2883,7 @@ VENT_CUSTOM_AMBIENT: DO NN=1,N_DUCTNODES
 
       DO
          ITCOUNT = ITCOUNT + 1
+         CALL GET_ENTHALPY(ZZ_GET,HGAS,TMP_SUM)
          CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR,TMP_SUM)
          IF (TMP_SUM > 1._EB) THEN
             CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR2,TMP_SUM-1._EB)
@@ -2291,17 +2892,18 @@ VENT_CUSTOM_AMBIENT: DO NN=1,N_DUCTNODES
             CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR2,TMP_SUM+1._EB)
             DCPDT = CPBAR2 - CPBAR
          ENDIF
-         TMP_NEW = TMP_SUM + (H_G - TMP_SUM*CPBAR)/(CPBAR+TMP_SUM*DCPDT)
+         CPBAR = HGAS / TMP_SUM
+         TMP_NEW = TMP_SUM + (H_G - HGAS)/(CPBAR+TMP_SUM*DCPDT)
          IF (ABS(TMP_SUM - TMP_NEW) < SPACING(TMP_NEW) .OR. ABS(TMP_SUM - TMP_NEW)/TMP_NEW < 0.0005_EB) EXIT
          IF (ITCOUNT>10) THEN
             TMP_NEW = 0.5_EB*(TMP_SUM+TMP_NEW)
-            CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR,TMP_SUM)
             EXIT
          ENDIF
          TMP_SUM = TMP_NEW
       ENDDO
       DN%TMP_V = TMP_NEW
-      DN%CP_V = CPBAR
+      CALL GET_ENTHALPY(ZZ_GET,HGAS,TMP_NEW)
+      DN%CP_V = HGAS/TMP_NEW
    ENDIF INTERNAL_NODE_IF
 END DO VENT_CUSTOM_AMBIENT
 
@@ -2332,15 +2934,18 @@ AMBIENT_LEAK: DO NN=1,N_DUCTNODES
       ENDIF
       DN%P_OLD = DN%P
       ZZ_GET(1:N_TRACKED_SPECIES) = DN%ZZ_V(1:N_TRACKED_SPECIES)
-      CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,DN%CP,DN%TMP)
+      CALL GET_ENTHALPY(ZZ_GET,HGAS,DN%TMP)
       DN%TMP_V  = DN%TMP
       DN%RSUM_V = DN%RSUM
+      DN%CP     = HGAS/DN%TMP
       DN%CP_V   = DN%CP
       DN%RHO_V  = DN%RHO
    ENDIF
 ENDDO AMBIENT_LEAK
 
 END SUBROUTINE COLLAPSE_HVAC_BC
+
+!> \brief Sets current iteration values for duct nodes connected to a vent to the bondary condition value
 
 SUBROUTINE SET_INIT_HVAC
 INTEGER:: NN
@@ -2358,17 +2963,15 @@ ENDDO
 
 END SUBROUTINE SET_INIT_HVAC
 
+!> \brief Initializes cell densities, temperatures, specific heats and species for discretized ducts
 
 SUBROUTINE SET_INIT_HVAC_MASS_TRANSPORT
-! Initialises cell densities, temperatures, specific heats and species' for discretised ducts
-USE PHYSICAL_FUNCTIONS, ONLY: GET_AVERAGE_SPECIFIC_HEAT
-USE COMP_FUNCTIONS, ONLY: SECOND
+USE PHYSICAL_FUNCTIONS, ONLY: GET_ENTHALPY
+USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
 INTEGER :: ND,NN,NR
-REAL(EB) :: DRHO,DTMP,DZZ(1:N_TRACKED_SPECIES), ZZ_GET(1:N_TRACKED_SPECIES)
+REAL(EB) :: DRHO,DTMP,DZZ(1:N_TRACKED_SPECIES), ZZ_GET(1:N_TRACKED_SPECIES),HGAS
 TYPE(DUCT_TYPE), POINTER :: DU=>NULL()
 TYPE(DUCTRUN_TYPE), POINTER :: DR=>NULL()
-
-CALL FIND_DUCTRUNS
 
 ! Propagates duct interpolation method through the ductruns, checking for errors in input
 DO NR = 1, N_DUCTRUNS
@@ -2390,10 +2993,6 @@ DUCTRUN_LOOP:DO NR = 1, N_DUCTRUNS
       DU => DUCT(DR%DUCT_INDEX(ND))
       IF (DU%LEAKAGE) CYCLE
       IF (DU%N_CELLS==1) CYCLE
-      ALLOCATE(DU%RHO_C(DU%N_CELLS))
-      ALLOCATE(DU%TMP_C(DU%N_CELLS))
-      ALLOCATE(DU%CP_C(DU%N_CELLS))
-      ALLOCATE(DU%ZZ_C(DU%N_CELLS,N_TRACKED_SPECIES))
       SELECT CASE (DU%DUCT_INTERP_TYPE_INDEX)
          CASE (NODE1) ! duct cells and ductnodes adopt values from node 1 of lowest duct_index duct in ductrun
             DU%RHO_C(:) = DUCTNODE(DUCT(DR%DUCT_INDEX(1))%NODE_INDEX(1))%RHO_V
@@ -2430,7 +3029,8 @@ DUCTRUN_LOOP:DO NR = 1, N_DUCTRUNS
                DU%TMP_C(NN) = DUCTNODE(DU%NODE_INDEX(1))%TMP + DTMP*(REAL(NN,EB) - 0.5_EB)
                DU%ZZ_C(NN,1:N_TRACKED_SPECIES) = DUCTNODE(DU%NODE_INDEX(1))%ZZ + DZZ(:)*(REAL(NN,EB) - 0.5_EB)
                ZZ_GET = DU%ZZ_C(NN,1:N_TRACKED_SPECIES)
-               CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,DU%CP_C(NN),DU%TMP_C(NN))
+               CALL GET_ENTHALPY(ZZ_GET,HGAS,DU%TMP_C(NN))
+               DU%CP_C(NN) = HGAS / DU%TMP_C(NN)
             ENDDO
          CASE DEFAULT
             WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR: DUCT_INTERP_TYPE is not correctly specified. Duct ID: ',TRIM(DU%ID)
@@ -2441,31 +3041,32 @@ ENDDO DUCTRUN_LOOP
 
 END SUBROUTINE SET_INIT_HVAC_MASS_TRANSPORT
 
+!> \brief sets the arrays of node temperatur, node species, and duct mass flow used for setting the FDS wall boundary condition
 
 SUBROUTINE UPDATE_NODE_BC
-!Takes the MPI gathered mesh array of HVAC boundary conditions and updates the DUCTNODE boundary condition values.
 INTEGER:: NN, NS, ND
 TYPE(DUCTNODE_TYPE), POINTER :: DN=>NULL()
 
 DO NN=1,N_DUCTNODES
    DN => DUCTNODE(NN)
-   NODE_TMP_EX(NN,:) = DN%TMP
+   NODE_TMP_EX(NN) = DN%TMP
    DO NS=1,N_TRACKED_SPECIES
-      NODE_ZZ_EX(NN,NS,:) = DN%ZZ(NS)
+      NODE_ZZ_EX(NN,NS) = DN%ZZ(NS)
    ENDDO
 END DO
 
 DO ND=1,N_DUCTS
-   DUCT_MF(ND,:) = DUCT(ND)%VEL(NEW)*DUCT(ND)%AREA*DUCT(ND)%RHO_D
+   DUCT_MF(ND) = DUCT(ND)%VEL(NEW)*DUCT(ND)%AREA*DUCT(ND)%RHO_D
 ENDDO
 
 END SUBROUTINE UPDATE_NODE_BC
 
+!> \brief Initializes leakage ducts and nodes
 
 SUBROUTINE LEAKAGE_HVAC
 
-USE PHYSICAL_FUNCTIONS, ONLY: GET_AVERAGE_SPECIFIC_HEAT
-REAL(EB) :: ZZ_GET(1:N_TRACKED_SPECIES)
+USE PHYSICAL_FUNCTIONS, ONLY: GET_ENTHALPY
+REAL(EB) :: ZZ_GET(1:N_TRACKED_SPECIES),HGAS
 INTEGER :: I_DUCT,I_DUCTNODE,NZ1,NZ2
 TYPE (DUCTNODE_TYPE), POINTER:: DN1=>NULL(),DN2=>NULL()
 TYPE (DUCT_TYPE), POINTER:: DU=>NULL()
@@ -2497,7 +3098,8 @@ DO NZ1 = 0, N_ZONE
          ALLOCATE(DU%ZZ(N_TRACKED_SPECIES))
          ZZ_GET(1:N_TRACKED_SPECIES) = SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0
          DU%ZZ(1:N_TRACKED_SPECIES) = ZZ_GET(1:N_TRACKED_SPECIES)
-         CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,DU%CP_D,TMPA)
+         CALL GET_ENTHALPY(ZZ_GET,HGAS,TMPA)
+         DU%CP_D = HGAS / TMPA
          DN1=>DUCTNODE(I_DUCTNODE)
          IF (NZ1==0) DN1%AMBIENT = .TRUE.
          ALLOCATE(DN1%DUCT_INDEX(1))
@@ -2537,6 +3139,10 @@ ENDDO
 
 END SUBROUTINE LEAKAGE_HVAC
 
+!> \brief Updates filter loading and filter flow loss
+!>
+!> \param DT Current time step (s)
+!> \param NODE_INDEX Index of a node containing a filter
 
 SUBROUTINE FILTER_UPDATE(DT,NODE_INDEX)
 !Updates filter loss and loading solution
@@ -2559,13 +3165,13 @@ ELSE
 ENDIF
 
 DU=>DUCT(DN%DUCT_INDEX(1))
-IF (DU%VEL(GUESS) >= 0._EB .AND. DU%NODE_INDEX(2)==NODE_INDEX) THEN
+IF (DU%VEL(PREVIOUS) >= 0._EB .AND. DU%NODE_INDEX(2)==NODE_INDEX) THEN
   DN2 => DUCTNODE(DU%NODE_INDEX(1))
-ELSEIF (DU%VEL(GUESS) <= 0._EB .AND. DU%NODE_INDEX(1)==NODE_INDEX) THEN
+ELSEIF (DU%VEL(PREVIOUS) <= 0._EB .AND. DU%NODE_INDEX(1)==NODE_INDEX) THEN
   DN2 => DUCTNODE(DU%NODE_INDEX(2))
 ELSE
    DU=>DUCT(DN%DUCT_INDEX(2))
-   IF (DU%VEL(GUESS) >= 0._EB .AND. DU%NODE_INDEX(2)==NODE_INDEX) THEN
+   IF (DU%VEL(PREVIOUS) >= 0._EB .AND. DU%NODE_INDEX(2)==NODE_INDEX) THEN
    DN2 => DUCTNODE(DU%NODE_INDEX(1))
    ELSE
    DN2 => DUCTNODE(DU%NODE_INDEX(2))
@@ -2573,17 +3179,20 @@ ELSE
 ENDIF
 
 !Ultimately add in logic for condensible gases
-DN%FILTER_LOADING(:,3) = DU%AREA*ABS(DU%VEL(GUESS))*DN2%RHO*DN2%ZZ*FI%EFFICIENCY
+DN%FILTER_LOADING(:,3) = DU%AREA*ABS(DU%VEL(PREVIOUS))*DN2%RHO*DN2%ZZ*FI%EFFICIENCY
 DN%FILTER_LOADING(:,2) = DN%FILTER_LOADING(:,1) + DN%FILTER_LOADING(:,3) * DT
 
 END SUBROUTINE FILTER_UPDATE
 
+!> \brief Updates the heat added or removed by aircoils
+!>
+!> \param T Current time (s)
 
 SUBROUTINE COIL_UPDATE(T)
 USE MATH_FUNCTIONS, ONLY : EVALUATE_RAMP
-USE PHYSICAL_FUNCTIONS, ONLY : GET_AVERAGE_SPECIFIC_HEAT
+USE PHYSICAL_FUNCTIONS, ONLY : GET_AVERAGE_SPECIFIC_HEAT, GET_ENTHALPY
 REAL(EB), INTENT(IN) :: T
-REAL(EB) :: TMP_IN,TMP_OUT,TMP_GUESS,MDOT_DU,E_IN,MCP_C,CP1,CP2,DCPDT,TSI,ZZ_GET(1:N_TRACKED_SPECIES)
+REAL(EB) :: TMP_IN,TMP_OUT,TMP_GUESS,MDOT_DU,E_IN,MCP_C,CP1,CP2,DCPDT,TSI,ZZ_GET(1:N_TRACKED_SPECIES), HGAS
 INTEGER :: ND,ITER
 TYPE(DUCT_TYPE),POINTER::DU
 TYPE(AIRCOIL_TYPE),POINTER:: AC
@@ -2613,11 +3222,12 @@ COIL_LOOP: DO ND = 1,N_DUCTS
       ITER = 0
       TMP_IN = DU%TMP_D
       TMP_GUESS = TMP_IN
-      MDOT_DU = DU%RHO_D*ABS(DU%VEL(GUESS))*DU%AREA
+      MDOT_DU = DU%RHO_D*ABS(DU%VEL(NEW))*DU%AREA
       MCP_C =  AC%COOLANT_MASS_FLOW*AC%COOLANT_SPECIFIC_HEAT
       E_IN = MDOT_DU*TMP_IN*DU%CP_D + MCP_C*AC%COOLANT_TEMPERATURE
       ZZ_GET = DU%ZZ
       DO WHILE (ITER <= 10)
+         CALL GET_ENTHALPY(ZZ_GET,HGAS,TMP_GUESS)
          CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CP1,TMP_GUESS)
          IF (TMP_GUESS > 1._EB) THEN
             CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CP2,TMP_GUESS-1._EB)
@@ -2626,7 +3236,8 @@ COIL_LOOP: DO ND = 1,N_DUCTS
             CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CP2,TMP_GUESS+1._EB)
             DCPDT = CP2-CP1
          ENDIF
-         TMP_OUT = TMP_GUESS + (E_IN - (MDOT_DU * CP1 + MCP_C) * TMP_GUESS) / &
+         CP1 = HGAS / TMP_GUESS
+         TMP_OUT = TMP_GUESS + (E_IN - MDOT_DU*HGAS - MCP_C * TMP_GUESS) / &
                                (MDOT_DU * (DCPDT * TMP_GUESS + CP1) + MCP_C)
          IF (ABS(TMP_OUT-TMP_GUESS) < TWO_EPSILON_EB) EXIT
          IF (ABS(TMP_OUT-TMP_GUESS)/TMP_GUESS < 0.0005) EXIT
@@ -2635,11 +3246,13 @@ COIL_LOOP: DO ND = 1,N_DUCTS
       ENDDO
 
       DU%COIL_Q = AC%COOLANT_MASS_FLOW * AC%COOLANT_SPECIFIC_HEAT*(AC%COOLANT_TEMPERATURE - TMP_OUT)*AC%EFFICIENCY
+
    ENDIF
 END DO COIL_LOOP
 
 END SUBROUTINE COIL_UPDATE
 
+!> \brief Adjusts the leak area based on the zone-to-zone pressure difference
 
 SUBROUTINE ADJUST_LEAKAGE_AREA
 INTEGER :: ND
@@ -2655,13 +3268,16 @@ ENDDO
 
 END SUBROUTINE ADJUST_LEAKAGE_AREA
 
+!> \brief Updates the 1D mass transport solution in ducts
+!>
+!> \param DT Current time step (s)
 
 SUBROUTINE UPDATE_HVAC_MASS_TRANSPORT(DT)
-USE PHYSICAL_FUNCTIONS,ONLY: GET_AVERAGE_SPECIFIC_HEAT
+USE PHYSICAL_FUNCTIONS,ONLY: GET_AVERAGE_SPECIFIC_HEAT, GET_ENTHALPY
 REAL(EB), INTENT(IN) :: DT
 INTEGER :: N_SUBSTEPS,ND,NS,NC,ITCOUNT
 TYPE(DUCT_TYPE),POINTER :: DU=>NULL()
-REAL(EB) :: CP,CP2,DCPDT,DT_CFL,DT_DUCT,MASS_FLUX,TGUESS,ZZ_GET(N_TRACKED_SPECIES)
+REAL(EB) :: CP,CP2,DCPDT,DT_CFL,DT_DUCT,MASS_FLUX,TGUESS,ZZ_GET(N_TRACKED_SPECIES),HGAS
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: CPT_C,CPT_F,RHOCPT_C
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: RHOZZ_C,ZZ_F
 
@@ -2714,12 +3330,13 @@ DUCT_LOOP: DO ND = 1,N_DUCTS
       DU_UPDATE_LOOP: DO NC = 1,DU%N_CELLS
          DU%RHO_C(NC) = SUM(RHOZZ_C(NC,1:N_TRACKED_SPECIES))
          DU%ZZ_C(NC,:) = RHOZZ_C(NC,:)/DU%RHO_C(NC)
-         CPT_C(NC) = RHOCPT_C(NC)/DU%RHO_C(NC) 
+         CPT_C(NC) = RHOCPT_C(NC)/DU%RHO_C(NC)
          ZZ_GET = DU%ZZ_C(NC,:) ! Single dimension to be used with GET_AVERAGE_...
          TGUESS = DU%TMP_C(NC)
          ITCOUNT = 0
-         CP_LOOP: DO ! Uses Newton method to iterate on temperature to get new TMP_C and CP_C
+         CP_LOOP: DO ! Uses Newton method to iterate to find solution of TMP_C from enthalpy
             ITCOUNT = ITCOUNT + 1
+            CALL GET_ENTHALPY(ZZ_GET,HGAS,TGUESS)
             CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CP,TGUESS)
             IF (TGUESS>1._EB) THEN
                CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CP2,TGUESS-1._EB)
@@ -2728,7 +3345,8 @@ DUCT_LOOP: DO ND = 1,N_DUCTS
                CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CP2,TGUESS+1._EB)
                DCPDT = CP2 - CP
             ENDIF
-            DU%TMP_C(NC) = TGUESS + ( CPT_C(NC) - CP * TGUESS ) / ( CP + TGUESS * DCPDT )
+            CP = HGAS/TGUESS
+            DU%TMP_C(NC) = TGUESS + ( CPT_C(NC) - HGAS ) / ( CP + TGUESS * DCPDT )
             IF (ABS(DU%TMP_C(NC) - TGUESS) < TWO_EPSILON_EB) EXIT CP_LOOP
             IF ((DU%TMP_C(NC) - TGUESS)/DU%TMP_C(NC) < 0.0005_EB) EXIT CP_LOOP
             IF (ITCOUNT > 10) THEN
@@ -2737,7 +3355,8 @@ DUCT_LOOP: DO ND = 1,N_DUCTS
             ENDIF
             TGUESS = DU%TMP_C(NC)
          ENDDO CP_LOOP
-         CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,DU%CP_C(NC),DU%TMP_C(NC))
+         CALL GET_ENTHALPY(ZZ_GET,HGAS,DU%TMP_C(NC))
+         DU%CP_C(NC) = HGAS / DU%TMP_C(NC)
       ENDDO DU_UPDATE_LOOP
 
       DEALLOCATE(RHOZZ_C)
@@ -2753,6 +3372,34 @@ ENDDO DUCT_LOOP
 
 END SUBROUTINE UPDATE_HVAC_MASS_TRANSPORT
 
+!> \brief Sets the boundary conditions for ambient nodes used for localized leakage
+
+SUBROUTINE SET_LOCALIZED_LEAKAGE_AMBIENT
+USE PHYSICAL_FUNCTIONS,ONLY: GET_ENTHALPY
+USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
+REAL(EB) ::ZZ_GET(1:N_TRACKED_SPECIES), DUMMY=0._EB
+INTEGER:: ND
+TYPE(DUCTNODE_TYPE),POINTER :: DN=>NULL()
+
+DO ND=1,N_DUCTS
+   IF (.NOT. DUCT(ND)%LOCALIZED_LEAKAGE) CYCLE
+   DN => DUCTNODE(DUCT(ND)%NODE_INDEX(2))
+   IF (.NOT. DN%AMBIENT) CYCLE
+   DN%XYZ = DUCTNODE(DUCT(ND)%NODE_INDEX(1))%XYZ
+   DN%TMP = TMPA*EVALUATE_RAMP(DN%XYZ(3),DUMMY,I_RAMP_TMP0_Z)
+   DN%P   = EVALUATE_RAMP(DN%XYZ(3),DUMMY,I_RAMP_P0_Z)
+   DN%RHO = DN%P/(DN%TMP*RSUM0)
+   DN%P_OLD = DN%P
+   ZZ_GET(1:N_TRACKED_SPECIES) = DN%ZZ_V(1:N_TRACKED_SPECIES)
+   CALL GET_ENTHALPY(ZZ_GET,DN%CP,DN%TMP)
+   DN%CP     = DN%CP / DN%TMP
+   DN%CP_V   = DN%CP
+   DN%TMP_V  = DN%TMP
+   DN%RSUM_V = DN%RSUM
+   DN%RHO_V  = DN%RHO 
+ENDDO
+
+END SUBROUTINE SET_LOCALIZED_LEAKAGE_AMBIENT
+
+
 END MODULE HVAC_ROUTINES
-
-

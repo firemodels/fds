@@ -1,0 +1,7 @@
+RENDERDIR
+ ../../Manuals/FDS_User_Guide/SCRIPT_FIGURES
+SETVIEWPOINT
+ view 1
+RENDERONCE
+ obst_cylinder
+

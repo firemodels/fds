@@ -38,6 +38,7 @@ disp('burke_schumann...');                 burke_schumann
 disp('convective_cooling_convergence...'); convective_cooling_convergence
 disp('random_walk_soln...');               random_walk_soln
 disp('water_evap_1_const_gamma...');       water_evap_1_const_gamma
+disp('vegetation_absorb...');              vegetation_absorb
 
 % Dataplot and scatplot options
 
@@ -49,13 +50,7 @@ Scatterplot_Inputs_File = 'FDS_verification_scatterplot_inputs.csv';
 % Statistics output options
 
 Stats_Output = 'Verification';
-Output_File = [pwd, '/../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/Scatterplots/FDS_verification_scatterplot_output.csv'];
-Statistics_Tex_Output = [pwd, '/../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/Scatterplots/verification_statistics.tex'];
-
-% Override the plot style options with NRC 1824 plot options
-
-NRC_Options = false;
-Append_To_Scatterplot_Title = '';
+Scatterplot_Dir = [pwd, '/../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/Scatterplots/'];
 
 % Run dataplot and scatplot scripts
 
@@ -64,10 +59,7 @@ scatplot(saved_data, drange, ...
          'Manuals_Dir', Manuals_Dir, ...
          'Scatterplot_Inputs_File', Scatterplot_Inputs_File, ...
          'Stats_Output', Stats_Output, ...
-         'Output_File', Output_File, ...
-         'Statistics_Tex_Output', Statistics_Tex_Output, ...
-         'NRC_Options', NRC_Options, ...
-         'Append_To_Scatterplot_Title', Append_To_Scatterplot_Title)
+         'Scatterplot_Dir', Scatterplot_Dir)
 
 % Special cases
 
@@ -80,6 +72,7 @@ disp('water_ice_water...');               water_ice_water
 disp('pcm_slab...');                      pcm_slab
 disp('pulsating...');                     pulsating
 disp('compression_wave...');              compression_wave
+disp('soborot_mass_transport...');        soborot_mass_transport
 disp('plate_view_factor...');             plate_view_factor
 disp('terminal_velocity_convergence...'); terminal_velocity_convergence
 disp('fluid_part...');                    fluid_part
@@ -88,16 +81,21 @@ disp('fan_curve...');                     fan_curve
 disp('mesh_transformation...');           mesh_transformation
 disp('synthetic_eddy_method...');         synthetic_eddy_method
 disp('shunn_mms_error...');               shunn_mms_error
+disp('shunn_cc_mms_error...');            shunn_cc_mms_error
+disp('rotcube_cc_mms_error...');          rotcube_cc_mms_error
 disp('openmp_timing_benchmarks...');      openmp_timing_benchmarks
 disp('rms_cov_corr...');                  rms_cov_corr
 disp('hot_layer_collapse...');            hot_layer_collapse
 disp('radiating_polygon...');             radiating_polygon
 disp('saad_mms_temporal_error...');       saad_mms_temporal_error
+disp('saad_cc_mms_temporal_error...');    saad_cc_mms_temporal_error
 disp('shunn_mms_temporal_error...');      shunn_mms_temporal_error
 disp('scaling_tests...');                 scaling_tests
 disp('hvac_mass_transport...');           hvac_mass_transport
+disp('particle_size_distribution...');    particle_size_distribution
+disp('mass_balance...');                  mass_balance
 disp('ht3d_cond...');                     ht3d_cond
-disp('vegetation...');                    vegetation
-disp('radiation_gas_panel...');           radiation_gas_panel
+disp('ht3d_sphere...');                   ht3d_sphere
+disp('geom_positive_errors...');          geom_positive_errors
 
 display('verification scripts completed successfully!')

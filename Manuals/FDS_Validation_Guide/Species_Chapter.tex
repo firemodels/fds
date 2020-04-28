@@ -78,6 +78,262 @@ Carbon dioxide and carbon monoxide were measured near the ceiling in the forward
 
 \clearpage
 
+\subsection{LLNL Enclosure}
+
+Oxygen and carbon dioxide concentrations were reported for a single location within the LLNL Enclosure. The test report~\cite{Foote:LLNL1986} specifies the lateral location of the sensors (1.5~m from the wall opposite the exhaust duct, along the room centerline), but the reported height is only ``top of room.'' In the model, the sensors were located 4.3~m off the floor, 0.2~m below the ceiling of the compartment.
+
+For some experiments, only two concentrations are reported, one being the ambient value. The results of these experiments are shown for completeness, but the values are not included in the calculation of the accuracy statistics.
+
+Also, the test report does not indicate whether the reported volume fractions were taken to be ``wet'' or ``dry''; that is, whether the water vapor was condensed out of the sample. For the sake of comparison, the FDS results are assumed to be ``dry''.
+
+Further details of the modeling can be found in Section~\ref{LLNL_Enclosure_Description}.
+
+\newpage
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_01_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_01_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_02_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_02_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_03_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_03_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_04_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_04_CO2}
+\end{tabular*}
+\caption{LLNL Enclosure, O$_2$ and CO$_2$ concentration, Tests 1-4.}
+\label{LLNL_Gas_1}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_05_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_05_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_06_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_06_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_07_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_07_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_08_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_08_CO2}
+\end{tabular*}
+\caption{LLNL Enclosure, O$_2$ and CO$_2$ concentration, Tests 5-8.}
+\label{LLNL_Gas_2}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_09_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_09_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_10_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_10_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_11_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_11_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_12_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_12_CO2}
+\end{tabular*}
+\caption{LLNL Enclosure, O$_2$ and CO$_2$ concentration, Tests 9-12.}
+\label{LLNL_Gas_3}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_13_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_13_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_14_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_14_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_15_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_15_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_16_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_16_CO2}
+\end{tabular*}
+\caption{LLNL Enclosure, O$_2$ and CO$_2$ concentration, Tests 13-16.}
+\label{LLNL_Gas_4}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_17_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_17_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_18_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_18_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_19_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_19_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_20_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_20_CO2}
+\end{tabular*}
+\caption{LLNL Enclosure, O$_2$ and CO$_2$ concentration, Tests 17-20.}
+\label{LLNL_Gas_5}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_21_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_21_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_22_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_22_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_23_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_23_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_24_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_24_CO2}
+\end{tabular*}
+\caption{LLNL Enclosure, O$_2$ and CO$_2$ concentration, Tests 21-24.}
+\label{LLNL_Gas_6}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_25_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_25_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_26_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_26_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_27_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_27_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_28_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_28_CO2}
+\end{tabular*}
+\caption{LLNL Enclosure, O$_2$ and CO$_2$ concentration, Tests 25-28.}
+\label{LLNL_Gas_7}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_29_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_29_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_30_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_30_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_31_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_31_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_32_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_32_CO2}
+\end{tabular*}
+\caption{LLNL Enclosure, O$_2$ and CO$_2$ concentration, Tests 29-32.}
+\label{LLNL_Gas_8}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_33_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_33_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_34_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_34_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_35_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_35_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_36_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_36_CO2}
+\end{tabular*}
+\caption{LLNL Enclosure, O$_2$ and CO$_2$ concentration, Tests 33-36.}
+\label{LLNL_Gas_9}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_37_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_37_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_38_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_38_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_39_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_39_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_40_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_40_CO2}
+\end{tabular*}
+\caption{LLNL Enclosure, O$_2$ and CO$_2$ concentration, Tests 37-40.}
+\label{LLNL_Gas_10}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_41_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_41_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_42_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_42_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_43_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_43_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_44_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_44_CO2}
+\end{tabular*}
+\caption{LLNL Enclosure, O$_2$ and CO$_2$ concentration, Tests 41-44.}
+\label{LLNL_Gas_11}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_45_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_45_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_46_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_46_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_47_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_47_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_48_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_48_CO2}
+\end{tabular*}
+\caption{LLNL Enclosure, O$_2$ and CO$_2$ concentration, Tests 45-48.}
+\label{LLNL_Gas_12}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_49_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_49_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_50_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_50_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_51_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_51_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_52_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_52_CO2}
+\end{tabular*}
+\caption{LLNL Enclosure, O$_2$ and CO$_2$ concentration, Tests 49-52.}
+\label{LLNL_Gas_13}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_53_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_53_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_54_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_54_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_55_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_55_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_56_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_56_CO2}
+\end{tabular*}
+\caption{LLNL Enclosure, O$_2$ and CO$_2$ concentration, Tests 53-56.}
+\label{LLNL_Gas_14}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_57_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_57_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_58_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_58_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_59_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_59_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_60_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_60_CO2}
+\end{tabular*}
+\caption{LLNL Enclosure, O$_2$ and CO$_2$ concentration, Tests 57-60.}
+\label{LLNL_Gas_15}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_61_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_61_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_62_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_62_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_63_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_63_CO2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_64_O2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/LLNL_Enclosure/LLNL_64_CO2}
+\end{tabular*}
+\caption{LLNL Enclosure, O$_2$ and CO$_2$ concentration, Tests 61-64.}
+\label{LLNL_Gas_16}
+\end{figure}
+
+
+\clearpage
+
+
 \subsection{NIST/NRC Experiments}
 
 The following pages present comparisons of oxygen and carbon dioxide concentration predictions and measurements for the
@@ -311,9 +567,7 @@ WTC experiments. There was only one measurement of each made near the ceiling of
 \subsection{UMD Line Burner}
 \label{UMD_Line_Burner_species}
 
-Oxygen concentration measurements were made across the coflow section of the burner.  Fig.~\ref{UMD_Line_Burner_methane_O2_p18_O2} shows mean volume fraction O$_2$ profiles for two heights, $z$, above the burner surface for the experiment with nitrogen dilution of the coflowing air to 18 vol.~\% O$_2$ with methane as fuel.  Notice that the O$_2$ level at the outer edge of the burner is the ambient value of 21 vol.~\%.  Further experimental details may be found in White et al.~\cite{White:2015}.
-
-FDS simulations are peformed at three grid resolutions corresponding to $W/\delta x = 4, 8, 16$, where $W = 5$ cm is the width of the line burner (see Fig.~\ref{fig:umd_line_burner_plan_view}).  Note that White et al.~\cite{White:2015} report measured global radiant fraction of $\chi_{\si{r}} = 0.18$ for 18 vol.~\% O$_2$ level with methane fuel.  We use this value in the simulations.  Also, because these simulations are well-resolved and we are interested in convergence of the numerical solution, we employ the CHARM flux limiter for scalar transport.  Second-order interpolated boundaries are used at mesh interfaces.  The domain decompositions, in order of increasing grid resolution, use 8, 16, and 128 meshes, respectively.
+Oxygen concentration measurements were made across the coflow section of the burner.  Fig.~\ref{UMD_Line_Burner_methane_O2_p18_O2} shows mean volume fraction O$_2$ profiles for two heights, $z$, above the burner surface for the experiment with nitrogen dilution of the coflowing air to 18 vol.~\% O$_2$ with methane as fuel.  Notice that the O$_2$ level at the outer edge of the burner is the ambient value of 21 vol.~\%.  Further experimental details may be found in White et al.~\cite{White:2015}. FDS simulations are performed at three grid resolutions corresponding to $W/\delta x = 4, 8, 16$, where $W = 5$ cm is the width of the line burner (see Fig.~\ref{fig:umd_line_burner_plan_view}).
 
 \begin{figure}[h]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -321,7 +575,7 @@ FDS simulations are peformed at three grid resolutions corresponding to $W/\delt
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/UMD_Line_Burner/methane_O2_p18_O2_z_p250}
 \end{tabular*}
 \caption[UMD\_Line\_Burner oxygen concentration profiles]
-{Measured and computed mean oxygen concentration profiles at 18 vol \% O$_2$.}
+{Measured and predicted mean oxygen concentration profiles at 18 vol \% O$_2$.}
 \label{UMD_Line_Burner_methane_O2_p18_O2}
 \end{figure}
 
@@ -346,20 +600,213 @@ FDS simulations are peformed at three grid resolutions corresponding to $W/\delt
 \clearpage
 
 
-\section{Smoke and Aerosols}
+\section{Smoke}
 
-\subsection{FM/FPRF Datacenter Experiments}
-\label{FM Smoke Concentration}
+\subsection{FM Burner Experiments}
+\label{FM_Burner_Soot}
 
-Results of the low speed (78 ACH) and high speed (265 ACH) tests for propylene and cables is shown in the figure below. The error is a propagation of the non-linear error in the FM laser aspiration device combined with the fan flow error. Each test had three measurement locations (subfloor, ceiling, and ceiling plenum); however, not all locations for all tests had a measurement above background noise in the laser signal.
+Mean and rms soot volume fraction measurements were made above a 13.7~cm (inner) diameter, 15 kW ethylene burner. Figures~\ref{FM_Burner_Soot_1} through \ref{FM_Burner_Soot_6} display the radial profiles located at heights of 0.5, 1.0, 1.5, 2.5, and 3.5 burner diameters, $D$. Figures~\ref{FM_Burner_Soot_PDF_20p9} through \ref{FM_Burner_Soot_PDF_15p2} display the probability distributions (PDFs) at the five heights and radii of 0~cm, 2~cm, 4~cm, 6~cm, and 8~cm.
 
 \begin{figure}[!h]
-\begin{center}
-\begin{tabular}{c}
-\includegraphics[height=4.0in]{SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Soot.pdf}
-\end{tabular}
-\end{center}
-\caption[Summary of smoke concentration predictions for the FM/FPRF Datacenter Tests]{Summary of smoke concentration predictions for the FM/FPRF Datacenter Tests.}
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Burner/LII_Radial_Mean_Soot_0p5D_20p9} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Burner/LII_Radial_RMS_Soot_0p5D_20p9} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Burner/LII_Radial_Mean_Soot_1p0D_20p9} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Burner/LII_Radial_RMS_Soot_1p0D_20p9} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Burner/LII_Radial_Mean_Soot_1p5D_20p9} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Burner/LII_Radial_RMS_Soot_1p5D_20p9}
+\end{tabular*}
+\caption[FM Burner experiments, plume mean and rms soot volume fraction, 20.9~\% O$_2$]
+{FM Burner experiments, plume mean and rms soot volume fraction at heights of 0.5, 1.0, and 1.5 burner diameters, D, 20.9~\% O$_2$.}
+\label{FM_Burner_Soot_1}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Burner/LII_Radial_Mean_Soot_2p5D_20p9} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Burner/LII_Radial_RMS_Soot_2p5D_20p9} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Burner/LII_Radial_Mean_Soot_3p5D_20p9} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Burner/LII_Radial_RMS_Soot_3p5D_20p9}
+\end{tabular*}
+\caption[FM Burner experiments, plume mean and rms soot voiume fraction, 20.9~\% O$_2$]
+{FM Burner experiments, plume mean and rms soot volume fraction at heights of 2.5 and 3.5 burner diameters, D, 20.9~\% O$_2$.}
+\label{FM_Burner_Soot_2}
+\end{figure}
+
+\begin{figure}[!h]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Burner/LII_Radial_Mean_Soot_0p5D_16p8} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Burner/LII_Radial_RMS_Soot_0p5D_16p8} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Burner/LII_Radial_Mean_Soot_1p0D_16p8} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Burner/LII_Radial_RMS_Soot_1p0D_16p8} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Burner/LII_Radial_Mean_Soot_1p5D_16p8} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Burner/LII_Radial_RMS_Soot_1p5D_16p8}
+\end{tabular*}
+\caption[FM Burner experiments, plume mean and rms soot volume fraction, 16.8~\% O$_2$]
+{FM Burner experiments, plume mean and rms soot volume fraction at heights of 0.5, 1.0, and 1.5 burner diameters, D, 16.8~\% O$_2$.}
+\label{FM_Burner_Soot_3}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Burner/LII_Radial_Mean_Soot_2p5D_16p8} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Burner/LII_Radial_RMS_Soot_2p5D_16p8} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Burner/LII_Radial_Mean_Soot_3p5D_16p8} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Burner/LII_Radial_RMS_Soot_3p5D_16p8}
+\end{tabular*}
+\caption[FM Burner experiments, plume mean and rms soot voiume fraction, 16.8~\% O$_2$]
+{FM Burner experiments, plume mean and rms soot volume fraction at heights of 2.5 and 3.5 burner diameters, D, 16.8~\% O$_2$.}
+\label{FM_Burner_Soot_4}
+\end{figure}
+
+\begin{figure}[!h]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Burner/LII_Radial_Mean_Soot_0p5D_15p2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Burner/LII_Radial_RMS_Soot_0p5D_15p2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Burner/LII_Radial_Mean_Soot_1p0D_15p2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Burner/LII_Radial_RMS_Soot_1p0D_15p2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Burner/LII_Radial_Mean_Soot_1p5D_15p2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Burner/LII_Radial_RMS_Soot_1p5D_15p2}
+\end{tabular*}
+\caption[FM Burner experiments, plume mean and rms soot volume fraction, 15.2~\% O$_2$]
+{FM Burner experiments, plume mean and rms soot volume fraction at heights of 0.5, 1.0, and 1.5 burner diameters, D, 15.2~\% O$_2$.}
+\label{FM_Burner_Soot_5}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Burner/LII_Radial_Mean_Soot_2p5D_15p2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Burner/LII_Radial_RMS_Soot_2p5D_15p2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Burner/LII_Radial_Mean_Soot_3p5D_15p2} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_Burner/LII_Radial_RMS_Soot_3p5D_15p2}
+\end{tabular*}
+\caption[FM Burner experiments, plume mean and rms soot voiume fraction, 15.2~\% O$_2$]
+{FM Burner experiments, plume mean and rms soot volume fraction at heights of 2.5 and 3.5 burner diameters, D, 15.2~\% O$_2$.}
+\label{FM_Burner_Soot_6}
+\end{figure}
+
+
+
+\begin{sidewaysfigure}[p]
+\begin{tabular*}{\textwidth}{ccccc}
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_0p5D_r=0cm_20p9} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_0p5D_r=2cm_20p9} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_0p5D_r=4cm_20p9} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_0p5D_r=6cm_20p9} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_0p5D_r=8cm_20p9} \\
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_1p0D_r=0cm_20p9} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_1p0D_r=2cm_20p9} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_1p0D_r=4cm_20p9} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_1p0D_r=6cm_20p9} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_1p0D_r=8cm_20p9} \\
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_1p5D_r=0cm_20p9} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_1p5D_r=2cm_20p9} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_1p5D_r=4cm_20p9} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_1p5D_r=6cm_20p9} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_1p5D_r=8cm_20p9} \\
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_2p5D_r=0cm_20p9} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_2p5D_r=2cm_20p9} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_2p5D_r=4cm_20p9} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_2p5D_r=6cm_20p9} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_1p5D_r=8cm_20p9} \\
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_3p5D_r=0cm_20p9} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_3p5D_r=2cm_20p9} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_3p5D_r=4cm_20p9} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_3p5D_r=6cm_20p9} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_3p5D_r=8cm_20p9} \\
+\end{tabular*}
+\caption[FM Burner experiments, soot volume fraction PDFs, 20.9~\% O$_2$]
+{FM Burner experiments, soot volume fraction PDFs, 20.9~\% O$_2$.}
+\label{FM_Burner_Soot_PDF_20p9}
+\end{sidewaysfigure}
+
+\begin{sidewaysfigure}[p]
+\begin{tabular*}{\textwidth}{ccccc}
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_0p5D_r=0cm_16p8} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_0p5D_r=2cm_16p8} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_0p5D_r=4cm_16p8} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_0p5D_r=6cm_16p8} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_0p5D_r=8cm_16p8} \\
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_1p0D_r=0cm_16p8} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_1p0D_r=2cm_16p8} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_1p0D_r=4cm_16p8} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_1p0D_r=6cm_16p8} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_1p0D_r=8cm_16p8} \\
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_1p5D_r=0cm_16p8} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_1p5D_r=2cm_16p8} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_1p5D_r=4cm_16p8} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_1p5D_r=6cm_16p8} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_1p5D_r=8cm_16p8} \\
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_2p5D_r=0cm_16p8} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_2p5D_r=2cm_16p8} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_2p5D_r=4cm_16p8} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_2p5D_r=6cm_16p8} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_1p5D_r=8cm_16p8} \\
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_3p5D_r=0cm_16p8} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_3p5D_r=2cm_16p8} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_3p5D_r=4cm_16p8} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_3p5D_r=6cm_16p8} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_3p5D_r=8cm_16p8} \\
+\end{tabular*}
+\caption[FM Burner experiments, soot volume fraction PDFs, 16.8~\% O$_2$]
+{FM Burner experiments, soot volume fraction PDFs, 16.8~\% O$_2$.}
+\label{FM_Burner_Soot_PDF_16p8}
+\end{sidewaysfigure}
+
+\begin{sidewaysfigure}[p]
+\begin{tabular*}{\textwidth}{ccccc}
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_0p5D_r=0cm_15p2} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_0p5D_r=2cm_15p2} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_0p5D_r=4cm_15p2} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_0p5D_r=6cm_15p2} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_0p5D_r=8cm_15p2} \\
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_1p0D_r=0cm_15p2} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_1p0D_r=2cm_15p2} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_1p0D_r=4cm_15p2} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_1p0D_r=6cm_15p2} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_1p0D_r=8cm_15p2} \\
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_1p5D_r=0cm_15p2} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_1p5D_r=2cm_15p2} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_1p5D_r=4cm_15p2} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_1p5D_r=6cm_15p2} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_1p5D_r=8cm_15p2} \\
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_2p5D_r=0cm_15p2} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_2p5D_r=2cm_15p2} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_2p5D_r=4cm_15p2} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_2p5D_r=6cm_15p2} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_1p5D_r=8cm_15p2} \\
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_3p5D_r=0cm_15p2} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_3p5D_r=2cm_15p2} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_3p5D_r=4cm_15p2} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_3p5D_r=6cm_15p2} &
+\includegraphics[width=1.5in]{SCRIPT_FIGURES/FM_Burner/LII_Soot_PDF_3p5D_r=8cm_15p2} \\
+\end{tabular*}
+\caption[FM Burner experiments, soot volume fraction PDFs, 15.2~\% O$_2$]
+{FM Burner experiments, soot volume fraction PDFs, 15.2~\% O$_2$.}
+\label{FM_Burner_Soot_PDF_15p2}
+\end{sidewaysfigure}
+
+
+
+\clearpage
+
+
+\subsection{FM/FPRF Data Center Experiments}
+\label{FM Smoke Concentration}
+
+Results of the low exhaust rate (78 ACH) and high exhaust rate (265 ACH) tests for propylene and cables is shown in the figure below. Each test had three measurement locations (subfloor, ceiling, and ceiling plenum); however, not all locations for all tests had a measurement above background noise in the laser signal.
+
+\begin{figure}[!h]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Low_C3H6_SF} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_High_C3H6_SF} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Low_C3H6_HA} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_High_C3H6_HA} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Low_Cable_SF} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_High_Cable_SF}
+\end{tabular*}
+\caption[FM/FPRF Data Center, smoke concentration, propylene and cable sources]{FM/FPRF Data Center, smoke concentration, low and high exhaust rate, propylene and cable sources.}
+\label{FM_FPRF_Datacenter_Smoke}
 \end{figure}
 
 \clearpage
@@ -443,55 +890,12 @@ Beam obscuration measurements were made at different locations within the compar
 
 \clearpage
 
+\section{Aerosols}
+
 \subsection{Sippola Aerosol Deposition Experiments}
 \label{Aerosol Deposition Velocity}
 
-FDS treats smoke particulate and aerosols in a similar way to other gaseous combustion products, basically a tracer gas whose production rate is a fixed fraction of the fuel consumption rate. However, there is an option in the model to allow smoke or aerosols to deposit on solid surfaces, thus reducing its concentration in the product stream. A total of 16 aerosol deposition experiments were conducted in a straight steel duct with smooth walls for 5 different particle diameters (1~$\mu$m, 3~$\mu$m, 5~$\mu$m, 9~$\mu$m, and 16~$\mu$m) and 3 different air velocities (2.2~m/s, 5.3~m/s, and 9.0~m/s). In the simulations, the aerosol is tracked explicitly, and the aerosol deposition routines are enabled (refer to the Aerosol Deposition section in the FDS User Guide~\cite{FDS_Users_Guide} and FDS Technical Reference Guide~\cite{FDS_Math_Guide} for more details). A summary of the 16~experiments is shown in Table~\ref{Sippola_Aerosol_Deposition_Summary}.
-
-\begin{table}[h]
-\caption{Summary of Sippola aerosol deposition experiments selected for model validation.}
-\begin{center}
-\begin{tabular}{|c|c|c|c|}
-\hline
-Test      &  Air Speed        &  Particle Diameter          &  Particle Density             \\
-No.       &  (m/s)            &  ($\mu$m)                   &  (kg/m$^3$)                   \\ \hline \hline
-1         &  2.2              &  1.0                        &  1350                         \\ \hline
-2         &  2.2              &  2.8                        &  1170                         \\ \hline
-3         &  2.1              &  5.2                        &  1210                         \\ \hline
-4         &  2.2              &  9.1                        &  1030                         \\ \hline
-5         &  2.2              &  16                         &  950                          \\ \hline
-6         &  5.3              &  1.0                        &  1350                         \\ \hline
-7         &  5.2              &  1.0                        &  1350                         \\ \hline
-8         &  5.2              &  3.1                        &  1170                         \\ \hline
-9         &  5.4              &  5.2                        &  1210                         \\ \hline
-10        &  5.3              &  9.8                        &  1030                         \\ \hline
-11        &  5.3              &  16                         &  950                          \\ \hline
-12        &  9.0              &  1.0                        &  1350                         \\ \hline
-13        &  9.0              &  3.1                        &  1170                         \\ \hline
-14        &  8.8              &  5.4                        &  1210                         \\ \hline
-15        &  9.2              &  8.7                        &  1030                         \\ \hline
-16        &  9.1              &  15                         &  950                          \\ \hline
-\end{tabular}
-\end{center}
-\label{Sippola_Aerosol_Deposition_Summary}
-\end{table}
-
-\noindent The particle deposition velocity, $u_{\rm dep}$, is calculated by
-\be
-   u_{\rm dep} = \frac{J_1 + J_2 + J_3 + J_4}{4 \; C_{\rm avg}}
-\ee
-where $J_1$ through $J_4$ are the deposition fluxes (\si{kg/(m^2.s)}) for duct panels 1 through 4 given by
-\be
-   J = \frac{m_{\rm d}}{A_{\rm d} \; \Delta t}
-\ee
-where $m_{\rm d}$ is the mass of particles on the duct panel (kg), $A_{\rm d}$ is the area of the duct panel (m$^2$),
-and $\Delta t$ is the duration over which the aerosol deposits onto the panel (s). $C_{\rm avg}$ is the
-average aerosol concentration in the duct test section (kg/m$^3$) and is given by
-\be
-   C_{\rm avg} = \frac{C_{\rm upstream} + C_{\rm downstream}}{2}
-\ee
-Figure~\ref{Sippola_Aerosol_Deposition_Velocity} compares the measured and predicted aerosol deposition velocities,
-and Figure~\ref{Summary_Aerosol_Deposition_Velocity} shows a summary of the results.
+Figure~\ref{Sippola_Aerosol_Deposition_Velocity} compares the measured and predicted aerosol deposition velocities in the Sippola experiments, and Figure~\ref{Summary_Aerosol_Deposition_Velocity} shows a summary of the results. Details of the experiment and simulation are found in Section~\ref{Sippola_Aerosol_Deposition_Description}
 
 \begin{figure}[!ht]
 \begin{center}
@@ -518,6 +922,177 @@ and Figure~\ref{Summary_Aerosol_Deposition_Velocity} shows a summary of the resu
 \label{Summary_Aerosol_Deposition_Velocity}
 \end{figure}
 
+\subsection{NIST Soot Deposition Gauge Experiments}
+\label{Aerosol Deposition}
+
+Figure~\ref{NIST Soot Deposition Gauge deposited mass} compares the measured and predicted aerosol mass deposition velocities in the NIST Soot Deposition Gauge experiments, and Figure~\ref{Summary_NIST_SDG} shows a summary of the results. Details of the experiment and simulation are found in Section~\ref{NIST_SDG_Description}
+
+\begin{figure}[!ht]
+	\begin{center}
+		\begin{tabular}{c}
+			\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Deposition_Gauge/NIST_SDG_100} \\
+			\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Deposition_Gauge/NIST_SDG_200}
+		\end{tabular}
+	\end{center}
+	\caption[Predicted and measured aerosol deposited mass, NIST Soot Deposition Gauge experiments]
+	{Predicted and measured aerosol deposited mass, NIST Soot Deposition Gauge experiments.}
+	\label{NIST Soot Deposition Gauge deposited mass}
+\end{figure}
+
+\begin{figure}[!ht]
+	\begin{center}
+		\begin{tabular}{c}
+			\includegraphics[height=4.0in]{SCRIPT_FIGURES/ScatterPlots/FDS_Aerosol_Deposition} \\
+			\vspace{0.25in} \\
+		\end{tabular}
+	\end{center}
+	\caption[Summary of aerosol deposited mass predictions]
+	{Summary of aerosol deposited mass predictions.}
+	\label{Summary_NIST_SDG}
+\end{figure}
+
+\clearpage
+
+\section{Droplet Evaporation}
+
+This section presents the results of simulations of liquid droplet evaporation experiments. The titles of the sections below are named for the experimentalists.
+
+\subsection{Ranz and Marshall}
+
+A description of the experiments is included in Sec.~\ref{Ranz_Marshall_Description}. Figure~\ref{RM_Fig_8} shows the results of predicting the drop diameter of a single droplet evaporating in dry air.
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics[height=2.15in]{SCRIPT_FIGURES/Ranz_Marshall/Ranz_Marshall_Time_Dep}
+    \caption[Droplet diameter for the Ranz and Marshall experiment]
+    {Measured and predicted droplet diameter for the Ranz and Marshall experiment shown in Fig.~8 of \cite{Ranz}.}
+    \label{RM_Fig_8}
+\end{figure}
+
+Figure~\ref{RM_Tables} compares the measured and predicted evaporation rates for Table 1 through Table 4 in \cite{Ranz}. The Table 1 experiments were water droplets in ambient air, the Table 2 experiments were water droplets at in warm air (less than boiling), the Table 3 experiments were water droplets in hot air (greater than boiling), and the Table 4 experiments were benzene droplets in ambient air.  A summary of the results is shown in Fig.~\ref{RM_Summary}.
+
+\begin{figure}[!h]
+	\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+		\includegraphics[height=2.15in]{SCRIPT_FIGURES/Ranz_Marshall/Ranz_Marshall_Table_1} &
+		\includegraphics[height=2.15in]{SCRIPT_FIGURES/Ranz_Marshall/Ranz_Marshall_Table_2} \\
+		\includegraphics[height=2.15in]{SCRIPT_FIGURES/Ranz_Marshall/Ranz_Marshall_Table_3} &
+		\includegraphics[height=2.15in]{SCRIPT_FIGURES/Ranz_Marshall/Ranz_Marshall_Table_4}
+	\end{tabular*}
+	\caption[Evaporation rates for the Ranz and Marshall experiments]{Evaporation rates for the Ranz and Marshall experiments~\cite{Ranz}.}
+	\label{RM_Tables}
+\end{figure}
+
+\begin{figure}[!ht]
+	\begin{center}
+		\begin{tabular}{c}
+			\includegraphics[height=4.0in]{SCRIPT_FIGURES/ScatterPlots/FDS_Evaporation_Rate} \\
+			\vspace{0.25in} \\
+		\end{tabular}
+	\end{center}
+	\caption[Summary of evaporation rates for the Ranz and Marshall experiments]{Summary of evaporation rates for the Ranz and Marshall experiments~\cite{Ranz}.}
+	\label{RM_Summary}
+\end{figure}
+
+\subsection{Fujita et al.}
+
+A description of the experiments is included in Sec.~\ref{Fujita_exp}. Figure~\ref{Fujita_drop_area} shows the droplet area normalized by its initial area, and Fig.~\ref{Fujita_drop_T} shows the droplet temperature change.
+
+\begin{figure}[!h]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Droplet_Evaporation/fujita_up8_hp0_d} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Droplet_Evaporation/fujita_up8_hp3_d} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Droplet_Evaporation/fujita_u2p0_hp0_d} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Droplet_Evaporation/fujita_u2p0_hp3_d}
+\end{tabular*}
+\caption[Normalized droplet area for the Fujita experiments]{Normalized droplet area for the Fujita experiments for varying Reynolds number (Re) and Humidty (H)}
+\label{Fujita_drop_area}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Droplet_Evaporation/fujita_up8_hp0_T} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Droplet_Evaporation/fujita_up8_hp3_T} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Droplet_Evaporation/fujita_u2p0_hp0_T} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Droplet_Evaporation/fujita_u2p0_hp3_T}
+\end{tabular*}
+\caption[Droplet temperature change, Fujita et al.]{Droplet temperature change for the Fujita experiments for varying Reynolds number (Re) and Humidity (H).}
+\label{Fujita_drop_T}
+\end{figure}
+
+\clearpage
+
+\subsection{Gavin}
+
+A description of the experiments is included in Sec.~\ref{Gavin_exp}. Figure~\ref{Gavin_plots} shows the simulation results for the droplet terminal velocity.
+
+\begin{figure}[!h]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Droplet_Evaporation/gavin_557} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Droplet_Evaporation/gavin_769}
+\end{tabular*}
+\caption[Droplet terminal velocity for the Gavin experiments]{Droplet terminal velocity for the Gavin experiments.}
+\label{Gavin_plots}
+\end{figure}
+
+\clearpage
+
+\subsection{Kolaitis and Founti}
+
+A description of the experiments is included in Sec.~\ref{Kolaitis_exp}. Figure~\ref{Kolaitis_d2} shows the simulation results for the squared droplet diameter. Figure~\ref{Kolaitis_T} shows the simulation results for the droplet surface temperature.
+
+\begin{figure}[!h]
+	\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+		\includegraphics[height=2.15in]{SCRIPT_FIGURES/Droplet_Evaporation/kolaitis_decane_d2} &
+		\includegraphics[height=2.15in]{SCRIPT_FIGURES/Droplet_Evaporation/kolaitis_ethanol_d2} \\
+		\includegraphics[height=2.15in]{SCRIPT_FIGURES/Droplet_Evaporation/kolaitis_heptane_1_d2} &
+		\includegraphics[height=2.15in]{SCRIPT_FIGURES/Droplet_Evaporation/kolaitis_heptane_2_d2}
+	\end{tabular*}
+	\caption[Square of the droplet diameter, Kolaitis and Founti]{Square of the droplet diameter, Kolaitis and Founti.}
+	\label{Kolaitis_d2}
+\end{figure}
+
+\begin{figure}[p]
+	\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+		\includegraphics[height=2.15in]{SCRIPT_FIGURES/Droplet_Evaporation/kolaitis_decane_T} &
+		\includegraphics[height=2.15in]{SCRIPT_FIGURES/Droplet_Evaporation/kolaitis_ethanol_T} \\
+		\includegraphics[height=2.15in]{SCRIPT_FIGURES/Droplet_Evaporation/kolaitis_heptane_1_T} &
+		\includegraphics[height=2.15in]{SCRIPT_FIGURES/Droplet_Evaporation/kolaitis_heptane_2_T}
+	\end{tabular*}
+	\caption[Droplet surface temperature, Kolaitis and Founti]{Droplet surface temperature, Kolaitis and Founti.}
+	\label{Kolaitis_T}
+\end{figure}
+
+\clearpage
+
+\subsection{Maqua et al.}
+
+A description of the experiments is included in Sec.~\ref{Maqua_exp}. Figure~\ref{Maqua_plots} shows the droplet surface temperature for the two experiments.
+
+\begin{figure}[!h]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Droplet_Evaporation/maqua_acetone} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Droplet_Evaporation/maqua_ethanol}
+\end{tabular*}
+\caption[Droplet surface temperature for the Maqua et al. experiments]{Droplet surface temperature for the Maqua et al. experiments.}
+\label{Maqua_plots}
+\end{figure}
+
+\clearpage
+
+\subsection{Taflin Experiments}
+
+A description of the experiments is included in Sec.~\ref{Taflin_exp}. Figure~\ref{Taflin_plots} shows the droplet diameter for the two Taflin experiments.
+
+\begin{figure}[!h]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Droplet_Evaporation/taflin_43p9} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Droplet_Evaporation/taflin_56p6}
+\end{tabular*}
+\caption[Droplet diameter for the Taflin experiments]{Droplet diameter for the Taflin experiments.}
+\label{Taflin_plots}
+\end{figure}
+
+
 
 \clearpage
 
@@ -527,8 +1102,20 @@ Predicting the concentration of products of incomplete combustion is challenging
 
 
 \subsection{Smyth Slot Burner Experiment}
+\label{Smyth_Reactions}
 
-A two-step CO production model (a modified version of the mechanism by Andersen et al.~\cite{AndersenJ:1}) is used to simulate a methane/air slot burner diffusion flame.  A 2D DNS calculation is run at two different grid resolutions: $\delta x = 0.250 \;\si{mm}$ and $\delta x = 0.125 \;\si{mm}$.  In our modified mechanism the hydrocarbon/oxygen reaction to CO is assumed to be infinitely fast (mixed is burnt) to avoid complications of modeling ignition.  The reversible CO to CO$_2$ reaction is modeled with Arrhenius kinetics.  As discussed by Westbrook and Dryer~\cite{Westbrook:1}, the kinetics constants for the reduced CO mechanisms may be model dependent.  Here, the Arrhenius constant for the forward CO to CO$_2$ reaction is tuned to match the Smyth experimental data.  These same model parameters are then also used in the NIST Reduced Scale Enclosure LES without modification (see Section \ref{sec:NIST_RSE_1994}).  Figures~\ref{Smyth_Slot_Burner_fuel_ox} through \ref{Smyth_Slot_Burner_co_co2} show predicted and measured concentrations of CH$_4$, O$_2$, CO,  and CO$_2$ at three elevations above the burner. Figure~\ref{Smyth_Slot_Burner_temp} shows predicted and measured temperatures at these same elevations.  The reported uncertainty in the species concentration measurements ranges from 10~\% to 20~\%.
+Figure~\ref{Smyth_Slot_Burner_temp} shows predicted and measured temperatures at three elevations above the Smyth slot burner (see Section~\ref{Smyth_Slot_Burner_Description} for details). Figures~\ref{Smyth_Slot_Burner_fuel_ox} through \ref{Smyth_Slot_Burner_h2o_h2} show predicted and measured concentrations of CH$_4$, O$_2$, CO, CO$_2$, H$_2$O and H$_2$ at the same three elevations. The reported uncertainty in the species concentration measurements ranges from 10~\% to 20~\%. The abbreviation ``FR'' in the labels means that the conversion of CO to CO$_2$ is modeled using a finite-rate, reversible reaction. The word ``Fast'' implies that this reaction is infinitely fast, but occurs following the first reaction, also infinitely fast.
+
+\begin{figure}[!h]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_11mm_Temperature} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_9mm_Temperature} \\
+\multicolumn{2}{c}{\includegraphics[height=2.15in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_7mm_Temperature}}
+\end{tabular*}
+\caption[Temperature predictions at 7~mm, 9~mm, and 11~mm above burner, Smyth experiment]
+{Predicted and measured temperature at 7~mm, 9~mm, and 11~mm above a methane-air slot burner.}
+\label{Smyth_Slot_Burner_temp}
+\end{figure}
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -539,8 +1126,8 @@ A two-step CO production model (a modified version of the mechanism by Andersen 
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_7mm_Fuel} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_7mm_Oxygen}
 \end{tabular*}
-\caption[Species predictions at 7~mm, 9~mm, and 11~mm above burner, Smyth experiment]
-{Predicted and measured fuel and oxygen species at 7~mm, 9~mm, and 11~mm above a methane-air slot burner.}
+\caption[CH$_4$ and O$_2$ volume fractions at 11~mm, 9~mm, and 7~mm above burner, Smyth burner]
+{Predicted and measured CH$_4$ and O$_2$ volume fractions at 11~mm, 9~mm, and 7~mm above a methane-air slot burner.}
 \label{Smyth_Slot_Burner_fuel_ox}
 \end{figure}
 
@@ -553,28 +1140,34 @@ A two-step CO production model (a modified version of the mechanism by Andersen 
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_7mm_Carbon_Dioxide} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_7mm_Carbon_Monoxide}
 \end{tabular*}
-\caption[Species predictions at 7~mm, 9~mm, and 11~mm above burner, Smyth experiment]
-{Predicted and measured carbon dioxide and carbon monoxide species at 7~mm, 9~mm, and 11~mm above a methane-air slot burner.}
+\caption[CO$_2$ and CO volume fractions at 11~mm, 9~mm, and 7~mm above burner, Smyth burner]
+{Predicted and measured CO$_2$ and CO volume fractions at 11~mm, 9~mm, and 7~mm above a methane-air slot burner.}
 \label{Smyth_Slot_Burner_co_co2}
 \end{figure}
 
 \begin{figure}[p]
-\centering
-\begin{tabular}{c}
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_11mm_Temperature} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_9mm_Temperature} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_7mm_Temperature}
-\end{tabular}
-\caption[Temperature predictions at 7~mm, 9~mm, and 11~mm above burner, Smyth experiment]
-{Predicted and measured temperature at 7~mm, 9~mm, and 11~mm above a methane-air slot burner.}
-\label{Smyth_Slot_Burner_temp}
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_11mm_Water} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_11mm_Hydrogen} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_9mm_Water} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_9mm_Hydrogen} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_7mm_Water} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Smyth_Slot_Burner/Smyth_Slot_Burner_7mm_Hydrogen}
+\end{tabular*}
+\caption[H$_2$O and H$_2$ volume fractions at 11~mm, 9~mm, and 7~mm above burner, Smyth burner]
+{Predicted and measured H$_2$O and H$_2$ volume fractions at 11~mm, 9~mm, and 7~mm above a methane-air slot burner.}
+\label{Smyth_Slot_Burner_h2o_h2}
 \end{figure}
+
+
 
 \clearpage
 
 \subsection{Beyler Hood Experiments}
 
-Fig.~\ref{Beyler_Species} shows species predictions made by the two-step model compared with measured data for a range of fire sizes and burner positions.  The model outputs are the time-averaged species concentration at the hood exhaust vent whereas the experiment is the time-averaged species concentration downstream in the exhaust duct.
+Fig.~\ref{Beyler_Species} compares measured and predicted species mass fractions in the Beyler Hood experiments. Both measured and predicted values are time-averaged. The FDS results are taken at the extraction vent, whereas the measurements were made downstream of the vent. Details of the experiments can be found in Section~\ref{Beyler_Hood_Description}.
+
+
 
 \begin{figure}[h]
 \begin{tabular*}{\textwidth}{c@{\extracolsep{\fill}}c}
@@ -595,17 +1188,24 @@ Fig.~\ref{Beyler_Species} shows species predictions made by the two-step model c
 \subsection{NIST Reduced Scale Enclosure (RSE) Experiments, 1994}
 \label{sec:NIST_RSE_1994}
 
-The RSE natural gas experiments were selected to assess the CO production capability rather than soot production. Nine fire sizes were simulated: 50~kW, 75~kW, 100~kW, 150~kW, 200~kW, 300~kW, 400~kW, 500~kW, and 600~kW. The experiments were modeled using properties of the natural gas supplied to the test facility. The model geometry included the compartment interior along with a 0.6~m deep region outside the door. Figures~\ref{NIST_RSE_1994_spec1} and \ref{NIST_RSE_1994_spec1} show the measured and predicted CO, CO$_2$ and O$_2$, and H$_2$O concentrations. Figure~\ref{NIST_RSE_1994_temp} shows the measured and predicted thermocouple temperatures in the front and rear of the compartment. The measured values are from the test series performed by Bryner, Johnsson, and Pitts~\cite{Bryner:1}.
+Figures~\ref{NIST_RSE_1994_CO} through \ref{NIST_RSE_1994_H2O} show the measured and predicted CO, CO$_2$ and O$_2$, and H$_2$O concentrations. Figure~\ref{NIST_RSE_1994_temp} shows the measured and predicted thermocouple temperatures in the front and rear of the compartment. The measurements were made 10~cm below the ceiling and 30~cm from the left side wall. The front position was 10~cm from the wall with the door; the back position was 30~cm from the rear wall. Details of the experiments are found in Section~\ref{NIST_RSE_1994_Description}.
 
 \begin{figure}[!h]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_1994/NIST_RSE_1994_CO_Front} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_1994/NIST_RSE_1994_CO_Rear} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_1994/NIST_RSE_1994_CO_Rear}
+\end{tabular*}
+\caption[Comparison of measured and predicted CO concentration, NIST RSE experiments]{Comparison of measured and predicted CO concentration, NIST RSE experiments.}
+\label{NIST_RSE_1994_CO}
+\end{figure}
+
+\begin{figure}[!h]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_1994/NIST_RSE_1994_CO2_Front} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_1994/NIST_RSE_1994_CO2_Rear}
 \end{tabular*}
-\caption[Summary of species concentrations in NIST RSE experiments]{Summary of species concentrations in NIST Reduced Scale Enclosure experiments.}
-\label{NIST_RSE_1994_spec1}
+\caption[Comparison of measured and predicted CO$_2$ concentration, NIST RSE experiments]{Comparison of measured and predicted CO$_2$ concentration, NIST RSE experiments.}
+\label{NIST_RSE_1994_CO2}
 \end{figure}
 
 \newpage
@@ -613,12 +1213,19 @@ The RSE natural gas experiments were selected to assess the CO production capabi
 \begin{figure}[!h]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_1994/NIST_RSE_1994_O2_Front} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_1994/NIST_RSE_1994_O2_Rear} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_1994/NIST_RSE_1994_O2_Rear}
+\end{tabular*}
+\caption[Comparison of measured and predicted O$_2$ concentration, NIST RSE experiments]{Comparison of measured and predicted O$_2$ concentration, NIST RSE experiments.}
+\label{NIST_RSE_1994_O2}
+\end{figure}
+
+\begin{figure}[!h]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_1994/NIST_RSE_1994_H2O_Front} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_1994/NIST_RSE_1994_H2O_Rear}
 \end{tabular*}
-\caption[Summary of species concentrations in NIST RSE experiments]{Summary of species concentrations in NIST Reduced Scale Enclosure experiments.}
-\label{NIST_RSE_1994_spec2}
+\caption[Comparison of measured and predicted H$_2$O concentration, NIST RSE experiments]{Comparison of measured and predicted H$_2$O concentration, NIST RSE experiments.}
+\label{NIST_RSE_1994_H2O}
 \end{figure}
 
 \begin{figure}[!h]
@@ -626,7 +1233,7 @@ The RSE natural gas experiments were selected to assess the CO production capabi
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_1994/NIST_RSE_1994_TC_Front} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_1994/NIST_RSE_1994_TC_Rear}
 \end{tabular*}
-\caption[Summary of thermocouple values in NIST RSE experiments]{Summary of thermocouple values in NIST Reduced Scale Enclosure experiments.}
+\caption[Comparison of measured and predicted temperature, NIST RSE experiments]{Comparison of measured and predicted temperature, NIST RSE experiments.}
 \label{NIST_RSE_1994_temp}
 \end{figure}
 
@@ -635,27 +1242,11 @@ The RSE natural gas experiments were selected to assess the CO production capabi
 
 
 \subsection{NIST Reduced-Scale Enclosure (RSE) Experiments, 2007}
+\label{sec:NIST_RSE_2007}
 
-In the simulations of the NIST RSE Experiments, it is assumed that the combustion can be simplified to two fast reactions, the first converting fuel to CO and soot, and the second converting CO to CO$_2$. The stoichiometry for the first reaction is given here:
-\begin{eqnarray*}
-   & \mathrm{Methane:}  \quad & \mathrm{CH_4      + 1.5 \,    O_2} \rightarrow \mathrm{         CO + 2 \, H_2O } \\[.1in]
-   & \mathrm{Methanol:} \quad & \mathrm{CH_4O     +           O_2} \rightarrow \mathrm{         CO + 2 \, H_2O } \\[.1in]
-   & \mathrm{Ethanol:}  \quad & \mathrm{C_2H_6O   + 1.9845 \, O_2} \rightarrow \mathrm{1.969 \, CO + 3 \, H_2O + 0.031 \, C} \quad ; \quad y_{\rm s} = 0.008 \\[.1in]
-   & \mathrm{Heptane:}  \quad & \mathrm{C_7H_{16} + 7.345  \, O_2} \rightarrow \mathrm{6.69 \,  CO + 8 \, H_2O + 0.31 \, C}  \quad ; \quad y_{\rm s} = 0.037 \\[.1in]
-   & \mathrm{Toluene:}  \quad & \mathrm{C_7H_8    + 4.8175 \, O_2} \rightarrow \mathrm{5.635 \, CO + 4 \, H_2O + 1.365 \, C} \quad ; \quad y_{\rm s} = 0.178 \\[.1in]
-   & \mathrm{Styrene:}  \quad & \mathrm{C_8H_8    + 5.233  \, O_2} \rightarrow \mathrm{6.466 \, CO + 4 \, H_2O + 1.534 \, C} \quad ; \quad y_{\rm s} = 0.177
-\end{eqnarray*}
-A single carbon atom serves as a surrogate for soot. Its stoichiometric coefficient is based on measured soot yields, $y_{\rm s}$, provided by Tewarson~\cite{SFPE:Tewarson}. The heats of combustion for the reactions are calculated directly from the heats of formation of the individual molecules.
+Species and temperature measurements were made in the front and rear of the compartment, 10~cm below the ceiling, 29~cm from the right wall (looking into the compartment), and 10~cm from the front wall or 29~cm from the rear wall. The compartment was 0.95~m wide by 1.42~m deep by 0.98~m tall with a door 0.48~m wide by 0.81~m tall centered on one of the short walls.  Measurements of temperature, O$_2$, CO$_2$, CO, and unburned hydrocarbon concentration were made near the ceiling in the front and back of the compartment. Details of the experiments are found in Section~\ref{NIST_RSE_2007_Description}.
 
-In the experiments, the heat release rate was measured via oxygen consumption calorimetry. In the simulations, the mass loss rate of fuel was specified by taking the measured HRR and dividing by the heats of combustion listed in Ref.~\cite{SFPE:Tewarson}.
-
-Species and temperature measurements were made in the front and rear of the compartment, 10~cm below the ceiling, 29~cm from the right wall (looking into the compartment), and 10~cm from the front wall or 29~cm from the rear wall.
-
-
-
-\newpage
-
-\begin{figure}[p]
+\begin{figure}[!ht]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_01_CO2} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_RSE_2007/RSE_01_CO} \\
@@ -667,6 +1258,8 @@ Species and temperature measurements were made in the front and rear of the comp
 \caption[Summary of Test 1, NIST RSE 2007]{Summary of Test 1, NIST RSE 2007.}
 \label{NIST_RSE_2007_1}
 \end{figure}
+
+\newpage
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -815,18 +1408,11 @@ Species and temperature measurements were made in the front and rear of the comp
 \clearpage
 
 \subsection{NIST Full-Scale Enclosure (FSE) Experiments, 2008}
+\label{sec:NIST_FSE_2008}
 
-The FSE experiments~\cite{Lock:1} were selected to assess CO production capability in under-ventilated compartment fires over a range of fuels types and fire sizes in a full-scale ISO 9705 enclosure. The 30 experiments (of which 27 were selected) featured 7 different fuels: heptane, natural gas, nylon, propylene, isopropanol, styrene, and toluene. Peak heat release rates ranged from approximately 100~kW to 2.5~MW. Compartment ventilation was varied from a full 80~cm door opening to 40~cm, 20~cm, and 10~cm openings. The fuel sources in the experiments were either pool fires or spray burners, both of which were modeled. The fuel flow rates were specified in the experiments even though the fuel did not always burn.
+Species concentrations and temperature measurements were made at the front and rear of the compartment. Details of the experiments are found in Section~\ref{NIST_FSE_2008_Description}.
 
-In the simulations, there are fuels which are not pre-defined in FDS (e.g., styrene, nylon). In these cases, the fuel's enthalpy of formation is specified instead of the heat of combustion. Typically, the heat of combustion is reported for complete combustion. For the reaction mechanism used to model these experiments, however, the oxidation of fuel produces only carbon monoxide (i.e., incomplete combustion). Thus, typical literature values are not appropriate. An alternative to specifying the heat of combustion is to use the enthalpy of formation of the fuel. If that value cannot be found from literature or if a fuel mixture has been created, FDS can be used to determine an approximate value. Consider the following {\ct REAC} line:
-\begin{lstlisting}
-&REAC ID='NG', FUEL='NATURAL_GAS',FORMULA='C1.06084H4.076451N0.015529O0.014848' /
-\end{lstlisting}
-FDS will compute a balanced reaction assuming complete combustion and the heat of combustion will be determined based on oxygen consumption (see the FDS User's Guide discussion of the parameter {\ct EPUMO2}). A benefit of this process is that the enthalpy of formation of the fuel is automatically computed and is written to the {\ct CHID.out} file. Enthalpy of formation is a fundamental fuel property and not a reaction property like heat of combustion. As a result, this value can be used to define the fuel for the reaction mechanism with incomplete combustion.
-
-\newpage
-
-\begin{figure}[p]
+\begin{figure}[!ht]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISONG3_Carbon_Dioxide} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_FSE_2008/ISONG3_Carbon_Monoxide} \\
@@ -838,6 +1424,8 @@ FDS will compute a balanced reaction assuming complete combustion and the heat o
 \caption[Summary of ISONG3, NIST FSE 2008]{Summary of ISONG3, NIST FSE 2008.}
 \label{NIST_FSE_1994_ISONG3}
 \end{figure}
+
+\newpage
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -1179,7 +1767,74 @@ FDS will compute a balanced reaction assuming complete combustion and the heat o
 \end{figure}
 
 
+\clearpage
 
+\subsection{NIST Pool Fires}
+\label{sec:NIST_Pool_Fires}
+
+Falkenstein-Smith et al.~\cite{Falkenstein-Smith:2019} made mean temperature and product species concentration measurements along the centerline above 30.5~cm diameter liquid pool fires of acetone, ethanol, and methanol; and a 37.0~cm diameter burner of methane. Note that the species measurements include the vapor form of the primary fuel molecule, in addition to intermediate fuel species. FDS does not model the decomposition of the fuel molecule into intermediate hydrocarbon species except for CO and H$_2$.
+
+The mean centerline temperature profiles are found in Section~\ref{NIST_Pool_Fires_Plume_Temps}. The species concentrations are found in Figs.~\ref{NIST_Pool_Fires_Acetone} through~\ref{NIST_Pool_Fires_Methane} on the following pages.
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Pool_Fires/NIST_Acetone_O2_CL} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Pool_Fires/NIST_Acetone_Fuel_CL} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Pool_Fires/NIST_Acetone_CO2_CL} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Pool_Fires/NIST_Acetone_CO_CL}    \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Pool_Fires/NIST_Acetone_H2O_CL} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Pool_Fires/NIST_Acetone_H2_CL} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Pool_Fires/NIST_Acetone_N2_CL} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Pool_Fires/NIST_Acetone_Soot_CL}
+\end{tabular*}
+\caption[NIST Pool Fires, centerline product species, acetone]{NIST Pool Fires, centerline product species, acetone.}
+\label{NIST_Pool_Fires_Acetone}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Pool_Fires/NIST_Ethanol_O2_CL} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Pool_Fires/NIST_Ethanol_Fuel_CL} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Pool_Fires/NIST_Ethanol_CO2_CL} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Pool_Fires/NIST_Ethanol_CO_CL}    \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Pool_Fires/NIST_Ethanol_H2O_CL} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Pool_Fires/NIST_Ethanol_H2_CL} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Pool_Fires/NIST_Ethanol_N2_CL} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Pool_Fires/NIST_Ethanol_Soot_CL}
+\end{tabular*}
+\caption[NIST Pool Fires, centerline product species, ethanol]{NIST Pool Fires, centerline product species, ethanol.}
+\label{NIST_Pool_Fires_Ethanol}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Pool_Fires/NIST_Methanol_O2_CL} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Pool_Fires/NIST_Methanol_Fuel_CL} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Pool_Fires/NIST_Methanol_CO2_CL} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Pool_Fires/NIST_Methanol_CO_CL}    \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Pool_Fires/NIST_Methanol_H2O_CL} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Pool_Fires/NIST_Methanol_H2_CL} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Pool_Fires/NIST_Methanol_N2_CL} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Pool_Fires/NIST_Methanol_Soot_CL}
+\end{tabular*}
+\caption[NIST Pool Fires, centerline product species, methanol]{NIST Pool Fires, centerline product species, methanol.}
+\label{NIST_Pool_Fires_Methanol}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Pool_Fires/NIST_Methane_O2_CL} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Pool_Fires/NIST_Methane_Fuel_CL} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Pool_Fires/NIST_Methane_CO2_CL} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Pool_Fires/NIST_Methane_CO_CL}    \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Pool_Fires/NIST_Methane_H2O_CL} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Pool_Fires/NIST_Methane_H2_CL} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Pool_Fires/NIST_Methane_N2_CL} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Pool_Fires/NIST_Methane_Soot_CL}
+\end{tabular*}
+\caption[NIST Pool Fires, centerline product species, methane]{NIST Pool Fires, centerline product species, methane.}
+\label{NIST_Pool_Fires_Methane}
+\end{figure}
 
 
 \clearpage

@@ -1,0 +1,78 @@
+&HEAD CHID='ground_vegetation_drag', FYI='Comparison of boundary models' /
+
+&TIME T_END=10. /
+
+&MESH IJK=120,20,10, XB=0.0,6.0,-0.5,0.5,0.0,0.5 /
+&MESH IJK=120,20,10, XB=0.0,6.0,-0.5,0.5,1.5,2.0 /
+
+&VENT MB='XMIN', SURF_ID='BLOW' /
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='YMIN', SURF_ID='MIRROR' /
+&VENT MB='YMAX', SURF_ID='MIRROR' /
+&VENT MB='ZMAX', SURF_ID='MIRROR' /
+
+&VENT SURF_ID='GROUND', XB=0.0,1.0,-0.5,0.5,0,0 /
+&VENT SURF_ID='GRASS',  XB=1.0,5.0,-0.5,0.5,0,0 /
+&VENT SURF_ID='GROUND', XB=5.0,6.0,-0.5,0.5,0,0 /
+
+&VENT SURF_ID='GROUND', XB=0.0,6.0,-0.5,0.5,1.5,1.5 /
+
+&SURF ID='BLOW', VEL=-2., COLOR='BLUE' /
+
+&MATL ID = 'SOIL'
+      CONDUCTIVITY = 0.25             
+      SPECIFIC_HEAT = 2.                   
+      DENSITY = 1300. /
+
+&SURF ID = 'GROUND'
+      MATL_ID = 'SOIL'
+      COLOR = 'BROWN'
+      THICKNESS = 0.1 /
+
+&SURF ID = 'GRASS'
+      MATL_ID = 'Dry Grass','SOIL' 
+      MOISTURE_FRACTION(1) = 0.1
+      PACKING_RATIO(1) = 0.01
+      COLOR = 'FOREST GREEN'
+      DRAG_COEFFICIENT = 2.8
+      SHAPE_FACTOR   = 0.15
+      SURFACE_VOLUME_RATIO(1) = 3092. 
+      THICKNESS(1:2) = 0.025,0.1 /
+
+&SURF ID = 'Blade of Grass'
+      MATL_ID = 'Dry Grass'
+      MOISTURE_FRACTION = 0.1
+      SURFACE_VOLUME_RATIO = 3092.
+      LENGTH = 0.02
+      GEOMETRY = 'CYLINDRICAL' /
+
+&PART ID             = 'Blade of Grass'
+      DRAG_COEFFICIENT = 2.8
+      SHAPE_FACTOR   = 0.15
+      COLOR          = 'FOREST GREEN'
+      SURF_ID        = 'Blade of Grass'
+      QUANTITIES     = 'PARTICLE TEMPERATURE','PARTICLE MASS'
+      STATIC         = .TRUE. /
+
+&INIT PART_ID              = 'Blade of Grass'
+      XB                   = 1.0,5.0,-0.5,0.5,1.5,1.525
+      N_PARTICLES_PER_CELL = 1
+      CELL_CENTERED        = .TRUE.
+      PACKING_RATIO        = 0.01 /
+
+&SPEC ID='WATER VAPOR' /
+
+&MATL ID                 = 'Dry Grass'
+      DENSITY            = 400.
+      CONDUCTIVITY       = 0.1
+      SPECIFIC_HEAT      = 1.5 /
+ 
+&DUMP DT_DEVC=1. /
+
+&DEVC ID='pres 1',  XYZ=0.3,0.0,0.2, QUANTITY='PRESSURE' /
+&DEVC ID='pres 2',  XYZ=0.3,0.0,1.7, QUANTITY='PRESSURE' /
+
+&SLCF PBY= 0.0, QUANTITY='PRESSURE', VECTOR=.TRUE. /
+
+&TAIL /
+

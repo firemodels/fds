@@ -13,7 +13,7 @@
 %                                                                                                 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\includeonly{Introduction_Chapter, Equation_Chapter, Mass_Chapter, Momentum_Chapter, Combustion_Chapter, Radiation_Chapter, Solid_Chapter, Particle_Chapter, Device_Chapter, HVAC_Chapter, Appendices}
+\includeonly{Introduction_Chapter, Equation_Chapter, Mass_Chapter, Momentum_Chapter, Combustion_Chapter, Radiation_Chapter, Solid_Chapter, Aerosol_Chapter, Particle_Chapter, Device_Chapter, HVAC_Chapter, Appendices}
 
 \input{../Bibliography/commoncommands}
 \IfFileExists{../Bibliography/gitrevision.tex}
@@ -43,7 +43,7 @@ Volume 1: Mathematical Model\\
 
 \vfill
 
-\headerD{1018-1}
+\headerD{1018}
 
 \vfill
 
@@ -71,11 +71,10 @@ Volume 1: Mathematical Model\\
 \authorsigs
 }
 
-\headerD{1018-1}
+\headerD{1018}
 
 \headerC{
 \flushright{\today \\
-FDS Version \fdsversion \\
 Revision:~\gitrevision}}
 
 
@@ -136,7 +135,7 @@ FDS is supported financially via internal funding at both NIST and VTT, Finland.
 The following individuals and organizations played a role in the development of the underlying mathematical model of FDS.
 \begin{itemize}
 \item Originally, the basic hydrodynamic solver was designed by Ronald Rehm and Howard Baum with programming help from Darcy Barnett, Dan Lozier and Hai Tang of the Computing and Applied Mathematics Laboratory at NIST, and Dan Corley of the Building and Fire Research Laboratory (BFRL). Jim Sims of CAML developed the original visualization software.
-\item The direct Poisson solver (CRAYFISKPAK) was written by Roland Sweet of the National Center for Atmospheric Research (NCAR), Boulder, Colorado.
+\item The direct Poisson solver (CRAYFISHPAK) was written by Roland Sweet of the National Center for Atmospheric Research (NCAR), Boulder, Colorado.
 \item Kuldeep Prasad added the multiple-mesh data structures, paving the way for parallel processing.
 \item Charles Bouldin devised the basic framework of the parallel version of the code.
 \item William Grosshandler (retired from NIST) and Tom Cleary (currently at NIST) developed an enhancement to the smoke detector activation algorithm, originally conceived by Gunnar Heskestad of Factory Mutual.
@@ -172,6 +171,7 @@ The following individuals and organizations played a role in the development of 
 \include{Combustion_Chapter}
 \include{Radiation_Chapter}
 \include{Solid_Chapter}
+\include{Aerosol_Chapter}
 \include{Particle_Chapter}
 \include{Device_Chapter}
 \include{HVAC_Chapter}
