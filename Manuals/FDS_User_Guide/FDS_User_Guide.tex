@@ -11651,6 +11651,18 @@ where {\ct Rank} is the number of the MPI process (starting at 0), {\ct MAIN}, {
 
 The {\ct CHID\_cpu.csv} file is printed out at the end of the simulation. To force it to be printed out periodically during the simulation, set {\ct DT\_CPU} on the {\ct DUMP} line. Its default value is very large, meaning that by default, the CPU information is only printed at the end of the simulation.
 
+\section{Time Step Data}
+\label{out:timestep}
+
+The file called {\ct CHID\_steps.csv} records data on the size of time steps and the amount of elapsed CPU time.
+\begin{lstlisting}
+Time Step,Wall Time,Step Size,Simulation Time,CPU Time
+1,2020-04-29T10:23:13.631-04:00,   0.100E+00,   0.10000,   0.23438
+           .
+           .
+\end{lstlisting}
+where {\ct Time Step} is the current time step, {\ct Wall Time} is the date and time for the indicated time step, {\ct Step Size} is the size of the current time step in seconds, {\ct Simulation Time} is the current time of the simulation in seconds, and {\ct CPU Time} is the elapsed CPU time since starting FDS. Note that the first time step will include time spent reading the input file and initializing FDS.
+
 \section{Gas Mass Data}
 
 The total mass of the various gas species at any instant in time is reported in the comma delimited file {\ct CHID\_mass.csv}. The file consists of several columns, the first column containing the time in seconds, the second contains the total mass of all the gas species in the computational domain in units of kg, the next lines contain the total mass of the individual species.
