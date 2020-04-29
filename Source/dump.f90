@@ -805,8 +805,8 @@ IF (APPEND) THEN
    IF (EX) OPEN(LU_STEPS,FILE=FN_STEPS,FORM='FORMATTED',STATUS='OLD',POSITION='APPEND')
 ELSE
    OPEN(LU_STEPS,FILE=FN_STEPS,FORM='FORMATTED',STATUS='REPLACE')
-   WRITE(LU_STEPS,'(A,",",A,",",A,",",A)') '','','s','s'
-   WRITE(LU_STEPS,'(A,",",A,",",A,",",A)') 'Time Step','Wall Time','Step Size','Simulation Time'
+   WRITE(LU_STEPS,'(A,",",A,",",A,",",A,",",A)') '','','s','s','s'
+   WRITE(LU_STEPS,'(A,",",A,",",A,",",A,",",A)') 'Time Step','Wall Time','Step Size','Simulation Time','CPU Time'
 ENDIF
 
 ! Open species mass file
@@ -3566,7 +3566,7 @@ REAL(EB), INTENT(IN) :: T,DT
 INTEGER :: NM,II,JJ,KK
 CHARACTER(80) :: SIMPLE_OUTPUT,SIMPLE_OUTPUT_ERR
 CHARACTER(LABEL_LENGTH) :: DATE
-REAL(EB) :: TNOW
+REAL(EB) :: TNOW,CPUTIME
 
 TNOW = CURRENT_TIME()
 
@@ -3642,7 +3642,8 @@ WRITE(LU_OUTPUT,'(7X,A)') '-----------------------------------------------------
 
 ! Write runtime diagnostics to the steps CSV file.
 CALL GET_DATE_ISO_8601(DATE)
-WRITE(LU_STEPS,'(I7,",",A,",",E12.3,",",F10.5)') ICYC,TRIM(DATE),DT,T
+CALL CPU_TIME(CPUTIME)
+WRITE(LU_STEPS,'(I7,",",A,",",E12.3,",",F10.5,",",F10.5)') ICYC,TRIM(DATE),DT,T,CPUTIME
 
 DO NM=1,NMESHES
    IF (EVACUATION_ONLY(NM)) CYCLE
@@ -6797,7 +6798,7 @@ IND_SELECT: SELECT CASE(IND)
       ENDIF
    CASE(44)  ! CPU TIME
       CALL CPU_TIME(CPUTIME)
-      GAS_PHASE_OUTPUT_RES = CPUTIME - CPU_TIME_START
+      GAS_PHASE_OUTPUT_RES = CPUTIME
    CASE(45)  ! ITERATION
       GAS_PHASE_OUTPUT_RES = ICYC
 
