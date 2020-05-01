@@ -125,6 +125,7 @@ TYPE (LAGRANGIAN_PARTICLE_CLASS_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: LAGR
 
 TYPE MATL_COMP_TYPE
    REAL(EB), POINTER, DIMENSION(:) :: RHO !< (1:NWP) Solid density (kg/m3)
+   REAL(EB), POINTER, DIMENSION(:) :: RHO_DOT !< (1:NWP) Change in solid density (kg/m3/s)
 END TYPE MATL_COMP_TYPE
 
 
@@ -136,7 +137,7 @@ END TYPE BAND_TYPE
 
 ! Note: If you change the number of scalar variables in ONE_D_M_AND_E_XFER_TYPE, adjust the numbers below
 
-INTEGER, PARAMETER :: N_ONE_D_SCALAR_REALS=32,N_ONE_D_SCALAR_INTEGERS=11,N_ONE_D_SCALAR_LOGICALS=2
+INTEGER, PARAMETER :: N_ONE_D_SCALAR_REALS=32,N_ONE_D_SCALAR_INTEGERS=12,N_ONE_D_SCALAR_LOGICALS=1
 
 !> \brief Variables associated with a WALL, PARTICLE, or CFACE boundary cell
 
@@ -157,6 +158,8 @@ TYPE ONE_D_M_AND_E_XFER_TYPE
    REAL(EB), POINTER, DIMENSION(:) :: AWM_AEROSOL         !< Accumulated aerosol mass per unit area (kg/m2)
    REAL(EB), POINTER, DIMENSION(:) :: LP_CPUA             !< Liquid droplet cooling rate unit area (W/m2)
    REAL(EB), POINTER, DIMENSION(:) :: LP_MPUA             !< Liquid droplet mass per unit area (kg/m2)
+   REAL(EB), POINTER, DIMENSION(:) :: RHO_C_S             !< Solid density times specific heat (J/m3/K)
+   REAL(EB), POINTER, DIMENSION(:) :: K_S                 !< Solid conductivity (W/m/K)
 
    TYPE(MATL_COMP_TYPE), ALLOCATABLE, DIMENSION(:) :: MATL_COMP !< (1:SF\%N_MATL) Material component
    TYPE(BAND_TYPE), ALLOCATABLE, DIMENSION(:) :: BAND           !< 1:NSB) Radiation wavelength band
@@ -173,6 +176,7 @@ TYPE ONE_D_M_AND_E_XFER_TYPE
    INTEGER, POINTER :: IOR            !< Index of orientation of the WALL cell
    INTEGER, POINTER :: PRESSURE_ZONE  !< Pressure ZONE of the adjacent gas phase cell
    INTEGER, POINTER :: NODE_INDEX     !< HVAC node index associated with surface
+   INTEGER, POINTER :: N_SUBSTEPS     !< Number of substeps in the 1-D conduction/reaction update
 
    REAL(EB), POINTER :: AREA            !< Face area (m2)
    REAL(EB), POINTER :: HEAT_TRANS_COEF !< Heat transfer coefficient (W/m2/K)
@@ -208,7 +212,6 @@ TYPE ONE_D_M_AND_E_XFER_TYPE
    REAL(EB), POINTER :: K_SUPPRESSION   !< Suppression coefficent (m2/kg/s)
 
    LOGICAL, POINTER :: BURNAWAY         !< Indicater if cell can burn away when fuel is exhausted
-   LOGICAL, POINTER :: CHANGE_THICKNESS !< Indicater if thickness of solid can change
 
 END TYPE ONE_D_M_AND_E_XFER_TYPE
 
@@ -457,7 +460,7 @@ TYPE SURFACE_TYPE
                DT_INSERT,H_FIXED=-1._EB,H_FIXED_B=-1._EB,HM_FIXED=-1._EB,EMISSIVITY_BACK,CONV_LENGTH,XYZ(3),FIRE_SPREAD_RATE, &
                MINIMUM_LAYER_THICKNESS,INNER_RADIUS=0._EB,MASS_FLUX_VAR=-1._EB,VEL_BULK, &
                PARTICLE_SURFACE_DENSITY=-1._EB,DRAG_COEFFICIENT=2.8_EB,SHAPE_FACTOR=0.25_EB,&
-               MINIMUM_BURNOUT_TIME=1.E6_EB
+               MINIMUM_BURNOUT_TIME=1.E6_EB,DELTA_TMP_MAX=10._EB
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: DX,RDX,RDXN,X_S,DX_WGT,MF_FRAC,PARTICLE_INSERT_CLOCK
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: RHO_0
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: MASS_FRACTION,MASS_FLUX,TAU,ADJUST_BURN_RATE
@@ -469,7 +472,7 @@ TYPE SURFACE_TYPE
    INTEGER :: THERMAL_BC_INDEX,NPPC,SPECIES_BC_INDEX,VELOCITY_BC_INDEX,SURF_TYPE,N_CELLS_INI,N_CELLS_MAX=0, &
               PART_INDEX,PROP_INDEX=-1,RAMP_T_I_INDEX=-1, RAMP_T_B_INDEX=0
    INTEGER :: PYROLYSIS_MODEL,NRA,NSB
-   INTEGER :: N_LAYERS,N_MATL
+   INTEGER :: N_LAYERS,N_MATL,SUBSTEP_POWER=2
    INTEGER :: N_ONE_D_STORAGE_REALS,N_ONE_D_STORAGE_INTEGERS,N_ONE_D_STORAGE_LOGICALS
    INTEGER :: N_WALL_STORAGE_REALS,N_WALL_STORAGE_INTEGERS,N_WALL_STORAGE_LOGICALS
    INTEGER :: N_CFACE_STORAGE_REALS,N_CFACE_STORAGE_INTEGERS,N_CFACE_STORAGE_LOGICALS
