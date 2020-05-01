@@ -85,12 +85,11 @@
 
 &MATL ID               = 'AIR'
       DENSITY          = 1.2
-      CONDUCTIVITY     = 0.026
-      SPECIFIC_HEAT    = 0.01
+      CONDUCTIVITY     = 0.0026
+      SPECIFIC_HEAT    = 0.1
       EMISSIVITY       = 0.0001 /
 
 &MATL ID                 = 'Dry Grass'
-      EMISSIVITY = 0.0001
       DENSITY            = 400.
       CONDUCTIVITY       = 0.1
       SPECIFIC_HEAT      = 1.5 /

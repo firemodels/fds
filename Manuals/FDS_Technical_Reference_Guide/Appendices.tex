@@ -382,7 +382,7 @@ Therefore, if $\bar{p}$ is constant and uniform then $\rho h_s$ is constant and 
 \chapter{Gas Phase Absorption Coefficients}
 \label{absorption_coefficients}
 
-The instantaneous absorption coefficient $\kappa_n$ of the gas mixture at location $\bx$ is calculated as a sum (superposition) of individual gases' gray or band-mean absorption coefficients $\kappa_{n,i}$ 
+The instantaneous absorption coefficient $\kappa_n$ of the gas mixture at location $\bx$ is calculated as a sum (superposition) of individual gases' gray or band-mean absorption coefficients $\kappa_{n,i}$
 \begin{equation}
 \kappa_{n}(\bx) = \sum_i \kappa_{n,i}(Y_i(\bx),T(\bx))
 \end{equation}
@@ -390,7 +390,7 @@ The instantaneous absorption coefficient $\kappa_n$ of the gas mixture at locati
 For the calculation of $\kappa_{n,i}(Y_i,T)$, a narrow-band model, RADCAL~\cite{RadCal}, has been
 implemented in FDS. During the initialization stage, RADCAL is used to generate tables of mean absorption coefficients for each individual species in mass fraction range $0 \leq Y_i \leq 1$ and temperature range 270 K $ \leq T \leq $ 2470 K. During the simulation, the local value of $\kappa_n$ is found from the nearest temperature value (lookup) and by interpolating the concentration value.
 
-RADCAL computes the spectral properties of the radiation participating species at discrete values of the spectrum (expressed either in wavenumber $\om$ or in wavelength $\la$) and temperature, 
+RADCAL computes the spectral properties of the radiation participating species at discrete values of the spectrum (expressed either in wavenumber $\om$ or in wavelength $\la$) and temperature,
 and returns two alternative mean absorption coefficients for each spectral band, $n$. The first coefficient is the Planck mean coefficient \cite{Tien:1968}
 \begin{equation}
 \kappa_{n,i,{\rm P}}(Y_i,T) = \dfrac{\pi}{\sigma T^4}
@@ -427,7 +427,7 @@ In cases with only one band ($N$=1), the smaller of the two absorption coefficie
 \be
    \kappa_{n,i}=\min \Big( \kappa_{n,i,{\rm P}}(Y_i,T),\kappa_{n,i,{\rm e}}(Y_i,T,L) \Big)
 \ee
-If $N>1$ or $L=0$, $\kappa_{n,i}=\kappa_{n,i,{\rm P}}$. Note that the spectral data within RADCAL are used whenever the gas mixture contains water vapor, fuel or combustion products, regardless of the number of radiation bands $N$. 
+If $N>1$ or $L=0$, $\kappa_{n,i}=\kappa_{n,i,{\rm P}}$. Note that the spectral data within RADCAL are used whenever the gas mixture contains water vapor, fuel or combustion products, regardless of the number of radiation bands $N$.
 
 \textbf{Note on wavenumber, wavelength, and frequency}: some confusion might arise when dealing with the various quantities describing the wave nature of radiation. These quantities are wavenumber $\om$, wavelength $\la$, and frequency denoted here $\nu$. Most users may be familiar with the frequency $\nu$, in units of \textit{hertz}, ${\rm Hz}$, representing the number of cycles per second. While this unit is preferred for radiation waves of low energy such as radio waves, wavelength and wavenumber are preferred for waves of higher energy. Wavenumber and wavelength are related to frequency through \cite{Penner:1959}
 \be
@@ -1729,8 +1729,6 @@ and therefore the boundary condition becomes
   \approx k_{s,1} \frac{T_{s,1}^{n}-T_{s,0}^{n}}{2 \delta r_{\frac{1}{2}}} + h\, \left( T_g - \frac{1}{2}T_{s,\frac{1}{2}}^n \right) +
   \dot{q}_{r, in}'' + 3 \, \epsilon\sigma \, \left( T_{s,\frac{1}{2}}^n \right)^4
 \end{equation}
-
-\newpage
 Rearranging terms, the temperature at node 0 becomes:
 \begin{equation}
 \label{T0}
@@ -1774,3 +1772,13 @@ To solve Eq.~(\ref{tridiagonal_1}), a tri-diagonal linear solver is used:
 & T^{n+1}_{s,i} = \frac{C_i - A_i \; C_{i+1}}{D_i} \quad i = N-1,..., 1
 \end{split}
 \end{equation}
+
+Typically, the time step, $\dt$, used by the solid phase solver is some multiple of the time step used by the gas phase solver. By default, the multiple is 2, but the user can select a different value if need be. However, there may be times during the simulation where the solid phase time step must be smaller than the gas phase time step due to potentially large, short-lived excursions of the internal heat source term, $\dq_{\rm s}'''$, which is not included in the implicit Crank-Nicolson scheme. It is simply evaluated at the start of the time step. To remedy this problem, after the heat source term has been evaluated, the maximum temperature change is estimated using an explicit, first order update:
+\begin{equation}
+  \Delta T_{s}^* \equiv \max_{i=1,N} \left| \frac{\dt}{(\rho_s c_s)_i} \left[ \frac{1}{r_{c,i}^I \delta r_i} \left( r_{i}^I k_{i+\frac{1}{2}} \frac{T_{s,i+1}^n-T_{s,i}^n)}{\delta r_{i+\frac{1}{2}}} - r_{i-1}^I k_{i+\frac{1}{2}} \frac{T_{s,i}^n-T_{s,i-1}^n}{\delta r_{i-\frac{1}{2}}} \right) + \dot{q}_{s,i}''' \right] \right| 
+\end{equation}
+If $\Delta T_{s}^*$ exceeds a user-specified threshold, $\Delta T_{\max}$, the time step is reduced below the gas phase time step, $\dt_{\rm gas}$:
+\begin{equation}
+   \dt = \dt_{\rm gas} \, 2^{-\lceil \ln \eta / \ln 2 \rceil }  \quad ; \quad \eta = \Delta T_{s}^*  / \Delta T_{\max} 
+\end{equation}
+Note that $\lceil x \rceil$ denotes the least integer greater than $x$. To prevent an endless spiral of decreasing solid phase time steps, there is a user-specified limit of the number of subdivisions of the gas phase time step. The default is $2^2=4$.

@@ -40,7 +40,7 @@ fprintf(fid11,'%s\n', 'dx,dx^2,relative error');
    
 T_exact = 295.3011488157;
 for j = 1:7
-    fprintf(fid11,'%8.3e, %8.3e, %9.5e\n', 0.01*dx(j),0.1*dx(j)^2,-(T(j)-T_exact)/T_exact);
+    fprintf(fid11,'%8.3e, %8.3e, %9.5e\n', 0.01*dx(j),0.1*dx(j)^2,abs(T(j)-T_exact)/T_exact);
 end
 fclose(fid11);
 
