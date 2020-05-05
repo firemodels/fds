@@ -12295,13 +12295,13 @@ RCEDGE_LOOP_1 : DO IEDGE=1,MESHES(NM)%IBM_NRCEDGE
       ! Divergence, take the EP value:
       DIV_FP = DUVW_EP(IAXIS,IAXIS,EP,0) + DUVW_EP(JAXIS,JAXIS,EP,0) + DUVW_EP(KAXIS,KAXIS,EP,0)
 
-      TIJ(IAXIS,IAXIS) = -2._EB*( - ONTH*DIV_FP)
-      TIJ(JAXIS,JAXIS) = -2._EB*( - ONTH*DIV_FP)
-      TIJ(KAXIS,KAXIS) = -2._EB*( - ONTH*DIV_FP)
-      TIJ(IAXIS,KAXIS) = -1._EB*(DUSDN_FP+DUNDS_FP); TIJ(KAXIS,IAXIS) = TIJ(IAXIS,KAXIS)
+      TIJ(IAXIS,IAXIS) = 2._EB*( - ONTH*DIV_FP)
+      TIJ(JAXIS,JAXIS) = 2._EB*( - ONTH*DIV_FP)
+      TIJ(KAXIS,KAXIS) = 2._EB*( - ONTH*DIV_FP)
+      TIJ(IAXIS,KAXIS) = 1._EB*(DUSDN_FP+DUNDS_FP); TIJ(KAXIS,IAXIS) = TIJ(IAXIS,KAXIS)
       TBAR_IJ = MATMUL( AIJ , MATMUL(TIJ, TRANSPOSE(AIJ)) )
 
-      ! Viscosity and TAU_E:
+     ! Viscosity and TAU_E:
       SELECT CASE(X1AXIS)
       CASE(IAXIS)
          MU_FP   = 0.25_EB*(MU(I,J,K) + MU(I,J+1,K) + MU(I,J+1,K+1) + MU(I,J,K+1) )
@@ -37839,7 +37839,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
    N_FACES_ORIG = N_FACES
 
    !--- setup a 2D surface (terrain) object (ZVALS keyword )
-
+   IF(IS_TERRAIN)  GEOM_TYPE = TERRAIN_GEOM_TYPE
    ZVALS_IF: IF (N_ZVALS>0) THEN
       GEOM_TYPE = TERRAIN_GEOM_TYPE
       CALL CHECK_XB(XB)
@@ -38251,7 +38251,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
          N_FACES=0
       ENDIF
 
-   ELSEIF(IS_TERRAIN) THEN ZVALS_IF
+   ELSEIF(IS_TERRAIN .AND. .NOT.READ_BINARY) THEN ZVALS_IF
 
       GEOM_TYPE = TERRAIN_GEOM_TYPE
 
@@ -39090,7 +39090,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
       ELSE
          SURFS(:) = 0 ! All external faces point to default surf ID.
       ENDIF
-   ELSEIF(IS_TERRAIN) THEN
+   ELSEIF(IS_TERRAIN .AND. .NOT.READ_BINARY) THEN
       ! Finally Enhance SURFS to accomodate new faces.
       ALLOCATE(SURFS2(N_FACES));
       ! Here define what SURF to assign to added faces.
