@@ -6025,6 +6025,32 @@ The absorption and emission of thermal radiation by a group of solid particles i
 where $C_{\rm s}$ is the shape factor (ratio of cross sectional area to surface area) of the class of particles, $A_{\rm p,s}$ is the surface area of the particle, and $V$ is the volume of the grid cell. You can specify the {\ct SHAPE\_FACTOR} of a class of particles on the {\ct PART} line. The default value is that of a sphere, 0.25.
 
 
+\subsection{Size Distribution}
+\label{info:solid_particle_size_distribution}
+\label{hot_rods}
+
+By default, solid particles of a given class are monodisperse; that is, have the same initial size which is specified via the {\ct SURF} line that is designated on the {\ct PART} line. However, it is possible to specify a distribution for the diameter of solid cylinders and spheres. Consider a case where you have a collection of cylindrical wooden rods whose diameters are uniformly distributed between 4000~$\mu$m and 6000~$\mu$m:
+\begin{lstlisting}
+&SURF ID='rod', MATL_ID='...', THICKNESS=0.0025, LENGTH=0.02, GEOMETRY='CYLINDRICAL' /
+&PART ID='rods', SURF_ID='rod', ..., MONODISPERSE=F, CNF_RAMP_ID='dist', N_STRATA=1 /
+&RAMP ID='dist', T=4000., F=0. /
+&RAMP ID='dist', T=6000., F=1. /
+\end{lstlisting}
+The material properties of the rods are specified via the {\ct MATL} line (not shown). The nominal {\rm radius} of the rods is given by the parameter {\ct THICKNESS} (m) on the {\ct SURF} line, but the distribution of the rod {\em diameters} is specified by the parameter {\ct CNF\_RAMP\_ID} (Cumulative Number Fraction) on the {\ct PART} line. The {\ct RAMP} lines designate the cumulative distribution function of the rod {\em diameters}, where the pairs ({\ct T},{\ct F}) denote a uniform distribution between 4000~$\mu$m and 6000~$\mu$m. Note that the units of the distribution are $\mu$m, not m. The parameter {\ct N\_STRATA} indicates the number of bins sub-dividing the diameter range, which is set to 1 here because the range is relatively small compared to typical liquid droplet size distributions.
+
+Following is an example of how to apply a distribution of solid particles. In the example case called {\ct WUI/hot\_rods.fds}, $L=0.02$~m long wooden rods whose radii are uniformly distributed between $r=0.002$~m and $r=0.003$~m ($f(r)=1000, \; 0.002<r<0.003; \; f(r)=0$ elsewhere) are poured onto a hot (800~$^\circ$C) floor and burned. The original density of the material is $\rho_{\rm p}=440$~kg/m$^3$. In total, 4000 rods are ejected from a small vent over the course of 10~s. The total mass is 
+\be
+   m=4000 \times \pi \overline{r^2} L \rho_{\rm p} \approx 0.7 \; \hbox{kg} \quad ; \quad \overline{r^2}=\int_{0.002}^{0.003} r^2 f(r) \d r \approx 6.333 \times 10^{-6}
+\ee
+Figure~\ref{hot_rods_image} displays the distribution of radii and the mass of rods as a function of time. Note that 8~\% of the mass remains as char.
+
+\begin{figure}[ht]
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/hot_rods_dist}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/hot_rods_mass}
+\caption[Results of the {\ct hot\_rods} test case]{(Left) Distribution of rod diameters. (Right) Total mass of rods as a function of time.}
+\label{hot_rods_image}
+\end{figure}
+
 
 \subsection{Splitting Particles}
 \label{info:particle_split}
