@@ -1,4 +1,5 @@
-! This file is common to both the RADCAL and the FDS source code repositories. If you change in one location, please make sure that the change is also made in the other location.
+! This file is common to both the RADCAL and the FDS source code repositories. If you change in one location, 
+! please make sure that the change is also made in the other location.
 
 !> \brief Variable defintions specific to RADCAL
 
@@ -1882,7 +1883,7 @@ REAL(EB) :: ABCO,FF,LAMBDA,RIN,RIK
 LAMBDA = 10000._EB/OMEGA
 
 ! H. CHANG, T. T. CHARALAMPOPOULOS, DETERMINATION OF THE WAVELENGTH DEPENDENCE OF REFRACTIVE INDICES OF FLAME SOOT,
-! PROCEEDINGS: MATHEMATICAL AND PHYSICAL SCIENCES 430 (1880) (1990) 577–591
+! PROCEEDINGS: MATHEMATICAL AND PHYSICAL SCIENCES 430 (1880) (1990) 577Â–591
 RIN=1.811_EB + 0.1263_EB*log(LAMBDA) + 0.0270_EB*(log(LAMBDA))**2 + 0.0417_EB*(log(LAMBDA))**3;
 RIK=0.5821_EB + 0.1213_EB*log(LAMBDA) + 0.2309_EB*(log(LAMBDA))**2 + 0.0100_EB*(log(LAMBDA))**3;
 
