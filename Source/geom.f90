@@ -12287,7 +12287,7 @@ RCEDGE_LOOP_1 : DO IEDGE=1,MESHES(NM)%IBM_NRCEDGE
       AIJ(IAXIS:KAXIS,KAXIS) = NN(IAXIS:KAXIS)
 
       ! Vorticity in local coordinates system, point FP:
-      OMEL(IAXIS:KAXIS,1) = (/ 0._EB, DUSDN_FP-DUNDS_FP, 0._EB /)
+      OMEL(IAXIS:KAXIS,1) = (/ 0._EB, U_STRM_EP/DXN_STRM_EP-DUNDS_FP, 0._EB /)
       OMEV = MATMUL(AIJ,OMEL) ! Transform Vorticity to Eulerian coordinates
 
       OME_E((/-2,-1,1,2/),IBM_RCEDGE(IEDGE)%IE) = OMEV(X1AXIS,1)
