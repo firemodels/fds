@@ -941,7 +941,7 @@ MEAN_FORCING_X: IF (MEAN_FORCING(1)) THEN
             ELSEIF (APPLY_SPONGE_LAYER(-1) .AND. I>IBAR-SPONGE_CELLS) THEN
                FVX(I,J,K) = FVX(I,J,K) - (UBAR-UU(I,J,K))/DT_LOC
             ELSE
-               FVX(I,J,K) = FVX(I,J,K) - DU_FORCING
+               FVX(I,J,K) = FVX(I,J,K) - DU_FORCING - (UBAR-UU(I,J,K))/DT_MEAN_FORCING_2
             ENDIF
          ENDDO
       ENDDO
@@ -981,7 +981,7 @@ MEAN_FORCING_Y: IF (MEAN_FORCING(2)) THEN
             ELSEIF (APPLY_SPONGE_LAYER(-2) .AND. J>JBAR-SPONGE_CELLS) THEN
                FVY(I,J,K) = FVY(I,J,K) - (VBAR-VV(I,J,K))/DT_LOC
             ELSE
-               FVY(I,J,K) = FVY(I,J,K) - DV_FORCING
+               FVY(I,J,K) = FVY(I,J,K) - DV_FORCING - (VBAR-VV(I,J,K))/DT_MEAN_FORCING_2
             ENDIF
          ENDDO
       ENDDO
@@ -1021,7 +1021,7 @@ MEAN_FORCING_Z: IF (MEAN_FORCING(3)) THEN
             ELSEIF (APPLY_SPONGE_LAYER(-3) .AND. K>KBAR-SPONGE_CELLS) THEN
                FVZ(I,J,K) = FVZ(I,J,K) - (WBAR-WW(I,J,K))/DT_LOC
             ELSE
-               FVZ(I,J,K) = FVZ(I,J,K) - DW_FORCING
+               FVZ(I,J,K) = FVZ(I,J,K) - DW_FORCING - (WBAR-WW(I,J,K))/DT_MEAN_FORCING_2
             ENDIF
          ENDDO
       ENDDO
@@ -2130,7 +2130,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
             VENT_INDEX = MAX(WCM%VENT_INDEX,WCP%VENT_INDEX)
             VT => VENTS(VENT_INDEX)
 
-            WIND_NO_WIND_IF: IF (.NOT.ANY(MEAN_FORCING)) THEN  ! For regular OPEN boundary, (free-slip) BCs
+         !  WIND_NO_WIND_IF: IF (.NOT.ANY(MEAN_FORCING)) THEN  ! For regular OPEN boundary, (free-slip) BCs
 
                SELECT CASE(IEC)
                   CASE(1)
@@ -2150,31 +2150,31 @@ EDGE_LOOP: DO IE=1,N_EDGES
                      IF (JJ==JBAR .AND. IOR==-2) UU(II,JBP1,KK) = UU(II,JBAR,KK)
                END SELECT
 
-            ELSE WIND_NO_WIND_IF  ! For wind, use prescribed far-field velocity all around
+         !  ELSE WIND_NO_WIND_IF  ! For wind, use prescribed far-field velocity all around
 
-               UBAR = U0*EVALUATE_RAMP(T,DUMMY,I_RAMP_U0_T)*EVALUATE_RAMP(ZC(KK),DUMMY,I_RAMP_U0_Z)
-               VBAR = V0*EVALUATE_RAMP(T,DUMMY,I_RAMP_V0_T)*EVALUATE_RAMP(ZC(KK),DUMMY,I_RAMP_V0_Z)
-               WBAR = W0*EVALUATE_RAMP(T,DUMMY,I_RAMP_W0_T)*EVALUATE_RAMP(ZC(KK),DUMMY,I_RAMP_W0_Z)
+         !     UBAR = U0*EVALUATE_RAMP(T,DUMMY,I_RAMP_U0_T)*EVALUATE_RAMP(ZC(KK),DUMMY,I_RAMP_U0_Z)
+         !     VBAR = V0*EVALUATE_RAMP(T,DUMMY,I_RAMP_V0_T)*EVALUATE_RAMP(ZC(KK),DUMMY,I_RAMP_V0_Z)
+         !     WBAR = W0*EVALUATE_RAMP(T,DUMMY,I_RAMP_W0_T)*EVALUATE_RAMP(ZC(KK),DUMMY,I_RAMP_W0_Z)
 
-               SELECT CASE(IEC)
-                  CASE(1)
-                     IF (JJ==0    .AND. IOR== 2) WW(II,0,KK)    = WBAR
-                     IF (JJ==JBAR .AND. IOR==-2) WW(II,JBP1,KK) = WBAR
-                     IF (KK==0    .AND. IOR== 3) VV(II,JJ,0)    = VBAR
-                     IF (KK==KBAR .AND. IOR==-3) VV(II,JJ,KBP1) = VBAR
-                  CASE(2)
-                     IF (II==0    .AND. IOR== 1) WW(0,JJ,KK)    = WBAR
-                     IF (II==IBAR .AND. IOR==-1) WW(IBP1,JJ,KK) = WBAR
-                     IF (KK==0    .AND. IOR== 3) UU(II,JJ,0)    = UBAR
-                     IF (KK==KBAR .AND. IOR==-3) UU(II,JJ,KBP1) = UBAR
-                  CASE(3)
-                     IF (II==0    .AND. IOR== 1) VV(0,JJ,KK)    = VBAR
-                     IF (II==IBAR .AND. IOR==-1) VV(IBP1,JJ,KK) = VBAR
-                     IF (JJ==0    .AND. IOR== 2) UU(II,0,KK)    = UBAR
-                     IF (JJ==JBAR .AND. IOR==-2) UU(II,JBP1,KK) = UBAR
-               END SELECT
+         !     SELECT CASE(IEC)
+         !        CASE(1)
+         !           IF (JJ==0    .AND. IOR== 2) WW(II,0,KK)    = WBAR
+         !           IF (JJ==JBAR .AND. IOR==-2) WW(II,JBP1,KK) = WBAR
+         !           IF (KK==0    .AND. IOR== 3) VV(II,JJ,0)    = VBAR
+         !           IF (KK==KBAR .AND. IOR==-3) VV(II,JJ,KBP1) = VBAR
+         !        CASE(2)
+         !           IF (II==0    .AND. IOR== 1) WW(0,JJ,KK)    = WBAR
+         !           IF (II==IBAR .AND. IOR==-1) WW(IBP1,JJ,KK) = WBAR
+         !           IF (KK==0    .AND. IOR== 3) UU(II,JJ,0)    = UBAR
+         !           IF (KK==KBAR .AND. IOR==-3) UU(II,JJ,KBP1) = UBAR
+         !        CASE(3)
+         !           IF (II==0    .AND. IOR== 1) VV(0,JJ,KK)    = VBAR
+         !           IF (II==IBAR .AND. IOR==-1) VV(IBP1,JJ,KK) = VBAR
+         !           IF (JJ==0    .AND. IOR== 2) UU(II,0,KK)    = UBAR
+         !           IF (JJ==JBAR .AND. IOR==-2) UU(II,JBP1,KK) = UBAR
+         !     END SELECT
 
-            ENDIF WIND_NO_WIND_IF
+         !  ENDIF WIND_NO_WIND_IF
 
             IF (IWM/=0 .AND. IWP/=0) THEN
                CYCLE EDGE_LOOP  ! Do no further processing of this edge if both cell faces are OPEN
