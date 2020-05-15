@@ -7244,6 +7244,13 @@ Bova et al.~\cite{Bova:IJWF2015} compare the level set calculation that has been
 \label{Bova_fig}
 \end{figure}
 
+\FloatBarrier
+
+\subsection{Using Mapping Software}
+\label{info:earth}
+
+If external mapping or GIS software is used to generate an FDS input file, it is handy to include the latitude and longitude of the origin of the computational domain via {\ct ORIGIN\_LAT} and {\ct ORIGIN\_LON} on the {\ct MISC} line, in units of decimal degree. Another useful parameter is {\ct NORTH\_BEARING} (default 0$^\circ$) which indicates the direction of true north.
+
 
 
 
@@ -10524,6 +10531,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct NOISE}                                         & Logical      & Section~\ref{info:NOISE}                &            & {\ct .TRUE.}      \\ \hline
 {\ct NOISE\_VELOCITY}                               & Real         & Section~\ref{info:NOISE}                &  m/s       & 0.005             \\ \hline
 {\ct NO\_EVACUATION}                                & Logical      & Reference~\cite{FDS_Evac_Users_Guide}   &            & {\ct .FALSE.}     \\ \hline
+{\ct NORTH\_BEARING}                                & Real         & Section~\ref{info:earth}                & deg.       &                   \\ \hline
+{\ct ORIGIN\_LAT}                                   & Real         & Section~\ref{info:earth}                & deg.       &                   \\ \hline
+{\ct ORIGIN\_LON}                                   & Real         & Section~\ref{info:earth}                & deg.       &                   \\ \hline
 {\ct OVERWRITE}                                     & Logical      & Section~\ref{info:OVERWRITE}            &            & {\ct .TRUE.}      \\ \hline
 {\ct PARTICLE\_CFL}                                 & Logical      & Section~\ref{info:PART_Stability}       &            & {\ct .FALSE.}     \\ \hline
 {\ct PARTICLE\_CFL\_MAX}                            & Real         & Section~\ref{info:PART_Stability}       &            & 1.0               \\ \hline
