@@ -661,7 +661,7 @@ To confirm the speedup provided by OpenMP, a series of test cases\footnote{The i
 
 Diagnostics for a given calculation are written into a file called {\ct CHID.out}. The current simulation time and time step is written here, so you can see how far along the program has progressed. At any time during a calculation, Smokeview can be run and the progress can be checked visually.
 
-By default, the diagnostics in the {\ct CHID.out} file are verbose. By default, its value is {\ct .TRUE.} for jobs involving 32 Meshes or less, and {\ct .FALSE.} for bigger numbers. When running large MPI jobs it may be advantageous to quiet this output, which is all written by MPI process 0.  To do this, add
+By default, the diagnostics in the {\ct CHID.out} file are verbose. By default, its value is {\ct .FALSE.} for jobs involving 32 Meshes or less, and {\ct .TRUE.} for bigger numbers. When running large MPI jobs it may be advantageous to quiet this output, which is all written by MPI process 0.  To do this, add
 \begin{lstlisting}
 &DUMP SUPPRESS_DIAGNOSTICS=.TRUE. /
 \end{lstlisting}
