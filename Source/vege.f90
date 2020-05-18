@@ -1,8 +1,8 @@
+!> \brief Level set model of fire spread across terrain
+
 MODULE VEGE
 
-! Level set model of fire spread across terrain.
-
-USE COMP_FUNCTIONS
+USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
 USE PRECISION_PARAMETERS
 USE GLOBAL_CONSTANTS
 USE MESH_POINTERS
@@ -12,17 +12,20 @@ PRIVATE
 PUBLIC INITIALIZE_LEVEL_SET_FIRESPREAD_1,INITIALIZE_LEVEL_SET_FIRESPREAD_2,LEVEL_SET_FIRESPREAD
 INTEGER :: IZERO
 INTEGER  :: LIMITER_LS
-REAL(EB) :: B_ROTH,BETA_OP_ROTH,C_ROTH,E_ROTH
+REAL(EB) :: B_ROTH,BETA_OP_ROTH,C_ROTH,E_ROTH,T_NOW
 REAL(EB), POINTER, DIMENSION(:,:) :: PHI_LS_P
 REAL(EB), PARAMETER :: PHI_LS_MIN=-1._EB, PHI_LS_MAX=1._EB
 
 CONTAINS
 
 
-SUBROUTINE INITIALIZE_LEVEL_SET_FIRESPREAD_1(NM)
+!> \brief Set up the major level set arrays
+!>
+!> \param NM Mesh number
+!> \details Set up the array for level set value PHI_LS, and determine terrain height on each 2D mesh, Z_LS(I,J).
+!> After this routine, go back to main, exchange Z_LS, and return for more initialization.
 
-! Set up the major arrays, like the level set value PHI_LS, and determine terrain height on each 2D mesh, Z_LS(I,J).
-! After this routine, go back to main, exchange Z_LS, and return for more initialization.
+SUBROUTINE INITIALIZE_LEVEL_SET_FIRESPREAD_1(NM)
 
 USE COMPLEX_GEOMETRY, ONLY : IBM_IDCF
 INTEGER, INTENT(IN) :: NM
@@ -31,6 +34,8 @@ TYPE (MESH_TYPE),    POINTER :: M
 TYPE (WALL_TYPE),    POINTER :: WC
 TYPE (CFACE_TYPE),   POINTER :: CFA
 TYPE (SURFACE_TYPE), POINTER :: SF
+
+T_NOW = CURRENT_TIME()
 
 CALL POINT_TO_MESH(NM)
 
@@ -111,12 +116,16 @@ Z_LS(IBP1,   0) = Z_LS(IBAR,   1)
 Z_LS(   0,JBP1) = Z_LS(   1,JBAR)
 Z_LS(IBP1,JBP1) = Z_LS(IBAR,JBAR)
 
+T_USED(15) = T_USED(15) + CURRENT_TIME() - T_NOW
 END SUBROUTINE INITIALIZE_LEVEL_SET_FIRESPREAD_1
 
 
-SUBROUTINE INITIALIZE_LEVEL_SET_FIRESPREAD_2(NM)
+!> \brief Continue initialialization of level set routines
+!>
+!> \param NM Mesh number 
+!> \details First, retrieve terrain height, Z_LS, from other meshes. Then do various other set up chores.
 
-! Continuation of set up routine. First, retrieve terrain height, Z_LS, from other meshes. Then do various other set up chores.
+SUBROUTINE INITIALIZE_LEVEL_SET_FIRESPREAD_2(NM)
 
 INTEGER, INTENT(IN) :: NM
 INTEGER :: I,IM1,IM2,IIG,IP1,IP2,J,JJG,JM1,JP1,KDUM,KWIND
@@ -126,6 +135,8 @@ REAL(EB) :: PHX,PHY,MAG_PHI,UMF_TMP
 REAL(EB) :: PHI_W_X,PHI_W_Y,MAG_PHI_S,UMF_X,UMF_Y
 TYPE (MESH_TYPE),    POINTER :: M
 TYPE (SURFACE_TYPE), POINTER :: SF
+
+T_NOW = CURRENT_TIME()
 
 CALL POINT_TO_MESH(NM)
 
@@ -257,7 +268,7 @@ DO JJG=1,JBAR
 
       ! Use assumed ellipse shape of fireline as in Farsite
 
-      IF_ELLIPSE_UNCOUPLED: IF (SF%VEG_LSET_ELLIPSE) THEN
+      IF_ELLIPSE: IF (SF%VEG_LSET_ELLIPSE) THEN
 
          ROS_HEAD(IIG,JJG) = SF%VEG_LSET_ROS
          SF%VEG_LSET_HT = MAX(0.001_EB,SF%VEG_LSET_HT)
@@ -355,26 +366,35 @@ DO JJG=1,JBAR
          THETA_ELPS(IIG,JJG) = PIO2 - THETA_ELPS(IIG,JJG)
          IF (THETA_ELPS(IIG,JJG) < 0.0_EB) THETA_ELPS(IIG,JJG) = 2.0_EB*PI + THETA_ELPS(IIG,JJG)
 
-      ENDIF IF_ELLIPSE_UNCOUPLED
+      ENDIF IF_ELLIPSE
 
    ENDDO
 ENDDO
 
+T_USED(15) = T_USED(15) + CURRENT_TIME() - T_NOW
 END SUBROUTINE INITIALIZE_LEVEL_SET_FIRESPREAD_2
 
 
+!> \brief Advance the level set array one time step
+!>
+!> \param T Current time (s)
+!> \param DT Time step (s)
+!> \param NM Mesh number
+!> \details Predictor: Estimate PHI_LS at next time step. Estimated value is called PHI1_LS.
+!> Corrector: Correct PHI_LS at next time step.
+
 SUBROUTINE LEVEL_SET_FIRESPREAD(T,DT,NM)
 
-! Predictor: Estimate PHI_LS at next time step. Estimated value is called PHI1_LS.
-! Corrector: Correct PHI_LS at next time step.
-
+USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T,DT
 INTEGER :: IIG,IW,JJG,IC
 INTEGER :: KDUM,KWIND,ICF,IKT
-REAL(EB) :: UMF_TMP,PHX,PHY,MAG_PHI,PHI_W_X,PHI_W_Y,UMF_X,UMF_Y,UMAG
+REAL(EB) :: UMF_TMP,PHX,PHY,MAG_PHI,PHI_W_X,PHI_W_Y,UMF_X,UMF_Y,UMAG,DUMMY=0._EB
 TYPE (ONE_D_M_AND_E_XFER_TYPE), POINTER :: ONE_D
 TYPE (SURFACE_TYPE), POINTER :: SF
+
+T_NOW = CURRENT_TIME()
 
 CALL POINT_TO_MESH(NM)
 
@@ -408,7 +428,7 @@ DO JJG=1,JBAR
 
          ! Use assumed ellipse shape of fireline as in Farsite
 
-         IF_ELLIPSE_COUPLED: IF (SF%VEG_LSET_ELLIPSE) THEN
+         IF_ELLIPSE: IF (SF%VEG_LSET_ELLIPSE) THEN
 
             ROS_HEAD(IIG,JJG) = SF%VEG_LSET_ROS
 
@@ -484,7 +504,14 @@ DO JJG=1,JBAR
             THETA_ELPS(IIG,JJG) = PIO2 - THETA_ELPS(IIG,JJG)
             IF (THETA_ELPS(IIG,JJG) < 0.0_EB) THETA_ELPS(IIG,JJG) = 2.0_EB*PI + THETA_ELPS(IIG,JJG)
 
-         ENDIF IF_ELLIPSE_COUPLED
+         ENDIF IF_ELLIPSE
+
+      ELSE IF_CFD_COUPLED
+
+         ! The wind velocity is specified by the user
+ 
+         U_LS(IIG,JJG) = U0*EVALUATE_RAMP(T,DUMMY,I_RAMP_U0_T)
+         V_LS(IIG,JJG) = V0*EVALUATE_RAMP(T,DUMMY,I_RAMP_V0_T)
 
       ENDIF IF_CFD_COUPLED
 
@@ -536,12 +563,13 @@ IF (.NOT.PREDICTOR) THEN
    ENDIF
 ENDIF
 
+T_USED(15) = T_USED(15) + CURRENT_TIME() - T_NOW
 END SUBROUTINE LEVEL_SET_FIRESPREAD
 
 
-SUBROUTINE GET_BOUNDARY_VALUES
+!> \brief Retrieve various quantities from neighboring meshes after MPI exchange
 
-! Retrieve various quantities from neighboring meshes.
+SUBROUTINE GET_BOUNDARY_VALUES
 
 INTEGER :: IIG,JJG,II,JJ,IOR
 
@@ -578,6 +606,8 @@ ENDDO
 
 CONTAINS
 
+! \brief Grab boundary values of PHI_LS from MPI storage arrays
+
 SUBROUTINE FILL_BOUNDARY_VALUES
 
 USE COMPLEX_GEOMETRY, ONLY : IBM_CGSC,IBM_SOLID,IBM_CUTCFE
@@ -585,8 +615,6 @@ INTEGER :: IW,IIO,JJO,N_INT_CELLS,NOM,IC
 REAL(EB) :: PHI_LS_OTHER,U_LS_OTHER,V_LS_OTHER,Z_LS_OTHER
 TYPE (EXTERNAL_WALL_TYPE), POINTER :: EWC
 LOGICAL :: SOLID_CELL
-
-! Grab boundary values of PHI_LS from MPI storage arrays
 
 IF (IOR==3) THEN  ! get the CELL_INDEX of the grid cell adjacent to the exterior boundary of the current mesh
    IC = CELL_INDEX(IIG,JJG,KBAR)
@@ -657,9 +685,9 @@ END SUBROUTINE FILL_BOUNDARY_VALUES
 END SUBROUTINE GET_BOUNDARY_VALUES
 
 
-SUBROUTINE LEVEL_SET_SPREAD_RATE
+!> \brief Compute components of spread rate vector
 
-! Compute components of spread rate vector
+SUBROUTINE LEVEL_SET_SPREAD_RATE
 
 INTEGER :: I,J,IM1,IP1,JM1,JP1
 REAL(EB) :: COS_THETA_WIND,COS_THETA_SLOPE,COS_THETA_WIND_H,COS_THETA_WIND_B, &
@@ -866,10 +894,12 @@ ENDDO FLUX_ILOOP
 END SUBROUTINE LEVEL_SET_SPREAD_RATE
 
 
-SUBROUTINE LEVEL_SET_ADVECT_FLUX
+!> \brief Compute the flux terms of the level set equation
+!>
+!> \details Use the spread rate [SR_X_LS,SR_Y_LS] to compute the limited scalar gradient and take dot product with 
+!> spread rate vector to get advective flux
 
-! Use the spread rate [SR_X_LS,SR_Y_LS] to compute the limited scalar gradient
-! and take dot product with spread rate vector to get advective flux
+SUBROUTINE LEVEL_SET_ADVECT_FLUX
 
 INTEGER :: I,IM1,IP1,IP2,J,JM1,JP1,JP2
 REAL(EB), DIMENSION(:) :: Z(4)
@@ -926,25 +956,18 @@ ENDDO
 END SUBROUTINE LEVEL_SET_ADVECT_FLUX
 
 
-REAL(EB) FUNCTION SCALAR_FACE_VALUE_LS(SR_XY,Z,LIMITER)
-
-! This function computes the scalar value on a face.
-! The scalar is denoted Z, and the velocity is denoted U.
-! The gradient (computed elsewhere) is a central difference across
-! the face subject to a flux limiter.  The flux limiter choices are:
-!
-! LIMITER = 1 implements the MINMOD limiter
-! LIMITER = 2 implements the SUPERBEE limiter of Roe
-! LIMITER = 3 implements first-order upwinding (monotone)
-!
-!                    location of face
-!
-!                            f
+!> \brief Compute the scalar value on the flux at a cell face
+!>
+!> \param SR_XY If positive, indicates that flow is from left to right
+!> \param Z Scalar quantity
+!> \param LIMITER Flux limiter (1) MINMOD, (2) SUPERBEE, (3) first-order upwinding (monotone)
+!> \details
+!                           face
 !    |     o     |     o     |     o     |     o     |
-!                     SRXY        SRXY
-!                 (if f_east)  (if f_west)
 !         Z(1)        Z(2)        Z(3)        Z(4)
 !
+REAL(EB) FUNCTION SCALAR_FACE_VALUE_LS(SR_XY,Z,LIMITER)
+
 INTEGER, INTENT(IN) :: LIMITER
 REAL(EB) :: SR_XY
 REAL(EB), INTENT(IN), DIMENSION(4) :: Z
