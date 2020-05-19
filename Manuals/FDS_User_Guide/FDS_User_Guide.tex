@@ -3246,12 +3246,15 @@ The thermal properties of a solid or liquid fuel determine the length of time fo
 However, each type of pyrolysis model handles fuel burnout in a slightly different way. These differences will be highlighted in the individual sections below.
 
 \subsubsection{Solid Fuel Burnout When the Burning Rate is Specified}
+\label{info:BURN_DURATION}
 
 If you {\em specify} the burning rate using {\ct HRRPUA} (Heat Release Rate Per Unit Area) or {\ct MLRPUA} (Mass Loss Rate Per Unit Area), the solid surface will continue to burn at the specified rate indefinitely with no fuel burnout. You may use {\ct RAMP\_Q} to stop the burning at a desired time. You can estimate this ``burnout time'' for a surface using the heat of combustion, $\Delta H$, material density, $\rho_{\rm s}$, material thickness, $\delta_{\rm s}$, and {\ct HRRPUA}, $\dq_{\rm f}''$:
 \be
    t_{\rm b} = \frac{\rho_{\rm s} \, \delta_{\rm s} \, \Delta H}{\dq''_{\rm f}}
 \ee
 The burnout time is not calculated and applied automatically because there are instances where the underlying solid is not considered fuel; that is, the burning rate and duration are not determined by the composition of the solid surface.
+
+An alternative to ramping the HRR up and down is to specify {\ct BURN\_DURATION} (s) on the {\ct SURF} line. This is the time duration after ignition when the fire will extinguish. The default value of this parameter is a very large number, meaning that by default a fire with a specified HRR will burn indefinitely.
 
 
 \subsubsection{Solid Fuel Burnout When the Burning Rate is Not Specified}
@@ -11189,6 +11192,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct ADIABATIC}                                           & Logical         & Section~\ref{info:adiabatic}              &                     & {\ct .FALSE.}           \\ \hline
 {\ct BACKING}                                             & Character       & Section~\ref{info:BACKING}                &                     & {\ct 'EXPOSED'}         \\ \hline
 {\ct BURN\_AWAY}                                          & Logical         & Section~\ref{info:BURN_AWAY}              &                     & {\ct .FALSE.}           \\ \hline
+{\ct BURN\_DURATION}                                      & Real            & Section~\ref{info:BURN_DURATION}          & s                   & 1000000                 \\ \hline
 {\ct CELL\_SIZE\_FACTOR}                                  & Real            & Section~\ref{info:solid_phase_stability}  &                     & 1.0                     \\ \hline
 {\ct C\_FORCED\_CONSTANT}                                 & Real            & Section~\ref{info:convection}             &                     & 0.0                     \\ \hline
 {\ct C\_FORCED\_PR\_EXP}                                  & Real            & Section~\ref{info:convection}             &                     & 0.0                     \\ \hline
