@@ -320,7 +320,8 @@ TYPE MESH_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: FLUX0_LS,FLUX1_LS,PHI_LS,PHI1_LS,ROS_BACKU, &
                                             ROS_HEAD,ROS_FLANK,WIND_EXP, &
                                             SR_X_LS,SR_Y_LS,U_LS,V_LS,Z_LS,DZTDX,DZTDY,MAG_ZT, &
-                                            PHI_WS,UMF,THETA_ELPS,PHI_S,PHI_S_X,PHI_S_Y,PHI_W,LS_WORK1,LS_WORK2
+                                            PHI_WS,UMF,THETA_ELPS,PHI_S,PHI_S_X,PHI_S_Y,PHI_W,LS_WORK1,LS_WORK2, &
+                                            BURN_TIME_LS
 
    ! Embedded Mesh
 
@@ -460,7 +461,8 @@ INTEGER, POINTER :: N_TERRAIN_SLCF
 REAL(EB), POINTER, DIMENSION(:,:) :: FLUX0_LS,FLUX1_LS,PHI_LS,PHI1_LS,ROS_BACKU, &
                                      ROS_HEAD,ROS_FLANK,WIND_EXP, &
                                      SR_X_LS,SR_Y_LS,U_LS,V_LS,Z_LS,DZTDX,DZTDY,MAG_ZT, &
-                                     PHI_WS,UMF,THETA_ELPS,PHI_S,PHI_S_X,PHI_S_Y,PHI_W,LS_WORK1,LS_WORK2
+                                     PHI_WS,UMF,THETA_ELPS,PHI_S,PHI_S_X,PHI_S_Y,PHI_W,LS_WORK1,LS_WORK2, &
+                                     BURN_TIME_LS
 
 ! Embedded Mesh
 
@@ -863,6 +865,7 @@ PHI_S_Y => M%PHI_S_Y
 PHI_W => M%PHI_W
 LS_WORK1 => M%LS_WORK1
 LS_WORK2 => M%LS_WORK2
+BURN_TIME_LS => M%BURN_TIME_LS
 
 END SUBROUTINE POINT_TO_MESH
 

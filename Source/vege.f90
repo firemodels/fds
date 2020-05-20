@@ -206,6 +206,10 @@ THETA_ELPS = 0.0_EB ! Normal to fireline
 ALLOCATE(M%SR_X_LS(IBAR,JBAR)) ; CALL ChkMemErr('VEGE:LEVEL SET','SR_X_LS',IZERO) ; SR_X_LS => M%SR_X_LS
 ALLOCATE(M%SR_Y_LS(IBAR,JBAR)) ; CALL ChkMemErr('VEGE:LEVEL SET','SR_Y_LS',IZERO) ; SR_Y_LS => M%SR_Y_LS
 
+! Burntime of fire
+ALLOCATE(M%BURN_TIME_LS(IBAR,JBAR)) ; CALL ChkMemErr('VEGE:LEVEL SET','BURN_TIME_LS',IZERO) ; BURN_TIME_LS=> M%BURN_TIME_LS
+BURN_TIME_LS = 0.0_EB
+
 ! Compute components of terrain slope gradient and magnitude of gradient
 
 GRADIENT_ILOOP: DO I = 1,IBAR
@@ -250,7 +254,10 @@ DO JJG=1,JBAR
 
       ! Ignite landscape at user specified location if ignition is at time zero
 
-      IF (SF%VEG_LSET_IGNITE_T == 0.0_EB) PHI_LS(IIG,JJG) = PHI_LS_MAX
+      IF (SF%VEG_LSET_IGNITE_T == 0.0_EB) THEN
+        PHI_LS(IIG,JJG) = PHI_LS_MAX
+        BURN_TIME_LS(IIG,JJG) = 1.E6_EB
+      ENDIF
 
       ! Wind field
 
@@ -391,6 +398,10 @@ REAL(EB), INTENT(IN) :: T,DT
 INTEGER :: IIG,IW,JJG,IC
 INTEGER :: KDUM,KWIND,ICF,IKT
 REAL(EB) :: UMF_TMP,PHX,PHY,MAG_PHI,PHI_W_X,PHI_W_Y,UMF_X,UMF_Y,UMAG,DUMMY=0._EB
+REAL(EB) :: BT,FB_TIME_FCTR,GRIDCELL_FRACTION,GRIDCELL_TIME,RFIREBASE_TIME,RGRIDCELL_TIME,ROS_MAG,SMF,TOTAL_FUEL_LOAD
+!These REAL should be &SURF parameters
+REAL(EB) :: VEG_LSET_FIREBASE_TIME,VEG_CHAR_FRACTION
+LOGICAL :: LSET_FIRE
 TYPE (ONE_D_M_AND_E_XFER_TYPE), POINTER :: ONE_D
 TYPE (SURFACE_TYPE), POINTER :: SF
 
@@ -411,8 +422,14 @@ DO JJG=1,JBAR
 
       ! Ignite landscape at user specified location(s) and time(s)
 
-      IF (SF%VEG_LSET_IGNITE_T > 0.0_EB .AND. SF%VEG_LSET_IGNITE_T < DT)  PHI_LS(IIG,JJG) = PHI_LS_MAX
-      IF (SF%VEG_LSET_IGNITE_T >= T .AND. SF%VEG_LSET_IGNITE_T <= T + DT) PHI_LS(IIG,JJG) = PHI_LS_MAX
+      IF (SF%VEG_LSET_IGNITE_T > 0.0_EB .AND. SF%VEG_LSET_IGNITE_T < DT) THEN
+        PHI_LS(IIG,JJG) = PHI_LS_MAX
+        BURN_TIME_LS(IIG,JJG) = 1.E6_EB
+      ENDIF
+      IF (SF%VEG_LSET_IGNITE_T >= T .AND. SF%VEG_LSET_IGNITE_T <= T + DT) THEN
+        PHI_LS(IIG,JJG) = PHI_LS_MAX
+        BURN_TIME_LS(IIG,JJG) = 1.E6_EB
+      ENDIF
 
       ! Variable update when level set is coupled to CFD computation
 
@@ -534,7 +551,7 @@ ENDIF
 ! Loop over all cells and assign the value of PHI_LS to the appropriate WALL or
 ! CFACE cells. Also, if PHI_LS increases above 0, set the ignition time T_IGN.
 
-IF (.NOT.PREDICTOR) THEN
+IF (.NOT.PREDICTOR .AND. SF%RAMP_Q /= 'null') THEN
    IF (CC_IBM) THEN
       DO JJG=1,JBAR
          DO IIG=1,IBAR
@@ -562,6 +579,96 @@ IF (.NOT.PREDICTOR) THEN
       ENDDO
    ENDIF
 ENDIF
+
+!--- Compute fuel gas flux into atmosphere
+
+!The following need to be made &SURF parameters
+!SF%VEG_LSET_FIREBASE_TIME
+!SF%VEG_CHAR_FRACTION
+VEG_CHAR_FRACTION = 0.2_EB
+
+IF_FIREBASE: IF (.NOT. PREDICTOR .AND. SF%RAMP_Q=='null') THEN
+  DO JJG=1,JBAR
+    DO IIG=1,IBAR
+      IF (K_LS(IIG,JJG)<1) CYCLE
+      IC = CELL_INDEX(IIG,JJG,K_LS(IIG,JJG))
+      IW = WALL_INDEX(IC,-3)
+      ONE_D => WALL(IW)%ONE_D
+      SF => SURFACE(LS_SURF_INDEX(IIG,JJG))
+      ONE_D%PHI_LS = PHI_LS(IIG,JJG)
+
+      VEG_LSET_FIREBASE_TIME = 756._EB/SF%VEG_LSET_SIGMA !SIGMA is in 1/cm
+      GRIDCELL_TIME  = 0.0_EB
+      RFIREBASE_TIME = 1.0_EB/VEG_LSET_FIREBASE_TIME
+      ROS_MAG = SQRT(SR_X_LS(IIG,JJG)**2 + SR_Y_LS(IIG,JJG)**2)
+      IF(ROS_MAG > 0.0_EB) THEN
+        GRIDCELL_TIME = SQRT(DX(IIG)**2 + DY(JJG)**2)/ROS_MAG
+        RGRIDCELL_TIME = 1.0_EB/GRIDCELL_TIME
+        GRIDCELL_FRACTION = MIN(1.0_EB,VEG_LSET_FIREBASE_TIME*RGRIDCELL_TIME) !assumes spread direction parallel to grid axes
+      ENDIF
+
+      BT  = BURN_TIME_LS(IIG,JJG)
+      SMF = 0.0_EB 
+      LSET_FIRE = .FALSE.
+
+!Determine fuel gas flux for fire spreading through grid cell. Account for fires with a depth that is smaller
+!than the grid cell (GRIDCELL_FRACTION). Also account for partial presence of fire base as fire spreads into 
+!and out of the grid cell (FB_TIME_FCTR).
+
+      TOTAL_FUEL_LOAD = SF%VEG_LSET_SURF_LOAD
+
+      IF_FIRELINE_PASSAGE: IF (PHI_LS(IIG,JJG) >= 0._EB) THEN 
+
+        LSET_FIRE = .TRUE.
+        SMF = (1.0_EB-VEG_CHAR_FRACTION)*TOTAL_FUEL_LOAD*RFIREBASE_TIME !max surface fuel vapor mass flux, kg/(s*m^2)
+
+!Grid cell > fire depth      
+        IF (GRIDCELL_FRACTION < 1.0_EB) THEN
+          SMF = SMF*GRIDCELL_FRACTION
+          FB_TIME_FCTR = 1.0_EB
+!       Fire entering cell
+          IF (0.0_EB        <= BT .AND. BT <= VEG_LSET_FIREBASE_TIME) FB_TIME_FCTR = BT*RFIREBASE_TIME
+!       Fire exiting cell
+          IF (GRIDCELL_TIME <  BT .AND. BT <= GRIDCELL_TIME + VEG_LSET_FIREBASE_TIME) FB_TIME_FCTR = &
+            1.0_EB - (BT - GRIDCELL_TIME)*RFIREBASE_TIME
+!       Fire has left cell
+          IF (BT > GRIDCELL_TIME + VEG_LSET_FIREBASE_TIME) LSET_FIRE = .FALSE.
+          BURN_TIME_LS(IIG,JJG) = BURN_TIME_LS(IIG,JJG) + DT
+          ONE_D%M_DOT_G_PP_ACTUAL(2) = SMF*FB_TIME_FCTR
+          ONE_D%M_DOT_G_PP_ADJUST(2) = ONE_D%M_DOT_G_PP_ACTUAL(2) !Needs checking
+        ENDIF
+
+!Grid cell <= fire depth      
+        IF (GRIDCELL_FRACTION >= 1.0_EB) THEN
+          FB_TIME_FCTR = 1.0_EB
+!       Fire entering cell
+          IF (0.0_EB        <= BT .AND. BT <= GRIDCELL_TIME) FB_TIME_FCTR = BT*RGRIDCELL_TIME
+!       Fire exiting cell
+          IF (VEG_LSET_FIREBASE_TIME <  BT .AND. BT <= GRIDCELL_TIME + VEG_LSET_FIREBASE_TIME) FB_TIME_FCTR = &
+            1.0_EB - (BT - VEG_LSET_FIREBASE_TIME)*RGRIDCELL_TIME
+!       Fire has left cell
+          IF (BT > GRIDCELL_TIME + VEG_LSET_FIREBASE_TIME) LSET_FIRE = .FALSE.
+          BURN_TIME_LS(IIG,JJG) = BURN_TIME_LS(IIG,JJG) + DT
+          ONE_D%M_DOT_G_PP_ACTUAL(2) = SMF*FB_TIME_FCTR
+          ONE_D%M_DOT_G_PP_ADJUST(2) = ONE_D%M_DOT_G_PP_ACTUAL(2) !Needs checking
+        ENDIF
+
+!     IF (WC%LSET_FIRE) HRRPUA_OUT(IIG,JJG) = -WC%VEG_LSET_SURFACE_HEATFLUX*0.001 !kW/m^2 for Smokeview output
+
+      ENDIF IF_FIRELINE_PASSAGE
+
+     
+! Stop burning if the fire front residence time is exceeded
+      IF (PHI_LS(IIG,JJG) >= 0._EB .AND. .NOT. LSET_FIRE) THEN
+        ONE_D%M_DOT_G_PP_ACTUAL(2) = 0._EB
+        ONE_D%M_DOT_G_PP_ADJUST(2) = 0._EB
+        BURN_TIME_LS(IIG,JJG) = 1.E6_EB
+      ENDIF
+
+    ENDDO
+  ENDDO
+
+ENDIF IF_FIREBASE
 
 T_USED(15) = T_USED(15) + CURRENT_TIME() - T_NOW
 END SUBROUTINE LEVEL_SET_FIRESPREAD
