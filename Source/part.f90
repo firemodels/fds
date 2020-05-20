@@ -1114,14 +1114,14 @@ IF (LPC%SOLID_PARTICLE) THEN
          SELECT CASE (SF%GEOMETRY)
             CASE (SURF_CARTESIAN,SURF_BLOWING_PLATE)
                LP%ONE_D%AREA = AREA
-               IF (SF%THERMALLY_THICK) THEN
+               IF (SF%THERMAL_BC_INDEX==THERMALLY_THICK) THEN
                   DO N=1,SF%N_LAYERS
                      LP%MASS = LP%MASS + AREA*SF%LAYER_THICKNESS(N)*SF%LAYER_DENSITY(N)
                   END DO
                ENDIF
             CASE (SURF_CYLINDRICAL)
                LP%ONE_D%AREA = AREA*PI
-               IF (SF%THERMALLY_THICK) THEN
+               IF (SF%THERMAL_BC_INDEX==THERMALLY_THICK) THEN
                   X1 = SUM(SF%LAYER_THICKNESS)
                   LENGTH = AREA / (2._EB*X1)
                   DO N=SF%N_LAYERS,1,-1
@@ -1132,7 +1132,7 @@ IF (LPC%SOLID_PARTICLE) THEN
                ENDIF
             CASE (SURF_SPHERICAL)
                LP%ONE_D%AREA = AREA*4._EB
-               IF (SF%THERMALLY_THICK) THEN
+               IF (SF%THERMAL_BC_INDEX==THERMALLY_THICK) THEN
                   X1 = SUM(SF%LAYER_THICKNESS)
                   LP%PWT = AREA/(PI*X1**2)
                   DO N=SF%N_LAYERS,1,-1
@@ -1152,7 +1152,7 @@ IF (LPC%SOLID_PARTICLE) THEN
          SELECT CASE (SF%GEOMETRY)
             CASE (SURF_CARTESIAN)
                LP%ONE_D%AREA = LP_VOLUME/SF%THICKNESS
-               IF (SF%THERMALLY_THICK) THEN
+               IF (SF%THERMAL_BC_INDEX==THERMALLY_THICK) THEN
                   DO N=1,SF%N_LAYERS
                      LP%MASS = LP%MASS + SF%LAYER_THICKNESS(N)*SF%LAYER_DENSITY(N)
                   END DO
@@ -1160,7 +1160,7 @@ IF (LPC%SOLID_PARTICLE) THEN
                ENDIF
             CASE (SURF_CYLINDRICAL)
                LP%ONE_D%AREA = 2._EB*LP_VOLUME/SF%THICKNESS
-               IF (SF%THERMALLY_THICK) THEN
+               IF (SF%THERMAL_BC_INDEX==THERMALLY_THICK) THEN
                   X1 = SUM(SF%LAYER_THICKNESS)
                   LENGTH = LP_VOLUME/(PI*X1**2)
                   DO N=SF%N_LAYERS,1,-1
@@ -1172,7 +1172,7 @@ IF (LPC%SOLID_PARTICLE) THEN
             CASE (SURF_SPHERICAL)
                LP%ONE_D%AREA = 3._EB*LP_VOLUME/SF%THICKNESS
                LP%PWT = LP%ONE_D%AREA/(4._EB*PI*SF%THICKNESS**2)
-               IF (SF%THERMALLY_THICK) THEN
+               IF (SF%THERMAL_BC_INDEX==THERMALLY_THICK) THEN
                   X1 = SUM(SF%LAYER_THICKNESS)
                   DO N=SF%N_LAYERS,1,-1
                      X2 = X1 - SF%LAYER_THICKNESS(N)
@@ -1193,7 +1193,7 @@ IF (LPC%SOLID_PARTICLE) THEN
             SCALE_FACTOR = 1._EB
          ENDIF
 
-         IF (SF%THERMALLY_THICK) THEN
+         IF (SF%THERMAL_BC_INDEX==THERMALLY_THICK) THEN
             SELECT CASE (SF%GEOMETRY)
                CASE (SURF_CARTESIAN,SURF_BLOWING_PLATE)
                   DO N=1,SF%N_LAYERS
@@ -1236,7 +1236,7 @@ IF (SF%RAMP_T_I_INDEX > 0) THEN
       ONE_D%TMP(N)=RAMPS(SF%RAMP_T_I_INDEX)%INTERPOLATED_DATA(NINT(X_POS*RAMPS(SF%RAMP_T_I_INDEX)%RDT)) + TMPM
    ENDDO
    ONE_D%TMP(SF%N_CELLS_INI+1) = ONE_D%TMP(SF%N_CELLS_INI)
-ELSEIF (SF%THERMALLY_THICK .AND. SF%TMP_INNER(1)>0._EB) THEN
+ELSEIF (SF%THERMAL_BC_INDEX==THERMALLY_THICK .AND. SF%TMP_INNER(1)>0._EB) THEN
    DO I=0,SF%N_CELLS_INI+1
       IF (SF%TMP_INNER(SF%LAYER_INDEX(I))>0._EB) ONE_D%TMP(I) = SF%TMP_INNER(SF%LAYER_INDEX(I))
    ENDDO
@@ -2489,7 +2489,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
 
                   ! Compute mcbar = rho_w a_w cp_w dx_w for first wall cell for limiting convective heat transfer
 
-                  IF (SF%THERMALLY_THICK) THEN
+                  IF (SF%THERMAL_BC_INDEX==THERMALLY_THICK) THEN
                      RHOCBAR = 0._EB
                      DO NMAT=1,SF%N_MATL
                         IF (ONE_D%MATL_COMP(NMAT)%RHO(1)<=TWO_EPSILON_EB) CYCLE
@@ -3114,7 +3114,7 @@ PARTICLE_LOOP: DO IP=1,NLP
       IF (LPC%DUCT_PARTICLE) CYCLE PARTICLE_LOOP
       ! Remove particles that are too small
 
-      IF (LPC%SOLID_PARTICLE .AND. SF%THERMALLY_THICK .AND. LP%ONE_D%BURNAWAY) THEN
+      IF (LPC%SOLID_PARTICLE .AND. SF%THERMAL_BC_INDEX==THERMALLY_THICK .AND. LP%ONE_D%BURNAWAY) THEN
          CALL PARTICLE_ORPHANAGE
          CYCLE WEED_LOOP
       ENDIF
