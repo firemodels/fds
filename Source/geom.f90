@@ -32064,8 +32064,8 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
                    IF (.NOT.INLIST) THEN
                        NSEG = NSEG + 1
                        SEG_FACE(NOD1:NOD2,NSEG) = VEC(NOD1:NOD2)
-                       BODNUM(IDUM)             =          IBOD
-                       SEGTYPE(IDUM)            =         STYPE
+                       BODNUM(NSEG)             =          IBOD
+                       SEGTYPE(NSEG)            =         STYPE
                        DX3 = XYZVERT(X3AXIS,INOD2)-XYZVERT(X3AXIS,INOD1)
                        DX2 = XYZVERT(X2AXIS,INOD2)-XYZVERT(X2AXIS,INOD1)
                        ANGSEG(NSEG) = ATAN2(DX3,DX2)
@@ -32131,7 +32131,8 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
              ENDDO
 
              ! Discard face with no conected edges:
-             IF ( NSEG == 0 ) THEN
+             IF ( (NSEG==0) .OR. (NSEG==2 .AND. ( ANY(SEG_FACE(NOD1:NOD2,1)==SEG_FACE(NOD2,2)) .AND. &
+                                                  ANY(SEG_FACE(NOD1:NOD2,1)==SEG_FACE(NOD1,2)) )) ) THEN
                 MESHES(NM)%FCVAR(INDI,INDJ,INDK,IBM_FGSC,X1AXIS) = IBM_SOLID
                 CYCLE
              ENDIF

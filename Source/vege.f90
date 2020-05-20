@@ -128,11 +128,8 @@ END SUBROUTINE INITIALIZE_LEVEL_SET_FIRESPREAD_1
 SUBROUTINE INITIALIZE_LEVEL_SET_FIRESPREAD_2(NM)
 
 INTEGER, INTENT(IN) :: NM
-INTEGER :: I,IM1,IM2,IIG,IP1,IP2,J,JJG,JM1,JP1,KDUM,KWIND
-REAL(EB) :: DZT_DUM
-REAL(EB) :: G_EAST,G_WEST,G_SOUTH,G_NORTH
-REAL(EB) :: PHX,PHY,MAG_PHI,UMF_TMP
-REAL(EB) :: PHI_W_X,PHI_W_Y,MAG_PHI_S,UMF_X,UMF_Y
+INTEGER :: I,IM1,IM2,IIG,IP1,IP2,J,JJG,JM1,JP1
+REAL(EB) :: DZT_DUM,G_EAST,G_WEST,G_SOUTH,G_NORTH
 TYPE (MESH_TYPE),    POINTER :: M
 TYPE (SURFACE_TYPE), POINTER :: SF
 
@@ -193,7 +190,6 @@ ALLOCATE(M%PHI_WS(IBAR,JBAR))   ; CALL ChkMemErr('VEGE:LEVEL SET','PHI_W',IZERO)
 ALLOCATE(M%PHI_S(IBAR,JBAR))    ; CALL ChkMemErr('VEGE:LEVEL SET','PHI_S',IZERO)   ; PHI_S => M%PHI_S
 ALLOCATE(M%PHI_S_X(IBAR,JBAR))  ; CALL ChkMemErr('VEGE:LEVEL SET','PHI_S_X',IZERO) ; PHI_S_X => M%PHI_S_X
 ALLOCATE(M%PHI_S_Y(IBAR,JBAR))  ; CALL ChkMemErr('VEGE:LEVEL SET','PHI_S_Y',IZERO) ; PHI_S_Y => M%PHI_S_Y
-ALLOCATE(M%PHI_W(IBAR,JBAR))    ; CALL ChkMemErr('VEGE:LEVEL SET','PHI_W',IZERO)   ; PHI_W => M%PHI_W
 
 ! UMF = wind speed at mean flame heights
 
@@ -239,11 +235,8 @@ GRADIENT_ILOOP: DO I = 1,IBAR
 
 ENDDO GRADIENT_ILOOP
 
-! Initialize arrays for head, flank, and back fire spread rates with values
-! explicitly declared in the input file or from FARSITE head fire and ellipse
-! based flank and back fires.
-! Fill arrays for the horizontal component of the velocity arrays.
-! Initialize level set scalar array PHI
+! Initialize arrays for head, flank, and back fire spread rates with values explicitly declared in the input file or 
+! from FARSITE head fire and ellipse based flank and back fires.
 
 DO JJG=1,JBAR
    DO IIG=1,IBAR
@@ -258,11 +251,6 @@ DO JJG=1,JBAR
         PHI_LS(IIG,JJG) = PHI_LS_MAX
         BURN_TIME_LS(IIG,JJG) = 1.E6_EB
       ENDIF
-
-      ! Wind field
-
-      U_LS(IIG,JJG) = 0.5_EB*(U(IIG-1,JJG,K_LS(IIG,JJG))+U(IIG,JJG,K_LS(IIG,JJG)))
-      V_LS(IIG,JJG) = 0.5_EB*(V(IIG,JJG-1,K_LS(IIG,JJG))+V(IIG,JJG,K_LS(IIG,JJG)))
 
       ROS_HEAD(IIG,JJG)  = SF%VEG_LSET_ROS_HEAD
       ROS_FLANK(IIG,JJG) = SF%VEG_LSET_ROS_FLANK
@@ -282,42 +270,17 @@ DO JJG=1,JBAR
 
          ! If any surfaces set to ellipse, then elliptical model used for all surfaces
 
-         IF (.NOT. LSET_ELLIPSE) LSET_ELLIPSE = .TRUE.
-
-         ! Find wind at ~6.1 m height for Farsite
-         KWIND = 0
-         DO KDUM = K_LS(IIG,JJG),KBAR
-            IF (ZC(KDUM)-ZC(K_LS(IIG,JJG)) >= 6.1_EB) KWIND = KDUM
-         ENDDO
-         IF (ZC(KBAR) < 6.1_EB) KWIND=1
-
-         U_LS(IIG,JJG) = 0.5_EB*(U(IIG-1,JJG,KWIND)+U(IIG,JJG,KWIND))
-         V_LS(IIG,JJG) = 0.5_EB*(V(IIG,JJG-1,KWIND)+V(IIG,JJG,KWIND))
-
-         ! Wind at midflame height (UMF). From Andrews 2012, USDA FS Gen Tech Rep. RMRS-GTR-266 (with added SI conversion)
-
-         UMF_TMP = 1.83_EB / LOG((20.0_EB + 1.18_EB * SF%VEG_LSET_HT) /(0.43_EB * SF%VEG_LSET_HT))
-
-         ! Factor 60 converts U from m/s to m/min which is used in elliptical model.
-         UMF_X = UMF_TMP * U_LS(IIG,JJG) * 60.0_EB
-         UMF_Y = UMF_TMP * V_LS(IIG,JJG) * 60.0_EB
+         LSET_ELLIPSE = .TRUE.
 
          ! Variables used in Phi_W formulas below (Rothermel model)
+
          B_ROTH = 0.15988_EB * (SF%VEG_LSET_SIGMA**0.54_EB)
          C_ROTH = 7.47_EB * EXP(-0.8711_EB * (SF%VEG_LSET_SIGMA**0.55_EB))
          E_ROTH = 0.715_EB * EXP(-0.01094_EB * SF%VEG_LSET_SIGMA)
          BETA_OP_ROTH = 0.20395_EB * (SF%VEG_LSET_SIGMA**(-0.8189_EB))! Optimum packing ratio
 
-         ! Components of wind factor - affects spread rate
-         PHI_W_X = C_ROTH * ((3.281_EB * ABS(UMF_X))**B_ROTH) * (SF%VEG_LSET_BETA / BETA_OP_ROTH)**(-E_ROTH)
-         PHI_W_X = SIGN(PHI_W_X,UMF_X)
-
-         PHI_W_Y = C_ROTH * ((3.281_EB * ABS(UMF_Y))**B_ROTH) * (SF%VEG_LSET_BETA / BETA_OP_ROTH)**(-E_ROTH)
-         PHI_W_Y = SIGN(PHI_W_Y,UMF_Y)
-
-         PHI_W(IIG,JJG) =  SQRT(PHI_W_X**2 + PHI_W_Y**2)
-
          ! Limit effect to slope lte 80 degrees. Phi_s_x,y are slope factors
+
          DZT_DUM = MIN(5.67_EB,ABS(DZTDX(IIG,JJG))) ! 5.67 ~ tan 80 deg
          PHI_S_X(IIG,JJG) = 5.275_EB * ((SF%VEG_LSET_BETA)**(-0.3_EB)) * DZT_DUM**2
          PHI_S_X(IIG,JJG) = SIGN(PHI_S_X(IIG,JJG),DZTDX(IIG,JJG))
@@ -325,53 +288,7 @@ DO JJG=1,JBAR
          PHI_S_Y(IIG,JJG) = 5.275_EB * ((SF%VEG_LSET_BETA)**(-0.3_EB)) * DZT_DUM**2
          PHI_S_Y(IIG,JJG) = SIGN(PHI_S_Y(IIG,JJG),DZTDY(IIG,JJG))
 
-         MAG_PHI_S = SQRT(PHI_S_X(IIG,JJG)**2 + PHI_S_Y(IIG,JJG)**2)
-
-         PHI_S(IIG,JJG) = MAG_PHI_S  !5.275 * MAG_ZT(I,J)**2 * (SF%VEG_LSET_BETA)**-0.3
-
-         ! Slope factor
-
-         IF (MAG_PHI_S > 0.0_EB) THEN
-
-            PHX = PHI_W_X + PHI_S_X(IIG,JJG)
-            PHY = PHI_W_Y + PHI_S_Y(IIG,JJG)
-            MAG_PHI = SQRT(PHX**2 + PHY**2)
-
-            ! Total phi (phi_w + phi_s) for use in spread rate section
-            PHI_WS(IIG,JJG) = MAG_PHI
-
-            ! Theta_elps is angle of direction (0 to 2pi) of highest spread rate
-            ! 0<=theta_elps<=2pi as measured clockwise from Y-axis
-            THETA_ELPS(IIG,JJG) = ATAN2(PHY,PHX)
-
-            !"Effective midflame windspeed" used in length-to-breadth ratio calculation (spread rate routine)
-            ! is the wind + slope effect obtained by solving Phi_w eqs. above for UMF
-            ! 8/8/13 - Changed phi_ws to Phi_s below to match Farsite, i.e., instead of adding phi_w and phi_s
-            ! and then calculating effective wind speed, phi_s is converted to an effected wind speed and added
-            ! to UMF calculated from the wind. Effective U has units of m/min in Wilson formula.
-            ! 0.3048 ~= 1/3.281
-            ! if phi_s < 0 then a complex value (NaN) results. Using abs(phi_s) and sign function to correct.
-
-            UMF_TMP = (((ABS(PHI_S_X(IIG,JJG)) * (SF%VEG_LSET_BETA / BETA_OP_ROTH)**E_ROTH)/C_ROTH)**(1/B_ROTH))*0.3048
-            UMF_TMP = SIGN(UMF_TMP,PHI_S_X(IIG,JJG))
-            UMF_X = UMF_X + UMF_TMP
-
-            UMF_TMP = (((ABS(PHI_S_Y(IIG,JJG)) * (SF%VEG_LSET_BETA / BETA_OP_ROTH)**E_ROTH)/C_ROTH)**(1/B_ROTH))*0.3048
-            UMF_TMP = SIGN(UMF_TMP,PHI_S_Y(IIG,JJG))
-            UMF_Y = UMF_Y + UMF_TMP
-
-         ELSE
-
-            PHI_WS(IIG,JJG) = SQRT (PHI_W_X**2 + PHI_W_Y**2)
-            THETA_ELPS(IIG,JJG) = ATAN2(PHI_W_Y,PHI_W_X)
-
-         ENDIF
-
-         UMF(IIG,JJG) = SQRT(UMF_X**2 + UMF_Y**2)
-
-         ! The following two lines convert ATAN2 output to compass system (0 to 2 pi CW from +Y-axis)
-         THETA_ELPS(IIG,JJG) = PIO2 - THETA_ELPS(IIG,JJG)
-         IF (THETA_ELPS(IIG,JJG) < 0.0_EB) THETA_ELPS(IIG,JJG) = 2.0_EB*PI + THETA_ELPS(IIG,JJG)
+         PHI_S(IIG,JJG) = SQRT(PHI_S_X(IIG,JJG)**2 + PHI_S_Y(IIG,JJG)**2)
 
       ENDIF IF_ELLIPSE
 
@@ -431,106 +348,109 @@ DO JJG=1,JBAR
         BURN_TIME_LS(IIG,JJG) = 1.E6_EB
       ENDIF
 
-      ! Variable update when level set is coupled to CFD computation
-
-      IF_CFD_COUPLED: IF (VEG_LEVEL_SET_COUPLED) THEN
+      IF_CFD_COUPLED: IF (VEG_LEVEL_SET_COUPLED) THEN  ! The wind speed is derived from the CFD computation
 
          U_LS(IIG,JJG) = 0.5_EB*(U(IIG-1,JJG,K_LS(IIG,JJG))+U(IIG,JJG,K_LS(IIG,JJG)))
          V_LS(IIG,JJG) = 0.5_EB*(V(IIG,JJG-1,K_LS(IIG,JJG))+V(IIG,JJG,K_LS(IIG,JJG)))
 
-         ! AU grassland ROS for infinite head and 6% moisutre
+      ELSE IF_CFD_COUPLED  ! The wind velocity is specified by the user
+ 
+         U_LS(IIG,JJG) = U0*EVALUATE_RAMP(T,DUMMY,I_RAMP_U0_T)
+         V_LS(IIG,JJG) = V0*EVALUATE_RAMP(T,DUMMY,I_RAMP_V0_T)
 
-         UMAG     = SQRT(U_LS(IIG,JJG)**2 + V_LS(IIG,JJG)**2)
-         ROS_HEAD(IIG,JJG)  = SF%VEG_LSET_ROS_HEAD*(0.165_EB + 0.534_EB*UMAG)*0.523_EB
+      ENDIF IF_CFD_COUPLED
 
-         ! Use assumed ellipse shape of fireline as in Farsite
+      IF_ELLIPSE: IF (LSET_ELLIPSE) THEN  ! Use assumed elliptical shape of fireline as in Farsite
 
-         IF_ELLIPSE: IF (SF%VEG_LSET_ELLIPSE) THEN
+         ROS_HEAD(IIG,JJG) = SF%VEG_LSET_ROS
 
-            ROS_HEAD(IIG,JJG) = SF%VEG_LSET_ROS
+         ! Find wind at ~6.1 m height for Farsite
 
-            ! Find wind at ~6.1 m height for Farsite
+         IF (VEG_LEVEL_SET_COUPLED) THEN
+
             KWIND = 0
             DO KDUM = K_LS(IIG,JJG),KBAR
-              IF(ZC(KDUM)-ZC(K_LS(IIG,JJG)) >= 6.1_EB) THEN
-               KWIND = KDUM
+               IF (ZC(KDUM)-ZC(K_LS(IIG,JJG))>=6.1_EB) THEN
+                  KWIND = KDUM
+                  EXIT
                ENDIF
             ENDDO
 
             U_LS(IIG,JJG) = 0.5_EB*(U(IIG-1,JJG,KWIND)+U(IIG,JJG,KWIND))
             V_LS(IIG,JJG) = 0.5_EB*(V(IIG,JJG-1,KWIND)+V(IIG,JJG,KWIND))
 
-            ! Wind at midflame height (UMF). From Andrews 2012, USDA FS Gen Tech Rep. RMRS-GTR-266 (with added SI conversion)
-            UMF_TMP = 1.83_EB / LOG((20.0_EB + 1.18_EB * SF%VEG_LSET_HT) /(0.43_EB * SF%VEG_LSET_HT))
+         ENDIF 
 
-            ! Factor 60 converts U from m/s to m/min which is used in elliptical model.
-            UMF_X = UMF_TMP * U_LS(IIG,JJG) * 60.0_EB
-            UMF_Y = UMF_TMP * V_LS(IIG,JJG) * 60.0_EB
+         ! Wind at midflame height (UMF). From Andrews 2012, USDA FS Gen Tech Rep. RMRS-GTR-266 (with added SI conversion)
 
-            ! Components of wind factor - affects spread rate
-            PHI_W_X = C_ROTH * ((3.281_EB * ABS(UMF_X))**B_ROTH) * (SF%VEG_LSET_BETA / BETA_OP_ROTH)**(-E_ROTH)
-            PHI_W_X = SIGN(PHI_W_X,UMF_X)
+         UMF_TMP = 1.83_EB / LOG((20.0_EB + 1.18_EB * SF%VEG_LSET_HT) /(0.43_EB * SF%VEG_LSET_HT))
 
-            PHI_W_Y = C_ROTH * ((3.281_EB * ABS(UMF_Y))**B_ROTH) * (SF%VEG_LSET_BETA / BETA_OP_ROTH)**(-E_ROTH)
-            PHI_W_Y = SIGN(PHI_W_Y,UMF_Y)
+         ! Factor 60 converts U from m/s to m/min which is used in elliptical model.
 
-            PHI_W(IIG,JJG) =  SQRT(PHI_W_X**2 + PHI_W_Y**2)
+         UMF_X = UMF_TMP * U_LS(IIG,JJG) * 60.0_EB
+         UMF_Y = UMF_TMP * V_LS(IIG,JJG) * 60.0_EB
 
-            ! Slope factor
+         ! Components of wind factor - affects spread rate
 
-            IF (PHI_S(IIG,JJG) > 0.0_EB) THEN
+         PHI_W_X = C_ROTH * ((3.281_EB * ABS(UMF_X))**B_ROTH) * (SF%VEG_LSET_BETA / BETA_OP_ROTH)**(-E_ROTH)
+         PHI_W_X = SIGN(PHI_W_X,UMF_X)
 
-               PHX = PHI_W_X + PHI_S_X(IIG,JJG)
-               PHY = PHI_W_Y + PHI_S_Y(IIG,JJG)
-               MAG_PHI = SQRT(PHX**2 + PHY**2)
+         PHI_W_Y = C_ROTH * ((3.281_EB * ABS(UMF_Y))**B_ROTH) * (SF%VEG_LSET_BETA / BETA_OP_ROTH)**(-E_ROTH)
+         PHI_W_Y = SIGN(PHI_W_Y,UMF_Y)
 
-               ! Total phi (phi_w + phi_s) for use in spread rate section
-               PHI_WS(IIG,JJG) = MAG_PHI
+         ! Slope factor
 
-               ! Theta_elps is angle of direction (0 to 2pi) of highest spread rate
-               ! 0<=theta_elps<=2pi as measured clockwise from Y-axis
-               THETA_ELPS(IIG,JJG) = ATAN2(PHY,PHX)
+         IF (PHI_S(IIG,JJG) > 0.0_EB) THEN
 
-               !"Effective midflame windspeed" used in length-to-breadth ratio calculation (spread rate routine)
-               ! is the wind + slope effect obtained by solving Phi_w eqs. above for UMF
-               ! 8/8/13 - Changed phi_ws to Phi_s below to match Farsite, i.e., instead of adding phi_w and phi_s
-               ! and then calculating effective wind speed, phi_s is converted to an effected wind speed and added
-               ! to UMF calculated from the wind. Effective U has units of m/min in Wilson formula.
-               ! 0.3048 ~= 1/3.281
-               !if phi_s < 0 then a complex value (NaN) results. Using abs(phi_s) and sign function to correct.
+            PHX = PHI_W_X + PHI_S_X(IIG,JJG)
+            PHY = PHI_W_Y + PHI_S_Y(IIG,JJG)
+            MAG_PHI = SQRT(PHX**2 + PHY**2)
 
-               UMF_TMP = (((ABS(PHI_S_X(IIG,JJG)) * (SF%VEG_LSET_BETA / BETA_OP_ROTH)**E_ROTH)/C_ROTH)**(1/B_ROTH))*0.3048
-               UMF_TMP = SIGN(UMF_TMP,PHI_S_X(IIG,JJG))
-               UMF_X = UMF_X + UMF_TMP
+            ! Total phi (phi_w + phi_s) for use in spread rate section
 
-               UMF_TMP = (((ABS(PHI_S_Y(IIG,JJG)) * (SF%VEG_LSET_BETA / BETA_OP_ROTH)**E_ROTH)/C_ROTH)**(1/B_ROTH))*0.3048
-               UMF_TMP = SIGN(UMF_TMP,PHI_S_Y(IIG,JJG))
-               UMF_Y = UMF_Y + UMF_TMP
+            PHI_WS(IIG,JJG) = MAG_PHI
 
-            ELSE
+            ! Theta_elps is angle of direction (0 to 2pi) of highest spread rate
+            ! 0<=theta_elps<=2pi as measured clockwise from Y-axis
 
-               PHI_WS(IIG,JJG) = SQRT(PHI_W_X**2 + PHI_W_Y**2)
-               THETA_ELPS(IIG,JJG) = ATAN2(PHI_W_Y,PHI_W_X)
+            THETA_ELPS(IIG,JJG) = ATAN2(PHY,PHX)
 
-            ENDIF
+            ! "Effective midflame windspeed" used in length-to-breadth ratio calculation (spread rate routine)
+            ! is the wind + slope effect obtained by solving Phi_w eqs. above for UMF
+            ! 8/8/13 - Changed phi_ws to Phi_s below to match Farsite, i.e., instead of adding phi_w and phi_s
+            ! and then calculating effective wind speed, phi_s is converted to an effected wind speed and added
+            ! to UMF calculated from the wind. Effective U has units of m/min in Wilson formula.
+            ! 0.3048 ~= 1/3.281
+            ! if phi_s < 0 then a complex value (NaN) results. Using abs(phi_s) and sign function to correct.
 
-            UMF(IIG,JJG) = SQRT(UMF_X**2 + UMF_Y**2)
+            UMF_TMP = (((ABS(PHI_S_X(IIG,JJG)) * (SF%VEG_LSET_BETA / BETA_OP_ROTH)**E_ROTH)/C_ROTH)**(1/B_ROTH))*0.3048
+            UMF_TMP = SIGN(UMF_TMP,PHI_S_X(IIG,JJG))
+            UMF_X = UMF_X + UMF_TMP
 
-            ! The following two lines convert ATAN2 output to compass system (0 to 2 pi CW from +Y-axis)
+            UMF_TMP = (((ABS(PHI_S_Y(IIG,JJG)) * (SF%VEG_LSET_BETA / BETA_OP_ROTH)**E_ROTH)/C_ROTH)**(1/B_ROTH))*0.3048
+            UMF_TMP = SIGN(UMF_TMP,PHI_S_Y(IIG,JJG))
+            UMF_Y = UMF_Y + UMF_TMP
 
-            THETA_ELPS(IIG,JJG) = PIO2 - THETA_ELPS(IIG,JJG)
-            IF (THETA_ELPS(IIG,JJG) < 0.0_EB) THETA_ELPS(IIG,JJG) = 2.0_EB*PI + THETA_ELPS(IIG,JJG)
+         ELSE
 
-         ENDIF IF_ELLIPSE
+            PHI_WS(IIG,JJG) = SQRT(PHI_W_X**2 + PHI_W_Y**2)
+            THETA_ELPS(IIG,JJG) = ATAN2(PHI_W_Y,PHI_W_X)
 
-      ELSE IF_CFD_COUPLED
+         ENDIF
 
-         ! The wind velocity is specified by the user
- 
-         U_LS(IIG,JJG) = U0*EVALUATE_RAMP(T,DUMMY,I_RAMP_U0_T)
-         V_LS(IIG,JJG) = V0*EVALUATE_RAMP(T,DUMMY,I_RAMP_V0_T)
+         UMF(IIG,JJG) = SQRT(UMF_X**2 + UMF_Y**2)
 
-      ENDIF IF_CFD_COUPLED
+         ! The following two lines convert ATAN2 output to compass system (0 to 2 pi CW from +Y-axis)
+
+         THETA_ELPS(IIG,JJG) = PIO2 - THETA_ELPS(IIG,JJG)
+         IF (THETA_ELPS(IIG,JJG) < 0.0_EB) THETA_ELPS(IIG,JJG) = 2.0_EB*PI + THETA_ELPS(IIG,JJG)
+
+      ELSE IF_ELLIPSE  ! AU grassland ROS for infinite head and 6% moisutre
+
+         UMAG     = SQRT(U_LS(IIG,JJG)**2 + V_LS(IIG,JJG)**2)
+         ROS_HEAD(IIG,JJG)  = SF%VEG_LSET_ROS_HEAD*(0.165_EB + 0.534_EB*UMAG)*0.523_EB
+
+      ENDIF IF_ELLIPSE
 
    ENDDO
 ENDDO
@@ -1143,8 +1063,8 @@ mlh = SF%VEG_LSET_MLH
                
 SELECT CASE(ROTHERMEL_FUEL_INDEX)
    CASE(1)  ! 'Short Grass'
-      w0d1=0.1659     ; w0d2=0.        ; w0d3=0.        ; w0lh=0.        ; w0lw=0. 
-      svd1=11483.     ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921. 
+      w0d1=0.1659     ; w0d2=0.        ; w0d3=0.        ; w0lh=0.        ; w0lw=0.     ! dry mass per unit area (kg/m2)
+      svd1=11483.     ; svd2=358.      ; svd3=98.       ; svlh=4921.     ; svlw=4921.  ! surface area to volume (1/m)
       mx=0.12         ; depth=0.3048   ; rhop=512.      ; heat=18607.    ; st=0.0555      ; se=0.01
    CASE(2)  ! 'Timbergrass'
       w0d1=0.448      ; w0d2=0.224     ; w0d3=0.112     ; w0lh=0.112     ; w0lw=0. 
@@ -1217,7 +1137,7 @@ swml = swlh*mlh + swlw*mlw
 ! Characteristic surface-to-volume ratio [R(71,72)]
 
 sigma = s2wt/swt
-SF%VEG_LSET_SIGMA = sigma*0.01  ! Convert from 1/m to 1/cm
+SF%VEG_LSET_SIGMA = sigma*0.01_EB  ! Convert from 1/m to 1/cm
    
 ! Mean bulk density [R(74)]
    
@@ -1330,6 +1250,11 @@ hsk  = rhob*hskz/swt
 ! Reaction intensity [R(27,58),Albini,p.89]
    
 bigIr = gamma*heat*etas*etaM
+
+IF (VEG_LEVEL_SET_COUPLED) THEN
+   SF%MASS_FLUX(REACTION(1)%FUEL_SMIX_INDEX) = bigIr/heat
+   SF%BURN_DURATION = 756._EB/SF%VEG_LSET_SIGMA   ! Albini (Eq. 14)
+ENDIF
    
 ! Rate of spread [R(52)] and the rate of spread in the absence of wind and with no slope.
    
