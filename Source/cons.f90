@@ -20,17 +20,23 @@ INTEGER, PARAMETER :: RK3=3                      !< COMBUSTION_ODE_SOLVER is thi
 INTEGER, PARAMETER :: RK2_RICHARDSON=4           !< COMBUSTION_ODE_SOLVER is second-order Runge-Kutta with Richardson extrapolation
 INTEGER, PARAMETER :: EXTINCTION_1=1             !< Flag for EXTINCT_MOD (EXTINCTION MODEL 1)
 INTEGER, PARAMETER :: EXTINCTION_2=2             !< Flag for EXTINCT_MOD (EXTINCTION MODEL 2)
-INTEGER, PARAMETER :: NO_TURB_MODEL=0            !< No turbulence model (DNS)
-INTEGER, PARAMETER :: CONSMAG=1                  !< Constant Smagorinsky turbulence model
-INTEGER, PARAMETER :: DYNSMAG=2                  !< Dynamic Smagorinsky turbulence model
-INTEGER, PARAMETER :: DEARDORFF=3                !< Deardorff turbulence model
-INTEGER, PARAMETER :: VREMAN=4                   !< Vreman turbulence model
-INTEGER, PARAMETER :: RNG=5                      !< ReNormalization Group turbulence model
-INTEGER, PARAMETER :: WALE=6                     !< Wall-Adapting Local Eddy viscosity turbulence model
+INTEGER, PARAMETER :: NO_TURB_MODEL=0            !< Flag for TURB_MODEL; No turbulence model (DNS)
+INTEGER, PARAMETER :: CONSMAG=1                  !< Flag for TURB_MODEL; Constant Smagorinsky turbulence model
+INTEGER, PARAMETER :: DYNSMAG=2                  !< Flag for TURB_MODEL; Dynamic Smagorinsky turbulence model
+INTEGER, PARAMETER :: DEARDORFF=3                !< Flag for TURB_MODEL; Deardorff turbulence model
+INTEGER, PARAMETER :: VREMAN=4                   !< Flag for TURB_MODEL; Vreman turbulence model
+INTEGER, PARAMETER :: RNG=5                      !< Flag for TURB_MODEL; ReNormalization Group turbulence model
+INTEGER, PARAMETER :: WALE=6                     !< Flag for TURB_MODEL; Wall-Adapting Local Eddy viscosity turbulence model
 INTEGER, PARAMETER :: MU_TURB_INTERP=7           !< Flag for NEAR_WALL_TURB_MODEL that avoids jump in viscosity, \f$ \mu \f$
-INTEGER, PARAMETER :: CONVECTIVE_FLUX_BC=-1,NET_FLUX_BC=0,SPECIFIED_TEMPERATURE=1,&
-                      NO_CONVECTION=2,THERMALLY_THICK=3,INFLOW_OUTFLOW=4,&
-                      INTERPOLATED_BC=6,THERMALLY_THICK_HT3D=7
+INTEGER, PARAMETER :: CONVECTIVE_FLUX_BC=-1      !< Flag for SF%THERMAL_BC_INDEX; Specified convective flux
+INTEGER, PARAMETER :: NET_FLUX_BC=0              !< Flag for SF%THERMAL_BC_INDEX; Specified net heat flux
+INTEGER, PARAMETER :: SPECIFIED_TEMPERATURE=1    !< Flag for SF%THERMAL_BC_INDEX; Specified surface temperature
+INTEGER, PARAMETER :: NO_CONVECTION=2            !< Flag for SF%THERMAL_BC_INDEX; No heat transfer at MIRROR boundary
+INTEGER, PARAMETER :: THERMALLY_THICK=3          !< Flag for SF%THERMAL_BC_INDEX; Thermally thick 1-D solid
+INTEGER, PARAMETER :: INFLOW_OUTFLOW=4           !< Flag for SF%THERMAL_BC_INDEX; OPEN boundary
+INTEGER, PARAMETER :: INTERPOLATED_BC=6          !< Flag for SF%THERMAL_BC_INDEX; Interface between two meshes
+INTEGER, PARAMETER :: THERMALLY_THICK_HT3D=7     !< Flag for SF%THERMAL_BC_INDEX; Thermally thick 3-D solid
+
 INTEGER, PARAMETER :: H_CUSTOM=-1,H_DEFAULT=0,H_LOGLAW=1,H_ABL=2,H_RAYLEIGH=3,H_YUAN=4,&
                       H_FREE_HORIZONTAL_CYLINDER=5,H_BLOWING_SPHERE=6,H_BLOWING_PLATE=7     ! Heat transfer coefficient model
 INTEGER, PARAMETER :: WALL_MODEL_BC=2,FREE_SLIP_BC=3,NO_SLIP_BC=4,BOUNDARY_FUEL_MODEL_BC=5,&
