@@ -2134,7 +2134,8 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
 
       ! If the current time is before the "activation" time, T_IGN, apply simple BCs and get out
 
-      IF (T < ONE_D%T_IGN .OR. ONE_D%T_IGN+SF%BURN_DURATION<T .OR. INITIALIZATION_PHASE) THEN
+!     IF (T < ONE_D%T_IGN .OR. ONE_D%T_IGN+SF%BURN_DURATION<T .OR. INITIALIZATION_PHASE) THEN
+      IF (T < ONE_D%T_IGN .OR. INITIALIZATION_PHASE) THEN
          ONE_D%ZZ_F(1:N_TRACKED_SPECIES) = ONE_D%ZZ_G(1:N_TRACKED_SPECIES)
          IF (PREDICTOR) ONE_D%U_NORMAL_S = 0._EB
          IF (CORRECTOR) ONE_D%U_NORMAL  = 0._EB
@@ -2151,7 +2152,8 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
       ! If the user has specified the burning rate, evaluate the ramp and other related parameters
 
       SUM_MASSFLUX_LOOP: DO N=1,N_TRACKED_SPECIES
-         IF (ABS(SF%MASS_FLUX(N)) > TWO_EPSILON_EB) THEN  ! Use user-specified ramp-up of mass flux
+!        IF (ABS(SF%MASS_FLUX(N)) > TWO_EPSILON_EB) THEN  ! Use user-specified ramp-up of mass flux
+         IF (ABS(SF%MASS_FLUX(N)) > TWO_EPSILON_EB .AND. SF%BURN_DURATION /= 1.E6_EB) THEN  ! Use user-specified ramp-up of mass flux
             IF (ABS(ONE_D%T_IGN-T_BEGIN) < SPACING(ONE_D%T_IGN) .AND. SF%RAMP_INDEX(N)>=1) THEN
                IF (PREDICTOR) TSI = T + DT
                IF (CORRECTOR) TSI = T
@@ -2161,6 +2163,7 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
             ENDIF
             ONE_D%M_DOT_G_PP_ACTUAL(N) = EVALUATE_RAMP(TSI,SF%TAU(N),SF%RAMP_INDEX(N))*SF%MASS_FLUX(N)
             ONE_D%M_DOT_G_PP_ADJUST(N) = SF%ADJUST_BURN_RATE(N)*ONE_D%M_DOT_G_PP_ACTUAL(N)*ONE_D%AREA_ADJUST
+print '(A,1x,1I3,1ES13.4)','wall0:n,sf_mass_flux(n)',n,sf%mass_flux(n)
          ENDIF
          MFT = MFT + ONE_D%M_DOT_G_PP_ADJUST(N)
       ENDDO SUM_MASSFLUX_LOOP

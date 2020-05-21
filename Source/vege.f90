@@ -315,12 +315,14 @@ REAL(EB), INTENT(IN) :: T,DT
 INTEGER :: IIG,IW,JJG,IC
 INTEGER :: KDUM,KWIND,ICF,IKT
 REAL(EB) :: UMF_TMP,PHX,PHY,MAG_PHI,PHI_W_X,PHI_W_Y,UMF_X,UMF_Y,UMAG,DUMMY=0._EB
+INTEGER  :: I_FUEL
 REAL(EB) :: BT,FB_TIME_FCTR,GRIDCELL_FRACTION,GRIDCELL_TIME,RFIREBASE_TIME,RGRIDCELL_TIME,ROS_MAG,SMF,TOTAL_FUEL_LOAD
 !These REAL should be &SURF parameters
 REAL(EB) :: VEG_LSET_FIREBASE_TIME,VEG_CHAR_FRACTION
 LOGICAL :: LSET_FIRE
 TYPE (ONE_D_M_AND_E_XFER_TYPE), POINTER :: ONE_D
 TYPE (SURFACE_TYPE), POINTER :: SF
+integer :: itest,jtest
 
 T_NOW = CURRENT_TIME()
 
@@ -471,7 +473,7 @@ ENDIF
 ! Loop over all cells and assign the value of PHI_LS to the appropriate WALL or
 ! CFACE cells. Also, if PHI_LS increases above 0, set the ignition time T_IGN.
 
-IF (.NOT.PREDICTOR .AND. SF%RAMP_Q /= 'null') THEN
+IF (.NOT.PREDICTOR) THEN
    IF (CC_IBM) THEN
       DO JJG=1,JBAR
          DO IIG=1,IBAR
@@ -506,16 +508,17 @@ ENDIF
 !SF%VEG_LSET_FIREBASE_TIME
 !SF%VEG_CHAR_FRACTION
 VEG_CHAR_FRACTION = 0.2_EB
+I_FUEL = REACTION(1)%FUEL_SMIX_INDEX
 
-IF_FIREBASE: IF (.NOT. PREDICTOR .AND. SF%RAMP_Q=='null') THEN
+IF_FIREBASE: IF (.NOT. PREDICTOR) THEN
   DO JJG=1,JBAR
     DO IIG=1,IBAR
       IF (K_LS(IIG,JJG)<1) CYCLE
       IC = CELL_INDEX(IIG,JJG,K_LS(IIG,JJG))
       IW = WALL_INDEX(IC,-3)
       ONE_D => WALL(IW)%ONE_D
+      IF (ONE_D%T_IGN > 1.E5_EB) CYCLE
       SF => SURFACE(LS_SURF_INDEX(IIG,JJG))
-      ONE_D%PHI_LS = PHI_LS(IIG,JJG)
 
       VEG_LSET_FIREBASE_TIME = 756._EB/SF%VEG_LSET_SIGMA !SIGMA is in 1/cm
       GRIDCELL_TIME  = 0.0_EB
@@ -530,6 +533,7 @@ IF_FIREBASE: IF (.NOT. PREDICTOR .AND. SF%RAMP_Q=='null') THEN
       BT  = BURN_TIME_LS(IIG,JJG)
       SMF = 0.0_EB 
       LSET_FIRE = .FALSE.
+!     SF%MASS_FLUX(I_FUEL) = 0.0_EB
 
 !Determine fuel gas flux for fire spreading through grid cell. Account for fires with a depth that is smaller
 !than the grid cell (GRIDCELL_FRACTION). Also account for partial presence of fire base as fire spreads into 
@@ -538,9 +542,9 @@ IF_FIREBASE: IF (.NOT. PREDICTOR .AND. SF%RAMP_Q=='null') THEN
       TOTAL_FUEL_LOAD = SF%VEG_LSET_SURF_LOAD
 
       IF_FIRELINE_PASSAGE: IF (PHI_LS(IIG,JJG) >= 0._EB) THEN 
-
         LSET_FIRE = .TRUE.
-        SMF = (1.0_EB-VEG_CHAR_FRACTION)*TOTAL_FUEL_LOAD*RFIREBASE_TIME !max surface fuel vapor mass flux, kg/(s*m^2)
+!       SMF = (1.0_EB-VEG_CHAR_FRACTION)*TOTAL_FUEL_LOAD*RFIREBASE_TIME !max surface fuel vapor mass flux, kg/(s*m^2)
+        SMF = SF%MASS_FLUX(I_FUEL)
 
 !Grid cell > fire depth      
         IF (GRIDCELL_FRACTION < 1.0_EB) THEN
@@ -554,8 +558,8 @@ IF_FIREBASE: IF (.NOT. PREDICTOR .AND. SF%RAMP_Q=='null') THEN
 !       Fire has left cell
           IF (BT > GRIDCELL_TIME + VEG_LSET_FIREBASE_TIME) LSET_FIRE = .FALSE.
           BURN_TIME_LS(IIG,JJG) = BURN_TIME_LS(IIG,JJG) + DT
-          ONE_D%M_DOT_G_PP_ACTUAL(2) = SMF*FB_TIME_FCTR
-          ONE_D%M_DOT_G_PP_ADJUST(2) = ONE_D%M_DOT_G_PP_ACTUAL(2) !Needs checking
+          ONE_D%M_DOT_G_PP_ACTUAL(I_FUEL) = SMF*FB_TIME_FCTR
+          ONE_D%M_DOT_G_PP_ADJUST(I_FUEL) = ONE_D%M_DOT_G_PP_ACTUAL(2) !Needs checking
         ENDIF
 
 !Grid cell <= fire depth      
@@ -569,8 +573,8 @@ IF_FIREBASE: IF (.NOT. PREDICTOR .AND. SF%RAMP_Q=='null') THEN
 !       Fire has left cell
           IF (BT > GRIDCELL_TIME + VEG_LSET_FIREBASE_TIME) LSET_FIRE = .FALSE.
           BURN_TIME_LS(IIG,JJG) = BURN_TIME_LS(IIG,JJG) + DT
-          ONE_D%M_DOT_G_PP_ACTUAL(2) = SMF*FB_TIME_FCTR
-          ONE_D%M_DOT_G_PP_ADJUST(2) = ONE_D%M_DOT_G_PP_ACTUAL(2) !Needs checking
+          ONE_D%M_DOT_G_PP_ACTUAL(I_FUEL) = SMF*FB_TIME_FCTR
+          ONE_D%M_DOT_G_PP_ADJUST(I_FUEL) = ONE_D%M_DOT_G_PP_ACTUAL(2) !Needs checking
         ENDIF
 
 !     IF (WC%LSET_FIRE) HRRPUA_OUT(IIG,JJG) = -WC%VEG_LSET_SURFACE_HEATFLUX*0.001 !kW/m^2 for Smokeview output
@@ -580,8 +584,8 @@ IF_FIREBASE: IF (.NOT. PREDICTOR .AND. SF%RAMP_Q=='null') THEN
      
 ! Stop burning if the fire front residence time is exceeded
       IF (PHI_LS(IIG,JJG) >= 0._EB .AND. .NOT. LSET_FIRE) THEN
-        ONE_D%M_DOT_G_PP_ACTUAL(2) = 0._EB
-        ONE_D%M_DOT_G_PP_ADJUST(2) = 0._EB
+        ONE_D%M_DOT_G_PP_ACTUAL(I_FUEL) = 0._EB
+        ONE_D%M_DOT_G_PP_ADJUST(I_FUEL) = 0._EB
         BURN_TIME_LS(IIG,JJG) = 1.E6_EB
       ENDIF
 
@@ -1117,6 +1121,7 @@ SELECT CASE(ROTHERMEL_FUEL_INDEX)
 END SELECT
 
 SF%VEG_LSET_HT = depth
+SF%VEG_LSET_SURF_LOAD = w0d1 + w0d2 + w0d3 + w0lh + w0lw
       
 ! Auxiliary functions
    
@@ -1253,7 +1258,8 @@ bigIr = gamma*heat*etas*etaM
 
 IF (VEG_LEVEL_SET_COUPLED) THEN
    SF%MASS_FLUX(REACTION(1)%FUEL_SMIX_INDEX) = bigIr/heat
-   SF%BURN_DURATION = 756._EB/SF%VEG_LSET_SIGMA   ! Albini (Eq. 14)
+!print '(A,1x,3ES13.4)','vege:bigIr/heat,sv,w',bigIr/heat,SF%VEG_LSET_SIGMA*100._EB,SF%VEG_LSET_SURF_LOAD
+!  SF%BURN_DURATION = 756._EB/SF%VEG_LSET_SIGMA   ! Albini (Eq. 14)
 ENDIF
    
 ! Rate of spread [R(52)] and the rate of spread in the absence of wind and with no slope.
