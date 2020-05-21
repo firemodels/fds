@@ -8,39 +8,39 @@ MODULE GLOBAL_CONSTANTS
 USE PRECISION_PARAMETERS
 IMPLICIT NONE
 
-INTEGER, PARAMETER :: DNS_MODE=1                 !< SIM_MODE is Direct Numerical Simulation
-INTEGER, PARAMETER :: LES_MODE=2                 !< SIM_MODE is Large Eddy Simulation
-INTEGER, PARAMETER :: VLES_MODE=3                !< SIM_MODE is Very Large Eddy Simulation
-INTEGER, PARAMETER :: SVLES_MODE=4               !< SIM_MODE is Simple Very Large Eddy Simulation
+INTEGER, PARAMETER :: DNS_MODE=1                 !< Flag for SIM_MODE: Direct Numerical Simulation
+INTEGER, PARAMETER :: LES_MODE=2                 !< Flag for SIM_MODE: Large Eddy Simulation
+INTEGER, PARAMETER :: VLES_MODE=3                !< Flag for SIM_MODE: Very Large Eddy Simulation
+INTEGER, PARAMETER :: SVLES_MODE=4               !< Flag for SIM_MODE: Simple Very Large Eddy Simulation
 
 INTEGER, PARAMETER :: GAS_SPECIES=2              !< Flag for SPECIES\%MODE indicating a gaseous species
 INTEGER, PARAMETER :: AEROSOL_SPECIES=3          !< Flag for SPECIES\%MODE indicating an aerosol species
 
-INTEGER, PARAMETER :: EXPLICIT_EULER=1           !< COMBUSTION_ODE_SOLVER is explicit first-order Euler
-INTEGER, PARAMETER :: RK2=2                      !< COMBUSTION_ODE_SOLVER is second-order Runge-Kutta
-INTEGER, PARAMETER :: RK3=3                      !< COMBUSTION_ODE_SOLVER is third-order Runge-Kutta
-INTEGER, PARAMETER :: RK2_RICHARDSON=4           !< COMBUSTION_ODE_SOLVER is second-order Runge-Kutta with Richardson extrapolation
+INTEGER, PARAMETER :: EXPLICIT_EULER=1           !< Flag for COMBUSTION_ODE_SOLVER: explicit first-order Euler
+INTEGER, PARAMETER :: RK2=2                      !< Flag for COMBUSTION_ODE_SOLVER: second-order Runge-Kutta
+INTEGER, PARAMETER :: RK3=3                      !< Flag for COMBUSTION_ODE_SOLVER: third-order Runge-Kutta
+INTEGER, PARAMETER :: RK2_RICHARDSON=4           !< Flag for COMBUSTION_ODE_SOLVER: second-order Runge-Kutta, Richardson extrap.
 
 INTEGER, PARAMETER :: EXTINCTION_1=1             !< Flag for EXTINCT_MOD (EXTINCTION MODEL 1)
 INTEGER, PARAMETER :: EXTINCTION_2=2             !< Flag for EXTINCT_MOD (EXTINCTION MODEL 2)
 
-INTEGER, PARAMETER :: NO_TURB_MODEL=0            !< Flag for TURB_MODEL; No turbulence model (DNS)
-INTEGER, PARAMETER :: CONSMAG=1                  !< Flag for TURB_MODEL; Constant Smagorinsky turbulence model
-INTEGER, PARAMETER :: DYNSMAG=2                  !< Flag for TURB_MODEL; Dynamic Smagorinsky turbulence model
-INTEGER, PARAMETER :: DEARDORFF=3                !< Flag for TURB_MODEL; Deardorff turbulence model
-INTEGER, PARAMETER :: VREMAN=4                   !< Flag for TURB_MODEL; Vreman turbulence model
-INTEGER, PARAMETER :: RNG=5                      !< Flag for TURB_MODEL; ReNormalization Group turbulence model
-INTEGER, PARAMETER :: WALE=6                     !< Flag for TURB_MODEL; Wall-Adapting Local Eddy viscosity turbulence model
-INTEGER, PARAMETER :: MU_TURB_INTERP=7           !< Flag for NEAR_WALL_TURB_MODEL that avoids jump in viscosity, \f$ \mu \f$
+INTEGER, PARAMETER :: NO_TURB_MODEL=0            !< Flag for TURB_MODEL: No turbulence model (DNS)
+INTEGER, PARAMETER :: CONSMAG=1                  !< Flag for TURB_MODEL: Constant Smagorinsky turbulence model
+INTEGER, PARAMETER :: DYNSMAG=2                  !< Flag for TURB_MODEL: Dynamic Smagorinsky turbulence model
+INTEGER, PARAMETER :: DEARDORFF=3                !< Flag for TURB_MODEL: Deardorff turbulence model
+INTEGER, PARAMETER :: VREMAN=4                   !< Flag for TURB_MODEL: Vreman turbulence model
+INTEGER, PARAMETER :: RNG=5                      !< Flag for TURB_MODEL: ReNormalization Group turbulence model
+INTEGER, PARAMETER :: WALE=6                     !< Flag for TURB_MODEL: Wall-Adapting Local Eddy viscosity turbulence model
+INTEGER, PARAMETER :: MU_TURB_INTERP=7           !< Flag for NEAR_WALL_TURB_MODEL: avoid jump in viscosity, \f$ \mu \f$
 
-INTEGER, PARAMETER :: CONVECTIVE_FLUX_BC=-1      !< Flag for SF\%THERMAL_BC_INDEX; Specified convective flux
-INTEGER, PARAMETER :: NET_FLUX_BC=0              !< Flag for SF\%THERMAL_BC_INDEX; Specified net heat flux
-INTEGER, PARAMETER :: SPECIFIED_TEMPERATURE=1    !< Flag for SF\%THERMAL_BC_INDEX; Specified surface temperature
-INTEGER, PARAMETER :: NO_CONVECTION=2            !< Flag for SF\%THERMAL_BC_INDEX; No heat transfer at MIRROR boundary
-INTEGER, PARAMETER :: THERMALLY_THICK=3          !< Flag for SF\%THERMAL_BC_INDEX; Thermally thick 1-D solid
-INTEGER, PARAMETER :: INFLOW_OUTFLOW=4           !< Flag for SF\%THERMAL_BC_INDEX; OPEN boundary
-INTEGER, PARAMETER :: INTERPOLATED_BC=6          !< Flag for SF\%THERMAL_BC_INDEX; Interface between two meshes
-INTEGER, PARAMETER :: THERMALLY_THICK_HT3D=7     !< Flag for SF\%THERMAL_BC_INDEX; Thermally thick 3-D solid
+INTEGER, PARAMETER :: CONVECTIVE_FLUX_BC=-1      !< Flag for SF\%THERMAL_BC_INDEX: Specified convective flux
+INTEGER, PARAMETER :: NET_FLUX_BC=0              !< Flag for SF\%THERMAL_BC_INDEX: Specified net heat flux
+INTEGER, PARAMETER :: SPECIFIED_TEMPERATURE=1    !< Flag for SF\%THERMAL_BC_INDEX: Specified surface temperature
+INTEGER, PARAMETER :: NO_CONVECTION=2            !< Flag for SF\%THERMAL_BC_INDEX: No heat transfer at MIRROR boundary
+INTEGER, PARAMETER :: THERMALLY_THICK=3          !< Flag for SF\%THERMAL_BC_INDEX: Thermally thick 1-D solid
+INTEGER, PARAMETER :: INFLOW_OUTFLOW=4           !< Flag for SF\%THERMAL_BC_INDEX: OPEN boundary
+INTEGER, PARAMETER :: INTERPOLATED_BC=6          !< Flag for SF\%THERMAL_BC_INDEX: Interface between two meshes
+INTEGER, PARAMETER :: THERMALLY_THICK_HT3D=7     !< Flag for SF\%THERMAL_BC_INDEX: Thermally thick 3-D solid
 
 INTEGER, PARAMETER :: H_CUSTOM=-1                  !< Flag for SF\%HEAT_TRANSFER_MODEL
 INTEGER, PARAMETER :: H_DEFAULT=0                  !< Flag for SF\%HEAT_TRANSFER_MODEL
@@ -58,14 +58,14 @@ INTEGER, PARAMETER :: NO_SLIP_BC=4                 !< Flag for SF\%VELOCITY_BC_I
 INTEGER, PARAMETER :: BOUNDARY_FUEL_MODEL_BC=5     !< Flag for SF\%VELOCITY_BC_INDEX
 INTEGER, PARAMETER :: INTERPOLATED_VELOCITY_BC=6   !< Flag for SF\%VELOCITY_BC_INDEX
 
-INTEGER, PARAMETER :: EXPOSED=0                    !< Flag for SF\%BACKING; Exposed to conditions on the other sidd
-INTEGER, PARAMETER :: VOID=1                       !< Flag for SF\%BACKING; Exposed to ambient void
-INTEGER, PARAMETER :: INSULATED=2                  !< Flag for SF\%BACKING; Insulated, no heat transfer out the back
+INTEGER, PARAMETER :: EXPOSED=0                    !< Flag for SF\%BACKING: Exposed to conditions on the other sidd
+INTEGER, PARAMETER :: VOID=1                       !< Flag for SF\%BACKING: Exposed to ambient void
+INTEGER, PARAMETER :: INSULATED=2                  !< Flag for SF\%BACKING: Insulated, no heat transfer out the back
 
-INTEGER, PARAMETER :: SURF_CARTESIAN=0             !< Flag for SF\%GEOMETRY; Flat
-INTEGER, PARAMETER :: SURF_CYLINDRICAL=1           !< Flag for SF\%GEOMETRY; Cylinder
-INTEGER, PARAMETER :: SURF_SPHERICAL=2             !< Flag for SF\%GEOMETRY; Sphere
-INTEGER, PARAMETER :: SURF_BLOWING_PLATE=3         !< Flag for SF\%GEOMETRY; Blowing plate
+INTEGER, PARAMETER :: SURF_CARTESIAN=0             !< Flag for SF\%GEOMETRY: Flat
+INTEGER, PARAMETER :: SURF_CYLINDRICAL=1           !< Flag for SF\%GEOMETRY: Cylinder
+INTEGER, PARAMETER :: SURF_SPHERICAL=2             !< Flag for SF\%GEOMETRY: Sphere
+INTEGER, PARAMETER :: SURF_BLOWING_PLATE=3         !< Flag for SF\%GEOMETRY: Blowing plate
 
 INTEGER, PARAMETER :: NO_MASS_FLUX=1               !< Flag for SF\%SPECIES_BC_INDEX
 INTEGER, PARAMETER :: SPECIFIED_MASS_FRACTION=2    !< Flag for SF\%SPECIES_BC_INDEX
@@ -78,33 +78,63 @@ INTEGER, PARAMETER :: OPEN_BOUNDARY=2              !< Flag for SF\%BOUNDARY_TYPE
 INTEGER, PARAMETER :: MIRROR_BOUNDARY=3            !< Flag for SF\%BOUNDARY_TYPE, VT\%BOUNDARY_TYPE, WC\%BOUNDARY_TYPE
 INTEGER, PARAMETER :: INTERPOLATED_BOUNDARY=6      !< Flag for SF\%BOUNDARY_TYPE, VT\%BOUNDARY_TYPE, WC\%BOUNDARY_TYPE
 INTEGER, PARAMETER :: PERIODIC_BOUNDARY=7          !< Flag for SF\%BOUNDARY_TYPE, VT\%BOUNDARY_TYPE, WC\%BOUNDARY_TYPE
+INTEGER, PARAMETER :: HVAC_BOUNDARY=42             !< Flag for SF\%THERMAL_BC_INDEX, SF\%SPECIES_BC_INDEX, VT\%BOUNDARY_TYPE
 
-INTEGER, PARAMETER :: FISHPAK_BC_PERIODIC=0            !< Flag for FISHPAK_BC(I) I=1,3; Period BC for Poisson solver
-INTEGER, PARAMETER :: FISHPAK_BC_DIRICHLET_DIRICHLET=1 !< Flag for FISHPAK_BC(I) I=1,3; Dirichlet at both sides
-INTEGER, PARAMETER :: FISHPAK_BC_DIRICHLET_NEUMANN=2   !< Flag for FISHPAK_BC(I) I=1,3; Dirichlet at lower, Neumann at upper
-INTEGER, PARAMETER :: FISHPAK_BC_NEUMANN_NEUMANN=3     !< Flag for FISHPAK_BC(I) I=1,3; Neumann at both sides
-INTEGER, PARAMETER :: FISHPAK_BC_NEUMANN_DIRICHLET=4   !< Flag for FISHPAK_BC(I) I=1,3; Neumann at lower, Dirichlet at upper
+INTEGER, PARAMETER :: FISHPAK_BC_PERIODIC=0            !< Flag for FISHPAK_BC(I) I=1,3: Period BC for Poisson solver
+INTEGER, PARAMETER :: FISHPAK_BC_DIRICHLET_DIRICHLET=1 !< Flag for FISHPAK_BC(I) I=1,3: Dirichlet at both sides
+INTEGER, PARAMETER :: FISHPAK_BC_DIRICHLET_NEUMANN=2   !< Flag for FISHPAK_BC(I) I=1,3: Dirichlet at lower, Neumann at upper
+INTEGER, PARAMETER :: FISHPAK_BC_NEUMANN_NEUMANN=3     !< Flag for FISHPAK_BC(I) I=1,3: Neumann at both sides
+INTEGER, PARAMETER :: FISHPAK_BC_NEUMANN_DIRICHLET=4   !< Flag for FISHPAK_BC(I) I=1,3: Neumann at lower, Dirichlet at upper
 
-INTEGER, PARAMETER :: DIRICHLET=1,NEUMANN=2,INTERNAL=3                                      ! Pressure Boundary Conditions
+INTEGER, PARAMETER :: DIRICHLET=1                      !< Flag for WC\%PRESSURE_BC_INDEX
+INTEGER, PARAMETER :: NEUMANN=2                        !< Flag for WC\%PRESSURE_BC_INDEX
+INTEGER, PARAMETER :: INTERNAL=3                       !< Flag for WC\%PRESSURE_BC_INDEX
 
-INTEGER, PARAMETER :: PYROLYSIS_NONE=0,PYROLYSIS_SOLID=1,PYROLYSIS_LIQUID=2,&
-                      PYROLYSIS_PREDICTED=3,PYROLYSIS_SPECIFIED=4,PYROLYSIS_VEGETATION=5     ! Pyrolysis model
+INTEGER, PARAMETER :: PYROLYSIS_NONE=0                 !< Flag for SF\%PYROLYSIS_MODEL, ML\%PYROLYSIS_MODEL
+INTEGER, PARAMETER :: PYROLYSIS_SOLID=1                !< Flag for ML\%PYROLYSIS_MODEL
+INTEGER, PARAMETER :: PYROLYSIS_LIQUID=2               !< Flag for ML\%PYROLYSIS_MODEL
+INTEGER, PARAMETER :: PYROLYSIS_PREDICTED=3            !< Flag for SF\%PYROLYSIS_MODEL
+INTEGER, PARAMETER :: PYROLYSIS_SPECIFIED=4            !< Flag for SF\%PYROLYSIS_MODEL
+INTEGER, PARAMETER :: PYROLYSIS_VEGETATION=5           !< Flag for ML\%PYROLYSIS_MODEL
 
-INTEGER, PARAMETER :: ATMOSPHERIC_PROFILE=1, PARABOLIC_PROFILE=2,&
-                      BOUNDARY_LAYER_PROFILE=3, RAMP_PROFILE=4                              ! Surface velocity profile
+INTEGER, PARAMETER :: ATMOSPHERIC_PROFILE=1            !< Flag for SF\%PROFILE
+INTEGER, PARAMETER :: PARABOLIC_PROFILE=2              !< Flag for SF\%PROFILE
+INTEGER, PARAMETER :: BOUNDARY_LAYER_PROFILE=3         !< Flag for SF\%PROFILE
+INTEGER, PARAMETER :: RAMP_PROFILE=4                   !< Flag for SF\%PROFILE
 
-INTEGER, PARAMETER :: CELL_CENTER=1, CELL_FACE=2, CELL_EDGE=3                               ! Cell position for output quantities
+INTEGER, PARAMETER :: CELL_CENTER=1                    !< Flag for OUTPUT_QUANTITY()\%CELL_POSITION
+INTEGER, PARAMETER :: CELL_FACE=2                      !< Flag for OUTPUT_QUANTITY()\%CELL_POSITION
+INTEGER, PARAMETER :: CELL_EDGE=3                      !< Flag for OUTPUT_QUANTITY()\%CELL_POSITION
 
-INTEGER, PARAMETER :: NO_STOP=0, INSTABILITY_STOP=1, USER_STOP=2, SETUP_STOP=3, &
-                      SETUP_ONLY_STOP=4, CTRL_STOP=5, TGA_ANALYSIS_STOP=6, &
-                      LEVELSET_STOP=7, REALIZABILITY_STOP=8, EVACUATION_STOP=9, &
-                      VERSION_STOP=10                                                       ! Program Stop Status
+INTEGER, PARAMETER :: NO_STOP=0                        !< Flag for STATUS_STOP
+INTEGER, PARAMETER :: INSTABILITY_STOP=1               !< Flag for STATUS_STOP
+INTEGER, PARAMETER :: USER_STOP=2                      !< Flag for STATUS_STOP
+INTEGER, PARAMETER :: SETUP_STOP=3                     !< Flag for STATUS_STOP
+INTEGER, PARAMETER :: SETUP_ONLY_STOP=4                !< Flag for STATUS_STOP
+INTEGER, PARAMETER :: CTRL_STOP=5                      !< Flag for STATUS_STOP
+INTEGER, PARAMETER :: TGA_ANALYSIS_STOP=6              !< Flag for STATUS_STOP
+INTEGER, PARAMETER :: LEVELSET_STOP=7                  !< Flag for STATUS_STOP
+INTEGER, PARAMETER :: REALIZABILITY_STOP=8             !< Flag for STATUS_STOP
+INTEGER, PARAMETER :: EVACUATION_STOP=9                !< Flag for STATUS_STOP
+INTEGER, PARAMETER :: VERSION_STOP=10                  !< Flag for STATUS_STOP
 
-INTEGER, PARAMETER :: SPHERE_DRAG=1,CYLINDER_DRAG=2,USER_DRAG=3,SCREEN_DRAG=4,POROUS_DRAG=5 ! Options for drag computation
-INTEGER, PARAMETER :: OLD=1,NEW=2,GUESS=3,PREVIOUS=4                                        ! Network solver indices
-INTEGER, PARAMETER :: NODE1=1,NODE2=2,LINEAR_INTERPOLATION=-1                               ! Duct mass transport interpolation
-INTEGER, PARAMETER :: HVAC_BOUNDARY=42
+INTEGER, PARAMETER :: SPHERE_DRAG=1                    !< Flag for LPC\%DRAG_LAW (LPC means LAGRANGIAN_PARTICLE_CLASS)
+INTEGER, PARAMETER :: CYLINDER_DRAG=2                  !< Flag for LPC\%DRAG_LAW
+INTEGER, PARAMETER :: USER_DRAG=3                      !< Flag for LPC\%DRAG_LAW: User-specified constant drag coefficient
+INTEGER, PARAMETER :: SCREEN_DRAG=4                    !< Flag for LPC\%DRAG_LAW: Special drag model for screens
+INTEGER, PARAMETER :: POROUS_DRAG=5                    !< Flag for LPC\%DRAG_LAW: Special drag model for porous media
+
+INTEGER, PARAMETER :: OLD=1                            !< Argument for DUCT()\%VEL()
+INTEGER, PARAMETER :: NEW=2                            !< Argument for DUCT()\%VEL()
+INTEGER, PARAMETER :: GUESS=3                          !< Argument for DUCT()\%VEL()
+INTEGER, PARAMETER :: PREVIOUS=4                       !< Argument for DUCT()\%VEL()
+
+INTEGER, PARAMETER :: NODE1=1                          !< Flag for DUCT()\%DUCT_INTERP_TYPE_INDEX
+INTEGER, PARAMETER :: NODE2=2                          !< Flag for DUCT()\%DUCT_INTERP_TYPE_INDEX
+INTEGER, PARAMETER :: LINEAR_INTERPOLATION=-1          !< Flag for DUCT()\%DUCT_INTERP_TYPE_INDEX
+
 INTEGER, PARAMETER :: OBST_SPHERE_TYPE=1,OBST_CYLINDER_TYPE=2,OBST_CONE_TYPE=3,OBST_BOX_TYPE=4
+
 INTEGER :: N_SIMPLE_CHEMISTRY_REACTIONS=1
 
 INTEGER :: FUEL_INDEX=0,O2_INDEX=0,N2_INDEX=0,H2O_INDEX=0,CO2_INDEX=0,CO_INDEX=0,H2_INDEX=0,SOOT_INDEX=0
