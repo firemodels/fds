@@ -1908,7 +1908,7 @@ PARTICLE_LOOP: DO IP=1,NLP
    AREA_SCALING = 1._EB
    IF (LPC%DRAG_LAW /= SCREEN_DRAG .AND. LPC%DRAG_LAW /= POROUS_DRAG) THEN
       SELECT CASE(SF%GEOMETRY)
-         CASE(SURF_CARTESIAN,SURF_BLOWING_PLATE)
+         CASE(SURF_CARTESIAN)
             ONE_D%AREA = 2._EB*SF%LENGTH*SF%WIDTH
          CASE(SURF_CYLINDRICAL)
             ONE_D%AREA = TWOPI*RADIUS*SF%LENGTH
@@ -1976,7 +1976,7 @@ PARTICLE_LOOP: DO IP=1,NLP
 
    CALC_LP_MASS: IF (SF%THERMAL_BC_INDEX==THERMALLY_THICK) THEN
       SELECT CASE (SF%GEOMETRY)
-         CASE (SURF_CARTESIAN,SURF_BLOWING_PLATE)
+         CASE (SURF_CARTESIAN)
             LP%MASS = 2._EB*SF%LENGTH*SF%WIDTH*SF%THICKNESS*SURFACE_DENSITY(NM,1,LAGRANGIAN_PARTICLE_INDEX=IP)
           CASE (SURF_CYLINDRICAL)
             LP%MASS = SF%LENGTH*PI*(SF%INNER_RADIUS+SF%THICKNESS)**2*SURFACE_DENSITY(NM,1,LAGRANGIAN_PARTICLE_INDEX=IP)
@@ -2516,7 +2516,7 @@ IF (ASSUMED_GAS_TEMPERATURE > 0._EB) ONE_D%TMP_G = TMPA + EVALUATE_RAMP(T-T_BEGI
 ! Exponents for cylindrical or spherical coordinates
 
 SELECT CASE(SF%GEOMETRY)
-   CASE(SURF_CARTESIAN,SURF_BLOWING_PLATE)   ; I_GRAD = 1
+   CASE(SURF_CARTESIAN)   ; I_GRAD = 1
    CASE(SURF_CYLINDRICAL) ; I_GRAD = 2
    CASE(SURF_SPHERICAL)   ; I_GRAD = 3
 END SELECT
@@ -3247,7 +3247,7 @@ TYPE(MATERIAL_TYPE), POINTER :: ML
 TYPE(SURFACE_TYPE), POINTER :: SF
 REAL(EB) :: DTMP,REACTION_RATE,Y_O2,X_O2,Q_DOT_S_PPP,MW_G,X_G,X_W,D_AIR,H_MASS,RE_L,SHERWOOD,MFLUX,MU_AIR,SC_AIR,U_TANG,&
             RDN,B_NUMBER,Y_DROP,Y_GAS,TMP_G,TMP_FILM,Y_AIR,R_AIR,RHO_AIR,LENGTH,SH_FAC_GAS,U2,V2,W2,VEL,MW_RATIO,&
-            RHO_DOT,DR,R_S_0,R_S_1,SH_FAC_WALL,H_R,DN,H_R_B,T_BOIL_EFF
+            RHO_DOT,DR,R_S_0,R_S_1,SH_FAC_WALL,H_R,H_R_B,T_BOIL_EFF
 
 Q_DOT_S_PPP = 0._EB
 Q_DOT_G_PPP = 0._EB
@@ -3280,7 +3280,7 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Tech Guide: Sum over the materials, alpha
                X_G = ZZ_GET(SMIX_INDEX)/SPECIES_MIXTURE(SMIX_INDEX)%MW*MW_G
             ENDIF
             T_BOIL_EFF = ML%TMP_BOIL
-            IF (ML%H_R_I(1) >0) THEN
+            IF (ML%H_R_I(1) > 0) THEN
                CALL GET_EQUIL_DATA(SPECIES_MIXTURE(SMIX_INDEX)%MW,TMP_F,PBAR(KKG,PRESSURE_ZONE(IIG,JJG,KKG)),&
                                          H_R,H_R_B,T_BOIL_EFF,X_W,RAMP_INDEX=ML%H_R_I(1))
             ELSE
@@ -3288,89 +3288,86 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Tech Guide: Sum over the materials, alpha
                                          H_R,H_R_B,T_BOIL_EFF,X_W,CONSTANT_H=ML%H_R(1))
             ENDIF
             TMP_G = TMP(IIG,JJG,KKG)
-            IF (SF%HM_FIXED>=0._EB) THEN
+            CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z(:,SMIX_INDEX),1),D_Z(:,SMIX_INDEX),TMP_G,D_AIR)
+
+            ! Compute mass transfer coefficient
+
+            H_MASS_IF: IF (SF%HM_FIXED>=0._EB) THEN
                H_MASS = SF%HM_FIXED
-            ELSEIF (SIM_MODE==DNS_MODE) THEN
-               CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z(:,SMIX_INDEX),1),D_Z(:,SMIX_INDEX),TMP_G,D_AIR)
+            ELSEIF (SIM_MODE==DNS_MODE) THEN H_MASS_IF
                SELECT CASE(ABS(IOR))
                   CASE(1); H_MASS = 2._EB*D_AIR*RDX(IIG)
                   CASE(2); H_MASS = 2._EB*D_AIR*RDY(JJG)
                   CASE(3); H_MASS = 2._EB*D_AIR*RDZ(KKG)
                END SELECT
-            ELSE
-               GEOMETRY_SELECT_1: SELECT CASE(SF%GEOMETRY)
-                  CASE DEFAULT
-                     CALL GET_VISCOSITY(ZZ_GET,MU_AIR,TMP_G)
-                     U_TANG   = SQRT(2._EB*KRES(IIG,JJG,KKG))
-                     RE_L     = MAX(5.E5_EB,RHO(IIG,JJG,KKG)*U_TANG*SF%CONV_LENGTH/MU_AIR)
-                     SC_AIR   = 0.6_EB ! NU_AIR/D_AIR (Incropera & DeWitt, Chap 7, External Flow)
-                     SHERWOOD = 0.037_EB*SC_AIR**ONTH*RE_L**0.8_EB
-                     H_MASS   = SHERWOOD*MU_AIR/(RHO(IIG,JJG,KKG)*SC*SF%CONV_LENGTH)
-                  CASE(SURF_SPHERICAL,SURF_BLOWING_PLATE)
-                     ! This section is using the mass transfer model from part
-                     TMP_FILM = TMP_F + EVAP_FILM_FAC*(TMP_G - TMP_F) ! LC Eq.(18)
-                     IF (SPECIES_MIXTURE(SMIX_INDEX)%SINGLE_SPEC_INDEX > 0) THEN
-                        CALL GET_MW_RATIO(SPECIES_MIXTURE(SMIX_INDEX)%SINGLE_SPEC_INDEX,MW_RATIO,Y_IN=Y_ALL)
-                     ELSE
-                        CALL GET_MW_RATIO(SMIX_INDEX,MW_RATIO,Z_IN=ZZ_GET)
-                     ENDIF
-                     Y_DROP  = X_W/(MW_RATIO + (1._EB-MW_RATIO)*X_W)
-                     ! Compute effective Z at the film temperature location LC Eq (19). Skip if no evaporation will occur.
-                     IF (Y_DROP > Y_GAS) THEN
-                        B_NUMBER = (Y_DROP - Y_GAS) / MAX(1.E-8_EB,1._EB-Y_DROP)
-                        Y_AIR = Y_DROP + EVAP_FILM_FAC * (Y_GAS - Y_DROP)
-                        ZZ_AIR = ZZ_GET
-                        ZZ_AIR(SMIX_INDEX) = ZZ_AIR(SMIX_INDEX) + (Y_AIR - Y_GAS)/(1-Y_AIR)
-                        ZZ_AIR = ZZ_AIR / SUM(ZZ_AIR)
-                     ELSE
-                        ZZ_AIR = ZZ_GET
-                     ENDIF
-                     CALL GET_VISCOSITY(ZZ_AIR,MU_AIR,TMP_FILM)
-                     CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_AIR,R_AIR)
-                     CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z(:,SMIX_INDEX),1),D_Z(:,SMIX_INDEX),TMP_F,D_AIR)
-                     RHO_AIR = PBAR(0,PRESSURE_ZONE(IIG,JJG,KKG))/(R_AIR*TMP_FILM)
-                     SC_AIR = MU_AIR/(RHO_AIR*D_AIR)
-                     SELECT CASE(SF%GEOMETRY)
-                        CASE(SURF_SPHERICAL)
-                           U2 = 0.5_EB*(U(IIG,JJG,KKG)+U(IIG-1,JJG,KKG))
-                           V2 = 0.5_EB*(V(IIG,JJG,KKG)+V(IIG,JJG-1,KKG))
-                           W2 = 0.5_EB*(W(IIG,JJG,KKG)+W(IIG,JJG,KKG-1))
-                           VEL = SQRT((U2-LPU)**2+(V2-LPV)**2+(W2-LPW)**2)
-                           SH_FAC_GAS = 0.6_EB*SC_AIR**ONTH
-                           LENGTH = 2._EB*R_DROP
-                           RE_L = RHO_AIR*VEL*LENGTH/MU_AIR
-                           IF (Y_DROP <= Y_GAS) THEN
-                              H_MASS = 0._EB
-                           ELSE
-                              SHERWOOD  = ( 2._EB + SH_FAC_GAS*SQRT(RE_L) )*LOG(1._EB+B_NUMBER)/(Y_DROP-Y_GAS)
-                              H_MASS = SHERWOOD*D_AIR/LENGTH
-                           ENDIF
-                        CASE(SURF_BLOWING_PLATE) !!! UNDER CONSTRUCTION !!!
-                           VEL = SQRT(2._EB*KRES(IIG,JJG,KKG))
-                           SH_FAC_WALL = 0.037_EB*SC_AIR**ONTH
-                           SELECT CASE(ABS(IOR))
-                              CASE(1); DN = 0.5_EB*DX(IIG)
-                              CASE(2); DN = 0.5_EB*DY(JJG)
-                              CASE(3); DN = 0.5_EB*DZ(KKG)
-                           END SELECT
-                           RE_L = RHO_AIR*VEL*SF%CONV_LENGTH/MU_AIR
-                           IF (Y_DROP <= Y_GAS) THEN
-                              H_MASS = 0._EB
-                           ELSE
-                              SHERWOOD  = MAX( 1._EB, ( SH_FAC_WALL*RE_L**0.8_EB )*LOG(1._EB+B_NUMBER)/(Y_DROP-Y_GAS) )
-                              H_MASS = SHERWOOD*D_AIR/DN
-                           ENDIF
-                     END SELECT
-               END SELECT GEOMETRY_SELECT_1
-            ENDIF
+            ELSE H_MASS_IF
+               IF (PRESENT(LPU) .AND. PRESENT(LPV) .AND. PRESENT(LPW)) THEN
+                  U2 = 0.5_EB*(U(IIG,JJG,KKG)+U(IIG-1,JJG,KKG))
+                  V2 = 0.5_EB*(V(IIG,JJG,KKG)+V(IIG,JJG-1,KKG))
+                  W2 = 0.5_EB*(W(IIG,JJG,KKG)+W(IIG,JJG,KKG-1))
+                  VEL = SQRT((U2-LPU)**2+(V2-LPV)**2+(W2-LPW)**2)
+               ELSE
+                  VEL = SQRT(2._EB*KRES(IIG,JJG,KKG))
+               ENDIF
+               BLOWING_IF: IF (SF%BLOWING) THEN
+                  ! This section is using the mass transfer model from part
+                  TMP_FILM = TMP_F + EVAP_FILM_FAC*(TMP_G - TMP_F) ! LC Eq.(18)
+                  IF (SPECIES_MIXTURE(SMIX_INDEX)%SINGLE_SPEC_INDEX > 0) THEN
+                     CALL GET_MW_RATIO(SPECIES_MIXTURE(SMIX_INDEX)%SINGLE_SPEC_INDEX,MW_RATIO,Y_IN=Y_ALL)
+                  ELSE
+                     CALL GET_MW_RATIO(SMIX_INDEX,MW_RATIO,Z_IN=ZZ_GET)
+                  ENDIF
+                  Y_DROP  = X_W/(MW_RATIO + (1._EB-MW_RATIO)*X_W) ! (9.28)
+                  ! Compute effective Z at the film temperature location LC Eq (19). Skip if no evaporation will occur.
+                  IF (Y_DROP > Y_GAS) THEN
+                     Y_AIR = Y_DROP + EVAP_FILM_FAC * (Y_GAS - Y_DROP)
+                     ZZ_AIR = ZZ_GET
+                     ZZ_AIR(SMIX_INDEX) = ZZ_AIR(SMIX_INDEX) + (Y_AIR - Y_GAS)/(1-Y_AIR)
+                     ZZ_AIR = ZZ_AIR / SUM(ZZ_AIR)
+                  ELSE
+                     ZZ_AIR = ZZ_GET
+                  ENDIF
+                  CALL GET_VISCOSITY(ZZ_AIR,MU_AIR,TMP_FILM)
+                  CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_AIR,R_AIR)
+                  CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z(:,SMIX_INDEX),1),D_Z(:,SMIX_INDEX),TMP_F,D_AIR)
+                  RHO_AIR = PBAR(0,PRESSURE_ZONE(IIG,JJG,KKG))/(R_AIR*TMP_FILM)
+                  SC_AIR = MU_AIR/(RHO_AIR*D_AIR)
+                  SELECT CASE(SF%GEOMETRY)
+                     CASE(SURF_SPHERICAL,SURF_CYLINDRICAL)
+                        SH_FAC_GAS = 0.6_EB*SC_AIR**ONTH
+                        LENGTH = 2._EB*R_DROP
+                        RE_L = RHO_AIR*VEL*LENGTH/MU_AIR
+                        SHERWOOD  = 2._EB + SH_FAC_GAS*SQRT(RE_L)
+                     CASE(SURF_CARTESIAN)
+                        SH_FAC_WALL = 0.037_EB*SC_AIR**ONTH
+                        LENGTH = SF%CONV_LENGTH
+                        RE_L = RHO_AIR*VEL*LENGTH/MU_AIR
+                        SHERWOOD  = MAX( 1._EB, ( SH_FAC_WALL*RE_L**0.8_EB ) )
+                  END SELECT
+                  IF (Y_DROP <= Y_GAS) THEN
+                     H_MASS = 0._EB
+                  ELSE
+                     B_NUMBER = (Y_DROP - Y_GAS) / MAX(DY_MIN_BLOWING, 1._EB-Y_DROP) ! (9.32)
+                     H_MASS = SHERWOOD*D_AIR/LENGTH*LOG(1._EB+B_NUMBER)/(Y_DROP-Y_GAS) ! (9.29-9.30)
+                  ENDIF
+               ELSE BLOWING_IF
+                  ! No blowing, old default evap model
+                  CALL GET_VISCOSITY(ZZ_GET,MU_AIR,TMP_G)
+                  LENGTH   = SF%CONV_LENGTH
+                  RE_L     = MAX(5.E5_EB,RHO(IIG,JJG,KKG)*VEL*LENGTH/MU_AIR) !!! BEWARE OF MAX !!!
+                  SC_AIR   = 0.6_EB ! NU_AIR/D_AIR (Incropera & DeWitt, Chap 7, External Flow)
+                  SHERWOOD = 0.037_EB*SC_AIR**ONTH*RE_L**0.8_EB
+                  H_MASS   = SHERWOOD*D_AIR/LENGTH
+               ENDIF BLOWING_IF
 
-            SELECT CASE(SF%GEOMETRY)
-               CASE DEFAULT
-                  MFLUX = MAX(0._EB,SPECIES_MIXTURE(SMIX_INDEX)%MW/R0/TMP_F*H_MASS*LOG((X_G-1._EB)/(X_W-1._EB))) &
+            ENDIF H_MASS_IF
+
+            IF (SF%BLOWING) THEN
+               MFLUX = MAX(0._EB,H_MASS*RHO_AIR*(Y_DROP - Y_GAS)) ! (9.24)
+            ELSE
+               MFLUX = MAX(0._EB,SPECIES_MIXTURE(SMIX_INDEX)%MW/R0/TMP_F*H_MASS*LOG((X_G-1._EB)/(X_W-1._EB))) &
                           * PBAR(KKG,PRESSURE_ZONE(IIG,JJG,KKG)) ! (7.48)
-               CASE(SURF_SPHERICAL,SURF_BLOWING_PLATE)
-                  MFLUX = MAX(0._EB,H_MASS*RHO_AIR*(Y_DROP - Y_GAS)) ! (8.24)
-            END SELECT
+            ENDIF
 
             IF (DX_S(1)>TWO_EPSILON_EB) THEN
                SELECT CASE(SF%GEOMETRY)
@@ -3717,7 +3714,7 @@ HTC_MODEL_SELECT: SELECT CASE(SFX%HEAT_TRANSFER_MODEL)
       TMP_G = TMP(IIG,JJG,KKG)
       ! Compute effective Z at the film temperature location LC Eq (19). Skip if no evaporation will occur.
       IF (Y_DROP > Y_GAS) THEN
-         B_NUMBER = (Y_DROP - Y_GAS) / MAX(1.E-8_EB,1._EB-Y_DROP)
+         B_NUMBER = (Y_DROP - Y_GAS) / MAX(DY_MIN_BLOWING,1._EB-Y_DROP)
          Y_AIR = Y_DROP + EVAP_FILM_FAC * (Y_GAS - Y_DROP)
          ZZ_AIR = ZZ_GET
          ZZ_AIR(SMIX_INDEX) = ZZ_AIR(SMIX_INDEX) + (Y_AIR - Y_GAS)/(1-Y_AIR)

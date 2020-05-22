@@ -3019,7 +3019,7 @@ SURFLOOP: DO N=0,N_SURF
       DO I=0,SF%N_CELLS_INI
          WRITE(LU_OUTPUT,'(15X,I6, I7, F16.7)') I,SF%LAYER_INDEX(MAX(I,1)), SF%X_S(I)
       ENDDO
-      IF (SF%GEOMETRY==SURF_CARTESIAN .OR. SF%GEOMETRY==SURF_BLOWING_PLATE) THEN
+      IF (SF%GEOMETRY==SURF_CARTESIAN) THEN
          IF (SF%BACKING==VOID)      WRITE(LU_OUTPUT,'(A)') '     Backing to void'
          IF (SF%BACKING==INSULATED) WRITE(LU_OUTPUT,'(A)') '     Insulated Backing'
          IF (SF%BACKING==EXPOSED)   WRITE(LU_OUTPUT,'(A)') '     Exposed Backing'
@@ -10706,7 +10706,7 @@ END SUBROUTINE DUMP_MMS
 
 !> \brief Estimate extreme values based on a shortened time series
 !>
-!> \details Given DV%N_INTERVALS values of DV%TIME_MIN(MAX)_VALUE, extrapolate the MIN(MAX) for the DV%TIME_PERIOD, 
+!> \details Given DV%N_INTERVALS values of DV%TIME_MIN(MAX)_VALUE, extrapolate the MIN(MAX) for the DV%TIME_PERIOD,
 !> which is typically longer than the statistical sampling duration DV%STATISTICS_END-DV%STATISTICS_START
 
 SUBROUTINE EXTRAPOLATE_EXTREMA
