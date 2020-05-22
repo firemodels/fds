@@ -25,8 +25,7 @@ SFPE 4th Ed. Figure 3-4.24. pg 3-132
       EXTERNAL_FLUX       = 50
       CELL_SIZE_FACTOR    = 0.1
       CONVECTION_LENGTH_SCALE = 0.025
-      HEAT_TRANSFER_MODEL = 'BLOWING PLATE'
-      GEOMETRY            = 'BLOWING PLATE'/
+      BLOWING             = T/
 
 &MATL ID                     = 'WATER'
       EMISSIVITY             = 0.95

@@ -1112,7 +1112,7 @@ IF (LPC%SOLID_PARTICLE) THEN
                  ABS(ORIENTATION_VECTOR(3,LPC%ORIENTATION_INDEX))*DX(ONE_D%IIG)*DY(ONE_D%JJG)) * &
                  LAGRANGIAN_PARTICLE_CLASS(LP%CLASS_INDEX)%FREE_AREA_FRACTION
          SELECT CASE (SF%GEOMETRY)
-            CASE (SURF_CARTESIAN,SURF_BLOWING_PLATE)
+            CASE (SURF_CARTESIAN)
                LP%ONE_D%AREA = AREA
                IF (SF%THERMAL_BC_INDEX==THERMALLY_THICK) THEN
                   DO N=1,SF%N_LAYERS
@@ -1195,7 +1195,7 @@ IF (LPC%SOLID_PARTICLE) THEN
 
          IF (SF%THERMAL_BC_INDEX==THERMALLY_THICK) THEN
             SELECT CASE (SF%GEOMETRY)
-               CASE (SURF_CARTESIAN,SURF_BLOWING_PLATE)
+               CASE (SURF_CARTESIAN)
                   DO N=1,SF%N_LAYERS
                      LP%MASS = LP%MASS + 2._EB*SF%LENGTH*SF%WIDTH*SF%LAYER_THICKNESS(N)*SCALE_FACTOR*SF%LAYER_DENSITY(N)
                   ENDDO
@@ -2453,7 +2453,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                Y_DROP  = X_DROP/(MW_RATIO + (1._EB-MW_RATIO)*X_DROP)
                ! Compute effective Z at the film temperature location LC Eq (19). Skip if no evaporation will occur.
                IF (Y_DROP > Y_GAS) THEN
-                  B_NUMBER = (Y_DROP - Y_GAS) / MAX(1.E-8_EB,1._EB-Y_DROP)
+                  B_NUMBER = (Y_DROP - Y_GAS) / MAX(DY_MIN_BLOWING,1._EB-Y_DROP)
                   Y_AIR = Y_DROP + EVAP_FILM_FAC * (Y_GAS - Y_DROP)
                   ZZ_AIR = ZZ_GET
                   ZZ_AIR(Z_INDEX) = ZZ_AIR(Z_INDEX) + (Y_AIR - Y_GAS)/(1-Y_AIR)
@@ -2957,7 +2957,7 @@ SUM_PART_QUANTITIES: IF (N_LP_ARRAY_INDICES > 0) THEN
             SF => SURFACE(LPC%SURF_INDEX)
             R_DROP = MAXVAL(LP%ONE_D%X(0:SF%N_CELLS_MAX))
             SELECT CASE(SF%GEOMETRY)
-               CASE(SURF_CARTESIAN,SURF_BLOWING_PLATE)
+               CASE(SURF_CARTESIAN)
                   A_DROP = 2._EB*SF%LENGTH*SF%WIDTH
                CASE(SURF_CYLINDRICAL)
                   A_DROP = 2._EB*SF%LENGTH*R_DROP
