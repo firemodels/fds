@@ -6998,6 +6998,20 @@ In the example, 1~kg of wet pine needles occupy 1~m$^3$. The number of particles
 \label{pine_needles_fig}
 \end{figure}
 
+\FloatBarrier
+
+\subsection{Trees}
+\label{info:trees}
+
+A coniferous tree (e.g. pine, spruce, fir) can be represented in FDS as a collection of Lagrangian particles as follows:
+\begin{lstlisting}
+&PART ID='needles', DRAG_COEFFICIENT=2.8, SURF_ID='needle surface', STATIC=.TRUE., 
+      COLOR='FOREST GREEN' /
+&INIT PART_ID='needles', XYZ=..., CROWN_BASE_WIDTH=3.2, CROWN_BASE_HEIGHT=15.,
+      TREE_HEIGHT=2, SHAPE='CONE', N_PARTICLES_PER_CELL=1, PACKING_RATIO=0.02  /
+\end{lstlisting}
+These lines create a collection of particles in the shape of a cone. The dimensions of the cone are specified via the parameters {\ct CROWN\_BASE\_WIDTH}, the diameter of the base of the cone (m), {\ct CROWN\_BASE\_HEIGHT}, the distance (m) from the ground to the base of the cone, {\ct TREE\_HEIGHT}, the height (m) of the tree from ground to tip, and the position triplet, {\ct XYZ}, of the trunk at the ground. Note that in this example, exactly one particle is specified per grid cell, positioned randomly within the cell. The number of actual pine needles this single particle represents depends on the specified {\ct PACKING\_RATIO}, the ratio of the (dry) mass per unit volume to the density of the needle itself. That information would be provided by the {\ct SURF} line {\ct 'needle surface'} and associated {\ct MATL} lines that are described in the previous section.
+
 \subsection{Firebrands}
 \label{info:firebrands}
 \label{dragon_5a}
@@ -10306,6 +10320,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hline \hline
 \endhead
 {\ct CELL\_CENTERED}              & Logical           & Section~\ref{info:initial_droplets}           &                & {\ct .FALSE.} \\ \hline
+{\ct CROWN\_BASE\_HEIGHT}         & Real              & Section~\ref{info:trees}                      & m              &               \\ \hline
+{\ct CROWN\_BASE\_WIDTH}          & Real              & Section~\ref{info:trees}                      & m              &               \\ \hline
 {\ct CTRL\_ID}                    & Character         & Section~\ref{info:initial_droplets}           &                &               \\ \hline
 {\ct DB}                          & Character         & Section~\ref{info:INIT}                       &                &               \\ \hline
 {\ct DENSITY}                     & Real              & Section~\ref{info:INIT}                       & kg/m$^3$       & Ambient       \\ \hline
@@ -10324,7 +10340,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MULT\_ID }                   & Character         & Section~\ref{info:MULT}                       &                &               \\ \hline
 {\ct N\_PARTICLES}                & Integer           & Section~\ref{info:initial_droplets}           &                & 0             \\ \hline
 {\ct N\_PARTICLES\_PER\_CELL}     & Integer           & Section~\ref{info:initial_droplets}           &                & 0             \\ \hline
-{\ct PACKING\_RATIO}              & Real              & Section~\ref{pine_needles}                 &                &               \\ \hline
+{\ct PACKING\_RATIO}              & Real              & Section~\ref{pine_needles}                    &                &               \\ \hline
 {\ct PART\_ID}                    & Character         & Section~\ref{info:initial_droplets}           &                &               \\ \hline
 {\ct PARTICLE\_WEIGHT\_FACTOR}    & Real              & Section~\ref{info:initial_droplets}           &                & 1.            \\ \hline
 {\ct PATH\_RAMP(3)}               & Character         & Section~\ref{info:path_ramp}                  &                &               \\ \hline
@@ -10334,6 +10350,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SPEC\_ID(N)}                 & Character Array   & Section~\ref{info:INIT}                       &                &               \\ \hline
 {\ct TEMPERATURE}                 & Real              & Section~\ref{info:INIT}                       & \si{\degree C} & {\ct TMPA}    \\ \hline
 {\ct T\_INSERT}                   & Real              & Section~\ref{info:delayed_insertion}          & s              & {\ct T\_BEGIN}\\ \hline
+{\ct TREE\_HEIGHT}                & Real              & Section~\ref{info:trees}                      & m              &               \\ \hline
 {\ct UNIFORM}                     & Logical           & Section~\ref{info:initial_droplets}           &                & {\ct .FALSE.} \\ \hline
 {\ct UVW(3)}                      & Real Array        & Section~\ref{info:initial_droplets}           & m/s            & 0.            \\ \hline
 {\ct VOLUME\_FRACTION(:)}         & Real Array        & Section~\ref{info:INIT}                       & mol/mol        & Ambient       \\ \hline
@@ -10715,7 +10732,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct XYZ(3) }                 & Real Array      & Section~\ref{info:multobst}             & m         & (0.,0.,0.)    \\ \hline
 \end{longtable}
 
-% Undocumented: NOTERRAIN (KM)
 
 
 \vspace{\baselineskip}
