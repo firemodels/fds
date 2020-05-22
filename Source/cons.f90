@@ -132,15 +132,26 @@ INTEGER, PARAMETER :: NODE1=1                          !< Flag for DUCT()\%DUCT_
 INTEGER, PARAMETER :: NODE2=2                          !< Flag for DUCT()\%DUCT_INTERP_TYPE_INDEX
 INTEGER, PARAMETER :: LINEAR_INTERPOLATION=-1          !< Flag for DUCT()\%DUCT_INTERP_TYPE_INDEX
 
-INTEGER, PARAMETER :: OBST_SPHERE_TYPE=1,OBST_CYLINDER_TYPE=2,OBST_CONE_TYPE=3,OBST_BOX_TYPE=4
+INTEGER, PARAMETER :: OBST_SPHERE_TYPE=1               !< Flag for OB\%SHAPE_TYPE
+INTEGER, PARAMETER :: OBST_CYLINDER_TYPE=2             !< Flag for OB\%SHAPE_TYPE
+INTEGER, PARAMETER :: OBST_CONE_TYPE=3                 !< Flag for OB\%SHAPE_TYPE
+INTEGER, PARAMETER :: OBST_BOX_TYPE=4                  !< Flag for OB\%SHAPE_TYPE
 
-INTEGER :: N_SIMPLE_CHEMISTRY_REACTIONS=1
+INTEGER :: N_SIMPLE_CHEMISTRY_REACTIONS=1  !< Number of SIMPLE_CHEMISTRY reactions
 
-INTEGER :: FUEL_INDEX=0,O2_INDEX=0,N2_INDEX=0,H2O_INDEX=0,CO2_INDEX=0,CO_INDEX=0,H2_INDEX=0,SOOT_INDEX=0
-INTEGER :: H2O_SMIX_INDEX = -1
-INTEGER :: HCN_INDEX=0,NO_INDEX=0,NO2_INDEX=0
-
-INTEGER :: ZETA_INDEX=0                    !< Index of the unmixed fuel fraction, ZETA
+INTEGER :: FUEL_INDEX=0                    !< Index for FUEL in SIMPLE_CHEMISTRY model
+INTEGER :: O2_INDEX=0                      !< Index for O2 in SIMPLE_CHEMISTRY model
+INTEGER :: N2_INDEX=0                      !< Index for N2 in SIMPLE_CHEMISTRY model
+INTEGER :: H2O_INDEX=0                     !< Index for H2O in SIMPLE_CHEMISTRY model
+INTEGER :: CO2_INDEX=0                     !< Index for CO2 in SIMPLE_CHEMISTRY model
+INTEGER :: CO_INDEX=0                      !< Index for CO in SIMPLE_CHEMISTRY model
+INTEGER :: H2_INDEX=0                      !< Index for H2 in SIMPLE_CHEMISTRY model
+INTEGER :: SOOT_INDEX=0                    !< Index for SOOT in SIMPLE_CHEMISTRY model
+INTEGER :: H2O_SMIX_INDEX = -1             !< Index for H2O
+INTEGER :: HCN_INDEX=0                     !< Index for HCN
+INTEGER :: NO_INDEX=0                      !< Index for NO
+INTEGER :: NO2_INDEX=0                     !< Index for NO2
+INTEGER :: ZETA_INDEX=0                    !< Index for unmixed fuel fraction, ZETA
 
 INTEGER :: STOP_STATUS=NO_STOP             !< Indicator of whether and why to stop the job
 INTEGER :: INPUT_FILE_LINE_NUMBER=0        !< Indicator of what line in the input file is being read
@@ -245,22 +256,25 @@ LOGICAL :: PERIODIC_DOMAIN_Z=.FALSE.                !< The domain is periodic \f
 
 INTEGER :: BNDF_TIME_INTEGRALS=0
 
-INTEGER, ALLOCATABLE, DIMENSION(:) :: CHANGE_TIME_STEP_INDEX,SETUP_PRESSURE_ZONES_INDEX
+INTEGER, ALLOCATABLE, DIMENSION(:) :: CHANGE_TIME_STEP_INDEX      !< Flag to indicate if a mesh needs to change time step
+INTEGER, ALLOCATABLE, DIMENSION(:) :: SETUP_PRESSURE_ZONES_INDEX  !< Flag to indicate if a mesh needs to keep searching for ZONEs
 
 ! Miscellaneous character strings
 
-CHARACTER(255) :: TITLE,RENDER_FILE,UVW_FILE='null'
-CHARACTER(CHID_LENGTH) :: CHID,RESTART_CHID
-INTEGER, PARAMETER :: MAX_TERRAIN_IMAGES=10
-INTEGER :: N_TERRAIN_IMAGES=0
-CHARACTER(255), DIMENSION(MAX_TERRAIN_IMAGES) :: TERRAIN_IMAGE
+CHARACTER(FORMULA_LENGTH) :: TITLE                                        !< Job title from HEAD line
+CHARACTER(FORMULA_LENGTH) :: RENDER_FILE                                  !< Third party geometry file for Smokeview
+CHARACTER(FORMULA_LENGTH) :: UVW_FILE='null'                              !< Velocity initialization field file
+INTEGER :: N_TERRAIN_IMAGES=0                                             !< Number of terrain images
+CHARACTER(FORMULA_LENGTH), DIMENSION(MAX_TERRAIN_IMAGES) :: TERRAIN_IMAGE !< Name of external terrain image
+CHARACTER(CHID_LENGTH) :: CHID                                            !< Job ID
+CHARACTER(CHID_LENGTH) :: RESTART_CHID                                    !< Job ID for a restarted case
 
 ! Dates, version numbers, revision numbers
 
-REAL(FB) :: VERSION_NUMBER=6.0
-CHARACTER(255) :: REVISION='unknown'
-CHARACTER(255) :: REVISION_DATE='unknown'
-CHARACTER(255) :: COMPILE_DATE='unknown'
+REAL(FB) :: VERSION_NUMBER=6.0                                            !< Version number solely for a few Smokeview files
+CHARACTER(FORMULA_LENGTH) :: REVISION='unknown'                           !< Git revision hash
+CHARACTER(FORMULA_LENGTH) :: REVISION_DATE='unknown'                      !< Date of last code change
+CHARACTER(FORMULA_LENGTH) :: COMPILE_DATE='unknown'                       !< Date of last code compilation
 
 ! Global EVACuation parameters
 
@@ -318,7 +332,7 @@ REAL(FB) :: HRRPUV_MAX_SMV=1200._FB, TEMP_MAX_SMV=2000._FB
 INTEGER :: N_SPECIES=0,N_REACTIONS,I_PRODUCTS=-1,I_WATER=-1,I_CO2=-1,N_TRACKED_SPECIES=0,N_SURFACE_DENSITY_SPECIES=0,&
            COMBUSTION_ODE_SOLVER=-1,EXTINCT_MOD=-1,MAX_CHEMISTRY_SUBSTEPS=20,MAX_PRIORITY=1,&
            N_PASSIVE_SCALARS=0,N_TOTAL_SCALARS=0,N_FIXED_CHEMISTRY_SUBSTEPS=-1
-LOGICAL :: SIMPLE_CHEM=.TRUE.,OUTPUT_CHEM_IT=.FALSE.,REAC_SOURCE_CHECK=.FALSE.
+LOGICAL :: OUTPUT_CHEM_IT=.FALSE.,REAC_SOURCE_CHECK=.FALSE.
 REAL(EB) :: RSUM0
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: Z2Y,CP_Z,CPBAR_Z,K_RSQMW_Z,MU_RSQMW_Z,D_Z,CP_AVG_Z,G_F_Z,H_SENS_Z
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: MWR_Z,RSQ_MW_Z
