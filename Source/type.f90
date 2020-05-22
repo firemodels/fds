@@ -604,7 +604,6 @@ TYPE OBSTRUCTION_TYPE
    LOGICAL :: CONSUMABLE=.FALSE.                !< The obstruction can burn away
    LOGICAL :: REMOVABLE=.FALSE.                 !< The obstruction can be removed from the simulation
    LOGICAL :: HOLE_FILLER=.FALSE.               !< The obstruction fills a HOLE
-   LOGICAL :: NOTERRAIN=.FALSE.                 !< The obstruction is not part of the terrain
    LOGICAL :: OVERLAY=.TRUE.                    !< The obstruction can have another obstruction overlap a surface
 
    ! 3D pyrolysis:
