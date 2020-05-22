@@ -5887,7 +5887,7 @@ The radiative properties of water and fuel droplets are determined automatically
 &TABL ID='radtab', TABLE_DATA= 5.0,1.33,0.002  /
 &TABL ID='radtab', TABLE_DATA=10.0,1.33,0.001  /
 \end{lstlisting}
-For calculating the absorption of thermal radiation by particles, FDS uses a running average of particle temperature and density. The {\ct RUNNING\_AVERAGE\_FACTOR} is set on the {\ct PART} line, and its default value is 0.5 for liquid droplets and 0 for solid particles. The value of 0 indicates that no running average is used.
+For calculating the absorption of thermal radiation by particles, FDS uses a running average of particle temperature and density. The {\ct RUNNING\_AVERAGE\_FACTOR} is set on the {\ct PART} line, and its default value is 0.5 for liquid droplets and 0 for solid particles. The value of 0 indicates that no running average is used. Similarly, the parameter {\ct RUNNING\_AVERAGE\_FACTOR\_WALL}, also set on the {\ct PART} line, controls the running average of droplet or particle mass on solid surfaces. Its defaults are the same as for {\ct RUNNING\_AVERAGE\_FACTOR}.
 
 
 \subsection{Size Distribution}
@@ -10800,6 +10800,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct REAL\_REFRACTIVE\_INDEX}            & Real        & Section~\ref{radiative_part_props}                                    &                & 1.33                  \\ \hline
 {\ct RGB(3)}                             & Integers    & Section~\ref{info:part_output}                                        &                &                       \\ \hline
 {\ct RUNNING\_AVERAGE\_FACTOR}           & Real        & Section~\ref{radiative_part_props}                                    &                & 0.5                   \\ \hline
+{\ct RUNNING\_AVERAGE\_FACTOR\_WALL}     & Real        & Section~\ref{radiative_part_props}                                    &                & 0.5                   \\ \hline
 {\ct SAMPLING\_FACTOR}                   & Integer     & Section~\ref{info:part_output}                                        &                & 1                     \\ \hline
 {\ct SECOND\_ORDER\_PARTICLE\_TRANSPORT} & Logical     & Section~\ref{info:PART_Stability}                                     &                & {\ct .FALSE.}         \\ \hline
 {\ct SHAPE\_FACTOR}                      & Real        & Sections~\ref{info:particle_radiation_absorption}, \ref{pine_needles} &                &                       \\ \hline
