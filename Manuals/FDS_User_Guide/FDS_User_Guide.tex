@@ -2564,7 +2564,7 @@ where $\hbox{Nu}$ is the Nusselt number, $k$ is the thermal conductivity of the 
 
 \subsubsection{Heat Transfer with Blowing}
 
-During pyrolysis of a solid or evaporation of a liquid the mass transfer off the surface generats a blowing velocity that alters the thermal and momentum boundary layers, thus affecting the heat and mass transfer coefficients.  For a surface with blowing, consider using the correlations discussed in Sazhin \cite{Sazhin:2006} with the Spalding mass transfer corrections \cite{Spalding:1}.  These may be activated by setting {\ct HEAT\_TRANSFER\_MODEL} to {\ct 'BLOWING PLATE'} or {\ct 'BLOWING SPHERE'} as appropriate on the {\ct SURF} line.  Note that for the {\ct 'BLOWING SPHERE'} the time dependent {\ct THICKNESS} of the surface is used in computing the Reynolds number.  For {\ct 'BLOWING PLATE'} the length scale for the Reynolds number is the usual {\ct CONVECTION\_LENGTH\_SCALE} set on the {\ct SURF} line.
+During pyrolysis of a solid or evaporation of a liquid the mass transfer off the surface generats a blowing velocity that alters the thermal and momentum boundary layers, thus affecting the heat and mass transfer coefficients.  For a surface with blowing, consider using the correlations discussed in Sazhin \cite{Sazhin:2006} with the Spalding mass transfer corrections \cite{Spalding:1}.  These may be activated by setting {\ct BLOWING=T} on the {\ct SURF} line.  Note that for {\ct GEOMETRY='SPHERICAL'} or {\ct GEOMETRY='CYLINDRICAL'} used together with {\ct BLOWING=T} the time dependent {\ct THICKNESS} of the surface is used in computing the Reynolds number.  For {\ct GEOMETRY='CARTESIAN'} and {\ct BLOWING=T} the length scale for the Reynolds number is the usual {\ct CONVECTION\_LENGTH\_SCALE} set on the {\ct SURF} line.
 
 
 \subsection{Special Topic: Adiabatic Surfaces}
@@ -3225,16 +3225,15 @@ In this example, {\ct 'ETHANOL'} is a {\em known} species; that is, it is listed
 
 \subsubsection{Heat and Mass Transfer with Blowing}
 
-To invoke the heat and mass transfer relationships from \cite{Sazhin:2006} for a flat plate, set {\ct GEOMETRY} and {\ct HEAT\_TRANSFER\_MODEL} to {\ct `BLOWING PLATE`} on the {\ct SURF} line.  For example,
-
+To invoke the heat and mass transfer relationships from \cite{Sazhin:2006}, set {\ct BLOWING=T} on the {\ct SURF} line.  For example,
 \begin{lstlisting}
 &SURF ID        = 'ETHANOL POOL'
       COLOR     = 'YELLOW'
       MATL_ID   = 'ETHANOL LIQUID'
       THICKNESS = 0.1
-      GEOMETRY  = 'BLOWING PLATE'
-      HEAT_TRANSFER_MODEL = 'BLOWING PLATE' /
+      BLOWING   = T /
 \end{lstlisting}
+Note that the default {\ct GEOMETRY} is {\ct 'CARTESIAN'} in which case the length scale used in the Reynolds number is taken from the {\ct 'CONVECTION\_LENGTH\_SCALE'} [default 1 m] on {\ct SURF}.  If the {\ct GEOMETRY} is set to {\ct 'SPHERICAL'} or {\ct 'CYLINDRICAL'}, then the time-dependent {\ct THICKNESS} is used as the radius, and the diameter is then used to compute the Reynolds number in the Sherwood and Nusselt correlations.
 
 
 \subsection{Fuel Burnout}
@@ -5887,7 +5886,7 @@ The radiative properties of water and fuel droplets are determined automatically
 &TABL ID='radtab', TABLE_DATA= 5.0,1.33,0.002  /
 &TABL ID='radtab', TABLE_DATA=10.0,1.33,0.001  /
 \end{lstlisting}
-For calculating the absorption of thermal radiation by particles, FDS uses a running average of particle temperature and density. The {\ct RUNNING\_AVERAGE\_FACTOR} is set on the {\ct PART} line, and its default value is 0.5 for liquid droplets and 0 for solid particles. The value of 0 indicates that no running average is used.
+For calculating the absorption of thermal radiation by particles, FDS uses a running average of particle temperature and density. The {\ct RUNNING\_AVERAGE\_FACTOR} is set on the {\ct PART} line, and its default value is 0.5 for liquid droplets and 0 for solid particles. The value of 0 indicates that no running average is used. Similarly, the parameter {\ct RUNNING\_AVERAGE\_FACTOR\_WALL}, also set on the {\ct PART} line, controls the running average of droplet or particle mass on solid surfaces. Its defaults are the same as for {\ct RUNNING\_AVERAGE\_FACTOR}.
 
 
 \subsection{Size Distribution}
@@ -6997,6 +6996,20 @@ In the example, 1~kg of wet pine needles occupy 1~m$^3$. The number of particles
 \caption[Example of burning vegetation]{Evolution of vegetation mass in the {\ct pine\_needles} test case.}
 \label{pine_needles_fig}
 \end{figure}
+
+\FloatBarrier
+
+\subsection{Trees}
+\label{info:trees}
+
+A coniferous tree (e.g. pine, spruce, fir) can be represented in FDS as a collection of Lagrangian particles as follows:
+\begin{lstlisting}
+&PART ID='needles', DRAG_COEFFICIENT=2.8, SURF_ID='needle surface', STATIC=.TRUE.,
+      COLOR='FOREST GREEN' /
+&INIT PART_ID='needles', XYZ=..., CROWN_BASE_WIDTH=3.2, CROWN_BASE_HEIGHT=15.,
+      TREE_HEIGHT=2, SHAPE='CONE', N_PARTICLES_PER_CELL=1, PACKING_RATIO=0.02  /
+\end{lstlisting}
+These lines create a collection of particles in the shape of a cone. The dimensions of the cone are specified via the parameters {\ct CROWN\_BASE\_WIDTH}, the diameter of the base of the cone (m), {\ct CROWN\_BASE\_HEIGHT}, the distance (m) from the ground to the base of the cone, {\ct TREE\_HEIGHT}, the height (m) of the tree from ground to tip, and the position triplet, {\ct XYZ}, of the trunk at the ground. Note that in this example, exactly one particle is specified per grid cell, positioned randomly within the cell. The number of actual pine needles this single particle represents depends on the specified {\ct PACKING\_RATIO}, the ratio of the (dry) mass per unit volume to the density of the needle itself. That information would be provided by the {\ct SURF} line {\ct 'needle surface'} and associated {\ct MATL} lines that are described in the previous section.
 
 \subsection{Firebrands}
 \label{info:firebrands}
@@ -8259,6 +8272,8 @@ Slice file information is recorded in files (See Section~\ref{out:SLCF}) labeled
 
 By default, Smokeview will blank slice file data inside obstructions.  However, this is expensive to load at startup in Smokeview for large cases.  If you wish Smokeview not to store this blanking array, set {\ct IBLANK\_SMV=.FALSE.} on {\ct MISC}.  Another option is to run Smokeview from the command line and to add {\ct -noblank} as an option.
 
+You may add a name via {\ct ID} on the {\ct SLCF} as an identifier sent to Smokeview. It is only optional.
+
 
 \section{Animated Boundary Quantities: The \texorpdfstring{{\tt BNDF}}{BNDF} Namelist Group}
 \label{info:BNDF}
@@ -8912,16 +8927,22 @@ expected to cause incapacitation in half the population. The incapacitating conc
 To include the irritant effect of a gas not listed in the table, you should specify $\mathrm{F_{FIC}}$ in ppm using the {\ct FIC\_CONCENTRATION}
 property on the corresponding {\ct SPEC} line.
 
-Note that the spatial integration features (Section~\ref{info:statistics}) cannot be used with FED output because FED makes
-use of the {\ct 'TIME INTEGRAL'} statistic (Section~\ref{info:time_integral}). For the same reason, FED output is only available as a point measurement.
-
-In order to view the FED slice file in smokeview, CO, CO${}_2$ and O${}_2$ slice files need to be defined in the input file as in the example below:
-
+The output quantities {\ct FED} and {\ct FIC} may be displayed either at a point via a device:
 \begin{lstlisting}
-&SLCF PBY= 1.0, QUANTITY='VOLUME FRACTION', SPEC_ID= 'CARBON DIOXIDE' /
-&SLCF PBY= 1.0, QUANTITY='VOLUME FRACTION', SPEC_ID= 'CARBON MONOXIDE' /
-&SLCF PBY= 1.0, QUANTITY='VOLUME FRACTION', SPEC_ID= 'OXYGEN' /
+&DEVC ID='whatever', XYZ=..., QUANTITY='FED', PROP_ID='Activity Level' /
 \end{lstlisting}
+You can also visualize {\ct FED} and {\ct FIC} as a contour slice by adding lines similar to the following:
+\begin{lstlisting}
+&SLCF PBY=1.0, QUANTITY='FED', PROP_ID='Activity Level' /
+&SLCF PBY=1.0, QUANTITY='VOLUME FRACTION', SPEC_ID='CARBON DIOXIDE' /
+&SLCF PBY=1.0, QUANTITY='VOLUME FRACTION', SPEC_ID='CARBON MONOXIDE' /
+&SLCF PBY=1.0, QUANTITY='VOLUME FRACTION', SPEC_ID='OXYGEN' /
+\end{lstlisting}
+Notice that all slices are defined on the same plane. Also note that device or slice output can make use of an optional activity level defined on a property line:
+\begin{lstlisting}
+&PROP ID='Activity Level', FED_ACTIVITY=3 /
+\end{lstlisting}
+The parameter {\ct FED\_ACTIVITY} is an integer denoting that the person is at rest (1), doing light work (2), or doing heavy work (3). The default value is 2.
 
 
 \subsection{Spatially-Integrated Outputs}
@@ -10306,6 +10327,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hline \hline
 \endhead
 {\ct CELL\_CENTERED}              & Logical           & Section~\ref{info:initial_droplets}           &                & {\ct .FALSE.} \\ \hline
+{\ct CROWN\_BASE\_HEIGHT}         & Real              & Section~\ref{info:trees}                      & m              &               \\ \hline
+{\ct CROWN\_BASE\_WIDTH}          & Real              & Section~\ref{info:trees}                      & m              &               \\ \hline
 {\ct CTRL\_ID}                    & Character         & Section~\ref{info:initial_droplets}           &                &               \\ \hline
 {\ct DB}                          & Character         & Section~\ref{info:INIT}                       &                &               \\ \hline
 {\ct DENSITY}                     & Real              & Section~\ref{info:INIT}                       & kg/m$^3$       & Ambient       \\ \hline
@@ -10324,7 +10347,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MULT\_ID }                   & Character         & Section~\ref{info:MULT}                       &                &               \\ \hline
 {\ct N\_PARTICLES}                & Integer           & Section~\ref{info:initial_droplets}           &                & 0             \\ \hline
 {\ct N\_PARTICLES\_PER\_CELL}     & Integer           & Section~\ref{info:initial_droplets}           &                & 0             \\ \hline
-{\ct PACKING\_RATIO}              & Real              & Section~\ref{pine_needles}                 &                &               \\ \hline
+{\ct PACKING\_RATIO}              & Real              & Section~\ref{pine_needles}                    &                &               \\ \hline
 {\ct PART\_ID}                    & Character         & Section~\ref{info:initial_droplets}           &                &               \\ \hline
 {\ct PARTICLE\_WEIGHT\_FACTOR}    & Real              & Section~\ref{info:initial_droplets}           &                & 1.            \\ \hline
 {\ct PATH\_RAMP(3)}               & Character         & Section~\ref{info:path_ramp}                  &                &               \\ \hline
@@ -10334,6 +10357,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SPEC\_ID(N)}                 & Character Array   & Section~\ref{info:INIT}                       &                &               \\ \hline
 {\ct TEMPERATURE}                 & Real              & Section~\ref{info:INIT}                       & \si{\degree C} & {\ct TMPA}    \\ \hline
 {\ct T\_INSERT}                   & Real              & Section~\ref{info:delayed_insertion}          & s              & {\ct T\_BEGIN}\\ \hline
+{\ct TREE\_HEIGHT}                & Real              & Section~\ref{info:trees}                      & m              &               \\ \hline
 {\ct UNIFORM}                     & Logical           & Section~\ref{info:initial_droplets}           &                & {\ct .FALSE.} \\ \hline
 {\ct UVW(3)}                      & Real Array        & Section~\ref{info:initial_droplets}           & m/s            & 0.            \\ \hline
 {\ct VOLUME\_FRACTION(:)}         & Real Array        & Section~\ref{info:INIT}                       & mol/mol        & Ambient       \\ \hline
@@ -10715,7 +10739,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct XYZ(3) }                 & Real Array      & Section~\ref{info:multobst}             & m         & (0.,0.,0.)    \\ \hline
 \end{longtable}
 
-% Undocumented: NOTERRAIN (KM)
 
 
 \vspace{\baselineskip}
@@ -10776,6 +10799,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct REAL\_REFRACTIVE\_INDEX}            & Real        & Section~\ref{radiative_part_props}                                    &                & 1.33                  \\ \hline
 {\ct RGB(3)}                             & Integers    & Section~\ref{info:part_output}                                        &                &                       \\ \hline
 {\ct RUNNING\_AVERAGE\_FACTOR}           & Real        & Section~\ref{radiative_part_props}                                    &                & 0.5                   \\ \hline
+{\ct RUNNING\_AVERAGE\_FACTOR\_WALL}     & Real        & Section~\ref{radiative_part_props}                                    &                & 0.5                   \\ \hline
 {\ct SAMPLING\_FACTOR}                   & Integer     & Section~\ref{info:part_output}                                        &                & 1                     \\ \hline
 {\ct SECOND\_ORDER\_PARTICLE\_TRANSPORT} & Logical     & Section~\ref{info:PART_Stability}                                     &                & {\ct .FALSE.}         \\ \hline
 {\ct SHAPE\_FACTOR}                      & Real        & Sections~\ref{info:particle_radiation_absorption}, \ref{pine_needles} &                &                       \\ \hline
@@ -10877,6 +10901,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct DENSITY}                           & Real          & Section~\ref{info:THERMOCOUPLE}           & kg/m$^3$              & 8908.       \\ \hline
 {\ct DIAMETER}                          & Real          & Section~\ref{info:THERMOCOUPLE}           & m                     & 0.001       \\ \hline
 {\ct EMISSIVITY}                        & Real          & Section~\ref{info:THERMOCOUPLE}           &                       & 0.85        \\ \hline
+{\ct FED\_ACTIVITY}                     & Integer       & Section~\ref{info:FED}                    &                       & 2           \\ \hline
 {\ct FLOW\_RAMP}                        & Character     & Section~\ref{info:sprinklers}             &                       &             \\ \hline
 {\ct FLOW\_RATE}                        & Real          & Section~\ref{info:sprinklers}             & L/min                 &             \\ \hline
 {\ct FLOW\_TAU}                         & Real          & Section~\ref{info:sprinklers}             &                       & 0.          \\ \hline
@@ -11088,11 +11113,13 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CELL\_CENTERED}    & Logical           & Section~\ref{info:SLCF}                   &           & {\ct .FALSE.}     \\ \hline
 {\ct DB}                & Character         & Section~\ref{info:SLCF}                   &           &                   \\ \hline
 {\ct EVACUATION}        & Logical           & Reference~\cite{FDS_Evac_Users_Guide}     &           & {\ct .FALSE.}     \\ \hline
+{\ct ID}                & Character         & Section~\ref{info:SLCF}                   &           &                   \\ \hline
 {\ct MAXIMUM\_VALUE}    & Real              & Reference~\cite{Smokeview_Users_Guide}    &           &                   \\ \hline
 {\ct MESH\_NUMBER}      & Integer           & Section~\ref{info:SLCF}                   &           &                   \\ \hline
 {\ct MINIMUM\_VALUE}    & Real              & Reference~\cite{Smokeview_Users_Guide}    &           &                   \\ \hline
 {\ct PART\_ID}          & Character         & Section~\ref{info:outputquantities}       &           &                   \\ \hline
 {\ct PBX, PBY, PBZ}     & Real              & Section~\ref{info:SLCF}                   & m         &                   \\ \hline
+{\ct PROP\_ID}          & Character         & Section~\ref{info:FED}                    &           &                   \\ \hline
 {\ct QUANTITY}          & Character         & Section~\ref{info:outputquantities}       &           &                   \\ \hline
 {\ct QUANTITY2}         & Character         & Section~\ref{info:outputquantities}       &           &                   \\ \hline
 {\ct REAC\_ID}          & Character         & See {\ct QUANTITY=`HRRPUV REAC`}          &           &                   \\ \hline
@@ -11191,6 +11218,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \endhead
 {\ct ADIABATIC}                                           & Logical         & Section~\ref{info:adiabatic}              &                     & {\ct .FALSE.}           \\ \hline
 {\ct BACKING}                                             & Character       & Section~\ref{info:BACKING}                &                     & {\ct 'EXPOSED'}         \\ \hline
+{\ct BLOWING}                                             & Logical         & Section~\ref{info:convection}             &                     & {\ct .FALSE.}           \\ \hline
 {\ct BURN\_AWAY}                                          & Logical         & Section~\ref{info:BURN_AWAY}              &                     & {\ct .FALSE.}           \\ \hline
 {\ct BURN\_DURATION}                                      & Real            & Section~\ref{info:BURN_DURATION}          & s                   & 1000000                 \\ \hline
 {\ct CELL\_SIZE\_FACTOR}                                  & Real            & Section~\ref{info:solid_phase_stability}  &                     & 1.0                     \\ \hline

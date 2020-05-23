@@ -14,6 +14,7 @@ INTEGER, PARAMETER :: MAX_REACTIONS=10               !< Maximum number of chemic
 INTEGER, PARAMETER :: MAX_STEPS=20                   !< Maximum steps in processing of material residues
 INTEGER, PARAMETER :: MAX_NUMBER_SPECTRAL_BANDS=9    !< Maximum number of radiation spectral bands
 INTEGER, PARAMETER :: MAX_NUMBER_FSK_POINTS=32
+INTEGER, PARAMETER :: MAX_TERRAIN_IMAGES=10          !< Maximum number of images to paste onto complex terrain
 INTEGER, PARAMETER :: MAX_INPUT_ID=40                !< Maximum number of CTRL INPUT_IDs
 INTEGER, PARAMETER :: N_ZONE_POINTS=100              !< Maximum number of declared ZONE points (deprecated)
 INTEGER, PARAMETER :: MAX_AIT_EXCLUSION_ZONES=10     !< Maximum number of AUTO_IGNITION_TEMPERATURE exclusion zones

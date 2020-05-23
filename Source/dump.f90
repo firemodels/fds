@@ -1662,7 +1662,7 @@ DO N=0,N_SURF
    SF => SURFACE(N)
    WRITE(LU_SMV,'(/A)') 'SURFACE'
    WRITE(LU_SMV,'(1X,A)') SURFACE(N)%ID
-   IF (SF%THERMALLY_THICK) THEN
+   IF (SF%THERMAL_BC_INDEX==THERMALLY_THICK) THEN
       ML => MATERIAL(SF%LAYER_MATL_INDEX(1,1))
       WRITE(LU_SMV,'(2F8.2)') TMPM,ML%EMISSIVITY
    ELSE
@@ -2267,7 +2267,7 @@ MESH_LOOP: DO NM=1,NMESHES
    DO N=1,M%N_OBST
       OB=>M%OBSTRUCTION(N)
       TYPE_INDICATOR=OB%TYPE_INDICATOR
-      IF (TERRAIN_CASE .AND. .NOT.OB%NOTERRAIN) THEN
+      IF (TERRAIN_CASE) THEN
          IF (TYPE_INDICATOR.GT.0) THEN
             TYPE_INDICATOR=TYPE_INDICATOR+8
          ELSE
@@ -3019,7 +3019,7 @@ SURFLOOP: DO N=0,N_SURF
       DO I=0,SF%N_CELLS_INI
          WRITE(LU_OUTPUT,'(15X,I6, I7, F16.7)') I,SF%LAYER_INDEX(MAX(I,1)), SF%X_S(I)
       ENDDO
-      IF (SF%GEOMETRY==SURF_CARTESIAN .OR. SF%GEOMETRY==SURF_BLOWING_PLATE) THEN
+      IF (SF%GEOMETRY==SURF_CARTESIAN) THEN
          IF (SF%BACKING==VOID)      WRITE(LU_OUTPUT,'(A)') '     Backing to void'
          IF (SF%BACKING==INSULATED) WRITE(LU_OUTPUT,'(A)') '     Insulated Backing'
          IF (SF%BACKING==EXPOSED)   WRITE(LU_OUTPUT,'(A)') '     Exposed Backing'
@@ -7645,7 +7645,7 @@ IND_SELECT: SELECT CASE(IND)
                      PHI = 0.001_EB*LPC%FTPR*PHI
                   ELSEIF (LPC%SURF_INDEX>0) THEN
                      SF => SURFACE(LPC%SURF_INDEX)
-                     IF (SF%THERMALLY_THICK) THEN
+                     IF (SF%THERMAL_BC_INDEX==THERMALLY_THICK) THEN
                         ! SURFACE_DENSITY with MODE=3 returns energy density kJ/(m3-initial)
                         ! here VOL multiplies by the initial volume
                         VOL = FOTHPI*(SF%INNER_RADIUS+SF%THICKNESS)**3
@@ -8080,7 +8080,7 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
       ENDIF
 
    CASE(24) ! WALL THICKNESS
-      IF (SURFACE(SURF_INDEX)%THERMALLY_THICK) THEN
+      IF (SURFACE(SURF_INDEX)%THERMAL_BC_INDEX==THERMALLY_THICK) THEN
          SOLID_PHASE_OUTPUT = SUM(ONE_D%LAYER_THICKNESS)
       ELSE
          SOLID_PHASE_OUTPUT = 0._EB
@@ -10706,7 +10706,7 @@ END SUBROUTINE DUMP_MMS
 
 !> \brief Estimate extreme values based on a shortened time series
 !>
-!> \details Given DV%N_INTERVALS values of DV%TIME_MIN(MAX)_VALUE, extrapolate the MIN(MAX) for the DV%TIME_PERIOD, 
+!> \details Given DV%N_INTERVALS values of DV%TIME_MIN(MAX)_VALUE, extrapolate the MIN(MAX) for the DV%TIME_PERIOD,
 !> which is typically longer than the statistical sampling duration DV%STATISTICS_END-DV%STATISTICS_START
 
 SUBROUTINE EXTRAPOLATE_EXTREMA
