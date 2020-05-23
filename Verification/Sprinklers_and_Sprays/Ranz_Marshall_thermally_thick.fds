@@ -28,7 +28,7 @@ from Ranz and Marshall "Evaporation from drops - Part II" Chemical Engineering P
       TMP_INNER    = 9.1
       CELL_SIZE_FACTOR = 0.01
       MINIMUM_LAYER_THICKNESS = 5.E-6
-      HEAT_TRANSFER_MODEL = 'BLOWING SPHERE' /
+      BLOWING      = T /
 
 &MATL ID                     = 'WATER'
       EMISSIVITY             = 0.95
