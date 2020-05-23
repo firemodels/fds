@@ -2564,7 +2564,7 @@ where $\hbox{Nu}$ is the Nusselt number, $k$ is the thermal conductivity of the 
 
 \subsubsection{Heat Transfer with Blowing}
 
-During pyrolysis of a solid or evaporation of a liquid the mass transfer off the surface generats a blowing velocity that alters the thermal and momentum boundary layers, thus affecting the heat and mass transfer coefficients.  For a surface with blowing, consider using the correlations discussed in Sazhin \cite{Sazhin:2006} with the Spalding mass transfer corrections \cite{Spalding:1}.  These may be activated by setting {\ct HEAT\_TRANSFER\_MODEL} to {\ct 'BLOWING PLATE'} or {\ct 'BLOWING SPHERE'} as appropriate on the {\ct SURF} line.  Note that for the {\ct 'BLOWING SPHERE'} the time dependent {\ct THICKNESS} of the surface is used in computing the Reynolds number.  For {\ct 'BLOWING PLATE'} the length scale for the Reynolds number is the usual {\ct CONVECTION\_LENGTH\_SCALE} set on the {\ct SURF} line.
+During pyrolysis of a solid or evaporation of a liquid the mass transfer off the surface generats a blowing velocity that alters the thermal and momentum boundary layers, thus affecting the heat and mass transfer coefficients.  For a surface with blowing, consider using the correlations discussed in Sazhin \cite{Sazhin:2006} with the Spalding mass transfer corrections \cite{Spalding:1}.  These may be activated by setting {\ct BLOWING=T} on the {\ct SURF} line.  Note that for {\ct GEOMETRY='SPHERICAL'} or {\ct GEOMETRY='CYLINDRICAL'} used together with {\ct BLOWING=T} the time dependent {\ct THICKNESS} of the surface is used in computing the Reynolds number.  For {\ct GEOMETRY='CARTESIAN'} and {\ct BLOWING=T} the length scale for the Reynolds number is the usual {\ct CONVECTION\_LENGTH\_SCALE} set on the {\ct SURF} line.
 
 
 \subsection{Special Topic: Adiabatic Surfaces}
@@ -3225,16 +3225,15 @@ In this example, {\ct 'ETHANOL'} is a {\em known} species; that is, it is listed
 
 \subsubsection{Heat and Mass Transfer with Blowing}
 
-To invoke the heat and mass transfer relationships from \cite{Sazhin:2006} for a flat plate, set {\ct GEOMETRY} and {\ct HEAT\_TRANSFER\_MODEL} to {\ct `BLOWING PLATE`} on the {\ct SURF} line.  For example,
-
+To invoke the heat and mass transfer relationships from \cite{Sazhin:2006}, set {\ct BLOWING=T} on the {\ct SURF} line.  For example,
 \begin{lstlisting}
 &SURF ID        = 'ETHANOL POOL'
       COLOR     = 'YELLOW'
       MATL_ID   = 'ETHANOL LIQUID'
       THICKNESS = 0.1
-      GEOMETRY  = 'BLOWING PLATE'
-      HEAT_TRANSFER_MODEL = 'BLOWING PLATE' /
+      BLOWING   = T /
 \end{lstlisting}
+Note that the default {\ct GEOMETRY} is {\ct 'CARTESIAN'} in which case the length scale used in the Reynolds number is taken from the {\ct 'CONVECTION\_LENGTH\_SCALE'} [default 1 m] on {\ct SURF}.  If the {\ct GEOMETRY} is set to {\ct 'SPHERICAL'} or {\ct 'CYLINDRICAL'}, then the time-dependent {\ct THICKNESS} is used as the radius, and the diameter is then used to compute the Reynolds number in the Sherwood and Nusselt correlations.
 
 
 \subsection{Fuel Burnout}
@@ -7005,7 +7004,7 @@ In the example, 1~kg of wet pine needles occupy 1~m$^3$. The number of particles
 
 A coniferous tree (e.g. pine, spruce, fir) can be represented in FDS as a collection of Lagrangian particles as follows:
 \begin{lstlisting}
-&PART ID='needles', DRAG_COEFFICIENT=2.8, SURF_ID='needle surface', STATIC=.TRUE., 
+&PART ID='needles', DRAG_COEFFICIENT=2.8, SURF_ID='needle surface', STATIC=.TRUE.,
       COLOR='FOREST GREEN' /
 &INIT PART_ID='needles', XYZ=..., CROWN_BASE_WIDTH=3.2, CROWN_BASE_HEIGHT=15.,
       TREE_HEIGHT=2, SHAPE='CONE', N_PARTICLES_PER_CELL=1, PACKING_RATIO=0.02  /
@@ -11219,6 +11218,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \endhead
 {\ct ADIABATIC}                                           & Logical         & Section~\ref{info:adiabatic}              &                     & {\ct .FALSE.}           \\ \hline
 {\ct BACKING}                                             & Character       & Section~\ref{info:BACKING}                &                     & {\ct 'EXPOSED'}         \\ \hline
+{\ct BLOWING}                                             & Logical         & Section~\ref{info:convection}             &                     & {\ct .FALSE.}           \\ \hline
 {\ct BURN\_AWAY}                                          & Logical         & Section~\ref{info:BURN_AWAY}              &                     & {\ct .FALSE.}           \\ \hline
 {\ct BURN\_DURATION}                                      & Real            & Section~\ref{info:BURN_DURATION}          & s                   & 1000000                 \\ \hline
 {\ct CELL\_SIZE\_FACTOR}                                  & Real            & Section~\ref{info:solid_phase_stability}  &                     & 1.0                     \\ \hline
