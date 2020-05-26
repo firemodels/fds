@@ -2444,6 +2444,8 @@ INTEGER  :: NWP_NEW,I_GRAD,IZERO,SURF_INDEX,PART_INDEX=0
 LOGICAL :: REMESH,E_FOUND,CHANGE_THICKNESS
 CHARACTER(MESSAGE_LENGTH) :: MESSAGE
 TYPE(WALL_TYPE), POINTER :: WALL_P
+! Debug
+REAL(EB) :: Q_S_TOT
 
 ! Copy commonly used derived type variables into local variables.
 
@@ -2878,6 +2880,14 @@ IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
    ENDDO
 ENDIF
 
+! Debug
+!Q_S_TOT = 0._EB
+!DO I=1,NWP
+!   Q_S_TOT = Q_S_TOT + Q_S(I)/RDX_S(I)
+!ENDDO
+!write(*,*) T,'1:',NWP,ONE_D%X(1),0.5_EB*(ONE_D%TMP(0)+ONE_D%TMP(1))-273.15_EB, ONE_D%TMP(1)-273.15_EB
+!write(*,*) T,'1:',NWP,0.5_EB*(ONE_D%TMP(0)+ONE_D%TMP(1))-273.15_EB, ONE_D%TMP(1)-273.15_EB, ONE_D%TMP(2)-273.15_EB
+
 ! Adjust the material layer masses and thicknesses
 
 REMESH = .FALSE.
@@ -2966,6 +2976,7 @@ IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
       NWP_NEW = 0
       THICKNESS = 0._EB
 
+      REMESH = .TRUE.
       I = 0
       LAYER_LOOP: DO NL=1,SF%N_LAYERS
 
@@ -2982,7 +2993,7 @@ IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
                SF%STRETCH_FACTOR(NL),SF%CELL_SIZE_FACTOR,SF%N_LAYER_CELLS_MAX(NL),N_LAYER_CELLS_NEW(NL),SMALLEST_CELL_SIZE(NL))
             NWP_NEW = NWP_NEW + N_LAYER_CELLS_NEW(NL)
          ENDIF
-         IF ( N_LAYER_CELLS_NEW(NL) /= ONE_D%N_LAYER_CELLS(NL)) REMESH = .TRUE.
+!         IF ( N_LAYER_CELLS_NEW(NL) /= ONE_D%N_LAYER_CELLS(NL)) REMESH = .TRUE.
 
          THICKNESS = THICKNESS + ONE_D%LAYER_THICKNESS(NL)
          I = I + ONE_D%N_LAYER_CELLS(NL)
@@ -3032,8 +3043,12 @@ IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
                                     ONE_D%X(0:NWP),X_S_NEW(0:NWP_NEW),INT_WGT)
          N_CELLS = MAX(NWP,NWP_NEW)
          CALL INTERPOLATE_WALL_ARRAY(N_CELLS,NWP,NWP_NEW,INT_WGT,ONE_D%TMP(1:N_CELLS))
-         ONE_D%TMP(0) = 2._EB*ONE_D%TMP_F-ONE_D%TMP(1) !Make sure surface temperature stays the same
-         ONE_D%TMP(NWP_NEW+1) = ONE_D%TMP(NWP+1)
+!         ONE_D%TMP_F  = 0.5_EB*(ONE_D%TMP(0)+ONE_D%TMP(1))
+!         ONE_D%TMP_B  = 0.5_EB*(ONE_D%TMP(NWP_NEW)+ONE_D%TMP(NWP+1))
+         ONE_D%TMP_F  = ONE_D%TMP(1)
+         ONE_D%TMP_B  = ONE_D%TMP(NWP_NEW)
+!         ONE_D%TMP(0) = 2._EB*ONE_D%TMP_F-ONE_D%TMP(1) !Make sure surface temperature stays the same
+!         ONE_D%TMP(NWP_NEW+1) = ONE_D%TMP(NWP+1)        ! How to deal with back side?
          CALL INTERPOLATE_WALL_ARRAY(N_CELLS,NWP,NWP_NEW,INT_WGT,Q_S(1:N_CELLS))
          DO N=1,SF%N_MATL
             ML  => MATERIAL(SF%MATL_INDEX(N))
@@ -3056,6 +3071,15 @@ IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
    ENDIF REMESH_GRID
 
 ENDIF
+
+! Debug
+!Q_S_TOT = 0._EB
+!DO I=1,NWP
+!   Q_S_TOT = Q_S_TOT + Q_S(I)/RDX_S(I)
+!ENDDO
+!write(*,*) T,'2:',NWP,ONE_D%X(1),0.5_EB*(ONE_D%TMP(0)+ONE_D%TMP(1))-273.15_EB, ONE_D%TMP(1)-273.15_EB
+!write(*,*) T,'2:',NWP,0.5_EB*(ONE_D%TMP(0)+ONE_D%TMP(1))-273.15_EB, ONE_D%TMP(1)-273.15_EB, ONE_D%TMP(2)-273.15_EB
+!write(101,*) T, Q_S_TOT
 
 ! Calculate thermal properties
 
@@ -3164,8 +3188,10 @@ IF (NWP == 1) THEN
    ONE_D%TMP_F = ONE_D%TMP(1)
    ONE_D%TMP_B = ONE_D%TMP_F
 ELSE
-   ONE_D%TMP_F  = 0.5_EB*(ONE_D%TMP(0)+ONE_D%TMP(1))
-   ONE_D%TMP_B  = 0.5_EB*(ONE_D%TMP(NWP)+ONE_D%TMP(NWP+1))
+   ONE_D%TMP_F = ONE_D%TMP(1)
+   ONE_D%TMP_B = ONE_D%TMP(NWP)
+!   ONE_D%TMP_F  = 0.5_EB*(ONE_D%TMP(0)+ONE_D%TMP(1))
+!   ONE_D%TMP_B  = 0.5_EB*(ONE_D%TMP(NWP)+ONE_D%TMP(NWP+1))
 ENDIF
 
 ! Clipping for excessively high or low temperatures
