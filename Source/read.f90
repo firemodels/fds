@@ -1990,12 +1990,6 @@ NAMELIST /MISC/ AEROSOL_AL2O3,AEROSOL_SCRUBBING,AGGLOMERATION,ALLOW_SURFACE_PART
 ! Physical constants
 
 TMPA         = 20._EB                                              ! Ambient temperature (C)
-GAMMA        = 1.4_EB                                              ! Heat capacity ratio for air
-P_INF        = 101325._EB                                          ! Ambient pressure (Pa)
-MU_AIR_0     = 1.8E-5_EB                                           ! Dynamic Viscosity of Air at 20 C (kg/m/s)
-CP_AIR_0     = 1012._EB                                            ! Specific Heat of Air at 20 C (J/kg/K)
-PR_AIR       = 0.7_EB
-K_AIR_0      = MU_AIR_0*CP_AIR_0/PR_AIR                            ! Thermal Conductivity of Air at 20 C (W/m/K)
 
 ! Empirical heat transfer constants
 
@@ -2037,12 +2031,6 @@ GVEC(1)              = 0._EB        ! x-component of gravity
 GVEC(2)              = 0._EB        ! y-component of gravity
 GVEC(3)              = -GRAV        ! z-component of gravity
 THICKEN_OBSTRUCTIONS = .FALSE.
-CFL_MAX              = 1.0_EB       ! Stability bounds
-CFL_MIN              = 0.8_EB
-VN_MAX               = 1.0_EB
-VN_MIN               = 0.8_EB
-PARTICLE_CFL_MAX     = 1._EB
-PARTICLE_CFL_MIN     = 0.8_EB
 N_TERRAIN_IMAGES     = 0
 DO I = 1, MAX_TERRAIN_IMAGES
    TERRAIN_IMAGE(I) = 'null'
@@ -6911,7 +6899,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
       VEG_LEVEL_SET_COUPLED = .FALSE.
       RADIATION = .FALSE.
    ENDIF
-   IF (VEG_LSET_FUEL_INDEX>0) HRRPUA = 1._EB  ! Placeholder for future setting
+   IF (VEG_LSET_FUEL_INDEX>0 .AND. VEG_LEVEL_SET_COUPLED) HRRPUA = 1._EB  ! Placeholder for future setting
 
    SF%VEG_LSET_SPREAD       = VEG_LSET_SPREAD
    SF%VEG_LSET_ROS          = VEG_LSET_ROS          ! no-wind, no-slope RoS (m/s), Rothermel model
