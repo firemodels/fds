@@ -45,8 +45,6 @@ I2 = imread([fig_repo,'fds/Reference_Figures/ribbed_channel_80_s1000.png']);
 % images must be the same size for comparison
 % so, take max element size and fill values with 0
 
-% NOTE: Matlab is 1 based for arrays.
-
 I1_SIZE = size(I1)
 I2_SIZE = size(I2)
 
