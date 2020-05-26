@@ -241,9 +241,7 @@ DO JJG=1,JBAR
 
       IF (.NOT. SF%VEG_LSET_SPREAD) CYCLE
 
-      ! Ignite landscape at user specified location if ignition is at time zero
-
-      IF (SF%VEG_LSET_IGNITE_T == 0.0_EB) PHI_LS(IIG,JJG) = PHI_LS_MAX
+      ! Initialize various arrays
 
       ROS_HEAD(IIG,JJG)  = SF%VEG_LSET_ROS_HEAD
       ROS_FLANK(IIG,JJG) = SF%VEG_LSET_ROS_FLANK
@@ -307,7 +305,7 @@ INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T,DT
 INTEGER :: IIG,IW,JJG,IC
 INTEGER :: KDUM,KWIND,ICF,IKT
-REAL(EB) :: UMF_TMP,PHX,PHY,MAG_PHI,PHI_W_X,PHI_W_Y,UMF_X,UMF_Y,UMAG,DUMMY=0._EB
+REAL(EB) :: UMF_TMP,PHX,PHY,MAG_PHI,PHI_W_X,PHI_W_Y,UMF_X,UMF_Y,UMAG,DUMMY=0._EB,ROS_MAG
 TYPE (ONE_D_M_AND_E_XFER_TYPE), POINTER :: ONE_D
 TYPE (SURFACE_TYPE), POINTER :: SF
 
@@ -326,10 +324,11 @@ DO JJG=1,JBAR
 
       IF (.NOT. SF%VEG_LSET_SPREAD) CYCLE
 
-      ! Ignite landscape at user specified location(s) and time(s)
+      ! Ignite landscape at user specified location and time
 
-      IF (SF%VEG_LSET_IGNITE_T > 0.0_EB .AND. SF%VEG_LSET_IGNITE_T < DT)  PHI_LS(IIG,JJG) = PHI_LS_MAX
-      IF (SF%VEG_LSET_IGNITE_T >= T .AND. SF%VEG_LSET_IGNITE_T <= T + DT) PHI_LS(IIG,JJG) = PHI_LS_MAX
+      IF (T>SF%VEG_LSET_IGNITE_T) PHI_LS(IIG,JJG) = PHI_LS_MAX
+
+      ! Establish the wind field
 
       IF_CFD_COUPLED: IF (VEG_LEVEL_SET_COUPLED) THEN  ! The wind speed is derived from the CFD computation
 
@@ -458,12 +457,19 @@ IF (.NOT.PREDICTOR) THEN
    IF (CC_IBM) THEN
       DO JJG=1,JBAR
          DO IIG=1,IBAR
+            SF => SURFACE(LS_SURF_INDEX(IIG,JJG))
+            IF (.NOT. SF%VEG_LSET_SPREAD) CYCLE
             DO IKT=LS_KLO_TERRAIN(IIG,JJG),K_LS(IIG,JJG)
                ! Loop over all CFACEs corresponding to IIG,JJG and set ONE_D%T_IGN and ONE_D%PHI_LS as below
                ICF = CCVAR(IIG,JJG,IKT,3); IF(ICF<1) CYCLE  ! IBM_IDCF = 3 CUT_FCE container for this cell.
                DO IW=1,CUT_FACE(ICF)%NFACE ! All IBM_INBOUNDARY CFACES on this cell.
                   ONE_D => CFACE( CUT_FACE(ICF)%CFACE_INDEX(IW) ) % ONE_D
-                  IF (PHI_LS(IIG,JJG)>=0._EB .AND. ONE_D%T_IGN>1.E5_EB) ONE_D%T_IGN = T
+                  IF (PHI_LS(IIG,JJG)>=0._EB .AND. ONE_D%T_IGN>1.E5_EB) THEN
+                     ONE_D%T_IGN = T
+                     ROS_MAG = MAX(0.01_EB,SQRT(SR_X_LS(IIG,JJG)**2 + SR_Y_LS(IIG,JJG)**2))
+                     ONE_D%BURN_DURATION = MAX(SF%BURN_DURATION,SQRT(DX(IIG)*DY(JJG))/ROS_MAG)
+                     ONE_D%AREA_ADJUST = SF%BURN_DURATION/ONE_D%BURN_DURATION
+                  ENDIF
                   ONE_D%PHI_LS = PHI_LS(IIG,JJG)
                ENDDO
             ENDDO
@@ -472,11 +478,18 @@ IF (.NOT.PREDICTOR) THEN
    ELSE
       DO JJG=1,JBAR
          DO IIG=1,IBAR
+            SF => SURFACE(LS_SURF_INDEX(IIG,JJG))
+            IF (.NOT. SF%VEG_LSET_SPREAD) CYCLE
             IF (K_LS(IIG,JJG)<1) CYCLE
             IC = CELL_INDEX(IIG,JJG,K_LS(IIG,JJG))
             IW = WALL_INDEX(IC,-3)
             ONE_D => WALL(IW)%ONE_D
-            IF (PHI_LS(IIG,JJG)>=0._EB .AND. ONE_D%T_IGN>1.E5_EB) ONE_D%T_IGN = T
+            IF (PHI_LS(IIG,JJG)>=0._EB .AND. ONE_D%T_IGN>1.E5_EB) THEN
+               ONE_D%T_IGN = T
+               ROS_MAG = MAX(0.01_EB,SQRT(SR_X_LS(IIG,JJG)**2 + SR_Y_LS(IIG,JJG)**2))
+               ONE_D%BURN_DURATION = MAX(SF%BURN_DURATION,SQRT(DX(IIG)*DY(JJG))/ROS_MAG)
+               ONE_D%AREA_ADJUST = SF%BURN_DURATION/ONE_D%BURN_DURATION
+            ENDIF
             ONE_D%PHI_LS = PHI_LS(IIG,JJG)
          ENDDO
       ENDDO

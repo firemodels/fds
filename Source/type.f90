@@ -137,7 +137,7 @@ END TYPE BAND_TYPE
 
 ! Note: If you change the number of scalar variables in ONE_D_M_AND_E_XFER_TYPE, adjust the numbers below
 
-INTEGER, PARAMETER :: N_ONE_D_SCALAR_REALS=32,N_ONE_D_SCALAR_INTEGERS=12,N_ONE_D_SCALAR_LOGICALS=1
+INTEGER, PARAMETER :: N_ONE_D_SCALAR_REALS=33,N_ONE_D_SCALAR_INTEGERS=12,N_ONE_D_SCALAR_LOGICALS=1
 
 !> \brief Variables associated with a WALL, PARTICLE, or CFACE boundary cell
 
@@ -210,6 +210,7 @@ TYPE ONE_D_M_AND_E_XFER_TYPE
    REAL(EB), POINTER :: Q_DOT_O2_PP     !< Heat release rate per unit area (W/m2) due to oxygen consumption
    REAL(EB), POINTER :: Q_CONDENSE      !< Heat release rate per unit area (W/m2) due to gas condensation
    REAL(EB), POINTER :: K_SUPPRESSION   !< Suppression coefficent (m2/kg/s)
+   REAL(EB), POINTER :: BURN_DURATION   !< Duration of a specified fire (s)
 
    LOGICAL, POINTER :: BURNAWAY         !< Indicater if cell can burn away when fuel is exhausted
 
