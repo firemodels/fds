@@ -3034,7 +3034,8 @@ SURFLOOP: DO N=0,N_SURF
    IF (ABS(SF%MASS_FLUX_TOTAL)>TWO_EPSILON_EB) WRITE(LU_OUTPUT,'(A,ES9.2)') '     Total Mass Flux (kg/m^2/s) ', SF%MASS_FLUX_TOTAL
    IF (ABS(SF%VOLUME_FLOW)>TWO_EPSILON_EB)     WRITE(LU_OUTPUT,'(A,ES9.2)') '     Volume Flow     (m^3/s)    ', SF%VOLUME_FLOW
 
-   IF (SF%HRRPUA > 0._EB) WRITE(LU_OUTPUT,'(A,F12.1)') '     HRR Per Unit Area (kW/m2) ', SF%HRRPUA/1000._EB
+   IF (SF%HRRPUA>0._EB .AND. .NOT.SF%VEG_LSET_SPREAD) &
+      WRITE(LU_OUTPUT,'(A,F12.1)') '     HRR Per Unit Area (kW/m2) ', SF%HRRPUA/1000._EB
    DO NN=1,N_TRACKED_SPECIES
       IF (SF%MASS_FRACTION(NN)>TWO_EPSILON_EB) WRITE(LU_OUTPUT,'(5X,A,A,8X,F6.3)') &
           TRIM(SPECIES_MIXTURE(NN)%ID),' Mass Fraction',SF%MASS_FRACTION(NN)
@@ -3046,14 +3047,13 @@ SURFLOOP: DO N=0,N_SURF
 
    IF (SF%VEG_LSET_SPREAD) THEN
       WRITE(LU_OUTPUT,'(A)')       '     Level Set Fire Spread Model'
-      IF (SF%VEG_LSET_IGNITE_T>-1._EB) THEN
-         WRITE(LU_OUTPUT,'(A,ES9.2)')  '     Ignition Time (s)           ', SF%VEG_LSET_IGNITE_T
-      ELSE
-         WRITE(LU_OUTPUT,'(A,ES10.3)') '     Rate of Spread (m/s)        ', SF%VEG_LSET_ROS
-         WRITE(LU_OUTPUT,'(A,ES10.3)') '     Packing Ratio               ', SF%VEG_LSET_BETA
-         WRITE(LU_OUTPUT,'(A,ES10.3)') '     Surface Area/Volume (1/m)   ', SF%VEG_LSET_SIGMA*100.  ! Convert from 1/cm to 1/m
-         WRITE(LU_OUTPUT,'(A,ES10.3)') '     Fuel Depth (m)              ', SF%VEG_LSET_HT
-      ENDIF
+      IF (SF%VEG_LSET_IGNITE_T<1.E6_EB) &
+      WRITE(LU_OUTPUT,'(A,ES9.2)')  '     Ignition Time (s)           ', SF%VEG_LSET_IGNITE_T
+      WRITE(LU_OUTPUT,'(A,ES10.3)') '     Burn Duration (s)           ', SF%BURN_DURATION
+      WRITE(LU_OUTPUT,'(A,ES10.3)') '     Rate of Spread (m/s)        ', SF%VEG_LSET_ROS
+      WRITE(LU_OUTPUT,'(A,ES10.3)') '     Packing Ratio               ', SF%VEG_LSET_BETA
+      WRITE(LU_OUTPUT,'(A,ES10.3)') '     Surface Area/Volume (1/m)   ', SF%VEG_LSET_SIGMA*100.  ! Convert from 1/cm to 1/m
+      WRITE(LU_OUTPUT,'(A,ES10.3)') '     Fuel Depth (m)              ', SF%VEG_LSET_HT
    ENDIF
 
 ENDDO SURFLOOP
@@ -9492,8 +9492,8 @@ CFACE_LOOP_2 : DO ICF=1,N_CFACE_CELLS
    CFA => CFACE(ICF)
    IF (CFA%BOUNDARY_TYPE/=SOLID_BOUNDARY) CYCLE CFACE_LOOP_2
    IF (I_FUEL>0) &
-   M_DOT(1,NM) = M_DOT(1,NM) +     CFA%ONE_D%M_DOT_G_PP_ACTUAL(I_FUEL)*CFA%ONE_D%AREA ! No need for AREA_ADJUST.
-   M_DOT(3,NM) = M_DOT(3,NM) + SUM(CFA%ONE_D%M_DOT_G_PP_ACTUAL)       *CFA%ONE_D%AREA
+   M_DOT(1,NM) = M_DOT(1,NM) +     CFA%ONE_D%M_DOT_G_PP_ACTUAL(I_FUEL)*CFA%ONE_D%AREA*CFA%ONE_D%AREA_ADJUST
+   M_DOT(3,NM) = M_DOT(3,NM) + SUM(CFA%ONE_D%M_DOT_G_PP_ACTUAL)       *CFA%ONE_D%AREA*CFA%ONE_D%AREA_ADJUST
 ENDDO CFACE_LOOP_2
 
 Q_DOT_SUM(:,NM) = Q_DOT_SUM(:,NM) + DT*Q_DOT(:,NM)

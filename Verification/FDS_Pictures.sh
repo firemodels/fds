@@ -50,3 +50,4 @@ $RUNSMV -d Turbulence ribbed_channel_80
 $RUNSMV -d WUI Bova_1a
 $RUNSMV -d WUI Bova_1b
 $RUNSMV -d WUI Bova_4a
+$RUNSMV -d WUI level_set_fuel_model_1

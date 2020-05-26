@@ -2134,7 +2134,7 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
 
       ! If the current time is before the "activation" time, T_IGN, apply simple BCs and get out
 
-      IF (T < ONE_D%T_IGN .OR. ONE_D%T_IGN+SF%BURN_DURATION<T .OR. INITIALIZATION_PHASE) THEN
+      IF (T < ONE_D%T_IGN .OR. ONE_D%T_IGN+ONE_D%BURN_DURATION<T .OR. INITIALIZATION_PHASE) THEN
          ONE_D%ZZ_F(1:N_TRACKED_SPECIES) = ONE_D%ZZ_G(1:N_TRACKED_SPECIES)
          IF (PREDICTOR) ONE_D%U_NORMAL_S = 0._EB
          IF (CORRECTOR) ONE_D%U_NORMAL  = 0._EB
@@ -3185,7 +3185,8 @@ ONE_D%N_SUBSTEPS = ONE_D%N_SUBSTEPS + 1
 ENDDO SUB_TIMESTEP_LOOP
 
 ONE_D%Q_CON_F = ONE_D%Q_CON_F / DT_BC
-ONE_D%HEAT_TRANS_COEF = ONE_D%Q_CON_F/(ONE_D%TMP_G-0.5_EB*(ONE_D%TMP_F_OLD+ONE_D%TMP_F))
+DTMP = ONE_D%TMP_G-0.5_EB*(ONE_D%TMP_F_OLD+ONE_D%TMP_F)
+IF (ABS(DTMP)>TWO_EPSILON_EB) ONE_D%HEAT_TRANS_COEF = ONE_D%Q_CON_F/DTMP
 
 ! If any gas massflux is non-zero or the surface temperature exceeds the ignition temperature, set the ignition time
 
