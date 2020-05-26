@@ -106,6 +106,13 @@ for NM=1:NMESHES
    
    TRANS(NM).NOC(IAXIS:KAXIS)= 0;
    
+   
+   
+   DZMEAN=MESHES(NM).ZF-MESHES(NM).ZS/MESHES(NM).KBAR;
+   if ( any( abs(MESHES(NM).DZ(MESHES(NM).KLO_CELL:MESHES(NM).KHI_CELL)-DZMEAN) > 1e-5*DZMEAN ) )
+       TRANS(NM).NOC(KAXIS)= 1;
+   end
+   
    MESHES(NM).N_SPCELL = 0;
 end
 

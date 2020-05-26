@@ -33310,11 +33310,10 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
                 DO ISS=2,NODEDG_FACE(1,N2COUNT)+1
                    ISEG = NODEDG_FACE(ISS,N2COUNT)
                    IF ( SEG_FLAG(ISEG) ) THEN ! This seg hasn't been added to SEG_FACE2
-                                             ! Drop if seg is the opposite of count seg:
-                      IF ( SEG_FACE2(NOD1,COUNT) == SEG_FACE(NOD2,ISEG) ) CYCLE
+                      ! Drop if seg is the opposite of count seg, only when 2nd node is connected to more than 2 segments:
+                      IF ( (SEG_FACE2(NOD1,COUNT)==SEG_FACE(NOD2,ISEG)) .AND. (NUMEDG_NODE(N2COUNT)>2) ) CYCLE
                       DANGI = ANGSEG(ISEG) - ANGCOUNT
                       IF ( DANGI < 0._EB ) DANGI = DANGI + 2._EB * PI
-
                       IF ( DANGI > DANG ) THEN
                          NEWSEG   =  ISEG
                          DANG     = DANGI
