@@ -2766,6 +2766,8 @@ REAL(EB) :: TYY_FAC
 CONTAINS
 
 
+!> \brief Initialize radiation arrays.
+!>
 SUBROUTINE INIT_RADIATION
 
 ! Meanings of some variables defined here:
@@ -3399,7 +3401,11 @@ ENDDO
 END SUBROUTINE INIT_RADIATION
 
 
-
+!> \brief Compute radiative source term and transfer.
+!>
+!> \param T Current time (s)
+!> \param NM Mesh number
+!> \param RAD_ITER Iteration number of radiation solution.
 SUBROUTINE COMPUTE_RADIATION(T,NM,RAD_ITER)
 
 ! Call radiation routine or simply specify the radiative loss
