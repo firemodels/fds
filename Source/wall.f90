@@ -2860,8 +2860,6 @@ T_BC_SUB = T_BC_SUB + DT_BC_SUB
 
 ! Store the mass and energy fluxes from this time sub-iteration
 
-ONE_D%HEAT_TRANS_COEF = ONE_D%HEAT_TRANS_COEF + HTCF*DT_BC_SUB/DT_BC
-ONE_D%Q_CON_F = ONE_D%Q_CON_F + Q_CON_F*DT_BC_SUB/DT_BC
 IF (SF%INTERNAL_RADIATION) THEN
    Q_RAD_OUT_OLD = Q_RAD_OUT
    ONE_D%Q_RAD_OUT = ONE_D%Q_RAD_OUT + Q_RAD_OUT*DT_BC_SUB/DT_BC
@@ -3161,6 +3159,8 @@ ONE_D%TMP(1:NWP) = MIN(TMPMAX,MAX(TMPMIN,CCS(1:NWP)))
 ONE_D%TMP(0)     =            MAX(TMPMIN,ONE_D%TMP(1)  *RFACF2+QDXKF)  ! Ghost value, allow it to be large
 ONE_D%TMP(NWP+1) =            MAX(TMPMIN,ONE_D%TMP(NWP)*RFACB2+QDXKB)  ! Ghost value, allow it to be large
 
+ONE_D%Q_CON_F = ONE_D%Q_CON_F + HTCF*DT_BC_SUB*(ONE_D%TMP_G-0.5_EB*ONE_D%TMP_F)
+
 IF (NWP == 1) THEN
    ONE_D%TMP_F = ONE_D%TMP(1)
    ONE_D%TMP_B = ONE_D%TMP_F
@@ -3168,6 +3168,8 @@ ELSE
    ONE_D%TMP_F  = 0.5_EB*(ONE_D%TMP(0)+ONE_D%TMP(1))
    ONE_D%TMP_B  = 0.5_EB*(ONE_D%TMP(NWP)+ONE_D%TMP(NWP+1))
 ENDIF
+
+ONE_D%Q_CON_F = ONE_D%Q_CON_F - 0.5_EB*HTCF*DT_BC_SUB*ONE_D%TMP_F
 
 ! Clipping for excessively high or low temperatures
 
@@ -3181,6 +3183,9 @@ IF (T_BC_SUB>=DT_BC-TWO_EPSILON_EB) EXIT SUB_TIMESTEP_LOOP
 ONE_D%N_SUBSTEPS = ONE_D%N_SUBSTEPS + 1
 
 ENDDO SUB_TIMESTEP_LOOP
+
+ONE_D%Q_CON_F = ONE_D%Q_CON_F / DT_BC
+ONE_D%HEAT_TRANS_COEF = ONE_D%Q_CON_F/(ONE_D%TMP_G-0.5_EB*(ONE_D%TMP_F_OLD+ONE_D%TMP_F))
 
 ! If any gas massflux is non-zero or the surface temperature exceeds the ignition temperature, set the ignition time
 
