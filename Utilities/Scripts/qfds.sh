@@ -838,6 +838,7 @@ EOF
 EOF
 if [ "$EMAIL" != "" ]; then
     cat << EOF >> $scriptfile
+#PBS -m abe
 #PBS -M $EMAIL
 EOF
 fi
