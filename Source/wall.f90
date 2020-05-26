@@ -2879,7 +2879,6 @@ IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
    ENDDO
 ENDIF
 
-
 ! Adjust the material layer masses and thicknesses
 
 REMESH = .FALSE.
@@ -2968,7 +2967,6 @@ IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
       NWP_NEW = 0
       THICKNESS = 0._EB
 
-      REMESH = .TRUE.
       I = 0
       LAYER_LOOP: DO NL=1,SF%N_LAYERS
 
@@ -2985,7 +2983,7 @@ IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
                SF%STRETCH_FACTOR(NL),SF%CELL_SIZE_FACTOR,SF%N_LAYER_CELLS_MAX(NL),N_LAYER_CELLS_NEW(NL),SMALLEST_CELL_SIZE(NL))
             NWP_NEW = NWP_NEW + N_LAYER_CELLS_NEW(NL)
          ENDIF
-!         IF ( N_LAYER_CELLS_NEW(NL) /= ONE_D%N_LAYER_CELLS(NL)) REMESH = .TRUE.
+         IF ( N_LAYER_CELLS_NEW(NL) /= ONE_D%N_LAYER_CELLS(NL)) REMESH = .TRUE.
 
          THICKNESS = THICKNESS + ONE_D%LAYER_THICKNESS(NL)
          I = I + ONE_D%N_LAYER_CELLS(NL)
@@ -3035,12 +3033,8 @@ IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
                                     ONE_D%X(0:NWP),X_S_NEW(0:NWP_NEW),INT_WGT)
          N_CELLS = MAX(NWP,NWP_NEW)
          CALL INTERPOLATE_WALL_ARRAY(N_CELLS,NWP,NWP_NEW,INT_WGT,ONE_D%TMP(1:N_CELLS))
-!         ONE_D%TMP_F  = 0.5_EB*(ONE_D%TMP(0)+ONE_D%TMP(1))
-!         ONE_D%TMP_B  = 0.5_EB*(ONE_D%TMP(NWP_NEW)+ONE_D%TMP(NWP+1))
-         ONE_D%TMP_F  = ONE_D%TMP(1)
-         ONE_D%TMP_B  = ONE_D%TMP(NWP_NEW)
-!         ONE_D%TMP(0) = 2._EB*ONE_D%TMP_F-ONE_D%TMP(1) !Make sure surface temperature stays the same
-!         ONE_D%TMP(NWP_NEW+1) = ONE_D%TMP(NWP+1)        ! How to deal with back side?
+         ONE_D%TMP(0) = 2._EB*ONE_D%TMP_F-ONE_D%TMP(1) !Make sure surface temperature stays the same
+         ONE_D%TMP(NWP_NEW+1) = ONE_D%TMP(NWP+1)
          CALL INTERPOLATE_WALL_ARRAY(N_CELLS,NWP,NWP_NEW,INT_WGT,Q_S(1:N_CELLS))
          DO N=1,SF%N_MATL
             ML  => MATERIAL(SF%MATL_INDEX(N))
@@ -3167,15 +3161,13 @@ ONE_D%TMP(1:NWP) = MIN(TMPMAX,MAX(TMPMIN,CCS(1:NWP)))
 ONE_D%TMP(0)     =            MAX(TMPMIN,ONE_D%TMP(1)  *RFACF2+QDXKF)  ! Ghost value, allow it to be large
 ONE_D%TMP(NWP+1) =            MAX(TMPMIN,ONE_D%TMP(NWP)*RFACB2+QDXKB)  ! Ghost value, allow it to be large
 
-!IF (NWP == 1) THEN
-!   ONE_D%TMP_F = ONE_D%TMP(1)
-!   ONE_D%TMP_B = ONE_D%TMP_F
-!ELSE
+IF (NWP == 1) THEN
    ONE_D%TMP_F = ONE_D%TMP(1)
-   ONE_D%TMP_B = ONE_D%TMP(NWP)
-!   ONE_D%TMP_F  = 0.5_EB*(ONE_D%TMP(0)+ONE_D%TMP(1))
-!   ONE_D%TMP_B  = 0.5_EB*(ONE_D%TMP(NWP)+ONE_D%TMP(NWP+1))
-!ENDIF
+   ONE_D%TMP_B = ONE_D%TMP_F
+ELSE
+   ONE_D%TMP_F  = 0.5_EB*(ONE_D%TMP(0)+ONE_D%TMP(1))
+   ONE_D%TMP_B  = 0.5_EB*(ONE_D%TMP(NWP)+ONE_D%TMP(NWP+1))
+ENDIF
 
 ! Clipping for excessively high or low temperatures
 
