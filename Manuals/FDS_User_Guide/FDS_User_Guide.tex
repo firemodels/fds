@@ -7164,14 +7164,14 @@ The resulting vegetation temperatures are shown in Fig.~\ref{ground_vegetation_c
 \section{Level Set Model for Wildland Fire Spread}
 \label{info:level_set}
 
-For simulations of wildland fires spanning large areas that cannot be gridded at fine enough resolution to predict fire spread using a physics-based model, there is an empirical model built into FDS based on level sets~\cite{Bova:IJWF2015}. The methodology reproduces in an Eulerian framework the approach used in the Lagrangian-based fire front-tracking model FARSITE~\cite{Finney:FARSITE}. This approach makes use of the Rothermel-Albini~\cite{Rothermel:1972,Albini:1976} surface fire spread rate formulae and the assumption that a surface fire spreading from a point under certain wind, slope and vegetation conditions does so with an ellipse-shaped fire front with, for a given wind speed, a fixed length-to-breadth ratio~\cite{Richards:1990}.
+For simulations of wildland fires spanning large areas that cannot be gridded finely enough to predict fire spread using a physics-based model, there is an empirical model built into FDS based on level sets~\cite{Bova:IJWF2015}. The methodology reproduces in an Eulerian framework the approach used in the Lagrangian-based fire front-tracking model FARSITE~\cite{Finney:FARSITE}. This approach makes use of the Rothermel-Albini~\cite{Rothermel:1972,Albini:1976} surface fire spread rate formulae and the assumption that a surface fire spreading from a point under certain wind, slope and vegetation conditions does so with an ellipse-shaped fire front with, for a given wind speed, a fixed length-to-breadth ratio~\cite{Richards:1990}.
 
 The fire is initiated by specifying a small area to be ignited at a particular time:
 \begin{lstlisting}
-&SURF ID='Ignited Area', VEG_LSET_IGNITE_TIME=1., COLOR='RED' /
+&SURF ID='Ignited Area', VEG_LSET_IGNITE_TIME=0., COLOR='RED' /
 &VENT XB=..., SURF_ID='Ignited Area' /
 \end{lstlisting}
-These lines indicate that a patch of terrain specified using {\ct XB} on the {\ct VENT} line ignites at 1~s, i.e. just after the start of the simulation. If the terrain is constructed using the immersed boundary framework {\ct GEOM}, add the logical parameter {\ct GEOM=T} to the {\ct VENT} line to indicate that the terrain geometry is an immersed boundary and does not conform exactly with the numerical grid. In such a case, the coordinates given by {\ct XB} designate a horizontal patch at the lowest level of the computational domain, and this plane is then projected upwards until it cuts through the terrain surface.
+These lines indicate that a patch of terrain specified using {\ct XB} on the {\ct VENT} line ignites at the start of the simulation. If the terrain is constructed using the immersed boundary framework (i.e. a {\ct GEOM} line), add the logical parameter {\ct GEOM=T} to the {\ct VENT} line to indicate that the terrain geometry is an immersed boundary and does not conform exactly with the numerical grid. In such a case, the coordinates given by {\ct XB} designate a horizontal patch at the lowest level of the computational domain, and this plane is then projected upwards until it cuts through the terrain surface.
 
 There are two options for specifying the surface properties:
 
@@ -7182,15 +7182,11 @@ The parameters for the 13 original Rothermel-Albini fuel models are listed in Ta
 &SURF ID = 'Wet Brush'
       VEG_LSET_COUPLED = .TRUE.
       VEG_LSET_FUEL_INDEX = 5
-      VEG_LSET_M1 = 0.06
-      HRRPUA = 200.
-      RAMP_Q = 'fire' /
+      VEG_LSET_M1 = 0.06 /
 \end{lstlisting}
-The parameter {\ct VEG\_LSET\_COUPLED=T} directs FDS to use the local wind field in its calculation of the fire front trajectory.
+The parameter {\ct VEG\_LSET\_COUPLED=T} directs FDS to use the local wind field in its calculation of the fire front trajectory. This is the default value. This set of inputs invokes fuel model 5, but it also provides you with a way to change the default moisture content of the dead and live fuel components. {\ct M1}, {\ct M10}, and {\ct M100} set the moisture fraction of the 1~h, 10~h, and 100~h dead fuels, and {\ct MLW} and {\ct MLH} set the moisture fraction of the live woody and herbaceous fuels. The default values of these parameters are listed at the bottom of Table~\ref{tbl:Rothermel}.
 
-This set of inputs invokes fuel model 5, but it also provides you with a way to change the default moisture content of the dead and live fuel components. {\ct M1}, {\ct M10}, and {\ct M100} set the moisture fraction of the 1~h, 10~h, and 100~h dead fuels, and {\ct MLW} and {\ct MLH} set the moisture fraction of the live woody and herbaceous fuels. The default values of these parameters are listed at the bottom of Table~\ref{tbl:Rothermel}.
-
-When the fire front arrives at a given surface cell, it begins to burn with a heat release per unit area given by {\ct HRRPUA} in kW/m$^2$. The local heat release rate is typically ramped up and down using {\ct RAMP\_Q}. The local burning rate and duration are function of the vegetation mass per unit area.
+When the fire front arrives at a given surface cell, it burns for a finite duration and with a heat release per unit area provided as part of the fuel model.
 
 \paragraph{Option 2}
 
@@ -7203,9 +7199,9 @@ In this second option, you create your own custom fuel type as follows:
       VEG_LSET_BETA = 0.0041
       VEG_LSET_HT = 0.91
       HRRPUA = 200.
-      RAMP_Q = 'fire' /
+      BURN_DURATION = 20 /
 \end{lstlisting}
-The parameter {\ct VEG\_LSET\_COUPLED=T} directs FDS to use the local wind field in its calculation of the fire front trajectory. {\ct VEG\_LSET\_ROS} is the no-wind, no-slope rate of spread for the given fuel model. {\ct VEG\_LSET\_SIGMA} (m$^{-1}$) and {\ct VEG\_LSET\_BETA} are the average surface to volume ratio ($\sigma$) and packing ratio ($\beta$) of the underlying vegetation. {\ct VEG\_LSET\_HT} (m) is the height of the vegetation. When the fire front arrives at a given surface cell, it begins to burn with a heat release per unit area given by {\ct HRRPUA} in kW/m$^2$. The local heat release rate is typically ramped up and down using {\ct RAMP\_Q}. The local burning rate and duration are function of the vegetation mass per unit area.
+The parameter {\ct VEG\_LSET\_COUPLED=T} directs FDS to use the local wind field in its calculation of the fire front trajectory. {\ct VEG\_LSET\_ROS} is the no-wind, no-slope rate of spread for the given fuel model. {\ct VEG\_LSET\_SIGMA} (m$^{-1}$) and {\ct VEG\_LSET\_BETA} are the average surface to volume ratio ($\sigma$) and packing ratio ($\beta$) of the underlying vegetation. {\ct VEG\_LSET\_HT} (m) is the height of the vegetation. When the fire front arrives at a given surface cell, it begins to burn with a heat release per unit area given by {\ct HRRPUA} in kW/m$^2$ for a period of {\ct BURN\_DURATION}~s. The local burning rate and duration are function of the vegetation mass per unit area.
 
 
 
@@ -7240,6 +7236,8 @@ For all models, the total mineral content $S_{\rm t}=0.056$, the effective miner
 
 \subsection{Simple Test Cases}
 
+\subsubsection{Examples of Uncoupled Level Set Calculations}
+
 Bova et al.~\cite{Bova:IJWF2015} compare the level set calculation that has been implemented in FDS with the identical algorithm in the U.S. Forest Service FARSITE model. The three contour plots in Fig.~\ref{Bova_fig} match those in Figs.~1(a), 1(b), and 4(a) in the paper. The FDS input files, {\ct WUI/Bova\_1a.fds}, {\ct WUI/Bova\_1b.fds}, and {\ct WUI/Bova\_4a.fds} all have the same {\ct SURF} line that defines the vegetation. Note that in these examples, there is no actual fire nor does the level set calculation depend on the local wind field. The purpose of the exercise is simply to test the level set algorithm.
 \begin{lstlisting}
 &SURF ID = 'Custom Grass'
@@ -7256,11 +7254,23 @@ Bova et al.~\cite{Bova:IJWF2015} compare the level set calculation that has been
 \includegraphics[height=2.7in]{SCRIPT_FIGURES/Bova_1b} \\
 \includegraphics[height=2.7in]{SCRIPT_FIGURES/Bova_4a}
 \end{center}
-\caption[Level set test cases]{Level set test cases from Bova et al.~\cite{Bova:IJWF2015}, Figs.~1(a), 1(b), and 4(a).}
+\caption[Bova et al. level set test cases]{Level set test cases from Bova et al.~\cite{Bova:IJWF2015}, Figs.~1(a), 1(b), and 4(a).}
 \label{Bova_fig}
 \end{figure}
 
 \FloatBarrier
+
+\subsubsection{Examples of Coupled Level Set Calculations}
+
+In this example, {\ct WUI/level\_set\_fuel\_model\_1.fds}, a fire is ignited directly in the center of a square patch of flat terrain, $L=1000$~m on a side, with no wind. {\ct VEG\_LSET\_FUEL\_INDEX=1} (Short Grass) is selected as the vegetation type. The simulation is performed on a uniform mesh with $\dx=25$~m grid cells. For this type of vegetation, the mass loss rate is calculated to be $\dot{m}''=0.00955$~kg/m$^2$/s, the heat of combustion is assumed to be $\Delta H=18607$~kJ/kg, and the local duration of burning is calculated to be $\Delta t=6.584$~s. These values are all reported in the file {\ct level\_set\_fuel\_model\_1.out}. After 10~h of simulation, the fire sweeps over the entire domain, consuming $\dot{m}'' L^2 \Delta t \approx 62877$~kg of vegetation. The left hand side of Fig.~\ref{level_set_fuel_model_1_fig} displays the fire intensity (burning rate) after 5~h, and the right hand side displays the integrated mass loss. Note that in this case the rate of spread is ${\rm ROS} \approx 0.03$~m/s, which means that the fire front crosses a single grid cell in approximately $\dx/{\rm ROS} \approx 830$~s, a much greater time period than the vegetation burning time, $\Delta t$. To ensure a relatively smooth fire front and burning rate, the mass loss rate and burning duration are adjusted by dividing and multiplying these values, respectively, by $\dx/{\rm ROS}$.
+
+\begin{figure}[ht]
+\includegraphics[trim=.5in 0 .5in 0, clip, height=2.4in]{SCRIPT_FIGURES/level_set_fuel_model_1.png}
+\includegraphics[height=2.4in]{SCRIPT_FIGURES/level_set_fuel_model_1_mass.pdf}
+\caption[No wind level set test case]{Level set test case for Fuel Model 1.}
+\label{level_set_fuel_model_1_fig}
+\end{figure}
+
 
 \subsection{Using Mapping Software}
 \label{info:earth}
