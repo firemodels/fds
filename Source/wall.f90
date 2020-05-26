@@ -47,7 +47,7 @@ TNOW=CURRENT_TIME()
 
 CALL POINT_TO_MESH(NM)
 
-
+! Compute the temperature TMP_F at all boundary cells, including PYROLYSIS and 1-D heat transfer
 
 CALL THERMAL_BC(T,DT,NM)
 
