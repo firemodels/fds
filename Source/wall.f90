@@ -2880,13 +2880,6 @@ IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
    ENDDO
 ENDIF
 
-! Debug
-!Q_S_TOT = 0._EB
-!DO I=1,NWP
-!   Q_S_TOT = Q_S_TOT + Q_S(I)/RDX_S(I)
-!ENDDO
-!write(*,*) T,'1:',NWP,ONE_D%X(1),0.5_EB*(ONE_D%TMP(0)+ONE_D%TMP(1))-273.15_EB, ONE_D%TMP(1)-273.15_EB
-!write(*,*) T,'1:',NWP,0.5_EB*(ONE_D%TMP(0)+ONE_D%TMP(1))-273.15_EB, ONE_D%TMP(1)-273.15_EB, ONE_D%TMP(2)-273.15_EB
 
 ! Adjust the material layer masses and thicknesses
 
@@ -3072,15 +3065,6 @@ IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
 
 ENDIF
 
-! Debug
-!Q_S_TOT = 0._EB
-!DO I=1,NWP
-!   Q_S_TOT = Q_S_TOT + Q_S(I)/RDX_S(I)
-!ENDDO
-!write(*,*) T,'2:',NWP,ONE_D%X(1),0.5_EB*(ONE_D%TMP(0)+ONE_D%TMP(1))-273.15_EB, ONE_D%TMP(1)-273.15_EB
-!write(*,*) T,'2:',NWP,0.5_EB*(ONE_D%TMP(0)+ONE_D%TMP(1))-273.15_EB, ONE_D%TMP(1)-273.15_EB, ONE_D%TMP(2)-273.15_EB
-!write(101,*) T, Q_S_TOT
-
 ! Calculate thermal properties
 
 ONE_D%K_S = 0._EB
@@ -3184,15 +3168,15 @@ ONE_D%TMP(1:NWP) = MIN(TMPMAX,MAX(TMPMIN,CCS(1:NWP)))
 ONE_D%TMP(0)     =            MAX(TMPMIN,ONE_D%TMP(1)  *RFACF2+QDXKF)  ! Ghost value, allow it to be large
 ONE_D%TMP(NWP+1) =            MAX(TMPMIN,ONE_D%TMP(NWP)*RFACB2+QDXKB)  ! Ghost value, allow it to be large
 
-IF (NWP == 1) THEN
-   ONE_D%TMP_F = ONE_D%TMP(1)
-   ONE_D%TMP_B = ONE_D%TMP_F
-ELSE
+!IF (NWP == 1) THEN
+!   ONE_D%TMP_F = ONE_D%TMP(1)
+!   ONE_D%TMP_B = ONE_D%TMP_F
+!ELSE
    ONE_D%TMP_F = ONE_D%TMP(1)
    ONE_D%TMP_B = ONE_D%TMP(NWP)
 !   ONE_D%TMP_F  = 0.5_EB*(ONE_D%TMP(0)+ONE_D%TMP(1))
 !   ONE_D%TMP_B  = 0.5_EB*(ONE_D%TMP(NWP)+ONE_D%TMP(NWP+1))
-ENDIF
+!ENDIF
 
 ! Clipping for excessively high or low temperatures
 
