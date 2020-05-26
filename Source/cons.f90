@@ -290,23 +290,73 @@ REAL(EB), ALLOCATABLE, DIMENSION(:) :: EVACUATION_Z_OFFSET
 
 ! Miscellaneous real constants
 
-REAL(EB) :: CPOPR,RSC,RPR,TMPA,TMPA4,RHOA,P_INF,RADIATIVE_FRACTION, &
-            CP_GAMMA,GAMMA,GM1OG,U0,V0,W0,H0,GVEC(3),FVEC(3)=0._EB,OVEC(3)=0._EB, &
-            C_SMAGORINSKY=0.2_EB,C_DEARDORFF=0.1_EB,C_VREMAN=0.07_EB,C_RNG=0.2_EB,C_RNG_CUTOFF=10._EB,C_WALE=0.60_EB, &
-            LAPSE_RATE,TEX_ORI(3),KAPPA0, &
-            ASSUMED_GAS_TEMPERATURE,PR_ONTH,MU_AIR_0,CP_AIR_0,PR_AIR,K_AIR_0, &
-            CHARACTERISTIC_VELOCITY,CFL_MAX,CFL_MIN,VN_MAX,VN_MIN,PR,SC,H_V_W,GROUND_LEVEL=0._EB, &
-            LIMITING_DT_RATIO=1.E-4_EB,NOISE_VELOCITY=0.005_EB, &
-            SCALAR_ENERGY_TOLERANCE=1.E-12_EB,DT_MEAN_FORCING=1._EB,DT_MEAN_FORCING_2=30._EB, &
-            TAU_DEFAULT=1._EB,TAU_CHEM=1.E-10_EB,TAU_FLAME=1.E10_EB,SMOKE_ALBEDO=0.3_EB, &
-            Y_WERNER_WENGLE=11.81_EB,PARTICLE_CFL_MAX=1.0_EB,PARTICLE_CFL_MIN=0.8_EB,DELTA_IBM,GRAV=9.80665_EB,&
-            H_V_H2O(0:5000),CHI_R_MIN=0._EB,CHI_R_MAX=1._EB,EVAP_FILM_FAC=1._EB/3._EB,&
-            ORIGIN_LAT=-1.E6_EB,ORIGIN_LON=-1.E6_EB,NORTH_BEARING=0._EB,LATITUDE=10000._EB,GEOSTROPHIC_WIND(2)=0._EB,&
-            DY_MIN_BLOWING=1.E-8_EB
+REAL(EB) :: CPOPR                              !< Specific heat divided by the Prandtl number (J/kg/K)
+REAL(EB) :: RSC                                !< Reciprocal of the Schmidt number
+REAL(EB) :: RPR                                !< Reciprocal of the Prandtl number
+REAL(EB) :: TMPA                               !< Ambient temperature (K)
+REAL(EB) :: TMPA4                              !< Ambient temperature to the fourth power (K^4)
+REAL(EB) :: RHOA                               !< Ambient density (kg/m3)
+REAL(EB) :: P_INF=101325._EB                   !< Ambient pressure at the ground (Pa)
+REAL(EB) :: RADIATIVE_FRACTION                 !< Radiative fraction
+REAL(EB) :: CP_GAMMA                           !< \f$ \frac{\gamma}{\gamma-1} \frac{R}{W_1} \f$
+REAL(EB) :: GAMMA=1.4_EB                       !< Ratio of specific heats, typically 1.4
+REAL(EB) :: GM1OG                              !< \f$ (\gamma-1)/\gamma \f$
+REAL(EB) :: U0                                 !< Wind speed in the \f$ x \f$ direction (m/s)
+REAL(EB) :: V0                                 !< Wind speed in the \f$ y \f$ direction (m/s)
+REAL(EB) :: W0                                 !< Wind speed in the \f$ z \f$ direction (m/s)
+REAL(EB) :: H0                                 !< 0.5_EB*(U0**2+V0**2+W0**2)
+REAL(EB) :: GVEC(3)                            !< Gravity vector (m/s2)
+REAL(EB) :: FVEC(3)=0._EB                      !< Force vector (N/m3)
+REAL(EB) :: OVEC(3)=0._EB                      !< Coriolis vector (1/s)
+REAL(EB) :: C_SMAGORINSKY=0.2_EB               !< Coefficient in turbulence model
+REAL(EB) :: C_DEARDORFF=0.1_EB                 !< Coefficient in turbulence model
+REAL(EB) :: C_VREMAN=0.07_EB                   !< Coefficient in turbulence model
+REAL(EB) :: C_RNG=0.2_EB                       !< Coefficient in turbulence model
+REAL(EB) :: C_RNG_CUTOFF=10._EB                !< Coefficient in turbulence model
+REAL(EB) :: C_WALE=0.60_EB                     !< Coefficient in turbulence model
+REAL(EB) :: LAPSE_RATE                         !< Temperature change with height (K/m)
+REAL(EB) :: TEX_ORI(3)                         !< Origin of the texture map for Smokeview (m)
+REAL(EB) :: KAPPA0                             !< Background gas radiative absorption coefficient (1/m)
+REAL(EB) :: ASSUMED_GAS_TEMPERATURE            !< Gas temperature used in solid phase calculations (K)
+REAL(EB) :: PR_ONTH                            !< Prandtl number to the 1/3 power
+REAL(EB) :: MU_AIR_0=1.8E-5_EB                 !< Dynamic Viscosity of Air at 20 C (kg/m/s)
+REAL(EB) :: PR_AIR=0.7_EB                      !< Prandtl number for Air
+REAL(EB) :: CFL_MAX=1.0_EB                     !< Upper bound of CFL constraint
+REAL(EB) :: CFL_MIN=0.8_EB                     !< Lower bound of CFL constraint
+REAL(EB) :: VN_MAX=1.0_EB                      !< Upper bound of von Neumann constraint
+REAL(EB) :: VN_MIN=0.8_EB                      !< Lower bound of von Neumann constraint
+REAL(EB) :: PR                                 !< Prandtl number
+REAL(EB) :: SC                                 !< Schmidt number
+REAL(EB) :: GROUND_LEVEL=0._EB                 !< Height of the ground, used for establishing atmospheric profiles (m)
+REAL(EB) :: LIMITING_DT_RATIO=1.E-4_EB         !< Ratio of current to initial time step when code is stopped
+REAL(EB) :: NOISE_VELOCITY=0.005_EB            !< Velocity of random noise vectors (m/s)
+REAL(EB) :: DT_MEAN_FORCING=1._EB              !< Time scale used in mean forcing algorithm (s)
+REAL(EB) :: DT_MEAN_FORCING_2=30._EB           !< Time scale used in mean forcing algorithm (s)
+REAL(EB) :: TAU_DEFAULT=1._EB                  !< Default ramp-up time (s)
+REAL(EB) :: TAU_CHEM=1.E-10_EB                 !< Smallest reaction mixing time scale (s)
+REAL(EB) :: TAU_FLAME=1.E10_EB                 !< Largest reaction mixing time scale (s)
+REAL(EB) :: SMOKE_ALBEDO=0.3_EB                !< Parmeter used by Smokeview
+REAL(EB) :: Y_WERNER_WENGLE=11.81_EB           !< Limit of y+ in Werner-Wengle model
+REAL(EB) :: PARTICLE_CFL_MAX=1.0_EB            !< Upper limit of CFL constraint based on particle velocity
+REAL(EB) :: PARTICLE_CFL_MIN=0.8_EB            !< Lower limit of CFL constraint based on particle velocity
+REAL(EB) :: GRAV=9.80665_EB                    !< Acceleration of gravity (m/s2)
+REAL(EB) :: H_V_H2O(0:5000)                    !< Heat of vaporization for water (J/kg)
+REAL(EB) :: CHI_R_MIN=0._EB                    !< Lower bound for radiative fraction
+REAL(EB) :: CHI_R_MAX=1._EB                    !< Upper bound for radiative fraction
+REAL(EB) :: EVAP_FILM_FAC=1._EB/3._EB          !< Factor used in droplet evaporation algorithm
+REAL(EB) :: ORIGIN_LAT=-1.E6_EB                !< Latitude of terrain map
+REAL(EB) :: ORIGIN_LON=-1.E6_EB                !< Longitude of terrain map
+REAL(EB) :: NORTH_BEARING=0._EB                !< North bearing for terrain map
+REAL(EB) :: LATITUDE=10000._EB                 !< Latitude for geostrophic calculation
+REAL(EB) :: GEOSTROPHIC_WIND(2)=0._EB          !< Wind vector (m/s)
+REAL(EB) :: DY_MIN_BLOWING=1.E-8_EB            !< Parameter in blowing algorithm (m)
 
-REAL(EB), PARAMETER :: TMPM=273.15_EB, P_STP=101325._EB,R0=8314.472_EB,R1=1.986257E-03_EB,&
-                       SIGMA=5.670373E-8_EB,K_BOLTZMANN=1.3806488E-23_EB,&
-                       EARTH_OMEGA=7.272205216643040e-05_EB ! [radians/s] = 2*pi/(24*3600)
+REAL(EB), PARAMETER :: TMPM=273.15_EB                       !< Melting temperature of water, conversion factor (K)
+REAL(EB), PARAMETER :: P_STP=101325._EB                     !< Standard pressure (Pa)
+REAL(EB), PARAMETER :: R0=8314.472_EB                       !< Gas constant (J/K/kmol)
+REAL(EB), PARAMETER :: SIGMA=5.670373E-8_EB                 !< Stefan-Boltzmann constant (W/m2/K4)
+REAL(EB), PARAMETER :: K_BOLTZMANN=1.3806488E-23_EB         !< Parameter in soot algorithm
+REAL(EB), PARAMETER :: EARTH_OMEGA=7.272205216643040e-05_EB !< Earth rotation rate [radians/s] = 2*pi/(24*3600)
 
 ! Parameters associated with parallel mode
 
