@@ -838,6 +838,11 @@ NODE_LOOP: DO NN = 1, N_DUCTNODES
                ENDIF
                DN%IN_MESH(NM) = .TRUE.
                MESHES(NM)%VENTS(NV)%NODE_INDEX=NN
+               ! Sets node to VENT center based on XB. This value will be used for Smokeview visualization. These values
+               ! will be modified as needed during the run to reflect the actual area of the VENT that is visible.
+               DN%XYZ(1) = 0.5_EB*(MESHES(NM)%VENTS(NV)%X1_ORIG+MESHES(NM)%VENTS(NV)%X2_ORIG)
+               DN%XYZ(2) = 0.5_EB*(MESHES(NM)%VENTS(NV)%Y1_ORIG+MESHES(NM)%VENTS(NV)%Y2_ORIG)
+               DN%XYZ(3) = 0.5_EB*(MESHES(NM)%VENTS(NV)%Z1_ORIG+MESHES(NM)%VENTS(NV)%Z2_ORIG)
                EXIT NODE_VENT_LOOP
             ENDIF
          ENDDO NODE_VENT_LOOP

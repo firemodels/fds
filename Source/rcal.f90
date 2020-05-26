@@ -1,3 +1,6 @@
+! This file is common to both the RADCAL and the FDS source code repositories. If you change in one location, 
+! please make sure that the change is also made in the other location.
+
 !> \brief Variable defintions specific to RADCAL
 
 MODULE RADCAL_VAR
@@ -178,7 +181,7 @@ INTEGER, PARAMETER :: I_CO=3, I_CO2=1, I_H2O=2, I_N2=14, I_O2=15, I_FV=16, I_C2H
 
 END MODULE RADCAL_VAR
 
-!> \brief The computational routines and band data for RADCAL   
+!> \brief The computational routines and band data for RADCAL
 
 MODULE RADCAL_CALC
 
@@ -194,7 +197,7 @@ PUBLIC INIT_RADCAL,RCALLOC,RCDEALLOC,PLANCK,SUB_RADCAL
 CONTAINS
 
 !> \brief Initializes some RADCAL variables
-   
+
 SUBROUTINE INIT_RADCAL
 
 REAL(EB) :: OMEGA !< Wavenumber (1/cm)
@@ -1879,10 +1882,10 @@ REAL(EB) :: ABCO,FF,LAMBDA,RIN,RIK
 
 LAMBDA = 10000._EB/OMEGA
 
-RIN = 1.6_EB
-RIK = 0.5_EB
-
-!FF = 36.0_EB*PI*RIN*RIK/LAMBDA/((RIN**2-RIK**2+2.0_EB)**2+(2.0_EB*RIN*RIK)**2)
+! H. CHANG, T. T. CHARALAMPOPOULOS, DETERMINATION OF THE WAVELENGTH DEPENDENCE OF REFRACTIVE INDICES OF FLAME SOOT,
+! PROCEEDINGS: MATHEMATICAL AND PHYSICAL SCIENCES 430 (1880) (1990) 577591
+RIN=1.811_EB + 0.1263_EB*log(LAMBDA) + 0.0270_EB*(log(LAMBDA))**2 + 0.0417_EB*(log(LAMBDA))**3;
+RIK=0.5821_EB + 0.1213_EB*log(LAMBDA) + 0.2309_EB*(log(LAMBDA))**2 + 0.0100_EB*(log(LAMBDA))**3;
 
 ! ABSORPTION COEF. IS BASED UPON MEASUREMENTS OF DALZELL AND
 ! SAROFIM
@@ -1895,10 +1898,11 @@ IF (AEROSOL_AL2O3) THEN
       FF = 0.00073_EB
    ENDIF
 ELSE
-   FF         = 7.0_EB/LAMBDA
+    FF = 36.0_EB*PI*RIN*RIK/LAMBDA/((RIN**2-RIK**2+2.0_EB)**2+(2.0_EB*RIN*RIK)**2)
 ENDIF
 ABCO       = FF*SOOT_VOLUME_FRAC*1.E6_EB
 X_PARTICLE = ABCO*PATH_LENGTH_CM*CM_TO_M
+
 
 !------------------------------------------------------------------------------
 RETURN

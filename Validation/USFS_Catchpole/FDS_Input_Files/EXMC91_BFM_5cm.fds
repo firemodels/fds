@@ -36,6 +36,7 @@
       DRAG_COEFFICIENT = 2.8
       SHAPE_FACTOR   = 0.25
       SURFACE_VOLUME_RATIO(1) = 7596.
+      MINIMUM_BURNOUT_TIME = 6.
       THICKNESS(1:2) = 0.102,0.013 /
 
 &VENT SURF_ID='Regular Excelsior', XB=0.0,8.0,-0.5,0.5,0,0 / fire board under vegetation

@@ -25,24 +25,11 @@
       FUEL = 'M1'
       SPEC_ID_NU = 'M1','AIR','PRODUCTS'
       NU = -1,-9.623581,10.623581
-      RADIATIVE_FRACTION=1,
-      RAMP_CHI_R='CHI_R' /
+      RADIATIVE_FRACTION=0.2365 /
 
-&SURF ID = 'FUEL PORT',     MASS_FLUX(1) = 0.040000, RAMP_MF(1) = 'FUEL', SPEC_ID(1) = 'M1',  COLOR = 'RED' /
-&SURF ID = 'OXIDIZER PORT', MASS_FLUX(1) = 0.263158, RAMP_MF(1) = 'AIR',  SPEC_ID(1) = 'AIR', COLOR = 'BLUE'
-                            MASS_FLUX(2) = 0.135911, RAMP_MF(2) = 'N2',   SPEC_ID(2) = 'NITROGEN' /
-
-&RAMP ID = 'FUEL', T =  0.0, F = 1.0 /
-&RAMP ID = 'FUEL', T =  1.0, F = 1.0 /
-
-&RAMP ID = 'AIR', T =  0.0, F = 1.0 /
-&RAMP ID = 'AIR', T =  1.0, F = 1.0 /
-
-&RAMP ID = 'N2',  T =  0.0, F = 0.0 /
-&RAMP ID = 'N2',  T =  1.0, F = 0.0 /
-
-&RAMP ID = 'CHI_R', T =  0.0, F = 0.2365 /
-&RAMP ID = 'CHI_R', T =  1.0, F = 0.2365 /
+&SURF ID = 'FUEL PORT',     MASS_FLUX(1) = 0.040000, SPEC_ID(1) = 'M1',  COLOR = 'RED' /
+&SURF ID = 'OXIDIZER PORT', MASS_FLUX(1) = 0.263158, SPEC_ID(1) = 'AIR', COLOR = 'BLUE'
+                            MASS_FLUX(2) = 0.135911, SPEC_ID(2) = 'NITROGEN' /
 
 &OBST XB = -0.025, 0.025, -0.250, 0.250, -0.020, 0.000, SURF_IDS = 'FUEL PORT','INERT','INERT' /
 &VENT XB = -0.250, 0.250, -0.375, 0.375, -0.020,-0.020, SURF_ID = 'OXIDIZER PORT' /

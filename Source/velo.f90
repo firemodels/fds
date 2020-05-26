@@ -27,7 +27,7 @@ CONTAINS
 
 SUBROUTINE COMPUTE_VISCOSITY(T,NM,APPLY_TO_ESTIMATED_VARIABLES)
 
-USE PHYSICAL_FUNCTIONS, ONLY: GET_VISCOSITY,LES_FILTER_WIDTH_FUNCTION,GET_POTENTIAL_TEMPERATURE,TURBULENT_VISCOSITY_INTERP1D
+USE PHYSICAL_FUNCTIONS, ONLY: GET_VISCOSITY,LES_FILTER_WIDTH_FUNCTION,GET_POTENTIAL_TEMPERATURE
 USE TURBULENCE, ONLY: VARDEN_DYNSMAG,TEST_FILTER,FILL_EDGES,WALL_MODEL,RNG_EDDY_VISCOSITY,WALE_VISCOSITY
 USE MATH_FUNCTIONS, ONLY:EVALUATE_RAMP
 USE COMPLEX_GEOMETRY, ONLY : CCREGION_COMPUTE_VISCOSITY
@@ -36,7 +36,7 @@ INTEGER, INTENT(IN) :: NM
 LOGICAL, INTENT(IN) :: APPLY_TO_ESTIMATED_VARIABLES
 REAL(EB) :: ZZ_GET(1:N_TRACKED_SPECIES),NU_EDDY,DELTA,KSGS,U2,V2,W2,AA,A_IJ(3,3),BB,B_IJ(3,3),&
             DUDX,DUDY,DUDZ,DVDX,DVDY,DVDZ,DWDX,DWDY,DWDZ,MU_EFF,SLIP_COEF,VEL_GAS,VEL_T,RAMP_T,TSI,&
-            VDF,LS,THETA_0,THETA_1,THETA_2,DTDZBAR,WGT,NU_2,NU_3,DX_1,DX_2,DX_3,T_NOW
+            VDF,LS,THETA_0,THETA_1,THETA_2,DTDZBAR,WGT,T_NOW
 REAL(EB), PARAMETER :: RAPLUS=1._EB/26._EB, C_LS=0.76_EB
 INTEGER :: I,J,K,IIG,JJG,KKG,II,JJ,KK,IW,IOR
 REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP=>NULL(),UP=>NULL(),VP=>NULL(),WP=>NULL(), &
@@ -398,43 +398,6 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
                   A_IJ(2,1)=DVDX; A_IJ(2,2)=DVDY; A_IJ(2,3)=DVDZ
                   A_IJ(3,1)=DWDX; A_IJ(3,2)=DWDY; A_IJ(3,3)=DWDZ
                   CALL WALE_VISCOSITY(NU_EDDY,A_IJ,DELTA)
-               CASE(MU_TURB_INTERP)
-                  !! Experimental !!
-                  ! avoids jump in viscosity model from bulk to near-wall cells
-                  DX_1 = 1._EB/WC%ONE_D%RDN
-                  SELECT CASE(IOR)
-                     CASE( 1)
-                        NU_2 = RHO(MIN(IIG+1,IBP1),JJG,KKG)*MU(MIN(IIG+1,IBP1),JJG,KKG)
-                        NU_3 = RHO(MIN(IIG+2,IBP1),JJG,KKG)*MU(MIN(IIG+2,IBP1),JJG,KKG)
-                        DX_2 = DX(MIN(IIG+1,IBP1))
-                        DX_3 = DX(MIN(IIG+2,IBP1))
-                     CASE(-1)
-                        NU_2 = RHO(MAX(IIG-1,0),JJG,KKG)*MU(MAX(IIG-1,0),JJG,KKG)
-                        NU_3 = RHO(MAX(IIG-2,0),JJG,KKG)*MU(MAX(IIG-2,0),JJG,KKG)
-                        DX_2 = DX(MAX(IIG-1,0))
-                        DX_3 = DX(MAX(IIG-2,0))
-                     CASE( 2)
-                        NU_2 = RHO(IIG,MIN(JJG+1,JBP1),KKG)*MU(IIG,MIN(JJG+1,JBP1),KKG)
-                        NU_3 = RHO(IIG,MIN(JJG+2,JBP1),KKG)*MU(IIG,MIN(JJG+2,JBP1),KKG)
-                        DX_2 = DY(MIN(JJG+1,JBP1))
-                        DX_3 = DY(MIN(JJG+2,JBP1))
-                     CASE(-2)
-                        NU_2 = RHO(IIG,MAX(JJG-1,0),KKG)*MU(IIG,MAX(JJG-1,0),KKG)
-                        NU_3 = RHO(IIG,MAX(JJG-2,0),KKG)*MU(IIG,MAX(JJG-2,0),KKG)
-                        DX_2 = DY(MAX(JJG-1,0))
-                        DX_3 = DY(MAX(JJG-2,0))
-                     CASE( 3)
-                        NU_2 = RHO(IIG,JJG,MIN(KKG+1,KBP1))*MU(IIG,JJG,MIN(KKG+1,KBP1))
-                        NU_3 = RHO(IIG,JJG,MIN(KKG+2,KBP1))*MU(IIG,JJG,MIN(KKG+2,KBP1))
-                        DX_2 = DZ(MIN(KKG+1,KBP1))
-                        DX_3 = DZ(MIN(KKG+2,KBP1))
-                     CASE(-3)
-                        NU_2 = RHO(IIG,JJG,MAX(KKG-1,0))*MU(IIG,JJG,MAX(KKG-1,0))
-                        NU_3 = RHO(IIG,JJG,MAX(KKG-2,0))*MU(IIG,JJG,MAX(KKG-2,0))
-                        DX_2 = DZ(MAX(KKG-1,0))
-                        DX_3 = DZ(MAX(KKG-2,0))
-                  END SELECT
-                  CALL TURBULENT_VISCOSITY_INTERP1D(NU_EDDY,NU_2,NU_3,DX_1,DX_2,DX_3)
             END SELECT
             IF (CELL_COUNTER(IIG,JJG,KKG)==0) MU(IIG,JJG,KKG) = 0._EB
             CELL_COUNTER(IIG,JJG,KKG) = CELL_COUNTER(IIG,JJG,KKG) + 1
@@ -978,7 +941,7 @@ MEAN_FORCING_X: IF (MEAN_FORCING(1)) THEN
             ELSEIF (APPLY_SPONGE_LAYER(-1) .AND. I>IBAR-SPONGE_CELLS) THEN
                FVX(I,J,K) = FVX(I,J,K) - (UBAR-UU(I,J,K))/DT_LOC
             ELSE
-               FVX(I,J,K) = FVX(I,J,K) - DU_FORCING
+               FVX(I,J,K) = FVX(I,J,K) - DU_FORCING - (UBAR-UU(I,J,K))/DT_MEAN_FORCING_2
             ENDIF
          ENDDO
       ENDDO
@@ -1018,7 +981,7 @@ MEAN_FORCING_Y: IF (MEAN_FORCING(2)) THEN
             ELSEIF (APPLY_SPONGE_LAYER(-2) .AND. J>JBAR-SPONGE_CELLS) THEN
                FVY(I,J,K) = FVY(I,J,K) - (VBAR-VV(I,J,K))/DT_LOC
             ELSE
-               FVY(I,J,K) = FVY(I,J,K) - DV_FORCING
+               FVY(I,J,K) = FVY(I,J,K) - DV_FORCING - (VBAR-VV(I,J,K))/DT_MEAN_FORCING_2
             ENDIF
          ENDDO
       ENDDO
@@ -1058,7 +1021,7 @@ MEAN_FORCING_Z: IF (MEAN_FORCING(3)) THEN
             ELSEIF (APPLY_SPONGE_LAYER(-3) .AND. K>KBAR-SPONGE_CELLS) THEN
                FVZ(I,J,K) = FVZ(I,J,K) - (WBAR-WW(I,J,K))/DT_LOC
             ELSE
-               FVZ(I,J,K) = FVZ(I,J,K) - DW_FORCING
+               FVZ(I,J,K) = FVZ(I,J,K) - DW_FORCING - (WBAR-WW(I,J,K))/DT_MEAN_FORCING_2
             ENDIF
          ENDDO
       ENDDO
@@ -1927,9 +1890,9 @@ USE COMPLEX_GEOMETRY, ONLY: CCIBM_VELOCITY_BC
 REAL(EB), INTENT(IN) :: T
 INTEGER, INTENT(IN) :: NM
 LOGICAL, INTENT(IN) :: APPLY_TO_ESTIMATED_VARIABLES
-REAL(EB) :: MUA,TSI,WGT,T_NOW,RAMP_T,OMW,MU_WALL,RHO_WALL,SLIP_COEF,VEL_T,UBAR,VBAR,WBAR, &
+REAL(EB) :: MUA,TSI,WGT,T_NOW,RAMP_T,OMW,MU_WALL,RHO_WALL,SLIP_COEF,VEL_T, &
             UUP(2),UUM(2),DXX(2),MU_DUIDXJ(-2:2),DUIDXJ(-2:2),PROFILE_FACTOR,VEL_GAS,VEL_GHOST, &
-            MU_DUIDXJ_USE(2),DUIDXJ_USE(2),VEL_EDDY,U_TAU,Y_PLUS,DUMMY
+            MU_DUIDXJ_USE(2),DUIDXJ_USE(2),VEL_EDDY,U_TAU,Y_PLUS
 INTEGER :: I,J,K,NOM(2),IIO(2),JJO(2),KKO(2),IE,II,JJ,KK,IEC,IOR,IWM,IWP,ICMM,ICMP,ICPM,ICPP,IC,ICD,ICDO,IVL,I_SGN,IS, &
            VELOCITY_BC_INDEX,IIGM,JJGM,KKGM,IIGP,JJGP,KKGP,SURF_INDEXM,SURF_INDEXP,ITMP,ICD_SGN,ICDO_SGN, &
            BOUNDARY_TYPE_M,BOUNDARY_TYPE_P,IS2,IWPI,IWMI,VENT_INDEX
@@ -2167,7 +2130,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
             VENT_INDEX = MAX(WCM%VENT_INDEX,WCP%VENT_INDEX)
             VT => VENTS(VENT_INDEX)
 
-            WIND_NO_WIND_IF: IF (.NOT.ANY(MEAN_FORCING)) THEN  ! For regular OPEN boundary, (free-slip) BCs
+         !  WIND_NO_WIND_IF: IF (.NOT.ANY(MEAN_FORCING)) THEN  ! For regular OPEN boundary, (free-slip) BCs
 
                SELECT CASE(IEC)
                   CASE(1)
@@ -2187,31 +2150,31 @@ EDGE_LOOP: DO IE=1,N_EDGES
                      IF (JJ==JBAR .AND. IOR==-2) UU(II,JBP1,KK) = UU(II,JBAR,KK)
                END SELECT
 
-            ELSE WIND_NO_WIND_IF  ! For wind, use prescribed far-field velocity all around
+         !  ELSE WIND_NO_WIND_IF  ! For wind, use prescribed far-field velocity all around
 
-               UBAR = U0*EVALUATE_RAMP(T,DUMMY,I_RAMP_U0_T)*EVALUATE_RAMP(ZC(KK),DUMMY,I_RAMP_U0_Z)
-               VBAR = V0*EVALUATE_RAMP(T,DUMMY,I_RAMP_V0_T)*EVALUATE_RAMP(ZC(KK),DUMMY,I_RAMP_V0_Z)
-               WBAR = W0*EVALUATE_RAMP(T,DUMMY,I_RAMP_W0_T)*EVALUATE_RAMP(ZC(KK),DUMMY,I_RAMP_W0_Z)
+         !     UBAR = U0*EVALUATE_RAMP(T,DUMMY,I_RAMP_U0_T)*EVALUATE_RAMP(ZC(KK),DUMMY,I_RAMP_U0_Z)
+         !     VBAR = V0*EVALUATE_RAMP(T,DUMMY,I_RAMP_V0_T)*EVALUATE_RAMP(ZC(KK),DUMMY,I_RAMP_V0_Z)
+         !     WBAR = W0*EVALUATE_RAMP(T,DUMMY,I_RAMP_W0_T)*EVALUATE_RAMP(ZC(KK),DUMMY,I_RAMP_W0_Z)
 
-               SELECT CASE(IEC)
-                  CASE(1)
-                     IF (JJ==0    .AND. IOR== 2) WW(II,0,KK)    = WBAR
-                     IF (JJ==JBAR .AND. IOR==-2) WW(II,JBP1,KK) = WBAR
-                     IF (KK==0    .AND. IOR== 3) VV(II,JJ,0)    = VBAR
-                     IF (KK==KBAR .AND. IOR==-3) VV(II,JJ,KBP1) = VBAR
-                  CASE(2)
-                     IF (II==0    .AND. IOR== 1) WW(0,JJ,KK)    = WBAR
-                     IF (II==IBAR .AND. IOR==-1) WW(IBP1,JJ,KK) = WBAR
-                     IF (KK==0    .AND. IOR== 3) UU(II,JJ,0)    = UBAR
-                     IF (KK==KBAR .AND. IOR==-3) UU(II,JJ,KBP1) = UBAR
-                  CASE(3)
-                     IF (II==0    .AND. IOR== 1) VV(0,JJ,KK)    = VBAR
-                     IF (II==IBAR .AND. IOR==-1) VV(IBP1,JJ,KK) = VBAR
-                     IF (JJ==0    .AND. IOR== 2) UU(II,0,KK)    = UBAR
-                     IF (JJ==JBAR .AND. IOR==-2) UU(II,JBP1,KK) = UBAR
-               END SELECT
+         !     SELECT CASE(IEC)
+         !        CASE(1)
+         !           IF (JJ==0    .AND. IOR== 2) WW(II,0,KK)    = WBAR
+         !           IF (JJ==JBAR .AND. IOR==-2) WW(II,JBP1,KK) = WBAR
+         !           IF (KK==0    .AND. IOR== 3) VV(II,JJ,0)    = VBAR
+         !           IF (KK==KBAR .AND. IOR==-3) VV(II,JJ,KBP1) = VBAR
+         !        CASE(2)
+         !           IF (II==0    .AND. IOR== 1) WW(0,JJ,KK)    = WBAR
+         !           IF (II==IBAR .AND. IOR==-1) WW(IBP1,JJ,KK) = WBAR
+         !           IF (KK==0    .AND. IOR== 3) UU(II,JJ,0)    = UBAR
+         !           IF (KK==KBAR .AND. IOR==-3) UU(II,JJ,KBP1) = UBAR
+         !        CASE(3)
+         !           IF (II==0    .AND. IOR== 1) VV(0,JJ,KK)    = VBAR
+         !           IF (II==IBAR .AND. IOR==-1) VV(IBP1,JJ,KK) = VBAR
+         !           IF (JJ==0    .AND. IOR== 2) UU(II,0,KK)    = UBAR
+         !           IF (JJ==JBAR .AND. IOR==-2) UU(II,JBP1,KK) = UBAR
+         !     END SELECT
 
-            ENDIF WIND_NO_WIND_IF
+         !  ENDIF WIND_NO_WIND_IF
 
             IF (IWM/=0 .AND. IWP/=0) THEN
                CYCLE EDGE_LOOP  ! Do no further processing of this edge if both cell faces are OPEN

@@ -661,7 +661,7 @@ To confirm the speedup provided by OpenMP, a series of test cases\footnote{The i
 
 Diagnostics for a given calculation are written into a file called {\ct CHID.out}. The current simulation time and time step is written here, so you can see how far along the program has progressed. At any time during a calculation, Smokeview can be run and the progress can be checked visually.
 
-By default, the diagnostics in the {\ct CHID.out} file are verbose.  When running large MPI jobs it may be advantageous to quiet this output, which is all written by MPI process 0.  To do this, add
+By default, the diagnostics in the {\ct CHID.out} file are verbose. By default, its value is {\ct .FALSE.} for jobs involving 32 Meshes or less, and {\ct .TRUE.} for bigger numbers. When running large MPI jobs it may be advantageous to quiet this output, which is all written by MPI process 0.  To do this, add
 \begin{lstlisting}
 &DUMP SUPPRESS_DIAGNOSTICS=.TRUE. /
 \end{lstlisting}
@@ -2564,7 +2564,7 @@ where $\hbox{Nu}$ is the Nusselt number, $k$ is the thermal conductivity of the 
 
 \subsubsection{Heat Transfer with Blowing}
 
-During pyrolysis of a solid or evaporation of a liquid the mass transfer off the surface generats a blowing velocity that alters the thermal and momentum boundary layers, thus affecting the heat and mass transfer coefficients.  For a surface with blowing, consider using the correlations discussed in Sazhin \cite{Sazhin:2006} with the Spalding mass transfer corrections \cite{Spalding:1}.  These may be activated by setting {\ct HEAT\_TRANSFER\_MODEL} to {\ct 'BLOWING PLATE'} or {\ct 'BLOWING SPHERE'} as appropriate on the {\ct SURF} line.  Note that for the {\ct 'BLOWING SPHERE'} the time dependent {\ct THICKNESS} of the surface is used in computing the Reynolds number.  For {\ct 'BLOWING PLATE'} the length scale for the Reynolds number is the usual {\ct CONVECTION\_LENGTH\_SCALE} set on the {\ct SURF} line.
+During pyrolysis of a solid or evaporation of a liquid the mass transfer off the surface generats a blowing velocity that alters the thermal and momentum boundary layers, thus affecting the heat and mass transfer coefficients.  For a surface with blowing, consider using the correlations discussed in Sazhin \cite{Sazhin:2006} with the Spalding mass transfer corrections \cite{Spalding:1}.  These may be activated by setting {\ct BLOWING=T} on the {\ct SURF} line.  Note that for {\ct GEOMETRY='SPHERICAL'} or {\ct GEOMETRY='CYLINDRICAL'} used together with {\ct BLOWING=T} the time dependent {\ct THICKNESS} of the surface is used in computing the Reynolds number.  For {\ct GEOMETRY='CARTESIAN'} and {\ct BLOWING=T} the length scale for the Reynolds number is the usual {\ct CONVECTION\_LENGTH\_SCALE} set on the {\ct SURF} line.
 
 
 \subsection{Special Topic: Adiabatic Surfaces}
@@ -3225,16 +3225,15 @@ In this example, {\ct 'ETHANOL'} is a {\em known} species; that is, it is listed
 
 \subsubsection{Heat and Mass Transfer with Blowing}
 
-To invoke the heat and mass transfer relationships from \cite{Sazhin:2006} for a flat plate, set {\ct GEOMETRY} and {\ct HEAT\_TRANSFER\_MODEL} to {\ct `BLOWING PLATE`} on the {\ct SURF} line.  For example,
-
+To invoke the heat and mass transfer relationships from \cite{Sazhin:2006}, set {\ct BLOWING=T} on the {\ct SURF} line.  For example,
 \begin{lstlisting}
 &SURF ID        = 'ETHANOL POOL'
       COLOR     = 'YELLOW'
       MATL_ID   = 'ETHANOL LIQUID'
       THICKNESS = 0.1
-      GEOMETRY  = 'BLOWING PLATE'
-      HEAT_TRANSFER_MODEL = 'BLOWING PLATE' /
+      BLOWING   = T /
 \end{lstlisting}
+Note that the default {\ct GEOMETRY} is {\ct 'CARTESIAN'} in which case the length scale used in the Reynolds number is taken from the {\ct 'CONVECTION\_LENGTH\_SCALE'} [default 1 m] on {\ct SURF}.  If the {\ct GEOMETRY} is set to {\ct 'SPHERICAL'} or {\ct 'CYLINDRICAL'}, then the time-dependent {\ct THICKNESS} is used as the radius, and the diameter is then used to compute the Reynolds number in the Sherwood and Nusselt correlations.
 
 
 \subsection{Fuel Burnout}
@@ -3246,12 +3245,15 @@ The thermal properties of a solid or liquid fuel determine the length of time fo
 However, each type of pyrolysis model handles fuel burnout in a slightly different way. These differences will be highlighted in the individual sections below.
 
 \subsubsection{Solid Fuel Burnout When the Burning Rate is Specified}
+\label{info:BURN_DURATION}
 
 If you {\em specify} the burning rate using {\ct HRRPUA} (Heat Release Rate Per Unit Area) or {\ct MLRPUA} (Mass Loss Rate Per Unit Area), the solid surface will continue to burn at the specified rate indefinitely with no fuel burnout. You may use {\ct RAMP\_Q} to stop the burning at a desired time. You can estimate this ``burnout time'' for a surface using the heat of combustion, $\Delta H$, material density, $\rho_{\rm s}$, material thickness, $\delta_{\rm s}$, and {\ct HRRPUA}, $\dq_{\rm f}''$:
 \be
    t_{\rm b} = \frac{\rho_{\rm s} \, \delta_{\rm s} \, \Delta H}{\dq''_{\rm f}}
 \ee
 The burnout time is not calculated and applied automatically because there are instances where the underlying solid is not considered fuel; that is, the burning rate and duration are not determined by the composition of the solid surface.
+
+An alternative to ramping the HRR up and down is to specify {\ct BURN\_DURATION} (s) on the {\ct SURF} line. This is the time duration after ignition when the fire will extinguish. The default value of this parameter is a very large number, meaning that by default a fire with a specified HRR will burn indefinitely.
 
 
 \subsubsection{Solid Fuel Burnout When the Burning Rate is Not Specified}
@@ -4096,7 +4098,7 @@ The pressure zone leakage approach is intended to capture the bulk leakage that 
 &SURF ID='LEAKY EXTERIOR WALL',..., LEAK_PATH=1,0 /
 &SURF ID='LEAKY INTERIOR WALL',..., LEAK_PATH=1,2 /
 \end{lstlisting}
-The first line designates a region of the computational domain to be Pressure Zone~1. Note that the order of the {\ct ZONE} lines is important; that is, the order implicitly defines Zone~1, Zone~2, etc. Zone 0 is by default the ambient pressure exterior. In this example, a leak exists between Zone~1 and the exterior Zone~0, and the area of the leak is 0.0001~m$^2$ (1 cm by 1 cm hole, for example). Zone~2 leaks to Zone~1 (and vice versa) with a leak area of 0.0002~m$^2$. Zone~2 also leaks to the outside with an area of 0.0003~m$^2$. Note that zones need not be physically connected for a leak to occur, but in each zone, except for the exterior, there must be some surface with a designated {\ct LEAK\_PATH}. Here, in Zones~1 and 2 there are surfaces defined by both {\ct 'LEAKY EXTERIOR WALL'} and {\ct 'LEAKY INTERIOR WALL'} so as to provide a surface over which to apply the leakage. Leakage is uniformly distributed over all of the solid surfaces assigned the {\ct LEAK\_PATH}. The order of the two pressure zones designated by {\ct LEAK\_PATH} is unimportant, and the solid obstructions where the leakage is applied need not form a boundary between the two zones.
+The first line designates a region of the computational domain to be Pressure Zone~1. Note that the order of the {\ct ZONE} lines is important; that is, the order implicitly defines Zone~1, Zone~2, etc. Zone 0 is by default the ambient pressure exterior. In this example, a leak exists between Zone~1 and the exterior Zone~0, and the area of the leak is 0.0001~m$^2$ (1 cm by 1 cm hole, for example). Zone~2 leaks to Zone~1 (and vice versa) with a leak area of 0.0002~m$^2$. Zone~2 also leaks to the outside with an area of 0.0003~m$^2$. Note that zones need not be physically connected for a leak to occur, but in each zone, except for the exterior, there must be some surface with a designated {\ct LEAK\_PATH}. Here, in Zones~1 and 2 there are surfaces defined by both {\ct 'LEAKY EXTERIOR WALL'} and {\ct 'LEAKY INTERIOR WALL'} so as to provide a surface over which to apply the leakage. Leakage is uniformly distributed over all of the solid surfaces assigned the {\ct LEAK\_PATH}. The order of the two pressure zones designated by {\ct LEAK\_PATH} is unimportant, and the solid obstructions where the leakage is applied need not form a boundary between the two zones. Note that {\ct LEAK\_PATH\_ID} can be used instead of {\ct LEAK\_PATH}. To use {\ct LEAK\_PATH\_ID} provide the {\ct ID} for the two {\ct ZONES} where specifying {\ct 'AMBIENT'} indicates Zone 0.
 
 The volume flow, $\dot{V}$, through a leak of area $A_{\rm L}$ is given by
 \be  \dot{V}_{\rm leak} = A_{\rm L} \; \hbox{sign} (\Delta p) \; \sqrt{2 \frac{ | \Delta p |}{\rho_\infty}} \ee
@@ -5884,7 +5886,7 @@ The radiative properties of water and fuel droplets are determined automatically
 &TABL ID='radtab', TABLE_DATA= 5.0,1.33,0.002  /
 &TABL ID='radtab', TABLE_DATA=10.0,1.33,0.001  /
 \end{lstlisting}
-For calculating the absorption of thermal radiation by particles, FDS uses a running average of particle temperature and density. The {\ct RUNNING\_AVERAGE\_FACTOR} is set on the {\ct PART} line, and its default value is 0.5 for liquid droplets and 0 for solid particles. The value of 0 indicates that no running average is used.
+For calculating the absorption of thermal radiation by particles, FDS uses a running average of particle temperature and density. The {\ct RUNNING\_AVERAGE\_FACTOR} is set on the {\ct PART} line, and its default value is 0.5 for liquid droplets and 0 for solid particles. The value of 0 indicates that no running average is used. Similarly, the parameter {\ct RUNNING\_AVERAGE\_FACTOR\_WALL}, also set on the {\ct PART} line, controls the running average of droplet or particle mass on solid surfaces. Its defaults are the same as for {\ct RUNNING\_AVERAGE\_FACTOR}.
 
 
 \subsection{Size Distribution}
@@ -6024,6 +6026,32 @@ The absorption and emission of thermal radiation by a group of solid particles i
 \ee
 where $C_{\rm s}$ is the shape factor (ratio of cross sectional area to surface area) of the class of particles, $A_{\rm p,s}$ is the surface area of the particle, and $V$ is the volume of the grid cell. You can specify the {\ct SHAPE\_FACTOR} of a class of particles on the {\ct PART} line. The default value is that of a sphere, 0.25.
 
+
+\subsection{Size Distribution}
+\label{info:solid_particle_size_distribution}
+\label{hot_rods}
+
+By default, solid particles of a given class are monodisperse; that is, have the same initial size which is specified via the {\ct SURF} line that is designated on the {\ct PART} line. However, it is possible to specify a distribution for the diameter of solid cylinders and spheres. Consider a case where you have a collection of cylindrical wooden rods whose diameters are uniformly distributed between 4000~$\mu$m and 6000~$\mu$m:
+\begin{lstlisting}
+&SURF ID='rod', MATL_ID='...', THICKNESS=0.0025, LENGTH=0.02, GEOMETRY='CYLINDRICAL' /
+&PART ID='rods', SURF_ID='rod', ..., MONODISPERSE=F, CNF_RAMP_ID='dist', N_STRATA=1 /
+&RAMP ID='dist', T=4000., F=0. /
+&RAMP ID='dist', T=6000., F=1. /
+\end{lstlisting}
+The material properties of the rods are specified via the {\ct MATL} line (not shown). The nominal {\rm radius} of the rods is given by the parameter {\ct THICKNESS} (m) on the {\ct SURF} line, but the distribution of the rod {\em diameters} is specified by the parameter {\ct CNF\_RAMP\_ID} (Cumulative Number Fraction) on the {\ct PART} line. The {\ct RAMP} lines designate the cumulative distribution function of the rod {\em diameters}, where the pairs ({\ct T},{\ct F}) denote a uniform distribution between 4000~$\mu$m and 6000~$\mu$m. Note that the units of the distribution are $\mu$m, not m. The parameter {\ct N\_STRATA} indicates the number of bins sub-dividing the diameter range, which is set to 1 here because the range is relatively small compared to typical liquid droplet size distributions.
+
+Following is an example of how to apply a distribution of solid particles. In the example case called {\ct WUI/hot\_rods.fds}, $L=0.02$~m long wooden rods whose radii are uniformly distributed between $r=0.002$~m and $r=0.003$~m ($f(r)=1000, \; 0.002<r<0.003; \; f(r)=0$ elsewhere) are poured onto a hot (800~$^\circ$C) floor and burned. The original density of the material is $\rho_{\rm p}=440$~kg/m$^3$. In total, 4000 rods are ejected from a small vent over the course of 10~s. The total mass is
+\be
+   m=4000 \times \pi \overline{r^2} L \rho_{\rm p} \approx 0.7 \; \hbox{kg} \quad ; \quad \overline{r^2}=\int_{0.002}^{0.003} r^2 f(r) \d r \approx 6.333 \times 10^{-6}
+\ee
+Figure~\ref{hot_rods_image} displays the distribution of radii and the mass of rods as a function of time. Note that 8~\% of the mass remains as char.
+
+\begin{figure}[ht]
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/hot_rods_dist}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/hot_rods_mass}
+\caption[Results of the {\ct hot\_rods} test case]{(Left) Distribution of rod diameters. (Right) Total mass of rods as a function of time.}
+\label{hot_rods_image}
+\end{figure}
 
 
 \subsection{Splitting Particles}
@@ -6395,13 +6423,9 @@ The expected HRR curve is:
 
 
 
-\chapter{Earth, Wind and Fire}
+\chapter{Wind and Atmospheric Stratification}
 
-This chapter describes techniques for modeling fires outside of buildings, including the effects of wind and the atmospheric boundary layer.
-
-Most of the parameters that describe the atmosphere are entered on a single namelist line called {\ct WIND}. This namelist group is new starting with FDS version 6.6.0. Previous versions of FDS used the {\ct MISC} line for parameters related to wind and atmospheric conditions. There are three ways to specify a wind in FDS. The preferred method, originally implemented in FDS version 6.6.0, is to model the wind and corresponding temperature profile using Monin-Obukhov similarity theory (Section~\ref{info:WIND}). A second, more complicated method, is to specify a uniform horizontal forcing function and allow the wind field to develop naturally. This has proven more useful in wind tunnel applications than for natural winds (Section~\ref{info:force_vector}). The third method, which has traditionally been employed in older versions of FDS, is to create essentially a ``wall of wind'' where an entire side of the computational domain is turned into a giant fan blowing air laterally. This is the least preferred method of creating a wind (Section~\ref{info:wall_of_wind}).
-
-Wildland fires can be modeled in a number of different ways in FDS. The most common technique is to use Lagrangian particles that represent leaves, grasses, shrubbery, etc., as described in Section~\ref{pine_needles}.
+Most of the parameters that describe the atmosphere are entered on a single namelist line called {\ct WIND}. There are three ways to specify a wind in FDS. The preferred method is to model the wind and corresponding temperature profile using Monin-Obukhov similarity theory (Section~\ref{info:WIND}). A second, more complicated method, is to specify a uniform horizontal forcing function and allow the wind field to develop naturally. This has proven more useful in wind tunnel applications than for natural winds (Section~\ref{info:force_vector}). The third method, which has traditionally been employed in older versions of FDS, is to create essentially a ``wall of wind'' where an entire side of the computational domain is turned into a giant fan blowing air laterally. This is the least preferred method of creating a wind (Section~\ref{info:wall_of_wind}).
 
 
 \section{Wind Method 1: Monin-Obukhov Similarity}
@@ -6508,7 +6532,7 @@ The side boundaries of the domain can be set either to {\ct 'OPEN'} or {\ct 'PER
 \subsubsection{Example Wind Simulation}
 \label{wind_example}
 
-The input files called {\ct wind\_example.fds} and {\ct wind\_example\_32.fds} in the samples folder called \linebreak[4]{\ct Atmospheric\_Effects} demonstrate wind functionality. The first case uses 8 meshes; the second 32. The computational domain is a flat landscape that is 1~km by 1~km by 100~m high. There are various rectangular blocks scattered about to represent buildings. The wind speed varies with height as shown in the right hand plot of Fig.~\ref{wind_profiles}. The wind also turns a full 360$^\circ$ in 50~s, starting and ending in the westerly direction (270$^\circ$). This turn of the wind is not realistic, but this case is intended to test the ramp and mean forcing functionality. The plots in Fig.~\ref{wind_example_fig} display some results of the simulation. On the left is a plot showing the mean velocity components of the simulated wind field compared to the specified components. Notice that the simulated wind field lags the specified field by roughly 1~s because the relaxation parameter {\ct DT\_MEAN\_FORCING} is set to 1~s by default. The right hand plot of Fig.~\ref{wind_example_fig} displays the specified vertical wind speed profile compared to the computed time average profile. The two profiles should be the same because FDS is ``forcing'' the simulated vertical wind speed profile averaged over the entire domain to match the user-specified profile.
+The input files called {\ct wind\_example.fds} and {\ct wind\_example\_32.fds} in the samples folder called \linebreak[4]{\ct Atmospheric\_Effects} demonstrate wind functionality. The first case uses 8 meshes; the second 32. The computational domain is a flat landscape that is 1~km by 1~km by 100~m high. There are various rectangular blocks scattered about to represent buildings. The wind speed varies with height as shown in the right hand plot of Fig.~\ref{wind_profiles}. The wind also turns a full 360$^\circ$ in 50~s, starting and ending in the westerly direction (270$^\circ$). This turn of the wind is not realistic, but this case is intended to test the ramp and mean forcing functionality. The plots in Fig.~\ref{wind_example_fig} display some results of the simulation. On the left is a plot showing the mean velocity components of the simulated wind field compared to the specified components. The right hand plot of Fig.~\ref{wind_example_fig} displays the specified vertical wind speed profile compared to the computed time average profile. The two profiles should be the same because FDS is ``forcing'' the simulated vertical wind speed profile averaged over the entire domain to match the user-specified profile.
 
 \begin{figure}[ht]
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/wind_example_time}
@@ -6521,16 +6545,30 @@ The input files called {\ct wind\_example.fds} and {\ct wind\_example\_32.fds} i
 \subsection{Temporal and Spatial Variation of the Wind}
 \label{info:wind_ramps}
 
-The velocity components {\ct U0}, {\ct V0}, and {\ct W0} (or the velocity magnitude, {\ct SPEED}) can be made functions of time and/or height using the {\ct RAMP} functions: {\ct RAMP\_DIRECTION}, {\ct RAMP\_U0\_T}, {\ct RAMP\_V0\_T}, or {\ct RAMP\_W0\_T} to vary the wind direction or its velocity components with time; and {\ct RAMP\_U0\_Z}, {\ct RAMP\_V0\_Z}, and {\ct RAMP\_W0\_Z} to vary the velocity components with height. For example,
+The wind {\ct SPEED} and {\ct DIRECTION} can be made a function of time and/or height using {\ct RAMP} functions. With respect to time, consider the following lines of input:
 \begin{lstlisting}
-&RAMP ID='t-ramp', T=  0., F=0. /
-&RAMP ID='t-ramp', T=100., F=1. /
+&WIND SPEED=1., RAMP_SPEED='spd', RAMP_DIRECTION='dir' /
 
+&RAMP ID='dir', T=   0, F=300 /
+&RAMP ID='dir', T= 600, F=330 /
+&RAMP ID='dir', T=1200, F=350 /
+.
+.
+&RAMP ID='spd', T=   0, F=2.8 /
+&RAMP ID='spd', T= 600, F=3.1 /
+&RAMP ID='spd', T=1200, F=3.5 /
+.
+.
+\end{lstlisting}
+These lines direct FDS to vary the wind speed and direction according to the {\ct RAMP} functions {\ct 'spd'} and {\ct 'dir'}, respectively. The parameter {\ct T} is the time in s. For the direction ramp function, {\ct F} represents the direction angle in degrees from the north (positive $y$ direction). For the speed ramp function, {\ct F} represents a multiplier of the base {\ct SPEED}, which in this case is unity. An alternative to specifying the wind speed and direction is to specify the velocity components, ({\ct U0},{\ct V0}) separately, along with time ramps {\ct RAMP\_U0\_T} and {\ct RAMP\_V0\_T}.
+
+You can also vary the wind velocity components with height using the ramp functions {\ct RAMP\_U0\_Z}, {\ct RAMP\_V0\_Z}, and {\ct RAMP\_W0\_Z}.
+\begin{lstlisting}
 &RAMP ID='z-ramp', Z=  0., F=1.0 /
 &RAMP ID='z-ramp', Z=200., F=1.5 /
 &RAMP ID='z-ramp', Z=500., F=1.8 /
 \end{lstlisting}
-The parameter {\ct F} represents the fraction of the specified velocity component as a function of time {\ct T} (s) or height {\ct Z} (m). Note that if you use Monin-Obukhov similarity parameters, you need not specify the vertical profile of the wind. It will be calculated automatically.
+The parameter {\ct Z} represents the height (m) and {\ct F} the fraction of the given velocity component value. Note that if you use Monin-Obukhov similarity parameters, you should not specify the vertical profile of the wind. It will be calculated automatically.
 
 \subsection{Aerodynamic Roughness}
 \label{aerodynamic_roughness}
@@ -6566,13 +6604,13 @@ There is no sense of ``indoor'' or ``outdoor'' in an FDS simulation; there are o
 
 The process of steering the solution of the mass, momentum, and energy equations to match wind speed and direction gathered at random weather stations is known as \emph{data assimilation}~\cite{Kalnay:2003}. FDS uses a relatively simple data assimilation technique, a method known as \emph{nudging}, where you add a forcing term to the momentum equation to ``nudge'' the flow in the direction of the specified wind. When you specify a wind {\ct SPEED} on the {\ct WIND} line, FDS automatically drives the mean velocity components toward the desired values by adding a forcing term to the momentum equation. For example, the $u$ component equation is modified as follows:
 \be
-   \dod{u}{t} + \ldots = \frac{u_0(z,t)-\overline{u}(z,t)}{\tau} \label{mean_forcing_u}
+   \dod{u}{t} + \ldots = \frac{u_0(z,t)-\overline{u}(z,t)}{\tau_1} + \frac{u_0(z,t)-u(\bx,t)}{\tau_2}  \label{mean_forcing_u}
 \ee
-Here, $u(\bx,t)$ is the computed velocity component, $u_0$ is the specified wind field component that can vary with height and time, and $\overline{u}$ is the average of the computed velocity component at the height $z$. The relaxation time scale, $\tau$, is an input parameter called {\ct DT\_MEAN\_FORCING} whose default value is 1~s. The shorter this time scale, the faster the flow field will ``catch up'' to the mean wind, but at the expense of possibly washing out important flow structures. Try several values of this time scale for your particular simulation to determine what is appropriate for your case. There is no firm guidance in the atmospheric modeling literature.
+Here, $u(\bx,t)$ is the computed velocity component, $u_0$ is the specified wind field component that can vary with height and time, and $\overline{u}$ is the average of the computed velocity component at the height $z$. The first term on the right hand side drives the average velocity component, $\overline{u}$, towards the specified wind component, $u_0$. The relaxation time scale, $\tau_1$, is an input parameter called {\ct DT\_MEAN\_FORCING} whose default value is 1~s. This time scale ensures that the average velocity field stays relatively close to the specified wind field. The second term on the right hand side drives the local velocity component, $u$, towards the specified wind component, $u_0$. The time scale, $\tau_2$ ({\ct DT\_MEAN\_FORCING\_2}), is much longer than $\tau_1$ (30~s by default). Its role is to ensure that the local velocity component time-averaged over a longer time period conforms to the specified wind, but at the expense of possibly washing out important flow structures. Try several values of this time scale for your particular simulation to determine what is appropriate for your case. There is no firm guidance in the atmospheric modeling literature.
 
 Note that if instead of specifying the wind {\ct SPEED}, you specify its components, {\ct U0} and {\ct V0} (rarely would you use {\ct W0}), FDS will {\em not} automatically assert mean forcing, but rather just initialize the flow field to these constant values of velocity. If you want to override this behavior, you can direct FDS to assert meaning forcing in all coordinate directions by setting {\ct MEAN\_FORCING=.TRUE.}, or you can assert mean forcing in the $x$, $y$, or $z$ directions using {\ct MEAN\_FORCING(N)=.TRUE.} where {\ct N} is set to 1, 2, or 3, respectively.
 
-When simulating a wind with {\ct OPEN} boundaries, you might notice spurious velocity patterns at the downstream edge of the computational domain. These are artifacts related to the mean forcing function and the application of open boundary conditions at the external faces of the domain. To reduce spurious artifacts at external open wind boundaries, FDS forces both the normal and tangential components of the velocity towards that of the mean wind field at the side and top boundaries, which is why you should ensure that your obstructions are reasonably far from the boundaries. Some suggest that the top, upstream, and lateral boundaries extend outward 5 times the characteristic height of the buildings, and the downstream boundary extend 15 times the height. It is also suggested that the cross sectional area of obstructions be less than 3~\% of the total cross sectional area. However, these recommendations might be overly restrictive. It is suggested that you investigate different domain dimensions to ensure that they do not affect the outcome of your simulation. If you see spurious flow activity at external boundaries, consider increasing the ``sponge layer'' that FDS automatically builds around the exterior lateral boundaries. There is a parameter called {\ct SPONGE\_CELLS}, which is the number of grid cells at the exterior boundary where FDS aggressively forces the velocity to conform with the mean wind field. Within the domain interior, the ``nudging'' or mean forcing is less aggressive. The default value of {\ct SPONGE\_CELLS} is 3, meaning that aggressive forcing is employed in the nearest 3 grid cells adjacent to the $x$ and $y$ exterior boundaries.
+When simulating a wind with {\ct OPEN} boundaries, you might notice spurious velocity patterns at the downstream edge of the computational domain. These are artifacts related to the mean forcing function and the application of open boundary conditions at the external faces of the domain. To reduce spurious artifacts at external open wind boundaries, FDS forces both the normal and tangential components of the velocity towards that of the mean wind field at the side and top boundaries, which is why you should ensure that your obstructions are reasonably far from the boundaries. Some suggest that the top, upstream, and lateral boundaries extend outward 5 times the characteristic height of the buildings, and the downstream boundary extend 15 times the height. It is also suggested that the cross sectional area of obstructions be less than 3~\% of the total cross sectional area. However, these recommendations might be overly restrictive. It is suggested that you investigate different domain dimensions to ensure that they do not affect the outcome of your simulation. If you see spurious flow activity at external boundaries, consider increasing the ``sponge layer'' that FDS can create around the exterior lateral boundaries. There is a parameter called {\ct SPONGE\_CELLS}, which is the number of grid cells at the exterior boundary where FDS aggressively forces the velocity to conform with the mean wind field. Within the domain interior, the ``nudging'' or mean forcing is less aggressive. The default value of {\ct SPONGE\_CELLS} is 0, meaning that aggressive forcing is not employed at the $x$ and $y$ exterior boundaries.
 
 You can output any of the three components of the wind velocity profile averaged over the entire domain (for example, $\overline{u}$ in Eq.~(\ref{mean_forcing_u})), using the input line:
 \begin{lstlisting}
@@ -6711,7 +6749,18 @@ where $ \Delta z$ is the distance from the leak point to the neutral plane.  Usi
 \end{figure}
 
 
-\clearpage
+
+
+\chapter{Wildland Fire Spread}
+
+There are three ways of simulating wildland fire spread in FDS:
+\begin{enumerate}
+\item {\bf Particle Model:} The vegetation is represented by a collection of Lagrangian particles that are heated via convection and radiation (Section~\ref{pine_needles}).
+\item {\bf Boundary Fuel Model:} Ground vegetation is modeled like a porous solid with a thickness equal to the height of the vegetation (Section~\ref{info:boundary_fuel_model}).
+\item {\bf Level Set Model:} The fire front propagates using purely empirical rules (Section~\ref{info:level_set}).
+\end{enumerate}
+The Particle Model and Boundary Fuel Model use the same basic pyrolysis model, and the fire spread rate is {\em predicted} by the model. The Level Set Model relies on a set of experimentally-determined spread rates for different types of vegetation and wind speeds.
+
 
 \section{Thermal Degradation Model for Vegetation}
 \label{vegetation_model}
@@ -6870,19 +6919,8 @@ Figure~\ref{vege_inputs} includes sample input lines demonstrating how the veget
 
 
 
-\section{Wildland Fire Spread}
 
-There are three ways of simulating wildland fire spread.
-
-\begin{enumerate}
-\item {\bf Particle Method:} The vegetation is represented by a collection of Lagrangian particles that are heated via convection and radiation.
-\item {\bf Boundary Fuel Model:} Ground vegetation is modeled like a porous solid with a thickness equal to the height of the vegetation.
-\item {\bf Level Set Method:} The fire front propagates using purely empirical rules.
-\end{enumerate}
-The Particle Method and Boundary Fuel Model require thermo-physical properties of the vegetative fuels and the fire spread rate is {\em predicted} by the model. The Level Set Method relies on a set of experimentally-determined spread rates for different types of vegetation and wind speeds.
-
-
-\subsection{Lagrangian Particle Model}
+\section{Lagrangian Particle Model}
 \label{info:vegetation}
 \label{pine_needles}
 
@@ -6959,8 +6997,42 @@ In the example, 1~kg of wet pine needles occupy 1~m$^3$. The number of particles
 \label{pine_needles_fig}
 \end{figure}
 
+\FloatBarrier
 
-\subsection{Boundary Fuel Model}
+\subsection{Trees}
+\label{info:trees}
+
+A coniferous tree (e.g. pine, spruce, fir) can be represented in FDS as a collection of Lagrangian particles as follows:
+\begin{lstlisting}
+&PART ID='needles', DRAG_COEFFICIENT=2.8, SURF_ID='needle surface', STATIC=.TRUE.,
+      COLOR='FOREST GREEN' /
+&INIT PART_ID='needles', XYZ=..., CROWN_BASE_WIDTH=3.2, CROWN_BASE_HEIGHT=15.,
+      TREE_HEIGHT=2, SHAPE='CONE', N_PARTICLES_PER_CELL=1, PACKING_RATIO=0.02  /
+\end{lstlisting}
+These lines create a collection of particles in the shape of a cone. The dimensions of the cone are specified via the parameters {\ct CROWN\_BASE\_WIDTH}, the diameter of the base of the cone (m), {\ct CROWN\_BASE\_HEIGHT}, the distance (m) from the ground to the base of the cone, {\ct TREE\_HEIGHT}, the height (m) of the tree from ground to tip, and the position triplet, {\ct XYZ}, of the trunk at the ground. Note that in this example, exactly one particle is specified per grid cell, positioned randomly within the cell. The number of actual pine needles this single particle represents depends on the specified {\ct PACKING\_RATIO}, the ratio of the (dry) mass per unit volume to the density of the needle itself. That information would be provided by the {\ct SURF} line {\ct 'needle surface'} and associated {\ct MATL} lines that are described in the previous section.
+
+\subsection{Firebrands}
+\label{info:firebrands}
+\label{dragon_5a}
+
+Firebrands are small pieces of burning wood and vegetation that can be lofted into the air and blown by the wind ahead of a wildland fire front. Manzello et~al.~\cite{Manzello:FSJ2008a} have developed a variety of experimental apparatus designed to generate firebrands in a laboratory setting. The example input file called {\ct dragon\_5a} in the {\ct WUI} (Wildland-Urban Interface) folder is a very simple mock-up of one of these experiments. The word ``dragon'' is based on the nickname of the apparatus; 5a is the figure number in Ref.~\cite{Manzello:FSJ2008a} on which this example case is loosely based. In the experiment, 700~g of small dowels (length 50~mm, diameter 8~mm) made of Ponderosa Pine wood were poured into a small steel chamber equipped with several propane burners. The dowels were left to burn for roughly a minute subject to a slow induced air flow after which time the air flow was increased and firebrands were propelled horizontally out of a 15~cm duct 2.25~m above the lab floor. It is reported that after several replicate experiments, the average mass of the firebrands collected from pans on the floor was 57~g. The average diameter of the collected dowels was 5.6~mm, and the average length was 13.5~mm.
+
+It is not possible to simulate the experiment in FDS exactly as it was performed. The reason is that in the experiment, all 700~g of the wooden dowels were poured into the heating chamber at once. FDS cannot handle such a dense packing of Lagrangian particles. Instead, the simulated dowels are introduced at a rate of 10 per second. FDS also does not have a mechanism to break-up the dowels, reducing their length from 50~mm to 13.5~mm. Thus, the initial cylindrical particles are 13.5~mm and remain that length throughout the simulation. The diameter of the cylindrical particles is reduced, however, from 8~mm to 5.6~mm, which takes the initial density of 440~kg/m$^3$ down to 71~kg/m$^3$ because the mass of the firebrands is assumed to be 8~\% of the original. The plot in Fig.~\ref{dragon_5a_fig} shows the increasing mass of firebrands thrown to the floor in the simulation after 100~s of particle insertion. The total mass of particles inserted into the apparatus is:
+\be \pi \, (0.004 \; {\rm m})^2 \times (0.0135 \; {\rm m}) \times (440 \; {\rm kg/m}^3) \times (10 \; {\rm part/s}) \times (100 \; {\rm s}) \approx 0.3 \; {\rm kg} \ee
+The amount expected on the floor is approximately 0.024~kg.
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/dragon_5a}
+\end{center}
+\caption[Mass generation of firebrands in the {\ct dragon\_5a} test case]{Mass generation of firebrands in the {\ct dragon\_5a} test case.}
+\label{dragon_5a_fig}
+\end{figure}
+
+
+
+
+\section{Boundary Fuel Model}
 \label{info:boundary_fuel_model}
 
 In many simulations of wildland fire, the ground vegetation layer is too thin to be resolved explicitly, as is done when using Lagrangian particles to represent the vegetation. In such cases, the ground vegetation can be modeled as a porous boundary consisting of a layer of dry vegetation, moisture, and air, underneath of which is hard ground~\cite{Perez-Ramirez:FT2017}. The drag exerted by the vegetation is modeled using a special velocity boundary condition, and convective heat transfer is modeled via a source term in the one-dimensional heat conduction equation that is solved through the layer of vegetation and solid ground. Thermal radiation penetrates the vegetation layer via a 1-D radiative transport equation that is used for semi-transparent solids.
@@ -7011,12 +7083,14 @@ For scenarios where the fire's rate of spread (ROS) is relatively slow and the n
 The more grid cells spanning the front width, the better resolved the simulation. In badly resolved simulations, the time required for the fire to spread the width of a grid cell may be comparable or longer than the burnout time, $\Delta t_{\rm b}$. In such cases, it is necessary to specify an effective ``burnout time'' that accounts for the unresolved burning occurring at sub-grid scales. This parameter, {\ct MINIMUM\_BURNOUT\_TIME} (s), is specified on the {\ct SURF} line that provides parameters for the vegetation. By default, it has a very large value, meaning that it is ignored unless specified.
 
 
-\subsection{Comparing the Particle and Boundary Fuel Models of Vegetation}
+
+
+\section{Comparing the Particle and Boundary Fuel Models of Vegetation}
 \label{ground_vegetation}
 
 For the purpose of comparing the two methods of representing ground vegetation, either as particles or a porous boundary, consider the simple test cases in the sample folder named {\ct WUI} (Wildland-Urban Interface) under the heading {\ct ground\_vegetation}.
 
-\subsubsection{Combustible Load}
+\subsection{Combustible Load}
 \label{ground_vegetation_load}
 
 In the first case, {\ct WUI/ground\_vegetation\_load.fds}, two 3~m long channels contain $A=1$~m$^2$ of generic ground vegetation with a packing ratio, $\beta=0.01$, dry density, $\rho_{\rm dry}=400$~kg/m$^3$, height, $h_{\rm b}=0.075$~m, char yield, $y_{\rm char}=0.25$, moisture fraction, $M=0.1$. The ceiling of the channel is set to 700~$^\circ$C and the lateral walls are periodic, mimicking an infinitely wide fire front. No wind is imposed in this example. The total amount of combustibles is:
@@ -7034,7 +7108,7 @@ Figure~\ref{ground_vegetation_load_fig} displays the heat release rate (left) an
 \label{ground_vegetation_load_fig}
 \end{figure}
 
-\subsubsection{Vegetation Drag}
+\subsection{Vegetation Drag}
 \label{ground_vegetation_drag}
 
 In this next example, ground vegetation with the same properties as the previous example lines the floor of two wind tunnels that are 8~m long, 1~m wide, and 0.5~m tall. The height of the vegetation is 2.5~cm, and the grid size in the simulation is 5~cm. The tunnel walls and ceiling are free-slip. Particles model the vegetation in one tunnel; the Boundary Fuel Model is applied in the other. A 2~m/s wind is imposed, and the pressure upstream of the vegetation is recorded. The tunnel is open downstream, where the pressure is ambient. The upstream pressure ought to be similar, as shown in Fig.~\ref{ground_vegetation_drag_fig}.
@@ -7046,7 +7120,7 @@ In this next example, ground vegetation with the same properties as the previous
 \label{ground_vegetation_drag_fig}
 \end{figure}
 
-\subsubsection{Vegetation Radiation Absorption}
+\subsection{Vegetation Radiation Absorption}
 \label{ground_vegetation_radi}
 
 In this next example, ground vegetation lines the floors of two unit cubes with hot ceilings and cold floors. The walls are {\ct MIRROR} boundaries so that the ceiling and floor can be taken as infinitely wide parallel plates. The height of the vegetation is $\delta=0.05$~m, and the grid size in the simulation is 5~cm.  Particles model the vegetation in one cube; the Boundary Fuel Model is applied in the other. The surface area to volume ratio of the vegetation, $\sigma_{\rm v}=3092$~m$^{-1}$, the packing ratio, $\beta=0.02$, and the shape factor, $C_{\rm s}$=0.25. The ceiling temperature, $T_{\rm c}=993$~K; the floor temperature, $T_{\rm f}=293$~K. The emissivity of both surfaces is 1. The radiation absorption coefficient, $\kappa \equiv C_{\rm s} \sigma_{\rm v} \beta=15.46$~m$^{-1}$, and the expected heat flux to the floor is:
@@ -7062,7 +7136,7 @@ The results are shown in Fig.~\ref{ground_vegetation_radi_fig}. The Lagrangian p
 \label{ground_vegetation_radi_fig}
 \end{figure}
 
-\subsubsection{Vegetation Convective Heating}
+\subsection{Vegetation Convective Heating}
 \label{ground_vegetation_conv}
 
 In this next example, two small wind tunnels blowing hot air at $U=2$~m/s and $T_{\rm air}=300$~$^\circ$C contain small amounts of vegetation modeled using either Lagrangian particles or the Boundary Fuel Model. The tunnel walls are {\ct ADIABATIC} so that heat is not lost to the walls. Two cylindrical particles of different diameters ($\sigma_{\rm v,A}=3000$~m$^{-1}$ and $\sigma_{\rm v,B}=1500$~m$^{-1}$)  occupy adjacent grid cells that abut the solid floor. Each particle represents all the vegetation within the grid cell. In the other tunnel, two adjacent patches on the floor represent the equivalent amount of vegetation via the Boundary Fuel Model. The initial vegetation temperature is $T_0=20$~$^\circ$C. Radiation heat transfer is turned off. The expected temperature increase with time is found by solving:
@@ -7085,28 +7159,9 @@ The resulting vegetation temperatures are shown in Fig.~\ref{ground_vegetation_c
 
 \FloatBarrier
 
-\subsection{Firebrands}
-\label{info:firebrands}
-\label{dragon_5a}
-
-Firebrands are small pieces of burning wood and vegetation that can be lofted into the air and blown by the wind ahead of a wildland fire front. Manzello et~al.~\cite{Manzello:FSJ2008a} have developed a variety of experimental apparatus designed to generate firebrands in a laboratory setting. The example input file called {\ct dragon\_5a} in the {\ct WUI} (Wildland-Urban Interface) folder is a very simple mock-up of one of these experiments. The word ``dragon'' is based on the nickname of the apparatus; 5a is the figure number in Ref.~\cite{Manzello:FSJ2008a} on which this example case is loosely based. In the experiment, 700~g of small dowels (length 50~mm, diameter 8~mm) made of Ponderosa Pine wood were poured into a small steel chamber equipped with several propane burners. The dowels were left to burn for roughly a minute subject to a slow induced air flow after which time the air flow was increased and firebrands were propelled horizontally out of a 15~cm duct 2.25~m above the lab floor. It is reported that after several replicate experiments, the average mass of the firebrands collected from pans on the floor was 57~g. The average diameter of the collected dowels was 5.6~mm, and the average length was 13.5~mm.
-
-It is not possible to simulate the experiment in FDS exactly as it was performed. The reason is that in the experiment, all 700~g of the wooden dowels were poured into the heating chamber at once. FDS cannot handle such a dense packing of Lagrangian particles. Instead, the simulated dowels are introduced at a rate of 10 per second. FDS also does not have a mechanism to break-up the dowels, reducing their length from 50~mm to 13.5~mm. Thus, the initial cylindrical particles are 13.5~mm and remain that length throughout the simulation. The diameter of the cylindrical particles is reduced, however, from 8~mm to 5.6~mm, which takes the initial density of 440~kg/m$^3$ down to 71~kg/m$^3$ because the mass of the firebrands is assumed to be 8~\% of the original. The plot in Fig.~\ref{dragon_5a_fig} shows the increasing mass of firebrands thrown to the floor in the simulation after 100~s of particle insertion. The total mass of particles inserted into the apparatus is:
-\be \pi \, (0.004 \; {\rm m})^2 \times (0.0135 \; {\rm m}) \times (440 \; {\rm kg/m}^3) \times (10 \; {\rm part/s}) \times (100 \; {\rm s}) \approx 0.3 \; {\rm kg} \ee
-The amount expected on the floor is approximately 0.024~kg.
-
-\begin{figure}[ht]
-\begin{center}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/dragon_5a}
-\end{center}
-\caption[Mass generation of firebrands in the {\ct dragon\_5a} test case]{Mass generation of firebrands in the {\ct dragon\_5a} test case.}
-\label{dragon_5a_fig}
-\end{figure}
 
 
-\FloatBarrier
-
-\subsection{Level Set Model for Wildland Fire Spread}
+\section{Level Set Model for Wildland Fire Spread}
 \label{info:level_set}
 
 For simulations of wildland fires spanning large areas that cannot be gridded at fine enough resolution to predict fire spread using a physics-based model, there is an empirical model built into FDS based on level sets~\cite{Bova:IJWF2015}. The methodology reproduces in an Eulerian framework the approach used in the Lagrangian-based fire front-tracking model FARSITE~\cite{Finney:FARSITE}. This approach makes use of the Rothermel-Albini~\cite{Rothermel:1972,Albini:1976} surface fire spread rate formulae and the assumption that a surface fire spreading from a point under certain wind, slope and vegetation conditions does so with an ellipse-shaped fire front with, for a given wind speed, a fixed length-to-breadth ratio~\cite{Richards:1990}.
@@ -7183,7 +7238,7 @@ The parameter {\ct VEG\_LSET\_COUPLED=T} directs FDS to use the local wind field
 For all models, the total mineral content $S_{\rm t}=0.056$, the effective mineral content $S_{\rm e}=0.01$, the heat of combustion $\Delta H=18600$~kW/kg, density $\rho_{\rm p}=510$~kg/m$^3$, moisture content of fine, medium, and large dead vegetation, $M_{\rm d,1}=0.03$, $M_{\rm d,2}=0.04$, $M_{\rm d,3}=0.05$, moisture content of live woody and herbaceous vegetation $M_{\rm l,w}=M_{\rm l,h}= 0.70$.
 \end{sidewaystable}
 
-\subsubsection{Simple Test Cases}
+\subsection{Simple Test Cases}
 
 Bova et al.~\cite{Bova:IJWF2015} compare the level set calculation that has been implemented in FDS with the identical algorithm in the U.S. Forest Service FARSITE model. The three contour plots in Fig.~\ref{Bova_fig} match those in Figs.~1(a), 1(b), and 4(a) in the paper. The FDS input files, {\ct WUI/Bova\_1a.fds}, {\ct WUI/Bova\_1b.fds}, and {\ct WUI/Bova\_4a.fds} all have the same {\ct SURF} line that defines the vegetation. Note that in these examples, there is no actual fire nor does the level set calculation depend on the local wind field. The purpose of the exercise is simply to test the level set algorithm.
 \begin{lstlisting}
@@ -7204,6 +7259,15 @@ Bova et al.~\cite{Bova:IJWF2015} compare the level set calculation that has been
 \caption[Level set test cases]{Level set test cases from Bova et al.~\cite{Bova:IJWF2015}, Figs.~1(a), 1(b), and 4(a).}
 \label{Bova_fig}
 \end{figure}
+
+\FloatBarrier
+
+\subsection{Using Mapping Software}
+\label{info:earth}
+
+If external mapping or GIS software is used to generate an FDS input file, it is handy to include the latitude and longitude of the origin of the computational domain via {\ct ORIGIN\_LAT} and {\ct ORIGIN\_LON} on the {\ct MISC} line, in units of decimal degree. Another useful parameter is {\ct NORTH\_BEARING} (default 0$^\circ$) which indicates the direction of true north.
+
+
 
 
 
@@ -8208,6 +8272,8 @@ Slice file information is recorded in files (See Section~\ref{out:SLCF}) labeled
 
 By default, Smokeview will blank slice file data inside obstructions.  However, this is expensive to load at startup in Smokeview for large cases.  If you wish Smokeview not to store this blanking array, set {\ct IBLANK\_SMV=.FALSE.} on {\ct MISC}.  Another option is to run Smokeview from the command line and to add {\ct -noblank} as an option.
 
+You may add a name via {\ct ID} on the {\ct SLCF} as an identifier sent to Smokeview. It is only optional.
+
 
 \section{Animated Boundary Quantities: The \texorpdfstring{{\tt BNDF}}{BNDF} Namelist Group}
 \label{info:BNDF}
@@ -8861,16 +8927,22 @@ expected to cause incapacitation in half the population. The incapacitating conc
 To include the irritant effect of a gas not listed in the table, you should specify $\mathrm{F_{FIC}}$ in ppm using the {\ct FIC\_CONCENTRATION}
 property on the corresponding {\ct SPEC} line.
 
-Note that the spatial integration features (Section~\ref{info:statistics}) cannot be used with FED output because FED makes
-use of the {\ct 'TIME INTEGRAL'} statistic (Section~\ref{info:time_integral}). For the same reason, FED output is only available as a point measurement.
-
-In order to view the FED slice file in smokeview, CO, CO${}_2$ and O${}_2$ slice files need to be defined in the input file as in the example below:
-
+The output quantities {\ct FED} and {\ct FIC} may be displayed either at a point via a device:
 \begin{lstlisting}
-&SLCF PBY= 1.0, QUANTITY='VOLUME FRACTION', SPEC_ID= 'CARBON DIOXIDE' /
-&SLCF PBY= 1.0, QUANTITY='VOLUME FRACTION', SPEC_ID= 'CARBON MONOXIDE' /
-&SLCF PBY= 1.0, QUANTITY='VOLUME FRACTION', SPEC_ID= 'OXYGEN' /
+&DEVC ID='whatever', XYZ=..., QUANTITY='FED', PROP_ID='Activity Level' /
 \end{lstlisting}
+You can also visualize {\ct FED} and {\ct FIC} as a contour slice by adding lines similar to the following:
+\begin{lstlisting}
+&SLCF PBY=1.0, QUANTITY='FED', PROP_ID='Activity Level' /
+&SLCF PBY=1.0, QUANTITY='VOLUME FRACTION', SPEC_ID='CARBON DIOXIDE' /
+&SLCF PBY=1.0, QUANTITY='VOLUME FRACTION', SPEC_ID='CARBON MONOXIDE' /
+&SLCF PBY=1.0, QUANTITY='VOLUME FRACTION', SPEC_ID='OXYGEN' /
+\end{lstlisting}
+Notice that all slices are defined on the same plane. Also note that device or slice output can make use of an optional activity level defined on a property line:
+\begin{lstlisting}
+&PROP ID='Activity Level', FED_ACTIVITY=3 /
+\end{lstlisting}
+The parameter {\ct FED\_ACTIVITY} is an integer denoting that the person is at rest (1), doing light work (2), or doing heavy work (3). The default value is 2.
 
 
 \subsection{Spatially-Integrated Outputs}
@@ -10255,6 +10327,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hline \hline
 \endhead
 {\ct CELL\_CENTERED}              & Logical           & Section~\ref{info:initial_droplets}           &                & {\ct .FALSE.} \\ \hline
+{\ct CROWN\_BASE\_HEIGHT}         & Real              & Section~\ref{info:trees}                      & m              &               \\ \hline
+{\ct CROWN\_BASE\_WIDTH}          & Real              & Section~\ref{info:trees}                      & m              &               \\ \hline
 {\ct CTRL\_ID}                    & Character         & Section~\ref{info:initial_droplets}           &                &               \\ \hline
 {\ct DB}                          & Character         & Section~\ref{info:INIT}                       &                &               \\ \hline
 {\ct DENSITY}                     & Real              & Section~\ref{info:INIT}                       & kg/m$^3$       & Ambient       \\ \hline
@@ -10273,7 +10347,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MULT\_ID }                   & Character         & Section~\ref{info:MULT}                       &                &               \\ \hline
 {\ct N\_PARTICLES}                & Integer           & Section~\ref{info:initial_droplets}           &                & 0             \\ \hline
 {\ct N\_PARTICLES\_PER\_CELL}     & Integer           & Section~\ref{info:initial_droplets}           &                & 0             \\ \hline
-{\ct PACKING\_RATIO}              & Real              & Section~\ref{pine_needles}                 &                &               \\ \hline
+{\ct PACKING\_RATIO}              & Real              & Section~\ref{pine_needles}                    &                &               \\ \hline
 {\ct PART\_ID}                    & Character         & Section~\ref{info:initial_droplets}           &                &               \\ \hline
 {\ct PARTICLE\_WEIGHT\_FACTOR}    & Real              & Section~\ref{info:initial_droplets}           &                & 1.            \\ \hline
 {\ct PATH\_RAMP(3)}               & Character         & Section~\ref{info:path_ramp}                  &                &               \\ \hline
@@ -10283,6 +10357,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SPEC\_ID(N)}                 & Character Array   & Section~\ref{info:INIT}                       &                &               \\ \hline
 {\ct TEMPERATURE}                 & Real              & Section~\ref{info:INIT}                       & \si{\degree C} & {\ct TMPA}    \\ \hline
 {\ct T\_INSERT}                   & Real              & Section~\ref{info:delayed_insertion}          & s              & {\ct T\_BEGIN}\\ \hline
+{\ct TREE\_HEIGHT}                & Real              & Section~\ref{info:trees}                      & m              &               \\ \hline
 {\ct UNIFORM}                     & Logical           & Section~\ref{info:initial_droplets}           &                & {\ct .FALSE.} \\ \hline
 {\ct UVW(3)}                      & Real Array        & Section~\ref{info:initial_droplets}           & m/s            & 0.            \\ \hline
 {\ct VOLUME\_FRACTION(:)}         & Real Array        & Section~\ref{info:INIT}                       & mol/mol        & Ambient       \\ \hline
@@ -10483,6 +10558,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct NOISE}                                         & Logical      & Section~\ref{info:NOISE}                &            & {\ct .TRUE.}      \\ \hline
 {\ct NOISE\_VELOCITY}                               & Real         & Section~\ref{info:NOISE}                &  m/s       & 0.005             \\ \hline
 {\ct NO\_EVACUATION}                                & Logical      & Reference~\cite{FDS_Evac_Users_Guide}   &            & {\ct .FALSE.}     \\ \hline
+{\ct NORTH\_BEARING}                                & Real         & Section~\ref{info:earth}                & deg.       &                   \\ \hline
+{\ct ORIGIN\_LAT}                                   & Real         & Section~\ref{info:earth}                & deg.       &                   \\ \hline
+{\ct ORIGIN\_LON}                                   & Real         & Section~\ref{info:earth}                & deg.       &                   \\ \hline
 {\ct OVERWRITE}                                     & Logical      & Section~\ref{info:OVERWRITE}            &            & {\ct .TRUE.}      \\ \hline
 {\ct PARTICLE\_CFL}                                 & Logical      & Section~\ref{info:PART_Stability}       &            & {\ct .FALSE.}     \\ \hline
 {\ct PARTICLE\_CFL\_MAX}                            & Real         & Section~\ref{info:PART_Stability}       &            & 1.0               \\ \hline
@@ -10661,7 +10739,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct XYZ(3) }                 & Real Array      & Section~\ref{info:multobst}             & m         & (0.,0.,0.)    \\ \hline
 \end{longtable}
 
-% Undocumented: NOTERRAIN (KM)
 
 
 \vspace{\baselineskip}
@@ -10722,6 +10799,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct REAL\_REFRACTIVE\_INDEX}            & Real        & Section~\ref{radiative_part_props}                                    &                & 1.33                  \\ \hline
 {\ct RGB(3)}                             & Integers    & Section~\ref{info:part_output}                                        &                &                       \\ \hline
 {\ct RUNNING\_AVERAGE\_FACTOR}           & Real        & Section~\ref{radiative_part_props}                                    &                & 0.5                   \\ \hline
+{\ct RUNNING\_AVERAGE\_FACTOR\_WALL}     & Real        & Section~\ref{radiative_part_props}                                    &                & 0.5                   \\ \hline
 {\ct SAMPLING\_FACTOR}                   & Integer     & Section~\ref{info:part_output}                                        &                & 1                     \\ \hline
 {\ct SECOND\_ORDER\_PARTICLE\_TRANSPORT} & Logical     & Section~\ref{info:PART_Stability}                                     &                & {\ct .FALSE.}         \\ \hline
 {\ct SHAPE\_FACTOR}                      & Real        & Sections~\ref{info:particle_radiation_absorption}, \ref{pine_needles} &                &                       \\ \hline
@@ -10823,6 +10901,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct DENSITY}                           & Real          & Section~\ref{info:THERMOCOUPLE}           & kg/m$^3$              & 8908.       \\ \hline
 {\ct DIAMETER}                          & Real          & Section~\ref{info:THERMOCOUPLE}           & m                     & 0.001       \\ \hline
 {\ct EMISSIVITY}                        & Real          & Section~\ref{info:THERMOCOUPLE}           &                       & 0.85        \\ \hline
+{\ct FED\_ACTIVITY}                     & Integer       & Section~\ref{info:FED}                    &                       & 2           \\ \hline
 {\ct FLOW\_RAMP}                        & Character     & Section~\ref{info:sprinklers}             &                       &             \\ \hline
 {\ct FLOW\_RATE}                        & Real          & Section~\ref{info:sprinklers}             & L/min                 &             \\ \hline
 {\ct FLOW\_TAU}                         & Real          & Section~\ref{info:sprinklers}             &                       & 0.          \\ \hline
@@ -11034,11 +11113,13 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CELL\_CENTERED}    & Logical           & Section~\ref{info:SLCF}                   &           & {\ct .FALSE.}     \\ \hline
 {\ct DB}                & Character         & Section~\ref{info:SLCF}                   &           &                   \\ \hline
 {\ct EVACUATION}        & Logical           & Reference~\cite{FDS_Evac_Users_Guide}     &           & {\ct .FALSE.}     \\ \hline
+{\ct ID}                & Character         & Section~\ref{info:SLCF}                   &           &                   \\ \hline
 {\ct MAXIMUM\_VALUE}    & Real              & Reference~\cite{Smokeview_Users_Guide}    &           &                   \\ \hline
 {\ct MESH\_NUMBER}      & Integer           & Section~\ref{info:SLCF}                   &           &                   \\ \hline
 {\ct MINIMUM\_VALUE}    & Real              & Reference~\cite{Smokeview_Users_Guide}    &           &                   \\ \hline
 {\ct PART\_ID}          & Character         & Section~\ref{info:outputquantities}       &           &                   \\ \hline
 {\ct PBX, PBY, PBZ}     & Real              & Section~\ref{info:SLCF}                   & m         &                   \\ \hline
+{\ct PROP\_ID}          & Character         & Section~\ref{info:FED}                    &           &                   \\ \hline
 {\ct QUANTITY}          & Character         & Section~\ref{info:outputquantities}       &           &                   \\ \hline
 {\ct QUANTITY2}         & Character         & Section~\ref{info:outputquantities}       &           &                   \\ \hline
 {\ct REAC\_ID}          & Character         & See {\ct QUANTITY=`HRRPUV REAC`}          &           &                   \\ \hline
@@ -11137,7 +11218,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \endhead
 {\ct ADIABATIC}                                           & Logical         & Section~\ref{info:adiabatic}              &                     & {\ct .FALSE.}           \\ \hline
 {\ct BACKING}                                             & Character       & Section~\ref{info:BACKING}                &                     & {\ct 'EXPOSED'}         \\ \hline
+{\ct BLOWING}                                             & Logical         & Section~\ref{info:convection}             &                     & {\ct .FALSE.}           \\ \hline
 {\ct BURN\_AWAY}                                          & Logical         & Section~\ref{info:BURN_AWAY}              &                     & {\ct .FALSE.}           \\ \hline
+{\ct BURN\_DURATION}                                      & Real            & Section~\ref{info:BURN_DURATION}          & s                   & 1000000                 \\ \hline
 {\ct CELL\_SIZE\_FACTOR}                                  & Real            & Section~\ref{info:solid_phase_stability}  &                     & 1.0                     \\ \hline
 {\ct C\_FORCED\_CONSTANT}                                 & Real            & Section~\ref{info:convection}             &                     & 0.0                     \\ \hline
 {\ct C\_FORCED\_PR\_EXP}                                  & Real            & Section~\ref{info:convection}             &                     & 0.0                     \\ \hline
@@ -11173,6 +11256,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct INTERNAL\_HEAT\_SOURCE}                              & Real Array      & Section~\ref{info:INTERNAL_HEAT_SOURCE}   & kW/m$^3$            &                         \\ \hline
 {\ct LAYER\_DIVIDE}                                       & Real            & Section~\ref{info:EXPOSED}                &                     & {\ct N\_LAYERS}/2       \\ \hline
 {\ct LEAK\_PATH}                                          & Int.~Pair       & Section~\ref{info:Leaks}                  &                     &                         \\ \hline
+{\ct LEAK\_PATH\_ID}                                      & Character~Pair  & Section~\ref{info:Leaks}                  &                     &                         \\ \hline
 {\ct LENGTH}                                              & Real            & Section~\ref{info:PART_GEOMETRY}          & m                   &                         \\ \hline
 {\ct MASS\_FLUX(:)}                                       & Real Array      & Section~\ref{info:MASS_FLUX}              & \si{kg/(m^2.s)}     &                         \\ \hline
 {\ct MASS\_FLUX\_TOTAL}                                   & Real            & Section~\ref{info:MASS_FLUX_TOTAL}        & \si{kg/(m^2.s)}     &                         \\ \hline
@@ -11417,7 +11501,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \endhead
 {\ct CORIOLIS\_VECTOR(3)}                       & Real          & Section~\ref{info:coriolis_force}             &               & 0.                \\ \hline
 {\ct DIRECTION}                                 & Real          & Section~\ref{info:WIND}                       & degrees       & 270               \\ \hline
-{\ct DT\_MEAN\_FORCING}                         & Real          & Section~\ref{info:WIND}                       & s             & 1.                \\ \hline
+{\ct DT\_MEAN\_FORCING}                         & Real          & Section~\ref{info:SPONGE_CELLS}               & s             & 1.                \\ \hline
+{\ct DT\_MEAN\_FORCING\_2}                      & Real          & Section~\ref{info:SPONGE_CELLS}               & s             & 30.               \\ \hline
 {\ct FORCE\_VECTOR(3)}                          & Real          & Section~\ref{info:force_vector}               &               & 0.                \\ \hline
 {\ct GEOSTROPHIC\_WIND(2)}                      & Real          & Section~\ref{info:geostrophic_wind}           & m/s           &                   \\ \hline
 {\ct GROUND\_LEVEL}                             & Real          & Section~\ref{info:stratification}             & m             & 0.                \\ \hline
@@ -11428,14 +11513,14 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RAMP\_FVX\_T}                              & Character     & Section~\ref{info:force_vector}               &               &                   \\ \hline
 {\ct RAMP\_FVY\_T}                              & Character     & Section~\ref{info:force_vector}               &               &                   \\ \hline
 {\ct RAMP\_FVZ\_T}                              & Character     & Section~\ref{info:force_vector}               &               &                   \\ \hline
-{\ct RAMP\_SPEED}                               & Character     & Section~\ref{info:WIND}                       &               &                   \\ \hline
+{\ct RAMP\_SPEED}                               & Character     & Section~\ref{info:wind_ramps}                 &               &                   \\ \hline
 {\ct RAMP\_TMP0\_Z}                             & Character     & Section~\ref{info:stratification}             &               &                   \\ \hline
-{\ct RAMP\_U0\_T}                               & Character     & Section~\ref{info:WIND}                       &               &                   \\ \hline
-{\ct RAMP\_U0\_Z}                               & Character     & Section~\ref{info:WIND}                       &               &                   \\ \hline
-{\ct RAMP\_V0\_T}                               & Character     & Section~\ref{info:WIND}                       &               &                   \\ \hline
-{\ct RAMP\_V0\_Z}                               & Character     & Section~\ref{info:WIND}                       &               &                   \\ \hline
-{\ct RAMP\_W0\_T}                               & Character     & Section~\ref{info:WIND}                       &               &                   \\ \hline
-{\ct RAMP\_W0\_Z}                               & Character     & Section~\ref{info:WIND}                       &               &                   \\ \hline
+{\ct RAMP\_U0\_T}                               & Character     & Section~\ref{info:wind_ramps}                 &               &                   \\ \hline
+{\ct RAMP\_U0\_Z}                               & Character     & Section~\ref{info:wind_ramps}                 &               &                   \\ \hline
+{\ct RAMP\_V0\_T}                               & Character     & Section~\ref{info:wind_ramps}                 &               &                   \\ \hline
+{\ct RAMP\_V0\_Z}                               & Character     & Section~\ref{info:wind_ramps}                 &               &                   \\ \hline
+{\ct RAMP\_W0\_T}                               & Character     & Section~\ref{info:wind_ramps}                 &               &                   \\ \hline
+{\ct RAMP\_W0\_Z}                               & Character     & Section~\ref{info:wind_ramps}                 &               &                   \\ \hline
 {\ct SPEED}                                     & Real          & Section~\ref{info:WIND}                       & m/s           & 0.                \\ \hline
 {\ct SPONGE\_CELLS}                             & Integer       & Section~\ref{info:SPONGE_CELLS}               &               & 3                 \\ \hline
 {\ct STRATIFICATION}                            & Logical       & Section~\ref{info:stratification}             &               & {\ct .TRUE.}      \\ \hline
