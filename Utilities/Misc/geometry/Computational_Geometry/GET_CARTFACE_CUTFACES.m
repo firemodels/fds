@@ -10,7 +10,7 @@ global IBM_EGSC IBM_IDCE IBM_FGSC IBM_IDCF
 global IBM_MAXCEELEM_FACE IBM_MAXVERTS_FACE
 global IJK_COUNTED
 
-global SEG_FACE_F SEG_FACE2_F XYZVERT_F NFACE_F CFELEM_F NVERT_F
+global SEG_FACE_F SEG_FACE2_F XYZVERT_F NFACE_F CFELEM_F NVERT_F ANGSEG_F
 
 ierr=1;
 
@@ -485,7 +485,7 @@ for IBNDINT=BNDINT_LOW:BNDINT_HIGH % 1,2 refers to block boundary faces, 3 to in
              ANGSEG   = ANGSEGAUX;
              NSEG=COUNT;
 
-%              if(X1AXIS==KAXIS && INDI==37 && INDJ==27 && INDK==11)
+%              if(X1AXIS==KAXIS && INDI==11 && INDJ==18 && INDK==16)
 %                  disp(['1 Cartface cutface:' num2str([INDI INDJ INDK X1AXIS])])
 %                  figure
 %                  subplot(1,3,1)
@@ -510,7 +510,7 @@ for IBNDINT=BNDINT_LOW:BNDINT_HIGH % 1,2 refers to block boundary faces, 3 to in
 %                  pause
 % 
 %              end
-
+% 
              NOTDONE = true;
              while(NOTDONE)
                 NOTDONE = false;
@@ -584,7 +584,7 @@ for IBNDINT=BNDINT_LOW:BNDINT_HIGH % 1,2 refers to block boundary faces, 3 to in
                NODEDG_FACE(NEDI+1,INOD1) = ISEG;
              end
 
-%              if(X1AXIS==KAXIS && INDI==37 && INDJ==27 && INDK==11)
+%              if(X1AXIS==KAXIS && INDI==11 && INDJ==18 && INDK==16)
 %                  disp(['2 Cartface cutface:' num2str([INDI INDJ INDK X1AXIS])])
 %                  subplot(1,3,2)
 %                  hold on
@@ -640,8 +640,8 @@ for IBNDINT=BNDINT_LOW:BNDINT_HIGH % 1,2 refers to block boundary faces, 3 to in
                 for ISS=2:NODEDG_FACE(1,N2COUNT)+1
                    ISEG = NODEDG_FACE(ISS,N2COUNT);
                    if ( SEG_FLAG(ISEG) ) % This seg hasn't been added to SEG_FACE2
-                                             % Drop if seg is the opposite of count seg:
-                      if ( SEG_FACE2(NOD1,COUNT) == SEG_FACE(NOD2,ISEG) ); continue; end
+                                         % Drop if seg is the opposite of count seg:
+                      if ( SEG_FACE2(NOD1,COUNT) == SEG_FACE(NOD2,ISEG) && NUMEDG_NODE(N2COUNT) > 2); continue; end
                       DANGI = ANGSEG(ISEG) - ANGCOUNT;
                       if ( DANGI < 0. ); DANGI = DANGI + 2. * pi; end
 
@@ -715,7 +715,7 @@ for IBNDINT=BNDINT_LOW:BNDINT_HIGH % 1,2 refers to block boundary faces, 3 to in
              NFACE = NP;
 
 
-%              if(X1AXIS==KAXIS && INDI==37 && INDJ==27 && INDK==11)
+%              if(X1AXIS==KAXIS && INDI==11 && INDJ==18 && INDK==16)
 %                  disp(['3 Cartface cutface:' num2str([INDI INDJ INDK X1AXIS])])
 %                  subplot(1,3,3)
 %                  axis equal; box on;
@@ -739,14 +739,15 @@ for IBNDINT=BNDINT_LOW:BNDINT_HIGH % 1,2 refers to block boundary faces, 3 to in
 %                  pause
 % 
 %              end
-
-
-%              if(INDI==12 && INDJ==12 && INDK==11 && X1AXIS==3)
+% 
+%              if(X1AXIS==KAXIS && INDI==11 && INDJ==18 && INDK==16)
 %                  disp(['Face=' num2str(MESHES(NM).N_CUTFACE_MESH + MESHES(NM).N_GCCUTFACE_MESH + 1)])
 %                  NVERT_F = NVERT;
 %                  NFACE_F = NFACE;
 %                  SEG_FACE_F = SEG_FACE;
+%                  ANGSEG_F   = ANGSEG;
 %                  SEG_FACE2_F = SEG_FACE2;
+%                  
 %                  XYZVERT_F   = XYZVERT;
 %                  CFELEM_F    = CFELEM;
 %              end

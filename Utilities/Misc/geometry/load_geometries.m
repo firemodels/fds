@@ -51,6 +51,10 @@ for IG=1:N_GEOM
 
       WSELEM(NOD1:NOD3) = GEOM(IG).FACES(NODS_WSEL*(IWSEL-1)+1:NODS_WSEL*IWSEL);
 
+      if(mod(IWSEL,10000)==0) 
+          disp(['1. IWSEL,N_FACES=' num2str([IWSEL GEOM(IG).N_FACES])])
+      end
+      
       for IEDGE=EDG1:EDG3 % For each face halfedge
 
          SEG(NOD1:NOD2) = WSELEM(NOD1:NOD2); % Get halfedge
@@ -61,14 +65,27 @@ for IG=1:N_GEOM
          % rule for connectivity for normal outside solid).
 
          INLIST = false;
-         for IEDLIST=1:NWSEDG
-            % Check if opposite halfedge already in list.
-            if ( (SEG(NOD1) == GEOM(IG).EDGES(NOD2,IEDLIST)) && ...
-                 (SEG(NOD2) == GEOM(IG).EDGES(NOD1,IEDLIST)) )
-               INLIST = true;
-               break
-            end
+%          for IEDLIST=1:NWSEDG
+%             % Check if opposite halfedge already in list.
+%             if ( (SEG(NOD1) == GEOM(IG).EDGES(NOD2,IEDLIST)) && ...
+%                  (SEG(NOD2) == GEOM(IG).EDGES(NOD1,IEDLIST)) )
+%                INLIST = true;
+%                break
+%             end
+%          end
+         I1=find(GEOM(IG).EDGES(NOD2,1:NWSEDG)==SEG(NOD1));
+         I2=find(GEOM(IG).EDGES(NOD1,1:NWSEDG)==SEG(NOD2));
+         if (~isempty(I1) && ~isempty(I2))
+             for II=1:length(I1)
+                 II2=find(I2(:)==I1(II));
+                 if(~isempty(II2))
+                    INLIST = true;
+                    IEDLIST= I1(II);
+                    break
+                 end
+             end
          end
+         
          if (INLIST) % Opposite halfedge already in list
             % Couple halfedge with its pair
             GEOM(IG).EDGE_FACES(1,IEDLIST)   = 2;
@@ -106,6 +123,10 @@ for IG=1:N_GEOM
 
       WSELEM(NOD1:NOD3) = GEOM(IG).FACES(NODS_WSEL*(IWSEL-1)+1:NODS_WSEL*IWSEL);
 
+      if(mod(IWSEL,10000)==0) 
+          disp(['2. IWSEL,N_FACES=' num2str([IWSEL GEOM(IG).N_FACES])])
+      end      
+      
       % Triangles NODES coordinates:
       for INOD=NOD1:NOD3
          XYZV(IAXIS:KAXIS,INOD) = GEOM(IG).VERTS(MAX_DIM*(WSELEM(INOD)-1)+1:MAX_DIM*WSELEM(INOD));
@@ -173,8 +194,15 @@ for IG=1:N_GEOM
             disp(['Found same faces: ' num2str([IFACE idf])])
         end
     end
-   
-   
+    
+    % Check that all edges attached to 2 faces:
+    for IEDGE=1:GEOM(IG).N_EDGES 
+        if(GEOM(IG).EDGE_FACES(1,IEDGE) < 2)
+            disp(['IEDGE=' num2str(IEDGE) ' has < 2 faces.'])
+            pause
+        end
+    end
+         
 end
 
 return
