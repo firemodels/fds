@@ -97,6 +97,7 @@ function usage {
     exit
   fi
   echo "Other options:"
+  echo " -b email_address - send an email to email_address when jobs starts, aborts and finishes"
   echo " -c file - loads Intel Trace Collector configuration file "
   echo " -C   - use modules currently loaded rather than modules loaded when fds was built."
   echo " -d dir - specify directory where the case is found [default: .]"
@@ -838,6 +839,7 @@ EOF
 EOF
 if [ "$EMAIL" != "" ]; then
     cat << EOF >> $scriptfile
+#PBS -m abe
 #PBS -M $EMAIL
 EOF
 fi
