@@ -3185,7 +3185,8 @@ ONE_D%N_SUBSTEPS = ONE_D%N_SUBSTEPS + 1
 ENDDO SUB_TIMESTEP_LOOP
 
 ONE_D%Q_CON_F = ONE_D%Q_CON_F / DT_BC
-ONE_D%HEAT_TRANS_COEF = ONE_D%Q_CON_F/(ONE_D%TMP_G-0.5_EB*(ONE_D%TMP_F_OLD+ONE_D%TMP_F))
+DTMP = ONE_D%TMP_G-0.5_EB*(ONE_D%TMP_F_OLD+ONE_D%TMP_F)
+IF (ABS(DTMP)>TWO_EPSILON_EB) ONE_D%HEAT_TRANS_COEF = ONE_D%Q_CON_F/DTMP
 
 ! If any gas massflux is non-zero or the surface temperature exceeds the ignition temperature, set the ignition time
 
