@@ -467,7 +467,7 @@ IF (.NOT.PREDICTOR) THEN
                   IF (PHI_LS(IIG,JJG)>=0._EB .AND. ONE_D%T_IGN>1.E5_EB) THEN
                      ONE_D%T_IGN = T
                      ROS_MAG = MAX(0.01_EB,SQRT(SR_X_LS(IIG,JJG)**2 + SR_Y_LS(IIG,JJG)**2))
-                     ONE_D%BURN_DURATION = MAX(SF%BURN_DURATION,SQRT(DX(IIG)*DY(JJG))/ROS_MAG)
+                     ONE_D%BURN_DURATION = SF%BURN_DURATION + SQRT(DX(IIG)**2+DY(JJG)**2)/ROS_MAG
                      ONE_D%AREA_ADJUST = SF%BURN_DURATION/ONE_D%BURN_DURATION
                   ENDIF
                   ONE_D%PHI_LS = PHI_LS(IIG,JJG)
@@ -487,7 +487,7 @@ IF (.NOT.PREDICTOR) THEN
             IF (PHI_LS(IIG,JJG)>=0._EB .AND. ONE_D%T_IGN>1.E5_EB) THEN
                ONE_D%T_IGN = T
                ROS_MAG = MAX(0.01_EB,SQRT(SR_X_LS(IIG,JJG)**2 + SR_Y_LS(IIG,JJG)**2))
-               ONE_D%BURN_DURATION = MAX(SF%BURN_DURATION,SQRT(DX(IIG)*DY(JJG))/ROS_MAG)
+               ONE_D%BURN_DURATION = SF%BURN_DURATION + SQRT(DX(IIG)**2+DY(JJG)**2)/ROS_MAG
                ONE_D%AREA_ADJUST = SF%BURN_DURATION/ONE_D%BURN_DURATION
             ENDIF
             ONE_D%PHI_LS = PHI_LS(IIG,JJG)
