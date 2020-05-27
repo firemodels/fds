@@ -38713,18 +38713,19 @@ REAL(EB) :: SPHERE_ORIGIN(3),SPHERE_RADIUS,TEXTURE_ORIGIN(3),TEXTURE_SCALE(2),XB
 
 INTEGER :: MAX_IDS=0,MAX_SURF_IDS=0,MAX_ZVALS=0,MAX_VERTS=0,MAX_FACES=0,MAX_VOLUS=0,MAX_POLY_VERTS=0,&
            N_VERTS,N_FACES,N_FACES_TEMP,N_VOLUS,N_ZVALS,N_SURF_ID,N_POLY_VERTS,&
-           MATL_INDEX,IOS,IZERO,N,I,J,K,IJ,FIRST_FACE_INDEX,I1,I2,I3,I4,I5,I6,I7,I8,&
+           MATL_INDEX,IOS,IZERO,N,I,J,K,IJ,FIRST_FACE_INDEX,I1,I2,I3,I4,&
            GEOM_TYPE,NXB,IJK(3),N_LEVELS,N_LAT,N_LONG,SPHERE_TYPE,BOXVERTLIST(8),NI,NIJ,IVOL,SORT_FACES,II,II1,II2,II3,&
            WSELEM(NOD1:NOD3),X1AXIS,NNN,CYLINDER_NSEG_THETA,CYLINDER_NSEG_AXIS,CYL_FIND(LOW_IND:HIGH_IND,1:3)
 
 LOGICAL :: AUTO_TEXTURE,HAVE_SURF,HAVE_MATL,IN_LIST,SURF_INDEX_PER_FACE,BNDF_GEOM,LOGTEST
-REAL(EB), POINTER, DIMENSION(:) :: VNEW,VOLD,V1,V2,V3,V4
+REAL(EB), POINTER, DIMENSION(:) :: V1,V2,V3,V4
 INTEGER, POINTER, DIMENSION(:) :: FACEI,FACEJ,FACE_FROM,FACE_TO,VOL
 TYPE(MESH_TYPE), POINTER :: M=>NULL()
 TYPE(GEOMETRY_TYPE), POINTER :: G=>NULL()
 
-INTEGER,  PARAMETER :: CAD_GEOM_TYPE=0,BOX_GEOM_TYPE=1,SPHERE_GEOM_TYPE=2,TERRAIN_GEOM_TYPE=3,&
-                       CYLINDER_GEOM_TYPE=4,EXTPOLY_GEOM_TYPE=5
+INTEGER,  PARAMETER :: CAD_GEOM_TYPE=1,TERRAIN_GEOM_TYPE=2,&
+                       BOX_GEOM_TYPE=3,SPHERE_GEOM_TYPE=4,CYLINDER_GEOM_TYPE=5,EXTPOLY_GEOM_TYPE=6 ! These 4 are for internal use.
+
 REAL(EB), PARAMETER :: MAX_VAL=1.0E20_EB
 
 LOGICAL :: READ_BINARY
@@ -38733,14 +38734,12 @@ INTEGER :: IJF, IJB, IJE, NM
 INTEGER, ALLOCATABLE, DIMENSION(:) :: B_IND,E_IND,F_IND
 REAL(EB) :: XLOW,XHI,YLOW,YHI,ZLOW,ZHI,DELX,DELY
 
-LOGICAL :: IS_TERRAIN,EXTEND_TERRAIN
+LOGICAL :: IS_TERRAIN,EXTEND_TERRAIN,WRITE_WARNING
 REAL(EB):: ZVAL_HORIZON, ZVAL_FACTOR
 
 INTEGER :: START_FACE_LO, START_FACE_MID, START_FACE_HI
 
-LOGICAL, PARAMETER :: TERRAIN_NEW_WAY = .TRUE.
-
-INTEGER :: N_EDGES,N_BEDGES,N_FACES_ORIG,ICPT,CLOSE_PT(NOD1:NOD4+1), RGB(3)=-1
+INTEGER :: N_EDGES,N_BEDGES,N_FACES_ORIG,N_VERTS_ORIG,N_VOLUS_ORIG,ICPT,CLOSE_PT(NOD1:NOD4+1), RGB(3)=-1
 INTEGER, ALLOCATABLE, DIMENSION(:,:) :: EDGES,FACE_EDGES,EDGE_FACES,BOUND_EDGES,BOUND_EDGES2
 INTEGER, ALLOCATABLE, DIMENSION(:) :: NBND_EDGE,COUNTED_EDGES
 REAL(EB) :: X_CEN,Y_CEN,ZMIN2,CORNER_PT(IAXIS:JAXIS,NOD1:NOD4+1),DIST,DISTI
@@ -38836,7 +38835,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
    N_POLY_VERTS=0
    IF(TRIM(BINARY_NAME)/='null') READ_BINARY = .TRUE. ! In case a binary name is provided, read the binary.
    G%READ_BINARY = READ_BINARY
-   READ_BIN_COND : IF (.NOT.READ_BINARY .AND. TRIM(BINARY_NAME)=='null') THEN
+   READ_BIN_COND : IF (.NOT.READ_BINARY) THEN
       ! count VERTS
       DO I = 1, MAX_VERTS
          IF (ANY(VERTS(3*I-2:3*I)>=MAX_VAL)) EXIT
@@ -38888,7 +38887,6 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
    ELSE READ_BIN_COND
       ! Read Binary file, reset values of other geometry types to default:
       ! Defaults for terrain, sphere, cylinder, box, etc.
-      N_ZVALS = 0
       XB=1.001_EB*MAX_VAL
       SPHERE_ORIGIN = 1.001_EB*MAX_VAL
       SPHERE_RADIUS = 1.001_EB*MAX_VAL
@@ -38917,29 +38915,29 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
          STATUS='OLD',FORM='UNFORMATTED',ACTION='READ',ERR=221,IOSTAT=IOS)
       ENDIF
       IF (IOS==0) THEN
-         READ(731) IJ
+         READ(731) GEOM_TYPE
          READ(731) N_VERTS,N_FACES,N_SURF_ID,N_VOLUS
-         IF (N_VERTS > 0 ) THEN
-            IF (N_VERTS > MAX_VERTS) THEN ! Check if N_VERTS bigger than size of VERTS, if so reallocate.
-               DEALLOCATE(VERTS); ALLOCATE(VERTS(1:3*N_VERTS))
-            ENDIF
-            READ(731) VERTS(1:3*N_VERTS)
+         IF(GEOM_TYPE==TERRAIN_GEOM_TYPE) THEN
+            IS_TERRAIN=.TRUE.
+         ELSE ! If GEOM is of any type other than terrains, set it to CAD type.
+            GEOM_TYPE=CAD_GEOM_TYPE
          ENDIF
+         ! Now reallocate if necessary, twice size is to make sure terrains have sufficient array size allocated:
+         IF (2*N_VERTS > MAX_VERTS) THEN; MAX_VERTS=2*N_VERTS; DEALLOCATE(VERTS); ALLOCATE(VERTS(1:3*MAX_VERTS)); ENDIF
+         IF (2*N_FACES > MAX_FACES) THEN
+            MAX_FACES=2*N_FACES
+            DEALLOCATE(FACES); ALLOCATE(FACES(1:3*MAX_FACES))
+            DEALLOCATE(TFACES); ALLOCATE(TFACES(1:6*MAX_FACES))
+         ENDIF
+         IF(ALLOCATED(SURFS)) DEALLOCATE(SURFS); ALLOCATE(SURFS(MAX_FACES))
+         IF (2*N_VOLUS > MAX_VOLUS) THEN; MAX_VOLUS=2*N_VOLUS; DEALLOCATE(VOLUS); ALLOCATE(VOLUS(1:4*N_VOLUS)); ENDIF
+         ! Read Vertices, Faces, Surfs and Volus:
+         IF (N_VERTS > 0 ) READ(731) VERTS(1:3*N_VERTS)
          IF (N_FACES > 0 ) THEN
-            IF(N_FACES > MAX_FACES) THEN
-               DEALLOCATE(FACES); ALLOCATE(FACES(1:3*N_FACES))
-               DEALLOCATE(TFACES); ALLOCATE(TFACES(1:6*N_FACES))
-            ENDIF
             READ(731) FACES(1:3*N_FACES)
-            IF(ALLOCATED(SURFS)) DEALLOCATE(SURFS); ALLOCATE(SURFS(N_FACES))
             READ(731) SURFS(1:N_FACES)
          ENDIF
-         IF (N_VOLUS > 0 ) THEN
-            IF (N_VOLUS > MAX_VOLUS) THEN
-               DEALLOCATE(VOLUS); ALLOCATE(VOLUS(1:4*N_VOLUS))
-            ENDIF
-            READ(731) VOLUS(1:4*N_VOLUS)
-         ENDIF
+         IF (N_VOLUS > 0 ) READ(731) VOLUS(1:4*N_VOLUS)
          CLOSE(731)
          IF (ANY(SURFS(1:N_FACES)>0) .AND. TRIM(SURF_ID(1))=='null') THEN
           IF (TRIM(BINARY_NAME)=='null') THEN
@@ -38966,10 +38964,11 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
       ENDIF
    ENDIF READ_BIN_COND
 
-   N_FACES_ORIG = N_FACES
+   N_VERTS_ORIG  = N_VERTS
+   N_FACES_ORIG  = N_FACES
+   N_VOLUS_ORIG  = N_VOLUS
 
    !--- setup a 2D surface (terrain) object (ZVALS keyword )
-   IF(IS_TERRAIN)  GEOM_TYPE = TERRAIN_GEOM_TYPE
    ZVALS_IF: IF (N_ZVALS>0) THEN
       GEOM_TYPE = TERRAIN_GEOM_TYPE
       CALL CHECK_XB(XB)
@@ -38988,400 +38987,281 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
          CALL SHUTDOWN('ERROR: At least 4 XB values (xmin, xmax, ymin, ymax) required when using ZVALS')
       ENDIF
 
-      IF (TERRAIN_NEW_WAY) THEN
-
-         IF (EXTEND_TERRAIN) THEN
-            ! Find XLOW,XHI,YLOW,YHI for the set of NM meshes defined:
-            XLOW = 1.E10_EB
-            XHI  =-1.E10_EB
-            YLOW = 1.E10_EB
-            YHI  =-1.E10_EB
-            DO NM=1,NMESHES
-               XLOW = MIN(XLOW,MESHES(NM)%XS)
-               XHI  = MAX(XHI ,MESHES(NM)%XF)
-               YLOW = MIN(YLOW,MESHES(NM)%YS)
-               YHI  = MAX(YHI ,MESHES(NM)%YF)
-            ENDDO
-         ENDIF
-         ! Move Low Z position of terrain to less that number od cutcells, s.t. they don't get computed on the bottom.
-         ZMIN2= 1.E10_EB
+      IF (EXTEND_TERRAIN) THEN
+         ! Find XLOW,XHI,YLOW,YHI for the set of NM meshes defined:
+         XLOW = 1.E10_EB
+         XHI  =-1.E10_EB
+         YLOW = 1.E10_EB
+         YHI  =-1.E10_EB
          DO NM=1,NMESHES
-            ZMIN2 = MIN( ZMIN2 , MESHES(NM)%ZS-REAL(NGUARD,EB)/REAL(MESHES(NM)%KBAR,EB)*(MESHES(NM)%ZF-MESHES(NM)%ZS) )
+            XLOW = MIN(XLOW,MESHES(NM)%XS)
+            XHI  = MAX(XHI ,MESHES(NM)%XF)
+            YLOW = MIN(YLOW,MESHES(NM)%YS)
+            YHI  = MAX(YHI ,MESHES(NM)%YF)
          ENDDO
-         ZHI  = MAXVAL(ZVALS(1:N_ZVALS))
-         ZLOW = MINVAL(ZVALS(1:N_ZVALS))
-         ZLOW = MIN(REAL(FLOOR(ZLOW-0.1_EB*(ZHI-ZLOW)),EB),ZMIN,ZMIN2)
+         WRITE_WARNING=.FALSE.
+         IF((XB(1)<=XLOW) .OR. (XB(2)>=XHI)) THEN; WRITE_WARNING =.TRUE.; EXTEND_TERRAIN=.FALSE.; ENDIF
+         IF((XB(3)<=YLOW) .OR. (XB(4)>=YHI)) THEN; WRITE_WARNING =.TRUE.; EXTEND_TERRAIN=.FALSE.; ENDIF
+         IF(MYID==0 .AND. WRITE_WARNING) WRITE(LU_ERR,'(A,A,A)') 'Warning : Terrain &GEOM ',TRIM(ID),&
+         ' cannot be extended. When setting EXTEND_TERRAIN=T, make sure it lays entirely within the computational domain.'
+      ENDIF
 
-         ZVAL_FACTOR = 1._EB
-         IF(ZVAL_HORIZON > MAX_VAL) ZVAL_FACTOR = 0._EB ! Not defined, use boundary polygon heights.
+      ! Move Low Z position of terrain to less that number od cutcells, s.t. they don't get computed on the bottom.
+      ZMIN2= 1.E10_EB
+      DO NM=1,NMESHES
+         ZMIN2 = MIN( ZMIN2 , MESHES(NM)%ZS-REAL(NGUARD,EB)/REAL(MESHES(NM)%KBAR,EB)*(MESHES(NM)%ZF-MESHES(NM)%ZS) )
+      ENDDO
+      ZHI  = MAXVAL(ZVALS(1:N_ZVALS))
+      ZLOW = MINVAL(ZVALS(1:N_ZVALS))
+      ZLOW = MIN(REAL(FLOOR(ZLOW-0.1_EB*(ZHI-ZLOW)),EB),ZMIN,ZMIN2)
 
-         N_VOLUS = 0
+      ZVAL_FACTOR = 1._EB
+      IF(ZVAL_HORIZON > MAX_VAL) ZVAL_FACTOR = 0._EB ! Not defined, use boundary polygon heights.
 
-         ALLOCATE(B_IND(2*(IJK(1)+IJK(2))-3)); B_IND=-1
-         ALLOCATE(E_IND(2*(IJK(1)+IJK(2))-3)); E_IND=-1
-         ALLOCATE(F_IND(2*(IJK(1)+IJK(2))-3)); F_IND=-1
+      N_VOLUS = 0; N_VOLUS_ORIG  = N_VOLUS
 
-         ! First add terrain IJK(1)*IJK(2) vertices:
-         IJ = 1
-         DO J = 1, IJK(2)
-            DO I = 1, IJK(1)
-               VERTS(3*IJ-2) = (XB(1)*REAL(IJK(1)-I,EB) + XB(2)*REAL(I-1,EB))/REAL(IJK(1)-1,EB)
-               VERTS(3*IJ-1) = (XB(3)*REAL(IJK(2)-J,EB) + XB(4)*REAL(J-1,EB))/REAL(IJK(2)-1,EB)
-               VERTS(3*IJ) = ZVALS(IJ)
-               IJ = IJ + 1
-            ENDDO
+      ALLOCATE(B_IND(2*(IJK(1)+IJK(2))-3)); B_IND=-1
+      ALLOCATE(E_IND(2*(IJK(1)+IJK(2))-3)); E_IND=-1
+      ALLOCATE(F_IND(2*(IJK(1)+IJK(2))-3)); F_IND=-1
+
+      ! First add terrain IJK(1)*IJK(2) vertices:
+      IJ = 1
+      DO J = 1, IJK(2)
+         DO I = 1, IJK(1)
+            VERTS(3*IJ-2) = (XB(1)*REAL(IJK(1)-I,EB) + XB(2)*REAL(I-1,EB))/REAL(IJK(1)-1,EB)
+            VERTS(3*IJ-1) = (XB(3)*REAL(IJK(2)-J,EB) + XB(4)*REAL(J-1,EB))/REAL(IJK(2)-1,EB)
+            VERTS(3*IJ) = ZVALS(IJ)
+            IJ = IJ + 1
          ENDDO
+      ENDDO
+      N_VERTS_ORIG  = IJ-1
 
-         ! Boundary indexes:
-         IJB = 1
+      ! Boundary indexes:
+      IJB = 1
+      DO J=1,1
+      DO I=1,IJK(1)
+         B_IND(IJB)=(J-1)*IJK(1)+I
+         IJB = IJB + 1
+      ENDDO
+      ENDDO
+      DO J=2,IJK(2)
+      DO I=IJK(1),IJK(1)
+         B_IND(IJB)=(J-1)*IJK(1)+I
+         IJB = IJB + 1
+      ENDDO
+      ENDDO
+      DO J=IJK(2),IJK(2)
+      DO I=IJK(1)-1,1,-1
+         B_IND(IJB)=(J-1)*IJK(1)+I
+         IJB = IJB + 1
+      ENDDO
+      ENDDO
+      DO J=IJK(2)-1,2,-1
+      DO I=1,1
+         B_IND(IJB)=(J-1)*IJK(1)+I
+         IJB = IJB + 1
+      ENDDO
+      ENDDO
+      B_IND(IJB)= B_IND(1) ! Last point equal to first.
+
+      ! Now add terrain 2*(IJK(1)-1)*(IJK(2)-1) faces:
+      IJF = 1
+      DO J = 1, IJK(2) - 1
+         DO I = 1, IJK(1) - 1
+            I1 = (J-1)*IJK(1) + I
+            I2 = I1 + 1
+            I3 = I2 + IJK(1)
+            I4 = I3 - 1
+
+            FACES(3*IJF-2) = I1
+            FACES(3*IJF-1) = I2
+            FACES(3*IJF) = I3
+            IJF = IJF + 1
+
+            FACES(3*IJF-2) = I1
+            FACES(3*IJF-1) = I3
+            FACES(3*IJF) = I4
+            IJF = IJF + 1
+         ENDDO
+      ENDDO
+      N_FACES_ORIG  = IJF-1
+
+      IF (EXTEND_TERRAIN) THEN
+       ! Then add 2*(IJK(1)+IJK(2))-4 extended points:
+         DELX = (XHI - XLOW)/REAL(IJK(1)-1,EB)
+         DELY = (YHI - YLOW)/REAL(IJK(2)-1,EB)
+
+         IJE = 1
+         ! Low Y along X: from IJK(1)*IJK(2)+1 : IJK(1)*IJK(2) + IJK(1)
          DO J=1,1
          DO I=1,IJK(1)
-            B_IND(IJB)=(J-1)*IJK(1)+I
-            IJB = IJB + 1
+            VERTS(3*IJ-2) = XLOW + DELX*REAL(I-1,EB)
+            VERTS(3*IJ-1) = YLOW + DELY*REAL(J-1,EB)
+            VERTS(3*IJ)   = (1._EB-ZVAL_FACTOR)*ZVALS((J-1)*IJK(1)+I) + ZVAL_FACTOR*ZVAL_HORIZON
+            E_IND(IJE) = IJ
+            IJE= IJE + 1
+            IJ = IJ  + 1
          ENDDO
          ENDDO
+
+         ! Hi X along Y: from IJK(1)*IJK(2) + IJK(1) + 1  : IJK(1)*IJK(2) + IJK(1) + IJK(2) - 2
          DO J=2,IJK(2)
          DO I=IJK(1),IJK(1)
-            B_IND(IJB)=(J-1)*IJK(1)+I
-            IJB = IJB + 1
+            VERTS(3*IJ-2) = XLOW + DELX*REAL(I-1,EB)
+            VERTS(3*IJ-1) = YLOW + DELY*REAL(J-1,EB)
+            VERTS(3*IJ)   = (1._EB-ZVAL_FACTOR)*ZVALS((J-1)*IJK(1)+I) + ZVAL_FACTOR*ZVAL_HORIZON
+            E_IND(IJE) = IJ
+            IJE= IJE + 1
+            IJ = IJ  + 1
          ENDDO
          ENDDO
+
+         ! Hi Y along X: from IJK(1)*IJK(2) + IJK(1) + IJK(2) - 1 : IJK(1)*IJK(2) + 2*IJK(1) + IJK(2) - 2
          DO J=IJK(2),IJK(2)
          DO I=IJK(1)-1,1,-1
-            B_IND(IJB)=(J-1)*IJK(1)+I
-            IJB = IJB + 1
+            VERTS(3*IJ-2) = XLOW + DELX*REAL(I-1,EB)
+            VERTS(3*IJ-1) = YLOW + DELY*REAL(J-1,EB)
+            VERTS(3*IJ)   = (1._EB-ZVAL_FACTOR)*ZVALS((J-1)*IJK(1)+I) + ZVAL_FACTOR*ZVAL_HORIZON
+            E_IND(IJE) = IJ
+            IJE= IJE + 1
+            IJ = IJ  + 1
          ENDDO
          ENDDO
+
+         ! Low X Along Y: from IJK(1)*IJK(2) + 2*IJK(1) + IJK(2) - 1 : IJK(1)*IJK(2) + 2*(IJK(1)+IJK(2)) - 4
          DO J=IJK(2)-1,2,-1
          DO I=1,1
-            B_IND(IJB)=(J-1)*IJK(1)+I
-            IJB = IJB + 1
+            VERTS(3*IJ-2) = XLOW + DELX*REAL(I-1,EB)
+            VERTS(3*IJ-1) = YLOW + DELY*REAL(J-1,EB)
+            VERTS(3*IJ)   = (1._EB-ZVAL_FACTOR)*ZVALS((J-1)*IJK(1)+I) + ZVAL_FACTOR*ZVAL_HORIZON
+            E_IND(IJE) = IJ
+            IJE= IJE + 1
+            IJ = IJ  + 1
          ENDDO
          ENDDO
-         B_IND(IJB)= B_IND(1) ! Last point equal to first.
+         E_IND(IJE) = E_IND(1) ! Last point equal to first.
 
-         ! Now add terrain 2*(IJK(1)-1)*(IJK(2)-1) faces:
-         IJF = 1
-         DO J = 1, IJK(2) - 1
-            DO I = 1, IJK(1) - 1
-               I1 = (J-1)*IJK(1) + I
-               I2 = I1 + 1
-               I3 = I2 + IJK(1)
-               I4 = I3 - 1
+         DO I=1,IJE-1
+            VERTS(3*IJ-2) = VERTS(3*E_IND(I)-2)
+            VERTS(3*IJ-1) = VERTS(3*E_IND(I)-1)
+            VERTS(3*IJ)   = ZLOW
+            F_IND(I)      = IJ
+            IJ            = IJ + 1
+         ENDDO
+         F_IND(IJE) = F_IND(1) ! Last lower point equal to the first.
 
-               FACES(3*IJF-2) = I1
-               FACES(3*IJF-1) = I2
-               FACES(3*IJF) = I3
-               IJF = IJF + 1
+         ! Remaining Faces:
+         ! Extension faces:
+         DO I=1,2*(IJK(1)+IJK(2))-4
+            I1 = E_IND(I)
+            I2 = E_IND(I+1)
+            I3 = B_IND(I+1)
+            I4 = B_IND(I)
 
-               FACES(3*IJF-2) = I1
-               FACES(3*IJF-1) = I3
-               FACES(3*IJF) = I4
-               IJF = IJF + 1
-            ENDDO
+            FACES(3*IJF-2) = I1
+            FACES(3*IJF-1) = I2
+            FACES(3*IJF) = I3
+            IJF = IJF + 1
+
+            FACES(3*IJF-2) = I1
+            FACES(3*IJF-1) = I3
+            FACES(3*IJF) = I4
+            IJF = IJF + 1
          ENDDO
 
-         IF (EXTEND_TERRAIN) THEN
-          ! Then add 2*(IJK(1)+IJK(2))-4 extended points:
-            DELX = (XHI - XLOW)/REAL(IJK(1)-1,EB)
-            DELY = (YHI - YLOW)/REAL(IJK(2)-1,EB)
+         ! Side faces:
+         DO I=1,2*(IJK(1)+IJK(2))-4
+            I1 = F_IND(I)
+            I2 = F_IND(I+1)
+            I3 = E_IND(I+1)
+            I4 = E_IND(I)
 
-            IJE = 1
-            ! Low Y along X: from IJK(1)*IJK(2)+1 : IJK(1)*IJK(2) + IJK(1)
-            DO J=1,1
-            DO I=1,IJK(1)
-               VERTS(3*IJ-2) = XLOW + DELX*REAL(I-1,EB)
-               VERTS(3*IJ-1) = YLOW + DELY*REAL(J-1,EB)
-               VERTS(3*IJ)   = (1._EB-ZVAL_FACTOR)*ZVALS((J-1)*IJK(1)+I) + ZVAL_FACTOR*ZVAL_HORIZON
-               E_IND(IJE) = IJ
-               IJE= IJE + 1
-               IJ = IJ  + 1
-            ENDDO
-            ENDDO
+            FACES(3*IJF-2) = I1
+            FACES(3*IJF-1) = I2
+            FACES(3*IJF) = I3
+            IJF = IJF + 1
 
-            ! Hi X along Y: from IJK(1)*IJK(2) + IJK(1) + 1  : IJK(1)*IJK(2) + IJK(1) + IJK(2) - 2
-            DO J=2,IJK(2)
-            DO I=IJK(1),IJK(1)
-               VERTS(3*IJ-2) = XLOW + DELX*REAL(I-1,EB)
-               VERTS(3*IJ-1) = YLOW + DELY*REAL(J-1,EB)
-               VERTS(3*IJ)   = (1._EB-ZVAL_FACTOR)*ZVALS((J-1)*IJK(1)+I) + ZVAL_FACTOR*ZVAL_HORIZON
-               E_IND(IJE) = IJ
-               IJE= IJE + 1
-               IJ = IJ  + 1
-            ENDDO
-            ENDDO
+            FACES(3*IJF-2) = I1
+            FACES(3*IJF-1) = I3
+            FACES(3*IJF) = I4
+            IJF = IJF + 1
+         ENDDO
 
-            ! Hi Y along X: from IJK(1)*IJK(2) + IJK(1) + IJK(2) - 1 : IJK(1)*IJK(2) + 2*IJK(1) + IJK(2) - 2
-            DO J=IJK(2),IJK(2)
-            DO I=IJK(1)-1,1,-1
-               VERTS(3*IJ-2) = XLOW + DELX*REAL(I-1,EB)
-               VERTS(3*IJ-1) = YLOW + DELY*REAL(J-1,EB)
-               VERTS(3*IJ)   = (1._EB-ZVAL_FACTOR)*ZVALS((J-1)*IJK(1)+I) + ZVAL_FACTOR*ZVAL_HORIZON
-               E_IND(IJE) = IJ
-               IJE= IJE + 1
-               IJ = IJ  + 1
-            ENDDO
-            ENDDO
+      ELSE
+         ! Do not Extend to domain boundary:
+         DO I=1,IJB-1
+            VERTS(3*IJ-2) = VERTS(3*B_IND(I)-2)
+            VERTS(3*IJ-1) = VERTS(3*B_IND(I)-1)
+            VERTS(3*IJ)   = ZLOW
+            F_IND(I)      = IJ
+            IJ            = IJ + 1
+         ENDDO
+         F_IND(IJB) = F_IND(1) ! Last lower point equal to the first.
 
-            ! Low X Along Y: from IJK(1)*IJK(2) + 2*IJK(1) + IJK(2) - 1 : IJK(1)*IJK(2) + 2*(IJK(1)+IJK(2)) - 4
-            DO J=IJK(2)-1,2,-1
-            DO I=1,1
-               VERTS(3*IJ-2) = XLOW + DELX*REAL(I-1,EB)
-               VERTS(3*IJ-1) = YLOW + DELY*REAL(J-1,EB)
-               VERTS(3*IJ)   = (1._EB-ZVAL_FACTOR)*ZVALS((J-1)*IJK(1)+I) + ZVAL_FACTOR*ZVAL_HORIZON
-               E_IND(IJE) = IJ
-               IJE= IJE + 1
-               IJ = IJ  + 1
-            ENDDO
-            ENDDO
-            E_IND(IJE) = E_IND(1) ! Last point equal to first.
+         ! Side faces:
+         DO I=1,2*(IJK(1)+IJK(2))-4
+            I1 = F_IND(I)
+            I2 = F_IND(I+1)
+            I3 = B_IND(I+1)
+            I4 = B_IND(I)
 
-            DO I=1,IJE-1
-               VERTS(3*IJ-2) = VERTS(3*E_IND(I)-2)
-               VERTS(3*IJ-1) = VERTS(3*E_IND(I)-1)
-               VERTS(3*IJ)   = ZLOW
-               F_IND(I)      = IJ
-               IJ            = IJ + 1
-            ENDDO
-            F_IND(IJE) = F_IND(1) ! Last lower point equal to the first.
+            FACES(3*IJF-2) = I1
+            FACES(3*IJF-1) = I2
+            FACES(3*IJF) = I3
+            IJF = IJF + 1
 
-            ! Remaining Faces:
-            ! Extension faces:
-            DO I=1,2*(IJK(1)+IJK(2))-4
-               I1 = E_IND(I)
-               I2 = E_IND(I+1)
-               I3 = B_IND(I+1)
-               I4 = B_IND(I)
+            FACES(3*IJF-2) = I1
+            FACES(3*IJF-1) = I3
+            FACES(3*IJF) = I4
+            IJF = IJF + 1
+         ENDDO
 
-               FACES(3*IJF-2) = I1
-               FACES(3*IJF-1) = I2
-               FACES(3*IJF) = I3
-               IJF = IJF + 1
+      ENDIF
 
-               FACES(3*IJF-2) = I1
-               FACES(3*IJF-1) = I3
-               FACES(3*IJF) = I4
-               IJF = IJF + 1
-            ENDDO
+      ! Bottom Faces:
+      ! First Face:
+      I  = 1
+      I1 = F_IND(I)
+      I2 = F_IND(I+1)
+      I3 = F_IND(2*(IJK(1)+IJK(2))-3-I)
+      FACES(3*IJF-2) = I2
+      FACES(3*IJF-1) = I1
+      FACES(3*IJF) = I3
+      IJF = IJF + 1
 
-            ! Side faces:
-            DO I=1,2*(IJK(1)+IJK(2))-4
-               I1 = F_IND(I)
-               I2 = F_IND(I+1)
-               I3 = E_IND(I+1)
-               I4 = E_IND(I)
-
-               FACES(3*IJF-2) = I1
-               FACES(3*IJF-1) = I2
-               FACES(3*IJF) = I3
-               IJF = IJF + 1
-
-               FACES(3*IJF-2) = I1
-               FACES(3*IJF-1) = I3
-               FACES(3*IJF) = I4
-               IJF = IJF + 1
-            ENDDO
-
-         ELSE
-            ! Do not Extend to domain boundary:
-            DO I=1,IJB-1
-               VERTS(3*IJ-2) = VERTS(3*B_IND(I)-2)
-               VERTS(3*IJ-1) = VERTS(3*B_IND(I)-1)
-               VERTS(3*IJ)   = ZLOW
-               F_IND(I)      = IJ
-               IJ            = IJ + 1
-            ENDDO
-            F_IND(IJB) = F_IND(1) ! Last lower point equal to the first.
-
-            ! Side faces:
-            DO I=1,2*(IJK(1)+IJK(2))-4
-               I1 = F_IND(I)
-               I2 = F_IND(I+1)
-               I3 = B_IND(I+1)
-               I4 = B_IND(I)
-
-               FACES(3*IJF-2) = I1
-               FACES(3*IJF-1) = I2
-               FACES(3*IJF) = I3
-               IJF = IJF + 1
-
-               FACES(3*IJF-2) = I1
-               FACES(3*IJF-1) = I3
-               FACES(3*IJF) = I4
-               IJF = IJF + 1
-            ENDDO
-
-         ENDIF
-
-         ! Bottom Faces:
-         ! First Face:
-         I  = 1
+      DO I=2,(2*(IJK(1)+IJK(2))-6)/2
          I1 = F_IND(I)
          I2 = F_IND(I+1)
          I3 = F_IND(2*(IJK(1)+IJK(2))-3-I)
+         I4 = F_IND(2*(IJK(1)+IJK(2))-2-I)
+
          FACES(3*IJF-2) = I2
          FACES(3*IJF-1) = I1
-         FACES(3*IJF) = I3
+         FACES(3*IJF) = I4
          IJF = IJF + 1
 
-         DO I=2,(2*(IJK(1)+IJK(2))-6)/2
-            I1 = F_IND(I)
-            I2 = F_IND(I+1)
-            I3 = F_IND(2*(IJK(1)+IJK(2))-3-I)
-            I4 = F_IND(2*(IJK(1)+IJK(2))-2-I)
-
-            FACES(3*IJF-2) = I2
-            FACES(3*IJF-1) = I1
-            FACES(3*IJF) = I4
-            IJF = IJF + 1
-
-            FACES(3*IJF-2) = I2
-            FACES(3*IJF-1) = I4
-            FACES(3*IJF) = I3
-            IJF = IJF + 1
-         ENDDO
-
-         ! Last Face:
-         I  = (2*(IJK(1)+IJK(2))-4)/2
-         I1 = F_IND(I)
-         I2 = F_IND(I+1)
-         I3 = F_IND(I+2)
          FACES(3*IJF-2) = I2
-         FACES(3*IJF-1) = I1
+         FACES(3*IJF-1) = I4
          FACES(3*IJF) = I3
          IJF = IJF + 1
+      ENDDO
 
-         N_VERTS = IJ  - 1
-         N_FACES = IJF - 1
+      ! Last Face:
+      I  = (2*(IJK(1)+IJK(2))-4)/2
+      I1 = F_IND(I)
+      I2 = F_IND(I+1)
+      I3 = F_IND(I+2)
+      FACES(3*IJF-2) = I2
+      FACES(3*IJF-1) = I1
+      FACES(3*IJF) = I3
+      IJF = IJF + 1
 
-         DEALLOCATE(B_IND,E_IND,F_IND)
+      N_VERTS = IJ  - 1
+      N_FACES = IJF - 1
 
-      ELSE ! TERRAIN_NEW_WAY
+      DEALLOCATE(B_IND,E_IND,F_IND)
 
-         ! OLD WAY of computing:
-         ALLOCATE(G%ZVALS(N_ZVALS),STAT=IZERO)
-         CALL ChkMemErr('READ_GEOM','G%ZVALS',IZERO)
-         N_FACES=2*(IJK(1)-1)*(IJK(2)-1)
-         N_VERTS=IJK(1)*IJK(2)
-
-         ! define terrain vertices
-
-         IJ = 1
-         DO J = 1, IJK(2)
-            DO I = 1, IJK(1)
-               VERTS(3*IJ-2) = (XB(1)*REAL(IJK(1)-I,EB) + XB(2)*REAL(I-1,EB))/REAL(IJK(1)-1,EB)
-               VERTS(3*IJ-1) = (XB(3)*REAL(IJK(2)-J,EB) + XB(4)*REAL(J-1,EB))/REAL(IJK(2)-1,EB)
-               VERTS(3*IJ) = ZVALS(IJ)
-               IJ = IJ + 1
-            ENDDO
-         ENDDO
-
-         ! define terrain faces
-         !        8 ---- 7
-         !       /|     /|
-         !     5 ----- 6 |
-         !     |  |    | |
-         !     |  |    | |
-         !     |  |    | |
-         !     |  4 ---- 3
-         !     | /     |/
-         !     1 ----  2
-
-         IJ = 1
-         DO J = 1, IJK(2) - 1
-            DO I = 1, IJK(1) - 1
-               I1 = (J-1)*IJK(1) + I
-               I2 = I1 + 1
-               I3 = I2 + IJK(1)
-               I4 = I3 - 1
-
-               FACES(3*IJ-2) = I1
-               FACES(3*IJ-1) = I2
-               FACES(3*IJ) = I3
-               IJ = IJ + 1
-
-               FACES(3*IJ-2) = I1
-               FACES(3*IJ-1) = I3
-               FACES(3*IJ) = I4
-               IJ = IJ + 1
-            ENDDO
-         ENDDO
-         N_FACES = IJ - 1
-
-         DO I = 1, N_VERTS
-            VNEW=>VERTS(3*N_VERTS+3*I-2:3*N_VERTS+3*I)
-            VOLD=>VERTS(3*I-2:3*I)
-            VNEW(1:3)=(/VOLD(1:2),ZMIN/)
-         ENDDO
-         N_VERTS=2*N_VERTS
-
-
-         IJ = 1
-         DO J = 1, IJK(2) - 1
-            DO I = 1, IJK(1) - 1
-               I1 = (J-1)*IJK(1) + I
-               I2 = I1 + 1
-               I3 = I2 + IJK(1)
-               I4 = I3 - 1
-
-               I5 = I1 + N_VERTS/2
-               I6 = I2 + N_VERTS/2
-               I7 = I3 + N_VERTS/2
-               I8 = I4 + N_VERTS/2
-
-               !     8-------7
-               !   / .     / |
-               ! 5-------6   |
-               ! |   .   |   |
-               ! |   .   |   |
-               ! |   4-------3
-               ! | /     | /
-               ! 1-------2
-
-               ! split box into 6 tetrahedra using: https://www.ics.uci.edu/~eppstein/projects/tetra/
-
-               VOLUS(4*IJ-3) = I1
-               VOLUS(4*IJ-2) = I2
-               VOLUS(4*IJ-1) = I6
-               VOLUS(4*IJ-0) = I7
-               IJ = IJ + 1
-
-               VOLUS(4*IJ-3) = I1
-               VOLUS(4*IJ-2) = I3
-               VOLUS(4*IJ-1) = I2
-               VOLUS(4*IJ-0) = I7
-               IJ = IJ + 1
-
-               VOLUS(4*IJ-3) = I1
-               VOLUS(4*IJ-2) = I6
-               VOLUS(4*IJ-1) = I5
-               VOLUS(4*IJ-0) = I7
-               IJ = IJ + 1
-
-               VOLUS(4*IJ-3) = I1
-               VOLUS(4*IJ-2) = I4
-               VOLUS(4*IJ-1) = I3
-               VOLUS(4*IJ-0) = I7
-               IJ = IJ + 1
-
-               VOLUS(4*IJ-3) = I1
-               VOLUS(4*IJ-2) = I7
-               VOLUS(4*IJ-1) = I5
-               VOLUS(4*IJ-0) = I8
-               IJ = IJ + 1
-
-               VOLUS(4*IJ-3) = I1
-               VOLUS(4*IJ-2) = I7
-               VOLUS(4*IJ-1) = I8
-               VOLUS(4*IJ-0) = I4
-               IJ = IJ + 1
-            ENDDO
-         ENDDO
-         N_VOLUS=IJ - 1
-         N_FACES=0
-      ENDIF
-
-   ELSEIF(IS_TERRAIN .AND. .NOT.READ_BINARY) THEN ZVALS_IF
+   ELSEIF(IS_TERRAIN) THEN ZVALS_IF
 
       GEOM_TYPE = TERRAIN_GEOM_TYPE
 
@@ -39448,6 +39328,13 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
             YLOW = MIN(YLOW,MESHES(NM)%YS)
             YHI  = MAX(YHI ,MESHES(NM)%YF)
          ENDDO
+         WRITE_WARNING=.FALSE.
+         IF(ANY(VERTS(1:3:3*N_VERTS-2) <= XLOW)) THEN; WRITE_WARNING =.TRUE.; EXTEND_TERRAIN=.FALSE.; ENDIF
+         IF(ANY(VERTS(1:3:3*N_VERTS-2) >= XHI )) THEN; WRITE_WARNING =.TRUE.; EXTEND_TERRAIN=.FALSE.; ENDIF
+         IF(ANY(VERTS(2:3:3*N_VERTS-1) <= YLOW)) THEN; WRITE_WARNING =.TRUE.; EXTEND_TERRAIN=.FALSE.; ENDIF
+         IF(ANY(VERTS(2:3:3*N_VERTS-1) >= YHI )) THEN; WRITE_WARNING =.TRUE.; EXTEND_TERRAIN=.FALSE.; ENDIF
+         IF(MYID==0 .AND. WRITE_WARNING) WRITE(LU_ERR,'(A,A,A)') 'Warning : Terrain &GEOM ',TRIM(ID),&
+         ' cannot be extended. When setting EXTEND_TERRAIN=T, make sure it lays entirely within the computational domain.'
       ENDIF
       ! Move Low Z position of terrain to less that number od cutcells, s.t. they don't get computed on the bottom.
       ZMIN2= 1.E10_EB
@@ -39493,7 +39380,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
                CLOSE_PT(ICPT) = I
                DIST = DISTI
             ENDDO
-        ENDDO
+         ENDDO
          DO ICPT=NOD2,NOD4
             IF(CLOSE_PT(ICPT) < CLOSE_PT(ICPT-1)) CLOSE_PT(ICPT) = CLOSE_PT(ICPT) + N_BEDGES ! Pad corner nodes.
          ENDDO
@@ -39912,7 +39799,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
    G%IJK = IJK
    G%GEOM_TYPE = GEOM_TYPE
 
-   LOGTEST = (GEOM_TYPE==CAD_GEOM_TYPE) .OR. ((GEOM_TYPE==TERRAIN_GEOM_TYPE) .AND. TERRAIN_NEW_WAY)
+   LOGTEST = GEOM_TYPE==CAD_GEOM_TYPE .OR. GEOM_TYPE==TERRAIN_GEOM_TYPE
    IF (.NOT.LOGTEST) THEN
       ! The geometry has been constructed from predefined object : Terrain, cube, sphere, etc.
       ! This requires removing duplicate verts.
@@ -40211,7 +40098,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
    ENDIF N_VOLUS_IF
 
    ! Terrain case built with ZVALS, optimized way, define SURFS(:):
-   IF (N_ZVALS > 0 .AND. TERRAIN_NEW_WAY) THEN
+   IF (N_ZVALS > 0) THEN
       ! Surf IDs for generated GEOM:
       IF(ALLOCATED(SURFS)) DEALLOCATE(SURFS)
       ALLOCATE(SURFS(N_FACES))
@@ -40220,7 +40107,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
       ELSE
          SURFS(:) = 0 ! All external faces point to default surf ID.
       ENDIF
-   ELSEIF(IS_TERRAIN .AND. .NOT.READ_BINARY) THEN
+   ELSEIF(IS_TERRAIN) THEN
       ! Finally Enhance SURFS to accomodate new faces.
       ALLOCATE(SURFS2(N_FACES));
       ! Here define what SURF to assign to added faces.
@@ -40320,12 +40207,20 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
    IF(MYID == 0 .AND. .NOT.READ_BINARY) THEN
       WRITE(BIN_GEOM_FILENAME,'(A,A,A,A,A)') './',TRIM(CHID),'_',TRIM(ID),'.bingeom'
       OPEN(UNIT=731,FILE=TRIM(BIN_GEOM_FILENAME),STATUS='UNKNOWN',ACTION='WRITE',FORM='UNFORMATTED')
-      WRITE(731) INTEGER_ONE
-      WRITE(731) N_VERTS,N_FACES,N_SURF_ID,N_VOLUS
-      WRITE(731) VERTS(1:3*N_VERTS)
-      WRITE(731) FACES(1:3*N_FACES)
-      WRITE(731) SURFS(1:N_FACES)
-      WRITE(731) VOLUS(1:4*N_VOLUS)
+      WRITE(731) GEOM_TYPE
+      IF (GEOM_TYPE==TERRAIN_GEOM_TYPE) THEN
+         WRITE(731) N_VERTS_ORIG,N_FACES_ORIG,N_SURF_ID,N_VOLUS_ORIG
+         WRITE(731) VERTS(1:3*N_VERTS_ORIG)
+         WRITE(731) FACES(1:3*N_FACES_ORIG)
+         WRITE(731) SURFS(1:N_FACES_ORIG)
+         WRITE(731) VOLUS(1:4*N_VOLUS_ORIG)
+      ELSE
+         WRITE(731) N_VERTS,N_FACES,N_SURF_ID,N_VOLUS
+         WRITE(731) VERTS(1:3*N_VERTS)
+         WRITE(731) FACES(1:3*N_FACES)
+         WRITE(731) SURFS(1:N_FACES)
+         WRITE(731) VOLUS(1:4*N_VOLUS)
+      ENDIF
       CLOSE(731)
    ENDIF
 
