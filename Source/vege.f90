@@ -162,7 +162,6 @@ ROS_FLANK = 0.0_EB
 ROS_BACKU = 0.0_EB
 WIND_EXP  = 1.0_EB
 
-LSET_ELLIPSE = .FALSE. ! Flag for the elliptical spread model
 LSET_TAN2    = .FALSE. ! Flag for ROS proportional to Tan(slope)^2
 
 ! Flux limiters
@@ -254,14 +253,10 @@ DO JJG=1,JBAR
 
       ! Use assumed ellipse shape of fireline as in Farsite
 
-      IF_ELLIPSE: IF (SF%VEG_LSET_ELLIPSE) THEN
+      IF_ELLIPSE: IF (LEVEL_SET_ELLIPSE) THEN
 
          ROS_HEAD(IIG,JJG) = SF%VEG_LSET_ROS
          SF%VEG_LSET_HT = MAX(0.001_EB,SF%VEG_LSET_HT)
-
-         ! If any surfaces set to ellipse, then elliptical model used for all surfaces
-
-         LSET_ELLIPSE = .TRUE.
 
          ! Variables used in Phi_W formulas below (Rothermel model)
 
@@ -330,7 +325,7 @@ DO JJG=1,JBAR
 
       ! Establish the wind field
 
-      IF_CFD_COUPLED: IF (VEG_LEVEL_SET_COUPLED) THEN  ! The wind speed is derived from the CFD computation
+      IF_CFD_COUPLED: IF (LEVEL_SET_COUPLED) THEN  ! The wind speed is derived from the CFD computation
 
          U_LS(IIG,JJG) = 0.5_EB*(U(IIG-1,JJG,K_LS(IIG,JJG))+U(IIG,JJG,K_LS(IIG,JJG)))
          V_LS(IIG,JJG) = 0.5_EB*(V(IIG,JJG-1,K_LS(IIG,JJG))+V(IIG,JJG,K_LS(IIG,JJG)))
@@ -342,13 +337,13 @@ DO JJG=1,JBAR
 
       ENDIF IF_CFD_COUPLED
 
-      IF_ELLIPSE: IF (LSET_ELLIPSE) THEN  ! Use assumed elliptical shape of fireline as in Farsite
+      IF_ELLIPSE: IF (LEVEL_SET_ELLIPSE) THEN  ! Use assumed elliptical shape of fireline as in Farsite
 
          ROS_HEAD(IIG,JJG) = SF%VEG_LSET_ROS
 
          ! Find wind at ~6.1 m height for Farsite
 
-         IF (VEG_LEVEL_SET_COUPLED) THEN
+         IF (LEVEL_SET_COUPLED) THEN
 
             KWIND = 0
             DO KDUM = K_LS(IIG,JJG),KBAR
@@ -696,7 +691,7 @@ FLUX_ILOOP: DO J=1,JBAR
 
       DEGREES_SLOPE = ATAN(MAG_ZT(I,J))*RAD_TO_DEGREE
 
-      IF (LSET_ELLIPSE) THEN
+      IF (LEVEL_SET_ELLIPSE) THEN
 
          ! Effective wind direction (theta) is clockwise from y-axis (Richards 1990)
          COS_THETA = COS(THETA_ELPS(I,J)) !V_LS(I,J) / MAG_U
@@ -1172,7 +1167,7 @@ hsk  = rhob*hskz/swt
    
 bigIr = gamma*heat*etas*etaM
 
-IF (VEG_LEVEL_SET_COUPLED) THEN
+IF (LEVEL_SET_COUPLED) THEN
    SF%MASS_FLUX(REACTION(1)%FUEL_SMIX_INDEX) = bigIr/heat
    SF%BURN_DURATION = 756._EB/SF%VEG_LSET_SIGMA   ! Albini (Eq. 14)
 ENDIF
