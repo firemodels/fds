@@ -494,8 +494,10 @@ REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: DSUM,USUM,PSUM
 
 ! Level Set vegetation fire spread
 
-LOGICAL  :: VEG_LEVEL_SET=.FALSE.,VEG_LEVEL_SET_COUPLED=.TRUE.
-LOGICAL  :: LSET_ELLIPSE,LSET_TAN2
+LOGICAL :: VEG_LEVEL_SET=.FALSE.     !< Indicator of level set simulation
+LOGICAL :: LEVEL_SET_COUPLED=.TRUE.  !< Indicator for fire and wind level set coupling
+LOGICAL :: LEVEL_SET_ELLIPSE=.TRUE.  !< Indicator of Richards elliptical level set formulation
+LOGICAL :: LSET_TAN2
 
 ! Parameters for Terrain and Wind simulation needs
 
