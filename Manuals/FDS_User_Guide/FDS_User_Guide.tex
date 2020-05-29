@@ -1139,7 +1139,13 @@ The following rules of thumb should also be followed when setting up a multiple 
 \item Be careful when using the shortcut convention of declaring an entire face of the domain to be an {\ct OPEN} vent. Every mesh takes on this attribute. See Section~\ref{info:VENT} for more details.
 \item If a planar obstruction is close to where two meshes abut, make sure that each mesh ``sees'' the obstruction. If the obstruction is even a millimeter outside of one of the meshes, that mesh does not account for it, in which case information is not transferred properly between meshes.
 \end{itemize}
-If you would like to check the mesh alignment without running the case, set {\ct CHECK\_MESH\_ALIGNMENT} to {\ct .TRUE.} on any {\ct MESH} line. If the job stops with no errors, the meshes obey the alignment rules. This check can sometimes take a few tens of seconds, but you can open Smokeview after launching the job to check the alignment by eye.
+If you would like to check the mesh alignment without running the case, set {\ct CHECK\_MESH\_ALIGNMENT} to {\ct .TRUE.} on any {\ct MESH} line. If the job stops with no errors, the meshes obey the alignment rules. This check can sometimes take a few tens of seconds, but you can open Smokeview after launching the job to check the alignment by eye. 
+
+The criterion for rejecting the alignment of two meshes is as follows. Suppose the size of the abutting coarse grid cell is $\dx_{\rm c}$ and the fine grid cell is $\dx_{\rm f}$. The meshes are out of alignment if
+\be
+   \left| \frac{ \dx_{\rm c} - n \, \dx_{\rm f} }{ \dx_{\rm f} } \right| < 0.001
+\ee
+where $n$ is the ratio of fine to coarse cells. The value of 0.001 can be changed via the {\ct MISC} line parameter {\ct ALIGNMENT\_TOLERANCE}.
 
 
 \subsubsection{Accuracy of the Multiple Mesh Calculation}
@@ -10528,6 +10534,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \endhead
 {\ct AEROSOL\_SCRUBBING}                            & Logical      & Section~\ref{info:scrubbing}            &            & {\ct .FALSE.}     \\ \hline
 {\ct AGGLOMERATION}                                 & Logical      & Section~\ref{info:agglomeration}        &            & {\ct .TRUE.}      \\ \hline
+{\ct ALIGNMENT\_TOLERANCE}                          & Real         & Section~\ref{info:mesh_alignment}       &            & 0.001             \\ \hline
 {\ct \footnotesize ALLOW\_SURFACE\_PARTICLES}       & Logical      & Section~\ref{info:surface_droplets}     &            & {\ct .TRUE.}      \\ \hline
 {\ct \footnotesize ALLOW\_UNDERSIDE\_PARTICLES}     & Logical      & Section~\ref{info:surface_droplets}     &            & {\ct .FALSE.}     \\ \hline
 {\ct \footnotesize ASSUMED\_GAS\_TEMPERATURE}       & Real         & Section~\ref{solid_phase_verification}  & $^\circ$C  &                   \\ \hline
