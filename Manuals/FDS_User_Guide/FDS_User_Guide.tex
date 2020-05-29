@@ -6380,6 +6380,8 @@ When a droplet strikes a solid surface\footnote{If you do not want droplets to a
 
 When a liquid droplet hits a solid surface, it is assumed to form a film for the purpose of calculating heat transfer between the liquid and the solid surface. Thus, its diameter is not important because it is assumed to mix with other droplets forming the film. However, when the droplet leaves the solid surface in the form of a ``drip,'' it reforms into a droplet, but its new diameter is assumed to be 1000~$\mu$m unless you specify an alternative {\ct SURFACE\_DIAMETER} on the {\ct PART} line.
 
+The heat transfer coefficient from solid to liquid is constant, by default, and controlled by {\ct PART} property {H\_SOLID\_TO\_DROPLET}. To turn on an experimental model that calculates that dynamically, you should set {\ct CONSTANT\_H\_SOLID\_TO\_DROPLET=.FALSE.} on the {\ct MISC} line.
+
 There are some applications, like the suppression of racked storage commodity fires, where it is useful to allow water droplets to move horizontally along the underside of a solid object. It is difficult to model this phenomenon precisely because it involves surface tension, surface porosity and absorption, and complicated geometry. However, a way to capture some of the effect is to set {\ct ALLOW\_UNDERSIDE\_PARTICLES=.TRUE.} on the {\ct MISC} line. It is normally false. Also, note that when droplets hit obstructions, the vertical direction is assumed to coincide with the $z$ axis, regardless of any change to the gravity vector, {\ct GVEC}.
 
 A useful sample case to demonstrate various features of droplet motion on solid obstructions is the test case called {\ct Sprinklers\_and\_Sprays/cascade.fds}. The image to the left in Fig.~\ref{cascade_image} shows 1~L of water droplets cascading down the sides of an array of boxes. The plot to the right checks that the total water mass is conserved. Note that some of the water evaporates into the compartment that initially has zero humidity.
@@ -10538,6 +10540,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CHECK\_HT}                                     & Logical      & Section~\ref{info:HT}                   &            & {\ct .FALSE.}     \\ \hline
 {\ct CHECK\_VN}                                     & Logical      & Section~\ref{info:VN}                   &            & {\ct .TRUE.}      \\ \hline
 {\ct CNF\_CUTOFF}                                   & Real         & Section~\ref{info:particle_size}        &            & 0.005             \\ \hline
+{\ct CONSTANT\_H\_SOLID\_TO\_DROPLET}               & Real         & Section~\ref{info:surface_droplets}     &            & .TRUE.            \\ \hline
 {\ct \footnotesize CONSTANT\_SPECIFIC\_HEAT\_RATIO} & Logical      & Section~\ref{info:Enthalpy}             &            & {\ct .FALSE.}     \\ \hline
 {\ct C\_RNG}                                        & Real         & Section~\ref{info:LES}                  &            & 0.20              \\ \hline
 {\ct C\_RNG\_CUTOFF}                                & Real         & Section~\ref{info:LES}                  &            & 10.               \\ \hline
@@ -10612,7 +10615,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \end{longtable}
 
 % Undocumented: AEROSOL_AL2O3, AEROSOL_SCRUBBING, CC_IBM(MV), CCVOL_LINK(MV), CC_SLIPIBM_VELO(MV,debug), CC_ZEROIBM_VELO(MV,debug), CHECK_MASS_CONSERVE(MV), COMPUTE_CUTCELLS_ONLY(MV),
-% CONSTANT_H_SOLID, DO_IMPLICIT_CCREGION (MV), ENTHALPY_TRANSPORT (RJM),
+% DO_IMPLICIT_CCREGION (MV), ENTHALPY_TRANSPORT (RJM),
 % EVAP_MODEL, EXTERNAL_BOUNDARY_CORRECTION, HT3D_TEST (RJM), MAXIMUM_GEOMETRY_FACES(MV), MAXIMUM_GEOMETRY_ZVALS(MV), NUCLEATION_SITES, PERIODIC_TEST (RJM),
 % POSITIVE_ERROR_TEST, PROFILING, QFAN_BETA_TEST, TENSOR_DIFFUSIVITY (RJM), TURB_INIT_CLOCK (RJM),
 % UVW_FILE (RJM), STORE_DIVERGENCE_CORRECTION (RJM)
@@ -10772,58 +10775,59 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct PART} (Lagrangian Particles/Droplets)} \\
 \hline \hline
 \endhead
-{\ct AGE}                                & Real        & Section~\ref{info:part_output}                                        & s              & $1\times 10^5$        \\ \hline
-{\ct BREAKUP}                            & Logical     & Section~\ref{info:secondary_breakup}                                  &                & {\ct .FALSE.}         \\ \hline
-{\ct BREAKUP\_CNF\_RAMP\_ID}             & Character   & Section~\ref{info:secondary_breakup}                                  &                &                       \\ \hline
-{\ct BREAKUP\_DISTRIBUTION}              & Character   & Section~\ref{info:secondary_breakup}                                  &                & {\ct 'ROSIN...'}      \\ \hline
-{\ct BREAKUP\_GAMMA\_D}                  & Real        & Section~\ref{info:secondary_breakup}                                  &                & 2.4                   \\ \hline
-{\ct BREAKUP\_RATIO}                     & Real        & Section~\ref{info:secondary_breakup}                                  &                & $3/7$                 \\ \hline
-{\ct BREAKUP\_SIGMA\_D}                  & Real        & Section~\ref{info:secondary_breakup}                                  &                &                       \\ \hline
-{\ct CHECK\_DISTRIBUTION}                & Logical     & Section~\ref{info:particle_size}                                      &                & {\ct .FALSE.}         \\ \hline
-{\ct CNF\_RAMP\_ID}                      & Character   & Section~\ref{info:particle_size}                                      &                &                       \\ \hline
-{\ct COLOR}                              & Character   & Section~\ref{info:part_output}                                        &                & {\ct 'BLACK'}         \\ \hline
-{\ct COMPLEX\_REFRACTIVE\_INDEX}         & Real        & Section~\ref{radiative_part_props}                                    &                & 0.01                  \\ \hline
-{\ct CTRL\_ID}                           & Character   & Section~\ref{info:particle_flux}                                      &                &                       \\ \hline
-{\ct DENSE\_VOLUME\_FRACTION}            & Real        & Section~\ref{info:DENSE_VOLUME_FRACTION}                              &                & $1\times 10^{-5}$     \\ \hline
-{\ct DEVC\_ID}                           & Character   & Section~\ref{info:particle_flux}                                      &                &                       \\ \hline
-{\ct DIAMETER}                           & Real        & Section~\ref{info:particle_size}                                      & $\mu$m         &                       \\ \hline
-{\ct DISTRIBUTION}                       & Character   & Section~\ref{info:particle_size}                                      &                & {\ct 'ROSIN...'}      \\ \hline
-{\ct DRAG\_COEFFICIENT(3)}               & Real Array  & Section~\ref{info:particle_drag}                                      &                &                       \\ \hline
-{\ct DRAG\_LAW}                          & Character   & Section~\ref{info:particle_drag}                                      &                & {\ct 'SPHERE'}        \\ \hline
-{\ct FREE\_AREA\_FRACTION}               & Real        & Section~\ref{info:particle_screen}                                    &                &                       \\ \hline
-{\ct GAMMA\_D}                           & Real        & Section~\ref{info:particle_size}                                      &                & 2.4                   \\ \hline
-{\ct HEAT\_OF\_COMBUSTION}               & Real        & Section~\ref{info:fuel_droplets}                                      & kJ/kg          &                       \\ \hline
-{\ct HORIZONTAL\_VELOCITY}               & Real        & Section~\ref{info:surface_droplets}                                   & m/s            &  0.2                  \\ \hline
-{\ct ID}                                 & Character   & Section~\ref{info:PART_Basics}                                        &                &                       \\ \hline
-{\ct INITIAL\_TEMPERATURE}               & Real        & Section~\ref{thermal_part_props}                                      & $^\circ$C      & {\ct TMPA}            \\ \hline
-{\ct KILL\_DIAMETER}                     & Real        & Section~\ref{info:particle_size}                                      & $\mu$m         &                       \\ \hline
-{\ct MASSLESS}                           & Logical     & Section~\ref{info:MASSLESS}                                           &                & {\ct .FALSE.}         \\ \hline
-{\ct MAXIMUM\_DIAMETER}                  & Real        & Section~\ref{info:particle_size}                                      & $\mu$m         & Infinite              \\ \hline
-{\ct MINIMUM\_DIAMETER}                  & Real        & Section~\ref{info:particle_size}                                      & $\mu$m         &                       \\ \hline
-{\ct MONODISPERSE}                       & Logical     & Section~\ref{info:particle_size}                                      &                & {\ct .FALSE.}         \\ \hline
-{\ct N\_STRATA}                          & Integer     & Section~\ref{info:particle_size}                                      &                & 6                     \\ \hline
-{\ct ORIENTATION(1:3,:)}                 & Real Array  & Section~\ref{info:PART_SURF}                                          &                &                       \\ \hline
-{\ct PERMEABILITY(3)}                    & Real Array  & Section~\ref{info:porous_media}                                       &                &                       \\ \hline
-{\ct POROUS\_VOLUME\_FRACTION}           & Real        & Section~\ref{info:porous_media}                                       &                &                       \\ \hline
-{\ct PROP\_ID}                           & Character   & Section~\ref{info:PART_Basics}                                        &                &                       \\ \hline
-{\ct QUANTITIES(10)}                     & Character   & Section~\ref{info:part_output}                                        &                &                       \\ \hline
-{\ct QUANTITIES\_SPEC\_ID(10)}           & Character   & Section~\ref{info:part_output}                                        &                &                       \\ \hline
-{\ct RADIATIVE\_PROPERTY\_TABLE}         & Real        & Section~\ref{radiative_part_props}                                    &                &                       \\ \hline
-{\ct REAL\_REFRACTIVE\_INDEX}            & Real        & Section~\ref{radiative_part_props}                                    &                & 1.33                  \\ \hline
-{\ct RGB(3)}                             & Integers    & Section~\ref{info:part_output}                                        &                &                       \\ \hline
-{\ct RUNNING\_AVERAGE\_FACTOR}           & Real        & Section~\ref{radiative_part_props}                                    &                & 0.5                   \\ \hline
-{\ct RUNNING\_AVERAGE\_FACTOR\_WALL}     & Real        & Section~\ref{radiative_part_props}                                    &                & 0.5                   \\ \hline
-{\ct SAMPLING\_FACTOR}                   & Integer     & Section~\ref{info:part_output}                                        &                & 1                     \\ \hline
-{\ct SECOND\_ORDER\_PARTICLE\_TRANSPORT} & Logical     & Section~\ref{info:PART_Stability}                                     &                & {\ct .FALSE.}         \\ \hline
-{\ct SHAPE\_FACTOR}                      & Real        & Sections~\ref{info:particle_radiation_absorption}, \ref{pine_needles} &                &                       \\ \hline
-{\ct SIGMA\_D}                           & Real        & Section~\ref{info:particle_size}                                      &                &                       \\ \hline
-{\ct SPEC\_ID}                           & Character   & Section~\ref{thermal_part_props}                                      &                &                       \\ \hline
-{\ct STATIC}                             & Logical     & Section~\ref{info:PART_SURF}                                          &                & {\ct .FALSE.}         \\ \hline
-{\ct SURFACE\_DIAMETER}                  & Real        & Section~\ref{info:surface_droplets}                                   & $\mu$m         & 1000.                 \\ \hline
-{\ct SURFACE\_TENSION}                   & Real        & Section~\ref{info:secondary_breakup}                                  & N/m            & $7.28 \times 10^{-2}$ \\ \hline
-{\ct SURF\_ID}                           & Character   & Section~\ref{info:PART_SURF}                                          &                &                       \\ \hline
-{\ct TURBULENT\_DISPERSION}              & Logical     & Section~\ref{info:MASSLESS}                                           &                & {\ct .FALSE.}         \\ \hline
-{\ct VERTICAL\_VELOCITY}                 & Real        & Section~\ref{info:surface_droplets}                                   & m/s            &  0.5                  \\ \hline
+{\ct AGE}                                & Real        & Section~\ref{info:part_output}                                        & s                 & $1\times 10^5$        \\ \hline
+{\ct BREAKUP}                            & Logical     & Section~\ref{info:secondary_breakup}                                  &                   & {\ct .FALSE.}         \\ \hline
+{\ct BREAKUP\_CNF\_RAMP\_ID}             & Character   & Section~\ref{info:secondary_breakup}                                  &                   &                       \\ \hline
+{\ct BREAKUP\_DISTRIBUTION}              & Character   & Section~\ref{info:secondary_breakup}                                  &                   & {\ct 'ROSIN...'}      \\ \hline
+{\ct BREAKUP\_GAMMA\_D}                  & Real        & Section~\ref{info:secondary_breakup}                                  &                   & 2.4                   \\ \hline
+{\ct BREAKUP\_RATIO}                     & Real        & Section~\ref{info:secondary_breakup}                                  &                   & $3/7$                 \\ \hline
+{\ct BREAKUP\_SIGMA\_D}                  & Real        & Section~\ref{info:secondary_breakup}                                  &                   &                       \\ \hline
+{\ct CHECK\_DISTRIBUTION}                & Logical     & Section~\ref{info:particle_size}                                      &                   & {\ct .FALSE.}         \\ \hline
+{\ct CNF\_RAMP\_ID}                      & Character   & Section~\ref{info:particle_size}                                      &                   &                       \\ \hline
+{\ct COLOR}                              & Character   & Section~\ref{info:part_output}                                        &                   & {\ct 'BLACK'}         \\ \hline
+{\ct COMPLEX\_REFRACTIVE\_INDEX}         & Real        & Section~\ref{radiative_part_props}                                    &                   & 0.01                  \\ \hline
+{\ct CTRL\_ID}                           & Character   & Section~\ref{info:particle_flux}                                      &                   &                       \\ \hline
+{\ct DENSE\_VOLUME\_FRACTION}            & Real        & Section~\ref{info:DENSE_VOLUME_FRACTION}                              &                   & $1\times 10^{-5}$     \\ \hline
+{\ct DEVC\_ID}                           & Character   & Section~\ref{info:particle_flux}                                      &                   &                       \\ \hline
+{\ct DIAMETER}                           & Real        & Section~\ref{info:particle_size}                                      & $\mu$m            &                       \\ \hline
+{\ct DISTRIBUTION}                       & Character   & Section~\ref{info:particle_size}                                      &                   & {\ct 'ROSIN...'}      \\ \hline
+{\ct DRAG\_COEFFICIENT(3)}               & Real Array  & Section~\ref{info:particle_drag}                                      &                   &                       \\ \hline
+{\ct DRAG\_LAW}                          & Character   & Section~\ref{info:particle_drag}                                      &                   & {\ct 'SPHERE'}        \\ \hline
+{\ct FREE\_AREA\_FRACTION}               & Real        & Section~\ref{info:particle_screen}                                    &                   &                       \\ \hline
+{\ct GAMMA\_D}                           & Real        & Section~\ref{info:particle_size}                                      &                   & 2.4                   \\ \hline
+{\ct HEAT\_OF\_COMBUSTION}               & Real        & Section~\ref{info:fuel_droplets}                                      & kJ/kg             &                       \\ \hline
+{\ct HORIZONTAL\_VELOCITY}               & Real        & Section~\ref{info:surface_droplets}                                   & m/s               &  0.2                  \\ \hline
+{\ct H\_SOLID\_TO\_DROPLET}              & Real        & Section~\ref{info:surface_droplets}                                   & \si{kJ/(m$^2$.K)} &  0.3                  \\ \hline
+{\ct ID}                                 & Character   & Section~\ref{info:PART_Basics}                                        &                   &                       \\ \hline
+{\ct INITIAL\_TEMPERATURE}               & Real        & Section~\ref{thermal_part_props}                                      & $^\circ$C          & {\ct TMPA}            \\ \hline
+{\ct KILL\_DIAMETER}                     & Real        & Section~\ref{info:particle_size}                                      & $\mu$m            &                       \\ \hline
+{\ct MASSLESS}                           & Logical     & Section~\ref{info:MASSLESS}                                           &                   & {\ct .FALSE.}         \\ \hline
+{\ct MAXIMUM\_DIAMETER}                  & Real        & Section~\ref{info:particle_size}                                      & $\mu$m            & Infinite              \\ \hline
+{\ct MINIMUM\_DIAMETER}                  & Real        & Section~\ref{info:particle_size}                                      & $\mu$m            &                       \\ \hline
+{\ct MONODISPERSE}                       & Logical     & Section~\ref{info:particle_size}                                      &                   & {\ct .FALSE.}         \\ \hline
+{\ct N\_STRATA}                          & Integer     & Section~\ref{info:particle_size}                                      &                   & 6                     \\ \hline
+{\ct ORIENTATION(1:3,:)}                 & Real Array  & Section~\ref{info:PART_SURF}                                          &                   &                       \\ \hline
+{\ct PERMEABILITY(3)}                    & Real Array  & Section~\ref{info:porous_media}                                       &                   &                       \\ \hline
+{\ct POROUS\_VOLUME\_FRACTION}           & Real        & Section~\ref{info:porous_media}                                       &                   &                       \\ \hline
+{\ct PROP\_ID}                           & Character   & Section~\ref{info:PART_Basics}                                        &                   &                       \\ \hline
+{\ct QUANTITIES(10)}                     & Character   & Section~\ref{info:part_output}                                        &                   &                       \\ \hline
+{\ct QUANTITIES\_SPEC\_ID(10)}           & Character   & Section~\ref{info:part_output}                                        &                   &                       \\ \hline
+{\ct RADIATIVE\_PROPERTY\_TABLE}         & Real        & Section~\ref{radiative_part_props}                                    &                   &                       \\ \hline
+{\ct REAL\_REFRACTIVE\_INDEX}            & Real        & Section~\ref{radiative_part_props}                                    &                   & 1.33                  \\ \hline
+{\ct RGB(3)}                             & Integers    & Section~\ref{info:part_output}                                        &                   &                       \\ \hline
+{\ct RUNNING\_AVERAGE\_FACTOR}           & Real        & Section~\ref{radiative_part_props}                                    &                   & 0.5                   \\ \hline
+{\ct RUNNING\_AVERAGE\_FACTOR\_WALL}     & Real        & Section~\ref{radiative_part_props}                                    &                   & 0.5                   \\ \hline
+{\ct SAMPLING\_FACTOR}                   & Integer     & Section~\ref{info:part_output}                                        &                   & 1                     \\ \hline
+{\ct SECOND\_ORDER\_PARTICLE\_TRANSPORT} & Logical     & Section~\ref{info:PART_Stability}                                     &                   & {\ct .FALSE.}         \\ \hline
+{\ct SHAPE\_FACTOR}                      & Real        & Sections~\ref{info:particle_radiation_absorption}, \ref{pine_needles} &                   &                       \\ \hline
+{\ct SIGMA\_D}                           & Real        & Section~\ref{info:particle_size}                                      &                   &                       \\ \hline
+{\ct SPEC\_ID}                           & Character   & Section~\ref{thermal_part_props}                                      &                   &                       \\ \hline
+{\ct STATIC}                             & Logical     & Section~\ref{info:PART_SURF}                                          &                   & {\ct .FALSE.}         \\ \hline
+{\ct SURFACE\_DIAMETER}                  & Real        & Section~\ref{info:surface_droplets}                                   & $\mu$m            & 1000.                 \\ \hline
+{\ct SURFACE\_TENSION}                   & Real        & Section~\ref{info:secondary_breakup}                                  & N/m               & $7.28 \times 10^{-2}$ \\ \hline
+{\ct SURF\_ID}                           & Character   & Section~\ref{info:PART_SURF}                                          &                   &                       \\ \hline
+{\ct TURBULENT\_DISPERSION}              & Logical     & Section~\ref{info:MASSLESS}                                           &                   & {\ct .FALSE.}         \\ \hline
+{\ct VERTICAL\_VELOCITY}                 & Real        & Section~\ref{info:surface_droplets}                                   & m/s               &  0.5                  \\ \hline
 \end{longtable}
 
 % Undocumented: EMBER_DENSITY_THRESHOLD (RJM), EMBER_PARTICLE (RJM), EMBER_VELOCITY_THRESHOLD (RJM), PRIMARY_BREAKUP_DRAG_REDUCTION_FACTOR (Simo), PRIMARY_BREAKUP_LENGTH (Simo)

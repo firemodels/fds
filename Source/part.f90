@@ -2178,7 +2178,7 @@ REAL(EB), POINTER, DIMENSION(:,:,:) :: DROP_DEN=>NULL(),DROP_RAD=>NULL(),DROP_TM
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZ_INTERIM=>NULL()
 REAL(EB) :: R_DROP,NUSSELT,K_AIR,H_V,H_V_REF, H_L,H_V2,&
             RVC,WGT,Q_CON_GAS,Q_CON_WALL,Q_RAD,H_HEAT,H_MASS,SH_FAC_GAS,SH_FAC_WALL,NU_FAC_GAS,NU_FAC_WALL,&
-            PR_AIR,M_VAP,M_VAP_MAX,MU_AIR,H_SOLID,Q_DOT_RAD,DEN_ADD,AREA_ADD,&
+            PR_AIR,M_VAP,M_VAP_MAX,MU_AIR,Q_DOT_RAD,DEN_ADD,AREA_ADD,&
             Y_DROP,Y_COND,Y_GAS,Y_GAS_NEW,LENGTH,U2,V2,W2,VEL,TMP_DROP_NEW,TMP_WALL,H_WALL,&
             SC_AIR,D_AIR,DHOR,SHERWOOD,X_DROP,M_DROP,RHO_G,MW_RATIO,MW_DROP,FTPR,&
             C_DROP,M_GAS,A_DROP,TMP_G,TMP_DROP,TMP_MELT,MINIMUM_FILM_THICKNESS,RE_L,Q_FRAC,Q_TOT,DT_SUBSTEP,&
@@ -2211,7 +2211,6 @@ M_DOT(4,NM) = 0._EB ! Total mass loss rate of droplets
 ! Rough estimates
 
 MINIMUM_FILM_THICKNESS = 1.E-5_EB   ! Minimum thickness of liquid film on the surface (m)
-H_SOLID                = 300._EB    ! Heat transfer coefficient from solid surface to drop (W/m2/K)
 
 ! Working arrays
 
@@ -2511,7 +2510,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                      ARRAY_CASE = 2
                   ENDIF
 
-                  IF (.NOT.CONSTANT_H_SOLID) THEN
+                  IF (.NOT.CONSTANT_H_SOLID_TO_DROPLET) THEN
                      LENGTH = 2._EB*R_DROP
                      NU_LIQUID = SS%MU_LIQUID / LPC%DENSITY
                      !Grashoff number
@@ -2540,7 +2539,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                      ! Incropera and Dewitt, Fundamentals of Heat and Mass Transfer, 7th Edition
                      NUSSELT  = NU_FAC_WALL*RE_L**0.8_EB-871._EB
                      SHERWOOD = SH_FAC_WALL*RE_L**0.8_EB-871._EB
-                     H_WALL   = H_SOLID
+                     H_WALL   = LPC%H_SOLID_TO_DROPLET
                   ENDIF
                   H_HEAT   = MAX(2._EB,NUSSELT)*K_AIR/LENGTH
                   IF (Y_DROP<=Y_GAS) THEN
