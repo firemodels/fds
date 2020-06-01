@@ -2960,6 +2960,31 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
       X_S_NEW(I) = R_S_NEW(0) - R_S_NEW(I)
       IF ((X_S_NEW(I)-X_S_NEW(I-1)) < TWO_EPSILON_EB) REMESH = .TRUE.
    ENDDO
+   
+   !If any nodes go to zero, apportion Q_S to surrounding nodes.
+   
+   IF (REMESH) THEN
+      IF (X_S_NEW(1)-X_S_NEW(0) < TWO_EPSILON_EB) Q_S(2) = Q_S(2) + Q_S(1)
+      IF (X_S_NEW(NWP)-X_S_NEW(NWP-1) < TWO_EPSILON_EB) Q_S(NWP-1) = Q_S(NWP-1) + Q_S(NWP)
+      DO I=2,NWP-1
+         IF (X_S_NEW(I) - X_S_NEW(I-1) < TWO_EPSILON_EB) THEN
+            N = 0
+            IF (X_S_NEW(I-1) - X_S_NEW(I-2) > TWO_EPSILON_EB) N=N+1
+            IF (X_S_NEW(I+1) - X_S_NEW(I) > TWO_EPSILON_EB) N=N+2
+            SELECT CASE (N)
+               CASE(1)
+                  Q_S(I-1) = Q_S(I-1) + Q_S(I)
+               CASE(2)
+                  Q_S(I+1) = Q_S(I+1) + Q_S(I) 
+               CASE(3)
+                  VOL = (R_S_NEW(I-1)**I_GRAD-R_S_NEW(I)**I_GRAD) / &
+                        ((R_S_NEW(I-1)**I_GRAD-R_S_NEW(I)**I_GRAD)+(R_S_NEW(I)**I_GRAD-R_S_NEW(I+1)**I_GRAD))
+                  Q_S(I-1) = Q_S(I-1) + Q_S(I) * VOL
+                  Q_S(I+1) = Q_S(I+1) + Q_S(I) * (1._EB-VOL)
+            END SELECT
+         ENDIF
+      ENDDO
+   ENDIF
 
    ! Re-generate grid for a wall changing thickness
 
@@ -3022,7 +3047,7 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
       ONE_D%X(0:NWP) = X_S_NEW(0:NWP)
 
       X_S_NEW = 0._EB
-      IF (REMESH) THEN
+      REMESH_IF: IF (REMESH) THEN
          
          RHO_H_S = 0._EB
          RHO_C_S = 0._EB
@@ -3054,11 +3079,9 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
          ALLOCATE(INT_WGT(NWP_NEW,NWP),STAT=IZERO)
          CALL GET_INTERPOLATION_WEIGHTS(SF%GEOMETRY,NWP,NWP_NEW,SF%INNER_RADIUS,ONE_D%X(0:NWP),X_S_NEW(0:NWP_NEW),INT_WGT)
          N_CELLS = MAX(NWP,NWP_NEW)
-
          CALL INTERPOLATE_WALL_ARRAY(N_CELLS,NWP,NWP_NEW,INT_WGT,Q_S(1:N_CELLS))
          CALL INTERPOLATE_WALL_ARRAY(N_CELLS,NWP,NWP_NEW,INT_WGT,RHO_H_S(1:N_CELLS))
          CALL INTERPOLATE_WALL_ARRAY(N_CELLS,NWP,NWP_NEW,INT_WGT,RHO_C_S(1:N_CELLS))
-
          DO N=1,SF%N_MATL
             ML  => MATERIAL(SF%MATL_INDEX(N))
             CALL INTERPOLATE_WALL_ARRAY(N_CELLS,NWP,NWP_NEW,INT_WGT,ONE_D%MATL_COMP(N)%RHO(1:N_CELLS))
@@ -3101,12 +3124,11 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
          ONE_D%N_LAYER_CELLS(1:SF%N_LAYERS) = N_LAYER_CELLS_NEW(1:SF%N_LAYERS)
          NWP = NWP_NEW
          ONE_D%X(0:NWP) = X_S_NEW(0:NWP)      ! Note: X(NWP+1...) are not set to zero.
-      ELSE
+      ELSE REMESH_IF
          CALL GET_WALL_NODE_WEIGHTS(NWP,SF%N_LAYERS,N_LAYER_CELLS_NEW,ONE_D%LAYER_THICKNESS(1:SF%N_LAYERS),SF%GEOMETRY, &
             ONE_D%X(0:NWP),LAYER_DIVIDE,DX_S(1:NWP),RDX_S(0:NWP+1),RDXN_S(0:NWP),DX_WGT_S(0:NWP),DXF,DXB, &
             LAYER_INDEX(0:NWP+1),MF_FRAC(1:NWP),SF%INNER_RADIUS)
-      ENDIF
-   
+      ENDIF REMESH_IF
    ENDIF REMESH_GRID
 
    ! Convert Q_S back to kW/m^3
@@ -3166,7 +3188,6 @@ ONE_D%K_S(NWP+1) = ONE_D%K_S(NWP)
 DO I=1,NWP-1
    ONE_D%K_S(I)  = 1._EB / ( DX_WGT_S(I)/ONE_D%K_S(I) + (1._EB-DX_WGT_S(I))/ONE_D%K_S(I+1) )
 ENDDO
-
 
 ! Update the 1-D heat transfer equation
 
