@@ -888,6 +888,7 @@ CHARACTER(LEN=1024) :: SLICEPARMS, SLICELABEL
 CHARACTER(7) :: SMLAB
 TYPE(PATCH_TYPE), POINTER :: PA
 INTEGER, PARAMETER :: SOOT=1, FIRE=2, TEMP=3, CO2=4
+INTEGER :: MULTI_RES
 
 
 TNOW=CURRENT_TIME()
@@ -1140,12 +1141,18 @@ DO N=1,M%N_SLCF
          WRITE(M%STRING(M%N_STRINGS),'(1X,A)') TRIM(FN_SLCF_GEOM(N,NM))
       ENDIF
       M%N_STRINGS = M%N_STRINGS + 1
-      IF (SL%ID/='null') THEN
-         WRITE(SLICELABEL,'(A,A,A,A,A,A,I6)') ' # ',TRIM(SL%SLICETYPE),' %',TRIM(SL%ID),TRIM(SLICEPARMS),&
-                                                ' ! ',SL%SLCF_INDEX
+
+      IF (SL%MULTI_RES) THEN
+         MULTI_RES = 1
       ELSE
-         WRITE(SLICELABEL,'(A,A,A,A,I6)') ' # ',TRIM(SL%SLICETYPE),TRIM(SLICEPARMS),&
-                                            ' ! ',SL%SLCF_INDEX
+         MULTI_RES = 0
+      ENDIF
+      IF (SL%ID/='null') THEN
+         WRITE(SLICELABEL,'(A,A,A,A,A,A,I6,1X,I2)') ' # ',TRIM(SL%SLICETYPE),' %',TRIM(SL%ID),TRIM(SLICEPARMS),&
+                                                ' ! ',SL%SLCF_INDEX, MULTI_RES
+      ELSE
+         WRITE(SLICELABEL,'(A,A,A,A,I6,1X,I2)') ' # ',TRIM(SL%SLICETYPE),TRIM(SLICEPARMS),&
+                                            ' ! ',SL%SLCF_INDEX, MULTI_RES
       ENDIF
       IF (SL%SLICETYPE=='STRUCTURED') THEN
          IF (SL%CELL_CENTERED) THEN
@@ -5817,7 +5824,27 @@ QUANTITY_LOOP: DO IQ=1,NQT
          STIME = REAL(T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR,FB)
          OPEN(LU_SLCF(IQ,NM),FILE=FN_SLCF(IQ,NM),FORM='UNFORMATTED',STATUS='OLD',POSITION='APPEND')
          WRITE(LU_SLCF(IQ,NM)) STIME
-         WRITE(LU_SLCF(IQ,NM)) (((QQ(I,J,K,1),I=I1,I2),J=J1,J2),K=K1,K2)
+         NX = I2 + 1 - I1
+         NY = J2 + 1 - J1
+         NZ = K2 + 1 - K1
+         IF(SL%MULTI_RES.AND.NX*NY*NZ.GT.0) THEN
+!    #define IJK(i,j,k) ((i)*ny*nz + (j)*nz +(k)) how C/C++ expects to see the data (PACK doesn't work)
+            ALLOCATE(QQ_PACK(NX*NY*NZ))
+            DO K = K1, K2
+               KFACT = (K-K1)
+               DO J = J1, J2
+                  JFACT = (J-J1)*NZ
+                  DO I = I1, I2
+                     IFACT = (I - I1)*NY*NZ
+                     QQ_PACK(1+IFACT+JFACT+KFACT) = QQ(I,J,K,1)
+                  ENDDO
+               ENDDO
+            ENDDO
+            WRITE(LU_SLCF(IQ,NM)) (QQ_PACK(SL%MULTI_RES_ORDER(I)),I=1,NX*NY*NZ)
+            DEALLOCATE(QQ_PACK)
+         ELSE
+            WRITE(LU_SLCF(IQ,NM)) (((QQ(I,J,K,1),I=I1,I2),J=J1,J2),K=K1,K2)
+         ENDIF
          CLOSE(LU_SLCF(IQ,NM))
 
          IF (SL%RLE) THEN
@@ -5829,7 +5856,6 @@ QUANTITY_LOOP: DO IQ=1,NQT
             IF (NX*NY*NZ>0) THEN
                ALLOCATE(QQ_PACK(NX*NY*NZ))
 
-!    #define IJK(i,j,k) ((i)*ny*nz + (j)*nz +(k)) how C/C++ expects to see the data (PACK doesn't work)
                DO K = K1, K2
                   KFACT = (K-K1)
                   DO J = J1, J2
