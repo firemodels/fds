@@ -3094,11 +3094,8 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
 
          ! Extract temperature
          DO I=1,NWP_NEW
-            ONE_D%MATL_COMP(:)%RHO(I) = ONE_D%MATL_COMP(:)%RHO(I) /&
-                            ((SF%INNER_RADIUS+X_S_NEW(NWP)-X_S_NEW(I-1))**I_GRAD-(SF%INNER_RADIUS+X_S_NEW(NWP)-X_S_NEW(I))**I_GRAD)
             H_NODE = RHO_H_S(I)
             T_NODE = H_NODE/RHO_C_S(I)
-
             IF (.NOT. CONST_C(I)) THEN
                T_SEARCH: DO
                   C_S = 0._EB
@@ -3106,7 +3103,7 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
                   ITMP = INT(T_NODE)
                   H_S = 0._EB
                   T_S: DO N=1,SF%N_MATL
-                     IF (ONE_D%MATL_COMP(N)%RHO(I)<=TWO_EPSILON_EB) CYCLE T_S
+                     IF (ONE_D%MATL_COMP(N)%RHO(I)<=0._EB) CYCLE T_S
                      ML  => MATERIAL(SF%MATL_INDEX(N))
                      H_S = H_S + (ML%H(ITMP)+(T_NODE-REAL(ITMP,EB))*(ML%H(ITMP+1)-ML%H(ITMP)))*ONE_D%MATL_COMP(N)%RHO(I)
                   ENDDO T_S
@@ -3116,6 +3113,8 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
                   T_NODE = ONE_D%TMP(I)
                ENDDO T_SEARCH
             ENDIF
+            ONE_D%MATL_COMP(:)%RHO(I) = ONE_D%MATL_COMP(:)%RHO(I) /&
+                            ((SF%INNER_RADIUS+X_S_NEW(NWP_NEW)-X_S_NEW(I-1))**I_GRAD-(SF%INNER_RADIUS+X_S_NEW(NWP_NEW)-X_S_NEW(I))**I_GRAD)
          ENDDO         
 
          ONE_D%TMP(0)         = 2._EB*ONE_D%TMP_F-ONE_D%TMP(1)   !Make sure front surface temperature stays the same
