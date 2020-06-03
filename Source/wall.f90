@@ -3058,13 +3058,15 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
             VOL = (THICKNESS+SF%INNER_RADIUS-ONE_D%X(I-1))**I_GRAD-(THICKNESS+SF%INNER_RADIUS-ONE_D%X(I))**I_GRAD
             MATL_REMESH: DO N=1,SF%N_MATL
                IF (ONE_D%MATL_COMP(N)%RHO(I)<=TWO_EPSILON_EB) CYCLE MATL_REMESH
-                  ML  => MATERIAL(SF%MATL_INDEX(N))
-                  ITMP = INT(ONE_D%TMP(I))
-                  H_S = ML%H(ITMP)+(ONE_D%TMP(I)-REAL(ITMP,EB))*(ML%H(ITMP+1)-ML%H(ITMP))
-                  RHO_H_S(I) = RHO_H_S(I) + ONE_D%MATL_COMP(N)%RHO(I) * H_S
+               ML  => MATERIAL(SF%MATL_INDEX(N))
+               ITMP = INT(ONE_D%TMP(I))
+               H_S = ML%H(ITMP)+(ONE_D%TMP(I)-REAL(ITMP,EB))*(ML%H(ITMP+1)-ML%H(ITMP))
+               RHO_H_S(I) = RHO_H_S(I) + ONE_D%MATL_COMP(N)%RHO(I) * H_S
             ENDDO MATL_REMESH
             RHO_H_S(I) = RHO_H_S(I) * VOL
-            ONE_D%MATL_COMP(:)%RHO(I) = ONE_D%MATL_COMP(:)%RHO(I) * VOL
+            DO N=1,SF%N_MATL
+               ONE_D%MATL_COMP(N)%RHO(I) = ONE_D%MATL_COMP(N)%RHO(I) * VOL
+            ENDDO
             RHO_C_S(I) = RHO_H_S(I) / ONE_D%TMP(I)
          ENDDO
 
@@ -3113,8 +3115,10 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
                   T_NODE = ONE_D%TMP(I)
                ENDDO T_SEARCH
             ENDIF
-            ONE_D%MATL_COMP(:)%RHO(I) = ONE_D%MATL_COMP(:)%RHO(I) /&
-                            ((SF%INNER_RADIUS+X_S_NEW(NWP_NEW)-X_S_NEW(I-1))**I_GRAD-(SF%INNER_RADIUS+X_S_NEW(NWP_NEW)-X_S_NEW(I))**I_GRAD)
+            DO N=1,SF%N_MATL
+               ONE_D%MATL_COMP(N)%RHO(I) = ONE_D%MATL_COMP(N)%RHO(I) /&
+                  ((SF%INNER_RADIUS+X_S_NEW(NWP_NEW)-X_S_NEW(I-1))**I_GRAD-(SF%INNER_RADIUS+X_S_NEW(NWP_NEW)-X_S_NEW(I))**I_GRAD)
+            ENDDO
          ENDDO         
 
          ONE_D%TMP(0)         = 2._EB*ONE_D%TMP_F-ONE_D%TMP(1)   !Make sure front surface temperature stays the same
