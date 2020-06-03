@@ -663,7 +663,7 @@ REAL(EB) :: NU_EDDY,DELTA,A_IJ(3,3),DUDX,DUDY,DUDZ,DVDX,DVDY,DVDZ,DWDX,DWDY,DWDZ
 
 REAL(EB) :: NVEC(IAXIS:KAXIS), TVEC1(IAXIS:KAXIS), TVEC2(IAXIS:KAXIS), VEL_WALL(IAXIS:KAXIS), VEL_CELL(IAXIS:KAXIS), &
             DN, RHO_WALL, MU_WALL, SLIP_FACTOR, TT(IAXIS:KAXIS), SS(IAXIS:KAXIS), &
-            U_NORM, U_ORTH, U_STRM, U_CELL, V_CELL, W_CELL, U_RELA(IAXIS:KAXIS)
+            U_NORM, U_ORTH, U_STRM, U_CELL, V_CELL, W_CELL, U_RELA(IAXIS:KAXIS), TNOW
 INTEGER  :: ICF,IND1,IND2
 TYPE(CFACE_TYPE), POINTER :: CFA
 TYPE(ONE_D_M_AND_E_XFER_TYPE), POINTER :: ONE_D
@@ -671,6 +671,8 @@ TYPE(SURFACE_TYPE), POINTER :: SF
 
 ! No need to compute WALE model turbulent viscosity on cut-cell region.
 IF (SIM_MODE==DNS_MODE) RETURN
+
+TNOW = CURRENT_TIME()
 
 IF (PREDICTOR) THEN
    RHOP => RHO
@@ -687,9 +689,13 @@ ELSE
 ENDIF
 
 ! Define velocities on gas cut-faces underlaying Cartesian faces.
-IF(.NOT.CC_VELOBC_FLAG) CALL CCIBM_INTERP_FACE_VEL(DT,NM,.TRUE.) ! The flag is to test without interpolation to Cartesian faces,
-                                                                 ! This is because we want to dispose of cartesian face
-                                                                 ! interpolations.
+IF(.NOT.CC_VELOBC_FLAG) THEN
+   T_USED(14) = T_USED(14) + CURRENT_TIME() - TNOW
+   CALL CCIBM_INTERP_FACE_VEL(DT,NM,.TRUE.) ! The flag is to test without interpolation to Cartesian faces,
+                                            ! This is because we want to dispose of cartesian face
+                                            ! interpolations.
+   TNOW = CURRENT_TIME()
+ENDIF
 
 ! WALE model on cells belonging to cut-cell region:
 DO K=1,KBAR
@@ -725,7 +731,11 @@ DO K=1,KBAR
    ENDDO
 ENDDO
 
-IF(.NOT.CC_VELOBC_FLAG) CALL CCIBM_INTERP_FACE_VEL(DT,NM,.FALSE.)
+IF(.NOT.CC_VELOBC_FLAG) THEN
+   T_USED(14) = T_USED(14) + CURRENT_TIME() - TNOW
+   CALL CCIBM_INTERP_FACE_VEL(DT,NM,.FALSE.)
+   TNOW = CURRENT_TIME()
+ENDIF
 
 
 ! Now compute U_TAU and Y_PLUS on CFACES:
@@ -764,6 +774,8 @@ DO ICF=1,N_CFACE_CELLS
    CALL WALL_MODEL(SLIP_FACTOR,ONE_D%U_TAU,ONE_D%Y_PLUS,MU_WALL/RHO_WALL,SF%ROUGHNESS,0.5_EB*DN,U_STRM)
 
 ENDDO
+
+T_USED(14) = T_USED(14) + CURRENT_TIME() - TNOW
 
 RETURN
 END SUBROUTINE CCREGION_COMPUTE_VISCOSITY
@@ -4264,8 +4276,8 @@ LOGICAL, INTENT(IN) :: DIAGNOSTICS
 ! Local Variables:
 INTEGER :: CODE
 REAL(EB):: TNOW
-!INTEGER :: NM,ICC,I,J,K
-!REAL(EB), POINTER, DIMENSION(:,:,:)  :: DP=>NULL()
+
+IF (FREEZE_VELOCITY .OR. SOLID_PHASE_ONLY) RETURN
 
 TNOW = CURRENT_TIME()
 
@@ -4553,6 +4565,9 @@ ELSE
    CALL MESH_CC_EXCHANGE2(4)
    CALL MESH_CC_EXCHANGE2(6)
 ENDIF
+
+CALL CCIBM_H_INTERP
+CALL CCIBM_RHO0W_INTERP
 
 ! Check divergence of initial velocity field:
 IF(GET_CUTCELLS_VERBOSE) CALL CCIBM_CHECK_DIVERGENCE(T,DT,.FALSE.)
@@ -12859,7 +12874,7 @@ USE TURBULENCE, ONLY : WALL_MODEL
 USE PHYSICAL_FUNCTIONS, ONLY: GET_VISCOSITY
 
 ! This routine is used to interpolate velocities in Cartesian Faces of type IBM_CUTCFE
-! (containing GASPHASE cut-faces), such that shear stresses used in momentum evorution
+! (containing GASPHASE cut-faces), such that shear stresses used in momentum evolution
 ! for surrounding regular cells are accurate.
 ! It assumes POINT_TO_MESH(NM) has already been called, and that required previous step
 ! velocities have been filled in CUT_FACE(ICF)%VEL_CARTCEN, CUT_FACE(ICF)%VELS_CARTCEN.
@@ -13278,7 +13293,7 @@ REAL(EB) :: U_VELO(MAX_DIM),U_SURF(MAX_DIM),U_RELA(MAX_DIM),&
 ! REAL(EB) :: DUSTRMDN_EP,DUSTRMDN_FP,AIJ(MAX_DIM,MAX_DIM),SIJ(MAX_DIM,MAX_DIM),&
 !             TIJ(MAX_DIM,MAX_DIM),TBAR_IJ(MAX_DIM,MAX_DIM)
 
-IF ( FREEZE_VELOCITY ) RETURN
+IF ( FREEZE_VELOCITY .OR. SOLID_PHASE_ONLY ) RETURN
 IF (PERIODIC_TEST == 103 .OR. PERIODIC_TEST == 11 .OR. PERIODIC_TEST==7) RETURN
 
 TNOW = CURRENT_TIME()
@@ -13638,6 +13653,8 @@ REAL(EB) :: U_VELO(MAX_DIM),U_SURF(MAX_DIM),U_RELA(MAX_DIM),&
             VAL_EP,DUMEB,COEF,TNOW,&
             U_NORM_EP,U_ORTH_EP,U_STRM_EP,U_NORM_FP,U_STRM_FP,DUSDN_FP
 
+IF (SOLID_PHASE_ONLY .OR. FREEZE_VELOCITY) RETURN
+
 TNOW = CURRENT_TIME()
 IF (PREDICTOR) PRFCT = 0._EB
 
@@ -13884,12 +13901,12 @@ INTEGER :: I,J,K,II,JJ,KK,IOR,IW,ICF,X1AXIS
 TYPE(WALL_TYPE), POINTER :: WC
 TYPE(EXTERNAL_WALL_TYPE), POINTER :: EWC
 
-TNOW=CURRENT_TIME()
-
 ! This is the CCIBM forcing routine for momentum eqns.
 
-IF ( FREEZE_VELOCITY ) RETURN
+IF (SOLID_PHASE_ONLY .OR. FREEZE_VELOCITY) RETURN
 IF ( PERIODIC_TEST == 103 .OR. PERIODIC_TEST == 11 .OR. PERIODIC_TEST==7) RETURN
+
+TNOW=CURRENT_TIME()
 
 RFODT = RELAXATION_FACTOR/DT
 
@@ -14028,9 +14045,13 @@ REAL(EB), INTENT(IN) :: DT
 
 ! Local Variables:
 INTEGER :: I,J,K
-REAL(EB):: UN_NEW, UN_NEW_OTHER, VELOCITY_ERROR
+REAL(EB):: UN_NEW, UN_NEW_OTHER, VELOCITY_ERROR, TNOW
 
+IF (SOLID_PHASE_ONLY) RETURN
+IF (FREEZE_VELOCITY)  RETURN
 IF (.NOT. PRES_ON_WHOLE_DOMAIN) RETURN ! No error in IBM_SOLID faces, solver used in Cartesian unstructured.
+
+TNOW = CURRENT_TIME()
 
 CALL POINT_TO_MESH(NM)
 
@@ -14089,6 +14110,8 @@ DO K=0,KBAR
       ENDDO
    ENDDO
 ENDDO
+
+T_USED(14) = T_USED(14) + CURRENT_TIME() - TNOW
 
 RETURN
 END SUBROUTINE CCIBM_COMPUTE_VELOCITY_ERROR
