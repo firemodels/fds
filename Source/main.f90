@@ -376,7 +376,7 @@ IF (RESTART) THEN
    DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       CALL READ_RESTART(T,DT,NM)
    ENDDO
-   CALL INIT_CUTCELL_DATA(T,DT)  ! Init centroid data (i.e. rho,zz) on cut-cells and cut-faces.
+   IF (CC_IBM) CALL INIT_CUTCELL_DATA(T,DT)  ! Init centroid data (i.e. rho,zz) on cut-cells and cut-faces.
    CALL STOP_CHECK(1)
 ENDIF
 
