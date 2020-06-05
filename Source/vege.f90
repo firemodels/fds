@@ -325,7 +325,7 @@ DO JJG=1,JBAR
 
       ! Establish the wind field
 
-      IF_CFD_COUPLED: IF (LEVEL_SET_COUPLED) THEN  ! The wind speed is derived from the CFD computation
+      IF_CFD_COUPLED: IF (LEVEL_SET_COUPLED_WIND) THEN  ! The wind speed is derived from the CFD computation
 
          U_LS(IIG,JJG) = 0.5_EB*(U(IIG-1,JJG,K_LS(IIG,JJG))+U(IIG,JJG,K_LS(IIG,JJG)))
          V_LS(IIG,JJG) = 0.5_EB*(V(IIG,JJG-1,K_LS(IIG,JJG))+V(IIG,JJG,K_LS(IIG,JJG)))
@@ -343,7 +343,7 @@ DO JJG=1,JBAR
 
          ! Find wind at ~6.1 m height for Farsite
 
-         IF (LEVEL_SET_COUPLED) THEN
+         IF (LEVEL_SET_COUPLED_WIND) THEN
 
             KWIND = 0
             DO KDUM = K_LS(IIG,JJG),KBAR
@@ -1167,7 +1167,7 @@ hsk  = rhob*hskz/swt
    
 bigIr = gamma*heat*etas*etaM
 
-IF (LEVEL_SET_COUPLED) THEN
+IF (LEVEL_SET_COUPLED_FIRE) THEN
    SF%MASS_FLUX(REACTION(1)%FUEL_SMIX_INDEX) = bigIr/heat
    SF%BURN_DURATION = 756._EB/SF%VEG_LSET_SIGMA   ! Albini (Eq. 14)
 ENDIF

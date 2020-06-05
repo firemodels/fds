@@ -7174,30 +7174,31 @@ The resulting vegetation temperatures are shown in Fig.~\ref{ground_vegetation_c
 
 For simulations of wildland fires spanning large areas that cannot be gridded finely enough to predict fire spread using a physics-based model, there is an empirical model built into FDS based on level sets~\cite{Bova:IJWF2015}. The methodology reproduces in an Eulerian framework the approach used in the Lagrangian-based fire front-tracking model FARSITE~\cite{Finney:FARSITE}. This approach makes use of the Rothermel-Albini~\cite{Rothermel:1972,Albini:1976} surface fire spread rate formulae and the assumption that a surface fire spreading from a point under certain wind, slope and vegetation conditions does so with an ellipse-shaped\footnote{There are other formulations of the level set method besides an elliptical fire front. The parameter {\ct LEVEL\_SET\_ELLIPSE=T} on the {\ct MISC} line is a placeholder until other methods are implemented.} fire front with, for a given wind speed, a fixed length-to-breadth ratio~\cite{Richards:1990}.
 
-The fire is initiated by specifying a small area to be ignited at a particular time:
+To invoke the level set feature, you {\em must} set {\ct LEVEL\_SET\_MODE} on the {\ct MISC} line to be either 1, 2, 3 or 4:
+\begin{description}
+\item[{\ct LEVEL\_SET\_MODE=1}] Only the level set simulation is performed. The wind is not affected by the terrain, and there is no fire.
+\item[{\ct LEVEL\_SET\_MODE=2}] The wind field is established over the terrain, but it is ``frozen'' when the fire ignites.
+\item[{\ct LEVEL\_SET\_MODE=3}] The wind field follows the terrain, but there is no actual fire in the simulation. It is just front-tracking.
+\item[{\ct LEVEL\_SET\_MODE=4}] The wind and fire are fully-coupled. When the fire front arrives at a given surface cell, it burns for a finite duration and with a heat release per unit area provided as part of the fuel model.
+\end{description}
+Regardless of the mode, the front propagation is initiated by specifying a small area to be ignited at a particular time:
 \begin{lstlisting}
 &SURF ID='Ignited Area', VEG_LSET_IGNITE_TIME=0., COLOR='RED' /
 &VENT XB=..., SURF_ID='Ignited Area' /
 \end{lstlisting}
 These lines indicate that a patch of terrain specified using {\ct XB} on the {\ct VENT} line ignites at the start of the simulation. If the terrain is constructed using the immersed boundary framework (i.e. a {\ct GEOM} line), add the logical parameter {\ct GEOM=T} to the {\ct VENT} line to indicate that the terrain geometry is an immersed boundary and does not conform exactly with the numerical grid. In such a case, the coordinates given by {\ct XB} designate a horizontal patch at the lowest level of the computational domain, and this plane is then projected upwards until it cuts through the terrain surface.
 
-Note that by setting {\ct LEVEL\_SET\_COUPLED=F} on the {\ct MISC} line, you can run the level set calculation without creating an actual fire. The default value of this parameter is {\ct .TRUE.}, meaning that a fire ignites when the fire front reaches a given point on the terrain.
+There are two options for specifying surface properties for the terrain:
 
-There are two options for specifying the surface properties:
-
-\paragraph{Option 1}
+\paragraph{Surface Option 1}
 
 The parameters for the 13 original Rothermel-Albini fuel models are listed in Table~\ref{tbl:Rothermel}. To use fuel model 5, for example, add the following lines:
 \begin{lstlisting}
-&SURF ID = 'Wet Brush'
-      VEG_LSET_FUEL_INDEX = 5
-      VEG_LSET_M1 = 0.06 /
+&SURF ID='Wet Brush', VEG_LSET_FUEL_INDEX=5, VEG_LSET_M1=0.06 /
 \end{lstlisting}
 This set of inputs invokes fuel model 5, but it also provides you with a way to change the default moisture content of the dead and live fuel components. {\ct M1}, {\ct M10}, and {\ct M100} set the moisture fraction of the 1~h, 10~h, and 100~h dead fuels, and {\ct MLW} and {\ct MLH} set the moisture fraction of the live woody and herbaceous fuels. The default values of these parameters are listed at the bottom of Table~\ref{tbl:Rothermel}.
 
-When the fire front arrives at a given surface cell, it burns for a finite duration and with a heat release per unit area provided as part of the fuel model.
-
-\paragraph{Option 2}
+\paragraph{Surface Option 2}
 
 In this second option, you create your own custom fuel type as follows:
 \begin{lstlisting}
@@ -7246,9 +7247,9 @@ For all models, the total mineral content $S_{\rm t}=0.056$, the effective miner
 
 \subsubsection{Examples of Uncoupled Level Set Calculations}
 
-Bova et al.~\cite{Bova:IJWF2015} compare the level set calculation that has been implemented in FDS with the identical algorithm in the U.S. Forest Service FARSITE model. The three contour plots in Fig.~\ref{Bova_fig} match those in Figs.~1(a), 1(b), and 4(a) in the paper. The FDS input files, {\ct WUI/Bova\_1a.fds}, {\ct WUI/Bova\_1b.fds}, and {\ct WUI/Bova\_4a.fds} all have the same {\ct SURF} line that defines the vegetation. Note that in these examples, there is no actual fire nor does the level set calculation depend on the local wind field ({\ct LEVEL\_SET\_COUPLED=F} on the {\ct MISC} line). The purpose of the exercise is simply to test the level set algorithm.
+Bova et al.~\cite{Bova:IJWF2015} compare the level set calculation that has been implemented in FDS with the identical algorithm in the U.S. Forest Service FARSITE model. The three contour plots in Fig.~\ref{Bova_fig} match those in Figs.~1(a), 1(b), and 4(a) in the paper. The FDS input files, {\ct WUI/Bova\_1a.fds}, {\ct WUI/Bova\_1b.fds}, and {\ct WUI/Bova\_4a.fds} all have the same {\ct SURF} line that defines the vegetation. Note that in these examples, there is no actual fire nor does the level set calculation depend on the local wind field ({\ct LEVEL\_SET\_MODE=1} on the {\ct MISC} line). The purpose of the exercise is simply to test the level set algorithm.
 \begin{lstlisting}
-&MISC ..., LEVEL_SET_COUPLED = F /
+&MISC ..., LEVEL_SET_MODE = 1 /
 &SURF ID = 'Custom Grass'
       VEG_LSET_ROS = 0.04
       VEG_LSET_SIGMA = 11400.
@@ -10572,8 +10573,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct HVAC\_MASS\_TRANSPORT}                         & Logical      & Section ~\ref{info:hvacmasstransport}   &            & {\ct .FALSE.}     \\ \hline
 {\ct HVAC\_PRES\_RELAX}                             & Real         & Section ~\ref{info:HVAC}                &            & 0.5               \\ \hline
 {\ct IBLANK\_SMV}                                   & Logical      & Section~\ref{info:SLCF}                 &            & {\ct .TRUE.}      \\ \hline
-{\ct LEVEL\_SET\_COUPLED}                           & Logical      & Section~\ref{info:level_set}            &            & {\ct .TRUE        \\ \hline
-{\ct LEVEL\_SET\_ELLIPSE}                           & Logical      & Section~\ref{info:level_set}            &            & {\ct .TRUE.}      \\ \hline
+{\ct LEVEL\_SET\_ELLIPSE}                           & Logical      & Section~\ref{info:level_set}            &            & {\ct .TRUE        \\ \hline
+{\ct LEVEL\_SET\_MODE}                              & Integer      & Section~\ref{info:level_set}            &            & 0                 \\ \hline
 {\ct MAXIMUM\_VISIBILITY}                           & Real         & Section~\ref{info:visibility}           &  m         &  30               \\ \hline
 {\ct MAX\_LEAK\_PATHS}                              & Integer      & Section~\ref{info:Leaks}                &            &  200              \\ \hline
 {\ct MPI\_TIMEOUT}                                  & Real         & Section~\ref{info:TIMING}               &  s         & 10.               \\ \hline
