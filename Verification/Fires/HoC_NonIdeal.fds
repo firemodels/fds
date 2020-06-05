@@ -1,5 +1,5 @@
 &HEAD CHID='HoC_NonIdeal', TITLE='Test' /
-&TIME TWFIN=4.0 /
+&TIME T_END=4.0 /
 
 &MESH IJK=10,10,10, XB=0.0,1.0,0.0,1.0,0.0,1.0 /
 
