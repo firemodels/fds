@@ -5828,14 +5828,13 @@ QUANTITY_LOOP: DO IQ=1,NQT
          NY = J2 + 1 - J1
          NZ = K2 + 1 - K1
          IF(SL%MULTI_RES.AND.NX*NY*NZ.GT.0) THEN
-!    #define IJK(i,j,k) ((i)*ny*nz + (j)*nz +(k)) how C/C++ expects to see the data (PACK doesn't work)
             ALLOCATE(QQ_PACK(NX*NY*NZ))
             DO K = K1, K2
-               KFACT = (K-K1)
+               KFACT = NX*NY*(K-K1)
                DO J = J1, J2
-                  JFACT = (J-J1)*NZ
+                  JFACT = (J-J1)*NX
                   DO I = I1, I2
-                     IFACT = (I - I1)*NY*NZ
+                     IFACT = (I - I1)
                      QQ_PACK(1+IFACT+JFACT+KFACT) = QQ(I,J,K,1)
                   ENDDO
                ENDDO
