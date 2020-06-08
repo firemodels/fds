@@ -5660,7 +5660,7 @@ The radiation solver is called before the start of the calculation to establish 
 
 
 \section{Absorption Coefficient of Gases and Soot}
-\label{info:RADI_RADCAL_Absorption}
+\label{info:RADI_Gas_and_Soot}
 
 By default FDS employs a gray gas model for the radiation absorption coefficient. Other options are the wide band model (often called Box Model in the radiation literature), and the Weighted Sum of Gray Gases (WSGG) model. The models are discussed in detail in the FDS Technical Reference Guide~\cite{FDS_Math_Guide}. 
 The radiation properties of most common gases involved in combustion processes (water vapor, carbon dioxide, carbon monoxide, fuel) and soot particles are automatically taken into account if the simulation involves combustion. In simulations with no combustion nor radiating species, it is possible to use a constant absorption coefficient by specifying {\ct KAPPA0} on the {\ct RADI} line.
@@ -5669,8 +5669,7 @@ You can output the gray absorption coefficient using the output {\ct QUANTITY} {
 The Wide Band and WSGG  models employ several values of the absorption coefficients for each location, and the {\ct 'ABSORPTION COEFFICIENT'} output quantity only shows one of them, making this output practically useless.
 
 \subsection{Gray Gas Model (default)}
-
-\label{info:RadCal}
+\label{info:RadCal} 
 
 The absorption coefficient is a function of gas composition and temperature. In the beginning of the simulation, FDS calls the RadCal narrow band model several times to build a look-up table of temperature dependent, gray specific absorption coefficients of all gases present in the simulation plus soot.  There are several considerations with regard to RadCal:
 
@@ -5701,7 +5700,7 @@ To activate the WSGG model, set {\ct WSGG\_MODEL=.TRUE.} on the RADI line. The W
 
 \section{Radiative Absorption and Scattering by Particles}
 
-\label{info:RADI_Absorption}
+\label{info:RADI_Two_Phase}
 
 The absorption and scattering of thermal radiation by Lagrangian particles is included in the radiation transport equation. The radiative properties can be given by specifying the components of the material refractive index on the corresponding {\ct PART} line, using keywords {\ct REAL\_REFRACTIVE\_INDEX} and {\ct COMPLEX\_REFRACTIVE\_INDEX}. Alternatively, wavelength dependent values of these two quantities can be tabulated in a {\ct TABLE} and called using the {\ct RADIATIVE\_PROPERTY\_TABLE}. More details can be found in Section~\ref{radiative_part_props}.
 
@@ -9550,7 +9549,7 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct QUANTITY}                           & Symbol                                        & Units          & File Type    \\
 \hline \hline
 \endhead
-{\ct ABSORPTION COEFFICIENT}                    & Section~\ref{info:RADI_RADCAL_Absorption}     & 1/m            & D,I,P,S      \\ \hline
+{\ct ABSORPTION COEFFICIENT}                    & Section~\ref{info:RADI_Gas_and_Soot}          & 1/m            & D,I,P,S      \\ \hline
 {\ct ACTUATED SPRINKLERS}                       & Section~\ref{info:TIMING}                     &                & D            \\ \hline
 {\ct ADIABATIC SURFACE TEMPERATURE}             & Section~\ref{info:AST}                        & $^\circ$C      & B,D          \\ \hline
 {\ct AEROSOL VOLUME FRACTION}$^1$               & Section~\ref{info:soot}                       & mol/mol        & D,I,P,S      \\ \hline
@@ -11018,23 +11017,23 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct RADI} (Radiation Parameters)} \\
 \hline \hline
 \endhead
-{\ct ANGLE\_INCREMENT}               & Integer      & Section~\ref{info:RADI_Resolution}   &            & 5              \\ \hline
+{\ct ANGLE\_INCREMENT}               & Integer      & Section~\ref{info:RADI_Gas_and_Soot} &            & 5              \\ \hline
 {\ct BAND\_LIMITS}                   & Real Array   & Section~\ref{info:RADI_Wide_Band}    & $\mu$m     &                \\ \hline
 {\ct C\_MAX}                         & Real         & Section~\ref{info:CHI_R}             &            & 100            \\ \hline
 {\ct C\_MIN}                         & Real         & Section~\ref{info:CHI_R}             &            & 1              \\ \hline
 {\ct INITIAL\_RADIATION\_ITERATIONS} & Integer      & Section~\ref{info:RADI_Resolution}   &            & 3              \\ \hline
-{\ct KAPPA0}                         & Real         & Section~\ref{info:RADI_Absorption}   & 1/m        & 0              \\ \hline
-{\ct MIE\_MINIMUM\_DIAMETER}         & Real         & Section~\ref{info:RADI_Absorption}   & $\mu$m     & 0.5            \\ \hline
-{\ct MIE\_MAXIMUM\_DIAMETER}         & Real         & Section~\ref{info:RADI_Absorption}   & $\mu$m     & 1.5$\times D$  \\ \hline
-{\ct MIE\_NDG}                       & Integer      & Section~\ref{info:RADI_Absorption}   &            & 50             \\ \hline
-{\ct NMIEANG}                        & Integer      & Section~\ref{info:RADI_Absorption}   &            & 15             \\ \hline
+{\ct KAPPA0}                         & Real         & Section~\ref{info:RADI_Gas_and_Soot} & 1/m        & 0              \\ \hline
+{\ct MIE\_MINIMUM\_DIAMETER}         & Real         & Section~\ref{info:RADI_Two_Phase}    & $\mu$m     & 0.5            \\ \hline
+{\ct MIE\_MAXIMUM\_DIAMETER}         & Real         & Section~\ref{info:RADI_Two_Phase}    & $\mu$m     & 1.5$\times D$  \\ \hline
+{\ct MIE\_NDG}                       & Integer      & Section~\ref{info:RADI_Two_Phase}    &            & 50             \\ \hline
+{\ct NMIEANG}                        & Integer      & Section~\ref{info:RADI_Two_Phase}    &            & 15             \\ \hline
 {\ct NUMBER\_RADIATION\_ANGLES}      & Integer      & Section~\ref{info:RADI_Resolution}   &            & 100            \\ \hline
 {\ct OPTICALLY\_THIN}                & Logical      & Section~\ref{info:CHI_R}             &            & {\ct .FALSE.}  \\ \hline
-{\ct PATH\_LENGTH }                  & Real         & Section~\ref{info:RADI_Wide_Band}    &   m        & 0.1            \\ \hline
+{\ct PATH\_LENGTH }                  & Real         & Section~\ref{info:RadCal}            &   m        & 0.1            \\ \hline
 {\ct QR\_CLIP}                       & Real         & Section~\ref{info:CHI_R}             & kW/m$^3$   & 10             \\ \hline
 {\ct RADIATION}                      & Logical      & Section~\ref{info:radiation_off}     &            & {\ct .TRUE.}   \\ \hline
 {\ct RADIATION\_ITERATIONS}          & Integer      & Section~\ref{info:RADI_Resolution}   &            & 1              \\ \hline
-{\ct RADTMP}                         & Real         & Section~\ref{info:RADI_Absorption}   & $^\circ$C   & 900            \\ \hline
+{\ct RADTMP}                         & Real         & Section~\ref{info:RADI_Two_Phase}    & $^\circ$C   & 900            \\ \hline
 {\ct SOOT\_DENSITY}                  & Real         & Section~\ref{info:RADI_WSGG}         & kg/m$^3$   & 1800            \\ \hline
 {\ct TIME\_STEP\_INCREMENT}          & Integer      & Section~\ref{info:RADI_Resolution}   &            & 3              \\ \hline
 {\ct WIDE\_BAND\_MODEL}              & Logical      & Section~\ref{info:RADI_Wide_Band}    &            & {\ct .FALSE.}  \\ \hline
