@@ -7,7 +7,13 @@ close all
 clear all
 
 outdir = '../../Verification/WUI/';
+infile = 'vegetation_absorb_devc.csv';
 
+if ~exist(infile)
+    display(['Error: File ',infile,' does not exist. Skipping case.'])
+    return
+end
+            
 M = importdata([outdir,'vegetation_absorb_devc.csv'],',',2);
 
 fid = fopen([outdir,'vegetation_absorb_FDS.csv'],'wt','n');
