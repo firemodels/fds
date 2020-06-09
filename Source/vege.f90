@@ -321,7 +321,13 @@ DO JJG=1,JBAR
 
       ! Ignite landscape at user specified location and time
 
-      IF (T>SF%VEG_LSET_IGNITE_T) PHI_LS(IIG,JJG) = PHI_LS_MAX
+      IF (PHI_LS(IIG,JJG)<0._EB .AND. T>SF%VEG_LSET_IGNITE_T) THEN
+         PHI_LS(IIG,JJG) = PHI_LS_MAX
+         IF (LEVEL_SET_MODE==2) THEN
+            FREEZE_VELOCITY = .TRUE.
+            SOLID_PHASE_ONLY = .TRUE.
+         ENDIF
+      ENDIF
 
       ! Establish the wind field
 

@@ -2170,7 +2170,7 @@ SELECT CASE(LEVEL_SET_MODE)
       SOLID_PHASE_ONLY       = .TRUE.
       TERRAIN_CASE           = .TRUE.
    CASE(2)
-      LEVEL_SET_COUPLED_WIND = .FALSE.
+      LEVEL_SET_COUPLED_WIND = .TRUE.
       LEVEL_SET_COUPLED_FIRE = .FALSE.
       RADIATION              = .FALSE.
       FREEZE_VELOCITY        = .FALSE.
@@ -2191,7 +2191,6 @@ SELECT CASE(LEVEL_SET_MODE)
       SOLID_PHASE_ONLY       = .FALSE.
       TERRAIN_CASE           = .TRUE.
 END SELECT
-
 
 ! Turbulence model
 
