@@ -1297,6 +1297,10 @@ OBST_LOOP: DO N=1,M%N_OBST
                M%WALL_INDEX_HT3D(IC,:) = 0
                CELL_COUNT = 0
                CELL_COUNT(0) = 1000000
+               IF (TWO_D) THEN  ! Don't search for a fuel path in the y direction
+                  CELL_COUNT( 2) = 1000000
+                  CELL_COUNT(-2) = 1000000
+               ENDIF
 
                MARCH_RIGHT: DO II=I+1,M%IBAR
                   ICN = M%CELL_INDEX(II,J,K)
