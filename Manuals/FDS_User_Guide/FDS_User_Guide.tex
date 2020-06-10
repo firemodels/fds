@@ -5662,14 +5662,14 @@ The radiation solver is called before the start of the calculation to establish 
 \section{Absorption Coefficient of Gases and Soot}
 \label{info:RADI_Gas_and_Soot}
 
-By default FDS employs a gray gas model for the radiation absorption coefficient. Other options are the wide band model (often called Box Model in the radiation literature), and the Weighted Sum of Gray Gases (WSGG) model. The models are discussed in detail in the FDS Technical Reference Guide~\cite{FDS_Math_Guide}. 
+By default FDS employs a gray gas model for the radiation absorption coefficient. Other options are the wide band model (often called Box Model in the radiation literature), and the Weighted Sum of Gray Gases (WSGG) model. The models are discussed in detail in the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 The radiation properties of most common gases involved in combustion processes (water vapor, carbon dioxide, carbon monoxide, fuel) and soot particles are automatically taken into account if the simulation involves combustion. In simulations with no combustion nor radiating species, it is possible to use a constant absorption coefficient by specifying {\ct KAPPA0} on the {\ct RADI} line.
 
-You can output the gray absorption coefficient using the output {\ct QUANTITY} {\ct 'ABSORPTION COEFFICIENT'}. 
+You can output the gray absorption coefficient using the output {\ct QUANTITY} {\ct 'ABSORPTION COEFFICIENT'}.
 The Wide Band and WSGG  models employ several values of the absorption coefficients for each location, and the {\ct 'ABSORPTION COEFFICIENT'} output quantity only shows one of them, making this output practically useless.
 
 \subsection{Gray Gas Model (default)}
-\label{info:RadCal} 
+\label{info:RadCal}
 
 The absorption coefficient is a function of gas composition and temperature. In the beginning of the simulation, FDS calls the RadCal narrow band model several times to build a look-up table of temperature dependent, gray specific absorption coefficients of all gases present in the simulation plus soot.  There are several considerations with regard to RadCal:
 
@@ -5689,14 +5689,14 @@ The original version of RadCal included only absorption data for methane, which 
 
 To use the optional wide band (box) model, set {\ct WIDE\_BAND\_MODEL=.TRUE.} on the {\ct RADI} line. It is recommended that this option only be used when the fuel is relatively non-sooting because it adds significantly to the cost of the calculation. Do not specify a {\ct RADIATIVE\_FRACTION} because it will not be used.
 
-When using the wide band model, the electromagnetic spectrum is divided in a relatively small number of bands, and within each band, the absorption coefficient is assumed constant, thus the name 'box'. These values are calculated with RadCal. The default operation with  {\ct WIDE\_BAND\_MODEL=.TRUE.} assumes six bands, and the sets of band limits have been pre-defined for the six bands of water, carbon dioxide, carbon monoxide, and a handful of fuel species. These fuels are {\ct 'ETHANE'}, {\ct 'ETHYLENE'}, {\ct 'METHANE'}, {\ct 'METHANOL'}, {\ct 'N-HEPTANE}, {\ct 'PROPANE'}, {\ct 'PROPYLENE'}, and {\ct 'TOLUENE'}.  
+When using the wide band model, the electromagnetic spectrum is divided in a relatively small number of bands, and within each band, the absorption coefficient is assumed constant, thus the name 'box'. These values are calculated with RadCal. The default operation with  {\ct WIDE\_BAND\_MODEL=.TRUE.} assumes six bands, and the sets of band limits have been pre-defined for the six bands of water, carbon dioxide, carbon monoxide, and a handful of fuel species. These fuels are {\ct 'ETHANE'}, {\ct 'ETHYLENE'}, {\ct 'METHANE'}, {\ct 'METHANOL'}, {\ct 'N-HEPTANE}, {\ct 'PROPANE'}, {\ct 'PROPYLENE'}, and {\ct 'TOLUENE'}.
 
 It is possible to set your own band limits by specifying {\ct BAND\_LIMITS} on the {\ct RADI} line. The limits should be given in ascending order, in units of microns ($\mu$m). The maximum number of bands is 9, in which case you would specify 10 real numbers separated by commas.
 
 \subsection{Weighted Sum of Gray Gases (WSGG)}
 \label{info:RADI_WSGG}
 
-To activate the WSGG model, set {\ct WSGG\_MODEL=.TRUE.} on the RADI line. The WSGG model calculates the absorption coefficient as a weighted sum of four gray coefficients, each being a function of gas composition (water vapor, carbon dioxide and soot) and temperature. Other gases are ignored. The soot absorption coefficient calculation assumes a value for the soot density, which can be set using {\ct SOOT\_DENSITY} parameter of the {\ct RADI} line. Do not set {\ct BAND\_LIMITS}. 
+To activate the WSGG model, set {\ct WSGG\_MODEL=.TRUE.} on the RADI line. The WSGG model calculates the absorption coefficient as a weighted sum of four gray coefficients, each being a function of gas composition (water vapor, carbon dioxide and soot) and temperature. Other gases are ignored. The soot absorption coefficient calculation assumes a value for the soot density, which can be set using {\ct SOOT\_DENSITY} parameter of the {\ct RADI} line. Do not set {\ct BAND\_LIMITS}.
 
 \section{Radiative Absorption and Scattering by Particles}
 
@@ -6945,7 +6945,7 @@ First, the {\ct PART} line defines a class of solid particles that represent pin
       DRAG_COEFFICIENT=2.8, SHAPE_FACTOR=0.15,
       PROP_ID='needle image', STATIC=.TRUE. /
 \end{lstlisting}
-{\ct STATIC=.TRUE.} specifies that the needles do not move, and {\ct SAMPLNIG\_FACTOR=1} specifies that each needle is to be shown in Smokeview. More importantly, this line specifies a drag coefficient for the needles based on wind tunnel measurements made at NIST~\cite{Falkenstein-Smith:2018}. The force per unit volume exerted by the vegetation is given by:
+{\ct STATIC=.TRUE.} specifies that the needles do not move, and {\ct SAMPLING\_FACTOR=1} specifies that each needle is to be shown in Smokeview. More importantly, this line specifies a drag coefficient for the needles based on wind tunnel measurements made at NIST~\cite{Falkenstein-Smith:2018}. The force per unit volume exerted by the vegetation is given by:
 \be
    \bof_{\rm b} = \frac{\rho}{2} \, C_{\rm d} \, C_{\rm s} \, \beta \, \sigma \, \bu \, ||\bu||
 \ee
