@@ -1301,73 +1301,62 @@ OBST_LOOP: DO N=1,M%N_OBST
                IF (.NOT.M%SOLID(IC)) CYCLE I_LOOP
                M%WALL_INDEX_HT3D(IC,:) = 0
                CELL_COUNT = 0
-               CELL_COUNT(0) = 1000000
-               IF (TWO_D) THEN  ! Don't search for a fuel path in the y direction
-                  CELL_COUNT( 2) = 1000000
-                  CELL_COUNT(-2) = 1000000
-               ENDIF
 
                MARCH_RIGHT: DO II=I+1,M%IBAR
                   ICN = M%CELL_INDEX(II,J,K)
-                  CELL_COUNT(1) = CELL_COUNT(1) + 1
                   IF (.NOT.M%SOLID(ICN)) THEN
+                     CELL_COUNT(1) = II-I
                      M%WALL_INDEX_HT3D(IC,1) = M%WALL_INDEX(ICN,-1)
                      EXIT MARCH_RIGHT
                   ENDIF
-                  IF (II==M%IBAR) CELL_COUNT(1) = 1000000
                ENDDO MARCH_RIGHT
 
                MARCH_LEFT: DO II=I-1,1,-1
                   ICN = M%CELL_INDEX(II,J,K)
-                  CELL_COUNT(-1) = CELL_COUNT(-1) + 1
                   IF (.NOT.M%SOLID(ICN)) THEN
+                     CELL_COUNT(-1) = I-II
                      M%WALL_INDEX_HT3D(IC,-1) = M%WALL_INDEX(ICN,1)
                      EXIT MARCH_LEFT
                   ENDIF
-                  IF (II==1) CELL_COUNT(-1) = 1000000
                ENDDO MARCH_LEFT
 
                MARCH_FORWARD: DO JJ=J+1,M%JBAR
                   ICN = M%CELL_INDEX(I,JJ,K)
-                  CELL_COUNT(2) = CELL_COUNT(2) + 1
                   IF (.NOT.M%SOLID(ICN)) THEN
+                     CELL_COUNT(2) = JJ-J
                      M%WALL_INDEX_HT3D(IC,2) = M%WALL_INDEX(ICN,-2)
                      EXIT MARCH_FORWARD
                   ENDIF
-                  IF (JJ==M%JBAR) CELL_COUNT(2) = 1000000
                ENDDO MARCH_FORWARD
 
                MARCH_BACK: DO JJ=J-1,1,-1
                   ICN = M%CELL_INDEX(I,JJ,K)
-                  CELL_COUNT(-2) = CELL_COUNT(-2) + 1
                   IF (.NOT.M%SOLID(ICN)) THEN
+                     CELL_COUNT(-2) = J-JJ
                      M%WALL_INDEX_HT3D(IC,-2) = M%WALL_INDEX(ICN,2)
                      EXIT MARCH_BACK
                   ENDIF
-                  IF (JJ==1) CELL_COUNT(-2) = 1000000
                ENDDO MARCH_BACK
 
                MARCH_UP: DO KK=K+1,M%KBAR
                   ICN = M%CELL_INDEX(I,J,KK)
-                  CELL_COUNT(3) = CELL_COUNT(3) + 1
                   IF (.NOT.M%SOLID(ICN)) THEN
+                     CELL_COUNT(3) = KK-K
                      M%WALL_INDEX_HT3D(IC,3) = M%WALL_INDEX(ICN,-3)
                      EXIT MARCH_UP
                   ENDIF
-                  IF (KK==M%KBAR) CELL_COUNT(3) = 1000000
                ENDDO MARCH_UP
 
                MARCH_DOWN: DO KK=K-1,1,-1
                   ICN = M%CELL_INDEX(I,J,KK)
-                  CELL_COUNT(-3) = CELL_COUNT(-3) + 1
                   IF (.NOT.M%SOLID(ICN)) THEN
+                     CELL_COUNT(-3) = K-KK
                      M%WALL_INDEX_HT3D(IC,-3) = M%WALL_INDEX(ICN,3)
                      EXIT MARCH_DOWN
                   ENDIF
-                  IF (KK==1) CELL_COUNT(-3) = 1000000
                ENDDO MARCH_DOWN
 
-               M%WALL_INDEX_HT3D(IC,0) = M%WALL_INDEX_HT3D(IC,MINLOC(CELL_COUNT,DIM=1)-4)
+               M%WALL_INDEX_HT3D(IC,0) = M%WALL_INDEX_HT3D(IC,MINLOC(CELL_COUNT,DIM=1,MASK=CELL_COUNT>0)-4)
 
             ENDDO I_LOOP
          ENDDO J_LOOP
