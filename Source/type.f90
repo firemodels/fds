@@ -138,7 +138,7 @@ END TYPE BAND_TYPE
 
 ! Note: If you change the number of scalar variables in ONE_D_M_AND_E_XFER_TYPE, adjust the numbers below
 
-INTEGER, PARAMETER :: N_ONE_D_SCALAR_REALS=33,N_ONE_D_SCALAR_INTEGERS=12,N_ONE_D_SCALAR_LOGICALS=1
+INTEGER, PARAMETER :: N_ONE_D_SCALAR_REALS=35,N_ONE_D_SCALAR_INTEGERS=12,N_ONE_D_SCALAR_LOGICALS=1
 
 !> \brief Variables associated with a WALL, PARTICLE, or CFACE boundary cell
 
@@ -213,6 +213,9 @@ TYPE ONE_D_M_AND_E_XFER_TYPE
    REAL(EB), POINTER :: Q_CONDENSE      !< Heat release rate per unit area (W/m2) due to gas condensation
    REAL(EB), POINTER :: K_SUPPRESSION   !< Suppression coefficent (m2/kg/s)
    REAL(EB), POINTER :: BURN_DURATION   !< Duration of a specified fire (s)
+   REAL(EB), POINTER :: T_SCALE         !< Scaled time for a surface with CONE_HEAT_FLUX (s)
+   REAL(EB), POINTER :: Q_SCALE         !< Scaled integrated heat release for a surface with CONE_HEAT_FLUX
+
 
    LOGICAL, POINTER :: BURNAWAY         !< Indicater if cell can burn away when fuel is exhausted
 
@@ -463,7 +466,7 @@ TYPE SURFACE_TYPE
                DT_INSERT,H_FIXED=-1._EB,H_FIXED_B=-1._EB,HM_FIXED=-1._EB,EMISSIVITY_BACK,CONV_LENGTH,XYZ(3),FIRE_SPREAD_RATE, &
                MINIMUM_LAYER_THICKNESS,INNER_RADIUS=0._EB,MASS_FLUX_VAR=-1._EB,VEL_BULK, &
                PARTICLE_SURFACE_DENSITY=-1._EB,DRAG_COEFFICIENT=2.8_EB,SHAPE_FACTOR=0.25_EB,&
-               MINIMUM_BURNOUT_TIME=1.E6_EB,DELTA_TMP_MAX=10._EB,BURN_DURATION=1.E6_EB
+               MINIMUM_BURNOUT_TIME=1.E6_EB,DELTA_TMP_MAX=10._EB,BURN_DURATION=1.E6_EB,CONE_HEAT_FLUX=-1._EB
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: DX,RDX,RDXN,X_S,DX_WGT,MF_FRAC,PARTICLE_INSERT_CLOCK
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: RHO_0
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: MASS_FRACTION,MASS_FLUX,TAU,ADJUST_BURN_RATE
