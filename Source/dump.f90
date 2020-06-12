@@ -9760,7 +9760,7 @@ IF (CC_IBM) THEN
       NC = 0
       I1=0; I2=-1; J1=0; J2=-1; K1=0; K2=-1; ! Just dummy numbers, not needed for INBOUND_FACES
       ! write geometry for slice file
-      IF (ABS(STIME-T_BEGIN)<TWO_EPSILON_EB) THEN
+      IF (ABS(REAL(T_BEGIN,FB)-T_BEGIN)<TWO_EPSILON_FB) THEN
          ! geometry and data file at first time step
          OPEN(LU_BNDF_GEOM(NF,NM),FILE=FN_BNDF_GEOM(NF,NM),FORM='UNFORMATTED',STATUS='REPLACE')
          CALL DUMP_SLICE_GEOM(LU_BNDF_GEOM(NF,NM),"INBOUND_FACES",1,STIME,I1,I2,J1,J2,K1,K2)
