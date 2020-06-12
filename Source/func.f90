@@ -978,6 +978,8 @@ ONE_D%Q_CONDENSE      => OS%REALS(RC+30,STORAGE_INDEX) ; IF (NEW) ONE_D%Q_CONDEN
 ONE_D%TMP_F_OLD       => OS%REALS(RC+31,STORAGE_INDEX) ; IF (NEW) ONE_D%TMP_F_OLD       = SF%TMP_FRONT
 ONE_D%K_SUPPRESSION   => OS%REALS(RC+32,STORAGE_INDEX) ; IF (NEW) ONE_D%K_SUPPRESSION   = 0._EB
 ONE_D%BURN_DURATION   => OS%REALS(RC+33,STORAGE_INDEX) ; IF (NEW) ONE_D%BURN_DURATION   = SF%BURN_DURATION
+ONE_D%T_SCALE         => OS%REALS(RC+34,STORAGE_INDEX) ; IF (NEW) ONE_D%T_SCALE         = 0._EB
+ONE_D%Q_SCALE         => OS%REALS(RC+35,STORAGE_INDEX) ; IF (NEW) ONE_D%Q_SCALE         = 0._EB
 
 I1 = RC+1+N_ONE_D_SCALAR_REALS ; I2 = I1 + SF%ONE_D_REALS_ARRAY_SIZE(1) - 1
 ONE_D%M_DOT_G_PP_ACTUAL(1:I2-I1+1) => OS%REALS(I1:I2,STORAGE_INDEX)
@@ -1356,7 +1358,10 @@ OBST_LOOP: DO N=1,M%N_OBST
                   ENDIF
                ENDDO MARCH_DOWN
 
-               M%WALL_INDEX_HT3D(IC,0) = M%WALL_INDEX_HT3D(IC,MINLOC(CELL_COUNT,DIM=1,MASK=CELL_COUNT>0)-4)
+               ! Note: If multiple elements in the CELL_COUNT array have the same value, which will happen at a corner
+               ! for example, then BACK=.TRUE. selects the last element.  This has the effect of giving precendence to +3
+               ! at a (+1,+3) corner, for example.
+               M%WALL_INDEX_HT3D(IC,0) = M%WALL_INDEX_HT3D(IC,MINLOC(CELL_COUNT,DIM=1,MASK=CELL_COUNT>0,BACK=.TRUE.)-4)
 
             ENDDO I_LOOP
          ENDDO J_LOOP
