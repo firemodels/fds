@@ -1358,7 +1358,10 @@ OBST_LOOP: DO N=1,M%N_OBST
                   ENDIF
                ENDDO MARCH_DOWN
 
-               M%WALL_INDEX_HT3D(IC,0) = M%WALL_INDEX_HT3D(IC,MINLOC(CELL_COUNT,DIM=1,MASK=CELL_COUNT>0)-4)
+               ! Note: If multiple elements in the CELL_COUNT array have the same value, which will happen at a corner
+               ! for example, then BACK=.TRUE. selects the last element.  This has the effect of giving precendence to +3
+               ! at a (+1,+3) corner, for example.
+               M%WALL_INDEX_HT3D(IC,0) = M%WALL_INDEX_HT3D(IC,MINLOC(CELL_COUNT,DIM=1,MASK=CELL_COUNT>0,BACK=.TRUE.)-4)
 
             ENDDO I_LOOP
          ENDDO J_LOOP
