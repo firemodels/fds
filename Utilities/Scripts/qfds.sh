@@ -785,7 +785,7 @@ walltimestring_pbs=
 walltimestring_slurm=
 if [ "$walltime" != "" ]; then
   walltimestring_pbs="-l walltime=$walltime"
-  walltimestring_slurm="-t $walltime"
+  walltimestring_slurm="--time=$walltime"
 fi
 
 #*** create a random script file for submitting jobs
@@ -811,8 +811,8 @@ if [ "$USE_SLURM_PBS" == "1" ]; then
 #SBATCH -J $JOBPREFIX$infile
 #SBATCH -e $outerr
 #SBATCH -o $outlog
-#SBATCH -p $queue
-#SBATCH -n $n_mpi_processes
+#SBATCH --partition=$queue
+#SBATCH --ntasks=$n_mpi_processes
 #SBATCH --nodes=$nodes
 #SBATCH --cpus-per-task=$n_openmp_threads
 #SBATCH --ntasks-per-node=$n_mpi_processes_per_node
