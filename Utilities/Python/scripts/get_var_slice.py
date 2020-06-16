@@ -51,6 +51,27 @@ def get_var_slice(inputFileName:str, varName:str = 'TEMPERATURE',
     with open(inputFileName) as ifile:    
         iflines = ifile.readlines()
         iflines = _join_continued_lines(iflines)
+        
+        dir = re.search('/',inputFileName)
+        if dir:
+            dir = re.search('(\S*)/', inputFileName).group(1)
+        else:
+            dir = "./"
+            
+    #---------- get chid, tstart, tend, nframes from input file
+    
+    tstart = 0
+    for line in iflines:
+        if line.find('&TIME') == 0:
+            tend = float(re.search('T_END\s*=\s*(\d*\.?\d*)', line).group(1))
+        if line.find('&DUMP') == 0:
+            nframes = int(re.search('NFRAMES\s*=\s*(\d*)', line).group(1))
+        if line.find('&HEAD') == 0:
+            chid = re.search("CHID\s*=\s*'(.+?)'", line).group(1)
+            
+    #nframes = 126 # doldb
+            
+        
     
     #---------- get varprops (list of tuples with: varname, plane dir, plane loc),
     #---------- also get index of variable of interest in this list: varind
@@ -70,19 +91,8 @@ def get_var_slice(inputFileName:str, varName:str = 'TEMPERATURE',
     
     mx, my, mz, nmx, nmy, nmz = _get_mesh_topology(iflines)
     
-    meshes = _get_meshes_for_plane(varprops[varind][1], varprops[varind][2], mx, my, mz)
+    meshes, ivarinmesh = _get_meshes_ivarinmesh(varind, varprops, mx,my,mz)
     
-    #---------- get chid, tstart, tend, nframes from input file
-    
-    tstart = 0
-    for line in iflines:
-        if line.find('&TIME') == 0:
-            tend = float(re.search('T_END\s*=\s*(\d*\.?\d*)', line).group(1))
-        if line.find('&DUMP') == 0:
-            nframes = int(re.search('NFRAMES\s*=\s*(\d*)', line).group(1))
-        if line.find('&HEAD') == 0:
-            chid = re.search("CHID\s*=\s*'(.+?)'", line).group(1)
-            
     #---------- read var from various mesh slice files, concatenate into single plane
     
     if varprops[varind][1]=='X':
@@ -98,7 +108,7 @@ def get_var_slice(inputFileName:str, varName:str = 'TEMPERATURE',
     for j in range(nm2):
         for i in range(nm1):
             imesh = j*nm1+i     # index in list of meshes
-            fname = f"{chid}_{meshes[imesh]+1:04d}_{varind+1:02d}.sf"
+            fname = f"{dir}/{chid}_{meshes[imesh]+1:04d}_{ivarinmesh[imesh]+1:02d}.sf"
             with _hide_print():
                 var, times = slread(fname, tstart, tend, nframes, gridskip=gridskip, timeskip=timeskip)
             if i==0:
@@ -124,6 +134,7 @@ def get_var_slice(inputFileName:str, varName:str = 'TEMPERATURE',
     X = X.T
     Y = Y.T
     
+    #return V, X, Y, planedir, times
     return V, X, Y, planedir
 
 ###############################################################################
@@ -271,22 +282,25 @@ def _get_mesh_topology(iflines: List[str]) -> Tuple[np.ndarray,np.ndarray,np.nda
 
 #-------------------------------------------------
 
-def _get_meshes_for_plane(mxyz: str, xyz: float, 
-                         mx: np.ndarray,
-                         my: np.ndarray,
-                         mz: np.ndarray) -> List[int]:
+def _get_meshes_ivarinmesh(varind: int, varprops: List[Tuple[str, str, float]],
+                           mx: np.ndarray, my: np.ndarray, mz: np.ndarray) -> Tuple[List[int],List[int]]:
     '''
-    Input mxyz: 'X' or 'Y', or 'Z' as the plane direction,
+    Input varind: index of variable of interest in list of SLCF lines.
+    Input varprops: list of tuples of variable properties e.g., (name, 'X', 15.0)
     Input mx, my, mz as the lists of mesh boundary locations in each direction.
-    Return list of meshes that the plane intersects.
-        (Only considers the lower meshes if the plane is between mesh boundaries.)
+    Return list of meshes that the plane intersects and index of the variable for that mesh.
+    (If the plane is on a mesh boundary, the lower of the two meshes is considered in the returned arrays.)
     '''
     
     nmx = len(mx)-1      # number of meshes in x dir
     nmy = len(my)-1      # number of meshes in y dir
     nmz = len(mz)-1      # number of meshes in z dir
     
+    mxyz = varprops[varind][1]
+    xyz  = varprops[varind][2]
+    
     meshes = []
+    ivarinmesh = []
     if mxyz == 'Z':
         for k in range(nmz):
             if xyz >= mz[k] and xyz < mz[k+1]:
@@ -294,6 +308,16 @@ def _get_meshes_for_plane(mxyz: str, xyz: float,
         for j in range(nmy):
             for i in range(nmx):
                 meshes.append( k*nmx*nmy + j*nmx + i)
+                iii = -1
+                for iv in range(varind+1):
+                    if   varprops[iv][1]=='X' and varprops[iv][2] >= mx[i] and varprops[iv][2] <= mx[i+1]:
+                        iii+=1
+                    elif varprops[iv][1]=='Y' and varprops[iv][2] >= my[j] and varprops[iv][2] <= my[j+1]:
+                        iii+=1
+                    elif varprops[iv][1]=='Z' and varprops[iv][2] >= mz[k] and varprops[iv][2] <= mz[k+1]:
+                        iii+=1
+                ivarinmesh.append(iii)
+                
     elif mxyz == 'Y':
         for j in range(nmy):
             if xyz >= my[j] and xyz < my[j+1]:
@@ -301,6 +325,16 @@ def _get_meshes_for_plane(mxyz: str, xyz: float,
         for k in range(nmz):
             for i in range(nmx):
                 meshes.append( k*nmx*nmy + j*nmx + i)
+                iii = -1
+                for iv in range(varind+1):
+                    if   varprops[iv][1]=='X' and varprops[iv][2] >= mx[i] and varprops[iv][2] <= mx[i+1]:
+                        iii+=1
+                    elif varprops[iv][1]=='Y' and varprops[iv][2] >= my[j] and varprops[iv][2] <= my[j+1]:
+                        iii+=1
+                    elif varprops[iv][1]=='Z' and varprops[iv][2] >= mz[k] and varprops[iv][2] <= mz[k+1]:
+                        iii+=1
+                ivarinmesh.append(iii)
+                
     elif mxyz == 'X':
         for i in range(nmx):
             if xyz >= mx[i] and xyz < mx[i+1]:
@@ -308,11 +342,20 @@ def _get_meshes_for_plane(mxyz: str, xyz: float,
         for k in range(nmz):
             for j in range(nmy):
                 meshes.append( k*nmx*nmy + j*nmx + i)
+                iii = -1
+                for iv in range(varind+1):
+                    if   varprops[iv][1]=='X' and varprops[iv][2] >= mx[i] and varprops[iv][2] <= mx[i+1]:
+                        iii+=1
+                    elif varprops[iv][1]=='Y' and varprops[iv][2] >= my[j] and varprops[iv][2] <= my[j+1]:
+                        iii+=1
+                    elif varprops[iv][1]=='Z' and varprops[iv][2] >= mz[k] and varprops[iv][2] <= mz[k+1]:
+                        iii+=1
+                ivarinmesh.append(iii)
     else:
         sys.error("ERROR: value is", mxyz, "but must be 'X', or 'Y', or 'Z'")
         
-    return meshes
-    
+    return meshes, ivarinmesh
+
 #-------------------------------------------------
 
 def _join_continued_lines(iflines: List[str]) -> List[str]:
