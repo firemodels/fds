@@ -25,6 +25,8 @@ IF "%SETUP_IFORT_COMPILER_64%"=="1" GOTO envexist
 
   echo Setting up compiler environment
   set STARTUP="%IFORT_COMPILER%\bin\compilervars"
+:: the compilervars script overwrites the mpi library locattion so we have to save it
+:: (the mpi install puts the mpi library in a different place than the Fortran install)
   set "I_MPI_ROOT_SAVE=%I_MPI_ROOT%"
   call %STARTUP% intel64
 
@@ -34,6 +36,8 @@ IF "%SETUP_IFORT_COMPILER_64%"=="1" GOTO envexist
   set   I_MPI_DEBUG_ROOT=%I_MPI_ROOT%\intel64\lib
   IF DEFINED IFORT_COMPILER19 set I_MPI_RELEASE_ROOT=%I_MPI_ROOT%\intel64\lib\release
   IF DEFINED IFORT_COMPILER19 set I_MPI_DEBUG_ROOT=%I_MPI_ROOT%\intel64\lib\debug
+  IF DEFINED IFORT_COMPILER20 set I_MPI_RELEASE_ROOT=%I_MPI_ROOT%\intel64\lib\release
+  IF DEFINED IFORT_COMPILER20 set I_MPI_DEBUG_ROOT=%I_MPI_ROOT%\intel64\lib\debug
   call "%I_MPI_ROOT%\intel64\bin\mpivars" release
 
 :envexist
