@@ -5840,7 +5840,7 @@ QUANTITY_LOOP: DO IQ=1,NQT
                   ENDDO
                ENDDO
             ENDDO
-            WRITE(LU_SLCF(IQ,NM)) (QQ_PACK(SL%MULTI_RES_ORDER(I)),I=1,NX*NY*NZ)
+            WRITE(LU_SLCF(IQ,NM)) (QQ_PACK(SL%REORDER_TO_KJI(I)),I=1,NX*NY*NZ)
             DEALLOCATE(QQ_PACK)
          ELSE
             WRITE(LU_SLCF(IQ,NM)) (((QQ(I,J,K,1),I=I1,I2),J=J1,J2),K=K1,K2)
