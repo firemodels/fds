@@ -999,7 +999,7 @@ ENDIF
 
 ! Solid 3D pyrolysis
 
-IF (ANY(OBSTRUCTION%PYRO3D)) SOLID_PYRO3D=.TRUE.
+IF (ANY(M%OBSTRUCTION%PYRO3D)) SOLID_PYRO3D=.TRUE.
 
 ! Initialize material densities for 3D pyrolysis
 

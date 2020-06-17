@@ -5840,7 +5840,7 @@ QUANTITY_LOOP: DO IQ=1,NQT
                   ENDDO
                ENDDO
             ENDDO
-            WRITE(LU_SLCF(IQ,NM)) (QQ_PACK(SL%MULTI_RES_ORDER(I)),I=1,NX*NY*NZ)
+            WRITE(LU_SLCF(IQ,NM)) (QQ_PACK(SL%REORDER_TO_KJI(I)),I=1,NX*NY*NZ)
             DEALLOCATE(QQ_PACK)
          ELSE
             WRITE(LU_SLCF(IQ,NM)) (((QQ(I,J,K,1),I=I1,I2),J=J1,J2),K=K1,K2)
@@ -9562,7 +9562,7 @@ USE PHYSICAL_FUNCTIONS, ONLY : GET_MASS_FRACTION_ALL
 REAL(EB) :: VC,Y_MF_INT(1:N_SPECIES),ZZ_GET(1:N_TRACKED_SPECIES)
 REAL(EB), INTENT(IN) :: DT
 INTEGER, INTENT(IN) :: NM
-INTEGER :: I,J,K
+INTEGER :: I,J,K,ICC,JCC,NCELL
 
 IF (.NOT.MASS_FILE) RETURN
 
@@ -9576,6 +9576,21 @@ DO K=1,KBAR
          IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
          IF (NM>1) THEN
             IF (INTERPOLATED_MESH(I,J,K)/=0) CYCLE
+         ENDIF
+         IF (CC_IBM) THEN
+            IF (CCVAR(I,J,K,IBM_CGSC) == IBM_SOLID) CYCLE
+            IF (CCVAR(I,J,K,IBM_IDCC) > 0) THEN ! we have a cutcell
+               ICC=CCVAR(I,J,K,IBM_IDCC)
+               NCELL=CUT_CELL(ICC)%NCELL
+               DO JCC=1,NCELL
+                  VC = CUT_CELL(ICC)%VOLUME(JCC)
+                  MINT(0,NM) = MINT(0,NM) + VC*CUT_CELL(ICC)%RHO(JCC)
+                  ZZ_GET(1:N_TRACKED_SPECIES) = CUT_CELL(ICC)%ZZ(1:N_TRACKED_SPECIES,JCC)
+                  CALL GET_MASS_FRACTION_ALL(ZZ_GET,Y_MF_INT)
+                  MINT(1:N_SPECIES,NM) = MINT(1:N_SPECIES,NM) + CUT_CELL(ICC)%RHO(JCC)*Y_MF_INT(1:N_SPECIES)*VC
+               ENDDO
+               CYCLE
+            ENDIF
          ENDIF
          VC = DX(I)*RC(I)*DY(J)*DZ(K)
          MINT(0,NM) = MINT(0,NM) + VC*RHO(I,J,K)
