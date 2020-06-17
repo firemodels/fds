@@ -2167,8 +2167,17 @@ In order for species mass fractions to be physically realizable they must all be
 \label{fig:realizable_mass_fractions}
 \end{figure}
 
+\subsection{Integral Mass Test for Complex Geometry (\texorpdfstring{\textct{geom\_mass\_file\_test}}{geom\_mass\_file\_test})}
+\label{geom_mass_file_test}
 
+A 1 m$^3$ box contains AIR at ambient conditions and has a sphere of radius 0.5 m leaving a volume of 0.4764 $m^3$.  The FDS {\ct MASS\_FILE} output is tested to ensure the correct cut cell volumes are being computed and the primitive species for AIR are correctly output.  The results are shown below in Fig.~\ref{fig:geom_mass_file_test}.
 
+\begin{figure}[ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/geom_mass_file_test}
+\caption[The \textct{geom\_mass\_file\_test} test case]{Results of the \textct{geom\_mass\_file\_test} test case.}
+\label{fig:geom_mass_file_test}
+\end{figure}
 
 \section{Energy Conservation}
 
@@ -4803,7 +4812,7 @@ This section tests a model for extrapolating heat release rate data from a cone 
 	\includegraphics[height=2.2in]{SCRIPT_FIGURES/cone_demo_2}
 	\caption[Cone data extrapolation model (the {\ct cone\_demo\_2} case)]{Check of the cone data extrapolation model.}
 	\label{fig:cone_demo_2}
-\end{figure} 
+\end{figure}
 
 \chapter{Lagrangian Particles}
 
@@ -5535,7 +5544,7 @@ The solution is that $\Delta p=344.16$~Pa, as shown in Fig.~\ref{fig_leak_test_4
 
 \begin{figure}[ht]
   \centering
-      \scalebox{1.0}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/leak_test_4} } 
+      \scalebox{1.0}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/leak_test_4} }
    \caption[The \textct{leak\_test\_4} test case]{Pressure rise in a compartment constructed of immersed boundary obstructions.}
    \label{fig_leak_test_4}
 \end{figure}
