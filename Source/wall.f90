@@ -2473,7 +2473,7 @@ UNPACK_WALL_PARTICLE: IF (PRESENT(WALL_INDEX)) THEN
    ONE_D => WC%ONE_D
    KK  = ONE_D%KK
    I_OBST = WC%OBST_INDEX
-   IWB = WC%BACK_INDEX
+   IWB = WC%BACK_INDEX  ! Wall cell index of backside of side
 
    ! Take away energy flux due to water evaporation
 
@@ -2491,7 +2491,7 @@ ELSEIF (PRESENT(CFACE_INDEX)) THEN UNPACK_WALL_PARTICLE
    ONE_D => CFA%ONE_D
    KK = ONE_D%KK
    I_OBST = 0
-   IWB = -1
+   IWB = 0  ! Back wall face is VOID
    Q_WATER_F = ONE_D%Q_CONDENSE
 
 ELSEIF (PRESENT(PARTICLE_INDEX)) THEN UNPACK_WALL_PARTICLE
@@ -2503,7 +2503,7 @@ ELSEIF (PRESENT(PARTICLE_INDEX)) THEN UNPACK_WALL_PARTICLE
    SF => SURFACE(SURF_INDEX)
    KK  = ONE_D%KKG
    I_OBST = 0
-   IWB = -1
+   IWB = -1  ! Special back conditions for a particle
    Q_WATER_F = ONE_D%Q_CONDENSE
    R_SURF=SUM(ONE_D%LAYER_THICKNESS(1:SF%N_LAYERS))
    U_SURF=LP%U
