@@ -348,9 +348,9 @@ The new cell mean mass fraction is found be evaluating Eq.~(\ref{eq:final_comp})
 \label{eq:final_comp2}
 \widetilde{Y}_{\alpha}(\delta t)= \zeta(\delta t) \, \widetilde{Y}_{\alpha}^0 + (1-\zeta(\delta t)) \, \hat{Y}_{\alpha}(\delta t)
 \end{equation}
-The heat release per unit volume is then found by summing the species mass production rates times the respective heats of formation:
+The heat release per unit volume, defined as $\dot{q}''' \equiv - \sum_\alpha \dot{m}_\alpha''' \, \Delta h_{{\rm f},\alpha}^0$, is then found by summing the species mass production rates times the respective heats of formation:
 \begin{equation}\label{eq:vol_heat_gen}
-\dot{q}''' = \rho  \sum_{\alpha} \left( \widetilde{Y}_{\alpha}(\delta t)-\widetilde{Y}_{\alpha}^0 \right) \, \Delta h_{{\rm f},\alpha}^0
+\dot{q}''' = - \rho  \sum_{\alpha} \frac{ \left( \widetilde{Y}_{\alpha}(\delta t)-\widetilde{Y}_{\alpha}^0 \right) }{\delta t} \, \Delta h_{{\rm f},\alpha}^0
 \end{equation}
 
 

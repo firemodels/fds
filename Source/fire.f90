@@ -403,7 +403,7 @@ ENDDO INTEGRATION_LOOP
 
 ! Compute heat release rate
 
-Q_OUT = -RHO_IN*SUM(SPECIES_MIXTURE%H_F*(ZZ_GET-ZZ_0))/DT ! FDS Tech Guide (5.44)
+Q_OUT = -RHO_IN*SUM(SPECIES_MIXTURE%H_F*(ZZ_GET-ZZ_0))/DT ! FDS Tech Guide (5.47)
 
 ! Extinction model
 
