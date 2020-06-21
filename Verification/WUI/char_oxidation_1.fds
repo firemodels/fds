@@ -39,7 +39,6 @@ CP_VEG = 1.02 + 0.0037*TMP_VEG kJ/kg/C Ritchie IAFSS 1997:177-188
 
 
 &MATL ID                 = 'CHAR'
-      ALPHA_CHAR         = 1.0
       DENSITY            = 300.
       CONDUCTIVITY       = 0.052
       SPECIFIC_HEAT_RAMP = 'cp_char'
