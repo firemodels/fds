@@ -7340,7 +7340,7 @@ The equation governing the temperature of the thermally-thick solid is
 \ee
 where $I$ is 1 for cylindrical and 2 for spherical coordinates. The source term is given by
 \be
-\dot{q}'''_{\rm s} = -\rho_{\rm s}(0) \left( \Delta{h_{\rm H_2O}}\ r_{\rm H_2O} + \Delta {h_{\rm pyr}}\ r_{\rm pyr} +  \Delta{h_{\rm char}}\ r_{\rm char} \right) 
+\dot{q}'''_{\rm s} = -\rho_{\rm s}(0) \left( \Delta{h_{\rm H_2O}}\ r_{\rm H_2O} + \Delta {h_{\rm pyr}}\ r_{\rm pyr} +  \Delta{h_{\rm char}}\ r_{\rm char} \right)
 \ee
 and the boundary condition
 \be
@@ -8681,7 +8681,7 @@ In addition to point measurements, the {\ct DEVC} group can be used to report in
 \begin{lstlisting}
 &DEVC XB=0.3,0.5,2.1,2.5,3.0,3.0, QUANTITY='MASS FLOW', ID='whatever' /
 \end{lstlisting}
-Note that in this case, a plane is specified rather than a point. The sextuplet {\ct XB} is used for this purpose. Notice when a flow is desired, two of the six coordinates need to be the same. Another {\ct QUANTITY}, {\ct HRR}, can be used to compute the total heat release rate within a subset of the domain. In this case, the sextuplet {\ct XB} ought to define a volume rather than a plane. Specification of the plane or volume over which the integration is to take place can only be done using {\ct XB} -- avoid planes or volumes that cross multiple mesh boundaries. FDS has to decide which mesh to use in the integration, and it chooses the finest mesh overlapping the centroid of the designated plane or volume.
+Note that in this case, a plane is specified rather than a point. The sextuplet {\ct XB} is used for this purpose. Notice when a flow is desired, two of the six coordinates need to be the same. Another {\ct QUANTITY}, {\ct HRR}, can be used to compute the total heat release rate within a subset of the domain. In this case, the sextuplet {\ct XB} ought to define a volume rather than a plane. Specification of the plane or volume over which the integration is to take place can only be done using {\ct XB}---avoid planes or volumes that cross multiple mesh boundaries. FDS has to decide which mesh to use in the integration, and it chooses the finest mesh overlapping the centroid of the designated plane or volume.
 
 
 
@@ -10279,7 +10279,7 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct RADIATION LOSS}                            & $\nabla \cdot \bq_r''$                            & kW/m$^3$       & D,I,P,S      \\ \hline
 {\ct RANDOM NUMBER}                             & Uniform random variable over [0,1]                &                & D            \\ \hline
 {\ct REAC SOURCE TERM}$^1$                      & $\dot{m}_\alpha^{\prime\prime\prime}$             & kg/m$^3$       & D,I,P,S      \\ \hline
-{\ct STRAIN RATE}                               & $2(S_{ij}S_{ij}-1/3(\nabla\cdot\mathbf{u})^2)$          & 1/s            & D,I,P,S      \\ \hline
+{\ct STRAIN RATE}                               & $2(S_{ij}S_{ij}-1/3(\nabla\cdot\mathbf{u})^2)$    & 1/s            & D,I,P,S      \\ \hline
 {\ct STRAIN RATE X}                             & $\partial w/\partial y + \partial v/\partial z$   & 1/s            & D,I,P,S      \\ \hline
 {\ct STRAIN RATE Y}                             & $\partial u/\partial z + \partial w/\partial x$   & 1/s            & D,I,P,S      \\ \hline
 {\ct STRAIN RATE Z}                             & $\partial v/\partial x + \partial u/\partial y$   & 1/s            & D,I,P,S      \\ \hline
@@ -10303,7 +10303,8 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct VORTICITY Z}                               & $\partial v/\partial x - \partial u/\partial y$   & 1/s            & D,I,P,S      \\ \hline
 %{\ct WALL CELL BOUNDARY TYPE}                   & Index of {\ct WC\%BOUNDARY\_TYPE} for debug       &                & B            \\ \hline
 %{\ct WALL CELL THERMAL BOUNDARY TYPE}           & Index of {\ct SF\%THERMAL\_BC\_INDEX} for debug   &                & B            \\ \hline
-{\ct WALL PRESSURE}                             & Section~\ref{info:distributed_forces} &     Pa                       & B,D         \\ \hline
+{\ct WALL ENTHALPY}                             & $\int \rho_s c_s T \,\d V_s$                      & kJ             & B,D          \\ \hline
+{\ct WALL PRESSURE}                             & Section~\ref{info:distributed_forces}             & Pa             & B,D          \\ \hline
 {\ct WALL VISCOSITY}                            & Near-wall viscosity, $\mu_w$                      & \si{kg/(m.s)}  & B,D          \\ \hline
 {\ct WAVELET ERROR}$^3$                         & Section~\ref{info:meshquality}                    &                & S            \\ \hline
 \end{longtable}
