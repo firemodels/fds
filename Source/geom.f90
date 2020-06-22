@@ -13583,15 +13583,12 @@ RCEDGE_LOOP_1 : DO IEDGE=1,MESHES(NM)%IBM_NRCEDGE
       SELECT CASE(X1AXIS)
          CASE(IAXIS)
             MU_FP   = 0.25_EB*(MU(I,J,K) + MU(I,J+1,K) + MU(I,J+1,K+1) + MU(I,J,K+1) )
-            MU_FP   = MAX(MU(I,J,K) , MU(I,J+1,K) , MU(I,J+1,K+1) , MU(I,J,K+1))
             TAU_E((/-2,-1,1,2/),IBM_RCEDGE(IEDGE)%IE) = MU_FP*TBAR_IJ(JAXIS,KAXIS)
          CASE(JAXIS)
             MU_FP   = 0.25_EB*(MU(I,J,K) + MU(I+1,J,K) + MU(I+1,J,K+1) + MU(I,J,K+1) )
-            MU_FP   = MAX(MU(I,J,K) , MU(I+1,J,K) , MU(I+1,J,K+1) , MU(I,J,K+1))
             TAU_E((/-2,-1,1,2/),IBM_RCEDGE(IEDGE)%IE) = MU_FP*TBAR_IJ(IAXIS,KAXIS)
          CASE(KAXIS)
             MU_FP   = 0.25_EB*(MU(I,J,K) + MU(I,J+1,K) + MU(I+1,J+1,K) + MU(I+1,J,K) )
-            MU_FP   = MAX(MU(I,J,K) , MU(I,J+1,K) , MU(I+1,J+1,K) , MU(I+1,J,K))
             TAU_E((/-2,-1,1,2/),IBM_RCEDGE(IEDGE)%IE) = MU_FP*TBAR_IJ(IAXIS,JAXIS)
       END SELECT
 
