@@ -5298,6 +5298,18 @@ In the test case called {\ct Sprinklers\_and\_Sprays/geom\_sprk\_mass.fds}, two 
 \caption[The {\ct geom\_sprk\_mass} test case]{Mass of water pooled on two solid obstructions.}
 \label{geom_sprk_mass_fig}
 \end{figure}
+ 
+\subsection{Water Cooling in Adiabatic Surface Temperature (\texorpdfstring{{\textct{adiabatic\_surface\_temperature\_spray}}}{adiabatic\_surface\_temperature\_spray}) }
+\label{AST_spray}
+
+This test case is a modified version of {\ct Radiation/adiabatic\_surface\_temperature}. A thin metal plate with insulated backing is heated for 100 s. Adiabatic surface temperature (AST) is measured from the surface of the plate. Figure~\ref{adiabatic_surf_temp_spray} shows that after about 40 s, the plate temperature and AST match each other. At 50 s, a water spray is turned on and it starts to cool down the surface. At 100 s, the heater is turned off, and the plate cools down even more. AST and plate temperatures should match each other in the end of every 50 s period.
+\begin{figure}[h!]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/adiabatic_surface_temperature_spray}
+\caption[The {\ct adiabatic\_surface\_temperature\_spray} test case]{Adiabatic and true surface temperatures under radiative heating (0 - 50 s), heating and spray  cooling (50-100 s) and only spray cooling (100-150 s).}
+\label{adiabatic_surf_temp_spray}
+\end{figure}
+
 
 
 \section{Flow Rate and Pipe Networks (\texorpdfstring{{\textct{flow\_rate\_2}}}{flow\_rate\_2}) }
