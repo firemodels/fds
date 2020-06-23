@@ -1,6 +1,6 @@
 $RUNSMV -d Adaptive_Mesh_Refinement random_meshes
 $RUNSMV -d Aerosols propane_flame_deposition
-RUNSMV -d Complex_Geometry geom_simple.fds
+$RUNSMV -d Complex_Geometry geom_simple.fds
 #$RUNSMV -d Complex_Geometry geom_azim.fds
 #$RUNSMV -d Complex_Geometry geom_elev.fds
 #$RUNSMV -d Complex_Geometry geom_scale.fds
@@ -26,6 +26,9 @@ $RUNSMV -d Complex_Geometry geom_texture3b.fds
 $RUNSMV -d Complex_Geometry geom_texture4a.fds
 $RUNSMV -d Complex_Geometry geom_texture4b.fds
 $RUNSMV -d Complex_Geometry geom_arch.fds
+$RUNSMV -d Complex_Geometry sphere_radiate
+$RUNSMV -d Complex_Geometry sphere_helium_conserve_3meshes
+$RUNSMV -d Complex_Geometry cone_1mesh
 $RUNSMV -d Controls activate_vents
 $RUNSMV -d Detectors beam_detector
 $RUNSMV -d Detectors objects_static
@@ -66,9 +69,6 @@ $RUNSMV -d Scalar_Analytical_Solution move_slug
 $RUNSMV -d Scalar_Analytical_Solution move_slug_fl1
 $RUNSMV -d Scalar_Analytical_Solution shunn3_256
 $RUNSMV -d Scalar_Analytical_Solution soborot_charm_square_wave_64
-$RUNSMV -d Complex_Geometry sphere_radiate
-$RUNSMV -d Complex_Geometry sphere_helium_conserve_3meshes
-$RUNSMV -d Complex_Geometry cone_1mesh
 $RUNSMV -d Sprinklers_and_Sprays cascade
 $RUNSMV -d Turbulence csmag_64
 $RUNSMV -d Turbulence dsmag_64
