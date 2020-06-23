@@ -34359,7 +34359,7 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
              NSFACE = COUNT; IF(NSFACE==0) CYCLE
 
              ! Compute area and Centroid, in local x1, x2, x3 coords:
-             ALLOCATE(DROPFACE(1:NFACE)); DROPFACE=.FALSE.
+             ALLOCATE(DROPFACE(1:NSFACE)); DROPFACE=.FALSE.
              AREAV(1:NSFACE)                 = 0._EB
              XYZCEN(IAXIS:KAXIS,1:NSFACE)    = 0._EB
              DO ICF=1,NSFACE
