@@ -3664,7 +3664,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                CALL GET_MASS_FRACTION(Z_ARRAY,SOOT_INDEX,SOOT_MASS_FRACTION)
 
                KAPPA_GAS(I,J,K) = KAPPA_WSGG(X_H2O, X_CO2,MOL_RAT,PARTIAL_P,IBND) + &
-                                  KAPPA_SOOT(SOOT_MASS_FRACTION,TMP(I,J,K))       ! Absorp coeff for the jth gas
+                                  KAPPA_SOOT(RHO(I,J,K)*SOOT_MASS_FRACTION,TMP(I,J,K))       ! Absorp coeff for the jth gas
 
                KFST4_GAS(I,J,K) = BBF*KAPPA_GAS(I,J,K)*FOUR_SIGMA*TMP(I,J,K)**4._EB
                IF (CHI_R(I,J,K)*Q(I,J,K)>QR_CLIP) THEN ! Precomputation of quantities for the RTE source term correction
@@ -4719,11 +4719,11 @@ END FUNCTION A_WSGG
 !Function to compute the gray absorption coefficient
 !of soot (same function as the one used by Fluent)
 !====================================================
-REAL(EB) FUNCTION KAPPA_SOOT(SOOT_MASS_FRAC,TTMP)
+REAL(EB) FUNCTION KAPPA_SOOT(SOOT_MASS_CONCENTRATION,TTMP)
 
-   REAL(EB),INTENT(IN) :: SOOT_MASS_FRAC,TTMP
+   REAL(EB),INTENT(IN) :: SOOT_MASS_CONCENTRATION,TTMP
 
-   KAPPA_SOOT = 1232.4_EB*SOOT_MASS_FRAC*(1._EB+4.8E-4_EB*(TTMP-2000._EB))
+   KAPPA_SOOT = 1232.4_EB*SOOT_MASS_CONCENTRATION*(1._EB+4.8E-4_EB*(TTMP-2000._EB))
 
 END FUNCTION KAPPA_SOOT
 
