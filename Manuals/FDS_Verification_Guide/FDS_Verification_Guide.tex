@@ -5088,7 +5088,7 @@ Figure~\ref{flat_fire_plots} compares the first and second order accurate FDS so
 
 \clearpage
 
-\section{Radiation Absorption by Particles}
+\section{Solid Particle Mass and Energy Transfer}
 
 \subsection{Radiation Absorption by Vegetation}
 \label{vegetation_absorb}
@@ -5103,6 +5103,23 @@ where $C_{\rm s}$ is the particle shape factor, $\beta$ is the ``packing ratio,'
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/vegetation_absorb}
 \caption[Results of the \textct{vegetation\_absorb} test case.]{Decrease in radiance caused by layers of vegetation of various densities.}
 \label{vegetation_absorb_fig}
+\end{figure}
+
+
+\subsection{Heating a Metal Sphere via Radiation and Convection}
+\label{particle_heating_convection}
+\label{particle_heating_radiation}
+
+A small metal sphere with mass, $m_{\rm s}=0.005$~kg, is suspended in a 1~m cube filled with $m_{\rm g}=0.318$~kg nitrogen with a specified specific heat, $c_p=1$~kJ/(kg$\cdot$K), and initial temperature, $T_{\rm g,i}=1073.15$~K. The metal has a specified specific heat, $c_{\rm s}=1$~kJ/(kg$\cdot$K), and initial temperature, $T_{\rm s,i}=293.15$~K. The walls of the box are adiabatic. In the first case, {\ct particle\_heating\_convection}, the sphere is heated via convection only and there is no radiation heat transfer. In the second case, {\ct particle\_heating\_radiation}, the sphere is heated via radiation only. The initial heat flux in both cases is approximately 75~kW/m$^2$, and the final temperature in both cases, $T_{\rm f}$, is found from solving an equation that equates the internal energy gained by the solid with the internal energy lost by the gas:
+\be
+   m_{\rm s} \, c_{\rm s} \, (T_{\rm f}-T_{\rm s,i}) = m_{\rm g} \, c_{v} \, (T_{\rm g,i}-T_{\rm f})  \quad ; \quad  c_v = c_p - \frac{R}{W} = 1 - \frac{8.3145}{28} \approx 0.703 \; \hbox{kJ/(kg}\cdot\hbox{K})
+\ee
+The final temperature, $T_{\rm f}=1056.1$~K or 782.9~$^\circ$C, as shown in Fig.~\ref{particle_heating_figs}.
+\begin{figure}[ht]
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/particle_heating_convection}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/particle_heating_radiation}
+\caption[The {\ct particle\_heating} test cases]{Temperature of a small cold sphere and surrounding hot gas when the sphere is heated by convection only (left) and radiation only (right).}
+\label{particle_heating_figs}
 \end{figure}
 
 
@@ -5298,7 +5315,7 @@ In the test case called {\ct Sprinklers\_and\_Sprays/geom\_sprk\_mass.fds}, two 
 \caption[The {\ct geom\_sprk\_mass} test case]{Mass of water pooled on two solid obstructions.}
 \label{geom_sprk_mass_fig}
 \end{figure}
- 
+
 \subsection{Water Cooling in Adiabatic Surface Temperature (\texorpdfstring{{\textct{adiabatic\_surface\_temperature\_spray}}}{adiabatic\_surface\_temperature\_spray}) }
 \label{AST_spray}
 

@@ -805,7 +805,7 @@ TYPE IBM_CUTCELL_TYPE
    INTEGER,  DIMENSION(MAX_DIM)                              ::       IJK ! [ i j k ]
    REAL(EB), ALLOCATABLE, DIMENSION(:)                       :: RHO, RHOS ! Cut cells densities.
    REAL(EB), ALLOCATABLE, DIMENSION(:)                       ::  RSUM,TMP ! Cut cells temperatures.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)                       ::    D,  DS ! Cut cell thermodynamic divg.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)                       ::    D,  DS, DVOL ! Cut cell thermodynamic divg.
    REAL(EB), ALLOCATABLE, DIMENSION(:)                       ::Q,QR,D_SOURCE ! Q,Thermo divg reaction component.
    REAL(EB), ALLOCATABLE, DIMENSION(:)                       :: CHI_R,MIX_TIME ! Cut-cell combustion
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)                     ::    Q_REAC          ! variables.
@@ -827,7 +827,7 @@ TYPE IBM_CUTCELL_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: INT_CCVARS      ! (1:N_INT_CCVARS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: INT_NOMIND     ! (LOW_IND:HIGH_IND,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
 
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)                     :: DEL_RHO_D_DEL_Z, U_DOT_DEL_RHO_Z
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)                     :: DEL_RHO_D_DEL_Z_VOL, U_DOT_DEL_RHO_Z_VOL
    LOGICAL,  ALLOCATABLE, DIMENSION(:)                       :: USE_CC_VOL
    INTEGER :: NOMICC(2)=0
    REAL(EB):: DIVVOL_BC=0._EB
