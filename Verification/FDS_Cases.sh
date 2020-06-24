@@ -582,6 +582,7 @@ $QFDS -d Sprinklers_and_Sprays bucket_test_3.fds
 $QFDS -d Sprinklers_and_Sprays bucket_test_4.fds
 $QFDS -d Sprinklers_and_Sprays cannon_ball.fds
 $QFDS -d Sprinklers_and_Sprays cascade.fds
+$QFDS -p 2 -d Sprinklers_and_Sprays e_coefficient.fds
 $QFDS -d Sprinklers_and_Sprays droplet_distributions.fds
 $QFDS -d Sprinklers_and_Sprays droplet_distributions_2.fds
 $QFDS -d Sprinklers_and_Sprays flow_rate.fds
@@ -594,8 +595,9 @@ $QFDS -d Sprinklers_and_Sprays particle_drag_U100_N16.fds
 $QFDS -d Sprinklers_and_Sprays particle_drag_U50_N1600.fds
 $QFDS -d Sprinklers_and_Sprays particle_drag_U100_N1600.fds
 $QFDS -d Sprinklers_and_Sprays particle_drag_U150_N1600.fds
-$QFDS -p 2 -d Sprinklers_and_Sprays e_coefficient.fds
 $QFDS -d Sprinklers_and_Sprays particle_flux.fds
+$QFDS -d Sprinklers_and_Sprays particle_heating_convection.fds
+$QFDS -d Sprinklers_and_Sprays particle_heating_radiation.fds
 $QFDS -d Sprinklers_and_Sprays sphere_drag_1.fds
 $QFDS -d Sprinklers_and_Sprays sphere_drag_2.fds
 $QFDS -d Sprinklers_and_Sprays terminal_velocity_dt_1_0.fds
