@@ -576,6 +576,7 @@ $QFDS -d Species wall_cond.fds
 $QFDS -d Species humidity.fds
 
 $QFDS -d Sprinklers_and_Sprays activate_sprinklers.fds
+$QFDS -d Sprinklers_and_Sprays adiabatic_surface_temperature_spray.fds
 $QFDS -d Sprinklers_and_Sprays bucket_test_1.fds
 $QFDS -d Sprinklers_and_Sprays bucket_test_2.fds
 $QFDS -d Sprinklers_and_Sprays bucket_test_3.fds
