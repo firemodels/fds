@@ -6108,6 +6108,9 @@ DEVICE_LOOP: DO N=1,N_DEVC
                      CASE('SURFACE AREA')
                         IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) &
                            SDV%VALUE_1 = SDV%VALUE_1 + WC%ONE_D%AREA
+                     CASE('SUM')
+                        IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) &
+                           SDV%VALUE_1 = SDV%VALUE_1 + VALUE
                   END SELECT
                ENDDO WALL_CELL_LOOP
 
@@ -6153,6 +6156,9 @@ DEVICE_LOOP: DO N=1,N_DEVC
                      CASE('SURFACE AREA')
                         IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) &
                            SDV%VALUE_1 = SDV%VALUE_1 + CFA%ONE_D%AREA
+                     CASE('SUM')
+                        IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) &
+                           SDV%VALUE_1 = SDV%VALUE_1 + VALUE
                   END SELECT
 
                ENDDO CFACE_LOOP
@@ -6256,6 +6262,9 @@ DEVICE_LOOP: DO N=1,N_DEVC
                            CASE('MASS MEAN')
                               SDV%VALUE_1 = SDV%VALUE_1 + VALUE*RHO(I,J,K)*VOL
                               SDV%VALUE_2 = SDV%VALUE_2 + VOL*RHO(I,J,K)
+                           CASE('SUM')
+                              IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) &
+                              SDV%VALUE_1 = SDV%VALUE_1 + VALUE
                      END SELECT STATISTICS_SELECT
                   ENDDO I_DEVICE_CELL_LOOP
                ENDDO J_DEVICE_CELL_LOOP
@@ -8686,6 +8695,7 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
                            (ML%H(ITMP)+(ONE_D%TMP(I)-REAL(ITMP,EB))*(ML%H(MIN(5000,ITMP+1))-ML%H(ITMP)))
          ENDDO H_MATL_LOOP
       ENDDO
+      IF (PRESENT(OPT_LP_INDEX)) SOLID_PHASE_OUTPUT = SOLID_PHASE_OUTPUT*LP%PWT
       SOLID_PHASE_OUTPUT = SOLID_PHASE_OUTPUT * 0.001_EB
 
    CASE(70) ! SUBSTEPS
