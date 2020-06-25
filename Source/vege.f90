@@ -14,7 +14,7 @@ INTEGER :: IZERO
 INTEGER  :: LIMITER_LS
 REAL(EB) :: B_ROTH,BETA_OP_ROTH,C_ROTH,E_ROTH,T_NOW
 REAL(EB), POINTER, DIMENSION(:,:) :: PHI_LS_P
-REAL(EB), PARAMETER :: PHI_LS_MIN=-1._EB, PHI_LS_MAX=1._EB
+REAL(EB), PARAMETER :: PHI_LS_MIN=-1._EB, PHI_LS_MAX=1._EB 
 
 CONTAINS
 
@@ -46,7 +46,12 @@ M => MESHES(NM)
 DO SURF_INDEX=0,N_SURF
    SF => SURFACE(SURF_INDEX)
    IF (SF%VEG_LSET_SPREAD .AND. SF%VEG_LSET_FUEL_INDEX>0) THEN
-      SF%VEG_LSET_ROS = ROS_NO_WIND_NO_SLOPE(SF%VEG_LSET_FUEL_INDEX,SURF_INDEX)
+      SF%VEG_LSET_ROS00 = ROS_NO_WIND_NO_SLOPE(SF%VEG_LSET_FUEL_INDEX,SURF_INDEX)
+   ENDIF
+   IF (SF%VEG_LSET_SPREAD .AND. SF%VEG_LSET_FUEL_INDEX==0) THEN
+     SF%BURN_DURATION = SF%VEG_LSET_FIREBASE_TIME
+     SF%MASS_FLUX(REACTION(1)%FUEL_SMIX_INDEX) = &
+       (1._EB-SF%VEG_LSET_CHAR_FRACTION)*SF%VEG_LSET_SURF_LOAD/SF%VEG_LSET_FIREBASE_TIME
    ENDIF
 ENDDO
 
@@ -190,7 +195,7 @@ ALLOCATE(M%PHI_S(IBAR,JBAR))    ; CALL ChkMemErr('VEGE:LEVEL SET','PHI_S',IZERO)
 ALLOCATE(M%PHI_S_X(IBAR,JBAR))  ; CALL ChkMemErr('VEGE:LEVEL SET','PHI_S_X',IZERO) ; PHI_S_X => M%PHI_S_X
 ALLOCATE(M%PHI_S_Y(IBAR,JBAR))  ; CALL ChkMemErr('VEGE:LEVEL SET','PHI_S_Y',IZERO) ; PHI_S_Y => M%PHI_S_Y
 
-! UMF = wind speed at mean flame heights
+! UMF = wind speed at mid-flame height
 
 ALLOCATE(M%UMF(IBAR,JBAR))    ; CALL ChkMemErr('VEGE:LEVEL SET','UMF',IZERO) ; M%UMF = 0._EB ; UMF => M%UMF
 ALLOCATE(M%THETA_ELPS(IBAR,JBAR))    ; CALL ChkMemErr('VEGE:LEVEL SET','THETA_ELPS',IZERO) ; THETA_ELPS => M%THETA_ELPS
@@ -255,17 +260,16 @@ DO JJG=1,JBAR
 
       IF_ELLIPSE: IF (LEVEL_SET_ELLIPSE) THEN
 
-         ROS_HEAD(IIG,JJG) = SF%VEG_LSET_ROS
          SF%VEG_LSET_HT = MAX(0.001_EB,SF%VEG_LSET_HT)
 
-         ! Variables used in Phi_W formulas below (Rothermel model)
+         ! Variables used in Phi_W slope factor formulas below (Rothermel model)
 
          B_ROTH = 0.15988_EB * (SF%VEG_LSET_SIGMA**0.54_EB)
          C_ROTH = 7.47_EB * EXP(-0.8711_EB * (SF%VEG_LSET_SIGMA**0.55_EB))
          E_ROTH = 0.715_EB * EXP(-0.01094_EB * SF%VEG_LSET_SIGMA)
          BETA_OP_ROTH = 0.20395_EB * (SF%VEG_LSET_SIGMA**(-0.8189_EB))! Optimum packing ratio
 
-         ! Limit effect to slope lte 80 degrees. Phi_s_x,y are slope factors
+         ! Limit effect to slope lte 80 degrees. Phi_s_x,y are slope factors (Rothermel model)
 
          DZT_DUM = MIN(5.67_EB,ABS(DZTDX(IIG,JJG))) ! 5.67 ~ tan 80 deg
          PHI_S_X(IIG,JJG) = 5.275_EB * ((SF%VEG_LSET_BETA)**(-0.3_EB)) * DZT_DUM**2
@@ -300,7 +304,7 @@ INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T,DT
 INTEGER :: IIG,IW,JJG,IC
 INTEGER :: KDUM,KWIND,ICF,IKT
-REAL(EB) :: UMF_TMP,PHX,PHY,MAG_PHI,PHI_W_X,PHI_W_Y,UMF_X,UMF_Y,UMAG,DUMMY=0._EB,ROS_MAG
+REAL(EB) :: UMF_TMP,PHX,PHY,MAG_PHI,PHI_W_X,PHI_W_Y,UMF_X,UMF_Y,UMAG,DUMMY=0._EB,ROS_MAG,UMF_MAG
 TYPE (ONE_D_M_AND_E_XFER_TYPE), POINTER :: ONE_D
 TYPE (SURFACE_TYPE), POINTER :: SF
 
@@ -345,8 +349,6 @@ DO JJG=1,JBAR
 
       IF_ELLIPSE: IF (LEVEL_SET_ELLIPSE) THEN  ! Use assumed elliptical shape of fireline as in Farsite
 
-         ROS_HEAD(IIG,JJG) = SF%VEG_LSET_ROS
-
          ! Find wind at ~6.1 m height for Farsite
 
          IF (LEVEL_SET_COUPLED_WIND) THEN
@@ -364,6 +366,11 @@ DO JJG=1,JBAR
 
          ENDIF 
 
+         IF (LEVEL_SET_MODE == 5) THEN
+           U_LS(IIG,JJG) = U0
+           V_LS(IIG,JJG) = V0
+         ENDIF
+
          ! Wind at midflame height (UMF). From Andrews 2012, USDA FS Gen Tech Rep. RMRS-GTR-266 (with added SI conversion)
 
          UMF_TMP = 1.83_EB / LOG((20.0_EB + 1.18_EB * SF%VEG_LSET_HT) /(0.43_EB * SF%VEG_LSET_HT))
@@ -372,16 +379,17 @@ DO JJG=1,JBAR
 
          UMF_X = UMF_TMP * U_LS(IIG,JJG) * 60.0_EB
          UMF_Y = UMF_TMP * V_LS(IIG,JJG) * 60.0_EB
+         UMF_MAG = SQRT(UMF_X**2 + UMF_Y**2)
 
-         ! Components of wind factor - affects spread rate
+         ! Components of Rothermel wind factor - affects spread rate
 
-         PHI_W_X = C_ROTH * ((3.281_EB * ABS(UMF_X))**B_ROTH) * (SF%VEG_LSET_BETA / BETA_OP_ROTH)**(-E_ROTH)
-         PHI_W_X = SIGN(PHI_W_X,UMF_X)
+         PHI_W_X = C_ROTH * ((3.281_EB * UMF_MAG)**B_ROTH) * (SF%VEG_LSET_BETA / BETA_OP_ROTH)**(-E_ROTH)
+         PHI_W_X = PHI_W_X*UMF_X/UMF_MAG
 
-         PHI_W_Y = C_ROTH * ((3.281_EB * ABS(UMF_Y))**B_ROTH) * (SF%VEG_LSET_BETA / BETA_OP_ROTH)**(-E_ROTH)
-         PHI_W_Y = SIGN(PHI_W_Y,UMF_Y)
+         PHI_W_Y = C_ROTH * ((3.281_EB * UMF_MAG)**B_ROTH) * (SF%VEG_LSET_BETA / BETA_OP_ROTH)**(-E_ROTH)
+         PHI_W_Y = PHI_W_Y*UMF_Y/UMF_MAG
 
-         ! Slope factor
+         ! Include Rothermel slope factor
 
          IF (PHI_S(IIG,JJG) > 0.0_EB) THEN
 
@@ -434,6 +442,8 @@ DO JJG=1,JBAR
          ROS_HEAD(IIG,JJG)  = SF%VEG_LSET_ROS_HEAD*(0.165_EB + 0.534_EB*UMAG)*0.523_EB
 
       ENDIF IF_ELLIPSE
+
+      IF (SF%VEG_LSET_ROS00 > 0._EB) ROS_HEAD(IIG,JJG) = SF%VEG_LSET_ROS00*(1._EB + PHI_WS(IIG,JJG))
 
    ENDDO
 ENDDO
@@ -703,7 +713,7 @@ FLUX_ILOOP: DO J=1,JBAR
          COS_THETA = COS(THETA_ELPS(I,J)) !V_LS(I,J) / MAG_U
          SIN_THETA = SIN(THETA_ELPS(I,J)) !U_LS(I,J) / MAG_U
 
-         ROS_TMP = ROS_HEAD(I,J) * (1.0_EB + PHI_WS(I,J))
+         ROS_TMP = ROS_HEAD(I,J)
 
          ! Mag of wind speed at midflame ht must be in units of m/s here
          UMF_DUM = UMF(I,J)/60.0_EB

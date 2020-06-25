@@ -3030,7 +3030,7 @@ SURFLOOP: DO N=0,N_SURF
       IF (SF%VEG_LSET_IGNITE_T<1.E6_EB) &
       WRITE(LU_OUTPUT,'(A,ES9.2)')  '     Ignition Time (s)           ', SF%VEG_LSET_IGNITE_T
       WRITE(LU_OUTPUT,'(A,ES10.3)') '     Burn Duration (s)           ', SF%BURN_DURATION
-      WRITE(LU_OUTPUT,'(A,ES10.3)') '     Rate of Spread (m/s)        ', SF%VEG_LSET_ROS
+      WRITE(LU_OUTPUT,'(A,ES10.3)') '     Rate of Spread,R00 (m/s)    ', SF%VEG_LSET_ROS00
       WRITE(LU_OUTPUT,'(A,ES10.3)') '     Packing Ratio               ', SF%VEG_LSET_BETA
       WRITE(LU_OUTPUT,'(A,ES10.3)') '     Surface Area/Volume (1/m)   ', SF%VEG_LSET_SIGMA*100.  ! Convert from 1/cm to 1/m
       WRITE(LU_OUTPUT,'(A,ES10.3)') '     Fuel Depth (m)              ', SF%VEG_LSET_HT
