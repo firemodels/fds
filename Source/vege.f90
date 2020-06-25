@@ -50,7 +50,8 @@ DO SURF_INDEX=0,N_SURF
    ENDIF
    IF (SF%VEG_LSET_SPREAD .AND. SF%VEG_LSET_FUEL_INDEX==0) THEN
      SF%BURN_DURATION = SF%VEG_LSET_FIREBASE_TIME
-     SF%MASS_FLUX(REACTION(1)%FUEL_SMIX_INDEX) = SF%VEG_LSET_SURF_LOAD/SF%VEG_LSET_FIREBASE_TIME
+     SF%MASS_FLUX(REACTION(1)%FUEL_SMIX_INDEX) = &
+       (1._EB-SF%VEG_LSET_CHAR_FRACTION)*SF%VEG_LSET_SURF_LOAD/SF%VEG_LSET_FIREBASE_TIME
    ENDIF
 ENDDO
 
@@ -259,8 +260,6 @@ DO JJG=1,JBAR
 
       IF_ELLIPSE: IF (LEVEL_SET_ELLIPSE) THEN
 
-!rm      ROS_HEAD(IIG,JJG) = SF%VEG_LSET_ROS
-!        ROS_HEAD(IIG,JJG) = SF%VEG_LSET_ROS00
          SF%VEG_LSET_HT = MAX(0.001_EB,SF%VEG_LSET_HT)
 
          ! Variables used in Phi_W slope factor formulas below (Rothermel model)
@@ -350,9 +349,6 @@ DO JJG=1,JBAR
 
       IF_ELLIPSE: IF (LEVEL_SET_ELLIPSE) THEN  ! Use assumed elliptical shape of fireline as in Farsite
 
-!rm      ROS_HEAD(IIG,JJG) = SF%VEG_LSET_ROS
-!        ROS_HEAD(IIG,JJG) = SF%VEG_LSET_ROS00
-
          ! Find wind at ~6.1 m height for Farsite
 
          IF (LEVEL_SET_COUPLED_WIND) THEN
@@ -387,13 +383,9 @@ DO JJG=1,JBAR
 
          ! Components of Rothermel wind factor - affects spread rate
 
-!        PHI_W_X = C_ROTH * ((3.281_EB * ABS(UMF_X))**B_ROTH) * (SF%VEG_LSET_BETA / BETA_OP_ROTH)**(-E_ROTH)
-!        PHI_W_X = SIGN(PHI_W_X,UMF_X)
          PHI_W_X = C_ROTH * ((3.281_EB * UMF_MAG)**B_ROTH) * (SF%VEG_LSET_BETA / BETA_OP_ROTH)**(-E_ROTH)
          PHI_W_X = PHI_W_X*UMF_X/UMF_MAG
 
-!        PHI_W_Y = C_ROTH * ((3.281_EB * ABS(UMF_Y))**B_ROTH) * (SF%VEG_LSET_BETA / BETA_OP_ROTH)**(-E_ROTH)
-!        PHI_W_Y = SIGN(PHI_W_Y,UMF_Y)
          PHI_W_Y = C_ROTH * ((3.281_EB * UMF_MAG)**B_ROTH) * (SF%VEG_LSET_BETA / BETA_OP_ROTH)**(-E_ROTH)
          PHI_W_Y = PHI_W_Y*UMF_Y/UMF_MAG
 
@@ -451,7 +443,7 @@ DO JJG=1,JBAR
 
       ENDIF IF_ELLIPSE
 
-      IF (SF%VEG_LSET_ROS00 > 0._EB) ROS_HEAD(IIG,JJG) = SF%VEG_LSET_ROS00*(1._EB + MAG_PHI)
+      IF (SF%VEG_LSET_ROS00 > 0._EB) ROS_HEAD(IIG,JJG) = SF%VEG_LSET_ROS00*(1._EB + PHI_WS(IIG,JJG))
 
    ENDDO
 ENDDO
@@ -721,7 +713,6 @@ FLUX_ILOOP: DO J=1,JBAR
          COS_THETA = COS(THETA_ELPS(I,J)) !V_LS(I,J) / MAG_U
          SIN_THETA = SIN(THETA_ELPS(I,J)) !U_LS(I,J) / MAG_U
 
-!rm      ROS_TMP = ROS_HEAD(I,J) * (1.0_EB + PHI_WS(I,J))
          ROS_TMP = ROS_HEAD(I,J)
 
          ! Mag of wind speed at midflame ht must be in units of m/s here
