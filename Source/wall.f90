@@ -2157,7 +2157,8 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
                IF (PREDICTOR) THEN
                   RP => RAMPS(SF%RAMP_INDEX(N))
                   IF (SF%EMISSIVITY > 0._EB) THEN
-                     ONE_D%T_SCALE = ONE_D%T_SCALE + DT * MAX(0._EB,(ONE_D%Q_CON_F + ONE_D%Q_RAD_IN))/(SF%CONE_HEAT_FLUX * SF%EMISSIVITY)
+                     ONE_D%T_SCALE = ONE_D%T_SCALE + DT * MAX(0._EB,(ONE_D%Q_CON_F + ONE_D%Q_RAD_IN))/ &
+                                     (SF%CONE_HEAT_FLUX * SF%EMISSIVITY)
                   ELSE
                      ONE_D%T_SCALE = ONE_D%T_SCALE + DT * MAX(0._EB,(ONE_D%Q_CON_F + ONE_D%Q_RAD_IN))/(SF%CONE_HEAT_FLUX)
                   ENDIF
