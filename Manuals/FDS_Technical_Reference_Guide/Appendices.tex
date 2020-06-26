@@ -1696,11 +1696,9 @@ The temperatures at the front and back surface of a Cartesian slab (or center of
 Note that $T_{\rm s,0}$ does not represent the gas temperature, but rather it is used to establish the temperature gradient at the surface. Note also that the thermal conductivity, $k_{\rm s,1}$, is that of the first node. The convective heat flux at the mid-point of the time step is
 \begin{equation}
 \label{conv}
-  \left( \dot{q}_{\rm c}'' \right)^{n+\frac{1}{2}} = h \, \left( T_{\rm g} - \frac{1}{2} \left( T_{\rm s,\frac{1}{2}}^n+T_{\rm s,\frac{1}{2}}^{n+1} \right) \right)
+  \left( \dot{q}_{\rm c}'' \right)^{n+\frac{1}{2}} = \frac{1}{2} \left( h^n \left(T_{\rm g}^n - T_{\rm s,\frac{1}{2}}^n\right) + h^{n+1} \left(T_{\rm g}^{n+1} - T_{\rm s,\frac{1}{2}}^{n+1} \right) \right)
 \end{equation}
-where $T_{\rm g}$ is the gas temperature in the first grid cell abutting the surface, and $T_{\rm s,\frac{1}{2}}$ is the surface temperature, defined as the average of $T_{\rm s,0}$ and $T_{\rm s,1}$.
-
-The radiative heat flux can be estimated at the mid-point of the time step:
+where $T_{\rm g}^n$ and $T_{\rm g}^{n+1}$ are the gas temperatures in the first grid cell abutting the surface at the start and end of the time step, $T_{\rm s,\frac{1}{2}}$ is the surface temperature, defined as the average of $T_{\rm s,0}$ and $T_{\rm s,1}$, and $h^n$ and $h^{n+1}$ are the convective heat transfer coefficients at the start and end of the time step. The radiative heat flux can be estimated at the mid-point of the time step:
 \begin{equation}
 \label{radi}
 \left( \dot{q}_{\rm r}'' \right)^{n+\frac{1}{2}} = \dot{q}_{\rm r, in}'' - \epsilon \sigma \, \left( T_{\rm s,\frac{1}{2}}^{n+\frac{1}{2}} \right)^4
@@ -1712,12 +1710,12 @@ Note the use of Taylor series expansion:
 (T^{n+1/2})^4 \approx (T^n)^4 + 2 \, (T^n)^3 (T^{n+1}-T^n)
 \end{equation}
 Now the front boundary condition is
-\begin{equation}
+\begin{eqnarray}
 \label{bc_front_2}
   -k_{\rm s,1} \frac{T_{\rm s,1}^{n+1}-T_{\rm s,0}^{n+1} + T_{\rm s,1}^{n}-T_{\rm s,0}^{n}}{2 \delta r_{\frac{1}{2}}}
-  \approx h \, \left( T_{\rm g} - \frac{1}{2} \left( T_{\rm s,\frac{1}{2}}^n+T_{\rm s,\frac{1}{2}}^{n+1} \right) \right) +
+  &\approx& \frac{1}{2} \left( h^n \left(T_{\rm g}^n - T_{\rm s,\frac{1}{2}}^n\right) + h^{n+1} \left(T_{\rm g}^{n+1} - T_{\rm s,\frac{1}{2}}^{n+1} \right) \right) \nonumber \\ &+&
   \dot{q}_{\rm r, in}'' - 2 \, \epsilon\sigma \, \left(T_{\rm s,\frac{1}{2}}^n \right)^3 \, T_{\rm s,\frac{1}{2}}^{n+1} +  \epsilon\sigma \, \left( T_{\rm s,\frac{1}{2}}^n \right)^4
-\end{equation}
+\end{eqnarray}
 The wall surface temperature is defined:
 \begin{equation}
 \label{T_front}
@@ -1725,20 +1723,20 @@ The wall surface temperature is defined:
 \end{equation}
 and the temperature gradient at the start of the time step is:
 \begin{equation}
-k_{\rm s,1} \frac{T_{\rm s,1}^{n}-T_{\rm s,0}^{n}}{2 \delta r_{\frac{1}{2}}} = -\frac{h}{2} \, \left( T_{\rm g} - T_{\rm s,\frac{1}{2}}^n \right) - \frac{1}{2} \left( \dot{q}_{\rm r, in}'' - \epsilon \sigma \, \left( T_{\rm s,\frac{1}{2}}^{n} \right)^4 \right)
+k_{\rm s,1} \frac{T_{\rm s,1}^{n}-T_{\rm s,0}^{n}}{2 \delta r_{\frac{1}{2}}} = -\frac{h^n}{2} \, \left( T_{\rm g}^n - T_{\rm s,\frac{1}{2}}^n \right) - \frac{1}{2} \left( \dot{q}_{\rm r, in}'' - \epsilon \sigma \, \left( T_{\rm s,\frac{1}{2}}^{n} \right)^4 \right)
 \end{equation}
 and therefore the boundary condition becomes
 \begin{equation}
 \label{bc_front_4}
-  -k_{\rm s,1} \frac{T_{\rm s,1}^{n+1}-T_{\rm s,0}^{n+1}}{2 \delta r_{\frac{1}{2}}} + \left( \frac{h}{2} + 2 \, \epsilon\sigma \, \left( T_{\rm s,\frac{1}{2}}^n \right)^3 \right) \frac{T_{\rm s,1}^{n+1}+T_{\rm s,0}^{n+1}}{2}
-  \approx  \frac{1}{2} \left( h \, T_{\rm g} +
+  -k_{\rm s,1} \frac{T_{\rm s,1}^{n+1}-T_{\rm s,0}^{n+1}}{2 \delta r_{\frac{1}{2}}} + \left( \frac{h^{n+1}}{2} + 2 \, \epsilon\sigma \, \left( T_{\rm s,\frac{1}{2}}^n \right)^3 \right) \frac{T_{\rm s,1}^{n+1}+T_{\rm s,0}^{n+1}}{2}
+  \approx  \frac{1}{2} \left( h^{n+1} \, T_{\rm g}^{n+1} +
   \dot{q}_{\rm r, in}'' \right) + \frac{3}{2} \, \epsilon\sigma \, \left( T_{\rm s,\frac{1}{2}}^n \right)^4
 \end{equation}
 Rearranging terms, the temperature at node 0 becomes:
 \begin{equation}
 \label{T0}
-  T_{\rm s,0}^{n+1} = \underbrace{\frac{\frac{k_{\rm s,1}}{\delta r_{\frac{1}{2}}}- \left(\frac{h}{2} + 2 \epsilon \sigma \left(T_{\rm s,\frac{1}{2}}^n\right)^3 \right)}{\frac{k_{\rm s,1}}{\delta r_{\frac{1}{2}}} + \left(\frac{h}{2} + 2 \epsilon \sigma \left( T_{\rm s,\frac{1}{2}}^n\right)^3 \right)}}_\textct{RFACF2} T_{\rm s,1}^{n+1} +
- \underbrace{ \frac{  h \, T_{\rm g} + \dot{q}_{\rm r,in}'' + 3 \epsilon \sigma \left( T_{\rm s,\frac{1}{2}}^n\right)^4 }{\frac{k_{\rm s,1}}{\delta r_{\frac{1}{2}}}+\left(\frac{h}{2} + 2 \epsilon \sigma \left( T_{\rm s,\frac{1}{2}}^n\right)^3 \right)} }_\textct{QDXKF}
+  T_{\rm s,0}^{n+1} = \underbrace{\frac{\frac{k_{\rm s,1}}{\delta r_{\frac{1}{2}}}- \left(\frac{h^{n+1}}{2} + 2 \epsilon \sigma \left(T_{\rm s,\frac{1}{2}}^n\right)^3 \right)}{\frac{k_{\rm s,1}}{\delta r_{\frac{1}{2}}} + \left(\frac{h^{n+1}}{2} + 2 \epsilon \sigma \left( T_{\rm s,\frac{1}{2}}^n\right)^3 \right)}}_\textct{RFACF2} T_{\rm s,1}^{n+1} +
+ \underbrace{ \frac{  h^{n+1} \, T_{\rm g}^{n+1} + \dot{q}_{\rm r,in}'' + 3 \epsilon \sigma \left( T_{\rm s,\frac{1}{2}}^n\right)^4 }{\frac{k_{\rm s,1}}{\delta r_{\frac{1}{2}}}+\left(\frac{h^{n+1}}{2} + 2 \epsilon \sigma \left( T_{\rm s,\frac{1}{2}}^n\right)^3 \right)} }_\textct{QDXKF}
 \end{equation}
 Note that \textct{RFACF2} and similar names are used in the actual source code to represent these quantities.
 In case of non-insulated backing in Cartesian geometry, the temperature of virtual node $N+1$ is calculated the same way.
