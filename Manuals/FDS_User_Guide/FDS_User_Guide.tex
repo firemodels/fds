@@ -538,28 +538,26 @@ where {\ct N} is the number of OpenMP threads to assign to each MPI process for 
 
 If you wish to run FDS on more than one computer, do the following:
 \begin{enumerate}
-\item Type the following command:
+\item Create a text file, say {\ct hostfile.txt}, and in it list, line by line, the names of your computers.
+\item Test your network by running the following test program:
 
-    {\ct mpiexec -hosts 2 <my\_computer> 1 <other\_computer> 1 test\_mpi}
+    {\ct mpiexec -n <procs> -f hostfile.txt test\_mpi}
 
-    If this command returns a ``Hello World'' message from your computer and the other computer on your network, proceed to the next step. If this command fails, check that you can ``see'' the other machine by pinging it, and check that the other computer can ``see'' your computer as well. Also, make sure that the same version of FDS is installed on the other computer.
+    where {\ct <procs>} is the number of computers you want to test. If this command returns a ``Hello World'' message from each of your computers, proceed to the next step. If this command fails, check that you can ``see'' the other machines by ``pinging'' them, and check that the other computer can ``see'' your computer as well. Also, make sure that the same version of FDS is installed on the other computers.
 
 \item Share (with both read and write privilege) a working directory on your machine. Do not put this directory within the ``Program Files'' folder because it is write-protected. Share the working directory with everybody so that all other computers can see it. Note how this directory is defined on the other computers. Sometimes it is {\ct \textbackslash\textbackslash<my\_computer>\textbackslash<my\_shared\_directory>\textbackslash} and sometimes it is defined via the numerical IP address, like {\ct \textbackslash\textbackslash129.6.129.87\textbackslash<my\_shared\_directory>\textbackslash}. The definition depends on the way your domain name server (DNS) works. In any case, do not leave blank spaces within any directory or file names. We have found that blanks create all sorts of trouble. Unless you are a DOS/Windows expert, avoid them.
 
 \item Within the command prompt, {\ct cd} to the working directory. Find or create within the working directory a relatively small, simple, two mesh FDS input file. At the command prompt, type:
 
-   {\ct mpiexec -hosts 2 fred 1 ethel 1 -wdir \textbackslash\textbackslash...\textbackslash... fds job\_name.fds}
+   {\ct mpiexec -n <procs> -ppn <procs per node> -f hostfile.txt fds job\_name.fds}
 
-   where {\ct fred} and {\ct ethel} are the names of two computers on your network. Remember to add the argument {\ct -env OMP\_NUM\_THREADS N} to set the number of OpenMP threads per MPI process on all computers. The default is {\em not} 1, but rather depends on the number of logical processors your computer has. If you accidently set too many OpenMP threads, you can overload your logical processors and reduce the job efficiency.
+   where {\ct <procs>} is the number of MPI processes that you are launching and {\ct <procs per node>} is the number of MPI processes to run on each computer. Add the argument 
+   
+   {\ct -env OMP\_NUM\_THREADS <OpenMP threads>} 
+   
+   to set the number of OpenMP threads per MPI process on all computers. The default is {\em not} 1, but rather depends on the number of logical processors your computer has. If you accidently set too many OpenMP threads, you can overload your logical processors and reduce the job efficiency.
 
-\item If successful, you should see the usual FDS printout indicating the processes being assigned to the computers. If unsuccessful, try running the case on your own computer:
-
-   {\ct mpiexec -hosts 1 fred 2 -wdir \textbackslash\textbackslash...\textbackslash... fds job\_name.fds}
-
-   If this is not successful, check with your network administrator or monitor the FDS help forums for advice.
-\item If you plan to use more than just a few computers to run the job, create a text file, say, {\ct hostfile.txt}, and list, line by line, the name of each computer, followed by the number of MPI processes per computer.
-
-   {\ct mpiexec -hostfile hostfile.txt -env ... -wdir ... fds job\_name.fds}
+\item If successful, you should see the usual FDS printout indicating the processes being assigned to the computers. If not successful, check with your network administrator or monitor the FDS help forums for advice.
 \end{enumerate}
 
 
