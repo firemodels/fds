@@ -13301,6 +13301,34 @@ RCEDGE_LOOP_1 : DO IEDGE=1,MESHES(NM)%IBM_NRCEDGE
       TBAR_IJ = MATMUL( AIJ , MATMUL(TIJ, TRANSPOSE(AIJ)) ) ! Transform back to Eulerian grid system
 
       ! Viscosity and TAU_E:
+      IF(CC_OMEEGR_FLAG) THEN
+      SELECT CASE(X1AXIS)
+         CASE(IAXIS)
+            IF(APPLY_TO_ESTIMATED_VARIABLES) THEN
+               OME_E((/-2,-1,1,2/),IBM_RCEDGE(IEDGE)%IE) = (WS(I,J+1,K)-WS(I,J,K))/DYN(J) - (VS(I,J,K+1)-VS(I,J,K))/DZN(K)
+            ELSE
+               OME_E((/-2,-1,1,2/),IBM_RCEDGE(IEDGE)%IE) = ( W(I,J+1,K)- W(I,J,K))/DYN(J) - ( V(I,J,K+1)- V(I,J,K))/DZN(K)
+            ENDIF
+            MU_FP   = 0.25_EB*(MU(I,J,K) + MU(I,J+1,K) + MU(I,J+1,K+1) + MU(I,J,K+1) )
+            TAU_E((/-2,-1,1,2/),IBM_RCEDGE(IEDGE)%IE) = MU_FP*TBAR_IJ(JAXIS,KAXIS)
+         CASE(JAXIS)
+            IF(APPLY_TO_ESTIMATED_VARIABLES) THEN
+               OME_E((/-2,-1,1,2/),IBM_RCEDGE(IEDGE)%IE) = (US(I,J,K+1)-US(I,J,K))/DZN(K) - (WS(I+1,J,K)-WS(I,J,K))/DXN(I)
+            ELSE
+               OME_E((/-2,-1,1,2/),IBM_RCEDGE(IEDGE)%IE) = ( U(I,J,K+1)- U(I,J,K))/DZN(K) - ( W(I+1,J,K)- W(I,J,K))/DXN(I)
+            ENDIF
+            MU_FP   = 0.25_EB*(MU(I,J,K) + MU(I+1,J,K) + MU(I+1,J,K+1) + MU(I,J,K+1) )
+            TAU_E((/-2,-1,1,2/),IBM_RCEDGE(IEDGE)%IE) = MU_FP*TBAR_IJ(IAXIS,KAXIS)
+         CASE(KAXIS)
+            IF(APPLY_TO_ESTIMATED_VARIABLES) THEN
+               OME_E((/-2,-1,1,2/),IBM_RCEDGE(IEDGE)%IE) = (VS(I+1,J,K)-VS(I,J,K))/DXN(I) - (US(I,J+1,K)-US(I,J,K))/DYN(J)
+            ELSE
+               OME_E((/-2,-1,1,2/),IBM_RCEDGE(IEDGE)%IE) = ( V(I+1,J,K)- V(I,J,K))/DXN(I) - ( U(I,J+1,K)- U(I,J,K))/DYN(J)
+            ENDIF
+            MU_FP   = 0.25_EB*(MU(I,J,K) + MU(I,J+1,K) + MU(I+1,J+1,K) + MU(I+1,J,K) )
+            TAU_E((/-2,-1,1,2/),IBM_RCEDGE(IEDGE)%IE) = MU_FP*TBAR_IJ(IAXIS,JAXIS)
+      END SELECT
+      ELSE
       SELECT CASE(X1AXIS)
          CASE(IAXIS)
             MU_FP   = 0.25_EB*(MU(I,J,K) + MU(I,J+1,K) + MU(I,J+1,K+1) + MU(I,J,K+1) )
@@ -13312,6 +13340,7 @@ RCEDGE_LOOP_1 : DO IEDGE=1,MESHES(NM)%IBM_NRCEDGE
             MU_FP   = 0.25_EB*(MU(I,J,K) + MU(I,J+1,K) + MU(I+1,J+1,K) + MU(I+1,J,K) )
             TAU_E((/-2,-1,1,2/),IBM_RCEDGE(IEDGE)%IE) = MU_FP*TBAR_IJ(IAXIS,JAXIS)
       END SELECT
+      ENDIF
 
    ENDIF INT_N_EXT_PTS_IF
 
