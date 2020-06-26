@@ -6520,9 +6520,9 @@ If you are modeling a relatively dense collection of solid particles, like veget
 
 The absorption and emission of thermal radiation by a group of solid particles is controlled by the absorption coefficient:
 \be
-   \kappa_{\rm p} = \frac{\sum C_{\rm s} \, A_{\rm p,s}}{V}
+   \kappa_{\rm p} = \frac{\sum \, A_{\rm p,s}}{4 \, V}
 \ee
-where $C_{\rm s}$ is the shape factor (ratio of cross sectional area to surface area) of the class of particles, $A_{\rm p,s}$ is the surface area of the particle, and $V$ is the volume of the grid cell. You can specify the {\ct SHAPE\_FACTOR} of a class of particles on the {\ct PART} line. The default value is that of a sphere, 0.25.
+where $A_{\rm p,s}$ is the surface area of the particle and $V$ is the volume of the grid cell.
 
 
 \subsection{Size Distribution}
@@ -7471,8 +7471,7 @@ Lagrangian particles can be used to represent different types of vegetation, lik
 First, the {\ct PART} line defines a class of solid particles that represent pine needles:
 \begin{lstlisting}
 &PART ID='pine needles', SAMPLING_FACTOR=1, SURF_ID='wet vegetation',
-      DRAG_COEFFICIENT=2.8, SHAPE_FACTOR=0.15,
-      PROP_ID='needle image', STATIC=.TRUE. /
+      DRAG_COEFFICIENT=2.8, PROP_ID='needle image', STATIC=.TRUE. /
 \end{lstlisting}
 {\ct STATIC=.TRUE.} specifies that the needles do not move, and {\ct SAMPLING\_FACTOR=1} specifies that each needle is to be shown in Smokeview. More importantly, this line specifies a drag coefficient for the needles based on wind tunnel measurements made at NIST~\cite{Falkenstein-Smith:2018}. The force per unit volume exerted by the vegetation is given by:
 \be
@@ -11438,7 +11437,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RUNNING\_AVERAGE\_FACTOR\_WALL}     & Real        & Section~\ref{radiative_part_props}                                    &                   & 0.5                   \\ \hline
 {\ct SAMPLING\_FACTOR}                   & Integer     & Section~\ref{info:part_output}                                        &                   & 1                     \\ \hline
 {\ct SECOND\_ORDER\_PARTICLE\_TRANSPORT} & Logical     & Section~\ref{info:PART_Stability}                                     &                   & {\ct .FALSE.}         \\ \hline
-{\ct SHAPE\_FACTOR}                      & Real        & Sections~\ref{info:particle_radiation_absorption}, \ref{pine_needles} &                   &                       \\ \hline
+{\ct SHAPE\_FACTOR}                      & Real        & Section~\ref{pine_needles}                                            &                   &                       \\ \hline
 {\ct SIGMA\_D}                           & Real        & Section~\ref{info:particle_size}                                      &                   &                       \\ \hline
 {\ct SPEC\_ID}                           & Character   & Section~\ref{thermal_part_props}                                      &                   &                       \\ \hline
 {\ct STATIC}                             & Logical     & Section~\ref{info:PART_SURF}                                          &                   & {\ct .FALSE.}         \\ \hline
