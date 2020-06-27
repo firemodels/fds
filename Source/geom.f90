@@ -532,12 +532,13 @@ INTEGER, PARAMETER :: MAX_INTERP_POINTS_VOL_LIN = 8 ! 8 stencil points for trili
 INTEGER, PARAMETER :: MAX_INTERP_POINTS_VOL_QUAD=27 !27 stencil points for quadratic interpolation.
 INTEGER, SAVE :: MAX_INTERP_POINTS = MAX_INTERP_POINTS_VOL_LIN ! Default linear interpolation.
 INTEGER, SAVE :: DELTA_INT = 1*MAX_DIM*MAX_INTERP_POINTS_VOL_LIN ! The 1 is for INT_N_EXT_PTS
-INTEGER, PARAMETER :: INT_VEL_IND=1, INT_VELS_IND=2, INT_FV_IND=3, INT_DHDX_IND=4, INT_DPDX_IND=6, N_INT_FVARS=6
-INTEGER, PARAMETER :: INT_H_IND=1, INT_RHO_IND=2, INT_TMP_IND=3, INT_RSUM_IND=4, INT_MU_IND=5, INT_MUDNS_IND=6, &
-                      INT_KRES_IND=7, INT_D_IND=8, INT_P_IND=9
+INTEGER, PARAMETER :: INT_VEL_IND=1, INT_VELS_IND=2, INT_FV_IND=3, INT_DHDX_IND=4, INT_DPDX_IND=6, N_INT_FVARS=4
+INTEGER, PARAMETER :: INT_H_IND=1, INT_RHO_IND=2, INT_TMP_IND=3, INT_RSUM_IND=4, INT_MU_IND=5, INT_MUDNS_IND=6, INT_P_IND=7
 INTEGER, PARAMETER :: INT_RHO0_IND=2, INT_WCEN_IND=3
 INTEGER, SAVE :: N_INT_CVARS, N_INT_CCVARS
 
+INTEGER, SAVE :: NQT2F = N_INT_FVARS-1 ! The -1 is because we either pass U or U^*.
+INTEGER, SAVE :: NQT2C = INT_P_IND+2   ! The +2 is because we pass RHO0, WCEN.
 
 ! Types of interpolation:
 INTEGER, PARAMETER :: IBM_LINEAR_INTERPOLATION    = 1
@@ -564,9 +565,6 @@ INTEGER :: LU_SETCC=99
 
 ! Unlinked cell write unit:
 INTEGER :: LU_UNLNK=88
-
-! Parameter for MESH_CC_EXCHANGE optimized unpacking option.
-LOGICAL, PARAMETER :: UNPACK_NEW=.FALSE.
 
 ! Rotated Cube verification case wave number:
 ! 1 , SPEC ID=MY BACKGROUND
@@ -1930,8 +1928,8 @@ LOGICAL, INTENT(IN) :: CALL_FROM_HINTERP
 ! Local Variables:
 INTEGER :: NM,NOM,NOOM,RNODE,SNODE,IERR
 INTEGER :: II1,JJ1,KK1,NCELL,ICC,ICC1,NQT2,JCC,LL,NN
-INTEGER :: I,J,K,IFC,ICF,X1AXIS,IFACE
-TYPE (MESH_TYPE), POINTER :: M
+INTEGER :: I,J,K,IFC,ICF,X1AXIS
+TYPE (MESH_TYPE), POINTER :: M,M1
 TYPE (OMESH_TYPE), POINTER :: M2,M3
 LOGICAL, SAVE :: INITIALIZE_CC_SCALARS_FORC=.TRUE.
 
@@ -1939,7 +1937,7 @@ TYPE (WALL_TYPE), POINTER :: WC
 TYPE (EXTERNAL_WALL_TYPE), POINTER :: EWC
 INTEGER :: IW,II,JJ,KK
 
-INTEGER :: EP,INPE,INT_NPE_LO,INT_NPE_HI,VIND,IFACE_START,ICELL,IEDGE,IFEP
+INTEGER :: EP,INPE,INT_NPE_LO,INT_NPE_HI,VIND,ICELL,IEDGE,IFEP
 
 #ifdef TIME_CC_IBM
 REAL(EB) :: TNOW
@@ -2022,7 +2020,7 @@ INITIALIZE_CC_SCALARS_FORC_COND : IF (INITIALIZE_CC_SCALARS_FORC) THEN
          IF (M3%NFCC_R(1)==0) CYCLE OTHER_MESH_LOOP_12
          SNODE = PROCESS(NOM)
          ! Face centered variables Ux1, Fvx1, dHdx1:
-         ALLOCATE(M3%REAL_RECV_PKG12(M3%NFCC_R(1)*5))
+         ALLOCATE(M3%REAL_RECV_PKG12(M3%NFCC_R(1) * NQT2F ))
          IF (RNODE/=SNODE) THEN
             N_REQ12 = N_REQ12 + 1
             CALL MPI_RECV_INIT(M3%REAL_RECV_PKG12(1),SIZE(M3%REAL_RECV_PKG12),MPI_DOUBLE_PRECISION, &
@@ -2037,7 +2035,7 @@ INITIALIZE_CC_SCALARS_FORC_COND : IF (INITIALIZE_CC_SCALARS_FORC) THEN
          IF (M3%NFCC_R(2)==0) CYCLE OTHER_MESH_LOOP_13
          SNODE = PROCESS(NOM)
          ! Cell centered variables:
-         ALLOCATE(M3%REAL_RECV_PKG13(M3%NFCC_R(2)*(11+N_TRACKED_SPECIES)))
+         ALLOCATE(M3%REAL_RECV_PKG13(M3%NFCC_R(2)*(NQT2C+N_TRACKED_SPECIES)))
          IF (RNODE/=SNODE) THEN
             N_REQ13 = N_REQ13 + 1
             CALL MPI_RECV_INIT(M3%REAL_RECV_PKG13(1),SIZE(M3%REAL_RECV_PKG13),MPI_DOUBLE_PRECISION, &
@@ -2076,7 +2074,7 @@ INITIALIZE_CC_SCALARS_FORC_COND : IF (INITIALIZE_CC_SCALARS_FORC) THEN
          SNODE = PROCESS(NOM)
          ! Initialize persistent send requests
          IF (M3%NFCC_S(1)>0 .AND. RNODE/=SNODE) THEN
-            ALLOCATE(M3%REAL_SEND_PKG12(M3%NFCC_S(1)*5))
+            ALLOCATE(M3%REAL_SEND_PKG12(M3%NFCC_S(1) * NQT2F ))
             N_REQ12 = N_REQ12 + 1
             CALL MPI_SEND_INIT(M3%REAL_SEND_PKG12(1),SIZE(M3%REAL_SEND_PKG12),MPI_DOUBLE_PRECISION, &
                                SNODE,NM,MPI_COMM_WORLD,REQ12(N_REQ12),IERR)
@@ -2091,7 +2089,7 @@ INITIALIZE_CC_SCALARS_FORC_COND : IF (INITIALIZE_CC_SCALARS_FORC) THEN
          SNODE = PROCESS(NOM)
          ! Initialize persistent send requests
          IF (M3%NFCC_S(2)>0 .AND. RNODE/=SNODE) THEN
-            ALLOCATE(M3%REAL_SEND_PKG13(M3%NFCC_S(2)*(11+N_TRACKED_SPECIES)))
+            ALLOCATE(M3%REAL_SEND_PKG13(M3%NFCC_S(2)*(NQT2C+N_TRACKED_SPECIES)))
             N_REQ13 = N_REQ13 + 1
             CALL MPI_SEND_INIT(M3%REAL_SEND_PKG13(1),SIZE(M3%REAL_SEND_PKG13),MPI_DOUBLE_PRECISION, &
                                SNODE,NM,MPI_COMM_WORLD,REQ13(N_REQ13),IERR)
@@ -2112,6 +2110,7 @@ SENDING_MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    M =>MESHES(NM)
    RECEIVING_MESH_LOOP_2: DO NOM=1,NMESHES
 
+      M1=>MESHES(NOM)
       M3=>MESHES(NM)%OMESH(NOM)
       IF (EVACUATION_ONLY(NOM)) CYCLE RECEIVING_MESH_LOOP_2
 
@@ -2135,8 +2134,6 @@ SENDING_MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                   M3%REAL_SEND_PKG11(NQT2*(LL-1)+1) = M%CUT_CELL(ICC)%RHOS(JCC)
                   M3%REAL_SEND_PKG11(NQT2*(LL-1)+2) = M%CUT_CELL(ICC)%TMP(JCC)
                   M3%REAL_SEND_PKG11(NQT2*(LL-1)+3) = M%CUT_CELL(ICC)%RSUM(JCC)
-                  !M3%REAL_SEND_PKG11(NQT2*(LL-1)+2) =   M%MU(II1,JJ1,KK1) !Take the underlying Cartesian cell value for
-                  !M3%REAL_SEND_PKG11(NQT2*(LL-1)+3) = M%KRES(II1,JJ1,KK1) !these for now.
                   M3%REAL_SEND_PKG11(NQT2*(LL-1)+4) =    M%CUT_CELL(ICC)%D(JCC)
                   DO NN=1,N_TOTAL_SCALARS
                      M3%REAL_SEND_PKG11(NQT2*(LL-1)+4+NN) = M%CUT_CELL(ICC)%ZZS(NN,JCC)
@@ -2144,32 +2141,22 @@ SENDING_MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                ENDDO
             ENDDO PACK_REAL_SEND_PKG11
          ELSE ! Same sender as receiver:
-            ! Fill REAL_RECV_PKG11 of NOM mesh directly:
-            M2=>MESHES(NOM)%OMESH(NM)
-            PACK_REAL_RECV_PKG11: DO ICC1=1,M3%NICC_S(1)
-               ICC=M3%ICC_UNKZ_CC_S(ICC1)
-               NCELL=M%CUT_CELL(ICC)%NCELL
-               II1=M%CUT_CELL(ICC)%IJK(IAXIS)
-               JJ1=M%CUT_CELL(ICC)%IJK(JAXIS)
-               KK1=M%CUT_CELL(ICC)%IJK(KAXIS)
-               DO JCC=1,NCELL
-                  LL = LL + 1
-                  M2%REAL_RECV_PKG11(NQT2*(LL-1)+1) = M%CUT_CELL(ICC)%RHOS(JCC)
-                  M2%REAL_RECV_PKG11(NQT2*(LL-1)+2) = M%CUT_CELL(ICC)%TMP(JCC)
-                  M2%REAL_RECV_PKG11(NQT2*(LL-1)+3) = M%CUT_CELL(ICC)%RSUM(JCC)
-                  !M2%REAL_RECV_PKG11(NQT2*(LL-1)+2) =   M%MU(II1,JJ1,KK1) !Take the underlying Cartesian cell value for
-                  !M2%REAL_RECV_PKG11(NQT2*(LL-1)+3) = M%KRES(II1,JJ1,KK1) !these for now.
-                  M2%REAL_RECV_PKG11(NQT2*(LL-1)+4) =    M%CUT_CELL(ICC)%D(JCC)
-                  DO NN=1,N_TOTAL_SCALARS
-                     M2%REAL_RECV_PKG11(NQT2*(LL-1)+4+NN) = M%CUT_CELL(ICC)%ZZS(NN,JCC)
-                  ENDDO
+            PACK_REAL_RECV_PKG11: DO ICC=M1%N_CUTCELL_MESH+1,M1%N_CUTCELL_MESH+M1%N_GCCUTCELL_MESH
+               NOOM   = M1%CUT_CELL(ICC)%NOMICC(1); IF (NOOM /= NM) CYCLE PACK_REAL_RECV_PKG11
+               ICC1   = M1%CUT_CELL(ICC)%NOMICC(2)
+               DO JCC=1,M1%CUT_CELL(ICC)%NCELL
+                  M1%CUT_CELL(ICC)%RHOS(JCC) = M%CUT_CELL(ICC1)%RHOS(JCC)
+                  M1%CUT_CELL(ICC)%TMP(JCC)  = M%CUT_CELL(ICC1)%TMP(JCC)
+                  M1%CUT_CELL(ICC)%RSUM(JCC) = M%CUT_CELL(ICC1)%RSUM(JCC)
+                  M1%CUT_CELL(ICC)%D(JCC)    = M%CUT_CELL(ICC1)%D(JCC)
+                  M1%CUT_CELL(ICC)%ZZS(1:N_TOTAL_SCALARS,JCC) = M%CUT_CELL(ICC1)%ZZS(1:N_TOTAL_SCALARS,JCC)
                ENDDO
             ENDDO PACK_REAL_RECV_PKG11
          ENDIF
       ENDIF
 
       IF (CODE==1 .AND. M3%NFCC_S(2)>0) THEN
-         NQT2 = 11+N_TOTAL_SCALARS
+         NQT2 = NQT2C+N_TOTAL_SCALARS
          LL = 0
          IF (RNODE/=SNODE) THEN
             PACK_REAL_SEND_PKG213 : DO ICC=1,M3%NFCC_S(2)
@@ -2185,34 +2172,29 @@ SENDING_MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                M3%REAL_SEND_PKG13(NQT2*(LL-1)+6) = M%RSUM(I,J,K)                          ! RSUM^*
                M3%REAL_SEND_PKG13(NQT2*(LL-1)+7) = M%MU(I,J,K)                            ! MU^n
                M3%REAL_SEND_PKG13(NQT2*(LL-1)+8) = M%MU_DNS(I,J,K)                        ! MU_DNS^n
-               M3%REAL_SEND_PKG13(NQT2*(LL-1)+9) = M%KRES(I,J,K)                          ! KRES^n
-               M3%REAL_SEND_PKG13(NQT2*(LL-1)+10)= M%D(I,J,K)                             ! DIV^*
-               M3%REAL_SEND_PKG13(NQT2*(LL-1)+11)= M%RHO(I,J,K)*(M%HS(I,J,K)-M%KRES(I,J,K)) ! Previous substep pressure.
+               M3%REAL_SEND_PKG13(NQT2*(LL-1)+NQT2C)= M%RHO(I,J,K)*(M%HS(I,J,K)-M%KRES(I,J,K)) ! Previous substep pressure.
                DO NN=1,N_TOTAL_SCALARS
-                  M3%REAL_SEND_PKG13(NQT2*(LL-1)+11+NN)= M%ZZS(I,J,K,NN)
+                  M3%REAL_SEND_PKG13(NQT2*(LL-1)+NQT2C+NN)= M%ZZS(I,J,K,NN)
                ENDDO
             ENDDO PACK_REAL_SEND_PKG213
          ELSE
-            ! Fill REAL_RECV_PKG13 of NOM mesh directly:
             M2=>MESHES(NOM)%OMESH(NM)
-            PACK_REAL_RECV_PKG213: DO ICC=1,M3%NFCC_S(2)
-               I     = M3%IIO_CC_S(ICC)
-               J     = M3%JJO_CC_S(ICC)
-               K     = M3%KKO_CC_S(ICC)
-               LL = LL + 1
-               M2%REAL_RECV_PKG13(NQT2*(LL-1)+1) = M%HS(I,J,K)                            ! Prev H in cell I,J,K
-               M2%REAL_RECV_PKG13(NQT2*(LL-1)+2) = M%RHO_0(K)                             ! RHO_0 in cell I,J,K
-               M2%REAL_RECV_PKG13(NQT2*(LL-1)+3) = 0.5_EB*(M%W(I,J,K-1)+M%W(I,J,K))       ! Wcen^n in I,J,K.
-               M2%REAL_RECV_PKG13(NQT2*(LL-1)+4) = M%RHOS(I,J,K)                          ! RHO^*
-               M2%REAL_RECV_PKG13(NQT2*(LL-1)+5) = M%TMP(I,J,K)                           ! TMP^*
-               M2%REAL_RECV_PKG13(NQT2*(LL-1)+6) = M%RSUM(I,J,K)                          ! RSUM^*
-               M2%REAL_RECV_PKG13(NQT2*(LL-1)+7) = M%MU(I,J,K)                            ! MU^n
-               M2%REAL_RECV_PKG13(NQT2*(LL-1)+8) = M%MU_DNS(I,J,K)                        ! MU_DNS^n
-               M2%REAL_RECV_PKG13(NQT2*(LL-1)+9) = M%KRES(I,J,K)                          ! KRES^n
-               M2%REAL_RECV_PKG13(NQT2*(LL-1)+10)= M%D(I,J,K)                             ! DIV^*
-               M2%REAL_RECV_PKG13(NQT2*(LL-1)+11)= M%RHO(I,J,K)*(M%HS(I,J,K)-M%KRES(I,J,K)) ! Previous substep pressure.
+            PACK_REAL_RECV_PKG213: DO IFEP=1,M2%NFEP_R(2)
+               ICF = M2%IFEP_R_2( LOW_IND,IFEP)
+               INPE= M2%IFEP_R_2(HIGH_IND,IFEP)
+               LL  = M1%CUT_FACE(ICF)%INT_NOMIND(HIGH_IND,INPE)
+               I     = M3%IIO_CC_S(LL)
+               J     = M3%JJO_CC_S(LL)
+               K     = M3%KKO_CC_S(LL)
+               M1%CUT_FACE(ICF)%INT_CVARS(    INT_H_IND,INPE)= M%HS(I,J,K)
+               M1%CUT_FACE(ICF)%INT_CVARS(  INT_RHO_IND,INPE)= M%RHOS(I,J,K)
+               M1%CUT_FACE(ICF)%INT_CVARS(  INT_TMP_IND,INPE)= M%TMP(I,J,K)
+               M1%CUT_FACE(ICF)%INT_CVARS( INT_RSUM_IND,INPE)= M%RSUM(I,J,K)
+               M1%CUT_FACE(ICF)%INT_CVARS(   INT_MU_IND,INPE)= M%MU(I,J,K)
+               M1%CUT_FACE(ICF)%INT_CVARS(INT_MUDNS_IND,INPE)= M%MU_DNS(I,J,K)
+               M1%CUT_FACE(ICF)%INT_CVARS(    INT_P_IND,INPE)= M%RHO(I,J,K)*(M%HS(I,J,K)-M%KRES(I,J,K))
                DO NN=1,N_TOTAL_SCALARS
-                  M2%REAL_RECV_PKG13(NQT2*(LL-1)+11+NN)= M%ZZS(I,J,K,NN)
+                  M1%CUT_FACE(ICF)%INT_CVARS(INT_P_IND+NN,INPE)=M%ZZS(I,J,K,NN)
                ENDDO
             ENDDO PACK_REAL_RECV_PKG213
          ENDIF
@@ -2221,7 +2203,6 @@ SENDING_MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       ! Exchange velocity, momentum rhs and previous substep dH/Dx1 for faces, in PREDICTOR, IBM forcing:
 
       IF (CODE==1 .AND. M3%NFCC_S(1)>0) THEN
-         NQT2 = 5
          LL = 0
          IF (RNODE/=SNODE) THEN
             PACK_REAL_SEND_PKG12 : DO IFC=1,M3%NFCC_S(1)
@@ -2232,65 +2213,42 @@ SENDING_MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                LL = LL + 1
                SELECT CASE(X1AXIS)
                CASE(IAXIS)
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+1) = M%U(I,J,K)                            ! U^n in x face I,J,K
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+2) = M%FVX(I,J,K)                          ! FVX in x face I,J,K
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+3) = (M%HS(I+1,J,K)-M%HS(I,J,K))*M%RDXN(I) ! dH/dx^n-1/2 in I,J,K.
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+4) = M%RDXN(I)*(M%RHO(I+1,J,K)*(M%HS(I+1,J,K)-M%KRES(I+1,J,K)) - &
-                                                                 M%RHO(I  ,J,K)*(M%HS(I  ,J,K)-M%KRES(I  ,J,K)))
-                                                      ! dP/dx^n-1/2
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+5) = 0.5_EB*(M%MU(I,J,K)+M%MU(I+1,J,K))    ! MU in face.
+                  M3%REAL_SEND_PKG12(NQT2F*(LL-1)+1) = M%U(I,J,K)                            ! U^n in x face I,J,K
+                  M3%REAL_SEND_PKG12(NQT2F*(LL-1)+2) = M%FVX(I,J,K)                          ! FVX in x face I,J,K
+                  M3%REAL_SEND_PKG12(NQT2F*(LL-1)+3) = (M%HS(I+1,J,K)-M%HS(I,J,K))*M%RDXN(I) ! dH/dx^n-1/2 in I,J,K.
                CASE(JAXIS)
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+1) = M%V(I,J,K)                            ! V^n in y face I,J,K
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+2) = M%FVY(I,J,K)                          ! FVY in y face I,J,K
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+3) = (M%HS(I,J+1,K)-M%HS(I,J,K))*M%RDYN(J) ! dH/dy^n-1/2 in I,J,K.
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+4) = M%RDYN(J)*(M%RHO(I,J+1,K)*(M%HS(I,J+1,K)-M%KRES(I,J+1,K)) - &
-                                                                 M%RHO(I,J  ,K)*(M%HS(I,J  ,K)-M%KRES(I,J  ,K)))
-                                                      ! dP/dy^n-1/2
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+5) = 0.5_EB*(M%MU(I,J,K)+M%MU(I,J+1,K))    ! MU in face.
+                  M3%REAL_SEND_PKG12(NQT2F*(LL-1)+1) = M%V(I,J,K)                            ! V^n in y face I,J,K
+                  M3%REAL_SEND_PKG12(NQT2F*(LL-1)+2) = M%FVY(I,J,K)                          ! FVY in y face I,J,K
+                  M3%REAL_SEND_PKG12(NQT2F*(LL-1)+3) = (M%HS(I,J+1,K)-M%HS(I,J,K))*M%RDYN(J) ! dH/dy^n-1/2 in I,J,K.
                CASE(KAXIS)
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+1) = M%W(I,J,K)                            ! W^n in z face I,J,K
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+2) = M%FVZ(I,J,K)                          ! FVZ in z face I,J,K
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+3) = (M%HS(I,J,K+1)-M%HS(I,J,K))*M%RDZN(K) ! dH/dz^n-1/2 in I,J,K.
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+4) = M%RDZN(K)*(M%RHO(I,J,K+1)*(M%HS(I,J,K+1)-M%KRES(I,J,K+1)) - &
-                                                                 M%RHO(I,J,K  )*(M%HS(I,J,K  )-M%KRES(I,J,K  )))
-                                                      ! dP/dz^n-1/2
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+5) = 0.5_EB*(M%MU(I,J,K)+M%MU(I,J,K+1))    ! MU in face.
+                  M3%REAL_SEND_PKG12(NQT2F*(LL-1)+1) = M%W(I,J,K)                            ! W^n in z face I,J,K
+                  M3%REAL_SEND_PKG12(NQT2F*(LL-1)+2) = M%FVZ(I,J,K)                          ! FVZ in z face I,J,K
+                  M3%REAL_SEND_PKG12(NQT2F*(LL-1)+3) = (M%HS(I,J,K+1)-M%HS(I,J,K))*M%RDZN(K) ! dH/dz^n-1/2 in I,J,K.
                END SELECT
             ENDDO PACK_REAL_SEND_PKG12
          ELSE
-            ! Fill REAL_RECV_PKG12 of NOM mesh directly:
             M2=>MESHES(NOM)%OMESH(NM)
-            PACK_REAL_RECV_PKG12: DO IFC=1,M3%NFCC_S(1)
-               I     = M3%IIO_FC_S(IFC)
-               J     = M3%JJO_FC_S(IFC)
-               K     = M3%KKO_FC_S(IFC)
-               X1AXIS= M3%AXS_FC_S(IFC)
-               LL = LL + 1
+            PACK_REAL_RECV_PKG12: DO IFEP=1,M2%NFEP_R(1)
+               ICF = M2%IFEP_R_1( LOW_IND,IFEP)
+               INPE= M2%IFEP_R_1(HIGH_IND,IFEP)
+               LL  = M1%CUT_FACE(ICF)%INT_NOMIND(HIGH_IND,INPE)
+               I     = M3%IIO_FC_S(LL)
+               J     = M3%JJO_FC_S(LL)
+               K     = M3%KKO_FC_S(LL)
+               X1AXIS= M3%AXS_FC_S(LL)
                SELECT CASE(X1AXIS)
                CASE(IAXIS)
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) = M%U(I,J,K)                            ! U^n in x face I,J,K
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+2) = M%FVX(I,J,K)                          ! FVX in x face I,J,K
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+3) = (M%HS(I+1,J,K)-M%HS(I,J,K))*M%RDXN(I) ! dH/dx^n-1/2 in I,J,K.
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+4) = M%RDXN(I)*(M%RHO(I+1,J,K)*(M%HS(I+1,J,K)-M%KRES(I+1,J,K)) - &
-                                                                 M%RHO(I  ,J,K)*(M%HS(I  ,J,K)-M%KRES(I  ,J,K)))
-                                                      ! dP/dx^n-1/2
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+5) = 0.5_EB*(M%MU(I,J,K)+M%MU(I+1,J,K))    ! MU in face.
+                  M1%CUT_FACE(ICF)%INT_FVARS( INT_VEL_IND,INPE) = M%U(I,J,K)                            ! U^n in x face I,J,K
+                  M1%CUT_FACE(ICF)%INT_FVARS(  INT_FV_IND,INPE) = M%FVX(I,J,K)                          ! FVX in x face I,J,K
+                  M1%CUT_FACE(ICF)%INT_FVARS(INT_DHDX_IND,INPE) = (M%HS(I+1,J,K)-M%HS(I,J,K))*M%RDXN(I) ! dH/dx^n-1/2 in I,J,K.
                CASE(JAXIS)
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) = M%V(I,J,K)                            ! V^n in y face I,J,K
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+2) = M%FVY(I,J,K)                          ! FVY in y face I,J,K
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+3) = (M%HS(I,J+1,K)-M%HS(I,J,K))*M%RDYN(J) ! dH/dy^n-1/2 in I,J,K.
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+4) = M%RDYN(J)*(M%RHO(I,J+1,K)*(M%HS(I,J+1,K)-M%KRES(I,J+1,K)) - &
-                                                                 M%RHO(I,J  ,K)*(M%HS(I,J  ,K)-M%KRES(I,J  ,K)))
-                                                      ! dP/dy^n-1/2
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+5) = 0.5_EB*(M%MU(I,J,K)+M%MU(I,J+1,K))    ! MU in face.
+                  M1%CUT_FACE(ICF)%INT_FVARS( INT_VEL_IND,INPE) = M%V(I,J,K)                            ! V^n in y face I,J,K
+                  M1%CUT_FACE(ICF)%INT_FVARS(  INT_FV_IND,INPE) = M%FVY(I,J,K)                          ! FVY in y face I,J,K
+                  M1%CUT_FACE(ICF)%INT_FVARS(INT_DHDX_IND,INPE) = (M%HS(I,J+1,K)-M%HS(I,J,K))*M%RDYN(J) ! dH/dy^n-1/2 in I,J,K.
                CASE(KAXIS)
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) = M%W(I,J,K)                            ! W^n in z face I,J,K
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+2) = M%FVZ(I,J,K)                          ! FVZ in z face I,J,K
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+3) = (M%HS(I,J,K+1)-M%HS(I,J,K))*M%RDZN(K) ! dH/dz^n-1/2 in I,J,K.
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+4) = M%RDZN(K)*(M%RHO(I,J,K+1)*(M%HS(I,J,K+1)-M%KRES(I,J,K+1)) - &
-                                                                 M%RHO(I,J,K  )*(M%HS(I,J,K  )-M%KRES(I,J,K  )))
-                                                      ! dP/dz^n-1/2
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+5) = 0.5_EB*(M%MU(I,J,K)+M%MU(I,J,K+1))    ! MU in face.
+                  M1%CUT_FACE(ICF)%INT_FVARS( INT_VEL_IND,INPE) = M%W(I,J,K)                            ! W^n in z face I,J,K
+                  M1%CUT_FACE(ICF)%INT_FVARS(  INT_FV_IND,INPE) = M%FVZ(I,J,K)                          ! FVZ in z face I,J,K
+                  M1%CUT_FACE(ICF)%INT_FVARS(INT_DHDX_IND,INPE) = (M%HS(I,J,K+1)-M%HS(I,J,K))*M%RDZN(K) ! dH/dz^n-1/2 in I,J,K.
                END SELECT
             ENDDO PACK_REAL_RECV_PKG12
          ENDIF
@@ -2298,7 +2256,6 @@ SENDING_MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
       ! Exchange Velocity and Pressure at end of PREDICTOR: To be used in RCEDGEs estimation of OME_E, TAU_E next substep.
       IF (CODE==3 .AND. M3%NFCC_S(1)>0) THEN
-         NQT2 = 5
          LL = 0
          IF (RNODE/=SNODE) THEN
             PACK_REAL_SEND_PKG121 : DO IFC=1,M3%NFCC_S(1)
@@ -2309,59 +2266,42 @@ SENDING_MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                LL = LL + 1
                SELECT CASE(X1AXIS)
                CASE(IAXIS)
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+1) = M%US(I,J,K)                           ! U^* in x face I,J,K
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+2) = M%FVX(I,J,K)                          ! FVX in x face I,J,K
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+3) = (M%H(I+1,J,K)-M%H(I,J,K))*M%RDXN(I)   ! dH/dx^n in I,J,K.
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+4) = M%RDXN(I)*(M%RHOS(I+1,J,K)*(M%H(I+1,J,K)-M%KRES(I+1,J,K)) - &
-                                                                 M%RHOS(I  ,J,K)*(M%H(I  ,J,K)-M%KRES(I  ,J,K))) ! dP/dx^n
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+5) = 0.5_EB*(M%MU(I,J,K)+M%MU(I+1,J,K))    ! MU in face.
+                  M3%REAL_SEND_PKG12(NQT2F*(LL-1)+1) = M%US(I,J,K)                           ! U^* in x face I,J,K
+                  M3%REAL_SEND_PKG12(NQT2F*(LL-1)+2) = M%FVX(I,J,K)                          ! FVX in x face I,J,K
+                  M3%REAL_SEND_PKG12(NQT2F*(LL-1)+3) = (M%H(I+1,J,K)-M%H(I,J,K))*M%RDXN(I)   ! dH/dx^n in I,J,K.
                CASE(JAXIS)
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+1) = M%VS(I,J,K)                           ! V^* in y face I,J,K
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+2) = M%FVY(I,J,K)                          ! FVY in y face I,J,K
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+3) = (M%H(I,J+1,K)-M%H(I,J,K))*M%RDYN(J)   ! dH/dy^n in I,J,K.
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+4) = M%RDYN(J)*(M%RHOS(I,J+1,K)*(M%H(I,J+1,K)-M%KRES(I,J+1,K)) - &
-                                                                 M%RHOS(I,J  ,K)*(M%H(I,J  ,K)-M%KRES(I,J  ,K))) ! dP/dy^n
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+5) = 0.5_EB*(M%MU(I,J,K)+M%MU(I,J+1,K))    ! MU in face.
+                  M3%REAL_SEND_PKG12(NQT2F*(LL-1)+1) = M%VS(I,J,K)                           ! V^* in y face I,J,K
+                  M3%REAL_SEND_PKG12(NQT2F*(LL-1)+2) = M%FVY(I,J,K)                          ! FVY in y face I,J,K
+                  M3%REAL_SEND_PKG12(NQT2F*(LL-1)+3) = (M%H(I,J+1,K)-M%H(I,J,K))*M%RDYN(J)   ! dH/dy^n in I,J,K.
                CASE(KAXIS)
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+1) = M%WS(I,J,K)                           ! W^* in z face I,J,K
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+2) = M%FVZ(I,J,K)                          ! FVZ in z face I,J,K
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+3) = (M%H(I,J,K+1)-M%H(I,J,K))*M%RDZN(K)   ! dH/dz^n in I,J,K.
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+4) = M%RDZN(K)*(M%RHOS(I,J,K+1)*(M%H(I,J,K+1)-M%KRES(I,J,K+1)) - &
-                                                                 M%RHOS(I,J,K  )*(M%H(I,J,K  )-M%KRES(I,J,K  ))) ! dP/dz^n
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+5) = 0.5_EB*(M%MU(I,J,K)+M%MU(I,J,K+1))    ! MU in face.
+                  M3%REAL_SEND_PKG12(NQT2F*(LL-1)+1) = M%WS(I,J,K)                           ! W^* in z face I,J,K
+                  M3%REAL_SEND_PKG12(NQT2F*(LL-1)+2) = M%FVZ(I,J,K)                          ! FVZ in z face I,J,K
+                  M3%REAL_SEND_PKG12(NQT2F*(LL-1)+3) = (M%H(I,J,K+1)-M%H(I,J,K))*M%RDZN(K)   ! dH/dz^n in I,J,K.
                END SELECT
             ENDDO PACK_REAL_SEND_PKG121
          ELSE
-            ! Fill REAL_RECV_PKG12 of NOM mesh directly:
             M2=>MESHES(NOM)%OMESH(NM)
-            PACK_REAL_RECV_PKG121: DO IFC=1,M3%NFCC_S(1)
-               I     = M3%IIO_FC_S(IFC)
-               J     = M3%JJO_FC_S(IFC)
-               K     = M3%KKO_FC_S(IFC)
-               X1AXIS= M3%AXS_FC_S(IFC)
-               LL = LL + 1
+            PACK_REAL_RECV_PKG121: DO IFEP=1,M2%NFEP_R(3)
+               IEDGE= M2%IFEP_R_3( LOW_IND,IFEP)
+               INPE = M2%IFEP_R_3(HIGH_IND,IFEP)
+               LL   = M%IBM_RCEDGE(IEDGE)%INT_NOMIND(HIGH_IND,INPE)
+               I     = M3%IIO_FC_S(LL)
+               J     = M3%JJO_FC_S(LL)
+               K     = M3%KKO_FC_S(LL)
+               X1AXIS= M3%AXS_FC_S(LL)
                SELECT CASE(X1AXIS)
                CASE(IAXIS)
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) = M%US(I,J,K)                           ! U^* in x face I,J,K
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+2) = M%FVX(I,J,K)                          ! FVX in x face I,J,K
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+3) = (M%H(I+1,J,K)-M%H(I,J,K))*M%RDXN(I)   ! dH/dx^n in I,J,K.
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+4) = M%RDXN(I)*(M%RHOS(I+1,J,K)*(M%H(I+1,J,K)-M%KRES(I+1,J,K)) - &
-                                                                 M%RHOS(I  ,J,K)*(M%H(I  ,J,K)-M%KRES(I  ,J,K))) ! dP/dx^n
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+5) = 0.5_EB*(M%MU(I,J,K)+M%MU(I+1,J,K))    ! MU in face.
+                  M1%IBM_RCEDGE(IEDGE)%INT_FVARS(INT_VELS_IND,INPE) = M%US(I,J,K)                           ! U^n in x face I,J,K
+                  M1%IBM_RCEDGE(IEDGE)%INT_FVARS(  INT_FV_IND,INPE) = M%FVX(I,J,K)                          ! FVX in x face I,J,K
+                  M1%IBM_RCEDGE(IEDGE)%INT_FVARS(INT_DHDX_IND,INPE) = (M%H(I+1,J,K)-M%H(I,J,K))*M%RDXN(I)   ! dH/dx^n-1/2 in I,J,K.
                CASE(JAXIS)
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) = M%VS(I,J,K)                           ! V^* in y face I,J,K
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+2) = M%FVY(I,J,K)                          ! FVY in y face I,J,K
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+3) = (M%H(I,J+1,K)-M%H(I,J,K))*M%RDYN(J)   ! dH/dy^n in I,J,K.
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+4) = M%RDYN(J)*(M%RHOS(I,J+1,K)*(M%H(I,J+1,K)-M%KRES(I,J+1,K)) - &
-                                                                 M%RHOS(I,J  ,K)*(M%H(I,J  ,K)-M%KRES(I,J  ,K))) ! dP/dy^n
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+5) = 0.5_EB*(M%MU(I,J,K)+M%MU(I,J+1,K))    ! MU in face.
+                  M1%IBM_RCEDGE(IEDGE)%INT_FVARS(INT_VELS_IND,INPE) = M%VS(I,J,K)                           ! V^n in y face I,J,K
+                  M1%IBM_RCEDGE(IEDGE)%INT_FVARS(  INT_FV_IND,INPE) = M%FVY(I,J,K)                          ! FVY in y face I,J,K
+                  M1%IBM_RCEDGE(IEDGE)%INT_FVARS(INT_DHDX_IND,INPE) = (M%H(I,J+1,K)-M%H(I,J,K))*M%RDYN(J)   ! dH/dy^n-1/2 in I,J,K.
                CASE(KAXIS)
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) = M%WS(I,J,K)                           ! W^* in z face I,J,K
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+2) = M%FVZ(I,J,K)                          ! FVZ in z face I,J,K
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+3) = (M%H(I,J,K+1)-M%H(I,J,K))*M%RDZN(K)   ! dH/dz^n in I,J,K.
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+4) = M%RDZN(K)*(M%RHOS(I,J,K+1)*(M%H(I,J,K+1)-M%KRES(I,J,K+1)) - &
-                                                                 M%RHOS(I,J,K  )*(M%H(I,J,K  )-M%KRES(I,J,K  ))) ! dP/dz^n
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+5) = 0.5_EB*(M%MU(I,J,K)+M%MU(I,J,K+1))    ! MU in face.
+                  M1%IBM_RCEDGE(IEDGE)%INT_FVARS(INT_VELS_IND,INPE) = M%WS(I,J,K)                           ! W^n in z face I,J,K
+                  M1%IBM_RCEDGE(IEDGE)%INT_FVARS(  INT_FV_IND,INPE) = M%FVZ(I,J,K)                          ! FVZ in z face I,J,K
+                  M1%IBM_RCEDGE(IEDGE)%INT_FVARS(INT_DHDX_IND,INPE) = (M%H(I,J,K+1)-M%H(I,J,K))*M%RDZN(K)   ! dH/dz^n-1/2 in I,J,K.
                END SELECT
             ENDDO PACK_REAL_RECV_PKG121
          ENDIF
@@ -2384,8 +2324,6 @@ SENDING_MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                   M3%REAL_SEND_PKG11(NQT2*(LL-1)+1) = M%CUT_CELL(ICC)%RHO(JCC)
                   M3%REAL_SEND_PKG11(NQT2*(LL-1)+2) = M%CUT_CELL(ICC)%TMP(JCC)
                   M3%REAL_SEND_PKG11(NQT2*(LL-1)+3) = M%CUT_CELL(ICC)%RSUM(JCC)
-                  !M3%REAL_SEND_PKG11(NQT2*(LL-1)+2) =   M%MU(II1,JJ1,KK1) !Take the underlying Cartesian cell value for
-                  !M3%REAL_SEND_PKG11(NQT2*(LL-1)+3) = M%KRES(II1,JJ1,KK1) !these for now.
                   M3%REAL_SEND_PKG11(NQT2*(LL-1)+4) =    M%CUT_CELL(ICC)%DS(JCC)
                   DO NN=1,N_TOTAL_SCALARS
                      M3%REAL_SEND_PKG11(NQT2*(LL-1)+4+NN) = M%CUT_CELL(ICC)%ZZ(NN,JCC)
@@ -2393,32 +2331,23 @@ SENDING_MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                ENDDO
             ENDDO PACK_REAL_SEND_PKG111
          ELSE ! Same sender as receiver:
-            ! Fill REAL_RECV_PKG11 of NOM mesh directly:
-            M2=>MESHES(NOM)%OMESH(NM)
-            PACK_REAL_RECV_PKG111: DO ICC1=1,M3%NICC_S(1)
-               ICC=M3%ICC_UNKZ_CC_S(ICC1)
-               NCELL=M%CUT_CELL(ICC)%NCELL
-               II1=M%CUT_CELL(ICC)%IJK(IAXIS)
-               JJ1=M%CUT_CELL(ICC)%IJK(JAXIS)
-               KK1=M%CUT_CELL(ICC)%IJK(KAXIS)
-               DO JCC=1,NCELL
-                  LL = LL + 1
-                  M2%REAL_RECV_PKG11(NQT2*(LL-1)+1) = M%CUT_CELL(ICC)%RHO(JCC)
-                  M2%REAL_RECV_PKG11(NQT2*(LL-1)+2) = M%CUT_CELL(ICC)%TMP(JCC)
-                  M2%REAL_RECV_PKG11(NQT2*(LL-1)+3) = M%CUT_CELL(ICC)%RSUM(JCC)
-                  !M2%REAL_RECV_PKG11(NQT2*(LL-1)+2) =   M%MU(II1,JJ1,KK1) !Take the underlying Cartesian cell value for
-                  !M2%REAL_RECV_PKG11(NQT2*(LL-1)+3) = M%KRES(II1,JJ1,KK1) !these for now.
-                  M2%REAL_RECV_PKG11(NQT2*(LL-1)+4) =    M%CUT_CELL(ICC)%DS(JCC)
-                  DO NN=1,N_TOTAL_SCALARS
-                     M2%REAL_RECV_PKG11(NQT2*(LL-1)+4+NN) = M%CUT_CELL(ICC)%ZZ(NN,JCC)
-                  ENDDO
+            M1=>MESHES(NOM)
+            PACK_REAL_RECV_PKG111: DO ICC=M1%N_CUTCELL_MESH+1,M1%N_CUTCELL_MESH+M1%N_GCCUTCELL_MESH
+               NOOM   = M1%CUT_CELL(ICC)%NOMICC(1); IF (NOOM /= NM) CYCLE PACK_REAL_RECV_PKG111
+               ICC1   = M1%CUT_CELL(ICC)%NOMICC(2)
+               DO JCC=1,M1%CUT_CELL(ICC)%NCELL
+                  M1%CUT_CELL(ICC)%RHO(JCC)   = M%CUT_CELL(ICC1)%RHO(JCC)
+                  M1%CUT_CELL(ICC)%TMP(JCC)   = M%CUT_CELL(ICC1)%TMP(JCC)
+                  M1%CUT_CELL(ICC)%RSUM(JCC)  = M%CUT_CELL(ICC1)%RSUM(JCC)
+                  M1%CUT_CELL(ICC)%DS(JCC)    = M%CUT_CELL(ICC1)%DS(JCC)
+                  M1%CUT_CELL(ICC)%ZZ(1:N_TOTAL_SCALARS,JCC) = M%CUT_CELL(ICC1)%ZZ(1:N_TOTAL_SCALARS,JCC)
                ENDDO
             ENDDO PACK_REAL_RECV_PKG111
          ENDIF
       ENDIF
 
       IF (CODE==4 .AND. M3%NFCC_S(2)>0) THEN
-         NQT2 = 11+N_TOTAL_SCALARS
+         NQT2 = NQT2C+N_TOTAL_SCALARS
          LL = 0
          IF (RNODE/=SNODE) THEN
             PACK_REAL_SEND_PKG313 : DO ICC=1,M3%NFCC_S(2)
@@ -2434,34 +2363,29 @@ SENDING_MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                M3%REAL_SEND_PKG13(NQT2*(LL-1)+6) = M%RSUM(I,J,K)                          ! RSUM^n+1
                M3%REAL_SEND_PKG13(NQT2*(LL-1)+7) = M%MU(I,J,K)                            ! MU^*
                M3%REAL_SEND_PKG13(NQT2*(LL-1)+8) = M%MU_DNS(I,J,K)                        ! MU_DNS^*
-               M3%REAL_SEND_PKG13(NQT2*(LL-1)+9) = M%KRES(I,J,K)                          ! KRES^*
-               M3%REAL_SEND_PKG13(NQT2*(LL-1)+10)= M%DS(I,J,K)                            ! DIV^n+1
-               M3%REAL_SEND_PKG13(NQT2*(LL-1)+11)= M%RHOS(I,J,K)*(M%H(I,J,K)-M%KRES(I,J,K)) ! Previous substep pressure.
+               M3%REAL_SEND_PKG13(NQT2*(LL-1)+NQT2C)= M%RHOS(I,J,K)*(M%H(I,J,K)-M%KRES(I,J,K)) ! Previous substep pressure.
                DO NN=1,N_TOTAL_SCALARS
-                  M3%REAL_SEND_PKG13(NQT2*(LL-1)+11+NN)= M%ZZ(I,J,K,NN)
+                  M3%REAL_SEND_PKG13(NQT2*(LL-1)+NQT2C+NN)= M%ZZ(I,J,K,NN)
                ENDDO
             ENDDO PACK_REAL_SEND_PKG313
          ELSE
-            ! Fill REAL_RECV_PKG13 of NOM mesh directly:
             M2=>MESHES(NOM)%OMESH(NM)
-            PACK_REAL_RECV_PKG313: DO ICC=1,M3%NFCC_S(2)
-               I     = M3%IIO_CC_S(ICC)
-               J     = M3%JJO_CC_S(ICC)
-               K     = M3%KKO_CC_S(ICC)
-               LL = LL + 1
-               M2%REAL_RECV_PKG13(NQT2*(LL-1)+1) = M%H(I,J,K)                             ! Prev H in cell I,J,K
-               M2%REAL_RECV_PKG13(NQT2*(LL-1)+2) = M%RHO_0(K)                             ! RHO_0 in cell I,J,K
-               M2%REAL_RECV_PKG13(NQT2*(LL-1)+3) = 0.5_EB*(M%WS(I,J,K-1)+M%WS(I,J,K))     ! Wcen^* in I,J,K.
-               M2%REAL_RECV_PKG13(NQT2*(LL-1)+4) = M%RHO(I,J,K)                           ! RHO^n+1
-               M2%REAL_RECV_PKG13(NQT2*(LL-1)+5) = M%TMP(I,J,K)                           ! TMP^n+1
-               M2%REAL_RECV_PKG13(NQT2*(LL-1)+6) = M%RSUM(I,J,K)                          ! RSUM^n+1
-               M2%REAL_RECV_PKG13(NQT2*(LL-1)+7) = M%MU(I,J,K)                            ! MU^*
-               M2%REAL_RECV_PKG13(NQT2*(LL-1)+8) = M%MU_DNS(I,J,K)                        ! MU_DNS^*
-               M2%REAL_RECV_PKG13(NQT2*(LL-1)+9) = M%KRES(I,J,K)                          ! KRES^*
-               M2%REAL_RECV_PKG13(NQT2*(LL-1)+10)= M%DS(I,J,K)                            ! DIV^n+1
-               M2%REAL_RECV_PKG13(NQT2*(LL-1)+11)= M%RHOS(I,J,K)*(M%H(I,J,K)-M%KRES(I,J,K)) ! Previous substep pressure.
+            PACK_REAL_RECV_PKG313: DO IFEP=1,M2%NFEP_R(2)
+               ICF = M2%IFEP_R_2( LOW_IND,IFEP)
+               INPE= M2%IFEP_R_2(HIGH_IND,IFEP)
+               LL  = M1%CUT_FACE(ICF)%INT_NOMIND(HIGH_IND,INPE)
+               I     = M3%IIO_CC_S(LL)
+               J     = M3%JJO_CC_S(LL)
+               K     = M3%KKO_CC_S(LL)
+               M1%CUT_FACE(ICF)%INT_CVARS(    INT_H_IND,INPE)= M%H(I,J,K)
+               M1%CUT_FACE(ICF)%INT_CVARS(  INT_RHO_IND,INPE)= M%RHO(I,J,K)
+               M1%CUT_FACE(ICF)%INT_CVARS(  INT_TMP_IND,INPE)= M%TMP(I,J,K)
+               M1%CUT_FACE(ICF)%INT_CVARS( INT_RSUM_IND,INPE)= M%RSUM(I,J,K)
+               M1%CUT_FACE(ICF)%INT_CVARS(   INT_MU_IND,INPE)= M%MU(I,J,K)
+               M1%CUT_FACE(ICF)%INT_CVARS(INT_MUDNS_IND,INPE)= M%MU_DNS(I,J,K)
+               M1%CUT_FACE(ICF)%INT_CVARS(    INT_P_IND,INPE)= M%RHOS(I,J,K)*(M%H(I,J,K)-M%KRES(I,J,K))
                DO NN=1,N_TOTAL_SCALARS
-                  M2%REAL_RECV_PKG13(NQT2*(LL-1)+11+NN)= M%ZZ(I,J,K,NN)
+                  M1%CUT_FACE(ICF)%INT_CVARS(INT_P_IND+NN,INPE)=M%ZZ(I,J,K,NN)
                ENDDO
             ENDDO PACK_REAL_RECV_PKG313
          ENDIF
@@ -2471,7 +2395,6 @@ SENDING_MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       ! Exchange velocity, momentum rhs and previous substep dH/Dx1 for faces, in CORRECTOR, IBM forcing:
 
       IF (CODE==4 .AND. M3%NFCC_S(1)>0) THEN
-         NQT2 = 5
          LL = 0
          IF (RNODE/=SNODE) THEN
             PACK_REAL_SEND_PKG112 : DO IFC=1,M3%NFCC_S(1)
@@ -2482,65 +2405,42 @@ SENDING_MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                LL = LL + 1
                SELECT CASE(X1AXIS)
                CASE(IAXIS)
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+1) = M%US(I,J,K)                           ! U^* in x face I,J,K
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+2) = M%FVX(I,J,K)                          ! FVX in x face I,J,K
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+3) = (M%H(I+1,J,K)-M%H(I,J,K))*M%RDXN(I)   ! dH/dx^n in I,J,K.
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+4) = M%RDXN(I)*(M%RHOS(I+1,J,K)*(M%H(I+1,J,K)-M%KRES(I+1,J,K)) - &
-                                                                 M%RHOS(I  ,J,K)*(M%H(I  ,J,K)-M%KRES(I  ,J,K)))
-                                                      ! dP/dx^n-1/2
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+5) = 0.5_EB*(M%MU(I,J,K)+M%MU(I+1,J,K))    ! MU in face.
+                  M3%REAL_SEND_PKG12(NQT2F*(LL-1)+1) = M%US(I,J,K)                           ! U^* in x face I,J,K
+                  M3%REAL_SEND_PKG12(NQT2F*(LL-1)+2) = M%FVX(I,J,K)                          ! FVX in x face I,J,K
+                  M3%REAL_SEND_PKG12(NQT2F*(LL-1)+3) = (M%H(I+1,J,K)-M%H(I,J,K))*M%RDXN(I)   ! dH/dx^n in I,J,K.
                CASE(JAXIS)
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+1) = M%VS(I,J,K)                           ! V^n in y face I,J,K
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+2) = M%FVY(I,J,K)                          ! FVY in y face I,J,K
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+3) = (M%H(I,J+1,K)-M%H(I,J,K))*M%RDYN(J)   ! dH/dy^n-1/2 in I,J,K.
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+4) = M%RDYN(J)*(M%RHOS(I,J+1,K)*(M%H(I,J+1,K)-M%KRES(I,J+1,K)) - &
-                                                                 M%RHOS(I,J  ,K)*(M%H(I,J  ,K)-M%KRES(I,J  ,K)))
-                                                      ! dP/dy^n-1/2
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+5) = 0.5_EB*(M%MU(I,J,K)+M%MU(I,J+1,K))    ! MU in face.
+                  M3%REAL_SEND_PKG12(NQT2F*(LL-1)+1) = M%VS(I,J,K)                           ! V^n in y face I,J,K
+                  M3%REAL_SEND_PKG12(NQT2F*(LL-1)+2) = M%FVY(I,J,K)                          ! FVY in y face I,J,K
+                  M3%REAL_SEND_PKG12(NQT2F*(LL-1)+3) = (M%H(I,J+1,K)-M%H(I,J,K))*M%RDYN(J)   ! dH/dy^n-1/2 in I,J,K.
                CASE(KAXIS)
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+1) = M%WS(I,J,K)                           ! W^n in z face I,J,K
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+2) = M%FVZ(I,J,K)                          ! FVZ in z face I,J,K
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+3) = (M%H(I,J,K+1)-M%H(I,J,K))*M%RDZN(K)   ! dH/dz^n-1/2 in I,J,K.
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+4) = M%RDZN(K)*(M%RHOS(I,J,K+1)*(M%H(I,J,K+1)-M%KRES(I,J,K+1)) - &
-                                                                 M%RHOS(I,J,K  )*(M%H(I,J,K  )-M%KRES(I,J,K  )))
-                                                      ! dP/dz^n-1/2
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+5) = 0.5_EB*(M%MU(I,J,K)+M%MU(I,J,K+1))    ! MU in face.
+                  M3%REAL_SEND_PKG12(NQT2F*(LL-1)+1) = M%WS(I,J,K)                           ! W^n in z face I,J,K
+                  M3%REAL_SEND_PKG12(NQT2F*(LL-1)+2) = M%FVZ(I,J,K)                          ! FVZ in z face I,J,K
+                  M3%REAL_SEND_PKG12(NQT2F*(LL-1)+3) = (M%H(I,J,K+1)-M%H(I,J,K))*M%RDZN(K)   ! dH/dz^n-1/2 in I,J,K.
                END SELECT
             ENDDO PACK_REAL_SEND_PKG112
          ELSE
-            ! Fill REAL_RECV_PKG12 of NOM mesh directly:
             M2=>MESHES(NOM)%OMESH(NM)
-            PACK_REAL_RECV_PKG112: DO IFC=1,M3%NFCC_S(1)
-               I     = M3%IIO_FC_S(IFC)
-               J     = M3%JJO_FC_S(IFC)
-               K     = M3%KKO_FC_S(IFC)
-               X1AXIS= M3%AXS_FC_S(IFC)
-               LL = LL + 1
+            PACK_REAL_RECV_PKG112: DO IFEP=1,M2%NFEP_R(1)
+               ICF = M2%IFEP_R_1( LOW_IND,IFEP)
+               INPE= M2%IFEP_R_1(HIGH_IND,IFEP)
+               LL  = M1%CUT_FACE(ICF)%INT_NOMIND(HIGH_IND,INPE)
+               I     = M3%IIO_FC_S(LL)
+               J     = M3%JJO_FC_S(LL)
+               K     = M3%KKO_FC_S(LL)
+               X1AXIS= M3%AXS_FC_S(LL)
                SELECT CASE(X1AXIS)
                CASE(IAXIS)
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) = M%US(I,J,K)                           ! U^n in x face I,J,K
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+2) = M%FVX(I,J,K)                          ! FVX in x face I,J,K
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+3) = (M%H(I+1,J,K)-M%H(I,J,K))*M%RDXN(I)   ! dH/dx^n-1/2 in I,J,K.
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+4) = M%RDXN(I)*(M%RHOS(I+1,J,K)*(M%H(I+1,J,K)-M%KRES(I+1,J,K)) - &
-                                                                 M%RHOS(I  ,J,K)*(M%H(I  ,J,K)-M%KRES(I  ,J,K)))
-                                                      ! dP/dx^n-1/2
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+5) = 0.5_EB*(M%MU(I,J,K)+M%MU(I+1,J,K))    ! MU in face.
+                  M1%CUT_FACE(ICF)%INT_FVARS(INT_VELS_IND,INPE) = M%US(I,J,K)                           ! U^n in x face I,J,K
+                  M1%CUT_FACE(ICF)%INT_FVARS(  INT_FV_IND,INPE) = M%FVX(I,J,K)                          ! FVX in x face I,J,K
+                  M1%CUT_FACE(ICF)%INT_FVARS(INT_DHDX_IND,INPE) = (M%H(I+1,J,K)-M%H(I,J,K))*M%RDXN(I)   ! dH/dx^n-1/2 in I,J,K.
                CASE(JAXIS)
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) = M%VS(I,J,K)                           ! V^n in y face I,J,K
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+2) = M%FVY(I,J,K)                          ! FVY in y face I,J,K
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+3) = (M%H(I,J+1,K)-M%H(I,J,K))*M%RDYN(J)   ! dH/dy^n-1/2 in I,J,K.
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+4) = M%RDYN(J)*(M%RHOS(I,J+1,K)*(M%H(I,J+1,K)-M%KRES(I,J+1,K)) - &
-                                                                 M%RHOS(I,J  ,K)*(M%H(I,J  ,K)-M%KRES(I,J  ,K)))
-                                                      ! dP/dy^n-1/2
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+5) = 0.5_EB*(M%MU(I,J,K)+M%MU(I,J+1,K))    ! MU in face.
+                  M1%CUT_FACE(ICF)%INT_FVARS(INT_VELS_IND,INPE) = M%VS(I,J,K)                           ! V^n in y face I,J,K
+                  M1%CUT_FACE(ICF)%INT_FVARS(  INT_FV_IND,INPE) = M%FVY(I,J,K)                          ! FVY in y face I,J,K
+                  M1%CUT_FACE(ICF)%INT_FVARS(INT_DHDX_IND,INPE) = (M%H(I,J+1,K)-M%H(I,J,K))*M%RDYN(J)   ! dH/dy^n-1/2 in I,J,K.
                CASE(KAXIS)
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) = M%WS(I,J,K)                           ! W^n in z face I,J,K
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+2) = M%FVZ(I,J,K)                          ! FVZ in z face I,J,K
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+3) = (M%H(I,J,K+1)-M%H(I,J,K))*M%RDZN(K)   ! dH/dz^n-1/2 in I,J,K.
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+4) = M%RDZN(K)*(M%RHOS(I,J,K+1)*(M%H(I,J,K+1)-M%KRES(I,J,K+1)) - &
-                                                                 M%RHOS(I,J,K  )*(M%H(I,J,K  )-M%KRES(I,J,K  )))
-                                                      ! dP/dz^n-1/2
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+5) = 0.5_EB*(M%MU(I,J,K)+M%MU(I,J,K+1))    ! MU in face.
+                  M1%CUT_FACE(ICF)%INT_FVARS(INT_VELS_IND,INPE) = M%WS(I,J,K)                           ! W^n in z face I,J,K
+                  M1%CUT_FACE(ICF)%INT_FVARS(  INT_FV_IND,INPE) = M%FVZ(I,J,K)                          ! FVZ in z face I,J,K
+                  M1%CUT_FACE(ICF)%INT_FVARS(INT_DHDX_IND,INPE) = (M%H(I,J,K+1)-M%H(I,J,K))*M%RDZN(K)   ! dH/dz^n-1/2 in I,J,K.
                END SELECT
             ENDDO PACK_REAL_RECV_PKG112
          ENDIF
@@ -2548,7 +2448,6 @@ SENDING_MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
       ! Exchange Velocity and Pressure at end of CORRECTOR: To be used in RCEDGEs estimation of OME_E, TAU_E next substep.
       IF (CODE==6 .AND. M3%NFCC_S(1)>0) THEN
-         NQT2 = 5
          LL = 0
          IF (RNODE/=SNODE) THEN
             PACK_REAL_SEND_PKG122 : DO IFC=1,M3%NFCC_S(1)
@@ -2559,59 +2458,42 @@ SENDING_MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                LL = LL + 1
                SELECT CASE(X1AXIS)
                CASE(IAXIS)
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+1) = M%U(I,J,K)                            ! U^n+1 in x face I,J,K
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+2) = M%FVX(I,J,K)                          ! FVX in x face I,J,K
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+3) = (M%HS(I+1,J,K)-M%HS(I,J,K))*M%RDXN(I) ! dH/dx^* in I,J,K.
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+4) = M%RDXN(I)*(M%RHO(I+1,J,K)*(M%HS(I+1,J,K)-M%KRES(I+1,J,K)) - &
-                                                                 M%RHO(I  ,J,K)*(M%HS(I  ,J,K)-M%KRES(I  ,J,K))) ! dP/dx^*
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+5) = 0.5_EB*(M%MU(I,J,K)+M%MU(I+1,J,K))    ! MU in face.
+                  M3%REAL_SEND_PKG12(NQT2F*(LL-1)+1) = M%U(I,J,K)                            ! U^n+1 in x face I,J,K
+                  M3%REAL_SEND_PKG12(NQT2F*(LL-1)+2) = M%FVX(I,J,K)                          ! FVX in x face I,J,K
+                  M3%REAL_SEND_PKG12(NQT2F*(LL-1)+3) = (M%HS(I+1,J,K)-M%HS(I,J,K))*M%RDXN(I) ! dH/dx^* in I,J,K.
                CASE(JAXIS)
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+1) = M%V(I,J,K)                            ! V^n+1 in y face I,J,K
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+2) = M%FVY(I,J,K)                          ! FVY in y face I,J,K
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+3) = (M%HS(I,J+1,K)-M%HS(I,J,K))*M%RDYN(J) ! dH/dy^* in I,J,K.
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+4) = M%RDYN(J)*(M%RHO(I,J+1,K)*(M%HS(I,J+1,K)-M%KRES(I,J+1,K)) - &
-                                                                 M%RHO(I,J  ,K)*(M%HS(I,J  ,K)-M%KRES(I,J  ,K))) ! dP/dy^*
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+5) = 0.5_EB*(M%MU(I,J,K)+M%MU(I,J+1,K))    ! MU in face.
+                  M3%REAL_SEND_PKG12(NQT2F*(LL-1)+1) = M%V(I,J,K)                            ! V^n+1 in y face I,J,K
+                  M3%REAL_SEND_PKG12(NQT2F*(LL-1)+2) = M%FVY(I,J,K)                          ! FVY in y face I,J,K
+                  M3%REAL_SEND_PKG12(NQT2F*(LL-1)+3) = (M%HS(I,J+1,K)-M%HS(I,J,K))*M%RDYN(J) ! dH/dy^* in I,J,K.
                CASE(KAXIS)
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+1) = M%W(I,J,K)                            ! W^n+1 in z face I,J,K
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+2) = M%FVZ(I,J,K)                          ! FVZ in z face I,J,K
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+3) = (M%HS(I,J,K+1)-M%HS(I,J,K))*M%RDZN(K) ! dH/dz^* in I,J,K.
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+4) = M%RDZN(K)*(M%RHO(I,J,K+1)*(M%HS(I,J,K+1)-M%KRES(I,J,K+1)) - &
-                                                                 M%RHO(I,J,K  )*(M%HS(I,J,K  )-M%KRES(I,J,K  ))) ! dP/dz^*
-                  M3%REAL_SEND_PKG12(NQT2*(LL-1)+5) = 0.5_EB*(M%MU(I,J,K)+M%MU(I,J,K+1))    ! MU in face.
+                  M3%REAL_SEND_PKG12(NQT2F*(LL-1)+1) = M%W(I,J,K)                            ! W^n+1 in z face I,J,K
+                  M3%REAL_SEND_PKG12(NQT2F*(LL-1)+2) = M%FVZ(I,J,K)                          ! FVZ in z face I,J,K
+                  M3%REAL_SEND_PKG12(NQT2F*(LL-1)+3) = (M%HS(I,J,K+1)-M%HS(I,J,K))*M%RDZN(K) ! dH/dz^* in I,J,K.
                END SELECT
             ENDDO PACK_REAL_SEND_PKG122
          ELSE
-            ! Fill REAL_RECV_PKG12 of NOM mesh directly:
             M2=>MESHES(NOM)%OMESH(NM)
-            PACK_REAL_RECV_PKG122: DO IFC=1,M3%NFCC_S(1)
-               I     = M3%IIO_FC_S(IFC)
-               J     = M3%JJO_FC_S(IFC)
-               K     = M3%KKO_FC_S(IFC)
-               X1AXIS= M3%AXS_FC_S(IFC)
-               LL = LL + 1
+            PACK_REAL_RECV_PKG122: DO IFEP=1,M2%NFEP_R(3)
+               IEDGE= M2%IFEP_R_3( LOW_IND,IFEP)
+               INPE = M2%IFEP_R_3(HIGH_IND,IFEP)
+               LL   = M%IBM_RCEDGE(IEDGE)%INT_NOMIND(HIGH_IND,INPE)
+               I     = M3%IIO_FC_S(LL)
+               J     = M3%JJO_FC_S(LL)
+               K     = M3%KKO_FC_S(LL)
+               X1AXIS= M3%AXS_FC_S(LL)
                SELECT CASE(X1AXIS)
                CASE(IAXIS)
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) = M%U(I,J,K)                            ! U^n+1 in x face I,J,K
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+2) = M%FVX(I,J,K)                          ! FVX in x face I,J,K
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+3) = (M%HS(I+1,J,K)-M%HS(I,J,K))*M%RDXN(I) ! dH/dx^* in I,J,K.
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+4) = M%RDXN(I)*(M%RHO(I+1,J,K)*(M%HS(I+1,J,K)-M%KRES(I+1,J,K)) - &
-                                                                 M%RHO(I  ,J,K)*(M%HS(I  ,J,K)-M%KRES(I  ,J,K))) ! dP/dx^*
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+5) = 0.5_EB*(M%MU(I,J,K)+M%MU(I+1,J,K))    ! MU in face.
+                  M1%IBM_RCEDGE(IEDGE)%INT_FVARS( INT_VEL_IND,INPE) = M%U(I,J,K)                            ! U^n in x face I,J,K
+                  M1%IBM_RCEDGE(IEDGE)%INT_FVARS(  INT_FV_IND,INPE) = M%FVX(I,J,K)                          ! FVX in x face I,J,K
+                  M1%IBM_RCEDGE(IEDGE)%INT_FVARS(INT_DHDX_IND,INPE) = (M%HS(I+1,J,K)-M%HS(I,J,K))*M%RDXN(I) ! dH/dx^n-1/2 in I,J,K.
                CASE(JAXIS)
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) = M%V(I,J,K)                            ! V^n+1 in y face I,J,K
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+2) = M%FVY(I,J,K)                          ! FVY in y face I,J,K
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+3) = (M%HS(I,J+1,K)-M%HS(I,J,K))*M%RDYN(J) ! dH/dy^* in I,J,K.
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+4) = M%RDYN(J)*(M%RHO(I,J+1,K)*(M%HS(I,J+1,K)-M%KRES(I,J+1,K)) - &
-                                                                 M%RHO(I,J  ,K)*(M%HS(I,J  ,K)-M%KRES(I,J  ,K))) ! dP/dy^*
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+5) = 0.5_EB*(M%MU(I,J,K)+M%MU(I,J+1,K))    ! MU in face.
+                  M1%IBM_RCEDGE(IEDGE)%INT_FVARS( INT_VEL_IND,INPE) = M%V(I,J,K)                            ! V^n in y face I,J,K
+                  M1%IBM_RCEDGE(IEDGE)%INT_FVARS(  INT_FV_IND,INPE) = M%FVY(I,J,K)                          ! FVY in y face I,J,K
+                  M1%IBM_RCEDGE(IEDGE)%INT_FVARS(INT_DHDX_IND,INPE) = (M%HS(I,J+1,K)-M%HS(I,J,K))*M%RDYN(J) ! dH/dy^n-1/2 in I,J,K.
                CASE(KAXIS)
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) = M%W(I,J,K)                            ! W^n+1 in z face I,J,K
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+2) = M%FVZ(I,J,K)                          ! FVZ in z face I,J,K
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+3) = (M%HS(I,J,K+1)-M%HS(I,J,K))*M%RDZN(K) ! dH/dz^* in I,J,K.
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+4) = M%RDZN(K)*(M%RHO(I,J,K+1)*(M%HS(I,J,K+1)-M%KRES(I,J,K+1)) - &
-                                                                 M%RHO(I,J,K  )*(M%HS(I,J,K  )-M%KRES(I,J,K  ))) ! dP/dz^*
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+5) = 0.5_EB*(M%MU(I,J,K)+M%MU(I,J,K+1))    ! MU in face.
+                  M1%IBM_RCEDGE(IEDGE)%INT_FVARS( INT_VEL_IND,INPE) = M%W(I,J,K)                            ! W^n in z face I,J,K
+                  M1%IBM_RCEDGE(IEDGE)%INT_FVARS(  INT_FV_IND,INPE) = M%FVZ(I,J,K)                          ! FVZ in z face I,J,K
+                  M1%IBM_RCEDGE(IEDGE)%INT_FVARS(INT_DHDX_IND,INPE) = (M%HS(I,J,K+1)-M%HS(I,J,K))*M%RDZN(K) ! dH/dz^n-1/2 in I,J,K.
                END SELECT
             ENDDO PACK_REAL_RECV_PKG122
          ENDIF
@@ -2716,257 +2598,119 @@ RECV_MESH_LOOP: DO NOM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       M2=>MESHES(NOM)%OMESH(NM)
       IF (EVACUATION_ONLY(NM)) CYCLE SEND_MESH_LOOP
 
-      ! Unpack densities and species mass fractions following PREDICTOR exchange
+      RNODE = PROCESS(NOM)
+      SNODE = PROCESS(NM)
 
-      IF (CODE==1 .AND. M2%NICC_R(1)>0) THEN
+      RNODE_SNODE_IF: IF(RNODE/=SNODE) THEN
 
-         NQT2 = 4+N_TOTAL_SCALARS
-         LL = 0
-         DO ICC=M%N_CUTCELL_MESH+1,M%N_CUTCELL_MESH+M%N_GCCUTCELL_MESH
-            NOOM   = M%CUT_CELL(ICC)%NOMICC(1); IF (NOOM /= NM) CYCLE
-            DO JCC=1,M%CUT_CELL(ICC)%NCELL
-               LL = LL + 1
-               M%CUT_CELL(ICC)%RHOS(JCC) = M2%REAL_RECV_PKG11(NQT2*(LL-1)+1)
-               M%CUT_CELL(ICC)%TMP(JCC)  = M2%REAL_RECV_PKG11(NQT2*(LL-1)+2)
-               M%CUT_CELL(ICC)%RSUM(JCC) = M2%REAL_RECV_PKG11(NQT2*(LL-1)+3)
-               !M%MU(II1,JJ1,KK1) = M2%REAL_RECV_PKG11(NQT2*(LL-1)+2)   ! Take the underlying Cartesian cell value for
-               !M%KRES(II1,JJ1,KK1) = M2%REAL_RECV_PKG11(NQT2*(LL-1)+3) ! these for now.
-               M%CUT_CELL(ICC)%D(JCC)    = M2%REAL_RECV_PKG11(NQT2*(LL-1)+4)
+         ! Unpack densities and species mass fractions following PREDICTOR exchange
+
+         IF (CODE==1 .AND. M2%NICC_R(1)>0) THEN
+            NQT2 = 4+N_TOTAL_SCALARS
+            LL = 0
+            DO ICC=M%N_CUTCELL_MESH+1,M%N_CUTCELL_MESH+M%N_GCCUTCELL_MESH
+               NOOM   = M%CUT_CELL(ICC)%NOMICC(1); IF (NOOM /= NM) CYCLE
+               DO JCC=1,M%CUT_CELL(ICC)%NCELL
+                  LL = LL + 1
+                  M%CUT_CELL(ICC)%RHOS(JCC) = M2%REAL_RECV_PKG11(NQT2*(LL-1)+1)
+                  M%CUT_CELL(ICC)%TMP(JCC)  = M2%REAL_RECV_PKG11(NQT2*(LL-1)+2)
+                  M%CUT_CELL(ICC)%RSUM(JCC) = M2%REAL_RECV_PKG11(NQT2*(LL-1)+3)
+                  M%CUT_CELL(ICC)%D(JCC)    = M2%REAL_RECV_PKG11(NQT2*(LL-1)+4)
+                  DO NN=1,N_TOTAL_SCALARS
+                     M%CUT_CELL(ICC)%ZZS(NN,JCC) = M2%REAL_RECV_PKG11(NQT2*(LL-1)+4+NN)
+                  ENDDO
+               ENDDO
+            ENDDO
+         ENDIF
+
+         IF((CODE==1 .OR. CODE==4) .AND. M2%NFCC_R(2)>0) THEN
+            NQT2 = NQT2C+N_TOTAL_SCALARS
+            DO IFEP=1,M2%NFEP_R(2)
+               ICF = M2%IFEP_R_2( LOW_IND,IFEP)
+               INPE= M2%IFEP_R_2(HIGH_IND,IFEP)
+               LL  = M%CUT_FACE(ICF)%INT_NOMIND(HIGH_IND,INPE)
+               M%CUT_FACE(ICF)%INT_CVARS(    INT_H_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+1)
+               M%CUT_FACE(ICF)%INT_CVARS(  INT_RHO_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+4)
+               M%CUT_FACE(ICF)%INT_CVARS(  INT_TMP_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+5)
+               M%CUT_FACE(ICF)%INT_CVARS( INT_RSUM_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+6)
+               M%CUT_FACE(ICF)%INT_CVARS(   INT_MU_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+7)
+               M%CUT_FACE(ICF)%INT_CVARS(INT_MUDNS_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+8)
+               M%CUT_FACE(ICF)%INT_CVARS(    INT_P_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+NQT2C)
                DO NN=1,N_TOTAL_SCALARS
-                  M%CUT_CELL(ICC)%ZZS(NN,JCC) = M2%REAL_RECV_PKG11(NQT2*(LL-1)+4+NN)
+                  M%CUT_FACE(ICF)%INT_CVARS(INT_P_IND+NN,INPE)=M2%REAL_RECV_PKG13(NQT2*(LL-1)+NQT2C+NN)
                ENDDO
             ENDDO
-         ENDDO
+         ENDIF
 
-      ENDIF
+         ! Unpack velocity, momentum rhs and previous substep dH/Dx1 for faces, in PREDICTOR, IBM forcing:
 
-      IF((CODE==1 .OR. CODE==4) .AND. M2%NFCC_R(2)>0) THEN
-         NQT2 = 11+N_TOTAL_SCALARS
-         VIND = 0 ! Cell centered variables.
-         IF(.NOT.UNPACK_NEW) THEN
-         ! First loop cut-faces:
-         DO ICF=1,M%N_CUTFACE_MESH
-            IF (M%CUT_FACE(ICF)%STATUS /= IBM_INBOUNDARY) CYCLE
-            DO IFACE=1,M%CUT_FACE(ICF)%NFACE
-               DO EP=1,INT_N_EXT_PTS  ! External point for face IFACE
-                  INT_NPE_LO = M%CUT_FACE(ICF)%INT_NPE(LOW_IND,VIND,EP,IFACE)
-                  INT_NPE_HI = M%CUT_FACE(ICF)%INT_NPE(HIGH_IND,VIND,EP,IFACE)
-                  DO INPE=INT_NPE_LO+1,INT_NPE_LO+INT_NPE_HI
-                     NOOM   = M%CUT_FACE(ICF)%INT_NOMIND( LOW_IND,INPE); IF (NOOM /= NM) CYCLE
-                     LL     = M%CUT_FACE(ICF)%INT_NOMIND(HIGH_IND,INPE)
-                     M%CUT_FACE(ICF)%INT_CVARS(    INT_H_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+1)
-                     M%CUT_FACE(ICF)%INT_CVARS(  INT_RHO_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+4)
-                     M%CUT_FACE(ICF)%INT_CVARS(  INT_TMP_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+5)
-                     M%CUT_FACE(ICF)%INT_CVARS( INT_RSUM_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+6)
-                     M%CUT_FACE(ICF)%INT_CVARS(   INT_MU_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+7)
-                     M%CUT_FACE(ICF)%INT_CVARS(INT_MUDNS_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+8)
-                     M%CUT_FACE(ICF)%INT_CVARS( INT_KRES_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+9)
-                     M%CUT_FACE(ICF)%INT_CVARS(    INT_D_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+10)
-                     M%CUT_FACE(ICF)%INT_CVARS(    INT_P_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+11)
-                     DO NN=1,N_TOTAL_SCALARS
-                        M%CUT_FACE(ICF)%INT_CVARS(INT_P_IND+NN,INPE)=M2%REAL_RECV_PKG13(NQT2*(LL-1)+11+NN)
-                     ENDDO
+         IF (CODE==1 .AND. M2%NFCC_R(1)>0) THEN
+            DO IFEP=1,M2%NFEP_R(1)
+               ICF = M2%IFEP_R_1( LOW_IND,IFEP)
+               INPE= M2%IFEP_R_1(HIGH_IND,IFEP)
+               LL  = M%CUT_FACE(ICF)%INT_NOMIND(HIGH_IND,INPE)
+               M%CUT_FACE(ICF)%INT_FVARS( INT_VEL_IND,INPE)= M2%REAL_RECV_PKG12(NQT2F*(LL-1)+1) ! Vel^n
+               M%CUT_FACE(ICF)%INT_FVARS(  INT_FV_IND,INPE)= M2%REAL_RECV_PKG12(NQT2F*(LL-1)+2) ! Predictor FV
+               M%CUT_FACE(ICF)%INT_FVARS(INT_DHDX_IND,INPE)= M2%REAL_RECV_PKG12(NQT2F*(LL-1)+3) ! dH/dx1^n-1/2
+            ENDDO
+         ENDIF
+
+         IF (CODE==3 .AND. M2%NFCC_R(1)>0) THEN
+            DO IFEP=1,M2%NFEP_R(3)
+               IEDGE= M2%IFEP_R_3( LOW_IND,IFEP)
+               INPE = M2%IFEP_R_3(HIGH_IND,IFEP)
+               LL   = M%IBM_RCEDGE(IEDGE)%INT_NOMIND(HIGH_IND,INPE)
+               M%IBM_RCEDGE(IEDGE)%INT_FVARS(INT_VELS_IND,INPE)= M2%REAL_RECV_PKG12(NQT2F*(LL-1)+1) ! Vel^*
+               M%IBM_RCEDGE(IEDGE)%INT_FVARS(  INT_FV_IND,INPE)= M2%REAL_RECV_PKG12(NQT2F*(LL-1)+2) ! Predictor FV
+               M%IBM_RCEDGE(IEDGE)%INT_FVARS(INT_DHDX_IND,INPE)= M2%REAL_RECV_PKG12(NQT2F*(LL-1)+3) ! dH/dx1^n
+            ENDDO
+         ENDIF
+
+         ! Unpack densities and species mass fractions following CORRECTOR exchange
+
+         IF (CODE==4 .AND. M2%NICC_R(1)>0) THEN
+            NQT2 = 4+N_TOTAL_SCALARS
+            LL = 0
+            DO ICC=M%N_CUTCELL_MESH+1,M%N_CUTCELL_MESH+M%N_GCCUTCELL_MESH
+               NOOM   = M%CUT_CELL(ICC)%NOMICC(1); IF (NOOM /= NM) CYCLE
+               DO JCC=1,M%CUT_CELL(ICC)%NCELL
+                  LL = LL + 1
+                  M%CUT_CELL(ICC)%RHO(JCC)  = M2%REAL_RECV_PKG11(NQT2*(LL-1)+1)
+                  M%CUT_CELL(ICC)%TMP(JCC)  = M2%REAL_RECV_PKG11(NQT2*(LL-1)+2)
+                  M%CUT_CELL(ICC)%RSUM(JCC) = M2%REAL_RECV_PKG11(NQT2*(LL-1)+3)
+                  M%CUT_CELL(ICC)%DS(JCC)   = M2%REAL_RECV_PKG11(NQT2*(LL-1)+4)
+                  DO NN=1,N_TOTAL_SCALARS
+                     M%CUT_CELL(ICC)%ZZ(NN,JCC) = M2%REAL_RECV_PKG11(NQT2*(LL-1)+4+NN)
                   ENDDO
                ENDDO
             ENDDO
-         ENDDO
-         ELSE
-         DO IFEP=1,M2%NFEP_R(2)
-            ICF = M2%IFEP_R_2( LOW_IND,IFEP)
-            INPE= M2%IFEP_R_2(HIGH_IND,IFEP)
-            LL  = M%CUT_FACE(ICF)%INT_NOMIND(HIGH_IND,INPE)
-            M%CUT_FACE(ICF)%INT_CVARS(    INT_H_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+1)
-            M%CUT_FACE(ICF)%INT_CVARS(  INT_RHO_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+4)
-            M%CUT_FACE(ICF)%INT_CVARS(  INT_TMP_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+5)
-            M%CUT_FACE(ICF)%INT_CVARS( INT_RSUM_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+6)
-            M%CUT_FACE(ICF)%INT_CVARS(   INT_MU_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+7)
-            M%CUT_FACE(ICF)%INT_CVARS(INT_MUDNS_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+8)
-            M%CUT_FACE(ICF)%INT_CVARS( INT_KRES_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+9)
-            M%CUT_FACE(ICF)%INT_CVARS(    INT_D_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+10)
-            M%CUT_FACE(ICF)%INT_CVARS(    INT_P_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+11)
-            DO NN=1,N_TOTAL_SCALARS
-               M%CUT_FACE(ICF)%INT_CVARS(INT_P_IND+NN,INPE)=M2%REAL_RECV_PKG13(NQT2*(LL-1)+11+NN)
-            ENDDO
-         ENDDO
          ENDIF
-      ENDIF
 
-      ! Unpack velocity, momentum rhs and previous substep dH/Dx1 for faces, in PREDICTOR, IBM forcing:
+         ! Unpack velocity, momentum rhs and previous substep dH/Dx1 for faces, in CORRECTOR, IBM forcing:
 
-      IF (CODE==1 .AND. M2%NFCC_R(1)>0) THEN
-         NQT2 = 5 ! Three variables are passed per Stencil point. Vel (or Vels), Fv and DHDX1.
-         IF(.NOT.UNPACK_NEW) THEN
-         ! First loop cut-faces:
-         DO ICF=1,M%N_CUTFACE_MESH
-            IFACE_START=1
-            IF (M%CUT_FACE(ICF)%STATUS == IBM_GASPHASE) IFACE_START=0
-            DO IFACE=IFACE_START,M%CUT_FACE(ICF)%NFACE
-               DO EP=1,INT_N_EXT_PTS  ! External point for face IFACE
-                  DO VIND=IAXIS,KAXIS ! Velocity component U, V or W for external point EP
-                     INT_NPE_LO = M%CUT_FACE(ICF)%INT_NPE(LOW_IND,VIND,EP,IFACE)
-                     INT_NPE_HI = M%CUT_FACE(ICF)%INT_NPE(HIGH_IND,VIND,EP,IFACE)
-                     DO INPE=INT_NPE_LO+1,INT_NPE_LO+INT_NPE_HI
-                        NOOM   = M%CUT_FACE(ICF)%INT_NOMIND( LOW_IND,INPE); IF (NOOM /= NM) CYCLE
-                        LL     = M%CUT_FACE(ICF)%INT_NOMIND(HIGH_IND,INPE)
-                        M%CUT_FACE(ICF)%INT_FVARS( INT_VEL_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) ! Vel^n
-                        M%CUT_FACE(ICF)%INT_FVARS(  INT_FV_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+2) ! Predictor FV
-                        M%CUT_FACE(ICF)%INT_FVARS(INT_DHDX_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+3) ! dH/dx1^n-1/2
-                        M%CUT_FACE(ICF)%INT_FVARS(INT_DPDX_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+4) ! dP/dx1^n-1/2
-                        M%CUT_FACE(ICF)%INT_FVARS(  INT_MU_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+5) ! Face Mu.
-                     ENDDO
-                  ENDDO
-               ENDDO
+         IF (CODE==4 .AND. M2%NFCC_R(1)>0) THEN
+            DO IFEP=1,M2%NFEP_R(1)
+               ICF = M2%IFEP_R_1( LOW_IND,IFEP)
+               INPE= M2%IFEP_R_1(HIGH_IND,IFEP)
+               LL  = M%CUT_FACE(ICF)%INT_NOMIND(HIGH_IND,INPE)
+               M%CUT_FACE(ICF)%INT_FVARS(INT_VELS_IND,INPE)= M2%REAL_RECV_PKG12(NQT2F*(LL-1)+1) ! Vel^*
+               M%CUT_FACE(ICF)%INT_FVARS(  INT_FV_IND,INPE)= M2%REAL_RECV_PKG12(NQT2F*(LL-1)+2) ! Corrector FV
+               M%CUT_FACE(ICF)%INT_FVARS(INT_DHDX_IND,INPE)= M2%REAL_RECV_PKG12(NQT2F*(LL-1)+3) ! dH/dx1^n-1/2
             ENDDO
-         ENDDO
-         ELSE
-         DO IFEP=1,M2%NFEP_R(1)
-            ICF = M2%IFEP_R_1( LOW_IND,IFEP)
-            INPE= M2%IFEP_R_1(HIGH_IND,IFEP)
-            LL  = M%CUT_FACE(ICF)%INT_NOMIND(HIGH_IND,INPE)
-            M%CUT_FACE(ICF)%INT_FVARS( INT_VEL_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) ! Vel^n
-            M%CUT_FACE(ICF)%INT_FVARS(  INT_FV_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+2) ! Predictor FV
-            M%CUT_FACE(ICF)%INT_FVARS(INT_DHDX_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+3) ! dH/dx1^n-1/2
-            M%CUT_FACE(ICF)%INT_FVARS(INT_DPDX_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+4) ! dP/dx1^n-1/2
-            M%CUT_FACE(ICF)%INT_FVARS(  INT_MU_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+5) ! Face Mu.
-         ENDDO
          ENDIF
-      ENDIF
 
-      IF (CODE==3 .AND. M2%NFCC_R(1)>0) THEN
-         NQT2 = 5 ! Three variables are passed per Stencil point. Vel (or Vels), Fv and DHDX1.
-         IF(.NOT.UNPACK_NEW) THEN
-         ! First loop cut-faces:
-         DO IEDGE=1,M%IBM_NRCEDGE
-            DO EP=1,INT_N_EXT_PTS  ! External point for IEDGE
-               DO VIND=IAXIS,KAXIS ! Velocity component U, V or W for external point EP
-                  INT_NPE_LO = M%IBM_RCEDGE(IEDGE)%INT_NPE(LOW_IND,VIND,EP,0)
-                  INT_NPE_HI = M%IBM_RCEDGE(IEDGE)%INT_NPE(HIGH_IND,VIND,EP,0)
-                  DO INPE=INT_NPE_LO+1,INT_NPE_LO+INT_NPE_HI
-                     NOOM   = M%IBM_RCEDGE(IEDGE)%INT_NOMIND( LOW_IND,INPE); IF (NOOM /= NM) CYCLE
-                     LL     = M%IBM_RCEDGE(IEDGE)%INT_NOMIND(HIGH_IND,INPE)
-                     M%IBM_RCEDGE(IEDGE)%INT_FVARS(INT_VELS_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) ! Vel^*
-                     M%IBM_RCEDGE(IEDGE)%INT_FVARS(  INT_FV_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+2) ! Predictor FV
-                     M%IBM_RCEDGE(IEDGE)%INT_FVARS(INT_DHDX_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+3) ! dH/dx1^n
-                     M%IBM_RCEDGE(IEDGE)%INT_FVARS(INT_DPDX_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+4) ! dP/dx1^n
-                     M%IBM_RCEDGE(IEDGE)%INT_FVARS(  INT_MU_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+5) ! Mu.
-                  ENDDO
-               ENDDO
+         IF (CODE==6 .AND. M2%NFCC_R(1)>0) THEN
+            DO IFEP=1,M2%NFEP_R(3)
+               IEDGE= M2%IFEP_R_3( LOW_IND,IFEP)
+               INPE = M2%IFEP_R_3(HIGH_IND,IFEP)
+               LL   = M%IBM_RCEDGE(IEDGE)%INT_NOMIND(HIGH_IND,INPE)
+               M%IBM_RCEDGE(IEDGE)%INT_FVARS( INT_VEL_IND,INPE)= M2%REAL_RECV_PKG12(NQT2F*(LL-1)+1) ! Vel^n+1
+               M%IBM_RCEDGE(IEDGE)%INT_FVARS(  INT_FV_IND,INPE)= M2%REAL_RECV_PKG12(NQT2F*(LL-1)+2) ! Corrector FV
+               M%IBM_RCEDGE(IEDGE)%INT_FVARS(INT_DHDX_IND,INPE)= M2%REAL_RECV_PKG12(NQT2F*(LL-1)+3) ! dH/dx1^n
             ENDDO
-         ENDDO
-         ELSE
-         DO IFEP=1,M2%NFEP_R(3)
-            IEDGE= M2%IFEP_R_3( LOW_IND,IFEP)
-            INPE = M2%IFEP_R_3(HIGH_IND,IFEP)
-            LL   = M%IBM_RCEDGE(IEDGE)%INT_NOMIND(HIGH_IND,INPE)
-            M%IBM_RCEDGE(IEDGE)%INT_FVARS(INT_VELS_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) ! Vel^*
-            M%IBM_RCEDGE(IEDGE)%INT_FVARS(  INT_FV_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+2) ! Predictor FV
-            M%IBM_RCEDGE(IEDGE)%INT_FVARS(INT_DHDX_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+3) ! dH/dx1^n
-            M%IBM_RCEDGE(IEDGE)%INT_FVARS(INT_DPDX_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+4) ! dP/dx1^n
-            M%IBM_RCEDGE(IEDGE)%INT_FVARS(  INT_MU_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+5) ! Mu.
-         ENDDO
          ENDIF
-      ENDIF
 
-      ! Unpack densities and species mass fractions following CORRECTOR exchange
-
-      IF (CODE==4 .AND. M2%NICC_R(1)>0) THEN
-
-         NQT2 = 4+N_TOTAL_SCALARS
-         LL = 0
-         DO ICC=M%N_CUTCELL_MESH+1,M%N_CUTCELL_MESH+M%N_GCCUTCELL_MESH
-            NOOM   = M%CUT_CELL(ICC)%NOMICC(1); IF (NOOM /= NM) CYCLE
-            DO JCC=1,M%CUT_CELL(ICC)%NCELL
-               LL = LL + 1
-               M%CUT_CELL(ICC)%RHO(JCC)  = M2%REAL_RECV_PKG11(NQT2*(LL-1)+1)
-               M%CUT_CELL(ICC)%TMP(JCC)  = M2%REAL_RECV_PKG11(NQT2*(LL-1)+2)
-               M%CUT_CELL(ICC)%RSUM(JCC) = M2%REAL_RECV_PKG11(NQT2*(LL-1)+3)
-               !M%MU(II1,JJ1,KK1) = M2%REAL_RECV_PKG11(NQT2*(LL-1)+2)   ! Take the underlying Cartesian cell value for
-               !M%KRES(II1,JJ1,KK1) = M2%REAL_RECV_PKG11(NQT2*(LL-1)+3) ! these for now.
-               M%CUT_CELL(ICC)%DS(JCC)   = M2%REAL_RECV_PKG11(NQT2*(LL-1)+4)
-               DO NN=1,N_TOTAL_SCALARS
-                  M%CUT_CELL(ICC)%ZZ(NN,JCC) = M2%REAL_RECV_PKG11(NQT2*(LL-1)+4+NN)
-               ENDDO
-            ENDDO
-         ENDDO
-
-      ENDIF
-
-      ! Unpack velocity, momentum rhs and previous substep dH/Dx1 for faces, in CORRECTOR, IBM forcing:
-
-      IF (CODE==4 .AND. M2%NFCC_R(1)>0) THEN
-         NQT2 = 5 ! Three variables are passed per Stencil point. Vel (or Vels), Fv and DHDX1.
-         IF(.NOT.UNPACK_NEW) THEN
-         ! First loop cut-faces:
-         DO ICF=1,M%N_CUTFACE_MESH
-            IFACE_START=1
-            IF (M%CUT_FACE(ICF)%STATUS == IBM_GASPHASE) IFACE_START=0
-            DO IFACE=IFACE_START,M%CUT_FACE(ICF)%NFACE
-               DO EP=1,INT_N_EXT_PTS  ! External point for face IFACE
-                  DO VIND=IAXIS,KAXIS ! Velocity component U, V or W for external point EP
-                     INT_NPE_LO = M%CUT_FACE(ICF)%INT_NPE(LOW_IND,VIND,EP,IFACE)
-                     INT_NPE_HI = M%CUT_FACE(ICF)%INT_NPE(HIGH_IND,VIND,EP,IFACE)
-                     DO INPE=INT_NPE_LO+1,INT_NPE_LO+INT_NPE_HI
-                        NOOM   = M%CUT_FACE(ICF)%INT_NOMIND( LOW_IND,INPE); IF (NOOM /= NM) CYCLE
-                        LL     = M%CUT_FACE(ICF)%INT_NOMIND(HIGH_IND,INPE)
-                        M%CUT_FACE(ICF)%INT_FVARS(INT_VELS_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) ! Vel^*
-                        M%CUT_FACE(ICF)%INT_FVARS(  INT_FV_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+2) ! Corrector FV
-                        M%CUT_FACE(ICF)%INT_FVARS(INT_DHDX_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+3) ! dH/dx1^n-1/2
-                        M%CUT_FACE(ICF)%INT_FVARS(INT_DPDX_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+4) ! dP/dx1^n-1/2
-                        M%CUT_FACE(ICF)%INT_FVARS(  INT_MU_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+5) ! Face Mu.
-                     ENDDO
-                  ENDDO
-               ENDDO
-            ENDDO
-         ENDDO
-         ELSE
-         DO IFEP=1,M2%NFEP_R(1)
-            ICF = M2%IFEP_R_1( LOW_IND,IFEP)
-            INPE= M2%IFEP_R_1(HIGH_IND,IFEP)
-            LL  = M%CUT_FACE(ICF)%INT_NOMIND(HIGH_IND,INPE)
-            M%CUT_FACE(ICF)%INT_FVARS( INT_VEL_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) ! Vel^n
-            M%CUT_FACE(ICF)%INT_FVARS(  INT_FV_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+2) ! Predictor FV
-            M%CUT_FACE(ICF)%INT_FVARS(INT_DHDX_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+3) ! dH/dx1^n-1/2
-            M%CUT_FACE(ICF)%INT_FVARS(INT_DPDX_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+4) ! dP/dx1^n-1/2
-            M%CUT_FACE(ICF)%INT_FVARS(  INT_MU_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+5) ! Face Mu.
-         ENDDO
-         ENDIF
-      ENDIF
-
-      IF (CODE==6 .AND. M2%NFCC_R(1)>0) THEN
-         NQT2 = 5 ! Three variables are passed per Stencil point. Vel (or Vels), Fv and DHDX1.
-         IF(.NOT.UNPACK_NEW) THEN
-         ! First loop cut-faces:
-         DO IEDGE=1,M%IBM_NRCEDGE
-            DO EP=1,INT_N_EXT_PTS  ! External point for face IEDGE
-               DO VIND=IAXIS,KAXIS ! Velocity component U, V or W for external point EP
-                  INT_NPE_LO = M%IBM_RCEDGE(IEDGE)%INT_NPE(LOW_IND,VIND,EP,0)
-                  INT_NPE_HI = M%IBM_RCEDGE(IEDGE)%INT_NPE(HIGH_IND,VIND,EP,0)
-                  DO INPE=INT_NPE_LO+1,INT_NPE_LO+INT_NPE_HI
-                     NOOM   = M%IBM_RCEDGE(IEDGE)%INT_NOMIND( LOW_IND,INPE); IF (NOOM /= NM) CYCLE
-                     LL     = M%IBM_RCEDGE(IEDGE)%INT_NOMIND(HIGH_IND,INPE)
-                     M%IBM_RCEDGE(IEDGE)%INT_FVARS( INT_VEL_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) ! Vel^n+1
-                     M%IBM_RCEDGE(IEDGE)%INT_FVARS(  INT_FV_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+2) ! Corrector FV
-                     M%IBM_RCEDGE(IEDGE)%INT_FVARS(INT_DHDX_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+3) ! dH/dx1^*
-                     M%IBM_RCEDGE(IEDGE)%INT_FVARS(INT_DPDX_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+4) ! dP/dx1^*
-                     M%IBM_RCEDGE(IEDGE)%INT_FVARS(  INT_MU_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+5) ! Mu.
-                  ENDDO
-               ENDDO
-            ENDDO
-         ENDDO
-         ELSE
-         DO IFEP=1,M2%NFEP_R(3)
-            IEDGE= M2%IFEP_R_3( LOW_IND,IFEP)
-            INPE = M2%IFEP_R_3(HIGH_IND,IFEP)
-            LL   = M%IBM_RCEDGE(IEDGE)%INT_NOMIND(HIGH_IND,INPE)
-            M%IBM_RCEDGE(IEDGE)%INT_FVARS(INT_VELS_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) ! Vel^*
-            M%IBM_RCEDGE(IEDGE)%INT_FVARS(  INT_FV_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+2) ! Predictor FV
-            M%IBM_RCEDGE(IEDGE)%INT_FVARS(INT_DHDX_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+3) ! dH/dx1^n
-            M%IBM_RCEDGE(IEDGE)%INT_FVARS(INT_DPDX_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+4) ! dP/dx1^n
-            M%IBM_RCEDGE(IEDGE)%INT_FVARS(  INT_MU_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+5) ! Mu.
-         ENDDO
-         ENDIF
-      ENDIF
-
+      ENDIF RNODE_SNODE_IF
 
       ! Unpack H, RHO_0 and W velocity averaged to cell center, at PREDICTOR or CORRECTOR end of step:
 
@@ -2993,7 +2737,6 @@ RECV_MESH_LOOP: DO NOM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                   M%HS(II,JJ,KK)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+1)
                ENDIF
             ENDDO EXT_WALL_LOOP
-
          ELSE
             ! First loop cut-cells:
             VIND = 0
@@ -3112,7 +2855,6 @@ RECV_MESH_LOOP: DO NOM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
       ! Boundary and gasphase cut-faces and rcedges, face centered variables for interpolation:
       CF_FC_IF : IF(M2%NFCC_R(1)>0) THEN
-         ! First cut-faces:
          ! Count:
          DO ICF=1,M%N_CUTFACE_MESH
             IFACE_START=1
@@ -3135,10 +2877,29 @@ RECV_MESH_LOOP: DO NOM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             IF (ALLOCATED(M2%IFEP_R_1)) DEALLOCATE(M2%IFEP_R_1)
             ALLOCATE(M2%IFEP_R_1(LOW_IND:HIGH_IND,M2%NFEP_R(1))); M2%IFEP_R_1 = IBM_UNDEFINED
             ! Add index entries:
-            IFEP = 0
+            ! First Gasphase Cut-faces:
+            IFEP = 0; IFACE_START=0
             DO ICF=1,M%N_CUTFACE_MESH
-               IFACE_START=1
-               IF (M%CUT_FACE(ICF)%STATUS == IBM_GASPHASE) IFACE_START=0
+               IF (M%CUT_FACE(ICF)%STATUS /= IBM_GASPHASE) CYCLE
+               DO IFACE=IFACE_START,M%CUT_FACE(ICF)%NFACE
+                  DO EP=1,INT_N_EXT_PTS  ! External point for face IFACE
+                     DO VIND=IAXIS,KAXIS ! Velocity component U, V or W for external point EP
+                        INT_NPE_LO = M%CUT_FACE(ICF)%INT_NPE(LOW_IND,VIND,EP,IFACE)
+                        INT_NPE_HI = M%CUT_FACE(ICF)%INT_NPE(HIGH_IND,VIND,EP,IFACE)
+                        DO INPE=INT_NPE_LO+1,INT_NPE_LO+INT_NPE_HI
+                           NOOM   = M%CUT_FACE(ICF)%INT_NOMIND( LOW_IND,INPE); IF (NOOM /= NM) CYCLE
+                           IFEP = IFEP + 1
+                           M2%IFEP_R_1( LOW_IND:HIGH_IND,IFEP) = (/ ICF, INPE /)
+                        ENDDO
+                     ENDDO
+                  ENDDO
+               ENDDO
+            ENDDO
+            ! Store INPE points associated to Gasphase cut-faces:
+            M2%NFEP_R_G = IFEP; IFACE_START=1
+            ! Then boundary CFACEs:
+            DO ICF=1,M%N_CUTFACE_MESH
+               IF (M%CUT_FACE(ICF)%STATUS /= IBM_INBOUNDARY) CYCLE
                DO IFACE=IFACE_START,M%CUT_FACE(ICF)%NFACE
                   DO EP=1,INT_N_EXT_PTS  ! External point for face IFACE
                      DO VIND=IAXIS,KAXIS ! Velocity component U, V or W for external point EP
@@ -3247,14 +3008,14 @@ USE MPI
 INTEGER, INTENT(IN) :: CODE
 
 ! Local Variables:
-INTEGER :: NM,NOM,RNODE,SNODE,IERR
+INTEGER :: NM,NOM,NOOM,RNODE,SNODE,IERR
 INTEGER :: II1,JJ1,KK1,NCELL,ICC,ICC1,NQT2,JCC,LL,NN
-INTEGER :: I,J,K,IFC,ICF,X1AXIS,IFACE
-TYPE (MESH_TYPE), POINTER :: M
+INTEGER :: I,J,K,IFC,ICF,X1AXIS
+TYPE (MESH_TYPE), POINTER :: M,M1
 TYPE (OMESH_TYPE), POINTER :: M2,M3
 LOGICAL, SAVE :: INITIALIZE_CC_SCALARS_FORC=.TRUE.
 
-INTEGER :: EP,INPE,INT_NPE_LO,INT_NPE_HI,VIND,IFACE_START,ICELL,IEDGE
+INTEGER :: EP,INPE,INT_NPE_LO,INT_NPE_HI,VIND,ICELL,IEDGE,IFEP
 REAL(EB) :: TNOW
 
 ! In case of initialization code from main return.
@@ -3333,7 +3094,7 @@ INITIALIZE_CC_SCALARS_FORC_COND : IF (INITIALIZE_CC_SCALARS_FORC) THEN
          IF (M3%NFCC_R(1)==0) CYCLE OTHER_MESH_LOOP_12
          SNODE = PROCESS(NOM)
          ! Face centered variables Ux1, Fvx1, dHdx1:
-         ALLOCATE(M3%REAL_RECV_PKG12(M3%NFCC_R(1)*2))
+         ALLOCATE(M3%REAL_RECV_PKG12(M3%NFCC_R(1) * 2))
          IF (RNODE/=SNODE) THEN
             N_REQ12 = N_REQ12 + 1
             CALL MPI_RECV_INIT(M3%REAL_RECV_PKG12(1),SIZE(M3%REAL_RECV_PKG12),MPI_DOUBLE_PRECISION, &
@@ -3348,7 +3109,7 @@ INITIALIZE_CC_SCALARS_FORC_COND : IF (INITIALIZE_CC_SCALARS_FORC) THEN
          IF (M3%NFCC_R(2)==0) CYCLE OTHER_MESH_LOOP_13
          SNODE = PROCESS(NOM)
          ! Cell centered variables:
-         ALLOCATE(M3%REAL_RECV_PKG13(M3%NFCC_R(2)*(11+N_TRACKED_SPECIES)))
+         ALLOCATE(M3%REAL_RECV_PKG13(M3%NFCC_R(2)*(NQT2C+N_TRACKED_SPECIES)))
          IF (RNODE/=SNODE) THEN
             N_REQ13 = N_REQ13 + 1
             CALL MPI_RECV_INIT(M3%REAL_RECV_PKG13(1),SIZE(M3%REAL_RECV_PKG13),MPI_DOUBLE_PRECISION, &
@@ -3387,7 +3148,7 @@ INITIALIZE_CC_SCALARS_FORC_COND : IF (INITIALIZE_CC_SCALARS_FORC) THEN
          SNODE = PROCESS(NOM)
          ! Initialize persistent send requests
          IF (M3%NFCC_S(1)>0 .AND. RNODE/=SNODE) THEN
-            ALLOCATE(M3%REAL_SEND_PKG12(M3%NFCC_S(1)*2))
+            ALLOCATE(M3%REAL_SEND_PKG12(M3%NFCC_S(1) * 2))
             N_REQ12 = N_REQ12 + 1
             CALL MPI_SEND_INIT(M3%REAL_SEND_PKG12(1),SIZE(M3%REAL_SEND_PKG12),MPI_DOUBLE_PRECISION, &
                                SNODE,NM,MPI_COMM_WORLD,REQ12(N_REQ12),IERR)
@@ -3402,7 +3163,7 @@ INITIALIZE_CC_SCALARS_FORC_COND : IF (INITIALIZE_CC_SCALARS_FORC) THEN
          SNODE = PROCESS(NOM)
          ! Initialize persistent send requests
          IF (M3%NFCC_S(2)>0 .AND. RNODE/=SNODE) THEN
-            ALLOCATE(M3%REAL_SEND_PKG13(M3%NFCC_S(2)*(11+N_TRACKED_SPECIES)))
+            ALLOCATE(M3%REAL_SEND_PKG13(M3%NFCC_S(2)*(NQT2C+N_TRACKED_SPECIES)))
             N_REQ13 = N_REQ13 + 1
             CALL MPI_SEND_INIT(M3%REAL_SEND_PKG13(1),SIZE(M3%REAL_SEND_PKG13),MPI_DOUBLE_PRECISION, &
                                SNODE,NM,MPI_COMM_WORLD,REQ13(N_REQ13),IERR)
@@ -3423,6 +3184,7 @@ SENDING_MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    M =>MESHES(NM)
    RECEIVING_MESH_LOOP_2: DO NOM=1,NMESHES
 
+      M1=>MESHES(NOM)
       M3=>MESHES(NM)%OMESH(NOM)
       IF (EVACUATION_ONLY(NOM)) CYCLE RECEIVING_MESH_LOOP_2
 
@@ -3453,23 +3215,15 @@ SENDING_MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                ENDDO
             ENDDO PACK_REAL_SEND_PKG11
          ELSE ! Same sender as receiver:
-            ! Fill REAL_RECV_PKG11 of NOM mesh directly:
-            M2=>MESHES(NOM)%OMESH(NM)
-            PACK_REAL_RECV_PKG11: DO ICC1=1,M3%NICC_S(1)
-               ICC=M3%ICC_UNKZ_CC_S(ICC1)
-               NCELL=M%CUT_CELL(ICC)%NCELL
-               II1=M%CUT_CELL(ICC)%IJK(IAXIS)
-               JJ1=M%CUT_CELL(ICC)%IJK(JAXIS)
-               KK1=M%CUT_CELL(ICC)%IJK(KAXIS)
-               DO JCC=1,NCELL
-                  LL = LL + 1
-                  M2%REAL_RECV_PKG11(NQT2*(LL-1)+1) = M%CUT_CELL(ICC)%RHOS(JCC)
-                  M2%REAL_RECV_PKG11(NQT2*(LL-1)+2) = M%CUT_CELL(ICC)%TMP(JCC)
-                  M2%REAL_RECV_PKG11(NQT2*(LL-1)+3) = M%CUT_CELL(ICC)%RSUM(JCC)
-                  M2%REAL_RECV_PKG11(NQT2*(LL-1)+4) = M%CUT_CELL(ICC)%D(JCC)
-                  DO NN=1,N_TOTAL_SCALARS
-                     M2%REAL_RECV_PKG11(NQT2*(LL-1)+4+NN) = M%CUT_CELL(ICC)%ZZS(NN,JCC)
-                  ENDDO
+            PACK_REAL_RECV_PKG11: DO ICC=M1%N_CUTCELL_MESH+1,M1%N_CUTCELL_MESH+M1%N_GCCUTCELL_MESH
+               NOOM   = M1%CUT_CELL(ICC)%NOMICC(1); IF (NOOM /= NM) CYCLE PACK_REAL_RECV_PKG11
+               ICC1   = M1%CUT_CELL(ICC)%NOMICC(2)
+               DO JCC=1,M1%CUT_CELL(ICC)%NCELL
+                  M1%CUT_CELL(ICC)%RHOS(JCC) = M%CUT_CELL(ICC1)%RHOS(JCC)
+                  M1%CUT_CELL(ICC)%TMP(JCC)  = M%CUT_CELL(ICC1)%TMP(JCC)
+                  M1%CUT_CELL(ICC)%RSUM(JCC) = M%CUT_CELL(ICC1)%RSUM(JCC)
+                  M1%CUT_CELL(ICC)%D(JCC)    = M%CUT_CELL(ICC1)%D(JCC)
+                  M1%CUT_CELL(ICC)%ZZS(1:N_TOTAL_SCALARS,JCC) = M%CUT_CELL(ICC1)%ZZS(1:N_TOTAL_SCALARS,JCC)
                ENDDO
             ENDDO PACK_REAL_RECV_PKG11
          ENDIF
@@ -3477,7 +3231,7 @@ SENDING_MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
       ! Information for CFACEs:
       IF (CODE==1 .AND. M3%NFCC_S(2)>0) THEN
-         NQT2 = 11+N_TOTAL_SCALARS
+         NQT2 = NQT2C+N_TOTAL_SCALARS
          LL = 0
          IF (RNODE/=SNODE) THEN
             PACK_REAL_SEND_PKG213 : DO ICC=1,M3%NFCC_S(2)
@@ -3493,34 +3247,29 @@ SENDING_MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                M3%REAL_SEND_PKG13(NQT2*(LL-1)+6) = M%RSUM(I,J,K)                          ! RSUM^*
                M3%REAL_SEND_PKG13(NQT2*(LL-1)+7) = M%MU(I,J,K)                            ! MU^n
                M3%REAL_SEND_PKG13(NQT2*(LL-1)+8) = M%MU_DNS(I,J,K)                        ! MU_DNS^n
-               M3%REAL_SEND_PKG13(NQT2*(LL-1)+9) = M%KRES(I,J,K)                          ! KRES^n
-               M3%REAL_SEND_PKG13(NQT2*(LL-1)+10)= M%D(I,J,K)                             ! DIV^*
-               M3%REAL_SEND_PKG13(NQT2*(LL-1)+11)= M%RHO(I,J,K)*(M%HS(I,J,K)-M%KRES(I,J,K)) ! Previous substep pressure.
+               M3%REAL_SEND_PKG13(NQT2*(LL-1)+NQT2C)= M%RHO(I,J,K)*(M%HS(I,J,K)-M%KRES(I,J,K)) ! Previous substep pressure.
                DO NN=1,N_TOTAL_SCALARS
-                  M3%REAL_SEND_PKG13(NQT2*(LL-1)+11+NN)= M%ZZS(I,J,K,NN)
+                  M3%REAL_SEND_PKG13(NQT2*(LL-1)+NQT2C+NN)= M%ZZS(I,J,K,NN)
                ENDDO
             ENDDO PACK_REAL_SEND_PKG213
          ELSE
-            ! Fill REAL_RECV_PKG13 of NOM mesh directly:
             M2=>MESHES(NOM)%OMESH(NM)
-            PACK_REAL_RECV_PKG213: DO ICC=1,M3%NFCC_S(2)
-               I     = M3%IIO_CC_S(ICC)
-               J     = M3%JJO_CC_S(ICC)
-               K     = M3%KKO_CC_S(ICC)
-               LL = LL + 1
-               M2%REAL_RECV_PKG13(NQT2*(LL-1)+1) = M%HS(I,J,K)                            ! Prev H in cell I,J,K
-               M2%REAL_RECV_PKG13(NQT2*(LL-1)+2) = M%RHO_0(K)                             ! RHO_0 in cell I,J,K
-               M2%REAL_RECV_PKG13(NQT2*(LL-1)+3) = 0.5_EB*(M%W(I,J,K-1)+M%W(I,J,K))       ! Wcen^n in I,J,K.
-               M2%REAL_RECV_PKG13(NQT2*(LL-1)+4) = M%RHOS(I,J,K)                          ! RHO^*
-               M2%REAL_RECV_PKG13(NQT2*(LL-1)+5) = M%TMP(I,J,K)                           ! TMP^*
-               M2%REAL_RECV_PKG13(NQT2*(LL-1)+6) = M%RSUM(I,J,K)                          ! RSUM^*
-               M2%REAL_RECV_PKG13(NQT2*(LL-1)+7) = M%MU(I,J,K)                            ! MU^n
-               M2%REAL_RECV_PKG13(NQT2*(LL-1)+8) = M%MU_DNS(I,J,K)                        ! MU_DNS^n
-               M2%REAL_RECV_PKG13(NQT2*(LL-1)+9) = M%KRES(I,J,K)                          ! KRES^n
-               M2%REAL_RECV_PKG13(NQT2*(LL-1)+10)= M%D(I,J,K)                             ! DIV^*
-               M2%REAL_RECV_PKG13(NQT2*(LL-1)+11)= M%RHO(I,J,K)*(M%HS(I,J,K)-M%KRES(I,J,K)) ! Previous substep pressure.
+            PACK_REAL_RECV_PKG213: DO IFEP=1,M2%NFEP_R(2)
+               ICF = M2%IFEP_R_2( LOW_IND,IFEP)
+               INPE= M2%IFEP_R_2(HIGH_IND,IFEP)
+               LL  = M1%CUT_FACE(ICF)%INT_NOMIND(HIGH_IND,INPE)
+               I     = M3%IIO_CC_S(LL)
+               J     = M3%JJO_CC_S(LL)
+               K     = M3%KKO_CC_S(LL)
+               M1%CUT_FACE(ICF)%INT_CVARS(    INT_H_IND,INPE)= M%HS(I,J,K)
+               M1%CUT_FACE(ICF)%INT_CVARS(  INT_RHO_IND,INPE)= M%RHOS(I,J,K)
+               M1%CUT_FACE(ICF)%INT_CVARS(  INT_TMP_IND,INPE)= M%TMP(I,J,K)
+               M1%CUT_FACE(ICF)%INT_CVARS( INT_RSUM_IND,INPE)= M%RSUM(I,J,K)
+               M1%CUT_FACE(ICF)%INT_CVARS(   INT_MU_IND,INPE)= M%MU(I,J,K)
+               M1%CUT_FACE(ICF)%INT_CVARS(INT_MUDNS_IND,INPE)= M%MU_DNS(I,J,K)
+               M1%CUT_FACE(ICF)%INT_CVARS(    INT_P_IND,INPE)= M%RHO(I,J,K)*(M%HS(I,J,K)-M%KRES(I,J,K))
                DO NN=1,N_TOTAL_SCALARS
-                  M2%REAL_RECV_PKG13(NQT2*(LL-1)+11+NN)= M%ZZS(I,J,K,NN)
+                  M1%CUT_FACE(ICF)%INT_CVARS(INT_P_IND+NN,INPE)=M%ZZS(I,J,K,NN)
                ENDDO
             ENDDO PACK_REAL_RECV_PKG213
          ENDIF
@@ -3551,30 +3300,31 @@ SENDING_MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                END SELECT
             ENDDO PACK_REAL_SEND_PKG12
          ELSE
-            ! Fill REAL_RECV_PKG12 of NOM mesh directly:
             M2=>MESHES(NOM)%OMESH(NM)
-            PACK_REAL_RECV_PKG12: DO IFC=1,M3%NFCC_S(1)
-               I     = M3%IIO_FC_S(IFC)
-               J     = M3%JJO_FC_S(IFC)
-               K     = M3%KKO_FC_S(IFC)
-               X1AXIS= M3%AXS_FC_S(IFC)
-               LL = LL + 1
+            PACK_REAL_RECV_PKG12: DO IFEP=1,M2%NFEP_R(1)
+               ICF = M2%IFEP_R_1( LOW_IND,IFEP)
+               INPE= M2%IFEP_R_1(HIGH_IND,IFEP)
+               LL  = M1%CUT_FACE(ICF)%INT_NOMIND(HIGH_IND,INPE)
+               I     = M3%IIO_FC_S(LL)
+               J     = M3%JJO_FC_S(LL)
+               K     = M3%KKO_FC_S(LL)
+               X1AXIS= M3%AXS_FC_S(LL)
                SELECT CASE(X1AXIS)
                CASE(IAXIS)
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) = M%FVX(I,J,K)                          ! FVX in x face I,J,K
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+2) = (M%H(I+1,J,K)-M%H(I,J,K))*M%RDXN(I)   ! dH/dx^n in I,J,K.
+                  M1%CUT_FACE(ICF)%INT_FVARS(  INT_FV_IND,INPE) = M%FVX(I,J,K)                        ! FVX in x face I,J,K
+                  M1%CUT_FACE(ICF)%INT_FVARS(INT_DHDX_IND,INPE) = (M%H(I+1,J,K)-M%H(I,J,K))*M%RDXN(I) ! dH/dx^n in I,J,K.
                CASE(JAXIS)
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) = M%FVY(I,J,K)                          ! FVY in y face I,J,K
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+2) = (M%H(I,J+1,K)-M%H(I,J,K))*M%RDYN(J)   ! dH/dy^n-1/2 in I,J,K.
+                  M1%CUT_FACE(ICF)%INT_FVARS(  INT_FV_IND,INPE) = M%FVY(I,J,K)                        ! FVY in y face I,J,K
+                  M1%CUT_FACE(ICF)%INT_FVARS(INT_DHDX_IND,INPE) = (M%H(I,J+1,K)-M%H(I,J,K))*M%RDYN(J) ! dH/dy^n in I,J,K.
                CASE(KAXIS)
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) = M%FVZ(I,J,K)                          ! FVZ in z face I,J,K
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+2) = (M%H(I,J,K+1)-M%H(I,J,K))*M%RDZN(K)   ! dH/dz^n-1/2 in I,J,K.
+                  M1%CUT_FACE(ICF)%INT_FVARS(  INT_FV_IND,INPE) = M%FVZ(I,J,K)                        ! FVZ in z face I,J,K
+                  M1%CUT_FACE(ICF)%INT_FVARS(INT_DHDX_IND,INPE) = (M%H(I,J,K+1)-M%H(I,J,K))*M%RDZN(K) ! dH/dz^n in I,J,K.
                END SELECT
             ENDDO PACK_REAL_RECV_PKG12
          ENDIF
       ENDIF
 
-      ! Exchange Velocity and Pressure at end of PREDICTOR: To be used in RCEDGEs estimation of OME_E, TAU_E next substep.
+      ! Exchange Velocity at end of PREDICTOR: To be used in RCEDGEs estimation of OME_E, TAU_E next substep.
       IF (CODE==3 .AND. M3%NFCC_S(1)>0) THEN
          NQT2 = 1
          LL = 0
@@ -3595,23 +3345,42 @@ SENDING_MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                END SELECT
             ENDDO PACK_REAL_SEND_PKG121
          ELSE
-            ! Fill REAL_RECV_PKG12 of NOM mesh directly:
             M2=>MESHES(NOM)%OMESH(NM)
-            PACK_REAL_RECV_PKG121: DO IFC=1,M3%NFCC_S(1)
-               I     = M3%IIO_FC_S(IFC)
-               J     = M3%JJO_FC_S(IFC)
-               K     = M3%KKO_FC_S(IFC)
-               X1AXIS= M3%AXS_FC_S(IFC)
-               LL = LL + 1
+            PACK_REAL_RECV_PKG121: DO IFEP=1,M2%NFEP_R(1)
+               ICF = M2%IFEP_R_1( LOW_IND,IFEP)
+               INPE= M2%IFEP_R_1(HIGH_IND,IFEP)
+               LL  = M1%CUT_FACE(ICF)%INT_NOMIND(HIGH_IND,INPE)
+               I     = M3%IIO_FC_S(LL)
+               J     = M3%JJO_FC_S(LL)
+               K     = M3%KKO_FC_S(LL)
+               X1AXIS= M3%AXS_FC_S(LL)
                SELECT CASE(X1AXIS)
                CASE(IAXIS)
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) = M%US(I,J,K)                           ! U^* in x face I,J,K
+                  M1%CUT_FACE(ICF)%INT_FVARS( INT_VELS_IND,INPE) = M%US(I,J,K)               ! U^* in x face I,J,K
                CASE(JAXIS)
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) = M%VS(I,J,K)                           ! V^* in y face I,J,K
+                  M1%CUT_FACE(ICF)%INT_FVARS( INT_VELS_IND,INPE) = M%VS(I,J,K)               ! V^* in y face I,J,K
                CASE(KAXIS)
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) = M%WS(I,J,K)                           ! W^* in z face I,J,K
+                  M1%CUT_FACE(ICF)%INT_FVARS( INT_VELS_IND,INPE) = M%WS(I,J,K)               ! W^* in z face I,J,K
                END SELECT
             ENDDO PACK_REAL_RECV_PKG121
+            ! Second Loop cut-edges:
+            PACK_REAL_RECV_PKG121E: DO IFEP=1,M2%NFEP_R(3)
+               IEDGE= M2%IFEP_R_3( LOW_IND,IFEP)
+               INPE = M2%IFEP_R_3(HIGH_IND,IFEP)
+               LL   = M1%IBM_RCEDGE(IEDGE)%INT_NOMIND(HIGH_IND,INPE)
+               I     = M3%IIO_FC_S(LL)
+               J     = M3%JJO_FC_S(LL)
+               K     = M3%KKO_FC_S(LL)
+               X1AXIS= M3%AXS_FC_S(LL)
+               SELECT CASE(X1AXIS)
+               CASE(IAXIS)
+                  M1%IBM_RCEDGE(IEDGE)%INT_FVARS(INT_VEL_IND,INPE) = M%US(I,J,K)               ! U^* in x face I,J,K
+               CASE(JAXIS)
+                  M1%IBM_RCEDGE(IEDGE)%INT_FVARS(INT_VEL_IND,INPE) = M%VS(I,J,K)               ! V^* in y face I,J,K
+               CASE(KAXIS)
+                  M1%IBM_RCEDGE(IEDGE)%INT_FVARS(INT_VEL_IND,INPE) = M%WS(I,J,K)               ! W^* in z face I,J,K
+               END SELECT
+            ENDDO PACK_REAL_RECV_PKG121E
          ENDIF
       ENDIF
 
@@ -3639,23 +3408,16 @@ SENDING_MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                ENDDO
             ENDDO PACK_REAL_SEND_PKG111
          ELSE ! Same sender as receiver:
-            ! Fill REAL_RECV_PKG11 of NOM mesh directly:
-            M2=>MESHES(NOM)%OMESH(NM)
-            PACK_REAL_RECV_PKG111: DO ICC1=1,M3%NICC_S(1)
-               ICC=M3%ICC_UNKZ_CC_S(ICC1)
-               NCELL=M%CUT_CELL(ICC)%NCELL
-               II1=M%CUT_CELL(ICC)%IJK(IAXIS)
-               JJ1=M%CUT_CELL(ICC)%IJK(JAXIS)
-               KK1=M%CUT_CELL(ICC)%IJK(KAXIS)
-               DO JCC=1,NCELL
-                  LL = LL + 1
-                  M2%REAL_RECV_PKG11(NQT2*(LL-1)+1) = M%CUT_CELL(ICC)%RHO(JCC)
-                  M2%REAL_RECV_PKG11(NQT2*(LL-1)+2) = M%CUT_CELL(ICC)%TMP(JCC)
-                  M2%REAL_RECV_PKG11(NQT2*(LL-1)+3) = M%CUT_CELL(ICC)%RSUM(JCC)
-                  M2%REAL_RECV_PKG11(NQT2*(LL-1)+4) = M%CUT_CELL(ICC)%DS(JCC)
-                  DO NN=1,N_TOTAL_SCALARS
-                     M2%REAL_RECV_PKG11(NQT2*(LL-1)+4+NN) = M%CUT_CELL(ICC)%ZZ(NN,JCC)
-                  ENDDO
+            M1=>MESHES(NOM)
+            PACK_REAL_RECV_PKG111: DO ICC=M1%N_CUTCELL_MESH+1,M1%N_CUTCELL_MESH+M1%N_GCCUTCELL_MESH
+               NOOM   = M1%CUT_CELL(ICC)%NOMICC(1); IF (NOOM /= NM) CYCLE PACK_REAL_RECV_PKG111
+               ICC1   = M1%CUT_CELL(ICC)%NOMICC(2)
+               DO JCC=1,M1%CUT_CELL(ICC)%NCELL
+                  M1%CUT_CELL(ICC)%RHO(JCC)   = M%CUT_CELL(ICC1)%RHO(JCC)
+                  M1%CUT_CELL(ICC)%TMP(JCC)   = M%CUT_CELL(ICC1)%TMP(JCC)
+                  M1%CUT_CELL(ICC)%RSUM(JCC)  = M%CUT_CELL(ICC1)%RSUM(JCC)
+                  M1%CUT_CELL(ICC)%DS(JCC)    = M%CUT_CELL(ICC1)%DS(JCC)
+                  M1%CUT_CELL(ICC)%ZZ(1:N_TOTAL_SCALARS,JCC) = M%CUT_CELL(ICC1)%ZZ(1:N_TOTAL_SCALARS,JCC)
                ENDDO
             ENDDO PACK_REAL_RECV_PKG111
          ENDIF
@@ -3663,7 +3425,7 @@ SENDING_MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
       ! Information for CFACEs:
       IF (CODE==4 .AND. M3%NFCC_S(2)>0) THEN
-         NQT2 = 11+N_TOTAL_SCALARS
+         NQT2 = NQT2C+N_TOTAL_SCALARS
          LL = 0
          IF (RNODE/=SNODE) THEN
             PACK_REAL_SEND_PKG313 : DO ICC=1,M3%NFCC_S(2)
@@ -3679,34 +3441,29 @@ SENDING_MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                M3%REAL_SEND_PKG13(NQT2*(LL-1)+6) = M%RSUM(I,J,K)                          ! RSUM^n+1
                M3%REAL_SEND_PKG13(NQT2*(LL-1)+7) = M%MU(I,J,K)                            ! MU^*
                M3%REAL_SEND_PKG13(NQT2*(LL-1)+8) = M%MU_DNS(I,J,K)                        ! MU_DNS^*
-               M3%REAL_SEND_PKG13(NQT2*(LL-1)+9) = M%KRES(I,J,K)                          ! KRES^*
-               M3%REAL_SEND_PKG13(NQT2*(LL-1)+10)= M%DS(I,J,K)                            ! DIV^n+1
-               M3%REAL_SEND_PKG13(NQT2*(LL-1)+11)= M%RHOS(I,J,K)*(M%H(I,J,K)-M%KRES(I,J,K)) ! Previous substep pressure.
+               M3%REAL_SEND_PKG13(NQT2*(LL-1)+NQT2C)= M%RHOS(I,J,K)*(M%H(I,J,K)-M%KRES(I,J,K)) ! Previous substep pressure.
                DO NN=1,N_TOTAL_SCALARS
-                  M3%REAL_SEND_PKG13(NQT2*(LL-1)+11+NN)= M%ZZ(I,J,K,NN)
+                  M3%REAL_SEND_PKG13(NQT2*(LL-1)+NQT2C+NN)= M%ZZ(I,J,K,NN)
                ENDDO
             ENDDO PACK_REAL_SEND_PKG313
          ELSE
-            ! Fill REAL_RECV_PKG13 of NOM mesh directly:
             M2=>MESHES(NOM)%OMESH(NM)
-            PACK_REAL_RECV_PKG313: DO ICC=1,M3%NFCC_S(2)
-               I     = M3%IIO_CC_S(ICC)
-               J     = M3%JJO_CC_S(ICC)
-               K     = M3%KKO_CC_S(ICC)
-               LL = LL + 1
-               M2%REAL_RECV_PKG13(NQT2*(LL-1)+1) = M%H(I,J,K)                             ! Prev H in cell I,J,K
-               M2%REAL_RECV_PKG13(NQT2*(LL-1)+2) = M%RHO_0(K)                             ! RHO_0 in cell I,J,K
-               M2%REAL_RECV_PKG13(NQT2*(LL-1)+3) = 0.5_EB*(M%WS(I,J,K-1)+M%WS(I,J,K))     ! Wcen^* in I,J,K.
-               M2%REAL_RECV_PKG13(NQT2*(LL-1)+4) = M%RHO(I,J,K)                           ! RHO^n+1
-               M2%REAL_RECV_PKG13(NQT2*(LL-1)+5) = M%TMP(I,J,K)                           ! TMP^n+1
-               M2%REAL_RECV_PKG13(NQT2*(LL-1)+6) = M%RSUM(I,J,K)                          ! RSUM^n+1
-               M2%REAL_RECV_PKG13(NQT2*(LL-1)+7) = M%MU(I,J,K)                            ! MU^*
-               M2%REAL_RECV_PKG13(NQT2*(LL-1)+8) = M%MU_DNS(I,J,K)                        ! MU_DNS^*
-               M2%REAL_RECV_PKG13(NQT2*(LL-1)+9) = M%KRES(I,J,K)                          ! KRES^*
-               M2%REAL_RECV_PKG13(NQT2*(LL-1)+10)= M%DS(I,J,K)                            ! DIV^n+1
-               M2%REAL_RECV_PKG13(NQT2*(LL-1)+11)= M%RHOS(I,J,K)*(M%H(I,J,K)-M%KRES(I,J,K)) ! Previous substep pressure.
+            PACK_REAL_RECV_PKG313: DO IFEP=1,M2%NFEP_R(2)
+               ICF = M2%IFEP_R_2( LOW_IND,IFEP)
+               INPE= M2%IFEP_R_2(HIGH_IND,IFEP)
+               LL  = M1%CUT_FACE(ICF)%INT_NOMIND(HIGH_IND,INPE)
+               I     = M3%IIO_CC_S(LL)
+               J     = M3%JJO_CC_S(LL)
+               K     = M3%KKO_CC_S(LL)
+               M1%CUT_FACE(ICF)%INT_CVARS(    INT_H_IND,INPE)= M%H(I,J,K)
+               M1%CUT_FACE(ICF)%INT_CVARS(  INT_RHO_IND,INPE)= M%RHO(I,J,K)
+               M1%CUT_FACE(ICF)%INT_CVARS(  INT_TMP_IND,INPE)= M%TMP(I,J,K)
+               M1%CUT_FACE(ICF)%INT_CVARS( INT_RSUM_IND,INPE)= M%RSUM(I,J,K)
+               M1%CUT_FACE(ICF)%INT_CVARS(   INT_MU_IND,INPE)= M%MU(I,J,K)
+               M1%CUT_FACE(ICF)%INT_CVARS(INT_MUDNS_IND,INPE)= M%MU_DNS(I,J,K)
+               M1%CUT_FACE(ICF)%INT_CVARS(    INT_P_IND,INPE)= M%RHOS(I,J,K)*(M%H(I,J,K)-M%KRES(I,J,K))
                DO NN=1,N_TOTAL_SCALARS
-                  M2%REAL_RECV_PKG13(NQT2*(LL-1)+11+NN)= M%ZZ(I,J,K,NN)
+                  M1%CUT_FACE(ICF)%INT_CVARS(INT_P_IND+NN,INPE)=M%ZZ(I,J,K,NN)
                ENDDO
             ENDDO PACK_REAL_RECV_PKG313
          ENDIF
@@ -3738,24 +3495,25 @@ SENDING_MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                END SELECT
             ENDDO PACK_REAL_SEND_PKG112
          ELSE
-            ! Fill REAL_RECV_PKG12 of NOM mesh directly:
             M2=>MESHES(NOM)%OMESH(NM)
-            PACK_REAL_RECV_PKG112: DO IFC=1,M3%NFCC_S(1)
-               I     = M3%IIO_FC_S(IFC)
-               J     = M3%JJO_FC_S(IFC)
-               K     = M3%KKO_FC_S(IFC)
-               X1AXIS= M3%AXS_FC_S(IFC)
-               LL = LL + 1
+            PACK_REAL_RECV_PKG112: DO IFEP=1,M2%NFEP_R(1)
+               ICF = M2%IFEP_R_1( LOW_IND,IFEP)
+               INPE= M2%IFEP_R_1(HIGH_IND,IFEP)
+               LL  = M1%CUT_FACE(ICF)%INT_NOMIND(HIGH_IND,INPE)
+               I     = M3%IIO_FC_S(LL)
+               J     = M3%JJO_FC_S(LL)
+               K     = M3%KKO_FC_S(LL)
+               X1AXIS= M3%AXS_FC_S(LL)
                SELECT CASE(X1AXIS)
                CASE(IAXIS)
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) = M%FVX(I,J,K)                          ! FVX in x face I,J,K
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+2) = (M%HS(I+1,J,K)-M%HS(I,J,K))*M%RDXN(I) ! dH/dx^* in I,J,K.
+                  M1%CUT_FACE(ICF)%INT_FVARS(  INT_FV_IND,INPE) = M%FVX(I,J,K)                          ! FVX in x face I,J,K
+                  M1%CUT_FACE(ICF)%INT_FVARS(INT_DHDX_IND,INPE) = (M%HS(I+1,J,K)-M%HS(I,J,K))*M%RDXN(I) ! dH/dx^* in I,J,K.
                CASE(JAXIS)
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) = M%FVY(I,J,K)                          ! FVY in y face I,J,K
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+2) = (M%HS(I,J+1,K)-M%HS(I,J,K))*M%RDYN(J) ! dH/dy^* in I,J,K.
+                  M1%CUT_FACE(ICF)%INT_FVARS(  INT_FV_IND,INPE) = M%FVY(I,J,K)                          ! FVY in y face I,J,K
+                  M1%CUT_FACE(ICF)%INT_FVARS(INT_DHDX_IND,INPE) = (M%HS(I,J+1,K)-M%HS(I,J,K))*M%RDYN(J) ! dH/dy^* in I,J,K.
                CASE(KAXIS)
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) = M%FVZ(I,J,K)                          ! FVZ in z face I,J,K
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+2) = (M%HS(I,J,K+1)-M%HS(I,J,K))*M%RDZN(K) ! dH/dz^* in I,J,K.
+                  M1%CUT_FACE(ICF)%INT_FVARS(  INT_FV_IND,INPE) = M%FVZ(I,J,K)                          ! FVZ in z face I,J,K
+                  M1%CUT_FACE(ICF)%INT_FVARS(INT_DHDX_IND,INPE) = (M%HS(I,J,K+1)-M%HS(I,J,K))*M%RDZN(K) ! dH/dz^* in I,J,K.
                END SELECT
             ENDDO PACK_REAL_RECV_PKG112
          ENDIF
@@ -3782,23 +3540,42 @@ SENDING_MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                END SELECT
             ENDDO PACK_REAL_SEND_PKG122
          ELSE
-            ! Fill REAL_RECV_PKG12 of NOM mesh directly:
             M2=>MESHES(NOM)%OMESH(NM)
-            PACK_REAL_RECV_PKG122: DO IFC=1,M3%NFCC_S(1)
-               I     = M3%IIO_FC_S(IFC)
-               J     = M3%JJO_FC_S(IFC)
-               K     = M3%KKO_FC_S(IFC)
-               X1AXIS= M3%AXS_FC_S(IFC)
-               LL = LL + 1
+            PACK_REAL_RECV_PKG122: DO IFEP=1,M2%NFEP_R(1)
+               ICF = M2%IFEP_R_1( LOW_IND,IFEP)
+               INPE= M2%IFEP_R_1(HIGH_IND,IFEP)
+               LL  = M1%CUT_FACE(ICF)%INT_NOMIND(HIGH_IND,INPE)
+               I     = M3%IIO_FC_S(LL)
+               J     = M3%JJO_FC_S(LL)
+               K     = M3%KKO_FC_S(LL)
+               X1AXIS= M3%AXS_FC_S(LL)
                SELECT CASE(X1AXIS)
                CASE(IAXIS)
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) = M%U(I,J,K)                            ! U^n+1 in x face I,J,K
+                  M1%CUT_FACE(ICF)%INT_FVARS( INT_VEL_IND,INPE) = M%U(I,J,K)                ! U^n+1 in x face I,J,K
                CASE(JAXIS)
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) = M%V(I,J,K)                            ! V^n+1 in y face I,J,K
+                  M1%CUT_FACE(ICF)%INT_FVARS( INT_VEL_IND,INPE) = M%V(I,J,K)                ! V^n+1 in y face I,J,K
                CASE(KAXIS)
-                  M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) = M%W(I,J,K)                            ! W^n+1 in z face I,J,K
+                  M1%CUT_FACE(ICF)%INT_FVARS( INT_VEL_IND,INPE) = M%W(I,J,K)                ! W^n+1 in z face I,J,K
                END SELECT
             ENDDO PACK_REAL_RECV_PKG122
+            ! Second Loop cut-edges:
+            PACK_REAL_RECV_PKG122E: DO IFEP=1,M2%NFEP_R(3)
+               IEDGE= M2%IFEP_R_3( LOW_IND,IFEP)
+               INPE = M2%IFEP_R_3(HIGH_IND,IFEP)
+               LL   = M1%IBM_RCEDGE(IEDGE)%INT_NOMIND(HIGH_IND,INPE)
+               I     = M3%IIO_FC_S(LL)
+               J     = M3%JJO_FC_S(LL)
+               K     = M3%KKO_FC_S(LL)
+               X1AXIS= M3%AXS_FC_S(LL)
+               SELECT CASE(X1AXIS)
+               CASE(IAXIS)
+                  M1%IBM_RCEDGE(IEDGE)%INT_FVARS(INT_VEL_IND,INPE) = M%U(I,J,K)             ! U^n+1 in x face I,J,K
+               CASE(JAXIS)
+                  M1%IBM_RCEDGE(IEDGE)%INT_FVARS(INT_VEL_IND,INPE) = M%V(I,J,K)             ! V^n+1 in y face I,J,K
+               CASE(KAXIS)
+                  M1%IBM_RCEDGE(IEDGE)%INT_FVARS(INT_VEL_IND,INPE) = M%W(I,J,K)             ! W^n+1 in z face I,J,K
+               END SELECT
+            ENDDO PACK_REAL_RECV_PKG122E
          ENDIF
       ENDIF
 
@@ -3818,7 +3595,6 @@ SENDING_MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                M3%REAL_SEND_PKG13(NQT2*(LL-1)+3) = 0.5_EB*(M%WS(I,J,K-1)+M%WS(I,J,K))     ! Wcen^* in I,J,K.
             ENDDO PACK_REAL_SEND_PKG13
          ELSE
-            ! Fill REAL_RECV_PKG13 of NOM mesh directly:
             M2=>MESHES(NOM)%OMESH(NM)
             PACK_REAL_RECV_PKG13: DO ICC=1,M3%NFCC_S(2)
                I     = M3%IIO_CC_S(ICC)
@@ -3848,7 +3624,6 @@ SENDING_MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                M3%REAL_SEND_PKG13(NQT2*(LL-1)+3) = 0.5_EB*(M%W(I,J,K-1)+M%W(I,J,K))       ! Wcen  in I,J,K.
             ENDDO PACK_REAL_SEND_PKG113
          ELSE
-            ! Fill REAL_RECV_PKG13 of NOM mesh directly:
             M2=>MESHES(NOM)%OMESH(NM)
             PACK_REAL_RECV_PKG113: DO ICC=1,M3%NFCC_S(2)
                I     = M3%IIO_CC_S(ICC)
@@ -3901,177 +3676,120 @@ RECV_MESH_LOOP: DO NOM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       M2=>MESHES(NOM)%OMESH(NM)
       IF (EVACUATION_ONLY(NM)) CYCLE SEND_MESH_LOOP
 
-      ! Unpack densities and species mass fractions following PREDICTOR exchange
+      RNODE = PROCESS(NOM)
+      SNODE = PROCESS(NM)
 
-      IF (CODE==1 .AND. M2%NICC_R(1)>0) THEN
+      RNODE_SNODE_IF: IF (RNODE/=SNODE) THEN
 
-         NQT2 = 4+N_TOTAL_SCALARS
-         LL = 0
-         DO ICC=M%N_CUTCELL_MESH+1,M%N_CUTCELL_MESH+M%N_GCCUTCELL_MESH
-            IF(M%CUT_CELL(ICC)%NOMICC(1) /= NM) CYCLE
-            DO JCC=1,M%CUT_CELL(ICC)%NCELL
-               LL = LL + 1
-               M%CUT_CELL(ICC)%RHOS(JCC) = M2%REAL_RECV_PKG11(NQT2*(LL-1)+1)
-               M%CUT_CELL(ICC)%TMP(JCC)  = M2%REAL_RECV_PKG11(NQT2*(LL-1)+2)
-               M%CUT_CELL(ICC)%RSUM(JCC) = M2%REAL_RECV_PKG11(NQT2*(LL-1)+3)
-               M%CUT_CELL(ICC)%D(JCC)    = M2%REAL_RECV_PKG11(NQT2*(LL-1)+4)
+         ! Unpack densities and species mass fractions following PREDICTOR exchange
+
+         IF (CODE==1 .AND. M2%NICC_R(1)>0) THEN
+            NQT2 = 4+N_TOTAL_SCALARS
+            LL = 0
+            DO ICC=M%N_CUTCELL_MESH+1,M%N_CUTCELL_MESH+M%N_GCCUTCELL_MESH
+               IF(M%CUT_CELL(ICC)%NOMICC(1) /= NM) CYCLE
+               DO JCC=1,M%CUT_CELL(ICC)%NCELL
+                  LL = LL + 1
+                  M%CUT_CELL(ICC)%RHOS(JCC) = M2%REAL_RECV_PKG11(NQT2*(LL-1)+1)
+                  M%CUT_CELL(ICC)%TMP(JCC)  = M2%REAL_RECV_PKG11(NQT2*(LL-1)+2)
+                  M%CUT_CELL(ICC)%RSUM(JCC) = M2%REAL_RECV_PKG11(NQT2*(LL-1)+3)
+                  M%CUT_CELL(ICC)%D(JCC)    = M2%REAL_RECV_PKG11(NQT2*(LL-1)+4)
+                  DO NN=1,N_TOTAL_SCALARS
+                     M%CUT_CELL(ICC)%ZZS(NN,JCC) = M2%REAL_RECV_PKG11(NQT2*(LL-1)+4+NN)
+                  ENDDO
+               ENDDO
+            ENDDO
+         ENDIF
+
+         IF((CODE==1 .OR. CODE==4) .AND. M2%NFCC_R(2)>0) THEN
+            NQT2 = NQT2C+N_TOTAL_SCALARS
+            DO IFEP=1,M2%NFEP_R(2)
+               ICF = M2%IFEP_R_2( LOW_IND,IFEP)
+               INPE= M2%IFEP_R_2(HIGH_IND,IFEP)
+               LL  = M%CUT_FACE(ICF)%INT_NOMIND(HIGH_IND,INPE)
+               M%CUT_FACE(ICF)%INT_CVARS(    INT_H_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+1)
+               M%CUT_FACE(ICF)%INT_CVARS(  INT_RHO_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+4)
+               M%CUT_FACE(ICF)%INT_CVARS(  INT_TMP_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+5)
+               M%CUT_FACE(ICF)%INT_CVARS( INT_RSUM_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+6)
+               M%CUT_FACE(ICF)%INT_CVARS(   INT_MU_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+7)
+               M%CUT_FACE(ICF)%INT_CVARS(INT_MUDNS_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+8)
+               M%CUT_FACE(ICF)%INT_CVARS(    INT_P_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+NQT2C)
                DO NN=1,N_TOTAL_SCALARS
-                  M%CUT_CELL(ICC)%ZZS(NN,JCC) = M2%REAL_RECV_PKG11(NQT2*(LL-1)+4+NN)
+                  M%CUT_FACE(ICF)%INT_CVARS(INT_P_IND+NN,INPE)=M2%REAL_RECV_PKG13(NQT2*(LL-1)+NQT2C+NN)
                ENDDO
             ENDDO
-         ENDDO
+         ENDIF
 
-      ENDIF
+         ! Unpack velocity, momentum rhs and previous substep dH/Dx1 for cut-faces, in PREDICTOR or CORRECTOR, IBM forcing:
 
-      IF((CODE==1 .OR. CODE==4) .AND. M2%NFCC_R(2)>0) THEN
-         NQT2 = 11+N_TOTAL_SCALARS
-         VIND = 0 ! Cell centered variables.
-         ! First loop cut-faces:
-         DO ICF=1,M%N_CUTFACE_MESH
-            IF (M%CUT_FACE(ICF)%STATUS /= IBM_INBOUNDARY) CYCLE
-            DO IFACE=1,M%CUT_FACE(ICF)%NFACE
-               DO EP=1,INT_N_EXT_PTS  ! External point for face IFACE
-                  INT_NPE_LO = M%CUT_FACE(ICF)%INT_NPE(LOW_IND,VIND,EP,IFACE)
-                  INT_NPE_HI = M%CUT_FACE(ICF)%INT_NPE(HIGH_IND,VIND,EP,IFACE)
-                  DO INPE=INT_NPE_LO+1,INT_NPE_LO+INT_NPE_HI
-                     IF(M%CUT_FACE(ICF)%INT_NOMIND( LOW_IND,INPE) /= NM) CYCLE
-                     LL     = M%CUT_FACE(ICF)%INT_NOMIND(HIGH_IND,INPE)
-                     M%CUT_FACE(ICF)%INT_CVARS(    INT_H_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+1)
-                     M%CUT_FACE(ICF)%INT_CVARS(  INT_RHO_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+4)
-                     M%CUT_FACE(ICF)%INT_CVARS(  INT_TMP_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+5)
-                     M%CUT_FACE(ICF)%INT_CVARS( INT_RSUM_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+6)
-                     M%CUT_FACE(ICF)%INT_CVARS(   INT_MU_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+7)
-                     M%CUT_FACE(ICF)%INT_CVARS(INT_MUDNS_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+8)
-                     M%CUT_FACE(ICF)%INT_CVARS( INT_KRES_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+9)
-                     M%CUT_FACE(ICF)%INT_CVARS(    INT_D_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+10)
-                     M%CUT_FACE(ICF)%INT_CVARS(    INT_P_IND,INPE)= M2%REAL_RECV_PKG13(NQT2*(LL-1)+11)
-                     DO NN=1,N_TOTAL_SCALARS
-                        M%CUT_FACE(ICF)%INT_CVARS(INT_P_IND+NN,INPE)=M2%REAL_RECV_PKG13(NQT2*(LL-1)+11+NN)
-                     ENDDO
+         IF (CODE==5  .AND. M2%NFCC_R(1)>0) THEN
+            NQT2 = 2 ! Two variables are passed per Stencil point. Fv and DHDX1.
+            DO IFEP=1,M2%NFEP_R_G ! Only Gasphase cut-faces:
+               ICF = M2%IFEP_R_1( LOW_IND,IFEP);
+               INPE= M2%IFEP_R_1(HIGH_IND,IFEP)
+               LL  = M%CUT_FACE(ICF)%INT_NOMIND(HIGH_IND,INPE)
+               M%CUT_FACE(ICF)%INT_FVARS(  INT_FV_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) ! Predictor FV
+               M%CUT_FACE(ICF)%INT_FVARS(INT_DHDX_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+2) ! dH/dx1^n
+            ENDDO
+         ENDIF
+
+         IF (CODE==3 .AND. M2%NFCC_R(1)>0) THEN
+            NQT2 = 1
+            ! First loop cut-faces:
+            DO IFEP=1,M2%NFEP_R(1) ! Gasphase and Boundary cut-faces:
+               ICF = M2%IFEP_R_1( LOW_IND,IFEP);
+               INPE= M2%IFEP_R_1(HIGH_IND,IFEP)
+               LL  = M%CUT_FACE(ICF)%INT_NOMIND(HIGH_IND,INPE)
+               M%CUT_FACE(ICF)%INT_FVARS(INT_VELS_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) ! Vel^*
+            ENDDO
+            ! Second Loop cut-edges:
+            DO IFEP=1,M2%NFEP_R(3)
+               IEDGE= M2%IFEP_R_3( LOW_IND,IFEP)
+               INPE = M2%IFEP_R_3(HIGH_IND,IFEP)
+               LL   = M%IBM_RCEDGE(IEDGE)%INT_NOMIND(HIGH_IND,INPE)
+               M%IBM_RCEDGE(IEDGE)%INT_FVARS(INT_VEL_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) ! Vel^*, added to INT_VEL_IND pos.
+            ENDDO
+         ENDIF
+
+         ! Unpack densities and species mass fractions following CORRECTOR exchange
+
+         IF (CODE==4 .AND. M2%NICC_R(1)>0) THEN
+            NQT2 = 4+N_TOTAL_SCALARS
+            LL = 0
+            DO ICC=M%N_CUTCELL_MESH+1,M%N_CUTCELL_MESH+M%N_GCCUTCELL_MESH
+               IF (M%CUT_CELL(ICC)%NOMICC(1) /= NM) CYCLE
+               DO JCC=1,M%CUT_CELL(ICC)%NCELL
+                  LL = LL + 1
+                  M%CUT_CELL(ICC)%RHO(JCC)  = M2%REAL_RECV_PKG11(NQT2*(LL-1)+1)
+                  M%CUT_CELL(ICC)%TMP(JCC)  = M2%REAL_RECV_PKG11(NQT2*(LL-1)+2)
+                  M%CUT_CELL(ICC)%RSUM(JCC) = M2%REAL_RECV_PKG11(NQT2*(LL-1)+3)
+                  M%CUT_CELL(ICC)%DS(JCC)   = M2%REAL_RECV_PKG11(NQT2*(LL-1)+4)
+                  DO NN=1,N_TOTAL_SCALARS
+                     M%CUT_CELL(ICC)%ZZ(NN,JCC) = M2%REAL_RECV_PKG11(NQT2*(LL-1)+4+NN)
                   ENDDO
                ENDDO
             ENDDO
-         ENDDO
-      ENDIF
+         ENDIF
 
-      ! Unpack velocity, momentum rhs and previous substep dH/Dx1 for cut-faces, in PREDICTOR or CORRECTOR, IBM forcing:
-
-      IF (CODE==5  .AND. M2%NFCC_R(1)>0) THEN
-         NQT2 = 2 ! Two variables are passed per Stencil point. Fv and DHDX1.
-         ! First loop cut-faces:
-         DO ICF=1,M%N_CUTFACE_MESH
-            IF (M%CUT_FACE(ICF)%STATUS /= IBM_GASPHASE) CYCLE
-            DO IFACE=0,M%CUT_FACE(ICF)%NFACE
-               DO EP=1,INT_N_EXT_PTS  ! External point for face IFACE
-                  DO VIND=IAXIS,KAXIS ! Velocity component U, V or W for external point EP
-                     INT_NPE_LO = M%CUT_FACE(ICF)%INT_NPE(LOW_IND,VIND,EP,IFACE)
-                     INT_NPE_HI = M%CUT_FACE(ICF)%INT_NPE(HIGH_IND,VIND,EP,IFACE)
-                     DO INPE=INT_NPE_LO+1,INT_NPE_LO+INT_NPE_HI
-                        IF (M%CUT_FACE(ICF)%INT_NOMIND( LOW_IND,INPE) /= NM) CYCLE
-                        LL     = M%CUT_FACE(ICF)%INT_NOMIND(HIGH_IND,INPE)
-                        M%CUT_FACE(ICF)%INT_FVARS(  INT_FV_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) ! Predictor FV
-                        M%CUT_FACE(ICF)%INT_FVARS(INT_DHDX_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+2) ! dH/dx1^n
-                     ENDDO
-                  ENDDO
-               ENDDO
+         IF (CODE==6 .AND. M2%NFCC_R(1)>0) THEN
+            NQT2 = 1
+            ! First loop cut-faces:
+            DO IFEP=1,M2%NFEP_R(1) ! Gasphase and Boundary cut-faces:
+               ICF = M2%IFEP_R_1( LOW_IND,IFEP);
+               INPE= M2%IFEP_R_1(HIGH_IND,IFEP)
+               LL  = M%CUT_FACE(ICF)%INT_NOMIND(HIGH_IND,INPE)
+               M%CUT_FACE(ICF)%INT_FVARS(INT_VEL_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) ! Vel^n+1
             ENDDO
-         ENDDO
-      ENDIF
-
-      IF (CODE==3 .AND. M2%NFCC_R(1)>0) THEN
-         NQT2 = 1
-         ! First loop cut-faces:
-         DO ICF=1,M%N_CUTFACE_MESH
-            IFACE_START=1
-            IF (M%CUT_FACE(ICF)%STATUS == IBM_GASPHASE) IFACE_START=0
-            DO IFACE=IFACE_START,M%CUT_FACE(ICF)%NFACE
-               DO EP=1,INT_N_EXT_PTS  ! External point for face IFACE
-                  DO VIND=IAXIS,KAXIS ! Velocity component U, V or W for external point EP
-                     INT_NPE_LO = M%CUT_FACE(ICF)%INT_NPE(LOW_IND,VIND,EP,IFACE)
-                     INT_NPE_HI = M%CUT_FACE(ICF)%INT_NPE(HIGH_IND,VIND,EP,IFACE)
-                     DO INPE=INT_NPE_LO+1,INT_NPE_LO+INT_NPE_HI
-                        IF (M%CUT_FACE(ICF)%INT_NOMIND( LOW_IND,INPE) /= NM) CYCLE
-                        LL     = M%CUT_FACE(ICF)%INT_NOMIND(HIGH_IND,INPE)
-                        M%CUT_FACE(ICF)%INT_FVARS(INT_VELS_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) ! Vel^*
-                     ENDDO
-                  ENDDO
-               ENDDO
+            ! Second Loop cut-edges:
+            DO IFEP=1,M2%NFEP_R(3)
+               IEDGE= M2%IFEP_R_3( LOW_IND,IFEP)
+               INPE = M2%IFEP_R_3(HIGH_IND,IFEP)
+               LL   = M%IBM_RCEDGE(IEDGE)%INT_NOMIND(HIGH_IND,INPE)
+               M%IBM_RCEDGE(IEDGE)%INT_FVARS(INT_VEL_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) ! Vel^n+1
             ENDDO
-         ENDDO
-         ! Second Loop cut-edges:
-         DO IEDGE=1,M%IBM_NRCEDGE
-            DO EP=1,INT_N_EXT_PTS  ! External point for IEDGE
-               DO VIND=IAXIS,KAXIS ! Velocity component U, V or W for external point EP
-                  INT_NPE_LO = M%IBM_RCEDGE(IEDGE)%INT_NPE(LOW_IND,VIND,EP,0)
-                  INT_NPE_HI = M%IBM_RCEDGE(IEDGE)%INT_NPE(HIGH_IND,VIND,EP,0)
-                  DO INPE=INT_NPE_LO+1,INT_NPE_LO+INT_NPE_HI
-                     IF (M%IBM_RCEDGE(IEDGE)%INT_NOMIND( LOW_IND,INPE) /= NM) CYCLE
-                     LL     = M%IBM_RCEDGE(IEDGE)%INT_NOMIND(HIGH_IND,INPE)
-                     M%IBM_RCEDGE(IEDGE)%INT_FVARS(INT_VEL_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) ! Vel^*
-                  ENDDO
-               ENDDO
-            ENDDO
-         ENDDO
-      ENDIF
+         ENDIF
 
-      ! Unpack densities and species mass fractions following CORRECTOR exchange
-
-      IF (CODE==4 .AND. M2%NICC_R(1)>0) THEN
-
-         NQT2 = 4+N_TOTAL_SCALARS
-         LL = 0
-         DO ICC=M%N_CUTCELL_MESH+1,M%N_CUTCELL_MESH+M%N_GCCUTCELL_MESH
-            IF (M%CUT_CELL(ICC)%NOMICC(1) /= NM) CYCLE
-            DO JCC=1,M%CUT_CELL(ICC)%NCELL
-               LL = LL + 1
-               M%CUT_CELL(ICC)%RHO(JCC)  = M2%REAL_RECV_PKG11(NQT2*(LL-1)+1)
-               M%CUT_CELL(ICC)%TMP(JCC)  = M2%REAL_RECV_PKG11(NQT2*(LL-1)+2)
-               M%CUT_CELL(ICC)%RSUM(JCC) = M2%REAL_RECV_PKG11(NQT2*(LL-1)+3)
-               M%CUT_CELL(ICC)%DS(JCC)   = M2%REAL_RECV_PKG11(NQT2*(LL-1)+4)
-               DO NN=1,N_TOTAL_SCALARS
-                  M%CUT_CELL(ICC)%ZZ(NN,JCC) = M2%REAL_RECV_PKG11(NQT2*(LL-1)+4+NN)
-               ENDDO
-            ENDDO
-         ENDDO
-
-      ENDIF
-
-      IF (CODE==6 .AND. M2%NFCC_R(1)>0) THEN
-         NQT2 = 1
-         ! First loop cut-faces:
-         DO ICF=1,M%N_CUTFACE_MESH
-            IFACE_START=1
-            IF (M%CUT_FACE(ICF)%STATUS == IBM_GASPHASE) IFACE_START=0
-            DO IFACE=IFACE_START,M%CUT_FACE(ICF)%NFACE
-               DO EP=1,INT_N_EXT_PTS  ! External point for face IFACE
-                  DO VIND=IAXIS,KAXIS ! Velocity component U, V or W for external point EP
-                     INT_NPE_LO = M%CUT_FACE(ICF)%INT_NPE(LOW_IND,VIND,EP,IFACE)
-                     INT_NPE_HI = M%CUT_FACE(ICF)%INT_NPE(HIGH_IND,VIND,EP,IFACE)
-                     DO INPE=INT_NPE_LO+1,INT_NPE_LO+INT_NPE_HI
-                        IF (M%CUT_FACE(ICF)%INT_NOMIND( LOW_IND,INPE) /= NM) CYCLE
-                        LL     = M%CUT_FACE(ICF)%INT_NOMIND(HIGH_IND,INPE)
-                        M%CUT_FACE(ICF)%INT_FVARS( INT_VEL_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+1)
-                     ENDDO
-                  ENDDO
-               ENDDO
-            ENDDO
-         ENDDO
-         ! Second loop cut-edges:
-         DO IEDGE=1,M%IBM_NRCEDGE
-            DO EP=1,INT_N_EXT_PTS  ! External point for face IEDGE
-               DO VIND=IAXIS,KAXIS ! Velocity component U, V or W for external point EP
-                  INT_NPE_LO = M%IBM_RCEDGE(IEDGE)%INT_NPE(LOW_IND,VIND,EP,0)
-                  INT_NPE_HI = M%IBM_RCEDGE(IEDGE)%INT_NPE(HIGH_IND,VIND,EP,0)
-                  DO INPE=INT_NPE_LO+1,INT_NPE_LO+INT_NPE_HI
-                     IF (M%IBM_RCEDGE(IEDGE)%INT_NOMIND( LOW_IND,INPE) /= NM) CYCLE
-                     LL     = M%IBM_RCEDGE(IEDGE)%INT_NOMIND(HIGH_IND,INPE)
-                     M%IBM_RCEDGE(IEDGE)%INT_FVARS( INT_VEL_IND,INPE)= M2%REAL_RECV_PKG12(NQT2*(LL-1)+1) ! Vel^n+1
-                  ENDDO
-               ENDDO
-            ENDDO
-         ENDDO
-      ENDIF
-
+      ENDIF RNODE_SNODE_IF
 
       ! Unpack H, RHO_0 and W velocity averaged to cell center, at PREDICTOR or CORRECTOR end of step:
 
@@ -4095,7 +3813,6 @@ RECV_MESH_LOOP: DO NOM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             ENDDO
          ENDDO
       ENDIF
-
 
    ENDDO SEND_MESH_LOOP
 ENDDO RECV_MESH_LOOP
@@ -17335,7 +17052,7 @@ ENDIF
 CALL FILL_IJKO_INTERP_STENCILS
 
 ! Fill unpacking arrays
-IF (UNPACK_NEW) CALL CC_EXCHANGE_UNPACKING_ARRAYS
+CALL CC_EXCHANGE_UNPACKING_ARRAYS
 
 
 IF(GET_CUTCELLS_VERBOSE) THEN
