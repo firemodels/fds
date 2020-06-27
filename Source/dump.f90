@@ -2905,10 +2905,10 @@ MATL_LOOP: DO N=1,N_MATL
       WRITE(LU_OUTPUT,'(A,ES9.2)') '     Specific Heat (kJ/kg/K)     ',EVALUATE_RAMP(TMPA,0._EB,NR)*0.001_EB
    ENDIF
    IF (ML%K_S>0._EB) THEN
-      WRITE(LU_OUTPUT,'(A,F8.4)') '     Conductivity (W/m/K)         ',ML%K_S
+      WRITE(LU_OUTPUT,'(A,ES9.2)') '     Conductivity (W/m/K)         ',ML%K_S
    ELSE
       NR = -NINT(ML%K_S)
-      WRITE(LU_OUTPUT,'(A,F8.4)') '     Conductivity (W/m/K)         ',EVALUATE_RAMP(TMPA,0._EB,NR)
+      WRITE(LU_OUTPUT,'(A,ES9.2)') '     Conductivity (W/m/K)         ',EVALUATE_RAMP(TMPA,0._EB,NR)
    ENDIF
    IF (ML%KAPPA_S<5.0E4_EB) THEN
       WRITE(LU_OUTPUT,'(A,F8.2)') '     Absorption coefficient (1/m) ',ML%KAPPA_S
