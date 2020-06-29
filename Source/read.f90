@@ -9665,24 +9665,25 @@ MESH_LOOP: DO NM=1,NMESHES
 
                      ALLOCATE(OB%RHO(OB%I1+1:OB%I2,OB%J1+1:OB%J2,OB%K1+1:OB%K2,SF%N_MATL),STAT=IZERO)
                      CALL ChkMemErr('READ_OBST','RHO',IZERO)
+                     PYRO3D_RESIDUE=.FALSE.
                      DO NNN=1,SF%N_MATL
                         ML=>MATERIAL(SF%MATL_INDEX(NNN))
                         IF (ML%N_REACTIONS>0) THEN
                            OB%PYRO3D=.TRUE.
                            OB%PYRO3D_IOR=PYRO3D_IOR      ! tell PYRO3D which direction to send pyrolyzate
                            OB%MT3D=PYRO3D_MASS_TRANSPORT ! supercedes PYRO3D_IOR
-                           PYRO3D_RESIDUE=.FALSE.
                            DO NR=1,ML%N_REACTIONS
                               IF (ABS(SUM(ML%NU_RESIDUE(:,NR)))>TWO_EPSILON_EB) PYRO3D_RESIDUE=.TRUE.
                            ENDDO
-                           IF (.NOT.PYRO3D_RESIDUE .AND. .NOT.OB%CONSUMABLE) THEN
-                              WRITE(MESSAGE,'(A,A,A)') &
-                                 'ERROR: MATL ',TRIM(ML%ID),', PYRO3D requires residue (NU_MATL) or BURN_AWAY'
-                              CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
-                           ENDIF
                         ENDIF
                         OB%RHO(:,:,:,NNN) = ML%RHO_S ! TEMPORARY -- must be reinitialized after PROC_WALL is called
                      ENDDO
+                     IF (.NOT.PYRO3D_RESIDUE .AND. .NOT.OB%CONSUMABLE) THEN
+                        WRITE(MESSAGE,'(A,A,A)') &
+                           'ERROR: MATLs associated to SURF ',TRIM(SF%ID), &
+                           ', PYRO3D requires residue (NU_MATL) or BURN_AWAY for the corresponding materials'
+                        CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
+                     ENDIF
 
                   ELSE OBST_MATL_IF
 
