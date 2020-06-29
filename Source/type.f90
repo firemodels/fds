@@ -27,7 +27,7 @@ TYPE LAGRANGIAN_PARTICLE_CLASS_TYPE
    CHARACTER(LABEL_LENGTH) :: SMOKEVIEW_BAR_LABEL(10)                          !< Short Smokeview label for output quantities
    CHARACTER(LABEL_LENGTH) :: QUANTITIES_SPEC_ID(10)                           !< SPECies IDs for output quantities
 
-   REAL(EB) :: HEAT_OF_COMBUSTION         !< Heat of Combustion (J/kg) of the evaporated gas
+   REAL(EB) :: HEAT_OF_COMBUSTION         !< Heat of Combustion (J/kg) of the evaporated gasw
    REAL(EB) :: ADJUST_EVAPORATION         !< LPC\%HEAT_OF_COMBUSTION/RN(1)\%HEAT_OF_COMBUSTION
    REAL(EB) :: LIFETIME                   !< Time (s) after insertion when particle is to be removed
    REAL(EB) :: DIAMETER                   !< Median volumetric diameter (m) of the particles
@@ -457,8 +457,11 @@ END TYPE MATERIAL_TYPE
 
 TYPE (MATERIAL_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: MATERIAL
 
+!> \brief Variables associated with a surface type
+
 TYPE SURFACE_TYPE
-   REAL(EB) :: AREA_MULTIPLIER=1._EB, TMP_FRONT=-1._EB,TMP_BACK=-1._EB,VEL,VEL_GRAD,PLE, &
+   REAL(EB) :: AREA_MULTIPLIER=1._EB                     !< Factor for manual surface area adjustment
+   REAL(EB) :: TMP_FRONT=-1._EB,TMP_BACK=-1._EB,VEL,VEL_GRAD,PLE, &
                Z0,CONVECTIVE_HEAT_FLUX,NET_HEAT_FLUX, &
                VOLUME_FLOW,HRRPUA,MLRPUA,T_IGN,SURFACE_DENSITY,CELL_SIZE_FACTOR, &
                E_COEFFICIENT,TEXTURE_WIDTH,TEXTURE_HEIGHT,THICKNESS,EXTERNAL_FLUX, &
