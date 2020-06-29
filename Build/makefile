@@ -40,6 +40,7 @@ GITINFO=-fpp $(GITINFO_BASE) -DBUILDDATE_PP=\""$(BUILD_DATE)\""
 GITINFOGNU=-cpp $(GITINFO_BASE) -DBUILDDATE_PP=\""$(BUILD_DATE)\""
 GITINFOXLF=-qsuffix=cpp=f90 '-WF,-DGITHASH_PP=\"$(GIT_HASH)\",-DGITDATE_PP=\"$(GIT_DATE)\",-DBUILDDATE_PP=\"$(BUILD_DATE_XLF)\"'
 GITINFOPGI=-Mpreprocess $(GITINFO_BASE) -DBUILDDATE_PP=\""$(BUILD_DATE)\""
+GFORTRAN_OPTIONS=
 
 ifeq ($(shell echo "check_quotes"),"check_quotes")
 # windows
@@ -51,6 +52,9 @@ else
   INTELMAJOR_COMPVERSION := $(shell ../Scripts/intelmajor_compversion.sh)
   OPENMPI_COMPVERSION := $(shell ../Scripts/openmpi_compversion.sh)
   GNU_COMPVERSION := $(shell ../Scripts/gnu_compversion.sh)
+  ifeq ($(shell ../Scripts/gnu_compmajorversion.sh),10)
+    GFORTRAN_OPTIONS=-fallow-argument-mismatch
+  endif
 endif
 
 INTELMPI_COMPINFO=-DCOMPVER_PP=\"$(INTELMPI_COMPVERSION)\"
@@ -351,7 +355,7 @@ mpi_xlf_aix : $(obj_mpi)
 
 #*** GNU Compilers ***
 
-mpi_gnu_linux_64 : FFLAGS = -m64 -O2 -std=f2008 -ffpe-summary=none -fall-intrinsics $(GITINFOGNU) $(GNU_COMPINFO) $(FFLAGSMKL_GNU_OPENMPI)
+mpi_gnu_linux_64 : FFLAGS = -m64 -O2 -std=f2008 -ffpe-summary=none -fall-intrinsics $(GITINFOGNU) $(GNU_COMPINFO) $(FFLAGSMKL_GNU_OPENMPI) $(GFORTRAN_OPTIONS)
 mpi_gnu_linux_64 : LFLAGSMKL = $(LFLAGSMKL_GNU_OPENMPI)
 mpi_gnu_linux_64 : FCOMPL = mpifort
 mpi_gnu_linux_64 : FOPENMPFLAGS = -fopenmp
@@ -359,7 +363,7 @@ mpi_gnu_linux_64 : obj = fds_mpi_gnu_linux_64
 mpi_gnu_linux_64 : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
-mpi_gnu_linux_64_db : FFLAGS = -m64 -O0 -std=f2008 -ggdb -Wall -Wcharacter-truncation -Wno-target-lifetime -fcheck=all -fbacktrace -ffpe-trap=invalid,zero,overflow -ffpe-summary=none -fall-intrinsics $(GITINFOGNU) $(GNU_COMPINFO) $(FFLAGSMKL_GNU_OPENMPI)
+mpi_gnu_linux_64_db : FFLAGS = -m64 -O0 -std=f2008 -ggdb -Wall -Wcharacter-truncation -Wno-target-lifetime -fcheck=all -fbacktrace -ffpe-trap=invalid,zero,overflow -ffpe-summary=none -fall-intrinsics $(GITINFOGNU) $(GNU_COMPINFO) $(FFLAGSMKL_GNU_OPENMPI) $(GFORTRAN_OPTIONS)
 mpi_gnu_linux_64_db : LFLAGSMKL = $(LFLAGSMKL_GNU_OPENMPI)
 mpi_gnu_linux_64_db : FCOMPL = mpifort
 mpi_gnu_linux_64_db : FOPENMPFLAGS = -fopenmp
@@ -367,7 +371,7 @@ mpi_gnu_linux_64_db : obj = fds_mpi_gnu_linux_64_db
 mpi_gnu_linux_64_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
-mpi_gnu_osx_64 : FFLAGS = -m64 -O2 -std=f2008 -ffpe-summary=none -fall-intrinsics $(GITINFOGNU) $(GNU_COMPINFO) $(FFLAGSMKL_GNU_CUSTOM)
+mpi_gnu_osx_64 : FFLAGS = -m64 -O2 -std=f2008 -ffpe-summary=none -fall-intrinsics $(GITINFOGNU) $(GNU_COMPINFO) $(FFLAGSMKL_GNU_CUSTOM) $(GFORTRAN_OPTIONS)
 mpi_gnu_osx_64 : LFLAGSMKL = $(LFLAGSMKL_GNU_CUSTOM)
 mpi_gnu_osx_64 : FCOMPL = mpifort
 mpi_gnu_osx_64 : FOPENMPFLAGS =
@@ -375,7 +379,7 @@ mpi_gnu_osx_64 : obj = fds_mpi_gnu_osx_64
 mpi_gnu_osx_64 : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
-mpi_gnu_osx_64_db : FFLAGS = -m64 -O0 -std=f2008 -ggdb -Wall -Wcharacter-truncation -Wno-target-lifetime -fcheck=all -fbacktrace -ffpe-trap=invalid,zero,overflow -ffpe-summary=none -fall-intrinsics $(GITINFOGNU) $(GNU_COMPINFO) $(FFLAGSMKL_GNU_CUSTOM)
+mpi_gnu_osx_64_db : FFLAGS = -m64 -O0 -std=f2008 -ggdb -Wall -Wcharacter-truncation -Wno-target-lifetime -fcheck=all -fbacktrace -ffpe-trap=invalid,zero,overflow -ffpe-summary=none -fall-intrinsics $(GITINFOGNU) $(GNU_COMPINFO) $(FFLAGSMKL_GNU_CUSTOM) $(GFORTRAN_OPTIONS)
 mpi_gnu_osx_64_db : LFLAGSMKL = $(LFLAGSMKL_GNU_CUSTOM)
 mpi_gnu_osx_64_db : FCOMPL = mpifort
 mpi_gnu_osx_64_db : FOPENMPFLAGS =
@@ -383,7 +387,7 @@ mpi_gnu_osx_64_db : obj = fds_mpi_gnu_osx_64_db
 mpi_gnu_osx_64_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
-mpi_gnu_osx_64_dv : FFLAGS = -m64 -O1 -fbacktrace -std=f2008 -ffpe-summary=none -fall-intrinsics $(GITINFOGNU) $(GNU_COMPINFO) $(FFLAGSMKL_GNU_CUSTOM)
+mpi_gnu_osx_64_dv : FFLAGS = -m64 -O1 -fbacktrace -std=f2008 -ffpe-summary=none -fall-intrinsics $(GITINFOGNU) $(GNU_COMPINFO) $(FFLAGSMKL_GNU_CUSTOM) $(GFORTRAN_OPTIONS)
 mpi_gnu_osx_64_dv : LFLAGSMKL = $(LFLAGSMKL_GNU_CUSTOM)
 mpi_gnu_osx_64_dv : FCOMPL = mpifort
 mpi_gnu_osx_64_dv : FOPENMPFLAGS =
