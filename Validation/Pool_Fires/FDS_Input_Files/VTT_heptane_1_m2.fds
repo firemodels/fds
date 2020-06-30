@@ -3,7 +3,9 @@
 &MESH IJK=80,80,60, XB=-2,2,-2,2,0,3 /
 &MESH IJK=80,80,60, XB=-2,2,-2,2,3,6 /
 
-&TIME T_END=500. /
+&TIME T_END=500., WALL_INCREMENT=1 /
+
+&MISC SIMULATION_MODE='LES', CHECK_HT=T/
 
 &REAC FUEL               = 'N-HEPTANE'
       FYI                = 'Heptane C_7 H_16'
@@ -32,7 +34,7 @@
       FSK_W             = 0.44629 0.32679 0.22692
       FSK_K		= 57.2 287.7 1505.2
 
-      1-point FSK (gray) for verifying 
+      1-point FSK (gray) for verifying
       FSK_W             = 1.0
       FSK_K		= 333.
 
@@ -207,4 +209,4 @@
 &BNDF QUANTITY = 'INCIDENT HEAT FLUX' /
 &BNDF QUANTITY = 'WALL TEMPERATURE' /
 
-&TAIL / 
+&TAIL /
