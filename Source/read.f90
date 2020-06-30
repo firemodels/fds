@@ -9678,7 +9678,7 @@ MESH_LOOP: DO NM=1,NMESHES
                         ENDIF
                         OB%RHO(:,:,:,NNN) = ML%RHO_S ! TEMPORARY -- must be reinitialized after PROC_WALL is called
                      ENDDO
-                     IF (.NOT.PYRO3D_RESIDUE .AND. .NOT.OB%CONSUMABLE) THEN
+                     IF (OB%PYRO3D .AND. .NOT.PYRO3D_RESIDUE .AND. .NOT.OB%CONSUMABLE) THEN
                         WRITE(MESSAGE,'(A,A,A)') &
                            'ERROR: MATLs associated to SURF ',TRIM(SF%ID), &
                            ', PYRO3D requires residue (NU_MATL) or BURN_AWAY for the corresponding materials'
