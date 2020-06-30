@@ -3587,7 +3587,7 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Tech Guide: Sum over the materials, alpha
 
       ! If there is char oxidation, save the HRR per unit volume generated
 
-      IF (ML%NU_O2_CHAR(J)>0._EB) THEN
+      IF (ML%NU_O2_CHAR(J)>0._EB .AND. SIMPLE_CHEMISTRY) THEN
          Q_DOT_O2_PPP = Q_DOT_O2_PPP + ABS(M_DOT_G_PPP_ACTUAL(REACTION(1)%AIR_SMIX_INDEX)*Y_O2_INFTY*H_R/ML%NU_O2_CHAR(J))
       ENDIF
 
