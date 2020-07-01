@@ -6,7 +6,7 @@
 
 &DUMP DT_DEVC=5., DT_HRR=5., SIG_FIGS=4, SIG_FIGS_EXP=2 /
 
-&MISC SIMULATION_MODE='LES', CHECK_HT=T /
+&MISC SIMULATION_MODE='LES' /
 
 &REAC FUEL               = 'BUTANE'
       FYI                = 'Butane  C_4 H_10'
@@ -34,7 +34,7 @@
       COLOR     = 'YELLOW'
       MATL_ID   = 'BUTANE LIQUID'
       THICKNESS = 0.1
-      TMP_INNER = -1.0 /
+      TMP_INNER = -10.0 /
 
 &SURF ID        = 'STEEL SHEET'
       COLOR     = 'BLACK'
