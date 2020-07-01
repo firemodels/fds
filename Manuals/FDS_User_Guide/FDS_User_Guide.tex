@@ -18,7 +18,6 @@
 {\input{../Bibliography/gitrevision}}
 {\newcommand{\gitrevision}{unknown} }
 
-
 \begin{document}
 
 \bibliographystyle{unsrt}
@@ -145,7 +144,7 @@ to test all of the various features of the model.
 Mohammed Assal                          & CFD Algeria                                                               \\ \hline
 Choon-Bum Choi                          & Building and Tunnel Technologies Inc. (BNTTEK), Korea                     \\ \hline
 William J. Ferrante                     & Roosevelt Fire District, Hyde Park, New York, USA                         \\ \hline
-Emanuele Gissi                          & Corpo nazionale dei Vigili del Fuoco, Italy                               \\ \hline
+Emanuele Gissi                          & Corpo Nazionale dei Vigili del Fuoco, Italy                               \\ \hline
 Timothy M. Groch                        & Engineering Planning and Management, Inc., Framingham, Massachusetts, USA \\ \hline
 Georges Guigay                          & Mannvit Engineering, Iceland                                              \\ \hline
 Simon J. Ham                            & Fire Safety Engineering Consultants Limited, UK                           \\ \hline
@@ -1758,6 +1757,7 @@ This case demonstrates the use of baroclinic correction for an axially-symmetric
 
 A common application of FDS is tunnel fires, but simulations of fires in long, relatively tight tunnels can have spurious fluctuations in the pressure field that can lead to numerical instabilities. If a numerical instability occurs in a simulation involving a tunnel, you might try the following remedies:
 \begin{enumerate}
+\item Set {\ct CONSTANT\_SPECIFIC\_HEAT\_RATIO=.TRUE.} on the {\ct MISC} line.  For long tunnels the background pressure variation in the streamwise direction can be significant and this variation is not accounted for in FDS.  In tunnels with significant heat release, the equivalence expression (see Eq.~(B.28) of the FDS Tech Guide \cite{FDS_Math_Guide}) for the divergence (energy equation) may be violated locally if variable temperature specific heats are used (FDS default).  This error is grid dependent and therefore does not allow convergence of the numerical solution.  At present, the best work-around for this problem is to avoid the error by using constant specific heats.
 \item Reduce the value of {\ct PRESSURE\_TOLERANCE} on the {\ct PRES} line to alleviate the mismatch between old and new pressure fields. The default value is $20/\dx^2$. A good value to try would be 1/5 to 1/10 of the default value.
 \item If you are using multiple meshes, reduce the value of {\ct VELOCITY\_TOLERANCE} on the {\ct PRES} line to force a tighter match of velocities at the mesh boundaries. The default value of {\ct VELOCITY\_TOLERANCE} (with units of m/s) is $\dx/2$. You may also want to increase the value of {\ct MAX\_PRESSURE\_ITERATIONS} which has a default value of 10. Try 50 as a starting point, and monitor the number of pressure iterations per time step in the {\ct CHID.out} file.
 \item Create {\ct OPEN} vents at various points along the length of the tunnel, near or at the floor. This models natural leakage in the tunnel, and alleviates, to some extent, wild oscillations in pressure. Note that even if the pressure equation is solved perfectly over the entire domain, the low Mach number assumption will still lead to fictitiously large fluctuations in pressure. The {\ct OPEN} boundaries can help relieve these pressure oscillations.
