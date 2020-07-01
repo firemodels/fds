@@ -6,7 +6,7 @@
 
 &DUMP DT_DEVC=5., DT_HRR=5., SIG_FIGS=4, SIG_FIGS_EXP=2 /
 
-&MISC SIMULATION_MODE='LES', CHECK_HT=T /
+&MISC SIMULATION_MODE='LES' /
 
 &REAC FUEL               = 'BENZENE'
       FYI                = 'Benzene C_6 H_6'

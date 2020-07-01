@@ -5,7 +5,7 @@
 
 &TIME T_END=500., WALL_INCREMENT=1 /
 
-&MISC SIMULATION_MODE='LES', CHECK_HT=T/
+&MISC SIMULATION_MODE='LES'/
 
 &REAC FUEL               = 'N-HEPTANE'
       FYI                = 'Heptane C_7 H_16'
