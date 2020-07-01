@@ -27,7 +27,7 @@ TYPE LAGRANGIAN_PARTICLE_CLASS_TYPE
    CHARACTER(LABEL_LENGTH) :: SMOKEVIEW_BAR_LABEL(10)                          !< Short Smokeview label for output quantities
    CHARACTER(LABEL_LENGTH) :: QUANTITIES_SPEC_ID(10)                           !< SPECies IDs for output quantities
 
-   REAL(EB) :: HEAT_OF_COMBUSTION         !< Heat of Combustion (J/kg) of the evaporated gasw
+   REAL(EB) :: HEAT_OF_COMBUSTION         !< Heat of Combustion (J/kg) of the evaporated gas
    REAL(EB) :: ADJUST_EVAPORATION         !< LPC\%HEAT_OF_COMBUSTION/RN(1)\%HEAT_OF_COMBUSTION
    REAL(EB) :: LIFETIME                   !< Time (s) after insertion when particle is to be removed
    REAL(EB) :: DIAMETER                   !< Median volumetric diameter (m) of the particles
