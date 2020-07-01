@@ -3173,7 +3173,7 @@ WRITE_RADIATION: IF (RADIATION .AND. ALLOCATED(RSA)) THEN
          WRITE(LU_OUTPUT,'(A,I4)')  '   Using gray gas absorption.'
          WRITE(LU_OUTPUT,'(A,F6.3,A)')'   Mean beam length ',PATH_LENGTH,' m'
       ENDIF
-   ELSE
+   ELSEIF (KAPPA0 >= 0._EB) THEN
       WRITE(LU_OUTPUT,'(A,F7.3,A)')'   Using constant absorption coefficient of ',KAPPA0,' 1/m'
    ENDIF
 ENDIF WRITE_RADIATION
