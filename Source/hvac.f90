@@ -356,6 +356,8 @@ DO NN=1,N_HVAC_READ
          DN%VENT_ID = VENT_ID
          DN%READ_IN = .TRUE.
          IF (TRIM(VENT_ID)/='null') DN%VENT=.TRUE.
+         ! Set temporary node elevation for vents so WIND can establish T and P RAMPs
+         IF (DN%VENT .AND. XYZ(3) <-1.E9) XYZ(3) = ZS_MIN
          IF (.NOT. DN%VENT .AND. XYZ(3)<-1.E9) THEN
             WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR: Ambient or internal ductnode requires an elevation, XYZ(3). Ductnode ID:',&
                                         TRIM(DN%ID),', HVAC line number:',NN
