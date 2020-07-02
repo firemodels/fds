@@ -1,4 +1,4 @@
-&HEAD CHID='particle_unisotropic_radiation', TITLE='Test particles radiation absorption in unisotropic field' /
+&HEAD CHID='particle_anisotropic_radiation', TITLE='Test particles radiation absorption in anisotropic field' /
 
 &TIME T_END=50, DT=0.1, WALL_INCREMENT=1 /
 
@@ -40,17 +40,17 @@
       THICKNESS                 = 0.02
       HEAT_TRANSFER_COEFFICIENT = 0.
       TMP_INNER                 = -273.15
-      LENGTH			= 0.1
+      LENGTH                    = 0.1
       GEOMETRY                  = 'CYLINDRICAL' /
 
 &SURF ID                        = 'plate'
       MATL_ID                   = 'material'
       THICKNESS                 = 0.01
-      BACKING 			= 'INSULATED'
+      BACKING                   = 'INSULATED'
       HEAT_TRANSFER_COEFFICIENT = 0.
       TMP_INNER                 = -273.15
-      LENGTH			= 0.1
-      WIDTH			= 0.1
+      LENGTH                    = 0.1
+      WIDTH                     = 0.1
       GEOMETRY                  = 'CARTESIAN' /
 
 &SURF ID                        = 'plate_o'
@@ -58,10 +58,10 @@
       THICKNESS                 = 0.02
       HEAT_TRANSFER_COEFFICIENT = 0.
       TMP_INNER                 = -273.15
-      BACKING 			= 'EXPOSED'/
+      BACKING                   = 'EXPOSED'/
 
 
-&RADI RADIATION=T, TIME_STEP_INCREMENT=1, ANGLE_INCREMENT=1, 
+&RADI RADIATION=T, TIME_STEP_INCREMENT=1, ANGLE_INCREMENT=1,
       INITIAL_RADIATION_ITERATIONS=50
       RADIATION_ITERATIONS = 3 /
 
@@ -76,7 +76,7 @@
 &OBST ID = 'plate_o'   SURF_ID = 'plate_o'   XB = 6.5,6.5,0.4,0.5,0.4,0.5 /
 
 &MATL ID                 = 'material'
-      EMISSIVITY	 = 1.0
+      EMISSIVITY         = 1.0
       DENSITY            = 50.
       CONDUCTIVITY       = 50.
       SPECIFIC_HEAT      = 1.0 /
@@ -95,7 +95,7 @@ Plate output
 
 Plate object output
 
-&DEVC XYZ=6.5,0.45,0.45 IOR = 1, QUANTITY='WALL ENTHALPY', ID='Delta e_plate', RELATIVE=T /
+&DEVC XYZ=6.5,0.45,0.45 IOR = 1, QUANTITY='WALL ENTHALPY', ID='Delta e_plate_o', RELATIVE=T /
 
 &DEVC ID='T_plate',   INIT_ID='plate', QUANTITY='WALL TEMPERATURE' /
 &DEVC ID='T_plate_o', XYZ=6.5,0.45,0.45 IOR = 1, QUANTITY='WALL TEMPERATURE' /
