@@ -1,4 +1,4 @@
-&HEAD CHID='particle_absorbing_radiation', TITLE='Test particles radiation absorption' /
+&HEAD CHID='particle_unisotropic_radiation', TITLE='Test particles radiation absorption in unisotropic field' /
 
 &TIME T_END=50, DT=0.1, WALL_INCREMENT=1 /
 
@@ -7,11 +7,12 @@
 &MESH IJK=10,10,10 XB=0.0,1.0,0.0,1.0,0.0,1.0 /
 &MESH IJK=10,10,10 XB=2.0,3.0,0.0,1.0,0.0,1.0 /
 &MESH IJK=10,10,10 XB=4.0,5.0,0.0,1.0,0.0,1.0 /
+&MESH IJK=10,10,10 XB=6.0,7.0,0.0,1.0,0.0,1.0 /
 
 &ZONE XB=0.0,1.0,0.0,1.0,0.0,1.0 /
 &ZONE XB=2.0,3.0,0.0,1.0,0.0,1.0 /
 &ZONE XB=4.0,5.0,0.0,1.0,0.0,1.0 /
-
+&ZONE XB=6.0,7.0,0.0,1.0,0.0,1.0 /
 
 &SPEC ID='NITROGEN', SPECIFIC_HEAT=1., BACKGROUND=T /
 
@@ -26,7 +27,6 @@
 &VENT MB = 'ZMAX' SURF_ID = 'MIRROR' /
 
 &CLIP MINIMUM_TEMPERATURE = -273.15 /
-      EMISSIVITY 		= 1. 
 
 &SURF ID                        = 'ball'
       MATL_ID                   = 'material'
@@ -45,12 +45,20 @@
 
 &SURF ID                        = 'plate'
       MATL_ID                   = 'material'
-      THICKNESS                 = 0.02
+      THICKNESS                 = 0.01
+      BACKING 			= 'INSULATED'
       HEAT_TRANSFER_COEFFICIENT = 0.
       TMP_INNER                 = -273.15
       LENGTH			= 0.1
       WIDTH			= 0.1
       GEOMETRY                  = 'CARTESIAN' /
+
+&SURF ID                        = 'plate_o'
+      MATL_ID                   = 'material'
+      THICKNESS                 = 0.02
+      HEAT_TRANSFER_COEFFICIENT = 0.
+      TMP_INNER                 = -273.15
+      BACKING 			= 'EXPOSED'/
 
 
 &RADI RADIATION=T, TIME_STEP_INCREMENT=1, ANGLE_INCREMENT=1, 
@@ -64,6 +72,8 @@
 &INIT ID = 'ball',     PART_ID = 'ball',     XYZ = 0.45,0.45,0.45   N_PARTICLES = 1 /
 &INIT ID = 'cylinder', PART_ID = 'cylinder', XYZ = 2.45,0.45,0.45   N_PARTICLES = 1 /
 &INIT ID = 'plate',    PART_ID = 'plate',    XYZ = 4.45,0.45,0.45   N_PARTICLES = 1 /
+
+&OBST ID = 'plate_o'   SURF_ID = 'plate_o'   XB = 6.5,6.5,0.4,0.5,0.4,0.5 /
 
 &MATL ID                 = 'material'
       EMISSIVITY	 = 1.0
@@ -83,6 +93,14 @@ Plate output
 &DEVC XB=4,5,0,1,0,1, QUANTITY='PARTICLE RADIATION LOSS', ID='Q_rad plate', SPATIAL_STATISTIC='VOLUME INTEGRAL' TEMPORAL_STATISTIC='TIME INTEGRAL'/
 &DEVC XB=4,5,0,1,0,1, QUANTITY='WALL ENTHALPY', INIT_ID='plate', ID='Delta e_plate', RELATIVE=T /
 
+Plate object output
+
+&DEVC XYZ=6.5,0.45,0.45 IOR = 1, QUANTITY='WALL ENTHALPY', ID='Delta e_plate', RELATIVE=T /
+
+&DEVC ID='T_plate',   INIT_ID='plate', QUANTITY='WALL TEMPERATURE' /
+&DEVC ID='T_plate_o', XYZ=6.5,0.45,0.45 IOR = 1, QUANTITY='WALL TEMPERATURE' /
+
 &SLCF PBY = 0.5 QUANTITY = 'PARTICLE RADIATION LOSS' /
 &SLCF PBY = 0.5 QUANTITY = 'TEMPERATURE' CELL_CENTERED=T /
+
 &TAIL /
