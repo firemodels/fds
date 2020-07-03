@@ -2746,6 +2746,20 @@ Tests similar to those in Section~\ref{droplet_absorption} are performed for sol
 \end{figure}
 
 
+\section{Consistency of Particle Absorbed Energy and the Radiative Loss Term}
+\label{particle_isotropic_radiation}
+\label{particle_anisotropic_radiation}
+
+Small spherical, cylindrical and planar particles with black (emissivity = 1) surfaces are placed in radiation field. Radiation is coming from black surfaces, and the gas is pure Nitrogen, i.e. non-participating. The amount of energy removed from the intensity field is measured by a device calculating spatial and temporal integrals of radiation loss term (Q\_w).  The reference solution (E\_w) is the wall enthalpy increase, as observed by the one-dimensional heat conduction solver. 
+In {\ct particle\_isotropic\_radiation}, the radiation field isotropic, i.e. all surfaces are black and constant temperature. In {\ct particle\_anisotropic\_radiation}, an anistropic intensity field is geated by specifying one hot wall, one cold wall, and four other fields being mirrors. 
+
+\begin{figure}[ht]
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/particle_isotropic_radiation}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/particle_anisotropic_radiation}
+\caption[The {\ct particle\_isotropic\_radiation} and {\ct particle\_anisotropic\_radiation} test cases]{Absorbed energy of spherical, cylindrical and cartesian particles in isotropic (left) and anisotropic (right) radiation field.}
+\label{particle_an_isotropic_radiation_figs}
+\end{figure}
+
 
 \section{Radiation Attenuation by Scattering Particles (\texorpdfstring{\textct{part\_attenuation}}{part\_attenuation}) }
 \label{part_attenuation}

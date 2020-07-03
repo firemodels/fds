@@ -1,8 +1,8 @@
 &HEAD CHID='particle_isotropic_radiation', TITLE='Test particles radiation absorption in isotropic intensity field' /
 
-&TIME T_END=50, DT=0.1, WALL_INCREMENT=1 /
+&TIME T_END=50, DT=0.05, WALL_INCREMENT=1 /
 
-&MISC TMPA=-273. CHECK_HT=T NOISE=F/
+&MISC TMPA=-273. NOISE=F/
 
 &MESH IJK=10,10,10 XB=0.0,1.0,0.0,1.0,0.0,1.0 /
 &MESH IJK=10,10,10 XB=2.0,3.0,0.0,1.0,0.0,1.0 /
