@@ -1,6 +1,6 @@
 &HEAD CHID='particle_anisotropic_radiation', TITLE='Test particles radiation absorption in anisotropic field' /
 
-&TIME T_END=50, DT=0.1, WALL_INCREMENT=1 /
+&TIME T_END=50, DT=0.05, WALL_INCREMENT=1 /
 
 &MISC TMPA=-273. CHECK_HT=T NOISE=F/
 
