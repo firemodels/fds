@@ -193,7 +193,6 @@
       MATL_ID   = 'MARINITE'
       COLOR     = 'BEIGE'
       BACKING   = 'EXPOSED'
-      LEAK_PATH = 1,0
       THICKNESS = 0.0254 /
 
 &SURF ID             = 'GYPSUM BOARD'

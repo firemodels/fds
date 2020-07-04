@@ -4,18 +4,21 @@
 
 &TIME T_END=120. / 
 
-&MISC TMPA=32. /
+&MISC TMPA=32., LEVEL_SET_MODE=4 /
 
 &WIND SPEED=4.6, DIRECTION=270., L=-500., Z_0=0.03 /
 
-&REAC FUEL='CELLULOSE', C=6, H=10, O=5, SOOT_YIELD=0.02, HEAT_OF_COMBUSTION=15600. /
+&REAC FUEL='CELLULOSE', C=6, H=10, O=5, SOOT_YIELD=0.0005, HEAT_OF_COMBUSTION=15600. /
 
 &SURF ID='IGNITION', VEG_LSET_IGNITE_TIME=0. /
 &SURF ID='LINE', 
-      VEG_LSET_ELLIPSE          = T
-      VEG_LSET_ROS              = 1
+      VEG_LSET_ROS_00           = 1
       HRRPUA                    = 200.
       RAMP_Q                    = 'fire' /
+&RAMP ID='fire', T= 0., F=0. /
+&RAMP ID='fire', T= 1., F=1. /
+&RAMP ID='fire', T= 9., F=1. /
+&RAMP ID='fire', T=10., F=0. /
 
 &VENT XB=-5.0,0.0, -5., 5.,0.,0., SURF_ID='IGNITION' /
 &VENT XB=-5.0,0.0,-25.,-5.,0.,0., SURF_ID='LINE' /
@@ -29,15 +32,8 @@
 &VENT MB='ZMAX', SURF_ID='OPEN' /
 
 &SURF ID                        = 'Short Grass'
-      VEG_LSET_ELLIPSE          = T
       VEG_LSET_FUEL_INDEX       = 1
-      VEG_LSET_M1               = 0.063
-      HRRPUA                    = 440.
-      RAMP_Q                    = 'fire' /
-&RAMP ID='fire', T= 0., F=0. /
-&RAMP ID='fire', T= 1., F=1. /
-&RAMP ID='fire', T= 9., F=1. /
-&RAMP ID='fire', T=10., F=0. /
+      VEG_LSET_M1               = 0.063 /
       
 &DUMP DT_HRR=1., DT_DEVC=1., SIG_FIGS=4, SIG_FIGS_EXP=2 /
 

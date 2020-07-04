@@ -5,7 +5,7 @@
 export SVNROOT=`pwd`/../..
 source $SVNROOT/Validation/Common_Run_All.sh
 
-$QFDS $DEBUG $QUEUE -p 24 -d $INDIR BK-R.fds
-$QFDS $DEBUG $QUEUE -p 24 -d $INDIR CLC-I-R.fds
-$QFDS $DEBUG $QUEUE -p 24 -d $INDIR CLC-II-R.fds
-$QFDS $DEBUG $QUEUE -p 24 -d $INDIR CMP-R.fds
+$QFDS $DEBUG $QUEUE -p 24 -n 8 -d $INDIR BK-R.fds
+$QFDS $DEBUG $QUEUE -p 24 -n 8 -d $INDIR CLC-I-R.fds
+$QFDS $DEBUG $QUEUE -p 24 -n 8 -d $INDIR CLC-II-R.fds
+$QFDS $DEBUG $QUEUE -p 24 -n 8 -d $INDIR CMP-R.fds
