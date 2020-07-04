@@ -80,7 +80,6 @@
       E                  = 74800. 
       MATL_ID            = 'Ash'
       NU_MATL            = 0.11 
-      ALPHA_CHAR         = 1.0
       SPEC_ID            = 'PRODUCTS','AIR'
       NU_SPEC            = 8.09,-7.2
       HEAT_OF_REACTION   = -32000. /

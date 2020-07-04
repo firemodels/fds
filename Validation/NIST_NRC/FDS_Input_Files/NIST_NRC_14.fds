@@ -193,7 +193,6 @@ cTRNY IDERIV=1,CC= 3.58,PC=0.5  /
       MATL_ID   = 'MARINITE'
       COLOR     = 'BEIGE'
       BACKING   = 'EXPOSED'
-      LEAK_PATH = 1,0
       THICKNESS = 0.0254 /
 
 &SURF ID             = 'GYPSUM BOARD'
