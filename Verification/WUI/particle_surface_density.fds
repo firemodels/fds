@@ -1,0 +1,58 @@
+&HEAD CHID='particle_surface_density', FYI='Comparison of OBST and GEOM in a WUI case' /
+
+&TIME T_END=100. /
+
+&MESH IJK=100,10,10, XB=0.0,100.0,-5.0,5.0, 0.0,10.0 /
+&MESH IJK=100,10,10, XB=0.0,100.0,-5.0,5.0,20.0,30.0 /
+
+&VENT XB=0.0,0.0,-5.0,5.0, 1.0,10.0, SURF_ID='BLOW' /
+&VENT XB=0.0,0.0,-5.0,5.0,21.0,30.0, SURF_ID='BLOW' /
+
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='YMIN', SURF_ID='MIRROR' /
+&VENT MB='YMAX', SURF_ID='MIRROR' /
+&VENT MB='ZMAX', SURF_ID='MIRROR' /
+
+&OBST XB=0.0,100.0,-5.0,5.0, 0.0, 1.0, SURF_ID='GROUND' /
+&GEOM XB=0.0,100.0,-5.0,5.0,20.0,21.0, SURF_ID='GROUND' /
+
+&SURF ID='BLOW', VEL=-5., COLOR='BLUE' /
+
+&MATL ID = 'SOIL'
+      CONDUCTIVITY = 0.25             
+      SPECIFIC_HEAT = 2.                   
+      DENSITY = 1300. /
+
+&SURF ID = 'GROUND'
+      MATL_ID = 'SOIL'
+      COLOR = 'BROWN'
+      PARTICLE_SURFACE_DENSITY = 1.0
+      PART_ID = 'Blade of Grass'
+      THICKNESS = 0.1 /
+
+&SURF ID = 'Blade of Grass'
+      MATL_ID = 'Dry Grass'
+      SURFACE_VOLUME_RATIO = 3092.
+      LENGTH = 0.02
+      GEOMETRY = 'CYLINDRICAL' /
+
+&PART ID             = 'Blade of Grass'
+      DRAG_COEFFICIENT = 2.8
+      COLOR          = 'FOREST GREEN'
+      SURF_ID        = 'Blade of Grass'
+      STATIC         = .TRUE. /
+
+&MATL ID                 = 'Dry Grass'
+      DENSITY            = 400.
+      CONDUCTIVITY       = 0.1
+      SPECIFIC_HEAT      = 1.5 /
+ 
+&DUMP DT_DEVC=1. /
+
+&DEVC ID='pres 1',  XYZ=30.,0.0, 5.0, QUANTITY='PRESSURE' /
+&DEVC ID='pres 2',  XYZ=30.,0.0,25.0, QUANTITY='PRESSURE' /
+
+&SLCF PBY= 0.0, QUANTITY='PRESSURE', VECTOR=.TRUE. /
+
+&TAIL /
+
