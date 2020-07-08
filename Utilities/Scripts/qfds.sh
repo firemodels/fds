@@ -439,6 +439,10 @@ if [ "$showcommandline" == "1" ]; then
   exit
 fi
 
+if [ "$n_mpi_processes" == "1" ]; then
+  n_mpi_processes_per_node=1
+fi
+
 if [ "$SET_MPI_PROCESSES_PER_NODE" == "1" ]; then
    n_mpi_processes_per_node=$n_mpi_processes
    if test $n_mpi_processes_per_node -gt $ncores ; then
