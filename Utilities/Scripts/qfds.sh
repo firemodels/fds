@@ -198,7 +198,7 @@ if [ "$MPIRUN_MCA" != "" ]; then
 fi
 
 n_mpi_processes=1
-n_mpi_processes_per_node=1
+n_mpi_processes_per_node=2
 if [ "$platform" == "linux" ]; then
 max_processes_per_node=`cat /proc/cpuinfo | grep cores | wc -l`
 else
