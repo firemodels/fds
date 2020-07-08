@@ -6874,9 +6874,9 @@ Modeling fire suppression by water has three principal components: transporting 
 
 When a droplet strikes a solid surface\footnote{If you do not want droplets to accumulate on solid surfaces, set {\ct ALLOW\_SURFACE\_PARTICLES=.FALSE.} on the {\ct MISC} line. It is normally {\ct .TRUE.}}, it sticks and is reassigned a new speed and direction. If the surface is horizontal, the direction is randomly chosen. If vertical, the direction is downwards. The parameters {\ct HORIZONTAL\_VELOCITY} and {\ct VERTICAL\_VELOCITY} on the {\ct PART} line allow you to control the speed at which droplets move horizontally or vertically (downward). The defaults are 0.2~m/s and 0.5~m/s, respectively.
 
-When a liquid droplet hits a solid surface, it is assumed to form a film for the purpose of calculating heat transfer between the liquid and the solid surface. Thus, its diameter is not important because it is assumed to mix with other droplets forming the film. However, when the droplet leaves the solid surface in the form of a ``drip,'' it reforms into a droplet, but its new diameter is assumed to be 1000~$\mu$m unless you specify an alternative {\ct SURFACE\_DIAMETER} on the {\ct PART} line.
+When a liquid droplet hits a solid surface, it is assumed to form a thin film with a \linebreak[4]{\ct MINIMUM\_FILM\_THICKNESS} that is assumed to be 0.001~m. This value can be changed on the {\ct MISC} line. The diameter of the droplet is not important because it is assumed to mix with other droplets forming the film. However, when the droplet leaves the solid surface in the form of a ``drip,'' it reforms into a droplet, and its new diameter is assumed to be 1000~$\mu$m unless you specify an alternative {\ct SURFACE\_DIAMETER} on the {\ct PART} line.
 
-The heat transfer coefficient from solid to liquid is constant, by default, and controlled by {\ct PART} property {H\_SOLID\_TO\_DROPLET}. To turn on an experimental model that calculates that dynamically, you should set {\ct CONSTANT\_H\_SOLID\_TO\_DROPLET=.FALSE.} on the {\ct MISC} line.
+The heat transfer coefficient between the solid and liquid is constant by default and specified by the {\ct PART} parameter {\ct HEAT\_TRANSFER\_COEFFICIENT\_SOLID}. Its default value is 300~W/(m$^2 \cdot$K). To turn on an experimental model that calculates this coefficient dynamically, just set its value to some negative number, say -1.
 
 There are some applications, like the suppression of racked storage commodity fires, where it is useful to allow water droplets to move horizontally along the underside of a solid object. It is difficult to model this phenomenon precisely because it involves surface tension, surface porosity and absorption, and complicated geometry. However, a way to capture some of the effect is to set {\ct ALLOW\_UNDERSIDE\_PARTICLES=.TRUE.} on the {\ct MISC} line. It is normally false. Also, note that when droplets hit obstructions, the vertical direction is assumed to coincide with the $z$ axis, regardless of any change to the gravity vector, {\ct GVEC}.
 
@@ -11157,7 +11157,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CHECK\_HT}                                     & Logical      & Section~\ref{info:HT}                   &            & {\ct .FALSE.}     \\ \hline
 {\ct CHECK\_VN}                                     & Logical      & Section~\ref{info:VN}                   &            & {\ct .TRUE.}      \\ \hline
 {\ct CNF\_CUTOFF}                                   & Real         & Section~\ref{info:particle_size}        &            & 0.005             \\ \hline
-{\ct CONSTANT\_H\_SOLID\_TO\_DROPLET}               & Real         & Section~\ref{info:surface_droplets}     &            & .TRUE.            \\ \hline
 {\ct \footnotesize CONSTANT\_SPECIFIC\_HEAT\_RATIO} & Logical      & Section~\ref{info:Enthalpy}             &            & {\ct .FALSE.}     \\ \hline
 {\ct C\_RNG}                                        & Real         & Section~\ref{info:LES}                  &            & 0.20              \\ \hline
 {\ct C\_RNG\_CUTOFF}                                & Real         & Section~\ref{info:LES}                  &            & 10.               \\ \hline
@@ -11186,6 +11185,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct LEVEL\_SET\_MODE}                              & Integer      & Section~\ref{info:level_set}            &            & 0                 \\ \hline
 {\ct MAXIMUM\_VISIBILITY}                           & Real         & Section~\ref{info:visibility}           &  m         &  30               \\ \hline
 {\ct MAX\_LEAK\_PATHS}                              & Integer      & Section~\ref{info:Leaks}                &            &  200              \\ \hline
+{\ct MINIMUM\_FILM\_THICKNESS}                      & Real         & Section~\ref{info:surface_droplets}     &  m         & 0.001             \\ \hline
 {\ct MPI\_TIMEOUT}                                  & Real         & Section~\ref{info:TIMING}               &  s         & 10.               \\ \hline
 {\ct NEAR\_WALL\_TURBULENCE\_MODEL}                 & Character    & Section~\ref{info:LES}                  &            &                   \\ \hline
 {\ct NOISE}                                         & Logical      & Section~\ref{info:NOISE}                &            & {\ct .TRUE.}      \\ \hline
@@ -11413,13 +11413,13 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct FREE\_AREA\_FRACTION}               & Real        & Section~\ref{info:particle_screen}                                    &                   &                       \\ \hline
 {\ct GAMMA\_D}                           & Real        & Section~\ref{info:particle_size}                                      &                   & 2.4                   \\ \hline
 {\ct HEAT\_OF\_COMBUSTION}               & Real        & Section~\ref{info:fuel_droplets}                                      & kJ/kg             &                       \\ \hline
+{\ct HEAT\_TRANSFER\_COEFFICIENT\_SOLID} & Real        & Section~\ref{info:surface_droplets}                                   & W/m$^2$/K         & 300                  \\ \hline
 {\ct HORIZONTAL\_VELOCITY}               & Real        & Section~\ref{info:surface_droplets}                                   & m/s               &  0.2                  \\ \hline
-{\ct H\_SOLID\_TO\_DROPLET}              & Real        & Section~\ref{info:surface_droplets}                                   & \si{kJ/(m$^2$.K)} &  0.3                  \\ \hline
 {\ct ID}                                 & Character   & Section~\ref{info:PART_Basics}                                        &                   &                       \\ \hline
-{\ct INITIAL\_TEMPERATURE}               & Real        & Section~\ref{thermal_part_props}                                      & $^\circ$C          & {\ct TMPA}            \\ \hline
+{\ct INITIAL\_TEMPERATURE}               & Real        & Section~\ref{thermal_part_props}                                      & $^\circ$C         & {\ct TMPA}            \\ \hline
 {\ct KILL\_DIAMETER}                     & Real        & Section~\ref{info:particle_size}                                      & $\mu$m            &                       \\ \hline
 {\ct MASSLESS}                           & Logical     & Section~\ref{info:MASSLESS}                                           &                   & {\ct .FALSE.}         \\ \hline
-{\ct MAXIMUM\_DIAMETER}                  & Real        & Section~\ref{info:particle_size}                                      & $\mu$m            & Infinite              \\ \hline
+{\ct MAXIMUM\_DIAMETER}                  & Real        & Section~\ref{info:particle_size}                                      & $\mu$m            & 1000000               \\ \hline
 {\ct MINIMUM\_DIAMETER}                  & Real        & Section~\ref{info:particle_size}                                      & $\mu$m            &                       \\ \hline
 {\ct MONODISPERSE}                       & Logical     & Section~\ref{info:particle_size}                                      &                   & {\ct .FALSE.}         \\ \hline
 {\ct N\_STRATA}                          & Integer     & Section~\ref{info:particle_size}                                      &                   & 6                     \\ \hline
