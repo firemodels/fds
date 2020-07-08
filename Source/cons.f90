@@ -357,12 +357,13 @@ REAL(EB), PARAMETER :: R0=8314.472_EB                       !< Gas constant (J/K
 REAL(EB), PARAMETER :: SIGMA=5.670373E-8_EB                 !< Stefan-Boltzmann constant (W/m2/K4)
 REAL(EB), PARAMETER :: K_BOLTZMANN=1.3806488E-23_EB         !< Parameter in soot algorithm
 REAL(EB), PARAMETER :: EARTH_OMEGA=7.272205216643040e-05_EB !< Earth rotation rate [radians/s] = 2*pi/(24*3600)
+REAL(EB), PARAMETER :: VON_KARMAN_CONSTANT=0.41_EB          !< von Karman constant
 
 ! Parameters associated with parallel mode
 
 INTEGER :: MYID=0                                           !< The MPI process index, starting at 0
 INTEGER :: N_MPI_PROCESSES=1                                !< Number of MPI processes
-INTEGER :: EVAC_PROCESS=-1                                 
+INTEGER :: EVAC_PROCESS=-1
 INTEGER :: LOWER_MESH_INDEX=1000000000                      !< Lower bound of meshes controlled by the current MPI process
 INTEGER :: UPPER_MESH_INDEX=-1000000000                     !< Upper bound of meshes controlled by the current MPI process
 LOGICAL :: PROFILING=.FALSE.
@@ -379,7 +380,7 @@ REAL(EB) :: TIME_SHRINK_FACTOR                              !< Factor to reduce 
 REAL(EB) :: RELAXATION_FACTOR=1._EB                         !< Factor used to relax normal velocity nudging at immersed boundaries
 REAL(EB) :: MPI_TIMEOUT=300._EB                             !< Time to wait for MPI messages to be received (s)
 REAL(EB) :: DT_END_MINIMUM=TWO_EPSILON_EB                   !< Smallest possible final time step (s)
-REAL(EB) :: DT_END_FILL=1.E-6_EB                            
+REAL(EB) :: DT_END_FILL=1.E-6_EB
 
 ! Combustion parameters
 
