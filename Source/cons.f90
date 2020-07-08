@@ -220,7 +220,6 @@ LOGICAL :: UVW_RESTART=.FALSE.              !< Initialize velocity field with va
 LOGICAL :: PARTICLE_CFL=.FALSE.             !< Include particle velocity as a constraint on time step
 LOGICAL :: IBM_FEM_COUPLING=.FALSE.
 LOGICAL :: ENTHALPY_TRANSPORT=.TRUE.
-LOGICAL :: CONSTANT_H_SOLID_TO_DROPLET=.TRUE. !< Use constant heat transfer coefficient between walls and droplets
 LOGICAL :: POTENTIAL_TEMPERATURE_CORRECTION=.FALSE.
 LOGICAL :: RTE_SOURCE_CORRECTION=.TRUE.     !< Apply a correction to the radiation source term to achieve desired rad fraction
 LOGICAL :: LAPLACE_PRESSURE_CORRECTION=.FALSE.
@@ -350,6 +349,7 @@ REAL(EB) :: NORTH_BEARING=0._EB                !< North bearing for terrain map
 REAL(EB) :: LATITUDE=10000._EB                 !< Latitude for geostrophic calculation
 REAL(EB) :: GEOSTROPHIC_WIND(2)=0._EB          !< Wind vector (m/s)
 REAL(EB) :: DY_MIN_BLOWING=1.E-8_EB            !< Parameter in blowing algorithm (m)
+REAL(EB) :: MINIMUM_FILM_THICKNESS=1.E-3_EB    !< Minimum thickness of liquid film on a solid surface (m)
 
 REAL(EB), PARAMETER :: TMPM=273.15_EB                       !< Melting temperature of water, conversion factor (K)
 REAL(EB), PARAMETER :: P_STP=101325._EB                     !< Standard pressure (Pa)
