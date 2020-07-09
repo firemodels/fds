@@ -5667,10 +5667,8 @@ QUANTITY_LOOP: DO IQ=1,NQT
       NTSL = NTSL + 1
       DO I=II1,II2
          DO J=JJ1,JJ2
-            DO K=KK1,KK2
-               KTS = K_AGL_SLICE(I,J,NTSL)
-               QUANTITY(I,J,K) = GAS_PHASE_OUTPUT(T,DT,NM,I,J,KTS,IND,IND2,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0,0,0)
-            ENDDO
+            KTS = K_AGL_SLICE(I,J,NTSL)
+            QUANTITY(I,J,K1) = GAS_PHASE_OUTPUT(T,DT,NM,I,J,KTS,IND,IND2,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,0,0,0,0)
          ENDDO
       ENDDO
    ENDIF
@@ -5683,28 +5681,16 @@ QUANTITY_LOOP: DO IQ=1,NQT
       IQQ = 1
    ENDIF
 
-   IF (.NOT.CC_CELL_CENTERED .AND. .NOT.CC_FACE_CENTERED) THEN
+   IF (AGL_TERRAIN_SLICE) THEN
 
-   ! node centered slice
-
-   DO K=K1,K2
       DO J=J1,J2
          DO I=I1,I2
-            SELECT CASE(OUTPUT_QUANTITY(IND)%CELL_POSITION)
-               CASE(CELL_CENTER)
-                  QQ(I,J,K,IQQ) = REAL(CORNER_VALUE(QUANTITY,B,S,IND),FB)
-               CASE(CELL_FACE)
-                  QQ(I,J,K,IQQ) = REAL(FACE_VALUE(),FB)
-               CASE(CELL_EDGE)
-                  QQ(I,J,K,IQQ) = REAL(EDGE_VALUE(QUANTITY,S,IND),FB)
-            END SELECT
+            QQ(I,J,K1,IQQ) = REAL(0.25_EB*(QUANTITY(I,J,K1)+QUANTITY(I+1,J,K1)+QUANTITY(I,J+1,K1)+QUANTITY(I+1,J+1,K1)),FB)
          ENDDO
       ENDDO
-   ENDDO
 
-   !  or cell centered or terrain-following (treated as cell centered) slice
+   ELSEIF (CC_CELL_CENTERED) THEN
 
-   ELSE IF (CC_CELL_CENTERED) THEN
       DO K=KK1,KK2
          DO J=JJ1,JJ2
             DO I=II1,II2
@@ -5713,9 +5699,7 @@ QUANTITY_LOOP: DO IQ=1,NQT
          ENDDO
       ENDDO
 
-   ELSE
-
-   ! face centered slice
+   ELSEIF (CC_FACE_CENTERED) THEN
 
       DO K=KK1,KK2
          DO J=JJ1,JJ2
@@ -5726,6 +5710,24 @@ QUANTITY_LOOP: DO IQ=1,NQT
             ENDDO
          ENDDO
       ENDDO
+
+   ELSE  ! Node interpolated slice
+
+      DO K=K1,K2
+         DO J=J1,J2
+            DO I=I1,I2
+               SELECT CASE(OUTPUT_QUANTITY(IND)%CELL_POSITION)
+                  CASE(CELL_CENTER)
+                     QQ(I,J,K,IQQ) = REAL(CORNER_VALUE(QUANTITY,B,S,IND),FB)
+                  CASE(CELL_FACE)
+                     QQ(I,J,K,IQQ) = REAL(FACE_VALUE(),FB)
+                  CASE(CELL_EDGE)
+                     QQ(I,J,K,IQQ) = REAL(EDGE_VALUE(QUANTITY,S,IND),FB)
+               END SELECT
+            ENDDO
+         ENDDO
+      ENDDO
+
    ENDIF
 
    ! Dump out the slice file to a .sf file
