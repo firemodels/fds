@@ -2124,6 +2124,24 @@ Figure \ref{fig:H2O_mass_balance} shows the results of two cases that test the m
 \label{fig:H2O_mass_balance}
 \end{figure}
 
+\subsection{Mass Balance for Species in a Reacting Flow (\texorpdfstring{\textct{mass\_balance\_reac}}{mass\_balance\_reac})}
+\label{mass_balance_reac}
+
+A 0.25 m$^2$ propane burner ramps up to 500 kW linearly in 10 s and holds this heat release rate for another 10 s.  Using a mass file, appropriate wall flux devices, surface integrals, and reaction source term devices, we perform a detailed mass balance on all the primitive species in the reaction.  The results are presented in Fig.~\ref{fig:mass_balance_reac}.  The mass balance can be understood through the mnemonic, ``Accumulation equals In minus Out plus Generation''.  For each species, we plot the ``accumulation'' term (first-order numerical differentiation of the columns in the {\ct MASS\_FILE}, the ``in-out'' term (surface intgral over the domain boundaries), ``generation'' term (reaction source term), and the sum of these as the ``balance''.
+
+\begin{figure}[ht]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/mass_balance_reac_C3H8} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/mass_balance_reac_O2}   \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/mass_balance_reac_N2}   &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/mass_balance_reac_H2O}  \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/mass_balance_reac_CO2}  &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/mass_balance_reac_Soot}
+\end{tabular*}
+\caption[The \textct{mass\_balance\_reac} test case]{Results of the \textct{mass\_balance\_reac} test case.}
+\label{fig:mass_balance_reac}
+\end{figure}
+
 \subsection{Checking the Equation of State (\texorpdfstring{\textct{particle\_offgas}}{particle\_offgas})}
 \label{particle_offgas_1}
 \label{particle_offgas_2}
@@ -2750,8 +2768,8 @@ Tests similar to those in Section~\ref{droplet_absorption} are performed for sol
 \label{particle_isotropic_radiation}
 \label{particle_anisotropic_radiation}
 
-Small spherical, cylindrical and planar particles with black (emissivity = 1) surfaces are placed in radiation field. Radiation is coming from black surfaces, and the gas is pure Nitrogen, i.e. non-participating. The amount of energy removed from the intensity field is measured by a device calculating spatial and temporal integrals of radiation loss term (Q\_w).  The reference solution (E\_w) is the wall enthalpy increase, as observed by the one-dimensional heat conduction solver. 
-In {\ct particle\_isotropic\_radiation}, the radiation field isotropic, i.e. all surfaces are black and constant temperature. In {\ct particle\_anisotropic\_radiation}, an anistropic intensity field is geated by specifying one hot wall, one cold wall, and four other fields being mirrors. 
+Small spherical, cylindrical and planar particles with black (emissivity = 1) surfaces are placed in radiation field. Radiation is coming from black surfaces, and the gas is pure Nitrogen, i.e. non-participating. The amount of energy removed from the intensity field is measured by a device calculating spatial and temporal integrals of radiation loss term (Q\_w).  The reference solution (E\_w) is the wall enthalpy increase, as observed by the one-dimensional heat conduction solver.
+In {\ct particle\_isotropic\_radiation}, the radiation field isotropic, i.e. all surfaces are black and constant temperature. In {\ct particle\_anisotropic\_radiation}, an anistropic intensity field is geated by specifying one hot wall, one cold wall, and four other fields being mirrors.
 
 \begin{figure}[ht]
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/particle_isotropic_radiation}
