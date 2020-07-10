@@ -39,6 +39,8 @@ TYPE LAGRANGIAN_PARTICLE_CLASS_TYPE
    REAL(EB) :: SIGMA                      !< Parameter in Rosin-Rammler distribution
    REAL(EB) :: VERTICAL_VELOCITY          !< Speed (m/s) of liquid droplet stuck to a vertical surface
    REAL(EB) :: HORIZONTAL_VELOCITY        !< Speed (m/s) of liquid droplet stuck to a horizontal surface
+   REAL(EB) :: MASS_TRANSFER_COEFFICIENT        !< Mass transfer coefficient from gas to liquid droplet (kg/m2/s)
+   REAL(EB) :: HEAT_TRANSFER_COEFFICIENT_GAS    !< Heat transfer coefficient from gas to liquid droplet (W/m2/K)
    REAL(EB) :: HEAT_TRANSFER_COEFFICIENT_SOLID  !< Heat transfer coefficient from solid surface to liquid droplet (W/m2/K)
    REAL(EB) :: DRAG_COEFFICIENT(3)        !< Drag coefficient in 3 coordinate directions
    REAL(EB) :: SURFACE_DIAMETER           !< Effective liquid droplet diameter (m) on a solid surface

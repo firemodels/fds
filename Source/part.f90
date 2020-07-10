@@ -12,6 +12,7 @@ USE SOOT_ROUTINES, ONLY: DROPLET_SCRUBBING
 IMPLICIT NONE
 
 PRIVATE
+
 PUBLIC INSERT_ALL_PARTICLES,UPDATE_PARTICLES,REMOVE_PARTICLES,GENERATE_PARTICLE_DISTRIBUTIONS,PARTICLE_MOMENTUM_TRANSFER
 
 CONTAINS
@@ -2202,7 +2203,7 @@ TYPE(ONE_D_M_AND_E_XFER_TYPE), POINTER :: ONE_D
 TYPE (SURFACE_TYPE), POINTER :: SF=>NULL()
 TYPE (SPECIES_TYPE), POINTER :: SS=>NULL()
 REAL(EB) :: AGHRHO, DTGOG, DTGOP, DTWOW, DTWOP, DTOG, DTOP, DYDT, A_COL(3), B_COL(3), C_COL(3), D_VEC(3), CP_BAR, &
-            DADYDTHVHL, DADYDTHV, TMP_WALL_NEW
+            DAHVHLDY, DADYHV, DADYDTHVHL, DADYDTHV, TMP_WALL_NEW
 INTEGER :: ARRAY_CASE
 
 CALL POINT_TO_MESH(NM)
@@ -2542,6 +2543,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                      NUSSELT  = NU_FAC_WALL*RE_L**0.8_EB-871._EB
                      SHERWOOD = SH_FAC_WALL*RE_L**0.8_EB-871._EB
                      H_WALL   = LPC%HEAT_TRANSFER_COEFFICIENT_SOLID
+
                   ENDIF
                   H_HEAT   = MAX(2._EB,NUSSELT)*K_AIR/LENGTH
                   IF (Y_DROP<=Y_GAS) THEN
@@ -2628,27 +2630,30 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                   TMP_WALL = TMPA
                   ARRAY_CASE = 1
                ENDIF SOLID_OR_GAS_PHASE_2
-
+               IF (LPC%HEAT_TRANSFER_COEFFICIENT_GAS>=0._EB) H_HEAT=LPC%HEAT_TRANSFER_COEFFICIENT_GAS
+               IF (LPC%MASS_TRANSFER_COEFFICIENT>=0._EB) H_HEAT=LPC%MASS_TRANSFER_COEFFICIENT
                ! Build and solve implicit arrays for updating particle, gas, and wall temperatures
                ITMP = INT(TMP_DROP)
                H1 = H_SENS_Z(ITMP,Z_INDEX)+(TMP_DROP-REAL(ITMP,EB))*(H_SENS_Z(ITMP+1,Z_INDEX)-H_SENS_Z(ITMP,Z_INDEX))
                ITMP = INT(TMP_G)
                H2 = H_SENS_Z(ITMP,Z_INDEX)+(TMP_G-REAL(ITMP,EB))*(H_SENS_Z(ITMP+1,Z_INDEX)-H_SENS_Z(ITMP,Z_INDEX))
-               DTOP = DT_SUBSTEP/(2._EB*M_DROP*WGT*C_DROP)
-               DTOG = DT_SUBSTEP/(2._EB*M_GAS*CP)
-               DTGOG = DT_SUBSTEP*A_DROP*WGT*H_HEAT/(2._EB*M_GAS*CP)
-               DTGOP = DT_SUBSTEP*A_DROP*H_HEAT/(2._EB*M_DROP*C_DROP)
-               AGHRHO = A_DROP*WGT*H_MASS*RHO_AIR/(1._EB+0.5_EB*RVC*DT_SUBSTEP*A_DROP*WGT*H_MASS*RHO_AIR/RHO_G)
-               DADYDTHVHL=DTOG*AGHRHO*DYDT*(H1-H2)
-               DADYDTHV=DTOP*AGHRHO*DYDT*H_V
+               DTOP = DT_SUBSTEP/(M_DROP*C_DROP)
+               DTOG = DT_SUBSTEP*WGT/(M_GAS*CP)
+               DTGOG = 0.5_EB*DTOG*A_DROP*WGT*H_HEAT
+               DTGOP = 0.5_EB*DTOP*A_DROP*H_HEAT
+               AGHRHO = A_DROP*H_MASS*RHO_AIR/(1._EB+0.5_EB*RVC*DT_SUBSTEP*A_DROP*WGT*H_MASS*RHO_AIR/RHO_G*(1._EB-Y_GAS))
+               DAHVHLDY = DTOG*AGHRHO*(H1-H2)*(Y_DROP-Y_GAS)
+               DADYHV = DTOP*AGHRHO*H_V*(Y_DROP-Y_GAS)
+               DADYDTHVHL=0.5_EB*DTOG*AGHRHO*DYDT*(H1-H2)
+               DADYDTHV=0.5_EB*DTOP*AGHRHO*DYDT*H_V
                SELECT CASE (ARRAY_CASE)
-                  CASE(1) ! Gas Only
+               CASE(1) ! Gas Only
                      A_COL(1) = 1._EB+DTGOG
                      B_COL(1) = -(DTGOG+DADYDTHVHL)
                      A_COL(2) = -DTGOP
                      B_COL(2) = 1._EB+DTGOP+DADYDTHV
-                     D_VEC(1) = (1._EB-DTGOG)*TMP_G+(DTGOG-DADYDTHVHL)*TMP_DROP+2._EB*DADYDTHVHL*(Y_DROP-Y_GAS)
-                     D_VEC(2) = DTGOP*TMP_G+(1-DTGOP+DADYDTHV)*TMP_DROP-2._EB*DADYDTHV*(Y_DROP-Y_GAS)+2._EB*DTOP*Q_DOT_RAD
+                     D_VEC(1) = (1._EB-DTGOG)*TMP_G+(DTGOG-DADYDTHVHL)*TMP_DROP+DAHVHLDY
+                     D_VEC(2) = DTGOP*TMP_G+(1-DTGOP+DADYDTHV)*TMP_DROP-DADYHV+DTOP*Q_DOT_RAD
                      TMP_DROP_NEW = -(A_COL(2)*D_VEC(1)-A_COL(1)*D_VEC(2))/(A_COL(1)*B_COL(2)-B_COL(1)*A_COL(2))
                      TMP_G_NEW = (D_VEC(1)-B_COL(1)*TMP_DROP_NEW)/A_COL(1)
                      TMP_WALL_NEW = TMP_WALL
@@ -2658,14 +2663,13 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                      B_COL(1) = -(DTGOG+DADYDTHVHL)
                      A_COL(2) = -DTGOP
                      B_COL(2) = 1._EB+DTGOP+DTWOP+DADYDTHV
-                     D_VEC(1) = (1._EB-DTGOG)*TMP_G+(DTGOG-DADYDTHVHL)*TMP_DROP+2._EB*DADYDTHVHL*(Y_DROP-Y_GAS)
-                     D_VEC(2) = DTGOP*TMP_G+(1-DTGOP-DTWOP+DADYDTHV)*TMP_DROP+2._EB*DTWOP*TMP_WALL-2._EB*DADYDTHV*(Y_DROP-Y_GAS)+&
-                                2._EB*DTOP*Q_DOT_RAD
+                     D_VEC(1) = (1._EB-DTGOG)*TMP_G+(DTGOG-DADYDTHVHL)*TMP_DROP+DAHVHLDY
+                     D_VEC(2) = DTGOP*TMP_G+(1-DTGOP-DTWOP+DADYDTHV)*TMP_DROP+2._EB*DTWOP*TMP_WALL-DADYHV+DTOP*Q_DOT_RAD
                      TMP_DROP_NEW = -(A_COL(2)*D_VEC(1)-A_COL(1)*D_VEC(2))/(A_COL(1)*B_COL(2)-B_COL(1)*A_COL(2))
                      TMP_G_NEW = (D_VEC(1)-B_COL(1)*TMP_DROP_NEW)/A_COL(1)
                      TMP_WALL_NEW = TMP_WALL
                   CASE(3) ! 1D Wall
-                     DTWOP = DT_SUBSTEP*A_DROP*WGT*H_WALL/(2._EB*M_DROP*WGT*C_DROP)
+                     DTWOP = DT_SUBSTEP*A_DROP*H_WALL/(2._EB*M_DROP*C_DROP)
                      DTWOW = DT_SUBSTEP*A_DROP*WGT*H_WALL/(2._EB*MCBAR)
                      A_COL(1) = 1._EB+DTGOG
                      B_COL(1) = -(DTGOG+DADYDTHVHL)
@@ -2676,16 +2680,15 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                      A_COL(3) = -DTGOP
                      B_COL(3) = 1._EB+DTGOP+DTWOP+DADYDTHV
                      C_COL(3) = -DTWOP
-                     D_VEC(1) = (1._EB-DTGOG)*TMP_G+(DTGOG-DADYDTHVHL)*TMP_DROP+2._EB*DADYDTHVHL*(Y_DROP-Y_GAS)
+                     D_VEC(1) = (1._EB-DTGOG)*TMP_G+(DTGOG-DADYDTHVHL)*TMP_DROP+DAHVHLDY
                      D_VEC(2) = DTWOW*TMP_DROP+(1._EB-DTWOW)*TMP_WALL
-                     D_VEC(3) = DTGOP*TMP_G+(1-DTGOP-DTWOP+DADYDTHV)*TMP_DROP+DTWOP*TMP_WALL-2._EB*DADYDTHV*(Y_DROP-Y_GAS)+&
-                                2._EB*DTOP*Q_DOT_RAD
+                     D_VEC(3) = DTGOP*TMP_G+(1-DTGOP-DTWOP+DADYDTHV)*TMP_DROP+DTWOP*TMP_WALL-DADYHV+DTOP*Q_DOT_RAD
                      TMP_DROP_NEW = (A_COL(1)*(D_VEC(2)*C_COL(3)-C_COL(2)*D_VEC(3))+D_VEC(1)*C_COL(2)*A_COL(3))/&
                                     (A_COL(1)*(B_COL(2)*C_COL(3)-C_COL(2)*B_COL(3))+B_COL(1)*C_COL(2)*A_COL(3))
-                     TMP_WALL_NEW = (D_VEC(3)-B_COL(2)*TMP_DROP_NEW)/C_COL(2)
+                     TMP_WALL_NEW = (D_VEC(2)-B_COL(2)*TMP_DROP_NEW)/C_COL(2)
                      TMP_G_NEW = (D_VEC(1)-B_COL(1)*TMP_DROP_NEW)/A_COL(1)
                END SELECT
-               M_VAP = MAX(0._EB,MIN(M_DROP, DT_SUBSTEP * AGHRHO/WGT * (Y_DROP-Y_GAS+0.5_EB*DYDT*(TMP_DROP_NEW-TMP_DROP))))
+               M_VAP = MAX(0._EB,MIN(M_DROP, DT_SUBSTEP * AGHRHO * (Y_DROP-Y_GAS+0.5_EB*DYDT*(TMP_DROP_NEW-TMP_DROP))))
 
                ! Compute the total amount of heat extracted from the gas, wall and radiative fields
 
@@ -2705,6 +2708,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                      C_DROP2 = SUM(SS%C_P_L(MIN(ITMP,ITMP2):MAX(ITMP,ITMP2)))/REAL(ABS(ITMP2-ITMP)+1,EB)
                      TMP_DROP_NEW = TMP_DROP + (Q_TOT - M_VAP * H_V)/(C_DROP2 * (M_DROP - M_VAP))
                   ENDIF
+
                   IF (TMP_DROP_NEW<TMP_MELT) THEN
                      ! If the PARTICLE temperature drops below its freezing point, just reset it
                      TMP_DROP_NEW = TMP_MELT
@@ -2757,7 +2761,9 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                      DT_SUBSTEP = DT_SUBSTEP * 0.5_EB
                      IF (DT_SUBSTEP <= 0.00001_EB*DT) THEN
                         DT_SUBSTEP = DT_SUBSTEP * 2.0_EB
-                        WRITE(LU_ERR,'(A,I0,A,I0)') 'WARNING Y_EQ < Y_G_N. Mesh: ',NM,'Particle Tag: ',LP%TAG
+                        WRITE(LU_ERR,'(A,I0,A,I0)') 'WARNING Y_EQ < Y_G_N. Mesh: ',NM,'Particle: ',IP
+                        !CALL SHUTDOWN('Numerical instability in particle energy transport, Y_EQUIL < Y_GAS_NEW')
+                        !RETURN
                      ELSE
                         CYCLE TIME_ITERATION_LOOP
                      ENDIF
@@ -2771,7 +2777,9 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                      DT_SUBSTEP = DT_SUBSTEP * 0.5_EB
                      IF (DT_SUBSTEP <= 0.00001_EB*DT) THEN
                         DT_SUBSTEP = DT_SUBSTEP * 2.0_EB
-                        WRITE(LU_ERR,'(A,I0,A,I0)') 'WARNING Y_G_N > Y_EQ. Mesh: ',NM,'Particle Tag: ',LP%TAG
+                        WRITE(LU_ERR,'(A,I0,A,I0)') 'WARNING Y_G_N > Y_EQ. Mesh: ',NM,'Particle: ',IP
+                        !CALL SHUTDOWN('Numerical instability in particle energy transport, Y_GAS_NEW > Y_EQUIL')
+                        !RETURN
                      ELSE
                      CYCLE TIME_ITERATION_LOOP
                      ENDIF
@@ -2824,7 +2832,9 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                   DT_SUBSTEP = DT_SUBSTEP * 0.5_EB
                   IF (DT_SUBSTEP <= 0.00001_EB*DT) THEN
                      DT_SUBSTEP = DT_SUBSTEP * 2.0_EB
-                     WRITE(LU_ERR,'(A,I0,A,I0)') 'WARNING Delta TMP_G. Mesh: ',NM,' Particle Tag: ',LP%TAG
+                     WRITE(LU_ERR,'(A,I0,A,I0)') 'WARNING Delta TMP_G. Mesh: ',NM,' Particle: ',IP
+                     !CALL SHUTDOWN('Numerical instability in particle energy transport, TMP_G')
+                     !RETURN
                   ELSE
                      CYCLE TIME_ITERATION_LOOP
                   ENDIF
@@ -2837,7 +2847,9 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                   DT_SUBSTEP = DT_SUBSTEP * 0.5_EB
                   IF (DT_SUBSTEP <= 0.00001_EB*DT) THEN
                      DT_SUBSTEP = DT_SUBSTEP * 2.0_EB
-                     WRITE(LU_ERR,'(A,I0,A,I0)') 'WARNING TMP_G_N < TMP_D_N. Mesh: ',NM,' Particle Tag: ',LP%TAG
+                     WRITE(LU_ERR,'(A,I0,A,I0)') 'WARNING TMP_G_N < TMP_D_N. Mesh: ',NM,' Particle: ',IP
+                     !CALL SHUTDOWN('Numerical instability in particle energy transport, TMP_G_NEW < TMP_G')
+                     !RETURN
                   ELSE
                      CYCLE TIME_ITERATION_LOOP
                   ENDIF
