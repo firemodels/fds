@@ -236,8 +236,6 @@ $QFDS -d Flowfields species_conservation_4.fds
 $QFDS -d Flowfields hot_layer_360.fds
 $QFDS -d Flowfields realizable_mass_fractions.fds
 $QFDS -d Flowfields mean_forcing_hole.fds
-$QFDS -d Flowfields mass_flux_wall_yindex.fds
-$QFDS -d Flowfields mass_flux_wall_zindex.fds
 $QFDS -p 4 -d Flowfields parabolic_profile.fds
 $QFDS -p 5 -d Flowfields simple_duct.fds
 $QFDS -p 8 -d Flowfields symmetry_test_mpi.fds
@@ -576,6 +574,9 @@ $QFDS -d Species condensation_2.fds
 $QFDS -d Species condensation_3.fds
 $QFDS -d Species wall_cond.fds
 $QFDS -d Species humidity.fds
+$QFDS -d Species mass_flux_wall_yindex.fds
+$QFDS -d Species mass_flux_wall_zindex.fds
+$QFDS -p 8 -d Species mass_balance_reac.fds
 
 $QFDS -d Sprinklers_and_Sprays activate_sprinklers.fds
 $QFDS -d Sprinklers_and_Sprays adiabatic_surface_temperature_spray.fds

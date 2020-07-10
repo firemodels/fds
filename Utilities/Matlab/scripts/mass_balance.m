@@ -16,7 +16,7 @@ figure
 set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
-ddir = '../../Verification/Flowfields/';
+ddir = '../../Verification/Species/';
 M = importdata([ddir,chid,'_mass.csv'],',',2);
 
 t = M.data(:,1);
