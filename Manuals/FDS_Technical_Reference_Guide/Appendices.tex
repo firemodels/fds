@@ -28,7 +28,7 @@ $g$                       \> acceleration of gravity \\
 $\bg$                     \> gravity vector, normally $(0,0,-g)$ \\
 $\cH$                      \> total pressure divided by the density (Bernoulli integral)\\
 $H_{{\rm r},\alpha\beta}$ \> heat of reaction for a solid phase reaction     \\
-$h$                       \> heat transfer coefficient; Planck constant      \\
+$h$                       \> heat transfer coefficient; mass transfer coefficient; enthalpy; Planck constant      \\
 $h_{\rm s,\alpha}$        \> sensible enthalpy of species $\alpha$   \\
 $I$                       \> radiation intensity per unit of solid angle     \\
 $I_{\rm b}$               \> radiation blackbody intensity per unit of solid angle  \\
@@ -1785,3 +1785,79 @@ If $\Delta T_{\rm s}^*$ exceeds a user-specified threshold, $\Delta T_{\max}$, t
    \dt = \dt_{\rm gas} \, 2^{-\lceil \ln \eta / \ln 2 \rceil }  \quad ; \quad \eta = \Delta T_{s}^*  / \Delta T_{\max}
 \end{equation}
 Note that $\lceil x \rceil$ denotes the least integer greater than $x$. To prevent an endless spiral of decreasing solid phase time steps, there is a user-specified limit of the number of subdivisions of the gas phase time step. The default is $2^2=4$.
+
+\chapter{Development of an Implicit Solution for Droplet Evaporation}
+\label{app_drop_evaporation}
+
+In this appendix, we consider evaporation of a single drop in a computational cell away from the wall.  Hence, our goal is to develop a solution for (a) the cell water vapor mass fraction $Y_{\rm \alpha, g}$, (b) the cell gas phase temperature $T_{\rm g}$, (c) the temperature of the droplet $T_{\rm p}$, and (d) if present an estimate of the first node of a solid surface $T_{\rm w}$. 
+
+The ODEs to be integrated are, respectively, the droplet mass, the change in cell water vapor mass fraction, the change in the droplet temperature, the change in the cell gas phase temperature, and the wall temperature~\cite{Cheremisinoff:1}:
+\begin{align}
+\frac{\d m_{\rm p}}{\d t} & = - A_{\rm p,s} \, h_{\rm m} \, \rho_{\rm f} \, (Y_{\alpha,\ell} - Y_{\rm \alpha, g}) \label{app_droplet_mass} \\[0.2in]
+\rho_{\rm g} V \frac{\d Y_{\rm \alpha, g}}{\d t} & = -\left(1-Y_{\rm \alpha, g}\right)\frac{\d m_{\rm p}}{\d t}  \label{app_droplet_gas_fraction} \\[0.2in]
+\frac{\d T_{\rm p}}{\d t} & = \frac{1}{m_{\rm p} \, c_{\rm p}}  \left[ \dq_{\rm r} + A_{\rm p,s} \, h_{\rm g}  \, (T_{\rm g}-T_{\rm p}) + A_{\rm p,s} \, h_{\rm w}  \, (T_{\rm w}-T_{\rm p}) + \frac{\d m_{\rm p}}{\d t} \; h_{\rm v} \right]  \label{app_droplet_temp}  \\[0.2in]
+\frac{\d T_{\rm g}}{\d t} & = \frac{1}{m_{\rm g} \, c_{\rm g}}  \left[A_{\rm p,s} \, h_{\rm g}  \, (T_{\rm p}-T_{\rm g}) - \frac{\d m_{\rm p}}{\d t} \; (h_{\rm \alpha,p}-h_{\rm \alpha,g}) \right]  \label{app_droplet_gas_temp}   \\[0.2in]
+\frac{\d T_{\rm w}}{\d t} & = -\frac{A_{\rm p,s} \, h_{\rm w}}{m_{\rm w} \, c_{\rm w}} (T_{\rm w}-T_{\rm p})  \label{app_droplet_solid_temp}
+\end{align}
+
+	Below we will consider the time integration for a single substep in the evaporation routine, which updates the local computational cell from time $t^n$ to $t^n + \Delta t^n$.  Usually, $\Delta t^n = \Delta t_{\mathrm{\tiny LES}}$.  However, it is possible that subtimesteps may be required to prevent spurious mass and temperature overshoots.  In what follows, unless otherwise specified RHS quantities are evaluated at the beginning of the substep, $t^n$ (hence the designation ``semi-implicit'' method).  This limits the stability range of the method (since the method is not fully implicit it is not unconditionally stable), but it greatly simplifies the solution procedure.
+
+To begin the development, we expanded Eq.~(\ref{app_droplet_gas_fraction}) with the mass loss rate (to be determined) evaluated at the midpoint of the time interval:
+\begin{equation}
+\label{eqn_imp_Ynp_2}
+Y_{\rm \alpha, g}^{n+1}=Y_{\rm \alpha, g}^n-\frac{\Delta t^n}{\rho_{\rm g} V} (1-Y_{\rm \alpha, g}) \left(\frac{\d m_{\rm p}}{\d t}\right)^{n+\frac{1}{2}}
+\end{equation}
+Substituting Eq.~\ref{eqn_imp_Ynp_2} into a Crank-Nicolson expansion of Eq.~(\ref{app_droplet_mass}) we have
+\begin{align}
+\label{eqn_imp_dmdt_2}
+\left(\frac{\d m_{\rm p}}{\d t} \right)^{n+\frac{1}{2}} &= -\frac{A_{\rm p,s} h_{\rm m}\rho_{\rm f}}{2} \Big(Y_{\alpha,\ell}^{n+1}+Y_{\alpha,\ell}^n-Y_{\rm \alpha, g}^{n+1}-Y_{\rm \alpha, g}^n \Big) \notag \\[.5em]
+&= -\frac{A_{\rm p,s} h_{\rm m} \rho_{\rm f}}{2} \Big(Y_{\alpha,\ell}^{n+1}+Y_{\alpha,\ell}^n+\frac{\Delta t^n}{\rho_{\rm g} V} (1-Y_{\rm \alpha, g}) \left(\frac{\d m_{\rm p}}{\d t}\right)-2Y_{\rm \alpha, g}^n \Big) \notag \\[.5em]
+&=-\frac{A_{\rm p,s} h_{\rm m} \rho_{\rm f}}{2} \left[\frac{Y^{n+1}_{\alpha,\ell}+Y^n_{\alpha,\ell}-2Y^n_{\rm \alpha, g}}{1+\frac{\Delta t^n A_{\rm p,s} h_{\rm m}(1-Y_{\rm \alpha, g})}{2 \rho_{\rm g} V}}\right]
+\end{align}
+
+Next, we find an approximation for the droplet surface equilibrium mass fraction $Y_{\alpha,\ell}^{n+1}$ via the expansion
+\begin{equation}
+\label{eqn_Yl_expansion}
+Y_{\alpha,\ell}^{n+1} = Y_{\alpha,\ell}^n + \left(\frac{\d Y_{\alpha,\ell}}{\d T}\right) (T_{\rm p}^{n+1} - T_{\rm p}^n)
+\end{equation}
+
+The derivative is determined from a chain rule expansion:
+\begin{equation}
+\label{eqn_dYldY_chainrule}
+\left(\frac{\d Y_{\alpha,\ell}}{\d T}\right) = \left(\frac{\d Y_{\alpha,\ell}}{\d X_{\alpha,\ell}}\right) \left(\frac{\d X_{\alpha,\ell}}{\d T}\right)
+\end{equation}
+
+The water vapor mole fraction on the surface of the droplet is determined from the Clausius-Clapeyron equation:
+\begin{equation}
+\label{app_Clausius_Clapeyron}
+X_{\alpha,\ell} = \exp \left[ \frac{h_v W_{\alpha}}{R} \left(\frac{1}{T_b} - \frac{1}{T_p}\right) \right]
+\end{equation}
+For a binary mixture in air, the relationship between the vapor mass and mole fractions is given by
+\begin{equation}
+\label{eqn_YX}
+Y_{\alpha,\ell} = \frac{X_{\alpha,\ell}}{X_{\alpha,\ell}(1-W_a/W_{\alpha}) + W_a/W_{\alpha}}
+\end{equation}
+
+Differentiating Eqs.~(\ref{app_Clausius_Clapeyron}) and (\ref{eqn_YX}) and substituting into (\ref{eqn_dYldY_chainrule}) yields
+\begin{equation}
+\label{eqn_dYldY_2}
+\left(\frac{\d Y_{\alpha,\ell}}{\d T}\right)=\frac{W_a / W_{\alpha}} {\left( X_{\alpha,\ell}(1-W_a/W_{\alpha})+(W_a/W_{\alpha}) \right)^2} \;\frac{h_v W_{\alpha}} {R T^2_{\rm p}} \exp\left[ \frac{h_v W_{\alpha}} {R} \left(\frac{1}{T_b} - \frac{1}{T_{\rm p}}\right)\right]
+\end{equation}
+
+Using (\ref{eqn_dYldY_2}) in (\ref{eqn_Yl_expansion}), subsequently (\ref{eqn_Yl_expansion}) in (\ref{eqn_imp_dmdt_2}), and then (\ref{eqn_imp_dmdt_2}) in (\ref{app_droplet_temp}) and (\ref{app_droplet_gas_temp}), leaves three equations with three unknowns, $T^{n+1}_{\rm p}$, $T^{n+1}_{\rm g}$,  and $T^{n+1}_{\rm w}$, to be solved simultaneously. As previously noted, unless otherwise indicated, all RHS quantities are evaluated at the beginning of the substep, $t^n$. 
+
+\begin{align}
+T_{\rm p}^{n+1} & = T_{\rm p}^n + \frac{\Delta t^n}{m_{\rm p} \, c_{\rm p}}  \left[ \dq_{\rm r} + \frac{ A_{\rm p,s} \, h_{\rm g}}{2}  \, (T_{\rm g}^{n+1}+T_{\rm g}^n-T_{\rm p}^{n+1}-T_{\rm p}^n) + \frac{A_{\rm p,s} \, h_{\rm w}}{2}  \, (T_{\rm w}^{n+1}+T_{\rm w}^n-T_{\rm p}^{n+1}-T_{\rm p}^n) -\frac{A_{\rm p,s} h_{\rm m} \rho_{\rm f}}{2} \left[\frac{Y^{n+1}_{\alpha,\ell}+Y^n_{\alpha,\ell}-2Y^n_{\rm \alpha, g}}{1+\frac{\Delta t^n A_{\rm p,s} h_{\rm m}(1-Y_{\rm \alpha, g})}{2 \rho_{\rm g} V}}\right] \; h_{\rm v} \right] 
+\label{eqn_imp_dTpdtx_2}\\[0.2in]
+T_{\rm g}^{n+1} & = T_{\rm g}^n + \frac{\Delta t^n}{m_{\rm g} \, c_{\rm g}}  \left[A_{\rm p,s} \, \frac{h_{\rm g}}{2}  \, (T_{\rm p}^{n+1}+T_{\rm p}^n-T_{\rm g}^{n+1}-T_{\rm g}^n) + \frac{A_{\rm p,s} h_{\rm m} \rho_{\rm f}}{2} \left[\frac{Y^{n+1}_{\alpha,\ell}+Y^n_{\alpha,\ell}-2Y^n_{\rm \alpha, g}}{1+\frac{\Delta t^n A_{\rm p,s} h_{\rm m}(1-Y_{\rm \alpha, g})}{2 \rho_{\rm g} V}}\right] \; (h_{\rm \alpha,p}-h_{\rm \alpha,g}) \right]  
+\label{eqn_imp_dTgdTx_2}\\[0.2in]
+T_{\rm w}^{n+1} & = T_{\rm w}^n-\frac{\Delta t^n A_{\rm p,s} \, h_{\rm w}}{2 m_{\rm w} \, c_{\rm w}} \left[ T_{\rm w}^{n+1}+T_{\rm w}^n-T_{\rm p}^{n+1}-T_{\rm p}^n) \right]
+\label{eqn_imp_dTwdTx_2}
+\end{align}
+
+Finally, the updated cell water vapor mass fraction, $Y^{n+1}_{\rm \alpha, g}$, may be found using (\ref{eqn_Yl_expansion}) in (\ref{eqn_imp_dmdt_2}), and then (\ref{eqn_imp_dmdt_2}) in (\ref{eqn_imp_Ynp_2}).
+\begin{equation}
+\label{eqn_final_Yv}
+Y^{n+1}_{\rm \alpha, g}=Y^n_{\rm \alpha, g}+\frac{\Delta t^n}{\rho V} \frac{A_{\rm p,s} h_{\rm m} \rho_{\rm f}}{2} \left[\frac{2Y_{\alpha,\ell}^n + \left(\frac{\d Y_{\alpha,\ell}}{\d T}\right) (T_{\rm p}^{n+1} - T_{\rm p}^n)-2Y^n_{\rm \alpha, g}}{1+\frac{\Delta t^n A_g h_{\rm m}(1-Y_{\rm \alpha, g})}{2 \rho_{\rm g} V}}\right]
+\end{equation}
+
