@@ -6290,6 +6290,8 @@ By specifying a {\ct SPEC\_ID}, you are implicitly invoking the droplet evaporat
 
 The properties you need to supply for a liquid droplet depend on whether or not the {\ct SPEC\_ID} is listed in Table~\ref{tab:gasspecies}, and if the column labelled ``Liquid'' is checked with a ``Y'', meaning that its liquid properties are known. The following sub-sections provide instructions on what to do in various instances. Note that the {\ct INITIAL\_TEMPERATURE} ($^\circ$C) of the liquid droplets is specified on the {\ct PART} line. Its default value is the overall ambient temperature of the simulation, {\ct TMPA}, from the {\ct MISC} line.
 
+Heat transfer and evaporation from liquid droplets to the gas uses correlations for the heat and mass transfer coefficients. These can instead be respectively specified using {\ct HEAT\_TRANSFER\_COEFFICIENT\_GAS} and {\ct MASS\_TRANSFER\_COEFFICIENT} on the {\ct PART} line.
+
 \subsubsection{Known Liquid/Gas Species}
 
 If the {\ct SPEC\_ID} is listed in Table~\ref{tab:gasspecies}, and if the column labelled ``Liquid'' is checked with a ``Y'', you need only list the following:
@@ -11413,12 +11415,14 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct FREE\_AREA\_FRACTION}               & Real        & Section~\ref{info:particle_screen}                                    &                   &                       \\ \hline
 {\ct GAMMA\_D}                           & Real        & Section~\ref{info:particle_size}                                      &                   & 2.4                   \\ \hline
 {\ct HEAT\_OF\_COMBUSTION}               & Real        & Section~\ref{info:fuel_droplets}                                      & kJ/kg             &                       \\ \hline
+{\ct HEAT\_TRANSFER\_COEFFICIENT\_GAS}   & Real        & Section~\ref{thermal_part_props}                                      & W/m$^2$/K         &                      \\ \hline
 {\ct HEAT\_TRANSFER\_COEFFICIENT\_SOLID} & Real        & Section~\ref{info:surface_droplets}                                   & W/m$^2$/K         & 300                  \\ \hline
 {\ct HORIZONTAL\_VELOCITY}               & Real        & Section~\ref{info:surface_droplets}                                   & m/s               &  0.2                  \\ \hline
 {\ct ID}                                 & Character   & Section~\ref{info:PART_Basics}                                        &                   &                       \\ \hline
 {\ct INITIAL\_TEMPERATURE}               & Real        & Section~\ref{thermal_part_props}                                      & $^\circ$C         & {\ct TMPA}            \\ \hline
 {\ct KILL\_DIAMETER}                     & Real        & Section~\ref{info:particle_size}                                      & $\mu$m            &                       \\ \hline
 {\ct MASSLESS}                           & Logical     & Section~\ref{info:MASSLESS}                                           &                   & {\ct .FALSE.}         \\ \hline
+{\ct MASS\_TRANSFER\_COEFFICIENT}        & Real        & Section~\ref{thermal_part_props}                                      & kg/m$^2$/s        &                      \\ \hline
 {\ct MAXIMUM\_DIAMETER}                  & Real        & Section~\ref{info:particle_size}                                      & $\mu$m            & 1000000               \\ \hline
 {\ct MINIMUM\_DIAMETER}                  & Real        & Section~\ref{info:particle_size}                                      & $\mu$m            &                       \\ \hline
 {\ct MONODISPERSE}                       & Logical     & Section~\ref{info:particle_size}                                      &                   & {\ct .FALSE.}         \\ \hline
