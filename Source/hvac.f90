@@ -510,8 +510,6 @@ DO NN=1,N_HVAC_READ
                                         ', HVAC line number:',NN
             CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
-         DN%XYZ      = XYZ
-         DN%AMBIENT  = .FALSE.
          DN%N_DUCTS=1
          ALLOCATE(DN%LOSS_ARRAY(2,2))
          DN%LOSS_ARRAY = 0._EB
@@ -529,6 +527,8 @@ DO NN=1,N_HVAC_READ
                                         ', HVAC line number:',NN
             CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
+         ! Set temporary node elevation for vents so WIND can establish T and P RAMPs
+         IF (XYZ(3) <-1.E9) XYZ(3) = ZS_MIN         
          DN%XYZ      = XYZ
          DN%AMBIENT  = .FALSE.
          IF (TRIM(DN%VENT_ID)=='AMBIENT') THEN
