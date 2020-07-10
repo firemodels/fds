@@ -15,12 +15,12 @@
 
 &SURF ID='Burner',
       COLOR='RED',
-      HRRPUA=2222.0,
+      HRRPUA=2000.0,
       RAMP_Q='Burner_RAMP_Q'/
 
 &RAMP ID='Burner_RAMP_Q', T=0.0, F=0.0/
 &RAMP ID='Burner_RAMP_Q', T=10.0, F=1.0/
-&RAMP ID='Burner_RAMP_Q', T=100.0, F=1.0/
+&RAMP ID='Burner_RAMP_Q', T=20.0, F=1.0/
 
 &OBST ID='Obstruction', XB=4.25,5.75,4.25,5.75,0.0,0.5, SURF_IDS='Burner','INERT','INERT'/
 
