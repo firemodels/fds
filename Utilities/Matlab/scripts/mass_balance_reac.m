@@ -41,11 +41,11 @@ gen = F.data(:,find(strcmp(F.colheaders,['"',devc_id,' mdot reac"'])));
 
 bal = -dmdt + mdot_out + gen;
 
-plot(t,zeros(1,length(t)),'k-'); hold on
-H(1)=plot(t,dmdt,'g-');
+%plot(t,zeros(1,length(t)),'k-'); hold on
+H(1)=plot(t,dmdt,'g-'); hold on
 H(2)=plot(t,mdot_out,'b-');
 H(3)=plot(t,gen,'r-');
-H(4)=plot(t,bal,'c--');
+H(4)=plot(t,bal,'k-');
 
 ylabel('mass flow (kg/s)', 'FontSize',Label_Font_Size)
 xlabel('time (s)', 'FontSize',Label_Font_Size)
