@@ -222,6 +222,7 @@ LOGICAL :: IBM_FEM_COUPLING=.FALSE.
 LOGICAL :: ENTHALPY_TRANSPORT=.TRUE.
 LOGICAL :: POTENTIAL_TEMPERATURE_CORRECTION=.FALSE.
 LOGICAL :: RTE_SOURCE_CORRECTION=.TRUE.     !< Apply a correction to the radiation source term to achieve desired rad fraction
+LOGICAL :: OBST_CREATED_OR_REMOVED=.FALSE.  !< An obstruction has just been created or removed and wall cells must be reassigned
 LOGICAL :: LAPLACE_PRESSURE_CORRECTION=.FALSE.
 LOGICAL :: CHECK_REALIZABILITY=.FALSE.
 LOGICAL :: MIN_DEVICES_EXIST=.FALSE.
