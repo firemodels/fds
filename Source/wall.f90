@@ -2030,7 +2030,7 @@ USE HVAC_ROUTINES, ONLY : DUCT_MF
 USE PHYSICAL_FUNCTIONS, ONLY: GET_SPECIFIC_GAS_CONSTANT, GET_REALIZABLE_MF, GET_AVERAGE_SPECIFIC_HEAT
 USE MATH_FUNCTIONS, ONLY : EVALUATE_RAMP, BOX_MULLER, INTERPOLATE1D_UNIFORM
 REAL(EB) :: UN,DD,MFT,TSI,ZZ_GET(1:N_TRACKED_SPECIES),RSUM_F,MPUA_SUM,RHO_F_PREVIOUS,RN1,RN2,TWOMFT,Q_NEW
-INTEGER :: N,ITER
+INTEGER :: N,ITER,IIO,JJO,KKO,OTHER_MESH_OBST_INDEX,LL
 INTEGER, INTENT(IN), OPTIONAL :: WALL_INDEX
 TYPE(OBSTRUCTION_TYPE), POINTER :: OB=>NULL()
 TYPE(RAMPS_TYPE), POINTER :: RP=>NULL()
@@ -2190,14 +2190,34 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
          ONE_D%M_DOT_G_PP_ACTUAL(1:N_TRACKED_SPECIES) = ONE_D%M_DOT_G_PP_ACTUAL(1:N_TRACKED_SPECIES)*EXP(-ONE_D%K_SUPPRESSION)
       ENDIF
 
-      ! Add total consumed mass to various summing arrays
+      ! If processing a 1-D, thermally-thick WALL cell, reduce the mass of the OBSTruction (OB%MASS) to which the WALL cell is
+      ! attached. If the WALL cell is at the exterior of the current MESH, and the OBSTstruction to which it is attached 
+      ! lives in a neighboring MESH, store the mass to be subtracted and the index of the OBSTstruction in a 1-D array
+      ! called MESHES(NM)%OMESH(NOM)%REAL_SEND_PKG8. This array will be sent to the neighboring MESH (NOM) the next time a 
+      ! MESH_EXCHANGE is done in main.f90. 
 
-      CONSUME_MASS: IF (PRESENT(WALL_INDEX) .AND. CORRECTOR .AND. SF%THERMAL_BC_INDEX==THERMALLY_THICK .AND. &
-                        SF%THERMAL_BC_INDEX/=THERMALLY_THICK_HT3D) THEN
+      CONSUME_MASS: IF (PRESENT(WALL_INDEX) .AND. CORRECTOR .AND. SF%THERMAL_BC_INDEX==THERMALLY_THICK .AND. & 
+                                                                  SF%THERMAL_BC_INDEX/=THERMALLY_THICK_HT3D) THEN
+         OTHER_MESH_OBST_INDEX = 0
          OB => OBSTRUCTION(WC%OBST_INDEX)
-         DO N=1,N_TRACKED_SPECIES
-            OB%MASS = OB%MASS - ONE_D%M_DOT_G_PP_ACTUAL(N)*DT*ONE_D%AREA
-         ENDDO
+         IF (WALL_INDEX<=N_EXTERNAL_WALL_CELLS) THEN
+            EWC => EXTERNAL_WALL(WALL_INDEX)
+            IF (EWC%NOM>0) THEN
+               IIO = EWC%IIO_MIN
+               JJO = EWC%JJO_MIN
+               KKO = EWC%KKO_MIN
+               OTHER_MESH_OBST_INDEX = MESHES(EWC%NOM)%OBST_INDEX_C(MESHES(EWC%NOM)%CELL_INDEX(IIO,JJO,KKO))
+            ENDIF
+         ENDIF
+         IF (OTHER_MESH_OBST_INDEX>0) THEN
+            OB%MASS = MESHES(EWC%NOM)%OBSTRUCTION(OTHER_MESH_OBST_INDEX)%MASS
+            OMESH(EWC%NOM)%N_EXTERNAL_OBST = OMESH(EWC%NOM)%N_EXTERNAL_OBST + 1
+            LL = 2*OMESH(EWC%NOM)%N_EXTERNAL_OBST
+            OMESH(EWC%NOM)%REAL_SEND_PKG8(LL-1) = REAL(OTHER_MESH_OBST_INDEX,EB)
+            OMESH(EWC%NOM)%REAL_SEND_PKG8(LL)   = SUM(ONE_D%M_DOT_G_PP_ACTUAL(1:N_TRACKED_SPECIES))*DT*ONE_D%AREA
+         ELSE
+            OB%MASS = OB%MASS - SUM(ONE_D%M_DOT_G_PP_ACTUAL(1:N_TRACKED_SPECIES))*DT*ONE_D%AREA
+         ENDIF
       ENDIF CONSUME_MASS
 
       ! Compute the cell face value of the species mass fraction to get the right mass flux
