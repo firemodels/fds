@@ -31,7 +31,6 @@ INTEGER, PARAMETER :: DEARDORFF=3                !< Flag for TURB_MODEL: Deardor
 INTEGER, PARAMETER :: VREMAN=4                   !< Flag for TURB_MODEL: Vreman turbulence model
 INTEGER, PARAMETER :: RNG=5                      !< Flag for TURB_MODEL: ReNormalization Group turbulence model
 INTEGER, PARAMETER :: WALE=6                     !< Flag for TURB_MODEL: Wall-Adapting Local Eddy viscosity turbulence model
-INTEGER, PARAMETER :: MU_TURB_INTERP=7           !< Flag for NEAR_WALL_TURB_MODEL: avoid jump in viscosity, \f$ \mu \f$
 
 INTEGER, PARAMETER :: CONVECTIVE_FLUX_BC=-1      !< Flag for SF\%THERMAL_BC_INDEX: Specified convective flux
 INTEGER, PARAMETER :: NET_FLUX_BC=0              !< Flag for SF\%THERMAL_BC_INDEX: Specified net heat flux
@@ -359,6 +358,7 @@ REAL(EB), PARAMETER :: SIGMA=5.670373E-8_EB                 !< Stefan-Boltzmann 
 REAL(EB), PARAMETER :: K_BOLTZMANN=1.3806488E-23_EB         !< Parameter in soot algorithm
 REAL(EB), PARAMETER :: EARTH_OMEGA=7.272205216643040e-05_EB !< Earth rotation rate [radians/s] = 2*pi/(24*3600)
 REAL(EB), PARAMETER :: VON_KARMAN_CONSTANT=0.41_EB          !< von Karman constant
+REAL(EB), PARAMETER :: BTILDE_ROUGH=8.5_EB                  !< Fully rough B(s+) in wall model
 
 ! Parameters associated with parallel mode
 
