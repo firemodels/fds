@@ -5,8 +5,8 @@
 export SVNROOT=`pwd`/../..
 source $SVNROOT/Validation/Common_Run_All.sh
 
-$QFDS $DEBUG $QUEUE -p 12 -d $INDIR plume_rise_1.fds
-$QFDS $DEBUG $QUEUE -p 12 -d $INDIR plume_rise_2.fds
-$QFDS $DEBUG $QUEUE -p 12 -d $INDIR plume_rise_3.fds
+$QFDS $DEBUG $QUEUE -p 12 -n 6 -d $INDIR plume_rise_1.fds
+$QFDS $DEBUG $QUEUE -p 12 -n 6 -d $INDIR plume_rise_2.fds
+$QFDS $DEBUG $QUEUE -p 12 -n 6 -d $INDIR plume_rise_3.fds
 
 echo FDS cases submitted

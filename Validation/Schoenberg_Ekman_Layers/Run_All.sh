@@ -5,8 +5,8 @@
 export SVNROOT=`pwd`/../..
 source $SVNROOT/Validation/Common_Run_All.sh
 
-$QFDS $DEBUG -p 16 $QUEUE -d $INDIR ekman_neutral.fds
-$QFDS $DEBUG -p 16 $QUEUE -d $INDIR ekman_stable.fds
-$QFDS $DEBUG -p 16 $QUEUE -d $INDIR ekman_unstable.fds
+$QFDS $DEBUG -p 16 -n 8 $QUEUE -d $INDIR ekman_neutral.fds
+$QFDS $DEBUG -p 16 -n 8 $QUEUE -d $INDIR ekman_stable.fds
+$QFDS $DEBUG -p 16 -n 8 $QUEUE -d $INDIR ekman_unstable.fds
 
 echo FDS cases submitted
