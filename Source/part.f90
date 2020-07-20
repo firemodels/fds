@@ -2174,8 +2174,8 @@ SUBROUTINE PARTICLE_MASS_ENERGY_TRANSFER(T,DT,NM)
 
 USE PHYSICAL_FUNCTIONS, ONLY : GET_MASS_FRACTION,GET_AVERAGE_SPECIFIC_HEAT,GET_MOLECULAR_WEIGHT,GET_SPECIFIC_GAS_CONSTANT,&
                                GET_SPECIFIC_HEAT,GET_MASS_FRACTION_ALL,GET_SENSIBLE_ENTHALPY,GET_VISCOSITY,GET_CONDUCTIVITY,&
-                               GET_MW_RATIO, GET_EQUIL_DATA
-USE MATH_FUNCTIONS, ONLY: INTERPOLATE1D_UNIFORM,EVALUATE_RAMP
+                               GET_MW_RATIO, GET_EQUIL_DATA,DROPLET_H_MASS_H_HEAT_GAS
+USE MATH_FUNCTIONS, ONLY: INTERPOLATE1D_UNIFORM,EVALUATE_RAMP,F_B
 USE COMP_FUNCTIONS, ONLY: SHUTDOWN
 USE OUTPUT_DATA, ONLY: M_DOT,Q_DOT
 REAL(EB), POINTER, DIMENSION(:,:,:) :: DROP_DEN=>NULL(),DROP_RAD=>NULL(),DROP_TMP=>NULL(),MVAP_TOT=>NULL(),DROP_AREA=>NULL(),&
@@ -2188,9 +2188,9 @@ REAL(EB) :: R_DROP,NUSSELT,K_AIR,H_V,H_V_REF, H_L,H_V2,&
             SC_AIR,D_AIR,DHOR,SHERWOOD,X_DROP,M_DROP,RHO_G,MW_RATIO,MW_DROP,FTPR,&
             C_DROP,M_GAS,A_DROP,TMP_G,TMP_DROP,TMP_MELT,RE_L,Q_FRAC,Q_TOT,DT_SUBSTEP,&
             CP,H_NEW,ZZ_AIR(1:N_TRACKED_SPECIES),ZZ_GET(1:N_TRACKED_SPECIES),ZZ_GET2(1:N_TRACKED_SPECIES),&
-            M_GAS_NEW,MW_GAS,DELTA_H_G,TMP_G_I,H_G_OLD,H_S_G_OLD,H_D_OLD,C_GAS_DROP,C_GAS_AIR,&
+            M_GAS_NEW,MW_GAS,DELTA_H_G,TMP_G_I,H_G_OLD,H_S_G_OLD,H_D_OLD,&
             TMP_G_NEW,DT_SUM,DCPDT,X_EQUIL,Y_EQUIL,Y_ALL(1:N_SPECIES),H_S_B,H_S,C_DROP2,&
-            T_BOIL_EFF,RAYLEIGH,GR,RHOCBAR,MCBAR,LEWIS,THETA,&
+            T_BOIL_EFF,RAYLEIGH,GR,RHOCBAR,MCBAR,&
             M_GAS_OLD,TMP_G_OLD,NU_LIQUID,H1,H2,TMP_FILM,CP_BAR_2,CP_AIR,R_AIR,RHO_AIR,Y_AIR,B_NUMBER, H_V_A, DH_V_A_DT
 INTEGER :: IP,II,JJ,KK,IW,ICF,N_LPC,ITMP,ITMP2,ITCOUNT,Y_INDEX,Z_INDEX,I_BOIL,I_MELT,I_FUEL,NMAT
 REAL(EB), INTENT(IN) :: T,DT
@@ -2562,70 +2562,8 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                ELSE SOLID_OR_GAS_PHASE_2
                   LENGTH = 2._EB*R_DROP
                   RE_L = RHO_AIR*VEL*LENGTH/MU_AIR
-                  SELECT CASE (EVAP_MODEL)
-                     CASE(-1) ! Ranz Marshall
-                        NUSSELT  = 2._EB + NU_FAC_GAS*SQRT(RE_L)
-                        H_HEAT   = NUSSELT*K_AIR/LENGTH
-                        IF (Y_DROP <= Y_GAS) THEN
-                           H_MASS   = 0._EB
-                        ELSE
-                           SHERWOOD = 2._EB + SH_FAC_GAS*SQRT(RE_L)
-                           H_MASS   = SHERWOOD*D_AIR/LENGTH
-                        ENDIF
-                     CASE(0) ! Sazhin M0, Eq 106 + 109 with B_T=B_M
-                        IF (Y_DROP <= Y_GAS) THEN
-                           NUSSELT  = 2._EB + NU_FAC_GAS*SQRT(RE_L)
-                           H_HEAT   = NUSSELT*K_AIR/LENGTH
-                           H_MASS   = 0._EB
-                        ELSE
-                           NUSSELT  = ( 2._EB + NU_FAC_GAS*SQRT(RE_L) )*LOG(1._EB+B_NUMBER)/B_NUMBER
-                           H_HEAT   = NUSSELT*K_AIR/LENGTH
-                           SHERWOOD = ( 2._EB + SH_FAC_GAS*SQRT(RE_L) )*LOG(1._EB+B_NUMBER)/(Y_DROP-Y_GAS)
-                           H_MASS   = SHERWOOD*D_AIR/LENGTH
-                           ! above we save a divide and multiply of B_NUMBER
-                           ! the full model corresponding to Sazhin (108) and (109) would be
-                           ! SH = SH_0 * LOG(1+B_M)/B_M
-                           ! H_MASS = SH * D/L * B_M/(Y_D-Y_G)
-                        ENDIF
-                     CASE(1) ! Sazhin M1, Eq 106 + 109 with eq 102.
-                        IF (Y_DROP <= Y_GAS) THEN
-                           NUSSELT  = 2._EB + NU_FAC_GAS*SQRT(RE_L)
-                           H_HEAT   = NUSSELT*K_AIR/LENGTH
-                           H_MASS   = 0._EB
-                        ELSE
-                           SHERWOOD = ( 2._EB + SH_FAC_GAS*SQRT(RE_L) )*LOG(1._EB+B_NUMBER)/(Y_DROP-Y_GAS)
-                           H_MASS   = SHERWOOD*D_AIR/LENGTH
-                           LEWIS    = K_AIR / (RHO_AIR * D_AIR * CP_AIR)
-                           ZZ_GET(1:N_TRACKED_SPECIES) = 0._EB
-                           ZZ_GET(Z_INDEX) = 1._EB
-                           CALL GET_SPECIFIC_HEAT(ZZ_AIR,C_GAS_DROP,TMP_FILM)
-                           ZZ_GET(1:N_TRACKED_SPECIES) = ZZ_INTERIM(II,JJ,KK,1:N_TRACKED_SPECIES)
-                           CALL GET_SPECIFIC_HEAT(ZZ_AIR,C_GAS_AIR,TMP_FILM)
-                           THETA = C_GAS_DROP/C_GAS_AIR/LEWIS
-                           B_NUMBER = (1._EB+B_NUMBER)**THETA-1._EB
-                           NUSSELT  = ( 2._EB + NU_FAC_GAS*SQRT(RE_L) )*LOG(1._EB+B_NUMBER)/B_NUMBER
-                           H_HEAT   = NUSSELT*K_AIR/LENGTH
-                        ENDIF
-                     CASE(2) ! Sazhin M2, Eq 116 and 117 with eq 106, 109, and 102.
-                        IF (Y_DROP <= Y_GAS) THEN
-                           NUSSELT  = 2._EB + NU_FAC_GAS*SQRT(RE_L)
-                           H_HEAT   = NUSSELT*K_AIR/LENGTH
-                           H_MASS   = 0._EB
-                        ELSE
-                           SHERWOOD = ( 2._EB + SH_FAC_GAS*SQRT(RE_L) )*LOG(1._EB+B_NUMBER)/((Y_DROP-Y_GAS)*F_B(B_NUMBER))
-                           H_MASS   = SHERWOOD*D_AIR/LENGTH
-                           LEWIS    = K_AIR / (RHO_AIR * D_AIR * CP_AIR)
-                           ZZ_GET(1:N_TRACKED_SPECIES) = 0._EB
-                           ZZ_GET(Z_INDEX) = 1._EB
-                           CALL GET_SPECIFIC_HEAT(ZZ_AIR,C_GAS_DROP,TMP_FILM)
-                           ZZ_GET(1:N_TRACKED_SPECIES) = ZZ_INTERIM(II,JJ,KK,1:N_TRACKED_SPECIES)
-                           CALL GET_SPECIFIC_HEAT(ZZ_AIR,C_GAS_AIR,TMP_FILM)
-                           THETA = C_GAS_DROP/C_GAS_AIR/LEWIS
-                           B_NUMBER = (1._EB+B_NUMBER)**THETA-1._EB
-                           NUSSELT  = ( 2._EB + NU_FAC_GAS*SQRT(RE_L) )*LOG(1._EB+B_NUMBER)/(B_NUMBER*F_B(B_NUMBER))
-                           H_HEAT   = NUSSELT*K_AIR/LENGTH
-                        ENDIF
-                  END SELECT
+                  CALL DROPLET_H_MASS_H_HEAT_GAS(H_MASS,H_HEAT,D_AIR,K_AIR,CP_AIR,RHO_AIR,LENGTH,Y_DROP,Y_GAS,B_NUMBER,NU_FAC_GAS, &
+                                                 SH_FAC_GAS,RE_L,TMP_FILM,ZZ_GET,Z_INDEX)
                   H_WALL   = 0._EB
                   TMP_WALL = TMPA
                   ARRAY_CASE = 1
@@ -3338,17 +3276,6 @@ MESHES(NM)%LAGRANGIAN_PARTICLE(LP_INDEX) = MESHES(NM)%LAGRANGIAN_PARTICLE(NLP)
 MESHES(NM)%LAGRANGIAN_PARTICLE(LP_INDEX)%ARRAY_INDEX = LP_INDEX
 
 END SUBROUTINE REMOVE_OLDEST_PARTICLE
-
-
-REAL(EB) FUNCTION F_B(B)
-REAL(EB), INTENT(IN) :: B
-
-IF (B<=0._EB) THEN
-   F_B = 1._EB
-ELSE
-   F_B = (1._EB+B)**0.7_EB*LOG(1._EB+B)/B
-ENDIF
-END FUNCTION F_B
 
 
 END MODULE PART
