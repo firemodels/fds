@@ -200,7 +200,7 @@ Smokeview is a separate visualization program that is used to display the result
 The first version of FDS was publicly released in February 2000. To date, about half of the applications of the model have been for design of smoke handling systems and sprinkler/detector activation studies. The other half consist of residential and industrial fire reconstructions. Throughout its development, FDS has been aimed at solving practical fire problems in fire protection engineering, while at the same time providing a tool to study fundamental fire dynamics and combustion.
 
 \begin{description}
-\item[Hydrodynamic Model] FDS solves numerically a form of the Navier-Stokes equations appropriate for low-speed, thermally-driven flow with an emphasis on smoke and heat transport from fires. The core algorithm is an explicit predictor-corrector scheme, second order accurate in space and time. Turbulence is treated by means of Large Eddy Simulation (LES). It is possible to perform a Direct Numerical Simulation (DNS) if the underlying numerical mesh is fine enough. LES is the default mode of operation.
+\item[Hydrodynamic Model] FDS solves numerically a form of the Navier-Stokes equations appropriate for low-speed, thermally-driven flow with an emphasis on smoke and heat transport from fires. The core algorithm is an explicit predictor-corrector scheme, second order accurate in space and time. Turbulence is treated by means of Large Eddy Simulation (LES). It is possible to perform a Direct Numerical Simulation (DNS) if the underlying numerical mesh is fine enough. See Sec.~\ref{Sim_Mode} for further details.
 \item[Combustion Model] For most applications, FDS uses a single step, mixing-controlled chemical reaction which uses three lumped species (a species representing a group of species). These lumped species are air, fuel, and products. By default the last two lumped species are explicitly computed. Options are available to include multiple reactions and reactions that are not necessarily mixing-controlled.
 \item[Radiation Transport] Radiative heat transfer is included in the model via the solution of the radiation transport equation for a gray gas, and in some limited cases using a wide band model. The equation is solved using a technique similar to finite volume methods for convective transport, thus the name given to it is the Finite Volume Method (FVM).  Using approximately 100 discrete angles, the finite volume solver requires about 20~\% of the total CPU time of a calculation, a modest cost given the complexity of radiation heat transfer. The absorption coefficients of the gas-soot mixtures are computed using the RadCal narrow-band model~\cite{RadCal}.  Liquid droplets can absorb and scatter thermal radiation. This is important in cases involving mist sprinklers, but also plays a role in all sprinkler cases.  The absorption and scattering coefficients are based on Mie theory.
 \item[Geometry] FDS approximates the governing equations on a rectilinear mesh. Rectangular obstructions are forced to conform with the underlying mesh.
@@ -1272,7 +1272,6 @@ Key Parameter                          & Section                        & {\ct '
 {\ct CHECK\_VN}                        & \ref{info:VN}                  & T           & T            & T             & F              \\ \hline
 {\ct CONSTANT\_SPECIFIC\_HEAT\_RATIO}  & \ref{info:Enthalpy}            & F           & F            & F             & T              \\ \hline
 {\ct MAX\_PRESSURE\_ITERATIONS}        & \ref{pressure_solver}          & 10          & 10           & 10            & 3              \\ \hline
-{\ct PROJECTION}                       & \ref{pressure_solver}          & T           & T            & F             & F              \\ \hline
 {\ct NEAR\_WALL\_TURBULENCE\_MODEL}    & \ref{info:LES}                 & None        & WALE         & Van Driest    & Van Driest     \\ \hline
 \end{tabular}
 \end{table}
@@ -1595,17 +1594,12 @@ If multiple meshes are involved, it is assumed that the {\ct CSVF} lines are pro
 \begin{lstlisting}
 &CSVF UVWFILE='CHID_t001_m001.csv' /
 &CSVF UVWFILE='CHID_t001_m002.csv' /
-&MISC PROJECTION=.TRUE. /
 \end{lstlisting}
 The above approach is deprecated because it may be cumbersome if a large number of meshes is needed.  To overcome this issue, you may set {\ct PER\_MESH=T}, which will append the mesh number and {\ct .csv} to the {\ct UVWFILE} string.  For example, if you had 16 meshes you can use
 \begin{lstlisting}
 &CSVF UVWFILE='CHID_t001_m', PER_MESH=T /
-&MISC PROJECTION=.TRUE. /
 \end{lstlisting}
 and FDS will read {\ct CHID\_t001\_m001.csv} through {\ct CHID\_t001\_m016.csv} in the order of the {\ct MESH} lines (note that a {\ct MULT} line for the meshes may also be used).  Note that the the {\ct UVWFILE} string should contain the ``{\ct m}'' (if it exists) as this is not automatically appended.
-
-It is recommended that you also specify {\ct PROJECTION=.TRUE.} on {\ct MISC} if the specified velocity field does not satisfy the divergence constraint to machine precision on a staggered grid (this may not even be true if an analytical solution to the Navier-Stokes equations is sampled at the staggered velocity component locations).
-
 
 
 
@@ -11202,7 +11196,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct PARTICLE\_CFL\_MIN}                            & Real         & Section~\ref{info:PART_Stability}       &            & 0.8               \\ \hline
 {\ct POROUS\_FLOOR}                                 & Logical      & Section~\ref{info:sprinklers}           &            & {\ct .TRUE.}      \\ \hline
 {\ct PR}                                            & Real         & Section~\ref{info:LES}                  &            & 0.5               \\ \hline
-{\ct PROJECTION}                                    & Logical      & Section~\ref{info:CSVF}                 &            & {\ct .FALSE.}     \\ \hline
 {\ct P\_INF}                                        & Real         & Section~\ref{info:MISC_Basics}          & Pa         & 101325            \\ \hline
 {\ct RAMP\_GX}                                      & Character    & Section~\ref{info:GVEC}                 &            &                   \\ \hline
 {\ct RAMP\_GY}                                      & Character    & Section~\ref{info:GVEC}                 &            &                   \\ \hline
@@ -11237,7 +11230,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 % DO_IMPLICIT_CCREGION (MV), ENTHALPY_TRANSPORT (RJM),
 % EVAP_MODEL, EXTERNAL_BOUNDARY_CORRECTION, HT3D_TEST (RJM), MAXIMUM_GEOMETRY_FACES(MV), MAXIMUM_GEOMETRY_ZVALS(MV), NUCLEATION_SITES, PERIODIC_TEST (RJM),
 % POSITIVE_ERROR_TEST, PROFILING, QFAN_BETA_TEST, TENSOR_DIFFUSIVITY (RJM), TURB_INIT_CLOCK (RJM),
-% UVW_FILE (RJM), STORE_DIVERGENCE_CORRECTION (RJM)
+% UVW_FILE (RJM), STORE_DIVERGENCE_CORRECTION (RJM), PROJECTION (RJM)
 
 \vspace{\baselineskip}
 
