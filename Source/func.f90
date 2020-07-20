@@ -421,6 +421,10 @@ IMPLICIT NONE
 
 CONTAINS
 
+!> \brief Constructs an error message if there was an error during allocatiion of an array
+!> \param CodeSect Character string containing the subroutine or function the allocation statement is in
+!> \param VarName Character string containing the name of the array being allocated
+!> \param IZERO Error value returned by the ALLOCATE statment where 0 is no error
 
 SUBROUTINE ChkMemErr(CodeSect,VarName,IZERO)
 
@@ -438,6 +442,10 @@ CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.)
 END SUBROUTINE ChkMemErr
 
 
+!> \brief Changes the allocation of an array with DIMENSION 1
+!> \param P Original array
+!> \param N1 Lower bound of new allocation
+!> \param N2 Upper bound of new allocation
 
 FUNCTION REALLOCATE(P,N1,N2)
 
@@ -459,6 +467,11 @@ DEALLOCATE(P)
 
 END FUNCTION REALLOCATE
 
+!> \brief Changes the allocation of a string array
+!> \param P Original array
+!> \param CLEN Length of string
+!> \param N1 Lower bound of new allocation
+!> \param N2 Upper bound of new allocation
 
 FUNCTION REALLOCATE_CHARACTER_ARRAY(P,CLEN,N1,N2)
 
@@ -480,6 +493,13 @@ DEALLOCATE(P)
 
 END FUNCTION REALLOCATE_CHARACTER_ARRAY
 
+
+!> \brief Changes the allocation of an array with DIMENSION 2
+!> \param P Original array
+!> \param M1 Lower bound of first dimension of new allocation
+!> \param M2 Upper bound of first dimension of new allocation
+!> \param N1 Lower bound of second dimension of new allocation
+!> \param N2 Upper bound of second dimension of new allocation
 
 FUNCTION REALLOCATE2D(P,M1,M2,N1,N2)
 
@@ -521,6 +541,8 @@ DEALLOCATE(DUMMY)
 END SUBROUTINE RE_ALLOCATE_STRINGS
 
 
+!> \brief Determines the size of the ONE_D_M_AND_E_XFER type structure for a surface type
+!> \param SURF_INDEX Index the to array of surface types
 
 SUBROUTINE COMPUTE_ONE_D_STORAGE_DIMENSIONS(SURF_INDEX)
 
@@ -561,6 +583,9 @@ SF%N_ONE_D_STORAGE_LOGICALS = N_ONE_D_SCALAR_LOGICALS
 END SUBROUTINE COMPUTE_ONE_D_STORAGE_DIMENSIONS
 
 
+!> \brief Determines the size of the WALL type structure for a surface type
+!> \param SURF_INDEX Index the to array of surface types
+
 SUBROUTINE COMPUTE_WALL_STORAGE_DIMENSIONS(SURF_INDEX)
 
 INTEGER, INTENT(IN) :: SURF_INDEX
@@ -575,6 +600,9 @@ SF%N_WALL_STORAGE_LOGICALS = N_WALL_SCALAR_LOGICALS + SF%N_ONE_D_STORAGE_LOGICAL
 END SUBROUTINE COMPUTE_WALL_STORAGE_DIMENSIONS
 
 
+!> \brief Determines the size of the CFACE type structure for a surface type
+!> \param SURF_INDEX Index the to array of surface types
+
 SUBROUTINE COMPUTE_CFACE_STORAGE_DIMENSIONS(SURF_INDEX)
 
 INTEGER, INTENT(IN) :: SURF_INDEX
@@ -588,6 +616,9 @@ SF%N_CFACE_STORAGE_LOGICALS = N_CFACE_SCALAR_LOGICALS + SF%N_ONE_D_STORAGE_LOGIC
 
 END SUBROUTINE COMPUTE_CFACE_STORAGE_DIMENSIONS
 
+
+!> \brief Determines the size of the LAGRAGIAN_PARTICLE type structure for a particle type
+!> \param LPC_INDEX Index the to array of surface types
 
 SUBROUTINE COMPUTE_PARTICLE_STORAGE_DIMENSIONS(LPC_INDEX)
 
@@ -604,6 +635,16 @@ LPC%N_STORAGE_LOGICALS = N_PARTICLE_SCALAR_LOGICALS + SF%N_ONE_D_STORAGE_LOGICAL
 
 END SUBROUTINE COMPUTE_PARTICLE_STORAGE_DIMENSIONS
 
+
+!> \brief Allocates storage for data associated with a single wall cell or Lagrangian particle
+!> \param NM Index to the current mesh
+!> \param SURF_INDEX Surface type. Used if WALL_INDEX or CFACE_INDEX is set
+!> \param LPC_INDEX Lagrangian particle class type. Used if LP_INDEX is set.
+!> \param WALL_INDEX Index to the wall cell being allocated. Optional (one of WALL_INDEX, CFACE_INDEX, or LP_INDEX)
+!> \param CFACE_INDEX Index to the cut cell face being allocated. Optional (one of WALL_INDEX, CFACE_INDEX, or LP_INDEX)
+!> \param LP_INDEX Index to the Lagrangian particle being allocated. Optional (one of WALL_INDEX, CFACE_INDEX, or LP_INDEX)
+!> \param TAG Unique indentifier for a particle used since a particle can move between meshes and reneter a mesh.
+!> \param NEW_TAG Flag indicating TAG is for a new particle.
 
 SUBROUTINE ALLOCATE_STORAGE(NM,SURF_INDEX,LPC_INDEX,WALL_INDEX,CFACE_INDEX,LP_INDEX,TAG,NEW_TAG)
 
@@ -3748,7 +3789,7 @@ END MODULE TRAN
 
 MODULE OPENMP
 
-! Module for OpenMP check
+!> \brief Module for various OpenMP functions
 
 USE GLOBAL_CONSTANTS, ONLY : OPENMP_AVAILABLE_THREADS, OPENMP_USED_THREADS, OPENMP_USER_SET_THREADS, USE_OPENMP
 !$ USE OMP_LIB
@@ -3757,7 +3798,8 @@ PUBLIC OPENMP_INIT, OPENMP_SET_THREADS, OPENMP_PRINT_STATUS
 
 CONTAINS
 
-! set the control flag USE_OPENMP if OpenMP is used
+!> \brief Set the control flag USE_OPENMP if OpenMP is used.
+   
 SUBROUTINE OPENMP_INIT
 
 !$OMP PARALLEL
@@ -3772,7 +3814,9 @@ SUBROUTINE OPENMP_INIT
 
 END SUBROUTINE OPENMP_INIT
 
-! change the number of OpenMP threads if set by the user in the input file
+
+!> \brief Change the number of OpenMP threads if set by the user in the input file.
+
 SUBROUTINE OPENMP_SET_THREADS
 
 !$IF (OPENMP_USER_SET_THREADS .EQV. .TRUE.) THEN
@@ -3786,7 +3830,9 @@ SUBROUTINE OPENMP_SET_THREADS
 
 END SUBROUTINE OPENMP_SET_THREADS
 
-! print OpenMP status
+
+!> \brief Write OpenMP status to standard error.
+
 SUBROUTINE OPENMP_PRINT_STATUS
   USE GLOBAL_CONSTANTS, ONLY : LU_ERR, MYID, N_MPI_PROCESSES, VERBOSE
   INTEGER :: THREAD_ID
@@ -3852,6 +3898,14 @@ WRITE(LU,'(A,A)') ' MPI library version: ',TRIM(MPILIBVERSION)
 
 END SUBROUTINE WRITE_SUMMARY_INFO
 
+
+!> \brief Finds the device or control function assoicated with an input
+!> \param NAME Namelist ID
+!> \param CTRL_ID String containing name of control function.
+!> \param DEVC_ID String containing name of device.
+!> \param DEVICE_INDEX Integer index locating DEVC_ID in the array of devices.
+!> \param CONTORL_INDEX Integer index locating CTRL_ID in the array of control functions.
+!> \param INPUT_INDEX The current count of inputs of type NAME.
 
 SUBROUTINE SEARCH_CONTROLLER(NAME,CTRL_ID,DEVC_ID,DEVICE_INDEX,CONTROL_INDEX,INPUT_INDEX)
 
