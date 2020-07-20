@@ -3506,6 +3506,23 @@ ENDIF
 
 END SUBROUTINE MONIN_OBUKHOV_STABILITY_CORRECTIONS
 
+!> \brief Computes the mass and heat transfer coeffiicents for a liquid droplet in air based on the selected EVAP_MODEL on MISC
+!> \param H_MASS The mass transfer coefficient (m2/s)
+!> \param H_HEAT The dropelt heat transfer coefficient (W/m2/K)
+!> \param D_AIR Diffusivity in air of the droplet species in the gas cell with the droplet (m2/s)
+!> \param K_AIR Conductivity in the gas cell with the droplet (W/m/k)
+!> \param CP_AIR Specific heat in the gas cell with the droplet (J/kg/K)
+!> \param RHO_AIR Density in the gas cell with the droplet (kg/m3)
+!> \param LENGTH Length scale (m)
+!> \param Y_DROP Equilibrium vapor fraction for the current droplet temperature
+!> \param Y_GAS Mass fraction of vapor in the gas
+!> \param B_NUMBER B number for the droplet
+!> \param NU_FAC_GAS Constant factor used in computing  the NUsselt number
+!> \param SH_FAC_GAS Constant factor used in computing  the Sherwood number
+!> \param RE_L Renyolds number
+!> \param TMP_FILM Film temperature for the droplet (K)
+!> \param ZZ_GET Tracked species mass fractions in the gas cell with the droplet
+!> \param Z_INDEX Droplet species index in ZZ
 
 SUBROUTINE DROPLET_H_MASS_H_HEAT_GAS(H_MASS,H_HEAT,D_AIR,K_AIR,CP_AIR,RHO_AIR,LENGTH,Y_DROP,Y_GAS,B_NUMBER,NU_FAC_GAS,SH_FAC_GAS, &
                                      RE_L,TMP_FILM,ZZ_GET,Z_INDEX)
@@ -3527,7 +3544,7 @@ SELECT CASE (EVAP_MODEL)
          SHERWOOD = 2._EB + SH_FAC_GAS*SQRT(RE_L)
          H_MASS   = SHERWOOD*D_AIR/LENGTH
       ENDIF
-   CASE(0) ! Sazhin M0, Eq 106 + 109 with B_T=B_M
+   CASE(0) ! Sazhin M0, Eq 106 + 109 with B_T=B_M. This is the default model.
       IF (Y_DROP <= Y_GAS) THEN
          NUSSELT  = 2._EB + NU_FAC_GAS*SQRT(RE_L)
          H_HEAT   = NUSSELT*K_AIR/LENGTH
