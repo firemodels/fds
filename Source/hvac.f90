@@ -1,8 +1,8 @@
 !> \brief Compute the HVAC mass and energy transport
 !> \details Module contains routines to read the HVAC namelist inputs, intialize the HVAC solver, and solve
 !> the flow for each timestep. Note that the HVAC solver is only called for the first MPI process. This requires
-!> that HVAC boundary conditions at VENTs be aggregated of MPI processes and that the HVAC solution 
-!> be shared with all MPI processes
+!> that HVAC boundary conditions at VENTs be aggregated over MPI processes and that the HVAC solution 
+!> be shared with all MPI processes.
    
 MODULE HVAC_ROUTINES
 
@@ -65,16 +65,65 @@ SUBROUTINE READ_HVAC
 USE MATH_FUNCTIONS, ONLY: GET_RAMP_INDEX,GET_TABLE_INDEX
 USE MISC_FUNCTIONS, ONLY: SEARCH_CONTROLLER
 INTEGER , PARAMETER :: MAX_DUCTS = 20 !< Maximum number of ducts connected to a node
-INTEGER :: IOS,IZERO,N_HVAC_READ,NS,N,NC,ND,NN,I_AIRCOIL=0,I_DUCT=0,I_DUCTNODE=0,I_FAN=0 ,I_FILTER=0,N_CELLS
-REAL(EB) :: AREA,DIAMETER,XYZ(3),LOSS(MAX_DUCTS,MAX_DUCTS),VOLUME_FLOW,MAX_FLOW,MAX_PRESSURE,ROUGHNESS,LENGTH,TNOW,TAU_AC,&
-            TAU_FAN,TAU_VF,FIXED_Q,CLEAN_LOSS,&
-            COOLANT_MASS_FLOW,COOLANT_SPECIFIC_HEAT,COOLANT_TEMPERATURE,PERIMETER,MASS_FLOW
-REAL(EB) :: LOADING(MAX_SPECIES),EFFICIENCY(MAX_SPECIES),LOADING_MULTIPLIER(MAX_SPECIES)
-LOGICAL :: ROUND, SQUARE, DAMPER, REVERSE, AMBIENT,LEAK_ENTHALPY,INITIALIZED_HVAC_MASS_TRANSPORT,QFAN_BETA=.FALSE.
-CHARACTER(LABEL_LENGTH) :: AIRCOIL_ID,CTRL_ID,DEVC_ID,DUCT_ID(MAX_DUCTS),DUCT_INTERP_TYPE,FAN_ID,FILTER_ID,ID,NODE_ID(2),RAMP_ID,&
-                           RAMP_LOSS,SPEC_ID(MAX_SPECIES),SURF_ID,TYPE_ID,VENT_ID,VENT2_ID
-TYPE(DUCTNODE_TYPE), POINTER :: DN=>NULL()
-TYPE(DUCT_TYPE), POINTER :: DU=>NULL()
+INTEGER :: IOS !< Used for returning the status of a READ statement
+INTEGER :: IZERO !< Used for returning the status of an ALLOCATE statement
+INTEGER :: N_HVAC_READ !< Counter for number of HVAC inputs that have been read in
+INTEGER :: NS,N,NC,ND,NN
+INTEGER :: I_AIRCOIL=0 !< AIRCOIL array index
+INTEGER :: I_DUCT=0 !< DUCT array index
+INTEGER :: I_DUCTNODE=0 !< DUCTNODE array index
+INTEGER :: I_FAN=0 !< FAN array index
+INTEGER :: I_FILTER=0 !< FILTER array index
+INTEGER :: N_CELLS !< Number of cells in a DUCT with HVAC_MASS_TRANSPORT
+REAL(EB) :: AREA !< Area (m2) of a DUCT. 
+REAL(EB) :: DIAMETER !< Diameter (m) of a DUCT. 
+REAL(EB) :: XYZ(3) !< Position (m) of a DUCTNODE.
+REAL(EB) :: LOSS(MAX_DUCTS,MAX_DUCTS) !< Array of flow losses for a DUCT or DUCTNODE.
+REAL(EB) :: VOLUME_FLOW !< Fixed volume flow (m3/s) for a FAN or a DUCT.
+REAL(EB) :: MAX_FLOW !< Flow at zero pressure (m3/s) for a quadratic FAN.
+REAL(EB) :: MAX_PRESSURE !< Stall pressure (Pa) for a quadratic FAN.
+REAL(EB) :: ROUGHNESS !< Absolute roughness (m) of a DUCT.
+REAL(EB) :: LENGTH !< Length (m) of a DUCT.
+REAL(EB) :: TNOW !< Current CPU time (s) used in computing length of time spent in HVAC routines.
+REAL(EB) :: TAU_AC !< Time constant (s) for full effectiveness of an AIRCOIL.
+REAL(EB) :: TAU_FAN !< Time constant (s) for a FAN to reach its full flow rate.
+REAL(EB) :: TAU_VF !< Time constant (s) for fixed flow in a DUCT.
+REAL(EB) :: FIXED_Q !< Fixed heat transfer (input as kW) for an AIRCOIL.
+REAL(EB) :: CLEAN_LOSS !< Flow loss for a clean filter (e.g. LOADING=0)
+REAL(EB) :: COOLANT_MASS_FLOW !< Mass flow (kg/s)of the working fluid for an AIRCOIL.
+REAL(EB) :: COOLANT_SPECIFIC_HEAT !< Specific heat (input as kJ/kg/K) of the working fluid for an AIRCOIL.
+REAL(EB) :: COOLANT_TEMPERATURE !< Temperature (input as C) of the working fluid for an AIRCOIL.
+REAL(EB) :: PERIMETER !< Perimeter (m) of a duct. Computes the hydraulic DIAMETER when specified with AREA.
+REAL(EB) :: MASS_FLOW !< Fixed mass flow (kg/s) in a DUCT.
+REAL(EB) :: LOADING(MAX_SPECIES) !< Initial species loading (kg) of a FILTER.
+REAL(EB) :: EFFICIENCY(MAX_SPECIES) !< Fraction of a species trapped by a FILTER.
+REAL(EB) :: LOADING_MULTIPLIER(MAX_SPECIES) !< Multiplier of LOADING used in computing the loss of a FILTER.
+LOGICAL :: ROUND !< Flag indicating DUCT has a round cross-section
+LOGICAL :: SQUARE !< Flag indicating DUCT has a square cross-section
+LOGICAL :: DAMPER !< Flag indicating that a damper is present in a DUCT.
+LOGICAL :: REVERSE !< Flag indicating that a specfied flow or FAN in a DUCT is from the second to the first node.
+LOGICAL :: AMBIENT !< Flag indicating a DUCTNODE is connected to the ambient.
+LOGICAL :: LEAK_ENTHALPY !< Flag indicating that the boundary condition for a LEAKAGE duct should preserve enthalpy. 
+LOGICAL :: INITIALIZED_HVAC_MASS_TRANSPORT !< Flag indicating DUCTs with N_CELLS>1 have been initiazed.
+LOGICAL :: QFAN_BETA=.FALSE. !< Routine accounting for multiple fans in connected grouping of ducts.
+CHARACTER(LABEL_LENGTH) :: AIRCOIL_ID !< ID of an AIRCOIL located in a DUCT.
+CHARACTER(LABEL_LENGTH) :: CTRL_ID !< Name of a control function controlling a FAN, damper, or AIRCOIL.
+CHARACTER(LABEL_LENGTH) :: DEVC_ID !< Name of a device controlling a FAN, damper, or AIRCOIL.
+CHARACTER(LABEL_LENGTH) :: DUCT_ID(MAX_DUCTS) !<IDs of DUCTs connected to a DUCTNODE.
+CHARACTER(LABEL_LENGTH) :: DUCT_INTERP_TYPE !<Method of interpolation for a DUCT with N_CELLS>1. 
+CHARACTER(LABEL_LENGTH) :: FAN_ID !< ID of a FAN located in a DUCT.
+CHARACTER(LABEL_LENGTH) :: FILTER_ID !< ID of a FILTER located at a DUCTNODE.
+CHARACTER(LABEL_LENGTH) :: ID !< Name of an HVAC component
+CHARACTER(LABEL_LENGTH) :: NODE_ID(2) !< IDs of the nodes for each end of a DUCT.
+CHARACTER(LABEL_LENGTH) :: RAMP_ID !< Name of a RAMP for DUCT flow, FAN curve, or AIRCOIL heat exchange.
+CHARACTER(LABEL_LENGTH) :: RAMP_LOSS !< Name of a RAMP for the flow loss of a variable damper where T=damper position and F=loss.
+CHARACTER(LABEL_LENGTH) :: SPEC_ID(MAX_SPECIES) !< List of species that are trapped by a filter.
+CHARACTER(LABEL_LENGTH) :: SURF_ID !< Surface type for a duct wall (not currently used).
+CHARACTER(LABEL_LENGTH) :: TYPE_ID !< Type of HVAC component (e.g. DUCT, FAN, DUCTNODE, etc.)
+CHARACTER(LABEL_LENGTH) :: VENT_ID !< Name of a VENT connected to a DUCTNODE or the first node for a LEAKAGE duct
+CHARACTER(LABEL_LENGTH) :: VENT2_ID !< VENT connected to the second node for a LEAKAGE duct
+TYPE(DUCTNODE_TYPE), POINTER :: DN=>NULL() !< Pointer to a DUCTNODE
+TYPE(DUCT_TYPE), POINTER :: DU=>NULL() !< Pointer to a DUCT
 NAMELIST /HVAC/ AIRCOIL_ID,AMBIENT,AREA,CLEAN_LOSS,COOLANT_SPECIFIC_HEAT,COOLANT_MASS_FLOW,COOLANT_TEMPERATURE,CTRL_ID,&
                 DAMPER,DEVC_ID,DIAMETER,DUCT_ID,DUCT_INTERP_TYPE,&
                 EFFICIENCY,FAN_ID,FILTER_ID,FIXED_Q,ID,LEAK_ENTHALPY,LENGTH,LOADING,LOADING_MULTIPLIER,LOSS,&
@@ -193,32 +242,51 @@ DO NN=1,N_HVAC_READ
          I_DUCT = I_DUCT + 1
          DU=> DUCT(I_DUCT)
          DU%ID   = ID
-         IF (DIAMETER <= 0._EB .AND. AREA <= 0._EB .AND. PERIMETER <= 0._EB) THEN
+         IF (DIAMETER < 0._EB .AND. AREA < 0._EB .AND. PERIMETER < 0._EB) THEN
             WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR: Duct has no AREA, DIAMETER, or PERIMTER. Duct ID:',TRIM(ID),&
                                         ', HVAC line number:',NN
             CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
-         IF (DIAMETER > 0._EB) THEN
-            IF (PERIMETER > 0._EB) THEN
-               WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR: Duct cannot input both PERIMETER and DIAMETER. Duct ID:',TRIM(ID),&
-                                          ', HVAC line number:',NN
+         IF (AREA < 0._EB) THEN
+            IF (DIAMETER < 0._EB) THEN
+               WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR: Duct without AREA has no DIAMETER. Duct ID:',TRIM(ID),&
+                                           ', HVAC line number:',NN
                CALL SHUTDOWN(MESSAGE); RETURN
+            ENDIF           
+            IF (SQUARE) THEN
+               AREA = DIAMETER**2
+               PERIMETER = 4._EB*DIAMETER
+            ELSEIF (ROUND) THEN
+               AREA = 0.25_EB*PI*DIAMETER**2
+               PERIMETER = PI*DIAMETER
+            ELSE
+               IF (PERIMETER < 0._EB) THEN
+                  WRITE(MESSAGE,'(A,A,A,I5)') &
+                     'ERROR: If both ROUND and SQUARE are FALSE, Duct with DIAMETER must also have PERIMETER. Duct ID:',TRIM(ID), &
+                     ', HVAC line number:',NN
+                  CALL SHUTDOWN(MESSAGE); RETURN
+               ENDIF
+               AREA = 0.25_EB*DIAMETER*PERIMETER
             ENDIF
-            AREA = 0.5_EB*PIO2*DIAMETER**2
-         ENDIF
-         IF (AREA > 0._EB) THEN
+         ELSEIF (AREA > 0._EB) THEN
             IF (DIAMETER >  0._EB .AND. PERIMETER >  0._EB) THEN
                WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR: Duct cannot input both PERIMETER and DIAMETER with AREA. Duct ID:',TRIM(ID),&
                                           ', HVAC line number:',NN
                CALL SHUTDOWN(MESSAGE); RETURN
             ENDIF
-            IF (PERIMETER <= 0._EB) DIAMETER = SQRT(2._EB*AREA/PIO2)
-            IF (PERIMETER >  0._EB) DIAMETER = 4._EB*AREA/PERIMETER
-         ENDIF
-         IF (PERIMETER > 0._EB .AND. AREA <= 0._EB) THEN
-            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR: Duct cannot have PERIMETER without AREA. Duct ID:',TRIM(ID),&
-                                        ', HVAC line number:',NN
-            CALL SHUTDOWN(MESSAGE); RETURN
+            IF (SQUARE) THEN 
+               DIAMETER = SQRT(AREA)
+               PERIMETER = 4._EB*DIAMETER
+            ELSEIF (ROUND) THEN
+               DIAMETER = SQRT(4._EB*AREA/PI)
+               PERIMETER = PI*DIAMETER
+            ELSE
+               IF (DIAMETER > 0._EB) THEN
+                  PERIMETER = 4._EB*AREA/DIAMETER                 
+               ELSE
+                  DIAMETER = 4._EB*AREA/PERIMETER                 
+               ENDIF
+            ENDIF
          ENDIF
          DU%AREA_INITIAL = AREA
          DU%AREA = AREA
@@ -644,10 +712,10 @@ SUBROUTINE PROC_HVAC
 USE PHYSICAL_FUNCTIONS, ONLY: GET_ENTHALPY
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 USE MPI
-!INTEGER :: I1,I2,J1,J2,K1,K2,IOR
 INTEGER :: N,ND,ND2,NM,NN,NF,NV,IERR
-REAL(EB) :: TNOW,ZZ_GET(1:N_TRACKED_SPECIES)
-LOGICAL :: FOUND
+REAL(EB) :: TNOW !< Current CPU time (s) used in computing time spent in HVAC routines
+REAL(EB) :: ZZ_GET(1:N_TRACKED_SPECIES) !< Species mass fraction array
+LOGICAL :: FOUND !< Flag indicating search loop has found the HVAC component assocaited with an ID
 TYPE (LAGRANGIAN_PARTICLE_CLASS_TYPE),DIMENSION(:), POINTER:: TEMPALLOC=>NULL()
 TYPE(DUCTNODE_TYPE), POINTER :: DN=>NULL()
 TYPE(DUCT_TYPE), POINTER :: DU=>NULL()
@@ -967,7 +1035,8 @@ END SUBROUTINE PROC_HVAC
 SUBROUTINE INIT_DUCT_NODE
 USE PHYSICAL_FUNCTIONS, ONLY: GET_ENTHALPY
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
-REAL(EB) :: ZZ_GET(1:N_TRACKED_SPECIES), DuMMY=0._EB
+REAL(EB) :: ZZ_GET(1:N_TRACKED_SPECIES) !< Species mass fraction array.
+REAL(EB):: DUMMY=0._EB !< Dummy real for use in function call
 INTEGER :: NN
 TYPE(DUCTNODE_TYPE), POINTER :: DN=>NULL()
 
@@ -1010,9 +1079,9 @@ END SUBROUTINE INIT_DUCT_NODE
 SUBROUTINE HVAC_CALC(T,DT,FIRST_PASS)
 INTEGER :: NNE,NN,NR,ND
 REAL(EB), INTENT(IN) :: T,DT
-LOGICAL :: CHANGE=.TRUE.
-LOGICAL, SAVE :: INITIALIZED_HVAC_MASS_TRANSPORT
 LOGICAL, INTENT(IN):: FIRST_PASS
+LOGICAL :: CHANGE=.TRUE. 
+LOGICAL, SAVE :: INITIALIZED_HVAC_MASS_TRANSPORT
 TYPE(NETWORK_TYPE), POINTER:: NE=>NULL()
 TYPE(DUCTRUN_TYPE), POINTER :: DR=>NULL()
 
@@ -1541,7 +1610,8 @@ SUBROUTINE RHSDUCT(NETWORK_INDEX)
 USE GLOBAL_CONSTANTS
 INTEGER, INTENT(IN)::NETWORK_INDEX
 INTEGER :: ND, ARRAYLOC,IPZ
-REAL(EB) :: HEAD,XYZ(3)
+REAL(EB) :: HEAD !< DUCT pressure head (Pa)
+REAL(EB) :: XYZ(3) !< Distance between duct nodes (m)
 TYPE(NETWORK_TYPE), POINTER::NE=>NULL()
 TYPE(DUCT_TYPE), POINTER::DU=>NULL()
 TYPE(DUCTNODE_TYPE), POINTER::DN=>NULL()
