@@ -2967,7 +2967,6 @@ Note that there is no need to specify a {\ct MATL\_ID} or {\ct THICKNESS}. Becau
 there is no need to say anything about its material composition or thickness.
 
 
-
 \subsection{Special Topic: Convective Heat Transfer Options}
 \label{info:convection}
 
@@ -3008,7 +3007,19 @@ By analogy, we define the non-dimensional temperature $T^+ \equiv (T_{\rm g}-T_{
 \begin{equation}
 h = \frac{\dot{q}''_{\rm w}}{T_{\rm g}-T_{\rm w}} = \frac{\rho_{\rm w} \, c_{\rm p} \, u_\tau}{T^+}
 \end{equation}
-Refer to the FDS Tech Guide \cite{FDS_Tech_Guide} for further details of the formulation. To specify this heat transfer model for a particular surface, set {\ct HEAT\_TRANSFER\_MODEL} equal to {\ct 'LOGLAW'} on the {\ct SURF} line.
+Refer to the FDS Tech Guide \cite{FDS_Tech_Guide} for further details of the formulation. To specify this heat transfer model for a particular surface, set {\ct HEAT\_TRANSFER\_MODEL} equal to {\ct 'LOGLAW'} on the {\ct SURF} line. Note that the loglaw model is not well-suited for buoyant flows---it requires a well-resolved ``wind'' near the surface and is therefore mainly applicable to forced convection type flows with high grid resolution.
+
+\subsubsection{Atmospheric Boundary Layer Wall Model}
+\label{sec:abl_model}
+
+The incorporation of buoyancy into the wall function is the domain of Monin-Obuhkov (MO) similarity theory, as discussed in Sec.~\ref{info:WIND}. To specify this heat transfer model for a particular surface, set {\ct HEAT\_TRANSFER\_MODEL} equal to {\ct ABL} on the {\ct SURF} line together with the aerodynamic roughness length, {\ct Z\_0}.  For example,
+\begin{lstlisting}
+&SURF ID='ground', HEAT_TRANSFER_MODEL='ABL', Z_0=0.05 /
+\end{lstlisting}
+
+As discussed in Sec.~\ref{info:WIND}, there is a simple conversion between the aerodynamic roughness and the sandgrain roughness, which can be input using {\ct ROUGHNESS} on {\ct SURF}.  Either {\ct Z\_0} or {\ct ROUGHNESS} may be specified, but not both.  Also, if a {\ct WIND} line is present, {\ct Z\_0} must be consistent between {\ct SURF} and {\ct WIND} lines.  The value of {\ct Z\_0} on {\ct SURF} will override the default value from {\ct WIND}.
+
+When the ABL wall model is used, this also changes the wall stress model (see FDS Tech Guide~\cite{FDS_Math_Guide}).  The local Obukhov length, $L$ (see Sec.~\ref{info:WIND}), and viscous wall units, $y^+$ (see Sec.~\ref{info:yplus}), can be output using boundary files or wall devices.
 
 \subsubsection{Free Convection, Horizontal Cylinder}
 
@@ -6929,15 +6940,15 @@ Most of the parameters that describe the atmosphere are entered on a single name
 
 \subsection{Basic Equations}
 
-The atmospheric boundary layer in FDS is modeled using Monin-Obukhov similarity theory. The wind speed profile, $u$, and potential temperature\footnote{The potential temperature is given by $$\theta=T \left( \frac{p_0}{p} \right)^{R/(W_{\rm air} \, c_p)}$$ where $p_0$ is typically 1000~mbar and $R/(W_{\rm air} \, c_p) \approx 0.286$.}, $\theta$, vary with height, $z$, according to:
+The atmospheric boundary layer in FDS is modeled using Monin-Obukhov similarity theory. The wind speed profile, $u$, and potential temperature\footnote{The potential temperature is given by $$\theta=T \left( \frac{p_0}{p} \right)^{R/(W_{\rm air} \, c_p)}$$ where $p_0$ is typically 100~kPa and $R/(W_{\rm air} \, c_p) \approx 0.286$.}, $\theta$, vary with height, $z$, according to:
 \begin{eqnarray}
-   u(z)      &=&            \frac{u_*}{\kappa}     \left[ \ln \left( \frac{z}{z_0} \right) - \psi_{\rm m} \left( \frac{z}{L} \right) \right] \label{u_om} \\[.15in]
-   \theta(z) &=& \theta_0 + \frac{\theta_*}{\kappa} \left[ \ln \left( \frac{z}{z_0} \right) - \psi_{\rm h} \left( \frac{z}{L} \right) \right]
+   u(z)      &=&            \frac{u_*}{\kappa}     \left[ \ln \left( \frac{z}{z_0} \right) - \Psi_{\rm m} \left( \frac{z}{L} \right) \right] \label{u_om} \\[.15in]
+   \theta(z) &=& \theta_0 + \frac{\theta_*}{\kappa} \left[ \ln \left( \frac{z}{z_0} \right) - \Psi_{\rm h} \left( \frac{z}{L} \right) \right]
 \end{eqnarray}
 where $u_*$ is the friction velocity, $\kappa=0.41$ is the Von K\'{a}rm\'{a}n constant, $z_0$ is the \emph{aerodynamic} roughness length, $\theta_*$ is the scaling potential temperature, $\theta_0$ is the ground level potential temperature, $L$ is the Obukhov length, and the similarity functions are those proposed by Dyer~\cite{Dyer:1974}:
 \begin{eqnarray}
-   \psi_{\rm m}\left(\frac{z}{L}\right) &=& \left\{ \begin{array}{c@{\quad:\quad}l} \displaystyle -5 \, \frac{z}{L} & L \ge 0 \\[.2in]  \displaystyle 2 \, \ln \left[\frac{1+\zeta}{2}\right] + \ln \left[\frac{1+\zeta^2}{2}\right]-2 \, \tan^{-1}(\zeta) + \frac{\pi}{2} & L<0 \end{array} \right.  \\[.2in]
-   \psi_{\rm h}\left(\frac{z}{L}\right) &=& \left\{ \begin{array}{c@{\quad:\quad}l} \displaystyle -5 \, \frac{z}{L} & L \ge 0 \\[.2in]  \displaystyle 2 \, \ln \left[\frac{1+\zeta^2}{2}\right] & L<0 \quad \quad  \displaystyle \zeta=\left( 1 - \frac{16 \, z}{L} \right)^{1/4}  \end{array} \right.
+   \Psi_{\rm M}\left(\frac{z}{L}\right) &=& \left\{ \begin{array}{c@{\quad:\quad}l} \displaystyle -5 \, \frac{z}{L} & L \ge 0 \\[.2in]  \displaystyle 2 \, \ln \left[\frac{1+\zeta}{2}\right] + \ln \left[\frac{1+\zeta^2}{2}\right]-2 \, \tan^{-1}(\zeta) + \frac{\pi}{2} & L<0 \end{array} \right.  \\[.2in]
+   \Psi_{\rm H}\left(\frac{z}{L}\right) &=& \left\{ \begin{array}{c@{\quad:\quad}l} \displaystyle -5 \, \frac{z}{L} & L \ge 0 \\[.2in]  \displaystyle 2 \, \ln \left[\frac{1+\zeta^2}{2}\right] & L<0 \quad \quad  \displaystyle \zeta=\left( 1 - \frac{16 \, z}{L} \right)^{1/4}  \end{array} \right.
 \end{eqnarray}
 The Obukhov length, $L$, characterizes the thermal stability of the atmosphere. When $L$ is negative, the atmosphere is unstably stratified; when positive, the atmosphere is stably stratified.  The stabilizing or destabilizing effects of stratification are strongest as $L$ nears zero.  Accordingly, a neutrally stratified atmosphere would have an infinite Obukhov length. Generally, an unstable atmosphere exhibits a decreasing temperature with height and relatively large fluctuations in wind direction/velocity. Unstable atmospheres are strongly affected by the buoyancy-generated turbulence, resulting in enhanced mixing.  Conversely, highly stable atmospheric conditions suppress turbulent mixing.
 
@@ -7075,9 +7086,10 @@ The \emph{aerodynamic} roughness length, $z_0$, is not the same as the \emph{san
 \ee
 For the purpose of implementing the Monin-Obukhov model within FDS, the velocity profile given by Eq.~(\ref{u_om}) near the ground where $\psi_{\rm m} \approx 0$ can be superimposed, leading to the effective translation of roughness factors:
 \be
-   s = z_0 \, {\rm e}^{8.5 \, \kappa} \approx 30 \, z_0
+\label{eq:roughness_conversion}
+   s = z_0 \, {\rm e}^{8.5 \, \kappa} \approx 32.6 \, z_0
 \ee
-To explicitly assert this relationship, you may set the {\ct ROUGHNESS} (m) on the {\ct SURF} line applied to the ground to be 30 times your chosen value of $z_0$.
+You may set either {\ct ROUGHNESS} or {\ct Z\_0} on the {\ct SURF} line (both in meters).  FDS will use Eq.~(\ref{eq:roughness_conversion}) to convert between the two depending on the wall model.
 
 \subsection{Sensible Heat Flux}
 
@@ -7741,7 +7753,7 @@ In this second option, you create your own custom fuel type as follows:
       VEG_LSET_CHAR_FRACTION = 0.25
       VEG_LSET_FIREBASE_TIME = 20 /
 \end{lstlisting}
-{\ct VEG\_LSET\_ROS\_00} is the no-wind, no-slope rate of spread for the given fuel model. {\ct VEG\_LSET\_SIGMA} (m$^{-1}$) and {\ct VEG\_LSET\_BETA} are the average surface to volume ratio ($\sigma$) and packing ratio ($\beta$) of the underlying vegetation. {\ct VEG\_LSET\_HT} (m) is the height of the vegetation. When the fire front arrives at a given surface cell, fuel vapors are generated at a rate given by 
+{\ct VEG\_LSET\_ROS\_00} is the no-wind, no-slope rate of spread for the given fuel model. {\ct VEG\_LSET\_SIGMA} (m$^{-1}$) and {\ct VEG\_LSET\_BETA} are the average surface to volume ratio ($\sigma$) and packing ratio ($\beta$) of the underlying vegetation. {\ct VEG\_LSET\_HT} (m) is the height of the vegetation. When the fire front arrives at a given surface cell, fuel vapors are generated at a rate given by
 \be
    \dot{m}_{\rm f}'' = (1-\nu_{\rm char}) \frac{m_{\rm f}''}{\delta t} \; {\rm kg}/({\rm m}^2 \cdot {\rm s})  \quad ; \quad \delta t = \frac{75600}{\sigma} \; \hbox{s}
 \ee
@@ -10273,13 +10285,14 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct GAS DENSITY}                               & Gas Density near wall                             & \si{kg/m^3}    & B,D          \\ \hline
 {\ct GAS TEMPERATURE}                           & Gas Temperature near wall                         & $^\circ$C      & B,D          \\ \hline
 {\ct H}                                         & $\cH=|\bu|^2/2 + \tp/\rho    $                    & (m/s)$^2$      & D,I,P,S      \\ \hline
-{\ct HEAT TRANSFER COEFFICIENT}                 & Convective heat transfer                          & \si{W/(m^2.K)} & B,D          \\ \hline
+{\ct HEAT TRANSFER COEFFICIENT}                 & Section \ref{info:convection}                     & \si{W/(m^2.K)} & B,D          \\ \hline
 {\ct HRRPUL}                                    & $\int \dq''' \, \d x \, \d y$                     & kW/m           & D            \\ \hline
 {\ct HRRPUV REAC}$^6$                           & $\dq'''$ for {\ct REAC\_ID}                       & kW/m$^3$       & D,S          \\ \hline
 {\ct IDEAL GAS PRESSURE}                        & $\bar{p}=\rho R T / \overline{W}$                 & Pa             & D,I,P,S      \\ \hline
 {\ct INTEGRATED INTENSITY}                      & $U=\int I \, \d \bs$                              & kW/m$^2$       & D,I,P,S      \\ \hline
 {\ct KINETIC ENERGY}                            & $(u^2+v^2+w^2)/2$                                 & (m/s)$^2$      & D,I,P,S      \\ \hline
 {\ct KOLMOGOROV LENGTH SCALE}                   & Section \ref{info:meshquality}                    & m              & D,I,P,S      \\ \hline
+{\ct OBUKHOV LENGTH}                            & Section \ref{sec:abl_model}                       & m              & B,D          \\ \hline
 {\ct MACH NUMBER}                               & $|\bu|/\sqrt{(R/\overline{W}) T \gamma}$          &                & S,D          \\ \hline
 {\ct MAXIMUM VELOCITY ERROR}                    & Section \ref{info:PRES}                           & m/s            & D            \\ \hline
 {\ct MIXING TIME}                               & Combustion mixing time                            & s              & D,I,P,S      \\ \hline
@@ -11987,6 +12000,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct WIDTH}                                               & Real            & Section~\ref{info:PART_GEOMETRY}          & m                   &                         \\ \hline
 {\ct XYZ(3)}                                              & Real Array      & Section~\ref{info:spread}                 & m                   &                         \\ \hline
 {\ct Z0 }                                                 & Real            & Section~\ref{info:stratification}         & m                   & 10.                     \\ \hline
+{\ct Z\_0 }                                               & Real            & Section~\ref{info:stratification}         & m                   & 0.                      \\ \hline
 \end{longtable}
 
 % Undocumented: FSK_A, FSK_K, FSK_W, IMPERMEABLE
