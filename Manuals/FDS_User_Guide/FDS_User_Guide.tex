@@ -3012,7 +3012,7 @@ Refer to the FDS Tech Guide \cite{FDS_Tech_Guide} for further details of the for
 \subsubsection{Atmospheric Boundary Layer Wall Model}
 \label{sec:abl_model}
 
-The incorporation of buoyancy into the wall function is the domain of Monin-Obuhkov (MO) similarity theory, as discussed in Sec.~\ref{info:WIND}. To specify this heat transfer model for a particular surface, set {\ct HEAT\_TRANSFER\_MODEL} equal to {\ct ABL} on the {\ct SURF} line together with the aerodynamic roughness length, {\ct Z\_0}.  For example,
+The incorporation of buoyancy into the wall function is the domain of Monin-Obuhkov (MO) similarity theory, as discussed in Sec.~\ref{info:WIND}. Further mathematical details of the ABL wall model are discussed in the FDS Tech Guide \cite{FDS_Math_Guide}.  To specify this model for a particular surface, set {\ct HEAT\_TRANSFER\_MODEL} equal to {\ct ABL} on the {\ct SURF} line together with the aerodynamic roughness length, {\ct Z\_0}.  For example,
 \begin{lstlisting}
 &SURF ID='ground', HEAT_TRANSFER_MODEL='ABL', Z_0=0.05 /
 \end{lstlisting}
@@ -12000,7 +12000,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct WIDTH}                                               & Real            & Section~\ref{info:PART_GEOMETRY}          & m                   &                         \\ \hline
 {\ct XYZ(3)}                                              & Real Array      & Section~\ref{info:spread}                 & m                   &                         \\ \hline
 {\ct Z0 }                                                 & Real            & Section~\ref{info:stratification}         & m                   & 10.                     \\ \hline
-{\ct Z\_0 }                                               & Real            & Section~\ref{info:stratification}         & m                   & 0.                      \\ \hline
+{\ct Z\_0 }                                               & Real            & Section~\ref{sec:abl_model}               & m                   & 0.                      \\ \hline
 \end{longtable}
 
 % Undocumented: FSK_A, FSK_K, FSK_W, IMPERMEABLE
