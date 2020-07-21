@@ -7733,14 +7733,19 @@ This set of inputs invokes fuel model 5, but it also provides you with a way to 
 In this second option, you create your own custom fuel type as follows:
 \begin{lstlisting}
 &SURF ID = 'My Fuel'
-      VEG_LSET_ROS = 0.007
+      VEG_LSET_ROS_00 = 0.007
       VEG_LSET_SIGMA = 3344.
       VEG_LSET_BETA = 0.0041
       VEG_LSET_HT = 0.91
-      HRRPUA = 200.
-      BURN_DURATION = 20 /
+      VEG_LSET_SURF_LOAD = 0.5
+      VEG_LSET_CHAR_FRACTION = 0.25
+      VEG_LSET_FIREBASE_TIME = 20 /
 \end{lstlisting}
-{\ct VEG\_LSET\_ROS} is the no-wind, no-slope rate of spread for the given fuel model. {\ct VEG\_LSET\_SIGMA} (m$^{-1}$) and {\ct VEG\_LSET\_BETA} are the average surface to volume ratio ($\sigma$) and packing ratio ($\beta$) of the underlying vegetation. {\ct VEG\_LSET\_HT} (m) is the height of the vegetation. When the fire front arrives at a given surface cell, it begins to burn with a heat release per unit area given by {\ct HRRPUA} in kW/m$^2$ for a period of {\ct BURN\_DURATION}~s. The local burning rate and duration are function of the vegetation mass per unit area.
+{\ct VEG\_LSET\_ROS\_00} is the no-wind, no-slope rate of spread for the given fuel model. {\ct VEG\_LSET\_SIGMA} (m$^{-1}$) and {\ct VEG\_LSET\_BETA} are the average surface to volume ratio ($\sigma$) and packing ratio ($\beta$) of the underlying vegetation. {\ct VEG\_LSET\_HT} (m) is the height of the vegetation. When the fire front arrives at a given surface cell, fuel vapors are generated at a rate given by 
+\be
+   \dot{m}_{\rm f}'' = (1-\nu_{\rm char}) \frac{m_{\rm f}''}{\delta t} \; {\rm kg}/({\rm m}^2 \cdot {\rm s})  \quad ; \quad \delta t = \frac{75600}{\sigma} \; \hbox{s}
+\ee
+Here, $m_{\rm f}''$ is the dry fuel loading in units of kg/m$^2$ ({\ct VEG\_LSET\_SURF\_LOAD}, default 0.3~kg/m$^2$); $\nu_{\rm char}$ is the char fraction ({\ct VEG\_LSET\_CHAR\_FRACTION}, default 0.2); and $\delta t$ is the duration of the fire at a given location. The expression for the burn duration is given by Albini~\cite{Albini:1976}, but you can enter your own burn duration using {\ct VEG\_LSET\_FIREBASE\_TIME} (s).
 
 
 
@@ -7781,7 +7786,7 @@ Bova et al.~\cite{Bova:IJWF2015} compare the level set calculation that has been
 \begin{lstlisting}
 &MISC ..., LEVEL_SET_MODE = 1 /
 &SURF ID = 'Custom Grass'
-      VEG_LSET_ROS = 0.04
+      VEG_LSET_ROS_00 = 0.04
       VEG_LSET_SIGMA = 11400.
       VEG_LSET_BETA = 0.0012
       VEG_LSET_HT = 0.51 /
@@ -11955,6 +11960,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct TMP\_INNER(:)}                                       & Real Array      & Section~\ref{info:TMP_INNER}              & $^\circ$C           & 20.                     \\ \hline
 {\ct TRANSPARENCY}                                        & Real            & Section~\ref{info:colors}                 &                     & 1.                      \\ \hline
 {\ct VEG\_LSET\_BETA}                                     & Real            & Section~\ref{info:level_set}              &                     & 0.                      \\ \hline
+{\ct VEG\_LSET\_CHAR\_FRACTION}                           & Real            & Section~\ref{info:level_set}              &                     & 0.2                     \\ \hline
+{\ct VEG\_LSET\_FIREBASE\_TIME}                           & Real            & Section~\ref{info:level_set}              & s                   &                         \\ \hline
 {\ct VEG\_LSET\_FUEL\_INDEX}                              & Integer         & Section~\ref{info:level_set}              &                     &                         \\ \hline
 {\ct VEG\_LSET\_HT}                                       & Real            & Section~\ref{info:level_set}              &                     & 0.                      \\ \hline
 {\ct VEG\_LSET\_IGNITE\_TIME}                             & Real            & Section~\ref{info:level_set}              & s                   &                         \\ \hline
@@ -11964,11 +11971,12 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct VEG\_LSET\_MLW}                                      & Real            & Section~\ref{info:level_set}              &                     & 0.70                    \\ \hline
 {\ct VEG\_LSET\_MLH}                                      & Real            & Section~\ref{info:level_set}              &                     & 0.70                    \\ \hline
 {\ct VEG\_LSET\_QCON}                                     & Real            & Section~\ref{info:level_set}              & kW/m$^2$            & 0.                      \\ \hline
-{\ct VEG\_LSET\_ROS}                                      & Real            & Section~\ref{info:level_set}              & m/s                 & 0.                      \\ \hline
+{\ct VEG\_LSET\_ROS\_00}                                  & Real            & Section~\ref{info:level_set}              & m/s                 & 0.                      \\ \hline
 {\ct VEG\_LSET\_ROS\_BACK}                                & Real            & Section~\ref{info:level_set}              & m/s                 & 0.                      \\ \hline
 {\ct VEG\_LSET\_ROS\_FLANK}                               & Real            & Section~\ref{info:level_set}              & m/s                 & 0.                      \\ \hline
 {\ct VEG\_LSET\_ROS\_HEAD}                                & Real            & Section~\ref{info:level_set}              & m/s                 & 0.                      \\ \hline
-{\ct VEG\_LSET\_SIGMA}                                    & Real            & Section~\ref{info:level_set}              &                     & 0.                      \\ \hline
+{\ct VEG\_LSET\_SIGMA}                                    & Real            & Section~\ref{info:level_set}              & 1/m                 & 0.                      \\ \hline
+{\ct VEG\_LSET\_SURF\_LOAD}                               & Real            & Section~\ref{info:level_set}              & kg/m$^2$            & 0.3                     \\ \hline
 {\ct VEG\_LSET\_TAN2}                                     & Real            & Section~\ref{info:level_set}              &                     &                         \\ \hline
 {\ct VEG\_LSET\_WIND\_EXP}                                & Real            & Section~\ref{info:level_set}              &                     & 1.                      \\ \hline
 {\ct VEL    }                                             & Real            & Section~\ref{info:Velocity_BC}            & m/s                 &                         \\ \hline
