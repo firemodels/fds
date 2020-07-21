@@ -2168,7 +2168,10 @@ END FUNCTION SHAPE_DEFORMATION
 END SUBROUTINE MOVE_PARTICLES
 
 
-!> \brief Compute mass and energy transfer between gas and PARTICLEs
+!> \brief Compute mass and energy transfer between gas and liquid PARTICLEs
+!> \param T Current simulation time (s)
+!> \param DT Time step size (s)
+!> \param NM Current mesh index
 
 SUBROUTINE PARTICLE_MASS_ENERGY_TRANSFER(T,DT,NM)
 
@@ -2178,23 +2181,142 @@ USE PHYSICAL_FUNCTIONS, ONLY : GET_MASS_FRACTION,GET_AVERAGE_SPECIFIC_HEAT,GET_M
 USE MATH_FUNCTIONS, ONLY: INTERPOLATE1D_UNIFORM,EVALUATE_RAMP,F_B
 USE COMP_FUNCTIONS, ONLY: SHUTDOWN
 USE OUTPUT_DATA, ONLY: M_DOT,Q_DOT
-REAL(EB), POINTER, DIMENSION(:,:,:) :: DROP_DEN=>NULL(),DROP_RAD=>NULL(),DROP_TMP=>NULL(),MVAP_TOT=>NULL(),DROP_AREA=>NULL(),&
-                                       RHO_INTERIM=>NULL(),TMP_INTERIM=>NULL()
-REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZ_INTERIM=>NULL()
-REAL(EB) :: R_DROP,NUSSELT,K_AIR,H_V,H_V_REF, H_L,H_V2,&
-            RVC,WGT,Q_CON_GAS,Q_CON_WALL,Q_RAD,H_HEAT,H_MASS,SH_FAC_GAS,SH_FAC_WALL,NU_FAC_GAS,NU_FAC_WALL,&
-            PR_AIR,M_VAP,M_VAP_MAX,MU_AIR,Q_DOT_RAD,DEN_ADD,AREA_ADD,&
-            Y_DROP,Y_COND,Y_GAS,Y_GAS_NEW,LENGTH,U2,V2,W2,VEL,TMP_DROP_NEW,TMP_WALL,H_WALL,&
-            SC_AIR,D_AIR,DHOR,SHERWOOD,X_DROP,M_DROP,RHO_G,MW_RATIO,MW_DROP,FTPR,&
-            C_DROP,M_GAS,A_DROP,TMP_G,TMP_DROP,TMP_MELT,RE_L,Q_FRAC,Q_TOT,DT_SUBSTEP,&
-            CP,H_NEW,ZZ_AIR(1:N_TRACKED_SPECIES),ZZ_GET(1:N_TRACKED_SPECIES),ZZ_GET2(1:N_TRACKED_SPECIES),&
-            M_GAS_NEW,MW_GAS,DELTA_H_G,TMP_G_I,H_G_OLD,H_S_G_OLD,H_D_OLD,&
-            TMP_G_NEW,DT_SUM,DCPDT,X_EQUIL,Y_EQUIL,Y_ALL(1:N_SPECIES),H_S_B,H_S,C_DROP2,&
-            T_BOIL_EFF,RAYLEIGH,GR,RHOCBAR,MCBAR,&
-            M_GAS_OLD,TMP_G_OLD,NU_LIQUID,H1,H2,TMP_FILM,CP_BAR_2,CP_AIR,R_AIR,RHO_AIR,Y_AIR,B_NUMBER, H_V_A, DH_V_A_DT
-INTEGER :: IP,II,JJ,KK,IW,ICF,N_LPC,ITMP,ITMP2,ITCOUNT,Y_INDEX,Z_INDEX,I_BOIL,I_MELT,I_FUEL,NMAT
+
 REAL(EB), INTENT(IN) :: T,DT
 INTEGER, INTENT(IN) :: NM
+
+REAL(EB), POINTER, DIMENSION(:,:,:) :: DROP_DEN=>NULL() 
+!< Average particle density in a grid cell (kg/m3) used in updating AVG_DROP_DEN
+REAL(EB), POINTER, DIMENSION(:,:,:) :: DROP_RAD=>NULL()
+!< Average particle radius in a grid cell (m) used in updating AVG_DROP_RAD
+REAL(EB), POINTER, DIMENSION(:,:,:) :: DROP_TMP=>NULL()
+!< Average particle temperature in a grid cell (K) used in updating AVG_DROP_TMP
+REAL(EB), POINTER, DIMENSION(:,:,:) :: DROP_AREA=>NULL()
+!< Average particle cross sectional areat in a grid cell (m2) used in updating AVG_DROP_AREA
+REAL(EB), POINTER, DIMENSION(:,:,:) :: MVAP_TOT=>NULL()
+!< Amount of mass evaporated into a grid cell (kg)
+REAL(EB), POINTER, DIMENSION(:,:,:) :: RHO_INTERIM=>NULL()
+!< Current gas density (kg/m3)
+REAL(EB), POINTER, DIMENSION(:,:,:) :: TMP_INTERIM=>NULL()
+!< Current gas temperature (K)
+REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZ_INTERIM=>NULL()
+!< Current gas species mass fractions
+REAL(EB) :: ZZ_AIR(1:N_TRACKED_SPECIES) !< Species mass fractioms in the film
+REAL(EB) :: CP_AIR !< Specific heat of the film (J/kg/K) at the film temperature
+REAL(EB) :: D_AIR !< Diffusivity into air of the droplet species (m2/s) at the film temperature
+REAL(EB) :: K_AIR !< Conducitvity of the film (W/m/K) at the film temperature
+REAL(EB) :: R_AIR !< Specfic gas constant  the film (J/kg/K)
+REAL(EB) :: RHO_AIR !< Density of the film (kg/m3) at the film temperature
+REAL(EB) :: MU_AIR !< Viscosity of the film (kg/m/s) at the film temperature
+REAL(EB) :: PR_AIR !< Prandtl number of the film
+REAL(EB) :: SC_AIR !< Schmidt number of the film
+REAL(EB) :: Y_AIR !< Droplet species mass fraction in the film
+REAL(EB) :: CP !< Specific heat (J/kg/K)
+REAL(EB) :: DCPDT !< Temperature derivative of the specific heat (J/kg/K2)
+REAL(EB) :: C_DROP2 !< Specific heat of particle (J/kg/K)
+REAL(EB) :: CP_BAR !< Average specific heat (J/kg/K)
+REAL(EB) :: CP_BAR_2 !< Average specific heat (J/kg/K)
+REAL(EB) :: H1 !< Sensible enthalpy (J/kg/K)
+REAL(EB) :: H2 !< Sensible enthalpy (J/kg/K)
+REAL(EB) :: H_D_OLD !< Particle enthalpy (J) at the start of a sub time step
+REAL(EB) :: H_G_OLD !< Gas enthalpy (J) at the start of a sub time step
+REAL(EB) :: H_S_G_OLD !< Sensible enthalpy of the gas (J) at the start of a sub time step
+REAL(EB) :: H_NEW !<  Total gas and particle enthalpy (J) at the end of a sub time step
+REAL(EB) :: H_V !< Heat of vaporization at the particle temperature (J/kg)
+REAL(EB) :: H_V2 !< Heat of vaporization at the particle temperature (J/kg)
+REAL(EB) :: H_V_A !< Effective heat of vaporization for use in the Clasius-Clapeyron relation (J/kg)
+REAL(EB) :: DH_V_A_DT !< Temperature derivative of H_VA (J/kg/K)
+REAL(EB) :: H_V_REF !< Heat of vaporization at the species heat of vaporization reference temperature (J/kg)
+REAL(EB) :: H_L !< Enthalpy of the particle (J)
+REAL(EB) :: H_S !< Sensible enthalpy of the vapor (J) at the gas temperature
+REAL(EB) :: H_S_B !< Sensible enthalpy of the vapor (J) at the particle temperature
+REAL(EB) :: DELTA_H_G !< H_S_B - H_S (J)
+REAL(EB) :: M_GAS !< Mass of the gas (kg) in the grid cell
+REAL(EB) :: RHO_G !< Current gas density (kg/m3)
+REAL(EB) :: M_GAS_NEW !< Mass of gas (kg) in the grid cell at the end of a sub time step
+REAL(EB) :: M_GAS_OLD !< Mass of gas (kg) in a grid cell at the start of a sub time step
+REAL(EB) :: MW_GAS !< Molecular weight (kg/kmol) of the gas
+REAL(EB) :: MW_RATIO !< Ratio of average gas molecular weigth to particle species molecular weight
+REAL(EB) :: RVC !< Inverse of the cell volume (1/m3)
+REAL(EB) :: WGT !< LAGRANGIAN_PARTICLE%PWT
+REAL(EB) :: Q_CON_GAS !< Convective heat transfer between the particle and the gas (J)
+REAL(EB) :: Q_CON_WALL !< Convective heat transfer between the particle and a surface (J)
+REAL(EB) :: Q_DOT_RAD ! Radiant heat transfer rate to particle (J/s)
+REAL(EB) :: Q_FRAC !< Heat transfer adjustment factor when particle reaches boiling temperature during a sub time step
+REAL(EB) :: Q_RAD !< Net radiation heat transfer to the particle (J)
+REAL(EB) :: Q_TOT !< Total heat transfer from convection and radiation to the particle (J)
+REAL(EB) :: H_HEAT !< Convection heat transfer coefficient between the particle and the gas (W/m2/K)
+REAL(EB) :: H_WALL !< Convection heat transfer coefficient between the particle and a surface (W/m2/K)
+REAL(EB) :: H_MASS !< Mass transfer coefficient (m/s)
+REAL(EB) :: LENGTH !< Length scale used in computing SH and NU
+REAL(EB) :: GR !< Particle Grashof number
+REAL(EB) :: RAYLEIGH !< Particle Rayleigh number
+REAL(EB) :: RE_L !< Particle Reynolds number
+REAL(EB) :: NUSSELT !< Nusselt number
+REAL(EB) :: SHERWOOD !< Particle Sherwood number
+REAL(EB) :: SH_FAC_GAS !< Sherwood number of a particle in the gas
+REAL(EB) :: SH_FAC_WALL !< Sherwood number of a particle on a surface
+REAL(EB) :: NU_FAC_GAS !< Nusselt number of a particle in the gas
+REAL(EB) :: NU_FAC_WALL !< Nusselt number of a particle on a surface
+REAL(EB) :: M_VAP !< Mass evaporated (kg) from the particle in the current sub time step
+REAL(EB) :: M_VAP_MAX !< Maximum allowable evaporation (kg)
+REAL(EB) :: DEN_ADD !< Weighted drop mass divided by cell volume (kg/m3)
+REAL(EB) :: AREA_ADD !< Weighted drop area divided by cell volume (1/m)
+REAL(EB) :: Y_ALL(1:N_SPECIES) !< Mass fraction of all primitive species
+REAL(EB) :: X_DROP !< Equilibirum vapor mole fraction at the particle temperature
+REAL(EB) :: Y_DROP !< Equilibrium vapor mass fraction at the particle temperature
+REAL(EB) :: Y_COND !< Fraction of mass associated with any condensed vapor of the particle species
+REAL(EB) :: Y_GAS !< Vapor fraction of the particle species
+REAL(EB) :: Y_GAS_NEW !< End of sub time step vapor fraction of the particle species
+REAL(EB) :: X_EQUIL !< Equilibrium vapor mole fraction  
+REAL(EB) :: Y_EQUIL !< Equilibrium vapor mass fraction
+REAL(EB) :: U2 !< Relative u-velocity (m/s)
+REAL(EB) :: V2 !< Relative v-velocity (m/s)
+REAL(EB) :: W2 !< Relative w-velocity (m/s)
+REAL(EB) :: VEL !< Relative velocity (m/s)
+REAL(EB) :: A_DROP !< Particle surface area (m2)
+REAL(EB) :: C_DROP !< Specific heat of the particle (J/kg/K) at the current temperature
+REAL(EB) :: DHOR !< Heat of vaporization divided by the gas constant (K).
+REAL(EB) :: FTPR !< 4/3 * PI * Particle density
+REAL(EB) :: M_DROP !< Mass of the  particle (kg)
+REAL(EB) :: R_DROP !< Particle radius (m)
+REAL(EB) :: MW_DROP !< Particle molecular weight (kg/kmol)
+REAL(EB) :: T_BOIL_EFF !< Effective boiling temperature (K) of the particle at the current pressuer
+REAL(EB) :: TMP_G_OLD !< Gas temperature (K) at the start of sub time step
+REAL(EB) :: TMP_G !< Current gas temperature (K)
+REAL(EB) :: TMP_G_I !< Gas temperature during search loop (K)
+REAL(EB) :: TMP_G_NEW !< Gas temperature (K) at the end of a sub time step
+REAL(EB) :: TMP_DROP !< Current particle temperature (K)
+REAL(EB) :: TMP_DROP_NEW !< End of sub time step particle temperature (K)
+REAL(EB) :: TMP_FILM !< Film temperature (K)
+REAL(EB) :: TMP_MELT !< Melting temperaturte of the particle species (K)
+REAL(EB) :: TMP_WALL !< Wall surface temperature (K)
+REAL(EB) :: TMP_WALL_NEW !< New surface temperature (K)
+REAL(EB) :: DT_SUBSTEP !< Current sub time step size (s)
+REAL(EB) :: DT_SUM !< Running sum of completed sub time steps (s)
+REAL(EB) :: ZZ_GET(1:N_TRACKED_SPECIES)
+REAL(EB) :: ZZ_GET2(1:N_TRACKED_SPECIES)
+REAL(EB) :: RHOCBAR ! Density of solid surface times specific heat the solid surface (J/m3/K)
+REAL(EB) :: MCBAR !< Particle mass time particle specific heat (J/K)
+REAL(EB) :: NU_LIQUID !< Kinematic viscosity of the particle species (m2/s)
+REAL(EB) :: B_NUMBER !< Particle B number
+REAL(EB) :: AGHRHO !< Collection of terms used in contstructing A_COL, B_COL, C_COL, and D_COL
+REAL(EB) :: DTGOG !< Collection of terms used in contstructing A_COL, B_COL, C_COL, and D_COL 
+REAL(EB) :: DTGOP !< Collection of terms used in contstructing A_COL, B_COL, C_COL, and D_COL
+REAL(EB) :: DTWOW !< Collection of terms used in contstructing A_COL, B_COL, C_COL, and D_COL
+REAL(EB) :: DTWOP !< Collection of terms used in contstructing A_COL, B_COL, C_COL, and D_COL
+REAL(EB) :: DTOG !< Collection of terms used in contstructing A_COL, B_COL, C_COL, and D_COL
+REAL(EB) :: DTOP !< Collection of terms used in contstructing A_COL, B_COL, C_COL, and D_COL
+REAL(EB) :: DAHVHLDY !< Collection of terms used in contstructing A_COL, B_COL, C_COL, and D_COL
+REAL(EB) :: DADYHV !< Collection of terms used in contstructing A_COL, B_COL, C_COL, and D_COL
+REAL(EB) :: DADYDTHVHL !< Collection of terms used in contstructing A_COL, B_COL, C_COL, and D_COL
+REAL(EB) :: DADYDTHV !< Collection of terms used in contstructing A_COL, B_COL, C_COL, and D_COL
+REAL(EB) :: DYDT !< Temperature derivative of the equilbirum vapor fraciton (1/K)
+REAL(EB) :: A_COL(3) !< Gas temperature terms in LHS of solution
+REAL(EB) :: B_COL(3) !< Particle temperatre terms in LHS of solution
+REAL(EB) :: C_COL(3) !< Wall temperature terms in LHS of solution
+REAL(EB) :: D_VEC(3) !< RHS of solution
+INTEGER :: IP,II,JJ,KK,IW,ICF,N_LPC,ITMP,ITMP2,ITCOUNT,Y_INDEX,Z_INDEX,I_BOIL,I_MELT,I_FUEL,NMAT
 LOGICAL :: TEMPITER
 CHARACTER(MESSAGE_LENGTH) :: MESSAGE
 TYPE (LAGRANGIAN_PARTICLE_TYPE), POINTER :: LP=>NULL()
@@ -2202,9 +2324,9 @@ TYPE (LAGRANGIAN_PARTICLE_CLASS_TYPE), POINTER :: LPC=>NULL()
 TYPE(ONE_D_M_AND_E_XFER_TYPE), POINTER :: ONE_D
 TYPE (SURFACE_TYPE), POINTER :: SF=>NULL()
 TYPE (SPECIES_TYPE), POINTER :: SS=>NULL()
-REAL(EB) :: AGHRHO, DTGOG, DTGOP, DTWOW, DTWOP, DTOG, DTOP, DYDT, A_COL(3), B_COL(3), C_COL(3), D_VEC(3), CP_BAR, &
-            DAHVHLDY, DADYHV, DADYDTHVHL, DADYDTHV, TMP_WALL_NEW
+
 INTEGER :: ARRAY_CASE
+!< 1 = Particle in gas only, 2 = Particle on constant temperature surface, 3 = Particle on thermally thick surface
 
 CALL POINT_TO_MESH(NM)
 
