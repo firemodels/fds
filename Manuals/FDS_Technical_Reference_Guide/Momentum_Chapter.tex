@@ -599,11 +599,41 @@ where $s^+ = s/\delta_\nu$ is the roughness length in viscous units and $s$ is t
 \end{equation}
 where $\tilde{B}_{\rm max} = 9.5$.
 
+\subsection{Atmospheric Boundary Layers}
+\label{sec:abl_wall_model}
+
+The formulation for the ABL wall model implemented in FDS follows \cite{Stoll:2008}.  The potential temperature is given by $$\theta=T \left( \frac{p_0}{p} \right)^{R/(W_{\rm air} \, c_p)}$$ where $p_0$ is typically 100~kPa and $R/(W_{\rm air} \, c_p) \approx 0.286$.  The heat flux at the wall is given by
+\be
+\dot{q}''_{\rm w} = h (\theta_{\rm w} - \theta_{\rm g}) = h\,\Delta \theta \,\mbox{,}
+\ee
+where $h$ is the heat transfer coefficient to be determined.  The potential temperatures at the wall and first gas phase cell center are $\theta_{\rm w}$ and $\theta_{\rm g}$, respectively.  A positive heat flux indicates an unstable boundary layer while a negative heat flux indicates a stable boundary layer.
+
+The key aspect of this model is that we require consistency between the surface heat flux, $\dot{q}''_{\rm w}$, and the wall stress obtained from the friction velocity, here denoted by $u_*$ to be consistent with the atmospheric literature ($u_* = u_\tau = \sqrt{\tau_w/\rho}$).  These quantities are linked via the Obukhov length, $L$.  The equations below for $L$, $u_*$, and $\dot{q}''_{\rm w}$ are solved simultaneously with $z=\Delta z/2$ being the distance of the first cell center away from the wall.  In practice, a simple Picard iteration usually converges to less than 1 \% error in three steps.
+
+\begin{equation}
+\label{eq:obukhov_length}
+L = -\frac{u_*^3 \theta_{\rm g}}{\kappa \,g\, \dot{q}''_{\rm w}}
+\end{equation}
+\begin{equation}
+\label{eq:ustar_abl_model}
+u_* = \frac{|u|\kappa}{\ln(z/z_0)-\Psi_M(z/L)}
+\end{equation}
+\begin{equation}
+\label{eq:q_abl_model}
+\dot{q}''_{\rm w} = \frac{\Delta \theta \,u_*\kappa}{\ln(z/z_0)-\Psi_H(z/L)}
+\end{equation}
+
+The stability corrections, $\Psi_M$ and $\Psi_H$, for momentum and heat flux, respectively, are given taken from Dyer~\cite{Dyer:1974}:
+\begin{eqnarray}
+   \Psi_{\rm M}\left(\frac{z}{L}\right) &=& \left\{ \begin{array}{c@{\quad:\quad}l} \displaystyle -5 \, \frac{z}{L} & L \ge 0 \\[.2in]  \displaystyle 2 \, \ln \left[\frac{1+\zeta}{2}\right] + \ln \left[\frac{1+\zeta^2}{2}\right]-2 \, \tan^{-1}(\zeta) + \frac{\pi}{2} & L<0 \end{array} \right.  \\[.2in]
+   \Psi_{\rm H}\left(\frac{z}{L}\right) &=& \left\{ \begin{array}{c@{\quad:\quad}l} \displaystyle -5 \, \frac{z}{L} & L \ge 0 \\[.2in]  \displaystyle 2 \, \ln \left[\frac{1+\zeta^2}{2}\right] & L<0 \quad \quad  \displaystyle \zeta=\left( 1 - \frac{16 \, z}{L} \right)^{1/4}  \end{array} \right.
+\end{eqnarray}
+
 \subsection{Wall Model Implementation}
-Once $u^+$ has been determined from the model profile, the stress may be obtained from (the definition of $u^+$)
+Once $u_\tau$ has been determined from the model profile, the stress may be obtained from
 \begin{equation}
 \label{eqn_wall_stress}
-\tau_w = \rho \left( \frac{u}{u^+} \right)^2
+\tau_w = \rho u_\tau^2
 \end{equation}
 Generally, this requires an iterative procedure since $\tau_w$ is needed to define $\delta_\nu$ and hence $y^+$.  The strategy employed in FDS is to first compute $\tau_w$ as if the flow is locally laminar (DNS), and if the calculation is an LES the laminar value is used as an initial guess.  Testing has shown that three iterations is sufficient to converge the residual error in the profile model to 1\%.
 
