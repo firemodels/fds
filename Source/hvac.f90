@@ -171,7 +171,7 @@ COUNT_HVAC_LOOP: DO
          N_DUCTNODES = N_DUCTNODES + 2
       CASE DEFAULT
          WRITE(MESSAGE,'(A,I5,A,I5)') &
-            'ERROR: Invalid tyPE_ID provided for HVAC line number ',N_HVAC_READ+1,', input line number',INPUT_FILE_LINE_NUMBER
+            'ERROR: Invalid TYPE_ID provided for HVAC line number ',N_HVAC_READ,', input line number',INPUT_FILE_LINE_NUMBER
          CALL SHUTDOWN(MESSAGE); RETURN     
    END SELECT
 ENDDO COUNT_HVAC_LOOP
