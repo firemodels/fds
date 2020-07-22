@@ -7184,6 +7184,12 @@ V_g &= + \frac{1}{\rho f_c} \frac{\partial \bar{p}}{\partial x}
 If the geostrophic wind speed is known, it can be entered on the {\ct WIND} line via {\ct GEOSTROPHIC\_WIND(1:2)} = $(U_g, V_g)$.  Notice that specification of the wind in $x$ implies a mean pressure gradient in $y$ and vice versa.  When a geostropic wind is specified, FDS converts this value to the implied {\ct FORCE\_VECTOR} according to Eq.~(\ref{eq:geostrophic_wind}).  To achieve the specified geostrophic wind aloft, you must also have the Coriolis force turned on (see Sec.~\ref{info:coriolis_force}).  Since the geostrophic wind is equivalent to applying {\ct FORCE\_VECTOR}, you may also apply a time ramp (see Sec.~\ref{info:force_vector}).
 
 
+\subsection{Deardorff Potential Temperature Correction}
+\label{info:potential_temperature_correction}
+
+The turbulent transport of heat in the atmosphere is greatly affected by the local stability condition.  In his 1980 paper \cite{Deardorff:1980}, Deardorff suggests a correction to the local turbulent viscosity to suppress turbulent transport in stable conditions.  To implement this correction in FDS, set {\ct POTENTIAL\_TEMPERATURE\_CORRECTION=T} on the {\ct WIND} line.  In this case, the local turbulent Prandtl number will be computed dynamically as discussed in \cite{Deardorff:1980}.  Details of the model are also discussed in the FDS Technical Guide \cite{FDS_Math_Guide}.
+
+
 \section{Wind Method 3: The ``Wall of Wind''}
 \label{info:wall_of_wind}
 
@@ -10325,17 +10331,18 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 %{\ct TOTAL MASS FLUX X} & $\overline{\rho Y_\alpha} u + \rho D_\alpha \partial Y_\alpha/\partial x$ & kg/s/m$^2$     & D,I,P,S      \\ \hline
 %{\ct TOTAL MASS FLUX Y} & $\overline{\rho Y_\alpha} v + \rho D_\alpha \partial Y_\alpha/\partial y$ & kg/s/m$^2$     & D,I,P,S      \\ \hline
 %{\ct TOTAL MASS FLUX Z} & $\overline{\rho Y_\alpha} w + \rho D_\alpha \partial Y_\alpha/\partial z$ & kg/s/m$^2$     & D,I,P,S      \\ \hline
-{\ct U MEAN FORCING}                            & Section~\ref{info:SPONGE_CELLS}                   &  m/s           & D            \\ \hline
-{\ct V MEAN FORCING}                            & Section~\ref{info:SPONGE_CELLS}                   &  m/s           & D            \\ \hline
-{\ct W MEAN FORCING}                            & Section~\ref{info:SPONGE_CELLS}                   &  m/s           & D            \\ \hline
+{\ct TURBULENT PRANDTL NUMBER}$^7$              & $\nu_t/\alpha_t$                                  &                & D,I,P,S      \\ \hline
+{\ct U MEAN FORCING}                            & Section~\ref{info:SPONGE_CELLS}                   & m/s            & D            \\ \hline
+{\ct V MEAN FORCING}                            & Section~\ref{info:SPONGE_CELLS}                   & m/s            & D            \\ \hline
 {\ct VELOCITY ERROR}                            & Section~\ref{info:PRES}                           &                & B            \\ \hline
-{\ct VISCOUS STRESS WALL}                       & Section~\ref{info:distributed_forces}        &    Pa       &  B,D        \\ \hline
+{\ct VISCOUS STRESS WALL}                       & Section~\ref{info:distributed_forces}             & Pa             & B,D          \\ \hline
 {\ct VISCOUS WALL UNITS}                        & Section~\ref{info:yplus}                          &                & B,D          \\ \hline
 {\ct VN}                                        & Section~\ref{info:TIMING}                         &                & D,I,P,S      \\ \hline
 {\ct VN MAX}                                    & Section~\ref{info:TIMING}                         &                & D            \\ \hline
 {\ct VORTICITY X}                               & $\partial w/\partial y - \partial v/\partial z$   & 1/s            & D,I,P,S      \\ \hline
 {\ct VORTICITY Y}                               & $\partial u/\partial z - \partial w/\partial x$   & 1/s            & D,I,P,S      \\ \hline
 {\ct VORTICITY Z}                               & $\partial v/\partial x - \partial u/\partial y$   & 1/s            & D,I,P,S      \\ \hline
+{\ct W MEAN FORCING}                            & Section~\ref{info:SPONGE_CELLS}                   &  m/s           & D            \\ \hline
 %{\ct WALL CELL BOUNDARY TYPE}                   & Index of {\ct WC\%BOUNDARY\_TYPE} for debug       &                & B            \\ \hline
 %{\ct WALL CELL THERMAL BOUNDARY TYPE}           & Index of {\ct SF\%THERMAL\_BC\_INDEX} for debug   &                & B            \\ \hline
 {\ct WALL ENTHALPY}                             & $\int \rho_s c_s T \,\d V_s$                      & kJ             & B,D          \\ \hline
@@ -10351,7 +10358,8 @@ $^2$                 \> Requires the specification of a particle name using {\ct
 $^3$                 \> Requires specification of an additional scalar using {\ct QUANTITY2}. \\
 $^4$                 \> Allows for an optional {\ct MATL\_ID}. \\
 $^5$                 \> Allows for an optional {\ct REAC\_ID}.  Default is Reaction 1. \\
-$^6$                 \> Requires {\ct REAC\_ID}.
+$^6$                 \> Requires {\ct REAC\_ID}. \\
+$^7$                 \> Requires {\ct POTENTIAL\_TEMPERATURE\_CORRECTION=T} on {\ct WIND}.
 \end{tabbing}
 
 
@@ -12167,6 +12175,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct L}                                         & Real          & Section~\ref{info:WIND}                       & m             & 0                 \\ \hline
 {\ct LAPSE\_RATE}                               & Real          & Section~\ref{info:stratification}             & $^\circ$C/m   & 0                 \\ \hline
 {\ct LATITUDE}                                  & Real          & Section~\ref{info:coriolis_force}             & degrees       &                   \\ \hline
+{\ct POTENTIAL\_TEMPERATURE\_CORRECTION}        & Logical       & Section~\ref{info:potential_temperature_correction} &         & {\ct .FALSE.}     \\ \hline
 {\ct RAMP\_DIRECTION}                           & Character     & Section~\ref{info:WIND}                       &               &                   \\ \hline
 {\ct RAMP\_FVX\_T}                              & Character     & Section~\ref{info:force_vector}               &               &                   \\ \hline
 {\ct RAMP\_FVY\_T}                              & Character     & Section~\ref{info:force_vector}               &               &                   \\ \hline
@@ -12190,7 +12199,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct Z\_REF}                                    & Real          & Section~\ref{info:WIND}                       & m             & 2.                \\ \hline
 \end{longtable}
 
-% Undocumented: POTENTIAL_TEMPERATURE_CORRECTION (RJM), USE_ATMOSPHERIC_INTERPOLATION (RJM)
+% Undocumented: USE_ATMOSPHERIC_INTERPOLATION (RJM)
 
 \vspace{\baselineskip}
 
