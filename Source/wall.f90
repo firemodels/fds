@@ -3159,7 +3159,11 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
                   ENDDO T_S
                   C_S = H_S/T_NODE
                   ONE_D%TMP(I) = T_NODE + (H_NODE - H_S)/C_S
-                  IF (ABS(ONE_D%TMP(I) - T_NODE) < 0.0001_EB .OR. ITER>20) EXIT T_SEARCH
+                  IF (ABS(ONE_D%TMP(I) - T_NODE) < 0.0001_EB) EXIT T_SEARCH
+                  IF (ITER > 20) THEN
+                     ONE_D%TMP(I) = 0.5_EB*(ONE_D%TMP(I)+T_NODE)
+                     EXIT T_SEARCH
+                  ENDIF
                   T_NODE = ONE_D%TMP(I)
                ENDDO T_SEARCH
             ELSE
