@@ -1503,7 +1503,7 @@ PARTICLE_LOOP: DO IP=1,NLP
                LP%X=X_OLD; LP%Y=Y_OLD; LP%Z=Z_OLD
                LP%U = VEL_VECTOR_1(1)*LPC%HORIZONTAL_VELOCITY
                LP%V = VEL_VECTOR_1(2)*LPC%HORIZONTAL_VELOCITY
-               LP%W = VEL_VECTOR_1(3)*LPC%HORIZONTAL_VELOCITY
+               LP%W = VEL_VECTOR_1(3)*LPC%VERTICAL_VELOCITY
                CYCLE PARTICLE_LOOP
             ELSE
                ! Search for cut-cell in the direction of -GVEC:
@@ -1538,7 +1538,7 @@ PARTICLE_LOOP: DO IP=1,NLP
                   VEL_VECTOR_1 = VEL_VECTOR_2/NORM2(VEL_VECTOR_2)
                   LP%U = VEL_VECTOR_1(1)*LPC%HORIZONTAL_VELOCITY
                   LP%V = VEL_VECTOR_1(2)*LPC%HORIZONTAL_VELOCITY
-                  LP%W = VEL_VECTOR_1(3)*LPC%HORIZONTAL_VELOCITY
+                  LP%W = VEL_VECTOR_1(3)*LPC%VERTICAL_VELOCITY
                ELSEIF (LP%ONE_D%IOR==0) THEN  CFACE_SLOPE ! surface is flat and particle has no direction, coming from gasphase,
                                                           ! particle is given random direction
                   CALL RANDOM_NUMBER(RN)
@@ -1548,7 +1548,7 @@ PARTICLE_LOOP: DO IP=1,NLP
                   VEL_VECTOR_1(KAXIS) = 0._EB
                   LP%U = VEL_VECTOR_1(IAXIS)*LPC%HORIZONTAL_VELOCITY
                   LP%V = VEL_VECTOR_1(JAXIS)*LPC%HORIZONTAL_VELOCITY
-                  LP%W = VEL_VECTOR_1(KAXIS)*LPC%HORIZONTAL_VELOCITY
+                  LP%W = VEL_VECTOR_1(KAXIS)*LPC%VERTICAL_VELOCITY
                ELSEIF (LP%CFACE_INDEX /= 0 .AND. ABS(LP%W)<TWO_EPSILON_EB) THEN CFACE_SLOPE
                   ! Particle moving in horizontal direction and assumed crossing into solid.
                   ! Bounce back on random direction, maintaining CFACE_INDEX:
@@ -1563,7 +1563,7 @@ PARTICLE_LOOP: DO IP=1,NLP
                      LP%X=X_OLD; LP%Y=Y_OLD; LP%Z=Z_OLD
                      LP%U = VEL_VECTOR_1(1)*LPC%HORIZONTAL_VELOCITY
                      LP%V = VEL_VECTOR_1(2)*LPC%HORIZONTAL_VELOCITY
-                     LP%W = VEL_VECTOR_1(3)*LPC%HORIZONTAL_VELOCITY
+                     LP%W = VEL_VECTOR_1(3)*LPC%VERTICAL_VELOCITY
                      CYCLE PARTICLE_LOOP
                   ENDIF
                ENDIF CFACE_SLOPE
