@@ -1414,12 +1414,12 @@ U_STAR = SQRT(TAU_W)                                ! friction velocity (m/s)
 Q_DOT_PP_S = MU_IN/RHO_IN*RPR*(TMP_S-TMP_G)/Z_AGL   ! heat flux at the surface (m/s * K)
 
 ABL_TYPE = NEUTRAL_ABL
+L = 1.E6_EB ! Obukhov length (m)
 IF (Q_DOT_PP_S<-EPS) THEN
    ABL_TYPE = STABLE_ABL
-   L = 10000._EB ! Obukhov length (m)
 ELSEIF (Q_DOT_PP_S>EPS) THEN
    ABL_TYPE = UNSTABLE_ABL
-   L = -10000._EB ! Obukhov length (m)
+   L = -1.E6_EB ! Obukhov length (m)
 ENDIF
 
 IF (ABS(U_TANG)<EPS) THEN
