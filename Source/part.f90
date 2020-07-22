@@ -1485,14 +1485,23 @@ PARTICLE_LOOP: DO IP=1,NLP
          CYCLE TIME_STEP_LOOP
       ENDIF
 
+      ! The next big loops are to determine if the particle or droplet has hit a solid surface.
+      ! HIT_SOLID indicates that it has.
+
+      HIT_SOLID = .FALSE.
+
       ! Determine if the particle is near a CFACE, and if so, change its trajectory
 
       CFACE_SEARCH: IF (CC_IBM) THEN
+
          INDCF = CCVAR(LP%ONE_D%IIG,LP%ONE_D%JJG,LP%ONE_D%KKG,IBM_IDCF)
+
          IF ( INDCF < 1 .AND. CCVAR(LP%ONE_D%IIG,LP%ONE_D%JJG,LP%ONE_D%KKG,IBM_CGSC)==IBM_SOLID) THEN
+
             ! Kinematics of a surface particle moving on Horizontal GEOM surface and passing to IBM_SOLID cell.
             ! Bounce back on random direction, maintaining CFACE_INDEX:
-            IF(LP%CFACE_INDEX /= 0 .AND. ABS(LP%W)<TWO_EPSILON_EB) THEN
+
+            IF (LP%CFACE_INDEX /= 0 .AND. ABS(LP%W)<TWO_EPSILON_EB) THEN
                CALL RANDOM_NUMBER(RN)
                DIST2_MIN = (1._EB-SIGN(1._EB,LP%V))*PI/2._EB
                IF(ABS(LP%U) > TWO_EPSILON_EB) DIST2_MIN = ATAN2(LP%V,LP%U)
@@ -1510,8 +1519,11 @@ PARTICLE_LOOP: DO IP=1,NLP
                DIND = MAXLOC(ABS(GVEC(1:3)),DIM=1); MADD(1:3,1:3) = -INT(SIGN(1._EB,GVEC(DIND)))*EYE3
                INDCF = CCVAR(LP%ONE_D%IIG+MADD(1,DIND),LP%ONE_D%JJG+MADD(2,DIND),LP%ONE_D%KKG+MADD(3,DIND),IBM_IDCF)
             ENDIF
+
          ENDIF
+
          INDCF_POS : IF ( INDCF > 0 ) THEN  ! Current grid cell has CFACEs
+
             DIST2_MIN = 1.E6_EB
             DO IFACE=1,CUT_FACE(INDCF)%NFACE  ! Loop through CFACEs and find the one closest to the particle
                ICF = CUT_FACE(INDCF)%CFACE_INDEX(IFACE)
@@ -1522,15 +1534,22 @@ PARTICLE_LOOP: DO IP=1,NLP
                ENDIF
             ENDDO
             ICF = ICF_MIN
+
             ! If the CFACE normal points up, force the particle to follow the contour. If the normal points down,
             ! put the particle back into the gas phase.
+
             P_VECTOR = (/LP%X-CFACE(ICF)%X,LP%Y-CFACE(ICF)%Y,LP%Z-CFACE(ICF)%Z/)
             TEST_POS = .FALSE.; IF(LP%CFACE_INDEX == 0) TEST_POS = DOT_PRODUCT(CFACE(ICF)%NVEC,P_VECTOR) > TWO_EPSILON_EB
+
             CFACE_ATTACH : IF (DOT_PRODUCT(CFACE(ICF)%NVEC,GVEC)>0._EB .OR. TEST_POS) THEN
+
                ! Normal points down or particle in gas phase. Let particle move freely:
+
                LP%CFACE_INDEX = 0
                LP%ONE_D%IOR = 0
+
             ELSE  CFACE_ATTACH ! normal points up; determine direction for particle to move
+
                CALL CROSS_PRODUCT(VEL_VECTOR_1,CFACE(ICF)%NVEC,GVEC)
                CALL CROSS_PRODUCT(VEL_VECTOR_2,VEL_VECTOR_1,CFACE(ICF)%NVEC)
                CFACE_SLOPE : IF (NORM2(VEL_VECTOR_2) > TWO_EPSILON_EB .AND. ABS(LP%W) > TWO_EPSILON_EB) THEN
@@ -1567,7 +1586,9 @@ PARTICLE_LOOP: DO IP=1,NLP
                      CYCLE PARTICLE_LOOP
                   ENDIF
                ENDIF CFACE_SLOPE
+
                ! If the particle is inside the solid, move it to the surface in the normal direction.
+
                PVEC_L = NORM2(P_VECTOR)
                IF (PVEC_L>TWO_EPSILON_EB) THEN
                   THETA = ACOS(DOT_PRODUCT(CFACE(ICF)%NVEC,P_VECTOR/PVEC_L))
@@ -1580,21 +1601,27 @@ PARTICLE_LOOP: DO IP=1,NLP
                ENDIF
                LP%CFACE_INDEX = ICF
                LP%ONE_D%IOR = 1
+               HIT_SOLID = .TRUE.
+
             ENDIF CFACE_ATTACH
             CYCLE PARTICLE_LOOP
+
          ELSEIF (CCVAR(LP%ONE_D%IIG,LP%ONE_D%JJG,LP%ONE_D%KKG,IBM_CGSC)/=IBM_GASPHASE) THEN INDCF_POS
+
             LP%ONE_D%IOR = 0
+
          ENDIF INDCF_POS
+
       ENDIF CFACE_SEARCH
 
       ! If the particle crosses a cell boundary, determine its new status and check if it has hit a solid.
 
-      CROSS_CELL_BOUNDARY: IF (IIG_OLD/=LP%ONE_D%IIG .OR. JJG_OLD/=LP%ONE_D%JJG .OR. KKG_OLD/=LP%ONE_D%KKG) THEN
+      WALL_SEARCH: IF (.NOT.HIT_SOLID .AND. LP%CFACE_INDEX==0 .AND. &
+                       IIG_OLD/=LP%ONE_D%IIG .OR. JJG_OLD/=LP%ONE_D%JJG .OR. KKG_OLD/=LP%ONE_D%KKG) THEN
 
          ! Calculate the STEP_FRACTION, which indicates the relative distance between the particles's old and new
          ! position where the particle hits a cell boundary.
 
-         HIT_SOLID = .FALSE.
          STEP_FRACTION = 1.1_EB
 
          IF (LP%ONE_D%IIG>IIG_OLD) STEP_FRACTION(-1) = (X(IIG_OLD)  -X_OLD)/(LP%X-X_OLD)
@@ -1653,42 +1680,9 @@ PARTICLE_LOOP: DO IP=1,NLP
             END SELECT
          ENDDO
 
-         ! Process the particle if it has hit a solid wall.
+         ! If the particle has hit a Cartesian solid, choose a new direction
 
          IF_HIT_SOLID: IF (HIT_SOLID) THEN
-
-            ! Remove the particle if it is not allowed on a surface
-
-            IF (.NOT.ALLOW_SURFACE_PARTICLES) THEN
-               LP%ONE_D%X(1) = 0.9_EB*LPC%KILL_RADIUS
-               CYCLE PARTICLE_LOOP
-            ENDIF
-
-            ! Add PARTICLE mass to accumulated liquid array if it has not already been counted (LP%SPLAT=F)
-
-            IF (ACCUMULATE_WATER .AND. .NOT.LP%SPLAT .AND. LPC%LIQUID_DROPLET) THEN
-               IF (LP%WALL_INDEX>0) THEN
-                  ONE_D => WALL(LP%WALL_INDEX)%ONE_D
-               ELSEIF (LP%CFACE_INDEX>0) THEN
-                  ONE_D => CFACE(LP%CFACE_INDEX)%ONE_D
-               ENDIF
-               IF (LP%WALL_INDEX>0 .OR. LP%CFACE_INDEX>0) THEN
-                  ONE_D%A_LP_MPUA(LPC%ARRAY_INDEX) = ONE_D%A_LP_MPUA(LPC%ARRAY_INDEX) + LP%PWT*LPC%FTPR*R_D**3/ONE_D%AREA
-                  LP%SPLAT = .TRUE.
-               ENDIF
-            ENDIF
-
-            ! Adjust the size of the PARTICLE and weighting factor
-
-            IF (LPC%LIQUID_DROPLET) THEN
-               R_D = MIN(0.5_EB*LPC%SURFACE_DIAMETER,LP%PWT**ONTH*R_D)
-               LP%PWT = LP%PWT*(R_D_0/R_D)**3
-               LP%ONE_D%X(1) = R_D
-               LP%ONE_D%LAYER_THICKNESS(1) = R_D
-               LP%MASS = FOTHPI*LP%ONE_D%MATL_COMP(1)%RHO(1)*R_D**3
-            ENDIF
-
-            ! Choose a direction for the PARTICLEs to move
 
             DIRECTION: SELECT CASE(LP%ONE_D%IOR)
                CASE (-2:-1,1:2) DIRECTION
@@ -1724,44 +1718,80 @@ PARTICLE_LOOP: DO IP=1,NLP
                   LP%W = 0._EB
             END SELECT DIRECTION
 
-            ! If the particle is solid, as opposed to a liquid droplet, do not make it stick to the wall.
-
-         !  IF (LPC%SOLID_PARTICLE) LP%ONE_D%IOR = 0
-
          ENDIF IF_HIT_SOLID
 
-      ENDIF CROSS_CELL_BOUNDARY
+      ENDIF WALL_SEARCH
+
+      ! Process the particle if it has hit either a WALL or CFACE
+
+      IF (HIT_SOLID) THEN
+
+         ! Remove the particle if it is not allowed on a surface
+
+         IF (.NOT.ALLOW_SURFACE_PARTICLES) THEN
+            LP%ONE_D%X(1) = 0.9_EB*LPC%KILL_RADIUS
+            CYCLE PARTICLE_LOOP
+         ENDIF
+
+         ! Add PARTICLE mass to accumulated liquid array if it has not already been counted (LP%SPLAT=F)
+
+         IF (ACCUMULATE_WATER .AND. .NOT.LP%SPLAT .AND. LPC%LIQUID_DROPLET) THEN
+            IF (LP%WALL_INDEX>0) THEN
+               ONE_D => WALL(LP%WALL_INDEX)%ONE_D
+            ELSEIF (LP%CFACE_INDEX>0) THEN
+               ONE_D => CFACE(LP%CFACE_INDEX)%ONE_D
+            ENDIF
+            IF (LP%WALL_INDEX>0 .OR. LP%CFACE_INDEX>0) THEN
+               ONE_D%A_LP_MPUA(LPC%ARRAY_INDEX) = ONE_D%A_LP_MPUA(LPC%ARRAY_INDEX) + LP%PWT*LPC%FTPR*R_D**3/ONE_D%AREA
+               LP%SPLAT = .TRUE.
+            ENDIF
+         ENDIF
+
+         ! Adjust the size of the PARTICLE and weighting factor
+
+         IF (LPC%LIQUID_DROPLET) THEN
+            R_D = MIN(0.5_EB*LPC%SURFACE_DIAMETER,LP%PWT**ONTH*R_D)
+            LP%PWT = LP%PWT*(R_D_0/R_D)**3
+            LP%ONE_D%X(1) = R_D
+            LP%ONE_D%LAYER_THICKNESS(1) = R_D
+            LP%MASS = FOTHPI*LP%ONE_D%MATL_COMP(1)%RHO(1)*R_D**3
+         ENDIF
+
+      ENDIF
 
       ! If the droplet was attached to a solid WALL (LP%ONE_D%IOR/=0), but now it is not, change its course. If the droplet was
       ! dripping down a vertical surface (IOR=+-1,2), make it go under the solid and then move upward to (possibly) stick
       ! to the underside or drip off. If the droplet moves off an upward or downward facing horizontal surface (IOR=+-3), reverse
       ! its course and drop it down the side of the solid obstruction.
 
-      LP%WALL_INDEX = WALL_INDEX(IC_NEW,-LP%ONE_D%IOR)
+      IF (LP%CFACE_INDEX==0 .AND. LP%ONE_D%IOR/=0) THEN
 
-      IF (WALL(LP%WALL_INDEX)%BOUNDARY_TYPE/=SOLID_BOUNDARY) THEN
-         IF (LPC%LIQUID_DROPLET) THEN
-            SELECT CASE(LP%ONE_D%IOR)
-               CASE( 1)
-                  LP%X = LP%X - 0.2_EB*DX(LP%ONE_D%IIG)
-                  LP%W = -2._EB*LP%W
-               CASE(-1)
-                  LP%X = LP%X + 0.2_EB*DX(LP%ONE_D%IIG)
-                  LP%W = -2._EB*LP%W
+         LP%WALL_INDEX = WALL_INDEX(IC_NEW,-LP%ONE_D%IOR)
+
+         IF (WALL(LP%WALL_INDEX)%BOUNDARY_TYPE/=SOLID_BOUNDARY) THEN
+            IF (LPC%LIQUID_DROPLET) THEN
+               SELECT CASE(LP%ONE_D%IOR)
+                  CASE( 1)
+                     LP%X = LP%X - 0.2_EB*DX(LP%ONE_D%IIG)
+                     LP%W = -2._EB*LP%W
+                  CASE(-1)
+                     LP%X = LP%X + 0.2_EB*DX(LP%ONE_D%IIG)
+                     LP%W = -2._EB*LP%W
                   CASE( 2)
-                  LP%Y = LP%Y - 0.2_EB*DY(LP%ONE_D%JJG)
-                  LP%W = -2._EB*LP%W
-               CASE(-2)
-                  LP%Y = LP%Y + 0.2_EB*DY(LP%ONE_D%JJG)
-                  LP%W = -2._EB*LP%W
+                     LP%Y = LP%Y - 0.2_EB*DY(LP%ONE_D%JJG)
+                     LP%W = -2._EB*LP%W
+                  CASE(-2)
+                     LP%Y = LP%Y + 0.2_EB*DY(LP%ONE_D%JJG)
+                     LP%W = -2._EB*LP%W
                   CASE(-3,3)
-                  LP%U = -LP%U
-                  LP%V = -LP%V
-                  LP%Z =  LP%Z - 0.2_EB*DZ(LP%ONE_D%KKG)
-            END SELECT
+                     LP%U = -LP%U
+                     LP%V = -LP%V
+                     LP%Z =  LP%Z - 0.2_EB*DZ(LP%ONE_D%KKG)
+               END SELECT
+            ENDIF
+            LP%ONE_D%IOR = 0
+            LP%WALL_INDEX = 0
          ENDIF
-         LP%ONE_D%IOR = 0
-         LP%WALL_INDEX = 0
       ENDIF
 
    ENDDO TIME_STEP_LOOP
