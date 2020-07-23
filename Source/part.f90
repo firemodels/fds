@@ -1345,7 +1345,7 @@ REAL(EB) :: XI,YJ,ZK,R_D,R_D_0,X_OLD,Y_OLD,Z_OLD,X_TRY,Y_TRY,Z_TRY,THETA,THETA_R
             STEP_FRACTION_PREVIOUS,DELTA,PVEC_L
 LOGICAL :: HIT_SOLID,CC_IBM_GASPHASE
 INTEGER :: IP,IC_NEW,IIG_OLD,JJG_OLD,KKG_OLD,IIG_TRY,JJG_TRY,KKG_TRY,IW,IC_OLD,IOR_HIT,&
-           N_ITER,ITER,I_COORD,IC_TRY
+           N_ITER,ITER,I_COORD,IC_TRY,IOR_ORIGINAL
 TYPE (LAGRANGIAN_PARTICLE_TYPE), POINTER :: LP=>NULL()
 TYPE (LAGRANGIAN_PARTICLE_CLASS_TYPE), POINTER :: LPC=>NULL()
 TYPE (SURFACE_TYPE), POINTER :: SF
@@ -1397,6 +1397,10 @@ PARTICLE_LOOP: DO IP=1,NLP
    LP%ACCEL_Y = 0._EB
    LP%ACCEL_Z = 0._EB
 
+   ! Save value of IOR to determine if the particle hit any surface during the time step
+
+   IOR_ORIGINAL = LP%ONE_D%IOR
+
    ! Sub-timesteps
 
    TIME_STEP_LOOP: DO ITER=1,N_ITER
@@ -1410,12 +1414,12 @@ PARTICLE_LOOP: DO IP=1,NLP
       ELSEIF (LPC%MASSLESS_TRACER) THEN
          R_D = 0._EB
       ELSEIF (LPC%MASSLESS_TARGET) THEN
-         CYCLE PARTICLE_LOOP
+         EXIT TIME_STEP_LOOP
       ENDIF
 
       ! Throw out particles that have run out of mass.
 
-      IF (.NOT.LPC%MASSLESS_TRACER .AND. R_D<LPC%KILL_RADIUS) CYCLE PARTICLE_LOOP
+      IF (.NOT.LPC%MASSLESS_TRACER .AND. R_D<LPC%KILL_RADIUS) EXIT TIME_STEP_LOOP
 
       ! Save original particle radius.
 
@@ -1435,7 +1439,7 @@ PARTICLE_LOOP: DO IP=1,NLP
 
       IF ((SOLID(IC_OLD) .OR. EXTERIOR(IC_OLD)) .AND. .NOT. LP%PATH_PARTICLE ) THEN
          LP%X = 1.E6_EB
-         CYCLE PARTICLE_LOOP
+         EXIT TIME_STEP_LOOP
       ENDIF
 
       ! Move the particle one sub-time-step, (X_OLD,Y_OLD,Z_OLD) --> (LP%X,LP%Y,LP%Z)
@@ -1450,7 +1454,7 @@ PARTICLE_LOOP: DO IP=1,NLP
 
          ! If the particle is massless or does not move, go on to the next particle
 
-         IF (LPC%MASSLESS_TRACER .OR. LP%PWT<=TWO_EPSILON_EB .OR. (LPC%STATIC .AND. .NOT.LP%EMBER)) CYCLE PARTICLE_LOOP
+         IF (LPC%MASSLESS_TRACER .OR. LP%PWT<=TWO_EPSILON_EB .OR. (LPC%STATIC .AND. .NOT.LP%EMBER)) EXIT TIME_STEP_LOOP
 
       ENDIF SOLID_GAS_MOVE
 
@@ -1464,7 +1468,7 @@ PARTICLE_LOOP: DO IP=1,NLP
                                                         LP%PWT*LPC%FTPR*R_D**3/WALL(IW)%ONE_D%AREA
             LP%SPLAT = .TRUE.
          ENDIF
-         CYCLE PARTICLE_LOOP
+         EXIT TIME_STEP_LOOP
       ENDIF
 
       ! Determine the cell indices of the new particle location.
@@ -1513,7 +1517,7 @@ PARTICLE_LOOP: DO IP=1,NLP
                LP%U = VEL_VECTOR_1(1)*LPC%HORIZONTAL_VELOCITY
                LP%V = VEL_VECTOR_1(2)*LPC%HORIZONTAL_VELOCITY
                LP%W = VEL_VECTOR_1(3)*LPC%VERTICAL_VELOCITY
-               CYCLE PARTICLE_LOOP
+               EXIT TIME_STEP_LOOP
             ELSE
                ! Search for cut-cell in the direction of -GVEC:
                DIND = MAXLOC(ABS(GVEC(1:3)),DIM=1); MADD(1:3,1:3) = -INT(SIGN(1._EB,GVEC(DIND)))*EYE3
@@ -1583,7 +1587,7 @@ PARTICLE_LOOP: DO IP=1,NLP
                      LP%U = VEL_VECTOR_1(1)*LPC%HORIZONTAL_VELOCITY
                      LP%V = VEL_VECTOR_1(2)*LPC%HORIZONTAL_VELOCITY
                      LP%W = VEL_VECTOR_1(3)*LPC%VERTICAL_VELOCITY
-                     CYCLE PARTICLE_LOOP
+                     EXIT TIME_STEP_LOOP
                   ENDIF
                ENDIF CFACE_SLOPE
 
@@ -1604,7 +1608,6 @@ PARTICLE_LOOP: DO IP=1,NLP
                HIT_SOLID = .TRUE.
 
             ENDIF CFACE_ATTACH
-            CYCLE PARTICLE_LOOP
 
          ELSEIF (CCVAR(LP%ONE_D%IIG,LP%ONE_D%JJG,LP%ONE_D%KKG,IBM_CGSC)/=IBM_GASPHASE) THEN INDCF_POS
 
@@ -1640,6 +1643,8 @@ PARTICLE_LOOP: DO IP=1,NLP
          IIG_TRY = IIG_OLD
          JJG_TRY = JJG_OLD
          KKG_TRY = KKG_OLD
+         IW = 0
+
          DO I_COORD=1,3
             IOR_HIT = MINLOC(STEP_FRACTION,DIM=1,MASK=STEP_FRACTION>STEP_FRACTION_PREVIOUS) - 4
             IF (STEP_FRACTION(IOR_HIT)>1._EB) EXIT
@@ -1682,14 +1687,13 @@ PARTICLE_LOOP: DO IP=1,NLP
 
          ! If the particle has hit a Cartesian solid, choose a new direction
 
-         IF_HIT_SOLID: IF (HIT_SOLID) THEN
+         IF_HIT_SOLID: IF (HIT_SOLID .AND. IW>0) THEN
 
             DIRECTION: SELECT CASE(LP%ONE_D%IOR)
                CASE (-2:-1,1:2) DIRECTION
                   LP%U = 0._EB
                   LP%V = 0._EB
                   IF (LPC%LIQUID_DROPLET) LP%W = -LPC%VERTICAL_VELOCITY
-                  LP%SPLAT = .FALSE.
                CASE (-3) DIRECTION
                   IF (LPC%SOLID_PARTICLE) THEN
                      LP%ONE_D%IOR = 0
@@ -1730,7 +1734,7 @@ PARTICLE_LOOP: DO IP=1,NLP
 
          IF (.NOT.ALLOW_SURFACE_PARTICLES) THEN
             LP%ONE_D%X(1) = 0.9_EB*LPC%KILL_RADIUS
-            CYCLE PARTICLE_LOOP
+            EXIT TIME_STEP_LOOP
          ENDIF
 
          ! Add PARTICLE mass to accumulated liquid array if it has not already been counted (LP%SPLAT=F)
@@ -1773,19 +1777,19 @@ PARTICLE_LOOP: DO IP=1,NLP
                SELECT CASE(LP%ONE_D%IOR)
                   CASE( 1)
                      LP%X = LP%X - 0.2_EB*DX(LP%ONE_D%IIG)
-                     LP%W = -2._EB*LP%W
+                     LP%W = SQRT(2._EB*GRAV*DZ(LP%ONE_D%KKG))
                   CASE(-1)
                      LP%X = LP%X + 0.2_EB*DX(LP%ONE_D%IIG)
-                     LP%W = -2._EB*LP%W
+                     LP%W = SQRT(2._EB*GRAV*DZ(LP%ONE_D%KKG))
                   CASE( 2)
                      LP%Y = LP%Y - 0.2_EB*DY(LP%ONE_D%JJG)
-                     LP%W = -2._EB*LP%W
+                     LP%W = SQRT(2._EB*GRAV*DZ(LP%ONE_D%KKG))
                   CASE(-2)
                      LP%Y = LP%Y + 0.2_EB*DY(LP%ONE_D%JJG)
-                     LP%W = -2._EB*LP%W
+                     LP%W = SQRT(2._EB*GRAV*DZ(LP%ONE_D%KKG))
                   CASE(-3,3)
-                     LP%U = -LP%U
-                     LP%V = -LP%V
+                     LP%U = -2._EB*LP%U
+                     LP%V = -2._EB*LP%V
                      LP%Z =  LP%Z - 0.2_EB*DZ(LP%ONE_D%KKG)
                END SELECT
             ENDIF
@@ -1795,6 +1799,8 @@ PARTICLE_LOOP: DO IP=1,NLP
       ENDIF
 
    ENDDO TIME_STEP_LOOP
+
+   IF (LP%ONE_D%IOR==0 .AND. IOR_ORIGINAL==0) LP%SPLAT = .FALSE.
 
 ENDDO PARTICLE_LOOP
 
