@@ -106,7 +106,6 @@ function usage {
   echo "      This options adds export I_MPI_FABRICS=shm:tcp to the run script"
   echo " -f repository root - name and location of repository where FDS is located"
   echo "    [default: $FDSROOT]"
-  echo " -F - add FI_PROVIDER=sockets to the run script"
   echo " -i use installed fds"
   echo " -I use Intel MPI version of fds"
   echo " -j prefix - specify a job prefix"
@@ -220,7 +219,6 @@ vtuneresdir=
 vtuneargs=
 use_config=""
 EMAIL=
-FIPROVIDER=
 
 # determine which resource manager is running (or none)
 
@@ -281,7 +279,7 @@ commandline=`echo $* | sed 's/-V//' | sed 's/-v//'`
 
 #*** read in parameters from command line
 
-while getopts 'Aa:b:c:Cd:D:e:Ef:FhHiIj:Lm:Mn:No:O:p:Pq:rsStT:vVw:x:' OPTION
+while getopts 'Aa:b:c:Cd:D:e:Ef:hHiIj:Lm:Mn:No:O:p:Pq:rsStT:vVw:x:' OPTION
 do
 case $OPTION  in
   A) # used by timing scripts to identify benchmark cases
@@ -314,9 +312,6 @@ case $OPTION  in
    ;;
   f)
    FDSROOT="$OPTARG"
-   ;;
-  F)
-   FIPROVIDER=1
    ;;
   h)
    usage
@@ -917,12 +912,6 @@ fi
 if [ "$TCP" != "" ]; then
   cat << EOF >> $scriptfile
 export I_MPI_FABRICS=shm:tcp
-EOF
-fi
-
-if [ "$FIPROVIDER" != "" ]; then
-  cat << EOF >> $scriptfile
-export FI_PROVIDER=sockets
 EOF
 fi
 
