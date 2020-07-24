@@ -1352,7 +1352,7 @@ TYPE (SURFACE_TYPE), POINTER :: SF
 TYPE(ONE_D_M_AND_E_XFER_TYPE), POINTER :: ONE_D
 REAL(EB), POINTER, DIMENSION(:,:,:) :: NDPC=>NULL()
 REAL(EB), PARAMETER :: ONTHHALF=0.5_EB**ONTH, B_1=1.7321_EB
-LOGICAL :: TEST_POS
+LOGICAL :: TEST_POS, BOUNCE_CF
 INTEGER :: DIND, MADD(3,3)
 INTEGER, PARAMETER :: EYE3(1:3,1:3)=RESHAPE( (/1,0,0, 0,1,0, 0,0,1 /), (/3,3/) )
 
@@ -1499,6 +1499,7 @@ PARTICLE_LOOP: DO IP=1,NLP
       CFACE_SEARCH: IF (CC_IBM) THEN
 
          INDCF = CCVAR(LP%ONE_D%IIG,LP%ONE_D%JJG,LP%ONE_D%KKG,IBM_IDCF)
+         BOUNCE_CF = .TRUE.
 
          IF ( INDCF < 1 .AND. CCVAR(LP%ONE_D%IIG,LP%ONE_D%JJG,LP%ONE_D%KKG,IBM_CGSC)==IBM_SOLID) THEN
 
@@ -1517,7 +1518,7 @@ PARTICLE_LOOP: DO IP=1,NLP
                LP%U = VEL_VECTOR_1(1)*LPC%HORIZONTAL_VELOCITY
                LP%V = VEL_VECTOR_1(2)*LPC%HORIZONTAL_VELOCITY
                LP%W = VEL_VECTOR_1(3)*LPC%VERTICAL_VELOCITY
-               EXIT TIME_STEP_LOOP
+               BOUNCE_CF = .FALSE.
             ELSE
                ! Search for cut-cell in the direction of -GVEC:
                DIND = MAXLOC(ABS(GVEC(1:3)),DIM=1); MADD(1:3,1:3) = -INT(SIGN(1._EB,GVEC(DIND)))*EYE3
@@ -1597,7 +1598,7 @@ PARTICLE_LOOP: DO IP=1,NLP
                IF (PVEC_L>TWO_EPSILON_EB) THEN
                   THETA = ACOS(DOT_PRODUCT(CFACE(ICF)%NVEC,P_VECTOR/PVEC_L))
                   IF (THETA>PIO2) THEN
-                     DELTA = PVEC_L*SIN(THETA-0.5_EB*PI)
+                     DELTA = PVEC_L*SIN(THETA-0.5_EB*PI)+TWO_EPSILON_EB
                      LP%X = LP%X + DELTA*CFACE(ICF)%NVEC(1)
                      LP%Y = LP%Y + DELTA*CFACE(ICF)%NVEC(2)
                      LP%Z = LP%Z + DELTA*CFACE(ICF)%NVEC(3)
@@ -1609,7 +1610,7 @@ PARTICLE_LOOP: DO IP=1,NLP
 
             ENDIF CFACE_ATTACH
 
-         ELSEIF (CCVAR(LP%ONE_D%IIG,LP%ONE_D%JJG,LP%ONE_D%KKG,IBM_CGSC)/=IBM_GASPHASE) THEN INDCF_POS
+         ELSEIF (CCVAR(LP%ONE_D%IIG,LP%ONE_D%JJG,LP%ONE_D%KKG,IBM_CGSC)/=IBM_GASPHASE .AND. BOUNCE_CF) THEN INDCF_POS
 
             LP%ONE_D%IOR = 0
 
@@ -2221,7 +2222,7 @@ USE OUTPUT_DATA, ONLY: M_DOT,Q_DOT
 REAL(EB), INTENT(IN) :: T,DT
 INTEGER, INTENT(IN) :: NM
 
-REAL(EB), POINTER, DIMENSION(:,:,:) :: DROP_DEN=>NULL() 
+REAL(EB), POINTER, DIMENSION(:,:,:) :: DROP_DEN=>NULL()
 !< Average particle density in a grid cell (kg/m3) used in updating AVG_DROP_DEN
 REAL(EB), POINTER, DIMENSION(:,:,:) :: DROP_RAD=>NULL()
 !< Average particle radius in a grid cell (m) used in updating AVG_DROP_RAD
@@ -2304,7 +2305,7 @@ REAL(EB) :: Y_DROP !< Equilibrium vapor mass fraction at the particle temperatur
 REAL(EB) :: Y_COND !< Fraction of mass associated with any condensed vapor of the particle species
 REAL(EB) :: Y_GAS !< Vapor fraction of the particle species
 REAL(EB) :: Y_GAS_NEW !< End of sub time step vapor fraction of the particle species
-REAL(EB) :: X_EQUIL !< Equilibrium vapor mole fraction  
+REAL(EB) :: X_EQUIL !< Equilibrium vapor mole fraction
 REAL(EB) :: Y_EQUIL !< Equilibrium vapor mass fraction
 REAL(EB) :: U2 !< Relative u-velocity (m/s)
 REAL(EB) :: V2 !< Relative v-velocity (m/s)
@@ -2337,7 +2338,7 @@ REAL(EB) :: MCBAR !< Particle mass time particle specific heat (J/K)
 REAL(EB) :: NU_LIQUID !< Kinematic viscosity of the particle species (m2/s)
 REAL(EB) :: B_NUMBER !< Particle B number
 REAL(EB) :: AGHRHO !< Collection of terms used in contstructing A_COL, B_COL, C_COL, and D_COL
-REAL(EB) :: DTGOG !< Collection of terms used in contstructing A_COL, B_COL, C_COL, and D_COL 
+REAL(EB) :: DTGOG !< Collection of terms used in contstructing A_COL, B_COL, C_COL, and D_COL
 REAL(EB) :: DTGOP !< Collection of terms used in contstructing A_COL, B_COL, C_COL, and D_COL
 REAL(EB) :: DTWOW !< Collection of terms used in contstructing A_COL, B_COL, C_COL, and D_COL
 REAL(EB) :: DTWOP !< Collection of terms used in contstructing A_COL, B_COL, C_COL, and D_COL
@@ -3150,7 +3151,7 @@ SUM_PART_QUANTITIES: IF (N_LP_ARRAY_INDICES > 0) THEN
             ENDIF
 
          ENDDO PARTICLE_LOOP_3
-         
+
          DO IW = 1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
             ONE_D => WALL(IW)%ONE_D
             ONE_D%LP_TEMP(LPC%ARRAY_INDEX) = ONE_D%LP_TEMP(LPC%ARRAY_INDEX)/(ONE_D%WORK2+TWO_EPSILON_EB)
