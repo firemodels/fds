@@ -4705,7 +4705,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
       ! Here are some hacky initializations:
       ! Set TMP_F to ambient in under laying cartesian cell.
-      CFA%ONE_D%TMP_F = TMP_0(CUT_FACE(IND1)%IJK(KAXIS))
+      CFA%ONE_D%TMP_F = SURFACE(CFA%SURF_INDEX)%TMP_FRONT
       CFA%ONE_D%TMP_G = TMP_0(CUT_FACE(IND1)%IJK(KAXIS))
       CFA%ONE_D%RHO_F = CUT_CELL(ICC)%RHO(JCC)
       CFA%ONE_D%RHO_G = CUT_CELL(ICC)%RHO(JCC)
