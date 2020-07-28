@@ -1444,7 +1444,7 @@ PARTICLE_LOOP: DO IP=1,NLP
 
       ! Move the particle one sub-time-step, (X_OLD,Y_OLD,Z_OLD) --> (LP%X,LP%Y,LP%Z)
 
-      SOLID_GAS_MOVE: IF (LP%ONE_D%IOR/=0 .AND. LPC%LIQUID_DROPLET) THEN
+      SOLID_GAS_MOVE: IF (LP%ONE_D%IOR/=0 .AND. LPC%ADHERE_TO_SOLID) THEN
 
          CALL MOVE_ON_SOLID
 
@@ -1694,7 +1694,7 @@ PARTICLE_LOOP: DO IP=1,NLP
                CASE (-2:-1,1:2) DIRECTION
                   LP%U = 0._EB
                   LP%V = 0._EB
-                  IF (LPC%LIQUID_DROPLET) LP%W = -LPC%VERTICAL_VELOCITY
+                  IF (LPC%ADHERE_TO_SOLID) LP%W = -LPC%VERTICAL_VELOCITY
                CASE (-3) DIRECTION
                   IF (LPC%SOLID_PARTICLE) THEN
                      LP%ONE_D%IOR = 0
@@ -1711,7 +1711,7 @@ PARTICLE_LOOP: DO IP=1,NLP
                      LP%W = 0._EB
                   ENDIF
                CASE (3) DIRECTION
-                  IF (LPC%LIQUID_DROPLET) THEN
+                  IF (LPC%ADHERE_TO_SOLID) THEN
                      CALL RANDOM_NUMBER(RN)
                      THETA_RN = TWOPI*REAL(RN,EB)
                      LP%U = LPC%HORIZONTAL_VELOCITY*COS(THETA_RN)
@@ -1740,7 +1740,7 @@ PARTICLE_LOOP: DO IP=1,NLP
 
          ! Add PARTICLE mass to accumulated liquid array if it has not already been counted (LP%SPLAT=F)
 
-         IF (ACCUMULATE_WATER .AND. .NOT.LP%SPLAT .AND. LPC%LIQUID_DROPLET) THEN
+         IF (ACCUMULATE_WATER .AND. .NOT.LP%SPLAT .AND. LPC%ADHERE_TO_SOLID) THEN
             IF (LP%WALL_INDEX>0) THEN
                ONE_D => WALL(LP%WALL_INDEX)%ONE_D
             ELSEIF (LP%CFACE_INDEX>0) THEN
@@ -1774,7 +1774,7 @@ PARTICLE_LOOP: DO IP=1,NLP
          LP%WALL_INDEX = WALL_INDEX(IC_NEW,-LP%ONE_D%IOR)
 
          IF (WALL(LP%WALL_INDEX)%BOUNDARY_TYPE/=SOLID_BOUNDARY) THEN
-            IF (LPC%LIQUID_DROPLET) THEN
+            IF (LPC%ADHERE_TO_SOLID) THEN
                SELECT CASE(LP%ONE_D%IOR)
                   CASE( 1)
                      LP%X = LP%X - 0.2_EB*DX(LP%ONE_D%IIG)

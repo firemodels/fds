@@ -37,8 +37,8 @@ TYPE LAGRANGIAN_PARTICLE_CLASS_TYPE
    REAL(EB) :: KILL_RADIUS                !< Radius (m) below which particle is killed (removed)
    REAL(EB) :: TMP_INITIAL                !< Initial temperature (K) of the particles
    REAL(EB) :: SIGMA                      !< Parameter in Rosin-Rammler distribution
-   REAL(EB) :: VERTICAL_VELOCITY          !< Speed (m/s) of liquid droplet stuck to a vertical surface
-   REAL(EB) :: HORIZONTAL_VELOCITY        !< Speed (m/s) of liquid droplet stuck to a horizontal surface
+   REAL(EB) :: VERTICAL_VELOCITY          !< Vertical velocity component (m/s) of particle stuck to a solid surface
+   REAL(EB) :: HORIZONTAL_VELOCITY        !< Horizontal velocity component (m/s) of particle stuck to a solid surface
    REAL(EB) :: MASS_TRANSFER_COEFFICIENT        !< Mass transfer coefficient from gas to liquid droplet (kg/m2/s)
    REAL(EB) :: HEAT_TRANSFER_COEFFICIENT_GAS    !< Heat transfer coefficient from gas to liquid droplet (W/m2/K)
    REAL(EB) :: HEAT_TRANSFER_COEFFICIENT_SOLID  !< Heat transfer coefficient from solid surface to liquid droplet (W/m2/K)
@@ -118,6 +118,7 @@ TYPE LAGRANGIAN_PARTICLE_CLASS_TYPE
    LOGICAL :: SECOND_ORDER_PARTICLE_TRANSPORT=.FALSE. !< Flag indicating second-order accurate particle position update
    LOGICAL :: DUCT_PARTICLE=.FALSE.         !< Flag indicating if particles can pass through a duct
    LOGICAL :: EMBER_PARTICLE=.FALSE.        !< Flag indicating if particles can become flying embers
+   LOGICAL :: ADHERE_TO_SOLID=.FALSE.       !< Flag indicating if particles can stick to a solid
 
 END TYPE LAGRANGIAN_PARTICLE_CLASS_TYPE
 
