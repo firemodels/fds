@@ -1564,9 +1564,8 @@ PARTICLE_LOOP: DO IP=1,NLP
                            ! Select another CFACE in the cell:
                            DIST2_MIN = 1.E6_EB; ICF_MIN=0
                            DO IFACE=1,CUT_FACE(INDCF)%NFACE  ! Loop through CFACEs and find the one closest to the particle
-                              ! Cycle if ICF=CFACE_INDEX, or found CFACE is higher than CFACE_INDEX one.
+                              ! Cycle if ICF=CFACE_INDEX.
                               ICF = CUT_FACE(INDCF)%CFACE_INDEX(IFACE); IF(LP%CFACE_INDEX==ICF) CYCLE
-                              IF((CFACE(ICF)%Z>(CFACE(LP%CFACE_INDEX)%Z+TWO_EPSILON_EB))) CYCLE
                               DIST2 = (LP%X-CFACE(ICF)%X)**2 + (LP%Y-CFACE(ICF)%Y)**2 + (LP%Z-CFACE(ICF)%Z)**2
                               IF (DIST2<DIST2_MIN) THEN
                                  DIST2_MIN = DIST2
@@ -1575,6 +1574,8 @@ PARTICLE_LOOP: DO IP=1,NLP
                            ENDDO
                            IF (ICF_MIN/=0) THEN ! We found a CFACE either plane or side below CFACE_INDEX.
                               ICF = ICF_MIN
+                              ! Do not fix velocity if found CFACE is not at lower height than CFACE_INDEX one.
+                              IF((CFACE(ICF)%Z>(CFACE(LP%CFACE_INDEX)%Z-TWO_EPSILON_EB))) IN_CFACE = .TRUE.
                            ELSE ! CFACE not found, continue with CFACE_INDEX face.
                               ICF = LP%CFACE_INDEX
                               IN_CFACE = .TRUE.
