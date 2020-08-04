@@ -687,9 +687,6 @@ TYPE(CFACE_TYPE), POINTER :: CFA
 TYPE(ONE_D_M_AND_E_XFER_TYPE), POINTER :: ONE_D
 TYPE(SURFACE_TYPE), POINTER :: SF
 
-! No need to compute WALE model turbulent viscosity on cut-cell region.
-IF (SIM_MODE==DNS_MODE) RETURN
-
 TNOW = CURRENT_TIME()
 
 IF (PREDICTOR) THEN
@@ -706,61 +703,63 @@ ELSE
    ZZP  => ZZS
 ENDIF
 
-! Define velocities on gas cut-faces underlaying Cartesian faces.
-IF(.NOT.CC_VELOBC_FLAG) THEN
-   T_USED(14) = T_USED(14) + CURRENT_TIME() - TNOW
+! No need to compute WALE model turbulent viscosity on cut-cell region.
+LES_IF : IF (SIM_MODE/=DNS_MODE) THEN
+   ! Define velocities on gas cut-faces underlaying Cartesian faces.
+   IF(.NOT.CC_VELOBC_FLAG) THEN
+      T_USED(14) = T_USED(14) + CURRENT_TIME() - TNOW
 #ifdef TIME_CC_IBM
-   T_CC_USED(CCREGION_COMPUTE_VISCOSITY_TIME_INDEX) = T_CC_USED(CCREGION_COMPUTE_VISCOSITY_TIME_INDEX) + CURRENT_TIME() - TNOW
+      T_CC_USED(CCREGION_COMPUTE_VISCOSITY_TIME_INDEX) = T_CC_USED(CCREGION_COMPUTE_VISCOSITY_TIME_INDEX) + CURRENT_TIME() - TNOW
 #endif
-   CALL CCIBM_INTERP_FACE_VEL(DT,NM,.TRUE.) ! The flag is to test without interpolation to Cartesian faces,
-                                            ! This is because we want to dispose of cartesian face
-                                            ! interpolations.
-   TNOW = CURRENT_TIME()
-ENDIF
+      CALL CCIBM_INTERP_FACE_VEL(DT,NM,.TRUE.) ! The flag is to test without interpolation to Cartesian faces,
+                                               ! This is because we want to dispose of cartesian face
+                                               ! interpolations.
+      TNOW = CURRENT_TIME()
+   ENDIF
 
-! WALE model on cells belonging to cut-cell region:
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=1,IBAR
-          IF(SOLID(CELL_INDEX(I,J,K))) CYCLE
-          IF(CCVAR(I,J,K,IBM_CGSC)==IBM_SOLID) THEN
-             MU(I,J,K) = MU_DNS(I,J,K)
-             CYCLE
-          ENDIF
-          IF(.NOT.(CCVAR(I,J,K,IBM_CGSC)==IBM_CUTCFE .OR. CCVAR(I,J,K,IBM_UNKZ)>0)) CYCLE
+   ! WALE model on cells belonging to cut-cell region:
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+             IF(SOLID(CELL_INDEX(I,J,K))) CYCLE
+             IF(CCVAR(I,J,K,IBM_CGSC)==IBM_SOLID) THEN
+                MU(I,J,K) = MU_DNS(I,J,K)
+                CYCLE
+             ENDIF
+             IF(.NOT.(CCVAR(I,J,K,IBM_CGSC)==IBM_CUTCFE .OR. CCVAR(I,J,K,IBM_UNKZ)>0)) CYCLE
 
-          DELTA = LES_FILTER_WIDTH_FUNCTION(DX(I),DY(J),DZ(K))
-          ! compute velocity gradient tensor
-          DUDX = RDX(I)*(UU(I,J,K)-UU(I-1,J,K))
-          DVDY = RDY(J)*(VV(I,J,K)-VV(I,J-1,K))
-          DWDZ = RDZ(K)*(WW(I,J,K)-WW(I,J,K-1))
-          DUDY = 0.25_EB*RDY(J)*(UU(I,J+1,K)-UU(I,J-1,K)+UU(I-1,J+1,K)-UU(I-1,J-1,K))
-          DUDZ = 0.25_EB*RDZ(K)*(UU(I,J,K+1)-UU(I,J,K-1)+UU(I-1,J,K+1)-UU(I-1,J,K-1))
-          DVDX = 0.25_EB*RDX(I)*(VV(I+1,J,K)-VV(I-1,J,K)+VV(I+1,J-1,K)-VV(I-1,J-1,K))
-          DVDZ = 0.25_EB*RDZ(K)*(VV(I,J,K+1)-VV(I,J,K-1)+VV(I,J-1,K+1)-VV(I,J-1,K-1))
-          DWDX = 0.25_EB*RDX(I)*(WW(I+1,J,K)-WW(I-1,J,K)+WW(I+1,J,K-1)-WW(I-1,J,K-1))
-          DWDY = 0.25_EB*RDY(J)*(WW(I,J+1,K)-WW(I,J-1,K)+WW(I,J+1,K-1)-WW(I,J-1,K-1))
-          A_IJ(1,1)=DUDX; A_IJ(1,2)=DUDY; A_IJ(1,3)=DUDZ
-          A_IJ(2,1)=DVDX; A_IJ(2,2)=DVDY; A_IJ(2,3)=DVDZ
-          A_IJ(3,1)=DWDX; A_IJ(3,2)=DWDY; A_IJ(3,3)=DWDZ
+             DELTA = LES_FILTER_WIDTH_FUNCTION(DX(I),DY(J),DZ(K))
+             ! compute velocity gradient tensor
+             DUDX = RDX(I)*(UU(I,J,K)-UU(I-1,J,K))
+             DVDY = RDY(J)*(VV(I,J,K)-VV(I,J-1,K))
+             DWDZ = RDZ(K)*(WW(I,J,K)-WW(I,J,K-1))
+             DUDY = 0.25_EB*RDY(J)*(UU(I,J+1,K)-UU(I,J-1,K)+UU(I-1,J+1,K)-UU(I-1,J-1,K))
+             DUDZ = 0.25_EB*RDZ(K)*(UU(I,J,K+1)-UU(I,J,K-1)+UU(I-1,J,K+1)-UU(I-1,J,K-1))
+             DVDX = 0.25_EB*RDX(I)*(VV(I+1,J,K)-VV(I-1,J,K)+VV(I+1,J-1,K)-VV(I-1,J-1,K))
+             DVDZ = 0.25_EB*RDZ(K)*(VV(I,J,K+1)-VV(I,J,K-1)+VV(I,J-1,K+1)-VV(I,J-1,K-1))
+             DWDX = 0.25_EB*RDX(I)*(WW(I+1,J,K)-WW(I-1,J,K)+WW(I+1,J,K-1)-WW(I-1,J,K-1))
+             DWDY = 0.25_EB*RDY(J)*(WW(I,J+1,K)-WW(I,J-1,K)+WW(I,J+1,K-1)-WW(I,J-1,K-1))
+             A_IJ(1,1)=DUDX; A_IJ(1,2)=DUDY; A_IJ(1,3)=DUDZ
+             A_IJ(2,1)=DVDX; A_IJ(2,2)=DVDY; A_IJ(2,3)=DVDZ
+             A_IJ(3,1)=DWDX; A_IJ(3,2)=DWDY; A_IJ(3,3)=DWDZ
 
-          CALL WALE_VISCOSITY(NU_EDDY,A_IJ,DELTA)
+             CALL WALE_VISCOSITY(NU_EDDY,A_IJ,DELTA)
 
-          MU(I,J,K) = MU_DNS(I,J,K) + RHOP(I,J,K)*NU_EDDY
+             MU(I,J,K) = MU_DNS(I,J,K) + RHOP(I,J,K)*NU_EDDY
 
+         ENDDO
       ENDDO
    ENDDO
-ENDDO
 
-IF(.NOT.CC_VELOBC_FLAG) THEN
-   T_USED(14) = T_USED(14) + CURRENT_TIME() - TNOW
+   IF(.NOT.CC_VELOBC_FLAG) THEN
+      T_USED(14) = T_USED(14) + CURRENT_TIME() - TNOW
 #ifdef TIME_CC_IBM
-   T_CC_USED(CCREGION_COMPUTE_VISCOSITY_TIME_INDEX) = T_CC_USED(CCREGION_COMPUTE_VISCOSITY_TIME_INDEX) + CURRENT_TIME() - TNOW
+      T_CC_USED(CCREGION_COMPUTE_VISCOSITY_TIME_INDEX) = T_CC_USED(CCREGION_COMPUTE_VISCOSITY_TIME_INDEX) + CURRENT_TIME() - TNOW
 #endif
-   CALL CCIBM_INTERP_FACE_VEL(DT,NM,.FALSE.)
-   TNOW = CURRENT_TIME()
-ENDIF
-
+      CALL CCIBM_INTERP_FACE_VEL(DT,NM,.FALSE.)
+      TNOW = CURRENT_TIME()
+   ENDIF
+ENDIF LES_IF
 
 ! Now compute U_TAU and Y_PLUS on CFACES:
 DO ICF=1,N_CFACE_CELLS
