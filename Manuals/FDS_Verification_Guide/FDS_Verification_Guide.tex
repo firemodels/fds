@@ -2001,6 +2001,19 @@ The bottom-left and -right plots in Fig.~\ref{fig_ribbed_channel} show the RMS v
 
 \chapter{Atmospheric Flows}
 
+\section{Monin-Obukhov Similarity Profiles (\texorpdfstring{\textct{MO\_velocity\_profile}}{MO\_velocity\_profile})}
+\label{MO_velocity_profile_stable}
+\label{MO_velocity_profile_unstable}
+
+Atmospheric turbulence is affected by the stability of the boundary layer.  A stable layer (cool, heavy air at ground level) will suppress turbulence, while an unstable layer (warm, light air at ground level) will enhance turbulent mixing as buoyant plumes rise.  The theory governing these flows, Monin-Obukhov similarity theory, is discussed at some length in the FDS User Guide \cite{FDS_Users_Guide}.  Here we examine velocity profiles from a stable boundary layer and an unstable boundary layer.  When mean forcing is used for driving the wind field the Monin-Obukhov parameters determine the shape of the mean streamwise velocity profile.  These cases use a very tight {\ct DT\_MEAN\_FORCING\_2} of 0.1 s in order to drive the flow field directly to the specified profile, therefore comfirming the target profile is being computed correctly in FDS.
+
+\begin{figure}[ht]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/MO_velocity_profile_stable} &
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/MO_velocity_profile_unstable} \\
+   \end{tabular*}
+   \caption[Monin-Obukhov velocity profiles]{\label{fig_MO_velocity_profiles} Stable (left) and unstable (right) mean streamwise velocity profiles for specified Monin-Obukhov parameters on the {\ct WIND} line.}
+\end{figure}
 
 \section{Ekman Layers (\texorpdfstring{\textct{ekman\_}}{ekman\_})}
 
