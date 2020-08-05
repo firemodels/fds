@@ -26,15 +26,17 @@
       COLOR     = 'GRAY'
       THICKNESS = 0.04 /
 
-&REAC FUEL='WOOD FUEL VAPOR'
-      SOOT_YIELD = 0.02
-      O          = 2.44
-      C          = 4.41
-      H          = 6.34
+&REAC FUEL='WOOD FUEL VAPOR', SPEC_ID_NU='WOOD FUEL VAPOR','OXYGEN','CARBON DIOXIDE','WATER VAPOR','SOOT'
+      NU=-1.,-4.608157,4.247666,3.160981,0.180371
       RADIATIVE_FRACTION = 0.24
       HEAT_OF_COMBUSTION = 16360. /
 
-&SPEC ID='WATER VAPOR' /
+&SPEC ID='NITROGEN',        BACKGROUND=T /
+&SPEC ID='WOOD FUEL VAPOR', MASS_FRACTION_0=0.000000, FORMULA=C4.41O2.44H6.34 /
+&SPEC ID='OXYGEN',          MASS_FRACTION_0=0.230997 /
+&SPEC ID='CARBON DIOXIDE',  MASS_FRACTION_0=0.000591 /
+&SPEC ID='WATER VAPOR',     MASS_FRACTION_0=0.005941 /
+&SPEC ID='SOOT',            MASS_FRACTION_0=0.000000 /
 
 &SURF ID                   = 'Pine Needles'
       MATL_ID              = 'Dry Pine'
@@ -74,14 +76,14 @@
       CONDUCTIVITY       = 0.052
       SPECIFIC_HEAT_RAMP = 'cp_char'
       N_S                = 0.
-      NU_O2_CHAR              = 1.65
+      NU_O2_CHAR         = 1.65
       BETA_CHAR          = 0.2
       A                  = 215.
       E                  = 74800. 
       MATL_ID            = 'Ash'
       NU_MATL            = 0.11 
-      SPEC_ID            = 'PRODUCTS','AIR'
-      NU_SPEC            = 8.09,-7.2
+      SPEC_ID            = 'OXYGEN','CARBON DIOXIDE'
+      NU_SPEC            = -1.65,2.54
       HEAT_OF_REACTION   = -32000. /
 
 &MATL ID            = 'Ash'
