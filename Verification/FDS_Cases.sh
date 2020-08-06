@@ -22,8 +22,10 @@ $QFDS -d Aerosols soot_oxidation_wall.fds
 $QFDS -d Atmospheric_Effects lee_waves.fds
 $QFDS -d Atmospheric_Effects stack_effect.fds
 $QFDS -d Atmospheric_Effects lapse_rate.fds
-$QFDS -p  8 -d Atmospheric_Effects wind_example.fds
+$QFDS -p 8 -d Atmospheric_Effects wind_example.fds
 $QFDS -p 32 -n 8 -d Atmospheric_Effects wind_example_32.fds
+$QFDS -d Atmospheric_Effects MO_velocity_profile_stable.fds
+$QFDS -d Atmospheric_Effects MO_velocity_profile_unstable.fds
 
 $QFDS -d Complex_Geometry geom_extruded_poly.fds
 $QFDS -d Complex_Geometry geom_intersection.fds
