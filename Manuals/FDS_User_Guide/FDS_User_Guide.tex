@@ -7029,10 +7029,10 @@ In simulations where wind and atmospheric effects are of interest, you usually h
 
 &VENT MB='ZMIN', SURF_ID='GROUND' /
 &VENT MB='ZMAX', SURF_ID='OPEN' /
-&VENT PBY=..., SURF_ID='PERIODIC', WIND=.TRUE. /
-&VENT PBY=..., SURF_ID='PERIODIC', WIND=.TRUE. /
-&VENT PBX=..., SURF_ID='PERIODIC', WIND=.TRUE. /
-&VENT PBX=..., SURF_ID='PERIODIC', WIND=.TRUE. /
+&VENT PBY=..., SURF_ID='PERIODIC FLOW ONLY' /
+&VENT PBY=..., SURF_ID='PERIODIC FLOW ONLY' /
+&VENT PBX=..., SURF_ID='PERIODIC FLOW ONLY' /
+&VENT PBX=..., SURF_ID='PERIODIC FLOW ONLY' /
 \end{lstlisting}
 It is assumed here that the wind speed is taken at a height 2~m off the ground and the temperature is the specified ambient ({\ct TMPA}). If it is not, set {\ct Z\_REF} (m) and {\ct TMP\_REF} ($^\circ$C) accordingly. The wind {\ct DIRECTION} follows the usual meteorological convention---a northerly wind has direction of 0$^\circ$ and blows from north to south, or in the negative $y$ direction in the FDS coordinate system. An easterly wind has a direction of 90$^\circ$ and blows from east to west, or in the negative $x$ direction.
 
@@ -7040,7 +7040,7 @@ If you know the value of $u_*$ or $\theta_*$, you can input these on the {\ct WI
 
 You may assign material properties to the {\ct GROUND} if you like, but be aware that FDS assumes the ground to be ambient temperature ({\ct TMPA}) initially, and the temperature of the atmosphere either increases or decreases with height according to the stability condition. The top of the domain is set to be {\ct 'OPEN'}, meaning that even though the wind field is more or less parallel to it, there might be, for example, a hot plume that can rise out of the computational domain.
 
-The side boundaries of the domain can be set either to {\ct 'OPEN'} or {\ct 'PERIODIC'}. The former is the usual inflow/outflow condition; the latter assumes that the domain repeats itself endlessly in each direction. This is an important assumption because the turbulent atmospheric boundary layer that is modeled using Monin-Obukhov similarity theory is assumed to develop over distances far beyond the computational domain. The extra parameter on the {\ct VENT} line, {\ct WIND=.TRUE.}, directs FDS to mirror the basic meteorological conditions in all directions, but to not mirror smoke plumes, gas dispersion, etc., that you might create in your fire scenario. That is, you do not want a smoke plume that exits the eastern boundary of the domain to reappear instantly at the western boundary.
+The side boundaries of the domain can be set either to {\ct SURF\_ID='OPEN'}, {\ct 'PERIODIC'}, or {\ct 'PERIODIC FLOW ONLY'}. {\ct SURF\_ID='OPEN'} is the usual inflow/outflow condition for any case where the computational domain is open to an infinite ambient void. {\ct SURF\_ID='PERIODIC'} assumes that the domain repeats itself endlessly in each direction. This is an important assumption because the turbulent atmospheric boundary layer that is modeled using Monin-Obukhov similarity theory is assumed to develop over distances far beyond the computational domain. {\ct SURF\_ID='PERIODIC FLOW ONLY'} is the same as {\ct 'PERIODIC'} except that only the velocity field is periodic, but scalar quantities are not. That is, you do not want a smoke plume that exits the eastern boundary of the domain to reappear instantly at the western boundary, even though you still might want the velocity field to be periodic.
 
 \subsubsection{Example Wind Simulation}
 \label{wind_example}
@@ -12147,7 +12147,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct TRANSPARENCY}          & Real              & Section~\ref{info:colors}                                 &               &   1.0               \\ \hline
 {\ct UVW(3) }               & Real Array        & Section~\ref{info:HVAClouvers}                            &               &                     \\ \hline
 {\ct VEL\_RMS}              & Real              & Section~\ref{info:synthetic_turbulence}                   & m/s           & 0.                  \\ \hline
-{\ct WIND}                  & Logical           & Section~\ref{info:wind_general}                           &               &  {\ct .FALSE.}      \\ \hline
 {\ct XB(6) }                & Real Array        & Section~\ref{info:VENT_Basics}                            & m             &                     \\ \hline
 {\ct XYZ(3) }               & Real Array        & Section~\ref{info:spread}                                 & m             &                     \\ \hline
 \end{longtable}
