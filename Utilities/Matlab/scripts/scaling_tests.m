@@ -32,6 +32,10 @@ for j=1:n_cols
    end
 end
 
+if t(8,n_cols)>4/r(8) || t(8,n_cols)<1/r(8)
+    display(['Error: strong scaling test out of tolerance'])
+end
+
 figure
 set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
@@ -109,8 +113,12 @@ r = [1 2 4 8 16 32 64 128 192 288 432];
 [n_rows,n_cols] = size(M(1).data);
 
 for i=1:11
-   t(i) = M(1).data(1,17)/M(i).data(1,n_cols);
+   t(i) = M(1).data(1,n_cols)/M(i).data(1,n_cols);
    t2(i) = 1.;
+end
+
+if t(11)>1. || t(11)<0.5
+    display(['Error: weak scaling test out of tolerance'])
 end
 
 figure
