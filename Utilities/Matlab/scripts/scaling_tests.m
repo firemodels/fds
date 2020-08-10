@@ -23,11 +23,17 @@ M(8) = importdata([outdir,'strong_scaling_test_432_cpu.csv'],',',1);
 r = [1 8 32 64 96 192 288 432];
 r2 = [.1 8 32 64 96 192 432 1000];
 
-for j=1:16
+[n_rows,n_cols] = size(M(1).data);
+
+for j=1:n_cols
    for i=1:8
-      t(i,j) = M(i).data(1,j)/M(1).data(1,16);
+      t(i,j) = M(i).data(1,j)/M(1).data(1,n_cols);
       t2(i) = 1./r2(i);
    end
+end
+
+if t(8,n_cols)>4/r(8) || t(8,n_cols)<1/r(8)
+    display(['Error: strong scaling test out of tolerance'])
 end
 
 figure
@@ -45,7 +51,7 @@ H1(8) = loglog(r2,t2/64,'k:'); hold on
 H1(9) = loglog(r2,t2/128,'k:'); hold on
 H1(10) = loglog(r2,t2/256,'k:'); hold on
 
-H(1) = loglog(r,t(:,16),'k-o');
+H(1) = loglog(r,t(:,n_cols),'k-o');
 H(2) = loglog(r,t(:,3),'r-o');
 H(3) = loglog(r,t(:,4),'b-o');
 H(4) = loglog(r,t(:,5),'m-o');
@@ -104,9 +110,15 @@ M(11) = importdata([outdir,'weak_scaling_test_432_cpu.csv'],',',1);
 
 r = [1 2 4 8 16 32 64 128 192 288 432];
 
+[n_rows,n_cols] = size(M(1).data);
+
 for i=1:11
-   t(i) = M(1).data(1,16)/M(i).data(1,16);
+   t(i) = M(1).data(1,n_cols)/M(i).data(1,n_cols);
    t2(i) = 1.;
+end
+
+if t(11)>1. || t(11)<0.5
+    display(['Error: weak scaling test out of tolerance'])
 end
 
 figure
