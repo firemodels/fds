@@ -1858,6 +1858,12 @@ PARTICLE_LOOP: DO IP=1,NLP
             LP%ONE_D%IOR = 0
             LP%WALL_INDEX = 0
          ENDIF
+
+      ELSE
+        
+         LP%ONE_D%IOR = 0
+         LP%WALL_INDEX = 0
+         
       ENDIF
 
    ENDDO TIME_STEP_LOOP
