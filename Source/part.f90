@@ -1859,10 +1859,9 @@ PARTICLE_LOOP: DO IP=1,NLP
             LP%WALL_INDEX = 0
          ENDIF
 
-      ELSE
+      ELSEIF (LP%CFACE_INDEX==0) THEN
         
-         LP%ONE_D%IOR = 0
-         LP%WALL_INDEX = 0
+         LP%WALL_INDEX = 0  ! The droplet is not stuck to a WALL cell
          
       ENDIF
 
