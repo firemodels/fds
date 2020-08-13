@@ -194,9 +194,6 @@ DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 ENDDO
 CALL STOP_CHECK(1)
 
-! If HVAC finish setup
-IF (HVAC_SOLVE .AND. MYID==0) CALL INIT_DUCT_NODE
-
 ! Allocate and initialize OMESH arrays to hold "other mesh" data for a given mesh
 
 N_COMMUNICATIONS = 0
@@ -455,6 +452,7 @@ ENDIF
 ! Initialize HVAC variables
 
 IF (HVAC_SOLVE) THEN
+   IF (MYID==0) CALL INIT_DUCT_NODE
    DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       IF (EVACUATION_ONLY(NM)) CYCLE
       CALL HVAC_BC_IN(NM)
