@@ -2778,16 +2778,16 @@ Tests similar to those in Section~\ref{droplet_absorption} are performed for sol
 
 
 \section{Consistency of Particle Absorbed Energy and the Radiative Loss Term}
-\label{particle_isotropic_radiation}
-\label{particle_anisotropic_radiation}
+\label{particle_isotropic_radi}
+\label{particle_anisotropic_radi}
 
 Small spherical, cylindrical and planar particles with black (emissivity = 1) surfaces are placed in radiation field. Radiation is coming from black surfaces, and the gas is pure Nitrogen, i.e. non-participating. The amount of energy removed from the intensity field is measured by a device calculating spatial and temporal integrals of radiation loss term (Q\_w).  The reference solution (E\_w) is the wall enthalpy increase, as observed by the one-dimensional heat conduction solver.
-In {\ct particle\_isotropic\_radiation}, the radiation field isotropic, i.e. all surfaces are black and constant temperature. In {\ct particle\_anisotropic\_radiation}, an anistropic intensity field is geated by specifying one hot wall, one cold wall, and four other fields being mirrors.
+In {\ct particle\_isotropic\_radi}, the radiation field isotropic, i.e. all surfaces are black and constant temperature. In {\ct particle\_anisotropic\_radi}, an anistropic intensity field is geated by specifying one hot wall, one cold wall, and four other fields being mirrors.
 
 \begin{figure}[ht]
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/particle_isotropic_radiation}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/particle_anisotropic_radiation}
-\caption[The {\ct particle\_isotropic\_radiation} and {\ct particle\_anisotropic\_radiation} test cases]{Absorbed energy of spherical, cylindrical and cartesian particles in isotropic (left) and anisotropic (right) radiation field.}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/particle_isotropic_radi}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/particle_anisotropic_radi}
+\caption[The {\ct particle\_isotropic\_radi} and {\ct particle\_anisotropic\_radi} test cases]{Absorbed energy of spherical, cylindrical and cartesian particles in isotropic (left) and anisotropic (right) radiation field.}
 \label{particle_an_isotropic_radiation_figs}
 \end{figure}
 
@@ -5380,13 +5380,13 @@ In the test case called {\ct Sprinklers\_and\_Sprays/geom\_sprk\_mass.fds}, two 
 \label{geom_sprk_mass_fig}
 \end{figure}
 
-\subsection{Water Cooling in Adiabatic Surface Temperature (\texorpdfstring{{\textct{adiabatic\_surface\_temperature\_spray}}}{adiabatic\_surface\_temperature\_spray}) }
+\subsection{Adiabatic Surface Temperature (\texorpdfstring{{\textct{adiabatic\_surf\_temp\_spray}}}{adiabatic\_surf\_temp\_spray}) }
 \label{AST_spray}
 
 This test case is a modified version of {\ct Radiation/adiabatic\_surface\_temperature}. A thin metal plate with insulated backing is heated for 100 s. Adiabatic surface temperature (AST) is measured from the surface of the plate. Figure~\ref{adiabatic_surf_temp_spray} shows that after about 40 s, the plate temperature and AST match each other. At 50 s, a water spray is turned on and it starts to cool down the surface. At 100 s, the heater is turned off, and the plate cools down even more. AST and plate temperatures should match each other in the end of every 50 s period.
 \begin{figure}[h!]
 \centering
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/adiabatic_surface_temperature_spray}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/adiabatic_surf_temp_spray}
 \caption[The {\ct adiabatic\_surface\_temperature\_spray} test case]{Adiabatic and true surface temperatures under radiative heating (0 - 50 s), heating and spray  cooling (50-100 s) and only spray cooling (100-150 s).}
 \label{adiabatic_surf_temp_spray}
 \end{figure}

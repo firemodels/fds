@@ -581,7 +581,7 @@ $QFDS -d Species mass_flux_wall_zindex.fds
 $QFDS -p 8 -d Species mass_balance_reac.fds
 
 $QFDS -d Sprinklers_and_Sprays activate_sprinklers.fds
-$QFDS -d Sprinklers_and_Sprays adiabatic_surface_temperature_spray.fds
+$QFDS -d Sprinklers_and_Sprays adiabatic_surf_temp_spray.fds
 $QFDS -d Sprinklers_and_Sprays bucket_test_1.fds
 $QFDS -d Sprinklers_and_Sprays bucket_test_2.fds
 $QFDS -d Sprinklers_and_Sprays bucket_test_3.fds
@@ -594,8 +594,8 @@ $QFDS -d Sprinklers_and_Sprays droplet_distributions_2.fds
 $QFDS -d Sprinklers_and_Sprays flow_rate.fds
 $QFDS -d Sprinklers_and_Sprays flow_rate_2.fds
 $QFDS -p 2 -d Sprinklers_and_Sprays geom_sprk_mass.fds
-$QFDS -d Sprinklers_and_Sprays particle_anisotropic_radiation.fds
-$QFDS -d Sprinklers_and_Sprays particle_isotropic_radiation.fds
+$QFDS -d Sprinklers_and_Sprays particle_anisotropic_radi.fds
+$QFDS -d Sprinklers_and_Sprays particle_isotropic_radi.fds
 $QFDS -d Sprinklers_and_Sprays particle_colors.fds
 $QFDS -d Sprinklers_and_Sprays particle_drag_U10_N16.fds
 $QFDS -d Sprinklers_and_Sprays particle_drag_U50_N16.fds

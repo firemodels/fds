@@ -1,4 +1,4 @@
-&HEAD CHID='adiabatic_surface_temperature_spray', TITLE='Test AST target model' /
+&HEAD CHID='adiabatic_surf_temp_spray', TITLE='Test AST target model' /
 
 &MESH IJK=20,20,20, XB=0,1,0,1,0,1 / 
 
