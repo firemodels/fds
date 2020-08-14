@@ -580,9 +580,9 @@ if [[ "$CHECK_DIRTY" == "1" ]] && [[ "$exe" != "" ]]; then
     if [ $is_dirty -gt 0 ]; then
       echo ""
       echo "  ***error: repo used to build executable was dirty"
-      echo " executabe: $exe"
+      echo "executable: $exe"
       echo "input file: $in"
-      echo run aborted
+      echo "run aborted"
       exit 1
     fi
   fi
