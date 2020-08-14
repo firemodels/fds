@@ -9,4 +9,4 @@ if %nothaveGIT% == 1 (
   exit /b 1
 )
 erase git.out git_count.txt
-git describe --long --dirty
+git describe --long
