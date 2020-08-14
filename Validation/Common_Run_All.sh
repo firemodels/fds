@@ -26,6 +26,7 @@ resource_manager=
 walltime=
 showcommandline=
 showscript=
+CHECK_DIRTY=-u
 
 INTEL="-I"
 # the mac doesn't have Intel MPI
@@ -54,6 +55,8 @@ echo "Runs FDS validation set"
 echo ""
 echo "Options"
 echo "-b - use debug version of FDS"
+echo "-d - run even if this repo is dirty and/or the executable was built"
+echo "     in a dirty repo"
 echo "-e exe - run using exe (full path to fds)."
 echo "      Note: environment must be defined to use this executable"
 echo "-h - display this message"
@@ -77,11 +80,14 @@ exit
 }
 
 DEBUG=$OPENMP
-while getopts 'be:EhIj:m:o:Oq:r:suvVw:xy' OPTION
+while getopts 'bde:EhIj:m:o:Oq:r:suvVw:xy' OPTION
 do
 case $OPTION in
   b)
    DEBUG="-b $OPENMP"
+   ;;
+  d)
+   CHECK_DIRTY=
    ;;
   e)
    EXE="$OPTARG"
@@ -147,7 +153,7 @@ if [ "$EXE" != "" ]; then
   EXE="-e $full_filepath"
 fi
 
-export QFDS="$SCRIPTDIR/qfds.sh -f $REPO $walltime $showcommandline $showscript $DV $INTEL $EXE"
+export QFDS="$SCRIPTDIR/qfds.sh $CHECK_DIRTY -f $REPO $walltime $showcommandline $showscript $DV $INTEL $EXE"
 
 if [ "$QUEUE" != "" ]; then
    QUEUE="-q $QUEUE"
@@ -161,6 +167,22 @@ else
    export RESOURCE_MANAGER="PBS"
 fi
 ##############################################################
+
+# abort if repo is dirty
+
+if [ ! $STOPFDS ] ; then
+  if [ "$CHECK_DIRTY" != "" ]; then
+    is_dirty=`git describe --dirty --long | grep dirty | wc -l `
+    if [ $is_dirty -gt 0 ]; then
+      echo "***error: repo is dirty."
+      echo "Use the -d option to run in a dirty repo."
+      git describe --dirty --long
+      echo "Exiting."
+      echo 
+      exit
+    fi
+  fi
+fi
 
 # Skip if STOPFDS (-s option) is specified
 if [ ! $STOPFDS ] ; then
