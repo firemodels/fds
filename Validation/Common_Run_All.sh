@@ -147,7 +147,7 @@ if [ "$EXE" != "" ]; then
   EXE="-e $full_filepath"
 fi
 
-export QFDS="$SCRIPTDIR/qfds.sh -f $REPO $walltime $showcommandline $showscript $DV $INTEL $EXE"
+export QFDS="$SCRIPTDIR/qfds.sh -u -f $REPO $walltime $showcommandline $showscript $DV $INTEL $EXE"
 
 if [ "$QUEUE" != "" ]; then
    QUEUE="-q $QUEUE"
