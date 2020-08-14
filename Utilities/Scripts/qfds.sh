@@ -117,12 +117,13 @@ function usage {
   echo "        MIN ( number of cores, number of mpi processes)"
   echo " -O n - run cases casea.fds, caseb.fds, ... using 1, ..., N OpenMP threads"
   echo "        where case is specified on the command line. N can be at most 9."
+  echo " -r   - append trace flag to the mpiexec call generated"
   echo " -s   - stop job"
   echo " -S   - use startup files to set the environment, do not load modules"
-  echo " -r   - append trace flag to the mpiexec call generated"
   echo " -t   - used for timing studies, run a job alone on a node (reserving $NCORES_COMPUTENODE cores)"
   echo " -T type - run dv (development), db (debug), inspect, advise, or vtune version of fds"
   echo "           if -T is not specified then the release version of fds is used"
+  echo " -u   - only run if executable was not compiled  in a dirty repo"
   echo " -V   - show command line used to invoke qfds.sh"
   echo " -w time - walltime, where time is hh:mm for PBS and dd-hh:mm:ss for SLURM. [default: $walltime]"
   echo ""
@@ -219,6 +220,7 @@ vtuneresdir=
 vtuneargs=
 use_config=""
 EMAIL=
+CHECK_DIRTY=
 
 # determine which resource manager is running (or none)
 
@@ -279,7 +281,7 @@ commandline=`echo $* | sed 's/-V//' | sed 's/-v//'`
 
 #*** read in parameters from command line
 
-while getopts 'Aa:b:c:Cd:D:e:Ef:hHiIj:Lm:Mn:No:O:p:Pq:rsStT:vVw:x:' OPTION
+while getopts 'Aa:b:c:Cd:D:e:Ef:hHiIj:Lm:Mn:No:O:p:Pq:rsStT:uvVw:x:' OPTION
 do
 case $OPTION  in
   A) # used by timing scripts to identify benchmark cases
@@ -415,6 +417,9 @@ case $OPTION  in
    if [ "$TYPE" == "vtune" ]; then
      use_vtune=1
    fi
+   ;;
+  u)
+   CHECK_DIRTY=1
    ;;
   v)
    showinput=1
@@ -566,6 +571,18 @@ if [ "$STARTUP" == "" ]; then
     MODULES=$FDS_LOADED_MODULES               # modules loaded when fds was built
   else
     MODULES=$CURRENT_LOADED_MODULES
+  fi
+fi
+
+if [[ "$CHECK_DIRTY" == "1" ]] && [[ "$exe" != "" ]]; then
+  if [ -e $exe ]; then
+    is_dirty=`echo "" | $exe |& grep dirty | wc -l`
+    if [ $is_dirty -gt 0 ]; then
+      echo ***error: repo used to build $exe was dirty
+      echo input file: $in
+      echo run aborted
+      exit 1
+    fi
   fi
 fi
 
