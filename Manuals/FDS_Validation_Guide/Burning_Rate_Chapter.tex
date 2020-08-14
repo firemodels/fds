@@ -47,7 +47,7 @@ more complicated behavior, like intumescence, need to be considered.
 A non-charring polymer is considered one of the easiest solids to model because it typically involves only a single, first order reaction that converts solid plastic to fuel vapor. No residue is formed and the plastic is completely pyrolyzed. Table~\ref{FAA_Properties} lists nine parameters for each polymer studied. These values have been input directly into FDS, and the predicted mass loss rates are compared with measured values from the NIST Gasification Apparatus, a device that pyrolyzes the solid in a nitrogen environment to prevent combustion of fuel gases. The results are shown in Fig.~\ref{FAA_Polymers}. The exposing heat flux was 52~kW/m$^2$. A 1~cm layer of insulation was placed under the sample. Its properties are given in Ref.~\cite{Stoliarov:CF2009}.
 
 \begin{table}[h!]
-\caption[FAA non-charring polymer properties.]{Input parameters for FAA Polymers non-charring samples. Courtesy S.~Stoliarov, M.~McKinnon and J.~Li, University of Maryland.
+\caption[FAA non-charring polymer properties]{Input parameters for FAA Polymers non-charring samples. Courtesy S.~Stoliarov, M.~McKinnon and J.~Li, University of Maryland.
 See Section~\ref{glossary} for an explanation of terms.}
 \begin{center}
 \begin{tabular}{|l|c|c|c|c|c|l|l|}
@@ -74,7 +74,8 @@ Heat of Reaction            & kJ/kg         & 920                   & 1000      
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/FAA_Polymers/FAA_Polymers_HIPS} \\
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/FAA_Polymers/FAA_Polymers_PMMA}&
 \end{tabular*}
-\caption[Results of FAA Polymers, non-charring, comparison.]{Comparison of predicted and measured mass loss rates for three non-charring polymers exposed to a heat flux of 52~kW/m$^2$ in a
+\caption[Results of FAA Polymers, non-charring, comparison]
+{Comparison of predicted and measured mass loss rates for three non-charring polymers exposed to a heat flux of 52~kW/m$^2$ in a
 nitrogen environment.}
 \label{FAA_Polymers}
 \end{figure}
@@ -118,7 +119,8 @@ Melting Temperature         & K             & 158                   & 262       
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/FAA_Polymers/FAA_Polymers_POM}&
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/FAA_Polymers/FAA_Polymers_PET} \\
 \end{tabular*}
-\caption[Results of FAA Polymers, complex, non-charring, comparison.]{Comparison of predicted and measured mass loss rates for four complex non-charring polymers exposed to a heat flux of 50~kW/m$^2$ in a
+\caption[Results of FAA Polymers, complex, non-charring, comparison]
+{Comparison of predicted and measured mass loss rates for four complex non-charring polymers exposed to a heat flux of 50~kW/m$^2$ in a
 nitrogen environment.}
 \label{FAA_Polymers2}
 \end{figure}
@@ -134,7 +136,7 @@ Table~\ref{Properties_PC} lists the measured properties of polycarbonate. These 
 \ee
 
 \begin{table}[h!]
-\caption[Properties of polycarbonate (PC).]{Properties of polycarbonate (PC). Courtesy S.~Stoliarov, University of Maryland. See Section~\ref{glossary} for an explanation of terms.}
+\caption[Properties of polycarbonate (PC)]{Properties of polycarbonate (PC). Courtesy S.~Stoliarov, University of Maryland. See Section~\ref{glossary} for an explanation of terms.}
 \begin{center}
 \begin{tabular}{|l|c|c|l|l|}
 \hline
@@ -167,7 +169,8 @@ Combustion Efficiency       &               & 0.84 $\pm$ 0.03                   
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/FAA_Polymers/FAA_Polymers_PC_3_75} \\
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/FAA_Polymers/FAA_Polymers_PC_9_75} &
 \end{tabular*}
-\caption[Heat release rate of polycarbonate (PC).]{Comparison of predicted and measured heat release rates for polycarbonate (PC).}
+\caption[Heat release rate of polycarbonate (PC)]
+{Comparison of predicted and measured heat release rates for polycarbonate (PC).}
 \label{HRR_PC}
 \end{figure}
 
@@ -186,7 +189,7 @@ It is assumed that the polymer decomposes via a two-step reaction:
 
 
 \begin{table}[h!]
-\caption[Properties of poly(vinyl chloride) (PVC).]{Properties of poly(vinyl chloride) (PVC). Courtesy S.~Stoliarov, University of Maryland. See Section~\ref{glossary} for an explanation of terms.}
+\caption[Properties of poly(vinyl chloride) (PVC)]{Properties of poly(vinyl chloride) (PVC). Courtesy S.~Stoliarov, University of Maryland. See Section~\ref{glossary} for an explanation of terms.}
 \begin{center}
 \begin{tabular}{|l|c|c|l|l|}
 \hline
@@ -231,7 +234,8 @@ Gas 2 Combustion Efficiency &               & 0.75 $\pm$ 0.03                   
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/FAA_Polymers/FAA_Polymers_PVC_3_75} \\
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/FAA_Polymers/FAA_Polymers_PVC_9_75} &
 \end{tabular*}
-\caption[Heat release rate of poly(vinyl chloride) (PVC).]{Comparison of predicted and measured heat release rates for poly(vinyl chloride) (PVC).}
+\caption[Heat release rate of poly(vinyl chloride) (PVC)]
+{Comparison of predicted and measured heat release rates for poly(vinyl chloride) (PVC).}
 \label{HRR_PVC}
 \end{figure}
 
@@ -253,7 +257,7 @@ It is also assumed that the gaseous fuel molecule is C$_{19}$H$_{12}$O$_3$. A 1~
 The results for 3.9~mm samples at imposed heat fluxes of 50~kW/m$^2$, 70~kW/m$^2$, and 90~kW/m$^2$ are shown in Fig.~\ref{HRR_PEEK}. Note that the plots on the left are the results of simulations of the solid phase only, where the heat feedback from the fire is assumed to be 15~kW/m$^2$ and it is applied at the time of ignition. The plots on the right are from 3-D simulations of the solid sample and the fire. In these cases, the radiative feedback is not specified but rather calculated.
 
 \begin{table}[p]
-\caption[Properties of poly(aryl ether ether ketone) (PEEK).]{Properties of poly(aryl ether ether ketone) (PEEK). Courtesy E.~Oztekin, U.S.~FAA and S.~Stoliarov,
+\caption[Properties of poly(aryl ether ether ketone) (PEEK)]{Properties of poly(aryl ether ether ketone) (PEEK). Courtesy E.~Oztekin, U.S.~FAA and S.~Stoliarov,
 University of Maryland. See Section~\ref{glossary} for an explanation of terms.}
 \begin{center}
 \begin{tabular}{|l|c|c|l|l|}
@@ -308,7 +312,8 @@ Reac 4 Heat of Reaction     & kJ/kg         & 0                                 
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/FAA_Polymers/FAA_Polymers_PEEK_90_solid_only} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/FAA_Polymers/FAA_Polymers_PEEK_90}
 \end{tabular*}
-\caption[Heat release rate of poly(aryl ether ether ketone) (PEEK).]{Comparison of predicted and measured heat release rates for poly(aryl ether ether ketone) (PEEK). The plots on the left include only a simulation of the solid phase with an added heat flux of 15~kW/m$^2$ to account for the radiative feedback from the flame. The plots on the right are 3-D simulations of the solid sample and the fire.}
+\caption[Heat release rate of poly(aryl ether ether ketone) (PEEK)]
+{Comparison of predicted and measured heat release rates for poly(aryl ether ether ketone) (PEEK). The plots on the left include only a simulation of the solid phase with an added heat flux of 15~kW/m$^2$ to account for the radiative feedback from the flame. The plots on the right are 3-D simulations of the solid sample and the fire.}
 \label{HRR_PEEK}
 \end{figure}
 
@@ -323,7 +328,7 @@ The results of the simulations are shown in Fig.~\ref{HRR_PBT}. Note that the ef
 
 
 \begin{table}[h!]
-\caption[Properties of poly(butylene terephtalate) (PBT).]{Properties of poly(butylene terephtalate) (PBT). Courtesy S.~Stoliarov, University of Maryland, and
+\caption[Properties of poly(butylene terephtalate) (PBT)]{Properties of poly(butylene terephtalate) (PBT). Courtesy S.~Stoliarov, University of Maryland, and
 Florian Kempel.
 See Section~\ref{glossary} for an explanation of terms. Note that the Specific Heat and Conductivity result from averaging the reported temperature dependent
 properties over the room to decomposition temperature range (300~K -- 650~K).
@@ -357,7 +362,8 @@ Combustion Efficiency   &           & 1                                 & Assump
  &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/FAA_Polymers/FAA_Polymers_PBT_70_solid_only}
 \end{tabular*}
-\caption[Mass loss rate of poly(butylene terephtalate) (PBT).]{Comparison of predicted and measured mass loss rates for poly(butylene terephtalate) (PBT)
+\caption[Mass loss rate of poly(butylene terephtalate) (PBT)]
+{Comparison of predicted and measured mass loss rates for poly(butylene terephtalate) (PBT)
 in both the Gasification Apparatus and Cone Calorimeter.}
 \label{HRR_PBT}
 \end{figure}
@@ -375,7 +381,7 @@ Samples of poly(butylene terephtalate) (PBT), blended with 30~\% by mass glass f
 The results of the simulations are shown in Fig.~\ref{HRR_PBTGF}. Note that the effect of the flame radiation heat feedback to the sample surface is accounted for by increasing the imposed heat fluxes of 35~kW/m$^2$ by 33~\%, 50~kW/m$^2$ by 16~\%, and 70~kW/m$^2$ by 5~\%~\cite{Kempel:1}.
 
 \begin{table}[h!]
-\caption[Properties of poly(butylene terephtalate) with glass fibers (PBT-GF).]{Properties of poly(butylene terephtalate) with glass fibers (PBT-GF).
+\caption[Properties of poly(butylene terephtalate) with glass fibers (PBT-GF)]{Properties of poly(butylene terephtalate) with glass fibers (PBT-GF).
 Courtesy S.~Stoliarov, University of Maryland. See Section~\ref{glossary} for an explanation of terms. Note that the Polymer Specific Heat and Polymer Conductivity
 are the result of averaging the reported temperature dependent properties over the room to decomposition temperature range (300~K -- 650~K).
 The heat capacity value is increased by 0.09~kJ/kg/K to account for the heat of melting (-32~kJ/kg), which takes place at 493~K.}
@@ -413,7 +419,7 @@ Combustion Efficiency   &               &          1                        & As
  &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/FAA_Polymers/FAA_Polymers_PBTGF_70_solid_only}
 \end{tabular*}
-\caption[Mass loss rate of poly(butylene terephtalate) with glass fibers (PBT-GF).]
+\caption[Mass loss rate of poly(butylene terephtalate) with glass fibers (PBT-GF)]
 {Comparison of predicted and measured mass loss rates for poly(butylene terephtalate) with glass fibers (PBT-GF) in both the Gasification Apparatus and Cone Calorimeter.}
 \label{HRR_PBTGF}
 \end{figure}
@@ -634,7 +640,7 @@ The reaction mechanism for the cardboard material includes one reaction to descr
 \end{eqnarray}
 
 \begin{longtable}{@{\extracolsep{\fill}}|l|c|c|l|l|}
-\caption[Properties of corrugated cardboard.]{Properties of corrugated cardboard. Courtesy M. McKinnon, University of Maryland. See Section~\ref{glossary} for an explanation of terms.}
+\caption[Properties of corrugated cardboard]{Properties of corrugated cardboard. Courtesy M. McKinnon, University of Maryland. See Section~\ref{glossary} for an explanation of terms.}
 \label{Properties_Cardboard} \\
 \hline
 \endfirsthead
@@ -765,7 +771,7 @@ The estimated reaction parameters are listed in Tables~\ref{christifire_kin_para
 The experimental and FDS results are shown in Fig.~\ref{christifire_small_scale_results}.
 
 \begin{table}[h!]
-\caption[Kinetic parameters for CHRISTIFIRE cable 701 v1.]{Reaction path, kinetic parameters and heat of combustion for sheath and insulation material of cable~701 v1. The values are provided in the same units as in FDS input file.}
+\caption[Kinetic parameters for CHRISTIFIRE cable 701 v1]{Reaction path, kinetic parameters and heat of combustion for sheath and insulation material of cable~701 v1. The values are provided in the same units as in FDS input file.}
 \begin{center}
 \begin{tabular}{|l|c|c|c|c|c|c|c|}
  \hline
@@ -800,7 +806,7 @@ The experimental and FDS results are shown in Fig.~\ref{christifire_small_scale_
 \end{table}
 
 \begin{table}[h!]
-\caption[Kinetic parameters for CHRISTIFIRE cable 701 v2.]{Reaction path, kinetic parameters and heat of combustion for sheath and insulation material of cable 701 v2. The values are provided in the same units as in FDS input file.}
+\caption[Kinetic parameters for CHRISTIFIRE cable 701 v2]{Reaction path, kinetic parameters and heat of combustion for sheath and insulation material of cable 701 v2. The values are provided in the same units as in FDS input file.}
 \begin{center}
 \begin{tabular}{|l|c|c|c|c|c|c|c|c|}
  \hline
@@ -845,7 +851,8 @@ The experimental and FDS results are shown in Fig.~\ref{christifire_small_scale_
  \includegraphics[height=2.15in]{SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_S701_mcc} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_I701_mcc} \\
 \end{tabular}
-\caption{Small scale results of the CHRISTIFIRE cable 701 sheath and insulation.}
+\caption[Small scale results of the CHRISTIFIRE cable 701 sheath and insulation]
+{Small scale results of the CHRISTIFIRE cable 701 sheath and insulation.}
 \label{christifire_small_scale_results}
 \end{figure}
 
@@ -871,7 +878,7 @@ The results are shown in Fig.~\ref{christifire_cone_results_other_fluxes}.
 
 \begin{table}
 \begin{center}
-\caption{Thermal parameters for CHRISTIFIRE cable 701 v1.}
+\caption[Thermal parameters for CHRISTIFIRE cable 701 v1]{Thermal parameters for CHRISTIFIRE cable 701 v1.}
 \begin{tabular}{|l|c|c|c|c|c|}
  \hline
  & \textct{DENSITY} & \textct{CONDUCTIVITY} & \textct{SPECIFIC\_HEAT} & \textct{HEAT\_OF\_REACTION} & \textct{EMISSIVITY} \\
@@ -905,7 +912,7 @@ The results are shown in Fig.~\ref{christifire_cone_results_other_fluxes}.
 
 \begin{table}
 \begin{center}
-\caption{Thermal parameters for CHRISTIFIRE cable 701 v2.}
+\caption[Thermal parameters for CHRISTIFIRE cable 701 v2]{Thermal parameters for CHRISTIFIRE cable 701 v2.}
 \begin{tabular}{|l|c|c|c|c|c|}
  \hline
  & \textct{DENSITY} & \textct{CONDUCTIVITY} & \textct{SPECIFIC\_HEAT} & \textct{HEAT\_OF\_REACTION} & \textct{EMISSIVITY} \\
@@ -945,7 +952,8 @@ The results are shown in Fig.~\ref{christifire_cone_results_other_fluxes}.
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_C701_mlr_50} \\
  \includegraphics[height=2.15in]{SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_C701_ehc_50} &
 \end{tabular}
-\caption{Cone calorimeter fitting of CHRISTIFIRE cable 701 at 50~kW/m$^2$ heat flux.}
+\caption[Cone calorimeter fitting of CHRISTIFIRE cable 701 at 50~kW/m$^2$]
+{Cone calorimeter fitting of CHRISTIFIRE cable 701 at 50~kW/m$^2$ heat flux.}
 \label{christifire_cone_results_50}
 \end{figure}
 
@@ -958,7 +966,8 @@ The results are shown in Fig.~\ref{christifire_cone_results_other_fluxes}.
  \includegraphics[height=2.15in]{SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_C701_ehc_75} &
  \includegraphics[height=2.15in]{SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_C701_ehc_25}
 \end{tabular}
-\caption{Cone calorimeter validation of CHRISTIFIRE cable 701 at 25 and 75~kW/m$^2$ heat fluxes.}
+\caption[Cone calorimeter validation of CHRISTIFIRE cable 701 at 25 and 75~kW/m$^2$]
+{Cone calorimeter validation of CHRISTIFIRE cable 701 at 25 and 75~kW/m$^2$ heat fluxes.}
 \label{christifire_cone_results_other_fluxes}
 \end{figure}
 
@@ -1014,7 +1023,7 @@ This section presents results from the evaporation of water in an ASTM E2058 fir
 \begin{figure}[h!]
 \centering
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/Pool_Fires/ASTM_E2058_Water_Evap}
-\caption{ASTM E2058 fire propagation apparatus water evaporation at 50~kW/m$^2$ heat flux.}
+\caption[ASTM E2058 fire propagation apparatus water evaporation at 50~kW/m$^2$ heat flux]{ASTM E2058 fire propagation apparatus water evaporation at 50~kW/m$^2$ heat flux.}
 \label{ASTM_E2058_Water_Evap_MLR}
 \end{figure}
 
@@ -1035,7 +1044,7 @@ The effective absorption coefficients. $\kappa$, for benzene and ethanol are bas
 
 \begin{table}[h!]
 \begin{center}
-\caption{Liquid fuel properties.} \label{fuelprops}
+\caption[Liquid fuel properties]{Liquid fuel properties.} \label{fuelprops}
 \begin{tabular}{|l|c|c|c|c|c|c|c|c|c|c|} \hline
         & $\rho$               & $c_p$                        & $k$                &  $\Delta h_{\rm v}$         &  $\Delta h_{\rm c}$  & $\chi_{\rm r}$       & $y_{\rm CO}$         & $y_{\rm s}$          & $T_{\rm b}$                    & $\kappa$  \\
 Fuel    & \si{\kg/\m^3}        & \si{\kJ/(\kg.\K)}            & \si{\W/(\m.\K)}    & \si{\kJ/\kg}                & \si{\kJ/\kg}         &                      &  \si{\g/\g}          &  \si{\g/\g}          & $^\circ$C                      & m$^{-1}$  \\
@@ -1062,7 +1071,7 @@ Methanol &  796  &  2.48   & 0.20  &   1099  & 20934  & 0.16 & 0.001 & 0.001 & 6
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/Pool_Fires/heptane_1_m} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/Pool_Fires/methanol_1_m} \\
 \end{tabular*}
-\caption[Comparison of burning rates for various liquid pool fires.]{Comparison of burning rates for various liquid pool fires.}
+\caption[Comparison of burning rates for various liquid pool fires]{Comparison of burning rates for various liquid pool fires.}
 \label{POOL_MLR}
 \end{figure}
 
@@ -1162,9 +1171,9 @@ For each case, three simulations are performed---one using Lagrangian particles 
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/CSIRO_Grassland_Fires/Case_C064} & \includegraphics[height=2.2in]{SCRIPT_FIGURES/CSIRO_Grassland_Fires/Case_C064_BFM} \\
 \multicolumn{2}{c}{\includegraphics[height=2.2in]{SCRIPT_FIGURES/CSIRO_Grassland_Fires/Case_C064_LS} } \\
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/CSIRO_Grassland_Fires/Case_F19}  & \includegraphics[height=2.2in]{SCRIPT_FIGURES/CSIRO_Grassland_Fires/Case_F19_BFM} \\
-\multicolumn{2}{c}{\includegraphics[height=2.2in]{SCRIPT_FIGURES/CSIRO_Grassland_Fires/Case_F19_LS} } 
+\multicolumn{2}{c}{\includegraphics[height=2.2in]{SCRIPT_FIGURES/CSIRO_Grassland_Fires/Case_F19_LS} }
 \end{tabular*}
-\caption[Comparison of the measured and predicted fire front position for the CSIRO Grassland Fires]{Comparison of the measured and predicted fire front position for the CSIRO Grassland Fires using three different methods of fire spread.}
+\caption[Measured and predicted fire front position for the CSIRO Grassland Fires]{Comparison of the measured and predicted fire front position for the CSIRO Grassland Fires using three different methods of fire spread.}
 \label{CSIRO}
 \end{figure}
 
