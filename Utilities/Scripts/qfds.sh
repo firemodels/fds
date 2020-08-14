@@ -700,7 +700,7 @@ if [[ "$CHECK_DIRTY" == "1" ]] && [[ "$exe" != "" ]]; then
   if [ -e $exe ]; then
     is_dirty_exe=`echo "" | $exe |& grep dirty |& wc -l`
     dirty_exe=`   echo "" | $exe |& grep dirty |& awk '{print $3}'`
-    is_dirty_input=`git diff --shortstat $in   |& grep -v usage | wc -l`
+    is_dirty_input=`git diff $in   |& wc -l`
 
     is_dirty=
     if [ $is_dirty_exe -gt 0 ]; then
@@ -711,18 +711,20 @@ if [[ "$CHECK_DIRTY" == "1" ]] && [[ "$exe" != "" ]]; then
     fi
 
     if [ "$is_dirty" == "1" ]; then
+      echo ""
       if [ $is_dirty_exe -gt 0 ]; then
         echo "***error: source used to build FDS is dirty."
       fi
-      if [ $is_dirty_input -gt 0 ]; then
-        echo "***error: input file is dirty."
-      fi
       echo "executable: $exe"
-        echo "          $dirty_exe"
+      echo "          $dirty_exe"
+      if [ $is_dirty_input -gt 0 ]; then
+        echo "***error: input file $in is dirty."
+      else
         echo "input file: $in"
+      fi
     fi
     if [ "$is_dirty" == "1" ]; then
-      echo "   Use the -g option to ignore this error"
+      echo "Use the -g option to ignore this error"
       echo "Exiting."
       exit 1
     fi
