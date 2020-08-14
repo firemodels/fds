@@ -55,10 +55,9 @@ echo "Runs FDS validation set"
 echo ""
 echo "Options"
 echo "-b - use debug version of FDS"
-echo "-d - run even if this repo is dirty and/or the executable was built"
-echo "     in a dirty repo"
 echo "-e exe - run using exe (full path to fds)."
 echo "      Note: environment must be defined to use this executable"
+echo "-g - run even if input files or executable is dirty"
 echo "-h - display this message"
 echo "-I - run with Intel MPI version of fds"
 echo "-j job_prefix - specify job prefix"
@@ -80,14 +79,11 @@ exit
 }
 
 DEBUG=$OPENMP
-while getopts 'bde:EhIj:m:o:Oq:r:suvVw:xy' OPTION
+while getopts 'be:EghIj:m:o:Oq:r:suvVw:xy' OPTION
 do
 case $OPTION in
   b)
    DEBUG="-b $OPENMP"
-   ;;
-  d)
-   CHECK_DIRTY=
    ;;
   e)
    EXE="$OPTARG"
@@ -97,6 +93,9 @@ case $OPTION in
    ;;
   E)
    TCP="-E "
+   ;;
+  g)
+   CHECK_DIRTY=
    ;;
   h)
   usage;

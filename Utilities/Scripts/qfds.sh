@@ -106,6 +106,7 @@ function usage {
   echo "      This options adds export I_MPI_FABRICS=shm:tcp to the run script"
   echo " -f repository root - name and location of repository where FDS is located"
   echo "    [default: $FDSROOT]"
+  echo " -g   - only run if input file and executable are not dirty"
   echo " -i use installed fds"
   echo " -I use Intel MPI version of fds"
   echo " -j prefix - specify a job prefix"
@@ -123,7 +124,6 @@ function usage {
   echo " -t   - used for timing studies, run a job alone on a node (reserving $NCORES_COMPUTENODE cores)"
   echo " -T type - run dv (development), db (debug), inspect, advise, or vtune version of fds"
   echo "           if -T is not specified then the release version of fds is used"
-  echo " -u   - only run if executable was not compiled  in a dirty repo"
   echo " -V   - show command line used to invoke qfds.sh"
   echo " -w time - walltime, where time is hh:mm for PBS and dd-hh:mm:ss for SLURM. [default: $walltime]"
   echo ""
@@ -281,7 +281,7 @@ commandline=`echo $* | sed 's/-V//' | sed 's/-v//'`
 
 #*** read in parameters from command line
 
-while getopts 'Aa:b:c:Cd:D:e:Ef:hHiIj:Lm:Mn:No:O:p:Pq:rsStT:uvVw:x:' OPTION
+while getopts 'Aa:b:c:Cd:D:e:Ef:ghHiIj:Lm:Mn:No:O:p:Pq:rsStT:vVw:x:' OPTION
 do
 case $OPTION  in
   A) # used by timing scripts to identify benchmark cases
@@ -314,6 +314,9 @@ case $OPTION  in
    ;;
   f)
    FDSROOT="$OPTARG"
+   ;;
+  g)
+   CHECK_DIRTY=1
    ;;
   h)
    usage
@@ -417,9 +420,6 @@ case $OPTION  in
    if [ "$TYPE" == "vtune" ]; then
      use_vtune=1
    fi
-   ;;
-  u)
-   CHECK_DIRTY=1
    ;;
   v)
    showinput=1
@@ -574,22 +574,6 @@ if [ "$STARTUP" == "" ]; then
   fi
 fi
 
-if [[ "$CHECK_DIRTY" == "1" ]] && [[ "$exe" != "" ]]; then
-  if [ -e $exe ]; then
-    is_dirty=`echo "" | $exe |& grep dirty |& wc -l`
-    dirty=`   echo "" | $exe |& grep dirty |& awk '{print $3}'`
-    if [ $is_dirty -gt 0 ]; then
-      echo ""
-      echo "  ***error: repo used to build executable was dirty."
-      echo "executable: $exe"
-      echo "            $dirty"
-      echo "input file: $in"
-      echo "Exiting."
-      exit 1
-    fi
-  fi
-fi
-
 #*** define number of nodes
 
 if test $n_mpi_processes_per_node -gt $ncores ; then
@@ -710,6 +694,40 @@ MPIRUN="$MPIRUNEXE $REPORT_BINDINGS $SOCKET_OPTION $MCA -np $n_mpi_processes $tr
 
 cd $dir
 fulldir=`pwd`
+
+#*** check if exe and/or input file is dirty before running
+if [[ "$CHECK_DIRTY" == "1" ]] && [[ "$exe" != "" ]]; then
+  if [ -e $exe ]; then
+    is_dirty_exe=`echo "" | $exe |& grep dirty |& wc -l`
+    dirty_exe=`   echo "" | $exe |& grep dirty |& awk '{print $3}'`
+    is_dirty_input=`git diff --shortstat $in   |& grep -v usage | wc -l`
+
+    is_dirty=
+    if [ $is_dirty_exe -gt 0 ]; then
+      is_dirty=1
+    fi
+    if [ $is_dirty_input -gt 0 ]; then
+      is_dirty=1
+    fi
+
+    if [ "$is_dirty" == "1" ]; then
+      if [ $is_dirty_exe -gt 0 ]; then
+        echo "***error: source used to build FDS is dirty."
+      fi
+      if [ $is_dirty_input -gt 0 ]; then
+        echo "***error: input file is dirty."
+      fi
+      echo "executable: $exe"
+        echo "          $dirty_exe"
+        echo "input file: $in"
+    fi
+    if [ "$is_dirty" == "1" ]; then
+      echo "   Use the -g option to ignore this error"
+      echo "Exiting."
+      exit 1
+    fi
+  fi
+fi
 
 #*** define files
 
