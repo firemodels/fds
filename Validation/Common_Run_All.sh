@@ -26,7 +26,7 @@ resource_manager=
 walltime=
 showcommandline=
 showscript=
-CHECK_DIRTY=-u
+CHECK_DIRTY=-g
 
 INTEL="-I"
 # the mac doesn't have Intel MPI
@@ -55,10 +55,9 @@ echo "Runs FDS validation set"
 echo ""
 echo "Options"
 echo "-b - use debug version of FDS"
-echo "-d - run even if this repo is dirty and/or the executable was built"
-echo "     in a dirty repo"
 echo "-e exe - run using exe (full path to fds)."
 echo "      Note: environment must be defined to use this executable"
+echo "-g - run even if input files or executable is dirty"
 echo "-h - display this message"
 echo "-I - run with Intel MPI version of fds"
 echo "-j job_prefix - specify job prefix"
@@ -80,14 +79,11 @@ exit
 }
 
 DEBUG=$OPENMP
-while getopts 'bde:EhIj:m:o:Oq:r:suvVw:xy' OPTION
+while getopts 'be:EghIj:m:o:Oq:r:suvVw:xy' OPTION
 do
 case $OPTION in
   b)
    DEBUG="-b $OPENMP"
-   ;;
-  d)
-   CHECK_DIRTY=
    ;;
   e)
    EXE="$OPTARG"
@@ -97,6 +93,9 @@ case $OPTION in
    ;;
   E)
    TCP="-E "
+   ;;
+  g)
+   CHECK_DIRTY=
    ;;
   h)
   usage;
@@ -172,14 +171,12 @@ fi
 
 if [ ! $STOPFDS ] ; then
   if [ "$CHECK_DIRTY" != "" ]; then
-    is_dirty=`git describe --dirty --long | grep dirty | wc -l `
-    if [ $is_dirty -gt 0 ]; then
-      echo "***error: repo is dirty."
-      echo "Use the -d option to run in a dirty repo."
-      git describe --dirty --long
-      echo "Exiting."
-      echo 
-      exit
+    ndiffs=`git diff --shortstat FDS_Input_Files/*.fds | wc -l`
+    if [ $ndiffs -gt 0 ]; then
+       echo "***error: One or more input files are dirty"
+       git status -uno | grep FDS_Input_Files  | grep -v \/FDS_Input_Files
+       echo "Exiting."
+       exit 1
     fi
   fi
 fi
