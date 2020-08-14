@@ -769,7 +769,7 @@ In the experiments, a fixed mass, $m$, of LNG was spilled onto water, forming a 
 The values of $D$ are given in Table~\ref{tab:LNG_Dispersion}.
 
 \begin{sidewaystable}[p]
-\caption{Summary of LNG Dispersion Experiments.}
+\caption[Summary of LNG Dispersion Experiments]{Summary of LNG Dispersion Experiments.}
 \begin{center}
 \begin{tabular}{|l|c|c|c|c|c|c|c|c|c|c|c|c|c|}
 \hline
@@ -814,7 +814,7 @@ In 1979, at the National Bureau of Standards (now NIST), Bernard McCaffrey measu
 \end{figure}
 
 \begin{table}[!ht]
-\caption{Summary of McCaffrey Plume Experiments, 1979.}
+\caption[Summary of McCaffrey Plume Experiments]{Summary of McCaffrey Plume Experiments, 1979.}
 \begin{center}
 \begin{tabular}{|c|c|c|c|c|c|}
 \hline
@@ -1026,7 +1026,7 @@ Peak heat release rates ranged from approximately 100~kW to 2.5~MW. Table~\ref{t
 \end{figure}
 
 \begin{table}[!ht]
-\caption{Summary of NIST FSE Experiments selected for model validation.}
+\caption[Summary of NIST FSE Experiments selected for model validation]{Summary of NIST FSE Experiments selected for model validation.}
 \begin{center}
 \begin{tabular}{|l|l|c|c|c|c|c|}
 \hline
@@ -1342,7 +1342,7 @@ Although a load cell was used in the experiments to measure the mass loss rate o
 A time offset was used to align the predicted ceiling thermocouple temperatures with the measured temperatures. This offset is reported as the time at which the $t$-squared ramp begins. The t-squared calibration parameters and time offsets for the HRR ramps are shown in Table~\ref{tab:NIST_Smoke_Alarms_Summary}. Additionally, the ignition source had a small effect on the measured ceiling thermocouple temperatures. Therefore, the size of the ignition source was approximated as either 3~kW or 7~kW, and the time offset of the ignition source was also calibrated by using the measured ceiling thermocouple temperatures. The resulting HRR curve was input into FDS as a fire ramp. A summary of the eight tests selected for model validation is shown in Table~\ref{tab:NIST_Smoke_Alarms_Summary}.
 
 \begin{table}[h!]
-\caption{Summary of NIST Smoke Alarm Experiments selected for model validation.}
+\caption[Summary of NIST Smoke Alarm Experiments selected for model validation]{Summary of NIST Smoke Alarm Experiments selected for model validation.}
 \begin{center}
 \begin{tabular}{|c|c|c|c|c|c|}
 \hline
@@ -1590,7 +1590,7 @@ A turbulent buoyant diffusion flame is established on a diffuser burner with an 
 In 1952 Ranz and Marshall performed a set of droplet evaporation experiments that ultimately led to the development of the Ranz-Marshall Nusselt and Schmidt number correlations for droplet heat and mass transfer~\cite{Ranz}. The experiments documented in Figure 8 and Tables 1 to 4 in the paper have been modeled with FDS. For the experiment in Figure 8 of the Ranz and Marshall paper a 1043~$\mu$m water droplet was suspended in still dry air at an ambient temperature and pressure of 24.9$^\circ$C and 98792 Pa. The droplet diameter was measured over time. For the experiments in Tables 1 to 4 in the paper, droplets were suspended in a dry air stream. Experimental parameters included the type of fluid (water or benzene), the initial drop diameter, the ambient temperature, and the velocity of the air stream. The evaporation rate in the FDS simulations was determined by allowing the drop temperature to reach equilibrium and then using the time it took the drop to decrease in size to 350~$\mu$m (the minimum reported droplet size in Figure 8 of the paper). The table below summarizes the experiments.
 
 \begin{table}[h]
-	\caption{Summary of Ranz and Marshall droplet evaporation experiments.}
+	\caption[Summary of Ranz and Marshall droplet evaporation experiments]{Summary of Ranz and Marshall droplet evaporation experiments.}
 	\begin{center}
 		\begin{tabular}{|c|c|c|c|c|c|c|}
 			\hline
@@ -1678,7 +1678,7 @@ Prior to running the validation cases, a set of five scoping simulations were ru
 The condensation simulations included a 4~m portion of duct upstream to allow for flow development, and a 1 m portion of duct downstream to avoid boundary effects on the test section. The upstream boundary condition was set with the conditions shown in the table below along with synthetic eddy method inputs using the rms velocity determine from the scoping simulations. The outlet was defined as an {\ct OPEN} boundary. The experiments measured temperature 1.5~cm into the aluminum plate along the plate centerline. The test measured condensation heat transfer was used with the inside plate temperature to derive the plate surface temperature. The condensation plate {\ct TMP\_FRONT} was set to derived temperature as a function of length along the plate.
 
 \begin{table}[h]
-	\caption{Summary of SETCOM condensation experiments selected for model validation.}
+	\caption[Summary of SETCOM condensation experiments selected for model validation]{Summary of SETCOM condensation experiments selected for model validation.}
 	\begin{center}
 		\begin{tabular}{|c|c|c|c|}
 			\hline
@@ -1700,7 +1700,7 @@ The condensation simulations included a 4~m portion of duct upstream to allow fo
 Mark Sippola, a doctoral student at the University of California, Berkeley, measured aerosol deposition velocities for various sizes of monodisperse fluorescent particles and various air velocities in a duct \cite{Sippola:2002,Sippola:2010}. The experimental facility consisted of a duct loop with a section for injecting fluorescent aerosol particles. The loop contained four measurement sections with two sections located after a long segment of straight duct such that fully-developed flow profiles existed. The experiments considered here include tests with measurements in the fully-developed flow test sections. Tests included 16 test for straight smooth steel duct and 15 tests in a straight duct lined with insulation. Based upon pressure drop measurements made in the duct, the roughness of the insulated duct was estimated as 1.5~mm. Both ducts had dimensions of 15~cm by 15~cm. The particle diameters were nominally 1~$\mu$m, 3~$\mu$m, 5~$\mu$m, 9~$\mu$m, and 16~$\mu$m. The air velocities in the duct were nominally 2.2~m/s, 5.3~m/s, and 9.0~m/s. In each test section, a total of twelve panels (20~cm by 10~cm) were cut from the duct section to measure the amount of particles deposited to the duct surfaces; four panels each from the duct ceiling, wall, and floor surfaces. Fluorescent measurement techniques and aerosol concentration measurements were used to calculate the deposition velocities of the particles to duct surfaces (ceiling, wall, and floor) in each of the two straight duct sections where the turbulent flow profile was fully developed. The experiments are summarized in Table~\ref{Sippola_Aerosol_Deposition_Summary}.
 
 \begin{table}[h]
-\caption{Summary of Sippola aerosol deposition experiments selected for model validation.}
+\caption[Summary of Sippola aerosol deposition experiments selected for model validation]{Summary of Sippola aerosol deposition experiments selected for model validation.}
 \begin{center}
 \begin{tabular}{|c|c|c|c|}
 \hline
@@ -1781,7 +1781,7 @@ The experiments were performed inside a standard compartment designed for corner
 
 \begin{figure}[!ht]
 \includegraphics[width=\textwidth]{FIGURES/SP_AST/SP_AST_Compartment_Drawing}
-\caption{Geometry of the  SP/AST compartment for Test 2.}
+\caption[Geometry of the  SP/AST compartment for Test 2]{Geometry of the  SP/AST compartment for Test 2.}
 \label{Room_Drawing}
 \end{figure}
 
@@ -1869,7 +1869,7 @@ $\Delta h$              &      kJ/kg    & 18100                              & \
 Steckler, Quintiere and Rinkinen performed a set of 55 compartment fire tests at NBS in 1979. The compartment was 2.8~m by 2.8~m by 2.13~m high\footnote{The test report gives the height of the compartment as 2.18~m. This is a misprint. The compartment was 2.13~m high.}, with a single door of various widths, or alternatively a single window with various heights. A 30~cm diameter methane burner was used to generate fires with heat release rates of 31.6~kW, 62.9~kW, 105.3~kW and 158~kW. Vertical profiles of velocity and temperature were measured in the doorway, along with a single vertical profile of temperature within the compartment. A full description and results are reported in Reference~\cite{Steckler:NBSIR_82-2520}. The basic test matrix is listed in Table~\ref{Steckler_Table}. Note that the test report does not include a detailed description of the compartment. However, an internal report\footnote{ {\em Technical Research Report, Fire Induced Flows Through Room Openings - Flow Coefficients}, Project 203005-003, Armstrong Cork Company, Lancaster, Pennsylvania, May, 1981.} by the test sponsor, Armstrong Cork Company, reports that the compartment floor was composed of 19~mm calcium silicate board on top of 12.7~mm plywood on wood joists. The walls and ceiling consisted of 12.7~mm ceramic fiber insulation board over 0.66~mm aluminum sheet attached to wood studs. A diagram of the compartment is displayed in Fig.~\ref{Steckler_ Drawing}.
 
 \begin{table}[h!]
-\caption{Summary of Steckler compartment experiments.}
+\caption[Summary of Steckler compartment experiments]{Summary of Steckler compartment experiments.}
 \begin{center}
 \begin{tabular}{|c|c|c|c|c||c|c|c|c|c|}
 \hline
@@ -1912,7 +1912,7 @@ Test    & Width     & Height        & $\dot{Q}$  & Location     & Test  & Width 
 
 \begin{figure}[!ht]
 \includegraphics[width=\textwidth]{FIGURES/Steckler_Compartment/Steckler_Room_Drawing}
-\caption{Geometry of the Steckler Compartment Experiments.}
+\caption[Geometry of the Steckler Compartment Experiments]{Geometry of the Steckler Compartment Experiments.}
 \label{Steckler_ Drawing}
 \end{figure}
 
@@ -2076,7 +2076,7 @@ Ceiling}}
 
 \end{picture}
 \end{center}
-\caption[Plan view of the UL/NFPRF heptane spray experiments, Series~I.] {Plan view of the UL/NFPRF heptane spray experiments, Series~I. The sprinklers are indicated by the solid circles and are spaced exactly 10~ft apart. The number beside each sprinkler location indicates the channel number of the nearest thermocouple. The vent dimensions are 4~ft by 8~ft. The boxed letters A, B, C and D indicate burner positions. Corresponding to each burner position is a vertical array of thermocouples. Thermocouples 1--9 hang 7, 22, 36, 50, 64, 78, 92, 106 and 120~in from the ceiling, respectively, above Position A. Thermocouples 10 and 11 are positioned above and below the ceiling tile directly above Position B, followed by 12--20 that hang at the same levels below the ceiling as 1--9. The same pattern is followed at Positions C and D, with thermocouples 21--31 at C and 32--42 at D.}
+\caption[Plan view of the UL/NFPRF heptane spray experiments, Series~I] {Plan view of the UL/NFPRF heptane spray experiments, Series~I. The sprinklers are indicated by the solid circles and are spaced exactly 10~ft apart. The number beside each sprinkler location indicates the channel number of the nearest thermocouple. The vent dimensions are 4~ft by 8~ft. The boxed letters A, B, C and D indicate burner positions. Corresponding to each burner position is a vertical array of thermocouples. Thermocouples 1--9 hang 7, 22, 36, 50, 64, 78, 92, 106 and 120~in from the ceiling, respectively, above Position A. Thermocouples 10 and 11 are positioned above and below the ceiling tile directly above Position B, followed by 12--20 that hang at the same levels below the ceiling as 1--9. The same pattern is followed at Positions C and D, with thermocouples 21--31 at C and 32--42 at D.}
 \label{layout}
 \end{figure}
 
@@ -2235,7 +2235,7 @@ II-12 & C  & All Open at Start       & 23 & 0:58 & 4:55 & 119.0 &246.2 \\ \hline
 
 \end{picture}
 \end{center}
-\caption[Plan view of the UL/NFPRF plastic commodity Test P-3.]
+\caption[Plan view of the UL/NFPRF plastic commodity Test P-3]
 {Plan view of the UL Large Scale Fire Test Facility with the layout of plastic commodity Test P-3. Tests P-1 and P-2 did not include the draft curtains (dashed lines). The sprinklers (dots) were separated by exactly 10~ft. The racks were located 30~ft south and 20~ft east of the position shown in Tests~P-1, P-4, and P-5. The racks were located 10~ft south of the position shown in Test~P-2. Each pallet load of boxed plastic commodity is represented by a square subdivided into four smaller squares to depict the individual boxes. Pallets containing empty boxes are represented by empty squares. Roof vents are represented by rectangles.}
 \label{layout3}
 \end{figure}
@@ -2413,7 +2413,7 @@ Mean and RMS (root mean square) temperature data are recorded using an array of 
 \begin{figure}[!ht]
 \centering
 \includegraphics[width=\textwidth]{FIGURES/UMD_Line_Burner/UMD_Line_Burner_isometric}
-\caption{UMD Line Burner isometric view of burner and oxidizer assembly.}
+\caption[UMD Line Burner isometric view of burner and oxidizer assembly]{UMD Line Burner isometric view of burner and oxidizer assembly.}
 \label{fig:umd_line_burner_plan_view}
 \end{figure}
 
@@ -2600,10 +2600,10 @@ Time    & Slow     & Medium     & Fast   \\
 \end{center}
 \label{Vettori_Ramps}
 \end{table}
-    	
+
 \section{Vettori Sloped Ceiling Experiments}
 \label{Vettori_Sloped_Ceiling_Description}
-    	
+
 Vettori~\cite{Vettori:2} performed a series of 72 compartment experiments to measure the activation times of quick-response residential pendent sprinklers mounted under a ceiling with an adjustable slope. There were 36 unique configurations (2 replicates of each) combining the following parameters:
 \begin{itemize}
 \item \underline{F}lat, \underline{13}$^\circ$, or \underline{24}$^\circ$ Ceiling Slope
@@ -2719,7 +2719,7 @@ Table~\ref{Test_Parameters} presents a summary of all the experiments described 
 
 \begin{landscape}
 \begin{longtable}{|l|c|c|c|c|c|c|c|c|c|c|}
-\caption{Summary of important experimental parameters.}  \label{Test_Parameters} \\
+\caption[Summary of important experimental parameters]{Summary of important experimental parameters.}  \label{Test_Parameters} \\
 \hline
                     & $\dot{Q}$     & $D$           & $H$   &                   &                     &               &             &             &                       &                       \\
 \rb{Test Series}    & (kW)          & (m)           & (m)   & \rb{$\dot{Q}^*$}  & \rb{$L_{\rm f}/H$}  & \rb{$\phi$}   & \rb{$W/H$}  & \rb{$L/H$}  & \rb{$r_{\rm cj}/H$}   & \rb{$r_{\rm rad}/D$}  \\
@@ -2791,7 +2791,7 @@ Note that the calculations performed for the various validation studies describe
 
 \begin{table}[!t]
 \centering
-\caption{Summary of important numerical parameters.}
+\caption[Summary of important numerical parameters]{Summary of important numerical parameters.}
 \begin{tabular}{|l|c|c|c|}
 \hline
                     &               &               &               \\
