@@ -577,10 +577,12 @@ fi
 if [[ "$CHECK_DIRTY" == "1" ]] && [[ "$exe" != "" ]]; then
   if [ -e $exe ]; then
     is_dirty=`echo "" | $exe |& grep dirty | wc -l`
+    dirty=`echo "" | $exe |& grep dirty`
     if [ $is_dirty -gt 0 ]; then
       echo ""
       echo "  ***error: repo used to build executable was dirty."
       echo "executable: $exe"
+      echo "            $dirty"
       echo "input file: $in"
       echo "Exiting."
       exit 1
