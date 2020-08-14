@@ -577,7 +577,7 @@ fi
 if [[ "$CHECK_DIRTY" == "1" ]] && [[ "$exe" != "" ]]; then
   if [ -e $exe ]; then
     is_dirty=`echo "" | $exe |& grep dirty |& wc -l`
-    dirty=`   echo "" | $exe |& grep dirty |& awk '{print $3}'``
+    dirty=`   echo "" | $exe |& grep dirty |& awk '{print $3}'`
     if [ $is_dirty -gt 0 ]; then
       echo ""
       echo "  ***error: repo used to build executable was dirty."
