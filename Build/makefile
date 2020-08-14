@@ -21,7 +21,7 @@ ifeq ($(shell echo "check_quotes"),"check_quotes")
 else
 # linux/osx
   SHELL:=/bin/bash
-  GIT_HASH := $(shell git describe --long)
+  GIT_HASH := $(shell git describe --long --dirty)
   ifeq ("$(shell git diff --shortstat $(VPATH)/*.f90)","")
     GIT_STAT :=
   else
