@@ -2,11 +2,12 @@
 
 USE_SSH=
 
-# uncomment following USE_SSH line to use ssh to copy figures 
+# uncomment following USE_SSH line to use ssh to copy figures
 # use when you can't cross mount directories containing firebot
 #USE_SSH=1
 
 # set firebot host to blaze
+# if using USE_SSH=1 over VPN add user name to HOST, e.g., HOST=rmcdermo@blaze.el.nist.gov
 HOST=blaze.el.nist.gov
 HOSTDIR=/home2/smokevis2/firebot/FireModels_clone/fds/
 
@@ -56,8 +57,8 @@ rsync -r --exclude=*.git $FBVAL/SCRIPT_FIGURES/* $BASEDIR/FDS_Validation_Guide/S
 echo Validation Guide Figures Copied
 
 # Copy Verification Results
-#rsync -v -r --include '*/' --include '*_git.txt' --include '*.csv' --include '*.prt5' --exclude '*' $FIREBOTVER/* $BASEDIR/../Verification/
-#cp $FIREBOTVER/Miscellaneous/mesh_transformation.smv $BASEDIR/../Verification/Miscellaneous/.
+#rsync -v -r --include '*/' --include '*_git.txt' --include '*.csv' --include '*.prt5' --include '*.err' --exclude '*' $FIREBOTVER/* $BASEDIR/../Verification/
+#$CP $FIREBOTVER/Miscellaneous/mesh_transformation.smv $BASEDIR/../Verification/Miscellaneous/.
 #echo Verification Results Copied
 
 # Copy Validation Results
