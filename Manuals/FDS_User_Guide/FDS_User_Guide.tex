@@ -1345,13 +1345,13 @@ The turbulent Prandtl number $\PR_t$ and the turbulent Schmidt number $\SC_t$ ar
 \centering
 \begin{tabular}{|lll|}
 \hline
-{\ct TURBULENCE\_MODEL} \hfill  & Description    \hfill                                         & Coefficient(s)  \hfill  \\ \hline
-{\ct 'CONSTANT SMAGORINSKY'}    & Constant coefficient Smagorinsky model \cite{Smagorinsky:1}   & {\ct C\_SMAGORINSKY}  \\
-{\ct 'DYNAMIC SMAGORINSKY'}     & Dynamic Smagorinsky model \cite{Germano:1991,Moin:1991}       & None                  \\
-{\ct 'DEARDORFF'}               & Deardorff model \cite{Deardorff:1980,Pope:2000}               & {\ct C\_DEARDORFF}    \\
-{\ct 'VREMAN'}                  & Vreman's eddy viscosity model \cite{Vreman:2004}              & {\ct C\_VREMAN}       \\
-{\ct 'RNG'}                     & Renormalization group eddy viscosity model \cite{Yakhot:1989} & {\ct C\_RNG}, {\ct C\_RNG\_CUTOFF} \\
-{\ct 'WALE'}                    & Wall-Adapting Local Eddy-viscosity model \cite{Nicoud:1999}   & {\ct C\_WALE} \\ \hline
+{\ct TURBULENCE\_MODEL} \hfill  & Description    \hfill                                   & Coefficient(s)  \hfill  \\ \hline
+{\ct 'CONSTANT SMAGORINSKY'}    & Constant-coefficient Smagorinsky \cite{Smagorinsky:1}   & {\ct C\_SMAGORINSKY}  \\
+{\ct 'DYNAMIC SMAGORINSKY'}     & Dynamic Smagorinsky \cite{Germano:1991,Moin:1991}       & None                  \\
+{\ct 'DEARDORFF'}               & Deardorff \cite{Deardorff:1980,Pope:2000}               & {\ct C\_DEARDORFF}    \\
+{\ct 'VREMAN'}                  & Vreman's eddy viscosity \cite{Vreman:2004}              & {\ct C\_VREMAN}       \\
+{\ct 'RNG'}                     & Renormalization group eddy viscosity \cite{Yakhot:1989} & {\ct C\_RNG}, {\ct C\_RNG\_CUTOFF} \\
+{\ct 'WALE'}                    & Wall-Adapting Local Eddy-viscosity \cite{Nicoud:1999}   & {\ct C\_WALE} \\ \hline
 \end{tabular}
 \end{table}
 
@@ -4967,7 +4967,7 @@ Note that while you can define as many species using {\ct SPEC} as you wish in a
 \label{info:SPEC_Basics}
 \label{gas_filling}
 
-Each {\ct SPEC} line should include at the very least the name of the species via a character string, {\ct ID}. Once the extra species has been declared, you introduce it at surfaces via the parameters {\ct MASS\_FRACTION(:)} or {\ct MASS\_FLUX(:)} along with the character array {\ct SPEC\_ID(:)}. A very simple example of how a gas---in this case hydrogen---can be introduced into the simulation is given by the simple input file called {\ct gas\_filling.fds}. The relevant lines are as follows:
+Each {\ct SPEC} line should include at the very least the name of the species via a character string, {\ct ID}. Once the extra species has been declared, you introduce it at surfaces via the parameters {\ct MASS\_FRACTION(:)} or {\ct MASS\_FLUX(:)} along with the character array {\ct SPEC\_ID(:)}. A very simple example of how a gas can be introduced into the simulation is given by the simple input file called {\ct gas\_filling.fds}. The relevant lines are as follows:
 \begin{lstlisting}
 &SPEC ID='HYDROGEN' /
 &SURF ID='LEAK', SPEC_ID(1)='HYDROGEN', MASS_FLUX(1)=0.01667, RAMP_MF(1)='leak_ramp' /
@@ -6036,7 +6036,7 @@ Note: The sign of {\ct NU} corresponds to whether that species is consumed (-) o
 
 If soot deposition is being computed, the soot present on surfaces can undergo oxidation if the local temperature is high enough and oxygen is present. Soot oxidation is enabled with the logical flag {\ct SOOT\_OXIDATION} on the {\ct MISC} input. Oxidation is computed as a single step, Arrhenius reaction using the soot surface density and the local oxygen mole fraction. The reaction uses a rate constant of $4.7 \times 10^{12}$ and an activation energy of 211~kJ/mol. These values are based upon work performed by Hartman, Beyler, Riahi, and Beyler~\cite{Hartman_2012}.
 
-Soot oxidation cannot be used with simple chemistry; you must use primitive species. See the {\ct soot\_oxidation\_wall} example case in the Verification Guide.
+Soot oxidation cannot be used with simple chemistry; you must use primitive species. See the sample case {\ct soot\_oxidation\_wall} in the Verification Guide.
 
 \section{Special Topic: Aerosol Agglomeration}
 \label{info:agglomeration}

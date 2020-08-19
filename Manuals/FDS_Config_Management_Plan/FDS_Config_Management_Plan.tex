@@ -130,7 +130,7 @@ not affiliated with NIST, VTT, or its software development collaborators.
 
 \label{acksection}
 
-The idea for this Guide originated with Jason Floyd, a co-developer of FDS and practicing engineer at Jensen Hughes. He readily saw the need for a clear description of the process of developing and maintaining FDS and Smokeview. Bryan Klein, currently with Thunderhead Engineering, Inc., instituted a number of the internet tools that are described in the Guide, including the source code repository, issue tracking system, and discussion group sites. Kristopher Overholt, currently with RStudio, developed the Firebot automated build and testing process. 
+The idea for this Guide originated with Jason Floyd, a co-developer of FDS and practicing engineer at Jensen Hughes. He readily saw the need for a clear description of the process of developing and maintaining FDS and Smokeview. Bryan Klein, currently with Thunderhead Engineering, Inc., instituted a number of the internet tools that are described in the Guide, including the source code repository, issue tracking system, and discussion group sites. Kristopher Overholt, currently with RStudio, developed the Firebot automated build and testing process.
 
 
 \newpage
@@ -205,7 +205,7 @@ tool to study fundamental fire dynamics and combustion. FDS can be used to model
 \item Sprinkler, heat detector, and smoke detector activation
 \item Sprinkler sprays and suppression by water or other agents
 \end{itemize}
-Although FDS was designed specifically for fire simulations, it can be used for other low-speed fluid flow simulations that do not necessarily include fire or thermal effects. To date, about half of the fire applications of the model have been for design of smoke control systems and sprinkler/detector activation studies. The other half consists of residential and industrial fire reconstructions. 
+Although FDS was designed specifically for fire simulations, it can be used for other low-speed fluid flow simulations that do not necessarily include fire or thermal effects. To date, about half of the fire applications of the model have been for design of smoke control systems and sprinkler/detector activation studies. The other half consists of residential and industrial fire reconstructions.
 
 
 \section{Input Parameters}
@@ -326,7 +326,7 @@ The FDS manuals are typeset using \LaTeX, specifically, PDF \LaTeX. The \LaTeX\ 
 
 Currently, FDS and Smokeview make use of GitHub, a free service to support software development for open source applications. GitHub uses Git version control software. Under this system a centralized repository containing all project files resides on an external server.   A record of version number when a specific file was last changed is maintained. As an open source program, any individual can obtain a copy of the repository or retrieve specific versions of the repository.
 
-Both FDS and Smokeview live within a GitHub \emph{organization} called ``Fire Models''.  The current location of the organization is availabbe view the \emph{View on Github} button at \href{https://pages.nist.gov/fds/} {\textct{https://pages.nist.gov/fds/}}.  The repositories that are used by the FDS and Smokeview projects contain more than 6000 configuration items and are listed below along with a brief description:
+Both FDS and Smokeview live within a GitHub \emph{organization} called ``Fire Models''.  The current location of the organization is available through the \emph{View on Github} button at \href{https://pages.nist.gov/fds/} {\textct{https://pages.nist.gov/fds/}}.  The repositories that are used by the FDS and Smokeview projects contain more than 6000 configuration items and are listed below along with a brief description:
 
 \vskip\baselineskip
 \begin{tabular}{ll}
@@ -336,7 +336,8 @@ exp & Repository of experimental data for model validation \\
 out & FDS output results for validation \\
 bot & Firebot (continuous integration system) source \\
 fds-smv & Web page html source \\
-fig & contains figures and other large files used in other repos under firemodels
+fig & contains figures and other large files used in other repos under firemodels \\
+cad & contains large CAD geometry files that may be included with FDS input files
 \end{tabular}
 \vskip\baselineskip
 
