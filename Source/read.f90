@@ -12254,20 +12254,6 @@ READ_EVACUATION_ZONE_LOOP: DO N=N_ZONE-N_EVAC_ZONE+1,N_ZONE
 
    P_ZONE(N)%MESH_INDEX = NM_EVAC
 
-   ! Find the first non-solid cell in the main evacuation mesh of this zone
-   M => MESHES(NM_EVAC)
-   EVAC_K_LOOP: DO K=1,M%KBAR
-      EVAC_J_LOOP: DO J=1,M%JBAR
-         EVAC_I_LOOP: DO I=1,M%IBAR
-            IF (M%SOLID(M%CELL_INDEX(I,J,K))) CYCLE EVAC_I_LOOP
-            P_ZONE(N)%X = M%XC(I)
-            P_ZONE(N)%Y = M%YC(J)
-            P_ZONE(N)%Z = M%ZC(K)
-            EXIT EVAC_K_LOOP
-         ENDDO EVAC_I_LOOP
-      ENDDO EVAC_J_LOOP
-   ENDDO EVAC_K_LOOP
-
    P_ZONE(N)%ID = TRIM('EvacZONE_') // TRIM(MESH_NAME(NM_EVAC))
    P_ZONE(N)%EVACUATION = .TRUE.
    P_ZONE(N)%PERIODIC = PERIODIC
