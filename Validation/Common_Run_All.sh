@@ -170,12 +170,26 @@ fi
 # abort if repo is dirty
 
 if [ ! $STOPFDS ] ; then
+  ABORT=
   if [ "$CHECK_DIRTY" != "" ]; then
     ndiffs=`git diff --shortstat FDS_Input_Files/*.fds | wc -l`
+    nsourcediffs=`git diff --shortstat ../../Source/*.f90 | wc -l`
     if [ $ndiffs -gt 0 ]; then
+       echo ""
        echo "***error: One or more input files are dirty."
-       echo "          Use the -g option to run anyway."
        git status -uno | grep FDS_Input_Files  | grep -v \/FDS_Input_Files
+       ABORT=1
+    fi
+    if [ $nsourcediffs -gt 0 ]; then
+       echo ""
+       echo "***error: One or more source files are dirty."
+       cd ../..
+       git status -uno | grep Source
+       ABORT=1
+    fi
+    if [ "$ABORT" == "1" ]; then
+       echo ""
+       echo "Use the -g option to run anyway."
        echo "Exiting."
        exit 1
     fi
