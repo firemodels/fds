@@ -173,7 +173,8 @@ if [ ! $STOPFDS ] ; then
   if [ "$CHECK_DIRTY" != "" ]; then
     ndiffs=`git diff --shortstat FDS_Input_Files/*.fds | wc -l`
     if [ $ndiffs -gt 0 ]; then
-       echo "***error: One or more input files are dirty"
+       echo "***error: One or more input files are dirty."
+       echo "          Use the -g option to run anyway."
        git status -uno | grep FDS_Input_Files  | grep -v \/FDS_Input_Files
        echo "Exiting."
        exit 1
