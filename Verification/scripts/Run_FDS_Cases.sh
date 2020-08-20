@@ -310,15 +310,6 @@ fi
 
 cd $CURDIR
 cd ..
-if [ "$GEOMCASES" == "1" ]; then
-  ./GEOM_Cases.sh
-  if [ "$CHECKCASES" == "" ]; then
-      echo Cases in GEOM_Cases.sh submitted
-  fi
-fi
-
-cd $CURDIR
-cd ..
 if [ "$INSPECTCASES" == "1" ]; then
   ./INSPECT_Cases.sh
   if [ "$CHECKCASES" == "" ]; then
