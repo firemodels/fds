@@ -1,11 +1,11 @@
 Water droplets evaporate in a tunnel.
 This case tests conservation of mass and energy.
 
-&HEAD CHID='water_evaporation_4', TITLE='Water Evaporation Test' / 
+&HEAD CHID='water_evaporation_4', TITLE='Water Evaporation Test' /
 
-&MESH IJK=30,10,10, XB=0.0,3.0,0.0,1.0,0.0,1.0 / 
+&MESH IJK=30,10,10, XB=0.0,3.0,0.0,1.0,0.0,1.0 /
 
-&TIME T_END=40. / 
+&TIME T_END=40. /
 
 &MISC GVEC=0,0,0, STRATIFICATION=.FALSE. ,HUMIDITY=0.,Y_CO2_INFTY=0./
 &RADI RADIATION=.FALSE./
@@ -17,13 +17,13 @@ This case tests conservation of mass and energy.
 
 &PART ID='water drops', SPEC_ID='WATER VAPOR', STATIC=.TRUE., DRAG_COEFFICIENT=0.,
       QUANTITIES(1:2)='PARTICLE DIAMETER','PARTICLE TEMPERATURE',
-      DIAMETER=20.,MINIMUM_DIAMETER=0.1, MONODISPERSE=.TRUE., INITIAL_TEMPERATURE=20., SAMPLING_FACTOR=1 /
+      DIAMETER=20.,MINIMUM_DIAMETER=0.1, MONODISPERSE=.TRUE., INITIAL_TEMPERATURE=20., SAMPLING_FACTOR=10 /
 
 &INIT PART_ID='water drops', MASS_PER_TIME=0.05, DT_INSERT=0.001, N_PARTICLES=1000, XB=1.0,2.0,0.0,1.0,0.0,1.0,
       DEVC_ID='clock' /
 
-&VENT MB='XMIN', SURF_ID='BLOW' / 
-&VENT MB='XMAX', SURF_ID='OPEN' / 
+&VENT MB='XMIN', SURF_ID='BLOW' /
+&VENT MB='XMAX', SURF_ID='OPEN' /
 
 &VENT MB='ZMIN',SURF_ID='MIRROR'/
 &VENT MB='ZMAX',SURF_ID='MIRROR'/
