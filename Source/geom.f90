@@ -1077,7 +1077,8 @@ DO K=1,KBAR
    DO J=1,JBAR
       DO I=0,IBAR
          IF (CC_IBM) THEN
-            IF (FCVAR(I,J,K,IBM_FGSC,IAXIS) /= IBM_GASPHASE) CYCLE
+            IF (.NOT.CC_VELOBC_FLAG3 .AND. FCVAR(I,J,K,IBM_FGSC,IAXIS) /= IBM_GASPHASE) CYCLE ! Case of regular IBM.
+            IF (     CC_VELOBC_FLAG3 .AND. FCVAR(I,J,K,IBM_FGSC,IAXIS) == IBM_SOLID) CYCLE    ! Stress method.
          ENDIF
          ! Kinematic Viscosity:
          NU = 0.5_EB*(MU(I,J,K)/RHOP(I,J,K) + MU(I+1,J,K)/RHOP(I+1,J,K))
@@ -1123,7 +1124,8 @@ DO K=0,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
          IF (CC_IBM) THEN
-            IF(FCVAR(I,J,K,IBM_FGSC,KAXIS) /= IBM_GASPHASE) CYCLE
+            IF (.NOT.CC_VELOBC_FLAG3 .AND. FCVAR(I,J,K,IBM_FGSC,KAXIS) /= IBM_GASPHASE) CYCLE ! Case of regular IBM.
+            IF (     CC_VELOBC_FLAG3 .AND. FCVAR(I,J,K,IBM_FGSC,KAXIS) == IBM_SOLID) CYCLE    ! Stress method.
          ENDIF
          ! Kinematic Viscosity:
          NU = 0.5_EB*(MU(I,J,K)/RHOP(I,J,K) + MU(I,J,K+1)/RHOP(I,J,K+1))
