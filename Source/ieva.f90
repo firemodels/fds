@@ -13447,7 +13447,6 @@ Module STAT
   Use PRECISION_PARAMETERS ! prec.f90g
   Use GLOBAL_CONSTANTS, GC_Gamma => Gamma    ! cons.f90
   Use COMP_FUNCTIONS, Only: SHUTDOWN         ! func.f90
-  Use MATH_FUNCTIONS, Only: AFILL ! func.f90
   Use MEMORY_FUNCTIONS, Only: ChkMemErr ! func.f90
 
   Implicit None
