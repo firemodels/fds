@@ -13270,7 +13270,7 @@ VELOBC_FLAG3_IF : IF(CC_VELOBC_FLAG3) THEN
                   ENDIF
 
                   DEL_EP = DXX(2) - ABS(XB_IB)
-                  IF ( DEL_EP < THRES_FCT_EP*DXX(2) ) THEN; SKIP_FCT = 2; DEL_EP = DEL_EP + DXX(2); ENDIF
+                  IF( DEL_EP < THRES_FCT_EP*DXX(2) ) THEN; SKIP_FCT = 2; DEL_EP = DEL_EP + DXX(2); ENDIF
                   IEP=II; JEP=JJ; KEP=KK+SKIP_FCT*I_SGN
 
                ELSE ! IF(FAXIS==KAXIS) THEN
@@ -13288,7 +13288,7 @@ VELOBC_FLAG3_IF : IF(CC_VELOBC_FLAG3) THEN
                   ENDIF
 
                   DEL_EP = DXX(1) - ABS(XB_IB)
-                  IF( DEL_EP > THRES_FCT_EP*DXX(1) ) THEN; SKIP_FCT = 2; DEL_EP = DEL_EP + DXX(1); ENDIF
+                  IF( DEL_EP < THRES_FCT_EP*DXX(1) ) THEN; SKIP_FCT = 2; DEL_EP = DEL_EP + DXX(1); ENDIF
                   IEP=II; JEP=JJ+SKIP_FCT*I_SGN; KEP=KK
 
                ENDIF
@@ -13378,7 +13378,7 @@ VELOBC_FLAG3_IF : IF(CC_VELOBC_FLAG3) THEN
                   ENDIF
 
                   DEL_EP = DXX(1) - ABS(XB_IB)
-                  IF( DEL_EP > THRES_FCT_EP*DXX(1) ) THEN; SKIP_FCT = 2; DEL_EP = DEL_EP + DXX(1); ENDIF
+                  IF( DEL_EP < THRES_FCT_EP*DXX(1) ) THEN; SKIP_FCT = 2; DEL_EP = DEL_EP + DXX(1); ENDIF
                   IEP=II; JEP=JJ; KEP=KK+SKIP_FCT*I_SGN
 
                ENDIF
@@ -13468,7 +13468,7 @@ VELOBC_FLAG3_IF : IF(CC_VELOBC_FLAG3) THEN
                   ENDIF
 
                   DEL_EP = DXX(1) - ABS(XB_IB)
-                  IF( DEL_EP > THRES_FCT_EP*DXX(1) ) THEN; SKIP_FCT = 2; DEL_EP = DEL_EP + DXX(1); ENDIF
+                  IF( DEL_EP < THRES_FCT_EP*DXX(1) ) THEN; SKIP_FCT = 2; DEL_EP = DEL_EP + DXX(1); ENDIF
                   IEP=II+SKIP_FCT*I_SGN; JEP=JJ; KEP=KK
 
                ENDIF
@@ -13528,7 +13528,7 @@ VELOBC_FLAG3_IF : IF(CC_VELOBC_FLAG3) THEN
          ! SLIP_COEF = -1, no slip, VEL_GHOST=-U_GAS
          ! SLIP_COEF =  1, free slip, VEL_GHOST=VEL_T
          VEL_GHOST = VEL_T + 0.5_EB*(SLIP_FACTOR-1._EB)*(U_GAS-VEL_T)
-         DUIDXJ(ICD_SGN) = REAL(I_SGN,EB)*(U_GAS-VEL_GHOST)/DXX(ICD)
+         DUIDXJ(ICD_SGN) = REAL(I_SGN,EB)*(U_GAS-VEL_GHOST)/(2._EB*DXN_STRM_UB)
          MU_DUIDXJ(ICD_SGN) = RHO_FACE*U_TAU**2 * SIGN(1._EB,REAL(I_SGN,EB)*(U_GAS-VEL_T))
 
          ! VLG(ICD_SGN)=U_GAS
@@ -16404,7 +16404,7 @@ INTEGER, PARAMETER :: IADD(IAXIS:KAXIS,IAXIS:KAXIS) = RESHAPE( (/ 0,1,1,1,0,1,1,
 LOGICAL, PARAMETER :: FACE_MASK = .TRUE.
 
 INTEGER :: IS,I_SGN,ICD,ICD_SGN,IIF,JJF,KKF,FAXIS,IEC,IE,SKIP_FCT,IEP,JEP,KEP,INDS(1:2,IAXIS:KAXIS)
-REAL(EB):: DXX(2),AREA_CF,XB_IB,DEL_EP
+REAL(EB):: DXX(2),AREA_CF,XB_IB,DEL_EP,DEL_IBEDGE
 
 REAL(EB) CPUTIME,CPUTIME_START,CPUTIME_START_LOOP
 #ifdef DEBUG_IBM_INTERPOLATION
@@ -17510,10 +17510,10 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                      ! For XB_IB we use the sum of gas cut-faces in the face and compare it with the face AREA:
                      AREA_CF = 0._EB; ICF = FCVAR(IIF,JJF,KKF,IBM_IDCF,FAXIS)
                      IF(ICF>0) AREA_CF = SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))
-                     DXX(1)  = DY(JJF); DXX(2)  = DZ(KKF)
+                     DXX(1)  = DY(JJF); DXX(2)  = DZ(KKF); DEL_IBEDGE = DX(IIF)
                      IF (FAXIS==JAXIS) THEN
                         ! XB_IB:
-                        IBM_IBEDGE(IEDGE)%XB_IB(ICD_SGN) = -(DXX(2)-AREA_CF/DXX(1)) ! -ve dist Bound to IBEDGE opposed to normal.
+                        IBM_IBEDGE(IEDGE)%XB_IB(ICD_SGN) = -(DXX(2)-AREA_CF/DEL_IBEDGE) !-ve dist Bound to IBEDGE opposed to normal.
                         ! SURF_INDEX:
                         IF (CCVAR(IIF,JJF,KKF,IBM_IDCF)>0) THEN
                            ! Low side cut-cell: Load first cut-face SURF_INDEX:
@@ -17524,7 +17524,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                         ENDIF
                      ELSE ! IF(FAXIS==KAXIS) THEN
                         ! XB_IB:
-                        IBM_IBEDGE(IEDGE)%XB_IB(ICD_SGN) = -(DXX(1)-AREA_CF/DXX(2)) ! -ve dist Bound to IBEDGE opposed to normal.
+                        IBM_IBEDGE(IEDGE)%XB_IB(ICD_SGN) = -(DXX(1)-AREA_CF/DEL_IBEDGE) !-ve dist Bound to IBEDGE opposed to normal.
                         ! SURF_INDEX:
                         IF (CCVAR(IIF,JJF,KKF,IBM_IDCF)>0) THEN
                            IBM_IBEDGE(IEDGE)%SURF_INDEX(ICD_SGN) = CUT_FACE(CCVAR(IIF,JJF,KKF,IBM_IDCF))%SURF_INDEX(1)
@@ -17542,7 +17542,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                         JEP=JJ; KEP=KK+SKIP_FCT*I_SGN
                      ELSE ! IF(FAXIS==KAXIS) THEN
                         DEL_EP = DXX(1) - ABS(XB_IB)
-                        IF( DEL_EP > THRES_FCT_EP*DXX(1) ) SKIP_FCT = 2 ! Pick next EP point +2*I_SGN
+                        IF( DEL_EP < THRES_FCT_EP*DXX(1) ) SKIP_FCT = 2 ! Pick next EP point +2*I_SGN
                         JEP=JJ+SKIP_FCT*I_SGN; KEP=KK
                      ENDIF
                      IF( JEP<=JBAR .AND. JEP>=0 .AND. KEP<=KBAR .AND. KEP>=0 ) IBM_IBEDGE(IEDGE)%EDGE_IN_MESH(ICD_SGN) = .TRUE.
@@ -17560,10 +17560,10 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                      ! For XB_IB we use the sum of gas cut-faces in the face and compare it with the face AREA:
                      AREA_CF = 0._EB; ICF = FCVAR(IIF,JJF,KKF,IBM_IDCF,FAXIS)
                      IF(ICF>0) AREA_CF = SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))
-                     DXX(1)  = DZ(KKF); DXX(2)  = DX(IIF)
+                     DXX(1)  = DZ(KKF); DXX(2)  = DX(IIF); DEL_IBEDGE = DY(JJF)
                      IF (FAXIS==KAXIS) THEN
                         ! XB_IB:
-                        IBM_IBEDGE(IEDGE)%XB_IB(ICD_SGN) = -(DXX(2)-AREA_CF/DXX(1)) ! -ve dist Bound to IBEDGE opposed to normal.
+                        IBM_IBEDGE(IEDGE)%XB_IB(ICD_SGN) = -(DXX(2)-AREA_CF/DEL_IBEDGE) !-ve dist Bound to IBEDGE opposed to normal.
                         ! SURF_INDEX:
                         IF (CCVAR(IIF,JJF,KKF,IBM_IDCF)>0) THEN
                            IBM_IBEDGE(IEDGE)%SURF_INDEX(ICD_SGN) = CUT_FACE(CCVAR(IIF,JJF,KKF,IBM_IDCF))%SURF_INDEX(1)
@@ -17572,7 +17572,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                         ENDIF
                      ELSE ! IF(FAXIS==IAXIS) THEN
                         ! XB_IB:
-                        IBM_IBEDGE(IEDGE)%XB_IB(ICD_SGN) = -(DXX(1)-AREA_CF/DXX(2)) ! -ve dist Bound to IBEDGE opposed to normal.
+                        IBM_IBEDGE(IEDGE)%XB_IB(ICD_SGN) = -(DXX(1)-AREA_CF/DEL_IBEDGE) !-ve dist Bound to IBEDGE opposed to normal.
                         ! SURF_INDEX:
                         IF (CCVAR(IIF,JJF,KKF,IBM_IDCF)>0) THEN
                            IBM_IBEDGE(IEDGE)%SURF_INDEX(ICD_SGN) = CUT_FACE(CCVAR(IIF,JJF,KKF,IBM_IDCF))%SURF_INDEX(1)
@@ -17590,7 +17590,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                         IEP=II+SKIP_FCT*I_SGN; KEP=KK
                      ELSE ! IF(FAXIS==IAXIS) THEN
                         DEL_EP = DXX(1) - ABS(XB_IB)
-                        IF( DEL_EP > THRES_FCT_EP*DXX(1) ) SKIP_FCT = 2 ! Pick next EP point +2*I_SGN
+                        IF( DEL_EP < THRES_FCT_EP*DXX(1) ) SKIP_FCT = 2 ! Pick next EP point +2*I_SGN
                         IEP=II; KEP=KK+SKIP_FCT*I_SGN
                      ENDIF
                      IF( IEP<=IBAR .AND. IEP>=0 .AND. KEP<=KBAR .AND. KEP>=0 ) IBM_IBEDGE(IEDGE)%EDGE_IN_MESH(ICD_SGN) = .TRUE.
@@ -17608,10 +17608,10 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                      ! For XB_IB we use the sum of gas cut-faces in the face and compare it with the face AREA:
                      AREA_CF = 0._EB; ICF = FCVAR(IIF,JJF,KKF,IBM_IDCF,FAXIS)
                      IF(ICF>0) AREA_CF = SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))
-                     DXX(1)  = DX(IIF); DXX(2)  = DY(JJF)
+                     DXX(1)  = DX(IIF); DXX(2)  = DY(JJF); DEL_IBEDGE = DZ(KKF)
                      IF (FAXIS==IAXIS) THEN
                         ! XB_IB:
-                        IBM_IBEDGE(IEDGE)%XB_IB(ICD_SGN) = -(DXX(2)-AREA_CF/DXX(1)) ! -ve dist Bound to IBEDGE opposed to normal.
+                        IBM_IBEDGE(IEDGE)%XB_IB(ICD_SGN) = -(DXX(2)-AREA_CF/DEL_IBEDGE) !-ve dist Bound to IBEDGE opposed to normal.
                         ! SURF_INDEX:
                         IF (CCVAR(IIF,JJF,KKF,IBM_IDCF)>0) THEN
                            IBM_IBEDGE(IEDGE)%SURF_INDEX(ICD_SGN) = CUT_FACE(CCVAR(IIF,JJF,KKF,IBM_IDCF))%SURF_INDEX(1)
@@ -17620,7 +17620,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                         ENDIF
                      ELSE ! IF(FAXIS==JAXIS) THEN
                         ! XB_IB:
-                        IBM_IBEDGE(IEDGE)%XB_IB(ICD_SGN) = -(DXX(1)-AREA_CF/DXX(2)) ! -ve dist Bound to IBEDGE opposed to normal.
+                        IBM_IBEDGE(IEDGE)%XB_IB(ICD_SGN) = -(DXX(1)-AREA_CF/DEL_IBEDGE) !-ve dist Bound to IBEDGE opposed to normal.
                         ! SURF_INDEX:
                         IF (CCVAR(IIF,JJF,KKF,IBM_IDCF)>0) THEN
                            IBM_IBEDGE(IEDGE)%SURF_INDEX(ICD_SGN) = CUT_FACE(CCVAR(IIF,JJF,KKF,IBM_IDCF))%SURF_INDEX(1)
@@ -17638,7 +17638,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                         IEP=II; JEP=JJ+SKIP_FCT*I_SGN
                      ELSE ! IF(FAXIS==JAXIS) THEN
                         DEL_EP = DXX(1) - ABS(XB_IB)
-                        IF( DEL_EP > THRES_FCT_EP*DXX(1) ) SKIP_FCT = 2 ! Pick next EP point +2*I_SGN
+                        IF( DEL_EP < THRES_FCT_EP*DXX(1) ) SKIP_FCT = 2 ! Pick next EP point +2*I_SGN
                         IEP=II+SKIP_FCT*I_SGN; JEP=JJ
                      ENDIF
                      IF( IEP<=IBAR .AND. IEP>=0 .AND. JEP<=JBAR .AND. JEP>=0 ) IBM_IBEDGE(IEDGE)%EDGE_IN_MESH(ICD_SGN) = .TRUE.
@@ -17685,7 +17685,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                         IEP=II; JEP=JJ; KEP=KK+SKIP_FCT*I_SGN
                      ELSE ! IF(FAXIS==KAXIS) THEN
                         DEL_EP = DXX(1) - ABS(XB_IB)
-                        IF( DEL_EP > THRES_FCT_EP*DXX(1) ) SKIP_FCT = 2 ! Pick next EP point +2*I_SGN
+                        IF( DEL_EP < THRES_FCT_EP*DXX(1) ) SKIP_FCT = 2 ! Pick next EP point +2*I_SGN
                         IEP=II; JEP=JJ+SKIP_FCT*I_SGN; KEP=KK
                      ENDIF
                      ! Add I,J,K locations of cells:
@@ -17709,7 +17709,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                         IEP=II+SKIP_FCT*I_SGN; JEP=JJ; KEP=KK
                      ELSE ! IF(FAXIS==IAXIS) THEN
                         DEL_EP = DXX(1) - ABS(XB_IB)
-                        IF( DEL_EP > THRES_FCT_EP*DXX(1) ) SKIP_FCT = 2 ! Pick next EP point +2*I_SGN
+                        IF( DEL_EP < THRES_FCT_EP*DXX(1) ) SKIP_FCT = 2 ! Pick next EP point +2*I_SGN
                         IEP=II; JEP=JJ; KEP=KK+SKIP_FCT*I_SGN
                      ENDIF
                      ! Add I,J,K locations of cells:
@@ -17733,7 +17733,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                         IEP=II; JEP=JJ+SKIP_FCT*I_SGN; KEP=KK
                      ELSE ! IF(FAXIS==JAXIS) THEN
                         DEL_EP = DXX(1) - ABS(XB_IB)
-                        IF( DEL_EP > THRES_FCT_EP*DXX(1) ) SKIP_FCT = 2 ! Pick next EP point +2*I_SGN
+                        IF( DEL_EP < THRES_FCT_EP*DXX(1) ) SKIP_FCT = 2 ! Pick next EP point +2*I_SGN
                         IEP=II+SKIP_FCT*I_SGN; JEP=JJ; KEP=KK
                      ENDIF
                      ! Add I,J,K locations of cells:
@@ -17796,7 +17796,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                         IEP=II; JEP=JJ; KEP=KK+SKIP_FCT*I_SGN
                      ELSE ! IF(FAXIS==KAXIS) THEN
                         DEL_EP = DXX(1) - ABS(XB_IB)
-                        IF( DEL_EP > THRES_FCT_EP*DXX(1) ) SKIP_FCT = 2 ! Pick next EP point +2*I_SGN
+                        IF( DEL_EP < THRES_FCT_EP*DXX(1) ) SKIP_FCT = 2 ! Pick next EP point +2*I_SGN
                         IEP=II; JEP=JJ+SKIP_FCT*I_SGN; KEP=KK
                      ENDIF
 
@@ -17838,7 +17838,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                         IEP=II+SKIP_FCT*I_SGN; JEP=JJ; KEP=KK
                      ELSE ! IF(FAXIS==IAXIS) THEN
                         DEL_EP = DXX(1) - ABS(XB_IB)
-                        IF( DEL_EP > THRES_FCT_EP*DXX(1) ) SKIP_FCT = 2 ! Pick next EP point +2*I_SGN
+                        IF( DEL_EP < THRES_FCT_EP*DXX(1) ) SKIP_FCT = 2 ! Pick next EP point +2*I_SGN
                         IEP=II; JEP=JJ; KEP=KK+SKIP_FCT*I_SGN
                      ENDIF
 
@@ -17880,7 +17880,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                         IEP=II; JEP=JJ+SKIP_FCT*I_SGN; KEP=KK
                      ELSE ! IF(FAXIS==JAXIS) THEN
                         DEL_EP = DXX(1) - ABS(XB_IB)
-                        IF( DEL_EP > THRES_FCT_EP*DXX(1) ) SKIP_FCT = 2 ! Pick next EP point +2*I_SGN
+                        IF( DEL_EP < THRES_FCT_EP*DXX(1) ) SKIP_FCT = 2 ! Pick next EP point +2*I_SGN
                         IEP=II+SKIP_FCT*I_SGN; JEP=JJ; KEP=KK
                      ENDIF
 
