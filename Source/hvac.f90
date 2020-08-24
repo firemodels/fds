@@ -888,12 +888,12 @@ NODE_LOOP: DO NN = 1, N_DUCTNODES
                IF (MESHES(NM)%VENTS(NV)%CTRL_INDEX > 0 .OR. MESHES(NM)%VENTS(NV)%DEVC_INDEX >0) THEN
                   WRITE(MESSAGE,'(A,A)') 'ERROR: VENT for ductnode has a DEVC_ID or CTRL_ID, VENT ID:',&
                                           TRIM(MESHES(NM)%VENTS(NV)%ID)
-                  CALL SHUTDOWN(MESSAGE); RETURN
+                  CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.)
                ENDIF
                IF (DN%READ_IN .AND. MESHES(NM)%VENTS(NV)%SURF_INDEX /= HVAC_SURF_INDEX) THEN
                   WRITE(MESSAGE,'(A,A)') 'ERROR: Ductnode attached to VENT without SURF_ID HVAC for VENT ID:',&
                                           TRIM(MESHES(NM)%VENTS(NV)%ID)
-                  CALL SHUTDOWN(MESSAGE); RETURN
+                  CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.)
                ENDIF
                IF (MESHES(NM)%VENTS(NV)%BOUNDARY_TYPE/=HVAC_BOUNDARY) THEN
                   SF => SURFACE(MESHES(NM)%VENTS(NV)%SURF_INDEX)
@@ -901,12 +901,12 @@ NODE_LOOP: DO NN = 1, N_DUCTNODES
                       ABS(SF%MASS_FLUX_TOTAL)>TWO_EPSILON_EB .OR. SF%PYROLYSIS_MODEL/= PYROLYSIS_NONE) THEN
                       WRITE(MESSAGE,'(A,A)') 'Cannot leak and specify flow or pyrolysis at the same time.  VENT ID:',&
                                              TRIM(MESHES(NM)%VENTS(NV)%ID)
-                      CALL SHUTDOWN(MESSAGE); RETURN
+                      CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.)
                   ENDIF
                   IF (ANY(SF%LEAK_PATH>0)) THEN
                       WRITE(MESSAGE,'(A,A)') 'Cannot specify custom leakage and zone leakage with the same surface.  VENT ID:',&
                                              TRIM(MESHES(NM)%VENTS(NV)%ID)
-                      CALL SHUTDOWN(MESSAGE); RETURN
+                      CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.)
                   ENDIF
                ENDIF
                DN%IN_MESH(NM) = .TRUE.
@@ -922,6 +922,10 @@ NODE_LOOP: DO NN = 1, N_DUCTNODES
       ENDDO MESH_LOOP
 
       ! Check if any MPI process has FOUND the VENT
+
+      IF (N_MPI_PROCESSES>1) CALL MPI_ALLREDUCE(MPI_IN_PLACE,STOP_STATUS,INTEGER_ONE,MPI_INTEGER,MPI_MAX,MPI_COMM_WORLD,IERR)
+
+      IF (STOP_STATUS/=0) RETURN
 
       CALL MPI_ALLREDUCE(MPI_IN_PLACE,FOUND,INTEGER_ONE,MPI_LOGICAL,MPI_LOR,MPI_COMM_WORLD,IERR)
       IF (.NOT. FOUND) THEN
