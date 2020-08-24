@@ -4862,7 +4862,6 @@ REAC_LOOP: DO NR=1,N_REACTIONS
          RN%NU_SPECIES(NS2) =  RN%NU_SPECIES(NS2) + RN%NU(NS)*SM%VOLUME_FRACTION(NS2)
       ENDDO
       IF (SM%ID=='WATER VAPOR')  I_WATER = NS
-      IF (SM%ID=='CARBON DIOXIDE') I_CO2 = NS
    ENDDO
 
    ! Check atom balance of the reaction
