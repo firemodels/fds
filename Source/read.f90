@@ -12639,12 +12639,48 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
          IF (EVACUATION_ONLY(NM)) CYCLE MESH_LOOP
          M=>MESHES(NM)
          IF (XYZ(1)>=M%XS .AND. XYZ(1)<=M%XF .AND. XYZ(2)>=M%YS .AND. XYZ(2)<=M%YF .AND. XYZ(3)>=M%ZS .AND. XYZ(3)<=M%ZF) THEN
-            IF (ABS(XYZ(1)-M%XS)<TWO_EPSILON_EB) XYZ(1) = XYZ(1) + 0.01_EB*M%DXI
-            IF (ABS(XYZ(1)-M%XF)<TWO_EPSILON_EB) XYZ(1) = XYZ(1) - 0.01_EB*M%DXI
-            IF (ABS(XYZ(2)-M%YS)<TWO_EPSILON_EB) XYZ(2) = XYZ(2) + 0.01_EB*M%DETA
-            IF (ABS(XYZ(2)-M%YF)<TWO_EPSILON_EB) XYZ(2) = XYZ(2) - 0.01_EB*M%DETA
-            IF (ABS(XYZ(3)-M%ZS)<TWO_EPSILON_EB) XYZ(3) = XYZ(3) + 0.01_EB*M%DZETA
-            IF (ABS(XYZ(3)-M%ZF)<TWO_EPSILON_EB) XYZ(3) = XYZ(3) - 0.01_EB*M%DZETA
+            IF (ABS(XYZ(1)-M%XS)<TWO_EPSILON_EB) THEN
+               IF (IOR==-1) THEN
+                  CYCLE MESH_LOOP
+               ELSE
+                  XYZ(1) = XYZ(1) + 0.01_EB*M%DXI
+               ENDIF
+            ENDIF
+            IF (ABS(XYZ(1)-M%XF)<TWO_EPSILON_EB) THEN
+               IF (IOR==1) THEN
+                  CYCLE MESH_LOOP
+               ELSE
+                  XYZ(1) = XYZ(1) - 0.01_EB*M%DXI
+               ENDIF
+            ENDIF
+            IF (ABS(XYZ(2)-M%YS)<TWO_EPSILON_EB) THEN
+               IF (IOR==-2) THEN
+                  CYCLE MESH_LOOP
+               ELSE
+                  XYZ(2) = XYZ(2) + 0.01_EB*M%DETA
+               ENDIF
+            ENDIF
+            IF (ABS(XYZ(2)-M%YF)<TWO_EPSILON_EB) THEN
+               IF (IOR==2) THEN
+                  CYCLE MESH_LOOP
+               ELSE
+                  XYZ(2) = XYZ(2) - 0.01_EB*M%DETA
+               ENDIF
+            ENDIF
+            IF (ABS(XYZ(3)-M%ZS)<TWO_EPSILON_EB) THEN
+               IF (IOR==-3) THEN
+                  CYCLE MESH_LOOP
+               ELSE
+                  XYZ(3) = XYZ(3) + 0.01_EB*M%DZETA
+               ENDIF
+            ENDIF
+            IF (ABS(XYZ(3)-M%ZF)<TWO_EPSILON_EB) THEN
+               IF (IOR==3) THEN
+                  CYCLE MESH_LOOP
+               ELSE
+                  XYZ(3) = XYZ(3) - 0.01_EB*M%DZETA
+               ENDIF
+            ENDIF
             MESH_NUMBER = NM
             BAD = .FALSE.
             IF (PROCESS(NM)==MYID) MESH_DEVICE(NM) = 1
