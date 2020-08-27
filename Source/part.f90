@@ -1388,7 +1388,7 @@ PARTICLE_LOOP: DO IP=1,NLP
    DT_CFL = MIN(DX(LP%ONE_D%IIG)/(ABS(LP%U)+TWO_EPSILON_EB),&
                 DY(LP%ONE_D%JJG)/(ABS(LP%V)+TWO_EPSILON_EB),&
                 DZ(LP%ONE_D%KKG)/(ABS(LP%W)+TWO_EPSILON_EB))
-   N_ITER = CEILING(DT/(0.95_EB*DT_CFL))
+   N_ITER = CEILING(DT/(0.90_EB*DT_CFL))
    DT_P   = DT/REAL(N_ITER,EB)
 
    ! Zero out acceleration terms that go into momentum equation.
@@ -1474,7 +1474,7 @@ PARTICLE_LOOP: DO IP=1,NLP
       ! Determine the cell indices of the new particle location.
 
       CALL GET_IJK(LP%X,LP%Y,LP%Z,NM,XI,YJ,ZK,LP%ONE_D%IIG,LP%ONE_D%JJG,LP%ONE_D%KKG)
-
+ 
       ! If the particle is not near a boundary cell, cycle.
 
       CC_IBM_GASPHASE = .TRUE.
