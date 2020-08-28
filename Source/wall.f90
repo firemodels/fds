@@ -3423,6 +3423,7 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Tech Guide: Sum over the materials, alpha
             IF (ML%H_R_I(1) > 0) THEN
                CALL GET_EQUIL_DATA(SPECIES_MIXTURE(SMIX_INDEX)%MW,TMP_F,PBAR(KKG,PRESSURE_ZONE(IIG,JJG,KKG)),&
                                          H_R,H_R_B,T_BOIL_EFF,X_W,RAMP_INDEX=ML%H_R_I(1))
+
             ELSE
                CALL GET_EQUIL_DATA(SPECIES_MIXTURE(SMIX_INDEX)%MW,TMP_F,PBAR(KKG,PRESSURE_ZONE(IIG,JJG,KKG)),&
                                          H_R,H_R_B,T_BOIL_EFF,X_W,CONSTANT_H=ML%H_R(1))
@@ -3469,7 +3470,7 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Tech Guide: Sum over the materials, alpha
                   ENDIF
                   CALL GET_VISCOSITY(ZZ_AIR,MU_AIR,TMP_FILM)
                   CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_AIR,R_AIR)
-                  CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z(:,SMIX_INDEX),1),D_Z(:,SMIX_INDEX),TMP_F,D_AIR)
+                  CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z(:,SMIX_INDEX),1),D_Z(:,SMIX_INDEX),TMP_FILM,D_AIR)
                   RHO_AIR = PBAR(0,PRESSURE_ZONE(IIG,JJG,KKG))/(R_AIR*TMP_FILM)
                   SC_AIR = MU_AIR/(RHO_AIR*D_AIR)
                   SELECT CASE(SF%GEOMETRY)
@@ -3479,10 +3480,15 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Tech Guide: Sum over the materials, alpha
                         RE_L = RHO_AIR*VEL*LENGTH/MU_AIR
                         SHERWOOD  = 2._EB + SH_FAC_GAS*SQRT(RE_L)
                      CASE(SURF_CARTESIAN)
-                        SH_FAC_WALL = 0.037_EB*SC_AIR**ONTH
-                        LENGTH = SF%CONV_LENGTH
+                        !LENGTH = SF%CONV_LENGTH
+                        SELECT CASE(ABS(IOR))
+                           CASE(1); LENGTH = .5_EB*DX(IIG)
+                           CASE(2); LENGTH = .5_EB*DY(JJG)
+                           CASE(3); LENGTH = .5_EB*DZ(KKG)
+                        END SELECT
                         RE_L = RHO_AIR*VEL*LENGTH/MU_AIR
-                        SHERWOOD  = MAX( 1._EB, ( SH_FAC_WALL*RE_L**0.8_EB ) )
+                        SHERWOOD  = MAX( SC_AIR**ONTH * 0.664_EB*SQRT(RE_L), SC_AIR**ONTH * 0.037_EB*RE_L**0.8_EB )
+                        SHERWOOD  = MAX( 1._EB, SHERWOOD )
                   END SELECT
                   IF (Y_DROP <= Y_GAS) THEN
                      H_MASS = 0._EB
@@ -3895,15 +3901,16 @@ HTC_MODEL_SELECT: SELECT CASE(SFX%HEAT_TRANSFER_MODEL)
       PR_AIR = MU_AIR*CP_AIR/K_AIR
       RHO_AIR = PBAR(0,PRESSURE_ZONE(IIG,JJG,KKG))/(R_AIR*TMP_FILM)
       SELECT CASE(SFX%GEOMETRY)
+         CASE DEFAULT;           LENGTH = SFX%CONV_LENGTH
          CASE(SURF_SPHERICAL);   LENGTH = 2._EB*R_DROP
          CASE(SURF_CYLINDRICAL); LENGTH = 2._EB*R_DROP
-         CASE(SURF_CARTESIAN);   LENGTH = SFX%CONV_LENGTH
-         CASE DEFAULT;           LENGTH = SFX%CONV_LENGTH
+         CASE(SURF_CARTESIAN);   LENGTH = DN
       END SELECT
       RE = RHO_AIR*VREL*LENGTH/MU_AIR
+      CALL RAYLEIGH_HEAT_FLUX_MODEL(H_NATURAL,ZSTAR,DN,ONE_DX%TMP_F,ONE_DX%TMP_G,K_AIR,ONE_DX%RHO_G,CP_AIR,MU_AIR)
       CALL FORCED_CONVECTION_MODEL(H_FORCED,RE,K_AIR,PR_AIR**ONTH,LENGTH,SFX%GEOMETRY)
-      IF (Y_DROP-Y_GAS>TWO_EPSILON_EB) H_FORCED = H_FORCED*LOG(1._EB+B_NUMBER)/B_NUMBER
-      H_NATURAL = 0._EB
+      IF (Y_DROP-Y_GAS>TWO_EPSILON_EB) H_NATURAL = MAX(H_NATURAL,H_FORCED)*LOG(1._EB+B_NUMBER)/B_NUMBER
+      H_FORCED = 0._EB
 END SELECT HTC_MODEL_SELECT
 
 HEAT_TRANSFER_COEFFICIENT = MAX(H_FORCED,H_NATURAL)
