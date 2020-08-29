@@ -9801,14 +9801,14 @@ FILE_LOOP: DO NF=1,N_BNDF
       ELSE
          IF (BF%DEBUG .EQ. 0) THEN
             WRITE(LU_BNDF(NF,NM)) ((PP(L,N),L=L1,L2+1),N=N1,N2+1)
-            DO L = L1-1, L2
-            DO N = N1-1, N2
-               BOUND_MIN = MIN(PPN(L,N),BOUND_MIN)
-               BOUND_MAX = MIN(PPN(L,N),BOUND_MAX)
+            DO L = L1, L2+1
+            DO N = N1, N2+1
+               BOUND_MIN = MIN(PP(L,N),BOUND_MIN)
+               BOUND_MAX = MAX(PP(L,N),BOUND_MAX)
             ENDDO
             ENDDO
          ELSE
-            WRITE(LU_BNDF(NF,NM)) ((REAL(100*NM,FB),L=L1-1,L2),N=N1-1,N2)
+            WRITE(LU_BNDF(NF,NM)) ((REAL(100*NM,FB),L=L1,L2+1),N=N1,N2+1)
             BOUND_MIN = MIN(REAL(100*NM,FB),BOUND_MIN)
             BOUND_MAX = MAX(REAL(100*NM,FB),BOUND_MAX)
          ENDIF
