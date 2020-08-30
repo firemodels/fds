@@ -1,4 +1,4 @@
-&HEAD CHID='EXMC91_LPM_10cm', FYI='Catchpole simulation using Lagrangian particles' /
+&HEAD CHID='EXMC91_LPM_10cm', TITLE='Catchpole simulation using Lagrangian particles' /
 
 &MISC TMPA=27 /
 &TIME T_END=120. /
