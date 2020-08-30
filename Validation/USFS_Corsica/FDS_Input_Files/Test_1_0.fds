@@ -1,4 +1,4 @@
-&HEAD CHID='Test_1_0', FYI='University of Corsica simulation using Lagrangian particles' /
+&HEAD CHID='Test_1_0', TITLE='University of Corsica simulation using Lagrangian particles' /
 
 &MISC TMPA=20, GVEC=0,0,-9.81 /
 
