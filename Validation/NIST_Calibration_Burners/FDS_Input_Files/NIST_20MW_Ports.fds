@@ -83,7 +83,7 @@
 
 &DEVC XB=0.0127,0.0127,0,0,0,0.3048, POINTS=20, QUANTITY='VELOCITY', ID='VEL', TIME_HISTORY=T /
 
-&DEVC XYZ=0,0,0.15, QUANTITY='AUTO IGNITION TEMPERATURE', ID='AIT'
+&DEVC XYZ=0,0,0.15, QUANTITY='AUTO IGNITION TEMPERATURE', ID='AIT' /
 
 ! --- Geometric entities (from Blender Objects)
 ! Use CATF line, concatenate geometry file from cad repo:
