@@ -1,4 +1,4 @@
-&HEAD CHID='mean_forcing_hole', TITLE='Test HOLE feature for MEAN_FORCING'
+&HEAD CHID='mean_forcing_hole', TITLE='Test HOLE feature for MEAN_FORCING' /
 
 &MESH IJK=40,40,20, XB=-20,20,-20,20,0,10 /
 
