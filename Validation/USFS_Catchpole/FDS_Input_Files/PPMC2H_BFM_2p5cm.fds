@@ -1,4 +1,4 @@
-&HEAD CHID='PPMC2H_BFM_2p5cm', FYI='Catchpole simulation using Boundary Fuel Model' /
+&HEAD CHID='PPMC2H_BFM_2p5cm', TITLE='Catchpole simulation using Boundary Fuel Model' /
 
 &MISC TMPA=27 /
 &TIME T_END= 999. /
