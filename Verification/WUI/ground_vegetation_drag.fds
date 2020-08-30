@@ -1,4 +1,4 @@
-&HEAD CHID='ground_vegetation_drag', FYI='Comparison of boundary models' /
+&HEAD CHID='ground_vegetation_drag', TITLE='Comparison of boundary models' /
 
 &TIME T_END=10. /
 
