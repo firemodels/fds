@@ -13866,7 +13866,6 @@ PROF_LOOP: DO NN=1,N_PROFO
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 
-   BAD = .FALSE.
    MESH_NUMBER = 0
 
    ! If the PROFile has been assigned an orientation (IOR/=0), determine what mesh its XYZ is in. If not in any mesh, reject it.
@@ -13876,18 +13875,34 @@ PROF_LOOP: DO NN=1,N_PROFO
          IF (.NOT.EVACUATION_ONLY(NM)) THEN
             M=>MESHES(NM)
             IF (XYZ(1)>=M%XS .AND. XYZ(1)<=M%XF .AND. XYZ(2)>=M%YS .AND. XYZ(2)<=M%YF .AND. XYZ(3)>=M%ZS .AND. XYZ(3)<=M%ZF) THEN
+               IF (ABS(XYZ(1)-M%XS)<TWO_EPSILON_EB) THEN
+                  IF (IOR==-1) THEN ; CYCLE MESH_LOOP ; ELSE ; XYZ(1)=XYZ(1)+0.001_EB*(M%XF-M%XS)/REAL(M%IBAR,EB) ; ENDIF
+               ENDIF
+               IF (ABS(XYZ(1)-M%XF)<TWO_EPSILON_EB) THEN
+                  IF (IOR== 1) THEN ; CYCLE MESH_LOOP ; ELSE ; XYZ(1)=XYZ(1)-0.001_EB*(M%XF-M%XS)/REAL(M%IBAR,EB) ; ENDIF
+               ENDIF
+               IF (ABS(XYZ(2)-M%YS)<TWO_EPSILON_EB) THEN
+                  IF (IOR==-2) THEN ; CYCLE MESH_LOOP ; ELSE ; XYZ(2)=XYZ(2)+0.001_EB*(M%YF-M%YS)/REAL(M%JBAR,EB) ; ENDIF
+               ENDIF
+               IF (ABS(XYZ(2)-M%YF)<TWO_EPSILON_EB) THEN
+                  IF (IOR== 2) THEN ; CYCLE MESH_LOOP ; ELSE ; XYZ(2)=XYZ(2)-0.001_EB*(M%YF-M%YS)/REAL(M%JBAR,EB) ; ENDIF
+               ENDIF
+               IF (ABS(XYZ(3)-M%ZS)<TWO_EPSILON_EB) THEN
+                  IF (IOR==-3) THEN ; CYCLE MESH_LOOP ; ELSE ; XYZ(3)=XYZ(3)+0.001_EB*(M%ZF-M%ZS)/REAL(M%KBAR,EB) ; ENDIF
+               ENDIF
+               IF (ABS(XYZ(3)-M%ZF)<TWO_EPSILON_EB) THEN
+                  IF (IOR== 3) THEN ; CYCLE MESH_LOOP ; ELSE ; XYZ(3)=XYZ(3)-0.001_EB*(M%ZF-M%ZS)/REAL(M%KBAR,EB) ; ENDIF
+               ENDIF
                MESH_NUMBER = NM
                EXIT MESH_LOOP
             ENDIF
          ENDIF
-         IF (NM==NMESHES) BAD = .TRUE.
       ENDDO MESH_LOOP
-   ENDIF
-
-   IF (BAD) THEN
-      N      = N-1
-      N_PROF = N_PROF-1
-      CYCLE PROF_LOOP
+      IF (MESH_NUMBER==0) THEN  ! No meshes have been found. Throw out this PROFile.
+         N      = N-1
+         N_PROF = N_PROF-1
+         CYCLE PROF_LOOP
+      ENDIF
    ENDIF
 
    ! Assign parameters to the PROFILE array
