@@ -1719,6 +1719,8 @@ IF (MYID==0) THEN
          WRITE(MESSAGE,'(A)') 'STOP: Level set analysis only'
       CASE(REALIZABILITY_STOP)
          WRITE(MESSAGE,'(A)') 'ERROR: Unrealizable mass density - FDS stopped'
+      CASE(MPI_TIMEOUT_STOP)
+         WRITE(MESSAGE,'(A)') 'ERROR: An MPI exchange timed out - FDS stopped'
       CASE DEFAULT
          WRITE(MESSAGE,'(A)') 'null'
    END SELECT
@@ -3264,6 +3266,7 @@ IF (.NOT.PROFILING) THEN
       IF (WAIT_TIME>MPI_TIMEOUT) THEN
          WRITE(LU_ERR,'(A,A,I6,A,A)') TRIM(RNAME),' timed out for MPI process ',MYID,' running on ',PNAME(1:PNAMELEN)
          FLAG = .TRUE.
+         STOP_STATUS = MPI_TIMEOUT_STOP
          DO NNN=1,NR
             CALL MPI_CANCEL(RR(NNN),IERR)
             CALL MPI_TEST(RR(NNN),FLAG2,MPI_STATUS_IGNORE,IERR)
