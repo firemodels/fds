@@ -11524,8 +11524,14 @@ DO I=1,64
 ENDDO
 ! Reorder and Symbolic factorization:
 PHASEZ = 11
+#ifdef __INTEL_COMPILER
+   CALL KMP_SET_WARNINGS_OFF()
+#endif
 CALL CLUSTER_SPARSE_SOLVER (PT_Z, MAXFCTZ, MNUMZ, MTYPEZ, PHASEZ, NUNKZ_TOTAL, &
     A_Z, IA_Z, JA_Z, PERMZ, NRHSZ, IPARMZ, MSGLVLZ, F_Z, RZ_Z, MPI_COMM_WORLD, ERRORZ)
+#ifdef __INTEL_COMPILER
+   CALL KMP_SET_WARNINGS_ON()
+#endif
 ! No WITH_MKL:
 ! WRITE(LU_ERR,*) 'Can not solve implicitly scalar transport on cut-cell region.'
 ! WRITE(LU_ERR,*) 'MKL library compile flag was not defined.'
