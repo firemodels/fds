@@ -426,7 +426,7 @@ hvac.o : func.o prec.o cons.o type.o mesh.o ctrl.o
 mass.o : func.o prec.o cons.o type.o mesh.o turb.o soot.o geom.o
 read.o : func.o prec.o cons.o type.o mesh.o devc.o ctrl.o radi.o evac.o hvac.o scrc.o data.o geom.o mass.o soot.o
 wall.o : func.o prec.o cons.o type.o mesh.o hvac.o mass.o soot.o geom.o
-fire.o : func.o prec.o cons.o type.o mesh.o mass.o soot.o
+fire.o : func.o prec.o cons.o type.o mesh.o mass.o soot.o radi.o
 divg.o : func.o prec.o cons.o type.o mesh.o scrc.o evac.o mass.o
 velo.o : func.o prec.o cons.o type.o mesh.o turb.o geom.o scrc.o
 pres.o : func.o prec.o cons.o type.o mesh.o pois.o velo.o scrc.o geom.o
@@ -460,7 +460,7 @@ hvac.obj : func.obj prec.obj cons.obj type.obj mesh.obj ctrl.obj
 mass.obj : func.obj prec.obj cons.obj type.obj mesh.obj turb.obj soot.obj geom.obj
 read.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj ctrl.obj radi.obj evac.obj hvac.obj scrc.obj data.obj geom.obj mass.obj soot.obj
 wall.obj : func.obj prec.obj cons.obj type.obj mesh.obj hvac.obj mass.obj soot.obj geom.obj
-fire.obj : func.obj prec.obj cons.obj type.obj mesh.obj mass.obj soot.obj
+fire.obj : func.obj prec.obj cons.obj type.obj mesh.obj mass.obj soot.obj radi.obj
 divg.obj : func.obj prec.obj cons.obj type.obj mesh.obj scrc.obj evac.obj mass.obj
 velo.obj : func.obj prec.obj cons.obj type.obj mesh.obj turb.obj geom.obj scrc.obj
 pres.obj : func.obj prec.obj cons.obj type.obj mesh.obj pois.obj velo.obj scrc.obj geom.obj
