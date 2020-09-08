@@ -20489,7 +20489,7 @@ USE MPI
 
 ! Local Variables:
 INTEGER :: NM,NOM,IERR
-TYPE (MESH_TYPE), POINTER :: M,M4
+TYPE (MESH_TYPE), POINTER :: M
 TYPE (OMESH_TYPE), POINTER :: M2,M3
 INTEGER, ALLOCATABLE, DIMENSION(:) :: REQ0
 INTEGER :: N_REQ0, NICC_R, ICC, ICC1, NCELL, JCC, NOMICC
@@ -20695,83 +20695,33 @@ ENDDO
 DEALLOCATE(NCC_SV)
 
 ! Finally Exchange Cartesian cell UNKZ:
-N_REQ0 = 0
-DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-   IF (EVACUATION_ONLY(NM)) CYCLE
-   M => MESHES(NM)
-   DO NOM=1,NMESHES
-      IF (EVACUATION_ONLY(NOM)) CYCLE
-      M3 => MESHES(NM)%OMESH(NOM)
-      IF (M3%NIC_R<1) CYCLE
-
-      M4 => MESHES(NOM)
-
+IF (N_MPI_PROCESSES>1) THEN
+   DO NM=1,NMESHES
+      IF (MPI_COMM_MESH(NM)==MPI_COMM_NULL) CYCLE
+      M => MESHES(NM)
+      IF (EVACUATION_ONLY(NM)) CYCLE
       ! X direction bounds:
       ILO_FACE = 0                    ! Low mesh boundary face index.
-      IHI_FACE = M4%IBAR              ! High mesh boundary face index.
+      IHI_FACE = M%IBAR               ! High mesh boundary face index.
       ISTR     = ILO_FACE - NGUARD    ! Allocation start x arrays.
       IEND     = IHI_FACE + NGUARD    ! Allocation end x arrays.
 
       ! Y direction bounds:
       JLO_FACE = 0                    ! Low mesh boundary face index.
-      JHI_FACE = M4%JBAR              ! High mesh boundary face index.
+      JHI_FACE = M%JBAR               ! High mesh boundary face index.
       JSTR     = JLO_FACE - NGUARD    ! Allocation start y arrays.
       JEND     = JHI_FACE + NGUARD    ! Allocation end y arrays.
 
       ! Z direction bounds:
       KLO_FACE = 0                    ! Low mesh boundary face index.
-      KHI_FACE = M4%KBAR              ! High mesh boundary face index.
+      KHI_FACE = M%KBAR               ! High mesh boundary face index.
       KSTR     = KLO_FACE - NGUARD    ! Allocation start z arrays.
       KEND     = KHI_FACE + NGUARD    ! Allocation end z arrays.
 
       N_INT = (IEND-ISTR+1)*(JEND-JSTR+1)*(KEND-KSTR+1)
-
-      IF (PROCESS(NOM)/=MYID) THEN
-         N_REQ0 = N_REQ0 + 1
-         CALL MPI_IRECV(M4%CCVAR(ISTR,JSTR,KSTR,IBM_UNKZ),N_INT,MPI_INTEGER,PROCESS(NOM),NM,MPI_COMM_WORLD,REQ0(N_REQ0),IERR)
-      ELSE
-         ! M4%CCVAR(:,:,:,IBM_UNKZ) = M4%CCVAR(:,:,:,IBM_UNKZ) ! No need, IBM_UNKZ has already been numbered in M4
-      ENDIF
+      CALL MPI_BCAST(M%CCVAR(ISTR,JSTR,KSTR,IBM_UNKZ),N_INT,MPI_INTEGER,MPI_COMM_MESH_ROOT(NM),MPI_COMM_MESH(NM),IERR)
    ENDDO
-ENDDO
-
-DO NM=1,NMESHES
-   IF (EVACUATION_ONLY(NM)) CYCLE
-   DO NOM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-      IF (EVACUATION_ONLY(NOM)) CYCLE
-      M2 => MESHES(NOM)%OMESH(NM)
-      IF(M2%NIC_S<1) CYCLE
-
-      M4 => MESHES(NOM)
-
-      ! X direction bounds:
-      ILO_FACE = 0                    ! Low mesh boundary face index.
-      IHI_FACE = M4%IBAR              ! High mesh boundary face index.
-      ISTR     = ILO_FACE - NGUARD    ! Allocation start x arrays.
-      IEND     = IHI_FACE + NGUARD    ! Allocation end x arrays.
-
-      ! Y direction bounds:
-      JLO_FACE = 0                    ! Low mesh boundary face index.
-      JHI_FACE = M4%JBAR              ! High mesh boundary face index.
-      JSTR     = JLO_FACE - NGUARD    ! Allocation start y arrays.
-      JEND     = JHI_FACE + NGUARD    ! Allocation end y arrays.
-
-      ! Z direction bounds:
-      KLO_FACE = 0                    ! Low mesh boundary face index.
-      KHI_FACE = M4%KBAR              ! High mesh boundary face index.
-      KSTR     = KLO_FACE - NGUARD    ! Allocation start z arrays.
-      KEND     = KHI_FACE + NGUARD    ! Allocation end z arrays.
-
-      N_INT = (IEND-ISTR+1)*(JEND-JSTR+1)*(KEND-KSTR+1)
-
-      IF (N_MPI_PROCESSES>1 .AND. NM/=NOM .AND. PROCESS(NM)/=MYID) THEN
-         N_REQ0 = N_REQ0 + 1
-         CALL MPI_ISEND(M4%CCVAR(ISTR,JSTR,KSTR,IBM_UNKZ),N_INT,MPI_INTEGER,PROCESS(NM),NM,MPI_COMM_WORLD,REQ0(N_REQ0),IERR)
-      ENDIF
-   ENDDO
-ENDDO
-
-IF ( (N_REQ0>0) .AND. (N_MPI_PROCESSES>1) ) CALL MPI_WAITALL(N_REQ0,REQ0(1:N_REQ0),MPI_STATUSES_IGNORE,IERR)
+ENDIF
 
 ! Finally Copy from NOM to NMs the unknown numbers UNKZ:
 MESH_LOOP_F : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
