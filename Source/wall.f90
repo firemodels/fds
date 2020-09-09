@@ -3372,7 +3372,7 @@ SUBROUTINE PYROLYSIS(N_MATS,MATL_INDEX,SURF_INDEX,IIG,JJG,KKG,TMP_S,TMP_F,IOR,RH
 USE PHYSICAL_FUNCTIONS, ONLY: GET_MASS_FRACTION,GET_MOLECULAR_WEIGHT,GET_VISCOSITY,GET_CONDUCTIVITY,&
                               GET_SPECIFIC_GAS_CONSTANT, GET_MASS_FRACTION_ALL,GET_MW_RATIO,GET_EQUIL_DATA,GET_SENSIBLE_ENTHALPY
 USE MATH_FUNCTIONS, ONLY: INTERPOLATE1D_UNIFORM,EVALUATE_RAMP
-USE TURBULENCE, ONLY: RAYLEIGH_HEAT_FLUX_MODEL
+USE TURBULENCE, ONLY: RAYLEIGH_HEAT_FLUX_MODEL,RAYLEIGH_MASS_FLUX_MODEL
 INTEGER, INTENT(IN) :: N_MATS,SURF_INDEX,IIG,JJG,KKG,IOR
 REAL(EB), INTENT(OUT), DIMENSION(:,:) :: RHO_DOT_OUT(N_MATS)
 REAL(EB), INTENT(IN) :: TMP_S,TMP_F,RHO_S0,DT_BC,DEPTH
@@ -3450,7 +3450,7 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Tech Guide: Sum over the materials, alpha
                ELSE
                   VEL = SQRT(2._EB*KRES(IIG,JJG,KKG))
                ENDIF
-               BLOWING_IF: IF (SF%BLOWING) THEN
+              IF (SF%BLOWING .OR. SF%BLOWING_2) THEN
                   ! This section is using the mass transfer model from part
                   TMP_FILM = TMP_F + EVAP_FILM_FAC*(TMP_G - TMP_F) ! LC Eq.(18)
                   IF (SPECIES_MIXTURE(SMIX_INDEX)%SINGLE_SPEC_INDEX > 0) THEN
@@ -3472,6 +3472,8 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Tech Guide: Sum over the materials, alpha
                   CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_AIR,R_AIR)
                   CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z(:,SMIX_INDEX),1),D_Z(:,SMIX_INDEX),TMP_FILM,D_AIR)
                   RHO_AIR = PBAR(0,PRESSURE_ZONE(IIG,JJG,KKG))/(R_AIR*TMP_FILM)
+               ENDIF
+               BLOWING_IF: IF (SF%BLOWING) THEN
                   SC_AIR = MU_AIR/(RHO_AIR*D_AIR)
                   SELECT CASE(SF%GEOMETRY)
                      CASE(SURF_SPHERICAL,SURF_CYLINDRICAL)
@@ -3496,6 +3498,13 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Tech Guide: Sum over the materials, alpha
                      B_NUMBER = (Y_DROP - Y_GAS) / MAX(DY_MIN_BLOWING, 1._EB-Y_DROP) ! (9.32)
                      H_MASS = SHERWOOD*D_AIR/LENGTH*LOG(1._EB+B_NUMBER)/(Y_DROP-Y_GAS) ! (9.29-9.30)
                   ENDIF
+               ELSEIF (SF%BLOWING_2) THEN
+                  SELECT CASE(ABS(IOR))
+                     CASE(1); LENGTH = DX(IIG)
+                     CASE(2); LENGTH = DY(JJG)
+                     CASE(3); LENGTH = DZ(KKG)
+                  END SELECT
+                  CALL RAYLEIGH_MASS_FLUX_MODEL(MFLUX,LENGTH,Y_DROP,Y_GAS,D_AIR,RHO_AIR,MU_AIR)
                ELSE BLOWING_IF
                   ! No blowing, old default evap model
                   CALL GET_VISCOSITY(ZZ_GET,MU_AIR,TMP_G)
@@ -3511,7 +3520,8 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Tech Guide: Sum over the materials, alpha
             IF (SF%BLOWING) THEN
                MFLUX = MAX(0._EB,H_MASS*RHO_AIR*(Y_DROP - Y_GAS)) ! (9.24)
             ELSE
-               MFLUX = MAX(0._EB,SPECIES_MIXTURE(SMIX_INDEX)%MW/R0/TMP_F*H_MASS*LOG((X_G-1._EB)/(X_W-1._EB))) &
+               IF(.NOT. SF%BLOWING_2) &
+                  MFLUX = MAX(0._EB,SPECIES_MIXTURE(SMIX_INDEX)%MW/R0/TMP_F*H_MASS*LOG((X_G-1._EB)/(X_W-1._EB))) &
                           * PBAR(KKG,PRESSURE_ZONE(IIG,JJG,KKG)) ! (7.48)
             ENDIF
 
