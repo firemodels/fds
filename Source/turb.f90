@@ -1610,7 +1610,7 @@ IF (Y_G >= Y_W) THEN
    RETURN
 ENDIF
 
-LN_B = LOG(1._EB + (Y_W - Y_G)/(1 - Y_W + 1E-8_EB))
+LN_B = LOG(1._EB + (Y_W - Y_G)/(1 - Y_W + 1.E-8_EB))
 
 ZC = 0.5_EB*DZ
 NU_G = MU_G/RHO_G
@@ -1626,11 +1626,11 @@ MFLUX = RHO_G*H*LN_B
 
 RAYLEIGH_LOOP: DO ITER=1,MAX_ITER
 
-   ! Step 3: compute new thermal diffusive length scale, delta*, from modified Grashof number * Pr
+   ! Step 3: compute new mass diffusive length scale, delta*, from modified Grashof number * Sc
 
    D_STAR = (D_STAR_FAC/MFLUX)**0.25_EB
 
-   ! Step 4: compute new z* (thermal)
+   ! Step 4: compute new z* (mass)
 
    Z_STAR = ZC/D_STAR ! Ra* = (z*)**4
 
