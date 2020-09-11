@@ -2343,10 +2343,12 @@ REAL(EB) :: MW_RATIO !< Ratio of average gas molecular weigth to particle specie
 REAL(EB) :: RVC !< Inverse of the cell volume (1/m3)
 REAL(EB) :: WGT !< LAGRANGIAN_PARTICLE%PWT
 REAL(EB) :: Q_CON_GAS !< Convective heat transfer between the particle and the gas (J)
+REAL(EB) :: Q_CON_SUM !< Sum of convective heat transfer between the particle and the surface over subtimesteps (J)
 REAL(EB) :: Q_CON_WALL !< Convective heat transfer between the particle and a surface (J)
 REAL(EB) :: Q_DOT_RAD ! Radiant heat transfer rate to particle (J/s)
 REAL(EB) :: Q_FRAC !< Heat transfer adjustment factor when particle reaches boiling temperature during a sub time step
 REAL(EB) :: Q_RAD !< Net radiation heat transfer to the particle (J)
+REAL(EB) :: Q_RAD_SUM !< Sum of radiant heat transfer to the particle over subtimesteps (J)
 REAL(EB) :: Q_TOT !< Total heat transfer from convection and radiation to the particle (J)
 REAL(EB) :: H_HEAT !< Convection heat transfer coefficient between the particle and the gas (W/m2/K)
 REAL(EB) :: H_WALL !< Convection heat transfer coefficient between the particle and a surface (W/m2/K)
@@ -2551,6 +2553,9 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
       DT_SUBSTEP = DT
       DT_SUM = 0._EB
       WGT    = LP%PWT
+      LP%M_DOT = 0._EB
+      Q_CON_SUM = 0._EB
+      Q_RAD_SUM = 0._EB
 
       Y_COND = 0._EB
 
@@ -2653,7 +2658,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                DELTA_H_G = H_S_B - H_S
                D_SOURCE(II,JJ,KK) = D_SOURCE(II,JJ,KK) + (MW_GAS/MW_DROP*M_VAP/M_GAS + (M_VAP*DELTA_H_G)/H_S_G_OLD) * WGT / DT
                M_DOT_PPP(II,JJ,KK,Z_INDEX) = M_DOT_PPP(II,JJ,KK,Z_INDEX) + M_VAP*RVC*WGT/DT
-               LP%M_DOT = M_VAP/DT
+               LP%M_DOT = LP%M_DOT + M_VAP/DT
 
                ! Add energy losses and gains to overall energy budget array
 
@@ -3034,7 +3039,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                D_SOURCE(II,JJ,KK) = D_SOURCE(II,JJ,KK) + &
                                     (MW_GAS/MW_DROP*M_VAP/M_GAS + (M_VAP*DELTA_H_G - Q_CON_GAS)/H_S_G_OLD) * WGT / DT
                M_DOT_PPP(II,JJ,KK,Z_INDEX) = M_DOT_PPP(II,JJ,KK,Z_INDEX) + M_VAP*RVC*WGT/DT
-               LP%M_DOT = M_VAP/DT
+               LP%M_DOT = LP%M_DOT + M_VAP/DT
 
                ! Add stability checks
 
@@ -3062,16 +3067,11 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                LP%ONE_D%TMP_F  = TMP_DROP_NEW
                LP%MASS = M_DROP
 
-               ! Compute surface cooling
-
+               ! Sum convection and radiation for surfaces
                IF (LP%WALL_INDEX>0 .OR. LP%CFACE_INDEX>0) THEN
-                  R_DROP = LP%ONE_D%X(1)
-                  A_DROP = WGT*PI*R_DROP**2
-                  ONE_D%LP_TEMP(LPC%ARRAY_INDEX) = ONE_D%LP_TEMP(LPC%ARRAY_INDEX) + A_DROP*0.5_EB*(TMP_DROP+TMP_DROP_NEW)
-                  ONE_D%LP_CPUA(LPC%ARRAY_INDEX) = ONE_D%LP_CPUA(LPC%ARRAY_INDEX) + &
-                                                   (1._EB-LPC%RUNNING_AVERAGE_FACTOR_WALL)*WGT*Q_CON_WALL/(ONE_D%AREA*DT)
-                  ONE_D%Q_RAD_IN = (ONE_D%AREA*DT*ONE_D%Q_RAD_IN - WGT*DT*Q_DOT_RAD) / (ONE_D%AREA*DT)
-               ENDIF
+                  Q_CON_SUM = Q_CON_SUM + Q_CON_WALL
+                  Q_RAD_SUM = Q_RAD_SUM + Q_DOT_RAD*DT_SUBSTEP
+               ENDIF               
 
             ENDIF BOIL_ALL
 
@@ -3085,6 +3085,17 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
          DT_SUBSTEP = MIN(DT-DT_SUM,DT_SUBSTEP * 1.5_EB)
 
       ENDDO TIME_ITERATION_LOOP
+
+      ! Compute surface cooling
+
+      IF (LP%WALL_INDEX>0 .OR. LP%CFACE_INDEX>0) THEN
+         R_DROP = LP%ONE_D%X(1)
+         A_DROP = WGT*PI*R_DROP**2
+         ONE_D%LP_TEMP(LPC%ARRAY_INDEX) = ONE_D%LP_TEMP(LPC%ARRAY_INDEX) + A_DROP*0.5_EB*(TMP_DROP+TMP_DROP_NEW)
+         ONE_D%LP_CPUA(LPC%ARRAY_INDEX) = ONE_D%LP_CPUA(LPC%ARRAY_INDEX) + &
+                                          (1._EB-LPC%RUNNING_AVERAGE_FACTOR_WALL)*WGT*Q_CON_WALL/(ONE_D%AREA*DT)
+         ONE_D%Q_RAD_IN = (ONE_D%AREA*DT*ONE_D%Q_RAD_IN - WGT*DT*Q_DOT_RAD) / (ONE_D%AREA*DT)
+      ENDIF
 
    ENDDO PARTICLE_LOOP
 
