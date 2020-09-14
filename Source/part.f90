@@ -1682,7 +1682,7 @@ PARTICLE_LOOP: DO IP=1,NLP
       ! If the particle crosses a cell boundary, determine its new status and check if it has hit a solid.
 
       WALL_SEARCH: IF (.NOT.HIT_SOLID .AND. LP%CFACE_INDEX==0 .AND. &
-                       IIG_OLD/=LP%ONE_D%IIG .OR. JJG_OLD/=LP%ONE_D%JJG .OR. KKG_OLD/=LP%ONE_D%KKG) THEN
+                       (IIG_OLD/=LP%ONE_D%IIG .OR. JJG_OLD/=LP%ONE_D%JJG .OR. KKG_OLD/=LP%ONE_D%KKG)) THEN
 
          ! Calculate the STEP_FRACTION, which indicates the relative distance between the particles's old and new
          ! position where the particle hits a cell boundary.
@@ -1787,6 +1787,11 @@ PARTICLE_LOOP: DO IP=1,NLP
          ENDIF IF_HIT_SOLID
 
       ENDIF WALL_SEARCH
+
+      ! If the particle has passed outside of its current mesh and it has not
+      ! hit anything, schedule it for removal or adoption by another mesh.
+
+      IF (EXTERIOR(IC_NEW) .AND. .NOT.HIT_SOLID) CYCLE PARTICLE_LOOP
 
       ! Process the particle if it has hit either a WALL or CFACE
 
