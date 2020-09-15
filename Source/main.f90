@@ -1135,6 +1135,10 @@ SELECT CASE(TASK_NUMBER)
       CALL MPI_COMM_GROUP(MPI_COMM_WORLD,GROUP_WORLD,IERR)  ! Get the group handle for MPI_COMM_WORLD
 
       DO NM=1,NMESHES
+         IF (EVACUATION_ONLY(NM)) THEN
+            MPI_COMM_MESH(NM) = MPI_COMM_NULL
+            CYCLE
+         END IF
          M => MESHES(NM)
          NN = -1
          DO N=1,M%N_NEIGHBORING_MESHES
