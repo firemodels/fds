@@ -4510,16 +4510,14 @@ If you are using {\ct DEVC}s to output spatially-integrated statistics as per Se
 \section{Pressure-Related Effects: The \texorpdfstring{{\tt ZONE}}{ZONE} Namelist Group (Table \ref{tbl:VENT})}
 \label{info:ZONE}
 
-FDS assumes pressure to be composed of a ``background'' component, $\bp(z,t)$, plus a perturbation pressure, $\tp(\bx,t)$. Most often, $\bp$ is just the hydrostatic pressure, and $\tp$ is the flow-induced spatially-resolved perturbation. You can specify any number of sealed compartments within the computational domain that can have their own ``background'' pressures, and these compartments, or ``pressure zones,'' can be connected via leakage and duct paths whose flow rates are tied to the pressure of the adjacent zones.
-
-
+FDS assumes pressure to be composed of a ``background'' component, $\bp(z,t)$, plus a perturbation pressure, $\tp(\bx,t)$. Most often, $\bp$ is just the hydrostatic pressure, and $\tp$ is the flow-induced spatially-resolved perturbation. FDS has an algorithm\footnote{The algorithm to identify pressure zones was introduced in FDS 6.7.6.} that identifies regions within the computational domain that are sealed; that is, are not connected to an {\ct OPEN} boundary. Thus, it is not necessary for you to explicitly declare these regions, or ``pressure zones.'' However, if you desire that a pressure zone be connected to another via a leak path, you need to explicitly declare it.
 
 \subsection{Specifying Pressure Zones}
 \label{info:ZONE_Basics}
 
-A pressure zone can be any region within the computational domain that is separated from the rest of the domain, or the exterior, by solid obstructions. There is currently no algorithm within FDS to identify these zones based solely on your specified obstructions. Consequently, it is necessary that you identify these zones explicitly in the input file. The basic syntax for a pressure {\ct ZONE} is:
+A pressure zone can be any region within the computational domain that is separated from the rest of the domain, or the exterior, by solid obstructions. There is an algorithm within FDS to identify these zones based solely on your specified obstructions. Consequently, it is not necessary that you identify these zones explicitly in the input file. However, you might want to have a particular zone leak to another zone or to the exterior of the domain. In that case, the basic syntax for a pressure {\ct ZONE} is:
 \begin{lstlisting}
-&ZONE XYZ=1.2,3.4,5.6 /
+&ZONE XYZ=1.2,3.4,5.6, LEAK_AREA(0)=0.001 /
 \end{lstlisting}
 The parameter {\ct XYZ}\footnote{Past versions of FDS also made use of the sextuplet {\ct XB} to specify a pressure zone. This parameter still works, but {\ct XYZ} is preferred.} specifies a single point $(1.2,3.4,5.6)$ that is within a sealed compartment, and it is not embedded within a solid obstruction. There can be multiple {\ct ZONE}s declared. The indices of the zones, which are required for the specification of leaks and fans, are determined simply by the order in which they are specified in the input file. By default, the exterior of the computational domain is Zone~0. If there are no {\ct OPEN} boundaries, the entire computational domain will be assumed to be Zone~1.
 
