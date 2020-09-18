@@ -544,6 +544,25 @@ DEALLOCATE(DUMMY)
 END SUBROUTINE RE_ALLOCATE_STRINGS
 
 
+!> \brief Re-allocate the derived type array P_ZONE
+
+SUBROUTINE REALLOCATE_P_ZONE(N1,N2)
+
+INTEGER, INTENT(IN) :: N1,N2
+TYPE (P_ZONE_TYPE), DIMENSION(:), ALLOCATABLE :: P_ZONE_DUMMY
+
+ALLOCATE(P_ZONE_DUMMY(1:N2))
+IF (ALLOCATED(P_ZONE)) THEN
+   P_ZONE_DUMMY(1:N1) = P_ZONE(1:N1)
+   DEALLOCATE(P_ZONE)
+ENDIF
+ALLOCATE(P_ZONE(1:N2))
+P_ZONE(1:N2) = P_ZONE_DUMMY(1:N2)
+DEALLOCATE(P_ZONE_DUMMY)
+
+END SUBROUTINE REALLOCATE_P_ZONE
+
+
 !> \brief Determines the size of the ONE_D_M_AND_E_XFER type structure for a surface type
 !> \param SURF_INDEX Index of the surface type
 
@@ -1506,7 +1525,7 @@ TYPE (MESH_TYPE), POINTER :: M
 TYPE (OBSTRUCTION_TYPE), POINTER :: OB
 
 M=>MESHES(NM)
-I_ZONE_OVERLAP = 0
+I_ZONE_OVERLAP = -1
 
 IF (XX<M%XS-TWO_EPSILON_EB .OR. XX>M%XF+TWO_EPSILON_EB .OR. &
     YY<M%YS-TWO_EPSILON_EB .OR. YY>M%YF+TWO_EPSILON_EB .OR. &
@@ -1626,12 +1645,12 @@ SORT_QUEUE: DO
 
          ! Cell not SOLID for OBSTS, or GEOM cell not IBM_SOLID:
          IF (.NOT.M%SOLID(IC) .AND. M%CCVAR(II,JJ,KK,1)/=1 .AND. &
-            M%PRESSURE_ZONE(II,JJ,KK)>0 .AND.  M%PRESSURE_ZONE(II,JJ,KK)/=I_ZONE) THEN
+            M%PRESSURE_ZONE(II,JJ,KK)>=0 .AND.  M%PRESSURE_ZONE(II,JJ,KK)/=I_ZONE) THEN
             I_ZONE_OVERLAP = M%PRESSURE_ZONE(II,JJ,KK)
             RETURN
          ENDIF
       ELSE
-         IF (.NOT.M%SOLID(IC) .AND. M%PRESSURE_ZONE(II,JJ,KK)>0 .AND.  M%PRESSURE_ZONE(II,JJ,KK)/=I_ZONE) THEN
+         IF (.NOT.M%SOLID(IC) .AND. M%PRESSURE_ZONE(II,JJ,KK)>=0 .AND.  M%PRESSURE_ZONE(II,JJ,KK)/=I_ZONE) THEN
             I_ZONE_OVERLAP = M%PRESSURE_ZONE(II,JJ,KK)
             RETURN
          ENDIF
@@ -1640,7 +1659,7 @@ SORT_QUEUE: DO
       ! If the current cell is unassigned, assign the cell the ZONE index, I_ZONE, and then add this cell to the
       ! queue so that further searches might originate from it.
 
-      IF (M%PRESSURE_ZONE(II,JJ,KK)<1) THEN
+      IF (M%PRESSURE_ZONE(II,JJ,KK)<0) THEN
          M%PRESSURE_ZONE(II,JJ,KK) = I_ZONE
          Q_N      = Q_N+1
          Q_I(Q_N) = II
