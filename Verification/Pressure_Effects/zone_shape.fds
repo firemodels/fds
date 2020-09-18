@@ -24,9 +24,6 @@ Each time a ZONE is opened, the pressure of the two connected ZONEs quickly equi
 
 &HOLE XB= 4.9, 5.3, 7.0, 8.0, 0.0, 2.0, DEVC_ID='door 2', COLOR='BLUE' /
 
-&ZONE XB= 0.0, 6.0, 0.0, 5.0, 0.0, 2.4 /
-&ZONE XB= 0.0, 5.0, 5.2,10.0, 0.0, 2.4 /
-
 &VENT XB= 2.0, 3.0, 2.0, 3.0, 0.0, 0.0, SURF_ID='BLOW' /
 
 &VENT XB= 0.0, 0.0, 6.0, 7.0, 0.0, 2.0, SURF_ID='OPEN' /

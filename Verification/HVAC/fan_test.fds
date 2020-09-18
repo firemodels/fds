@@ -8,11 +8,7 @@
 &MISC STRATIFICATION=.FALSE.,Y_CO2_INFTY=0.,HUMIDITY=0./
 &RADI RADIATION=.FALSE./
 
-&ZONE XB=-3.0, 0.0,-1.0, 1.0, 0.0, 2.0 /  Pressure Zone 1
-&ZONE XB= 0.0, 3.0,-1.0, 1.0, 0.0, 2.0 /  Pressure Zone 2
-
 &OBST XB= -0.15, 0.15,-1.0, 1.0, 0.0, 2.0 / Partition Wall
-
 
 &VENT XB=-0.15,-0.15,-0.2, 0.2, 0.4, 0.6, COLOR='RED', ID='BLOW LEFT 1',SURF_ID='HVAC',IOR=-1/ 
 &VENT XB= 0.15, 0.15,-0.2, 0.2, 0.4, 0.6, COLOR='GREEN', ID='BLOW LEFT 2',SURF_ID='HVAC',IOR=1/ 
