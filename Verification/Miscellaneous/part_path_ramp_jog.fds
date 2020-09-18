@@ -1,11 +1,7 @@
 &HEAD CHID='part_path_ramp_jog', TITLE='Test of PATH_RAMP feature'/
 
-! &MESH XB=0,1,0,1,0,1,IJK=11,11,11/
-
 &MESH XB=0,0.5,0,1,0,1,IJK=11,21,21/
 &MESH XB=0.5,1,0,1,0,1,IJK=11,21,21/
-
-&ZONE XYZ=.1,.1,.1/
 
 &TIME T_END=10./
 &DUMP MASS_FILE=T/
