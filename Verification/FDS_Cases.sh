@@ -55,7 +55,6 @@ $QFDS -d Complex_Geometry geom_texture3a.fds
 $QFDS -d Complex_Geometry geom_texture3b.fds
 $QFDS -d Complex_Geometry geom_texture4a.fds
 $QFDS -d Complex_Geometry geom_texture4b.fds
-$QFDS -d Complex_Geometry geom_arch.fds
 $QFDS -d Complex_Geometry sphere_helium_1mesh.fds
 $QFDS -p 3 -d Complex_Geometry sphere_helium_3meshes.fds
 $QFDS -p 3 -d Complex_Geometry sphere_helium_conserve_3meshes.fds
