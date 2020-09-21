@@ -22,7 +22,7 @@
 &SURF ID='terrain', ROUGHNESS=0.66, COLOR='FOREST GREEN', DEFAULT=T/
 
 ! &CATF OTHER_FILES='../../../../cad/Askervein_Hill/Askervein.geom' /
-&GEOM ID='terrain', SURF_ID='terrain', READ_BINARY=T, BINARY_NAME='../../../../cad/Askervein_Hill/Askervein_5m.bingeom' /
+&GEOM ID='terrain', SURF_ID='terrain', BINARY_FILE='../../../../cad/Askervein_Hill/Askervein_5m.bingeom' /
 
 ! Slices:
 &SLCF DB='XMID', QUANTITY='VELOCITY', VECTOR=T/

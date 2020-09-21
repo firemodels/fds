@@ -41314,7 +41314,7 @@ USE OUTPUT_DATA, ONLY: COLOR2RGB
 
 CHARACTER(LABEL_LENGTH) :: ID,MATL_ID,TEXTURE_MAPPING, &
                            DEVC_ID,PROP_ID,CTRL_ID,SURF_IDS(3),SURF_ID6(6),MOVE_ID
-CHARACTER(MESSAGE_LENGTH) :: BUFFER, BIN_GEOM_FILENAME,BINARY_DIR,BINARY_NAME
+CHARACTER(MESSAGE_LENGTH) :: BUFFER, BIN_GEOM_FILENAME,BINARY_DIR,BINARY_FILE
 CHARACTER(LABEL_LENGTH),  ALLOCATABLE, DIMENSION(:) :: SURF_ID
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZVALS,TFACES
 REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:) :: VERTS
@@ -41369,10 +41369,10 @@ LOGICAL :: SNAP_TO_GRID=.FALSE.
 
 INTEGER :: INOD, IERR
 
-NAMELIST /GEOM/ AUTO_TEXTURE,BNDF_GEOM,BINARY_DIR,BINARY_NAME,COLOR,CYLINDER_ORIGIN,CYLINDER_AXIS,&
+NAMELIST /GEOM/ AUTO_TEXTURE,BNDF_GEOM,BINARY_DIR,BINARY_FILE,COLOR,CYLINDER_ORIGIN,CYLINDER_AXIS,&
                 CYLINDER_RADIUS,CYLINDER_LENGTH,CYLINDER_NSEG_THETA,CYLINDER_NSEG_AXIS,&
                 EXTRUDE,EXTEND_TERRAIN,FACES,ID,IJK,IS_TERRAIN,MOVE_ID,MATL_ID,N_LAT,N_LEVELS,N_LONG,POLY,PROP_ID,&
-                READ_BINARY,RGB,SNAP_TO_GRID,SPHERE_ORIGIN,SPHERE_RADIUS,SPHERE_TYPE,SURF_ID,SURF_IDS,SURF_ID6,&
+                RGB,SNAP_TO_GRID,SPHERE_ORIGIN,SPHERE_RADIUS,SPHERE_TYPE,SURF_ID,SURF_IDS,SURF_ID6,&
                 TEXTURE_MAPPING,TEXTURE_ORIGIN,TEXTURE_SCALE,&
                 VERTS,VOLUS,XB,ZMIN,ZVALS,ZVAL_HORIZON
 
@@ -41449,7 +41449,8 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
    N_VOLUS=0
    N_ZVALS=0
    N_POLY_VERTS=0
-   IF(TRIM(BINARY_NAME)/='null') READ_BINARY = .TRUE. ! In case a binary name is provided, read the binary.
+   IF(TRIM(BINARY_FILE)/='null') READ_BINARY = .TRUE. ! In case a binary name is provided, read the binary.
+   IF(TRIM(BINARY_DIR) =='null') THEN; BINARY_DIR = ''; ELSE; BINARY_DIR = TRIM(BINARY_DIR)//'/'; ENDIF
    G%READ_BINARY = READ_BINARY
    READ_BIN_COND : IF (.NOT.READ_BINARY) THEN
       ! count VERTS
@@ -41523,13 +41524,8 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
       ENDIF
 
       ! Read Binary
-      IF (TRIM(BINARY_NAME)=='null') THEN
-         WRITE(BIN_GEOM_FILENAME,'(A,A,A,A,A)') './',TRIM(CHID),'_',TRIM(ID),'.bingeom'
-         OPEN(UNIT=731,FILE=TRIM(BIN_GEOM_FILENAME),STATUS='OLD',FORM='UNFORMATTED',ACTION='READ',ERR=221,IOSTAT=IOS)
-      ELSE
-         OPEN(UNIT=731,FILE=TRIM(BINARY_DIR)//'/'//TRIM(BINARY_NAME),&
-         STATUS='OLD',FORM='UNFORMATTED',ACTION='READ',ERR=221,IOSTAT=IOS)
-      ENDIF
+      OPEN(UNIT=731,FILE=TRIM(BINARY_DIR)//TRIM(BINARY_FILE),&
+      STATUS='OLD',FORM='UNFORMATTED',ACTION='READ',ERR=221,IOSTAT=IOS)
       IF (IOS==0) THEN
          READ(731) GEOM_TYPE
          READ(731) N_VERTS,N_FACES,N_SURF_ID,N_VOLUS
@@ -41556,26 +41552,16 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
          IF (N_VOLUS > 0 ) READ(731) VOLUS(1:4*N_VOLUS)
          CLOSE(731)
          IF (ANY(SURFS(1:N_FACES)>0) .AND. TRIM(SURF_ID(1))=='null') THEN
-          IF (TRIM(BINARY_NAME)=='null') THEN
           WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR: missing SURF_ID in &GEOM line ',TRIM(ID),&
-                                       ' for binary file ',TRIM(BIN_GEOM_FILENAME),'. Add SURF_ID in said &GEOM line.'
-          ELSE
-          WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR: missing SURF_ID in &GEOM line ',TRIM(ID),&
-                                       ' for binary file ',TRIM(BINARY_DIR)//'/'//TRIM(BINARY_NAME),&
+                                       ' for binary file ',TRIM(BINARY_DIR)//TRIM(BINARY_FILE),&
                                        '. Add SURF_ID in said &GEOM line.'
-          ENDIF
           CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
       ENDIF
 221   IF(IOS > 0) THEN
-         IF (TRIM(BINARY_NAME)=='null') THEN
          WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR: could not read binary connectivity for GEOM ',TRIM(ID),&
-                                       ' in binary file ',TRIM(BIN_GEOM_FILENAME),'. Check file exists.'
-         ELSE
-         WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR: could not read binary connectivity for GEOM ',TRIM(ID),&
-                                       ' in binary file ',TRIM(BINARY_DIR)//'/'//TRIM(BINARY_NAME),&
-                                       '. Check file exists.'
-         ENDIF
+                                      ' in binary file ',TRIM(BINARY_DIR)//TRIM(BINARY_FILE),&
+                                      '. Check file exists.'
          CALL SHUTDOWN(MESSAGE); RETURN
       ENDIF
    ENDIF READ_BIN_COND
@@ -43595,8 +43581,8 @@ SUBROUTINE SET_GEOM_DEFAULTS
    GEOM_TYPE=CAD_GEOM_TYPE
    BNDF_GEOM=BNDF_DEFAULT
    READ_BINARY = .FALSE.
-   BINARY_DIR  = './'
-   BINARY_NAME = 'null'
+   BINARY_DIR  = 'null'
+   BINARY_FILE = 'null'
    RGB=-1
 
 END SUBROUTINE SET_GEOM_DEFAULTS
