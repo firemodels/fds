@@ -2332,79 +2332,24 @@ For example, in the following {\ct GEOM}\ namelist,
 In cases where geometries have very large numbers of nodes and surface triangles, it can be more efficient at setup time to read this data from an FDS produced binary file. This binary file can be obtained running the case in setup only mode ({\ct T\_END=0.0}).
 Consider the chair geometry defined in the previous section. When a geometry is read by FDS, the {\ct XYZ} and face connectivity data {\ct FACES} is automatically written into a binary file with name {\ct CHID\_GEOM\_ID.bingeom} on the run directory (here, {\ct GEOM\_ID='chair'}). If an {\ct ID} is not provided, the name of the binary file will be  {\ct CHID\_N\_GEOM.bingeom}, where {\ct N\_GEOM} is the number defining the order of appearance of the geometry line on the FDS input file.
 
-Then, the next time the case is run, the geometry line can be modified to:
+Then, supposing the case {\ct CHID='DiningRoom'}, the next time the case is run, the geometry line can be modified to:
 {\small
 \begin{verbatim}
 &GEOM ID='chair',
       SURF_ID='woodSID','apholsterySID',
-      READ_BINARY=.TRUE.
+      BINARY_FILE='DiningRoom_chair.bingeom',
       MOVE_ID='ChairMove'
 /
 \end{verbatim}
 }
 
-where {\ct READ\_BINARY=.TRUE.} instructs FDS to read nodes and faces from the binary geometry file.
+where the presence of {\ct BINARY\_FILE} instructs FDS to read nodes and faces from the binary geometry file present.
 Note we have deleted the {\ct VERTS, FACES} arrays from the input line.
 This manner of loading large geometries avoids the testing and reading of all lines related to these arrays on the FDS input file.
 It is particularly efficient in large parallel calculations, where parallel file systems are used. See section~\ref{inout:bingeom} for more information on geometry I/O binary format.
-If a different name than the default is used, it can be specified in the field {\ct BINARY\_NAME}. The location directory can be specified in {\ct BINARY\_DIR}.
+If a different name than the default is used, it can be specified in the field {\ct BINARY\_FILE}. The location directory can be specified either in the {\ct BINARY\_FILE} string or in the field {\ct BINARY\_DIR}.
 Terrains can also be read and written in binary format, and in this case only their top surface triangulation is recorded. The binary contains their geometry information and terrain type, but the  {\ct SURF\_ID} array has to be provided in the geometry line as shown above. Same requirement is needed for {\ct EXTEND\_TERRAIN} if terrain extension is desired.
 
-
-%\subsection{Grouping Objects}
-%One may group objects to form a new object.  In the following example,
-%{\ct chair}\ and {\ct couch}\ are objects that have been defined previously.  A new {\ct living room set}\ object
-%is defined by referencing {\ct chair}\ and {\ct couch}\ in the {\ct GEOM\_IDS}\ keyword.  The chair and couch
-%are place at a particular locations using the {\ct DXYZ}\ keyword.
-%
-%{\small
-%\begin{verbatim}
-%&GEOM ID='chair' ..... /
-%
-%&GEOM ID='sofa' ...... /
-%
-%&GEOM ID='living room set'
-%
-%      XYZ=[0,0,0],
-%      AZIM=[0],
-%      ELEV=[0],
-%
-%      GEOM_IDS(1)='chair',  DSCALE(1)=..., DAZIM(1)=..., DELEV(1)...
-%                            DXYZ0(1:3,1)=..., DXYZ(1:3,1)=...,
-%      GEOM_IDS(2)='couch',  DSCALE(2)=..., DAZIM(2)=..., DELEV(2)...
-%                            DXYZ0(1:3,2)=..., DXYZ(1:3,2)=...,
-%/
-%\end{verbatim}
-%}
-%
-%\noindent Referenced objects such as {\ct chair}\ and {\ct couch} in this case must be defined in
-%previous {GEOM}\ lines.  Forward references are not permitted.
-%One may scale, rotate and translate objects as they are placed in the group using
-%{\ct DSCALE}\, for scaling, {\ct DAZIM} and {\ct DELEV} for rotation and {\ct DXYZ} for translation.
-%
-%The {\ct DXYZ0}\ and {\ct DXYZ}\ keywords use two coordinates (array indices) to specify data.
-%The first coordinate specifies the spatial component (1 for x, 2 for y, 3 for z or 1:3 for all three).
-%The second coordinate specifies the object number according to its position in the {\ct GEOM\_IDS}\ array.
-%For example,
-%DXYZ(1,3) would specify the translation along the x direction for the third object in the {\ct GEOM\_IDS}\ array.
-%
-%The {\ct COMPONENT\_ONLY}\ keyword if .TRUE., indicates that the object being defined is only a component found in other geometries.
-%It will not appear by itself in the FDS model.
-
-%\subsection{Dynamic Objects}
-%An object's position and orientation may change with time.
-%These changes are specified using various keywords that end with {\ct \_DOT}.
-%See Table \ref{tbl:GEOM} for a complete list of these keywords.
-%In the following example, {\ct AZIM\_DOT} is used to vary the azimuthal rotation angle by 1 deg/s.
-%Similarly, the position may be changed by using {\ct XYZ\_DOT}.
-%For example, {\ct XYZ\_DOT=0.0,0.0,1.0}\ would cause an object to move 1~m/s in a vertical direction.
-%{\small
-%\begin{verbatim}
-%&GEOM VERTS=...,FACES=....,AZIM=0.0,AZIM_DOT=1.0 /
-%\end{verbatim}
-%}
-%
-%\vspace{\baselineskip}
 
 \fi
 
@@ -10793,7 +10738,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hline \hline
 \endhead
 {\ct BINARY\_DIR}     & Character              & Section~\ref{info:GEOM}            &           &  {\ct 'null'}           \\ \hline
-{\ct BINARY\_NAME}     & Character              & Section~\ref{info:GEOM}            &           &  {\ct 'null'}           \\ \hline
+{\ct BINARY\_FILE}     & Character              & Section~\ref{info:GEOM}            &           &  {\ct 'null'}           \\ \hline
 {\ct CYLINDER\_LENGTH}& Real                  & Section~\ref{info:GEOM}            &   m       &                      \\ \hline
 {\ct CYLINDER\_RADIUS}& Real                  & Section~\ref{info:GEOM}            &   m       &                       \\ \hline
 {\ct CYLINDER\_ORIGIN}& Real Triplet          & Section~\ref{info:GEOM}            &   m       &             \\ \hline
@@ -10812,7 +10757,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct N\_LEVELS}    & Integer                & Section~\ref{info:GEOM}            &           &   0                      \\ \hline
 {\ct N\_LONG}      & Integer                & Section~\ref{info:GEOM}            &           &   0                      \\ \hline
 {\ct POLY}        & array of Integers     & Section~\ref{info:GEOM}     &           &    0                     \\ \hline
-{\ct READ\_BINARY}   & Logical         & Section~\ref{info:GEOM}            &              &   {\ct .FALSE.} \\ \hline
 {\ct SPHERE\_ORIGIN}& Real Triplet          & Section~\ref{info:GEOM}            &   m       &             \\ \hline
 {\ct SPHERE\_RADIUS}& Real                  & Section~\ref{info:GEOM}            &   m       &                    \\ \hline
 {\ct SPHERE\_TYPE} & Integer                & Section~\ref{info:GEOM}            &           &                        \\ \hline
@@ -12576,7 +12520,7 @@ The first {\ct ONE}\ is an endian flag.  Smokeview uses this number to determine
 
 
 \section{Geometry, Isosurface Files}
-\label{out:GEOMETRY}
+\label{out:GEOMETRY_ISO}
 
 Both immersed geometric surfaces (generalized obstructions) and FDS generated isosurfaces are stored using a file format described in this section. Iso-surface files are used to store one or more surfaces where the specified {\ct QUANTITY} is a specified value. FDS outputs iso-surface data at fixed time intervals.  These surfaces are defined in terms of vertices and triangles.  A vertex consists of an $(x,y,z)$ coordinate. A triangle consists of 3 connected vertices.  The file format allows one to specify objects that change with time. Static geometry is defined once and displayed by Smokeview unchanged at each time step. Dynamic geometry is defined at each time step either in terms of nodes and faces or in terms of a translation and two rotations (azimuthal and elevation) of dynamic geometry defined in the first time step. These files are written out from {\ct dump.f90} using lines equivalent to the following:
 \begin{lstlisting}
