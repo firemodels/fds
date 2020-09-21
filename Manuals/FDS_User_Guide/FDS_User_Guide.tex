@@ -122,6 +122,7 @@ visualization program for FDS. Its full capability is described in the Smokeview
 
 The Fire Dynamics Simulator, in various forms, has been under development for almost 25 years. It was first released to the public in 2000. Since then, continued improvements have been made to the software based largely on feedback from its users. Included below are some who made important contributions related to the application of FDS.
 \begin{itemize}
+\item Ulf Wickstr\"{o}m of Lule\r{a} University of Technology, Sweden, provided guidance and articles on the adiabatic surface temperature concept.
 \item At NIST, Dan Madrzykowski, Doug Walton, Bob Vettori, Dave Stroup, Steve Kerber, Nelson Bryner, and Adam Barowy have used FDS and Smokeview as part of several investigations of fire fighter line of duty deaths. They have provided valuable information on the model's usability and accuracy when compared to large scale measurements made during fire reconstructions.
 \item Bryan Klein of Thunderhead Engineering assisted in adding cross-referencing functionality to this document, making it easier to view electronically. He also designed the on-line services for revision control, bug reporting, and general discussion of topics related to FDS.
 \item At VTT, Joonas Ryyn\"{a}nen implemented and documented the FED/FIC routine.
@@ -3390,7 +3391,7 @@ Real objects, like furnishings, office equipment, and so on, are often difficult
 \end{lstlisting}
 An object with surface properties defined by {\ct 'my surface'} shall burn at a rate of 1000~kW/m$^2$ after a linear ramp-up of 10 s following its ``ignition'' when its surface temperature reaches 500~$^\circ$C. Burning shall continue for 5~min, and then ramp-down in 10~s. Note that the time {\ct T} in the {\ct RAMP} means time from ignition, not the time from the beginning of the simulation. Note also that now the ``ignition temperature'' is a surface property, not material property.
 
-After the surface has ignited, the heat transfer into the solid is still calculated, but there is no coupling between the burning rate and the surface temperature. As a result, the surface temperature may increase too much. To account for the energy loss due to the vaporization of the solid fuel, {\ct HEAT\_OF\_VAPORIZATION} can be specified for the surface. For example, when using the lines below, the net heat flux at the material surface is reduced by a factor 1000~kJ/kg times the instantaneous burning rate.
+After the surface has ignited, the heat transfer into the solid is still calculated, but there is no coupling between the burning rate and the surface temperature. As a result, the surface temperature may increase too much. To account for the energy loss due to the vaporization of the solid fuel, {\ct HEAT\_OF\_VAPORIZATION} can be specified for the surface. For example, when using the lines below, the total heat flux at the material surface is reduced by a factor 1000~kJ/kg times the instantaneous burning rate.
 \begin{lstlisting}
 &SURF ID                   = 'my surface'
       COLOR                = 'GREEN'
@@ -3910,7 +3911,7 @@ This section describes how to set up a simple model of the cone calorimeter or o
 \item Generate {\ct MATL} lines, plus a single {\ct SURF} line, as you normally would, except add {\ct EXTERNAL\_FLUX} to the {\ct SURF} line. This is simply a ``virtual'' source that heats the solid. Think of this as a perfect radiant panel or conical heating unit. You can control the {\ct EXTERNAL\_FLUX} using either {\ct TAU\_EF} or {\ct RAMP\_EF}. This is useful if you want to ramp up the heat flux following ignition to account for the additional radiation from the flame. See Section~\ref{info:RAMP_Time} for more details about ramps.
 \item Set an {\ct ASSUMED\_GAS\_TEMPERATURE} ($^\circ$C, default {\ct TMPA}) and optionally a \linebreak[4]{\ct HEAT\_TRANSFER\_COEFFICIENT} (kW/(m$^2 \cdot$K)) on the {\ct SURF} line, allowing you to control the convective heat flux from gas to surface and vice versa.
 \item Assign the {\ct SURF\_ID} to a {\ct VENT} that spans the bottom of the computational domain. Create {\ct OPEN} vents on all other faces of the computational domain.
-\item Add solid phase output devices to the solid surface, like {\ct 'WALL TEMPERATURE'}, {\ct 'NET HEAT FLUX'}, {\ct 'GAUGE HEAT FLUX'}, and {\ct 'WALL THICKNESS'}. Use these to track the condition of the solid as a function of time. The generation rate of the various gases is output via the quantity {\ct 'MASS FLUX'} along with the appropriate {\ct SPEC\_ID}. Do not specify the quantity {\ct 'BURNING RATE'} because FDS assumes that this is specific for fuel gas, and in this exercise there is no fuel gas.
+\item Add solid phase output devices to the solid surface, like {\ct 'WALL TEMPERATURE'}, {\ct 'TOTAL HEAT FLUX'}, {\ct 'GAUGE HEAT FLUX'}, and {\ct 'WALL THICKNESS'}. Use these to track the condition of the solid as a function of time. The generation rate of the various gases is output via the quantity {\ct 'MASS FLUX'} along with the appropriate {\ct SPEC\_ID}. Do not specify the quantity {\ct 'BURNING RATE'} because FDS assumes that this is specific for fuel gas, and in this exercise there is no fuel gas.
 \end{enumerate}
 Compare your results to measurements made in a bench-scale device, like the cone calorimeter. Keep in mind, however, that the calculation and the experiment are not necessarily perfectly matched. The calculation is designed to eliminate uncertainties related to convection, combustion, and apparatus-specific phenomena. Below is an FDS input file that demonstrates how you can test a candidate pyrolysis model by running very short calculations. The simulation only involves the solid phase model. Essentially, the gas phase calculation is shut off except for the imposition of a 50~kW/m$^2$ ``external'' heat flux. The solid in this example is a 8.5~mm thick slab of PMMA. For more details, see the FDS Validation Guide under the heading ``FAA Polymers.''
 \begin{lstlisting}
@@ -9138,16 +9139,16 @@ where $\epsilon_{\rm TC}$ is the emissivity of the thermocouple, $U$ is the inte
 \subsection{Heat Flux}
 \label{info:heat_flux}
 
-There are various output quantities related to heat flux.
+There are various output quantities related to heat flux and the thermal exposure of solid surfaces.
 
 \begin{labeling}{SPACE}
 
-\item[\ct 'NET HEAT FLUX']
-\hspace{1in} \newline The word {\em net} is used here to describe the sum of the emitted and absorbed radiation at a solid surface:
+\item[\ct 'TOTAL HEAT FLUX']
+\hspace{1in} \newline The rate of radiative and convective energy absorbed at a solid surface:
 \be
    \dq_{\rm net}'' = \epsilon_{\rm s} \, \left( \dq_{\rm inc,rad}'' - \sigma \, T_{\rm s}^4 \right) + h \, (T_{\rm gas} - T_{\rm s}) \label{net_flux}
 \ee
-where $\dot{q}_{\rm inc,rad}''$ is the {\em incident} radiative heat flux, $\epsilon_{\rm s}$ is the surface emissivity, $h$ is the convective heat transfer coefficient, $T_{\rm s}$ is the surface temperature, and $T_{\rm gas}$ is the gas temperature in the vicinity of the surface.
+where $\dot{q}_{\rm inc,rad}''$ is the {\em incident} radiative heat flux, $\epsilon_{\rm s}$ is the surface emissivity, $h$ is the convective heat transfer coefficient, $T_{\rm s}$ is the surface temperature, and $T_{\rm gas}$ is the gas temperature in the vicinity of the surface. The convective heat transfer coefficient, $h$, is calculated by FDS using the specified surface properties and the calculated near-boundary flow characteristics.
 
 \item[\ct 'RADIATIVE HEAT FLUX']
 \hspace{1in} \newline This is the radiative component of Eq.~(\ref{net_flux}), $\quad \dq_{\rm r}'' = \epsilon_{\rm s} \, \left( \dq_{\rm inc,rad}'' - \sigma \, T_{\rm s}^4 \right)$.
@@ -9159,37 +9160,40 @@ where $\dot{q}_{\rm inc,rad}''$ is the {\em incident} radiative heat flux, $\eps
 \hspace{1in} \newline This is the term $\dq_{\rm inc,rad}''$ in Eq.~(\ref{net_flux}).
 
 \item[\ct 'GAUGE HEAT FLUX']
-\hspace{1in} \newline This quantity simulates a measurement made with a cold water heat flux gauge:
+\hspace{1in} \newline This quantity simulates a measurement made with a water-cooled heat flux gauge:
 \be
    \dq_{\rm gauge}'' = \epsilon_{\rm gauge} \, \left( \dq_{\rm inc,rad}'' - \sigma \, T_{\rm gauge}^4 \right) + h \, (T_{\rm gas} - T_{\rm gauge})
+   \label{gauge_heat_flux}
 \ee
-If the heat flux gauge used in an experiment has a temperature other than ambient or an emissivity other than 1, use {\ct GAUGE\_TEMPERATURE} ($T_{\rm gauge}$) and {\ct GAUGE\_EMISSIVITY} ($\epsilon_{\rm gauge}$) on the {\ct PROP} line associated with the device:
+If the heat flux gauge used in an experiment has a temperature other than ambient or an emissivity other than 1, specify {\ct GAUGE\_TEMPERATURE} ($T_{\rm gauge}$, $^\circ$C) and {\ct GAUGE\_EMISSIVITY} ($\epsilon_{\rm gauge}$) on the {\ct PROP} line associated with the device:
 \begin{lstlisting}
 &DEVC ID='hf', XYZ=..., IOR=-2, QUANTITY='GAUGE HEAT FLUX', PROP_ID='hfp' /
 &PROP ID='hfp', GAUGE_TEMPERATURE=80., GAUGE_EMISSIVITY=0.9 /
 \end{lstlisting}
-The heat transfer coefficient, $h$, is that of the solid surface to which the device is attached.
+By default, the heat transfer coefficient, $h$, in Eq.~(\ref{gauge_heat_flux}) is calculated at the solid surface to which the device is attached, based on the specified surface properties and characteristics of the surrounding flow field. However, you may specify a fixed {\ct HEAT\_TRANSFER\_COEFFICIENT} (W/(m$^2 \cdot$K)) for the gauge on the {\ct PROP} line.
 
 \item[\ct 'RADIOMETER']
-\hspace{1in} \newline Similar to a heat flux gauge, this quantity measures only the radiative heat flux:
+\hspace{1in} \newline Similar to a water-cooled heat flux gauge, except that this quantity measures only the radiative component:
 \be
    \dq_{\rm radiometer}'' = \epsilon_{\rm gauge} \, \left( \dq_{\rm inc,rad}'' - \sigma \, T_{\rm gauge}^4 \right)
 \ee
-The {\ct GAUGE\_TEMPERATURE} ($T_{\rm gauge}$) and {\ct GAUGE\_EMISSIVITY} ($\epsilon_{\rm gauge}$) can be set on the {\ct PROP} line associated with the device if their values are different than ambient and 1, respectively.
+The {\ct GAUGE\_TEMPERATURE} ($T_{\rm gauge}$, $^\circ$C) and {\ct GAUGE\_EMISSIVITY} ($\epsilon_{\rm gauge}$) can be set on the {\ct PROP} line associated with the device if their values are different than ambient and 1, respectively.
+
+The quantity {\ct RADIOMETER} is based on the {\em ellipsoidal radiometer} concept first proposed by Nils-Erik Gunners and described in the Ref.~\cite{Murthy:JResNIST2003}. The intent of such a device is to eliminate the contribution of convection from the measurement.
 
 \item[\ct 'RADIATIVE HEAT FLUX GAS']
-\hspace{1in} \newline All of the above heat flux output quantities are defined at a solid surface. To record the radiative heat flux away from a solid surface, add a device with the following format:
+\hspace{1in} \newline This output quantity is the same as {\ct 'RADIATIVE HEAT FLUX'} described above, except it can located anywhere within the computational domain and not just at a solid surface. It can also have an arbitrary {\ct ORIENTATION} vector that points in the desired direction, much like a heat flux gauge. The {\ct ORIENTATION} vector need not be normalized, as in the following:
 \begin{lstlisting}
-&DEVC ID='hf', QUANTITY='RADIATIVE HEAT FLUX GAS', XYZ=..., ORIENTATION=-1,0,0/
+&DEVC ID='hf', QUANTITY='RADIATIVE HEAT FLUX GAS', XYZ=..., ORIENTATION=-1,1,0/
 \end{lstlisting}
-Note that the parameter {\ct SPATIAL\_STATISTIC} is not appropriate for this quantity, meaning that you cannot integrate this quantity over a plane or volume. However, you can use the parameter {\ct POINTS} to create a one-dimensional array of heat flux gauges (see Section~\ref{info:line_file}).
+Note that the parameter {\ct SPATIAL\_STATISTIC} is not appropriate for this quantity, meaning that you cannot integrate this quantity over a plane or volume. However, you can use the parameter {\ct POINTS} to create a one-dimensional array of these devices (see Section~\ref{info:line_file}).
 
 \item[\ct 'RADIANCE']
 \hspace{1in} \newline This is the term for the radiation intensity at the point, $\bx$, and direction angle, $\bs$, where the summation is over all spectral bands:
 \be
    I(\bx,\bs) = \sum_{n=1}^N I_n(\bx,\bs)
 \ee
-This quantity works in a similar way to {\ct 'RADIATIVE HEAT FLUX GAS'} in that a surrogate target particle is placed at the point {\ct XYZ} with an {\ct ORIENTATION} pointing towards the source of the heat.
+This output quantity is specified in a similar way as {\ct 'RADIATIVE HEAT FLUX GAS'} in that a surrogate target particle is placed at the point {\ct XYZ} with an {\ct ORIENTATION} pointing towards the source of the heat.
 \begin{lstlisting}
 &DEVC ID='rad2', QUANTITY='RADIANCE', XYZ=..., ORIENTATION=-1,0,0 /
 \end{lstlisting}
@@ -9201,7 +9205,7 @@ The units for {\ct 'RADIANCE'} are kW/m$^2$/sr.
 \subsection{Adiabatic Surface Temperature}
 \label{info:AST}
 
-FDS includes a calculation of the adiabatic surface temperature (AST), a quantity that is representative of the heat flux to a solid surface. Following the idea proposed by Ulf Wickstr\"{o}m~\cite{Wickstrom:Interflam2007}, $T_{\hbox{\tiny AST}}$ is the surface temperature for which the net heat flux (Eq.~(\ref{net_flux}) is zero. The following equation can be solved using an analytical solution given by Malendowski~\cite{Malendowski:FT}:
+FDS includes a calculation of the adiabatic surface temperature (AST), a way of expressing the thermal exposure of a solid surface. Following the idea proposed by Ulf Wickstr\"{o}m~\cite{Wickstrom:Interflam2007}, $T_{\hbox{\tiny AST}}$ is the surface temperature for which the total heat flux defined by Eq.~(\ref{net_flux}) is zero. The following equation can be solved using an analytical solution given by Malendowski~\cite{Malendowski:FT}:
 \be
    \epsilon \, \left( \dq_{\rm inc,rad}'' - \sigma \, T_{\hbox{\tiny AST}}^4 \right) + h \, (T_{\rm gas} - T_{\hbox{\tiny AST}}) = 0
 \ee
@@ -9612,9 +9616,9 @@ would output the total mass of methane in the volume {\ct XB} where the mass fra
 
 A set of additional {\ct SPATIAL\_STATISTIC}'s are available for use with {\ct QUANTITY\_RANGE}: {\ct 'MASS'}, {\ct 'VOLUME'}, and {\ct 'SURFACE AREA'}.  These output the mass, volume, or surface area (for a solid phase quantity) where the {\ct QUANTITY} lies within the {\ct QUANTITY\_RANGE}.  For example:
 \begin{lstlisting}
-&DEVC XB=..., QUANTITY='NET HEAT FLUX', SPATIAL_STATISTIC='SURFACE AREA', QUANTITY_RANGE(1)=10./
+&DEVC XB=..., QUANTITY='TOTAL HEAT FLUX', SPATIAL_STATISTIC='SURFACE AREA', QUANTITY_RANGE(1)=10./
 \end{lstlisting}
-would output the total surface area in the volume {\ct XB} where the net heat flux exceeds 10~kW/m$^2$.
+would output the total surface area in the volume {\ct XB} where the total heat flux exceeds 10~kW/m$^2$.
 
 \subsubsection{Volume, Mass, and Heat Flow}
 \label{info:flows}
@@ -10136,7 +10140,7 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct GAUGE HEAT FLUX}                           & Section~\ref{info:heat_flux}                  & kW/m$^2$       & B,D          \\ \hline
 {\ct HEAT FLOW}                                 & Section~\ref{info:flows}                      & kW             & D            \\ \hline
 {\ct HEAT FLOW WALL}                            & Section~\ref{info:flows}                      & kW             & D            \\ \hline
-{\ct NET HEAT FLUX}                             & Section~\ref{info:heat_flux}                  & kW/m$^2$       & B,D          \\ \hline
+{\ct TOTAL HEAT FLUX}                           & Section~\ref{info:heat_flux}                  & kW/m$^2$       & B,D          \\ \hline
 {\ct HRR}                                       & $\int \dq''' \; \d V$                         & kW             & D            \\ \hline
 {\ct HRRPUA}                                    & $\dq''$                                       & kW/m$^2$       & D            \\ \hline
 {\ct HRRPUV}                                    & $\dq'''$                                      & kW/m$^3$       & D,I,P,S      \\ \hline
