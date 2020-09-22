@@ -118,9 +118,9 @@ $QFDS -d Complex_Geometry rotated_cube_0deg_128_obs.fds
 $QFDS -d Complex_Geometry rotated_cube_0deg_256_exp.fds
 $QFDS -d Complex_Geometry rotated_cube_0deg_256_imp.fds
 $QFDS -d Complex_Geometry rotated_cube_0deg_256_obs.fds
-$QFDS -o 4 -d Complex_Geometry rotated_cube_0deg_384_exp.fds
-$QFDS -o 4 -d Complex_Geometry rotated_cube_0deg_384_imp.fds
-$QFDS -o 4 -d Complex_Geometry rotated_cube_0deg_384_obs.fds
+$QFDS -o 2 -d Complex_Geometry rotated_cube_0deg_384_exp.fds
+$QFDS -o 2 -d Complex_Geometry rotated_cube_0deg_384_imp.fds
+$QFDS -o 2 -d Complex_Geometry rotated_cube_0deg_384_obs.fds
 $QFDS -d Complex_Geometry rotated_cube_27deg_32_exp.fds
 $QFDS -d Complex_Geometry rotated_cube_27deg_32_imp.fds
 $QFDS -d Complex_Geometry rotated_cube_27deg_64_exp.fds
@@ -129,8 +129,8 @@ $QFDS -d Complex_Geometry rotated_cube_27deg_128_exp.fds
 $QFDS -d Complex_Geometry rotated_cube_27deg_128_imp.fds
 $QFDS -d Complex_Geometry rotated_cube_27deg_256_exp.fds
 $QFDS -d Complex_Geometry rotated_cube_27deg_256_imp.fds
-$QFDS -o 4 -d Complex_Geometry rotated_cube_27deg_384_exp.fds
-$QFDS -o 4 -d Complex_Geometry rotated_cube_27deg_384_imp.fds
+$QFDS -o 2 -d Complex_Geometry rotated_cube_27deg_384_exp.fds
+$QFDS -o 2 -d Complex_Geometry rotated_cube_27deg_384_imp.fds
 $QFDS -d Complex_Geometry rotated_cube_45deg_32_exp.fds
 $QFDS -d Complex_Geometry rotated_cube_45deg_32_imp.fds
 $QFDS -d Complex_Geometry rotated_cube_45deg_64_exp.fds
@@ -139,8 +139,8 @@ $QFDS -d Complex_Geometry rotated_cube_45deg_128_exp.fds
 $QFDS -d Complex_Geometry rotated_cube_45deg_128_imp.fds
 $QFDS -d Complex_Geometry rotated_cube_45deg_256_exp.fds
 $QFDS -d Complex_Geometry rotated_cube_45deg_256_imp.fds
-$QFDS -o 4 -d Complex_Geometry rotated_cube_45deg_384_exp.fds
-$QFDS -o 4 -d Complex_Geometry rotated_cube_45deg_384_imp.fds
+$QFDS -o 2 -d Complex_Geometry rotated_cube_45deg_384_exp.fds
+$QFDS -o 2 -d Complex_Geometry rotated_cube_45deg_384_imp.fds
 
 $QFDS -d Complex_Geometry cone_1mesh.fds
 $QFDS -d Complex_Geometry geom_mass_file_test.fds
