@@ -2333,7 +2333,7 @@ For example, in the following {\ct GEOM}\ namelist,
 In cases where geometries have very large numbers of nodes and surface triangles, it can be more efficient at setup time to read this data from an FDS produced binary file. This binary file can be obtained running the case in setup only mode ({\ct T\_END=0.0}).
 Consider the chair geometry defined in the previous section. When a geometry is read by FDS, the {\ct XYZ} and face connectivity data {\ct FACES} is automatically written into a binary file with name {\ct CHID\_GEOM\_ID.bingeom} on the run directory (here, {\ct GEOM\_ID='chair'}). If an {\ct ID} is not provided, the name of the binary file will be  {\ct CHID\_N\_GEOM.bingeom}, where {\ct N\_GEOM} is the number defining the order of appearance of the geometry line on the FDS input file.
 
-Then, supposing the case {\ct CHID='DiningRoom'}, the next time the case is run, the geometry line can be modified to:
+Then, supposing the case ID is {\ct CHID='DiningRoom'}, the next time the case is run, the geometry line can be modified to:
 {\small
 \begin{verbatim}
 &GEOM ID='chair',
@@ -2344,11 +2344,11 @@ Then, supposing the case {\ct CHID='DiningRoom'}, the next time the case is run,
 \end{verbatim}
 }
 
-where the presence of {\ct BINARY\_FILE} instructs FDS to read nodes and faces from the binary geometry file present.
+\noindent where the presence of {\ct BINARY\_FILE} instructs FDS to read nodes and faces from the binary geometry file. 
 Note we have deleted the {\ct VERTS, FACES} arrays from the input line.
 This manner of loading large geometries avoids the testing and reading of all lines related to these arrays on the FDS input file.
 It is particularly efficient in large parallel calculations, where parallel file systems are used. See section~\ref{inout:bingeom} for more information on geometry I/O binary format.
-If a different name than the default is used, it can be specified in the field {\ct BINARY\_FILE}. The location directory can be specified either in the {\ct BINARY\_FILE} string or in the field {\ct BINARY\_DIR}.
+If a different name than the default is used, it can be specified in the field {\ct BINARY\_FILE}. The location directory can also be added in the {\ct BINARY\_FILE} string.
 Terrains can also be read and written in binary format, and in this case only their top surface triangulation is recorded. The binary contains their geometry information and terrain type, but the  {\ct SURF\_ID} array has to be provided in the geometry line as shown above. Same requirement is needed for {\ct EXTEND\_TERRAIN} if terrain extension is desired.
 
 
@@ -10741,7 +10741,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct GEOM} (Unstructured Geometry Parameters)} \\
 \hline \hline
 \endhead
-{\ct BINARY\_DIR}     & Character              & Section~\ref{info:GEOM}            &           &  {\ct 'null'}           \\ \hline
 {\ct BINARY\_FILE}     & Character              & Section~\ref{info:GEOM}            &           &  {\ct 'null'}           \\ \hline
 {\ct CYLINDER\_LENGTH}& Real                  & Section~\ref{info:GEOM}            &   m       &                      \\ \hline
 {\ct CYLINDER\_RADIUS}& Real                  & Section~\ref{info:GEOM}            &   m       &                       \\ \hline
