@@ -205,15 +205,6 @@ BUILDING GEMOEMTRY
 &OBST XB= 1.0,15.9,10.1,10.3, 0.0,27.8, SURF_ID='Concrete Wall'/ External Wall
 &OBST XB=15.7,15.9, 1.0,10.1, 0.0,27.8, SURF_ID='Concrete Wall'/ External Wall
 
-&ZONE XYZ= 3.0, 3.6, 27.5 / Building return/exhaust shaft
-&ZONE XYZ= 3.0, 7.0, 27.5 / Building supply shaft
-&ZONE XYZ= 5.0, 7.0, 27.5 / Service shaft
-&ZONE XYZ= 7.0, 7.0, 27.5 / Elevator shaft
-&ZONE XYZ=11.0, 5.0, 27.5 / Smoke shaft
-&ZONE XYZ=10.0, 5.0, 27.5 / Elevator/stair vestibule supply shaft
-&ZONE XYZ= 6.0, 5.5, 27.5 / Stair supply shaft
-&ZONE XYZ= 8.0, 5.5, 27.5 / Stair exhaust shaft
-
 &HOLE XB= 2.6, 4.0, 2.6, 5.4, 3.2,26.0 / Building return/exhaust shaft
 &HOLE XB= 2.6, 4.0, 5.6, 8.7, 3.2,26.0 / Building supply shaft
 &HOLE XB= 4.2, 6.2, 5.9, 8.7, 3.2,26.0 / Service shaft
