@@ -385,26 +385,75 @@ TYPE SPECIES_TYPE
    LOGICAL ::  EXPLICIT_H_F=.FALSE.               !< Heat of Formation is explicitly specified
    LOGICAL ::  CONDENSABLE=.FALSE.                !< Species can condense to liquid form
 
-   CHARACTER(LABEL_LENGTH) :: ID,RAMP_CP,RAMP_CP_L,RAMP_K,RAMP_MU,RAMP_D,RADCAL_ID,RAMP_G_F,PROP_ID
-   CHARACTER(FORMULA_LENGTH) :: FORMULA
-   INTEGER :: MODE=2,RAMP_CP_INDEX=-1,RAMP_CP_L_INDEX=-1,RAMP_K_INDEX=-1,RAMP_MU_INDEX=-1,RAMP_D_INDEX=-1,RADCAL_INDEX=-1,&
-              RAMP_G_F_INDEX=-1,AWM_INDEX=-1
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: H_V,C_P_L,C_P_L_BAR,H_L
+   CHARACTER(LABEL_LENGTH) :: ID                  !< Species name
+   CHARACTER(LABEL_LENGTH) :: RAMP_CP             !< Name of specific heat ramp
+   CHARACTER(LABEL_LENGTH) :: RAMP_CP_L           !< Name of liquid specific heat rame
+   CHARACTER(LABEL_LENGTH) :: RAMP_K              !< Name of conductivity ramp
+   CHARACTER(LABEL_LENGTH) :: RAMP_MU             !< Name of viscosity rame
+   CHARACTER(LABEL_LENGTH) :: RAMP_D              !< Name of diffusivity ramp
+   CHARACTER(LABEL_LENGTH) :: RADCAL_ID           !< Name of closest species with RADCAL properties
+   CHARACTER(LABEL_LENGTH) :: RAMP_G_F            
+   CHARACTER(LABEL_LENGTH) :: PROP_ID             !< Name of PROPerty parameters
+   CHARACTER(FORMULA_LENGTH) :: FORMULA           !< Chemical formula
+   INTEGER :: MODE=2
+   INTEGER :: RAMP_CP_INDEX=-1                    !< Index of specific heat ramp
+   INTEGER :: RAMP_CP_L_INDEX=-1                  !< Index of liquid specific heat ramp
+   INTEGER :: RAMP_K_INDEX=-1                     !< Index of conductivity ramp
+   INTEGER :: RAMP_MU_INDEX=-1                    !< Index of viscosity ramp
+   INTEGER :: RAMP_D_INDEX=-1                     !< Index of diffusivity heat ramp
+   INTEGER :: RADCAL_INDEX=-1                     !< Index of nearest species with RADCAL properties
+   INTEGER :: RAMP_G_F_INDEX=-1
+   INTEGER :: AWM_INDEX=-1
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: H_V       !< Heat of vaporization as a function of temperature
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: C_P_L     !< Liquid specific heat as a function of temperature
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: C_P_L_BAR !< Average liquid specific heat as a function of temperture
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: H_L       !< Heat of liquification as a function of temperature
 
 END TYPE SPECIES_TYPE
 
 TYPE (SPECIES_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: SPECIES
 
+
+!> \brief Properties of lumped species
+
 TYPE SPECIES_MIXTURE_TYPE
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: MASS_FRACTION,VOLUME_FRACTION
-   REAL(EB) :: MW , RCON, ZZ0=0._EB, MASS_EXTINCTION_COEFFICIENT=0._EB,ADJUST_NU=1._EB,ATOMS(118)=0._EB,MEAN_DIAMETER,&
-               SPECIFIC_HEAT=-1._EB,REFERENCE_ENTHALPY=-2.E20_EB,THERMOPHORETIC_DIAMETER, &
-               REFERENCE_TEMPERATURE,MU_USER=-1._EB,K_USER=-1._EB,D_USER=-1._EB,PR_USER=-1._EB,EPSK=-1._EB,SIG=-1._EB,&
-               FLD_LETHAL_DOSE=0._EB,FIC_CONCENTRATION=0._EB,&
-               DENSITY_SOLID,CONDUCTIVITY_SOLID,H_F=-1.E30_EB
-   CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: SPEC_ID
-   CHARACTER(LABEL_LENGTH) :: ID='null',RAMP_CP,RAMP_CP_L,RAMP_K,RAMP_MU,RAMP_D,RAMP_G_F
-   CHARACTER(FORMULA_LENGTH) :: FORMULA='null'
+
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: MASS_FRACTION    !< Mass fractions of components
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: VOLUME_FRACTION  !< Volume fractions of components
+
+   REAL(EB) :: MW                                  !< Molecular weight (g/mol)
+   REAL(EB) :: RCON                                !< Specific gas constant, \f$ R_0 \sum_\alpha Y_\alpha/W_\alpha \f$ (J/kg/K)
+   REAL(EB) :: ZZ0=0._EB                           !< Initial mass fraction of lumped species
+   REAL(EB) :: MASS_EXTINCTION_COEFFICIENT=0._EB   !< Absorption coefficient of visible light (m2/kg)
+   REAL(EB) :: ADJUST_NU=1._EB                     !< Adjustment factor if stoichiometric coefficients given for non-normalized VF
+   REAL(EB) :: ATOMS(118)=0._EB                    !< Count of each atom in the mixture
+   REAL(EB) :: MEAN_DIAMETER           
+   REAL(EB) :: SPECIFIC_HEAT=-1._EB                !< Specific heat (J/kg/K)
+   REAL(EB) :: REFERENCE_ENTHALPY=-2.E20_EB        !< Enthalpy at REFERENCE_TEMPERATURE (J/kg)
+   REAL(EB) :: THERMOPHORETIC_DIAMETER
+   REAL(EB) :: REFERENCE_TEMPERATURE               !< Reference temperature of mixture (K)
+   REAL(EB) :: MU_USER=-1._EB                      !< User-specified viscosity (kg/m/s)
+   REAL(EB) :: K_USER=-1._EB                       !< User-specified thermal conductivity (W/m/K)
+   REAL(EB) :: D_USER=-1._EB                       !< User-specified diffusion coefficient (m2/s)
+   REAL(EB) :: PR_USER=-1._EB                      !< User-specified Prandhl number
+   REAL(EB) :: EPSK=-1._EB
+   REAL(EB) :: SIG=-1._EB
+   REAL(EB) :: FLD_LETHAL_DOSE=0._EB
+   REAL(EB) :: FIC_CONCENTRATION=0._EB
+   REAL(EB) :: DENSITY_SOLID
+   REAL(EB) :: CONDUCTIVITY_SOLID
+   REAL(EB) :: H_F=-1.E30_EB
+
+   CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: SPEC_ID  !< Array of component species names
+   CHARACTER(LABEL_LENGTH) :: ID='null'                           !< Name of lumped species
+   CHARACTER(LABEL_LENGTH) :: RAMP_CP                             !< Name of specific heat ramp
+   CHARACTER(LABEL_LENGTH) :: RAMP_CP_L                           !< Name of liquid specific heat ramp
+   CHARACTER(LABEL_LENGTH) :: RAMP_K                              !< Name of conductivity ramp
+   CHARACTER(LABEL_LENGTH) :: RAMP_MU                             !< Name of viscosity ramp
+   CHARACTER(LABEL_LENGTH) :: RAMP_D                              !< Name of diffusion coefficient ramp
+   CHARACTER(LABEL_LENGTH) :: RAMP_G_F
+   CHARACTER(FORMULA_LENGTH) :: FORMULA='null'                    !< Chemical formula of lumped species
+
    INTEGER :: AWM_INDEX = -1,RAMP_CP_INDEX=-1,SINGLE_SPEC_INDEX=-1,RAMP_K_INDEX=-1,RAMP_MU_INDEX=-1,RAMP_D_INDEX=-1,&
               RAMP_G_F_INDEX=-1,CONDENSATION_SMIX_INDEX=-1,EVAPORATION_SMIX_INDEX=-1,AGGLOMERATION_INDEX=-1
    LOGICAL :: DEPOSITING=.FALSE.,VALID_ATOMS=.TRUE.,EVAPORATING=.FALSE.
