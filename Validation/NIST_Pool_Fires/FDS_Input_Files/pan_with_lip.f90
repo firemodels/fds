@@ -7,15 +7,16 @@ Y0 = 0.
 Z1 = -0.04
 Z2 = 0.
 RAD = 0.185
-PAN_THICKNESS = 0.015
-IBAR = 30
-JBAR = 30
+LIP_THICKNESS = 0.005
+LIP_HEIGHT = 0.00
+IBAR = 120
+JBAR = 120
 XS = -0.3
 XF = 0.3
 YS = -.3
 YF = 0.3
 
-RAD2 = RAD + PAN_THICKNESS
+RAD2 = RAD + LIP_THICKNESS
 DX = (XF-XS)/REAL(IBAR)
 DY = (YF-YS)/REAL(JBAR)
 AREA = 0.
@@ -28,7 +29,7 @@ DO J=1,JBAR
          WRITE(6,'(A,6(F6.3,","),A)') "&OBST XB=",X-0.5*DX,X+0.5*DX,Y-0.5*DY,Y+0.5*DY,Z1,Z2, " SURF_IDS='POOL','PAN','PAN' /"
          AREA = AREA + DX*DY
       ELSEIF ( ((X-X0)**2+(Y-Y0)**2)<RAD2**2 ) THEN
-         WRITE(6,'(A,6(F6.3,","),A)') "&OBST XB=",X-0.5*DX,X+0.5*DX,Y-0.5*DY,Y+0.5*DY,Z1,Z2+0.01, " SURF_ID='PAN' /"
+         WRITE(6,'(A,6(F6.3,","),A)') "&OBST XB=",X-0.5*DX,X+0.5*DX,Y-0.5*DY,Y+0.5*DY,Z1,Z2+LIP_HEIGHT, " SURF_ID='PAN' /"
       ENDIF
    ENDDO
 ENDDO
