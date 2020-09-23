@@ -1,4 +1,4 @@
-&HEAD CHID='NIST_Propane_34_kW_Prescribed_2cm', TITLE='NIST Propane Fire, 37 cm diameter pan, 0.5 cm resolution' /
+&HEAD CHID='NIST_Propane_34kW_Prescribed_2cm', TITLE='NIST Propane Fire, 37 cm diameter pan, 0.5 cm resolution' /
 
 &TIME T_END=60. /
 
