@@ -1474,7 +1474,7 @@ PARTICLE_LOOP: DO IP=1,NLP
       ! Determine the cell indices of the new particle location.
 
       CALL GET_IJK(LP%X,LP%Y,LP%Z,NM,XI,YJ,ZK,LP%ONE_D%IIG,LP%ONE_D%JJG,LP%ONE_D%KKG)
- 
+
       ! If the particle is not near a boundary cell, cycle.
 
       CC_IBM_GASPHASE = .TRUE.
@@ -1865,9 +1865,9 @@ PARTICLE_LOOP: DO IP=1,NLP
          ENDIF
 
       ELSEIF (LP%CFACE_INDEX==0) THEN
-        
+
          LP%WALL_INDEX = 0  ! The droplet is not stuck to a WALL cell
-         
+
       ENDIF
 
    ENDDO TIME_STEP_LOOP
@@ -1936,10 +1936,9 @@ UBAR = AFILL2(U,IIG_OLD-1,JJY,KKZ,(X_OLD-X(IIG_OLD-1))*RDX(IIG_OLD),Y_WGT,Z_WGT)
 VBAR = AFILL2(V,IIX,JJG_OLD-1,KKZ,X_WGT,(Y_OLD-Y(JJG_OLD-1))*RDY(JJG_OLD),Z_WGT)
 WBAR = AFILL2(W,IIX,JJY,KKG_OLD-1,X_WGT,Y_WGT,(Z_OLD-Z(KKG_OLD-1))*RDZ(KKG_OLD))
 
-! If the particle is massless, just move it and go on to the next particle
+! If the particle has a path, just follow the path and return
 
 IF (LP%PATH_PARTICLE) THEN
-   ! If the particle has a path, just follow the path and return
    IF (INITIALIZATION(LP%INIT_INDEX)%PATH_RAMP_INDEX(1) > 0) &
       LP%X = EVALUATE_RAMP(T,0._EB,INITIALIZATION(LP%INIT_INDEX)%PATH_RAMP_INDEX(1))
    IF (INITIALIZATION(LP%INIT_INDEX)%PATH_RAMP_INDEX(2) > 0) &
@@ -1949,23 +1948,27 @@ IF (LP%PATH_PARTICLE) THEN
    RETURN
 ENDIF
 
+! If the particle is massless, just move it and go on to the next particle
+
 TRACER_IF: IF (LPC%MASSLESS_TRACER .OR. LP%PWT<=TWO_EPSILON_EB) THEN
    IF (LPC%TURBULENT_DISPERSION) THEN
       DD_X = RSC * (MU(IIG_OLD+1,JJG_OLD,KKG_OLD) - MU(IIG_OLD-1,JJG_OLD,KKG_OLD)) * &
              RDXN(IIG_OLD-1)*RDXN(IIG_OLD)/(RDXN(IIG_OLD-1) + RDXN(IIG_OLD))
-      DD_Y = RSC * (MU(IIG_OLD,JJG_OLD+1,KKG_OLD) - MU(IIG_OLD,JJG_OLD-1,KKG_OLD)) * &
-             RDYN(JJG_OLD-1)*RDYN(JJG_OLD)/(RDYN(JJG_OLD-1) + RDYN(JJG_OLD))
+      IF (.NOT.TWO_D) THEN
+         DD_Y = RSC * (MU(IIG_OLD,JJG_OLD+1,KKG_OLD) - MU(IIG_OLD,JJG_OLD-1,KKG_OLD)) * &
+                RDYN(JJG_OLD-1)*RDYN(JJG_OLD)/(RDYN(JJG_OLD-1) + RDYN(JJG_OLD))
+      ENDIF
       DD_Z = RSC * (MU(IIG_OLD,JJG_OLD,KKG_OLD+1) - MU(IIG_OLD,JJG_OLD,KKG_OLD-1)) * &
              RDZN(KKG_OLD-1)*RDZN(KKG_OLD)/(RDZN(KKG_OLD-1) + RDZN(KKG_OLD))
       LP%U = UBAR + DD_X/RHO(IIG_OLD,JJG_OLD,KKG_OLD)
-      LP%V = VBAR + DD_Y/RHO(IIG_OLD,JJG_OLD,KKG_OLD)
+      IF (.NOT.TWO_D) LP%V = VBAR + DD_Y/RHO(IIG_OLD,JJG_OLD,KKG_OLD)
       LP%W = WBAR + DD_Z/RHO(IIG_OLD,JJG_OLD,KKG_OLD)
       DD   = SQRT(2._EB*MU(IIG_OLD,JJG_OLD,KKG_OLD)/RHO(IIG_OLD,JJG_OLD,KKG_OLD)*RSC*DT_P)
       ! generate pairs of standard Gaussian random variables
       CALL BOX_MULLER(DW_X,DW_Y)
       CALL BOX_MULLER(DW_Z,DW_X)
       LP%X = X_OLD + LP%U*DT_P + DD*DW_X
-      LP%Y = Y_OLD + LP%V*DT_P + DD*DW_Y
+      IF (.NOT.TWO_D) LP%Y = Y_OLD + LP%V*DT_P + DD*DW_Y
       LP%Z = Z_OLD + LP%W*DT_P + DD*DW_Z
    ELSE
       LP%U = UBAR
@@ -2120,6 +2123,26 @@ PARTICLE_NON_STATIC_IF: IF (.NOT.LPC%STATIC .OR. LP%EMBER) THEN ! Move airborne,
    LP%V = ( V_OLD + (V_OLD+ALPHA*VBAR)*BDTOA )/OBDT
    LP%W = ( W_OLD + (W_OLD+ALPHA*WBAR)*BDTOA )/OBDT
 
+   ! Massive particles undergoing turbulent dispersion
+
+   IF (LPC%TURBULENT_DISPERSION) THEN
+      DD_X = RSC * (MU(IIG_OLD+1,JJG_OLD,KKG_OLD) - MU(IIG_OLD-1,JJG_OLD,KKG_OLD)) * &
+             RDXN(IIG_OLD-1)*RDXN(IIG_OLD)/(RDXN(IIG_OLD-1) + RDXN(IIG_OLD))
+      IF (.NOT.TWO_D) THEN
+         DD_Y = RSC * (MU(IIG_OLD,JJG_OLD+1,KKG_OLD) - MU(IIG_OLD,JJG_OLD-1,KKG_OLD)) * &
+                RDYN(JJG_OLD-1)*RDYN(JJG_OLD)/(RDYN(JJG_OLD-1) + RDYN(JJG_OLD))
+      ENDIF
+      DD_Z = RSC * (MU(IIG_OLD,JJG_OLD,KKG_OLD+1) - MU(IIG_OLD,JJG_OLD,KKG_OLD-1)) * &
+             RDZN(KKG_OLD-1)*RDZN(KKG_OLD)/(RDZN(KKG_OLD-1) + RDZN(KKG_OLD))
+      LP%U = LP%U + DD_X/RHO(IIG_OLD,JJG_OLD,KKG_OLD)
+      IF (.NOT.TWO_D) LP%V = LP%V + DD_Y/RHO(IIG_OLD,JJG_OLD,KKG_OLD)
+      LP%W = LP%W + DD_Z/RHO(IIG_OLD,JJG_OLD,KKG_OLD)
+      DD   = SQRT(2._EB*MU(IIG_OLD,JJG_OLD,KKG_OLD)/RHO(IIG_OLD,JJG_OLD,KKG_OLD)*RSC*DT_P)
+      ! generate pairs of standard Gaussian random variables
+      CALL BOX_MULLER(DW_X,DW_Y)
+      CALL BOX_MULLER(DW_Z,DW_X)
+   ENDIF
+
    ! Compute gravity components
 
    IF (.NOT.SPATIAL_GRAVITY_VARIATION) THEN
@@ -2144,6 +2167,12 @@ PARTICLE_NON_STATIC_IF: IF (.NOT.LPC%STATIC .OR. LP%EMBER) THEN ! Move airborne,
       LP%X = X_OLD + (U_OLD+ALPHA*UBAR)*DTOPA + ALBO*(U_OLD-UBAR) + GX_LOC*HALF_DT2
       LP%Y = Y_OLD + (V_OLD+ALPHA*VBAR)*DTOPA + ALBO*(V_OLD-VBAR) + GY_LOC*HALF_DT2
       LP%Z = Z_OLD + (W_OLD+ALPHA*WBAR)*DTOPA + ALBO*(W_OLD-WBAR) + GZ_LOC*HALF_DT2
+
+      IF (LPC%TURBULENT_DISPERSION) THEN
+         LP%X = LP%X + DD*DW_X
+         IF (.NOT.TWO_D) LP%Y = LP%Y + DD*DW_Y
+         LP%Z = LP%Z + DD*DW_Z
+      ENDIF
    ELSE
       ! no drag
       LP%ACCEL_X  = 0._EB
@@ -3076,7 +3105,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                IF (LP%WALL_INDEX>0 .OR. LP%CFACE_INDEX>0) THEN
                   Q_CON_SUM = Q_CON_SUM + Q_CON_WALL
                   Q_RAD_SUM = Q_RAD_SUM + Q_DOT_RAD*DT_SUBSTEP
-               ENDIF               
+               ENDIF
 
             ENDIF BOIL_ALL
 

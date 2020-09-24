@@ -210,6 +210,9 @@ TYPE MESH_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: CELLSI !< Array used to locate the cell index of \f$ x \f$
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: CELLSJ !< Array used to locate the cell index of \f$ y \f$
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: CELLSK !< Array used to locate the cell index of \f$ z \f$
+   INTEGER :: CELLSI_LO,CELLSI_HI                !< hold CELLSI array bounds
+   INTEGER :: CELLSJ_LO,CELLSJ_HI                !< hold CELLSJ array bounds
+   INTEGER :: CELLSK_LO,CELLSK_HI                !< hold CELLSK array bounds
    REAL(FB), ALLOCATABLE, DIMENSION(:) :: XPLT   !< 4 byte real array holding \f$ x \f$ mesh coordinates
    REAL(FB), ALLOCATABLE, DIMENSION(:) :: YPLT   !< 4 byte real array holding \f$ y \f$ mesh coordinates
    REAL(FB), ALLOCATABLE, DIMENSION(:) :: ZPLT   !< 4 byte real array holding \f$ z \f$ mesh coordinates
@@ -401,6 +404,7 @@ REAL(EB), POINTER :: DXI,DETA,DZETA,RDXI,RDETA,RDZETA, &
 REAL(EB), POINTER, DIMENSION(:) :: R,RC,X,Y,Z,XC,YC,ZC,HX,HY,HZ, &
    DX,RDX,DXN,RDXN,DY,RDY,DYN,RDYN,DZ,RDZ,DZN,RDZN, &
    CELLSI,CELLSJ,CELLSK,RRN
+INTEGER, POINTER :: CELLSI_LO,CELLSI_HI,CELLSJ_LO,CELLSJ_HI,CELLSK_LO,CELLSK_HI
 REAL(FB), POINTER, DIMENSION(:) :: XPLT,YPLT,ZPLT
 INTEGER, POINTER :: N_OBST
 TYPE(OBSTRUCTION_TYPE), POINTER, DIMENSION(:) :: OBSTRUCTION
@@ -751,6 +755,12 @@ RDZN=>M%RDZN
 CELLSI=>M%CELLSI
 CELLSJ=>M%CELLSJ
 CELLSK=>M%CELLSK
+CELLSI_LO=>M%CELLSI_LO
+CELLSJ_LO=>M%CELLSJ_LO
+CELLSK_LO=>M%CELLSK_LO
+CELLSI_HI=>M%CELLSI_HI
+CELLSJ_HI=>M%CELLSJ_HI
+CELLSK_HI=>M%CELLSK_HI
 RRN=>M%RRN
 XPLT=>M%XPLT
 YPLT=>M%YPLT
