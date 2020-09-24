@@ -1187,7 +1187,7 @@ END SUBROUTINE ALLOCATE_STORAGE
 
 !> \brief Increase the size of the array used to hold WALL, CFACE, LAGRANGIAN_PARTICLE data
 !> \param NM Mesh number
-!> \param MODE Indicator of the type of array 
+!> \param MODE Indicator of the type of array
 !> \param INDX Index of the LAGRANGIAN_PARTICLE_CLASS or the SURFACE type
 !> \param N_NEW_STORAGE_SLOTS Number of new storage slots to allocate
 !> \param NOM Optional parameter indicating the "number of the other mesh" for particles passing from one mesh to another
@@ -4080,7 +4080,7 @@ END FUNCTION GINV
 !> \param I Cell index of the point in the x direction
 !> \param J Cell index of the point in the y direction
 !> \param K Cell index of the point in the z direction
-!> \details For example, if the mesh is the unit cube with 10 cm cells, for the point (X,Y,Z)=(0.23,0.46,0.66), 
+!> \details For example, if the mesh is the unit cube with 10 cm cells, for the point (X,Y,Z)=(0.23,0.46,0.66),
 !> GET_IJK would return (XI,JK,ZK)=(2.3,4.6,6.6) and (I,J,K)=(3,5,7).
 
 SUBROUTINE GET_IJK(X,Y,Z,NM,XI,YJ,ZK,I,J,K)
@@ -4091,9 +4091,9 @@ INTEGER,INTENT(IN) :: NM
 REAL(EB), INTENT(OUT) :: XI,YJ,ZK
 INTEGER, INTENT(OUT) :: I,J,K
 
-XI = MESHES(NM)%CELLSI(FLOOR((X-MESHES(NM)%XS)*MESHES(NM)%RDXINT))
-YJ = MESHES(NM)%CELLSJ(FLOOR((Y-MESHES(NM)%YS)*MESHES(NM)%RDYINT))
-ZK = MESHES(NM)%CELLSK(FLOOR((Z-MESHES(NM)%ZS)*MESHES(NM)%RDZINT))
+XI = MESHES(NM)%CELLSI(  MIN( MESHES(NM)%CELLSI_HI, MAX(MESHES(NM)%CELLSI_LO,FLOOR((X-MESHES(NM)%XS)*MESHES(NM)%RDXINT)) )  )
+YJ = MESHES(NM)%CELLSJ(  MIN( MESHES(NM)%CELLSJ_HI, MAX(MESHES(NM)%CELLSJ_LO,FLOOR((Y-MESHES(NM)%YS)*MESHES(NM)%RDYINT)) )  )
+ZK = MESHES(NM)%CELLSK(  MIN( MESHES(NM)%CELLSK_HI, MAX(MESHES(NM)%CELLSK_LO,FLOOR((Z-MESHES(NM)%ZS)*MESHES(NM)%RDZINT)) )  )
 I = FLOOR(XI+1._EB)
 J = FLOOR(YJ+1._EB)
 K = FLOOR(ZK+1._EB)

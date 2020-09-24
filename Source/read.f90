@@ -1758,17 +1758,25 @@ MESH_LOOP: DO NM=1,NMESHES
    ALLOCATE(M%CELLSK(-NIPZS:NIPZ+NIPZF),STAT=IZERO)
    CALL ChkMemErr('READ','CELLSK',IZERO)
 
-   DO I=-NIPXS,NIPX+NIPXF
+   M%CELLSI_LO=-NIPXS
+   M%CELLSI_HI=NIPX+NIPXF
+   DO I=M%CELLSI_LO,M%CELLSI_HI
       M%CELLSI(I) = GINV(REAL(I,EB)/M%RDXINT,1,NM)*M%RDXI
       M%CELLSI(I) = MAX(M%CELLSI(I),-0.9_EB)
       M%CELLSI(I) = MIN(M%CELLSI(I),REAL(M%IBAR)+0.9_EB)
    ENDDO
-   DO J=-NIPYS,NIPY+NIPYF
+
+   M%CELLSJ_LO=-NIPYS
+   M%CELLSJ_HI=NIPY+NIPYF
+   DO J=M%CELLSJ_LO,M%CELLSJ_HI
       M%CELLSJ(J) = GINV(REAL(J,EB)/M%RDYINT,2,NM)*M%RDETA
       M%CELLSJ(J) = MAX(M%CELLSJ(J),-0.9_EB)
       M%CELLSJ(J) = MIN(M%CELLSJ(J),REAL(M%JBAR)+0.9_EB)
    ENDDO
-   DO K=-NIPZS,NIPZ+NIPZF
+
+   M%CELLSK_LO=-NIPZS
+   M%CELLSK_HI=NIPZ+NIPZF
+   DO K=M%CELLSK_LO,M%CELLSK_HI
       M%CELLSK(K) = GINV(REAL(K,EB)/M%RDZINT,3,NM)*M%RDZETA
       M%CELLSK(K) = MAX(M%CELLSK(K),-0.9_EB)
       M%CELLSK(K) = MIN(M%CELLSK(K),REAL(M%KBAR)+0.9_EB)
@@ -13981,7 +13989,7 @@ END SUBROUTINE READ_ISOF
 
 
 !> \brief Subdivide a grid
-!> \details This routine is used to split a slice file into finer and finer sub-regions until at the last step 
+!> \details This routine is used to split a slice file into finer and finer sub-regions until at the last step
 !> each region is a grid cell I_IND and NI are intially defined to be NI=2, I_IND(1)=1, I_IND(2)=NI_ALL.
 !> The first step would be to generate NI=3, I_IND(1), I_IND(2)=INT((1+NI_ALL)/2), I_IND(3)=NI_ALL.
 !> This routine is then called multiple times until NI=NI_ALL, I_IND(1)=1, ..., I_IND(NI_ALL)=NI_ALL.
