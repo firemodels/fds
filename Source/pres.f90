@@ -1453,6 +1453,9 @@ INTEGER :: CGSC=IS_CGSC, UNKH=IS_UNKH, NCVARS=IS_NCVARS
 ! Pardiso or Sparse cluster solver message level:
 INTEGER, SAVE :: MSGLVL = 0  ! 0 no messages, 1 print statistical information
 
+! Factor to drop DY in cylindrical axisymmetric coordinates.
+REAL(EB), SAVE :: CYL_FCT
+
 !#define SINGLE_PRECISION_PSN_SOLVE
 #ifdef SINGLE_PRECISION_PSN_SOLVE
 REAL(FB), ALLOCATABLE, DIMENSION(:) :: F_H_FB, X_H_FB, A_H_FB
@@ -1517,8 +1520,8 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             IF (CCVAR(I,J,K,UNKH) <= 0) CYCLE ! Gasphase Cartesian cells.
             ! Row number:
             IROW = CCVAR(I,J,K,UNKH) - UNKH_IND(NM_START) ! Local numeration.
-            ! Add to F_H:
-            F_H(IROW) = F_H(IROW) + PRHS(I,J,K) * DX(I)*DY(J)*DZ(K)
+            ! Add to F_H: If CYL_FCT=0. -> Cartesian coordinates volume (RC(I)=1.). If CYL_FCT=1. -> Cylindrical coords volume.
+            F_H(IROW) = F_H(IROW) + PRHS(I,J,K) * ((1._EB-CYL_FCT)*DY(J) + CYL_FCT*RC(I))*DX(I)*DZ(K)
          ENDDO
       ENDDO
    ENDDO
@@ -1544,10 +1547,10 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          ! Define cell size, normal to WC:
          SELECT CASE (IOR)
          CASE(-1) ! -IAXIS oriented, high face of IIG cell.
-            AF  =  DY(JJG)*DZ(KKG)
+            AF  =  ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*R(IIG  )) * DZ(KKG)
             VAL = -BXF(JJG,KKG)*AF
          CASE( 1) ! +IAXIS oriented, low face of IIG cell.
-            AF  =  DY(JJG)*DZ(KKG)
+            AF  =  ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*R(IIG-1)) * DZ(KKG)
             VAL =  BXS(JJG,KKG)*AF
          CASE(-2) ! -JAXIS oriented, high face of JJG cell.
             AF  =  DX(IIG)*DZ(KKG)
@@ -1556,10 +1559,10 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             AF  =  DX(IIG)*DZ(KKG)
             VAL =  BYS(IIG,KKG)*AF
          CASE(-3) ! -KAXIS oriented, high face of KKG cell.
-            AF  =  DX(IIG)*DY(JJG)
+            AF  =  ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*RC(IIG  ))* DX(IIG)
             VAL = -BZF(IIG,JJG)*AF
          CASE( 3) ! +KAXIS oriented, low face of KKG cell.
-            AF  =  DX(IIG)*DY(JJG)
+            AF  =  ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*RC(IIG  ))* DX(IIG)
             VAL =  BZS(IIG,JJG)*AF
          END SELECT
 
@@ -1596,11 +1599,11 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          SELECT CASE (IOR)
          CASE(-1) ! -IAXIS oriented, high face of IIG cell.
             IDX = 1._EB / DXN(IIG)
-            AF  =  DY(JJG)*DZ(KKG)
+            AF  =  ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*R(IIG  )) * DZ(KKG)
             VAL = -2._EB*IDX*AF*BXF(JJG,KKG)
          CASE( 1) ! +IAXIS oriented, low face of IIG cell.
             IDX = 1._EB / DXN(IIG-1)
-            AF  =  DY(JJG)*DZ(KKG)
+            AF  =  ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*R(IIG-1)) * DZ(KKG)
             VAL = -2._EB*IDX*AF*BXS(JJG,KKG)
          CASE(-2) ! -JAXIS oriented, high face of JJG cell.
             IDX = 1._EB / DYN(JJG)
@@ -1612,11 +1615,11 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             VAL = -2._EB*IDX*AF*BYS(IIG,KKG)
          CASE(-3) ! -KAXIS oriented, high face of KKG cell.
             IDX = 1._EB / DZN(KKG)
-            AF  =  DX(IIG)*DY(JJG)
+            AF  =  ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*RC(IIG  ))* DX(IIG)
             VAL = -2._EB*IDX*AF*BZF(IIG,JJG)
          CASE( 3) ! +KAXIS oriented, low face of KKG cell.
             IDX = 1._EB / DZN(KKG-1)
-            AF  =  DX(IIG)*DY(JJG)
+            AF  =  ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*RC(IIG  ))* DX(IIG)
             VAL = -2._EB*IDX*AF*BZS(IIG,JJG)
          END SELECT
 
@@ -1831,6 +1834,9 @@ LOGICAL :: SUPPORTED_MESH=.TRUE.
 
 SELECT CASE(STAGE_FLAG)
 CASE(1)
+
+    ! Factor to drop DY(J) in cylindrical coordinates. Soln assumes DTheta=1.
+    CYL_FCT = 0._EB; IF (CYLINDRICAL) CYL_FCT = 1._EB
 
    ! Check for unsupported mesh configurations:
    CALL CHECK_UNSUPPORTED_MESH(SUPPORTED_MESH)
@@ -2630,17 +2636,17 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       IND_LOC(LOW_IND) = IND(LOW_IND) - UNKH_IND(NM1) ! All row indexes must refer to ind_loc.
       SELECT CASE(WC%ONE_D%IOR)
       CASE( IAXIS)
-         AF = DY(JJG)*DZ(KKG);            IDX= 1._EB/DXN(IIG-1)
+         AF = ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*R(IIG-1)) * DZ(KKG);            IDX= 1._EB/DXN(IIG-1)
       CASE(-IAXIS)
-         AF = DY(JJG)*DZ(KKG);            IDX= 1._EB/DXN(IIG  )
+         AF = ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*R(IIG  )) * DZ(KKG);            IDX= 1._EB/DXN(IIG  )
       CASE( JAXIS)
          AF = DX(IIG)*DZ(KKG);            IDX= 1._EB/DYN(JJG-1)
       CASE(-JAXIS)
          AF = DX(IIG)*DZ(KKG);            IDX= 1._EB/DYN(JJG  )
       CASE( KAXIS)
-         AF = DX(IIG)*DY(JJG);            IDX= 1._EB/DZN(KKG-1)
+         AF = ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*RC(IIG  ))* DX(IIG);            IDX= 1._EB/DZN(KKG-1)
       CASE(-KAXIS)
-         AF = DX(IIG)*DY(JJG);            IDX= 1._EB/DZN(KKG  )
+         AF = ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*RC(IIG  ))* DX(IIG);            IDX= 1._EB/DZN(KKG  )
       END SELECT
 
       ! Now add to Adiff corresponding coeff:
@@ -2789,7 +2795,14 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          IND_LOC(HIGH_IND)= IND(HIGH_IND)- UNKH_IND(NM1)
 
          ! Face Area and inv DX1:
-         AF  = DX2(I2)*DX3(I3)
+         IF (CYLINDRICAL) THEN
+            SELECT CASE(X1AXIS)
+            CASE(IAXIS); AF  = R(I) *DX3(I3)
+            CASE(KAXIS); AF  = RC(I)*DX2(I2)
+            END SELECT
+         ELSE
+            AF  = DX2(I2)*DX3(I3)
+         ENDIF
          IDX =    1._EB/DX1(I1)
 
          ! Now add to Adiff corresponding coeff:
@@ -2852,23 +2865,17 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
       SELECT CASE(IOR)
       CASE( IAXIS)
-         AF = DY(JJG)*DZ(KKG)
-         IDX= 1._EB/DXN(IIG-1)
+         AF = ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*R(IIG-1)) * DZ(KKG);         IDX= 1._EB/DXN(IIG-1)
       CASE(-IAXIS)
-         AF = DY(JJG)*DZ(KKG)
-         IDX= 1._EB/DXN(IIG)
+         AF = ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*R(IIG  )) * DZ(KKG);         IDX= 1._EB/DXN(IIG)
       CASE( JAXIS)
-         AF = DX(IIG)*DZ(KKG)
-         IDX= 1._EB/DYN(JJG-1)
+         AF = DX(IIG)*DZ(KKG);         IDX= 1._EB/DYN(JJG-1)
       CASE(-JAXIS)
-         AF = DX(IIG)*DZ(KKG)
-         IDX= 1._EB/DYN(JJG)
+         AF = DX(IIG)*DZ(KKG);         IDX= 1._EB/DYN(JJG)
       CASE( KAXIS)
-         AF = DX(IIG)*DY(JJG)
-         IDX= 1._EB/DZN(KKG-1)
+         AF = ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*RC(IIG  ))* DX(IIG);         IDX= 1._EB/DZN(KKG-1)
       CASE(-KAXIS)
-         AF = DX(IIG)*DY(JJG)
-         IDX= 1._EB/DZN(KKG)
+         AF = ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*RC(IIG  ))* DX(IIG);         IDX= 1._EB/DZN(KKG)
       END SELECT
 
       ! Now add to Adiff corresponding coeff:
