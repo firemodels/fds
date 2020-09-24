@@ -2344,7 +2344,7 @@ Then, supposing the case ID is {\ct CHID='DiningRoom'}, the next time the case i
 \end{verbatim}
 }
 
-\noindent where the presence of {\ct BINARY\_FILE} instructs FDS to read nodes and faces from the binary geometry file. 
+\noindent where the presence of {\ct BINARY\_FILE} instructs FDS to read nodes and faces from the binary geometry file.
 Note we have deleted the {\ct VERTS, FACES} arrays from the input line.
 This manner of loading large geometries avoids the testing and reading of all lines related to these arrays on the FDS input file.
 It is particularly efficient in large parallel calculations, where parallel file systems are used. See section~\ref{inout:bingeom} for more information on geometry I/O binary format.
@@ -6223,7 +6223,11 @@ since {\ct MASSLESS} particles are for visualization only.
 
 \subsection*{Turbulent Dispersion}
 
-Massless tracer particles may also be useful in modeling dispersion of a tracer gas that does not affect the mean flow field (passive scalar).  The number density of the particles then may be translated into a local mass concentration.  See how to output number concentration in Sec.~\ref{PDPA}.  To properly account for subgrid-scale (unresolved) turbulent motions, add the parameter {\ct TURBULENT\_DISPERSION=.TRUE.} to the {\ct PART} line.  The particles will then undergo a random walk based on the subgrid diffusivity.  For further information, see the {\ct random\_walk} test cases in the {\ct WUI} directory of the verification suite.
+Massless tracer particles may also be useful in modeling dispersion of a tracer gas that does not affect the mean flow field (passive scalar).  The number density of the particles then may be translated into a local mass concentration.  See how to output number concentration in Sec.~\ref{PDPA}.
+
+To account for subgrid-scale turbulent motions, add {\ct TURBULENT\_DISPERSION=.TRUE.} to the {\ct PART} line.  The particles will then undergo a random walk based on the subgrid diffusivity.  As an example, see the {\ct random\_walk} test cases in the {\ct WUI} directory of the verification suite.
+
+{\ct TURBULENT\_DISPERSION=.TRUE.} may also be used with massive particles and helps to homogenize the particle number density on the grid.
 
 
 \clearpage
