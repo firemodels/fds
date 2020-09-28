@@ -9088,7 +9088,7 @@ where $\epsilon_{\rm TC}$ is the emissivity of the thermocouple, $U$ is the inte
 \subsection{Heat Flux}
 \label{info:heat_flux}
 
-There are various output quantities related to heat flux and the thermal exposure of solid surfaces.
+There are various output quantities related to the thermal exposure of solid surfaces.
 
 \begin{labeling}{SPACE}
 
@@ -9100,7 +9100,7 @@ There are various output quantities related to heat flux and the thermal exposur
 where $\dot{q}_{\rm inc,rad}''$ is the {\em incident} radiative heat flux, $\epsilon_{\rm s}$ is the surface emissivity, $h$ is the convective heat transfer coefficient, $T_{\rm s}$ is the surface temperature, and $T_{\rm gas}$ is the gas temperature in the vicinity of the surface. The convective heat transfer coefficient, $h$, is calculated by FDS using the specified surface properties and the calculated near-boundary flow characteristics.
 
 \item[\ct 'RADIATIVE HEAT FLUX']
-\hspace{1in} \newline This is the radiative component of Eq.~(\ref{net_flux}), $\quad \dq_{\rm r}'' = \epsilon_{\rm s} \, \left( \dq_{\rm inc,rad}'' - \sigma \, T_{\rm s}^4 \right)$.
+\hspace{1in} \newline This is the net radiative component of Eq.~(\ref{net_flux}), $\quad \dq_{\rm r}'' = \epsilon_{\rm s} \, \left( \dq_{\rm inc,rad}'' - \sigma \, T_{\rm s}^4 \right)$.
 
 \item[\ct 'CONVECTIVE HEAT FLUX']
 \hspace{1in} \newline This is the convective component of Eq.~(\ref{net_flux}), $\quad \dq_{\rm c}'' = h \, (T_{\rm gas} - T_{\rm s})$.
@@ -9122,7 +9122,7 @@ If the heat flux gauge used in an experiment has a temperature other than ambien
 By default, the heat transfer coefficient, $h$, in Eq.~(\ref{gauge_heat_flux}) is calculated at the solid surface to which the device is attached, based on the specified surface properties and characteristics of the surrounding flow field. However, you may specify a fixed {\ct HEAT\_TRANSFER\_COEFFICIENT} (W/(m$^2 \cdot$K)) for the gauge on the {\ct PROP} line.
 
 \item[\ct 'RADIOMETER']
-\hspace{1in} \newline Similar to a water-cooled heat flux gauge, except that this quantity measures only the radiative component:
+\hspace{1in} \newline Similar to a water-cooled heat flux gauge, except that this quantity measures only the net radiative component:
 \be
    \dq_{\rm radiometer}'' = \epsilon_{\rm gauge} \, \left( \dq_{\rm inc,rad}'' - \sigma \, T_{\rm gauge}^4 \right)
 \ee
@@ -9131,7 +9131,7 @@ The {\ct GAUGE\_TEMPERATURE} ($T_{\rm gauge}$, $^\circ$C) and {\ct GAUGE\_EMISSI
 The quantity {\ct RADIOMETER} is based on the {\em ellipsoidal radiometer} concept first proposed by Nils-Erik Gunners and described in the Ref.~\cite{Murthy:JResNIST2003}. The intent of such a device is to eliminate the contribution of convection from the measurement.
 
 \item[\ct 'RADIATIVE HEAT FLUX GAS']
-\hspace{1in} \newline This output quantity is the same as {\ct 'RADIATIVE HEAT FLUX'} described above, except it can located anywhere within the computational domain and not just at a solid surface. It can also have an arbitrary {\ct ORIENTATION} vector that points in the desired direction, much like a heat flux gauge. The {\ct ORIENTATION} vector need not be normalized, as in the following:
+\hspace{1in} \newline This output quantity is the same as {\ct 'RADIATIVE HEAT FLUX'} described above, except it can located anywhere within the computational domain and not just at a solid surface. It also has an arbitrary {\ct ORIENTATION} vector that points in any desired direction, much like a heat flux gauge. The {\ct ORIENTATION} vector need not be normalized, as in the following:
 \begin{lstlisting}
 &DEVC ID='hf', QUANTITY='RADIATIVE HEAT FLUX GAS', XYZ=..., ORIENTATION=-1,1,0/
 \end{lstlisting}
@@ -9142,7 +9142,7 @@ Note that the parameter {\ct SPATIAL\_STATISTIC} is not appropriate for this qua
 \be
    I(\bx,\bs) = \sum_{n=1}^N I_n(\bx,\bs)
 \ee
-This output quantity is specified in a similar way as {\ct 'RADIATIVE HEAT FLUX GAS'} in that a surrogate target particle is placed at the point {\ct XYZ} with an {\ct ORIENTATION} pointing towards the source of the heat.
+This output quantity is specified in a similar way as {\ct 'RADIATIVE HEAT FLUX GAS'} in that a surrogate target particle is placed at the point {\ct XYZ} with an {\ct ORIENTATION} vector pointing in any desired direction.
 \begin{lstlisting}
 &DEVC ID='rad2', QUANTITY='RADIANCE', XYZ=..., ORIENTATION=-1,0,0 /
 \end{lstlisting}
@@ -9160,13 +9160,21 @@ FDS includes a calculation of the adiabatic surface temperature (AST), a way of 
 \ee
 where, $\dot{q}_{\rm inc,rad}''$ is the {\em incident} radiative heat flux onto the surface, $\epsilon$ is the surface emissivity, $h$ is the convective heat transfer coefficient, and $T_{\rm gas}$ is the surrounding gas temperature.
 
-The usefulness of the AST is that it represents an effective exposure temperature that can be passed on to a more detailed model of the solid object. It provides the gas phase thermal boundary condition in a single quantity, and it is not affected by the uncertainty associated with the solid phase heat conduction model within FDS. Obviously, the objective in passing information to a more detailed model is to get a better prediction of the solid temperature (and ultimately its mechanical response) than FDS can provide. To reinforce this notion, you can output the adiabatic surface temperature even when there is no actual solid surface using the following lines:
+To output the AST at a single point on a solid surface, include a device as follows:
+\begin{lstlisting}
+&DEVC ID='AST', XYZ=..., IOR=..., QUANTITY='ADIABATIC SURFACE TEMPERATURE' /
+\end{lstlisting}
+Note that {\ct IOR} specifies the orientation of the surface. To produce a contour plot of AST on all solid surfaces, include a boundary file as follows:
+\begin{lstlisting}
+&BNDF QUANTITY='ADIABATIC SURFACE TEMPERATURE' /
+\end{lstlisting}
+The usefulness of the AST is that it represents an effective exposure temperature that can be passed on to a more detailed model of the solid object. It provides the gas phase thermal boundary condition in a single quantity, and it is not affected by the uncertainty associated with the solid phase heat conduction model within FDS. Obviously, the objective in passing information to a more detailed model is to get a better prediction of the solid temperature (and ultimately its mechanical response) than FDS can provide. To reinforce this notion, you can output the adiabatic surface temperature even when there is no actual solid surface in your model using the following lines:
 \begin{lstlisting}
 &DEVC ID='AST', XYZ=..., QUANTITY='ADIABATIC SURFACE TEMPERATURE GAS',
       ORIENTATION=0.707,0.0,0.707, PROP_ID='props' /
 &PROP ID='props', EMISSIVITY=0.9, HEAT_TRANSFER_COEFFICIENT=10. /
 \end{lstlisting}
-This output indicates the maximum achievable solid surface temperature at the given location {\ct XYZ} that is \emph{not} actually in the vicinity of a solid surface, facing in any direction as indicated by the {\ct ORIENTATION} vector. Note that you {\em must} set the {\ct EMISSIVITY} and {\ct HEAT\_TRANSFER\_COEFFICIENT} (W/(m$^2\cdot$K)) on the {\ct PROP} line because there is no actual solid surface from which to infer these values.
+This output indicates the maximum achievable solid surface temperature at the given location {\ct XYZ} that is \emph{not} actually in the vicinity of any solid surface, facing in any direction as indicated by the {\ct ORIENTATION} vector. Note that you {\em must} set the {\ct EMISSIVITY} and {\ct HEAT\_TRANSFER\_COEFFICIENT} (W/(m$^2\cdot$K)) on the {\ct PROP} line because there is no actual solid surface from which to infer these values.
 In fact, FDS creates a Lagrangian particle that records the AST at the desired location. FDS creates an {\ct INIT} line to position the particle. If you want to output other quantities at this point that are related to the AST, you can create another {\ct DEVC} at the same location and use {\ct INIT\_ID} to identify the {\ct DEVC} line for the {\ct ADIABATIC SURFACE TEMPERATURE}. For example, you can output the heat transfer coefficient used in calculating the AST as follows:
 \begin{lstlisting}
 &DEVC ID='AST', XYZ=..., QUANTITY='ADIABATIC SURFACE TEMPERATURE GAS', ... /
