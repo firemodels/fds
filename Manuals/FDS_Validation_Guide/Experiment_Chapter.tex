@@ -668,15 +668,18 @@ A widely used experimental correlation for flame height is given by the expressi
 where $\rho_\infty$, $c_p$, and $T_\infty$ are the ambient density, specific heat, and temperature. $\dot{Q}^*$ is a non-dimensional quantity that relates the fire's heat release rate, $\dQ$, with the diameter of its base, $D$. The greater the value of $Q^*$, the higher the flame height relative to its base diameter.
 
 \section{Insulation Material Fire Resistance Tests}
-Small scale fire resistance tests consist of 30 different types of stone wool varying in density, thickness, and organic content~\cite{Paudel:2020}. During the test, a sample of size 60$\times$60 cm$^2$ and thickness $l$ is separated from the combustion chamber using a 1 mm thin steel plate, its cold-side is open to the ambient ($ T_\infty $), and the hot-side follows the ISO 834 standard fire curve,
-\begin{align}
-	T_\textrm{h}(t) = T_\infty + 345\textrm{log}_{10}(8t + 1),
+\label{Insulation_Materials_Description}
+
+Paudel et al.~\cite{Paudel:2020} conducted small-scale fire resistance tests for 30 different types of stone wool insulation varying in density, thickness, and organic content. During each test, a 60~cm square sample of insulation covered by a 1~mm thick steel plate was mounted to the opening of a small combustion chamber. Thus, one side of the sample was exposed to ambient ($ T_\infty $) conditions, and the other side was attached to the steel plate whose temperature followed the ISO 834 standard fire curve,
+\begin{equation}
+	T_\textrm{h}(t) = T_\infty + 345 \, \textrm{log}_{10}(8t + 1)
 	\label{eq:isocurve}
-\end{align} 
-where $t$ is in minute and $T_{\textrm{h}}$ is in $^\circ$C. The temperature measurement is using K-type thermocouples covered with $30\times30\times2$ mm inorganic insulating pads. The pads are attached to the sample using heat-resistant glue or pins.
+\end{equation}
+with time, $t$, in minutes and exposure temperature, $T_{\textrm{h}}$, in $^\circ$C. The temperature measurements were made using K-type thermocouples covered with 30~mm square inorganic insulating pads. The pads were attached to the back side of the sample using heat-resistant glue or pins.
 
 \subsubsection{Modeling Notes}
-The simulation model is explained in Ref.~\cite{Paudel:2020}. The reliable TGA measurement is not currently available. The chemical decomposition parameters ($A$, $E_{\textrm{a}}$ and $n$) are optimized by finding minimum error in cold-side temperatures. Unlike in Ref.~\cite{Paudel:2020}, the optimized values are constant, $A$=0.0028 s$^{-1}$, $E_{\textrm{a}}$=21700 J$\cdot$mol$^{-1}$ and $n$=0.71. The optimization is using Monte Carlo (MC) simulation of N=1000 Latin Hypercube Samples (LHS), where the sampling range is 1E-3 to 1E3 s$^{-1}$, 1E4 to 1E5 Jmol${^{-1}}$, and 1E-1 to 1E0 for $A$, $E_{\textrm{a}}$ and $n$ respectively.
+
+The numerical simulation is explained in Ref.~\cite{Paudel:2020}. Because detailed kinetic properties of the material are currently not available, the chemical decomposition parameters ($A$, $E_{\textrm{a}}$ and $n$) were optimized based on the cold-side measured temperatures. Unlike in Ref.~\cite{Paudel:2020}, the optimized values in the simulation are constant, $A=0.0028$~s$^{-1}$, $E_{\textrm{a}}=21700$~J/mol, and $n=0.71$. The optimization used a Monte Carlo method of 1000 Latin hypercube samples, where the sampling range was 0.001 to 1000~s$^{-1}$ for $A$, $1\times10^4$ to $1\times10^5$~J/mol for $E_{\textrm{a}}$, and 0.1 to 1 for $n$.
 
 \section{LEMTA Spray Test for Radiation Attenuation}
 \label{LEMTA_Spray_Description}
@@ -1317,7 +1320,7 @@ Sung et al.~\cite{Sung:TN2019} made mean and rms centerline and radial gas tempe
 
 \subsubsection{Gas Species Measurements}
 
-Falkenstein-Smith et al. measured the time-averaged centerline species concentrations within the flaming region of three liquid fuel fires---acetone, ethanol, and methanol~\cite{Falkenstein-Smith:2019}. The measurements were made using a gas chromatograph/mass spectrometer system (GC/MSD). The volume fraction of each species was calculated via the number of moles identified by the GC/MSD at each centerline point. Soot mass fractions were measured during the gas sampling process. 
+Falkenstein-Smith et al. measured the time-averaged centerline species concentrations within the flaming region of three liquid fuel fires---acetone, ethanol, and methanol~\cite{Falkenstein-Smith:2019}. The measurements were made using a gas chromatograph/mass spectrometer system (GC/MSD). The volume fraction of each species was calculated via the number of moles identified by the GC/MSD at each centerline point. Soot mass fractions were measured during the gas sampling process.
 
 Similar measurements were made for 37~cm diameter methane and propane fires with a measured fuel flow rate of 0.69~g/s and an estimated HRR of 34.5~kW for the methane fire, and heat release rates of 20~kW and 34~kW for the propane.
 
