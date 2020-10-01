@@ -1112,31 +1112,71 @@ END TYPE INIT_RESERVED_TYPE
 
 TYPE (INIT_RESERVED_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: INIT_RESERVED
 
+
+!> \brief Parameters associated with a pressure ZONE
+
 TYPE P_ZONE_TYPE
-   REAL(EB) :: X,Y,Z,DPSTAR=0._EB
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: LEAK_AREA,LEAK_REFERENCE_PRESSURE,LEAK_PRESSURE_EXPONENT
-   INTEGER :: N_DUCTNODES,MESH_INDEX=0
-   LOGICAL :: EVACUATION=.FALSE.,PERIODIC=.FALSE.
-   INTEGER, ALLOCATABLE, DIMENSION(:) :: NODE_INDEX
-   CHARACTER(LABEL_LENGTH) :: ID
+   REAL(EB) :: X                                                   !< x coordinate of ZONE specifier (m)
+   REAL(EB) :: Y                                                   !< y coordinate of ZONE specifier (m)
+   REAL(EB) :: Z                                                   !< z coordinate of ZONE specifier (m)
+   REAL(EB) :: DPSTAR=0._EB                                          
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: LEAK_AREA                !< Array of leak areas to other ZONEs
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: LEAK_REFERENCE_PRESSURE  !< Array of leak reference pressures
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: LEAK_PRESSURE_EXPONENT   !< Array of leak reference exponents
+   INTEGER :: N_DUCTNODES                                          !< Number of duct nodes in the ZONE
+   INTEGER :: MESH_INDEX=0                                         !< Index of the MESH where the ZONE is located
+   LOGICAL :: EVACUATION=.FALSE.
+   LOGICAL :: PERIODIC=.FALSE.                                     !< Indicator if the ZONE boundary is periodic
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: NODE_INDEX                !< Array of NODE indices connected to the ZONE
+   CHARACTER(LABEL_LENGTH) :: ID                                   !< Identifier
 END TYPE P_ZONE_TYPE
 
 TYPE (P_ZONE_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: P_ZONE
 
+
+!> \brief Parameters associated with a MOVE line, used to rotate or translate OBSTructions
+
 TYPE MOVEMENT_TYPE
-   REAL(EB) :: SCALE,SCALEX,SCALEY,SCALEZ,DX,DY,DZ,X0,Y0,Z0,ROTATION_ANGLE,AXIS(3),T34(3,4)
-   INTEGER :: INDEX
-   CHARACTER(LABEL_LENGTH) :: ID
+   REAL(EB) :: SCALE              !< Overall scale factor
+   REAL(EB) :: SCALEX             !< Scale factor for x dimension
+   REAL(EB) :: SCALEY             !< Scale factor for y dimension
+   REAL(EB) :: SCALEZ             !< Scale factor for z dimension
+   REAL(EB) :: DX                 !< Translation in x direction (m)
+   REAL(EB) :: DY                 !< Translation in y direction (m)
+   REAL(EB) :: DZ                 !< Translation in z direction (m)
+   REAL(EB) :: X0                 !< x origin of rotation axis (m)
+   REAL(EB) :: Y0                 !< y origin of rotation axis (m)
+   REAL(EB) :: Z0                 !< z origin of rotation axis (m)
+   REAL(EB) :: ROTATION_ANGLE     !< Angle of rotation around AXIS (deg)
+   REAL(EB) :: AXIS(3)            !< Vector originating at (X0,Y0,Z0) that defines axis of rotation
+   REAL(EB) :: T34(3,4)           !< Transformation matrix
+   INTEGER :: INDEX               !< Integer identifier
+   CHARACTER(LABEL_LENGTH) :: ID  !< Character identifier
 END TYPE MOVEMENT_TYPE
 
 TYPE (MOVEMENT_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: MOVEMENT
 
+
+!> \brief Parameters associated with a MULT line for multiplying OBSTs, VENTs, etc
+
 TYPE MULTIPLIER_TYPE
-   REAL(EB) :: DXB(6),DX0,DY0,DZ0,FDS_AREA(6)=0._EB
-   INTEGER  :: I_LOWER,I_UPPER,J_LOWER,J_UPPER,K_LOWER,K_UPPER,N_LOWER,N_UPPER,N_COPIES
-   LOGICAL, ALLOCATABLE, DIMENSION(:,:,:) :: SKIP
-   CHARACTER(LABEL_LENGTH) :: ID
-   LOGICAL :: SEQUENTIAL=.FALSE.
+   REAL(EB) :: DXB(6)                               !< Array of deltas for six coordinates (m)
+   REAL(EB) :: DX0                                  !< Translation in x direction (m)
+   REAL(EB) :: DY0                                  !< Translation in x direction (m)
+   REAL(EB) :: DZ0                                  !< Translation in x direction (m)
+   REAL(EB) :: FDS_AREA(6)=0._EB                       
+   INTEGER  :: I_LOWER                              !< Lower bound of i index
+   INTEGER  :: I_UPPER                              !< Upper bound of i index
+   INTEGER  :: J_LOWER                              !< Lower bound of j index
+   INTEGER  :: J_UPPER                              !< Upper bound of j index
+   INTEGER  :: K_LOWER                              !< Lower bound of k index
+   INTEGER  :: K_UPPER                              !< Upper bound of k index
+   INTEGER  :: N_LOWER                              !< Lower bound of n index
+   INTEGER  :: N_UPPER                              !< Upper bound of n index
+   INTEGER  :: N_COPIES                             !< Total number of copies of the original item
+   LOGICAL, ALLOCATABLE, DIMENSION(:,:,:) :: SKIP   !< Flag to skip copies in one of three directions
+   CHARACTER(LABEL_LENGTH) :: ID                    !< Identifying string
+   LOGICAL :: SEQUENTIAL=.FALSE.                    !< Flag indicating of the MULT creates a series of copies or 3D array
 END TYPE MULTIPLIER_TYPE
 
 TYPE (MULTIPLIER_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: MULTIPLIER
