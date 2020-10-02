@@ -1404,7 +1404,7 @@ END MODULE PRES
 
 ! ---------------------------------- GLOBALMATRIX_SOLVER --------------------------------------------
 
-MODULE GLOBALMATRIX_SOLVER
+MODULE GLOBMAT_SOLVER
 
 ! Module that contains global matrix vector builds for Poisson equation on gas-cells only when PRES_ON_WHOLE_DOMAIN=.FALSE.
 ! Builds Matrices and RHS entries per MPI process in parallel.
@@ -3807,4 +3807,4 @@ RETURN
 END SUBROUTINE FINISH_GLMAT_SOLVER_H
 
 
-END MODULE GLOBALMATRIX_SOLVER
+END MODULE GLOBMAT_SOLVER
