@@ -3073,6 +3073,14 @@ PROPERTY_LOOP: DO N=1,N_PROP
    WRITE(LU_OUTPUT,'(A,A   )') '     Smokeview ID                ', TRIM(PY%SMOKEVIEW_ID(1))
 ENDDO PROPERTY_LOOP
 
+! Write out maximum and minimum density and temperature
+
+WRITE(LU_OUTPUT,'(//A/)')   ' Cut-off Density and Temperature'
+WRITE(LU_OUTPUT,'(A,F7.1,A)') '    Minimum Temperature: ',TMPMIN-TMPM,' C'
+WRITE(LU_OUTPUT,'(A,F7.1,A)') '    Maximum Temperature: ',TMPMAX-TMPM,' C'
+WRITE(LU_OUTPUT,'(A,F6.3,A)') '    Minimum Density: ',RHOMIN,' kg/m3'
+WRITE(LU_OUTPUT,'(A,F6.3,A)') '    Maximum Density: ',RHOMAX,' kg/m3'
+
 ! Print out DEVICE locations and info
 
 IF (N_DEVC>0) THEN
