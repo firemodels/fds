@@ -3075,11 +3075,11 @@ ENDDO PROPERTY_LOOP
 
 ! Write out maximum and minimum density and temperature
 
-WRITE(LU_OUTPUT,'(//A/)')   ' Cut-off Density and Temperature'
-WRITE(LU_OUTPUT,'(A,F7.1,A)') '    Minimum Temperature: ',TMPMIN-TMPM,' C'
-WRITE(LU_OUTPUT,'(A,F7.1,A)') '    Maximum Temperature: ',TMPMAX-TMPM,' C'
-WRITE(LU_OUTPUT,'(A,F6.3,A)') '    Minimum Density: ',RHOMIN,' kg/m3'
-WRITE(LU_OUTPUT,'(A,F6.3,A)') '    Maximum Density: ',RHOMAX,' kg/m3'
+WRITE(LU_OUTPUT,'(//A/)')       ' Cut-off Density and Temperature'
+WRITE(LU_OUTPUT,'(A,F7.1,A)')   '    Minimum Temperature: ',TMPMIN-TMPM,' C'
+WRITE(LU_OUTPUT,'(A,F7.1,A)')   '    Maximum Temperature: ',TMPMAX-TMPM,' C'
+WRITE(LU_OUTPUT,'(A,ES10.3,A)') '    Minimum Density: ',RHOMIN,' kg/m3'
+WRITE(LU_OUTPUT,'(A,ES10.3,A)') '    Maximum Density: ',RHOMAX,' kg/m3'
 
 ! Print out DEVICE locations and info
 
