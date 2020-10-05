@@ -171,26 +171,26 @@ where $r_p$ is the droplet radius, $C$ is the weighting factor for the droplet, 
 
 The removal efficiency is given by the product sum of an interception efficiency, $\epsilon_{in}$, and an impaction efficiency, $\epsilon_{im}$. Both result from summing viscous, $vis$, and potential flow, $pot$, behaviors.
 \be
-\epsilon_{in,vis} = (1+l)^2 \left(1-\frac{3}{2(1+l)}+\frac{1}{2(1+l)^3} \right)
+\epsilon_{in,vis} = \left(1+\frac{r_a}{r_p} \right)^2 \left(1-\frac{3}{2 \left(1+\frac{r_a}{r_p} \right)}+\frac{1}{2 \left(1+\frac{r_a}{r_p} \right)^3} \right)
 \ee
 \be
-\epsilon_{in,pot} = (1+l)^2 - (1+l)
+\epsilon_{in,pot} = \left(1+\frac{r_a}{r_p} \right)^2 - \left(1+\frac{r_a}{r_p} \right)
 \ee
 \be
 \epsilon_{im,vis} = \left\{ \begin{array}{ll}
-	0  & Stk \leq 1.214  \\[0.1in]
-	\left(1+\frac{0.75 \ln (2 Stk) }{Stk-1.214} \right)^{-2} & Stk > 1.214
+	0  & {\rm Stk} \leq 1.214  \\[0.1in]
+	\left(1+\frac{0.75 \ln (2 {\rm Stk}) }{{\rm Stk}-1.214} \right)^{-2} & {\rm Stk} > 1.214
 \end{array} \right.  \\[0.1in]
 \ee
 \be
 \epsilon_{im,pot} = \left\{ \begin{array}{ll}
 	0  & Stk \leq 0.0834  \\[0.1in]
-	\left(\frac{Stk}{Stk+0.5} \right)^2 & Stk > 0.2
+	\left(\frac{{\rm Stk}}{{\rm Stk}+0.5} \right)^2 & {\rm Stk} > 0.2
 \end{array} \right.  \\[0.1in]
 \ee
-Where $Stk$ is the Stokes number. For other values of $Stk$, $\epsilon_{im,pot}$ is interpolated. The viscous and potential values are combined as:
+Where ${\rm Stk}$ is the Stokes number. For other values of ${\rm Stk}$, $\epsilon_{im,pot}$ is interpolated. The viscous and potential values are combined as:
 \be
-\epsilon_x = \frac{\epsilon_{x,vis}+\epsilon_{x,pot} (\RE_D/60)}{1+(\RE_D/60)}
+\epsilon_x = \frac{\epsilon_{x,vis}+\epsilon_{x,pot} (\RE_p/60)}{1+(\RE_p/60)}
 \ee
 The total efficiency is given as:
 \be
