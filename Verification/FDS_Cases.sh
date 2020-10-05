@@ -166,8 +166,9 @@ $QFDS -d Energy_Budget energy_budget_adiabatic_two_fuels.fds
 $QFDS -d Energy_Budget energy_budget_cold_walls.fds
 $QFDS -d Energy_Budget energy_budget_combustion.fds
 $QFDS -d Energy_Budget energy_budget_dns_100.fds
-$QFDS -d Energy_Budget energy_budget_tmix.fds
+$QFDS -d Energy_Budget energy_budget_particles.fds
 $QFDS -d Energy_Budget energy_budget_solid.fds
+$QFDS -d Energy_Budget energy_budget_tmix.fds
 
 #$QFDS -d Evacuation evac_smv_testcase0.fds
 #$QFDS -d Evacuation evac_smv_testcase2.fds
