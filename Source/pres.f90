@@ -1483,11 +1483,12 @@ INTEGER :: MAXFCT, MNUM, MTYPE, PHASE, NRHS, ERROR
 #ifdef WITH_MKL
 INTEGER :: PERM(1)
 #endif
-INTEGER :: NM, IW, IIG, JJG, KKG, IOR, IROW, I, J, K
+INTEGER :: NM, IW, IIG, JJG, KKG, IOR, IROW, I, J, K, ICC, I_ZONE
 TYPE (WALL_TYPE), POINTER :: WC=>NULL()
 REAL(EB) :: IDX, AF, VAL
-REAL(EB), POINTER, DIMENSION(:,:,:) :: HP
-REAL(EB) :: SUM_FH(2),MEAN_FH,SUM_XH(2),MEAN_XH
+REAL(EB), POINTER, DIMENSION(:,:,:)   :: HP
+REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: SUM_FH, SUM_XH ! For use in cases with all compartments without OPEN boundaries.
+REAL(EB), ALLOCATABLE, DIMENSION(:)   :: MEAN_FH, MEAN_XH
 INTEGER :: IERR
 
 ! CHARACTER(30) :: FILE_NAME
@@ -1526,7 +1527,7 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       ENDDO
    ENDDO
 
-   IF (CC_IBM) CALL GET_CUTCELL_FH(NM)
+   IF (CC_IBM) CALL GET_CUTCELL_FH(NM) ! Note: CYL_FCT not used for cut-cells.
 
    ! Then External BCs:
    WALL_CELL_LOOP_1: DO IW=1,N_EXTERNAL_WALL_CELLS
@@ -1647,12 +1648,84 @@ ELSE ! positive definite
 ENDIF
 
 IF (H_MATRIX_INDEFINITE) THEN
-   SUM_FH(1:2) = SUM(F_H(1:NUNKH_LOCAL))
-   IF (N_MPI_PROCESSES>1) CALL MPI_ALLREDUCE(SUM_FH(1),SUM_FH(2),1,MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,IERR)
-   MEAN_FH = SUM_FH(2)/REAL(NUNKH_TOTAL,EB)
-   ! IF (MYID==0) WRITE(LU_ERR,*) 'INDEFINITE POISSON MATRIX, MEAN(RHS), SUM(RHS)=',MEAN_FH,SUM_FH(2)
-   ! Substract Mean:
-   F_H(:) = F_H(:) - MEAN_FH
+   ALLOCATE(SUM_FH(1:3,0:N_ZONE),SUM_XH(1:3,0:N_ZONE)); SUM_FH = 0._EB;  SUM_XH = 0._EB
+   ALLOCATE(MEAN_FH(0:N_ZONE), MEAN_XH(0:N_ZONE));     MEAN_FH = 0._EB; MEAN_XH = 0._EB
+   WHOLE_DOM_IF1 : IF(.NOT.PRES_ON_WHOLE_DOMAIN) THEN
+      ! Sum source F_H by Pressure Zone:
+      DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+         IF (EVACUATION_ONLY(NM) .OR. EVACUATION_SKIP(NM)) CYCLE
+         CALL POINT_TO_MESH(NM)
+         DO K=1,KBAR
+            DO J=1,JBAR
+               DO I=1,IBAR
+                  IF (CCVAR(I,J,K,UNKH)<=0 .OR. PRESSURE_ZONE(I,J,K)<=0) CYCLE ! Gasphase Cartesian cells.
+                  ! Row number:
+                  IROW = CCVAR(I,J,K,UNKH) - UNKH_IND(NM_START) ! Local numeration.
+                  ! Sum FH:
+                  SUM_FH(1,PRESSURE_ZONE(I,J,K)) = SUM_FH(1,PRESSURE_ZONE(I,J,K)) + F_H(IROW)
+                  SUM_FH(2,PRESSURE_ZONE(I,J,K)) = SUM_FH(2,PRESSURE_ZONE(I,J,K)) + 1._EB
+               ENDDO
+            ENDDO
+         ENDDO
+         ! Add cut-cell region contribution:
+         DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+            I = CUT_CELL(ICC)%IJK(IAXIS)
+            J = CUT_CELL(ICC)%IJK(JAXIS)
+            K = CUT_CELL(ICC)%IJK(KAXIS)
+            IF (PRESSURE_ZONE(I,J,K)<=0) CYCLE
+            IROW     = MESHES(NM)%CUT_CELL(ICC)%UNKH(1) - UNKH_IND(NM_START) ! Local numeration.
+            SUM_FH(1,PRESSURE_ZONE(I,J,K)) = SUM_FH(1,PRESSURE_ZONE(I,J,K)) + F_H(IROW)
+            SUM_FH(2,PRESSURE_ZONE(I,J,K)) = SUM_FH(2,PRESSURE_ZONE(I,J,K)) + 1._EB
+         ENDDO
+      ENDDO
+
+      IF (N_MPI_PROCESSES>1) CALL MPI_ALLREDUCE(MPI_IN_PLACE,SUM_FH(1:2,0:N_ZONE),2*(N_ZONE+1),&
+                                                MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,IERR)
+
+      ! Compute arithmetic mean by pressure zone:
+      DO I_ZONE=0,N_ZONE
+         MEAN_FH(I_ZONE) = SUM_FH(1,I_ZONE)/(SUM_FH(2,I_ZONE)+TWO_EPSILON_EB)
+      ENDDO
+      ! Write out:
+      ! IF (MYID==0) THEN
+      !    DO I_ZONE=0,N_ZONE
+      !    WRITE(LU_ERR,*) PREDICTOR,'INDEFINITE POISSON MATRIX, I_ZONE, MEAN(RHS), SUM(RHS)=',&
+      !                    I_ZONE,MEAN_FH(I_ZONE),SUM_FH(1:2,I_ZONE)
+      !    ENDDO
+      ! ENDIF
+
+      ! Substract Mean:
+      DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+         IF (EVACUATION_ONLY(NM) .OR. EVACUATION_SKIP(NM)) CYCLE
+         CALL POINT_TO_MESH(NM)
+         DO K=1,KBAR
+            DO J=1,JBAR
+               DO I=1,IBAR
+                  IF (CCVAR(I,J,K,UNKH)<=0 .OR. PRESSURE_ZONE(I,J,K)<=0) CYCLE ! Gasphase Cartesian cells.
+                  ! Row number:
+                  IROW = CCVAR(I,J,K,UNKH) - UNKH_IND(NM_START) ! Local numeration.
+                  F_H(IROW) = F_H(IROW) - MEAN_FH(PRESSURE_ZONE(I,J,K))
+               ENDDO
+            ENDDO
+         ENDDO
+         ! Add cut-cell region contribution:
+         DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+            I = CUT_CELL(ICC)%IJK(IAXIS)
+            J = CUT_CELL(ICC)%IJK(JAXIS)
+            K = CUT_CELL(ICC)%IJK(KAXIS)
+            IF (PRESSURE_ZONE(I,J,K)<=0) CYCLE
+            IROW     = MESHES(NM)%CUT_CELL(ICC)%UNKH(1) - UNKH_IND(NM_START) ! Local numeration.
+            F_H(IROW) = F_H(IROW) - MEAN_FH(PRESSURE_ZONE(I,J,K))
+         ENDDO
+      ENDDO
+   ELSE WHOLE_DOM_IF1
+      SUM_FH(1:2,0) = SUM(F_H(1:NUNKH_LOCAL))
+      IF (N_MPI_PROCESSES>1) CALL MPI_ALLREDUCE(SUM_FH(1,0),SUM_FH(2,0),1,MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,IERR)
+      MEAN_FH(0) = SUM_FH(2,0)/REAL(NUNKH_TOTAL,EB)
+      ! IF (MYID==0) WRITE(LU_ERR,*) 'INDEFINITE POISSON MATRIX, MEAN(RHS), SUM(RHS)=',MEAN_FH(0),SUM_FH(2,0)
+      ! Substract Mean:
+      F_H(:) = F_H(:) - MEAN_FH(0)
+   ENDIF WHOLE_DOM_IF1
 ENDIF
 
 ! WRITE(LU_ERR,*) 'SUM_FH=',SUM(F_H),H_MATRIX_INDEFINITE
@@ -1678,12 +1751,82 @@ IF (ERROR /= 0) &
 WRITE(0,*) 'GLMAT_SOLVER_H: The following ERROR was detected: ', ERROR
 
 IF (H_MATRIX_INDEFINITE) THEN
-   SUM_XH(1:2) = SUM(X_H(1:NUNKH_LOCAL))
-   IF (N_MPI_PROCESSES>1) CALL MPI_ALLREDUCE(SUM_XH(1),SUM_XH(2),1,MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,IERR)
-   MEAN_XH = SUM_XH(2)/REAL(NUNKH_TOTAL,EB)
-   ! IF (MYID==0) WRITE(LU_ERR,*) 'INDEFINITE POISSON MATRIX, MEAN(H), SUM(H)=',MEAN_XH,SUM_XH(2)
-   ! Substract Mean:
-   X_H(:) = X_H(:) - MEAN_XH
+   WHOLE_DOM_IF2 : IF(.NOT.PRES_ON_WHOLE_DOMAIN) THEN
+      ! Sum H by Pressure Zone:
+      DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+         IF (EVACUATION_ONLY(NM) .OR. EVACUATION_SKIP(NM)) CYCLE
+         CALL POINT_TO_MESH(NM)
+         DO K=1,KBAR
+            DO J=1,JBAR
+               DO I=1,IBAR
+                  IF (CCVAR(I,J,K,UNKH)<=0 .OR. PRESSURE_ZONE(I,J,K)<=0) CYCLE ! Gasphase Cartesian cells.
+                  ! Row number:
+                  IROW = CCVAR(I,J,K,UNKH) - UNKH_IND(NM_START) ! Local numeration.
+                  ! Sum FH:
+                  SUM_XH(1,PRESSURE_ZONE(I,J,K)) = SUM_XH(1,PRESSURE_ZONE(I,J,K)) + X_H(IROW)
+                  SUM_XH(2,PRESSURE_ZONE(I,J,K)) = SUM_XH(2,PRESSURE_ZONE(I,J,K)) + 1._EB
+               ENDDO
+            ENDDO
+         ENDDO
+         ! Add cut-cell region contribution:
+         DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+            I = CUT_CELL(ICC)%IJK(IAXIS)
+            J = CUT_CELL(ICC)%IJK(JAXIS)
+            K = CUT_CELL(ICC)%IJK(KAXIS)
+            IF (PRESSURE_ZONE(I,J,K)<=0) CYCLE
+            IROW     = MESHES(NM)%CUT_CELL(ICC)%UNKH(1) - UNKH_IND(NM_START) ! Local numeration.
+            SUM_XH(1,PRESSURE_ZONE(I,J,K)) = SUM_XH(1,PRESSURE_ZONE(I,J,K)) + X_H(IROW)
+            SUM_XH(2,PRESSURE_ZONE(I,J,K)) = SUM_XH(2,PRESSURE_ZONE(I,J,K)) + 1._EB
+         ENDDO
+      ENDDO
+
+      IF (N_MPI_PROCESSES>1) CALL MPI_ALLREDUCE(MPI_IN_PLACE,SUM_XH(1:2,0:N_ZONE),2*(N_ZONE+1),&
+                                                MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,IERR)
+
+      ! Compute arithmetic mean by pressure zone:
+      DO I_ZONE=0,N_ZONE
+         MEAN_XH(I_ZONE) = SUM_XH(1,I_ZONE)/(SUM_XH(2,I_ZONE)+TWO_EPSILON_EB)
+      ENDDO
+      ! Write out:
+      ! IF (MYID==0) THEN
+      !    DO I_ZONE=0,N_ZONE
+      !    WRITE(LU_ERR,*) PREDICTOR,'INDEFINITE POISSON MATRIX, I_ZONE, MEAN(H), SUM(H)=',I_ZONE,MEAN_XH(I_ZONE),SUM_XH(1:2,I_ZONE)
+      !    ENDDO
+      ! ENDIF
+
+      ! Substract Mean:
+      DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+         IF (EVACUATION_ONLY(NM) .OR. EVACUATION_SKIP(NM)) CYCLE
+         CALL POINT_TO_MESH(NM)
+         DO K=1,KBAR
+            DO J=1,JBAR
+               DO I=1,IBAR
+                  IF (CCVAR(I,J,K,UNKH)<=0 .OR. PRESSURE_ZONE(I,J,K)<=0) CYCLE ! Gasphase Cartesian cells.
+                  ! Row number:
+                  IROW = CCVAR(I,J,K,UNKH) - UNKH_IND(NM_START) ! Local numeration.
+                  X_H(IROW) = X_H(IROW) - MEAN_XH(PRESSURE_ZONE(I,J,K))
+               ENDDO
+            ENDDO
+         ENDDO
+         ! Add cut-cell region contribution:
+         DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+            I = CUT_CELL(ICC)%IJK(IAXIS)
+            J = CUT_CELL(ICC)%IJK(JAXIS)
+            K = CUT_CELL(ICC)%IJK(KAXIS)
+            IF (PRESSURE_ZONE(I,J,K)<=0) CYCLE
+            IROW     = MESHES(NM)%CUT_CELL(ICC)%UNKH(1) - UNKH_IND(NM_START) ! Local numeration.
+            X_H(IROW) = X_H(IROW) - MEAN_XH(PRESSURE_ZONE(I,J,K))
+         ENDDO
+      ENDDO
+   ELSE WHOLE_DOM_IF2
+      SUM_XH(1:2,0) = SUM(X_H(1:NUNKH_LOCAL))
+      IF (N_MPI_PROCESSES>1) CALL MPI_ALLREDUCE(SUM_XH(1,0),SUM_XH(2,0),1,MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,IERR)
+      MEAN_XH(0) = SUM_XH(2,0)/REAL(NUNKH_TOTAL,EB)
+      ! IF (MYID==0) WRITE(LU_ERR,*) 'INDEFINITE POISSON MATRIX, MEAN(H), SUM(H)=',MEAN_XH(0),SUM_XH(2,0)
+      ! Substract Mean:
+      X_H(:) = X_H(:) - MEAN_XH(0)
+   ENDIF WHOLE_DOM_IF2
+   DEALLOCATE(SUM_FH,SUM_XH,MEAN_FH,MEAN_XH)
 ENDIF
 
 ! WRITE(LU_ERR,*) 'SUM_XH=',SUM(X_H),SUM(A_H(1:IA_H(NUNKH_LOCAL+1)))
@@ -2534,7 +2677,7 @@ IF (ERROR /= 0) THEN
    WRITE(LU_ERR,'(A,I5)') 'GET_H_MATRIX_LUDCMP CLUSTER_SOLVER Sym Factor: The following ERROR was detected: ', ERROR
    IF(ERROR == -4) THEN
       WRITE(LU_ERR,'(A,A)') 'This error is probably due to having one or more sealed compartments ',&
-      ' besides a compartment with/without open boundary. Currently only one pressure zone is supported.'
+      'besides a pressure zone with open boundary. Currently this situation is not supported.'
    ELSEIF(ERROR == -2) THEN
       WRITE(LU_ERR,'(A)') 'Not enough physical memory in your system for factoring the Poisson Matrix.'
    ENDIF
