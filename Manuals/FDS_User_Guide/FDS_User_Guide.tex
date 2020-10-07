@@ -1639,7 +1639,7 @@ To verify the accuracy of the pressure solution on each mesh, set {\ct CHECK\_PO
 \subsection{Optional Pressure Solver}
 \label{optional_pressure_solver}
 
-The default Poisson solver in FDS ({\ct SOLVER='FFT'} on the {\ct PRES} line) is based on the package of linear algebra routines called CrayFishpak. For non-overlapping, non-stretched meshes at the same refinement level covering a single connected domain, you can specify {\ct SOLVER='UGLMAT'} on the {\ct PRES} line to solve the global Poisson equation over the entire domain. The solver used is the Intel\textsuperscript{\textregistered} MKL Sparse Cluster Solver. When using {\ct 'UGLMAT'}, the unknown values of the pressure live only in gas-phase cells, allowing for the normal components of velocity at a solid surface to be computed exactly (no velocity penetration error).  Strictly speaking, in this mode, FDS is no longer using an ``immersed boundary method'' for flow obstructions---the pressure solution is now ``unstructured.'' If you specify {\ct SOLVER='GLMAT'}, the pressure is solved in both solid and gas cells using an immersed boundary method for flow obstructions, the same as the default FFT solver.  This mode will reproduce the exact same pressure solution as a single mesh FFT solve.  That is, velocity errors at any mesh boundaries will be eliminated. As UGLMAT and GLMAT are based on Intel\textsuperscript{\textregistered} MKL parallel LU decomposition solver, they require computation and storage of global factorization matrices. Depending on the size of the problem, these operations can be expensive in terms of both CPU time and memory. Our tests find it suitable for problems with up to a million cells on a multi-core workstation with 64~GB of RAM. Note that currently a single discretization matrix is built for all gas cells defined on the model, therefore the solver is not meant to be used in cases where both sealed compartments and regions with open boundaries are present. 
+The default Poisson solver in FDS ({\ct SOLVER='FFT'} on the {\ct PRES} line) is based on the package of linear algebra routines called CrayFishpak. For non-overlapping, non-stretched meshes at the same refinement level covering a single connected domain, you can specify {\ct SOLVER='UGLMAT'} on the {\ct PRES} line to solve the global Poisson equation over the entire domain. The solver used is the Intel\textsuperscript{\textregistered} MKL Sparse Cluster Solver. When using {\ct 'UGLMAT'}, the unknown values of the pressure live only in gas-phase cells, allowing for the normal components of velocity at a solid surface to be computed exactly (no velocity penetration error).  Strictly speaking, in this mode, FDS is no longer using an ``immersed boundary method'' for flow obstructions---the pressure solution is now ``unstructured.'' If you specify {\ct SOLVER='GLMAT'}, the pressure is solved in both solid and gas cells using an immersed boundary method for flow obstructions, the same as the default FFT solver.  This mode will reproduce the exact same pressure solution as a single mesh FFT solve.  That is, velocity errors at any mesh boundaries will be eliminated. As UGLMAT and GLMAT are based on Intel\textsuperscript{\textregistered} MKL parallel LU decomposition solver, they require computation and storage of global factorization matrices. Depending on the size of the problem, these operations can be expensive in terms of both CPU time and memory. Our tests find it suitable for problems with up to a million cells on a multi-core workstation with 64~GB of RAM. Note that currently a single discretization matrix is built for all gas cells defined on the model, therefore the solver is not meant to be used in cases where both sealed compartments and regions with open boundaries are present.
 
 
 \subsection{Example Case: Pressure\_Solver/duct\_flow}
@@ -3220,15 +3220,16 @@ The default {\ct SURF} for an {\ct OBST} is {\ct 'INERT'}, which is a Dirichlet 
 &SURF ID='s1', HT3D=.TRUE./
 &OBST XB=..., HT3D=.TRUE., MATL_ID='steel', SURF_ID='s1'/
 \end{lstlisting}
-The exception to this rule is that an {\ct EXTERNAL\_FLUX} may be applied together with {\ct {HT3D=.TRUE.}} on {\ct SURF}.  The user should make sure that the {\ct {SURF}} does not also have an associated {\ct {MATL\_ID}}, which implements the 1D heat conduction model.
+If the {\ct SURF} has an associated {\ct MATL\_ID}, then do not specify the material again on {\ct OBST}.
 
 \subsubsection*{Specifying an Initial Temperature}
 \label{sec:init_tmp}
 
-If an initial temperature other than ambient is desired inside the solid, use an {\ct INIT} line per the following example:
+If an initial temperature other than ambient is desired inside the solid, there are two options:  First, you may use an {\ct INIT} line per the following example:
 \begin{lstlisting}
 &INIT XB=-.1,.1,-.1,.1,-.1,.1, TEMPERATURE=100./
 \end{lstlisting}
+Or, you may apply a {\ct SURF} to the {\ct OBST} with {\ct TMP\_INNER} specified.  Note that {\ct TMP\_INNER} on {\ct SURF} overrides the temperature from the {\ct INIT} line.
 
 \subsubsection*{Internal Heat Sources}
 \label{sec:heat_sources}
@@ -8994,11 +8995,11 @@ Quantities associated with the overall energy budget are reported in the comma d
 \underbrace{\frac{\partial}{\partial t} \int \rho h_{\rm s} \, \d V }_{\hbox{\ct Q\_ENTH}} &=&
 \underbrace{\int \dot{q}''' \, \d V}_{\hbox{\ct HRR}}
 \; + \; \underbrace{\left(\dq_{\rm p,r} - \int \nabla \cdot \dot{\bq}_{\rm r}'' \d V\right)}_{\hbox{\ct Q\_RADI}}
-\; + \; \underbrace{\sum_\alpha \dm_{\rm p,\alpha} h_{\rm s,\alpha} - \int \rho \bu h_{\rm s} \cdot \d {\bf S}}_{\hbox{\ct Q\_CONV}} \nonumber \\[0.1in] 
+\; + \; \underbrace{\sum_\alpha \dm_{\rm p,\alpha} h_{\rm s,\alpha} - \int \rho \bu h_{\rm s} \cdot \d {\bf S}}_{\hbox{\ct Q\_CONV}} \nonumber \\[0.1in]
 &&
 \; + \; \underbrace{\left( \dq_{\rm p,w} - \int \dq_{\rm c}'' \d A\right)}_{\hbox{\ct Q\_COND}}
 \; + \; \underbrace{\sum_\alpha \int h_{\rm s,\alpha} \, \rho D_\alpha \nabla Y_\alpha \cdot \d {\bf S}}_{\hbox{\ct Q\_DIFF}}
-\; + \; \underbrace{\int \frac{d \overline{p} }{\d t} \, \d V}_{\hbox{\ct Q\_PRES}} \\[0.1in] 
+\; + \; \underbrace{\int \frac{d \overline{p} }{\d t} \, \d V}_{\hbox{\ct Q\_PRES}} \\[0.1in]
 &&
 \; + \; \underbrace{\left(-\dq_{\rm p,r}-\dq_{\rm p,c}-\dq_{\rm p,w}\right)}_{\hbox{\ct Q\_PART}} \nonumber
 \end{eqnarray}
@@ -9011,7 +9012,7 @@ Quantities associated with the overall energy budget are reported in the comma d
 \item[{\ct Q\_PRES}] The work done by volumetric expansion (kW).
 \item[{\ct Q\_PART}] The rate of energy gained by the gas from liquid droplets or solid particles. $\dq_{\rm p,r}$ is the \underline{r}adiation absorbed by a droplet or \underline{p}article (kW). $\dq_{\rm p,c}$ is the energy transferred via \underline{c}onvection from the gas to a droplet or \underline{p}article (kW). $\dq_{\rm p,w}$ is the energy transferred from a solid surface (\underline{w}all) to a droplet or \underline{p}article adhering to it.
 \end{description}
-An additional column, {\ct Q\_TOTAL}, includes the sum of the terms on the right hand side of the equation. Ideally, this sum should equal the term on the left, {\ct Q\_ENTH}. All terms are reported in units of kW. 
+An additional column, {\ct Q\_TOTAL}, includes the sum of the terms on the right hand side of the equation. Ideally, this sum should equal the term on the left, {\ct Q\_ENTH}. All terms are reported in units of kW.
 
 The other columns in the {\ct CHID\_hrr.csv} file contain the total burning rate of fuel, in units of kg/s, and the zone pressures. Note that the reported value of the burning rate is not adjusted to account for the possibility that each individual material might have a different heat of combustion. For this reason, it is not always the case that the reported total burning rate multiplied by the gas phase heat of combustion is equal to the reported heat release rate.
 
