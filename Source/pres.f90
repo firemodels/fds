@@ -1940,20 +1940,37 @@ MESH_LOOP_2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          IOR   = WC%ONE_D%IOR
 
          ! Define cell size, normal to WC:
-         SELECT CASE (IOR)
-            CASE(-1) ! -IAXIS oriented, high face of IIG cell.
-               HP(I,J,K) =-HP(IIG,JJG,KKG) + 2._EB*BXF(J,K)
-            CASE( 1) ! +IAXIS oriented, low face of IIG cell.
-               HP(I,J,K) =-HP(IIG,JJG,KKG) + 2._EB*BXS(J,K)
-            CASE(-2) ! -JAXIS oriented, high face of JJG cell.
-               HP(I,J,K) =-HP(IIG,JJG,KKG) + 2._EB*BYF(I,K)
-            CASE( 2) ! +JAXIS oriented, low face of JJG cell.
-               HP(I,J,K) =-HP(IIG,JJG,KKG) + 2._EB*BYS(I,K)
-            CASE(-3) ! -KAXIS oriented, high face of KKG cell.
-               HP(I,J,K) =-HP(IIG,JJG,KKG) + 2._EB*BZF(I,J)
-            CASE( 3) ! +KAXIS oriented, low face of KKG cell.
-               HP(I,J,K) =-HP(IIG,JJG,KKG) + 2._EB*BZS(I,J)
-         END SELECT
+         IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
+            SELECT CASE (IOR) ! Set Homogeneous Neumann in external SOLID_BOUNDARY.
+               CASE(-1) ! -IAXIS oriented, high face of IIG cell.
+                  HP(I,J,K) =HP(IIG,JJG,KKG)
+               CASE( 1) ! +IAXIS oriented, low face of IIG cell.
+                  HP(I,J,K) =HP(IIG,JJG,KKG)
+               CASE(-2) ! -JAXIS oriented, high face of JJG cell.
+                  HP(I,J,K) =HP(IIG,JJG,KKG)
+               CASE( 2) ! +JAXIS oriented, low face of JJG cell.
+                  HP(I,J,K) =HP(IIG,JJG,KKG)
+               CASE(-3) ! -KAXIS oriented, high face of KKG cell.
+                  HP(I,J,K) =HP(IIG,JJG,KKG)
+               CASE( 3) ! +KAXIS oriented, low face of KKG cell.
+                  HP(I,J,K) =HP(IIG,JJG,KKG)
+            END SELECT
+         ELSE
+            SELECT CASE (IOR)
+               CASE(-1) ! -IAXIS oriented, high face of IIG cell.
+                  HP(I,J,K) =-HP(IIG,JJG,KKG) + 2._EB*BXF(J,K)
+               CASE( 1) ! +IAXIS oriented, low face of IIG cell.
+                  HP(I,J,K) =-HP(IIG,JJG,KKG) + 2._EB*BXS(J,K)
+               CASE(-2) ! -JAXIS oriented, high face of JJG cell.
+                  HP(I,J,K) =-HP(IIG,JJG,KKG) + 2._EB*BYF(I,K)
+               CASE( 2) ! +JAXIS oriented, low face of JJG cell.
+                  HP(I,J,K) =-HP(IIG,JJG,KKG) + 2._EB*BYS(I,K)
+               CASE(-3) ! -KAXIS oriented, high face of KKG cell.
+                  HP(I,J,K) =-HP(IIG,JJG,KKG) + 2._EB*BZF(I,J)
+               CASE( 3) ! +KAXIS oriented, low face of KKG cell.
+                  HP(I,J,K) =-HP(IIG,JJG,KKG) + 2._EB*BZS(I,J)
+            END SELECT
+         ENDIF
 
       ENDIF IF_DIRICHLET2
 
