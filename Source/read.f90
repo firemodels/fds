@@ -7218,6 +7218,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
    SF%NO_SLIP              = NO_SLIP
    SF%FYI                  = FYI
    SF%EXTERNAL_FLUX        = 1000._EB*EXTERNAL_FLUX
+   SF%HT3D                 = HT3D
    SF%IMPERMEABLE          = IMPERMEABLE
    SF%INNER_RADIUS         = INNER_RADIUS
    SELECT CASE(GEOMETRY)

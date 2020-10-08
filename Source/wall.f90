@@ -3562,8 +3562,10 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Tech Guide: Sum over the materials, alpha
                      DR = (R_S_0**3-R_S_1**3)/(3._EB*R_S_0**2)
                      RHO_DOT = MIN(MFLUX/DR,ML%RHO_S/DT_BC)
                END SELECT
-            ELSE
-               ! handle case with 3D pyrolysis
+            ENDIF
+
+            ! handle case with 3D pyrolysis
+            IF (SF%HT3D) THEN
                SELECT CASE(IOR)
                   CASE( 1); RDN = RDX(IIG-1)
                   CASE(-1); RDN = RDX(IIG+1)

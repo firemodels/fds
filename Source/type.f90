@@ -392,7 +392,7 @@ TYPE SPECIES_TYPE
    CHARACTER(LABEL_LENGTH) :: RAMP_MU             !< Name of viscosity rame
    CHARACTER(LABEL_LENGTH) :: RAMP_D              !< Name of diffusivity ramp
    CHARACTER(LABEL_LENGTH) :: RADCAL_ID           !< Name of closest species with RADCAL properties
-   CHARACTER(LABEL_LENGTH) :: RAMP_G_F            
+   CHARACTER(LABEL_LENGTH) :: RAMP_G_F
    CHARACTER(LABEL_LENGTH) :: PROP_ID             !< Name of PROPerty parameters
    CHARACTER(FORMULA_LENGTH) :: FORMULA           !< Chemical formula
    INTEGER :: MODE=2
@@ -427,7 +427,7 @@ TYPE SPECIES_MIXTURE_TYPE
    REAL(EB) :: MASS_EXTINCTION_COEFFICIENT=0._EB   !< Absorption coefficient of visible light (m2/kg)
    REAL(EB) :: ADJUST_NU=1._EB                     !< Adjustment factor if stoichiometric coefficients given for non-normalized VF
    REAL(EB) :: ATOMS(118)=0._EB                    !< Count of each atom in the mixture
-   REAL(EB) :: MEAN_DIAMETER           
+   REAL(EB) :: MEAN_DIAMETER
    REAL(EB) :: SPECIFIC_HEAT=-1._EB                !< Specific heat (J/kg/K)
    REAL(EB) :: REFERENCE_ENTHALPY=-2.E20_EB        !< Enthalpy at REFERENCE_TEMPERATURE (J/kg)
    REAL(EB) :: THERMOPHORETIC_DIAMETER
@@ -555,7 +555,7 @@ TYPE SURFACE_TYPE
    LOGICAL :: BURN_AWAY,ADIABATIC,INTERNAL_RADIATION,USER_DEFINED=.TRUE., &
               FREE_SLIP=.FALSE.,NO_SLIP=.FALSE.,SPECIFIED_NORMAL_VELOCITY=.FALSE.,SPECIFIED_TANGENTIAL_VELOCITY=.FALSE., &
               SPECIFIED_NORMAL_GRADIENT=.FALSE.,CONVERT_VOLUME_TO_MASS=.FALSE.,SPECIFIED_HEAT_SOURCE=.FALSE.,&
-              IMPERMEABLE=.FALSE.,BOUNDARY_FUEL_MODEL=.FALSE.,BLOWING=.FALSE.,BLOWING_2=.FALSE.,ABL_MODEL=.FALSE.
+              IMPERMEABLE=.FALSE.,BOUNDARY_FUEL_MODEL=.FALSE.,BLOWING=.FALSE.,BLOWING_2=.FALSE.,ABL_MODEL=.FALSE.,HT3D=.FALSE.
    INTEGER :: GEOMETRY,BACKING,PROFILE,HEAT_TRANSFER_MODEL=0
    CHARACTER(LABEL_LENGTH) :: PART_ID,RAMP_Q,RAMP_V,RAMP_T,RAMP_EF,RAMP_PART,RAMP_V_X,RAMP_V_Y,RAMP_V_Z,RAMP_T_B,RAMP_T_I
    CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: RAMP_MF
@@ -1165,7 +1165,7 @@ TYPE P_ZONE_TYPE
    REAL(EB) :: X                                                   !< x coordinate of ZONE specifier (m)
    REAL(EB) :: Y                                                   !< y coordinate of ZONE specifier (m)
    REAL(EB) :: Z                                                   !< z coordinate of ZONE specifier (m)
-   REAL(EB) :: DPSTAR=0._EB                                          
+   REAL(EB) :: DPSTAR=0._EB
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: LEAK_AREA                !< Array of leak areas to other ZONEs
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: LEAK_REFERENCE_PRESSURE  !< Array of leak reference pressures
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: LEAK_PRESSURE_EXPONENT   !< Array of leak reference exponents
@@ -1210,7 +1210,7 @@ TYPE MULTIPLIER_TYPE
    REAL(EB) :: DX0                                  !< Translation in x direction (m)
    REAL(EB) :: DY0                                  !< Translation in x direction (m)
    REAL(EB) :: DZ0                                  !< Translation in x direction (m)
-   REAL(EB) :: FDS_AREA(6)=0._EB                       
+   REAL(EB) :: FDS_AREA(6)=0._EB
    INTEGER  :: I_LOWER                              !< Lower bound of i index
    INTEGER  :: I_UPPER                              !< Upper bound of i index
    INTEGER  :: J_LOWER                              !< Lower bound of j index
