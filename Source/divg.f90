@@ -1490,16 +1490,16 @@ EVACUATION_PREDICTOR: IF (PREDICTOR) THEN
       IF (N==0) THEN
          WRITE(LU_ERR,'(A,A)') 'ERROR FDS+Evac: Zone error, no pressure zone found for mesh ',TRIM(MESH_NAME(NM))
       END IF
-
+      
       U=0._EB; V=0._EB; W=0._EB; US=0._EB; VS=0._EB; WS=0._EB; FVX=0._EB; FVY=0._EB; FVZ=0._EB
       H=0._EB; HS=0._EB; KRES=0._EB; DDDT=0._EB; D=0._EB; DS=0._EB
       P_0=P_INF; TMP_0=TMPA
       PBAR=P_INF; PBAR_S=P_INF; R_PBAR=0._EB; D_PBAR_DT=0._EB; D_PBAR_DT_S=0._EB
       RHO=RHO_0(1); RHOS=RHO_0(1); TMP=TMPA
       USUM(:,NM) = 0.0_EB ; DSUM(:,NM) = 0.0_EB; PSUM(:,NM) = 0.0_EB
-      PRESSURE_ZONE = 0
+      PRESSURE_ZONE = -1
 
-      DO K=0,KBP1
+      ZONE_LOOP_EVAC: DO K=0,KBP1
          DO J=0,JBP1
             DO I=0,IBP1
                IF (PRESSURE_ZONE(I,J,K)==N) CYCLE
@@ -1507,8 +1507,18 @@ EVACUATION_PREDICTOR: IF (PREDICTOR) THEN
                     YC(J) - Y1 >=0._EB .AND. YC(J) < Y2 .AND. &
                     ZC(K) - Z1 >=0._EB .AND. ZC(K) < Z2) THEN
                   PRESSURE_ZONE(I,J,K) = N
-                  IF (.NOT.SOLID(CELL_INDEX(I,J,K))) CALL ASSIGN_PRESSURE_ZONE(NM,XC(I),YC(J),ZC(K),N,N_OVERLAP)
+                  IF (.NOT.SOLID(CELL_INDEX(I,J,K))) THEN
+                     CALL ASSIGN_PRESSURE_ZONE(NM,XC(I),YC(J),ZC(K),N,N_OVERLAP)
+                     EXIT ZONE_LOOP_EVAC
+                  ENDIF
                ENDIF
+            ENDDO
+         ENDDO
+      ENDDO ZONE_LOOP_EVAC
+      DO K=0,KBP1
+         DO J=0,JBP1
+            DO I=0,IBP1
+               PRESSURE_ZONE(I,J,K) = MAX(0,PRESSURE_ZONE(I,J,K))
             ENDDO
          ENDDO
       ENDDO
@@ -1529,6 +1539,7 @@ EVACUATION_PREDICTOR: IF (PREDICTOR) THEN
          KKG = WC%ONE_D%KKG
          IF (KK==1) WC%ONE_D%PRESSURE_ZONE = PRESSURE_ZONE(IIG,JJG,KKG)
       END DO
+
    END IF EVACUATION_NEW_FIELD
 END IF EVACUATION_PREDICTOR
 
