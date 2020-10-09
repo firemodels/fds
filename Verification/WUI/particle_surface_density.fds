@@ -1,4 +1,4 @@
-&HEAD CHID='particle_surface_density', FYI='Comparison of OBST and GEOM in a WUI case' /
+&HEAD CHID='particle_surface_density', TITLE='Comparison of OBST and GEOM in a WUI case' /
 
 &TIME T_END=100. /
 

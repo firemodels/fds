@@ -96,8 +96,8 @@ set(0, 'CurrentFigure', hfig1);
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 
-xlabel('{\itz/Q}^{2/5}','FontSize',Label_Font_Size)
-ylabel('{\itV/Q}^{1/5}','FontSize',Label_Font_Size)
+xlabel('$z/Q^{2/5}$ (m/kW$^{2/5}$)','FontSize',Label_Font_Size,'Interpreter','LaTeX')
+ylabel('$w/Q^{1/5}$ (m/s/kW$^{1/5}$)','FontSize',Label_Font_Size,'Interpreter','LaTeX')
 
 xmin = 0.01;
 xmax = 1;
@@ -105,13 +105,13 @@ ymin = .5;
 ymax = 3.0;
 axis([xmin xmax ymin ymax])
 
-lh = legend(h1,'14.4 kW','21.7 kW','33.0 kW','44.9 kW','57.5 kW','({\itz/Q}^{2/5})^\eta','Location','SouthEast');
+lh = legend(h1,'14.4 kW','21.7 kW','33.0 kW','44.9 kW','57.5 kW','$(z/Q^{2/5})^\eta$','Location','SouthEast','Interpreter','LaTeX');
 set(lh,'FontSize',Key_Font_Size)
 
 text(.0125,2.6,'McCaffrey Centerline Velocity Correlation','FontName',Font_Name,'FontSize',Title_Font_Size)
-text(.04,1.2,'\eta=1/2','FontSize',Label_Font_Size,'FontName',Font_Name)
-text(.10,1.7,'\eta=0','FontSize',Label_Font_Size,'FontName',Font_Name)
-text(.295,1.25,'\eta=-1/3','FontSize',Label_Font_Size,'FontName',Font_Name)
+text(.04,1.2,'$\eta=1/2$','FontSize',Label_Font_Size,'FontName',Font_Name,'Interpreter','LaTeX')
+text(.10,1.7,'$\eta=0$','FontSize',Label_Font_Size,'FontName',Font_Name,'Interpreter','LaTeX')
+text(.2,1.25,'$\eta=-1/3$','FontSize',Label_Font_Size,'FontName',Font_Name,'Interpreter','LaTeX')
 
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'Units',Paper_Units);
@@ -127,18 +127,18 @@ set(0, 'CurrentFigure', hfig2);
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 
-xlabel('{\itz/Q}^{2/5}','FontSize',Label_Font_Size)
-ylabel('\Delta{\itT} (\circC)','FontSize',Label_Font_Size)
+xlabel('$z/Q^{2/5}$ (m/kW$^{2/5}$)','FontSize',Label_Font_Size,'Interpreter','LaTeX')
+ylabel('$\Delta T \; (^\circ$C)','FontSize',Label_Font_Size,'Interpreter','LaTeX')
 
 axis([.008 1 100 1200])
 
-lh = legend(h2,'14.4 kW','21.7 kW','33.0 kW','44.9 kW','57.5 kW','({\itz/Q}^{2/5})^\eta','Location','SouthWest');
+lh = legend(h2,'14.4 kW','21.7 kW','33.0 kW','44.9 kW','57.5 kW','$(z/Q^{2/5})^\eta$','Location','SouthWest','Interpreter','LaTeX');
 set(lh,'FontSize',Key_Font_Size)
 
 text(.01,1000,'McCaffrey Centerline Temperature Correlation','FontName',Font_Name,'FontSize',Title_Font_Size)
-text(.03,650,'\eta=0','FontSize',Label_Font_Size,'FontName',Font_Name)
-text(.08,425,'\eta=-1','FontSize',Label_Font_Size,'FontName',Font_Name)
-text(.18,125,'\eta=-5/3','FontSize',Label_Font_Size,'FontName',Font_Name)
+text(.03,650,'$\eta=0$','FontSize',Label_Font_Size,'FontName',Font_Name,'Interpreter','LaTeX')
+text(.06,425,'$\eta=-1$','FontSize',Label_Font_Size,'FontName',Font_Name,'Interpreter','LaTeX')
+text(.12,125,'$\eta=-5/3$','FontSize',Label_Font_Size,'FontName',Font_Name,'Interpreter','LaTeX')
 
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'Units',Paper_Units);

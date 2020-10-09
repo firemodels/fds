@@ -19,7 +19,7 @@ PUBLIC :: INIT_TURB_ARRAYS, VARDEN_DYNSMAG, WANNIER_FLOW, &
           LOGLAW_HEAT_FLUX_MODEL, RNG_EDDY_VISCOSITY, &
           NS_ANALYTICAL_SOLUTION, NS_U_EXACT, NS_V_EXACT, NS_H_EXACT, SANDIA_DAT, SPECTRAL_OUTPUT, SANDIA_OUT, &
           FILL_EDGES, NATURAL_CONVECTION_MODEL, FORCED_CONVECTION_MODEL, RAYLEIGH_HEAT_FLUX_MODEL, YUAN_HEAT_FLUX_MODEL, &
-          WALE_VISCOSITY, TAU_WALL_IJ, ABL_WALL_MODEL
+          WALE_VISCOSITY, TAU_WALL_IJ, ABL_WALL_MODEL, RAYLEIGH_MASS_FLUX_MODEL
 
 CONTAINS
 
@@ -1526,13 +1526,13 @@ SUBROUTINE RAYLEIGH_HEAT_FLUX_MODEL(H,Z_STAR,DZ,TMP_W,TMP_G,K_G,RHO_G,CP_G,MU_G)
 
 REAL(EB), INTENT(OUT) :: H,Z_STAR
 REAL(EB), INTENT(IN) :: DZ,TMP_W,TMP_G,K_G,RHO_G,CP_G,MU_G
-REAL(EB) :: NUSSELT,Q,ZC,NU_G,DS,ALPHA,THETA,Q_OLD,ERROR
+REAL(EB) :: NUSSELT,Q,ZC,NU_G,D_STAR,ALPHA,THETA,Q_OLD,ERROR,DTMP
 INTEGER :: ITER
 INTEGER, PARAMETER :: MAX_ITER=10
 ! C_L = Z_L**(-0.8_EB)
 ! C_T = C_L*Z_T**(-0.2_EB)
 REAL(EB), PARAMETER :: Z_L = 3.2_EB, Z_T=17._EB
-REAL(EB), PARAMETER :: C_L = 3.2_EB**(-0.8_EB), C_T = 0.394_EB*17._EB**(-0.2_EB)
+REAL(EB), PARAMETER :: C_L = 3.2_EB**(-0.8_EB), C_T = C_L*17._EB**(-0.2_EB)
 
 IF (ABS(TMP_W-TMP_G)<TWO_EPSILON_EB) THEN
    H = 0._EB
@@ -1548,17 +1548,18 @@ THETA = TMP_W*K_G*ALPHA*NU_G/GRAV
 ! Step 1: assume a heat transfer coefficient
 
 H = K_G/ZC ! initial guess
-Q = H*ABS(TMP_W-TMP_G)
+DTMP = ABS(TMP_W-TMP_G)
+Q = H*DTMP
 
 RAYLEIGH_LOOP: DO ITER=1,MAX_ITER
 
    ! Step 2: compute new thermal diffusive length scale, delta*, from modified Grashof number * Pr
 
-   DS = (THETA/Q)**0.25_EB
+   D_STAR = (THETA/Q)**0.25_EB
 
    ! Step 3: compute new z* (thermal)
 
-   Z_STAR = ZC/DS ! Ra* = (z*)**4
+   Z_STAR = ZC/D_STAR ! Ra* = (z*)**4
 
    ! Step 4: based on z*, choose Ra scaling law
 
@@ -1574,7 +1575,7 @@ RAYLEIGH_LOOP: DO ITER=1,MAX_ITER
 
    H = NUSSELT*K_G/ZC
    Q_OLD = Q
-   Q = H*ABS(TMP_W-TMP_G)
+   Q = H*DTMP
 
    ERROR = ABS(Q-Q_OLD)/MAX(Q_OLD,TWO_EPSILON_EB)
 
@@ -1583,6 +1584,79 @@ RAYLEIGH_LOOP: DO ITER=1,MAX_ITER
 ENDDO RAYLEIGH_LOOP
 
 END SUBROUTINE RAYLEIGH_HEAT_FLUX_MODEL
+
+
+SUBROUTINE RAYLEIGH_MASS_FLUX_MODEL(MFLUX,DZ,Y_W,Y_G,D_G,RHO_G,MU_G)
+
+!!!!! EXPERIMENTAL !!!!!
+
+! Rayleigh number scaling in nondimensional mass transfer wall units
+!
+! The formulation is based on the discussion of natural convection systems in
+! J.P. Holman, Heat Transfer, 7th Ed., McGraw-Hill, 1990, p. 346.
+
+REAL(EB), INTENT(OUT) :: MFLUX
+REAL(EB), INTENT(IN) :: DZ,Y_W,Y_G,D_G,RHO_G,MU_G
+REAL(EB) :: SHERWOOD,ZC,NU_G,D_STAR,MFLUX_OLD,ERROR,LN_B,D_STAR_FAC,H,Z_STAR
+INTEGER :: ITER
+INTEGER, PARAMETER :: MAX_ITER=10
+! C_L = Z_L**(-0.8_EB)
+! C_T = C_L*Z_T**(-0.2_EB)
+REAL(EB), PARAMETER :: Z_L = 3.2_EB, Z_T=17._EB
+REAL(EB), PARAMETER :: C_L = 3.2_EB**(-0.8_EB), C_T = C_L*17._EB**(-0.2_EB)
+
+IF (Y_G >= Y_W) THEN
+   MFLUX = 0._EB
+   RETURN
+ENDIF
+
+LN_B = LOG(1._EB + (Y_W - Y_G)/(1 - Y_W + 1.E-8_EB))
+
+ZC = 0.5_EB*DZ
+NU_G = MU_G/RHO_G
+D_STAR_FAC = RHO_G*D_G**2*NU_G/GRAV
+
+! Step 1: assume a mass transfer coefficient
+
+H = D_G/ZC ! initial guess
+
+! Step 2: compute initial MFLUX
+
+MFLUX = RHO_G*H*LN_B
+
+RAYLEIGH_LOOP: DO ITER=1,MAX_ITER
+
+   ! Step 3: compute new mass diffusive length scale, delta*, from modified Grashof number * Sc
+
+   D_STAR = (D_STAR_FAC/MFLUX)**0.25_EB
+
+   ! Step 4: compute new z* (mass)
+
+   Z_STAR = ZC/D_STAR ! Ra* = (z*)**4
+
+   ! Step 5: based on z*, choose Ra scaling law
+
+   IF (Z_STAR<=Z_L) THEN
+      SHERWOOD = 1._EB
+   ELSEIF (Z_STAR>Z_L .AND. Z_STAR<=Z_T) THEN
+      SHERWOOD = C_L * Z_STAR**0.8_EB
+   ELSE
+      SHERWOOD = C_T * Z_STAR
+   ENDIF
+
+   ! Step 6: update mass transfer coefficient
+
+   H = SHERWOOD*D_G/ZC
+   MFLUX_OLD = MFLUX
+   MFLUX = RHO_G*H*LN_B
+
+   ERROR = ABS(MFLUX-MFLUX_OLD)/MAX(MFLUX_OLD,TWO_EPSILON_EB)
+
+   IF (ERROR<0.001_EB) EXIT RAYLEIGH_LOOP
+
+ENDDO RAYLEIGH_LOOP
+
+END SUBROUTINE RAYLEIGH_MASS_FLUX_MODEL
 
 
 SUBROUTINE YUAN_HEAT_FLUX_MODEL(H,Y_STAR,DY,TMP_W,TMP_G,K_G,RHO_G,CP_G)

@@ -4,9 +4,6 @@
 
 &TIME T_END=25./
 
-&ZONE XB=0,1,0,1,0,1 /
-&ZONE XB=1,2,0,1,0,1 /
-
 &PRES SOLVER='UGLMAT'/
 
 &OBST XB=1,1,0,1,0,1 /

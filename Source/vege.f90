@@ -389,6 +389,14 @@ DO JJG=1,JBAR
          PHI_W_Y = C_ROTH * ((3.281_EB * UMF_MAG)**B_ROTH) * (SF%VEG_LSET_BETA / BETA_OP_ROTH)**(-E_ROTH)
          PHI_W_Y = PHI_W_Y*UMF_Y/UMF_MAG
 
+         IF (ABS(UMF_MAG)>TWO_EPSILON_EB) THEN
+            PHI_W_X = PHI_W_X*UMF_X/UMF_MAG
+            PHI_W_Y = PHI_W_Y*UMF_Y/UMF_MAG
+         ELSE
+            PHI_W_X = 0.0_EB
+            PHI_W_Y = 0.0_EB
+         ENDIF
+
          ! Include Rothermel slope factor
 
          IF (PHI_S(IIG,JJG) > 0.0_EB) THEN

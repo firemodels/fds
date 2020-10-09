@@ -1,4 +1,4 @@
-&HEAD CHID='Test_1_20', FYI='University of Corsica simulation using Lagrangian particles' /
+&HEAD CHID='Test_1_20', TITLE='University of Corsica simulation using Lagrangian particles' /
 
 &MISC TMPA=20, GVEC=-3.355,0,-9.218 /
 
@@ -32,7 +32,7 @@
       HEAT_OF_COMBUSTION = 16360. /
 
 &SPEC ID='NITROGEN',        BACKGROUND=T /
-&SPEC ID='WOOD FUEL VAPOR', MASS_FRACTION_0=0.000000, FORMULA=C4.41O2.44H6.34 /
+&SPEC ID='WOOD FUEL VAPOR', MASS_FRACTION_0=0.000000, FORMULA='C4.41O2.44H6.34' /
 &SPEC ID='OXYGEN',          MASS_FRACTION_0=0.230997 /
 &SPEC ID='CARBON DIOXIDE',  MASS_FRACTION_0=0.000591 /
 &SPEC ID='WATER VAPOR',     MASS_FRACTION_0=0.005941 /

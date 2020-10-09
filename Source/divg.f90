@@ -1483,7 +1483,7 @@ EVACUATION_PREDICTOR: IF (PREDICTOR) THEN
       DO I = 1,N_ZONE
          IF (.NOT.(P_ZONE(I)%EVACUATION)) CYCLE
          IF (P_ZONE(I)%MESH_INDEX==NM) THEN
-            N = I ! The ordinar number of the pressure zone of this main evacuation mesh
+            N = I ! The ordinal number of the pressure zone of this main evacuation mesh
             EXIT
          END IF
       END DO

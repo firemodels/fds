@@ -8,7 +8,6 @@ A simple two-dimensional case demonstrating how to model stack effect in buildin
 &WIND LAPSE_RATE=0.0 /
 
 &TIME T_END=100. / 
-&ZONE XB=20,100,-1,1,0,100/
 &PRES VELOCITY_TOLERANCE=0.01/
 
 &VENT XB=19,19,-1,1,2,3,ID='LOWER EX',SURF_ID='HVAC',COLOR='BLUE'/

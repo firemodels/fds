@@ -411,6 +411,7 @@ END SUBROUTINE CHANGE_UNITS
 END MODULE COMP_FUNCTIONS
 
 
+!> \brief A collection of routines that manage memory
 
 MODULE MEMORY_FUNCTIONS
 
@@ -467,6 +468,7 @@ DEALLOCATE(P)
 
 END FUNCTION REALLOCATE
 
+
 !> \brief Changes the allocation of a string array
 !> \param P Original array
 !> \param CLEN Length of string
@@ -503,8 +505,6 @@ END FUNCTION REALLOCATE_CHARACTER_ARRAY
 
 FUNCTION REALLOCATE2D(P,M1,M2,N1,N2)
 
-! Resize the 2D array P
-
 REAL(EB), POINTER, DIMENSION(:,:) :: P, REALLOCATE2D
 INTEGER, INTENT(IN) :: M1,M2,N1,N2
 INTEGER :: MOLD,NOLD,IERR
@@ -522,6 +522,9 @@ DEALLOCATE(P)
 
 END FUNCTION REALLOCATE2D
 
+
+!> \brief Changes the allocation of the array STRING by adding 100 new entries
+!> \param NM Mesh number
 
 SUBROUTINE RE_ALLOCATE_STRINGS(NM)
 
@@ -541,8 +544,27 @@ DEALLOCATE(DUMMY)
 END SUBROUTINE RE_ALLOCATE_STRINGS
 
 
+!> \brief Re-allocate the derived type array P_ZONE
+
+SUBROUTINE REALLOCATE_P_ZONE(N1,N2)
+
+INTEGER, INTENT(IN) :: N1,N2
+TYPE (P_ZONE_TYPE), DIMENSION(:), ALLOCATABLE :: P_ZONE_DUMMY
+
+ALLOCATE(P_ZONE_DUMMY(1:N2))
+IF (ALLOCATED(P_ZONE)) THEN
+   P_ZONE_DUMMY(1:N1) = P_ZONE(1:N1)
+   DEALLOCATE(P_ZONE)
+ENDIF
+ALLOCATE(P_ZONE(1:N2))
+P_ZONE(1:N2) = P_ZONE_DUMMY(1:N2)
+DEALLOCATE(P_ZONE_DUMMY)
+
+END SUBROUTINE REALLOCATE_P_ZONE
+
+
 !> \brief Determines the size of the ONE_D_M_AND_E_XFER type structure for a surface type
-!> \param SURF_INDEX Index the to array of surface types
+!> \param SURF_INDEX Index of the surface type
 
 SUBROUTINE COMPUTE_ONE_D_STORAGE_DIMENSIONS(SURF_INDEX)
 
@@ -584,7 +606,7 @@ END SUBROUTINE COMPUTE_ONE_D_STORAGE_DIMENSIONS
 
 
 !> \brief Determines the size of the WALL type structure for a surface type
-!> \param SURF_INDEX Index the to array of surface types
+!> \param SURF_INDEX Index of the surface type
 
 SUBROUTINE COMPUTE_WALL_STORAGE_DIMENSIONS(SURF_INDEX)
 
@@ -601,7 +623,7 @@ END SUBROUTINE COMPUTE_WALL_STORAGE_DIMENSIONS
 
 
 !> \brief Determines the size of the CFACE type structure for a surface type
-!> \param SURF_INDEX Index the to array of surface types
+!> \param SURF_INDEX Index of the surface type
 
 SUBROUTINE COMPUTE_CFACE_STORAGE_DIMENSIONS(SURF_INDEX)
 
@@ -617,8 +639,8 @@ SF%N_CFACE_STORAGE_LOGICALS = N_CFACE_SCALAR_LOGICALS + SF%N_ONE_D_STORAGE_LOGIC
 END SUBROUTINE COMPUTE_CFACE_STORAGE_DIMENSIONS
 
 
-!> \brief Determines the size of the LAGRAGIAN_PARTICLE type structure for a particle type
-!> \param LPC_INDEX Index the to array of surface types
+!> \brief Determines the size of the LAGRAGIAN_PARTICLE type structure for the input particle class
+!> \param LPC_INDEX Index of the particle class
 
 SUBROUTINE COMPUTE_PARTICLE_STORAGE_DIMENSIONS(LPC_INDEX)
 
@@ -636,7 +658,7 @@ LPC%N_STORAGE_LOGICALS = N_PARTICLE_SCALAR_LOGICALS + SF%N_ONE_D_STORAGE_LOGICAL
 END SUBROUTINE COMPUTE_PARTICLE_STORAGE_DIMENSIONS
 
 
-!> \brief Allocates storage for data associated with a single wall cell or Lagrangian particle
+!> \brief Allocates storage for data associated with a single WALL cell or LAGRANGIAN_PARTICLE
 !> \param NM Index to the current mesh
 !> \param SURF_INDEX Surface type. Used if WALL_INDEX or CFACE_INDEX is set
 !> \param LPC_INDEX Lagrangian particle class type. Used if LP_INDEX is set.
@@ -647,8 +669,6 @@ END SUBROUTINE COMPUTE_PARTICLE_STORAGE_DIMENSIONS
 !> \param NEW_TAG Flag indicating TAG is for a new particle.
 
 SUBROUTINE ALLOCATE_STORAGE(NM,SURF_INDEX,LPC_INDEX,WALL_INDEX,CFACE_INDEX,LP_INDEX,TAG,NEW_TAG)
-
-! This routine allocates space in a storage array for either a lagrangian particle or a wall cell
 
 USE GLOBAL_CONSTANTS, ONLY: SIGMA,TMPA4,RPI,T_BEGIN,DIRICHLET,INITIALIZATION_PHASE,PERIODIC_TEST,TMPA
 LOGICAL, INTENT(IN), OPTIONAL :: NEW_TAG
@@ -812,6 +832,10 @@ IF (PRESENT(LP_INDEX))    CALL PARTICLE_POINTERS(LP_INDEX,NEW_SLOT)
 CONTAINS
 
 
+!> \brief Assign pointers for variables associated with a LAGRANGIAN_PARTICLE
+!> \param LP_INDEX_LOCAL Index of the LAGRANGIAN_PARTICLE in the array of particles for mesh NM
+!> \param NEW Logical parameter indicating if the particle is new
+
 SUBROUTINE PARTICLE_POINTERS(LP_INDEX_LOCAL,NEW)
 
 INTEGER, INTENT(IN) :: LP_INDEX_LOCAL
@@ -864,6 +888,10 @@ CALL ONE_D_POINTERS(LP_INDEX_LOCAL,NEW,N_PARTICLE_SCALAR_REALS,N_PARTICLE_SCALAR
 END SUBROUTINE PARTICLE_POINTERS
 
 
+!> \brief Assign pointers for variables associated with a WALL cell
+!> \param WALL_INDEX_LOCAL Index of the WALL cell in the array of WALL cells for mesh NM
+!> \param NEW Logical parameter indicating if the WALL cell is new
+
 SUBROUTINE WALL_POINTERS(WALL_INDEX_LOCAL,NEW)
 
 USE GLOBAL_CONSTANTS, ONLY: NULL_BOUNDARY,NEUMANN
@@ -905,6 +933,10 @@ CALL ONE_D_POINTERS(WALL_INDEX_LOCAL,NEW,N_WALL_SCALAR_REALS,N_WALL_SCALAR_INTEG
 END SUBROUTINE WALL_POINTERS
 
 
+!> \brief Assign pointers for variables associated with a CFACE
+!> \param CFACE_INDEX_LOCAL Index of the CFACE in the array of CFACEs for mesh NM
+!> \param NEW Logical parameter indicating if the CFACE is new
+
 SUBROUTINE CFACE_POINTERS(CFACE_INDEX_LOCAL,NEW)
 
 USE GLOBAL_CONSTANTS, ONLY: NULL_BOUNDARY
@@ -938,6 +970,13 @@ CALL ONE_D_POINTERS(CFACE_INDEX_LOCAL,NEW,N_CFACE_SCALAR_REALS,N_CFACE_SCALAR_IN
 
 END SUBROUTINE CFACE_POINTERS
 
+
+!> \brief Assign pointers for variables associated with the ONE_D derived type variable of a WALL, CFACE, or LAGRANGIAN_PARTICLE
+!> \param ONE_D_INDEX_LOCAL Index of the WALL, CFACE, or LAGRANGIAN_PARTICLE
+!> \param NEW Logical parameter indicating if the WALL, CFACE, or LAGRANGIAN_PARTICLE is new
+!> \param RC Number of REALs already associated with the WALL, CFACE, or LAGRANGIAN_PARTICLE
+!> \param IC Number of INTEGERs already associated with the WALL, CFACE, or LAGRANGIAN_PARTICLE
+!> \param LC Number of LOGICALs already associated with the WALL, CFACE, or LAGRANGIAN_PARTICLE
 
 SUBROUTINE ONE_D_POINTERS(ONE_D_INDEX_LOCAL,NEW,RC,IC,LC)
 
@@ -1146,6 +1185,13 @@ END SUBROUTINE ONE_D_POINTERS
 END SUBROUTINE ALLOCATE_STORAGE
 
 
+!> \brief Increase the size of the array used to hold WALL, CFACE, LAGRANGIAN_PARTICLE data
+!> \param NM Mesh number
+!> \param MODE Indicator of the type of array
+!> \param INDX Index of the LAGRANGIAN_PARTICLE_CLASS or the SURFACE type
+!> \param N_NEW_STORAGE_SLOTS Number of new storage slots to allocate
+!> \param NOM Optional parameter indicating the "number of the other mesh" for particles passing from one mesh to another
+
 SUBROUTINE REALLOCATE_STORAGE_ARRAYS(NM,MODE,INDX,N_NEW_STORAGE_SLOTS,NOM)
 
 INTEGER, INTENT(IN) :: MODE,NM,INDX,N_NEW_STORAGE_SLOTS
@@ -1218,9 +1264,13 @@ OS%N_STORAGE_SLOTS = OS%N_STORAGE_SLOTS + N_NEW_STORAGE_SLOTS
 END SUBROUTINE REALLOCATE_STORAGE_ARRAYS
 
 
-SUBROUTINE GET_LAGRANGIAN_PARTICLE_INDEX(NM,LPC_INDEX,LP_TAG,LP_INDEX)
+!> \brief Find the index of the LAGRANGIAN_PARTICLE with the given TAG and LP_CLASS index. If not found, return 0.
+!> \param NM Mesh number
+!> \param LPC_INDEX Index of the LAGRANGIAN_PARTICLE_CLASS
+!> \param LP_TAG A unique integer assigned to each LAGRANGIAN_PARTICLE, regardless of mesh
+!> \param LP_INDEX The index of the LAGRANGIAN_PARTICLE of the input class and tag
 
-! On mesh NM, find the index of the particle with the given TAG and LPC (Class). If not found, return 0.
+SUBROUTINE GET_LAGRANGIAN_PARTICLE_INDEX(NM,LPC_INDEX,LP_TAG,LP_INDEX)
 
 USE GLOBAL_CONSTANTS, ONLY: EVACUATION_ONLY
 INTEGER, INTENT(IN) :: NM,LPC_INDEX,LP_TAG
@@ -1243,9 +1293,9 @@ END MODULE MEMORY_FUNCTIONS
 
 
 
-MODULE GEOMETRY_FUNCTIONS
+!> \brief Functions and subroutines for manipulating geometry
 
-! Functions for manipulating geometry
+MODULE GEOMETRY_FUNCTIONS
 
 USE PRECISION_PARAMETERS
 USE MESH_VARIABLES
@@ -1255,9 +1305,16 @@ IMPLICIT NONE
 CONTAINS
 
 
-SUBROUTINE SEARCH_OTHER_MESHES(XX,YY,ZZ,NOM,IIO,JJO,KKO)
+!> \brief Determine the mesh index and cell indices of an input point.
+!> \param XX x-coordinate of the point (m)
+!> \param YY y-coordinate of the point (m)
+!> \param ZZ z-coordinate of the point (m)
+!> \param NOM Number of the other mesh where the point is located
+!> \param IIO I-index of the cell in the other mesh where the point is located
+!> \param JJO J-index of the cell in the other mesh where the point is located
+!> \param KKO K-index of the cell in the other mesh where the point is located
 
-! Given the point (XX,YY,ZZ), determine which other mesh it intersects and what its indices are.
+SUBROUTINE SEARCH_OTHER_MESHES(XX,YY,ZZ,NOM,IIO,JJO,KKO)
 
 REAL(EB), INTENT(IN) :: XX,YY,ZZ
 REAL(EB) :: XI,YJ,ZK
@@ -1289,9 +1346,18 @@ NOM = 0
 END SUBROUTINE SEARCH_OTHER_MESHES
 
 
-SUBROUTINE BLOCK_CELL(NM,I1,I2,J1,J2,K1,K2,IVAL,OBST_INDEX)
+!> \brief Block or unblock a cell of a given mesh
+!> \param NM Mesh number
+!> \param I1 Lower bound of I cell indices of the region to be blocked or unblocked
+!> \param I2 Upper bound of I cell indices of the region to be blocked or unblocked
+!> \param J1 Lower bound of J cell indices of the region to be blocked or unblocked
+!> \param J2 Upper bound of J cell indices of the region to be blocked or unblocked
+!> \param K1 Lower bound of K cell indices of the region to be blocked or unblocked
+!> \param K2 Upper bound of K cell indices of the region to be blocked or unblocked
+!> \param IVAL Indicator if the cell is to blocked (1) or unblocked (0)
+!> \param OBST_INDEX Index of the OBSTruction blocking the cell
 
-! Indicate which cells are blocked off
+SUBROUTINE BLOCK_CELL(NM,I1,I2,J1,J2,K1,K2,IVAL,OBST_INDEX)
 
 INTEGER :: NM,I1,I2,J1,J2,K1,K2,IVAL,I,J,K,OBST_INDEX,IC
 TYPE (MESH_TYPE), POINTER :: M=>NULL()
@@ -1317,16 +1383,18 @@ ENDDO
 END SUBROUTINE BLOCK_CELL
 
 
-SUBROUTINE ASSIGN_HT3D_WALL_INDICES(NM)
+!> \brief For each cell in an HT3D solid obstruction, determine its nearest surface WALL cell
+!> \param NM Mesh number
+!> \details Fill in the array MESHES(NM)\%WALL_INDEX_HT3D(IC,-3:3) such that: \n
+!> WALL_INDEX_HT3D(IC,-3) is the wall index of the bottom of the solid obstruction \n
+!> WALL_INDEX_HT3D(IC,-2) is the wall index of the back   of the solid obstruction \n
+!> WALL_INDEX_HT3D(IC,-1) is the wall index of the left   of the solid obstruction \n
+!> WALL_INDEX_HT3D(IC, 1) is the wall index of the right  of the solid obstruction \n
+!> WALL_INDEX_HT3D(IC, 2) is the wall index of the front  of the solid obstruction \n
+!> WALL_INDEX_HT3D(IC, 3) is the wall index of the top    of the solid obstruction \n
+!> WALL_INDEX_HT3D(IC, 0) is the wall index of the nearest surface of the solid obstruction
 
-! For each cell with CELL_INDEX=IC in an HT3D solid obstruction, fill in the array MESHES(NM)%WALL_INDEX_HT3D(IC,-3:3) such that:
-! WALL_INDEX_HT3D(IC,-3) is the wall index of the bottom of the solid obstruction
-! WALL_INDEX_HT3D(IC,-2) is the wall index of the back   of the solid obstruction
-! WALL_INDEX_HT3D(IC,-1) is the wall index of the left   of the solid obstruction
-! WALL_INDEX_HT3D(IC, 1) is the wall index of the right  of the solid obstruction
-! WALL_INDEX_HT3D(IC, 2) is the wall index of the front  of the solid obstruction
-! WALL_INDEX_HT3D(IC, 3) is the wall index of the top    of the solid obstruction
-! WALL_INDEX_HT3D(IC, 0) is the wall index of the nearest surface of the solid obstruction
+SUBROUTINE ASSIGN_HT3D_WALL_INDICES(NM)
 
 INTEGER, INTENT(IN) :: NM
 INTEGER :: I,J,K,N,IC,II,JJ,KK,ICN,CELL_COUNT(-3:3)
@@ -1414,6 +1482,11 @@ ENDDO OBST_LOOP
 END SUBROUTINE ASSIGN_HT3D_WALL_INDICES
 
 
+!> \brief Determine if a point is in the interior of at least one mesh
+!> \param XX x-coordinate of the point (m)
+!> \param YY y-coordinate of the point (m)
+!> \param ZZ z-coordinate of the point (m)
+
 LOGICAL FUNCTION INTERIOR(XX,YY,ZZ)
 
 INTEGER NM
@@ -1430,9 +1503,15 @@ ENDDO
 END FUNCTION INTERIOR
 
 
-SUBROUTINE ASSIGN_PRESSURE_ZONE(NM,XX,YY,ZZ,I_ZONE,I_ZONE_OVERLAP)
+!> \brief Assign the pressure zone for all cells connected to a given input point
+!> \param NM Mesh number
+!> \param XX x-coordinate of the point (m)
+!> \param YY y-coordinate of the point (m)
+!> \param ZZ z-coordinate of the point (m)
+!> \param I_ZONE Index of the pressure zone to assign to the connected cells
+!> \param I_ZONE_OVERLAP Index of a pressure zone that overlaps I_ZONE
 
-! Given the point (XX,YY,ZZ) within Mesh NM, determine all mesh cells within the same pressure zone
+SUBROUTINE ASSIGN_PRESSURE_ZONE(NM,XX,YY,ZZ,I_ZONE,I_ZONE_OVERLAP)
 
 USE COMP_FUNCTIONS, ONLY : SHUTDOWN
 REAL(EB), INTENT(IN) :: XX,YY,ZZ
@@ -1446,7 +1525,7 @@ TYPE (MESH_TYPE), POINTER :: M
 TYPE (OBSTRUCTION_TYPE), POINTER :: OB
 
 M=>MESHES(NM)
-I_ZONE_OVERLAP = 0
+I_ZONE_OVERLAP = -1
 
 IF (XX<M%XS-TWO_EPSILON_EB .OR. XX>M%XF+TWO_EPSILON_EB .OR. &
     YY<M%YS-TWO_EPSILON_EB .OR. YY>M%YF+TWO_EPSILON_EB .OR. &
@@ -1566,12 +1645,12 @@ SORT_QUEUE: DO
 
          ! Cell not SOLID for OBSTS, or GEOM cell not IBM_SOLID:
          IF (.NOT.M%SOLID(IC) .AND. M%CCVAR(II,JJ,KK,1)/=1 .AND. &
-            M%PRESSURE_ZONE(II,JJ,KK)>0 .AND.  M%PRESSURE_ZONE(II,JJ,KK)/=I_ZONE) THEN
+            M%PRESSURE_ZONE(II,JJ,KK)>=0 .AND.  M%PRESSURE_ZONE(II,JJ,KK)/=I_ZONE) THEN
             I_ZONE_OVERLAP = M%PRESSURE_ZONE(II,JJ,KK)
             RETURN
          ENDIF
       ELSE
-         IF (.NOT.M%SOLID(IC) .AND. M%PRESSURE_ZONE(II,JJ,KK)>0 .AND.  M%PRESSURE_ZONE(II,JJ,KK)/=I_ZONE) THEN
+         IF (.NOT.M%SOLID(IC) .AND. M%PRESSURE_ZONE(II,JJ,KK)>=0 .AND.  M%PRESSURE_ZONE(II,JJ,KK)/=I_ZONE) THEN
             I_ZONE_OVERLAP = M%PRESSURE_ZONE(II,JJ,KK)
             RETURN
          ENDIF
@@ -1580,7 +1659,7 @@ SORT_QUEUE: DO
       ! If the current cell is unassigned, assign the cell the ZONE index, I_ZONE, and then add this cell to the
       ! queue so that further searches might originate from it.
 
-      IF (M%PRESSURE_ZONE(II,JJ,KK)<1) THEN
+      IF (M%PRESSURE_ZONE(II,JJ,KK)<0) THEN
          M%PRESSURE_ZONE(II,JJ,KK) = I_ZONE
          Q_N      = Q_N+1
          Q_I(Q_N) = II
@@ -1599,9 +1678,16 @@ DEALLOCATE(Q_K)
 END SUBROUTINE ASSIGN_PRESSURE_ZONE
 
 
-SUBROUTINE GET_N_LAYER_CELLS(DIFFUSIVITY,LAYER_THICKNESS,STRETCH_FACTOR,CELL_SIZE_FACTOR,N_LAYER_CELLS_MAX,N_CELLS,DX_MIN)
+!> \brief Determine the number of 1-D cells in a layer of solid material
+!> \param DIFFUSIVITY \f$ k/(\rho c) \; (\hbox{m}^2/\hbox{s}) \f$, used to determine cell size
+!> \param LAYER_THICKNESS Thickness of the material layer (m)
+!> \param STRETCH_FACTOR A real number indicating the amount to stretch the second and subsequent cells in the interior
+!> \param CELL_SIZE_FACTOR A real number indicating how much to shrink the first cell at the surface
+!> \param N_LAYER_CELLS_MAX Maximum number of cells to assign to the layer
+!> \param N_CELLS Number of cells in the layer
+!> \param DX_MIN Minimum cell size
 
-! Get number of wall cells in the layer
+SUBROUTINE GET_N_LAYER_CELLS(DIFFUSIVITY,LAYER_THICKNESS,STRETCH_FACTOR,CELL_SIZE_FACTOR,N_LAYER_CELLS_MAX,N_CELLS,DX_MIN)
 
 INTEGER, INTENT(OUT)  :: N_CELLS
 INTEGER, INTENT(IN) :: N_LAYER_CELLS_MAX
@@ -1632,9 +1718,15 @@ ENDDO SHRINK_LOOP
 END SUBROUTINE GET_N_LAYER_CELLS
 
 
-SUBROUTINE GET_WALL_NODE_COORDINATES(N_CELLS,N_LAYERS,N_LAYER_CELLS,SMALLEST_CELL_SIZE,STRETCH_FACTOR,X_S)
+!> \brief Determine the coordinates of the 1-D interior cells
+!> \param N_CELLS Number of cells in the entire collection of layers
+!> \param N_LAYERS Number of layers
+!> \param N_LAYER_CELLS Array holding the number of cells in each layer
+!> \param SMALLEST_CELL_SIZE Array holding the sizes of the bounding cells in each layer (m)
+!> \param STRETCH_FACTOR Array holding the stretching factors of each layer
+!> \param X_S Array containing boundaries of the interior cells
 
-! Get the wall internal coordinates
+SUBROUTINE GET_WALL_NODE_COORDINATES(N_CELLS,N_LAYERS,N_LAYER_CELLS,SMALLEST_CELL_SIZE,STRETCH_FACTOR,X_S)
 
 INTEGER, INTENT(IN)     :: N_CELLS,N_LAYERS, N_LAYER_CELLS(N_LAYERS)
 REAL(EB), INTENT(IN)    :: SMALLEST_CELL_SIZE(N_LAYERS),STRETCH_FACTOR(N_LAYERS)
@@ -1656,6 +1748,24 @@ ENDDO
 END SUBROUTINE GET_WALL_NODE_COORDINATES
 
 
+
+!> \brief Determine the internal coordinates of the 1-D grid inside a solid.
+!> \param N_CELLS Number of cells in the entire 1-D array
+!> \param N_LAYERS Number of layers
+!> \param N_LAYER_CELLS Array holding the number of cells in each layer
+!> \param LAYER_THICKNESS Array of layer thicknesses (m)
+!> \param GEOMETRY Indicates whether the surface is Cartesian, cylindrical, or spherical
+!> \param X_S Array holding node coordinates (m)
+!> \param LAYER_DIVIDE Number of layers that off gas to the front surface
+!> \param DX Array of cell sizes (m)
+!> \param RDX Reciprocal of DX (1/m)
+!> \param RDXN Reciprocal of the distance from cell center to cell center (1/m)
+!> \param DX_WGT Ratio of cell sizes: DX_WGT(I)=DX(I)*RDXN(I)*2
+!> \param DXF Size of cell nearest the front surface (m)
+!> \param DXB Size of cell nearest the back surface (m)
+!> \param LAYER_INDEX Array of indices indicating the layer to which each interior cell belongs
+!> \param MF_FRAC Array containing the fraction of each cells mass that is assigned to the front surface
+!> \param INNER_RADIUS Inner radius of hollow cylinder or sphere (m)
 
 SUBROUTINE GET_WALL_NODE_WEIGHTS(N_CELLS,N_LAYERS,N_LAYER_CELLS, &
          LAYER_THICKNESS,GEOMETRY,X_S,LAYER_DIVIDE,DX,RDX,RDXN,DX_WGT,DXF,DXB,LAYER_INDEX,MF_FRAC,INNER_RADIUS)
@@ -1777,6 +1887,14 @@ REAL(EB) :: R, THICKNESS, X_DIVIDE
 END SUBROUTINE GET_WALL_NODE_WEIGHTS
 
 
+!> \brief Determine weighting factors for 1-D solid cells
+!> \param GEOMETRY Indicator of surface geometry: Cartesian, cylindrical, or spherical
+!> \param NWP Number of interior cells
+!> \param NWP_NEW Number of interior cells after shrinkage or swelling
+!> \param INNER_RADIUS Inner radius of hollow cylinder or sphere (m)
+!> \param X_S Array of interior cell edge positions (m)
+!> \param X_S_NEW Array of interior cell edge positions after shrinkage or swelling (m)
+!> \param INT_WGT Array of weighting factors for new arrangement of interior cells
 
 SUBROUTINE GET_INTERPOLATION_WEIGHTS(GEOMETRY,NWP,NWP_NEW,INNER_RADIUS,X_S,X_S_NEW,INT_WGT)
 
@@ -1848,9 +1966,18 @@ ENDDO
 END SUBROUTINE INTERPOLATE_WALL_ARRAY
 
 
-SUBROUTINE RANDOM_RECTANGLE(XX,YY,ZZ,X1,X2,Y1,Y2,Z1,Z2)
+!> \brief Choose a random point from within a rectangular volume
+!> \param XX x-coordinate of the point (m)
+!> \param YY y-coordinate of the point (m)
+!> \param ZZ z-coordinate of the point (m)
+!> \param X1 Lower x-coordinate of the volume (m)
+!> \param X2 Upper x-coordinate of the volume (m)
+!> \param Y1 Lower y-coordinate of the volume (m)
+!> \param Y2 Upper y-coordinate of the volume (m)
+!> \param Z1 Lower z-coordinate of the volume (m)
+!> \param Z2 Upper z-coordinate of the volume (m)
 
-! Choose a random point (XX,YY,ZZ) from within a rectangular volume bounded by X1, X2, ...
+SUBROUTINE RANDOM_RECTANGLE(XX,YY,ZZ,X1,X2,Y1,Y2,Z1,Z2)
 
 REAL(EB), INTENT(IN) :: X1,X2,Y1,Y2,Z1,Z2
 REAL(EB), INTENT(OUT) :: XX,YY,ZZ
@@ -1866,9 +1993,18 @@ ZZ = Z1 + RN*(Z2-Z1)
 END SUBROUTINE RANDOM_RECTANGLE
 
 
-SUBROUTINE RANDOM_CONE(NM,XX,YY,ZZ,X0,Y0,Z0,RR0,HH0)
+!> \brief Choose a random point from within a vertically oriented cone
+!> \param NM Mesh number
+!> \param XX x-coordinate of the point (m)
+!> \param YY y-coordinate of the point (m)
+!> \param ZZ z-coordinate of the point (m)
+!> \param X0 x-coordinate of the center of the code base (m)
+!> \param Y0 y-coordinate of the center of the code base (m)
+!> \param Z0 z-coordinate of the center of the code base (m)
+!> \param RR0 Radius of the base (m)
+!> \param HH0 Height of the cone (m)
 
-! Choose a random point (XX,YY,ZZ) from within a vertically oriented cone
+SUBROUTINE RANDOM_CONE(NM,XX,YY,ZZ,X0,Y0,Z0,RR0,HH0)
 
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: X0,Y0,Z0,RR0,HH0
@@ -1893,9 +2029,15 @@ ENDDO SEARCH_LOOP
 END SUBROUTINE RANDOM_CONE
 
 
-SUBROUTINE RANDOM_RING(NM,XX,YY,X0,Y0,RR0)
+!> \brief Choose a random point on a horizontally-oriented ring
+!> \param NM Mesh number
+!> \param XX x-coordinate of the point (m)
+!> \param YY y-coordinate of the point (m)
+!> \param X0 x-coordinate of the center of the ring (m)
+!> \param Y0 y-coordinate of the center of the ring (m)
+!> \param RR0 Radius of the ring (m)
 
-! Choose a random point (XX,YY) on a horizontally-oriented ring
+SUBROUTINE RANDOM_RING(NM,XX,YY,X0,Y0,RR0)
 
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: X0,Y0,RR0
@@ -1915,9 +2057,17 @@ ENDDO SEARCH_LOOP
 END SUBROUTINE RANDOM_RING
 
 
-SUBROUTINE UNIFORM_RING(NM,XX,YY,X0,Y0,RR0,NP,NP_TOTAL)
+!> \brief Assign an ordered point on a horizontally-oriented ring
+!> \param NM Mesh number
+!> \param XX x-coordinate of the point (m)
+!> \param YY y-coordinate of the point (m)
+!> \param X0 x-coordinate of the center of the ring (m)
+!> \param Y0 y-coordinate of the center of the ring (m)
+!> \param RR0 Radius of the ring (m)
+!> \param NP Number of the current point
+!> \param NP_TOTAL Total number of points in the ring
 
-! Choose a point (XX,YY) uniformly on a horizontally-oriented ring
+SUBROUTINE UNIFORM_RING(NM,XX,YY,X0,Y0,RR0,NP,NP_TOTAL)
 
 INTEGER, INTENT(IN) :: NM,NP,NP_TOTAL
 REAL(EB), INTENT(IN) :: X0,Y0,RR0
@@ -1936,9 +2086,16 @@ ENDDO SEARCH_LOOP
 END SUBROUTINE UNIFORM_RING
 
 
-REAL(EB) FUNCTION CIRCLE_CELL_INTERSECTION_AREA(X0,Y0,RAD,X1,X2,Y1,Y2)
+!> \brief Estimate area of intersection of circle and rectangle
+!> \param X0 x-coordinate of the center of the circle (m)
+!> \param Y0 y-coordinate of the center of the circle (m)
+!> \param RAD Radius of the circle (m)
+!> \param X1 Lower x-coordinate of the rectangle (m)
+!> \param X2 Upper x-coordinate of the rectangle (m)
+!> \param Y1 Lower y-coordinate of the rectangle (m)
+!> \param Y2 Upper y-coordinate of the rectangle (m)
 
-! Estimate area of intersection of circle with origin (X0,Y0), radius, RAD, and rectangle (X1,Y1,X2,Y2)
+REAL(EB) FUNCTION CIRCLE_CELL_INTERSECTION_AREA(X0,Y0,RAD,X1,X2,Y1,Y2)
 
 REAL(EB), INTENT(IN) :: X0,Y0,RAD,X1,X2,Y1,Y2
 INTEGER :: NN,II,JJ
@@ -1959,9 +2116,15 @@ ENDDO
 END FUNCTION CIRCLE_CELL_INTERSECTION_AREA
 
 
-REAL(EB) FUNCTION CONE_MESH_INTERSECTION_VOLUME(NM,X0,Y0,Z0,RR0,HH0)
+!> \brief Calculate volume of the interaction of MESH NM with a cone
+!> \param NM Mesh number
+!> \param X0 x-coordinate of the center of the base of the cone (m)
+!> \param Y0 y-coordinate of the center of the base of the cone (m)
+!> \param Z0 z-coordinate of the center of the base of the cone (m)
+!> \param RR0 Radius of the base of the cone (m)
+!> \param HH0 Height of the cone (m)
 
-! Calculate volume of the interaction of MESH NM with a cone
+REAL(EB) FUNCTION CONE_MESH_INTERSECTION_VOLUME(NM,X0,Y0,Z0,RR0,HH0)
 
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: X0,Y0,Z0,RR0,HH0
@@ -2003,9 +2166,13 @@ ENDDO
 END FUNCTION CONE_MESH_INTERSECTION_VOLUME
 
 
-SUBROUTINE TRANSFORM_COORDINATES(X,Y,Z,MOVE_INDEX)
+!> \brief Rotate and translate a point using the parameters of MOVE input line
+!> \param X x-coordinate of the point (m)
+!> \param Y y-coordinate of the point (m)
+!> \param Z z-coordinate of the point (m)
+!> \param MOVE_INDEX Index of the set of parameters on a MOVE input line
 
-! Transform (X,Y,Z) using the parameters of MOVE(MOVE_INDEX)
+SUBROUTINE TRANSFORM_COORDINATES(X,Y,Z,MOVE_INDEX)
 
 INTEGER, INTENT(IN) :: MOVE_INDEX
 REAL(EB), INTENT(INOUT) :: X,Y,Z
@@ -2015,6 +2182,7 @@ TYPE(MOVEMENT_TYPE), POINTER :: MV
 MV => MOVEMENT(MOVE_INDEX)
 
 ! If T34 present, use Matrix T3x4 for transformation: Note it takes precedence over other transformation parameters.
+
 IF (SUM(ABS(MV%T34(1:3,1:4))) > TWO_EPSILON_EB) THEN
    X_VECTOR_1 = RESHAPE( (/X,Y,Z,1._EB/), (/4, 1/) )
    X_VECTOR   = MATMUL(MV%T34, X_VECTOR_1)
@@ -2040,7 +2208,8 @@ SCL= RESHAPE((/ MV%SCALE*MV%SCALEX,0.0_EB,0.0_EB, &
                 0.0_EB,MV%SCALE*MV%SCALEY,0.0_EB, &
                 0.0_EB,0.0_EB,MV%SCALE*MV%SCALEZ /),(/3,3/))
 
-! Note: Scaling takes precedence over rotation transformation (applied first on the local axes):
+! Scaling takes precedence over rotation transformation (applied first on the local axes):
+
 X_VECTOR = X_VECTOR_0 + MATMUL(MATMUL(M,SCL),X_VECTOR-X_VECTOR_0)
 X = X_VECTOR(1,1) + MV%DX
 Y = X_VECTOR(2,1) + MV%DY
@@ -2051,12 +2220,22 @@ END SUBROUTINE TRANSFORM_COORDINATES
 END MODULE GEOMETRY_FUNCTIONS
 
 
+!> \brief Routines that do various mathematical manipulations
+
 MODULE MATH_FUNCTIONS
 
 USE PRECISION_PARAMETERS
 IMPLICIT NONE
 
 CONTAINS
+
+
+!> \brief Add new value to a growing histogram
+!> \param NBINS Number of bins in the histogram
+!> \param LIMITS The range of values underlying the histogram
+!> \param COUNTS Array of weight currently assigned to each bin
+!> \param VAL New value to be added
+!> \param WEIGHT Relative weight associated with the new value
 
 SUBROUTINE UPDATE_HISTOGRAM(NBINS,LIMITS,COUNTS,VAL,WEIGHT)
 INTEGER,INTENT(IN)::NBINS
@@ -2068,24 +2247,16 @@ COUNTS(IND)=COUNTS(IND)+WEIGHT
 END SUBROUTINE UPDATE_HISTOGRAM
 
 
-REAL(EB) FUNCTION AFILL(A111,A211,A121,A221,A112,A212,A122,A222,P,R,S)
-
-! Linear interpolation function that returns the weighted average of values at 8 corners of a parallelpiped. A111, etc, are the
-! eight values, and P, R, S are fractions of the distance from the origin in the x, y, and z directions.
-
-REAL(EB) :: A111,A211,A121,A221,A112,A212,A122,A222,P,R,S,PP,RR,SS
-
-PP = 1._EB-P
-RR = 1._EB-R
-SS = 1._EB-S
-AFILL = ((PP*A111+P*A211)*RR + (PP*A121+P*A221)*R)*SS + ((PP*A112+P*A212)*RR + (PP*A122+P*A222)*R)*S
-
-END FUNCTION AFILL
-
+!> \brief Linearly interpolate the value at a point in a 3D array
+!> \param A The 3D array of values
+!> \param I The lower x index of the array
+!> \param J The lower y index of the array
+!> \param K The lower z index of the array
+!> \param P Fraction of the distance from the lower to upper x coordinate
+!> \param R Fraction of the distance from the lower to upper y coordinate
+!> \param S Fraction of the distance from the lower to upper z coordinate
 
 REAL(EB) FUNCTION AFILL2(A,I,J,K,P,R,S)
-
-! Linear interpolation function. Same as AFILL, only it reads in entire array.
 
 REAL(EB), INTENT(IN), DIMENSION(0:,0:,0:) :: A
 INTEGER, INTENT(IN) :: I,J,K
@@ -2107,17 +2278,27 @@ AFILL2 = ((PP*A111+P*A211)*RR+(PP*A121+P*A221)*R)*SS+ ((PP*A112+P*A212)*RR+(PP*A
 END FUNCTION AFILL2
 
 
+!> \brief Calculate the value of polynomial function.
+!> \param N Number of coefficients in the polynomial
+!> \param TEMP The independent variable
+!> \param COEF The array of coefficients
+
 REAL(EB) FUNCTION POLYVAL(N,TEMP,COEF)
-! Calculate the value of polynomial function.
-INTEGER N,I
-REAL(EB) TEMP, COEF(N), VAL
-VAL = 0._EB
+INTEGER, INTENT(IN) :: N
+REAL(EB), INTENT(IN) :: TEMP,COEF(N)
+INTEGER :: I
+POLYVAL = 0._EB
 DO I=1,N
-   VAL  = VAL  + COEF(I)*TEMP**(I-1)
+   POLYVAL  = POLYVAL  + COEF(I)*TEMP**(I-1)
 ENDDO
-POLYVAL = VAL
 END FUNCTION POLYVAL
 
+
+!> \brief Determine the index of a RAMP with a given name (ID)
+!> \param ID The name of the ramp function
+!> \param TYPE The kind of ramp
+!> \param RAMP_INDEX The index of the ramp
+!> \param DUPLICATE_RAMP Optional logical parameter indicating if the ramp has already been processed
 
 SUBROUTINE GET_RAMP_INDEX(ID,TYPE,RAMP_INDEX,DUPLICATE_RAMP)
 
@@ -2155,6 +2336,11 @@ RAMP_TYPE(RAMP_INDEX) = TYPE
 END SUBROUTINE GET_RAMP_INDEX
 
 
+!> \brief Determine the index of a table with a given name
+!> \param ID Name of the table
+!> \param TYPE Kind of table
+!> \param TABLE_INDEX Index of the table
+
 SUBROUTINE GET_TABLE_INDEX(ID,TYPE,TABLE_INDEX)
 
 USE GLOBAL_CONSTANTS, ONLY: N_TABLE,TABLE_ID,TABLE_TYPE
@@ -2183,9 +2369,12 @@ TABLE_TYPE(TABLE_INDEX) = TYPE
 END SUBROUTINE GET_TABLE_INDEX
 
 
-REAL(EB) FUNCTION EVALUATE_RAMP(RAMP_INPUT,TAU,RAMP_INDEX)
+!> \brief Return an interpolated value from a given RAMP function
+!> \param RAMP_INPUT Independent variable of the RAMP function
+!> \param TAU Time scale used for reserved t-squared or tanh ramps
+!> \param RAMP_INDEX Index of the RAMP function
 
-! General time ramp up
+REAL(EB) FUNCTION EVALUATE_RAMP(RAMP_INPUT,TAU,RAMP_INDEX)
 
 USE TYPES, ONLY: RAMPS
 USE DEVICE_VARIABLES, ONLY: DEVICE
@@ -2218,9 +2407,10 @@ END SELECT
 END FUNCTION EVALUATE_RAMP
 
 
-REAL(EB) FUNCTION IERFC(Y)
+!> \brief Compute inverse erfc function
+!> \param Y Y=ERFC(X), where X is returned by IERFC(Y)
 
-! Inverse of ERFC(Y)
+REAL(EB) FUNCTION IERFC(Y)
 
 REAL(EB), INTENT(IN) :: Y
 REAL(EB) :: QA,QB,QC,QD,Q0,Q1,Q2,Q3,Q4,PA,PB,P0,P1,P2,P3,P4,P5,P6,P7,P8,P9,P10, &
@@ -2288,14 +2478,22 @@ IERFC = X
 END FUNCTION IERFC
 
 
+!> \brief Solve a linear system of equations with Gauss-Jordon elimination (Press, Numerical Recipes)
+!> \param A Primary matrix of A*x=b
+!> \param N Dimension of A
+!> \param NP Dimension of array containing A
+!> \param B Array of vectors B of the linear system
+!> \param M Number of columns of B
+!> \param MP Number of columns of the array holding the B vectors
+!> \param IERROR Error code
+
 SUBROUTINE GAUSSJ(A,N,NP,B,M,MP,IERROR)
 
-! Solve a linear system of equations with Gauss-Jordon elimination
-! Source: Press et al. "Numerical Recipes"
-
-INTEGER :: M,MP,N,NP,I,ICOL=0,IROW=0,J,K,L,LL,INDXC(NP),INDXR(NP),IPIV(NP)
-REAL(EB) :: A(NP,NP),B(NP,MP),BIG,DUM,PIVINV
+INTEGER, INTENT(IN) :: M,MP,N,NP
+REAL(EB), INTENT(INOUT) :: A(NP,NP),B(NP,MP)
 INTEGER, INTENT(OUT) :: IERROR
+REAL(EB) :: BIG,DUM,PIVINV
+INTEGER :: I,ICOL=0,IROW=0,J,K,L,LL,INDXC(NP),INDXR(NP),IPIV(NP)
 
 IERROR = 0
 IPIV(1:N) = 0
@@ -2363,6 +2561,12 @@ ENDDO
 END SUBROUTINE GAUSSJ
 
 
+!> \brief Linearly interpolate the value of a given function at a given point
+!> \param X Independent variable
+!> \param Y Dependent variable
+!> \param XI Point to interpolate
+!> \param ANS Value of the function at the point XI
+
 SUBROUTINE INTERPOLATE1D(X,Y,XI,ANS)
 
 REAL(EB), INTENT(IN), DIMENSION(:) :: X, Y
@@ -2392,6 +2596,12 @@ ENDIF
 END SUBROUTINE INTERPOLATE1D
 
 
+!> \brief Interpolate a 1D array of numbers
+!> \param LOWER Lower index of the array X
+!> \param X Array of numbers
+!> \param XI Real number representing a fractional array index
+!> \param ANS Interpolated value at XI
+
 SUBROUTINE INTERPOLATE1D_UNIFORM(LOWER,X,XI,ANS)
 
 INTEGER, INTENT(IN) :: LOWER
@@ -2417,7 +2627,14 @@ ENDIF
 END SUBROUTINE INTERPOLATE1D_UNIFORM
 
 
+!> \brief Find interpolated value in a 2D array
+!> \param TABLE_INDEX Index of the table
+!> \param XI Index of first array dimension
+!> \param YI Index of second array dimension
+!> \param ANS Interpolated value at (XI,YI)
+
 SUBROUTINE INTERPOLATE2D(TABLE_INDEX,XI,YI,ANS)
+
 USE TYPES, ONLY: TABLES,TABLES_TYPE
 INTEGER, INTENT(IN) :: TABLE_INDEX
 REAL(EB), INTENT(IN) :: XI,YI
@@ -2472,15 +2689,19 @@ ANS = (YI-TA%Y(J-1))/(TA%Y(J)-TA%Y(J-1))*(XU-XL)+XL
 END SUBROUTINE INTERPOLATE2D
 
 
+!> \brief Randomly choose a point from a normal distribution
+!> \param MEAN Mean of the normal distribution
+!> \param SIGMA Standard deviation
+
 REAL(EB) FUNCTION NORMAL(MEAN,SIGMA)
 
-! Randomly choose a point from a normal distribution
-
-REAL(EB) :: MEAN,SIGMA,TMP,FAC,GSAVE,RSQ,R1,R2
+REAL(EB), INTENT(IN) :: MEAN,SIGMA
+REAL(EB) :: TMP,FAC,GSAVE,RSQ,R1,R2
 REAL     :: RN
 INTEGER :: FLAG
 SAVE FLAG,GSAVE
 DATA FLAG /0/
+
 IF (FLAG==0) THEN
    RSQ=2.0_EB
    DO WHILE(RSQ>=1.0_EB.OR.RSQ==0.0_EB)
@@ -2499,14 +2720,16 @@ ELSE
    FLAG=0
 ENDIF
 NORMAL=TMP*SIGMA+MEAN
-RETURN
 
 END FUNCTION NORMAL
 
 
-SUBROUTINE CROSS_PRODUCT(C,A,B)
+!> \brief Compute the cross product of two triplets, A x B = C
+!> \param C The resulting vector
+!> \param A First vector
+!> \param B Second vector
 
-! C = A x B
+SUBROUTINE CROSS_PRODUCT(C,A,B)
 
 REAL(EB), INTENT(IN) :: A(3),B(3)
 REAL(EB), INTENT(OUT) :: C(3)
@@ -2518,9 +2741,13 @@ C(3) = A(1)*B(2)-A(2)*B(1)
 END SUBROUTINE CROSS_PRODUCT
 
 
-SUBROUTINE RANDOM_CHOICE(CDF,VAR,NPTS,CHOICE)
+!> \brief Randomly choose a value from the distribution with given CDF
+!> \param CDF Cumulative Distribution Function
+!> \param VAR Independent variable
+!> \param NPTS Number of points in the CDF
+!> \param CHOICE Randomly chosen value
 
-! Randomly choose a value from the distribution with given CDF
+SUBROUTINE RANDOM_CHOICE(CDF,VAR,NPTS,CHOICE)
 
 INTEGER,  INTENT(IN)  :: NPTS
 REAL(EB), INTENT(IN)  :: CDF(0:NPTS),VAR(0:NPTS)
@@ -2561,10 +2788,12 @@ MINMOD4 = 0.125_EB*(SIGN(1._EB,W)+SIGN(1._EB,X))* &
 END FUNCTION MINMOD4
 
 
-SUBROUTINE BOX_MULLER(Z0,Z1)
+!> \brief Generate pairs of normally distributed pseudo-random numbers with zero mean and unit variance based on the
+!> Box-Muller transformation.
+!> \param Z0 Output value 1
+!> \param Z1 Output value 2
 
-! Generate pairs of normally distributed pseudo-random numbers with zero mean and unit variance based on the
-! Box-Muller transformation.
+SUBROUTINE BOX_MULLER(Z0,Z1)
 
 REAL(EB), INTENT(OUT) :: Z0,Z1
 REAL(EB) :: U1,U2,A
@@ -2577,6 +2806,8 @@ Z1 = A*SIN(TWOPI*U2)
 
 END SUBROUTINE BOX_MULLER
 
+
+!> \brief Flux-limiting function
 
 REAL(EB) FUNCTION F_B(B)
 REAL(EB), INTENT(IN) :: B
@@ -2592,9 +2823,10 @@ END FUNCTION F_B
 END MODULE MATH_FUNCTIONS
 
 
-MODULE PHYSICAL_FUNCTIONS
 
-! Functions for physical quantities
+!> \brief Functions for physical quantities
+
+MODULE PHYSICAL_FUNCTIONS
 
 USE PRECISION_PARAMETERS
 USE GLOBAL_CONSTANTS
@@ -2603,6 +2835,9 @@ IMPLICIT NONE
 
 CONTAINS
 
+
+!> \brief Check if the species mass fractions are in bounds
+!> \param ZZ_IN Array of mass fractions
 
 LOGICAL FUNCTION IS_REALIZABLE(ZZ_IN)
 
@@ -2617,6 +2852,9 @@ ENDIF
 
 END FUNCTION IS_REALIZABLE
 
+
+!> \brief Clip mass fractions between zero and one and redistribute clipped mass to most abundant species
+!> \param ZZ_GET Array of mass fractions
 
 SUBROUTINE GET_REALIZABLE_MF(ZZ_GET)
 
@@ -2636,9 +2874,12 @@ ZZ_GET(N_ZZ_MAX) = 1._EB - SUM_OTHER_SPECIES
 END SUBROUTINE GET_REALIZABLE_MF
 
 
-SUBROUTINE GET_MASS_FRACTION(Z_IN,INDEX,Y_OUT)
+!> \brief Determine the mass fraction of a primitive species
+!> \param Z_IN Array of lumped mass fractions
+!> \param INDEX Index of desired primitive species
+!> \param Y_OUT Mass fraction of desired primitive species
 
-! Y_OUT returns the mass fraction of species INDEX
+SUBROUTINE GET_MASS_FRACTION(Z_IN,INDEX,Y_OUT)
 
 INTEGER, INTENT(IN) :: INDEX
 REAL(EB) :: Z_IN(1:N_TRACKED_SPECIES)
@@ -2650,11 +2891,13 @@ Y_OUT = MIN(1._EB,MAX(0._EB,Y_OUT))
 END SUBROUTINE GET_MASS_FRACTION
 
 
+!> \brief Determine the mass fractions of all primitive species
+!> \param Z_IN Array of lumped species mass fractions
+!> \param Y_OUT Array of primitive species mass fractions
+
 SUBROUTINE GET_MASS_FRACTION_ALL(Z_IN,Y_OUT)
 
-! Y_OUT returns the mass fraction of all primitive species
-
-REAL(EB) :: Z_IN(1:N_TRACKED_SPECIES)
+REAL(EB), INTENT(IN)  :: Z_IN(1:N_TRACKED_SPECIES)
 REAL(EB), INTENT(OUT) :: Y_OUT(1:N_SPECIES)
 INTEGER :: I
 
@@ -2667,7 +2910,14 @@ Y_OUT = MIN(1._EB,MAX(0._EB,Y_OUT))
 END SUBROUTINE GET_MASS_FRACTION_ALL
 
 
+!> \brief Compute ratio of molecular weight of all gas components except the one specified to the mol. wgt. of the one specified
+!> \param INDEX_IN Index of the gas species
+!> \param MW_RATIO W_all/W_in
+!> \param Y_IN Optional mass fraction of primitive species
+!> \param Z_IN Optional mass fraction of lumped species
+
 SUBROUTINE GET_MW_RATIO(INDEX_IN,MW_RATIO,Y_IN,Z_IN)
+
 REAL(EB), INTENT(IN), OPTIONAL :: Y_IN(1:N_SPECIES), Z_IN(1:N_TRACKED_SPECIES)
 INTEGER, INTENT(IN):: INDEX_IN
 REAL(EB), INTENT(OUT) :: MW_RATIO
@@ -2710,6 +2960,7 @@ END SUBROUTINE GET_MW_RATIO
 
 
 SUBROUTINE GET_EQUIL_DATA(MW,TMP_L,PRES_IN,H_V,H_V_EFF,T_BOIL_EFF,X_EQ,H_V_LOWER,H_V_DATA,RAMP_INDEX,CONSTANT_H)
+
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP,INTERPOLATE1D_UNIFORM
 REAL(EB), INTENT(IN):: MW,TMP_L,PRES_IN
 REAL(EB), INTENT(IN), OPTIONAL :: H_V_DATA(:),CONSTANT_H
@@ -2742,8 +2993,13 @@ X_EQ = MIN(1._EB,EXP(H_V_EFF*MW/R0*(1._EB/T_BOIL_EFF-1._EB/TMP_L)))
 END SUBROUTINE GET_EQUIL_DATA
 
 
+!> \brief Compute volume fraction of a primitive species
+!> \param Y_INDEX Index of primitive species
+!> \param ZZ_ARRAY Array of lumped species
+!> \param R_MIX R/W of species mixture
 
 REAL(EB) FUNCTION GET_VOLUME_FRACTION(Y_INDEX,ZZ_ARRAY,R_MIX)
+
 INTEGER, INTENT(IN) :: Y_INDEX
 REAL(EB), INTENT(IN) :: R_MIX,ZZ_ARRAY(:)
 REAL(EB) :: MASS_FRACTION,RCON
@@ -2753,6 +3009,11 @@ RCON = SPECIES(Y_INDEX)%RCON
 GET_VOLUME_FRACTION = RCON*MASS_FRACTION/R_MIX
 
 END FUNCTION GET_VOLUME_FRACTION
+
+
+!> \brief Determine molecular weight of the gas mixture
+!> \param Z_IN Array of lumped species mass fractions
+!> \param MW_OUT Average molecular weight (g/mol)
 
 SUBROUTINE GET_MOLECULAR_WEIGHT(Z_IN,MW_OUT)
 
@@ -2764,6 +3025,10 @@ MW_OUT =  1._EB/DOT_PRODUCT(MWR_Z,Z_IN)
 END SUBROUTINE GET_MOLECULAR_WEIGHT
 
 
+!> \brief Compute R/W for a gas mixture
+!> \param Z_IN Array of lumped species mass fractions
+!> \param RSUM_OUT R/W_avg
+
 SUBROUTINE GET_SPECIFIC_GAS_CONSTANT(Z_IN,RSUM_OUT)
 
 REAL(EB) :: Z_IN(1:N_TRACKED_SPECIES)
@@ -2773,6 +3038,11 @@ RSUM_OUT =  R0 * DOT_PRODUCT(MWR_Z,Z_IN)
 
 END SUBROUTINE GET_SPECIFIC_GAS_CONSTANT
 
+
+!> \brief Get specific heat of the gas mixture at a specified temperature
+!> \param Z_IN Array of lumped species mass fractions
+!> \param CP_OUT Specific heat of the mixture (J/kg/K)
+!> \param TMPG Gas mixture temperature (K)
 
 SUBROUTINE GET_SPECIFIC_HEAT(Z_IN,CP_OUT,TMPG)
 
@@ -2786,6 +3056,11 @@ CP_OUT  = DOT_PRODUCT(CP_Z(ITMP,1:N_TRACKED_SPECIES),Z_IN)
 
 END SUBROUTINE GET_SPECIFIC_HEAT
 
+
+!> \brief Get sensible enthalpy of the gas mixture at a specified temperature
+!> \param Z_IN Array of lumped species mass fractions
+!> \param H_S_OUT Specific heat of the mixture (J/kg)
+!> \param TMPG Gas mixture temperature (K)
 
 SUBROUTINE GET_SENSIBLE_ENTHALPY(Z_IN,H_S_OUT,TMPG)
 
@@ -2814,6 +3089,11 @@ G_F_OUT = 1.E6_EB*DOT_PRODUCT(G_F_Z(ITMP,1:N_TRACKED_SPECIES),NU_IN) ! convert f
 END SUBROUTINE GET_GIBBS_FREE_ENERGY
 
 
+!> \brief Get average specific heat of the gas mixture up to a specified temperature
+!> \param Z_IN Array of lumped species mass fractions
+!> \param CPBAR_OUT Average specific heat of the mixture (J/kg/K)
+!> \param TMPG Gas mixture temperature (K)
+
 SUBROUTINE GET_AVERAGE_SPECIFIC_HEAT(Z_IN,CPBAR_OUT,TMPG)
 
 INTEGER :: ITMP
@@ -2827,18 +3107,10 @@ CPBAR_OUT = DOT_PRODUCT(CPBAR_Z(ITMP,1:N_TRACKED_SPECIES),Z_IN)
 END SUBROUTINE GET_AVERAGE_SPECIFIC_HEAT
 
 
-!SUBROUTINE GET_AVERAGE_SENSIBLE_SPECIFIC_HEAT(Z_IN,CP_AVG_OUT,TMPG)
-
-!INTEGER :: ITMP
-!REAL(EB), INTENT(IN) :: TMPG
-!REAL(EB) :: Z_IN(1:N_TRACKED_SPECIES)
-!REAL(EB), INTENT(OUT) :: CP_AVG_OUT
-!
-!ITMP = MIN(5000,NINT(TMPG))
-!CP_AVG_OUT = DOT_PRODUCT(CP_AVG_Z(ITMP,1:N_TRACKED_SPECIES),Z_IN)
-!
-!END SUBROUTINE GET_AVERAGE_SENSIBLE_SPECIFIC_HEAT
-
+!> \brief Get sensible enthalpy of lumped species N at a specified temperature
+!> \param N Index of lumped species
+!> \param TMPG Gas mixture temperature (K)
+!> \param H_S Sensible enthalpy of lumped species N (J/kg)
 
 SUBROUTINE GET_SENSIBLE_ENTHALPY_Z(N,TMPG,H_S)
 
@@ -2853,6 +3125,11 @@ H_S = H_SENS_Z(ITMP,N)+(TMPG-REAL(ITMP,EB))*(H_SENS_Z(ITMP+1,N)-H_SENS_Z(ITMP,N)
 END SUBROUTINE GET_SENSIBLE_ENTHALPY_Z
 
 
+!> \brief Get average specific heat of lumped species N up to a specified temperature
+!> \param N Index of lumped species
+!> \param TMPG Gas mixture temperature (K)
+!> \param CPBAR_OUT Average specific heat of lumped species N (J/kg/K)
+
 SUBROUTINE GET_AVERAGE_SPECIFIC_HEAT_Z(N,TMPG,CPBAR_OUT)
 
 INTEGER :: ITMP
@@ -2865,6 +3142,11 @@ CPBAR_OUT = CPBAR_Z(ITMP,N)
 
 END SUBROUTINE GET_AVERAGE_SPECIFIC_HEAT_Z
 
+
+!> \brief Get thermal conductivity of gas mixture at a specified temperature
+!> \param Z_IN Array of lumped species mass fractions
+!> \param K_OUT Conductivity of gas mixture (W/m/K)
+!> \param TMPG Gas mixture temperature (K)
 
 SUBROUTINE GET_CONDUCTIVITY(Z_IN,K_OUT,TMPG)
 
@@ -3029,6 +3311,11 @@ IF (VOLSUM>0._EB) INDEX_OUT = INDEX_OUT/VOLSUM
 END SUBROUTINE GET_SOLID_REFRACTIVE_INDEX
 
 
+!> \brief Get viscosity of gas mixture at a specified temperature
+!> \param Z_IN Array of lumped species mass fractions
+!> \param MU_OUT Viscosity of gas mixture (kg/m/s)
+!> \param TMPG Gas mixture temperature (K)
+
 SUBROUTINE GET_VISCOSITY(Z_IN,MU_OUT,TMPG)
 
 INTEGER :: ITMP
@@ -3104,13 +3391,14 @@ END SELECT
 END FUNCTION DRAG
 
 
-REAL(EB) FUNCTION SURFACE_DENSITY(NM,MODE,WALL_INDEX,LAGRANGIAN_PARTICLE_INDEX,MATL_INDEX)
+!> \brief Compute the surface (mass or energy) density of a wall cell
+!> \param NM Mesh number
+!> \param MODE Indicator of returned quantity (0) kg/m2, (1) kg/m3, (2) kJ/m2, (3) kJ/m3
+!> \param WALL_INDEX Index of the WALL cell
+!> \param LAGRANGIAN_PARTICLE_INDEX Index of the particle
+!> \param MATL_INDEX Index of the material component
 
-! Compute the surface (mass or energy) density of a wall cell
-! If MODE=0, return kg/m2
-! If MODE=1, return kg/m3
-! If MODE=2, return kJ/m2
-! If MODE=3, return kJ/m3
+REAL(EB) FUNCTION SURFACE_DENSITY(NM,MODE,WALL_INDEX,LAGRANGIAN_PARTICLE_INDEX,MATL_INDEX)
 
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 INTEGER, INTENT(IN) :: NM,MODE
@@ -3193,9 +3481,17 @@ ENDIF THERMALLY_THICK_IF
 END FUNCTION SURFACE_DENSITY
 
 
-SUBROUTINE PARTICLE_SIZE_DISTRIBUTION(DM,RR,CNF,CVF,NPT,GAMMA,SIGMA,DISTRIBUTION)
+!> \brief Compute particle Cumulative Number Fraction (CNF) and Cumulative Volume Fraction (CVF)
+!> \param DM Median particle diameter (m)
+!> \param RR Array of particle radii (m)
+!> \param CNF Cumulative Number Fraction
+!> \param CVF Cumulative Volume Fraction
+!> \param NPT Number of points in the distribution
+!> \param GAMMA Parameter in the distribution function
+!> \param SIGMA Parameter in the distribution function
+!> \param DISTRIBUTION Type of distribution
 
-! Compute particle Cumulative Number Fraction (CNF) and Cumulative Volume Fraction (CVF)
+SUBROUTINE PARTICLE_SIZE_DISTRIBUTION(DM,RR,CNF,CVF,NPT,GAMMA,SIGMA,DISTRIBUTION)
 
 USE MATH_FUNCTIONS, ONLY: IERFC
 CHARACTER(LABEL_LENGTH), INTENT(IN) :: DISTRIBUTION
@@ -3547,6 +3843,7 @@ ENDIF
 
 END SUBROUTINE MONIN_OBUKHOV_STABILITY_CORRECTIONS
 
+
 !> \brief Computes the mass and heat transfer coeffiicents for a liquid droplet in air based on the selected EVAP_MODEL on MISC
 !> \param H_MASS The mass transfer coefficient (m2/s)
 !> \param H_HEAT The dropelt heat transfer coefficient (W/m2/K)
@@ -3643,9 +3940,10 @@ END SUBROUTINE DROPLET_H_MASS_H_HEAT_GAS
 END MODULE PHYSICAL_FUNCTIONS
 
 
-MODULE TRAN
 
-! Coordinate transformation functions
+!> \brief Coordinate transformation functions
+
+MODULE TRAN
 
 USE PRECISION_PARAMETERS
 IMPLICIT NONE
@@ -3660,9 +3958,12 @@ TYPE (TRAN_TYPE), ALLOCATABLE, TARGET, DIMENSION(:) :: TRANS
 CONTAINS
 
 
-REAL(EB) FUNCTION G(X,IC,NM)
+!> \brief Transformation function that maps uniform numerical coordinate to non-uniform physical coordinate
+!> \param X Coordinate on uniform numerical grid (m)
+!> \param IC Coordinate index, 1, 2, or 3
+!> \param NM Mesh number
 
-! Coordinate transformation function
+REAL(EB) FUNCTION G(X,IC,NM)
 
 REAL(EB), INTENT(IN) :: X
 INTEGER, INTENT(IN)  :: IC,NM
@@ -3694,9 +3995,12 @@ END SELECT
 END FUNCTION G
 
 
-REAL(EB) FUNCTION GP(X,IC,NM)
+!> \brief First derivative of the transformation function that maps uniform numerical coordinate to non-uniform physical coordinate
+!> \param X Coordinate on uniform numerical grid (m)
+!> \param IC Coordinate index, 1, 2, or 3
+!> \param NM Mesh number
 
-! Derivative of the coordinate transformation function
+REAL(EB) FUNCTION GP(X,IC,NM)
 
 REAL(EB), INTENT(IN) :: X
 INTEGER, INTENT(IN)  :: IC,NM
@@ -3729,9 +4033,12 @@ END SELECT
 END FUNCTION GP
 
 
-REAL(EB) FUNCTION GINV(Z,IC,NM)
+!> \brief Inverse of the transformation function that maps uniform numerical coordinate to non-uniform physical coordinate
+!> \param Z Coordinate on non-uniform physical grid (m)
+!> \param IC Coordinate index, 1, 2, or 3
+!> \param NM Mesh number
 
-! Inverse of the coordinate transformation function
+REAL(EB) FUNCTION GINV(Z,IC,NM)
 
 REAL(EB) :: GF
 INTEGER :: N,IT,II,I
@@ -3762,11 +4069,21 @@ END SELECT
 END FUNCTION GINV
 
 
-SUBROUTINE GET_IJK(X,Y,Z,NM,XI,YJ,ZK,I,J,K)
+!> \brief Determine the continuous and discrete form of the cell indices of a given point
+!> \param X x-coordinate of the point (m)
+!> \param Y y-coordinate of the point (m)
+!> \param Z z-coordinate of the point (m)
+!> \param NM Mesh number
+!> \param XI Real number indicating the cell index of the point in the x direction
+!> \param YJ Real number indicating the cell index of the point in the y direction
+!> \param ZK Real number indicating the cell index of the point in the z direction
+!> \param I Cell index of the point in the x direction
+!> \param J Cell index of the point in the y direction
+!> \param K Cell index of the point in the z direction
+!> \details For example, if the mesh is the unit cube with 10 cm cells, for the point (X,Y,Z)=(0.23,0.46,0.66),
+!> GET_IJK would return (XI,JK,ZK)=(2.3,4.6,6.6) and (I,J,K)=(3,5,7).
 
-! Given the point (X,Y,Z) in mesh NM, GET_IJK returns the continuous and discrete form of the cell indices, (XI,YJ,ZK) and (I,J,K).
-! For example, if the mesh is the unit cube with 10 cm cells, for the point (X,Y,Z)=(0.23,0.46,0.66), GET_IJK would return
-! (XI,JK,ZK)=(2.3,4.6,6.6) and (I,J,K)=(3,5,7).
+SUBROUTINE GET_IJK(X,Y,Z,NM,XI,YJ,ZK,I,J,K)
 
 USE MESH_VARIABLES
 REAL(EB),INTENT(IN) :: X,Y,Z
@@ -3774,9 +4091,9 @@ INTEGER,INTENT(IN) :: NM
 REAL(EB), INTENT(OUT) :: XI,YJ,ZK
 INTEGER, INTENT(OUT) :: I,J,K
 
-XI = MESHES(NM)%CELLSI(FLOOR((X-MESHES(NM)%XS)*MESHES(NM)%RDXINT))
-YJ = MESHES(NM)%CELLSJ(FLOOR((Y-MESHES(NM)%YS)*MESHES(NM)%RDYINT))
-ZK = MESHES(NM)%CELLSK(FLOOR((Z-MESHES(NM)%ZS)*MESHES(NM)%RDZINT))
+XI = MESHES(NM)%CELLSI(  MIN( MESHES(NM)%CELLSI_HI, MAX(MESHES(NM)%CELLSI_LO,FLOOR((X-MESHES(NM)%XS)*MESHES(NM)%RDXINT)) )  )
+YJ = MESHES(NM)%CELLSJ(  MIN( MESHES(NM)%CELLSJ_HI, MAX(MESHES(NM)%CELLSJ_LO,FLOOR((Y-MESHES(NM)%YS)*MESHES(NM)%RDYINT)) )  )
+ZK = MESHES(NM)%CELLSK(  MIN( MESHES(NM)%CELLSK_HI, MAX(MESHES(NM)%CELLSK_LO,FLOOR((Z-MESHES(NM)%ZS)*MESHES(NM)%RDZINT)) )  )
 I = FLOOR(XI+1._EB)
 J = FLOOR(YJ+1._EB)
 K = FLOOR(ZK+1._EB)
@@ -3787,9 +4104,10 @@ END SUBROUTINE GET_IJK
 END MODULE TRAN
 
 
-MODULE OPENMP
 
 !> \brief Module for various OpenMP functions
+
+MODULE OPENMP
 
 USE GLOBAL_CONSTANTS, ONLY : OPENMP_AVAILABLE_THREADS, OPENMP_USED_THREADS, OPENMP_USER_SET_THREADS, USE_OPENMP
 !$ USE OMP_LIB
@@ -3904,7 +4222,7 @@ END SUBROUTINE WRITE_SUMMARY_INFO
 !> \param CTRL_ID String containing name of control function.
 !> \param DEVC_ID String containing name of device.
 !> \param DEVICE_INDEX Integer index locating DEVC_ID in the array of devices.
-!> \param CONTORL_INDEX Integer index locating CTRL_ID in the array of control functions.
+!> \param CONTROL_INDEX Integer index locating CTRL_ID in the array of control functions.
 !> \param INPUT_INDEX The current count of inputs of type NAME.
 
 SUBROUTINE SEARCH_CONTROLLER(NAME,CTRL_ID,DEVC_ID,DEVICE_INDEX,CONTROL_INDEX,INPUT_INDEX)
@@ -3954,7 +4272,6 @@ END SUBROUTINE SEARCH_CONTROLLER
 
 
 !> \brief Returns true if current MPI process MYID controls mesh NM or its neighbors.
-!>
 !> \param NM Mesh number.
 
 LOGICAL FUNCTION PROCESS_MESH_NEIGHBORHOOD(NM)

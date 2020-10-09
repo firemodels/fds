@@ -2391,6 +2391,24 @@ To obtain tight mass and energy balances it is important to output the actual va
 \label{mass_heat_wall_device_heat_flow}
 \end{figure}
 
+\FloatBarrier
+
+\subsection{Energy Conservation for Solid Particles (\texorpdfstring\textct{energy\_budget\_particles}{energy\_budget\_particles})}
+\label{energy_budget_particles}
+
+A sealed, adiabatic box, 1~m on a side, is filled with 10~kg of spherically-shaped solid metallic particles, 1~cm in diameter, with a specific heat of 1~kJ/(kg$\cdot$K), density of 5000~kg/m$^3$, and conductivity of 50~W/(m$\cdot$K). The initial air temperature is 100~$^\circ$C and the initial particle temperature is 20~$^\circ$C. The simulation is run until thermal equilibrium is achieved. Figure~\ref{energy_budget_particles_figs} displays on the left the contributions to the sensible enthalpy of the air, most of which are negative because the air loses energy to the particles. {\ct Q\_RADI} is the net contribution of thermal radiation, {\ct Q\_COND} is the contribution of convection at the exterior wall of the box, {\ct Q\_PRES} is the contribution of pressure work on the exterior wall, and {\ct Q\_PART} is the contribution by the particles. The negative value of {\ct Q\_PART} means that the particles absorb radiative and convective energy. The plot on the right of Fig.~\ref{energy_budget_particles_figs} compares the sum of these four contributions, {\ct Q\_TOTAL}, with the computed change in the sensible enthalpy of the air, ({\ct Q\_ENTH}). These two quantities should be equal, as shown by the overlaying curves.
+
+\begin{figure}[ht]
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/energy_budget_particles}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/energy_budget_particles_total}
+\caption[The \textct{energy\_budget\_particles} test case]{(Left) Contributions to change in sensible enthalpy. (Right) Sum of contributions versus total change in enthalpy.}
+\label{energy_budget_particles_figs}
+\end{figure}
+
+
+
+
+
 
 \chapter{Checking for Coding Errors}
 
@@ -6088,20 +6106,6 @@ is applied to the object using spherical coordinates.
  The two sphere on the left are discretized by splitting the sphere along longitudinal (east/west) and latitudinal (north/south) directions.
  The two spheres on the right are discretized recursively starting with an icosahedron ( 20 sided polyhedron).  Texture maps applied to the top two sphere have 8 segments. Texture map applied to the bottom two spheres have 5 segments.  Cases: geom\_texture3a.fds, geom\_texture3b.fds, geom\_texture4a.fds, geom\_texture4b.fds}
 \label{fig:geom_texture3}
-\end{figure}
-
-\subsection{geom\_arch.fds}
-Figure \ref{fig:geom_arch} was created using VERTS and FACES keywords.
-
-\begin{figure}
-\begin{center}
-\begin{tabular}{c}
- \includegraphics[width=4.0in]{../FDS_User_Guide/SCRIPT_FIGURES/geom_arch.png}
-  \end{tabular}
-\end{center}
- \caption{An arch structure created with FACES and VERTS keywords.
- Case: geom\_arch.fds . }
-\label{fig:geom_arch}
 \end{figure}
 
 

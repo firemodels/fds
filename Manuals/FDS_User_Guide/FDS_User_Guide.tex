@@ -122,6 +122,7 @@ visualization program for FDS. Its full capability is described in the Smokeview
 
 The Fire Dynamics Simulator, in various forms, has been under development for almost 25 years. It was first released to the public in 2000. Since then, continued improvements have been made to the software based largely on feedback from its users. Included below are some who made important contributions related to the application of FDS.
 \begin{itemize}
+\item Ulf Wickstr\"{o}m of Lule\r{a} University of Technology, Sweden, provided guidance and articles on the adiabatic surface temperature concept.
 \item At NIST, Dan Madrzykowski, Doug Walton, Bob Vettori, Dave Stroup, Steve Kerber, Nelson Bryner, and Adam Barowy have used FDS and Smokeview as part of several investigations of fire fighter line of duty deaths. They have provided valuable information on the model's usability and accuracy when compared to large scale measurements made during fire reconstructions.
 \item Bryan Klein of Thunderhead Engineering assisted in adding cross-referencing functionality to this document, making it easier to view electronically. He also designed the on-line services for revision control, bug reporting, and general discussion of topics related to FDS.
 \item At VTT, Joonas Ryyn\"{a}nen implemented and documented the FED/FIC routine.
@@ -1638,7 +1639,7 @@ To verify the accuracy of the pressure solution on each mesh, set {\ct CHECK\_PO
 \subsection{Optional Pressure Solver}
 \label{optional_pressure_solver}
 
-The default Poisson solver in FDS ({\ct SOLVER='FFT'} on the {\ct PRES} line) is based on the package of linear algebra routines called CrayFishpak. For non-overlapping, non-stretched meshes at the same refinement level covering a single connected domain (single pressure zone), you can specify {\ct SOLVER='UGLMAT'} on the {\ct PRES} line to solve the global Poisson equation over the entire domain. The solver used is the Intel\textsuperscript{\textregistered} MKL Sparse Cluster Solver. When using {\ct 'UGLMAT'}, the unknown values of the pressure live only in gas-phase cells, allowing for the normal components of velocity at a solid surface to be computed exactly (no velocity penetration error).  Strictly speaking, in this mode, FDS is no longer using an ``immersed boundary method'' for flow obstructions---the pressure solution is now ``unstructured.'' If you specify {\ct SOLVER='GLMAT'}, the pressure is solved in both solid and gas cells using an immersed boundary method for flow obstructions, the same as the default FFT solver.  This mode will reproduce the exact same pressure solution as a single mesh FFT solve.  That is, velocity errors at any mesh boundaries will be eliminated. As UGLMAT and GLMAT are based on Intel\textsuperscript{\textregistered} MKL parallel LU decomposition solver, they require computation and storage of global factorization matrices. Depending on the size of the problem, these operations can be expensive in terms of both CPU time and memory. Our tests find it suitable for problems with up to a million cells on a multi-core workstation with 64~GB of RAM. Note that currently a single discretization matrix is built for all gas cells defined on the model, therefore the solver is not meant to be used in cases of multiple sealed compartments and pressure zones.
+The default Poisson solver in FDS ({\ct SOLVER='FFT'} on the {\ct PRES} line) is based on the package of linear algebra routines called CrayFishpak. For non-overlapping, non-stretched meshes at the same refinement level covering a single connected domain, you can specify {\ct SOLVER='UGLMAT'} on the {\ct PRES} line to solve the global Poisson equation over the entire domain. The solver used is the Intel\textsuperscript{\textregistered} MKL Sparse Cluster Solver. When using {\ct 'UGLMAT'}, the unknown values of the pressure live only in gas-phase cells, allowing for the normal components of velocity at a solid surface to be computed exactly (no velocity penetration error).  Strictly speaking, in this mode, FDS is no longer using an ``immersed boundary method'' for flow obstructions---the pressure solution is now ``unstructured.'' If you specify {\ct SOLVER='GLMAT'}, the pressure is solved in both solid and gas cells using an immersed boundary method for flow obstructions, the same as the default FFT solver.  This mode will reproduce the exact same pressure solution as a single mesh FFT solve.  That is, velocity errors at any mesh boundaries will be eliminated. As UGLMAT and GLMAT are based on Intel\textsuperscript{\textregistered} MKL parallel LU decomposition solver, they require computation and storage of global factorization matrices. Depending on the size of the problem, these operations can be expensive in terms of both CPU time and memory. Our tests find it suitable for problems with up to a million cells on a multi-core workstation with 64~GB of RAM. Note that currently a single discretization matrix is built for all gas cells defined on the model, therefore the solver is not meant to be used in cases where both sealed compartments and regions with open boundaries are present. 
 
 
 \subsection{Example Case: Pressure\_Solver/duct\_flow}
@@ -2332,79 +2333,24 @@ For example, in the following {\ct GEOM}\ namelist,
 In cases where geometries have very large numbers of nodes and surface triangles, it can be more efficient at setup time to read this data from an FDS produced binary file. This binary file can be obtained running the case in setup only mode ({\ct T\_END=0.0}).
 Consider the chair geometry defined in the previous section. When a geometry is read by FDS, the {\ct XYZ} and face connectivity data {\ct FACES} is automatically written into a binary file with name {\ct CHID\_GEOM\_ID.bingeom} on the run directory (here, {\ct GEOM\_ID='chair'}). If an {\ct ID} is not provided, the name of the binary file will be  {\ct CHID\_N\_GEOM.bingeom}, where {\ct N\_GEOM} is the number defining the order of appearance of the geometry line on the FDS input file.
 
-Then, the next time the case is run, the geometry line can be modified to:
+Then, supposing the case ID is {\ct CHID='DiningRoom'}, the next time the case is run, the geometry line can be modified to:
 {\small
 \begin{verbatim}
 &GEOM ID='chair',
       SURF_ID='woodSID','apholsterySID',
-      READ_BINARY=.TRUE.
+      BINARY_FILE='DiningRoom_chair.bingeom',
       MOVE_ID='ChairMove'
 /
 \end{verbatim}
 }
 
-where {\ct READ\_BINARY=.TRUE.} instructs FDS to read nodes and faces from the binary geometry file.
+\noindent where the presence of {\ct BINARY\_FILE} instructs FDS to read nodes and faces from the binary geometry file.
 Note we have deleted the {\ct VERTS, FACES} arrays from the input line.
 This manner of loading large geometries avoids the testing and reading of all lines related to these arrays on the FDS input file.
 It is particularly efficient in large parallel calculations, where parallel file systems are used. See section~\ref{inout:bingeom} for more information on geometry I/O binary format.
-If a different name than the default is used, it can be specified in the field {\ct BINARY\_NAME}. The location directory can be specified in {\ct BINARY\_DIR}.
+If a different name than the default is used, it can be specified in the field {\ct BINARY\_FILE}. The location directory can also be added in the {\ct BINARY\_FILE} string.
 Terrains can also be read and written in binary format, and in this case only their top surface triangulation is recorded. The binary contains their geometry information and terrain type, but the  {\ct SURF\_ID} array has to be provided in the geometry line as shown above. Same requirement is needed for {\ct EXTEND\_TERRAIN} if terrain extension is desired.
 
-
-%\subsection{Grouping Objects}
-%One may group objects to form a new object.  In the following example,
-%{\ct chair}\ and {\ct couch}\ are objects that have been defined previously.  A new {\ct living room set}\ object
-%is defined by referencing {\ct chair}\ and {\ct couch}\ in the {\ct GEOM\_IDS}\ keyword.  The chair and couch
-%are place at a particular locations using the {\ct DXYZ}\ keyword.
-%
-%{\small
-%\begin{verbatim}
-%&GEOM ID='chair' ..... /
-%
-%&GEOM ID='sofa' ...... /
-%
-%&GEOM ID='living room set'
-%
-%      XYZ=[0,0,0],
-%      AZIM=[0],
-%      ELEV=[0],
-%
-%      GEOM_IDS(1)='chair',  DSCALE(1)=..., DAZIM(1)=..., DELEV(1)...
-%                            DXYZ0(1:3,1)=..., DXYZ(1:3,1)=...,
-%      GEOM_IDS(2)='couch',  DSCALE(2)=..., DAZIM(2)=..., DELEV(2)...
-%                            DXYZ0(1:3,2)=..., DXYZ(1:3,2)=...,
-%/
-%\end{verbatim}
-%}
-%
-%\noindent Referenced objects such as {\ct chair}\ and {\ct couch} in this case must be defined in
-%previous {GEOM}\ lines.  Forward references are not permitted.
-%One may scale, rotate and translate objects as they are placed in the group using
-%{\ct DSCALE}\, for scaling, {\ct DAZIM} and {\ct DELEV} for rotation and {\ct DXYZ} for translation.
-%
-%The {\ct DXYZ0}\ and {\ct DXYZ}\ keywords use two coordinates (array indices) to specify data.
-%The first coordinate specifies the spatial component (1 for x, 2 for y, 3 for z or 1:3 for all three).
-%The second coordinate specifies the object number according to its position in the {\ct GEOM\_IDS}\ array.
-%For example,
-%DXYZ(1,3) would specify the translation along the x direction for the third object in the {\ct GEOM\_IDS}\ array.
-%
-%The {\ct COMPONENT\_ONLY}\ keyword if .TRUE., indicates that the object being defined is only a component found in other geometries.
-%It will not appear by itself in the FDS model.
-
-%\subsection{Dynamic Objects}
-%An object's position and orientation may change with time.
-%These changes are specified using various keywords that end with {\ct \_DOT}.
-%See Table \ref{tbl:GEOM} for a complete list of these keywords.
-%In the following example, {\ct AZIM\_DOT} is used to vary the azimuthal rotation angle by 1 deg/s.
-%Similarly, the position may be changed by using {\ct XYZ\_DOT}.
-%For example, {\ct XYZ\_DOT=0.0,0.0,1.0}\ would cause an object to move 1~m/s in a vertical direction.
-%{\small
-%\begin{verbatim}
-%&GEOM VERTS=...,FACES=....,AZIM=0.0,AZIM_DOT=1.0 /
-%\end{verbatim}
-%}
-%
-%\vspace{\baselineskip}
 
 \fi
 
@@ -3390,7 +3336,7 @@ Real objects, like furnishings, office equipment, and so on, are often difficult
 \end{lstlisting}
 An object with surface properties defined by {\ct 'my surface'} shall burn at a rate of 1000~kW/m$^2$ after a linear ramp-up of 10 s following its ``ignition'' when its surface temperature reaches 500~$^\circ$C. Burning shall continue for 5~min, and then ramp-down in 10~s. Note that the time {\ct T} in the {\ct RAMP} means time from ignition, not the time from the beginning of the simulation. Note also that now the ``ignition temperature'' is a surface property, not material property.
 
-After the surface has ignited, the heat transfer into the solid is still calculated, but there is no coupling between the burning rate and the surface temperature. As a result, the surface temperature may increase too much. To account for the energy loss due to the vaporization of the solid fuel, {\ct HEAT\_OF\_VAPORIZATION} can be specified for the surface. For example, when using the lines below, the net heat flux at the material surface is reduced by a factor 1000~kJ/kg times the instantaneous burning rate.
+After the surface has ignited, the heat transfer into the solid is still calculated, but there is no coupling between the burning rate and the surface temperature. As a result, the surface temperature may increase too much. To account for the energy loss due to the vaporization of the solid fuel, {\ct HEAT\_OF\_VAPORIZATION} can be specified for the surface. For example, when using the lines below, the total heat flux at the material surface is reduced by a factor 1000~kJ/kg times the instantaneous burning rate.
 \begin{lstlisting}
 &SURF ID                   = 'my surface'
       COLOR                = 'GREEN'
@@ -3910,7 +3856,7 @@ This section describes how to set up a simple model of the cone calorimeter or o
 \item Generate {\ct MATL} lines, plus a single {\ct SURF} line, as you normally would, except add {\ct EXTERNAL\_FLUX} to the {\ct SURF} line. This is simply a ``virtual'' source that heats the solid. Think of this as a perfect radiant panel or conical heating unit. You can control the {\ct EXTERNAL\_FLUX} using either {\ct TAU\_EF} or {\ct RAMP\_EF}. This is useful if you want to ramp up the heat flux following ignition to account for the additional radiation from the flame. See Section~\ref{info:RAMP_Time} for more details about ramps.
 \item Set an {\ct ASSUMED\_GAS\_TEMPERATURE} ($^\circ$C, default {\ct TMPA}) and optionally a \linebreak[4]{\ct HEAT\_TRANSFER\_COEFFICIENT} (kW/(m$^2 \cdot$K)) on the {\ct SURF} line, allowing you to control the convective heat flux from gas to surface and vice versa.
 \item Assign the {\ct SURF\_ID} to a {\ct VENT} that spans the bottom of the computational domain. Create {\ct OPEN} vents on all other faces of the computational domain.
-\item Add solid phase output devices to the solid surface, like {\ct 'WALL TEMPERATURE'}, {\ct 'NET HEAT FLUX'}, {\ct 'GAUGE HEAT FLUX'}, and {\ct 'WALL THICKNESS'}. Use these to track the condition of the solid as a function of time. The generation rate of the various gases is output via the quantity {\ct 'MASS FLUX'} along with the appropriate {\ct SPEC\_ID}. Do not specify the quantity {\ct 'BURNING RATE'} because FDS assumes that this is specific for fuel gas, and in this exercise there is no fuel gas.
+\item Add solid phase output devices to the solid surface, like {\ct 'WALL TEMPERATURE'}, {\ct 'TOTAL HEAT FLUX'}, {\ct 'GAUGE HEAT FLUX'}, and {\ct 'WALL THICKNESS'}. Use these to track the condition of the solid as a function of time. The generation rate of the various gases is output via the quantity {\ct 'MASS FLUX'} along with the appropriate {\ct SPEC\_ID}. Do not specify the quantity {\ct 'BURNING RATE'} because FDS assumes that this is specific for fuel gas, and in this exercise there is no fuel gas.
 \end{enumerate}
 Compare your results to measurements made in a bench-scale device, like the cone calorimeter. Keep in mind, however, that the calculation and the experiment are not necessarily perfectly matched. The calculation is designed to eliminate uncertainties related to convection, combustion, and apparatus-specific phenomena. Below is an FDS input file that demonstrates how you can test a candidate pyrolysis model by running very short calculations. The simulation only involves the solid phase model. Essentially, the gas phase calculation is shut off except for the imposition of a 50~kW/m$^2$ ``external'' heat flux. The solid in this example is a 8.5~mm thick slab of PMMA. For more details, see the FDS Validation Guide under the heading ``FAA Polymers.''
 \begin{lstlisting}
@@ -4510,16 +4456,14 @@ If you are using {\ct DEVC}s to output spatially-integrated statistics as per Se
 \section{Pressure-Related Effects: The \texorpdfstring{{\tt ZONE}}{ZONE} Namelist Group (Table \ref{tbl:VENT})}
 \label{info:ZONE}
 
-FDS assumes pressure to be composed of a ``background'' component, $\bp(z,t)$, plus a perturbation pressure, $\tp(\bx,t)$. Most often, $\bp$ is just the hydrostatic pressure, and $\tp$ is the flow-induced spatially-resolved perturbation. You can specify any number of sealed compartments within the computational domain that can have their own ``background'' pressures, and these compartments, or ``pressure zones,'' can be connected via leakage and duct paths whose flow rates are tied to the pressure of the adjacent zones.
-
-
+FDS assumes pressure to be composed of a ``background'' component, $\bp(z,t)$, plus a perturbation pressure, $\tp(\bx,t)$. Most often, $\bp$ is just the hydrostatic pressure, and $\tp$ is the flow-induced spatially-resolved perturbation. FDS has an algorithm\footnote{The algorithm to identify pressure zones was introduced in FDS 6.7.6.} that identifies regions within the computational domain that are sealed; that is, are not connected to an {\ct OPEN} boundary. Thus, it is not necessary for you to explicitly declare these regions, or ``pressure zones.'' However, if you desire that a pressure zone be connected to another via a leak path, you need to explicitly declare it.
 
 \subsection{Specifying Pressure Zones}
 \label{info:ZONE_Basics}
 
-A pressure zone can be any region within the computational domain that is separated from the rest of the domain, or the exterior, by solid obstructions. There is currently no algorithm within FDS to identify these zones based solely on your specified obstructions. Consequently, it is necessary that you identify these zones explicitly in the input file. The basic syntax for a pressure {\ct ZONE} is:
+A pressure zone can be any region within the computational domain that is separated from the rest of the domain, or the exterior, by solid obstructions. There is an algorithm within FDS to identify these zones based solely on your specified obstructions. Consequently, it is not necessary that you identify these zones explicitly in the input file. However, you might want to have a particular zone leak to another zone or to the exterior of the domain. In that case, the basic syntax for a pressure {\ct ZONE} is:
 \begin{lstlisting}
-&ZONE XYZ=1.2,3.4,5.6 /
+&ZONE XYZ=1.2,3.4,5.6, LEAK_AREA(0)=0.001 /
 \end{lstlisting}
 The parameter {\ct XYZ}\footnote{Past versions of FDS also made use of the sextuplet {\ct XB} to specify a pressure zone. This parameter still works, but {\ct XYZ} is preferred.} specifies a single point $(1.2,3.4,5.6)$ that is within a sealed compartment, and it is not embedded within a solid obstruction. There can be multiple {\ct ZONE}s declared. The indices of the zones, which are required for the specification of leaks and fans, are determined simply by the order in which they are specified in the input file. By default, the exterior of the computational domain is Zone~0. If there are no {\ct OPEN} boundaries, the entire computational domain will be assumed to be Zone~1.
 
@@ -6279,7 +6223,11 @@ since {\ct MASSLESS} particles are for visualization only.
 
 \subsection*{Turbulent Dispersion}
 
-Massless tracer particles may also be useful in modeling dispersion of a tracer gas that does not affect the mean flow field (passive scalar).  The number density of the particles then may be translated into a local mass concentration.  See how to output number concentration in Sec.~\ref{PDPA}.  To properly account for subgrid-scale (unresolved) turbulent motions, add the parameter {\ct TURBULENT\_DISPERSION=.TRUE.} to the {\ct PART} line.  The particles will then undergo a random walk based on the subgrid diffusivity.  For further information, see the {\ct random\_walk} test cases in the {\ct WUI} directory of the verification suite.
+Massless tracer particles may also be useful in modeling dispersion of a tracer gas that does not affect the mean flow field (passive scalar).  The number density of the particles then may be translated into a local mass concentration.  See how to output number concentration in Sec.~\ref{PDPA}.
+
+To account for subgrid-scale turbulent motions, add {\ct TURBULENT\_DISPERSION=.TRUE.} to the {\ct PART} line.  The particles will then undergo a random walk based on the subgrid diffusivity.  As an example, see the {\ct random\_walk} test cases in the {\ct WUI} directory of the verification suite.
+
+{\ct TURBULENT\_DISPERSION=.TRUE.} may also be used with massive particles and helps to homogenize the particle number density on the grid.
 
 
 \clearpage
@@ -9036,27 +8984,36 @@ Note that the parameter {\ct DX} on the {\ct INIT} line creates a line of partic
 This section lists a variety of output quantities that are useful for studying thermally-driven flows, combustion, pyrolysis, and so forth. Note that some of the output quantities can be produced in a variety of ways.
 
 
-\subsection{Heat Release Rate}
+\subsection{Heat Release Rate and Energy Conservation}
 \label{info:HRR}
 \label{hallways}
 
 Quantities associated with the overall energy budget are reported in the comma delimited file {\ct CHID\_hrr.csv}.  This file is automatically generated; the only input parameter associated with it is {\ct DT\_HRR} on the {\ct DUMP} line. The columns in this file record the time history of the integrals of the terms in the enthalpy transport equation. The columns are defined as follows:
 \begin{eqnarray}
 \label{eqn_enthalpytransport}
-\underbrace{\frac{\partial}{\partial t} \int \rho h_s \, \d V }_{\hbox{\ct Q\_ENTH}} &=&
-\underbrace{\dm_b h_{s,b} - \int \rho \bu h_{\rm s} \cdot \d {\bf S}}_{\hbox{\ct Q\_CONV}}
-\; + \; \underbrace{\dq_{b,w} + \int k \nabla T \cdot \d {\bf S}}_{\hbox{\ct Q\_COND}}
-\; + \; \underbrace{\sum_\alpha \int h_{s,\alpha} \, \rho D_\alpha \nabla Y_\alpha \cdot \d {\bf S}}_{\hbox{\ct Q\_DIFF}}  \nonumber \\
+\underbrace{\frac{\partial}{\partial t} \int \rho h_{\rm s} \, \d V }_{\hbox{\ct Q\_ENTH}} &=&
+\underbrace{\int \dot{q}''' \, \d V}_{\hbox{\ct HRR}}
+\; + \; \underbrace{\left(\dq_{\rm p,r} - \int \nabla \cdot \dot{\bq}_{\rm r}'' \d V\right)}_{\hbox{\ct Q\_RADI}}
+\; + \; \underbrace{\sum_\alpha \dm_{\rm p,\alpha} h_{\rm s,\alpha} - \int \rho \bu h_{\rm s} \cdot \d {\bf S}}_{\hbox{\ct Q\_CONV}} \nonumber \\[0.1in] 
 &&
-+\underbrace{\dq_{b,r} - \int \dot{\mathbf{q}}^{\prime\prime}_{r} \cdot \d {\bf S}}_{\hbox{\ct Q\_RADI}}
-\; + \; \underbrace{\int \dot{q}''' \, \d V}_{\hbox{\ct HRR}}
-\; + \; \underbrace{\int \frac{d \overline{p} }{\d t} \, \d V}_{\hbox{\ct Q\_PRES}}
-\; + \; \underbrace{\left( -\dq_{b,c} - \dq_{b,r} - \dq_{b,w} \right) }_{\hbox{\ct Q\_PART}}
+\; + \; \underbrace{\left( \dq_{\rm p,w} - \int \dq_{\rm c}'' \d A\right)}_{\hbox{\ct Q\_COND}}
+\; + \; \underbrace{\sum_\alpha \int h_{\rm s,\alpha} \, \rho D_\alpha \nabla Y_\alpha \cdot \d {\bf S}}_{\hbox{\ct Q\_DIFF}}
+\; + \; \underbrace{\int \frac{d \overline{p} }{\d t} \, \d V}_{\hbox{\ct Q\_PRES}} \\[0.1in] 
+&&
+\; + \; \underbrace{\left(-\dq_{\rm p,r}-\dq_{\rm p,c}-\dq_{\rm p,w}\right)}_{\hbox{\ct Q\_PART}} \nonumber
 \end{eqnarray}
-An additional column, {\ct Q\_TOTAL}, includes the sum of the terms on the right hand side of the equation. Ideally, this sum should equal the term on the left, {\ct Q\_ENTH}. All terms are reported in units of kW. Note that the terms that make up {\ct Q\_PART} are summed over the Lagrangian particles. They represent the heat absorbed by the particles via \underline{c}onvection, \underline{r}adiation, and conduction from the \underline{w}all.
+\begin{description}
+\item[{\ct Q\_ENTH}] The change in the sensible enthalpy of the gas. $\rho$ is the density of the gas (kg/m$^3$). $h_{\rm s}$ is the \underline{s}ensible enthalpy of the gas (kJ/kg). The volume integral is over the entire domain.
+\item[{\ct HRR}] The total heat release rate of the fire (kW).
+\item[{\ct Q\_RADI}] The thermal radiation {\em into} the domain from the exterior boundary or particles.  $\dot{\bq}_{\rm r}''$ is the \underline{r}adiation heat flux vector (kW/m$^2$). Its divergence represents the net radiative emission from a volume of gas. Typically, {\ct Q\_RADI} has a negative value, meaning that a fire or hot gases radiate energy out of the domain. $\dq_{\rm p,r}$ is the \underline{r}adiation absorbed by a droplet or \underline{p}article (kW). This term is added to {\ct Q\_RADI} and subtracted from {\ct Q\_PART} because it is implicitly included in $\nabla \cdot \dot{\bq}_{\rm r}''$ and needs to be separated off for the purpose of explicitly accounting for it in the energy budget.
+\item[{\ct Q\_CONV}] The flow of sensible enthalpy {\em into} the computational domain. $\dm_{\rm p,\alpha}$ is the production rate of gas species $\alpha$ from a solid \underline{p}article or liquid droplet (kg/s). $h_{\rm s,\alpha}$ is the \underline{s}ensible enthalpy of gas species $\alpha$ (kJ/kg). $\rho$ is the gas density (kg/m$^3$), $\bu$ is the velocity vector (m/s). $h_{\rm s}$ is the \underline{s}ensible enthalpy of the gas. If the gas is flowing out of the domain, $\bu \cdot \d {\bf S}$ is positive.
+\item[{\ct Q\_COND}] The convective heat flux {\em into} the computational domain. $\dq_{\rm c}''$ is the heat \underline{c}onvected from the gas to a surface. If the gas is relatively hot and the surfaces/particles/droplets relatively cool, {\ct Q\_COND} is negative. At {\ct OPEN} boundaries, {\ct Q\_COND} is $\int k \nabla T \cdot \d {\bf S}$, where $k$ (kW/(m$\cdot$K)) is the turbulent thermal conductivity of the gas and $\nabla T$ is the temperature gradient across the open boundary. $\dq_{\rm p,w}$ is the energy transferred from a solid surface (\underline{w}all) to a droplet or \underline{p}article adhering to it. Notice that it is subtracted off in {\ct Q\_PART} because it makes no contribution to the energy of the gas.
+\item[{\ct Q\_PRES}] The work done by volumetric expansion (kW).
+\item[{\ct Q\_PART}] The rate of energy gained by the gas from liquid droplets or solid particles. $\dq_{\rm p,r}$ is the \underline{r}adiation absorbed by a droplet or \underline{p}article (kW). $\dq_{\rm p,c}$ is the energy transferred via \underline{c}onvection from the gas to a droplet or \underline{p}article (kW). $\dq_{\rm p,w}$ is the energy transferred from a solid surface (\underline{w}all) to a droplet or \underline{p}article adhering to it.
+\end{description}
+An additional column, {\ct Q\_TOTAL}, includes the sum of the terms on the right hand side of the equation. Ideally, this sum should equal the term on the left, {\ct Q\_ENTH}. All terms are reported in units of kW. 
 
-The other columns in the file contain the total burning rate of fuel, in units of kg/s, and the zone pressures. Note that the reported value of the burning rate is not adjusted to account for the possibility that each individual
-material might have a different heat of combustion. For this reason, it is not always the case that the reported total burning rate multiplied by the gas phase heat of combustion is equal to the reported heat release rate.
+The other columns in the {\ct CHID\_hrr.csv} file contain the total burning rate of fuel, in units of kg/s, and the zone pressures. Note that the reported value of the burning rate is not adjusted to account for the possibility that each individual material might have a different heat of combustion. For this reason, it is not always the case that the reported total burning rate multiplied by the gas phase heat of combustion is equal to the reported heat release rate.
 
 Note that the volume integrations in Eq.~(\ref{eqn_enthalpytransport}) are performed over the entire domain. The differential, $\d V$, is the product of the local grid cell dimensions, $\d x \, \d y \, \d z$. For the special case of two-dimensional cylindrical coordinates, $\d V=r \, \d r \, \d \theta \, \d z$, where $r=x$, $\d r = \d x$, and $\d \theta = \d y$.
 
@@ -9140,19 +9097,19 @@ where $\epsilon_{\rm TC}$ is the emissivity of the thermocouple, $U$ is the inte
 \subsection{Heat Flux}
 \label{info:heat_flux}
 
-There are various output quantities related to heat flux.
+There are various output quantities related to the thermal exposure of solid surfaces.
 
 \begin{labeling}{SPACE}
 
-\item[\ct 'NET HEAT FLUX']
-\hspace{1in} \newline The word {\em net} is used here to describe the sum of the emitted and absorbed radiation at a solid surface:
+\item[\ct 'TOTAL HEAT FLUX']
+\hspace{1in} \newline The rate of radiative and convective energy absorbed at a solid surface:
 \be
    \dq_{\rm net}'' = \epsilon_{\rm s} \, \left( \dq_{\rm inc,rad}'' - \sigma \, T_{\rm s}^4 \right) + h \, (T_{\rm gas} - T_{\rm s}) \label{net_flux}
 \ee
-where $\dot{q}_{\rm inc,rad}''$ is the {\em incident} radiative heat flux, $\epsilon_{\rm s}$ is the surface emissivity, $h$ is the convective heat transfer coefficient, $T_{\rm s}$ is the surface temperature, and $T_{\rm gas}$ is the gas temperature in the vicinity of the surface.
+where $\dot{q}_{\rm inc,rad}''$ is the {\em incident} radiative heat flux, $\epsilon_{\rm s}$ is the surface emissivity, $h$ is the convective heat transfer coefficient, $T_{\rm s}$ is the surface temperature, and $T_{\rm gas}$ is the gas temperature in the vicinity of the surface. The convective heat transfer coefficient, $h$, is calculated by FDS using the specified surface properties and the calculated near-boundary flow characteristics.
 
 \item[\ct 'RADIATIVE HEAT FLUX']
-\hspace{1in} \newline This is the radiative component of Eq.~(\ref{net_flux}), $\quad \dq_{\rm r}'' = \epsilon_{\rm s} \, \left( \dq_{\rm inc,rad}'' - \sigma \, T_{\rm s}^4 \right)$.
+\hspace{1in} \newline This is the net radiative component of Eq.~(\ref{net_flux}), $\quad \dq_{\rm r}'' = \epsilon_{\rm s} \, \left( \dq_{\rm inc,rad}'' - \sigma \, T_{\rm s}^4 \right)$.
 
 \item[\ct 'CONVECTIVE HEAT FLUX']
 \hspace{1in} \newline This is the convective component of Eq.~(\ref{net_flux}), $\quad \dq_{\rm c}'' = h \, (T_{\rm gas} - T_{\rm s})$.
@@ -9161,37 +9118,40 @@ where $\dot{q}_{\rm inc,rad}''$ is the {\em incident} radiative heat flux, $\eps
 \hspace{1in} \newline This is the term $\dq_{\rm inc,rad}''$ in Eq.~(\ref{net_flux}).
 
 \item[\ct 'GAUGE HEAT FLUX']
-\hspace{1in} \newline This quantity simulates a measurement made with a cold water heat flux gauge:
+\hspace{1in} \newline This quantity simulates a measurement made with a water-cooled heat flux gauge:
 \be
    \dq_{\rm gauge}'' = \epsilon_{\rm gauge} \, \left( \dq_{\rm inc,rad}'' - \sigma \, T_{\rm gauge}^4 \right) + h \, (T_{\rm gas} - T_{\rm gauge})
+   \label{gauge_heat_flux}
 \ee
-If the heat flux gauge used in an experiment has a temperature other than ambient or an emissivity other than 1, use {\ct GAUGE\_TEMPERATURE} ($T_{\rm gauge}$) and {\ct GAUGE\_EMISSIVITY} ($\epsilon_{\rm gauge}$) on the {\ct PROP} line associated with the device:
+If the heat flux gauge used in an experiment has a temperature other than ambient or an emissivity other than 1, specify {\ct GAUGE\_TEMPERATURE} ($T_{\rm gauge}$, $^\circ$C) and {\ct GAUGE\_EMISSIVITY} ($\epsilon_{\rm gauge}$) on the {\ct PROP} line associated with the device:
 \begin{lstlisting}
 &DEVC ID='hf', XYZ=..., IOR=-2, QUANTITY='GAUGE HEAT FLUX', PROP_ID='hfp' /
 &PROP ID='hfp', GAUGE_TEMPERATURE=80., GAUGE_EMISSIVITY=0.9 /
 \end{lstlisting}
-The heat transfer coefficient, $h$, is that of the solid surface to which the device is attached.
+By default, the heat transfer coefficient, $h$, in Eq.~(\ref{gauge_heat_flux}) is calculated at the solid surface to which the device is attached, based on the specified surface properties and characteristics of the surrounding flow field. However, you may specify a fixed {\ct HEAT\_TRANSFER\_COEFFICIENT} (W/(m$^2 \cdot$K)) for the gauge on the {\ct PROP} line.
 
 \item[\ct 'RADIOMETER']
-\hspace{1in} \newline Similar to a heat flux gauge, this quantity measures only the radiative heat flux:
+\hspace{1in} \newline Similar to a water-cooled heat flux gauge, except that this quantity measures only the net radiative component:
 \be
    \dq_{\rm radiometer}'' = \epsilon_{\rm gauge} \, \left( \dq_{\rm inc,rad}'' - \sigma \, T_{\rm gauge}^4 \right)
 \ee
-The {\ct GAUGE\_TEMPERATURE} ($T_{\rm gauge}$) and {\ct GAUGE\_EMISSIVITY} ($\epsilon_{\rm gauge}$) can be set on the {\ct PROP} line associated with the device if their values are different than ambient and 1, respectively.
+The {\ct GAUGE\_TEMPERATURE} ($T_{\rm gauge}$, $^\circ$C) and {\ct GAUGE\_EMISSIVITY} ($\epsilon_{\rm gauge}$) can be set on the {\ct PROP} line associated with the device if their values are different than ambient and 1, respectively.
+
+The quantity {\ct RADIOMETER} is based on the {\em ellipsoidal radiometer} concept first proposed by Nils-Erik Gunners and described in the Ref.~\cite{Murthy:JResNIST2003}. The intent of such a device is to eliminate the contribution of convection from the measurement.
 
 \item[\ct 'RADIATIVE HEAT FLUX GAS']
-\hspace{1in} \newline All of the above heat flux output quantities are defined at a solid surface. To record the radiative heat flux away from a solid surface, add a device with the following format:
+\hspace{1in} \newline This output quantity is the same as {\ct 'RADIATIVE HEAT FLUX'} described above, except it can located anywhere within the computational domain and not just at a solid surface. It also has an arbitrary {\ct ORIENTATION} vector that points in any desired direction, much like a heat flux gauge. The {\ct ORIENTATION} vector need not be normalized, as in the following:
 \begin{lstlisting}
-&DEVC ID='hf', QUANTITY='RADIATIVE HEAT FLUX GAS', XYZ=..., ORIENTATION=-1,0,0/
+&DEVC ID='hf', QUANTITY='RADIATIVE HEAT FLUX GAS', XYZ=..., ORIENTATION=-1,1,0/
 \end{lstlisting}
-Note that the parameter {\ct SPATIAL\_STATISTIC} is not appropriate for this quantity, meaning that you cannot integrate this quantity over a plane or volume. However, you can use the parameter {\ct POINTS} to create a one-dimensional array of heat flux gauges (see Section~\ref{info:line_file}).
+Note that the parameter {\ct SPATIAL\_STATISTIC} is not appropriate for this quantity, meaning that you cannot integrate this quantity over a plane or volume. However, you can use the parameter {\ct POINTS} to create a one-dimensional array of these devices (see Section~\ref{info:line_file}).
 
 \item[\ct 'RADIANCE']
 \hspace{1in} \newline This is the term for the radiation intensity at the point, $\bx$, and direction angle, $\bs$, where the summation is over all spectral bands:
 \be
    I(\bx,\bs) = \sum_{n=1}^N I_n(\bx,\bs)
 \ee
-This quantity works in a similar way to {\ct 'RADIATIVE HEAT FLUX GAS'} in that a surrogate target particle is placed at the point {\ct XYZ} with an {\ct ORIENTATION} pointing towards the source of the heat.
+This output quantity is specified in a similar way as {\ct 'RADIATIVE HEAT FLUX GAS'} in that a surrogate target particle is placed at the point {\ct XYZ} with an {\ct ORIENTATION} vector pointing in any desired direction.
 \begin{lstlisting}
 &DEVC ID='rad2', QUANTITY='RADIANCE', XYZ=..., ORIENTATION=-1,0,0 /
 \end{lstlisting}
@@ -9203,19 +9163,27 @@ The units for {\ct 'RADIANCE'} are kW/m$^2$/sr.
 \subsection{Adiabatic Surface Temperature}
 \label{info:AST}
 
-FDS includes a calculation of the adiabatic surface temperature (AST), a quantity that is representative of the heat flux to a solid surface. Following the idea proposed by Ulf Wickstr\"{o}m~\cite{Wickstrom:Interflam2007}, $T_{\hbox{\tiny AST}}$ is the surface temperature for which the net heat flux (Eq.~(\ref{net_flux}) is zero. The following equation can be solved using an analytical solution given by Malendowski~\cite{Malendowski:FT}:
+FDS includes a calculation of the adiabatic surface temperature (AST), a way of expressing the thermal exposure of a solid surface. Following the idea proposed by Ulf Wickstr\"{o}m~\cite{Wickstrom:Interflam2007}, $T_{\hbox{\tiny AST}}$ is the surface temperature for which the total heat flux defined by Eq.~(\ref{net_flux}) is zero. The following equation can be solved using an analytical solution given by Malendowski~\cite{Malendowski:FT}:
 \be
    \epsilon \, \left( \dq_{\rm inc,rad}'' - \sigma \, T_{\hbox{\tiny AST}}^4 \right) + h \, (T_{\rm gas} - T_{\hbox{\tiny AST}}) = 0
 \ee
 where, $\dot{q}_{\rm inc,rad}''$ is the {\em incident} radiative heat flux onto the surface, $\epsilon$ is the surface emissivity, $h$ is the convective heat transfer coefficient, and $T_{\rm gas}$ is the surrounding gas temperature.
 
-The usefulness of the AST is that it represents an effective exposure temperature that can be passed on to a more detailed model of the solid object. It provides the gas phase thermal boundary condition in a single quantity, and it is not affected by the uncertainty associated with the solid phase heat conduction model within FDS. Obviously, the objective in passing information to a more detailed model is to get a better prediction of the solid temperature (and ultimately its mechanical response) than FDS can provide. To reinforce this notion, you can output the adiabatic surface temperature even when there is no actual solid surface using the following lines:
+To output the AST at a single point on a solid surface, include a device as follows:
+\begin{lstlisting}
+&DEVC ID='AST', XYZ=..., IOR=..., QUANTITY='ADIABATIC SURFACE TEMPERATURE' /
+\end{lstlisting}
+Note that {\ct IOR} specifies the orientation of the surface. To produce a contour plot of AST on all solid surfaces, include a boundary file as follows:
+\begin{lstlisting}
+&BNDF QUANTITY='ADIABATIC SURFACE TEMPERATURE' /
+\end{lstlisting}
+The usefulness of the AST is that it represents an effective exposure temperature that can be passed on to a more detailed model of the solid object. It provides the gas phase thermal boundary condition in a single quantity, and it is not affected by the uncertainty associated with the solid phase heat conduction model within FDS. Obviously, the objective in passing information to a more detailed model is to get a better prediction of the solid temperature (and ultimately its mechanical response) than FDS can provide. To reinforce this notion, you can output the adiabatic surface temperature even when there is no actual solid surface in your model using the following lines:
 \begin{lstlisting}
 &DEVC ID='AST', XYZ=..., QUANTITY='ADIABATIC SURFACE TEMPERATURE GAS',
       ORIENTATION=0.707,0.0,0.707, PROP_ID='props' /
 &PROP ID='props', EMISSIVITY=0.9, HEAT_TRANSFER_COEFFICIENT=10. /
 \end{lstlisting}
-This output indicates the maximum achievable solid surface temperature at the given location {\ct XYZ} that is \emph{not} actually in the vicinity of a solid surface, facing in any direction as indicated by the {\ct ORIENTATION} vector. Note that you {\em must} set the {\ct EMISSIVITY} and {\ct HEAT\_TRANSFER\_COEFFICIENT} (W/(m$^2\cdot$K)) on the {\ct PROP} line because there is no actual solid surface from which to infer these values.
+This output indicates the maximum achievable solid surface temperature at the given location {\ct XYZ} that is \emph{not} actually in the vicinity of any solid surface, facing in any direction as indicated by the {\ct ORIENTATION} vector. Note that you {\em must} set the {\ct EMISSIVITY} and {\ct HEAT\_TRANSFER\_COEFFICIENT} (W/(m$^2\cdot$K)) on the {\ct PROP} line because there is no actual solid surface from which to infer these values.
 In fact, FDS creates a Lagrangian particle that records the AST at the desired location. FDS creates an {\ct INIT} line to position the particle. If you want to output other quantities at this point that are related to the AST, you can create another {\ct DEVC} at the same location and use {\ct INIT\_ID} to identify the {\ct DEVC} line for the {\ct ADIABATIC SURFACE TEMPERATURE}. For example, you can output the heat transfer coefficient used in calculating the AST as follows:
 \begin{lstlisting}
 &DEVC ID='AST', XYZ=..., QUANTITY='ADIABATIC SURFACE TEMPERATURE GAS', ... /
@@ -9614,9 +9582,9 @@ would output the total mass of methane in the volume {\ct XB} where the mass fra
 
 A set of additional {\ct SPATIAL\_STATISTIC}'s are available for use with {\ct QUANTITY\_RANGE}: {\ct 'MASS'}, {\ct 'VOLUME'}, and {\ct 'SURFACE AREA'}.  These output the mass, volume, or surface area (for a solid phase quantity) where the {\ct QUANTITY} lies within the {\ct QUANTITY\_RANGE}.  For example:
 \begin{lstlisting}
-&DEVC XB=..., QUANTITY='NET HEAT FLUX', SPATIAL_STATISTIC='SURFACE AREA', QUANTITY_RANGE(1)=10./
+&DEVC XB=..., QUANTITY='TOTAL HEAT FLUX', SPATIAL_STATISTIC='SURFACE AREA', QUANTITY_RANGE(1)=10./
 \end{lstlisting}
-would output the total surface area in the volume {\ct XB} where the net heat flux exceeds 10~kW/m$^2$.
+would output the total surface area in the volume {\ct XB} where the total heat flux exceeds 10~kW/m$^2$.
 
 \subsubsection{Volume, Mass, and Heat Flow}
 \label{info:flows}
@@ -10138,7 +10106,7 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct GAUGE HEAT FLUX}                           & Section~\ref{info:heat_flux}                  & kW/m$^2$       & B,D          \\ \hline
 {\ct HEAT FLOW}                                 & Section~\ref{info:flows}                      & kW             & D            \\ \hline
 {\ct HEAT FLOW WALL}                            & Section~\ref{info:flows}                      & kW             & D            \\ \hline
-{\ct NET HEAT FLUX}                             & Section~\ref{info:heat_flux}                  & kW/m$^2$       & B,D          \\ \hline
+{\ct TOTAL HEAT FLUX}                           & Section~\ref{info:heat_flux}                  & kW/m$^2$       & B,D          \\ \hline
 {\ct HRR}                                       & $\int \dq''' \; \d V$                         & kW             & D            \\ \hline
 {\ct HRRPUA}                                    & $\dq''$                                       & kW/m$^2$       & D            \\ \hline
 {\ct HRRPUV}                                    & $\dq'''$                                      & kW/m$^3$       & D,I,P,S      \\ \hline
@@ -10794,8 +10762,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct GEOM} (Unstructured Geometry Parameters)} \\
 \hline \hline
 \endhead
-{\ct BINARY\_DIR}     & Character              & Section~\ref{info:GEOM}            &           &  {\ct 'null'}           \\ \hline
-{\ct BINARY\_NAME}     & Character              & Section~\ref{info:GEOM}            &           &  {\ct 'null'}           \\ \hline
+{\ct BINARY\_FILE}     & Character              & Section~\ref{info:GEOM}            &           &  {\ct 'null'}           \\ \hline
 {\ct CYLINDER\_LENGTH}& Real                  & Section~\ref{info:GEOM}            &   m       &                      \\ \hline
 {\ct CYLINDER\_RADIUS}& Real                  & Section~\ref{info:GEOM}            &   m       &                       \\ \hline
 {\ct CYLINDER\_ORIGIN}& Real Triplet          & Section~\ref{info:GEOM}            &   m       &             \\ \hline
@@ -10814,7 +10781,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct N\_LEVELS}    & Integer                & Section~\ref{info:GEOM}            &           &   0                      \\ \hline
 {\ct N\_LONG}      & Integer                & Section~\ref{info:GEOM}            &           &   0                      \\ \hline
 {\ct POLY}        & array of Integers     & Section~\ref{info:GEOM}     &           &    0                     \\ \hline
-{\ct READ\_BINARY}   & Logical         & Section~\ref{info:GEOM}            &              &   {\ct .FALSE.} \\ \hline
 {\ct SPHERE\_ORIGIN}& Real Triplet          & Section~\ref{info:GEOM}            &   m       &             \\ \hline
 {\ct SPHERE\_RADIUS}& Real                  & Section~\ref{info:GEOM}            &   m       &                    \\ \hline
 {\ct SPHERE\_TYPE} & Integer                & Section~\ref{info:GEOM}            &           &                        \\ \hline
@@ -12578,7 +12544,7 @@ The first {\ct ONE}\ is an endian flag.  Smokeview uses this number to determine
 
 
 \section{Geometry, Isosurface Files}
-\label{out:GEOMETRY}
+\label{out:GEOMETRY_ISO}
 
 Both immersed geometric surfaces (generalized obstructions) and FDS generated isosurfaces are stored using a file format described in this section. Iso-surface files are used to store one or more surfaces where the specified {\ct QUANTITY} is a specified value. FDS outputs iso-surface data at fixed time intervals.  These surfaces are defined in terms of vertices and triangles.  A vertex consists of an $(x,y,z)$ coordinate. A triangle consists of 3 connected vertices.  The file format allows one to specify objects that change with time. Static geometry is defined once and displayed by Smokeview unchanged at each time step. Dynamic geometry is defined at each time step either in terms of nodes and faces or in terms of a translation and two rotations (azimuthal and elevation) of dynamic geometry defined in the first time step. These files are written out from {\ct dump.f90} using lines equivalent to the following:
 \begin{lstlisting}

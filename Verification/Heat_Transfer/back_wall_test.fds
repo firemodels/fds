@@ -42,8 +42,6 @@ gas is nitrogen. The heat transfer is purely radiative in the gas phase and cond
 &OBST XB=-0.50, 0.50,-0.50, 0.50,-0.50,-0.50 / 
 &OBST XB=-0.50, 0.50,-0.50, 0.50, 0.50, 0.50 / 
 
-&ZONE XB=-0.30, 0.30,-0.50,-0.40,-0.30, 0.30 /
-
 &VENT MB='XMIN', SURF_ID='OPEN' /
 &VENT MB='XMAX', SURF_ID='OPEN' /
 &VENT MB='YMIN', SURF_ID='OPEN' /

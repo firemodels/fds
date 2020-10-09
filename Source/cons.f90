@@ -115,6 +115,7 @@ INTEGER, PARAMETER :: LEVELSET_STOP=7                  !< Flag for STATUS_STOP
 INTEGER, PARAMETER :: REALIZABILITY_STOP=8             !< Flag for STATUS_STOP
 INTEGER, PARAMETER :: EVACUATION_STOP=9                !< Flag for STATUS_STOP
 INTEGER, PARAMETER :: VERSION_STOP=10                  !< Flag for STATUS_STOP
+INTEGER, PARAMETER :: MPI_TIMEOUT_STOP=11              !< Flag for STATUS_STOP
 
 INTEGER, PARAMETER :: SPHERE_DRAG=1                    !< Flag for LPC\%DRAG_LAW (LPC means LAGRANGIAN_PARTICLE_CLASS)
 INTEGER, PARAMETER :: CYLINDER_DRAG=2                  !< Flag for LPC\%DRAG_LAW
@@ -370,6 +371,8 @@ INTEGER :: UPPER_MESH_INDEX=-1000000000                     !< Upper bound of me
 LOGICAL :: PROFILING=.FALSE.
 INTEGER, ALLOCATABLE, DIMENSION(:) :: PROCESS               !< The MPI process of the given mesh index
 INTEGER, ALLOCATABLE, DIMENSION(:) :: FILE_COUNTER          !< Counter for the number of output files currently opened
+INTEGER, ALLOCATABLE, DIMENSION(:) :: MPI_COMM_MESH         !< MPI communicator for the a given mesh and its neighbors
+INTEGER, ALLOCATABLE, DIMENSION(:) :: MPI_COMM_MESH_ROOT    !< The rank of the given mesh within the MPI communicator
 
 ! Time parameters
 
@@ -409,21 +412,54 @@ REAL(EB) :: AIT_EXCLUSION_ZONE(6,MAX_AIT_EXCLUSION_ZONES)=-1.E6_EB  !< Volume in
 REAL(FB) :: HRRPUV_MAX_SMV=1200._FB                                 !< Clipping value used by Smokeview (kW/m3)
 REAL(FB) :: TEMP_MAX_SMV=2000._FB                                   !< Clipping value used by Smokeview (C)
 
-INTEGER :: N_SPECIES=0,N_REACTIONS,I_PRODUCTS=-1,I_WATER=-1,I_CO2=-1,N_TRACKED_SPECIES=0,N_SURFACE_DENSITY_SPECIES=0,&
-           COMBUSTION_ODE_SOLVER=-1,EXTINCT_MOD=-1,MAX_CHEMISTRY_SUBSTEPS=20,MAX_PRIORITY=1,&
-           N_PASSIVE_SCALARS=0,N_TOTAL_SCALARS=0,N_FIXED_CHEMISTRY_SUBSTEPS=-1
-LOGICAL :: OUTPUT_CHEM_IT=.FALSE.,REAC_SOURCE_CHECK=.FALSE.
-REAL(EB) :: RSUM0
-REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: Z2Y,CP_Z,CPBAR_Z,K_RSQMW_Z,MU_RSQMW_Z,D_Z,CP_AVG_Z,G_F_Z,H_SENS_Z
+INTEGER :: N_SPECIES=0                                              !< Number of total gas phase species
+INTEGER :: N_REACTIONS                                              !< Number of gas phase reactions
+INTEGER :: I_WATER=-1                                               !< Index of the 'WATER VAPOR' tracked species
+INTEGER :: N_TRACKED_SPECIES=0                                      !< Number of tracked (computed) gas species
+INTEGER :: N_SURFACE_DENSITY_SPECIES=0
+INTEGER :: COMBUSTION_ODE_SOLVER=-1                                 !< Indicator of ODE solver
+INTEGER :: EXTINCT_MOD=-1                                           !< Indicator of extinction model
+INTEGER :: MAX_CHEMISTRY_SUBSTEPS=20                                !< Limit on combustion iterations
+INTEGER :: MAX_PRIORITY=1                                           !< Maximum numbers of serial fast reactions
+INTEGER :: N_PASSIVE_SCALARS=0                                      !< Number of passive scalars
+INTEGER :: N_TOTAL_SCALARS=0                                        !< Number of total scalars, tracked and passive
+INTEGER :: N_FIXED_CHEMISTRY_SUBSTEPS=-1                            !< Number of chemistry substeps in combustion routine
+
+LOGICAL :: OUTPUT_CHEM_IT=.FALSE.
+LOGICAL :: REAC_SOURCE_CHECK=.FALSE.
+
+REAL(EB) :: RSUM0                                     !< Initial specific gas constant, \f$ R \sum_i Z_{i,0}/W_i \f$
+
+REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: Z2Y          !< Matrix that converts lumped species vector to primitive, \f$ AZ=Y \f$
+REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: CP_Z         !< CP_Z(I,J) Specific heat (J/kg/K) of lumped species J at temperature I (K)
+REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: CPBAR_Z
+REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: K_RSQMW_Z
+REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: MU_RSQMW_Z
+REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: D_Z
+REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: CP_AVG_Z
+REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: G_F_Z
+REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: H_SENS_Z
+
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: MWR_Z,RSQ_MW_Z
 CHARACTER(LABEL_LENGTH) :: EXTINCTION_MODEL='null'
 
 ! Radiation parameters
 
-LOGICAL, ALLOCATABLE, DIMENSION(:) :: RADIATION_COMPLETED
-INTEGER :: NUMBER_SPECTRAL_BANDS=0,NUMBER_RADIATION_ANGLES=0,ANGLE_INCREMENT=0,RADIATION_ITERATIONS=1, &
-           INITIAL_RADIATION_ITERATIONS,NUMBER_FSK_POINTS=1
-REAL(EB) :: RTE_SOURCE_CORRECTION_FACTOR=1._EB,RAD_Q_SUM=0._EB,KFST4_SUM=0._EB,QR_CLIP,C_MAX=100._EB,C_MIN=1._EB
+LOGICAL, ALLOCATABLE, DIMENSION(:) :: RADIATION_COMPLETED  !< Indicates that the radiation field is completely updated
+
+INTEGER :: NUMBER_SPECTRAL_BANDS=0                         !< Number of wavelength bands for rad solver (1 for gray gas)
+INTEGER :: NUMBER_RADIATION_ANGLES=0                       !< Number of solid angles over which radiation is solved
+INTEGER :: ANGLE_INCREMENT=0                               !< Indicates how many radiation angles are updated in one time step
+INTEGER :: RADIATION_ITERATIONS=1                          !< Number of times to repeat radiation solve in a single time step
+INTEGER :: INITIAL_RADIATION_ITERATIONS                    !< Number of radiation solves before time stepping starts
+INTEGER :: NUMBER_FSK_POINTS=1
+
+REAL(EB) :: RTE_SOURCE_CORRECTION_FACTOR=1._EB   !< Multiplicative factor used in correcting RTE source term
+REAL(EB) :: RAD_Q_SUM=0._EB   !< \f$ \sum_{ijk} \left( \chi_{\rm r} \dot{q}_{ijk}''' + \kappa_{ijk} U_{ijk} \right) V_{ijk} \f$
+REAL(EB) :: KFST4_SUM=0._EB   !< \f$ \sum_{ijk} 4 \kappa_{ijk} \sigma T_{ijk}^4 V_{ijk} \f$
+REAL(EB) :: QR_CLIP           !< Lower bound of \f$ \chi_{\rm r} \dot{q}_{ijk}''' \f$ below which no source correction is made
+REAL(EB) :: C_MAX=100._EB     !< Maximum value of RAD_Q_SUM/KFST4_SUM
+REAL(EB) :: C_MIN=1._EB       !< Minimum value of RAD_Q_SUM/KFST4_SUM
 
 ! Ramping parameters
 
@@ -574,7 +610,6 @@ REAL(EB) :: MIN_PARTICLE_DIAMETER(MAX_SPECIES),MAX_PARTICLE_DIAMETER(MAX_SPECIES
 
 INTEGER :: N_INIT,N_ZONE,N_MULT,N_MOVE
 LOGICAL, ALLOCATABLE, DIMENSION(:,:,:) :: CONNECTED_ZONES
-LOGICAL, ALLOCATABLE, DIMENSION(:) :: SEALED_MESH
 REAL(EB) :: PRESSURE_RELAX_TIME=1._EB
 
 ! Clipping values

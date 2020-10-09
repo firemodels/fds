@@ -55,7 +55,6 @@ $QFDS -d Complex_Geometry geom_texture3a.fds
 $QFDS -d Complex_Geometry geom_texture3b.fds
 $QFDS -d Complex_Geometry geom_texture4a.fds
 $QFDS -d Complex_Geometry geom_texture4b.fds
-$QFDS -d Complex_Geometry geom_arch.fds
 $QFDS -d Complex_Geometry sphere_helium_1mesh.fds
 $QFDS -p 3 -d Complex_Geometry sphere_helium_3meshes.fds
 $QFDS -p 3 -d Complex_Geometry sphere_helium_conserve_3meshes.fds
@@ -119,9 +118,9 @@ $QFDS -d Complex_Geometry rotated_cube_0deg_128_obs.fds
 $QFDS -d Complex_Geometry rotated_cube_0deg_256_exp.fds
 $QFDS -d Complex_Geometry rotated_cube_0deg_256_imp.fds
 $QFDS -d Complex_Geometry rotated_cube_0deg_256_obs.fds
-$QFDS -o 4 -d Complex_Geometry rotated_cube_0deg_384_exp.fds
-$QFDS -o 4 -d Complex_Geometry rotated_cube_0deg_384_imp.fds
-$QFDS -o 4 -d Complex_Geometry rotated_cube_0deg_384_obs.fds
+$QFDS -o 2 -d Complex_Geometry rotated_cube_0deg_384_exp.fds
+$QFDS -o 2 -d Complex_Geometry rotated_cube_0deg_384_imp.fds
+$QFDS -o 2 -d Complex_Geometry rotated_cube_0deg_384_obs.fds
 $QFDS -d Complex_Geometry rotated_cube_27deg_32_exp.fds
 $QFDS -d Complex_Geometry rotated_cube_27deg_32_imp.fds
 $QFDS -d Complex_Geometry rotated_cube_27deg_64_exp.fds
@@ -130,8 +129,8 @@ $QFDS -d Complex_Geometry rotated_cube_27deg_128_exp.fds
 $QFDS -d Complex_Geometry rotated_cube_27deg_128_imp.fds
 $QFDS -d Complex_Geometry rotated_cube_27deg_256_exp.fds
 $QFDS -d Complex_Geometry rotated_cube_27deg_256_imp.fds
-$QFDS -o 4 -d Complex_Geometry rotated_cube_27deg_384_exp.fds
-$QFDS -o 4 -d Complex_Geometry rotated_cube_27deg_384_imp.fds
+$QFDS -o 2 -d Complex_Geometry rotated_cube_27deg_384_exp.fds
+$QFDS -o 2 -d Complex_Geometry rotated_cube_27deg_384_imp.fds
 $QFDS -d Complex_Geometry rotated_cube_45deg_32_exp.fds
 $QFDS -d Complex_Geometry rotated_cube_45deg_32_imp.fds
 $QFDS -d Complex_Geometry rotated_cube_45deg_64_exp.fds
@@ -140,8 +139,8 @@ $QFDS -d Complex_Geometry rotated_cube_45deg_128_exp.fds
 $QFDS -d Complex_Geometry rotated_cube_45deg_128_imp.fds
 $QFDS -d Complex_Geometry rotated_cube_45deg_256_exp.fds
 $QFDS -d Complex_Geometry rotated_cube_45deg_256_imp.fds
-$QFDS -o 4 -d Complex_Geometry rotated_cube_45deg_384_exp.fds
-$QFDS -o 4 -d Complex_Geometry rotated_cube_45deg_384_imp.fds
+$QFDS -o 2 -d Complex_Geometry rotated_cube_45deg_384_exp.fds
+$QFDS -o 2 -d Complex_Geometry rotated_cube_45deg_384_imp.fds
 
 $QFDS -d Complex_Geometry cone_1mesh.fds
 $QFDS -d Complex_Geometry geom_mass_file_test.fds
@@ -167,8 +166,9 @@ $QFDS -d Energy_Budget energy_budget_adiabatic_two_fuels.fds
 $QFDS -d Energy_Budget energy_budget_cold_walls.fds
 $QFDS -d Energy_Budget energy_budget_combustion.fds
 $QFDS -d Energy_Budget energy_budget_dns_100.fds
-$QFDS -d Energy_Budget energy_budget_tmix.fds
+$QFDS -d Energy_Budget energy_budget_particles.fds
 $QFDS -d Energy_Budget energy_budget_solid.fds
+$QFDS -d Energy_Budget energy_budget_tmix.fds
 
 #$QFDS -d Evacuation evac_smv_testcase0.fds
 #$QFDS -d Evacuation evac_smv_testcase2.fds

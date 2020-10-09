@@ -25,7 +25,6 @@ $RUNSMV -d Complex_Geometry geom_texture3a.fds
 $RUNSMV -d Complex_Geometry geom_texture3b.fds
 $RUNSMV -d Complex_Geometry geom_texture4a.fds
 $RUNSMV -d Complex_Geometry geom_texture4b.fds
-$RUNSMV -d Complex_Geometry geom_arch.fds
 $RUNSMV -d Complex_Geometry sphere_radiate
 $RUNSMV -d Complex_Geometry sphere_helium_conserve_3meshes
 $RUNSMV -d Complex_Geometry cone_1mesh

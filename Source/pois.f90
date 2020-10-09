@@ -6364,7 +6364,7 @@ DO  K = 1,NC
   W3(K) = 1._EB
   COEF(K) = SIGN
   DO  I = 1,M
-    COEF(K) = COEF(K)*W1(I)*W2(I)/W3(I)
+    IF (ABS(W3(I))>TWO_EPSILON_EB) COEF(K) = COEF(K)*W1(I)*W2(I)/W3(I)
   END DO
 END DO
 RETURN
