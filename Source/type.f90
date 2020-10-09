@@ -392,7 +392,7 @@ TYPE SPECIES_TYPE
    CHARACTER(LABEL_LENGTH) :: RAMP_MU             !< Name of viscosity rame
    CHARACTER(LABEL_LENGTH) :: RAMP_D              !< Name of diffusivity ramp
    CHARACTER(LABEL_LENGTH) :: RADCAL_ID           !< Name of closest species with RADCAL properties
-   CHARACTER(LABEL_LENGTH) :: RAMP_G_F            
+   CHARACTER(LABEL_LENGTH) :: RAMP_G_F
    CHARACTER(LABEL_LENGTH) :: PROP_ID             !< Name of PROPerty parameters
    CHARACTER(FORMULA_LENGTH) :: FORMULA           !< Chemical formula
    INTEGER :: MODE=2
@@ -427,7 +427,7 @@ TYPE SPECIES_MIXTURE_TYPE
    REAL(EB) :: MASS_EXTINCTION_COEFFICIENT=0._EB   !< Absorption coefficient of visible light (m2/kg)
    REAL(EB) :: ADJUST_NU=1._EB                     !< Adjustment factor if stoichiometric coefficients given for non-normalized VF
    REAL(EB) :: ATOMS(118)=0._EB                    !< Count of each atom in the mixture
-   REAL(EB) :: MEAN_DIAMETER           
+   REAL(EB) :: MEAN_DIAMETER
    REAL(EB) :: SPECIFIC_HEAT=-1._EB                !< Specific heat (J/kg/K)
    REAL(EB) :: REFERENCE_ENTHALPY=-2.E20_EB        !< Enthalpy at REFERENCE_TEMPERATURE (J/kg)
    REAL(EB) :: THERMOPHORETIC_DIAMETER
@@ -555,7 +555,7 @@ TYPE SURFACE_TYPE
    LOGICAL :: BURN_AWAY,ADIABATIC,INTERNAL_RADIATION,USER_DEFINED=.TRUE., &
               FREE_SLIP=.FALSE.,NO_SLIP=.FALSE.,SPECIFIED_NORMAL_VELOCITY=.FALSE.,SPECIFIED_TANGENTIAL_VELOCITY=.FALSE., &
               SPECIFIED_NORMAL_GRADIENT=.FALSE.,CONVERT_VOLUME_TO_MASS=.FALSE.,SPECIFIED_HEAT_SOURCE=.FALSE.,&
-              IMPERMEABLE=.FALSE.,BOUNDARY_FUEL_MODEL=.FALSE.,BLOWING=.FALSE.,BLOWING_2=.FALSE.,ABL_MODEL=.FALSE.
+              IMPERMEABLE=.FALSE.,BOUNDARY_FUEL_MODEL=.FALSE.,BLOWING=.FALSE.,BLOWING_2=.FALSE.,ABL_MODEL=.FALSE.,HT3D=.FALSE.
    INTEGER :: GEOMETRY,BACKING,PROFILE,HEAT_TRANSFER_MODEL=0
    CHARACTER(LABEL_LENGTH) :: PART_ID,RAMP_Q,RAMP_V,RAMP_T,RAMP_EF,RAMP_PART,RAMP_V_X,RAMP_V_Y,RAMP_V_Z,RAMP_T_B,RAMP_T_I
    CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: RAMP_MF
@@ -1091,23 +1091,69 @@ END TYPE PROFILE_TYPE
 
 TYPE (PROFILE_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: PROFILE
 
+
+!> \brief Parameters associated with initialization of particles or regions of the domain
+
 TYPE INITIALIZATION_TYPE
-   REAL(EB) :: TEMPERATURE,DENSITY,X1,X2,Y1,Y2,Z1,Z2,MASS_PER_VOLUME,MASS_PER_TIME,DT_INSERT,T_INSERT, &
-               X0,Y0,Z0,U0,V0,W0,VOLUME,HRRPUV=0._EB,DX=0._EB,DY=0._EB,DZ=0._EB,HEIGHT,RADIUS,DIAMETER=-1._EB, &
-               PARTICLE_WEIGHT_FACTOR, PACKING_RATIO,CHI_R
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: PARTICLE_INSERT_CLOCK,MASS_FRACTION
-   INTEGER  :: PART_INDEX=0,N_PARTICLES,LU_PARTICLE,PROF_INDEX=0,DEVC_INDEX=0,CTRL_INDEX=0,TABL_INDEX=0, &
-               N_PARTICLES_PER_CELL=0,PATH_RAMP_INDEX(3)=0,RAMP_Q_INDEX=0
-   LOGICAL :: ADJUST_DENSITY=.FALSE.,ADJUST_TEMPERATURE=.FALSE.,SINGLE_INSERTION=.TRUE., &
-              CELL_CENTERED=.FALSE.,UNIFORM=.FALSE.,RTE_CORRECTION=.TRUE.
+   REAL(EB) :: TEMPERATURE      !< Temperature (K) of the initialized region
+   REAL(EB) :: DENSITY          !< Density (kg/m3) of the initialized region
+   REAL(EB) :: X1               !< Lower x boundary of the initialized region (m)
+   REAL(EB) :: X2               !< Upper x boundary of the initialized region (m)
+   REAL(EB) :: Y1               !< Lower y boundary of the initialized region (m)
+   REAL(EB) :: Y2               !< Upper y boundary of the initialized region (m)
+   REAL(EB) :: Z1               !< Lower z boundary of the initialized region (m)
+   REAL(EB) :: Z2               !< Upper z boundary of the initialized region (m)
+   REAL(EB) :: MASS_PER_VOLUME  !< Mass per unit volume of particles (kg/m3)
+   REAL(EB) :: MASS_PER_TIME    !< Mass (kg) per time (s) of particles
+   REAL(EB) :: DT_INSERT        !< Time increment between particle inserts (s)
+   REAL(EB) :: T_INSERT         !< Time to start inserting particles (s)
+   REAL(EB) :: X0               !< x origin of initialization region (m)
+   REAL(EB) :: Y0               !< y origin of initialization region (m)
+   REAL(EB) :: Z0               !< z origin of initialization region (m)
+   REAL(EB) :: U0               !< Initial u component of velocity of particles (m/s)
+   REAL(EB) :: V0               !< Initial v component of velocity of particles (m/s)
+   REAL(EB) :: W0               !< Initial w component of velocity of particles (m/s)
+   REAL(EB) :: VOLUME           !< Volume of region (m3)
+   REAL(EB) :: HRRPUV=0._EB     !< Heat Release Rate Per Unit Volume (W/m3)
+   REAL(EB) :: DX=0._EB         !< Spacing (m) of an array of particles
+   REAL(EB) :: DY=0._EB         !< Spacing (m) of an array of particles
+   REAL(EB) :: DZ=0._EB         !< Spacing (m) of an array of particles
+   REAL(EB) :: HEIGHT           !< Height of initialization region (m)
+   REAL(EB) :: RADIUS           !< Radius of initialization region, like a cone (m)
+   REAL(EB) :: DIAMETER=-1._EB  !< Diameter of liquid droplets specified on an INIT line (m)
+   REAL(EB) :: PARTICLE_WEIGHT_FACTOR !< Multiplicative factor for particles specified on the INIT line
+   REAL(EB) :: PACKING_RATIO    !< Volume of particles divided by the volume of gas
+   REAL(EB) :: CHI_R            !< Radiative fraction of HRRPUV
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: PARTICLE_INSERT_CLOCK  !< Time of last particle insertion (s)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: MASS_FRACTION          !< Mass fraction of gas components
+   INTEGER  :: PART_INDEX=0     !< Particle class index of inserted particles
+   INTEGER  :: N_PARTICLES      !< Number of particles to insert
+   INTEGER  :: DEVC_INDEX=0     !< Index of the device that uses this INITIALIZATION variable
+   INTEGER  :: CTRL_INDEX=0     !< Index of the controller that uses this INITIALIZATION variable
+   INTEGER  :: N_PARTICLES_PER_CELL=0 !< Number of particles to insert in each cell
+   INTEGER  :: PATH_RAMP_INDEX(3)=0   !< Ramp index of a particle path
+   INTEGER  :: RAMP_Q_INDEX=0         !< Ramp of HRRPUV
+   LOGICAL :: ADJUST_DENSITY=.FALSE.
+   LOGICAL :: ADJUST_TEMPERATURE=.FALSE.
+   LOGICAL :: SINGLE_INSERTION=.TRUE.
+   LOGICAL :: CELL_CENTERED=.FALSE.
+   LOGICAL :: UNIFORM=.FALSE.
+   LOGICAL :: RTE_CORRECTION=.TRUE.
    LOGICAL, ALLOCATABLE, DIMENSION(:) :: ALREADY_INSERTED
-   CHARACTER(LABEL_LENGTH) :: SHAPE,DEVC_ID,CTRL_ID,ID
+   CHARACTER(LABEL_LENGTH) :: SHAPE
+   CHARACTER(LABEL_LENGTH) :: DEVC_ID
+   CHARACTER(LABEL_LENGTH) :: CTRL_ID
+   CHARACTER(LABEL_LENGTH) :: ID
 END TYPE INITIALIZATION_TYPE
 
 TYPE (INITIALIZATION_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: INITIALIZATION
 
+
+!> \brief Parameters used to initalize particles used as gas phase devices
+
 TYPE INIT_RESERVED_TYPE
-   INTEGER :: N_PARTICLES,DEVC_INDEX
+   INTEGER :: N_PARTICLES  !< Number of particles for the device, usually 1
+   INTEGER :: DEVC_INDEX   !< The index of the device
 END TYPE INIT_RESERVED_TYPE
 
 TYPE (INIT_RESERVED_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: INIT_RESERVED
@@ -1119,7 +1165,7 @@ TYPE P_ZONE_TYPE
    REAL(EB) :: X                                                   !< x coordinate of ZONE specifier (m)
    REAL(EB) :: Y                                                   !< y coordinate of ZONE specifier (m)
    REAL(EB) :: Z                                                   !< z coordinate of ZONE specifier (m)
-   REAL(EB) :: DPSTAR=0._EB                                          
+   REAL(EB) :: DPSTAR=0._EB
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: LEAK_AREA                !< Array of leak areas to other ZONEs
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: LEAK_REFERENCE_PRESSURE  !< Array of leak reference pressures
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: LEAK_PRESSURE_EXPONENT   !< Array of leak reference exponents
@@ -1164,7 +1210,7 @@ TYPE MULTIPLIER_TYPE
    REAL(EB) :: DX0                                  !< Translation in x direction (m)
    REAL(EB) :: DY0                                  !< Translation in x direction (m)
    REAL(EB) :: DZ0                                  !< Translation in x direction (m)
-   REAL(EB) :: FDS_AREA(6)=0._EB                       
+   REAL(EB) :: FDS_AREA(6)=0._EB
    INTEGER  :: I_LOWER                              !< Lower bound of i index
    INTEGER  :: I_UPPER                              !< Upper bound of i index
    INTEGER  :: J_LOWER                              !< Lower bound of j index
