@@ -3402,18 +3402,19 @@ END SUBROUTINE INIT_RADIATION
 
 
 !> \brief Compute radiative source term and transfer.
-!>
 !> \param T Current time (s)
 !> \param NM Mesh number
-!> \param RAD_ITER Iteration number of radiation solution.
+!> \param RAD_ITER Counter for repeated calls to the radiation solver
+
 SUBROUTINE COMPUTE_RADIATION(T,NM,RAD_ITER)
 
-! Call radiation routine or simply specify the radiative loss
-
+USE MATH_FUNCTIONS, ONLY : EVALUATE_RAMP
 USE COMP_FUNCTIONS, ONLY : CURRENT_TIME
 USE COMPLEX_GEOMETRY
-REAL(EB) :: TNOW,T
+REAL(EB), INTENT(IN) :: T
 INTEGER, INTENT(IN) :: NM,RAD_ITER
+REAL(EB), POINTER, DIMENSION(:,:,:) :: KFST4_GAS
+REAL(EB) :: TNOW
 
 IF (EVACUATION_ONLY(NM)) RETURN
 
@@ -3423,10 +3424,11 @@ CALL POINT_TO_MESH(NM)
 
 IF (RADIATION) THEN
    RADIATION_COMPLETED(NM) = .FALSE.
-   CALL RADIATION_FVM(T,NM,RAD_ITER)
+   CALL RADIATION_FVM
 ELSE
    RADIATION_COMPLETED(NM) = .TRUE.
    IF (N_REACTIONS>0) QR = -CHI_R*Q
+   IF (INIT_HRRPUV) CALL ADD_VOLUMETRIC_HEAT_SOURCE(0) ! Even if no radiation, add HRRPUV specified on an INIT line
 ENDIF
 
 T_USED(9)=T_USED(9)+CURRENT_TIME()-TNOW
@@ -3434,14 +3436,16 @@ T_USED(9)=T_USED(9)+CURRENT_TIME()-TNOW
 CONTAINS
 
 
-SUBROUTINE RADIATION_FVM(T,NM,RAD_ITER)
+!> \brief Finite Volume Method of radiation transport
+
+SUBROUTINE RADIATION_FVM
+
 USE MIEV
-USE MATH_FUNCTIONS, ONLY : INTERPOLATE1D, EVALUATE_RAMP
+USE MATH_FUNCTIONS, ONLY : INTERPOLATE1D
 USE TRAN, ONLY : GET_IJK
 USE COMPLEX_GEOMETRY, ONLY : IBM_IDRA,IBM_CGSC,IBM_SOLID
 USE PHYSICAL_FUNCTIONS, ONLY : GET_VOLUME_FRACTION, GET_MASS_FRACTION
-USE MPI
-REAL(EB) :: T, RAP, AX, AXU, AXD, AY, AYU, AYD, AZ, VC, RU, RD, RP, &
+REAL(EB) :: RAP, AX, AXU, AXD, AY, AYU, AYD, AZ, VC, RU, RD, RP, &
             ILXU, ILYU, ILZU, QVAL, BBF, BBFA, NCSDROP, RSA_RAT,EFLUX,SOOT_MASS_FRACTION, &
             AIU_SUM,A_SUM,VOL,VC1,AY1,AZ1,COSINE,AFX,AFY,AFZ,ILXU_AUX,ILYU_AUX,ILZU_AUX,AFX_AUX,AFY_AUX,AFZ_AUX
 INTEGER  :: N,NN,IIG,JJG,KKG,I,J,K,IW,ICF,II,JJ,KK,IOR,IC,IWUP,IWDOWN, &
@@ -3455,19 +3459,17 @@ REAL(EB) :: XID,YJD,ZKD,AREA_VOLUME_RATIO,DLF,DLA(3),TSI,TMP_EXTERIOR,DUMMY
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_GET
 INTEGER :: IID,JJD,KKD,IP
 LOGICAL :: UPDATE_INTENSITY, UPDATE_QRW2
-REAL(EB), POINTER, DIMENSION(:,:,:) :: IL,UIIOLD,KAPPA_PART,KFST4_GAS,KFST4_PART,EXTCOE,SCAEFF,SCAEFF_G,IL_UP
+REAL(EB), POINTER, DIMENSION(:,:,:) :: IL,UIIOLD,KAPPA_PART,KFST4_PART,EXTCOE,SCAEFF,SCAEFF_G,IL_UP
 REAL(EB), POINTER, DIMENSION(:)     :: OUTRAD_W,INRAD_W,OUTRAD_F,INRAD_F,IL_F
-INTEGER, INTENT(IN) :: NM,RAD_ITER
 TYPE (OMESH_TYPE), POINTER :: M2
 TYPE(SURFACE_TYPE), POINTER :: SF
 TYPE(VENTS_TYPE), POINTER :: VT
 TYPE(RAD_FILE_TYPE), POINTER :: RF
 TYPE(LAGRANGIAN_PARTICLE_CLASS_TYPE), POINTER :: LPC
 TYPE(LAGRANGIAN_PARTICLE_TYPE), POINTER :: LP
-TYPE(INITIALIZATION_TYPE), POINTER :: IN
 CHARACTER(20) :: FORMT
 
-!Variables added for the WSGG model
+! Variables added for the WSGG model
 REAL(EB) :: X_H2O, X_CO2, MOL_RAT,PARTIAL_P,R_MIXTURE,TOTAL_P
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: Z_ARRAY
 
@@ -3510,11 +3512,18 @@ ELSE
    EXCHANGE_RADIATION = .FALSE.
 ENDIF
 
+! If this is the last iteration of the solver in a single time step, update the call counter.
+
 IF (RAD_ITER==RADIATION_ITERATIONS) RAD_CALL_COUNTER  = RAD_CALL_COUNTER + 1
 
-IF (WIDE_BAND_MODEL .OR. WSGG_MODEL) THEN
-   QR = 0._EB
-ENDIF
+! If there is a user-specified HRRPUV on an INIT line, and there are multiple iterations of the radiation solver, 
+! subtract off the HRRPUV from Q, leaving just the chemical HRR.
+
+IF (INIT_HRRPUV .AND. RAD_ITER>1) CALL ADD_VOLUMETRIC_HEAT_SOURCE(2)
+
+! Initialize the radiative loss to zero for special case models that loop over wavelength bands
+
+IF (WIDE_BAND_MODEL .OR. WSGG_MODEL) QR = 0._EB
 
 ! Zero out radiation flux to wall, particles, facets if the intensity is to be updated
 
@@ -3676,30 +3685,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
          ENDDO
       ENDDO
 
-      INIT_LOOPM1: DO N=1,N_INIT
-         IN => INITIALIZATION(N)
-         IF (.NOT. IN%RTE_CORRECTION) CYCLE INIT_LOOPM1
-         IF (IN%X1 > XC(IBP1) .OR. IN%X2 < XC(0) .OR. &
-             IN%Y1 > YC(JBP1) .OR. IN%Y2 < YC(0) .OR. &
-             IN%Z1 > ZC(KBP1) .OR. IN%Z2 < ZC(0)) CYCLE INIT_LOOPM1
-         DO K=0,KBP1
-            DO J=0,JBP1
-               DO I=0,IBP1
-                  IF (XC(I) > IN%X1 .AND. XC(I) < IN%X2 .AND. &
-                      YC(J) > IN%Y1 .AND. YC(J) < IN%Y2 .AND. &
-                      ZC(K) > IN%Z1 .AND. ZC(K) < IN%Z2) THEN
-                      IF (CHI_R(I,J,K)*Q(I,J,K)>QR_CLIP) THEN
-                         VOL = R(I)*DX(I)*DY(J)*DZ(K)
-                         RAD_Q_SUM = RAD_Q_SUM - (BBF*CHI_R(I,J,K)*Q(I,J,K) + KAPPA_GAS(I,J,K)*UIID(I,J,K,IBND))*VOL
-                         KFST4_SUM = KFST4_SUM - KFST4_GAS(I,J,K)*VOL
-                      ENDIF
-                  ENDIF
-               ENDDO
-            ENDDO
-         ENDDO
-      ENDDO INIT_LOOPM1
-
-      !Correct the source term in the RTE based on user-specified RADIATIVE_FRACTION on REAC
+      ! Correct the source term in the RTE based on user-specified RADIATIVE_FRACTION on REAC
 
       DO K=1,KBAR
          DO J=1,JBAR
@@ -3709,25 +3695,6 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
             ENDDO
          ENDDO
       ENDDO
-
-      INIT_LOOP1: DO N=1,N_INIT
-         IN => INITIALIZATION(N)
-         IF (IN%RTE_CORRECTION) CYCLE INIT_LOOP1
-         IF (IN%X1 > XC(IBP1) .OR. IN%X2 < XC(0) .OR. &
-             IN%Y1 > YC(JBP1) .OR. IN%Y2 < YC(0) .OR. &
-             IN%Z1 > ZC(KBP1) .OR. IN%Z2 < ZC(0)) CYCLE INIT_LOOP1
-         DO K=0,KBP1
-            DO J=0,JBP1
-               DO I=0,IBP1
-                  IF (XC(I) > IN%X1 .AND. XC(I) < IN%X2 .AND. &
-                      YC(J) > IN%Y1 .AND. YC(J) < IN%Y2 .AND. &
-                      ZC(K) > IN%Z1 .AND. ZC(K) < IN%Z2) THEN
-                      IF (CHI_R(I,J,K)*Q(I,J,K)>QR_CLIP) KFST4_GAS(I,J,K) = CHI_R(I,J,K)*Q(I,J,K)+KAPPA_GAS(I,J,K)*UII(I,J,K)
-                  ENDIF
-               ENDDO
-            ENDDO
-         ENDDO
-      ENDDO INIT_LOOP1
 
    ELSE WIDE_BAND_MODEL_IF
 
@@ -3751,29 +3718,6 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
             ENDDO
          ENDDO
 
-         INIT_LOOP2: DO N=1,N_INIT
-            IN => INITIALIZATION(N)
-            IF (IN%RTE_CORRECTION) CYCLE INIT_LOOP2
-            IF (IN%X1 > XC(IBP1) .OR. IN%X2 < XC(0) .OR. &
-                IN%Y1 > YC(JBP1) .OR. IN%Y2 < YC(0) .OR. &
-                IN%Z1 > ZC(KBP1) .OR. IN%Z2 < ZC(0)) CYCLE INIT_LOOP2
-            DO K=0,KBP1
-               DO J=0,JBP1
-                  DO I=0,IBP1
-                     IF (XC(I) > IN%X1 .AND. XC(I) < IN%X2 .AND. &
-                         YC(J) > IN%Y1 .AND. YC(J) < IN%Y2 .AND. &
-                         ZC(K) > IN%Z1 .AND. ZC(K) < IN%Z2) THEN
-                        IF (CHI_R(I,J,K)*Q(I,J,K)>QR_CLIP) THEN
-                           VOL = R(I)*DX(I)*DY(J)*DZ(K)
-                           RAD_Q_SUM = RAD_Q_SUM - (CHI_R(I,J,K)*Q(I,J,K)+KAPPA_GAS(I,J,K)*UII(I,J,K))*VOL
-                           KFST4_SUM = KFST4_SUM - KFST4_GAS(I,J,K)*VOL
-                        ENDIF
-                     ENDIF
-                  ENDDO
-               ENDDO
-            ENDDO
-         ENDDO INIT_LOOP2
-
          ! Correct the source term in the RTE based on user-specified RADIATIVE_FRACTION on REAC
 
          DO K=1,KBAR
@@ -3784,25 +3728,6 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                ENDDO
             ENDDO
          ENDDO
-
-         INIT_LOOP3: DO N=1,N_INIT
-            IN => INITIALIZATION(N)
-            IF (IN%RTE_CORRECTION) CYCLE INIT_LOOP3
-            IF (IN%X1 > XC(IBP1) .OR. IN%X2 < XC(0) .OR. &
-                IN%Y1 > YC(JBP1) .OR. IN%Y2 < YC(0) .OR. &
-                IN%Z1 > ZC(KBP1) .OR. IN%Z2 < ZC(0)) CYCLE INIT_LOOP3
-            DO K=0,KBP1
-               DO J=0,JBP1
-                  DO I=0,IBP1
-                     IF (XC(I) > IN%X1 .AND. XC(I) < IN%X2 .AND. &
-                         YC(J) > IN%Y1 .AND. YC(J) < IN%Y2 .AND. &
-                         ZC(K) > IN%Z1 .AND. ZC(K) < IN%Z2) THEN
-                         IF (CHI_R(I,J,K)*Q(I,J,K)>QR_CLIP) KFST4_GAS(I,J,K) = CHI_R(I,J,K)*Q(I,J,K)+KAPPA_GAS(I,J,K)*UII(I,J,K)
-                     ENDIF
-                  ENDDO
-               ENDDO
-            ENDDO
-         ENDDO INIT_LOOP3
 
       ELSE RTE_SOURCE_CORRECTION_IF  ! OPTICALLY_THIN
 
@@ -3821,7 +3746,12 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
 
    ENDIF WIDE_BAND_MODEL_IF
 
-   ! Compute the added contribution of any condensed speices
+   ! Add contribution to source term from a user-specified volumetric heat relase rate
+
+   IF (INIT_HRRPUV) CALL ADD_VOLUMETRIC_HEAT_SOURCE(1)
+
+   ! Compute the added contribution of any condensed species
+
    IF (ANY(SPECIES_MIXTURE%EVAPORATION_SMIX_INDEX > 0)) THEN
 
       IF (NUMBER_SPECTRAL_BANDS==1) THEN
@@ -4500,6 +4430,42 @@ ENDIF
 
 END SUBROUTINE RADIATION_FVM
 
+
+!> \brief Add user-specified HRRPUV to the heat release rate term, Q
+
+SUBROUTINE ADD_VOLUMETRIC_HEAT_SOURCE(MODE)
+
+INTEGER, INTENT(IN) :: MODE
+REAL(EB) :: TIME_RAMP_FACTOR
+INTEGER :: N,I,J,K
+TYPE(INITIALIZATION_TYPE), POINTER :: IN
+
+DO N=1,N_INIT
+   IN => INITIALIZATION(N)
+   IF (IN%HRRPUV<=0._EB) CYCLE
+   TIME_RAMP_FACTOR=1._EB
+   IF (IN%RAMP_Q_INDEX>0) TIME_RAMP_FACTOR = EVALUATE_RAMP(T,0._EB,IN%RAMP_Q_INDEX)
+   DO K=0,KBP1
+      DO J=0,JBP1
+         DO I=0,IBP1
+            IF (XC(I) > IN%X1 .AND. XC(I) < IN%X2 .AND. &
+                YC(J) > IN%Y1 .AND. YC(J) < IN%Y2 .AND. &
+                ZC(K) > IN%Z1 .AND. ZC(K) < IN%Z2) THEN
+               IF (MODE==1) THEN
+                  Q(I,J,K) = Q(I,J,K) + TIME_RAMP_FACTOR*IN%HRRPUV
+                  KFST4_GAS(I,J,K) = KFST4_GAS(I,J,K) + IN%CHI_R*TIME_RAMP_FACTOR*IN%HRRPUV
+               ELSEIF (MODE==2) THEN
+                  Q(I,J,K) = Q(I,J,K) - TIME_RAMP_FACTOR*IN%HRRPUV
+               ELSE
+                  Q(I,J,K) = Q(I,J,K) + TIME_RAMP_FACTOR*IN%HRRPUV
+               ENDIF
+            ENDIF
+         ENDDO
+      ENDDO
+   ENDDO
+ENDDO
+
+END SUBROUTINE ADD_VOLUMETRIC_HEAT_SOURCE
 
 END SUBROUTINE COMPUTE_RADIATION
 
