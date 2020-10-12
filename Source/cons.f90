@@ -158,6 +158,7 @@ INTEGER :: INPUT_FILE_LINE_NUMBER=0        !< Indicator of what line in the inpu
 
 REAL(EB) :: FUEL_C_TO_CO_FRACTION=0.6667_EB !< Fraction of carbon atoms in the fuel that are converted to CO
 REAL(EB) :: FUEL_H_TO_H2_FRACTION=0._EB     !< Fraction of hydrogen atoms in the fuel that are converted to H2
+REAL(EB) :: FUEL_N_TO_HCN_FRACTION=0._EB    !< Fraction of nitrogen atoms in the fuel that are converted to HCN
 
 ! Miscellaneous logical constants
 
@@ -397,6 +398,7 @@ REAL(EB) :: MW_CO2                                                  !< Molecular
 REAL(EB) :: MW_H2O                                                  !< Molecular weight of water vapor (g/mol)
 REAL(EB) :: MW_CO                                                   !< Molecular weight of carbon monoxide (g/mol)
 REAL(EB) :: MW_H2                                                   !< Molecular weight of hydrogen (g/mol)
+REAL(EB) :: MW_HCN                                                  !< Molecular weight of hydrogen cyanide (g/mol)
 REAL(EB) :: VISIBILITY_FACTOR=3._EB                                 !< Parameter in light extinction calculation
 REAL(EB) :: EC_LL                                                   !< Extinction Coefficient, Lower Limit (1/m)
 REAL(EB) :: ZZ_MIN_GLOBAL=1.E-10_EB                                 !< Minimum lumped species mass fraction
