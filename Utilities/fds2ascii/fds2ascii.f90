@@ -24,7 +24,7 @@ END INTERFACE
 
 CHARACTER(255), PARAMETER :: f2aversion='2.1.0'
 INTEGER, PARAMETER :: FB = SELECTED_REAL_KIND(6)
-INTEGER, PARAMETER :: FILE_DIM = 500
+INTEGER, PARAMETER :: FILE_DIM = 2000
 INTEGER :: IERR, NMESHES, NM, NOC, I, J, K, L
 INTEGER :: IDUM, IFILE, NSAM, NV, MV
 INTEGER :: I1, I2, J1, J2, K1, K2, I3, J3, K3
@@ -409,7 +409,7 @@ EXTRA_PLOT3D_FILES: DO
    
             IF(AUTO_SLICE_FLAG.EQ.0)THEN
                IF (BATCHMODE.EQ.0)THEN
-                  write(6,'(I3,1x,A,1x,A)')I,TRIM(SLCF_TEXT(I)),TRIM(SLCF_FILE(I))
+                  write(6,'(I5,1x,A,1x,A)')I,TRIM(SLCF_TEXT(I)),TRIM(SLCF_FILE(I))
                   write(6,'(3x,A,6(1x,f8.2))')'slice bounds:',M%X(I1),M%X(I2),M%Y(J1),M%Y(J2),M%Z(K1),M%Z(K2)
                ENDIF
             ENDIF
