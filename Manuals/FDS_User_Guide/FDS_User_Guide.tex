@@ -5222,15 +5222,17 @@ This approach to combustion, referred to below as the ``simple chemistry'' combu
 For the simple chemistry model, each reaction is assumed to be of the form:
 \be \mathrm{C_xH_yO_zN_v} + \nu_{\OTWO} \; \mathrm{O_2} \rightarrow
     \nu_{\COTWO} \; \mathrm{CO_2} + \nu_{\HTWOO} \; \mathrm{H_2O} +
-    \nu_{\CO}   \; \mathrm{CO}   + \nu_{\rm S} \; \mathrm{Soot} + \nu_{\NTWO} \; \mathrm{N_2} \ee
+    \nu_{\CO}   \; \mathrm{CO}   + \nu_{\rm S} \; \mathrm{Soot} + \nu_{\HCN} \; \mathrm{HCN} +
+    \nu_{\NTWO} \; \mathrm{N_2} \ee
 You need only specify the chemical formula of the fuel along with the yields of CO and soot, and the volume fraction of hydrogen in the soot, $X_\Hy$. FDS will use that information and calculate the stoichiometric coefficients automatically as follows:
 \begin{eqnarray*}
 \nu_{\OTWO}    &=& \nu_{\COTWO} + \frac{\nu_{\CO}}{2} + \frac{\nu_{\HTWOO}}{2} - \frac{\hbox{z}}{2}   \\
-\nu_{\COTWO}   &=& \hbox{x} - \nu_{\CO} - (1-X_\Hy) \, \nu_{\rm S} \\
-\nu_{\HTWOO}   &=& \frac{\hbox{y}}{2} - \frac{X_\Hy}{2} \, \nu_{\rm S} \\
+\nu_{\COTWO}   &=& \hbox{x} - \nu_{\CO} - \nu_{\HCN} - (1-X_\Hy) \, \nu_{\rm S} \\
+\nu_{\HTWOO}   &=& \frac{\hbox{y}}{2} - \frac{X_\Hy}{2} \, \nu_{\rm S} - \frac{\nu_{\HCN}}{2}\\
 \nu_{\CO}      &=& \frac{W_{\rm F}}{W_{\CO}} \, y_{\CO}  \\
 \nu_{\rm s}    &=& \frac{W_{\rm F}}{W_{\rm S}} \, y_{\rm S}  \\
-\nu_{\NTWO}    &=& \frac{\rm v}{2}  \\
+\nu_{\HCN}     &=& \frac{W_{\rm F}}{W_{\HCN}} \, y_{\HCN}  \\
+\nu_{\NTWO}    &=& \frac{\rm v}{2} - \nu_{\HCN} \\
 W_{\rm s}      &=& X_\Hy \, W_\Hy + (1-X_\Hy) \, W_\C
 \end{eqnarray*}
 The following parameters may be prescribed on the {\ct REAC} line when using the simple chemistry model.
@@ -5255,6 +5257,8 @@ simple chemistry model is applied. (Default 0.)
 \item[{\ct SOOT\_YIELD}] The fraction of fuel mass converted into smoke particulate, $y_{\rm s}$.
 Note that this parameter is only appropriate when the simple chemistry model is applied.  (Default 0.)
 \item[{\ct SOOT\_H\_FRACTION}] The fraction of the atoms in the soot that are hydrogen.  The default value is 0.1, equivalent to the input {\ct FORMULA='C0.9H0.1'} (Section~\ref{info:FORMULA}). Note that this parameter is only appropriate when the simple chemistry model is applied.
+\item[{\ct HCN\_YIELD}] The fraction of fuel mass converted into hydrogen cyanide, $y_{\HCN}$. Note that this parameter is only appropriate when the
+simple chemistry model is applied and the fuel contains nitrogen. (Default 0.)
 \item[{\ct FUEL\_RADCAL\_ID}] RadCal species to be used for the fuel.  The default is the default RadCal species for the fuel species or {\ct 'METHANE'} if there is no species default. See Section~\ref{info:RadCal_fuelspecies} for details.
 \end{description}
 The ambient mass fractions for the constituents of air are specified on {\ct MISC} using the inputs:
@@ -5333,9 +5337,9 @@ flow domain from the burning object.
 The heat of combustion can be determined in a couple of ways.
 One approach is to take the difference in the heats of formation for the products (assuming complete combustion) and the reactants.
 This is typically how values are tabulated for pure fuels (e.g., one species) in handbooks.
-This ideal heat of combustion does not account for the  {\ct SOOT\_YIELD} or  {\ct CO\_YIELD} that occurs in a real fire.
+This ideal heat of combustion does not account for the  {\ct SOOT\_YIELD}, {\ct CO\_YIELD}, or {\ct HCN\_YIELD} that occurs in a real fire.
 Carbon and hydrogen that go to soot and CO rather than CO$_2$ and H$_2$O result in a lower effective heat of combustion.
-Setting {\ct IDEAL=.TRUE.} will reduce the {\ct HEAT\_OF\_COMBUSTION} based upon the inputs for {\ct SOOT\_YIELD} and {\ct CO\_YIELD}.
+Setting {\ct IDEAL=.TRUE.} will reduce the {\ct HEAT\_OF\_COMBUSTION} based upon the inputs for {\ct SOOT\_YIELD}, {\ct CO\_YIELD}, and {\ct HCN\_YIELD}.
 If {\ct EPUMO2} is specified instead of {\ct HEAT\_OF\_COMBUSTION}, then the {\ct EPUMO2} will not be changed.
 
 The second approach to determining the heat of combustion is to burn a known mass of the material in a calorimeter and divide the heat release
@@ -5353,12 +5357,14 @@ If the reaction is under defined, FDS will return an error at the start of the c
 
 The default ``simple chemistry'' single-step combustion model has a two-step option. This option is invoked by setting {\ct N\_SIMPLE\_CHEMISTRY\_REACTIONS} to 2 on the {\ct COMB} line. All of the other parameters that are appropriate for the default single-step model are still applicable. The two-step scheme basically takes all of the carbon in the fuel molecule and converts it to CO and Soot in the first step, and then oxidizes most of the CO and Soot to form CO$_2$ in the second step. The hydrogen in the fuel molecule can form either H$_2$ or H$_2$O in the first step as well.
 \begin{eqnarray}
-  \mathrm{C_xH_yO_zN_v} + \nu_{\text{\tiny \OTWO ,1}} \; \mathrm{O_2} &\longrightarrow& \underbrace{ \nu_{\mathrm{\tiny H_2,1}} \; \mathrm{H_2} + \nu_{\text{\tiny \HTWOO,1}} \; \mathrm{H_2O} + \nu_{\text{\tiny \CO ,1}} \; \mathrm{CO}   + \nu_{\text{\tiny S,1}} \; \mathrm{Soot} + \nu_{\text{\tiny \NTWO ,1}} \; \mathrm{N_2} }_{\rm Int.~Products} \\[0.1in]
-   \mathrm{Int.~Products} + \nu_{\text{\tiny \OTWO,2}} \; \mathrm{O_2} &\longrightarrow& \nu_{\text{\tiny \COTWO}} \; \mathrm{CO_2} + \nu_{\text{\tiny \HTWOO ,2}} \; \mathrm{H_2O} + \nu_{\text{\tiny \CO ,2}} \; \mathrm{CO}   + \nu_{\text{\tiny S,2}} \; \mathrm{Soot} + \nu_{\text{\tiny \NTWO ,2}} \; \mathrm{N_2}
+  \mathrm{C_xH_yO_zN_v} + \nu_{\text{\tiny \OTWO ,1}} \; \mathrm{O_2} &\longrightarrow& \underbrace{ \nu_{\mathrm{\tiny H_2,1}} \! \mathrm{H_2} + \nu_{\text{\tiny \HTWOO,1}} \! \mathrm{H_2O} + \nu_{\text{\tiny \CO ,1}} \! \mathrm{CO}   + \nu_{\text{\tiny S,1}} \! \mathrm{Soot} + \nu_{\text{\tiny \HCN,1}} \! \mathrm{HCN} +
+  \nu_{\text{\tiny \NTWO ,1}} \!  \mathrm{N_2} }_{\rm Int.~Products} \\[0.1in]
+   \mathrm{Int.~Products} + \nu_{\text{\tiny \OTWO,2}} \! \mathrm{O_2} &\longrightarrow& \nu_{\text{\tiny \COTWO}} \! \mathrm{CO_2} + \nu_{\text{\tiny \HTWOO ,2}} \! \mathrm{H_2O} + \nu_{\text{\tiny \CO ,2}} \! \mathrm{CO}   + \nu_{\text{\tiny S,2}} \, \mathrm{Soot} + \nu_{\text{\tiny \HCN,2}} \, \mathrm{HCN} +
+    \nu_{\text{\tiny \NTWO ,2}} \! \mathrm{N_2}
 \end{eqnarray}
-By default, in the first step, two out of three carbon atoms in the fuel are converted to CO. There is not yet a solid basis for this assumption, and the distribution of carbon to CO and Soot can be changed via the parameter {\ct FUEL\_C\_TO\_CO\_FRACTION} on the {\ct COMB} line. It is 2/3, by default. In addition, a fraction of the hydrogen in the fuel molecule can form H$_2$ in the first step. The controlling parameter is called {\ct FUEL\_H\_TO\_H2\_FRACTION} and it is zero by default because this chemistry is not well understood and has been added to the two-step scheme as a placeholder for future research.
+By default, in the first step, two out of three carbon atoms in the fuel are converted to CO. There is not yet a solid basis for this assumption, and the distribution of carbon to CO and Soot can be changed via the parameter {\ct FUEL\_C\_TO\_CO\_FRACTION} on the {\ct COMB} line. It is 2/3, by default. Also by default one out of five nitrogen atoms in the fuel are converted to HCN. This value is based on testing of nitrogen containing fuels over a range of equivalence ratios \cite{IAFSS:Purser} and can be changed via the parameter {\ct FUEL\_N\_TO\_HCN\_FRACTION}. In addition, a fraction of the hydrogen in the fuel molecule can form H$_2$ in the first step. The controlling parameter is called {\ct FUEL\_H\_TO\_H2\_FRACTION} and it is zero by default because this chemistry is not well understood and has been added to the two-step scheme as a placeholder for future research.
 
-Note that the parameters {\ct CO\_YIELD} and {\ct SOOT\_YIELD} retain their meanings from the single-step simple chemistry model; that is, they represent the {\em post-flame} yields of these species. Essentially, the two-step model acknowledges the fact that CO and Soot are present at much higher concentrations within the flame envelop than their post-flame yields would suggest.
+Note that the parameters {\ct CO\_YIELD}, {\ct SOOT\_YIELD}, and {\ct HCN\_YIELD} retain their meanings from the single-step simple chemistry model; that is, they represent the {\em post-flame} yields of these species. Essentially, the two-step model acknowledges the fact that CO and Soot are present at much higher concentrations within the flame envelop than their post-flame yields would suggest.
 
 The two-step simple chemistry option should only be invoked when you have an interest in near-flame phenomena where the increased concentration of CO and Soot play an important role in the flame chemistry and radiative emission. The resolution of the fire should be reasonably good, as well. What ``reasonably good'' means depends on the particular circumstances, but suffice it to say that you ought to experiment by running simple simulations with and without the two-step option to see if it leads to significantly different results. The cost of the two-step scheme is an additional transport equation for the scalar variable referred to as ``Intermediate Products.''
 
@@ -10054,7 +10060,7 @@ These commands tell {\ct fds2ascii} that you want to convert (binary) boundary f
 
 Table~\ref{tab:output}, spread over the following pages, summarizes the various Output Quantities. The column ``File Type'' lists the allowed output files for the quantities. ``B'' is for Boundary ({\ct BNDF}), ``D'' is for Device ({\ct DEVC}), ``I'' is for Iso-surface ({\ct ISOF}), ``P'' is for Plot3D, ``PA'' for PArticle ({\ct PART}), ``S'' is for Slice ({\ct SLCF}). Be careful when specifying complicated quantities for Iso-surface or Plot3D files, as it requires computation in every gas phase cell.
 
-For those output quantities that require a species name via {\ct SPEC\_ID}, the species implicitly defined when using the simple chemistry combustion model are {\ct 'OXYGEN'}, {\ct 'NITROGEN'}, {\ct 'WATER VAPOR'}, and {\ct 'CARBON DIOXIDE'}. If {\ct CO\_YIELD} and/or {\ct SOOT\_YIELD} are specified on the {\ct REAC} line, then {\ct 'CARBON MONOXIDE'} and {\ct 'SOOT'} are included as output species. The fuel species can be output via the {\ct FUEL} specified on the {\ct REAC} line. As an example of how to use the species names, suppose you want to calculate the integrated mass flux of carbon monoxide through a horizontal plane, like the total amount entrained in a fire plume. Use a ``device'' as follows
+For those output quantities that require a species name via {\ct SPEC\_ID}, the species implicitly defined when using the simple chemistry combustion model are {\ct 'OXYGEN'}, {\ct 'NITROGEN'}, {\ct 'WATER VAPOR'}, and {\ct 'CARBON DIOXIDE'}. If {\ct CO\_YIELD}, {\ct SOOT\_YIELD}, and/or {\ct HCN\_YIELD} are specified on the {\ct REAC} line, then {\ct 'CARBON MONOXIDE'}, {\ct 'SOOT'}, and/or {\ct 'HYDROGEN CYANIDE'} are included as output species. The fuel species can be output via the {\ct FUEL} specified on the {\ct REAC} line. As an example of how to use the species names, suppose you want to calculate the integrated mass flux of carbon monoxide through a horizontal plane, like the total amount entrained in a fire plume. Use a ``device'' as follows
 \begin{lstlisting}
 &DEVC ID='CO_flow', XB=-5,5,-5,5,2,2, QUANTITY='MASS FLUX Z',
       SPEC_ID='CARBON MONOXIDE', SPATIAL_STATISTIC='AREA INTEGRAL' /
@@ -10519,6 +10525,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct FREE\_BURN\_TEMPERATURE}         & Real       & Section~\ref{info:extinction}                & $^\circ$C &  600                 \\ \hline
 {\ct FUEL\_C\_TO\_CO\_FRACTION}       & Real       & Section~\ref{info:two-step_simple_chemistry} &           &  2/3                 \\ \hline
 {\ct FUEL\_H\_TO\_H2\_FRACTION}       & Real       & Section~\ref{info:two-step_simple_chemistry} &           &  0                   \\ \hline
+{\ct FUEL\_N\_TO\_HCN\_FRACTION}      & Real       & Section~\ref{info:two-step_simple_chemistry} &           &  1/5                 \\ \hline
 {\ct INITIAL\_UNMIXED\_FRACTION}      & Real       & Section~\ref{info:turbulent_combustion}      &           & 1.0                  \\ \hline
 {\ct MAX\_CHEMISTRY\_SUBSTEPS}        & Integer    & Section~\ref{info:chem_integration}          &           & 20                   \\ \hline
 {\ct N\_FIXED\_CHEMISTRY\_SUBSTEPS}   & Integer    & Section~\ref{info:chem_integration}          &           & -1                   \\ \hline
@@ -11708,6 +11715,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct FUEL\_RADCAL\_ID}                    & Character      & Section~\ref{info:simple_chemistry}       &                   &                   \\ \hline
 {\ct FWD\_ID}                             & Character      & Section~\ref{info:eqbm_reac}              &                   &                   \\ \hline
 {\ct H}                                   & Real           & Section~\ref{info:simple_chemistry}       &                   & 0                 \\ \hline
+{\ct HCN\_YIELD}                          & Real           & Section~\ref{info:simple_chemistry}       & kg/kg             & 0                 \\ \hline
 {\ct HEAT\_OF\_COMBUSTION}                & Real           & Section~\ref{info:heat_of_combustion}     & kJ/kg             &                   \\ \hline
 {\ct HOC\_COMPLETE}                       & Real           & Section~\ref{info:hoc_complete}           & kJ/kg             &                   \\ \hline
 {\ct ID}                                  & Character      & Section~\ref{info:simple_chemistry}       &                   &                   \\ \hline
