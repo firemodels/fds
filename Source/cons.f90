@@ -158,7 +158,7 @@ INTEGER :: INPUT_FILE_LINE_NUMBER=0        !< Indicator of what line in the inpu
 
 REAL(EB) :: FUEL_C_TO_CO_FRACTION=0.6667_EB !< Fraction of carbon atoms in the fuel that are converted to CO
 REAL(EB) :: FUEL_H_TO_H2_FRACTION=0._EB     !< Fraction of hydrogen atoms in the fuel that are converted to H2
-REAL(EB) :: FUEL_N_TO_HCN_FRACTION=0._EB    !< Fraction of nitrogen atoms in the fuel that are converted to HCN
+REAL(EB) :: FUEL_N_TO_HCN_FRACTION=0.2_EB   !< Fraction of nitrogen atoms in the fuel that are converted to HCN
 
 ! Miscellaneous logical constants
 
