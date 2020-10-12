@@ -1510,9 +1510,10 @@ The algorithms in FDS are designed to work within a certain range of values for 
 
 Typically, an FDS simulation begins at time $t=0$ with ambient conditions. The air temperature is assumed constant with height, and the density and pressure decrease with height (the $z$ direction). This decrease is not noticed in most building scale calculations, but it is important in large outdoor simulations.
 
-There are some scenarios for which it is convenient to change the ambient conditions within rectangular regions of the domain using the namelist keyword {\ct INIT} (Table~\ref{tbl:INIT}). There can be multiple {\ct INIT} lines. IF two rectangular regions defined by {\ct INIT} overlap, it is the second of the overlapping regions that takes precedence, including default conditions. That is, it is possible to overwrite the initial conditions explicitly specified by the first {\ct INIT} line with the default initial conditions implied by the second {\ct INIT} line.
+There are some scenarios for which it is convenient to change the ambient conditions within rectangular regions of the domain using the namelist keyword {\ct INIT} (Table~\ref{tbl:INIT}). There can be multiple {\ct INIT} lines. If two rectangular regions defined by {\ct INIT} overlap, it is the second of the overlapping regions that takes precedence, including default conditions. That is, it is possible to overwrite the initial conditions explicitly specified by the first {\ct INIT} line with the default initial conditions implied by the second {\ct INIT} line.
 
 \section{Gas Species}
+\label{info:init_species}
 
 Species concentrations can be initialized using pairs of {\ct SPEC\_ID(N)} and {\ct MASS\_FRACTION(N)} where {\ct N} is an ordinal index starting from 1. Note that {\ct N} is not necessarily indicative of the order in which the species are listed in the input file. Also note that the background species cannot be specified when using {\ct MASS\_FRACTION}.  The mass fraction of the background species will be set to account for any mass fraction not specified with other species.
 Make sure that you specify all species (components of {\ct MASS\_FRACTION(N)}) on the same {\ct INIT} line for example,
@@ -1521,12 +1522,13 @@ Make sure that you specify all species (components of {\ct MASS\_FRACTION(N)}) o
       MASS_FRACTION(1)=0.21, SPEC_ID(1)='OXYGEN',
       MASS_FRACTION(2)=0.06, SPEC_ID(2)='PROPANE' /
 \end{lstlisting}
-Here, within the region whose bounds are given by the sextuplet {\ct XB}, the initial mass fractions of oxygen and propane will be initialized to 0.21 and 0.06, respectively. You must specify the gas species using the {\ct SPEC} namelist group. See Section~\ref{info:SPEC} for details.  Note that {\ct VOLUME\_FRACTION} can be substituted for {\ct MASS\_FRACTION}.
+Here, within the region whose bounds are given by the sextuplet {\ct XB}, the initial mass fractions of oxygen and propane will be initialized to 0.21 and 0.06, respectively. You must specify the gas species using the {\ct SPEC} namelist group. See Chapter~\ref{info:SPEC} for details.  Note that {\ct VOLUME\_FRACTION} can be substituted for {\ct MASS\_FRACTION}.
 
 You may use the shortcut {\ct DB='WHOLE DOMAIN'} in place of {\ct XB}, which is equivalent to specifying the values of $xmin$, $xmax$, etc., as domain boundaries with {\ct XB}.
 
 
 \section{Temperature}
+\label{info:init_temperature}
 
 To modify the local initial temperature, add lines of the form,
 \begin{lstlisting}
@@ -1541,6 +1543,7 @@ This indicates that the temperature shall be 60~$^\circ$C instead of the ambient
 \end{lstlisting}
 
 \section{Density}
+\label{info:init_density}
 
 When specifying an initial density it is important to recognize the order in which FDS solves the governing equations. In the following example, initial species mass fractions, temperature, and density are all initialized in the same volume.
 \begin{lstlisting}
@@ -1551,16 +1554,14 @@ When specifying an initial density it is important to recognize the order in whi
 \end{lstlisting}
 This example is a case where we have over-defined the problem. Since the temperature is computed from the equation of state using the specified density, the specified temperature will not, in general, satisfy the equation of state, and FDS will overwrite the specified temperature.
 
-\section{Heat Release Rate Per Unit Volume (HRRPUV)}
+\section{Heat Release Rate Per Unit Volume}
 \label{info:init_hrrpuv}
 
 The {\ct INIT} line may also be used to specify a volumetric heat source term. For example,
 \begin{lstlisting}
-&INIT XB=0.0,0.1,0.0,0.025,0.0,0.1, HRRPUV=1000. /
+&INIT XB=0.0,0.1,0.0,0.025,0.0,0.1, HRRPUV=1000., RADIATIVE_FRACTION=0.25 /
 \end{lstlisting}
-indicates that the region bounded by {\ct XB} shall generate 1000~kW/m$^3$. This feature is mainly useful for diagnostics, or to model a fire in a very simple way.
-
-You may specify a time ramp for volumetric heat source via {\ct RAMP\_Q}.  For example,
+indicates that the region bounded by {\ct XB} shall generate 1000~kW/m$^3$, 25~\% of which is radiative. The default value of {\ct RADIATIVE\_FRACTION} in this context is 0. This feature is mainly useful for diagnostics, or to model a fire in a very simple way. You may specify a time ramp for volumetric heat source via {\ct RAMP\_Q}.  For example,
 \begin{lstlisting}
 &RAMP ID='q1', T=0,  F=0/
 &RAMP ID='q1', T=60, F=1/
@@ -1574,7 +1575,7 @@ The volumetric heat source may be applied both to the gas phase and a solid usin
 \label{info:velo_restart}
 \label{info:CSVF}
 
-It may be useful to start a calculation from an established flow field.  Usually this can be accomplished with the normal restart functionality.  But in some circumstances restart may be fragile, or you may want to specify a profile throughout the entire domain.  For such situations we have added the ability to read the velocity field information from a comma-separated value (.csv) file.  You have the option of creating the velocity file using FDS or creating your own.  To generate the velocity initialization file with FDS, in the input file add a {\ct DUMP} line with a {\ct UVW\_TIMER} (time in seconds).  The timer will accept up to 10 values, and will write velocity files for each mesh and each timer index to the working directory.  For example, if you want to write the simulation velocity field at 10 minutes into the run, add the following:
+It may be useful to start a calculation from an established flow field.  Usually this can be accomplished with the normal restart functionality, but you may want to specify your own flow field throughout the domain. The flow field is stored in a comma-separated value (.csv) file.  You have the option of creating this file using FDS or creating your own.  To generate the file with FDS, in the input file add the array {\ct UVW\_TIMER} to the {\ct DUMP} line.  You can specify up to 10 times at which the velocity field will be saved to the working directory.  For example, if you want to write the velocity field at 10 minutes into the run, add the following:
 \begin{lstlisting}
 &DUMP UVW_TIMER(1)=600 /
 \end{lstlisting}
@@ -1602,7 +1603,7 @@ The above approach is deprecated because it may be cumbersome if a large number 
 \begin{lstlisting}
 &CSVF UVWFILE='CHID_t001_m', PER_MESH=T /
 \end{lstlisting}
-and FDS will read {\ct CHID\_t001\_m001.csv} through {\ct CHID\_t001\_m016.csv} in the order of the {\ct MESH} lines (note that a {\ct MULT} line for the meshes may also be used).  Note that the the {\ct UVWFILE} string should contain the ``{\ct m}'' (if it exists) as this is not automatically appended.
+and FDS will read {\ct CHID\_t001\_m001.csv} through {\ct CHID\_t001\_m016.csv} in the order of the {\ct MESH} lines (note that a {\ct MULT} line for the meshes may also be used).  Note that the {\ct UVWFILE} string should contain the ``{\ct m}'' (if it exists) as this is not automatically appended.
 
 
 
@@ -10967,8 +10968,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CROWN\_BASE\_HEIGHT}         & Real              & Section~\ref{info:trees}                      & m              &               \\ \hline
 {\ct CROWN\_BASE\_WIDTH}          & Real              & Section~\ref{info:trees}                      & m              &               \\ \hline
 {\ct CTRL\_ID}                    & Character         & Section~\ref{info:initial_droplets}           &                &               \\ \hline
-{\ct DB}                          & Character         & Section~\ref{info:INIT}                       &                &               \\ \hline
-{\ct DENSITY}                     & Real              & Section~\ref{info:INIT}                       & kg/m$^3$       & Ambient       \\ \hline
+{\ct DB}                          & Character         & Section~\ref{info:gas_species}                &                &               \\ \hline
+{\ct DENSITY}                     & Real              & Section~\ref{info:init_density}               & kg/m$^3$       & Ambient       \\ \hline
 {\ct DEVC\_ID}                    & Character         & Section~\ref{info:initial_droplets}           &                &               \\ \hline
 {\ct DIAMETER}                    & Real              & Section~\ref{info:initial_droplets}           & \si{\micro m}  &               \\ \hline
 {\ct DT\_INSERT}                  & Real              & Section~\ref{info:initial_droplets}           & s              &               \\ \hline
@@ -10976,9 +10977,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct DY}                          & Real              & Section~\ref{info:initial_droplets}           & m              & 0.            \\ \hline
 {\ct DZ}                          & Real              & Section~\ref{info:initial_droplets}           & m              & 0.            \\ \hline
 {\ct HEIGHT}                      & Real              & Section~\ref{info:initial_droplets}           & m              &               \\ \hline
-{\ct HRRPUV}                      & Real              & Section~\ref{info:INIT}                       & \si{kW/m^3}    &               \\ \hline
+{\ct HRRPUV}                      & Real              & Section~\ref{info:init_hrrpuv}                & \si{kW/m^3}    &               \\ \hline
 {\ct ID}                          & Character         & Section~\ref{info:PART_SURF}                  &                &               \\ \hline
-{\ct MASS\_FRACTION(:)}           & Real Array        & Section~\ref{info:INIT}                       & kg/kg          & Ambient       \\ \hline
+{\ct MASS\_FRACTION(:)}           & Real Array        & Section~\ref{info:init_species}               & kg/kg          & Ambient       \\ \hline
 {\ct MASS\_PER\_TIME}             & Real              & Section~\ref{info:initial_droplets}           & kg/s           &               \\ \hline
 {\ct MASS\_PER\_VOLUME}           & Real              & Section~\ref{info:initial_droplets}           & \si{kg/m^3}    & 1             \\ \hline
 {\ct MULT\_ID }                   & Character         & Section~\ref{info:MULT}                       &                &               \\ \hline
@@ -10988,17 +10989,18 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct PART\_ID}                    & Character         & Section~\ref{info:initial_droplets}           &                &               \\ \hline
 {\ct PARTICLE\_WEIGHT\_FACTOR}    & Real              & Section~\ref{info:initial_droplets}           &                & 1.            \\ \hline
 {\ct PATH\_RAMP(3)}               & Character         & Section~\ref{info:path_ramp}                  &                &               \\ \hline
+{\ct RADIATIVE\_FRACTION}         & Real              & Section~\ref{info:init_hrrpuv}                &                & 0.            \\ \hline
 {\ct RADIUS}                      & Real              & Section~\ref{info:initial_droplets}           & m              &               \\ \hline
 {\ct RAMP\_Q}                     & Character         & Section~\ref{info:init_hrrpuv}                &                &               \\ \hline
 {\ct SHAPE}                       & Character         & Section~\ref{info:initial_droplets}           &                & {\ct 'BLOCK'} \\ \hline
-{\ct SPEC\_ID(N)}                 & Character Array   & Section~\ref{info:INIT}                       &                &               \\ \hline
-{\ct TEMPERATURE}                 & Real              & Section~\ref{info:INIT}                       & \si{\degree C} & {\ct TMPA}    \\ \hline
+{\ct SPEC\_ID(N)}                 & Character Array   & Section~\ref{info:init_species}               &                &               \\ \hline
+{\ct TEMPERATURE}                 & Real              & Section~\ref{info:init_temperature}           & \si{\degree C} & {\ct TMPA}    \\ \hline
 {\ct T\_INSERT}                   & Real              & Section~\ref{info:delayed_insertion}          & s              & {\ct T\_BEGIN}\\ \hline
 {\ct TREE\_HEIGHT}                & Real              & Section~\ref{info:trees}                      & m              &               \\ \hline
 {\ct UNIFORM}                     & Logical           & Section~\ref{info:initial_droplets}           &                & {\ct .FALSE.} \\ \hline
 {\ct UVW(3)}                      & Real Array        & Section~\ref{info:initial_droplets}           & m/s            & 0.            \\ \hline
-{\ct VOLUME\_FRACTION(:)}         & Real Array        & Section~\ref{info:INIT}                       & mol/mol        & Ambient       \\ \hline
-{\ct XB(6)}                       & Real Array        & Section~\ref{info:INIT}                       & m              &               \\ \hline
+{\ct VOLUME\_FRACTION(:)}         & Real Array        & Section~\ref{info:init_species}               & mol/mol        & Ambient       \\ \hline
+{\ct XB(6)}                       & Real Array        & Section~\ref{info:gas_species}                & m              &               \\ \hline
 {\ct XYZ(3)}                      & Real Array        & Section~\ref{info:initial_droplets}           & m              &               \\ \hline
 \end{longtable}
 
