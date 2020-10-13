@@ -2922,7 +2922,7 @@ MATL_LOOP: DO N=1,N_MATL
       WRITE(LU_OUTPUT,'(A,A,A,F8.2)')'        ',SPECIES_MIXTURE(NS)%ID,': ',ML%NU_GAS(NS,NR)
       ENDDO
       WRITE(LU_OUTPUT,'(A,ES9.2)')'        A (1/s)    : ',ML%A(NR)
-      WRITE(LU_OUTPUT,'(A,ES9.2)')'        E (J/mol): ',ML%E(NR)/1000.
+      WRITE(LU_OUTPUT,'(A,ES9.2)')'        E (J/mol)  : ',ML%E(NR)/1000.
       IF (ML%H_R_I(NR)>0) THEN
          WRITE(LU_OUTPUT,'(A,ES9.2)')'        H_R (kJ/kg): ',EVALUATE_RAMP(TMPA,0._EB,ML%H_R_I(NR))/1000._EB
       ELSE
