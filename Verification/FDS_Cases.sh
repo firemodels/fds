@@ -454,7 +454,9 @@ $QFDS -d Pyrolysis pyro3d_wood_char.fds
 $QFDS -d Pyrolysis pyro3d_vs_pyro1d.fds
 $QFDS -d Pyrolysis pyro3d_vs_pyro1d_wood_moist.fds
 $QFDS -d Pyrolysis pyro3d_transport.fds
-
+$QFDS -d Pyrolysis solid_particle_decomposition_1.fds
+$QFDS -d Pyrolysis solid_particle_decomposition_2.fds
+$QFDS -d Pyrolysis solid_particle_decomposition_3.fds
 
 $QFDS -d Radiation adiabatic_surface_temperature.fds
 $QFDS -d Radiation droplet_absorption_cart.fds
