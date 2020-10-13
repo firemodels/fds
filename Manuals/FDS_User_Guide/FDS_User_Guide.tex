@@ -1515,16 +1515,21 @@ There are some scenarios for which it is convenient to change the ambient condit
 \section{Gas Species}
 \label{info:init_species}
 
-Species concentrations can be initialized using pairs of {\ct SPEC\_ID(N)} and {\ct MASS\_FRACTION(N)} where {\ct N} is an ordinal index starting from 1. Note that {\ct N} is not necessarily indicative of the order in which the species are listed in the input file. Also note that the background species cannot be specified when using {\ct MASS\_FRACTION}.  The mass fraction of the background species will be set to account for any mass fraction not specified with other species.
-Make sure that you specify all species (components of {\ct MASS\_FRACTION(N)}) on the same {\ct INIT} line for example,
+Species concentrations can be initialized as follows:
 \begin{lstlisting}
 &INIT XB=0.0,0.1,0.0,0.025,0.0,0.1,
-      MASS_FRACTION(1)=0.21, SPEC_ID(1)='OXYGEN',
-      MASS_FRACTION(2)=0.06, SPEC_ID(2)='PROPANE' /
+      SPEC_ID(1)='OXYGEN',  MASS_FRACTION(1)=0.23, 
+      SPEC_ID(2)='PROPANE', MASS_FRACTION(2)=0.06  /
 \end{lstlisting}
-Here, within the region whose bounds are given by the sextuplet {\ct XB}, the initial mass fractions of oxygen and propane will be initialized to 0.21 and 0.06, respectively. You must specify the gas species using the {\ct SPEC} namelist group. See Chapter~\ref{info:SPEC} for details.  Note that {\ct VOLUME\_FRACTION} can be substituted for {\ct MASS\_FRACTION}.
-
-You may use the shortcut {\ct DB='WHOLE DOMAIN'} in place of {\ct XB}, which is equivalent to specifying the values of $xmin$, $xmax$, etc., as domain boundaries with {\ct XB}.
+where {\ct XB} indicates a rectangular volume within the domain where the initial mass fractions of oxygen and propane will be initialized to 0.23 and 0.06, respectively. Note the following rules:
+\begin{itemize}
+\item The indices of {\ct SPEC\_ID} and {\ct MASS\_FRACTION} are not necessarily indicative of the order in which the species are listed in the input file, but rather should come in consecutive order starting from 1.
+\item {\ct VOLUME\_FRACTION(N)} can be used instead of {\ct MASS\_FRACTION(N)} as long as they are not used together on the same input line. 
+\item Specify all species components on the same {\ct INIT} line.
+\item The initial concentration of the background gas species cannot be specified this way.  The mass or volume fraction of the background species will be set to account for the unspecified fraction.
+\item All gas species must be specified using the {\ct SPEC} or {\ct REAC} namelist groups. In other words, any species listed must be individually tracked and not just a component of a lumped species. See Chapter~\ref{info:SPEC} for details.
+\item You may use the shortcut {\ct DB='WHOLE DOMAIN'} in place of {\ct XB=...}, which is equivalent to specifying the entire domain as the region of initialization.
+\end{itemize}
 
 
 \section{Temperature}
@@ -1537,7 +1542,7 @@ To modify the local initial temperature, add lines of the form,
 This indicates that the temperature shall be 60~$^\circ$C instead of the ambient within the bounds given by {\ct XB}. The {\ct INIT} construct may be useful in examining the influence of stack effect in a building, where the temperature is different inside and outside. If you wanted to initialize both temperature and species in the same volume, both quantities would use the same {\ct INIT} line,
 \begin{lstlisting}
 &INIT XB=0.0,0.1,0.0,0.025,0.0,0.1,
-      MASS_FRACTION(1)=0.21, SPEC_ID(1)='OXYGEN',
+      MASS_FRACTION(1)=0.23, SPEC_ID(1)='OXYGEN',
       MASS_FRACTION(2)=0.06, SPEC_ID(2)='PROPANE',
       TEMPERATURE=60. /
 \end{lstlisting}
@@ -1548,11 +1553,11 @@ This indicates that the temperature shall be 60~$^\circ$C instead of the ambient
 When specifying an initial density it is important to recognize the order in which FDS solves the governing equations. In the following example, initial species mass fractions, temperature, and density are all initialized in the same volume.
 \begin{lstlisting}
 &INIT XB=0.0,0.1,0.0,0.025,0.0,0.1,
-      MASS_FRACTION(1)=0.21, SPEC_ID(1)='OXYGEN',
+      MASS_FRACTION(1)=0.23, SPEC_ID(1)='OXYGEN',
       MASS_FRACTION(2)=0.06, SPEC_ID(2)='PROPANE',
       TEMPERATURE=60., DENSITY=1.13 /
 \end{lstlisting}
-This example is a case where we have over-defined the problem. Since the temperature is computed from the equation of state using the specified density, the specified temperature will not, in general, satisfy the equation of state, and FDS will overwrite the specified temperature.
+This is a case where we have over-specified the parameters. Since the temperature is computed from the equation of state using the specified density, the specified temperature will not, in general, satisfy the equation of state, and FDS will overwrite the specified temperature.
 
 \section{Heat Release Rate Per Unit Volume}
 \label{info:init_hrrpuv}
@@ -10968,7 +10973,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CROWN\_BASE\_HEIGHT}         & Real              & Section~\ref{info:trees}                      & m              &               \\ \hline
 {\ct CROWN\_BASE\_WIDTH}          & Real              & Section~\ref{info:trees}                      & m              &               \\ \hline
 {\ct CTRL\_ID}                    & Character         & Section~\ref{info:initial_droplets}           &                &               \\ \hline
-{\ct DB}                          & Character         & Section~\ref{info:gas_species}                &                &               \\ \hline
+{\ct DB}                          & Character         & Section~\ref{info:init_species}               &                &               \\ \hline
 {\ct DENSITY}                     & Real              & Section~\ref{info:init_density}               & kg/m$^3$       & Ambient       \\ \hline
 {\ct DEVC\_ID}                    & Character         & Section~\ref{info:initial_droplets}           &                &               \\ \hline
 {\ct DIAMETER}                    & Real              & Section~\ref{info:initial_droplets}           & \si{\micro m}  &               \\ \hline
@@ -11000,7 +11005,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct UNIFORM}                     & Logical           & Section~\ref{info:initial_droplets}           &                & {\ct .FALSE.} \\ \hline
 {\ct UVW(3)}                      & Real Array        & Section~\ref{info:initial_droplets}           & m/s            & 0.            \\ \hline
 {\ct VOLUME\_FRACTION(:)}         & Real Array        & Section~\ref{info:init_species}               & mol/mol        & Ambient       \\ \hline
-{\ct XB(6)}                       & Real Array        & Section~\ref{info:gas_species}                & m              &               \\ \hline
+{\ct XB(6)}                       & Real Array        & Section~\ref{info:init_species}               & m              &               \\ \hline
 {\ct XYZ(3)}                      & Real Array        & Section~\ref{info:initial_droplets}           & m              &               \\ \hline
 \end{longtable}
 
