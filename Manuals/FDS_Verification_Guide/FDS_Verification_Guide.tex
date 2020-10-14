@@ -3472,12 +3472,9 @@ When using a non-predefined fuel, one may have heat of combustion data represent
 
 
 
-\section{Fractional Effective Dose (FED) and Fractional Irritant Concentration (FIC) (\texorpdfstring{\textct{FED\_FIC}}{FED\_FIC}) }
-\label{FED_FIC}
-\label{FED_FIC_SMIX}
+\section{Fractional Effective Dose (FED) and Fractional Irritant Concentration (FIC) ) }
 
-The Fractional Effective Dose index (FED), developed by Purser~\cite{SFPE:Purser}, is a commonly used measure of human incapacitation
-due to the combustion gases. The FED value is calculated as
+The Fractional Effective Dose index (FED), developed by Purser~\cite{SFPE:Purser}, is a commonly used measure of human incapacitation due to the combustion gases. The FED value is calculated as
 \be
 \mathrm{FED}_\mathrm{tot} = (\mathrm{FED}_\mathrm{CO} + \mathrm{FED}_\mathrm{CN} + \mathrm{FED}_\mathrm{NO_x} + \mathrm{FLD}_\mathrm{irr}) \times \mathrm{HV}_\mathrm{CO_2} + \mathrm{FED}_\mathrm{O_2}
 \ee
@@ -3546,6 +3543,10 @@ depends upon the immediate concentrations of irritants. The overall irritant con
 where the numerators are the instantaneous concentrations of each irritant, and the denominators are the concentrations of respective irritants
 expected to cause incapacitation in half the population. The incapacitating concentrations~\cite{SFPE:Purser} are given in the table above.
 
+\subsection{FED and FIC of gas mixtures (\texorpdfstring{\textct{FED\_FIC}}{FED\_FIC}) }
+\label{FED_FIC}
+\label{FED_FIC_SMIX}
+
 The FED and FIC values were computed from specified constant gas concentrations for four cases using an external script.
 The gas concentrations are listed in the table below. The concentrations are in ppm.
 \begin{center}
@@ -3603,6 +3604,19 @@ Figs.~\ref{FED_FIC_plot} and \ref{FED_FIC_SMIX_plot}.
 \vskip-\baselineskip
 \caption[The FED and FIC values in \textct{FED\_FIC\_SMIX} test cases]{Comparison of FED and FIC predictions with expected values using \textct{SMIX}.}
 \label{FED_FIC_SMIX_plot}
+\end{figure}
+
+\subsection{FED from post-combustion yield of CO and HCN (\texorpdfstring{\textct{FED\_CO\_HCN}}{FED\_CO\_HCN}) }
+\label{FED_CO_HCN}
+The calculation of FED resulting from post-combustion yields of CO$_2$, CO and HCN, and the corresponding oxygen reduction is tested by specifying a combustion reaction of Polyisocyanurate (PIR) foam with 1 \% CO yield and 0.5 \% yield of HCN. The computational volume is intialized with 15 vol-\% of combustion products. The species concentrations were measured by volume fraction devices, and the expected value of FED index was calculated using an external Matlab script. The results are shown in~\ref{fig:FED_CO_HCN}.
+
+\begin{figure}[ht]
+\centering
+\begin{tabular}{c}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FED_CO_HCN}
+\end{tabular}
+\caption[The FED value in \textct{FED\_CO\_HCN} case]{Comparison of predicted and expected FED resulting from the post-combustion yields of CO and HCN.}
+\label{fig:FED_CO_HCN}
 \end{figure}
 
 
