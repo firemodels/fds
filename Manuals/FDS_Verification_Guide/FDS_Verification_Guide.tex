@@ -4436,9 +4436,52 @@ Figure~\ref{surf_mass_two_species} shows the results of three test cases involvi
 \label{surf_mass_two_species}
 \end{figure}
 
+\clearpage
 
+\subsection{Rate of Solid Particle Decomposition (\texorpdfstring{\textct{solid\_particle\_decomposition}}{solid\_particle\_decomposition})}
+\label{sec:solid_particle_decomposition}
+\label{solid_particle_decomposition}
 
+\textbf{Paul Papas and Chamgmin Cao, Raytheon Technologies}\\
 
+In this set of cases we present a simple analytical solution for the solid phase decomposition of a spherical particle with a constant rate of reaction under isothermal conditions.  Let $m(t)$ denote the mass of a spherical particle with radius $r(t)$, changing with time, $t$.  The initial mass is $m_0 = m(t=0)$.  The extent of reaction is defined as
+\begin{equation}
+\alpha \equiv \frac{m_0-m}{m_0}
+\end{equation}
+
+The density of the material, $\rho$, is a constant.  The volume is denoted $V(t)$.  The rate of change of $\alpha$ for a first-order reaction is given by \cite{Khawam:2006}
+\begin{equation}
+\frac{\d \alpha}{\d t} = k \, (1-\alpha)
+\end{equation}
+where the rate constant of the reaction is
+\begin{equation}
+k = A e^{-E_a/(RT)}
+\end{equation}
+Here, $A$ is the Arrhenius parameter (1/s) and $E_a$ is the activation energy (J/mol); $R$ is the gas constant (8.3145 J/mol/K) and $T$ is temperature in K.
+
+Integrating with constant density gives
+\begin{equation}
+\int \frac{\d \alpha}{1-\alpha} = k \int \d t \quad \Rightarrow \quad \left[\ln(1-\alpha)\right]_{\alpha_0}^{\alpha} = -k t
+\end{equation}
+
+\begin{equation}
+\frac{1-\alpha}{1-\alpha_0} = e^{-kt} \quad ; \quad \alpha_0=0 \quad ; \quad \alpha = 1-\frac{m}{m_0}
+\end{equation}
+
+\begin{equation}
+\frac{m}{m_0} = e^{-k t} \quad \Rightarrow \quad \frac{\rho V}{\rho_0 V_0} = e^{-k t} \quad \Rightarrow \quad r^3 = r_0^3 \, e^{-k t}
+\end{equation}
+
+\subsection*{Example}
+
+In Fig.~\ref{fig:solid_particle_decomposition} below, we take $A = 3.4e11$ 1/s, $E_a = 103000$ J/mol, $r_0 = 2.5$ $\mu$m, and compare FDS with the analytical solution for $T=[420, 450, 500]$ K.
+
+\begin{figure}[!h]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/solid_particle_decomposition}
+\caption[The \textct{solid\_particle\_decomposition} test cases]{Comparison of analytical and predicted particle diameter for a first-order solid phase reaction under isothermal conditions.}
+\label{fig:solid_particle_decomposition}
+\end{figure}
 
 \section{Burning Rate of a Small Object (\texorpdfstring{\textct{cell\_burn\_away}}{cell\_burn\_away})}
 \label{cell_burn_away}
