@@ -54,6 +54,7 @@ CHECKCASES=
 RERUN=
 DELAY=
 SUBSET=
+RESTART=
 FIREBOT_LITE=
 
 function usage {
@@ -77,6 +78,7 @@ echo "     example: an option of 10 would cause FDS to stop after 10 iterations"
 echo "-o nthreads - run FDS with a specified number of threads [default: $nthreads]"
 echo "-O - use OpenMPI version of FDS"
 echo "-q queue_name - run cases using the queue queue_name [default: batch]"
+echo "-r option - run restart test cases; option=1 run up to restart time, option=2 run after restart time"
 echo "-R - run only regular (non-benchmark) cases"
 echo "-s - stop FDS runs"
 echo "-S - run cases in FDS_Cases_Subset.sh"
@@ -127,7 +129,7 @@ cd $SVNROOT
 export SVNROOT=`pwd`
 cd $CURDIR
 
-while getopts 'bCdD:e:Fghj:Jm:o:Oq:RsStw:W' OPTION
+while getopts 'bCdD:e:Fghj:Jm:o:Oq:r:RsStw:W' OPTION
 do
 case $OPTION in
   b)
@@ -186,6 +188,17 @@ case $OPTION in
    ;;
   q)
    QUEUE="$OPTARG"
+   ;;
+  r)
+   BENCHMARK=
+   GEOMCASES=
+   REGULAR=
+   RERUN=
+   SUBSET=
+   RESTART="$OPTARG"
+   if [ "$RESTART" != "2" ]; then
+     RESTART=1
+   fi
    ;;
   R)
    BENCHMARK=
@@ -305,6 +318,20 @@ if [ "$REGULAR" == "1" ]; then
     ./FDS_Cases.sh
    if [ "$CHECKCASES" == "" ]; then
       echo Cases in FDS_Cases.sh submitted
+   fi
+fi
+
+cd $CURDIR
+cd ..
+if [ "$RESTART" != "" ]; then
+    ./RESTART_Cases.sh $RESTART
+   if [ "$CHECKCASES" == "" ]; then
+      echo Cases in RESTART_Cases.sh submitted
+      if [ "$RESTART" == "1" ]; then
+        echo "(before restart time)"
+      else
+        echo "(after restart time)"
+      fi
    fi
 fi
 
