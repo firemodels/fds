@@ -115,7 +115,6 @@ TYPE LAGRANGIAN_PARTICLE_CLASS_TYPE
    LOGICAL :: BREAKUP=.FALSE.               !< Flag indicating if paricles or droplets break-up
    LOGICAL :: CHECK_DISTRIBUTION=.FALSE.    !< Flag indicating if diagnostic output on size distribution is specified
    LOGICAL :: FUEL=.FALSE.                  !< Flag indicating if droplets evaporate into fuel gas
-   LOGICAL :: SECOND_ORDER_PARTICLE_TRANSPORT=.FALSE. !< Flag indicating second-order accurate particle position update
    LOGICAL :: DUCT_PARTICLE=.FALSE.         !< Flag indicating if particles can pass through a duct
    LOGICAL :: EMBER_PARTICLE=.FALSE.        !< Flag indicating if particles can become flying embers
    LOGICAL :: ADHERE_TO_SOLID=.FALSE.       !< Flag indicating if particles can stick to a solid
