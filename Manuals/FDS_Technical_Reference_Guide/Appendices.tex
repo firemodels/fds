@@ -1397,133 +1397,32 @@ FDS uses a value of $C_\nu = 0.1$ for the Deardorff model constant.
 \chapter{Fluid-Particle Momentum Transfer}
 \label{particle_momentum_transfer}
 
-The trajectories of Lagrangian particles in FDS could be calculated with Forward Euler (FE) time integration. However, Forward Euler extracts momentum from the cell corresponding to each particle's initial position and this may cause large changes in the flow field and ultimately instability unless the time step is extremely small. Consequently, a stable, single-step approximate solution is developed and is implemented in FDS.
-
-Several effects are neglected in this formulation. One is the effect of the change in droplet mass between  time steps. The droplet's evaporation is not coupled to this model. This is justified because the change in droplet mass per time step is small. A second neglected effect is the change in drag coefficient between time steps. This is justified because of the large uncertainties in the drag coefficients. Modeling the time derivative of the drag coefficient would not improve accuracy beyond these uncertainties, but it would slow down the computation.
-
-\subsubsection*{Relative velocities}
-Let $m_{\rm p}$ denote the particle mass, $\mathbf{u}$ the particle velocity, $A_\text{p,c}$ the particle cross-sectional area, $C_\text{d}$ the particle drag coefficient, $\rho$ the fluid mass density, $\mathbf{U}$ the fluid velocity around the particle, $V_\text{g}$ the volume occupied by the fluid in a cell, $M \equiv \rho V_\text{g}$ the fluid mass of a cell, $n_\text{p}$ the number of particles in a cell, $M_\text{p} \equiv M/n_\text{p}$ the average fluid mass per particle in a cell, and $\mathbf{g}$ the gravitational acceleration vector.
-
-The equations of motion of the particles and fluid are formulated as follows from Newton's second law,
-\begin{align}
+The trajectory of a Lagrangian particle is governed by the momentum conservation equation:
+\begin{equation}
     \label{particle_eom}
-    m_{\rm p} \frac{\d \mathbf{u}}{\d t} &= - \frac{1}{2} \rho C_\text{d} A_\text{p,c} (\mathbf{u} - \mathbf{U}) |\mathbf{u} - \mathbf{U}| + m_{\rm p} \mathbf{g} \\[.1in]
-    \label{fluid_eom}
-    M_{\rm p} \frac{\d \mathbf{U}}{\d t} &= \frac{1}{2} \rho C_\text{d} A_\text{p,c} (\mathbf{u} - \mathbf{U}) |\mathbf{u} - \mathbf{U}|
-\end{align}
-The fluid Eq.\ (\ref{fluid_eom}) is a greatly simplified version of Eq.\ (\ref{momeq}). It exists to get a reasonable estimate of the momentum coupling between the fluid and particle phases. Because it neglects terms corresponding to the pressure gradient, viscosity, etc., it is at best first-order accurate when those effects exist. However, unlike first-order accurate Forward Euler, this approach is stable. Additional terms could be added to improve accuracy in certain verification test cases, however, the current approach would solve these with a Forward Euler like step, which can cause instabilities if these terms are not constant. Thus, for the moment these terms are neglected despite their potential utility.
+    m_{\rm p} \frac{\d \mathbf{u}_{\rm p}}{\d t} = - \frac{1}{2} \rho C_\text{d} A_\text{p,c} (\mathbf{u}_{\rm p} - \mathbf{u}) \|\mathbf{u}_{\rm p} - \mathbf{u}\| + m_{\rm p} \mathbf{g}
+\end{equation}
+where $m_{\rm p}$ is the particle mass, $\mathbf{u}_{\rm p}(t)$ the particle velocity, $A_\text{p,c}$ the particle cross-sectional area, $C_\text{d}$ the drag coefficient, $\rho$ the gas density, $\mathbf{u}$ the gas velocity in the vicinity of the particle, and $\mathbf{g}$ the gravity vector. There is no analytical solution to this equation, but its linearized form:
+\begin{equation}
+   \frac{\d \mathbf{u}_{\rm p}}{\d t} = - \beta (\mathbf{u}_{\rm p} - \mathbf{u}) + \mathbf{g}  \quad \; \quad \beta = \frac{1}{2 m_{\rm p}} \rho C_\text{d} A_\text{p,c} \|\mathbf{u}_{\rm p}(0) - \mathbf{u}\|
+\end{equation}
+has the solution:
+\begin{equation}
+   \label{part_soln}
+   \mathbf{u}_{\rm p}(t) = \mathbf{u} + \left( \mathbf{u}_{\rm p}(0) - \mathbf{u} - \frac{\mathbf{g}}{\beta} \right) \hbox{e}^{-\beta t} + \frac{\mathbf{g}}{\beta}
+\end{equation}
+assuming that the gas velocity $\mathbf{u}$ is unchanging over the short duration for which this solution is valid.
 
-If we define $\mathbf{u}_\text{r} \equiv \mathbf{u} - \mathbf{U}$ as the relative velocity between the fluid and the particle, we can find a single equation for the relative velocity by dividing both equations by their respective masses (i.e., $m_{\rm p}$ and $M_{\rm p}$) and then subtracting the second from the first. This result is
-\begin{align}
-    \frac{\d \mathbf{u}_\text{r}}{\d t} = -\frac{1}{2} \rho C_\text{d} A_\text{p,c} \left(\frac{1}{m_{\rm p}} + \frac{1}{M_{\rm p}} \right) \mathbf{u}_\text{r} |\mathbf{u}_\text{r}| + \mathbf{g} \,.
-\end{align}
-This equation can be written in compact form as follows:
-\begin{align}
-    \frac{\d \mathbf{u}_\text{r}}{\d t} = -K_{\rm p} \mathbf{u}_\text{r} |\mathbf{u}_\text{r}| + \mathbf{g} \quad ; \quad K_{\rm p} \equiv \frac{1}{2} \rho C_\text{d} A_\text{p,c} \left(\frac{1}{m_{\rm p}} + \frac{1}{M_{\rm p}} \right) \,.
-\end{align}
-This is the drag equation, which has no solution in terms of elementary functions. Our solution approach first finds a solution neglecting gravity and then adds in a series for the gravity terms. $\mathbf{u}_\text{r} \equiv \mathbf{u}_\text{d} + \mathbf{u}_\text{g}$ is the decomposition of $\mathbf{u}_\text{r}$. The velocities $\mathbf{u}_\text{r}$ and $\mathbf{u}_\text{d}$ both have the same initial condition, $\mathbf{u}_\text{d}(0) = \mathbf{u}_\text{r}(0) \equiv \mathbf{u}(0) - \mathbf{U}(0)$. And $\mathbf{u}_\text{d}$ satisfies the drag equation without gravity, specifically
-\begin{align}
-    \frac{\d \mathbf{u}_\text{d}}{\d t} = -K_{\rm p} \mathbf{u}_\text{d} |\mathbf{u}_\text{d}|
-\end{align}
-The solution subject to these initial conditions is
-\begin{align}
-    \label{ud_exact}
-    \mathbf{u}_\text{d}(t) = \frac{\mathbf{u}(0) - \mathbf{U}(0)}{1 + \beta_{\rm p} t} \quad ; \quad \beta_{\rm p} \equiv K_{\rm p} |\mathbf{u}_{\text{r}}(0)|
-\end{align}
-We can decompose $\mathbf{u}_\text{r}$ to find a series solution for $\mathbf{u}_\text{g}$. The function $\mathbf{u}_\text{g}$ can be written $\mathbf{u_g} = \mathbf{u}_\text{r} - \mathbf{u}_\text{d}$.  So the differential equation for $\mathbf{u}_\text{g}$ is
-\begin{align}
-    \frac{\d \mathbf{u}_\text{g}}{\d t} = -K_{\rm p} (\mathbf{u}_\text{r} |\mathbf{u}_\text{r}| - \mathbf{u}_\text{d} |\mathbf{u}_\text{d}|) + \mathbf{g} \quad ; \quad \mathbf{u}_\text{g}(0) = \mathbf{u}_\text{r}(0) - \mathbf{u}_\text{d}(0) = 0
-\end{align}
-The Taylor series for $\mathbf{u}_\text{g}$ about $t = 0$ is
-\begin{align}
-    \mathbf{u}_\text{g}(t) = \mathbf{u}_\text{g}(0) + t \frac{\d \mathbf{u}_\text{g}}{\d t}(0) + \frac{t^2}{2} \frac{\d^2 \mathbf{u}_\text{g}}{\d t^2}(0) + \frac{t^3}{6} \frac{\d^3 \mathbf{u}_\text{g}}{\d t^3}(0) + \cdots \,.
-\end{align}
-The task now is to find the derivatives of $\mathbf{u}_\text{g}$ at $t = 0$. The first derivative, $\d \mathbf{u}_\text{g} / \d t(0)$, can be seen to be $\mathbf{g}$ by inspection, as we would expect from the solution without drag. The second derivative is more complicated, and we find that
-\begin{align*}
-    \frac{\d^2 \mathbf{u}_\text{g}}{\d^2 t} = -K_{\rm p} \frac{\d}{\d t}(\mathbf{u}_\text{r} |\mathbf{u}_\text{r}| - \mathbf{u}_\text{d} |\mathbf{u}_\text{d}|) + \frac{\d \mathbf{g}}{\d t} = -K_{\rm p} \left(|\mathbf{u}_\text{r}| \frac{\d \mathbf{u}_\text{r}}{\d t} + \mathbf{u}_\text{r} \frac{\d |\mathbf{u}_\text{r}|}{\d t} - |\mathbf{u}_\text{d}| \frac{\d \mathbf{u}_\text{d}}{\d t} - \mathbf{u}_\text{d} \frac{\d |\mathbf{u}_\text{d}|}{\d t}\right)
-\end{align*}
-\begin{align}
-    \frac{\d^2 \mathbf{u}_\text{g}}{\d^2 t}(0) = -K_{\rm p} \left(|\mathbf{u}_\text{r}(0)| \frac{\d \mathbf{u}_\text{r}}{\d t}(0) + \mathbf{u}_\text{r}(0) \frac{\d |\mathbf{u}_\text{r}|}{\d t}(0) - |\mathbf{u}_\text{d}(0)| \frac{\d \mathbf{u}_\text{d}}{\d t}(0) - \mathbf{u}_\text{d}(0) \frac{\d |\mathbf{u}_\text{d}|}{\d t}(0)\right)
-\end{align}
-where
-\begin{align*}
-    \frac{\d \mathbf{u}_\text{r}}{\d t}(0) &= -K_{\rm p} \mathbf{u}_{\text{r}}(0) |\mathbf{u}_{\text{r}}(0)| + \mathbf{g}  \\[.1in]
-    \frac{\d \mathbf{u}_\text{d}}{\d t}(0) &= -K_{\rm p} \mathbf{u}_{\text{r}}(0) |\mathbf{u}_{\text{r}}(0)|
-\end{align*}
-% = -K_{\rm p} \left(\frac{\d \mathbf{u} |\mathbf{u}|}{\d t} - \frac{\d \mathbf{u}_\text{d} |\mathbf{u}_\text{d}|}{\d t} \right)
-The derivative of the length of the velocity vectors (speed) must now be found. It can be shown that for an arbitrary vector $\mathbf{a}$,
-\begin{align*}
-    \frac{\d |\mathbf{a}|}{\d t} = \left(\frac{\mathbf{a}}{|\mathbf{a}|}\right) \cdot \frac{\d \mathbf{a}}{\d t}
-\end{align*}
-The derivatives of the vector lengths can be written as
-\begin{align}
-    \frac{\d |\mathbf{u}_\text{r}|}{\d t} &= \left(\frac{\mathbf{u}_\text{r}}{|\mathbf{u}_\text{r}|}\right) \cdot \frac{\d \mathbf{u}_\text{r}}{\d t} = \left(\frac{\mathbf{u}_{\text{r}}(0)}{|\mathbf{u}_{\text{r}}(0)|}\right) \cdot (-K_{\rm p} \mathbf{u}_{\text{r}}(0) |\mathbf{u}_{\text{r}}(0)| + \mathbf{g})  \\[.1in]
-    \frac{\d |\mathbf{u}_\text{d}|}{\d t} &= \left(\frac{\mathbf{u}_\text{d}}{|\mathbf{u}_\text{d}|}\right) \cdot \frac{\d \mathbf{u}_\text{d}}{\d t} = \left(\frac{\mathbf{u}_{\text{r}}(0)}{|\mathbf{u}_{\text{r}}(0)|}\right) \cdot (-K_{\rm p} \mathbf{u}_{\text{r}}(0) |\mathbf{u}_{\text{r}}(0)|)
-\end{align}
-Once all of this is written out and expanded, the second derivative of $\mathbf{u}_\text{g}$ at $t = 0$ is
-\begin{align}
-    \frac{\d^2 \mathbf{u}_\text{g}}{\d^2 t}(0) = -K_{\rm p} \left[\mathbf{u}_{\text{r}}(0) \left(\frac{\mathbf{u}_{\text{r}}(0) \cdot \mathbf{g}}{|\mathbf{u}_{\text{r}}(0)|}\right) + \mathbf{g} |\mathbf{u}_{\text{r}}(0)|\right] = - \beta_{\rm p} \left[\mathbf{u}_{\text{r}}(0) \left(\frac{\mathbf{u}_{\text{r}}(0) \cdot \mathbf{g}}{|\mathbf{u}_{\text{r}}(0)|^2}\right) + \mathbf{g}\right]
-\end{align}
-This has a term parallel to the initial relative velocity and a term parallel to the gravitational acceleration vector.
-
-Assembling all these terms, $\mathbf{u}_\text{g}$ can be found to be
-\begin{align}
-    \label{ug_second_order}
-    \mathbf{u}_\text{g}(t) = \mathbf{g} t - \frac{\beta_{\rm p} t^2}{2} \left[\mathbf{u}_{\text{r}}(0) \left(\frac{\mathbf{u}_{\text{r}}(0) \cdot \mathbf{g}}{|\mathbf{u}_{\text{r}}(0)|^2}\right) + \mathbf{g}\right] + \mathit{O}(t^3)
-\end{align}
-Assembling Eqs. (\ref{ud_exact}) and (\ref{ug_second_order}), the solution for $\mathbf{u}_\text{r}$ is
-\begin{align}
-    \label{ur_short}
-    \mathbf{u}_\text{r}(t) &= \frac{\mathbf{u}_{\text{r}}(0)}{1 + \beta_{\rm p} t} + \mathbf{g} t - \frac{\beta_{\rm p} t^2}{2} \left[\mathbf{u}_{\text{r}}(0) \left(\frac{\mathbf{u}_{\text{r}}(0) \cdot \mathbf{g}}{|\mathbf{u}_{\text{r}}(0)|^2}\right) + \mathbf{g}\right] + \mathit{O}(t^3) \quad ; \quad \beta_{\rm p} \equiv K_{\rm p} |\mathbf{u}_{\text{r}}(0)| %\\
-    %\label{ur_expanded}
-    %\mathbf{u} - \mathbf{U} &= \frac{\mathbf{u}(0) - \mathbf{U}(0)}{1 + \beta_{\rm p} t} + \mathbf{g} t - \frac{\beta_{\rm p} t^2}{2} \left[(\mathbf{u}(0) - \mathbf{U}(0)) \left(\frac{(\mathbf{u}(0) - \mathbf{U}(0)) \cdot \mathbf{g}}{|\mathbf{u}(0) - \mathbf{U}(0)|^2}\right) + \mathbf{g}\right] + \mathit{O}(t^3) \quad ; \quad \beta_{\rm p} \equiv K_{\rm p} |\mathbf{u}(0) - \mathbf{U}(0)|
-\end{align}
-
-\subsubsection*{Particle velocities and positions}
-
-The results of the previous section are not directly useful unless $\mathbf{U}(t)$ is known. $\mathbf{U}(t)$ can be found via the conservation of momentum and this leads to a solution for the particle velocities and positions. The fluid and particles can gain or lose momentum due to gravity. Drag forces exchange momentum between the fluid and particle, which does not change the total momentum of the system. Summing the equations of motion and integrating in time to find the total momentum at an instant, we find that
-\begin{align}
-    m_{\rm p} \mathbf{u}(t) + M_{\rm p} \mathbf{U}(t) &= m_{\rm p} \mathbf{u}(0) + M_{\rm p} \mathbf{U}(0) + m_{\rm p} \mathbf{g} t  \\[.1in]
-    \label{part_mom_cons}
-    \mathbf{u}(t) + \alpha_{\rm p} \mathbf{U}(t) &= \mathbf{u}(0) + \alpha_{\rm p} \mathbf{U}(0) + \mathbf{g} t \quad ; \quad \alpha_{\rm p} \equiv \frac{M_{\rm p}}{m_{\rm p}}
-\end{align}
-After recognizing that $\mathbf{u} = \mathbf{U} + \mathbf{u}_\text{r}$ and $\mathbf{u}_\text{r} \equiv \mathbf{u}_\text{d} + \mathbf{u}_\text{g}$, we can write that $\mathbf{u} = \mathbf{U} + \mathbf{u}_\text{d} + \mathbf{u}_\text{g}$ Substituting that result in and solving for $\mathbf{U}$ leads to
-\begin{align*}
-    \mathbf{U}(t) + \mathbf{u}_\text{d}(t) + \mathbf{u}_\text{g}(t) + \alpha_{\rm p} \mathbf{U}(t) &= \mathbf{u}(0) + \alpha_{\rm p} \mathbf{U}(0) + \mathbf{g} t  \\[.1in]
-    \mathbf{U}(t) + \frac{\mathbf{u}_{\text{r}}(0)}{1 + \beta_{\rm p} t} + \mathbf{u}_\text{g}(t) + \alpha_{\rm p} \mathbf{U}(t) &= \mathbf{u}(0) + \alpha_{\rm p} \mathbf{U}(0) + \mathbf{g} t
-\end{align*}
-\begin{align}
-    \label{mom_U_p}
-    \mathbf{U}(t) = \frac{\mathbf{u}(0) + \alpha_{\rm p} \mathbf{U}(0) + \mathbf{g} t - \mathbf{u}_\text{g}}{1 + \alpha_{\rm p}} - \frac{\mathbf{u}_{\text{r}}(0)}{(1 + \beta_{\rm p} t)(1 + \alpha_{\rm p})}
-\end{align}
-Eq.\ (\ref{mom_U_p}) can be substituted into Eq.\ (\ref{ur_short}) to get the solution for $\mathbf{u}$.
-\begin{align}
-    \mathbf{u}(t) &= \mathbf{U}(t) + \frac{\mathbf{u}(0) - \mathbf{U}(0)}{1 + \beta_{\rm p} t} + \mathbf{u}_\text{g} \nonumber \\[.1in]
-    &= \frac{\mathbf{u}(0) + \alpha_{\rm p} \mathbf{U}(0) + \mathbf{g} t - \mathbf{u}_\text{g}}{1 + \alpha_{\rm p}} - \frac{\mathbf{u}(0) - \mathbf{U}(0)}{(1 + \beta_{\rm p} t)(1 + \alpha_{\rm p})} + \frac{\mathbf{u}(0) - \mathbf{U}(0)}{1 + \beta_{\rm p} t} + \mathbf{u}_\text{g} \nonumber \\[.1in]
-    &= \frac{\mathbf{u}(0)}{1 + \beta_{\rm p} t} + \frac{(\mathbf{u}(0) + \alpha_{\rm p} \mathbf{U}(0))\beta_{\rm p} t}{(1 + \beta_{\rm p} t)(1 + \alpha_{\rm p})} + \frac{\mathbf{g} t + \alpha_{\rm p} \mathbf{u}_\text{g}}{1 + \alpha_{\rm p}} \nonumber \\[.1in]
-    &= \frac{\mathbf{u}(0)}{1 + \beta_{\rm p} t} + \frac{(\mathbf{u}(0) + \alpha_{\rm p} \mathbf{U}(0))\beta_{\rm p} t}{(1 + \beta_{\rm p} t)(1 + \alpha_{\rm p})} + \mathbf{g} t - \frac{\alpha_{\rm p} \beta_{\rm p} t^2}{2 (1 + \alpha_{\rm p})} \left[\mathbf{u}_{\text{r}}(0) \left(\frac{\mathbf{u}_{\text{r}}(0) \cdot \mathbf{g}}{|\mathbf{u}_{\text{r}}(0)|^2}\right) + \mathbf{g}\right] + \mathit{O}(t^3) \label{mom_u_p_full}
-\end{align}
-Integrating Eq.~(\ref{mom_u_p_full}) leads to an equation for the particle positions,
-\begin{eqnarray}
-    \label{mom_x_p_full}
-    \mathbf{x}(t) = \mathbf{x}(0) + \left(\frac{\mathbf{u}(0) + \alpha_{\rm p} \mathbf{U}(0)}{1 + \alpha_{\rm p}}\right) t &-& \frac{\alpha_{\rm p} (\mathbf{u}(0) - \mathbf{U}(0))}{\beta_{\rm p} (1 + \alpha_{\rm p})} \text{ln}(\beta_{\rm p} t + 1) \nonumber \\[.1in]
-    &+& \frac{\mathbf{g} t^2}{2} - \frac{\alpha_{\rm p} \beta_{\rm p} t^3}{6 (1 + \alpha_{\rm p})} \left[\mathbf{u}_{\text{r}}(0) \left(\frac{\mathbf{u}_{\text{r}}(0) \cdot \mathbf{g}}{|\mathbf{u}_{\text{r}}(0)|^2}\right) + \mathbf{g}\right] + \mathit{O}(t^4)
-\end{eqnarray}
-
-\subsubsection*{Implementation in FDS}
-
-In FDS, the particle position is advanced by a time step increment, $\Delta t_{\rm p}$, which is a fraction of the gas phase time step, $\Delta t$, determined so as to ensure that the particle does not travel more than the width of a grid cell in one sub-time step:
+In FDS, the particle position is advanced over the course of a gas-phase time step, $\delta t$, by a series of sub-time steps, $\delta t_{\rm p}$, that are determined so as to ensure that the particle does not traverse the width of a grid cell in one sub-time step:
 \be
-   \Delta t_{\rm p} = \frac{\Delta t}{\lceil 0.9 \, \hbox{CFL} \rceil } \quad ; \quad \hbox{CFL} = \Delta t \max \left( \frac{|u_{\rm p}|}{\dx},\frac{|v_{\rm p}|}{\dy},\frac{|w_{\rm p}|}{\dz} \right)
-\ee 
-Note that $\lceil \hbox{CFL} \rceil$ denotes the ceiling operator.
-\begin{align}
-    \mathbf{u}^{n+1} &= \frac{\mathbf{u}^n}{1 + \beta_{\rm p} \Delta t_{\rm p}} + \frac{(\mathbf{u}^n + \alpha_{\rm p} \mathbf{U}^n)\beta_{\rm p} \Delta t_{\rm p}}{(1 + \beta_{\rm p} \Delta t_{\rm p})(1 + \alpha_{\rm p})} + \mathbf{g} \Delta t_{\rm p} - \frac{\alpha_{\rm p} \beta_{\rm p} (\Delta t_{\rm p})^2}{2 (1 + \alpha_{\rm p})} \left[\mathbf{u}_\text{r}^n \left(\frac{\mathbf{u}_\text{r}^n \cdot \mathbf{g}}{|\mathbf{u}_\text{r}^n|^2}\right) + \mathbf{g}\right] \\[.1in]
-    \mathbf{x}^{n+1} &= \mathbf{x}^n + \left(\frac{\mathbf{u}^n + \alpha_{\rm p} \mathbf{U}^n}{1 + \alpha_{\rm p}}\right) \Delta t + \frac{\alpha_{\rm p} (\mathbf{u}^n - \mathbf{U}^n)}{\beta_{\rm p} (1 + \alpha_{\rm p})} \text{ln}(\beta_{\rm p} \Delta t_{\rm p} + 1) + \frac{\mathbf{g} (\Delta t_{\rm p})^2}{2} \\[.1in]
-    \alpha_{\rm p} &\equiv \frac{\rho V_{\rm g}}{m_{\rm p} n_{\rm p}} \\[.1in]
-    \beta_{\rm p} &\equiv \frac{1}{2} \rho C_\text{d} A_\text{p} \left(\frac{1}{m_{\rm p}} + \frac{1}{M_{\rm p}} \right) |\mathbf{u}_{\text{r}}(0)|
-\end{align}
-At first glance, the theoretical accuracy of the original equation for $\mathbf{x}^{n+1}$, Eq.~(\ref{mom_x_p_full}), appears to be $\mathit{O}(\Delta t_{\rm p}^3)$. But computation reveals it is actually $\mathit{O}(\Delta t_{\rm p}^2)$. This is due to the velocity error reducing the overall accuracy of the position solution. The $(\Delta t_{\rm p})^3$ term, therefore, may be dropped from Eq.~(\ref{mom_x_p_full}) without loss of accuracy.
+   \delta t_{\rm p} = \frac{\delta t}{\lceil 0.9 \, \hbox{CFL} \rceil } \quad ; \quad \hbox{CFL} = \delta t \max \left( \frac{|u_{\rm p}^n|}{\dx},\frac{|v_{\rm p}^n|}{\dy},\frac{|w_{\rm p}^n|}{\dz} \right)
+\ee
+Note that the {\em ceiling} function, $\lceil \hbox{CFL} \rceil$, denotes the least integer greater than the CFL. For a given time step, denoted by $n$, the particle position is advanced according to:
+\begin{equation}
+    \mathbf{x}_{\rm p}^{n+1} = \mathbf{x}_{\rm p}^n + \frac{\delta t_{\rm p}}{2} \left( \mathbf{u}_{\rm p}^{n+1} + \mathbf{u}_{\rm p}^n \right)
+\end{equation}
+where $\mathbf{u}_{\rm p}^{n+1}$ is given by Eq.~(\ref{part_soln}).
+
 
 
 
