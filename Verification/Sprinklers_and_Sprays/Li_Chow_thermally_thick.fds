@@ -25,8 +25,7 @@ Inputs based on Fig 6 Li Chow Fire Tech 44 351-381 2008
 !! Thermally thin (isothermal droplet) PART line for comparison
 ! &PART ID='droplet',SPEC_ID='WATER VAPOR',
 !       DIAMETER=100.,MONODISPERSE=T,
-!       INITIAL_TEMPERATURE=10.,SAMPLING_FACTOR=1,
-!       SECOND_ORDER_PARTICLE_TRANSPORT=T/
+!       INITIAL_TEMPERATURE=10.,SAMPLING_FACTOR=1 /
 
 &SURF ID           = 'MY DROPLET'
       MATL_ID      = 'WATER'
@@ -96,8 +95,7 @@ Inputs based on Fig 6 Li Chow Fire Tech 44 351-381 2008
 
 &PART ID='droplet', SURF_ID='MY DROPLET',
       SAMPLING_FACTOR=1,
-      QUANTITIES(1)='PARTICLE W'
-      SECOND_ORDER_PARTICLE_TRANSPORT=T/
+      QUANTITIES(1)='PARTICLE W' /
 
 &INIT ID='part1',XB=0.55,0.55,0.55,0.55,2.95,2.95, PART_ID='droplet', N_PARTICLES=1, UVW=0,0,-3./
 

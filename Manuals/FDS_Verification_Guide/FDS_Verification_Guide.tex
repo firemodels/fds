@@ -5134,7 +5134,7 @@ where $\rho_{\rm a}$ is the air density, $C_{\rm d}=1$ is the drag coefficient, 
     x = - \frac{\text{ln}\left[\text{cosh}\left(\sqrt{g K} t \right)\right]}{K} \quad ; \quad
     K \equiv \frac{3 \rho_{\rm a} C_{\rm d}}{4 \rho_{\rm d} D}
 \ee
-The $L_\infty$ (maximum) error of the FDS computed terminal velocity and position are computed and plotted for each time step. As shown in Fig.~\ref{fig_terminal_velocity_convergence}, FDS exhibits second-order convergence for both the velocity and position.
+The $L_\infty$ (maximum) error of the FDS computed terminal velocity and position are computed and plotted for each time step. As shown in Fig.~\ref{fig_terminal_velocity_convergence}, FDS exhibits first-order convergence for the particle position and the terminal velocity error is near machine precision.
 
 \begin{figure}[h]
 \noindent
@@ -5146,39 +5146,7 @@ The $L_\infty$ (maximum) error of the FDS computed terminal velocity and positio
 \label{fig_terminal_velocity_convergence}
 \end{figure}
 
-%
-%\section{Accuracy of Fluid-Particle Momentum Transfer}
-%In Appendix G of the Technical Reference Guide the numerical scheme FDS uses to compute these trajectories is detailed. The equation for particle velocities is
-%\begin{equation}
-%   \mathbf{u}_p^{n+1} = \frac{\mathbf{u}_p^n}{1 + \beta_p \Delta t} + \frac{(\mathbf{u}_p^n + \alpha_p \mathbf{U}_p^n)\beta_p \Delta t}{(1 + \beta_p \Delta t)(1 + \alpha_p)} + \mathbf{g} \Delta t - \frac{\alpha_p \beta_p (\Delta t)^2}{2 (1 + \alpha_p)} \left[\mathbf{u}_r^n \left(\frac{\mathbf{u}_r^n \cdot \mathbf{g}}{|\mathbf{u}_r^n|^2}\right) + \mathbf{g}\right] \,.
-%\end{equation}
-%And the equation for particle positions is
-%\begin{equation}
-%   \mathbf{x}_p^{n+1} = \mathbf{x}_p^n + \left(\frac{\mathbf{u}_p^n + \alpha_p \mathbf{U}_p^n}{1 + \alpha_p}\right) \Delta t + \frac{\alpha_p (\mathbf{u}_p^n - \mathbf{U}_p^n)}{\beta_p (1 + \alpha_p)} \text{ln}(\beta_p \Delta t + 1) + \frac{\mathbf{g} (\Delta t)^2}{2} - \frac{\alpha_p \beta_p (\Delta t)^3}{6 (1 + \alpha_p)} \left[\mathbf{u}_p^n \left(\frac{\mathbf{u}_p^n \cdot \mathbf{g}}{|\mathbf{u}_p^n|^2}\right) + \mathbf{g}\right] \,.
-%\end{equation}
-%The particle velocities are second-order accurate in time. In other words, they are accurate to an order-of-magnitude of $\Delta t^2$. The error committed each time step as shown in Appendix G is
-%\begin{equation}
-%   \epsilon = \mathcal{O}(\Delta t^3) \,.
-%\end{equation}
-%This error is accumulated over many time steps. The allows us to define the total error $E \equiv n \epsilon$ where $n = T/\Delta T$ is the number of time steps and $T$ is the final time iterated out to. The total error can be found to be
-%\begin{equation}
-%   E = n \epsilon = \frac{T}{\Delta t} \mathcal{O}(\Delta t^3) = \mathcal{O}(\Delta t^2) \,.
-%\end{equation}
-%The particle velocities should be second-order accurate, as has been shown in FDS.
-%
-%
-%The accuracy of the particle positions, $\mathbf{x}$ is less obvious and finding their accuracy requires knowledge of the accuracy of $\mathbf{u}$. The natural log term of the position equation reduces the order of accuracy. Note that
-%\begin{equation}
-%   \frac{\alpha_p (\mathbf{u}_p^n - \mathbf{U}_p^n)}{\beta_p (1 + \alpha_p)} \text{ln}(\beta_p \Delta t + 1) = \frac{\alpha_p (\mathbf{u}_p^n - \mathbf{U}_p^n)}{1 + \alpha_p} \left(\Delta t - \frac{\beta_p \Delta t^2}{2} + \cdots \right) \quad \text{ for } \beta_p t < 1 \,.
-%\end{equation}
-%Also note that $\mathbf{u}_p^n = \mathbf{u}_{p,\text{exact}}^n + \mathcal{O}(\Delta t^2)$ in general. This error propagates through the natural log term. If only the relevant parts of the term are extracted we can see that
-%\begin{equation}
-%   \frac{\mathbf{u}_p^n}{\beta_p} \text{ln}(\beta_p \Delta t + 1) = (\mathbf{u}_{p,\text{exact}}^n + \mathcal{O}(\Delta t^2)) \left(\Delta t - \frac{\beta_p \Delta t^2}{2} + \cdots \right) = \frac{\mathbf{u}_{p,\text{exact}}^n \text{ln}(\beta_p \Delta t + 1)}{\beta_p} + \mathcal{O}(\Delta t^3) \,.
-%\end{equation}
-%This third-order error per time step becomes an accumulated second-order error, and consequently the position scheme is only second-order accurate as has been shown numerically.
-%
-%
-%Due to this error, the $\Delta t^3$ term of the position equation is dropped because it offers no improvements in accuracy but requires more computation.
+
 
 
 
@@ -5210,7 +5178,8 @@ Initial height                    & $h$                  & 8 m \\
 \hline
 \end{tabular}
 \end{center}
-Figure~\ref{flat_fire_plots} compares the first and second order accurate FDS solutions to the ``flat fire'' solution given above. The ``flat fire'' solution should have a slightly faster vertical velocity component, $w_{\rm p}$, at extended times because the speed of the particle is approximated with $u_{\rm p}$, which is lower than the true speed. This ensures the drag force is lower than it should be, and consequently $|w_{\rm p}|$ is larger in the ``flat fire'' solution. In the lower left plot in Fig.~\ref{flat_fire_plots} $|w_{\rm p}|$ computed by FDS using the second order accurate scheme is slightly less than the ``flat fire'' solution.
+Figure~\ref{flat_fire_plots} compares the computed solution to the ``flat fire'' solution given above. 
+
 \begin{figure}[!ht]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/flat_fire_trajectory} &

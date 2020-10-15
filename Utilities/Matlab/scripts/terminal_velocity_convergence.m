@@ -79,7 +79,7 @@ if errvec(5) > 1e-6
    display(['Matlab Warning: The velocity in the terminal_velocity* cases is out of tolerance.'])
 end
 
-if Linf(5) > 1e-6
+if Linf(5) > 1e-3
    display(['Matlab Warning: The position in the terminal_velocity* cases is out of tolerance.'])
 end
 
@@ -102,10 +102,8 @@ set(gca, 'FontSize', Label_Font_Size)
 
 xlabel('Time Step (s)', 'Interpreter', Font_Interpreter,'FontSize',Label_Font_Size)
 ylabel('Terminal Velocity Error (m/s)','FontSize',Label_Font_Size)
-h = legend(H, 'FDS', 'O({\it \deltat})',...
-    'O({\it \deltat}^2)', 'Location', 'Southeast');
-set(h,'Interpreter', Font_Interpreter)
-set(h,'FontSize', Key_Font_Size)
+h = legend(H, 'FDS', '$\mathcal{O}(\delta t)$',...
+    '$\mathcal{O}(\delta t^2)$', 'Location', 'East','Interpreter', 'LaTeX','FontSize', Key_Font_Size);
 
 set(gcf, 'Visible', Figure_Visibility);
 set(gcf, 'Units', Paper_Units);
@@ -126,8 +124,8 @@ set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
 H(1) = loglog(dtvec, Linf, '-*k');
 hold on
-H(2) = loglog(dtvec, 50 * dtvec, '--k');
-H(3) = loglog(dtvec, 5 * dtvec.^2, '-k');
+H(2) = loglog(dtvec, dtvec, '--k');
+H(3) = loglog(dtvec, dtvec.^2, '-k');
 hold off
 dto = dtvec((length(dtvec) - 1):length(dtvec));
 erro = Linf((length(Linf) - 1):length(Linf));
@@ -139,10 +137,8 @@ set(gca, 'FontSize', Label_Font_Size)
 
 xlabel('Time Step (s)', 'Interpreter', Font_Interpreter,'FontSize',Label_Font_Size)
 ylabel('Position Error (m)','FontSize',Label_Font_Size)
-h = legend(H, 'FDS', 'O({\it \deltat})',...
-    'O({\it \deltat}^2)', 'Location', 'Southeast');
-set(h,'Interpreter', Font_Interpreter)
-set(h,'FontSize', Key_Font_Size)
+h = legend(H, 'FDS', '$\mathcal{O}(\delta t)$',...
+    '$\mathcal{O}(\delta t^2)$', 'Location', 'Southeast','Interpreter','LaTeX','FontSize', Key_Font_Size);
 
 set(gcf, 'Visible', Figure_Visibility);
 set(gcf, 'Units', Paper_Units);
