@@ -76,7 +76,7 @@ echo "     example: an option of 10 would cause FDS to stop after 10 iterations"
 echo "-o nthreads - run FDS with a specified number of threads [default: $nthreads]"
 echo "-O - use OpenMPI version of FDS"
 echo "-q queue_name - run cases using the queue queue_name [default: batch]"
-echo "-r option - run restart test cases"
+echo "-r - run restart test cases"
 echo "-R - run only regular (non-benchmark) cases"
 echo "-s - stop FDS runs"
 echo "-S - run cases in FDS_Cases_Subset.sh"
@@ -133,7 +133,9 @@ case $OPTION in
   b)
    BENCHMARK=1
    GEOMCASES=
+   INSPECTCASES=
    REGULAR=
+   RESTART=
    SUBSET=
    ;;
   C)
@@ -152,7 +154,9 @@ case $OPTION in
   g)
    BENCHMARK=
    GEOMCASES=1
+   INSPECTCASES=
    REGULAR=
+   RESTART=
    SUBSET=
    ;;
   h)
@@ -181,14 +185,17 @@ case $OPTION in
   r)
    BENCHMARK=
    GEOMCASES=
+   INSPECTCASES=
    REGULAR=
-   SUBSET=
    RESTART=1
+   SUBSET=
    ;;
   R)
    BENCHMARK=
    GEOMCASES=1
+   INSPECTCASES=
    REGULAR=1
+   RESTART=
    SUBSET=
    ;;
   s)
@@ -201,9 +208,10 @@ case $OPTION in
    BENCHMARK=
    GEOMCASES=
    REGULAR=
+   RESTART=
    INSPECTCASES=1
-   DEBUG=_inspect
    SUBSET=
+   DEBUG=_inspect
    ;;
   w)
    walltime="-w $OPTARG"
@@ -218,6 +226,7 @@ if [ "$FIREBOT_LITE" != "" ]; then
    BENCHMARK=
    GEOMCASES=
    REGULAR=
+   RESTART=
    SUBSET=1
 fi
 
