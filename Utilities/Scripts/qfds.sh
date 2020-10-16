@@ -598,6 +598,15 @@ if test $nodes -lt 1 ; then
   nodes=1
 fi
 
+# don't let other jobs run on nodes used by this job if you are using psm and more than 1 node
+if [ "$USE_PSM" != "" ]; then
+  if test $nodes -gt 1 ; then
+    SLURM_PSM="#SBATCH --exclusive"
+  fi
+#  use --exclusive for all jobs if the PSM module is loaded - for now
+  SLURM_PSM="#SBATCH --exclusive"
+fi
+
 #*** define processes per node
 
 let ppn="$n_mpi_processes_per_node*n_openmp_threads"
@@ -882,6 +891,7 @@ fi
 
 cat << EOF >> $scriptfile
 $SLURM_MEM
+$SLURM_PSM
 EOF
     if [ "$walltimestring_slurm" != "" ]; then
       cat << EOF >> $scriptfile
