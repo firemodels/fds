@@ -46,7 +46,6 @@ if [ "`uname`" == "Darwin" ]; then
   INTEL=
   INTEL2=
 fi
-GEOMCASES=1
 INSPECTCASES=
 WAIT=
 EXE=
@@ -67,7 +66,6 @@ echo "-d - use debug version of FDS"
 echo "-D n - delay the submission of each case by n seconds"
 echo "-e exe - run using exe"
 echo "      Note: environment must be defined to use this executable"
-echo "-g - run only geometry cases"
 echo "-h - display this message"
 echo "-j - job prefix"
 echo "-J - use Intel MPI version of FDS"
@@ -127,12 +125,11 @@ cd $SVNROOT
 export SVNROOT=`pwd`
 cd $CURDIR
 
-while getopts 'bCdD:e:ghj:Jm:o:Oq:rRsStw:W' OPTION
+while getopts 'bCdD:e:hj:Jm:o:Oq:rRsStw:W' OPTION
 do
 case $OPTION in
   b)
    BENCHMARK=1
-   GEOMCASES=
    INSPECTCASES=
    REGULAR=
    RESTART=
@@ -150,14 +147,6 @@ case $OPTION in
    ;;
   e)
    EXE="$OPTARG"
-   ;;
-  g)
-   BENCHMARK=
-   GEOMCASES=1
-   INSPECTCASES=
-   REGULAR=
-   RESTART=
-   SUBSET=
    ;;
   h)
    usage;
@@ -184,7 +173,6 @@ case $OPTION in
    ;;
   r)
    BENCHMARK=
-   GEOMCASES=
    INSPECTCASES=
    REGULAR=
    RESTART=1
@@ -192,7 +180,6 @@ case $OPTION in
    ;;
   R)
    BENCHMARK=
-   GEOMCASES=1
    INSPECTCASES=
    REGULAR=1
    RESTART=
@@ -206,7 +193,6 @@ case $OPTION in
    ;;
   t)
    BENCHMARK=
-   GEOMCASES=
    REGULAR=
    RESTART=
    INSPECTCASES=1
@@ -224,7 +210,6 @@ done
 
 if [ "$FIREBOT_LITE" != "" ]; then
    BENCHMARK=
-   GEOMCASES=
    REGULAR=
    RESTART=
    SUBSET=1
