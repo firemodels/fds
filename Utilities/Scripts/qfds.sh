@@ -602,9 +602,9 @@ fi
 if [ "$USE_PSM" != "" ]; then
   if test $nodes -gt 1 ; then
     SLURM_PSM="#SBATCH --exclusive"
+  else
+    VERBS="export FI_PROVIDER=verbs"
   fi
-#  use --exclusive for all jobs if the PSM module is loaded - for now
-  SLURM_PSM="#SBATCH --exclusive"
 fi
 
 #*** define processes per node
@@ -889,13 +889,22 @@ cat << EOF >> $scriptfile
 EOF
 fi
 
+if [ "$SLURM_MEM" != "" ]; then
 cat << EOF >> $scriptfile
 $SLURM_MEM
+EOF
+fi
+
+if [ "$SLURM_PSM" != "" ]; then
+cat << EOF >> $scriptfile
 $SLURM_PSM
 EOF
+fi
+
     if [ "$walltimestring_slurm" != "" ]; then
       cat << EOF >> $scriptfile
 #SBATCH $walltimestring_slurm
+
 EOF
     fi
 
@@ -977,7 +986,15 @@ export VT_CONFIG=$use_config
 EOF
 fi
 
+
+if [ "$VERBS" != "" ]; then
 cat << EOF >> $scriptfile
+$VERBS
+EOF
+fi
+
+cat << EOF >> $scriptfile
+
 cd $fulldir
 echo
 echo \`date\`
