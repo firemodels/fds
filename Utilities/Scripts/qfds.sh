@@ -603,7 +603,7 @@ if [ "$USE_PSM" != "" ]; then
   if test $nodes -gt 1 ; then
     SLURM_PSM="#SBATCH --exclusive"
   else
-    VERBS="export FI_PROVIDER=verbs"
+    PROVIDER="export FI_PROVIDER=shm"
   fi
 fi
 
@@ -987,9 +987,9 @@ EOF
 fi
 
 
-if [ "$VERBS" != "" ]; then
+if [ "$PROVIDER" != "" ]; then
 cat << EOF >> $scriptfile
-$VERBS
+$PROVIDER
 EOF
 fi
 
