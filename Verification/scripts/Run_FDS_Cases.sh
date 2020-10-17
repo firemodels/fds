@@ -302,7 +302,7 @@ cd ..
 if [ "$RESTART" != "" ]; then
     ./FDS_RESTART_Cases.sh 
    if [ "$CHECKCASES" == "" ]; then
-      echo Cases in RESTART_Cases.sh submitted
+      echo Cases in FDS_RESTART_Cases.sh submitted
    fi
 fi
 
