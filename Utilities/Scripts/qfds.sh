@@ -598,6 +598,15 @@ if test $nodes -lt 1 ; then
   nodes=1
 fi
 
+# don't let other jobs run on nodes used by this job if you are using psm and more than 1 node
+if [ "$USE_PSM" != "" ]; then
+  if test $nodes -gt 1 ; then
+    SLURM_PSM="#SBATCH --exclusive"
+  else
+    PROVIDER="export FI_PROVIDER=shm"
+  fi
+fi
+
 #*** define processes per node
 
 let ppn="$n_mpi_processes_per_node*n_openmp_threads"
@@ -880,12 +889,22 @@ cat << EOF >> $scriptfile
 EOF
 fi
 
+if [ "$SLURM_MEM" != "" ]; then
 cat << EOF >> $scriptfile
 $SLURM_MEM
 EOF
+fi
+
+if [ "$SLURM_PSM" != "" ]; then
+cat << EOF >> $scriptfile
+$SLURM_PSM
+EOF
+fi
+
     if [ "$walltimestring_slurm" != "" ]; then
       cat << EOF >> $scriptfile
 #SBATCH $walltimestring_slurm
+
 EOF
     fi
 
@@ -967,7 +986,15 @@ export VT_CONFIG=$use_config
 EOF
 fi
 
+
+if [ "$PROVIDER" != "" ]; then
 cat << EOF >> $scriptfile
+$PROVIDER
+EOF
+fi
+
+cat << EOF >> $scriptfile
+
 cd $fulldir
 echo
 echo \`date\`
