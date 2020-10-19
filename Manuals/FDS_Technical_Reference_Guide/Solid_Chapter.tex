@@ -112,6 +112,12 @@ where $C$ is a empirical coefficient for natural convection (1.52 for a horizont
 \ee
 For planar surfaces, the default values are $C_1=0$, $C_2=0.037$, $n=0.8$, $m=0.33$, and $L=1$~m. For cylindrical surfaces, the default values are $C_1=0$, $C_2=0.683$, $n=0.466$, $m=0.33$, and $L=D$, the diameter of the cylinder. For spherical surfaces, the default values are $C_1=2$, $C_2=0.6$, $n=0.5$, $m=0.33$, and $L=D$, the diameter of the sphere. Note that for a sphere, the coefficient for natural convection, $C$, is assumed to be zero. It is possible to change these values for a particular application, but it is not possible to find a set of parameters that is appropriate for the wide variety of scenarios considered. Various correlations for planes, cylinders, and spheres can be found in Refs.~\cite{Holman:1,Incropera:1}.
 
+To avoid excessively large values of the heat transfer coefficient for very small cylinders and spheres, an upper bound is imposed: 
+\be
+    h<0.5 \, \frac{r \, \rho \, c}{n \, \dt} 
+\ee
+where $r$ is the radius of the cylinder or sphere, $\rho c$ is the density times specific heat of the solid material, $\dt$ is the time step, and $n=2$ for a cylinder and $n=3$ for a sphere. The factor of 0.5 on the right hand side of the inequality ensures that the change in temperature of the small particle in one time step cannot exceed one half of the difference between the gas and solid.
+
 
 \subsubsection{Optional Near-Wall Model}
 \label{conflux_wall_model}
