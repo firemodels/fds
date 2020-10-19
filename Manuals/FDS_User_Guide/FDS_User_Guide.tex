@@ -6234,13 +6234,15 @@ defined via the line
 Note that if the particles are {\ct MASSLESS}, it is not appropriate to color them according to any particular property. Particles are not colored by gas phase quantities, but rather by properties of the particle itself. For example, {\ct 'PARTICLE TEMPERATURE'} for a non-massless particle refers to the temperature of the particle itself rather than the local gas temperature. Also note that if {\ct MASSLESS=.TRUE.}, the {\ct SAMPLING\_FACTOR} (Section~\ref{info:part_output}) is set to 1 unless you say otherwise, which would be pointless
 since {\ct MASSLESS} particles are for visualization only.
 
-\subsection*{Turbulent Dispersion}
+\subsection*{Turbulent Dispersion (Massless Tracers)}
 
 Massless tracer particles may also be useful in modeling dispersion of a tracer gas that does not affect the mean flow field (passive scalar).  The number density of the particles then may be translated into a local mass concentration.  See how to output number concentration in Sec.~\ref{PDPA}.
 
 To account for subgrid-scale turbulent motions, add {\ct TURBULENT\_DISPERSION=.TRUE.} to the {\ct PART} line.  The particles will then undergo a random walk based on the subgrid diffusivity.  As an example, see the {\ct random\_walk} test cases in the {\ct WUI} directory of the verification suite.
 
-{\ct TURBULENT\_DISPERSION=.TRUE.} may also be used with massive particles and helps to homogenize the particle number density on the grid.
+\subsection*{Turbulent Dispersion (Massive Particles)}
+
+{\ct TURBULENT\_DISPERSION=.TRUE.} may also be used with massive particles.  In this case, a random walk model is not used; instead, the fluid velocity used in the drag calculation is augmented with a fluctuating component that is taken from an estimate of the subgrid kinetic energy.  Details of the formulation are discussed in the FDS Technical Reference Guide \cite{FDS_Math_Guide}.
 
 
 \clearpage
