@@ -1912,7 +1912,7 @@ REAL(EB) :: UBAR,VBAR,WBAR,RVC,UREL,VREL,WREL,QREL,RHO_G,TMP_G,MU_AIR, &
             U_OLD,V_OLD,W_OLD,ZZ_GET(1:N_TRACKED_SPECIES),WAKE_VEL,DROP_VOL_FRAC,RE_WAKE,&
             WE_G,T_BU_BAG,T_BU_STRIP,MPOM,ALBO,SFAC,BREAKUP_RADIUS(0:NDC),&
             DD,DD_X,DD_Y,DD_Z,DW_X,DW_Y,DW_Z,K_TERM(3),Y_TERM(3),C_DRAG,A_DRAG,HAB,PARACOR,QREL2,X_WGT,Y_WGT,Z_WGT,&
-            GX_LOC,GY_LOC,GZ_LOC,DUMMY,DRAG_MAX(3)=0._EB,SUM_RHO,RN_X,RN_Y,RN_Z,K_SGS,Q_SGS,C_SGS,BETA_SGS,RE_SGS,NU_SGS
+            GX_LOC,GY_LOC,GZ_LOC,DUMMY,DRAG_MAX(3)=0._EB,SUM_RHO,K_SGS,U_P
 REAL(EB), SAVE :: HALF_DT2,BETA
 INTEGER :: IIX,JJY,KKZ,SURF_INDEX,N
 REAL(EB), PARAMETER :: MAX_TURBULENCE_INTENSITY = 0.1_EB
@@ -1988,6 +1988,24 @@ TRACER_IF: IF (LPC%MASSLESS_TRACER .OR. LP%PWT<=TWO_EPSILON_EB) THEN
    ENDIF
    RETURN
 ENDIF TRACER_IF
+
+! Massive particles undergoing turbulent dispersion (EXPERIMENTAL, under construction)
+
+IF (LPC%TURBULENT_DISPERSION) THEN
+   ! Built model from ideas in this ref:
+   ! M. Breuer and M. Alletto, Efficient simulation of particle-laden turbulent flows with high mass loadings using LES,
+   ! Int. J. Heat and Fluid Flow, 35:2-12, 2012.
+   ! The basic idea is to add an isotropic turbulent fluctuation to the cell mean velocity components prior to
+   ! computing the drag.
+   DELTA = LES_FILTER_WIDTH_FUNCTION(DX(IIG_OLD),DY(JJG_OLD),DZ(KKG_OLD))
+   K_SGS = (MU(IIG_OLD,JJG_OLD,KKG_OLD)/RHO(IIG_OLD,JJG_OLD,KKG_OLD)/C_DEARDORFF/DELTA)**2 ! def of Deardorff eddy viscosity
+   U_P = SQRT(TWTH*K_SGS)
+   CALL BOX_MULLER(DW_X,DW_Y)
+   CALL BOX_MULLER(DW_Z,DW_X)
+   UBAR = UBAR + U_P*DW_X
+   VBAR = VBAR + U_P*DW_Y
+   WBAR = WBAR + U_P*DW_X
+ENDIF
 
 ! Calculate the particle drag coefficient
 
@@ -2144,34 +2162,6 @@ PARTICLE_NON_STATIC_IF: IF (.NOT.LPC%STATIC .OR. LP%EMBER) THEN ! Move airborne,
       LP%U = U_OLD + DT_P*GX_LOC
       LP%V = V_OLD + DT_P*GY_LOC
       LP%W = W_OLD + DT_P*GZ_LOC
-   ENDIF
-
-   ! Massive particles undergoing turbulent dispersion (EXPERIMENTAL, under construction)
-
-   IF (LPC%TURBULENT_DISPERSION) THEN
-      ! Built model from ideas in this ref:
-      ! M. Breuer and M. Alletto, Efficient simulation of particle-laden turbulent flows with high mass loadings using LES,
-      ! Int. J. Heat and Fluid Flow, 35:2-12, 2012.
-      NU_SGS = MU(IIG_OLD,JJG_OLD,KKG_OLD)/RHO(IIG_OLD,JJG_OLD,KKG_OLD)
-      DELTA = LES_FILTER_WIDTH_FUNCTION(DX(IIG_OLD),DY(JJG_OLD),DZ(KKG_OLD))
-      K_SGS = 0.5_EB*(QREL-NU_SGS/DELTA)**2
-      Q_SGS = SQRT(TWTH*K_SGS)
-
-      RE_SGS = RHO_G*Q_SGS*2._EB*R_D/MU_AIR
-      C_SGS = DRAG(RE_SGS,LPC%DRAG_LAW)
-      BETA_SGS = 0.5_EB*RHO_G*C_SGS*A_DRAG*Q_SGS/LP%MASS
-      DD = MIN( MAX_TURBULENCE_INTENSITY*Q_SGS, BETA*DT_P * Q_SGS ) ! turbulent velocity fluctuation scaled by drag coefficient
-
-      CALL RANDOM_NUMBER(RN_X)
-      CALL RANDOM_NUMBER(RN_Y)
-      CALL RANDOM_NUMBER(RN_Z)
-      DD_X = DD * SIGN(1._EB,RN_X-0.5_EB)
-      DD_Y = DD * SIGN(1._EB,RN_Y-0.5_EB)
-      DD_Z = DD * SIGN(1._EB,RN_Z-0.5_EB)
-
-      LP%U = LP%U + DD_X
-      LP%V = LP%V + DD_Y
-      LP%W = LP%W + DD_Z
    ENDIF
 
    ! Fluid momentum source term
