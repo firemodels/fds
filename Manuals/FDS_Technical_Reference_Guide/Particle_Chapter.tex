@@ -362,7 +362,7 @@ For massive particles, a random walk model is not used.  Instead, the fluid velo
 \be
 \mathbf{u} = \tilde{\mathbf{u}} + u^\prime \, {\bm \zeta}
 \ee
-where $\tilde{\mathbf{u}}$ is the resolved LES velocity, $u^\prime = \sqrt{\frac{2}{3}\,k_{sgs}}$, and the components of $\bm \zeta$ are independent standardized Gaussian random variables (zero mean and unit variance) generated from a Box-Muller transform \cite{Box-Muller:1958}.
+where $\tilde{\mathbf{u}}$ is the resolved LES velocity, $u^\prime = \sqrt{\frac{2}{3}\,k_{sgs}}$, and the components of $\bm \zeta$ are independent standardized Gaussian random variables (zero mean and unit variance) generated from a Box-Muller transform \cite{Box-Muller:1958}.  The subgrid kinetic energy is estimated from the turbulent viscosity as $k_{sgs} = (\mu_t/(\rho C_{\nu} \Delta))^2$; $C_\nu = 0.1$ is the Deardorff eddy viscosity coefficient.
 
 
 
