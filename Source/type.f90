@@ -106,7 +106,6 @@ TYPE LAGRANGIAN_PARTICLE_CLASS_TYPE
    INTEGER, ALLOCATABLE, DIMENSION(:) :: STRATUM_INDEX_UPPER  !< Upper index of size distribution band
 
    LOGICAL :: STATIC=.FALSE.                !< Flag indicating if particles move or not
-   LOGICAL :: MASSIVE_TRACER=.FALSE.        !< Flag indicating if particles do not feed momentum back to the gas
    LOGICAL :: MASSLESS_TRACER=.FALSE.       !< Flag indicating if particles are just tracers for visualization
    LOGICAL :: MASSLESS_TARGET=.FALSE.       !< Flag indicating if particles are just targets for an output quantity
    LOGICAL :: LIQUID_DROPLET=.FALSE.        !< Flag indicating if particles are liquid droplets
