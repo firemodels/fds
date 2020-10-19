@@ -5700,6 +5700,7 @@ SURFACE_TENSION          = 72.8E-3_EB  ! N/m, applies for water
 COLOR                    = 'null'
 SAMPLING_FACTOR          = -1
 STATIC                   = .FALSE.
+MASSLESS                 = .FALSE.
 TARGET_ONLY              = .FALSE.
 TURBULENT_DISPERSION     = .FALSE.
 REAL_REFRACTIVE_INDEX    = 1.33_EB
