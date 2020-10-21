@@ -30,6 +30,7 @@ $QFDS -d Atmospheric_Effects MO_velocity_profile_unstable.fds
 $QFDS -d Complex_Geometry geom_extruded_poly.fds
 $QFDS -d Complex_Geometry geom_intersection.fds
 $QFDS -d Complex_Geometry geom_bad_inverted_normals.fds
+$QFDS -p 4 -d Complex_Geometry geom_particle_cascade_2.fds
 $QFDS -d Complex_Geometry geom_simple.fds
 #$QFDS -d Complex_Geometry geom_azim.fds
 #$QFDS -d Complex_Geometry geom_elev.fds
