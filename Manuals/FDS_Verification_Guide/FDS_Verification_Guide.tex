@@ -5178,7 +5178,7 @@ Initial height                    & $h$                  & 8 m \\
 \hline
 \end{tabular}
 \end{center}
-Figure~\ref{flat_fire_plots} compares the computed solution to the ``flat fire'' solution given above. 
+Figure~\ref{flat_fire_plots} compares the computed solution to the ``flat fire'' solution given above.
 
 \begin{figure}[!ht]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -5423,6 +5423,18 @@ In the test case called {\ct Sprinklers\_and\_Sprays/geom\_sprk\_mass.fds}, two 
 \caption[The {\ct geom\_sprk\_mass} test case]{Mass of water pooled on two solid obstructions.}
 \label{geom_sprk_mass_fig}
 \end{figure}
+
+\subsection{Obstructions of Different Orientations (\texorpdfstring{{\textct{geom\_particle\_cascade\_2}}}{geom\_particle\_cascade\_2}) }
+\label{geom_particle_cascade_2}
+
+In the test case called {\ct Complex\_Geometry/geom\_particle\_cascade\_2.fds}, four identical sprinklers pour water on four obstructions, one of which is created using the traditional {\ct OBST} input parameters, the other three are created using the immersed boundary {\ct GEOM} parameters. The objective is simply to ensure that the droplets drip off the obstructions appropriately. The sprinklers operate for 10~s, each discharging 10~L of water. Figure~\ref{geom_particle_cascade_2_fig} displays the accumulated mass of water on the floor as a function of time, demonstrating equivalent behavior by different types of solid obstructions.
+\begin{figure}[h!]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/geom_particle_cascade_2}
+\caption[The {\ct geom\_particle\_cascade\_2} test case]{Mass of water flowing over four obstructions.}
+\label{geom_particle_cascade_2_fig}
+\end{figure}
+
 
 \subsection{Adiabatic Surface Temperature (\texorpdfstring{{\textct{adiabatic\_surf\_temp\_spray}}}{adiabatic\_surf\_temp\_spray}) }
 \label{AST_spray}
