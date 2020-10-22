@@ -29345,7 +29345,8 @@ CASE(INTEGER_THREE)
 
          ! This test and restriction of NOM==NM is temporary. Discard when parallel CFACE info is in place.
          IF (NOM/=NM) THEN
-            WRITE(LU_ERR,*) 'WARNING : BACK CFACE search, other mesh NOM not equal to working mesh NM. NM=',NM,&
+            IF(NOM==0) RETURN
+            WRITE(LU_ERR,*) 'WARNING: BACK CFACE search, other mesh NOM not equal to working mesh NM. NM=',NM,&
                             ', NOM and other cell IIO,JJO,KKO=',NOM,IIO,JJO,KKO,', intersection pt=',POS(IAXIS:KAXIS)
             RETURN
          ENDIF
@@ -29401,7 +29402,7 @@ CASE(INTEGER_THREE)
 
                ! Write error for testing:
                IF (.NOT.BACK_CFACE_FOUND) THEN
-                  WRITE(LU_ERR,*) 'WARNING : BACK CFACE search, MESH, CFACE_INDEX=',NM,CFACE_INDEX,&
+                  WRITE(LU_ERR,*) 'WARNING: BACK CFACE search, MESH, CFACE_INDEX=',NM,CFACE_INDEX,&
                   ', back CFACE not found in mesh NOM,IIO,JJO,KKO=',NOM,IIO,JJO,KKO
                   RETURN
                ENDIF
@@ -29418,7 +29419,7 @@ CASE(INTEGER_THREE)
       ELSE ! Did not find intersection with other triangles.
          ! To Do : Here we can add a test to check if CFACE is indeed within geometry IG. Geometry intersection and
          ! linearization lead need to CFACES lay outside of the geometry.
-         WRITE(LU_ERR,*) 'WARNING : BACK CFACE search did NOT Find Intersection. MESH=',NM,', GEOM=',IG,&
+         WRITE(LU_ERR,*) 'WARNING: BACK CFACE search did NOT Find Intersection. MESH=',NM,', GEOM=',IG,&
                          ', CFACE_INDEX, Centroid location=',CFACE_INDEX,XP(:)
          RETURN
       ENDIF
