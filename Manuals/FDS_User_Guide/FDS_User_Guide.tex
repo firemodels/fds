@@ -6705,13 +6705,13 @@ There are two ways of introducing particles at a solid surface. You can specify 
 
 \subsubsection{Particles specified using a mass flux}
 
-If the particles have mass and are introduced from a solid surface, specify {\ct PARTICLE\_MASS\_FLUX} on the {\ct SURF} line. The number of particles inserted at each solid cell every {\ct DT\_INSERT} seconds starting at {\ct T\_INSERT} seconds is specified by {\ct NPPC} (Number of Particles Per Cell) on the {\ct SURF} line defining the solid surface. The default value of {\ct DT\_INSERT} is 0.01~s and {\ct NPPC} is 1. As an example, the following set of input lines:
+If the particles have mass and are introduced from a solid surface, specify {\ct PARTICLE\_MASS\_FLUX} on the {\ct SURF} line. The number of particles inserted at each solid cell every {\ct DT\_INSERT} seconds is specified by {\ct NPPC} (Number of Particles Per Cell) on the {\ct SURF} line defining the solid surface. The default value of {\ct DT\_INSERT} is 0.01~s and {\ct NPPC} is 1. As an example, the following set of input lines:
 \begin{lstlisting}
 &PART ID='particles', ... /
-&SURF ID='SLOT', PART_ID='particles', VEL=-5., PARTICLE_MASS_FLUX=0.1, T_INSERT=6. /
+&SURF ID='SLOT', PART_ID='particles', VEL=-5., PARTICLE_MASS_FLUX=0.1 /
 &OBST XB=-0.2,0.2,-0.2,0.2,4.0,4.4, SURF_IDS='INERT','SLOT','INERT' /
 \end{lstlisting}
-creates an obstruction that ejects particles out of its sides starting at 6~s at a rate of 0.1~\si{kg/(m$^2$.s)} and a velocity of 5~m/s (the minus sign indicates the particles are ejected from the surface). FDS will adjust the mass flux if the obstruction or vent dimensions are changed to conform to the numerical grid. The {\ct ID}s have no meaning other than as identifiers. The surface on which particles are specified must have a non-zero normal velocity directed into the computational domain. This happens automatically if the surface is burning, but must be specified if it is not. There is a simple input file called {\ct particle\_flux.fds} that demonstrates how the above input lines can produce a stream of particles from a block. The total mass flux from the block is the product of the {\ct PARTICLE\_MASS\_FLUX} times the total area of the sides of the block, 0.4~m $\times$ 0.4~m $\times$ 4. The expected accumulated mass of particles on the ground after 10~s is expected to be 0.64~kg, as shown in Fig.~\ref{particle_flux_fig}.
+creates an obstruction that ejects particles out of its sides at a rate of 0.1~\si{kg/(m$^2$.s)} and a velocity of 5~m/s (the minus sign indicates the particles are ejected from the surface). FDS will adjust the mass flux if the obstruction or vent dimensions are changed to conform to the numerical grid. The {\ct ID}s have no meaning other than as identifiers. The surface on which particles are specified must have a non-zero normal velocity directed into the computational domain. This happens automatically if the surface is burning, but must be specified if it is not. There is a simple input file called {\ct particle\_flux.fds} that demonstrates how the above input lines can produce a stream of particles from a block. The total mass flux from the block is the product of the {\ct PARTICLE\_MASS\_FLUX} times the total area of the sides of the block, 0.4~m $\times$ 0.4~m $\times$ 4. The expected accumulated mass of particles on the ground after 10~s is expected to be 0.64~kg, as shown in Fig.~\ref{particle_flux_fig}.
 
 \begin{figure}[ht]
 \begin{center}
@@ -6809,11 +6809,6 @@ Note that the {\ct DIAMETER} ($\mu$m) on the {\ct INIT} line is only valid for l
 If you want to introduce particles within a given region periodically in time and not just initially, set {\ct DT\_INSERT} on the {\ct INIT} line to a positive value indicating the time increment (s) for insertion. The parameter {\ct N\_PARTICLES} now indicates the number of droplets/particles inserted every {\ct DT\_INSERT} seconds. If the droplets/particles have mass, use {\ct MASS\_PER\_TIME} (kg/s) instead of {\ct MASS\_PER\_VOLUME} to indicate how much mass is to be introduced per second.
 
 If you want to delay the insertion of droplets, you can use either a {\ct DEVC\_ID} or a {\ct CTRL\_ID} on the {\ct INIT} line to name the controlling device. See Section~\ref{info:basic_control} for more information on controlling devices.
-
-\subsubsection{Delayed Insertion}
-\label{info:delayed_insertion}
-
-If you do not want to introduce the particles right at the start of the simulation, use {\ct T\_INSERT} (s) to insert the particle(s) at some later time.
 
 \subsubsection{Controlled Particle Movement}
 \label{info:path_ramp}
@@ -11002,7 +10997,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SHAPE}                       & Character         & Section~\ref{info:initial_droplets}           &                & {\ct 'BLOCK'} \\ \hline
 {\ct SPEC\_ID(N)}                 & Character Array   & Section~\ref{info:init_species}               &                &               \\ \hline
 {\ct TEMPERATURE}                 & Real              & Section~\ref{info:init_temperature}           & \si{\degree C} & {\ct TMPA}    \\ \hline
-{\ct T\_INSERT}                   & Real              & Section~\ref{info:delayed_insertion}          & s              & {\ct T\_BEGIN}\\ \hline
 {\ct TREE\_HEIGHT}                & Real              & Section~\ref{info:trees}                      & m              &               \\ \hline
 {\ct UNIFORM}                     & Logical           & Section~\ref{info:initial_droplets}           &                & {\ct .FALSE.} \\ \hline
 {\ct UVW(3)}                      & Real Array        & Section~\ref{info:initial_droplets}           & m/s            & 0.            \\ \hline
@@ -11970,7 +11964,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct TGA\_FINAL\_TEMPERATURE}                             & Real            & Section~\ref{info:TGA_DSC_MCC}            & $^\circ$C           & 800.                    \\ \hline
 {\ct TGA\_HEATING\_RATE}                                  & Real            & Section~\ref{info:TGA_DSC_MCC}            & $^\circ$C/min       & 5.                      \\ \hline
 {\ct THICKNESS(:)}                                        & Real Array      & Section~\ref{info:SURF_MATL_Basics}       & m                   &                         \\ \hline
-{\ct T\_INSERT}                                           & Real            & Section~\ref{info:particle_flux}          & s                   & {\ct T\_BEGIN}          \\ \hline
 {\ct TMP\_BACK}                                           & Real            & Section~\ref{info:TMP_INNER}              & $^\circ$C           & 20.                     \\ \hline
 {\ct TMP\_FRONT}                                          & Real            & Section~\ref{info:specified_temperature}  & $^\circ$C           & 20.                     \\ \hline
 {\ct TMP\_INNER(:)}                                       & Real Array      & Section~\ref{info:TMP_INNER}              & $^\circ$C           & 20.                     \\ \hline
