@@ -46,14 +46,13 @@ if [ "`uname`" == "Darwin" ]; then
   INTEL=
   INTEL2=
 fi
-GEOMCASES=1
 INSPECTCASES=
 WAIT=
 EXE=
 CHECKCASES=
-RERUN=
 DELAY=
 SUBSET=
+RESTART=
 FIREBOT_LITE=
 
 function usage {
@@ -67,8 +66,6 @@ echo "-d - use debug version of FDS"
 echo "-D n - delay the submission of each case by n seconds"
 echo "-e exe - run using exe"
 echo "      Note: environment must be defined to use this executable"
-echo "-F - rerun 'regular' cases that failed with 'BAD TERMINATION' errors"
-echo "-g - run only geometry cases"
 echo "-h - display this message"
 echo "-j - job prefix"
 echo "-J - use Intel MPI version of FDS"
@@ -77,6 +74,7 @@ echo "     example: an option of 10 would cause FDS to stop after 10 iterations"
 echo "-o nthreads - run FDS with a specified number of threads [default: $nthreads]"
 echo "-O - use OpenMPI version of FDS"
 echo "-q queue_name - run cases using the queue queue_name [default: batch]"
+echo "-r - run restart test cases"
 echo "-R - run only regular (non-benchmark) cases"
 echo "-s - stop FDS runs"
 echo "-S - run cases in FDS_Cases_Subset.sh"
@@ -127,14 +125,14 @@ cd $SVNROOT
 export SVNROOT=`pwd`
 cd $CURDIR
 
-while getopts 'bCdD:e:Fghj:Jm:o:Oq:RsStw:W' OPTION
+while getopts 'bCdD:e:hj:Jm:o:Oq:rRsStw:W' OPTION
 do
 case $OPTION in
   b)
    BENCHMARK=1
-   GEOMCASES=
+   INSPECTCASES=
    REGULAR=
-   RERUN=
+   RESTART=
    SUBSET=
    ;;
   C)
@@ -149,20 +147,6 @@ case $OPTION in
    ;;
   e)
    EXE="$OPTARG"
-   ;;
-  F)
-   BENCHMARK=
-   GEOMCASES=
-   REGULAR=
-   RERUN=1
-   SUBSET=
-   ;;
-  g)
-   BENCHMARK=
-   GEOMCASES=1
-   REGULAR=
-   RERUN=
-   SUBSET=
    ;;
   h)
    usage;
@@ -187,11 +171,18 @@ case $OPTION in
   q)
    QUEUE="$OPTARG"
    ;;
+  r)
+   BENCHMARK=
+   INSPECTCASES=
+   REGULAR=
+   RESTART=1
+   SUBSET=
+   ;;
   R)
    BENCHMARK=
-   GEOMCASES=1
+   INSPECTCASES=
    REGULAR=1
-   RERUN=
+   RESTART=
    SUBSET=
    ;;
   s)
@@ -202,12 +193,11 @@ case $OPTION in
    ;;
   t)
    BENCHMARK=
-   GEOMCASES=
    REGULAR=
-   RERUN=
+   RESTART=
    INSPECTCASES=1
-   DEBUG=_inspect
    SUBSET=
+   DEBUG=_inspect
    ;;
   w)
    walltime="-w $OPTARG"
@@ -220,9 +210,8 @@ done
 
 if [ "$FIREBOT_LITE" != "" ]; then
    BENCHMARK=
-   GEOMCASES=
    REGULAR=
-   RERUN=
+   RESTART=
    SUBSET=1
 fi
 
@@ -267,7 +256,7 @@ fi
 
 export BASEDIR=`pwd`
 
-export QFDS="$QFDSSH $walltime -n $nthreads $INTEL2 -e $FDSMPI $QUEUE $OOPT $POPT" 
+export QFDS="$QFDSSH $walltime -o $nthreads $INTEL2 -e $FDSMPI $QUEUE $OOPT $POPT" 
 if [ "$CHECKCASES" == "1" ]; then
   export QFDS="$SVNROOT/fds/Verification/scripts/Check_FDS_Cases.sh"
 fi
@@ -287,7 +276,7 @@ fi
 if [ "$CHECKCASES" == "1" ]; then
   export QFDS="$SVNROOT/fds/Verification/scripts/Check_FDS_Cases.sh"
 else
-  export QFDS="$QFDSSH $walltime -n $nthreads $INTEL2 -e $FDSMPI $QUEUE $OOPT $POPT" 
+  export QFDS="$QFDSSH $walltime -o $nthreads $INTEL2 -e $FDSMPI $QUEUE $OOPT $POPT" 
 fi
 
 cd $CURDIR
@@ -310,6 +299,15 @@ fi
 
 cd $CURDIR
 cd ..
+if [ "$RESTART" != "" ]; then
+    ./FDS_RESTART_Cases.sh 
+   if [ "$CHECKCASES" == "" ]; then
+      echo Cases in FDS_RESTART_Cases.sh submitted
+   fi
+fi
+
+cd $CURDIR
+cd ..
 if [ "$INSPECTCASES" == "1" ]; then
   ./INSPECT_Cases.sh
   if [ "$CHECKCASES" == "" ]; then
@@ -319,21 +317,6 @@ fi
 
 cd $CURDIR
 cd ..
-if [ "$RERUN" == "1" ]; then
-  grep 'BAD TERMINATION' */*.log | awk -F':' '{print($1)}' | sort -u | awk -F'/' '{print($2)}' | awk -F'.' '{print($1".fds")}' > badcaselist
-  echo "#!/bin/bash" > RERUN_Cases.sh
-  grep -f badcaselist FDS_Cases.sh >> RERUN_Cases.sh
-  nlines=`cat RERUN_Cases.sh | wc -l`
-  if [ $nlines -gt 1 ]; then
-    echo warning the following cases failed with BAD TERMINATION errors. They were rerun
-    grep 'BAD TERMINATION' -A 2 */*.log 
-    chmod +x RERUN_Cases.sh
-    ./RERUN_Cases.sh
-    if [ "$CHECKCASES" == "" ]; then
-      echo "FDS cases that failed with BAD TERMINATION errors re-submitted"
-    fi
-  fi
-fi
 
 if [ "$CHECKCASES" == "" ]; then
   if [ "$WAIT" == "1" ]; then

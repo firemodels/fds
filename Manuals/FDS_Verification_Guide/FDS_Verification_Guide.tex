@@ -3472,12 +3472,9 @@ When using a non-predefined fuel, one may have heat of combustion data represent
 
 
 
-\section{Fractional Effective Dose (FED) and Fractional Irritant Concentration (FIC) (\texorpdfstring{\textct{FED\_FIC}}{FED\_FIC}) }
-\label{FED_FIC}
-\label{FED_FIC_SMIX}
+\section{Fractional Effective Dose (FED) and Fractional Irritant Concentration (FIC) ) }
 
-The Fractional Effective Dose index (FED), developed by Purser~\cite{SFPE:Purser}, is a commonly used measure of human incapacitation
-due to the combustion gases. The FED value is calculated as
+The Fractional Effective Dose index (FED), developed by Purser~\cite{SFPE:Purser}, is a commonly used measure of human incapacitation due to the combustion gases. The FED value is calculated as
 \be
 \mathrm{FED}_\mathrm{tot} = (\mathrm{FED}_\mathrm{CO} + \mathrm{FED}_\mathrm{CN} + \mathrm{FED}_\mathrm{NO_x} + \mathrm{FLD}_\mathrm{irr}) \times \mathrm{HV}_\mathrm{CO_2} + \mathrm{FED}_\mathrm{O_2}
 \ee
@@ -3546,6 +3543,10 @@ depends upon the immediate concentrations of irritants. The overall irritant con
 where the numerators are the instantaneous concentrations of each irritant, and the denominators are the concentrations of respective irritants
 expected to cause incapacitation in half the population. The incapacitating concentrations~\cite{SFPE:Purser} are given in the table above.
 
+\subsection{FED and FIC of gas mixtures (\texorpdfstring{\textct{FED\_FIC}}{FED\_FIC}) }
+\label{FED_FIC}
+\label{FED_FIC_SMIX}
+
 The FED and FIC values were computed from specified constant gas concentrations for four cases using an external script.
 The gas concentrations are listed in the table below. The concentrations are in ppm.
 \begin{center}
@@ -3603,6 +3604,19 @@ Figs.~\ref{FED_FIC_plot} and \ref{FED_FIC_SMIX_plot}.
 \vskip-\baselineskip
 \caption[The FED and FIC values in \textct{FED\_FIC\_SMIX} test cases]{Comparison of FED and FIC predictions with expected values using \textct{SMIX}.}
 \label{FED_FIC_SMIX_plot}
+\end{figure}
+
+\subsection{FED from post-combustion yield of CO and HCN (\texorpdfstring{\textct{FED\_CO\_HCN}}{FED\_CO\_HCN}) }
+\label{FED_CO_HCN}
+The calculation of FED resulting from post-combustion yields of CO$_2$, CO and HCN, and the corresponding oxygen reduction is tested by specifying a combustion reaction of Polyisocyanurate (PIR) foam with 1 \% CO yield and 0.5 \% yield of HCN. The computational volume is intialized with 15 vol-\% of combustion products. The species concentrations were measured by volume fraction devices, and the expected value of FED index was calculated using an external Matlab script. The results are shown in~\ref{fig:FED_CO_HCN}.
+
+\begin{figure}[ht]
+\centering
+\begin{tabular}{c}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/FED_CO_HCN}
+\end{tabular}
+\caption[The FED value in \textct{FED\_CO\_HCN} case]{Comparison of predicted and expected FED resulting from the post-combustion yields of CO and HCN.}
+\label{fig:FED_CO_HCN}
 \end{figure}
 
 
@@ -4422,9 +4436,52 @@ Figure~\ref{surf_mass_two_species} shows the results of three test cases involvi
 \label{surf_mass_two_species}
 \end{figure}
 
+\clearpage
 
+\subsection{Rate of Solid Particle Decomposition (\texorpdfstring{\textct{solid\_particle\_decomposition}}{solid\_particle\_decomposition})}
+\label{sec:solid_particle_decomposition}
+\label{solid_particle_decomposition}
 
+\textbf{Paul Papas and Changmin Cao, Raytheon Technologies}\\
 
+In this set of cases we present a simple analytical solution for the solid phase decomposition of a spherical particle with a constant rate of reaction under isothermal conditions.  Let $m(t)$ denote the mass of a spherical particle with radius $r(t)$, changing with time, $t$.  The initial mass is $m_0 = m(t=0)$.  The extent of reaction is defined as
+\begin{equation}
+\alpha \equiv \frac{m_0-m}{m_0}
+\end{equation}
+
+The density of the material, $\rho$, is a constant.  The volume is denoted $V(t)$.  The rate of change of $\alpha$ for a first-order reaction is given by \cite{Khawam:2006}
+\begin{equation}
+\frac{\d \alpha}{\d t} = k \, (1-\alpha)
+\end{equation}
+where the rate constant of the reaction is
+\begin{equation}
+k = A e^{-E_a/(RT)}
+\end{equation}
+Here, $A$ is the Arrhenius parameter (1/s) and $E_a$ is the activation energy (J/mol); $R$ is the gas constant (8.3145 J/mol/K) and $T$ is temperature in K.
+
+Integrating with constant density gives
+\begin{equation}
+\int \frac{\d \alpha}{1-\alpha} = k \int \d t \quad \Rightarrow \quad \left[\ln(1-\alpha)\right]_{\alpha_0}^{\alpha} = -k t
+\end{equation}
+
+\begin{equation}
+\frac{1-\alpha}{1-\alpha_0} = e^{-kt} \quad ; \quad \alpha_0=0 \quad ; \quad \alpha = 1-\frac{m}{m_0}
+\end{equation}
+
+\begin{equation}
+\frac{m}{m_0} = e^{-k t} \quad \Rightarrow \quad \frac{\rho V}{\rho_0 V_0} = e^{-k t} \quad \Rightarrow \quad r^3 = r_0^3 \, e^{-k t}
+\end{equation}
+
+\subsection*{Example}
+
+In Fig.~\ref{fig:solid_particle_decomposition} below, we take $A = 3.4e11$ 1/s, $E_a = 103000$ J/mol, $r_0 = 2.5$ $\mu$m, and compare FDS with the analytical solution for $T=[420, 450, 500]$ K.
+
+\begin{figure}[!h]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/solid_particle_decomposition}
+\caption[The \textct{solid\_particle\_decomposition} test cases]{Comparison of analytical and predicted particle diameter for a first-order solid phase reaction under isothermal conditions.}
+\label{fig:solid_particle_decomposition}
+\end{figure}
 
 \section{Burning Rate of a Small Object (\texorpdfstring{\textct{cell\_burn\_away}}{cell\_burn\_away})}
 \label{cell_burn_away}
@@ -5077,7 +5134,7 @@ where $\rho_{\rm a}$ is the air density, $C_{\rm d}=1$ is the drag coefficient, 
     x = - \frac{\text{ln}\left[\text{cosh}\left(\sqrt{g K} t \right)\right]}{K} \quad ; \quad
     K \equiv \frac{3 \rho_{\rm a} C_{\rm d}}{4 \rho_{\rm d} D}
 \ee
-The $L_\infty$ (maximum) error of the FDS computed terminal velocity and position are computed and plotted for each time step. As shown in Fig.~\ref{fig_terminal_velocity_convergence}, FDS exhibits second-order convergence for both the velocity and position.
+The $L_\infty$ (maximum) error of the FDS computed terminal velocity and position are computed and plotted for each time step. As shown in Fig.~\ref{fig_terminal_velocity_convergence}, FDS exhibits first-order convergence for the particle position and the terminal velocity error is near machine precision.
 
 \begin{figure}[h]
 \noindent
@@ -5089,39 +5146,7 @@ The $L_\infty$ (maximum) error of the FDS computed terminal velocity and positio
 \label{fig_terminal_velocity_convergence}
 \end{figure}
 
-%
-%\section{Accuracy of Fluid-Particle Momentum Transfer}
-%In Appendix G of the Technical Reference Guide the numerical scheme FDS uses to compute these trajectories is detailed. The equation for particle velocities is
-%\begin{equation}
-%   \mathbf{u}_p^{n+1} = \frac{\mathbf{u}_p^n}{1 + \beta_p \Delta t} + \frac{(\mathbf{u}_p^n + \alpha_p \mathbf{U}_p^n)\beta_p \Delta t}{(1 + \beta_p \Delta t)(1 + \alpha_p)} + \mathbf{g} \Delta t - \frac{\alpha_p \beta_p (\Delta t)^2}{2 (1 + \alpha_p)} \left[\mathbf{u}_r^n \left(\frac{\mathbf{u}_r^n \cdot \mathbf{g}}{|\mathbf{u}_r^n|^2}\right) + \mathbf{g}\right] \,.
-%\end{equation}
-%And the equation for particle positions is
-%\begin{equation}
-%   \mathbf{x}_p^{n+1} = \mathbf{x}_p^n + \left(\frac{\mathbf{u}_p^n + \alpha_p \mathbf{U}_p^n}{1 + \alpha_p}\right) \Delta t + \frac{\alpha_p (\mathbf{u}_p^n - \mathbf{U}_p^n)}{\beta_p (1 + \alpha_p)} \text{ln}(\beta_p \Delta t + 1) + \frac{\mathbf{g} (\Delta t)^2}{2} - \frac{\alpha_p \beta_p (\Delta t)^3}{6 (1 + \alpha_p)} \left[\mathbf{u}_p^n \left(\frac{\mathbf{u}_p^n \cdot \mathbf{g}}{|\mathbf{u}_p^n|^2}\right) + \mathbf{g}\right] \,.
-%\end{equation}
-%The particle velocities are second-order accurate in time. In other words, they are accurate to an order-of-magnitude of $\Delta t^2$. The error committed each time step as shown in Appendix G is
-%\begin{equation}
-%   \epsilon = \mathcal{O}(\Delta t^3) \,.
-%\end{equation}
-%This error is accumulated over many time steps. The allows us to define the total error $E \equiv n \epsilon$ where $n = T/\Delta T$ is the number of time steps and $T$ is the final time iterated out to. The total error can be found to be
-%\begin{equation}
-%   E = n \epsilon = \frac{T}{\Delta t} \mathcal{O}(\Delta t^3) = \mathcal{O}(\Delta t^2) \,.
-%\end{equation}
-%The particle velocities should be second-order accurate, as has been shown in FDS.
-%
-%
-%The accuracy of the particle positions, $\mathbf{x}$ is less obvious and finding their accuracy requires knowledge of the accuracy of $\mathbf{u}$. The natural log term of the position equation reduces the order of accuracy. Note that
-%\begin{equation}
-%   \frac{\alpha_p (\mathbf{u}_p^n - \mathbf{U}_p^n)}{\beta_p (1 + \alpha_p)} \text{ln}(\beta_p \Delta t + 1) = \frac{\alpha_p (\mathbf{u}_p^n - \mathbf{U}_p^n)}{1 + \alpha_p} \left(\Delta t - \frac{\beta_p \Delta t^2}{2} + \cdots \right) \quad \text{ for } \beta_p t < 1 \,.
-%\end{equation}
-%Also note that $\mathbf{u}_p^n = \mathbf{u}_{p,\text{exact}}^n + \mathcal{O}(\Delta t^2)$ in general. This error propagates through the natural log term. If only the relevant parts of the term are extracted we can see that
-%\begin{equation}
-%   \frac{\mathbf{u}_p^n}{\beta_p} \text{ln}(\beta_p \Delta t + 1) = (\mathbf{u}_{p,\text{exact}}^n + \mathcal{O}(\Delta t^2)) \left(\Delta t - \frac{\beta_p \Delta t^2}{2} + \cdots \right) = \frac{\mathbf{u}_{p,\text{exact}}^n \text{ln}(\beta_p \Delta t + 1)}{\beta_p} + \mathcal{O}(\Delta t^3) \,.
-%\end{equation}
-%This third-order error per time step becomes an accumulated second-order error, and consequently the position scheme is only second-order accurate as has been shown numerically.
-%
-%
-%Due to this error, the $\Delta t^3$ term of the position equation is dropped because it offers no improvements in accuracy but requires more computation.
+
 
 
 
@@ -5153,7 +5178,8 @@ Initial height                    & $h$                  & 8 m \\
 \hline
 \end{tabular}
 \end{center}
-Figure~\ref{flat_fire_plots} compares the first and second order accurate FDS solutions to the ``flat fire'' solution given above. The ``flat fire'' solution should have a slightly faster vertical velocity component, $w_{\rm p}$, at extended times because the speed of the particle is approximated with $u_{\rm p}$, which is lower than the true speed. This ensures the drag force is lower than it should be, and consequently $|w_{\rm p}|$ is larger in the ``flat fire'' solution. In the lower left plot in Fig.~\ref{flat_fire_plots} $|w_{\rm p}|$ computed by FDS using the second order accurate scheme is slightly less than the ``flat fire'' solution.
+Figure~\ref{flat_fire_plots} compares the computed solution to the ``flat fire'' solution given above.
+
 \begin{figure}[!ht]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/flat_fire_trajectory} &
@@ -5397,6 +5423,18 @@ In the test case called {\ct Sprinklers\_and\_Sprays/geom\_sprk\_mass.fds}, two 
 \caption[The {\ct geom\_sprk\_mass} test case]{Mass of water pooled on two solid obstructions.}
 \label{geom_sprk_mass_fig}
 \end{figure}
+
+\subsection{Obstructions of Different Orientations (\texorpdfstring{{\textct{geom\_particle\_cascade\_2}}}{geom\_particle\_cascade\_2}) }
+\label{geom_particle_cascade_2}
+
+In the test case called {\ct Complex\_Geometry/geom\_particle\_cascade\_2.fds}, four identical sprinklers pour water on four obstructions, one of which is created using the traditional {\ct OBST} input parameters, the other three are created using the immersed boundary {\ct GEOM} parameters. The objective is simply to ensure that the droplets drip off the obstructions appropriately. The sprinklers operate for 10~s, each discharging 10~L of water. Figure~\ref{geom_particle_cascade_2_fig} displays the accumulated mass of water on the floor as a function of time, demonstrating equivalent behavior by different types of solid obstructions.
+\begin{figure}[h!]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/geom_particle_cascade_2}
+\caption[The {\ct geom\_particle\_cascade\_2} test case]{Mass of water flowing over four obstructions.}
+\label{geom_particle_cascade_2_fig}
+\end{figure}
+
 
 \subsection{Adiabatic Surface Temperature (\texorpdfstring{{\textct{adiabatic\_surf\_temp\_spray}}}{adiabatic\_surf\_temp\_spray}) }
 \label{AST_spray}

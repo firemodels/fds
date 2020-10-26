@@ -1,0 +1,33 @@
+&HEAD CHID='FED_CO_HCN', TITLE='Verification of FED outputs for CO yield and HCN yield'/
+
+ All material properties etc. are completely fabricated.
+
+ This is a verifiaction test case for the gas phase DEVC output
+ quantity FED, which calculates the Fractional Effective Dose 
+ (FED) index.
+
+
+&MESH IJK= 5,5,5, XB= 0.0,2.0, 0.0,2.0, 0.0,2.0 /
+
+&TIME T_END=100.0, DT=0.1 /
+
+&DUMP DT_DEVC=0.1 /
+
+&REAC FUEL = 'POLYISOCYANURATE'
+      FORMULA='C63.5H4.98O21.8N6.15'
+      SOOT_YIELD = 0.01
+      CO_YIELD = 0.01
+      HCN_YIELD = 0.005
+      HEAT_OF_COMBUSTION=15000. /
+
+&INIT XB = 0,2,0,2,0,2 SPEC_ID = 'PRODUCTS' VOLUME_FRACTION(1) = 0.15 /
+
+!Devices						
+&DEVC XYZ= 1.0,1.0,1.0, QUANTITY='VOLUME FRACTION', SPEC_ID='CARBON MONOXIDE'	ID='CO'	 CONVERSION_FACTOR=1E6 UNITS='ppm'/
+&DEVC XYZ= 1.0,1.0,1.0, QUANTITY='VOLUME FRACTION', SPEC_ID='HYDROGEN CYANIDE'	ID='HCN' CONVERSION_FACTOR=1E6 UNITS='ppm'/
+&DEVC XYZ= 1.0,1.0,1.0, QUANTITY='VOLUME FRACTION', SPEC_ID='CARBON DIOXIDE'	ID='CO2' CONVERSION_FACTOR=1E2 UNITS='%'/
+&DEVC XYZ= 1.0,1.0,1.0, QUANTITY='VOLUME FRACTION', SPEC_ID='OXYGEN'		ID='O2'  CONVERSION_FACTOR=1E2 UNITS='%'/
+&DEVC XYZ= 1.0,1.0,1.0, QUANTITY='FED',						ID='FED' /
+
+
+&TAIL /

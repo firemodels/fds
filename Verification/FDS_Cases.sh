@@ -30,6 +30,7 @@ $QFDS -d Atmospheric_Effects MO_velocity_profile_unstable.fds
 $QFDS -d Complex_Geometry geom_extruded_poly.fds
 $QFDS -d Complex_Geometry geom_intersection.fds
 $QFDS -d Complex_Geometry geom_bad_inverted_normals.fds
+$QFDS -p 4 -d Complex_Geometry geom_particle_cascade_2.fds
 $QFDS -d Complex_Geometry geom_simple.fds
 #$QFDS -d Complex_Geometry geom_azim.fds
 #$QFDS -d Complex_Geometry geom_elev.fds
@@ -454,7 +455,9 @@ $QFDS -d Pyrolysis pyro3d_wood_char.fds
 $QFDS -d Pyrolysis pyro3d_vs_pyro1d.fds
 $QFDS -d Pyrolysis pyro3d_vs_pyro1d_wood_moist.fds
 $QFDS -d Pyrolysis pyro3d_transport.fds
-
+$QFDS -d Pyrolysis solid_particle_decomposition_1.fds
+$QFDS -d Pyrolysis solid_particle_decomposition_2.fds
+$QFDS -d Pyrolysis solid_particle_decomposition_3.fds
 
 $QFDS -d Radiation adiabatic_surface_temperature.fds
 $QFDS -d Radiation droplet_absorption_cart.fds
@@ -530,9 +533,12 @@ $QFDS -d Radiation TC_heating.fds
 $QFDS -d Radiation TC_view_factor.fds
 $QFDS -d Radiation wall_internal_radiation.fds
 
+$QFDS -d Restart restart_test1a.fds
+
 $QFDS -d Species burke_schumann.fds
 $QFDS -d Species FED_FIC.fds
 $QFDS -d Species FED_FIC_SMIX.fds
+$QFDS -d Species FED_CO_HCN.fds
 $QFDS -d Species methane_flame_simple.fds
 $QFDS -d Species methane_flame_simple_2.fds
 $QFDS -d Species methane_flame_primitive.fds

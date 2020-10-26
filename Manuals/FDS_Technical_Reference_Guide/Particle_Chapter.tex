@@ -21,6 +21,7 @@ The particle acceleration is given by
 \be
     \frac{\d \bu_{\rm p}}{\d t} = \bg - \ha \frac{\rho\,C_{\rm d} \, A_{\rm p,c}}{m_{\rm p}} \,
     (\bu_{\rm p}-\bu) |\bu_{\rm p}-\bu|
+    \label{part_accel}
 \ee
 The particle position, $\bx_{\rm p}$, is determined from the equation
 \be
@@ -105,7 +106,6 @@ which is 78\% of that for an isolated spherical particle.
 
 An alternative approach to drag reduction was provided by Prahl et al.~\cite{Prahl:1} who studied the interaction between two solid spheres in steady or pulsating flow by detailed numerical simulations. According to their study, the above equation underestimates the drag reduction significantly at small drop-to-drop distances. The inflow pulsations were found to reduce the effect of the drag reduction. At large distances, the two results are similar, the Ram\'{\i}rez-Mu\~{n}oz correlation showing more drag reduction. This is not surprising since the velocity profile of a fully developed axi-symmetric wake behind an axi-symmetric body is used in developing the drag reduction correction in Eqs.~\ref{eq:dragredfact} and \ref{eq:Wake-Vel}. At short distances, the wake is not fully developed and the assumption does not hold.
 
-\newpage
 \section{Liquid Droplet Size Distribution}
 
 The cumulative volume distribution for a liquid spray is represented by a combination of log-normal and Rosin-Rammler distributions~\cite{Chan:1}:
@@ -167,7 +167,7 @@ where ${\cal U}(0,1)$ is a uniformly distributed real number between 0 and 1 and
     The mass and heat transferred from each droplet will be multiplied by the weighting factor $C$.
 \end{enumerate}
 
-\newpage
+
 \section{Spray Initialization}
 
 The droplets are introduced into the simulation along a spherical surface whose diameter is a specified stand-off distance from the nozzle orifice. It is assumed that the droplets have fully atomized by this stage. The longitude of the initial droplet position, $0\le \theta < 2 \pi$, is randomly chosen from a uniform distribution. The latitude, $0 \le \phi < \pi$, is randomly selected from the following distribution:
@@ -232,7 +232,7 @@ where $\NU_0$ is the low mass flux Nusselt number, $\NU$ is the Nusselt number w
 The exchange of mass and energy between liquid droplets and the surrounding gases (or solid surfaces) is computed droplet by droplet. After the temperature of each droplet is computed, the
 appropriate amount of vaporized liquid is defined as a source term for the given mesh cell, any heat transfer to a solid is stored as a convective term, and the net effect of heat transfer and mass addition to the gas is defined as a divergence. The mass and divergence terms are discussed in the sections that follow.
 
-Equation~(\ref{droplet_mass}) through Equation~(\ref{droplet_gas_temp}) are solved as a set of coupled implicit equations over the course of a gas phase time step. Details on this solution process are given in Appendix~\ref{app_drop_evaporation}. 
+Equation~(\ref{droplet_mass}) through Equation~(\ref{droplet_gas_temp}) are solved as a set of coupled implicit equations over the course of a gas phase time step. Details on this solution process are given in Appendix~\ref{app_drop_evaporation}.
 
 \subsection{Filtered Volumetric Source Terms}
 
@@ -346,6 +346,8 @@ This force term essentially spreads the pressure drop over the width of a grid c
 
 \section{Turbulent Dispersion}
 
+\subsection{Massless Tracers}
+
 The effect of subgrid-scale turbulent fluid motion on the velocity and position of a Lagrangian particle may be accounted for using a random walk model \cite{Raman:CF}.  The position of a tracer particle obeys the stochastic differential equation
 \be
 \mbox{d}\mathbf{x}^* = \left[ \tilde{\mathbf{u}} + \frac{1}{\bar{\rho}}\nabla (\bar{\rho}\,D_t) \right] \,\mbox{d}t + \sqrt{2D_t} \,\mbox{d}\mbox{\textbf{W}}
@@ -353,3 +355,14 @@ The effect of subgrid-scale turbulent fluid motion on the velocity and position 
 where $\mathbf{x}^*$ denotes the particle position (an asterisk signifies a particle property), $\tilde{\mathbf{u}}$ is the resolved LES velocity, $D_t$ is the turbulent diffusivity (taken from an eddy viscosity model, for example), and $\mbox{\textbf{W}}$ is an independent Wiener process.  Notice that if no turbulent diffusion exists, the particle follows the resolved flow.  The term added to the resolved velocity accounts for the deterministic mean drift and the random walk term (Wiener process) accounts for the reorientation effect of unresolved turbulent motion.
 
 For those unfamiliar with stochastic differential equations, the Wiener process may be understood numerically as $\mbox{dW}(t) = (\delta t)^{1/2} \, \zeta(t)$ in the limit $\delta t \rightarrow 0$, where $\zeta(t)$ is an independent standardized Gaussian random variable \cite{Pope:2000}.  In FDS, $\zeta(t)$ are generated from a Box-Muller transform \cite{Box-Muller:1958}.
+
+\subsection{Massive Particles}
+
+For massive particles, a random walk model is not used.  Instead, the fluid velocity used in the drag calculation is augmented with an isotropic velocity fluctuation taken from an estimate of the subgrid kinetic energy.  Following \cite{Breuer:2012}, the gas velocity used in Eqs.~(\ref{part_force}) and (\ref{part_accel}) is given by
+\be
+\mathbf{u} = \tilde{\mathbf{u}} + u^\prime \, {\bm \zeta}
+\ee
+where $\tilde{\mathbf{u}}$ is the resolved LES velocity, $u^\prime = \sqrt{\frac{2}{3}\,k_{sgs}}$, and the components of $\bm \zeta$ are independent standardized Gaussian random variables (zero mean and unit variance) generated from a Box-Muller transform \cite{Box-Muller:1958}.  The subgrid kinetic energy is estimated from the turbulent viscosity as $k_{sgs} = (\mu_t/(\rho C_{\nu} \Delta))^2$; $C_\nu = 0.1$ is the Deardorff eddy viscosity coefficient.
+
+
+

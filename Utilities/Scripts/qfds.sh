@@ -224,6 +224,12 @@ EMAIL=
 CHECK_DIRTY=
 USERMAX=
 
+# by default maximize cores used if psm module is loaded
+MAX_MPI_PROCESSES_PER_NODE=
+if [ "$USE_PSM" != "" ]; then
+  MAX_MPI_PROCESSES_PER_NODE=1
+fi
+
 # determine which resource manager is running (or none)
 
 STATUS_FILE=status_file.$$
@@ -259,8 +265,8 @@ dir=.
 benchmark=no
 showinput=0
 exe=
+
 STARTUP=
-SET_MPI_PROCESSES_PER_NODE=
 if [ "$QFDS_STARTUP" != "" ]; then
   STARTUP=$QFDS_STARTUP
 fi
@@ -349,9 +355,10 @@ case $OPTION  in
    ;;
   n)
    n_mpi_processes_per_node="$OPTARG"
+   MAX_MPI_PROCESSES_PER_NODE=
    ;;
   N)
-   SET_MPI_PROCESSES_PER_NODE=1
+   MAX_MPI_PROCESSES_PER_NODE=1
    ;;
   o)
    n_openmp_threads="$OPTARG"
@@ -453,7 +460,8 @@ if [ "$n_mpi_processes" == "1" ]; then
   n_mpi_processes_per_node=1
 fi
 
-if [ "$SET_MPI_PROCESSES_PER_NODE" == "1" ]; then
+# use as many processes per node as possible (fewest number of nodes)
+if [ "$MAX_MPI_PROCESSES_PER_NODE" == "1" ]; then
    n_mpi_processes_per_node=$n_mpi_processes
    if test $n_mpi_processes_per_node -gt $ncores ; then
      n_mpi_processes_per_node=$ncores
@@ -596,6 +604,15 @@ fi
 let "nodes=($n_mpi_processes-1)/$n_mpi_processes_per_node+1"
 if test $nodes -lt 1 ; then
   nodes=1
+fi
+
+# don't let other jobs run on nodes used by this job if you are using psm and more than 1 node
+if [ "$USE_PSM" != "" ]; then
+  if test $nodes -gt 1 ; then
+    SLURM_PSM="#SBATCH --exclusive"
+  else
+    PROVIDER="export FI_PROVIDER=shm"
+  fi
 fi
 
 #*** define processes per node
@@ -880,12 +897,22 @@ cat << EOF >> $scriptfile
 EOF
 fi
 
+if [ "$SLURM_MEM" != "" ]; then
 cat << EOF >> $scriptfile
 $SLURM_MEM
 EOF
+fi
+
+if [ "$SLURM_PSM" != "" ]; then
+cat << EOF >> $scriptfile
+$SLURM_PSM
+EOF
+fi
+
     if [ "$walltimestring_slurm" != "" ]; then
       cat << EOF >> $scriptfile
 #SBATCH $walltimestring_slurm
+
 EOF
     fi
 
@@ -967,7 +994,15 @@ export VT_CONFIG=$use_config
 EOF
 fi
 
+
+if [ "$PROVIDER" != "" ]; then
 cat << EOF >> $scriptfile
+$PROVIDER
+EOF
+fi
+
+cat << EOF >> $scriptfile
+
 cd $fulldir
 echo
 echo \`date\`
