@@ -29230,7 +29230,7 @@ INTEGER, INTENT(IN) :: NM,ICF,IFACE,CFACE_INDEX,SURF_INDEX,STAGE_FLG
 INTEGER :: IBOD, IWSEL, ICC, JCC
 
 INTEGER :: IG, TRI, WSELEM(NOD1:NOD3), NOM, IIO, JJO, KKO, IIV(3), JJV(3), KKV(3), ICF2, JCF2, JCF22, ICF3, JCF3, &
-           II, JJ, KK, III, JJJ, KKK, ICFACE
+           II, JJ, KK, III, JJJ, KKK, ICFACE, ICFF
 REAL(EB):: XP(IAXIS:KAXIS),RDIR(IAXIS:KAXIS),V1(IAXIS:KAXIS),V2(IAXIS:KAXIS),V3(IAXIS:KAXIS),POS(IAXIS:KAXIS),DIST,DIST2
 LOGICAL :: IS_INTERSECT=.FALSE., BACK_CFACE_FOUND=.FALSE.
 
@@ -29357,6 +29357,7 @@ CASE(INTEGER_THREE)
                JJV(1:3) = (/ JJO, MAX(JJO-1,1), MIN(JJO+1,MESHES(NOM)%JBAR) /)
                KKV(1:3) = (/ KKO, MAX(KKO-1,1), MIN(KKO+1,MESHES(NOM)%KBAR) /)
 
+               DIST= 1._EB/TWO_EPSILON_EB; ICFF=0; JCF2=0
                K_LOOP : DO KKK=1,3
                   KK=KKV(KKK)
                   DO JJJ=1,3
@@ -29367,41 +29368,42 @@ CASE(INTEGER_THREE)
                         ICF2_COND : IF (ICF2>0) THEN
 
                            ! Use cut-face with closest centroid to POS:
-                           DIST= 1._EB/TWO_EPSILON_EB; JCF2=1
                            DO JCF22=1,MESHES(NOM)%CUT_FACE(ICF2)%NFACE
+                              IF(ICF==ICF2 .AND. IFACE==JCF22) CYCLE
                               DIST2 = (POS(IAXIS) - MESHES(NOM)%CUT_FACE(ICF2)%XYZCEN(IAXIS,JCF22))**2._EB + &
                                       (POS(JAXIS) - MESHES(NOM)%CUT_FACE(ICF2)%XYZCEN(JAXIS,JCF22))**2._EB + &
                                       (POS(KAXIS) - MESHES(NOM)%CUT_FACE(ICF2)%XYZCEN(KAXIS,JCF22))**2._EB
                               IF (DIST2<DIST) THEN
                                  DIST = DIST2
+                                 ICFF = ICF2
                                  JCF2 = JCF22
+                                 BACK_CFACE_FOUND = .TRUE.
                               ENDIF
                            ENDDO
-
-                           ! Loop NOM CUT_FACE array to find BACKING CFACE index:
-                           ICFACE=0;
-                           ICF3_LOOP : DO ICF3=1,MESHES(NOM)%N_CUTFACE_MESH
-                              IF(MESHES(NOM)%CUT_FACE(ICF3)%STATUS/=IBM_INBOUNDARY) CYCLE ICF3_LOOP
-                              DO JCF3=1,MESHES(NOM)%CUT_FACE(ICF3)%NFACE
-                                 ICFACE=ICFACE+1
-                                 IF(ICF2==ICF3 .AND. JCF2==JCF3) EXIT ICF3_LOOP
-                              ENDDO
-                           ENDDO ICF3_LOOP
-
-                           ! Define BACK_MESH, BACK_INDEX:
-                           CFACE(CFACE_INDEX)%BACK_MESH  = NOM
-                           CFACE(CFACE_INDEX)%BACK_INDEX = ICFACE
-                           !WRITE(LU_ERR,*) CFACE_INDEX,'BACK_MESH, BACK_INDEX=', &
-                           !CFACE(CFACE_INDEX)%BACK_MESH,CFACE(CFACE_INDEX)%BACK_INDEX
-                           BACK_CFACE_FOUND = .TRUE.
-                           EXIT K_LOOP
                         ENDIF ICF2_COND
                      ENDDO
                   ENDDO
                ENDDO K_LOOP
 
-               ! Write error for testing:
-               IF (.NOT.BACK_CFACE_FOUND) THEN
+               ! Loop NOM CUT_FACE array to find BACKING CFACE index:
+               IF(BACK_CFACE_FOUND) THEN
+                  ICFACE=0;
+                  ICF3_LOOP : DO ICF3=1,MESHES(NOM)%N_CUTFACE_MESH
+                     IF(MESHES(NOM)%CUT_FACE(ICF3)%STATUS/=IBM_INBOUNDARY) CYCLE ICF3_LOOP
+                     DO JCF3=1,MESHES(NOM)%CUT_FACE(ICF3)%NFACE
+                        ICFACE=ICFACE+1
+                        IF(ICFF==ICF3 .AND. JCF2==JCF3) EXIT ICF3_LOOP
+                     ENDDO
+                  ENDDO ICF3_LOOP
+
+                  ! Define BACK_MESH, BACK_INDEX:
+                  CFACE(CFACE_INDEX)%BACK_MESH  = NOM
+                  CFACE(CFACE_INDEX)%BACK_INDEX = ICFACE
+                  !WRITE(LU_ERR,*) CFACE_INDEX,'BACK_MESH, BACK_INDEX=', &
+                  !CFACE(CFACE_INDEX)%BACK_MESH,CFACE(CFACE_INDEX)%BACK_INDEX
+
+                  ! Write error for testing:
+               ELSE
                   WRITE(LU_ERR,*) 'WARNING: BACK CFACE search, MESH, CFACE_INDEX=',NM,CFACE_INDEX,&
                   ', back CFACE not found in mesh NOM,IIO,JJO,KKO=',NOM,IIO,JJO,KKO
                   RETURN
