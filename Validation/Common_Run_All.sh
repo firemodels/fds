@@ -27,6 +27,7 @@ walltime=
 showcommandline=
 showscript=
 CHECK_DIRTY=-g
+CHECK=
 
 INTEL="-I"
 # the mac doesn't have Intel MPI
@@ -55,6 +56,7 @@ echo "Runs FDS validation set"
 echo ""
 echo "Options"
 echo "-b - use debug version of FDS"
+echo "-C - check that case has run"
 echo "-e exe - run using exe (full path to fds)."
 echo "      Note: environment must be defined to use this executable"
 echo "-g - run even if input files or executable is dirty"
@@ -79,11 +81,14 @@ exit
 }
 
 DEBUG=$OPENMP
-while getopts 'be:EghIj:m:o:Oq:r:suvVw:xy' OPTION
+while getopts 'bCe:EghIj:m:o:Oq:r:suvVw:xy' OPTION
 do
 case $OPTION in
   b)
    DEBUG="-b $OPENMP"
+   ;;
+  C)
+   CHECK=1
    ;;
   e)
    EXE="$OPTARG"
@@ -153,6 +158,9 @@ if [ "$EXE" != "" ]; then
 fi
 
 export QFDS="$SCRIPTDIR/qfds.sh $CHECK_DIRTY -f $REPO $walltime $showcommandline $showscript $DV $INTEL $EXE"
+if [ "$CHECK" != "" ]; then
+  export QFDS="$SVNROOT/fds/Verification/scripts/Check_FDS_Cases.sh"
+fi
 
 if [ "$QUEUE" != "" ]; then
    QUEUE="-q $QUEUE"
