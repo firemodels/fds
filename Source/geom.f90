@@ -26767,7 +26767,7 @@ IF (GET_CUTCELLS_VERBOSE) THEN
       DO IPROC=1,N_MPI_PROCESSES-1
          TAG = 0
          IF (MYID==IPROC) THEN ! Send CC_COMPUTE_MESH array.
-            TAG=1000000+IPROC
+            TAG=IPROC
             CALL MPI_SEND(CC_COMPUTE_MESH(1),NMESHES,MPI_LOGICAL,0,TAG,MPI_COMM_WORLD,IERR)
             ! Open file to write SET_CUTCELLS_3D progress:
             WRITE(VERBOSE_FILE,'(A,A,I5.5,A)') TRIM(CHID),'_cutcell_',MYID,'.log'
@@ -26788,7 +26788,7 @@ IF (GET_CUTCELLS_VERBOSE) THEN
                ENDIF
             ENDDO
          ELSEIF (MYID==0) THEN ! Receive CC_COMPUTE_MESH array and write.
-            TAG=1000000+IPROC
+            TAG=IPROC
             CALL MPI_RECV(CC_COMPUTE_MESH_AUX(1),NMESHES,MPI_LOGICAL,IPROC,TAG,MPI_COMM_WORLD,MPISTATUS,IERR)
             ! Write to LU_ERR:
             NMESH_CC=0
