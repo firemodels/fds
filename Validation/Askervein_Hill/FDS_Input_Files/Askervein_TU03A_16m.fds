@@ -19,7 +19,7 @@
 &VENT MB='ZMAX',SURF_ID='OPEN'/
 
 ! Geometry:
-&SURF ID='terrain', Z_0=0.022, HEAT_TRANSFER_MODEL='ABL', COLOR='FOREST GREEN', DEFAULT=T/
+&SURF ID='terrain', Z_0=0.022, COLOR='FOREST GREEN', DEFAULT=T/
 
 ! &CATF OTHER_FILES='../../../../cad/Askervein_Hill/Askervein.geom' /
 &GEOM ID='terrain', SURF_ID='terrain', BINARY_FILE='../../../../cad/Askervein_Hill/Askervein_5m.bingeom' /
