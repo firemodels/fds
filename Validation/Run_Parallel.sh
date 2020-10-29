@@ -6,6 +6,7 @@
 OPTIONS="$* -y"
 
 cd Arup_Tunnel;  ./Run_All.sh $OPTIONS; cd ..
+cd Askervein_Hill; ./Run_All.sh $OPTIONS; cd ..
 cd ATF_Corridors;  ./Run_All.sh $OPTIONS; cd ..
 cd Atmospheric_Dispersion;  ./Run_All.sh $OPTIONS; cd ..
 cd Backward_Facing_Step;  ./Run_All.sh $OPTIONS; cd ..
