@@ -1114,7 +1114,6 @@ TYPE INITIALIZATION_TYPE
    REAL(EB) :: MASS_PER_VOLUME  !< Mass per unit volume of particles (kg/m3)
    REAL(EB) :: MASS_PER_TIME    !< Mass (kg) per time (s) of particles
    REAL(EB) :: DT_INSERT        !< Time increment between particle inserts (s)
-   REAL(EB) :: T_INSERT         !< Time to start inserting particles (s)
    REAL(EB) :: X0               !< x origin of initialization region (m)
    REAL(EB) :: Y0               !< y origin of initialization region (m)
    REAL(EB) :: Z0               !< z origin of initialization region (m)
