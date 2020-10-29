@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# This script runs the FDS Verification Cases on a linux machine with
+# This script runs the FDS Cases on a linux machine with
 # a batch queuing system
 
 if [ ! -e .verification_script_dir ]; then
@@ -54,6 +54,7 @@ DELAY=
 SUBSET=
 RESTART=
 FIREBOT_LITE=
+VALIDATION=
 
 function usage {
 echo "Run_FDS_Cases.sh [ -d -h -m max_iterations -o nthreads -q queue_name -s "
@@ -79,6 +80,7 @@ echo "-R - run only regular (non-benchmark) cases"
 echo "-s - stop FDS runs"
 echo "-S - run cases in FDS_Cases_Subset.sh"
 echo "-t - run only thread checking cases"
+echo "-V - run validation cases"
 echo "-w time - walltime request for a batch job"
 echo "     default: empty"
 echo "     format for PBS: hh:mm:ss, format for SLURM: dd-hh:mm:ss"
@@ -134,6 +136,7 @@ case $OPTION in
    REGULAR=
    RESTART=
    SUBSET=
+   VALIDATION=
    ;;
   C)
    CHECKCASES="1"
@@ -177,6 +180,7 @@ case $OPTION in
    REGULAR=
    RESTART=1
    SUBSET=
+   VALIDATION=
    ;;
   R)
    BENCHMARK=
@@ -184,6 +188,7 @@ case $OPTION in
    REGULAR=1
    RESTART=
    SUBSET=
+   VALIDATION=
    ;;
   s)
    export STOPFDS=1
@@ -198,6 +203,15 @@ case $OPTION in
    INSPECTCASES=1
    SUBSET=
    DEBUG=_inspect
+   VALIDATION=
+   ;;
+  V)
+   BENCHMARK=
+   INSPECTCASES=
+   REGULAR=
+   RESTART=
+   SUBSET=
+   VALIDATION=1
    ;;
   w)
    walltime="-w $OPTARG"
@@ -212,6 +226,7 @@ if [ "$FIREBOT_LITE" != "" ]; then
    BENCHMARK=
    REGULAR=
    RESTART=
+   VALIDATION=
    SUBSET=1
 fi
 
@@ -303,6 +318,15 @@ if [ "$RESTART" != "" ]; then
     ./FDS_RESTART_Cases.sh 
    if [ "$CHECKCASES" == "" ]; then
       echo Cases in FDS_RESTART_Cases.sh submitted
+   fi
+fi
+
+cd $CURDIR
+cd ../Validation
+if [ "$VALIDATION" != "" ]; then
+    ./FDS_VAL_Cases.sh 
+   if [ "$CHECKCASES" == "" ]; then
+      echo Cases in FDS_Val_Cases.sh submitted
    fi
 fi
 

@@ -1,19 +1,9 @@
 #!/bin/bash
 
-CHECK=
-while getopts 'C' OPTION
-do
-case $OPTION in
-  C)
-   CHECK="-C"
-   ;;
-esac
-done
-
 # To include validation data sets to be run automatically by Validationbot,
 # be sure to include the data set in ~/FDS-SMV/Validation/Process_All_Output.sh
 
-OPTIONS="$* -y $CHECK"
+OPTIONS="$* -y"
 
 CURDIR=`pwd`
 
