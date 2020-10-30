@@ -127,7 +127,7 @@ cd $SVNROOT
 export SVNROOT=`pwd`
 cd $CURDIR
 
-while getopts 'bCdD:e:hj:Jm:o:Oq:rRsStw:W' OPTION
+while getopts 'bCdD:e:hj:Jm:o:Oq:rRsStVw:W' OPTION
 do
 case $OPTION in
   b)
@@ -321,10 +321,9 @@ if [ "$RESTART" != "" ]; then
    fi
 fi
 
-cd $CURDIR
-cd ../Validation
 if [ "$VALIDATION" != "" ]; then
-    ./FDS_VAL_Cases.sh 
+   cd $SVNROOT/fds/Validation
+    ./FDS_Val_Cases.sh 
    if [ "$CHECKCASES" == "" ]; then
       echo Cases in FDS_Val_Cases.sh submitted
    fi
