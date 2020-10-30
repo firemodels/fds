@@ -2686,6 +2686,7 @@ Different variations of the case include the mesh resolution (20$^3$ and 100$^3$
 This example is similar to the one presented in Section~\ref{radiation_in_a_box}, except now the radiating plate is a polygon with sides of even length. The incident radiation heat flux from an $n$-sided polygon with temperature, $T=1000$~$^\circ$, is given by the formula~\cite{Siegel:1}:
 \be
    \dq_{\rm r}'' = \sigma \, T^4 \, \frac{n \, H}{\pi \, \sqrt{1+H^2}} \; \tan^{-1} \sqrt{\frac{R^2-H^2}{1+H^2}} \quad ; \quad H=\frac{h}{l} \quad ; \quad R=\frac{r}{l}
+   \label{plate_view_factor}
 \ee
 where $h$ is the distance from the center of the polygon to the center point of any of its sides, $r$ is the distance from the center to any vertex, and $l$ is the distance from the center to the target surface along a perpendicular line. Figure~\ref{radiating_polygon_figure} displays calculations performed with a range of grid and angular resolutions. Note that the number of angles used to solve the RTE is quadrupled when the number of grid cells in each coordinate direction is doubled.
 
@@ -4021,6 +4022,23 @@ In this example, a unit cube made of 0.5~cm thick steel has several of its sides
 \end{tabular*}
 \caption[The \textct{back\_wall\_test} test case]{(Left) The heat flux into and out of a steel plate. (Right) The external temperature of a steel box whose sides are either zero or one cell thick.}
 \label{back_wall_test_fig}
+\end{figure}
+
+
+\section{Heat Conduction through Immersed Boundaries (\texorpdfstring{\textct{back\_wall\_test\_2}}{back\_wall\_test\_2})}
+\label{back_wall_test_2}
+
+A 0.8~m by 0.8~m plate with surface temperature 1000~$^\circ$C and emissivity of 1 exposes a parallel plate separated by 0.15~m. The exposed plate is 1~cm thick, with a conductivity of 25~W/(m$\cdot$K), density 1000~kg/m$^3$, specific heat 0.1~kJ/(kg$\cdot$K), emissivity 1, and a convective heat transfer coefficient of 0. Three different configurations are considered: (1) the plates are all defined as traditional FDS {\ct OBST}ructions, (2) the plates are defined as immersed boundary ({\ct GEOM}) obstructions, and (3) the same plates as in (2) are rotated 45$^\circ$. Figure~\ref{back_wall_test_2_fig} displays the front and back surface temperatures for all three cases, compared to the exact solution where the analytically determined heat flux, Eq.~(\ref{plate_view_factor}), is imposed directly on the front plate surface. The error in all three cases is due mainly to the error in the radiation transport calculation on grids with 2.5~cm cells.
+
+\begin{figure}[ht]
+\noindent
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/back_wall_test_2_temp_obst} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/back_wall_test_2_temp_geom} \\
+\multicolumn{2}{c}{\includegraphics[height=2.2in]{SCRIPT_FIGURES/back_wall_test_2_temp_geom_rotated}}
+\end{tabular*}
+\caption[The \textct{back\_wall\_test\_2} test cases]{Front and back surface temperatures of a plate defined using the {\ct OBST} namelist parameters (top, left); {\ct GEOM} namelist parameters (top, right); {\ct GEOM} parameters rotated 45$^\circ$.}
+\label{back_wall_test_2_fig}
 \end{figure}
 
 
