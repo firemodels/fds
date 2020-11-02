@@ -748,6 +748,7 @@ $QFDS -d Turbulence sem_flat_leddy_p2.fds
 $QFDS -d Turbulence sem_par_leddy_p2.fds
 $QFDS -d Turbulence sem_atm_leddy_p2.fds
 $QFDS -d Turbulence sem_ramp_leddy_p2.fds
+$QFDS -d Turbulence sem_open_wind.fds
 $QFDS -d Turbulence ramp_prof_u_z.fds
 
 $QFDS -d WUI Bova_1a.fds
