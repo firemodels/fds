@@ -1348,7 +1348,7 @@ INTEGER, INTENT(IN) :: NM
 REAL     :: RN
 REAL(EB) :: XI,YJ,ZK,R_D,R_D_0,X_OLD,Y_OLD,Z_OLD,X_TRY,Y_TRY,Z_TRY,THETA,THETA_RN,STEP_FRACTION(-3:3),DT_CFL,DT_P,&
             STEP_FRACTION_PREVIOUS,DELTA,PVEC_L
-LOGICAL :: HIT_SOLID,CC_IBM_GASPHASE
+LOGICAL :: HIT_SOLID,CC_IBM_GASPHASE,EXTRACT_PARTICLE
 INTEGER :: IP,IC_NEW,IIG_OLD,JJG_OLD,KKG_OLD,IIG_TRY,JJG_TRY,KKG_TRY,IW,IC_OLD,IOR_HIT,&
            N_ITER,ITER,I_COORD,IC_TRY,IOR_ORIGINAL
 TYPE (LAGRANGIAN_PARTICLE_TYPE), POINTER :: LP=>NULL()
@@ -1463,19 +1463,6 @@ PARTICLE_LOOP: DO IP=1,NLP
 
       ENDIF SOLID_GAS_MOVE
 
-      ! Special case where a liquid droplet hits a POROUS_FLOOR
-
-      IF (POROUS_FLOOR .AND. LP%Z<ZS .AND. LPC%LIQUID_DROPLET) THEN
-         IC_OLD = CELL_INDEX(IIG_OLD,JJG_OLD,1)
-         IW = WALL_INDEX(IC_OLD,-3)
-         IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY .AND. ACCUMULATE_WATER .AND. .NOT.LP%SPLAT) THEN
-            WALL(IW)%ONE_D%A_LP_MPUA(LPC%ARRAY_INDEX) = WALL(IW)%ONE_D%A_LP_MPUA(LPC%ARRAY_INDEX) + &
-                                                        LP%PWT*LPC%FTPR*R_D**3/WALL(IW)%ONE_D%AREA
-            LP%SPLAT = .TRUE.
-         ENDIF
-         EXIT TIME_STEP_LOOP
-      ENDIF
-
       ! Determine the cell indices of the new particle location.
 
       CALL GET_IJK(LP%X,LP%Y,LP%Z,NM,XI,YJ,ZK,LP%ONE_D%IIG,LP%ONE_D%JJG,LP%ONE_D%KKG)
@@ -1491,6 +1478,7 @@ PARTICLE_LOOP: DO IP=1,NLP
 
       IF ((IC_OLD==0 .OR. IC_NEW==0) .AND. CC_IBM_GASPHASE) THEN
          LP%ONE_D%IOR = 0
+         LP%CFACE_INDEX = 0
          CYCLE TIME_STEP_LOOP
       ENDIF
 
@@ -1507,7 +1495,7 @@ PARTICLE_LOOP: DO IP=1,NLP
          BOUNCE_CF = .TRUE.
 
          IF ( INDCF < 1 ) THEN
-            IF(CCVAR(LP%ONE_D%IIG,LP%ONE_D%JJG,LP%ONE_D%KKG,IBM_CGSC)==IBM_SOLID) THEN
+            IF (CCVAR(LP%ONE_D%IIG,LP%ONE_D%JJG,LP%ONE_D%KKG,IBM_CGSC)==IBM_SOLID) THEN
                ! Kinematics of a surface particle moving on Horizontal GEOM surface and passing to IBM_SOLID cell.
                ! Bounce back on random direction, maintaining CFACE_INDEX:
 
@@ -1672,6 +1660,9 @@ PARTICLE_LOOP: DO IP=1,NLP
                   LP%ONE_D%IOR = 1
                   HIT_SOLID = .TRUE.
 
+                  CALL VENT_PARTICLE_EXTRACTION(EXTRACT_PARTICLE,CFACE_INDEX=ICF)
+                  IF (EXTRACT_PARTICLE) EXIT TIME_STEP_LOOP
+
                ENDIF CFACE_ATTACH
 
             ENDIF SLIDE_CF_IF
@@ -1679,6 +1670,7 @@ PARTICLE_LOOP: DO IP=1,NLP
          ELSEIF (CCVAR(LP%ONE_D%IIG,LP%ONE_D%JJG,LP%ONE_D%KKG,IBM_CGSC)/=IBM_GASPHASE .AND. BOUNCE_CF) THEN INDCF_POS
 
             LP%ONE_D%IOR = 0
+            LP%CFACE_INDEX = 0
 
          ENDIF INDCF_POS
 
@@ -1712,9 +1704,9 @@ PARTICLE_LOOP: DO IP=1,NLP
          KKG_TRY = KKG_OLD
          IW = 0
 
-         DO I_COORD=1,3
+         TRIAL_LOOP: DO I_COORD=1,3
             IOR_HIT = MINLOC(STEP_FRACTION,DIM=1,MASK=STEP_FRACTION>STEP_FRACTION_PREVIOUS) - 4
-            IF (STEP_FRACTION(IOR_HIT)>1._EB) EXIT
+            IF (STEP_FRACTION(IOR_HIT)>1._EB) EXIT TRIAL_LOOP
             X_TRY = X_OLD + STEP_FRACTION(IOR_HIT)*(LP%X-X_OLD)
             Y_TRY = Y_OLD + STEP_FRACTION(IOR_HIT)*(LP%Y-Y_OLD)
             Z_TRY = Z_OLD + STEP_FRACTION(IOR_HIT)*(LP%Z-Z_OLD)
@@ -1722,6 +1714,8 @@ PARTICLE_LOOP: DO IP=1,NLP
             IW = WALL_INDEX(IC_TRY,-IOR_HIT)
             IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
                LP%WALL_INDEX = IW
+               CALL VENT_PARTICLE_EXTRACTION(EXTRACT_PARTICLE,WALL_INDEX=IW)
+               IF (EXTRACT_PARTICLE) EXIT TIME_STEP_LOOP
                LP%ONE_D%IOR  = IOR_HIT
                LP%X = X_TRY
                LP%Y = Y_TRY
@@ -1739,7 +1733,7 @@ PARTICLE_LOOP: DO IP=1,NLP
                LP%ONE_D%KKG = KKG_TRY
                IC_NEW = IC_TRY
                HIT_SOLID = .TRUE.
-               EXIT
+               EXIT TRIAL_LOOP
             ENDIF
             STEP_FRACTION_PREVIOUS = STEP_FRACTION(IOR_HIT)
             SELECT CASE(IOR_HIT)
@@ -1750,7 +1744,7 @@ PARTICLE_LOOP: DO IP=1,NLP
                CASE( 2) ; JJG_TRY = JJG_TRY-1
                CASE( 3) ; KKG_TRY = KKG_TRY-1
             END SELECT
-         ENDDO
+         ENDDO TRIAL_LOOP
 
          ! If the particle has hit a Cartesian solid, choose a new direction
 
@@ -1809,20 +1803,6 @@ PARTICLE_LOOP: DO IP=1,NLP
             EXIT TIME_STEP_LOOP
          ENDIF
 
-         ! Add PARTICLE mass to accumulated liquid array if it has not already been counted (LP%SPLAT=F)
-
-         IF (ACCUMULATE_WATER .AND. .NOT.LP%SPLAT .AND. LPC%ADHERE_TO_SOLID) THEN
-            IF (LP%WALL_INDEX>0) THEN
-               ONE_D => WALL(LP%WALL_INDEX)%ONE_D
-            ELSEIF (LP%CFACE_INDEX>0) THEN
-               ONE_D => CFACE(LP%CFACE_INDEX)%ONE_D
-            ENDIF
-            IF (LP%WALL_INDEX>0 .OR. LP%CFACE_INDEX>0) THEN
-               ONE_D%A_LP_MPUA(LPC%ARRAY_INDEX) = ONE_D%A_LP_MPUA(LPC%ARRAY_INDEX) + LP%PWT*LPC%FTPR*R_D**3/ONE_D%AREA
-               LP%SPLAT = .TRUE.
-            ENDIF
-         ENDIF
-
          ! Adjust the size of the PARTICLE and weighting factor
 
          IF (LPC%LIQUID_DROPLET) THEN
@@ -1876,6 +1856,8 @@ PARTICLE_LOOP: DO IP=1,NLP
       ENDIF
 
    ENDDO TIME_STEP_LOOP
+
+   ! If the particle is not stuck to a wall, allow it to be counted again.
 
    IF (LP%ONE_D%IOR==0 .AND. IOR_ORIGINAL==0) LP%SPLAT = .FALSE.
 
@@ -2243,6 +2225,44 @@ ELSE PARTICLE_NON_STATIC_IF ! Drag calculation for stationary, airborne particle
 ENDIF PARTICLE_NON_STATIC_IF
 
 END SUBROUTINE MOVE_IN_GAS
+
+
+!> \brief Test to see if particles should be removed from solid WALL or CFACE
+!> \details If a particle has hit a solid boundary (LP%WALL_INDEX>0 or LP%CFACE_INDEX>0) do the following:
+!> If the user has specified AMPUA (Accumulated Mass Per Unit Area) for
+!> a particle type, and the particle has not already been counted (LP%SPLAT=F), add its mass to an array.
+!> If the solid surface has an inward normal velocity (U_NORMAL>0) and
+!> this velocity is greater than a user-specified minimum (PARTICLE_EXTRACTION_VELOCITY) OR if a droplet has
+!> hit the floor (LP%Z<ZS) and the floor is POROUS, remove it.
+
+SUBROUTINE VENT_PARTICLE_EXTRACTION(EXTRACT,WALL_INDEX,CFACE_INDEX)
+
+LOGICAL, INTENT(OUT) :: EXTRACT
+INTEGER, INTENT(IN), OPTIONAL :: WALL_INDEX,CFACE_INDEX
+INTEGER :: SURF_INDEX
+
+EXTRACT = .FALSE.
+
+IF (PRESENT(WALL_INDEX)) THEN
+   ONE_D => WALL(WALL_INDEX)%ONE_D
+   SURF_INDEX = WALL(WALL_INDEX)%SURF_INDEX
+ELSEIF (PRESENT(CFACE_INDEX)) THEN
+   ONE_D => CFACE(CFACE_INDEX)%ONE_D
+   SURF_INDEX = CFACE(CFACE_INDEX)%SURF_INDEX
+ENDIF
+
+IF (ACCUMULATE_WATER .AND. .NOT.LP%SPLAT .AND. LPC%ADHERE_TO_SOLID) THEN
+   ONE_D%A_LP_MPUA(LPC%ARRAY_INDEX) = ONE_D%A_LP_MPUA(LPC%ARRAY_INDEX) + LP%PWT*LPC%FTPR*R_D**3/ONE_D%AREA
+   LP%SPLAT = .TRUE.
+ENDIF
+
+IF ( ONE_D%U_NORMAL>SURFACE(SURF_INDEX)%PARTICLE_EXTRACTION_VELOCITY .OR. &
+     (POROUS_FLOOR .AND. LP%Z<ZS .AND. LPC%LIQUID_DROPLET) ) THEN
+   LP%X=-1.E6_EB
+   EXTRACT = .TRUE.
+ENDIF
+
+END SUBROUTINE VENT_PARTICLE_EXTRACTION
 
 
 !> \brief Compute C_DRAG reduction due to the wake effect (Ramirez, Munoz et al. 2007)
@@ -3352,8 +3372,11 @@ PARTICLE_LOOP: DO IP=1,NLP
       LP  => MESHES(NM)%LAGRANGIAN_PARTICLE(IP)
       LPC => LAGRANGIAN_PARTICLE_CLASS(LP%CLASS_INDEX)
       SF  => SURFACE(LPC%SURF_INDEX)
+
       ! Ignore HVAC particles
+
       IF (LPC%DUCT_PARTICLE) CYCLE PARTICLE_LOOP
+
       ! Remove particles that are too small
 
       IF (LPC%SOLID_PARTICLE .AND. SF%THERMAL_BC_INDEX==THERMALLY_THICK .AND. LP%ONE_D%BURNAWAY) THEN
