@@ -172,7 +172,7 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
             WBAR = W0*EVALUATE_RAMP(T,DUMMY,I_RAMP_W0_T)*EVALUATE_RAMP(ZC(K),DUMMY,I_RAMP_W0_Z)
             H0 = 0.5_EB*(UBAR**2+VBAR**2+WBAR**2)
          ENDIF
-         ! Synthetic eedy method for OPEN inflow boundaries
+         ! Synthetic eddy method for OPEN inflow boundaries
          IF (VT%N_EDDY>0) THEN
             SELECT CASE(ABS(VT%IOR))
                CASE(1); H0 = 0.5_EB*((UBAR+VT%U_EDDY(J,K))**2+(VBAR+VT%V_EDDY(J,K))**2+(WBAR+VT%W_EDDY(J,K))**2)
