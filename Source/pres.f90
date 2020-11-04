@@ -163,34 +163,26 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
          TIME_RAMP_FACTOR = EVALUATE_RAMP(TSI,DUMMY,VT%PRESSURE_RAMP_INDEX)
          P_EXTERNAL = TIME_RAMP_FACTOR*VT%DYNAMIC_PRESSURE
 
-         UBAR = 0._EB
-         VBAR = 0._EB
-         WBAR = 0._EB
          IF (ANY(MEAN_FORCING)) THEN
             UBAR = U0*EVALUATE_RAMP(T,DUMMY,I_RAMP_U0_T)*EVALUATE_RAMP(ZC(K),DUMMY,I_RAMP_U0_Z)
             VBAR = V0*EVALUATE_RAMP(T,DUMMY,I_RAMP_V0_T)*EVALUATE_RAMP(ZC(K),DUMMY,I_RAMP_V0_Z)
             WBAR = W0*EVALUATE_RAMP(T,DUMMY,I_RAMP_W0_T)*EVALUATE_RAMP(ZC(K),DUMMY,I_RAMP_W0_Z)
-            IF (NEW_OPEN_WIND) THEN
-               ! experimental, to remove spurious inflow at wind outflow boundaries
-               SELECT CASE(IOR)
-                  CASE( 1); H0 = HP(1,J,K)    + 0.5_EB/RDXN(1)   /DT*(UBAR - UU(0,   J,K))
-                  CASE(-1); H0 = HP(IBAR,J,K) - 0.5_EB/RDXN(IBAR)/DT*(UBAR - UU(IBAR,J,K))
-                  CASE( 2); H0 = HP(I,1,K)    + 0.5_EB/RDYN(1)   /DT*(VBAR - VV(I,0,   K))
-                  CASE(-2); H0 = HP(I,JBAR,K) - 0.5_EB/RDYN(JBAR)/DT*(VBAR - VV(I,JBAR,K))
-                  CASE( 3); H0 = HP(I,J,1)    + 0.5_EB/RDZN(1)   /DT*(WBAR - WW(I,J,0   ))
-                  CASE(-3); H0 = HP(I,J,KBAR) - 0.5_EB/RDZN(KBAR)/DT*(WBAR - WW(I,J,KBAR))
-               END SELECT
-            ELSE
-               H0 = 0.5_EB*(UBAR**2+VBAR**2+WBAR**2)
-            ENDIF
-         ENDIF
-         ! Synthetic eddy method for OPEN inflow boundaries
-         IF (VT%N_EDDY>0) THEN
-            SELECT CASE(ABS(VT%IOR))
-               CASE(1); H0 = 0.5_EB*((UBAR+VT%U_EDDY(J,K))**2+(VBAR+VT%V_EDDY(J,K))**2+(WBAR+VT%W_EDDY(J,K))**2)
-               CASE(2); H0 = 0.5_EB*((UBAR+VT%U_EDDY(I,K))**2+(VBAR+VT%V_EDDY(I,K))**2+(WBAR+VT%W_EDDY(I,K))**2)
-               CASE(3); H0 = 0.5_EB*((UBAR+VT%U_EDDY(I,J))**2+(VBAR+VT%V_EDDY(I,J))**2+(WBAR+VT%W_EDDY(I,J))**2)
+            SELECT CASE(IOR)
+               CASE( 1); H0 = HP(1,J,K)    + 0.5_EB/(DT*RDXN(0)   )*(UBAR - UU(0,   J,K))
+               CASE(-1); H0 = HP(IBAR,J,K) - 0.5_EB/(DT*RDXN(IBAR))*(UBAR - UU(IBAR,J,K))
+               CASE( 2); H0 = HP(I,1,K)    + 0.5_EB/(DT*RDYN(0)   )*(VBAR - VV(I,0,   K))
+               CASE(-2); H0 = HP(I,JBAR,K) - 0.5_EB/(DT*RDYN(JBAR))*(VBAR - VV(I,JBAR,K))
+               CASE( 3); H0 = HP(I,J,1)    + 0.5_EB/(DT*RDZN(0)   )*(WBAR - WW(I,J,0   ))
+               CASE(-3); H0 = HP(I,J,KBAR) - 0.5_EB/(DT*RDZN(KBAR))*(WBAR - WW(I,J,KBAR))
             END SELECT
+            ! Synthetic eddy method for OPEN inflow boundaries
+            IF (VT%N_EDDY>0) THEN
+               SELECT CASE(ABS(VT%IOR))
+                  CASE(1); H0 = 0.5_EB*((UBAR+VT%U_EDDY(J,K))**2+(VBAR+VT%V_EDDY(J,K))**2+(WBAR+VT%W_EDDY(J,K))**2)
+                  CASE(2); H0 = 0.5_EB*((UBAR+VT%U_EDDY(I,K))**2+(VBAR+VT%V_EDDY(I,K))**2+(WBAR+VT%W_EDDY(I,K))**2)
+                  CASE(3); H0 = 0.5_EB*((UBAR+VT%U_EDDY(I,J))**2+(VBAR+VT%V_EDDY(I,J))**2+(WBAR+VT%W_EDDY(I,J))**2)
+               END SELECT
+            ENDIF
          ENDIF
 
          SELECT CASE(IOR)
