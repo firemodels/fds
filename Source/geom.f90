@@ -46722,8 +46722,8 @@ REAL(EB) :: A(3),C,DENOM,V(3),A1(3),A2(3),A3(3),B1(3),B2(3),B3(3),R_THETA(3,3)
 ! initialize 2D rotation matrix
 ! this is a counterclockwise rotation
 R_THETA = 0._EB
-R_THETA(1,1) = COS(THETA*PI/180._EB);  R_THETA(1,2) = SIN(THETA*PI/180._EB)
-R_THETA(2,1) = -SIN(THETA*PI/180._EB); R_THETA(2,2) = COS(THETA*PI/180._EB)
+R_THETA(1,1) =  COS(THETA*DEG2RAD); R_THETA(1,2) = SIN(THETA*DEG2RAD)
+R_THETA(2,1) = -SIN(THETA*DEG2RAD); R_THETA(2,2) = COS(THETA*DEG2RAD)
 R_THETA(3,3) = 1._EB
 
 ! initialize R_OUT as 2D rotation matrix
