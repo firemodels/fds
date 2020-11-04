@@ -7059,6 +7059,12 @@ You can also vary the wind velocity components with height using the ramp functi
 \end{lstlisting}
 The parameter {\ct Z} represents the height (m) and {\ct F} the fraction of the given velocity component value. Note that if you use Monin-Obukhov similarity parameters, you should not specify the vertical profile of the wind. It will be calculated automatically.
 
+Often for longer simulations lasting hours, you may not know exactly how the wind {\ct DIRECTION} varies, but you might have some estimate based on the {\em stability class} of the atmosphere. Using the terminology of the atmospheric dispersion community~\cite{Hanna:1982}, the perturbation to the wind {\ct DIRECTION} can be modeled as:
+\be
+   \theta'(t+\dt) = R^2 \, \theta'(t) + N\left( 0,\sqrt{1-R^2} \, \sigma_\theta \right) \quad ; \quad R={\rm e}^{-\dt/\tau}  \quad ; \quad \theta'(0) = 0
+\ee
+where $N(\mu,\sigma)$ denotes a normal random variable with mean $\mu$ and standard deviation $\sigma$, $\sigma_\theta$ ({\ct SIGMA\_THETA} specified with units of degrees on the {\ct WIND} line) depends on the stability class of the atmosphere and $\tau$ ({\ct TAU\_THETA}) is a time scale with a default value of 300~s.
+
 \subsection{Aerodynamic Roughness}
 \label{aerodynamic_roughness}
 
@@ -7107,6 +7113,9 @@ You can output any of the three components of the wind velocity profile averaged
 &DEVC XB=..., POINTS=20, QUANTITY='U MEAN FORCING', Z_ID='z', ID='u' /
 \end{lstlisting}
 The parameter {\ct XB} consists of six coordinates $(x_1,x_2,y_1,y_2,z_1,z_2)$. Only the $z$ values matter, but $x_1$ and $x_2$ should be the same and within the domain. The same is true for the $y$ values. The output, written to the {\ct CHID\_line.csv} file, is a vertical profile of the given velocity component averaged over a time period controlled by {\ct STATISTICS\_START} and {\ct STATISTICS\_END}. The default values are ({\ct T\_END}$-${\ct T\_BEGIN})/2 and {\ct T\_END}, respectively.
+
+
+
 
 
 
@@ -12192,9 +12201,11 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RAMP\_V0\_Z}                               & Character     & Section~\ref{info:wind_ramps}                 &               &                   \\ \hline
 {\ct RAMP\_W0\_T}                               & Character     & Section~\ref{info:wind_ramps}                 &               &                   \\ \hline
 {\ct RAMP\_W0\_Z}                               & Character     & Section~\ref{info:wind_ramps}                 &               &                   \\ \hline
+{\ct SIGMA\_THETA}                              & Real          & Section~\ref{info:wind_ramps}                 & degrees       &                   \\ \hline
 {\ct SPEED}                                     & Real          & Section~\ref{info:WIND}                       & m/s           & 0.                \\ \hline
 {\ct SPONGE\_CELLS}                             & Integer       & Section~\ref{info:SPONGE_CELLS}               &               & 3                 \\ \hline
 {\ct STRATIFICATION}                            & Logical       & Section~\ref{info:stratification}             &               & {\ct .TRUE.}      \\ \hline
+{\ct TAU\_THETA}                                & Real          & Section~\ref{info:wind_ramps}                 & s             & 300               \\ \hline
 {\ct THETA\_STAR}                               & Real          & Section~\ref{info:WIND}                       & K             &                   \\ \hline
 {\ct TMP\_REF}                                  & Real          & Section~\ref{info:WIND}                       & $^\circ$C     & {\ct TMPA}        \\ \hline
 {\ct U\_STAR}                                   & Real          & Section~\ref{info:WIND}                       & m/s           &                   \\ \hline
