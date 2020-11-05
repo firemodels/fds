@@ -2964,14 +2964,14 @@ Refer to the FDS Tech Guide \cite{FDS_Tech_Guide} for further details of the for
 \subsubsection{Atmospheric Boundary Layer Wall Model}
 \label{sec:abl_model}
 
-The incorporation of buoyancy into the wall function is the domain of Monin-Obuhkov (MO) similarity theory, as discussed in Sec.~\ref{info:WIND}. Further mathematical details of the ABL wall model are discussed in the FDS Tech Guide \cite{FDS_Math_Guide}.  To specify this model for a particular surface, set {\ct HEAT\_TRANSFER\_MODEL} equal to {\ct ABL} on the {\ct SURF} line together with the aerodynamic roughness length, {\ct Z\_0}.  For example,
+The incorporation of buoyancy into the wall function is the domain of Monin-Obuhkov (MO) similarity theory, as discussed in Sec.~\ref{info:WIND}. Further mathematical details of the ABL wall model are discussed in the FDS Tech Guide \cite{FDS_Math_Guide}.  Note that the model assumes gravity to point in the $-z$ direction.  To specify this model for a particular surface, set {\ct HEAT\_TRANSFER\_MODEL} equal to {\ct 'ABL'} on the {\ct SURF} line together with the aerodynamic roughness length, {\ct Z\_0}.  For example,
 \begin{lstlisting}
 &SURF ID='ground', HEAT_TRANSFER_MODEL='ABL', Z_0=0.05 /
 \end{lstlisting}
 
 As discussed in Sec.~\ref{info:WIND}, there is a simple conversion between the aerodynamic roughness and the sandgrain roughness, which can be input using {\ct ROUGHNESS} on {\ct SURF}.  Either {\ct Z\_0} or {\ct ROUGHNESS} may be specified, but not both.  Also, if a {\ct WIND} line is present, {\ct Z\_0} must be consistent between {\ct SURF} and {\ct WIND} lines.  The value of {\ct Z\_0} on {\ct SURF} will override the default value from {\ct WIND}.
 
-When the ABL wall model is used, this also changes the wall stress model (see FDS Tech Guide~\cite{FDS_Math_Guide}).  The local Obukhov length, $L$ (see Sec.~\ref{info:WIND}), and viscous wall units, $y^+$ (see Sec.~\ref{info:yplus}), can be output using boundary files or wall devices.
+When the ABL wall model is used, this also changes the wall stress model (see FDS Tech Guide~\cite{FDS_Math_Guide}).  The local Obukhov length, $L$ (see Sec.~\ref{info:WIND}), and viscous wall units, $y^+$ (see Sec.~\ref{info:yplus}), can be output using boundary files or wall devices.  Note that the perfectly ``neutral'' value for local $L$ is set to zero to avoid problems with the colorbar range that would occur if the physically correct value of infinity were used.  However, if the flow is not perfectly isothermal then usually there is enough of a temperature difference to register a physically realizable value for $L$ in the ABL model.
 
 \subsubsection{Free Convection, Horizontal Cylinder}
 
@@ -4068,7 +4068,7 @@ The no-slip condition implies that the continuum tangential gas velocity at a su
 \subsection{Synthetic Turbulence Inflow Boundary Conditions}
 \label{info:synthetic_turbulence}
 
-Real flows of low-viscosity fluids like air are rarely perfectly stationary in time or uniform in space---they are turbulent (to some degree). Of course, the turbulence characteristics of the flow may have a significant impact on mixing and other behaviors so the specification of nominally constant and uniform boundary conditions may be insufficient.  To address this issue, FDS employs a synthetic eddy method (SEM)\footnote{SEM only applies to velocity boundary conditions and so may not be used for HVAC vents, which are strict mass flux boundaries.}.  Refer to Jarrin \cite{Jarrin:2008} for a detailed description. In brief, ``eddies'' are injected into the flow at random positions on the boundary and advect with the mean flow over a short distance near the boundary equivalent to the maximum eddy length scale.  Once the eddy passes through this region it is recycled at the inlet of the boundary with a new random position and length scale. The eddies are idealized as velocity perturbations over a spherical region in space with a diameter (eddy length scale) selected from a uniform random distribution. The selection procedures guarantee that prescribed first and second-order statistics (including Reynolds stresses) are satisfied.
+Real flows of low-viscosity fluids like air are rarely perfectly stationary in time or uniform in space---they are turbulent (to some degree). Of course, the turbulence characteristics of the flow may have a significant impact on mixing and other behaviors, so the specification of nominally constant and uniform boundary conditions may be insufficient.  To address this issue, FDS employs a synthetic eddy method (SEM)\footnote{SEM may not be used for HVAC vents, which are strict mass flux boundaries.}.  Refer to Jarrin \cite{Jarrin:2008} for a detailed description. In brief, ``eddies'' are injected into the flow at random positions on the boundary and advect with the mean flow over a short distance near the boundary equivalent to the maximum eddy length scale.  Once the eddy passes through this region it is recycled at the inlet of the boundary with a new random position and length scale. The eddies are idealized as velocity perturbations over a spherical region in space with a diameter (eddy length scale) selected from a uniform random distribution. The selection procedures guarantee that prescribed first and second-order statistics (including Reynolds stresses) are satisfied.
 
 Synthetic turbulence is invoked by setting the number of eddies, {\ct N\_EDDY}, the characteristic eddy length scale, {\ct L\_EDDY}, and either the root mean square (RMS)
 velocity fluctuation, {\ct VEL\_RMS}, or the Reynolds stress tensor components, {\ct REYNOLDS\_STRESS(3,3)} on the {\ct VENT} line.  In Fig.~\ref{fig:sem_profiles} we show examples using SEM for flat, parabolic, atmospheric, and ramp profiles with 10 \% turbulence intensity (see the {\ct sem\_*} test series in the Turbulence verification subdirectory).  The input lines for the atmospheric case are (see Section \ref{info:stratification} for further discussion of profile parameters).
@@ -4107,6 +4107,36 @@ In Chapter 7 of Jarrin's thesis~\cite{Jarrin:2008}, he introduces the Modified S
    REYNOLDS_STRESS(2,1)=0.,    REYNOLDS_STRESS(2,2)=1.53, REYNOLDS_STRESS(2,3)=0.
    REYNOLDS_STRESS(3,1)=-0.47, REYNOLDS_STRESS(3,2)=0.,   REYNOLDS_STRESS(3,3)=4.259 /
 \end{lstlisting}
+
+\subsubsection*{Synthetic Turbulence at OPEN Boundaries}
+\label{info:sem_open}
+
+For wind simulations (see Sec.~\ref{info:WIND}) it may be necessary to add a degree of inflow turbulence in order to match atmospheric conditions without drastically increasing the size of the computational domain.  The Synthetic Eddy Method of Jarrin \cite{Jarrin:2008} may be invoked on the {\ct VENT} line with an {\ct 'OPEN'} boundary.  This should be used in conjunction with a {\ct WIND} line to specify the mean wind field.  For example,
+
+\begin{lstlisting}
+&WIND SPEED=10, DIRECTION=270, ... /
+&VENT DB='XMIN', SURF_ID='OPEN', N_EDDY=500, L_EDDY=3, VEL_RMS=1 /
+\end{lstlisting}
+
+Figure \ref{fig:sem_open_wind} shows results from a demonstration case ({\ct sem\_open\_wind.fds}).  In this case the mean wind speed is 10 m/s at 10 m elevation with a Monin-Obukhov length of $-667$ m (unstably stratified) and an aerodynamic roughness of $z_0=0.022$ m.  The ground temperature is set to 20 $^\circ \mbox{C}$ and the ambient temperature is set fo 19.18 $^\circ \mbox{C}$ based on the Monin-Obukhov profile.  The rms velocity fluctuation at the inlet is set to 1 m/s. The lateral boundaries are {\ct 'PERIODIC'}.  The inflow, outflow, and top boundary conditions are set to {\ct 'OPEN'}.  Note that a special OPEN boundary condition for WIND has been developed, which is discussed in the FDS Tech Guide \cite{FDS_Math_Guide}.
+
+\begin{figure}[ht]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/sem_open_wind_u_prof} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/sem_open_wind_T_prof} \\
+\end{tabular*}
+\caption[Synthetic Eddy Method at OPEN boundary]{Synthetic Eddy Method at OPEN boundary with prescribed WIND field: (left) Monin-Obukhov velocity profile, (right) Monin-Obukhov temperature profile.}
+\label{fig:sem_open_wind}
+\end{figure}
+
+This test case also uses the atmospheric boundary layer (ABL) wall model (see Sec.~\ref{sec:abl_model}) for computing the wall stress and heat flux.  This model generates a local Monin-Obukhov (MO) length scale that is appropriate for solid phase output.  Here we compare the ground surface mean MO lenth scale, $L$, as a function of time with the prescribed {\ct L} on the {\ct WIND} line ($-667$ m).  The resulting time history is shown in Fig.~\ref{fig:sem_open_wind_LMO}.  Note that the negative MO length indicates an unstable boundary layer.  The initial transient (spike) is due to setting a uniform ambient temperature, which generates a large initial heat flux.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/sem_open_wind_LMO}
+\caption[Monin-Obukhov length from ABL\_WALL\_MODEL]{Mean Monin-Obukhov length scale output from the ABL wall model compared to the input $L$.}
+\label{fig:sem_open_wind_LMO}
+\end{figure}
 
 
 \subsection{Random Mass Flux Variation}
@@ -12203,7 +12233,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RAMP\_W0\_Z}                               & Character     & Section~\ref{info:wind_ramps}                 &               &                   \\ \hline
 {\ct SIGMA\_THETA}                              & Real          & Section~\ref{info:wind_ramps}                 & degrees       &                   \\ \hline
 {\ct SPEED}                                     & Real          & Section~\ref{info:WIND}                       & m/s           & 0.                \\ \hline
-{\ct SPONGE\_CELLS}                             & Integer       & Section~\ref{info:SPONGE_CELLS}               &               & 3                 \\ \hline
+{\ct SPONGE\_CELLS}                             & Integer       & Section~\ref{info:SPONGE_CELLS}               &               & 0                 \\ \hline
 {\ct STRATIFICATION}                            & Logical       & Section~\ref{info:stratification}             &               & {\ct .TRUE.}      \\ \hline
 {\ct TAU\_THETA}                                & Real          & Section~\ref{info:wind_ramps}                 & s             & 300               \\ \hline
 {\ct THETA\_STAR}                               & Real          & Section~\ref{info:WIND}                       & K             &                   \\ \hline
