@@ -2147,6 +2147,51 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
          IF (BOUNDARY_TYPE_M==NULL_BOUNDARY .AND. BOUNDARY_TYPE_P==NULL_BOUNDARY) CYCLE ORIENTATION_LOOP
 
+         ! Set up synthetic eddy method
+
+         SYNTHETIC_EDDY_METHOD = .FALSE.
+         IF (IWM>0 .AND. IWP>0) THEN
+            IF (WCM%VENT_INDEX==WCP%VENT_INDEX) THEN
+               IF (WCM%VENT_INDEX>0) THEN
+                  VT=>VENTS(WCM%VENT_INDEX)
+                  IF (VT%N_EDDY>0) SYNTHETIC_EDDY_METHOD=.TRUE.
+               ENDIF
+            ENDIF
+         ENDIF
+
+         VEL_EDDY = 0._EB
+         SYNTHETIC_EDDY_IF_1: IF (SYNTHETIC_EDDY_METHOD) THEN
+            IS_SELECT_1: SELECT CASE(IS) ! unsigned vent orientation
+               CASE(1) ! yz plane
+                  SELECT CASE(IEC) ! edge orientation
+                     CASE(2)
+                        IF (ICD==1) VEL_EDDY = 0.5_EB*(VT%U_EDDY(JJ,KK)+VT%U_EDDY(JJ,KK+1))
+                        IF (ICD==2) VEL_EDDY = 0.5_EB*(VT%W_EDDY(JJ,KK)+VT%W_EDDY(JJ,KK+1))
+                     CASE(3)
+                        IF (ICD==1) VEL_EDDY = 0.5_EB*(VT%V_EDDY(JJ,KK)+VT%V_EDDY(JJ+1,KK))
+                        IF (ICD==2) VEL_EDDY = 0.5_EB*(VT%U_EDDY(JJ,KK)+VT%U_EDDY(JJ+1,KK))
+                  END SELECT
+               CASE(2) ! zx plane
+                  SELECT CASE(IEC)
+                     CASE(3)
+                        IF (ICD==1) VEL_EDDY = 0.5_EB*(VT%V_EDDY(II,KK)+VT%V_EDDY(II+1,KK))
+                        IF (ICD==2) VEL_EDDY = 0.5_EB*(VT%U_EDDY(II,KK)+VT%U_EDDY(II+1,KK))
+                     CASE(1)
+                        IF (ICD==1) VEL_EDDY = 0.5_EB*(VT%W_EDDY(II,KK)+VT%W_EDDY(II,KK+1))
+                        IF (ICD==2) VEL_EDDY = 0.5_EB*(VT%V_EDDY(II,KK)+VT%V_EDDY(II,KK+1))
+                  END SELECT
+               CASE(3) ! xy plane
+                  SELECT CASE(IEC)
+                     CASE(1)
+                        IF (ICD==1) VEL_EDDY = 0.5_EB*(VT%W_EDDY(II,JJ)+VT%W_EDDY(II,JJ+1))
+                        IF (ICD==2) VEL_EDDY = 0.5_EB*(VT%V_EDDY(II,JJ)+VT%V_EDDY(II,JJ+1))
+                     CASE(2)
+                        IF (ICD==1) VEL_EDDY = 0.5_EB*(VT%U_EDDY(II,JJ)+VT%U_EDDY(II+1,JJ))
+                        IF (ICD==2) VEL_EDDY = 0.5_EB*(VT%W_EDDY(II,JJ)+VT%W_EDDY(II+1,JJ))
+                  END SELECT
+            END SELECT IS_SELECT_1
+         ENDIF SYNTHETIC_EDDY_IF_1
+
          ! OPEN boundary conditions, both varieties, with and without a wind
 
          OPEN_AND_WIND_BC: IF ((IWM==0.OR.WALL(IWM)%BOUNDARY_TYPE==OPEN_BOUNDARY) .AND. &
@@ -2305,15 +2350,13 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
             MUA = 0.5_EB*(MU(IIGM,JJGM,KKGM) + MU(IIGP,JJGP,KKGP))
 
-            ! Set up synthetic eddy method (experimental)
+            ! Check for HVAC tangential velocity
 
-            SYNTHETIC_EDDY_METHOD = .FALSE.
             HVAC_TANGENTIAL = .FALSE.
             IF (IWM>0 .AND. IWP>0) THEN
                IF (WCM%VENT_INDEX==WCP%VENT_INDEX) THEN
                   IF (WCM%VENT_INDEX>0) THEN
                      VT=>VENTS(WCM%VENT_INDEX)
-                     IF (VT%N_EDDY>0) SYNTHETIC_EDDY_METHOD=.TRUE.
                      IF (ALL(VT%UVW > -1.E12_EB) .AND. VT%NODE_INDEX > 0) HVAC_TANGENTIAL = .TRUE.
                   ENDIF
                ENDIF
@@ -2321,41 +2364,9 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
             ! Determine if there is a tangential velocity component
 
-            VEL_T_IF: IF (.NOT.SF%SPECIFIED_TANGENTIAL_VELOCITY .AND. .NOT.SYNTHETIC_EDDY_METHOD .AND. .NOT. HVAC_TANGENTIAL) THEN
+            VEL_T_IF: IF (.NOT.SF%SPECIFIED_TANGENTIAL_VELOCITY .AND. .NOT.SYNTHETIC_EDDY_METHOD .AND. .NOT.HVAC_TANGENTIAL) THEN
                VEL_T = 0._EB
             ELSE VEL_T_IF
-               VEL_EDDY = 0._EB
-               SYNTHETIC_EDDY_IF: IF (SYNTHETIC_EDDY_METHOD) THEN
-                  IS_SELECT: SELECT CASE(IS) ! unsigned vent orientation
-                     CASE(1) ! yz plane
-                        SELECT CASE(IEC) ! edge orientation
-                           CASE(2)
-                              IF (ICD==1) VEL_EDDY = 0.5_EB*(VT%U_EDDY(JJ,KK)+VT%U_EDDY(JJ,KK+1))
-                              IF (ICD==2) VEL_EDDY = 0.5_EB*(VT%W_EDDY(JJ,KK)+VT%W_EDDY(JJ,KK+1))
-                           CASE(3)
-                              IF (ICD==1) VEL_EDDY = 0.5_EB*(VT%V_EDDY(JJ,KK)+VT%V_EDDY(JJ+1,KK))
-                              IF (ICD==2) VEL_EDDY = 0.5_EB*(VT%U_EDDY(JJ,KK)+VT%U_EDDY(JJ+1,KK))
-                        END SELECT
-                     CASE(2) ! zx plane
-                        SELECT CASE(IEC)
-                           CASE(3)
-                              IF (ICD==1) VEL_EDDY = 0.5_EB*(VT%V_EDDY(II,KK)+VT%V_EDDY(II+1,KK))
-                              IF (ICD==2) VEL_EDDY = 0.5_EB*(VT%U_EDDY(II,KK)+VT%U_EDDY(II+1,KK))
-                           CASE(1)
-                              IF (ICD==1) VEL_EDDY = 0.5_EB*(VT%W_EDDY(II,KK)+VT%W_EDDY(II,KK+1))
-                              IF (ICD==2) VEL_EDDY = 0.5_EB*(VT%V_EDDY(II,KK)+VT%V_EDDY(II,KK+1))
-                        END SELECT
-                     CASE(3) ! xy plane
-                        SELECT CASE(IEC)
-                           CASE(1)
-                              IF (ICD==1) VEL_EDDY = 0.5_EB*(VT%W_EDDY(II,JJ)+VT%W_EDDY(II,JJ+1))
-                              IF (ICD==2) VEL_EDDY = 0.5_EB*(VT%V_EDDY(II,JJ)+VT%V_EDDY(II,JJ+1))
-                           CASE(2)
-                              IF (ICD==1) VEL_EDDY = 0.5_EB*(VT%U_EDDY(II,JJ)+VT%U_EDDY(II+1,JJ))
-                              IF (ICD==2) VEL_EDDY = 0.5_EB*(VT%W_EDDY(II,JJ)+VT%W_EDDY(II+1,JJ))
-                        END SELECT
-                  END SELECT IS_SELECT
-               ENDIF SYNTHETIC_EDDY_IF
                IF (ABS(SF%T_IGN-T_BEGIN)<=SPACING(SF%T_IGN) .AND. SF%RAMP_INDEX(TIME_VELO)>=1) THEN
                   TSI = T
                ELSE

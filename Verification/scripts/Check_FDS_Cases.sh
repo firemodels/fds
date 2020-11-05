@@ -17,7 +17,7 @@ case=$1
 infile=$DIR/${case%.*}.fds
 errfile=$DIR/${case%.*}.err
 if [  -e $errfile ]; then
-  if [[ `grep -iE 'completed successfully|Set-up only|stopped by KILL control|TGA analysis only' $errfile` != "" ]]; then
+  if [[ `grep -iE 'completed successfully|Set-up only|stopped by user|stopped by KILL control|TGA analysis only' $errfile` != "" ]]; then
     # continue along
     :
   else

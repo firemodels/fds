@@ -6838,6 +6838,21 @@ The {\ct INIT} parameter {\ct PATH\_RAMP(1:3)} is a list of three character stri
 \end{figure}
 
 
+\section{Particle Removal}
+\label{info:particle_removal}
+
+Lagrangian particles can be removed from a simulation in a number of ways:
+\begin{enumerate}
+\item Specify the {\ct AGE} on the {\ct PART} line so that particles are removed after this period of time after insertion.
+\item Liquid droplets disappear when they hit the ``floor'' of the computational domain, regardless of whether it is solid or not. This feature mimics the presence of floor drains. To stop FDS from removing liquid droplets from the floor of the domain, add the phrase {\ct POROUS\_FLOOR=.FALSE.} to the {\ct MISC} line. Be aware, however, that droplets that land on the floor continue to move horizontally in randomly selected directions; bouncing off obstructions, and consuming CPU time. Note also that solid particles do not disappear from the floor of the domain like liquid droplets.
+\item If droplets or particles are drawn towards an extracting vent, they will not be removed unless you specify a minimum {\ct PARTICLE\_EXTRACTION\_VELOCITY} (m/s). That is, if the vent's extraction velocity exceeds this value, the particles or droplets will be extracted as well. By default, this parameter is a large positive value, meaning that you must specify a value for this parameter to have an effect.
+\end{enumerate}
+
+
+
+
+
+
 \section{Special Topic: Suppression by Water}
 \label{info:suppression}
 
@@ -7001,12 +7016,12 @@ If you know the value of $u_*$ or $\theta_*$, you can input these on the {\ct WI
 
 You may assign material properties to the {\ct GROUND} if you like, but be aware that FDS assumes the ground to be ambient temperature ({\ct TMPA}) initially, and the temperature of the atmosphere either increases or decreases with height according to the stability condition. The top of the domain is set to be {\ct 'OPEN'}, meaning that even though the wind field is more or less parallel to it, there might be, for example, a hot plume that can rise out of the computational domain.
 
-The side boundaries of the domain can be set either to {\ct SURF\_ID='OPEN'}, {\ct 'PERIODIC'}, or {\ct 'PERIODIC FLOW ONLY'}. {\ct SURF\_ID='OPEN'} is the usual inflow/outflow condition for any case where the computational domain is open to an infinite ambient void. {\ct SURF\_ID='PERIODIC'} assumes that the domain repeats itself endlessly in each direction. This is an important assumption because the turbulent atmospheric boundary layer that is modeled using Monin-Obukhov similarity theory is assumed to develop over distances far beyond the computational domain. {\ct SURF\_ID='PERIODIC FLOW ONLY'} is the same as {\ct 'PERIODIC'} except that only the velocity field is periodic, but scalar quantities are not. That is, you do not want a smoke plume that exits the eastern boundary of the domain to reappear instantly at the western boundary, even though you still might want the velocity field to be periodic.
+The side boundaries of the domain can be set either to {\ct SURF\_ID='OPEN'}, {\ct 'PERIODIC'}, or {\ct 'PERIODIC FLOW ONLY'}. {\ct SURF\_ID='OPEN'} is the usual inflow/outflow condition for any case where the computational domain is open to an infinite ambient void. {\ct SURF\_ID='PERIODIC'} assumes that the domain repeats itself endlessly in each direction. This is an important assumption because the turbulent atmospheric boundary layer that is modeled using Monin-Obukhov similarity theory is assumed to develop over distances far beyond the computational domain. {\ct SURF\_ID='PERIODIC FLOW ONLY'} is the same as {\ct 'PERIODIC'} except that only the velocity field is periodic, but scalar quantities are not. That is, you do not want a smoke plume that exits the eastern boundary of the domain to reappear instantly at the western boundary, even though you still might want the velocity field to be periodic. Wind speed and temperature profiles corresponding to various choices of Monin-Obukhov parameters are shown in Fig.~\ref{wind_profiles}.
 
 \subsubsection{Example Wind Simulation}
 \label{wind_example}
 
-The input files called {\ct wind\_example.fds} and {\ct wind\_example\_32.fds} in the samples folder called \linebreak[4]{\ct Atmospheric\_Effects} demonstrate wind functionality. The first case uses 8 meshes; the second 32. The computational domain is a flat landscape that is 1~km by 1~km by 100~m high. There are various rectangular blocks scattered about to represent buildings. The wind speed varies with height as shown in the right hand plot of Fig.~\ref{wind_profiles}. The wind also turns a full 360$^\circ$ in 50~s, starting and ending in the westerly direction (270$^\circ$). This turn of the wind is not realistic, but this case is intended to test the ramp and mean forcing functionality. The plots in Fig.~\ref{wind_example_fig} display some results of the simulation. On the left is a plot showing the mean velocity components of the simulated wind field compared to the specified components. The right hand plot of Fig.~\ref{wind_example_fig} displays the specified vertical wind speed profile compared to the computed time average profile. The two profiles should be the same because FDS is ``forcing'' the simulated vertical wind speed profile averaged over the entire domain to match the user-specified profile.
+The input files called {\ct wind\_example.fds} and {\ct wind\_example\_32.fds} in the samples folder called \linebreak[4]{\ct Atmospheric\_Effects} demonstrate wind functionality. The first case uses 8 meshes; the second 32. The computational domain is a flat landscape that is 1~km by 1~km by 100~m high. There are various rectangular blocks scattered about to represent buildings. The wind turns a full 360$^\circ$ in 50~s, starting and ending in the westerly direction (270$^\circ$). This turn of the wind is not realistic, but this case is intended to test the ramp and mean forcing functionality. The plots in Fig.~\ref{wind_example_fig} display some results of the simulation. On the left is a plot showing the mean velocity components of the simulated wind field compared to the specified components. The right hand plot of Fig.~\ref{wind_example_fig} displays the specified wind speed profile in the vertical direction compared to the computed time average profile. The two profiles should be the same because FDS is ``forcing'' the simulated vertical wind speed profile averaged over the entire domain to match the user-specified profile.
 
 \begin{figure}[ht]
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/wind_example_time}
@@ -7043,6 +7058,12 @@ You can also vary the wind velocity components with height using the ramp functi
 &RAMP ID='z-ramp', Z=500., F=1.8 /
 \end{lstlisting}
 The parameter {\ct Z} represents the height (m) and {\ct F} the fraction of the given velocity component value. Note that if you use Monin-Obukhov similarity parameters, you should not specify the vertical profile of the wind. It will be calculated automatically.
+
+Often for longer simulations lasting hours, you may not know exactly how the wind {\ct DIRECTION} varies, but you might have some estimate based on the {\em stability class} of the atmosphere. Using the terminology of the atmospheric dispersion community~\cite{Hanna:1982}, the perturbation to the wind {\ct DIRECTION} can be modeled as:
+\be
+   \theta'(t+\dt) = R^2 \, \theta'(t) + N\left( 0,\sqrt{1-R^2} \, \sigma_\theta \right) \quad ; \quad R={\rm e}^{-\dt/\tau}  \quad ; \quad \theta'(0) = 0
+\ee
+where $N(\mu,\sigma)$ denotes a normal random variable with mean $\mu$ and standard deviation $\sigma$, $\sigma_\theta$ ({\ct SIGMA\_THETA} specified with units of degrees on the {\ct WIND} line) depends on the stability class of the atmosphere and $\tau$ ({\ct TAU\_THETA}) is a time scale with a default value of 300~s.
 
 \subsection{Aerodynamic Roughness}
 \label{aerodynamic_roughness}
@@ -7092,6 +7113,9 @@ You can output any of the three components of the wind velocity profile averaged
 &DEVC XB=..., POINTS=20, QUANTITY='U MEAN FORCING', Z_ID='z', ID='u' /
 \end{lstlisting}
 The parameter {\ct XB} consists of six coordinates $(x_1,x_2,y_1,y_2,z_1,z_2)$. Only the $z$ values matter, but $x_1$ and $x_2$ should be the same and within the domain. The same is true for the $y$ values. The output, written to the {\ct CHID\_line.csv} file, is a vertical profile of the given velocity component averaged over a time period controlled by {\ct STATISTICS\_START} and {\ct STATISTICS\_END}. The default values are ({\ct T\_END}$-${\ct T\_BEGIN})/2 and {\ct T\_END}, respectively.
+
+
+
 
 
 
@@ -7889,7 +7913,7 @@ A sprinkler, known as {\ct 'Spr-1'}, is located at a point in space given by {\c
 \item[{\ct ACTIVATION\_TEMPERATURE}] in units of $^\circ$C. (Default 74~$^\circ$C)
 \item[{\ct INITIAL\_TEMPERATURE}] of the link in units of $^\circ$C. (Default {\ct TMPA})
 \item[{\ct FLOW\_RATE} or {\ct MASS\_FLOW\_RATE}] in units of L/min or kg/s. An alternative is to provide the {\ct K\_FACTOR} in units of $\si{L/(min.bar^{\ha})}$ and the {\ct OPERATING\_PRESSURE}, the gauge pressure at the sprinkler, in units of bar. The flow rate is then given by $K \sqrt{p}$. Note that 1 bar is equivalent to 14.5~psi, 1 gpm is equivalent to 3.785~L/min, 1~gpm/psi$^\ha$ is equivalent to 14.41~L/min/bar$^\ha$.  If {\ct MASS\_FLOW\_RATE} is given then {\ct PARTICLE\_VELOCITY} must also be defined. Note that {\ct FLOW\_RATE} is only appropriate for liquid droplets; solid particles should use {\ct MASS\_FLOW\_RATE}
-\item[{\ct OFFSET}] Radius (m) of a sphere surrounding the sprinkler where the water droplets are initially placed in the simulation. It is assumed that beyond the {\ct OFFSET} the droplets have completely broken up and are transported independently of each other. (Default 0.05~m)
+\item[{\ct OFFSET}] Radius (m) of a sphere surrounding the sprinkler where the water droplets are initially placed in the simulation (Default 0.05~m). It is assumed that beyond the {\ct OFFSET} the droplets have completely broken up and are transported independently of each other. Do not locate a sprinkler or nozzle within {\ct OFFSET} meters of a mesh boundary. If you do, the droplets introduced into the adjacent mesh will be rejected. The entire spray pattern of the sprinkler need not lie within one mesh, but the volume immediately surrounding the sprinkler itself must lie in one mesh.
 \item[{\ct PARTICLE\_VELOCITY}]  Initial droplet velocity. (Default 0~m/s)
 \item[{\ct ORIFICE\_DIAMETER}] Diameter of the nozzle orifice in m (default 0~m). This input provides an alternative way to set droplet velocity by giving values for {\ct FLOW\_RATE} and {\ct ORIFICE\_DIAMETER}, in which case the droplet velocity is computed by dividing the flow rate by the orifice area. Use this method if you do not have any information about droplet velocity. However, quite often you must fine-tune the {\ct PARTICLE\_VELOCITY} in order to reproduce a particular spray profile. The {\ct ORIFICE\_DIAMETER} is not used if either {\ct PARTICLE\_VELOCITY} or {\ct SPRAY\_PATTERN\_TABLE} is specified.
 \item[{\ct SPRAY\_ANGLE}] A pair of angles (in degrees) through which the droplets are sprayed. The angles outline a conical spray pattern relative to the south pole of the sphere centered at the sprinkler with radius {\ct OFFSET}. For example, {\ct SPRAY\_ANGLE=30.,80.} directs the water spray through a band between 30$^\circ$ and 80$^\circ$ of the {\ct ORIENTATION} vector, which is (0,0,-1) by default (see Figure~\ref{Sprinkler_Sketch}). Elliptical spray patterns can be specified via a pair of spray angles. For example, {\ct SPRAY\_ANGLE(1:2,1)=0.,60.}  and {\ct SPRAY\_ANGLE(1:2,2)=0.,30.}, defines a spray pattern with 60 degree angle in the direction of the $x$ axis and a 30 degree angle in the direction of the $y$ axis. From above, the spray pattern resembles an ellipse. {\ct SPRAY\_PATTERN\_SHAPE} determines how the droplets are distributed within the specified {\ct SPRAY\_ANGLE}. Choices are {\ct 'UNIFORM'} and {\ct 'GAUSSIAN'}. The default distribution is {\ct 'GAUSSIAN'}. The parameter {\ct SPRAY\_PATTERN\_MU} controls the latitude of the maximum density of droplets for the {\ct 'GAUSSIAN'} distribution. The width of the distribution is controlled by the parameter {\ct SPRAY\_PATTERN\_BETA}.
@@ -7898,9 +7922,9 @@ A sprinkler, known as {\ct 'Spr-1'}, is located at a point in space given by {\c
 \item[{\ct PRESSURE\_RAMP}] The name of the {\ct RAMP} lines specifying the dependence of pipe pressure on the number of active sprinklers and nozzles.
 \item[{\ct SMOKEVIEW\_ID}] The name of a drawing of a sprinkler to include in the Smokeview animation.
 \end{description}
-Be aware that sprinklers can produce many droplets. To limit the computational cost, liquid droplets disappear when they hit the ``floor'' of the computational domain, regardless of whether it is solid or not. This feature mimics the presence of floor drains. To stop FDS from removing liquid droplets from the floor of the domain, add the phrase {\ct POROUS\_FLOOR=.FALSE.} to the {\ct MISC} line. Be aware, however, that droplets that land on the floor continue to move horizontally in randomly selected directions; bouncing off obstructions, and consuming CPU time. Note also that solid particles do not disappear from the floor of the domain like liquid droplets.
 
-Do not locate a sprinkler or nozzle within {\ct OFFSET} meters of a mesh boundary. If you do, the droplets introduced into the adjacent mesh will be rejected. The entire spray pattern of the sprinkler need not lie within one mesh, but the volume immediately surrounding the sprinkler itself must lie in one mesh.
+
+
 
 \begin{figure}[ht]
 \includegraphics[width=6.5in]{FIGURES/Sprinkler_Sketch}
@@ -11209,7 +11233,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct PARTICLE\_CFL}                                 & Logical      & Section~\ref{info:PART_Stability}       &            & {\ct .FALSE.}     \\ \hline
 {\ct PARTICLE\_CFL\_MAX}                            & Real         & Section~\ref{info:PART_Stability}       &            & 1.0               \\ \hline
 {\ct PARTICLE\_CFL\_MIN}                            & Real         & Section~\ref{info:PART_Stability}       &            & 0.8               \\ \hline
-{\ct POROUS\_FLOOR}                                 & Logical      & Section~\ref{info:sprinklers}           &            & {\ct .TRUE.}      \\ \hline
+{\ct POROUS\_FLOOR}                                 & Logical      & Section~\ref{info:particle_removal}     &            & {\ct .TRUE.}      \\ \hline
 {\ct PR}                                            & Real         & Section~\ref{info:LES}                  &            & 0.5               \\ \hline
 {\ct P\_INF}                                        & Real         & Section~\ref{info:MISC_Basics}          & Pa         & 101325            \\ \hline
 {\ct RAMP\_GX}                                      & Character    & Section~\ref{info:GVEC}                 &            &                   \\ \hline
@@ -11925,7 +11949,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct NET\_HEAT\_FLUX}                                     & Real            & Section~\ref{info:convection}             & kW/m$^2$            &                         \\ \hline
 {\ct NO\_SLIP}                                            & Logical         & Section~\ref{info:WALL_MODEL}             &                     & {\ct .FALSE.}           \\ \hline
 {\ct NPPC}                                                & Integer         & Section~\ref{info:particle_flux}          &                     & 1                       \\ \hline
-{\ct PACKING\_RATIO(:) }                                  & Real Array      & Section~\ref{pine_needles}             &                     &                         \\ \hline
+{\ct PACKING\_RATIO(:) }                                  & Real Array      & Section~\ref{pine_needles}                &                     &                         \\ \hline
+{\ct PARTICLE\_EXTRACTION\_VELOCITY}                      & Real            & Section~\ref{info:particle_removal}       & m/s                 &                         \\ \hline
 {\ct PARTICLE\_MASS\_FLUX}                                & Real            & Section~\ref{info:particle_flux}          & \si{kg/(m^2.s)}     &                         \\ \hline
 {\ct PARTICLE\_SURFACE\_DENSITY}                          & Real            & Section~\ref{info:particle_flux}          & kg/m$^2$            &                         \\ \hline
 {\ct PART\_ID}                                            & Character       & Section~\ref{info:particle_flux}          &                     &                         \\ \hline
@@ -12176,9 +12201,11 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RAMP\_V0\_Z}                               & Character     & Section~\ref{info:wind_ramps}                 &               &                   \\ \hline
 {\ct RAMP\_W0\_T}                               & Character     & Section~\ref{info:wind_ramps}                 &               &                   \\ \hline
 {\ct RAMP\_W0\_Z}                               & Character     & Section~\ref{info:wind_ramps}                 &               &                   \\ \hline
+{\ct SIGMA\_THETA}                              & Real          & Section~\ref{info:wind_ramps}                 & degrees       &                   \\ \hline
 {\ct SPEED}                                     & Real          & Section~\ref{info:WIND}                       & m/s           & 0.                \\ \hline
 {\ct SPONGE\_CELLS}                             & Integer       & Section~\ref{info:SPONGE_CELLS}               &               & 3                 \\ \hline
 {\ct STRATIFICATION}                            & Logical       & Section~\ref{info:stratification}             &               & {\ct .TRUE.}      \\ \hline
+{\ct TAU\_THETA}                                & Real          & Section~\ref{info:wind_ramps}                 & s             & 300               \\ \hline
 {\ct THETA\_STAR}                               & Real          & Section~\ref{info:WIND}                       & K             &                   \\ \hline
 {\ct TMP\_REF}                                  & Real          & Section~\ref{info:WIND}                       & $^\circ$C     & {\ct TMPA}        \\ \hline
 {\ct U\_STAR}                                   & Real          & Section~\ref{info:WIND}                       & m/s           &                   \\ \hline

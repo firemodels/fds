@@ -288,6 +288,7 @@ $QFDS -d Heat_Transfer ht3d_sphere_51.fds
 $QFDS -p 8 -d Heat_Transfer ht3d_sphere_102.fds
 $QFDS -d Heat_Transfer ht3d_vs_ht1d.fds
 $QFDS -p 4 -d Heat_Transfer back_wall_test.fds
+$QFDS -p 3 -d Heat_Transfer back_wall_test_2.fds
 $QFDS -d Heat_Transfer ht3d_radiation_kappa100_n10.fds
 $QFDS -d Heat_Transfer ht3d_radiation_kappa100_n20.fds
 $QFDS -d Heat_Transfer ht3d_radiation_kappa100_n40.fds
@@ -747,6 +748,7 @@ $QFDS -d Turbulence sem_flat_leddy_p2.fds
 $QFDS -d Turbulence sem_par_leddy_p2.fds
 $QFDS -d Turbulence sem_atm_leddy_p2.fds
 $QFDS -d Turbulence sem_ramp_leddy_p2.fds
+$QFDS -d Turbulence sem_open_wind.fds
 $QFDS -d Turbulence ramp_prof_u_z.fds
 
 $QFDS -d WUI Bova_1a.fds
