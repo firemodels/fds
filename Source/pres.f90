@@ -24,7 +24,7 @@ REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,HP,RHOP
 INTEGER :: I,J,K,IW,IOR,NOM,N_INT_CELLS,IIO,JJO,KKO
 REAL(EB) :: TRM1,TRM2,TRM3,TRM4,H_OTHER,TNOW,DUMMY=0._EB, &
             TSI,TIME_RAMP_FACTOR,DX_OTHER,DY_OTHER,DZ_OTHER,P_EXTERNAL, &
-            UBAR,VBAR,WBAR
+            UBAR,VBAR,WBAR,VEL_EDDY
 TYPE (VENTS_TYPE), POINTER :: VT
 TYPE (WALL_TYPE), POINTER :: WC
 TYPE (EXTERNAL_WALL_TYPE), POINTER :: EWC
@@ -167,22 +167,23 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
             UBAR = U0*EVALUATE_RAMP(T,DUMMY,I_RAMP_U0_T)*EVALUATE_RAMP(ZC(K),DUMMY,I_RAMP_U0_Z)
             VBAR = V0*EVALUATE_RAMP(T,DUMMY,I_RAMP_V0_T)*EVALUATE_RAMP(ZC(K),DUMMY,I_RAMP_V0_Z)
             WBAR = W0*EVALUATE_RAMP(T,DUMMY,I_RAMP_W0_T)*EVALUATE_RAMP(ZC(K),DUMMY,I_RAMP_W0_Z)
-            SELECT CASE(IOR)
-               CASE( 1); H0 = HP(1,J,K)    + 0.5_EB/(DT*RDXN(0)   )*(UBAR - UU(0,   J,K))
-               CASE(-1); H0 = HP(IBAR,J,K) - 0.5_EB/(DT*RDXN(IBAR))*(UBAR - UU(IBAR,J,K))
-               CASE( 2); H0 = HP(I,1,K)    + 0.5_EB/(DT*RDYN(0)   )*(VBAR - VV(I,0,   K))
-               CASE(-2); H0 = HP(I,JBAR,K) - 0.5_EB/(DT*RDYN(JBAR))*(VBAR - VV(I,JBAR,K))
-               CASE( 3); H0 = HP(I,J,1)    + 0.5_EB/(DT*RDZN(0)   )*(WBAR - WW(I,J,0   ))
-               CASE(-3); H0 = HP(I,J,KBAR) - 0.5_EB/(DT*RDZN(KBAR))*(WBAR - WW(I,J,KBAR))
-            END SELECT
+            VEL_EDDY = 0._EB
             ! Synthetic eddy method for OPEN inflow boundaries
             IF (VT%N_EDDY>0) THEN
                SELECT CASE(ABS(VT%IOR))
-                  CASE(1); H0 = 0.5_EB*((UBAR+VT%U_EDDY(J,K))**2+(VBAR+VT%V_EDDY(J,K))**2+(WBAR+VT%W_EDDY(J,K))**2)
-                  CASE(2); H0 = 0.5_EB*((UBAR+VT%U_EDDY(I,K))**2+(VBAR+VT%V_EDDY(I,K))**2+(WBAR+VT%W_EDDY(I,K))**2)
-                  CASE(3); H0 = 0.5_EB*((UBAR+VT%U_EDDY(I,J))**2+(VBAR+VT%V_EDDY(I,J))**2+(WBAR+VT%W_EDDY(I,J))**2)
+                  CASE(1); VEL_EDDY = VT%U_EDDY(J,K)
+                  CASE(2); VEL_EDDY = VT%V_EDDY(I,K)
+                  CASE(3); VEL_EDDY = VT%W_EDDY(I,J)
                END SELECT
             ENDIF
+            SELECT CASE(IOR)
+               CASE( 1); H0 = HP(1,J,K)    + 0.5_EB/(DT*RDXN(0)   )*(UBAR + VEL_EDDY - UU(0,   J,K))
+               CASE(-1); H0 = HP(IBAR,J,K) - 0.5_EB/(DT*RDXN(IBAR))*(UBAR + VEL_EDDY - UU(IBAR,J,K))
+               CASE( 2); H0 = HP(I,1,K)    + 0.5_EB/(DT*RDYN(0)   )*(VBAR + VEL_EDDY - VV(I,0,   K))
+               CASE(-2); H0 = HP(I,JBAR,K) - 0.5_EB/(DT*RDYN(JBAR))*(VBAR + VEL_EDDY - VV(I,JBAR,K))
+               CASE( 3); H0 = HP(I,J,1)    + 0.5_EB/(DT*RDZN(0)   )*(WBAR + VEL_EDDY - WW(I,J,0   ))
+               CASE(-3); H0 = HP(I,J,KBAR) - 0.5_EB/(DT*RDZN(KBAR))*(WBAR + VEL_EDDY - WW(I,J,KBAR))
+            END SELECT
          ENDIF
 
          SELECT CASE(IOR)
