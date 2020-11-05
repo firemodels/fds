@@ -2256,20 +2256,20 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
                SELECT CASE(IEC)
                   CASE(1)
-                     IF (JJ==0    .AND. IOR== 2) WW(II,0,KK)    = WBAR + VEL_EDDY
-                     IF (JJ==JBAR .AND. IOR==-2) WW(II,JBP1,KK) = WBAR + VEL_EDDY
-                     IF (KK==0    .AND. IOR== 3) VV(II,JJ,0)    = VBAR + VEL_EDDY
-                     IF (KK==KBAR .AND. IOR==-3) VV(II,JJ,KBP1) = VBAR + VEL_EDDY
+                     IF (JJ==0    .AND. IOR== 2) WW(II,0,KK)    = WBAR
+                     IF (JJ==JBAR .AND. IOR==-2) WW(II,JBP1,KK) = WBAR
+                     IF (KK==0    .AND. IOR== 3) VV(II,JJ,0)    = VBAR
+                     IF (KK==KBAR .AND. IOR==-3) VV(II,JJ,KBP1) = VBAR
                   CASE(2)
-                     IF (II==0    .AND. IOR== 1) WW(0,JJ,KK)    = WBAR + VEL_EDDY
-                     IF (II==IBAR .AND. IOR==-1) WW(IBP1,JJ,KK) = WBAR + VEL_EDDY
-                     IF (KK==0    .AND. IOR== 3) UU(II,JJ,0)    = UBAR + VEL_EDDY
-                     IF (KK==KBAR .AND. IOR==-3) UU(II,JJ,KBP1) = UBAR + VEL_EDDY
+                     IF (II==0    .AND. IOR== 1) WW(0,JJ,KK)    = WBAR
+                     IF (II==IBAR .AND. IOR==-1) WW(IBP1,JJ,KK) = WBAR
+                     IF (KK==0    .AND. IOR== 3) UU(II,JJ,0)    = UBAR
+                     IF (KK==KBAR .AND. IOR==-3) UU(II,JJ,KBP1) = UBAR
                   CASE(3)
-                     IF (II==0    .AND. IOR== 1) VV(0,JJ,KK)    = VBAR + VEL_EDDY
-                     IF (II==IBAR .AND. IOR==-1) VV(IBP1,JJ,KK) = VBAR + VEL_EDDY
-                     IF (JJ==0    .AND. IOR== 2) UU(II,0,KK)    = UBAR + VEL_EDDY
-                     IF (JJ==JBAR .AND. IOR==-2) UU(II,JBP1,KK) = UBAR + VEL_EDDY
+                     IF (II==0    .AND. IOR== 1) VV(0,JJ,KK)    = VBAR
+                     IF (II==IBAR .AND. IOR==-1) VV(IBP1,JJ,KK) = VBAR
+                     IF (JJ==0    .AND. IOR== 2) UU(II,0,KK)    = UBAR
+                     IF (JJ==JBAR .AND. IOR==-2) UU(II,JBP1,KK) = UBAR
                END SELECT
 
             ENDIF WIND_NO_WIND_IF
