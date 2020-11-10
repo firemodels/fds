@@ -164,37 +164,50 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
          TIME_RAMP_FACTOR = EVALUATE_RAMP(TSI,DUMMY,VT%PRESSURE_RAMP_INDEX)
          P_EXTERNAL = TIME_RAMP_FACTOR*VT%DYNAMIC_PRESSURE
 
-         IF (ANY(MEAN_FORCING)) THEN
-            VEL_EDDY = 0._EB
-            ! Synthetic eddy method for OPEN inflow boundaries
-            IF (VT%N_EDDY>0) THEN
-               SELECT CASE(ABS(VT%IOR))
-                  CASE(1); VEL_EDDY = VT%U_EDDY(J,K)
-                  CASE(2); VEL_EDDY = VT%V_EDDY(I,K)
-                  CASE(3); VEL_EDDY = VT%W_EDDY(I,J)
-               END SELECT
-            ENDIF
-            ! Check for cut-face and compute area ratio for flux matched velocity
-            A_RATIO=1._EB
-            IF (CC_IBM) THEN
-               SELECT CASE(IOR)
-                  CASE( 1); ICF = FCVAR(0,   J,K,IBM_IDCF,ABS(IOR))
-                  CASE(-1); ICF = FCVAR(IBAR,J,K,IBM_IDCF,ABS(IOR))
-                  CASE( 2); ICF = FCVAR(I,0,   K,IBM_IDCF,ABS(IOR))
-                  CASE(-2); ICF = FCVAR(I,JBAR,K,IBM_IDCF,ABS(IOR))
-                  CASE( 3); ICF = FCVAR(I,J,0,   IBM_IDCF,ABS(IOR))
-                  CASE(-3); ICF = FCVAR(I,J,KBAR,IBM_IDCF,ABS(IOR))
-               END SELECT
-               IF(ICF>0) A_RATIO = SUM( CUT_FACE(ICF) % AREA(1:CUT_FACE(ICF)%NFACE) ) / WC%ONE_D%AREA
-            ENDIF
-            ! Now set boundary value of H0
+         ! Synthetic eddy method for OPEN inflow boundaries
+         VEL_EDDY = 0._EB
+         IF (VT%N_EDDY>0) THEN
+            SELECT CASE(ABS(VT%IOR))
+               CASE(1); VEL_EDDY = VT%U_EDDY(J,K)
+               CASE(2); VEL_EDDY = VT%V_EDDY(I,K)
+               CASE(3); VEL_EDDY = VT%W_EDDY(I,J)
+            END SELECT
+         ENDIF
+         ! Check for cut-face and compute area ratio for flux matched velocity
+         A_RATIO = 1._EB
+         IF (CC_IBM) THEN
             SELECT CASE(IOR)
-               CASE( 1); H0 = HP(1,J,K)    + 0.5_EB/(DT*RDXN(0)   )*((U_WIND(K) + VEL_EDDY)*A_RATIO - UU(0,   J,K))
-               CASE(-1); H0 = HP(IBAR,J,K) - 0.5_EB/(DT*RDXN(IBAR))*((U_WIND(K) + VEL_EDDY)*A_RATIO - UU(IBAR,J,K))
-               CASE( 2); H0 = HP(I,1,K)    + 0.5_EB/(DT*RDYN(0)   )*((V_WIND(K) + VEL_EDDY)*A_RATIO - VV(I,0,   K))
-               CASE(-2); H0 = HP(I,JBAR,K) - 0.5_EB/(DT*RDYN(JBAR))*((V_WIND(K) + VEL_EDDY)*A_RATIO - VV(I,JBAR,K))
-               CASE( 3); H0 = HP(I,J,1)    + 0.5_EB/(DT*RDZN(0)   )*((W_WIND(K) + VEL_EDDY)*A_RATIO - WW(I,J,0   ))
-               CASE(-3); H0 = HP(I,J,KBAR) - 0.5_EB/(DT*RDZN(KBAR))*((W_WIND(K) + VEL_EDDY)*A_RATIO - WW(I,J,KBAR))
+               CASE( 1); ICF = FCVAR(0,   J,K,IBM_IDCF,ABS(IOR))
+               CASE(-1); ICF = FCVAR(IBAR,J,K,IBM_IDCF,ABS(IOR))
+               CASE( 2); ICF = FCVAR(I,0,   K,IBM_IDCF,ABS(IOR))
+               CASE(-2); ICF = FCVAR(I,JBAR,K,IBM_IDCF,ABS(IOR))
+               CASE( 3); ICF = FCVAR(I,J,0,   IBM_IDCF,ABS(IOR))
+               CASE(-3); ICF = FCVAR(I,J,KBAR,IBM_IDCF,ABS(IOR))
+            END SELECT
+            IF(ICF>0) A_RATIO = MAX(0._EB,MIN(1._EB, SUM( CUT_FACE(ICF) % AREA(1:CUT_FACE(ICF)%NFACE) ) / WC%ONE_D%AREA ))
+         ENDIF
+
+         ! Wind inflow boundary conditions
+         IF (ANY(MEAN_FORCING)) THEN
+            SELECT CASE(IOR)
+               CASE( 1); H0 = ( HP(1,J,K)    + 0.5_EB/(DT*RDXN(0)   )*(U_WIND(K) + VEL_EDDY - UU(0,   J,K)) ) * A_RATIO
+               CASE(-1); H0 = ( HP(IBAR,J,K) - 0.5_EB/(DT*RDXN(IBAR))*(U_WIND(K) + VEL_EDDY - UU(IBAR,J,K)) ) * A_RATIO
+               CASE( 2); H0 = ( HP(I,1,K)    + 0.5_EB/(DT*RDYN(0)   )*(V_WIND(K) + VEL_EDDY - VV(I,0,   K)) ) * A_RATIO
+               CASE(-2); H0 = ( HP(I,JBAR,K) - 0.5_EB/(DT*RDYN(JBAR))*(V_WIND(K) + VEL_EDDY - VV(I,JBAR,K)) ) * A_RATIO
+               CASE( 3); H0 = ( HP(I,J,1)    + 0.5_EB/(DT*RDZN(0)   )*(W_WIND(K) + VEL_EDDY - WW(I,J,0   )) ) * A_RATIO
+               CASE(-3); H0 = ( HP(I,J,KBAR) - 0.5_EB/(DT*RDZN(KBAR))*(W_WIND(K) + VEL_EDDY - WW(I,J,KBAR)) ) * A_RATIO
+            END SELECT
+         ENDIF
+
+         ! Experiment with new OPEN inflow bc for tunnels
+         IF (TEST_NEW_OPEN) THEN
+            SELECT CASE(IOR)
+               CASE( 1); H0 = ( HP(1,J,K)    + 0.5_EB/(DT*RDXN(0)   )*(U0 + VEL_EDDY - UU(0,   J,K)) ) * A_RATIO
+               CASE(-1); H0 = ( HP(IBAR,J,K) - 0.5_EB/(DT*RDXN(IBAR))*(U0 + VEL_EDDY - UU(IBAR,J,K)) ) * A_RATIO
+               CASE( 2); H0 = ( HP(I,1,K)    + 0.5_EB/(DT*RDYN(0)   )*(V0 + VEL_EDDY - VV(I,0,   K)) ) * A_RATIO
+               CASE(-2); H0 = ( HP(I,JBAR,K) - 0.5_EB/(DT*RDYN(JBAR))*(V0 + VEL_EDDY - VV(I,JBAR,K)) ) * A_RATIO
+               CASE( 3); H0 = ( HP(I,J,1)    + 0.5_EB/(DT*RDZN(0)   )*(W0 + VEL_EDDY - WW(I,J,0   )) ) * A_RATIO
+               CASE(-3); H0 = ( HP(I,J,KBAR) - 0.5_EB/(DT*RDZN(KBAR))*(W0 + VEL_EDDY - WW(I,J,KBAR)) ) * A_RATIO
             END SELECT
          ENDIF
 

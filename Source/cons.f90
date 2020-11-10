@@ -253,6 +253,7 @@ LOGICAL :: STORE_DIVERGENCE_CORRECTION=.FALSE.
 LOGICAL :: PERIODIC_DOMAIN_X=.FALSE.                !< The domain is periodic \f$ x \f$
 LOGICAL :: PERIODIC_DOMAIN_Y=.FALSE.                !< The domain is periodic \f$ y \f$
 LOGICAL :: PERIODIC_DOMAIN_Z=.FALSE.                !< The domain is periodic \f$ z \f$
+LOGICAL :: TEST_NEW_OPEN=.FALSE.
 
 INTEGER :: BNDF_TIME_INTEGRALS=0
 
