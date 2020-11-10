@@ -9349,19 +9349,30 @@ PROF_LOOP: DO N=1,N_PROF
    ENDIF
 
    STIME = REAL(T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR,FB)
-   WRITE(TCFORM,'(3A,I5,5A)') "(",FMT_R,",',',I5,',',",2*NWP+1,"(",FMT_R,",','),",FMT_R,")"
    IF (PF%QUANTITY == 'TEMPERATURE') THEN
       IF (PF%FORMAT_INDEX==1) THEN
-         WRITE(LU_PROF(N),TCFORM) STIME,NWP+1,(X_S_NEW(I),I=0,NWP),&
-                                 (ONE_D%TMP(I)+DX_WGT_S(I)*(ONE_D%TMP(I+1)-ONE_D%TMP(I))-TMPM,I=0,NWP)
+         IF (PF%CELL_CENTERED) THEN
+            WRITE(TCFORM,'(3A,I5,5A)') "(",FMT_R,",',',I5,',',",2*NWP-1,"(",FMT_R,",','),",FMT_R,")"
+            WRITE(LU_PROF(N),TCFORM) STIME,NWP,(0.5_EB*(X_S_NEW(I)+X_S_NEW(I-1)),I=1,NWP),(ONE_D%TMP(I)-TMPM,I=1,NWP)
+         ELSE
+            WRITE(TCFORM,'(3A,I5,5A)') "(",FMT_R,",',',I5,',',",2*NWP+1,"(",FMT_R,",','),",FMT_R,")"
+            WRITE(LU_PROF(N),TCFORM) STIME,NWP+1,(X_S_NEW(I),I=0,NWP),&
+                                    (ONE_D%TMP(I)+DX_WGT_S(I)*(ONE_D%TMP(I+1)-ONE_D%TMP(I))-TMPM,I=0,NWP)
+         ENDIF
       ELSE
          REWIND(LU_PROF(N))
          WRITE(LU_PROF(N),'(A)') 'm,C'
          WRITE(LU_PROF(N),'(A)') 'Depth,Temperature'
          WRITE(TCFORM,'(5A)') "(" , FMT_R , ",','," , FMT_R , ")"
-         DO I=0,NWP
-            WRITE(LU_PROF(N),TCFORM) X_S_NEW(I),ONE_D%TMP(I)+DX_WGT_S(I)*(ONE_D%TMP(I+1)-ONE_D%TMP(I))-TMPM
-         ENDDO
+         IF (PF%CELL_CENTERED) THEN
+            DO I=1,NWP
+               WRITE(LU_PROF(N),TCFORM) 0.5_EB*(X_S_NEW(I)+X_S_NEW(I-1)),ONE_D%TMP(I)-TMPM
+            ENDDO
+         ELSE
+            DO I=0,NWP
+               WRITE(LU_PROF(N),TCFORM) X_S_NEW(I),ONE_D%TMP(I)+DX_WGT_S(I)*(ONE_D%TMP(I+1)-ONE_D%TMP(I))-TMPM
+            ENDDO
+         ENDIF
       ENDIF
    ELSE
       RHO_S = 0._EB
@@ -9374,7 +9385,13 @@ PROF_LOOP: DO N=1,N_PROF
       ENDDO
       RHO_S(0)     = RHO_S(1)
       RHO_S(NWP+1) = RHO_S(NWP)
-      WRITE(LU_PROF(N),TCFORM) STIME,NWP+1,(X_S_NEW(I),I=0,NWP),(RHO_S(I)+DX_WGT_S(I)*(RHO_S(I+1)-RHO_S(I)),I=0,NWP)
+      IF (PF%CELL_CENTERED) THEN
+         WRITE(TCFORM,'(3A,I5,5A)') "(",FMT_R,",',',I5,',',",2*NWP-1,"(",FMT_R,",','),",FMT_R,")"
+         WRITE(LU_PROF(N),TCFORM) STIME,NWP,(0.5_EB*(X_S_NEW(I)+X_S_NEW(I-1)),I=1,NWP),(RHO_S(I),I=1,NWP)
+      ELSE
+         WRITE(TCFORM,'(3A,I5,5A)') "(",FMT_R,",',',I5,',',",2*NWP+1,"(",FMT_R,",','),",FMT_R,")"
+         WRITE(LU_PROF(N),TCFORM) STIME,NWP+1,(X_S_NEW(I),I=0,NWP),(RHO_S(I)+DX_WGT_S(I)*(RHO_S(I+1)-RHO_S(I)),I=0,NWP)
+      ENDIF
    ENDIF
 
 ENDDO PROF_LOOP
