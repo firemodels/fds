@@ -1190,7 +1190,8 @@ TYPE INITIALIZATION_TYPE
    INTEGER  :: CTRL_INDEX=0     !< Index of the controller that uses this INITIALIZATION variable
    INTEGER  :: N_PARTICLES_PER_CELL=0 !< Number of particles to insert in each cell
    INTEGER  :: PATH_RAMP_INDEX(3)=0   !< Ramp index of a particle path
-   INTEGER  :: RAMP_Q_INDEX=0         !< Ramp of HRRPUV
+   INTEGER  :: RAMP_Q_INDEX=0         !< Ramp index for HRRPUV
+   INTEGER  :: RAMP_PART_INDEX=0         !< Ramp index for MASS_PER_TIME or MASS_PER_VOLUME
    LOGICAL :: ADJUST_DENSITY=.FALSE.
    LOGICAL :: ADJUST_TEMPERATURE=.FALSE.
    LOGICAL :: SINGLE_INSERTION=.TRUE.
