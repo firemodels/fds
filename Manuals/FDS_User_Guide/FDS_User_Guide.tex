@@ -8839,11 +8839,11 @@ For a particle, you must reference an {\ct INIT} line used to place the particle
 &INIT ID='my particle', XYZ=..., N_PARTICLES=1, PART_ID='...' /
 &PROF ID='T-2', INIT_ID='my particle', QUANTITY='TEMPERATURE' /
 \end{lstlisting}
-For a particle, do not specify {\ct XYZ} or {\ct IOR} on the {\ct PROF} line.
+For a particle, do not specify {\ct XYZ} or {\ct IOR} on the {\ct PROF} line. 
 
-The {\ct QUANTITY} is the physical quantity to monitor. Other possible quantities are the total {\ct 'DENSITY'} or the density of a particular solid material component, {\ct '[MATL\_ID]'}, where {\ct [MATL\_ID]} is the name of the material component. Each {\ct PROF} line creates a separate file. The first number in each row is the time at which the profile is extracted. The second number is the number of ``nodes,'' $n$, which is the number of solid phase cells plus 1. The next $n$ numbers are the node coordinates, running from 0 at the surface to the full {\ct THICKNESS} at the end. The next $n$ numbers are the values of the {\ct QUANTITY} at the node points. The first of these values is located at the surface.
+The {\ct QUANTITY} is the physical quantity to record. The choices are {\ct 'TEMPERATURE'} or the total {\ct 'DENSITY'}. Each {\ct PROF} line creates a separate file. The first number in each row is the time at which the profile is extracted. The second number is the number of ``nodes,'' $n$, which is the number of solid phase cells plus 1. The next $n$ values are the node coordinates, running from 0 at the surface to the full {\ct THICKNESS} at the end. The next $n$ numbers are the values of the {\ct QUANTITY} at the node points. The first of these values is located at the surface. If you specify {\ct CELL\_CENTERED=T}, the {\ct QUANTITY} values will be recorded at $n$ interior cell centers rather than cell boundaries.
 
-There is a second optional format. If you specify {\ct FORMAT\_INDEX=2} on the {\ct PROF} line, the resulting file will contain columns containing only the final set of node coordinates and quantity values. This is handy for displaying a steady-state profile.
+There is a second optional format. If you specify {\ct FORMAT\_INDEX=2} on the {\ct PROF} line, the resulting file will contain columns containing only the final set of node coordinates and quantity values. This is handy for displaying a steady-state temperature profile.
 
 
 
@@ -11564,6 +11564,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct PROF} (Wall Profile Parameters)} \\
 \hline \hline
 \endhead
+{\ct CELL\_CENTERED}        & Logical           & Section~\ref{info:PROF}      &            & {\ct .FALSE.}  \\ \hline
 {\ct FORMAT\_INDEX}         & Integer           & Section~\ref{info:PROF}      &            & 1     \\ \hline
 {\ct ID}                    & Character         & Section~\ref{info:PROF}      &            &       \\ \hline
 {\ct INIT\_ID}              & Character         & Section~\ref{info:PROF}      &            &       \\ \hline
