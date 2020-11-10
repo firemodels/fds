@@ -6779,7 +6779,7 @@ The parameter {\ct N\_PARTICLES} on the {\ct INIT} line indicates the number of 
 \begin{lstlisting}
 &INIT PART_ID='my particles', XB=..., N_PARTICLES=..., MASS_PER_VOLUME=... /
 \end{lstlisting}
-Note that the volume of the specified region is calculated according to the {\ct SHAPE} dimensions, regardless of whether there are solid obstructions within this region. Note also that in most applications, the number of particles, {\ct N\_PARTICLES}, is somewhat arbitrary but should be chosen to provide at least a few particles per grid cell. FDS will then automatically assign a weighting factor to each particle to ensure that the {\ct MASS\_PER\_VOLUME} is achieved. In some applications, on the other hand, it may be important to specify the number of particles. For example, if using particles to model the burning of electrical cables, you may want to specify how many cables are actually burning.
+Note that the volume of the specified region is calculated according to the {\ct SHAPE} dimensions, regardless of whether there are solid obstructions within this region. Note also that in most applications, the number of particles, {\ct N\_PARTICLES}, is somewhat arbitrary but should be chosen to provide at least a few particles per grid cell. FDS will then automatically assign a weighting factor to each particle to ensure that the {\ct MASS\_PER\_VOLUME} is achieved. In some applications, on the other hand, it may be important to specify the number of particles. For example, if using particles to model the burning of electrical cables, you may want to specify how many cables are actually burning. The {\ct MASS\_PER\_VOLUME} can be ramped up and down in time using the ramp function {\ct RAMP\_PART} on the {\ct INIT} line.
 
 If the volume specified by the sextuplet {\ct XB} crosses mesh boundaries, be aware that {\ct N\_PARTICLES} refers to the entire volume, not just the volume within a particular mesh. FDS will automatically compute the necessary number of particles to assign to each mesh.
 
@@ -6836,7 +6836,7 @@ Note that the {\ct DIAMETER} ($\mu$m) on the {\ct INIT} line is only valid for l
 
 \subsubsection{Periodic Insertion of Particles within a Specified Volume}
 
-If you want to introduce particles within a given region periodically in time and not just initially, set {\ct DT\_INSERT} on the {\ct INIT} line to a positive value indicating the time increment (s) for insertion. The parameter {\ct N\_PARTICLES} now indicates the number of droplets/particles inserted every {\ct DT\_INSERT} seconds. If the droplets/particles have mass, use {\ct MASS\_PER\_TIME} (kg/s) instead of {\ct MASS\_PER\_VOLUME} to indicate how much mass is to be introduced per second.
+If you want to introduce particles within a given region periodically in time and not just initially, set {\ct DT\_INSERT} on the {\ct INIT} line to a positive value indicating the time increment (s) for insertion. The parameter {\ct N\_PARTICLES} now indicates the number of droplets/particles inserted every {\ct DT\_INSERT} seconds. If the droplets/particles have mass, use {\ct MASS\_PER\_TIME} (kg/s) instead of {\ct MASS\_PER\_VOLUME} to indicate how much mass is to be introduced per second. This parameter can be ramped up and down in time using the ramp function {\ct RAMP\_PART} on the {\ct INIT} line.
 
 If you want to delay the insertion of droplets, you can use either a {\ct DEVC\_ID} or a {\ct CTRL\_ID} on the {\ct INIT} line to name the controlling device. See Section~\ref{info:basic_control} for more information on controlling devices.
 
@@ -8839,7 +8839,7 @@ For a particle, you must reference an {\ct INIT} line used to place the particle
 &INIT ID='my particle', XYZ=..., N_PARTICLES=1, PART_ID='...' /
 &PROF ID='T-2', INIT_ID='my particle', QUANTITY='TEMPERATURE' /
 \end{lstlisting}
-For a particle, do not specify {\ct XYZ} or {\ct IOR} on the {\ct PROF} line. 
+For a particle, do not specify {\ct XYZ} or {\ct IOR} on the {\ct PROF} line.
 
 The {\ct QUANTITY} is the physical quantity to record. The choices are {\ct 'TEMPERATURE'} or the total {\ct 'DENSITY'}. Each {\ct PROF} line creates a separate file. The first number in each row is the time at which the profile is extracted. The second number is the number of ``nodes,'' $n$, which is the number of solid phase cells plus 1. The next $n$ values are the node coordinates, running from 0 at the surface to the full {\ct THICKNESS} at the end. The next $n$ numbers are the values of the {\ct QUANTITY} at the node points. The first of these values is located at the surface. If you specify {\ct CELL\_CENTERED=T}, the {\ct QUANTITY} values will be recorded at $n$ interior cell centers rather than cell boundaries.
 
@@ -11047,6 +11047,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct PATH\_RAMP(3)}               & Character         & Section~\ref{info:path_ramp}                  &                &               \\ \hline
 {\ct RADIATIVE\_FRACTION}         & Real              & Section~\ref{info:init_hrrpuv}                &                & 0.            \\ \hline
 {\ct RADIUS}                      & Real              & Section~\ref{info:initial_droplets}           & m              &               \\ \hline
+{\ct RAMP\_PART}                  & Character         & Section~\ref{info:initial_droplets}           &                &               \\ \hline
 {\ct RAMP\_Q}                     & Character         & Section~\ref{info:init_hrrpuv}                &                &               \\ \hline
 {\ct SHAPE}                       & Character         & Section~\ref{info:initial_droplets}           &                & {\ct 'BLOCK'} \\ \hline
 {\ct SPEC\_ID(N)}                 & Character Array   & Section~\ref{info:init_species}               &                &               \\ \hline
