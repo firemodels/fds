@@ -1232,7 +1232,7 @@ TYPE P_ZONE_TYPE
    LOGICAL :: EVACUATION=.FALSE.
    LOGICAL :: PERIODIC=.FALSE.                                     !< Indicator if the ZONE boundary is periodic
    INTEGER, ALLOCATABLE, DIMENSION(:) :: NODE_INDEX                !< Array of NODE indices connected to the ZONE
-   CHARACTER(LABEL_LENGTH) :: ID                                   !< Identifier
+   CHARACTER(LABEL_LENGTH) :: ID='null'                            !< Identifier
 END TYPE P_ZONE_TYPE
 
 TYPE (P_ZONE_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: P_ZONE
