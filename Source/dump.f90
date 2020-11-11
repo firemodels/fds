@@ -3565,11 +3565,11 @@ TNOW = CURRENT_TIME()
 
 IF (ICYC==1) WRITE(LU_OUTPUT,100)
 
-IF (T<=0.0001) THEN
+IF (ABS(T)<=0.0001) THEN
    WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.5,A,F8.5,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,' s'
-ELSEIF (T>0.0001 .AND. T <=0.001) THEN
+ELSEIF (ABS(T)>0.0001 .AND. ABS(T) <=0.001) THEN
    WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.4,A,F8.5,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,' s'
-ELSEIF (T>0.001 .AND. T<=0.01) THEN
+ELSEIF (ABS(T)>0.001 .AND. ABS(T)<=0.01) THEN
    WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.3,A,F8.5,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,' s'
 ELSE
    WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.2,A,F8.5,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,' s'
@@ -3602,11 +3602,11 @@ ENDIF
 
 CALL GET_DATE(DATE)
 WRITE(LU_OUTPUT,'(7X,A,I7,3X,A)') 'Time Step ',ICYC,TRIM(DATE)
-IF (T<=0.0001) THEN
+IF (ABS(T)<=0.0001) THEN
    WRITE(LU_OUTPUT,150) DT,T
-ELSEIF (T>0.0001 .AND. T <=0.001) THEN
+ELSEIF (ABS(T)>0.0001 .AND. ABS(T) <=0.001) THEN
    WRITE(LU_OUTPUT,151) DT,T
-ELSEIF (T>0.001 .AND. T <=0.01) THEN
+ELSEIF (ABS(T)>0.001 .AND. ABS(T) <=0.01) THEN
    WRITE(LU_OUTPUT,152) DT,T
 ELSE
    WRITE(LU_OUTPUT,153) DT,T
@@ -3624,7 +3624,7 @@ IF (ITERATE_PRESSURE) THEN
    JJ = PRESSURE_ERROR_MAX_LOC(2,NM)
    KK = PRESSURE_ERROR_MAX_LOC(3,NM)
    WRITE(LU_OUTPUT,'(7X,A,E9.2,A,I3,A,3I4,A)') 'Maximum Pressure Error: ',MAXVAL(PRESSURE_ERROR_MAX), &
-                                               ' on Mesh ',NM,' at (',II,JJ,KK,')'
+                                               ' on Mesh ',NM,' at (',II,JJ,KK,')' 
 ENDIF
 IF (TRIM(PRES_METHOD) == 'SCARC' .OR. TRIM(PRES_METHOD) == 'USCARC') THEN
    WRITE(LU_OUTPUT,'(7X,A,i6,A,e9.2,A,e9.2)') 'ScaRC: iterations', SCARC_ITERATIONS, &
@@ -3636,8 +3636,8 @@ WRITE(LU_OUTPUT,'(7X,A)') '-----------------------------------------------------
 ! Write runtime diagnostics to the steps CSV file.
 CALL GET_DATE_ISO_8601(DATE)
 CALL CPU_TIME(CPUTIME)
-IF (T<=9999._EB) WRITE(LU_STEPS,'(I7,",",A,",",E12.3,",",F10.5,",",F10.5)') ICYC,TRIM(DATE),DT,T,CPUTIME - CPU_TIME_START
-IF (T> 9999._EB) WRITE(LU_STEPS,'(I7,",",A,",",E12.3,",",F10.2,",",F10.5)') ICYC,TRIM(DATE),DT,T,CPUTIME - CPU_TIME_START
+IF (ABS(T)<=999._EB) WRITE(LU_STEPS,'(I7,",",A,",",E12.3,",",F10.5,",",E12.3)') ICYC,TRIM(DATE),DT,T,CPUTIME - CPU_TIME_START
+IF (ABS(T)> 999._EB) WRITE(LU_STEPS,'(I7,",",A,",",E12.3,",",F10.2,",",E12.3)') ICYC,TRIM(DATE),DT,T,CPUTIME - CPU_TIME_START
 
 DO NM=1,NMESHES
    IF (EVACUATION_ONLY(NM)) CYCLE
