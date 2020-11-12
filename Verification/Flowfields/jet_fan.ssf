@@ -1,7 +1,7 @@
 RENDERDIR
  ../../Manuals/FDS_User_Guide/SCRIPT_FIGURES
 LOADVFILE
- jet_fan_0001_01.sf
+ jet_fan_1_1.sf
 SETTIMEVAL
  5.000000
 RENDERONCE

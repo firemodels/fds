@@ -5,11 +5,11 @@ csmag_64.ini
 SETVIEWPOINT
 view 2
 LOADFILE
-csmag_64_0001_01.sf
+csmag_64_1_1.sf
 LOADFILE
-csmag_64_0001_05.sf
+csmag_64_1_5.sf
 LOADFILE
-csmag_64_0001_09.sf
+csmag_64_1_9.sf
 SETTIMEVAL
  0.004000
 RENDERONCE
