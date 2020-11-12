@@ -771,7 +771,3 @@ $QFDS -d WUI random_walk_2.fds
 $QFDS -p 6 -d WUI vegetation_absorb.fds
 $QFDS -d WUI vegetation_drag_1.fds
 $QFDS -d WUI vegetation_drag_2.fds
-
-$QFDS -p 4 -d WRF wrf_time_ramp.fds
-$QFDS -p 4 -d WRF wrf_prof_ramp.fds
-$QFDS -p 4 -d WRF wrf_time_prof_ramp.fds
