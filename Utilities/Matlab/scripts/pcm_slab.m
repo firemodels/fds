@@ -40,8 +40,8 @@ end
 addpath('../../Verification/Pyrolysis')
 
 skip_case = 0;
-if ~exist('pcm_slab_prof_01.csv')
-    display('Error: File pcm_slab_prof_01.csv does not exist. Skipping case.')
+if ~exist('pcm_slab_prof_1.csv')
+    display('Error: File pcm_slab_prof_1.csv does not exist. Skipping case.')
     skip_case = 1;
 end
 if ~exist('pcm_slab_devc.csv')
@@ -52,7 +52,7 @@ if skip_case
     return
 end
 
-Iprof = csvread('pcm_slab_prof_01.csv',2);
+Iprof = csvread('pcm_slab_prof_1.csv',2);
 M_fds = csvread('pcm_slab_devc.csv',2);
 %
 Ice_density = 990;

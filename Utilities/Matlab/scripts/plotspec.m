@@ -27,9 +27,9 @@ kc = 1/2*N*k0;
 
 ddir = '../../Verification/Turbulence/';
 
-uvw_file1 = [ddir,chid,'_uvw_001.csv'];
-uvw_file2 = [ddir,chid,'_uvw_002.csv'];
-uvw_file3 = [ddir,chid,'_uvw_003.csv'];
+uvw_file1 = [ddir,chid,'_uvw_1.csv'];
+uvw_file2 = [ddir,chid,'_uvw_2.csv'];
+uvw_file3 = [ddir,chid,'_uvw_3.csv'];
 
 skip_case = 0;
 if ~exist(uvw_file1)

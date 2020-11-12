@@ -3,11 +3,11 @@ RENDERDIR
 PARTCLASSCOLOR
  HUMAN_SPEED
 LOADFILE
- evac_smv_testcase2_0001.prt5
+ evac_smv_testcase2_1.prt5
 PARTCLASSCOLOR
  HUMAN_SPEED
 LOADFILE
- evac_smv_testcase2_0002.prt5
+ evac_smv_testcase2_2.prt5
 SETTIMEVAL
  -0.500000
 RENDERONCE

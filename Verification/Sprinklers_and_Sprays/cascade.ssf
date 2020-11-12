@@ -3,7 +3,7 @@ RENDERDIR
 SETVIEWPOINT
  view 1
 LOADFILE
- cascade_0001.prt5
+ cascade_1.prt5
 SETTIMEVAL
  20.
 RENDERONCE

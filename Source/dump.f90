@@ -202,14 +202,14 @@ ELSE
       ENDDO
    ENDIF
    IF (T>=UVW_TIMER(MESHES(NM)%IUVW)) THEN
-      WRITE(FN_UVW,'(A,A,I3.3,A,I3.3,A)') TRIM(CHID),'_uvw_t',MESHES(NM)%IUVW,'_m',NM,'.csv'
+      WRITE(FN_UVW,'(A,A,I0,A,I0,A)') TRIM(CHID),'_uvw_t',MESHES(NM)%IUVW,'_m',NM,'.csv'
       CALL DUMP_UVW(NM,FN_UVW)
       MESHES(NM)%IUVW = MESHES(NM)%IUVW + 1
    ENDIF
    PERIODIC_TEST_SELECT: SELECT CASE(PERIODIC_TEST)
       CASE(2)
          IF (T>=UVW_CLOCK_CBC(MESHES(NM)%IUVW)) THEN
-            WRITE(FN_UVW,'(A,A,I3.3,A)') TRIM(CHID),'_uvw_',MESHES(NM)%IUVW,'.csv'
+            WRITE(FN_UVW,'(A,A,I0,A)') TRIM(CHID),'_uvw_',MESHES(NM)%IUVW,'.csv'
             CALL DUMP_UVW(NM,FN_UVW)
             MESHES(NM)%IUVW = MESHES(NM)%IUVW + 1
          ENDIF
@@ -227,7 +227,7 @@ ELSE
          ENDIF
       CASE(9)
          IF (T>=UVW_CLOCK_CBC(MESHES(NM)%IUVW)) THEN
-            WRITE(FN_SPEC,'(A,A,I3.3,A)') TRIM(CHID),'_spec_',MESHES(NM)%IUVW,'.csv'
+            WRITE(FN_SPEC,'(A,A,I0,A)') TRIM(CHID),'_spec_',MESHES(NM)%IUVW,'.csv'
             CALL SPECTRAL_OUTPUT(NM,FN_SPEC)
             MESHES(NM)%IUVW = MESHES(NM)%IUVW + 1
          ENDIF
@@ -350,8 +350,7 @@ ALLOCATE(FN_PROF(N_PROF))
 
 DO N=1,N_PROF
    LU_PROF(N) = GET_FILE_NUMBER()
-   IF (N_PROF <100) CFORM = '(A,A,I2.2,A)'
-   IF (N_PROF>=100) CFORM = '(A,A,I3.3,A)'
+   CFORM = '(A,A,I0,A)'
    WRITE(FN_PROF(N),CFORM) TRIM(CHID),'_prof_',N,'.csv'
 ENDDO
 
@@ -417,7 +416,7 @@ MESH_LOOP: DO NM=1,NMESHES
    LU_XYZ(NM)  = GET_FILE_NUMBER()
    LU_PL3D(NM) = GET_FILE_NUMBER()
    LU_PL3D(NM+NMESHES) = GET_FILE_NUMBER()
-   WRITE(FN_XYZ(NM),'(A,A,I4.4,A)') TRIM(CHID),'_',NM,'.xyz'
+   WRITE(FN_XYZ(NM),'(A,A,I0,A)') TRIM(CHID),'_',NM,'.xyz'
 
    ! Iso Surface Files
 
@@ -430,8 +429,8 @@ MESH_LOOP: DO NM=1,NMESHES
       IF (RESTART) LU_ISOF(N,NM) = ABS(LU_ISOF(N,NM))
       LU_ISOF2(N,NM) = -GET_FILE_NUMBER()
       IF (RESTART) LU_ISOF2(N,NM) = ABS(LU_ISOF2(N,NM))
-      WRITE(FN_ISOF(N,NM), '(A,A,I4.4,A,I2.2,A)') TRIM(CHID),'_',NM,'_',N,'.iso'
-      WRITE(FN_ISOF2(N,NM),'(A,A,I4.4,A,I2.2,A)') TRIM(CHID),'_',NM,'_',N,'.viso'
+      WRITE(FN_ISOF(N,NM), '(A,A,I0,A,I0,A)') TRIM(CHID),'_',NM,'_',N,'.iso'
+      WRITE(FN_ISOF2(N,NM),'(A,A,I0,A,I0,A)') TRIM(CHID),'_',NM,'_',N,'.viso'
    ENDDO
 
    ! Allocate unit numbers and file names for 3d smoke files
@@ -442,10 +441,10 @@ MESH_LOOP: DO NM=1,NMESHES
       IF (SMOKE3D_QUANTITY_INDEX(N)==0) CYCLE
       LU_SMOKE3D(N,NM) = -GET_FILE_NUMBER()
       IF (RESTART) LU_SMOKE3D(N,NM) = ABS(LU_SMOKE3D(N,NM))
-      WRITE(FN_SMOKE3D(N,NM),  '(A,A,I4.4,A,I2.2,A)') TRIM(CHID),'_',NM,'_',N,'.s3d'
+      WRITE(FN_SMOKE3D(N,NM),  '(A,A,I0,A,I0,A)') TRIM(CHID),'_',NM,'_',N,'.s3d'
       LU_SMOKE3D(N+4,NM) = -GET_FILE_NUMBER()
       IF (RESTART) LU_SMOKE3D(N+4,NM) = ABS(LU_SMOKE3D(N+4,NM))
-      WRITE(FN_SMOKE3D(N+4,NM),'(A,A,I4.4,A,I2.2,A)') TRIM(CHID),'_',NM,'_',N,'.s3d.sz'
+      WRITE(FN_SMOKE3D(N+4,NM),'(A,A,I0,A,I0,A)') TRIM(CHID),'_',NM,'_',N,'.s3d.sz'
    ENDDO
 
    ! Slice Files
@@ -455,8 +454,7 @@ MESH_LOOP: DO NM=1,NMESHES
       LU_SLCF_GEOM(N,NM)         = GET_FILE_NUMBER()
       LU_SLCF(N+N_SLCF_MAX,NM)   = GET_FILE_NUMBER() ! bounds for slice file
       LU_SLCF(N+2*N_SLCF_MAX,NM) = GET_FILE_NUMBER() ! run length encoded slice file
-      IF (M%N_SLCF <100) CFORM = '(A,A,I4.4,A,I2.2,A)'
-      IF (M%N_SLCF>=100) CFORM = '(A,A,I4.4,A,I3.3,A)'
+      CFORM = '(A,A,I0,A,I0,A)'
       WRITE(FN_SLCF(N,NM),CFORM) TRIM(CHID),'_',NM,'_',N,'.sf'
       WRITE(FN_SLCF_GEOM(N,NM),CFORM) TRIM(CHID),'_',NM,'_',N,'.gsf'
       WRITE(FN_SLCF(N+N_SLCF_MAX,NM),CFORM) TRIM(CHID),'_',NM,'_',N,'.sf.bnd'
@@ -467,8 +465,7 @@ MESH_LOOP: DO NM=1,NMESHES
 
    DO N=1,M%N_RADF
       LU_RADF(N,NM) = GET_FILE_NUMBER()
-      IF (M%N_RADF <100) CFORM = '(A,A,I4.4,A,I2.2,A)'
-      IF (M%N_RADF>=100) CFORM = '(A,A,I4.4,A,I3.3,A)'
+      CFORM = '(A,A,I0,A,I0,A)'
       WRITE(FN_RADF(N,NM),CFORM) TRIM(CHID),'_radf_',NM,'_',N,'.txt'
    ENDDO
 
@@ -482,12 +479,12 @@ MESH_LOOP: DO NM=1,NMESHES
          LU_BNDG(N,NM) = GET_FILE_NUMBER()
          LU_BNDG(N+N_BNDF,NM) = GET_FILE_NUMBER()
       ENDIF
-      WRITE(FN_BNDF(N,NM),'(A,A,I4.4,A,I2.2,A)') TRIM(CHID),'_',NM,'_',N,'.bf'
-      WRITE(FN_BNDF(N+N_BNDF,NM),'(A,A,I4.4,A,I2.2,A)') TRIM(CHID),'_',NM,'_',N,'.bf.bnd'
+      WRITE(FN_BNDF(N,NM),'(A,A,I0,A,I0,A)')        TRIM(CHID),'_',NM,'_',N,'.bf'
+      WRITE(FN_BNDF(N+N_BNDF,NM),'(A,A,I0,A,I0,A)') TRIM(CHID),'_',NM,'_',N,'.bf.bnd'
       IF (CC_IBM) THEN
-         WRITE(FN_BNDF_GEOM(N,NM),'(A,A,I4.4,A,I2.2,A)') TRIM(CHID),'_',NM,'_',N,'.gbf'
-         WRITE(FN_BNDG(N,NM),'(A,A,I4.4,A,I2.2,A)') TRIM(CHID),'_',NM,'_',N,'.be'
-         WRITE(FN_BNDG(N+N_BNDF,NM),'(A,A,I4.4,A,I2.2,A)') TRIM(CHID),'_',NM,'_',N,'.be.bnd'
+         WRITE(FN_BNDF_GEOM(N,NM),'(A,A,I0,A,I0,A)') TRIM(CHID),'_',NM,'_',N,'.gbf'
+         WRITE(FN_BNDG(N,NM),'(A,A,I0,A,I0,A)') TRIM(CHID),'_',NM,'_',N,'.be'
+         WRITE(FN_BNDG(N+N_BNDF,NM),'(A,A,I0,A,I0,A)') TRIM(CHID),'_',NM,'_',N,'.be.bnd'
       ENDIF
    ENDDO
 
@@ -495,7 +492,7 @@ MESH_LOOP: DO NM=1,NMESHES
 
    IF (TERRAIN_CASE) THEN
       LU_TERRAIN(NM) = GET_FILE_NUMBER()
-      WRITE(FN_TERRAIN(NM),'(A,A,I5.5,A)') TRIM(CHID),'_',NM,'.ter'
+      WRITE(FN_TERRAIN(NM),'(A,A,I0,A)') TRIM(CHID),'_',NM,'.ter'
    ENDIF
 
    ! Particle Files
@@ -503,8 +500,8 @@ MESH_LOOP: DO NM=1,NMESHES
    IF (PARTICLE_FILE .AND. .NOT.EVACUATION_ONLY(NM)) THEN
       LU_PART(NM) = GET_FILE_NUMBER()
       LU_PART(NM+NMESHES) = GET_FILE_NUMBER()
-      WRITE(FN_PART(NM),'(A,I4.4,A)') TRIM(CHID)//'_',NM,'.prt5'
-      WRITE(FN_PART(NM+NMESHES),'(A,I4.4,A)') TRIM(CHID)//'_',NM,'.prt5.bnd'
+      WRITE(FN_PART(NM),'(A,I0,A)') TRIM(CHID)//'_',NM,'.prt5'
+      WRITE(FN_PART(NM+NMESHES),'(A,I0,A)') TRIM(CHID)//'_',NM,'.prt5.bnd'
    ENDIF
 
    ! Particle Files for Evacuation
@@ -513,17 +510,17 @@ MESH_LOOP: DO NM=1,NMESHES
       IF (EMESH_INDEX(NM)>0) THEN
          LU_PART(NM) = GET_FILE_NUMBER()
          LU_PART(NM+NMESHES) = GET_FILE_NUMBER()
-         WRITE(FN_PART(NM),'(A,I4.4,A)') TRIM(CHID)//'_evac_',NM-NFM,'.prt5'
-         WRITE(FN_PART(NM+NMESHES),'(A,I4.4,A)') TRIM(CHID)//'_evac_',NM-NFM,'.prt5.bnd'
+         WRITE(FN_PART(NM),'(A,I0,A)') TRIM(CHID)//'_evac_',NM-NFM,'.prt5'
+         WRITE(FN_PART(NM+NMESHES),'(A,I0,A)') TRIM(CHID)//'_evac_',NM-NFM,'.prt5.bnd'
       ENDIF
    ENDIF
 
    ! Restart Files
 
    LU_RESTART(NM) = GET_FILE_NUMBER()
-   WRITE(FN_RESTART(NM),'(A,A,I4.4,A)') TRIM(RESTART_CHID),'_',NM,'.restart'
+   WRITE(FN_RESTART(NM),'(A,A,I0,A)') TRIM(RESTART_CHID),'_',NM,'.restart'
    LU_CORE(NM)    = GET_FILE_NUMBER()
-   WRITE(FN_CORE(NM),   '(A,A,I4.4,A)') TRIM(CHID),'_',NM,'.restart'
+   WRITE(FN_CORE(NM),   '(A,A,I0,A)') TRIM(CHID),'_',NM,'.restart'
 
 ENDDO MESH_LOOP
 
@@ -532,15 +529,15 @@ ENDDO MESH_LOOP
 IF (N_FACE>0 .OR. N_GEOMETRY>0) THEN
    DO N=1,1
       LU_GEOM(N) = GET_FILE_NUMBER()
-      WRITE(FN_GEOM(N),'(A,A,I2.2,A)') TRIM(CHID),'_',N,'.ge'
+      WRITE(FN_GEOM(N),'(A,A,I0,A)') TRIM(CHID),'_',N,'.ge'
       LU_GEOM(N+1) = GET_FILE_NUMBER()   ! used to output which &GEOM a face belongs too
-      WRITE(FN_GEOM(N+1),'(A,A,I2.2,A)') TRIM(CHID),'_',N,'.ge2'
+      WRITE(FN_GEOM(N+1),'(A,A,I0,A)') TRIM(CHID),'_',N,'.ge2'
    ENDDO
    IF (N_TRNF>0) THEN
       LU_GEOM_TRAN = GET_FILE_NUMBER()
       DO N=1,N_TRNF
          DO NM=1,NMESHES
-            WRITE(FN_GEOM_TRNF(N,NM),'(A,A,I2.2,A,I2.2,A)') TRIM(CHID),'_trnf_',N,'_',NM,'.ge'
+            WRITE(FN_GEOM_TRNF(N,NM),'(A,A,I0,A,I0,A)') TRIM(CHID),'_trnf_',N,'_',NM,'.ge'
          ENDDO
       ENDDO
    ENDIF
@@ -616,9 +613,9 @@ IF (N_DEVC_TIME>0) THEN
       ELSE
          N_OUT = MIN(DEVC_COLUMN_LIMIT , N_DEVC_TIME-DEVC_COLUMN_LIMIT*(I-1))
          OPEN(LU_DEVC(I),FILE=FN_DEVC(I),FORM='FORMATTED',STATUS='REPLACE')
-         WRITE(TCFORM,'(A,I5.5,A)') "(",N_OUT,"(A,','),A)"
+         WRITE(TCFORM,'(A,I0,A)') "(",N_OUT,"(A,','),A)"
          WRITE(LU_DEVC(I),TCFORM) 's',(TRIM(TIME_DEVC_UNITS(N)),N=DEVC_COLUMN_LIMIT*(I-1)+1,MIN(N_DEVC_TIME,I*DEVC_COLUMN_LIMIT))
-         WRITE(TCFORM,'(A,I5.5,A)') "(A,",N_OUT,"(',',3A))"
+         WRITE(TCFORM,'(A,I0,A)') "(A,",N_OUT,"(',',3A))"
          WRITE(LU_DEVC(I),TCFORM) 'Time',('"',TRIM(TIME_DEVC_LABEL(N)),'"', &
                                   N=DEVC_COLUMN_LIMIT * (I - 1) + 1,MIN(N_DEVC_TIME, I * DEVC_COLUMN_LIMIT))
       ENDIF
@@ -749,9 +746,9 @@ IF (N_CTRL>0) THEN
       ELSE
          OPEN(LU_CTRL(I),FILE=FN_CTRL(I),FORM='FORMATTED',STATUS='REPLACE')
          N_OUT = MIN(CTRL_COLUMN_LIMIT, N_CTRL - CTRL_COLUMN_LIMIT * (I - 1))
-         WRITE(TCFORM,'(A,I5.5,A)') "(",N_OUT,"(A,','),A)"
+         WRITE(TCFORM,'(A,I0,A)') "(",N_OUT,"(A,','),A)"
          WRITE(LU_CTRL(I),TCFORM) 's',('status',N=CTRL_COLUMN_LIMIT * (I - 1) + 1,MIN(N_CTRL, I * CTRL_COLUMN_LIMIT))
-         WRITE(TCFORM,'(A,I5.5,A)') "(A,",N_OUT,"(',',3A))"
+         WRITE(TCFORM,'(A,I0,A)') "(A,",N_OUT,"(',',3A))"
          WRITE(LU_CTRL(I),TCFORM) 'Time',('"',TRIM(CONTROL(N)%ID),'"', &
                                    N=CTRL_COLUMN_LIMIT * (I - 1) + 1,MIN(N_CTRL, I * CTRL_COLUMN_LIMIT))
       ENDIF
@@ -775,7 +772,7 @@ IF (APPEND) THEN
    CALL APPEND_FILE(LU_HRR,2,T_BEGIN+(T-T_BEGIN)*TIME_SHRINK_FACTOR)
 ELSE
    OPEN(LU_HRR,FILE=FN_HRR,FORM='FORMATTED',STATUS='REPLACE')
-   WRITE(TCFORM,'(A,I4.4,A)') "(",11+N_ZONE_TMP,"(A,','),A)"
+   WRITE(TCFORM,'(A,I0,A)') "(",11+N_ZONE_TMP,"(A,','),A)"
    WRITE(LU_HRR,TCFORM) 's','kW','kW','kW','kW','kW','kW','kW','kW','kW','kg/s','kg/s',('Pa',N=1,N_ZONE_TMP)
    IF (N_ZONE_TMP>0) THEN
       WRITE(LU_HRR,TCFORM) 'Time','HRR','Q_RADI','Q_CONV','Q_COND','Q_DIFF','Q_PRES','Q_PART','Q_ENTH','Q_TOTAL',&
@@ -809,7 +806,7 @@ IF (MASS_FILE) THEN
       LABEL(2) = 'Total'
       NN=2
       LABEL(3:3+N_SPECIES-1) = SPECIES(1:N_SPECIES)%ID
-      WRITE(TCFORM,'(A,I4.4,A)') "(",N_SPECIES+1,"(A,','),A)"
+      WRITE(TCFORM,'(A,I0,A)') "(",N_SPECIES+1,"(A,','),A)"
       WRITE(LU_MASS,TCFORM) 's',('kg',N=1,N_SPECIES+1)
       WRITE(LU_MASS,TCFORM) (TRIM(LABEL(N)),N=1,N_SPECIES+2)
    ENDIF
@@ -5533,19 +5530,14 @@ IF (PLOT3D) THEN  ! Write out information to .smv file
    TT   = T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR
    ITM  = INT(TT)
    ITM1 = INT(ABS(TT-ITM)*100)
-   IF (ITM <0 ) THEN
-      WRITE(FN_PL3D(NM),'(A,A,I4.4,A1,I8.7,A,I2.2,A2)') TRIM(CHID),'_',NM,'_',ITM,'_',ITM1,'.q'
-      WRITE(FN_PL3D(NM+NMESHES),'(A,A,I4.4,A1,I8.7,A,I2.2,A2)') TRIM(CHID),'_',NM,'_',ITM,'_',ITM1,'.q.bnd'
-   ELSE
-      WRITE(FN_PL3D(NM),'(A,A,I4.4,A1,I8.8,A,I2.2,A2)') TRIM(CHID),'_',NM,'_',ITM,'_',ITM1,'.q'
-      WRITE(FN_PL3D(NM+NMESHES),'(A,A,I4.4,A1,I8.8,A,I2.2,A6)') TRIM(CHID),'_',NM,'_',ITM,'_',ITM1,'.q.bnd'
-   ENDIF
+   WRITE(FN_PL3D(NM),'(A,A,I0,A,I0,A,I0,A)') TRIM(CHID),'_',NM,'_',ITM,'_',ITM1,'.q'
+   WRITE(FN_PL3D(NM+NMESHES),'(A,A,I0,A,I0,A,I0,A)') TRIM(CHID),'_',NM,'_',ITM,'_',ITM1,'.q.bnd'
    IF (N_STRINGS+17>N_STRINGS_MAX) THEN
       CALL RE_ALLOCATE_STRINGS(NM)
       STRING => MESHES(NM)%STRING
    ENDIF
    N_STRINGS = N_STRINGS + 1
-   WRITE(STRING(N_STRINGS),'(A,I8,A,I2.2,I6)')  'PL3D ',ITM,'.',ITM1,NM
+   WRITE(STRING(N_STRINGS),'(A,I8,A,I0,I6)')  'PL3D ',ITM,'.',ITM1,NM
    N_STRINGS = N_STRINGS + 1
    WRITE(STRING(N_STRINGS),'(1X,A)') TRIM(FN_PL3D(NM))
    DO IQ=1,5
@@ -9157,7 +9149,7 @@ IF (N_HISTOGRAM>0) THEN
    IF (OPN) CLOSE(LU_HISTOGRAM)
    OPEN(LU_HISTOGRAM,FILE=FN_HISTOGRAM,FORM='FORMATTED',STATUS='REPLACE')
    IF (N_HISTOGRAM==1) WRITE(TCFORM,'(A)') "(A)"
-   IF (N_HISTOGRAM>1 ) WRITE(TCFORM,'(A,I4.4,A)') "(",N_HISTOGRAM-1,"(A,','),A)"
+   IF (N_HISTOGRAM>1 ) WRITE(TCFORM,'(A,I0,A)') "(",N_HISTOGRAM-1,"(A,','),A)"
    WRITE(LU_HISTOGRAM,TCFORM) (TRIM(HISTOGRAM_UNITS(N)),N=1,N_HISTOGRAM)
    WRITE(LU_HISTOGRAM,TCFORM) (TRIM(HISTOGRAM_LABEL(N)),N=1,N_HISTOGRAM)
    DO N=1,MAX_HISTOGRAM_NBINS
@@ -9181,7 +9173,7 @@ ENDDO
 
 DO I=1,N_DEVC_FILES
    N_OUT = MIN(DEVC_COLUMN_LIMIT, N_DEVC_TIME - DEVC_COLUMN_LIMIT * (I - 1))
-   WRITE(TCFORM,'(A,I5.5,5A)') "(",N_OUT,"(",FMT_R,",','),",FMT_R,")"
+   WRITE(TCFORM,'(A,I0,5A)') "(",N_OUT,"(",FMT_R,",','),",FMT_R,")"
    WRITE(LU_DEVC(I),TCFORM) DEVC_TIME,(TIME_DEVC_VALUE(N),N=DEVC_COLUMN_LIMIT*(I-1)+1, MIN(N_DEVC_TIME,DEVC_COLUMN_LIMIT*I))
 ENDDO
 
@@ -9253,7 +9245,7 @@ IF (N_DEVC_LINE>0) THEN
    IF (OPN) CLOSE(LU_LINE)
    OPEN(LU_LINE,FILE=FN_LINE,FORM='FORMATTED',STATUS='REPLACE')
    IF (N_DEVC_LINE==1) WRITE(TCFORM,'(A)') "(A)"
-   IF (N_DEVC_LINE>1 ) WRITE(TCFORM,'(A,I4.4,A)') "(",N_DEVC_LINE-1,"(A,','),A)"
+   IF (N_DEVC_LINE>1 ) WRITE(TCFORM,'(A,I0,A)') "(",N_DEVC_LINE-1,"(A,','),A)"
    WRITE(LU_LINE,TCFORM) (TRIM(LINE_DEVC_UNITS(N)),N=1,N_DEVC_LINE)
    WRITE(LU_LINE,TCFORM) (TRIM(LINE_DEVC_LABEL(N)),N=1,N_DEVC_LINE)
    DO N=1,MAX_DEVC_LINE_POINTS
@@ -9285,7 +9277,7 @@ END WHERE
 
 DO I=1,N_CTRL_FILES
    N_OUT = MIN(CTRL_COLUMN_LIMIT, N_CTRL - CTRL_COLUMN_LIMIT * (I - 1))
-   WRITE(TCFORM,'(3A,I5.5,A)') "(",FMT_R,",",N_OUT,"(',',I2))"
+   WRITE(TCFORM,'(3A,I0,A)') "(",FMT_R,",",N_OUT,"(',',I2))"
    WRITE(LU_CTRL(I),TCFORM) STIME,(WRITE_VALUE(N), N=CTRL_COLUMN_LIMIT*(I-1)+1, MIN(N_CTRL,CTRL_COLUMN_LIMIT*I))
 ENDDO
 
@@ -9610,7 +9602,7 @@ IF (N_ZONE>0) THEN
    ENDDO
 ENDIF
 
-WRITE(TCFORM,'(A,I4.4,5A)') "(",11+N_ZONE_TMP,"(",FMT_R,",','),",FMT_R,")"
+WRITE(TCFORM,'(A,I0,5A)') "(",11+N_ZONE_TMP,"(",FMT_R,",','),",FMT_R,")"
 IF (N_ZONE_TMP>0) THEN
    WRITE(LU_HRR,TCFORM) STIME,0.001_EB*Q_DOT_TOTAL(1:N_Q_DOT),0.001_EB*SUM(Q_DOT_TOTAL(1:N_Q_DOT-1)),&
                         M_DOT_TOTAL(1:2),(P_ZONE_P(I),I=1,N_ZONE_TMP)
@@ -9698,7 +9690,7 @@ DO NM=1,NMESHES
    MINT_TOTAL(0:N_SPECIES) = MINT_TOTAL(0:N_SPECIES) + MINT_SUM(0:N_SPECIES,NM)/MAX(DT,T-T_LAST_DUMP_MASS)
 ENDDO
 
-WRITE(TCFORM,'(A,I4.4,5A)') "(",N_SPECIES+1,"(",FMT_R,",','),",FMT_R,")"
+WRITE(TCFORM,'(A,I0,5A)') "(",N_SPECIES+1,"(",FMT_R,",','),",FMT_R,")"
 WRITE(LU_MASS,TCFORM) STIME,(MINT_TOTAL(N),N=0,N_SPECIES)
 
 END SUBROUTINE DUMP_MASS

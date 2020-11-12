@@ -5,11 +5,11 @@ LOAD3DSMOKE
 PARTCLASSCOLOR
  HUMAN_SPEED
 LOADFILE
- evac_smv_testcase1_0002.prt5
+ evac_smv_testcase1_2.prt5
 PARTCLASSCOLOR
  HUMAN_SPEED
 LOADFILE
- evac_smv_testcase1_0003.prt5
+ evac_smv_testcase1_3.prt5
 SETTIMEVAL
  -0.500000
 RENDERONCE
