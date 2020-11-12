@@ -765,7 +765,7 @@ IF (N_ZONE>0) THEN
    DO N=1,N_ZONE
       IF (.NOT.P_ZONE(N)%EVACUATION) THEN
          N_ZONE_TMP = N_ZONE_TMP + 1
-         IF (P_ZONE(N)%ID=='null') WRITE(P_ZONE(N)%ID,'(A,I2.2)') 'ZONE_',N
+         IF (P_ZONE(N)%ID=='null') WRITE(P_ZONE(N)%ID,'(A,I3.3)') 'ZONE_',N
       ENDIF
    ENDDO
 ENDIF
