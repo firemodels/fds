@@ -1076,8 +1076,8 @@ DO K=1,KBAR
    DO J=1,JBAR
       DO I=0,IBAR
          IF (CC_IBM) THEN
-            IF (.NOT.CC_VELOBC_FLAG3 .AND. FCVAR(I,J,K,IBM_FGSC,IAXIS) /= IBM_GASPHASE) CYCLE ! Case of regular IBM.
-            IF (     CC_VELOBC_FLAG3 .AND. FCVAR(I,J,K,IBM_FGSC,IAXIS) == IBM_SOLID) CYCLE    ! Stress method.
+            IF (.NOT.CC_STRESS_METHOD .AND. FCVAR(I,J,K,IBM_FGSC,IAXIS) /= IBM_GASPHASE) CYCLE ! Case of regular IBM.
+            IF (     CC_STRESS_METHOD .AND. FCVAR(I,J,K,IBM_FGSC,IAXIS) == IBM_SOLID) CYCLE    ! Stress method.
          ENDIF
          ! Kinematic Viscosity:
          NU = 0.5_EB*(MU(I,J,K)/RHOP(I,J,K) + MU(I+1,J,K)/RHOP(I+1,J,K))
@@ -1123,8 +1123,8 @@ DO K=0,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
          IF (CC_IBM) THEN
-            IF (.NOT.CC_VELOBC_FLAG3 .AND. FCVAR(I,J,K,IBM_FGSC,KAXIS) /= IBM_GASPHASE) CYCLE ! Case of regular IBM.
-            IF (     CC_VELOBC_FLAG3 .AND. FCVAR(I,J,K,IBM_FGSC,KAXIS) == IBM_SOLID) CYCLE    ! Stress method.
+            IF (.NOT.CC_STRESS_METHOD .AND. FCVAR(I,J,K,IBM_FGSC,KAXIS) /= IBM_GASPHASE) CYCLE ! Case of regular IBM.
+            IF (     CC_STRESS_METHOD .AND. FCVAR(I,J,K,IBM_FGSC,KAXIS) == IBM_SOLID) CYCLE    ! Stress method.
          ENDIF
          ! Kinematic Viscosity:
          NU = 0.5_EB*(MU(I,J,K)/RHOP(I,J,K) + MU(I,J,K+1)/RHOP(I,J,K+1))
@@ -3022,7 +3022,7 @@ RECV_MESH_LOOP: DO NOM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
          ! Then IBEDGES:
          ! Count:
-         IF(CC_VELOBC_FLAG3) THEN
+         IF(CC_STRESS_METHOD) THEN
             DO IEDGE=1,M%IBM_NIBEDGE
                DO ICD_SGN=-2,2
                   IF(ICD_SGN==0) CYCLE
@@ -3056,7 +3056,7 @@ RECV_MESH_LOOP: DO NOM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             ! Allocate:
             IF (ALLOCATED(M2%IFEP_R_4)) DEALLOCATE(M2%IFEP_R_4)
             ALLOCATE(M2%IFEP_R_4(LOW_IND:HIGH_IND,M2%NFEP_R(4))); M2%IFEP_R_4 = IBM_UNDEFINED
-            IF(CC_VELOBC_FLAG3) THEN
+            IF(CC_STRESS_METHOD) THEN
                ! Add index entries:
                IFEP = 0
                DO IEDGE=1,M%IBM_NIBEDGE
@@ -3134,7 +3134,7 @@ RECV_MESH_LOOP: DO NOM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             ENDDO
          ENDIF
          ! Case of IBEDGES:
-         IF(CC_VELOBC_FLAG3) THEN
+         IF(CC_STRESS_METHOD) THEN
             ! Count:
             DO IEDGE=1,M%IBM_NIBEDGE
                DO ICD_SGN=-2,2
@@ -4043,8 +4043,8 @@ RECV_MESH_LOOP: DO NOM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                ENDDO
             ENDDO
          ENDDO
-         ! Then Loop IBEDGES if CC_VELOBC_FLAG3=.TRUE. add MU:
-         IF (CC_VELOBC_FLAG3) THEN
+         ! Then Loop IBEDGES if CC_STRESS_METHOD=.TRUE. add MU:
+         IF (CC_STRESS_METHOD) THEN
             DO IFEP=1,M2%NFEP_R(5)
                IEDGE= M2%IFEP_R_5( LOW_IND,IFEP)
                INPE = M2%IFEP_R_5(HIGH_IND,IFEP)
@@ -4173,7 +4173,7 @@ TNOW2 = CURRENT_TIME()
 SET_CUTCELLS_CALL_IF : IF(FIRST_CALL) THEN
 
 ! Plane by plane Evaluation of stesses for IBEDGES, a la OBSTS.
-IF(CC_VELOBC_FLAG3) THEN
+IF(CC_STRESS_METHOD) THEN
    CC_VELOBC_FLAG2=.TRUE.
    CC_ONLY_IBEDGES_FLAG=.FALSE.
 ENDIF
@@ -13182,7 +13182,7 @@ ALLOCATE(UVW_EP(IAXIS:KAXIS,0:INT_N_EXT_PTS,0:0))
 ALLOCATE(DUVW_EP(IAXIS:KAXIS,IAXIS:KAXIS,0:INT_N_EXT_PTS,0:0))
 
 IS_RCEDGE = .TRUE.
-IF(CC_VELOBC_FLAG3) THEN
+IF(CC_STRESS_METHOD) THEN
    RCEDGE_LOOP_1 : DO IEDGE=1,MESHES(NM)%IBM_NRCEDGE
       IBM_EDGE => IBM_RCEDGE(IEDGE)
       CALL IBM_RCEDGE_DUIDXJ
@@ -13201,7 +13201,7 @@ IBEDGE_LOOP_1 : DO IEDGE=1,MESHES(NM)%IBM_NIBEDGE
 ENDDO IBEDGE_LOOP_1
 
 IS_RCEDGE = .TRUE.
-IF(CC_VELOBC_FLAG3) THEN
+IF(CC_STRESS_METHOD) THEN
    RCEDGE_LOOP_3 : DO IEDGE=1,MESHES(NM)%IBM_NRCEDGE
       IBM_EDGE => IBM_RCEDGE(IEDGE)
       CALL IBM_RCEDGE_TAU_OMG
@@ -13385,7 +13385,7 @@ VLG(-2:2)=0._EB; NUV(-2:2)=0._EB; RGH(-2:2)=0._EB; UTA(-2:2)=0._EB
 ! Set these to zero for now:
 VEL_T = 0._EB; SRGH = 0._EB
 
-VELOBC_FLAG3_IF : IF(CC_VELOBC_FLAG3) THEN
+VELOBC_FLAG3_IF : IF(CC_STRESS_METHOD) THEN
 
    IE = IBM_EDGE%IE
    II     = IJKE( 1,IE)
@@ -13452,9 +13452,11 @@ VELOBC_FLAG3_IF : IF(CC_VELOBC_FLAG3) THEN
                   ! Linear :
                   DF     = DXX(2) - ABS(XB_IB)
                   DE     = DXN_STRM_UB
-                  IF (.NOT.( (KKF+I_SGN>KBP1) .OR. (KKF+I_SGN<0) )) DE     = DZ(KKF+I_SGN) ! Should be one up from DXX(2).
-                  UF     = VV(IIF,JJF,KKF)
-                  UE     = VV(IIF,JJF,KKF+I_SGN)
+                  UF     = VV(IIF,JJF,KKF);  UE     = UF
+                  IF (.NOT.( (KKF+I_SGN>KBP1) .OR. (KKF+I_SGN<0) )) THEN
+                     DE     = DZ(KKF+I_SGN) ! Should be one up from DXX(2).
+                     UE     = VV(IIF,JJF,KKF+I_SGN)
+                  ENDIF
                   UB     = VEL_T
                   U_GAS  = 2._EB/(DF+DE)*((DE/2._EB+DF)*UF-DF/2._EB*UE) - 2._EB/(DF+DE)*(UF-UE)*(DXN_STRM_UB/2._EB)
 
@@ -13471,9 +13473,11 @@ VELOBC_FLAG3_IF : IF(CC_VELOBC_FLAG3) THEN
                   ! Linear :
                   DF     = DXX(1) - ABS(XB_IB)
                   DE     = DXN_STRM_UB
-                  IF (.NOT.( (JJF+I_SGN>JBP1) .OR. (JJF+I_SGN<0) )) DE     = DY(JJF+I_SGN) ! Should be one up from DXX(1).
-                  UF     = WW(IIF,JJF,KKF)
-                  UE     = WW(IIF,JJF+I_SGN,KKF)
+                  UF     = WW(IIF,JJF,KKF);  UE     = UF
+                  IF (.NOT.( (JJF+I_SGN>JBP1) .OR. (JJF+I_SGN<0) )) THEN
+                     DE     = DY(JJF+I_SGN) ! Should be one up from DXX(1).
+                     UE     = WW(IIF,JJF+I_SGN,KKF)
+                  ENDIF
                   UB     = VEL_T
                   U_GAS  = 2._EB/(DF+DE)*((DE/2._EB+DF)*UF-DF/2._EB*UE) - 2._EB/(DF+DE)*(UF-UE)*(DXN_STRM_UB/2._EB)
 
@@ -13549,9 +13553,11 @@ VELOBC_FLAG3_IF : IF(CC_VELOBC_FLAG3) THEN
                   ! Linear :
                   DF     = DXX(2) - ABS(XB_IB)
                   DE     = DXN_STRM_UB
-                  IF (.NOT.( (IIF+I_SGN>IBP1) .OR. (IIF+I_SGN<0) )) DE     = DX(IIF+I_SGN) ! Should be one up from DXX(2).
-                  UF     = WW(IIF,JJF,KKF)
-                  UE     = WW(IIF+I_SGN,JJF,KKF)
+                  UF     = WW(IIF,JJF,KKF);  UE     = UF
+                  IF (.NOT.( (IIF+I_SGN>IBP1) .OR. (IIF+I_SGN<0) )) THEN
+                     DE     = DX(IIF+I_SGN) ! Should be one up from DXX(2).
+                     UE     = WW(IIF+I_SGN,JJF,KKF)
+                  ENDIF
                   UB     = VEL_T
                   U_GAS  = 2._EB/(DF+DE)*((DE/2._EB+DF)*UF-DF/2._EB*UE) - 2._EB/(DF+DE)*(UF-UE)*(DXN_STRM_UB/2._EB)
 
@@ -13568,9 +13574,11 @@ VELOBC_FLAG3_IF : IF(CC_VELOBC_FLAG3) THEN
                   ! Linear :
                   DF     = DXX(1) - ABS(XB_IB)
                   DE     = DXN_STRM_UB
-                  IF (.NOT.( (KKF+I_SGN>KBP1) .OR. (KKF+I_SGN<0) )) DE     = DZ(KKF+I_SGN) ! Should be one up from DXX(1).
-                  UF     = UU(IIF,JJF,KKF)
-                  UE     = UU(IIF,JJF,KKF+I_SGN)
+                  UF     = UU(IIF,JJF,KKF);  UE     = UF
+                  IF (.NOT.( (KKF+I_SGN>KBP1) .OR. (KKF+I_SGN<0) )) THEN
+                     DE     = DZ(KKF+I_SGN) ! Should be one up from DXX(1).
+                     UE     = UU(IIF,JJF,KKF+I_SGN)
+                  ENDIF
                   UB     = VEL_T
                   U_GAS  = 2._EB/(DF+DE)*((DE/2._EB+DF)*UF-DF/2._EB*UE) - 2._EB/(DF+DE)*(UF-UE)*(DXN_STRM_UB/2._EB)
 
@@ -13654,9 +13662,11 @@ VELOBC_FLAG3_IF : IF(CC_VELOBC_FLAG3) THEN
                   ! Linear :
                   DF     = DXX(2) - ABS(XB_IB)
                   DE     = DXN_STRM_UB
-                  IF (.NOT.( (JJF+I_SGN>JBP1) .OR. (JJF+I_SGN<0) )) DE     = DY(JJF+I_SGN) ! Should be one up from DXX(2).
-                  UF     = UU(IIF,JJF,KKF)
-                  UE     = UU(IIF,JJF+I_SGN,KKF)
+                  UF     = UU(IIF,JJF,KKF);  UE     = UF
+                  IF (.NOT.( (JJF+I_SGN>JBP1) .OR. (JJF+I_SGN<0) )) THEN
+                     DE     = DY(JJF+I_SGN) ! Should be one up from DXX(2).
+                     UE     = UU(IIF,JJF+I_SGN,KKF)
+                  ENDIF
                   UB     = VEL_T
                   U_GAS  = 2._EB/(DF+DE)*((DE/2._EB+DF)*UF-DF/2._EB*UE) - 2._EB/(DF+DE)*(UF-UE)*(DXN_STRM_UB/2._EB)
 
@@ -13673,9 +13683,11 @@ VELOBC_FLAG3_IF : IF(CC_VELOBC_FLAG3) THEN
                   ! Linear :
                   DF     = DXX(1) - ABS(XB_IB)
                   DE     = DXN_STRM_UB
-                  IF (.NOT.( (IIF+I_SGN>IBP1) .OR. (IIF+I_SGN<0) )) DE     = DX(IIF+I_SGN) ! Should be one up from DXX(1).
-                  UF     = VV(IIF,JJF,KKF)
-                  UE     = VV(IIF+I_SGN,JJF,KKF)
+                  UF     = VV(IIF,JJF,KKF);  UE     = UF
+                  IF (.NOT.( (IIF+I_SGN>IBP1) .OR. (IIF+I_SGN<0) )) THEN
+                     DE     = DX(IIF+I_SGN) ! Should be one up from DXX(1).
+                     UE     = VV(IIF+I_SGN,JJF,KKF)
+                  ENDIF
                   UB     = VEL_T
                   U_GAS  = 2._EB/(DF+DE)*((DE/2._EB+DF)*UF-DF/2._EB*UE) - 2._EB/(DF+DE)*(UF-UE)*(DXN_STRM_UB/2._EB)
 
@@ -15015,7 +15027,7 @@ FORCE_GAS_FACE_IF: IF (FORCE_GAS_FACE .AND. .NOT.CC_VELOBC_FLAG2) THEN
    ENDDO CUTFACE_LOOP
 ENDIF FORCE_GAS_FACE_IF
 
-IF(CC_VELOBC_FLAG3) THEN
+IF(CC_STRESS_METHOD) THEN
    U_IBM = 0._EB; V_IBM = 0._EB; W_IBM = 0._EB
    CUTFACE_LOOP_2 : DO ICF=1,MESHES(NM)%N_CUTFACE_MESH
       IF ( CUT_FACE(ICF)%STATUS /= IBM_GASPHASE) CYCLE CUTFACE_LOOP_2
@@ -17667,7 +17679,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    ENDDO CUT_CELL_LOOP2
 
    ! Compute stencils for RCEDGES, regular edges connecting cut and regular faces, and IBEDGES, solid edges next to cut-faces:
-   VELOBC_FLAG3_IF : IF (CC_VELOBC_FLAG3) THEN
+   VELOBC_FLAG3_IF : IF (CC_STRESS_METHOD) THEN
 
     RCEDGE_LOOP_1 : DO IEDGE=1,MESHES(NM)%IBM_NRCEDGE
        ALLOCATE(IBM_RCEDGE(IEDGE)%XB_IB(-2:2),IBM_RCEDGE(IEDGE)%DUIDXJ(-2:2),IBM_RCEDGE(IEDGE)%MU_DUIDXJ(-2:2))
@@ -18908,7 +18920,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       ENDDO
    ENDDO
    ! 2. IBEDGES:
-   VELOBC_FLAG3_IF2 : IF (CC_VELOBC_FLAG3) THEN
+   VELOBC_FLAG3_IF2 : IF (CC_STRESS_METHOD) THEN
       DO IEDGE=1,MESHES(NM)%IBM_NIBEDGE
          DO ICD_SGN=-2,2
             IF(ICD_SGN==0) CYCLE
@@ -19122,7 +19134,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    ENDDO
 
    ! 2. Cell-centered variables for IBEDGES:
-   VELOBC_FLAG3_IF3 : IF (CC_VELOBC_FLAG3) THEN
+   VELOBC_FLAG3_IF3 : IF (CC_STRESS_METHOD) THEN
       VIND = 0
       DO IEDGE=1,MESHES(NM)%IBM_NIBEDGE
          DO ICD_SGN=-2,2
@@ -19270,7 +19282,7 @@ ENDIF
 DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    WRITE(MSEGS_FILE,'(A,A,I4.4,A)') TRIM(CHID),'_ibsegns_mesh_',NM,'.dat'
    OPEN(333,FILE=TRIM(MSEGS_FILE),STATUS='UNKNOWN')
-   IF (.NOT.CC_VELOBC_FLAG3) THEN
+   IF (.NOT.CC_STRESS_METHOD) THEN
       DO ECOUNT=1,MESHES(NM)%IBM_NIBEDGE
          WRITE(333,'(5F13.8)') MESHES(NM)%IBM_IBEDGE(ECOUNT)%INT_NOUT(IAXIS:KAXIS,0),&
                                MESHES(NM)%IBM_IBEDGE(ECOUNT)%INT_XN(0:1,0)
