@@ -482,7 +482,7 @@ TYPE REACTION_TYPE
    CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: SPEC_ID_N_S      !< Array of finite rate species exponents
    CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: SPEC_ID_N_S_READ !< Holding array of finite rate species exponents
    CHARACTER(MESSAGE_LENGTH) :: FYI='null'  !< User comment
-   CHARACTER(FORMULA_LENGTH) :: EQUATION    !< Reaction equation 
+   CHARACTER(FORMULA_LENGTH) :: EQUATION    !< Reaction equation
    CHARACTER(LABEL_LENGTH) :: FWD_ID        !< ID of forward reaction
    REAL(EB) :: C                            !< Number of carbon atoms in the fuel molecule (SIMPLE_CHEMISTRY)
    REAL(EB) :: H                            !< Number of hydrogen atoms in the fuel molecule (SIMPLE_CHEMISTRY)
@@ -495,7 +495,7 @@ TYPE REACTION_TYPE
    REAL(EB) :: A_IN                         !< Unajusted pre-exponential reaction kinetic parameter
    REAL(EB) :: E                            !< Activation energy (J/kmol)
    REAL(EB) :: E_IN                         !< User-specified activation energy (J/mol)
-   REAL(EB) :: K                           
+   REAL(EB) :: K
    REAL(EB) :: MW_FUEL                      !< Molecular weight of fuel (g/mol)
    REAL(EB) :: MW_SOOT                      !< Molecular weight of soot surrogate gas (g/mol)
    REAL(EB) :: Y_O2_MIN                     !< Lower oxygen limit in terms of mass fraction
@@ -838,7 +838,7 @@ TYPE IBM_EDGE_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: INT_FVARS      ! (1:N_INT_FVARS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: INT_CVARS      ! (1:N_INT_CVARS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: INT_NOMIND     ! (LOW_IND:HIGH_IND,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
-   REAL(EB), ALLOCATABLE, DIMENSION(:)        :: XB_IB
+   REAL(EB), ALLOCATABLE, DIMENSION(:)        :: XB_IB,DUIDXJ,MU_DUIDXJ
    INTEGER,  ALLOCATABLE, DIMENSION(:)        :: SURF_INDEX
    LOGICAL,  ALLOCATABLE, DIMENSION(:)        :: PROCESS_EDGE_ORIENTATION,EDGE_IN_MESH
 END TYPE IBM_EDGE_TYPE
