@@ -27504,7 +27504,7 @@ DO NM=1,NMESHES
       DO ICC2=1,NCELL
          CCGP_XYZCEN(IAXIS:KAXIS) = CCGP_XYZCEN(IAXIS:KAXIS) + MESHES(NM)%CUT_CELL(ICC1)%VOLUME(ICC2) * &
                                                                MESHES(NM)%CUT_CELL(ICC1)%XYZCEN(IAXIS:KAXIS,ICC2)
-         IF ( MESHES(NM)%CUT_CELL(ICC1)%VOLUME(ICC2) < -GEOMEPS) &
+         IF ( MESHES(NM)%CUT_CELL(ICC1)%VOLUME(ICC2) < TWO_EPSILON_EB) &
              WRITE(LU_ERR,*) "Cut-cell=",ICC1,ICC2,", VOL=",MESHES(NM)%CUT_CELL(ICC1)%VOLUME(ICC2)
       ENDDO
       CC_VOLUME_INB = CC_VOLUME_INB + SUM(MESHES(NM)%CUT_CELL(ICC1)%VOLUME(1:NCELL))
@@ -38153,6 +38153,7 @@ LOGICAL, ALLOCATABLE, DIMENSION(:)  :: SOLID_EDGE
 INTEGER, ALLOCATABLE, DIMENSION(:)  :: VERT_SEGS, SEG_POS
 INTEGER, ALLOCATABLE, DIMENSION(:,:):: SPCELL_LIST
 LOGICAL :: CYCLE_CELL, IFLG
+REAL(EB) :: XMIN(IAXIS:KAXIS),XMAX(IAXIS:KAXIS)
 
 REAL(EB) :: TNOW
 
@@ -38951,22 +38952,38 @@ DO K=KLO,KHI
 
             ! First test if INB face is on Cartesian face and pointing
             ! outside of Cartesian cell. If so drop:
-            XYZ(IAXIS:KAXIS) = XYZVERT(IAXIS:KAXIS,SEG_FACE2(1,1))
+            ! Get min max in face for VERTS x,y,z:
+            XMIN(IAXIS:KAXIS)= 1._EB/TWO_EPSILON_EB
+            XMAX(IAXIS:KAXIS)=-1._EB/TWO_EPSILON_EB
+            DO ISEG_FACE=1,NSEG_FACE
+                XMIN(IAXIS) = MIN(XMIN(IAXIS), XYZVERT(IAXIS,SEG_FACE2(NOD1,ISEG_FACE)))
+                XMIN(JAXIS) = MIN(XMIN(JAXIS), XYZVERT(JAXIS,SEG_FACE2(NOD1,ISEG_FACE)))
+                XMIN(KAXIS) = MIN(XMIN(KAXIS), XYZVERT(KAXIS,SEG_FACE2(NOD1,ISEG_FACE)))
+                XMAX(IAXIS) = MAX(XMAX(IAXIS), XYZVERT(IAXIS,SEG_FACE2(NOD1,ISEG_FACE)))
+                XMAX(JAXIS) = MAX(XMAX(JAXIS), XYZVERT(JAXIS,SEG_FACE2(NOD1,ISEG_FACE)))
+                XMAX(KAXIS) = MAX(XMAX(KAXIS), XYZVERT(KAXIS,SEG_FACE2(NOD1,ISEG_FACE)))
+            ENDDO
             ! IAXIS:
             IF ( (ABS(NORMTRI(IAXIS)+1._EB) < GEOMEPS) .AND. &
-                 (ABS(XFACE(I-FCELL  )-XYZ(IAXIS)) < GEOMEPS) ) CYCLE ! Low Face
+                 (ABS(XFACE(I-FCELL  )-XMIN(IAXIS)) < GEOMEPS)  .AND. &
+                 (ABS(XFACE(I-FCELL  )-XMAX(IAXIS)) < GEOMEPS)) CYCLE ! Low Face
             IF ( (ABS(NORMTRI(IAXIS)-1._EB) < GEOMEPS) .AND. &
-                 (ABS(XFACE(I-FCELL+1)-XYZ(IAXIS)) < GEOMEPS) ) CYCLE ! High Face
+                 (ABS(XFACE(I-FCELL+1)-XMIN(IAXIS)) < GEOMEPS)  .AND. &
+                 (ABS(XFACE(I-FCELL+1)-XMAX(IAXIS)) < GEOMEPS)) CYCLE ! High Face
             ! JAXIS:
             IF ( (ABS(NORMTRI(JAXIS)+1._EB) < GEOMEPS) .AND. &
-                 (ABS(YFACE(J-FCELL  )-XYZ(JAXIS)) < GEOMEPS) ) CYCLE ! Low Face
+                 (ABS(YFACE(J-FCELL  )-XMIN(JAXIS)) < GEOMEPS)  .AND. &
+                 (ABS(YFACE(J-FCELL  )-XMAX(JAXIS)) < GEOMEPS)) CYCLE ! Low Face
             IF ( (ABS(NORMTRI(JAXIS)-1._EB) < GEOMEPS) .AND. &
-                 (ABS(YFACE(J-FCELL+1)-XYZ(JAXIS)) < GEOMEPS) ) CYCLE ! High Face
+                 (ABS(YFACE(J-FCELL+1)-XMIN(JAXIS)) < GEOMEPS)  .AND. &
+                 (ABS(YFACE(J-FCELL+1)-XMAX(JAXIS)) < GEOMEPS)) CYCLE ! High Face
             ! KAXIS:
             IF ( (ABS(NORMTRI(KAXIS)+1._EB) < GEOMEPS) .AND. &
-                 (ABS(ZFACE(K-FCELL  )-XYZ(KAXIS)) < GEOMEPS) ) CYCLE ! Low Face
+                 (ABS(ZFACE(K-FCELL  )-XMIN(KAXIS)) < GEOMEPS)  .AND. &
+                 (ABS(ZFACE(K-FCELL  )-XMAX(KAXIS)) < GEOMEPS)) CYCLE ! Low Face
             IF ( (ABS(NORMTRI(KAXIS)-1._EB) < GEOMEPS) .AND. &
-                 (ABS(ZFACE(K-FCELL+1)-XYZ(KAXIS)) < GEOMEPS) ) CYCLE ! High Face
+                 (ABS(ZFACE(K-FCELL+1)-XMIN(KAXIS)) < GEOMEPS)  .AND. &
+                 (ABS(ZFACE(K-FCELL+1)-XMAX(KAXIS)) < GEOMEPS)) CYCLE ! High Face
 
             ! Face Vertices average location:
             XCEN(IAXIS:KAXIS) = 0._EB
