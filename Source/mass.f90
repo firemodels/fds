@@ -383,7 +383,7 @@ CASE(.TRUE.) PREDICTOR_STEP
 
    ! Check mass density for positivity
 
-   CALL CHECK_MASS_DENSITY
+   CALL CHECK_MASS_DENSITY(NM)
 
    ! Extract mass fraction from RHO * ZZ
 
@@ -539,7 +539,7 @@ CASE(.FALSE.) PREDICTOR_STEP
 
    ! Check mass density for positivity
 
-   CALL CHECK_MASS_DENSITY
+   CALL CHECK_MASS_DENSITY(NM)
 
    ! Extract Y_n from rho*Y_n
 
@@ -592,21 +592,26 @@ T_USED(3)=T_USED(3)+CURRENT_TIME()-TNOW
 END SUBROUTINE DENSITY
 
 
-SUBROUTINE CHECK_MASS_DENSITY
+!> \brief Redistribute mass from cells below or above the density cut-off limits
+!> \param NM Mesh number
+!> \details Do not apply OpenMP to this routine
 
-! Redistribute mass from cells below or above the density cut-off limits
-! Do not apply OpenMP to this routine
+SUBROUTINE CHECK_MASS_DENSITY(NM)
 
 USE GLOBAL_CONSTANTS, ONLY : PREDICTOR,RHOMIN,RHOMAX
+INTEGER, INTENT(IN) :: NM
 REAL(EB) :: MASS_N(-3:3),CONST,MASS_C,RHO_ZZ_CUT,RHO_CUT,VC(-3:3),SIGN_FACTOR,SUM_MASS_N,VC1(-3:3),RHO_ZZ_MIN,RHO_ZZ_MAX
 INTEGER  :: IC,I,J,K,N
 REAL(EB), POINTER, DIMENSION(:,:,:) :: DELTA_RHO=>NULL(),DELTA_RHO_ZZ=>NULL(),RHOP=>NULL()
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: RHO_ZZ=>NULL()
+LOGICAL :: CLIP_RHOMIN,CLIP_RHOMAX
 
 IF (CHECK_MASS_CONSERVE) RETURN ! Don't modify scalar components.
 
 DELTA_RHO => WORK4
 DELTA_RHO =  0._EB
+CLIP_RHOMIN = .FALSE.
+CLIP_RHOMAX = .FALSE.
 
 IF (PREDICTOR) THEN
    RHO_ZZ => ZZS  ! At this stage of the time step, ZZS is actually RHOS*ZZS
@@ -635,9 +640,11 @@ DO K=1,KBAR
          IF (RHOP(I,J,K)<RHOMIN) THEN
             RHO_CUT = RHOMIN
             SIGN_FACTOR = 1._EB
+            CLIP_RHOMIN = .TRUE.
          ELSE
             RHO_CUT = RHOMAX
             SIGN_FACTOR = -1._EB
+            CLIP_RHOMAX = .TRUE.
          ENDIF
          MASS_N = 0._EB
          VC( 0)  = DX(I)  * VC1( 0)
@@ -754,6 +761,9 @@ DO K=1,KBAR
       ENDDO
    ENDDO
 ENDDO
+
+IF (CLIP_RHOMIN) WRITE(LU_ERR,'(A,F8.3,A,I0)') 'WARNING: Minimum density, ',RHOMIN,' kg/m3, clipped in Mesh ',NM
+IF (CLIP_RHOMAX) WRITE(LU_ERR,'(A,F8.3,A,I0)') 'WARNING: Maximum density, ',RHOMAX,' kg/m3, clipped in Mesh ',NM
 
 END SUBROUTINE CHECK_MASS_DENSITY
 

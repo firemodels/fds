@@ -6,6 +6,7 @@
 MODULE GLOBAL_CONSTANTS
 
 USE PRECISION_PARAMETERS
+USE ISO_FORTRAN_ENV, ONLY: ERROR_UNIT
 IMPLICIT NONE
 
 INTEGER, PARAMETER :: DNS_MODE=1                 !< Flag for SIM_MODE: Direct Numerical Simulation
@@ -525,7 +526,7 @@ REAL(EB) :: ALIGNMENT_TOLERANCE=0.001_EB      !< Maximum ratio of sizes of abutt
 
 ! Logical units and output file names
 
-INTEGER                              :: LU_ERR=0,LU_END=2,LU_GIT=3,LU_SMV=4,LU_INPUT=5,LU_OUTPUT=6,LU_STOP=7,LU_CPU=8,&
+INTEGER                              :: LU_ERR=ERROR_UNIT,LU_END=2,LU_GIT=3,LU_SMV=4,LU_INPUT=5,LU_OUTPUT=6,LU_STOP=7,LU_CPU=8,&
                                         LU_CATF=9
 INTEGER                              :: LU_MASS,LU_HRR,LU_STEPS,LU_NOTREADY,LU_VELOCITY_ERROR,LU_CFL,LU_LINE=-1,LU_CUTCELL
 INTEGER                              :: LU_EVACCSV,LU_EVACEFF,LU_EVACFED,LU_EVACOUT,LU_HISTOGRAM,LU_EVAC_CB
