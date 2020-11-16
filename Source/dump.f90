@@ -2581,7 +2581,7 @@ USE SCRC, ONLY: SCARC_METHOD, SCARC_GRID, SCARC_MATRIX, SCARC_SMOOTH, SCARC_PREC
                 SCARC_KRYLOV_ITERATIONS, SCARC_KRYLOV_ACCURACY, SCARC_MKL_PRECISION, SCARC_TWOLEVEL
 
 REAL(EB), INTENT(IN) :: DT
-INTEGER :: NM,I,NN,N,NR,NL,NS,ITMP, CELL_COUNT
+INTEGER :: NM,I,NN,N,NR,NL,NS,ITMP, CELL_COUNT,KK
 REAL(EB) ::ZZ_GET(1:N_TRACKED_SPECIES), MU_Z,K_Z,CP_ZN,H_Z
 CHARACTER(LABEL_LENGTH) :: QUANTITY,ODE_SOLVER,OUTFORM
 TYPE(SPECIES_MIXTURE_TYPE),POINTER :: SM=>NULL()
@@ -2627,10 +2627,10 @@ IF (.NOT.SUPPRESS_DIAGNOSTICS) THEN
       WRITE(LU_OUTPUT,'(A,F10.3)')  '   Height (m)                  ',M%ZF-M%ZS
       WRITE(LU_OUTPUT,'(A,F10.3)')  '   Initial Time Step (s)       ',DT
    ENDDO MESH_LOOP
-   WRITE(LU_OUTPUT,'(/A,I9)')    'Total Number of Grid Cells     ',CELL_COUNT
+   WRITE(LU_OUTPUT,'(/A,I9/)')    'Total Number of Grid Cells     ',CELL_COUNT
 ENDIF
 
-WRITE(LU_OUTPUT,'(//A/)')     ' Miscellaneous Parameters'
+WRITE(LU_OUTPUT,'(/A/)')     ' Miscellaneous Parameters'
 IF (ABS(TIME_SHRINK_FACTOR -1._EB)>SPACING(1._EB)) &
 WRITE(LU_OUTPUT,'(A,F8.1)')   '   Time Shrink Factor (s/s)      ',TIME_SHRINK_FACTOR
 WRITE(LU_OUTPUT,'(A,F8.1)')   '   Simulation Start Time (s)     ',T_BEGIN
@@ -2666,7 +2666,19 @@ IF (SIM_MODE/=DNS_MODE) THEN
       WRITE(LU_OUTPUT,'(A,F8.2)')   '   Turbulent Schmidt Number:     ',SC
    ENDIF
 ENDIF
-WRITE(LU_OUTPUT,'(A,F8.2)')   '   Ambient Temperature (C):      ',TMPA-TMPM
+WRITE(LU_OUTPUT,'(A,F10.2)')   '   Background Pressure (Pa):   '  ,P_INF
+WRITE(LU_OUTPUT,'(A,F8.2)')    '   Ambient Temperature (C):      ',TMPA-TMPM
+
+! Print out information about background pressure and temperature stratification
+
+IF (STRATIFICATION .AND. .NOT.SUPPRESS_DIAGNOSTICS) THEN
+   WRITE(LU_OUTPUT,'(//A/)')  ' Background Stratification'
+   WRITE(LU_OUTPUT,'(A)')     '      Z (m)     P_0 (Pa)    TMP_0 (C)'
+   WRITE(LU_OUTPUT,'(A)')     '   ------------------------------------'
+   DO KK=MESHES(1)%KBAR,1,-1
+      WRITE(LU_OUTPUT,'(4X,F8.2,3X,F10.2,2X,F8.2)') MESHES(1)%ZC(KK), MESHES(1)%P_0(KK), MESHES(1)%TMP_0(KK)-TMPM
+   ENDDO
+ENDIF
 
 ! Write out the transformation matrix that converts species mixtures to primitive species
 
@@ -3018,7 +3030,7 @@ SURFLOOP: DO N=0,N_SURF
    IF (ABS(SF%CONV_LENGTH - 1._EB)>SPACING(1._EB)) WRITE(LU_OUTPUT,'(A,ES9.2)') '     Convection length scale (m) ', SF%CONV_LENGTH
 
    IF (SF%VEG_LSET_SPREAD) THEN
-      WRITE(LU_OUTPUT,'(A)')       '     Level Set Fire Spread Model'
+      WRITE(LU_OUTPUT,'(A)')        '     Level Set Fire Spread Model'
       IF (SF%VEG_LSET_IGNITE_T<1.E6_EB) &
       WRITE(LU_OUTPUT,'(A,ES9.2)')  '     Ignition Time (s)           ', SF%VEG_LSET_IGNITE_T
       WRITE(LU_OUTPUT,'(A,ES10.3)') '     Burn Duration (s)           ', SF%BURN_DURATION
@@ -3619,7 +3631,7 @@ IF (ITERATE_PRESSURE) THEN
    JJ = PRESSURE_ERROR_MAX_LOC(2,NM)
    KK = PRESSURE_ERROR_MAX_LOC(3,NM)
    WRITE(LU_OUTPUT,'(7X,A,E9.2,A,I3,A,3I4,A)') 'Maximum Pressure Error: ',MAXVAL(PRESSURE_ERROR_MAX), &
-                                               ' on Mesh ',NM,' at (',II,JJ,KK,')' 
+                                               ' on Mesh ',NM,' at (',II,JJ,KK,')'
 ENDIF
 IF (TRIM(PRES_METHOD) == 'SCARC' .OR. TRIM(PRES_METHOD) == 'USCARC') THEN
    WRITE(LU_OUTPUT,'(7X,A,i6,A,e9.2,A,e9.2)') 'ScaRC: iterations', SCARC_ITERATIONS, &
