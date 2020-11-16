@@ -166,14 +166,6 @@ ENDIF
 
 T = T_BEGIN
 
-! Stop all the processes if this is just a set-up run
-
-IF (CHECK_MESH_ALIGNMENT) THEN
-   IF (MYID==0) CALL INITIALIZE_DIAGNOSTIC_FILE(DT)
-   STOP_STATUS = SETUP_ONLY_STOP
-   IF (MYID==0) WRITE(LU_ERR,'(A)') ' Checking mesh alignment. This could take a few tens of seconds...'
-ENDIF
-
 ! Allocate various utility arrays
 
 CALL MPI_INITIALIZATION_CHORES(2)
@@ -198,6 +190,14 @@ CALL EXCHANGE_GEOMETRY_INFO
 DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    CALL INITIALIZE_MESH_VARIABLES_1(DT,NM)
 ENDDO
+
+! Stop all the processes if this is just a set-up run
+
+IF (CHECK_MESH_ALIGNMENT) THEN
+   IF (MYID==0) CALL INITIALIZE_DIAGNOSTIC_FILE(DT)
+   STOP_STATUS = SETUP_ONLY_STOP
+   IF (MYID==0) WRITE(LU_ERR,'(A)') ' Checking mesh alignment. This could take a few tens of seconds...'
+ENDIF
 CALL STOP_CHECK(1)
 
 ! Allocate and initialize OMESH arrays to hold "other mesh" data for a given mesh
