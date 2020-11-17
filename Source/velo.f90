@@ -2206,7 +2206,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
             UPWIND_BOUNDARY = .FALSE.
             INFLOW_BOUNDARY = .FALSE.
 
-            IF (ANY(MEAN_FORCING)) THEN
+            IF (ANY(MEAN_FORCING) .OR. TEST_NEW_OPEN) THEN
                SELECT CASE(IEC)
                   CASE(1)
                      IF (JJ==0    .AND. IOR== 2) U_NORM = 0.5_EB*(VV(II,   0,KK) + VV(II,   0,KK+1))
