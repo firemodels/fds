@@ -501,7 +501,7 @@ USE COMPLEX_GEOMETRY, ONLY : RANDOM_CFACE_XYZ
 
 INTEGER, INTENT(IN), OPTIONAL :: WALL_INDEX,CFACE_INDEX
 INTEGER :: I
-REAL(EB):: CFA_X, CFA_Y, CFA_Z, RN
+REAL(EB):: CFA_X, CFA_Y, CFA_Z, RN, VEL_PART
 
 TYPE(CFACE_TYPE), POINTER :: CFA=>NULL()
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
@@ -595,31 +595,36 @@ PARTICLE_INSERT_LOOP2: DO I=1,SF%NPPC
       END SELECT
       ! Give particles an initial velocity
       IF (.NOT.LPC%STATIC) THEN
+         IF (SF%VEL_PART >-999999._EB) THEN
+            VEL_PART = SF%VEL_PART
+         ELSE
+            VEL_PART = ONE_D%U_NORMAL
+         ENDIF
          SELECT CASE(IOR)
             CASE( 1)
-               LP%U = -ONE_D%U_NORMAL
+               LP%U = -VEL_PART
                LP%V = SF%VEL_T(1)
                LP%W = SF%VEL_T(2)
             CASE(-1)
-               LP%U =  ONE_D%U_NORMAL
+               LP%U =  VEL_PART
                LP%V = SF%VEL_T(1)
                LP%W = SF%VEL_T(2)
             CASE( 2)
                LP%U = SF%VEL_T(1)
-               LP%V = -ONE_D%U_NORMAL
+               LP%V = -VEL_PART
                LP%W = SF%VEL_T(2)
             CASE(-2)
                LP%U = SF%VEL_T(1)
-               LP%V =  ONE_D%U_NORMAL
+               LP%V =  VEL_PART
                LP%W = SF%VEL_T(2)
             CASE( 3)
                LP%U = SF%VEL_T(1)
                LP%V = SF%VEL_T(2)
-               LP%W = -ONE_D%U_NORMAL
+               LP%W = -VEL_PART
             CASE(-3)
                LP%U = SF%VEL_T(1)
                LP%V = SF%VEL_T(2)
-               LP%W =  ONE_D%U_NORMAL
+               LP%W =  VEL_PART
          END SELECT
       ENDIF
    ELSEIF (PRESENT(CFACE_INDEX)) THEN
