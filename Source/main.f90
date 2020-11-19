@@ -1384,7 +1384,7 @@ PRESSURE_ITERATION_LOOP: DO
       CALL NO_FLUX(DT,NM)
       IF (CC_IBM) THEN
          ! Wall model to define target velocities in gas cut faces.
-         IF(PRESSURE_ITERATIONS==1. .AND. CC_FORCE_PRESSIT .AND. .NOT.CC_VELOBC_FLAG2) CALL CCIBM_TARGET_VELOCITY(DT,NM)
+         IF(PRESSURE_ITERATIONS<=2 .AND. CC_FORCE_PRESSIT .AND. .NOT.CC_VELOBC_FLAG2) CALL CCIBM_TARGET_VELOCITY(DT,NM)
          CALL CCIBM_NO_FLUX(DT,NM)
       ENDIF
       IF (PRESSURE_ITERATIONS==1) MESHES(NM)%WALL_WORK1 = 0._EB
@@ -1429,11 +1429,7 @@ PRESSURE_ITERATION_LOOP: DO
    DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       IF (EVACUATION_ONLY(NM) .OR. EVACUATION_SKIP(NM)) CYCLE
       CALL COMPUTE_VELOCITY_ERROR(DT,NM)
-      IF (CC_IBM) THEN
-         IF(CC_FORCE_PRESSIT .AND. .NOT.CC_VELOBC_FLAG2) CALL CCIBM_TARGET_VELOCITY(DT,NM) ! Wall model to define n+1 target
-                                                                                           ! velocities in gas cut faces.
-         CALL CCIBM_COMPUTE_VELOCITY_ERROR(DT,NM) ! Inside solids respect to zero velocity.
-      ENDIF
+      IF (CC_IBM) CALL CCIBM_COMPUTE_VELOCITY_ERROR(DT,NM) ! Inside solids respect to zero velocity.
    ENDDO
 
    ! Make all MPI processes aware of the maximum velocity error to decide if another pressure iteration is needed.

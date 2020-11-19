@@ -447,6 +447,8 @@ REAL(EB),ALLOCATABLE, DIMENSION(:)   :: A_H
 
 LOGICAL :: H_MATRIX_INDEFINITE
 
+LOGICAL :: CALL_FOR_GLMAT = .FALSE. ! Flag to avoid MESH_CC_EXCHANGE(5) whithin GLMAT calls in PRESSURE_ITERATION_SCHEME.
+
 ! Soln and RHS containers:
 REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:) :: F_H
 REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:) :: X_H
@@ -586,7 +588,7 @@ REAL(EB), PARAMETER :: DISPL  = PI
 REAL(EB) :: ROTANG, ROTMAT(2,2), TROTMAT(2,2)
 
 PRIVATE
-PUBLIC :: ADD_INPLACE_NNZ_H_WHLDOM,ADD_Q_DOT_CUTCELLS,&
+PUBLIC :: ADD_INPLACE_NNZ_H_WHLDOM,ADD_Q_DOT_CUTCELLS,CALL_FOR_GLMAT,&
           CCREGION_DIVERGENCE_PART_1,CCIBM_CHECK_DIVERGENCE,CCIBM_COMPUTE_VELOCITY_ERROR, &
           CCIBM_END_STEP,CCIBM_H_INTERP,CCIBM_INTERP_FACE_VEL,CCIBM_NO_FLUX, &
           CCIBM_RHO0W_INTERP,CCIBM_SET_DATA,CCIBM_TARGET_VELOCITY,CCIBM_VELOCITY_BC,CCIBM_VELOCITY_CUTFACES,CCIBM_VELOCITY_FLUX, &
@@ -3203,7 +3205,9 @@ REAL(EB) :: TNOW
 ! Initialization of cut-cell communications needs to be done later in the main.f90 sequence and will be done using
 ! INITIALIZE_CC_SCALARS/VELOCITY logicals.
 IF (CODE == 0 .OR. CODE==2 .OR. CODE>6) RETURN
-IF (CODE == 5 .AND. CC_VELOBC_FLAG2) RETURN ! No need to do mesh exchange within pressure iteration scheme here, no IBM forcing.
+! No need to do mesh exchange within pressure iteration scheme here, when no IBM forcing, or call to fill GLMAT H ghost cells.
+! Target velocity update is done at most twice in pressure iteration.
+IF (CODE == 5 .AND. (CC_VELOBC_FLAG2 .OR. PRESSURE_ITERATIONS>1 .OR. CALL_FOR_GLMAT)) RETURN
 IF (.NOT.CC_MATVEC_DEFINED) RETURN
 
 TNOW = CURRENT_TIME()
