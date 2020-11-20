@@ -33,6 +33,10 @@ INTEGER, PARAMETER :: VREMAN=4                   !< Flag for TURB_MODEL: Vreman 
 INTEGER, PARAMETER :: RNG=5                      !< Flag for TURB_MODEL: ReNormalization Group turbulence model
 INTEGER, PARAMETER :: WALE=6                     !< Flag for TURB_MODEL: Wall-Adapting Local Eddy viscosity turbulence model
 
+INTEGER, PARAMETER :: MEAN_LES_FILTER_WIDTH=1    !< Flag for LES_FILTER_WIDTH_TYPE: geometric mean filter width
+INTEGER, PARAMETER :: MAX_LES_FILTER_WIDTH=2     !< Flag for LES_FILTER_WIDTH_TYPE: take max of DX,DY,DZ
+INTEGER            :: LES_FILTER_WIDTH_TYPE=MEAN_LES_FILTER_WIDTH !< Default filter width type is mean
+
 INTEGER, PARAMETER :: CONVECTIVE_FLUX_BC=-1      !< Flag for SF\%THERMAL_BC_INDEX: Specified convective flux
 INTEGER, PARAMETER :: NET_FLUX_BC=0              !< Flag for SF\%THERMAL_BC_INDEX: Specified net heat flux
 INTEGER, PARAMETER :: SPECIFIED_TEMPERATURE=1    !< Flag for SF\%THERMAL_BC_INDEX: Specified surface temperature
