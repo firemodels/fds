@@ -5643,7 +5643,7 @@ READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
       CASE('POROUS MEDIA')
          IF (ANY(DRAG_COEFFICIENT<TWO_EPSILON_EB) .OR. ANY(PERMEABILITY<TWO_EPSILON_EB)) THEN
             WRITE(MESSAGE,'(A,I0,A)') 'ERROR: PART line ',N,&
-                                      '.  For POROUS MEDIA must specify all compoents for DRAG_COEFFICIENT and PERMIABILTIY.'
+                                      '.  For POROUS MEDIA must specify all compoents for DRAG_COEFFICIENT and PERMEABILTIY.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          LPC%DRAG_LAW = POROUS_DRAG
