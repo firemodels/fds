@@ -1223,10 +1223,12 @@ IF (LPC%SOLID_PARTICLE) THEN
          IF (SF%THERMAL_BC_INDEX==THERMALLY_THICK) THEN
             SELECT CASE (SF%GEOMETRY)
                CASE (SURF_CARTESIAN)
+                  LP%ONE_D%AREA = 2._EB*SF%LENGTH*SF%WIDTH
                   DO N=1,SF%N_LAYERS
                      LP%MASS = LP%MASS + 2._EB*SF%LENGTH*SF%WIDTH*SF%LAYER_THICKNESS(N)*SCALE_FACTOR*SF%LAYER_DENSITY(N)
                   ENDDO
                CASE (SURF_CYLINDRICAL)
+                  LP%ONE_D%AREA = 2._EB*PI*SF%THICKNESS*SF%LENGTH
                   X1 = SUM(SF%LAYER_THICKNESS)*SCALE_FACTOR
                   DO N=SF%N_LAYERS,1,-1
                      X2 = X1 - SF%LAYER_THICKNESS(N)*SCALE_FACTOR
@@ -1234,6 +1236,7 @@ IF (LPC%SOLID_PARTICLE) THEN
                      X1 = X2
                   ENDDO
                CASE (SURF_SPHERICAL)
+                  LP%ONE_D%AREA = 4._EB*PI*SF%THICKNESS**2
                   X1 = SUM(SF%LAYER_THICKNESS)*SCALE_FACTOR
                   DO N=SF%N_LAYERS,1,-1
                      X2 = X1 - SF%LAYER_THICKNESS(N)*SCALE_FACTOR
