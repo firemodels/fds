@@ -2263,7 +2263,7 @@ MESH_LOOP: DO NM=1,NMESHES
    ! Replace vents on exterior mesh boundary with "dummy" vents to avoid overlap conflict in Smokeview
 
    NDV = 0
-   NDVDIM = 10*N_VENT_TOTAL
+   NDVDIM = 10*(6+N_VENT_TOTAL)
    ALLOCATE(DUMMY_VENT_INDEX(NDVDIM))
    ALLOCATE(IDV1(NDVDIM))
    ALLOCATE(IDV2(NDVDIM))
