@@ -381,7 +381,7 @@ INTEGER,  ALLOCATABLE, DIMENSION(:)  :: IBM_IS_CRS,IBM_SEG_CRS,IBM_BDNUM_CRS,IBM
 INTEGER,  ALLOCATABLE, DIMENSION(:,:):: IBM_IS_CRS2
 REAL(EB), ALLOCATABLE, DIMENSION(:,:):: IBM_SEG_TAN
 INTEGER :: X1NOC, X2NOC, X3NOC
-INTEGER, PARAMETER :: MAX_CELL_POLYLINES = 30
+INTEGER, PARAMETER :: MAX_CELL_POLYLINES =100
 
 ! Matrix vector building variables:
 
@@ -17240,7 +17240,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
             ENDDO ! Loop over LOW side and HIGH side cut-cells of GASPHASE cut-face.
 
-            IF (.NOT.FOUND_POINT) PRINT*, 'CF: Havent found closest point. ICF, IFACE=',ICF,IFACE
+            IF (.NOT.FOUND_POINT .AND. GET_CUTCELLS_VERBOSE) WRITE(LU_ERR,*)'CF: Havent found closest point. ICF, IFACE=',ICF,IFACE
 
             ! Here test if point in boundary and interpolation point coincide:
             IF (DISTANCE <= MIN_DIST_VEL) THEN
@@ -17563,7 +17563,7 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
          ENDDO JCC_LOOP
 
-         IF (.NOT.FOUND_POINT) THEN
+         IF (.NOT.FOUND_POINT .AND. GET_CUTCELLS_VERBOSE) THEN
             IF(ICELL==0) THEN
                WRITE(LU_ERR,*) 'CF: Havent found closest point CART CELL. ICC=',ICC
             ELSE
@@ -36778,6 +36778,7 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
                                    XY(JAXIS,II2) * XY(IAXIS,II2+1) )
                 ENDDO
                 AREA = AREA / 2._EB
+                IF ( ABS(AREA) < TWO_EPSILON_EB ) THEN; DROPFACE(ICF) = .TRUE.; CYCLE; ENDIF
                 IF ( (AREA<GEOMEPS**2) .AND. (MESHES(NM)%ECVAR(INDI1,INDJ1,INDK1,IBM_EGSC,X2AXIS) == IBM_SOLID) .AND. &
                                              (MESHES(NM)%ECVAR(INDI2,INDJ2,INDK2,IBM_EGSC,X2AXIS) == IBM_SOLID) .AND. &
                                              (MESHES(NM)%ECVAR(INDI3,INDJ3,INDK3,IBM_EGSC,X3AXIS) == IBM_SOLID) .AND. &
