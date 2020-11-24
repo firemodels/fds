@@ -2871,17 +2871,23 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                H1 = H_SENS_Z(ITMP,Z_INDEX)+(TMP_DROP-REAL(ITMP,EB))*(H_SENS_Z(ITMP+1,Z_INDEX)-H_SENS_Z(ITMP,Z_INDEX))
                ITMP = INT(TMP_G)
                H2 = H_SENS_Z(ITMP,Z_INDEX)+(TMP_G-REAL(ITMP,EB))*(H_SENS_Z(ITMP+1,Z_INDEX)-H_SENS_Z(ITMP,Z_INDEX))
-               DTOP = DT_SUBSTEP/(M_DROP*C_DROP)
+
+               AGHRHO = A_DROP*H_MASS*RHO_AIR/(1._EB+0.5_EB*RVC*DT_SUBSTEP*A_DROP*WGT*H_MASS*RHO_AIR*(1._EB-Y_GAS)/RHO_G)
+
                DTOG = DT_SUBSTEP*WGT/(M_GAS*CP)
-               DTGOG = 0.5_EB*DTOG*A_DROP*WGT*H_HEAT
-               DTGOP = 0.5_EB*DTOP*A_DROP*H_HEAT
-               AGHRHO = A_DROP*H_MASS*RHO_AIR/(1._EB+0.5_EB*RVC*DT_SUBSTEP*A_DROP*WGT*H_MASS*RHO_AIR/RHO_G*(1._EB-Y_GAS))
+               DTGOG = 0.5_EB*DTOG*A_DROP*H_HEAT
+
                DAHVHLDY = DTOG*AGHRHO*(H1-H2)*(Y_DROP-Y_GAS)
+               DADYDTHVHL=0.5_EB*DTOG*AGHRHO*(H1-H2)*DYDT
+               
+               DTOP = DT_SUBSTEP/(M_DROP*C_DROP)
+               DTGOP = 0.5_EB*DTOP*A_DROP*H_HEAT
+               
                DADYHV = DTOP*AGHRHO*H_V*(Y_DROP-Y_GAS)
-               DADYDTHVHL=0.5_EB*DTOG*AGHRHO*DYDT*(H1-H2)
                DADYDTHV=0.5_EB*DTOP*AGHRHO*DYDT*H_V
+
                SELECT CASE (ARRAY_CASE)
-               CASE(1) ! Gas Only
+                  CASE(1) ! Gas Only
                      A_COL(1) = 1._EB+DTGOG
                      B_COL(1) = -(DTGOG+DADYDTHVHL)
                      A_COL(2) = -DTGOP
@@ -2892,7 +2898,9 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                      TMP_G_NEW = (D_VEC(1)-B_COL(1)*TMP_DROP_NEW)/A_COL(1)
                      TMP_WALL_NEW = TMP_WALL
                   CASE(2) ! Const Temp Wall
-                     DTWOP = DT_SUBSTEP*A_DROP*WGT*H_WALL/(2._EB*M_DROP*WGT*C_DROP)
+
+                     DTWOP = 0.5_EB*DTOP*A_DROP*H_WALL
+
                      A_COL(1) = 1._EB+DTGOG
                      B_COL(1) = -(DTGOG+DADYDTHVHL)
                      A_COL(2) = -DTGOP
@@ -2903,8 +2911,10 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                      TMP_G_NEW = (D_VEC(1)-B_COL(1)*TMP_DROP_NEW)/A_COL(1)
                      TMP_WALL_NEW = TMP_WALL
                   CASE(3) ! 1D Wall
-                     DTWOP = DT_SUBSTEP*A_DROP*H_WALL/(2._EB*M_DROP*C_DROP)
+
+                     DTWOP = 0.5_EB*DTOP*A_DROP*H_WALL
                      DTWOW = DT_SUBSTEP*A_DROP*WGT*H_WALL/(2._EB*MCBAR)
+
                      A_COL(1) = 1._EB+DTGOG
                      B_COL(1) = -(DTGOG+DADYDTHVHL)
                      C_COL(1) = 0._EB
