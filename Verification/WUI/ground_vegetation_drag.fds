@@ -1,6 +1,6 @@
 &HEAD CHID='ground_vegetation_drag', TITLE='Comparison of boundary models' /
 
-&TIME T_END=10. /
+&TIME T_END=30. /
 
 &MESH IJK=120,20,10, XB=0.0,6.0,-0.5,0.5,0.0,0.5 /
 &MESH IJK=120,20,10, XB=0.0,6.0,-0.5,0.5,1.5,2.0 /
