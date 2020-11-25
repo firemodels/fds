@@ -9880,8 +9880,9 @@ MESH_LOOP: DO NM=1,NMESHES
 
                HT3D_IF: IF (HT3D) THEN
 
-                  OB%HT3D = HT3D
-                  SOLID_HT3D = .TRUE. ! global parameter
+                  OB%HT3D         = .TRUE.
+                  OB%HT3D_RESTART = .TRUE. ! determines write/read of OB%RHO for RESTART; needed because OB%HT3D changes state
+                  SOLID_HT3D      = .TRUE. ! global parameter
 
                   IF (VOL_ADJUSTED<TWO_EPSILON_EB) THEN
                      ! test if OB is on boundary
