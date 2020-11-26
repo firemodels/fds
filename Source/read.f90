@@ -9881,7 +9881,6 @@ MESH_LOOP: DO NM=1,NMESHES
                HT3D_IF: IF (HT3D) THEN
 
                   OB%HT3D         = .TRUE.
-                  OB%HT3D_RESTART = .TRUE. ! determines write/read of OB%RHO for RESTART; needed because OB%HT3D changes state
                   SOLID_HT3D      = .TRUE. ! global parameter
 
                   IF (VOL_ADJUSTED<TWO_EPSILON_EB) THEN
@@ -9941,6 +9940,7 @@ MESH_LOOP: DO NM=1,NMESHES
 
                      ! Allocate and initialize MATL densities in OBST for 3D pyrolysis
 
+                     OB%HT3D_RESTART = .TRUE. ! determines write/read of OB%RHO for RESTART; needed because OB%HT3D changes state
                      ALLOCATE(OB%RHO(OB%I1+1:OB%I2,OB%J1+1:OB%J2,OB%K1+1:OB%K2,SF%N_MATL),STAT=IZERO)
                      CALL ChkMemErr('READ_OBST','RHO',IZERO)
                      PYRO3D_RESIDUE=.FALSE.
