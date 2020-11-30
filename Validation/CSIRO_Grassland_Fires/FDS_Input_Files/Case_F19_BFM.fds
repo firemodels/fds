@@ -57,7 +57,7 @@
       SHAPE_FACTOR              = 0.25
       MINIMUM_BURNOUT_TIME      = 10.
       SURFACE_VOLUME_RATIO(1)   = 12240. /
-      
+
 &MATL ID                 = 'DRY GRASS'
       DENSITY            = 512.
       CONDUCTIVITY       = 0.1
@@ -65,14 +65,14 @@
       A                  = 36300.
       E                  = 60300.
       MATL_ID            = 'CHAR'
-      NU_MATL            = 0.2 
+      NU_MATL            = 0.2
       SPEC_ID            = 'CELLULOSE'
       NU_SPEC            = 0.8
       HEAT_OF_REACTION   = 416. /
 
 &RAMP ID='c_v', T= 20., F=1.184 /
 &RAMP ID='c_v', T=800., F=4.070 /
- 
+
 &MATL ID                 = 'CHAR'
       DENSITY            = 300.
       CONDUCTIVITY       = 0.052
@@ -98,9 +98,10 @@
 
 &DUMP DT_HRR=1., DT_DEVC=1., SIG_FIGS=4, SIG_FIGS_EXP=2 /
 
-&SLCF PBY=1., QUANTITY='TEMPERATURE', VECTOR=.TRUE. /
-&SLCF PBZ=2., QUANTITY='VELOCITY', VECTOR=.TRUE. /
-&SLCF PBY=1., QUANTITY='INTEGRATED INTENSITY', CELL_CENTERED=.TRUE. /
+&SLCF PBY=1., QUANTITY='TEMPERATURE', VECTOR=T /
+&SLCF PBZ=2., QUANTITY='VELOCITY', VECTOR=T /
+&SLCF PBY=1., QUANTITY='INTEGRATED INTENSITY', CELL_CENTERED=T /
+&SLCF PBZ=0.1, QUANTITY='HRRPUV', CELL_CENTERED=T /
 
 &BNDF QUANTITY='WALL TEMPERATURE' /
 &BNDF QUANTITY='GAUGE HEAT FLUX' /
