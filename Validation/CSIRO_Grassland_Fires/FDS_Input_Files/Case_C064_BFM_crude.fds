@@ -3,7 +3,7 @@
 &MESH IJK=20,20,20, XB=-10.0,10.0,0.0,20.0,0.0,20.0, MULT_ID='mesh' /
 &MULT ID='mesh', DX=20., DY=20., DZ=20., I_LOWER=0, I_UPPER=5, J_LOWER=-3, J_UPPER=2, K_UPPER=0 /
 
-&TIME T_END=120. / 
+&TIME T_END=120. /
 
 &MISC TMPA=32. /
 
@@ -55,7 +55,7 @@
       SHAPE_FACTOR              = 0.25
       MINIMUM_BURNOUT_TIME      = 10.
       SURFACE_VOLUME_RATIO(1)   = 9770. /
-      
+
 &MATL ID                 = 'DRY GRASS'
       DENSITY            = 512.
       CONDUCTIVITY       = 0.1
@@ -63,14 +63,14 @@
       A                  = 36300.
       E                  = 60300.
       MATL_ID            = 'CHAR'
-      NU_MATL            = 0.2 
+      NU_MATL            = 0.2
       SPEC_ID            = 'CELLULOSE'
       NU_SPEC            = 0.8
       HEAT_OF_REACTION   = 416. /
 
 &RAMP ID='c_v', T= 20., F=1.184 /
 &RAMP ID='c_v', T=800., F=4.070 /
- 
+
 &MATL ID                 = 'CHAR'
       DENSITY            = 300.
       CONDUCTIVITY       = 0.052
@@ -96,9 +96,10 @@
 
 &DUMP DT_HRR=1., DT_DEVC=1., SIG_FIGS=4, SIG_FIGS_EXP=2 /
 
-&SLCF PBY=1., QUANTITY='TEMPERATURE', VECTOR=.TRUE. /
-&SLCF PBZ=2., QUANTITY='VELOCITY', VECTOR=.TRUE. /
-&SLCF PBY=1., QUANTITY='INTEGRATED INTENSITY', CELL_CENTERED=.TRUE. /
+&SLCF PBY=1., QUANTITY='TEMPERATURE', VECTOR=T /
+&SLCF PBZ=2., QUANTITY='VELOCITY', VECTOR=T /
+&SLCF PBY=1., QUANTITY='INTEGRATED INTENSITY', CELL_CENTERED=T /
+&SLCF PBZ=0.1, QUANTITY='HRRPUV', CELL_CENTERED=T
 
 &BNDF QUANTITY='WALL TEMPERATURE' /
 &BNDF QUANTITY='GAUGE HEAT FLUX' /
