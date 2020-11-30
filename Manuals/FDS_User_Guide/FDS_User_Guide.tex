@@ -2964,14 +2964,14 @@ Refer to the FDS Tech Guide \cite{FDS_Tech_Guide} for further details of the for
 \subsubsection{Atmospheric Boundary Layer Wall Model}
 \label{sec:abl_model}
 
-The incorporation of buoyancy into the wall function is the domain of Monin-Obuhkov (MO) similarity theory, as discussed in Sec.~\ref{info:WIND}. Further mathematical details of the ABL wall model are discussed in the FDS Tech Guide \cite{FDS_Math_Guide}.  To specify this model for a particular surface, set {\ct HEAT\_TRANSFER\_MODEL} equal to {\ct ABL} on the {\ct SURF} line together with the aerodynamic roughness length, {\ct Z\_0}.  For example,
+The incorporation of buoyancy into the wall function is the domain of Monin-Obuhkov (MO) similarity theory, as discussed in Sec.~\ref{info:WIND}. Further mathematical details of the ABL wall model are discussed in the FDS Tech Guide \cite{FDS_Math_Guide}.  Note that the model assumes gravity to point in the $-z$ direction.  To specify this model for a particular surface, set {\ct HEAT\_TRANSFER\_MODEL} equal to {\ct 'ABL'} on the {\ct SURF} line together with the aerodynamic roughness length, {\ct Z\_0}.  For example,
 \begin{lstlisting}
 &SURF ID='ground', HEAT_TRANSFER_MODEL='ABL', Z_0=0.05 /
 \end{lstlisting}
 
 As discussed in Sec.~\ref{info:WIND}, there is a simple conversion between the aerodynamic roughness and the sandgrain roughness, which can be input using {\ct ROUGHNESS} on {\ct SURF}.  Either {\ct Z\_0} or {\ct ROUGHNESS} may be specified, but not both.  Also, if a {\ct WIND} line is present, {\ct Z\_0} must be consistent between {\ct SURF} and {\ct WIND} lines.  The value of {\ct Z\_0} on {\ct SURF} will override the default value from {\ct WIND}.
 
-When the ABL wall model is used, this also changes the wall stress model (see FDS Tech Guide~\cite{FDS_Math_Guide}).  The local Obukhov length, $L$ (see Sec.~\ref{info:WIND}), and viscous wall units, $y^+$ (see Sec.~\ref{info:yplus}), can be output using boundary files or wall devices.
+When the ABL wall model is used, this also changes the wall stress model (see FDS Tech Guide~\cite{FDS_Math_Guide}).  The local Obukhov length, $L$ (see Sec.~\ref{info:WIND}), and viscous wall units, $y^+$ (see Sec.~\ref{info:yplus}), can be output using boundary files or wall devices.  Note that the perfectly ``neutral'' value for local $L$ is set to zero to avoid problems with the colorbar range that would occur if the physically correct value of infinity were used.  However, if the flow is not perfectly isothermal then usually there is enough of a temperature difference to register a physically realizable value for $L$ in the ABL model.
 
 \subsubsection{Free Convection, Horizontal Cylinder}
 
@@ -3451,7 +3451,7 @@ where
 \ee
 The term, $r_{ij}$, defines the rate of reaction at the temperature, $T_{\rm s}$, of the $i$th material undergoing its $j$th reaction. The second term on the right of the equation (\ref{rr_tot}) represents the contributions of other materials producing the $i$th material as a residue with a yield of $\nu_{{\rm s},i'j}$. This term is denoted by {\ct NU\_MATL(:,j)} on the $i'$-th {\ct MATL} line. $\rho_{{\rm s},i}$ is the density of the $i$th material component of the layer, defined as the mass of the $i$th material component divided by the volume of the layer.  $\rho_{\rm s}(0)$ is the initial density of the layer. Thus, $Y_{{\rm s},i}=\rho_{{\rm s},i}/\rho_{\rm s}(0)$ is a quantity that increases if the $i$th material component is produced as a residue of some other reaction, or decreases if the $i$th component decomposes.  If the layer is composed of only one material, then $\rho_{{\rm s},i}/\rho_{\rm s}(0)$ is initially 1. $n_{{\rm s},ij}$ is the reaction order and prescribed under the name {\ct N\_S(j)}, and is 1 by default. If the value of $n_{\rm s}$ is not known, it is a good starting point to assume it is 1.
 
-The pre-exponential factor, $A_{ij}$, is prescribed under the name {\ct A(j)} on the {\ct MATL} line of the $i$th material, with units of s$^{-1}$. $E_{ij}$, the activation energy, is prescribed via {\ct E(j)} in units of J/mol. Remember that 1~kcal is 4,184~J, and be careful with factors of 1000. For a given reaction, specify both $A$ and $E$, or neither. Do not specify only one of these two parameters. Typically, these parameters only have meaning when both are derived from a common set of experiments, like TGA (thermogravimetric analysis).
+The pre-exponential factor, $A_{ij}$, is prescribed under the name {\ct A(j)} on the {\ct MATL} line of the $i$th material, with units of s$^{-1}$. $E_{ij}$, the activation energy, is prescribed via {\ct E(j)} in units of J/mol. Remember that 1~kcal is 4.184~kJ, and be careful with factors of 1000. For a given reaction, specify both $A$ and $E$, or neither. Do not specify only one of these two parameters. Typically, these parameters only have meaning when both are derived from a common set of experiments, like TGA (thermogravimetric analysis).
 
 The fourth term of the reaction rate equation (\ref{rr}) can be used to simulate oxidation reactions. If the heterogeneous reaction order $n_{{\rm O_2},ij}$ is greater than zero, the reaction rate is affected by the local oxygen volume fraction, $X_{\rm O_2}$. It is calculated from the gas phase (first grid cell) oxygen volume fraction $X_{\rm O_2,g}$ by assuming simultaneous diffusion and consumption so that the concentration profile is in equilibrium, and the concentration at depth $x$ is given by
 \be
@@ -4068,7 +4068,7 @@ The no-slip condition implies that the continuum tangential gas velocity at a su
 \subsection{Synthetic Turbulence Inflow Boundary Conditions}
 \label{info:synthetic_turbulence}
 
-Real flows of low-viscosity fluids like air are rarely perfectly stationary in time or uniform in space---they are turbulent (to some degree). Of course, the turbulence characteristics of the flow may have a significant impact on mixing and other behaviors so the specification of nominally constant and uniform boundary conditions may be insufficient.  To address this issue, FDS employs a synthetic eddy method (SEM)\footnote{SEM only applies to velocity boundary conditions and so may not be used for HVAC vents, which are strict mass flux boundaries.}.  Refer to Jarrin \cite{Jarrin:2008} for a detailed description. In brief, ``eddies'' are injected into the flow at random positions on the boundary and advect with the mean flow over a short distance near the boundary equivalent to the maximum eddy length scale.  Once the eddy passes through this region it is recycled at the inlet of the boundary with a new random position and length scale. The eddies are idealized as velocity perturbations over a spherical region in space with a diameter (eddy length scale) selected from a uniform random distribution. The selection procedures guarantee that prescribed first and second-order statistics (including Reynolds stresses) are satisfied.
+Real flows of low-viscosity fluids like air are rarely perfectly stationary in time or uniform in space---they are turbulent (to some degree). Of course, the turbulence characteristics of the flow may have a significant impact on mixing and other behaviors, so the specification of nominally constant and uniform boundary conditions may be insufficient.  To address this issue, FDS employs a synthetic eddy method (SEM)\footnote{SEM may not be used for HVAC vents, which are strict mass flux boundaries.}.  Refer to Jarrin \cite{Jarrin:2008} for a detailed description. In brief, ``eddies'' are injected into the flow at random positions on the boundary and advect with the mean flow over a short distance near the boundary equivalent to the maximum eddy length scale.  Once the eddy passes through this region it is recycled at the inlet of the boundary with a new random position and length scale. The eddies are idealized as velocity perturbations over a spherical region in space with a diameter (eddy length scale) selected from a uniform random distribution. The selection procedures guarantee that prescribed first and second-order statistics (including Reynolds stresses) are satisfied.
 
 Synthetic turbulence is invoked by setting the number of eddies, {\ct N\_EDDY}, the characteristic eddy length scale, {\ct L\_EDDY}, and either the root mean square (RMS)
 velocity fluctuation, {\ct VEL\_RMS}, or the Reynolds stress tensor components, {\ct REYNOLDS\_STRESS(3,3)} on the {\ct VENT} line.  In Fig.~\ref{fig:sem_profiles} we show examples using SEM for flat, parabolic, atmospheric, and ramp profiles with 10 \% turbulence intensity (see the {\ct sem\_*} test series in the Turbulence verification subdirectory).  The input lines for the atmospheric case are (see Section \ref{info:stratification} for further discussion of profile parameters).
@@ -4107,6 +4107,36 @@ In Chapter 7 of Jarrin's thesis~\cite{Jarrin:2008}, he introduces the Modified S
    REYNOLDS_STRESS(2,1)=0.,    REYNOLDS_STRESS(2,2)=1.53, REYNOLDS_STRESS(2,3)=0.
    REYNOLDS_STRESS(3,1)=-0.47, REYNOLDS_STRESS(3,2)=0.,   REYNOLDS_STRESS(3,3)=4.259 /
 \end{lstlisting}
+
+\subsubsection*{Synthetic Turbulence at OPEN Boundaries}
+\label{info:sem_open}
+
+For wind simulations (see Sec.~\ref{info:WIND}) it may be necessary to add a degree of inflow turbulence in order to match atmospheric conditions without drastically increasing the size of the computational domain.  The Synthetic Eddy Method of Jarrin \cite{Jarrin:2008} may be invoked on the {\ct VENT} line with an {\ct 'OPEN'} boundary.  This should be used in conjunction with a {\ct WIND} line to specify the mean wind field.  For example,
+
+\begin{lstlisting}
+&WIND SPEED=10, DIRECTION=270, ... /
+&VENT DB='XMIN', SURF_ID='OPEN', N_EDDY=500, L_EDDY=3, VEL_RMS=1 /
+\end{lstlisting}
+
+Figure \ref{fig:sem_open_wind} shows results from a demonstration case ({\ct sem\_open\_wind.fds}).  In this case the mean wind speed is 10 m/s at 10 m elevation with a Monin-Obukhov length of $-667$ m (unstably stratified) and an aerodynamic roughness of $z_0=0.022$ m.  The ground temperature is set to 20 $^\circ \mbox{C}$ and the ambient temperature is set fo 19.18 $^\circ \mbox{C}$ based on the Monin-Obukhov profile.  The rms velocity fluctuation at the inlet is set to 1 m/s. The lateral boundaries are {\ct 'PERIODIC'}.  The inflow, outflow, and top boundary conditions are set to {\ct 'OPEN'}.  Note that a special OPEN boundary condition for WIND has been developed, which is discussed in the FDS Tech Guide \cite{FDS_Math_Guide}.
+
+\begin{figure}[ht]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/sem_open_wind_u_prof} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/sem_open_wind_T_prof} \\
+\end{tabular*}
+\caption[Synthetic Eddy Method at OPEN boundary]{Synthetic Eddy Method at OPEN boundary with prescribed WIND field: (left) Monin-Obukhov velocity profile, (right) Monin-Obukhov temperature profile.}
+\label{fig:sem_open_wind}
+\end{figure}
+
+This test case also uses the atmospheric boundary layer (ABL) wall model (see Sec.~\ref{sec:abl_model}) for computing the wall stress and heat flux.  This model generates a local Monin-Obukhov (MO) length scale that is appropriate for solid phase output.  Here we compare the ground surface mean MO lenth scale, $L$, as a function of time with the prescribed {\ct L} on the {\ct WIND} line ($-667$ m).  The resulting time history is shown in Fig.~\ref{fig:sem_open_wind_LMO}.  Note that the negative MO length indicates an unstable boundary layer.  The initial transient (spike) is due to setting a uniform ambient temperature, which generates a large initial heat flux.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/sem_open_wind_LMO}
+\caption[Monin-Obukhov length from ABL\_WALL\_MODEL]{Mean Monin-Obukhov length scale output from the ABL wall model compared to the input $L$.}
+\label{fig:sem_open_wind_LMO}
+\end{figure}
 
 
 \subsection{Random Mass Flux Variation}
@@ -6687,8 +6717,12 @@ The THIEF model assumes that the cable plastic material has a thermal conductivi
 \section{Particle Insertion}
 \label{info:controlling_droplets}
 
-There are three ways of introducing droplets or particles into a simulation. The first way is to define a sprinkler or nozzle using a {\ct PROP} line that includes a {\ct PART\_ID} that specifies the particle or droplet parameters. The second way is to add a {\ct PART\_ID} to a {\ct SURF} line, in which case particles or droplets will be ejected from that surface. Note that this only works if the surface has a normal velocity pointing into the flow domain. The third way to introduce particles or droplets is via an {\ct INIT} line that defines a volume within the computational domain in which the particles/droplets are to be introduced initially and/or periodically in time.
-
+There are three ways of introducing droplets or particles into a simulation:
+\begin{enumerate}
+\item Define a sprinkler or nozzle using a {\ct PROP} line that includes a {\ct PART\_ID} that specifies the particle or droplet parameters. The individual sprinklers or nozzles are specified via {\ct DEVC} lines.
+\item Add a {\ct PART\_ID} to a {\ct SURF} line, in which case particles or droplets will be ejected from that surface with an outward normal velocity given by a negative value of {\ct VEL}.
+\item Create an {\ct INIT} line that defines a volume within the computational domain in which the particles/droplets are to be introduced initially and/or periodically in time.
+\end{enumerate}
 It is not unusual to include hundreds of thousands of particles in a simulation. Visualizing all of the particles in Smokeview can sometimes be impractical due to memory limitations. To limit the amount of particles, you can make use of the following parameters on the {\ct PART} line:
 \begin{description}
 \item[{\ct SAMPLING\_FACTOR}] Sampling factor for the output file {\ct CHID.prt5}. This parameter can be used to reduce the size of the particle output file used to animate the simulation. The default value is 1 for {\ct MASSLESS} particles, meaning that every particle or droplet will be shown in Smokeview. The default is 10 for all other types of particles. {\ct MASSLESS} particles are discussed in Section~\ref{info:MASSLESS}.
@@ -6711,7 +6745,7 @@ If the particles have mass and are introduced from a solid surface, specify {\ct
 &SURF ID='SLOT', PART_ID='particles', VEL=-5., PARTICLE_MASS_FLUX=0.1 /
 &OBST XB=-0.2,0.2,-0.2,0.2,4.0,4.4, SURF_IDS='INERT','SLOT','INERT' /
 \end{lstlisting}
-creates an obstruction that ejects particles out of its sides at a rate of 0.1~\si{kg/(m$^2$.s)} and a velocity of 5~m/s (the minus sign indicates the particles are ejected from the surface). FDS will adjust the mass flux if the obstruction or vent dimensions are changed to conform to the numerical grid. The {\ct ID}s have no meaning other than as identifiers. The surface on which particles are specified must have a non-zero normal velocity directed into the computational domain. This happens automatically if the surface is burning, but must be specified if it is not. There is a simple input file called {\ct particle\_flux.fds} that demonstrates how the above input lines can produce a stream of particles from a block. The total mass flux from the block is the product of the {\ct PARTICLE\_MASS\_FLUX} times the total area of the sides of the block, 0.4~m $\times$ 0.4~m $\times$ 4. The expected accumulated mass of particles on the ground after 10~s is expected to be 0.64~kg, as shown in Fig.~\ref{particle_flux_fig}.
+creates an obstruction that ejects particles out of its sides at a rate of 0.1~\si{kg/(m$^2$.s)} and a velocity of 5~m/s (the minus sign indicates the particles are ejected from the surface). FDS will adjust the mass flux if the obstruction or vent dimensions are changed to conform to the numerical grid. The {\ct ID}s have no meaning other than as identifiers. By default, the particle initial velocity is the surface normal velocity. This means that the surface on which particles are specified must have a non-zero normal velocity directed into the computational domain. This happens automatically if the surface is burning. If not then either specify a non-zero and negative {\ct VEL}, or if you do not wish to also inject gas you can specify {\ct VEL\_PART}. {\ct VEL\_PART} has the same sign convention as {\ct VEL}. If {\ct VEL\_PART} is specified, it will override the gas velocity for the surface and inject the particle at {\ct VEL\_PART}. There is a simple input file called {\ct particle\_flux.fds} that demonstrates how the above input lines can produce a stream of particles from a block. The total mass flux from the block is the product of the {\ct PARTICLE\_MASS\_FLUX} times the total area of the sides of the block, 0.4~m $\times$ 0.4~m $\times$ 4. The expected accumulated mass of particles on the ground after 10~s is expected to be 0.64~kg, as shown in Fig.~\ref{particle_flux_fig}.
 
 \begin{figure}[ht]
 \begin{center}
@@ -6731,11 +6765,9 @@ Instead of a mass flux, you can specify the {\ct PARTICLE\_SURFACE\_DENSITY} (kg
 \subsection{Particles or Droplets Introduced at a Sprinkler or Nozzle}
 \label{info:sprinkler_droplets}
 
-A sprinkler or nozzle is added to the simulation using a {\ct PROP} line to describe the features of the device and a {\ct DEVC} line to position and orient the device within the computational domain. {\ct PARTICLES\_PER\_SECOND} is the  number of droplets inserted every second per active sprinkler or nozzle (Default 5000). It is listed on the {\ct PROP} line that includes other properties of the sprinkler or nozzle. Note that this parameter only affects sprinklers and nozzles. Changing this parameter does {\em not} change the flow rate, but rather the number of droplets used to represent the flow.
+A sprinkler or nozzle is added to the simulation using a {\ct PROP} line to describe the features of the device and a {\ct DEVC} line to position and orient the device within the computational domain. {\ct PARTICLES\_PER\_SECOND} is the  number of droplets inserted every second per active sprinkler or nozzle (Default 5000). It is listed on the {\ct PROP} line that includes other properties of the sprinkler or nozzle. Note that this parameter only affects sprinklers and nozzles. Changing this parameter does {\em not} change the flow rate, but rather the number of droplets used to represent the flow. In some simulations, it is a good idea to increase the {\ct PARTICLES\_PER\_SECOND} beyond its default so that the particle/droplet mass is distributed more uniformly inside the domain. If this parameter is too small, it can lead to a non-physical evaporation pattern, sometimes even to the point of causing a numerical instability. If you encounter a numerical instability shortly after the activation of a sprinkler or nozzle, consider increasing {\ct PARTICLES\_PER\_SECOND} to produce a smoother evaporation pattern that is more realistic. Keep in mind that for a real sprinkler or nozzle, there are many more droplets created per second than the number that can be simulated.
 
-Note that {\ct PARTICLES\_PER\_SECOND} can be a very important parameter. In some simulations, it is a good idea to increase this number so that the liquid mass is distributed more uniformly over the droplets. If this parameter is too small, it can lead to a non-physical evaporation pattern, sometimes even to the point of causing a numerical instability. If you encounter a numerical instability shortly after the activation of a sprinkler or nozzle, consider increasing {\ct PARTICLES\_PER\_SECOND} to produce a smoother evaporation pattern that is more realistic. Keep in mind that for a real sprinkler or nozzle, there are many more droplets created per second than the number that can be simulated.
-
-Note that by default the parameter {\ct PARTICLE\_CFL} is set to {\ct .FALSE.} (see Section \ref{info:PART_Stability}).  Thus, particles inserted with a velocity faster than the local fluid entrainment velocity may traverse more than one cell.  If the particles represent a fuel spray or sprinkler droplets that are to be collected in a pan, it may be necessary to set {\ct PARTICLE\_CFL=.TRUE.} on {\ct MISC} to precisely account for particle mass.  For example, the particles may represent liquid fuel being sprayed into a pan burner made from a zero thickness obstruction.  In this case, if the particle position overshoots the cell face representing the boundary of the pan then either spurious burning of the particle will occur underneath the pan or, if the particle does not burn, the heat release rate will be diminished.
+The {\ct PARTICLE\_VELOCITY} specified on the {\ct PROP} line indicates the initial velocity of the droplets/particles. If this value is relatively large, FDS computes the trajectory of the droplet/particle by taking sub-steps of the gas phase time step to ensure that the droplet/particle does not traverse more than a single grid cell within a sub-time step. A stricter limit on the time step is given by the parameter {\ct PARTICLE\_CFL} on the {\ct MISC} line which is set to {\ct .FALSE.} by default (see Section \ref{info:PART_Stability}). If {\ct .TRUE.} the gas phase time step is limited by the particle CFL. Normally, it is not necessary to restrict the gas phase time step to account for fast droplets/particles---the sub-time stepping is usually adequate.
 
 
 \subsection{Particles or Droplets Introduced within a Volume}
@@ -6749,7 +6781,7 @@ The parameter {\ct N\_PARTICLES} on the {\ct INIT} line indicates the number of 
 \begin{lstlisting}
 &INIT PART_ID='my particles', XB=..., N_PARTICLES=..., MASS_PER_VOLUME=... /
 \end{lstlisting}
-Note that the volume of the specified region is calculated according to the {\ct SHAPE} dimensions, regardless of whether there are solid obstructions within this region. Note also that in most applications, the number of particles, {\ct N\_PARTICLES}, is somewhat arbitrary but should be chosen to provide at least a few particles per grid cell. FDS will then automatically assign a weighting factor to each particle to ensure that the {\ct MASS\_PER\_VOLUME} is achieved. In some applications, on the other hand, it may be important to specify the number of particles. For example, if using particles to model the burning of electrical cables, you may want to specify how many cables are actually burning.
+Note that the volume of the specified region is calculated according to the {\ct SHAPE} dimensions, regardless of whether there are solid obstructions within this region. Note also that in most applications, the number of particles, {\ct N\_PARTICLES}, is somewhat arbitrary but should be chosen to provide at least a few particles per grid cell. FDS will then automatically assign a weighting factor to each particle to ensure that the {\ct MASS\_PER\_VOLUME} is achieved. In some applications, on the other hand, it may be important to specify the number of particles. For example, if using particles to model the burning of electrical cables, you may want to specify how many cables are actually burning. The {\ct MASS\_PER\_VOLUME} can be ramped up and down in time using the ramp function {\ct RAMP\_PART} on the {\ct INIT} line.
 
 If the volume specified by the sextuplet {\ct XB} crosses mesh boundaries, be aware that {\ct N\_PARTICLES} refers to the entire volume, not just the volume within a particular mesh. FDS will automatically compute the necessary number of particles to assign to each mesh.
 
@@ -6806,7 +6838,7 @@ Note that the {\ct DIAMETER} ($\mu$m) on the {\ct INIT} line is only valid for l
 
 \subsubsection{Periodic Insertion of Particles within a Specified Volume}
 
-If you want to introduce particles within a given region periodically in time and not just initially, set {\ct DT\_INSERT} on the {\ct INIT} line to a positive value indicating the time increment (s) for insertion. The parameter {\ct N\_PARTICLES} now indicates the number of droplets/particles inserted every {\ct DT\_INSERT} seconds. If the droplets/particles have mass, use {\ct MASS\_PER\_TIME} (kg/s) instead of {\ct MASS\_PER\_VOLUME} to indicate how much mass is to be introduced per second.
+If you want to introduce particles within a given region periodically in time and not just initially, set {\ct DT\_INSERT} on the {\ct INIT} line to a positive value indicating the time increment (s) for insertion. The parameter {\ct N\_PARTICLES} now indicates the number of droplets/particles inserted every {\ct DT\_INSERT} seconds. If the droplets/particles have mass, use {\ct MASS\_PER\_TIME} (kg/s) instead of {\ct MASS\_PER\_VOLUME} to indicate how much mass is to be introduced per second. This parameter can be ramped up and down in time using the ramp function {\ct RAMP\_PART} on the {\ct INIT} line.
 
 If you want to delay the insertion of droplets, you can use either a {\ct DEVC\_ID} or a {\ct CTRL\_ID} on the {\ct INIT} line to name the controlling device. See Section~\ref{info:basic_control} for more information on controlling devices.
 
@@ -6845,7 +6877,7 @@ Lagrangian particles can be removed from a simulation in a number of ways:
 \begin{enumerate}
 \item Specify the {\ct AGE} on the {\ct PART} line so that particles are removed after this period of time after insertion.
 \item Liquid droplets disappear when they hit the ``floor'' of the computational domain, regardless of whether it is solid or not. This feature mimics the presence of floor drains. To stop FDS from removing liquid droplets from the floor of the domain, add the phrase {\ct POROUS\_FLOOR=.FALSE.} to the {\ct MISC} line. Be aware, however, that droplets that land on the floor continue to move horizontally in randomly selected directions; bouncing off obstructions, and consuming CPU time. Note also that solid particles do not disappear from the floor of the domain like liquid droplets.
-\item If droplets or particles are drawn towards an extracting vent, they will not be removed unless you specify a minimum {\ct PARTICLE\_EXTRACTION\_VELOCITY} (m/s). That is, if the vent's extraction velocity exceeds this value, the particles or droplets will be extracted as well. By default, this parameter is a large positive value, meaning that you must specify a value for this parameter to have an effect.
+\item If droplets or particles are drawn towards an extracting vent, they will not be removed unless you specify a minimum {\ct PARTICLE\_EXTRACTION\_VELOCITY} (m/s). That is, if the vent's extraction velocity exceeds this value, the particles or droplets will be removed from the simulation. Otherwise, the droplets/particles will be behave as if they have struck any other solid surface. By default, this parameter is a large positive value, meaning that you must specify a positive value less than the normal vent extraction velocity for this parameter to have an effect. If you want all particles/droplets to be extracted, set the value to a very small positive  number.
 \end{enumerate}
 
 
@@ -8811,9 +8843,9 @@ For a particle, you must reference an {\ct INIT} line used to place the particle
 \end{lstlisting}
 For a particle, do not specify {\ct XYZ} or {\ct IOR} on the {\ct PROF} line.
 
-The {\ct QUANTITY} is the physical quantity to monitor. Other possible quantities are the total {\ct 'DENSITY'} or the density of a particular solid material component, {\ct '[MATL\_ID]'}, where {\ct [MATL\_ID]} is the name of the material component. Each {\ct PROF} line creates a separate file. The first number in each row is the time at which the profile is extracted. The second number is the number of ``nodes,'' $n$, which is the number of solid phase cells plus 1. The next $n$ numbers are the node coordinates, running from 0 at the surface to the full {\ct THICKNESS} at the end. The next $n$ numbers are the values of the {\ct QUANTITY} at the node points. The first of these values is located at the surface.
+The {\ct QUANTITY} is the physical quantity to record. The choices are {\ct 'TEMPERATURE'} or the total {\ct 'DENSITY'}. Each {\ct PROF} line creates a separate file. The first number in each row is the time at which the profile is extracted. The second number is the number of ``nodes,'' $n$, which is the number of solid phase cells plus 1. The next $n$ values are the node coordinates, running from 0 at the surface to the full {\ct THICKNESS} at the end. The next $n$ numbers are the values of the {\ct QUANTITY} at the node points. The first of these values is located at the surface. If you specify {\ct CELL\_CENTERED=T}, the {\ct QUANTITY} values will be recorded at $n$ interior cell centers rather than cell boundaries.
 
-There is a second optional format. If you specify {\ct FORMAT\_INDEX=2} on the {\ct PROF} line, the resulting file will contain columns containing only the final set of node coordinates and quantity values. This is handy for displaying a steady-state profile.
+There is a second optional format. If you specify {\ct FORMAT\_INDEX=2} on the {\ct PROF} line, the resulting file will contain columns containing only the final set of node coordinates and quantity values. This is handy for displaying a steady-state temperature profile.
 
 
 
@@ -11017,6 +11049,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct PATH\_RAMP(3)}               & Character         & Section~\ref{info:path_ramp}                  &                &               \\ \hline
 {\ct RADIATIVE\_FRACTION}         & Real              & Section~\ref{info:init_hrrpuv}                &                & 0.            \\ \hline
 {\ct RADIUS}                      & Real              & Section~\ref{info:initial_droplets}           & m              &               \\ \hline
+{\ct RAMP\_PART}                  & Character         & Section~\ref{info:initial_droplets}           &                &               \\ \hline
 {\ct RAMP\_Q}                     & Character         & Section~\ref{info:init_hrrpuv}                &                &               \\ \hline
 {\ct SHAPE}                       & Character         & Section~\ref{info:initial_droplets}           &                & {\ct 'BLOCK'} \\ \hline
 {\ct SPEC\_ID(N)}                 & Character Array   & Section~\ref{info:init_species}               &                &               \\ \hline
@@ -11534,6 +11567,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct PROF} (Wall Profile Parameters)} \\
 \hline \hline
 \endhead
+{\ct CELL\_CENTERED}        & Logical           & Section~\ref{info:PROF}      &            & {\ct .FALSE.}  \\ \hline
 {\ct FORMAT\_INDEX}         & Integer           & Section~\ref{info:PROF}      &            & 1     \\ \hline
 {\ct ID}                    & Character         & Section~\ref{info:PROF}      &            &       \\ \hline
 {\ct INIT\_ID}              & Character         & Section~\ref{info:PROF}      &            &       \\ \hline
@@ -12016,6 +12050,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct VEL    }                                             & Real            & Section~\ref{info:Velocity_BC}            & m/s                 &                         \\ \hline
 {\ct VEL\_BULK}                                           & Real            & Section~\ref{info:profiles}               & m/s                 &                         \\ \hline
 {\ct VEL\_GRAD}                                           & Real            & Section~\ref{info:vel_grad}               & 1/s                 &                         \\ \hline
+{\ct VEL\_PART}                                           & Real            & Section~\ref{info:particle_flux}          & m/s                 &                         \\ \hline
 {\ct VEL\_T(2) }                                          & Real Array      & Section~\ref{info:louvers}                & m/s                 &                         \\ \hline
 {\ct VOLUME\_FLOW}                                        & Real            & Section~\ref{info:Velocity_BC}            & \si{m^3/s}          &                         \\ \hline
 {\ct WIDTH}                                               & Real            & Section~\ref{info:PART_GEOMETRY}          & m                   &                         \\ \hline
@@ -12203,7 +12238,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RAMP\_W0\_Z}                               & Character     & Section~\ref{info:wind_ramps}                 &               &                   \\ \hline
 {\ct SIGMA\_THETA}                              & Real          & Section~\ref{info:wind_ramps}                 & degrees       &                   \\ \hline
 {\ct SPEED}                                     & Real          & Section~\ref{info:WIND}                       & m/s           & 0.                \\ \hline
-{\ct SPONGE\_CELLS}                             & Integer       & Section~\ref{info:SPONGE_CELLS}               &               & 3                 \\ \hline
+{\ct SPONGE\_CELLS}                             & Integer       & Section~\ref{info:SPONGE_CELLS}               &               & 0                 \\ \hline
 {\ct STRATIFICATION}                            & Logical       & Section~\ref{info:stratification}             &               & {\ct .TRUE.}      \\ \hline
 {\ct TAU\_THETA}                                & Real          & Section~\ref{info:wind_ramps}                 & s             & 300               \\ \hline
 {\ct THETA\_STAR}                               & Real          & Section~\ref{info:WIND}                       & K             &                   \\ \hline

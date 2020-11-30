@@ -263,7 +263,7 @@ SPRINKLER_INSERT_LOOP: DO KS=1,N_DEVC
 
    FLOW_RATE = EVALUATE_RAMP(TSI,PY%FLOW_TAU,PY%FLOW_RAMP_INDEX)*FLOW_RATE ! kg/s
 
-   IF (FLOW_RATE <= 0._EB) THEN
+   IF (FLOW_RATE <= TWO_EPSILON_EB) THEN
       DV%T = T
       CYCLE SPRINKLER_INSERT_LOOP
    ENDIF
@@ -458,7 +458,11 @@ SPRINKLER_INSERT_LOOP: DO KS=1,N_DEVC
    ! Compute weighting factor for the PARTICLEs just inserted
 
    IF (DROP_SUM > 0) THEN
-      PWT0 = LPC%N_STRATA*FLOW_RATE/(LPC%DENSITY*LPC%MEAN_DROPLET_VOLUME*REAL(PY%PARTICLES_PER_SECOND,EB))/D_PRES_FACTOR**3
+      IF (LPC%LIQUID_DROPLET) THEN
+         PWT0 = LPC%N_STRATA*FLOW_RATE/(LPC%DENSITY*LPC%MEAN_DROPLET_VOLUME*REAL(PY%PARTICLES_PER_SECOND,EB))/D_PRES_FACTOR**3
+      ELSE
+         PWT0 = FLOW_RATE*REAL(DROP_SUM,EB)/(MASS_SUM*REAL(PY%PARTICLES_PER_SECOND,EB))
+      ENDIF
       DO I=1,N_INSERT
          N = LP_INDEX_LOOKUP(I)
          LAGRANGIAN_PARTICLE(N)%PWT = LAGRANGIAN_PARTICLE(N)%PWT * PWT0
@@ -497,7 +501,7 @@ USE COMPLEX_GEOMETRY, ONLY : RANDOM_CFACE_XYZ
 
 INTEGER, INTENT(IN), OPTIONAL :: WALL_INDEX,CFACE_INDEX
 INTEGER :: I
-REAL(EB):: CFA_X, CFA_Y, CFA_Z, RN
+REAL(EB):: CFA_X, CFA_Y, CFA_Z, RN, VEL_PART
 
 TYPE(CFACE_TYPE), POINTER :: CFA=>NULL()
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
@@ -591,31 +595,36 @@ PARTICLE_INSERT_LOOP2: DO I=1,SF%NPPC
       END SELECT
       ! Give particles an initial velocity
       IF (.NOT.LPC%STATIC) THEN
+         IF (SF%VEL_PART >-999999._EB) THEN
+            VEL_PART = SF%VEL_PART
+         ELSE
+            VEL_PART = ONE_D%U_NORMAL
+         ENDIF
          SELECT CASE(IOR)
             CASE( 1)
-               LP%U = -ONE_D%U_NORMAL
+               LP%U = -VEL_PART
                LP%V = SF%VEL_T(1)
                LP%W = SF%VEL_T(2)
             CASE(-1)
-               LP%U =  ONE_D%U_NORMAL
+               LP%U =  VEL_PART
                LP%V = SF%VEL_T(1)
                LP%W = SF%VEL_T(2)
             CASE( 2)
                LP%U = SF%VEL_T(1)
-               LP%V = -ONE_D%U_NORMAL
+               LP%V = -VEL_PART
                LP%W = SF%VEL_T(2)
             CASE(-2)
                LP%U = SF%VEL_T(1)
-               LP%V =  ONE_D%U_NORMAL
+               LP%V =  VEL_PART
                LP%W = SF%VEL_T(2)
             CASE( 3)
                LP%U = SF%VEL_T(1)
                LP%V = SF%VEL_T(2)
-               LP%W = -ONE_D%U_NORMAL
+               LP%W = -VEL_PART
             CASE(-3)
                LP%U = SF%VEL_T(1)
                LP%V = SF%VEL_T(2)
-               LP%W =  ONE_D%U_NORMAL
+               LP%W =  VEL_PART
          END SELECT
       ENDIF
    ELSEIF (PRESENT(CFACE_INDEX)) THEN
@@ -681,7 +690,8 @@ END SUBROUTINE PARTICLE_FACE_INSERT
 SUBROUTINE INSERT_VOLUMETRIC_PARTICLES
 
 INTEGER :: IIP,N_INSERT,I1,J1,K1,I2,J2,K2,N,N_PARTICLES_INSERT
-REAL(EB) :: XC1,XC2,YC1,YC2,ZC1,ZC2,X0,Y0,Z0,RR,HH,INSERT_VOLUME,INPUT_VOLUME,LP_X,LP_Y,LP_Z
+REAL(EB) :: XC1,XC2,YC1,YC2,ZC1,ZC2,X0,Y0,Z0,RR,HH,INSERT_VOLUME,INPUT_VOLUME,VOLUME_SPLIT_FACTOR,LP_X,LP_Y,LP_Z,&
+            DUMMY=0._EB,RAMP_FACTOR
 
 VOLUME_INSERT_LOOP: DO IB=1,N_INIT
 
@@ -692,6 +702,15 @@ VOLUME_INSERT_LOOP: DO IB=1,N_INIT
    ILPC = IN%PART_INDEX
    IF (ILPC<1) CYCLE VOLUME_INSERT_LOOP
    IF (IN%SINGLE_INSERTION .AND. IN%ALREADY_INSERTED(NM)) CYCLE VOLUME_INSERT_LOOP
+
+   ! If there is a RAMP for MASS_PER_TIME or MASS_PER_VOLUME, evaluate it now and if zero, cycle.
+
+   IF (IN%RAMP_PART_INDEX>0) THEN
+      RAMP_FACTOR = EVALUATE_RAMP(T,DUMMY,IN%RAMP_PART_INDEX)
+      IF (RAMP_FACTOR<TWO_EPSILON_EB) CYCLE
+   ELSE
+      RAMP_FACTOR = 1._EB
+   ENDIF
 
    ! Determine if the particles/PARTICLEs are controlled by devices
 
@@ -938,9 +957,11 @@ VOLUME_INSERT_LOOP: DO IB=1,N_INIT
       ! Adjust particle weighting factor PWT so that desired MASS_PER_VOLUME is achieved
 
       IF (IN%MASS_PER_TIME>0._EB) THEN
-         PWT0 = IN%MASS_PER_TIME*IN%DT_INSERT/MASS_SUM
+         VOLUME_SPLIT_FACTOR = 1._EB
+         IF (INPUT_VOLUME>TWO_EPSILON_EB .AND. INSERT_VOLUME>TWO_EPSILON_EB) VOLUME_SPLIT_FACTOR = INSERT_VOLUME/INPUT_VOLUME
+         PWT0 = VOLUME_SPLIT_FACTOR*RAMP_FACTOR*IN%MASS_PER_TIME*IN%DT_INSERT/MASS_SUM
       ELSEIF (IN%MASS_PER_VOLUME>0._EB) THEN
-         PWT0 = IN%MASS_PER_VOLUME*INSERT_VOLUME/MASS_SUM
+         PWT0 = RAMP_FACTOR*IN%MASS_PER_VOLUME*INSERT_VOLUME/MASS_SUM
       ELSE
          PWT0 = IN%PARTICLE_WEIGHT_FACTOR
       ENDIF
@@ -1202,10 +1223,12 @@ IF (LPC%SOLID_PARTICLE) THEN
          IF (SF%THERMAL_BC_INDEX==THERMALLY_THICK) THEN
             SELECT CASE (SF%GEOMETRY)
                CASE (SURF_CARTESIAN)
+                  LP%ONE_D%AREA = 2._EB*SF%LENGTH*SF%WIDTH
                   DO N=1,SF%N_LAYERS
                      LP%MASS = LP%MASS + 2._EB*SF%LENGTH*SF%WIDTH*SF%LAYER_THICKNESS(N)*SCALE_FACTOR*SF%LAYER_DENSITY(N)
                   ENDDO
                CASE (SURF_CYLINDRICAL)
+                  LP%ONE_D%AREA = 2._EB*PI*SF%THICKNESS*SF%LENGTH
                   X1 = SUM(SF%LAYER_THICKNESS)*SCALE_FACTOR
                   DO N=SF%N_LAYERS,1,-1
                      X2 = X1 - SF%LAYER_THICKNESS(N)*SCALE_FACTOR
@@ -1213,6 +1236,7 @@ IF (LPC%SOLID_PARTICLE) THEN
                      X1 = X2
                   ENDDO
                CASE (SURF_SPHERICAL)
+                  LP%ONE_D%AREA = 4._EB*PI*SF%THICKNESS**2
                   X1 = SUM(SF%LAYER_THICKNESS)*SCALE_FACTOR
                   DO N=SF%N_LAYERS,1,-1
                      X2 = X1 - SF%LAYER_THICKNESS(N)*SCALE_FACTOR
@@ -2847,17 +2871,23 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                H1 = H_SENS_Z(ITMP,Z_INDEX)+(TMP_DROP-REAL(ITMP,EB))*(H_SENS_Z(ITMP+1,Z_INDEX)-H_SENS_Z(ITMP,Z_INDEX))
                ITMP = INT(TMP_G)
                H2 = H_SENS_Z(ITMP,Z_INDEX)+(TMP_G-REAL(ITMP,EB))*(H_SENS_Z(ITMP+1,Z_INDEX)-H_SENS_Z(ITMP,Z_INDEX))
-               DTOP = DT_SUBSTEP/(M_DROP*C_DROP)
+
+               AGHRHO = A_DROP*H_MASS*RHO_AIR/(1._EB+0.5_EB*RVC*DT_SUBSTEP*A_DROP*WGT*H_MASS*RHO_AIR*(1._EB-Y_GAS)/RHO_G)
+
                DTOG = DT_SUBSTEP*WGT/(M_GAS*CP)
-               DTGOG = 0.5_EB*DTOG*A_DROP*WGT*H_HEAT
-               DTGOP = 0.5_EB*DTOP*A_DROP*H_HEAT
-               AGHRHO = A_DROP*H_MASS*RHO_AIR/(1._EB+0.5_EB*RVC*DT_SUBSTEP*A_DROP*WGT*H_MASS*RHO_AIR/RHO_G*(1._EB-Y_GAS))
+               DTGOG = 0.5_EB*DTOG*A_DROP*H_HEAT
+
                DAHVHLDY = DTOG*AGHRHO*(H1-H2)*(Y_DROP-Y_GAS)
+               DADYDTHVHL=0.5_EB*DTOG*AGHRHO*(H1-H2)*DYDT
+               
+               DTOP = DT_SUBSTEP/(M_DROP*C_DROP)
+               DTGOP = 0.5_EB*DTOP*A_DROP*H_HEAT
+               
                DADYHV = DTOP*AGHRHO*H_V*(Y_DROP-Y_GAS)
-               DADYDTHVHL=0.5_EB*DTOG*AGHRHO*DYDT*(H1-H2)
                DADYDTHV=0.5_EB*DTOP*AGHRHO*DYDT*H_V
+
                SELECT CASE (ARRAY_CASE)
-               CASE(1) ! Gas Only
+                  CASE(1) ! Gas Only
                      A_COL(1) = 1._EB+DTGOG
                      B_COL(1) = -(DTGOG+DADYDTHVHL)
                      A_COL(2) = -DTGOP
@@ -2868,7 +2898,9 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                      TMP_G_NEW = (D_VEC(1)-B_COL(1)*TMP_DROP_NEW)/A_COL(1)
                      TMP_WALL_NEW = TMP_WALL
                   CASE(2) ! Const Temp Wall
-                     DTWOP = DT_SUBSTEP*A_DROP*WGT*H_WALL/(2._EB*M_DROP*WGT*C_DROP)
+
+                     DTWOP = 0.5_EB*DTOP*A_DROP*H_WALL
+
                      A_COL(1) = 1._EB+DTGOG
                      B_COL(1) = -(DTGOG+DADYDTHVHL)
                      A_COL(2) = -DTGOP
@@ -2879,8 +2911,10 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                      TMP_G_NEW = (D_VEC(1)-B_COL(1)*TMP_DROP_NEW)/A_COL(1)
                      TMP_WALL_NEW = TMP_WALL
                   CASE(3) ! 1D Wall
-                     DTWOP = DT_SUBSTEP*A_DROP*H_WALL/(2._EB*M_DROP*C_DROP)
+
+                     DTWOP = 0.5_EB*DTOP*A_DROP*H_WALL
                      DTWOW = DT_SUBSTEP*A_DROP*WGT*H_WALL/(2._EB*MCBAR)
+
                      A_COL(1) = 1._EB+DTGOG
                      B_COL(1) = -(DTGOG+DADYDTHVHL)
                      C_COL(1) = 0._EB

@@ -2,7 +2,7 @@
 
 &TIME T_END=50, DT=0.05, WALL_INCREMENT=1 /
 
-&MISC TMPA=-273. CHECK_HT=T NOISE=F/
+&MISC NOISE=F /
 
 &MESH IJK=10,10,10 XB=0.0,1.0,0.0,1.0,0.0,1.0 /
 &MESH IJK=10,10,10 XB=2.0,3.0,0.0,1.0,0.0,1.0 /
@@ -20,8 +20,6 @@
 &VENT MB = 'YMAX' SURF_ID = 'MIRROR' /
 &VENT MB = 'ZMIN' SURF_ID = 'MIRROR' /
 &VENT MB = 'ZMAX' SURF_ID = 'MIRROR' /
-
-&CLIP MINIMUM_TEMPERATURE = -273.15 /
 
 &SURF ID                        = 'ball'
       MATL_ID                   = 'material'

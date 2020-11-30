@@ -55,6 +55,7 @@
       PACKING_RATIO(1)          = 0.0012
       DRAG_COEFFICIENT          = 2.8
       SHAPE_FACTOR              = 0.25
+      MINIMUM_BURNOUT_TIME      = 10.
       SURFACE_VOLUME_RATIO(1)   = 12240. /
       
 &MATL ID                 = 'DRY GRASS'

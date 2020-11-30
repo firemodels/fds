@@ -3,7 +3,7 @@ RENDERDIR
 SETVIEWPOINT
  view 1
 LOADFILE
- pressure_boundary_0001_02.s3d
+ pressure_boundary_1_2.s3d
 SETTIMEVAL
  13.260000
 RENDERONCE

@@ -472,20 +472,68 @@ END TYPE SPECIES_MIXTURE_TYPE
 TYPE (SPECIES_MIXTURE_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: SPECIES_MIXTURE
 
 TYPE REACTION_TYPE
-   CHARACTER(LABEL_LENGTH) :: FUEL,OXIDIZER,PRODUCTS,ID,RAMP_CHI_R
-   CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: SPEC_ID_NU,SPEC_ID_NU_READ,SPEC_ID_N_S,SPEC_ID_N_S_READ
-   REAL(EB) :: C,H,N,O,EPUMO2,HEAT_OF_COMBUSTION,HOC_COMPLETE,A,A_PRIME,A_PRIME_FAST,A_IN,E,E_IN,K,&
-               Y_O2_INFTY,Y_N2_INFTY=0._EB,MW_FUEL,MW_SOOT,Y_O2_MIN,&
-               CO_YIELD,SOOT_YIELD,H2_YIELD,HCN_YIELD,SOOT_H_FRACTION,RHO_EXPONENT,RHO_EXPONENT_FAST,CRIT_FLAME_TMP,&
-               NU_O2=0._EB,NU_N2=0._EB,NU_H2O=0._EB,NU_H2=0._EB,NU_HCN=0._EB,NU_CO2=0._EB,NU_CO=0._EB,NU_SOOT=0._EB,S=0._EB,&
-               COMPLETE_HEAT_OF_COMBUSTION
-   REAL(EB) :: N_T=0._EB,CHI_R
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: NU,NU_READ,NU_SPECIES,N_S,N_S_READ,NU_MW_O_MW_F
-   INTEGER :: FUEL_SMIX_INDEX=-1,AIR_SMIX_INDEX=-1,N_SMIX,N_SPEC,RAMP_CHI_R_INDEX=0,PRIORITY=1
-   LOGICAL :: IDEAL,CHECK_ATOM_BALANCE,FAST_CHEMISTRY=.FALSE.,REVERSE=.FALSE.,THIRD_BODY=.FALSE.
-   CHARACTER(MESSAGE_LENGTH) :: FYI='null'
-   CHARACTER(255) :: EQUATION
-   CHARACTER(100) :: FWD_ID
+   CHARACTER(LABEL_LENGTH) :: FUEL        !< Name of reaction fuel species
+   CHARACTER(LABEL_LENGTH) :: OXIDIZER    !< Name of reaction oxidizer (lumped) species
+   CHARACTER(LABEL_LENGTH) :: PRODUCTS    !< Name of reaction product (lumped) species
+   CHARACTER(LABEL_LENGTH) :: ID          !< Identifer of reaction
+   CHARACTER(LABEL_LENGTH) :: RAMP_CHI_R  !< Name of ramp for radiative fraction
+   CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: SPEC_ID_NU       !< Array of species names corresponding to stoich coefs
+   CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: SPEC_ID_NU_READ  !< Holding array for SPEC_ID_NU
+   CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: SPEC_ID_N_S      !< Array of finite rate species exponents
+   CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: SPEC_ID_N_S_READ !< Holding array of finite rate species exponents
+   CHARACTER(MESSAGE_LENGTH) :: FYI='null'  !< User comment
+   CHARACTER(FORMULA_LENGTH) :: EQUATION    !< Reaction equation
+   CHARACTER(LABEL_LENGTH) :: FWD_ID        !< ID of forward reaction
+   REAL(EB) :: C                            !< Number of carbon atoms in the fuel molecule (SIMPLE_CHEMISTRY)
+   REAL(EB) :: H                            !< Number of hydrogen atoms in the fuel molecule (SIMPLE_CHEMISTRY)
+   REAL(EB) :: N                            !< Number of nitrogen atoms in the fuel molecule (SIMPLE_CHEMISTRY)
+   REAL(EB) :: O                            !< Number of oxygen atoms in the fuel molecule (SIMPLE_CHEMISTRY)
+   REAL(EB) :: EPUMO2                       !< Energy Per Unit Mass Oxygen consumed (J/kg)
+   REAL(EB) :: HEAT_OF_COMBUSTION           !< Energy per unit mass fuel consumed (J/kg)
+   REAL(EB) :: HOC_COMPLETE                 !< Complete heat of combustion for two step SIMPLE_CHEMISTRY (J/kg)
+   REAL(EB) :: A_PRIME                      !< Adjusted pre-exponential reaction kinetic parameter
+   REAL(EB) :: A_IN                         !< Unajusted pre-exponential reaction kinetic parameter
+   REAL(EB) :: E                            !< Activation energy (J/kmol)
+   REAL(EB) :: E_IN                         !< User-specified activation energy (J/mol)
+   REAL(EB) :: K
+   REAL(EB) :: MW_FUEL                      !< Molecular weight of fuel (g/mol)
+   REAL(EB) :: MW_SOOT                      !< Molecular weight of soot surrogate gas (g/mol)
+   REAL(EB) :: Y_O2_MIN                     !< Lower oxygen limit in terms of mass fraction
+   REAL(EB) :: CO_YIELD                     !< CO yield in SIMPLE_CHEMISTRY model
+   REAL(EB) :: SOOT_YIELD                   !< Soot yield in SIMPLE_CHEMISTRY model
+   REAL(EB) :: H2_YIELD                     !< H2 yield in SIMPLE_CHEMISTRY model
+   REAL(EB) :: HCN_YIELD                    !< HCN yield in SIMPLE_CHEMISTRY model
+   REAL(EB) :: SOOT_H_FRACTION              !< Mass fraction of hydrogen within soot
+   REAL(EB) :: RHO_EXPONENT                 !< Exponent of density in reaction expression
+   REAL(EB) :: CRIT_FLAME_TMP               !< Critical Flame Temperature (K)
+   REAL(EB) :: NU_O2=0._EB                  !< Oxygen coefficient in SIMPLE_CHEMISTRY model
+   REAL(EB) :: NU_N2=0._EB                  !< Nitrogen coefficient in SIMPLE_CHEMISTRY model
+   REAL(EB) :: NU_H2O=0._EB                 !< Water coefficient in SIMPLE_CHEMISTRY model
+   REAL(EB) :: NU_H2=0._EB                  !< Hydrogen coefficient in SIMPLE_CHEMISTRY model
+   REAL(EB) :: NU_HCN=0._EB                 !< Hydrogen cyanide coefficient in SIMPLE_CHEMISTRY model
+   REAL(EB) :: NU_CO2=0._EB                 !< Carbon dioxide coefficient in SIMPLE_CHEMISTRY model
+   REAL(EB) :: NU_CO=0._EB                  !< Carbon monoxide coefficient in SIMPLE_CHEMISTRY model
+   REAL(EB) :: NU_SOOT=0._EB                !< Soot coefficient in SIMPLE_CHEMISTRY model
+   REAL(EB) :: S=0._EB                      !< Stoichiometric coefficient for MIXTURE FRACTION output
+   REAL(EB) :: N_T=0._EB                    !< Temperature exponent in reaction expression
+   REAL(EB) :: CHI_R                        !< Radiative fraction
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: NU              !< Array of stoichiometric coefficients for lumped species equation
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: NU_READ         !< Holding array of stoichiometric coefficients
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: NU_SPECIES      !< Array of stoichiometric coefficients for primitive species equation
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: N_S             !< Array of species exponents
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: N_S_READ        !< Holding array of species exponents
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: NU_MW_O_MW_F    !< Species mol. weight times stoich. coef. over fuel MW
+   INTEGER :: FUEL_SMIX_INDEX=-1            !< Lumped species index for fuel
+   INTEGER :: AIR_SMIX_INDEX=-1             !< Lumped species index for air
+   INTEGER :: N_SMIX                        !< Number of lumped species in reaction equation
+   INTEGER :: N_SPEC                        !< Number of primitive species in reaction equation
+   INTEGER :: RAMP_CHI_R_INDEX=0            !< Index of radiative fraction ramp
+   INTEGER :: PRIORITY=1                    !< Index used in fast-fast SIMPLE_CHEMISTRY two step reaction
+   LOGICAL :: IDEAL                         !< Indicator that the given HEAT_OF_COMBUSTION is the ideal value
+   LOGICAL :: CHECK_ATOM_BALANCE            !< Indicator for diagnostic output
+   LOGICAL :: FAST_CHEMISTRY=.FALSE.        !< Indicator of fast reaction
+   LOGICAL :: REVERSE=.FALSE.               !< Indicator of a reverse reaction
+   LOGICAL :: THIRD_BODY=.FALSE.            !< Indicator of catalyst
 END TYPE REACTION_TYPE
 
 TYPE (REACTION_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: REACTION
@@ -528,7 +576,7 @@ TYPE SURFACE_TYPE
                TMP_IGN,TMP_EXT,H_V,LAYER_DIVIDE,ROUGHNESS,LENGTH=-1._EB,WIDTH=-1._EB, &
                DT_INSERT,H_FIXED=-1._EB,H_FIXED_B=-1._EB,HM_FIXED=-1._EB,EMISSIVITY_BACK, &
                CONV_LENGTH,XYZ(3),FIRE_SPREAD_RATE, &
-               MINIMUM_LAYER_THICKNESS,INNER_RADIUS=0._EB,MASS_FLUX_VAR=-1._EB,VEL_BULK, &
+               MINIMUM_LAYER_THICKNESS,INNER_RADIUS=0._EB,MASS_FLUX_VAR=-1._EB,VEL_BULK,VEL_PART, &
                PARTICLE_SURFACE_DENSITY=-1._EB,DRAG_COEFFICIENT=2.8_EB,SHAPE_FACTOR=0.25_EB,&
                MINIMUM_BURNOUT_TIME=1.E6_EB,DELTA_TMP_MAX=10._EB,BURN_DURATION=1.E6_EB,CONE_HEAT_FLUX=-1._EB,&
                PARTICLE_EXTRACTION_VELOCITY=1.E6_EB
@@ -790,7 +838,7 @@ TYPE IBM_EDGE_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: INT_FVARS      ! (1:N_INT_FVARS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: INT_CVARS      ! (1:N_INT_CVARS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: INT_NOMIND     ! (LOW_IND:HIGH_IND,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
-   REAL(EB), ALLOCATABLE, DIMENSION(:)        :: XB_IB
+   REAL(EB), ALLOCATABLE, DIMENSION(:)        :: XB_IB,DUIDXJ,MU_DUIDXJ
    INTEGER,  ALLOCATABLE, DIMENSION(:)        :: SURF_INDEX
    LOGICAL,  ALLOCATABLE, DIMENSION(:)        :: PROCESS_EDGE_ORIENTATION,EDGE_IN_MESH
 END TYPE IBM_EDGE_TYPE
@@ -971,7 +1019,7 @@ TYPE VENTS_TYPE
    CHARACTER(LABEL_LENGTH) :: DEVC_ID='null',CTRL_ID='null',ID='null'
    ! turbulent inflow (experimental)
    INTEGER :: N_EDDY=0
-   REAL(EB) :: R_IJ(3,3)=0._EB,A_IJ(3,3)=0._EB,SIGMA_IJ(3,3)=0._EB,EDDY_BOX_VOLUME=0._EB, &
+   REAL(EB) :: VEL=-1.E12_EB, R_IJ(3,3)=0._EB,A_IJ(3,3)=0._EB,SIGMA_IJ(3,3)=0._EB,EDDY_BOX_VOLUME=0._EB, &
                X_EDDY_MIN=0._EB,X_EDDY_MAX=0._EB, &
                Y_EDDY_MIN=0._EB,Y_EDDY_MAX=0._EB, &
                Z_EDDY_MIN=0._EB,Z_EDDY_MAX=0._EB
@@ -1097,6 +1145,7 @@ TYPE PROFILE_TYPE
    REAL(EB) :: X,Y,Z
    INTEGER  :: IOR=0,WALL_INDEX=0,LP_TAG=0,ORDINAL,MESH,FORMAT_INDEX=1,PART_CLASS_INDEX=-1
    CHARACTER(LABEL_LENGTH) :: ID='null',QUANTITY='TEMPERATURE',INIT_ID='null'
+   LOGICAL :: CELL_CENTERED=.FALSE.
 END TYPE PROFILE_TYPE
 
 TYPE (PROFILE_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: PROFILE
@@ -1141,7 +1190,8 @@ TYPE INITIALIZATION_TYPE
    INTEGER  :: CTRL_INDEX=0     !< Index of the controller that uses this INITIALIZATION variable
    INTEGER  :: N_PARTICLES_PER_CELL=0 !< Number of particles to insert in each cell
    INTEGER  :: PATH_RAMP_INDEX(3)=0   !< Ramp index of a particle path
-   INTEGER  :: RAMP_Q_INDEX=0         !< Ramp of HRRPUV
+   INTEGER  :: RAMP_Q_INDEX=0         !< Ramp index for HRRPUV
+   INTEGER  :: RAMP_PART_INDEX=0         !< Ramp index for MASS_PER_TIME or MASS_PER_VOLUME
    LOGICAL :: ADJUST_DENSITY=.FALSE.
    LOGICAL :: ADJUST_TEMPERATURE=.FALSE.
    LOGICAL :: SINGLE_INSERTION=.TRUE.
@@ -1182,7 +1232,7 @@ TYPE P_ZONE_TYPE
    LOGICAL :: EVACUATION=.FALSE.
    LOGICAL :: PERIODIC=.FALSE.                                     !< Indicator if the ZONE boundary is periodic
    INTEGER, ALLOCATABLE, DIMENSION(:) :: NODE_INDEX                !< Array of NODE indices connected to the ZONE
-   CHARACTER(LABEL_LENGTH) :: ID                                   !< Identifier
+   CHARACTER(LABEL_LENGTH) :: ID='null'                            !< Identifier
 END TYPE P_ZONE_TYPE
 
 TYPE (P_ZONE_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: P_ZONE

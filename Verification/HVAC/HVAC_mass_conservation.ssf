@@ -1,7 +1,7 @@
 RENDERDIR
  ../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES
 LOADFILE
- HVAC_mass_conservation_0001_01.sf
+ HVAC_mass_conservation_1_1.sf
 SETTIMEVAL
  1.0
 RENDERONCE

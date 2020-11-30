@@ -20,8 +20,8 @@ if ~exist('water_ice_water_devc.csv')
     display('Error: File water_ice_water_devc.csv does not exist. Skipping case.')
     skip_case = 1;
 end
-if ~exist('water_ice_water_prof_01.csv')
-    display('Error: File water_ice_water_prof_01.csv does not exist. Skipping case.')
+if ~exist('water_ice_water_prof_1.csv')
+    display('Error: File water_ice_water_prof_1.csv does not exist. Skipping case.')
     skip_case = 1;
 end
 if skip_case
@@ -29,7 +29,7 @@ if skip_case
 end
 
 wiw_M = csvread('water_ice_water_devc.csv',2);
-wiw_m = csvread('water_ice_water_prof_01.csv',2);
+wiw_m = csvread('water_ice_water_prof_1.csv',2);
 
 figure
 set(gca,'Units',Plot_Units)

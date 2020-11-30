@@ -612,6 +612,7 @@ SUBROUTINE VELOCITY_FLUX(T,DT,NM,APPLY_TO_ESTIMATED_VARIABLES)
 ! Compute convective and diffusive terms of the momentum equations
 
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
+USE PHYSICAL_FUNCTIONS, ONLY: COMPUTE_WIND_COMPONENTS
 USE COMPLEX_GEOMETRY, ONLY : ROTATED_CUBE_VELOCITY_FLUX,CCIBM_INTERP_FACE_VEL
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T,DT
@@ -905,7 +906,9 @@ ENDIF
 
 ! Additional force terms
 
-IF (ANY(MEAN_FORCING))             CALL MOMENTUM_NUDGING           ! Mean forcing
+IF (ANY(MEAN_FORCING) .OR. TEST_NEW_OPEN) CALL COMPUTE_WIND_COMPONENTS(T,NM)
+IF (ANY(MEAN_FORCING)                   ) CALL MOMENTUM_NUDGING    ! Mean forcing
+
 IF (ANY(ABS(FVEC)>TWO_EPSILON_EB)) CALL DIRECT_FORCE               ! Direct force
 IF (ANY(ABS(OVEC)>TWO_EPSILON_EB)) CALL CORIOLIS_FORCE             ! Coriolis force
 IF (PATCH_VELOCITY)                CALL PATCH_VELOCITY_FLUX        ! Specified patch velocity
@@ -916,12 +919,13 @@ T_USED(4) = T_USED(4) + CURRENT_TIME() - T_NOW
 
 CONTAINS
 
+
 SUBROUTINE MOMENTUM_NUDGING
 
 ! Add a force vector to the momentum equation that moves the flow field towards the direction of the mean flow.
 
 USE COMPLEX_GEOMETRY, ONLY : IBM_GASPHASE, IBM_FGSC
-REAL(EB) :: UBAR,VBAR,WBAR,VC,DU_FORCING,DV_FORCING,DW_FORCING,DT_LOC
+REAL(EB) :: VC,DU_FORCING,DV_FORCING,DW_FORCING,DT_LOC
 
 IF (ICYC==1) RETURN ! need one cycle to initialize forcing arrays
 
@@ -949,18 +953,17 @@ MEAN_FORCING_X: IF (MEAN_FORCING(1)) THEN
       ENDDO
    ENDIF PREDICTOR_IF_U
    DO K=1,KBAR
-      UBAR = U0*EVALUATE_RAMP(T,DUMMY,I_RAMP_U0_T)*EVALUATE_RAMP(ZC(K),DUMMY,I_RAMP_U0_Z)
-      DU_FORCING = (UBAR-U_MEAN_FORCING(K_MEAN_FORCING(K)))/DT_LOC
+      DU_FORCING = (U_WIND(K)-U_MEAN_FORCING(K_MEAN_FORCING(K)))/DT_LOC
       DO J=1,JBAR
          DO I=0,IBAR
             IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
             IF (.NOT.MEAN_FORCING_CELL(I+1,J,K)) CYCLE
             IF (APPLY_SPONGE_LAYER(1) .AND. I<SPONGE_CELLS) THEN
-               FVX(I,J,K) = FVX(I,J,K) - (UBAR-UU(I,J,K))/DT_LOC
+               FVX(I,J,K) = FVX(I,J,K) - (U_WIND(K)-UU(I,J,K))/DT_LOC
             ELSEIF (APPLY_SPONGE_LAYER(-1) .AND. I>IBAR-SPONGE_CELLS) THEN
-               FVX(I,J,K) = FVX(I,J,K) - (UBAR-UU(I,J,K))/DT_LOC
+               FVX(I,J,K) = FVX(I,J,K) - (U_WIND(K)-UU(I,J,K))/DT_LOC
             ELSE
-               FVX(I,J,K) = FVX(I,J,K) - DU_FORCING - (UBAR-UU(I,J,K))/DT_MEAN_FORCING_2
+               FVX(I,J,K) = FVX(I,J,K) - DU_FORCING - (U_WIND(K)-UU(I,J,K))/DT_MEAN_FORCING_2
             ENDIF
          ENDDO
       ENDDO
@@ -989,18 +992,17 @@ MEAN_FORCING_Y: IF (MEAN_FORCING(2)) THEN
       ENDDO
    ENDIF PREDICTOR_IF_V
    DO K=1,KBAR
-      VBAR = V0*EVALUATE_RAMP(T,DUMMY,I_RAMP_V0_T)*EVALUATE_RAMP(ZC(K),DUMMY,I_RAMP_V0_Z)
-      DV_FORCING = (VBAR-V_MEAN_FORCING(K_MEAN_FORCING(K)))/DT_LOC
+      DV_FORCING = (V_WIND(K)-V_MEAN_FORCING(K_MEAN_FORCING(K)))/DT_LOC
       DO J=0,JBAR
          DO I=1,IBAR
             IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
             IF (.NOT.MEAN_FORCING_CELL(I,J+1,K)) CYCLE
             IF (APPLY_SPONGE_LAYER(2) .AND. J<SPONGE_CELLS) THEN
-               FVY(I,J,K) = FVY(I,J,K) - (VBAR-VV(I,J,K))/DT_LOC
+               FVY(I,J,K) = FVY(I,J,K) - (V_WIND(K)-VV(I,J,K))/DT_LOC
             ELSEIF (APPLY_SPONGE_LAYER(-2) .AND. J>JBAR-SPONGE_CELLS) THEN
-               FVY(I,J,K) = FVY(I,J,K) - (VBAR-VV(I,J,K))/DT_LOC
+               FVY(I,J,K) = FVY(I,J,K) - (V_WIND(K)-VV(I,J,K))/DT_LOC
             ELSE
-               FVY(I,J,K) = FVY(I,J,K) - DV_FORCING - (VBAR-VV(I,J,K))/DT_MEAN_FORCING_2
+               FVY(I,J,K) = FVY(I,J,K) - DV_FORCING - (V_WIND(K)-VV(I,J,K))/DT_MEAN_FORCING_2
             ENDIF
          ENDDO
       ENDDO
@@ -1029,18 +1031,17 @@ MEAN_FORCING_Z: IF (MEAN_FORCING(3)) THEN
       ENDDO
    ENDIF PREDICTOR_IF_W
    DO K=1,KBM1
-      WBAR = W0*EVALUATE_RAMP(T,DUMMY,I_RAMP_W0_T)*EVALUATE_RAMP(ZC(K),DUMMY,I_RAMP_W0_Z)
-      DW_FORCING = (WBAR-W_MEAN_FORCING(K_MEAN_FORCING(K)))/DT_LOC
+      DW_FORCING = (W_WIND(K)-W_MEAN_FORCING(K_MEAN_FORCING(K)))/DT_LOC
       DO J=1,JBAR
          DO I=1,IBAR
             IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
             IF (.NOT.MEAN_FORCING_CELL(I,J,K+1)) CYCLE
             IF (APPLY_SPONGE_LAYER(3) .AND. K<SPONGE_CELLS) THEN
-               FVZ(I,J,K) = FVZ(I,J,K) - (WBAR-WW(I,J,K))/DT_LOC
+               FVZ(I,J,K) = FVZ(I,J,K) - (W_WIND(K)-WW(I,J,K))/DT_LOC
             ELSEIF (APPLY_SPONGE_LAYER(-3) .AND. K>KBAR-SPONGE_CELLS) THEN
-               FVZ(I,J,K) = FVZ(I,J,K) - (WBAR-WW(I,J,K))/DT_LOC
+               FVZ(I,J,K) = FVZ(I,J,K) - (W_WIND(K)-WW(I,J,K))/DT_LOC
             ELSE
-               FVZ(I,J,K) = FVZ(I,J,K) - DW_FORCING - (WBAR-WW(I,J,K))/DT_MEAN_FORCING_2
+               FVZ(I,J,K) = FVZ(I,J,K) - DW_FORCING - (W_WIND(K)-WW(I,J,K))/DT_MEAN_FORCING_2
             ENDIF
          ENDDO
       ENDDO
@@ -1913,7 +1914,7 @@ LOGICAL, INTENT(IN) :: APPLY_TO_ESTIMATED_VARIABLES
 REAL(EB) :: MUA,TSI,WGT,T_NOW,RAMP_T,OMW,MU_WALL,RHO_WALL,SLIP_COEF,VEL_T, &
             UUP(2),UUM(2),DXX(2),MU_DUIDXJ(-2:2),DUIDXJ(-2:2),PROFILE_FACTOR,VEL_GAS,VEL_GHOST, &
             MU_DUIDXJ_USE(2),DUIDXJ_USE(2),VEL_EDDY,U_TAU,Y_PLUS,&
-            TMP_F,TMP_G,K_G,CP_G,LOB,HTC,ZZ_GET(1:N_TRACKED_SPECIES),UBAR,VBAR,WBAR,DUMMY,U_NORM
+            TMP_F,TMP_G,K_G,CP_G,LOB,HTC,ZZ_GET(1:N_TRACKED_SPECIES),U_NORM,DUMMY
 INTEGER :: I,J,K,NOM(2),IIO(2),JJO(2),KKO(2),IE,II,JJ,KK,IEC,IOR,IWM,IWP,ICMM,ICMP,ICPM,ICPP,IC,ICD,ICDO,IVL,I_SGN,IS, &
            VELOCITY_BC_INDEX,IIGM,JJGM,KKGM,IIGP,JJGP,KKGP,SURF_INDEXM,SURF_INDEXP,ITMP,ICD_SGN,ICDO_SGN, &
            BOUNDARY_TYPE_M,BOUNDARY_TYPE_P,IS2,IWPI,IWMI,VENT_INDEX
@@ -2203,10 +2204,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
             UPWIND_BOUNDARY = .FALSE.
             INFLOW_BOUNDARY = .FALSE.
 
-            IF (ANY(MEAN_FORCING)) THEN
-               UBAR = U0*EVALUATE_RAMP(T,DUMMY,I_RAMP_U0_T)*EVALUATE_RAMP(ZC(KK),DUMMY,I_RAMP_U0_Z)
-               VBAR = V0*EVALUATE_RAMP(T,DUMMY,I_RAMP_V0_T)*EVALUATE_RAMP(ZC(KK),DUMMY,I_RAMP_V0_Z)
-               WBAR = W0*EVALUATE_RAMP(T,DUMMY,I_RAMP_W0_T)*EVALUATE_RAMP(ZC(KK),DUMMY,I_RAMP_W0_Z)
+            IF (ANY(MEAN_FORCING) .OR. TEST_NEW_OPEN) THEN
                SELECT CASE(IEC)
                   CASE(1)
                      IF (JJ==0    .AND. IOR== 2) U_NORM = 0.5_EB*(VV(II,   0,KK) + VV(II,   0,KK+1))
@@ -2224,9 +2222,9 @@ EDGE_LOOP: DO IE=1,N_EDGES
                      IF (JJ==0    .AND. IOR== 2) U_NORM = 0.5_EB*(VV(II,   0,KK) + VV(II+1,   0,KK))
                      IF (JJ==JBAR .AND. IOR==-2) U_NORM = 0.5_EB*(VV(II,JBAR,KK) + VV(II+1,JBAR,KK))
                END SELECT
-               IF ((IOR==1.AND.UBAR>=0._EB)   .OR. (IOR==-1.AND.UBAR<=0._EB))   UPWIND_BOUNDARY = .TRUE.
-               IF ((IOR==2.AND.VBAR>=0._EB)   .OR. (IOR==-2.AND.VBAR<=0._EB))   UPWIND_BOUNDARY = .TRUE.
-               IF ((IOR==3.AND.WBAR>=0._EB)   .OR. (IOR==-3.AND.WBAR<=0._EB))   UPWIND_BOUNDARY = .TRUE.
+               IF ((IOR==1.AND.U_WIND(KK)>=0._EB)  .OR. (IOR==-1.AND.U_WIND(KK)<=0._EB)) UPWIND_BOUNDARY = .TRUE.
+               IF ((IOR==2.AND.V_WIND(KK)>=0._EB)  .OR. (IOR==-2.AND.V_WIND(KK)<=0._EB)) UPWIND_BOUNDARY = .TRUE.
+               IF ((IOR==3.AND.W_WIND(KK)>=0._EB)  .OR. (IOR==-3.AND.W_WIND(KK)<=0._EB)) UPWIND_BOUNDARY = .TRUE.
                IF ((IOR==1.AND.U_NORM>=0._EB) .OR. (IOR==-1.AND.U_NORM<=0._EB)) INFLOW_BOUNDARY = .TRUE.
                IF ((IOR==2.AND.U_NORM>=0._EB) .OR. (IOR==-2.AND.U_NORM<=0._EB)) INFLOW_BOUNDARY = .TRUE.
                IF ((IOR==3.AND.U_NORM>=0._EB) .OR. (IOR==-3.AND.U_NORM<=0._EB)) INFLOW_BOUNDARY = .TRUE.
@@ -2256,20 +2254,20 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
                SELECT CASE(IEC)
                   CASE(1)
-                     IF (JJ==0    .AND. IOR== 2) WW(II,0,KK)    = WBAR
-                     IF (JJ==JBAR .AND. IOR==-2) WW(II,JBP1,KK) = WBAR
-                     IF (KK==0    .AND. IOR== 3) VV(II,JJ,0)    = VBAR
-                     IF (KK==KBAR .AND. IOR==-3) VV(II,JJ,KBP1) = VBAR
+                     IF (JJ==0    .AND. IOR== 2) WW(II,0,KK)    = W_WIND(KK)
+                     IF (JJ==JBAR .AND. IOR==-2) WW(II,JBP1,KK) = W_WIND(KK)
+                     IF (KK==0    .AND. IOR== 3) VV(II,JJ,0)    = V_WIND(KK)
+                     IF (KK==KBAR .AND. IOR==-3) VV(II,JJ,KBP1) = V_WIND(KK)
                   CASE(2)
-                     IF (II==0    .AND. IOR== 1) WW(0,JJ,KK)    = WBAR
-                     IF (II==IBAR .AND. IOR==-1) WW(IBP1,JJ,KK) = WBAR
-                     IF (KK==0    .AND. IOR== 3) UU(II,JJ,0)    = UBAR
-                     IF (KK==KBAR .AND. IOR==-3) UU(II,JJ,KBP1) = UBAR
+                     IF (II==0    .AND. IOR== 1) WW(0,JJ,KK)    = W_WIND(KK)
+                     IF (II==IBAR .AND. IOR==-1) WW(IBP1,JJ,KK) = W_WIND(KK)
+                     IF (KK==0    .AND. IOR== 3) UU(II,JJ,0)    = U_WIND(KK)
+                     IF (KK==KBAR .AND. IOR==-3) UU(II,JJ,KBP1) = U_WIND(KK)
                   CASE(3)
-                     IF (II==0    .AND. IOR== 1) VV(0,JJ,KK)    = VBAR
-                     IF (II==IBAR .AND. IOR==-1) VV(IBP1,JJ,KK) = VBAR
-                     IF (JJ==0    .AND. IOR== 2) UU(II,0,KK)    = UBAR
-                     IF (JJ==JBAR .AND. IOR==-2) UU(II,JBP1,KK) = UBAR
+                     IF (II==0    .AND. IOR== 1) VV(0,JJ,KK)    = V_WIND(KK)
+                     IF (II==IBAR .AND. IOR==-1) VV(IBP1,JJ,KK) = V_WIND(KK)
+                     IF (JJ==0    .AND. IOR== 2) UU(II,0,KK)    = U_WIND(KK)
+                     IF (JJ==JBAR .AND. IOR==-2) UU(II,JBP1,KK) = U_WIND(KK)
                END SELECT
 
             ENDIF WIND_NO_WIND_IF
@@ -2390,6 +2388,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
                ELSE
                   IF (SF%PROFILE/=0 .AND. SF%VEL>TWO_EPSILON_EB) &
                      PROFILE_FACTOR = ABS(0.5_EB*(WCM%ONE_D%U_NORMAL_0+WCP%ONE_D%U_NORMAL_0)/SF%VEL)
+                  IF (SF%RAMP_INDEX(VELO_PROF_Z)>0) PROFILE_FACTOR = EVALUATE_RAMP(ZC(KK),DUMMY,SF%RAMP_INDEX(VELO_PROF_Z))
                   RAMP_T = EVALUATE_RAMP(TSI,SF%TAU(TIME_VELO),SF%RAMP_INDEX(TIME_VELO))
                   IF (IEC==1 .OR. (IEC==2 .AND. ICD==2)) VEL_T = RAMP_T*(PROFILE_FACTOR*(SF%VEL_T(2) + VEL_EDDY))
                   IF (IEC==3 .OR. (IEC==2 .AND. ICD==1)) VEL_T = RAMP_T*(PROFILE_FACTOR*(SF%VEL_T(1) + VEL_EDDY))
@@ -3195,7 +3194,7 @@ REAL(EB), INTENT(IN) :: T
 INTEGER, INTENT(IN) :: NM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL(),RHOP=>NULL(),HP=>NULL(),RHMK=>NULL(),RRHO=>NULL()
 INTEGER  :: I,J,K,II,JJ,KK,IIG,JJG,KKG,IOR,IW
-REAL(EB) :: P_EXTERNAL,TSI,TIME_RAMP_FACTOR,DUMMY,UN,T_NOW
+REAL(EB) :: P_EXTERNAL,TSI,TIME_RAMP_FACTOR,DUMMY=0._EB,UN,T_NOW
 LOGICAL  :: INFLOW
 TYPE(VENTS_TYPE), POINTER :: VT=>NULL()
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()

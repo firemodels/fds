@@ -16,15 +16,16 @@ SUBROUTINE PRESSURE_SOLVER_COMPUTE_RHS(T,DT,NM)
 
 USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
+USE COMPLEX_GEOMETRY, ONLY: IBM_IDCF
 USE GLOBAL_CONSTANTS
 
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T,DT
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,HP,RHOP
-INTEGER :: I,J,K,IW,IOR,NOM,N_INT_CELLS,IIO,JJO,KKO
+INTEGER :: I,J,K,IW,IOR,NOM,N_INT_CELLS,IIO,JJO,KKO,ICF
 REAL(EB) :: TRM1,TRM2,TRM3,TRM4,H_OTHER,TNOW,DUMMY=0._EB, &
             TSI,TIME_RAMP_FACTOR,DX_OTHER,DY_OTHER,DZ_OTHER,P_EXTERNAL, &
-            UBAR,VBAR,WBAR,VEL_EDDY
+            VEL_EDDY
 TYPE (VENTS_TYPE), POINTER :: VT
 TYPE (WALL_TYPE), POINTER :: WC
 TYPE (EXTERNAL_WALL_TYPE), POINTER :: EWC
@@ -163,27 +164,42 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
          TIME_RAMP_FACTOR = EVALUATE_RAMP(TSI,DUMMY,VT%PRESSURE_RAMP_INDEX)
          P_EXTERNAL = TIME_RAMP_FACTOR*VT%DYNAMIC_PRESSURE
 
-         IF (ANY(MEAN_FORCING)) THEN
-            UBAR = U0*EVALUATE_RAMP(T,DUMMY,I_RAMP_U0_T)*EVALUATE_RAMP(ZC(K),DUMMY,I_RAMP_U0_Z)
-            VBAR = V0*EVALUATE_RAMP(T,DUMMY,I_RAMP_V0_T)*EVALUATE_RAMP(ZC(K),DUMMY,I_RAMP_V0_Z)
-            WBAR = W0*EVALUATE_RAMP(T,DUMMY,I_RAMP_W0_T)*EVALUATE_RAMP(ZC(K),DUMMY,I_RAMP_W0_Z)
-            VEL_EDDY = 0._EB
-            ! Synthetic eddy method for OPEN inflow boundaries
-            IF (VT%N_EDDY>0) THEN
-               SELECT CASE(ABS(VT%IOR))
-                  CASE(1); VEL_EDDY = VT%U_EDDY(J,K)
-                  CASE(2); VEL_EDDY = VT%V_EDDY(I,K)
-                  CASE(3); VEL_EDDY = VT%W_EDDY(I,J)
+         ! Synthetic eddy method for OPEN inflow boundaries
+         VEL_EDDY = 0._EB
+         IF (VT%N_EDDY>0) THEN
+            SELECT CASE(ABS(VT%IOR))
+               CASE(1); VEL_EDDY = VT%U_EDDY(J,K)
+               CASE(2); VEL_EDDY = VT%V_EDDY(I,K)
+               CASE(3); VEL_EDDY = VT%W_EDDY(I,J)
+            END SELECT
+         ENDIF
+
+         ICF = 0
+         IF (CC_IBM) THEN
+            SELECT CASE(IOR)
+               CASE( 1); ICF = FCVAR(0,   J,K,IBM_IDCF,ABS(IOR))
+               CASE(-1); ICF = FCVAR(IBAR,J,K,IBM_IDCF,ABS(IOR))
+               CASE( 2); ICF = FCVAR(I,0,   K,IBM_IDCF,ABS(IOR))
+               CASE(-2); ICF = FCVAR(I,JBAR,K,IBM_IDCF,ABS(IOR))
+               CASE( 3); ICF = FCVAR(I,J,0,   IBM_IDCF,ABS(IOR))
+               CASE(-3); ICF = FCVAR(I,J,KBAR,IBM_IDCF,ABS(IOR))
+            END SELECT
+         ENDIF
+
+         ! Wind inflow boundary conditions
+         IF (ANY(MEAN_FORCING) .OR. TEST_NEW_OPEN) THEN
+            IF (ICF>0) THEN
+               H0 = 0.5_EB*((U_WIND(K)+VEL_EDDY)**2 + (V_WIND(K)+VEL_EDDY)**2 + (W_WIND(K)+VEL_EDDY)**2)
+            ELSE
+               SELECT CASE(IOR)
+                  CASE( 1); H0 = HP(1,J,K)    + 0.5_EB/(DT*RDXN(0)   )*(U_WIND(K) + VEL_EDDY - UU(0,   J,K))
+                  CASE(-1); H0 = HP(IBAR,J,K) - 0.5_EB/(DT*RDXN(IBAR))*(U_WIND(K) + VEL_EDDY - UU(IBAR,J,K))
+                  CASE( 2); H0 = HP(I,1,K)    + 0.5_EB/(DT*RDYN(0)   )*(V_WIND(K) + VEL_EDDY - VV(I,0,   K))
+                  CASE(-2); H0 = HP(I,JBAR,K) - 0.5_EB/(DT*RDYN(JBAR))*(V_WIND(K) + VEL_EDDY - VV(I,JBAR,K))
+                  CASE( 3); H0 = HP(I,J,1)    + 0.5_EB/(DT*RDZN(0)   )*(W_WIND(K) + VEL_EDDY - WW(I,J,0   ))
+                  CASE(-3); H0 = HP(I,J,KBAR) - 0.5_EB/(DT*RDZN(KBAR))*(W_WIND(K) + VEL_EDDY - WW(I,J,KBAR))
                END SELECT
             ENDIF
-            SELECT CASE(IOR)
-               CASE( 1); H0 = HP(1,J,K)    + 0.5_EB/(DT*RDXN(0)   )*(UBAR + VEL_EDDY - UU(0,   J,K))
-               CASE(-1); H0 = HP(IBAR,J,K) - 0.5_EB/(DT*RDXN(IBAR))*(UBAR + VEL_EDDY - UU(IBAR,J,K))
-               CASE( 2); H0 = HP(I,1,K)    + 0.5_EB/(DT*RDYN(0)   )*(VBAR + VEL_EDDY - VV(I,0,   K))
-               CASE(-2); H0 = HP(I,JBAR,K) - 0.5_EB/(DT*RDYN(JBAR))*(VBAR + VEL_EDDY - VV(I,JBAR,K))
-               CASE( 3); H0 = HP(I,J,1)    + 0.5_EB/(DT*RDZN(0)   )*(WBAR + VEL_EDDY - WW(I,J,0   ))
-               CASE(-3); H0 = HP(I,J,KBAR) - 0.5_EB/(DT*RDZN(KBAR))*(WBAR + VEL_EDDY - WW(I,J,KBAR))
-            END SELECT
          ENDIF
 
          SELECT CASE(IOR)
@@ -1431,7 +1447,7 @@ USE GLOBAL_CONSTANTS
 USE MESH_VARIABLES
 USE MESH_POINTERS
 
-USE COMPLEX_GEOMETRY, ONLY : IBM_CGSC,IBM_FGSC, IBM_UNKH, IBM_NCVARS, GET_H_CUTFACES,        &
+USE COMPLEX_GEOMETRY, ONLY : CALL_FOR_GLMAT, IBM_CGSC,IBM_FGSC, IBM_UNKH, IBM_NCVARS, GET_H_CUTFACES,        &
                              GET_BOUNDFACE_GEOM_INFO_H, ADD_INPLACE_NNZ_H_WHLDOM,   &
                              NUNKH_LOC, NUNKH_TOT, UNKH_IND, NUNKH_LOCAL, NUNKH_TOTAL, NM_START, &
                              NNZ_ROW_H, TOT_NNZ_H, NNZ_D_MAT_H, D_MAT_H, JD_MAT_H, IA_H,       &
@@ -1510,6 +1526,7 @@ INTEGER :: IERR
 ! CHARACTER(30) :: FILE_NAME
 ! INTEGER :: ICC, IERR
 
+IF (CC_IBM) CALL_FOR_GLMAT = .TRUE.
 IF (FREEZE_VELOCITY) RETURN ! Fixed velocity soln. i.e. PERIODIC_TEST=102 => FREEZE_VELOCITY=.TRUE.
 IF (SOLID_PHASE_ONLY) RETURN
 TNOW=CURRENT_TIME()
@@ -2309,6 +2326,8 @@ TYPE (OMESH_TYPE), POINTER :: OM=>NULL()
 TYPE (WALL_TYPE), POINTER :: WC=>NULL()
 TYPE (EXTERNAL_WALL_TYPE), POINTER :: EWC=>NULL()
 LOGICAL :: FLG
+
+IF (CC_IBM) CALL_FOR_GLMAT = .FALSE.
 
 IF (SOLID_PHASE_ONLY) RETURN
 IF (FREEZE_VELOCITY)  RETURN

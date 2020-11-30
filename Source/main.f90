@@ -166,14 +166,6 @@ ENDIF
 
 T = T_BEGIN
 
-! Stop all the processes if this is just a set-up run
-
-IF (CHECK_MESH_ALIGNMENT) THEN
-   IF (MYID==0) CALL INITIALIZE_DIAGNOSTIC_FILE(DT)
-   STOP_STATUS = SETUP_ONLY_STOP
-   IF (MYID==0) WRITE(LU_ERR,'(A)') ' Checking mesh alignment. This could take a few tens of seconds...'
-ENDIF
-
 ! Allocate various utility arrays
 
 CALL MPI_INITIALIZATION_CHORES(2)
@@ -198,6 +190,14 @@ CALL EXCHANGE_GEOMETRY_INFO
 DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    CALL INITIALIZE_MESH_VARIABLES_1(DT,NM)
 ENDDO
+
+! Stop all the processes if this is just a set-up run
+
+IF (CHECK_MESH_ALIGNMENT) THEN
+   IF (MYID==0) CALL INITIALIZE_DIAGNOSTIC_FILE(DT)
+   STOP_STATUS = SETUP_ONLY_STOP
+   IF (MYID==0) WRITE(LU_ERR,'(A)') ' Checking mesh alignment. This could take a few tens of seconds...'
+ENDIF
 CALL STOP_CHECK(1)
 
 ! Allocate and initialize OMESH arrays to hold "other mesh" data for a given mesh
@@ -1384,7 +1384,7 @@ PRESSURE_ITERATION_LOOP: DO
       CALL NO_FLUX(DT,NM)
       IF (CC_IBM) THEN
          ! Wall model to define target velocities in gas cut faces.
-         IF(PRESSURE_ITERATIONS==1. .AND. CC_FORCE_PRESSIT .AND. .NOT.CC_VELOBC_FLAG2) CALL CCIBM_TARGET_VELOCITY(DT,NM)
+         IF(PRESSURE_ITERATIONS<=2 .AND. CC_FORCE_PRESSIT .AND. .NOT.CC_VELOBC_FLAG2) CALL CCIBM_TARGET_VELOCITY(DT,NM)
          CALL CCIBM_NO_FLUX(DT,NM)
       ENDIF
       IF (PRESSURE_ITERATIONS==1) MESHES(NM)%WALL_WORK1 = 0._EB
@@ -1429,11 +1429,7 @@ PRESSURE_ITERATION_LOOP: DO
    DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       IF (EVACUATION_ONLY(NM) .OR. EVACUATION_SKIP(NM)) CYCLE
       CALL COMPUTE_VELOCITY_ERROR(DT,NM)
-      IF (CC_IBM) THEN
-         IF(CC_FORCE_PRESSIT .AND. .NOT.CC_VELOBC_FLAG2) CALL CCIBM_TARGET_VELOCITY(DT,NM) ! Wall model to define n+1 target
-                                                                                           ! velocities in gas cut faces.
-         CALL CCIBM_COMPUTE_VELOCITY_ERROR(DT,NM) ! Inside solids respect to zero velocity.
-      ENDIF
+      IF (CC_IBM) CALL CCIBM_COMPUTE_VELOCITY_ERROR(DT,NM) ! Inside solids respect to zero velocity.
    ENDDO
 
    ! Make all MPI processes aware of the maximum velocity error to decide if another pressure iteration is needed.
@@ -4223,12 +4219,12 @@ ENDIF
 IF (.NOT.ALL(EVACUATION_ONLY) .AND. RADIATION .AND. ICYC > 0) THEN
    DO NM = 1, NMESHES
       IF (.NOT.EVACUATION_ONLY(NM)) CYCLE
+      MESHES(NM)%RAD_CALL_COUNTER  = MESHES(NM)%RAD_CALL_COUNTER + 1
       IF (MOD(MESHES(NM)%RAD_CALL_COUNTER,TIME_STEP_INCREMENT)==0 .OR. ICYC==1) THEN
          EXCHANGE_RADIATION = .TRUE.
       ELSE
          EXCHANGE_RADIATION = .FALSE.
       ENDIF
-      MESHES(NM)%RAD_CALL_COUNTER  = MESHES(NM)%RAD_CALL_COUNTER + 1
    ENDDO
 ENDIF
 
