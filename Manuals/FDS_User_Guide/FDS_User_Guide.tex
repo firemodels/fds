@@ -7051,15 +7051,25 @@ You may assign material properties to the {\ct GROUND} if you like, but be aware
 The side boundaries of the domain can be set either to {\ct SURF\_ID='OPEN'}, {\ct 'PERIODIC'}, or {\ct 'PERIODIC FLOW ONLY'}. {\ct SURF\_ID='OPEN'} is the usual inflow/outflow condition for any case where the computational domain is open to an infinite ambient void. {\ct SURF\_ID='PERIODIC'} assumes that the domain repeats itself endlessly in each direction. This is an important assumption because the turbulent atmospheric boundary layer that is modeled using Monin-Obukhov similarity theory is assumed to develop over distances far beyond the computational domain. {\ct SURF\_ID='PERIODIC FLOW ONLY'} is the same as {\ct 'PERIODIC'} except that only the velocity field is periodic, but scalar quantities are not. That is, you do not want a smoke plume that exits the eastern boundary of the domain to reappear instantly at the western boundary, even though you still might want the velocity field to be periodic. Wind speed and temperature profiles corresponding to various choices of Monin-Obukhov parameters are shown in Fig.~\ref{wind_profiles}.
 
 \subsubsection{Example Wind Simulation}
-\label{wind_example}
+\label{wind_example_5}
+\label{wind_example_10}
+\label{wind_example_32}
 
-The input files called {\ct wind\_example.fds} and {\ct wind\_example\_32.fds} in the samples folder called \linebreak[4]{\ct Atmospheric\_Effects} demonstrate wind functionality. The first case uses 8 meshes; the second 32. The computational domain is a flat landscape that is 1~km by 1~km by 100~m high. There are various rectangular blocks scattered about to represent buildings. The wind turns a full 360$^\circ$ in 50~s, starting and ending in the westerly direction (270$^\circ$). This turn of the wind is not realistic, but this case is intended to test the ramp and mean forcing functionality. The plots in Fig.~\ref{wind_example_fig} display some results of the simulation. On the left is a plot showing the mean velocity components of the simulated wind field compared to the specified components. The right hand plot of Fig.~\ref{wind_example_fig} displays the specified wind speed profile in the vertical direction compared to the computed time average profile. The two profiles should be the same because FDS is ``forcing'' the simulated vertical wind speed profile averaged over the entire domain to match the user-specified profile.
+The input files called {\ct wind\_example\_nn.fds} in the samples folder called {\ct Atmospheric\_Effects} demonstrate wind functionality. Each case considers a flat patch of terrain 1000~m by 1000~m by 100~m high. In the examples called {\ct wind\_example\_5} and {\ct wind\_example\_10}, a 5~m/s wind is turned 90$^\circ$ in 10~min. One case is run at 5~m resolution and other at 10~m. Figure~\ref{wind_example_fig_1} shows the delay in the mean velocity components due to the fact that the wind profile is imposed only at external boundaries.
+\begin{figure}[ht]
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/wind_example_5}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/wind_example_10}
+\caption[Results of the {\ct wind\_example\_5} and {\ct wind\_example\_10} test cases]{Mean velocity components of a 5~m/s wind turning 90$^\circ$ in 10~m. The grid resolutions are 5~m (left) and 10~m (right).}
+\label{wind_example_fig_1}
+\end{figure}
+
+In the example called {\ct wind\_example\_32} there are various rectangular blocks scattered about the domain to represent buildings. Figure~\ref{wind_example_fig_2} displays the specified wind speed profile in the vertical direction compared to the computed time average profile. The two profiles should be similar.
 
 \begin{figure}[ht]
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/wind_example_time}
+\centering
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/wind_example_prof}
-\caption[Results of the {\ct wind\_example} test case]{(Left) Mean velocity components of the wind vs. the specified values. (Right) Simulated vs. specified vertical wind speed profile.}
-\label{wind_example_fig}
+\caption[Results of the {\ct wind\_example\_32} test case]{Simulated vs. specified vertical wind speed profile.}
+\label{wind_example_fig_2}
 \end{figure}
 
 
