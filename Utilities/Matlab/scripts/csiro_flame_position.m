@@ -1,6 +1,8 @@
 % McDermott
 % 12-1-2020
 % csiro_flame_position.m
+%
+% NOTE: this script depends on slread.m, double check "endianness" in slread.m!
 
 close all
 clear all
@@ -95,17 +97,17 @@ h(1)=plot(fl_27_x,fl_27_y,'ko','markersize',6); hold on
 h(2)=plot(fl_53_x,fl_53_y,'kv','markersize',6);
 h(3)=plot(fl_100_x,fl_100_y,'ksq','markersize',8);
 
-plot([0,100],[-55,-55],'k:')
-plot([0,100],[+55,+55],'k:')
-plot([0,0],[-55,+55],'k:')
-plot([100,100],[-55,+55],'k:')
+plot([0,100],[-50,-50],'k:')
+plot([0,100],[+50,+50],'k:')
+plot([0,0],[-50,+50],'k:')
+plot([100,100],[-50,+50],'k:')
 
 set(h(1), 'markerfacecolor', get(h(1), 'color'));
 set(h(2), 'markerfacecolor', get(h(2), 'color'));
 set(h(3), 'markerfacecolor', get(h(3), 'color'));
 
 axis equal
-axis([-10 110 -60 60])
+axis([-5 105 -55 55])
 xticks([0:10:100])
 yticks([-50:10:50])
 xlabel('x (m)')
