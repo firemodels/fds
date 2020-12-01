@@ -21,6 +21,10 @@ if (filesep=='/')
 else
     fid  = fopen(fname,'r','l');
 end
+
+% % little endian seems to be needed on macOS Catalina irrespective of filesep
+% fid  = fopen(fname,'r','l'); % might need 'b' for "big endian" instead of 'l', check your file system
+
 r4b(fid);
 Str1 = char([fread(fid,30,'schar')]');
 r4b(fid);
@@ -89,4 +93,4 @@ end
 fclose(fid);
 
 function r4b(fid)
-fread(fid,4,'int8'); 
+fread(fid,4,'int8');
