@@ -259,6 +259,8 @@ LOGICAL :: PERIODIC_DOMAIN_X=.FALSE.                !< The domain is periodic \f
 LOGICAL :: PERIODIC_DOMAIN_Y=.FALSE.                !< The domain is periodic \f$ y \f$
 LOGICAL :: PERIODIC_DOMAIN_Z=.FALSE.                !< The domain is periodic \f$ z \f$
 LOGICAL :: TEST_NEW_OPEN=.FALSE.
+LOGICAL :: TEST_CLIP_STABILITY_CHECK=.FALSE.
+INTEGER, PARAMETER :: CLIP_COUNT_MAX=5
 
 INTEGER :: BNDF_TIME_INTEGRALS=0
 
