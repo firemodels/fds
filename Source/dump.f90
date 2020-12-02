@@ -3664,6 +3664,7 @@ DO NM=1,NMESHES
    IF (M%NLP>0) WRITE(LU_OUTPUT,141) M%NLP
    IF (ABS(Q_DOT(1,NM))>1._EB) WRITE(LU_OUTPUT,119) Q_DOT(1,NM)/1000._EB
    IF (ABS(Q_DOT(2,NM))>1._EB) WRITE(LU_OUTPUT,120) Q_DOT(2,NM)/1000._EB
+   IF (CLIP_COUNT>0)           WRITE(LU_OUTPUT,121) CLIP_COUNT
 ENDDO
 
 WRITE(LU_OUTPUT,*)
@@ -3681,6 +3682,7 @@ WRITE(LU_OUTPUT,*)
 119 FORMAT(6X,' Total Heat Release Rate:      ',F13.3,' kW')
 120 FORMAT(6X,' Radiation Loss to Boundaries: ',F13.3,' kW')
 141 FORMAT(6X,' No. of Lagrangian Particles:  ',I12)
+121 FORMAT(6X,' No. of CLIP DT restrictions:  ',I2)
 
 T_USED(7) = T_USED(7) + CURRENT_TIME() - TNOW
 
