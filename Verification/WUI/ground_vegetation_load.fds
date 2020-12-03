@@ -37,7 +37,6 @@
       PACKING_RATIO(1) = 0.01
       COLOR = 'FOREST GREEN'
       DRAG_COEFFICIENT = 2.8
-      SHAPE_FACTOR   = 0.15
       SURFACE_VOLUME_RATIO(1) = 3092. 
       THICKNESS(1:2) = 0.075,0.1 /
 
@@ -50,7 +49,6 @@
 
 &PART ID             = 'Blade of Grass'
       DRAG_COEFFICIENT = 2.8
-      SHAPE_FACTOR   = 0.15
       COLOR          = 'FOREST GREEN'
       SURF_ID        = 'Blade of Grass'
       QUANTITIES     = 'PARTICLE TEMPERATURE','PARTICLE MASS'

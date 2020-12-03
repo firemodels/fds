@@ -101,7 +101,6 @@
       SURF_ID='wet vegetation'
       PROP_ID='grass image'
       DRAG_COEFFICIENT=2.8
-      SHAPE_FACTOR = 0.15
       QUANTITIES='PARTICLE TEMPERATURE','PARTICLE MASS'
       STATIC=T
       COLOR='BROWN' /

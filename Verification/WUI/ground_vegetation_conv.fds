@@ -22,7 +22,6 @@
       PACKING_RATIO = 0.01
       COLOR = 'FOREST GREEN'
       DRAG_COEFFICIENT = 2.8
-      SHAPE_FACTOR   = 0.15
       BACKING = 'INSULATED'
       SURFACE_VOLUME_RATIO = 3000. 
       EMISSIVITY = 0.
@@ -33,7 +32,6 @@
       PACKING_RATIO = 0.01
       COLOR = 'FOREST GREEN'
       DRAG_COEFFICIENT = 2.8
-      SHAPE_FACTOR   = 0.15
       BACKING = 'INSULATED'
       SURFACE_VOLUME_RATIO = 1500.
       EMISSIVITY = 0.
@@ -55,7 +53,6 @@
 
 &PART ID             = 'Grass Particle A'
       DRAG_COEFFICIENT = 2.8
-      SHAPE_FACTOR   = 0.15
       COLOR          = 'FOREST GREEN'
       SURF_ID        = 'Grass Particle A'
       QUANTITIES     = 'PARTICLE TEMPERATURE','PARTICLE MASS'
@@ -63,7 +60,6 @@
 
 &PART ID             = 'Grass Particle B'
       DRAG_COEFFICIENT = 2.8
-      SHAPE_FACTOR   = 0.15
       COLOR          = 'FOREST GREEN'
       SURF_ID        = 'Grass Particle B'
       QUANTITIES     = 'PARTICLE TEMPERATURE','PARTICLE MASS'

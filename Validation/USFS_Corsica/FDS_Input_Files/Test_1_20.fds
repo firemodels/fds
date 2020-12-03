@@ -47,7 +47,6 @@
 
 &PART ID             = 'Needles' 
       DRAG_COEFFICIENT = 2.8
-      SHAPE_FACTOR   = 0.25
       COLOR          = 'GREEN'
       SURF_ID        = 'Pine Needles' 
       QUANTITIES     = 'PARTICLE TEMPERATURE','PARTICLE MASS'
