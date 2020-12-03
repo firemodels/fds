@@ -7535,7 +7535,7 @@ First, the {\ct PART} line defines a class of solid particles that represent pin
 \be
    \bof_{\rm b} = \frac{\rho}{2} \, C_{\rm d} \, C_{\rm s} \, \beta \, \sigma \, \bu \, ||\bu||
 \ee
-where $\rho$ is the air density, $C_{\rm d}$ is the drag coefficient, $C_{\rm s}$ is the {\ct SHAPE\_FACTOR}, $\beta$ is the packing ratio (see below), $\sigma$ is the surface area to volume ratio (see below), and $\bu$ is the air velocity.
+where $\rho$ is the air density, $C_{\rm d}$ is the drag coefficient, $C_{\rm s}$ is the {\ct SHAPE\_FACTOR} (0.25 by default), $\beta$ is the packing ratio (see below), $\sigma$ is the surface area to volume ratio (see below), and $\bu$ is the air velocity.
 
 The {\ct PART} line also tells Smokeview to visualize each needle as a tube that is 0.1~m long and 0.5~mm in diameter:
 \begin{lstlisting}
@@ -11537,7 +11537,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RUNNING\_AVERAGE\_FACTOR}           & Real        & Section~\ref{radiative_part_props}                                    &                   & 0.5                   \\ \hline
 {\ct RUNNING\_AVERAGE\_FACTOR\_WALL}     & Real        & Section~\ref{radiative_part_props}                                    &                   & 0.5                   \\ \hline
 {\ct SAMPLING\_FACTOR}                   & Integer     & Section~\ref{info:part_output}                                        &                   & 1                     \\ \hline
-{\ct SHAPE\_FACTOR}                      & Real        & Section~\ref{pine_needles}                                            &                   &                       \\ \hline
+{\ct SHAPE\_FACTOR}                      & Real        & Section~\ref{pine_needles}                                            &                   & 0.25                  \\ \hline
 {\ct SIGMA\_D}                           & Real        & Section~\ref{info:particle_size}                                      &                   &                       \\ \hline
 {\ct SPEC\_ID}                           & Character   & Section~\ref{thermal_part_props}                                      &                   &                       \\ \hline
 {\ct STATIC}                             & Logical     & Section~\ref{info:PART_SURF}                                          &                   & {\ct .FALSE.}         \\ \hline
