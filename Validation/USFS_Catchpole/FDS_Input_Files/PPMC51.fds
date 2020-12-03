@@ -67,7 +67,6 @@
 
 &PART ID             = 'Regular Excelsior' 
       DRAG_COEFFICIENT = 2.8
-      SHAPE_FACTOR   = 0.25
       COLOR          = 'GREEN'
       SURF_ID        = 'Regular Excelsior' 
       QUANTITIES     = 'PARTICLE TEMPERATURE','PARTICLE MASS'
@@ -87,7 +86,6 @@
 
 &PART ID             = 'NO BURN FUEL' 
       DRAG_COEFFICIENT = 2.8
-      SHAPE_FACTOR   = 0.25
       COLOR          = 'OLIVE'
       SURF_ID        = 'NO BURN FUEL' 
       QUANTITIES     = 'PARTICLE TEMPERATURE','PARTICLE MASS'
