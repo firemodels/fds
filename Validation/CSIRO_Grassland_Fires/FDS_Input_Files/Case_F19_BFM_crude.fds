@@ -1,6 +1,6 @@
-&HEAD CHID='Case_F19_BFM', TITLE='Australian Grassland Fire Experiment, Case F19, Boundary Fuel Model' /
+&HEAD CHID='Case_F19_BFM_crude', TITLE='Australian Grassland Fire Experiment, Case F19, Boundary Fuel Model' /
 
-&MESH IJK=80,80,40, XB=-20.0,20.0,0.0,40.0,0.0,20.0, MULT_ID='mesh' /
+&MESH IJK=40,40,20, XB=-20.0,20.0,0.0,40.0,0.0,20.0, MULT_ID='mesh' /
 &MULT ID='mesh', DX=40., DY=40., DZ=20., I_LOWER=0, I_UPPER=5, J_LOWER=-3, J_UPPER=2, K_UPPER=0 /
 
 &TIME T_END=180. /

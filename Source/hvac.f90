@@ -34,6 +34,7 @@ REAL(EB), ALLOCATABLE, DIMENSION(:) :: DPSTAR !< Array of extrapoloated presure 
 INTEGER :: ITER !< Current HVAC solver iterations
 INTEGER :: ITER_MAX=10  !< Maximum allowed solver iterations
 LOGICAL :: DUCT_NODE_INIT  !< Flag indicating duct nodes have been initialized
+LOGICAL :: TRANSPORT_PARTICLES !< Flag indicating particles should be transferred across a localized leak path
 
 PUBLIC HVAC_CALC,READ_HVAC,PROC_HVAC,HVAC_BC_IN,FIND_NETWORKS,COLLAPSE_HVAC_BC,SET_INIT_HVAC,INIT_DUCT_NODE
 
@@ -127,7 +128,8 @@ NAMELIST /HVAC/ AIRCOIL_ID,AMBIENT,AREA,CLEAN_LOSS,COOLANT_SPECIFIC_HEAT,COOLANT
                 DAMPER,DEVC_ID,DIAMETER,DUCT_ID,DUCT_INTERP_TYPE,&
                 EFFICIENCY,FAN_ID,FILTER_ID,FIXED_Q,ID,LEAK_ENTHALPY,LENGTH,LOADING,LOADING_MULTIPLIER,LOSS,&
                 MASS_FLOW,MAX_FLOW,MAX_PRESSURE,N_CELLS,NODE_ID,PERIMETER,QFAN_BETA,&
-                RAMP_ID,RAMP_LOSS,REVERSE,ROUGHNESS,SPEC_ID,SURF_ID,TAU_AC,TAU_FAN,TAU_VF,TYPE_ID,VENT_ID,VENT2_ID,VOLUME_FLOW,XYZ
+                RAMP_ID,RAMP_LOSS,REVERSE,ROUGHNESS,SPEC_ID,SURF_ID,TAU_AC,TAU_FAN,TAU_VF,TRANSPORT_PARTICLES,&
+                TYPE_ID,VENT_ID,VENT2_ID,VOLUME_FLOW,XYZ
 
 TNOW=CURRENT_TIME()
 
@@ -567,6 +569,7 @@ DO NN=1,N_HVAC_READ
          DN%VENT_ID = VENT_ID
          DN%VENT=.TRUE.
          DN%READ_IN = .FALSE.
+         DN%TRANSPORT_PARTICLES = TRANSPORT_PARTICLES
          IF (TRIM(DN%VENT_ID)=='null') THEN
             WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR: Leakage path must have VENT_ID defined. Leak ID:',TRIM(ID),', HVAC line number:',NN
             CALL SHUTDOWN(MESSAGE); RETURN
@@ -588,6 +591,7 @@ DO NN=1,N_HVAC_READ
          DN%VENT_ID = VENT2_ID
          DN%VENT=.TRUE.
          DN%READ_IN = .FALSE.
+         DN%TRANSPORT_PARTICLES = TRANSPORT_PARTICLES
          IF (TRIM(VENT2_ID)=='null') THEN
             WRITE(MESSAGE,'(A,A,A,I2)') 'ERROR: Leakage path must have VENT2_ID defined. Leak ID:',TRIM(ID),&
                                         ', HVAC line number:',NN
@@ -694,6 +698,7 @@ TYPE_ID      = 'null'
 TAU_AC       = TAU_DEFAULT
 TAU_FAN      = TAU_DEFAULT
 TAU_VF       = TAU_DEFAULT
+TRANSPORT_PARTICLES = .FALSE.
 VENT_ID      = 'null'
 VENT2_ID     = 'null'
 VOLUME_FLOW  = 1.E7_EB

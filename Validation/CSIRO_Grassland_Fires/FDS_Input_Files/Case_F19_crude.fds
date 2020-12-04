@@ -1,6 +1,6 @@
-&HEAD CHID='Case_F19_BFM', TITLE='Australian Grassland Fire Experiment, Case F19, Boundary Fuel Model' /
+&HEAD CHID='Case_F19_crude', TITLE='Australian Grassland Fire Experiment, Case F19' /
 
-&MESH IJK=80,80,40, XB=-20.0,20.0,0.0,40.0,0.0,20.0, MULT_ID='mesh' /
+&MESH IJK=40,40,20, XB=-20.0,20.0,0.0,40.0,0.0,20.0, MULT_ID='mesh' /
 &MULT ID='mesh', DX=40., DY=40., DZ=20., I_LOWER=0, I_UPPER=5, J_LOWER=-3, J_UPPER=2, K_UPPER=0 /
 
 &TIME T_END=180. /
@@ -19,8 +19,7 @@
 &RAMP ID='ignitor', T=11., F=1. /
 &RAMP ID='ignitor', T=12., F=0. /
 
-&VENT XB=-3.3,0.0,-87.,87.,0.,0., SURF_ID='IGNITION', XYZ=0,0,0, SPREAD_RATE=1.56 /
-&VENT XB= 0.0,200.0,-100.,100.,0.,0., SURF_ID='wet vegetation' /
+&VENT XB=0.0,3.3,-87.,87.,0.,0., SURF_ID='IGNITION', XYZ=0,0,0, SPREAD_RATE=1.56 /
 
 &VENT MB='XMIN', SURF_ID='OPEN' /
 &VENT MB='XMAX', SURF_ID='OPEN' /
@@ -47,16 +46,17 @@
       SPECIFIC_HEAT = 2.
       DENSITY = 1300. /
 
+&SURF ID='GROUND'
+      DEFAULT=T
+      MATL_ID='DIRT'
+      THICKNESS=0.2 /
+
 &SURF ID                        = 'wet vegetation'
-      COLOR                     = 'BROWN'
-      MATL_ID                   = 'DRY GRASS','DIRT'
-      THICKNESS(1:2)            = 0.51,0.10
-      MOISTURE_FRACTION(1)      = 0.058
-      PACKING_RATIO(1)          = 0.0012
-      DRAG_COEFFICIENT          = 2.8
-      SHAPE_FACTOR              = 0.25
-      MINIMUM_BURNOUT_TIME      = 10.
-      SURFACE_VOLUME_RATIO(1)   = 12240. /
+      MATL_ID                   = 'DRY GRASS'
+      MOISTURE_FRACTION         = 0.058
+      SURFACE_VOLUME_RATIO      = 12240.
+      LENGTH                    = 0.20
+      GEOMETRY                  = 'CYLINDRICAL' /
 
 &MATL ID                 = 'DRY GRASS'
       DENSITY            = 512.
@@ -95,6 +95,20 @@
       DENSITY       = 67.
       CONDUCTIVITY  = 0.1
       SPECIFIC_HEAT = 2.0 /
+
+&PART ID='blade of grass'
+      SAMPLING_FACTOR=20
+      SURF_ID='wet vegetation'
+      PROP_ID='grass image'
+      DRAG_COEFFICIENT=2.8
+      SHAPE_FACTOR = 0.15
+      QUANTITIES='PARTICLE TEMPERATURE','PARTICLE MASS'
+      STATIC=T
+      COLOR='BROWN' /
+
+&INIT PART_ID='blade of grass', XB=0.,200.,-100.,100.,0.00,0.49, N_PARTICLES_PER_CELL=1, CELL_CENTERED=T, PACKING_RATIO=0.0012 /
+
+&PROP ID='grass image', SMOKEVIEW_ID='TUBE', SMOKEVIEW_PARAMETERS='L=0.20','D=0.00016','DIRZ=1' /
 
 &DUMP DT_HRR=1., DT_DEVC=1., DT_SLCF=1., SIG_FIGS=4, SIG_FIGS_EXP=2 /
 

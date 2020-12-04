@@ -1,26 +1,25 @@
-&HEAD CHID='Case_F19_BFM', TITLE='Australian Grassland Fire Experiment, Case F19, Boundary Fuel Model' /
+&HEAD CHID='Case_C064_crude', TITLE='Australian Grassland Fire Experiment, Case C064' /
 
-&MESH IJK=80,80,40, XB=-20.0,20.0,0.0,40.0,0.0,20.0, MULT_ID='mesh' /
-&MULT ID='mesh', DX=40., DY=40., DZ=20., I_LOWER=0, I_UPPER=5, J_LOWER=-3, J_UPPER=2, K_UPPER=0 /
+&MESH IJK=20,20,20, XB=-10.0,10.0,0.0,20.0,0.0,20.0, MULT_ID='mesh' /
+&MULT ID='mesh', DX=20., DY=20., DZ=20., I_LOWER=0, I_UPPER=5, J_LOWER=-3, J_UPPER=2, K_UPPER=0 /
 
-&TIME T_END=180. /
+&TIME T_END=120. /
 
-&MISC TMPA=34. /
+&MISC TMPA=32. /
 
-&WIND SPEED=4.8, DIRECTION=270., L=-500., Z_0=0.03 /
+&WIND SPEED=4.6, DIRECTION=270., L=-500., Z_0=0.03 /
 
 &REAC FUEL='CELLULOSE', C=6, H=10, O=5, SOOT_YIELD=0.001, HEAT_OF_COMBUSTION=15600. /
 
 &SPEC ID='WATER VAPOR' /
 
-&SURF ID='IGNITION', HRRPUA=1460., COLOR='RED', TMP_FRONT=100., RAMP_Q='ignitor' /
+&SURF ID='IGNITION', HRRPUA=1500., COLOR='RED', TMP_FRONT=100., RAMP_Q='ignitor' /
 &RAMP ID='ignitor', T= 0., F=0. /
 &RAMP ID='ignitor', T= 1., F=1. /
-&RAMP ID='ignitor', T=11., F=1. /
-&RAMP ID='ignitor', T=12., F=0. /
+&RAMP ID='ignitor', T= 5., F=1. /
+&RAMP ID='ignitor', T= 6., F=0. /
 
-&VENT XB=-3.3,0.0,-87.,87.,0.,0., SURF_ID='IGNITION', XYZ=0,0,0, SPREAD_RATE=1.56 /
-&VENT XB= 0.0,200.0,-100.,100.,0.,0., SURF_ID='wet vegetation' /
+&VENT XB=0.0,1.6,-25.,25.,0.,0., SURF_ID='IGNITION', XYZ=0,0,0, SPREAD_RATE=1. /
 
 &VENT MB='XMIN', SURF_ID='OPEN' /
 &VENT MB='XMAX', SURF_ID='OPEN' /
@@ -33,30 +32,29 @@
       MATL_ID='DIRT'
       THICKNESS=0.2 /
 
-&VENT XB=-20,220,-105,-100,0,0, SURF_ID='ROAD' /
-&VENT XB=-20,220,-115,-110,0,0, SURF_ID='ROAD' /
-&VENT XB=-20,220, 100, 105,0,0, SURF_ID='ROAD' /
-&VENT XB=-20,220, 110, 115,0,0, SURF_ID='ROAD' /
-&VENT XB= -5,  0,-120, 120,0,0, SURF_ID='ROAD' /
-&VENT XB=-15,-10,-120, 120,0,0, SURF_ID='ROAD' /
-&VENT XB=200,205,-120, 120,0,0, SURF_ID='ROAD' /
-&VENT XB=210,215,-120, 120,0,0, SURF_ID='ROAD' /
+&VENT XB=-10,110,-53,-50,0,0, SURF_ID='ROAD' /
+&VENT XB=-10,110, 50, 53,0,0, SURF_ID='ROAD' /
+&VENT XB=-10,110, 54, 57,0,0, SURF_ID='ROAD' /
+&VENT XB= -3,  0,-60, 60,0,0, SURF_ID='ROAD' /
+&VENT XB=100,103,-60, 60,0,0, SURF_ID='ROAD' /
+&VENT XB=104,107,-60, 60,0,0, SURF_ID='ROAD' /
 
 &MATL ID='DIRT'
       CONDUCTIVITY = 0.25
       SPECIFIC_HEAT = 2.
       DENSITY = 1300. /
 
+&SURF ID='GROUND'
+      DEFAULT=T
+      MATL_ID='DIRT'
+      THICKNESS=0.2 /
+
 &SURF ID                        = 'wet vegetation'
-      COLOR                     = 'BROWN'
-      MATL_ID                   = 'DRY GRASS','DIRT'
-      THICKNESS(1:2)            = 0.51,0.10
-      MOISTURE_FRACTION(1)      = 0.058
-      PACKING_RATIO(1)          = 0.0012
-      DRAG_COEFFICIENT          = 2.8
-      SHAPE_FACTOR              = 0.25
-      MINIMUM_BURNOUT_TIME      = 10.
-      SURFACE_VOLUME_RATIO(1)   = 12240. /
+      MATL_ID                   = 'DRY GRASS'
+      MOISTURE_FRACTION         = 0.063
+      SURFACE_VOLUME_RATIO      = 9770.
+      LENGTH                    = 0.20
+      GEOMETRY                  = 'CYLINDRICAL' /
 
 &MATL ID                 = 'DRY GRASS'
       DENSITY            = 512.
@@ -96,6 +94,20 @@
       CONDUCTIVITY  = 0.1
       SPECIFIC_HEAT = 2.0 /
 
+&PART ID='blade of grass'
+      SAMPLING_FACTOR=5
+      SURF_ID='wet vegetation'
+      PROP_ID='grass image'
+      DRAG_COEFFICIENT=2.8
+      SHAPE_FACTOR = 0.15
+      QUANTITIES='PARTICLE TEMPERATURE','PARTICLE MASS'
+      STATIC=T
+      COLOR='BROWN' /
+
+&INIT PART_ID='blade of grass', XB=0.,100.,-50.,50.,0.00,0.21, N_PARTICLES_PER_CELL=1, CELL_CENTERED=T, PACKING_RATIO=0.0026 /
+
+&PROP ID='grass image', SMOKEVIEW_ID='TUBE', SMOKEVIEW_PARAMETERS='L=0.20','D=0.0004','DIRZ=1' /
+
 &DUMP DT_HRR=1., DT_DEVC=1., DT_SLCF=1., SIG_FIGS=4, SIG_FIGS_EXP=2 /
 
 &SLCF PBY=1., QUANTITY='TEMPERATURE', VECTOR=T /
@@ -106,6 +118,6 @@
 &BNDF QUANTITY='WALL TEMPERATURE' /
 &BNDF QUANTITY='GAUGE HEAT FLUX' /
 
-&DEVC ID='x', QUANTITY='TEMPERATURE', SPATIAL_STATISTIC='MAXLOC X', XB=-20,220,-1,0,0,1 /
+&DEVC ID='x', QUANTITY='TEMPERATURE', SPATIAL_STATISTIC='MAXLOC X', XB=-10,110,-1,0,0,1 /
 
 &TAIL /

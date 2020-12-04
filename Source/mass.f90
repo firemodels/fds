@@ -52,6 +52,11 @@ ELSE
    ZZP => ZZS
 ENDIF
 
+! Reset counter for CLIP_RHOMIN, CLIP_RHOMAX
+! Done here so CLIP_COUNT will persist until WRITE_DIAGNOSTICS is called
+
+IF (PREDICTOR) CLIP_COUNT = 0
+
 ! Species face values
 
 SPECIES_LOOP: DO N=1,N_TOTAL_SCALARS
@@ -604,7 +609,6 @@ REAL(EB) :: MASS_N(-3:3),CONST,MASS_C,RHO_ZZ_CUT,RHO_CUT,VC(-3:3),SIGN_FACTOR,SU
 INTEGER  :: IC,I,J,K,N
 REAL(EB), POINTER, DIMENSION(:,:,:) :: DELTA_RHO=>NULL(),DELTA_RHO_ZZ=>NULL(),RHOP=>NULL()
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: RHO_ZZ=>NULL()
-LOGICAL :: CLIP_RHOMIN,CLIP_RHOMAX
 
 IF (CHECK_MASS_CONSERVE) RETURN ! Don't modify scalar components.
 
@@ -762,8 +766,10 @@ DO K=1,KBAR
    ENDDO
 ENDDO
 
-IF (CLIP_RHOMIN) WRITE(LU_ERR,'(A,F8.3,A,I0)') 'WARNING: Minimum density, ',RHOMIN,' kg/m3, clipped in Mesh ',NM
-IF (CLIP_RHOMAX) WRITE(LU_ERR,'(A,F8.3,A,I0)') 'WARNING: Maximum density, ',RHOMAX,' kg/m3, clipped in Mesh ',NM
+IF (.NOT.TEST_CLIP_STABILITY_CHECK) THEN
+   IF (CLIP_RHOMIN) WRITE(LU_ERR,'(A,F8.3,A,I0)') 'WARNING: Minimum density, ',RHOMIN,' kg/m3, clipped in Mesh ',NM
+   IF (CLIP_RHOMAX) WRITE(LU_ERR,'(A,F8.3,A,I0)') 'WARNING: Maximum density, ',RHOMAX,' kg/m3, clipped in Mesh ',NM
+ENDIF
 
 END SUBROUTINE CHECK_MASS_DENSITY
 
