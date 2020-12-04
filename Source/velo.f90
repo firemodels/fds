@@ -3169,13 +3169,13 @@ ENDIF PARABOLIC_IF
 ! ------ Experimental ------
 DT_CLIP = HUGE(1._EB)
 IF (CLIP_RHOMIN .OR. CLIP_RHOMAX) THEN
-   IF (CLIP_COUNT>CLIP_DT_RESTRICTIONS_MAX) THEN
+   IF (DT_RESTRICT_COUNT>=CLIP_DT_RESTRICTIONS_MAX) THEN
       IF (CLIP_RHOMIN) WRITE(LU_ERR,'(A,F8.3,A,I0)') 'WARNING: Minimum density, ',RHOMIN,' kg/m3, clipped in Mesh ',NM
       IF (CLIP_RHOMAX) WRITE(LU_ERR,'(A,F8.3,A,I0)') 'WARNING: Maximum density, ',RHOMAX,' kg/m3, clipped in Mesh ',NM
    ELSE
       CFL = HUGE(1._EB)
       DT_CLIP = DT
-      CLIP_COUNT = CLIP_COUNT + 1
+      DT_RESTRICT_COUNT = DT_RESTRICT_COUNT + 1
    ENDIF
 ENDIF
 !----------------------------

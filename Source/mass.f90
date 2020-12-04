@@ -53,9 +53,9 @@ ELSE
 ENDIF
 
 ! Reset counter for CLIP_RHOMIN, CLIP_RHOMAX
-! Done here so CLIP_COUNT will persist until WRITE_DIAGNOSTICS is called
+! Done here so DT_RESTRICT_COUNT will persist until WRITE_DIAGNOSTICS is called
 
-IF (PREDICTOR) CLIP_COUNT = 0
+IF (PREDICTOR) DT_RESTRICT_COUNT = 0
 
 ! Species face values
 
