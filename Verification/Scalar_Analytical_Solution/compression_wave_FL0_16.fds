@@ -9,7 +9,7 @@
       FREEZE_VELOCITY=.TRUE.
       DNS=.TRUE.
       FLUX_LIMITER='CENTRAL'
-      CFL_MAX=0.125
+      CFL_MAX=0.25
       CFL_VELOCITY_NORM=3
       PERIODIC_TEST=3
        /
