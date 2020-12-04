@@ -2296,7 +2296,7 @@ IF ( ONE_D%U_NORMAL>SURFACE(SURF_INDEX)%PARTICLE_EXTRACTION_VELOCITY .OR. &
                   IF(SOLID(CELL_INDEX(ONE_D%IIG-2,ONE_D%JJG,ONE_D%KKG))) THEN
                      SET_EXTRACT = .TRUE.
                   ELSE
-                     LP%X = X(ONE_D%IIG-2)-0.001_EB*DX(ONE_D%IIG-2)
+                     LP%X = X(ONE_D%IIG-2)-0.01_EB*DX(ONE_D%IIG-2)
                      HIT_SOLID = .FALSE.
                   ENDIF
                ENDIF
@@ -2307,7 +2307,7 @@ IF ( ONE_D%U_NORMAL>SURFACE(SURF_INDEX)%PARTICLE_EXTRACTION_VELOCITY .OR. &
                   IF(SOLID(CELL_INDEX(ONE_D%IIG+2,ONE_D%JJG,ONE_D%KKG))) THEN
                      SET_EXTRACT = .TRUE.
                   ELSE
-                     LP%X = X(ONE_D%IIG+1)+0.001_EB*DX(ONE_D%IIG+2)
+                     LP%X = X(ONE_D%IIG+1)+0.01_EB*DX(ONE_D%IIG+2)
                      HIT_SOLID = .FALSE.
                   ENDIF
                ENDIF
@@ -2318,7 +2318,7 @@ IF ( ONE_D%U_NORMAL>SURFACE(SURF_INDEX)%PARTICLE_EXTRACTION_VELOCITY .OR. &
                   IF(SOLID(CELL_INDEX(ONE_D%IIG,ONE_D%JJG-2,ONE_D%KKG))) THEN
                      SET_EXTRACT = .TRUE.
                   ELSE
-                     LP%Y = Y(ONE_D%JJG-2)-0.001_EB*DY(ONE_D%JJG-2)
+                     LP%Y = Y(ONE_D%JJG-2)-0.01_EB*DY(ONE_D%JJG-2)
                      HIT_SOLID = .FALSE.
                   ENDIF
                ENDIF             
@@ -2329,7 +2329,7 @@ IF ( ONE_D%U_NORMAL>SURFACE(SURF_INDEX)%PARTICLE_EXTRACTION_VELOCITY .OR. &
                   IF(SOLID(CELL_INDEX(ONE_D%IIG,ONE_D%JJG+2,ONE_D%KKG))) THEN
                      SET_EXTRACT = .TRUE.
                   ELSE
-                     LP%Y = Y(ONE_D%JJG+1)+0.001_EB*DY(ONE_D%JJG+2)
+                     LP%Y = Y(ONE_D%JJG+1)+0.01_EB*DY(ONE_D%JJG+2)
                      HIT_SOLID = .FALSE.
                   ENDIF
                ENDIF
@@ -2340,7 +2340,7 @@ IF ( ONE_D%U_NORMAL>SURFACE(SURF_INDEX)%PARTICLE_EXTRACTION_VELOCITY .OR. &
                   IF(SOLID(CELL_INDEX(ONE_D%IIG,ONE_D%JJG,ONE_D%KKG-2))) THEN
                      SET_EXTRACT = .TRUE.
                   ELSE
-                     LP%Z = Z(ONE_D%KKG-2)-0.001_EB*DZ(ONE_D%KKG-2)
+                     LP%Z = Z(ONE_D%KKG-2)-0.01_EB*DZ(ONE_D%KKG-2)
                      HIT_SOLID = .FALSE.
                   ENDIF
                ENDIF             
@@ -2351,7 +2351,7 @@ IF ( ONE_D%U_NORMAL>SURFACE(SURF_INDEX)%PARTICLE_EXTRACTION_VELOCITY .OR. &
                   IF(SOLID(CELL_INDEX(ONE_D%IIG,ONE_D%JJG,ONE_D%KKG+2))) THEN
                      SET_EXTRACT = .TRUE.
                   ELSE
-                     LP%Z = Z(ONE_D%KKG+1)+0.001_EB*DZ(ONE_D%KKG+2)
+                     LP%Z = Z(ONE_D%KKG+1)+0.01_EB*DZ(ONE_D%KKG+2)
                      HIT_SOLID = .FALSE.
                   ENDIF
                ENDIF
