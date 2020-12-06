@@ -11,24 +11,25 @@ close all
 clear all
 clc
 
-file='Death_Star.obj';
+file='Restaurant2.obj';
+
 %file='UWO-BLWT-SS21-Test6-40ft.obj';
 
-%% Parameters:
+%%Parameters;
 IAXIS = 1; JAXIS = 2; KAXIS = 3; MDIM = 3;
 NOD1  = 1; NOD2  = 2; NOD3  = 3; MNOD = 3;
 
 OBJ = read_wobj(file);
 
 V = OBJ.vertices;
-F = OBJ.objects(3).data.vertices;
+%%F = OBJ.objects(3).data.vertices;
 N = OBJ.vertices_normal;
 
 nnodes = length(V(:,IAXIS));
 nfaces = 0;
 nsurf = 0;
-SURF_INDEX = zeros([1 20]);
-SURF_ID = strings([1 20]);
+SURF_INDEX = zeros([1 length(OBJ.objects)]);
+SURF_ID = strings([1 length(OBJ.objects)]);
 
 % Draw the object
 
@@ -62,7 +63,7 @@ fileout=[file(1:end-3) 'dat'];
 [fid]=fopen([fileout],'w');
 
 label{1} = ['&GEOM ID=''%8s'', ']; 
-for i=2:10
+for i=2:nsurf+1
     label{i} = ['SURF_ID(' num2str(i-1) ')=''%5s'', '];
 end
 formatSpec = [strcat(label{1:nsurf+1}) '/\n'];
