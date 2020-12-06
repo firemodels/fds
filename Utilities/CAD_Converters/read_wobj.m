@@ -134,7 +134,7 @@ for iline=1:length(ftype)
                 vertices_texture(nvt,1:3)=data;
             end
         case('l')
-            no=no+1; if(mod(no,10000)==1), objects(no+10001).data=0; end
+            no=no+1; if(mod(no,10000)==1), objects(no+10002).data=struct(); end
             array_vertices=[];
             array_texture=[];
             for i=1:length(data),
@@ -159,7 +159,7 @@ for iline=1:length(ftype)
             objects(no).data.vertices=array_vertices;
             objects(no).data.texture=array_texture;
         case('f')
-            no=no+1; if(mod(no,10000)==1), objects(no+10001).data=0; end
+            no=no+1; if(mod(no,10000)==1), objects(no+10002).data=struct(); end
             array_vertices=[];
             array_texture=[];
             array_normal=[];
@@ -194,12 +194,12 @@ for iline=1:length(ftype)
             % multiple faces of only 3 indices.
             objects(no).type='f';
             findex=1:min (3,length(array_vertices));
-           
+
             objects(no).data.vertices=array_vertices(findex);
             if(~isempty(array_texture)),objects(no).data.texture=array_texture(findex); end
             if(~isempty(array_normal)),objects(no).data.normal=array_normal(findex); end
             for i=1:length(array_vertices)-3;
-                no=no+1; if(mod(no,10000)==1), objects(no+10001).data=0; end
+                no=no+1; if(mod(no,10000)==1), objects(no+10001).data=struct(); end
                 findex=[1 2+i 3+i];
                 findex(findex>length(array_vertices))=findex(findex>length(array_vertices))-length(array_vertices);
                 objects(no).type='f';
@@ -209,7 +209,7 @@ for iline=1:length(ftype)
             end
         case{'#','$'}
             % Comment
-            tline='  %'; 
+            tline='  %';
             if(iscell(data)) 
                 for i=1:length(data), tline=[tline ' ' data{i}]; end
             else
@@ -219,7 +219,7 @@ for iline=1:length(ftype)
         case{''}
         otherwise
             no=no+1;
-            if(mod(no,10000)==1), objects(no+10001).data=0; end
+            if(mod(no,10000)==1), objects(no+10001).data=struct(); end
             objects(no).type=type;
             objects(no).data=data;
     end
@@ -386,7 +386,7 @@ for iline=1:length(ftype)
         case{''}
         otherwise
             no=no+1;
-            if(mod(no,10000)==1), objects(no+10001).data=0; end
+            if(mod(no,10000)==1), objects(no+10001).data=struct(); end
             objects(no).type=type;
             objects(no).data=data;
     end
