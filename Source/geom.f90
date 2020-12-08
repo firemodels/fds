@@ -26828,7 +26828,7 @@ MAIN_MESH_LOOP3 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
           ! Write out unlinked cells properties:
           ! Open file to write unlinked cells:
-          WRITE(UNLINKED_FILE,'(A,A,I5.5,A)') TRIM(CHID),'_unlinked_',MYID,'.log'
+          WRITE(UNLINKED_FILE,'(A,A,I0,A)') TRIM(CHID),'_unlinked_',MYID,'.log'
           ! Create file:
           IF (UNLINKED_1ST_CALL) THEN
              OPEN(UNIT=LU_UNLNK,FILE=TRIM(UNLINKED_FILE),STATUS='UNKNOWN')
@@ -27300,7 +27300,7 @@ IF (GET_CUTCELLS_VERBOSE) THEN
    ! MYID = 0 writes first:
    IF (MYID==0) THEN
       ! Open file to write SET_CUTCELLS_3D progress:
-      WRITE(VERBOSE_FILE,'(A,A,I5.5,A)') TRIM(CHID),'_cutcell_',MYID,'.log'
+      WRITE(VERBOSE_FILE,'(A,A,I0,A)') TRIM(CHID),'_cutcell_',MYID,'.log'
       OPEN(UNIT=LU_SETCC,FILE=TRIM(VERBOSE_FILE),STATUS='UNKNOWN')
       WRITE(LU_ERR,*) ' '
       WRITE(LU_ERR,*) '2. Generate Cut-cells in Meshes :'
@@ -27334,7 +27334,7 @@ IF (GET_CUTCELLS_VERBOSE) THEN
             TAG=IPROC
             CALL MPI_SEND(CC_COMPUTE_MESH(1),NMESHES,MPI_LOGICAL,0,TAG,MPI_COMM_WORLD,IERR)
             ! Open file to write SET_CUTCELLS_3D progress:
-            WRITE(VERBOSE_FILE,'(A,A,I5.5,A)') TRIM(CHID),'_cutcell_',MYID,'.log'
+            WRITE(VERBOSE_FILE,'(A,A,I0,A)') TRIM(CHID),'_cutcell_',MYID,'.log'
             OPEN(UNIT=LU_SETCC,FILE=TRIM(VERBOSE_FILE),STATUS='UNKNOWN')
             WRITE(LU_SETCC,*) ' '
             WRITE(LU_SETCC,*) '2. Generate Cut-cells in Meshes :'
@@ -27359,7 +27359,7 @@ IF (GET_CUTCELLS_VERBOSE) THEN
             DO NOM=1,NMESHES
                IF(CC_COMPUTE_MESH_AUX(NOM)) NMESH_CC = NMESH_CC + 1
             ENDDO
-            WRITE(VERBOSE_FILE_AUX,'(A,A,I5.5,A)') TRIM(CHID),'_cutcell_',IPROC,'.log'
+            WRITE(VERBOSE_FILE_AUX,'(A,A,I0,A)') TRIM(CHID),'_cutcell_',IPROC,'.log'
             WRITE(LU_ERR,'(A,I4,A,I4,A,A,A)',advance="no") ' Process MYID=',IPROC,', will process M=',NMESH_CC, &
                                                            ' meshes in file ',TRIM(VERBOSE_FILE_AUX),'.'
             WRITE(LU_ERR,'(A)',advance="no") ' Meshes to Process : '
@@ -44462,7 +44462,7 @@ SUBROUTINE SET_GEOM_DEFAULTS
    ! Set defaults
 
    ZMIN=ZS_MIN
-   WRITE(ID,'(A,I6.6)') 'geom_',N
+   WRITE(ID,'(A,I0)') 'geom_',N
    SURF_ID(:)= 'null'
    SURF_IDS = 'null'
    SURF_ID6 = 'null'
