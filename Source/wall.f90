@@ -3176,7 +3176,7 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
                   ITER = ITER + 1
                   C_S = 0._EB
                   H_S = 0._EB
-                  ITMP = INT(T_NODE)
+                  ITMP = MIN(4999,INT(T_NODE))
                   H_S = 0._EB
                   T_S: DO N=1,SF%N_MATL
                      IF (ONE_D%MATL_COMP(N)%RHO(I)<=0._EB) CYCLE T_S
