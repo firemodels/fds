@@ -899,8 +899,6 @@ CHARACTER(LEN=1024) :: SLICEPARMS, SLICELABEL
 CHARACTER(7) :: SMLAB
 TYPE(PATCH_TYPE), POINTER :: PA
 INTEGER, PARAMETER :: SOOT=1, FIRE=2, TEMP=3, CO2=4
-INTEGER :: MULTI_RES
-
 
 TNOW=CURRENT_TIME()
 
@@ -1153,17 +1151,10 @@ DO N=1,M%N_SLCF
       ENDIF
       M%N_STRINGS = M%N_STRINGS + 1
 
-      IF (SL%MULTI_RES) THEN
-         MULTI_RES = 1
-      ELSE
-         MULTI_RES = 0
-      ENDIF
       IF (SL%ID/='null') THEN
-         WRITE(SLICELABEL,'(A,A,A,A,A,A,I6,1X,I2)') ' # ',TRIM(SL%SLICETYPE),' %',TRIM(SL%ID),TRIM(SLICEPARMS),&
-                                                ' ! ',SL%SLCF_INDEX, MULTI_RES
+         WRITE(SLICELABEL,'(A,A,A,A,A,A,I6,1X)') ' # ',TRIM(SL%SLICETYPE),' %',TRIM(SL%ID),TRIM(SLICEPARMS),' ! ',SL%SLCF_INDEX
       ELSE
-         WRITE(SLICELABEL,'(A,A,A,A,I6,1X,I2)') ' # ',TRIM(SL%SLICETYPE),TRIM(SLICEPARMS),&
-                                            ' ! ',SL%SLCF_INDEX, MULTI_RES
+         WRITE(SLICELABEL,'(A,A,A,A,I6,1X)') ' # ',TRIM(SL%SLICETYPE),TRIM(SLICEPARMS),' ! ',SL%SLCF_INDEX
       ENDIF
       IF (SL%SLICETYPE=='STRUCTURED') THEN
          IF (SL%CELL_CENTERED) THEN
@@ -1171,8 +1162,7 @@ DO N=1,M%N_SLCF
          ELSEIF (SL%FACE_CENTERED) THEN
             WRITE(M%STRING(M%N_STRINGS),'(A,I6,A)') 'SLCD',NM,TRIM(SLICELABEL)
          ELSEIF (SL%TERRAIN_SLICE) THEN
-           WRITE(M%STRING(M%N_STRINGS),'(A,I6,F10.4,A,1X,A,I6,1X,I2)') 'SLCT',NM,SL%AGL_SLICE,TRIM(SLICEPARMS),&
-                                           ' ! ',SL%SLCF_INDEX, MULTI_RES
+           WRITE(M%STRING(M%N_STRINGS),'(A,I6,F10.4,A,1X,A,I6,1X)') 'SLCT',NM,SL%AGL_SLICE,TRIM(SLICEPARMS),' ! ',SL%SLCF_INDEX
          ELSE
             WRITE(M%STRING(M%N_STRINGS),'(A,I6,A)') 'SLCF',NM,TRIM(SLICELABEL)
          ENDIF
@@ -5756,23 +5746,7 @@ QUANTITY_LOOP: DO IQ=1,NQT
          NX = I2 + 1 - I1
          NY = J2 + 1 - J1
          NZ = K2 + 1 - K1
-         IF(SL%MULTI_RES.AND.NX*NY*NZ.GT.0) THEN
-            ALLOCATE(QQ_PACK(NX*NY*NZ))
-            DO K = K1, K2
-               KFACT = NX*NY*(K-K1)
-               DO J = J1, J2
-                  JFACT = (J-J1)*NX
-                  DO I = I1, I2
-                     IFACT = (I - I1)
-                     QQ_PACK(1+IFACT+JFACT+KFACT) = QQ(I,J,K,1)
-                  ENDDO
-               ENDDO
-            ENDDO
-            WRITE(LU_SLCF(IQ,NM)) (QQ_PACK(SL%REORDER_TO_KJI(I)),I=1,NX*NY*NZ)
-            DEALLOCATE(QQ_PACK)
-         ELSE
-            WRITE(LU_SLCF(IQ,NM)) (((QQ(I,J,K,1),I=I1,I2),J=J1,J2),K=K1,K2)
-         ENDIF
+         WRITE(LU_SLCF(IQ,NM)) (((QQ(I,J,K,1),I=I1,I2),J=J1,J2),K=K1,K2)
          CLOSE(LU_SLCF(IQ,NM))
 
          IF (SL%RLE) THEN
