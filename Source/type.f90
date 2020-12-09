@@ -133,8 +133,8 @@ END TYPE MATL_COMP_TYPE
 
 !> \brief Gas mass concentration in solid for 1-D mass transfer
 TYPE SPEC_COMP_TYPE
-   REAL(EB), POINTER, DIMENSION(:) :: RHO !< (1:NWP) Gas density (kg/m3)
-!   REAL(EB), POINTER, DIMENSION(:) :: RHO_DOT !< (1:NWP) Change in gas density (kg/m3/s)
+   REAL(EB), POINTER, DIMENSION(:) :: RHO_ZZ !< (0:NWP+1) Gas concentratoin (kg/m3)
+!   REAL(EB), POINTER, DIMENSION(:) :: RHO_DOT !< (1:NWP) Change in gas concentration (kg/m3/s)
 END TYPE SPEC_COMP_TYPE
 
 
