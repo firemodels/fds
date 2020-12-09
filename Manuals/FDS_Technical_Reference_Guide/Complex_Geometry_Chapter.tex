@@ -11,7 +11,7 @@
 \typeout{new file: Complex_Geometry_Chapter.tex}
 
 
-\chapter{Cut Cell Immersed Boundary Method (CC\_IBM) Technical Notes}
+\chapter{Unstructured Geometry Technical Notes}
 
 
 \section{Introduction}
@@ -74,7 +74,7 @@ In equation~\eqref{eq:bal2}, the following convective and diffusive fluxes per u
 The definition of diffusion velocities $\mathbf{V}_\alpha$ is a central component of multispecies mass transport. For atmospheric combustion we consider the binary diffusion of all species respect to Nitrogen, the most abundant (\textit{background}) species. This simplification allows us to uncouple the diffusive fluxes, using Ficks Law of diffusion
 %
 \begin{equation}
-   \mathbf{J_{d \alpha}} = \rho Y_\alpha  \mathbf{V}_\alpha = - \rho D_\alpha \boldsymbol{\nabla} Y_\alpha \label{eq:fick}
+   \mathbf{J_{d \alpha}} = \rho Y_\alpha  \mathbf{V}_\alpha = - \rho D_\alpha \boldsymbol{\nabla} Y_\alpha
 \end{equation}
 %
 where $D_\alpha$ is the binary diffusivity coefficient respect to the background species.
@@ -183,9 +183,10 @@ We assume (see figure~\ref{Fig:FVdiscCC}a) the cut-cell definition algorithm has
 %
 \subsection{CC discretization of Diffusive term}  \label{sec:CCdiff}
 
-Consider the FV discretization of the diffusive term (equation~\eqref{eq:discfvdiff}) on cut-cell $ii$ in figure~\ref{Fig:FVdiscCC}b. We have
+Consider the FV discretization of the diffusive term (equation~\eqref{eq:intconvdiff}) on cut-cell $ii$ in figure~\ref{Fig:FVdiscCC}b. We have
 %
 \begin{equation}
+    \int_{\Omega_{ii}} { \boldsymbol{\nabla} \cdot \left(  \mathbf{J_{d \alpha}}  \right)  } d \Omega =
     \int_{\partial \Omega_{ii}} { \left( - \rho D_\alpha \boldsymbol{\nabla} Y_\alpha \right) \cdot \hat{\mathbf{n}}_{ii} } \: d \partial \Omega = \sum^{nf_c=6}_{k=1}
     \left( - \rho D_\alpha \boldsymbol{\nabla} Y_\alpha \right)_k \cdot \hat{\mathbf{n}}_{ii,k} \: A_k \label{eq:discfvdiffcc}
 \end{equation}
@@ -300,7 +301,7 @@ where $K_{jj,k}=K_{ii,k}=[ \rho D_\alpha ]_p \frac{A_k}{(y_{ii}-y_{jj})}$. Note 
 \end{equation}
 %
 
-Similar expressions would be found for a \texttt{GASPHASE} cut-face normal to the $x$ direction. The last two expressions are the cut-cell versions of what was seen on Section~\ref{Sec:FVdiff}. Similar expressions are found for constant density diffusive fluxes, where $K_{jj,k}'=K_{ii,k}'=[D_\alpha ]_p \frac{A_k}{(y_{ii}-y_{jj})}$ coefficients are associated with variables $\left( \rho Y_{\alpha} \right)_{ii}$, and $\left( \rho Y_{\alpha} \right)_{jj}$.
+Similar expressions would be found for a \texttt{GASPHASE} cut-face normal to the $x$ direction. Alternative expressions are found for constant density diffusive fluxes, where $K_{jj,k}'=K_{ii,k}'=[D_\alpha ]_p \frac{A_k}{(y_{ii}-y_{jj})}$ coefficients are associated with variables $\left( \rho Y_{\alpha} \right)_{ii}$, and $\left( \rho Y_{\alpha} \right)_{jj}$.
 
 
 \subsection*{C. Faces $\mathbf{1},\mathbf{2}$ are \texttt{INBOUNDARY} \textit{cut-faces}:}
@@ -312,7 +313,7 @@ Consider \texttt{INBOUNDARY} cut-face $k=\mathbf{1}$ in figure~\ref{Fig:FVdiscCC
 \end{equation}
 %
 where as before, the prescribed normal derivative of $Y_\alpha$ on this face $\partial Y_\alpha / \partial n |_k=\partial  \gamma_{ii,k}$ is defined in the direction of $\hat{\mathbf{n}}_1$.
-This term adds to $\mathbf{F_{BC \alpha}}$ in the location of cell $ii$. Similarly to what was seen on section~\ref{sec:FVBCsCart} for \texttt{SOLID\_BOUNDARIES}, zero diffusive mass flux implies a homogeneous $\partial Y_\alpha / \partial n |_k=0$ for the mass fraction field of species $\alpha$.
+This term adds to $\mathbf{F_{BC \alpha}}$ in the location of cell $ii$. For \texttt{SOLID\_BOUNDARIES}, zero diffusive mass flux implies a homogeneous $\partial Y_\alpha / \partial n |_k=0$ for the mass fraction field of species $\alpha$.
 
 
 % Here define how we treat CFACEs Boundary Conditions.
@@ -394,7 +395,7 @@ we replace $\phi_1(\xi_p)$ by $\overline{\phi_1}(v_k)=1/2*(1+sgn(v_k))$ and $\ph
 
 \subsection*{C. Faces $\mathbf{1},\mathbf{2}$ are \texttt{INBOUNDARY} \textit{cut-faces}:}
 
-The treatment of advective terms in boundary cut-faces is the same as defined in section~\ref{sec:FVBCsCart}, in particular in the source arising from the immersed boundary treatment derived transpiration velocities.
+The treatment of advective terms in boundary cut-faces is similar as described before, in particular in the source arising from the immersed boundary treatment derived transpiration velocities.
 
 \subsection{Unsteady evolution: Fully explicit time integration for scalars} \label{sec:exscl}
 
@@ -569,19 +570,28 @@ where as time has been discretized, $\mathbf{u}^{n+1}$ represents a numerical ap
 Although in the original problem~\eqref{eq:LowMachMom}-\eqref{eq:LowMachDiv} no boundary condition is required for $H(\mathbf{x},t)$, a consequence of the projection scheme is that boundary conditions are required on the Poisson equation of step~\eqref{it:FSPoisson}. For explicit methods and stationary \textit{solid} boundaries, the corresponding boundary condition is \textit{homogeneous} Neumann for $H^n$, $\partial H^n / \partial x_n =0$ in $\partial \Omega,\partial \Omega_1,...,\partial \Omega_{nbods}$ (i.e.~\cite{Perot:1993}).
 The next component of our scheme is used to approximate the no slip boundary condition for immersed solid boundaries. We employ a direct forcing immersed boundary method for the momentum equations~\cite{Fadlun:2000}. In order to do this, a force field is devised on the discrete momentum equations on grid faces crossed by the immersed surfaces, to approximate the no-slip boundary condition on said surfaces. We describe some preliminary concepts before introducing our IBM+CC momentum-pressure coupling scheme.
 
-\subsection{DNS : Simple Planar Velocity interpolation:}
+\subsection{Tangential Velocity estimation for wall modeled IBM:}
 
-% To do, probably goes together with next section.
-
-
-\subsection{Dynamic Velocity estimation for wall modeled IBM:}
+% To do.
 
 
-% To do. See writeup in FAA Tech Report or Atmosphere manuscript.
+\subsection{Tangential velocities estimated through Cartesian stresses:}
+
+
+% To do. 
 
 
 \subsection{Equivalence of discrete divergence integrals among cut-cells and underlying Eulerian cells:}
 
+% figure
+\begin{figure}[h]
+      \centering
+      \includegraphics[trim = 30mm 22mm 40mm 22mm, clip,
+       width=0.75\linewidth]{../../../fig/fds/Geometry_Figures/CutCellsIBSketchNormal.png}
+      \caption{Velocity interpolation along normal through cut-face centroid $d$: \texttt{GASPHASE} cut-cells,  corresponding \texttt{GASPHASE} regular and cut-faces (in red), and underlying Eulerian staggered mesh are shown. Velocity points used for linear IB interpolation to cut-face centroids (in red) are shown. }
+        \label{Fig:IBCart}
+\end{figure}
+%
 Consider Eulerian cell $i,j$ in figure~\ref{Fig:IBCart}, containing a \texttt{GASPHASE} cut-cell $ii$ with centroid $\mathbf{x}_{ii}$. The integral of the Eulerian cell velocity divergence can be divided as:
 %
 \begin{equation}
