@@ -1684,7 +1684,7 @@ PARTICLE_LOOP: DO IP=1,NLP
                   LP%ONE_D%IOR = 1
                   HIT_SOLID = .TRUE.
 
-                  CALL VENT_PARTICLE_EXTRACTION(EXTRACT_PARTICLE,CFACE_INDEX=ICF)
+                  CALL VENT_PARTICLE_EXTRACTION(HIT_SOLID,EXTRACT_PARTICLE,CFACE_INDEX=ICF)
                   IF (EXTRACT_PARTICLE) EXIT TIME_STEP_LOOP
 
                ENDIF CFACE_ATTACH
@@ -1738,7 +1738,9 @@ PARTICLE_LOOP: DO IP=1,NLP
             IW = WALL_INDEX(IC_TRY,-IOR_HIT)
             IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
                LP%WALL_INDEX = IW
-               CALL VENT_PARTICLE_EXTRACTION(EXTRACT_PARTICLE,WALL_INDEX=IW)
+               HIT_SOLID = .TRUE.
+               CALL VENT_PARTICLE_EXTRACTION(HIT_SOLID,EXTRACT_PARTICLE,WALL_INDEX=IW)
+               IF (.NOT. HIT_SOLID) EXIT TRIAL_LOOP
                IF (EXTRACT_PARTICLE) EXIT TIME_STEP_LOOP
                LP%ONE_D%IOR  = IOR_HIT
                LP%X = X_TRY
@@ -1756,7 +1758,6 @@ PARTICLE_LOOP: DO IP=1,NLP
                LP%ONE_D%JJG = JJG_TRY
                LP%ONE_D%KKG = KKG_TRY
                IC_NEW = IC_TRY
-               HIT_SOLID = .TRUE.
                EXIT TRIAL_LOOP
             ENDIF
             STEP_FRACTION_PREVIOUS = STEP_FRACTION(IOR_HIT)
@@ -2259,13 +2260,16 @@ END SUBROUTINE MOVE_IN_GAS
 !> this velocity is greater than a user-specified minimum (PARTICLE_EXTRACTION_VELOCITY) OR if a droplet has
 !> hit the floor (LP%Z<ZS) and the floor is POROUS, remove it.
 
-SUBROUTINE VENT_PARTICLE_EXTRACTION(EXTRACT,WALL_INDEX,CFACE_INDEX)
+SUBROUTINE VENT_PARTICLE_EXTRACTION(HIT_SOLID,EXTRACT,WALL_INDEX,CFACE_INDEX)
 
 LOGICAL, INTENT(OUT) :: EXTRACT
+LOGICAL, INTENT(INOUT) :: HIT_SOLID
+LOGICAL :: SET_EXTRACT
 INTEGER, INTENT(IN), OPTIONAL :: WALL_INDEX,CFACE_INDEX
 INTEGER :: SURF_INDEX
 
 EXTRACT = .FALSE.
+SET_EXTRACT = .FALSE.
 
 IF (PRESENT(WALL_INDEX)) THEN
    ONE_D => WALL(WALL_INDEX)%ONE_D
@@ -2282,8 +2286,86 @@ ENDIF
 
 IF ( ONE_D%U_NORMAL>SURFACE(SURF_INDEX)%PARTICLE_EXTRACTION_VELOCITY .OR. &
      (POROUS_FLOOR .AND. LP%Z<ZS .AND. LPC%LIQUID_DROPLET) ) THEN
-   LP%X=-1.E6_EB
-   EXTRACT = .TRUE.
+   IF (ONE_D%NODE_INDEX > 0) THEN
+      IF (DUCTNODE(ONE_D%NODE_INDEX)%TRANSPORT_PARTICLES) THEN
+         SELECT CASE (ONE_D%IOR)
+            CASE(1)
+               IF(ONE_D%IIG-2 < 1) THEN
+                  SET_EXTRACT = .TRUE.
+               ELSE
+                  IF(SOLID(CELL_INDEX(ONE_D%IIG-2,ONE_D%JJG,ONE_D%KKG))) THEN
+                     SET_EXTRACT = .TRUE.
+                  ELSE
+                     LP%X = X(ONE_D%IIG-2)-0.01_EB*DX(ONE_D%IIG-2)
+                     HIT_SOLID = .FALSE.
+                  ENDIF
+               ENDIF
+            CASE(-1)
+               IF(ONE_D%IIG+2 > IBAR) THEN
+                  SET_EXTRACT = .TRUE.
+               ELSE
+                  IF(SOLID(CELL_INDEX(ONE_D%IIG+2,ONE_D%JJG,ONE_D%KKG))) THEN
+                     SET_EXTRACT = .TRUE.
+                  ELSE
+                     LP%X = X(ONE_D%IIG+1)+0.01_EB*DX(ONE_D%IIG+2)
+                     HIT_SOLID = .FALSE.
+                  ENDIF
+               ENDIF
+            CASE(2)
+               IF(ONE_D%JJG-2 < 1) THEN
+                  SET_EXTRACT = .TRUE.
+               ELSE
+                  IF(SOLID(CELL_INDEX(ONE_D%IIG,ONE_D%JJG-2,ONE_D%KKG))) THEN
+                     SET_EXTRACT = .TRUE.
+                  ELSE
+                     LP%Y = Y(ONE_D%JJG-2)-0.01_EB*DY(ONE_D%JJG-2)
+                     HIT_SOLID = .FALSE.
+                  ENDIF
+               ENDIF             
+            CASE(-2)
+               IF(ONE_D%JJG+2 > JBAR) THEN
+                  SET_EXTRACT = .TRUE.
+               ELSE
+                  IF(SOLID(CELL_INDEX(ONE_D%IIG,ONE_D%JJG+2,ONE_D%KKG))) THEN
+                     SET_EXTRACT = .TRUE.
+                  ELSE
+                     LP%Y = Y(ONE_D%JJG+1)+0.01_EB*DY(ONE_D%JJG+2)
+                     HIT_SOLID = .FALSE.
+                  ENDIF
+               ENDIF
+            CASE(3)
+               IF(ONE_D%KKG-2 < 1) THEN
+                  SET_EXTRACT = .TRUE.
+               ELSE
+                  IF(SOLID(CELL_INDEX(ONE_D%IIG,ONE_D%JJG,ONE_D%KKG-2))) THEN
+                     SET_EXTRACT = .TRUE.
+                  ELSE
+                     LP%Z = Z(ONE_D%KKG-2)-0.01_EB*DZ(ONE_D%KKG-2)
+                     HIT_SOLID = .FALSE.
+                  ENDIF
+               ENDIF             
+            CASE(-3)
+               IF(ONE_D%KKG+2 > KBAR) THEN
+                  SET_EXTRACT = .TRUE.
+               ELSE
+                  IF(SOLID(CELL_INDEX(ONE_D%IIG,ONE_D%JJG,ONE_D%KKG+2))) THEN
+                     SET_EXTRACT = .TRUE.
+                  ELSE
+                     LP%Z = Z(ONE_D%KKG+1)+0.01_EB*DZ(ONE_D%KKG+2)
+                     HIT_SOLID = .FALSE.
+                  ENDIF
+               ENDIF
+         END SELECT            
+      ELSE
+         SET_EXTRACT = .TRUE.
+      ENDIF
+   ELSE
+      SET_EXTRACT = .TRUE.
+   ENDIF
+   IF (SET_EXTRACT) THEN
+      LP%X=-1.E6_EB
+      EXTRACT = .TRUE.
+   ENDIF      
 ENDIF
 
 END SUBROUTINE VENT_PARTICLE_EXTRACTION

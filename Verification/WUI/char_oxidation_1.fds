@@ -89,7 +89,6 @@ CP_ASH = 1.244(TMP_VEG+273/[TMPA+273])**0.315 kJ/kg/C Lautenberger & Fernandez-P
       SAMPLING_FACTOR=1 
       SURF_ID='foliage' 
       DRAG_COEFFICIENT=2.8
-      SHAPE_FACTOR = 0.32
       QUANTITIES='PARTICLE TEMPERATURE','PARTICLE MASS' 
       STATIC=.TRUE. 
       COLOR='BROWN' /

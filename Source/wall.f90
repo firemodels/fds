@@ -3132,7 +3132,7 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
             MATL_REMESH: DO N=1,SF%N_MATL
                IF (ONE_D%MATL_COMP(N)%RHO(I)<=TWO_EPSILON_EB) CYCLE MATL_REMESH
                ML  => MATERIAL(SF%MATL_INDEX(N))
-               ITMP = INT(ONE_D%TMP(I))
+               ITMP = MIN(4999,INT(ONE_D%TMP(I)))
                H_S = ML%H(ITMP)+(ONE_D%TMP(I)-REAL(ITMP,EB))*(ML%H(ITMP+1)-ML%H(ITMP))
                RHO_H_S(I) = RHO_H_S(I) + ONE_D%MATL_COMP(N)%RHO(I) * H_S
             ENDDO MATL_REMESH
@@ -3179,7 +3179,7 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
                   ITER = ITER + 1
                   C_S = 0._EB
                   H_S = 0._EB
-                  ITMP = INT(T_NODE)
+                  ITMP = MIN(4999,INT(T_NODE))
                   H_S = 0._EB
                   T_S: DO N=1,SF%N_MATL
                      IF (ONE_D%MATL_COMP(N)%RHO(I)<=0._EB) CYCLE T_S

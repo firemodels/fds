@@ -22,9 +22,10 @@ z_0 = 0.01;
 z_r = 2.;
 u_r = 5.;
 p_r = p_0-rho_0*g*(z_r-z_0);
-T_r = 20+273;
-theta_0 = (p_0/p_r)^0.285*(T_r+(g/cp)*(z_0-z_r));
+T_r = 20+273.15;
+theta_r = T_r*(p_0/p_r)^0.285;
 u_star = kappa*u_r/log(z_r/z_0);
+theta_0 = theta_r/(1+u_star^2*log(z_r/z_0)/(g*kappa^2*L));
 theta_star = u_star^2*theta_0/(g*kappa*L);
 
 z = [z_0 10*z_0 1 2 3 4 5 6 7 8 9 10 15 20 25 30 50 100];
@@ -44,18 +45,15 @@ end
 
 u = (u_star/kappa)*(log(z/z_0) - psi_m);
 theta = theta_0 + (theta_star/kappa)*(log(z/z_0) - psi_h);
-T = theta*(p_0/p_r)^-0.285 - (g/cp)*(z-z_r);
-delta_T = T(1)-T_r;
-T = T - delta_T;
+T = theta.*(p_0./(p_0-rho_0*g*(z-z_0))).^-0.285;
 
 plot(u,z,'ko-'); hold on
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
 axis([0 10 0 30])
-text(.05,.90,'$u_{\rm ref}(2 \; \hbox{m})=5$ m/s','FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter','LaTeX','Units','normalized')
+text(.05,.90,'$u(2 \; \hbox{m})=5$ m/s','FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter','LaTeX','Units','normalized')
 text(.05,.80,['$L=' num2str(L,'%4.0f\n') '$ m'],'FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter','LaTeX','Units','normalized')
 text(.05,.70,['$z_0=' num2str(z_0,'%5.3f\n') '$ m'],'FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter','LaTeX','Units','normalized')
-text(.05,.60,'$T_0=20 \;^\circ$C','FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter','LaTeX','Units','normalized')
 xlabel('Velocity (m/s)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 ylabel('Height (m)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 
@@ -70,10 +68,13 @@ figure(2)
 set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 
-plot(T-273,z,'ko-'); hold on
+plot(T-273.15,z,'ko-'); hold on
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
 axis([15 25 0 30])
+text(.05,.90,'$T(2 \; \hbox{m})=20\;^\circ$C','FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter','LaTeX','Units','normalized')
+text(.05,.80,['$L=' num2str(L,'%4.0f\n') '$ m'],'FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter','LaTeX','Units','normalized')
+text(.05,.70,['$z_0=' num2str(z_0,'%5.3f\n') '$ m'],'FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter','LaTeX','Units','normalized')
 xlabel('Temperature (°C)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 ylabel('Height (m)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 
@@ -89,7 +90,7 @@ print(gcf,'-dpdf',['tmp_' 'L=' num2str(L,'%4.0f\n')])
 fid = fopen('Monin_Obukhov_Profile.csv','wt','n');
 fprintf(fid,'%s\n','z,u,T');
 for j=1:numel(z)
-   fprintf(fid,'%5.1f, %5.2f, %5.1f\n',z(j),u(j),T(j)-273);
+   fprintf(fid,'%6.2f, %5.2f, %6.2f\n',z(j),u(j),T(j)-273.15);
 end
 fclose(fid);
 

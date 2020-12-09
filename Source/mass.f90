@@ -52,6 +52,11 @@ ELSE
    ZZP => ZZS
 ENDIF
 
+! Reset counter for CLIP_RHOMIN, CLIP_RHOMAX
+! Done here so DT_RESTRICT_COUNT will persist until WRITE_DIAGNOSTICS is called
+
+IF (PREDICTOR) DT_RESTRICT_COUNT = 0
+
 ! Species face values
 
 SPECIES_LOOP: DO N=1,N_TOTAL_SCALARS
@@ -383,7 +388,7 @@ CASE(.TRUE.) PREDICTOR_STEP
 
    ! Check mass density for positivity
 
-   CALL CHECK_MASS_DENSITY(NM)
+   CALL CHECK_MASS_DENSITY
 
    ! Extract mass fraction from RHO * ZZ
 
@@ -539,7 +544,7 @@ CASE(.FALSE.) PREDICTOR_STEP
 
    ! Check mass density for positivity
 
-   CALL CHECK_MASS_DENSITY(NM)
+   CALL CHECK_MASS_DENSITY
 
    ! Extract Y_n from rho*Y_n
 
@@ -596,15 +601,13 @@ END SUBROUTINE DENSITY
 !> \param NM Mesh number
 !> \details Do not apply OpenMP to this routine
 
-SUBROUTINE CHECK_MASS_DENSITY(NM)
+SUBROUTINE CHECK_MASS_DENSITY
 
 USE GLOBAL_CONSTANTS, ONLY : PREDICTOR,RHOMIN,RHOMAX
-INTEGER, INTENT(IN) :: NM
 REAL(EB) :: MASS_N(-3:3),CONST,MASS_C,RHO_ZZ_CUT,RHO_CUT,VC(-3:3),SIGN_FACTOR,SUM_MASS_N,VC1(-3:3),RHO_ZZ_MIN,RHO_ZZ_MAX
 INTEGER  :: IC,I,J,K,N
 REAL(EB), POINTER, DIMENSION(:,:,:) :: DELTA_RHO=>NULL(),DELTA_RHO_ZZ=>NULL(),RHOP=>NULL()
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: RHO_ZZ=>NULL()
-LOGICAL :: CLIP_RHOMIN,CLIP_RHOMAX
 
 IF (CHECK_MASS_CONSERVE) RETURN ! Don't modify scalar components.
 
@@ -761,9 +764,6 @@ DO K=1,KBAR
       ENDDO
    ENDDO
 ENDDO
-
-IF (CLIP_RHOMIN) WRITE(LU_ERR,'(A,F8.3,A,I0)') 'WARNING: Minimum density, ',RHOMIN,' kg/m3, clipped in Mesh ',NM
-IF (CLIP_RHOMAX) WRITE(LU_ERR,'(A,F8.3,A,I0)') 'WARNING: Maximum density, ',RHOMAX,' kg/m3, clipped in Mesh ',NM
 
 END SUBROUTINE CHECK_MASS_DENSITY
 

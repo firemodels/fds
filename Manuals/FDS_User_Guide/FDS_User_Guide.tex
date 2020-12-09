@@ -1358,13 +1358,15 @@ The turbulent Prandtl number $\PR_t$ and the turbulent Schmidt number $\SC_t$ ar
 
 \subsubsection*{Near-Wall Turbulence Model}
 
-By default, FDS uses constant coefficient Smagorinsky \cite{Smagorinsky:1} with Van Driest damping (see \cite{Wilcox:1}) for the eddy viscosity in the first off-wall grid cell because the test filtering operation for the Deardorff model is ill-defined near the wall.  The damping function is added to the eddy viscosity so that the viscosity goes to zero at the correct rate as you approach the wall where the no slip condition applies.
+% By default, FDS uses constant coefficient Smagorinsky \cite{Smagorinsky:1} with Van Driest damping (see \cite{Wilcox:1}) for the eddy viscosity in the first off-wall grid cell because the test filtering operation for the Deardorff model is ill-defined near the wall.  The damping function is added to the eddy viscosity so that the viscosity goes to zero at the correct rate as you approach the wall where the no slip condition applies.
 
-An alternative to the damping function is to use the WALE model of Nicoud and Ducros \cite{Nicoud:1999}.  To implement WALE as the near-wall model use {\ct NEAR\_WALL\_TURBULENCE\_MODEL='WALE'} on the {\ct MISC} line.  Note that even if you have set WALE as the bulk turbulence model, you must also explicitly set WALE as the near-wall turbulence model if that is desired.
+% An alternative to the damping function is to use the WALE model of Nicoud and Ducros \cite{Nicoud:1999}.  To implement WALE as the near-wall model use {\ct NEAR\_WALL\_TURBULENCE\_MODEL='WALE'} on the {\ct MISC} line.  Note that even if you have set WALE as the bulk turbulence model, you must also explicitly set WALE as the near-wall turbulence model if that is desired.
 
+By default, FDS uses the WALE model of Nicoud and Ducros \cite{Nicoud:1999} for the eddy viscosity in the first off-wall grid cell because the test filtering operation for the Deardorff model is ill-defined near a wall.  The WALE model has the advantage that the eddy viscosity tends to zero at the correct rate as you approach the wall where the no slip condition applies.
 
+As an alternative, you may choose to use the constant coefficient Smagorinsky \cite{Smagorinsky:1} model with Van Driest damping (see \cite{Wilcox:1}).  To invoke this model, set {\ct NEAR\_WALL\_TURBULENCE\_MODEL='VAN DRIEST'} on the {\ct MISC} line.
 
-
+Note that the near-wall turbulence model sets the eddy viscosity, $\mu_\mathrm{t}$, near the wall, \emph{not} the wall stress, $\tau_\mathrm{w}$.  The wall stress depends on the choice of wall function, as discussed in Sec.~\ref{info:WALL_MODEL}.
 
 
 \section{Special Topic: Numerical Stability Parameters}
@@ -1906,9 +1908,17 @@ Obstructions may be created or removed during a simulation. See Section~\ref{inf
 
 \subsection{Thin Obstructions}
 
-An obstruction that is relatively thin compared to the gas phase numerical grid spacing is approximated as an infinitely thin sheet. These obstructions, like window panes, form a flow and (partial) radiation barrier, but if the numerical mesh is coarse relative to its thickness, the obstruction might be unnecessarily large if it is assumed to be one layer of mesh cells thick. Smokeview renders this obstruction as a thin sheet, but it is allowed to have thermally-thick boundary conditions. This obstruction\footnote{Prior to FDS 6.7.2, thin obstructions were not allowed to burn. That restriction has been eliminated.} has the drawback that it is not possible to specify a normal velocity component on its surface. A thin sheet obstruction can only have one velocity vector on its face, thus a gas cannot be injected or extracted reliably from a thin obstruction because whatever is pushed from one side is necessarily pulled from the other. If you want to create a simple fan, for example, the obstruction should be specified to be at least one mesh cell thick. To prevent FDS from allowing thin sheet obstructions, set {\ct THICKEN\_OBSTRUCTIONS=.TRUE.} on the {\ct MISC} line, or {\ct THICKEN=.TRUE.} on each {\ct OBST} line for which the thin sheet assumption is not allowed.
+An obstruction that is relatively thin compared to the gas phase numerical grid spacing is approximated as an infinitely thin sheet. These obstructions, like window panes, form a flow and (partial) radiation barrier, but if the numerical mesh is coarse relative to its thickness, the obstruction might be unnecessarily large if it is assumed to be one layer of mesh cells thick. Smokeview renders this obstruction as a thin sheet, but it is allowed to have thermally-thick boundary conditions.
 
-Obstructions that are too small relative to the underlying numerical mesh are rejected. That is, if at least two of the three obstruction dimensions are less than half of the corresponding cell dimensions, the obstruction is ignored.
+This obstruction has the drawback that it is not possible to specify a normal velocity component on its surface. A thin sheet obstruction can only have one velocity vector on its face, thus a gas cannot be injected or extracted reliably from a thin obstruction because whatever is pushed from one side is necessarily pulled from the other. If you want to create a simple fan, for example, the obstruction should be specified to be at least one mesh cell thick. To prevent FDS from allowing thin sheet obstructions, set {\ct THICKEN\_OBSTRUCTIONS=.TRUE.} on the {\ct MISC} line, or {\ct THICKEN=.TRUE.} on each {\ct OBST} line for which the thin sheet assumption is not allowed.
+
+Thin obstructions may generate a mass source without specification of a normal velocity component.  The gas cell next to the obstruction is given a volumetric source term, but the momentum at the surface remains zero.
+
+\subsection{Specified Versus Actual Areas}
+
+The {\ct OBST} dimensions specified by {\ct XB} in the input file may not (usually do not) perfectly align with the underlying Cartesian mesh.  FDS then ``snaps'' the geometry to fill (or void) the volume of the nearest cell.  Obstructions that are too small relative to the underlying numerical mesh are rejected. That is, if at least two of the three obstruction dimensions are less than half of the corresponding cell dimensions, the obstruction is ignored.  As mentioned above, if you always want the cell to be filled, then specify {\ct THICKEN=.TRUE.} on the {\ct OBST} line.
+
+When the {\ct OBST} snaps to the Cartesian mesh, the area of the cell face is changed, and therefore the total area of a {\ct SURF} may slightly change.  If a specified mass flux boundary (including {\ct HRRPUA}) is given, then FDS will automatically adjust this mass flux so that total of the \emph{specified area} times the \emph{specified mass flux} is maintained.
 
 \subsection{Overlapping Obstructions}
 
@@ -2964,7 +2974,7 @@ Refer to the FDS Tech Guide \cite{FDS_Tech_Guide} for further details of the for
 \subsubsection{Atmospheric Boundary Layer Wall Model}
 \label{sec:abl_model}
 
-The incorporation of buoyancy into the wall function is the domain of Monin-Obuhkov (MO) similarity theory, as discussed in Sec.~\ref{info:WIND}. Further mathematical details of the ABL wall model are discussed in the FDS Tech Guide \cite{FDS_Math_Guide}.  Note that the model assumes gravity to point in the $-z$ direction.  To specify this model for a particular surface, set {\ct HEAT\_TRANSFER\_MODEL} equal to {\ct 'ABL'} on the {\ct SURF} line together with the aerodynamic roughness length, {\ct Z\_0}.  For example,
+The incorporation of buoyancy into the wall function is the domain of Monin-Obukhov (MO) similarity theory, as discussed in Sec.~\ref{info:WIND}. Further mathematical details of the ABL wall model are discussed in the FDS Tech Guide \cite{FDS_Math_Guide}.  Note that the model assumes gravity to point in the $-z$ direction.  To specify this model for a particular surface, set {\ct HEAT\_TRANSFER\_MODEL} equal to {\ct 'ABL'} on the {\ct SURF} line together with the aerodynamic roughness length, {\ct Z\_0}.  For example,
 \begin{lstlisting}
 &SURF ID='ground', HEAT_TRANSFER_MODEL='ABL', Z_0=0.05 /
 \end{lstlisting}
@@ -4062,7 +4072,7 @@ where $\rho$ is the density, $Z_\alpha$ is the mass fraction of $\alpha$, $u$ is
 \subsection{Tangential Velocity Boundary Conditions at Solid Surfaces}
 \label{info:WALL_MODEL}
 
-The no-slip condition implies that the continuum tangential gas velocity at a surface is zero. In turbulent flow the velocity increases rapidly through a boundary layer that is only a few millimeters thick to its ``free-stream'' value. In most practical simulations, it is not possible to resolve this boundary layer directly; thus, an empirical model is used to represent its effect on the overall flow field. For a DNS (Direct Numerical Simulation), the velocity gradient at the wall is computed directly from the resolved velocity near the wall ({\ct NO\_SLIP=.TRUE.} by default). For an LES (Large Eddy Simulation), a ``log law'' wall model is applied. The ``sand grain'' surface roughness\footnote{Note the \emph{sand grain} roughness, $s$, is different than the \emph{aerodynamic} roughness, $z_0$, used in atmospheric flows (see Sec.~\ref{aerodynamic_roughness}).} (in meters) is set by {\ct ROUGHNESS} on {\ct SURF}. See the FDS Technical Reference Guide~\cite{FDS_Math_Guide} for wall model details. To force a solid boundary to have a free-slip condition, set {\ct FREE\_SLIP=.TRUE.}\footnote{This parameter sets the wall stress to zero (removes viscous friction).  It is \emph{not} equivalent to the {\ct SAWTOOTH=.FALSE.} functionality from versions of FDS prior to Version 6.} on the {\ct SURF} line. In LES, to override the wall model and force a no-slip boundary condition, set {\ct NO\_SLIP=.TRUE.} on the {\ct SURF} line.
+The no-slip condition implies that the continuum tangential gas velocity at a surface is zero. In turbulent flow the velocity increases rapidly through a boundary layer that is only a few millimeters thick to its ``free-stream'' value. In most practical simulations, it is not possible to resolve this boundary layer directly; thus, an empirical model is used to represent its effect on the overall flow field. For a DNS (Direct Numerical Simulation), the velocity gradient at the wall is computed directly from the resolved velocity near the wall ({\ct NO\_SLIP=.TRUE.} by default). For an LES (Large Eddy Simulation), a ``log law'' wall model is applied. The ``sand grain'' surface roughness\footnote{Note the \emph{sand grain} roughness, $s$, is different than the \emph{aerodynamic} roughness, $z_0$, used in atmospheric flows (see Sec.~\ref{aerodynamic_roughness}).} (in meters) is set by {\ct ROUGHNESS} on {\ct SURF}. See the FDS Technical Reference Guide~\cite{FDS_Math_Guide} for wall model details. To force a solid boundary to have a free-slip condition, set {\ct FREE\_SLIP=.TRUE.} on the {\ct SURF} line. In LES, to override the wall model and force a no-slip boundary condition, set {\ct NO\_SLIP=.TRUE.} on the {\ct SURF} line.
 
 
 \subsection{Synthetic Turbulence Inflow Boundary Conditions}
@@ -7063,12 +7073,12 @@ The input files called {\ct wind\_example\_nn.fds} in the samples folder called 
 \label{wind_example_fig_1}
 \end{figure}
 
-In the example called {\ct wind\_example\_32} there are various rectangular blocks scattered about the domain to represent buildings. Figure~\ref{wind_example_fig_2} displays the specified wind speed profile in the vertical direction compared to the computed time average profile. The two profiles should be similar.
+In the example called {\ct wind\_example\_32} there are various rectangular blocks scattered about the domain to represent buildings and the wind is held steady. Figure~\ref{wind_example_fig_2} displays the specified wind speed and temperature profiles in the vertical direction compared to the computed time average profiles. The profiles should be similar, but not exactly the same.
 
 \begin{figure}[ht]
-\centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/wind_example_prof}
-\caption[Results of the {\ct wind\_example\_32} test case]{Simulated vs. specified vertical wind speed profile.}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/wind_example_u_prof}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/wind_example_T_prof}
+\caption[Results of the {\ct wind\_example\_32} test case]{Simulated vs. specified vertical wind speed and temperature profiles.}
 \label{wind_example_fig_2}
 \end{figure}
 
@@ -7525,7 +7535,7 @@ First, the {\ct PART} line defines a class of solid particles that represent pin
 \be
    \bof_{\rm b} = \frac{\rho}{2} \, C_{\rm d} \, C_{\rm s} \, \beta \, \sigma \, \bu \, ||\bu||
 \ee
-where $\rho$ is the air density, $C_{\rm d}$ is the drag coefficient, $C_{\rm s}$ is the {\ct SHAPE\_FACTOR}, $\beta$ is the packing ratio (see below), $\sigma$ is the surface area to volume ratio (see below), and $\bu$ is the air velocity.
+where $\rho$ is the air density, $C_{\rm d}$ is the drag coefficient, $C_{\rm s}$ is the {\ct SHAPE\_FACTOR} (0.25 by default), $\beta$ is the packing ratio (see below), $\sigma$ is the surface area to volume ratio (see below), and $\bu$ is the air velocity.
 
 The {\ct PART} line also tells Smokeview to visualize each needle as a tube that is 0.1~m long and 0.5~mm in diameter:
 \begin{lstlisting}
@@ -8712,7 +8722,7 @@ To visualize the flow patterns better, save planar slices of data, either in the
 
 The namelist group {\ct DUMP} contains parameters (Table \ref{tbl:DUMP}) that control the rate at which output files are written, and various other global parameters associated with output files. Its parameters include:
 \begin{description}
-\item[{\ct NFRAMES}] Number of output dumps per calculation. The default is 1000. Device data, slice data, particle data, isosurface data, 3D smoke data, boundary data, solid phase profile data, and control function data are saved every {\ct (T\_END-T\_BEGIN)/NFRAMES} seconds unless otherwise specified using {\ct DT\_DEVC}, {\ct DT\_SLCF}, {\ct DT\_PART}, {\ct DT\_ISOF}, {\ct DT\_BNDF}, {\ct DT\_PROF}, or {\ct DT\_CTRL}. Note that {\ct DT\_SLCF} controls Smoke3D output. {\ct DT\_HRR} controls the output of heat release rate and associated quantities.
+\item[{\ct NFRAMES}] Number of output dumps per calculation. The default is 1000. Device data, slice data, particle data, isosurface data, 3D smoke data, boundary data, solid phase profile data, and control function data are saved every {\ct (T\_END-T\_BEGIN)/NFRAMES} seconds unless otherwise specified using {\ct DT\_DEVC}, {\ct DT\_SLCF}, {\ct DT\_SMOKE3D}, {\ct DT\_PART}, {\ct DT\_ISOF}, {\ct DT\_BNDF}, {\ct DT\_PROF}, or {\ct DT\_CTRL}. {\ct DT\_HRR} controls the output of heat release rate and associated quantities.  Nonuniform discrete time output is available for {\ct SLCF}, {\ct SL3D}, and {\ct BNDF} files using \emph{timers}, as discussed below.
 \item[{\ct MASS\_FILE}] If {\ct .TRUE.}, produce an output file listing the total masses of all gas species as a function of time. It is {\ct .FALSE.} by default because the calculation of all gas species in all mesh cells is time-consuming. The parameter {\ct DT\_MASS} controls the frequency of output.
 \item[{\ct MAXIMUM\_PARTICLES}] Maximum number of Lagrangian particles that can be included on any mesh at any given time. (Default 1000000)
 \item[{\ct SMOKE3D}] If {\ct .FALSE.}, do not produce an animation of the smoke and fire. It is {\ct .TRUE.} by default.
@@ -8866,6 +8876,12 @@ The {\ct SLCF} (``slice file'') namelist group parameters (Table~\ref{tbl:SLCF})
 
 By default, 1-D and 2-D slice files are saved {\ct NFRAMES} times per simulation. You can control the frequency of output with {\ct DT\_SLCF} on the {\ct DUMP} line. If the ``slice'' is a 3-D volume, then its output frequency is controlled by the parameter {\ct DT\_SL3D}.  By default, FDS sets {\ct DT\_SL3D=(T\_END-T\_BEGIN)/5}.  You may specify a different value of {\ct DT\_SL3D} on {\ct DUMP}.  Note that 3-D slice files can become extremely large if {\ct DT\_SL3D} is small.
 
+It is also possible to specify discrete time outputs for both {\ct SLCF} and {\ct SL3D} files using \emph{timers}.  On the {\ct DUMP} line, instead of using a uniform {\ct DT\_SLCF}, you may use {\ct SLCF\_TIMER(1:10)}.  For example, suppose you only wanted slice file output at only at the times 27 s, 53 s, 100 s in the simulation.  Then you could use
+\begin{lstlisting}
+&DUMP SLCF_TIMER(1:3)=27,53,100 /
+\end{lstlisting}
+Similarly, instead of {\ct DT\_SL3D}, you may used {\ct SL3D\_TIMER(1:10)}.  This can be useful for drastically reducing the size of the slice files while still managing to synchronize output with experimental data time stamps.
+
 Animated vectors can be created in Smokeview if a given {\ct SLCF} line has the attribute {\ct VECTOR=.TRUE.} If two {\ct SLCF} entries are in the same plane, then only one of the lines needs to have {\ct VECTOR=.TRUE.} Otherwise, a redundant set of velocity component slices will be created.
 
 Normally, FDS averages slice file data at cell corners. For example, gas temperatures are computed at cell centers, but they are linearly interpolated to cell corners and output to a file that is read by Smokeview. To prevent this from happening, set {\ct CELL\_CENTERED=.TRUE.} This forces FDS to output the actual cell-centered data with no averaging. Note that this feature is mainly useful for diagnostics because it enables you to visualize the values that FDS actually computes.  If {\ct CELL\_CENTERED=.TRUE.} is combined with {\ct VECTOR=.TRUE.} then the staggered velocity components will be displayed.  For example,
@@ -8889,6 +8905,8 @@ The {\ct BNDF} (``boundary file'') namelist group parameters allows you to recor
 Note that {\ct BNDF} files (Section~\ref{out:BNDF}) can become very large, so be careful in prescribing the time interval, {\ct DT\_BNDF} on the {\ct DUMP} line. One way to reduce the size of the output file is to turn off the drawing of boundary information on desired obstructions. On any given {\ct OBST} line, if the string {\ct BNDF\_OBST=.FALSE.} is included, the obstruction is not colored. To turn off all boundary drawing, set {\ct BNDF\_DEFAULT=.FALSE.} on the {\ct MISC} line. Then individual obstructions can be turned back on with {\ct BNDF\_OBST=.TRUE.} on the appropriate {\ct OBST} line. Individual faces of a given obstruction can be controlled via {\ct BNDF\_FACE(IOR)}, where {\ct IOR} is the index of orientation (+1 for the positive $x$ direction, -1 for negative, and so on). Normally, FDS averages boundary file data at cell corners. For example, surface temperatures are computed at the center of each surface cell, but they are linearly interpolated to cell corners and output to a file that is read by Smokeview. To prevent this from happening, set {\ct CELL\_CENTERED=.TRUE.} on the {\ct BNDF} line. This forces FDS to output the actual cell-centered data with no averaging. Note that this feature is mainly useful for diagnostics.
 
 Sometimes it is useful to render the {\ct QUANTITY} integrated over time. For example, a heat flux in units of kW/m$^2$ can be integrated in time producing the total energy absorbed by the surface in units of kJ/m$^2$. To do this, set {\ct TEMPORAL\_STATISTIC} equal to {\ct 'TIME INTEGRAL'} on the {\ct BNDF} line. Note that there are no other options for {\ct TEMPORAL\_STATISTIC} on a {\ct BNDF} line.
+
+Control the output frequency of {\ct BNDF} files on {\ct DUMP} using {\ct DT\_BNDF}.  If nonuniform output timings are desired, you may use {\ct BNDF\_TIMER(1:10)}, similar to the example for {\ct SLCF\_TIMER} in Sec.~\ref{info:SLCF}.
 
 
 
@@ -10772,6 +10790,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 \multicolumn{5}{|c|}{{\ct DUMP} (Output Parameters)} \\
 \hline \hline
 \endhead
+{\ct BNDF\_TIMER}                   & Real Vector (10)  & Section~\ref{info:BNDF}           &  s        &                                \\ \hline
 {\ct CFL\_FILE}                     & Logical      & Section~\ref{info:TIME_Control}        &           & {\ct .FALSE.}                  \\ \hline
 {\ct CLIP\_RESTART\_FILES}          & Logical      & Section~\ref{info:restart}             &           & {\ct .TRUE.}                   \\ \hline
 {\ct COLUMN\_DUMP\_LIMIT}           & Logical      & Section~\ref{info:out:DEVC}            &           & {\ct .FALSE.}                  \\ \hline
@@ -10792,6 +10811,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct DT\_RESTART}                   & Real         & Section~\ref{info:DUMP}                &  s        & 1000000.                       \\ \hline
 {\ct DT\_SL3D}                      & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t/5$                   \\ \hline
 {\ct DT\_SLCF}                      & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
+{\ct DT\_SMOKE3D}                   & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
 {\ct EB\_PART\_FILE}                & Logical      & Section~\ref{out:PART}                 &           & {\ct .FALSE.}                  \\ \hline
 {\ct FLUSH\_FILE\_BUFFERS}          & Logical      & Section~\ref{info:DUMP}                &           & {\ct .TRUE.}                   \\ \hline
 {\ct MASS\_FILE}                    & Logical      & Section~\ref{info:DUMP}                &           & {\ct .FALSE.}                  \\ \hline
@@ -10804,6 +10824,8 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct RENDER\_FILE}                  & Character    & Reference~\cite{Smokeview_Users_Guide} &           &                                \\ \hline
 {\ct SIG\_FIGS}                     & Integer      & Section~\ref{info:SIG_FIGS}            &           & 8                              \\ \hline
 {\ct SIG\_FIGS\_EXP}                & Integer      & Section~\ref{info:SIG_FIGS}            &           & 3                              \\ \hline
+{\ct SL3D\_TIMER}                   & Real Vector (10)  & Section~\ref{info:SLCF}           &  s        &                                \\ \hline
+{\ct SLCF\_TIMER}                   & Real Vector (10)  & Section~\ref{info:SLCF}           &  s        &                                \\ \hline
 {\ct SMOKE3D}                       & Logical      & Section~\ref{info:SMOKE3D}             &           & {\ct .TRUE.}                   \\ \hline
 {\ct SMOKE3D\_QUANTITY}             & Character    & Section~\ref{info:SMOKE3D}             &           &                                \\ \hline
 {\ct SMOKE3D\_SPEC\_ID}             & Character    & Section~\ref{info:SMOKE3D}             &           &                                \\ \hline
@@ -11515,7 +11537,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RUNNING\_AVERAGE\_FACTOR}           & Real        & Section~\ref{radiative_part_props}                                    &                   & 0.5                   \\ \hline
 {\ct RUNNING\_AVERAGE\_FACTOR\_WALL}     & Real        & Section~\ref{radiative_part_props}                                    &                   & 0.5                   \\ \hline
 {\ct SAMPLING\_FACTOR}                   & Integer     & Section~\ref{info:part_output}                                        &                   & 1                     \\ \hline
-{\ct SHAPE\_FACTOR}                      & Real        & Section~\ref{pine_needles}                                            &                   &                       \\ \hline
+{\ct SHAPE\_FACTOR}                      & Real        & Section~\ref{pine_needles}                                            &                   & 0.25                  \\ \hline
 {\ct SIGMA\_D}                           & Real        & Section~\ref{info:particle_size}                                      &                   &                       \\ \hline
 {\ct SPEC\_ID}                           & Character   & Section~\ref{thermal_part_props}                                      &                   &                       \\ \hline
 {\ct STATIC}                             & Logical     & Section~\ref{info:PART_SURF}                                          &                   & {\ct .FALSE.}         \\ \hline
@@ -11834,7 +11856,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MAXIMUM\_VALUE}    & Real              & Reference~\cite{Smokeview_Users_Guide}    &           &                   \\ \hline
 {\ct MESH\_NUMBER}      & Integer           & Section~\ref{info:SLCF}                   &           &                   \\ \hline
 {\ct MINIMUM\_VALUE}    & Real              & Reference~\cite{Smokeview_Users_Guide}    &           &                   \\ \hline
-%{\ct MULTI\_RES}        & Logical           & Reference~\cite{info:SLCF}                &           &                   \\ \hline
 {\ct PART\_ID}          & Character         & Section~\ref{info:outputquantities}       &           &                   \\ \hline
 {\ct PBX, PBY, PBZ}     & Real              & Section~\ref{info:SLCF}                   & m         &                   \\ \hline
 {\ct PROP\_ID}          & Character         & Section~\ref{info:FED}                    &           &                   \\ \hline

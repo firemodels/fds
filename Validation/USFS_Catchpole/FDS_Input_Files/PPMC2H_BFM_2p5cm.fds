@@ -40,7 +40,6 @@
       PACKING_RATIO(1) = 0.063
       COLOR = 'FIREBRICK'
       DRAG_COEFFICIENT = 2.8
-      SHAPE_FACTOR   = 0.25
       SURFACE_VOLUME_RATIO(1) = 5710.
       MINIMUM_BURNOUT_TIME = 92.
       THICKNESS(1:2) = 0.076,0.013 /
@@ -78,7 +77,6 @@
 
 &PART ID             = 'NO BURN FUEL' 
       DRAG_COEFFICIENT = 2.8
-      SHAPE_FACTOR   = 0.25
       COLOR          = 'OLIVE'
       SURF_ID        = 'NO BURN FUEL' 
       QUANTITIES     = 'PARTICLE TEMPERATURE','PARTICLE MASS'
