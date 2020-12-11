@@ -6903,7 +6903,7 @@ PROC_MATL_LOOP: DO N=1,N_MATL
          ML%H(I) = ML%H(I-1) + ML%C_S
       ELSE
          NR = -NINT(ML%C_S)
-         ML%H(I) = ML%H(I-1) + EVALUATE_RAMP(REAL(I,EB),0._EB,NR)
+         ML%H(I) = ML%H(I-1) + 0.5_EB*(EVALUATE_RAMP(REAL(I,EB),0._EB,NR)+EVALUATE_RAMP(REAL(I-1,EB),0._EB,NR))
       ENDIF
   ENDDO
 
