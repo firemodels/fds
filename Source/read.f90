@@ -8553,7 +8553,6 @@ USE PHYSICAL_FUNCTIONS, ONLY: GET_SPECIFIC_GAS_CONSTANT
 INTEGER :: SURF_INDEX,N,NL,II,IL,NN,N_CELLS_MAX
 REAL(EB) :: K_S_0,C_S_0,SMALLEST_CELL_SIZE(MAX_LAYERS),SWELL_RATIO,DENSITY_MAX,DENSITY_MIN
 LOGICAL :: PROC_SURF_GRID
-! needed if initializing concentrations instead of mass fractions for internal gases
 REAL(EB) :: GAS_DENSITY, RR_SUM,ZZ_GET(1:N_TRACKED_SPECIES)
 
 ! Calculate ambient temperature thermal DIFFUSIVITY for each MATERIAL, to be used in determining number of solid cells
