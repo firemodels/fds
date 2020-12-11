@@ -2510,7 +2510,8 @@ REAL(EB) :: DUMMY,DTMP,QDXKF,QDXKB,RR,RFACF,RFACB,RFACF2,RFACB2, &
             M_DOT_S_PPP(MAX_MATERIALS),M_DOT_S_PP(MAX_MATERIALS),GEOM_FACTOR,RHO_TEMP(MAX_MATERIALS),RHO_DOT_TEMP(MAX_MATERIALS),&
             DEL_DOT_Q_SC,Q_DOT_G_PPP,Q_DOT_O2_PPP,Q_DOT_G_PP,Q_DOT_O2_PP,R_SURF,U_SURF,V_SURF,W_SURF,T_BC_SUB,DT_BC_SUB,&
             Q_NET_F,Q_NET_B,TMP_RATIO,KODXF,KODXB,H_S,T_NODE,C_S,H_NODE,RHO_C_S(1:NWP_MAX),RHO_H_S(1:NWP_MAX),VOL
-REAL(EB) :: D_Z_N(0:5000),D_Z_TEMP,D_Z_P(0:NWP_MAX+1), D_DRHOZDX(0:NWP_MAX),D_BAR,RR_SUM,GAS_DENSITY
+REAL(EB) :: D_Z_N(0:5000),D_Z_TEMP,D_Z_P(0:NWP_MAX+1), D_DRHOZDX(0:NWP_MAX),D_BAR,PHI_BAR,D_STAR_BAR,&
+            RR_SUM,GAS_DENSITY,POROSITY(0:NWP_MAX+1)
 
 REAL(EB), POINTER, DIMENSION(:) :: DELTA_TMP
 INTEGER :: IIB,JJB,KKB,IWB,NWP,KK,I,NR,NL,N,I_OBST,NS,N_LAYER_CELLS_NEW(MAX_LAYERS),N_CELLS,EXPON,ITMP,ITER
@@ -3246,49 +3247,6 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
 
 ENDIF PYROLYSIS_PREDICTED_IF_2
 
-! Compute mass transfer within the solid
-
-MASS_TRANSFER_1D: IF (SF%MT1D) THEN
-
-   DO NS = 1,SF%N_SPEC
-      ! Set diffusivity
-      D_Z_N = D_Z(:,NS)
-      DO I=1,NWP+1
-         CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,ONE_D%TMP(I),D_Z_TEMP)
-         D_Z_P(I) = D_Z_TEMP
-         ! if user specifies diffusivity on MATL line, over-ride defaults
-         DO N=1,N_MATL
-            ML => MATERIAL(N)
-            IF (ML%DIFFUSIVITY_GAS(NS)>TWO_EPSILON_EB) D_Z_P(I) = ML%DIFFUSIVITY_GAS(NS)
-            EXIT 
-         ENDDO
-      ENDDO
-      ! Set boundary conditions
-      ONE_D%SPEC_COMP(NS)%RHO_ZZ(0) = RHO_ZZ_F(NS)
-      IF (BACKING==INSULATED) THEN
-         ONE_D%SPEC_COMP(NS)%RHO_ZZ(NWP+1) = ONE_D%SPEC_COMP(NS)%RHO_ZZ(NWP)
-      ELSE
-         ONE_D%SPEC_COMP(NS)%RHO_ZZ(NWP+1) = RHO_ZZ_B(NS)
-      ENDIF
-      ! Calculate diffusive fluxes
-      D_Z_P(0) = D_Z_P(1)
-      D_Z_P(NWP+1) = D_Z_P(NWP)
-      DO I=0,NWP
-         D_BAR  = 1._EB / ( DX_WGT_S(I)/D_Z_P(I) + (1._EB-DX_WGT_S(I))/D_Z_P(I+1) )
-         D_DRHOZDX(I) = D_BAR*(ONE_D%SPEC_COMP(NS)%RHO_ZZ(I+1)-ONE_D%SPEC_COMP(NS)%RHO_ZZ(I))*RDXN_S(I)
-      ENDDO
-      D_DRHOZDX(0) = 2._EB*D_DRHOZDX(0)           ! RDXN_S is equal to cell size at first and last cell
-      D_DRHOZDX(NWP) = 2._EB*D_DRHOZDX(NWP)       ! Distance from surface to cell centre is only half of that
-      ! Update gas concentrations
-      DO I=1,NWP
-         ONE_D%SPEC_COMP(NS)%RHO_ZZ(I) = ONE_D%SPEC_COMP(NS)%RHO_ZZ(I)+DT_BC_SUB*(D_DRHOZDX(I)-D_DRHOZDX(I-1))*RDX_S(I)
-         ! + M_DOT_G_PP_ACTUAL
-         ONE_D%SPEC_COMP(NS)%RHO_ZZ(I) = MAX(0._EB,ONE_D%SPEC_COMP(NS)%RHO_ZZ(I)) ! guarantee boundedness
-      ENDDO
-!      IF (NS==2) write(102,*) T,ONE_D%SPEC_COMP(NS)%RHO_ZZ(1:NWP)
-   ENDDO
-ENDIF MASS_TRANSFER_1D
-
 
 ! Calculate thermal properties
 
@@ -3296,6 +3254,7 @@ ONE_D%K_S = 0._EB
 RHO_S   = 0._EB
 ONE_D%RHO_C_S = 0._EB
 ONE_D%EMISSIVITY = 0._EB
+POROSITY = 0._EB
 E_FOUND = .FALSE.
 
 POINT_LOOP3: DO I=1,NWP
@@ -3319,20 +3278,19 @@ POINT_LOOP3: DO I=1,NWP
       ENDIF
       IF (.NOT.E_FOUND) ONE_D%EMISSIVITY = ONE_D%EMISSIVITY + ONE_D%MATL_COMP(N)%RHO(I)*ML%EMISSIVITY/ML%RHO_S
       RHO_S(I) = RHO_S(I) + ONE_D%MATL_COMP(N)%RHO(I)
-
+      POROSITY(I) = POROSITY(I) + ONE_D%MATL_COMP(N)%RHO(I)*ML%POROSITY/ML%RHO_S
    ENDDO MATERIAL_LOOP3
 
    IF (VOLSUM > 0._EB) THEN
       ONE_D%K_S(I) = ONE_D%K_S(I)/VOLSUM
+      POROSITY(I) = POROSITY(I)/VOLSUM
       IF (.NOT.E_FOUND) ONE_D%EMISSIVITY = ONE_D%EMISSIVITY/VOLSUM
    ENDIF
    IF (ONE_D%EMISSIVITY>=0._EB) E_FOUND = .TRUE.
-
    IF (ONE_D%K_S(I)<=TWO_EPSILON_EB)      ONE_D%K_S(I)      = 10000._EB
    IF (ONE_D%RHO_C_S(I)<=TWO_EPSILON_EB)  ONE_D%RHO_C_S(I)  = 0.001_EB
 
 ENDDO POINT_LOOP3
-
 ! Calculate average K_S between at grid cell boundaries. Store result in K_S
 
 ONE_D%K_S(0)     = ONE_D%K_S(1)
@@ -3340,6 +3298,7 @@ ONE_D%K_S(NWP+1) = ONE_D%K_S(NWP)
 DO I=1,NWP-1
    ONE_D%K_S(I)  = 1._EB / ( DX_WGT_S(I)/ONE_D%K_S(I) + (1._EB-DX_WGT_S(I))/ONE_D%K_S(I+1) )
 ENDDO
+
 
 ! Update the 1-D heat transfer equation
 
@@ -3401,6 +3360,59 @@ ONE_D%Q_CON_F = ONE_D%Q_CON_F - 0.5_EB*HTCF*DT_BC_SUB*ONE_D%TMP_F
 
 ONE_D%TMP_F  = MIN(TMPMAX,MAX(TMPMIN,ONE_D%TMP_F))
 ONE_D%TMP_B  = MIN(TMPMAX,MAX(TMPMIN,ONE_D%TMP_B))
+
+
+! Compute 1D mass transfer within the solid
+
+MASS_TRANSFER_1D: IF (SF%MT1D) THEN
+
+   DO NS = 1,SF%N_SPEC
+      ! Set diffusivity
+      D_Z_N = D_Z(:,NS)
+      DO I=1,NWP+1
+         CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,ONE_D%TMP(I),D_Z_TEMP)
+         D_Z_P(I) = D_Z_TEMP
+         ! if user specifies diffusivity on MATL line, over-ride defaults
+         DO N=1,N_MATL
+            ML => MATERIAL(N)
+            IF (ML%DIFFUSIVITY_GAS(NS)>TWO_EPSILON_EB) D_Z_P(I) = ML%DIFFUSIVITY_GAS(NS)
+            EXIT 
+         ENDDO
+      ENDDO
+      ! Set boundary conditions
+      ONE_D%SPEC_COMP(NS)%RHO_ZZ(0) = RHO_ZZ_F(NS)
+      IF (BACKING==INSULATED) THEN
+         ONE_D%SPEC_COMP(NS)%RHO_ZZ(NWP+1) = ONE_D%SPEC_COMP(NS)%RHO_ZZ(NWP)
+      ELSE
+         ONE_D%SPEC_COMP(NS)%RHO_ZZ(NWP+1) = RHO_ZZ_B(NS)
+      ENDIF
+      ! Calculate diffusive fluxes
+      D_Z_P(0) = D_Z_P(1)
+      D_Z_P(NWP+1) = D_Z_P(NWP)
+      POROSITY(0) = POROSITY(1)
+      POROSITY(NWP+1) = POROSITY(NWP)
+      DO I=0,NWP
+         IF (MIN(POROSITY(I),POROSITY(I+1))<1E-6) THEN
+            D_DRHOZDX(I) = 0._EB
+         ELSE
+            PHI_BAR = 1._EB / ( DX_WGT_S(I)/POROSITY(I) + (1._EB-DX_WGT_S(I))/POROSITY(I+1) )
+            D_BAR  = 1._EB / ( DX_WGT_S(I)/D_Z_P(I) + (1._EB-DX_WGT_S(I))/D_Z_P(I+1) )
+            D_STAR_BAR = D_BAR*PHI_BAR
+            D_DRHOZDX(I) = D_STAR_BAR*(ONE_D%SPEC_COMP(NS)%RHO_ZZ(I+1)-ONE_D%SPEC_COMP(NS)%RHO_ZZ(I))*RDXN_S(I)
+         ENDIF
+      ENDDO
+      D_DRHOZDX(0) = 2._EB*D_DRHOZDX(0)           ! RDXN_S is equal to cell size at first and last cell
+      D_DRHOZDX(NWP) = 2._EB*D_DRHOZDX(NWP)       ! Distance from surface to cell centre is only half of that
+      ! Update gas concentrations
+      DO I=1,NWP
+         ONE_D%SPEC_COMP(NS)%RHO_ZZ(I) = ONE_D%SPEC_COMP(NS)%RHO_ZZ(I)+DT_BC_SUB*(D_DRHOZDX(I)-D_DRHOZDX(I-1))*RDX_S(I)
+         ! + M_DOT_G_PP_ACTUAL
+         ONE_D%SPEC_COMP(NS)%RHO_ZZ(I) = MAX(0._EB,ONE_D%SPEC_COMP(NS)%RHO_ZZ(I)) ! guarantee boundedness
+      ENDDO
+!      IF (NS==2) write(102,*) T,ONE_D%SPEC_COMP(NS)%RHO_ZZ(1:NWP)
+   ENDDO
+ENDIF MASS_TRANSFER_1D
+
 
 ! Determine if the iterations are done, otherwise return to the top
 
