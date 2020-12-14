@@ -328,6 +328,7 @@ TYPE EXTERNAL_WALL_TYPE
    INTEGER :: NOM                                     !< Number of the adjacent (Other) Mesh
    INTEGER :: NIC_MIN                                 !< Start of indices for the cell in the other mesh
    INTEGER :: NIC_MAX                                 !< End of indices for the cell in the other mesh
+   INTEGER :: NIC                                     !< NIC_MAX-NIC_MIN
    INTEGER :: IIO_MIN                                 !< Minimum I index of adjacent cell in other mesh
    INTEGER :: IIO_MAX                                 !< Maximum I index of adjacent cell in other mesh
    INTEGER :: JJO_MIN                                 !< Minimum J index of adjacent cell in other mesh
@@ -625,7 +626,7 @@ TYPE SURFACE_TYPE
    REAL(EB), DIMENSION(MAX_LAYERS,MAX_SPECIES) :: LAYER_SPEC_FRAC
    REAL(EB), DIMENSION(MAX_LAYERS) :: LAYER_POROSITY
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: PHIRHOZ_0
-   
+
    ! Level Set Firespread
 
    LOGICAL :: VEG_LSET_SPREAD,VEG_LSET_TAN2
