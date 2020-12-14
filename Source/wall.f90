@@ -223,16 +223,20 @@ CONTAINS
 SUBROUTINE CALCULATE_TMP_F(WALL_INDEX,CFACE_INDEX,PARTICLE_INDEX)
 
 USE MASS, ONLY: SCALAR_FACE_VALUE
+USE PHYSICAL_FUNCTIONS, ONLY: GET_VISCOSITY
+USE MATH_FUNCTIONS, ONLY: INTERPOLATE1D_UNIFORM
 
 INTEGER, INTENT(IN), OPTIONAL :: WALL_INDEX,CFACE_INDEX,PARTICLE_INDEX
-REAL(EB) :: ARO,FDERIV,QEXTRA,QNET,RAMP_FACTOR,RHO_G_2,RSUM_F,PBAR_F,TMP_OTHER,TSI,UN, &
+REAL(EB) :: ARO,FDERIV,QEXTRA,QNET,RAMP_FACTOR,RHO_G_2,RSUM_F,PBAR_F,TMP_OTHER_SOLID,TSI,UN, &
             RHO_ZZ_F(1:N_TOTAL_SCALARS),ZZ_GET(1:N_TRACKED_SPECIES),DUMMY, &
             ZZZ(1:4),RHO_OTHER,RHO_OTHER_2,RHO_ZZ_OTHER(1:N_TOTAL_SCALARS),RHO_ZZ_OTHER_2,RHO_ZZ_G,RHO_ZZ_G_2, &
-            DDO,PBAR_G,PBAR_OTHER,DENOM
+            DDO,PBAR_G,PBAR_OTHER,DENOM,D_Z_N(0:5000),D_Z_G,D_Z_OTHER,RHO_G,TMP_G,TMP_OTHER, &
+            MU_DNS_G,MU_G,MU_DNS_OTHER,MU_OTHER,RHO_D,RHO_D_TURB,RHO_D_DZDN,RHO_D_DZDN_OTHER,RSUM_OTHER
 
 LOGICAL :: INFLOW,SECOND_ORDER_INTERPOLATED_BOUNDARY,SOLID_OTHER,ATMOSPHERIC_INTERPOLATION
 INTEGER :: II,JJ,KK,IIG,JJG,KKG,IOR,IIO,JJO,KKO,N,ADCOUNT,ICG,ICO
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: OM_ZZP=>NULL()
+REAL(EB), POINTER, DIMENSION(:,:,:) :: OM_MUP=>NULL()
 
 SF  => SURFACE(SURF_INDEX)
 
@@ -399,7 +403,7 @@ METHOD_OF_HEAT_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
 
       RHO_OTHER=0._EB
       RHO_ZZ_OTHER=0._EB
-      TMP_OTHER=0._EB
+      TMP_OTHER_SOLID=0._EB
       SOLID_OTHER=.FALSE.
       DDO=1._EB
 
@@ -426,7 +430,7 @@ METHOD_OF_HEAT_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
                RHO_ZZ_OTHER(1:N_TOTAL_SCALARS) = RHO_ZZ_OTHER(1:N_TOTAL_SCALARS) &
                   + ARO*OM_RHOP(IIO,JJO,KKO)*OM_ZZP(IIO,JJO,KKO,1:N_TOTAL_SCALARS)
                IF (SOLID_HT3D) THEN
-                  TMP_OTHER = TMP_OTHER + ARO*OM_TMP(IIO,JJO,KKO)
+                  TMP_OTHER_SOLID = TMP_OTHER_SOLID + ARO*OM_TMP(IIO,JJO,KKO)
                   ICO = MM%CELL_INDEX(IIO,JJO,KKO)
                   IF (MM%SOLID(ICO)) SOLID_OTHER=.TRUE.
                ENDIF
@@ -601,6 +605,77 @@ METHOD_OF_HEAT_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
             ONE_D%TMP_F = PBAR_F/(RSUM_F*ONE_D%RHO_F)
          ENDIF
 
+         ! flux match species diffusive flux at iterpolated boundaries with mesh refinement
+         COARSE_MESH_IF: IF (EWC%NIC>1) THEN
+            ! we are on the coarse mesh gas cell (G) and need to average fluxes from the fine mesh (OTHER)
+            SPECIES_LOOP_2: DO N=1,N_TOTAL_SCALARS
+               OM_MUP => OM%MU
+               MU_G = MU(IIG,JJG,KKG)
+               SELECT CASE(SIM_MODE)
+                  CASE(DNS_MODE,LES_MODE)
+                     D_Z_N = D_Z(:,N)
+                     RHO_G = RHOP(IIG,JJG,KKG)
+                     TMP_G = TMP(IIG,JJG,KKG)
+                     CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMP_G,D_Z_G)
+                     IF (SIM_MODE==LES_MODE) CALL GET_VISCOSITY(ZZ_GET,MU_DNS_G,TMP_G)
+               END SELECT
+               RHO_D_DZDN_OTHER = 0._EB
+               KKO_LOOP: DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
+                  JJO_LOOP: DO JJO=EWC%JJO_MIN,EWC%JJO_MAX
+                     IIO_LOOP: DO IIO=EWC%IIO_MIN,EWC%IIO_MAX
+                        MU_OTHER = OM_MUP(IIO,JJO,KKO)
+                        RHO_OTHER = OM_RHOP(IIO,JJO,KKO)
+                        MODE_SELECT: SELECT CASE(SIM_MODE)
+                           CASE DEFAULT
+                              RHO_D = MAX(0._EB, 0.5_EB*(MU_OTHER+MU_G) )*RSC
+                           CASE(DNS_MODE,LES_MODE)
+                              D_Z_N = D_Z(:,N)
+                              ZZ_GET(1:N_TRACKED_SPECIES) = OM_ZZP(IIO,JJO,KKO,1:N_TRACKED_SPECIES)
+                              CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,RSUM_OTHER)
+                              PBAR_OTHER = EVALUATE_RAMP(MM%ZC(KKO),DUMMY,I_RAMP_P0_Z)
+                              TMP_OTHER = PBAR_OTHER/(RSUM_OTHER*RHO_OTHER)
+                              CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMP_OTHER,D_Z_OTHER)
+                              RHO_D_TURB = 0._EB
+                              IF (SIM_MODE==LES_MODE) THEN
+                                 CALL GET_VISCOSITY(ZZ_GET,MU_DNS_OTHER,TMP_OTHER)
+                                 RHO_D_TURB = 0.5_EB*(MU_OTHER-MU_DNS_OTHER + MU_G-MU_DNS_G)*RSC
+                              ENDIF
+                              RHO_D = 0.5_EB*( RHO_OTHER*D_Z_OTHER + RHO_G*D_Z_G ) + RHO_D_TURB
+                        END SELECT MODE_SELECT
+                        SELECT CASE(IOR)
+                           CASE( 1)
+                              ARO = MM%DY(JJO)*MM%DZ(KKO)/(DY(JJ)*DZ(KK))
+                              RHO_D_DZDN = RHO_D*(ZZP(IIG,JJG,KKG,N)-OM_ZZP(IIO,JJO,KKO,N))*MM%RDXN(IIO)
+                           CASE(-1)
+                              ARO = MM%DY(JJO)*MM%DZ(KKO)/(DY(JJ)*DZ(KK))
+                              RHO_D_DZDN = RHO_D*(ZZP(IIG,JJG,KKG,N)-OM_ZZP(IIO,JJO,KKO,N))*MM%RDXN(IIO-1)
+                           CASE( 2)
+                              ARO = MM%DX(IIO)*MM%DZ(KKO)/(DX(II)*DZ(KK))
+                              RHO_D_DZDN = RHO_D*(ZZP(IIG,JJG,KKG,N)-OM_ZZP(IIO,JJO,KKO,N))*MM%RDYN(JJO)
+                           CASE(-2)
+                              ARO = MM%DX(IIO)*MM%DZ(KKO)/(DX(II)*DZ(KK))
+                              RHO_D_DZDN = RHO_D*(ZZP(IIG,JJG,KKG,N)-OM_ZZP(IIO,JJO,KKO,N))*MM%RDYN(JJO-1)
+                           CASE( 3)
+                              ARO = MM%DX(IIO)*MM%DY(JJO)/(DX(II)*DY(JJ))
+                              RHO_D_DZDN = RHO_D*(ZZP(IIG,JJG,KKG,N)-OM_ZZP(IIO,JJO,KKO,N))*MM%RDZN(KKO)
+                           CASE(-3)
+                              ARO = MM%DX(IIO)*MM%DY(JJO)/(DX(II)*DY(JJ))
+                              RHO_D_DZDN = RHO_D*(ZZP(IIG,JJG,KKG,N)-OM_ZZP(IIO,JJO,KKO,N))*MM%RDZN(KKO-1)
+                        END SELECT
+                        ! average multiple face values
+                        RHO_D_DZDN_OTHER = RHO_D_DZDN_OTHER + ARO*RHO_D_DZDN
+                     ENDDO IIO_LOOP
+                  ENDDO JJO_LOOP
+               ENDDO KKO_LOOP
+               ! store for use in divg
+               ONE_D%RHO_D_DZDN_F(N) =  RHO_D_DZDN_OTHER
+            ENDDO SPECIES_LOOP_2
+            IF (SIM_MODE==DNS_MODE .OR. SIM_MODE==LES_MODE) THEN
+               N=MAXLOC(ONE_D%ZZ_F(1:N_TRACKED_SPECIES),1)
+               ONE_D%RHO_D_DZDN_F(N) = -(SUM(ONE_D%RHO_D_DZDN_F(1:N_TRACKED_SPECIES))-ONE_D%RHO_D_DZDN_F(N))
+            ENDIF
+         ENDIF COARSE_MESH_IF
+
       ELSE SINGLE_SPEC_IF
          ONE_D%ZZ_F(1) = 1._EB
          TMP(II,JJ,KK) = PBAR_P(KK,ONE_D%PRESSURE_ZONE)/(RSUM0*RHOP(II,JJ,KK))
@@ -619,7 +694,7 @@ METHOD_OF_HEAT_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
       ENDIF SINGLE_SPEC_IF
 
       IF (SOLID_HT3D) THEN
-         IF (SOLID_OTHER) TMP(II,JJ,KK) = TMP_OTHER
+         IF (SOLID_OTHER) TMP(II,JJ,KK) = TMP_OTHER_SOLID
       ENDIF
 
       ONE_D%Q_CON_F = 0._EB ! no convective heat transfer at interpolated boundary
@@ -2494,8 +2569,8 @@ END SUBROUTINE HVAC_BC
 
 SUBROUTINE SOLID_HEAT_TRANSFER_1D(NM,T,DT_BC,PARTICLE_INDEX,WALL_INDEX,CFACE_INDEX)
 
-USE GEOMETRY_FUNCTIONS 
-USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP, INTERPOLATE1D_UNIFORM   
+USE GEOMETRY_FUNCTIONS
+USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP, INTERPOLATE1D_UNIFORM
 USE COMP_FUNCTIONS, ONLY: SHUTDOWN
 USE PHYSICAL_FUNCTIONS, ONLY: GET_SPECIFIC_GAS_CONSTANT
 REAL(EB), INTENT(IN) :: DT_BC,T
@@ -3376,7 +3451,7 @@ MASS_TRANSFER_1D: IF (SF%MT1D) THEN
          DO N=1,N_MATL
             ML => MATERIAL(N)
             IF (ML%DIFFUSIVITY_GAS(NS)>TWO_EPSILON_EB) D_Z_P(I) = ML%DIFFUSIVITY_GAS(NS)
-            EXIT 
+            EXIT
          ENDDO
       ENDDO
       ! Set boundary conditions

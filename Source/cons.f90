@@ -259,7 +259,7 @@ LOGICAL :: PERIODIC_DOMAIN_X=.FALSE.                !< The domain is periodic \f
 LOGICAL :: PERIODIC_DOMAIN_Y=.FALSE.                !< The domain is periodic \f$ y \f$
 LOGICAL :: PERIODIC_DOMAIN_Z=.FALSE.                !< The domain is periodic \f$ z \f$
 LOGICAL :: TEST_NEW_OPEN=.FALSE.
-INTEGER :: CLIP_DT_RESTRICTIONS_MAX=0               !< Maximum number of DT restrictions before clipping is invoked
+INTEGER :: CLIP_DT_RESTRICTIONS_MAX=5               !< Maximum number of DT restrictions before clipping is invoked
 
 INTEGER :: BNDF_TIME_INTEGRALS=0
 
