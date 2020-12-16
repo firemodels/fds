@@ -175,7 +175,6 @@ In simulations involving more than one numerical mesh, information has to be pas
 the meshes are being processed by separate computers. If two meshes abut each other, and the mesh cells are aligned and the same size, then
 one mesh simply uses the density and species mass fractions of the adjacent mesh as the ``ghost'' cell values. However, in cases where the
 mesh cells are not the same size, the exchange of information must be done more carefully. Consider a case where two meshes meet:
-
 \begin{figure}[h!]
 \begin{picture}(200,110)(0,-10)
 \setlength{\unitlength}{0.02in}
@@ -190,16 +189,23 @@ mesh cells are not the same size, the exchange of information must be done more 
 \caption{Mesh interface boundary with 2:1 refinement.}
 \label{fig:meshinterface}
 \end{figure}
-
 \noindent
-We want the total and species mass fluxes between meshes to be the same. Let the density in cell $(1,j',k')$ of Mesh 2 be denoted $\rho_{1,j'k'}^{(2)}$. Assume that this cell abuts two cells in Mesh 1. The densities in the two abutting cells of Mesh 1 are denoted $\rho_{I,jk}^{(1)}$. Note that $j$ and $k$ are not the same as $j'$ and $k'$. $I$ is the number of cells in the $x$ direction of Mesh 1. The ghost cell quantities in Mesh 1 have an $i$ index of $I+1$. The ghost cell quantities in Mesh 2 have an $i$ index of 0.
-We want to assert mass conservation at the mesh interface:
+\paragraph{Advective Flux Matching}
+We want the total and species mass fluxes between meshes to be the same. Let the density in cell $(1,j',k')$ of Mesh 2 be denoted $\smash{\rho_{1,j'k'}^{(2)}}$. Assume that this cell abuts two cells in Mesh 1. The densities in the two abutting cells of Mesh 1 are denoted $\smash{\rho_{I,jk}^{(1)}}$. Note that $j$ and $k$ are not the same as $j'$ and $k'$. $I$ is the number of cells in the $x$ direction of Mesh 1. The ghost cell quantities in Mesh 1 have an $i$ index of $I+1$. The ghost cell quantities in Mesh 2 have an $i$ index of 0. We want to assert mass conservation at the mesh interface:
+
 \be
    \sum_{j,k} u_{I,jk}^{(1)} \; \rho_{{\rm w},jk}^{(1)} \; \dy^{(1)} \, \dz^{(1)}  =
               u_{0,j'k'}^{(2)} \; \rho_{{\rm w},j'k'}^{(2)} \; \dy^{(2)} \, \dz^{(2)}  \label{rhou}
 \ee
-To enforce this condition, we obtain $\rho_{{\rm w},jk}^{(1)}$ on Mesh 1 and $\rho_{{\rm w},j'k'}^{(2)}$ on Mesh 2 from a flux limiter (see Section \ref{sec_flux_limiters}) once data has been exchanged between meshes.  Since only one layer of ghost cells is exchanged, the second upwind data value is linearly extrapolated to maintain second-order accuracy of the interpolated face density.
+\noindent
+To enforce this condition, we obtain $\rho_{{\rm w},jk}^{(1)}$ on Mesh 1 and $\rho_{{\rm w},j'k'}^{(2)}$ on Mesh 2 from a flux limiter (see Section \ref{sec_flux_limiters}) once data has been exchanged between meshes.  If both Mesh 1 and Mesh 2 have the same grid resolution, then two layers of ghost cells are exchanged to enable second-order accuracy for advective fluxes.  First-order upwinding is used at refined mesh boundaries.
 
+\paragraph{Diffusive Flux Matching}
+For a mesh boundary without refinement, the exchange of ghost cell information is sufficient to achieve matched diffusive fluxes computed independently by each mesh process.  However, for refined meshes, special treatment is required.  The strategy employed is to compute the fine mesh fluxes and average them for the coarse mesh.  After the scalar transport update the scalar values are exchanged so that the coarse mesh has the necessary fine mesh values to independently compute and average the fine mesh fluxes for matching.  Referring again to Fig.~\ref{fig:meshinterface}, the following relationship is enforced at the mesh refinement boundary:
+\be
+\sum_{j,k} \frac{1}{2}\left[(\rho D_\alpha)_{1,j'k'}^{(2)}+(\rho D_\alpha)_{\mathrm{IBAR},jk}^{(1)}\right] \frac{Z_{\alpha,1,j'k'}^{(2)}-Z_{\alpha,\mathrm{IBAR},jk}^{(1)}}{\dx_{I,jk}^{(1)}} \; \dy_{jk}^{(1)} \, \dz_{jk}^{(1)} = \underbrace{\left[(\rho D_\alpha) \frac{\partial Z_\alpha}{\partial x}\right]_{0,j'k'}^{(2)}}_{\mathrm{computed\;term}} \; \dy_{j'k'}^{(2)} \, \dz_{j'k'}^{(2)}
+\ee
+Note that the value $\smash{Z_{\alpha,1,j'k'}^{(2)}}$ is direct injected from the coarse mesh as a fine mesh ghost cell value (i.e., no interpolation is performed to the fine mesh ghost cell center; this is a first-order approximation).  Similarly, the coarse mesh diffusivity term $\smash{(\rho D_\alpha)_{1,j'k'}^{(2)}}$ is directly injected to the fine mesh ghost cell to compute the average interface value.
 
 \subsubsection{Special Topic: Vertical Mesh Coarsening in Atmospheric Flows}
 
