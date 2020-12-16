@@ -605,17 +605,17 @@ METHOD_OF_HEAT_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
             ONE_D%TMP_F = PBAR_F/(RSUM_F*ONE_D%RHO_F)
          ENDIF
 
-         ! flux match species diffusive flux at iterpolated boundaries with mesh refinement
+         ! flux match species diffusive flux at interpolated boundaries with mesh refinement
          COARSE_MESH_IF: IF (EWC%NIC>1) THEN
-            ! we are on the coarse mesh gas cell (G) and need to average fluxes from the fine mesh (OTHER)
+            ! we are on coarse mesh gas cell (G) and need to average fluxes from the fine mesh (OTHER)
+            OM_MUP => OM%MU
+            MU_G  = MU(IIG,JJG,KKG)
+            RHO_G = RHOP(IIG,JJG,KKG)
+            TMP_G = TMP(IIG,JJG,KKG)
             SPECIES_LOOP_2: DO N=1,N_TOTAL_SCALARS
-               OM_MUP => OM%MU
-               MU_G = MU(IIG,JJG,KKG)
                SELECT CASE(SIM_MODE)
                   CASE(DNS_MODE,LES_MODE)
                      D_Z_N = D_Z(:,N)
-                     RHO_G = RHOP(IIG,JJG,KKG)
-                     TMP_G = TMP(IIG,JJG,KKG)
                      CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z_N,1),D_Z_N,TMP_G,D_Z_G)
                      IF (SIM_MODE==LES_MODE) CALL GET_VISCOSITY(ZZ_GET,MU_DNS_G,TMP_G)
                END SELECT
