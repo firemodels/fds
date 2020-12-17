@@ -1415,7 +1415,11 @@ We can argue that the case we are most concerned with is when $\rho^n$ is near z
 \delta t < \frac{\rho}{\overline{u}_i \left(\frac{\rho-0}{\delta x_i}\right) + \rho \nabla\cdot\mathbf{u}}
   = \left[ \frac{\overline{u}_i}{\delta x_i} + \nabla\cdot\mathbf{u} \right]^{-1}
 \ee
-Eq.~(\ref{eqn_divstability}) basically adds the effect of thermal expansion to the CFL constraint.
+Equation~(\ref{eqn_divstability}) basically adds the effect of thermal expansion to the CFL constraint.
+
+\paragraph{Time step restrictions to avoid clipping}
+
+If the CFL constraint is not sufficient to maintain realizable mass fractions ($0 \le Z_\alpha \le 1$) then FDS will attempt to redistribute mass to the neighboring cells, as discussed in the FDS Tech Guide \cite{FDS_Math_Guide}.  If this fails, then a 10\% time step restriction will be applied and the mass transport equations will be reiterated.  Controlling the number of time step restrictions is discussed in Sec.~\ref{info:CLIP}.
 
 
 \subsection{The Von Neumann Constraint}
@@ -1504,6 +1508,9 @@ For certain types of diagnostic tests, it is useful to turn off the velocity fie
 \label{info:CLIP}
 
 The algorithms in FDS are designed to work within a certain range of values for density, temperature and mass fraction. To prevent unphysical results, there are bounds placed on these variables to prevent a single spurious value from causing a numerical instability. It also prevents out of range errors from calls to temperature-dependent look-up tables. By default, FDS determines the lowest and highest values of the variables based on your input, but it is not possible in all cases to anticipate just how low or high a given value might be. Thus, on rare occasions you might need to set upper or lower bounds on the density or temperature. Temperature and density bounds are input under the namelist group called {\ct CLIP}. The parameters are listed in Table~\ref{tbl:CLIP}. You only need to set these values if you notice that one of them appears to be ``cut off'' when examining the results in Smokeview. For typical fire scenarios, you need not set these values, but if you anticipate relatively low or high values in an unusual case, take a look at the calculation results to determine if a change in the bounds is needed.
+
+Clipping of mass fractions violates mass conservation, so it is preferable to avoid clipping if possible.  As discussed in Sec.~\ref{info:Stability_Constraints}, the time step is set to adhere to the CFL constraints of the flow field.  The proper {\ct DT} combined with flux limiters generally avoids the need for clipping.  Beyond this, FDS then employs a mass redistribution scheme, as discussed in FDS Technical Guide \cite{FDS_Math_Guide}.  If this fails, there is yet one more attempt to avoid clipping---the time step is nudged down by 10\% ($\dt_{\mathrm{new}} = 0.9 \,\dt$) and the scalar transport equations are reiterated.  This process is carried out a maximum of {\ct CLIP\_DT\_RESTRICTIONS\_MAX} times; the default is 5.  In some very extreme circumstances, this loop can drive the time step into numerical instability range ($\dt/\dt_{\mathrm{init}} < \mbox{\ct LIMITING\_DT\_RATIO}$).  You can control the max number of time step restrictions by setting the parameter {\ct CLIP\_DT\_RESTRICTIONS\_MAX} on the {\ct CLIP} line (set to 0 to bypass the algorithm altogether). The number of restrictions (if any) is noted in the {\ct CHID.out} file for a given time step.
+
 
 
 
@@ -10581,6 +10588,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 \multicolumn{5}{|c|}{{\ct CLIP} (Specified Upper and Lower Limits)} \\
 \hline \hline
 \endhead
+{\ct CLIP\_DT\_RESTRICTIONS\_MAX}   & Integer        & Section~\ref{info:CLIP}      &            & 5   \\ \hline
 {\ct MAXIMUM\_DENSITY}              & Real           & Section~\ref{info:CLIP}      & kg/m$^3$   &     \\ \hline
 {\ct MAXIMUM\_TEMPERATURE}          & Real           & Section~\ref{info:CLIP}      & $^\circ$C  &     \\ \hline
 {\ct MINIMUM\_DENSITY}              & Real           & Section~\ref{info:CLIP}      & kg/m$^3$   &     \\ \hline
