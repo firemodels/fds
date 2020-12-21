@@ -136,7 +136,9 @@
 # Second Floor Opening
 &VENT XB= 17.00, 17.00, 0.00, 1.75, 2.60, 4.60, SURF_ID='OPEN', COLOR='BEIGE' / Opening at the east end of top hallway
 
-&VENT XB= 17.00, 17.00, 0.80, 0.95, 0.00, 0.10, SURF_ID='OPEN', COLOR='BEIGE' / Leakage near door of lower hallway
+# Crack under closed door on lower level
+&VENT XB= 17.00, 17.00, 0.40, 1.45, 0.00, 0.10, SURF_ID='GYPSUM BOARD', ID='DOOR CRACK', COLOR='GRAY 80' /
+&HVAC ID='DOOR LEAK', TYPE_ID='LEAK', VENT_ID='DOOR CRACK', VENT2_ID='AMBIENT', AREA=0.01 /
 
 # Output Information
 
