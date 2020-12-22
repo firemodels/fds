@@ -3164,9 +3164,8 @@ PARABOLIC_IF: IF (CHECK_VN) THEN
 
 ENDIF PARABOLIC_IF
 
-! Adjust time step size if necessary
+! Attempt DT restriction to avoid clippings
 
-! ------ Experimental ------
 DT_CLIP = HUGE(1._EB)
 IF (CLIP_RHOMIN .OR. CLIP_RHOMAX) THEN
    IF (DT_RESTRICT_COUNT>=CLIP_DT_RESTRICTIONS_MAX) THEN
@@ -3176,9 +3175,11 @@ IF (CLIP_RHOMIN .OR. CLIP_RHOMAX) THEN
       CFL = HUGE(1._EB)
       DT_CLIP = DT
       DT_RESTRICT_COUNT = DT_RESTRICT_COUNT + 1
+      DT_RESTRICT_STORE = MAX(DT_RESTRICT_STORE,DT_RESTRICT_COUNT)
    ENDIF
 ENDIF
-!----------------------------
+
+! Adjust time step size if necessary
 
 IF ((CFL<CFL_MAX .AND. VN<VN_MAX .AND. PART_CFL<PARTICLE_CFL_MAX) .OR. LOCK_TIME_STEP) THEN
    DT_NEW(NM) = DT
