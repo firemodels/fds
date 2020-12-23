@@ -1718,11 +1718,11 @@ IF (MYID==0) THEN
       CASE(SETUP_ONLY_STOP)
          WRITE(MESSAGE,'(A)') 'STOP: Set-up only'
       CASE(CTRL_STOP)
-         WRITE(MESSAGE,'(A)') 'STOP: FDS was stopped by KILL control function'
+         WRITE(MESSAGE,'(A)') 'STOP: FDS was stopped by KILL control function and completed successfully'
       CASE(TGA_ANALYSIS_STOP)
-         WRITE(MESSAGE,'(A)') 'STOP: TGA analysis only'
+         WRITE(MESSAGE,'(A)') 'STOP: FDS performed a TGA analysis only and finished successfully'
       CASE(LEVELSET_STOP)
-         WRITE(MESSAGE,'(A)') 'STOP: Level set analysis only'
+         WRITE(MESSAGE,'(A)') 'STOP: FDS performed a level set analysis only and finished successfully'
       CASE(REALIZABILITY_STOP)
          WRITE(MESSAGE,'(A)') 'ERROR: Unrealizable mass density - FDS stopped'
       CASE(MPI_TIMEOUT_STOP)
