@@ -686,15 +686,6 @@ DO K=0,KBAR
 ENDDO
 !$OMP END PARALLEL DO
 
-! Wannier Flow (Stokes flow) test case
-
-IF (PERIODIC_TEST==5) THEN
-   OMX=0._EB
-   OMY=0._EB
-   OMZ=0._EB
-   OME_E = -1.E6_EB
-ENDIF
-
 ! Compute gravity components
 
 IF (.NOT.SPATIAL_GRAVITY_VARIATION) THEN
