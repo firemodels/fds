@@ -12,7 +12,7 @@ USE COMP_FUNCTIONS
 IMPLICIT NONE
 PRIVATE
 
-PUBLIC :: INIT_TURB_ARRAYS, VARDEN_DYNSMAG, WANNIER_FLOW, &
+PUBLIC :: INIT_TURB_ARRAYS, VARDEN_DYNSMAG, &
           WALL_MODEL, COMPRESSION_WAVE, VELTAN2D,VELTAN3D, &
           SYNTHETIC_TURBULENCE, SYNTHETIC_EDDY_SETUP, TEST_FILTER, EX2G3D, &
           TWOD_VORTEX_CERFACS, TWOD_VORTEX_UMD, TWOD_SOBOROT_UMD, &
@@ -176,52 +176,6 @@ UP = NS_U_EXACT(XX,YY,TT,MUP,RHOP,AA)
 VP = NS_V_EXACT(XX,YY,TT,MUP,RHOP,AA)
 NS_H_EXACT = -AA**2/4._EB*( COS(2._EB*(XX-TT)) + COS(2._EB*(YY-TT)) )*EXP(-4._EB * MUP / RHOP * TT) + 0.5_EB*(UP**2 + VP**2)
 END FUNCTION NS_H_EXACT
-
-
-REAL(EB) FUNCTION WANNIER_FLOW(XX,YY,IVEL)
-
-! References:
-!
-! G.H. Wannier. A contribution to the hydrodynamics of lubrication. Quart. Appl.
-! Math. 8(1) (1950).
-!
-! S.J. Sherwin, G.E. Karniadakis. Comput. Methods Appl. Mech. Engrg. 123
-! (1995) 189-229. (note: errors in this write up)
-!
-! T. Ye, R. Mittal, H.S. Udaykumar, and W. Shyy. An Accurate
-! Cartesian Grid Method for Viscous Incompressible Flows with Complex Immersed
-! Boundaries. J. Comp. Phys. 156:209-240 (1999). Appendix 2
-
-REAL(EB), INTENT(IN) :: XX,YY ! position
-INTEGER, INTENT(IN) :: IVEL ! velocity component
-REAL(EB), PARAMETER :: RR=0.5_EB,HH=1.75_EB,UU=1._EB,X0=0._EB,Y0=HH
-REAL(EB) :: AA,BB,CC,FF,GG,SS,OMEGA,K1,K2
-
-IF ( (XX-X0)**2 + (YY-Y0)**2 < RR**2 ) THEN
-   WANNIER_FLOW = 0._EB
-   RETURN
-ENDIF
-OMEGA = -GEOMETRY(1)%OMEGA
-SS = SQRT(HH**2-RR**2)
-GG = (HH+SS)/(HH-SS)
-K1 = XX**2+(SS+YY)**2
-K2 = XX**2+(SS-YY)**2
-
-FF = UU/LOG(GG)
-AA = -HH*FF - 0.5_EB*HH*OMEGA/SS
-BB = 2._EB*(HH+SS)*FF + (HH+SS)*OMEGA/SS
-CC = 2._EB*(HH-SS)*FF + (HH-SS)*OMEGA/SS
-
-SELECT CASE(IVEL)
-   CASE(1)
-      WANNIER_FLOW = UU - 2._EB*(AA+FF*YY)/K1*((SS+YY)+K1/K2*(SS-YY)) - FF*LOG(K1/K2) &
-                   - BB/K1*(SS+2._EB*YY-2*YY*(SS+YY)**2._EB/K1) &
-                   - CC/K2*(SS-2._EB*YY+2*YY*(SS-YY)**2._EB/K2)
-   CASE(2)
-      WANNIER_FLOW = 2._EB*XX/(K1*K2)*(AA+FF*YY)*(K2-K1) - 2._EB*BB*XX*YY*(SS+YY)/K1**2 - 2._EB*CC*XX*YY*(SS-YY)/K2**2
-END SELECT
-
-END FUNCTION WANNIER_FLOW
 
 
 SUBROUTINE COMPRESSION_WAVE(NM,T,ITEST)
