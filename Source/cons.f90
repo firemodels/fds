@@ -219,7 +219,6 @@ LOGICAL :: CHECK_HT=.FALSE.                 !< Apply heat transfer stability con
 LOGICAL :: PATCH_VELOCITY=.FALSE.           !< Assume user-defined velocity patches
 LOGICAL :: OVERWRITE=.TRUE.                 !< Overwrite old output files
 LOGICAL :: INIT_HRRPUV=.FALSE.              !< Assume an initial spatial distribution of HRR per unit volume
-LOGICAL :: TENSOR_DIFFUSIVITY=.FALSE.
 LOGICAL :: SYNTHETIC_EDDY_METHOD=.FALSE.
 LOGICAL :: UVW_RESTART=.FALSE.              !< Initialize velocity field with values from a file
 LOGICAL :: PARTICLE_CFL=.FALSE.             !< Include particle velocity as a constraint on time step
