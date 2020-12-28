@@ -1905,7 +1905,7 @@ SUBROUTINE VELOCITY_BC(T,NM,APPLY_TO_ESTIMATED_VARIABLES)
 ! Assert tangential velocity boundary conditions
 
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
-USE TURBULENCE, ONLY: WALL_MODEL,WANNIER_FLOW,ABL_WALL_MODEL
+USE TURBULENCE, ONLY: WALL_MODEL,ABL_WALL_MODEL
 USE PHYSICAL_FUNCTIONS, ONLY: GET_CONDUCTIVITY,GET_SPECIFIC_HEAT
 USE COMPLEX_GEOMETRY, ONLY: CCIBM_VELOCITY_BC
 REAL(EB), INTENT(IN) :: T
@@ -2416,19 +2416,6 @@ EDGE_LOOP: DO IE=1,N_EDGES
                      ALTERED_GRADIENT(ICD_SGN) = .TRUE.
 
                   CASE (NO_SLIP_BC) BOUNDARY_CONDITION
-
-                     WANNIER_BC: IF (PERIODIC_TEST==5) THEN
-                        SELECT CASE(IOR)
-                           CASE( 1)
-                              VEL_T = WANNIER_FLOW(X(II),Z(KK),2)
-                           CASE(-1)
-                              VEL_T = WANNIER_FLOW(X(II),Z(KK),2)
-                           CASE( 3)
-                              VEL_T = WANNIER_FLOW(X(II),Z(KK),1)
-                           CASE(-3)
-                              VEL_T = WANNIER_FLOW(X(II),Z(KK),1)
-                        END SELECT
-                     ENDIF WANNIER_BC
 
                      VEL_GHOST = 2._EB*VEL_T - VEL_GAS
                      DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
