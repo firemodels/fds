@@ -30,8 +30,7 @@ INTEGER, PARAMETER :: CONSMAG=1                  !< Flag for TURB_MODEL: Constan
 INTEGER, PARAMETER :: DYNSMAG=2                  !< Flag for TURB_MODEL: Dynamic Smagorinsky turbulence model
 INTEGER, PARAMETER :: DEARDORFF=3                !< Flag for TURB_MODEL: Deardorff turbulence model
 INTEGER, PARAMETER :: VREMAN=4                   !< Flag for TURB_MODEL: Vreman turbulence model
-INTEGER, PARAMETER :: RNG=5                      !< Flag for TURB_MODEL: ReNormalization Group turbulence model
-INTEGER, PARAMETER :: WALE=6                     !< Flag for TURB_MODEL: Wall-Adapting Local Eddy viscosity turbulence model
+INTEGER, PARAMETER :: WALE=5                     !< Flag for TURB_MODEL: Wall-Adapting Local Eddy viscosity turbulence model
 
 INTEGER, PARAMETER :: MEAN_LES_FILTER_WIDTH=1    !< Flag for LES_FILTER_WIDTH_TYPE: geometric mean filter width
 INTEGER, PARAMETER :: MAX_LES_FILTER_WIDTH=2     !< Flag for LES_FILTER_WIDTH_TYPE: take max of DX,DY,DZ
@@ -315,8 +314,6 @@ REAL(EB) :: OVEC(3)=0._EB                      !< Coriolis vector (1/s)
 REAL(EB) :: C_SMAGORINSKY=0.2_EB               !< Coefficient in turbulence model
 REAL(EB) :: C_DEARDORFF=0.1_EB                 !< Coefficient in turbulence model
 REAL(EB) :: C_VREMAN=0.07_EB                   !< Coefficient in turbulence model
-REAL(EB) :: C_RNG=0.2_EB                       !< Coefficient in turbulence model
-REAL(EB) :: C_RNG_CUTOFF=10._EB                !< Coefficient in turbulence model
 REAL(EB) :: C_WALE=0.60_EB                     !< Coefficient in turbulence model
 REAL(EB) :: LAPSE_RATE                         !< Temperature change with height (K/m)
 REAL(EB) :: TEX_ORI(3)                         !< Origin of the texture map for Smokeview (m)

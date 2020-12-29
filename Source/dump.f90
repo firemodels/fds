@@ -2657,8 +2657,6 @@ IF (SIM_MODE/=DNS_MODE) THEN
          WRITE(LU_OUTPUT,'(A,F4.2,A)')    '   Eddy Viscosity:           Deardorff Model (C_DEARDORFF = ',C_DEARDORFF,')'
       CASE(VREMAN)
          WRITE(LU_OUTPUT,'(A,F4.2,A)')    '   Eddy Viscosity:           Vreman Model (C_VREMAN = ',C_VREMAN,')'
-      CASE(RNG)
-         WRITE(LU_OUTPUT,'(A,F7.2,F7.2)') '   Eddy Viscosity:           RNG Model (C_RNG,C_RNG_CUTOFF) ',C_RNG,C_RNG_CUTOFF
       CASE(WALE)
          WRITE(LU_OUTPUT,'(A,F4.2,A)')    '   Eddy Viscosity:           WALE Model (C_WALE = ',C_WALE,')'
    END SELECT TURB_MODEL_SELECT
