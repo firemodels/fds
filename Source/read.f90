@@ -14337,7 +14337,7 @@ MESH_LOOP: DO NM=1,NMESHES
          SL%SLICETYPE = TRIM(SLICETYPE)
          SL%GEOM_INDEX = GEOM_INDEX
          SL%TRNF_INDEX = TRNF_INDEX
-         IF ((FACE_CENTERED .OR. CELL_CENTERED) .AND. NITER==1) THEN ! scalar raw data
+         IF (FACE_CENTERED .OR. CELL_CENTERED) THEN
             DO I=1,IBAR
                IF ( ABS(XB(1)-XC(I)) < 0.5_EB*DX(I) + TOL ) SL%I1 = I
                IF ( ABS(XB(2)-XC(I)) < 0.5_EB*DX(I) + TOL ) SL%I2 = I
