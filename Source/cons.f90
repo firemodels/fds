@@ -414,10 +414,10 @@ REAL(EB) :: AIT_EXCLUSION_ZONE(6,MAX_AIT_EXCLUSION_ZONES)=-1.E6_EB  !< Volume in
 REAL(FB) :: HRRPUV_MAX_SMV=1200._FB                                 !< Clipping value used by Smokeview (kW/m3)
 REAL(FB) :: TEMP_MAX_SMV=2000._FB                                   !< Clipping value used by Smokeview (C)
 
-INTEGER :: N_SPECIES=0                                              !< Number of total gas phase species
+INTEGER :: N_SPECIES=0                                              !< Number of total gas phase primitive species
 INTEGER :: N_REACTIONS                                              !< Number of gas phase reactions
 INTEGER :: I_WATER=-1                                               !< Index of the 'WATER VAPOR' tracked species
-INTEGER :: N_TRACKED_SPECIES=0                                      !< Number of tracked (computed) gas species
+INTEGER :: N_TRACKED_SPECIES=0                                      !< Number of lumped or tracked (computed) gas species
 INTEGER :: N_SURFACE_DENSITY_SPECIES=0
 INTEGER :: COMBUSTION_ODE_SOLVER=-1                                 !< Indicator of ODE solver
 INTEGER :: EXTINCT_MOD=-1                                           !< Indicator of extinction model
