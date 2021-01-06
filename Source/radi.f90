@@ -4436,7 +4436,7 @@ END SUBROUTINE RADIATION_FVM
 SUBROUTINE ADD_VOLUMETRIC_HEAT_SOURCE(MODE)
 
 INTEGER, INTENT(IN) :: MODE
-REAL(EB) :: TIME_RAMP_FACTOR
+REAL(EB) :: TIME_RAMP_FACTOR,RR
 INTEGER :: N,I,J,K
 TYPE(INITIALIZATION_TYPE), POINTER :: IN
 
@@ -4448,17 +4448,22 @@ DO N=1,N_INIT
    DO K=0,KBP1
       DO J=0,JBP1
          DO I=0,IBP1
-            IF (XC(I) > IN%X1 .AND. XC(I) < IN%X2 .AND. &
-                YC(J) > IN%Y1 .AND. YC(J) < IN%Y2 .AND. &
-                ZC(K) > IN%Z1 .AND. ZC(K) < IN%Z2) THEN
-               IF (MODE==1) THEN
-                  Q(I,J,K) = Q(I,J,K) + TIME_RAMP_FACTOR*IN%HRRPUV
-                  KFST4_GAS(I,J,K) = KFST4_GAS(I,J,K) + IN%CHI_R*TIME_RAMP_FACTOR*IN%HRRPUV
-               ELSEIF (MODE==2) THEN
-                  Q(I,J,K) = Q(I,J,K) - TIME_RAMP_FACTOR*IN%HRRPUV
-               ELSE
-                  Q(I,J,K) = Q(I,J,K) + TIME_RAMP_FACTOR*IN%HRRPUV
-               ENDIF
+            SELECT CASE(IN%SHAPE)
+               CASE DEFAULT
+                  IF (XC(I) < IN%X1 .OR. XC(I) > IN%X2 .OR. &
+                      YC(J) < IN%Y1 .OR. YC(J) > IN%Y2 .OR. &
+                      ZC(K) < IN%Z1 .OR. ZC(K) > IN%Z2) CYCLE
+               CASE('CONE')
+                  RR = MAX(0._EB,IN%RADIUS*(1._EB-(ZC(K)-IN%Z0)/IN%HEIGHT))
+                  IF ((XC(I)-IN%X0)**2+(YC(J)-IN%Y0)**2>RR**2) CYCLE
+            END SELECT
+            IF (MODE==1) THEN
+               Q(I,J,K) = Q(I,J,K) + TIME_RAMP_FACTOR*IN%HRRPUV
+               KFST4_GAS(I,J,K) = KFST4_GAS(I,J,K) + IN%CHI_R*TIME_RAMP_FACTOR*IN%HRRPUV
+            ELSEIF (MODE==2) THEN
+               Q(I,J,K) = Q(I,J,K) - TIME_RAMP_FACTOR*IN%HRRPUV
+            ELSE
+               Q(I,J,K) = Q(I,J,K) + TIME_RAMP_FACTOR*IN%HRRPUV
             ENDIF
          ENDDO
       ENDDO
