@@ -5183,18 +5183,18 @@ By default, duplicate species are considered to be a lumped species and not a pr
 \begin{lstlisting}
 &SPEC ID='NITROGEN',BACKGROUND=.TRUE./
 &SPEC ID='OXYGEN',MASS_FRACTION_0=0.1/
-&SPEC ID='O2',SPEC_ID='OXYGEN',MASS_FRACTION_0=0.2/
-&SPEC ID='O3',SPEC_ID='OXYGEN',MASS_FRACTION_0=0.3,PRIMITIVE=.TRUE./
+&SPEC ID='O2 LUMPED',SPEC_ID='OXYGEN',MASS_FRACTION_0=0.2/
+&SPEC ID='O2 DUPLICATE PRIMITIVE',SPEC_ID='OXYGEN',MASS_FRACTION_0=0.3,PRIMITIVE=.TRUE./
 
 &DEVC XYZ=0.5,0.5,0.5,QUANTITY='MASS FRACTION',SPEC_ID='OXYGEN'/
-&DEVC XYZ=0.5,0.5,0.5,QUANTITY='MASS FRACTION',SPEC_ID='O2'/
-&DEVC XYZ=0.5,0.5,0.5,QUANTITY='MASS FRACTION',SPEC_ID='O3'/
+&DEVC XYZ=0.5,0.5,0.5,QUANTITY='MASS FRACTION',SPEC_ID='O2 LUMPED'/
+&DEVC XYZ=0.5,0.5,0.5,QUANTITY='MASS FRACTION',SPEC_ID='O2 DUPLICATE PRIMITIVE'/
 \end{lstlisting}
 
 \section{Specifying Lumped Species (Mixtures of Primitive Species)}
 \label{info:lumped}
 
-The {\ct SPEC} namelist group also allows you to define species mixtures. The purpose of a species mixture is to reduce the number of species transport equations that are explicitly solved. For example, consider air. Air is composed of nitrogen, oxygen, water vapor, and carbon dioxide. If we define the four component species of air, we will have four total species. One of these, say nitrogen, can be set to be the background species, leaving three transport equations to solve. Alternatively, we can define a ``lumped species'' that represents the air mixture and save on CPU time because the three transport equations are no longer needed and the ``lumped'' air becomes the background species.
+The {\ct SPEC} namelist group also allows you to define species mixtures. The purpose of a species mixture is to reduce the number of species transport equations that are explicitly solved. Air, for example, is composed of nitrogen, oxygen, water vapor, and carbon dioxide. If we define the four component species of air, we will have four total species. Alternatively, we can define a ``lumped species'' that represents the air mixture, which saves on comptational time because we need only solve one transport equation.  A lumped species is a group of species that transport and react together in the same proportion.  This implies the molecular diffusivities of each component of the mixture are the same, which is an approximation\footnote{Turbulent diffusion usually dominates by a couple orders of magnitude making equal diffusivities a good approximation.}.
 
 The following inputs define equivalent initial mixtures. But in the first example three species are explicitly tracked and in the second example only a background mixture is specified.  Note that this example represents the background species created by FDS when no background is explicitly defined in the input file.  It is also noted that any implicitly defined species (such as the nitrogen, oxygen, water vapor, and carbon dioxide for the air background species or the species in the lumped product species for simple chemistry, see ~\ref{info:simple_chemistry}), can be referenced by any of the outputs such as {\ct DEVC} or {\ct SLCF}.
 
