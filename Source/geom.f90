@@ -13410,7 +13410,7 @@ CONTAINS
 SUBROUTINE IBM_RCEDGE_DUIDXJ
 
 INTEGER :: IOE
-REAL(EB):: U_GAS(-2:2),XB_IB(-2:2),MU_RC,DEL_RC,UB,U1,BFC,CFC
+REAL(EB):: VEL_GAS(-2:2),XB_IB(-2:2),MU_RC,DEL_RC,UB,U1,BFC,CFC
 
 IE = IBM_EDGE%IE
 II     = IJKE( 1,IE)
@@ -13418,7 +13418,7 @@ JJ     = IJKE( 2,IE)
 KK     = IJKE( 3,IE)
 IEC= IJKE( 4,IE) ! IEC is the edges X1AXIS
 
-U_GAS(-2:2) = 0._EB; XB_IB(-2:2) = 0._EB
+VEL_GAS(-2:2) = 0._EB; XB_IB(-2:2) = 0._EB
 ORIENTATION_LOOP: DO IS=1,3
    IF (IS==IEC) CYCLE ORIENTATION_LOOP
    SIGN_LOOP: DO I_SGN=-1,1,2
@@ -13447,7 +13447,7 @@ ORIENTATION_LOOP: DO IS=1,3
       !                     ICD_SGN= 2 => FACE high Y normal to IAXIS.
       ! is GASPHASE cut-face.
       XB_IB(ICD_SGN) = IBM_EDGE%XB_IB(ICD_SGN)
-      SELECT CASE(IEC)
+      IEC_SELECT: SELECT CASE(IEC)
          CASE(IAXIS)
             ! Define Face indexes and normal axis FAXIS.
             SELECT CASE(ICD_SGN)
@@ -13457,9 +13457,9 @@ ORIENTATION_LOOP: DO IS=1,3
                CASE( 2); IIF=II  ; JJF=JJ  ; KKF=KK+1; FAXIS=JAXIS
             END SELECT
             IF (FAXIS==JAXIS) THEN
-                U_GAS(ICD_SGN)   = VV(IIF,JJF,KKF)
+                VEL_GAS(ICD_SGN)   = VV(IIF,JJF,KKF)
             ELSE ! IF(FAXIS==KAXIS) THEN
-                U_GAS(ICD_SGN)   = WW(IIF,JJF,KKF)
+                VEL_GAS(ICD_SGN)   = WW(IIF,JJF,KKF)
             ENDIF
 
          CASE(JAXIS)
@@ -13471,9 +13471,9 @@ ORIENTATION_LOOP: DO IS=1,3
                CASE( 2); IIF=II+1; JJF=JJ  ; KKF=KK  ; FAXIS=KAXIS
             END SELECT
             IF (FAXIS==KAXIS) THEN
-               U_GAS(ICD_SGN)   = WW(IIF,JJF,KKF)
+               VEL_GAS(ICD_SGN)   = WW(IIF,JJF,KKF)
             ELSE ! IF(FAXIS==IAXIS) THEN
-               U_GAS(ICD_SGN)   = UU(IIF,JJF,KKF)
+               VEL_GAS(ICD_SGN)   = UU(IIF,JJF,KKF)
             ENDIF
 
          CASE(KAXIS)
@@ -13485,12 +13485,12 @@ ORIENTATION_LOOP: DO IS=1,3
                CASE( 2); IIF=II  ; JJF=JJ+1; KKF=KK  ; FAXIS=IAXIS
             END SELECT
             IF (FAXIS==IAXIS) THEN
-               U_GAS(ICD_SGN)   = UU(IIF,JJF,KKF)
+               VEL_GAS(ICD_SGN)   = UU(IIF,JJF,KKF)
             ELSE ! IF(FAXIS==JAXIS) THEN
-               U_GAS(ICD_SGN)   = VV(IIF,JJF,KKF)
+               VEL_GAS(ICD_SGN)   = VV(IIF,JJF,KKF)
             ENDIF
 
-      END SELECT
+      END SELECT IEC_SELECT
 
       ! Divide distance to boundary (cut-face) or DXX (reg face) by 2 to get collocation point position:
       XB_IB(ICD_SGN) = XB_IB(ICD_SGN)/2._EB
@@ -13509,7 +13509,7 @@ END SELECT
 ! IEC = KAXIS : DUDY (IOE=1), DVDX (IOE=2):
 DO IOE = 1,2
    DEL_RC= XB_IB(-IOE)+XB_IB(IOE) ! Sum of 1/2*DY (IOE=1) or, 1/2*DZ (IOE=2), when IEC=IAXIS, etc.
-   IBM_EDGE%DUIDXJ((/-IOE,IOE/))    = (U_GAS(IOE)-U_GAS(-IOE))/DEL_RC
+   IBM_EDGE%DUIDXJ((/-IOE,IOE/))    = (VEL_GAS(IOE)-VEL_GAS(-IOE))/DEL_RC
    IBM_EDGE%MU_DUIDXJ((/-IOE,IOE/)) = MU_RC*IBM_EDGE%DUIDXJ((/-IOE,IOE/))
 ENDDO
 
@@ -13561,12 +13561,12 @@ END SUBROUTINE IBM_RCEDGE_TAU_OMG
 
 SUBROUTINE IBM_EDGE_TAU_OMG
 
-REAL(EB) :: ADDV,VEL_T,VEL_GHOST,I_SGNR,I_SGN2,DUDXN,MU_DUDXN
+REAL(EB) :: ADDV,VEL_T,VEL_GHOST,I_SGNR,I_SGN2,DUDXN,MU_DUDXN,MUA
 INTEGER  :: IEP,JEP,KEP,SURF_INDEX,ITMP,SKIP_FCT,NPE_LIST_START,NPE_LIST_COUNT,IRCEDG,IRC,JRC,KRC
 LOGICAL, PARAMETER :: WALL_MODEL_IN_NRMPLANE_TO_EDGE = .TRUE.
 LOGICAL :: ALTERED_GRADIENT(-2:2)
 REAL(EB):: XB_IB,OMEV_EP(-2:2),TAUV_EP(-2:2),DWDY,DVDZ,DUDZ,DWDX,DUDY,DVDX, &
-           DUIDXJ_EP(-2:2),MU_DUIDXJ_EP(-2:2),EC_B(-2:2),EC_EP(-2:2),DEL_UB,DEL_EP,U_GAS,CEP,CB
+           DUIDXJ_EP(-2:2),MU_DUIDXJ_EP(-2:2),EC_B(-2:2),EC_EP(-2:2),DEL_UB,DEL_EP,VEL_GAS,CEP,CB
 
 REAL(EB):: DEL_EP1, DEL_EP2, AINV(2,2), UE1, UE2, B_POLY, C_POLY, USTR_1, USTR_2, ZETA
 
@@ -13576,11 +13576,10 @@ VLG(-2:2)=0._EB; NUV(-2:2)=0._EB; RGH(-2:2)=0._EB; UTA(-2:2)=0._EB
 ! Set these to zero for now:
 VEL_T = 0._EB; SRGH = 0._EB
 
-
 IE = IBM_EDGE%IE
-II     = IJKE( 1,IE)
-JJ     = IJKE( 2,IE)
-KK     = IJKE( 3,IE)
+II = IJKE( 1,IE)
+JJ = IJKE( 2,IE)
+KK = IJKE( 3,IE)
 IEC= IJKE( 4,IE) ! IEC is the edges X1AXIS
 
 ! Loop over all possible orientations of edge and reassign velocity gradients if appropriate
@@ -13619,8 +13618,8 @@ ORIENTATION_LOOP: DO IS=1,3
       ! is GASPHASE cut-face.
       XB_IB      = IBM_EDGE%XB_IB(ICD_SGN) ! Coordinate centroid of IBEDGE resp to Boundary (note, either zero or negative).
       SURF_INDEX = IBM_EDGE%SURF_INDEX(ICD_SGN)
-      SELECT CASE(IEC)
-         CASE(IAXIS)
+      IEC_SELECT: SELECT CASE(IEC)
+         CASE(IAXIS) IEC_SELECT
             ! Define Face indexes and normal axis FAXIS.
             SELECT CASE(ICD_SGN)
                CASE(-2); IIF=II  ; JJF=JJ  ; KKF=KK  ; FAXIS=JAXIS
@@ -13631,12 +13630,13 @@ ORIENTATION_LOOP: DO IS=1,3
             IF(FCVAR(IIF,JJF,KKF,IBM_FGSC,FAXIS)/=IBM_CUTCFE) CYCLE SIGN_LOOP
             DXX(1)  = DY(JJF); DXX(2)  = DZ(KKF)
 
-            ! Compute TAUV_EP, OMEV_EP, MU_FC, DXN_STRM_UB, U_GAS:
+            ! Compute TAUV_EP, OMEV_EP, MU_FC, DXN_STRM_UB, VEL_GAS:
             SKIP_FCT = 1
             IF (FAXIS==JAXIS) THEN
                ITMP = MIN(5000,NINT(0.5_EB*(TMP(IIF,JJF,KKF)+TMP(IIF,JJF+1,KKF))))
                MU_FACE = MU_RSQMW_Z(ITMP,1)/RSQ_MW_Z(1)
                RHO_FACE = 0.5_EB*(  RHOP(IIF,JJF,KKF)+  RHOP(IIF,JJF+1,KKF))
+               MUA = 0.5_EB*(MU(IIF,JJF,KKF) + MU(IIF,JJF+1,KKF))
 
                DXN_STRM_UB = DXX(2)
                ! Linear :
@@ -13648,7 +13648,7 @@ ORIENTATION_LOOP: DO IS=1,3
                   UE     = VV(IIF,JJF,KKF+I_SGN)
                ENDIF
                UB     = VEL_T
-               U_GAS  = 2._EB/(DF+DE)*((DE/2._EB+DF)*UF-DF/2._EB*UE) - 2._EB/(DF+DE)*(UF-UE)*(DXN_STRM_UB/2._EB)
+               VEL_GAS  = 2._EB/(DF+DE)*((DE/2._EB+DF)*UF-DF/2._EB*UE) - 2._EB/(DF+DE)*(UF-UE)*(DXN_STRM_UB/2._EB)
 
                DEL_EP = DXX(2) - ABS(XB_IB)
                IF( DEL_EP < THRES_FCT_EP*DXX(2) ) THEN; SKIP_FCT = 2; DEL_EP = DEL_EP + DXX(2); ENDIF
@@ -13658,6 +13658,7 @@ ORIENTATION_LOOP: DO IS=1,3
                ITMP = MIN(5000,NINT(0.5_EB*(TMP(IIF,JJF,KKF)+TMP(IIF,JJF,KKF+1))))
                MU_FACE = MU_RSQMW_Z(ITMP,1)/RSQ_MW_Z(1)
                RHO_FACE = 0.5_EB*(  RHOP(IIF,JJF,KKF)+  RHOP(IIF,JJF,KKF+1))
+               MUA = 0.5_EB*(MU(IIF,JJF,KKF) + MU(IIF,JJF,KKF+1))
 
                DXN_STRM_UB = DXX(1)
                ! Linear :
@@ -13669,7 +13670,7 @@ ORIENTATION_LOOP: DO IS=1,3
                   UE     = WW(IIF,JJF+I_SGN,KKF)
                ENDIF
                UB     = VEL_T
-               U_GAS  = 2._EB/(DF+DE)*((DE/2._EB+DF)*UF-DF/2._EB*UE) - 2._EB/(DF+DE)*(UF-UE)*(DXN_STRM_UB/2._EB)
+               VEL_GAS  = 2._EB/(DF+DE)*((DE/2._EB+DF)*UF-DF/2._EB*UE) - 2._EB/(DF+DE)*(UF-UE)*(DXN_STRM_UB/2._EB)
 
                DEL_EP = DXX(1) - ABS(XB_IB)
                IF( DEL_EP < THRES_FCT_EP*DXX(1) ) THEN; SKIP_FCT = 2; DEL_EP = DEL_EP + DXX(1); ENDIF
@@ -13721,7 +13722,7 @@ ORIENTATION_LOOP: DO IS=1,3
                DUIDXJ_EP(ICD_SGN)    = DWDY
             ENDIF
 
-         CASE(JAXIS)
+         CASE(JAXIS) IEC_SELECT
             ! Define Face indexes and normal axis FAXIS.
             SELECT CASE(ICD_SGN)
                CASE(-2); IIF=II  ; JJF=JJ  ; KKF=KK  ; FAXIS=KAXIS
@@ -13732,12 +13733,13 @@ ORIENTATION_LOOP: DO IS=1,3
             IF(FCVAR(IIF,JJF,KKF,IBM_FGSC,FAXIS)/=IBM_CUTCFE) CYCLE SIGN_LOOP
             DXX(1)  = DZ(KKF); DXX(2)  = DX(IIF)
 
-            ! Compute TAUV_EP, OMEV_EP, MU_FC, DXN_STRM_UB, U_GAS:
+            ! Compute TAUV_EP, OMEV_EP, MU_FC, DXN_STRM_UB, VEL_GAS:
             SKIP_FCT = 1
             IF (FAXIS==KAXIS) THEN
                ITMP = MIN(5000,NINT(0.5_EB*(TMP(IIF,JJF,KKF)+TMP(IIF,JJF,KKF+1))))
                MU_FACE = MU_RSQMW_Z(ITMP,1)/RSQ_MW_Z(1)
                RHO_FACE = 0.5_EB*(  RHOP(IIF,JJF,KKF)+  RHOP(IIF,JJF,KKF+1))
+               MUA = 0.5_EB*(MU(IIF,JJF,KKF) +  MU(IIF,JJF,KKF+1))
 
                DXN_STRM_UB = DXX(2)
                ! Linear :
@@ -13749,7 +13751,7 @@ ORIENTATION_LOOP: DO IS=1,3
                   UE     = WW(IIF+I_SGN,JJF,KKF)
                ENDIF
                UB     = VEL_T
-               U_GAS  = 2._EB/(DF+DE)*((DE/2._EB+DF)*UF-DF/2._EB*UE) - 2._EB/(DF+DE)*(UF-UE)*(DXN_STRM_UB/2._EB)
+               VEL_GAS  = 2._EB/(DF+DE)*((DE/2._EB+DF)*UF-DF/2._EB*UE) - 2._EB/(DF+DE)*(UF-UE)*(DXN_STRM_UB/2._EB)
 
                DEL_EP = DXX(2) - ABS(XB_IB)
                IF( DEL_EP < THRES_FCT_EP*DXX(2) ) THEN; SKIP_FCT = 2; DEL_EP = DEL_EP + DXX(2); ENDIF
@@ -13759,6 +13761,7 @@ ORIENTATION_LOOP: DO IS=1,3
                ITMP = MIN(5000,NINT(0.5_EB*(TMP(IIF,JJF,KKF)+TMP(IIF+1,JJF,KKF))))
                MU_FACE = MU_RSQMW_Z(ITMP,1)/RSQ_MW_Z(1)
                RHO_FACE = 0.5_EB*(  RHOP(IIF,JJF,KKF)+  RHOP(IIF+1,JJF,KKF))
+               MUA = 0.5_EB*(MU(IIF,JJF,KKF) +  MU(IIF+1,JJF,KKF))
 
                DXN_STRM_UB = DXX(1)
                ! Linear :
@@ -13770,7 +13773,7 @@ ORIENTATION_LOOP: DO IS=1,3
                   UE     = UU(IIF,JJF,KKF+I_SGN)
                ENDIF
                UB     = VEL_T
-               U_GAS  = 2._EB/(DF+DE)*((DE/2._EB+DF)*UF-DF/2._EB*UE) - 2._EB/(DF+DE)*(UF-UE)*(DXN_STRM_UB/2._EB)
+               VEL_GAS  = 2._EB/(DF+DE)*((DE/2._EB+DF)*UF-DF/2._EB*UE) - 2._EB/(DF+DE)*(UF-UE)*(DXN_STRM_UB/2._EB)
 
                DEL_EP = DXX(1) - ABS(XB_IB)
                IF( DEL_EP < THRES_FCT_EP*DXX(1) ) THEN; SKIP_FCT = 2; DEL_EP = DEL_EP + DXX(1); ENDIF
@@ -13823,14 +13826,14 @@ ORIENTATION_LOOP: DO IS=1,3
             ENDIF
 
             !  IF(NM==1 .AND. II==41 .AND. JJ==20 .AND. KK==32 .AND. FAXIS==IAXIS) THEN
-            !    WRITE(LU_ERR,*) '>>>> ICD_SGN, FAXIS, U_GAS=',ICD_SGN,FAXIS,IEP,JEP,KEP
-            !    WRITE(LU_ERR,*) '                          =',XB_IB,DXN_STRM_UB,ZETA,USTR_1,USTR_2,U_GAS
+            !    WRITE(LU_ERR,*) '>>>> ICD_SGN, FAXIS, VEL_GAS=',ICD_SGN,FAXIS,IEP,JEP,KEP
+            !    WRITE(LU_ERR,*) '                          =',XB_IB,DXN_STRM_UB,ZETA,USTR_1,USTR_2,VEL_GAS
             !    WRITE(LU_ERR,*) 'DF,DE,UF,VV(IIF,JJF,KKF),UE,UB=',DF,DE,UF,UU(IIF,JJF,KKF),UE,UB
             !    WRITE(LU_ERR,*) 'ICD_SGN,DUIDXJ_EP(ICD_SGN)=',ICD_SGN,DUIDXJ_EP(ICD_SGN)
             !    WRITE(LU_ERR,*) 'DE,DEZ+1=',KKF,I_SGN,DZ(KKF),DZ(KKF+I_SGN)
             ! ENDIF
 
-         CASE(KAXIS)
+         CASE(KAXIS) IEC_SELECT
             ! Define Face indexes and normal axis FAXIS.
             SELECT CASE(ICD_SGN)
                CASE(-2); IIF=II  ; JJF=JJ  ; KKF=KK  ; FAXIS=IAXIS
@@ -13841,12 +13844,13 @@ ORIENTATION_LOOP: DO IS=1,3
             IF(FCVAR(IIF,JJF,KKF,IBM_FGSC,FAXIS)/=IBM_CUTCFE) CYCLE SIGN_LOOP
             DXX(1)  = DX(IIF); DXX(2)  = DY(JJF)
 
-            ! Compute TAUV_EP, OMEV_EP, MU_FC, DXN_STRM_UB, U_GAS:
+            ! Compute TAUV_EP, OMEV_EP, MU_FC, DXN_STRM_UB, VEL_GAS:
             SKIP_FCT = 1
             IF (FAXIS==IAXIS) THEN
                ITMP = MIN(5000,NINT(0.5_EB*(TMP(IIF,JJF,KKF)+TMP(IIF+1,JJF,KKF))))
                MU_FACE = MU_RSQMW_Z(ITMP,1)/RSQ_MW_Z(1)
                RHO_FACE = 0.5_EB*(  RHOP(IIF,JJF,KKF)+  RHOP(IIF+1,JJF,KKF))
+               MUA = 0.5_EB*(MU(IIF,JJF,KKF) +  MU(IIF+1,JJF,KKF))
 
                DXN_STRM_UB = DXX(2)
                ! Linear :
@@ -13858,7 +13862,7 @@ ORIENTATION_LOOP: DO IS=1,3
                   UE     = UU(IIF,JJF+I_SGN,KKF)
                ENDIF
                UB     = VEL_T
-               U_GAS  = 2._EB/(DF+DE)*((DE/2._EB+DF)*UF-DF/2._EB*UE) - 2._EB/(DF+DE)*(UF-UE)*(DXN_STRM_UB/2._EB)
+               VEL_GAS  = 2._EB/(DF+DE)*((DE/2._EB+DF)*UF-DF/2._EB*UE) - 2._EB/(DF+DE)*(UF-UE)*(DXN_STRM_UB/2._EB)
 
                DEL_EP = DXX(2) - ABS(XB_IB)
                IF( DEL_EP < THRES_FCT_EP*DXX(2) ) THEN; SKIP_FCT = 2; DEL_EP = DEL_EP + DXX(2); ENDIF
@@ -13868,6 +13872,7 @@ ORIENTATION_LOOP: DO IS=1,3
                ITMP = MIN(5000,NINT(0.5_EB*(TMP(IIF,JJF,KKF)+TMP(IIF,JJF+1,KKF))))
                MU_FACE = MU_RSQMW_Z(ITMP,1)/RSQ_MW_Z(1)
                RHO_FACE = 0.5_EB*(  RHOP(IIF,JJF,KKF)+  RHOP(IIF,JJF+1,KKF))
+               MUA = 0.5_EB*(MU(IIF,JJF,KKF) +  MU(IIF,JJF+1,KKF))
 
                DXN_STRM_UB = DXX(1)
                ! Linear :
@@ -13879,7 +13884,7 @@ ORIENTATION_LOOP: DO IS=1,3
                   UE     = VV(IIF+I_SGN,JJF,KKF)
                ENDIF
                UB     = VEL_T
-               U_GAS  = 2._EB/(DF+DE)*((DE/2._EB+DF)*UF-DF/2._EB*UE) - 2._EB/(DF+DE)*(UF-UE)*(DXN_STRM_UB/2._EB)
+               VEL_GAS  = 2._EB/(DF+DE)*((DE/2._EB+DF)*UF-DF/2._EB*UE) - 2._EB/(DF+DE)*(UF-UE)*(DXN_STRM_UB/2._EB)
 
                DEL_EP = DXX(1) - ABS(XB_IB)
                IF( DEL_EP < THRES_FCT_EP*DXX(1) ) THEN; SKIP_FCT = 2; DEL_EP = DEL_EP + DXX(1); ENDIF
@@ -13931,7 +13936,7 @@ ORIENTATION_LOOP: DO IS=1,3
                DUIDXJ_EP(ICD_SGN)    = DVDX
             ENDIF
 
-      END SELECT
+      END SELECT IEC_SELECT
 
       ! Make collocated velocity point distance, half DELTA gas CF size:
       DXN_STRM_UB = DXN_STRM_UB/2._EB
@@ -13943,17 +13948,28 @@ ORIENTATION_LOOP: DO IS=1,3
 
       ! Here we have a cut-face, and OME and TAU in an external EDGE for extrapolation to IBEDGE.
       ! Now get value at the boundary using wall model:
-      NU       = MU_FACE/RHO_FACE
-      CALL WALL_MODEL(SLIP_FACTOR,U_TAU,Y_PLUS,NU,SURFACE(SURF_INDEX)%ROUGHNESS,DXN_STRM_UB,U_GAS-VEL_T)
 
-      ! Finally OME_E, TAU_E:
-      ! SLIP_COEF = -1, no slip, VEL_GHOST=-U_GAS
-      ! SLIP_COEF =  1, free slip, VEL_GHOST=VEL_T
-      VEL_GHOST = VEL_T + 0.5_EB*(SLIP_FACTOR-1._EB)*(U_GAS-VEL_T)
-      DUIDXJ(ICD_SGN) = REAL(I_SGN,EB)*(U_GAS-VEL_GHOST)/(2._EB*DXN_STRM_UB)
-      MU_DUIDXJ(ICD_SGN) = RHO_FACE*U_TAU**2 * SIGN(1._EB,REAL(I_SGN,EB)*(U_GAS-VEL_T))
+      SELECT CASE(SURFACE(SURF_INDEX)%VELOCITY_BC_INDEX)
+         CASE (FREE_SLIP_BC)
+            VEL_GHOST = VEL_GAS
+            DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/(2._EB*DXN_STRM_UB)
+            MU_DUIDXJ(ICD_SGN) = MUA*DUIDXJ(ICD_SGN)
+         CASE (NO_SLIP_BC)
+            VEL_GHOST = 2._EB*VEL_T - VEL_GAS
+            DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/(2._EB*DXN_STRM_UB)
+            MU_DUIDXJ(ICD_SGN) = MUA*DUIDXJ(ICD_SGN)
+         CASE (WALL_MODEL_BC)
+            NU = MU_FACE/RHO_FACE
+            CALL WALL_MODEL(SLIP_FACTOR,U_TAU,Y_PLUS,NU,SURFACE(SURF_INDEX)%ROUGHNESS,DXN_STRM_UB,VEL_GAS-VEL_T)
+            ! Finally OME_E, TAU_E:
+            ! SLIP_COEF = -1, no slip, VEL_GHOST=-VEL_GAS
+            ! SLIP_COEF =  1, free slip, VEL_GHOST=VEL_T
+            VEL_GHOST = VEL_T + 0.5_EB*(SLIP_FACTOR-1._EB)*(VEL_GAS-VEL_T)
+            DUIDXJ(ICD_SGN) = REAL(I_SGN,EB)*(VEL_GAS-VEL_GHOST)/(2._EB*DXN_STRM_UB)
+            MU_DUIDXJ(ICD_SGN) = RHO_FACE*U_TAU**2 * SIGN(1._EB,REAL(I_SGN,EB)*(VEL_GAS-VEL_T))
+      END SELECT
 
-      ! VLG(ICD_SGN)=U_GAS
+      ! VLG(ICD_SGN)=VEL_GAS
       ! NUV(ICD_SGN)=MU_FACE  ! NU
       ! RGH(ICD_SGN)=RHO_FACE ! SURFACE(SURF_INDEX)%ROUGHNESS
       ! UTA(ICD_SGN)=U_TAU
@@ -13963,133 +13979,133 @@ ORIENTATION_LOOP: DO IS=1,3
       EC_EP(ICD_SGN)= 1._EB - EC_B(ICD_SGN)
 
       ! If needed re-interpolate stress and duidxj to RC EDGE:
-      SELECT CASE(IEC)
-      CASE(IAXIS)
-         ! Define Face indexes and normal axis FAXIS.
-         SELECT CASE(ICD_SGN)
-            CASE(-2); IIF=II  ; JJF=JJ  ; KKF=KK  ; FAXIS=JAXIS
-            CASE(-1); IIF=II  ; JJF=JJ  ; KKF=KK  ; FAXIS=KAXIS
-            CASE( 1); IIF=II  ; JJF=JJ+1; KKF=KK  ; FAXIS=KAXIS
-            CASE( 2); IIF=II  ; JJF=JJ  ; KKF=KK+1; FAXIS=JAXIS
-         END SELECT
-         IF(FCVAR(IIF,JJF,KKF,IBM_FGSC,FAXIS)/=IBM_CUTCFE) CYCLE SIGN_LOOP
-         DXX(1)  = DY(JJF); DXX(2)  = DZ(KKF)
-         IF (FAXIS==JAXIS) THEN
-            DEL_EP = DXX(2) - ABS(XB_IB)
-            IF( DEL_EP < THRES_FCT_EP*DXX(2) ) THEN
-               DEL_EP = DEL_EP + DXX(2);
-               IRC=II; JRC=JJ; KRC=KK+I_SGN
-               IRCEDG = ECVAR(IRC,JRC,KRC,IBM_IDCE,IEC)
-               IF (IRCEDG>0) THEN
-                  CEP = (DXX(2) - ABS(XB_IB))/DEL_EP; CB=DXX(2)/DEL_EP
-                  IBM_RCEDGE(IRCEDG)%DUIDXJ((/ -ICD, ICD /))    = 0.5_EB*(IBM_RCEDGE(IRCEDG)%DUIDXJ(ICD_SGN) + &
-                                                                  CEP*   DUIDXJ_EP(ICD_SGN) + CB*   DUIDXJ(ICD_SGN))
-                  IBM_RCEDGE(IRCEDG)%MU_DUIDXJ((/ -ICD, ICD /)) = 0.5_EB*(IBM_RCEDGE(IRCEDG)%MU_DUIDXJ(ICD_SGN) + &
-                                                                  CEP*MU_DUIDXJ_EP(ICD_SGN) + CB*MU_DUIDXJ(ICD_SGN))
+      IEC_SELECT_2: SELECT CASE(IEC)
+         CASE(IAXIS) IEC_SELECT_2
+            ! Define Face indexes and normal axis FAXIS.
+            SELECT CASE(ICD_SGN)
+               CASE(-2); IIF=II  ; JJF=JJ  ; KKF=KK  ; FAXIS=JAXIS
+               CASE(-1); IIF=II  ; JJF=JJ  ; KKF=KK  ; FAXIS=KAXIS
+               CASE( 1); IIF=II  ; JJF=JJ+1; KKF=KK  ; FAXIS=KAXIS
+               CASE( 2); IIF=II  ; JJF=JJ  ; KKF=KK+1; FAXIS=JAXIS
+            END SELECT
+            IF(FCVAR(IIF,JJF,KKF,IBM_FGSC,FAXIS)/=IBM_CUTCFE) CYCLE SIGN_LOOP
+            DXX(1)  = DY(JJF); DXX(2)  = DZ(KKF)
+            IF (FAXIS==JAXIS) THEN
+               DEL_EP = DXX(2) - ABS(XB_IB)
+               IF( DEL_EP < THRES_FCT_EP*DXX(2) ) THEN
+                  DEL_EP = DEL_EP + DXX(2);
+                  IRC=II; JRC=JJ; KRC=KK+I_SGN
+                  IRCEDG = ECVAR(IRC,JRC,KRC,IBM_IDCE,IEC)
+                  IF (IRCEDG>0) THEN
+                     CEP = (DXX(2) - ABS(XB_IB))/DEL_EP; CB=DXX(2)/DEL_EP
+                     IBM_RCEDGE(IRCEDG)%DUIDXJ((/ -ICD, ICD /))    = 0.5_EB*(IBM_RCEDGE(IRCEDG)%DUIDXJ(ICD_SGN) + &
+                                                                     CEP*   DUIDXJ_EP(ICD_SGN) + CB*   DUIDXJ(ICD_SGN))
+                     IBM_RCEDGE(IRCEDG)%MU_DUIDXJ((/ -ICD, ICD /)) = 0.5_EB*(IBM_RCEDGE(IRCEDG)%MU_DUIDXJ(ICD_SGN) + &
+                                                                     CEP*MU_DUIDXJ_EP(ICD_SGN) + CB*MU_DUIDXJ(ICD_SGN))
+                  ENDIF
+               ENDIF
+            ELSE ! IF(FAXIS==KAXIS) THEN
+               DEL_EP = DXX(1) - ABS(XB_IB)
+               IF( DEL_EP < THRES_FCT_EP*DXX(1) ) THEN
+                  DEL_EP = DEL_EP + DXX(1);
+                  IRC=II; JRC=JJ+I_SGN; KRC=KK
+                  IRCEDG = ECVAR(IRC,JRC,KRC,IBM_IDCE,IEC)
+                  IF (IRCEDG>0) THEN
+                     CEP = (DXX(1) - ABS(XB_IB))/DEL_EP; CB=DXX(1)/DEL_EP
+                     IBM_RCEDGE(IRCEDG)%DUIDXJ((/ -ICD, ICD /))    = 0.5_EB*(IBM_RCEDGE(IRCEDG)%DUIDXJ(ICD_SGN) + &
+                                                                     CEP*   DUIDXJ_EP(ICD_SGN) + CB*   DUIDXJ(ICD_SGN))
+                     IBM_RCEDGE(IRCEDG)%MU_DUIDXJ((/ -ICD, ICD /)) = 0.5_EB*(IBM_RCEDGE(IRCEDG)%MU_DUIDXJ(ICD_SGN) + &
+                                                                     CEP*MU_DUIDXJ_EP(ICD_SGN) + CB*MU_DUIDXJ(ICD_SGN))
+                  ENDIF
                ENDIF
             ENDIF
-         ELSE ! IF(FAXIS==KAXIS) THEN
-            DEL_EP = DXX(1) - ABS(XB_IB)
-            IF( DEL_EP < THRES_FCT_EP*DXX(1) ) THEN
-               DEL_EP = DEL_EP + DXX(1);
-               IRC=II; JRC=JJ+I_SGN; KRC=KK
-               IRCEDG = ECVAR(IRC,JRC,KRC,IBM_IDCE,IEC)
-               IF (IRCEDG>0) THEN
-                  CEP = (DXX(1) - ABS(XB_IB))/DEL_EP; CB=DXX(1)/DEL_EP
-                  IBM_RCEDGE(IRCEDG)%DUIDXJ((/ -ICD, ICD /))    = 0.5_EB*(IBM_RCEDGE(IRCEDG)%DUIDXJ(ICD_SGN) + &
-                                                                  CEP*   DUIDXJ_EP(ICD_SGN) + CB*   DUIDXJ(ICD_SGN))
-                  IBM_RCEDGE(IRCEDG)%MU_DUIDXJ((/ -ICD, ICD /)) = 0.5_EB*(IBM_RCEDGE(IRCEDG)%MU_DUIDXJ(ICD_SGN) + &
-                                                                  CEP*MU_DUIDXJ_EP(ICD_SGN) + CB*MU_DUIDXJ(ICD_SGN))
+         CASE(JAXIS) IEC_SELECT_2
+            ! Define Face indexes and normal axis FAXIS.
+            SELECT CASE(ICD_SGN)
+               CASE(-2); IIF=II  ; JJF=JJ  ; KKF=KK  ; FAXIS=KAXIS
+               CASE(-1); IIF=II  ; JJF=JJ  ; KKF=KK  ; FAXIS=IAXIS
+               CASE( 1); IIF=II  ; JJF=JJ  ; KKF=KK+1; FAXIS=IAXIS
+               CASE( 2); IIF=II+1; JJF=JJ  ; KKF=KK  ; FAXIS=KAXIS
+            END SELECT
+            IF(FCVAR(IIF,JJF,KKF,IBM_FGSC,FAXIS)/=IBM_CUTCFE) CYCLE SIGN_LOOP
+            DXX(1)  = DZ(KKF); DXX(2)  = DX(IIF)
+            IF (FAXIS==KAXIS) THEN
+               DEL_EP = DXX(2) - ABS(XB_IB)
+               IF( DEL_EP < THRES_FCT_EP*DXX(2) ) THEN
+                  DEL_EP = DEL_EP + DXX(2);
+                  IRC=II+I_SGN; JRC=JJ; KRC=KK
+                  IRCEDG = ECVAR(IRC,JRC,KRC,IBM_IDCE,IEC)
+                  IF (IRCEDG>0) THEN
+                     CEP = (DXX(2) - ABS(XB_IB))/DEL_EP; CB=DXX(2)/DEL_EP
+                     IBM_RCEDGE(IRCEDG)%DUIDXJ((/ -ICD, ICD /))    = 0.5_EB*(IBM_RCEDGE(IRCEDG)%DUIDXJ(ICD_SGN) + &
+                                                                     CEP*   DUIDXJ_EP(ICD_SGN) + CB*   DUIDXJ(ICD_SGN))
+                     IBM_RCEDGE(IRCEDG)%MU_DUIDXJ((/ -ICD, ICD /)) = 0.5_EB*(IBM_RCEDGE(IRCEDG)%MU_DUIDXJ(ICD_SGN) + &
+                                                                     CEP*MU_DUIDXJ_EP(ICD_SGN) + CB*MU_DUIDXJ(ICD_SGN))
+                  ENDIF
+               ENDIF
+            ELSE ! IF(FAXIS==IAXIS) THEN
+               DEL_EP = DXX(1) - ABS(XB_IB)
+               IF( DEL_EP < THRES_FCT_EP*DXX(1) ) THEN
+                  DEL_EP = DEL_EP + DXX(1);
+                  IRC=II; JRC=JJ; KRC=KK+I_SGN
+                  IRCEDG = ECVAR(IRC,JRC,KRC,IBM_IDCE,IEC)
+                  IF (IRCEDG>0) THEN
+                     CEP = (DXX(1) - ABS(XB_IB))/DEL_EP; CB=DXX(1)/DEL_EP
+                     ! WRITE(LU_ERR,*) ' '
+                     ! WRITE(LU_ERR,*) 'EDGE JAXIS=',IRC,JRC,KRC,CEP,CB
+                     ! WRITE(LU_ERR,*) 'OLD DUIDXJ=',IBM_RCEDGE(IRCEDG)%DUIDXJ(ICD_SGN),IBM_RCEDGE(IRCEDG)%MU_DUIDXJ(ICD_SGN)
+                     ! WRITE(LU_ERR,*) 'EP  DUIDXJ=',DUIDXJ_EP(ICD_SGN),MU_DUIDXJ_EP(ICD_SGN)
+                     ! WRITE(LU_ERR,*) 'B   DUIDXJ=',DUIDXJ (ICD_SGN),MU_DUIDXJ (ICD_SGN)
+                     IBM_RCEDGE(IRCEDG)%DUIDXJ((/ -ICD, ICD /))     = 0.5_EB*(IBM_RCEDGE(IRCEDG)%DUIDXJ(ICD_SGN) + &
+                                                                      CEP*   DUIDXJ_EP(ICD_SGN) + CB*   DUIDXJ(ICD_SGN))
+                     IBM_RCEDGE(IRCEDG)%MU_DUIDXJ((/ -ICD, ICD /))  = 0.5_EB*(IBM_RCEDGE(IRCEDG)%MU_DUIDXJ(ICD_SGN) + &
+                                                                      CEP*MU_DUIDXJ_EP(ICD_SGN) + CB*MU_DUIDXJ(ICD_SGN))
+                     ! WRITE(LU_ERR,*) 'NEW   DUIDXJ=',IBM_RCEDGE(IRCEDG)%DUIDXJ(ICD_SGN), IBM_RCEDGE(IRCEDG)%MU_DUIDXJ(ICD_SGN)
+                     ! WRITE(LU_ERR,*) 'OTHER DUIDXJ=',IBM_RCEDGE(IRCEDG)%DUIDXJ(-ICD_SGN),IBM_RCEDGE(IRCEDG)%MU_DUIDXJ(-ICD_SGN)
+                  ENDIF
                ENDIF
             ENDIF
-         ENDIF
-      CASE(JAXIS)
-         ! Define Face indexes and normal axis FAXIS.
-         SELECT CASE(ICD_SGN)
-            CASE(-2); IIF=II  ; JJF=JJ  ; KKF=KK  ; FAXIS=KAXIS
-            CASE(-1); IIF=II  ; JJF=JJ  ; KKF=KK  ; FAXIS=IAXIS
-            CASE( 1); IIF=II  ; JJF=JJ  ; KKF=KK+1; FAXIS=IAXIS
-            CASE( 2); IIF=II+1; JJF=JJ  ; KKF=KK  ; FAXIS=KAXIS
-         END SELECT
-         IF(FCVAR(IIF,JJF,KKF,IBM_FGSC,FAXIS)/=IBM_CUTCFE) CYCLE SIGN_LOOP
-         DXX(1)  = DZ(KKF); DXX(2)  = DX(IIF)
-         IF (FAXIS==KAXIS) THEN
-            DEL_EP = DXX(2) - ABS(XB_IB)
-            IF( DEL_EP < THRES_FCT_EP*DXX(2) ) THEN
-               DEL_EP = DEL_EP + DXX(2);
-               IRC=II+I_SGN; JRC=JJ; KRC=KK
-               IRCEDG = ECVAR(IRC,JRC,KRC,IBM_IDCE,IEC)
-               IF (IRCEDG>0) THEN
-                  CEP = (DXX(2) - ABS(XB_IB))/DEL_EP; CB=DXX(2)/DEL_EP
-                  IBM_RCEDGE(IRCEDG)%DUIDXJ((/ -ICD, ICD /))    = 0.5_EB*(IBM_RCEDGE(IRCEDG)%DUIDXJ(ICD_SGN) + &
-                                                                  CEP*   DUIDXJ_EP(ICD_SGN) + CB*   DUIDXJ(ICD_SGN))
-                  IBM_RCEDGE(IRCEDG)%MU_DUIDXJ((/ -ICD, ICD /)) = 0.5_EB*(IBM_RCEDGE(IRCEDG)%MU_DUIDXJ(ICD_SGN) + &
-                                                                  CEP*MU_DUIDXJ_EP(ICD_SGN) + CB*MU_DUIDXJ(ICD_SGN))
-               ENDIF
-            ENDIF
-         ELSE ! IF(FAXIS==IAXIS) THEN
-            DEL_EP = DXX(1) - ABS(XB_IB)
-            IF( DEL_EP < THRES_FCT_EP*DXX(1) ) THEN
-               DEL_EP = DEL_EP + DXX(1);
-               IRC=II; JRC=JJ; KRC=KK+I_SGN
-               IRCEDG = ECVAR(IRC,JRC,KRC,IBM_IDCE,IEC)
-               IF (IRCEDG>0) THEN
-                  CEP = (DXX(1) - ABS(XB_IB))/DEL_EP; CB=DXX(1)/DEL_EP
-                  ! WRITE(LU_ERR,*) ' '
-                  ! WRITE(LU_ERR,*) 'EDGE JAXIS=',IRC,JRC,KRC,CEP,CB
-                  ! WRITE(LU_ERR,*) 'OLD DUIDXJ=',IBM_RCEDGE(IRCEDG)%DUIDXJ(ICD_SGN),IBM_RCEDGE(IRCEDG)%MU_DUIDXJ(ICD_SGN)
-                  ! WRITE(LU_ERR,*) 'EP  DUIDXJ=',DUIDXJ_EP(ICD_SGN),MU_DUIDXJ_EP(ICD_SGN)
-                  ! WRITE(LU_ERR,*) 'B   DUIDXJ=',DUIDXJ (ICD_SGN),MU_DUIDXJ (ICD_SGN)
-                  IBM_RCEDGE(IRCEDG)%DUIDXJ((/ -ICD, ICD /))     = 0.5_EB*(IBM_RCEDGE(IRCEDG)%DUIDXJ(ICD_SGN) + &
-                                                                   CEP*   DUIDXJ_EP(ICD_SGN) + CB*   DUIDXJ(ICD_SGN))
-                  IBM_RCEDGE(IRCEDG)%MU_DUIDXJ((/ -ICD, ICD /))  = 0.5_EB*(IBM_RCEDGE(IRCEDG)%MU_DUIDXJ(ICD_SGN) + &
-                                                                   CEP*MU_DUIDXJ_EP(ICD_SGN) + CB*MU_DUIDXJ(ICD_SGN))
-                  ! WRITE(LU_ERR,*) 'NEW   DUIDXJ=',IBM_RCEDGE(IRCEDG)%DUIDXJ(ICD_SGN), IBM_RCEDGE(IRCEDG)%MU_DUIDXJ(ICD_SGN)
-                  ! WRITE(LU_ERR,*) 'OTHER DUIDXJ=',IBM_RCEDGE(IRCEDG)%DUIDXJ(-ICD_SGN),IBM_RCEDGE(IRCEDG)%MU_DUIDXJ(-ICD_SGN)
-               ENDIF
-            ENDIF
-         ENDIF
-      CASE(KAXIS)
-         ! Define Face indexes and normal axis FAXIS.
-         SELECT CASE(ICD_SGN)
-            CASE(-2); IIF=II  ; JJF=JJ  ; KKF=KK  ; FAXIS=IAXIS
-            CASE(-1); IIF=II  ; JJF=JJ  ; KKF=KK  ; FAXIS=JAXIS
-            CASE( 1); IIF=II+1; JJF=JJ  ; KKF=KK  ; FAXIS=JAXIS
-            CASE( 2); IIF=II  ; JJF=JJ+1; KKF=KK  ; FAXIS=IAXIS
-         END SELECT
-         IF(FCVAR(IIF,JJF,KKF,IBM_FGSC,FAXIS)/=IBM_CUTCFE) CYCLE SIGN_LOOP
-         DXX(1)  = DX(IIF); DXX(2)  = DY(JJF)
+         CASE(KAXIS) IEC_SELECT_2
+            ! Define Face indexes and normal axis FAXIS.
+            SELECT CASE(ICD_SGN)
+               CASE(-2); IIF=II  ; JJF=JJ  ; KKF=KK  ; FAXIS=IAXIS
+               CASE(-1); IIF=II  ; JJF=JJ  ; KKF=KK  ; FAXIS=JAXIS
+               CASE( 1); IIF=II+1; JJF=JJ  ; KKF=KK  ; FAXIS=JAXIS
+               CASE( 2); IIF=II  ; JJF=JJ+1; KKF=KK  ; FAXIS=IAXIS
+            END SELECT
+            IF(FCVAR(IIF,JJF,KKF,IBM_FGSC,FAXIS)/=IBM_CUTCFE) CYCLE SIGN_LOOP
+            DXX(1)  = DX(IIF); DXX(2)  = DY(JJF)
 
-         IF (FAXIS==IAXIS) THEN
-            DEL_EP = DXX(2) - ABS(XB_IB)
-            IF( DEL_EP < THRES_FCT_EP*DXX(2) ) THEN
-               DEL_EP = DEL_EP + DXX(2);
-               IRC=II; JRC=JJ+I_SGN; KRC=KK
-               IRCEDG = ECVAR(IRC,JRC,KRC,IBM_IDCE,IEC)
-               IF (IRCEDG>0) THEN
-                  CEP = (DXX(2) - ABS(XB_IB))/DEL_EP; CB=DXX(2)/DEL_EP
-                  IBM_RCEDGE(IRCEDG)%DUIDXJ((/ -ICD, ICD /))    = 0.5_EB*(IBM_RCEDGE(IRCEDG)%DUIDXJ(ICD_SGN) + &
-                                                                  CEP*   DUIDXJ_EP(ICD_SGN) + CB*   DUIDXJ(ICD_SGN))
-                  IBM_RCEDGE(IRCEDG)%MU_DUIDXJ((/ -ICD, ICD /)) = 0.5_EB*(IBM_RCEDGE(IRCEDG)%MU_DUIDXJ(ICD_SGN) + &
-                                                                  CEP*MU_DUIDXJ_EP(ICD_SGN) + CB*MU_DUIDXJ(ICD_SGN))
+            IF (FAXIS==IAXIS) THEN
+               DEL_EP = DXX(2) - ABS(XB_IB)
+               IF( DEL_EP < THRES_FCT_EP*DXX(2) ) THEN
+                  DEL_EP = DEL_EP + DXX(2);
+                  IRC=II; JRC=JJ+I_SGN; KRC=KK
+                  IRCEDG = ECVAR(IRC,JRC,KRC,IBM_IDCE,IEC)
+                  IF (IRCEDG>0) THEN
+                     CEP = (DXX(2) - ABS(XB_IB))/DEL_EP; CB=DXX(2)/DEL_EP
+                     IBM_RCEDGE(IRCEDG)%DUIDXJ((/ -ICD, ICD /))    = 0.5_EB*(IBM_RCEDGE(IRCEDG)%DUIDXJ(ICD_SGN) + &
+                                                                     CEP*   DUIDXJ_EP(ICD_SGN) + CB*   DUIDXJ(ICD_SGN))
+                     IBM_RCEDGE(IRCEDG)%MU_DUIDXJ((/ -ICD, ICD /)) = 0.5_EB*(IBM_RCEDGE(IRCEDG)%MU_DUIDXJ(ICD_SGN) + &
+                                                                     CEP*MU_DUIDXJ_EP(ICD_SGN) + CB*MU_DUIDXJ(ICD_SGN))
+                  ENDIF
+               ENDIF
+            ELSE ! IF(FAXIS==JAXIS) THEN
+               DEL_EP = DXX(1) - ABS(XB_IB)
+               IF( DEL_EP < THRES_FCT_EP*DXX(1) ) THEN
+                  DEL_EP = DEL_EP + DXX(1);
+                  IRC=II+I_SGN; JRC=JJ; KRC=KK
+                  IRCEDG = ECVAR(IRC,JRC,KRC,IBM_IDCE,IEC)
+                  IF (IRCEDG>0) THEN
+                     CEP = (DXX(1) - ABS(XB_IB))/DEL_EP; CB=DXX(1)/DEL_EP
+                     IBM_RCEDGE(IRCEDG)%DUIDXJ((/ -ICD, ICD /))    = 0.5_EB*(IBM_RCEDGE(IRCEDG)%DUIDXJ(ICD_SGN) + &
+                                                                     CEP*   DUIDXJ_EP(ICD_SGN) + CB*   DUIDXJ(ICD_SGN))
+                     IBM_RCEDGE(IRCEDG)%MU_DUIDXJ((/ -ICD, ICD /)) = 0.5_EB*(IBM_RCEDGE(IRCEDG)%MU_DUIDXJ(ICD_SGN) + &
+                                                                     CEP*MU_DUIDXJ_EP(ICD_SGN) + CB*MU_DUIDXJ(ICD_SGN))
+                  ENDIF
                ENDIF
             ENDIF
-         ELSE ! IF(FAXIS==JAXIS) THEN
-            DEL_EP = DXX(1) - ABS(XB_IB)
-            IF( DEL_EP < THRES_FCT_EP*DXX(1) ) THEN
-               DEL_EP = DEL_EP + DXX(1);
-               IRC=II+I_SGN; JRC=JJ; KRC=KK
-               IRCEDG = ECVAR(IRC,JRC,KRC,IBM_IDCE,IEC)
-               IF (IRCEDG>0) THEN
-                  CEP = (DXX(1) - ABS(XB_IB))/DEL_EP; CB=DXX(1)/DEL_EP
-                  IBM_RCEDGE(IRCEDG)%DUIDXJ((/ -ICD, ICD /))    = 0.5_EB*(IBM_RCEDGE(IRCEDG)%DUIDXJ(ICD_SGN) + &
-                                                                  CEP*   DUIDXJ_EP(ICD_SGN) + CB*   DUIDXJ(ICD_SGN))
-                  IBM_RCEDGE(IRCEDG)%MU_DUIDXJ((/ -ICD, ICD /)) = 0.5_EB*(IBM_RCEDGE(IRCEDG)%MU_DUIDXJ(ICD_SGN) + &
-                                                                  CEP*MU_DUIDXJ_EP(ICD_SGN) + CB*MU_DUIDXJ(ICD_SGN))
-               ENDIF
-            ENDIF
-         ENDIF
-      END SELECT
+      END SELECT IEC_SELECT_2
 
    ENDDO SIGN_LOOP
 ENDDO ORIENTATION_LOOP
