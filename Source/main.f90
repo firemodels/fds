@@ -1363,10 +1363,15 @@ PRESSURE_ITERATION_LOOP: DO
    ! The following loops and exchange always get executed the first pass through the PRESSURE_ITERATION_LOOP.
    ! If we need to iterate the baroclinic torque term, the loop is executed each time.
 
-   IF (ITERATE_BAROCLINIC_TERM .OR. PRESSURE_ITERATIONS==1) THEN
+   IF (ITERATE_BAROCLINIC_TERM .OR. PRESSURE_ITERATIONS==1 .OR. CC_IBM) THEN
       DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          IF (EVACUATION_ONLY(NM) .OR. EVACUATION_SKIP(NM)) CYCLE
          IF (BAROCLINIC) CALL BAROCLINIC_CORRECTION(T,NM)
+         IF (CC_IBM) THEN
+            ! Wall model to define target velocities in gas cut faces.
+            IF(PRESSURE_ITERATIONS<=1 .AND. CC_FORCE_PRESSIT .AND. .NOT.CC_VELOBC_FLAG2) CALL CCIBM_TARGET_VELOCITY(DT,NM)
+            CALL CCIBM_NO_FLUX(DT,NM,.TRUE.) ! IBM Force, we do it here to get velocity flux matched.
+         ENDIF
       ENDDO
       CALL MESH_EXCHANGE(5)  ! Exchange FVX, FVY, FVZ
       DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
@@ -1382,11 +1387,7 @@ PRESSURE_ITERATION_LOOP: DO
    DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       IF (EVACUATION_ONLY(NM) .OR. EVACUATION_SKIP(NM)) CYCLE
       CALL NO_FLUX(DT,NM)
-      IF (CC_IBM) THEN
-         ! Wall model to define target velocities in gas cut faces.
-         IF(PRESSURE_ITERATIONS<=2 .AND. CC_FORCE_PRESSIT .AND. .NOT.CC_VELOBC_FLAG2) CALL CCIBM_TARGET_VELOCITY(DT,NM)
-         CALL CCIBM_NO_FLUX(DT,NM)
-      ENDIF
+      IF (CC_IBM) CALL CCIBM_NO_FLUX(DT,NM,.FALSE.) ! set WALL_WORK1 to 0 in cells inside geometries.
       IF (PRESSURE_ITERATIONS==1) MESHES(NM)%WALL_WORK1 = 0._EB
       CALL PRESSURE_SOLVER_COMPUTE_RHS(T,DT,NM)
    ENDDO

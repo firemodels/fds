@@ -839,7 +839,7 @@ USE COMPLEX_GEOMETRY, ONLY : CALL_FOR_GLMAT, IBM_CGSC,IBM_FGSC, IBM_UNKH, IBM_NC
                              NUNKH_LOC, NUNKH_TOT, UNKH_IND, NUNKH_LOCAL, NUNKH_TOTAL, NM_START, &
                              NNZ_ROW_H, TOT_NNZ_H, NNZ_D_MAT_H, D_MAT_H, JD_MAT_H, IA_H,       &
                              JA_H, A_H, H_MATRIX_INDEFINITE, F_H, X_H, PT_H, IPARM, COPY_CC_UNKH_TO_HS, &
-                             COPY_CC_HS_TO_UNKH
+                             COPY_CC_HS_TO_UNKH,CALL_FROM_GLMAT_SETUP
 
 #ifdef WITH_MKL
 USE MKL_CLUSTER_SPARSE_SOLVER
@@ -1420,6 +1420,8 @@ TNOW=CURRENT_TIME()
 SELECT CASE(STAGE_FLAG)
 CASE(1)
 
+    CALL_FROM_GLMAT_SETUP = .TRUE.
+
     ! Factor to drop DY(J) in cylindrical coordinates. Soln assumes DTheta=1.
     CYL_FCT = 0._EB; IF (CYLINDRICAL) CYL_FCT = 1._EB
 
@@ -1490,6 +1492,8 @@ CASE(3)
 
    ! 9. Pass D_MAT_H, NNZ_D_MAT_H, JD_MAT_H to CSR format and invoque LU solver:
    CALL GET_H_MATRIX_LUDCMP
+
+   CALL_FROM_GLMAT_SETUP = .FALSE.
 
 END SELECT
 
@@ -1888,7 +1892,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          IOR = WC%ONE_D%IOR
          NOM = EWC%NOM
          ! Here if NOM==0 means it is an OBST laying on an external boundary -> CYCLE
-         IF(NOM < 1) CYCLE
+         IF(NOM < 1) CYCLE EXTERNAL_WALL_LOOP
          OM => OMESH(NOM)
 
          ! This assumes all meshes at the same level of refinement:
