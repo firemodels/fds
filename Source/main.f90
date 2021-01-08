@@ -1369,7 +1369,7 @@ PRESSURE_ITERATION_LOOP: DO
          IF (BAROCLINIC) CALL BAROCLINIC_CORRECTION(T,NM)
          IF (CC_IBM) THEN
             ! Wall model to define target velocities in gas cut faces.
-            IF(PRESSURE_ITERATIONS<=1 .AND. CC_FORCE_PRESSIT .AND. .NOT.CC_VELOBC_FLAG2) CALL CCIBM_TARGET_VELOCITY(DT,NM)
+            IF(PRESSURE_ITERATIONS<=1 .AND. CC_FORCE_PRESSIT .AND. .NOT.CC_STRESS_METHOD) CALL CCIBM_TARGET_VELOCITY(DT,NM)
             CALL CCIBM_NO_FLUX(DT,NM,.TRUE.) ! IBM Force, we do it here to get velocity flux matched.
          ENDIF
       ENDDO
