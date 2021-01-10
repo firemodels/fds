@@ -886,7 +886,7 @@ NODE_LOOP: DO NN = 1, N_DUCTNODES
 
       MESH_LOOP: DO NM = 1, NMESHES
          IF (EVACUATION_ONLY(NM)) CYCLE MESH_LOOP
-         IF (PROCESS(NM)/=MYID)   CYCLE MESH_LOOP  ! Only search meshes controlled by the current MPI process
+         IF (PROCESS(NM)/=MY_RANK)   CYCLE MESH_LOOP  ! Only search meshes controlled by the current MPI process
          NODE_VENT_LOOP:DO NV = 1, MESHES(NM)%N_VENT
             IF(MESHES(NM)%VENTS(NV)%ID == DN%VENT_ID) THEN
                FOUND = .TRUE.
