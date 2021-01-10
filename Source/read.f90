@@ -65,11 +65,11 @@ CALL GET_INPUT_FILE
 
 INQUIRE(FILE=FN_INPUT,EXIST=EX)
 IF (.NOT.EX) THEN
-   IF (MYID==0) WRITE(LU_ERR,'(A,A,A)') "ERROR: The file, ", TRIM(FN_INPUT),", does not exist in the current directory"
+   IF (MY_RANK==0) WRITE(LU_ERR,'(A,A,A)') "ERROR: The file, ", TRIM(FN_INPUT),", does not exist in the current directory"
    STOP_STATUS = VERSION_STOP ; RETURN
 ENDIF
 
-IF (MYID==0) WRITE(LU_ERR,'(/A/)') ' Reading FDS input file ...'
+IF (MY_RANK==0) WRITE(LU_ERR,'(/A/)') ' Reading FDS input file ...'
 
 ! Allocate the global orientation vector
 
@@ -148,7 +148,7 @@ CALL READ_RADF    ; CALL CHECK_STOP_STATUS ; IF (STOP_STATUS/=NO_STOP) RETURN
 
 CLOSE (LU_INPUT)
 
-IF (MYID==0 .AND. VERBOSE) WRITE(LU_ERR,'(A)') ' Input file read'
+IF (MY_RANK==0 .AND. VERBOSE) WRITE(LU_ERR,'(A)') ' Input file read'
 
 ! Set QUANTITY ambient values
 
@@ -190,14 +190,14 @@ CALL GET_INPUT_FILE
 ! If no input file is given, just print out the version number and stop
 
 IF (FN_INPUT(1:1)==' ') THEN
-   IF (MYID==0) THEN
+   IF (MY_RANK==0) THEN
       CALL WRITE_SUMMARY_INFO(LU_ERR)
       WRITE(LU_ERR,'(A)')  ' Consult FDS Users Guide Chapter, Running FDS, for further instructions.'
    ENDIF
    STOP ! this routine is only called before MPI is initialized so safe to STOP here
 ENDIF
 IF (FN_INPUT(1:2)=='-V' .OR. FN_INPUT(1:2)=='-v') THEN
-   IF (MYID==0) THEN
+   IF (MY_RANK==0) THEN
       CALL MPI_GET_LIBRARY_VERSION(MPILIBVERSION,MPILIBLENGTH,IERR)
       WRITE(LU_ERR,'(A,A)') 'FDS revision       : ',TRIM(GITHASH_PP)
       WRITE(LU_ERR,'(A,A)') 'MPI library version: ',TRIM(MPILIBVERSION)
@@ -277,7 +277,7 @@ IF (EX .AND. .NOT.OVERWRITE) THEN
    CALL SHUTDOWN(TRIM(BUFFER)) ; RETURN
 ENDIF
 
-IF (MYID==0) THEN
+IF (MY_RANK==0) THEN
    OPEN(LU_CATF,FILE=FN_CATF,ACTION='WRITE')
    ! Write new header for LU_CATF:
    WRITE(LU_CATF,'(A)')&
@@ -321,7 +321,7 @@ COPY_OFILES_LOOP: DO
       ! If it exists open it and copy its contents without the &HEAD line (if any) up to the first &TAIL /
       ! appearance or the EOF.
       OPEN(LU_CATF2,FILE=TRIM(OTHER_FILES(OFI)),ACTION='READ')
-      IF (MYID==0) THEN
+      IF (MY_RANK==0) THEN
          IF (TFI>1) WRITE(LU_CATF,'(A)')
          WRITE(LU_CATF,'(A)')'# Start of file '//TRIM(OTHER_FILES(OFI))//' :'
       ENDIF
@@ -334,7 +334,7 @@ ENDDO COPY_OFILES_LOOP
 IF (N_MPI_PROCESSES > 1) CALL MPI_BARRIER(MPI_COMM_WORLD,IERR)
 
 ! Process 0 closes LU_CATF and reopens FN_CATF as LU_INPUT:
-IF (MYID==0) THEN
+IF (MY_RANK==0) THEN
    WRITE(LU_CATF,'(A)')
    WRITE(LU_CATF,'(A)') '&TAIL /'
    CLOSE(LU_CATF)
@@ -342,7 +342,7 @@ ENDIF
 
 IF (N_MPI_PROCESSES > 1) CALL MPI_BARRIER(MPI_COMM_WORLD,IERR)
 
-IF (MYID==0) THEN
+IF (MY_RANK==0) THEN
    CLOSE(LU_INPUT)
    OPEN(LU_INPUT,FILE=FN_CATF,STATUS='OLD',ACTION='READ')
 ENDIF
@@ -351,7 +351,7 @@ IF (N_MPI_PROCESSES > 1) CALL MPI_BARRIER(MPI_COMM_WORLD,IERR)
 
 ! Finally other processes reopen FN_CATF as LU_INPUT:
 IOS = 0
-IF (MYID/=0) THEN
+IF (MY_RANK/=0) THEN
    CLOSE(LU_INPUT)
    TFI = 0
    DO
@@ -400,7 +400,7 @@ COPY_IFILE_LOOP: DO
    IF (BUFFER2(1:5)=='&HEAD') CYCLE COPY_IFILE_LOOP
    IF (BUFFER2(1:5)=='&CATF') CYCLE COPY_IFILE_LOOP
    IF (BUFFER2(1:5)=='&TAIL') EXIT COPY_IFILE_LOOP ! Do not copy the tail line to LU_CATF
-   IF(MYID==0) WRITE(LU_OUTFILE,'(A)') TRIM(BUFFER2)
+   IF(MY_RANK==0) WRITE(LU_OUTFILE,'(A)') TRIM(BUFFER2)
 ENDDO COPY_IFILE_LOOP
 10 RETURN
 
@@ -797,7 +797,7 @@ MESH_LOOP: DO N=1,NMESHES_READ
                   ELSE
                      ! Prevents fatal error when testing a run on a single core with MPI_PROCESS set for meshes
                      WRITE(MESSAGE,'(A,I0,A)') 'WARNING: MPI_PROCESS set for MESH ',NM,' and only one MPI process exists'
-                     IF (MYID==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
+                     IF (MY_RANK==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
                      CURRENT_MPI_PROCESS=0
                   ENDIF
                ENDIF
@@ -841,13 +841,13 @@ MESH_LOOP: DO N=1,NMESHES_READ
 
             ! Associate the MESH with the PROCESS
 
-            IF (MYID==CURRENT_MPI_PROCESS) THEN
+            IF (MY_RANK==CURRENT_MPI_PROCESS) THEN
                LOWER_MESH_INDEX = MIN(LOWER_MESH_INDEX,NM)
                UPPER_MESH_INDEX = MAX(UPPER_MESH_INDEX,NM)
             ENDIF
 
             PROCESS(NM) = CURRENT_MPI_PROCESS
-            IF (MYID==0 .AND. VERBOSE) &
+            IF (MY_RANK==0 .AND. VERBOSE) &
                WRITE(LU_ERR,'(A,I0,A,I0)') ' Mesh ',NM,' is assigned to MPI Process ',PROCESS(NM)
             IF (EVACUATION_ONLY(NM) .AND. (N_MPI_PROCESSES>1)) EVAC_PROCESS = N_MPI_PROCESSES-1
 
@@ -859,7 +859,7 @@ MESH_LOOP: DO N=1,NMESHES_READ
 
             ! If OMP number of threads is explicitly set for this mesh and the mesh is assigned to this MPI process,
             ! then set this value
-            IF (MYID == PROCESS(NM) .AND. N_THREADS > 0) THEN
+            IF (MY_RANK == PROCESS(NM) .AND. N_THREADS > 0) THEN
                ! Check if OPENMP is active
                IF (USE_OPENMP .NEQV. .TRUE.) THEN
                   WRITE(MESSAGE, '(A)') 'ERROR: setting N_THREADS, but OPENMP is not active'
@@ -1117,13 +1117,13 @@ LOOP_EMESHES: DO N = 1, NEVAC_MESHES
 
    ! Associate the MESH with the PROCESS
 
-   IF (MYID==CURRENT_MPI_PROCESS) THEN
+   IF (MY_RANK==CURRENT_MPI_PROCESS) THEN
       LOWER_MESH_INDEX = MIN(LOWER_MESH_INDEX,NM)
       UPPER_MESH_INDEX = MAX(UPPER_MESH_INDEX,NM)
    ENDIF
 
    PROCESS(NM) = CURRENT_MPI_PROCESS
-   IF (MYID==0 .AND. VERBOSE) WRITE(LU_ERR,'(A,I0,A,I0)') ' Mesh ',NM,' is assigned to MPI Process ',PROCESS(NM)
+   IF (MY_RANK==0 .AND. VERBOSE) WRITE(LU_ERR,'(A,I0,A,I0)') ' Mesh ',NM,' is assigned to MPI Process ',PROCESS(NM)
    IF (EVACUATION_ONLY(NM) .AND. (N_MPI_PROCESSES>1)) EVAC_PROCESS = N_MPI_PROCESSES-1
 
    ! Mesh boundary colors
@@ -1255,13 +1255,13 @@ LOOP_STAIRS: DO N = 1, N_STRS
 
    ! Associate the MESH with the PROCESS
 
-   IF (MYID==CURRENT_MPI_PROCESS) THEN
+   IF (MY_RANK==CURRENT_MPI_PROCESS) THEN
       LOWER_MESH_INDEX = MIN(LOWER_MESH_INDEX,NM)
       UPPER_MESH_INDEX = MAX(UPPER_MESH_INDEX,NM)
    ENDIF
 
    PROCESS(NM) = CURRENT_MPI_PROCESS
-   IF (MYID==0 .AND. VERBOSE) WRITE(LU_ERR,'(A,I0,A,I0)') ' Mesh ',NM,' is assigned to MPI Process ',PROCESS(NM)
+   IF (MY_RANK==0 .AND. VERBOSE) WRITE(LU_ERR,'(A,I0,A,I0)') ' Mesh ',NM,' is assigned to MPI Process ',PROCESS(NM)
    IF (EVACUATION_ONLY(NM) .AND. (N_MPI_PROCESSES>1)) EVAC_PROCESS = N_MPI_PROCESSES-1
 
    ! Mesh boundary colors
@@ -1340,16 +1340,16 @@ MESH_LOOP: DO NM=1,NMESHES
    M => MESHES(NM)
 
    ! Only read and process the TRNX, TRNY and TRNZ lines if the current MPI
-   ! process (MYID) controls mesh NM or one of its neighbors.
+   ! process (MY_RANK) controls mesh NM or one of its neighbors.
 
    PROCESS_TRANS = .FALSE.
    DO N=1,M%N_NEIGHBORING_MESHES
-      IF (MYID==PROCESS(M%NEIGHBORING_MESH(N))) PROCESS_TRANS = .TRUE.
+      IF (MY_RANK==PROCESS(M%NEIGHBORING_MESH(N))) PROCESS_TRANS = .TRUE.
    ENDDO
 
    ! A fast fix for fire+evacuation calculation with MPI and neighboring_mesh array problem
    ! Evacuation meshes need fire mesh obst information => evacuation process processes all fire meshes
-   IF(MYID==EVAC_PROCESS .AND. .NOT.EVACUATION_ONLY(NM)) PROCESS_TRANS = .TRUE.
+   IF(MY_RANK==EVAC_PROCESS .AND. .NOT.EVACUATION_ONLY(NM)) PROCESS_TRANS = .TRUE.
 
    IF (.NOT.PROCESS_TRANS) CYCLE MESH_LOOP
 
@@ -2648,7 +2648,7 @@ IF (ANY(MEAN_FORCING)) THEN
    ALLOCATE(V_MEAN_FORCING(N_MEAN_FORCING_BINS),STAT=IZERO)         ; CALL ChkMemErr('READ','V_MEAN_FORCING',IZERO)
    ALLOCATE(W_MEAN_FORCING(N_MEAN_FORCING_BINS),STAT=IZERO)         ; CALL ChkMemErr('READ','W_MEAN_FORCING',IZERO)
    DO NM=1,NMESHES
-      IF (MYID/=PROCESS(NM) .OR. EVACUATION_ONLY(NM)) CYCLE
+      IF (MY_RANK/=PROCESS(NM) .OR. EVACUATION_ONLY(NM)) CYCLE
       M=>MESHES(NM)
       ALLOCATE(M%MEAN_FORCING_CELL(0:M%IBP1,0:M%JBP1,0:M%KBP1),STAT=IZERO) ; CALL ChkMemErr('READ','MEAN_FORCING_CELL',IZERO)
       M%MEAN_FORCING_CELL=.TRUE.
@@ -3313,7 +3313,7 @@ PRIMITIVE_SPEC_READ_LOOP: DO WHILE (N_SPEC_READ < N_SPEC_READ_2 .OR. N < N_SPECI
          H2O_INDEX = N
          IF (MASS_FRACTION_0 > 0._EB .AND. LUMPED_COMPONENT_ONLY) THEN
             WRITE(MESSAGE,'(A)') 'WARNING: MASS_FRACTION_0 specified for WATER VAPOR with LUMPED_COMPONENT_ONLY = .TRUE.'
-            IF (MYID==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
+            IF (MY_RANK==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
          ENDIF
          IF (PREDEFINED_SMIX(1)) Y_H2O_INFTY = WATER_VAPOR_MASS_FRACTION(HUMIDITY,MIN(373.15_EB,TMPA),P_INF)
       CASE('CARBON DIOXIDE')
@@ -3756,7 +3756,7 @@ DO NS = 1,N_SUB_SPECIES
             ELSE
                WRITE(MESSAGE,'(A,A,A)') 'WARNING: Cannot do deposition with a lumped species.  Species ',TRIM(SM%ID),&
                                         ' will not have deposition'
-               IF (MYID==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
+               IF (MY_RANK==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
             ENDIF
          ENDIF
          EXIT FIND_SPEC_ID
@@ -5159,7 +5159,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
       ! Find heat of formation of lumped fuel to satisfy specified heat of combustion
       IF (REDEFINE_H_F(RN%FUEL_SMIX_INDEX)) THEN
          WRITE(MESSAGE,'(A,I0,A)') 'WARNING: H_F for FUEL for REACtion ',NR,' was redefined multiple times.'
-         IF (MYID==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
+         IF (MY_RANK==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
       ENDIF
       REDEFINE_H_F(RN%FUEL_SMIX_INDEX) = .TRUE.
       SMF%H_F = RN%HEAT_OF_COMBUSTION * ABS(RN%NU(RN%FUEL_SMIX_INDEX)) * SMF%MW * 0.001_EB
@@ -6244,7 +6244,7 @@ READ_PROP_LOOP: DO N=0,N_PROP
          IF (PARTICLE_VELOCITY<=TWO_EPSILON_EB .AND. ORIFICE_DIAMETER<=TWO_EPSILON_EB .AND. &
             PRESSURE_RAMP=='null' .AND. SPRAY_PATTERN_TABLE=='null') THEN
             WRITE(MESSAGE,'(A,A,A)') 'WARNING: PROP ',TRIM(PY%ID),' PARTICLE velocity is not defined.'
-            IF (MYID==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
+            IF (MY_RANK==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
          ENDIF
 
          IF (PARTICLE_VELOCITY > 0._EB) THEN
@@ -6588,7 +6588,7 @@ READ_MATL_LOOP: DO N=1,N_MATL
          ENDIF
          IF (ABS(SUM(NU_MATL(:,NR)))<=TWO_EPSILON_EB .AND. ABS(SUM(NU_SPEC(:,NR)))<=TWO_EPSILON_EB) THEN
             WRITE(MESSAGE,'(A,A,A,I0,A)') 'WARNING: MATL ',TRIM(ID),', REAC ',NR,'. No product yields (NUs) set'
-            IF (MYID==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
+            IF (MY_RANK==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
          ENDIF
       ENDDO
 
@@ -8375,7 +8375,7 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
 
    IF ((ABS(SF%SURFACE_DENSITY) <= TWO_EPSILON_EB) .AND. SF%BURN_AWAY) THEN
       WRITE(MESSAGE,'(A,A,A)') 'WARNING: SURF ',TRIM(SF%ID),' has BURN_AWAY set but zero combustible density'
-      IF (MYID==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
+      IF (MY_RANK==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
    ENDIF
 
    ! Ignition Time
@@ -9021,7 +9021,7 @@ IF (MAXIMUM_TEMPERATURE>-TMPM) TMPMAX = MAXIMUM_TEMPERATURE + TMPM
 
 IF (TMPMAX > 5000._EB) THEN
    WRITE(MESSAGE,'(A)') 'WARNING: Thermal properties are tabulated between 0 K and 5000 K'
-   IF (MYID==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
+   IF (MY_RANK==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
 ENDIF
 
 IF (MINIMUM_DENSITY>0._EB) THEN
@@ -10609,7 +10609,7 @@ READ_HOLE_LOOP: DO N=1,N_HOLE_O
 
    MESH_LOOP: DO NM=1,NMESHES
 
-      IF (.NOT.PROCESS_MESH_NEIGHBORHOOD(NM) .AND. MYID/=EVAC_PROCESS) CYCLE MESH_LOOP
+      IF (.NOT.PROCESS_MESH_NEIGHBORHOOD(NM) .AND. MY_RANK/=EVAC_PROCESS) CYCLE MESH_LOOP
 
       M=>MESHES(NM)
       CALL POINT_TO_MESH(NM)
@@ -11465,11 +11465,11 @@ MESH_LOOP_1: DO NM=1,NMESHES
 
 ENDDO MESH_LOOP_1
 
-! Go through all the meshes again, but this time only if PROCESS(NM)==MYID
+! Go through all the meshes again, but this time only if PROCESS(NM)==MY_RANK
 
 MESH_LOOP_2: DO NM=1,NMESHES
 
-   IF (PROCESS(NM)/=MYID) CYCLE MESH_LOOP_2
+   IF (PROCESS(NM)/=MY_RANK) CYCLE MESH_LOOP_2
 
    CALL POINT_TO_MESH(NM)
 
@@ -12738,7 +12738,7 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
          IF (XB(5)/=XB(6) .AND. (XB(5)>=M%ZF .OR. XB(6)<=M%ZS)) OVERLAPPING_Z = .FALSE.
          IF (OVERLAPPING_X .AND. OVERLAPPING_Y .AND. OVERLAPPING_Z) THEN
             BAD = .FALSE.
-            IF (PROCESS(NM)==MYID) MESH_DEVICE(NM) = 1
+            IF (PROCESS(NM)==MY_RANK) MESH_DEVICE(NM) = 1
             MESH_NUMBER = NM
          ENDIF
       ENDDO CHECK_MESH_LOOP
@@ -12828,7 +12828,7 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
             ENDIF
             MESH_NUMBER = NM
             BAD = .FALSE.
-            IF (PROCESS(NM)==MYID) MESH_DEVICE(NM) = 1
+            IF (PROCESS(NM)==MY_RANK) MESH_DEVICE(NM) = 1
             EXIT MESH_LOOP
          ENDIF
       ENDDO MESH_LOOP
@@ -12864,12 +12864,12 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
             IF (INIT_ID/='null') THEN
                MESH_DEVICE = 1  ! This is the case where a DEVC is assigned to particles specified on an INIT line
             ELSE
-               IF (PROCESS(1)==MYID) MESH_DEVICE(1) = 1  ! This refers to HVAC or control logic
+               IF (PROCESS(1)==MY_RANK) MESH_DEVICE(1) = 1  ! This refers to HVAC or control logic
             ENDIF
          ELSE
             IF (ALL(EVACUATION_ONLY)) CYCLE READ_DEVC_LOOP
             WRITE(MESSAGE,'(A,A,A)') 'WARNING: DEVC ',TRIM(ID),' is not within any mesh.'
-            IF (MYID==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
+            IF (MY_RANK==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
             CYCLE READ_DEVC_LOOP
          ENDIF
       ENDIF
@@ -13458,7 +13458,7 @@ PROC_CTRL_LOOP: DO NC = 1, N_CTRL
 END DO PROC_CTRL_LOOP
 
 IF (ABS(TIME_SHRINK_FACTOR-1._EB)>TWO_EPSILON_EB .AND. TSF_WARNING) THEN
-    IF (MYID==0)  WRITE(LU_ERR,'(A)') 'WARNING: One or more time based CTRL functions are being used with TIME_SHRINK_FACTOR'
+    IF (MY_RANK==0)  WRITE(LU_ERR,'(A)') 'WARNING: One or more time based CTRL functions are being used with TIME_SHRINK_FACTOR'
 ENDIF
 
 END SUBROUTINE PROC_CTRL
@@ -13473,7 +13473,7 @@ INTEGER :: NM,N,I,J,K,IS,JS,KS,IC1,IC2
 
 MESH_LOOP: DO NM=1,NMESHES
 
-   IF (PROCESS(NM)/=MYID)   CYCLE MESH_LOOP
+   IF (PROCESS(NM)/=MY_RANK)   CYCLE MESH_LOOP
    IF (EVACUATION_ONLY(NM)) CYCLE MESH_LOOP
 
    M=>MESHES(NM)
@@ -13678,7 +13678,7 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
    ! Determine the cell indices of the device
 
    IF (DV%MESH>0) THEN
-      IF (PROCESS(DV%MESH)==MYID) THEN
+      IF (PROCESS(DV%MESH)==MY_RANK) THEN
          M => MESHES(DV%MESH)
          DO NNN=1,DV%N_QUANTITY
             CALL GET_IJK(DV%X,DV%Y,DV%Z,DV%MESH,XI,YJ,ZK,DV%I(NNN),DV%J(NNN),DV%K(NNN))
@@ -14153,7 +14153,7 @@ NAMELIST /SLCF/ AGL_SLICE,CELL_CENTERED,DB,EVACUATION,FACE_CENTERED,FYI,ID,MAXIM
 
 MESH_LOOP: DO NM=1,NMESHES
 
-   IF (MYID/=PROCESS(NM)) CYCLE MESH_LOOP
+   IF (MY_RANK/=PROCESS(NM)) CYCLE MESH_LOOP
 
    M=>MESHES(NM)
    CALL POINT_TO_MESH(NM)
@@ -14464,7 +14464,7 @@ NAMELIST /RADF/ FYI,I_STEP,J_STEP,K_STEP,XB
 
 MESH_LOOP: DO NM=1,NMESHES
 
-   IF (MYID/=PROCESS(NM)) CYCLE MESH_LOOP
+   IF (MY_RANK/=PROCESS(NM)) CYCLE MESH_LOOP
 
    M=>MESHES(NM)
    CALL POINT_TO_MESH(NM)

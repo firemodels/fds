@@ -364,7 +364,7 @@ REAL(EB), PARAMETER :: BTILDE_ROUGH=8.5_EB                  !< Fully rough B(s+)
 
 ! Parameters associated with parallel mode
 
-INTEGER :: MYID=0                                           !< The MPI process index, starting at 0
+INTEGER :: MY_RANK=0                                           !< The MPI process index, starting at 0
 INTEGER :: N_MPI_PROCESSES=1                                !< Number of MPI processes
 INTEGER :: EVAC_PROCESS=-1
 INTEGER :: LOWER_MESH_INDEX=1000000000                      !< Lower bound of meshes controlled by the current MPI process

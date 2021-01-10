@@ -1107,7 +1107,7 @@ IF (H_MATRIX_INDEFINITE) THEN
          MEAN_FH(I_ZONE) = SUM_FH(1,I_ZONE)/(SUM_FH(2,I_ZONE)+TWO_EPSILON_EB)
       ENDDO
       ! Write out:
-      ! IF (MYID==0) THEN
+      ! IF (MY_RANK==0) THEN
       !    DO I_ZONE=0,N_ZONE
       !    WRITE(LU_ERR,*) PREDICTOR,'INDEFINITE POISSON MATRIX, I_ZONE, MEAN(RHS), SUM(RHS)=',&
       !                    I_ZONE,MEAN_FH(I_ZONE),SUM_FH(1:2,I_ZONE)
@@ -1142,7 +1142,7 @@ IF (H_MATRIX_INDEFINITE) THEN
       SUM_FH(1:2,0) = SUM(F_H(1:NUNKH_LOCAL))
       IF (N_MPI_PROCESSES>1) CALL MPI_ALLREDUCE(SUM_FH(1,0),SUM_FH(2,0),1,MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,IERR)
       MEAN_FH(0) = SUM_FH(2,0)/REAL(NUNKH_TOTAL,EB)
-      ! IF (MYID==0) WRITE(LU_ERR,*) 'INDEFINITE POISSON MATRIX, MEAN(RHS), SUM(RHS)=',MEAN_FH(0),SUM_FH(2,0)
+      ! IF (MY_RANK==0) WRITE(LU_ERR,*) 'INDEFINITE POISSON MATRIX, MEAN(RHS), SUM(RHS)=',MEAN_FH(0),SUM_FH(2,0)
       ! Substract Mean:
       F_H(:) = F_H(:) - MEAN_FH(0)
    ENDIF WHOLE_DOM_IF1
@@ -1208,7 +1208,7 @@ IF (H_MATRIX_INDEFINITE) THEN
          MEAN_XH(I_ZONE) = SUM_XH(1,I_ZONE)/(SUM_XH(2,I_ZONE)+TWO_EPSILON_EB)
       ENDDO
       ! Write out:
-      ! IF (MYID==0) THEN
+      ! IF (MY_RANK==0) THEN
       !    DO I_ZONE=0,N_ZONE
       !    WRITE(LU_ERR,*) PREDICTOR,'INDEFINITE POISSON MATRIX, I_ZONE, MEAN(H), SUM(H)=',I_ZONE,MEAN_XH(I_ZONE),SUM_XH(1:2,I_ZONE)
       !    ENDDO
@@ -1242,7 +1242,7 @@ IF (H_MATRIX_INDEFINITE) THEN
       SUM_XH(1:2,0) = SUM(X_H(1:NUNKH_LOCAL))
       IF (N_MPI_PROCESSES>1) CALL MPI_ALLREDUCE(SUM_XH(1,0),SUM_XH(2,0),1,MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,IERR)
       MEAN_XH(0) = SUM_XH(2,0)/REAL(NUNKH_TOTAL,EB)
-      ! IF (MYID==0) WRITE(LU_ERR,*) 'INDEFINITE POISSON MATRIX, MEAN(H), SUM(H)=',MEAN_XH(0),SUM_XH(2,0)
+      ! IF (MY_RANK==0) WRITE(LU_ERR,*) 'INDEFINITE POISSON MATRIX, MEAN(H), SUM(H)=',MEAN_XH(0),SUM_XH(2,0)
       ! Substract Mean:
       X_H(:) = X_H(:) - MEAN_XH(0)
    ENDIF WHOLE_DOM_IF2
@@ -1254,7 +1254,7 @@ ENDIF
 ! IF (CORRECTOR) THEN
 !    DO NM=1,NMESHES
 !       CALL MPI_BARRIER(MPI_COMM_WORLD,IERR)
-!       IF(MYID/=PROCESS(NM))CYCLE
+!       IF(MY_RANK/=PROCESS(NM))CYCLE
 !       CALL POINT_TO_MESH(NM)
 !       WRITE(FILE_NAME,'(A,I2.2,A,I2.2,A)') "FHXH_",N_MPI_PROCESSES,'_',NMESHES,".dat"
 !       IF(NM==1)THEN
@@ -1534,7 +1534,7 @@ ENDDO MESH_LOOP_TRN
 TRN_ME(2)=TRN_ME(1)
 IF (N_MPI_PROCESSES > 1) CALL MPI_ALLREDUCE(TRN_ME(1),TRN_ME(2),1,MPI_INTEGER,MPI_SUM,MPI_COMM_WORLD,IERR)
 IF (TRN_ME(2) > 0) THEN ! There is a TRNX, TRNY or TRNZ line defined for stretched grids. Not Unsupported.
-   IF (MYID == 0) WRITE(LU_ERR,*) 'GLMAT Setup Error : Stretched grids currently unsupported.'
+   IF (MY_RANK == 0) WRITE(LU_ERR,*) 'GLMAT Setup Error : Stretched grids currently unsupported.'
    SUPPORTED_MESH = .FALSE.
    STOP_STATUS = SETUP_STOP
    RETURN
@@ -1544,7 +1544,7 @@ IF (NMESHES == 1) RETURN
 
 ! 2. Two different cell sizes in mesh (i.e. different refinement levels):
 NM = 1
-IF (MYID==PROCESS(NM)) THEN
+IF (MY_RANK==PROCESS(NM)) THEN
    CALL POINT_TO_MESH(NM)
    DX_P(IAXIS) = DX(1)
    DX_P(JAXIS) = DY(1)
@@ -1576,7 +1576,7 @@ ENDDO MESH_LOOP_CELL
 TRN_ME(2)=TRN_ME(1)
 IF (N_MPI_PROCESSES > 1) CALL MPI_ALLREDUCE(TRN_ME(1),TRN_ME(2),1,MPI_INTEGER,MPI_SUM,MPI_COMM_WORLD,IERR)
 IF (TRN_ME(2) > 0) THEN ! Meshes at different refinement levels. Not Unsupported.
-   IF (MYID == 0) WRITE(LU_ERR,*) 'GLMAT Setup Error : Meshes at different refinement levels unsupported.'
+   IF (MY_RANK == 0) WRITE(LU_ERR,*) 'GLMAT Setup Error : Meshes at different refinement levels unsupported.'
    SUPPORTED_MESH = .FALSE.
    STOP_STATUS = SETUP_STOP
    RETURN
@@ -1669,7 +1669,7 @@ ALLOCATE(DIRI_SET(NSETS)); DIRI_SET(:)=0
 SETS_LOOP : DO ISET=1,NSETS
    DO NMLOC=DSETS(LOW_IND,ISET),DSETS(HIGH_IND,ISET)
       NM=MESH_LIST(NMLOC)
-      IF (MYID/=PROCESS(NM)) CYCLE
+      IF (MY_RANK/=PROCESS(NM)) CYCLE
       IF (EVACUATION_ONLY(NM) .OR. EVACUATION_SKIP(NM)) CYCLE SETS_LOOP
       CALL POINT_TO_MESH(NM)
 
@@ -1684,7 +1684,7 @@ ENDDO SETS_LOOP
 
 IF(N_MPI_PROCESSES>1) CALL MPI_ALLREDUCE(MPI_IN_PLACE,DIRI_SET,NSETS,MPI_INTEGER,MPI_SUM,MPI_COMM_WORLD,IERR)
 
-! IF (MYID==0) THEN
+! IF (MY_RANK==0) THEN
 !    WRITE(LU_ERR,*) ' '
 !    WRITE(LU_ERR,*) 'NSETS=',NSETS
 !    DO ISET=1,NSETS
@@ -1694,7 +1694,7 @@ IF(N_MPI_PROCESSES>1) CALL MPI_ALLREDUCE(MPI_IN_PLACE,DIRI_SET,NSETS,MPI_INTEGER
 
 ! Finally do test:
 IF (ANY(DIRI_SET(1:NSETS) == 0)) THEN
-   IF (MYID==0) WRITE(LU_ERR,*) 'GLMAT Setup Error : Unsupported disjoint domains present on the model.'
+   IF (MY_RANK==0) WRITE(LU_ERR,*) 'GLMAT Setup Error : Unsupported disjoint domains present on the model.'
    DEALLOCATE(MESH_GRAPH,DSETS,MESH_LIST,COUNTED,DIRI_SET)
    SUPPORTED_MESH = .FALSE.
    STOP_STATUS = SETUP_STOP
@@ -2065,7 +2065,7 @@ ALLOCATE(PT_H(64))
 !     A_H, IA_H, JA_H, PERM, NRHS, IPARM, MSGLVL, F_H, X_H, ERROR)
 !
 ! IF (ERROR /= 0) THEN
-!    IF (MYID==0) &
+!    IF (MY_RANK==0) &
 !    WRITE(LU_ERR,'(A,I5)') 'GET_H_MATRIX_LUDCMP PARDISO Sym Factor: The following ERROR was detected: ', ERROR
 !    ! Some error - stop flag for CALL STOP_CHECK(1).
 !    STOP_STATUS = SETUP_STOP
@@ -2078,7 +2078,7 @@ ALLOCATE(PT_H(64))
 !   A_H, IA_H, JA_H, PERM, NRHS, IPARM, MSGLVL, F_H, X_H, ERROR)
 !
 ! IF (ERROR /= 0) THEN
-!    IF (MYID==0) &
+!    IF (MY_RANK==0) &
 !    WRITE(LU_ERR,'(A,I5)') 'GET_H_MATRIX_LUDCMP PARDISO Num Factor: The following ERROR was detected: ', ERROR
 !    ! Some error - stop flag for CALL STOP_CHECK(1).
 !    STOP_STATUS = SETUP_STOP
@@ -2116,7 +2116,7 @@ CALL CLUSTER_SPARSE_SOLVER (PT_H, MAXFCT, MNUM, MTYPE, PHASE, NUNKH_TOTAL, &
 #endif
 
 IF (ERROR /= 0) THEN
-   IF (MYID==0) THEN
+   IF (MY_RANK==0) THEN
    WRITE(LU_ERR,'(A,I5)') 'GET_H_MATRIX_LUDCMP CLUSTER_SOLVER Sym Factor: The following ERROR was detected: ', ERROR
    IF(ERROR == -4) THEN
       WRITE(LU_ERR,'(A,A)') 'This error is probably due to having one or more sealed compartments ',&
@@ -2132,12 +2132,12 @@ END IF
 
 ! Define array of MB required by process, gather data to Master:
 ALLOCATE(MB_FACTOR(2,0:N_MPI_PROCESSES-1)); MB_FACTOR(:,:)=0
-MB_FACTOR(1,MYID) = MAX(IPARM(15),IPARM(16)+IPARM(17))/1000
-MB_FACTOR(2,MYID) = NUNKH_LOCAL
+MB_FACTOR(1,MY_RANK) = MAX(IPARM(15),IPARM(16)+IPARM(17))/1000
+MB_FACTOR(2,MY_RANK) = NUNKH_LOCAL
 IF(N_MPI_PROCESSES > 1) &
 CALL MPI_ALLREDUCE(MPI_IN_PLACE, MB_FACTOR, 2*N_MPI_PROCESSES, MPI_INTEGER, MPI_SUM, MPI_COMM_WORLD, IERR)
 ! Write to output file:
-IF(MYID==0) THEN
+IF(MY_RANK==0) THEN
    IPROC=MAXLOC(MB_FACTOR(1,0:N_MPI_PROCESSES-1),DIM=1) - 1 ! MaxLoc defines which element in the array, not index.
    WRITE(LU_OUTPUT,*) '   MPI Process, H unknowns =',IPROC,MB_FACTOR(2,IPROC), &
       ', Peak Factorization Memory Required (MB)=',MB_FACTOR(1,IPROC)
@@ -2157,7 +2157,7 @@ CALL CLUSTER_SPARSE_SOLVER (PT_H, MAXFCT, MNUM, MTYPE, PHASE, NUNKH_TOTAL, &
 #endif
 
 IF (ERROR /= 0) THEN
-   IF (MYID==0) THEN
+   IF (MY_RANK==0) THEN
    WRITE(LU_ERR,'(A,I5)') 'GET_H_MATRIX_LUDCMP CLUSTER_SOLVER Num Factor: The following ERROR was detected: ', ERROR
    IF(ERROR == -4) THEN
       WRITE(LU_ERR,'(A,A)') 'This error is probably due to having one or more sealed compartments ',&
@@ -2173,7 +2173,7 @@ ENDIF
 
 #else
 
-IF (MYID==0) WRITE(LU_ERR,'(A)') &
+IF (MY_RANK==0) WRITE(LU_ERR,'(A)') &
 'Error: MKL Library compile flag was not defined for GLMAT as pressure solver.'
 ! Some error - stop flag for CALL STOP_CHECK(1).
 STOP_STATUS = SETUP_STOP
@@ -2527,7 +2527,7 @@ NUNKH_LOCAL = sum(NUNKH_LOC(1:NMESHES)) ! Filled in GET_MATRIX_INDEXES_H, only n
                                         ! that belong to this process.
 
 ! Write number of pressure unknowns to output:
-IF (MYID==0) THEN
+IF (MY_RANK==0) THEN
    WRITE(LU_OUTPUT,'(A)') '   Using GLMAT as pressure solver. List of H unknown numbers per proc:'
 ENDIF
 
