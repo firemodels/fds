@@ -5417,7 +5417,7 @@ READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
    ! Set default colors for Smokeview. Water droplets are BLUE. Fuel droplets are YELLOW. Everything else is BLACK.
 
    IF (TRIM(SPEC_ID)=='WATER VAPOR') THEN
-      IF (ANY(RGB<0) .AND. COLOR=='null') COLOR='BLUE'
+      IF (ANY(RGB<0) .AND. COLOR=='null') COLOR='SKY BLUE 5'
    ENDIF
 
    IF (SIMPLE_CHEMISTRY) THEN
