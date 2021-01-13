@@ -2011,7 +2011,7 @@ IF (LPC%TURBULENT_DISPERSION) THEN
    CALL BOX_MULLER(DW_Z,DW_X)
    UBAR = UBAR + U_P*DW_X
    VBAR = VBAR + U_P*DW_Y
-   WBAR = WBAR + U_P*DW_X
+   WBAR = WBAR + U_P*DW_Z
 ENDIF
 
 ! Calculate the particle drag coefficient
@@ -2321,7 +2321,7 @@ IF ( ONE_D%U_NORMAL>SURFACE(SURF_INDEX)%PARTICLE_EXTRACTION_VELOCITY .OR. &
                      LP%Y = Y(ONE_D%JJG-2)-0.01_EB*DY(ONE_D%JJG-2)
                      HIT_SOLID = .FALSE.
                   ENDIF
-               ENDIF             
+               ENDIF
             CASE(-2)
                IF(ONE_D%JJG+2 > JBAR) THEN
                   SET_EXTRACT = .TRUE.
@@ -2343,7 +2343,7 @@ IF ( ONE_D%U_NORMAL>SURFACE(SURF_INDEX)%PARTICLE_EXTRACTION_VELOCITY .OR. &
                      LP%Z = Z(ONE_D%KKG-2)-0.01_EB*DZ(ONE_D%KKG-2)
                      HIT_SOLID = .FALSE.
                   ENDIF
-               ENDIF             
+               ENDIF
             CASE(-3)
                IF(ONE_D%KKG+2 > KBAR) THEN
                   SET_EXTRACT = .TRUE.
@@ -2355,7 +2355,7 @@ IF ( ONE_D%U_NORMAL>SURFACE(SURF_INDEX)%PARTICLE_EXTRACTION_VELOCITY .OR. &
                      HIT_SOLID = .FALSE.
                   ENDIF
                ENDIF
-         END SELECT            
+         END SELECT
       ELSE
          SET_EXTRACT = .TRUE.
       ENDIF
@@ -2365,7 +2365,7 @@ IF ( ONE_D%U_NORMAL>SURFACE(SURF_INDEX)%PARTICLE_EXTRACTION_VELOCITY .OR. &
    IF (SET_EXTRACT) THEN
       LP%X=-1.E6_EB
       EXTRACT = .TRUE.
-   ENDIF      
+   ENDIF
 ENDIF
 
 END SUBROUTINE VENT_PARTICLE_EXTRACTION
@@ -2961,10 +2961,10 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
 
                DAHVHLDY = DTOG*AGHRHO*(H1-H2)*(Y_DROP-Y_GAS)
                DADYDTHVHL=0.5_EB*DTOG*AGHRHO*(H1-H2)*DYDT
-               
+
                DTOP = DT_SUBSTEP/(M_DROP*C_DROP)
                DTGOP = 0.5_EB*DTOP*A_DROP*H_HEAT
-               
+
                DADYHV = DTOP*AGHRHO*H_V*(Y_DROP-Y_GAS)
                DADYDTHV=0.5_EB*DTOP*AGHRHO*DYDT*H_V
 
