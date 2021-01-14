@@ -4926,13 +4926,13 @@ This case compares mass loss rates and material thickness for pyrolysis of black
 	\label{fig:pyro3d_vs_pyro1d_wood_moist}
 \end{figure}
 
-\subsection{Restart Function (\texorpdfstring{\textct{pyro3d\_restart})}
+\subsection{Restart Function (\texorpdfstring{\textct{pyro3d\_restart}}{pyro3d\_restart})}
 	\label{pyro3d_restart}
-	
+
 	\textbf{Morteza Gholami Haghighi Fard, Aalto University}\\
-	
+
 	\noindent This case analyses the numerical reliability of the restart function on the PYRO3D routine. A cube of 0.002 m $\times$ 0.002 m $\times$ 0.010 m black PMMA sample pyrolyzes with burn away capability of the 3D solver. The material is heated with 50 \si{kW/m^2} external flux from the top, while other sides of the material are thermally insulated. The grid resolution is 0.001 m and combustion is ignored in the simulations. A test case is forcefully stopped at 350 s of the simulation time and restarted until all the material is burned away at about 600 s. Another simulation is performed completely without any interruption until the entire PMMA is consumed. The verification target is identical time-resolved mass loss rate curves for both simulations. It is confirmed by a point by point comparison of the results, shown in Fig.~\ref{fig:pyro3d_restart}.
-	
+
 	\begin{figure}[!ht]
 		\centering
 		\includegraphics[height=2.2in]{SCRIPT_FIGURES/pyro3d_restart}
