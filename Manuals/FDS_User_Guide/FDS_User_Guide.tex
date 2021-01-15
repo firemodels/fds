@@ -9583,19 +9583,21 @@ The output quantities {\ct FED} and {\ct FIC} may be displayed either at a point
 \begin{lstlisting}
 &DEVC ID='whatever', XYZ=..., QUANTITY='FED', PROP_ID='Activity Level' /
 \end{lstlisting}
-You can also visualize {\ct FED} and {\ct FIC} as a contour slice by adding lines similar to the following:
+You can also visualize {\ct FIC} as a contour slice. The output quantity {\ct FED} cannot be directly output as a contour slice, but it can be visualized as a slice in Smokeview if the slices for O$_2$, CO$_2$, and CO are defined in the same plane:
 \begin{lstlisting}
-&SLCF PBY=1.0, QUANTITY='FED', PROP_ID='Activity Level' /
 &SLCF PBY=1.0, QUANTITY='VOLUME FRACTION', SPEC_ID='CARBON DIOXIDE' /
 &SLCF PBY=1.0, QUANTITY='VOLUME FRACTION', SPEC_ID='CARBON MONOXIDE' /
 &SLCF PBY=1.0, QUANTITY='VOLUME FRACTION', SPEC_ID='OXYGEN' /
 \end{lstlisting}
-Notice that all slices are defined on the same plane. Also note that device or slice output can make use of an optional activity level defined on a property line:
+Notice that all slices are defined on the same plane. If these slices are present, Smokeview can compute the FED and display it as a contour slice.
+
+Also note that device output for FED can make use of an optional activity level defined on a property line:
 \begin{lstlisting}
 &PROP ID='Activity Level', FED_ACTIVITY=3 /
 \end{lstlisting}
 The parameter {\ct FED\_ACTIVITY} is an integer denoting that the person is at rest (1), doing light work (2), or doing heavy work (3). The default value is 2.
 
+There is an FED related quantity, {\ct INCAPACITATION TIME}, that can be output as a point device or a contour slice. This quantity shows the time in minutes until incapacitation for person exposed to the current conditions.
 
 \subsection{Spatially-Integrated Outputs}
 \label{info:statistics}
@@ -10212,6 +10214,7 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct HRR}                                       & $\int \dq''' \; \d V$                         & kW             & D            \\ \hline
 {\ct HRRPUA}                                    & $\dq''$                                       & kW/m$^2$       & D            \\ \hline
 {\ct HRRPUV}                                    & $\dq'''$                                      & kW/m$^3$       & D,I,P,S      \\ \hline
+{\ct INCAPACITATION TIME}                       & Section~\ref{info:FED}                        & min            & D            \\ \hline
 {\ct INCIDENT HEAT FLUX}                        & Section~\ref{info:heat_flux}                  & kW/m$^2$       & B,D          \\ \hline
 {\ct INSIDE WALL TEMPERATURE}                   & Section~\ref{info:DEPTH}                      & $^\circ$C      & D            \\ \hline
 {\ct INSIDE WALL DEPTH}                         & Section~\ref{info:DEPTH}                      & m              & D            \\ \hline
