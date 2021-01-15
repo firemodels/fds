@@ -539,6 +539,8 @@ $QFDS -d Radiation wall_internal_radiation.fds
 $QFDS -d Restart restart_test1a.fds
 $QFDS -d Restart pyro3d_restart_a.fds
 $QFDS -d Restart pyro3d_restart_base_case.fds
+$QFDS -d Restart geom_restart_a.fds
+$QFDS -d Restart geom_restart_base_case.fds
 
 $QFDS -d Species burke_schumann.fds
 $QFDS -d Species FED_FIC.fds

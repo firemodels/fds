@@ -6492,6 +6492,17 @@ as shown in Fig.~\ref{sphere_leak_fig}.
 \label{sphere_leak_fig}
 \end{figure}
 
+\subsection{Restart Function}
+\label{geom_restart}
+
+In this test, a GEOM cube is heated from below by a surface at a fixed temperature.  The internal temperature inside the geometry is monitored.  The full calculation runs for 1,200 s.  At 700 s, a RESTART is performed and compared with the base case.  The results are shown in Fig.~\ref{fig:geom_restart}.
+\begin{figure}[ht]
+\centering
+\includegraphics[width=3.2in]{../FDS_Verification_Guide/SCRIPT_FIGURES/geom_restart.pdf}
+\caption[The {\ct geom\_restart} test case]{Test of restart functionality for complex geometry.}
+\label{fig:geom_restart}
+\end{figure}
+
 
 \section{Geometry tests involving fire}
 
