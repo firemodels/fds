@@ -1,0 +1,41 @@
+&HEAD CHID='geom_restart', TITLE='Test restart behaviour' /
+
+&MESH IJK=10,10,10, XB=0,1, 0,1, 0,1 /
+
+&TIME T_END=750.0 /
+
+&DUMP DT_RESTART=100.0/
+
+&MISC RESTART=F/
+
+! temperture sensors, inside the sample:
+&DEVC XYZ=0.5,0.5,0.4, QUANTITY='INSIDE WALL TEMPERATURE', DEPTH=0.05, ID='S_05', IOR=3 /
+&DEVC XYZ=0.5,0.5,0.4, QUANTITY='INSIDE WALL TEMPERATURE', DEPTH=0.15, ID='S_15', IOR=3 /
+
+! temperture sensors, wall temperatures:
+&DEVC XYZ=0.5,0.5,0.1, QUANTITY='WALL TEMPERATURE',  ID='W_1', IOR=3 /
+&DEVC XYZ=0.5,0.5,0.4, QUANTITY='WALL TEMPERATURE',  ID='W_4', IOR=3 /
+
+! temperture sensors, gas phase:
+&DEVC XYZ=0.5,0.5,0.15, QUANTITY='TEMPERATURE',  ID='F_15' /
+&DEVC XYZ=0.5,0.5,0.25, QUANTITY='TEMPERATURE',  ID='F_25' /
+&DEVC XYZ=0.5,0.5,0.35, QUANTITY='TEMPERATURE',  ID='F_35' /
+
+! Slice file:
+&SLCF PBX=0.5, QUANTITY='TEMPERATURE', VECTOR=T /
+
+! specify a hot surface and a sample
+&SURF ID='hot_surf', RGB=204,1,1, TMP_FRONT = 200 /
+&SURF ID='sample', MATL_ID='sample', THICKNESS=0.2, RGB=46,33,204 /
+
+! sample properties
+&MATL ID='sample'
+      DENSITY = 400
+      CONDUCTIVITY = 0.60
+      SPECIFIC_HEAT = 0.1/
+
+&OBST XB= 0.,1., 0.,1., 0.,0.1, SURF_ID='hot_surf' /
+
+&GEOM ID='Cube', XB=0.4,0.6,0.4,0.6,0.4,0.6, SURF_ID='sample'/
+
+&TAIL /
