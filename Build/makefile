@@ -153,8 +153,8 @@ main.obj: FFLAGS += $(FOPENMPFLAGS)
 #*** note: the following scripts (located in ..\Scripts directory) must be run before running make with this target
 #    ..\Scripts\ifortvars intel64
 
-impi_intel_win_64 : MPILIB = "$(I_MPI_RELEASE_ROOT)\impi.lib"
-impi_intel_win_64 : MPIINCLUDE = "$(I_MPI_ROOT)\intel64\include"
+impi_intel_win_64 : MPILIB = "$(IMPI_RELEASE_ROOT)\impi.lib"
+impi_intel_win_64 : MPIINCLUDE = "$(IMPI_INCLUDE)"
 impi_intel_win_64 : FFLAGS = /Qipo /O2 /I$(MPIINCLUDE) /traceback /debug:full /wrap-margin- $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL)
 impi_intel_win_64 : FOPENMPFLAGS = /Qopenmp
 impi_intel_win_64 : FCOMPL = ifort
@@ -162,8 +162,8 @@ impi_intel_win_64 : obj = fds_impi_win_64
 impi_intel_win_64 : setup_win $(objwin_mpi)
 	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB) $(LFLAGSMKL_INTEL)
 
-impi_intel_win_64_dv : MPILIB = "$(I_MPI_RELEASE_ROOT)\impi.lib"
-impi_intel_win_64_dv : MPIINCLUDE = "$(I_MPI_ROOT)\intel64\include"
+impi_intel_win_64_dv : MPILIB = "$(IMPI_RELEASE_ROOT)\impi.lib"
+impi_intel_win_64_dv : MPIINCLUDE = "$(IMPI_INCLUDE)"
 impi_intel_win_64_dv : FFLAGS = /O1 /I$(MPIINCLUDE) /traceback /debug:full /wrap-margin- $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL)
 impi_intel_win_64_dv : FOPENMPFLAGS = /Qopenmp
 impi_intel_win_64_dv : FCOMPL = ifort
@@ -171,8 +171,8 @@ impi_intel_win_64_dv : obj = fds_impi_win_64_dv
 impi_intel_win_64_dv : setup_win $(objwin_mpi)
 	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB) $(LFLAGSMKL_INTEL)
 
-impi_intel_win_64_db : MPILIB = "$(I_MPI_DEBUG_ROOT)\impi.lib"
-impi_intel_win_64_db : MPIINCLUDE = "$(I_MPI_ROOT)\intel64\include"
+impi_intel_win_64_db : MPILIB = "$(IMPI_DEBUG_ROOT)\impi.lib"
+impi_intel_win_64_db : MPIINCLUDE = "$(IMPI_INCLUDE)"
 impi_intel_win_64_db : FFLAGS = /Od /nologo /debug:all /I$(MPIINCLUDE) /Z7 /extend_source:132 /warn:unused /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f08 /wrap-margin- $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL)
 impi_intel_win_64_db : FOPENMPFLAGS = /Qopenmp
 impi_intel_win_64_db : FCOMPL = ifort
@@ -191,9 +191,9 @@ impi_intel_linux_64 : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
 impi_intel_linux_64_db : FFLAGS = -m64 -mt_mpi -check all -warn all -O0 -auto -WB -g -traceback -fpe0 -fltconsistency -stand:f08 -no-wrap-margin $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL)
-ifeq ($(shell expr $(INTELMAJOR_COMPVERSION) \> 19), 1)
-impi_intel_linux_64_db : FFLAGS += -warn noexternals
-endif
+#ifeq ($(shell expr $(INTELMAJOR_COMPVERSION) \> 19), 1)
+#impi_intel_linux_64_db : FFLAGS += -warn noexternals
+#endif
 impi_intel_linux_64_db : LFLAGSMKL = $(LFLAGSMKL_INTEL)
 impi_intel_linux_64_db : LFLAGS = -static-intel
 impi_intel_linux_64_db : FCOMPL = mpiifort
@@ -257,8 +257,10 @@ impi_intel_linux_64_vtune : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
 impi_intel_linux_64_inspect : FFLAGS = -m64 -mt_mpi -check none -warn all -O0 -auto -WB -g -traceback -fpe0 -fltconsistency -stand:f08 -no-wrap-margin $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL)
+ifneq ($(shell echo "check_quotes"),"check_quotes")
 ifeq ($(shell expr $(INTELMAJOR_COMPVERSION) \> 19), 1)
 impi_intel_linux_64_inspect : FFLAGS += -warn noexternals
+endif
 endif
 impi_intel_linux_64_inspect : LFLAGSMKL = $(LFLAGSMKL_INTEL)
 impi_intel_linux_64_inspect : LFLAGS = -shared-intel
