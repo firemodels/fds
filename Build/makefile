@@ -181,7 +181,7 @@ impi_intel_win_64_db : setup_win $(objwin_mpi)
 	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB) $(LFLAGSMKL_INTEL)
 
 # Intel Compiler for Linux
-impi_intel_linux_64 : FFLAGS = -m64 -O2 -ipo -mt_mpi -g -traceback -no-wrap-margin $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL)
+impi_intel_linux_64 : FFLAGS = -m64 -O2 -ipo -g -traceback -no-wrap-margin $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL)
 impi_intel_linux_64 : LFLAGSMKL = $(LFLAGSMKL_INTEL)
 impi_intel_linux_64 : LFLAGS = -static-intel
 impi_intel_linux_64 : FCOMPL = mpiifort
@@ -190,7 +190,7 @@ impi_intel_linux_64 : obj = fds_impi_intel_linux_64
 impi_intel_linux_64 : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
-impi_intel_linux_64_db : FFLAGS = -m64 -mt_mpi -check all -warn all -O0 -auto -WB -g -traceback -fpe0 -fltconsistency -stand:f08 -no-wrap-margin $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL)
+impi_intel_linux_64_db : FFLAGS = -m64 -check all -warn all -O0 -g -traceback -fpe0 -fltconsistency -stand:f18 -no-wrap-margin $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL)
 ifneq ($(shell echo "check_quotes"),"check_quotes")
 ifeq ($(shell expr $(INTELMAJOR_COMPVERSION) \> 19), 1)
 impi_intel_linux_64_db : FFLAGS += -warn noexternals
@@ -258,7 +258,7 @@ impi_intel_linux_64_vtune : obj = fds_impi_intel_linux_64_vtune
 impi_intel_linux_64_vtune : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
-impi_intel_linux_64_inspect : FFLAGS = -m64 -mt_mpi -check none -warn all -O0 -auto -WB -g -traceback -fpe0 -fltconsistency -stand:f08 -no-wrap-margin $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL)
+impi_intel_linux_64_inspect : FFLAGS = -m64 -check none -warn all -O0 -auto -WB -g -traceback -fpe0 -fltconsistency -stand:f08 -no-wrap-margin $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL)
 ifneq ($(shell echo "check_quotes"),"check_quotes")
 ifeq ($(shell expr $(INTELMAJOR_COMPVERSION) \> 19), 1)
 impi_intel_linux_64_inspect : FFLAGS += -warn noexternals

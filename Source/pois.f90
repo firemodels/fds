@@ -4718,13 +4718,13 @@ END IF
 
 !                               DEFINE GRID PARAMETERS
 
-DR = (RF-RS)/FLOAT(L)
+DR = (RF-RS)/REAL(L,EB)
 DRBY2 = DR/2._EB
 DRSQR = 1._EB/ (DR**2)
-DT = (TF-TS)/FLOAT(M)
+DT = (TF-TS)/REAL(M,EB)
 DTBY2 = DT/2._EB
 DTSQR = 1._EB/ (DT**2)
-DP = (PF-PS)/FLOAT(N)
+DP = (PF-PS)/REAL(N,EB)
 DPSQR = 1._EB/ (DP**2)
 
 !                               ALLOCATE SAVE ARRAY
@@ -6338,7 +6338,7 @@ CALL FSH13S(W1,0,NB1,NB1,NB2,NB)
 DO  IP = 1,NB
   W4(IP) = W1(NB+IP)
 END DO
-M = MAX0(NA,NC,NB)
+M = MAX(NA,NC,NB)
 DO  I = 1,NA
   W1(I) = A(I)
 END DO
@@ -7197,11 +7197,11 @@ END IF
 
 !                               DEFINE GRID PARAMETERS
 
-DZ = (ZF-ZS)/FLOAT(N)
+DZ = (ZF-ZS)/REAL(N,EB)
 DZSQR = 1._EB/ (DZ**2)
 NP = NBDCND + 1
 
-DR = (RF-RS)/FLOAT(L)
+DR = (RF-RS)/REAL(L,EB)
 DRBY2 = DR/2._EB
 DRSQR = 1._EB/ (DR**2)
 

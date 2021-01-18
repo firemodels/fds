@@ -3037,7 +3037,7 @@ IMPLICIT NONE
       do i1=1,np1,2
       do i3=i1,ntot,np2
       j=i3
-      do 260 i=1,nwork,2
+      loop_260: do i=1,nwork,2
       if(icase-3.ne.0) goto 220
       work(i)=data(j)
       work(i+1)=data(j+1)
@@ -3048,12 +3048,12 @@ IMPLICIT NONE
       iif=ifmin
 240   ifp1=ifp2/ifact(iif)
       j=j+ifp1
-      if(j-i3-ifp2.lt.0) goto 260
+      if(j-i3-ifp2.lt.0) cycle loop_260
       j=j-ifp2
       ifp2=ifp1
       iif=iif+1
       if(ifp2-np1.gt.0) goto 240
-260   continue
+      enddo loop_260
       i2max=i3+np2-np1
       i=1
       do i2=i3,i2max,np1
@@ -3092,8 +3092,8 @@ IMPLICIT NONE
       enddo
 350   mmax=np1
 360   if(mmax-ntwo/2.ge.0) goto 600
-      lmax=max0(np1tw,mmax/2)
-      do 570 l=np1,lmax,np1tw
+      lmax=max(np1tw,mmax/2)
+      loop_570: do l=np1,lmax,np1tw
       m=l
       if(mmax-np1.le.0) goto 420
       theta=-twopi*REAL(l,EB)/REAL(4*mmax,EB)
@@ -3105,13 +3105,13 @@ IMPLICIT NONE
       w2i=2._EB*wr*wi
       w3r=w2r*wr-w2i*wi
       w3i=w2r*wi+w2i*wr
-420   do 530 i1=1,i1rng,2
+420   loop_530: do i1=1,i1rng,2
       kmin=i1+ipar*m
       if(mmax-np1.gt.0) goto 440
       kmin=i1
 440   kdif=ipar*mmax
 450   kstep=4*kdif
-      if(kstep-ntwo.gt.0) goto 530
+      if(kstep-ntwo.gt.0) cycle loop_530
       do k1=kmin,ntot,kstep
       k2=k1+kdif
       k3=k2+kdif
@@ -3160,9 +3160,9 @@ IMPLICIT NONE
       kdif=kstep
       kmin=4*(kmin-i1)+i1
       go to 450
-530   continue
+      enddo loop_530
       m=m+lmax
-      if(m-mmax.gt.0) goto 570
+      if(m-mmax.gt.0) cycle loop_570
       if(isign.ge.0) goto 560
       tempr=wr
       wr=(wr+wi)*rthlf
@@ -3172,7 +3172,7 @@ IMPLICIT NONE
       wr=(wr-wi)*rthlf
       wi=(tempr+wi)*rthlf
       go to 410
-570   continue
+      enddo loop_570
       ipar=3-ipar
       mmax=mmax+mmax
       go to 360
