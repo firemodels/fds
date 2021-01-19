@@ -363,6 +363,10 @@ SELECT CASE (SPATIAL_STATISTIC)
    CASE('AREA INTEGRAL','SURFACE INTEGRAL')
       I = INDEX(UNITS,'/m2')
       IF (I/=0) WRITE(NEW_UNITS,'(A,A)') UNITS(1:I-1),UNITS(I+3:UNIT_L)
+      IF (I==0 .AND. UNITS=='m/s') THEN
+         NEW_UNITS = 'm3/s'
+         I = 1
+      ENDIF
    CASE ('VOLUME')
       NEW_UNITS = 'm3'
       I=1
