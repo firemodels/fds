@@ -4336,7 +4336,7 @@ ELSE ! For any other flux limiter use Godunov in CC region.
    BRP1 = 0._EB ! If 0., Godunov for advective term; if 1., centered interp.
 ENDIF
 
-IF (PERIODIC_TEST == 105) THEN ! Set cc-guard to zero, for timings.
+IF (PERIODIC_TEST == 105) THEN ! Set cc-guard to zero, i.e. do not compute guard-cell cut-cells, for timings.
    NGUARD = 2
    CCGUARD= NGUARD-2
 ENDIF
@@ -17629,9 +17629,11 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
    ! Compute stencils for RCEDGES, regular edges connecting cut and regular faces, and IBEDGES, solid edges next to cut-faces:
    RCEDGE_LOOP_1 : DO IEDGE=1,MESHES(NM)%IBM_NRCEDGE
-      ALLOCATE(IBM_RCEDGE(IEDGE)%XB_IB(-2:2),IBM_RCEDGE(IEDGE)%DUIDXJ(-2:2),IBM_RCEDGE(IEDGE)%MU_DUIDXJ(-2:2))
+      ALLOCATE(IBM_RCEDGE(IEDGE)%XB_IB(-2:2),IBM_RCEDGE(IEDGE)%SURF_INDEX(-2:2),&
+      IBM_RCEDGE(IEDGE)%DUIDXJ(-2:2),IBM_RCEDGE(IEDGE)%MU_DUIDXJ(-2:2))
       ALLOCATE(IBM_RCEDGE(IEDGE)%INT_NPE(LOW_IND:HIGH_IND,0:KAXIS,1:INT_N_EXT_PTS,-2:2))
       IBM_RCEDGE(IEDGE)%XB_IB(-2:2)      = 0._EB
+      IBM_RCEDGE(IEDGE)%SURF_INDEX(-2:2) = -1
       ! IBM_RCEDGE(IEDGE)%PROCESS_EDGE_ORIENTATION(-2:2) = .FALSE. ! Process Orientation in double loop.
       ! IBM_RCEDGE(IEDGE)%EDGE_IN_MESH(-2:2)             = .TRUE.  ! Always true for RCEDGES, no need to mesh_cc_exchange variables.
       IBM_RCEDGE(IEDGE)%INT_NPE                          = 0       ! Required to avoid segfault in comm.
@@ -17685,10 +17687,28 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                   DXX(1)  = DY(JJF); DXX(2)  = DZ(KKF); DEL_IBEDGE = DX(IIF)
                   IF (FAXIS==JAXIS) THEN
                      IBM_RCEDGE(IEDGE)%XB_IB(ICD_SGN) = DXX(2) ! Twice Distance to velocity collocation point.
-                     IF(FCVAR(IIF,JJF,KKF,IBM_FGSC,FAXIS)==IBM_CUTCFE) IBM_RCEDGE(IEDGE)%XB_IB(ICD_SGN)=(AREA_CF/DEL_IBEDGE)
+                     IF(FCVAR(IIF,JJF,KKF,IBM_FGSC,FAXIS)==IBM_CUTCFE) THEN
+                        IBM_RCEDGE(IEDGE)%XB_IB(ICD_SGN)=(AREA_CF/DEL_IBEDGE)
+                        ! SURF_INDEX:
+                        IF (CCVAR(IIF,JJF,KKF,IBM_IDCF)>0) THEN
+                           ! Low side cut-cell: Load first cut-face SURF_INDEX:
+                           IBM_RCEDGE(IEDGE)%SURF_INDEX(ICD_SGN) = CUT_FACE(CCVAR(IIF,JJF,KKF,IBM_IDCF))%SURF_INDEX(1)
+                        ELSEIF(CCVAR(IIF,JJF+1,KKF,IBM_IDCF)>0) THEN
+                           ! High side cut-cell: Load first cut-face SURF_INDEX:
+                           IBM_RCEDGE(IEDGE)%SURF_INDEX(ICD_SGN) = CUT_FACE(CCVAR(IIF,JJF+1,KKF,IBM_IDCF))%SURF_INDEX(1)
+                        ENDIF
+                     ENDIF
                   ELSE ! IF(FAXIS==KAXIS) THEN
                      IBM_RCEDGE(IEDGE)%XB_IB(ICD_SGN) = DXX(1) ! Twice Distance to velocity collocation point.
-                     IF(FCVAR(IIF,JJF,KKF,IBM_FGSC,FAXIS)==IBM_CUTCFE) IBM_RCEDGE(IEDGE)%XB_IB(ICD_SGN)=(AREA_CF/DEL_IBEDGE)
+                     IF(FCVAR(IIF,JJF,KKF,IBM_FGSC,FAXIS)==IBM_CUTCFE) THEN
+                        IBM_RCEDGE(IEDGE)%XB_IB(ICD_SGN)=(AREA_CF/DEL_IBEDGE)
+                        ! SURF_INDEX:
+                        IF (CCVAR(IIF,JJF,KKF,IBM_IDCF)>0) THEN
+                           IBM_RCEDGE(IEDGE)%SURF_INDEX(ICD_SGN) = CUT_FACE(CCVAR(IIF,JJF,KKF,IBM_IDCF))%SURF_INDEX(1)
+                        ELSEIF(CCVAR(IIF,JJF,KKF+1,IBM_IDCF)>0) THEN
+                           IBM_RCEDGE(IEDGE)%SURF_INDEX(ICD_SGN) = CUT_FACE(CCVAR(IIF,JJF,KKF+1,IBM_IDCF))%SURF_INDEX(1)
+                        ENDIF
+                     ENDIF
                   ENDIF
 
                CASE(JAXIS)
@@ -17705,10 +17725,26 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                   DXX(1)  = DZ(KKF); DXX(2)  = DX(IIF); DEL_IBEDGE = DY(JJF)
                   IF (FAXIS==KAXIS) THEN
                      IBM_RCEDGE(IEDGE)%XB_IB(ICD_SGN) = DXX(2) ! Twice Distance to velocity collocation point.
-                     IF(FCVAR(IIF,JJF,KKF,IBM_FGSC,FAXIS)==IBM_CUTCFE) IBM_RCEDGE(IEDGE)%XB_IB(ICD_SGN)=(AREA_CF/DEL_IBEDGE)
+                     IF(FCVAR(IIF,JJF,KKF,IBM_FGSC,FAXIS)==IBM_CUTCFE) THEN
+                        IBM_RCEDGE(IEDGE)%XB_IB(ICD_SGN)=(AREA_CF/DEL_IBEDGE)
+                        ! SURF_INDEX:
+                        IF (CCVAR(IIF,JJF,KKF,IBM_IDCF)>0) THEN
+                           IBM_RCEDGE(IEDGE)%SURF_INDEX(ICD_SGN) = CUT_FACE(CCVAR(IIF,JJF,KKF,IBM_IDCF))%SURF_INDEX(1)
+                        ELSEIF(CCVAR(IIF,JJF,KKF+1,IBM_IDCF)>0) THEN
+                           IBM_RCEDGE(IEDGE)%SURF_INDEX(ICD_SGN) = CUT_FACE(CCVAR(IIF,JJF,KKF+1,IBM_IDCF))%SURF_INDEX(1)
+                        ENDIF
+                     ENDIF
                   ELSE ! IF(FAXIS==IAXIS) THEN
                      IBM_RCEDGE(IEDGE)%XB_IB(ICD_SGN) = DXX(1) ! Twice Distance to velocity collocation point.
-                     IF(FCVAR(IIF,JJF,KKF,IBM_FGSC,FAXIS)==IBM_CUTCFE) IBM_RCEDGE(IEDGE)%XB_IB(ICD_SGN)=(AREA_CF/DEL_IBEDGE)
+                     IF(FCVAR(IIF,JJF,KKF,IBM_FGSC,FAXIS)==IBM_CUTCFE) THEN
+                        IBM_RCEDGE(IEDGE)%XB_IB(ICD_SGN)=(AREA_CF/DEL_IBEDGE)
+                        ! SURF_INDEX:
+                        IF (CCVAR(IIF,JJF,KKF,IBM_IDCF)>0) THEN
+                           IBM_RCEDGE(IEDGE)%SURF_INDEX(ICD_SGN) = CUT_FACE(CCVAR(IIF,JJF,KKF,IBM_IDCF))%SURF_INDEX(1)
+                        ELSEIF(CCVAR(IIF+1,JJF,KKF,IBM_IDCF)>0) THEN
+                           IBM_RCEDGE(IEDGE)%SURF_INDEX(ICD_SGN) = CUT_FACE(CCVAR(IIF+1,JJF,KKF,IBM_IDCF))%SURF_INDEX(1)
+                        ENDIF
+                     ENDIF
                   ENDIF
 
                CASE(KAXIS)
@@ -17725,10 +17761,26 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                   DXX(1)  = DX(IIF); DXX(2)  = DY(JJF); DEL_IBEDGE = DZ(KKF)
                   IF (FAXIS==IAXIS) THEN
                      IBM_RCEDGE(IEDGE)%XB_IB(ICD_SGN) = DXX(2) ! Twice Distance to velocity collocation point.
-                     IF(FCVAR(IIF,JJF,KKF,IBM_FGSC,FAXIS)==IBM_CUTCFE) IBM_RCEDGE(IEDGE)%XB_IB(ICD_SGN)=(AREA_CF/DEL_IBEDGE)
+                     IF(FCVAR(IIF,JJF,KKF,IBM_FGSC,FAXIS)==IBM_CUTCFE) THEN
+                        IBM_RCEDGE(IEDGE)%XB_IB(ICD_SGN)=(AREA_CF/DEL_IBEDGE)
+                        ! SURF_INDEX:
+                        IF (CCVAR(IIF,JJF,KKF,IBM_IDCF)>0) THEN
+                           IBM_RCEDGE(IEDGE)%SURF_INDEX(ICD_SGN) = CUT_FACE(CCVAR(IIF,JJF,KKF,IBM_IDCF))%SURF_INDEX(1)
+                        ELSEIF(CCVAR(IIF+1,JJF,KKF,IBM_IDCF)>0) THEN
+                           IBM_RCEDGE(IEDGE)%SURF_INDEX(ICD_SGN) = CUT_FACE(CCVAR(IIF+1,JJF,KKF,IBM_IDCF))%SURF_INDEX(1)
+                        ENDIF
+                     ENDIF
                   ELSE ! IF(FAXIS==JAXIS) THEN
                      IBM_RCEDGE(IEDGE)%XB_IB(ICD_SGN) = DXX(1) ! Twice Distance to velocity collocation point.
-                     IF(FCVAR(IIF,JJF,KKF,IBM_FGSC,FAXIS)==IBM_CUTCFE) IBM_RCEDGE(IEDGE)%XB_IB(ICD_SGN)=(AREA_CF/DEL_IBEDGE)
+                     IF(FCVAR(IIF,JJF,KKF,IBM_FGSC,FAXIS)==IBM_CUTCFE) THEN
+                        IBM_RCEDGE(IEDGE)%XB_IB(ICD_SGN)=(AREA_CF/DEL_IBEDGE)
+                        ! SURF_INDEX:
+                        IF (CCVAR(IIF,JJF,KKF,IBM_IDCF)>0) THEN
+                           IBM_RCEDGE(IEDGE)%SURF_INDEX(ICD_SGN) = CUT_FACE(CCVAR(IIF,JJF,KKF,IBM_IDCF))%SURF_INDEX(1)
+                        ELSEIF(CCVAR(IIF,JJF+1,KKF,IBM_IDCF)>0) THEN
+                           IBM_RCEDGE(IEDGE)%SURF_INDEX(ICD_SGN) = CUT_FACE(CCVAR(IIF,JJF+1,KKF,IBM_IDCF))%SURF_INDEX(1)
+                        ENDIF
+                     ENDIF
                   ENDIF
 
              END SELECT
@@ -20625,7 +20677,7 @@ DO NM=1,NMESHES
    IF (EVACUATION_ONLY(NM)) CYCLE
    DO NOM=1,NMESHES
       IF (EVACUATION_ONLY(NOM)) CYCLE
-      IF (.NOT.MESHES(NM)%CONNECTED_MESH(NOM)) CYCLE
+      IF (.NOT.(TWO_D .AND. NMESHES==1) .AND. .NOT.MESHES(NM)%CONNECTED_MESH(NOM)) CYCLE
       M3 => MESHES(NM)%OMESH(NOM)
       IF (N_MPI_PROCESSES>1 .AND. NM/=NOM .AND. PROCESS(NOM)/=MY_RANK .AND. MESHES(NM)%CONNECTED_MESH(NOM)) THEN
          N_REQ0 = N_REQ0 + 1
@@ -27594,10 +27646,6 @@ DO IG=1,N_GEOMETRY
    ENDDO
 
    ! Add to wet surface Areas:
-   DO IFACE=1,GEOMETRY(IG)%N_FACES
-      if ( GEOMETRY(IG)%FACES_AREA(IFACE) < GEOMEPS ) &
-         print*, "GEOM FACE=",IFACE,", AREA=",GEOMETRY(IG)%FACES_AREA(IFACE)
-   ENDDO
    AREA_GEOM = AREA_GEOM + GEOMETRY(IG)%GEOM_AREA
 
    ! Add to GEOMETRY volume:
@@ -27633,8 +27681,8 @@ DO NM=1,NMESHES
       DO ICC2=1,NCELL
          CCGP_XYZCEN(IAXIS:KAXIS) = CCGP_XYZCEN(IAXIS:KAXIS) + MESHES(NM)%CUT_CELL(ICC1)%VOLUME(ICC2) * &
                                                                MESHES(NM)%CUT_CELL(ICC1)%XYZCEN(IAXIS:KAXIS,ICC2)
-         IF ( MESHES(NM)%CUT_CELL(ICC1)%VOLUME(ICC2) < TWO_EPSILON_EB) &
-             WRITE(LU_ERR,*) "Cut-cell=",ICC1,ICC2,", VOL=",MESHES(NM)%CUT_CELL(ICC1)%VOLUME(ICC2)
+         IF ( (MESHES(NM)%CUT_CELL(ICC1)%VOLUME(ICC2)<TWO_EPSILON_EB) .AND. GET_CUTCELLS_VERBOSE) &
+             WRITE(LU_SETCC,"(A,3I0,A,E11.4)") "NM, Cut-cell=",NM,ICC1,ICC2,", Volume=",MESHES(NM)%CUT_CELL(ICC1)%VOLUME(ICC2)
       ENDDO
       CC_VOLUME_INB = CC_VOLUME_INB + SUM(MESHES(NM)%CUT_CELL(ICC1)%VOLUME(1:NCELL))
    ENDDO
