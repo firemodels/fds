@@ -291,7 +291,7 @@ mpi_intel_linux_64_inspect : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
 # OSX
-mpi_intel_osx_64 : FFLAGS = -m64 -O2 -ipo -no-wrap-margin $(GITINFO) $(OPENMPI_COMPINFO) $(FFLAGSMKL_CUSTOM)
+mpi_intel_osx_64 : FFLAGS = -m64 -O2 -ipo -stand:f18 -no-wrap-margin $(GITINFO) $(OPENMPI_COMPINFO) $(FFLAGSMKL_CUSTOM)
 mpi_intel_osx_64 : LFLAGSMKL = $(LFLAGSMKL_CUSTOM)
 mpi_intel_osx_64 : LFLAGS = -static-intel
 mpi_intel_osx_64 : FOPENMPFLAGS = -qopenmp -qopenmp-link static
@@ -300,7 +300,7 @@ mpi_intel_osx_64 : obj = fds_mpi_intel_osx_64
 mpi_intel_osx_64 : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
-mpi_intel_osx_64_db : FFLAGS = -m64 -check all -fp-stack-check -warn unused -O0 -auto -WB -g -traceback -fpe0 -fltconsistency -stand:f08 -no-wrap-margin $(GITINFO) $(OPENMPI_COMPINFO) $(FFLAGSMKL_CUSTOM)
+mpi_intel_osx_64_db : FFLAGS = -m64 -check all -fp-stack-check -warn unused -O0 -auto -WB -g -traceback -fpe0 -fltconsistency -stand:f18 -no-wrap-margin $(GITINFO) $(OPENMPI_COMPINFO) $(FFLAGSMKL_CUSTOM)
 mpi_intel_osx_64_db : LFLAGSMKL = $(LFLAGSMKL_CUSTOM)
 mpi_intel_osx_64_db : LFLAGS = -static-intel
 mpi_intel_osx_64_db : FOPENMPFLAGS = -qopenmp -qopenmp-link static
@@ -309,7 +309,7 @@ mpi_intel_osx_64_db : obj = fds_mpi_intel_osx_64_db
 mpi_intel_osx_64_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
-mpi_intel_osx_64_dv : FFLAGS = -m64 -warn unused -O1 -g -traceback -no-wrap-margin  $(GITINFO) $(OPENMPI_COMPINFO) $(FFLAGSMKL_CUSTOM)
+mpi_intel_osx_64_dv : FFLAGS = -m64 -warn unused -O1 -g -traceback -stand:f18 -no-wrap-margin  $(GITINFO) $(OPENMPI_COMPINFO) $(FFLAGSMKL_CUSTOM)
 mpi_intel_osx_64_dv : LFLAGSMKL = $(LFLAGSMKL_CUSTOM)
 mpi_intel_osx_64_dv : LFLAGS = -static-intel
 mpi_intel_osx_64_dv : FOPENMPFLAGS = -qopenmp -qopenmp-link static
