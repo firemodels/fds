@@ -217,7 +217,7 @@ CALL MPI_INITIALIZATION_CHORES(5)
 ! Initial complex geometry CC setup
 
 IF (CC_IBM) THEN
-   CALL CCIBM_SET_DATA(.TRUE.) ! Define Cartesian cell types (used to define pressure zones), cut-cells, cfaces.
+   CALL CCIBM_SET_DATA(FIRST_CALL=.TRUE.) ! Define Cartesian cell types (used to define pressure zones), cut-cells, cfaces.
    CALL STOP_CHECK(1)
 ENDIF
 
@@ -276,7 +276,7 @@ ENDDO
 ! Final complex geometry CC setup
 
 IF (CC_IBM) THEN
-   CALL CCIBM_SET_DATA(.FALSE.) ! Interpolation Stencils, Scalar transport MATVEC data, cface RDNs.
+   CALL CCIBM_SET_DATA(FIRST_CALL=.FALSE.) ! Interpolation Stencils, Scalar transport MATVEC data, cface RDNs.
    CALL STOP_CHECK(1)
 ENDIF
 
