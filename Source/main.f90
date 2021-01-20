@@ -144,7 +144,6 @@ DO N=0,N_MPI_PROCESSES-1
    IF (N==N_MPI_PROCESSES-1) EXIT
    IF (SHARED_FILE_SYSTEM) CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
 ENDDO
-CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
 
 ! Shut down the run if it is only for checking the set up
 
@@ -172,7 +171,6 @@ CALL MPI_INITIALIZATION_CHORES(2)
 ! Initialize global parameters
 
 CALL INITIALIZE_GLOBAL_VARIABLES
-CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
 
 ! Initialize radiation
 
@@ -204,7 +202,6 @@ CALL STOP_CHECK(1)
 DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    CALL INITIALIZE_MESH_EXCHANGE_1(NM)
 ENDDO
-CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
 
 ! Allocate "request" arrays to keep track of MPI communications
 
@@ -236,7 +233,7 @@ CALL MPI_INITIALIZATION_CHORES(6)
 DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    CALL INITIALIZE_MESH_EXCHANGE_2(NM)
 ENDDO
-CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
+
 IF (MY_RANK==0 .AND. VERBOSE) WRITE(LU_ERR,'(A)') ' Completed INITIALIZE_MESH_EXCHANGE_2'
 
 ! Initialize persistent MPI sends and receives and allocate buffer arrays.
@@ -398,7 +395,7 @@ DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    IF (TGA_SURF_INDEX<1) CALL INITIALIZE_PROFILES(NM)
    IF (TGA_SURF_INDEX<1) CALL INITIALIZE_MESH_DUMPS(NM)
 ENDDO
-CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
+
 IF (MY_RANK==0 .AND. VERBOSE) WRITE(LU_ERR,'(A)') ' Inserted particles'
 
 ! Check for any stop flags at this point in the set up.
@@ -432,7 +429,6 @@ IF (GLMAT_SOLVER) THEN
    CALL STOP_CHECK(1)
 ENDIF
 CALL INIT_EVAC_DUMPS
-CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
 
 ! Initialize EVACuation routines
 
@@ -2643,10 +2639,6 @@ TNOW = CURRENT_TIME()
 ! Special circumstances when doing the radiation exchange (CODE=2)
 
 IF (CODE==2 .AND. (.NOT.EXCHANGE_RADIATION .OR. .NOT.RADIATION)) RETURN
-
-! Ensure that all MPI processes wait here until all are ready to proceed
-
-CALL MPI_BARRIER(MPI_COMM_WORLD,IERR)
 
 ! For each mesh, NM, controlled by MPI process, SNODE, send data to other meshes, NOM.
 
