@@ -90,9 +90,9 @@ where $\RE$ is the single particle Reynolds number, $L$ is the distance between 
   W = 1 - \frac{C_{\rm d,0}}{2} \left[ 1 - \exp \left( - \frac{\RE}{16}
   \frac{1}{\left( L / D - 1 / 2 \right)} \right) \right]. \label{eq:Wake-Vel}
 \ee
-This model assumes that the spheres are traveling directly in-line with each other. As such, this provides an upper bound for the strength of the aerodynamic interactions between two particles of the same size. The average separation distance $L/D$ between particle centers is calculated from the local particle volume fraction and local average particle diameter $\bar{D}$ via
+This model assumes that the spheres are traveling directly in-line with each other. As such, this provides an upper bound for the strength of the aerodynamic interactions between two particles of the same size. The average separation distance $L/D$ between particle centers is calculated from the local particle volume fraction, $\alpha$, as follows:
 \be
-  L/D = \bar{D} \left(\pi/6\alpha \right)^{\frac{1}{3}}.
+  L/D = \left(\pi/6\alpha \right)^{\frac{1}{3}}.
 \ee
 This simple approximation assumes that particles are uniformly distributed in each computational cell~\cite{Bhattacharyya2008}.
 

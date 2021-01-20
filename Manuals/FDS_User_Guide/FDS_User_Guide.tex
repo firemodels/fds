@@ -9007,7 +9007,7 @@ The volume over which to integrate, {\ct XB}, should be at least one grid cell t
 \subsection{Droplet and Particle Densities and Fluxes in the Gas Phase}
 \label{bucket_test_4}
 
-Away from solid surfaces, {\ct 'MPUV'} is the \underline{M}ass \underline{P}er \underline{U}nit \underline{V}olume of particles or droplets of type ({\ct PART\_ID}) in units of kg/m$^3$.  {\ct 'MPUV\_Z'} provides the same information integrated over all droplets of a single species, ({\ct SPEC\_ID}).
+Away from solid surfaces, {\ct 'MPUV'} is the \underline{M}ass \underline{P}er \underline{U}nit \underline{V}olume of particles or droplets of type ({\ct PART\_ID}) in units of kg/m$^3$.  The averagae volume fraction of droplets in the cell is {\ct 'DROPLET VOLUME FRACTION'}, which is equal to the {\ct MPUV} divided by the liquid density of the droplets.  {\ct 'MPUV\_Z'} provides the same information integrated over all droplets of a single species, ({\ct SPEC\_ID}).
 
 The quantities {\ct 'PARTICLE FLUX X'},  {\ct 'PARTICLE FLUX Y'}, and {\ct 'PARTICLE FLUX Z'} produce slice and Plot3D colored contours of the mass flux of particles in the $x$, $y$, and $z$ directions, respectively, in units of kg/m$^2$/s. You can also apply these quantities to a device. For example, in the case called {\ct bucket\_test\_4.fds}, the input line
 \begin{lstlisting}
@@ -10202,6 +10202,7 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct DENSITY}                                   & $\rho$ or $\rho Y_\alpha$ with {\ct SPEC\_ID} & kg/m$^3$       & D,I,P,S      \\ \hline
 {\ct DEPOSITION VELOCITY}                       & Section~\ref{info:deposition}                 & m/s            & B,D          \\ \hline
 {\ct DIVERGENCE}                                & $\nabla \cdot \bu$                            & 1/s            & D,I,P,S      \\ \hline
+{\ct DROPLET VOLUME FRACTION}$^2$               & Section~\ref{info:part_output}                &                & D,P,S        \\ \hline
 {\ct ENTHALPY}                                  & Section~\ref{info:Enthalpy}                   & kJ/m$^3$       & D,I,P,S      \\ \hline
 {\ct EXTINCTION COEFFICIENT}                    & Section~\ref{info:visibility}                 & 1/m            & D,I,P,S      \\ \hline
 {\ct FED}                                       & Section~\ref{info:FED}                        &                & D            \\ \hline
