@@ -982,7 +982,7 @@ If something sudden is to happen right at the start of a simulation, like a spri
 
 At the end of the first part of the explicit predictor-corrector time update, the time step is checked to ensure that it is within the appropriate stability bounds. If it is not, it is adjusted up or down by 10~\% (or until it is within limits) and the predictor part of the time step is re-run. If you want to prevent FDS from automatically changing the time step, set {\ct LOCK\_TIME\_STEP} equal to {\ct .TRUE.} on the {\ct TIME} line, in which case the specified time step, {\ct DT}, will not be adjusted. This parameter is intended for diagnostic purposes only, for example, timing program execution. It can lead to numerical instabilities if the initial time step is set too high.
 
-The diagnostic output file called {\ct CHID.out} contains information about the time step and CFL number in each mesh. However, for simulations that involve dozens or hundreds of meshes, it can be difficult to assess the global time step information. For detailed information about the time step, there is an optional output file called {\ct CHID\_cfl.csv} that contains, for every time step, the time~(s), time step size~(s), maximum CFL number, the mesh and mesh indices where the maximum CFL value occurs, the six velocity components on the six faces of the grid cell where the maximum CFL number occurs, and the divergence~(1/s), viscosity~(kg/m/s), and HRRPUV~(kW/m$^3$) where the maximum CFL occurs. Also listed is the maximum VN (Von Neumann) number and the mesh and cell indices were it occurs. To output this file, set {\ct CFL\_FILE} to {\ct .TRUE.} on the {\ct DUMP} line. It is normally set to {\ct .FALSE.}
+The diagnostic output file called {\ct CHID.out} contains information about the time step and CFL number in each mesh. However, for simulations that involve dozens or hundreds of meshes, it can be difficult to assess the global time step information. For detailed information about the time step, there is an optional output file called {\ct CHID\_cfl.csv} that contains, for every time step, the time~(s), time step size~(s), maximum CFL number, the mesh and mesh indices where the maximum CFL value occurs, the six velocity components on the six faces of the grid cell where the maximum CFL number occurs, and the divergence~(1/s), viscosity~(kg/m/s), HRRPUV~(kW/m$^3$), and combustion mixing time (s) where the maximum CFL occurs. Also listed is the maximum VN (Von Neumann) number and the mesh and cell indices were it occurs. To output this file, set {\ct CFL\_FILE} to {\ct .TRUE.} on the {\ct DUMP} line. It is normally set to {\ct .FALSE.}
 
 \subsubsection{The Final Time Step}
 
@@ -1351,7 +1351,6 @@ The turbulent Prandtl number $\PR_t$ and the turbulent Schmidt number $\SC_t$ ar
 {\ct 'DYNAMIC SMAGORINSKY'}     & Dynamic Smagorinsky \cite{Germano:1991,Moin:1991}       & None                  \\
 {\ct 'DEARDORFF'}               & Deardorff \cite{Deardorff:1980,Pope:2000}               & {\ct C\_DEARDORFF}    \\
 {\ct 'VREMAN'}                  & Vreman's eddy viscosity \cite{Vreman:2004}              & {\ct C\_VREMAN}       \\
-{\ct 'RNG'}                     & Renormalization group eddy viscosity \cite{Yakhot:1989} & {\ct C\_RNG}, {\ct C\_RNG\_CUTOFF} \\
 {\ct 'WALE'}                    & Wall-Adapting Local Eddy-viscosity \cite{Nicoud:1999}   & {\ct C\_WALE} \\ \hline
 \end{tabular}
 \end{table}
@@ -2978,7 +2977,7 @@ h = \frac{\dot{q}''_{\rm w}}{T_{\rm g}-T_{\rm w}} = \frac{\rho_{\rm w} \, c_{\rm
 \end{equation}
 Refer to the FDS Tech Guide \cite{FDS_Tech_Guide} for further details of the formulation. To specify this heat transfer model for a particular surface, set {\ct HEAT\_TRANSFER\_MODEL} equal to {\ct 'LOGLAW'} on the {\ct SURF} line. Note that the loglaw model is not well-suited for buoyant flows---it requires a well-resolved ``wind'' near the surface and is therefore mainly applicable to forced convection type flows with high grid resolution.
 
-\subsubsection{Atmospheric Boundary Layer Wall Model}
+\subsubsection{Atmospheric Boundary Layer Wall Model (Experimental)}
 \label{sec:abl_model}
 
 The incorporation of buoyancy into the wall function is the domain of Monin-Obukhov (MO) similarity theory, as discussed in Sec.~\ref{info:WIND}. Further mathematical details of the ABL wall model are discussed in the FDS Tech Guide \cite{FDS_Math_Guide}.  Note that the model assumes gravity to point in the $-z$ direction.  To specify this model for a particular surface, set {\ct HEAT\_TRANSFER\_MODEL} equal to {\ct 'ABL'} on the {\ct SURF} line together with the aerodynamic roughness length, {\ct Z\_0}.  For example,
@@ -2989,6 +2988,8 @@ The incorporation of buoyancy into the wall function is the domain of Monin-Obuk
 As discussed in Sec.~\ref{info:WIND}, there is a simple conversion between the aerodynamic roughness and the sandgrain roughness, which can be input using {\ct ROUGHNESS} on {\ct SURF}.  Either {\ct Z\_0} or {\ct ROUGHNESS} may be specified, but not both.  Also, if a {\ct WIND} line is present, {\ct Z\_0} must be consistent between {\ct SURF} and {\ct WIND} lines.  The value of {\ct Z\_0} on {\ct SURF} will override the default value from {\ct WIND}.
 
 When the ABL wall model is used, this also changes the wall stress model (see FDS Tech Guide~\cite{FDS_Math_Guide}).  The local Obukhov length, $L$ (see Sec.~\ref{info:WIND}), and viscous wall units, $y^+$ (see Sec.~\ref{info:yplus}), can be output using boundary files or wall devices.  Note that the perfectly ``neutral'' value for local $L$ is set to zero to avoid problems with the colorbar range that would occur if the physically correct value of infinity were used.  However, if the flow is not perfectly isothermal then usually there is enough of a temperature difference to register a physically realizable value for $L$ in the ABL model.
+
+A word of caution with this model: Experience has shown the ABL model can lead to instabilities when a specified heat flux is supplied as the surface boundary condition, which is often called for to achieve the correct mean stability behavior of the atmospheric flow.  This happens because very large values of the heat transfer coefficient may be needed to offset small temperature differenced for a given heat flux.
 
 \subsubsection{Free Convection, Horizontal Cylinder}
 
@@ -5182,18 +5183,18 @@ By default, duplicate species are considered to be a lumped species and not a pr
 \begin{lstlisting}
 &SPEC ID='NITROGEN',BACKGROUND=.TRUE./
 &SPEC ID='OXYGEN',MASS_FRACTION_0=0.1/
-&SPEC ID='O2',SPEC_ID='OXYGEN',MASS_FRACTION_0=0.2/
-&SPEC ID='O3',SPEC_ID='OXYGEN',MASS_FRACTION_0=0.3,PRIMITIVE=.TRUE./
+&SPEC ID='O2 LUMPED',SPEC_ID='OXYGEN',MASS_FRACTION_0=0.2/
+&SPEC ID='O2 DUPLICATE PRIMITIVE',SPEC_ID='OXYGEN',MASS_FRACTION_0=0.3,PRIMITIVE=.TRUE./
 
 &DEVC XYZ=0.5,0.5,0.5,QUANTITY='MASS FRACTION',SPEC_ID='OXYGEN'/
-&DEVC XYZ=0.5,0.5,0.5,QUANTITY='MASS FRACTION',SPEC_ID='O2'/
-&DEVC XYZ=0.5,0.5,0.5,QUANTITY='MASS FRACTION',SPEC_ID='O3'/
+&DEVC XYZ=0.5,0.5,0.5,QUANTITY='MASS FRACTION',SPEC_ID='O2 LUMPED'/
+&DEVC XYZ=0.5,0.5,0.5,QUANTITY='MASS FRACTION',SPEC_ID='O2 DUPLICATE PRIMITIVE'/
 \end{lstlisting}
 
 \section{Specifying Lumped Species (Mixtures of Primitive Species)}
 \label{info:lumped}
 
-The {\ct SPEC} namelist group also allows you to define species mixtures. The purpose of a species mixture is to reduce the number of species transport equations that are explicitly solved. For example, consider air. Air is composed of nitrogen, oxygen, water vapor, and carbon dioxide. If we define the four component species of air, we will have four total species. One of these, say nitrogen, can be set to be the background species, leaving three transport equations to solve. Alternatively, we can define a ``lumped species'' that represents the air mixture and save on CPU time because the three transport equations are no longer needed and the ``lumped'' air becomes the background species.
+The {\ct SPEC} namelist group also allows you to define species mixtures. The purpose of a species mixture is to reduce the number of species transport equations that are explicitly solved. Air, for example, is composed of nitrogen, oxygen, water vapor, and carbon dioxide. If we define the four component species of air, we will have four total species. Alternatively, we can define a ``lumped species'' that represents the air mixture, which saves on comptational time because we need only solve one transport equation.  A lumped species is a group of species that transport and react together in the same proportion.  This implies the molecular diffusivities of each component of the mixture are the same, which is an approximation\footnote{Turbulent diffusion usually dominates by a couple orders of magnitude making equal diffusivities a good approximation.}.
 
 The following inputs define equivalent initial mixtures. But in the first example three species are explicitly tracked and in the second example only a background mixture is specified.  Note that this example represents the background species created by FDS when no background is explicitly defined in the input file.  It is also noted that any implicitly defined species (such as the nitrogen, oxygen, water vapor, and carbon dioxide for the air background species or the species in the lumped product species for simple chemistry, see ~\ref{info:simple_chemistry}), can be referenced by any of the outputs such as {\ct DEVC} or {\ct SLCF}.
 
@@ -6332,7 +6333,7 @@ If the {\ct SPEC\_ID} is not listed in Table~\ref{tab:gasspecies} with a ``Y'' i
 \item[{\ct ENTHALPY\_OF\_FORMATION}] The heat of formation of the gas (kJ/mol).
 \item[{\ct HEAT\_OF\_VAPORIZATION}] Latent heat of vaporization of the liquid, $h_{\rm v}$ (kJ/kg).
 \item[{\ct H\_V\_REFERENCE\_TEMPERATURE}] The temperature corresponding to the {\ct HEAT\_OF\_VAPORIZATION} ($^\circ$C).
-\item[{\ct VISCOSITY\_LIQUID}] The viscosity of the liquid ()\si{kg/m.s}).
+\item[{\ct VISCOSITY\_LIQUID}] The viscosity of the liquid (\si{kg/(m.s)}).
 \item[{\ct CONDUCTIVTY\_LIQUID}] The conductivity of the liquid (\si{W/(m.K)}).
 \item[{\ct BETA\_LIQUID}] The coefficient of thermal expansion of the liquid (1/K).
 \end{description}
@@ -9582,19 +9583,21 @@ The output quantities {\ct FED} and {\ct FIC} may be displayed either at a point
 \begin{lstlisting}
 &DEVC ID='whatever', XYZ=..., QUANTITY='FED', PROP_ID='Activity Level' /
 \end{lstlisting}
-You can also visualize {\ct FED} and {\ct FIC} as a contour slice by adding lines similar to the following:
+You can also visualize {\ct FIC} as a contour slice. The output quantity {\ct FED} cannot be directly output as a contour slice, but it can be visualized as a slice in Smokeview if the slices for O$_2$, CO$_2$, and CO are defined in the same plane:
 \begin{lstlisting}
-&SLCF PBY=1.0, QUANTITY='FED', PROP_ID='Activity Level' /
 &SLCF PBY=1.0, QUANTITY='VOLUME FRACTION', SPEC_ID='CARBON DIOXIDE' /
 &SLCF PBY=1.0, QUANTITY='VOLUME FRACTION', SPEC_ID='CARBON MONOXIDE' /
 &SLCF PBY=1.0, QUANTITY='VOLUME FRACTION', SPEC_ID='OXYGEN' /
 \end{lstlisting}
-Notice that all slices are defined on the same plane. Also note that device or slice output can make use of an optional activity level defined on a property line:
+Notice that all slices are defined on the same plane. If these slices are present, Smokeview can compute the FED and display it as a contour slice.
+
+Also note that device output for FED can make use of an optional activity level defined on a property line:
 \begin{lstlisting}
 &PROP ID='Activity Level', FED_ACTIVITY=3 /
 \end{lstlisting}
 The parameter {\ct FED\_ACTIVITY} is an integer denoting that the person is at rest (1), doing light work (2), or doing heavy work (3). The default value is 2.
 
+There is an FED related quantity, {\ct INCAPACITATION TIME}, that can be output as a point device or a contour slice. This quantity shows the time in minutes until incapacitation for person exposed to the current conditions.
 
 \subsection{Spatially-Integrated Outputs}
 \label{info:statistics}
@@ -10211,6 +10214,7 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct HRR}                                       & $\int \dq''' \; \d V$                         & kW             & D            \\ \hline
 {\ct HRRPUA}                                    & $\dq''$                                       & kW/m$^2$       & D            \\ \hline
 {\ct HRRPUV}                                    & $\dq'''$                                      & kW/m$^3$       & D,I,P,S      \\ \hline
+{\ct INCAPACITATION TIME}                       & Section~\ref{info:FED}                        & min            & D            \\ \hline
 {\ct INCIDENT HEAT FLUX}                        & Section~\ref{info:heat_flux}                  & kW/m$^2$       & B,D          \\ \hline
 {\ct INSIDE WALL TEMPERATURE}                   & Section~\ref{info:DEPTH}                      & $^\circ$C      & D            \\ \hline
 {\ct INSIDE WALL DEPTH}                         & Section~\ref{info:DEPTH}                      & m              & D            \\ \hline
@@ -11266,8 +11270,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CHECK\_VN}                                     & Logical      & Section~\ref{info:VN}                   &            & {\ct .TRUE.}      \\ \hline
 {\ct CNF\_CUTOFF}                                   & Real         & Section~\ref{info:particle_size}        &            & 0.005             \\ \hline
 {\ct \footnotesize CONSTANT\_SPECIFIC\_HEAT\_RATIO} & Logical      & Section~\ref{info:Enthalpy}             &            & {\ct .FALSE.}     \\ \hline
-{\ct C\_RNG}                                        & Real         & Section~\ref{info:LES}                  &            & 0.20              \\ \hline
-{\ct C\_RNG\_CUTOFF}                                & Real         & Section~\ref{info:LES}                  &            & 10.               \\ \hline
 {\ct C\_SMAGORINSKY}                                & Real         & Section~\ref{info:LES}                  &            & 0.20              \\ \hline
 {\ct C\_VREMAN}                                     & Real         & Section~\ref{info:LES}                  &            & 0.07              \\ \hline
 {\ct C\_WALE}                                       & Real         & Section~\ref{info:LES}                  &            & 0.60              \\ \hline
@@ -11340,7 +11342,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 
 % Undocumented: AEROSOL_AL2O3, AEROSOL_SCRUBBING, CC_IBM(MV), CCVOL_LINK(MV), CC_SLIPIBM_VELO(MV,debug), CC_ZEROIBM_VELO(MV,debug), CHECK_MASS_CONSERVE(MV), COMPUTE_CUTCELLS_ONLY(MV),
 % DO_IMPLICIT_CCREGION (MV), ENTHALPY_TRANSPORT (RJM),
-% EVAP_MODEL, EXTERNAL_BOUNDARY_CORRECTION, HT3D_TEST (RJM), MAXIMUM_GEOMETRY_FACES(MV), MAXIMUM_GEOMETRY_ZVALS(MV), NUCLEATION_SITES, PERIODIC_TEST (RJM),
+% EVAP_MODEL, HT3D_TEST (RJM), MAXIMUM_GEOMETRY_FACES(MV), MAXIMUM_GEOMETRY_ZVALS(MV), NUCLEATION_SITES, PERIODIC_TEST (RJM),
 % POSITIVE_ERROR_TEST, PROFILING, QFAN_BETA_TEST, TENSOR_DIFFUSIVITY (RJM), TURB_INIT_CLOCK (RJM),
 % UVW_FILE (RJM), STORE_DIVERGENCE_CORRECTION (RJM), PROJECTION (RJM)
 

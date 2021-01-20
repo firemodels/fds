@@ -17,7 +17,6 @@ USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP,INTERPOLATE1D_UNIFORM
 USE PHYSICAL_FUNCTIONS, ONLY: GET_CONDUCTIVITY,GET_SPECIFIC_HEAT,GET_SENSIBLE_ENTHALPY_Z,GET_SENSIBLE_ENTHALPY,&
                               GET_VISCOSITY,GET_MOLECULAR_WEIGHT
-USE TURBULENCE, ONLY: TENSOR_DIFFUSIVITY_MODEL,WANNIER_FLOW
 USE MASS, ONLY: SCALAR_FACE_VALUE
 USE GEOMETRY_FUNCTIONS, ONLY: ASSIGN_PRESSURE_ZONE
 USE MANUFACTURED_SOLUTIONS, ONLY: DIFF_MMS,UF_MMS,WF_MMS,VD2D_MMS_Z_SRC !,RHO_0_MMS,RHO_1_MMS
@@ -173,10 +172,6 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
          ENDDO
       ENDDO
       !$OMP END PARALLEL DO
-
-      ! Tensor diffusivity model (experimental)
-
-      IF (TENSOR_DIFFUSIVITY .AND. SIM_MODE/=DNS_MODE) CALL TENSOR_DIFFUSIVITY_MODEL(NM,N)
 
       ! Store rho*D_n grad Z_n at OPEN boundaries, flux match at INTERPOLATED boundaries, zero out otherwise
 
@@ -1373,21 +1368,6 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
                   END IF
                   WC%ONE_D%U_NORMAL_S = TIME_RAMP_FACTOR*WC%ONE_D%U_NORMAL_0
                END IF EVACUATION_BC_IF
-               WANNIER_BC: IF (PERIODIC_TEST==5) THEN
-                  II = WC%ONE_D%II
-                  JJ = WC%ONE_D%JJ
-                  KK = WC%ONE_D%KK
-                  SELECT CASE(IOR)
-                     CASE( 1)
-                        WC%ONE_D%U_NORMAL_S = -WANNIER_FLOW(X(II),ZC(KK),1)
-                     CASE(-1)
-                        WC%ONE_D%U_NORMAL_S =  WANNIER_FLOW(X(II-1),ZC(KK),1)
-                     CASE( 3)
-                        WC%ONE_D%U_NORMAL_S = -WANNIER_FLOW(XC(II),Z(KK),2)
-                     CASE(-3)
-                        WC%ONE_D%U_NORMAL_S =  WANNIER_FLOW(XC(II),Z(KK-1),2)
-                  END SELECT
-               ENDIF WANNIER_BC
             ENDIF VENT_IF
 
          CASE(OPEN_BOUNDARY,INTERPOLATED_BOUNDARY)

@@ -538,6 +538,9 @@ $QFDS -d Radiation wall_internal_radiation.fds
 
 $QFDS -d Restart restart_test1a.fds
 $QFDS -d Restart pyro3d_restart_a.fds
+$QFDS -d Restart pyro3d_restart_base_case.fds
+$QFDS -d Restart geom_restart_a.fds
+$QFDS -d Restart geom_restart_base_case.fds
 
 $QFDS -d Species burke_schumann.fds
 $QFDS -d Species FED_FIC.fds
@@ -592,7 +595,7 @@ $QFDS -p 8 -d Species mass_balance_reac.fds
 
 $QFDS -d Sprinklers_and_Sprays activate_sprinklers.fds
 $QFDS -d Sprinklers_and_Sprays adiabatic_surf_temp_spray.fds
-$QFDS -d Sprinklers_and_Sprays bucket_test_1.fds
+$QFDS -p 4 -d Sprinklers_and_Sprays bucket_test_1.fds
 $QFDS -d Sprinklers_and_Sprays bucket_test_2.fds
 $QFDS -d Sprinklers_and_Sprays bucket_test_3.fds
 $QFDS -d Sprinklers_and_Sprays bucket_test_4.fds
@@ -732,8 +735,6 @@ $QFDS -d Turbulence deardorff_32.fds
 $QFDS -d Turbulence deardorff_64.fds
 $QFDS -d Turbulence vreman_32.fds
 $QFDS -d Turbulence vreman_64.fds
-$QFDS -d Turbulence rng_32.fds
-$QFDS -d Turbulence rng_64.fds
 $QFDS -d Turbulence wale_32.fds
 $QFDS -d Turbulence wale_64.fds
 $QFDS -d Turbulence yplus_8.fds

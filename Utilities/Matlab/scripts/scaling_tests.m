@@ -117,7 +117,7 @@ for i=1:11
    t2(i) = 1.;
 end
 
-if t(11)>1. || t(11)<0.5
+if t(11)>1. || t(11)<0.4
     display(['Error: weak scaling test out of tolerance'])
 end
 

@@ -761,9 +761,9 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_SUB-DT_BC_HT3D)>TWO_EPSILON_EB )
       JACOBI_ITERATION_LOOP: DO ITER=1,N_JACOBI_ITERATIONS
 
          ! compute material thermal conductivity
-         DO K=1,KBAR
-            DO J=1,JBAR
-               DO I=1,IBAR
+         K_LOOP: DO K=1,KBAR
+            J_LOOP: DO J=1,JBAR
+               I_LOOP: DO I=1,IBAR
                   IC = CELL_INDEX(I,J,K);              IF (.NOT.SOLID(IC)) CYCLE
                   OB => OBSTRUCTION(OBST_INDEX_C(IC)); IF (.NOT.OB%HT3D)   CYCLE
                   IF (OB%MATL_INDEX>0) THEN
@@ -813,9 +813,9 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_SUB-DT_BC_HT3D)>TWO_EPSILON_EB )
                            VSRVC_Z(I,J,K) = VSRVC(I,J,K)
                      END SELECT
                   ENDIF
-               ENDDO
-            ENDDO
-         ENDDO
+               ENDDO I_LOOP
+            ENDDO J_LOOP
+         ENDDO K_LOOP
 
          KP_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
             WC => WALL(IW)
@@ -869,9 +869,9 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_SUB-DT_BC_HT3D)>TWO_EPSILON_EB )
          ENDDO KP_WALL_LOOP
 
          ! build heat flux vectors
-         DO K=1,KBAR
-            DO J=1,JBAR
-               DO I=0,IBAR
+         K_LOOP_2: DO K=1,KBAR
+            J_LOOP_2: DO J=1,JBAR
+               I_LOOP_2: DO I=0,IBAR
                   ICM = CELL_INDEX(I,J,K)
                   ICP = CELL_INDEX(I+1,J,K)
                   IF (.NOT.(SOLID(ICM).AND.SOLID(ICP))) CYCLE
@@ -918,9 +918,9 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_SUB-DT_BC_HT3D)>TWO_EPSILON_EB )
                      KDTDX(I,J,K) = K_S_M * (TMP_I-TMP_NEW(I,J,K)) * 2._EB/(DX(I)*VSRVC_X(I,J,K))
                      K_S_MAX = MAX(K_S_MAX,MAX(K_S_M,K_S_P))
                   ENDIF
-               ENDDO
-            ENDDO
-         ENDDO
+               ENDDO I_LOOP_2
+            ENDDO J_LOOP_2
+         ENDDO K_LOOP_2
          TWO_D_IF: IF (.NOT.TWO_D) THEN
             DO K=1,KBAR
                DO J=0,JBAR
@@ -1288,11 +1288,11 @@ INIT_IF: IF (T_SUB<TWO_EPSILON_EB) THEN
       OB => OBSTRUCTION(N)
       IF (OB%MT3D .OR. .NOT.OB%PYRO3D) CYCLE OBST_LOOP_1
       ! Set mass fluxes to 0
-      DO K=OB%K1+1,OB%K2
-         DO J=OB%J1+1,OB%J2
-            I_LOOP: DO I=OB%I1+1,OB%I2
+      K_LOOP_1: DO K=OB%K1+1,OB%K2
+         J_LOOP_1: DO J=OB%J1+1,OB%J2
+            I_LOOP_1: DO I=OB%I1+1,OB%I2
                IC = CELL_INDEX(I,J,K)
-               IF (.NOT.SOLID(IC)) CYCLE I_LOOP
+               IF (.NOT.SOLID(IC)) CYCLE I_LOOP_1
                IOR_SELECT: SELECT CASE(OB%PYRO3D_IOR)
                   CASE DEFAULT
                      IF (WALL_INDEX_HT3D(IC,OB%PYRO3D_IOR)>0) THEN
@@ -1314,9 +1314,9 @@ INIT_IF: IF (T_SUB<TWO_EPSILON_EB) THEN
                         ENDIF
                      ENDDO IOR_LOOP
                END SELECT IOR_SELECT
-            ENDDO I_LOOP
-         ENDDO
-      ENDDO
+            ENDDO I_LOOP_1
+         ENDDO J_LOOP_1
+      ENDDO K_LOOP_1
    ENDDO OBST_LOOP_1
 ENDIF INIT_IF
 
@@ -1324,8 +1324,8 @@ OBST_LOOP_2: DO N=1,N_OBST
    OB => OBSTRUCTION(N)
    IF (.NOT.OB%PYRO3D) CYCLE OBST_LOOP_2
 
-   DO K=OB%K1+1,OB%K2
-      DO J=OB%J1+1,OB%J2
+   K_LOOP_2: DO K=OB%K1+1,OB%K2
+      J_LOOP_2: DO J=OB%J1+1,OB%J2
          I_LOOP_2: DO I=OB%I1+1,OB%I2
             IC = CELL_INDEX(I,J,K)
             IF (.NOT.SOLID(IC)) CYCLE I_LOOP_2
@@ -1503,8 +1503,8 @@ OBST_LOOP_2: DO N=1,N_OBST
             ENDIF
 
          ENDDO I_LOOP_2
-      ENDDO
-   ENDDO
+      ENDDO J_LOOP_2
+   ENDDO K_LOOP_2
 ENDDO OBST_LOOP_2
 
 END SUBROUTINE SOLID_PYROLYSIS_3D

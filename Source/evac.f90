@@ -707,7 +707,7 @@ CONTAINS
           IF (VENT_FFIELD /= 'null') DEFINE_MESH = .FALSE. ! Old input, user gives the door flow meshes
 
           ! Old input used COLOR_INDEX, next lines are needed for that
-          IF (MYID==MAX(0,EVAC_PROCESS) .AND. COLOR_INDEX/=-1) WRITE (LU_ERR,'(A,A)') &
+          IF (MY_RANK==MAX(0,EVAC_PROCESS) .AND. COLOR_INDEX/=-1) WRITE (LU_ERR,'(A,A)') &
                ' WARNING: keyword COLOR_INDEX is replaced by COLOR at EXIT line ', TRIM(ID)
           IF (COLOR_INDEX == 1) COLOR = 'BLACK'
           IF (COLOR_INDEX == 2) COLOR = 'YELLOW'
@@ -730,7 +730,7 @@ CONTAINS
 
           IF (EVAC_MESH /= 'null') THEN
              MESH_ID = TRIM(EVAC_MESH)
-             IF (MYID==MAX(0,EVAC_PROCESS)) WRITE (LU_ERR,'(A,A)') &
+             IF (MY_RANK==MAX(0,EVAC_PROCESS)) WRITE (LU_ERR,'(A,A)') &
                   ' WARNING: keyword EVAC_MESH is replaced by MESH_ID at EXIT line ', TRIM(ID)
           END IF
 
@@ -766,31 +766,31 @@ CONTAINS
              END IF
           END DO PEX_StrsLoop_0
 
-          IF (II == 0 .AND. MYID==MAX(0,EVAC_PROCESS)) THEN
+          IF (II == 0 .AND. MY_RANK==MAX(0,EVAC_PROCESS)) THEN
              WRITE(MESSAGE,'(A,A,A)') 'ERROR: EXIT ',TRIM(ID), ' problem with IMESH, no mesh found'
              CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
           END IF
-          IF (II > 1 .AND. MYID==MAX(0,EVAC_PROCESS)) THEN
+          IF (II > 1 .AND. MY_RANK==MAX(0,EVAC_PROCESS)) THEN
              WRITE(MESSAGE,'(A,A,A)') 'ERROR: EXIT ',TRIM(ID), ' not an unique mesh found '
              CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
           END IF
           SELECT CASE (IOR)
           CASE (-1,+1)
              IF ( (XB(2)-XB(1)) >= TWO_EPSILON_EB ) THEN
-                IF (MYID==MAX(0,EVAC_PROCESS)) THEN
+                IF (MY_RANK==MAX(0,EVAC_PROCESS)) THEN
                    WRITE(MESSAGE,'(A,A,A)') 'ERROR: EXIT ',TRIM(ID), ' IOR=+-1 but not a vertical plane '
                    CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                 END IF
              END IF
           CASE (-2,+2)
              IF ( (XB(4)-XB(3)) >= TWO_EPSILON_EB ) THEN
-                IF (MYID==MAX(0,EVAC_PROCESS)) THEN
+                IF (MY_RANK==MAX(0,EVAC_PROCESS)) THEN
                    WRITE(MESSAGE,'(A,A,A)') 'ERROR: EXIT ',TRIM(ID), ' IOR=+-2 but not a vertical plane '
                    CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                 END IF
              END IF
           CASE Default
-             IF (MYID==MAX(0,EVAC_PROCESS)) THEN
+             IF (MY_RANK==MAX(0,EVAC_PROCESS)) THEN
                 WRITE(MESSAGE,'(A,A,A)') 'ERROR: EXIT ',TRIM(ID), ' No IOR given or not -2,-1,+1,+2 '
                 CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
              END IF
@@ -838,7 +838,7 @@ CONTAINS
           IF (TO_NODE     == 'null') DEFINE_MESH = .FALSE. ! This is more or less like an entry.
 
           ! Old input used COLOR_INDEX, next lines are needed for that
-          IF (MYID==MAX(0,EVAC_PROCESS) .AND. COLOR_INDEX/=-1) WRITE (LU_ERR,'(A,A)') &
+          IF (MY_RANK==MAX(0,EVAC_PROCESS) .AND. COLOR_INDEX/=-1) WRITE (LU_ERR,'(A,A)') &
                ' WARNING: keyword COLOR_INDEX is replaced by COLOR at DOOR line ', TRIM(ID)
           IF (COLOR_INDEX == 1) COLOR = 'BLACK'
           IF (COLOR_INDEX == 2) COLOR = 'YELLOW'
@@ -855,7 +855,7 @@ CONTAINS
 
           IF (EVAC_MESH /= 'null') THEN
              MESH_ID = TRIM(EVAC_MESH)
-             IF (MYID==MAX(0,EVAC_PROCESS)) WRITE (LU_ERR,'(A,A)') &
+             IF (MY_RANK==MAX(0,EVAC_PROCESS)) WRITE (LU_ERR,'(A,A)') &
                   ' WARNING: keyword EVAC_MESH is replaced by MESH_ID at DOOR line ', TRIM(ID)
           END IF
 
@@ -891,31 +891,31 @@ CONTAINS
              END IF
           END DO PDX_StrsLoop_0
 
-          IF (II == 0 .AND. MYID==MAX(0,EVAC_PROCESS)) THEN
+          IF (II == 0 .AND. MY_RANK==MAX(0,EVAC_PROCESS)) THEN
              WRITE(MESSAGE,'(A,A,A)') 'ERROR: DOOR ',TRIM(ID), ' problem with IMESH, no mesh found'
              CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
           END IF
-          IF (II > 1 .AND. MYID==MAX(0,EVAC_PROCESS)) THEN
+          IF (II > 1 .AND. MY_RANK==MAX(0,EVAC_PROCESS)) THEN
              WRITE(MESSAGE,'(A,A,A)') 'ERROR: DOOR ',TRIM(ID), ' not an unique mesh found '
              CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
           END IF
           SELECT CASE (IOR)
           CASE (-1,+1)
              IF ( (XB(2)-XB(1)) >= TWO_EPSILON_EB ) THEN
-                IF (MYID==MAX(0,EVAC_PROCESS)) THEN
+                IF (MY_RANK==MAX(0,EVAC_PROCESS)) THEN
                    WRITE(MESSAGE,'(A,A,A)') 'ERROR: DOOR ',TRIM(ID), ' IOR=+-1 but not a vertical plane '
                    CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                 END IF
              END IF
           CASE (-2,+2)
              IF ( (XB(4)-XB(3)) >= TWO_EPSILON_EB ) THEN
-                IF (MYID==MAX(0,EVAC_PROCESS)) THEN
+                IF (MY_RANK==MAX(0,EVAC_PROCESS)) THEN
                    WRITE(MESSAGE,'(A,A,A)') 'ERROR: DOOR ',TRIM(ID), ' IOR=+-2 but not a vertical plane '
                    CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                 END IF
              END IF
           CASE Default
-             IF (MYID==MAX(0,EVAC_PROCESS)) THEN
+             IF (MY_RANK==MAX(0,EVAC_PROCESS)) THEN
                 WRITE(MESSAGE,'(A,A,A)') 'ERROR: DOOR ',TRIM(ID), ' No IOR given or not -2,-1,+1,+2 '
                 CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
              END IF
@@ -948,7 +948,7 @@ CONTAINS
     ! Lines below are only for imode=2, i.e., after the READ_MESH in read.f90.
     IF (.NOT. ANY(EVACUATION_ONLY)) THEN
        N_EVAC = 0
-       IF (MYID==MAX(0,EVAC_PROCESS)) THEN
+       IF (MY_RANK==MAX(0,EVAC_PROCESS)) THEN
           IF (ANY(EVACUATION_ONLY)) THEN
              WRITE(MESSAGE,'(A,A,A)') 'ERROR: No main evacuation meshes defined.'
              CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
@@ -966,7 +966,7 @@ CONTAINS
     I33 = 0
     ILH = 0
 
-    IF (MYID==MAX(0,EVAC_PROCESS)) THEN
+    IF (MY_RANK==MAX(0,EVAC_PROCESS)) THEN
        ALLOCATE(Tsteps(NMESHES),STAT=IZERO)
        CALL ChkMemErr('READ_EVAC','Tsteps',IZERO)
        Tsteps(:) = EVAC_DT_FLOWFIELD
@@ -1054,7 +1054,7 @@ CONTAINS
     DEALLOCATE(TMP_AVATAR_TYPE_PROP)
     DEALLOCATE(TMP_AVATAR_TYPE_INDEX)
     DEALLOCATE(TMP_AVATAR_TYPE_NAME)
-    IF (MYID /= MAX(0,EVAC_PROCESS)) RETURN
+    IF (MY_RANK /= MAX(0,EVAC_PROCESS)) RETURN
 
     CALL CHECK_EVAC_NODES ; IF (STOP_STATUS==SETUP_STOP) RETURN
 
@@ -1320,7 +1320,7 @@ CONTAINS
 
          ! Allocate quantities for EVAC, PERS, EXIT types and initialize some variables
          !
-         EVAC_PROC_IF: IF (MYID==MAX(0,EVAC_PROCESS)) THEN
+         EVAC_PROC_IF: IF (MY_RANK==MAX(0,EVAC_PROCESS)) THEN
             IF (NPC_EVAC > 0 ) THEN
                ALLOCATE(EVAC_EVACS(NPC_EVAC),STAT=IZERO)
                CALL ChkMemErr('READ','EVAC_EVACS',IZERO)
@@ -1420,7 +1420,7 @@ CONTAINS
 
          END IF EVAC_PROC_IF
 
-         EVAC_PROC_IF_2: IF (MYID==MAX(0,EVAC_PROCESS)) THEN
+         EVAC_PROC_IF_2: IF (MY_RANK==MAX(0,EVAC_PROCESS)) THEN
             N_NODES = N_ENTRYS + N_EXITS + N_DOORS + N_CORRS + N_EGRIDS + N_STRS
             IF (N_NODES > 0) THEN
                ALLOCATE(EVAC_Node_List(1:N_NODES),STAT=IZERO)
@@ -1911,11 +1911,11 @@ CONTAINS
                END IF
             CASE ('null')
                ! Do nothing, use the defaults
-               IF (MYID == MAX(0,EVAC_PROCESS)) THEN
+               IF (MY_RANK == MAX(0,EVAC_PROCESS)) THEN
                   WRITE (LU_ERR,'(A,A)') ' WARNING: PERS ',TRIM(ID),' no DEFAULT_PROPERTIES given'
                END IF
             CASE Default
-               IF (MYID == MAX(0,EVAC_PROCESS)) THEN
+               IF (MY_RANK == MAX(0,EVAC_PROCESS)) THEN
                   WRITE(MESSAGE,'(A,A,A)') 'ERROR: PERS ',TRIM(ID),' problem with DEFAULT_PROPERTIES'
                   CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
                END IF
@@ -1924,14 +1924,14 @@ CONTAINS
          END IF
 
          IF (PRE_MEAN < 0._EB .OR. PRE_LOW < 0._EB) THEN
-            IF (MYID == MAX(0,EVAC_PROCESS)) THEN
+            IF (MY_RANK == MAX(0,EVAC_PROCESS)) THEN
                WRITE(MESSAGE,'(A,A,A)') 'ERROR: PERS ',TRIM(ID), ' PRE-evacuation time should positive.'
                CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
             END IF
          END IF
 
          IF (FED_ACTIVITY < 1 .OR. FED_ACTIVITY > 3) THEN
-            IF (MYID == MAX(0,EVAC_PROCESS)) THEN
+            IF (MY_RANK == MAX(0,EVAC_PROCESS)) THEN
                WRITE(MESSAGE,'(A,A,A,I3)') 'ERROR: PERS ',TRIM(ID), ' not a valid FED activity switch: ',FED_ACTIVITY
                CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
             END IF
@@ -1975,7 +1975,7 @@ CONTAINS
             EVAC_AVATAR_RGB(1:3,i_avatar_color) = AVATAR_RGB
          END IF
          !
-         IF (MYID /= MAX(0,EVAC_PROCESS)) CYCLE READ_PERS_LOOP
+         IF (MY_RANK /= MAX(0,EVAC_PROCESS)) CYCLE READ_PERS_LOOP
          !
          PCP=>EVAC_PERSON_CLASSES(N)
          !
@@ -2108,7 +2108,7 @@ CONTAINS
          CONTINUE
       CASE (7)
          COLOR_METHOD = -1
-         IF (MYID==MAX(0,EVAC_PROCESS)) WRITE (LU_ERR,'(A)') &
+         IF (MY_RANK==MAX(0,EVAC_PROCESS)) WRITE (LU_ERR,'(A)') &
               ' WARNING: COLOR_METHOD=7 is not defined anymore, the default (-1) is used.'
       CASE Default
          WRITE(MESSAGE,'(A,I3,A)') 'ERROR: READ_EVAC COLOR METHOD',COLOR_METHOD, ' is not defined'
@@ -2242,7 +2242,7 @@ CONTAINS
          IF (VENT_FFIELD /= 'null') DEFINE_MESH = .FALSE. ! Old input, user gives the door flow meshes
          IF (COUNT_ONLY) DEFINE_MESH = .FALSE.
          ! Old input used COLOR_INDEX, next lines are needed for that
-         IF (MYID==MAX(0,EVAC_PROCESS) .AND. COLOR_INDEX/=-1) WRITE (LU_ERR,'(A,A)') &
+         IF (MY_RANK==MAX(0,EVAC_PROCESS) .AND. COLOR_INDEX/=-1) WRITE (LU_ERR,'(A,A)') &
               ' WARNING: keyword COLOR_INDEX is replaced by COLOR at EXIT line ',TRIM(ID)
          IF (COLOR_INDEX == 1) COLOR = 'BLACK'
          IF (COLOR_INDEX == 2) COLOR = 'YELLOW'
@@ -2264,7 +2264,7 @@ CONTAINS
             EVAC_AVATAR_RGB(1:3,i_avatar_color) = RGB
          END IF
 
-         IF (MYID /= MAX(0,EVAC_PROCESS)) CYCLE READ_EXIT_LOOP
+         IF (MY_RANK /= MAX(0,EVAC_PROCESS)) CYCLE READ_EXIT_LOOP
 
          PEX=>EVAC_EXITS(N)
 
@@ -2284,7 +2284,7 @@ CONTAINS
          END IF
          IF (EVAC_MESH /= 'null') THEN
             MESH_ID = TRIM(EVAC_MESH)
-            IF (MYID==MAX(0,EVAC_PROCESS)) WRITE (LU_ERR,'(A,A)') &
+            IF (MY_RANK==MAX(0,EVAC_PROCESS)) WRITE (LU_ERR,'(A,A)') &
                  ' WARNING: keyword EVAC_MESH is replaced by MESH_ID at EXIT line ', TRIM(ID)
          END IF
 
@@ -2690,7 +2690,7 @@ CONTAINS
 
 
          ! Old input used COLOR_INDEX, next lines are needed for that
-         IF (MYID==MAX(0,EVAC_PROCESS) .AND. COLOR_INDEX/=-1) WRITE (LU_ERR,'(A,A)') &
+         IF (MY_RANK==MAX(0,EVAC_PROCESS) .AND. COLOR_INDEX/=-1) WRITE (LU_ERR,'(A,A)') &
               ' WARNING: keyword COLOR_INDEX is replaced by COLOR at DOOR line ',TRIM(ID)
          IF (COLOR_INDEX == 1) COLOR = 'BLACK'
          IF (COLOR_INDEX == 2) COLOR = 'YELLOW'
@@ -2708,7 +2708,7 @@ CONTAINS
             EVAC_AVATAR_RGB(1:3,i_avatar_color) = RGB
          END IF
 
-         IF (MYID /= MAX(0,EVAC_PROCESS)) CYCLE READ_DOOR_LOOP
+         IF (MY_RANK /= MAX(0,EVAC_PROCESS)) CYCLE READ_DOOR_LOOP
 
          PDX=>EVAC_DOORS(N)
 
@@ -2728,7 +2728,7 @@ CONTAINS
 
          IF (EVAC_MESH /= 'null') THEN
             MESH_ID = EVAC_MESH
-            IF (MYID==MAX(0,EVAC_PROCESS)) WRITE (LU_ERR,'(A,A)') &
+            IF (MY_RANK==MAX(0,EVAC_PROCESS)) WRITE (LU_ERR,'(A,A)') &
                  ' WARNING: keyword EVAC_MESH is replaced by MESH_ID at DOOR line ', TRIM(ID)
          END IF
 
@@ -3093,7 +3093,7 @@ CONTAINS
       !
       n_max_in_corrs = 0
       READ_CORR_LOOP: DO N = 1, N_CORRS
-         IF (MYID /= MAX(0,EVAC_PROCESS)) CYCLE READ_CORR_LOOP
+         IF (MY_RANK /= MAX(0,EVAC_PROCESS)) CYCLE READ_CORR_LOOP
          PCX=>EVAC_CORRS(N)
          !
          ID            = 'null'
@@ -3356,7 +3356,7 @@ CONTAINS
 
       ! Read the STRS line
       READ_STRS_LOOP: DO N = 1,N_STRS
-         IF (MYID /= MAX(0,EVAC_PROCESS)) CYCLE READ_STRS_LOOP
+         IF (MY_RANK /= MAX(0,EVAC_PROCESS)) CYCLE READ_STRS_LOOP
          STRP=>EVAC_STRS(N)
          !
          ID                          = 'null'
@@ -3594,7 +3594,7 @@ CONTAINS
       IMPLICIT NONE
       !
       ! Now exits, doors, corrs and strs are already read in
-      IF (N_NODES > 0 .AND. MYID==MAX(0,EVAC_PROCESS)) THEN
+      IF (N_NODES > 0 .AND. MY_RANK==MAX(0,EVAC_PROCESS)) THEN
          n_tmp = 0
          DO N = 1, NMESHES
             IF (EVACUATION_ONLY(N).AND.EVACUATION_SKIP(N)) THEN
@@ -3731,7 +3731,7 @@ CONTAINS
          READ(LU_INPUT,ENTR,END=28,IOSTAT=IOS)
          !
          ! Old input used QUANTITY, next lines are needed for that
-         IF (MYID==MAX(0,EVAC_PROCESS) .AND. QUANTITY /= 'null') WRITE (LU_ERR,'(A,A)') &
+         IF (MY_RANK==MAX(0,EVAC_PROCESS) .AND. QUANTITY /= 'null') WRITE (LU_ERR,'(A,A)') &
               ' WARNING: keyword QUANTITY is replaced by AVATAR_COLOR at ENTR line ',TRIM(ID)
          IF (QUANTITY == 'BLACK')   AVATAR_COLOR = 'BLACK'
          IF (QUANTITY == 'YELLOW')  AVATAR_COLOR = 'YELLOW'
@@ -3741,7 +3741,7 @@ CONTAINS
          IF (QUANTITY == 'MAGENTA') AVATAR_COLOR = 'MAGENTA'
          IF (QUANTITY == 'CYAN')    AVATAR_COLOR = 'CYAN'
          !
-         IF (MYID==MAX(0,EVAC_PROCESS)) THEN
+         IF (MY_RANK==MAX(0,EVAC_PROCESS)) THEN
             IF(TRIM(CROWBAR_INPUT_FILE)/='null' .AND. &
                  ((MAX_FLOW > TWO_EPSILON_EB) .OR. TRIM(MAX_HUMANS_RAMP)/='null')) THEN
                WRITE(MESSAGE,'(A,A,A)') 'ERROR: ENTR line ',TRIM(ID),&
@@ -3787,7 +3787,7 @@ CONTAINS
             END IF
          END IF
 
-         IF (MYID /= MAX(0,EVAC_PROCESS)) CYCLE READ_ENTR_LOOP
+         IF (MY_RANK /= MAX(0,EVAC_PROCESS)) CYCLE READ_ENTR_LOOP
 
          ! Restart is not working for evacuation part, but fire+evacuation calculation could
          ! be restarted to produce a good CHID_evac.fed file for later evacuation simulations.
@@ -3827,7 +3827,7 @@ CONTAINS
 
          IF (EVAC_MESH /= 'null') THEN
             MESH_ID = EVAC_MESH
-            IF (MYID==MAX(0,EVAC_PROCESS)) WRITE (LU_ERR,'(A,A)') &
+            IF (MY_RANK==MAX(0,EVAC_PROCESS)) WRITE (LU_ERR,'(A,A)') &
                  ' WARNING: keyword EVAC_MESH is replaced by MESH_ID at ENTR line ', TRIM(ID)
          END IF
 
@@ -4182,9 +4182,9 @@ CONTAINS
          READ(LU_INPUT,EVAC,END=25,IOSTAT=IOS)
          !
          ! Old input used QUANTITY, next lines are needed for that
-         IF (MYID==MAX(0,EVAC_PROCESS) .AND. QUANTITY /= 'null') WRITE (LU_ERR,'(A,A)') &
+         IF (MY_RANK==MAX(0,EVAC_PROCESS) .AND. QUANTITY /= 'null') WRITE (LU_ERR,'(A,A)') &
               ' WARNING: keyword QUANTITY is replaced by AVATAR_COLOR at EVAC line ',TRIM(ID)
-         IF (MYID==MAX(0,EVAC_PROCESS) .AND. TRIM(CROWBAR_INPUT_FILE)/='null' .AND. NUMBER_INITIAL_PERSONS < 1) THEN
+         IF (MY_RANK==MAX(0,EVAC_PROCESS) .AND. TRIM(CROWBAR_INPUT_FILE)/='null' .AND. NUMBER_INITIAL_PERSONS < 1) THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: EVAC line ',TRIM(ID),&
                  ' problem with CROWBAR_INPUT_FILE and NUMBER_INITIAL_PERSONS'
             CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
@@ -4241,7 +4241,7 @@ CONTAINS
             END IF
          END IF
 
-         IF (MYID /= MAX(0,EVAC_PROCESS)) CYCLE READ_EVAC_LOOP
+         IF (MY_RANK /= MAX(0,EVAC_PROCESS)) CYCLE READ_EVAC_LOOP
 
          HPT=>EVAC_EVACS(N)
 
@@ -4252,7 +4252,7 @@ CONTAINS
          IF (COLOR_METHOD == 0 .AND. NUMBER_INITIAL_PERSONS > 0) HPT%Avatar_Color_Index = i_avatar_color
          IF (EVAC_MESH /= 'null') THEN
             MESH_ID = EVAC_MESH
-            IF (MYID==MAX(0,EVAC_PROCESS)) WRITE (LU_ERR,'(A,A)') &
+            IF (MY_RANK==MAX(0,EVAC_PROCESS)) WRITE (LU_ERR,'(A,A)') &
                  ' WARNING: keyword EVAC_MESH is replaced by MESH_ID at EVAC line ', TRIM(ID)
          END IF
 
@@ -4507,7 +4507,7 @@ CONTAINS
       TYPE (EVAC_EDEV_TYPE), POINTER :: EDV=>NULL()
 
       READ_EDEV_LOOP: DO N = 1, N_EDEV
-         IF (MYID /= MAX(0,EVAC_PROCESS)) CYCLE READ_EDEV_LOOP
+         IF (MY_RANK /= MAX(0,EVAC_PROCESS)) CYCLE READ_EDEV_LOOP
          EDV => EVAC_EDEV(N)
          !
          ID            = 'null'
@@ -4608,7 +4608,7 @@ CONTAINS
       TYPE (EVAC_HOLE_TYPE),  POINTER :: EHX=>NULL()
 
       READ_EVHO_LOOP: DO N = 1, N_HOLES
-         IF (MYID /= MAX(0,EVAC_PROCESS)) CYCLE READ_EVHO_LOOP
+         IF (MY_RANK /= MAX(0,EVAC_PROCESS)) CYCLE READ_EVHO_LOOP
          EHX=>EVAC_HOLES(N)
          !
          ID            = 'null'
@@ -4637,7 +4637,7 @@ CONTAINS
          END DO
          IF (EVAC_MESH /= 'null') THEN
             MESH_ID = EVAC_MESH
-            IF (MYID==MAX(0,EVAC_PROCESS)) WRITE (LU_ERR,'(A,A)') &
+            IF (MY_RANK==MAX(0,EVAC_PROCESS)) WRITE (LU_ERR,'(A,A)') &
                  ' WARNING: keyword EVAC_MESH is replaced by MESH_ID at EVHO line ', TRIM(ID)
          END IF
 
@@ -4707,7 +4707,7 @@ CONTAINS
       LOGICAL L_TMP
 
       READ_EVSS_LOOP: DO N = 1, N_SSTANDS
-         IF (MYID /= MAX(0,EVAC_PROCESS)) CYCLE READ_EVSS_LOOP
+         IF (MY_RANK /= MAX(0,EVAC_PROCESS)) CYCLE READ_EVSS_LOOP
          ESS => EVAC_SSTANDS(N)
          !
          ID            = 'null'
@@ -4744,7 +4744,7 @@ CONTAINS
          END DO
          IF (EVAC_MESH /= 'null') THEN
             MESH_ID = EVAC_MESH
-            IF (MYID==MAX(0,EVAC_PROCESS)) WRITE (LU_ERR,'(A,A)') &
+            IF (MY_RANK==MAX(0,EVAC_PROCESS)) WRITE (LU_ERR,'(A,A)') &
                  ' WARNING: keyword EVAC_MESH is replaced by MESH_ID at EVSS line ', TRIM(ID)
          END IF
          !
@@ -5096,7 +5096,7 @@ CONTAINS
                END DO
             END IF
          END DO CheckDoorStrLoop
-         IF (MYID==MAX(0,EVAC_PROCESS) .AND. PDX%STR_INDX/=0 .AND. PDX%STR_SUB_INDX==0) THEN
+         IF (MY_RANK==MAX(0,EVAC_PROCESS) .AND. PDX%STR_INDX/=0 .AND. PDX%STR_SUB_INDX==0) THEN
             WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR: DOOR line ', TRIM(PDX%ID), ' is in stairs ', &
                  TRIM(EVAC_STRS(PDX%STR_INDX)%ID), ', no node found'
             CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
@@ -5914,7 +5914,7 @@ CONTAINS
     END DO
 
     ! Write STRS properties
-    IF (MYID==MAX(0,EVAC_PROCESS)) THEN
+    IF (MY_RANK==MAX(0,EVAC_PROCESS)) THEN
        DO N = 1, N_STRS
           WRITE (LU_EVACOUT,'(A,A)')      '  Stair ',TRIM(EVAC_STRS(N)%ID)
           WRITE (LU_EVACOUT,'(A,6F10.3)') '   Co-ordinates: ',EVAC_STRS(N)%XB(1:6)
@@ -5978,7 +5978,7 @@ CONTAINS
     IF (.NOT.(EVACUATION_ONLY(NM))) RETURN
     IF (EMESH_INDEX(NM)==0) RETURN
     ! Next means that only EVAC_PROCESS is doing something
-    IF (MYID /= PROCESS(NM)) RETURN
+    IF (MY_RANK /= PROCESS(NM)) RETURN
 
     TNOW = CURRENT_TIME()
     !

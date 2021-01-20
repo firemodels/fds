@@ -219,7 +219,7 @@ For regions of high turbulence intensity ($\mu_t \gg \mu$), RNG recovers the con
 \subsection{Wall-Adapting Local Eddy-viscosity (WALE) Model}
 \label{sec:wale}
 
-The Wall-Adapting Local Eddy-viscosity, or WALE, model of Nicoud and Ducros \cite{Nicoud:1999} was originally conceived as a method for properly scaling the eddy viscosity in the vicinity of a wall.  While the invariant used in the Smagorinsky model $|S|$ is $O(1)$ near a wall, the invariant designed for WALE correctly scales as $O(y^3)$, where $y$ is the distance from the wall.  Thus, the WALE model may be used as an alternative to Van Driest damping near the wall (see Sec.~\ref{sec:wall_damping}).  The dynamic turbulent viscosity is written as follows:
+The Wall-Adapting Local Eddy-viscosity, or WALE, model of Nicoud and Ducros \cite{Nicoud:1999} was originally conceived as a method for properly scaling the eddy viscosity in the vicinity of a wall.  While the invariant used in the Smagorinsky model $|S|$ is $O(1)$ near a wall, the invariant designed for WALE correctly scales as $O(y^3)$, where $y$ is the distance from the wall.  The WALE model is used for the eddy viscosity in the first off-wall grid cell.  The dynamic turbulent viscosity is written as follows:
 \begin{equation}
 \label{eq:wale}
 \mu_{\si{t}} = \rho (C_{\si{w}} \Delta)^2 \frac{(S^d_{ij} S^d_{ij})^{3/2}}{(S_{ij} S_{ij})^{5/2} + (S^d_{ij} S^d_{ij})^{5/4}}
@@ -616,7 +616,7 @@ where $s^+ = s/\delta_\nu$ is the roughness length in viscous units and $s$ is t
 \end{equation}
 where $\tilde{B}_{\rm max} = 9.5$.
 
-\subsection{Atmospheric Boundary Layers}
+\subsection{Atmospheric Boundary Layer Model (Experimental)}
 \label{sec:abl_wall_model}
 
 The formulation for the ABL wall model implemented in FDS follows \cite{Stoll:2008}.  The potential temperature is given by $$\theta=T \left( \frac{p_0}{p} \right)^{R/(W_{\rm air} \, c_p)}$$ where $p_0$ is typically 100~kPa and $R/(W_{\rm air} \, c_p) \approx 0.286$.  The heat flux at the wall is given by
@@ -654,10 +654,15 @@ Once $u_\tau$ has been determined from the model profile, the stress may be obta
 \end{equation}
 Generally, this requires an iterative procedure since $\tau_w$ is needed to define $\delta_\nu$ and hence $y^+$.  The strategy employed in FDS is to first compute $\tau_w$ as if the flow is locally laminar (DNS), and if the calculation is an LES the laminar value is used as an initial guess.  Testing has shown that three iterations is sufficient to converge the residual error in the profile model to 1\%.
 
+\subsection{Near-Wall Eddy Viscosity Model}
+\label{sec:wall_wale_model}
+
+The WALE model (see Sec.~\ref{sec:wale}) is used as the near-wall eddy viscosity model; that is, WALE is used to compute the eddy viscosity for any Cartesian cell adjacent to a solid boundary.  There are two reasons for this.  First, the test filtering operation needed for the subgrid kinetic energy in our implementation of Deardorff's model is not well defined near a wall.  Second, with the WALE model the eddy viscosity goes to zero at the correct rate, $\nu_t = O(y^3)$, without the need for an explicit damping function.
+
 \subsection{Wall Damping of the Turbulent Viscosity}
 \label{sec:wall_damping}
 
-The turbulent viscosity $\nu_{\rm t} = \mu_{\rm t}/\rho$ may be thought of as a ``mixing length'' squared divided by a time scale.  For example, in the Smagorinsky model the mixing length is $\ell_{\rm mix} = C_{\rm s} \,\Delta$ and the time scale is the inverse of the strain rate invariant $1/|S|$.  Thus, the turbulent kinematic viscosity has units of length$^2$/time.
+An alternative to the WALE model is to use Van Driest damping\footnote{Van Driest damping was the default wall model in FDS Version 6}. The turbulent viscosity $\nu_{\rm t} = \mu_{\rm t}/\rho$ may be thought of as a ``mixing length'' squared divided by a time scale.  For example, in the Smagorinsky model the mixing length is $\ell_{\rm mix} = C_{\rm s} \,\Delta$ and the time scale is the inverse of the strain rate invariant $1/|S|$.  Thus, the turbulent kinematic viscosity has units of length$^2$/time.
 
 To achieve the correct decay of the Reynolds stresses near a wall, Van Driest~\cite{Wilcox:1} proposed the following modification:
 \begin{equation}
@@ -669,11 +674,6 @@ where $A$ is a dimensionless empirical constant equal to 26.  The term in bracke
    \nu_{\rm t} = \ell_{\rm mix}^{\,2}\,|S|  \label{eqn_nearwall_viscosity}
 \end{equation}
 where the strain rate, $|S|$, is defined in Eq.~(\ref{constant_coef_LES}).
-
-\subsection{Alternate Near-Wall Eddy Viscosity Model}
-\label{sec:wall_wale_model}
-
-The WALE model (see Sec.~\ref{sec:wale}) is also available as a near-wall eddy viscosity model.  In fact, this is WALE's main purpose.  With the WALE model the eddy viscosity goes to zero at the correct rate, $\nu_t = O(y^3)$, without the need for an explicit damping function.
 
 \subsection{Open Boundaries (General, Wind)}
 \label{sec:opentang}
