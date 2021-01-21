@@ -255,9 +255,7 @@ LOGICAL :: PERIODIC_DOMAIN_X=.FALSE.                !< The domain is periodic \f
 LOGICAL :: PERIODIC_DOMAIN_Y=.FALSE.                !< The domain is periodic \f$ y \f$
 LOGICAL :: PERIODIC_DOMAIN_Z=.FALSE.                !< The domain is periodic \f$ z \f$
 LOGICAL :: TEST_NEW_OPEN=.FALSE.
-INTEGER :: CLIP_DT_RESTRICTIONS_MAX=5               !< Maximum number of DT restrictions before clipping is invoked
-
-INTEGER :: BNDF_TIME_INTEGRALS=0
+LOGICAL :: TEST_NEW_WAKE_REDUCTION=.FALSE.
 
 INTEGER, ALLOCATABLE, DIMENSION(:) :: CHANGE_TIME_STEP_INDEX      !< Flag to indicate if a mesh needs to change time step
 INTEGER, ALLOCATABLE, DIMENSION(:) :: SETUP_PRESSURE_ZONES_INDEX  !< Flag to indicate if a mesh needs to keep searching for ZONEs
@@ -493,15 +491,11 @@ INTEGER, ALLOCATABLE, DIMENSION(:,:) :: VELOCITY_ERROR_MAX_LOC,PRESSURE_ERROR_MA
 INTEGER :: PRESSURE_ITERATIONS=0,MAX_PRESSURE_ITERATIONS=10,TOTAL_PRESSURE_ITERATIONS=0
 CHARACTER(LABEL_LENGTH):: PRES_METHOD = 'FFT'
 
-!! Parameters for the Laplace solver (under construction)
-!
-!INTEGER, PARAMETER :: SCI_KM1=1,SCI_JM1=2,SCI_IM1=3,SCI_IJK=4,SCI_IP1=5,SCI_JP1=6,SCI_KP1=7 ! (S)parse (C)olumn (I)ndex
-!INTEGER, PARAMETER :: NDIAG=7
-
 ! Miscellaneous integer constants
 
 INTEGER :: ICYC,ICYC_RESTART=0,NFRAMES,PERIODIC_TEST=0,SIM_MODE=3,TURB_MODEL=0,FISHPAK_BC(3)=-1,&
-           STOP_AT_ITER=0,HT3D_TEST=0,WALL_INCREMENT=2,WALL_INCREMENT_HT3D=1,NEAR_WALL_TURB_MODEL=1
+           STOP_AT_ITER=0,HT3D_TEST=0,WALL_INCREMENT=2,WALL_INCREMENT_HT3D=1,NEAR_WALL_TURB_MODEL=1,&
+           CLIP_DT_RESTRICTIONS_MAX=5,BNDF_TIME_INTEGRALS=0
 
 ! Clocks for output file dumps
 

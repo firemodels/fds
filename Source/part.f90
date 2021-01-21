@@ -149,7 +149,7 @@ IF (N_LAGRANGIAN_CLASSES==0) RETURN ! Don't waste time if no particles
 TNOW=CURRENT_TIME()
 CALL POINT_TO_MESH(NM)
 
-! Insert particles at spray nozzles (INSERT_SPRAY_PARTICLES), VENT surfaces (INSERT_VENT_PARTICLES), specified 
+! Insert particles at spray nozzles (INSERT_SPRAY_PARTICLES), VENT surfaces (INSERT_VENT_PARTICLES), specified
 ! volumes (INSERT_VOLUMETRIC_PARTICLES), or HVAC ducts (INSERT_DUCT_PARTICLES). If the insertions are to be made according
 ! to a user-specified clock, allow the possibility via the OVERALL_INSERT_LOOP of inserting multiple sets of particles.
 
@@ -195,7 +195,7 @@ IF (PARTICLE_CFL) THEN
    ENDDO
 ENDIF
 
-! If any of the newly inserted particles finds itself in a neighboring mesh, set a flag to indicate that an MPI exchange must 
+! If any of the newly inserted particles finds itself in a neighboring mesh, set a flag to indicate that an MPI exchange must
 ! be done to transfer that particle to the MPI process that controls the neighboring mesh.
 
 EXCHANGE_INSERTED_PARTICLES = .FALSE.
@@ -424,7 +424,7 @@ SPRINKLER_INSERT_LOOP: DO KS=1,N_DEVC
             LP%Y = DV%Y
          ENDIF
 
-         ! If the particle position is outside the current mesh, exit the loop and the particle will be sent to another mesh 
+         ! If the particle position is outside the current mesh, exit the loop and the particle will be sent to another mesh
          ! or eliminated by the call to REMOVE_PARTICLES at the end of the subroutine.
 
          IF (LP%X<=XS .OR. LP%X>=XF .OR. LP%Y<=YS .OR. LP%Y>=YF .OR. LP%Z<=ZS .OR. LP%Z>=ZF) THEN
@@ -1375,15 +1375,15 @@ REAL(EB), INTENT(IN) :: T,DT
 INTEGER, INTENT(IN) :: NM
 REAL     :: RN
 REAL(EB) :: XI,YJ,ZK,R_D,R_D_0,X_OLD,Y_OLD,Z_OLD,X_TRY,Y_TRY,Z_TRY,THETA,THETA_RN,STEP_FRACTION(-3:3),DT_CFL,DT_P,&
-            STEP_FRACTION_PREVIOUS,DELTA,PVEC_L
+            STEP_FRACTION_PREVIOUS,DELTA,PVEC_L,AREA_VOLUME_RATIO,A_DRAG
 LOGICAL :: HIT_SOLID,CC_IBM_GASPHASE,EXTRACT_PARTICLE
 INTEGER :: IP,IC_NEW,IIG_OLD,JJG_OLD,KKG_OLD,IIG_TRY,JJG_TRY,KKG_TRY,IW,IC_OLD,IOR_HIT,&
-           N_ITER,ITER,I_COORD,IC_TRY,IOR_ORIGINAL
+           N_ITER,ITER,I_COORD,IC_TRY,IOR_ORIGINAL,IID,JJD,KKD
 TYPE (LAGRANGIAN_PARTICLE_TYPE), POINTER :: LP=>NULL()
 TYPE (LAGRANGIAN_PARTICLE_CLASS_TYPE), POINTER :: LPC=>NULL()
 TYPE (SURFACE_TYPE), POINTER :: SF
 TYPE(ONE_D_M_AND_E_XFER_TYPE), POINTER :: ONE_D
-REAL(EB), POINTER, DIMENSION(:,:,:) :: NDPC=>NULL()
+REAL(EB), POINTER, DIMENSION(:,:,:) :: NDPC=>NULL(),KAPPA_E=>NULL()
 REAL(EB), PARAMETER :: ONTHHALF=0.5_EB**ONTH, B_1=1.7321_EB
 LOGICAL :: TEST_POS, BOUNCE_CF, IN_CFACE, SLIDE_CF
 INTEGER :: DIND, MADD(3,3)
@@ -1401,6 +1401,45 @@ DO IP=1,NLP
    CALL GET_IJK(LP%X,LP%Y,LP%Z,NM,XI,YJ,ZK,LP%ONE_D%IIG,LP%ONE_D%JJG,LP%ONE_D%KKG)
    NDPC(LP%ONE_D%IIG,LP%ONE_D%JJG,LP%ONE_D%KKG) = NDPC(LP%ONE_D%IIG,LP%ONE_D%JJG,LP%ONE_D%KKG) + LP%PWT
 ENDDO
+
+NEW_WAKE_REDUCTION_IF: IF (TEST_NEW_WAKE_REDUCTION) THEN
+   KAPPA_E=>WORK2
+   KAPPA_E=0._EB
+   DO IP=1,NLP
+      LP  => LAGRANGIAN_PARTICLE(IP)
+      LPC => LAGRANGIAN_PARTICLE_CLASS(LP%CLASS_INDEX)
+
+      ! Determine particle area (redundant, see below, need to reorganize R_D and A_DRAG)
+
+      IF (LPC%LIQUID_DROPLET) THEN
+         R_D = LP%ONE_D%X(1)
+      ELSEIF (LPC%SOLID_PARTICLE) THEN
+         R_D = SUM(LP%ONE_D%LAYER_THICKNESS(1:SF%N_LAYERS))
+      ELSEIF (LPC%MASSLESS_TRACER .OR. LPC%MASSLESS_TARGET) THEN
+         R_D = 0._EB
+      ENDIF
+
+      IF (LPC%LIQUID_DROPLET) THEN
+         A_DRAG = PI*R_D**2
+      ELSE
+         SELECT CASE(SF%GEOMETRY)
+            CASE(SURF_CARTESIAN)
+               A_DRAG = 2._EB*SF%LENGTH*SF%WIDTH*LPC%SHAPE_FACTOR
+            CASE(SURF_CYLINDRICAL)
+               A_DRAG = 2._EB*PI*R_D*SF%LENGTH*LPC%SHAPE_FACTOR
+            CASE(SURF_SPHERICAL)
+               A_DRAG = 4._EB*PI*R_D**2*LPC%SHAPE_FACTOR
+         END SELECT
+      ENDIF
+
+      IID = LP%ONE_D%IIG
+      JJD = LP%ONE_D%JJG
+      KKD = LP%ONE_D%KKG
+
+      AREA_VOLUME_RATIO = 0.25_EB*LP%PWT*A_DRAG*RDX(IID)*RRN(IID)*RDY(JJD)*RDZ(KKD)
+      KAPPA_E(IID,JJD,KKD) = KAPPA_E(IID,JJD,KKD) + AREA_VOLUME_RATIO
+   ENDDO
+ENDIF NEW_WAKE_REDUCTION_IF
 
 ! Zero out max particle velocity if CFL number is to be bound by particle speed.
 
@@ -2055,9 +2094,13 @@ DRAG_LAW_SELECT: SELECT CASE (LPC%DRAG_LAW)
          ! Drag reduction model for liquid droplets
 
          WAKE_VEL=1.0_EB
-         IF (LPC%LIQUID_DROPLET) THEN
+         IF (.NOT.TEST_NEW_WAKE_REDUCTION .AND. LPC%LIQUID_DROPLET) THEN
             DROP_VOL_FRAC = MIN(1._EB,AVG_DROP_DEN(IIG_OLD,JJG_OLD,KKG_OLD,LPC%ARRAY_INDEX)/LPC%DENSITY)
             IF (DROP_VOL_FRAC > LPC%DENSE_VOLUME_FRACTION) CALL WAKE_REDUCTION(DROP_VOL_FRAC,LP%RE,C_DRAG,WAKE_VEL)
+         ENDIF
+
+         IF (TEST_NEW_WAKE_REDUCTION) THEN
+            C_DRAG = C_DRAG * KAPPA_E(IIG_OLD,JJG_OLD,KKG_OLD)
          ENDIF
 
          ! Secondary break-up model
