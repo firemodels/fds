@@ -232,7 +232,7 @@ END TYPE ONE_D_M_AND_E_XFER_TYPE
 
 ! Note: If you change the number of scalar variables in LAGRANGIAN_PARTICLE_TYPE, adjust the numbers below
 
-INTEGER, PARAMETER :: N_PARTICLE_SCALAR_REALS=18,N_PARTICLE_SCALAR_INTEGERS=10,N_PARTICLE_SCALAR_LOGICALS=4
+INTEGER, PARAMETER :: N_PARTICLE_SCALAR_REALS=19,N_PARTICLE_SCALAR_INTEGERS=10,N_PARTICLE_SCALAR_LOGICALS=4
 
 !> \brief Variables assoicated with a single Lagrangian particle
 
@@ -263,6 +263,7 @@ TYPE LAGRANGIAN_PARTICLE_TYPE
    REAL(EB), POINTER :: DZ                  !< Length scale used in POROUS_DRAG calculation (m)
    REAL(EB), POINTER :: M_DOT               !< Particle mass evaporation rate (kg/s)
    REAL(EB), POINTER :: HTC_LIMIT           !< Limiter for the heat transfer coefficient (W/m2/K)
+   REAL(EB), POINTER :: C_DRAG              !< Drag coefficient
 
    INTEGER, POINTER :: TAG                  !< Unique integer identifier for the particle
    INTEGER, POINTER :: ARRAY_INDEX          !< Index in the array of evaporating particles
