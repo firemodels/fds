@@ -1770,7 +1770,6 @@ ENDDO
 END SUBROUTINE GET_WALL_NODE_COORDINATES
 
 
-
 !> \brief Determine the internal coordinates of the 1-D grid inside a solid.
 !> \param N_CELLS Number of cells in the entire 1-D array
 !> \param N_LAYERS Number of layers
@@ -3373,21 +3372,25 @@ ENDIF
 END SUBROUTINE GET_ENTHALPY
 
 
-REAL(EB) FUNCTION DRAG(RE,DRAG_LAW)
+REAL(EB) FUNCTION DRAG(RE,DRAG_LAW,KN)
 
 ! drag coefficient
 
+USE SOOT_ROUTINES, ONLY: CUNNINGHAM
 INTEGER, INTENT(IN) :: DRAG_LAW
 REAL(EB), INTENT(IN) :: RE
+REAL(EB), OPTIONAL, INTENT(IN) :: KN
 
 SELECT CASE(DRAG_LAW)
 
    ! see J.P. Holman 7th Ed. Fig. 6-10
    CASE(SPHERE_DRAG)
-      IF (RE<=TWO_EPSILON_EB) THEN
-         DRAG = 100._EB
-      ELSEIF (RE<=1._EB) THEN
-         DRAG = 24._EB/RE
+      IF (RE<1._EB) THEN
+         IF (PRESENT(KN)) THEN
+            DRAG = 24._EB/RE/CUNNINGHAM(KN)
+         ELSE
+            DRAG = MIN(240000._EB,24._EB/RE)
+         ENDIF
       ELSEIF (RE<1000._EB) THEN
          !!DRAG = 24._EB*(1._EB+0.15_EB*RE**0.687_EB)/RE ! see Crowe, Sommerfeld, Tsuji, 1998, Eq. (4.51)
          DRAG = 24._EB*(0.85_EB+0.15_EB*RE**0.687_EB)/RE ! matches Stokes drag at RE=1 (RJM)
