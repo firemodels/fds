@@ -9026,6 +9026,7 @@ records the integrated mass flux of {\em all} particles passing through the give
 \subsection{Coloring Particles and Droplets in Smokeview}
 
 The parameter {\ct QUANTITIES} on the {\ct PART} line is an array of character strings indicating which scalar quantities should be used to color particles and droplets in Smokeview. The choices are \\
+\\
 {\ct 'PARTICLE AGE'} (s) \\
 {\ct 'PARTICLE DIAMETER'} ($\mu$m) \\
 {\ct 'PARTICLE TEMPERATURE'} ($^\circ$C) \\
@@ -9035,6 +9036,10 @@ The parameter {\ct QUANTITIES} on the {\ct PART} line is an array of character s
 {\ct 'PARTICLE WEIGHTING FACTOR'} \\
 {\ct 'PARTICLE U'}, {\ct 'PARTICLE V'}, {\ct 'PARTICLE W'} (m/s) \\
 {\ct 'PARTICLE X'}, {\ct 'PARTICLE Y'}, {\ct 'PARTICLE Z'} (m) \\
+{\ct 'PARTICLE ACCEL X'}, {\ct 'PARTICLE ACCEL Y'}, {\ct 'PARTICLE ACCEL Z'} (m/s$^2$) \\
+{\ct 'PARTICLE DRAG FORCE X'}, {\ct 'PARTICLE DRAG FORCE Y'}, {\ct 'PARTICLE DRAG FORCE Z'} (N) \\
+{\ct 'PARTICLE DRAG COEFFICIENT'} \\
+\\
 By default, if no {\ct QUANTITIES} are specified and none are selected in Smokeview, then Smokeview will display particles with a single color. To select this color specify either {\ct RGB} or {\ct COLOR}. By default, water droplets are colored blue. All others are colored black.
 
 The {\ct PARTICLE WEIGHTING FACTOR} describes how many actual particles each of the computational particles represent.
