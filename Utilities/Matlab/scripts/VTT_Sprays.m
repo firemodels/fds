@@ -146,7 +146,7 @@ set(gcf, 'Position', [0 0 Paper_Width Paper_Height]);
 git_file = [outdir, 'LN02_4_git.txt'];
 addverstr(gca,git_file,'linear')
 
-display('Printing plot LN02_diam_40.pdf...')
+display('Printing plot LN02_flux_40.pdf...')
 print(gcf, '-dpdf', '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/VTT_Sprays/LN02_flux_40');
 
 
@@ -240,7 +240,7 @@ set(gcf, 'Position', [0 0 Paper_Width Paper_Height]);
 git_file = [outdir, 'LN02_4_git.txt'];
 addverstr(gca,git_file,'linear')
 
-display('Printing plot LN02_diam_62.pdf...')
+display('Printing plot LN02_flux_62.pdf...')
 print(gcf, '-dpdf', '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/VTT_Sprays/LN02_flux_62');
 
 
