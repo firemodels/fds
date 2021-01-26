@@ -65,9 +65,6 @@ $QFDS -d Complex_Geometry sphere_leak.fds
 $QFDS -d Complex_Geometry saad_CC_explicit_512_cfl_p25.fds
 $QFDS -d Complex_Geometry saad_CC_explicit_512_cfl_p125.fds
 $QFDS -d Complex_Geometry saad_CC_explicit_512_cfl_p0625.fds
-$QFDS -d Complex_Geometry saad_CC_implicit_512_cfl_p25.fds
-$QFDS -d Complex_Geometry saad_CC_implicit_512_cfl_p125.fds
-$QFDS -d Complex_Geometry saad_CC_implicit_512_cfl_p0625.fds
 $QFDS -d Complex_Geometry shunn3_32_cc_exp_cen.fds
 $QFDS -d Complex_Geometry shunn3_64_cc_exp_cen.fds
 $QFDS -d Complex_Geometry shunn3_128_cc_exp_cen.fds
@@ -78,16 +75,6 @@ $QFDS -d Complex_Geometry shunn3_64_cc_exp_gdv.fds
 $QFDS -d Complex_Geometry shunn3_128_cc_exp_gdv.fds
 $QFDS -d Complex_Geometry shunn3_256_cc_exp_gdv.fds
 $QFDS -d Complex_Geometry shunn3_384_cc_exp_gdv.fds
-$QFDS -d Complex_Geometry shunn3_32_cc_imp_cen.fds
-$QFDS -d Complex_Geometry shunn3_64_cc_imp_cen.fds
-$QFDS -d Complex_Geometry shunn3_128_cc_imp_cen.fds
-$QFDS -d Complex_Geometry shunn3_256_cc_imp_cen.fds
-$QFDS -d Complex_Geometry shunn3_384_cc_imp_cen.fds
-$QFDS -d Complex_Geometry shunn3_32_cc_imp_gdv.fds
-$QFDS -d Complex_Geometry shunn3_64_cc_imp_gdv.fds
-$QFDS -d Complex_Geometry shunn3_128_cc_imp_gdv.fds
-$QFDS -d Complex_Geometry shunn3_256_cc_imp_gdv.fds
-$QFDS -d Complex_Geometry shunn3_384_cc_imp_gdv.fds
 
 $QFDS -d Complex_Geometry geom_poiseuille_N10a_theta0.fds
 $QFDS -d Complex_Geometry geom_poiseuille_N20a_theta0.fds
