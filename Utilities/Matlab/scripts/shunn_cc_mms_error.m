@@ -63,9 +63,9 @@ dx = L./nx;
 datadir = '../../Verification/Complex_Geometry/';
 
 file_s=1;
-file_f=4;
+file_f=2;
 
-file_str = ['exp_cen';'exp_gdv';'imp_cen';'imp_gdv'];
+file_str = ['exp_cen';'exp_gdv'];
 
 skip_case = 0;
 for ifile=file_s:file_f
@@ -166,7 +166,7 @@ for ifile=file_s:file_f
     hh(4)=loglog(dx,e_H,'k+-');
     hh(5)=loglog(dx,dx,'k--');
     hh(6)=loglog(dx,dx.^2,'k-');
-    if (ifile==1 | ifile==3)
+    if (ifile==1)
        axis([10^-3 10^-1 10^-6 10^-1])
     else
        axis([10^-3 10^-1 10^-6 10^0])
@@ -199,7 +199,7 @@ for ifile=file_s:file_f
            'shunn_cc_' file_str(ifile,:) '_mms_convergence'];
     print(gcf,'-dpdf',strng)
     
-    if (ifile==1 | ifile==3) % Central flux limiter cases:
+    if (ifile==1) % Central flux limiter cases:
         % check errors
         if e_r(end) > 2e-4
             display(['Matlab Warning: Density in shunn3 '    ...
