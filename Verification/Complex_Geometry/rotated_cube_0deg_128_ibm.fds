@@ -1,7 +1,7 @@
-&HEAD CHID='rotated_cube_0deg_256_exp', TITLE='Complex Geometry: Accuracy test, flow around rotated cube, 0 degree rotation.' /
+&HEAD CHID='rotated_cube_0deg_128_ibm', TITLE='Complex Geometry: Accuracy test, flow around rotated cube, 0 degree rotation.' /
 
 # Mesh:
-&MESH IJK=256,1,256, XB=0.0,6.283185307179586,-1.0,1.0,0.0,6.283185307179586 /
+&MESH IJK=128,1,128, XB=0.0,6.283185307179586,-1.0,1.0,0.0,6.283185307179586 /
 
 # Simulation Paremeters:
 &TIME T_END=1. /

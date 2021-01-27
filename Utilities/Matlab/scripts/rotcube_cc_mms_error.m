@@ -41,7 +41,7 @@ ifile_s=1;
 ifile_f=3;
 ifile_ang = [0; atan(1./2.); atan(1.)];
 ifile_str = {'0deg_';'27deg_';'45deg_'};
-jfile_str = {'exp';'imp';'obs'};
+jfile_str = {'ibm';'stm';'obs'};
 
 skip_case = 0;
 nfile     = 0;
@@ -59,7 +59,7 @@ for ifile=ifile_s:ifile_f
                             ['rotated_cube_' ifile_str{ifile} '128_' jfile_str{jfile} '_mms.csv'], ...
                             ['rotated_cube_' ifile_str{ifile} '256_' jfile_str{jfile} '_mms.csv'], ...};
                             ['rotated_cube_' ifile_str{ifile} '384_' jfile_str{jfile} '_mms.csv']};
-       file(nfile).nameout = ['rotated_cube_' ifile_str{ifile} jfile_str{jfile} '_mms_connvergence'];
+       file(nfile).nameout = ['rotated_cube_' ifile_str{ifile} jfile_str{jfile} '_mms_convergence'];
        file(nfile).rotang=ifile_ang(ifile);
        for n=1:length(file(nfile).name)
            if ~exist([datadir,file(nfile).name{n}])
@@ -292,7 +292,7 @@ for ifile=1:nfile
         'Fontname',Font_Name)
     
     % add Git version if file is available
-    Git_Filename = [datadir,'rotated_cube_45deg_256_exp_git.txt'];
+    Git_Filename = [datadir,'rotated_cube_45deg_256_ibm_git.txt'];
     addverstr(gca,Git_Filename,'loglog')
     
     % print to pdf
@@ -312,7 +312,7 @@ for ifile=1:nfile
         if file(ifile).e_z_2(end) > 2e-6
             display(['Matlab Warning: Neumann BC Species in rotated_cube OBST ' ...
             file(ifile).name{end} ' is out of tolerance. e_z = ',      ...
-            file(ifile).e_z_2(end)])
+            num2str(file(ifile).e_z_2(end))])
         end
         if file(ifile).e_u_2(end) > 2e-5
             display(['Matlab Warning: Velocity in rotated_cube OBST '             ...
@@ -327,34 +327,34 @@ for ifile=1:nfile
     elseif(ifile==4)
         % check errors
         if file(ifile).e_z_2(end) > 6e-5
-            display(['Matlab Warning: Neumann BC Species in rotated_cube 27deg exp ' ...
+            display(['Matlab Warning: Neumann BC Species in rotated_cube 27deg ibm ' ...
             file(ifile).name{end} ' is out of tolerance. e_z = ',      ...
-            file(ifile).e_z_2(end)])
+            num2str(file(ifile).e_z_2(end))])
         end
         if file(ifile).e_u_2(end) > 1.5e-4
-            display(['Matlab Warning: Velocity in rotated_cube 27deg exp '             ...
+            display(['Matlab Warning: Velocity in rotated_cube 27deg ibm '             ...
                      file(ifile).name{end} ' is out of tolerance. e_u = ', ...
                      num2str(file(ifile).e_u_2(end))])
         end
         if file(ifile).e_H_2(end) > 2.5e-3
-            display(['Matlab Warning: Pressure in rotated_cube 27deg exp '             ...
+            display(['Matlab Warning: Pressure in rotated_cube 27deg ibm '             ...
                      file(ifile).name{end} ' is out of tolerance. e_H = ', ...
                      num2str(file(ifile).e_H_2(end))])
         end
     elseif(ifile==5)
         % check errors
-        if file(ifile).e_z_2(end) > 2e-5
-            display(['Matlab Warning: Neumann BC Species in rotated_cube 27deg imp ' ...
+        if file(ifile).e_z_2(end) > 6e-5
+            display(['Matlab Warning: Neumann BC Species in rotated_cube 27deg stm ' ...
             file(ifile).name{end} ' is out of tolerance. e_z = ',      ...
-            file(ifile).e_z_2(end)])
+            num2str(file(ifile).e_z_2(end))])
         end
-        if file(ifile).e_u_2(end) > 1.5e-4
-            display(['Matlab Warning: Velocity in rotated_cube 27deg imp '             ...
+        if file(ifile).e_u_2(end) > 4.e-4
+            display(['Matlab Warning: Velocity in rotated_cube 27deg stm '             ...
                      file(ifile).name{end} ' is out of tolerance. e_u = ', ...
                      num2str(file(ifile).e_u_2(end))])
         end
         if file(ifile).e_H_2(end) > 2.5e-3
-            display(['Matlab Warning: Pressure in rotated_cube 27deg imp '             ...
+            display(['Matlab Warning: Pressure in rotated_cube 27deg stm '             ...
                      file(ifile).name{end} ' is out of tolerance. e_H = ', ...
                      num2str(file(ifile).e_H_2(end))])
         end        

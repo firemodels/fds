@@ -1,11 +1,11 @@
-&HEAD CHID='rotated_cube_0deg_256_imp', TITLE='Complex Geometry: Accuracy test, flow around rotated cube, 0 degree rotation.' /
+&HEAD CHID='rotated_cube_0deg_256_ibm', TITLE='Complex Geometry: Accuracy test, flow around rotated cube, 0 degree rotation.' /
 
 # Mesh:
 &MESH IJK=256,1,256, XB=0.0,6.283185307179586,-1.0,1.0,0.0,6.283185307179586 /
 
 # Simulation Paremeters:
 &TIME T_END=1. /
-&MISC SIMULATION_MODE='DNS', NOISE=.FALSE., STRATIFICATION=.FALSE.,  CFL_MAX=0.1, PERIODIC_TEST=21, DO_IMPLICIT_CCREGION=.TRUE. /
+&MISC SIMULATION_MODE='DNS', NOISE=.FALSE., STRATIFICATION=.FALSE.,  CFL_MAX=0.1, PERIODIC_TEST=21, DO_IMPLICIT_CCREGION=.FALSE. /
 &RADI RADIATION=.FALSE. /
 &PRES SOLVER='UGLMAT'  /
 &DUMP MMS_TIMER=0.95 /
