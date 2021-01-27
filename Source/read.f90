@@ -2138,44 +2138,6 @@ ENDDO MISC_LOOP
 
 IF (RETURN_BEFORE_SIM_MODE) RETURN
 
-! Choose evacuation calculation mode
-!
-! 1) EVACUATION_INITIALIZATION=T => only evac meshes read in, write chid_evac.xyz file
-!
-! 2) EVACUATION_INITIALIZATION=F,EVACUATION_WRITE_FED=T => just fire meshes, write fed file
-! 2b) If no chid_evac.xyz file not found => stop (no accidental long runs)
-!
-! 3) EVACUATION_INITIALIZATION=F, EVACUATION_MC_MODE=T => read (eff) and FED files, just evacuation meshes are used.
-! 3b) If no chid_evac.eff found => stop
-! 3c) If EVACUATION_DRILL=F and no chid_evac.fed found => stop
-
-IF (EVACUATION_INITIALIZATION) THEN ! No fire meshes, do not use FED, write FEDxyz file 
-   ! Calculates an evacuation drill and makes chid_evac.eff and chid_evac.xyz files
-   NO_EVACUATION        = .FALSE. ! If no evac meshes in the input file, no mesh is found and program stops
-   EVACUATION_WRITE_FED = .FALSE.
-   EVACUATION_MC_MODE   = .FALSE.
-   EVACUATION_DRILL     = .TRUE. 
-ENDIF
-
-IF (NO_EVACUATION) THEN ! Do an ordinary fire calculation
-   EVACUATION_DRILL     = .FALSE. 
-   EVACUATION_MC_MODE   = .FALSE.
-   EVACUATION_WRITE_FED = .FALSE.
-ENDIF
-   
-IF (EVACUATION_WRITE_FED) THEN ! No evacuation meshes, read FEDxyz file and write FED file
-   NO_EVACUATION        = .TRUE.  ! no evacuation meshes in a fire calculation
-   EVACUATION_DRILL     = .FALSE. 
-   EVACUATION_MC_MODE   = .FALSE.
-ENDIF
-
-IF (.NOT.EVACUATION_WRITE_FED .AND. .NOT.EVACUATION_INITIALIZATION .AND. .NOT.NO_EVACUATION) THEN
-   ! Read eff and fed files from the disk, if evacuation meshes in the input file
-   ! Do an ordinary fire calculation, if no evacuation meshes in the input file
-   NO_EVACUATION        = .FALSE. ! If no evac meshes in the input file => normal fire calculation
-   EVACUATION_MC_MODE   = .TRUE.  ! If no evac meshes in the input file => this is not used at all
-ENDIF
-
 ! Choose simulation mode
 
 IF (DNS .OR. SIMULATION_MODE=='DNS') THEN
@@ -2221,6 +2183,44 @@ REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
 CALL CHECKREAD('MISC',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
 IF (IOS==0) READ(LU_INPUT,MISC)
 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
+
+! Choose evacuation calculation mode
+!
+! 1) EVACUATION_INITIALIZATION=T => only evac meshes read in, write chid_evac.xyz file
+!
+! 2) EVACUATION_INITIALIZATION=F,EVACUATION_WRITE_FED=T => just fire meshes, write fed file
+! 2b) If no chid_evac.xyz file not found => stop (no accidental long runs)
+!
+! 3) EVACUATION_INITIALIZATION=F, EVACUATION_MC_MODE=T => read (eff) and FED files, just evacuation meshes are used.
+! 3b) If no chid_evac.eff found => stop
+! 3c) If EVACUATION_DRILL=F and no chid_evac.fed found => stop
+
+IF (EVACUATION_INITIALIZATION) THEN ! No fire meshes, do not use FED, write FEDxyz file 
+   ! Calculates an evacuation drill and makes chid_evac.eff and chid_evac.xyz files
+   NO_EVACUATION        = .FALSE. ! If no evac meshes in the input file, no mesh is found and program stops
+   EVACUATION_WRITE_FED = .FALSE.
+   EVACUATION_MC_MODE   = .FALSE.
+   EVACUATION_DRILL     = .TRUE. 
+ENDIF
+
+IF (NO_EVACUATION) THEN ! Do an ordinary fire calculation
+   EVACUATION_DRILL     = .FALSE. 
+   EVACUATION_MC_MODE   = .FALSE.
+   EVACUATION_WRITE_FED = .FALSE.
+ENDIF
+   
+IF (EVACUATION_WRITE_FED) THEN ! No evacuation meshes, read FEDxyz file and write FED file
+   NO_EVACUATION        = .TRUE.  ! no evacuation meshes in a fire calculation
+   EVACUATION_DRILL     = .FALSE. 
+   EVACUATION_MC_MODE   = .FALSE.
+ENDIF
+
+IF (.NOT.EVACUATION_WRITE_FED .AND. .NOT.EVACUATION_INITIALIZATION .AND. .NOT.NO_EVACUATION) THEN
+   ! Read eff and fed files from the disk, if evacuation meshes in the input file
+   ! Do an ordinary fire calculation, if no evacuation meshes in the input file
+   NO_EVACUATION        = .FALSE. ! If no evac meshes in the input file => normal fire calculation
+   EVACUATION_MC_MODE   = .TRUE.  ! If no evac meshes in the input file => this is not used at all
+ENDIF
 
 ! Temperature conversions
 
