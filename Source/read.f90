@@ -2042,7 +2042,7 @@ NAMELIST /MISC/ AEROSOL_AL2O3,AEROSOL_SCRUBBING,AGGLOMERATION,ALIGNMENT_TOLERANC
                 CFL_MAX,CFL_MIN,CFL_VELOCITY_NORM,CHECK_HT,CHECK_MASS_CONSERVE,CHECK_VN, &
                 CNF_CUTOFF,COMPUTE_CUTCELLS_ONLY,CONSTANT_SPECIFIC_HEAT_RATIO,&
                 C_SMAGORINSKY,C_VREMAN,&
-                C_WALE,DO_IMPLICIT_CCREGION,DEPOSITION,ENTHALPY_TRANSPORT,&
+                C_WALE,DEPOSITION,ENTHALPY_TRANSPORT,&
                 EVACUATION_DRILL,EVACUATION_MC_MODE,EVAC_PRESSURE_ITERATIONS,EVAC_SURF_DEFAULT,EVAC_TIME_ITERATIONS,&
                 EVACUATION_WRITE_FED,EVACUATION_INITIALIZATION, &
                 EVAP_MODEL,&
@@ -2194,23 +2194,23 @@ REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
 ! 3b) If no chid_evac.eff found => stop
 ! 3c) If EVACUATION_DRILL=F and no chid_evac.fed found => stop
 
-IF (EVACUATION_INITIALIZATION) THEN ! No fire meshes, do not use FED, write FEDxyz file 
+IF (EVACUATION_INITIALIZATION) THEN ! No fire meshes, do not use FED, write FEDxyz file
    ! Calculates an evacuation drill and makes chid_evac.eff and chid_evac.xyz files
    NO_EVACUATION        = .FALSE. ! If no evac meshes in the input file, no mesh is found and program stops
    EVACUATION_WRITE_FED = .FALSE.
    EVACUATION_MC_MODE   = .FALSE.
-   EVACUATION_DRILL     = .TRUE. 
+   EVACUATION_DRILL     = .TRUE.
 ENDIF
 
 IF (NO_EVACUATION) THEN ! Do an ordinary fire calculation
-   EVACUATION_DRILL     = .FALSE. 
+   EVACUATION_DRILL     = .FALSE.
    EVACUATION_MC_MODE   = .FALSE.
    EVACUATION_WRITE_FED = .FALSE.
 ENDIF
-   
+
 IF (EVACUATION_WRITE_FED) THEN ! No evacuation meshes, read FEDxyz file and write FED file
    NO_EVACUATION        = .TRUE.  ! no evacuation meshes in a fire calculation
-   EVACUATION_DRILL     = .FALSE. 
+   EVACUATION_DRILL     = .FALSE.
    EVACUATION_MC_MODE   = .FALSE.
 ENDIF
 
