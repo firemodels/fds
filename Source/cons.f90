@@ -651,7 +651,6 @@ LOGICAL :: CC_ZEROIBM_VELO=.FALSE.
 LOGICAL :: CC_SLIPIBM_VELO=.FALSE.
 LOGICAL :: CC_STRESS_METHOD=.FALSE.
 LOGICAL :: CC_ONLY_IBEDGES_FLAG=.TRUE.
-LOGICAL :: CC_FORCE_PRESSIT=.TRUE.
 
 ! Threshold factor for volume of cut-cells respect to volume of Cartesian cells:
 ! Currently used in the thermo div definition of cut-cells.
