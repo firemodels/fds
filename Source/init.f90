@@ -984,13 +984,15 @@ IF (SOLID_HT3D) THEN
       OB=>M%OBSTRUCTION(N)
       IF (OB%MATL_SURF_INDEX<=0) CYCLE OBST_LOOP_4
       SF=>SURFACE(OB%MATL_SURF_INDEX)
-      DO K=OB%K1+1,OB%K2
-         DO J=OB%J1+1,OB%J2
-            DO I=OB%I1+1,OB%I2
-               M%TMP(I,J,K) = SF%TMP_INNER(1)
+      TMP_INNER_IF: IF (SF%TMP_INNER_HT3D>0._EB) THEN
+         DO K=OB%K1+1,OB%K2
+            DO J=OB%J1+1,OB%J2
+               DO I=OB%I1+1,OB%I2
+                  M%TMP(I,J,K) = SF%TMP_INNER_HT3D
+               ENDDO
             ENDDO
          ENDDO
-      ENDDO
+      ENDIF TMP_INNER_IF
    ENDDO OBST_LOOP_4
 ENDIF
 
