@@ -7782,6 +7782,8 @@ READ_SURF_LOOP: DO N=0,N_SURF
       IF (TMP_INNER(NN)>= -TMPM) TMPMIN = MIN(TMPMIN,TMP_INNER(NN)+TMPM)
    ENDDO
 
+   IF (SF%HT3D) SF%TMP_INNER_HT3D = TMP_INNER(1) + TMPM
+
    ! Store the names and indices of all materials associated with the surface
 
    NNN = 0
