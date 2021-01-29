@@ -7,6 +7,8 @@
 
 &TIME T_END=720. /    
 
+&CLIP MINIMUM_DENSITY=0.05 /  Account for high temps due to charring
+
 &DUMP DT_DEVC=5, DT_HRR=5 /
 
 &REAC FUEL='CELLULOSE',
