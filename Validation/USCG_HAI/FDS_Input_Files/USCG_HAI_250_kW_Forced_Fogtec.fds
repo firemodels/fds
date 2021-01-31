@@ -50,7 +50,7 @@
 
 TC Trees
 
-&PROP ID='Sheathed Type K', BEAD_DIAMETER=0.0032 /
+&PROP ID='Sheathed Type K', DIAMETER=0.0032 /
 
 &DEVC XYZ=1.00,2.50,0.50, QUANTITY='THERMOCOUPLE', PROP_ID='Sheathed Type K', ID='TC 1-1' /
 &DEVC XYZ=1.00,2.50,1.00, QUANTITY='THERMOCOUPLE', PROP_ID='Sheathed Type K', ID='TC 1-2' /

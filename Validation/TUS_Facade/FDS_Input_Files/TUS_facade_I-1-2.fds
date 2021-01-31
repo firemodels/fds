@@ -199,11 +199,11 @@ HOLE	XB = 2.2,2.8, 3.9,4.2, 0.4,0.9	/
 
 &PROP ID		= 'TC'
       QUANTITY		= 'THERMOCOUPLE'
-      BEAD_DIAMETER	= 0.0032/
+      DIAMETER	= 0.0032/
 
 &PROP ID		= 'TC2'
       QUANTITY		= 'THERMOCOUPLE'
-      BEAD_DIAMETER	= 0.0016/
+      DIAMETER	= 0.0016/
 
 Gas Temperatures
 
