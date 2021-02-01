@@ -484,6 +484,25 @@ IF (.NOT.EVACUATION_ONLY(NM)) THEN
    ENDDO
 ENDIF
 
+! Assign TMP_INNER for HT3D (gets overridden by INIT)
+
+IF (SOLID_HT3D) THEN
+   OBST_LOOP_4: DO N=1,M%N_OBST
+      OB=>M%OBSTRUCTION(N)
+      IF (OB%MATL_SURF_INDEX<=0) CYCLE OBST_LOOP_4
+      SF=>SURFACE(OB%MATL_SURF_INDEX)
+      TMP_INNER_IF: IF (SF%TMP_INNER_HT3D>0._EB) THEN
+         DO K=OB%K1+1,OB%K2
+            DO J=OB%J1+1,OB%J2
+               DO I=OB%I1+1,OB%I2
+                  M%TMP(I,J,K) = SF%TMP_INNER_HT3D
+               ENDDO
+            ENDDO
+         ENDDO
+      ENDIF TMP_INNER_IF
+   ENDDO OBST_LOOP_4
+ENDIF
+
 ! Over-ride default ambient conditions with user-prescribed INITializations
 
 DO N=1,N_INIT
@@ -975,25 +994,6 @@ IF (SOLID_HT3D) THEN
          ENDDO
       ENDDO
    ENDDO OBST_LOOP_3
-ENDIF
-
-! Assign TMP_INNER for HT3D (overrides INIT)
-
-IF (SOLID_HT3D) THEN
-   OBST_LOOP_4: DO N=1,M%N_OBST
-      OB=>M%OBSTRUCTION(N)
-      IF (OB%MATL_SURF_INDEX<=0) CYCLE OBST_LOOP_4
-      SF=>SURFACE(OB%MATL_SURF_INDEX)
-      TMP_INNER_IF: IF (SF%TMP_INNER_HT3D>0._EB) THEN
-         DO K=OB%K1+1,OB%K2
-            DO J=OB%J1+1,OB%J2
-               DO I=OB%I1+1,OB%I2
-                  M%TMP(I,J,K) = SF%TMP_INNER_HT3D
-               ENDDO
-            ENDDO
-         ENDDO
-      ENDIF TMP_INNER_IF
-   ENDDO OBST_LOOP_4
 ENDIF
 
 ! Solid 3D pyrolysis
