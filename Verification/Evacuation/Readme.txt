@@ -82,13 +82,19 @@ agents from one mesh to some other mesh.
 
 evac_smv_testcase0.fds
 
-   Just fire mesh
+   Just fire calculation (NO_EVACUATION=.TRUE.)
 
-evac_smv_testcase1.fds
+   VERIFICATION OK IF: "STOP: FDS completed successfully"
+
+evac_smv_testcase1a.fds,evac_smv_testcase1b.fds,evac_smv_testcase1c.fds
 
    Fire + evacuation meshes
+   a: Phase 1, writes the .eff and .xyz files
+      copy evac_smv_testcase1a_evac.xyz => evac_smv_test1case1b_evac.xyz 
+      copy evac_smv_testcase1a_evac.eff => evac_smv_test1case1c_evac.eff 
+   b: Phase 2, reads the .xyz file and write the .fed file 
+      copy evac_smv_testcase1b_evac.fed => evac_smv_test1case1c_evac.fed 
+   c: Phase 3, reads the .eff and .fed files   
 
-evac_smv_testcase2.fds
-
-   Just evacuation meshes
+   VERIFICATION OK IF: a,b,c, "STOP: FDS completed successfully"
 
