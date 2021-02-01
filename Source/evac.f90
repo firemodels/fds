@@ -5320,6 +5320,10 @@ CONTAINS
           N_EGRIDS = n_egrids_tmp
           ! ntmp2 = 4
           N_CORRS = ntmp3
+          IF (N_CORRS > 0 ) THEN
+             ALLOCATE(EVAC_CORRS(N_CORRS),STAT=IZERO)
+             CALL ChkMemErr('INITIALIZE_EVAC_DUMPS','EVAC_CORRS',IZERO)
+          END IF
           ! ntmp4 = 8, ntmp5 = 0, ntmp6 = 4
           READ  (LU_EVACXYZ) ntmp1
           N_DEVC_EVAC = ntmp1
