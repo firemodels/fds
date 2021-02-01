@@ -3,9 +3,9 @@
  Two floor evacuation test case, the rooms have two doors.
  See the FDS+Evac Guide, Chapter "Sample Input Files"
 
-&HEAD CHID='evac_smv_testcase0', TITLE='Test 0, fire mesh'  / 
+&HEAD CHID='evac_smv_testcase1a', TITLE='Test 1, fire+evac meshes'  / 
 
- Fire calculation only
+ Fire + evacuation meshes
 
  Fire mesh(es).
 &MESH IJK=22,20,5, XB= -0.2,10.6,  0.0,10.0, 0.0,2.5, ID='Fire_1stFloor' /
@@ -18,11 +18,10 @@
       EVACUATION=.TRUE., EVAC_HUMANS=.TRUE., ID='MainEvacGrid2' /
 
 &TIME T_END=10.0, DT=0.05 / 
-      defaults: EVAC_DT_FLOWFIELD=0.01, EVAC_DT_STEADY_STATE=0.05,
 
-&MISC NO_EVACUATION=.TRUE., NOISE=.FALSE.,
+&MISC EVACUATION_INITIALIZATION=.TRUE., NOISE=.FALSE.,
       EVAC_PRESSURE_ITERATIONS=15, EVAC_TIME_ITERATIONS=50,
-      EVACUATION_MC_MODE=.FALSE., EVACUATION_DRILL=.FALSE. /
+      EVACUATION_MC_MODE=.FALSE., EVACUATION_DRILL=.FALSE.  /
 
 &DUMP SMOKE3D=.TRUE.,
       NFRAMES=10,
@@ -56,10 +55,7 @@
       MATL_ID        = 'GYPSUM PLASTER'
       THICKNESS      = 0.012 /
 
- Default material for evacuation meshes is INERT and its color
- can not be changed esily in Smokeview. Thus, an evacuation 
- material is defined below, which has only color:
-&SURF ID= 'EVAC_WALL', COLOR='RED', EVAC_DEFAULT=.TRUE. / or COLOR
+&SURF ID= 'EVAC_WALL', COLOR='RED', EVAC_DEFAULT=.TRUE. / or RGB
 
 ============= FIRE FDS GEOMETRY STARTS ================
 
@@ -88,7 +84,7 @@
 &VENT XB=  4.0,6.0,   0.0, 0.0, 0.0,2.0, SURF_ID='OPEN', COLOR='MAGENTA' /
 
 &VENT XB= -0.2,-0.2,  4.4,5.6, 0.0,2.0, SURF_ID='OPEN', COLOR='MAGENTA' / Left Exit
-&VENT XB= 10.6,10.6,  4.4,5.6, 0.0,2.0, SURF_ID='OPEN', COLOR='MAGENTA' / Left Exit
+&VENT XB= 10.6,10.6,  4.4,5.6, 0.0,2.0, SURF_ID='OPEN', COLOR='MAGENTA' / Rigth Exit
 
 ============= FIRE FDS GEOMETRY ENDS ==================
 
@@ -288,10 +284,13 @@
 &EVAC ID = 'Human2ndFloor', 
       NUMBER_INITIAL_PERSONS = 50,
       XB = 0.5,9.5,  0.5,9.5, 3.0,4.2
-      AVATAR_COLOR = 'BLACK',
+      AVATAR_COLOR = 'BLACK', AVATAR_TYPE='Firefighter', PROP_ID='Firemen_props',
       KNOWN_DOOR_NAMES = 'LeftDoor2nd','RightDoor2nd','RightExit',
       KNOWN_DOOR_PROBS = 0.5,1.0,1.0,
       PERS_ID = 'Adult' / 
+
+&PROP ID='Firemen_props', SMOKEVIEW_ID(1:4)='human_fixed','human_altered_with_data',
+         'fire_fighter_with_gear','disk' /
 
  An evacuation hole, i.e., do not put humans here (an EVHO is to an EVAC what
  a HOLE is for an OBST). By default an EVHO applies to all EVAC-lines.
@@ -313,7 +312,7 @@
 &SLCF PBX=3.50, QUANTITY='VELOCITY' /
 
  Next lines could be used to plot the evacuation flow fields:
- SLCF PBZ = 1.000, QUANTITY= 'VELOCITY', VECTOR = .TRUE., EVACUATION=.TRUE. / 
- SLCF PBZ = 3.600, QUANTITY= 'VELOCITY', VECTOR = .TRUE., EVACUATION=.TRUE. / 
+ SLCF PBZ = 1.000, QUANTITY = 'VELOCITY', VECTOR = .TRUE., EVACUATION=.TRUE. / 
+ SLCF PBZ = 3.600, QUANTITY = 'VELOCITY', VECTOR = .TRUE., EVACUATION=.TRUE. / 
 
 &TAIL /
