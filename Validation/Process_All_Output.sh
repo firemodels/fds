@@ -69,6 +69,7 @@ PROCESS Juelich_SETCOM
 PROCESS LEMTA_Spray
 PROCESS LLNL_Enclosure
 PROCESS LNG_Dispersion
+PROCESS LNG_Fires
 PROCESS McCaffrey_Plume
 PROCESS Moody_Chart
 PROCESS MPI_Scaling_Tests
