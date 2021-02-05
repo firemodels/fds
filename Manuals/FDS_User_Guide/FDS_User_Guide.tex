@@ -6175,7 +6175,7 @@ The absorption coefficient is a function of gas composition and temperature. In 
 
 \subsubsection{Path Length}
 
-Because RadCal computes effective absorption coefficients over a range of wavelengths, it requires a user-specified {\ct PATH\_LENGTH} (m). Its default value is 0.1~m.
+For a given gas temperature and species composition, RadCal computes a single effective absorption coefficient that is independent of wavelength. To calculate this coefficient, a user-specified {\ct PATH\_LENGTH} (m) is needed. Its default value is 0.1~m. The choice of {\ct PATH\_LENGTH} can be based on the physical size of the fire, the compartment, or the overall computational domain, depending on the application. The default value has been chosen to capture accurately radiation heat transfer in and around the fire itself. A useful ``rule of thumb'' for this length scale is $4V/A$, where $V$ is the volume of the region of interest and $A$ is the encompassing surface area. This region might be the volume occupied by the fire itself or a flashed-over compartment. Alternatively, if the application involves calculating the heat flux to distant targets, a more appropriate {\ct PATH\_LENGTH} might be the distance from the fire to the target. A sensitivity analysis should be done in any case to determine how the chosen {\ct PATH\_LENGTH} affects the predicted values.
 
 \subsubsection{Fuel Species}
 
