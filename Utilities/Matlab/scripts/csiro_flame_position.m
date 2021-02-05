@@ -7,6 +7,8 @@
 close all
 clear all
 
+plot_style
+
 expdir = '../../../../exp/CSIRO_Grassland_Fires/';
 outdir = '../../../../fds/Validation/CSIRO_Grassland_Fires/Current_Results/';
 pltdir = '../../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/CSIRO_Grassland_Fires/';
@@ -17,13 +19,18 @@ figure
 
 T = [56 86 138]-0;
 for k=1:length(T)
-    for n=1:NM
+    for n=1:NM3
         nsf = 5;
-        if n>=19 & n<=24
+        % % Case_F19
+        % if n>=19 & n<=24
+        %     nsf = 10;
+        % end
+        % Case_F19_fine
+        if n>=73 & n<=84
             nsf = 10;
         end
-        [Qdata,Time]=slread([outdir 'Case_F19_' num2str(n) '_' num2str(nsf) '.sf'],T(k),T(k)+0.1);
-        contourf(M1(n).X,M1(n).Y,Qdata(:,:,1),[20 100]); hold on
+        [Qdata,Time]=slread([outdir 'Case_F19_fine_' num2str(n) '_' num2str(nsf) '.sf'],T(k),T(k)+0.1);
+        contourf(M3(n).X,M3(n).Y,Qdata(:,:,1),[20 100]); hold on
     end
 end
 
@@ -45,6 +52,8 @@ plot([0,200],[+100,+100],'k:')
 plot([0,0],[-100,+100],'k:')
 plot([200,200],[-100,+100],'k:')
 
+set(gca,'FontName',Font_Name)
+
 set(h(1), 'markerfacecolor', get(h(1), 'color'));
 set(h(2), 'markerfacecolor', get(h(2), 'color'));
 set(h(3), 'markerfacecolor', get(h(3), 'color'));
@@ -53,8 +62,8 @@ axis equal
 axis([-10 210 -110 110])
 xticks([0:50:200])
 yticks([-100:50:100])
-xlabel('x (m)')
-ylabel('y (m)')
+xlabel('x (m)','Interpreter',Font_Interpreter)
+ylabel('y (m)','Interpreter',Font_Interpreter)
 
 lh=legend(h,'56 s','86 s','138 s','location','southeast');
 
@@ -72,15 +81,15 @@ print(gcf,'-dpdf',[pltdir,'Case_F19_flame_position'])
 
 figure
 
-T = [27 53 100]-10;
+T = [27 53 100];
 for k=1:length(T)
-    for n=1:NM
+    for n=1:NM4
         nsf = 5;
         if n>=19 & n<=24
             nsf = 10;
         end
-        [Qdata,Time]=slread([outdir 'Case_C064_' num2str(n) '_' num2str(nsf) '.sf'],T(k),T(k)+0.1);
-        contourf(M2(n).X,M2(n).Y,Qdata(:,:,1),[20 100]); hold on
+        [Qdata,Time]=slread([outdir 'Case_C064_fine_' num2str(n) '_' num2str(nsf) '.sf'],T(k),T(k)+0.1);
+        contourf(M4(n).X,M4(n).Y,Qdata(:,:,1),[20 100]); hold on
     end
 end
 
@@ -102,6 +111,8 @@ plot([0,100],[+50,+50],'k:')
 plot([0,0],[-50,+50],'k:')
 plot([100,100],[-50,+50],'k:')
 
+set(gca,'FontName',Font_Name)
+
 set(h(1), 'markerfacecolor', get(h(1), 'color'));
 set(h(2), 'markerfacecolor', get(h(2), 'color'));
 set(h(3), 'markerfacecolor', get(h(3), 'color'));
@@ -110,8 +121,8 @@ axis equal
 axis([-5 105 -55 55])
 xticks([0:10:100])
 yticks([-50:10:50])
-xlabel('x (m)')
-ylabel('y (m)')
+xlabel('x (m)','Interpreter',Font_Interpreter)
+ylabel('y (m)','Interpreter',Font_Interpreter)
 
 lh=legend(h,'27 s','53 s','100 s','location','southeast');
 
