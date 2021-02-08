@@ -796,9 +796,15 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_SUB-DT_BC_HT3D)>TWO_EPSILON_EB )
                      SELECT CASE(ABS(OB%PYRO3D_IOR))
                         CASE DEFAULT
                            ! isotropic shrinking and swelling
-                           VSRVC_X(I,J,K) = VSRVC(I,J,K)**ONTH
-                           VSRVC_Y(I,J,K) = VSRVC_X(I,J,K)
-                           VSRVC_Z(I,J,K) = VSRVC_X(I,J,K)
+                           IF (TWO_D) THEN
+								VSRVC_X(I,J,K) = VSRVC(I,J,K)**0.5_EB
+								VSRVC_Y(I,J,K) = 1._EB
+								VSRVC_Z(I,J,K) = VSRVC_X(I,J,K)
+							ELSE   
+								VSRVC_X(I,J,K) = VSRVC(I,J,K)**ONTH
+								VSRVC_Y(I,J,K) = VSRVC_X(I,J,K)
+								VSRVC_Z(I,J,K) = VSRVC_X(I,J,K)
+							ENDIF
                         CASE(1)
                            VSRVC_X(I,J,K) = VSRVC(I,J,K)
                            VSRVC_Y(I,J,K) = 1._EB
