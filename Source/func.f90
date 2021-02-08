@@ -2844,6 +2844,130 @@ ENDIF
 END FUNCTION F_B
 
 
+!> \brief This function computes the flux limited scalar value on a face.
+!> \param A    Velocity.
+!> \param U(4) Scalar in 4 points, (1:2) lower index points to the face, (3:4) upper index points.
+!> \param LIMITER Flux limiter used.
+
+REAL(EB) FUNCTION SCALAR_FACE_VALUE(A,U,LIMITER)
+
+REAL(EB), INTENT(IN) :: A,U(4)
+INTEGER, INTENT(IN) :: LIMITER
+REAL(EB) :: R,B,DU_UP,DU_LOC,V(-2:2)
+
+! The scalar is denoted U, and the velocity is denoted A.
+! The divergence (computed elsewhere) uses a central difference across
+! the cell subject to a flux LIMITER.  The flux LIMITER choices are:
+!
+! CENTRAL_LIMITER  = 0
+! GODUNOV_LIMITER  = 1
+! SUPERBEE_LIMITER = 2
+! MINMOD_LIMITER   = 3
+! CHARM_LIMITER    = 4
+! MP5_LIMITER      = 5
+!
+!                    location of face
+!
+!                            f
+!    |     o     |     o     |     o     |     o     |
+!                            A
+!         U(1)        U(2)        U(3)        U(4)
+
+WIND_DIRECTION_IF: IF (A>0._EB) THEN
+
+   ! the flow is left to right
+   DU_UP  = U(2)-U(1)
+   DU_LOC = U(3)-U(2)
+
+   R = 0._EB
+   B = 0._EB
+
+   SELECT CASE(LIMITER)
+      CASE(0) ! central differencing
+         SCALAR_FACE_VALUE = 0.5_EB*(U(2)+U(3))
+      CASE(1) ! first-order upwinding
+         SCALAR_FACE_VALUE = U(2)
+      CASE(2) ! SUPERBEE, Roe (1986)
+         IF (ABS(DU_LOC)>TWO_EPSILON_EB) R = DU_UP/DU_LOC
+         B = MAX(0._EB,MIN(2._EB*R,1._EB),MIN(R,2._EB))
+         SCALAR_FACE_VALUE = U(2) + 0.5_EB*B*DU_LOC
+      CASE(3) ! MINMOD
+         IF (ABS(DU_LOC)>TWO_EPSILON_EB) R = DU_UP/DU_LOC
+         B = MAX(0._EB,MIN(1._EB,R))
+         SCALAR_FACE_VALUE = U(2) + 0.5_EB*B*DU_LOC
+      CASE(4) ! CHARM
+         IF (ABS(DU_UP)>TWO_EPSILON_EB) R = DU_LOC/DU_UP
+         IF (R>0._EB) B = R*(3._EB*R+1._EB)/((R+1._EB)**2)
+         SCALAR_FACE_VALUE = U(2) + 0.5_EB*B*DU_UP
+      CASE(5) ! MP5, Suresh and Huynh (1997)
+         V = (/2._EB*U(1)-U(2),U(1:4)/)
+         SCALAR_FACE_VALUE = MP5()
+   END SELECT
+
+ELSE WIND_DIRECTION_IF
+
+   ! the flow is right to left
+   DU_UP  = U(4)-U(3)
+   DU_LOC = U(3)-U(2)
+
+   R = 0._EB
+   B = 0._EB
+
+   SELECT CASE(LIMITER)
+      CASE(0) ! central differencing
+         SCALAR_FACE_VALUE = 0.5_EB*(U(2)+U(3))
+      CASE(1) ! first-order upwinding
+         SCALAR_FACE_VALUE = U(3)
+      CASE(2) ! SUPERBEE, Roe (1986)
+         IF (ABS(DU_LOC)>TWO_EPSILON_EB) R = DU_UP/DU_LOC
+         B = MAX(0._EB,MIN(2._EB*R,1._EB),MIN(R,2._EB))
+         SCALAR_FACE_VALUE = U(3) - 0.5_EB*B*DU_LOC
+      CASE(3) ! MINMOD
+         IF (ABS(DU_LOC)>TWO_EPSILON_EB) R = DU_UP/DU_LOC
+         B = MAX(0._EB,MIN(1._EB,R))
+         SCALAR_FACE_VALUE = U(3) - 0.5_EB*B*DU_LOC
+      CASE(4) ! CHARM
+         IF (ABS(DU_UP)>TWO_EPSILON_EB) R = DU_LOC/DU_UP
+         IF (R>0._EB) B = R*(3._EB*R+1._EB)/((R+1._EB)**2)
+         SCALAR_FACE_VALUE = U(3) - 0.5_EB*B*DU_UP
+      CASE(5) ! MP5, Suresh and Huynh (1997)
+         V = (/2._EB*U(4)-U(3),U(4),U(3),U(2),U(1)/)
+         SCALAR_FACE_VALUE = MP5()
+    END SELECT
+
+ENDIF WIND_DIRECTION_IF
+
+CONTAINS
+
+REAL(EB) FUNCTION MP5()
+REAL(EB), PARAMETER :: B1 = 0.016666666666667_EB, B2 = 1.333333333333_EB, ALPHA=4._EB, EPSM=1.E-10_EB
+REAL(EB) :: VOR,VMP,DJM1,DJ,DJP1,DM4JPH,DM4JMH,VUL,VAV,VMD,VLC,VMIN,VMAX
+
+! Monotonicity preserving 5th-order scheme (MP5) of Suresh and Huynh, JCP 136, 83-99 (1997)
+
+VOR = B1*(2._EB*V(-2)-13._EB*V(-1)+47._EB*V(0)+27._EB*V(1)-3._EB*V(2))
+VMP = V(0) + MINMOD2(V(1)-V(0),ALPHA*(V(0)-V(-1)))
+IF ((VOR-V(0))*(VOR-VMP)<EPSM) THEN
+   MP5=VOR
+ELSE
+   DJM1 = V(-2)-2._EB*V(-1)+V(0)
+   DJ   = V(-1)-2._EB*V(0) +V(1)
+   DJP1 = V(0) -2._EB*V(1) +V(2)
+   DM4JPH = MINMOD4(4._EB*DJ-DJP1,4._EB*DJP1-DJ,DJ,DJP1)
+   DM4JMH = MINMOD4(4._EB*DJ-DJM1,4._EB*DJM1-DJ,DJ,DJM1)
+   VUL = V(0) + ALPHA*(V(0)-V(-1))
+   VAV = 0.5_EB*(V(0)+V(1))
+   VMD = VAV - 0.5_EB*DM4JPH
+   VLC = V(0) + 0.5_EB*(V(0)-V(-1)) + B2*DM4JMH
+   VMIN = MAX(MIN(V(0),V(1),VMD),MIN(V(0),VUL,VLC))
+   VMAX = MIN(MAX(V(0),V(1),VMD),MAX(V(0),VUL,VLC))
+   MP5 = VOR + MINMOD2(VMIN-VOR,VMAX-VOR)
+ENDIF
+
+END FUNCTION MP5
+
+END FUNCTION SCALAR_FACE_VALUE
+
 END MODULE MATH_FUNCTIONS
 
 
