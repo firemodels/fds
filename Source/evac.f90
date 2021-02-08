@@ -634,7 +634,7 @@ CONTAINS
     !
     IF_IMODE_1: IF (IMODE == 1) THEN
        N_DOOR_MESHES = 0
-       IF (NO_EVACUATION) THEN
+       IF (.NOT.DO_EVACUATION) THEN
           N_EVAC = 0
           RETURN ! skip evacuation calculation
        END IF
@@ -993,13 +993,13 @@ CONTAINS
     END IF IF_IMODE_1
 
     ! Lines below are only for imode=2, i.e., after the READ_MESH in read.f90.
-    IF (.NOT. ANY(EVACUATION_ONLY)) THEN
+    IF (.NOT. DO_EVACUATION) THEN
        N_EVAC = 0
        IF (EVACUATION_WRITE_FED) THEN
           I_EVAC = 16*1 + 8*0 + 4*0 + 2*1 + 1*0  ! I_EVAC=16+2 => do only fire calculation, save fed info
        END IF
        IF (MY_RANK==MAX(0,EVAC_PROCESS)) THEN
-          IF (ANY(EVACUATION_ONLY)) THEN
+          IF (DO_EVACUATION) THEN
              WRITE(MESSAGE,'(A,A,A)') 'ERROR: No main evacuation meshes defined.'
              CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
           END IF
@@ -1036,7 +1036,7 @@ CONTAINS
     ! These are just initialization. Later it is checked if files exists.
     ! If EFF/FED file does not exists, then it is calculated (and saved).
     I_EVAC = 16*0 + 8*0 + 4*0 + 2*0 + 1*0 ! do not save soot,fed files
-    IF (.NOT. ALL(EVACUATION_ONLY) ) THEN
+    IF (.NOT.DO_EVACUATION) THEN
        ! Note: If EVACUATION_DRILL=true there are no fire meshes
        ! Note: If NO_EVACUATION=true there are no evacuation meshes
        ! There are fire grids ==> save fed and evac flow fields
@@ -3791,7 +3791,7 @@ CONTAINS
          END IF
          READ(LU_INPUT,ENTR,END=28,IOSTAT=IOS)
          !
-         IF (.NOT.ALL(EVACUATION_ONLY)) THEN
+         IF (.NOT.DO_EVACUATION) THEN
             MAX_HUMANS         = 0
             MAX_FLOW           = 0.0_EB
             MAX_HUMANS_RAMP    = 'null'
@@ -4248,7 +4248,7 @@ CONTAINS
             EXIT READ_EVAC_LOOP
          END IF
          READ(LU_INPUT,EVAC,END=25,IOSTAT=IOS)
-         IF (.NOT.ALL(EVACUATION_ONLY)) THEN
+         IF (.NOT.DO_EVACUATION) THEN
             NUMBER_INITIAL_PERSONS   = 0
             EVACFILE                 = .FALSE.
             GUARD_MEN_IN  = 0
@@ -5288,7 +5288,7 @@ CONTAINS
     !      New Format, version 2.2.2: n=-2 ==> no fed info for exits and doors
     ! LU_EVACXYZ: CHID_evac.xyz, evac-mesh xyz + door/exit/corr xyz (z: EVSS shifts included) for FED and soot, binary?
 
-    IF (.NOT.ANY(EVACUATION_ONLY)) THEN
+    IF (.NOT.DO_EVACUATION) THEN
        ! Only fire meshes (e.g. phase 2 of the new evacuation scheme)
        IF (EVACUATION_WRITE_FED) THEN
           LU_EVACXYZ = GET_FILE_NUMBER()
@@ -6919,7 +6919,7 @@ CONTAINS
     TYPE (EVAC_SSTAND_TYPE), POINTER :: ESS=>NULL()
     TYPE (HUMAN_TYPE), POINTER :: HR=>NULL()
     !
-    IF (.NOT.ANY(EVACUATION_ONLY)) RETURN
+    IF (.NOT.DO_EVACUATION) RETURN
     IF (STOP_STATUS > 0) RETURN
 
     TNOW=CURRENT_TIME()
@@ -7173,7 +7173,7 @@ CONTAINS
 
     EXCHANGE_EVACUATION=.FALSE.
     !
-    IF (.NOT. ANY(EVACUATION_ONLY).AND. .NOT.EVACUATION_WRITE_FED) RETURN
+    IF (.NOT.DO_EVACUATION .AND. .NOT.EVACUATION_WRITE_FED) RETURN
     IF (ICYC < 1) RETURN
     !
     ! I_MODE: 'binary' index:
@@ -7259,7 +7259,7 @@ CONTAINS
           T_SAVE = T_TMP + DT_TMP ! Next time point in the file
        END IF
 
-       IF (EVACUATION_WRITE_FED .AND. .NOT.ALL(EVACUATION_ONLY)) THEN
+       IF (EVACUATION_WRITE_FED .AND. .NOT.DO_EVACUATION) THEN
           ! New fire+evacuation strategy: only fire meshes, write fed data to the disk
           IF (L_FED_SAVE) THEN
              MESH_LOOP_FEDXYZ: DO NM=1,N_EGRIDS
@@ -7540,7 +7540,7 @@ CONTAINS
     !
     TYPE (MESH_TYPE), POINTER :: MFF=>NULL()
 
-    IF (.NOT.ANY(EVACUATION_ONLY)) RETURN
+    IF (.NOT.DO_EVACUATION) RETURN
 
     L_EFF_READ = BTEST(I_EVAC,2)
     L_EFF_SAVE = BTEST(I_EVAC,0)
@@ -7599,7 +7599,7 @@ CONTAINS
     ! Local variables
     !
     INTRINSIC :: BTEST
-    IF (.NOT.ANY(EVACUATION_ONLY)) RETURN
+    IF (.NOT.DO_EVACUATION) RETURN
     IF (ICYC < 1) RETURN
     ! Check if FED is used
     IF (BTEST(I_MODE,3) .OR. BTEST(I_MODE,1)) EVAC_DEVICES(:)%USE_NOW = .FALSE.
@@ -15137,7 +15137,7 @@ CONTAINS
     TYPE (HUMAN_TYPE), ALLOCATABLE, DIMENSION(:) :: DUMMY
     TYPE (MESH_TYPE), POINTER :: M =>NULL()
     !
-    IF (.NOT.ANY(EVACUATION_ONLY)) RETURN
+    IF (.NOT.DO_EVACUATION) RETURN
     IF (.NOT.EVACUATION_ONLY(NM)) RETURN
 
     SELECT CASE(CODE)
@@ -15177,7 +15177,7 @@ CONTAINS
     TYPE (HUMAN_TYPE), POINTER :: HR =>NULL()
     INTEGER, PARAMETER :: PART_BOUNDFILE_VERSION=1
     !
-    IF (.NOT.ANY(EVACUATION_ONLY)) RETURN
+    IF (.NOT.DO_EVACUATION) RETURN
     IF (.NOT.(EVACUATION_ONLY(NM) .AND. EMESH_INDEX(NM)>0)) RETURN
     TNOW=CURRENT_TIME()
     !
@@ -15509,7 +15509,7 @@ CONTAINS
     INTEGER n_cols, n_tot_humans, i, ii, izero, ii_ntargets, ii_density
     REAL(FB), ALLOCATABLE, DIMENSION(:) :: ITEMP
     !
-    IF (.NOT.ANY(EVACUATION_ONLY)) RETURN
+    IF (.NOT.DO_EVACUATION) RETURN
     !
     ALLOCATE(ITEMP(MAX(1,N_EXITS+N_DOORS)), STAT = IZERO)
     CALL ChkMemErr('DUMP_EVAC_CSV','ITEMP', IZERO)
