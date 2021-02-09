@@ -889,6 +889,7 @@ LP%DY                => OS%REALS(15,STORAGE_INDEX) ; IF (NEW) LP%DY      = 0._EB
 LP%DZ                => OS%REALS(16,STORAGE_INDEX) ; IF (NEW) LP%DZ      = 0._EB
 LP%M_DOT             => OS%REALS(17,STORAGE_INDEX) ; IF (NEW) LP%M_DOT   = 0._EB
 LP%HTC_LIMIT         => OS%REALS(18,STORAGE_INDEX) ; IF (NEW) LP%HTC_LIMIT=1.E6_EB
+LP%C_DRAG            => OS%REALS(19,STORAGE_INDEX) ; IF (NEW) LP%C_DRAG  = 0._EB
 
 CALL ONE_D_POINTERS(LP_INDEX_LOCAL,NEW,N_PARTICLE_SCALAR_REALS,N_PARTICLE_SCALAR_INTEGERS,N_PARTICLE_SCALAR_LOGICALS)
 
@@ -1293,13 +1294,13 @@ END SUBROUTINE REALLOCATE_STORAGE_ARRAYS
 
 SUBROUTINE GET_LAGRANGIAN_PARTICLE_INDEX(NM,LPC_INDEX,LP_TAG,LP_INDEX)
 
-USE GLOBAL_CONSTANTS, ONLY: EVACUATION_ONLY
+USE GLOBAL_CONSTANTS, ONLY: DO_EVACUATION
 INTEGER, INTENT(IN) :: NM,LPC_INDEX,LP_TAG
 INTEGER, INTENT(OUT) :: LP_INDEX
 INTEGER :: I
 
 LP_INDEX = 0
-IF (EVACUATION_ONLY(NM)) RETURN
+IF (DO_EVACUATION) RETURN
 DO I=1,MESHES(NM)%PARTICLE_STORAGE(LPC_INDEX)%N_STORAGE_SLOTS
    IF (MESHES(NM)%PARTICLE_STORAGE(LPC_INDEX)%INTEGERS(1,I)==LP_TAG) THEN
       LP_INDEX = MESHES(NM)%PARTICLE_STORAGE(LPC_INDEX)%INTEGERS(2,I)
@@ -1343,7 +1344,7 @@ INTEGER, INTENT(OUT) :: NOM,IIO,JJO,KKO
 TYPE (MESH_TYPE), POINTER :: M2=>NULL()
 
 OTHER_MESH_LOOP: DO NOM=1,NMESHES
-   IF (EVACUATION_ONLY(NOM)) CYCLE OTHER_MESH_LOOP
+   IF (DO_EVACUATION) CYCLE OTHER_MESH_LOOP
    M2=>MESHES(NOM)
    IF (XX>=M2%XS .AND. XX<=M2%XF .AND.  YY>=M2%YS .AND. YY<=M2%YF .AND. ZZ>=M2%ZS .AND. ZZ<=M2%ZF) THEN
       IF (ALLOCATED(M2%CELLSI)) THEN
@@ -1767,7 +1768,6 @@ DO NL=1,N_LAYERS
 ENDDO
 
 END SUBROUTINE GET_WALL_NODE_COORDINATES
-
 
 
 !> \brief Determine the internal coordinates of the 1-D grid inside a solid.
@@ -2844,6 +2844,130 @@ ENDIF
 END FUNCTION F_B
 
 
+!> \brief This function computes the flux limited scalar value on a face.
+!> \param A    Velocity.
+!> \param U(4) Scalar in 4 points, (1:2) lower index points to the face, (3:4) upper index points.
+!> \param LIMITER Flux limiter used.
+
+REAL(EB) FUNCTION SCALAR_FACE_VALUE(A,U,LIMITER)
+
+REAL(EB), INTENT(IN) :: A,U(4)
+INTEGER, INTENT(IN) :: LIMITER
+REAL(EB) :: R,B,DU_UP,DU_LOC,V(-2:2)
+
+! The scalar is denoted U, and the velocity is denoted A.
+! The divergence (computed elsewhere) uses a central difference across
+! the cell subject to a flux LIMITER.  The flux LIMITER choices are:
+!
+! CENTRAL_LIMITER  = 0
+! GODUNOV_LIMITER  = 1
+! SUPERBEE_LIMITER = 2
+! MINMOD_LIMITER   = 3
+! CHARM_LIMITER    = 4
+! MP5_LIMITER      = 5
+!
+!                    location of face
+!
+!                            f
+!    |     o     |     o     |     o     |     o     |
+!                            A
+!         U(1)        U(2)        U(3)        U(4)
+
+WIND_DIRECTION_IF: IF (A>0._EB) THEN
+
+   ! the flow is left to right
+   DU_UP  = U(2)-U(1)
+   DU_LOC = U(3)-U(2)
+
+   R = 0._EB
+   B = 0._EB
+
+   SELECT CASE(LIMITER)
+      CASE(0) ! central differencing
+         SCALAR_FACE_VALUE = 0.5_EB*(U(2)+U(3))
+      CASE(1) ! first-order upwinding
+         SCALAR_FACE_VALUE = U(2)
+      CASE(2) ! SUPERBEE, Roe (1986)
+         IF (ABS(DU_LOC)>TWO_EPSILON_EB) R = DU_UP/DU_LOC
+         B = MAX(0._EB,MIN(2._EB*R,1._EB),MIN(R,2._EB))
+         SCALAR_FACE_VALUE = U(2) + 0.5_EB*B*DU_LOC
+      CASE(3) ! MINMOD
+         IF (ABS(DU_LOC)>TWO_EPSILON_EB) R = DU_UP/DU_LOC
+         B = MAX(0._EB,MIN(1._EB,R))
+         SCALAR_FACE_VALUE = U(2) + 0.5_EB*B*DU_LOC
+      CASE(4) ! CHARM
+         IF (ABS(DU_UP)>TWO_EPSILON_EB) R = DU_LOC/DU_UP
+         IF (R>0._EB) B = R*(3._EB*R+1._EB)/((R+1._EB)**2)
+         SCALAR_FACE_VALUE = U(2) + 0.5_EB*B*DU_UP
+      CASE(5) ! MP5, Suresh and Huynh (1997)
+         V = (/2._EB*U(1)-U(2),U(1:4)/)
+         SCALAR_FACE_VALUE = MP5()
+   END SELECT
+
+ELSE WIND_DIRECTION_IF
+
+   ! the flow is right to left
+   DU_UP  = U(4)-U(3)
+   DU_LOC = U(3)-U(2)
+
+   R = 0._EB
+   B = 0._EB
+
+   SELECT CASE(LIMITER)
+      CASE(0) ! central differencing
+         SCALAR_FACE_VALUE = 0.5_EB*(U(2)+U(3))
+      CASE(1) ! first-order upwinding
+         SCALAR_FACE_VALUE = U(3)
+      CASE(2) ! SUPERBEE, Roe (1986)
+         IF (ABS(DU_LOC)>TWO_EPSILON_EB) R = DU_UP/DU_LOC
+         B = MAX(0._EB,MIN(2._EB*R,1._EB),MIN(R,2._EB))
+         SCALAR_FACE_VALUE = U(3) - 0.5_EB*B*DU_LOC
+      CASE(3) ! MINMOD
+         IF (ABS(DU_LOC)>TWO_EPSILON_EB) R = DU_UP/DU_LOC
+         B = MAX(0._EB,MIN(1._EB,R))
+         SCALAR_FACE_VALUE = U(3) - 0.5_EB*B*DU_LOC
+      CASE(4) ! CHARM
+         IF (ABS(DU_UP)>TWO_EPSILON_EB) R = DU_LOC/DU_UP
+         IF (R>0._EB) B = R*(3._EB*R+1._EB)/((R+1._EB)**2)
+         SCALAR_FACE_VALUE = U(3) - 0.5_EB*B*DU_UP
+      CASE(5) ! MP5, Suresh and Huynh (1997)
+         V = (/2._EB*U(4)-U(3),U(4),U(3),U(2),U(1)/)
+         SCALAR_FACE_VALUE = MP5()
+    END SELECT
+
+ENDIF WIND_DIRECTION_IF
+
+CONTAINS
+
+REAL(EB) FUNCTION MP5()
+REAL(EB), PARAMETER :: B1 = 0.016666666666667_EB, B2 = 1.333333333333_EB, ALPHA=4._EB, EPSM=1.E-10_EB
+REAL(EB) :: VOR,VMP,DJM1,DJ,DJP1,DM4JPH,DM4JMH,VUL,VAV,VMD,VLC,VMIN,VMAX
+
+! Monotonicity preserving 5th-order scheme (MP5) of Suresh and Huynh, JCP 136, 83-99 (1997)
+
+VOR = B1*(2._EB*V(-2)-13._EB*V(-1)+47._EB*V(0)+27._EB*V(1)-3._EB*V(2))
+VMP = V(0) + MINMOD2(V(1)-V(0),ALPHA*(V(0)-V(-1)))
+IF ((VOR-V(0))*(VOR-VMP)<EPSM) THEN
+   MP5=VOR
+ELSE
+   DJM1 = V(-2)-2._EB*V(-1)+V(0)
+   DJ   = V(-1)-2._EB*V(0) +V(1)
+   DJP1 = V(0) -2._EB*V(1) +V(2)
+   DM4JPH = MINMOD4(4._EB*DJ-DJP1,4._EB*DJP1-DJ,DJ,DJP1)
+   DM4JMH = MINMOD4(4._EB*DJ-DJM1,4._EB*DJM1-DJ,DJ,DJM1)
+   VUL = V(0) + ALPHA*(V(0)-V(-1))
+   VAV = 0.5_EB*(V(0)+V(1))
+   VMD = VAV - 0.5_EB*DM4JPH
+   VLC = V(0) + 0.5_EB*(V(0)-V(-1)) + B2*DM4JMH
+   VMIN = MAX(MIN(V(0),V(1),VMD),MIN(V(0),VUL,VLC))
+   VMAX = MIN(MAX(V(0),V(1),VMD),MAX(V(0),VUL,VLC))
+   MP5 = VOR + MINMOD2(VMIN-VOR,VMAX-VOR)
+ENDIF
+
+END FUNCTION MP5
+
+END FUNCTION SCALAR_FACE_VALUE
+
 END MODULE MATH_FUNCTIONS
 
 
@@ -3372,21 +3496,29 @@ ENDIF
 END SUBROUTINE GET_ENTHALPY
 
 
-REAL(EB) FUNCTION DRAG(RE,DRAG_LAW)
+REAL(EB) FUNCTION DRAG(RE,DRAG_LAW,KN)
 
 ! drag coefficient
 
 INTEGER, INTENT(IN) :: DRAG_LAW
 REAL(EB), INTENT(IN) :: RE
+REAL(EB), OPTIONAL, INTENT(IN) :: KN
+
+IF (RE<TWO_EPSILON_EB) THEN
+   DRAG = 0._EB
+   RETURN
+ENDIF
 
 SELECT CASE(DRAG_LAW)
 
    ! see J.P. Holman 7th Ed. Fig. 6-10
    CASE(SPHERE_DRAG)
-      IF (RE<=TWO_EPSILON_EB) THEN
-         DRAG = 100._EB
-      ELSEIF (RE<=1._EB) THEN
-         DRAG = 24._EB/RE
+      IF (RE<1._EB) THEN
+         IF (PRESENT(KN)) THEN
+            DRAG = 24._EB/RE/CUNNINGHAM(KN)
+         ELSE
+            DRAG = MIN(240000._EB,24._EB/RE)
+         ENDIF
       ELSEIF (RE<1000._EB) THEN
          !!DRAG = 24._EB*(1._EB+0.15_EB*RE**0.687_EB)/RE ! see Crowe, Sommerfeld, Tsuji, 1998, Eq. (4.51)
          DRAG = 24._EB*(0.85_EB+0.15_EB*RE**0.687_EB)/RE ! matches Stokes drag at RE=1 (RJM)
@@ -3413,6 +3545,15 @@ SELECT CASE(DRAG_LAW)
 END SELECT
 
 END FUNCTION DRAG
+
+
+REAL(EB) FUNCTION CUNNINGHAM(KN)
+REAL(EB), INTENT(IN) :: KN
+REAL(EB), PARAMETER :: K1=1.257_EB,K2=0.4_EB,K3=1.1_EB
+
+CUNNINGHAM = 1._EB+K1*KN+K2*KN*EXP(-K3/KN)
+
+END FUNCTION CUNNINGHAM
 
 
 !> \brief Compute the surface (mass or energy) density of a wall cell

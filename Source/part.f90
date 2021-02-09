@@ -149,7 +149,7 @@ IF (N_LAGRANGIAN_CLASSES==0) RETURN ! Don't waste time if no particles
 TNOW=CURRENT_TIME()
 CALL POINT_TO_MESH(NM)
 
-! Insert particles at spray nozzles (INSERT_SPRAY_PARTICLES), VENT surfaces (INSERT_VENT_PARTICLES), specified 
+! Insert particles at spray nozzles (INSERT_SPRAY_PARTICLES), VENT surfaces (INSERT_VENT_PARTICLES), specified
 ! volumes (INSERT_VOLUMETRIC_PARTICLES), or HVAC ducts (INSERT_DUCT_PARTICLES). If the insertions are to be made according
 ! to a user-specified clock, allow the possibility via the OVERALL_INSERT_LOOP of inserting multiple sets of particles.
 
@@ -195,7 +195,7 @@ IF (PARTICLE_CFL) THEN
    ENDDO
 ENDIF
 
-! If any of the newly inserted particles finds itself in a neighboring mesh, set a flag to indicate that an MPI exchange must 
+! If any of the newly inserted particles finds itself in a neighboring mesh, set a flag to indicate that an MPI exchange must
 ! be done to transfer that particle to the MPI process that controls the neighboring mesh.
 
 EXCHANGE_INSERTED_PARTICLES = .FALSE.
@@ -424,7 +424,7 @@ SPRINKLER_INSERT_LOOP: DO KS=1,N_DEVC
             LP%Y = DV%Y
          ENDIF
 
-         ! If the particle position is outside the current mesh, exit the loop and the particle will be sent to another mesh 
+         ! If the particle position is outside the current mesh, exit the loop and the particle will be sent to another mesh
          ! or eliminated by the call to REMOVE_PARTICLES at the end of the subroutine.
 
          IF (LP%X<=XS .OR. LP%X>=XF .OR. LP%Y<=YS .OR. LP%Y>=YF .OR. LP%Z<=ZS .OR. LP%Z>=ZF) THEN
@@ -1923,7 +1923,7 @@ REAL(EB) :: UBAR,VBAR,WBAR,RVC,UREL,VREL,WREL,QREL,RHO_G,TMP_G,MU_AIR, &
             U_OLD,V_OLD,W_OLD,ZZ_GET(1:N_TRACKED_SPECIES),WAKE_VEL,DROP_VOL_FRAC,RE_WAKE,&
             WE_G,T_BU_BAG,T_BU_STRIP,MPOM,ALBO,SFAC,BREAKUP_RADIUS(0:NDC),&
             DD,DD_X,DD_Y,DD_Z,DW_X,DW_Y,DW_Z,K_TERM(3),Y_TERM(3),C_DRAG,A_DRAG,HAB,PARACOR,QREL2,X_WGT,Y_WGT,Z_WGT,&
-            GX_LOC,GY_LOC,GZ_LOC,DUMMY,DRAG_MAX(3)=0._EB,SUM_RHO,K_SGS,U_P
+            GX_LOC,GY_LOC,GZ_LOC,DUMMY,DRAG_MAX(3)=0._EB,SUM_RHO,K_SGS,U_P,L_WAKE,KAPPA_E,KN
 REAL(EB), SAVE :: HALF_DT2,BETA
 INTEGER :: IIX,JJY,KKZ,SURF_INDEX,N
 REAL(EB), PARAMETER :: MAX_TURBULENCE_INTENSITY = 0.1_EB
@@ -2042,7 +2042,9 @@ DRAG_LAW_SELECT: SELECT CASE (LPC%DRAG_LAW)
       ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(IIG_OLD,JJG_OLD,KKG_OLD,1:N_TRACKED_SPECIES)
       CALL GET_VISCOSITY(ZZ_GET,MU_AIR,TMP_G)
       LP%RE  = RHO_G*QREL*2._EB*R_D/MU_AIR
-      C_DRAG = DRAG(LP%RE,LPC%DRAG_LAW)
+      KN = 0._EB
+      IF (LP%RE<1._EB) KN = MU_AIR*SQRT(0.5_EB*PI/(PBAR(KKG_OLD,PRESSURE_ZONE(IIG_OLD,JJG_OLD,KKG_OLD))*RHO_G))/(2._EB*R_D)
+      C_DRAG = DRAG(LP%RE,LPC%DRAG_LAW,KN)
 
       ! Primary break-up model
 
@@ -2055,9 +2057,16 @@ DRAG_LAW_SELECT: SELECT CASE (LPC%DRAG_LAW)
          ! Drag reduction model for liquid droplets
 
          WAKE_VEL=1.0_EB
-         IF (LPC%LIQUID_DROPLET) THEN
+         IF (.NOT.TEST_NEW_WAKE_REDUCTION .AND. LPC%LIQUID_DROPLET) THEN
             DROP_VOL_FRAC = MIN(1._EB,AVG_DROP_DEN(IIG_OLD,JJG_OLD,KKG_OLD,LPC%ARRAY_INDEX)/LPC%DENSITY)
             IF (DROP_VOL_FRAC > LPC%DENSE_VOLUME_FRACTION) CALL WAKE_REDUCTION(DROP_VOL_FRAC,LP%RE,C_DRAG,WAKE_VEL)
+         ENDIF
+
+         IF (TEST_NEW_WAKE_REDUCTION) THEN
+            KAPPA_E = AVG_DROP_AREA(IIG_OLD,JJG_OLD,KKG_OLD,LPC%ARRAY_INDEX)*NDPC(IIG_OLD,JJG_OLD,KKG_OLD) &
+                    * RDX(IIG_OLD)*RRN(IIG_OLD)*RDY(JJG_OLD)*RDZ(KKG_OLD)
+            L_WAKE = LES_FILTER_WIDTH_FUNCTION(DX(IIG_OLD),DY(JJG_OLD),DZ(KKG_OLD))
+            C_DRAG = C_DRAG * MAX(0._EB,MIN(1._EB,EXP(-KAPPA_E*L_WAKE)))
          ENDIF
 
          ! Secondary break-up model
@@ -2252,6 +2261,15 @@ ELSE PARTICLE_NON_STATIC_IF ! Drag calculation for stationary, airborne particle
    IF (ANY(ABS(DRAG_MAX)>PART_UVWMAX)) PART_UVWMAX = MAX(PART_UVWMAX,MAXVAL(DRAG_MAX))
 
 ENDIF PARTICLE_NON_STATIC_IF
+
+! store C_DRAG for output
+
+SELECT CASE(LPC%DRAG_LAW)
+   CASE DEFAULT
+      LP%C_DRAG = C_DRAG
+   CASE (SCREEN_DRAG, POROUS_DRAG)
+      LP%C_DRAG = MAXVAL(LPC%DRAG_COEFFICIENT)
+END SELECT
 
 END SUBROUTINE MOVE_IN_GAS
 

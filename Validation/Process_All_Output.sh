@@ -69,6 +69,7 @@ PROCESS Juelich_SETCOM
 PROCESS LEMTA_Spray
 PROCESS LLNL_Enclosure
 PROCESS LNG_Dispersion
+PROCESS LNG_Fires
 PROCESS McCaffrey_Plume
 PROCESS Moody_Chart
 PROCESS MPI_Scaling_Tests
@@ -102,6 +103,7 @@ PROCESS SP_AST
 PROCESS SP_Wood_Cribs
 PROCESS Steckler_Compartment
 PROCESS SWJTU_Tunnels
+PROCESS Tunnel_Ventilation
 PROCESS Turbulent_Jet
 PROCESS UL_NFPRF
 PROCESS UL_NIJ_Houses

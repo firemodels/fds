@@ -809,6 +809,15 @@ $^\dag$ The Falcon experiments involved 4 separated spills
 \end{sidewaystable}
 
 
+\section{LNG Fire Experiments}
+\label{LNG_Fires_Description}
+
+In 1982 and 1983, Croce, Mudan, and Moorhouse conducted 13 liquified natural gas (LNG) trench fire experiments on behalf of the Gas Research Institute~\cite{Croce:GRI}. Thirteen experiments were performed with nominal trench sizes ranging from 0.8~m by 4.4~m to 3.9~m by 52~m and aspect ratios ranging from approximately 5 to 30. Wind speeds varied from approximately 1~m/s to almost 10~m/s. Measurements made during the tests included flame geometry, radiative heat flux, emissive power, burning rate, LNG liquid and vapor compositions, and meteorological data. The fires were observed to exhibit substantial flame drag and flame breakup, unlike low aspect ratio pools. Steady burning was achieved in all tests.
+
+\subsubsection{Modeling Notes}
+
+The experiments are simulated using the specified fuel burning rate. The fuel is assumed to be methane. The atmosphere is assumed to be neutral with a large Obukhov length, $L=1000000$, and the ground surface is flat with an assumed aerodynamic roughness, $z_0=0.1$~m. The relative humidity, ambient temperature and pressure, and wind speed at 9~m are specified in the report. The radiative fraction is assumed to 0.25 and the radiative path length is assumed to be 50~m; that is, the effective absorption coefficients of the various gas mixtures are evaluated over a distance of 50~m. The radiation source term is taken directly as 25~\% of the combustion energy release rate. The soot yield is assumed to be 0.005.
+
 
 \section{McCaffrey Plume Experiments}
 \label{McCaffrey_Plume_Description}
@@ -1942,6 +1951,16 @@ Test    & Width     & Height        & $\dot{Q}$  & Location     & Test  & Width 
 Fires fueled by methanol and propane ranging from 5.6~kW to 16.8~kW were conducted in a 1:20 reduced-scale tunnel at Southwest Jiaotong University, Chengdu, China~\cite{Wang:TUST2019}. The tunnel was 0.45~m wide, 0.23~m high and 20.8~m long. The burner was located at the center of the tunnel and both ends were open. Temperatures and gas concentrations (i.e., O$_2$, CO and CO$_2$) were measured. The results showed that both methanol and propane fires self-extinguished in the 20.8~m long tunnel within approximately 10~min, except for the 5.6~kW methanol fire. The larger the heat release rate, the faster the self-extinction of the fire. The oxygen concentrations in the 20.8~m long tunnel decreased to approximately 12~\% except for the 5.6~kW methanol fire, which remained well above the limiting oxygen concentration.  Self-extinction was not observed for fires of the same heat release rates in a 10~m long tunnel of the same cross section. The oxygen concentrations in the 10~m long tunnel decreased to approximately 17~\%.  In the long tunnel with large fire sizes, the smoke layer descended to the floor, inhibiting the supply of fresh air reaching the fire.
 
 
+\section{Tunnel Ventilation}
+\label{Tunnel_Ventilation_Description}
+
+An important issue in road tunnel design with respect to fire safety is {\em back-layering}. In the event of a fire in a tunnel, a common strategy is to blow the smoke in one direction to allow occupants to escape and first responders to find the fire. The extent to which smoke from the fire spreads against imposed ventilation is known as back-layering. Experiments to quantify back-layering have been conducted at both small and full-scale. One important set of small-scale experiments was performed by Wu and Bakar~\cite{Wu:FSJ2000}. The experiments were conducted in 15~m long tunnels with 5 different cross sections. Tunnels~A, B, C, and D were rectangular in cross section with a height of 25~cm and widths of 13.6~cm, 25~cm, 50~cm, and 100~cm, respectively. Tunnel~E was 24.4~cm high, 27.4~cm wide at the base, with walls slanted inwards 7$^\circ$ from the vertical leading to a circular arch ceiling.
+
+A 12~cm diameter circular propane burner was placed flush with the floor at a distance of approximately 6~m from the upstream opening. For a range of fire sizes, the air velocity through the tunnel was ramped up until the back-layer length was reduced to zero; that is, the upstream extent of the smoke layer coincided with the upstream edge of the burner. These results were then used to develop an empirical correlation relating the {\em critical velocity}, tunnel cross section, and heat release rate.
+
+\subsubsection{Modeling Notes}
+
+Five simulations are conducted; one for each tunnel type. In each, the heat release rate is stepped over from the lowest to highest reported value in 20~s increments. During each steady period, the near-ceiling temperatures are recorded and used to infer the location of the back-layer; that is, the back-layer extent coincides with a drop in the ceiling jet temperature to within 10~$^\circ$C of ambient. The surface roughness of the tunnel walls is estimated to be 1~mm. The wall material is taken as generic steel.
 
 
 \section{UL/NIST Vent Experiments}
