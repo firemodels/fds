@@ -744,7 +744,6 @@ REAL(EB) :: RTMPMAX               !< Maximum temperature (K) for tabulation of r
 REAL(EB) :: RTMPMIN               !< Minimum temperature (K) for tabulation of radiative properties
 REAL(EB) :: MIE_MINIMUM_DIAMETER  !< Minimum droplet size (micron) considered in Mie initialization
 REAL(EB) :: MIE_MAXIMUM_DIAMETER  !< Maximum droplet size (micron) considered in Mie initialization
-REAL(EB) :: SOOT_DENSITY          !< Density (kg/m3) of solid soot particles
 
 INTEGER :: TIME_STEP_INCREMENT    !< Frequency of calls to radiation solver
 INTEGER :: NMIEANG                !< Number of angle bins in forward scattering integration
