@@ -2588,7 +2588,8 @@ USE PHYSICAL_FUNCTIONS, ONLY: GET_VISCOSITY, GET_CONDUCTIVITY, GET_SPECIFIC_HEAT
 USE SOOT_ROUTINES, ONLY: PARTICLE_RADIUS
 USE SCRC, ONLY: SCARC_METHOD, SCARC_GRID, SCARC_MATRIX, SCARC_SMOOTH, SCARC_PRECON, SCARC_COARSE, SCARC_COARSENING, &
                 SCARC_MULTIGRID, SCARC_MULTIGRID_CYCLE, SCARC_MULTIGRID_ITERATIONS, SCARC_MULTIGRID_ACCURACY, &
-                SCARC_KRYLOV_ITERATIONS, SCARC_KRYLOV_ACCURACY, SCARC_MKL_PRECISION, SCARC_TWOLEVEL
+                SCARC_KRYLOV_ITERATIONS, SCARC_KRYLOV_ACCURACY, SCARC_MKL_PRECISION, SCARC_TWOLEVEL, &
+                SCARC_MGM_BC, SCARC_MGM_LAPLACE_SOLVER
 
 REAL(EB), INTENT(IN) :: DT
 INTEGER :: NM,I,NN,N,NR,NL,NS,ITMP, CELL_COUNT,KK
@@ -3225,6 +3226,9 @@ WRITE_SCARC: IF (TRIM(PRES_METHOD) == 'SCARC' .OR. TRIM(PRES_METHOD) == 'USCARC'
          WRITE(LU_OUTPUT,'(3X,A25,A12)')   'Cycle type               ', TRIM(SCARC_MULTIGRID_CYCLE)
          WRITE(LU_OUTPUT,'(3X,A25,I12)')   'Max iterations           ', SCARC_MULTIGRID_ITERATIONS
          WRITE(LU_OUTPUT,'(3X,A25,E12.2)') 'Stopping accuracy        ', SCARC_MULTIGRID_ACCURACY
+      CASE('MGM')
+         WRITE(LU_OUTPUT,'(3X,A25,A12)') 'MGM internal BC type     ', TRIM(SCARC_MGM_BC)
+         WRITE(LU_OUTPUT,'(3X,A25,A12)') 'MGM Laplace solver       ', TRIM(SCARC_MGM_LAPLACE_SOLVER)
    END SELECT
 ENDIF WRITE_SCARC
 
@@ -3582,7 +3586,7 @@ END SUBROUTINE READ_RESTART
 
 SUBROUTINE WRITE_DIAGNOSTICS(T,DT)
 
-USE SCRC, ONLY: SCARC_CAPPA, SCARC_ITERATIONS, SCARC_RESIDUAL
+USE SCRC, ONLY: SCARC_METHOD, SCARC_CAPPA, SCARC_ITERATIONS, SCARC_RESIDUAL, SCARC_MGM_ACCURACY
 USE COMP_FUNCTIONS, ONLY : CURRENT_TIME,GET_DATE,GET_DATE_ISO_8601
 REAL(EB), INTENT(IN) :: T,DT
 INTEGER :: NM,II,JJ,KK
@@ -3656,9 +3660,16 @@ IF (ITERATE_PRESSURE) THEN
                                                ' on Mesh ',NM,' at (',II,JJ,KK,')'
 ENDIF
 IF (TRIM(PRES_METHOD) == 'SCARC' .OR. TRIM(PRES_METHOD) == 'USCARC') THEN
-   WRITE(LU_OUTPUT,'(7X,A,i6,A,e9.2,A,e9.2)') 'ScaRC: iterations', SCARC_ITERATIONS, &
-                                              ', residual ',SCARC_RESIDUAL,&
-                                              ', convergence rate  ',SCARC_CAPPA
+   IF (TRIM(SCARC_METHOD) /= 'MGM') THEN
+      WRITE(LU_OUTPUT,'(7X,A,i6,A,e9.2,A,e9.2)') 'ScaRC: Iterations', SCARC_ITERATIONS, &
+                                                 ', Residual ',SCARC_RESIDUAL,&
+                                                 ', Rate  ',SCARC_CAPPA
+   ELSE
+      WRITE(LU_OUTPUT,'(7X,A,i6,A,e9.2,A,e9.2,A,e9.2)') 'ScaRC: iterations', SCARC_ITERATIONS, &
+                                                 ', Residual ',SCARC_RESIDUAL,&
+                                                 ', Rate ',SCARC_CAPPA, &
+                                                 ', MGM Velocity Error ',SCARC_MGM_ACCURACY
+   ENDIF
 ENDIF
 WRITE(LU_OUTPUT,'(7X,A)') '---------------------------------------------------------------'
 
