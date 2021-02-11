@@ -3779,7 +3779,7 @@ DO NS = 1,N_SUB_SPECIES
                ELSE
                   SM%THERMOPHORETIC_DIAMETER = MEAN_DIAMETER
                ENDIF
-               IF (ABS(DENSITY_SOLID-1800._EB) <=TWO_EPSILON_EB .AND. &
+               IF (ABS(DENSITY_SOLID-SOOT_DENSITY) <=TWO_EPSILON_EB .AND. &
                      ABS(DENSITY_SOLID-SPECIES(NS2)%DENSITY_SOLID) <=TWO_EPSILON_EB) THEN
                      SM%DENSITY_SOLID = DENSITY_SOLID
                ELSE
@@ -3878,7 +3878,7 @@ CONDUCTIVITY                = -1._EB
 CONDUCTIVITY_LIQUID         = -1._EB
 CONDUCTIVITY_SOLID          = 0.26_EB !W/m/K Ben-Dor, et al. 2002. (~10 x air)
 COPY_LUMPED                 = .FALSE.
-DENSITY_SOLID               = 1800._EB !kg/m^3 Slowik, et al. 2004
+DENSITY_SOLID               = SOOT_DENSITY
 DIFFUSIVITY                 = -1._EB
 EPSILONKLJ                  =  0._EB
 FIC_CONCENTRATION           =  0._EB
