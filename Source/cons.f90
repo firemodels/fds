@@ -351,6 +351,7 @@ REAL(EB) :: LATITUDE=10000._EB                 !< Latitude for geostrophic calcu
 REAL(EB) :: GEOSTROPHIC_WIND(2)=0._EB          !< Wind vector (m/s)
 REAL(EB) :: DY_MIN_BLOWING=1.E-8_EB            !< Parameter in blowing algorithm (m)
 REAL(EB) :: MINIMUM_FILM_THICKNESS=1.E-5_EB    !< Minimum thickness of liquid film on a solid surface (m)
+REAL(EB) :: SOOT_DENSITY=1800._EB              !< Density of solid soot (kg/m3)
 
 REAL(EB), PARAMETER :: TMPM=273.15_EB                       !< Melting temperature of water, conversion factor (K)
 REAL(EB), PARAMETER :: P_STP=101325._EB                     !< Standard pressure (Pa)
@@ -744,7 +745,6 @@ REAL(EB) :: RTMPMAX               !< Maximum temperature (K) for tabulation of r
 REAL(EB) :: RTMPMIN               !< Minimum temperature (K) for tabulation of radiative properties
 REAL(EB) :: MIE_MINIMUM_DIAMETER  !< Minimum droplet size (micron) considered in Mie initialization
 REAL(EB) :: MIE_MAXIMUM_DIAMETER  !< Maximum droplet size (micron) considered in Mie initialization
-REAL(EB) :: SOOT_DENSITY          !< Density (kg/m3) of solid soot particles
 
 INTEGER :: TIME_STEP_INCREMENT    !< Frequency of calls to radiation solver
 INTEGER :: NMIEANG                !< Number of angle bins in forward scattering integration

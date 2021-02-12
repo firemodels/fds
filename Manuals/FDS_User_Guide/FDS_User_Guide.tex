@@ -6196,7 +6196,7 @@ It is possible to set your own band limits by specifying {\ct BAND\_LIMITS} on t
 \subsection{Weighted Sum of Gray Gases (WSGG)}
 \label{info:RADI_WSGG}
 
-To activate the WSGG model, set {\ct WSGG\_MODEL=.TRUE.} on the RADI line. The WSGG model calculates the absorption coefficient as a weighted sum of four gray coefficients, each being a function of gas composition (water vapor, carbon dioxide and soot) and temperature. Other gases are ignored. The soot absorption coefficient calculation assumes a value for the soot density, which can be set using {\ct SOOT\_DENSITY} parameter of the {\ct RADI} line. Do not set {\ct BAND\_LIMITS}.
+To activate the WSGG model, set {\ct WSGG\_MODEL=.TRUE.} on the RADI line. The WSGG model calculates the absorption coefficient as a weighted sum of four gray coefficients, each being a function of gas composition (water vapor, carbon dioxide and soot) and temperature. Other gases are ignored. Do not set {\ct BAND\_LIMITS}.
 
 \section{Radiative Absorption and Scattering by Particles}
 
@@ -9918,7 +9918,7 @@ Specifying a {\ct DEVC} with a {\ct 'MASS FRACTION'} and a {\ct SPEC\_ID} of {\c
 \begin{equation}\label{eq:soot_volume_fraction}
 f_v = \rho Y_{\rm a} / \rho_{\rm a}
 \end{equation}
-\noindent where $\rho$ is the local density, $Y_{\rm a}$ is the local mass fraction of the aerosol, and $\rho_{\rm a}$ is density of the aerosol defined using the {\ct SPEC} input {\ct DENSITY\_SOLID}, which defaults to 1800~kg/m$^3$ for soot.
+where $\rho$ is the local density, $Y_{\rm a}$ is the local mass fraction of the aerosol, and $\rho_{\rm a}$ is density of the aerosol defined using the {\ct SPEC} input {\ct DENSITY\_SOLID}, which defaults to 1800~kg/m$^3$ for soot~\cite{Slowik:AST2004}.
 
 
 \subsection{Gas Velocity}
@@ -10546,7 +10546,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 % ignorenamelistkw: /PRES/SCARC_SMOOTH_ITERATIONS, /PRES/SCARC_SMOOTH_ACCURACY,  /PRES/SCARC_SMOOTH_OMEGA
 % ignorenamelistkw: /PRES/SCARC_PRECON_ITERATIONS, /PRES/SCARC_PRECON_ACCURACY, /PRES/SCARC_PRECON_OMEGA
 % ignorenamelistkw: /PRES/SCARC_COARSE_ITERATIONS, /PRES/SCARC_COARSE_ACCURACY
-% ignorenamelistkw: /PROP/BEAD_DENSITY, /PROP/BEAD_DIAMETER, /PROP/BEAD_EMISSIVITY, /PROP/BEAD_HEAT_TRANSFER_COEFFICIENT, /PROP/BEAD_SPECIFIC_HEAT, /PROP/DROPLET_VELOCITY
+% ignorenamelistkw: /PROP/DROPLET_VELOCITY
 % ignorenamelistkw: /SLCF/RLE_MIN, /SLCF/RLE_MAX, /SLCF/SLICETYPE
 % ignorenamelistkw: /SURF/EXTERNAL_FLUX_RAMP, /SURF/TAU_EXTERNAL_FLUX, /SURF/VOLUME_FLUX, /SURF/AERODYNAMIC_ROUGHNESS
 % ignorenamelistkw: /TIME/TWFIN
@@ -11779,7 +11779,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RADIATION}                      & Logical      & Section~\ref{info:radiation_off}     &            & {\ct .TRUE.}   \\ \hline
 {\ct RADIATION\_ITERATIONS}          & Integer      & Section~\ref{info:RADI_Resolution}   &            & 1              \\ \hline
 {\ct RADTMP}                         & Real         & Section~\ref{info:RADI_Two_Phase}    & $^\circ$C   & 900            \\ \hline
-{\ct SOOT\_DENSITY}                  & Real         & Section~\ref{info:RADI_WSGG}         & kg/m$^3$   & 1800            \\ \hline
 {\ct TIME\_STEP\_INCREMENT}          & Integer      & Section~\ref{info:RADI_Resolution}   &            & 3              \\ \hline
 {\ct WIDE\_BAND\_MODEL}              & Logical      & Section~\ref{info:RADI_Wide_Band}    &            & {\ct .FALSE.}  \\ \hline
 {\ct WSGG\_MODEL}                    & Logical      & Section~\ref{info:RADI_WSGG}         &            & {\ct .FALSE.}  \\ \hline
