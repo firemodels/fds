@@ -232,7 +232,7 @@ END TYPE ONE_D_M_AND_E_XFER_TYPE
 
 ! Note: If you change the number of scalar variables in LAGRANGIAN_PARTICLE_TYPE, adjust the numbers below
 
-INTEGER, PARAMETER :: N_PARTICLE_SCALAR_REALS=18,N_PARTICLE_SCALAR_INTEGERS=10,N_PARTICLE_SCALAR_LOGICALS=4
+INTEGER, PARAMETER :: N_PARTICLE_SCALAR_REALS=19,N_PARTICLE_SCALAR_INTEGERS=10,N_PARTICLE_SCALAR_LOGICALS=4
 
 !> \brief Variables assoicated with a single Lagrangian particle
 
@@ -263,6 +263,7 @@ TYPE LAGRANGIAN_PARTICLE_TYPE
    REAL(EB), POINTER :: DZ                  !< Length scale used in POROUS_DRAG calculation (m)
    REAL(EB), POINTER :: M_DOT               !< Particle mass evaporation rate (kg/s)
    REAL(EB), POINTER :: HTC_LIMIT           !< Limiter for the heat transfer coefficient (W/m2/K)
+   REAL(EB), POINTER :: C_DRAG              !< Drag coefficient
 
    INTEGER, POINTER :: TAG                  !< Unique integer identifier for the particle
    INTEGER, POINTER :: ARRAY_INDEX          !< Index in the array of evaporating particles
@@ -570,7 +571,7 @@ TYPE (MATERIAL_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: MATERIAL
 
 TYPE SURFACE_TYPE
    REAL(EB) :: AREA_MULTIPLIER=1._EB                     !< Factor for manual surface area adjustment
-   REAL(EB) :: TMP_FRONT=-1._EB,TMP_BACK=-1._EB,VEL,VEL_GRAD,PLE, &
+   REAL(EB) :: TMP_FRONT=-1._EB,TMP_BACK=-1._EB,TMP_INNER_HT3D=-1._EB,VEL,VEL_GRAD,PLE, &
                Z0,Z_0,CONVECTIVE_HEAT_FLUX,NET_HEAT_FLUX, &
                VOLUME_FLOW,HRRPUA,MLRPUA,T_IGN,SURFACE_DENSITY,CELL_SIZE_FACTOR, &
                E_COEFFICIENT,TEXTURE_WIDTH,TEXTURE_HEIGHT,THICKNESS,EXTERNAL_FLUX, &
@@ -871,13 +872,12 @@ TYPE IBM_CUTFACE_TYPE
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)           ::  UNKH, UNKZ
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)           ::  XCENLOW, XCENHIGH
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)           ::  RHO
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)           ::  ZZ_FACE, DIFF_FACE, RHO_D, VELD
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)           ::  ZZ_FACE, RHO_D
    REAL(EB), ALLOCATABLE, DIMENSION(:)             :: TMP_FACE
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:)         :: RHO_D_DZDN
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)           :: H_RHO_D_DZDN
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)           :: RHO_D_DZDN, H_RHO_D_DZDN
    REAL(EB), ALLOCATABLE, DIMENSION(:)             ::  VEL, VELS, DHDX, FN, VELNP1, VELINT
    INTEGER,  ALLOCATABLE, DIMENSION(:,:,:)         ::  JDZ, JDH
-   REAL(EB) :: VELN_CRF, VELD_CRF, DHDX_CRF, FN_CRF, VELNP1_CRF, VELINT_CRF
+   REAL(EB) :: VELINT_CRF
    INTEGER,  ALLOCATABLE, DIMENSION(:,:,:)                         ::      CELL_LIST ! [RC_TYPE I J K ]
 
    ! Here: VIND=IAXIS:KAXIS, EP=1:INT_N_EXT_PTS,
@@ -957,7 +957,8 @@ TYPE IBM_CUTCELL_TYPE
 
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)                     :: DEL_RHO_D_DEL_Z_VOL, U_DOT_DEL_RHO_Z_VOL
    LOGICAL,  ALLOCATABLE, DIMENSION(:)                       :: USE_CC_VOL
-   INTEGER :: NOMICC(2)=0
+   INTEGER :: N_NOMICC=0
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:) :: NOMICC
    REAL(EB):: DIVVOL_BC=0._EB
 END TYPE IBM_CUTCELL_TYPE
 
@@ -971,8 +972,8 @@ TYPE IBM_REGFACEZ_TYPE
    INTEGER :: IWC=0
    INTEGER,  DIMENSION(MAX_DIM)                                    ::       IJK
    INTEGER,  DIMENSION(1:2,1:2)                                    ::        JD
-   REAL(EB), DIMENSION(MAX_SPECIES)                                ::   DIFF_FACE=0._EB, RHO_D=0._EB, VELD=0._EB
-   REAL(EB), DIMENSION(MAX_SPECIES,LOW_IND:HIGH_IND)               ::   RHO_D_DZDN=0._EB
+   REAL(EB), DIMENSION(MAX_SPECIES)                                ::   RHO_D=0._EB
+   REAL(EB), DIMENSION(MAX_SPECIES)                                ::   RHO_D_DZDN=0._EB
    REAL(EB), DIMENSION(MAX_SPECIES)                                :: H_RHO_D_DZDN=0._EB
    REAL(EB), DIMENSION(-1:0)                                       ::    RHOPVN=0._EB
 END TYPE IBM_REGFACEZ_TYPE
@@ -992,8 +993,8 @@ TYPE IBM_RCFACE_LST_TYPE
    REAL(EB), DIMENSION(MAX_DIM,LOW_IND:HIGH_IND)                   ::      XCEN
    INTEGER,  DIMENSION(1:2,1:2)                                    ::        JD
    INTEGER,  DIMENSION(MAX_DIM+1,LOW_IND:HIGH_IND)                 :: CELL_LIST ! [RC_TYPE I J K ]
-   REAL(EB), DIMENSION(MAX_SPECIES)                              :: ZZ_FACE=0._EB,DIFF_FACE=0._EB,RHO_D=0._EB,VELD=0._EB
-   REAL(EB), DIMENSION(MAX_SPECIES,LOW_IND:HIGH_IND)               :: RHO_D_DZDN=0._EB
+   REAL(EB), DIMENSION(MAX_SPECIES)                                :: ZZ_FACE=0._EB,RHO_D=0._EB
+   REAL(EB), DIMENSION(MAX_SPECIES)                                :: RHO_D_DZDN=0._EB
    REAL(EB), DIMENSION(MAX_SPECIES)                                :: H_RHO_D_DZDN=0._EB
    REAL(EB), DIMENSION(-1:0)                                       ::    RHOPVN=0._EB
 END TYPE IBM_RCFACE_LST_TYPE
@@ -1099,6 +1100,18 @@ TYPE HUMAN_GRID_TYPE
 ! II,JJ,KK: Fire mesh cell reference
    INTEGER  :: IMESH,II,JJ,KK
 END TYPE HUMAN_GRID_TYPE
+
+TYPE HUMAN_GRID_FED_TYPE
+! (x,y,z) Centers of the grid cells in the main evacuation meshes
+! SOOT_DENS: Smoke density at the center of the cell (mg/m3)
+! FED_CO_CO2_O2: Purser's FED for co, co2, and o2
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: X,Y,Z,SOOT_DENS,FED_CO_CO2_O2,TMP_G,RADFLUX
+   INTEGER, ALLOCATABLE, DIMENSION(:,:) :: II,JJ,KK,IMESH
+   INTEGER :: N, N_old, IGRID, IHUMAN, ILABEL
+! IMESH: (x,y,z) which fire mesh, if any
+! II,JJ,KK: Fire mesh cell reference
+   INTEGER  :: IBAR,JBAR,KBAR
+END TYPE HUMAN_GRID_FED_TYPE
 
 TYPE SLICE_TYPE
    INTEGER :: I1,I2,J1,J2,K1,K2,GEOM_INDEX=-1,TRNF_INDEX=-1,INDEX,INDEX2=0,Z_INDEX=-999,Y_INDEX=-999,MATL_INDEX=-999,&

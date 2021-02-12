@@ -1,6 +1,8 @@
 &HEAD CHID='bucket_test_1', TITLE='Single Sprinkler Test Case' /
 
-&MESH IJK=50,50,25, XB=-5.0,5.0,-5.0,5.0,0.0,5.0 /
+&MESH IJK=25,25,25, XB=-5.0,0.0,-5.0,0.0,0.0,5.0, MULT_ID='mesh' /
+&MULT ID='mesh', DX=5.0, DY=5.0, I_UPPER=1, J_UPPER=1 /
+
 &RADI RADIATION=.FALSE./
 &TIME DT=0.05, T_END=40. /
 &SPEC ID='WATER VAPOR'/

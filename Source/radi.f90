@@ -1625,11 +1625,10 @@ SUBROUTINE LPCOEF( NTRM, NMOM, IPOLZN, MOMDIM, CALCMO, NPQUAN, A, B, PMOM )
 !      BI(I)       NUMERICAL COEFFICIENTS  B-SUB-I-SUPER-L
 !                     IN DAVE, EQS. 1-15, AS SIMPLIFIED IN REF. 5.
 !      BIDEL(I)    1/2 BI(I) TIMES FACTOR CAPITAL-DEL IN DAVE
-!      CM,DM()     ARRAYS C AND D IN DAVE, EQS. 16-17 (MUELLER FORM),
+!      C,D()       ARRAYS C AND D IN DAVE, EQS. 16-17 (MUELLER FORM),
 !                     CALCULATED USING RECURRENCE DERIVED IN REF. 5
 !      CS,DS()     ARRAYS C AND D IN REF. 4, EQS. A5-A6 (SEKERA FORM),
 !                     CALCULATED USING RECURRENCE DERIVED IN REF. 5
-!      C,D()       EITHER CM,DM OR CS,DS, DEPENDING ON IPOLZN
 !      EVENL       TRUE FOR EVEN-NUMBERED MOMENTS;  FALSE OTHERWISE
 !      IDEL        1 + LITTLE-DEL  IN DAVE
 !      MAXTRM      MAX. NO. OF TERMS IN MIE SERIES
@@ -1663,12 +1662,7 @@ REAL(EB)    SUM
 !     .. LOCAL ARRAYS ..
 
 REAL(EB)    AM( 0:MAXTRM ), BI( 0:MXMOM2 ), BIDEL( 0:MXMOM2 ), RECIP( MAXRCP )
-COMPLEX(EB) C( MAXTRM ), CM( MAXTRM ), CS( MAXTRM ), D( MAXTRM ), DM( MAXTRM ), DS( MAXTRM )
-!     ..
-!     .. EQUIVALENCES ..
-
-EQUIVALENCE ( C, CM ), ( D, DM )
-!     ..
+COMPLEX(EB) C( MAXTRM ), CS( MAXTRM ), D( MAXTRM ), DS( MAXTRM )
 SAVE      PASS1, RECIP
 DATA      PASS1 / .TRUE. /
 
@@ -1695,26 +1689,26 @@ END IF
 
 IF( NTRM + 2>MAXTRM )CALL ERRMSG('LPCOEF--PARAMETER MAXTRM TOO SMALL',.TRUE.)
 !                                     ** CALCULATE MUELLER C, D ARRAYS
-CM( NTRM + 2 ) = ( 0._EB, 0._EB )
-DM( NTRM + 2 ) = ( 0._EB, 0._EB )
-CM( NTRM + 1 ) = ( 1._EB - RECIP( NTRM+1 ) ) * B( NTRM )
-DM( NTRM + 1 ) = ( 1._EB - RECIP( NTRM+1 ) ) * A( NTRM )
-CM( NTRM ) = ( RECIP( NTRM ) + RECIP( NTRM+1 ) ) * A( NTRM ) + ( 1._EB - RECIP( NTRM ) )*B( NTRM-1 )
-DM( NTRM ) = ( RECIP( NTRM ) + RECIP( NTRM+1 ) ) * B( NTRM ) + ( 1._EB - RECIP( NTRM ) )*A( NTRM-1 )
+C( NTRM + 2 ) = ( 0._EB, 0._EB )
+D( NTRM + 2 ) = ( 0._EB, 0._EB )
+C( NTRM + 1 ) = ( 1._EB - RECIP( NTRM+1 ) ) * B( NTRM )
+D( NTRM + 1 ) = ( 1._EB - RECIP( NTRM+1 ) ) * A( NTRM )
+C( NTRM ) = ( RECIP( NTRM ) + RECIP( NTRM+1 ) ) * A( NTRM ) + ( 1._EB - RECIP( NTRM ) )*B( NTRM-1 )
+D( NTRM ) = ( RECIP( NTRM ) + RECIP( NTRM+1 ) ) * B( NTRM ) + ( 1._EB - RECIP( NTRM ) )*A( NTRM-1 )
 DO K = NTRM-1, 2, -1
-   CM( K ) = CM( K+2 ) - ( 1._EB + RECIP(K+1) ) * B( K+1 )+ ( RECIP(K) + RECIP(K+1) ) * A( K ) &
+   C( K ) = C( K+2 ) - ( 1._EB + RECIP(K+1) ) * B( K+1 )+ ( RECIP(K) + RECIP(K+1) ) * A( K ) &
                         + ( 1._EB - RECIP(K) ) * B( K-1 )
-   DM( K ) = DM( K+2 ) - ( 1._EB + RECIP(K+1) ) * A( K+1 )  + ( RECIP(K) + RECIP(K+1) ) * B( K ) &
+   D( K ) = D( K+2 ) - ( 1._EB + RECIP(K+1) ) * A( K+1 )  + ( RECIP(K) + RECIP(K+1) ) * B( K ) &
                         + ( 1._EB - RECIP(K) ) * A( K-1 )
 END DO
 
-CM( 1 ) = CM( 3 ) + 1.5_EB * ( A( 1 ) - B( 2 ) )
-DM( 1 ) = DM( 3 ) + 1.5_EB * ( B( 1 ) - A( 2 ) )
+C( 1 ) = C( 3 ) + 1.5_EB * ( A( 1 ) - B( 2 ) )
+D( 1 ) = D( 3 ) + 1.5_EB * ( B( 1 ) - A( 2 ) )
 
 IF( IPOLZN>=0 ) THEN
    DO K = 1, NTRM + 2
-      C( K ) = ( 2*K - 1 ) * CM( K )
-      D( K ) = ( 2*K - 1 ) * DM( K )
+      C( K ) = ( 2*K - 1 ) * C( K )
+      D( K ) = ( 2*K - 1 ) * D( K )
    END DO
 ELSE
 !                                    ** COMPUTE SEKERA C AND D ARRAYS
@@ -1724,8 +1718,8 @@ ELSE
    DS( NTRM + 1 ) = ( 0._EB, 0._EB )
 
    DO K = NTRM, 1, -1
-      CS( K ) = CS( K+2 ) + ( 2*K + 1 ) * ( CM( K+1 ) - B( K ) )
-      DS( K ) = DS( K+2 ) + ( 2*K + 1 ) * ( DM( K+1 ) - A( K ) )
+      CS( K ) = CS( K+2 ) + ( 2*K + 1 ) * ( C( K+1 ) - B( K ) )
+      DS( K ) = DS( K+2 ) + ( 2*K + 1 ) * ( D( K+1 ) - A( K ) )
    END DO
 
    DO K = 1, NTRM + 2
@@ -3358,7 +3352,7 @@ ENDIF
 
 DO NM=1,NMESHES
 
-   IF (MYID/=PROCESS(NM)) CYCLE
+   IF (MY_RANK/=PROCESS(NM)) CYCLE
 
    CALL POINT_TO_MESH(NM)
 
@@ -4436,7 +4430,7 @@ END SUBROUTINE RADIATION_FVM
 SUBROUTINE ADD_VOLUMETRIC_HEAT_SOURCE(MODE)
 
 INTEGER, INTENT(IN) :: MODE
-REAL(EB) :: TIME_RAMP_FACTOR
+REAL(EB) :: TIME_RAMP_FACTOR,RR
 INTEGER :: N,I,J,K
 TYPE(INITIALIZATION_TYPE), POINTER :: IN
 
@@ -4448,17 +4442,22 @@ DO N=1,N_INIT
    DO K=0,KBP1
       DO J=0,JBP1
          DO I=0,IBP1
-            IF (XC(I) > IN%X1 .AND. XC(I) < IN%X2 .AND. &
-                YC(J) > IN%Y1 .AND. YC(J) < IN%Y2 .AND. &
-                ZC(K) > IN%Z1 .AND. ZC(K) < IN%Z2) THEN
-               IF (MODE==1) THEN
-                  Q(I,J,K) = Q(I,J,K) + TIME_RAMP_FACTOR*IN%HRRPUV
-                  KFST4_GAS(I,J,K) = KFST4_GAS(I,J,K) + IN%CHI_R*TIME_RAMP_FACTOR*IN%HRRPUV
-               ELSEIF (MODE==2) THEN
-                  Q(I,J,K) = Q(I,J,K) - TIME_RAMP_FACTOR*IN%HRRPUV
-               ELSE
-                  Q(I,J,K) = Q(I,J,K) + TIME_RAMP_FACTOR*IN%HRRPUV
-               ENDIF
+            SELECT CASE(IN%SHAPE)
+               CASE DEFAULT
+                  IF (XC(I) < IN%X1 .OR. XC(I) > IN%X2 .OR. &
+                      YC(J) < IN%Y1 .OR. YC(J) > IN%Y2 .OR. &
+                      ZC(K) < IN%Z1 .OR. ZC(K) > IN%Z2) CYCLE
+               CASE('CONE')
+                  RR = MAX(0._EB,IN%RADIUS*(1._EB-(ZC(K)-IN%Z0)/IN%HEIGHT))
+                  IF ((XC(I)-IN%X0)**2+(YC(J)-IN%Y0)**2>RR**2) CYCLE
+            END SELECT
+            IF (MODE==1) THEN
+               Q(I,J,K) = Q(I,J,K) + TIME_RAMP_FACTOR*IN%HRRPUV
+               KFST4_GAS(I,J,K) = KFST4_GAS(I,J,K) + IN%CHI_R*TIME_RAMP_FACTOR*IN%HRRPUV
+            ELSEIF (MODE==2) THEN
+               Q(I,J,K) = Q(I,J,K) - TIME_RAMP_FACTOR*IN%HRRPUV
+            ELSE
+               Q(I,J,K) = Q(I,J,K) + TIME_RAMP_FACTOR*IN%HRRPUV
             ENDIF
          ENDDO
       ENDDO

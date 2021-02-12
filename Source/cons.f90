@@ -30,8 +30,7 @@ INTEGER, PARAMETER :: CONSMAG=1                  !< Flag for TURB_MODEL: Constan
 INTEGER, PARAMETER :: DYNSMAG=2                  !< Flag for TURB_MODEL: Dynamic Smagorinsky turbulence model
 INTEGER, PARAMETER :: DEARDORFF=3                !< Flag for TURB_MODEL: Deardorff turbulence model
 INTEGER, PARAMETER :: VREMAN=4                   !< Flag for TURB_MODEL: Vreman turbulence model
-INTEGER, PARAMETER :: RNG=5                      !< Flag for TURB_MODEL: ReNormalization Group turbulence model
-INTEGER, PARAMETER :: WALE=6                     !< Flag for TURB_MODEL: Wall-Adapting Local Eddy viscosity turbulence model
+INTEGER, PARAMETER :: WALE=5                     !< Flag for TURB_MODEL: Wall-Adapting Local Eddy viscosity turbulence model
 
 INTEGER, PARAMETER :: MEAN_LES_FILTER_WIDTH=1    !< Flag for LES_FILTER_WIDTH_TYPE: geometric mean filter width
 INTEGER, PARAMETER :: MAX_LES_FILTER_WIDTH=2     !< Flag for LES_FILTER_WIDTH_TYPE: take max of DX,DY,DZ
@@ -219,7 +218,6 @@ LOGICAL :: CHECK_HT=.FALSE.                 !< Apply heat transfer stability con
 LOGICAL :: PATCH_VELOCITY=.FALSE.           !< Assume user-defined velocity patches
 LOGICAL :: OVERWRITE=.TRUE.                 !< Overwrite old output files
 LOGICAL :: INIT_HRRPUV=.FALSE.              !< Assume an initial spatial distribution of HRR per unit volume
-LOGICAL :: TENSOR_DIFFUSIVITY=.FALSE.
 LOGICAL :: SYNTHETIC_EDDY_METHOD=.FALSE.
 LOGICAL :: UVW_RESTART=.FALSE.              !< Initialize velocity field with values from a file
 LOGICAL :: PARTICLE_CFL=.FALSE.             !< Include particle velocity as a constraint on time step
@@ -241,10 +239,8 @@ LOGICAL :: SOLID_HT3D=.FALSE.
 LOGICAL :: SOLID_MT3D=.FALSE.
 LOGICAL :: SOLID_PYRO3D=.FALSE.
 LOGICAL :: HVAC_MASS_TRANSPORT=.FALSE.
-LOGICAL :: EXTERNAL_BOUNDARY_CORRECTION=.FALSE.
 LOGICAL :: DUCT_HT=.FALSE.
 LOGICAL :: DUCT_HT_INSERTED=.FALSE.
-LOGICAL :: STORE_Q_DOT_PPP_S=.FALSE.
 LOGICAL :: STORE_OLD_VELOCITY=.FALSE.
 LOGICAL :: QFAN_BETA_TEST=.FALSE.
 LOGICAL :: USE_ATMOSPHERIC_INTERPOLATION=.FALSE.
@@ -259,9 +255,7 @@ LOGICAL :: PERIODIC_DOMAIN_X=.FALSE.                !< The domain is periodic \f
 LOGICAL :: PERIODIC_DOMAIN_Y=.FALSE.                !< The domain is periodic \f$ y \f$
 LOGICAL :: PERIODIC_DOMAIN_Z=.FALSE.                !< The domain is periodic \f$ z \f$
 LOGICAL :: TEST_NEW_OPEN=.FALSE.
-INTEGER :: CLIP_DT_RESTRICTIONS_MAX=5               !< Maximum number of DT restrictions before clipping is invoked
-
-INTEGER :: BNDF_TIME_INTEGRALS=0
+LOGICAL :: TEST_NEW_WAKE_REDUCTION=.FALSE.
 
 INTEGER, ALLOCATABLE, DIMENSION(:) :: CHANGE_TIME_STEP_INDEX      !< Flag to indicate if a mesh needs to change time step
 INTEGER, ALLOCATABLE, DIMENSION(:) :: SETUP_PRESSURE_ZONES_INDEX  !< Flag to indicate if a mesh needs to keep searching for ZONEs
@@ -289,7 +283,8 @@ LOGICAL, ALLOCATABLE, DIMENSION(:) :: EVACUATION_ONLY, EVACUATION_SKIP
 REAL(EB) :: EVAC_DT_FLOWFIELD,EVAC_DT_STEADY_STATE,T_EVAC,T_EVAC_SAVE
 INTEGER :: EVAC_PRESSURE_ITERATIONS,EVAC_TIME_ITERATIONS,EVAC_N_QUANTITIES,I_EVAC
 INTEGER :: EVAC_AVATAR_NCOLOR
-LOGICAL :: EVACUATION_MC_MODE=.FALSE.,EVACUATION_DRILL=.FALSE.,NO_EVACUATION=.FALSE.
+LOGICAL :: EVACUATION_MC_MODE=.FALSE.,EVACUATION_DRILL=.FALSE.,DO_EVACUATION=.FALSE.,EVACUATION_WRITE_FED=.FALSE.
+LOGICAL :: EVACUATION_INITIALIZATION=.FALSE.
 CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: EVAC_CLASS_NAME, EVAC_CLASS_PROP
 INTEGER, ALLOCATABLE, DIMENSION(:) :: EVAC_QUANTITIES_INDEX
 INTEGER, ALLOCATABLE, DIMENSION(:,:) :: EVAC_CLASS_RGB,EVAC_AVATAR_RGB
@@ -318,8 +313,6 @@ REAL(EB) :: OVEC(3)=0._EB                      !< Coriolis vector (1/s)
 REAL(EB) :: C_SMAGORINSKY=0.2_EB               !< Coefficient in turbulence model
 REAL(EB) :: C_DEARDORFF=0.1_EB                 !< Coefficient in turbulence model
 REAL(EB) :: C_VREMAN=0.07_EB                   !< Coefficient in turbulence model
-REAL(EB) :: C_RNG=0.2_EB                       !< Coefficient in turbulence model
-REAL(EB) :: C_RNG_CUTOFF=10._EB                !< Coefficient in turbulence model
 REAL(EB) :: C_WALE=0.60_EB                     !< Coefficient in turbulence model
 REAL(EB) :: LAPSE_RATE                         !< Temperature change with height (K/m)
 REAL(EB) :: TEX_ORI(3)                         !< Origin of the texture map for Smokeview (m)
@@ -370,7 +363,7 @@ REAL(EB), PARAMETER :: BTILDE_ROUGH=8.5_EB                  !< Fully rough B(s+)
 
 ! Parameters associated with parallel mode
 
-INTEGER :: MYID=0                                           !< The MPI process index, starting at 0
+INTEGER :: MY_RANK=0                                           !< The MPI process index, starting at 0
 INTEGER :: N_MPI_PROCESSES=1                                !< Number of MPI processes
 INTEGER :: EVAC_PROCESS=-1
 INTEGER :: LOWER_MESH_INDEX=1000000000                      !< Lower bound of meshes controlled by the current MPI process
@@ -420,10 +413,10 @@ REAL(EB) :: AIT_EXCLUSION_ZONE(6,MAX_AIT_EXCLUSION_ZONES)=-1.E6_EB  !< Volume in
 REAL(FB) :: HRRPUV_MAX_SMV=1200._FB                                 !< Clipping value used by Smokeview (kW/m3)
 REAL(FB) :: TEMP_MAX_SMV=2000._FB                                   !< Clipping value used by Smokeview (C)
 
-INTEGER :: N_SPECIES=0                                              !< Number of total gas phase species
+INTEGER :: N_SPECIES=0                                              !< Number of total gas phase primitive species
 INTEGER :: N_REACTIONS                                              !< Number of gas phase reactions
 INTEGER :: I_WATER=-1                                               !< Index of the 'WATER VAPOR' tracked species
-INTEGER :: N_TRACKED_SPECIES=0                                      !< Number of tracked (computed) gas species
+INTEGER :: N_TRACKED_SPECIES=0                                      !< Number of lumped or tracked (computed) gas species
 INTEGER :: N_SURFACE_DENSITY_SPECIES=0
 INTEGER :: COMBUSTION_ODE_SOLVER=-1                                 !< Indicator of ODE solver
 INTEGER :: EXTINCT_MOD=-1                                           !< Indicator of extinction model
@@ -499,21 +492,17 @@ INTEGER, ALLOCATABLE, DIMENSION(:,:) :: VELOCITY_ERROR_MAX_LOC,PRESSURE_ERROR_MA
 INTEGER :: PRESSURE_ITERATIONS=0,MAX_PRESSURE_ITERATIONS=10,TOTAL_PRESSURE_ITERATIONS=0
 CHARACTER(LABEL_LENGTH):: PRES_METHOD = 'FFT'
 
-!! Parameters for the Laplace solver (under construction)
-!
-!INTEGER, PARAMETER :: SCI_KM1=1,SCI_JM1=2,SCI_IM1=3,SCI_IJK=4,SCI_IP1=5,SCI_JP1=6,SCI_KP1=7 ! (S)parse (C)olumn (I)ndex
-!INTEGER, PARAMETER :: NDIAG=7
-
 ! Miscellaneous integer constants
 
 INTEGER :: ICYC,ICYC_RESTART=0,NFRAMES,PERIODIC_TEST=0,SIM_MODE=3,TURB_MODEL=0,FISHPAK_BC(3)=-1,&
-           STOP_AT_ITER=0,HT3D_TEST=0,WALL_INCREMENT=2,WALL_INCREMENT_HT3D=1,NEAR_WALL_TURB_MODEL=1
+           STOP_AT_ITER=0,HT3D_TEST=0,WALL_INCREMENT=2,WALL_INCREMENT_HT3D=1,NEAR_WALL_TURB_MODEL=1,&
+           CLIP_DT_RESTRICTIONS_MAX=5,BNDF_TIME_INTEGRALS=0
 
 ! Clocks for output file dumps
 
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: PART_CLOCK,SLCF_CLOCK,SL3D_CLOCK,SMOKE3D_CLOCK,&
                                        PL3D_CLOCK,BNDF_CLOCK,ISOF_CLOCK,PROF_CLOCK,RADF_CLOCK
-REAL(EB) :: MINT_CLOCK,DEVC_CLOCK,HRR_CLOCK,EVAC_CLOCK=1.E6_EB,CTRL_CLOCK,FLUSH_CLOCK,CPU_CLOCK,RESTART_CLOCK,&
+REAL(EB) :: MASS_CLOCK,DEVC_CLOCK,HRR_CLOCK,EVAC_CLOCK=1.E6_EB,CTRL_CLOCK,FLUSH_CLOCK,CPU_CLOCK,RESTART_CLOCK,&
             BNDC_CLOCK,GEOC_CLOCK,GEOM_CLOCK,UVW_CLOCK,TURB_INIT_CLOCK=-1.E10_EB,&
             UVW_CLOCK_CBC(1:4)=(/0._EB,0.28_EB,0.67_EB,1.E10_EB/)
 REAL(EB) :: UVW_TIMER(10),MMS_TIMER=1.E10_EB,SLCF_TIMER(10),BNDF_TIMER(10),SL3D_TIMER(10)
@@ -534,7 +523,7 @@ REAL(EB) :: ALIGNMENT_TOLERANCE=0.001_EB      !< Maximum ratio of sizes of abutt
 INTEGER                              :: LU_ERR=ERROR_UNIT,LU_END=2,LU_GIT=3,LU_SMV=4,LU_INPUT=5,LU_OUTPUT=6,LU_STOP=7,LU_CPU=8,&
                                         LU_CATF=9
 INTEGER                              :: LU_MASS,LU_HRR,LU_STEPS,LU_NOTREADY,LU_VELOCITY_ERROR,LU_CFL,LU_LINE=-1,LU_CUTCELL
-INTEGER                              :: LU_EVACCSV,LU_EVACEFF,LU_EVACFED,LU_EVACOUT,LU_HISTOGRAM,LU_EVAC_CB
+INTEGER                              :: LU_EVACCSV,LU_EVACEFF,LU_EVACFED,LU_EVACXYZ,LU_EVACOUT,LU_HISTOGRAM,LU_EVAC_CB
 INTEGER                              :: LU_BNDC=-1,LU_GEOC=-1,LU_TGA,LU_INFO
 INTEGER, ALLOCATABLE, DIMENSION(:)   :: LU_PART,LU_PROF,LU_XYZ,LU_TERRAIN,LU_PL3D,LU_DEVC,LU_STATE,LU_CTRL,LU_CORE,LU_RESTART
 INTEGER, ALLOCATABLE, DIMENSION(:)   :: LU_VEG_OUT,LU_GEOM
@@ -547,6 +536,7 @@ CHARACTER(250)                             :: FN_INPUT='null'
 CHARACTER(80)                              :: FN_STOP='null',FN_CPU,FN_CFL,FN_OUTPUT='null'
 CHARACTER(80)                              :: FN_MASS,FN_HRR,FN_STEPS,FN_SMV,FN_END,FN_ERR,FN_NOTREADY,FN_VELOCITY_ERROR,FN_GIT
 CHARACTER(80)                              :: FN_EVACCSV,FN_EVACEFF,FN_EVACFED,FN_EVACOUT,FN_LINE,FN_HISTOGRAM,FN_CUTCELL,FN_TGA
+CHARACTER(80)                              :: FN_EVACXYZ
 CHARACTER(80), ALLOCATABLE, DIMENSION(:)   :: FN_PART,FN_PROF,FN_XYZ,FN_TERRAIN,FN_PL3D,FN_DEVC,FN_STATE,FN_CTRL,FN_CORE,FN_RESTART
 CHARACTER(80), ALLOCATABLE, DIMENSION(:)   :: FN_VEG_OUT,FN_GEOM
 CHARACTER(80), ALLOCATABLE, DIMENSION(:,:) :: FN_SLCF,FN_SLCF_GEOM,FN_BNDF,FN_BNDF_GEOM,FN_BNDG, &
@@ -589,16 +579,16 @@ REAL(EB), ALLOCATABLE, DIMENSION(:) :: MEAN_FORCING_SUM_U_VOL,MEAN_FORCING_SUM_V
 ! Sprinkler Variables
 
 REAL(EB) :: C_DIMARZO=6.E6_EB
-INTEGER :: N_ACTUATED_SPRINKLERS=0,N_OPEN_NOZZLES=0,EVAP_MODEL=0
+INTEGER :: N_ACTUATED_SPRINKLERS=0,EVAP_MODEL=0
 INTEGER, PARAMETER :: NDC=1000,NDC2=100
 LOGICAL :: POROUS_FLOOR=.TRUE.,ALLOW_UNDERSIDE_PARTICLES=.FALSE.,ALLOW_SURFACE_PARTICLES=.TRUE.
 
-! Particles and PARTICLEs
+! Particles
 
 INTEGER :: MAXIMUM_PARTICLES,N_LAGRANGIAN_CLASSES,N_EVAC,N_LP_ARRAY_INDICES=0
 REAL(EB) :: CNF_CUTOFF=0.005_EB
 LOGICAL :: EB_PART_FILE=.FALSE.,PL3D_PARTICLE_FLUX=.FALSE.,SLCF_PARTICLE_FLUX=.FALSE.,DEVC_PARTICLE_FLUX=.FALSE.
-LOGICAL :: OMESH_PARTICLES=.FALSE.
+LOGICAL :: OMESH_PARTICLES=.FALSE.,EXCHANGE_INSERTED_PARTICLES=.FALSE.
 
 INTEGER :: MOMENTUM_INTERPOLATION_METHOD=0
 
@@ -656,15 +646,11 @@ LOGICAL :: GLMAT_SOLVER =.FALSE.
 LOGICAL :: GLMAT_VERBOSE=.FALSE.
 LOGICAL :: PRES_ON_WHOLE_DOMAIN=.TRUE.
 LOGICAL :: PRES_ON_CARTESIAN=.TRUE.
-LOGICAL :: DO_IMPLICIT_CCREGION=.FALSE.
 LOGICAL :: COMPUTE_CUTCELLS_ONLY=.FALSE.
 LOGICAL :: CC_ZEROIBM_VELO=.FALSE.
 LOGICAL :: CC_SLIPIBM_VELO=.FALSE.
-LOGICAL :: CC_VELOBC_FLAG=.FALSE.
-LOGICAL :: CC_VELOBC_FLAG2=.FALSE.
 LOGICAL :: CC_STRESS_METHOD=.FALSE.
 LOGICAL :: CC_ONLY_IBEDGES_FLAG=.TRUE.
-LOGICAL :: CC_FORCE_PRESSIT=.TRUE.
 
 ! Threshold factor for volume of cut-cells respect to volume of Cartesian cells:
 ! Currently used in the thermo div definition of cut-cells.

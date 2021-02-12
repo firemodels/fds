@@ -7,7 +7,7 @@ IMPLICIT NONE
 
 INTEGER, ALLOCATABLE, DIMENSION(:) :: DEVC_PIPE_OPERATING
 
-!> \brief Derived type storing inputs for the PROP namelist group 
+!> \brief Derived type storing inputs for the PROP namelist group
 
 TYPE PROPERTY_TYPE
    REAL(EB) :: DENSITY,DIAMETER,EMISSIVITY,HEAT_TRANSFER_COEFFICIENT,SPECIFIC_HEAT,RTI, &
@@ -50,7 +50,7 @@ TYPE SUBDEVICE_TYPE
    !> Grid index for a grid cell along subdevice path for TRANSMISSION or PATH OBSCURATION
    INTEGER, ALLOCATABLE, DIMENSION(:) :: I_PATH,J_PATH,K_PATH
    ! !\}
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: D_PATH 
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: D_PATH
    !<Segment length in a grid cell along subdevice path for TRANSMISSION or PATH OBSCURATION
 END TYPE SUBDEVICE_TYPE
 
@@ -94,14 +94,15 @@ TYPE DEVICE_TYPE
                     INIT_ID='null',NO_UPDATE_DEVC_ID='null',NO_UPDATE_CTRL_ID='null',REAC_ID='null'
    CHARACTER(LABEL_LENGTH) :: SMOKEVIEW_LABEL
    LOGICAL :: INITIAL_STATE,CURRENT_STATE,LATCH,PRIOR_STATE,DRY=.FALSE.,HIDE_COORDINATES=.FALSE., &
-              EVACUATION=.FALSE.,RELATIVE=.FALSE.,OUTPUT=.TRUE.,ABSOLUTE_VALUE=.FALSE.,USE_PREVIOUS_VALUE=.FALSE.
+              EVACUATION=.FALSE.,RELATIVE=.FALSE.,OUTPUT=.TRUE.,ABSOLUTE_VALUE=.FALSE.,USE_PREVIOUS_VALUE=.FALSE., &
+              UNITS_SPECIFIED=.FALSE.
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: HISTOGRAM_COUNTS
 END TYPE DEVICE_TYPE
 
 ! Device arrays
 
 INTEGER :: N_PROP !< Number of PROP inputs
-INTEGER :: N_DEVC ! <Number of DEVC inputs 
+INTEGER :: N_DEVC ! <Number of DEVC inputs
 INTEGER :: N_DEVC_TIME !<Number of DEVC with DV\%QUANTITY='TIME'
 INTEGER :: N_DEVC_LINE !<Number of DEVC with DV\%POINTS > 0
 INTEGER :: MAX_DEVC_LINE_POINTS=1
@@ -139,7 +140,7 @@ INTEGER, PARAMETER :: AND_GATE=1, OR_GATE=2, XOR_GATE=3, X_OF_N_GATE=4, TIME_DEL
 !> !\{
 !> Parameter used to define the type of input for CONTROL\%INPUT_TYPE
 INTEGER, PARAMETER :: DEVICE_INPUT=1,CONTROL_INPUT=2,CONSTANT_INPUT=3
-!> !\} 
+!> !\}
 
 INTEGER :: N_CTRL = 0 !< Length of CONTROL
 INTEGER :: N_CTRL_FILES = 0 !< Number of CHID_ctrl.csv output files
@@ -157,11 +158,11 @@ TYPE CONTROL_TYPE
    INTEGER :: N_INPUTS=0            !< Number of inputs to the control function
    INTEGER :: RAMP_INDEX=0          !< Index of a RAMP used for the CUSTOM control function
    INTEGER :: MESH=1                !< Mesh location of the control function
-   INTEGER :: N=1                   
+   INTEGER :: N=1
    !< Number of inputs that must be true to change the INITIAL_STATE of an AT LEAST or ONLY functions
-   INTEGER :: ON_BOUND=0            
+   INTEGER :: ON_BOUND=0
    !< Negative indicates a DEADBAND INITIAL_STATE trips at the lower bound. Positive trips at the upper bound.
-   INTEGER :: TRIP_DIRECTION        
+   INTEGER :: TRIP_DIRECTION
    !< Negative indicates INITIAL_STATE trips when dropping below the SETPOINT. Positive is increase above SETPOINT.
    INTEGER, ALLOCATABLE, DIMENSION (:) :: INPUT
    !< Array of indices containing the device and control function inputs
@@ -181,7 +182,7 @@ TYPE CONTROL_TYPE
    REAL(EB) :: TARGET_VALUE = -9.E30_EB !<Desired target used to compute error value for input to a PID control function
    CHARACTER(LABEL_LENGTH) :: ID='null' !<Name of control function
    CHARACTER(LABEL_LENGTH) :: RAMP_ID='null' !<Name of RAMP used for a CUSTOM control function
-   CHARACTER(LABEL_LENGTH) :: INPUT_ID(40)='null' !<Array of DEVC\%ID or CTRL\%ID 
+   CHARACTER(LABEL_LENGTH) :: INPUT_ID(40)='null' !<Array of DEVC\%ID or CTRL\%ID
 END TYPE CONTROL_TYPE
 
 TYPE (CONTROL_TYPE),  DIMENSION(:), ALLOCATABLE, TARGET :: CONTROL !< Array of all defined CTRL inputs

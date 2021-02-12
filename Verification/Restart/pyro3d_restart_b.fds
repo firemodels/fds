@@ -1,8 +1,8 @@
-&HEAD CHID='pyro3d_restart'/ submitted by Morteza Haghighi
+&HEAD CHID='pyro3d_restart'/
 
 &MESH IJK=4,4,12, XB=-0.004,0.000,-0.002,0.002,-0.001,0.011/
 
-&TIME T_END=600., WALL_INCREMENT=1, DT=0.05 /
+&TIME T_END=610., WALL_INCREMENT=1, DT=0.05 /
 
 &DUMP DT_HRR=1., MASS_FILE=T, DT_RESTART=20.0 /
 
