@@ -1088,10 +1088,10 @@ fi
 
 # wait until number of jobs running alread by user is less than USERMAX
 if [ "$USERMAX" != "" ]; then
-  nuser=`squeue | grep -v JOBID | awk '{print $4}' | grep $USER | wc -l`
+  nuser=`squeue | grep -v JOBID | awk '{print $2 $4}' | grep $queue | grep $USER | wc -l`
   while [ $nuser -gt $USERMAX ]
   do
-    nuser=`squeue | grep -v JOBID | awk '{print $4}' | grep $USER | wc -l`
+    nuser=`squeue | grep -v JOBID | awk '{print $2 $4}' | grep $queue | grep $USER | wc -l`
     sleep 10
   done
 fi
