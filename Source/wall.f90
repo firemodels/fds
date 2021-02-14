@@ -709,7 +709,7 @@ SUBROUTINE SOLID_HEAT_TRANSFER_3D
 
 REAL(EB) :: DT_SUB,T_SUB,K_S,K_S_M,K_S_P,TMP_G,TMP_F,TMP_S,RDN,HTC,TMP_OTHER,RAMP_FACTOR,&
             QNET,TSI,FDERIV,QEXTRA,K_S_MAX,VN_HT3D,R_K_S,TMP_I,TH_EST4,FO_EST3,&
-            RHO_GET(N_MATL),K_GET,K_OTHER,RHOCBAR_S,VC,VSRVC_LOC,RDS,KDTDN_S,KAPPA_S,K_R,REFRACTIVE_INDEX_S
+            RHO_GET(N_MATL),K_GET,K_OTHER,RHOCBAR_S,VC,VSRVC_LOC,RDS,KDTDN_S,KAPPA_S,K_R,REFRACTIVE_INDEX_S,DUMMY
 INTEGER  :: II,JJ,KK,I,J,K,IOR,IC,ICM,ICP,IIG,JJG,KKG,ADCOUNT,IIO,JJO,KKO,NOM,N_INT_CELLS,NN,ITER,ICO
 LOGICAL :: CONT_MATL_PROP,IS_STABLE_DT_SUB
 INTEGER, PARAMETER :: N_JACOBI_ITERATIONS=1,SURFACE_HEAT_FLUX_MODEL=1
@@ -1102,6 +1102,9 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_SUB-DT_BC_HT3D)>TWO_EPSILON_EB )
                      END SELECT
                   ELSE
                      TMP_G = TMP_NEW(IIG,JJG,KKG)
+                     ! Special case where the gas temperature is fixed by the user
+                     IF (ASSUMED_GAS_TEMPERATURE > 0._EB) TMP_G = TMPA + &
+                        EVALUATE_RAMP(T-T_BEGIN,DUMMY,I_RAMP_AGT)*(ASSUMED_GAS_TEMPERATURE-TMPA)
                      TMP_F = WC%ONE_D%TMP_F
                      TMP_OTHER = TMP_F
                      DTMP = TMP_G - TMP_F
@@ -1146,6 +1149,9 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_SUB-DT_BC_HT3D)>TWO_EPSILON_EB )
                   JJG = WC%ONE_D%JJG
                   KKG = WC%ONE_D%KKG
                   TMP_G = TMP_NEW(IIG,JJG,KKG)
+                  ! Special case where the gas temperature is fixed by the user
+                  IF (ASSUMED_GAS_TEMPERATURE > 0._EB) TMP_G = TMPA + &
+                     EVALUATE_RAMP(T-T_BEGIN,DUMMY,I_RAMP_AGT)*(ASSUMED_GAS_TEMPERATURE-TMPA)
                   TMP_S = TMP_NEW(II,JJ,KK)
                   TMP_F = WC%ONE_D%TMP_F
                   RDS = 0._EB
