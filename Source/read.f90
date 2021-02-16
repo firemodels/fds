@@ -10330,7 +10330,7 @@ MESH_LOOP_3: DO NM=1,NMESHES
    DO K=0,KBP1
       DO J=0,JBP1
          DO I=0,IBP1
-         IC = CELL_INDEX(I,J,K)
+            IC = CELL_INDEX(I,J,K)
             IF (IC>0) THEN
                I_CELL(IC) = I
                J_CELL(IC) = J
