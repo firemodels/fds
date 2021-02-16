@@ -1,6 +1,6 @@
 &HEAD CHID='plate_thermometer_75', TITLE='Simple simulation of a plate thermometer at a fixed heat flux' /
 
-&MESH IJK=3,3,4, XB=-0.15,0.15,-0.15,0.15,0.0,0.4 / 
+&MESH IJK=3,3,4, XB=-0.15,0.15,-0.15,0.15,0.0,0.4 /
 
 &TIME T_END=2100, WALL_INCREMENT=1, DT=0.1 /
 
@@ -48,7 +48,7 @@
       MATL_ID = 'INCONEL','CERABLANKET'
       THICKNESS = 0.00079,0.0254
       EXTERNAL_FLUX=75.
-      EXTERNAL_FLUX_RAMP='flux'  /
+      RAMP_EF='flux'  /
 
 &RAMP ID='flux', T=   0., F=0. /
 &RAMP ID='flux', T=   1., F=1. /
@@ -66,4 +66,4 @@
 &DUMP DT_DEVC=10. /
 &DEVC ID='temp', XYZ=0.0,0.0,0.0, QUANTITY='WALL TEMPERATURE', IOR=3 /
 
-&TAIL / 
+&TAIL /
