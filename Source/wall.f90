@@ -800,9 +800,9 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_SUB-DT_BC_HT3D)>TWO_EPSILON_EB )
                               VSRVC_Y(I,J,K) = 1._EB
                               VSRVC_Z(I,J,K) = VSRVC_X(I,J,K)
                            ELSE
-                              VSRVC_X(I,J,K) = VSRVC(I,J,K)**ONTH
-                              VSRVC_Y(I,J,K) = VSRVC_X(I,J,K)
-                              VSRVC_Z(I,J,K) = VSRVC_X(I,J,K)
+                           VSRVC_X(I,J,K) = VSRVC(I,J,K)**ONTH
+                           VSRVC_Y(I,J,K) = VSRVC_X(I,J,K)
+                           VSRVC_Z(I,J,K) = VSRVC_X(I,J,K)
                            ENDIF
                         CASE(1)
                            VSRVC_X(I,J,K) = VSRVC(I,J,K)
@@ -2598,15 +2598,15 @@ REAL(EB) :: DUMMY,DTMP,QDXKF,QDXKB,RR,RFACF,RFACB,RFACF2,RFACB2, &
             DEL_DOT_Q_SC,Q_DOT_G_PPP,Q_DOT_O2_PPP,Q_DOT_G_PP,Q_DOT_O2_PP,R_SURF,U_SURF,V_SURF,W_SURF,T_BC_SUB,DT_BC_SUB,&
             Q_NET_F,Q_NET_B,TMP_RATIO,KODXF,KODXB,H_S,T_NODE,C_S,H_NODE,RHO_C_S(1:NWP_MAX),RHO_H_S(1:NWP_MAX),VOL,T_BOIL_EFF
 REAL(EB) :: D_Z_N(0:5000),D_Z_TEMP,D_Z_P(0:NWP_MAX+1), D_DRHOZDX(0:NWP_MAX),D_BAR,PHI_BAR,D_STAR_BAR,&
-            RR_SUM,GAS_DENSITY,POROSITY(0:NWP_MAX+1),H_R,TMP_S,H_S_B,RHO_DOT,RHO_DOT_0(1:NWP_MAX)
-
+            RR_SUM,GAS_DENSITY,POROSITY(0:NWP_MAX+1),H_R,TMP_S,H_S_B,RHO_DOT,RHO_DOT_0(1:NWP_MAX),DDSUM,&
+            SMALLEST_CELL_SIZE(1:MAX_LAYERS)
 REAL(EB), POINTER, DIMENSION(:) :: DELTA_TMP
 INTEGER :: IIB,JJB,KKB,IWB,NWP,KK,I,NR,NL,N,I_OBST,NS,N_LAYER_CELLS_NEW(MAX_LAYERS),N_CELLS,EXPON,ITMP,ITER
-REAL(EB) :: SMALLEST_CELL_SIZE(MAX_LAYERS),THICKNESS
+REAL(EB) :: DX_MIN(MAX_LAYERS),THICKNESS
 REAL(EB),ALLOCATABLE,DIMENSION(:,:) :: INT_WGT
 REAL(EB), DIMENSION(:) :: RHO_ZZ_F(1:N_TRACKED_SPECIES),RHO_ZZ_B(1:N_TRACKED_SPECIES),ZZ_GET(1:N_TRACKED_SPECIES)
 INTEGER  :: NWP_NEW,I_GRAD,IZERO,SURF_INDEX,SURF_INDEX_BACK,BACKING
-LOGICAL :: REMESH,E_FOUND,CHANGE_THICKNESS,CONST_C(NWP_MAX),BOIL_CYCLE
+LOGICAL :: E_FOUND,CHANGE_THICKNESS,CONST_C(NWP_MAX),BOIL_CYCLE,REMESH_LAYER(MAX_LAYERS),REMESH_CHECK
 CHARACTER(MESSAGE_LENGTH) :: MESSAGE
 
 ! Copy commonly used derived type variables into local variables.
@@ -3066,10 +3066,10 @@ ENDIF
 
 ! If liquid evaporation may need to recycle timestep if any node temperature exceeds boiling
 CYCLE_BOIL: DO
-
+   
 ! Adjust the material layer masses and thicknesses
 
-REMESH = .FALSE.
+REMESH_LAYER = .FALSE.
 
 PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
 
@@ -3090,13 +3090,13 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
 
       MATERIAL_LOOP1a: DO N=1,SF%N_MATL
          ML  => MATERIAL(SF%MATL_INDEX(N))
-         IF (ML%PYROLYSIS_MODEL==PYROLYSIS_LIQUID) THEN
-            REMESH = .TRUE.
-            IF (ONE_D%MATL_COMP(N)%RHO_DOT(I)<=TWO_EPSILON_EB) THEN
-               REGRID_SUM = 1._EB
-               CYCLE MATERIAL_LOOP1a
-            ENDIF
-         ENDIF
+         !IF (ML%PYROLYSIS_MODEL==PYROLYSIS_LIQUID) THEN
+         !   REMESH = .TRUE.
+         !   IF (ONE_D%MATL_COMP(N)%RHO_DOT(I)<=TWO_EPSILON_EB) THEN
+         !      REGRID_SUM = 1._EB
+         !      CYCLE MATERIAL_LOOP1a
+         !   ENDIF
+         !ENDIF
          ONE_D%MATL_COMP(N)%RHO(I) = MAX( 0._EB , ONE_D%MATL_COMP(N)%RHO(I) - DT_BC_SUB*ONE_D%MATL_COMP(N)%RHO_DOT(I) )
          REGRID_MAX = MAX(REGRID_MAX,ONE_D%MATL_COMP(N)%RHO(I)/ML%RHO_S)
          REGRID_SUM = REGRID_SUM + ONE_D%MATL_COMP(N)%RHO(I)/ML%RHO_S
@@ -3138,21 +3138,22 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
    ENDDO POINT_LOOP2
 
    ! Compute new coordinates if the solid changes thickness. Save new coordinates in X_S_NEW.
+   ! Remesh layer if any node goes to zero thickness
 
    R_S_NEW(NWP) = 0._EB
    DO I=NWP-1,0,-1
       R_S_NEW(I) = ( R_S_NEW(I+1)**I_GRAD + (R_S(I)**I_GRAD-R_S(I+1)**I_GRAD)*REGRID_FACTOR(I+1) )**(1./REAL(I_GRAD,EB))
    ENDDO
-
+   
    X_S_NEW(0) = 0._EB
    DO I=1,NWP
       X_S_NEW(I) = R_S_NEW(0) - R_S_NEW(I)
-      IF ((X_S_NEW(I)-X_S_NEW(I-1)) < TWO_EPSILON_EB) REMESH = .TRUE.
+      IF ((X_S_NEW(I)-X_S_NEW(I-1)) < TWO_EPSILON_EB) REMESH_LAYER(SF%LAYER_INDEX(I)) = .TRUE.
    ENDDO
 
    !If any nodes go to zero, apportion Q_S to surrounding nodes.
 
-   IF (REMESH) THEN
+   IF (ANY(REMESH_LAYER(1:SF%N_LAYERS))) THEN
       IF (X_S_NEW(1)-X_S_NEW(0) < TWO_EPSILON_EB) Q_S(2) = Q_S(2) + Q_S(1)
       IF (X_S_NEW(NWP)-X_S_NEW(NWP-1) < TWO_EPSILON_EB) Q_S(NWP-1) = Q_S(NWP-1) + Q_S(NWP)
       DO I=2,NWP-1
@@ -3178,7 +3179,7 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
    ! Re-generate grid for a wall changing thickness
 
    N_LAYER_CELLS_NEW = 0
-   SMALLEST_CELL_SIZE = 0._EB
+   DX_MIN = 0._EB
 
    REMESH_GRID: IF (CHANGE_THICKNESS) THEN
       NWP_NEW = 0
@@ -3194,13 +3195,97 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
          IF (ONE_D%LAYER_THICKNESS(NL) < SF%MINIMUM_LAYER_THICKNESS) THEN
             X_S_NEW(I+ONE_D%N_LAYER_CELLS(NL):NWP) = X_S_NEW(I+ONE_D%N_LAYER_CELLS(NL):NWP)-ONE_D%LAYER_THICKNESS(NL)
             ONE_D%LAYER_THICKNESS(NL) = 0._EB
+            IF (ONE_D%N_LAYER_CELLS(NL) > 0) REMESH_LAYER(NL) = .TRUE.
             N_LAYER_CELLS_NEW(NL) = 0
-         ELSE
-            CALL GET_N_LAYER_CELLS(SF%MIN_DIFFUSIVITY(NL),ONE_D%LAYER_THICKNESS(NL), &
-               SF%STRETCH_FACTOR(NL),SF%CELL_SIZE_FACTOR,SF%N_LAYER_CELLS_MAX(NL),N_LAYER_CELLS_NEW(NL),SMALLEST_CELL_SIZE(NL))
             NWP_NEW = NWP_NEW + N_LAYER_CELLS_NEW(NL)
-         ENDIF
-         IF ( N_LAYER_CELLS_NEW(NL) /= ONE_D%N_LAYER_CELLS(NL)) REMESH = .TRUE.
+            CYCLE LAYER_LOOP
+         ELSE
+            
+            ! If there is only one cell, nothing to do
+            IF (ONE_D%N_LAYER_CELLS(NL)==1) THEN
+               N_LAYER_CELLS_NEW(NL) = ONE_D%N_LAYER_CELLS(NL)
+               NWP_NEW = NWP_NEW + N_LAYER_CELLS_NEW(NL)
+               IF (ABS(REGRID_FACTOR(I+1)-1._EB) > TWO_EPSILON_EB) THEN
+                  REMESH_LAYER(NL) = .TRUE.
+                  N_LAYER_CELLS_NEW(NL) = 1
+                  ONE_D%SMALLEST_CELL_SIZE(NL) = ONE_D%LAYER_THICKNESS(NL)
+               ENDIF
+               THICKNESS = THICKNESS + ONE_D%LAYER_THICKNESS(NL)
+               I = I + ONE_D%N_LAYER_CELLS(NL)               
+               CYCLE LAYER_LOOP
+            ENDIF
+            
+            ! If no cells in the layer have changed size, nothing to do
+            IF (ALL(ABS(REGRID_FACTOR(I+1:I+ONE_D%N_LAYER_CELLS(NL))-1._EB) <= TWO_EPSILON_EB)) THEN
+               N_LAYER_CELLS_NEW(NL) = ONE_D%N_LAYER_CELLS(NL)
+               NWP_NEW = NWP_NEW + N_LAYER_CELLS_NEW(NL)
+               THICKNESS = THICKNESS + ONE_D%LAYER_THICKNESS(NL)
+               I = I + ONE_D%N_LAYER_CELLS(NL)               
+               CYCLE LAYER_LOOP
+            ENDIF
+         ENDIF   
+         
+         ! Check if layer is expanding or contracting.
+         EXPAND_CONTRACT: IF (ANY(REGRID_FACTOR(I+1:I+ONE_D%N_LAYER_CELLS(NL)) < 1._EB)) THEN
+            ! At least one cell is contracting. Check to see if cells meets the RENODE_DELTA_T criterion
+            REMESH_CHECK=.TRUE.
+            DO N = I+1,I+ONE_D%N_LAYER_CELLS(NL)
+               IF (ABS(ONE_D%TMP(N)-ONE_D%TMP(N-1))>SF%RENODE_DELTA_T(NL)) THEN
+                  REMESH_CHECK = .FALSE.
+                  EXIT
+               ENDIF
+            ENDDO
+            REMESH_CHECK_IF: IF (REMESH_CHECK) THEN
+               
+               !If call cells in layer pass check, get new number of cells but limit decrease to at most one cell in a layer
+               CALL GET_N_LAYER_CELLS(SF%MIN_DIFFUSIVITY(NL),ONE_D%LAYER_THICKNESS(NL), &
+                  SF%STRETCH_FACTOR(NL),SF%CELL_SIZE_FACTOR,SF%N_LAYER_CELLS_MAX(NL),N_LAYER_CELLS_NEW(NL),SMALLEST_CELL_SIZE(NL),&
+                  DDSUM)
+                  LAYER_CELL_CHECK: IF (ONE_D%N_LAYER_CELLS(NL) - N_LAYER_CELLS_NEW(NL) > 1) THEN
+                     N_LAYER_CELLS_NEW(NL) = ONE_D%N_LAYER_CELLS(NL)- 1
+                     IF (MOD(N_LAYER_CELLS_NEW(NL),2)==0) THEN
+                        DDSUM = 0._EB
+                        DO N=1,N_LAYER_CELLS_NEW(NL)/2
+                           DDSUM = DDSUM + SF%STRETCH_FACTOR(NL)**(N-1)
+                        ENDDO
+                        DDSUM = 2._EB*DDSUM
+                     ELSE
+                        DDSUM = 0._EB
+                        DO N=1,(N_LAYER_CELLS_NEW(NL)-1)/2
+                           DDSUM = DDSUM + SF%STRETCH_FACTOR(NL)**(N-1)
+                        ENDDO
+                        DDSUM = 2._EB*DDSUM + SF%STRETCH_FACTOR(NL)**((N_LAYER_CELLS_NEW(NL)-1)/2)
+                     ENDIF
+                     ONE_D%SMALLEST_CELL_SIZE(NL) = ONE_D%LAYER_THICKNESS(NL) / DDSUM
+                     ONE_D%DDSUM(NL) = DDSUM
+                     REMESH_LAYER(NL) = .TRUE.
+                  ELSEIF (ONE_D%N_LAYER_CELLS(NL) - N_LAYER_CELLS_NEW(NL) == 1) THEN LAYER_CELL_CHECK
+                     ONE_D%SMALLEST_CELL_SIZE(NL) = SMALLEST_CELL_SIZE(NL)
+                     ONE_D%DDSUM(NL) = DDSUM
+                     REMESH_LAYER(NL) = .TRUE.
+                  ELSE LAYER_CELL_CHECK
+                     N_LAYER_CELLS_NEW(NL) = ONE_D%N_LAYER_CELLS(NL)
+                     ONE_D%SMALLEST_CELL_SIZE(NL) = ONE_D%LAYER_THICKNESS(NL) / ONE_D%DDSUM(NL)
+                     REMESH_LAYER(NL) = .TRUE.
+                  ENDIF LAYER_CELL_CHECK
+            ELSE REMESH_CHECK_IF
+               
+               ! If at least one cell does not pass the check, keep the same number of cells but remesh.               
+               N_LAYER_CELLS_NEW(NL) = ONE_D%N_LAYER_CELLS(NL)
+               ONE_D%SMALLEST_CELL_SIZE(NL) = ONE_D%LAYER_THICKNESS(NL) / ONE_D%DDSUM(NL)
+               SMALLEST_CELL_SIZE(NL) = ONE_D%SMALLEST_CELL_SIZE(NL)
+               REMESH_LAYER(NL) = .TRUE.
+            ENDIF REMESH_CHECK_IF
+            NWP_NEW = NWP_NEW + N_LAYER_CELLS_NEW(NL)
+
+         ELSE EXPAND_CONTRACT
+            !Since cells only expanding, there is no issue with remeshing layer
+            CALL GET_N_LAYER_CELLS(SF%MIN_DIFFUSIVITY(NL),ONE_D%LAYER_THICKNESS(NL), &
+               SF%STRETCH_FACTOR(NL),SF%CELL_SIZE_FACTOR,SF%N_LAYER_CELLS_MAX(NL),N_LAYER_CELLS_NEW(NL), &
+               ONE_D%SMALLEST_CELL_SIZE(NL),ONE_D%DDSUM(NL))
+               NWP_NEW = NWP_NEW + N_LAYER_CELLS_NEW(NL)
+               REMESH_LAYER(NL) = .TRUE.
+         ENDIF EXPAND_CONTRACT
 
          THICKNESS = THICKNESS + ONE_D%LAYER_THICKNESS(NL)
          I = I + ONE_D%N_LAYER_CELLS(NL)
@@ -3236,7 +3321,7 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
       ONE_D%X(0:NWP) = X_S_NEW(0:NWP)
 
       X_S_NEW = 0._EB
-      REMESH_IF: IF (REMESH) THEN
+      REMESH_IF: IF (ANY(REMESH_LAYER)) THEN
 
          RHO_H_S = 0._EB
          RHO_C_S = 0._EB
@@ -3259,8 +3344,9 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
             RHO_C_S(I) = RHO_H_S(I) / ONE_D%TMP(I)
          ENDDO
 
-         CALL GET_WALL_NODE_COORDINATES(NWP_NEW,SF%N_LAYERS,N_LAYER_CELLS_NEW, &
-            SMALLEST_CELL_SIZE(1:SF%N_LAYERS),SF%STRETCH_FACTOR(1:SF%N_LAYERS),X_S_NEW(0:NWP_NEW))
+         CALL GET_WALL_NODE_COORDINATES(NWP_NEW,NWP,SF%N_LAYERS,N_LAYER_CELLS_NEW,ONE_D%N_LAYER_CELLS, &
+            ONE_D%SMALLEST_CELL_SIZE(1:SF%N_LAYERS),SF%STRETCH_FACTOR(1:SF%N_LAYERS),REMESH_LAYER(1:SF%N_LAYERS),&
+            X_S_NEW(0:NWP_NEW),ONE_D%X(0:NWP))
          CALL GET_WALL_NODE_WEIGHTS(NWP_NEW,SF%N_LAYERS,N_LAYER_CELLS_NEW,ONE_D%LAYER_THICKNESS,SF%GEOMETRY, &
             X_S_NEW(0:NWP_NEW),LAYER_DIVIDE,DX_S(1:NWP_NEW),RDX_S(0:NWP_NEW+1),RDXN_S(0:NWP_NEW),&
             DX_WGT_S(0:NWP_NEW),DXF,DXB,LAYER_INDEX(0:NWP_NEW+1),MF_FRAC(1:NWP_NEW),SF%INNER_RADIUS)
@@ -3274,6 +3360,7 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
          CALL INTERPOLATE_WALL_ARRAY(N_CELLS,NWP,NWP_NEW,INT_WGT,Q_S(1:N_CELLS))
          CALL INTERPOLATE_WALL_ARRAY(N_CELLS,NWP,NWP_NEW,INT_WGT,RHO_H_S(1:N_CELLS))
          CALL INTERPOLATE_WALL_ARRAY(N_CELLS,NWP,NWP_NEW,INT_WGT,RHO_C_S(1:N_CELLS))
+
          DO N=1,SF%N_MATL
             ML  => MATERIAL(SF%MATL_INDEX(N))
             CALL INTERPOLATE_WALL_ARRAY(N_CELLS,NWP,NWP_NEW,INT_WGT,ONE_D%MATL_COMP(N)%RHO(1:N_CELLS))
@@ -3405,6 +3492,7 @@ DO I=1,NWP
    CCS(I) = ONE_D%TMP(I) - AAS(I)*(ONE_D%TMP(I+1)-ONE_D%TMP(I)) + BBS(I)*(ONE_D%TMP(I)-ONE_D%TMP(I-1)) &
             + DT_BC_SUB*Q_S(I)/ONE_D%RHO_C_S(I)
 ENDDO
+
 IF ( .NOT.RADIATION .OR. SF%INTERNAL_RADIATION ) THEN
    RFACF = 0.5_EB*HTCF
    RFACB = 0.5_EB*HTCB
@@ -3426,6 +3514,7 @@ CCS(NWP) = CCS(NWP) - AAS(NWP)*QDXKB
 DDT(1:NWP) = DDS(1:NWP)
 DDT(1)   = DDT(1)   + BBS(1)  *RFACF2
 DDT(NWP) = DDT(NWP) + AAS(NWP)*RFACB2
+
 TRIDIAGONAL_SOLVER_1: DO I=2,NWP
    RR     = BBS(I)/DDT(I-1)
    DDT(I) = DDT(I) - RR*AAS(I-1)
@@ -3447,20 +3536,20 @@ BOIL_CHECK: IF (MATERIAL(SF%MATL_INDEX(1))%PYROLYSIS_MODEL==PYROLYSIS_LIQUID .AN
    BOIL_CELL_LOOP: DO I=1,NWP
       IF (CCS(I) > T_BOIL_EFF) THEN
          ML => MATERIAL(SF%MATL_INDEX(1))
-
+         
          ITMP = INT(CCS(I))
          H_S = ML%H(ITMP)+(CCS(I)-REAL(ITMP,EB))*(ML%H(ITMP+1)-ML%H(ITMP))
          ITMP = INT(T_BOIL_EFF)
          H_S = H_S - (ML%H(ITMP)+(T_BOIL_EFF-REAL(ITMP,EB))*(ML%H(ITMP+1)-ML%H(ITMP)))
          H_S = H_S * ML%RHO_S
-
+         
          IF (ML%H_R_I(1) > 0) THEN
             H_R = EVALUATE_RAMP(T_BOIL_EFF,0._EB,ML%H_R_I(1))
          ELSE
             H_R = ML%H_R(1)
          ENDIF
          RHO_DOT = MIN(H_S/H_R,ML%RHO_S)/DT_BC_SUB
-         GEOM_FACTOR = MF_FRAC(I)*(R_S(I-1)**I_GRAD-R_S(I)**I_GRAD)/(I_GRAD*SF%THICKNESS+SF%INNER_RADIUS**(I_GRAD-1))
+         GEOM_FACTOR = MF_FRAC(I)*(R_S(I-1)**I_GRAD-R_S(I)**I_GRAD)/(I_GRAD*(SF%THICKNESS+SF%INNER_RADIUS)**(I_GRAD-1))
          Q_S(I) = Q_S(I) - RHO_DOT*H_R
          DO NS=1,N_TRACKED_SPECIES
             ONE_D%M_DOT_G_PP_ADJUST(NS) = ONE_D%M_DOT_G_PP_ADJUST(NS) + &
@@ -3477,15 +3566,15 @@ BOIL_CHECK: IF (MATERIAL(SF%MATL_INDEX(1))%PYROLYSIS_MODEL==PYROLYSIS_LIQUID .AN
          BOIL_CYCLE = .TRUE.
       ENDIF
    ENDDO BOIL_CELL_LOOP
-   IF (BOIL_CYCLE) THEN
+   IF (BOIL_CYCLE) THEN 
       CYCLE CYCLE_BOIL
    ELSE
          ONE_D%MATL_COMP(1)%RHO_DOT(1:NWP) = RHO_DOT_0(1:NWP)
    ENDIF
 ENDIF BOIL_CHECK
-
+   
 EXIT CYCLE_BOIL
-
+   
 END DO CYCLE_BOIL
 
 IF (BOIL_CYCLE) ONE_D%MATL_COMP(1)%RHO_DOT(1:NWP) = ONE_D%MATL_COMP(1)%RHO_DOT(1:NWP) + RHO_DOT_0(1:NWP)
