@@ -2808,6 +2808,7 @@ SELECT CASE(BACKING)
       Q_CON_B = HTCB*DTMP
       Q_RAD_IN_B   =  E_WALLB*SIGMA*TMP_BACK**4
       Q_WATER_B = 0._EB
+      LAYER_DIVIDE = REAL(SF%N_LAYERS+1)
 
    CASE(INSULATED)  ! No heat transfer out the back
 
