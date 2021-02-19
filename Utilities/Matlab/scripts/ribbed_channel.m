@@ -50,9 +50,9 @@ for ii=1:length(geom)
     H(1)=plot([0 100],Ub*ones(1,2),'k-','linewidth',2); hold on
 
     for i=1:lnx
-        t_fds = M{i}.data(:,1)
-        Ub_fds = M{i}.data(:,2)
-        H(1+i)=plot(t_fds,Ub_fds,fds_marker{i})
+        t_fds = M{i}.data(:,1);
+        Ub_fds = M{i}.data(:,2);
+        H(1+i)=plot(t_fds,Ub_fds,fds_marker{i});
         t_range = find(t_fds>20);
         disp(['Ub mean nx ',num2str(nx(i)),' : ',num2str(mean(Ub_fds(t_range)))])
     end
