@@ -187,7 +187,8 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
          ENDIF
 
          ! Wind inflow boundary conditions
-         IF (ANY(MEAN_FORCING) .OR. TEST_NEW_OPEN) THEN
+
+         IF (OPEN_WIND_BOUNDARY) THEN
             IF (ICF>0) THEN
                H0 = 0.5_EB*((U_WIND(K)+VEL_EDDY)**2 + (V_WIND(K)+VEL_EDDY)**2 + (W_WIND(K)+VEL_EDDY)**2)
             ELSE
