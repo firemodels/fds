@@ -881,8 +881,7 @@ ENDIF
 
 ! Additional force terms
 
-IF (ANY(MEAN_FORCING) .OR. TEST_NEW_OPEN) CALL COMPUTE_WIND_COMPONENTS(T,NM)
-IF (ANY(MEAN_FORCING)                   ) CALL MOMENTUM_NUDGING    ! Mean forcing
+IF (OPEN_WIND_BOUNDARY) CALL COMPUTE_WIND_COMPONENTS(T,NM)
 
 IF (ANY(ABS(FVEC)>TWO_EPSILON_EB)) CALL DIRECT_FORCE               ! Direct force
 IF (ANY(ABS(OVEC)>TWO_EPSILON_EB)) CALL CORIOLIS_FORCE             ! Coriolis force
@@ -893,138 +892,6 @@ IF (PERIODIC_TEST==21 .OR. PERIODIC_TEST==22 .OR. PERIODIC_TEST==23) CALL ROTATE
 T_USED(4) = T_USED(4) + CURRENT_TIME() - T_NOW
 
 CONTAINS
-
-
-SUBROUTINE MOMENTUM_NUDGING
-
-! Add a force vector to the momentum equation that moves the flow field towards the direction of the mean flow.
-
-USE COMPLEX_GEOMETRY, ONLY : IBM_GASPHASE, IBM_FGSC
-REAL(EB) :: VC,DU_FORCING,DV_FORCING,DW_FORCING,DT_LOC
-
-IF (ICYC==1) RETURN ! need one cycle to initialize forcing arrays
-
-DT_LOC = MAX(DT,DT_MEAN_FORCING)
-
-MEAN_FORCING_X: IF (MEAN_FORCING(1)) THEN
-   PREDICTOR_IF_U: IF (PREDICTOR) THEN
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=0,IBAR
-               IC1 = CELL_INDEX(I,J,K)
-               IC2 = CELL_INDEX(I+1,J,K)
-               IF (SOLID(IC1)) CYCLE
-               IF (SOLID(IC2)) CYCLE
-               IF (CC_IBM) THEN
-                  IF (FCVAR(I,J,K,IBM_FGSC,IAXIS) /= IBM_GASPHASE) CYCLE ! If face not regular gasphase type cycle.
-               ENDIF
-               IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
-               IF (.NOT.MEAN_FORCING_CELL(I+1,J,K)) CYCLE
-               VC = DXN(I)*DY(J)*DZ(K)
-               MEAN_FORCING_SUM_U_VOL(K_MEAN_FORCING(K)) = MEAN_FORCING_SUM_U_VOL(K_MEAN_FORCING(K)) + UU(I,J,K)*VC
-               MEAN_FORCING_SUM_VOL_X(K_MEAN_FORCING(K)) = MEAN_FORCING_SUM_VOL_X(K_MEAN_FORCING(K)) +           VC
-            ENDDO
-         ENDDO
-      ENDDO
-   ENDIF PREDICTOR_IF_U
-   DO K=1,KBAR
-      DU_FORCING = (U_WIND(K)-U_MEAN_FORCING(K_MEAN_FORCING(K)))/DT_LOC
-      DO J=1,JBAR
-         DO I=0,IBAR
-            IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
-            IF (.NOT.MEAN_FORCING_CELL(I+1,J,K)) CYCLE
-            IF (APPLY_SPONGE_LAYER(1) .AND. I<SPONGE_CELLS) THEN
-               FVX(I,J,K) = FVX(I,J,K) - (U_WIND(K)-UU(I,J,K))/DT_LOC
-            ELSEIF (APPLY_SPONGE_LAYER(-1) .AND. I>IBAR-SPONGE_CELLS) THEN
-               FVX(I,J,K) = FVX(I,J,K) - (U_WIND(K)-UU(I,J,K))/DT_LOC
-            ELSE
-               FVX(I,J,K) = FVX(I,J,K) - DU_FORCING - (U_WIND(K)-UU(I,J,K))/DT_MEAN_FORCING_2
-            ENDIF
-         ENDDO
-      ENDDO
-   ENDDO
-ENDIF MEAN_FORCING_X
-
-MEAN_FORCING_Y: IF (MEAN_FORCING(2)) THEN
-   PREDICTOR_IF_V: IF (PREDICTOR) THEN
-      DO K=1,KBAR
-         DO J=0,JBAR
-            DO I=1,IBAR
-               IC1 = CELL_INDEX(I,J,K)
-               IC2 = CELL_INDEX(I,J+1,K)
-               IF (SOLID(IC1)) CYCLE
-               IF (SOLID(IC2)) CYCLE
-               IF (CC_IBM) THEN
-                  IF (FCVAR(I,J,K,IBM_FGSC,JAXIS) /= IBM_GASPHASE) CYCLE
-               ENDIF
-               IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
-               IF (.NOT.MEAN_FORCING_CELL(I,J+1,K)) CYCLE
-               VC = DX(I)*DYN(J)*DZ(K)
-               MEAN_FORCING_SUM_V_VOL(K_MEAN_FORCING(K)) = MEAN_FORCING_SUM_V_VOL(K_MEAN_FORCING(K)) + VV(I,J,K)*VC
-               MEAN_FORCING_SUM_VOL_Y(K_MEAN_FORCING(K)) = MEAN_FORCING_SUM_VOL_Y(K_MEAN_FORCING(K)) +           VC
-            ENDDO
-         ENDDO
-      ENDDO
-   ENDIF PREDICTOR_IF_V
-   DO K=1,KBAR
-      DV_FORCING = (V_WIND(K)-V_MEAN_FORCING(K_MEAN_FORCING(K)))/DT_LOC
-      DO J=0,JBAR
-         DO I=1,IBAR
-            IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
-            IF (.NOT.MEAN_FORCING_CELL(I,J+1,K)) CYCLE
-            IF (APPLY_SPONGE_LAYER(2) .AND. J<SPONGE_CELLS) THEN
-               FVY(I,J,K) = FVY(I,J,K) - (V_WIND(K)-VV(I,J,K))/DT_LOC
-            ELSEIF (APPLY_SPONGE_LAYER(-2) .AND. J>JBAR-SPONGE_CELLS) THEN
-               FVY(I,J,K) = FVY(I,J,K) - (V_WIND(K)-VV(I,J,K))/DT_LOC
-            ELSE
-               FVY(I,J,K) = FVY(I,J,K) - DV_FORCING - (V_WIND(K)-VV(I,J,K))/DT_MEAN_FORCING_2
-            ENDIF
-         ENDDO
-      ENDDO
-   ENDDO
-ENDIF MEAN_FORCING_Y
-
-MEAN_FORCING_Z: IF (MEAN_FORCING(3)) THEN
-   PREDICTOR_IF_W: IF (PREDICTOR) THEN
-      DO K=1,KBM1
-         DO J=1,JBAR
-            DO I=1,IBAR
-               IC1 = CELL_INDEX(I,J,K)
-               IC2 = CELL_INDEX(I,J,K+1)
-               IF (SOLID(IC1)) CYCLE
-               IF (SOLID(IC2)) CYCLE
-               IF (CC_IBM) THEN
-                  IF (FCVAR(I,J,K,IBM_FGSC,KAXIS) /= IBM_GASPHASE) CYCLE
-               ENDIF
-               IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
-               IF (.NOT.MEAN_FORCING_CELL(I,J,K+1)) CYCLE
-               VC = DX(I)*DY(J)*DZN(K)
-               MEAN_FORCING_SUM_W_VOL(K_MEAN_FORCING(K)) = MEAN_FORCING_SUM_W_VOL(K_MEAN_FORCING(K)) + WW(I,J,K)*VC
-               MEAN_FORCING_SUM_VOL_Z(K_MEAN_FORCING(K)) = MEAN_FORCING_SUM_VOL_Z(K_MEAN_FORCING(K)) +           VC
-            ENDDO
-         ENDDO
-      ENDDO
-   ENDIF PREDICTOR_IF_W
-   DO K=1,KBM1
-      DW_FORCING = (W_WIND(K)-W_MEAN_FORCING(K_MEAN_FORCING(K)))/DT_LOC
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IF (.NOT.MEAN_FORCING_CELL(I,J,K)  ) CYCLE
-            IF (.NOT.MEAN_FORCING_CELL(I,J,K+1)) CYCLE
-            IF (APPLY_SPONGE_LAYER(3) .AND. K<SPONGE_CELLS) THEN
-               FVZ(I,J,K) = FVZ(I,J,K) - (W_WIND(K)-WW(I,J,K))/DT_LOC
-            ELSEIF (APPLY_SPONGE_LAYER(-3) .AND. K>KBAR-SPONGE_CELLS) THEN
-               FVZ(I,J,K) = FVZ(I,J,K) - (W_WIND(K)-WW(I,J,K))/DT_LOC
-            ELSE
-               FVZ(I,J,K) = FVZ(I,J,K) - DW_FORCING - (W_WIND(K)-WW(I,J,K))/DT_MEAN_FORCING_2
-            ENDIF
-         ENDDO
-      ENDDO
-   ENDDO
-ENDIF MEAN_FORCING_Z
-
-END SUBROUTINE MOMENTUM_NUDGING
-
 
 SUBROUTINE DIRECT_FORCE()
 REAL(EB) :: TIME_RAMP_FACTOR
@@ -2179,7 +2046,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
             UPWIND_BOUNDARY = .FALSE.
             INFLOW_BOUNDARY = .FALSE.
 
-            IF (ANY(MEAN_FORCING) .OR. TEST_NEW_OPEN) THEN
+            IF (OPEN_WIND_BOUNDARY) THEN
                SELECT CASE(IEC)
                   CASE(1)
                      IF (JJ==0    .AND. IOR== 2) U_NORM = 0.5_EB*(VV(II,   0,KK) + VV(II,   0,KK+1))

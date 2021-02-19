@@ -213,7 +213,6 @@ LOGICAL :: AEROSOL_SCRUBBING=.FALSE.        !< Allow aerosol scrubbing
 LOGICAL :: VELOCITY_ERROR_FILE=.FALSE.      !< Generate a diagnostic output file listing velocity and pressure errors
 LOGICAL :: CFL_FILE=.FALSE.                 !< Generate a diagnostic output file listing quantities related to CFL and VN
 LOGICAL :: CONSTANT_SPECIFIC_HEAT_RATIO=.FALSE. !< Assume that the ratio of specific heats is constant, \f$ \gamma=1.4 \f$
-LOGICAL :: MEAN_FORCING(3)=.FALSE.          !< Apply mean forcing to wind in each coordinate direction
 LOGICAL :: CHECK_HT=.FALSE.                 !< Apply heat transfer stability condition
 LOGICAL :: PATCH_VELOCITY=.FALSE.           !< Assume user-defined velocity patches
 LOGICAL :: OVERWRITE=.TRUE.                 !< Overwrite old output files
@@ -254,7 +253,7 @@ LOGICAL :: STORE_DIVERGENCE_CORRECTION=.FALSE.
 LOGICAL :: PERIODIC_DOMAIN_X=.FALSE.                !< The domain is periodic \f$ x \f$
 LOGICAL :: PERIODIC_DOMAIN_Y=.FALSE.                !< The domain is periodic \f$ y \f$
 LOGICAL :: PERIODIC_DOMAIN_Z=.FALSE.                !< The domain is periodic \f$ z \f$
-LOGICAL :: TEST_NEW_OPEN=.FALSE.
+LOGICAL :: OPEN_WIND_BOUNDARY=.FALSE.               !< There is a prevailing wind
 LOGICAL :: TEST_NEW_WAKE_REDUCTION=.FALSE.
 
 INTEGER, ALLOCATABLE, DIMENSION(:) :: CHANGE_TIME_STEP_INDEX      !< Flag to indicate if a mesh needs to change time step
@@ -330,8 +329,6 @@ REAL(EB) :: SC                                 !< Schmidt number
 REAL(EB) :: GROUND_LEVEL=0._EB                 !< Height of the ground, used for establishing atmospheric profiles (m)
 REAL(EB) :: LIMITING_DT_RATIO=1.E-4_EB         !< Ratio of current to initial time step when code is stopped
 REAL(EB) :: NOISE_VELOCITY=0.005_EB            !< Velocity of random noise vectors (m/s)
-REAL(EB) :: DT_MEAN_FORCING=1._EB              !< Time scale used in mean forcing algorithm (s)
-REAL(EB) :: DT_MEAN_FORCING_2=30._EB           !< Time scale used in mean forcing algorithm (s)
 REAL(EB) :: TAU_DEFAULT=1._EB                  !< Default ramp-up time (s)
 REAL(EB) :: TAU_CHEM=1.E-10_EB                 !< Smallest reaction mixing time scale (s)
 REAL(EB) :: TAU_FLAME=1.E10_EB                 !< Largest reaction mixing time scale (s)
@@ -572,10 +569,7 @@ LOGICAL :: LSET_TAN2
 ! Parameters for Terrain and Wind simulation needs
 
 LOGICAL :: TERRAIN_CASE=.FALSE.
-INTEGER :: N_VENT_TOTAL=0,SPONGE_CELLS,N_MEAN_FORCING_BINS
-REAL(EB), ALLOCATABLE, DIMENSION(:) :: MEAN_FORCING_SUM_U_VOL,MEAN_FORCING_SUM_V_VOL,MEAN_FORCING_SUM_W_VOL, &
-                                       MEAN_FORCING_SUM_VOL_X,MEAN_FORCING_SUM_VOL_Y,MEAN_FORCING_SUM_VOL_Z, &
-                                       U_MEAN_FORCING,V_MEAN_FORCING,W_MEAN_FORCING
+INTEGER :: N_VENT_TOTAL=0
 
 ! Sprinkler Variables
 

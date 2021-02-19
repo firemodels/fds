@@ -402,30 +402,6 @@ DO K=0,M%KBP1
    M%W(:,:,K)   = M%W_WIND(K)
 ENDDO
 
-IF (ANY(MEAN_FORCING) .AND. .NOT.DO_EVACUATION) THEN
-   DO K=0,M%KBP1
-      DO J=0,M%JBP1
-         DO I=0,M%IBAR
-            IF ( .NOT.(M%MEAN_FORCING_CELL(I,J,K) .AND. M%MEAN_FORCING_CELL(I+1,J,K)) ) M%U(I,J,K)=0._EB
-         ENDDO
-      ENDDO
-   ENDDO
-   DO K=0,M%KBP1
-      DO J=0,M%JBAR
-         DO I=0,M%IBP1
-            IF ( .NOT.(M%MEAN_FORCING_CELL(I,J,K) .AND. M%MEAN_FORCING_CELL(I,J+1,K)) ) M%V(I,J,K)=0._EB
-         ENDDO
-      ENDDO
-   ENDDO
-   DO K=0,M%KBAR
-      DO J=0,M%JBP1
-         DO I=0,M%IBP1
-            IF ( .NOT.(M%MEAN_FORCING_CELL(I,J,K) .AND. M%MEAN_FORCING_CELL(I,J,K+1)) ) M%W(I,J,K)=0._EB
-         ENDDO
-      ENDDO
-   ENDDO
-ENDIF
-
 M%US    = M%U
 M%VS    = M%V
 M%WS    = M%W
@@ -1043,16 +1019,6 @@ IF (STORE_OLD_VELOCITY) THEN
    ALLOCATE(M%U_OLD(0:M%IBP1,0:M%JBP1,0:M%KBP1),STAT=IZERO); CALL ChkMemErr('INIT','U_OLD',IZERO)
    ALLOCATE(M%V_OLD(0:M%IBP1,0:M%JBP1,0:M%KBP1),STAT=IZERO); CALL ChkMemErr('INIT','V_OLD',IZERO)
    ALLOCATE(M%W_OLD(0:M%IBP1,0:M%JBP1,0:M%KBP1),STAT=IZERO); CALL ChkMemErr('INIT','W_OLD',IZERO)
-ENDIF
-
-! Wind
-
-IF (ANY(MEAN_FORCING)) THEN
-   DO IW=1,M%N_EXTERNAL_WALL_CELLS
-      WC => M%WALL(IW)
-      IOR = WC%ONE_D%IOR
-      IF (SPONGE_CELLS>0 .AND. WC%BOUNDARY_TYPE==OPEN_BOUNDARY .AND. MEAN_FORCING(ABS(IOR))) M%APPLY_SPONGE_LAYER(IOR) = .TRUE.
-   ENDDO
 ENDIF
 
 ! Reset ghost cell values of cell centered velocity for use in computing viscosity (must be done after INIT_WALL_CELL)

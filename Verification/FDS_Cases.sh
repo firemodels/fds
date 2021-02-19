@@ -227,7 +227,6 @@ $QFDS -d Flowfields species_conservation_3.fds
 $QFDS -d Flowfields species_conservation_4.fds
 $QFDS -d Flowfields hot_layer_360.fds
 $QFDS -d Flowfields realizable_mass_fractions.fds
-$QFDS -d Flowfields mean_forcing_hole.fds
 $QFDS -p 4 -d Flowfields parabolic_profile.fds
 $QFDS -p 5 -d Flowfields simple_duct.fds
 $QFDS -p 8 -d Flowfields symmetry_test_mpi.fds
