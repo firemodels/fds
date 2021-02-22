@@ -8,13 +8,14 @@
 
 X0 = 0.;
 Y0 = 0.;
-Z1 = -0.04;
+Z1 = -0.06;              % Waterloo pan depth
 Z2 = 0.;
-RAD = 0.1524;
-PAN_THICKNESS = 0.015;
+RAD = 0.1525;            % Waterloo outside diameter
+PAN_THICKNESS = 0.015;   % Waterloo pan thickness (0.15 cm), here thickened by 10x
 LIP_HEIGHT = 0.01;
-IBAR = 30;
-JBAR = 30;
+
+IBAR = 60; % dx=2 cm -->IBAR=30; dx=1 cm --> IBAR=60; dx=0.5 cm --> IBAR=120
+JBAR = 60;
 XS = -0.3;
 XF = 0.3;
 YS = -0.3;
@@ -25,7 +26,7 @@ DX = (XF-XS)/double(IBAR);
 DY = (YF-YS)/double(JBAR);
 AREA = 0.;
 
-fid = fopen('pan.txt','w');
+fid = fopen('waterloo_pan_dx1cm.txt','w');
 
 for J=1:JBAR
     Y = YS + DY*(J-0.5);
