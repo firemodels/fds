@@ -7954,15 +7954,11 @@ A sprinkler, known as {\ct 'Spr-1'}, is located at a point in space given by {\c
 \item[{\ct SMOKEVIEW\_ID}] The name of a drawing of a sprinkler to include in the Smokeview animation.
 \end{description}
 
-
-
-
 \begin{figure}[ht]
 \includegraphics[width=6.5in]{FIGURES/Sprinkler_Sketch}
 \caption[Sketch of sprinkler spray]{Sketch showing the role of {\ct OFFSET} and {\ct SPRAY\_ANGLE}.}
 \label{Sprinkler_Sketch}
 \end{figure}
-
 
 \subsubsection{Special Topic: Specifying Complex Spray Patterns}
 \label{info:spraypattern}
@@ -7978,6 +7974,22 @@ For full-cone sprays, the parameter {\ct SPRAY\_PATTERN\_MU} is set to zero by d
 \begin{lstlisting}
 &PROP ... SPRAY_ANGLE=0.,30., SPRAY_PATTERN_MU=15. /
 \end{lstlisting}
+
+Figure \ref{fig:spray_pattern_parameters} gives a sense of how the parameters {\ct SPRAY\_PATTERN\_MU} and {\ct SPRAY\_PATTERN\_BETA} affect the distribution.  In each row of the figure, the maximinum angle, {\ct SPRAY\_ANGLE(2,1)}, is varied from 22.5 to 45 degrees.  Each plot varies the spread parameter, {\ct SPRAY\_PATTERN\_BETA}, from 0 (uniform) to 1000 (narrow distribution).  The peak angle of the distribution, {\ct SPRAY\_PATTERN\_MU}, is varied from 0 to 10 to 20 as you go from the top to the bottom row.
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=0.49\textwidth]{FIGURES/spray_pattern_mu_0_phimax_22p5}
+\includegraphics[width=0.49\textwidth]{FIGURES/spray_pattern_mu_0_phimax_45}\\
+\includegraphics[width=0.49\textwidth]{FIGURES/spray_pattern_mu_10_phimax_22p5}
+\includegraphics[width=0.49\textwidth]{FIGURES/spray_pattern_mu_10_phimax_45}\\
+\includegraphics[width=0.49\textwidth]{FIGURES/spray_pattern_mu_20_phimax_22p5}
+\includegraphics[width=0.49\textwidth]{FIGURES/spray_pattern_mu_20_phimax_45}
+\end{center}
+\caption[Spray pattern parameters]{Spray pattern parameters, peak and spread.}
+\label{fig:spray_pattern_parameters}
+\end{figure}
+
 If a more complex spray pattern is desired than one characterized by a {\ct SPRAY\_ANGLE}, then a \linebreak[4]{\ct SPRAY\_PATTERN\_TABLE} can be specified using the {\ct TABL} namelist group. Specify the total flow using {\ct FLOW\_RATE} on the {\ct PROP} line, the name of the spray pattern using {\ct SPRAY\_PATTERN\_TABLE} and then one or more {\ct TABL} lines of the form:
 \begin{lstlisting}
 &TABL ID='table_id', TABLE_DATA=LAT1,LAT2,LON1,LON2,VELO,FRAC /
