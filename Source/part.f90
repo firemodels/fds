@@ -1241,7 +1241,7 @@ IF (LPC%SOLID_PARTICLE) THEN
                CASE (SURF_CYLINDRICAL)
                   LP%ONE_D%AREA = 2._EB*PI*SF%THICKNESS*SF%LENGTH
                   X1 = SUM(SF%LAYER_THICKNESS)*SCALE_FACTOR
-                  DO N=SF%N_LAYERS,1,-1
+                  DO N=1,SF%N_LAYERS
                      X2 = X1 - SF%LAYER_THICKNESS(N)*SCALE_FACTOR
                      LP%MASS = LP%MASS + SF%LENGTH*SF%LAYER_DENSITY(N)*PI*(X1**2-X2**2)
                      X1 = X2
@@ -1249,7 +1249,7 @@ IF (LPC%SOLID_PARTICLE) THEN
                CASE (SURF_SPHERICAL)
                   LP%ONE_D%AREA = 4._EB*PI*SF%THICKNESS**2
                   X1 = SUM(SF%LAYER_THICKNESS)*SCALE_FACTOR
-                  DO N=SF%N_LAYERS,1,-1
+                  DO N=1,SF%N_LAYERS
                      X2 = X1 - SF%LAYER_THICKNESS(N)*SCALE_FACTOR
                      LP%MASS = LP%MASS + SF%LAYER_DENSITY(N)*FOTHPI*(X1**3-X2**3)
                      X1 = X2
