@@ -483,17 +483,30 @@ CHARACTER(LABEL_LENGTH), DIMENSION(:), ALLOCATABLE :: MESH_NAME
 
 ! Variables related to pressure solver
 
-LOGICAL :: ITERATE_PRESSURE=.FALSE.,ITERATE_BAROCLINIC_TERM,SUSPEND_PRESSURE_ITERATIONS=.TRUE.
-REAL(EB) :: VELOCITY_TOLERANCE=0._EB,PRESSURE_TOLERANCE=0._EB,ITERATION_SUSPEND_FACTOR=0.95_EB
-REAL(EB), ALLOCATABLE, DIMENSION(:) :: VELOCITY_ERROR_MAX,PRESSURE_ERROR_MAX
-INTEGER, ALLOCATABLE, DIMENSION(:,:) :: VELOCITY_ERROR_MAX_LOC,PRESSURE_ERROR_MAX_LOC
-INTEGER :: PRESSURE_ITERATIONS=0,MAX_PRESSURE_ITERATIONS=10,TOTAL_PRESSURE_ITERATIONS=0
-CHARACTER(LABEL_LENGTH):: PRES_METHOD = 'FFT'
-LOGICAL :: TUNNEL_PRECONDITIONER=.FALSE.
-INTEGER :: TUNNEL_NXP
-REAL(EB), ALLOCATABLE, DIMENSION(:) :: TP_AA,TP_BB,TP_CC,TP_DD,H_BAR
-INTEGER, ALLOCATABLE, DIMENSION(:) :: COUNTS_TP,DISPLS_TP
-
+LOGICAL :: ITERATE_PRESSURE=.FALSE.                              !< Flag indicating if pressure solution is iterated
+LOGICAL :: ITERATE_BAROCLINIC_TERM                               !< Flag indicating if baroclinic term is iterated
+LOGICAL :: SUSPEND_PRESSURE_ITERATIONS=.TRUE.                    !< Flag for stopping pressure iterations
+REAL(EB) :: VELOCITY_TOLERANCE=0._EB                             !< Error tolerance for normal velocity at solids or boundaries
+REAL(EB) :: PRESSURE_TOLERANCE=0._EB                             !< Error tolerance for iteration of baroclinic pressure term
+REAL(EB) :: ITERATION_SUSPEND_FACTOR=0.95_EB                     !< If new velocity error is not this value of old, stop iteration
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: VELOCITY_ERROR_MAX        !< Max velocity error of entire domain
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: PRESSURE_ERROR_MAX        !< Max pressure error of entire domain
+INTEGER, ALLOCATABLE, DIMENSION(:,:) :: VELOCITY_ERROR_MAX_LOC   !< Indices of max velocity error
+INTEGER, ALLOCATABLE, DIMENSION(:,:) :: PRESSURE_ERROR_MAX_LOC   !< Indices of max pressure error
+INTEGER :: PRESSURE_ITERATIONS=0                                 !< Counter for pressure iterations
+INTEGER :: MAX_PRESSURE_ITERATIONS=10                            !< Max pressure iterations per pressure solve
+INTEGER :: TOTAL_PRESSURE_ITERATIONS=0                           !< Counter for total pressure iterations
+CHARACTER(LABEL_LENGTH):: PRES_METHOD = 'FFT'                    !< Pressure solver method
+LOGICAL :: TUNNEL_PRECONDITIONER=.FALSE.                         !< Use special pressure preconditioner for tunnels
+INTEGER :: TUNNEL_NXP                                            !< Number of x points in the entire tunnel
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: TP_AA                     !< Upper off-diagonal of tri-diagonal matrix for tunnel pressure
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: TP_BB                     !< Lower off-diagonal of tri-diagonal matrix for tunnel pressure
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: TP_CC                     !< Right hand side of 1-D tunnel pressure linear system
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: TP_DD                     !< Diagonal of tri-diagonal matrix for tunnel pressure solver
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: H_BAR                     !< Pressure solution of 1-D tunnel pressure solver
+INTEGER, ALLOCATABLE, DIMENSION(:) :: COUNTS_TP                  !< Counter for MPI calls used for 1-D tunnel pressure solver
+INTEGER, ALLOCATABLE, DIMENSION(:) :: DISPLS_TP                  !< Displacements for MPI calls used for 1-D tunnel pressure solver
+INTEGER, ALLOCATABLE, DIMENSION(:) :: I_OFFSET                   !< Spatial index of tunnel
 
 ! Miscellaneous integer constants
 
