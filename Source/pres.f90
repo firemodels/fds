@@ -466,8 +466,26 @@ ENDDO
 ! In the special case of a tunnel, add 1-D Poisson solution, H_BAR, to the 3-D solution, H'
 
 IF (TUNNEL_PRECONDITIONER) THEN
-   DO I=0,IBP1
-      HP(I,0:JBP1,0:KBP1) = HP(I,0:JBP1,0:KBP1) + H_BAR(I_OFFSET(NM)+I)
+   DO I=1,IBAR
+      HP(I,1:JBAR,1:KBAR) = HP(I,1:JBAR,1:KBAR) + H_BAR(I_OFFSET(NM)+I)
+   ENDDO
+   DO K=1,KBAR
+      DO J=1,JBAR
+         HP(0,J,K)    = HP(0,J,K)    + H_BAR(I_OFFSET(NM))
+         HP(IBP1,J,K) = HP(IBP1,J,K) + H_BAR(I_OFFSET(NM)+IBP1)
+      ENDDO
+   ENDDO
+   DO K=1,KBAR
+      DO I=1,IBAR
+         HP(I,0,K)    = HP(I,0,K)    + H_BAR(I_OFFSET(NM)+I)
+         HP(I,JBP1,K) = HP(I,JBP1,K) + H_BAR(I_OFFSET(NM)+I)
+      ENDDO
+   ENDDO
+   DO J=1,JBAR
+      DO I=1,IBAR
+         HP(I,J,0)    = HP(I,J,0)    + H_BAR(I_OFFSET(NM)+I)
+         HP(I,J,KBP1) = HP(I,J,KBP1) + H_BAR(I_OFFSET(NM)+I)
+      ENDDO
    ENDDO
 ENDIF
 
