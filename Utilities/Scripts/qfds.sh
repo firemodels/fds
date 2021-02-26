@@ -596,8 +596,8 @@ fi
 if [ "$USE_PSM" != "" ]; then
   if test $nodes -gt 1 ; then
     SLURM_PSM="#SBATCH --exclusive"
- #else
- #  PROVIDER="export FI_PROVIDER=shm"
+  else
+    PROVIDER="export I_MPI_FABRICS=shm"
   fi
 fi
 
