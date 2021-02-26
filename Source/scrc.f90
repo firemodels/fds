@@ -853,7 +853,7 @@ TYPE SCARC_MGM_TYPE
 
    INTEGER :: ITE = 0                            
    INTEGER :: ITE_POISSON = 0
-   INTEGER :: ITE_LAPLACE = 0
+   INTEGER :: ITE_LAPLACE = 1
 
    LOGICAL :: HAS_OBSTRUCTIONS = .FALSE.
 
@@ -7735,7 +7735,7 @@ CROUTINE = 'SCARC_SETUP_PARDISO'
 CALL SCARC_POINT_TO_GRID (NM, NL)                                    
 AS  => SCARC_POINT_TO_CMATRIX (NSCARC_MATRIX_LAPLACE_SYM)
 
-! Allocate workspace for parameters nnd pointers eeded in MKL-routine
+! Allocate workspace for parameters and pointers needed in MKL-routine
  
 CALL SCARC_ALLOCATE_INT1 (MKL%IPARM, 1, 64, NSCARC_INIT_ZERO, 'MKL%IPARM', CROUTINE)
 
@@ -11445,7 +11445,6 @@ MULTI_LEVEL_IF: IF (HAS_MULTIPLE_LEVELS .AND. .NOT.HAS_AMG_LEVELS) THEN
 ENDIF MULTI_LEVEL_IF
 
 ! ------ If MKL-solver is used on specific levels, then setup symmetric Poisson matrix there
-! ------ If optimized 
   
 #ifdef WITH_MKL
 IF (.NOT. IS_MGM) THEN
@@ -11508,7 +11507,6 @@ ELSE
 
 ENDIF
 #endif
-
 
 END SUBROUTINE SCARC_SETUP_SYSTEMS
 
@@ -16986,45 +16984,42 @@ USE SCARC_POINTERS, ONLY: MGM, SCARC_POINT_TO_MGM
 INTEGER, INTENT(IN):: ITE_MGM, NTYPE
 INTEGER:: NM
 
-! Note: Convergence history of previous Krylov method is available in ITE and CAPPA 
-
 SCARC_MGM_CONVERGENCE_STATE = NSCARC_MGM_FAILURE
 DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 
    CALL SCARC_POINT_TO_MGM(NM, NLEVEL_MIN)
-
-   !IF (MGM%VELOCITY_ERROR > VELOCITY_ERROR_GLOBAL) VELOCITY_ERROR_GLOBAL = MGM%VELOCITY_ERROR
-
-   SCARC_MGM_ACCURACY   = VELOCITY_ERROR_GLOBAL
-   SCARC_MGM_ITERATIONS = ITE_MGM
 
    SELECT CASE (NTYPE)
 
       ! Initialization - after first structured inhomogeneous Poisson solution
 
       CASE (0)
+
          MGM%ITE = 0
          MGM%ITE_LAPLACE = 0
-         MGM%ITE_POISSON = ITE                 
+         MGM%ITE_POISSON = ITE                   ! ITE, CAPPA contain statistics of preceding structured CG-solution
          MGM%CAPPA_POISSON = CAPPA
 
       ! MGM iteration - after each unstructured homogeneous Laplace solution
 
       CASE (1)
-         MGM%ITE = ITE_MGM
-         IF (TYPE_MGM_LAPLACE >= NSCARC_MGM_LAPLACE_LU) THEN
-            MGM%ITE_LAPLACE = 1
-            MGM%CAPPA_LAPLACE = 0
-         ELSE IF (ITE > MGM%ITE_LAPLACE) THEN
-            MGM%ITE_LAPLACE = MAX(ITE, MGM%ITE_LAPLACE)
-            MGM%CAPPA_LAPLACE = CAPPA
-         ENDIF
 
-      ! termination - after whole MGM solution
+         MGM%ITE = ITE_MGM
+         IF (TYPE_MGM_LAPLACE == NSCARC_MGM_LAPLACE_CG .AND. ITE > MGM%ITE_LAPLACE) THEN
+            MGM%ITE_LAPLACE = MAX(ITE, MGM%ITE_LAPLACE)            ! Store worst Laplace-CG statistics
+            MGM%CAPPA_LAPLACE = CAPPA
+         ENDIF                         
+
+      ! Termination - after whole MGM solution
 
       CASE (-1)
+
          CAPPA = MGM%CAPPA_POISSON   ! Reset to Krylov statistics of Poisson solution for statistics in chid.out
          ITE   = MGM%ITE_POISSON
+
+         SCARC_MGM_ACCURACY   = VELOCITY_ERROR_GLOBAL  ! Store achieved MGM accuracy for statistics in chid.out
+         SCARC_MGM_ITERATIONS = ITE_MGM                ! Store required MGM iterations for statistics in chid.out
+
    END SELECT
    IF (VELOCITY_ERROR_GLOBAL <= VELOCITY_ERROR_MGM) SCARC_MGM_CONVERGENCE_STATE = NSCARC_MGM_SUCCESS
 
@@ -17047,86 +17042,10 @@ DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 
    SELECT CASE(NTYPE)
 
-      CASE  (NSCARC_MGM_POISSON, NSCARC_MGM_SCARC, NSCARC_MGM_USCARC, NSCARC_MGM_TERMINATE) 
-
-         IF (NTYPE == NSCARC_MGM_POISSON) THEN
-            HP => MGM%SIP
-         ELSE IF (NTYPE == NSCARC_MGM_TERMINATE) THEN
-            HP => MGM%UIP
-         ELSE IF (NTYPE == NSCARC_MGM_SCARC) THEN
-            HP => MGM%SCARC
-         ELSE IF (NTYPE == NSCARC_MGM_USCARC) THEN
-            HP => MGM%USCARC
-         ELSE
-            WRITE(*,*) 'ERROR IN MGM_UPDATE_GHOSTCELLS'
-         ENDIF
-         BXS => M%BXS ; BXF => M%BXF
-         BYS => M%BYS ; BYF => M%BYF
-         BZS => M%BZS ; BZF => M%BZF
-
-       
-         WALL_CELLS_LOOP: DO IW = 1, L%N_WALL_CELLS_EXT
-      
-            GWC => G%WALL(IW)
-      
-            IF (GWC%BTYPE == INTERNAL) CYCLE
-
-            IXG = GWC%IXG
-            IYG = GWC%IYG
-            IZG = GWC%IZG
-      
-            IXW = GWC%IXW
-            IYW = GWC%IYW
-            IZW = GWC%IZW
-      
-            IOR0 = GWC%IOR
-      
-            SELECT CASE (IOR0)
-               CASE ( 1)
-                  IF (GWC%BTYPE == DIRICHLET) THEN
-                     HP(IXG, IYW, IZW) = -HP(IXW, IYW, IZW) + 2.0_EB*BXS(IYW, IZW)
-                  ELSE IF (GWC%BTYPE == NEUMANN) THEN
-                     HP(IXG, IYW, IZW) =  HP(IXW, IYW, IZW) - L%DX*BXS(IYW, IZW)
-                  ENDIF
-               CASE (-1)
-                  IF (GWC%BTYPE == DIRICHLET) THEN
-                     HP(IXG, IYW, IZW) = -HP(IXW, IYW, IZW) + 2.0_EB*BXF(IYW, IZW)
-                  ELSE IF (GWC%BTYPE == NEUMANN) THEN
-                     HP(IXG, IYW, IZW) =  HP(IXW, IYW, IZW) + L%DX*BXF(IYW, IZW)
-                  ENDIF
-               CASE ( 2)
-                  IF (GWC%BTYPE == DIRICHLET) THEN
-                     HP(IXW, IYG, IZW) = -HP(IXW, IYW, IZW) + 2.0_EB*BYS(IXW, IZW)
-                  ELSE IF (GWC%BTYPE == NEUMANN) THEN
-                     HP(IXW, IYG, IZW) =  HP(IXW, IYW, IZW) - L%DY*BYS(IXW, IZW)
-                  ENDIF
-               CASE (-2)
-                  IF (GWC%BTYPE == DIRICHLET) THEN
-                     HP(IXW, IYG, IZW) = -HP(IXW, IYW, IZW) + 2.0_EB*BYF(IXW, IZW)
-                  ELSE IF (GWC%BTYPE == NEUMANN) THEN
-                     HP(IXW, IYG, IZW) =  HP(IXW, IYW, IZW) + L%DY*BYF(IXW, IZW)
-                  ENDIF
-               CASE ( 3)
-                  IF (GWC%BTYPE == DIRICHLET) THEN
-                     HP(IXW, IYW, IZG) = -HP(IXW, IYW, IZW) + 2.0_EB*BZS(IXW, IYW)
-                  ELSE IF (GWC%BTYPE == NEUMANN) THEN
-                     HP(IXW, IYW, IZG) =  HP(IXW, IYW, IZW) - L%DZ*BZS(IXW, IYW)
-                  ENDIF
-               CASE (-3)
-                  IF (GWC%BTYPE == DIRICHLET) THEN
-                     HP(IXW, IYW, IZG) = -HP(IXW, IYW, IZW) + 2.0_EB*BZF(IXW, IYW)
-                  ELSE IF (GWC%BTYPE == NEUMANN) THEN
-                     HP(IXW, IYW, IZG) =  HP(IXW, IYW, IZW) + L%DZ*BZF(IXW, IYW)
-                  ENDIF
-            END SELECT
-      
-         ENDDO WALL_CELLS_LOOP
-
-      ! 
       ! Update ghostcells for local Laplace problems
       ! Along external boundaries use zero Dirichlet or Neumann BC's
       ! Along mesh interfaces use Dirichlet BC's corresponding to MGM interface settings 
-      ! 
+        
       CASE (NSCARC_MGM_LAPLACE)
 
          HP => MGM%UHL
@@ -17200,6 +17119,84 @@ DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
             END SELECT
       
          ENDDO WALL_CELLS_LOOP_LAPLACE
+
+      ! All other cases: 
+      ! Updating the ghost cells for the inhomogeneous structured Poisson as well as 
+      ! the (optional) ScaRC and UScaRC solutions in MGM and when terminating the current MGM run
+
+      CASE  (NSCARC_MGM_POISSON, NSCARC_MGM_SCARC, NSCARC_MGM_USCARC, NSCARC_MGM_TERMINATE) 
+
+         SELECT CASE (NTYPE)
+            CASE (NSCARC_MGM_POISSON)
+               HP => MGM%SIP
+            CASE (NSCARC_MGM_SCARC) 
+               HP => MGM%SCARC
+            CASE (NSCARC_MGM_USCARC)
+               HP => MGM%USCARC
+            CASE (NSCARC_MGM_TERMINATE)
+               HP => MGM%UIP
+         END SELECT
+
+         BXS => M%BXS ; BXF => M%BXF
+         BYS => M%BYS ; BYF => M%BYF
+         BZS => M%BZS ; BZF => M%BZF
+       
+         WALL_CELLS_LOOP: DO IW = 1, L%N_WALL_CELLS_EXT
+      
+            GWC => G%WALL(IW)
+      
+            IF (GWC%BTYPE == INTERNAL) CYCLE
+
+            IXG = GWC%IXG
+            IYG = GWC%IYG
+            IZG = GWC%IZG
+      
+            IXW = GWC%IXW
+            IYW = GWC%IYW
+            IZW = GWC%IZW
+      
+            IOR0 = GWC%IOR
+      
+            SELECT CASE (IOR0)
+               CASE ( 1)
+                  IF (GWC%BTYPE == DIRICHLET) THEN
+                     HP(IXG, IYW, IZW) = -HP(IXW, IYW, IZW) + 2.0_EB*BXS(IYW, IZW)
+                  ELSE IF (GWC%BTYPE == NEUMANN) THEN
+                     HP(IXG, IYW, IZW) =  HP(IXW, IYW, IZW) - L%DX*BXS(IYW, IZW)
+                  ENDIF
+               CASE (-1)
+                  IF (GWC%BTYPE == DIRICHLET) THEN
+                     HP(IXG, IYW, IZW) = -HP(IXW, IYW, IZW) + 2.0_EB*BXF(IYW, IZW)
+                  ELSE IF (GWC%BTYPE == NEUMANN) THEN
+                     HP(IXG, IYW, IZW) =  HP(IXW, IYW, IZW) + L%DX*BXF(IYW, IZW)
+                  ENDIF
+               CASE ( 2)
+                  IF (GWC%BTYPE == DIRICHLET) THEN
+                     HP(IXW, IYG, IZW) = -HP(IXW, IYW, IZW) + 2.0_EB*BYS(IXW, IZW)
+                  ELSE IF (GWC%BTYPE == NEUMANN) THEN
+                     HP(IXW, IYG, IZW) =  HP(IXW, IYW, IZW) - L%DY*BYS(IXW, IZW)
+                  ENDIF
+               CASE (-2)
+                  IF (GWC%BTYPE == DIRICHLET) THEN
+                     HP(IXW, IYG, IZW) = -HP(IXW, IYW, IZW) + 2.0_EB*BYF(IXW, IZW)
+                  ELSE IF (GWC%BTYPE == NEUMANN) THEN
+                     HP(IXW, IYG, IZW) =  HP(IXW, IYW, IZW) + L%DY*BYF(IXW, IZW)
+                  ENDIF
+               CASE ( 3)
+                  IF (GWC%BTYPE == DIRICHLET) THEN
+                     HP(IXW, IYW, IZG) = -HP(IXW, IYW, IZW) + 2.0_EB*BZS(IXW, IYW)
+                  ELSE IF (GWC%BTYPE == NEUMANN) THEN
+                     HP(IXW, IYW, IZG) =  HP(IXW, IYW, IZW) - L%DZ*BZS(IXW, IYW)
+                  ENDIF
+               CASE (-3)
+                  IF (GWC%BTYPE == DIRICHLET) THEN
+                     HP(IXW, IYW, IZG) = -HP(IXW, IYW, IZW) + 2.0_EB*BZF(IXW, IYW)
+                  ELSE IF (GWC%BTYPE == NEUMANN) THEN
+                     HP(IXW, IYW, IZG) =  HP(IXW, IYW, IZW) + L%DZ*BZF(IXW, IYW)
+                  ENDIF
+            END SELECT
+      
+         ENDDO WALL_CELLS_LOOP
 
    END SELECT
 
