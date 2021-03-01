@@ -7736,7 +7736,7 @@ CALL SCARC_POINT_TO_GRID (NM, NL)
 MKL => L%MKL
 AS  => SCARC_POINT_TO_CMATRIX (NSCARC_MATRIX_LAPLACE_SYM)
 
-! Allocate workspace for parameters nnd pointers eeded in MKL-routine
+! Allocate workspace for parameters and pointers needed in MKL-routine
  
 CALL SCARC_ALLOCATE_INT1 (MKL%IPARM, 1, 64, NSCARC_INIT_ZERO, 'MKL%IPARM', CROUTINE)
 
