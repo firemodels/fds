@@ -1691,13 +1691,13 @@ In this example, air is pushed through a 30~cm long, two-dimensional channel at 
 \label{dancing_eddies_figure}
 \end{figure}
 
-One strategy for reducing the computational cost associated with a tightened tolerance on the normal velocity at mesh boundaries is to overlap the meshes. The idea is described in detail for a non-structured mesh in Ref.~\cite{Grinberg:JCP2010}. The basic idea is that a slight overlap of meshes can lead to faster convergence of the pressure solver towards the desired level of accuracy. In the {\ct dancing\_eddies} test case, the case called {\ct dancing\_eddies\_tight} is rerun as {\ct dancing\_eddies\_tight\_overlap} where each mesh is extended an additional 10 grid cells in the longitudinal direction. This increases the work by approximately a factor of 85/75, but it reduces the number of iterations. Figure~\ref{dancing_eddies_overlap} shows the reduction in the number of pressure iterations (left) and the CPU time (right).  It can be seen that the overlap strategy does not ultimately reduce the CPU cost, whereas the UGLMAT solver reduces the cost by a factor of 0.5 by using a single iteration as shown on the left plot.
+The case called {\ct dancing\_eddies\_tight} is rerun without the special pressure preconditioner {\ct dancing\_eddies\_tight\_no\_precon}. Figure~\ref{dancing_eddies_precon} shows the reduction in the number of pressure iterations (left) and the CPU time (right).
 
 \begin{figure}[ht]
 \includegraphics[width=3in]{SCRIPT_FIGURES/dancing_eddies_iterations}
-\includegraphics[width=3in]{SCRIPT_FIGURES/dancing_eddies_tight_overlap}
-\caption[Reduction of pressure iterations in the {\ct dancing\_eddies} test cases]{The number of pressure iterations (left) and the total CPU time (right) for overlapped and non-overlapped meshes.}
-\label{dancing_eddies_overlap}
+\includegraphics[width=3in]{SCRIPT_FIGURES/dancing_eddies_tight_precon}
+\caption[Pressure iterations in the {\ct dancing\_eddies} test cases]{The number of pressure iterations (left) and the total CPU time (right) for preconditioned and non-preconditioned pressure solvers.}
+\label{dancing_eddies_precon}
 \end{figure}
 
 
