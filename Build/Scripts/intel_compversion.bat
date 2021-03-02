@@ -1,14 +1,23 @@
 @echo off
-call :is_file_installed head|| exit /b 1
-call :is_file_installed sed || exit /b 1
-call :is_file_installed gawk|| exit /b 1
+setlocal enabledelayedexpansion
+
 call :is_file_installed ifort || exit /b 1
 
 ifort > f_version.txt 2>&1
-head -1 f_version.txt | sed "s/^.*\(Version.*\).*$/\1/" | gawk "{print $2}" > vers.out
-set /p vers=<vers.out
-echo "Intel ifort %vers%"
-erase f_version.txt vers.out
+set /p vers=<f_version.txt
+
+set nargs=0
+for %%a in ("%vers: =" "%") do (
+   set vector2[!nargs!]=%%~a
+   set /A nargs+=1
+   set vector[!nargs!]=%%a
+)
+
+FOR /L %%i IN (0,1,%nargs%) DO (
+  if !vector[%%i]! == "Version"     echo "Intel ifort !vector2[%%i]!"
+)
+
+erase f_version.txt
 goto eof
 
 :: -------------------------------------------------------------
@@ -28,5 +37,3 @@ goto eof
   exit /b 0
 
 :eof
-
-
