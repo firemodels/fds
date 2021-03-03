@@ -343,7 +343,7 @@ for ifile=1:nfile
         end
     elseif(ifile==5)
         % check errors
-        if file(ifile).e_z_2(end) > 6e-5
+        if file(ifile).e_z_2(end) > 6.5e-5
             display(['Matlab Warning: Neumann BC Species in rotated_cube 27deg stm ' ...
             file(ifile).name{end} ' is out of tolerance. e_z = ',      ...
             num2str(file(ifile).e_z_2(end))])
