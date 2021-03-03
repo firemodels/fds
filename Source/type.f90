@@ -971,10 +971,12 @@ TYPE IBM_REGFACE_TYPE
 END TYPE IBM_REGFACE_TYPE
 
 TYPE IBM_REGFACEZ_TYPE
+   LOGICAL :: DO_LO_IND=.FALSE.,DO_HI_IND=.FALSE.
    INTEGER :: IWC=0
+   REAL(EB):: FN_H_S=0._EB
    INTEGER,  DIMENSION(MAX_DIM)                                    ::       IJK
    INTEGER,  DIMENSION(1:2,1:2)                                    ::        JD
-   REAL(EB), DIMENSION(MAX_SPECIES)                                ::   RHO_D=0._EB
+   REAL(EB), DIMENSION(MAX_SPECIES)                                ::   RHO_D=0._EB,RHOZZ_U=0._EB,FN_ZZ=0._EB
    REAL(EB), DIMENSION(MAX_SPECIES)                                ::   RHO_D_DZDN=0._EB
    REAL(EB), DIMENSION(MAX_SPECIES)                                :: H_RHO_D_DZDN=0._EB
    REAL(EB), DIMENSION(-1:0)                                       ::    RHOPVN=0._EB
