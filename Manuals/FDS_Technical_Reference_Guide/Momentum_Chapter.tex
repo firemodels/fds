@@ -568,6 +568,7 @@ Note that for both stages, the normal components of velocity at the interface ar
    \ee
    If the criteria are not met, return to Step~\ref{step3}.
 \end{enumerate}
+This iterative scheme works well for most multiple mesh configurations, but it is excessively slow in the case of tunnel geometries, where potentially dozens of meshes might be aligned end to end to make up the tunnel. In such circumstances, there is an optional pre-conditioning scheme for the solution of the Poisson equation described in Appendix~\ref{tunnel_preconditioner}.
 
 
 
