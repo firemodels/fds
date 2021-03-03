@@ -812,7 +812,8 @@ TYPE SCARC_MGM_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION (:,:,:) :: UHL_VS_DSCARC       !< difference of unstructured Laplace MGM and diff ScaRC-UScarC
 
    REAL(EB), ALLOCATABLE, DIMENSION (:)     :: BC                  !< Boundary conditions along internal mesh interfaces
-   REAL(EB), ALLOCATABLE, DIMENSION (:)     :: X, Y, B             !< RHS and solution vectors of LU (experimental)
+   REAL(EB), ALLOCATABLE, DIMENSION (:)     :: X, Y, B             !< solution, auxiliary and RHS vectors for local Laplace solvers
+   REAL(FB), ALLOCATABLE, DIMENSION (:)     :: X_FB, B_FB          !< solution and RHS vectors for local Laplace solvers (SP)
    REAL(EB), ALLOCATABLE, DIMENSION (:,:)   :: AAA                 !< Matrix for LU-decomposition (experimental)
    REAL(EB), ALLOCATABLE, DIMENSION (:,:)   :: LLL                 !< Lower part of LU-decomposition (experimental)
    REAL(EB), ALLOCATABLE, DIMENSION (:,:)   :: UUU                 !< Upper part of LU-decomposition (experimental)
@@ -1975,6 +1976,7 @@ IF (HAS_CSV_DUMP) THEN
 ENDIF
 
 END SUBROUTINE SCARC_SETUP_MESSAGES
+
 
 
 END MODULE SCARC_MESSAGES
@@ -6832,8 +6834,6 @@ ENDDO
 END SUBROUTINE SCARC_UNPACK_MGM_VELO2
 
 
-
-
 ! --------------------------------------------------------------------------------------------------------------
 !> \brief Pack overlapping parts of specified vector VC (numbered via IC values)
 ! --------------------------------------------------------------------------------------------------------------
@@ -7652,7 +7652,7 @@ CALL SCARC_POINT_TO_GRID (NM, NL)
 MKL => L%MKL
 AS  => SCARC_POINT_TO_CMATRIX (NSCARC_MATRIX_POISSON_SYM)
 
-! Allocate workspace for parameters nnd pointers eeded in MKL-routine
+! Allocate workspace for parameters and pointers needed in MKL-routine
  
 CALL SCARC_ALLOCATE_INT1 (MKL%IPARM, 1, 64, NSCARC_INIT_ZERO, 'MKL%IPARM', CROUTINE)
 
@@ -7727,6 +7727,7 @@ INTEGER, INTENT(IN) :: NM, NL
 INTEGER :: I, IDUMMY(1)=0
 REAL (EB) :: TNOW
 REAL (EB) :: DUMMY(1)=0.0_EB
+REAL (FB) :: DUMMY_FB(1)=0.0_FB
 
 TNOW = CURRENT_TIME()
 CROUTINE = 'SCARC_SETUP_PARDISO'
@@ -7777,17 +7778,27 @@ MKL%MTYPE  = -2         ! Matrix type real non-symmetric
 ! First perform only reordering and symbolic factorization
 ! Then perform only factorization
 
-MKL%IPARM(28) = 0         ! double precision
-MKL%PHASE = 11
-CALL PARDISO_D(MKL%PT, MKL%MAXFCT, MKL%MNUM, MKL%MTYPE, MKL%PHASE, G%NC, &
-               AS%VAL, AS%ROW, AS%COL, IDUMMY, &
-               MKL%NRHS, MKL%IPARM, MKL%MSGLVL, DUMMY, DUMMY, MKL%ERROR)
-MKL%PHASE = 22
-CALL PARDISO_D(MKL%PT, MKL%MAXFCT, MKL%MNUM, MKL%MTYPE, MKL%PHASE, G%NC, &
-               AS%VAL, AS%ROW, AS%COL, IDUMMY, &
-               MKL%NRHS, MKL%IPARM, MKL%MSGLVL, DUMMY, DUMMY, MKL%ERROR)
-
-
+IF (TYPE_MKL_PRECISION == NSCARC_PRECISION_SINGLE) THEN
+   MKL%IPARM(28) = 1         ! single precision
+   MKL%PHASE = 11
+   CALL PARDISO_S(MKL%PT, MKL%MAXFCT, MKL%MNUM, MKL%MTYPE, MKL%PHASE, G%NC, &
+                  AS%VAL_FB, AS%ROW, AS%COL, IDUMMY, &
+                  MKL%NRHS, MKL%IPARM, MKL%MSGLVL, DUMMY_FB, DUMMY_FB, MKL%ERROR)
+   MKL%PHASE = 22
+   CALL PARDISO_S(MKL%PT, MKL%MAXFCT, MKL%MNUM, MKL%MTYPE, MKL%PHASE, G%NC, &
+                  AS%VAL_FB, AS%ROW, AS%COL, IDUMMY, &
+                  MKL%NRHS, MKL%IPARM, MKL%MSGLVL, DUMMY_FB, DUMMY_FB, MKL%ERROR)
+ELSE
+   MKL%IPARM(28) = 0         ! double precision
+   MKL%PHASE = 11
+   CALL PARDISO_D(MKL%PT, MKL%MAXFCT, MKL%MNUM, MKL%MTYPE, MKL%PHASE, G%NC, &
+                  AS%VAL, AS%ROW, AS%COL, IDUMMY, &
+                  MKL%NRHS, MKL%IPARM, MKL%MSGLVL, DUMMY, DUMMY, MKL%ERROR)
+   MKL%PHASE = 22
+   CALL PARDISO_D(MKL%PT, MKL%MAXFCT, MKL%MNUM, MKL%MTYPE, MKL%PHASE, G%NC, &
+                  AS%VAL, AS%ROW, AS%COL, IDUMMY, &
+                  MKL%NRHS, MKL%IPARM, MKL%MSGLVL, DUMMY, DUMMY, MKL%ERROR)
+ENDIF
 END SUBROUTINE SCARC_SETUP_MGM_PARDISO
 
 END MODULE SCARC_MKL
@@ -9016,7 +9027,10 @@ MESHES_LOOP2: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
       
       ! Check whether the current meshes contains obstructions or not
       ! This information can be used to replace local preconditioning by the faster FFT for structured meshes
-      IF (G%NC < L%NX*L%NY*L%NZ) L%HAS_OBSTRUCTIONS = .TRUE.
+      IF (G%NC < L%NX*L%NY*L%NZ) THEN
+         L%HAS_OBSTRUCTIONS = .TRUE.
+         WRITE(*,*) 'NM =', MY_RANK + 1,': G%NC=', G%NC,': PRODUCT:', L%NX*L%NY*L%NZ, ': HAS_OBSTRUCTIONS:', L%HAS_OBSTRUCTIONS
+      ENDIF
 
    ! If only one specified type of discretization must be admistrated:
    ! allocate and preset cell numbers and state arrays for requested type of discretization
@@ -12864,28 +12878,58 @@ ELSE
    AS => G%LAPLACE_SYM
 ENDIF
 
-DO IW = 1, G%NW
+SELECT CASE (TYPE_MKL_PRECISION) 
 
-   GWC => G%WALL(IW)
-   IOR0 = GWC%IOR
-   IF (TWO_D .AND. ABS(IOR0) == 2) CYCLE       
-   IF (GWC%BTYPE /= INTERNAL) CYCLE
+   CASE (NSCARC_PRECISION_DOUBLE)
 
-   F  => L%FACE(IOR0)
+      DO IW = 1, G%NW
+      
+         GWC => G%WALL(IW)
+         IOR0 = GWC%IOR
+         IF (TWO_D .AND. ABS(IOR0) == 2) CYCLE       
+         IF (GWC%BTYPE /= INTERNAL) CYCLE
+      
+         F  => L%FACE(IOR0)
+      
+         I = GWC%IXW
+         J = GWC%IYW
+         K = GWC%IZW
+      
+         IF (IS_UNSTRUCTURED .AND. L%IS_SOLID(I, J, K)) CYCLE
+      
+         NOM = GWC%NOM
+         IC  = G%CELL_NUMBER(I, J, K)
+      
+         IP = AS%ROW(IC)
+         AS%VAL(IP) = AS%VAL(IP) - F%INCR_BOUNDARY
+      
+      ENDDO 
+      
+   CASE (NSCARC_PRECISION_SINGLE)
 
-   I = GWC%IXW
-   J = GWC%IYW
-   K = GWC%IZW
-
-   IF (IS_UNSTRUCTURED .AND. L%IS_SOLID(I, J, K)) CYCLE
-
-   NOM = GWC%NOM
-   IC  = G%CELL_NUMBER(I, J, K)
-
-   IP = AS%ROW(IC)
-   AS%VAL(IP) = AS%VAL(IP) - F%INCR_BOUNDARY
-
-ENDDO 
+      DO IW = 1, G%NW
+      
+         GWC => G%WALL(IW)
+         IOR0 = GWC%IOR
+         IF (TWO_D .AND. ABS(IOR0) == 2) CYCLE       
+         IF (GWC%BTYPE /= INTERNAL) CYCLE
+      
+         F  => L%FACE(IOR0)
+      
+         I = GWC%IXW
+         J = GWC%IYW
+         K = GWC%IZW
+      
+         IF (IS_UNSTRUCTURED .AND. L%IS_SOLID(I, J, K)) CYCLE
+      
+         NOM = GWC%NOM
+         IC  = G%CELL_NUMBER(I, J, K)
+      
+         IP = AS%ROW(IC)
+         AS%VAL_FB(IP) = AS%VAL_FB(IP) - REAL(F%INCR_BOUNDARY, FB)
+      
+      ENDDO 
+END SELECT
 
  
 END SUBROUTINE SCARC_SETUP_BOUNDARY_MKL
@@ -16818,6 +16862,13 @@ DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
       CALL SCARC_ALLOCATE_REAL1 (MGM%X, 1, G%NC, NSCARC_INIT_ZERO, 'X', CROUTINE)
       CALL SCARC_ALLOCATE_REAL1 (MGM%B, 1, G%NC, NSCARC_INIT_ZERO, 'B', CROUTINE)
 
+#ifdef WITH_MKL
+      IF (TYPE_MKL_PRECISION == NSCARC_PRECISION_SINGLE) THEN
+         CALL SCARC_ALLOCATE_REAL1_FB (MGM%X_FB, 1, G%NC, NSCARC_INIT_ZERO, 'X', CROUTINE)
+         CALL SCARC_ALLOCATE_REAL1_FB (MGM%B_FB, 1, G%NC, NSCARC_INIT_ZERO, 'B', CROUTINE)
+      ENDIF
+#endif
+
    ENDIF
 
    ! The following code is still experimental and addresses the solution of the LU method compactly stored matrices
@@ -17638,7 +17689,7 @@ DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 ENDDO
 
 !#ifdef WITH_SCARC_DEBUG
-!1000 FORMAT (A, ': IX, IY, IZ =', 3I4, ': ICU =', I4, ': HP =', E14.6)
+!1000 FORMAT (A, ': IX, IY, IZ =', 3I6, ': ICU =', I6, ': HP =', E14.6)
 !#endif
 END SUBROUTINE SCARC_MGM_STORE
 
@@ -19938,13 +19989,22 @@ MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
    ST  => L%STAGE(STACK(NS)%SOLVER%TYPE_STAGE)
 
    MKL%PHASE  = 33                    ! only solving
-   MGM%X = 0.0_EB
-   CALL PARDISO_D(MKL%PT, MKL%MAXFCT, MKL%MNUM, MKL%MTYPE, MKL%PHASE, G%NC, &
-                  AS%VAL, AS%ROW, AS%COL, MKL%PERM, MKL%NRHS, MKL%IPARM, &
-                  MKL%MSGLVL, MGM%B, MGM%X, MKL%ERROR)
 
+   IF (TYPE_MKL_PRECISION == NSCARC_PRECISION_DOUBLE) THEN
+      MGM%X = 0.0_EB
+      CALL PARDISO_D(MKL%PT, MKL%MAXFCT, MKL%MNUM, MKL%MTYPE, MKL%PHASE, G%NC, &
+                     AS%VAL, AS%ROW, AS%COL, MKL%PERM, MKL%NRHS, MKL%IPARM, &
+                     MKL%MSGLVL, MGM%B, MGM%X, MKL%ERROR)
+   ELSE
+      MGM%B_FB = REAL(MGM%B, FB)
+      MGM%X_FB = 0.0_EB
+      CALL PARDISO_S(MKL%PT, MKL%MAXFCT, MKL%MNUM, MKL%MTYPE, MKL%PHASE, G%NC, &
+                     AS%VAL_FB, AS%ROW, AS%COL, MKL%PERM, MKL%NRHS, MKL%IPARM, &
+                     MKL%MSGLVL, MGM%B_FB, MGM%X_FB, MKL%ERROR)
+      MGM%X = REAL(MGM%X_FB,EB)
+   ENDIF
+   
    IF (MKL%ERROR /= 0) CALL SCARC_ERROR(NSCARC_ERROR_MKL_INTERNAL, SCARC_NONE, MKL%ERROR)
-
 
 ENDDO MESHES_LOOP
 
@@ -19986,12 +20046,22 @@ MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          MKL => L%MKL
          MKL%PHASE  = 33         ! only solving
 
-         MGM%X = 0.0_EB
-         CALL PARDISO_D(MKL%PT, MKL%MAXFCT, MKL%MNUM, MKL%MTYPE, MKL%PHASE, G%NC, &
-                        AS%VAL, AS%ROW, AS%COL, MKL%PERM, MKL%NRHS, MKL%IPARM, &
-                        MKL%MSGLVL, MGM%B, MGM%X, MKL%ERROR)
-   
+         IF (TYPE_MKL_PRECISION == NSCARC_PRECISION_DOUBLE) THEN
+            MGM%X = 0.0_EB
+            CALL PARDISO_D(MKL%PT, MKL%MAXFCT, MKL%MNUM, MKL%MTYPE, MKL%PHASE, G%NC, &
+                           AS%VAL, AS%ROW, AS%COL, MKL%PERM, MKL%NRHS, MKL%IPARM, &
+                           MKL%MSGLVL, MGM%B, MGM%X, MKL%ERROR)
+         ELSE
+            MGM%B_FB = REAL(MGM%B, FB)
+            MGM%X_FB = 0.0_EB
+            CALL PARDISO_S(MKL%PT, MKL%MAXFCT, MKL%MNUM, MKL%MTYPE, MKL%PHASE, G%NC, &
+                           AS%VAL_FB, AS%ROW, AS%COL, MKL%PERM, MKL%NRHS, MKL%IPARM, &
+                           MKL%MSGLVL, MGM%B_FB, MGM%X_FB, MKL%ERROR)
+            MGM%X = REAL(MGM%X_FB, EB)
+         ENDIF
+      
          IF (MKL%ERROR /= 0) CALL SCARC_ERROR(NSCARC_ERROR_MKL_INTERNAL, SCARC_NONE, MKL%ERROR)
+
 
       ! If mesh contains obstructions, then the grid is structured and the FFT from Crayfishpak is used 
        
