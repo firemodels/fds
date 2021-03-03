@@ -7804,6 +7804,8 @@ END SUBROUTINE SCARC_SETUP_MGM_PARDISO
 END MODULE SCARC_MKL
 
 #endif
+
+
 !=======================================================================================================================
 !
 ! MODULE SCARC_VECTORS
@@ -11251,11 +11253,12 @@ CONTAINS
 ! Define matrix stencils and initialize matrices and boundary conditions on all needed levels
 ! ------------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_SETUP_SYSTEMS
-USE SCARC_POINTERS, ONLY: L, SCARC_POINT_TO_GRID
-INTEGER :: NM, NL
+USE SCARC_POINTERS, ONLY: SCARC_POINT_TO_GRID
 #ifdef WITH_MKL
+USE SCARC_POINTERS, ONLY: L
 INTEGER :: TYPE_MKL_SAVE(0:1), TYPE_SCOPE_SAVE(0:1)
 #endif
+INTEGER :: NM, NL
   
 CROUTINE = 'SCARC_SETUP_SYSTEMS'
 
@@ -12862,6 +12865,7 @@ END SELECT
 END SUBROUTINE SCARC_SETUP_BOUNDARY
 
 
+#ifdef WITH_MKL
 ! --------------------------------------------------------------------------------------------------------------
 !> \brief Insert internal Dirichlet boundary conditions to local MKL preconditioning matrices
 ! --------------------------------------------------------------------------------------------------------------
@@ -12931,8 +12935,8 @@ SELECT CASE (TYPE_MKL_PRECISION)
       ENDDO 
 END SELECT
 
- 
 END SUBROUTINE SCARC_SETUP_BOUNDARY_MKL
+#endif
 
 
 ! --------------------------------------------------------------------------------------------------------------
@@ -15388,11 +15392,13 @@ END SUBROUTINE SCARC_CLEAN_WORKSPACE_AMG
 ! --------------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_RELAX_NULLSPACE(NL)
 USE SCARC_POINTERS, ONLY: L, G, A, MG, SCARC_POINT_TO_GRID, SCARC_POINT_TO_CMATRIX
-INTEGER, INTENT(IN):: NL
-INTEGER:: IC, ICOL, NM, JC, JCG
-#ifdef WITH_MKL
+#ifndef WITH_MKL
+USE SCARC_VECTORS, ONLY: SCARC_DAXPY_CONSTANT_DOUBLE
+#else
 EXTERNAL:: DAXPBY
 #endif
+INTEGER, INTENT(IN):: NL
+INTEGER:: IC, ICOL, NM, JC, JCG
 
 CROUTINE = 'SCARC_RELAX_NULLSPACE'
 
@@ -15475,7 +15481,6 @@ DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 #else
   CALL SCARC_DAXPY_CONSTANT_DOUBLE(G%NC, -1.0_EB, G%AUX2, 1.0_EB, G%NULLSPACE)
 #endif
-   
 
 ENDDO
 
@@ -18484,6 +18489,7 @@ N_STACK_TOTAL = NSTACK
 END SUBROUTINE SCARC_SETUP_KRYLOV_ENVIRONMENT
 
 
+#ifdef WITH_MKL
 ! --------------------------------------------------------------------------------------------------------------
 !> \brief  Setup optimized local preconditioner, either local FFT or PARDISO, depending on structure of mesh
 ! If mesh does not contain obstructions, the faster FFT preconditioner is used, otherwise PARDISO from IntelMKL
@@ -18507,6 +18513,7 @@ DO NL = NLMIN, NLMAX
 ENDDO
 
 END SUBROUTINE SCARC_SETUP_OPTIMIZED
+#endif
 
 
 ! --------------------------------------------------------------------------------------------------------------
@@ -18593,14 +18600,18 @@ END SUBROUTINE SCARC_SETUP_MULTIGRID_ENVIRONMENT
 !  - environment for unstructured local solvers in pass 2 of MGM
 ! --------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_SETUP_MGM_ENVIRONMENT
-USE SCARC_POINTERS, ONLY: L, SCARC_POINT_TO_MGM
+USE SCARC_POINTERS, ONLY: SCARC_POINT_TO_MGM
 USE SCARC_MGM, ONLY: SCARC_SETUP_MGM
 #ifdef WITH_MKL
+USE SCARC_POINTERS, ONLY: L
 USE SCARC_MKL, ONLY: SCARC_SETUP_PARDISO, SCARC_SETUP_MGM_PARDISO
+USE SCARC_MATRICES, ONLY: SCARC_SETUP_MATRIX_MKL
 #endif
 USE SCARC_FFT, ONLY: SCARC_SETUP_FFT, SCARC_SETUP_MGM_FFT
-USE SCARC_MATRICES, ONLY: SCARC_SETUP_MATRIX_MKL
-INTEGER :: NSTACK, NM, TYPE_MATRIX_SAVE
+INTEGER :: NSTACK, TYPE_MATRIX_SAVE
+#ifdef WITH_MKL
+INTEGER :: NM
+#endif
 
 ! Allocate workspace and define variables for the different boundary settings in MGM-method
 
@@ -19861,10 +19872,12 @@ IF (STATE_MGM /= NSCARC_MGM_SUCCESS) THEN
             CALL SCARC_METHOD_KRYLOV (N_STACK_LAPLACE, NSCARC_STACK_ZERO, NLEVEL_MIN)
          CASE (NSCARC_MGM_LAPLACE_LU, NSCARC_MGM_LAPLACE_LUPERM)
             CALL SCARC_METHOD_MGM_LU(N_STACK_LAPLACE, NSCARC_STACK_ZERO, NLEVEL_MIN)
+#ifdef WITH_MKL
          CASE (NSCARC_MGM_LAPLACE_PARDISO)
             CALL SCARC_METHOD_MGM_PARDISO(N_STACK_LAPLACE, NSCARC_STACK_ZERO, NLEVEL_MIN)
          CASE (NSCARC_MGM_LAPLACE_OPTIMIZED)
             CALL SCARC_METHOD_MGM_OPTIMIZED(N_STACK_LAPLACE, NSCARC_STACK_ZERO, NLEVEL_MIN)
+#endif
       END SELECT
    
       CALL SCARC_MGM_STORE (NSCARC_MGM_LAPLACE)            
@@ -19966,11 +19979,15 @@ CALL SCARC_RELEASE_SCOPE(NS, NP)
 END SUBROUTINE SCARC_METHOD_MGM_LU
 
 
+#ifdef WITH_MKL
 ! --------------------------------------------------------------------------------------------------------------
 !> \brief Perform solution of local Laplace problems by IntelMKL Pardiso methods on each mesh
 ! --------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_METHOD_MGM_PARDISO(NS, NP, NL)
-USE SCARC_POINTERS, ONLY: L, G, MGM, MKL, AS, ST, SCARC_POINT_TO_MGM, SCARC_POINT_TO_CMATRIX
+USE SCARC_POINTERS, ONLY: L, G, MGM, AS, ST, SCARC_POINT_TO_MGM, SCARC_POINT_TO_CMATRIX
+#ifdef WITH_MKL
+USE SCARC_POINTERS, ONLY: MKL
+#endif
 INTEGER, INTENT(IN) :: NS, NP, NL
 INTEGER :: NM
 REAL (EB) :: TNOW
@@ -20018,7 +20035,10 @@ END SUBROUTINE SCARC_METHOD_MGM_PARDISO
 !- if mesh happens to be structured   : Use Crayfishpak FFT
 ! --------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_METHOD_MGM_OPTIMIZED (NS, NP, NL)
-USE SCARC_POINTERS, ONLY: L, G, MGM, MKL, FFT, AS, ST, SCARC_POINT_TO_MGM, SCARC_POINT_TO_CMATRIX
+USE SCARC_POINTERS, ONLY: L, G, MGM, FFT, AS, ST, SCARC_POINT_TO_MGM, SCARC_POINT_TO_CMATRIX
+#ifdef WITH_MKL
+USE SCARC_POINTERS, ONLY: MKL
+#endif
 USE POIS, ONLY: H2CZSS, H3CZSS
 INTEGER, INTENT(IN) :: NS, NP, NL
 INTEGER :: NM, IC
@@ -20096,6 +20116,7 @@ ENDDO MESHES_LOOP
 
 CALL SCARC_RELEASE_SCOPE(NS, NP)
 END SUBROUTINE SCARC_METHOD_MGM_OPTIMIZED
+#endif
 
 
 ! --------------------------------------------------------------------------------------------------------------
