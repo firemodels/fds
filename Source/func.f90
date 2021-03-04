@@ -2046,10 +2046,11 @@ END SUBROUTINE RANDOM_RECTANGLE
 !> \param Z0 z-coordinate of the center of the code base (m)
 !> \param RR0 Radius of the base (m)
 !> \param HH0 Height of the cone (m)
+!> \param G_FACTOR Geometry indicator: 1 for a cone, 0 for a cylinder
 
-SUBROUTINE RANDOM_CONE(NM,XX,YY,ZZ,X0,Y0,Z0,RR0,HH0)
+SUBROUTINE RANDOM_CONE(NM,XX,YY,ZZ,X0,Y0,Z0,RR0,HH0,G_FACTOR)
 
-INTEGER, INTENT(IN) :: NM
+INTEGER, INTENT(IN) :: NM,G_FACTOR
 REAL(EB), INTENT(IN) :: X0,Y0,Z0,RR0,HH0
 REAL(EB), INTENT(OUT) :: XX,YY,ZZ
 REAL(EB) :: THETA,RR,RN
@@ -2065,7 +2066,9 @@ SEARCH_LOOP: DO
    RR = SQRT(RN)*RR0
    XX = X0 + RR*COS(THETA)
    YY = Y0 + RR*SIN(THETA)
-   IF (RR**2>(RR0*(1._EB-(ZZ-Z0)/HH0))**2) CYCLE SEARCH_LOOP
+   IF (G_FACTOR==1) THEN
+      IF (RR**2>(RR0*(1._EB-(ZZ-Z0)/HH0))**2) CYCLE SEARCH_LOOP
+   ENDIF
    IF (XX>=M%XS .AND. XX<=M%XF .AND. YY>=M%YS .AND. YY<=M%YF .AND. ZZ>=M%ZS .AND. ZZ<=M%ZF) EXIT SEARCH_LOOP
 ENDDO SEARCH_LOOP
 
@@ -2166,10 +2169,11 @@ END FUNCTION CIRCLE_CELL_INTERSECTION_AREA
 !> \param Z0 z-coordinate of the center of the base of the cone (m)
 !> \param RR0 Radius of the base of the cone (m)
 !> \param HH0 Height of the cone (m)
+!> \param G_FACTOR Geometry indicator: 1 for a cone, 0 for a cylinder
 
-REAL(EB) FUNCTION CONE_MESH_INTERSECTION_VOLUME(NM,X0,Y0,Z0,RR0,HH0)
+REAL(EB) FUNCTION CONE_MESH_INTERSECTION_VOLUME(NM,X0,Y0,Z0,RR0,HH0,G_FACTOR)
 
-INTEGER, INTENT(IN) :: NM
+INTEGER, INTENT(IN) :: NM,G_FACTOR
 REAL(EB), INTENT(IN) :: X0,Y0,Z0,RR0,HH0
 INTEGER :: I,J,K,NX,NY,NZ
 REAL(EB) :: XX,YY,ZZ,R2,X_MIN,X_MAX,Y_MIN,Y_MAX,Z_MIN,Z_MAX,DX,DY,DZ
@@ -2200,7 +2204,7 @@ DO K=1,NZ
       DO I=1,NX
          XX = X_MIN + (I-0.5_EB)*DX
          R2 = (XX-X0)**2+(YY-Y0)**2
-         IF (R2<(RR0*(1._EB-(ZZ-Z0)/HH0))**2) &
+         IF (R2<(RR0*(1._EB-G_FACTOR*(ZZ-Z0)/HH0))**2) &
             CONE_MESH_INTERSECTION_VOLUME = CONE_MESH_INTERSECTION_VOLUME + DX*DY*DZ
       ENDDO
    ENDDO

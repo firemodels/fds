@@ -764,14 +764,19 @@ VOLUME_INSERT_LOOP: DO IB=1,N_INIT
       CASE('BLOCK')
          INSERT_VOLUME = (X2-X1)*(Y2-Y1)*(Z2-Z1)
          INPUT_VOLUME  = (IN%X2-IN%X1)*(IN%Y2-IN%Y1)*(IN%Z2-IN%Z1)
-      CASE('CONE')
+      CASE('CONE','CYLINDER')
          X0 = 0.5_EB*(IN%X1+IN%X2)
          Y0 = 0.5_EB*(IN%Y1+IN%Y2)
          Z0 = IN%Z1
          RR = 0.5_EB*(IN%X2-IN%X1)
          HH = IN%Z2-IN%Z1
-         INSERT_VOLUME = CONE_MESH_INTERSECTION_VOLUME(NM,X0,Y0,Z0,RR,HH)
-         INPUT_VOLUME  = PI*(0.5_EB*(IN%X2-IN%X1))**2*(IN%Z2-IN%Z1)/3._EB
+         IF (IN%SHAPE=='CONE') THEN
+            INSERT_VOLUME = CONE_MESH_INTERSECTION_VOLUME(NM,X0,Y0,Z0,RR,HH,1)
+            INPUT_VOLUME  = PI*(0.5_EB*(IN%X2-IN%X1))**2*(IN%Z2-IN%Z1)/3._EB
+         ELSE
+            INSERT_VOLUME = CONE_MESH_INTERSECTION_VOLUME(NM,X0,Y0,Z0,RR,HH,0)
+            INPUT_VOLUME  = PI*(0.5_EB*(IN%X2-IN%X1))**2*(IN%Z2-IN%Z1)
+         ENDIF
       CASE('RING','LINE')
          INSERT_VOLUME = 0._EB
          INPUT_VOLUME  = 0._EB
@@ -812,13 +817,14 @@ VOLUME_INSERT_LOOP: DO IB=1,N_INIT
             SELECT CASE(IN%SHAPE)
                CASE('BLOCK')
                   CALL RANDOM_RECTANGLE(LP_X,LP_Y,LP_Z,X1,X2,Y1,Y2,Z1,Z2)
-               CASE('CONE')
+               CASE('CONE','CYLINDER')
                   X0 = 0.5_EB*(IN%X1+IN%X2)
                   Y0 = 0.5_EB*(IN%Y1+IN%Y2)
                   Z0 = IN%Z1
                   RR = 0.5_EB*(IN%X2-IN%X1)
                   HH = IN%Z2-IN%Z1
-                  CALL RANDOM_CONE(NM,LP_X,LP_Y,LP_Z,X0,Y0,Z0,RR,HH)
+                  IF (IN%SHAPE=='CONE')     CALL RANDOM_CONE(NM,LP_X,LP_Y,LP_Z,X0,Y0,Z0,RR,HH,1)
+                  IF (IN%SHAPE=='CYLINDER') CALL RANDOM_CONE(NM,LP_X,LP_Y,LP_Z,X0,Y0,Z0,RR,HH,0)
                CASE('RING')
                   X0 = 0.5_EB*(IN%X1+IN%X2)
                   Y0 = 0.5_EB*(IN%Y1+IN%Y2)
@@ -906,6 +912,9 @@ VOLUME_INSERT_LOOP: DO IB=1,N_INIT
                IF (SOLID(CELL_INDEX(II,JJ,KK))) CYCLE II_LOOP
                IF (IN%SHAPE=='CONE') THEN
                   IF ((XC(II)-X0)**2+(YC(JJ)-Y0)**2>(RR*(1._EB-(ZC(KK)-Z0)/HH))**2) CYCLE II_LOOP
+               ENDIF
+               IF (IN%SHAPE=='CYLINDER') THEN
+                  IF ((XC(II)-X0)**2+(YC(JJ)-Y0)**2>RR**2) CYCLE II_LOOP
                ENDIF
                INSERT_VOLUME = INSERT_VOLUME + (MIN(X(II),IN%X2)-MAX(X(II-1),IN%X1)) &
                                              * (MIN(Y(JJ),IN%Y2)-MAX(Y(JJ-1),IN%Y1)) &

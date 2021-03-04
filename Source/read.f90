@@ -11927,7 +11927,7 @@ INIT_LOOP: DO N=1,N_INIT_READ+N_INIT_RESERVED
 
    ! Create a box around a CONE
 
-   IF (SHAPE=='CONE' .OR. SHAPE=='RING') THEN
+   IF (SHAPE=='CONE' .OR. SHAPE=='RING' .OR. SHAPE=='CYLINDER') THEN
       XB(1) = XYZ(1) - RADIUS
       XB(2) = XYZ(1) + RADIUS
       XB(3) = XYZ(2) - RADIUS
