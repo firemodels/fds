@@ -85,13 +85,14 @@ INTEGER, PARAMETER :: NSCARC_ERROR_MGM_PERMUTATION   = 25        !< Type of erro
 INTEGER, PARAMETER :: NSCARC_ERROR_MKL_CLUSTER       = 26        !< Type of error message: CLUSTER_SPARSE_SOLVER missing
 INTEGER, PARAMETER :: NSCARC_ERROR_MKL_INTERNAL      = 27        !< Type of error message: internal error in MKL routine
 INTEGER, PARAMETER :: NSCARC_ERROR_MKL_PARDISO       = 28        !< Type of error message: PARDISO solver missing
-INTEGER, PARAMETER :: NSCARC_ERROR_MKL_STORAGE       = 29        !< Type of error message: wrong storage scheme in MKL
-INTEGER, PARAMETER :: NSCARC_ERROR_MULTIGRID_LEVEL   = 30        !< Type of error message: wrong multigrid level
-INTEGER, PARAMETER :: NSCARC_ERROR_PARSE_INPUT       = 31        !< Type of error message: wrong input parameter
-INTEGER, PARAMETER :: NSCARC_ERROR_STACK_MESSAGE     = 32        !< Type of error message: error with stack message
-INTEGER, PARAMETER :: NSCARC_ERROR_STACK_SOLVER      = 33        !< Type of error message: error in solver stack
-INTEGER, PARAMETER :: NSCARC_ERROR_STENCIL           = 34        !< Type of error message: error in matrix stencil
-INTEGER, PARAMETER :: NSCARC_ERROR_VECTOR_LENGTH     = 35        !< Type of error message: error in vector length
+INTEGER, PARAMETER :: NSCARC_ERROR_MKL_STACK         = 29        !< Type of error message: MKL method not available on this stack
+INTEGER, PARAMETER :: NSCARC_ERROR_MKL_STORAGE       = 30        !< Type of error message: wrong storage scheme in MKL
+INTEGER, PARAMETER :: NSCARC_ERROR_MULTIGRID_LEVEL   = 31        !< Type of error message: wrong multigrid level
+INTEGER, PARAMETER :: NSCARC_ERROR_PARSE_INPUT       = 32        !< Type of error message: wrong input parameter
+INTEGER, PARAMETER :: NSCARC_ERROR_STACK_MESSAGE     = 33        !< Type of error message: error with stack message
+INTEGER, PARAMETER :: NSCARC_ERROR_STACK_SOLVER      = 34        !< Type of error message: error in solver stack
+INTEGER, PARAMETER :: NSCARC_ERROR_STENCIL           = 35        !< Type of error message: error in matrix stencil
+INTEGER, PARAMETER :: NSCARC_ERROR_VECTOR_LENGTH     = 36        !< Type of error message: error in vector length
 
 INTEGER, PARAMETER :: NSCARC_EXCHANGE_AUXILIARY      =  1        !< Type of data exchange: various auxiliary data 
 INTEGER, PARAMETER :: NSCARC_EXCHANGE_BASIC_SIZES    =  2        !< Type of data exchange: basic sizes during setup
@@ -4719,7 +4720,7 @@ SELECT CASE (TRIM(SCARC_METHOD))
                   TYPE_SMOOTH = NSCARC_RELAX_MKL
 #else
                   TYPE_SMOOTH = NSCARC_RELAX_SSOR
-                  CALL SCARC_WARNING(NSCARC_WARNING_NO_MKL_PRECON, SCARC_NONE, NSCARC_NONE)
+                  CALL SCARC_WARNING(NSCARC_WARNING_NO_MKL_SMOOTH, SCARC_NONE, NSCARC_NONE)
 #endif
 
                CASE ('CLUSTER')
@@ -4727,7 +4728,7 @@ SELECT CASE (TRIM(SCARC_METHOD))
                   TYPE_SMOOTH = NSCARC_RELAX_MKL
 #else
                   TYPE_SMOOTH = NSCARC_RELAX_SSOR
-                  CALL SCARC_ERROR(NSCARC_WARNING_NO_MKL_PRECON, SCARC_NONE, NSCARC_NONE)
+                  CALL SCARC_ERROR(NSCARC_WARNING_NO_MKL_SMOOTH, SCARC_NONE, NSCARC_NONE)
 #endif
                CASE DEFAULT
                   CALL SCARC_ERROR(NSCARC_ERROR_PARSE_INPUT, SCARC_SMOOTH, NSCARC_NONE)
@@ -5015,21 +5016,6 @@ SELECT CASE (TRIM(SCARC_COARSENING))
       TYPE_COARSENING = NSCARC_COARSENING_AGGREGATED
 END SELECT
 
-! Set type of coarse grid solver
-SELECT CASE (TRIM(SCARC_COARSE))
-   CASE ('ITERATIVE')
-      TYPE_COARSE = NSCARC_COARSE_ITERATIVE
-   CASE ('DIRECT')
-#ifdef WITH_MKL
-      TYPE_COARSE   = NSCARC_COARSE_DIRECT
-      TYPE_MKL(0)   = NSCARC_MKL_COARSE
-#else
-      CALL SCARC_ERROR(NSCARC_ERROR_MKL_CLUSTER, SCARC_NONE, NSCARC_NONE)
-#endif
-   CASE DEFAULT
-      CALL SCARC_ERROR(NSCARC_ERROR_PARSE_INPUT, SCARC_COARSE, NSCARC_NONE)
-END SELECT
-
 ! Set type of accuracy (ABSOLUTE/RELATIVE)
  
 SELECT CASE (TRIM(SCARC_ACCURACY))
@@ -5082,6 +5068,25 @@ HAS_GMG_LEVELS = IS_GMG .OR. IS_CG_GMG .OR. HAS_TWO_LEVELS
 HAS_AMG_LEVELS = IS_AMG .OR. IS_CG_AMG 
 
 IS_MGM = TYPE_METHOD == NSCARC_METHOD_MGM
+
+
+! If two or more grid levels are used, also set type of coarse grid solver
+
+IF (HAS_TWO_LEVELS .OR. HAS_MULTIPLE_LEVELS) THEN
+   SELECT CASE (TRIM(SCARC_COARSE))
+      CASE ('ITERATIVE')
+         TYPE_COARSE = NSCARC_COARSE_ITERATIVE
+      CASE ('DIRECT')
+#ifdef WITH_MKL
+         TYPE_COARSE   = NSCARC_COARSE_DIRECT
+         TYPE_MKL(0)   = NSCARC_MKL_COARSE
+#else
+         CALL SCARC_ERROR(NSCARC_ERROR_MKL_CLUSTER, SCARC_NONE, NSCARC_NONE)
+#endif
+      CASE DEFAULT
+         CALL SCARC_ERROR(NSCARC_ERROR_PARSE_INPUT, SCARC_COARSE, NSCARC_NONE)
+   END SELECT
+ENDIF
 
 END SUBROUTINE SCARC_PARSE_INPUT
 
@@ -7804,8 +7809,6 @@ END SUBROUTINE SCARC_SETUP_MGM_PARDISO
 END MODULE SCARC_MKL
 
 #endif
-
-
 !=======================================================================================================================
 !
 ! MODULE SCARC_VECTORS
@@ -9029,10 +9032,7 @@ MESHES_LOOP2: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
       
       ! Check whether the current meshes contains obstructions or not
       ! This information can be used to replace local preconditioning by the faster FFT for structured meshes
-      IF (G%NC < L%NX*L%NY*L%NZ) THEN
-         L%HAS_OBSTRUCTIONS = .TRUE.
-         WRITE(*,*) 'NM =', MY_RANK + 1,': G%NC=', G%NC,': PRODUCT:', L%NX*L%NY*L%NZ, ': HAS_OBSTRUCTIONS:', L%HAS_OBSTRUCTIONS
-      ENDIF
+      IF (G%NC < L%NX*L%NY*L%NZ) L%HAS_OBSTRUCTIONS = .TRUE.
 
    ! If only one specified type of discretization must be admistrated:
    ! allocate and preset cell numbers and state arrays for requested type of discretization
@@ -11482,10 +11482,8 @@ IF (.NOT. IS_MGM) THEN
             IF (TYPE_PRECON == NSCARC_RELAX_OPTIMIZED .OR. TYPE_SMOOTH == NSCARC_RELAX_OPTIMIZED) THEN
                IF (.NOT.L%HAS_OBSTRUCTIONS) TYPE_MKL(NL) = NSCARC_MKL_NONE
             ENDIF
-            IF (TYPE_MKL(NL) /= NSCARC_MKL_NONE) THEN
-               CALL SCARC_SETUP_MATRIX_MKL(NSCARC_MATRIX_POISSON, NM, NL)
-               CALL SCARC_SETUP_BOUNDARY_MKL(NSCARC_MATRIX_POISSON, NM, NL)
-            ENDIF
+            IF (TYPE_MKL(NL) /= NSCARC_MKL_NONE)  CALL SCARC_SETUP_MATRIX_MKL  (NSCARC_MATRIX_POISSON, NM, NL)
+            IF (TYPE_MKL(NL) == NSCARC_MKL_LOCAL) CALL SCARC_SETUP_BOUNDARY_MKL(NSCARC_MATRIX_POISSON, NM, NL)
          ENDDO
       ENDIF
 
@@ -12935,6 +12933,7 @@ SELECT CASE (TYPE_MKL_PRECISION)
       ENDDO 
 END SELECT
 
+ 
 END SUBROUTINE SCARC_SETUP_BOUNDARY_MKL
 #endif
 
@@ -15481,6 +15480,7 @@ DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 #else
   CALL SCARC_DAXPY_CONSTANT_DOUBLE(G%NC, -1.0_EB, G%AUX2, 1.0_EB, G%NULLSPACE)
 #endif
+   
 
 ENDDO
 
@@ -18435,7 +18435,6 @@ SELECT_KRYLOV_PRECON: SELECT CASE (TYPE_PRECON)
    CASE (NSCARC_RELAX_OPTIMIZED)                                    ! mixture of IntelMKL and FFT preconditioning
       CALL SCARC_SETUP_STACK_PRECON(NSTACK, NSCARC_SCOPE_LOCAL)
       CALL SCARC_SETUP_OPTIMIZED(NLEVEL_MIN, NLEVEL_MIN)
-
 #endif
  
    CASE (NSCARC_RELAX_GMG)                                          ! Preconditioning by complete GMG method
@@ -18601,12 +18600,12 @@ END SUBROUTINE SCARC_SETUP_MULTIGRID_ENVIRONMENT
 ! --------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_SETUP_MGM_ENVIRONMENT
 USE SCARC_POINTERS, ONLY: SCARC_POINT_TO_MGM
-USE SCARC_MGM, ONLY: SCARC_SETUP_MGM
 #ifdef WITH_MKL
 USE SCARC_POINTERS, ONLY: L
 USE SCARC_MKL, ONLY: SCARC_SETUP_PARDISO, SCARC_SETUP_MGM_PARDISO
 USE SCARC_MATRICES, ONLY: SCARC_SETUP_MATRIX_MKL
 #endif
+USE SCARC_MGM, ONLY: SCARC_SETUP_MGM
 USE SCARC_FFT, ONLY: SCARC_SETUP_FFT, SCARC_SETUP_MGM_FFT
 INTEGER :: NSTACK, TYPE_MATRIX_SAVE
 #ifdef WITH_MKL
@@ -19361,7 +19360,6 @@ SELECT_SOLVER_TYPE: SELECT CASE (SV%TYPE_SOLVER)
             HP => M%HS
          ENDIF
 
-   
          ! Get right hand side (PRHS from pres.f90) and initial vector (H or HS from last time step)
 
          BXS => M%BXS   ;  BXF => M%BXF
@@ -19984,10 +19982,7 @@ END SUBROUTINE SCARC_METHOD_MGM_LU
 !> \brief Perform solution of local Laplace problems by IntelMKL Pardiso methods on each mesh
 ! --------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_METHOD_MGM_PARDISO(NS, NP, NL)
-USE SCARC_POINTERS, ONLY: L, G, MGM, AS, ST, SCARC_POINT_TO_MGM, SCARC_POINT_TO_CMATRIX
-#ifdef WITH_MKL
-USE SCARC_POINTERS, ONLY: MKL
-#endif
+USE SCARC_POINTERS, ONLY: L, G, MGM, MKL, AS, ST, SCARC_POINT_TO_MGM, SCARC_POINT_TO_CMATRIX
 INTEGER, INTENT(IN) :: NS, NP, NL
 INTEGER :: NM
 REAL (EB) :: TNOW
@@ -20035,10 +20030,7 @@ END SUBROUTINE SCARC_METHOD_MGM_PARDISO
 !- if mesh happens to be structured   : Use Crayfishpak FFT
 ! --------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_METHOD_MGM_OPTIMIZED (NS, NP, NL)
-USE SCARC_POINTERS, ONLY: L, G, MGM, FFT, AS, ST, SCARC_POINT_TO_MGM, SCARC_POINT_TO_CMATRIX
-#ifdef WITH_MKL
-USE SCARC_POINTERS, ONLY: MKL
-#endif
+USE SCARC_POINTERS, ONLY: L, G, MGM, MKL, FFT, AS, ST, SCARC_POINT_TO_MGM, SCARC_POINT_TO_CMATRIX
 USE POIS, ONLY: H2CZSS, H3CZSS
 INTEGER, INTENT(IN) :: NS, NP, NL
 INTEGER :: NM, IC
@@ -20261,6 +20253,9 @@ END SUBROUTINE SCARC_METHOD_MULTIGRID
 ! --------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_METHOD_MKL(NSTACK, NPARENT, NLEVEL)
 INTEGER, INTENT(IN) :: NSTACK, NPARENT, NLEVEL
+#ifndef WITH_MKL
+INTEGER :: NDUMMY
+#endif
 
 #ifdef WITH_MKL
 SELECT_MKL: SELECT CASE (TYPE_MKL(0))
@@ -20270,7 +20265,8 @@ SELECT_MKL: SELECT CASE (TYPE_MKL(0))
       CALL SCARC_METHOD_PARDISO(NSCARC_MATRIX_POISSON_SYM, NSTACK, NPARENT, NLEVEL)
 END SELECT SELECT_MKL
 #else
-WRITE(*,*) 'MKL not defined on stack position ', NSTACK, ' for parent ', NPARENT, ' on level ', NLEVEL
+NDUMMY = NPARENT * NLEVEL
+CALL SCARC_ERROR(NSCARC_ERROR_MKL_STACK, SCARC_NONE, NSTACK)
 #endif
 
 END SUBROUTINE SCARC_METHOD_MKL
@@ -21719,6 +21715,7 @@ CPU(MY_RANK)%SOLVER =CPU(MY_RANK)%SOLVER+CURRENT_TIME()-TNOW
 CPU(MY_RANK)%OVERALL=CPU(MY_RANK)%OVERALL+CURRENT_TIME()-TNOW
 
 END SUBROUTINE SCARC_SOLVER
+
 
 END MODULE SCRC
 
