@@ -1280,11 +1280,13 @@ END SUBROUTINE SOLID_HEAT_TRANSFER_3D
 
 SUBROUTINE SOLID_PYROLYSIS_3D(DT_SUB,T_SUB)
 
+USE PHYSICAL_FUNCTIONS, ONLY: GET_SENSIBLE_ENTHALPY,GET_SOLID_RHOH
 REAL(EB), INTENT(IN) :: DT_SUB,T_SUB
-INTEGER :: N,NN,NS,I,J,K,IC,IIG,JJG,KKG,II2,JJ2,KK2,IOR,OBST_INDEX,II,JJ,KK
+INTEGER :: N,NN,NS,I,J,K,IC,IIG,JJG,KKG,II2,JJ2,KK2,IOR,OBST_INDEX,II,JJ,KK,ITMP,ITER
 REAL(EB) :: M_DOT_G_PPP_ADJUST(N_TRACKED_SPECIES),M_DOT_G_PPP_ACTUAL(N_TRACKED_SPECIES),M_DOT_S_PPP(MAX_MATERIALS),&
             RHO_IN(N_MATL),RHO_DOT_OUT(N_MATL),RHO_OUT(N_MATL),GEOM_FACTOR,TIME_FACTOR,VC,VC2,TMP_S,VSRVC_LOC,&
-            RHOCBAR,RHOCBAR2,TMP_F,Q_DOT_G_PPP,Q_DOT_O2_PPP,T_BOIL_EFF
+            RHOCBAR,RHOCBAR2,TMP_F,Q_DOT_G_PPP,Q_DOT_O2_PPP,T_BOIL_EFF,H_NODE,T_NODE,H_S,C_S,RHOH,RHOH2,&
+            ZZ_GET(1:N_TRACKED_SPECIES)
 LOGICAL :: OB2_FOUND
 REAL(EB), PARAMETER :: SOLID_VOLUME_MERGE_THRESHOLD=0.1_EB, SOLID_VOLUME_CLIP_THRESHOLD=1.E-6_EB
 TYPE(OBSTRUCTION_TYPE), POINTER :: OB=>NULL(),OB2=>NULL()
@@ -1487,17 +1489,44 @@ OBST_LOOP_2: DO N=1,N_OBST
                      ELSE
                         VC2 = DX(II2)*DY(JJ2)*DZ(KK2)
                      ENDIF
-                     ! get rho*c for each cell before merge
+                     ! Get enthalpy
                      RHO_IN(1:MS%N_MATL) = OB%RHO(I,J,K,1:MS%N_MATL)
-                     CALL GET_SOLID_RHOCBAR(RHOCBAR,TMP(I,J,K),OPT_SURF_INDEX=OB%MATL_SURF_INDEX,OPT_RHO_IN=RHO_IN)
+                     CALL GET_SOLID_RHOH(RHOH,TMP(I,J,K),OB%MATL_SURF_INDEX,RHO_IN)
                      RHO_IN(1:MS%N_MATL) = OB2%RHO(II2,JJ2,KK2,1:MS%N_MATL)
-                     CALL GET_SOLID_RHOCBAR(RHOCBAR2,TMP(II2,JJ2,KK2),OPT_SURF_INDEX=OB2%MATL_SURF_INDEX,OPT_RHO_IN=RHO_IN)
+                     CALL GET_SOLID_RHOH(RHOH2,TMP(II2,JJ2,KK2),OB2%MATL_SURF_INDEX,RHO_IN)
+                     H_NODE = (VC*RHOH+VC2*RHOH2)/VC2
+                     ! Set guess for temperature search as mass weighted temperature
+                     T_NODE = (VC*SUM(OB%RHO(I,J,K,1:MS%N_MATL))*TMP(I,J,K) + &
+                               VC2*SUM(OB2%RHO(I,J,K,1:MS%N_MATL))*TMP(II2,JJ2,KK2)) / &
+                              (VC*SUM(OB%RHO(I,J,K,1:MS%N_MATL))+VC2*SUM(OB2%RHO(I,J,K,1:MS%N_MATL)))
                      ! transfer mass of solid
                      OB2%RHO(II2,JJ2,KK2,1:MS%N_MATL) = OB2%RHO(II2,JJ2,KK2,1:MS%N_MATL) + OB%RHO(I,J,K,1:MS%N_MATL)*VC/VC2
+
                      ! compute new cell temperature
-                     TMP(II2,JJ2,KK2) = (VC*RHOCBAR*TMP(I,J,K)+VC2*RHOCBAR2*TMP(II2,JJ2,KK2))/(VC*RHOCBAR+VC2*RHOCBAR2)
+                     ITER = 0
+                     T_SEARCH: DO
+                        ITER = ITER + 1
+                        C_S = 0._EB
+                        H_S = 0._EB
+                        ITMP = MIN(4999,INT(T_NODE))
+                        T_S: DO NN=1,MS%N_MATL
+                           IF (OB2%RHO(II2,JJ2,KK2,NN)<=0._EB) CYCLE T_S
+                           ML  => MATERIAL(MS%MATL_INDEX(NN))
+                           H_S = H_S + (ML%H(ITMP)+(T_NODE-REAL(ITMP,EB))*(ML%H(ITMP+1)-ML%H(ITMP)))*OB2%RHO(II2,JJ2,KK2,NN)
+                        ENDDO T_S
+                        C_S = H_S/T_NODE
+                        TMP(II2,JJ2,KK2) = T_NODE + (H_NODE - H_S)/C_S
+                        IF (ABS(TMP(II2,JJ2,KK2) - T_NODE) < 0.0001_EB) EXIT T_SEARCH
+                        IF (ITER > 20) THEN
+                           TMP(II2,JJ2,KK2) = 0.5_EB*(TMP(II2,JJ2,KK2)+T_NODE)
+                           EXIT T_SEARCH
+                        ENDIF
+                        T_NODE = TMP(II2,JJ2,KK2)
+                     ENDDO T_SEARCH
+
                      TMP(I,J,K) = TMP(IIG,JJG,KKG) ! replace solid cell tmp with nearest gas phase tmp
                      OB%RHO(I,J,K,1:MS%N_MATL) = 0._EB
+
                   ELSEIF (VSRVC_LOC<SOLID_VOLUME_CLIP_THRESHOLD) THEN OB2_IF
                      ! VS/VC is small, but there are no more cells to accept the mass, clip the mass
                      OB%RHO(I,J,K,1:MS%N_MATL) = 0._EB
@@ -3066,7 +3095,7 @@ ENDIF
 
 ! If liquid evaporation may need to recycle timestep if any node temperature exceeds boiling
 CYCLE_BOIL: DO
-   
+
 ! Adjust the material layer masses and thicknesses
 
 REMESH_LAYER = .FALSE.
@@ -3144,7 +3173,7 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
    DO I=NWP-1,0,-1
       R_S_NEW(I) = ( R_S_NEW(I+1)**I_GRAD + (R_S(I)**I_GRAD-R_S(I+1)**I_GRAD)*REGRID_FACTOR(I+1) )**(1./REAL(I_GRAD,EB))
    ENDDO
-   
+
    X_S_NEW(0) = 0._EB
    DO I=1,NWP
       X_S_NEW(I) = R_S_NEW(0) - R_S_NEW(I)
@@ -3200,7 +3229,7 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
             I = I + ONE_D%N_LAYER_CELLS(NL)
             CYCLE LAYER_LOOP
          ELSE
-            
+
             ! If there is only one cell, nothing to do
             IF (ONE_D%N_LAYER_CELLS(NL)==1) THEN
                N_LAYER_CELLS_NEW(NL) = ONE_D%N_LAYER_CELLS(NL)
@@ -3211,20 +3240,20 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
                   ONE_D%SMALLEST_CELL_SIZE(NL) = ONE_D%LAYER_THICKNESS(NL)
                ENDIF
                THICKNESS = THICKNESS + ONE_D%LAYER_THICKNESS(NL)
-               I = I + ONE_D%N_LAYER_CELLS(NL)               
+               I = I + ONE_D%N_LAYER_CELLS(NL)
                CYCLE LAYER_LOOP
             ENDIF
-            
+
             ! If no cells in the layer have changed size, nothing to do
             IF (ALL(ABS(REGRID_FACTOR(I+1:I+ONE_D%N_LAYER_CELLS(NL))-1._EB) <= TWO_EPSILON_EB)) THEN
                N_LAYER_CELLS_NEW(NL) = ONE_D%N_LAYER_CELLS(NL)
                NWP_NEW = NWP_NEW + N_LAYER_CELLS_NEW(NL)
                THICKNESS = THICKNESS + ONE_D%LAYER_THICKNESS(NL)
-               I = I + ONE_D%N_LAYER_CELLS(NL)               
+               I = I + ONE_D%N_LAYER_CELLS(NL)
                CYCLE LAYER_LOOP
             ENDIF
-         ENDIF   
-         
+         ENDIF
+
          ! Check if layer is expanding or contracting.
          EXPAND_CONTRACT: IF (ANY(REGRID_FACTOR(I+1:I+ONE_D%N_LAYER_CELLS(NL)) < 1._EB)) THEN
             ! At least one cell is contracting. Check to see if cells meets the RENODE_DELTA_T criterion
@@ -3236,7 +3265,7 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
                ENDIF
             ENDDO
             REMESH_CHECK_IF: IF (REMESH_CHECK) THEN
-               
+
                !If call cells in layer pass check, get new number of cells but limit decrease to at most one cell in a layer
                CALL GET_N_LAYER_CELLS(SF%MIN_DIFFUSIVITY(NL),ONE_D%LAYER_THICKNESS(NL), &
                   SF%STRETCH_FACTOR(NL),SF%CELL_SIZE_FACTOR,SF%N_LAYER_CELLS_MAX(NL),N_LAYER_CELLS_NEW(NL),SMALLEST_CELL_SIZE(NL),&
@@ -3269,8 +3298,8 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
                      REMESH_LAYER(NL) = .TRUE.
                   ENDIF LAYER_CELL_CHECK
             ELSE REMESH_CHECK_IF
-               
-               ! If at least one cell does not pass the check, keep the same number of cells but remesh.               
+
+               ! If at least one cell does not pass the check, keep the same number of cells but remesh.
                N_LAYER_CELLS_NEW(NL) = ONE_D%N_LAYER_CELLS(NL)
                ONE_D%SMALLEST_CELL_SIZE(NL) = ONE_D%LAYER_THICKNESS(NL) / ONE_D%DDSUM(NL)
                SMALLEST_CELL_SIZE(NL) = ONE_D%SMALLEST_CELL_SIZE(NL)
@@ -3536,13 +3565,13 @@ BOIL_CHECK: IF (MATERIAL(SF%MATL_INDEX(1))%PYROLYSIS_MODEL==PYROLYSIS_LIQUID .AN
    BOIL_CELL_LOOP: DO I=1,NWP
       IF (CCS(I) > T_BOIL_EFF) THEN
          ML => MATERIAL(SF%MATL_INDEX(1))
-         
+
          ITMP = INT(CCS(I))
          H_S = ML%H(ITMP)+(CCS(I)-REAL(ITMP,EB))*(ML%H(ITMP+1)-ML%H(ITMP))
          ITMP = INT(T_BOIL_EFF)
          H_S = H_S - (ML%H(ITMP)+(T_BOIL_EFF-REAL(ITMP,EB))*(ML%H(ITMP+1)-ML%H(ITMP)))
          H_S = H_S * ML%RHO_S
-         
+
          IF (ML%H_R_I(1) > 0) THEN
             H_R = EVALUATE_RAMP(T_BOIL_EFF,0._EB,ML%H_R_I(1))
          ELSE
@@ -3566,15 +3595,15 @@ BOIL_CHECK: IF (MATERIAL(SF%MATL_INDEX(1))%PYROLYSIS_MODEL==PYROLYSIS_LIQUID .AN
          BOIL_CYCLE = .TRUE.
       ENDIF
    ENDDO BOIL_CELL_LOOP
-   IF (BOIL_CYCLE) THEN 
+   IF (BOIL_CYCLE) THEN
       CYCLE CYCLE_BOIL
    ELSE
          ONE_D%MATL_COMP(1)%RHO_DOT(1:NWP) = RHO_DOT_0(1:NWP)
    ENDIF
 ENDIF BOIL_CHECK
-   
+
 EXIT CYCLE_BOIL
-   
+
 END DO CYCLE_BOIL
 
 IF (BOIL_CYCLE) ONE_D%MATL_COMP(1)%RHO_DOT(1:NWP) = ONE_D%MATL_COMP(1)%RHO_DOT(1:NWP) + RHO_DOT_0(1:NWP)
