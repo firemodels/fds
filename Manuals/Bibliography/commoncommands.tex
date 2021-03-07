@@ -60,8 +60,6 @@
 \newcommand{\ct}{\tt\small} % eventually will be deprecated due to http://www.tex.ac.uk/cgi-bin/texfaq2html?label=2letterfontcmd
 \newcommand{\textct}[1]{\texttt{\small #1}}
 
-\usepackage{tocstyle} % Fix table of contents sections from overlapping section titles
-\usetocstyle{standard}
 \usepackage{siunitx}
 \sisetup{
     detect-all = true,
@@ -136,9 +134,9 @@
 \setlength{\parindent}{0.25in}
 \setlength{\oddsidemargin}{0.0in}
 \setlength{\evensidemargin}{0.0in}
-\setlength{\leftmargini}{\parindent} % Controls the indenting of the "bullets" in a list
-\setlength{\cftsecnumwidth}{0.45in}
-\setlength{\cftsubsecnumwidth}{0.5in}
+\setlength{\leftmargini}{\parindent}  % Controls the indenting of the "bullets" in a list
+\setlength{\cftsecnumwidth}{0.40in}   % Width of section number in toc (parameter of tocloft package)
+\setlength{\cftsubsecnumwidth}{0.6in} % Width of subsection number in toc (parameter of tocloft package)
 \setlength{\cftfignumwidth}{0.45in}
 \setlength{\cfttabnumwidth}{0.45in}
 
