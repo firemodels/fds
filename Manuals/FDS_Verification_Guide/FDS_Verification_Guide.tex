@@ -5368,7 +5368,7 @@ by assuming that the liquid water temperature is equal to air temperature at the
 \label{water_evaporation_4}
 
 In the fourth case, air at 500~\si{\degree C} is forced through a 3~m long, 1~m wide, 1~m tall tunnel at 1~m/s. Water droplets with a median volumetric diameter of 20~$\mu$m are
-introduced in the middle of the tunnel at a rate of 0.05~kg/s, starting at 10~s. The water temperature is 20~\si{\degree C}.
+introduced in the middle of the tunnel at a rate of 0.05~kg/s, starting at 10~s. Two cases are run with different values of {\ct DT\_INSERT} and {\ct N\_PARTICLES} while keeping the total rate of mass injected the same.  The first case uses {\ct DT\_INSERT}=0.001 s and {\ct N\_PARTICLES}=1000; the second case, {\ct water\_evaporation\_4\_np100}, uses {\ct DT\_INSERT}=0.01 s and {\ct N\_PARTICLES}=100, reducing the total number of particles by a factor of 100.  The water temperature is 20~\si{\degree C}.
 The mass fraction of water vapor in the hot air flowing into the tunnel is 0.
 The water evaporates at approximately the same rate at which it is introduced.
 Figure~\ref{water_evaporation_4_plot}, left, displays the time history of the enthalpy flow out of the tunnel. The enthalpy flow rate of the dry hot air is 229~kW above its ambient value. The steady-state temperature is 211~\si{\degree C}. FDS reports heat flow as the difference in enthalpy of the flowing gas at its current temperature from that at ambient temperature.  For the steady-state condition of 0.05~kg/s in the air flow at 211~\si{\degree C} the heat flow is expected to be 107 kW.
@@ -5377,7 +5377,7 @@ Figure~\ref{water_evaporation_4_plot}, left, displays the time history of the en
 \begin{figure}[h!]
 \centering
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/water_evaporation_4_enthalpy}
-\caption[Sample case \textct{water\_evaporation\_4}]{Output of \textct{water\_evaporation\_4} test case.}
+\caption[Sample case \textct{water\_evaporation\_4}]{Output of \textct{water\_evaporation\_4} test case.  The black line indicates the FDS results for the test case with 1000 particles injected every 0.001 s.  The dashed red line shows results for FDS with 100 particles injected every 0.01 s.  Note that the same total mass is injected in both cases.}
 \label{water_evaporation_4_plot}
 \end{figure}
 
