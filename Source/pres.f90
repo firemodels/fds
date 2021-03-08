@@ -361,7 +361,7 @@ ENDIF
 
 ! For tunnel geometries, solve a 1-D Poisson equation for average pressure
 
-IF (PRESSURE_ITERATIONS==1 .AND. TUNNEL_PRECONDITIONER) CALL TUNNEL_POISSON_SOLVER
+IF (TUNNEL_PRECONDITIONER) CALL TUNNEL_POISSON_SOLVER
 
 ! Call the Poisson solver
 
@@ -423,7 +423,7 @@ END SELECT
 
 ! For the special case of tunnels, add back 1-D global pressure solution to 3-D local pressure solution
 
-IF (PRESSURE_ITERATIONS==1 .AND. TUNNEL_PRECONDITIONER) THEN
+IF (TUNNEL_PRECONDITIONER) THEN
    DO I=1,IBAR
       HP(I,1:JBAR,1:KBAR) = HP(I,1:JBAR,1:KBAR) + H_BAR(I_OFFSET(NM)+I)  ! H = H' + H_bar
    ENDDO
@@ -651,12 +651,12 @@ IF (ITERATE_BAROCLINIC_TERM) THEN
                  + (        (FVY(I,J-1,K)-FVY_B(I,J-1,K)) -      (FVY(I,J,K)-FVY_B(I,J,K)) )*RDY(J)        &
                  + (        (FVZ(I,J,K-1)-FVZ_B(I,J,K-1)) -      (FVZ(I,J,K)-FVZ_B(I,J,K)) )*RDZ(K)        &
                  - DDDT(I,J,K)
-            LHSS = ((P(I+1,J,K)-P(I,J,K))*RDXN(I)*R(I)    *2._EB/(RHOP(I+1,J,K)+RHOP(I,J,K)) - &
-                    (P(I,J,K)-P(I-1,J,K))*RDXN(I-1)*R(I-1)*2._EB/(RHOP(I-1,J,K)+RHOP(I,J,K)))*RDX(I)*RRN(I) &
-                 + ((P(I,J+1,K)-P(I,J,K))*RDYN(J)         *2._EB/(RHOP(I,J+1,K)+RHOP(I,J,K)) - &
-                    (P(I,J,K)-P(I,J-1,K))*RDYN(J-1)       *2._EB/(RHOP(I,J-1,K)+RHOP(I,J,K)))*RDY(J)        &
-                 + ((P(I,J,K+1)-P(I,J,K))*RDZN(K)         *2._EB/(RHOP(I,J,K+1)+RHOP(I,J,K)) - &
-                    (P(I,J,K)-P(I,J,K-1))*RDZN(K-1)       *2._EB/(RHOP(I,J,K-1)+RHOP(I,J,K)))*RDZ(K)        &
+            LHSS = ((P(I+1,J,K)-P(I,J,K))*RDXN(I)*R(I)    *0.5 * (1./RHOP(I+1,J,K)+1./RHOP(I,J,K)) - &
+                    (P(I,J,K)-P(I-1,J,K))*RDXN(I-1)*R(I-1)*0.5 * (1./RHOP(I-1,J,K)+1./RHOP(I,J,K)))*RDX(I)*RRN(I) &
+                 + ((P(I,J+1,K)-P(I,J,K))*RDYN(J)         *0.5 * (1./RHOP(I,J+1,K)+1./RHOP(I,J,K)) - &
+                    (P(I,J,K)-P(I,J-1,K))*RDYN(J-1)       *0.5 * (1./RHOP(I,J-1,K)+1./RHOP(I,J,K)))*RDY(J)        &
+                 + ((P(I,J,K+1)-P(I,J,K))*RDZN(K)         *0.5 * (1./RHOP(I,J,K+1)+1./RHOP(I,J,K)) - &
+                    (P(I,J,K)-P(I,J,K-1))*RDZN(K-1)       *0.5 * (1./RHOP(I,J,K-1)+1./RHOP(I,J,K)))*RDZ(K)        &
                  + ((KRES(I+1,J,K)-KRES(I,J,K))*RDXN(I)*R(I) - (KRES(I,J,K)-KRES(I-1,J,K))*RDXN(I-1)*R(I-1) )*RDX(I)*RRN(I) &
                  + ((KRES(I,J+1,K)-KRES(I,J,K))*RDYN(J)      - (KRES(I,J,K)-KRES(I,J-1,K))*RDYN(J-1)        )*RDY(J)        &
                  + ((KRES(I,J,K+1)-KRES(I,J,K))*RDZN(K)      - (KRES(I,J,K)-KRES(I,J,K-1))*RDZN(K-1)        )*RDZ(K)
