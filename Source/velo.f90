@@ -3067,23 +3067,13 @@ IF (PREDICTOR) THEN
    VV => V
    WW => W
    RHOP=>RHO
-   IF (PRESSURE_ITERATIONS>1) THEN
-      HP => H
-   ELSE
-      HP => HS
-   ENDIF
-   ! Note: this ordering of HP=HS in PREDICTOR is required to achieve 2nd order temporal convergence.
-   ! We should rethink our notation and re-examine whether both H and HS are required.
+   HP => H
 ELSE
    UU => US
    VV => VS
    WW => WS
    RHOP=>RHOS
-   IF (PRESSURE_ITERATIONS>1) THEN
-      HP => HS
-   ELSE
-      HP => H
-   ENDIF
+   HP => HS
 ENDIF
 
 ! Compute pressure and 1/rho in each grid cell

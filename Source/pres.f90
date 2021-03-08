@@ -345,6 +345,7 @@ INTEGER, INTENT(IN) :: NM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: HP
 INTEGER :: I,J,K
 REAL(EB) :: TNOW
+REAL(EB) :: BXS_BAR,BXF_BAR
 
 IF (SOLID_PHASE_ONLY) RETURN
 IF (FREEZE_VELOCITY)  RETURN
@@ -358,9 +359,9 @@ ELSE
    HP => HS
 ENDIF
 
-! Tunnel Preconditioner
+! For tunnel geometries, solve a 1-D Poisson equation for average pressure
 
-IF (TUNNEL_PRECONDITIONER) CALL TUNNEL_POISSON_SOLVER
+IF (PRESSURE_ITERATIONS==1 .AND. TUNNEL_PRECONDITIONER) CALL TUNNEL_POISSON_SOLVER
 
 ! Call the Poisson solver
 
@@ -420,6 +421,16 @@ SELECT CASE(IPS)
       ENDDO
 END SELECT
 
+! For the special case of tunnels, add back 1-D global pressure solution to 3-D local pressure solution
+
+IF (PRESSURE_ITERATIONS==1 .AND. TUNNEL_PRECONDITIONER) THEN
+   DO I=1,IBAR
+      HP(I,1:JBAR,1:KBAR) = HP(I,1:JBAR,1:KBAR) + H_BAR(I_OFFSET(NM)+I)  ! H = H' + H_bar
+   ENDDO
+   BXS = BXS + BXS_BAR  ! b = b' + b_bar
+   BXF = BXF + BXF_BAR  ! b = b' + b_bar
+ENDIF
+
 ! Apply boundary conditions to H
 
 DO K=1,KBAR
@@ -463,32 +474,6 @@ DO J=1,JBAR
    ENDDO
 ENDDO
 
-! In the special case of a tunnel, add 1-D Poisson solution, H_BAR, to the 3-D solution, H'
-
-IF (TUNNEL_PRECONDITIONER) THEN
-   DO I=1,IBAR
-      HP(I,1:JBAR,1:KBAR) = HP(I,1:JBAR,1:KBAR) + H_BAR(I_OFFSET(NM)+I)
-   ENDDO
-   DO K=1,KBAR
-      DO J=1,JBAR
-         HP(0,J,K)    = HP(0,J,K)    + H_BAR(I_OFFSET(NM))
-         HP(IBP1,J,K) = HP(IBP1,J,K) + H_BAR(I_OFFSET(NM)+IBP1)
-      ENDDO
-   ENDDO
-   DO K=1,KBAR
-      DO I=1,IBAR
-         HP(I,0,K)    = HP(I,0,K)    + H_BAR(I_OFFSET(NM)+I)
-         HP(I,JBP1,K) = HP(I,JBP1,K) + H_BAR(I_OFFSET(NM)+I)
-      ENDDO
-   ENDDO
-   DO J=1,JBAR
-      DO I=1,IBAR
-         HP(I,J,0)    = HP(I,J,0)    + H_BAR(I_OFFSET(NM)+I)
-         HP(I,J,KBP1) = HP(I,J,KBP1) + H_BAR(I_OFFSET(NM)+I)
-      ENDDO
-   ENDDO
-ENDIF
-
 T_USED(5)=T_USED(5)+CURRENT_TIME()-TNOW
 
 CONTAINS
@@ -499,7 +484,7 @@ CONTAINS
 SUBROUTINE TUNNEL_POISSON_SOLVER
 
 USE MPI
-REAL(EB) :: RR,BXS_BAR,BXF_BAR
+REAL(EB) :: RR
 INTEGER :: IERR,II
 
 DO I=1,IBAR
@@ -529,8 +514,9 @@ DO K=1,KBAR
 ENDDO
 BXS_BAR = BXS_BAR/((YF-YS)*(ZF-ZS))  ! Left boundary condition
 BXF_BAR = BXF_BAR/((YF-YS)*(ZF-ZS))  ! Right boundary condition
-BXS = BXS - BXS_BAR
-BXF = BXF - BXF_BAR
+
+BXS = BXS - BXS_BAR  ! This new BXS will be used for the 3-D pressure solve
+BXF = BXF - BXF_BAR  ! This new BXF will be used for the 3-D pressure solve
 
 ! Apply boundary conditions at end of tunnel to the matrix components
 
@@ -592,21 +578,10 @@ CALL MPI_BCAST(TP_CC,TUNNEL_NXP,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,IERR)
 
 H_BAR(1:TUNNEL_NXP) = TP_CC(1:TUNNEL_NXP)
 
-IF (NM==1) THEN
-   IF (LBC==FISHPAK_BC_NEUMANN_NEUMANN .OR. LBC==FISHPAK_BC_NEUMANN_DIRICHLET) THEN
-      H_BAR(0) =  H_BAR(1) - DXI*BXS_BAR
-   ELSE
-      H_BAR(0) = -H_BAR(1) + 2._EB*BXS_BAR
-   ENDIF
-ENDIF
+! Apply Dirichlet BCs at mesh interfaces
 
-IF (NM==NMESHES) THEN
-   IF (LBC==FISHPAK_BC_NEUMANN_NEUMANN .OR. LBC==FISHPAK_BC_DIRICHLET_NEUMANN) THEN
-      H_BAR(TUNNEL_NXP+1) =  H_BAR(TUNNEL_NXP) + DXI*BXF_BAR
-   ELSE
-      H_BAR(TUNNEL_NXP+1) = -H_BAR(TUNNEL_NXP) + 2._EB*BXF_BAR
-   ENDIF
-ENDIF
+IF (NM/=1)       BXS_BAR = 0.5_EB*(H_BAR(I_OFFSET(NM))     +H_BAR(I_OFFSET(NM)+1))
+IF (NM/=NMESHES) BXF_BAR = 0.5_EB*(H_BAR(I_OFFSET(NM)+IBAR)+H_BAR(I_OFFSET(NM)+IBP1))
 
 END SUBROUTINE TUNNEL_POISSON_SOLVER
 
