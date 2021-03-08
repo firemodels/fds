@@ -361,7 +361,7 @@ ENDIF
 
 ! For tunnel geometries, solve a 1-D Poisson equation for average pressure
 
-IF (PRESSURE_ITERATIONS==1 .AND. TUNNEL_PRECONDITIONER) CALL TUNNEL_POISSON_SOLVER
+IF (TUNNEL_PRECONDITIONER) CALL TUNNEL_POISSON_SOLVER
 
 ! Call the Poisson solver
 
@@ -423,7 +423,7 @@ END SELECT
 
 ! For the special case of tunnels, add back 1-D global pressure solution to 3-D local pressure solution
 
-IF (PRESSURE_ITERATIONS==1 .AND. TUNNEL_PRECONDITIONER) THEN
+IF (TUNNEL_PRECONDITIONER) THEN
    DO I=1,IBAR
       HP(I,1:JBAR,1:KBAR) = HP(I,1:JBAR,1:KBAR) + H_BAR(I_OFFSET(NM)+I)  ! H = H' + H_bar
    ENDDO
