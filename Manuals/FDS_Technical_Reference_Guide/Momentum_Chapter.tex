@@ -489,24 +489,32 @@ Boundary conditions at a solid surface fall into three distinct categories:
 \subsubsection{Boundary Conditions at Mesh Interfaces}
 \label{section:mesh_interface}
 
-Dirichlet boundary conditions are applied at the interface between two meshes, which means that $\cH$ is specified at the interface. Consider the interface between two non-overlapping meshes. The value of $\cH$ in the center of the rightmost cell of the left mesh is denoted $\cH_I$, and the value of $\cH$ in the center of the leftmost cell of the right mesh is $\cH_1$. The interface value of the left mesh is denoted $\cH_{I+\ha} \equiv (\cH_I + \cH_{I+1})/2$, and the interface value of the right mesh is denoted $\cH_\ha \equiv (\cH_0 + \cH_1)/2$. The specified value of $\cH$ for both meshes is:
-\be
-   \cH_{\ha}^k = \cH_{I+\ha}^k \equiv \frac{\cH_I^{k-1} + \cH_1^{k-1} }{2} + \frac{\dx}{4\, \dt} \left( u_I^{*,k-1}-u_0^{*,k-1} \right) \label{Hbc}
-\ee
-The superscript $k$ is an iterative index. The terms, $u_I^{*,k-1}$ and $u_0^{*,k-1}$, are first-order estimates of the normal velocity components at the next time step, based on the previous ($k-1$) estimate of the pressure field. For example, the normal velocity at the left mesh interface is calculated:
-\be
-  u_I^{*,k-1} = \bar{u}_I^n - \dt \left( F_{x,I}^{n} + \frac{ \cH_{I+\ha}^{k-1} - \cH_I^{k-1} }{ \dx/2} \right) \quad ; \quad \cH_{I+\ha}^{k-1} = \frac{\cH_I^{k-1}+\cH_1^{k-1}}{2} \label{u_est}
-\ee
-The purpose of the second term on the right hand side of Eq.~(\ref{Hbc}) is demonstrated by substituting $\cH_{I+\ha}^k$ from Eq.~(\ref{Hbc}) into Eq.~(\ref{u_est}) which leads to:
-\be
-   u_I^{*,k-1} = \bar{u}_I^n - \frac{u_I^{*,k-2}-u_0^{*,k-2}}{2} - \dt \left( F_{x,I}^{n} + \frac{ (\cH_I^{k-2}+\cH_1^{k-2})/2 - \cH_I^{k-1} }{ \dx/2} \right) \label{uI}
-\ee
-The extra term on the right hand side drives $u_I$ halfway towards $u_0$, which is itself driven halfway towards $u_I$. This iterative process continues until $\left| u_I^{*,k} - u_0^{*,k} \right|$ falls below a specified tolerance. By default, the tolerance is $\dx/2$.
+Dirichlet boundary conditions are applied at the interface between two meshes, which means that $\cH$, rather than $\nabla \cH$, is specified at the interface. Consider the interface between two non-overlapping meshes that abut at a common $x$ boundary. The value of $\cH$ in the center of the rightmost cell of the left mesh is denoted $\cH_{I,jk}$, and the value of $\cH$ in the center of the leftmost cell of the right mesh is $\cH_{1,jk}$. The interface value of the left mesh is denoted $\cH_{I+\ha,jk}$, and the interface value of the right mesh is denoted $\cH_{\ha,jk}$.
 
-For the corrector step, this procedure is the same, except the boundary condition for the pressure term is:
+At the start of a given time step $n$, the normal component of velocity at the interface of each respective mesh, $\bar{u}_{I,jk}^n$ and $\bar{u}_{0,jk}^n$, are forced to take on the same value, their average from the previous time step. In the predictor phase of the time step, the values are updated independently to provide a first-order estimate at the next time step:
+\begin{eqnarray}
+  u_{I,jk}^{*,m} &=& \bar{u}_{I,jk}^n - \dt \left( F_{x,I,jk}^{n} + \frac{ \cH_{I+\ha,jk}^{m} - \cH_{I,jk}^{m} }{ \dx/2} \right) \quad ; \quad  u_{I,jk}^* = \lim_{m\to \infty} u_{I,jk}^{*,m} \label{u_est} \\[.1in]
+  u_{0,jk}^{*,m} &=& \bar{u}_{0,jk}^n - \dt \left( F_{x,0,jk}^{n} + \frac{ \cH_{1,jk}^{m} - \cH_{\ha,jk}^{m} }{ \dx/2} \right)   \quad ; \quad  u_{0,jk}^* = \lim_{m\to \infty} u_{0,jk}^{*,m} \label{u_est2}
+\end{eqnarray}
+Ideally, these estimated values, $u_{I,jk}^{*,m}$ and $u_{0,jk}^{*,m}$, should be the same, but they are typically not because the respective pressure fields are only guaranteed to be continuous at the interface, not differentiable (smooth). The common value of the pressure field at the interface boundary is:
 \be
-   \cH_{\ha}^k = \cH_{I+\ha}^k \equiv \frac{\cH_I^{k-1} + \cH_1^{k-1} }{2} + \frac{\dx}{2\, \dt} \left( u_I^{n+1,k-1}-u_0^{n+1,k-1} \right)
+   \cH_{\ha,jk}^m \equiv \cH_{I+\ha,jk}^m = \frac{\cH_{I,jk}^{m-1} + \cH_{1,jk}^{m-1} }{2} + \frac{\dx}{4\, \dt} \left( u_{I,jk}^{*,m-1}-u_{0,jk}^{*,m-1} \right) \label{Hbc}
 \ee
+The purpose of the second term on the right hand side of Eq.~(\ref{Hbc}) is seen by substituting $\cH_{I+\ha,jk}^m$ from Eq.~(\ref{Hbc}) into Eq.~(\ref{u_est}) which leads to:
+\be
+   u_{I,jk}^{*,m} = \bar{u}_{I,jk}^n - \frac{u_{I,jk}^{*,m-1}-u_{0,jk}^{*,m-1}}{2} - \dt \left( F_{x,I,jk}^{n} + \frac{ (\cH_{I,jk}^{m-1}+\cH_{1,jk}^{m-1})/2 - \cH_{I,jk}^{m} }{ \dx/2} \right) \label{uI}
+\ee
+The extra term on the right hand side drives $u_{I,jk}^{*,m}$ halfway towards $u_{0,jk}^{*,m}$, and vice versa. This iterative process continues until $\left| u_{I,jk}^{*,m} - u_{0,jk}^{*,m} \right|$ falls below a specified tolerance. By default, the tolerance is $\dx/2$.
+
+For the corrector phase of the time step, the procedure is the same, except the boundary condition for the pressure term is:
+\be
+   \cH_{\ha,jk}^m \equiv \cH_{I+\ha,jk}^m = \frac{\cH_{I,jk}^{m-1} + \cH_{1,jk}^{m-1} }{2} + \frac{\dx}{2\, \dt} \left( u_{I,jk}^{n+1,m-1}-u_{0,jk}^{n+1,m-1} \right) \quad ; \quad  u_{I,jk}^{n+1} = \lim_{m\to \infty} u_{I,jk}^{n+1,m}
+\ee
+The factor of $1/2$ instead of $1/4$ on the last term is due to the structure of the corrector velocity step:
+\be
+   u_{I,jk}^{n+1,m} = \frac{\bar{u}_{I,jk}^n+\bar{u}_{I,jk}^*}{2} - \frac{u_{I,jk}^{n+1,m-1}-u_{0,jk}^{n+1,m-1}}{2} - \frac{\dt}{2} \left( F_{x,I,jk}^{*} + \frac{ (\cH_{I,jk}^{m-1}+\cH_{1,jk}^{m-1})/2 - \cH_{I,jk}^{m} }{ \dx/2} \right) \label{uI2}
+\ee
+Note that throughout this iterative procedure, MPI calls are made to exchange values of $u$ and $\cH$ in the neighboring cells. 
 
 \subsection{Iterative Procedure for Updating Velocity}
 \label{section:pressure_iteration}
