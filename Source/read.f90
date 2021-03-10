@@ -12001,6 +12001,9 @@ INIT_LOOP: DO N=1,N_INIT_READ+N_INIT_RESERVED
             IN%DX            = DX
             IN%DY            = DY
             IN%DZ            = DZ
+            IN%X0            = XYZ(1)
+            IN%Y0            = XYZ(2)
+            IN%Z0            = XYZ(3)
             IN%CTRL_ID       = CTRL_ID
             IN%DEVC_ID       = DEVC_ID
             CALL SEARCH_CONTROLLER('INIT',IN%CTRL_ID,IN%DEVC_ID,IN%DEVC_INDEX,IN%CTRL_INDEX,N)
