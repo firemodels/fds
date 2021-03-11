@@ -3422,7 +3422,6 @@ IF (RADIATION) THEN
 ELSE
    RADIATION_COMPLETED(NM) = .TRUE.
    IF (N_REACTIONS>0) QR = -CHI_R*Q
-   IF (INIT_HRRPUV) CALL ADD_VOLUMETRIC_HEAT_SOURCE(0) ! Even if no radiation, add HRRPUV specified on an INIT line
 ENDIF
 
 T_USED(9)=T_USED(9)+CURRENT_TIME()-TNOW
@@ -3509,11 +3508,6 @@ ENDIF
 ! If this is the last iteration of the solver in a single time step, update the call counter.
 
 IF (RAD_ITER==RADIATION_ITERATIONS) RAD_CALL_COUNTER  = RAD_CALL_COUNTER + 1
-
-! If there is a user-specified HRRPUV on an INIT line, and there are multiple iterations of the radiation solver, 
-! subtract off the HRRPUV from Q, leaving just the chemical HRR.
-
-IF (INIT_HRRPUV .AND. RAD_ITER>1) CALL ADD_VOLUMETRIC_HEAT_SOURCE(2)
 
 ! Initialize the radiative loss to zero for special case models that loop over wavelength bands
 
@@ -3739,10 +3733,6 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
       ENDIF RTE_SOURCE_CORRECTION_IF
 
    ENDIF WIDE_BAND_MODEL_IF
-
-   ! Add contribution to source term from a user-specified volumetric heat relase rate
-
-   IF (INIT_HRRPUV) CALL ADD_VOLUMETRIC_HEAT_SOURCE(1)
 
    ! Compute the added contribution of any condensed species
 
@@ -4423,48 +4413,6 @@ IF (N_RADF>0 .AND. T>=RADF_CLOCK(NM)) THEN
 ENDIF
 
 END SUBROUTINE RADIATION_FVM
-
-
-!> \brief Add user-specified HRRPUV to the heat release rate term, Q
-
-SUBROUTINE ADD_VOLUMETRIC_HEAT_SOURCE(MODE)
-
-INTEGER, INTENT(IN) :: MODE
-REAL(EB) :: TIME_RAMP_FACTOR,RR
-INTEGER :: N,I,J,K
-TYPE(INITIALIZATION_TYPE), POINTER :: IN
-
-DO N=1,N_INIT
-   IN => INITIALIZATION(N)
-   IF (IN%HRRPUV<=0._EB) CYCLE
-   TIME_RAMP_FACTOR=1._EB
-   IF (IN%RAMP_Q_INDEX>0) TIME_RAMP_FACTOR = EVALUATE_RAMP(T,0._EB,IN%RAMP_Q_INDEX)
-   DO K=0,KBP1
-      DO J=0,JBP1
-         DO I=0,IBP1
-            SELECT CASE(IN%SHAPE)
-               CASE DEFAULT
-                  IF (XC(I) < IN%X1 .OR. XC(I) > IN%X2 .OR. &
-                      YC(J) < IN%Y1 .OR. YC(J) > IN%Y2 .OR. &
-                      ZC(K) < IN%Z1 .OR. ZC(K) > IN%Z2) CYCLE
-               CASE('CONE')
-                  RR = MAX(0._EB,IN%RADIUS*(1._EB-(ZC(K)-IN%Z0)/IN%HEIGHT))
-                  IF ((XC(I)-IN%X0)**2+(YC(J)-IN%Y0)**2>RR**2) CYCLE
-            END SELECT
-            IF (MODE==1) THEN
-               Q(I,J,K) = Q(I,J,K) + TIME_RAMP_FACTOR*IN%HRRPUV
-               KFST4_GAS(I,J,K) = KFST4_GAS(I,J,K) + IN%CHI_R*TIME_RAMP_FACTOR*IN%HRRPUV
-            ELSEIF (MODE==2) THEN
-               Q(I,J,K) = Q(I,J,K) - TIME_RAMP_FACTOR*IN%HRRPUV
-            ELSE
-               Q(I,J,K) = Q(I,J,K) + TIME_RAMP_FACTOR*IN%HRRPUV
-            ENDIF
-         ENDDO
-      ENDDO
-   ENDDO
-ENDDO
-
-END SUBROUTINE ADD_VOLUMETRIC_HEAT_SOURCE
 
 END SUBROUTINE COMPUTE_RADIATION
 
