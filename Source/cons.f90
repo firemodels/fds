@@ -488,7 +488,7 @@ LOGICAL :: ITERATE_BAROCLINIC_TERM                               !< Flag indicat
 LOGICAL :: SUSPEND_PRESSURE_ITERATIONS=.TRUE.                    !< Flag for stopping pressure iterations
 REAL(EB) :: VELOCITY_TOLERANCE=0._EB                             !< Error tolerance for normal velocity at solids or boundaries
 REAL(EB) :: PRESSURE_TOLERANCE=0._EB                             !< Error tolerance for iteration of baroclinic pressure term
-REAL(EB) :: ITERATION_SUSPEND_FACTOR=0.95_EB                     !< If new velocity error is not this value of old, stop iteration
+REAL(EB) :: ITERATION_SUSPEND_FACTOR=0.9_EB                      !< If new velocity error is not this value of old, stop iteration
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: VELOCITY_ERROR_MAX        !< Max velocity error of entire domain
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: PRESSURE_ERROR_MAX        !< Max pressure error of entire domain
 INTEGER, ALLOCATABLE, DIMENSION(:,:) :: VELOCITY_ERROR_MAX_LOC   !< Indices of max velocity error
