@@ -271,11 +271,14 @@ INTEGER, PARAMETER :: NSCARC_STENCIL_CONSTANT        =  1        !< Type of matr
 INTEGER, PARAMETER :: NSCARC_STENCIL_VARIABLE        =  2        !< Type of matrix stencil: variable matrix entries
 
 INTEGER, PARAMETER :: NSCARC_TWOLEVEL_NONE           =  0        !< Type of two-level method: only one level
-INTEGER, PARAMETER :: NSCARC_TWOLEVEL_ADD            =  1        !< Type of two-level method: additive 2-level 
-INTEGER, PARAMETER :: NSCARC_TWOLEVEL_MUL            =  2        !< Type of two-level method: multiplicative 2-level 
-INTEGER, PARAMETER :: NSCARC_TWOLEVEL_MUL2           =  3        !< Type of two-level method: multiplicative 2-level, type2
-INTEGER, PARAMETER :: NSCARC_TWOLEVEL_COARSE         =  4        !< Type of two-level method: only coarse grid
+INTEGER, PARAMETER :: NSCARC_TWOLEVEL_COARSE_ADD     =  1        !< Type of two-level method: additive 2-level 
+INTEGER, PARAMETER :: NSCARC_TWOLEVEL_COARSE_MUL1    =  2        !< Type of two-level method: multiplicative1 2-level (fine last)
+INTEGER, PARAMETER :: NSCARC_TWOLEVEL_COARSE_MUL2    =  3        !< Type of two-level method: multiplicative2 2-level (fine first)
+INTEGER, PARAMETER :: NSCARC_TWOLEVEL_COARSE_ONLY    =  4        !< Type of two-level method: only coarse grid
 INTEGER, PARAMETER :: NSCARC_TWOLEVEL_MACRO          =  5        !< Type of two-level method: use macro solver 
+INTEGER, PARAMETER :: NSCARC_TWOLEVEL_XMEAN_ADD      =  6        !< Type of two-level method: additive xmean 
+INTEGER, PARAMETER :: NSCARC_TWOLEVEL_XMEAN_MUL1     =  7        !< Type of two-level method: multiplicative1 xmean (fine last)
+INTEGER, PARAMETER :: NSCARC_TWOLEVEL_XMEAN_MUL2     =  8        !< Type of two-level method: multiplicative2 xmean (fine first)
 
 INTEGER, PARAMETER :: NSCARC_VECTOR_ONE_X            =  1        !< Flag for 1D-vector on stage 1: X
 INTEGER, PARAMETER :: NSCARC_VECTOR_ONE_B            =  2        !< Flag for 1D-vector on stage 1: B
@@ -477,6 +480,18 @@ TYPE SCARC_OBST_TYPE
    INTEGER :: I1, I2, J1, J2, K1, K2                  !< Cell indices of obstructions
 END TYPE SCARC_OBST_TYPE
 
+!> \brief Preconditioning information for unidirection meanvalue preconditioning
+ 
+TYPE SCARC_PRECON_TYPE
+
+   REAL(EB), ALLOCATABLE, DIMENSION (:) :: DIAG        !< Main diagonal workspace for Twolevel-Xmean preconditioning
+   REAL(EB), ALLOCATABLE, DIMENSION (:) :: AUX         !< Auxiliary main diagonal workspace for Twolevel-Xmean preconditioning
+   REAL(EB), ALLOCATABLE, DIMENSION (:) :: LOW         !< Lower diagonal workspace for Twolevel-Xmean preconditioning
+   REAL(EB), ALLOCATABLE, DIMENSION (:) :: UP          !< Upper workspace for Twolevel-Xmean preconditioning
+   REAL(EB), ALLOCATABLE, DIMENSION (:) :: RHS         !< RHS workspace for Twolevel-Xmean preconditioning
+
+END TYPE SCARC_PRECON_TYPE
+
 !> \brief Compact matrix entries which will be exchanged during generation of condensed system
  
 TYPE SCARC_MATRIX_COMPACT_CONDENSED_TYPE
@@ -511,6 +526,7 @@ TYPE SCARC_CMATRIX_TYPE
 
    REAL(EB), ALLOCATABLE, DIMENSION (:) :: VAL         !< Values of matrix (real precision)
    REAL(EB), ALLOCATABLE, DIMENSION (:) :: ILU         !< ILU-decomposition
+   REAL(EB), ALLOCATABLE, DIMENSION (:) :: DIAG         !< ILU-decomposition
    REAL(EB), ALLOCATABLE, DIMENSION (:) :: RELAX       !< Workspace for relaxation
    REAL(EB), DIMENSION (-3:3)           :: STENCIL     !< Store basic stencil information in single precision
 
@@ -873,6 +889,7 @@ TYPE SCARC_LEVEL_TYPE
    TYPE (SCARC_FFT_TYPE)       :: FFT                          !< FFT preconditioner based on CRAYFISHPAK
    TYPE (SCARC_MGM_TYPE)       :: MGM                          !< McKenney-Greengard-Mayo method 
    TYPE (SCARC_MULTIGRID_TYPE) :: MG                           !< Multigrid method information
+   TYPE (SCARC_PRECON_TYPE)    :: PRECON                       !< Preconditioning information
 
 #ifdef WITH_MKL
    TYPE (SCARC_MKL_TYPE)       :: MKL                          !< MKL preconditioner based on Intel MKL
@@ -1177,8 +1194,8 @@ LOGICAL :: IS_CG_GMG             = .FALSE.                       !< Flag for Kry
 LOGICAL :: IS_CG_COARSE          = .FALSE.                       !< Flag for only coarse grid solver
 LOGICAL :: IS_CG_MACRO           = .FALSE.                       !< Flag for macro coarse grid solver
 LOGICAL :: IS_CG_MG              = .FALSE.                       !< Flag for Krylov method with MG-preconditioning
-LOGICAL :: IS_CG_MUL             = .FALSE.                       !< Flag for multiplicative Twolevel-Krylov method
-LOGICAL :: IS_CG_MUL2            = .FALSE.                       !< Flag for multiplicative-type2 Twolevel-Krylov method
+LOGICAL :: IS_CG_MUL1            = .FALSE.                       !< Flag for multiplicative1 Twolevel-Krylov method (fine last)
+LOGICAL :: IS_CG_MUL2            = .FALSE.                       !< Flag for multiplicative2 Twolevel-Krylov method (fine first) 
 LOGICAL :: IS_FFT                = .FALSE.                       !< Flag for FFT-method
 LOGICAL :: IS_FFTO               = .FALSE.                       !< Flag for FFTO-method
 LOGICAL :: IS_LAPLACE            = .FALSE.                       !< Flag for use of Laplace matrix (MGM only)
@@ -1190,6 +1207,7 @@ LOGICAL :: IS_MGM                = .FALSE.                       !< Flag for McK
 LOGICAL :: HAS_CSV_DUMP          = .FALSE.                       !< Flag for CSV-file to be dumped out
 LOGICAL :: HAS_MULTIPLE_GRIDS    = .FALSE.                       !< Flag for multiple discretization types
 LOGICAL :: HAS_TWO_LEVELS        = .FALSE.                       !< Flag for two grid levels
+LOGICAL :: HAS_XMEAN_LEVELS      = .FALSE.                       !< Flag for two-level xmean values preconditioning
 LOGICAL :: HAS_MULTIPLE_LEVELS   = .FALSE.                       !< Flag for multiple grid levels
 LOGICAL :: HAS_AMG_LEVELS        = .FALSE.                       !< Flag for AMG-based grid levels
 LOGICAL :: HAS_GMG_LEVELS        = .FALSE.                       !< Flag for GMG-based grid levels
@@ -1229,6 +1247,7 @@ INTEGER :: TYPE_VECTOR              = NSCARC_UNDEF_INT           !< Type of vect
  
 INTEGER :: NLEVEL_MIN, NLEVEL_MAX                           !< Minimum and maximum number of multigrid levels
 INTEGER :: NC_GLOBAL(20)  = 0                               !< Number of global cells
+INTEGER :: NX_GLOBAL      = 0                               !< Number of cells in x-direction on finest level
 INTEGER :: N_DIRIC_GLOBAL(20)  = 0                          !< Global number of Dirichlet BCs
 INTEGER :: N_STACK_TOTAL  = 0                               !< Maximum number of used solvers in stack
 INTEGER :: N_STACK_LAPLACE = 0                              !< Stack position of local MGM Laplace problems
@@ -1240,6 +1259,7 @@ INTEGER,  ALLOCATABLE, DIMENSION (:)  :: REQ                !< Request array for
 INTEGER,  ALLOCATABLE, DIMENSION (:)  :: COUNTS             !< Counter array for data exchange
 INTEGER,  ALLOCATABLE, DIMENSION (:)  :: DISPLS             !< Displacement array for data exchange
 INTEGER,  ALLOCATABLE, DIMENSION (:)  :: MESH_INT           !< Local integer data array for data exchange
+INTEGER,  ALLOCATABLE, DIMENSION (:)  :: NX_OFFSET          !< Offset array of offsets in x-direction
 REAL(EB), ALLOCATABLE, DIMENSION (:)  :: MESH_REAL          !< Local real data array for data exchange
 
 INTEGER  :: GLOBAL_INT,  RANK_INT
@@ -1395,8 +1415,9 @@ TYPE (SCARC_SOLVER_TYPE), POINTER:: SVP=>NULL()              !< Pointer to paren
 TYPE (SCARC_STAGE_TYPE),  POINTER:: ST=>NULL()               !< Pointer to solver stage structure
 TYPE (SCARC_STAGE_TYPE),  POINTER:: STP=>NULL()              !< Pointer to parent solver stage structure
 
-TYPE (SCARC_FFT_TYPE), POINTER:: FFT=>NULL()                 !< Pointer to FFT structure
-TYPE (SCARC_MGM_TYPE), POINTER:: MGM=>NULL()                 !< Pointer to McKeeney-Greengard-Mayo structure
+TYPE (SCARC_FFT_TYPE),    POINTER:: FFT=>NULL()              !< Pointer to FFT structure
+TYPE (SCARC_MGM_TYPE),    POINTER:: MGM=>NULL()              !< Pointer to McKeeney-Greengard-Mayo structure
+TYPE (SCARC_PRECON_TYPE), POINTER:: PRE=>NULL()              !< Pointer to preconditioning structure
 
 TYPE (SCARC_BMATRIX_TYPE), POINTER:: AB=>NULL()       !< Pointer to bandwise matrix structure
 TYPE (SCARC_BMATRIX_TYPE), POINTER:: OAB=>NULL()      !< Pointer to neighboring bandwise matrix structure
@@ -1698,10 +1719,6 @@ TYPE(SCARC_CMATRIX_TYPE), POINTER:: SCARC_POINT_TO_CMATRIX
 INTEGER, INTENT(IN):: NTYPE
 
 SELECT CASE(NTYPE)
-   CASE (NSCARC_MATRIX_POISSON_PROL)
-      SCARC_POINT_TO_CMATRIX => G%POISSON_PROL
-   CASE (NSCARC_MATRIX_CONNECTION)
-      SCARC_POINT_TO_CMATRIX => G%CONNECTION
    CASE (NSCARC_MATRIX_POISSON)
       SCARC_POINT_TO_CMATRIX => G%POISSON
    CASE (NSCARC_MATRIX_LAPLACE)
@@ -1716,12 +1733,18 @@ SELECT CASE(NTYPE)
       SCARC_POINT_TO_CMATRIX => G%PROLONGATION
    CASE (NSCARC_MATRIX_RESTRICTION)
       SCARC_POINT_TO_CMATRIX => G%RESTRICTION
-   CASE (NSCARC_MATRIX_ZONES)
-      SCARC_POINT_TO_CMATRIX => G%ZONES
    CASE (NSCARC_MATRIX_LOWER)
       SCARC_POINT_TO_CMATRIX => G%LOWER
    CASE (NSCARC_MATRIX_UPPER)
       SCARC_POINT_TO_CMATRIX => G%UPPER
+#ifdef WITH_SCARC_AMG
+   CASE (NSCARC_MATRIX_POISSON_PROL)
+      SCARC_POINT_TO_CMATRIX => G%POISSON_PROL
+   CASE (NSCARC_MATRIX_CONNECTION)
+      SCARC_POINT_TO_CMATRIX => G%CONNECTION
+   CASE (NSCARC_MATRIX_ZONES)
+      SCARC_POINT_TO_CMATRIX => G%ZONES
+#endif
 END SELECT
 
 END FUNCTION SCARC_POINT_TO_CMATRIX
@@ -1750,10 +1773,6 @@ TYPE(SCARC_CMATRIX_TYPE), POINTER:: SCARC_POINT_TO_OTHER_CMATRIX
 INTEGER, INTENT(IN):: NTYPE
 
 SELECT CASE(NTYPE)
-   CASE (NSCARC_MATRIX_POISSON_PROL)
-      SCARC_POINT_TO_OTHER_CMATRIX => OG%POISSON_PROL
-   CASE (NSCARC_MATRIX_CONNECTION)
-      SCARC_POINT_TO_OTHER_CMATRIX => OG%CONNECTION
    CASE (NSCARC_MATRIX_POISSON)
       SCARC_POINT_TO_OTHER_CMATRIX => OG%POISSON
 #ifdef WITH_MKL
@@ -1764,8 +1783,14 @@ SELECT CASE(NTYPE)
       SCARC_POINT_TO_OTHER_CMATRIX => OG%PROLONGATION
    CASE (NSCARC_MATRIX_RESTRICTION)
       SCARC_POINT_TO_OTHER_CMATRIX => OG%RESTRICTION
+#ifdef WITH_SCARC_AMG
+   CASE (NSCARC_MATRIX_POISSON_PROL)
+      SCARC_POINT_TO_OTHER_CMATRIX => OG%POISSON_PROL
+   CASE (NSCARC_MATRIX_CONNECTION)
+      SCARC_POINT_TO_OTHER_CMATRIX => OG%CONNECTION
    CASE (NSCARC_MATRIX_ZONES)
       SCARC_POINT_TO_OTHER_CMATRIX => OG%ZONES
+#endif
 END SELECT
 
 END FUNCTION SCARC_POINT_TO_OTHER_CMATRIX
@@ -4208,32 +4233,32 @@ SV%OMEGA =  SCARC_PRECON_OMEGA
  
 SELECT CASE(TYPE_PRECON)
    CASE (NSCARC_RELAX_JAC)
-      SV%CNAME = 'SCARC_PRECONDITIONER'
+      SV%CNAME = 'SCARC_PRECON_JAC'
    CASE (NSCARC_RELAX_SSOR)
-      SV%CNAME = 'SCARC_PRECONDITIONER'
+      SV%CNAME = 'SCARC_PRECON_SSOR'
    CASE (NSCARC_RELAX_MJAC)
-      SV%CNAME = 'SCARC_PRECONDITIONER'
+      SV%CNAME = 'SCARC_PRECON_MJAC'
    CASE (NSCARC_RELAX_MGS)
-      SV%CNAME = 'SCARC_PRECONDITIONERS'
+      SV%CNAME = 'SCARC_PRECON_MGS'
    CASE (NSCARC_RELAX_MSGS)
-      SV%CNAME = 'SCARC_PRECONDITIONER'
+      SV%CNAME = 'SCARC_PRECON_MSGS'
    CASE (NSCARC_RELAX_MSOR)
-      SV%CNAME = 'SCARC_PRECONDITIONER'
+      SV%CNAME = 'SCARC_PRECON_MSOR'
    CASE (NSCARC_RELAX_MSSOR)
-      SV%CNAME = 'SCARC_PRECONDITIONER'
+      SV%CNAME = 'SCARC_PRECON_MSSOR'
    CASE (NSCARC_RELAX_LU)
-      SV%CNAME = 'SCARC_PRECONDITIONER'
+      SV%CNAME = 'SCARC_PRECON_LU'
    CASE (NSCARC_RELAX_ILU)
-      SV%CNAME = 'SCARC_PRECONDITIONER'
+      SV%CNAME = 'SCARC_PRECON_ILU'
       SV%OMEGA = 1.0_EB
    CASE (NSCARC_RELAX_FFT)
-      SV%CNAME = 'SCARC_PRECONDITIONER'
+      SV%CNAME = 'SCARC_PRECON_FFT'
       SV%OMEGA = 1.0_EB
    CASE (NSCARC_RELAX_FFTO)
-      SV%CNAME = 'SCARC_PRECONDITIONERO'
+      SV%CNAME = 'SCARC_PRECON_FFTO'
       SV%OMEGA = 1.0_EB
    CASE (NSCARC_RELAX_GMG)
-      SV%CNAME = 'SCARC_PRECONDITIONER'
+      SV%CNAME = 'SCARC_PRECON_GMG'
 #ifdef WITH_MKL
    CASE (NSCARC_RELAX_MKL)
       SV%OMEGA = 1.0_EB
@@ -4302,37 +4327,37 @@ SV%OMEGA =  SCARC_SMOOTH_OMEGA
 
 SELECT CASE(TYPE_SMOOTH)
    CASE (NSCARC_RELAX_JAC)
-      SV%CNAME = 'SCARC_SMOOTHER'
+      SV%CNAME = 'SCARC_SMOOTHER_JAC'
    CASE (NSCARC_RELAX_SSOR)
-      SV%CNAME = 'SCARC_SMOOTHER'
+      SV%CNAME = 'SCARC_SMOOTHER_SSOR'
    CASE (NSCARC_RELAX_MJAC)
-      SV%CNAME = 'SCARC_SMOOTHER'
+      SV%CNAME = 'SCARC_SMOOTHER_MJAC'
    CASE (NSCARC_RELAX_MGS)
-      SV%CNAME = 'SCARC_SMOOTH_MGS'
+      SV%CNAME = 'SCARC_SMOOTHER_MGS'
    CASE (NSCARC_RELAX_MSGS)
-      SV%CNAME = 'SCARC_SMOOTHER'
+      SV%CNAME = 'SCARC_SMOOTHER_MSGS'
    CASE (NSCARC_RELAX_MSOR)
-      SV%CNAME = 'SCARC_SMOOTHER'
+      SV%CNAME = 'SCARC_SMOOTHER_MSOR'
    CASE (NSCARC_RELAX_MSSOR)
-      SV%CNAME = 'SCARC_SMOOTHER'
+      SV%CNAME = 'SCARC_SMOOTHER_MSSOR'
    CASE (NSCARC_RELAX_ILU)
-      SV%CNAME = 'SCARC_SMOOTHER'
+      SV%CNAME = 'SCARC_SMOOTHER_ILU'
    CASE (NSCARC_RELAX_FFT)
-      SV%CNAME = 'SCARC_SMOOTHER'
+      SV%CNAME = 'SCARC_SMOOTHER_FFT'
       SV%OMEGA = 1.0_EB
    CASE (NSCARC_RELAX_FFTO)
-      SV%CNAME = 'SCARC_SMOOTHERO'
+      SV%CNAME = 'SCARC_SMOOTHER_FFTO'
       SV%OMEGA = 1.0_EB
 #ifdef WITH_MKL
    CASE (NSCARC_RELAX_MKL)
       SV%OMEGA = 1.0_EB
       IF (NSCOPE == NSCARC_SCOPE_GLOBAL) THEN
-         SV%CNAME = 'SCARC_SMOOTH_CLUSTER'
+         SV%CNAME = 'SCARC_SMOOTHER_CLUSTER'
       ELSE
-         SV%CNAME = 'SCARC_SMOOTH_PARDISO'
+         SV%CNAME = 'SCARC_SMOOTHER_PARDISO'
       ENDIF
    CASE (NSCARC_RELAX_OPTIMIZED)
-      SV%CNAME = 'SCARC_SMOOTH_OPTIMIZED'
+      SV%CNAME = 'SCARC_SMOOTHER_OPTIMIZED'
       SV%OMEGA = 1.0_EB
 #endif
    CASE DEFAULT
@@ -4654,15 +4679,21 @@ SELECT CASE (TRIM(SCARC_METHOD))
          CASE ('NONE')
             TYPE_TWOLEVEL = NSCARC_TWOLEVEL_NONE
          CASE ('ADDITIVE')
-            TYPE_TWOLEVEL = NSCARC_TWOLEVEL_ADD
+            TYPE_TWOLEVEL = NSCARC_TWOLEVEL_COARSE_ADD
          CASE ('MULTIPLICATIVE')
-            TYPE_TWOLEVEL = NSCARC_TWOLEVEL_MUL
+            TYPE_TWOLEVEL = NSCARC_TWOLEVEL_COARSE_MUL1
          CASE ('MULTIPLICATIVE2')
-            TYPE_TWOLEVEL = NSCARC_TWOLEVEL_MUL2
+            TYPE_TWOLEVEL = NSCARC_TWOLEVEL_COARSE_MUL2
          CASE ('COARSE')
-            TYPE_TWOLEVEL = NSCARC_TWOLEVEL_COARSE
+            TYPE_TWOLEVEL = NSCARC_TWOLEVEL_COARSE_ONLY
          CASE ('MACRO')
             TYPE_TWOLEVEL = NSCARC_TWOLEVEL_MACRO
+         CASE ('XMEAN_ADD')
+            TYPE_TWOLEVEL = NSCARC_TWOLEVEL_XMEAN_ADD
+         CASE ('XMEAN_MUL1')
+            TYPE_TWOLEVEL = NSCARC_TWOLEVEL_XMEAN_MUL1
+         CASE ('XMEAN_MUL2')
+            TYPE_TWOLEVEL = NSCARC_TWOLEVEL_XMEAN_MUL2
          CASE DEFAULT
             CALL SCARC_ERROR(NSCARC_ERROR_PARSE_INPUT, SCARC_TWOLEVEL, NSCARC_NONE)
       END SELECT
@@ -4820,7 +4851,7 @@ SELECT CASE (TRIM(SCARC_METHOD))
             TYPE_SMOOTH = NSCARC_RELAX_MSOR
          CASE ('MSSOR')                                     ! Symmetric SOR preconditioner in matrix form
             TYPE_SMOOTH = NSCARC_RELAX_MSSOR
-         CASE ('ILU')
+         CASE ('ILU')                                       ! ILU preconditioner
             TYPE_SMOOTH = NSCARC_RELAX_ILU
          CASE ('FFT')
             IF (IS_UNSTRUCTURED) CALL SCARC_ERROR(NSCARC_ERROR_FFT_GRID, SCARC_NONE, NSCARC_NONE)
@@ -5056,19 +5087,25 @@ IS_FFT = (TYPE_PRECON == NSCARC_RELAX_FFT)  .OR. (TYPE_SMOOTH == NSCARC_RELAX_FF
 IS_FFTO= (TYPE_PRECON == NSCARC_RELAX_FFTO) .OR. (TYPE_SMOOTH == NSCARC_RELAX_FFTO)
 IS_MKL = (TYPE_PRECON >= NSCARC_RELAX_MKL)  .OR. (TYPE_SMOOTH >= NSCARC_RELAX_MKL) 
 
-HAS_TWO_LEVELS      = IS_CG .AND. (TYPE_PRECON /= NSCARC_RELAX_GMG) .AND. (TYPE_TWOLEVEL > NSCARC_TWOLEVEL_NONE)
+IF (IS_CG .AND. (TYPE_PRECON /= NSCARC_RELAX_GMG)) THEN
+   IF (TYPE_TWOLEVEL >= NSCARC_TWOLEVEL_XMEAN_ADD) THEN 
+      HAS_XMEAN_LEVELS = .TRUE.
+   ELSE IF (TYPE_TWOLEVEL > NSCARC_TWOLEVEL_NONE) THEN
+      HAS_TWO_LEVELS = .TRUE.
+   ENDIF
+ENDIF
 HAS_MULTIPLE_LEVELS = IS_MG .OR. IS_CG_MG .OR. HAS_TWO_LEVELS 
 
-IS_CG_ADD    = HAS_TWO_LEVELS .AND. (TYPE_TWOLEVEL == NSCARC_TWOLEVEL_ADD)
-IS_CG_MUL    = HAS_TWO_LEVELS .AND. (TYPE_TWOLEVEL == NSCARC_TWOLEVEL_MUL)
+IS_CG_ADD    = HAS_TWO_LEVELS .AND. (TYPE_TWOLEVEL == NSCARC_TWOLEVEL_COARSE_ADD)
+IS_CG_MUL1   = HAS_TWO_LEVELS .AND. (TYPE_TWOLEVEL == NSCARC_TWOLEVEL_COARSE_MUL1)
+IS_CG_MUL2   = HAS_TWO_LEVELS .AND. (TYPE_TWOLEVEL == NSCARC_TWOLEVEL_COARSE_MUL1)
+IS_CG_COARSE = HAS_TWO_LEVELS .AND. (TYPE_TWOLEVEL == NSCARC_TWOLEVEL_COARSE_ONLY)
 IS_CG_MACRO  = HAS_TWO_LEVELS .AND. (TYPE_TWOLEVEL == NSCARC_TWOLEVEL_MACRO)
-IS_CG_COARSE = HAS_TWO_LEVELS .AND. (TYPE_TWOLEVEL == NSCARC_TWOLEVEL_COARSE)
 
 HAS_GMG_LEVELS = IS_GMG .OR. IS_CG_GMG .OR. HAS_TWO_LEVELS
 HAS_AMG_LEVELS = IS_AMG .OR. IS_CG_AMG 
 
 IS_MGM = TYPE_METHOD == NSCARC_METHOD_MGM
-
 
 ! If two or more grid levels are used, also set type of coarse grid solver
 
@@ -13814,7 +13851,7 @@ INTEGER :: NM
 INTEGER :: IXF, IYF, IZF, ICF(8)=0, ICFB(-2:2,-2:2)=0
 INTEGER :: IXC, IYC, IZC, ICC, IC, ICOL
 
-IF (IS_GMG .OR. IS_CG_GMG .OR. IS_CG_ADD .OR. IS_CG_MUL) THEN
+IF (IS_GMG .OR. IS_CG_GMG .OR. IS_CG_ADD .OR. IS_CG_MUL1) THEN
  
 ! ---------- Twolevel-CG or Geometric multigrid (as main solver or preconditioner) 
  
@@ -14042,7 +14079,7 @@ INTEGER :: NM, I
 INTEGER :: IXF, IYF, IZF, ICF(8)=0, ICFB(-1:1,-1:1)=0
 INTEGER :: IXC, IYC, IZC, ICC, IC, ICOL
 
-IF (IS_GMG .OR. IS_CG_GMG .OR. IS_CG_ADD .OR. IS_CG_MUL) THEN
+IF (IS_GMG .OR. IS_CG_GMG .OR. IS_CG_ADD .OR. IS_CG_MUL1) THEN
  
 ! ------------------ Twolevel CG or Geometric Multigrid 
  
@@ -18475,7 +18512,9 @@ END SELECT SELECT_KRYLOV_PRECON
  
 ! If two-level Krylov, allocate intermediate structures for interpolation and workspace for global coarse solver
  
-IF (HAS_TWO_LEVELS) THEN
+IF (HAS_XMEAN_LEVELS) THEN
+   CALL SCARC_SETUP_PRECON_XMEAN(NLEVEL_MIN)
+ELSE IF (HAS_TWO_LEVELS) THEN
    IF (.NOT.IS_CG_AMG) CALL SCARC_SETUP_INTERPOLATION(NSCARC_STAGE_ONE, NLEVEL_MIN+1, NLEVEL_MAX)
    NSTACK = NSTACK + 1
    CALL SCARC_SETUP_COARSE_SOLVER(NSCARC_STAGE_ONE, NSCARC_SCOPE_GLOBAL, NSTACK, NLEVEL_MAX, NLEVEL_MAX)
@@ -19249,6 +19288,91 @@ MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 ENDDO MESHES_LOOP
 
 END SUBROUTINE SCARC_SETUP_ILU
+
+
+! --------------------------------------------------------------------------------------------------------------------
+!> \brief Setup onedirectional Poisson-preconditioner
+! --------------------------------------------------------------------------------------------------------------------
+SUBROUTINE SCARC_SETUP_PRECON_XMEAN(NL)
+USE SCARC_POINTERS, ONLY: M, L, PRE, SCARC_POINT_TO_LEVEL
+USE GLOBAL_CONSTANTS
+USE MPI
+INTEGER, INTENT(IN) :: NL
+INTEGER :: II, IX, NM
+
+CROUTINE = 'SCARC_SETUP_PRECON_XMEAN'
+
+NX_GLOBAL = 0
+DO NM = 1, NMESHES
+   NX_GLOBAL = NX_GLOBAL + MESHES(NM)%IBAR
+ENDDO
+
+CALL SCARC_ALLOCATE_INT1 (NX_OFFSET, 1, NMESHES, NSCARC_INIT_ZERO, 'NX_OFFSET', CROUTINE)
+NX_OFFSET(1) = 0
+DO NM = 2, NMESHES
+   NX_OFFSET(NM) = NX_OFFSET(NM-1) + MESHES(NM-1)%IBAR
+ENDDO
+
+MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
+
+   CALL SCARC_POINT_TO_LEVEL (NM, NL)                                    
+   PRE => L%PRECON
+
+   CALL SCARC_ALLOCATE_REAL1 (PRE%DIAG, 1, NX_GLOBAL, NSCARC_INIT_ZERO, 'PRE%DIAG', CROUTINE)
+   CALL SCARC_ALLOCATE_REAL1 (PRE%LOW , 1, NX_GLOBAL, NSCARC_INIT_ZERO, 'PRE%LOW',  CROUTINE)
+   CALL SCARC_ALLOCATE_REAL1 (PRE%UP  , 1, NX_GLOBAL, NSCARC_INIT_ZERO, 'PRE%UP',   CROUTINE)
+   CALL SCARC_ALLOCATE_REAL1 (PRE%RHS , 1, NX_GLOBAL, NSCARC_INIT_ZERO, 'PRE%UP',   CROUTINE)
+   CALL SCARC_ALLOCATE_REAL1 (PRE%AUX , 1, NX_GLOBAL, NSCARC_INIT_ZERO, 'PRE%AUX',  CROUTINE)
+
+   DO IX = 1, L%NX
+      II = NX_OFFSET(NM) + IX  
+      PRE%DIAG(II) = -M%RDX(IX)*(M%RDXN(IX)+M%RDXN(IX-1))  ! Main diagonal
+      PRE%UP(II)   =  M%RDX(IX)*M%RDXN(IX)                 ! Upper diagonal 
+      PRE%LOW(II)  =  M%RDX(IX)*M%RDXN(IX-1)               ! Lower diagonal 
+   ENDDO
+      
+   ! Apply boundary conditions at end of tunnel to the matrix components
+
+   IF (NM==1) THEN
+      IF (M%LBC==FISHPAK_BC_NEUMANN_NEUMANN .OR. M%LBC==FISHPAK_BC_NEUMANN_DIRICHLET) THEN     ! Neumann 
+         PRE%DIAG(1) = PRE%DIAG(1) + PRE%LOW(1)
+      ELSE                                                                                     ! Dirichlet
+         PRE%DIAG(1) = PRE%DIAG(1) - PRE%LOW(1)
+      ENDIF
+   ENDIF
+
+   IF (NM==NMESHES) THEN
+      IF (M%LBC==FISHPAK_BC_NEUMANN_NEUMANN .OR. M%LBC==FISHPAK_BC_DIRICHLET_NEUMANN) THEN     ! Neumann BC
+         PRE%DIAG(NX_GLOBAL) = PRE%DIAG(NX_GLOBAL) + PRE%UP(NX_GLOBAL)
+      ELSE                                                                                     ! Dirichet BC
+         PRE%DIAG(NX_GLOBAL) = PRE%DIAG(NX_GLOBAL) - PRE%UP(NX_GLOBAL)
+      ENDIF
+   ENDIF
+
+   ! If not MPI process 0 send matrix components to process 0
+
+   IF (MY_RANK>0) THEN  
+   
+      CALL MPI_GATHERV(PRE%UP(DISPLS_TP(MY_RANK)+1),COUNTS_TP(MY_RANK),MPI_DOUBLE_PRECISION,PRE%UP,COUNTS_TP,DISPLS_TP,&
+                       MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,IERROR)
+      CALL MPI_GATHERV(PRE%LOW(DISPLS_TP(MY_RANK)+1),COUNTS_TP(MY_RANK),MPI_DOUBLE_PRECISION,PRE%LOW,COUNTS_TP,DISPLS_TP,&
+                       MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,IERROR)
+      CALL MPI_GATHERV(PRE%DIAG(DISPLS_TP(MY_RANK)+1),COUNTS_TP(MY_RANK),MPI_DOUBLE_PRECISION,PRE%DIAG,COUNTS_TP,DISPLS_TP,&
+                       MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,IERROR)
+      
+   ! If MPI process 0 receive matrix components from slaves and compose global matrix
+
+   ELSE  
+   
+      CALL MPI_GATHERV(MPI_IN_PLACE,0,MPI_DATATYPE_NULL,PRE%UP,COUNTS_TP,DISPLS_TP,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,IERROR)
+      CALL MPI_GATHERV(MPI_IN_PLACE,0,MPI_DATATYPE_NULL,PRE%LOW,COUNTS_TP,DISPLS_TP,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,IERROR)
+      CALL MPI_GATHERV(MPI_IN_PLACE,0,MPI_DATATYPE_NULL,PRE%DIAG,COUNTS_TP,DISPLS_TP,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,IERROR)
+      
+   ENDIF
+      
+ENDDO MESHES_LOOP
+   
+END SUBROUTINE SCARC_SETUP_PRECON_XMEAN
 
 
 ! ------------------------------------------------------------------------------------------------------------------
@@ -20669,15 +20793,17 @@ INTEGER :: IL
 SELECT_PRECON_TYPE: SELECT CASE (TYPE_TWOLEVEL)
 
    ! ---------- Classical one-level preconditioning
+   ! Solve local fine Poisson problems by selected relaxation method (SSOR, FFT, PARDISO, etc.)
  
    CASE (NSCARC_TWOLEVEL_NONE)
 
       CALL SCARC_VECTOR_COPY (R, V, 1.0_EB, NL)                   !  v := r
       CALL SCARC_RELAXATION (R, V, NS+1, NP, NL)                  !  v := Relax(r)
  
-   ! ---------- Additive two-level preconditioning
+   ! ---------- Additive two-level preconditioning : COARSE_ADD
+   ! Local fine Poisson problems and global coarse Poisson problem are based on same defect
  
-   CASE (NSCARC_TWOLEVEL_ADD)
+   CASE (NSCARC_TWOLEVEL_COARSE_ADD)
 
       CALL SCARC_VECTOR_COPY (R, B, 1.0_EB, NL)                   !  Use r^l as right hand side for preconditioner
       DO IL = NL, NLEVEL_MAX-1                                    !  successively restrict to coarser levels up to coarsest
@@ -20685,69 +20811,97 @@ SELECT_PRECON_TYPE: SELECT CASE (TYPE_TWOLEVEL)
       ENDDO
       CALL SCARC_METHOD_COARSE(NS+2, NS, NLEVEL_MAX)              !  solve A^L * x^L := b^L on coarsest level
       CALL SCARC_VECTOR_COPY (X, Z, 1.0_EB, NLEVEL_MAX)           !  z^L := x^L
-
       DO IL = NLEVEL_MAX-1, NL, -1                                !  successively interpolate to finer levels up to finest
          CALL SCARC_PROLONGATION(Z, Z, IL+1, IL)                  !  z^l := Prolongation(z^{l+1})
       ENDDO
       CALL SCARC_VECTOR_COPY (R, V, 1.0_EB, NL)                   !  v^l := r^l
       CALL SCARC_RELAXATION (R, V, NS+1, NP, NL)                  !  v^l := Relax(r^l)
-      CALL SCARC_VECTOR_SUM (Z, V, 1.0_EB, 1.0_EB, NL)            !  v^l := z^l + v^l
+      CALL SCARC_VECTOR_SUM (Z, V, SCARC_COARSE_OMEGA, 1.0_EB, NL)    !  v^l := z^l + v^l
 
-   ! ---------- Multiplicative two-level preconditioning (coarse first, fine second)
+   ! ---------- Multiplicative two-level preconditioning : COARSE_MUL1
+   ! First solve global coarse Poisson problem, build new defect, then solve local fine Poisson problems
  
-   CASE (NSCARC_TWOLEVEL_MUL)
+   CASE (NSCARC_TWOLEVEL_COARSE_MUL1)
 
       CALL SCARC_VECTOR_COPY (R, B, 1.0_EB, NL)                   !  Use r^l as right hand side for preconditioner
-
       DO IL = NL, NLEVEL_MAX-1
          CALL SCARC_RESTRICTION (B, B, IL, IL+1)                  !  b^{l+1} := Restriction(r^l)
       ENDDO
-
-      CALL SCARC_METHOD_COARSE(NS+2, NS, NLEVEL_MAX)              !  solve A^L * x^L := b^L on coarsest level
       CALL SCARC_VECTOR_COPY (X, Y, 1.0_EB, NLEVEL_MAX)           !  y^L := x^L
-
-      DO IL = NLEVEL_MAX-1, NL, -1
+      DO IL = NLEVEL_MAX-1, NLEVEL_MIN, -1
          CALL SCARC_PROLONGATION (Y, Y, NL+1, NL)                 !  y^l := Prolongation(y^{l+1})
       ENDDO
       CALL SCARC_MATVEC_PRODUCT (Y, Z, NL)                        !  z^l := A^l * y^l
-
       CALL SCARC_VECTOR_SUM (R, Z, 1.0_EB, -1.0_EB, NL)           !  z^l := r^l - z^l
       CALL SCARC_VECTOR_COPY (Z, V, 1.0_EB, NL)                   !  v^l := z^l
       CALL SCARC_RELAXATION (Z, V, NS+1, NP, NL)                  !  v^l := Relax(z^l)
-      CALL SCARC_VECTOR_SUM (Y, V, 1.0_EB, 1.0_EB, NL)            !  v^l := y^l - z^l
+      CALL SCARC_VECTOR_SUM (Y, V, SCARC_COARSE_OMEGA, 1.0_EB, NL)   !  v^l := y^l - z^l
 
-   ! ---------- Multiplicative two-level preconditioning (fine first, coarse second):
-   ! coarse level is one level away from finest one (one coarsening step)
- 
-   CASE (NSCARC_TWOLEVEL_MUL2)
+   ! ---------- Multiplicative two-level preconditioning : COARSE_MUL2
+   ! First solve local fine Poisson problems, build new defect, then solve global coarse Poisson problem
+
+   CASE (NSCARC_TWOLEVEL_COARSE_MUL2)
 
       CALL SCARC_VECTOR_COPY (R, V, 1.0_EB, NL)                   !  v^l := r^l
       CALL SCARC_RELAXATION (R, V, NS+1, NP, NL)                  !  v^l := Relax(r^l)
       CALL SCARC_MATVEC_PRODUCT (V, Z, NL)                        !  z^l := A^{l} * v^l
-
       CALL SCARC_VECTOR_SUM (R, Z, 1.0_EB, -1.0_EB, NL)           !  z^l := r^l - z^l
-
       CALL SCARC_RESTRICTION (Z, B, NL, NL+1)                     !  b^{l+1} := rest(R^{l})
       CALL SCARC_METHOD_COARSE(NS+2, NS, NLEVEL_MAX)              !  x^{l+1} := A^{l+1}^{-1}(b^{l+1})
       CALL SCARC_PROLONGATION (X, Z, NL+1, NL)                    !  v^l := Prolongation(x^{l+1})
-      CALL SCARC_VECTOR_SUM (Z, V, 1.0_EB, 1.0_EB, NL)            !  z^l := r^l - z^l
+      CALL SCARC_VECTOR_SUM (Z, V, SCARC_COARSE_OMEGA, 1.0_EB, NL)       !  z^l := r^l - z^l
  
-   ! ---------- Only coarse grid preconditioner
+   ! ---------- Only coarse grid preconditioner : COARSE_ONLY
+   ! Only solve global coarse Poisson problem
  
-   CASE (NSCARC_TWOLEVEL_COARSE)
+   CASE (NSCARC_TWOLEVEL_COARSE_ONLY)
 
       CALL SCARC_VECTOR_COPY (R, B, 1.0_EB, NL)                   !  Use r^l as right hand side for preconditioner
       DO IL = NL, NLEVEL_MAX-1                                    !  successively restrict to coarser levels up to coarsest
          CALL SCARC_RESTRICTION (B, B, IL, IL+1)                  !  b^{l+1} := Restriction(b^l)
       ENDDO
-
       CALL SCARC_METHOD_COARSE(NS+2, NS, NLEVEL_MAX)              !  solve A^L * x^L := b^L on coarsest level
       CALL SCARC_VECTOR_COPY (X, Y, 1.0_EB, NLEVEL_MAX)           !  y^L := x^L
-
       DO IL = NLEVEL_MAX-1, NL, -1                                !  successively interpolate to finer levels up to finest
          CALL SCARC_PROLONGATION (Y, Y, NL+1, NL)                 !  y^l := Prolongation(y^{l+1})
       ENDDO
       CALL SCARC_VECTOR_COPY (Y, V, 1.0_EB, NL)                   !  v^l := y^l
+
+   ! ---------- Twolevel preconditioning using meanvalues in x-direction : XMEAN_ADD
+   ! Global 1D-meanvalue problem and local fine Poisson problems are based on same defect
+ 
+   CASE (NSCARC_TWOLEVEL_XMEAN_ADD)
+
+      CALL SCARC_VECTOR_COPY (R, Z, 1.0_EB, NL)                   !  z := r                   (copy defect)
+      CALL SCARC_PRECON_XMEAN (Z, NL)                             !  z := A1d^{-1} * z_mean   (solve global 1D mean problem)
+      CALL SCARC_VECTOR_COPY (R, V, 1.0_EB, NL)                   !  v := r 
+      CALL SCARC_RELAXATION (R, V, NS+1, NP, NL)                  !  v := Relax(v)            (solve local Poisson problems)
+      CALL SCARC_VECTOR_SUM (Z, V, SCARC_COARSE_OMEGA, 1.0_EB, NL) !                          (relax influence of 1D-meanvalues)
+
+   ! ---------- Twolevel preconditioning using meanvalues in x-direction : XMEAN_MUL1
+   ! First solve global 1D-meanvalue problem, build new defect, then solve local fine Poisson problems
+ 
+   CASE (NSCARC_TWOLEVEL_XMEAN_MUL1)
+
+      CALL SCARC_VECTOR_COPY (R, Y, 1.0_EB, NL)                   !  y := r                   (copy residual)
+      CALL SCARC_PRECON_XMEAN(Y, NL)                              !  y := A1d^{-1} * y_mean   (solve global 1D mean problem)
+      CALL SCARC_MATVEC_PRODUCT (Y, Z, NL)                        !  z = A * y
+      CALL SCARC_VECTOR_SUM (R, Z, 1.0_EB, -1.0_EB, NL)           !  z = r - z  = r - A * y   (new defect)
+      CALL SCARC_VECTOR_COPY (Z, V, 1.0_EB, NL)                   !  v := z
+      CALL SCARC_RELAXATION (Z, V, NS+1, NP, NL)                  !  v := Relax(z)            (solve local Poisson problems)
+      CALL SCARC_VECTOR_SUM (Y, V, SCARC_COARSE_OMEGA, 1.0_EB, NL) !                          (relax influence of 1D-meanvalues)
+
+   ! ---------- Twolevel preconditioning using meanvalues in x-direction : XMEAN_MUL2
+   ! First solve local Poisson problems, build new defect, then solve global 1D-meanvalue problem
+ 
+   CASE (NSCARC_TWOLEVEL_XMEAN_MUL2)
+
+      CALL SCARC_VECTOR_COPY (R, V, 1.0_EB, NL)                   !  v := r                   (copy residual)
+      CALL SCARC_RELAXATION (R, V, NS+1, NP, NL)                  !  v := Relax(r)            (solve local Poisson problems)
+      CALL SCARC_MATVEC_PRODUCT (V, Z, NL)                        !  z := A * v
+      CALL SCARC_VECTOR_SUM (R, Z, 1.0_EB, -1.0_EB, NL)           !  z := r - z  = r - A * v  (new defect)
+      CALL SCARC_PRECON_XMEAN(Z, NL)                              !  z := A1d^{-1} * z_mean   (solve global 1D mean problem)
+      CALL SCARC_VECTOR_SUM (Z, V, SCARC_COARSE_OMEGA, 1.0_EB, NL) !                          (relax influence of 1D-meanvalues)
 
 END SELECT SELECT_PRECON_TYPE
 
@@ -20855,7 +21009,7 @@ USE SCARC_POINTERS, ONLY: AS, MKL, V1_FB, V2_FB
 #endif
 USE SCARC_UTILITIES, ONLY: SET_MATRIX_TYPE
 USE POIS, ONLY: H2CZSS, H3CZSS
-REAL(EB) :: AUX, OMEGA_SSOR = 1.5_EB 
+REAL(EB) :: AUX, OMEGA_SSOR = 1.5_EB
 REAL (EB) :: TNOW
 INTEGER, INTENT(IN) :: NV1, NV2, NS, NP, NL
 INTEGER :: NM, NP0, IC, JC, ICOL, ITYPE, IDIAG, IPTR, INCR, IOR0, IC0, IY, IZ
@@ -21182,8 +21336,6 @@ SELECT CASE (ITYPE)
       
       ENDDO LU_MESHES_LOOP
       
-
- 
    ! --------- Preconditioning by blockwise Geometric Multigrid
  
    CASE (NSCARC_RELAX_GMG)
@@ -21384,6 +21536,7 @@ SELECT CASE (ITYPE)
 
 #ifdef WITH_MKL
  
+
    ! --------- Preconditioning by LU-decomposition
  
    CASE (NSCARC_RELAX_MKL)
@@ -21472,6 +21625,7 @@ SELECT CASE (ITYPE)
 
       ENDIF MKL_SCOPE_IF
 
+      
    ! --------- Preconditioning by optimized use of FFT or PARDISO, depending on structure of mesh
  
    CASE (NSCARC_RELAX_OPTIMIZED)
@@ -21560,6 +21714,80 @@ END SELECT
 
 CPU(MY_RANK)%RELAXATION =CPU(MY_RANK)%RELAXATION+CURRENT_TIME()-TNOW
 END SUBROUTINE SCARC_RELAXATION
+
+
+! --------------------------------------------------------------------------------------------------------------
+!> \brief Twolevel relaxation by meanvalues in x-direction
+! --------------------------------------------------------------------------------------------------------------
+SUBROUTINE SCARC_PRECON_XMEAN (NV2, NL)
+USE SCARC_POINTERS, ONLY: M, L, G, V2, PRE, SCARC_POINT_TO_GRID, SCARC_POINT_TO_VECTOR
+INTEGER, INTENT(IN) :: NV2, NL
+INTEGER :: II, IX, IY, IZ, IC, I, NM
+REAL(EB) :: XMEAN, VAL
+ 
+MEAN1D_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
+
+   CALL SCARC_POINT_TO_GRID (NM, NL)                                    
+
+   PRE => L%PRECON
+   V2  => SCARC_POINT_TO_VECTOR(NM, NL, NV2)
+      
+   DO IX = 1, L%NX
+      II = NX_OFFSET(NM) + IX  
+      PRE%RHS(II) = 0._EB
+      DO IZ = 1, L%NZ
+         DO IY = 1, L%NY
+            IF (L%IS_SOLID(IX, IY, IZ)) CYCLE
+            IC = G%CELL_NUMBER(IX, IY, IZ)
+            XMEAN = V2(IC)*M%DY(IY)*M%DZ(IZ)
+            PRE%RHS(II) = PRE%RHS(II) + V2(IC)*M%DY(IY)*M%DZ(IZ)
+         ENDDO
+      ENDDO
+      PRE%RHS(II) = PRE%RHS(II)/((M%YF-M%YS)*(M%ZF-M%ZS)) 
+   ENDDO
+
+   ! If not MPI process 0 send RHS components to process 0
+
+   IF (MY_RANK>0) THEN  
+      
+      CALL MPI_GATHERV(PRE%RHS(DISPLS_TP(MY_RANK)+1),COUNTS_TP(MY_RANK),MPI_DOUBLE_PRECISION,PRE%RHS,COUNTS_TP,DISPLS_TP,&
+                       MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,IERROR)
+      
+   ! If MPI process 0 receive RHS components form slaves and solve tridiagonal Poisson system
+
+   ELSE  
+      
+      CALL MPI_GATHERV(MPI_IN_PLACE,0,MPI_DATATYPE_NULL,PRE%RHS,COUNTS_TP,DISPLS_TP,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,IERROR)
+
+      PRE%AUX = PRE%DIAG
+      TRIDIAGONAL_SOLVER_1: DO I=2,NX_GLOBAL
+         VAL = PRE%LOW(I)/PRE%AUX(I-1)
+         PRE%AUX(I) = PRE%AUX(I) - VAL*PRE%UP(I-1)
+         PRE%RHS(I) = PRE%RHS(I) - VAL*PRE%RHS(I-1)
+      ENDDO TRIDIAGONAL_SOLVER_1
+      PRE%RHS(NX_GLOBAL)  = PRE%RHS(NX_GLOBAL)/PRE%AUX(NX_GLOBAL)
+      TRIDIAGONAL_SOLVER_2: DO I=NX_GLOBAL-1,1,-1
+         PRE%RHS(I) = (PRE%RHS(I) - PRE%UP(I)*PRE%RHS(I+1))/PRE%AUX(I)
+      ENDDO TRIDIAGONAL_SOLVER_2
+
+   ENDIF
+      
+   ! The solution to the tri-diagonal linear system is PRE%RHS. Broadcast this to all the MPI processes.
+
+   CALL MPI_BCAST(PRE%RHS,NX_GLOBAL,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,IERROR)
+
+   DO IX = 1, L%NX
+      DO IY = 1, L%NY
+         DO IZ = 1, L%NZ
+            IC = G%CELL_NUMBER(IX, IY, IZ)
+            V2(IC) = PRE%RHS(NX_OFFSET(NM)+IX)
+         ENDDO
+      ENDDO
+   ENDDO
+
+ENDDO MEAN1D_MESHES_LOOP
+ 
+END SUBROUTINE SCARC_PRECON_XMEAN
 
 END MODULE SCARC_METHODS
 
@@ -21715,7 +21943,6 @@ CPU(MY_RANK)%SOLVER =CPU(MY_RANK)%SOLVER+CURRENT_TIME()-TNOW
 CPU(MY_RANK)%OVERALL=CPU(MY_RANK)%OVERALL+CURRENT_TIME()-TNOW
 
 END SUBROUTINE SCARC_SOLVER
-
 
 END MODULE SCRC
 
