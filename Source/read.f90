@@ -1044,7 +1044,6 @@ CONTAINS
 
 SUBROUTINE DEFINE_EVACUATION_MESHES(NM)
 
-IMPLICIT NONE
 INTEGER, INTENT(INOUT) :: NM
 INTEGER :: N, N_END, I, J, NN, JMAX, NM_OLD, I_MAIN_EVAC_MESH
 REAL(EB) :: Z_MID
@@ -10349,7 +10348,6 @@ CONTAINS
     !
     USE EVAC, ONLY: N_DOORS, N_EXITS, N_CO_EXITS, EVAC_EMESH_EXITS_TYPE, EMESH_EXITS, &
          N_STRS, EMESH_STAIRS, EVAC_EMESH_STAIRS_TYPE
-    IMPLICIT NONE
     ! Passed variables
     INTEGER, INTENT(IN) :: NM, IMODE, EVAC_N
     ! Local variables
@@ -10888,7 +10886,6 @@ CONTAINS
     ! Clear the STRS meshes by a hole with size of XB of the stairs.
     ! The core is put there applying permit_hole=false.
     USE EVAC, ONLY: N_STRS, EMESH_STAIRS, EVAC_EMESH_STAIRS_TYPE
-    IMPLICIT NONE
     ! Passed variables
     INTEGER, INTENT(IN) :: IMODE
     ! Local variables
