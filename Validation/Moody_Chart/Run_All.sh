@@ -57,6 +57,10 @@ $QFDS -p 80 -n 8 $DEBUG $QUEUE -d $INDIR tunnel_pressure_drop_c_20.fds
 $QFDS -p 80 -n 8 $DEBUG $QUEUE -d $INDIR tunnel_pressure_drop_d_20.fds
 $QFDS -p 80 -n 8 $DEBUG $QUEUE -d $INDIR tunnel_pressure_drop_e_20.fds
 
+$QFDS -p 80 -n 8 $DEBUG $QUEUE -d $INDIR tunnel_fire_10.fds
+$QFDS -p 80 -n 8 $DEBUG $QUEUE -d $INDIR tunnel_fire_20.fds
+$QFDS -p 80 -n 8 $DEBUG $QUEUE -d $INDIR tunnel_fire_40.fds
+
 $QFDS $DEBUG $QUEUE -d $INDIR geom_moody_dpdx=-0p01_N16.fds
 $QFDS $DEBUG $QUEUE -d $INDIR geom_moody_dpdx=-0p01_N32.fds
 $QFDS $DEBUG $QUEUE -d $INDIR geom_moody_dpdx=-0p01_N8.fds
