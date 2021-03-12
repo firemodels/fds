@@ -7,8 +7,8 @@
 clear all
 close all
 
-outdir = '../../../out/Tunnel_Ventilation/';
-pltdir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Tunnel_Ventilation/';
+outdir = '../../../out/Wu_Bakar_Tunnels/';
+pltdir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Wu_Bakar_Tunnels/';
 
 g = 9.81;
 cp = 1.0;
@@ -97,6 +97,6 @@ set(gcf,'Units',Paper_Units);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
-print(gcf,'-dpdf',[pltdir,'Tunnel_Ventilation'])
+print(gcf,'-dpdf',[pltdir,'Wu_Bakar_Critical_Velocity'])
 
 display('Wu_Bakar_Tunnels completed successfully')

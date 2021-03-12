@@ -1767,12 +1767,13 @@ This case demonstrates the use of baroclinic correction for an axially-symmetric
 \label{tunnel_demo}
 \label{tunnel_demo_glmat}
 
-A common application of FDS is tunnel fires, but simulations of fires in long, relatively tight tunnels that are made up of multiple meshes can exhibit spurious fluctuations in the pressure field that can lead to numerical instabilities. If a numerical instability occurs in a simulation involving a tunnel, you might try the following remedies:
+A common application of FDS is tunnel fires, but simulations of fires in long, relatively tight tunnels that are made up of multiple meshes can exhibit spurious fluctuations in the pressure field that can lead to numerical instabilities. If a numerical instability occurs in a simulation involving a tunnel, you might try the following remedies, which are listed here in order of effectiveness:
 \begin{enumerate}
-\item If the tunnel is made up of multiple meshes that abut end to end, and there are no other meshes outside of the tunnel, set {\ct TUNNEL\_PRECONDITIONER=T} on the {\ct PRES} line. This option instructs FDS to solve a 1-D pressure equation that spans the entire tunnel. This 1-D solution can be thought of as an average pressure field which is added to the 3-D pressure fields that are solved for using the default FFT-based solver on each mesh. The 1-D global solution accelerates the convergence of the overall 3-D pressure field on the entire domain.
+\item If the tunnel is made up of multiple meshes that abut end to end, and there are no other meshes outside of the tunnel, and there are no {\ct OPEN} boundaries on the top, bottom or sides of the tunnel; set {\ct TUNNEL\_PRECONDITIONER=T} on the {\ct PRES} line. This option instructs FDS to solve a 1-D pressure equation that spans the entire tunnel. This 1-D solution can be thought of as an average pressure field which is added to the 3-D pressure fields that are solved for using the default FFT-based solver on each mesh. The 1-D global solution accelerates the convergence of the overall 3-D pressure field on the entire domain.
+\item You can increase the value of {\ct MAX\_PRESSURE\_ITERATIONS} which has a default value of 10 in most cases; 20 when the {\ct TUNNEL\_PRECONDITIONER} is invoked. If you experience a numerical instability in a tunnel scenario, try setting the {\ct MAX\_PRESSURE\_ITERATIONS} to 50 as a starting point, and monitor the number of pressure iterations per time step in the {\ct CHID.out} file.
+\item If you are using multiple meshes, reduce the value of {\ct VELOCITY\_TOLERANCE} on the {\ct PRES} line to force a tighter match of velocities at the mesh boundaries. The default value of {\ct VELOCITY\_TOLERANCE} (with units of m/s) is $\dx/2$. If you set {\ct TUNNEL\_PRECONDITIONER=T}, there is less of a need to decrease the {\ct VELOCITY\_TOLERANCE} from its default value, but it still may be necessary to increase the {\ct MAX\_PRESSURE\_ITERATIONS} to account for occasional excursions of pressure.
+\item Create {\ct OPEN} vents at various points along the length of the tunnel, near or at the floor. This models natural leakage in the tunnel, and alleviates, to some extent, wild oscillations in pressure. Note that even if the pressure equation is solved perfectly over the entire domain, the low Mach number assumption will still lead to fictitiously large fluctuations in pressure. The {\ct OPEN} boundaries can help relieve these pressure oscillations. If you do choose to create {\ct OPEN} boundaries along the length of the tunnel, you should {\em not} set {\ct TUNNEL\_PRECONDITIONER} to {\ct .TRUE.}
 \item Reduce the value of {\ct PRESSURE\_TOLERANCE} on the {\ct PRES} line to alleviate the mismatch between old and new pressure fields. The default value is $20/\dx^2$. A good value to try would be 1/5 to 1/10 of the default value.
-\item If you are using multiple meshes, reduce the value of {\ct VELOCITY\_TOLERANCE} on the {\ct PRES} line to force a tighter match of velocities at the mesh boundaries. The default value of {\ct VELOCITY\_TOLERANCE} (with units of m/s) is $\dx/2$. You may also want to increase the value of {\ct MAX\_PRESSURE\_ITERATIONS} which has a default value of 10. Try 50 as a starting point, and monitor the number of pressure iterations per time step in the {\ct CHID.out} file. If you set {\ct TUNNEL\_PRECONDITIONER=T}, there is less of a need to decrease the {\ct VELOCITY\_TOLERANCE} from its default value, but it still may be necessary to increase the {\ct MAX\_PRESSURE\_ITERATIONS} to account for occasional excursions of pressure.
-\item Create {\ct OPEN} vents at various points along the length of the tunnel, near or at the floor. This models natural leakage in the tunnel, and alleviates, to some extent, wild oscillations in pressure. Note that even if the pressure equation is solved perfectly over the entire domain, the low Mach number assumption will still lead to fictitiously large fluctuations in pressure. The {\ct OPEN} boundaries can help relieve these pressure oscillations.
 \item Use the GLMAT solver to strictly enforce the matching of normal velocity and pressure at mesh boundaries or the UGLMAT solver to do what GLMAT does plus enforce zero normal velocities at solid obstructions. If you use these solvers, you need not set the various tolerances described above or use the {\ct TUNNEL\_PRECONDITIONER}. However, these solvers are very expensive, so it is best to try a simple case first to determine how much CPU time the pressure solver consumes.
 \end{enumerate}
 Two simple test cases, {\ct Pressure\_Solver/tunnel\_demo.fds} and {\ct tunnel\_demo\_glmat.fds}, demonstrate some of the issues discussed in this section. The first case uses the default FFT-based pressure solver with the {\ct TUNNEL\_PRECONDITIONER} set to {\ct T}; the second uses the GLMAT solver. An 8~MW fire is situated in a 4~m by 4~m by 128~m long tunnel that is sloped 10$^\circ$, closed at the lower end and open at the upper end. The tunnel is divided into 8 meshes, all the same size, with a uniform grid of 20~cm. The cases run for a relatively short amount of time, and diagnostic files\footnote{Caution: the velocity error file can be quite large. Use it only for relatively short simulations only.} containing information about the velocity and pressure errors are printed out. These file are generated by setting {\ct VELOCITY\_ERROR\_FILE} to {\ct .TRUE.} on the {\ct DUMP} line. The names of the files are {\ct tunnel\_demo\_pressit.csv} and {\ct tunnel\_demo\_glmat\_pressit.csv}. Column~1 of these files is the time step iteration. Column~2 is the pressure iteration within the time step. Column~3 is the total number of pressure iterations for the entire simulation. Columns~4-7 contain the mesh and cell indices where the maximum velocity error occurs, which is listed in Column~8\footnote{The velocity error is the maximum value of the difference between normal velocity components at mesh interfaces or at solid internal boundaries.}. Columns~9-12 contain the mesh and cell indices where the maximum pressure error occurs, which is listed in Column~13.
@@ -1790,34 +1791,35 @@ Figure~\ref{tunnel_demo_fig} shows the velocity and pressure errors for the two 
 \label{tunnel_demo_fig}
 \end{figure}
 
+\FloatBarrier
+
 \subsubsection{Special Case: Pressure Drop in Long Tunnels}
 \label{sec:tunnel_pressure_drop}
 
 This section describes a set of cases to extract the implied friction factor from an FDS simulation of flow down a long tunnel ({\ct Validation/Moody\_Chart/FDS\_Input\_Files/tunnel\_pressure\_drop} series).  Note that a more complete mapping of the Moody Chart is provided in the FDS Verification Guide~\cite{FDS_Verification_Guide}, but that series uses a mean pressure gradient to force the flow, which is not a typical user case.  Here the flow is forced from a {\ct VENT} and the axial pressure profile is formed from planar averages {\ct DEVC}s.  The tunnel is 1.6~km (approximately 1~mi) long with a square cross-section 10~m by 10~m for Cases A, B, C, and D.  The cross section for Case E is 12.8~m in width by 5~m in height, giving a hydraulic diameter of 7.2~m. Air is forced from the entrance at 2, 4, or 10~m/s for sand-grain roughness heights of 0.0001, 0.01, or 0.1~m.  Two grid resolutions are used, with 10 or 20 uniform cells spanning the tunnel height.  Streamwise grid resolution is twice the wall-normal resolution.  The case matrix and friction factor results are given in Table~\ref{tab:tunnel_pressure_drop}.  The target friction factor is taken from the Colebrook equation~\cite{MYO}.  FDS results for the 10 and 20 vertical cell cases are also shown along with the maximum relative error as compared to the Colebrook value. The pressure profiles are shown in Fig.~\ref{fig:tunnel_pressure_drop}.
 
-\begin{table}[ht]
+\begin{table}[!ht]
 \input{SCRIPT_FIGURES/tunnel_pressure_drop}
 \end{table}
 
-\begin{figure}[ht]
-\centering
-\includegraphics[width=3in]{SCRIPT_FIGURES/tunnel_pressure_drop_a}
-\includegraphics[width=3in]{SCRIPT_FIGURES/tunnel_pressure_drop_b}\\
-\includegraphics[width=3in]{SCRIPT_FIGURES/tunnel_pressure_drop_c}
-\includegraphics[width=3in]{SCRIPT_FIGURES/tunnel_pressure_drop_d}\\
-\includegraphics[width=3in]{SCRIPT_FIGURES/tunnel_pressure_drop_e}
+\begin{figure}[!ht]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=3in]{SCRIPT_FIGURES/tunnel_pressure_drop_a} &
+\includegraphics[width=3in]{SCRIPT_FIGURES/tunnel_pressure_drop_b} \\
+\includegraphics[width=3in]{SCRIPT_FIGURES/tunnel_pressure_drop_c} &
+\includegraphics[width=3in]{SCRIPT_FIGURES/tunnel_pressure_drop_d} \\
+\includegraphics[width=3in]{SCRIPT_FIGURES/tunnel_pressure_drop_e} &
+\includegraphics[width=3in]{SCRIPT_FIGURES/tunnel_fire}
+\end{tabular*}
 \caption[The {\ct tunnel\_pressure\_drop} cases]{Tunnel pressure drop for cases listed in Table \ref{tab:tunnel_pressure_drop}.}
 \label{fig:tunnel_pressure_drop}
 \end{figure}
 
-A word of caution: To achieve sensible results for tunnel cases you must take care to eliminate any mesh-to-mesh mass conservation errors and you must ensure that the time step stability criterion is never violated.  For the first, you should simply use the {\ct 'GLMAT'} solver.  To remain stable, use {\ct CFL\_VELOCITY\_NORM=1}, which employs a more restrictive definition of the cell velocity magnitude.  Without this setting, even slight violations of the stability limits (which are precisely unknown for the Navier-Stokes equations, in general) may lead to dramatic spurious pressure oscillations.  We also find that improved results for friction factor are obtained if the {\ct 'WALE'} near-wall eddy-viscosity is used.  Both these settings can be achieved using {\ct 'LES'} mode.
-\begin{lstlisting}
-&MISC SIMULATION_MODE='LES'/
-&PRES SOLVER='GLMAT'/
-\end{lstlisting}
-While reasonable grid resolution is important, as you can see, the wall models in FDS are capable of giving the correct mean wall stress even at rather coarse resolution.  For example, the $y^+$ for Case C with 10 cells is, in fact, 5000 (this is the location of the middle of the first grid cell divided by the roughness height).  Note that this resolution may not be sufficient if other complexities exist and it is the user's responsibility to ensure grid convergence for their application.
+While reasonable grid resolution is important, the wall models in FDS are capable of giving the correct mean wall stress even at rather coarse resolution.  For example, the $y^+$ for Case C with 10 cells is, in fact, 5000 (this is the location of the middle of the first grid cell divided by the roughness height). Also, note that a roughness of 0.1~mm is used here only for completeness in testing the code.  While this is indeed the value one finds in the literature for the roughness of concrete, a real-world tunnel may have geometric features along the walls that are unresolved by the grid and may act as roughness elements.  These elements should be considered when specifying the roughness in FDS.
 
-Also, note that a roughness of 0.1~mm is used here only for completeness in testing the code.  While this is indeed the value one finds in the literature for the roughness of concrete, a real-world tunnel may have geometric features along the walls that are unresolved by the grid and may act as roughness elements.  These elements should be considered when specifying the roughness in FDS.
+The lower right plot in Fig.~\ref{fig:tunnel_pressure_drop} displays the pressure drop in Tunnel~B (2~m/s flow speed, 0.1~m wall roughness) which now contains a hypothetical 60~MW fire at its midpoint. The grid resolution in the vertical direction is listed in the legend of the plots. For this case, the pressure is evaluated at mid-height along the tunnel centerline. The relatively rapid drop in pressure at the open end of the tunnel ($x=1600$~m) is due to the fact that the pressure is assumed to be ambient at an open boundary.
+
+
 
 
 
@@ -10905,6 +10907,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct TEXTURE\_MAPPING}& Character           & Section~\ref{info:GEOM}            &           & {\ct 'RECTANGULAR'}      \\ \hline
 {\ct TEXTURE\_ORIGIN} & Real Triplet        & Section~\ref{info:GEOM}            &   m       &   0.0,0.0,0.0            \\ \hline
 {\ct TEXTURE\_SCALE}& Real                  & Section~\ref{info:GEOM}            &           &   1.0                    \\ \hline
+{\ct TRANSPARENCY}  & Real                  & Section~\ref{info:GEOM}            &           &   1.0                    \\ \hline
 {\ct VERTS}        & array of Real Triplets & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
 {\ct VOLUS}        & array of Integer Quadruplets     & Section~\ref{info:GEOM}  &           &    0                     \\ \hline
 {\ct XB}           & Real sex-tuplet        & Section~\ref{info:GEOM}            &   m       &   0.0                    \\ \hline
