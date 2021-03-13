@@ -1,4 +1,4 @@
-&CHID='blasius_128', TITLE='Blasius boundary layer' /
+&HEAD CHID='blasius_128', TITLE='Blasius boundary layer' /
 
 &MESH IJK=192,1,128, XB=0,0.15,-0.005,0.005,0,0.3/
 
