@@ -61,4 +61,4 @@
 
 &DEVC ID='U', XB=0,0,-18,-18,0.05,9.95, POINTS=50, QUANTITY='VELOCITY', Z_ID='z' /
 
-&TAIL &
+&TAIL /
