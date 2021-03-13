@@ -42,6 +42,6 @@ This case tests conservation of mass and energy.
 &DEVC XYZ=0.25,0.25,0.25, QUANTITY='PDPA', PROP_ID='thermometer', ID='temp_w' /
 &PROP ID='thermometer', PDPA_RADIUS=2, QUANTITY='TEMPERATURE', PART_ID='water drops', PDPA_INTEGRATE=.FALSE., PDPA_NORMALIZE=.FALSE. /
 
-&TAIL
+&TAIL /
 
 
