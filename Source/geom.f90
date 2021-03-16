@@ -3018,7 +3018,7 @@ MESH_LOOP_5 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             ICF=CCVAR(I,J,K,IBM_IDCF)
             IF (ICF<1) CYCLE
             IF (CUT_FACE(ICF)%NFACE==0) CYCLE
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE 
             DO X1AXIS=IAXIS,KAXIS
                SELECT CASE(X1AXIS)
                CASE(IAXIS)
