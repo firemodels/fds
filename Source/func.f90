@@ -91,6 +91,24 @@ WRITE(DATE,'(A,I3,A,I4,2X,I2.2,A,I2.2,A,I2.2)') TRIM(MONTH),DATE_TIME(3),', ',DA
 END SUBROUTINE GET_DATE
 
 
+!> \brief Pause the code for DELTA_T s
+!> \param DELTA_T Time to pause (s)
+
+SUBROUTINE FDS_SLEEP(DELTA_T)
+
+INTEGER, INTENT(IN) :: DELTA_T
+REAL(EB) :: S1,S2
+
+S1 = CURRENT_TIME()
+
+DO
+  S2 = CURRENT_TIME()
+  IF (S2-S1>REAL(DELTA_T,EB)) EXIT
+ENDDO
+
+END SUBROUTINE FDS_SLEEP
+
+
 !> \brief Stop the code gracefully after writing a message.
 !> \param MESSAGE Character string containing an explanation for shutting down.
 !> \param PROCESS_0_ONLY If .TRUE., only MPI process 0 should write the message.
