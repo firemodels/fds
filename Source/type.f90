@@ -146,7 +146,7 @@ END TYPE BAND_TYPE
 
 ! Note: If you change the number of scalar variables in ONE_D_M_AND_E_XFER_TYPE, adjust the numbers below
 
-INTEGER, PARAMETER :: N_ONE_D_SCALAR_REALS=36,N_ONE_D_SCALAR_INTEGERS=12,N_ONE_D_SCALAR_LOGICALS=1
+INTEGER, PARAMETER :: N_ONE_D_SCALAR_REALS=37,N_ONE_D_SCALAR_INTEGERS=12,N_ONE_D_SCALAR_LOGICALS=1
 
 !> \brief Variables associated with a WALL, PARTICLE, or CFACE boundary cell
 
@@ -229,6 +229,7 @@ TYPE ONE_D_M_AND_E_XFER_TYPE
    REAL(EB), POINTER :: T_SCALE         !< Scaled time for a surface with CONE_HEAT_FLUX (s)
    REAL(EB), POINTER :: Q_SCALE         !< Scaled integrated heat release for a surface with CONE_HEAT_FLUX
    REAL(EB), POINTER :: L_OBUKHOV       !< Obukhov length (m)
+   REAL(EB), POINTER :: T_MATL_PART     !< Time interval for current value in PART_MASS and PART_ENTHALPY arrays (s)
 
    LOGICAL, POINTER :: BURNAWAY         !< Indicater if cell can burn away when fuel is exhausted
 

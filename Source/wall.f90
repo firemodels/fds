@@ -3638,6 +3638,7 @@ ONE_D%TMP_B  = MIN(TMPMAX,MAX(TMPMIN,ONE_D%TMP_B))
 IF (SF%N_LPC > 0) THEN
    ONE_D%PART_MASS(1:SF%N_LPC) = ONE_D%PART_MASS(1:SF%N_LPC) + DT_BC_SUB * M_DOT_PART_S(1:SF%N_LPC)
    ONE_D%PART_ENTHALPY(1:SF%N_LPC) = ONE_D%PART_ENTHALPY(1:SF%N_LPC) + DT_BC_SUB * Q_DOT_PART_S(1:SF%N_LPC)
+   ONE_D%T_MATL_PART = ONE_D%T_MATL_PART + DT_BC_SUB
 ENDIF
 
 ! Compute 1D mass transfer within the solid
@@ -3708,13 +3709,6 @@ IF (ABS(DTMP)>TWO_EPSILON_EB .AND. ABS(ONE_D%Q_CON_F)>TWO_EPSILON_EB) THEN
 ELSE
    ONE_D%HEAT_TRANS_COEF = HTCF
 ENDIF
-
-! Updated particle production
-IF (SF%N_LPC > 0) THEN
-   ONE_D%PART_MASS(1:SF%N_LPC) = ONE_D%PART_MASS(1:SF%N_LPC) / DT_BC
-   ONE_D%PART_ENTHALPY(1:SF%N_LPC) = ONE_D%PART_ENTHALPY(1:SF%N_LPC) / DT_BC
-ENDIF
-
 
 ! If any gas massflux is non-zero or the surface temperature exceeds the ignition temperature, set the ignition time
 
