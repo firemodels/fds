@@ -393,7 +393,7 @@ F_{{\rm B},\z,ijk} &=  - \frac{\tp_{ij,k+1}  \, \rho_{ijk} + \tp_{ijk} \, \rho_{
 \end{align}
 Notice the somewhat unusual discretization of the term $\tp \, \nabla (1/\rho)$, which is needed to be consistent with the discretization of the other two terms in Eq.~(\ref{p_decomp}):
 \begin{align}
-  \frac{1}{(\rho_{ijk}+\rho_{i,jk})/2} \frac{\tp_{i+1,jk}-\tp_{ijk}}{\dx} =& \frac{1}{\dx} \left( \frac{\tp_{i+1,jk}}{\rho_{i+1,jk}}-\frac{\tp_{ijk}}{\rho_{ijk}} \right) \nonumber \\[.1in]
+  \frac{1}{(\rho_{ijk}+\rho_{i+1,jk})/2} \frac{\tp_{i+1,jk}-\tp_{ijk}}{\dx} =& \frac{1}{\dx} \left( \frac{\tp_{i+1,jk}}{\rho_{i+1,jk}}-\frac{\tp_{ijk}}{\rho_{ijk}} \right) \nonumber \\[.1in]
   & - \frac{\tp_{i+1,jk} \, \rho_{ijk} + \tp_{ijk} \, \rho_{i+1,jk}}{\rho_{ijk}+\rho_{i+1,jk}} \frac{1}{\dx} \left( \frac{1}{\rho_{i+1,jk}} - \frac{1}{\rho_{ijk}} \right)
 \end{align}
 
