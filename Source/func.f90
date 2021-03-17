@@ -1374,12 +1374,17 @@ CONTAINS
 !> \param JJO J-index of the cell in the other mesh where the point is located
 !> \param KKO K-index of the cell in the other mesh where the point is located
 
-SUBROUTINE SEARCH_OTHER_MESHES(XX,YY,ZZ,NOM,IIO,JJO,KKO)
+SUBROUTINE SEARCH_OTHER_MESHES(XX,YY,ZZ,NOM,IIO,JJO,KKO,XXI,YYJ,ZZK)
 
 REAL(EB), INTENT(IN) :: XX,YY,ZZ
+REAL(EB), OPTIONAL :: XXI,YYJ,ZZK
 REAL(EB) :: XI,YJ,ZK
 INTEGER, INTENT(OUT) :: NOM,IIO,JJO,KKO
 TYPE (MESH_TYPE), POINTER :: M2=>NULL()
+
+IF (PRESENT(XXI)) XXI = 0._EB
+IF (PRESENT(YYJ)) YYJ = 0._EB
+IF (PRESENT(ZZK)) ZZK = 0._EB
 
 OTHER_MESH_LOOP: DO NOM=1,NMESHES
    IF (DO_EVACUATION) CYCLE OTHER_MESH_LOOP
@@ -1392,6 +1397,9 @@ OTHER_MESH_LOOP: DO NOM=1,NMESHES
          IIO = FLOOR(XI)
          JJO = FLOOR(YJ)
          KKO = FLOOR(ZK)
+         IF (PRESENT(XXI)) XXI = XI - 1._EB
+         IF (PRESENT(YYJ)) YYJ = YJ - 1._EB
+         IF (PRESENT(ZZK)) ZZK = ZK - 1._EB
       ELSE
          IIO = 0  ! The mesh if found, but no detailed information is available to the current process
          JJO = 0
