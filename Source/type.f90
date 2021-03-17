@@ -1009,14 +1009,6 @@ TYPE IBM_RCFACE_LST_TYPE
    REAL(EB), DIMENSION(-1:0)                                       ::    RHOPVN=0._EB
 END TYPE IBM_RCFACE_LST_TYPE
 
-TYPE IBM_EXIMFACE_TYPE
-   INTEGER :: LHFACE, UNKZ, IWC=0
-   INTEGER,  DIMENSION(MAX_DIM+1)                                  ::       IJK ! [ I J K x1axis]
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)                           ::       FLX
-   REAL(EB) :: AREA,FN_H_S
-   REAL(EB), DIMENSION(MAX_SPECIES)                                ::H_RHO_D_DZDN=0._EB,FN_ZZ=0._EB
-END TYPE IBM_EXIMFACE_TYPE
-
 TYPE CSVF_TYPE
     CHARACTER(255) :: CSVFILE,UVWFILE
 END TYPE CSVF_TYPE
