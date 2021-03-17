@@ -9596,11 +9596,19 @@ A useful feature of a device ({\ct DEVC}) is to specify an output quantity along
 \begin{lstlisting}
 &DEVC XB=..., QUANTITY='TEMPERATURE', ID='maxT', SPATIAL_STATISTIC='MAX' /
 \end{lstlisting}
-causes FDS to write out the maximum gas phase temperature over the volume bounded by {\ct XB}. Note that it does not compute the maximum over the entire computational domain, just the specified volume. Other {\ct SPATIAL\_STATISTIC}'s are discussed below.  Note that some are appropriate for gas phase output quantities, some for solid phase, and some for both.
+causes FDS to write out the maximum gas phase temperature over the volume bounded by {\ct XB}. Other {\ct SPATIAL\_STATISTIC}'s are discussed below.  Some are appropriate for gas phase output quantities, some for solid phase, and some for both.
 
 For solid phase output quantities, like heat fluxes and surface temperatures, the specification of a {\ct SURF\_ID} along with the appropriate statistic limits the calculation to only those surfaces. You can further limit the search by using the sextuplet of coordinates {\ct XB} to force FDS to only compute statistics for surface cells within the given volume. Be careful to account for the fact that the solid surface might shift to conform to the underlying numerical grid. Note that you do not (and should not) specify an orientation via the parameter {\ct IOR} when using a spatial statistic. {\ct IOR} is only needed to find a specific point on the solid surface.
 
 Note that a shortcut for specifying the six {\ct XB} values on the {\ct DEVC} line is to instead use {\ct DB='WHOLE DOMAIN'} ({\ct DB} stands for ``Domain Boundary'').
+
+\subsubsection{Linearly Interpolated Value}
+
+By default, FDS reports a given gas-phase {\ct QUANTITY} at a given point {\ct XYZ} to be the value computed at the center of the cell containing the point. However, in some instances, you might want to report a linearly-interpolated value over the nearest eight grid cells:
+\begin{lstlisting}
+&DEVC XYZ=..., QUANTITY='TEMPERATURE', ID='T', SPATIAL_STATISTIC='INTERPOLATION' /
+\end{lstlisting}
+Be careful when using this option near a thin obstruction or a collection of stair-stepped obstructions because the average value might include data from the opposite side of the obstructions. A notable example would be a sprinkler ``device'' located under a stair-stepped ceiling.  
 
 
 \subsubsection{Minimum or Maximum Value}
