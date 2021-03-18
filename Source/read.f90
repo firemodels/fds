@@ -12871,17 +12871,19 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
 
       IF (POINTS>1 .OR. XB(1)<-1.E5_EB) MESH_DEVICE = 0
 
-      IF (XB(1)>-1.E5_EB .AND. ANY(XYZ<-1.E5_EB)) THEN
+      IF (XB(1)>-1.E5_EB) THEN
          IF (TRIM(QUANTITY)=='VELOCITY PATCH') THEN
-            XYZ(1) = XB(1) + (XB(2)-XB(1))/2._EB
-            XYZ(2) = XB(3) + (XB(4)-XB(3))/2._EB
-            XYZ(3) = XB(5) + (XB(6)-XB(5))/2._EB
+            IF (ANY(XYZ<-1.E5_EB)) THEN
+               XYZ(1) = XB(1) + (XB(2)-XB(1))/2._EB
+               XYZ(2) = XB(3) + (XB(4)-XB(3))/2._EB
+               XYZ(3) = XB(5) + (XB(6)-XB(5))/2._EB
+            ENDIF
          ELSE
             IF (POINTS > 1) THEN
                XYZ(1) = XB(1) + (XB(2)-XB(1))*REAL(I_POINT-1,EB)/REAL(MAX(POINTS-1,1),EB)
                XYZ(2) = XB(3) + (XB(4)-XB(3))*REAL(I_POINT-1,EB)/REAL(MAX(POINTS-1,1),EB)
                XYZ(3) = XB(5) + (XB(6)-XB(5))*REAL(I_POINT-1,EB)/REAL(MAX(POINTS-1,1),EB)
-            ELSE
+            ELSEIF (SPATIAL_STATISTIC/='INTERPOLATION') THEN
                XYZ(1) = XB(1) + (XB(2)-XB(1))/2._EB
                XYZ(2) = XB(3) + (XB(4)-XB(3))/2._EB
                XYZ(3) = XB(5) + (XB(6)-XB(5))/2._EB
