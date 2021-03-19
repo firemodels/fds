@@ -67,7 +67,7 @@ MODULE EVAC
   USE DEVICE_VARIABLES
   USE CONTROL_VARIABLES
 
-  IMPLICIT NONE
+  IMPLICIT NONE (TYPE,EXTERNAL)
   PRIVATE
 
   ! Public subprograms (called from the main program or read or dump)
