@@ -173,7 +173,7 @@ impi_intel_win_64_dv : setup_win $(objwin_mpi)
 
 impi_intel_win_64_db : MPILIB = "$(IMPI_DEBUG_ROOT)\impi.lib"
 impi_intel_win_64_db : MPIINCLUDE = "$(IMPI_INCLUDE)"
-impi_intel_win_64_db : FFLAGS = /Od /nologo /debug:all /I$(MPIINCLUDE) /Z7 /extend-source:132 /warn:unused /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f08 /wrap-margin- $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL)
+impi_intel_win_64_db : FFLAGS = /Od /nologo /debug:all /I$(MPIINCLUDE) /Z7 /extend-source:132 /warn:unused /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f18 /wrap-margin- $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL)
 impi_intel_win_64_db : FOPENMPFLAGS = /Qopenmp
 impi_intel_win_64_db : FCOMPL = ifort
 impi_intel_win_64_db : obj = fds_impi_win_64_db
@@ -191,11 +191,6 @@ impi_intel_linux_64 : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
 impi_intel_linux_64_db : FFLAGS = -m64 -check all -warn all -O0 -g -traceback -fpe0 -fltconsistency -stand:f18 -no-wrap-margin $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL)
-ifneq ($(shell echo "check_quotes"),"check_quotes")
-ifeq ($(shell expr $(INTELMAJOR_COMPVERSION) \> 19), 1)
-impi_intel_linux_64_db : FFLAGS += -warn noexternals
-endif
-endif
 impi_intel_linux_64_db : LFLAGSMKL = $(LFLAGSMKL_INTEL)
 impi_intel_linux_64_db : LFLAGS =
 impi_intel_linux_64_db : FCOMPL = mpiifort

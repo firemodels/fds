@@ -211,7 +211,7 @@ USE MPI_F08
  USE MKL_CLUSTER_SPARSE_SOLVER
 #endif /* WITH_MKL */
 
-IMPLICIT NONE
+IMPLICIT NONE (TYPE,EXTERNAL)
 CHARACTER(2*MESSAGE_LENGTH) :: MESSAGE
 
 !! ---------------------------------------------------------------------------------
