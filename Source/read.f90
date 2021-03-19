@@ -4632,6 +4632,14 @@ IF (N_SIMPLE_CHEMISTRY_REACTIONS==2) N_REACTIONS = 2
 
 ALLOCATE(REACTION(N_REACTIONS),STAT=IZERO)
 
+! If there are multiple reactions, do not allow 'EXTINCTION MODEL 2'
+
+IF (N_REACTIONS>1 .AND. EXTINCT_MOD==EXTINCTION_2 .AND. SUPPRESSION) THEN
+   EXTINCT_MOD = EXTINCTION_1
+   WRITE(MESSAGE,'(A)') 'WARNING: EXTINCTION MODEL 2 not allowed for multiple reaction combustion; switching to EXTINCTION 1'
+   IF (MY_RANK==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
+ENDIF
+
 ! Read and store the reaction parameters
 
 NFR = 0 ! Number of fast reactions
