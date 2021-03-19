@@ -567,7 +567,7 @@ ELSE  ! MPI process 0 receives matrix components and solves tri-diagonal linear 
    TRIDIAGONAL_SOLVER_2: DO I=TUNNEL_NXP-1,1,-1
       TP_CC(I) = (TP_CC(I) - TP_AA(I)*TP_CC(I+1))/TP_DD(I)
    ENDDO TRIDIAGONAL_SOLVER_2
-   
+
 ENDIF
 
 ! The solution to the tri-diagonal linear system is TP_CC. Broadcast this to all the MPI processes.
@@ -636,7 +636,7 @@ IF (CHECK_POISSON) THEN
 ENDIF
 
 ! Mandatory check of how well the computed pressure satisfies the inseparable Poisson equation:
-! LHSS = del dot (1/rho) del p + del K = -del dot F - dD/dt = RHSS
+! LHSS = del dot ((1/rho) del p + del K) = -del dot F - dD/dt = RHSS
 
 IF (ITERATE_BAROCLINIC_TERM) THEN
    P => WORK7
@@ -2071,6 +2071,9 @@ END SUBROUTINE COPY_CCVAR_IN_HS
 SUBROUTINE GET_H_MATRIX_LUDCMP
 
 USE MPI_F08
+#ifdef __INTEL_COMPILER
+USE OPENMP, ONLY : KMP_SET_WARNINGS_OFF, KMP_SET_WARNINGS_ON
+#endif
 
 ! Local Variables:
 INTEGER :: INNZ, IROW, JCOL
