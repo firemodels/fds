@@ -800,9 +800,9 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_SUB-DT_BC_HT3D)>TWO_EPSILON_EB )
                               VSRVC_Y(I,J,K) = 1._EB
                               VSRVC_Z(I,J,K) = VSRVC_X(I,J,K)
                            ELSE
-                           VSRVC_X(I,J,K) = VSRVC(I,J,K)**ONTH
-                           VSRVC_Y(I,J,K) = VSRVC_X(I,J,K)
-                           VSRVC_Z(I,J,K) = VSRVC_X(I,J,K)
+                              VSRVC_X(I,J,K) = VSRVC(I,J,K)**ONTH
+                              VSRVC_Y(I,J,K) = VSRVC_X(I,J,K)
+                              VSRVC_Z(I,J,K) = VSRVC_X(I,J,K)
                            ENDIF
                         CASE(1)
                            VSRVC_X(I,J,K) = VSRVC(I,J,K)
@@ -2956,7 +2956,7 @@ PYROLYSIS_PREDICTED_IF: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
             M_DOT_S_PP(N) = M_DOT_S_PP(N)  + M_DOT_S_PPP(N)*GEOM_FACTOR
          ENDDO
       ENDIF
-      
+
       ! Compute particle mass flux at the surface
       IF (SF%N_LPC > 0) THEN
          GEOM_FACTOR = MF_FRAC(I)*(R_S(I-1)**I_GRAD-R_S(I)**I_GRAD)/(I_GRAD*(SF%THICKNESS+SF%INNER_RADIUS)**(I_GRAD-1))
@@ -3105,7 +3105,7 @@ ENDIF
 
 ! If liquid evaporation may need to recycle timestep if any node temperature exceeds boiling
 CYCLE_BOIL: DO
-   
+
 ! Adjust the material layer masses and thicknesses
 
 REMESH_LAYER = .FALSE.
@@ -3183,7 +3183,7 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
    DO I=NWP-1,0,-1
       R_S_NEW(I) = ( R_S_NEW(I+1)**I_GRAD + (R_S(I)**I_GRAD-R_S(I+1)**I_GRAD)*REGRID_FACTOR(I+1) )**(1./REAL(I_GRAD,EB))
    ENDDO
-   
+
    X_S_NEW(0) = 0._EB
    DO I=1,NWP
       X_S_NEW(I) = R_S_NEW(0) - R_S_NEW(I)
@@ -3239,7 +3239,7 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
             I = I + ONE_D%N_LAYER_CELLS(NL)
             CYCLE LAYER_LOOP
          ELSE
-            
+
             ! If there is only one cell, nothing to do
             IF (ONE_D%N_LAYER_CELLS(NL)==1) THEN
                N_LAYER_CELLS_NEW(NL) = ONE_D%N_LAYER_CELLS(NL)
@@ -3250,20 +3250,20 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
                   ONE_D%SMALLEST_CELL_SIZE(NL) = ONE_D%LAYER_THICKNESS(NL)
                ENDIF
                THICKNESS = THICKNESS + ONE_D%LAYER_THICKNESS(NL)
-               I = I + ONE_D%N_LAYER_CELLS(NL)               
+               I = I + ONE_D%N_LAYER_CELLS(NL)
                CYCLE LAYER_LOOP
             ENDIF
-            
+
             ! If no cells in the layer have changed size, nothing to do
             IF (ALL(ABS(REGRID_FACTOR(I+1:I+ONE_D%N_LAYER_CELLS(NL))-1._EB) <= TWO_EPSILON_EB)) THEN
                N_LAYER_CELLS_NEW(NL) = ONE_D%N_LAYER_CELLS(NL)
                NWP_NEW = NWP_NEW + N_LAYER_CELLS_NEW(NL)
                THICKNESS = THICKNESS + ONE_D%LAYER_THICKNESS(NL)
-               I = I + ONE_D%N_LAYER_CELLS(NL)               
+               I = I + ONE_D%N_LAYER_CELLS(NL)
                CYCLE LAYER_LOOP
             ENDIF
-         ENDIF   
-         
+         ENDIF
+
          ! Check if layer is expanding or contracting.
          EXPAND_CONTRACT: IF (ANY(REGRID_FACTOR(I+1:I+ONE_D%N_LAYER_CELLS(NL)) < 1._EB)) THEN
             ! At least one cell is contracting. Check to see if cells meets the RENODE_DELTA_T criterion
@@ -3275,7 +3275,7 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
                ENDIF
             ENDDO
             REMESH_CHECK_IF: IF (REMESH_CHECK) THEN
-               
+
                !If call cells in layer pass check, get new number of cells but limit decrease to at most one cell in a layer
                CALL GET_N_LAYER_CELLS(SF%MIN_DIFFUSIVITY(NL),ONE_D%LAYER_THICKNESS(NL), &
                   SF%STRETCH_FACTOR(NL),SF%CELL_SIZE_FACTOR,SF%N_LAYER_CELLS_MAX(NL),N_LAYER_CELLS_NEW(NL),SMALLEST_CELL_SIZE(NL),&
@@ -3308,8 +3308,8 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
                      REMESH_LAYER(NL) = .TRUE.
                   ENDIF LAYER_CELL_CHECK
             ELSE REMESH_CHECK_IF
-               
-               ! If at least one cell does not pass the check, keep the same number of cells but remesh.               
+
+               ! If at least one cell does not pass the check, keep the same number of cells but remesh.
                N_LAYER_CELLS_NEW(NL) = ONE_D%N_LAYER_CELLS(NL)
                ONE_D%SMALLEST_CELL_SIZE(NL) = ONE_D%LAYER_THICKNESS(NL) / ONE_D%DDSUM(NL)
                SMALLEST_CELL_SIZE(NL) = ONE_D%SMALLEST_CELL_SIZE(NL)
@@ -3575,13 +3575,13 @@ BOIL_CHECK: IF (MATERIAL(SF%MATL_INDEX(1))%PYROLYSIS_MODEL==PYROLYSIS_LIQUID .AN
    BOIL_CELL_LOOP: DO I=1,NWP
       IF (CCS(I) > T_BOIL_EFF) THEN
          ML => MATERIAL(SF%MATL_INDEX(1))
-         
+
          ITMP = INT(CCS(I))
          H_S = ML%H(ITMP)+(CCS(I)-REAL(ITMP,EB))*(ML%H(ITMP+1)-ML%H(ITMP))
          ITMP = INT(T_BOIL_EFF)
          H_S = H_S - (ML%H(ITMP)+(T_BOIL_EFF-REAL(ITMP,EB))*(ML%H(ITMP+1)-ML%H(ITMP)))
          H_S = H_S * ML%RHO_S
-         
+
          IF (ML%H_R_I(1) > 0) THEN
             H_R = EVALUATE_RAMP(T_BOIL_EFF,0._EB,ML%H_R_I(1))
          ELSE
@@ -3605,15 +3605,15 @@ BOIL_CHECK: IF (MATERIAL(SF%MATL_INDEX(1))%PYROLYSIS_MODEL==PYROLYSIS_LIQUID .AN
          BOIL_CYCLE = .TRUE.
       ENDIF
    ENDDO BOIL_CELL_LOOP
-   IF (BOIL_CYCLE) THEN 
+   IF (BOIL_CYCLE) THEN
       CYCLE CYCLE_BOIL
    ELSE
       ONE_D%MATL_COMP(1)%RHO_DOT(1:NWP) = RHO_DOT_0(1:NWP)
    ENDIF
 ENDIF BOIL_CHECK
-   
+
 EXIT CYCLE_BOIL
-   
+
 END DO CYCLE_BOIL
 
 IF (BOIL_CYCLE) ONE_D%MATL_COMP(1)%RHO_DOT(1:NWP) = ONE_D%MATL_COMP(1)%RHO_DOT(1:NWP) + RHO_DOT_0(1:NWP)
