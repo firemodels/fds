@@ -2764,7 +2764,7 @@ REAL(EB) :: A_COL(3) !< Gas temperature terms in LHS of solution
 REAL(EB) :: B_COL(3) !< Particle temperatre terms in LHS of solution
 REAL(EB) :: C_COL(3) !< Wall temperature terms in LHS of solution
 REAL(EB) :: D_VEC(3) !< RHS of solution
-INTEGER :: IP,II,JJ,KK,IW,ICF,N_LPC,ITMP,ITMP2,ITCOUNT,Y_INDEX,Z_INDEX,I_BOIL,I_MELT,I_FUEL,NMAT
+INTEGER :: IP,II,JJ,KK,IW,ICF,N_LPC,ITMP,ITMP2,ITCOUNT,Y_INDEX,Z_INDEX,I_BOIL,I_MELT,NMAT
 INTEGER :: ARRAY_CASE
 !< 1 = Particle in gas only, 2 = Particle on constant temperature surface, 3 = Particle on thermally thick surface
 LOGICAL :: TEMPITER !< Flag to continue temperature search iteration
@@ -2776,11 +2776,6 @@ TYPE (SURFACE_TYPE), POINTER :: SF=>NULL()
 TYPE (SPECIES_TYPE), POINTER :: SS=>NULL()
 
 CALL POINT_TO_MESH(NM)
-
-! Initializations
-
-M_DOT(2,NM) = 0._EB ! Fuel mass loss rate of droplets
-M_DOT(4,NM) = 0._EB ! Total mass loss rate of droplets
 
 ! Working arrays
 
@@ -2988,9 +2983,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
 
                M_VAP = M_DROP
                Q_RAD = M_VAP*H_V
-               I_FUEL = 0
-               IF (N_REACTIONS>0) I_FUEL = REACTION(1)%FUEL_SMIX_INDEX
-               IF (LPC%Z_INDEX==I_FUEL .AND. I_FUEL>0) M_VAP = LPC%ADJUST_EVAPORATION*M_VAP
+               M_VAP = LPC%ADJUST_EVAPORATION*M_VAP
 
                ! Compute contribution to the divergence
 
@@ -3009,8 +3002,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                Q_DOT(3,NM) = Q_DOT(3,NM) + M_VAP*H_S_B*WGT/DT                       ! Q_CONV
                Q_DOT(2,NM) = Q_DOT(2,NM) + Q_RAD*WGT/DT                             ! Q_RADI
 
-               IF (LPC%Z_INDEX==I_FUEL .AND. I_FUEL>0) M_DOT(2,NM) = M_DOT(2,NM) + WGT*M_VAP/DT/LPC%ADJUST_EVAPORATION
-               M_DOT(4,NM) = M_DOT(4,NM) + WGT*M_VAP/DT  ! Total mass loss rate
+               IF (LPC%Z_INDEX>0) M_DOT(LPC%Z_INDEX,NM) = M_DOT(LPC%Z_INDEX,NM) + WGT*M_VAP/DT/LPC%ADJUST_EVAPORATION
 
                ! Keep track of total mass evaporated in cell
 
@@ -3259,10 +3251,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                ! Add fuel evaporation rate to running counter and adjust mass of evaporated fuel to account for different
                ! Heat of Combustion between fuel PARTICLE and gas
 
-               I_FUEL = 0
-               IF (N_REACTIONS>0) I_FUEL = REACTION(1)%FUEL_SMIX_INDEX
-
-               IF (LPC%Z_INDEX==I_FUEL .AND. I_FUEL>0) M_VAP = LPC%ADJUST_EVAPORATION*M_VAP
+               M_VAP = LPC%ADJUST_EVAPORATION*M_VAP
 
                M_GAS_NEW = M_GAS + WGT*M_VAP
                Y_GAS_NEW = (Y_GAS*M_GAS+WGT*M_VAP)/M_GAS_NEW
@@ -3397,8 +3386,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                Q_DOT(2,NM) = Q_DOT(2,NM) + Q_RAD*WGT/DT                             ! Q_RADI
                Q_DOT(4,NM) = Q_DOT(4,NM) + Q_CON_WALL*WGT/DT                        ! Q_COND
 
-               IF (LPC%Z_INDEX==I_FUEL .AND. I_FUEL>0) M_DOT(2,NM) = M_DOT(2,NM) + WGT*M_VAP/DT/LPC%ADJUST_EVAPORATION
-               M_DOT(4,NM) = M_DOT(4,NM) + WGT*M_VAP/DT  ! Total mass loss rate
+               IF (LPC%Z_INDEX>0) M_DOT(LPC%Z_INDEX,NM) = M_DOT(LPC%Z_INDEX,NM) + WGT*M_VAP/DT/LPC%ADJUST_EVAPORATION
 
                ! Keep track of total mass evaporated in cell
 
