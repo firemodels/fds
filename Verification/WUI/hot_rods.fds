@@ -20,14 +20,14 @@
 
 &SURF ID             = 'brand'
       MATL_ID        = 'wood'
-      THICKNESS      = 0.0025
+      THICKNESS      = 0.0030
       LENGTH         = 0.02
       GEOMETRY       = 'CYLINDRICAL' /
 
 &MATL ID                    = 'wood'
       DENSITY               = 440.
       CONDUCTIVITY          = 0.1
-      SPECIFIC_HEAT         = 1.0   
+      SPECIFIC_HEAT         = 1.0
       REFERENCE_TEMPERATURE = 300.
       NU_MATL               = 0.08
       MATL_ID               = 'char'
@@ -63,7 +63,7 @@
       HISTOGRAM=T
       HISTOGRAM_NBINS=200
       HISTOGRAM_LIMITS=0,0.01
-      HISTOGRAM_NORMALIZE=T 
+      HISTOGRAM_NORMALIZE=T
       HISTOGRAM_CUMULATIVE=F /
 
 &DEVC ID='rods', XYZ=0,0,0, QUANTITY='PDPA', PROP_ID='distro' /
