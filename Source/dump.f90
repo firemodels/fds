@@ -9916,12 +9916,12 @@ END SUBROUTINE DUMP_BNDF
 
 !> \brief Dump immersed boundary (IBM) quantities into CHID_nn.ge file
 !> \param T Current simulation time (s)
+!> \param DO_CFACES Process C_FACES
 
 SUBROUTINE DUMP_GEOM(T,DO_CFACES)
 
 REAL(EB), INTENT(IN) :: T
 LOGICAL, INTENT(IN)  :: DO_CFACES
-! Local vars:
 REAL(EB) :: STIME
 
 STIME = T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR
