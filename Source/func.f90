@@ -1373,6 +1373,9 @@ CONTAINS
 !> \param IIO I-index of the cell in the other mesh where the point is located
 !> \param JJO J-index of the cell in the other mesh where the point is located
 !> \param KKO K-index of the cell in the other mesh where the point is located
+!> \param XXI (Optional) continuous form of I index
+!> \param YYJ (Optional) continuous form of J index
+!> \param ZZK (Optional) continuous form of K index
 
 SUBROUTINE SEARCH_OTHER_MESHES(XX,YY,ZZ,NOM,IIO,JJO,KKO,XXI,YYJ,ZZK)
 
@@ -1788,13 +1791,15 @@ END SUBROUTINE GET_N_LAYER_CELLS
 
 !> \brief Determine the coordinates of the 1-D interior cells
 !> \param N_CELLS Number of cells in the entire collection of layers
+!> \param N_CELLS_OLD Former value of N_CELLS
 !> \param N_LAYERS Number of layers
 !> \param N_LAYER_CELLS Array holding the number of cells in each layer
+!> \param N_LAYER_CELLS_OLD Former value of N_LAYER_CELLS
 !> \param SMALLEST_CELL_SIZE Array holding the sizes of the bounding cells in each layer (m)
 !> \param STRETCH_FACTOR Array holding the stretching factors of each layer
-!> \param X_S Array containing boundaries of the interior cells
 !> \param REMESH_LAYER Logical array indicating if current layer should be remeshed
-!> \parama X_S_OLD Array containing old boundaries of the interior cells used when skipping remesh for a layer
+!> \param X_S Array containing boundaries of the interior cells
+!> \param X_S_OLD Array containing old boundaries of the interior cells used when skipping remesh for a layer
 
 SUBROUTINE GET_WALL_NODE_COORDINATES(N_CELLS,N_CELLS_OLD,N_LAYERS,N_LAYER_CELLS,N_LAYER_CELLS_OLD,SMALLEST_CELL_SIZE,&
                                      STRETCH_FACTOR,REMESH_LAYER,X_S,X_S_OLD)
@@ -2907,8 +2912,8 @@ END FUNCTION F_B
 
 
 !> \brief This function computes the flux limited scalar value on a face.
-!> \param A    Velocity.
-!> \param U(4) Scalar in 4 points, (1:2) lower index points to the face, (3:4) upper index points.
+!> \param A Velocity.
+!> \param U Scalar in 4 points, (1:2) lower index points to the face, (3:4) upper index points.
 !> \param LIMITER Flux limiter used.
 
 REAL(EB) FUNCTION SCALAR_FACE_VALUE(A,U,LIMITER)
@@ -3504,8 +3509,7 @@ IF (RHOH_OUT<=TWO_EPSILON_EB) RHOH_OUT = 0.001_EB
 END SUBROUTINE GET_SOLID_RHOH
 
 
-!> \brief Get enthalpy of a particle at a specified uniform temperature
-!> \param GET_PARTICLE_ENTHALPY Enthalpy of particle (J/kg)
+!> \brief Get enthalpy (J/kg) of a particle at a specified uniform temperature
 !> \param I_LPC Index of particle class
 !> \param TMP_S Particle temperature (K)
 

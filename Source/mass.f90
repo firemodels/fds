@@ -599,7 +599,6 @@ END SUBROUTINE DENSITY
 
 
 !> \brief Redistribute mass from cells below or above the density cut-off limits
-!> \param NM Mesh number
 !> \details Do not apply OpenMP to this routine
 
 SUBROUTINE CHECK_MASS_DENSITY
