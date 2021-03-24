@@ -118,14 +118,6 @@ Most simple LES subgrid closures take production of subgrid kinetic energy to be
 \end{align}
 Using a model kinetic energy spectrum (see \cite{Pope:2000}), Eq.~(\ref{eqn_ke_dissipation}) can be used to derive theoretical values for model constants, such as the Smagorinsky constant, discussed below.  See Appendix \ref{app:lilly_analysis}.
 
-\subsection{Wind Fields via Mean Forcing or Nudging}
-\label{sec:windfieldnudging}
-
-A common technique used in data assimilation referred to as mean forcing or {\em nudging} is applied to model wind fields~\cite{Kalnay:2003}. Given a vertically and temporally varying wind field, $\bu_\infty(z,t)$, that is assumed to apply to the entire computational domain, a forcing term is added to the momentum equation:
-\be
-   \frac{\partial \bu}{\partial t} = \ldots + \frac{\bu_\infty - \overline{\bu}}{\tau}
-\ee
-where $\overline{\bu}$ is the average velocity vector over a particular horizontal slice of the atmosphere (typically a single horizontal row of grid cells). The relaxation time scale, $\tau$, is chosen by the user such that the computed velocity field faithfully follows the specified wind field. In cases where the wind is steady, the value of $\tau$ can be fairly large and hence the forcing term fairly small. However, if the wind field fluctuates rapidly in time, the value of $\tau$ needs to be chosen based on some trial and error.
 
 \newpage
 \section{Models for the Turbulent Viscosity}
@@ -514,7 +506,7 @@ The factor of $1/2$ instead of $1/4$ on the last term is due to the structure of
 \be
    u_{I,jk}^{n+1,m} = \frac{\bar{u}_{I,jk}^n+\bar{u}_{I,jk}^*}{2} - \frac{u_{I,jk}^{n+1,m-1}-u_{0,jk}^{n+1,m-1}}{2} - \frac{\dt}{2} \left( F_{x,I,jk}^{*} + \frac{ (\cH_{I,jk}^{m-1}+\cH_{1,jk}^{m-1})/2 - \cH_{I,jk}^{m} }{ \dx/2} \right) \label{uI2}
 \ee
-Note that throughout this iterative procedure, MPI calls are made to exchange values of $u$ and $\cH$ in the neighboring cells. 
+Note that throughout this iterative procedure, MPI calls are made to exchange values of $u$ and $\cH$ in the neighboring cells.
 
 \subsection{Iterative Procedure for Updating Velocity}
 \label{section:pressure_iteration}
