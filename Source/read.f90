@@ -6589,7 +6589,8 @@ READ_MATL_LOOP: DO N=1,N_MATL
             WRITE(MESSAGE,'(A,A,A,I0,A)') 'ERROR: Problem with MATL ',TRIM(ID),', REAC ',NR,'. Set REFERENCE_TEMPERATURE or E, A'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
-         IF (ABS(SUM(NU_MATL(:,NR)))<=TWO_EPSILON_EB .AND. ABS(SUM(NU_SPEC(:,NR)))<=TWO_EPSILON_EB) THEN
+         IF (ABS(SUM(NU_MATL(:,NR)))<=TWO_EPSILON_EB .AND. ABS(SUM(NU_SPEC(:,NR)))<=TWO_EPSILON_EB &
+             .AND. ABS(SUM(NU_PART(:,NR)))<=TWO_EPSILON_EB) THEN
             WRITE(MESSAGE,'(A,A,A,I0,A)') 'WARNING: MATL ',TRIM(ID),', REAC ',NR,'. No product yields (NUs) set'
             IF (MY_RANK==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
          ENDIF
@@ -6929,19 +6930,6 @@ PROC_MATL_LOOP: DO N=1,N_MATL
          IF (LAGRANGIAN_PARTICLE_CLASS(NLPC2)%MASSLESS_TRACER) THEN
             WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR: PARTicle ',TRIM(ML%PART_ID(NLPC,NR)),&
                                          ' corresponding to MATL ',TRIM(MATL_NAME(N)),' cannot be MASSLESS'
-            CALL SHUTDOWN(MESSAGE) ; RETURN
-         ENDIF
-
-         ! Temporary restriction to liquid droplets. Will remove once overall functionality is working.
-         IF (.NOT. LAGRANGIAN_PARTICLE_CLASS(NLPC2)%LIQUID_DROPLET) THEN
-            WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR: PARTicle ',TRIM(ML%PART_ID(NLPC,NR)),&
-                                         ' corresponding to MATL ',TRIM(MATL_NAME(N)),' must use SPEC_ID'
-            CALL SHUTDOWN(MESSAGE) ; RETURN
-         ENDIF
-
-         IF (LAGRANGIAN_PARTICLE_CLASS(NLPC2)%LIQUID_DROPLET .AND. .NOT. LAGRANGIAN_PARTICLE_CLASS(NLPC2)%MONODISPERSE) THEN
-            WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR: liquid PARTicle ',TRIM(ML%PART_ID(NLPC,NR)),&
-                                         ' corresponding to MATL ',TRIM(MATL_NAME(N)),' must be MONOSIDISPERSE'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
 
