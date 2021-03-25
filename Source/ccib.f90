@@ -84,6 +84,8 @@ REAL(EB), PARAMETER :: DISPXY(1:2,1) = RESHAPE((/ -PI/2._EB, -PI/2._EB /),(/2,1/
 REAL(EB), PARAMETER :: DISPL  = PI
 REAL(EB) :: ROTANG, ROTMAT(2,2), TROTMAT(2,2)
 
+INTEGER :: LU_UNLNK
+
 PRIVATE
 
 PUBLIC :: ADD_INPLACE_NNZ_H_WHLDOM,CALL_FOR_GLMAT,CALL_FROM_GLMAT_SETUP,CCCOMPUTE_RADIATION,&
@@ -4343,7 +4345,7 @@ INTEGER :: N,I,J,K,X1AXIS,ISIDE,IFACE,ICC,JCC,ICF
 REAL(EB), POINTER, DIMENSION(:,:,:) :: DP,DPVOL,RHOP,RTRM,CP,R_H_G,U_DOT_DEL_RHO_Z_VOL
 REAL(EB), POINTER, DIMENSION(:,:) :: PBAR_P
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP
-REAL(EB) :: RDT,CCM1,CCP1,IDX,AF,TMP_G,H_S,ZZ_FACE(MAX_SPECIES),TNOW,RHOPV(-1:0),TMPV(-1:0),X1F,PRFCT,PRFCTV, &
+REAL(EB) :: RDT,CCM1,CCP1,IDX,AF,TMP_G,H_S,ZZ_FACE(MAX_SPECIES),TNOW,RHOPV(-2:1),TMPV(-1:0),X1F,PRFCT,PRFCTV, &
             CPV(-1:0),FCT,MUV(-1:0),MU_DNSV(-1:0)
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_GET
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW
@@ -20294,40 +20296,43 @@ MAIN_MESH_LOOP3 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
              ENDDO
           ENDDO
 
-          ! Write out unlinked cells properties:
-          ! Open file to write unlinked cells:
-          WRITE(UNLINKED_FILE,'(A,A,I0,A)') TRIM(CHID),'_unlinked_',MY_RANK,'.log'
-          ! Create file:
-          IF (UNLINKED_1ST_CALL) THEN
-             OPEN(UNIT=LU_UNLNK,FILE=TRIM(UNLINKED_FILE),STATUS='UNKNOWN')
-             WRITE(LU_UNLNK,*) 'Unlinked cut-cell Information for Process=',MY_RANK
-             CLOSE(LU_UNLNK)
-             UNLINKED_1ST_CALL = .FALSE.
-          ENDIF
-          ! Open file to write unlinked cell information:
-          OPEN(UNIT=LU_UNLNK,FILE=TRIM(UNLINKED_FILE),STATUS='OLD',POSITION='APPEND')
-          WRITE(LU_UNLNK,*) ' '
-          WRITE(LU_UNLNK,'(A,I4,A,I4)') ' Mesh NM=',NM,', number of unlinked cells=',ULINK_COUNT
+          IF (GET_CUTCELLS_VERBOSE) THEN
+             ! Write out unlinked cells properties:
+             ! Open file to write unlinked cells:
+             WRITE(UNLINKED_FILE,'(A,A,I0,A)') TRIM(CHID),'_unlinked_',MY_RANK,'.log'
+             ! Create file:
+             IF (UNLINKED_1ST_CALL) THEN
+                LU_UNLNK = GET_FILE_NUMBER()
+                OPEN(UNIT=LU_UNLNK,FILE=TRIM(UNLINKED_FILE),STATUS='UNKNOWN')
+                WRITE(LU_UNLNK,*) 'Unlinked cut-cell Information for Process=',MY_RANK
+                CLOSE(LU_UNLNK)
+                UNLINKED_1ST_CALL = .FALSE.
+             ENDIF
+             ! Open file to write unlinked cell information:
+             OPEN(UNIT=LU_UNLNK,FILE=TRIM(UNLINKED_FILE),STATUS='OLD',POSITION='APPEND')
+             WRITE(LU_UNLNK,*) ' '
+             WRITE(LU_UNLNK,'(A,I4,A,I4)') ' Mesh NM=',NM,', number of unlinked cells=',ULINK_COUNT
 
-          ! Dump info:
-          ULINK_COUNT = 0
-          DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
-             I = CUT_CELL(ICC)%IJK(IAXIS)
-             J = CUT_CELL(ICC)%IJK(JAXIS)
-             K = CUT_CELL(ICC)%IJK(KAXIS)
-             ! Don't count cut-cells inside an OBST:
-             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-             NCELL = CUT_CELL(ICC)%NCELL
-             CCVOL_THRES = CCVOL_LINK*DX(I)*DY(J)*DZ(K)
-             DO JCC=1,NCELL
-                IF ( CUT_CELL(ICC)%UNKZ(JCC) > 0 ) CYCLE
-                ULINK_COUNT = ULINK_COUNT + 1
-                WRITE(LU_UNLNK,'(I5,A,5I5,A,5F16.8)') &
-                ULINK_COUNT,', I,J,K,ICC,JCC=',I,J,K,ICC,JCC,', X,Y,Z,CCVOL,CCVOL_CRT=',X(I),Y(J),Z(K), &
-                CUT_CELL(ICC)%VOLUME(JCC),DX(I)*DY(J)*DZ(K)
+             ! Dump info:
+             ULINK_COUNT = 0
+             DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+                I = CUT_CELL(ICC)%IJK(IAXIS)
+                J = CUT_CELL(ICC)%IJK(JAXIS)
+                K = CUT_CELL(ICC)%IJK(KAXIS)
+                ! Don't count cut-cells inside an OBST:
+                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+                NCELL = CUT_CELL(ICC)%NCELL
+                CCVOL_THRES = CCVOL_LINK*DX(I)*DY(J)*DZ(K)
+                DO JCC=1,NCELL
+                   IF ( CUT_CELL(ICC)%UNKZ(JCC) > 0 ) CYCLE
+                   ULINK_COUNT = ULINK_COUNT + 1
+                   WRITE(LU_UNLNK,'(I5,A,5I5,A,5F16.8)') &
+                   ULINK_COUNT,', I,J,K,ICC,JCC=',I,J,K,ICC,JCC,', X,Y,Z,CCVOL,CCVOL_CRT=',X(I),Y(J),Z(K), &
+                   CUT_CELL(ICC)%VOLUME(JCC),DX(I)*DY(J)*DZ(K)
+                ENDDO
              ENDDO
-          ENDDO
-          CLOSE(LU_UNLNK)
+             CLOSE(LU_UNLNK)
+          ENDIF
 
           ! 1st Try: Link each cell to closest unknown numbered regular cell in the mesh:
           DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
@@ -20370,33 +20375,35 @@ MAIN_MESH_LOOP3 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
              ENDDO
           ENDDO
 
-          ! Write out remaining unlinked cells properties.
-          ! Open file to write unlinked cell information:
-          OPEN(UNIT=LU_UNLNK,FILE=TRIM(UNLINKED_FILE),STATUS='OLD',POSITION='APPEND')
-          WRITE(LU_UNLNK,*) ' '
-          WRITE(LU_UNLNK,*) 'STATUS AFTER CUT-CELL REGION REGULAR CELL CARTESIAN SEARCH:'
-          WRITE(LU_UNLNK,'(A,I4,A,I4)') ' Mesh NM=',NM,', number of unlinked cells after REG CELL approx=',ULINK_COUNT
-          IF(ULINK_COUNT > 0) THEN
-             ! Dump info:
-             ULINK_COUNT = 0
-             DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
-                I = CUT_CELL(ICC)%IJK(IAXIS)
-                J = CUT_CELL(ICC)%IJK(JAXIS)
-                K = CUT_CELL(ICC)%IJK(KAXIS)
-                ! Drop cut-cells inside an OBST:
-                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-                NCELL = CUT_CELL(ICC)%NCELL
-                CCVOL_THRES = CCVOL_LINK*DX(I)*DY(J)*DZ(K)
-                DO JCC=1,NCELL
-                   IF ( CUT_CELL(ICC)%UNKZ(JCC) > 0 ) CYCLE
-                   ULINK_COUNT = ULINK_COUNT + 1
-                   WRITE(LU_UNLNK,'(I5,A,5I5,A,5F16.8)') &
-                   ULINK_COUNT,', I,J,K,ICC,JCC=',I,J,K,ICC,JCC,', X,Y,Z,CCVOL,CCVOL_CRT=',X(I),Y(J),Z(K), &
-                   CUT_CELL(ICC)%VOLUME(JCC),DX(I)*DY(J)*DZ(K)
+          IF (GET_CUTCELLS_VERBOSE) THEN
+             ! Write out remaining unlinked cells properties.
+             ! Open file to write unlinked cell information:
+             OPEN(UNIT=LU_UNLNK,FILE=TRIM(UNLINKED_FILE),STATUS='OLD',POSITION='APPEND')
+             WRITE(LU_UNLNK,*) ' '
+             WRITE(LU_UNLNK,*) 'STATUS AFTER CUT-CELL REGION REGULAR CELL CARTESIAN SEARCH:'
+             WRITE(LU_UNLNK,'(A,I4,A,I4)') ' Mesh NM=',NM,', number of unlinked cells after REG CELL approx=',ULINK_COUNT
+             IF(ULINK_COUNT > 0) THEN
+                ! Dump info:
+                ULINK_COUNT = 0
+                DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+                   I = CUT_CELL(ICC)%IJK(IAXIS)
+                   J = CUT_CELL(ICC)%IJK(JAXIS)
+                   K = CUT_CELL(ICC)%IJK(KAXIS)
+                   ! Drop cut-cells inside an OBST:
+                   IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+                   NCELL = CUT_CELL(ICC)%NCELL
+                   CCVOL_THRES = CCVOL_LINK*DX(I)*DY(J)*DZ(K)
+                   DO JCC=1,NCELL
+                      IF ( CUT_CELL(ICC)%UNKZ(JCC) > 0 ) CYCLE
+                      ULINK_COUNT = ULINK_COUNT + 1
+                      WRITE(LU_UNLNK,'(I5,A,5I5,A,5F16.8)') &
+                      ULINK_COUNT,', I,J,K,ICC,JCC=',I,J,K,ICC,JCC,', X,Y,Z,CCVOL,CCVOL_CRT=',X(I),Y(J),Z(K), &
+                      CUT_CELL(ICC)%VOLUME(JCC),DX(I)*DY(J)*DZ(K)
+                   ENDDO
                 ENDDO
-             ENDDO
+             ENDIF
+             CLOSE(LU_UNLNK)
           ENDIF
-          CLOSE(LU_UNLNK)
 
           IF (ULINK_COUNT == 0) EXIT LINK_LOOP
 
@@ -20432,12 +20439,14 @@ MAIN_MESH_LOOP3 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
              ENDDO
           ENDDO
 
-          ! Write out final status:
-          OPEN(UNIT=LU_UNLNK,FILE=TRIM(UNLINKED_FILE),STATUS='OLD',POSITION='APPEND')
-          WRITE(LU_UNLNK,*) ' '
-          WRITE(LU_UNLNK,*) 'STATUS AFTER SMALL CUT-CELL CUT_CELL(ICC)%USE_CC_VOL(JCC) change to .FALSE.:'
-          WRITE(LU_UNLNK,'(A,I4,A,I4)') ' Mesh NM=',NM,', number of unlinked cells after Vol change approx=',ULINK_COUNT
-          CLOSE(LU_UNLNK)
+          IF (GET_CUTCELLS_VERBOSE) THEN
+             ! Write out final status:
+             OPEN(UNIT=LU_UNLNK,FILE=TRIM(UNLINKED_FILE),STATUS='OLD',POSITION='APPEND')
+             WRITE(LU_UNLNK,*) ' '
+             WRITE(LU_UNLNK,*) 'STATUS AFTER SMALL CUT-CELL CUT_CELL(ICC)%USE_CC_VOL(JCC) change to .FALSE.:'
+             WRITE(LU_UNLNK,'(A,I4,A,I4)') ' Mesh NM=',NM,', number of unlinked cells after Vol change approx=',ULINK_COUNT
+             CLOSE(LU_UNLNK)
+          ENDIF
 
           EXIT LINK_LOOP
       ENDIF
