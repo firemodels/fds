@@ -237,7 +237,7 @@ END TYPE ONE_D_M_AND_E_XFER_TYPE
 
 ! Note: If you change the number of scalar variables in LAGRANGIAN_PARTICLE_TYPE, adjust the numbers below
 
-INTEGER, PARAMETER :: N_PARTICLE_SCALAR_REALS=19,N_PARTICLE_SCALAR_INTEGERS=10,N_PARTICLE_SCALAR_LOGICALS=4
+INTEGER, PARAMETER :: N_PARTICLE_SCALAR_REALS=19,N_PARTICLE_SCALAR_INTEGERS=11,N_PARTICLE_SCALAR_LOGICALS=4
 
 !> \brief Variables assoicated with a single Lagrangian particle
 
@@ -280,6 +280,7 @@ TYPE LAGRANGIAN_PARTICLE_TYPE
    INTEGER, POINTER :: INIT_INDEX           !< Index of INIT line
    INTEGER, POINTER :: DUCT_CELL_INDEX      !< Index of duct cell
    INTEGER, POINTER :: CFACE_INDEX          !< Index of immersed boundary CFACE that the droplet has attached to
+   INTEGER, POINTER :: PROP_INDEX           !< Index of the PROPERTY_TYPE assigned to the particle
 
 END TYPE LAGRANGIAN_PARTICLE_TYPE
 
