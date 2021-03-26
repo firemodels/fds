@@ -75,7 +75,7 @@ IF (MY_RANK==0) WRITE(LU_ERR,'(/A/)') ' Reading FDS input file ...'
 
 N_ORIENTATION_VECTOR = 0
 ALLOCATE(ORIENTATION_VECTOR(3,0:10))
-ORIENTATION_VECTOR(1:3,0) = (/1._EB,1._EB,1._EB/)
+ORIENTATION_VECTOR(1:3,0) = (/0._EB,0._EB,-1._EB/)
 
 ! Set humidity data
 
