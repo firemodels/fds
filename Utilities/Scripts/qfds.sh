@@ -97,6 +97,7 @@ function usage {
     exit
   fi
   echo "Other options:"
+  echo " -a - use vtune"
   echo " -b email_address - send an email to email_address when jobs starts, aborts and finishes"
   echo " -c file - loads Intel Trace Collector configuration file "
   echo " -C   - use modules currently loaded rather than modules loaded when fds was built."
@@ -128,6 +129,8 @@ function usage {
   echo " -V   - show command line used to invoke qfds.sh"
   echo " -w time - walltime, where time is hh:mm for PBS and dd-hh:mm:ss for SLURM. [default: $walltime]"
   echo " -x   - analyze the case with Intel Inspector"
+  echo " -y dir - run case in directory dir"
+  echo " -Y   - run case in directory casename where casename.fds is the case being run"
   echo ""
   echo " Resource manager: $RESOURCE_MANAGER"
   exit
@@ -223,6 +226,8 @@ use_config=""
 EMAIL=
 CHECK_DIRTY=
 USERMAX=
+casedir=
+use_default_casedir=
 
 # by default maximize cores used if psm module is loaded
 MAX_MPI_PROCESSES_PER_NODE=
@@ -289,7 +294,7 @@ commandline=`echo $* | sed 's/-V//' | sed 's/-v//'`
 
 #*** read in parameters from command line
 
-while getopts 'Aa:b:c:Cd:D:e:Ef:ghHiIj:Lm:Mn:No:O:p:Pq:rsStT:U:vVw:x' OPTION
+while getopts 'Aa:b:c:Cd:D:e:Ef:ghHiIj:Lm:Mn:No:O:p:Pq:rsStT:U:vVw:xy:Y' OPTION
 do
 case $OPTION  in
   A) # used by timing scripts to identify benchmark cases
@@ -436,6 +441,12 @@ case $OPTION  in
   x)
    use_inspect=1
    ;;
+  y)
+   casedir="$OPTARG"
+   ;;
+  Y)
+   use_default_casedir=1
+   ;;
    
 esac
 done
@@ -462,6 +473,18 @@ fi
 
 in=$1
 infile=${in%.*}
+
+# run case in a sub-directory
+if [ "$use_default_casedir" != "" ]; then
+  casedir=$infile
+fi
+if [ "$casedir" != "" ]; then
+  if [ ! -d $casedir ]; then
+    mkdir $casedir
+  fi
+  cp $in $casedir/.
+  cd $casedir
+fi
 
 if [[ "$TCP" != "" ]] && [[ "$use_intel_mpi" == "" ]]; then
   echo "***error: -The E option for specifying tcp transport is only available"
@@ -994,6 +1017,11 @@ if [ "$OPENMPCASES" == "" ]; then
 cat << EOF >> $scriptfile
 echo "    Input file: $in"
 EOF
+if [ "$casedir" != "" ]; then
+cat << EOF >> $scriptfile
+echo "     Input dir: $casedir"
+EOF
+fi
 else
 cat << EOF >> $scriptfile
 echo "    Input files: "
@@ -1058,6 +1086,9 @@ echo "submitted at `date`"                          > $qlog
 if [ "$queue" != "none" ]; then
 if [ "$OPENMPCASES" == "" ]; then
   echo "         Input file:$in"             | tee -a $qlog
+if [ "$casedir" != "" ]; then
+  echo "          Input dir:$casedir"             | tee -a $qlog
+fi
 else
   echo "         Input files:"               | tee -a $qlog
 for i in `seq 1 $OPENMPCASES`; do
