@@ -9222,6 +9222,14 @@ If the heat flux gauge used in an experiment has a temperature other than ambien
 \end{lstlisting}
 By default, the heat transfer coefficient, $h$, in Eq.~(\ref{gauge_heat_flux}) is calculated at the solid surface to which the device is attached, based on the specified surface properties and characteristics of the surrounding flow field. However, you may specify a fixed {\ct HEAT\_TRANSFER\_COEFFICIENT} (W/(m$^2 \cdot$K)) for the gauge on the {\ct PROP} line.
 
+\item[\ct 'GAUGE HEAT FLUX GAS']
+\hspace{1in} \newline This quantity is the same as {\ct 'GAUGE HEAT FLUX'}, except that it can be located anywhere within the computational domain and not just at a solid surface. It also has an arbitrary {\ct ORIENTATION} vector that points in any desired direction, much like a heat flux gauge. The {\ct ORIENTATION} vector need not be normalized, as in the following:
+\begin{lstlisting}
+&DEVC ID='hf', QUANTITY='GAUGE HEAT FLUX GAS', XYZ=..., ORIENTATION=-1,1,0/
+\end{lstlisting}
+Note that the parameter {\ct SPATIAL\_STATISTIC} is not appropriate for this quantity, meaning that you cannot integrate this quantity over a plane or volume. However, you can use the parameter {\ct POINTS} to create a one-dimensional array of these devices (see Section~\ref{info:line_file}). Also, the convective component of the heat flux is calculated based on the assumption that the virtual target is a flat plate normal to the {\ct ORIENTATION} vector, and that the heat transfer coefficient is a function of the local gas temperature and velocity which will not be affected by the virtual device. Alternatively, you can specify {\ct HEAT\_TRANSFER\_COEFFICIENT} on a {\ct PROP} line whose {\ct ID} is specified on the {\ct DEVC} line.
+
+
 \item[\ct 'RADIOMETER']
 \hspace{1in} \newline Similar to a water-cooled heat flux gauge, except that this quantity measures only the net radiative component:
 \be
