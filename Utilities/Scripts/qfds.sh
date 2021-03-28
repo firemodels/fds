@@ -130,7 +130,7 @@ function usage {
   echo " -w time - walltime, where time is hh:mm for PBS and dd-hh:mm:ss for SLURM. [default: $walltime]"
   echo " -x   - analyze the case with Intel Inspector"
   echo " -y dir - run case in directory dir"
-  echo " -Y   - run case in directory casename"
+  echo " -Y   - run case in directory casename where casename.fds is the case being run"
   echo ""
   echo " Resource manager: $RESOURCE_MANAGER"
   exit
