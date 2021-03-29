@@ -16,7 +16,7 @@ h = 0.1;
 dx = 1./nx;
 fds_marker = {'r+-' 'c^-' 'g>-' 'k-'};
 fds_key = {'FDS {\it h/\deltax}=2' 'FDS {\it h/\deltax}=4' 'FDS {\it h/\deltax}=8' 'FDS {\it h/\deltax}=16'};
-geom = {'_'}; %  '_geom_'
+geom = {'_', '_geom_'};
 
 if ~exist([datadir,'ribbed_channel_data.csv'])
     display(['Error: File ' [datadir,'ribbed_channel_data.csv'] ' does not exist. Skipping case.'])
@@ -27,6 +27,65 @@ D = importdata([datadir,'ribbed_channel_data.csv'],',',1);
 
 for ii=1:length(geom)
 
+    % check existence of device files
+
+    for i=1:lnx
+        if ~exist([datadir,'ribbed_channel',geom{ii},num2str(nx(i)),'_devc.csv'])
+            display(['Error: File ' [datadir,'ribbed_channel',geom{ii},num2str(nx(i)),'_devc.csv'] ' does not exist. Skipping case.'])
+            return
+        end
+    end
+
+    % check bulk velocity is 1 m/s
+
+    for i=1:lnx
+        M{i} = importdata([datadir,'ribbed_channel',geom{ii},num2str(nx(i)),'_devc.csv'],',',2);
+    end
+
+    figure
+    set(gca,'Units',Plot_Units)
+    set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
+
+    Ub=1;
+    H(1)=plot([0 100],Ub*ones(1,2),'k-','linewidth',2); hold on
+
+    for i=1:lnx
+        t_fds = M{i}.data(:,1);
+        Ub_fds = M{i}.data(:,2);
+        H(1+i)=plot(t_fds,Ub_fds,fds_marker{i});
+        t_range = find(t_fds>20);
+        if abs(mean(Ub_fds(t_range))-Ub)/Ub > 0.1
+            disp(['Matlab Warning: Ub mean nx ',num2str(nx(i)),' = ',num2str(mean(Ub_fds(t_range)))])
+        end
+    end
+
+    xlabel('Time (s)','Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size,'FontName',Font_Name)
+    ylabel('Bulk Velocity (m/s)','Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size,'FontName',Font_Name)
+
+    axis([0 100 0 1.5*Ub])
+
+    set(gca,'FontName',Font_Name)
+    set(gca,'FontSize',Title_Font_Size)
+
+    lh = legend(H,'Exp Bulk Velocity',fds_key{1:lnx},'Location','SouthEast');
+    set(lh,'Interpreter',Font_Interpreter)
+
+    % add Git revision if file is available
+
+    Git_Filename = [datadir,'ribbed_channel',geom{ii},num2str(nx(1)),'_git.txt'];
+    addverstr(gca,Git_Filename,'linear')
+
+    % print to pdf
+
+    set(gcf,'Visible',Figure_Visibility);
+    set(gcf,'Units',Paper_Units);
+    set(gcf,'PaperUnits',Paper_Units);
+    set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+    set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
+    print(gcf,'-dpdf',[plotdir,'ribbed_channel',geom{ii},'Ubulk'])
+
+    % check existence of line device files
+
     for i=1:lnx
         if ~exist([datadir,'ribbed_channel',geom{ii},num2str(nx(i)),'_line.csv'])
             display(['Error: File ' [datadir,'ribbed_channel',geom{ii},num2str(nx(i)),'_line.csv'] ' does not exist. Skipping case.'])
@@ -35,7 +94,6 @@ for ii=1:length(geom)
     end
 
     % read experimental and FDS data files
-
 
     for i=1:lnx
         M{i} = importdata([datadir,'ribbed_channel',geom{ii},num2str(nx(i)),'_line.csv'],',',2);

@@ -30,7 +30,10 @@ K-factor = 4.09E-6 kg/s/Pa^1/2
  FLOW_RATE=0.347
  PARTICLE_VELOCITY=60.
  PARTICLES_PER_SECOND=1E5
- SPRAY_ANGLE=0.0 38 /
+ SPRAY_ANGLE=0. 45.
+ SPRAY_PATTERN_SHAPE='GAUSSIAN'
+ SPRAY_PATTERN_MU=14.
+ SPRAY_PATTERN_BETA=20. /
 
 &PART ID='water drops'
  SPEC_ID = 'WATER VAPOR'
@@ -46,7 +49,7 @@ K-factor = 4.09E-6 kg/s/Pa^1/2
 
 &PROP ID='pdpa_w00'
       PART_ID='water drops'
-      QUANTITY="W-VELOCITY"
+      QUANTITY='W-VELOCITY'
       PDPA_RADIUS=0.012
       PDPA_START=0.5
       PDPA_END=50.0
@@ -56,7 +59,7 @@ K-factor = 4.09E-6 kg/s/Pa^1/2
 
 &PROP ID='pdpa_w33'
       PART_ID='water drops'
-      QUANTITY="W-VELOCITY"
+      QUANTITY='W-VELOCITY'
       PDPA_RADIUS=0.012
       PDPA_START=0.5
       PDPA_END=50.0
@@ -66,14 +69,14 @@ K-factor = 4.09E-6 kg/s/Pa^1/2
 
 &PROP ID='pdpa_n'
       PART_ID='water drops'
-      QUANTITY="NUMBER CONCENTRATION"
+      QUANTITY='NUMBER CONCENTRATION'
       PDPA_RADIUS=0.012
       PDPA_START=1.0
       PDPA_END=50.0 /
 
 &PROP ID='pdpa_d10'
       PART_ID='water drops'
-      QUANTITY="DIAMETER"
+      QUANTITY='DIAMETER'
       PDPA_RADIUS=0.012
       PDPA_START=1.0
       PDPA_END=50.0
@@ -83,7 +86,7 @@ K-factor = 4.09E-6 kg/s/Pa^1/2
 
 &PROP ID='pdpa_d32'
       PART_ID='water drops'
-      QUANTITY="DIAMETER"
+      QUANTITY='DIAMETER'
       PDPA_RADIUS=0.012
       PDPA_START=1.0
       PDPA_END=50.0
@@ -93,7 +96,7 @@ K-factor = 4.09E-6 kg/s/Pa^1/2
 
 &PROP ID='pdpa_d43'
       PART_ID='water drops'
-      QUANTITY="DIAMETER"
+      QUANTITY='DIAMETER'
       PDPA_RADIUS=0.012
       PDPA_START=1.0
       PDPA_END=50.0
@@ -103,7 +106,7 @@ K-factor = 4.09E-6 kg/s/Pa^1/2
 
 &PROP ID='pdpa_d43'
       PART_ID='water drops'
-      QUANTITY="DIAMETER"
+      QUANTITY='DIAMETER'
       PDPA_RADIUS=0.012
       PDPA_START=1.0
       PDPA_END=50.0
@@ -113,7 +116,7 @@ K-factor = 4.09E-6 kg/s/Pa^1/2
 
 &PROP ID='pdpa_f'
       PART_ID='water drops'
-      QUANTITY="PARTICLE FLUX Z"
+      QUANTITY='PARTICLE FLUX Z'
       PDPA_RADIUS=0.01
       PDPA_START=1.0
       PDPA_END=50.0 /

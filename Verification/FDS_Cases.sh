@@ -227,7 +227,6 @@ $QFDS -d Flowfields species_conservation_3.fds
 $QFDS -d Flowfields species_conservation_4.fds
 $QFDS -d Flowfields hot_layer_360.fds
 $QFDS -d Flowfields realizable_mass_fractions.fds
-$QFDS -d Flowfields mean_forcing_hole.fds
 $QFDS -p 4 -d Flowfields parabolic_profile.fds
 $QFDS -p 5 -d Flowfields simple_duct.fds
 $QFDS -p 8 -d Flowfields symmetry_test_mpi.fds
@@ -359,7 +358,7 @@ $QFDS -p 8 -d Pressure_Effects zone_shape_2.fds
 $QFDS -d Pressure_Solver dancing_eddies_1mesh.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_uglmat.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_tight.fds
-$QFDS -p 4 -d Pressure_Solver dancing_eddies_tight_overlap.fds
+$QFDS -p 4 -d Pressure_Solver dancing_eddies_tight_no_precon.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_default.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_scarc.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_scarc_tight.fds
@@ -621,6 +620,7 @@ $QFDS -d Sprinklers_and_Sprays water_evaporation_1.fds
 $QFDS -d Sprinklers_and_Sprays water_evaporation_2.fds
 $QFDS -d Sprinklers_and_Sprays water_evaporation_3.fds
 $QFDS -d Sprinklers_and_Sprays water_evaporation_4.fds
+$QFDS -d Sprinklers_and_Sprays water_evaporation_4_np100.fds
 $QFDS -d Sprinklers_and_Sprays water_evaporation_5.fds
 $QFDS -d Sprinklers_and_Sprays Ranz_Marshall_thermally_thick.fds
 $QFDS -d Sprinklers_and_Sprays water_evaporation_6.fds
@@ -730,11 +730,11 @@ $QFDS -d Turbulence yplus_32.fds
 $QFDS -d Turbulence ribbed_channel_20.fds
 $QFDS -d Turbulence ribbed_channel_40.fds
 $QFDS -d Turbulence ribbed_channel_80.fds
-# $QFDS -d Turbulence ribbed_channel_160.fds # output file committed to fds/Verification/Turbulence/
-# $QFDS -d Turbulence ribbed_channel_geom_20.fds
-# $QFDS -d Turbulence ribbed_channel_geom_40.fds
-# $QFDS -d Turbulence ribbed_channel_geom_80.fds
-# $QFDS -d Turbulence ribbed_channel_geom_160.fds # output file committed to fds/Verification/Turbulence/
+# $QFDS -p 4 -d Turbulence ribbed_channel_160.fds # output file committed to fds/Verification/Turbulence/
+$QFDS -d Turbulence ribbed_channel_geom_20.fds
+$QFDS -d Turbulence ribbed_channel_geom_40.fds
+$QFDS -d Turbulence ribbed_channel_geom_80.fds
+# $QFDS -p 4 -d Turbulence ribbed_channel_geom_160.fds # output file committed to fds/Verification/Turbulence/
 $QFDS -d Turbulence sem_flat_leddy_p2.fds
 $QFDS -d Turbulence sem_par_leddy_p2.fds
 $QFDS -d Turbulence sem_atm_leddy_p2.fds

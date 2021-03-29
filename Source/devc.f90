@@ -3,7 +3,7 @@
 MODULE DEVICE_VARIABLES
 
 USE PRECISION_PARAMETERS
-IMPLICIT NONE
+IMPLICIT NONE (TYPE,EXTERNAL)
 
 INTEGER, ALLOCATABLE, DIMENSION(:) :: DEVC_PIPE_OPERATING
 
@@ -58,7 +58,7 @@ END TYPE SUBDEVICE_TYPE
 
 TYPE DEVICE_TYPE
    TYPE(SUBDEVICE_TYPE), ALLOCATABLE, DIMENSION(:) :: SUBDEVICE !<Array of subdevices
-   REAL(EB) :: T !< Used to track time shit for a DEVC that is part of an ASPIRATION detector.
+   REAL(EB) :: T !< Used to track time stuff for a DEVC that is part of an ASPIRATION detector.
    !> !\{
    !> Physical coordinate of a point DEVC
    REAL(EB) :: X,Y,Z
@@ -129,7 +129,7 @@ MODULE CONTROL_VARIABLES
 
 USE PRECISION_PARAMETERS
 
-IMPLICIT NONE
+IMPLICIT NONE (TYPE,EXTERNAL)
 
 !> !\{
 !> Parameter defining the type of control function for CONTROL\%CONTROL_INDEX

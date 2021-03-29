@@ -10,14 +10,14 @@ clear all
 outdir = '../../../out/FM_Burner/';
 
 fuel_name    = {'C2H4','C3H6','C3H8','CH4'};
-res_name     = {'1p0cm'};
+res_name     = {'2cm','1cm','5mm'};
 
 for i_fuel=1:4;
 
-   for fds_resolution=1:1;
+   for fds_resolution=1:3;
 
-      DEV = importdata([outdir,'FM_15cm_Burner_',fuel_name{i_fuel},'_devc.csv'],',',2);
-      HRR = importdata([outdir,'FM_15cm_Burner_',fuel_name{i_fuel},'_hrr.csv'],',',2);
+      DEV = importdata([outdir,'FM_15cm_Burner_',fuel_name{i_fuel},'_',res_name{fds_resolution},'_devc.csv'],',',2);
+      HRR = importdata([outdir,'FM_15cm_Burner_',fuel_name{i_fuel},'_',res_name{fds_resolution},'_hrr.csv'],',',2);
 
       Time_FDS = DEV.data(:,find(strcmp(DEV.colheaders,'Time')));
       XO2_FDS  = DEV.data(:,find(strcmp(DEV.colheaders,'"XO2"')));

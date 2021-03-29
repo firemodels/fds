@@ -1945,18 +1945,25 @@ As seen in the left side of Fig.~\ref{fig_heated_channel}, the velocity profile 
 \end{figure}
 
 
-
-
 \section{Ribbed Square Duct Flow (\texorpdfstring{\textct{ribbed\_channel}}{ribbed\_channel})}
 \label{sec:ribbed_channel}
 
+\subsection{Cartesian Geometry}
+
 In this test case, we compare FDS results with particle-image velocimetry (PIV) data from Casara and Arts \cite{Casara:1} for flow in a square duct with a ribbed obstruction.  The rib height is $h = 0.1$ m and the duct height is $D = 0.3$ m.  The distance between ribs in the periodic duct (the ``pitch'') is $10 \, h$.  The length of our domain is therefore 1 m.  The Reynolds number based on $D$ is nominally 40,000 (this is discussed more later). The FDS mesh is uniform in each direction.  We test grid resolutions of $h/\delta x = \{2,4,8,16\}$.
 
-A side view image of mean velocity vectors in the 3D flow is shown in Fig.~\ref{fig_ribbed_channel_image} for the $h/\delta x = 8$ case.  The primary goal of this calculation is to predict the mean recirculation patterns on the windward and leeward side of the rib.  To measure the FDS results, a line of devices (represented by the green dots in the figure) is placed near the floor of the duct.  Where the mean $u$ velocity component changes sign indicates a reattachment location.  Results for the mean streamwise velocity near the surface are shown in the upper-left plot of Fig.~\ref{fig_ribbed_channel}.  The independent axis on the plots ranges from 0 m to 1 m, representing the center to center distance between ribs.  Note that the image is offset and ranges from -0.4 m to 0.6 m.  As can be seen from the plot, the $h/\delta x = 8$ resolution (green sideways triangles) slightly overpredicts the reattachment length, with the zero crossing near $x/h = 4.5$ (note that the correspondence with the vectors in the image).  The finest resolution, $h/\delta x=16$, is sufficient to accurately capture the reattachment zone.
+A side view image of mean velocity vectors in the 3D flow is shown in Fig.~\ref{fig_ribbed_channel_image} for the $h/\delta x = 8$ case.  The goals of this calculation are to predict the flow profile above the ribs and the recirculation patterns on the windward and leeward side of the ribs.  To measure the FDS results, a line of devices (represented by the green dots in the figure) is placed near the floor of the duct.  Where the mean $u$ velocity component changes sign indicates a reattachment location.  Results for the mean streamwise velocity near the surface are shown in the upper-left plot of Fig.~\ref{fig_ribbed_channel}.  The independent axis on the plots ranges from 0 m to 1 m, representing the center to center distance between ribs.  Note that the image is offset and ranges from -0.4 m to 0.6 m.  As can be seen from the plot, the $h/\delta x = 8$ resolution (green sideways triangles) slightly overpredicts the reattachment length, with the zero crossing near $x/h = 4.5$ (note that the correspondence with the vectors in the image).  The finest resolution, $h/\delta x=16$, is sufficient to accurately capture the reattachment zone.
 
 Despite the fact that the coarser cases do not perfectly capture the reattachment region, it is remarkable that with $h/\delta x = 2$ we achieve any recirculation at all.  The wiggles in the solution are due to numerical dispersion error.
 
-The mean streamwise velocity profile at the rib centerline is shown in the upper-right plot of Fig.~\ref{fig_ribbed_channel}.  Here we point out that the setup for this case is basically copied from Loh\'asz et al.~\cite{Lohasz:1}.  Their method of forcing, however, is ambiguous.  Using the FDS \textct{MEAN\_FORCING} feature, we set our bulk velocity to 1 m/s (\textct{U0 = 1.0} on \textct{MISC}) in order to match the mean profile for the finest grid resolution.  All other cases use the same forcing.
+The mean streamwise velocity profile at the rib centerline is shown in the upper-right plot of Fig.~\ref{fig_ribbed_channel}.  Here we point out that the setup for this case is basically copied from Loh\'asz et al.~\cite{Lohasz:1}.  Their method of forcing, however, is ambiguous.  Here we adjust the FDS \textct{FORCE\_VECTOR} to obtain a bulk velocity of 1 m/s; results are confirmed in Fig.~\ref{fig_ribbed_channel_Ubulk}.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ribbed_channel_Ubulk}
+\caption[Bulk velocity {\ct ribbed\_channel} test case]{Bulk velocity for the ribbed channel cases measured in the duct section in front of the rib compared with the experimental value of 1 m/s.}
+\label{fig_ribbed_channel_Ubulk}
+\end{figure}
 
 The bottom-left and -right plots in Fig.~\ref{fig_ribbed_channel} show the RMS velocity along the duct floor and the center profile above the rib, respectively. As can be seen, the $h/\delta x = 16$ case provides accurate results.  This resolution for this problem corresponds to wall $y^+$ values around 30.
 
@@ -1975,6 +1982,28 @@ The bottom-left and -right plots in Fig.~\ref{fig_ribbed_channel} show the RMS v
       \includegraphics[height=2.2in]{SCRIPT_FIGURES/ribbed_channel_urms_prof} \\
    \end{tabular*}
    \caption[Mean and RMS velocity profiles for ribbed square duct flow]{\label{fig_ribbed_channel} Mean and RMS velocity profiles for ribbed square duct flow. Comparison with PIV data from Casara and Arts \cite{Casara:1,Lohasz:1}.}
+\end{figure}
+
+\clearpage
+\subsection{Complex Geometry}
+
+Below we plot the results for the {\ct ribbed\_channel\_geom} test series.  These cases are identical to the Cartesian geometry discussed above, except they use a {\ct GEOM} line with a grid-aligned {\ct XB} region to model the square rib.  The same mean force vectors are used as in the analogous Cartesian cases.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/ribbed_channel_geom_Ubulk}
+\caption[Bulk velocity {\ct ribbed\_channel\_geom} test case]{Bulk velocity for ribbed channel geom cases measured in the duct section in front of the rib compared with the experimental value of 1 m/s.}
+\label{fig_ribbed_channel_geom_Ubulk}
+\end{figure}
+
+\begin{figure}[ht]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/ribbed_channel_geom_u_strm} &
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/ribbed_channel_geom_u_prof} \\
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/ribbed_channel_geom_urms_strm} &
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/ribbed_channel_geom_urms_prof} \\
+   \end{tabular*}
+   \caption[Mean and RMS velocity profiles for ribbed channel geom]{\label{fig_ribbed_channel_Geom} Mean and RMS velocity profiles for ribbed square duct flow with complex geometry. Comparison with PIV data from Casara and Arts \cite{Casara:1,Lohasz:1}.}
 \end{figure}
 
 
@@ -5339,7 +5368,7 @@ by assuming that the liquid water temperature is equal to air temperature at the
 \label{water_evaporation_4}
 
 In the fourth case, air at 500~\si{\degree C} is forced through a 3~m long, 1~m wide, 1~m tall tunnel at 1~m/s. Water droplets with a median volumetric diameter of 20~$\mu$m are
-introduced in the middle of the tunnel at a rate of 0.05~kg/s, starting at 10~s. The water temperature is 20~\si{\degree C}.
+introduced in the middle of the tunnel at a rate of 0.05~kg/s, starting at 10~s. Two cases are run with different values of {\ct DT\_INSERT} and {\ct N\_PARTICLES} while keeping the total rate of mass injected the same.  The first case uses {\ct DT\_INSERT}=0.001 s and {\ct N\_PARTICLES}=1000; the second case, {\ct water\_evaporation\_4\_np100}, uses {\ct DT\_INSERT}=0.01 s and {\ct N\_PARTICLES}=100, reducing the total number of particles by a factor of 100.  The water temperature is 20~\si{\degree C}.
 The mass fraction of water vapor in the hot air flowing into the tunnel is 0.
 The water evaporates at approximately the same rate at which it is introduced.
 Figure~\ref{water_evaporation_4_plot}, left, displays the time history of the enthalpy flow out of the tunnel. The enthalpy flow rate of the dry hot air is 229~kW above its ambient value. The steady-state temperature is 211~\si{\degree C}. FDS reports heat flow as the difference in enthalpy of the flowing gas at its current temperature from that at ambient temperature.  For the steady-state condition of 0.05~kg/s in the air flow at 211~\si{\degree C} the heat flow is expected to be 107 kW.
@@ -5348,7 +5377,7 @@ Figure~\ref{water_evaporation_4_plot}, left, displays the time history of the en
 \begin{figure}[h!]
 \centering
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/water_evaporation_4_enthalpy}
-\caption[Sample case \textct{water\_evaporation\_4}]{Output of \textct{water\_evaporation\_4} test case.}
+\caption[Sample case \textct{water\_evaporation\_4}]{Output of \textct{water\_evaporation\_4} test case.  The black line indicates the FDS results for the test case with 1000 particles injected every 0.001 s.  The dashed red line shows results for FDS with 100 particles injected every 0.01 s.  Note that the same total mass is injected in both cases.}
 \label{water_evaporation_4_plot}
 \end{figure}
 

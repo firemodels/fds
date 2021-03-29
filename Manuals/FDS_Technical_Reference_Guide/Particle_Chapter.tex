@@ -172,9 +172,9 @@ where ${\cal U}(0,1)$ is a uniformly distributed real number between 0 and 1 and
 
 The droplets are introduced into the simulation along a spherical surface whose diameter is a specified stand-off distance from the nozzle orifice. It is assumed that the droplets have fully atomized by this stage. The longitude of the initial droplet position, $0\le \theta < 2 \pi$, is randomly chosen from a uniform distribution. The latitude, $0 \le \phi < \pi$, is randomly selected from the following distribution:
 \begin{equation}
-  f(\phi) = \exp \left[ - \beta \left( \frac{\phi - \phi_{\min}}{\phi_{\max} - \phi_{\min}} \right)^2 \right]
+  f(\phi) = \exp \left[ - \beta \left( \frac{\phi - \mu}{\phi_{\max} - \phi_{\min}} \right)^2 \right]
 \end{equation}
-Note that $\phi=0$ is the south pole of the sphere. The spread parameter, $\beta$, is 5 by default. All the droplets are given the same initial speed in the direction of the surface normal.
+Note that $\phi=0$ is the south pole of the sphere. The parameter $\phi_{\min}=0$ by default. The parameter $\mu$ controls the location of the peak of the distribution and may be used to approximate a hollow cone nozzle.  By default, $\mu=\phi_{\min}=0$.  However, if $\phi_{\min}>0$, unless otherwise specified, $\mu$ is set to the average of $\phi_{\min}$ and $\phi_{\max}$.  The spread parameter, $\beta$, is 5 by default.  If $\beta=0$ the distribution is uniform.  As $\beta$ becomes large, the distribution approximates a delta function at $\mu$.  All the droplets are given the same initial speed in the direction of the surface normal.
 
 
 

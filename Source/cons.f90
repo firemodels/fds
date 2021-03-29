@@ -6,8 +6,9 @@
 MODULE GLOBAL_CONSTANTS
 
 USE PRECISION_PARAMETERS
+USE MPI_F08
 USE ISO_FORTRAN_ENV, ONLY: ERROR_UNIT
-IMPLICIT NONE
+IMPLICIT NONE (TYPE,EXTERNAL)
 
 INTEGER, PARAMETER :: DNS_MODE=1                 !< Flag for SIM_MODE: Direct Numerical Simulation
 INTEGER, PARAMETER :: LES_MODE=2                 !< Flag for SIM_MODE: Large Eddy Simulation
@@ -213,7 +214,6 @@ LOGICAL :: AEROSOL_SCRUBBING=.FALSE.        !< Allow aerosol scrubbing
 LOGICAL :: VELOCITY_ERROR_FILE=.FALSE.      !< Generate a diagnostic output file listing velocity and pressure errors
 LOGICAL :: CFL_FILE=.FALSE.                 !< Generate a diagnostic output file listing quantities related to CFL and VN
 LOGICAL :: CONSTANT_SPECIFIC_HEAT_RATIO=.FALSE. !< Assume that the ratio of specific heats is constant, \f$ \gamma=1.4 \f$
-LOGICAL :: MEAN_FORCING(3)=.FALSE.          !< Apply mean forcing to wind in each coordinate direction
 LOGICAL :: CHECK_HT=.FALSE.                 !< Apply heat transfer stability condition
 LOGICAL :: PATCH_VELOCITY=.FALSE.           !< Assume user-defined velocity patches
 LOGICAL :: OVERWRITE=.TRUE.                 !< Overwrite old output files
@@ -254,7 +254,7 @@ LOGICAL :: STORE_DIVERGENCE_CORRECTION=.FALSE.
 LOGICAL :: PERIODIC_DOMAIN_X=.FALSE.                !< The domain is periodic \f$ x \f$
 LOGICAL :: PERIODIC_DOMAIN_Y=.FALSE.                !< The domain is periodic \f$ y \f$
 LOGICAL :: PERIODIC_DOMAIN_Z=.FALSE.                !< The domain is periodic \f$ z \f$
-LOGICAL :: TEST_NEW_OPEN=.FALSE.
+LOGICAL :: OPEN_WIND_BOUNDARY=.FALSE.               !< There is a prevailing wind
 LOGICAL :: TEST_NEW_WAKE_REDUCTION=.FALSE.
 
 INTEGER, ALLOCATABLE, DIMENSION(:) :: CHANGE_TIME_STEP_INDEX      !< Flag to indicate if a mesh needs to change time step
@@ -330,8 +330,6 @@ REAL(EB) :: SC                                 !< Schmidt number
 REAL(EB) :: GROUND_LEVEL=0._EB                 !< Height of the ground, used for establishing atmospheric profiles (m)
 REAL(EB) :: LIMITING_DT_RATIO=1.E-4_EB         !< Ratio of current to initial time step when code is stopped
 REAL(EB) :: NOISE_VELOCITY=0.005_EB            !< Velocity of random noise vectors (m/s)
-REAL(EB) :: DT_MEAN_FORCING=1._EB              !< Time scale used in mean forcing algorithm (s)
-REAL(EB) :: DT_MEAN_FORCING_2=30._EB           !< Time scale used in mean forcing algorithm (s)
 REAL(EB) :: TAU_DEFAULT=1._EB                  !< Default ramp-up time (s)
 REAL(EB) :: TAU_CHEM=1.E-10_EB                 !< Smallest reaction mixing time scale (s)
 REAL(EB) :: TAU_FLAME=1.E10_EB                 !< Largest reaction mixing time scale (s)
@@ -351,6 +349,7 @@ REAL(EB) :: LATITUDE=10000._EB                 !< Latitude for geostrophic calcu
 REAL(EB) :: GEOSTROPHIC_WIND(2)=0._EB          !< Wind vector (m/s)
 REAL(EB) :: DY_MIN_BLOWING=1.E-8_EB            !< Parameter in blowing algorithm (m)
 REAL(EB) :: MINIMUM_FILM_THICKNESS=1.E-5_EB    !< Minimum thickness of liquid film on a solid surface (m)
+REAL(EB) :: SOOT_DENSITY=1800._EB              !< Density of solid soot (kg/m3)
 
 REAL(EB), PARAMETER :: TMPM=273.15_EB                       !< Melting temperature of water, conversion factor (K)
 REAL(EB), PARAMETER :: P_STP=101325._EB                     !< Standard pressure (Pa)
@@ -371,7 +370,7 @@ INTEGER :: UPPER_MESH_INDEX=-1000000000                     !< Upper bound of me
 LOGICAL :: PROFILING=.FALSE.
 INTEGER, ALLOCATABLE, DIMENSION(:) :: PROCESS               !< The MPI process of the given mesh index
 INTEGER, ALLOCATABLE, DIMENSION(:) :: FILE_COUNTER          !< Counter for the number of output files currently opened
-INTEGER, ALLOCATABLE, DIMENSION(:) :: MPI_COMM_MESH         !< MPI communicator for the a given mesh and its neighbors
+TYPE (MPI_COMM), ALLOCATABLE, DIMENSION(:) :: MPI_COMM_MESH !< MPI communicator for the a given mesh and its neighbors
 INTEGER, ALLOCATABLE, DIMENSION(:) :: MPI_COMM_MESH_ROOT    !< The rank of the given mesh within the MPI communicator
 
 ! Time parameters
@@ -485,12 +484,30 @@ CHARACTER(LABEL_LENGTH), DIMENSION(:), ALLOCATABLE :: MESH_NAME
 
 ! Variables related to pressure solver
 
-LOGICAL :: ITERATE_PRESSURE=.FALSE.,ITERATE_BAROCLINIC_TERM,SUSPEND_PRESSURE_ITERATIONS=.TRUE.
-REAL(EB) :: VELOCITY_TOLERANCE=0._EB,PRESSURE_TOLERANCE=0._EB,ITERATION_SUSPEND_FACTOR=0.95_EB
-REAL(EB), ALLOCATABLE, DIMENSION(:) :: VELOCITY_ERROR_MAX,PRESSURE_ERROR_MAX
-INTEGER, ALLOCATABLE, DIMENSION(:,:) :: VELOCITY_ERROR_MAX_LOC,PRESSURE_ERROR_MAX_LOC
-INTEGER :: PRESSURE_ITERATIONS=0,MAX_PRESSURE_ITERATIONS=10,TOTAL_PRESSURE_ITERATIONS=0
-CHARACTER(LABEL_LENGTH):: PRES_METHOD = 'FFT'
+LOGICAL :: ITERATE_PRESSURE=.FALSE.                              !< Flag indicating if pressure solution is iterated
+LOGICAL :: ITERATE_BAROCLINIC_TERM                               !< Flag indicating if baroclinic term is iterated
+LOGICAL :: SUSPEND_PRESSURE_ITERATIONS=.TRUE.                    !< Flag for stopping pressure iterations
+REAL(EB) :: VELOCITY_TOLERANCE=0._EB                             !< Error tolerance for normal velocity at solids or boundaries
+REAL(EB) :: PRESSURE_TOLERANCE=0._EB                             !< Error tolerance for iteration of baroclinic pressure term
+REAL(EB) :: ITERATION_SUSPEND_FACTOR=0.95_EB                     !< If new velocity error is not this value of old, stop iteration
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: VELOCITY_ERROR_MAX        !< Max velocity error of entire domain
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: PRESSURE_ERROR_MAX        !< Max pressure error of entire domain
+INTEGER, ALLOCATABLE, DIMENSION(:,:) :: VELOCITY_ERROR_MAX_LOC   !< Indices of max velocity error
+INTEGER, ALLOCATABLE, DIMENSION(:,:) :: PRESSURE_ERROR_MAX_LOC   !< Indices of max pressure error
+INTEGER :: PRESSURE_ITERATIONS=0                                 !< Counter for pressure iterations
+INTEGER :: MAX_PRESSURE_ITERATIONS=10                            !< Max pressure iterations per pressure solve
+INTEGER :: TOTAL_PRESSURE_ITERATIONS=0                           !< Counter for total pressure iterations
+CHARACTER(LABEL_LENGTH):: PRES_METHOD = 'FFT'                    !< Pressure solver method
+LOGICAL :: TUNNEL_PRECONDITIONER=.FALSE.                         !< Use special pressure preconditioner for tunnels
+INTEGER :: TUNNEL_NXP                                            !< Number of x points in the entire tunnel
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: TP_AA                     !< Upper off-diagonal of tri-diagonal matrix for tunnel pressure
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: TP_BB                     !< Lower off-diagonal of tri-diagonal matrix for tunnel pressure
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: TP_CC                     !< Right hand side of 1-D tunnel pressure linear system
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: TP_DD                     !< Diagonal of tri-diagonal matrix for tunnel pressure solver
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: H_BAR                     !< Pressure solution of 1-D tunnel pressure solver
+INTEGER, ALLOCATABLE, DIMENSION(:) :: COUNTS_TP                  !< Counter for MPI calls used for 1-D tunnel pressure solver
+INTEGER, ALLOCATABLE, DIMENSION(:) :: DISPLS_TP                  !< Displacements for MPI calls used for 1-D tunnel pressure solver
+INTEGER, ALLOCATABLE, DIMENSION(:) :: I_OFFSET                   !< Spatial index of tunnel
 
 ! Miscellaneous integer constants
 
@@ -526,7 +543,7 @@ INTEGER                              :: LU_MASS,LU_HRR,LU_STEPS,LU_NOTREADY,LU_V
 INTEGER                              :: LU_EVACCSV,LU_EVACEFF,LU_EVACFED,LU_EVACXYZ,LU_EVACOUT,LU_HISTOGRAM,LU_EVAC_CB
 INTEGER                              :: LU_BNDC=-1,LU_GEOC=-1,LU_TGA,LU_INFO
 INTEGER, ALLOCATABLE, DIMENSION(:)   :: LU_PART,LU_PROF,LU_XYZ,LU_TERRAIN,LU_PL3D,LU_DEVC,LU_STATE,LU_CTRL,LU_CORE,LU_RESTART
-INTEGER, ALLOCATABLE, DIMENSION(:)   :: LU_VEG_OUT,LU_GEOM
+INTEGER, ALLOCATABLE, DIMENSION(:)   :: LU_VEG_OUT,LU_GEOM,LU_CFACE_GEOM
 INTEGER                              :: LU_GEOM_TRAN
 INTEGER, ALLOCATABLE, DIMENSION(:,:) :: LU_SLCF,LU_SLCF_GEOM,LU_BNDF,LU_BNDF_GEOM,LU_BNDG,LU_ISOF,LU_ISOF2, &
                                         LU_SMOKE3D,LU_RADF
@@ -538,7 +555,7 @@ CHARACTER(80)                              :: FN_MASS,FN_HRR,FN_STEPS,FN_SMV,FN_
 CHARACTER(80)                              :: FN_EVACCSV,FN_EVACEFF,FN_EVACFED,FN_EVACOUT,FN_LINE,FN_HISTOGRAM,FN_CUTCELL,FN_TGA
 CHARACTER(80)                              :: FN_EVACXYZ
 CHARACTER(80), ALLOCATABLE, DIMENSION(:)   :: FN_PART,FN_PROF,FN_XYZ,FN_TERRAIN,FN_PL3D,FN_DEVC,FN_STATE,FN_CTRL,FN_CORE,FN_RESTART
-CHARACTER(80), ALLOCATABLE, DIMENSION(:)   :: FN_VEG_OUT,FN_GEOM
+CHARACTER(80), ALLOCATABLE, DIMENSION(:)   :: FN_VEG_OUT,FN_GEOM, FN_CFACE_GEOM
 CHARACTER(80), ALLOCATABLE, DIMENSION(:,:) :: FN_SLCF,FN_SLCF_GEOM,FN_BNDF,FN_BNDF_GEOM,FN_BNDG, &
                                               FN_ISOF,FN_ISOF2,FN_SMOKE3D,FN_RADF,FN_GEOM_TRNF
 
@@ -571,10 +588,7 @@ LOGICAL :: LSET_TAN2
 ! Parameters for Terrain and Wind simulation needs
 
 LOGICAL :: TERRAIN_CASE=.FALSE.
-INTEGER :: N_VENT_TOTAL=0,SPONGE_CELLS,N_MEAN_FORCING_BINS
-REAL(EB), ALLOCATABLE, DIMENSION(:) :: MEAN_FORCING_SUM_U_VOL,MEAN_FORCING_SUM_V_VOL,MEAN_FORCING_SUM_W_VOL, &
-                                       MEAN_FORCING_SUM_VOL_X,MEAN_FORCING_SUM_VOL_Y,MEAN_FORCING_SUM_VOL_Z, &
-                                       U_MEAN_FORCING,V_MEAN_FORCING,W_MEAN_FORCING
+INTEGER :: N_VENT_TOTAL=0
 
 ! Sprinkler Variables
 
@@ -618,6 +632,7 @@ REAL(EB) :: TMPMIN,TMPMAX,RHOMIN,RHOMAX
 
 INTEGER, PARAMETER :: CENTRAL_LIMITER=0,GODUNOV_LIMITER=1,SUPERBEE_LIMITER=2,MINMOD_LIMITER=3,CHARM_LIMITER=4,MP5_LIMITER=5
 INTEGER :: I_FLUX_LIMITER=SUPERBEE_LIMITER,CFL_VELOCITY_NORM=2
+LOGICAL, PARAMETER :: OW_ADVFLX_USE_WALL=.TRUE.
 
 ! Numerical quadrature (used in TEST_FILTER)
 
@@ -715,7 +730,7 @@ END MODULE GLOBAL_CONSTANTS
 MODULE RADCONS
 
 USE PRECISION_PARAMETERS
-IMPLICIT NONE
+IMPLICIT NONE (TYPE,EXTERNAL)
 
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: DLN                !< Wall-normal matrix
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: ORIENTATION_FACTOR !< Fraction of radiation angle corresponding to a particular direction
@@ -744,7 +759,6 @@ REAL(EB) :: RTMPMAX               !< Maximum temperature (K) for tabulation of r
 REAL(EB) :: RTMPMIN               !< Minimum temperature (K) for tabulation of radiative properties
 REAL(EB) :: MIE_MINIMUM_DIAMETER  !< Minimum droplet size (micron) considered in Mie initialization
 REAL(EB) :: MIE_MAXIMUM_DIAMETER  !< Maximum droplet size (micron) considered in Mie initialization
-REAL(EB) :: SOOT_DENSITY          !< Density (kg/m3) of solid soot particles
 
 INTEGER :: TIME_STEP_INCREMENT    !< Frequency of calls to radiation solver
 INTEGER :: NMIEANG                !< Number of angle bins in forward scattering integration

@@ -30,7 +30,7 @@ IF "%SETUP_IFORT_COMPILER_64%"=="1" GOTO envexist
 
   echo Setting up compiler environment
   set STARTUP="%IFORT_COMPILER%\bin\compilervars"
-  IF DEFINED I_MPI_ONEAPI_ROOT set STARTUP="%IFORT_COMPILER%\..\env\vars"
+  IF DEFINED ONEAPI_ROOT set STARTUP="%ONEAPI_ROOT%\setvars"
   
 :: the compilervars script overwrites the mpi library locattion so we have to save it
 :: (the mpi install puts the mpi library in a different place than the Fortran install)
@@ -54,6 +54,9 @@ IF "%SETUP_IFORT_COMPILER_64%"=="1" GOTO envexist
   IF DEFINED I_MPI_ONEAPI_ROOT set IMPI_INCLUDE=%IMPI_RELEASE_ROOT%\include
 
   if NOT DEFINED I_MPI_ONEAPI_ROOT call "%I_MPI_ROOT%\intel64\bin\mpivars" release
-  if DEFINED     I_MPI_ONEAPI_ROOT call "%I_MPI_ROOT%\env\vars" release
+  :: A separate startup script for mpi is not needed for the oneAPI compilers.
+  :: The oneAPI setup script defines the environment for mkl and mpi libraries
+  ::    todo: add parameters to the oneAPI startup script to not define the environment
+  ::    for everyting else
 
 :envexist
