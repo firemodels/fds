@@ -20387,16 +20387,37 @@ INTEGER :: COUNT_OUT
 
 FLAG = .TRUE.
 
-! Drop vertices contained whithin lines of the polygon:
+! Drop vertices that are repeated, close verts in EB precision that are fused in FB:
 VERT_FLAG(1:NVERTS)=1
+I = 1
+VV1(1:3)=>VERTS(3*NVERTS-2:3*NVERTS)
+VV2(1:3)=>VERTS(3*I-2:3*I)
+IF ( ABS(VV1(1)-VV2(1))+ABS(VV1(2)-VV2(2))+ABS(VV1(3)-VV2(3)) < EPS_FB) VERT_FLAG(I)=0
+DO I = 2, NVERTS
+   VV1(1:3)=>VERTS(3*(I-1)-2:3*(I-1))
+   VV2(1:3)=>VERTS(3*I-2:3*I)
+   IF ( ABS(VV1(1)-VV2(1))+ABS(VV1(2)-VV2(2))+ABS(VV1(3)-VV2(3)) < EPS_FB) VERT_FLAG(I)=0
+ENDDO
+NLIST  = SUM(VERT_FLAG(1:NVERTS))
+NVERTS2= NLIST
+COUNT = 0
 DO I = 1, NVERTS
-   IM1 = I - 1
-   IF (I==1     )IM1 = NVERTS
-   IP1 = I + 1
-   IF (I==NVERTS)IP1 = 1
-   IF ( DIFF_ANGLE(DIR,VERTS,NVERTS,IM1,I,IP1,.TRUE.) ) VERT_FLAG(I)=0 ! Vertex located in line joining neighbors.
+   IF(VERT_FLAG(I)==0) CYCLE
+   COUNT= COUNT + 1
+   VERT_LIST(COUNT) = I
+ENDDO
+VERT_LIST(0) = VERT_LIST(NLIST)
+VERT_LIST(NLIST+1) = VERT_LIST(1)
+
+! Now drop vertices contained whithin lines of the polygon:
+DO I=1,NLIST
+   IM1   = VERT_LIST(I-1)
+   IVERT = VERT_LIST(I)
+   IP1   = VERT_LIST(I+1)
+   IF ( DIFF_ANGLE(DIR,VERTS,NVERTS,IM1,IVERT,IP1,.TRUE.) ) VERT_FLAG(IVERT)=0
 ENDDO
 
+! Redo List:
 NLIST  = SUM(VERT_FLAG(1:NVERTS))
 
 IF (NLIST < 3) THEN
