@@ -20326,7 +20326,7 @@ MAIN_MESH_LOOP3 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                 DO JCC=1,NCELL
                    IF ( CUT_CELL(ICC)%UNKZ(JCC) > 0 ) CYCLE
                    ULINK_COUNT = ULINK_COUNT + 1
-                   WRITE(LU_UNLNK,'(I5,A,5I5,A,5F16.8)') &
+                   WRITE(LU_UNLNK,'(I8,A,5I8,A,5F22.8)') &
                    ULINK_COUNT,', I,J,K,ICC,JCC=',I,J,K,ICC,JCC,', X,Y,Z,CCVOL,CCVOL_CRT=',X(I),Y(J),Z(K), &
                    CUT_CELL(ICC)%VOLUME(JCC),DX(I)*DY(J)*DZ(K)
                 ENDDO
@@ -20396,7 +20396,7 @@ MAIN_MESH_LOOP3 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                    DO JCC=1,NCELL
                       IF ( CUT_CELL(ICC)%UNKZ(JCC) > 0 ) CYCLE
                       ULINK_COUNT = ULINK_COUNT + 1
-                      WRITE(LU_UNLNK,'(I5,A,5I5,A,5F16.8)') &
+                      WRITE(LU_UNLNK,'(I8,A,5I8,A,5F22.8)') &
                       ULINK_COUNT,', I,J,K,ICC,JCC=',I,J,K,ICC,JCC,', X,Y,Z,CCVOL,CCVOL_CRT=',X(I),Y(J),Z(K), &
                       CUT_CELL(ICC)%VOLUME(JCC),DX(I)*DY(J)*DZ(K)
                    ENDDO
