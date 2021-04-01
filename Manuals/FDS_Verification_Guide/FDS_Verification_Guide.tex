@@ -5739,6 +5739,20 @@ The solution is that $\Delta p=344.16$~Pa, as shown in Fig.~\ref{fig_leak_test_4
 \end{figure}
 
 
+\subsection{Localized Leakage (\texorpdfstring{\textct{leak\_enthalpy}}{leak\_enthalpy})}
+\label{leak_enthalpy}
+
+A domain that is 2~m by 1~m by 1~m with 10~cm grid resolution is divided into two halves by a 20~cm thick wall. In the left side is given a 100~kW/m$^3$ heat source in its entire volume that lasts for 4~s. A localized leakage path that is 0.001~m$^2$ is defined for one grid cell at the center on either side of the dividing wall. The parameter {\ct LEAK\_PATH} is set to true. All the boundaries are defined as adiabatic. The heat source creates pressure on the left side which force heated on into the right side. The localized leakage should conserve mass, and the energy source should add 360~kJ to the domain. Results are shown in Fig.~\ref{fig_leak_enthalpy}
+
+\begin{figure}[ht]
+	\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+		\scalebox{1.0}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/leak_enthalpy_mass} } &
+		\scalebox{1.0}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/leak_enthalpy_energy} }
+	\end{tabular*}
+	\caption[The \textct{leak\_enthalpy} test case]{Change in mass (left) and energy (right) in the domain.}
+	\label{fig_enthalpy}
+\end{figure}
+
 \subsection{Multiple Zone, Multiple Mesh Leakage (\texorpdfstring{\textct{zone\_shape\_2}}{zone\_shape\_2})}
 \label{zone_shape_2}
 
