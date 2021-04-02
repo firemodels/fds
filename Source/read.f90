@@ -6965,7 +6965,8 @@ PROC_MATL_LOOP: DO N=1,N_MATL
          ENDIF
       ENDIF
    ENDDO
-   ALLOCATE(ML%H(0:I_MAX_TEMP))
+
+   ALLOCATE(ML%H(0:I_MAX_TEMP)) ; ML%H(0) = 0._EB
    DO I=1,I_MAX_TEMP
        IF (ML%C_S>0._EB) THEN
          ML%H(I) = ML%H(I-1) + ML%C_S
