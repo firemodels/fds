@@ -315,6 +315,7 @@ $QFDS -d HVAC HVAC_tee_loss_1.fds
 $QFDS -d HVAC HVAC_tee_loss_2.fds
 $QFDS -d HVAC leak_test.fds
 $QFDS -d HVAC leak_test_2.fds
+$QFDS -d HVAC leak_enthalpy.fds
 $QFDS -p 2 -d HVAC leak_test_3.fds
 $QFDS -d HVAC leak_test_4.fds
 $QFDS -d HVAC HVAC_leak_exponent.fds
