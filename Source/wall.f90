@@ -1524,7 +1524,7 @@ OBST_LOOP_2: DO N=1,N_OBST
                         ITER = ITER + 1
                         C_S = 0._EB
                         H_S = 0._EB
-                        ITMP = MIN(4999,INT(T_NODE))
+                        ITMP = MIN(I_MAX_TEMP-1,INT(T_NODE))
                         T_S: DO NN=1,MS%N_MATL
                            IF (OB2%RHO(II2,JJ2,KK2,NN)<=0._EB) CYCLE T_S
                            ML  => MATERIAL(MS%MATL_INDEX(NN))
@@ -1989,7 +1989,7 @@ SELECT CASE(SIM_MODE)
          ONE_D%RHO_D_F(N) = ONE_D%MU_G*RSC*ONE_D%RHO_F/ONE_D%RHO_G
       ENDDO
    CASE (LES_MODE)
-      ITMP = MIN(4999,NINT(ONE_D%TMP_F))
+      ITMP = MIN(I_MAX_TEMP-1,NINT(ONE_D%TMP_F))
       IIG = ONE_D%IIG
       JJG = ONE_D%JJG
       KKG = ONE_D%KKG
@@ -1997,7 +1997,7 @@ SELECT CASE(SIM_MODE)
          ONE_D%RHO_D_F(N) = ONE_D%RHO_F*( D_Z(ITMP,N) + (ONE_D%MU_G-MU_DNS(IIG,JJG,KKG))/ONE_D%RHO_G*RSC )
       ENDDO
    CASE (DNS_MODE)
-      ITMP = MIN(4999,NINT(ONE_D%TMP_F))
+      ITMP = MIN(I_MAX_TEMP-1,NINT(ONE_D%TMP_F))
       DO N=1,N_TRACKED_SPECIES
          ONE_D%RHO_D_F(N) = ONE_D%RHO_F*D_Z(ITMP,N)
       ENDDO
@@ -3386,7 +3386,7 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
             MATL_REMESH: DO N=1,SF%N_MATL
                IF (ONE_D%MATL_COMP(N)%RHO(I)<=TWO_EPSILON_EB) CYCLE MATL_REMESH
                ML  => MATERIAL(SF%MATL_INDEX(N))
-               ITMP = MIN(4999,INT(ONE_D%TMP(I)))
+               ITMP = MIN(I_MAX_TEMP-1,INT(ONE_D%TMP(I)))
                H_S = ML%H(ITMP)+(ONE_D%TMP(I)-REAL(ITMP,EB))*(ML%H(ITMP+1)-ML%H(ITMP))
                RHO_H_S(I) = RHO_H_S(I) + ONE_D%MATL_COMP(N)%RHO(I) * H_S
             ENDDO MATL_REMESH
@@ -3434,7 +3434,7 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
                   ITER = ITER + 1
                   C_S = 0._EB
                   H_S = 0._EB
-                  ITMP = MIN(4999,INT(T_NODE))
+                  ITMP = MIN(I_MAX_TEMP-1,INT(T_NODE))
                   H_S = 0._EB
                   T_S: DO N=1,SF%N_MATL
                      IF (ONE_D%MATL_COMP(N)%RHO(I)<=0._EB) CYCLE T_S
@@ -4217,7 +4217,7 @@ H_NATURAL = 0._EB
 H_FORCED  = 0._EB
 
 TMP_FILM = 0.5_EB*(ONE_DX%TMP_G+ONE_DX%TMP_F)
-ITMP = MIN(4999,NINT(TMP_FILM))
+ITMP = MIN(I_MAX_TEMP-1,NINT(TMP_FILM))
 
 ZZ_GET(1:N_TRACKED_SPECIES) = ONE_DX%ZZ_G(1:N_TRACKED_SPECIES)
 

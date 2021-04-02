@@ -436,12 +436,12 @@ REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: CP_Z         !< CP_Z(I,J) Specific heat
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: CPBAR_Z
 !< CPBAR_Z(I,J) Average specific heat (J/kg/K) of lumped species J at temperature I (K). Includes reference enthalpy.
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: K_RSQMW_Z
-!< K_RSQMW_Z(I,J) Conductivty (W/m/K) of lumped species J at temperature I (K) divided by SM%MW^0.5.
+!< K_RSQMW_Z(I,J) Conductivty (W/m/K) of lumped species J at temperature I (K) divided by SM%MW^0.5
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: MU_RSQMW_Z
-!< MU_RSQMW_Z(I,J) Viscosity (m^2/s)  of lumped species J at temperature I (K) divided by SM%MW^0.5..
-REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: D_Z          !< D_Z(I,J) Diffusivity (m^2/s) of lumped species J at temperature I (K)
-REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: G_F_Z        !< CP_Z(I,J) Gibbs free energy (J/kg) of lumped species J at temperature I (K)
-REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: H_SENS_Z     !< H_SENS(I,J) Spensible enthalpy (J/kg) of lumped species J at temperature I (K)
+!< MU_RSQMW_Z(I,J) Viscosity (m^2/s)  of lumped species J at temperature I (K) divided by SM%MW^0.5
+REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: D_Z          !< D_Z(I,J) Diffusivity (m^2/s) of lumped species J at temp I (K)
+REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: G_F_Z        !< CP_Z(I,J) Gibbs free energy (J/kg) of lumped species J at temp I (K)
+REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: H_SENS_Z     !< H_SENS(I,J) Sensible enthalpy (J/kg) of lumped species J at temp I (K)
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: CP_AVG_Z     !< CP_AVG_Z(I,J) H_SENS_Z(I,J)/I
 
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: MWR_Z,RSQ_MW_Z
