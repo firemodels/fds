@@ -4814,6 +4814,10 @@ be safe.
   unusable.  The default is that the exit is always categorized as
   usable in the exit selection algorithm.
 %
+\item[\Timts{LOCKED\_WHEN\_CLOSED}] If it is set \Timts{TRUE} then the agents stop at the exit line if the exit is closed. In normal mode the agents can go through closed exits, but they do not use closed exits in the door selection algorithm.
+%
+\item[\Timts{TARGET\_WHEN\_CLOSED}] If it is set \Timts{TRUE} then the exit is included in the door selection algorithm even if it is closed. The agents will go towards closed exits and will go through the closed exits if \Timts{TARGET\_WHEN\_CLOSED} is not set to true.
+%
 \item[\Timts{SHOW}] A logical switch used to control if the exit is
   shown in Smokeview or not.  This switch has only effect on the real
   exits, the count only exits are never shown in Smokeview.  The
@@ -5018,6 +5022,10 @@ part of the calculation, \emph{e.g.}, to stairs or to a different
 \item[\Timts{TIME\_CLOSE}] The time (s) when this door becomes
   unusable.  The default is that the door is always categorized as
   usable in the exit selection algorithm.
+%
+\item[\Timts{LOCKED\_WHEN\_CLOSED}] If it is set \Timts{TRUE} then the agents stop at the door line if the door is closed. In normal mode the agents can go through closed doors, but they do not use closed doors in the door selection algorithm.
+%
+\item[\Timts{TARGET\_WHEN\_CLOSED}] If it is set \Timts{TRUE} then the door is included in the door selection algorithm even if it is closed. The agents will go towards closed doors and will go through the closed doors if \Timts{TARGET\_WHEN\_CLOSED} is not set to true.
 %
 \item[\Timts{SHOW}] A logical switch used to control if the door is
   shown in Smokeview or not.  The default is \Timtt{.TRUE.}.
