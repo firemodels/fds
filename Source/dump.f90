@@ -843,7 +843,7 @@ ENDIF
 
 IF (VELOCITY_ERROR_FILE) THEN
    OPEN(UNIT=LU_VELOCITY_ERROR,FILE=FN_VELOCITY_ERROR,FORM='FORMATTED',STATUS='UNKNOWN',POSITION='REWIND')
-   WRITE(LU_VELOCITY_ERROR,'(A)') 'Time Step,Iteration,Total,Mesh,I,J,K,Velocity Error,Mesh,I,J,K,Pressure Error'
+   WRITE(LU_VELOCITY_ERROR,'(A)') 'Time,Time Step,Iteration,Total,Mesh,I,J,K,Velocity Error,Mesh,I,J,K,Pressure Error'
 ENDIF
 
 ! Special output for detailed CFL info
