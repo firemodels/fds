@@ -1327,9 +1327,9 @@ Details and references with regard to the plume temperature measurements are giv
 
 The 30~cm pool fires are modeled at three different grid resolutions---2~cm, 1~cm, and 0.5~cm. The 100~cm pool fires are modeled at 4~cm, 2~cm, and 1~cm resolution. The mass loss rate of the fuel is specified.
 
-A two-step reaction mechanism is implemented. In the first reaction, fuel is converted to CO, soot, H$_2$, and H$_2$O. In the second reaction, the CO, soot, and H$_2$ are converted to CO$_2$ and H$_2$O. Both reactions employ fast kinetics, but proceed in series, not in parallel. The relative amounts of CO, soot, and H$_2$ produced in the first step are still subjects of study, and for the moment have been estimated based on measured results. For example, the methanol fire produces no measurable soot and thus all of the carbon in the fuel molecule is assumed to produce CO in the first step.
+A two-step reaction mechanism is implemented. In the first reaction, fuel is converted to CO, soot, H$_2$, and H$_2$O. In the second reaction, the CO, soot, and H$_2$ are converted to CO$_2$ and H$_2$O. Both reactions employ fast kinetics, but proceed in series, not in parallel. The relative amounts of CO, soot, and H$_2$ produced in the first step are still subjects of study, and for the moment have been estimated based on measured results. The fractions of carbon atoms converted to CO in the first step are as follows---0.85 for acetone; 0.95 for ethanol; 0.97 for methane; 0.97 for 1~m methanol; 0.85 for propane. For all fuels, one half of the hydrogen atoms are converted to H$_2$ in the first step.
 
-The radiative fraction is not specified, but rather predicted using the computed temperature and radiative properties computed by RadCal.
+The radiative fractions are specified based on measured values---0.31 for acetone; 0.26 for ethanol; 0.15 for methane; 0.21 for 1~m methanol; 0.22 for 30~cm methanol; 0.22 for propane.
 
 
 \section{NIST Smoke Alarm Experiments}
@@ -2676,15 +2676,15 @@ Additional measurements of a 30.5~cm diameter methanol pool fire were made by Ha
 
 The methanol pool fire is modeled at three different grid resolutions---2~cm, 1~cm, and 0.5~cm. Two sets of simulations are performed, one in which the mass loss rate of fuel is specified, and one in which it is predicted. The gas phase measurements are compared with the simulations for which the burning rate is specified.
 
-Because measurements of CO were made within the flame envelop, a two-step reaction mechanism is implemented. In the first reaction, fuel is converted to CO and H$_2$O, and in the second reaction, CO is converted to CO$_2$. Both reactions employ fast kinetics.
+Because measurements of CO were made within the flame envelop, a two-step reaction mechanism is implemented. In the first reaction, fuel is converted to CO and H$_2$O, and in the second reaction, CO is converted to CO$_2$. Both reactions employ fast kinetics and performed serially. It is assumed that no soot is formed in either reaction.
 
 Physical properties of methanol are taken from a data sheet published by the Methanol Institute~\cite{Methanol}: boiling temperature, 64.6~$^\circ$C, heat of vaporization at 64.6~$^\circ$C, 1098.3~kJ/kg, thermal conductivity, 0.2~W/(m$\cdot$K), specific heat at 25~$^\circ$C, 2.53~kJ/(kg$\cdot$K), density at 20~$^\circ$C, 792~kg/m$^3$. The heat of combustion is given as 19.9~kJ/g, but this value is not input directly, but rather calculated based on the heats of formation of the reactants and products of combustion.
 
-The radiative fraction is specified to be 16~\% (Table A.39, {\em SFPE~Handbook}~\cite{SFPE}). The path length used by RadCal to compute the table of effective radiative absorption coefficients for the gas mixture is set to 10~cm. Normally, its value is a function of grid size, but has been fixed so as not to influence the grid convergence study. The absorption coefficient of the liquid methanol is given as 52~m$^{-1}$, based on the discussion found in Appendix~L of the FDS Technical Reference Guide~\cite{FDS_Tech_Guide}, ``Absorption Coefficients of Liquid Fuels.''
+The radiative fraction is {\em predicted} by the model, not specified by the user, for all cases. The path length used by RadCal to compute the table of effective radiative absorption coefficients for the gas mixture is set to 10~cm, the default value. The absorption coefficient of the liquid methanol is given as 1140~m$^{-1}$.
 
 The modeled thermocouple has a bead diameter of 100~$\mu$m to match the experiments.
 
-For the simulations where the burning rate is not specified, a one-step, first-order reaction converting liquid methanol to fuel vapor was used. The boiling temperature of the liquid was specified as the temperature at which the reaction rate is at its peak, 64.5~$^\circ$C. This approach is different than the liquid fuel burning model in FDS. It is more like that used for non-charring polymers.
+For the simulations where the burning rate is not specified, a liquid fuel evaporation model is used with a boiling temperature of 64.6~$^\circ$C.
 
 
 \section{WTC Spray Burner Experiments}
