@@ -199,7 +199,6 @@ LOGICAL :: SHARED_FILE_SYSTEM=.TRUE.        !< Assume that FDS is being run on c
 LOGICAL :: FREEZE_VELOCITY=.FALSE.          !< Hold velocity fixed, do not perform a velocity update
 LOGICAL :: BNDF_DEFAULT=.TRUE.              !< Output boundary output files
 LOGICAL :: SPATIAL_GRAVITY_VARIATION=.FALSE.!< Assume gravity varies as a function of the \f$ x \f$ coordinate
-LOGICAL :: PROJECTION=.TRUE.                !< Apply the projection method for the divergence
 LOGICAL :: CHECK_VN=.TRUE.                  !< Check the Von Neumann number
 LOGICAL :: SOLID_PARTICLES=.FALSE.          !< Indicates the existence of solid particles
 LOGICAL :: HVAC=.FALSE.                     !< Perform an HVAC calculation
@@ -442,7 +441,6 @@ REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: MU_RSQMW_Z
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: D_Z          !< D_Z(I,J) Diffusivity (m^2/s) of lumped species J at temp I (K)
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: G_F_Z        !< CP_Z(I,J) Gibbs free energy (J/kg) of lumped species J at temp I (K)
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: H_SENS_Z     !< H_SENS(I,J) Sensible enthalpy (J/kg) of lumped species J at temp I (K)
-REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: CP_AVG_Z     !< CP_AVG_Z(I,J) H_SENS_Z(I,J)/I
 
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: MWR_Z,RSQ_MW_Z
 CHARACTER(LABEL_LENGTH) :: EXTINCTION_MODEL='null'
