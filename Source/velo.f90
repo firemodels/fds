@@ -2527,12 +2527,10 @@ IF (PREDICTOR) THEN
    UU => US
    VV => VS
    WW => WS
-   D_CORR = 0._EB
 ELSE
    UU => U
    VV => V
    WW => W
-   DS_CORR = 0._EB
 ENDIF
 
 ! Loop over all external wall cells and force adjacent normal components of velocty at interpolated boundaries to match.
@@ -2606,8 +2604,6 @@ EXTERNAL_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
             ENDDO
          ENDDO
          UU_AVG = 0.5_EB*(UU(0,JJ,KK) + UU_OTHER)
-         IF (PREDICTOR) D_CORR(IW) = DS_CORR(IW) + 0.5*(UU_AVG-UU(0,JJ,KK))*R(0)*RDX(1)*RRN(1)
-         IF (CORRECTOR) DS_CORR(IW) = (UU_AVG-UU(0,JJ,KK))*R(0)*RDX(1)*RRN(1)
          UVW_SAVE(IW) = UU(0,JJ,KK)
          UU(0,JJ,KK)  = UU_AVG
 
@@ -2623,8 +2619,6 @@ EXTERNAL_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
             ENDDO
          ENDDO
          UU_AVG = 0.5_EB*(UU(IBAR,JJ,KK) + UU_OTHER)
-         IF (PREDICTOR) D_CORR(IW) = DS_CORR(IW) - 0.5*(UU_AVG-UU(IBAR,JJ,KK))*R(IBAR)*RDX(IBAR)*RRN(IBAR)
-         IF (CORRECTOR) DS_CORR(IW) = -(UU_AVG-UU(IBAR,JJ,KK))*R(IBAR)*RDX(IBAR)*RRN(IBAR)
          UVW_SAVE(IW) = UU(IBAR,JJ,KK)
          UU(IBAR,JJ,KK) = UU_AVG
 
@@ -2640,8 +2634,6 @@ EXTERNAL_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
             ENDDO
          ENDDO
          VV_AVG = 0.5_EB*(VV(II,0,KK) + VV_OTHER)
-         IF (PREDICTOR) D_CORR(IW) = DS_CORR(IW) + 0.5*(VV_AVG-VV(II,0,KK))*RDY(1)
-         IF (CORRECTOR) DS_CORR(IW) = (VV_AVG-VV(II,0,KK))*RDY(1)
          UVW_SAVE(IW) = VV(II,0,KK)
          VV(II,0,KK)  = VV_AVG
 
@@ -2657,8 +2649,6 @@ EXTERNAL_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
             ENDDO
          ENDDO
          VV_AVG = 0.5_EB*(VV(II,JBAR,KK) + VV_OTHER)
-         IF (PREDICTOR) D_CORR(IW) = DS_CORR(IW) - 0.5*(VV_AVG-VV(II,JBAR,KK))*RDY(JBAR)
-         IF (CORRECTOR) DS_CORR(IW) = -(VV_AVG-VV(II,JBAR,KK))*RDY(JBAR)
          UVW_SAVE(IW)   = VV(II,JBAR,KK)
          VV(II,JBAR,KK) = VV_AVG
 
@@ -2674,8 +2664,6 @@ EXTERNAL_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
             ENDDO
          ENDDO
          WW_AVG = 0.5_EB*(WW(II,JJ,0) + WW_OTHER)
-         IF (PREDICTOR) D_CORR(IW) = DS_CORR(IW) + 0.5*(WW_AVG-WW(II,JJ,0))*RDZ(1)
-         IF (CORRECTOR) DS_CORR(IW) = (WW_AVG-WW(II,JJ,0))*RDZ(1)
          UVW_SAVE(IW) = WW(II,JJ,0)
          WW(II,JJ,0)  = WW_AVG
 
@@ -2691,8 +2679,6 @@ EXTERNAL_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
             ENDDO
          ENDDO
          WW_AVG = 0.5_EB*(WW(II,JJ,KBAR) + WW_OTHER)
-         IF (PREDICTOR) D_CORR(IW) = DS_CORR(IW) - 0.5*(WW_AVG-WW(II,JJ,KBAR))*RDZ(KBAR)
-         IF (CORRECTOR) DS_CORR(IW) = -(WW_AVG-WW(II,JJ,KBAR))*RDZ(KBAR)
          UVW_SAVE(IW)   = WW(II,JJ,KBAR)
          WW(II,JJ,KBAR) = WW_AVG
 
