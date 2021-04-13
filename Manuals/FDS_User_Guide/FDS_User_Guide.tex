@@ -1508,7 +1508,27 @@ For certain types of diagnostic tests, it is useful to turn off the velocity fie
 
 The algorithms in FDS are designed to work within a certain range of values for density, temperature and mass fraction. To prevent unphysical results, there are bounds placed on these variables to prevent a single spurious value from causing a numerical instability. It also prevents out of range errors from calls to temperature-dependent look-up tables. By default, FDS determines the lowest and highest values of the variables based on your input, but it is not possible in all cases to anticipate just how low or high a given value might be. Thus, on rare occasions you might need to set upper or lower bounds on the density or temperature. Temperature and density bounds are input under the namelist group called {\ct CLIP}. The parameters are listed in Table~\ref{tbl:CLIP}. You only need to set these values if you notice that one of them appears to be ``cut off'' when examining the results in Smokeview. For typical fire scenarios, you need not set these values, but if you anticipate relatively low or high values in an unusual case, take a look at the calculation results to determine if a change in the bounds is needed.
 
-Clipping of mass fractions violates mass conservation, so it is preferable to avoid clipping if possible.  As discussed in Sec.~\ref{info:Stability_Constraints}, the time step is set to adhere to the CFL constraints of the flow field.  The proper {\ct DT} combined with flux limiters generally avoids the need for clipping.  Beyond this, FDS then employs a mass redistribution scheme, as discussed in FDS Technical Guide \cite{FDS_Math_Guide}.  If this fails, there is yet one more attempt to avoid clipping---the time step is nudged down by 10\% ($\dt_{\mathrm{new}} = 0.9 \,\dt$) and the scalar transport equations are reiterated.  This process is carried out a maximum of {\ct CLIP\_DT\_RESTRICTIONS\_MAX} times; the default is 5.  In some very extreme circumstances, this loop can drive the time step into numerical instability range ($\dt/\dt_{\mathrm{init}} < \mbox{\ct LIMITING\_DT\_RATIO}$).  You can control the max number of time step restrictions by setting the parameter {\ct CLIP\_DT\_RESTRICTIONS\_MAX} on the {\ct CLIP} line (set to 0 to bypass the algorithm altogether). The number of restrictions (if any) is noted in the {\ct CHID.out} file for a given time step.
+\subsection{Temperature}
+\label{info:CLIP:temp}
+
+The gas temperature is not solved for directly. Rather, the gas density and species mass fractions determine the gas temperature via the equation of state. Nevertheless, the calculation of the temperature of liquid droplets and solid obstructions do make use of temperature bounds. The default bounds are
+\be
+   \min \left( T_\infty , T_{\rm m} \right) - 10 < T < 2727 \quad ^\circ {\rm C}
+\ee
+where $T_\infty$ is the user-specified ambient temperature and $T_{\rm m}$ is the melting temperature of water. These bounds are widened by user-specified temperatures, like an initial solid or droplet temperature. To set your own bounds, use {\ct MINIMUM\_TEMPERATURE} and/or {\ct MAXIMUM\_TEMPERATURE} on the {\ct CLIP} line.
+
+One other consideration related to high temperatures is that FDS uses tabulated gas and solid property data up to a temperature of 5000~K. If for some reason you expect higher temperatures, set the integer parameter {\ct I\_MAX\_TEMP} on the {\ct MISC} line. This sets the upper dimension of many property arrays. Even though this parameter is an integer, it can be thought of as a maximum temperature in units of K. Note that temperature-dependent properties like specific heat at temperatures above 5000~K remain fixed, but integrated quantities like enthalpy take into account the higher temperature.
+
+\subsection{Density}
+\label{info:CLIP:dens}
+
+The density of the gas has a natural lower bound of zero, but if the density in a cell decreases to nearly zero, the temperature would then increase to an extremely high value due to the equation of state. Thus, by default, the density is kept within the following range:
+\be
+   \min \left( 0.1 \, \rho_\infty , \frac{2 \, p_\infty \, W_{\min}}{\R \, T_{\max}} \right) < \rho <  \frac{2 \, p_\infty \, W_{\max}}{\R \, T_{\min}} 
+\ee
+where $W_{\min}$ and $W_{\max}$ are the minimum and maximum values of the molecular weight of the tracked gas species in units of g/mol, and $\R$ is the universal gas constant, 8314.5~J/(kmol$\cdot$K). $T_{\min}$ and $T_{\max}$ are described above. To override the limits of density, specify {\ct MINIMUM\_DENSITY} and/or {\ct MAXIMUM\_DENSITY} on the {\ct CLIP} line in units of kg/m$^3$. 
+
+Clipping of density and mass fractions violates mass conservation, so it is preferable to avoid clipping if possible.  As discussed in Sec.~\ref{info:Stability_Constraints}, the time step is set to adhere to the CFL constraints of the flow field.  The proper {\ct DT} combined with flux limiters generally avoids the need for clipping.  Beyond this, FDS then employs a mass redistribution scheme, as discussed in FDS Technical Guide~\cite{FDS_Math_Guide}.  If this fails, there is yet one more attempt to avoid clipping---the time step is decreased by 10~\% ($\dt_{\mathrm{new}} = 0.9 \,\dt$) and the scalar transport equations are reiterated.  This process is carried out a maximum of {\ct CLIP\_DT\_RESTRICTIONS\_MAX} times; the default is 5.  In some very extreme circumstances, this loop can drive the time step into numerical instability range ($\dt/\dt_{\mathrm{init}} < \mbox{\ct LIMITING\_DT\_RATIO}$).  You can control the max number of time step restrictions by setting the parameter {\ct CLIP\_DT\_RESTRICTIONS\_MAX} on the {\ct CLIP} line (set to 0 to bypass the algorithm altogether). The number of restrictions (if any) is noted in the {\ct CHID.out} file for a given time step.
 
 
 
@@ -10624,11 +10644,11 @@ properties be specified as well. Simply prescribing as many properties as possib
 \multicolumn{5}{|c|}{{\ct CLIP} (Specified Upper and Lower Limits)} \\
 \hline \hline
 \endhead
-{\ct CLIP\_DT\_RESTRICTIONS\_MAX}   & Integer        & Section~\ref{info:CLIP}      &            & 5   \\ \hline
-{\ct MAXIMUM\_DENSITY}              & Real           & Section~\ref{info:CLIP}      & kg/m$^3$   &     \\ \hline
-{\ct MAXIMUM\_TEMPERATURE}          & Real           & Section~\ref{info:CLIP}      & $^\circ$C  &     \\ \hline
-{\ct MINIMUM\_DENSITY}              & Real           & Section~\ref{info:CLIP}      & kg/m$^3$   &     \\ \hline
-{\ct MINIMUM\_TEMPERATURE}          & Real           & Section~\ref{info:CLIP}      & $^\circ$C  &     \\ \hline
+{\ct CLIP\_DT\_RESTRICTIONS\_MAX}   & Integer        & Section~\ref{info:CLIP:dens}      &            & 5   \\ \hline
+{\ct MAXIMUM\_DENSITY}              & Real           & Section~\ref{info:CLIP:dens}      & kg/m$^3$   &     \\ \hline
+{\ct MAXIMUM\_TEMPERATURE}          & Real           & Section~\ref{info:CLIP:temp}      & $^\circ$C  &     \\ \hline
+{\ct MINIMUM\_DENSITY}              & Real           & Section~\ref{info:CLIP:dens}      & kg/m$^3$   &     \\ \hline
+{\ct MINIMUM\_TEMPERATURE}          & Real           & Section~\ref{info:CLIP:temp}      & $^\circ$C  &     \\ \hline
 \end{longtable}
 
 \vspace{\baselineskip}
@@ -11326,6 +11346,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct HVAC\_MASS\_TRANSPORT}                         & Logical      & Section ~\ref{info:hvacmasstransport}   &            & {\ct F}     \\ \hline
 {\ct HVAC\_PRES\_RELAX}                             & Real         & Section ~\ref{info:HVAC}                &            & 0.5               \\ \hline
 {\ct IBLANK\_SMV}                                   & Logical      & Section~\ref{info:SLCF}                 &            & {\ct T}      \\ \hline
+{\ct I\_MAX\_TEMP}                                  & Integer      & Section~\ref{info:CLIP:temp}            & K          & 5000               \\ \hline
 {\ct LEVEL\_SET\_ELLIPSE}                           & Logical      & Section~\ref{info:level_set}            &            & {\ct T}      \\ \hline
 {\ct LEVEL\_SET\_MODE}                              & Integer      & Section~\ref{info:level_set}            &            & 0                 \\ \hline
 {\ct MAXIMUM\_VISIBILITY}                           & Real         & Section~\ref{info:visibility}           &  m         &  30               \\ \hline
@@ -11704,7 +11725,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct OFFSET}                            & Real          & Section~\ref{info:sprinklers}             & m                     & 0.05        \\ \hline
 {\ct OPERATING\_PRESSURE}               & Real          & Section~\ref{info:sprinklers}             & bar                   & 1.          \\ \hline
 {\ct ORIFICE\_DIAMETER}                 & Real          & Section~\ref{info:sprinklers}             & m                     & 0.          \\ \hline
-{\ct P0,PX(3),PXX(3,3)}                 & Real          & Section~\ref{info:velocity_patch}         & m/s                   &  0.         \\ \hline
 {\ct PARTICLES\_PER\_SECOND}            & Integer       & Section~\ref{info:sprinklers}             &                       & 5000        \\ \hline
 {\ct PARTICLE\_VELOCITY}                & Real          & Section~\ref{info:sprinklers}             & m/s                   & 0.          \\ \hline
 {\ct PART\_ID}                          & Character     & Section~\ref{info:sprinklers}             &                       &             \\ \hline
@@ -11716,6 +11736,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct PDPA\_RADIUS}                      & Real          & Section~\ref{PDPA}                        & m                     & 0.          \\ \hline
 {\ct PDPA\_START}                       & Real          & Section~\ref{PDPA}                        & s                     & 0.          \\ \hline
 {\ct PRESSURE\_RAMP}                    & Character     & Section~\ref{info:sprinklers}             &                       &             \\ \hline
+{\ct P0}                                & Real          & Section~\ref{info:velocity_patch}         & m/s                   &  0.         \\ \hline
+{\ct PX(3)}                             & Real          & Section~\ref{info:velocity_patch}         & m/s                   &  0.         \\ \hline
+{\ct PXX(3,3)}                          & Real          & Section~\ref{info:velocity_patch}         & m/s                   &  0.         \\ \hline
 {\ct QUANTITY}                          & Character     & Section~\ref{info:sprinklers}             &                       &             \\ \hline
 {\ct RTI}                               & Real          & Section~\ref{info:sprinklers}             & $\sqrt{\si{m.s}}$     & 100.        \\ \hline
 {\ct SMOKEVIEW\_ID(:)}                  & Char.~Array   & Section~\ref{info:SMOKEVIEW_ID}           &                       &             \\ \hline
@@ -12241,7 +12264,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct DB    }                & Character         & Section~\ref{info:VENT_Basics}                            &               &                     \\ \hline
 {\ct DEVC\_ID }             & Character         & Section~\ref{info:activate_deactivate}                    &               &                     \\ \hline
 {\ct DYNAMIC\_PRESSURE}     & Real              & Section~\ref{info:pressure_boundary}                      & Pa            & 0.                  \\ \hline
-{\ct EVACUATION    }        & Logical           & Reference~\cite{FDS_Evac_Users_Guide}                     &               &  {\ct F}      \\ \hline
+{\ct EVACUATION    }        & Logical           & Reference~\cite{FDS_Evac_Users_Guide}                     &               &  {\ct F}            \\ \hline
+{\ct GEOM    }              & Logical           & Section~\ref{info:level_set}                              &               &  {\ct F}            \\ \hline
 {\ct ID }                   & Character         & Section~\ref{info:VENT_Basics}                            &               &                     \\ \hline
 {\ct IOR}                   & Integer           & Section~\ref{info:VENT_Trouble}                           &               &                     \\ \hline
 {\ct L\_EDDY}               & Real              & Section~\ref{info:synthetic_turbulence}                   & m             & 0.                  \\ \hline
