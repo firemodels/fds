@@ -143,24 +143,24 @@ to test all of the various features of the model.
 \hline
 \multicolumn{2}{|c|}{\bf FDS 6 Beta Testers} \\ \hline \hline
 Mohammed Assal                          & CFD Algeria                                                               \\ \hline
-Choon-Bum Choi                          & Building and Tunnel Technologies Inc. (BNTTEK), Korea                     \\ \hline
+Choon-Bum Choi                          & KyungWon Tech Co., Ltd.~(KW Tech), Korea                                  \\ \hline
 William J. Ferrante                     & Roosevelt Fire District, Hyde Park, New York, USA                         \\ \hline
 Emanuele Gissi                          & Corpo Nazionale dei Vigili del Fuoco, Italy                               \\ \hline
-Timothy M. Groch                        & Engineering Planning and Management, Inc., Framingham, Massachusetts, USA \\ \hline
+Timothy M. Groch                        & Engineering Planning and Management, Inc.,~Framingham, Massachusetts, USA \\ \hline
 Georges Guigay                          & Mannvit Engineering, Iceland                                              \\ \hline
 Simon J. Ham                            & Fire Safety Engineering Consultants Limited, UK                           \\ \hline
 Chris Lautenberger                      & Reax Engineering, Berkeley, California, USA                               \\ \hline
 Tim McDonald                            & Endress Ingenieurgesellschaft mbH, Germany                                \\ \hline
 Dave McGill                             & Seneca College, Ontario, Canada                                           \\ \hline
-Adrian Milford                          & Sereca Fire Consulting Ltd., British Columbia, Canada                     \\ \hline
+Adrian Milford                          & Sereca Fire Consulting Ltd.,~British Columbia, Canada                     \\ \hline
 Luca Nassi                              & National Fire Department, Italy                                           \\ \hline
-Stephen Olenick                         & Combustion Science and Engineering, Inc., Columbia, Maryland, USA         \\ \hline
+Stephen Olenick                         & Combustion Science and Engineering, Inc.,~Columbia, Maryland, USA         \\ \hline
 Natalie Ong                             & Arup Fire Singapore                                                       \\ \hline
 Chris Salter                            & Hoare Lea and Partners, UK                                                \\ \hline
 Joakim Sandstr\"{o}m                    & LTU/Brandskyddslaget, Sweden                                              \\ \hline
 Julio Cesar Silva                       & Federal University of Rio de Janeiro, Brazil                              \\ \hline
 Boris Stock                             & BFT Cognos GmbH, Aachen, Germany                                          \\ \hline
-Csaba Szilagyi                          & OPTOMM Ltd., Budapest, Hungary                                            \\ \hline
+Csaba Szilagyi                          & OPTOMM Ltd.,~Budapest, Hungary                                            \\ \hline
 Giacomo Villi                           & Universit\`{a} di Padova, Italy                                           \\ \hline
 Andreas Vischer                         & Wijnveld//Ingenieure, Osnabr\"{u}ck, Germany                              \\ \hline
 Christopher Wood                        & FireLink, LLC, Tewksbury, Massachusetts, USA                              \\ \hline
@@ -1524,9 +1524,9 @@ One other consideration related to high temperatures is that FDS uses tabulated 
 
 The density of the gas has a natural lower bound of zero, but if the density in a cell decreases to nearly zero, the temperature would then increase to an extremely high value due to the equation of state. Thus, by default, the density is kept within the following range:
 \be
-   \min \left( 0.1 \, \rho_\infty , \frac{2 \, p_\infty \, W_{\min}}{\R \, T_{\max}} \right) < \rho <  \frac{2 \, p_\infty \, W_{\max}}{\R \, T_{\min}} 
+   \min \left( 0.1 \, \rho_\infty , \frac{2 \, p_\infty \, W_{\min}}{\R \, T_{\max}} \right) < \rho <  \frac{2 \, p_\infty \, W_{\max}}{\R \, T_{\min}}
 \ee
-where $W_{\min}$ and $W_{\max}$ are the minimum and maximum values of the molecular weight of the tracked gas species in units of g/mol, and $\R$ is the universal gas constant, 8314.5~J/(kmol$\cdot$K). $T_{\min}$ and $T_{\max}$ are described above. To override the limits of density, specify {\ct MINIMUM\_DENSITY} and/or {\ct MAXIMUM\_DENSITY} on the {\ct CLIP} line in units of kg/m$^3$. 
+where $W_{\min}$ and $W_{\max}$ are the minimum and maximum values of the molecular weight of the tracked gas species in units of g/mol, and $\R$ is the universal gas constant, 8314.5~J/(kmol$\cdot$K). $T_{\min}$ and $T_{\max}$ are described above. To override the limits of density, specify {\ct MINIMUM\_DENSITY} and/or {\ct MAXIMUM\_DENSITY} on the {\ct CLIP} line in units of kg/m$^3$.
 
 Clipping of density and mass fractions violates mass conservation, so it is preferable to avoid clipping if possible.  As discussed in Sec.~\ref{info:Stability_Constraints}, the time step is set to adhere to the CFL constraints of the flow field.  The proper {\ct DT} combined with flux limiters generally avoids the need for clipping.  Beyond this, FDS then employs a mass redistribution scheme, as discussed in FDS Technical Guide~\cite{FDS_Math_Guide}.  If this fails, there is yet one more attempt to avoid clipping---the time step is decreased by 10~\% ($\dt_{\mathrm{new}} = 0.9 \,\dt$) and the scalar transport equations are reiterated.  This process is carried out a maximum of {\ct CLIP\_DT\_RESTRICTIONS\_MAX} times; the default is 5.  In some very extreme circumstances, this loop can drive the time step into numerical instability range ($\dt/\dt_{\mathrm{init}} < \mbox{\ct LIMITING\_DT\_RATIO}$).  You can control the max number of time step restrictions by setting the parameter {\ct CLIP\_DT\_RESTRICTIONS\_MAX} on the {\ct CLIP} line (set to 0 to bypass the algorithm altogether). The number of restrictions (if any) is noted in the {\ct CHID.out} file for a given time step.
 
