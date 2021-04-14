@@ -62,7 +62,7 @@ SELECT CASE(PREDICTOR)
       PBAR_P => PBAR_S
       RHOP => RHOS
    CASE(.FALSE.)
-      DP => DDDT
+      DP => D
       PBAR_P => PBAR
       RHOP => RHO
 END SELECT
@@ -1622,7 +1622,7 @@ SELECT CASE(PREDICTOR)
       DP => DS
       PBAR_P => PBAR_S
    CASE(.FALSE.)
-      DP => DDDT
+      DP => D
       PBAR_P => PBAR
 END SELECT
 
@@ -1793,7 +1793,6 @@ ELSEIF (CORRECTOR) THEN
          ENDDO
       ENDDO
    ENDDO
-   D = DDDT
    DDDT = (2._EB*DP-DIV)*RDT
 ENDIF
 
