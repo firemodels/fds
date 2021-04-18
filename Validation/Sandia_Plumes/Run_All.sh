@@ -6,7 +6,7 @@ export SVNROOT=`pwd`/../..
 source $SVNROOT/Validation/Common_Run_All.sh
 
 $QFDS $DEBUG -p 1  $QUEUE -d $INDIR Sandia_He_1m_dx20cm.fds
-$QFDS $DEBUG -p 64 -n 8 $QUEUE -d $INDIR Sandia_He_1m_dx10cm.fds
+$QFDS $DEBUG -p 1  $QUEUE -d $INDIR Sandia_He_1m_dx10cm.fds
 $QFDS $DEBUG -p 64 -n 8 $QUEUE -d $INDIR Sandia_He_1m_dx6cm.fds
 $QFDS $DEBUG -p 64 -n 8 $QUEUE -d $INDIR Sandia_He_1m_dx3cm.fds
 $QFDS $DEBUG -p 64 -n 8 $QUEUE -d $INDIR Sandia_He_1m_dx1p5cm.fds
