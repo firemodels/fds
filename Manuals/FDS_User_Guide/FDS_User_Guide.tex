@@ -8793,13 +8793,13 @@ Note that in this case, a plane is specified rather than a point. The sextuplet 
 \subsection{Linear Array of Point Devices}
 \label{info:line_file}
 
-You can use a single {\ct DEVC} line to specify a linear array of devices. By adding the parameter {\ct POINTS} and using the sextuple coordinate array {\ct XB}, you can direct FDS to create a line of devices from $(x_1,y_1,z_1)$ to $(x_2,y_2,z_2)$. There are two options.
+You can use a single {\ct DEVC} line to specify a linear array of devices. By adding the parameter {\ct POINTS} and using the sextuple coordinate array {\ct XBP}\footnote{Earlier versions of FDS made use of the array {\ct XB} to specify the extents of a linear array of point devices. However, {\ct XB} might be needed to specify a particular type of {\ct SPATIAL\_STATISTIC} associated with each device.}, you can direct FDS to create a line of devices from $(x_1,y_1,z_1)$ to $(x_2,y_2,z_2)$. There are two options.
 
 \subsubsection{Steady-State Profile}
 
 Sometimes it is convenient to calculate a steady-state profile. For example, the vertical velocity profile along the centerline of a doorway can be recorded with the following line of input:
 \begin{lstlisting}
-&DEVC XB=X1,X2,Y1,Y2,Z1,Z2, QUANTITY='U-VELOCITY', ID='vel', POINTS=20,
+&DEVC XBP=X1,X2,Y1,Y2,Z1,Z2, QUANTITY='U-VELOCITY', ID='vel', POINTS=20,
       STATISTICS_START=20., STATISTICS_END=40. /
 \end{lstlisting}
 In a file called {\ct CHID\_line.csv}, there will be between 1 and 4 columns of data associated with this single {\ct DEVC} line. If {\ct X1} is different than {\ct X2}, there will be a column of $x$ coordinates associated with the linear array of points. The same holds for the $y$ and $z$ coordinates. The last column contains the 20 temperature points time-averaged over the interval between {\ct STATISTICS\_START} and {\ct STATISTICS\_END}. The default value of the latter is {\ct T\_END} and the former is half the total simulation time. This is a convenient way to output a time-averaged linear profile of a quantity, like an array of thermocouples.  Note that the statistics output to the {\ct \_line.csv} file start being averaged at {\ct T=STATISTICS\_START}.  Prior to this time, the values are zero.  This prevents initial transient from biasing the final average value or other temporal statistics.
@@ -8812,16 +8812,15 @@ You can convert the spatial coordinate of a steady-state profile by setting {\ct
 
 If you do not want a steady-state profile, but rather you just want to specify an array of evenly spaced devices, you can use a similar input line, except with the additional attribute {\ct TIME\_HISTORY}.
 \begin{lstlisting}
-&DEVC XB=X1,X2,Y1,Y2,Z1,Z2, QUANTITY='U-VELOCITY', ID='vel', POINTS=20,
+&DEVC XBP=X1,X2,Y1,Y2,Z1,Z2, QUANTITY='U-VELOCITY', ID='vel', POINTS=20,
       TIME_HISTORY=T /
 \end{lstlisting}
 This directs FDS to just add 20 devices to the on-going list, saving you from having to write 20 {\ct DEVC} lines. The {\ct ID} for each device will be {\ct 'vel-01'}, {\ct 'vel-02'}, etc.
 
 
-
 \subsubsection{Other Statistics for a Linear Array of Devices}
 
-By default, when you specify multiple {\ct POINTS} on a {\ct DEVC} line and you do not specify {\ct TIME\_HISTORY=T}, a running average of the specified {\ct QUANTITY} is saved at each point location and written to the file with suffix {\ct \_line.csv} with the accumulated values at the time {\ct STATISTICS\_END}. However, you can apply any other {\ct TEMPORAL\_STATISTIC} and compute, for example, the root-mean-square ({\ct 'RMS'}), minimum ({\ct 'MIN'}), or maximum ({\ct 'MAX'}) value over the specified time interval.
+By default, when you specify multiple {\ct POINTS} on a {\ct DEVC} line and you do not specify {\ct TIME\_HISTORY=T}, a running average of the specified {\ct QUANTITY} is saved at each point location and written to the file with suffix {\ct \_line.csv} with the accumulated values at the time {\ct STATISTICS\_END}. However, you can apply any other {\ct TEMPORAL\_STATISTIC} and compute, for example, the root-mean-square ({\ct 'RMS'}), minimum ({\ct 'MIN'}), or maximum ({\ct 'MAX'}) value over the specified time interval. You may also specify a {\ct SPATIAL\_STATISTIC} for each device in the line using {\ct XB} for the limits of the plane or volume over which the function is calculated.
 
 \subsubsection{Moving a Linear Array of Devices}
 \label{info:MOVE_ID}
@@ -8838,7 +8837,7 @@ To record the temperature inside the surface, you can use a device as follows:
 \end{lstlisting}
 The parameter {\ct DEPTH} (m) indicates the distance inside the solid surface. If {\ct DEPTH} is positive FDS outputs the temperature at the wall node given by moving {\ct DEPTH} from the front face of the surface. If negative, it is measured from the back surface (e.g. the location from the front given by the current solid surface thickness + {\ct DEPTH}). Note that if the wall thickness is decreasing over time due to the solid phase reactions, and the distance is measured from the current front surface, the measurement point will be moving towards the back side of the solid. Eventually, the measurement point may emerge from the solid, in which case it starts to show ambient temperature. Measuring the distance from the back surface can then be better suited for the purpose.
 
-Note that {\ct DEPTH} may not perfectly align with the discrete spatial position of the cell center corresponding to the solid cell temperature being output by {\ct INSIDE WALL TEMPERATURE}.  Given the stretching and re-meshing done by the solid phase routines, it difficult to compute the local discrete cell position by hand.  If the discrete solid cell center position is needed, it may be output using
+Note that {\ct DEPTH} may not perfectly align with the discrete spatial position of the center corresponding to the solid cell temperature being output by {\ct 'INSIDE WALL TEMPERATURE'}.  Given the stretching and re-meshing done by the solid phase routines, it difficult to compute the local discrete cell position by hand.  If the discrete solid cell center position is needed, it may be output using
 \begin{lstlisting}
 &DEVC XYZ=..., QUANTITY='INSIDE WALL DEPTH', DEPTH=0.005, ID='XC_1', IOR=3 /
 \end{lstlisting}
@@ -10827,6 +10826,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct UNITS}                 & Character       & Section~\ref{info:out:DEVC}                                     &       &               \\ \hline
 {\ct VELO\_INDEX}           & Integer         & Section~\ref{info:velocity}                                     &       &  0            \\ \hline
 {\ct XB(6)}                 & Real Sextuplet  & Section~\ref{info:statistics}                                   & m     &               \\ \hline
+{\ct XBP(6)}                & Real Sextuplet  & Section~\ref{info:line_file}                                    & m     &               \\ \hline
 {\ct XYZ(3)}                & Real Triplet    & Section~\ref{info:DEVC}                                         & m     &               \\ \hline
 {\ct X\_ID}                 & Character       & Section~\ref{info:line_file}                                    &       &  {\ct ID-x}   \\ \hline
 {\ct Y\_ID}                 & Character       & Section~\ref{info:line_file}                                    &       &  {\ct ID-y}   \\ \hline
