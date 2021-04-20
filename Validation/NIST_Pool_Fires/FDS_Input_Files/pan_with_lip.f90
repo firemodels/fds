@@ -2,15 +2,19 @@ PROGRAM PAN_WITH_LIP
 
 ! Estimate area of intersection of circle with origin (X0,Y0), radius, RAD, and rectangle (X1,Y1,X2,Y2)
 
+IMPLICIT NONE
+REAL :: X0,Y0,Z1,Z2,RAD,LIP_THICKNESS,LIP_HEIGHT,XS,XF,YS,YF,RAD2,DX,DY,AREA,X,Y
+INTEGER :: I,J,IBAR,JBAR
+
 X0 = 0.
 Y0 = 0.
-Z1 = -0.04
-Z2 = 0.
+Z1 = -0.08
+Z2 = -0.07
 RAD = 0.185
-LIP_THICKNESS = 0.005
-LIP_HEIGHT = 0.00
-IBAR = 120
-JBAR = 120
+LIP_THICKNESS = 0.01
+LIP_HEIGHT = 0.07
+IBAR = 60
+JBAR = 60
 XS = -0.3
 XF = 0.3
 YS = -.3
@@ -26,7 +30,7 @@ DO J=1,JBAR
    DO I=1,IBAR
       X = XS + DX*(I-0.5)
       IF ( ((X-X0)**2+(Y-Y0)**2)<RAD**2 ) THEN
-         WRITE(6,'(A,6(F6.3,","),A)') "&OBST XB=",X-0.5*DX,X+0.5*DX,Y-0.5*DY,Y+0.5*DY,Z1,Z2, " SURF_IDS='POOL','PAN','PAN' /"
+         WRITE(6,'(A,6(F6.3,","),A)') "&OBST XB=",X-0.5*DX,X+0.5*DX,Y-0.5*DY,Y+0.5*DY,Z1,Z2, " SURF_ID='PAN' /"
          AREA = AREA + DX*DY
       ELSEIF ( ((X-X0)**2+(Y-Y0)**2)<RAD2**2 ) THEN
          WRITE(6,'(A,6(F6.3,","),A)') "&OBST XB=",X-0.5*DX,X+0.5*DX,Y-0.5*DY,Y+0.5*DY,Z1,Z2+LIP_HEIGHT, " SURF_ID='PAN' /"

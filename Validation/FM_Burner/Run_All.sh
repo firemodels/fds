@@ -18,9 +18,17 @@ $QFDS -p 64 -n 8 $DEBUG $QUEUE -d $INDIR FM_15cm_Burner_C2H4_20p9_1cm.fds
 $QFDS -p 64 -n 8 $DEBUG $QUEUE -d $INDIR FM_15cm_Burner_C2H4_20p9_2cm.fds
 $QFDS -p 64 -n 8 $DEBUG $QUEUE -d $INDIR FM_15cm_Burner_C2H4_20p9_5mm.fds
 
-$QFDS -p 125 -n 8 $DEBUG $QUEUE -d $INDIR FM_15cm_Burner_CH4.fds
-$QFDS -p 125 -n 8 $DEBUG $QUEUE -d $INDIR FM_15cm_Burner_C2H4.fds
-$QFDS -p 125 -n 8 $DEBUG $QUEUE -d $INDIR FM_15cm_Burner_C3H6.fds
-$QFDS -p 125 -n 8 $DEBUG $QUEUE -d $INDIR FM_15cm_Burner_C3H8.fds
+$QFDS -p 64 -n 8 $DEBUG $QUEUE -d $INDIR FM_15cm_Burner_CH4_5mm.fds
+$QFDS -p 64 -n 8 $DEBUG $QUEUE -d $INDIR FM_15cm_Burner_CH4_1cm.fds
+$QFDS -p 64 -n 8 $DEBUG $QUEUE -d $INDIR FM_15cm_Burner_CH4_2cm.fds
+$QFDS -p 64 -n 8 $DEBUG $QUEUE -d $INDIR FM_15cm_Burner_C2H4_5mm.fds
+$QFDS -p 64 -n 8 $DEBUG $QUEUE -d $INDIR FM_15cm_Burner_C2H4_1cm.fds
+$QFDS -p 64 -n 8 $DEBUG $QUEUE -d $INDIR FM_15cm_Burner_C2H4_2cm.fds
+$QFDS -p 64 -n 8 $DEBUG $QUEUE -d $INDIR FM_15cm_Burner_C3H6_5mm.fds
+$QFDS -p 64 -n 8 $DEBUG $QUEUE -d $INDIR FM_15cm_Burner_C3H6_1cm.fds
+$QFDS -p 64 -n 8 $DEBUG $QUEUE -d $INDIR FM_15cm_Burner_C3H6_2cm.fds
+$QFDS -p 64 -n 8 $DEBUG $QUEUE -d $INDIR FM_15cm_Burner_C3H8_5mm.fds
+$QFDS -p 64 -n 8 $DEBUG $QUEUE -d $INDIR FM_15cm_Burner_C3H8_1cm.fds
+$QFDS -p 64 -n 8 $DEBUG $QUEUE -d $INDIR FM_15cm_Burner_C3H8_2cm.fds
 
 echo FDS cases submitted

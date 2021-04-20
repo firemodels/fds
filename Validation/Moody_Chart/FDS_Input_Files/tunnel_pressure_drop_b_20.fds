@@ -11,16 +11,13 @@
 
 &HEAD CHID='tunnel_pressure_drop_b_20', TITLE='LES of flow through a rough tunnel'/
 
-! &MESH IJK=800,10,10, XB=0,1600,-5,5,0,10/
-
 &MULT ID='m1', DX=20, I_UPPER=79/ 80 mesh case
 &MESH IJK=20,20,20, XB=0,20,-5,5,0,10, MULT_ID='m1'/
 
 &TIME T_END=1600.0/
-&DUMP DT_DEVC=800, DT_BNDF=800, VELOCITY_ERROR_FILE=T/
+&DUMP DT_DEVC=800, DT_BNDF=800 /
 
-&MISC SIMULATION_MODE='LES'/
-&PRES SOLVER='GLMAT'/
+&PRES TUNNEL_PRECONDITIONER=T /
 
 &SURF ID='inflow', VEL=-2, COLOR='BLUE'/ ! Re=1.33e6
 &SURF ID='rough wall',

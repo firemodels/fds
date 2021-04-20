@@ -4,7 +4,7 @@ USE PRECISION_PARAMETERS
 USE GLOBAL_CONSTANTS
 USE MESH_POINTERS
 
-IMPLICIT NONE
+IMPLICIT NONE (TYPE,EXTERNAL)
 PRIVATE
 
 PUBLIC DIVERGENCE_PART_1,DIVERGENCE_PART_2,CHECK_DIVERGENCE
@@ -36,7 +36,7 @@ REAL(EB), POINTER, DIMENSION(:,:) :: PBAR_P
 REAL(EB) :: DELKDELT,VC,VC1,DTDX,DTDY,DTDZ,TNOW, &
             DZDX,DZDY,DZDZ,RDT,TSI,TIME_RAMP_FACTOR,DELTA_P,PRES_RAMP_FACTOR,&
             TMP_G,DIV_DIFF_HEAT_FLUX,H_S,ZZZ(1:4),DU,DU_P,DU_M,UN,PROFILE_FACTOR, &
-            XHAT,ZHAT,TT,Q_Z,D_Z_TEMP,D_Z_N(0:5000),RHO_D_DZDN_GET(1:N_TRACKED_SPECIES),JCOR,UN_P,TMP_F_GAS,R_PFCT,RHO_D_DZDN
+            XHAT,ZHAT,TT,Q_Z,D_Z_TEMP,D_Z_N(0:I_MAX_TEMP),RHO_D_DZDN_GET(1:N_TRACKED_SPECIES),JCOR,UN_P,TMP_F_GAS,R_PFCT,RHO_D_DZDN
 INTEGER :: IW,N,IOR,II,JJ,KK,IIG,JJG,KKG,I,J,K,IPZ,IOPZ,N_ZZ_MAX,ICC
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_GET
 TYPE(SURFACE_TYPE), POINTER :: SF=>NULL()
@@ -62,7 +62,7 @@ SELECT CASE(PREDICTOR)
       PBAR_P => PBAR_S
       RHOP => RHOS
    CASE(.FALSE.)
-      DP => DDDT
+      DP => D
       PBAR_P => PBAR
       RHOP => RHO
 END SELECT
@@ -944,7 +944,11 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
             ! ///   II   ///  II+1  |  II+2  | ...
             !                       ^ WALL_INDEX(II+1,+1)
             IF ((UU(II+1,JJ,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II+1,JJ,KK),+1)>0)) THEN
-               ZZZ(1:3) = (/WC%ONE_D%RHO_F*H_S,RHO_H_S_P(II+1:II+2,JJ,KK)/)
+               IF (OW_ADVFLX_USE_WALL) THEN
+                  ZZZ(1:3) = (/WC%ONE_D%RHO_F*H_S,RHO_H_S_P(II+1:II+2,JJ,KK)/)
+               ELSE
+                  ZZZ(1:3) = (/RHO_H_S_P(II+1,JJ,KK),RHO_H_S_P(II+1:II+2,JJ,KK)/)
+               ENDIF
                FX_H_S(II+1,JJ,KK) = SCALAR_FACE_VALUE(UU(II+1,JJ,KK),ZZZ,I_FLUX_LIMITER)
             ENDIF
          CASE(-1) OFF_WALL_SELECT_1
@@ -952,27 +956,47 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
             ! ... |  II-2  |  II-1  ///   II   ///
             !              ^ WALL_INDEX(II-1,-1)
             IF ((UU(II-2,JJ,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II-1,JJ,KK),-1)>0)) THEN
-               ZZZ(2:4) = (/RHO_H_S_P(II-2:II-1,JJ,KK),WC%ONE_D%RHO_F*H_S/)
+               IF (OW_ADVFLX_USE_WALL) THEN
+                  ZZZ(2:4) = (/RHO_H_S_P(II-2:II-1,JJ,KK),WC%ONE_D%RHO_F*H_S/)
+               ELSE
+                  ZZZ(2:4) = (/RHO_H_S_P(II-2:II-1,JJ,KK),RHO_H_S_P(II-1,JJ,KK)/)
+               ENDIF
                FX_H_S(II-2,JJ,KK) = SCALAR_FACE_VALUE(UU(II-2,JJ,KK),ZZZ,I_FLUX_LIMITER)
             ENDIF
          CASE( 2) OFF_WALL_SELECT_1
             IF ((VV(II,JJ+1,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ+1,KK),+2)>0)) THEN
-               ZZZ(1:3) = (/WC%ONE_D%RHO_F*H_S,RHO_H_S_P(II,JJ+1:JJ+2,KK)/)
+               IF (OW_ADVFLX_USE_WALL) THEN
+                  ZZZ(1:3) = (/WC%ONE_D%RHO_F*H_S,RHO_H_S_P(II,JJ+1:JJ+2,KK)/)
+               ELSE
+                  ZZZ(1:3) = (/RHO_H_S_P(II,JJ+1,KK),RHO_H_S_P(II,JJ+1:JJ+2,KK)/)
+               ENDIF
                FY_H_S(II,JJ+1,KK) = SCALAR_FACE_VALUE(VV(II,JJ+1,KK),ZZZ,I_FLUX_LIMITER)
             ENDIF
          CASE(-2) OFF_WALL_SELECT_1
             IF ((VV(II,JJ-2,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ-1,KK),-2)>0)) THEN
-               ZZZ(2:4) = (/RHO_H_S_P(II,JJ-2:JJ-1,KK),WC%ONE_D%RHO_F*H_S/)
+               IF (OW_ADVFLX_USE_WALL) THEN
+                  ZZZ(2:4) = (/RHO_H_S_P(II,JJ-2:JJ-1,KK),WC%ONE_D%RHO_F*H_S/)
+               ELSE
+                  ZZZ(2:4) = (/RHO_H_S_P(II,JJ-2:JJ-1,KK),RHO_H_S_P(II,JJ-1,KK)/)
+               ENDIF
                FY_H_S(II,JJ-2,KK) = SCALAR_FACE_VALUE(VV(II,JJ-2,KK),ZZZ,I_FLUX_LIMITER)
             ENDIF
          CASE( 3) OFF_WALL_SELECT_1
             IF ((WW(II,JJ,KK+1)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK+1),+3)>0)) THEN
-               ZZZ(1:3) = (/WC%ONE_D%RHO_F*H_S,RHO_H_S_P(II,JJ,KK+1:KK+2)/)
+               IF (OW_ADVFLX_USE_WALL) THEN
+                  ZZZ(1:3) = (/WC%ONE_D%RHO_F*H_S,RHO_H_S_P(II,JJ,KK+1:KK+2)/)
+               ELSE
+                  ZZZ(1:3) = (/RHO_H_S_P(II,JJ,KK+1),RHO_H_S_P(II,JJ,KK+1:KK+2)/)
+               ENDIF
                FZ_H_S(II,JJ,KK+1) = SCALAR_FACE_VALUE(WW(II,JJ,KK+1),ZZZ,I_FLUX_LIMITER)
             ENDIF
          CASE(-3) OFF_WALL_SELECT_1
             IF ((WW(II,JJ,KK-2)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK-1),-3)>0)) THEN
-               ZZZ(2:4) = (/RHO_H_S_P(II,JJ,KK-2:KK-1),WC%ONE_D%RHO_F*H_S/)
+               IF (OW_ADVFLX_USE_WALL) THEN
+                  ZZZ(2:4) = (/RHO_H_S_P(II,JJ,KK-2:KK-1),WC%ONE_D%RHO_F*H_S/)
+               ELSE
+                  ZZZ(2:4) = (/RHO_H_S_P(II,JJ,KK-2:KK-1),RHO_H_S_P(II,JJ,KK-1)/)
+               ENDIF
                FZ_H_S(II,JJ,KK-2) = SCALAR_FACE_VALUE(WW(II,JJ,KK-2),ZZZ,I_FLUX_LIMITER)
             ENDIF
       END SELECT OFF_WALL_SELECT_1
@@ -1128,7 +1152,11 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
             ! ///   II   ///  II+1  |  II+2  | ...
             !                       ^ WALL_INDEX(II+1,+1)
             IF ((UU(II+1,JJ,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II+1,JJ,KK),+1)>0)) THEN
-               ZZZ(1:3) = (/WC%ONE_D%RHO_F*WC%ONE_D%ZZ_F(N),RHO_Z_P(II+1:II+2,JJ,KK)/)
+               IF (OW_ADVFLX_USE_WALL) THEN
+                  ZZZ(1:3) = (/WC%ONE_D%RHO_F*WC%ONE_D%ZZ_F(N),RHO_Z_P(II+1:II+2,JJ,KK)/)
+               ELSE
+                  ZZZ(1:3) = (/RHO_Z_P(II+1,JJ,KK),RHO_Z_P(II+1:II+2,JJ,KK)/)
+               ENDIF
                FX_ZZ(II+1,JJ,KK) = SCALAR_FACE_VALUE(UU(II+1,JJ,KK),ZZZ,I_FLUX_LIMITER)
             ENDIF
          CASE(-1) OFF_WALL_SELECT_2
@@ -1136,27 +1164,47 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
             ! ... |  II-2  |  II-1  ///   II   ///
             !              ^ WALL_INDEX(II-1,-1)
             IF ((UU(II-2,JJ,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II-1,JJ,KK),-1)>0)) THEN
-               ZZZ(2:4) = (/RHO_Z_P(II-2:II-1,JJ,KK),WC%ONE_D%RHO_F*WC%ONE_D%ZZ_F(N)/)
+               IF (OW_ADVFLX_USE_WALL) THEN
+                  ZZZ(2:4) = (/RHO_Z_P(II-2:II-1,JJ,KK),WC%ONE_D%RHO_F*WC%ONE_D%ZZ_F(N)/)
+               ELSE
+                  ZZZ(2:4) = (/RHO_Z_P(II-2:II-1,JJ,KK),RHO_Z_P(II-1,JJ,KK)/)
+               ENDIF
                FX_ZZ(II-2,JJ,KK) = SCALAR_FACE_VALUE(UU(II-2,JJ,KK),ZZZ,I_FLUX_LIMITER)
             ENDIF
          CASE( 2) OFF_WALL_SELECT_2
             IF ((VV(II,JJ+1,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ+1,KK),+2)>0)) THEN
-               ZZZ(1:3) = (/WC%ONE_D%RHO_F*WC%ONE_D%ZZ_F(N),RHO_Z_P(II,JJ+1:JJ+2,KK)/)
+               IF (OW_ADVFLX_USE_WALL) THEN
+                  ZZZ(1:3) = (/WC%ONE_D%RHO_F*WC%ONE_D%ZZ_F(N),RHO_Z_P(II,JJ+1:JJ+2,KK)/)
+               ELSE
+                  ZZZ(1:3) = (/RHO_Z_P(II,JJ+1,KK),RHO_Z_P(II,JJ+1:JJ+2,KK)/)
+               ENDIF
                FY_ZZ(II,JJ+1,KK) = SCALAR_FACE_VALUE(VV(II,JJ+1,KK),ZZZ,I_FLUX_LIMITER)
             ENDIF
          CASE(-2) OFF_WALL_SELECT_2
             IF ((VV(II,JJ-2,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ-1,KK),-2)>0)) THEN
-               ZZZ(2:4) = (/RHO_Z_P(II,JJ-2:JJ-1,KK),WC%ONE_D%RHO_F*WC%ONE_D%ZZ_F(N)/)
+               IF (OW_ADVFLX_USE_WALL) THEN
+                  ZZZ(2:4) = (/RHO_Z_P(II,JJ-2:JJ-1,KK),WC%ONE_D%RHO_F*WC%ONE_D%ZZ_F(N)/)
+               ELSE
+                  ZZZ(2:4) = (/RHO_Z_P(II,JJ-2:JJ-1,KK),RHO_Z_P(II,JJ-1,KK)/)
+               ENDIF
                FY_ZZ(II,JJ-2,KK) = SCALAR_FACE_VALUE(VV(II,JJ-2,KK),ZZZ,I_FLUX_LIMITER)
             ENDIF
          CASE( 3) OFF_WALL_SELECT_2
             IF ((WW(II,JJ,KK+1)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK+1),+3)>0)) THEN
-               ZZZ(1:3) = (/WC%ONE_D%RHO_F*WC%ONE_D%ZZ_F(N),RHO_Z_P(II,JJ,KK+1:KK+2)/)
+               IF (OW_ADVFLX_USE_WALL) THEN
+                  ZZZ(1:3) = (/WC%ONE_D%RHO_F*WC%ONE_D%ZZ_F(N),RHO_Z_P(II,JJ,KK+1:KK+2)/)
+               ELSE
+                  ZZZ(1:3) = (/RHO_Z_P(II,JJ,KK+1),RHO_Z_P(II,JJ,KK+1:KK+2)/)
+               ENDIF
                FZ_ZZ(II,JJ,KK+1) = SCALAR_FACE_VALUE(WW(II,JJ,KK+1),ZZZ,I_FLUX_LIMITER)
             ENDIF
          CASE(-3) OFF_WALL_SELECT_2
             IF ((WW(II,JJ,KK-2)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK-1),-3)>0)) THEN
-               ZZZ(2:4) = (/RHO_Z_P(II,JJ,KK-2:KK-1),WC%ONE_D%RHO_F*WC%ONE_D%ZZ_F(N)/)
+               IF (OW_ADVFLX_USE_WALL) THEN
+                  ZZZ(2:4) = (/RHO_Z_P(II,JJ,KK-2:KK-1),WC%ONE_D%RHO_F*WC%ONE_D%ZZ_F(N)/)
+               ELSE
+                  ZZZ(2:4) = (/RHO_Z_P(II,JJ,KK-2:KK-1),RHO_Z_P(II,JJ,KK-1)/)
+               ENDIF
                FZ_ZZ(II,JJ,KK-2) = SCALAR_FACE_VALUE(WW(II,JJ,KK-2),ZZZ,I_FLUX_LIMITER)
             ENDIF
       END SELECT OFF_WALL_SELECT_2
@@ -1432,7 +1480,6 @@ END SUBROUTINE PREDICT_NORMAL_VELOCITY
 
 
 SUBROUTINE EVACUATION_PRESSURE_ZONES
-IMPLICIT NONE
 REAL(EB) :: X1,Y1,X2,Y2,Z1,Z2
 INTEGER :: IW,N,II,JJ,KK,IIG,JJG,KKG,ITMP,I,J,K,I_VENT,N_OVERLAP
 
@@ -1552,7 +1599,7 @@ USE COMPLEX_GEOMETRY, ONLY : IBM_CGSC, IBM_IDCC, IBM_SOLID, IBM_CUTCFE
 
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: DT
-REAL(EB), POINTER, DIMENSION(:,:,:) :: DP,D_NEW,RTRM,DIV
+REAL(EB), POINTER, DIMENSION(:,:,:) :: DP,RTRM,DIV
 REAL(EB) :: USUM_ADD(N_ZONE),UN_P
 REAL(EB) :: RDT,TNOW,P_EQ,SUM_P_PSUM,SUM_USUM,SUM_DSUM,SUM_PSUM,R_PFCT
 LOGICAL :: OPEN_ZONE
@@ -1575,7 +1622,7 @@ SELECT CASE(PREDICTOR)
       DP => DS
       PBAR_P => PBAR_S
    CASE(.FALSE.)
-      DP => DDDT
+      DP => D
       PBAR_P => PBAR
 END SELECT
 
@@ -1723,60 +1770,31 @@ ENDDO BC_LOOP
 
 ! Compute time derivative of the divergence, dD/dt
 
-TRUE_PROJECTION: IF (PROJECTION) THEN
+DIV=>WORK1
 
-   DIV=>WORK1
-
-   IF (PREDICTOR) THEN
-      DO K = 1,KBAR
-         DO J = 1,JBAR
-            DO I = 1,IBAR
-               DIV(I,J,K) = (R(I)*U(I,J,K)-R(I-1)*U(I-1,J,K))*RDX(I)*RRN(I) + (V(I,J,K)-V(I,J-1,K))*RDY(J) + &
-                            (W(I,J,K)-W(I,J,K-1))*RDZ(K)
-            ENDDO
+IF (PREDICTOR) THEN
+   DO K = 1,KBAR
+      DO J = 1,JBAR
+         DO I = 1,IBAR
+            DIV(I,J,K) = (R(I)*U(I,J,K)-R(I-1)*U(I-1,J,K))*RDX(I)*RRN(I) + (V(I,J,K)-V(I,J-1,K))*RDY(J) + &
+                         (W(I,J,K)-W(I,J,K-1))*RDZ(K)
          ENDDO
       ENDDO
-      DDDT = (DP-DIV)*RDT
-   ELSEIF (CORRECTOR) THEN
-      DO K = 1,KBAR
-         DO J = 1,JBAR
-            DO I = 1,IBAR
-               DIV(I,J,K) = (R(I)*U(I,J,K) -R(I-1)*U(I-1,J,K)) *RDX(I)*RRN(I) + (V(I,J,K)- V(I,J-1,K)) *RDY(J) + &
-                            (W(I,J,K) -W(I,J,K-1)) *RDZ(K) &
-                          + (R(I)*US(I,J,K)-R(I-1)*US(I-1,J,K))*RDX(I)*RRN(I) + (VS(I,J,K)-VS(I,J-1,K))*RDY(J) + &
-                            (WS(I,J,K)-WS(I,J,K-1))*RDZ(K)
-            ENDDO
+   ENDDO
+   DDDT = (DP-DIV)*RDT
+ELSEIF (CORRECTOR) THEN
+   DO K = 1,KBAR
+      DO J = 1,JBAR
+         DO I = 1,IBAR
+            DIV(I,J,K) = (R(I)*U(I,J,K) -R(I-1)*U(I-1,J,K)) *RDX(I)*RRN(I) + (V(I,J,K)- V(I,J-1,K)) *RDY(J) + &
+                         (W(I,J,K) -W(I,J,K-1)) *RDZ(K) &
+                       + (R(I)*US(I,J,K)-R(I-1)*US(I-1,J,K))*RDX(I)*RRN(I) + (VS(I,J,K)-VS(I,J-1,K))*RDY(J) + &
+                         (WS(I,J,K)-WS(I,J,K-1))*RDZ(K)
          ENDDO
       ENDDO
-      D = DDDT
-      DDDT = (2._EB*DP-DIV)*RDT
-   ENDIF
-
-ELSE TRUE_PROJECTION
-
-   IF (PREDICTOR) THEN
-      DDDT = (DS-D)*RDT
-   ELSE
-      D_NEW => WORK1
-      D_NEW = DP
-      DDDT  = (2._EB*D_NEW-DS-D)*RDT
-      D     = D_NEW
-   ENDIF
-
-   ! Adjust dD/dt to correct error in divergence due to velocity matching at interpolated boundaries
-
-   NO_SCARC_IF: IF (PRES_METHOD /= 'SCARC' .AND. PRES_METHOD /= 'USCARC') THEN
-      DO IW=1,N_EXTERNAL_WALL_CELLS
-         IF (EXTERNAL_WALL(IW)%NOM==0) CYCLE
-         IIG = WALL(IW)%ONE_D%IIG
-         JJG = WALL(IW)%ONE_D%JJG
-         KKG = WALL(IW)%ONE_D%KKG
-         IF (PREDICTOR) DDDT(IIG,JJG,KKG) = DDDT(IIG,JJG,KKG) + DS_CORR(IW)*RDT
-         IF (CORRECTOR) DDDT(IIG,JJG,KKG) = DDDT(IIG,JJG,KKG) + (2._EB*D_CORR(IW)-DS_CORR(IW))*RDT
-      ENDDO
-   ENDIF NO_SCARC_IF
-
-ENDIF TRUE_PROJECTION
+   ENDDO
+   DDDT = (2._EB*DP-DIV)*RDT
+ENDIF
 
 T_USED(2)=T_USED(2)+CURRENT_TIME()-TNOW
 END SUBROUTINE DIVERGENCE_PART_2

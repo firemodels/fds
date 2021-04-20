@@ -1771,3 +1771,41 @@ Y^{n+1}_{\rm \alpha, g}=Y^n_{\rm \alpha, g}+\frac{\Delta t^n}{\rho V} \frac{A_{\
 \end{equation}
 
 
+\chapter{A Special Preconditioning Scheme for Solving the Poisson Equation in Tunnels}
+\label{tunnel_preconditioner}
+
+Consider the Poisson equation in a tunnel geometry where multiple meshes abut end to end in the $x$ direction. Start with the conventional equation for the pressure term, $\cH(\bx)$:
+\be
+   \nabla^2 \cH = -\dod{(\nabla\!\cdot \bu)}{t} - \nabla\!\cdot  \bF  \equiv f(\bx)
+\ee
+with boundary conditions
+\be
+   \dod{\cH}{n} = b_{n,m} \quad \hbox{or} \quad \cH = b_{n,m} \quad ; \quad n\in (x,y,z) \quad m \in(1,2)
+\ee
+at each of the six boundary faces of the rectangular domain. Now assume that $\cH$ can be decomposed:
+\be
+   \cH(\bx) = \bar{\cH}(x) + \cH'(\bx)
+\ee
+where $x$ is the lengthwise spatial coordinate of the tunnel. Solve the following equation for $\bar{\cH}$:
+\be
+   \frac{\d^2 \bar{\cH}}{\d x^2} = \bar{f}(x) \quad ; \quad  \bar{f}(x) = \frac{1}{\bar{Y}\bar{Z}} \int_0^{\bar{Y}} \int_0^{\bar{Z}} f(\bx) \, \d z \, \d y   \label{cHeq}
+\ee
+with boundary conditions at the ends of the tunnel:
+\be
+   \frac{\d \bar{\cH}}{\d x} = \bar{b}_{x,m}  \quad \hbox{or} \quad \bar{\cH} = \bar{b}_{x,m} \quad ; \quad \bar{b}_{x,m} = \frac{1}{\bar{Y}\bar{Z}} \int_0^{\bar{Y}} \int_0^{\bar{Z}} b_{x,m}(y,z) \, \d z \, \d y
+\ee
+Now solve in each mesh using the 3-D Poisson solver:
+\be
+   \nabla^2 \cH' = f(\bx) - \bar{f}(x) \label{pe2}
+\ee
+with boundary conditions at the left and right face of each mesh, including the ends of the tunnel:
+\be
+   \dod{\cH'}{x} = b_{x,m}(y,z) - \bar{b}_{x,m}  \quad \hbox{or} \quad \cH' = b_{x,m}(y,z) -  \bar{b}_{x,m}
+\ee
+The averaging term, $\bar{\cH}$, handles the significant fluctuations in pressure that are caused by the fluctuations in the fire's heat release rate. $\cH'$ is much easier to solve for because it does not include the large pressure fluctuations.
+
+To implement this in FDS, the terms $\bar{f}$ and $\bar{b}_{x,m}$ are gathered to the root MPI process which solves the tri-diagonal linear system resulting from discretizing Eq.~(\ref{cHeq}). The resulting solution is then broadcast to the other MPI processes and added to the solution of Eq.~(\ref{pe2}) which is computed on each individual mesh independently. The decomposition and reconstruction of $\cH$ is all done within the pressure solving step, reducing the memory requirements to just the 1-D array of $\bar{\cH}$.
+
+
+
+

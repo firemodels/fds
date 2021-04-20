@@ -163,7 +163,7 @@ Inertial agglomeration results from particles departing from the flow streamline
 \newpage
 \section{Aerosol Scrubbing}
 
-Scrubbing is the removal of aerosols from the gas phase. In FDS, aerosols can be scrubbed by water sprays. The correlations used to define the scrubbing efficiency are based on the containment spray scrubbing model in MELCOR~\cite{MELCOR}. The rate of aerosol scrubbing in a grid cell is based on the volume of the grid cell swept by a droplet over a timestep and the removal efficiency, $\epsilon$, for that droplet. The fraction of a grid cell's volume swept during a time step, $F$, is determined by the projected surface area of the droplet and its velocity: 
+Scrubbing is the removal of aerosols from the gas phase. In FDS, aerosols can be scrubbed by water sprays. The correlations used to define the scrubbing efficiency are based on the containment spray scrubbing model in MELCOR~\cite{MELCOR}. The rate of aerosol scrubbing in a grid cell is based on the volume of the grid cell swept by a droplet over a timestep and the removal efficiency, $\epsilon$, for that droplet. The fraction of a grid cell's volume swept during a time step, $F$, is determined by the projected surface area of the droplet and its velocity:
 \be
 F = \frac {\min \left(C \pi r^2_p (\delta x_i \delta y_j \delta z_k)^{2/3} \right) u_p \Delta t_p } {\delta x_i \delta y_j \delta z_k}
 \ee
@@ -222,16 +222,16 @@ For the condensed phase, the radiation absorption is computed following Section~
 \subsection{Wall Condensation}
 Condensation and evaporation for a wall cell follows a similar process to a gas cell. The process begins with an equilibrium vapor check where $T_b$ is assumed to be the wall temperature. The rate of evaporation and condensation is based on a wall function \cite{setcom_cfd}.
 \be
-Y^+_{\alpha}= \frac{\rho u_{\tau}}{\dot{m}_{{\rm dep},\alpha}^{\pp}} \left( Y_{\alpha}-Y_{\alpha,\ell} \right) 
+Y^+_{\alpha}= \frac{\rho u_{\tau}}{\dot{m}_{{\rm dep},\alpha}^{\pp}} \left( Y_{\alpha}-Y_{\alpha,\ell} \right)
 \ee
 \be
 y^+ = \frac{\rho u_{\tau} \delta n /2} {\mu}
 \ee
 \be
-Y^+_{\alpha}= \mbox{Sc}_t y^ + e^{-\Gamma} + (2.12 \ln(y^+) + (3.85 \mbox{Sc}_t^{1/3}-1.3)^2+2.12 \ln(\mbox{Sc}_t)) e^{-1/ \Gamma}
+Y^+_{\alpha}= \mbox{Sc} y^ + \mathrm{e}^{-\Gamma} + (2.12 \ln(y^+) + (3.85 \mbox{Sc}^{1/3}-1.3)^2+2.12 \ln(\mbox{Sc})) \,\mathrm{e}^{-1/ \Gamma}
 \ee
 \be
-\Gamma = \frac{ 0.01 \left( \mbox{Sc}_t y^+ \right) ^4}{1+5\mbox{Sc}_t^3 y^+}
+\Gamma = \frac{ 0.01 \left( \mbox{Sc} y^+ \right) ^4}{1+5\mbox{Sc}^3 y^+}
 \ee
 
 
