@@ -8820,12 +8820,21 @@ This directs FDS to just add 20 devices to the on-going list, saving you from ha
 
 \subsubsection{Other Statistics for a Linear Array of Devices}
 
-By default, when you specify multiple {\ct POINTS} on a {\ct DEVC} line and you do not specify {\ct TIME\_HISTORY=T}, a running average of the specified {\ct QUANTITY} is saved at each point location and written to the file with suffix {\ct \_line.csv} with the accumulated values at the time {\ct STATISTICS\_END}. However, you can apply any other {\ct TEMPORAL\_STATISTIC} and compute, for example, the root-mean-square ({\ct 'RMS'}), minimum ({\ct 'MIN'}), or maximum ({\ct 'MAX'}) value over the specified time interval. You may also specify a {\ct SPATIAL\_STATISTIC} for each device in the line using {\ct XB} for the limits of the plane or volume over which the function is calculated.
+By default, when you specify multiple {\ct POINTS} on a {\ct DEVC} line and you do not specify {\ct TIME\_HISTORY=T}, a running average of the specified {\ct QUANTITY} is saved at each point location and written to the file with suffix {\ct \_line.csv} with the accumulated values at the time {\ct STATISTICS\_END}. However, you can apply any other {\ct TEMPORAL\_STATISTIC} and compute, for example, the root-mean-square ({\ct 'RMS'}), minimum ({\ct 'MIN'}), or maximum ({\ct 'MAX'}) value over the specified time interval. 
+
+You may also specify a {\ct SPATIAL\_STATISTIC} for each device in the line as follows:
+\begin{lstlisting}
+&DEVC XBP=1,10,5,5,8,8, QUANTITY='TEMPERATURE', ID='Tmean', POINTS=20,
+      STATISTICS_START=20., STATISTICS_END=40.
+      SPATIAL_STATISTIC='MEAN', DX=0.1, DY=5.0, DZ=3.0 /
+\end{lstlisting}
+This input line specifies a linear array of 20 points starting at $\bx=(1,5,8)$ and ending at $\bx=(10,5,8)$. For each point in the array, $(x_i,y_i,z_i)$, FDS calculates the average temperature over the volume $x_i - \dx \le x \le x_i+\dx$; $y_i - \dy \le y \le y_i+\dy$; $z_i - \dz \le z \le z_i+\dz$. These average temperatures are then time-averaged over the time interval between 20~s and 40~s. In general, the spatial averaging is done first; that is, FDS reports the time-average of the spatially-averaged temperatures for each point in the linear array, not the spatial-average of the temporally-averaged temperatures.
+
 
 \subsubsection{Moving a Linear Array of Devices}
 \label{info:MOVE_ID}
 
-It is possible to translate and/or rotate a linear array of devices using parameters on a {\ct MOVE} line (see Section~\ref{info:MOVE}). To specify these parameters, use the character string {\ct MOVE\_ID} on the {\ct DEVC} line.
+It is possible to translate and/or rotate a linear array of devices using parameters on a {\ct MOVE} line (see Section~\ref{info:MOVE}). To specify these parameters, use the character string {\ct MOVE\_ID} on the {\ct DEVC} line. Note that if a {\ct SPATIAL\_STATISTIC} is specified, the spatial bounds, {\ct DX}, {\ct DY}, and/or {\ct DZ}, are not transformed.
 
 
 \subsection{Quantities at Certain Depth}
@@ -10769,7 +10778,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 \multicolumn{5}{|c|}{{\ct DEVC} (Device Parameters)} \\
 \hline \hline
 \endhead
-{\ct ABSOLUTE\_VALUE}       & Logical         & Section~\ref{info:out:DEVC}                                     &       & {\ct F} \\ \hline
+{\ct ABSOLUTE\_VALUE}       & Logical         & Section~\ref{info:out:DEVC}                                     &       & {\ct F}       \\ \hline
 {\ct BYPASS\_FLOWRATE}      & Real            & Section~\ref{info:aspiration_detector}                          & kg/s  & 0             \\ \hline
 {\ct CONVERSION\_ADDEND}    & Real            & Section~\ref{info:out:DEVC}                                     &       & 0             \\ \hline
 {\ct CONVERSION\_FACTOR}    & Real            & Section~\ref{info:out:DEVC}                                     &       & 1             \\ \hline
@@ -10780,17 +10789,20 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct DEPTH}                 & Real            & Section~\ref{info:material_components}                          & m     & 0             \\ \hline
 {\ct DEVC\_ID}              & Character       & Sections~\ref{info:aspiration_detector} and \ref{info:RAMPDEVC} &       &               \\ \hline
 {\ct D\_ID}                 & Character       & Section~\ref{info:line_file}                                    &       &               \\ \hline
-{\ct DRY}                   & Logical         & Section~\ref{info:dry}                                          &       & {\ct F} \\ \hline
+{\ct DRY}                   & Logical         & Section~\ref{info:dry}                                          &       & {\ct F}       \\ \hline
 {\ct DUCT\_ID}              & Character       & Section~\ref{info:HVAC}                                         &       &               \\ \hline
-{\ct EVACUATION}            & Logical         & Reference~\cite{FDS_Evac_Users_Guide}                           &       & {\ct F} \\ \hline
+{\ct DX}                    & Real            & Section~\ref{info:line_file}                                    & m     & 0             \\ \hline
+{\ct DY}                    & Real            & Section~\ref{info:line_file}                                    & m     & 0             \\ \hline
+{\ct DZ}                    & Real            & Section~\ref{info:line_file}                                    & m     & 0             \\ \hline
+{\ct EVACUATION}            & Logical         & Reference~\cite{FDS_Evac_Users_Guide}                           &       & {\ct F}       \\ \hline
 {\ct FLOWRATE}              & Real            & Section~\ref{info:aspiration_detector}                          & kg/s  & 0             \\ \hline
 {\ct FORCE\_DIRECTION}      & Real(3)         & Section~\ref{info:distributed_forces}                           &       &               \\ \hline
-{\ct HIDE\_COORDINATES}     & Logical         & Section~\ref{info:line_file}                                    &       & {\ct F} \\ \hline
+{\ct HIDE\_COORDINATES}     & Logical         & Section~\ref{info:line_file}                                    &       & {\ct F}       \\ \hline
 {\ct ID}                    & Character       & Section~\ref{info:DEVC}                                         &       &               \\ \hline
-{\ct INITIAL\_STATE}        & Logical         & Section~\ref{info:basic_control}                                &       & {\ct F} \\ \hline
+{\ct INITIAL\_STATE}        & Logical         & Section~\ref{info:basic_control}                                &       & {\ct F}       \\ \hline
 {\ct INIT\_ID}              & Character       & Section~\ref{info:PART_SURF}                                    &       &               \\ \hline
 {\ct IOR}                   & Integer         & Section~\ref{info:DEVC}                                         &       &               \\ \hline
-{\ct LATCH}                 & Logical         & Section~\ref{info:basic_control}                                &       & {\ct T}  \\ \hline
+{\ct LATCH}                 & Logical         & Section~\ref{info:basic_control}                                &       & {\ct T}       \\ \hline
 {\ct MATL\_ID}              & Character       & Section~\ref{info:material_components}                          &       &               \\ \hline
 {\ct MOVE\_ID}              & Character       & Section~\ref{info:MOVE_ID}                                      &       &               \\ \hline
 {\ct N\_INTERVALS}          & Integer         & Section~\ref{info:time_integral}                                &       & 10            \\ \hline
@@ -10799,7 +10811,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct NO\_UPDATE\_DEVC\_ID}  & Character       & Section~\ref{info:freeze_device}                                &       &               \\ \hline
 {\ct ORIENTATION}           & Real Triplet    & Section~\ref{info:DEVC}                                         &       & 0,0,-1        \\ \hline
 {\ct ORIENTATION\_NUMBER}   & Integer         & Section~\ref{info:part_output}                                  &       & 1             \\ \hline
-{\ct OUTPUT}                & Logical         & Section~\ref{info:out:DEVC}                                     &       & {\ct T}  \\ \hline
+{\ct OUTPUT}                & Logical         & Section~\ref{info:out:DEVC}                                     &       & {\ct T}       \\ \hline
 {\ct PART\_ID}              & Character       & Section~\ref{info:outputquantities}                             &       &               \\ \hline
 {\ct PIPE\_INDEX}           & Integer         & Section~\ref{info:pressureramp}                                 &       &  1            \\ \hline
 {\ct POINTS}                & Integer         & Section~\ref{info:line_file}                                    &       & 1             \\ \hline
@@ -10808,7 +10820,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct QUANTITY2}             & Character       & Section~\ref{info:line_file}                                    &       &               \\ \hline
 {\ct QUANTITY\_RANGE}       & Real(2)         & Section~\ref{info:statistics}                                   &       & -1.E50,1.E50  \\ \hline
 {\ct REAC\_ID}              & Character       & Section~\ref{info:oddoutputquantities}                          &       &               \\ \hline
-{\ct RELATIVE}              & Logical         & Section~\ref{info:out:DEVC}                                     &       & {\ct F} \\ \hline
+{\ct RELATIVE}              & Logical         & Section~\ref{info:out:DEVC}                                     &       & {\ct F}       \\ \hline
 {\ct R\_ID}                 & Character       & Section~\ref{info:line_file}                                    &       &               \\ \hline
 {\ct ROTATION}              & Real            & Section~\ref{info:DEVC}                                         & deg.  & 0             \\ \hline
 {\ct SETPOINT}              & Real            & Section~\ref{info:basic_control}                                &       &               \\ \hline
