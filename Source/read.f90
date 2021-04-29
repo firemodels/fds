@@ -12895,7 +12895,7 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
 
       ! Determine the bounds, XB, for an interpolated gas device
 
-      IF (SPATIAL_STATISTIC=='INTERPOLATION' .OR. TEMPORAL_STATISTIC=='FAVRE AVERAGE') THEN
+      IF (SPATIAL_STATISTIC=='INTERPOLATION') THEN
          CALL SEARCH_OTHER_MESHES(XYZ(1),XYZ(2),XYZ(3),NM,IIG,JJG,KKG,XI,YJ,ZK)
          IF (IIG>0 .AND. JJG>0 .AND. KKG>0) THEN
             M => MESHES(NM)
@@ -12912,7 +12912,15 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
 
       ! Force MASS MEAN spatial statistic for FAVRE average
 
-      IF (TEMPORAL_STATISTIC=='FAVRE AVERAGE') SPATIAL_STATISTIC='MASS MEAN'
+      IF (TEMPORAL_STATISTIC=='FAVRE AVERAGE') THEN
+         SPATIAL_STATISTIC='MASS MEAN'
+         XB(1) = XYZ(1)
+         XB(2) = XYZ(1)
+         XB(3) = XYZ(2)
+         XB(4) = XYZ(2)
+         XB(5) = XYZ(3)
+         XB(6) = XYZ(3)
+      ENDIF
 
       ! Determine which mesh the device is in
 
