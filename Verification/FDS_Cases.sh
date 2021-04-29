@@ -51,6 +51,7 @@ $QFDS -d Complex_Geometry geom_sphere3a.fds
 $QFDS -d Complex_Geometry geom_sphere3c.fds
 $QFDS -d Complex_Geometry geom_sphere3e.fds
 $QFDS -d Complex_Geometry geom_terrain.fds
+$QFDS -d Complex_Geometry geom_terrain2.fds
 $QFDS -d Complex_Geometry geom_texture.fds
 $QFDS -d Complex_Geometry geom_texture2.fds
 $QFDS -d Complex_Geometry geom_texture3a.fds
