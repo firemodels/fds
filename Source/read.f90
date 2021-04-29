@@ -6652,7 +6652,7 @@ READ_MATL_LOOP: DO N=1,N_MATL
    ML%NU_O2_CHAR(:)        = NU_O2_CHAR(:)
    ML%N_S(:)               = N_S(:)
    ML%N_T(:)               = N_T(:)
-   ML%NU_PART              = NU_PART   
+   ML%NU_PART              = NU_PART
    ML%PART_ID              = PART_ID
    ML%NU_SPEC              = NU_SPEC
    ML%PERMEABILITY         = PERMEABILITY
@@ -6679,11 +6679,11 @@ READ_MATL_LOOP: DO N=1,N_MATL
 
    ALLOCATE(ML%NU_LPC(N_LAGRANGIAN_CLASSES,N_REACTIONS),STAT=IZERO)
    CALL ChkMemErr('READ','MATERIAL',IZERO)
-   ML%NU_LPC=0._EB   
-   
+   ML%NU_LPC=0._EB
+
    ALLOCATE(ML%LPC_INDEX(N_LAGRANGIAN_CLASSES,N_REACTIONS),STAT=IZERO)
    CALL ChkMemErr('READ','MATERIAL',IZERO)
-   ML%LPC_INDEX=-1   
+   ML%LPC_INDEX=-1
 
    ! Gas in solid diffusion coefficients
 
@@ -6904,7 +6904,7 @@ PROC_MATL_LOOP: DO N=1,N_MATL
                  NLPC, 'of reaction ', NR
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
-      
+
          IF (TRIM(ML%PART_ID(NLPC,NR))=='null') EXIT
 
          DO NLPC2=1,N_LAGRANGIAN_CLASSES
@@ -6929,7 +6929,7 @@ PROC_MATL_LOOP: DO N=1,N_MATL
 
       ENDDO
    ENDDO
-   
+
    ! Check units of specific heat
 
    IF (ML%RAMP_C_S/='null') THEN
@@ -8627,7 +8627,7 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
                INDEX_LIST(N_LIST) = ML%LPC_INDEX(NLPC,NR)
             ENDDO
          ENDDO
-      ENDDO 
+      ENDDO
 
       ! Eliminate multiply counted particles from the list
 
@@ -12713,6 +12713,7 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
       CASE('null')
       CASE('INSTANT VALUE')   ; TEMPORAL_STATISTIC = 'INSTANT VALUE'
       CASE('TIME AVERAGE')    ; TEMPORAL_STATISTIC = 'TIME AVERAGE'
+      CASE('FAVRE AVERAGE')   ; TEMPORAL_STATISTIC = 'FAVRE AVERAGE'
       CASE('RUNNING AVERAGE') ; TEMPORAL_STATISTIC = 'RUNNING AVERAGE'
       CASE('TIME INTEGRAL')   ; TEMPORAL_STATISTIC = 'TIME INTEGRAL'
       CASE('TIME MAX')        ; TEMPORAL_STATISTIC = 'MAX'
@@ -12894,7 +12895,7 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
 
       ! Determine the bounds, XB, for an interpolated gas device
 
-      IF (SPATIAL_STATISTIC=='INTERPOLATION') THEN
+      IF (SPATIAL_STATISTIC=='INTERPOLATION' .OR. TEMPORAL_STATISTIC=='FAVRE AVERAGE') THEN
          CALL SEARCH_OTHER_MESHES(XYZ(1),XYZ(2),XYZ(3),NM,IIG,JJG,KKG,XI,YJ,ZK)
          IF (IIG>0 .AND. JJG>0 .AND. KKG>0) THEN
             M => MESHES(NM)
@@ -12908,6 +12909,10 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
             XB = 0._EB
          ENDIF
       ENDIF
+
+      ! Force MASS MEAN spatial statistic for FAVRE average
+
+      IF (TEMPORAL_STATISTIC=='FAVRE AVERAGE') SPATIAL_STATISTIC='MASS MEAN'
 
       ! Determine which mesh the device is in
 
