@@ -8820,7 +8820,7 @@ This directs FDS to just add 20 devices to the on-going list, saving you from ha
 
 \subsubsection{Other Statistics for a Linear Array of Devices}
 
-By default, when you specify multiple {\ct POINTS} on a {\ct DEVC} line and you do not specify {\ct TIME\_HISTORY=T}, a running average of the specified {\ct QUANTITY} is saved at each point location and written to the file with suffix {\ct \_line.csv} with the accumulated values at the time {\ct STATISTICS\_END}. However, you can apply any other {\ct TEMPORAL\_STATISTIC} and compute, for example, the root-mean-square ({\ct 'RMS'}), minimum ({\ct 'MIN'}), or maximum ({\ct 'MAX'}) value over the specified time interval. 
+By default, when you specify multiple {\ct POINTS} on a {\ct DEVC} line and you do not specify {\ct TIME\_HISTORY=T}, a running average of the specified {\ct QUANTITY} is saved at each point location and written to the file with suffix {\ct \_line.csv} with the accumulated values at the time {\ct STATISTICS\_END}. However, you can apply any other {\ct TEMPORAL\_STATISTIC} and compute, for example, the root-mean-square ({\ct 'RMS'}), minimum ({\ct 'MIN'}), or maximum ({\ct 'MAX'}) value over the specified time interval.
 
 You may also specify a {\ct SPATIAL\_STATISTIC} for each device in the line as follows:
 \begin{lstlisting}
@@ -9795,6 +9795,10 @@ The {\ct TEMPORAL\_STATISTIC='TIME AVERAGE'} is typically applied by default, un
 \subsubsection{Running Average}
 
 The {\ct TEMPORAL\_STATISTIC='RUNNING AVERAGE'} outputs the running average value of the {\ct QUANTITY} over the time period starting at {\ct STATISTICS\_START} and ending at {\ct STATISTICS\_END}. This is the default behavior of ``line'' devices discussed in Section~\ref{info:line_file}.
+
+\subsubsection{Favre Average}
+
+The {\ct TEMPORAL\_STATISTIC='FAVRE AVERAGE'} outputs the Favre (density weighted) running average value of the {\ct QUANTITY} over the time period starting at {\ct STATISTICS\_START} and ending at {\ct STATISTICS\_END}. If the scalar quantity of interest is $\phi$ and the density if $\rho$ and the running average is defined by an overbar (that is, $\overline{\phi}$ is the running average of the scalar), then the Favre average is denoted with a tilde and computed as $\tilde{\phi} = \overline{\rho \phi}/\overline{\rho}$.
 
 \subsubsection{Instantaneous Value}
 
