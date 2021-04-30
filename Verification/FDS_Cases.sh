@@ -680,6 +680,8 @@ $QFDS -d Scalar_Analytical_Solution saad_512_cfl_p5.fds
 $QFDS -d Scalar_Analytical_Solution saad_512_cfl_p25.fds
 $QFDS -d Scalar_Analytical_Solution saad_512_cfl_p125.fds
 $QFDS -d Scalar_Analytical_Solution saad_512_cfl_p0625.fds
+$QFDS -d Scalar_Analytical_Solution shunn3_FavreZ_32.fds
+$QFDS -d Scalar_Analytical_Solution shunn3_FavreZ_64.fds
 $QFDS -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_32.fds
 $QFDS -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_64.fds
 $QFDS -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_128.fds
