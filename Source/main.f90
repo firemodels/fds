@@ -2867,12 +2867,16 @@ SENDING_MESH_LOOP: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
       SEND_RADIATION: IF (CODE==2 .AND. M3%NIC_S>0) THEN
          IF (RNODE/=SNODE) THEN
-            IF (ICYC>1) ANG_INC_COUNTER = M%ANGLE_INC_COUNTER
+            IF (ICYC>1) THEN
+               AIC = M%ANGLE_INC_COUNTER
+            ELSE
+               AIC = ANG_INC_COUNTER
+            ENDIF
             LLL = 0
             PACK_REAL_SEND_PKG5: DO LL=1,M3%NIC_S
                IOR = M3%IOR_S(LL)
                DO NN2=1,NUMBER_SPECTRAL_BANDS
-                  DO NN1=NUMBER_RADIATION_ANGLES-ANG_INC_COUNTER+1,1,-ANGLE_INCREMENT
+                  DO NN1=NUMBER_RADIATION_ANGLES-AIC+1,1,-ANGLE_INCREMENT
                      IF (DLN(IOR,NN1)<=0._EB) CYCLE
                      LLL = LLL + 1
                      M3%REAL_SEND_PKG5(LLL) = M3%IL_S(LL,NN1,NN2)
@@ -3218,12 +3222,16 @@ RECV_MESH_LOOP: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       ! Unpack radiation information at the end of the CORRECTOR stage of the time step
 
       RECEIVE_RADIATION: IF (CODE==2 .AND. M2%NIC_R>0 .AND. RNODE/=SNODE) THEN
-         IF (ICYC>1) ANG_INC_COUNTER = M%ANGLE_INC_COUNTER
+         IF (ICYC>1) THEN
+            AIC = M%ANGLE_INC_COUNTER
+         ELSE
+            AIC = ANG_INC_COUNTER
+         ENDIF
          LLL = 0
          UNPACK_REAL_RECV_PKG5: DO LL=1,M2%NIC_R
             IOR = M2%IOR_R(LL)
             DO NN2=1,NUMBER_SPECTRAL_BANDS
-               DO NN1=NUMBER_RADIATION_ANGLES-ANG_INC_COUNTER+1,1,-ANGLE_INCREMENT
+               DO NN1=NUMBER_RADIATION_ANGLES-AIC+1,1,-ANGLE_INCREMENT
                   IF (DLN(IOR,NN1)<=0._EB) CYCLE
                   LLL = LLL + 1
                   M2%IL_R(LL,NN1,NN2) = M2%REAL_RECV_PKG5(LLL)
