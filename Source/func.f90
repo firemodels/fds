@@ -1648,6 +1648,8 @@ SORT_QUEUE: DO
       IF (IOR==0) CYCLE SEARCH_LOOP
 
       IC  = M%CELL_INDEX(III,JJJ,KKK)
+ 
+      IF (M%SOLID(IC)) CYCLE SEARCH_LOOP  ! Do not search within a solid
 
       SELECT CASE(IOR)
          CASE(-1)
