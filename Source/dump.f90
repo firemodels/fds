@@ -2924,55 +2924,62 @@ ENDIF
 WRITE(LU_OUTPUT,'(//A,I2)')  ' Material Information'
 
 MATL_LOOP: DO N=1,N_MATL
+
    ML => MATERIAL(N)
+
    WRITE(LU_OUTPUT,'(/I4,1X,A)')    N,MATL_NAME(N)
    IF (ML%FYI/='null') WRITE(LU_OUTPUT,'(5X,A)') TRIM(ML%FYI)
    WRITE(LU_OUTPUT,'(A,F8.3)')    '     Emissivity                   ',ML%EMISSIVITY
    WRITE(LU_OUTPUT,'(A,F8.1)')    '     Density (kg/m3)              ',ML%RHO_S
+
    IF (ML%C_S>0._EB) THEN
       WRITE(LU_OUTPUT,'(A,ES9.2)') '     Specific Heat (kJ/kg/K)     ',ML%C_S*0.001_EB
    ELSE
       NR = -NINT(ML%C_S)
       WRITE(LU_OUTPUT,'(A,ES9.2)') '     Specific Heat (kJ/kg/K)     ',EVALUATE_RAMP(TMPA,0._EB,NR)*0.001_EB
    ENDIF
+
    IF (ML%K_S>0._EB) THEN
       WRITE(LU_OUTPUT,'(A,ES9.2)') '     Conductivity (W/m/K)         ',ML%K_S
    ELSE
       NR = -NINT(ML%K_S)
       WRITE(LU_OUTPUT,'(A,ES9.2)') '     Conductivity (W/m/K)         ',EVALUATE_RAMP(TMPA,0._EB,NR)
    ENDIF
+
    IF (ML%KAPPA_S<5.0E4_EB) THEN
       WRITE(LU_OUTPUT,'(A,F8.2)') '     Absorption coefficient (1/m) ',ML%KAPPA_S
    ENDIF
-   IF (ML%PYROLYSIS_MODEL==PYROLYSIS_SOLID) THEN
-   DO NR=1,ML%N_REACTIONS
-      WRITE(LU_OUTPUT,'(A,I2)')   '     Reaction ', NR
-      DO NN=1,N_MATL
-         IF (ML%NU_RESIDUE(NN,NR) > 0._EB) WRITE(LU_OUTPUT,'(A,A,A,F6.3)') &
-                               '        Residue: ',TRIM(MATL_NAME(NN)),', Yield: ',ML%NU_RESIDUE(NN,NR)
+
+   IF (ML%PYROLYSIS_MODEL==PYROLYSIS_SOLID .OR. ML%PYROLYSIS_MODEL==PYROLYSIS_VEGETATION) THEN
+      DO NR=1,ML%N_REACTIONS
+         WRITE(LU_OUTPUT,'(A,I2)')   '     Reaction ', NR
+         DO NN=1,N_MATL
+            IF (ML%NU_RESIDUE(NN,NR) > 0._EB) WRITE(LU_OUTPUT,'(A,A,A,F6.3)') &
+                                  '        Residue: ',TRIM(MATL_NAME(NN)),', Yield: ',ML%NU_RESIDUE(NN,NR)
+         ENDDO
+         WRITE(LU_OUTPUT,'(A)')      '        Gaseous Yields:'
+         DO NS = 1,N_TRACKED_SPECIES
+         WRITE(LU_OUTPUT,'(A,A,A,F8.2)')'        ',SPECIES_MIXTURE(NS)%ID,': ',ML%NU_GAS(NS,NR)
+         ENDDO
+         WRITE(LU_OUTPUT,'(A,ES9.2)')'        A (1/s)    : ',ML%A(NR)
+         WRITE(LU_OUTPUT,'(A,ES9.2)')'        E (J/mol)  : ',ML%E(NR)/1000.
+            IF (ML%H_R_I(NR)>0) THEN
+            WRITE(LU_OUTPUT,'(A,ES9.2)')'        H_R (kJ/kg): ',EVALUATE_RAMP(TMPA,0._EB,ML%H_R_I(NR))/1000._EB
+         ELSE
+            WRITE(LU_OUTPUT,'(A,ES9.2)')'        H_R (kJ/kg): ',ML%H_R(NR)/1000._EB
+         ENDIF
+         WRITE(LU_OUTPUT,'(A,F8.2)') '        N_S        : ',ML%N_S(NR)
+         IF (ML%N_O2(NR)>0._EB) THEN
+            WRITE(LU_OUTPUT,'(A,F8.2)') '        N_O2       : ',ML%N_O2(NR)
+         WRITE(LU_OUTPUT,'(A,F8.4)') '        Gas diffusion depth (m): ',ML%GAS_DIFFUSION_DEPTH(NR)
+         ENDIF
+         IF (ML%TMP_THR(NR)>0._EB) THEN
+         WRITE(LU_OUTPUT,'(A,F8.2)') '        Threshold temperature (C): ',ML%TMP_THR(NR)-TMPM
+         WRITE(LU_OUTPUT,'(A,F8.2)') '        N_T        : ',ML%N_T(NR)
+         ENDIF
       ENDDO
-      WRITE(LU_OUTPUT,'(A)')      '        Gaseous Yields:'
-      DO NS = 1,N_TRACKED_SPECIES
-      WRITE(LU_OUTPUT,'(A,A,A,F8.2)')'        ',SPECIES_MIXTURE(NS)%ID,': ',ML%NU_GAS(NS,NR)
-      ENDDO
-      WRITE(LU_OUTPUT,'(A,ES9.2)')'        A (1/s)    : ',ML%A(NR)
-      WRITE(LU_OUTPUT,'(A,ES9.2)')'        E (J/mol)  : ',ML%E(NR)/1000.
-      IF (ML%H_R_I(NR)>0) THEN
-         WRITE(LU_OUTPUT,'(A,ES9.2)')'        H_R (kJ/kg): ',EVALUATE_RAMP(TMPA,0._EB,ML%H_R_I(NR))/1000._EB
-      ELSE
-         WRITE(LU_OUTPUT,'(A,ES9.2)')'        H_R (kJ/kg): ',ML%H_R(NR)/1000._EB
-      ENDIF
-      WRITE(LU_OUTPUT,'(A,F8.2)') '        N_S        : ',ML%N_S(NR)
-      IF (ML%N_O2(NR)>0._EB) THEN
-      WRITE(LU_OUTPUT,'(A,F8.2)') '        N_O2       : ',ML%N_O2(NR)
-      WRITE(LU_OUTPUT,'(A,F8.4)') '        Gas diffusion depth (m): ',ML%GAS_DIFFUSION_DEPTH(NR)
-      ENDIF
-      IF (ML%TMP_THR(NR)>0._EB) THEN
-      WRITE(LU_OUTPUT,'(A,F8.2)') '        Threshold temperature (C): ',ML%TMP_THR(NR)-TMPM
-      WRITE(LU_OUTPUT,'(A,F8.2)') '        N_T        : ',ML%N_T(NR)
-      ENDIF
-   ENDDO
    ENDIF
+
    IF (ML%PYROLYSIS_MODEL==PYROLYSIS_LIQUID) THEN
       WRITE(LU_OUTPUT,'(A)')      '     Liquid evaporation reaction'
       WRITE(LU_OUTPUT,'(A)')      '        Gaseous Yields:'
@@ -2986,6 +2993,7 @@ MATL_LOOP: DO N=1,N_MATL
          WRITE(LU_OUTPUT,'(A,ES9.2)')'        H_R (kJ/kg)            : ',ML%H_R(1)/1000._EB
       ENDIF
    ENDIF
+
 ENDDO MATL_LOOP
 
 ! Print out information about surface types
