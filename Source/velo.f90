@@ -591,9 +591,13 @@ T_USED(4) = T_USED(4) + CURRENT_TIME() - T_NOW
 END SUBROUTINE VISCOSITY_BC
 
 
-SUBROUTINE VELOCITY_FLUX(T,DT,NM,APPLY_TO_ESTIMATED_VARIABLES)
+!> \brief Compute convective and diffusive terms of the momentum equations
+!> \param T Current time (s)
+!> \param DT Current time step (s)
+!> \param NM Mesh number
+!> \param APPLY_TO_ESTIMATED_VARIABLES Flag indicating whether to use estimated values of variables
 
-! Compute convective and diffusive terms of the momentum equations
+SUBROUTINE VELOCITY_FLUX(T,DT,NM,APPLY_TO_ESTIMATED_VARIABLES)
 
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 USE PHYSICAL_FUNCTIONS, ONLY: COMPUTE_WIND_COMPONENTS
@@ -608,8 +612,7 @@ REAL(EB) :: MUX,MUY,MUZ,UP,UM,VP,VM,WP,WM,VTRM,OMXP,OMXM,OMYP,OMYM,OMZP,OMZM,TXY
             RRHO,GX(0:IBAR_MAX),GY(0:IBAR_MAX),GZ(0:IBAR_MAX),TXXP,TXXM,TYYP,TYYM,TZZP,TZZM,DTXXDX,DTYYDY,DTZZDZ, &
             DUMMY=0._EB,T_NOW
 INTEGER :: I,J,K,IEXP,IEXM,IEYP,IEYM,IEZP,IEZM,IC,IC1,IC2
-REAL(EB), POINTER, DIMENSION(:,:,:) :: TXY=>NULL(),TXZ=>NULL(),TYZ=>NULL(),OMX=>NULL(),OMY=>NULL(),OMZ=>NULL(), &
-                                       UU=>NULL(),VV=>NULL(),WW=>NULL(),RHOP=>NULL(),DP=>NULL()
+REAL(EB), POINTER, DIMENSION(:,:,:) :: TXY,TXZ,TYZ,OMX,OMY,OMZ,UU,VV,WW,RHOP,DP
 
 T_NOW=CURRENT_TIME()
 
@@ -637,6 +640,7 @@ OMY => WORK5
 OMZ => WORK6
 
 ! Define velocities on gas cut-faces underlaying Cartesian faces.
+
 IF (CC_IBM .AND. .NOT.CC_STRESS_METHOD) THEN
    T_USED(4) = T_USED(4) + CURRENT_TIME() - T_NOW
    CALL CCIBM_INTERP_FACE_VEL(DT,NM,.TRUE.)
@@ -894,6 +898,7 @@ T_USED(4) = T_USED(4) + CURRENT_TIME() - T_NOW
 CONTAINS
 
 SUBROUTINE DIRECT_FORCE()
+
 REAL(EB) :: TIME_RAMP_FACTOR
 
 TIME_RAMP_FACTOR = EVALUATE_RAMP(T,DUMMY,I_RAMP_FVX_T)
@@ -937,10 +942,10 @@ END SUBROUTINE DIRECT_FORCE
 
 SUBROUTINE CORIOLIS_FORCE()
 
-REAL(EB), POINTER, DIMENSION(:,:,:) :: UP=>NULL(),VP=>NULL(),WP=>NULL()
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UP,VP,WP
 REAL(EB) :: UBAR,VBAR,WBAR
 INTEGER :: II,JJ,KK,IW
-TYPE(WALL_TYPE), POINTER :: WC=>NULL()
+TYPE(WALL_TYPE), POINTER :: WC
 
 ! Velocities relative to the p-cell center (same work done in Deardorff eddy viscosity)
 
@@ -1044,12 +1049,13 @@ ENDDO
 END SUBROUTINE MMS_VELOCITY_FLUX
 
 
-SUBROUTINE PATCH_VELOCITY_FLUX
+!> \brief Compute the velocity flux at a user-specified patch
+!> \details The user may specify a polynomial profile using the PROP and DEVC lines. This routine
+!> specifies the source term in the momentum equation to drive the local velocity toward
+!> this user-specified value, in much the same way as the immersed boundary method
+!> (see IBM_VELOCITY_FLUX).
 
-! The user may specify a polynomial profile using the PROP and DEVC lines. This routine
-! specifies the source term in the momentum equation to drive the local velocity toward
-! this user-specified value, in much the same way as the immersed boundary method
-! (see IBM_VELOCITY_FLUX).
+SUBROUTINE PATCH_VELOCITY_FLUX
 
 USE DEVICE_VARIABLES, ONLY: DEVICE_TYPE,PROPERTY_TYPE,N_DEVC,DEVICE,PROPERTY
 USE TRAN, ONLY: GINV
@@ -1189,9 +1195,12 @@ END SUBROUTINE PATCH_VELOCITY_FLUX
 END SUBROUTINE VELOCITY_FLUX
 
 
-SUBROUTINE VELOCITY_FLUX_CYLINDRICAL(T,NM,APPLY_TO_ESTIMATED_VARIABLES)
+!> \brief Compute convective and diffusive terms of the momentum equations in 2-D cylindrical coordinates
+!> \param T Current time (s)
+!> \param NM Mesh number
+!> \param APPLY_TO_ESTIMATED_VARIABLES Flag indicating whether to use estimated values of variables
 
-! Compute convective and diffusive terms for 2D axisymmetric
+SUBROUTINE VELOCITY_FLUX_CYLINDRICAL(T,NM,APPLY_TO_ESTIMATED_VARIABLES)
 
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 REAL(EB) :: T,DMUDX
@@ -1325,19 +1334,21 @@ T_USED(4) = T_USED(4) + CURRENT_TIME() - T_NOW
 END SUBROUTINE VELOCITY_FLUX_CYLINDRICAL
 
 
-SUBROUTINE NO_FLUX(DT,NM)
+!> \brief Set momentum fluxes inside and on the surface of solid obstructions to maintain user-specified flux
+!> \param DT Time step (s)
+!> \param NM Mesh number
 
-! Set FVX,FVY,FVZ inside and on the surface of solid obstructions to maintain no flux
+SUBROUTINE NO_FLUX(DT,NM)
 
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: DT
-REAL(EB), POINTER, DIMENSION(:,:,:) :: HP=>NULL(),OM_HP=>NULL()
+REAL(EB), POINTER, DIMENSION(:,:,:) :: HP,OM_HP
 REAL(EB) :: RFODT,H_OTHER,DUUDT,DVVDT,DWWDT,UN,T_NOW,DHFCT
 INTEGER  :: IC2,IC1,N,I,J,K,IW,II,JJ,KK,IOR,N_INT_CELLS,IIO,JJO,KKO,NOM
-TYPE (OBSTRUCTION_TYPE), POINTER :: OB=>NULL()
-TYPE (WALL_TYPE), POINTER :: WC=>NULL()
-TYPE (EXTERNAL_WALL_TYPE), POINTER :: EWC=>NULL()
+TYPE (OBSTRUCTION_TYPE), POINTER :: OB
+TYPE (WALL_TYPE), POINTER :: WC
+TYPE (EXTERNAL_WALL_TYPE), POINTER :: EWC
 LOGICAL :: GLMAT_ON_WHOLE_DOMAIN
 
 IF (SOLID_PHASE_ONLY .OR. FREEZE_VELOCITY) RETURN
@@ -1543,13 +1554,17 @@ T_USED(4)=T_USED(4)+CURRENT_TIME()-T_NOW
 END SUBROUTINE NO_FLUX
 
 
+!> \brief Estimate the velocity components at the next time step
+!> \param T Current time (s)
+!> \param DT Time step (s)
+!> \param DT_NEW New time step (if necessary)
+!> \param NM Mesh number
+
 SUBROUTINE VELOCITY_PREDICTOR(T,DT,DT_NEW,NM)
 
 USE TURBULENCE, ONLY: COMPRESSION_WAVE
 USE MANUFACTURED_SOLUTIONS, ONLY: UF_MMS,WF_MMS,VD2D_MMS_U,VD2D_MMS_V
 USE CC_SCALARS_IBM, ONLY : CCIBM_VELOCITY_NO_GRADH
-
-! Estimates the velocity components at the next time step
 
 REAL(EB) :: T_NOW,XHAT,ZHAT
 INTEGER  :: I,J,K
@@ -1640,13 +1655,16 @@ T_USED(4)=T_USED(4)+CURRENT_TIME()-T_NOW
 END SUBROUTINE VELOCITY_PREDICTOR
 
 
+!> \brief Correct the velocity components at the next time step
+!> \param T Current time (s)
+!> \param DT Time step (s)
+!> \param NM Mesh number
+
 SUBROUTINE VELOCITY_CORRECTOR(T,DT,NM)
 
 USE TURBULENCE, ONLY: COMPRESSION_WAVE
 USE MANUFACTURED_SOLUTIONS, ONLY: UF_MMS,WF_MMS,VD2D_MMS_U,VD2D_MMS_V
 USE CC_SCALARS_IBM, ONLY : CCIBM_VELOCITY_NO_GRADH
-
-! Correct the velocity components
 
 REAL(EB) :: T_NOW,XHAT,ZHAT
 INTEGER  :: I,J,K
@@ -1738,13 +1756,15 @@ ENDIF
 IF (DO_EVACUATION) W = 0._EB
 
 T_USED(4)=T_USED(4)+CURRENT_TIME()-T_NOW
-
 END SUBROUTINE VELOCITY_CORRECTOR
 
 
-SUBROUTINE VELOCITY_BC(T,NM,APPLY_TO_ESTIMATED_VARIABLES)
+!> \brief Assert tangential velocity boundary conditions
+!> \param T Current time (s)
+!> \param NM Mesh number
+!> \param APPLY_TO_ESTIMATED_VARIABLES Flag indicating that estimated (starred) variables are to be used
 
-! Assert tangential velocity boundary conditions
+SUBROUTINE VELOCITY_BC(T,NM,APPLY_TO_ESTIMATED_VARIABLES)
 
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 USE TURBULENCE, ONLY: WALL_MODEL,ABL_WALL_MODEL
@@ -1762,11 +1782,10 @@ INTEGER :: I,J,K,NOM(2),IIO(2),JJO(2),KKO(2),IE,II,JJ,KK,IEC,IOR,IWM,IWP,ICMM,IC
            BOUNDARY_TYPE_M,BOUNDARY_TYPE_P,IS2,IWPI,IWMI,VENT_INDEX
 LOGICAL :: ALTERED_GRADIENT(-2:2),PROCESS_EDGE,SYNTHETIC_EDDY_METHOD,HVAC_TANGENTIAL,INTERPOLATED_EDGE,&
            UPWIND_BOUNDARY,INFLOW_BOUNDARY
-REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL(),U_Y=>NULL(),U_Z=>NULL(), &
-                                       V_X=>NULL(),V_Z=>NULL(),W_X=>NULL(),W_Y=>NULL(),RHOP=>NULL(),VEL_OTHER=>NULL()
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,U_Y,U_Z,V_X,V_Z,W_X,W_Y,RHOP,VEL_OTHER
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP
-TYPE (SURFACE_TYPE), POINTER :: SF=>NULL()
-TYPE (OMESH_TYPE), POINTER :: OM=>NULL()
+TYPE (SURFACE_TYPE), POINTER :: SF
+TYPE (OMESH_TYPE), POINTER :: OM
 TYPE (VENTS_TYPE), POINTER :: VT
 TYPE (WALL_TYPE), POINTER :: WCM,WCP
 
@@ -2500,18 +2519,20 @@ IF(CC_IBM .AND. CC_STRESS_METHOD) CALL CCIBM_VELOCITY_BC(T,NM,APPLY_TO_ESTIMATED
 END SUBROUTINE VELOCITY_BC
 
 
-SUBROUTINE MATCH_VELOCITY(NM)
+!> \brief Force normal component of velocity to match at interpolated boundaries
+!> \param NM Mesh number
 
-! Force normal component of velocity to match at interpolated boundaries
+SUBROUTINE MATCH_VELOCITY(NM)
 
 INTEGER  :: NOM,II,JJ,KK,IOR,IW,IIO,JJO,KKO
 INTEGER, INTENT(IN) :: NM
-REAL(EB) :: UU_AVG,VV_AVG,WW_AVG,T_NOW,DA_OTHER,UU_OTHER,VV_OTHER,WW_OTHER,NOM_CELLS
-REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL(),OM_UU=>NULL(),OM_VV=>NULL(),OM_WW=>NULL()
-TYPE (OMESH_TYPE), POINTER :: OM=>NULL()
-TYPE (MESH_TYPE), POINTER :: M2=>NULL()
-TYPE (WALL_TYPE), POINTER :: WC=>NULL()
-TYPE (EXTERNAL_WALL_TYPE), POINTER :: EWC=>NULL()
+REAL(EB) :: T_NOW,DA_OTHER,UU_OTHER,VV_OTHER,WW_OTHER,NOM_CELLS
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,OM_UU,OM_VV,OM_WW
+TYPE (OMESH_TYPE), POINTER :: OM
+TYPE (MESH_TYPE), POINTER :: M2
+TYPE (WALL_TYPE), POINTER :: WC
+TYPE (EXTERNAL_WALL_TYPE), POINTER :: EWC
+
 IF (SOLID_PHASE_ONLY) RETURN
 IF (DO_EVACUATION) RETURN
 
@@ -2527,12 +2548,10 @@ IF (PREDICTOR) THEN
    UU => US
    VV => VS
    WW => WS
-   D_CORR = 0._EB
 ELSE
    UU => U
    VV => V
    WW => W
-   DS_CORR = 0._EB
 ENDIF
 
 ! Loop over all external wall cells and force adjacent normal components of velocty at interpolated boundaries to match.
@@ -2605,11 +2624,8 @@ EXTERNAL_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
                ENDDO
             ENDDO
          ENDDO
-         UU_AVG = 0.5_EB*(UU(0,JJ,KK) + UU_OTHER)
-         IF (PREDICTOR) D_CORR(IW) = DS_CORR(IW) + 0.5*(UU_AVG-UU(0,JJ,KK))*R(0)*RDX(1)*RRN(1)
-         IF (CORRECTOR) DS_CORR(IW) = (UU_AVG-UU(0,JJ,KK))*R(0)*RDX(1)*RRN(1)
          UVW_SAVE(IW) = UU(0,JJ,KK)
-         UU(0,JJ,KK)  = UU_AVG
+         UU(0,JJ,KK)  = 0.5_EB*(UU(0,JJ,KK) + UU_OTHER)
 
       CASE(-1)
 
@@ -2622,11 +2638,8 @@ EXTERNAL_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
                ENDDO
             ENDDO
          ENDDO
-         UU_AVG = 0.5_EB*(UU(IBAR,JJ,KK) + UU_OTHER)
-         IF (PREDICTOR) D_CORR(IW) = DS_CORR(IW) - 0.5*(UU_AVG-UU(IBAR,JJ,KK))*R(IBAR)*RDX(IBAR)*RRN(IBAR)
-         IF (CORRECTOR) DS_CORR(IW) = -(UU_AVG-UU(IBAR,JJ,KK))*R(IBAR)*RDX(IBAR)*RRN(IBAR)
          UVW_SAVE(IW) = UU(IBAR,JJ,KK)
-         UU(IBAR,JJ,KK) = UU_AVG
+         UU(IBAR,JJ,KK) = 0.5_EB*(UU(IBAR,JJ,KK) + UU_OTHER)
 
       CASE( 2)
 
@@ -2639,11 +2652,8 @@ EXTERNAL_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
                ENDDO
             ENDDO
          ENDDO
-         VV_AVG = 0.5_EB*(VV(II,0,KK) + VV_OTHER)
-         IF (PREDICTOR) D_CORR(IW) = DS_CORR(IW) + 0.5*(VV_AVG-VV(II,0,KK))*RDY(1)
-         IF (CORRECTOR) DS_CORR(IW) = (VV_AVG-VV(II,0,KK))*RDY(1)
          UVW_SAVE(IW) = VV(II,0,KK)
-         VV(II,0,KK)  = VV_AVG
+         VV(II,0,KK)  = 0.5_EB*(VV(II,0,KK) + VV_OTHER)
 
       CASE(-2)
 
@@ -2656,11 +2666,8 @@ EXTERNAL_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
                ENDDO
             ENDDO
          ENDDO
-         VV_AVG = 0.5_EB*(VV(II,JBAR,KK) + VV_OTHER)
-         IF (PREDICTOR) D_CORR(IW) = DS_CORR(IW) - 0.5*(VV_AVG-VV(II,JBAR,KK))*RDY(JBAR)
-         IF (CORRECTOR) DS_CORR(IW) = -(VV_AVG-VV(II,JBAR,KK))*RDY(JBAR)
          UVW_SAVE(IW)   = VV(II,JBAR,KK)
-         VV(II,JBAR,KK) = VV_AVG
+         VV(II,JBAR,KK) = 0.5_EB*(VV(II,JBAR,KK) + VV_OTHER)
 
       CASE( 3)
 
@@ -2673,11 +2680,8 @@ EXTERNAL_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
                ENDDO
             ENDDO
          ENDDO
-         WW_AVG = 0.5_EB*(WW(II,JJ,0) + WW_OTHER)
-         IF (PREDICTOR) D_CORR(IW) = DS_CORR(IW) + 0.5*(WW_AVG-WW(II,JJ,0))*RDZ(1)
-         IF (CORRECTOR) DS_CORR(IW) = (WW_AVG-WW(II,JJ,0))*RDZ(1)
          UVW_SAVE(IW) = WW(II,JJ,0)
-         WW(II,JJ,0)  = WW_AVG
+         WW(II,JJ,0)  = 0.5_EB*(WW(II,JJ,0) + WW_OTHER)
 
       CASE(-3)
 
@@ -2690,11 +2694,8 @@ EXTERNAL_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
                ENDDO
             ENDDO
          ENDDO
-         WW_AVG = 0.5_EB*(WW(II,JJ,KBAR) + WW_OTHER)
-         IF (PREDICTOR) D_CORR(IW) = DS_CORR(IW) - 0.5*(WW_AVG-WW(II,JJ,KBAR))*RDZ(KBAR)
-         IF (CORRECTOR) DS_CORR(IW) = -(WW_AVG-WW(II,JJ,KBAR))*RDZ(KBAR)
          UVW_SAVE(IW)   = WW(II,JJ,KBAR)
-         WW(II,JJ,KBAR) = WW_AVG
+         WW(II,JJ,KBAR) = 0.5_EB*(WW(II,JJ,KBAR) + WW_OTHER)
 
    END SELECT
 
@@ -2732,9 +2733,10 @@ T_USED(4)=T_USED(4)+CURRENT_TIME()-T_NOW
 END SUBROUTINE MATCH_VELOCITY
 
 
-SUBROUTINE MATCH_VELOCITY_FLUX(NM)
+!> \brief Force normal component of velocity flux to match at interpolated boundaries
+!> \param NM Mesh number
 
-! Force normal component of velocity flux to match at interpolated boundaries
+SUBROUTINE MATCH_VELOCITY_FLUX(NM)
 
 INTEGER  :: NOM,II,JJ,KK,IOR,IW,IIO,JJO,KKO
 INTEGER, INTENT(IN) :: NM
@@ -2886,9 +2888,12 @@ T_USED(4)=T_USED(4)+CURRENT_TIME()-T_NOW
 END SUBROUTINE MATCH_VELOCITY_FLUX
 
 
-SUBROUTINE CHECK_STABILITY(DT,DT_NEW,NM)
+!> \brief Check the Courant and Von Neumann stability criteria, and if necessary, reduce or increase the time step
+!> \param DT Time step (s)
+!> \param DT_NEW New time step (s)
+!> \param NM Mesh number
 
-! Checks the Courant and Von Neumann stability criteria, and if necessary, reduces the time step accordingly
+SUBROUTINE CHECK_STABILITY(DT,DT_NEW,NM)
 
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: DT
@@ -3030,9 +3035,11 @@ ENDIF
 END SUBROUTINE CHECK_STABILITY
 
 
-SUBROUTINE BAROCLINIC_CORRECTION(T,NM)
+!> \brief Add baroclinic term to the momentum equation
+!> \param T Current time (s)
+!> \param NM Mesh number
 
-! Add baroclinic term to the momentum equation
+SUBROUTINE BAROCLINIC_CORRECTION(T,NM)
 
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 REAL(EB), INTENT(IN) :: T
@@ -3183,18 +3190,16 @@ T_USED(4) = T_USED(4) + CURRENT_TIME() - T_NOW
 END SUBROUTINE BAROCLINIC_CORRECTION
 
 
-! ------------------------ WALL_VELOCITY_NO_GRADH ---------------------------------
+!> \brief Recompute velocities on wall cells
+!> \param DT Time step (s)
+!> \param STORE_UN Flag indicating whether normal velocity component is to be saved
+!> \details Ensure that the correct normal derivative of H is used on the projection. It is only used when the Poisson equation
+!> for the pressure is solved .NOT. PRES_ON_WHOLE_DOMAIN (i.e. using the GLMAT solver).
 
 SUBROUTINE WALL_VELOCITY_NO_GRADH(DT,STORE_UN)
 
-! This routine recomputes velocities on wall cells, such that the correct
-! normal derivative of H is used on the projection. It is only used when the Poisson equation
-! for the pressure is solved .NOT. PRES_ON_WHOLE_DOMAIN (i.e. using the GLMAT solver).
-
 REAL(EB), INTENT(IN) :: DT
 LOGICAL, INTENT(IN) :: STORE_UN
-
-! Local variables:
 INTEGER :: IIG,JJG,KKG,IOR,IW,N_INTERNAL_WALL_CELLS_AUX
 REAL(EB) :: DHDN, VEL_N
 TYPE (WALL_TYPE), POINTER :: WC

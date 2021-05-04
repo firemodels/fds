@@ -4405,7 +4405,7 @@ SELECT CASE(PREDICTOR)
       RHOP   => RHOS
       PRFCT  = 0._EB ! Use star cut-cell quantities.
    CASE(.FALSE.)
-      DP     => DDDT
+      DP     => D
       PBAR_P => PBAR
       RHOP   => RHO
       PRFCT  = 1._EB ! Use end of step cut-cell quantities.
@@ -11245,7 +11245,7 @@ LOGICAL, SAVE :: FIRST_CALL=.TRUE.
 
 SELECT CASE (PERIODIC_TEST)
    CASE DEFAULT
-      IF (PROJECTION .AND. ICYC<=1) RETURN
+      IF (ICYC<=1) RETURN
    CASE (5,8)
       RETURN
    CASE (7,11)
@@ -16354,8 +16354,6 @@ ELSEIF (PRES_ON_CARTESIAN .AND. .NOT.PRES_ON_WHOLE_DOMAIN ) THEN
       K = MESHES(NM)%CUT_CELL(ICC)%IJK(KAXIS)
 
       IROW     = MESHES(NM)%CUT_CELL(ICC)%UNKH(1) - UNKH_IND(NM_START)
-
-      ! This might have the buoyancy div term DDDT wrong !!! - CHECK -
 
       ! Add to F_H:
       F_H(IROW) = F_H(IROW) + PRHS(I,J,K) * DX(I)*DY(J)*DZ(K)

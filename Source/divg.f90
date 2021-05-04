@@ -62,7 +62,7 @@ SELECT CASE(PREDICTOR)
       PBAR_P => PBAR_S
       RHOP => RHOS
    CASE(.FALSE.)
-      DP => DDDT
+      DP => D
       PBAR_P => PBAR
       RHOP => RHO
 END SELECT
@@ -1599,7 +1599,7 @@ USE COMPLEX_GEOMETRY, ONLY : IBM_CGSC, IBM_IDCC, IBM_SOLID, IBM_CUTCFE
 
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: DT
-REAL(EB), POINTER, DIMENSION(:,:,:) :: DP,D_NEW,RTRM,DIV
+REAL(EB), POINTER, DIMENSION(:,:,:) :: DP,RTRM,DIV
 REAL(EB) :: USUM_ADD(N_ZONE),UN_P
 REAL(EB) :: RDT,TNOW,P_EQ,SUM_P_PSUM,SUM_USUM,SUM_DSUM,SUM_PSUM,R_PFCT
 LOGICAL :: OPEN_ZONE
@@ -1622,7 +1622,7 @@ SELECT CASE(PREDICTOR)
       DP => DS
       PBAR_P => PBAR_S
    CASE(.FALSE.)
-      DP => DDDT
+      DP => D
       PBAR_P => PBAR
 END SELECT
 
@@ -1770,60 +1770,31 @@ ENDDO BC_LOOP
 
 ! Compute time derivative of the divergence, dD/dt
 
-TRUE_PROJECTION: IF (PROJECTION) THEN
+DIV=>WORK1
 
-   DIV=>WORK1
-
-   IF (PREDICTOR) THEN
-      DO K = 1,KBAR
-         DO J = 1,JBAR
-            DO I = 1,IBAR
-               DIV(I,J,K) = (R(I)*U(I,J,K)-R(I-1)*U(I-1,J,K))*RDX(I)*RRN(I) + (V(I,J,K)-V(I,J-1,K))*RDY(J) + &
-                            (W(I,J,K)-W(I,J,K-1))*RDZ(K)
-            ENDDO
+IF (PREDICTOR) THEN
+   DO K = 1,KBAR
+      DO J = 1,JBAR
+         DO I = 1,IBAR
+            DIV(I,J,K) = (R(I)*U(I,J,K)-R(I-1)*U(I-1,J,K))*RDX(I)*RRN(I) + (V(I,J,K)-V(I,J-1,K))*RDY(J) + &
+                         (W(I,J,K)-W(I,J,K-1))*RDZ(K)
          ENDDO
       ENDDO
-      DDDT = (DP-DIV)*RDT
-   ELSEIF (CORRECTOR) THEN
-      DO K = 1,KBAR
-         DO J = 1,JBAR
-            DO I = 1,IBAR
-               DIV(I,J,K) = (R(I)*U(I,J,K) -R(I-1)*U(I-1,J,K)) *RDX(I)*RRN(I) + (V(I,J,K)- V(I,J-1,K)) *RDY(J) + &
-                            (W(I,J,K) -W(I,J,K-1)) *RDZ(K) &
-                          + (R(I)*US(I,J,K)-R(I-1)*US(I-1,J,K))*RDX(I)*RRN(I) + (VS(I,J,K)-VS(I,J-1,K))*RDY(J) + &
-                            (WS(I,J,K)-WS(I,J,K-1))*RDZ(K)
-            ENDDO
+   ENDDO
+   DDDT = (DP-DIV)*RDT
+ELSEIF (CORRECTOR) THEN
+   DO K = 1,KBAR
+      DO J = 1,JBAR
+         DO I = 1,IBAR
+            DIV(I,J,K) = (R(I)*U(I,J,K) -R(I-1)*U(I-1,J,K)) *RDX(I)*RRN(I) + (V(I,J,K)- V(I,J-1,K)) *RDY(J) + &
+                         (W(I,J,K) -W(I,J,K-1)) *RDZ(K) &
+                       + (R(I)*US(I,J,K)-R(I-1)*US(I-1,J,K))*RDX(I)*RRN(I) + (VS(I,J,K)-VS(I,J-1,K))*RDY(J) + &
+                         (WS(I,J,K)-WS(I,J,K-1))*RDZ(K)
          ENDDO
       ENDDO
-      D = DDDT
-      DDDT = (2._EB*DP-DIV)*RDT
-   ENDIF
-
-ELSE TRUE_PROJECTION
-
-   IF (PREDICTOR) THEN
-      DDDT = (DS-D)*RDT
-   ELSE
-      D_NEW => WORK1
-      D_NEW = DP
-      DDDT  = (2._EB*D_NEW-DS-D)*RDT
-      D     = D_NEW
-   ENDIF
-
-   ! Adjust dD/dt to correct error in divergence due to velocity matching at interpolated boundaries
-
-   NO_SCARC_IF: IF (PRES_METHOD /= 'SCARC' .AND. PRES_METHOD /= 'USCARC') THEN
-      DO IW=1,N_EXTERNAL_WALL_CELLS
-         IF (EXTERNAL_WALL(IW)%NOM==0) CYCLE
-         IIG = WALL(IW)%ONE_D%IIG
-         JJG = WALL(IW)%ONE_D%JJG
-         KKG = WALL(IW)%ONE_D%KKG
-         IF (PREDICTOR) DDDT(IIG,JJG,KKG) = DDDT(IIG,JJG,KKG) + DS_CORR(IW)*RDT
-         IF (CORRECTOR) DDDT(IIG,JJG,KKG) = DDDT(IIG,JJG,KKG) + (2._EB*D_CORR(IW)-DS_CORR(IW))*RDT
-      ENDDO
-   ENDIF NO_SCARC_IF
-
-ENDIF TRUE_PROJECTION
+   ENDDO
+   DDDT = (2._EB*DP-DIV)*RDT
+ENDIF
 
 T_USED(2)=T_USED(2)+CURRENT_TIME()-TNOW
 END SUBROUTINE DIVERGENCE_PART_2

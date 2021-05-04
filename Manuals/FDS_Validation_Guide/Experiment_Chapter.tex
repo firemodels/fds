@@ -1327,9 +1327,9 @@ Details and references with regard to the plume temperature measurements are giv
 
 The 30~cm pool fires are modeled at three different grid resolutions---2~cm, 1~cm, and 0.5~cm. The 100~cm pool fires are modeled at 4~cm, 2~cm, and 1~cm resolution. The mass loss rate of the fuel is specified.
 
-A two-step reaction mechanism is implemented. In the first reaction, fuel is converted to CO, soot, H$_2$, and H$_2$O. In the second reaction, the CO, soot, and H$_2$ are converted to CO$_2$ and H$_2$O. Both reactions employ fast kinetics, but proceed in series, not in parallel. The relative amounts of CO, soot, and H$_2$ produced in the first step are still subjects of study, and for the moment have been estimated based on measured results. For example, the methanol fire produces no measurable soot and thus all of the carbon in the fuel molecule is assumed to produce CO in the first step.
+A two-step reaction mechanism is implemented. In the first reaction, fuel is converted to CO, soot, H$_2$, and H$_2$O. In the second reaction, the CO, soot, and H$_2$ are converted to CO$_2$ and H$_2$O. Both reactions employ fast kinetics, but proceed in series, not in parallel. The relative amounts of CO, soot, and H$_2$ produced in the first step are still subjects of study, and for the moment have been estimated based on measured results. The fractions of carbon atoms converted to CO in the first step are as follows---0.85 for acetone; 0.95 for ethanol; 0.97 for methane; 1.0 for methanol; 0.85 for propane. For all fuels, one half of the hydrogen atoms are converted to H$_2$ in the first step.
 
-The radiative fraction is not specified, but rather predicted using the computed temperature and radiative properties computed by RadCal.
+The radiative fractions are specified based on measured values---0.31 for acetone; 0.26 for ethanol; 0.15 for methane; 0.21 for 1~m methanol; 0.22 for 30~cm methanol; 0.22 for propane.
 
 
 \section{NIST Smoke Alarm Experiments}
@@ -1592,69 +1592,79 @@ A turbulent buoyant diffusion flame is established on a diffuser burner with an 
 \section{Ranz Marshall Droplet Experiments}
 \label{Ranz_Marshall_Description}
 
-In 1952 Ranz and Marshall performed a set of droplet evaporation experiments that ultimately led to the development of the Ranz-Marshall Nusselt and Schmidt number correlations for droplet heat and mass transfer~\cite{Ranz}. The experiments documented in Figure 8 and Tables 1 to 4 in the paper have been modeled with FDS. For the experiment in Figure 8 of the Ranz and Marshall paper a 1043~$\mu$m water droplet was suspended in still dry air at an ambient temperature and pressure of 24.9$^\circ$C and 98792 Pa. The droplet diameter was measured over time. For the experiments in Tables 1 to 4 in the paper, droplets were suspended in a dry air stream. Experimental parameters included the type of fluid (water or benzene), the initial drop diameter, the ambient temperature, and the velocity of the air stream. The evaporation rate in the FDS simulations was determined by allowing the drop temperature to reach equilibrium and then using the time it took the drop to decrease in size to 350~$\mu$m (the minimum reported droplet size in Figure 8 of the paper). The table below summarizes the experiments.
+In 1952, Ranz and Marshall performed a set of droplet evaporation experiments that ultimately led to the development of Nusselt and Schmidt number correlations for droplets~\cite{Ranz}. The experiments documented in Figure~8 and Tables~1-4 in the paper have been modeled with FDS. For Figure~8 of the paper, a 1043~$\mu$m water droplet was suspended in still dry air at an ambient temperature and pressure of 24.9~$^\circ$C and 98792~Pa, and its diameter was measured over time. For the experiments in Tables~1-4 in the paper, droplets were suspended in a dry air stream. Experimental parameters include the fluid type (water or benzene), initial droplet diameter, ambient temperature, and velocity of the air stream. The evaporation rate in the simulations is calculated based the time required for the droplet to decrease in size to 350~$\mu$m, the minimum reported diameter. Table~\ref{Ranz_Marshall_Summary} summarizes the experiments.
 
-\begin{table}[h]
-	\caption[Summary of Ranz and Marshall droplet evaporation experiments]{Summary of Ranz and Marshall droplet evaporation experiments.}
-	\begin{center}
-		\begin{tabular}{|c|c|c|c|c|c|c|}
-			\hline
-			Table   & Test   & Fluid  &  Diameter  &  Air Temperature & Pressure &  Velocity  \\
-			No.     & No.    &        & ($\mu$m)   &  ($^{\circ}$C)   &  (Pa)    &  (m/s)     \\ \hline \hline
-1 & 1 & Water & 954 & 19.9 & 99059 & 2.46 \\hline
-1 & 2 & Water & 954 & 24.6 & 98659 & 2.1 \\hline
-1 & 3 & Water & 954 & 24.9 & 98659 & 1.723 \\hline
-1 & 4 & Water & 954 & 25.3 & 98659 & 1.532 \\hline
-1 & 5 & Water & 954 & 25.4 & 98659 & 1.197 \\hline
-1 & 6 & Water & 954 & 24.3 & 98392 & 0.952 \\hline
-1 & 7 & Water & 954 & 24.4 & 98392 & 0.762 \\hline
-1 & 8 & Water & 954 & 24.5 & 98392 & 0.571 \\hline
-1 & 9 & Water & 954 & 24.5 & 98392 & 0.571 \\hline
-1 & 10 & Water & 954 & 24.6 & 98392 & 0.285 \\hline
-1 & 11 & Water & 954 & 24.7 & 98392 & 0.1513 \\hline
-1 & 12 & Water & 954 & 24.8 & 98392 & 0.1718 \\hline
-1 & 13 & Water & 954 & 24.9 & 98392 & 0.0841 \\hline
-1 & 14 & Water & 954 & 25.0 & 98392 & 0.0337 \\hline
-1 & 15 & Water & 954 & 23.2 & 98392 & 2.86 \\hline
-1 & 16 & Water & 954 & 23.6 & 99459 & 2.67 \\hline
-1 & 17 & Water & 954 & 23.7 & 99459 & 2.28 \\hline
-1 & 18 & Water & 954 & 24.0 & 99459 & 3.06 \\hline
-1 & 19 & Water & 954 & 24.9 & 98792 & 0 \\hline
-2 & 1 & Water & 950 & 90.0 & 98792 & 2.3 \\hline
-2 & 2 & Water & 950 & 77.5 & 98792 & 1.1 \\hline
-2 & 3 & Water & 950 & 78.7 & 98792 & 1.1 \\hline
-2 & 4 & Water & 950 & 78.7 & 98792 & 1.1 \\hline
-2 & 5 & Water & 950 & 84.0 & 98792 & 1.83 \\hline
-2 & 6 & Water & 950 & 82.5 & 98792 & 1.14 \\hline
-2 & 7 & Water & 950 & 83.0 & 98792 & 1.14 \\hline
-2 & 8 & Water & 950 & 66.4 & 98792 & 0.55 \\hline
-2 & 9 & Water & 950 & 71.4 & 98792 & 0.176 \\hline
-3 & 1 & Water & 850 & 115.0 & 98792 & 1.84 \\hline
-3 & 2 & Water & 710 & 115.0 & 98792 & 1.84 \\hline
-3 & 3 & Water & 560 & 85.0 & 98792 & 0.188 \\hline
-3 & 4 & Water & 460 & 85.0 & 98792 & 0.188 \\hline
-3 & 5 & Water & 960 & 221.0 & 98792 & 1.84 \\hline
-3 & 6 & Water & 580 & 221.0 & 98792 & 1.84 \\hline
-3 & 7 & Water & 880 & 193.0 & 98792 & 0.77 \\hline
-3 & 8 & Water & 600 & 193.0 & 98792 & 0.77 \\hline
-3 & 9 & Water & 1010 & 125.0 & 98792 & 0.21 \\hline
-4 & 1 & Benzene & 1100 & 24.4 & 97592 & 0.051 \\hline
-4 & 2 & Benzene & 1100 & 26.4 & 97592 & 0.153 \\hline
-4 & 3 & Benzene & 1100 & 27.1 & 98125 & 0.289 \\hline
-4 & 4 & Benzene & 1100 & 17.9 & 98525 & 0.748 \\hline
-4 & 5 & Benzene & 1100 & 17.5 & 98525 & 1.124 \\hline
-4 & 6 & Benzene & 1100 & 17.7 & 97725 & 1.5 \\hline
-4 & 7 & Benzene & 1100 & 20.7 & 97725 & 0.188 \\hline
-4 & 8 & Benzene & 1100 & 20.4 & 97725 & 0.283 \\hline
-4 & 9 & Benzene & 1100 & 19.9 & 97725 & 0.755 \\hline
-4 & 10 & Benzene & 1100 & 20.0 & 97725 & 1.13 \\hline
-4 & 11 & Benzene & 1100 & 20.2 & 97725 & 1.516 \\hline
-4 & 12 & Benzene & 1100 & 20.2 & 97725 & 1.9 \\hline
-4 & 13 & Benzene & 1100 & 20.4 & 97725 & 2.88 \\hline
-		\end{tabular}
-	\end{center}
-	\label{Ranz_Marshall_Summary}
-\end{table}
+\begin{longtable}[c]{|c|c|c|c|c|c|c|}
+\caption[Summary of Ranz and Marshall droplet evaporation experiments]{Summary of Ranz and Marshall droplet evaporation experiments.}
+\label{Ranz_Marshall_Summary} \\
+\hline
+Table   & Test   & Fluid  &  Diameter  &  Air Temperature & Pressure &  Velocity  \\
+			No.     & No.    &        & ($\mu$m)   &  ($^{\circ}$C)   &  (Pa)    &  (m/s)     \\ 
+\hline \hline
+\endfirsthead
+\caption[]{Continued} \\
+\hline
+Table   & Test   & Fluid  &  Diameter  &  Air Temperature & Pressure &  Velocity  \\
+			No.     & No.    &        & ($\mu$m)   &  ($^{\circ}$C)   &  (Pa)    &  (m/s)     \\
+\hline \hline
+\endhead
+\hline
+\endfoot
+
+\hline
+\endlastfoot
+1 & 1 & Water & 954 & 19.9 & 99059 & 2.46 \\
+1 & 2 & Water & 954 & 24.6 & 98659 & 2.1 \\
+1 & 3 & Water & 954 & 24.9 & 98659 & 1.723 \\
+1 & 4 & Water & 954 & 25.3 & 98659 & 1.532 \\
+1 & 5 & Water & 954 & 25.4 & 98659 & 1.197 \\
+1 & 6 & Water & 954 & 24.3 & 98392 & 0.952 \\
+1 & 7 & Water & 954 & 24.4 & 98392 & 0.762 \\
+1 & 8 & Water & 954 & 24.5 & 98392 & 0.571 \\
+1 & 9 & Water & 954 & 24.5 & 98392 & 0.571 \\
+1 & 10 & Water & 954 & 24.6 & 98392 & 0.285 \\
+1 & 11 & Water & 954 & 24.7 & 98392 & 0.1513 \\
+1 & 12 & Water & 954 & 24.8 & 98392 & 0.1718 \\
+1 & 13 & Water & 954 & 24.9 & 98392 & 0.0841 \\
+1 & 14 & Water & 954 & 25.0 & 98392 & 0.0337 \\
+1 & 15 & Water & 954 & 23.2 & 98392 & 2.86 \\
+1 & 16 & Water & 954 & 23.6 & 99459 & 2.67 \\
+1 & 17 & Water & 954 & 23.7 & 99459 & 2.28 \\
+1 & 18 & Water & 954 & 24.0 & 99459 & 3.06 \\
+1 & 19 & Water & 954 & 24.9 & 98792 & 0 \\
+2 & 1 & Water & 950 & 90.0 & 98792 & 2.3 \\
+2 & 2 & Water & 950 & 77.5 & 98792 & 1.1 \\
+2 & 3 & Water & 950 & 78.7 & 98792 & 1.1 \\
+2 & 4 & Water & 950 & 78.7 & 98792 & 1.1 \\
+2 & 5 & Water & 950 & 84.0 & 98792 & 1.83 \\
+2 & 6 & Water & 950 & 82.5 & 98792 & 1.14 \\
+2 & 7 & Water & 950 & 83.0 & 98792 & 1.14 \\
+2 & 8 & Water & 950 & 66.4 & 98792 & 0.55 \\
+2 & 9 & Water & 950 & 71.4 & 98792 & 0.176 \\
+3 & 1 & Water & 850 & 115.0 & 98792 & 1.84 \\
+3 & 2 & Water & 710 & 115.0 & 98792 & 1.84 \\
+3 & 3 & Water & 560 & 85.0 & 98792 & 0.188 \\
+3 & 4 & Water & 460 & 85.0 & 98792 & 0.188 \\
+3 & 5 & Water & 960 & 221.0 & 98792 & 1.84 \\
+3 & 6 & Water & 580 & 221.0 & 98792 & 1.84 \\
+3 & 7 & Water & 880 & 193.0 & 98792 & 0.77 \\
+3 & 8 & Water & 600 & 193.0 & 98792 & 0.77 \\
+3 & 9 & Water & 1010 & 125.0 & 98792 & 0.21 \\
+4 & 1 & Benzene & 1100 & 24.4 & 97592 & 0.051 \\
+4 & 2 & Benzene & 1100 & 26.4 & 97592 & 0.153 \\
+4 & 3 & Benzene & 1100 & 27.1 & 98125 & 0.289 \\
+4 & 4 & Benzene & 1100 & 17.9 & 98525 & 0.748 \\
+4 & 5 & Benzene & 1100 & 17.5 & 98525 & 1.124 \\
+4 & 6 & Benzene & 1100 & 17.7 & 97725 & 1.5 \\
+4 & 7 & Benzene & 1100 & 20.7 & 97725 & 0.188 \\
+4 & 8 & Benzene & 1100 & 20.4 & 97725 & 0.283 \\
+4 & 9 & Benzene & 1100 & 19.9 & 97725 & 0.755 \\
+4 & 10 & Benzene & 1100 & 20.0 & 97725 & 1.13 \\
+4 & 11 & Benzene & 1100 & 20.2 & 97725 & 1.516 \\
+4 & 12 & Benzene & 1100 & 20.2 & 97725 & 1.9 \\
+4 & 13 & Benzene & 1100 & 20.4 & 97725 & 2.88 \\
+\hline
+\end{longtable}
 
 \section{Restivo Compartment Air Flow Experiment}
 \label{Restivo_Description}
@@ -2676,15 +2686,15 @@ Additional measurements of a 30.5~cm diameter methanol pool fire were made by Ha
 
 The methanol pool fire is modeled at three different grid resolutions---2~cm, 1~cm, and 0.5~cm. Two sets of simulations are performed, one in which the mass loss rate of fuel is specified, and one in which it is predicted. The gas phase measurements are compared with the simulations for which the burning rate is specified.
 
-Because measurements of CO were made within the flame envelop, a two-step reaction mechanism is implemented. In the first reaction, fuel is converted to CO and H$_2$O, and in the second reaction, CO is converted to CO$_2$. Both reactions employ fast kinetics.
+Because measurements of CO were made within the flame envelop, a two-step reaction mechanism is implemented. In the first reaction, fuel is converted to CO and H$_2$O, and in the second reaction, CO is converted to CO$_2$. Both reactions employ fast kinetics and performed serially. It is assumed that no soot is formed in either reaction.
 
 Physical properties of methanol are taken from a data sheet published by the Methanol Institute~\cite{Methanol}: boiling temperature, 64.6~$^\circ$C, heat of vaporization at 64.6~$^\circ$C, 1098.3~kJ/kg, thermal conductivity, 0.2~W/(m$\cdot$K), specific heat at 25~$^\circ$C, 2.53~kJ/(kg$\cdot$K), density at 20~$^\circ$C, 792~kg/m$^3$. The heat of combustion is given as 19.9~kJ/g, but this value is not input directly, but rather calculated based on the heats of formation of the reactants and products of combustion.
 
-The radiative fraction is specified to be 16~\% (Table A.39, {\em SFPE~Handbook}~\cite{SFPE}). The path length used by RadCal to compute the table of effective radiative absorption coefficients for the gas mixture is set to 10~cm. Normally, its value is a function of grid size, but has been fixed so as not to influence the grid convergence study. The absorption coefficient of the liquid methanol is given as 52~m$^{-1}$, based on the discussion found in Appendix~L of the FDS Technical Reference Guide~\cite{FDS_Tech_Guide}, ``Absorption Coefficients of Liquid Fuels.''
+The radiative fraction is {\em predicted} by the model, not specified by the user, for all cases. The path length used by RadCal to compute the table of effective radiative absorption coefficients for the gas mixture is set to 10~cm, the default value. The absorption coefficient of the liquid methanol is given as 1140~m$^{-1}$.
 
 The modeled thermocouple has a bead diameter of 100~$\mu$m to match the experiments.
 
-For the simulations where the burning rate is not specified, a one-step, first-order reaction converting liquid methanol to fuel vapor was used. The boiling temperature of the liquid was specified as the temperature at which the reaction rate is at its peak, 64.5~$^\circ$C. This approach is different than the liquid fuel burning model in FDS. It is more like that used for non-charring polymers.
+For the simulations where the burning rate is not specified, a liquid fuel evaporation model is used with a boiling temperature of 64.6~$^\circ$C.
 
 
 \section{WTC Spray Burner Experiments}
