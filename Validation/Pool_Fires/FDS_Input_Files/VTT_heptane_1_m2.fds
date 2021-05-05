@@ -1,7 +1,7 @@
 &HEAD CHID='VTT_heptane_1_m2', TITLE='Heptane pool D = 1.17 m, VTT Test hall, NFSC2 series' /
 
-&MESH IJK=80,80,60, XB=-2,2,-2,2,0,3 /
-&MESH IJK=80,80,60, XB=-2,2,-2,2,3,6 /
+&MULT ID='m1', DX=1,DY=1,DZ=1, I_UPPER=3,J_UPPER=3,K_UPPER=5/ 96 meshes
+&MESH IJK=20,20,20, XB=-2,-1,-2,-1,0,1, MULT_ID='m1'/
 
 &TIME T_END=500., WALL_INCREMENT=1 /
 
