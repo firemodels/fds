@@ -1,6 +1,7 @@
 &HEAD CHID='acetone_1_m', TITLE='Single pan of burning acetone' /
 
-&MESH IJK=32,32,96, XB=-0.8,0.8,-0.8,0.8,0.0,4.8 /
+&MULT ID='m1', DX=0.8,DY=0.8,DZ=0.8, I_UPPER=1,J_UPPER=1,K_UPPER=5/ 24 meshes
+&MESH IJK=16,16,16, XB=-0.8,0,-0.8,0,0,0.8, MULT_ID='m1'/
 
 &TIME T_END=400., WALL_INCREMENT=1 /
 
