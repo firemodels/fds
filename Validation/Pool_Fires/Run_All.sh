@@ -11,7 +11,7 @@ $QFDS $DEBUG $QUEUE -d $INDIR -p 24 -n 8 methanol_1_m.fds
 $QFDS $DEBUG $QUEUE -d $INDIR -p 24 -n 8 butane_1_m.fds
 $QFDS $DEBUG $QUEUE -d $INDIR -p 24 -n 8 benzene_1_m.fds
 $QFDS $DEBUG $QUEUE -d $INDIR -p 24 -n 8 heptane_1_m.fds
-$QFDS $DEBUG $QUEUE -d $INDIR -p 24 -n 8 ASTM_E2058_Water_Evap.fds
+$QFDS $DEBUG $QUEUE -d $INDIR ASTM_E2058_Water_Evap.fds
 $QFDS $DEBUG $QUEUE -d $INDIR -p 96 -n 8 VTT_heptane_1_m2.fds
 $QFDS $DEBUG $QUEUE -d $INDIR -p 96 -n 8 VTT_heptane_2_m2.fds
 
