@@ -1649,7 +1649,9 @@ SORT_QUEUE: DO
 
       IC  = M%CELL_INDEX(III,JJJ,KKK)
  
-!     IF (M%SOLID(IC)) CYCLE SEARCH_LOOP  ! Do not search within a solid
+      IF (M%SOLID(IC)) THEN
+         IF (.NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE) CYCLE SEARCH_LOOP  ! Do not search within a non-removable solid
+      ENDIF
 
       SELECT CASE(IOR)
          CASE(-1)
