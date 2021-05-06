@@ -29,21 +29,8 @@
       SPECIFIC_HEAT          = 4.2
       DENSITY                = 1000./
 
-
-      Add these to the SURF line to use 3-point scheme
-      3-point FSK
-      FSK_W       = 0.44629 0.32679 0.22692
-      FSK_K       = 57.2 287.7 1505.2
-
-      1-point FSK (gray) for verifying
-      FSK_W       = 1.0
-      FSK_K       = 333.
-
-Remove FSK-parameters to run the gray case.
 &SURF ID          = 'POOL'
       COLOR       = 'YELLOW'
-      FSK_W       = 0.44629 0.32679 0.22692
-      FSK_K       = 57.2 287.7 1505.2
       MATL_ID     = 'N-HEPTANE LIQUID','WATER'
       THICKNESS   = 0.022,0.02 /
 
