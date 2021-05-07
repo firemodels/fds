@@ -122,7 +122,6 @@ sites, and the various utility programs that support FDS and Smokeview. This doc
 not affiliated with NIST, VTT, or its software development collaborators.
 
 
-% \chapter{Disclaimer}
 \input{../Bibliography/disclaimer}
 
 
@@ -130,11 +129,12 @@ not affiliated with NIST, VTT, or its software development collaborators.
 
 \label{acksection}
 
-The idea for this Guide originated with Jason Floyd, a co-developer of FDS and practicing engineer at Jensen Hughes. He readily saw the need for a clear description of the process of developing and maintaining FDS and Smokeview. Bryan Klein, currently with Thunderhead Engineering, Inc., instituted a number of the internet tools that are described in the Guide, including the source code repository, issue tracking system, and discussion group sites. Kristopher Overholt, currently with RStudio, developed the Firebot automated build and testing process.
+The idea for this Guide originated with Jason Floyd, a co-developer of FDS and practicing engineer at Jensen Hughes. He readily saw the need for a clear description of the process of developing and maintaining FDS and Smokeview. Bryan Klein, currently with Thunderhead Engineering, Inc., instituted a number of the internet tools that are described in the Guide, including the source code repository, issue tracking system, and discussion group sites. Kristopher Overholt, currently with RStudio, developed the original Firebot automated build and testing process.
 
 
-\newpage
-
+\cleardoublepage
+\phantomsection
+\addcontentsline{toc}{chapter}{Contents}
 \tableofcontents
 
 \mainmatter
@@ -476,7 +476,7 @@ The release version of FDS is compiled. Any compiler warnings are logged at this
 
 \subsection*{Stage 5: Run verification suite (or validation set) in release mode}
 
-All of the cases in the verification suite are invoked using the FDS release versions that were compiled in Stage~4. After all of the cases run to completion, the FDS output logs are checked for Fortran errors, numerical instabilities, missing verification case files, or other FDS errors. 
+All of the cases in the verification suite are invoked using the FDS release versions that were compiled in Stage~4. After all of the cases run to completion, the FDS output logs are checked for Fortran errors, numerical instabilities, missing verification case files, or other FDS errors.
 
 \subsection*{Stage 6: Compilation of Smokeview and scripted generation of figures}
 
