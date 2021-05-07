@@ -134,11 +134,11 @@
 \setlength{\parindent}{0.25in}
 \setlength{\oddsidemargin}{0.0in}
 \setlength{\evensidemargin}{0.0in}
-\setlength{\leftmargini}{\parindent}  % Controls the indenting of the "bullets" in a list
-\setlength{\cftsecnumwidth}{0.40in}   % Width of section number in toc (parameter of tocloft package)
-\setlength{\cftsubsecnumwidth}{0.6in} % Width of subsection number in toc (parameter of tocloft package)
-\setlength{\cftfignumwidth}{0.45in}
-\setlength{\cfttabnumwidth}{0.45in}
+\setlength{\leftmargini}{\parindent}        % Controls the indenting of the "bullets" in a list
+\cftsetindents{section}{.25in}{0.40in}      % Distance from left margin to section number; Width of section number and space before section title
+\cftsetindents{subsection}{0.65in}{0.60in}  % Distance from left margin to subsection number; Width of subsection number and space before subsection title
+\setlength{\cftfignumwidth}{0.45in}         % Width of figure number and space before figure caption in the list of figures
+\setlength{\cfttabnumwidth}{0.45in}         % Width of table number and space before table caption in the list of tables
 
 \newcommand{\authortitlesigs}
 {
