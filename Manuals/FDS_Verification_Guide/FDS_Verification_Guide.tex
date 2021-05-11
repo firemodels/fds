@@ -134,7 +134,6 @@ and limitations of a model. Throughout its development, FDS has undergone variou
 This volume provides a survey of verification work conducted to date to evaluate FDS.
 
 
-% \chapter{Disclaimer}
 \input{../Bibliography/disclaimer}
 
 
@@ -6599,6 +6598,17 @@ using the base functions as shown below.
 &CTRL ID='sum',     FUNCTION_TYPE='SUM',      INPUT_ID='tanh','rn2' /
 \end{lstlisting}
 
+\subsection{Favre Average (\texorpdfstring{\textct{shunn3\_FavreZ}}{shunn3\_FavreZ})}
+\label{sec:favre_average}
+
+The Shunn manufactured solution (see Sec.~\ref{sec:shunn_mms}) provides a 2D analytical solution for both the density and mixture fraction.  In this section, to test the statistical output {\ct TEMPORAL\_STATISTIC='FAVRE AVERAGE'} we compare FDS results at two grid resolutions, $\delta x$ = [$L/32$, $L/64$], with $L=2$.  The case is run to $t=10$ s.  Both the running average and Favre average are output at ($x=0,y=0$), the center of the domain.  Note that this imparts an $\mathcal{O}(\delta x)$ error to the output.  The higher grid resolution is therefore more accurate.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/shunn_mms_FavreZ}
+\caption[Favre average test \textct{shunn3\_FavreZ}]{Output of the \textct{shunn3\_FavreZ} test cases in which the Favre average (continuous line) and running average (dashed line) at ($x=0,y=0$) are compared against expected values from the Shunn manufactured solution (see Sec.~\ref{sec:shunn_mms}).}
+\label{fig:shunn_mms_FavreZ}
+\end{figure}
 
 
 \bibliography{../Bibliography/FDS_refs,../Bibliography/FDS_general,../Bibliography/FDS_mathcomp}
