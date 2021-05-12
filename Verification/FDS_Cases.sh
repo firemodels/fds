@@ -758,6 +758,14 @@ $QFDS -p 2 -d WUI ground_vegetation_load.fds
 $QFDS -p 2 -d WUI ground_vegetation_radi.fds
 $QFDS -d WUI hot_rods.fds
 $QFDS -d WUI level_set_fuel_model_1.fds
+$QFDS -d WUI Needle_TGA_A.fds
+$QFDS -d WUI Needle_TGA_B.fds
+$QFDS -d WUI Needle_TGA_C.fds
+$QFDS -d WUI Needle_TGA_D.fds
+$QFDS -d WUI Needle_TGA_E.fds
+$QFDS -d WUI Needle_TGA_F.fds
+$QFDS -d WUI Needle_TGA_G.fds
+$QFDS -d WUI Needle_TGA_H.fds
 $QFDS -d WUI pine_needles.fds
 $QFDS -d WUI radiation_gas-veg_consistency_gas.fds
 $QFDS -d WUI radiation_gas-veg_consistency_veg.fds
