@@ -353,27 +353,10 @@ IF (FREEZE_VELOCITY)  RETURN
 TNOW=CURRENT_TIME()
 CALL POINT_TO_MESH(NM)
 
-! IF (PREDICTOR) THEN
-!    HP => H
-! ELSE
-!    HP => HS
-! ENDIF
-
-! This IF block makes HP consistent with HP in BAROCLINIC_CORRECTION
 IF (PREDICTOR) THEN
-   IF (PRESSURE_ITERATIONS>1) THEN
-      HP => H
-   ELSE
-      HP => HS
-   ENDIF
-   ! Note: this ordering of HP=HS in PREDICTOR is required to achieve 2nd order temporal convergence.
-   ! We should rethink our notation and re-examine whether both H and HS are required.
+   HP => H
 ELSE
-   IF (PRESSURE_ITERATIONS>1) THEN
-      HP => HS
-   ELSE
-      HP => H
-   ENDIF
+   HP => HS
 ENDIF
 
 ! For tunnel geometries, solve a 1-D Poisson equation for average pressure
