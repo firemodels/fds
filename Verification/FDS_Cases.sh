@@ -580,6 +580,7 @@ $QFDS -d Species humidity.fds
 $QFDS -d Species mass_flux_wall_yindex.fds
 $QFDS -d Species mass_flux_wall_zindex.fds
 $QFDS -p 8 -d Species mass_balance_reac.fds
+$QFDS -p 3 -d Species favre_test.fds
 
 $QFDS -d Sprinklers_and_Sprays activate_sprinklers.fds
 $QFDS -d Sprinklers_and_Sprays adiabatic_surf_temp_spray.fds
