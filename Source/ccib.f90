@@ -1532,7 +1532,7 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
             DELTA_P          = PBAR_P(KK,SF%DUCT_PATH(1)) - PBAR_P(KK,SF%DUCT_PATH(2))
             PRES_RAMP_FACTOR = SIGN(1._EB,SF%MAX_PRESSURE-DELTA_P)*SQRT(ABS((DELTA_P-SF%MAX_PRESSURE)/SF%MAX_PRESSURE))
 
-            VEL_INTO_BOD0    =-(CFA%NVEC(IAXIS)*U0 + CFA%NVEC(JAXIS)*V0 + CFA%NVEC(KAXIS)*W0)
+            VEL_INTO_BOD0    = 0._EB
 
             CFA%ONE_D%U_NORMAL_S    = VEL_INTO_BOD0 + TIME_RAMP_FACTOR*(CFA%ONE_D%U_NORMAL_0-VEL_INTO_BOD0)
 
@@ -3703,7 +3703,8 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
          AREAT  = SUM( CUT_FACE(ICF)%AREA(1:NFACE) )
 
-         ! Flux matched U0 to cut-face centroids, they all get same velocity:
+         ! Flux matched U to cut-face centroids, they all get same velocity:
+
          SELECT CASE(X1AXIS)
          CASE(IAXIS)
             VEL_CF = (DY(J)*DZ(K))/AREAT * U(I,J,K)
