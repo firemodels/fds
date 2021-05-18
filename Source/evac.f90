@@ -1055,7 +1055,7 @@ CONTAINS
           WRITE(MESSAGE, '(A,A)') ' ERROR: Evacuation only and pressure solver is: ',TRIM(PRES_METHOD)
           CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.) ; RETURN
        END IF
-       IF (EVACUATION_MC_MODE) THEN 
+       IF (EVACUATION_MC_MODE) THEN
           ! New fire+evacuation strategy: Phase 3 (read in eff,fed files)
           ! 3) EVACUATION_INITIALIZATION=F, EVACUATION_MC_MODE=T
           !    => read (eff) and FED files, just evacuation meshes are used.
@@ -5339,7 +5339,7 @@ CONTAINS
           ! of the HUMAN_GRID%objects
           ALLOCATE(HUMAN_GRID_FED(N_EGRIDS), STAT=IZERO)
           CALL ChkMemErr('INIT_EVACUATION','HUMAN_GRID_FED',IZERO)
-          
+
           ! Mesh loop, now n_egrids
           FEDXYZ_NM_LOOP: DO NM = 1, N_EGRIDS
              ! N_TMP = 4  New format (version 1.11)
@@ -5428,7 +5428,7 @@ CONTAINS
              EVAC_CORRS(I)%RADFLUX(2) = 0.0_EB
 
           END DO CORR_LOOP_READ_XYZ
-          
+
        ENDIF
        RETURN
     ENDIF
@@ -7078,7 +7078,7 @@ CONTAINS
 
     WRITE (LU_EVACOUT,FMT='(/A)') ' EVAC: Initial positions of the agents'
     WRITE (LU_EVACOUT,FMT='(A,A)') ' Agent      X       Y       Z    Tpre    Tdet  ', &
-         ' Dia    V0   Tau   I_gr I_ff'
+         ' Dia    V0   Tau   I_gr I_ff COLOR_INDEX'
 
     ! Initialize the GROUP_I_FFIELDS
     I_EGRID = 0
@@ -7382,7 +7382,7 @@ CONTAINS
              ELSEIF (ICYC==1) THEN ! Write CHID_evac.xyz file
                 WRITE (LU_EVACXYZ) &
                      REAL(EVAC_CORRS(I)%X1,FB),REAL(EVAC_CORRS(I)%Y1,FB),REAL(EVAC_CORRS(I)%Z1,FB), &
-                     REAL(EVAC_CORRS(I)%X2,FB),REAL(EVAC_CORRS(I)%Y2,FB),REAL(EVAC_CORRS(I)%Z2,FB)  
+                     REAL(EVAC_CORRS(I)%X2,FB),REAL(EVAC_CORRS(I)%Y2,FB),REAL(EVAC_CORRS(I)%Z2,FB)
              END IF
           ELSE                    ! Read FED from a file
              ! Read FED, SOOT, TEMP(C), and RADFLUX
@@ -8136,14 +8136,14 @@ CONTAINS
                             HERDING_LIST_DOORS(ABS(HRE%I_Target)) = HERDING_LIST_DOORS(ABS(HRE%I_Target)) + &
                                  W0_HERDING -((W0_HERDING-WR_HERDING)/R_HERD_HR)*P2P_DIST
                          END DO Other_Agent_Loop_2
-                         
+
                          Other_TPRE = 0.0_EB
                          Other_Agent_Loop_3: DO IE = 1, HERDING_LIST_N
                             HRE => HUMAN(HERDING_LIST_IHUMAN(IE))
                             Other_TPRE = Other_TPRE + HRE%TPRE
                          END DO Other_Agent_Loop_3
                          Other_TPRE = Other_TPRE/REAL(MAX(1,HERDING_LIST_N))
-                         
+
                          DO II = 1, N_DOORS+N_EXITS
                             IF (HERDING_LIST_DOORS(II)>0.0_EB) THEN
                                ! Make it symmetrical with respect the doors.
@@ -14573,7 +14573,7 @@ CONTAINS
        CALL SHUTDOWN('ERROR: Class_Properties I_VEL_DIST',PROCESS_0_ONLY=.FALSE.) ; RETURN
     END SELECT
     HR%Speed = Max(HR%Speed, 0.0_EB)
-    
+
     SELECT CASE(PCP%I_DIA_DIST)
     CASE(-1)
        CALL SHUTDOWN('ERROR: Class_Properties: -1',PROCESS_0_ONLY=.FALSE.) ; RETURN
@@ -15215,7 +15215,7 @@ CONTAINS
           AP(NPP,3) =   2.0_FB*REAL(HR%r_torso,FB) ! diameter
           ! Height of a human scaled by radius, default male 1.80 m
           AP(NPP,4) =  1.80_FB*REAL(HR%Radius/0.27_EB,FB)
-          
+
           IF (CROWBAR_DUMP) THEN
              EVEL = SQRT(HR%U_CB**2 + HR%V_CB**2)
              IF (EVEL >= TWO_EPSILON_EB) THEN
@@ -16489,7 +16489,7 @@ CONTAINS
              max_fed = MIN(max_fed, max_fed2) ; ave_K = MIN(ave_K, ave_K2)
           END IF
           PP_see_door = PP_see_door .OR. (PP_see_doorXB .AND. PP_correct_side)
-             
+
           FED_max_Door(i) = max_fed
           K_ave_Door(i) = MAX(ave_K,0.5_EB*ABS(FED_DOOR_CRIT)) ! no divisions by zero
 
