@@ -903,6 +903,7 @@ fi
 if [ "$benchmark" == "yes" ]; then
 cat << EOF >> $scriptfile
 #SBATCH --exclusive
+#SBATCH --cpu-freq=Performance
 EOF
 fi
 
