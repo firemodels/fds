@@ -65,7 +65,7 @@ datadir = '../../Verification/Complex_Geometry/';
 file_s=1;
 file_f=2;
 
-file_str = ['exp_cen';'exp_gdv'];
+file_str = ['exp_chm';'exp_gdv'];
 
 skip_case = 0;
 for ifile=file_s:file_f
@@ -185,7 +185,7 @@ for ifile=file_s:file_f
         'Fontname',Font_Name)
     
     % add Git version if file is available
-    Git_Filename = [datadir,'shunn3_256_cc_exp_cen_git.txt'];
+    Git_Filename = [datadir,'shunn3_256_cc_exp_chm_git.txt'];
     addverstr(gca,Git_Filename,'loglog')
     
     % print to pdf
