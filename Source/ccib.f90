@@ -2547,6 +2547,8 @@ MESH_LOOP : DO NM=1,NMESHES
 
       AREATOT= SUM( CUT_FACE(ICF)%AREA(1:NFACE) )
 
+      FLX_FCT = 0._EB
+      IF(AREATOT>TWO_EPSILON_EB) THEN
       SELECT CASE(X1AXIS)
       CASE(IAXIS)
          VEL_CART = UP(I,J,K)
@@ -2561,7 +2563,7 @@ MESH_LOOP : DO NM=1,NMESHES
          FLX_FCT  = DY(J)*DX(I)/AREATOT  ! This is Area Cartesian / Sum of cut-face areas.
 
       END SELECT
-
+      ENDIF
       IF (PREDICTOR) THEN
          ! For now assign to all cut-faces same velocity:
          CUT_FACE(ICF)%VELS(1:NFACE) = FLX_FCT*VEL_CART
@@ -3707,11 +3709,11 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
          SELECT CASE(X1AXIS)
          CASE(IAXIS)
-            VEL_CF = (DY(J)*DZ(K))/AREAT * U(I,J,K)
+            VEL_CF = (DY(J)*DZ(K))/(AREAT+TWO_EPSILON_EB) * U(I,J,K)
          CASE(JAXIS)
-            VEL_CF = (DX(I)*DZ(K))/AREAT * V(I,J,K)
+            VEL_CF = (DX(I)*DZ(K))/(AREAT+TWO_EPSILON_EB) * V(I,J,K)
          CASE(KAXIS)
-            VEL_CF = (DX(I)*DY(J))/AREAT * W(I,J,K)
+            VEL_CF = (DX(I)*DY(J))/(AREAT+TWO_EPSILON_EB) * W(I,J,K)
          END SELECT
 
          CUT_FACE(ICF)%VEL(1:NFACE)  = VEL_CF
