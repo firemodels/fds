@@ -217,7 +217,7 @@ Many of the changes in FDS~6 are improvements to the various sub-models that do 
 \subsubsection{Hydrodynamics and Turbulence}
 
    \begin{itemize}
-   \item Conservative, total variation diminishing (TVD) scalar transport is implemented: Superbee (LES default) and CHARM (DNS default). These schemes prevent over-shoots and under-shoots in species concentrations and temperature.
+   \item Conservative, total variation diminishing (TVD) scalar transport is implemented: Superbee (VLES default) and CHARM (LES and DNS default). These schemes prevent over-shoots and under-shoots in species concentrations and temperature.
    \item Improved models for the turbulent viscosity are implemented: Deardorff (default), Dynamic Smagorinsky, and Vreman. These models provide more dynamic range to the flow field for coarse resolution and converge to the correct solution at fine resolution.
    \item The conservative form of the sensible enthalpy equation is satisfied by construction in the FDS~6 formulation, eliminating temperature anomalies and energy conservation errors due to numerical mixing.
    \item The baroclinic torque is included by default.
