@@ -320,7 +320,7 @@ ylabel('{\it z} (m)','FontName',Font_Name,'FontSize',Label_Font_Size)
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 
-h = legend(H,'Monin-Obukhov profile','Prescribed rms','FDS mean (forced)','FDS rms','location','northwest');
+h = legend(H,'Monin-Obukhov profile','Prescribed rms','FDS mean','FDS rms','location','northwest');
 set(h,'Interpreter',Font_Interpreter,'FontName',Font_Name,'FontSize',Label_Font_Size)
 
 Git_Filename = [datadir,'sem_open_wind_git.txt'];
@@ -364,7 +364,7 @@ ylabel('{\it z} (m)','FontName',Font_Name,'FontSize',Label_Font_Size)
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 
-h = legend(H(1:2),'Monin-Obukhov profile','FDS mean (unforced)','location','northeast');
+h = legend(H(1:2),'Monin-Obukhov profile','FDS mean','location','northeast');
 set(h,'Interpreter',Font_Interpreter,'FontName',Font_Name,'FontSize',Label_Font_Size)
 
 Git_Filename = [datadir,'sem_open_wind_git.txt'];
