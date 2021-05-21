@@ -7088,10 +7088,10 @@ In simulations where wind and atmospheric effects are of interest, you usually h
 
 &VENT MB='ZMIN', SURF_ID='GROUND' /
 &VENT MB='ZMAX', SURF_ID='OPEN' /
-&VENT PBY=..., SURF_ID='PERIODIC FLOW ONLY' /
-&VENT PBY=..., SURF_ID='PERIODIC FLOW ONLY' /
-&VENT PBX=..., SURF_ID='PERIODIC FLOW ONLY' /
-&VENT PBX=..., SURF_ID='PERIODIC FLOW ONLY' /
+&VENT MB='XMIN', SURF_ID='OPEN' /
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='YMIN', SURF_ID='OPEN' /
+&VENT MB='YMAX', SURF_ID='OPEN' /
 \end{lstlisting}
 It is assumed here that the wind speed is taken at a height 2~m off the ground and the temperature is the specified ambient ({\ct TMPA}). If it is not, set {\ct Z\_REF} (m) and {\ct TMP\_REF} ($^\circ$C) accordingly. The wind {\ct DIRECTION} follows the usual meteorological convention---a northerly wind has direction of 0$^\circ$ and blows from north to south, or in the negative $y$ direction in the FDS coordinate system. An easterly wind has a direction of 90$^\circ$ and blows from east to west, or in the negative $x$ direction.
 
