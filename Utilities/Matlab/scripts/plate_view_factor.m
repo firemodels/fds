@@ -68,7 +68,7 @@ set(gca,'FontSize',Label_Font_Size)
 
 axis([20 110 30 120])
 xlabel('Number of Radiation Angles','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
-ylabel('Heat Flux (kW/m^2)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+ylabel('Heat Flux (kW/m²)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 Plot_Title='Radiative Heat Flux (plate\_view\_factor)';
 text(30,113,Plot_Title,'FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
 %leg=legend('Exact 2D','FDS 2D','Exact 3D','FDS 3D','FDS 3D IBM','Exact cyl.','FDS cyl.','Location','EastOutside');

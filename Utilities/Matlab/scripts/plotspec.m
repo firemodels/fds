@@ -97,7 +97,7 @@ loglog(k,E3,'k-');
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 axis([1e1 2e3 1e-7 1e-3])
-ylabel('{\it E(k)} (m^3/s^2)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
+ylabel('{\it E(k)} (m³/s²)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 xlabel('{\it k} (1/m)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 
 % Add lines to indicate cutoff wavenumbers
