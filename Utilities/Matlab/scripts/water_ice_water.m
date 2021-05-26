@@ -41,8 +41,8 @@ h=plot(wiw_M(1:500,3),wiw_m(1:500,5),'b-',wiw_M(501:1000,3),wiw_m(501:1000,5),'r
 
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
-xlabel('Temperature (\circC)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
-ylabel('Liquid concentration (kg/m^3)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+xlabel('Temperature (°C)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+ylabel('Liquid concentration (kg/m³)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 axis([-10 10 0 1000])
 
 lh=legend('Cooling (freezing)','Heating (melting)');

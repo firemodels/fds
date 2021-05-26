@@ -46,8 +46,8 @@ set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 
 axis([1e2 1e8 .005 .2]) % based on MYO
-xlabel('Re_{\it H}','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
-ylabel('\it f','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'Rotation',0.0)
+xlabel('Re$_H$','Interpreter','LaTeX','FontSize',Label_Font_Size)
+ylabel('$f$','Interpreter','LaTeX','FontSize',Label_Font_Size,'Rotation',0.0)
 
 outdir = '../../../out/Moody_Chart/';
 
@@ -109,13 +109,13 @@ dpdx = -100;
 [f,Re] = friction_factor_calc(dpdx,L,[outdir,'s=p01_dpdx=-100_N16_devc.csv'],mu);loglog(Re,f,'g^')
 [f,Re] = friction_factor_calc(dpdx,2*L,[outdir,'s=p02_dpdx=-100_N16_devc.csv'],mu);loglog(Re,f,'g>')
 
-text(1.3e8,2e-1,'{\it s/H}','Interpreter',Font_Interpreter,'FontSize',Key_Font_Size,'Fontname',Font_Name)
+text(1.3e8,2e-1,'$s/H$','Interpreter','LaTeX','FontSize',Key_Font_Size,'Fontname',Font_Name)
 text(1.3e8,1.2e-2,num2str(RR(2)),'Interpreter',Font_Interpreter,'FontSize',Key_Font_Size,'Fontname',Font_Name)
 text(1.3e8,1.95e-2,num2str(RR(3)),'Interpreter',Font_Interpreter,'FontSize',Key_Font_Size,'Fontname',Font_Name)
 text(1.3e8,3.85e-2,num2str(RR(4)),'Interpreter',Font_Interpreter,'FontSize',Key_Font_Size,'Fontname',Font_Name)
 text(1.3e8,1.02e-1,num2str(RR(5)),'Interpreter',Font_Interpreter,'FontSize',Key_Font_Size,'Fontname',Font_Name)
-h = legend(H,'\it N_z=8, H=1','\it N_z=16, H=1','\it N_z=32, H=1','\it N_z=16, H=2','Location','Southwest');
-set(h,'Interpreter',Font_Interpreter,'FontSize',Key_Font_Size)
+h = legend(H,'$N_z=8$, $H=1$','$N_z=16$, $H=1$','$N_z=32$, $H=1$','$N_z=16$, $H=2$','Location','Southwest');
+set(h,'Interpreter','LaTeX','FontSize',Key_Font_Size)
 
 % add VerStr if file is available
 

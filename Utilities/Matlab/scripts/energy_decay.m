@@ -107,7 +107,7 @@ set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Key_Font_Size)
 
 xlabel('Time (s)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
-ylabel('Kinetic Energy (m^2/s^2)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
+ylabel('Kinetic Energy (m²/s²)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 
 H(4)=plot(0.0,E1_bar,'ko','MarkerSize',8);
 plot(0.28,E2_bar,'ro','MarkerSize',8)

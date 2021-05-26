@@ -96,7 +96,7 @@ for i_plot=1:2
        h=plot(M_fds(1:5:nt_fds,1),M_fds(1:5:nt_fds,3),'ro');hold on
        h=plot(M_fds(1:5:nt_fds,1),M_fds(1:5:nt_fds,4),'gs');
        xlabel('Time (s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
-       ylabel('Temperature (\circC)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
+       ylabel('Temperature (°C)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
        legend('Analytical 1 cm','Analytical 5 cm','Analytical 10 cm','FDS 1 cm','FDS 5 cm','FDS 10 cm')
     end
 

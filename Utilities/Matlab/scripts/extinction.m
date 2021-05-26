@@ -294,7 +294,7 @@ set(h([2 4]),'MarkerSize',7)
 axis([0. 1700 0 0.21])
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Scat_Label_Font_Size)
-xlabel('Temperature (\circC)','Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size,'FontName',Font_Name)
+xlabel('Temperature (°C)','Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size,'FontName',Font_Name)
 ylabel('Oxygen Volume Fraction','Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size,'FontName',Font_Name)
 lh=legend('Simple Model','Expected Burning','FDS Burning','Expected Extinction','FDS Extinction','Location','NorthEast');
 set(lh,'FontSize',Key_Font_Size)
