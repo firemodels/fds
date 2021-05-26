@@ -64,7 +64,7 @@ else
 
     set(gca,'FontName',Font_Name)
     set(gca,'FontSize',Label_Font_Size)
-    xlabel('Time(s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
+    xlabel('Time (s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
     ylabel('{\it u} rms (m/s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
     legend('Analytic','FDS','Location','East')
 
@@ -96,8 +96,8 @@ else
 
     set(gca,'FontName',Font_Name)
     set(gca,'FontSize',Label_Font_Size)
-    xlabel('Time(s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
-    ylabel('{\it uw} covariance (m^2/s^2)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
+    xlabel('Time (s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
+    ylabel('{\it uw} covariance (m²/s²)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
     legend('Analytic','FDS','Location','East')
 
     % add Git revision if file is available
@@ -128,7 +128,7 @@ else
 
     set(gca,'FontName',Font_Name)
     set(gca,'FontSize',Label_Font_Size)
-    xlabel('Time(s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
+    xlabel('Time (s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
     ylabel('{\it uw} cross correlation','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
     legend('Analytic','FDS','Location','East')
 

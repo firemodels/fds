@@ -156,7 +156,7 @@ set(gca,'FontSize',Title_Font_Size)
 
 xlabel('{\it \Deltax} (m)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname',Font_Name)
 ylabel('{\it L}_{\infty} error (°C)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname',Font_Name)
-lh=legend(hh,'FDS','{\it O(\Deltax)}','{\it O(\Deltax^2)}','location','northwest');
+lh=legend(hh,'FDS','{\it O(\Deltax)}','{\it O(\Deltax²)}','location','northwest');
 set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 
 % add version string if file is available
