@@ -398,7 +398,7 @@ This reaction can be implemented by setting $T_{\rm thr,\alpha\beta} = T_{\rm f}
 \subsection{Liquid Fuels}
 
 The rate at which liquid fuel evaporates when burning is a function of the liquid temperature and the concentration of fuel vapor above the pool surface. According to the Clausius-Clapeyron relation, the volume fraction of the fuel vapor above the surface is a function of the liquid boiling temperature
-\be X_{\rm F,\ell} = \exp \left[ -\frac{ h_{\rm v} W_{\rm F}}\R \left(\frac{1}{T_{\rm s}}-\frac{1}{T_{\rm b}} \right) \right]
+\be X_{\rm F,g} = \exp \left[ -\frac{ h_{\rm v} W_{\rm F}}\R \left(\frac{1}{T_{\rm s}}-\frac{1}{T_{\rm b}} \right) \right]
 \label{CC_liquid}
 \ee
 where $h_{\rm v}$ is the heat of vaporization, $W_{\rm F}$ is the molecular weight of the fuel gas, $T_{\rm s}$ is the surface temperature, and $T_{\rm b}$ is the boiling temperature of the fuel~\cite{Prasad:1}. The evaporation rate of the fuel is governed by Stefan diffusion~\cite{Taylor&Krishna}:
@@ -412,6 +412,30 @@ where $\bp_m$ is the pressure, $T_{\rm g}$ is the temperature, and $X_{\rm F,g}$
 The Reynolds number is calculated based on conditions in the cell adjacent to the surface. The length scale, $L$, used in calculating the Reynolds number is \SI{1}{m} unless otherwise specified and is the same length scale used for the convective heat transfer calculation.
 
 For simplicity, the liquid fuel itself is treated like a thermally-thick solid for the purpose of computing the heat conduction. There is no computation of the convection of the liquid within the pool.
+
+\subsection{Multi-component Liquid Evaportaion (Distillation)}
+\label{sec:distillation}
+
+Thermodynamic equilibrium at a liquid-vapor interface is determined by an obscure thermodynamic quantity called \emph{fugacity}.  At equilibrium, the fugacity of the liquid and vapor phases are the same for each component independently.  Fugacity is a bit like pressure, and so the analogy of a force balance at equilibrium for each component of the mixture is appropriate.  To formalize this equilibrium state, we equate the vapor phase, ${\rm g}$, and liquid phase, $\ell$, fugacities as follows:
+\be
+\label{eq:fugacity}
+f_{\alpha,{\rm g}} = f_{\alpha,\ell}
+\ee
+
+The usual approximation for the vapor phase fugacity is to simply use the partial pressure of the component in the gas phase.  The approximation of the liquid phase fugacity involves computing (or assuming) an \emph{activity coefficient}, $\gamma_\alpha$, and liquid \emph{equilibriun vapor pressure}, $p^*_\alpha$.  A common simplification is to assume the activity coefficient is unity.  This leads to ``Raoult's law'':
+\begin{align}
+\label{eq:raoult}
+X_{\alpha,{\rm g}} \, \bp_m &= X_{\alpha,\ell} \, p^*_\alpha
+\end{align}
+where $X_{\alpha,{\rm g}}$ is the \emph{mole} fraction of $\alpha$ in the vapor phase and $X_{\alpha,\ell}$ is the \emph{mole fraction} of $\alpha$ in the liquid phase.  Of course, if the liquid is pure, then $X_{\alpha,\ell}=1$, and we have the vapor pressure equal to the equilibrium vapor pressure, by construction.  Thus, as written above in Eq.~(\ref{CC_liquid}), the Clausius-Clapeyron equation is providing the equilibrium vapor mole fraction as the ratio of the equilibrium vapor pressure (of the fuel species, assumed pure in the liquid phase) to the local total thermodynamic pressure, $X_{\rm F,g} = p^*_{\rm F}/\bp_m$.
+
+For distillation, we need to first rearrange the Clausius-Clapeyron equation to give the equilibrium vapor pressure for component $\alpha$:
+\be
+\label{eq:CC_eqbm_vap_press}
+p^*_\alpha = \bp_m \exp \left[ -\frac{ h_{\rm v,\alpha} W_\alpha}{\R} \left(\frac{1}{T_{\rm s}}-\frac{1}{T_{\rm b,\alpha}} \right) \right]
+\ee
+
+Our goal now is to determine the vapor phase mole fractions which then feed into the mass flux driving force (Fick's law).  Typically, we will assume the liquid phase mole fractions to be known.  Then, the unknowns in the problem are the $n$ gas phase mole fractions and the temperature $T_{\rm s}$.  The equations we have are $n$ vapor pressure relations plus one constraint on the mole fractions $\sum X_{\alpha,{\rm g}}=1$.
 
 \subsection{Shrinking and Swelling Materials}
 \label{sec:shrink_swell}
