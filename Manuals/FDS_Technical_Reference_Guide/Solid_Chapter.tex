@@ -435,7 +435,15 @@ For distillation, we need to first rearrange the Clausius-Clapeyron equation to 
 p^*_\alpha = \bp_m \exp \left[ -\frac{ h_{\rm v,\alpha} W_\alpha}{\R} \left(\frac{1}{T_{\rm s}}-\frac{1}{T_{\rm b,\alpha}} \right) \right]
 \ee
 
-Our goal now is to determine the vapor phase mole fractions which then feed into the mass flux driving force (Fick's law).  Typically, we will assume the liquid phase mole fractions to be known.  Then, the unknowns in the problem are the $n$ gas phase mole fractions and the temperature $T_{\rm s}$.  The equations we have are $n$ vapor pressure relations plus one constraint on the mole fractions $\sum X_{\alpha,{\rm g}}=1$.
+Our goal now is to determine the vapor phase mole fractions which then feed into the mass flux driving force (Fick's law).  Typically, we will assume the liquid phase mole fractions to be known.  The surface temperature is also known from the energy balance---this may or may not over-constrain the problem.  Let $N_g$ represent the number of tracked species in the gas phase.  And let $N_\ell$ represent the number of liquid phase species. Note that $N_\ell \le N_g$.
+
+Plugging Eq.~(\ref{eq:CC_eqbm_vap_press}) into Eq.~(\ref{eq:raoult}) gives an expression for the gas phase mole fraction at the surface of the liquid, assuming we know the surface temperature, $T_{\rm s}$.
+\be
+\label{eq:CC_eqbm_Xg}
+X_{\alpha,{\rm g}} = X_{\alpha,\ell} \, \exp \left[ -\frac{ h_{\rm v,\alpha} W_\alpha}{\R} \left(\frac{1}{T_{\rm s}}-\frac{1}{T_{\rm b,\alpha}} \right) \right]
+\ee
+If $\sum_{\alpha=1}^{N_\ell} X_{\alpha,{\rm g}} \le 1$, then we set the remaining tracked species composition such that the surface composition sums to one.  If $\sum_{\alpha=1}^{N_\ell} X_{\alpha,{\rm g}} > 1$, then we either need to rescale the mole fractions accordingly such that they sum to 1 or we need to adjust the surface temperature.
+
 
 \subsection{Shrinking and Swelling Materials}
 \label{sec:shrink_swell}
