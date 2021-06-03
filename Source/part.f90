@@ -3608,13 +3608,16 @@ END SUBROUTINE PARTICLE_MASS_ENERGY_TRANSFER
 
 
 !> \brief Add PARTICLE momentum as a force term in momentum equation
+!> \param DT Current time step (s)
+!> \param NM Current mesh number
 
-SUBROUTINE PARTICLE_MOMENTUM_TRANSFER(NM)
+SUBROUTINE PARTICLE_MOMENTUM_TRANSFER(DT,NM)
 
 USE TRAN, ONLY : GET_IJK
 INTEGER, INTENT(IN) :: NM
-REAL(EB), POINTER, DIMENSION(:,:,:) :: FVXS,FVYS,FVZS
-REAL(EB) :: XI,YJ,ZK,X_WGT,Y_WGT,Z_WGT
+REAL(EB), INTENT(IN) :: DT
+REAL(EB), POINTER, DIMENSION(:,:,:) :: FVXS,FVYS,FVZS,UU,VV,WW
+REAL(EB) :: XI,YJ,ZK,X_WGT,Y_WGT,Z_WGT,RDT,UODT,VODT,WODT
 INTEGER :: II,JJ,KK,I,J,K,IC,IW
 TYPE (LAGRANGIAN_PARTICLE_TYPE), POINTER :: LP
 TYPE (LAGRANGIAN_PARTICLE_CLASS_TYPE), POINTER :: LPC
@@ -3626,6 +3629,18 @@ CALL POINT_TO_MESH(NM)
 FVXS => WORK1 ; FVXS = 0._EB
 FVYS => WORK2 ; FVYS = 0._EB
 FVZS => WORK3 ; FVZS = 0._EB
+
+RDT = 1._EB/DT
+
+IF (PREDICTOR) THEN
+   UU => U
+   VV => V
+   WW => W
+ELSE
+   UU => US
+   VV => VS
+   WW => WS
+ENDIF
 
 SUM_MOMENTUM_LOOP: DO I=1,NLP
    LP=>LAGRANGIAN_PARTICLE(I)
@@ -3654,12 +3669,18 @@ SUM_MOMENTUM_LOOP: DO I=1,NLP
 
 ENDDO SUM_MOMENTUM_LOOP
 
+! Add summed particle accelerations to the momentum equation. Limit the value to plus/minus abs(u)/dt to prevent a sudden
+! change in gas direction.
+
 DO K=0,KBAR
    DO J=0,JBAR
       DO I=0,IBAR
-         FVX(I,J,K) = FVX(I,J,K) + FVXS(I,J,K)
-         FVY(I,J,K) = FVY(I,J,K) + FVYS(I,J,K)
-         FVZ(I,J,K) = FVZ(I,J,K) + FVZS(I,J,K)
+         UODT = ABS(UU(I,J,K)*RDT)
+         VODT = ABS(VV(I,J,K)*RDT)
+         WODT = ABS(WW(I,J,K)*RDT)
+         FVX(I,J,K) = FVX(I,J,K) + MIN(UODT,MAX(-UODT,FVXS(I,J,K)))
+         FVY(I,J,K) = FVY(I,J,K) + MIN(VODT,MAX(-VODT,FVYS(I,J,K)))
+         FVZ(I,J,K) = FVZ(I,J,K) + MIN(WODT,MAX(-WODT,FVZS(I,J,K)))
       ENDDO
    ENDDO
 ENDDO
