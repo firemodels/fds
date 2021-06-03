@@ -13697,6 +13697,7 @@ DO K=KLO,KHI
          ! Drop segments that are unconnected:
          ALLOCATE(VERT_SEGS(1:NVERT)); VERT_SEGS(1:NVERT)=0
          DO IDUM = 1,NSEG
+            IF (SEG_CELL(NOD1,IDUM) == SEG_CELL(NOD2,IDUM)) CYCLE
             VERT_SEGS(SEG_CELL(NOD1,IDUM)) = VERT_SEGS(SEG_CELL(NOD1,IDUM)) + 1
             VERT_SEGS(SEG_CELL(NOD2,IDUM)) = VERT_SEGS(SEG_CELL(NOD2,IDUM)) + 1
          ENDDO
@@ -13704,7 +13705,8 @@ DO K=KLO,KHI
          SEG_CELL_AUX = SEG_CELL
          COUNT = 0
          DO IDUM = 1,NSEG
-         IF ( (VERT_SEGS(SEG_CELL_AUX(NOD1,IDUM))>1) .AND. (VERT_SEGS(SEG_CELL_AUX(NOD2,IDUM))>1) ) THEN
+         IF ( (SEG_CELL_AUX(NOD1,IDUM) /= SEG_CELL_AUX(NOD2,IDUM)) .AND. &
+              (VERT_SEGS(SEG_CELL_AUX(NOD1,IDUM))>1) .AND. (VERT_SEGS(SEG_CELL_AUX(NOD2,IDUM))>1) ) THEN
             COUNT = COUNT + 1
             SEG_CELL(:,COUNT) = SEG_CELL_AUX(:,IDUM)
             CYCLE
@@ -14037,9 +14039,9 @@ DO K=KLO,KHI
             ENDDO
             ! Final seg:
             IDUM = MESHES(NM)%CUT_FACE(NCUTFACE)%CFELEM(1+NSEG_FACE,NCF)
-            x1(IAXIS:KAXIS) = XYZvert(IAXIS:KAXIS,IDUM)
+            X1(IAXIS:KAXIS) = XYZVERT(IAXIS:KAXIS,IDUM)
             IDUM = MESHES(NM)%CUT_FACE(NCUTFACE)%CFELEM(1+1        ,NCF)
-            x2(IAXIS:KAXIS) = XYZvert(IAXIS:KAXIS,IDUM)
+            X2(IAXIS:KAXIS) = XYZVERT(IAXIS:KAXIS,IDUM)
 
             VC1(IAXIS:KAXIS) = X1(IAXIS:KAXIS) - XCEN(IAXIS:KAXIS)
             V12(IAXIS:KAXIS) = X2(IAXIS:KAXIS) - X1(IAXIS:KAXIS)
@@ -14051,6 +14053,27 @@ DO K=KLO,KHI
 
             AREAI = 0.5_EB * SQRT( CROSSV(IAXIS)**2._EB + CROSSV(JAXIS)**2._EB + CROSSV(KAXIS)**2._EB )
             AREA  = AREA + AREAI
+            ! IF(AREA<TWO_EPSILON_EB) THEN
+            !    WRITE(LU_ERR,*) 'NM,I,J,K,AREA,GEOMEPS=',NM,I,J,K,AREA,GEOMEPS
+            !    WRITE(LU_ERR,*) 'NBODTRI, NCF, NSEG_FACE=',NBODTRI,NCF,NSEG_FACE
+            !    DO ISEG_FACE=1,NSEG_FACE-1
+            !       IDUM = MESHES(NM)%CUT_FACE(NCUTFACE)%CFELEM(1+ISEG_FACE,NCF)
+            !       X1(IAXIS:KAXIS)  = XYZVERT(IAXIS:KAXIS,IDUM)
+            !       IDUM = MESHES(NM)%CUT_FACE(NCUTFACE)%CFELEM(2+ISEG_FACE,NCF)
+            !       X2(IAXIS:KAXIS)  = XYZVERT(IAXIS:KAXIS,IDUM)
+            !       WRITE(LU_ERR,*) ISEG_FACE,&
+            !       MESHES(NM)%CUT_FACE(NCUTFACE)%CFELEM(1+ISEG_FACE,NCF),IDUM,&
+            !       ':',X1(IAXIS:KAXIS),'-',X2(IAXIS:KAXIS)
+            !    ENDDO
+            !    ! Final seg:
+            !    IDUM = MESHES(NM)%CUT_FACE(NCUTFACE)%CFELEM(1+NSEG_FACE,NCF)
+            !    x1(IAXIS:KAXIS) = XYZvert(IAXIS:KAXIS,IDUM)
+            !    IDUM = MESHES(NM)%CUT_FACE(NCUTFACE)%CFELEM(1+1        ,NCF)
+            !    x2(IAXIS:KAXIS) = XYZvert(IAXIS:KAXIS,IDUM)
+            !    WRITE(LU_ERR,*) NSEG_FACE,&
+            !    MESHES(NM)%CUT_FACE(NCUTFACE)%CFELEM(1+NSEG_FACE,NCF),IDUM,&
+            !    ':',X1(IAXIS:KAXIS),'-',X2(IAXIS:KAXIS)
+            ! ENDIF
             ACEN(IAXIS:KAXIS)  = (ACEN(IAXIS:KAXIS) + AREAI * XCENI(IAXIS:KAXIS))/AREA
             ! volume computation variables:
             XC1(IAXIS:KAXIS) = 0.5_EB*(XCEN(IAXIS:KAXIS) + X1(IAXIS:KAXIS))
