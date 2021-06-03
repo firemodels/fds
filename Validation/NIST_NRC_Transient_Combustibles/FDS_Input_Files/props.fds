@@ -1,0 +1,231 @@
+&REAC FUEL='CELLULOSE'
+      SOOT_YIELD=0.01 
+      C=3.3
+      H=10.
+      O=5
+      HEAT_OF_COMBUSTION=12120 /
+   
+&SPEC ID='WATER VAPOR' /
+
+&VENT MB='XMIN', SURF_ID='OPEN' /
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='YMIN', SURF_ID='OPEN' /
+&VENT MB='YMAX', SURF_ID='OPEN' /
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+
+&SURF ID='Igniter BCs', HRRPUA=2000, RAMP_Q='ign', TMP_FRONT=2000, COLOR='RED', GEOMETRY='CYLINDRICAL', THICKNESS=0.005, LENGTH=0.075 /
+&RAMP ID='ign', T=  0., F=0. /
+&RAMP ID='ign', T=  1., F=1. /
+&RAMP ID='ign', T=300., F=1. /
+&RAMP ID='ign', T=301., F=0. /
+
+&PART ID='Igniter', SURF_ID='Igniter BCs', STATIC=T /
+
+&SURF ID='Concrete Board', 
+      DEFAULT = .TRUE.
+      THICKNESS=0.015,
+      COLOR='GRAY'
+      MATL_ID='Concrete' /
+ 
+&MATL ID='Concrete',
+      DENSITY=2000,
+      SPECIFIC_HEAT=1.,
+      CONDUCTIVITY=0.1 /
+  
+&SURF ID='Single Cardboard',
+      MATL_ID = 'Corrugated Paper Simple'
+      MOISTURE_FRACTION = 0.05
+      COLOR = 'BROWN'
+      BURN_AWAY = .TRUE.
+      THICKNESS = 0.0018 /
+
+&SURF ID='Double Cardboard',
+      MATL_ID = 'Corrugated Paper Simple'
+      MOISTURE_FRACTION = 0.05
+      COLOR = 'BROWN'
+      BURN_AWAY = .TRUE.
+      THICKNESS = 0.0036 /
+
+&SURF ID='Quadruple Cardboard',
+      MATL_ID = 'Corrugated Paper Simple'
+      MOISTURE_FRACTION = 0.05
+      COLOR = 'BROWN'
+      BURN_AWAY = .TRUE.
+      THICKNESS = 0.0072 /
+
+&SURF ID='SOLID PINE', 
+      MATL_ID = 'CRIB PINE WOOD'
+      MOISTURE_FRACTION = 0.05
+      BACKING = 'INSULATED'
+      THICKNESS = 0.01 /
+
+&SURF ID='PINE CRIB', 
+      MATL_ID = 'CRIB PINE WOOD'
+      MOISTURE_FRACTION = 0.05
+      SURFACE_VOLUME_RATIO = 69.
+      GEOMETRY = 'CYLINDRICAL'
+      LENGTH = 0.04 /
+
+&SURF ID='PINE PALLET',
+      MATL_ID = 'PALLET PINE WOOD'
+      BACKING = 'INSULATED'
+      MOISTURE_FRACTION = 0.05
+      THICKNESS = 0.008
+      WIDTH = 0.04
+      LENGTH = 0.04 /
+
+&SURF ID='Crinkle Paper',
+      MATL_ID = 'Corrugated Paper'
+      BACKING = 'INSULATED'
+      MOISTURE_FRACTION = 0.05
+      SURFACE_VOLUME_RATIO = 10000.
+      GEOMETRY = 'CARTESIAN'
+      LENGTH = 0.03
+      WIDTH = 0.004 /
+
+&MATL ID='Corrugated Paper'
+      A(1) = 7.95E9
+      E(1) = 1.30E5
+      EMISSIVITY=0.7
+      DENSITY=350.
+      SPEC_ID='CELLULOSE'
+      NU_SPEC=0.1
+      MATL_ID='Corrugated Paper Intermediate'
+      NU_MATL=0.9
+      CONDUCTIVITY = 0.1
+      SPECIFIC_HEAT = 1.80 /
+
+&MATL ID='Corrugated Paper Intermediate'
+      A(1) = 2.0E11
+      E(1) = 1.60E5
+      EMISSIVITY=0.775
+      HEAT_OF_REACTION=126.
+      DENSITY=315.
+      SPEC_ID='CELLULOSE'
+      NU_SPEC=0.63
+      MATL_ID='Corrugated Paper Char 1'
+      NU_MATL=0.37
+      CONDUCTIVITY = 0.06
+      SPECIFIC_HEAT = 1.55 /
+
+&MATL ID='Corrugated Paper Simple'
+      A(1) = 2.0E11
+      E(1) = 1.60E5
+      EMISSIVITY=0.775
+      HEAT_OF_REACTION=126.
+      DENSITY=350.
+      SPEC_ID='CELLULOSE'
+      HEAT_OF_COMBUSTION=16120.
+      NU_SPEC=1.0
+      CONDUCTIVITY = 0.06
+      SPECIFIC_HEAT = 1.55 /
+
+&MATL ID='Corrugated Paper Char 1'
+      A(1) = 2.61e-2
+      E(1) = 1.70E4
+      EMISSIVITY=0.85
+      DENSITY=170.
+      SPEC_ID='CELLULOSE'
+      NU_SPEC=0.41
+      MATL_ID='char'
+      NU_MATL=0.59
+      CONDUCTIVITY_RAMP = 'k_char'
+      SPECIFIC_HEAT = 1.30 /
+
+&MATL ID                 = 'CRIB PINE WOOD'
+      DENSITY            = 463.
+      CONDUCTIVITY_RAMP  = 'wood_k'
+      SPECIFIC_HEAT_RAMP = 'wood_cp'
+      REFERENCE_TEMPERATURE = 320.
+      MATL_ID            = 'char'
+      NU_MATL            = 0.20
+      SPEC_ID            = 'CELLULOSE'
+      NU_SPEC            = 0.80
+      HEAT_OF_REACTION   = 418. /
+
+&MATL ID                 = 'PALLET PINE WOOD'
+      DENSITY            = 414.
+      CONDUCTIVITY_RAMP  = 'wood_k'
+      SPECIFIC_HEAT_RAMP = 'wood_cp'
+      REFERENCE_TEMPERATURE = 320.
+      MATL_ID            = 'char'
+      NU_MATL            = 0.20
+      SPEC_ID            = 'CELLULOSE'
+      NU_SPEC            = 0.80
+      HEAT_OF_REACTION   = 418. /
+
+&MATL ID                 = 'char'
+      DENSITY            = 135.
+      CONDUCTIVITY_RAMP  = 'k_char'
+      SPECIFIC_HEAT_RAMP = 'cp_char'
+      N_S                = 0.
+      NU_O2_CHAR         = 1.65
+      BETA_CHAR          = 0.2
+      A                  = 430.
+      E                  = 74800.
+      MATL_ID            = 'ash'
+      NU_MATL            = 0.25
+      SPEC_ID            = 'PRODUCTS','AIR'
+      NU_SPEC            = 7.92,-7.17
+      HEAT_OF_REACTION   = -32120. /
+
+&MATL ID            = 'ash'
+      DENSITY       = 67.
+      CONDUCTIVITY  = 0.1
+      SPECIFIC_HEAT = 2.0 /
+
+&RAMP ID = 'wood_k', T = 20,  F = 0.096 /
+&RAMP ID = 'wood_k', T = 800, F = 0.370 /
+
+&RAMP ID = 'wood_cp', T = 20.,  F = 0.90 /
+&RAMP ID = 'wood_cp', T = 800., F = 2.73 /
+
+&RAMP ID = 'cp_char', T = 20, F = 0.8 /
+&RAMP ID = 'cp_char', T = 120, F =1.4 /
+&RAMP ID = 'cp_char', T = 220, F =2.0 /
+&RAMP ID = 'cp_char', T = 320, F =2.6 /
+&RAMP ID = 'cp_char', T = 420, F =3.2 /
+&RAMP ID = 'cp_char', T = 520, F =3.8 /
+&RAMP ID = 'cp_char', T = 620, F =4.4 /
+&RAMP ID = 'cp_char', T = 720, F =5.0 /
+&RAMP ID = 'cp_char', T = 800, F =5.6 / 
+
+&RAMP ID='k_char', T=347., F=0.0357 /
+&RAMP ID='k_char', T=447., F=0.0560 /
+&RAMP ID='k_char', T=627., F=0.1094 /
+&RAMP ID='k_char', T=847., F=0.2107 /
+
+&PART ID             = 'PINE CRIB PARTICLE'
+      DRAG_COEFFICIENT = 40.
+      COLOR          = 'BROWN'
+      SURF_ID        = 'PINE CRIB'
+      QUANTITIES     = 'PARTICLE TEMPERATURE','PARTICLE MASS'
+      STATIC         = .TRUE. /
+
+&PART ID             = 'PINE PALLET PARTICLE'
+      DRAG_COEFFICIENT = 3.
+      COLOR          = 'BROWN'
+      SURF_ID        = 'PINE PALLET'
+      QUANTITIES     = 'PARTICLE TEMPERATURE','PARTICLE MASS'
+      STATIC         = .TRUE. /
+
+&PART ID             = 'Crinkle Paper'
+      DRAG_COEFFICIENT = 1.0
+      COLOR          = 'BEIGE'
+      SURF_ID        = 'Crinkle Paper'
+      QUANTITIES     = 'PARTICLE TEMPERATURE','PARTICLE MASS'
+      STATIC         = .TRUE. /
+
+&DUMP DT_DEVC=10, DT_HRR=10 /
+
+&SLCF QUANTITY='TEMPERATURE',                      PBY=-0.3, VECTOR=.TRUE. /
+&SLCF QUANTITY='TEMPERATURE',                      PBY=-0.3, CELL_CENTERED=.TRUE. /
+&SLCF QUANTITY='HRRPUV',                           PBY=-0.3, CELL_CENTERED=.TRUE. /
+&SLCF QUANTITY='ABSORPTION COEFFICIENT',           PBY=-0.3, CELL_CENTERED=.TRUE. /
+&SLCF QUANTITY='RADIATION LOSS',                   PBY=-0.3, CELL_CENTERED=.TRUE. /
+&SLCF QUANTITY='INTEGRATED INTENSITY',             PBY=-0.3, CELL_CENTERED=.TRUE. /
+&SLCF QUANTITY='VOLUME FRACTION',SPEC_ID='OXYGEN', PBY=-0.3, CELL_CENTERED=.TRUE. /
+
+&BNDF QUANTITY='WALL TEMPERATURE', CELL_CENTERED=.TRUE. /
+&BNDF QUANTITY='BURNING RATE', CELL_CENTERED=.TRUE. /
+

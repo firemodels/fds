@@ -1,0 +1,76 @@
+&REAC FUEL               = 'N-OCTANE'
+      SOOT_YIELD         = 0.038 /
+
+&DEVC XB=-0.60,0.60,-0.60,0.60,0.00,0.10, QUANTITY='BURNING RATE',     SPATIAL_STATISTIC='MEAN', SURF_ID='POOL', ID='mdot'/
+&DEVC XB=-0.60,0.60,-0.60,0.60,0.00,0.10, QUANTITY='WALL TEMPERATURE', SPATIAL_STATISTIC='MEAN', SURF_ID='POOL', ID='Tsurf' /
+&DEVC XB=-0.60,0.60,-0.60,0.60,0.00,0.10, QUANTITY='WALL TEMPERATURE', SPATIAL_STATISTIC='MAX',  SURF_ID='POOL', ID='Tsurf_max' /
+
+&DUMP DT_DEVC=10., DT_HRR=10., SIG_FIGS=4, SIG_FIGS_EXP=2 /
+
+&SURF ID='Igniter BCs', TMP_FRONT=2000, COLOR='RED', GEOMETRY='CYLINDRICAL', THICKNESS=0.005, LENGTH=0.075 /
+&RAMP ID='ign', T= 0., F=0. /
+&RAMP ID='ign', T= 1., F=1. /
+&RAMP ID='ign', T=20., F=1. /
+&RAMP ID='ign', T=21., F=0. /
+
+&PART ID='Igniter', SURF_ID='Igniter BCs', STATIC=T, AGE=21. /
+&INIT PART_ID='Igniter', N_PARTICLES=1, XYZ=0.01,0.01,0.07 /
+
+&MATL ID                     = 'GASOLINE'
+      NU_SPEC                = 1.
+      SPEC_ID                = 'N-OCTANE'
+      HEAT_OF_REACTION       = 338.9
+      CONDUCTIVITY           = 0.19
+      SPECIFIC_HEAT          = 2.2
+      DENSITY                = 742.
+      ABSORPTION_COEFFICIENT = 300
+      HEAT_OF_COMBUSTION     = 37600.
+      BOILING_TEMPERATURE    = 211.7 /
+
+&MATL ID                     = 'KEROSENE'
+      NU_SPEC                = 1.
+      SPEC_ID                = 'N-OCTANE'
+      HEAT_OF_REACTION       = 290.8
+      CONDUCTIVITY           = 0.2
+      SPECIFIC_HEAT          = 2.0
+      DENSITY                = 798.
+      ABSORPTION_COEFFICIENT = 300
+      HEAT_OF_COMBUSTION     = 40200.
+      BOILING_TEMPERATURE    = 256.7 /
+
+&MATL ID            = 'STEEL'
+      EMISSIVITY    = 1.0
+      DENSITY       = 7850.
+      CONDUCTIVITY  = 45.8
+      SPECIFIC_HEAT = 0.46 /
+
+&MATL ID            = 'CONCRETE'
+      DENSITY       = 2300.
+      CONDUCTIVITY  = 1.4
+      SPECIFIC_HEAT = 0.88 /
+
+&MATL ID            = 'VINYL'
+      DENSITY       = 1200.
+      CONDUCTIVITY  = 0.19
+      SPECIFIC_HEAT = 1.47 /
+
+&SURF ID        = 'STEEL SHEET'
+      COLOR     = 'BLACK'
+      MATL_ID   = 'STEEL'
+      BACKING   = 'EXPOSED'
+      THICKNESS = 0.006 /
+
+&VENT MB='XMIN', SURF_ID = 'OPEN' /
+&VENT MB='XMAX', SURF_ID = 'OPEN' /
+&VENT MB='YMIN', SURF_ID = 'OPEN' /
+&VENT MB='YMAX', SURF_ID = 'OPEN' /
+&VENT MB='ZMAX', SURF_ID = 'OPEN' /
+
+&SLCF PBY=0.000, QUANTITY='TEMPERATURE', VECTOR=.TRUE. /
+&SLCF PBY=0.001, QUANTITY='HRRPUV', CELL_CENTERED=T /
+
+&BNDF QUANTITY='BURNING RATE',     CELL_CENTERED=T /
+&BNDF QUANTITY='GAUGE HEAT FLUX',  CELL_CENTERED=T /
+&BNDF QUANTITY='WALL TEMPERATURE', CELL_CENTERED=T /
+
+
