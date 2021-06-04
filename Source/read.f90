@@ -5414,15 +5414,6 @@ READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 
-   ! If particle class has no ID at this point, stop.
-
-   DO I=1,10
-      IF (QUANTITIES(I)=='MASS FLUX' .AND. QUANTITIES_SPEC_ID(I)=='null') THEN
-         WRITE(MESSAGE,'(A)') "ERROR: PART QUANTITIES 'MASS FLUX' requires QUANTITIES_SPEC_ID."
-         CALL SHUTDOWN(MESSAGE) ; RETURN
-      ENDIF
-   ENDDO
-
    ! Set default colors for Smokeview. Water droplets are BLUE. Fuel droplets are YELLOW. Everything else is BLACK.
 
    IF (TRIM(SPEC_ID)=='WATER VAPOR') THEN
