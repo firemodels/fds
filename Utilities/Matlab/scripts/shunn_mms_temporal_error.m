@@ -83,9 +83,19 @@ if L2_rho<1.99
     disp(['Matlab Warning: L2_rho = ',num2str(L2_rho),' in Shunn 3 MMS temporal order'])
 end
 
-L2_Z = norm(p_Z,2)/sqrt(nx);
+L2_Z = norm(p_Z,2)/nx;
 if L2_Z<1.99
     disp(['Matlab Warning: L2_Z = ',num2str(L2_Z),' in Shunn 3 MMS temporal order'])
+end
+
+L2_U = norm(p_U,2)/nx;
+if L2_U<1.99
+    disp(['Matlab Warning: L2_U = ',num2str(L2_U),' in Shunn 3 MMS temporal order'])
+end
+
+L2_H = norm(p_H,2)/nx;
+if L2_H<0.99
+    disp(['Matlab Warning: L2_H = ',num2str(L2_H),' in Shunn 3 MMS temporal order'])
 end
 
 % Tony Saad's way...

@@ -38,7 +38,7 @@ set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 axis([0 800 0 1.1])
 
-xlabel('Temperature (\circC)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+xlabel('Temperature (°C)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 ylabel('Mass Fraction','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 set(h([1 3]),'Color','b')
 set(h([2 4]),'Color','r')

@@ -217,7 +217,7 @@ Many of the changes in FDS~6 are improvements to the various sub-models that do 
 \subsubsection{Hydrodynamics and Turbulence}
 
    \begin{itemize}
-   \item Conservative, total variation diminishing (TVD) scalar transport is implemented: Superbee (LES default) and CHARM (DNS default). These schemes prevent over-shoots and under-shoots in species concentrations and temperature.
+   \item Conservative, total variation diminishing (TVD) scalar transport is implemented: Superbee (VLES default) and CHARM (LES and DNS default). These schemes prevent over-shoots and under-shoots in species concentrations and temperature.
    \item Improved models for the turbulent viscosity are implemented: Deardorff (default), Dynamic Smagorinsky, and Vreman. These models provide more dynamic range to the flow field for coarse resolution and converge to the correct solution at fine resolution.
    \item The conservative form of the sensible enthalpy equation is satisfied by construction in the FDS~6 formulation, eliminating temperature anomalies and energy conservation errors due to numerical mixing.
    \item The baroclinic torque is included by default.
@@ -1788,7 +1788,7 @@ This case demonstrates the use of baroclinic correction for an axially-symmetric
 
 A common application of FDS is tunnel fires, but simulations of fires in long, relatively tight tunnels that are made up of multiple meshes can exhibit spurious fluctuations in the pressure field that can lead to numerical instabilities. If a numerical instability occurs in a simulation involving a tunnel, you might try the following remedies, which are listed here in order of effectiveness:
 \begin{enumerate}
-\item If the tunnel is made up of multiple meshes that abut end to end, and there are no other meshes outside of the tunnel, and there are no {\ct OPEN} boundaries on the top, bottom or sides of the tunnel; set {\ct TUNNEL\_PRECONDITIONER=T} on the {\ct PRES} line. This option instructs FDS to solve a 1-D pressure equation that spans the entire tunnel. This 1-D solution can be thought of as an average pressure field which is added to the 3-D pressure fields that are solved for using the default FFT-based solver on each mesh. The 1-D global solution accelerates the convergence of the overall 3-D pressure field on the entire domain.
+\item If (1) the tunnel is made up of multiple meshes that abut end to end, (2) there are no other meshes outside of the tunnel, (3) there are no {\ct OPEN} boundaries on the top, bottom or sides of the tunnel, and (4) the number of MPI processes is equal to the number of meshes; set {\ct TUNNEL\_PRECONDITIONER=T} on the {\ct PRES} line. This option instructs FDS to solve a 1-D pressure equation that spans the entire tunnel. This 1-D solution can be thought of as an average pressure field which is added to the 3-D pressure fields that are solved for using the default FFT-based solver on each mesh. The 1-D global solution accelerates the convergence of the overall 3-D pressure field on the entire domain.
 \item You can increase the value of {\ct MAX\_PRESSURE\_ITERATIONS} which has a default value of 10 in most cases; 20 when the {\ct TUNNEL\_PRECONDITIONER} is invoked. If you experience a numerical instability in a tunnel scenario, try setting the {\ct MAX\_PRESSURE\_ITERATIONS} to 50 as a starting point, and monitor the number of pressure iterations per time step in the {\ct CHID.out} file.
 \item If you are using multiple meshes, reduce the value of {\ct VELOCITY\_TOLERANCE} on the {\ct PRES} line to force a tighter match of velocities at the mesh boundaries. The default value of {\ct VELOCITY\_TOLERANCE} (with units of m/s) is $\dx/2$. If you set {\ct TUNNEL\_PRECONDITIONER=T}, there is less of a need to decrease the {\ct VELOCITY\_TOLERANCE} from its default value, but it still may be necessary to increase the {\ct MAX\_PRESSURE\_ITERATIONS} to account for occasional excursions of pressure.
 \item Create {\ct OPEN} vents at various points along the length of the tunnel, near or at the floor. This models natural leakage in the tunnel, and alleviates, to some extent, wild oscillations in pressure. Note that even if the pressure equation is solved perfectly over the entire domain, the low Mach number assumption will still lead to fictitiously large fluctuations in pressure. The {\ct OPEN} boundaries can help relieve these pressure oscillations. If you do choose to create {\ct OPEN} boundaries along the length of the tunnel, you should {\em not} set {\ct TUNNEL\_PRECONDITIONER} to {\ct T}
@@ -2908,7 +2908,7 @@ A simple example is shown Fig~\ref{fig:obst_rotbox}.
 \begin{figure}[ht]
 \centering
 \includegraphics[width=.7\textwidth,trim={0 .5in 0 .5in},clip]{SCRIPT_FIGURES/obst_rotbox}
-\caption[Creating an {\ct OBST} cone using {\ct MULT} and {\ct SHAPE}]{Creating an {\ct OBST} rotated box using {\ct MULT} and {\ct SHAPE}.}
+\caption[Creating an {\ct OBST} rotated box using {\ct MULT} and {\ct SHAPE}]{Creating an {\ct OBST} rotated box using {\ct MULT} and {\ct SHAPE}.}
 \label{fig:obst_rotbox}
 \end{figure}
 
@@ -5087,6 +5087,7 @@ Species &   Mol.~Wt.            & Formula          & $\sigma$ & $\epsilon/k$   &
 {\ct N-HEPTANE}          & 100.201940 & C$_7$H$_{16}$    & 4.701    & 205.75   &  Y       & 0.83  &  {\ct N-HEPTANE}           \\ \hline
 {\ct N-HEXANE}           & 86.175360  & C$_6$H$_{12}$    & 5.949    & 399.3    &  Y       & 0.79 &  {\ct N-HEPTANE}           \\ \hline
 {\ct N-OCTANE}           & 114.228520 & C$_8$H$_{18}$    & 4.892    & 231.16   &  Y       & 0.64 &  {\ct N-HEPTANE}           \\ \hline
+{\ct N-PENTANE}          & 72.148780  & C$_5$H$_{12}$    & 5.784    & 341.1   &  Y       & 0.79 &  {\ct N-HEPTANE}           \\ \hline
 {\ct NITRIC OXIDE}       & 30.006100  & NO               & 3.492    & 116.7    &  Y       & 0.74 &                            \\ \hline
 {\ct NITROGEN}           & 28.013400  & N$_2$            & 3.798    & 71.4     &  Y       & 0.71 &                            \\ \hline
 {\ct NITROGEN ATOM}      & 14.006700  & N                & 2.66     & 92.1     &          & 0.71 &                            \\ \hline
@@ -5542,6 +5543,7 @@ Fuel              & Formula          & $X_{\rm OI}$    & $T_{\rm OI}$ ($^\circ$C
 {\ct N-HEPTANE}   & C$_7$H$_{16}$    & 0.134        & 1497 \\ \hline
 {\ct N-HEXANE}    & C$_6$H$_{14}$    & 0.134        & 1497 \\ \hline
 {\ct N-OCTANE}    & C$_8$H$_{18}$    & 0.134        & 1507 \\ \hline
+{\ct N-PENTANE}   & C$_5$H$_{12}$    & 0.134        & 1487 \\ \hline
 {\ct PROPANE}     & C$_3$H$_8$       & 0.127        & 1447 \\ \hline
 All other species &                  & 0.135        & 1427 \\ \hline
 \end{tabular}
@@ -7088,10 +7090,10 @@ In simulations where wind and atmospheric effects are of interest, you usually h
 
 &VENT MB='ZMIN', SURF_ID='GROUND' /
 &VENT MB='ZMAX', SURF_ID='OPEN' /
-&VENT PBY=..., SURF_ID='PERIODIC FLOW ONLY' /
-&VENT PBY=..., SURF_ID='PERIODIC FLOW ONLY' /
-&VENT PBX=..., SURF_ID='PERIODIC FLOW ONLY' /
-&VENT PBX=..., SURF_ID='PERIODIC FLOW ONLY' /
+&VENT MB='XMIN', SURF_ID='OPEN' /
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='YMIN', SURF_ID='OPEN' /
+&VENT MB='YMAX', SURF_ID='OPEN' /
 \end{lstlisting}
 It is assumed here that the wind speed is taken at a height 2~m off the ground and the temperature is the specified ambient ({\ct TMPA}). If it is not, set {\ct Z\_REF} (m) and {\ct TMP\_REF} ($^\circ$C) accordingly. The wind {\ct DIRECTION} follows the usual meteorological convention---a northerly wind has direction of 0$^\circ$ and blows from north to south, or in the negative $y$ direction in the FDS coordinate system. An easterly wind has a direction of 90$^\circ$ and blows from east to west, or in the negative $x$ direction.
 
@@ -12425,14 +12427,14 @@ fds-smv & Web page html source
 \chapter{Compiling FDS}
 \label{info:compilation}
 
-If a compiled version of FDS exists for the machine on which the calculation is to be run and no changes have been made to the original source code, there is no need to re-compile the code. For example, the file {\ct fds.exe} is the compiled program for a Windows-based PC; thus PC users do not need a Fortran compiler and do not need to compile the source code. For machines for which an executable has not been compiled, you must compile the code. A Fortran 2008 compliant compiler is required.
+If a compiled version of FDS exists for the machine on which the calculation is to be run and no changes have been made to the original source code, there is no need to re-compile the code. For example, the file {\ct fds.exe} is the compiled program for a Windows-based PC; thus PC users do not need a Fortran compiler and do not need to compile the source code. For machines for which an executable has not been compiled, you must compile the code. A Fortran 2018 compliant compiler is required.
 
 \section{FDS Source Code}
 
-Table~\ref{tab:sourcefiles} lists the files that make up the FDS source code. Files with the ``.f90'' suffix contain free-form Fortran~90 instructions conforming to the ANSI and ISO standards (2008 edition). A {\ct makefile} is available in the Build directory of the fds Repository that contains platform specific options for compilation. Note the following:
+Table~\ref{tab:sourcefiles} lists the files that make up the FDS source code. Files with the ``.f90'' suffix contain free-form Fortran~90 instructions conforming to the ANSI and ISO standards (2018 edition). A {\ct makefile} is available in the Build directory of the fds Repository that contains platform specific options for compilation. Note the following:
 \begin{itemize}
 \item The source code consists entirely of Fortran statements organized into 33 files. Some compilers have a standard optimization level, plus various degrees of ``aggressive'' optimization. Be cautious in using the highest levels of optimization.
-\item To compile FDS, you need a Fortran compiler (2008 or greater) and MPI libraries. More details on MPI can be found at the FDS repository
+\item To compile FDS, you need a Fortran compiler (2018 or greater) and MPI libraries. More details on MPI can be found at the FDS repository
 \href{https://github.com/firemodels/fds}{{https://github.com/firemodels/fds}}.
 \end{itemize}
 

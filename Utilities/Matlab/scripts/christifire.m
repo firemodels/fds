@@ -108,7 +108,7 @@ plot(S_tga_air(:,1),S_tga_air(:,2),'k--')
 plot(S_tga_air_v1(:,2),S_tga_air_v1(:,4)./max(S_tga_air_v1(:,4)).*100, '--', ...
     S_tga_air_v2(:,2),S_tga_air_v2(:,4)./max(S_tga_air_v2(:,4)).*100, '--')
 
-xlabel('Temperature (\circC)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+xlabel('Temperature (°C)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 ylabel('Mass (%)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 lh=legend('Exp (N2)','FDS v1 (N2)', 'FDS v2 (N2)', 'Exp (air)','FDS v1 (air)', 'FDS v2 (air)');
 set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
@@ -162,7 +162,7 @@ plot(S_mcc_v1(:,2),S_mcc_v1(:,5), '--',  ...
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 
-xlabel('Temperature (\circC)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+xlabel('Temperature (°C)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 ylabel('HRR (kW/kg)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 lh=legend('Exp','FDS v1', 'FDS v2','Location', 'East');
 set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
@@ -211,7 +211,7 @@ plot(I_tga_N2_v1(:,2),I_tga_N2_v1(:,4)./max(I_tga_N2_v1(:,4)).*100, '--', ...
 
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
-xlabel('Temperature (\circC)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+xlabel('Temperature (°C)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 ylabel('Mass (%)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 lh=legend('Exp','FDS v1', 'FDS v2');
 set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
@@ -260,7 +260,7 @@ plot(I_mcc_v1(:,2),I_mcc_v1(:,5), '--',  ...
 
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
-xlabel('Temperature (\circC)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+xlabel('Temperature (°C)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 ylabel('HRR (kW/kg)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 lh=legend('Exp','FDS v1', 'FDS v2','Location', 'East');
 set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
@@ -317,7 +317,7 @@ plot(C_cone_50_v1(:,1),C_cone_50_v1(:,3)./0.01, '--',  ...
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 xlabel('Time (s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
-ylabel('HRR (kW/m^2)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+ylabel('HRR (kW/m²)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 lh=legend('Exp','FDS v1', 'FDS v2','Location', 'East');
 set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 
@@ -360,7 +360,7 @@ plot(C_cone_25_v1(:,1),C_cone_25_v1(:,3)./0.01, '--', ...
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 xlabel('Time (s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
-ylabel('HRR (kW/m^2)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+ylabel('HRR (kW/m²)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 lh=legend('Exp','FDS v1', 'FDS v2', 'Location', 'East');
 set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 
@@ -403,7 +403,7 @@ plot(C_cone_75_v1(:,1),C_cone_75_v1(:,3)./0.01, '--', ...
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 xlabel('Time (s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
-ylabel('HRR (kW/m^2)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+ylabel('HRR (kW/m²)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 lh=legend('Exp','FDS v1', 'FDS v2','Location', 'East');
 set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 
@@ -446,7 +446,7 @@ plot(C_cone_50_v1(:,1),-gradient(C_cone_50_v1(:,2),C_cone_50_v1(:,1)), '--', ...
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 xlabel('Time (s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
-ylabel('MLR (kg/sm^2)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+ylabel('MLR (kg/m²)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 lh=legend('Exp','FDS v1', 'FDS v2','Location', 'East');
 set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 
@@ -489,7 +489,7 @@ plot(C_cone_25_v1(:,1),-gradient(C_cone_25_v1(:,2),C_cone_25_v1(:,1)), '--', ...
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 xlabel('Time (s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
-ylabel('MLR (kg/sm^2)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+ylabel('MLR (kg/m²)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 lh=legend('Exp','FDS v1', 'FDS v2','Location', 'East');
 set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 
@@ -532,7 +532,7 @@ plot(C_cone_75_v1(:,1),-gradient(C_cone_75_v1(:,2),C_cone_75_v1(:,1)), '--', ...
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 xlabel('Time (s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
-ylabel('MLR (kg/sm^2)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+ylabel('MLR (kg/m²)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 lh=legend('Exp','FDS v1', 'FDS v2','Location', 'East');
 set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 

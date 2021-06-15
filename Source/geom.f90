@@ -222,6 +222,8 @@ INTEGER :: LU_DB_SETCC
 !! ---------------------------------------------------------------------------------
 ! Start Variable declaration for CC_IBM:
 ! Local constants used on routines:
+! INTEGER, PARAMETER :: QB = SELECTED_REAL_KIND(33,4931)  !< Precision of "Sixteen Byte" reals
+! LOGICAL, PARAMETER :: DO_QUAD_PRECISION_CUTCELLS = .FALSE.
 REAL(EB), SAVE :: GEOMEPS=1.E-12_EB
 REAL(EB), SAVE :: LOOSEPS=1.E-6_EB
 REAL(EB), PARAMETER :: GEOMQUALITYFCT=1000._EB ! Factor for GEOMs quality check
@@ -1696,6 +1698,35 @@ MAIN_MESH_LOOP : DO NM=1,NMESHES
    ENDIF
    IF(MESHES(NM)%N_CUTCELL_MESH+MESHES(NM)%N_GCCUTCELL_MESH == 0) THEN
       IF (ALLOCATED(MESHES(NM)%CUT_CELL)) DEALLOCATE(MESHES(NM)%CUT_CELL)
+   ENDIF
+
+   ! Sanity tests on cut-faces, cut-cells:
+   IF (DEBUG_SET_CUTCELLS) THEN
+      CUTFACE_TEST_LOOP : DO ICF=1,MESHES(NM)%N_CUTFACE_MESH
+         NFACE  = MESHES(NM)%CUT_FACE(ICF)%NFACE
+         I      = MESHES(NM)%CUT_FACE(ICF)%IJK(IAXIS)
+         J      = MESHES(NM)%CUT_FACE(ICF)%IJK(JAXIS)
+         K      = MESHES(NM)%CUT_FACE(ICF)%IJK(KAXIS)
+         X1AXIS = MESHES(NM)%CUT_FACE(ICF)%IJK(KAXIS+1)
+         DO I=1,NFACE
+            IF(MESHES(NM)%CUT_FACE(ICF)%AREA(I)<TWO_EPSILON_EB) THEN
+            WRITE(LU_ERR,*) 'ZERO AREA=',MESHES(NM)%CUT_FACE(ICF)%STATUS,ICF,I,NFACE,MESHES(NM)%CUT_FACE(ICF)%AREA(I)
+            WRITE(LU_ERR,*) 'CFELEM   =',MESHES(NM)%CUT_FACE(ICF)%CFELEM(1:MESHES(NM)%CUT_FACE(ICF)%CFELEM(1,I)+1,I)
+            DO J=1,MESHES(NM)%CUT_FACE(ICF)%CFELEM(1,I)
+            WRITE(LU_ERR,*) J,'=',MESHES(NM)%CUT_FACE(ICF)%XYZVERT(IAXIS:KAXIS,MESHES(NM)%CUT_FACE(ICF)%CFELEM(J+1,I))
+            ENDDO
+            ENDIF
+         ENDDO
+      ENDDO CUTFACE_TEST_LOOP
+      CUTCELL_TEST_LOOP : DO ICF=1,MESHES(NM)%N_CUTCELL_MESH
+         NCELL  = MESHES(NM)%CUT_CELL(ICF)%NCELL
+         DO I=1,NCELL
+            IF(MESHES(NM)%CUT_CELL(ICF)%VOLUME(I)<TWO_EPSILON_EB) THEN
+            WRITE(LU_ERR,*) 'ZERO VOLU=',ICF,I,NCELL,MESHES(NM)%CUT_CELL(ICF)%VOLUME(I)
+            WRITE(LU_ERR,*) 'CCELEM   =',MESHES(NM)%CUT_CELL(ICF)%CCELEM(1:MESHES(NM)%CUT_CELL(ICF)%CCELEM(1,I)+1,I)
+            ENDIF
+         ENDDO
+      ENDDO CUTCELL_TEST_LOOP
    ENDIF
 
    ! Deallocate Gasphase cut-faces and cut-cells inside Connecting meshes:
@@ -7547,11 +7578,14 @@ LOGICAL, INTENT(OUT) :: INTFLG
 
 ! Local variables:
 REAL(EB) :: DVEC(MAX_DIM), DIRV(MAX_DIM), NMDV, DENOM, PLNEQ, TLINE
+! REAL(QB) :: DVECQ(MAX_DIM), DIRVQ(MAX_DIM), NMDVQ, DENOMQ, PLNEQQ, TLINEQ
+
 
 ! Initialize:
 INTFLG = .FALSE.
 XYZ_INT(IAXIS:KAXIS) = 0._EB
 
+! IF(.NOT.DO_QUAD_PRECISION_CUTCELLS) THEN
 ! Preliminary calculations:
 DVEC(IAXIS:KAXIS) = LNC(IAXIS:KAXIS,NOD2) - LNC(IAXIS:KAXIS,NOD1)
 NMDV = SQRT( DVEC(IAXIS)**2._EB + DVEC(JAXIS)**2._EB + DVEC(KAXIS)**2._EB )
@@ -7576,6 +7610,35 @@ ENDIF
 TLINE = -PLNEQ/DENOM  ! Coordinate along the line LNC.
 XYZ_INT(IAXIS:KAXIS) = LNC(IAXIS:KAXIS,NOD1) + TLINE*DIRV(IAXIS:KAXIS) ! Intersection point.
 XYZ_INT(X1AXIS) = X1PLN ! Force X1AXIS coordinate to be the planes value.
+! ELSE
+!    ! Preliminary calculations:
+!    DVECQ(IAXIS:KAXIS) = REAL(LNC(IAXIS:KAXIS,NOD2),QB) - REAL(LNC(IAXIS:KAXIS,NOD1),QB)
+!    NMDVQ  = SQRT( DVECQ(IAXIS)**2._QB + DVECQ(JAXIS)**2._QB + DVECQ(KAXIS)**2._QB )
+!    DIRVQ  = DVECQ(IAXIS:KAXIS) * NMDVQ**(-1._QB)
+!    DENOMQ = DIRVQ(IAXIS)*REAL(PLNORMAL(IAXIS),QB) + &
+!             DIRVQ(JAXIS)*REAL(PLNORMAL(JAXIS),QB) + &
+!             DIRVQ(KAXIS)*REAL(PLNORMAL(KAXIS),QB)
+!    PLNEQQ = REAL(LNC(IAXIS,NOD1),QB)*REAL(PLNORMAL(IAXIS),QB) + &
+!             REAL(LNC(JAXIS,NOD1),QB)*REAL(PLNORMAL(JAXIS),QB) + &
+!             REAL(LNC(KAXIS,NOD1),QB)*REAL(PLNORMAL(KAXIS),QB) - REAL(X1PLN,QB)
+!
+!    ! Line parallel to plane:
+!    IF ( ABS(REAL(DENOMQ,EB)) < GEOMEPS ) THEN
+!       ! Check if seg lies on plane or not.
+!       ! Do this by checking if node one of segment is on plane.
+!       IF ( ABS(REAL(PLNEQ,EB)) < GEOMEPS ) THEN
+!          XYZ_INT(IAXIS:KAXIS) = LNC(IAXIS:KAXIS,NOD1); XYZ_INT(X1AXIS) = X1PLN
+!          INTFLG = .TRUE.
+!       ENDIF
+!       RETURN
+!    ENDIF
+!
+!    ! Non parallel case:
+!    TLINEQ = -PLNEQQ/DENOMQ  ! Coordinate along the line LNC.
+!    XYZ_INT(IAXIS:KAXIS) = REAL(REAL(LNC(IAXIS:KAXIS,NOD1),QB)+TLINEQ*DIRVQ(IAXIS:KAXIS),EB) ! Intersection pt.
+!    XYZ_INT(X1AXIS) = X1PLN ! Force X1AXIS coordinate to be the planes value.
+! ENDIF
+
 INTFLG = .TRUE.
 
 RETURN
@@ -7600,6 +7663,7 @@ LOGICAL, ALLOCATABLE, DIMENSION(:)  :: COUNTED_VERT
 
 LOGICAL, PARAMETER :: OPTIMIZE_SEG_DEF = .TRUE.
 
+! REAL(QB) :: V12Q(IAXIS:KAXIS),V23Q(IAXIS:KAXIS),V31Q(IAXIS:KAXIS),WSNORMQ(IAXIS:KAXIS),MGNRMQ
 
 REAL(EB) :: CPUTIME_START, CPUTIME
 
@@ -7707,11 +7771,21 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
       END IF
 
       ! Cross V12 x V23:
+      ! IF(.NOT.DO_QUAD_PRECISION_CUTCELLS) THEN
       WSNORM(IAXIS) = V12(JAXIS)*V23(KAXIS) - V12(KAXIS)*V23(JAXIS)
       WSNORM(JAXIS) = V12(KAXIS)*V23(IAXIS) - V12(IAXIS)*V23(KAXIS)
       WSNORM(KAXIS) = V12(IAXIS)*V23(JAXIS) - V12(JAXIS)*V23(IAXIS)
-
       MGNRM = SQRT( WSNORM(IAXIS)**2._EB + WSNORM(JAXIS)**2._EB + WSNORM(KAXIS)**2._EB )
+      ! ELSE
+      !    V12Q(IAXIS:KAXIS) = REAL(XYZV(IAXIS:KAXIS,NOD2),QB) - REAL(XYZV(IAXIS:KAXIS,NOD1),QB)
+      !    V23Q(IAXIS:KAXIS) = REAL(XYZV(IAXIS:KAXIS,NOD3),QB) - REAL(XYZV(IAXIS:KAXIS,NOD2),QB)
+      !    V31Q(IAXIS:KAXIS) = REAL(XYZV(IAXIS:KAXIS,NOD1),QB) - REAL(XYZV(IAXIS:KAXIS,NOD3),QB)
+      !    WSNORMQ(IAXIS) = V12Q(JAXIS)*V23Q(KAXIS) - V12Q(KAXIS)*V23Q(JAXIS)
+      !    WSNORMQ(JAXIS) = V12Q(KAXIS)*V23Q(IAXIS) - V12Q(IAXIS)*V23Q(KAXIS)
+      !    WSNORMQ(KAXIS) = V12Q(IAXIS)*V23Q(JAXIS) - V12Q(JAXIS)*V23Q(IAXIS)
+      !    MGNRMQ = SQRT( WSNORMQ(IAXIS)**2._QB + WSNORMQ(JAXIS)**2._QB + WSNORMQ(KAXIS)**2._QB )
+      !    MGNRM  = REAL(MGNRMQ,EB)
+      ! ENDIF
 
       XCEN  = (XYZV(IAXIS,NOD1) + XYZV(IAXIS,NOD2) + XYZV(IAXIS,NOD3)) / 3._EB
 
@@ -7730,8 +7804,14 @@ GEOMETRY_LOOP : DO IG=1,N_GEOMETRY
       ENDIF
 
       ! Assign to GEOMETRY:
+      ! IF(.NOT.DO_QUAD_PRECISION_CUTCELLS) THEN
       GEOMETRY(IG)%FACES_NORMAL(IAXIS:KAXIS,IWSEL) = WSNORM(IAXIS:KAXIS) * MGNRM**(-1._EB)
       GEOMETRY(IG)%FACES_AREA(IWSEL) = MGNRM/2._EB
+      ! ELSE
+      !    GEOMETRY(IG)%FACES_NORMAL(IAXIS:KAXIS,IWSEL) = REAL(WSNORMQ(IAXIS:KAXIS)*MGNRMQ**(-1._QB),EB)
+      !    GEOMETRY(IG)%FACES_AREA(IWSEL) = REAL(MGNRMQ/2._QB,EB)
+      ! ENDIF
+
       ! Total Area and Volume for GEOMETRY(IG).
       GEOMETRY(IG)%GEOM_AREA  = GEOMETRY(IG)%GEOM_AREA  + GEOMETRY(IG)%FACES_AREA(IWSEL)
       GEOMETRY(IG)%GEOM_VOLUME= GEOMETRY(IG)%GEOM_VOLUME+ & ! Divergence theorem with F = x i, assumes we have a volume.
@@ -8744,6 +8824,8 @@ REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: SVAR_AUX
 REAL(EB) :: DX3_1, DX3_2, XI1, XI2
 REAL(EB) :: TNOW
 
+! REAL(QB) :: X2_21Q,X3_21Q,SLENQ,STANIQ(IAXIS:JAXIS),DX3_1Q,DX3_2Q,XI1Q,XI2Q,DVQ(IAXIS:JAXIS)
+
 TNOW=CURRENT_TIME()
 
 
@@ -8763,6 +8845,7 @@ DO ISEG=1,BODINT_PLANE%NSEGS
    ! x2_x3 of segment point 2:
    X2_2 = XYZ2(X2AXIS); X3_2 = XYZ2(X3AXIS)
 
+   ! IF (.NOT.DO_QUAD_PRECISION_CUTCELLS) THEN
    ! Segment length:
    SLEN = SQRT( (X2_2-X2_1)**2._EB + (X3_2-X3_1)**2._EB )
 
@@ -8776,6 +8859,23 @@ DO ISEG=1,BODINT_PLANE%NSEGS
    XI2   = DX3_2 / (X3_2-X3_1)
    DV(IAXIS:JAXIS) = (/ (XI1-1._EB)*X2_1+XI2*X2_2 , DX3_2 /)
    SBOD = DV(IAXIS)*STANI(IAXIS)+DV(JAXIS)*STANI(JAXIS)
+   ! ELSE
+   !    ! Segment length:
+   !    X2_21Q = (REAL(X2_2,QB)-REAL(X2_1,QB))
+   !    X3_21Q = (REAL(X3_2,QB)-REAL(X3_1,QB))
+   !    SLENQ = SQRT( X2_21Q**2._QB + X3_21Q**2._QB )
+   !
+   !    ! Unit vector along segment:
+   !    STANIQ(IAXIS:JAXIS) = 1._QB/SLENQ * (/ X2_21Q, X3_21Q /)
+   !
+   !    ! S coordinate along segment:
+   !    DX3_1Q = REAL(X3_2,QB) - REAL(X3RAY,QB)
+   !    DX3_2Q = REAL(X3RAY,QB)- REAL(X3_1,QB)
+   !    XI1Q   = DX3_1Q / X3_21Q
+   !    XI2Q   = DX3_2Q / X3_21Q
+   !    DVQ(IAXIS:JAXIS) = (/ (XI1Q-1._QB)*REAL(X2_1,QB)+XI2Q*REAL(X2_2,QB) , DX3_2Q /)
+   !    SBOD = REAL(DVQ(IAXIS)*STANIQ(IAXIS)+DVQ(JAXIS)*STANIQ(JAXIS),EB)
+   ! ENDIF
 
    ! If crossing is already defined, cycle:
    DO IBCR=1,BODINT_PLANE%NBCROSS(ISEG)
@@ -8824,6 +8924,8 @@ REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: SVAR_AUX
 LOGICAL  :: ISCONT
 REAL(EB) :: TNOW
 
+! REAL(QB) :: X2_21Q,X3_21Q,SLENQ,STANIQ(IAXIS:JAXIS),DX2_1Q,DX2_2Q,XI1Q,XI2Q,DVQ(IAXIS:JAXIS)
+
 TNOW=CURRENT_TIME()
 
 DO ISEG=1,BODINT_PLANE%NSEGS
@@ -8839,11 +8941,19 @@ DO ISEG=1,BODINT_PLANE%NSEGS
    ! x2_x3 of segment point 2:
    X2_2 = XYZ2(X2AXIS); X3_2 = XYZ2(X3AXIS)
 
+   ! IF(.NOT.DO_QUAD_PRECISION_CUTCELLS) THEN
    ! Segment length:
    SLEN = SQRT( (X2_2-X2_1)**2._EB + (X3_2-X3_1)**2._EB )
-
    ! Unit vector along segment:
    STANI(IAXIS:JAXIS) = (/ (X2_2-X2_1), (X3_2-X3_1) /)*SLEN**(-1._EB)
+   ! ELSE
+   !    ! Segment length:
+   !    X2_21Q = (REAL(X2_2,QB)-REAL(X2_1,QB))
+   !    X3_21Q = (REAL(X3_2,QB)-REAL(X3_1,QB))
+   !    SLENQ = SQRT( X2_21Q**2._QB + X3_21Q**2._QB )
+   !    ! Unit vector along segment:
+   !    STANIQ(IAXIS:JAXIS) = 1._QB/SLENQ * (/ X2_21Q, X3_21Q /)
+   ! ENDIF
 
    MINX = MIN(X2_1,X2_2)
    MAXX = MAX(X2_1,X2_2)
@@ -8880,6 +8990,7 @@ DO ISEG=1,BODINT_PLANE%NSEGS
 
    DO JJ=JSTR,JEND
 
+      ! IF(.NOT.DO_QUAD_PRECISION_CUTCELLS) THEN
       ! S coordinate along segment:
       DX2_1 = X2_2 - X2FACE(JJ)
       DX2_2 = X2FACE(JJ) - X2_1
@@ -8887,6 +8998,16 @@ DO ISEG=1,BODINT_PLANE%NSEGS
       XI2   = DX2_2 / (X2_2-X2_1)
       DV(IAXIS:JAXIS) = (/ DX2_2, (XI1-1._EB)*X3_1+XI2*X3_2 /)
       SBOD = DV(IAXIS)*STANI(IAXIS)+DV(JAXIS)*STANI(JAXIS)
+      ! ELSE
+      !    ! S coordinate along segment:
+      !    DX2_1Q = REAL(X2_2,QB) - REAL(X2FACE(JJ),QB)
+      !    DX2_2Q = REAL(X2FACE(JJ),QB)- REAL(X2_1,QB)
+      !    XI1Q   = DX2_1Q / X2_21Q
+      !    XI2Q   = DX2_2Q / X2_21Q
+      !    DVQ(IAXIS:JAXIS) = (/ DX2_2Q, (XI1Q-1._QB)*REAL(X3_1,QB)+XI2Q*REAL(X3_2,QB) /)
+      !    SBOD = REAL(DVQ(IAXIS)*STANIQ(IAXIS)+DVQ(JAXIS)*STANIQ(JAXIS),EB)
+      ! ENDIF
+
 
       ! If crossing is already defined, cycle:
       NBCROSS = BODINT_PLANE%NBCROSS(ISEG)
@@ -9826,6 +9947,8 @@ REAL(EB), INTENT(INOUT), DIMENSION(IAXIS:KAXIS,1:MAXVERTS) :: XYZVERT  ! Locatio
 INTEGER,  INTENT(INOUT):: NVERT
 INTEGER,  INTENT(OUT)  :: INOD
 
+REAL(EB), PARAMETER :: VERT_PROX_FCT = 1000._EB
+
 ! Local Variables:
 ! INTEGER  :: JNOD, JNOD2, PIVOT(LOW_IND:HIGH_IND)
 ! REAL(EB) :: DV(MAX_DIM)
@@ -9894,9 +10017,9 @@ INTEGER,  INTENT(OUT)  :: INOD
 ! XYZVERT(IAXIS:KAXIS,INOD) = XYZV(IAXIS:KAXIS)
 
 DO INOD=1,NVERT
-   IF( ABS(XYZV(IAXIS)-XYZVERT(IAXIS,INOD)) > 100._EB*GEOMEPS ) CYCLE
-   IF( ABS(XYZV(JAXIS)-XYZVERT(JAXIS,INOD)) > 100._EB*GEOMEPS ) CYCLE
-   IF( ABS(XYZV(KAXIS)-XYZVERT(KAXIS,INOD)) > 100._EB*GEOMEPS ) CYCLE
+   IF( ABS(XYZV(IAXIS)-XYZVERT(IAXIS,INOD)) > VERT_PROX_FCT*GEOMEPS ) CYCLE
+   IF( ABS(XYZV(JAXIS)-XYZVERT(JAXIS,INOD)) > VERT_PROX_FCT*GEOMEPS ) CYCLE
+   IF( ABS(XYZV(KAXIS)-XYZVERT(KAXIS,INOD)) > VERT_PROX_FCT*GEOMEPS ) CYCLE
    RETURN
 ENDDO
 NVERT = NVERT + 1
@@ -10869,6 +10992,12 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
              ENDDO
 
              NVERTFACE = MAXVAL(CFELEM(1,1:NFACE)) + 1
+
+             ! Area Test: Discard cut-faces with zero total area.
+             IF(SUM(AREAV(1:NFACE2))<TWO_EPSILON_EB) THEN
+                MESHES(NM)%FCVAR(INDI,INDJ,INDK,IBM_FGSC,X1AXIS) = IBM_SOLID
+                CYCLE
+             ENDIF
 
              ! This is a cut-face, allocate space:
              NCUTFACE = MESHES(NM)%N_CUTFACE_MESH + MESHES(NM)%N_GCCUTFACE_MESH + 1
@@ -12416,6 +12545,8 @@ REAL(EB) :: TNOW, EDGECUBE(LOW_IND:HIGH_IND,IAXIS:KAXIS)
 TYPE(BODINT_CELL_EDGE_TYPE) :: BODINT_CELL_EDGE
 LOGICAL :: FOUND_SEG
 
+! REAL(QB) :: DVQ(IAXIS:KAXIS), SLENQ, STANIQ(IAXIS:KAXIS), DENOMQ, PLANEEQQ
+
 ! GET_CUTCELLS_VERBOSE variables:
 REAL(EB) :: CPUTIME, CPUTIME_START
 INTEGER :: NCUTEDG
@@ -12541,10 +12672,19 @@ GEOM_LOOP : DO IG=1,N_GEOMETRY
       ENDDO X1AXIS_LOOP
       IF (DROPSEG) CYCLE
 
+      ! IF(.NOT.DO_QUAD_PRECISION_CUTCELLS) THEN
       ! Edge length and tangent unit vector:
       DV(IAXIS:KAXIS) = XYZ2(IAXIS:KAXIS) - XYZ1(IAXIS:KAXIS)
       SLEN = SQRT( DV(IAXIS)**2._EB + DV(JAXIS)**2._EB + DV(KAXIS)**2._EB ) ! Segment length.
       STANI(IAXIS:KAXIS) = DV(IAXIS:KAXIS) * SLEN**(-1._EB)                 ! Segment tangent versor.
+      ! ELSE
+      !    ! Edge length and tangent unit vector:
+      !    DVQ(IAXIS:KAXIS) = REAL(XYZ2(IAXIS:KAXIS),QB) - REAL(XYZ1(IAXIS:KAXIS),QB)
+      !    SLENQ = SQRT( DVQ(IAXIS)**2._QB + DVQ(JAXIS)**2._QB + DVQ(KAXIS)**2._QB ) ! Segment length.
+      !    STANIQ(IAXIS:KAXIS) = DVQ(IAXIS:KAXIS) * SLENQ**(-1._QB)                  ! Segment tangent versor.
+      !    SLEN = REAL(SLENQ,EB)
+      !    STANI(IAXIS:KAXIS)  = REAL(STANIQ(IAXIS:KAXIS),EB)
+      ! ENDIF
 
       ! Add segment ends as intersections:
       BODINT_CELL_EDGE%NWCROSS   =    2 ! Nodes 1,2 of segment are considered intersection.
@@ -12594,10 +12734,18 @@ GEOM_LOOP : DO IG=1,N_GEOMETRY
             IF (ABS(DOT1) <= GEOMEPS) CYCLE
             IF (ABS(DOT2) <= GEOMEPS) CYCLE
 
+
+            ! IF(.NOT.DO_QUAD_PRECISION_CUTCELLS) THEN
             ! Now regular case: Find svar and insert in BODINT_CELL%SVAR(:,IWSEDG):
             DENOM  = STANI(X1AXIS) ! dot(stani,plnormal)
             PLANEEQ= DOT1          ! dot(xyz1(IAXIS:KAXIS),plnormal) - x1pln
             SVARI  = - PLANEEQ / DENOM
+            ! ELSE
+            !    DENOMQ   = STANIQ(X1AXIS) ! dot(stani,plnormal)
+            !    PLANEEQQ = REAL(DOT1,QB)  ! dot(xyz1(IAXIS:KAXIS),plnormal) - x1pln
+            !    SVARI    = REAL(-PLANEEQQ/DENOMQ,EB)
+            ! ENDIF
+
 
             ! Insertion sort, discard repeated intersections:
             NWCROSS = BODINT_CELL_EDGE%NWCROSS + 1
@@ -12709,6 +12857,7 @@ GEOM_LOOP : DO IG=1,N_GEOMETRY
          NVERT = MESHES(NM)%CUT_EDGE(CEI)%NVERT
          ! Define vertices for this segment:
          !               xv1                 yv1                 zv1
+         ! IF(.NOT.DO_QUAD_PRECISION_CUTCELLS) THEN
          XYZV1(IAXIS:KAXIS) = (/ XYZ1(IAXIS)+SVAR1*STANI(IAXIS), &
                                  XYZ1(JAXIS)+SVAR1*STANI(JAXIS), &
                                  XYZ1(KAXIS)+SVAR1*STANI(KAXIS) /)
@@ -12718,6 +12867,17 @@ GEOM_LOOP : DO IG=1,N_GEOMETRY
                                  XYZ1(JAXIS)+SVAR2*STANI(JAXIS), &
                                  XYZ1(KAXIS)+SVAR2*STANI(KAXIS) /)
          CALL INSERT_FACE_VERT(XYZV2,NM,CEI,NVERT,INOD2)
+         ! ELSE
+         !     XYZV1(IAXIS:KAXIS) = REAL((/ REAL(XYZ1(IAXIS),QB)+REAL(SVAR1,QB)*STANIQ(IAXIS), &
+         !                                  REAL(XYZ1(JAXIS),QB)+REAL(SVAR1,QB)*STANIQ(JAXIS), &
+         !                                  REAL(XYZ1(KAXIS),QB)+REAL(SVAR1,QB)*STANIQ(KAXIS) /),EB)
+         !     CALL INSERT_FACE_VERT(XYZV1,NM,CEI,NVERT,INOD1)
+         !     !               xv2                 yv2                 zv2
+         !     XYZV2(IAXIS:KAXIS) = REAL((/ REAL(XYZ1(IAXIS),QB)+REAL(SVAR2,QB)*STANIQ(IAXIS), &
+         !                                  REAL(XYZ1(JAXIS),QB)+REAL(SVAR2,QB)*STANIQ(JAXIS), &
+         !                                  REAL(XYZ1(KAXIS),QB)+REAL(SVAR2,QB)*STANIQ(KAXIS) /),EB)
+         !     CALL INSERT_FACE_VERT(XYZV2,NM,CEI,NVERT,INOD2)
+         ! ENDIF
 
          NEDGE = MESHES(NM)%CUT_EDGE(CEI)%NEDGE + 1
          CALL REALLOCATE_EDGE_ELEM(NM,CEI,NEDGE)
@@ -13537,6 +13697,7 @@ DO K=KLO,KHI
          ! Drop segments that are unconnected:
          ALLOCATE(VERT_SEGS(1:NVERT)); VERT_SEGS(1:NVERT)=0
          DO IDUM = 1,NSEG
+            IF (SEG_CELL(NOD1,IDUM) == SEG_CELL(NOD2,IDUM)) CYCLE
             VERT_SEGS(SEG_CELL(NOD1,IDUM)) = VERT_SEGS(SEG_CELL(NOD1,IDUM)) + 1
             VERT_SEGS(SEG_CELL(NOD2,IDUM)) = VERT_SEGS(SEG_CELL(NOD2,IDUM)) + 1
          ENDDO
@@ -13544,7 +13705,8 @@ DO K=KLO,KHI
          SEG_CELL_AUX = SEG_CELL
          COUNT = 0
          DO IDUM = 1,NSEG
-         IF ( (VERT_SEGS(SEG_CELL_AUX(NOD1,IDUM))>1) .AND. (VERT_SEGS(SEG_CELL_AUX(NOD2,IDUM))>1) ) THEN
+         IF ( (SEG_CELL_AUX(NOD1,IDUM) /= SEG_CELL_AUX(NOD2,IDUM)) .AND. &
+              (VERT_SEGS(SEG_CELL_AUX(NOD1,IDUM))>1) .AND. (VERT_SEGS(SEG_CELL_AUX(NOD2,IDUM))>1) ) THEN
             COUNT = COUNT + 1
             SEG_CELL(:,COUNT) = SEG_CELL_AUX(:,IDUM)
             CYCLE
@@ -13877,9 +14039,9 @@ DO K=KLO,KHI
             ENDDO
             ! Final seg:
             IDUM = MESHES(NM)%CUT_FACE(NCUTFACE)%CFELEM(1+NSEG_FACE,NCF)
-            x1(IAXIS:KAXIS) = XYZvert(IAXIS:KAXIS,IDUM)
+            X1(IAXIS:KAXIS) = XYZVERT(IAXIS:KAXIS,IDUM)
             IDUM = MESHES(NM)%CUT_FACE(NCUTFACE)%CFELEM(1+1        ,NCF)
-            x2(IAXIS:KAXIS) = XYZvert(IAXIS:KAXIS,IDUM)
+            X2(IAXIS:KAXIS) = XYZVERT(IAXIS:KAXIS,IDUM)
 
             VC1(IAXIS:KAXIS) = X1(IAXIS:KAXIS) - XCEN(IAXIS:KAXIS)
             V12(IAXIS:KAXIS) = X2(IAXIS:KAXIS) - X1(IAXIS:KAXIS)
@@ -13891,6 +14053,27 @@ DO K=KLO,KHI
 
             AREAI = 0.5_EB * SQRT( CROSSV(IAXIS)**2._EB + CROSSV(JAXIS)**2._EB + CROSSV(KAXIS)**2._EB )
             AREA  = AREA + AREAI
+            ! IF(AREA<TWO_EPSILON_EB) THEN
+            !    WRITE(LU_ERR,*) 'NM,I,J,K,AREA,GEOMEPS=',NM,I,J,K,AREA,GEOMEPS
+            !    WRITE(LU_ERR,*) 'NBODTRI, NCF, NSEG_FACE=',NBODTRI,NCF,NSEG_FACE
+            !    DO ISEG_FACE=1,NSEG_FACE-1
+            !       IDUM = MESHES(NM)%CUT_FACE(NCUTFACE)%CFELEM(1+ISEG_FACE,NCF)
+            !       X1(IAXIS:KAXIS)  = XYZVERT(IAXIS:KAXIS,IDUM)
+            !       IDUM = MESHES(NM)%CUT_FACE(NCUTFACE)%CFELEM(2+ISEG_FACE,NCF)
+            !       X2(IAXIS:KAXIS)  = XYZVERT(IAXIS:KAXIS,IDUM)
+            !       WRITE(LU_ERR,*) ISEG_FACE,&
+            !       MESHES(NM)%CUT_FACE(NCUTFACE)%CFELEM(1+ISEG_FACE,NCF),IDUM,&
+            !       ':',X1(IAXIS:KAXIS),'-',X2(IAXIS:KAXIS)
+            !    ENDDO
+            !    ! Final seg:
+            !    IDUM = MESHES(NM)%CUT_FACE(NCUTFACE)%CFELEM(1+NSEG_FACE,NCF)
+            !    x1(IAXIS:KAXIS) = XYZvert(IAXIS:KAXIS,IDUM)
+            !    IDUM = MESHES(NM)%CUT_FACE(NCUTFACE)%CFELEM(1+1        ,NCF)
+            !    x2(IAXIS:KAXIS) = XYZvert(IAXIS:KAXIS,IDUM)
+            !    WRITE(LU_ERR,*) NSEG_FACE,&
+            !    MESHES(NM)%CUT_FACE(NCUTFACE)%CFELEM(1+NSEG_FACE,NCF),IDUM,&
+            !    ':',X1(IAXIS:KAXIS),'-',X2(IAXIS:KAXIS)
+            ! ENDIF
             ACEN(IAXIS:KAXIS)  = (ACEN(IAXIS:KAXIS) + AREAI * XCENI(IAXIS:KAXIS))/AREA
             ! volume computation variables:
             XC1(IAXIS:KAXIS) = 0.5_EB*(XCEN(IAXIS:KAXIS) + X1(IAXIS:KAXIS))
@@ -15257,6 +15440,7 @@ DO K=KLO,KHI
                IF(VOL(ICELL) < GEOMEPS) THEN ! Volume too small for correct calculation of XYZCEN-> take cartcell centroid.
                   JJ = 0
                   VOL(ICELL) = ABS(VOL(ICELL))
+                  IF (VOL(ICELL)<TWO_EPSILON_EB) VOL(ICELL) = DX(I)*DY(J)*DZ(K)
                   XYZCEN(IAXIS:KAXIS,ICELL) = (/ XCELL(I), YCELL(J), ZCELL(K) /)
                ELSE
                   ! divide xyzcen by 2*vol:

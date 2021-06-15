@@ -2158,7 +2158,7 @@ INTEGER, INTENT(IN) :: I,J,K,NM,OBST_INDEX,IW,IOR,SURF_INDEX
 INTEGER  :: NOM_FOUND,NOM=0,ITER,IIO_MIN,IIO_MAX,JJO_MIN,JJO_MAX,KKO_MIN,KKO_MAX,VENT_INDEX
 INTEGER, INTENT(OUT) :: IERR
 REAL(EB), INTENT(IN) :: TT
-REAL(EB) :: PX,PY,PZ,T_ACTIVATE,XIN,YIN,ZIN,DIST,XW,YW,ZW,UW,RDN,AW,TSI,&
+REAL(EB) :: PX,PY,PZ,T_ACTIVATE,XIN,YIN,ZIN,DIST,XW,YW,ZW,RDN,AW,TSI,&
             ZZ_GET(1:N_TRACKED_SPECIES),RSUM_F,R1,RR,DELTA
 INTEGER  :: N,SURF_INDEX_NEW,IIG,JJG,KKG,IIO,JJO,KKO,IC,ICG,ICO,NOM_CHECK(0:1),BOUNDARY_TYPE
 INTEGER :: NSLICE
@@ -2235,14 +2235,12 @@ IF (ABS(IOR)==1) THEN
       IIG    = I+1
       RDN    = M%RDXN(I)
       AW     = M%R(I)*M%DY(J)*M%DZ(K)
-      UW     = -U0
    ENDIF
    IF (IOR==-1) THEN
       XW     = M%X(I-1)
       IIG    = I-1
       RDN    = M%RDXN(I-1)
       AW     = M%R(I-1)*M%DY(J)*M%DZ(K)
-      UW     = U0
    ENDIF
    JJG    = J
    KKG    = K
@@ -2254,13 +2252,11 @@ IF (ABS(IOR)==2) THEN
       YW     = M%Y(J)
       JJG    = J+1
       RDN    = M%RDYN(J)
-      UW     = -V0
    ENDIF
    IF (IOR==-2) THEN
       YW     = M%Y(J-1)
       JJG    = J-1
       RDN    = M%RDYN(J-1)
-      UW     = V0
    ENDIF
    IIG    = I
    KKG    = K
@@ -2273,13 +2269,11 @@ IF (ABS(IOR)==3) THEN
       ZW     = M%Z(K)
       KKG    = K+1
       RDN    = M%RDZN(K)
-      UW     = -W0
    ENDIF
    IF (IOR==-3) THEN
       ZW     = M%Z(K-1)
       KKG    = K-1
       RDN    = M%RDZN(K-1)
-      UW     = W0
    ENDIF
    IIG    = I
    JJG    = J
@@ -2492,8 +2486,8 @@ WC%ONE_D%JJG    = JJG
 WC%ONE_D%KKG    = KKG
 WC%ONE_D%RDN    = RDN
 WC%ONE_D%AREA   = AW
-WC%ONE_D%U_NORMAL   = UW
-WC%ONE_D%U_NORMAL_S = UW
+WC%ONE_D%U_NORMAL   = 0._EB
+WC%ONE_D%U_NORMAL_S = 0._EB
 
 IF (IW<=M%N_EXTERNAL_WALL_CELLS) THEN
    M%EXTERNAL_WALL(IW)%NOM     = NOM_FOUND

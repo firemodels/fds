@@ -95,7 +95,7 @@ axis([M.data(1,3)-5 M.data(1,3)+5 0 30])
 text(M.data(1,3)-4.8,27,[test{i},' Temperature'],'Interpreter',Font_Interpreter,'Fontname',Font_Name,'FontSize',Title_Font_Size)
 legend_handle=legend('Measured','M-O Theory','Simulated','Location','SouthEast');
 set(legend_handle,'Fontsize',Key_Font_Size);
-xlabel('Temperature (\circC)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
+xlabel('Temperature (°C)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 ylabel('Height (m)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 
 % add Git revision if file is available

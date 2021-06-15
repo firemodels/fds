@@ -31,7 +31,7 @@ plot_style
 
 for i=1:5
 
-   % Find the back-layer length, L, defined as the distance from the upstream edge of the burner, 6.15 m, back to where 
+   % Find the back-layer length, L, defined as the distance from the upstream edge of the burner, 6.15 m, back to where
    % the back-layer temperature drops to 30 C, or 10 C above ambient.
 
    S = importdata([outdir,'Wu_Bakar_Tunnel_',label{i},'_line.csv'],',',2);
@@ -81,15 +81,15 @@ set(gca,'FontSize',Title_Font_Size)
 axis([0.001 10 0.1 1.0])
 set(gca,'xticklabel',arrayfun(@(x) num2str(x),get(gca,'xtick'),'un',0))
 set(gca,'yticklabel',arrayfun(@(y) num2str(y),get(gca,'ytick'),'un',0))
-xlabel('Heat Release Rate, $Q^*$','FontSize',Title_Font_Size,'Interpreter','LaTeX')
-ylabel('Critical Velocity, $V^*$','FontSize',Title_Font_Size,'Interpreter','LaTeX')
+xlabel('Heat Release Rate, {\it Q*}','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
+ylabel('Critical Velocity, {\it V*}','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 h = legend({'Tunnel A','Tunnel B','Tunnel C','Tunnel D','Tunnel E','Correlation'}, 'Location', 'NorthWest');
 
 % Add Git revision if file is available
 
 Git_Filename = [outdir,'Wu_Bakar_Tunnel_A_git.txt'];
 addverstr(gca,Git_Filename,'loglog')
- 
+
 % Make the pdf figure
 
 set(gcf,'Visible',Figure_Visibility);

@@ -3864,7 +3864,7 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Tech Guide: Sum over the materials, alpha
                ELSE
                   VEL = SQRT(2._EB*KRES(IIG,JJG,KKG))
                ENDIF
-              IF (SF%BLOWING .OR. SF%BLOWING_2) THEN
+               IF (SF%BLOWING .OR. SF%BLOWING_2) THEN
                   ! This section is using the mass transfer model from part
                   TMP_FILM = TMP_F + EVAP_FILM_FAC*(TMP_G - TMP_F) ! LC Eq.(18)
                   IF (SPECIES_MIXTURE(SMIX_INDEX)%SINGLE_SPEC_INDEX > 0) THEN
