@@ -9894,7 +9894,7 @@ Instead of specifying a plane on which to draw contours of gas temperature, you 
 
 The second method of visualizing data on complex terrain is via a boundary ({\ct BNDF}) file. Specify a solid phase output quantity as you normally would, for example:
 \begin{lstlisting}
-&SLCF QUANTITY='WALL TEMPERATURE' /
+&BNDF QUANTITY='WALL TEMPERATURE' /
 \end{lstlisting}
 and add {\ct TERRAIN\_CASE=T} to the {\ct MISC} line. This will create two boundary files---one of which is the conventional one, and one will be listed as a ``slice'' file that conforms to the terrain.
 
