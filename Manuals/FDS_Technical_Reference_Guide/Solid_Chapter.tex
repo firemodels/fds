@@ -399,23 +399,29 @@ This reaction can be implemented by setting $T_{\rm thr,\alpha\beta} = T_{\rm f}
 
 Consider a liquid consisting of one or more components. The evaporation rate of each component is governed by the following relation:
 \be
-\dot{m}_\alpha'' = h_{\rm m,\alpha} \, \rho_{\rm film} \, \ln \left( 1+B \right) \left( Y_{\alpha,{\rm film}}+\frac{Y_{\alpha,{\rm film}}-Y_{\alpha,{\rm gas}}}{B} \right) \quad ; \quad B=\frac{\sum_\alpha (Y_{\alpha,{\rm film}}-Y_{\alpha,{\rm gas}})}{1-\sum_\alpha Y_{\alpha,{\rm film}}}
+\dot{m}_\alpha'' = h_{\rm m} \, \rho_{\rm film} \, \ln \left( 1+B \right) \left( Y_{\alpha,{\rm sv}}+\frac{Y_{\alpha,{\rm sv}}-Y_{\alpha,{\rm g}}}{B} \right) \quad ; \quad B=\frac{\sum_{\alpha'} (Y_{\alpha',{\rm sv}}-Y_{\alpha',{\rm g}})}{1-\sum_{\alpha'} Y_{\alpha',{\rm sv}}}
 \ee
-$h_{\rm m,\alpha}$ is the mass transfer coefficient, $\rho_{\rm film}$ is the density within the thin surface layer, $B$ is the Spalding mass transfer number, $Y_{\alpha,{\rm film}}$ is the mass fraction of component $\alpha$ in the thin surface layer, and $Y_{\alpha,{\rm gas}}$ is the mass fraction of component $\alpha$ beyond the thin surface layer. The composition of the thin surface layer is obtained using Raoult's law with the Clausius-Clapeyron equation for the equilibrium vapor pressure.  The volume fraction of component $\alpha$ in the thin surface layer becomes:
-\be 
-   X_{\alpha,{\rm film}} = X_{\alpha,{\rm liq}} \, \exp \left[ -\frac{ h_{\rm v,\alpha} W_{\alpha}}\R \left(\frac{1}{T_{\rm s}}-\frac{1}{T_{\rm b,\alpha}} \right) \right]  \quad ; \quad
-   Y_{\alpha,{\rm film}} = \frac{X_{\rm \alpha,film} W_{\alpha} }{\sum_{\alpha'} X_{\rm \alpha',film} W_{\alpha'} } 
+$h_{\rm m}$ is the mass transfer coefficient, $\rho_{\rm film}$ is the density within a thin surface layer, $B$ is the Spalding mass transfer number, $Y_{\alpha,{\rm sv}}$ is the ``surface vapor'' mass fraction of component $\alpha$ at the liquid surface, and $Y_{\alpha,{\rm g}}$ is the mass fraction of component $\alpha$ in the gas away from the surface. The composition of the surface layer is obtained using Raoult's law with the Clausius-Clapeyron equation for the equilibrium vapor pressure.  The volume fraction of component $\alpha$ at the surface is:
+\be
+   X_{\alpha,{\rm sv}} = X_{\alpha,\ell} \, \exp \left[ -\frac{ h_{\rm v,\alpha} W_{\alpha}}\R \left(\frac{1}{T_{\rm s}}-\frac{1}{T_{\rm b,\alpha}} \right) \right]  \quad ; \quad
+   Y_{\alpha,{\rm sv}} = \frac{X_{\rm \alpha,sv} W_{\alpha} }{\sum_{\alpha'} X_{\rm \alpha',sv} W_{\alpha'} }
    \label{CC_liquid}
 \ee
-Here $X_{\alpha,{\rm liq}}$ is the volume fraction of component $\alpha$ in the liquid, $h_{\rm v,\alpha}$ is its heat of vaporization, $W_{\rm \alpha}$ is its molecular weight, $T_{\rm b,\alpha}$ is its boiling temperature, and $T_{\rm s}$ is the surface temperature.  The mass transfer coefficient is given by
+Here $X_{\alpha,\ell}$ is the volume fraction of component $\alpha$ in the liquid, $h_{\rm v,\alpha}$ is its heat of vaporization, $W_\alpha$ is its molecular weight, $T_{\rm b,\alpha}$ is its boiling temperature, and $T_{\rm s}$ is the surface temperature.  The mass transfer coefficient is given by
 \be
-h_{\rm m,\alpha}= \frac{\SH \, D_{\alpha}}{L} \quad ; \quad \SH=0.037~\SC^{\frac{1}{3}} \RE^{\frac{4}{5}} \quad ; \quad {\rm Sc}=0.6 \quad ; \quad \RE= \frac{\rho~||\bu||~L}{\mu}
+h_{\rm m}= \frac{\SH \, D}{L} \quad ; \quad \SH=0.037~\SC^{\frac{1}{3}} \RE^{\frac{4}{5}} \quad ; \quad {\rm Sc}=0.6 \quad ; \quad \RE= \frac{\rho~||\bu||~L}{\mu}
 \ee
-Sh is the Sherwood number, $D_\alpha$ is the gas phase diffusivity of species $\alpha$. The Reynolds number is calculated based on conditions in the gas phase grid cell adjacent to the surface. The length scale, $L$, is 1~m for a liquid pool unless specified otherwise.
+Sh is the Sherwood number and $D$ is the mole-weighted gas phase diffusivity. The Reynolds number is calculated based on conditions in the gas phase grid cell adjacent to the surface. The length scale, $L$, is 1~m for a liquid pool unless specified otherwise.
+
+In practice, a liquid fuel may have multiple components, like gasoline or kerosene, but for the sake of reducing CPU time, all liquid components can be assumed to evaporate to form a common lumped gas species whose mass fraction is denoted $Z_{\rm g}$. In this case, the effective mass fraction of gas species $\alpha$ is assumed to be proportional to its value at the liquid surface:
+\be
+   Y_{\rm \alpha,g} = Z_{\rm g} \frac{Y_{\rm \alpha,sv}}{\sum_{\alpha'} Y_{\alpha',{\rm sv}}}
+\ee
+The assumption of an assumed lumped gas species is not mandatory---one can evaporate each liquid component to form a unique gas species.
 
 For simplicity, the liquid fuel itself is treated like a thermally-thick solid for the purpose of computing the heat conduction. There is no computation of the convection of the liquid within the pool.
 
- 
+
 
 \subsection{Shrinking and Swelling Materials}
 \label{sec:shrink_swell}
