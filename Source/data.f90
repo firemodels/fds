@@ -3955,12 +3955,12 @@ SELECT CASE(FUEL)
    CASE('BUTANE')      ; CHI_R = 0.30_EB
    CASE('DODECANE')    ; CHI_R = 0.40_EB
    CASE('ETHANE')      ; CHI_R = 0.25_EB
-   CASE('ETHANOL')     ; CHI_R = 0.25_EB
+   CASE('ETHANOL')     ; CHI_R = 0.26_EB
    CASE('ETHYLENE')    ; CHI_R = 0.25_EB
    CASE('HYDROGEN')    ; CHI_R = 0.20_EB
    CASE('ISOPROPANOL') ; CHI_R = 0.29_EB
    CASE('METHANE')     ; CHI_R = 0.20_EB
-   CASE('METHANOL')    ; CHI_R = 0.16_EB
+   CASE('METHANOL')    ; CHI_R = 0.22_EB
    CASE('N-DECANE')    ; CHI_R = 0.40_EB
    CASE('N-HEPTANE')   ; CHI_R = 0.40_EB
    CASE('N-HEXANE')    ; CHI_R = 0.40_EB
