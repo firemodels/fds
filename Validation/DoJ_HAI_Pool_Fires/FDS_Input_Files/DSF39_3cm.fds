@@ -4,8 +4,16 @@
 
 &SURF ID        = 'POOL'
       COLOR     = 'YELLOW'
-      MATL_ID   = 'KEROSENE','VINYL'
+      MATL_ID(1,1:2) = 'KEROSENE','DECANE'
+      MATL_MASS_FRACTION(1,1:2) = 0.5,0.5
+      MATL_ID(2,1) = 'VINYL'
+      MATL_MASS_FRACTION(2,1) = 1.
+      EXTERNAL_FLUX=50
+      RAMP_EF='flux'
       THICKNESS = 0.010,0.05 /
+&RAMP ID='flux', T= 0, F=1 /
+&RAMP ID='flux', T=20, F=1 /
+&RAMP ID='flux', T=21, F=0 /
 
 &OBST XB=-.30,0.30,-.30,0.30,0.00,0.05, SURF_IDS='POOL','STEEL SHEET','STEEL SHEET' /
 &OBST XB=-.30,-.30,-.30,0.30,0.00,0.10, SURF_ID='STEEL SHEET' /
