@@ -3879,12 +3879,12 @@ IF_ANY_LIQUIDS_PRESENT: IF (DO_EVAPORATION) THEN
       ELSE
          VEL = SQRT(2._EB*KRES(IIG,JJG,KKG))
       ENDIF
-         CALL GET_VISCOSITY(ZZ_GET,MU_AIR,TMP_G)
-         LENGTH   = SF%CONV_LENGTH
-         RE_L     = RHO(IIG,JJG,KKG)*VEL*LENGTH/MU_AIR
-         SC_AIR   = 0.6_EB  ! Incropera & DeWitt, Chap 7, External Flow
-         SHERWOOD = 0.037_EB*SC_AIR**ONTH*RE_L**0.8_EB
-         H_MASS   = SHERWOOD*D_AIR/LENGTH
+      CALL GET_VISCOSITY(ZZ_GET,MU_AIR,TMP_G)
+      LENGTH   = SF%CONV_LENGTH
+      RE_L     = RHO(IIG,JJG,KKG)*VEL*LENGTH/MU_AIR
+      SC_AIR   = 0.6_EB  ! Incropera & DeWitt, Chap 7, External Flow
+      SHERWOOD = 0.037_EB*SC_AIR**ONTH*RE_L**0.8_EB
+      H_MASS   = SHERWOOD*D_AIR/LENGTH
 
    ENDIF H_MASS_IF
 
