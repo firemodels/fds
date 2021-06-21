@@ -5,7 +5,7 @@
 
 &TIME T_END=400., WALL_INCREMENT=1 /
 
-&DUMP DT_DEVC=5., DT_HRR=5., SIG_FIGS=4, SIG_FIGS_EXP=2 /
+&DUMP DT_DEVC=10., DT_HRR=10., SIG_FIGS=4, SIG_FIGS_EXP=2 /
 
 &REAC FUEL               = 'BENZENE'
       FYI                = 'Benzene C_6 H_6'
@@ -13,11 +13,10 @@
       SOOT_YIELD         = 0.181 /
 
 &MATL ID                     = 'BENZENE LIQUID'
-      EMISSIVITY             = 1.
       NU_SPEC                = 1.
       SPEC_ID                = 'BENZENE'
       HEAT_OF_REACTION       = 393
-      CONDUCTIVITY           = 0.14
+      CONDUCTIVITY           = 0.2
       SPECIFIC_HEAT          = 1.74
       DENSITY                = 874
       ABSORPTION_COEFFICIENT = 132
@@ -32,7 +31,13 @@
 &SURF ID        = 'BENZENE POOL'
       COLOR     = 'YELLOW'
       MATL_ID   = 'BENZENE LIQUID'
-      THICKNESS = 0.1 /
+      THICKNESS = 0.1
+      EXTERNAL_FLUX=10
+      RAMP_EF='flux' /
+&RAMP ID='flux', T= 0, F=1 /
+&RAMP ID='flux', T= 4, F=1 /
+&RAMP ID='flux', T= 5, F=0 /
+
 
 &SURF ID        = 'STEEL SHEET'
       COLOR     = 'BLACK'

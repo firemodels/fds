@@ -1,42 +1,103 @@
-&REAC FUEL               = 'N-OCTANE'
-      SOOT_YIELD         = 0.038 /
+&REAC FUEL='N-HEXANE', SOOT_YIELD=0.038, HEAT_OF_COMBUSTION=37600. /
 
 &DEVC XB=-0.60,0.60,-0.60,0.60,0.00,0.10, QUANTITY='BURNING RATE',     SPATIAL_STATISTIC='MEAN', SURF_ID='POOL', ID='mdot'/
 &DEVC XB=-0.60,0.60,-0.60,0.60,0.00,0.10, QUANTITY='WALL TEMPERATURE', SPATIAL_STATISTIC='MEAN', SURF_ID='POOL', ID='Tsurf' /
 &DEVC XB=-0.60,0.60,-0.60,0.60,0.00,0.10, QUANTITY='WALL TEMPERATURE', SPATIAL_STATISTIC='MAX',  SURF_ID='POOL', ID='Tsurf_max' /
+&DEVC XB=-0.60,0.60,-0.60,0.60,0.00,0.10, QUANTITY='NET HEAT FLUX',    SPATIAL_STATISTIC='MEAN',  SURF_ID='POOL', ID='flux' /
+&DEVC XYZ=0.071,0.071,0.051, IOR=3, QUANTITY='WALL THICKNESS', ID='delta' /
+ DEVC XB=-0.60,0.60,-0.60,0.60,0.00,0.10, QUANTITY='MASS FLUX', SPATIAL_STATISTIC='MEAN', MATL_ID='HEXANE', SURF_ID='POOL', ID='mdot_hexane' /
+ DEVC XB=-0.60,0.60,-0.60,0.60,0.00,0.10, QUANTITY='MASS FLUX', SPATIAL_STATISTIC='MEAN', MATL_ID='HEPTANE', SURF_ID='POOL', ID='mdot_heptane' /
+ DEVC XB=-0.60,0.60,-0.60,0.60,0.00,0.10, QUANTITY='MASS FLUX', SPATIAL_STATISTIC='MEAN', MATL_ID='OCTANE', SURF_ID='POOL', ID='mdot_octane' /
+ DEVC XB=-0.60,0.60,-0.60,0.60,0.00,0.10, QUANTITY='MASS FLUX', SPATIAL_STATISTIC='MEAN', MATL_ID='DECANE', SURF_ID='POOL', ID='mdot_decane' /
+ DEVC XB=-0.60,0.60,-0.60,0.60,0.00,0.10, QUANTITY='MASS FLUX', SPATIAL_STATISTIC='MEAN', MATL_ID='BENZENE', SURF_ID='POOL', ID='mdot_benzene' /
+ DEVC XB=-0.60,0.60,-0.60,0.60,0.00,0.10, QUANTITY='MASS FLUX', SPATIAL_STATISTIC='MEAN', MATL_ID='TOLUENE', SURF_ID='POOL', ID='mdot_toluene' /
 
-&DUMP DT_DEVC=10., DT_HRR=10., SIG_FIGS=4, SIG_FIGS_EXP=2 /
+&PROF XYZ=0.07,0.07,0.05, IOR=3, QUANTITY='TEMPERATURE', CELL_CENTERED=T /
+ PROF XYZ=0.07,0.07,0.05, IOR=3, QUANTITY='HEXANE', CELL_CENTERED=T /
+ PROF XYZ=0.07,0.07,0.05, IOR=3, QUANTITY='HEPTANE', CELL_CENTERED=T /
+ PROF XYZ=0.07,0.07,0.05, IOR=3, QUANTITY='OCTANE', CELL_CENTERED=T /
+ PROF XYZ=0.07,0.07,0.05, IOR=3, QUANTITY='DECANE', CELL_CENTERED=T /
+ PROF XYZ=0.07,0.07,0.05, IOR=3, QUANTITY='BENZENE', CELL_CENTERED=T /
+ PROF XYZ=0.07,0.07,0.05, IOR=3, QUANTITY='TOLUENE', CELL_CENTERED=T /
 
-&SURF ID='Igniter BCs', TMP_FRONT=2000, COLOR='RED', GEOMETRY='CYLINDRICAL', THICKNESS=0.005, LENGTH=0.075 /
-&RAMP ID='ign', T= 0., F=0. /
-&RAMP ID='ign', T= 1., F=1. /
-&RAMP ID='ign', T=20., F=1. /
-&RAMP ID='ign', T=21., F=0. /
+&DUMP DT_DEVC=10., DT_HRR=10., DT_PROF=10., SIG_FIGS=4, SIG_FIGS_EXP=2 /
 
-&PART ID='Igniter', SURF_ID='Igniter BCs', STATIC=T, AGE=21. /
-&INIT PART_ID='Igniter', N_PARTICLES=1, XYZ=0.01,0.01,0.07 /
-
-&MATL ID                     = 'GASOLINE'
+&MATL ID                     = 'HEXANE'
+      MW                     = 86.2
       NU_SPEC                = 1.
-      SPEC_ID                = 'N-OCTANE'
-      HEAT_OF_REACTION       = 338.9
-      CONDUCTIVITY           = 0.19
+      SPEC_ID                = 'N-HEXANE'
+      HEAT_OF_REACTION       = 364.9
+      CONDUCTIVITY           = 0.02
       SPECIFIC_HEAT          = 2.2
-      DENSITY                = 742.
-      ABSORPTION_COEFFICIENT = 300
-      HEAT_OF_COMBUSTION     = 37600.
-      BOILING_TEMPERATURE    = 211.7 /
+      DENSITY                = 664.
+      ABSORPTION_COEFFICIENT = 300.
+      BOILING_TEMPERATURE    = 68.0 /
+
+&MATL ID                     = 'HEPTANE'
+      MW                     = 100.2
+      NU_SPEC                = 1.
+      SPEC_ID                = 'N-HEXANE'
+      HEAT_OF_REACTION       = 364.9
+      CONDUCTIVITY           = 0.02
+      SPECIFIC_HEAT          = 2.2
+      DENSITY                = 688.
+      ABSORPTION_COEFFICIENT = 300.
+      BOILING_TEMPERATURE    = 98.5 /
+
+&MATL ID                     = 'BENZENE'
+      MW                     = 78.1
+      NU_SPEC                = 1.
+      SPEC_ID                = 'N-HEXANE'
+      HEAT_OF_REACTION       = 431.8
+      CONDUCTIVITY           = 0.02
+      SPECIFIC_HEAT          = 2.2
+      DENSITY                = 885.
+      ABSORPTION_COEFFICIENT = 300.
+      BOILING_TEMPERATURE    = 80.0 /
+
+&MATL ID                     = 'OCTANE'
+      MW                     = 114.2
+      NU_SPEC                = 1.
+      SPEC_ID                = 'N-HEXANE'
+      HEAT_OF_REACTION       = 300.0
+      CONDUCTIVITY           = 0.02
+      SPECIFIC_HEAT          = 2.2
+      DENSITY                = 707.
+      ABSORPTION_COEFFICIENT = 300.
+      BOILING_TEMPERATURE    = 125.6 /
+
+&MATL ID                     = 'DECANE'
+      MW                     = 142.3
+      NU_SPEC                = 1.
+      SPEC_ID                = 'N-HEXANE'
+      HEAT_OF_REACTION       = 359.8
+      CONDUCTIVITY           = 0.02
+      SPECIFIC_HEAT          = 2.0
+      DENSITY                = 734.
+      ABSORPTION_COEFFICIENT = 300.
+      BOILING_TEMPERATURE    = 174.0 /
 
 &MATL ID                     = 'KEROSENE'
+      MW                     = 154.0
       NU_SPEC                = 1.
-      SPEC_ID                = 'N-OCTANE'
+      SPEC_ID                = 'N-HEXANE'
       HEAT_OF_REACTION       = 290.8
-      CONDUCTIVITY           = 0.2
+      CONDUCTIVITY           = 0.02
       SPECIFIC_HEAT          = 2.0
       DENSITY                = 798.
-      ABSORPTION_COEFFICIENT = 300
-      HEAT_OF_COMBUSTION     = 40200.
-      BOILING_TEMPERATURE    = 256.7 /
+      ABSORPTION_COEFFICIENT = 300.
+      BOILING_TEMPERATURE    = 250.0 /
+
+&MATL ID                     = 'TOLUENE'
+      MW                     = 92.1
+      NU_SPEC                = 1.
+      SPEC_ID                = 'N-HEXANE'
+      HEAT_OF_REACTION       = 362.8
+      CONDUCTIVITY           = 0.02
+      SPECIFIC_HEAT          = 2.2
+      DENSITY                = 872.
+      ABSORPTION_COEFFICIENT = 300.
+      BOILING_TEMPERATURE    = 110.6 /
 
 &MATL ID            = 'STEEL'
       EMISSIVITY    = 1.0
@@ -68,6 +129,11 @@
 
 &SLCF PBY=0.000, QUANTITY='TEMPERATURE', VECTOR=.TRUE. /
 &SLCF PBY=0.001, QUANTITY='HRRPUV', CELL_CENTERED=T /
+&SLCF PBY=0.001, QUANTITY='RADIATION LOSS', CELL_CENTERED=T /
+&SLCF PBY=0.001, QUANTITY='INTEGRATED INTENSITY', CELL_CENTERED=T /
+&SLCF PBY=0.001, QUANTITY='ABSORPTION COEFFICIENT', CELL_CENTERED=T /
+&SLCF PBY=0.001, QUANTITY='TEMPERATURE', CELL_CENTERED=T /
+&SLCF PBY=0.001, QUANTITY='VOLUME FRACTION', SPEC_ID='N-HEXANE', CELL_CENTERED=T /
 
 &BNDF QUANTITY='BURNING RATE',     CELL_CENTERED=T /
 &BNDF QUANTITY='GAUGE HEAT FLUX',  CELL_CENTERED=T /
