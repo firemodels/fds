@@ -16,10 +16,10 @@
       NU_SPEC                = 1.
       SPEC_ID                = 'BENZENE'
       HEAT_OF_REACTION       = 393
-      CONDUCTIVITY           = 0.2
+      CONDUCTIVITY           = 0.14
       SPECIFIC_HEAT          = 1.74
       DENSITY                = 874
-      ABSORPTION_COEFFICIENT = 132
+      ABSORPTION_COEFFICIENT = 123
       BOILING_TEMPERATURE    = 80.15 /
 
 &MATL ID            = 'STEEL'

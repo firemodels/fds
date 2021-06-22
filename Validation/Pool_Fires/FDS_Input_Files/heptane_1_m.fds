@@ -16,10 +16,10 @@
       NU_SPEC                = 1.
       SPEC_ID                = 'N-HEPTANE'
       HEAT_OF_REACTION       = 317
-      CONDUCTIVITY           = 0.2
+      CONDUCTIVITY           = 0.14
       SPECIFIC_HEAT          = 2.24
       DENSITY                = 675
-      ABSORPTION_COEFFICIENT = 333
+      ABSORPTION_COEFFICIENT = 187.5
       BOILING_TEMPERATURE    = 98.35 /
 
 &MATL ID            = 'STEEL'

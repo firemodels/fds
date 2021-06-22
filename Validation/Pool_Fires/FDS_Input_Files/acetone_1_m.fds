@@ -16,7 +16,7 @@
       NU_SPEC                = 1.
       SPEC_ID                = 'ACETONE'
       HEAT_OF_REACTION       = 501
-      CONDUCTIVITY           = 0.2
+      CONDUCTIVITY           = 0.20
       SPECIFIC_HEAT          = 2.13
       DENSITY                = 791
       ABSORPTION_COEFFICIENT = 100

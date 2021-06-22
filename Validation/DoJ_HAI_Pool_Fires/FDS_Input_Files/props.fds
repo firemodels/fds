@@ -66,6 +66,39 @@
       ABSORPTION_COEFFICIENT = 300.
       BOILING_TEMPERATURE    = 125.6 /
 
+&MATL ID                     = 'ISO-OCTANE'
+      MW                     = 114.2
+      NU_SPEC                = 1.
+      SPEC_ID                = 'N-HEXANE'
+      HEAT_OF_REACTION       = 272
+      CONDUCTIVITY           = 0.02
+      SPECIFIC_HEAT          = 2.15
+      DENSITY                = 692.
+      ABSORPTION_COEFFICIENT = 300.
+      BOILING_TEMPERATURE    = 117.7 /
+
+&MATL ID                     = 'NONANE'
+      MW                     = 128.3
+      NU_SPEC                = 1.
+      SPEC_ID                = 'N-HEXANE'
+      HEAT_OF_REACTION       = 288.3
+      CONDUCTIVITY           = 0.02
+      SPECIFIC_HEAT          = 2.10
+      DENSITY                = 772.
+      ABSORPTION_COEFFICIENT = 300.
+      BOILING_TEMPERATURE    = 150.6 /
+
+&MATL ID                     = 'ISO-NONANE'
+      MW                     = 216.4
+      NU_SPEC                = 1.
+      SPEC_ID                = 'N-HEXANE'
+      HEAT_OF_REACTION       = 288.3
+      CONDUCTIVITY           = 0.02
+      SPECIFIC_HEAT          = 2.10
+      DENSITY                = 772.
+      ABSORPTION_COEFFICIENT = 300.
+      BOILING_TEMPERATURE    = 150.6 /
+
 &MATL ID                     = 'DECANE'
       MW                     = 142.3
       NU_SPEC                = 1.
@@ -76,6 +109,39 @@
       DENSITY                = 734.
       ABSORPTION_COEFFICIENT = 300.
       BOILING_TEMPERATURE    = 174.0 /
+
+&MATL ID                     = 'UNDECANE'
+      MW                     = 156.3
+      NU_SPEC                = 1.
+      SPEC_ID                = 'N-HEXANE'
+      HEAT_OF_REACTION       = 268  
+      CONDUCTIVITY           = 0.02
+      SPECIFIC_HEAT          = 2.0
+      DENSITY                = 740.
+      ABSORPTION_COEFFICIENT = 300.
+      BOILING_TEMPERATURE    = 195.9 /
+
+&MATL ID                     = 'ISO-DECANE'
+      MW                     = 484.8
+      NU_SPEC                = 1.
+      SPEC_ID                = 'N-HEXANE'
+      HEAT_OF_REACTION       = 359.8
+      CONDUCTIVITY           = 0.02
+      SPECIFIC_HEAT          = 2.0
+      DENSITY                = 734.
+      ABSORPTION_COEFFICIENT = 300.
+      BOILING_TEMPERATURE    = 174.0 /
+
+&MATL ID                     = 'DECALIN'
+      MW                     = 138.3
+      NU_SPEC                = 1.
+      SPEC_ID                = 'N-HEXANE'
+      HEAT_OF_REACTION       = 309
+      CONDUCTIVITY           = 0.02
+      SPECIFIC_HEAT          = 1.67
+      DENSITY                = 896.
+      ABSORPTION_COEFFICIENT = 300.
+      BOILING_TEMPERATURE    = 190   /
 
 &MATL ID                     = 'KEROSENE'
       MW                     = 154.0
