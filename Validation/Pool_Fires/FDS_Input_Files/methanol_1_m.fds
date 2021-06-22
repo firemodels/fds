@@ -16,10 +16,10 @@
       NU_SPEC                = 1.
       SPEC_ID                = 'METHANOL'
       HEAT_OF_REACTION       = 1099
-      CONDUCTIVITY           = 0.02
+      CONDUCTIVITY           = 0.20
       SPECIFIC_HEAT          = 2.48
       DENSITY                = 796
-      ABSORPTION_COEFFICIENT = 1140
+      ABSORPTION_COEFFICIENT = 1500
       BOILING_TEMPERATURE    = 64.65 /
 
 &MATL ID            = 'STEEL'
