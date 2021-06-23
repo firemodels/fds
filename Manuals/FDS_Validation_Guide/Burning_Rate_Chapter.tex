@@ -973,9 +973,56 @@ The results are shown in Fig.~\ref{christifire_cone_results_other_fluxes}.
 
 \clearpage
 
-\section{Wood Cribs}
+\section{Wood Cribs and Similar Wood/Paper Combustibles}
 
 A common combustible used in fire research and testing is a wood crib; that is, a uniform array of wooden dowels of nearly square cross section. However, a stack of wooden pallets can be viewed as a wood crib as well. Whatever its form, these cribs tend to burn at a consistent and predictable rate, making them ideal for fire testing.
+
+\subsection{NIST/NRC Transient Combustibles}
+
+Figure~\ref{NIST_NRC_Transient_Combustibles_cribs} compares measured and predicted heat release rates for a single wood crib and arrays of multiple cribs. The simulations are all performed using Lagrangian particles as surrogates for the 56~cm long, 3.8~cm square pine sticks. The grid resolution in all cases is 8~cm, with additional simulations performed with 4~cm and 2~cm resolution for the single crib.
+
+\begin{figure}[!h]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_NRC_Transient_Combustibles/crib_1x1x1_HRR} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_NRC_Transient_Combustibles/crib_2x1x1_HRR} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_NRC_Transient_Combustibles/crib_2x2x1_HRR} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_NRC_Transient_Combustibles/crib_2x2x2_HRR} 
+\end{tabular*}
+\caption[NIST/NRC Transient Combustibles: wood cribs]{NIST/NRC Transient Combustibles: wood cribs.}
+\label{NIST_NRC_Transient_Combustibles_cribs}
+\end{figure}
+
+\FloatBarrier
+
+Figure~\ref{NIST_NRC_Transient_Combustibles_boxes} compares measured and predicted heat release rates for a single cardbard box filled with shredded craft paper and arrays of multiple boxes. The simulations are all performed using Lagrangian particles as surrogates for the small paper strips. The grid resolution in all cases is 5~cm.
+
+\begin{figure}[!h]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_NRC_Transient_Combustibles/box_1x1x1_HRR} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_NRC_Transient_Combustibles/box_2x1x1_HRR} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_NRC_Transient_Combustibles/box_2x2x1_HRR} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_NRC_Transient_Combustibles/box_2x2x2_HRR}
+\end{tabular*}
+\caption[NIST/NRC Transient Combustibles: boxes]{NIST/NRC Transient Combustibles: boxes.}
+\label{NIST_NRC_Transient_Combustibles_boxes}
+\end{figure}
+
+\FloatBarrier
+
+Figure~\ref{NIST_NRC_Transient_Combustibles_pallets} compares measured and predicted heat release rates for a stack of two, four and eight wood pallets. The simulations are all performed using Lagrangian particles as surrogates for the wooden planks. The grid resolution in all cases is 6~cm.
+
+\begin{figure}[!h]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_NRC_Transient_Combustibles/pallet_1x1x2_HRR} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_NRC_Transient_Combustibles/pallet_1x1x4_HRR} \\
+\multicolumn{2}{c}{\includegraphics[height=2.2in]{SCRIPT_FIGURES/NIST_NRC_Transient_Combustibles/pallet_1x1x8_HRR}}
+\end{tabular*}
+\caption[NIST/NRC Transient Combustibles: pallets]{NIST/NRC Transient Combustibles: pallets.}
+\label{NIST_NRC_Transient_Combustibles_pallets}
+\end{figure}
+
+\FloatBarrier
+
 
 \subsection{SP Wood Crib Experiments}
 
@@ -1028,6 +1075,155 @@ This section presents results from the evaporation of water in an ASTM E2058 fir
 \end{figure}
 
 
+\FloatBarrier
+
+\subsection{DoJ/HAI Pool Fires}
+
+Figures~\ref{DoJ_HAI_Pool_Fires_1} through \ref{DoJ_HAI_Pool_Fires_6} display measured and predicted burning rate of a variety of gasoline and kerosene pool fires in 0.3~m, 0.6~m, and 1.2~m square pans of various depths and two substrates---concrete and vinyl. Table~\ref{DoJ_HAI_Matrix} lists the relevant parameters.
+
+\begin{table}[p]
+\caption[Summary of DoJ/HAI Diked Fire Tests]{Summary of DoJ/HAI Diked Fire Tests.}
+\begin{center}
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+Test ID   & Pan Side Length (m)  & Fuel &  Depth (mm)  & Substrate  \\ \hline
+DSF1-C-CC-G-1-0.093    & 0.31  & Gasoline  & 1  & Coated Concrete   \\ \hline
+DSF2-C-CC-G-5-0.093    & 0.31  & Gasoline  & 5  & Coated Concrete   \\ \hline
+DSF3-C-CC-G-10-0.093   & 0.31  & Gasoline  & 10 & Coated Concrete   \\ \hline
+DSF4-C-CC-G-20-0.093   & 0.31  & Gasoline  & 20 & Coated Concrete   \\ \hline
+DSF5-C-CC-K-1-0.093    & 0.31  & Kerosene  & 1  & Coated Concrete   \\ \hline
+DSF6-C-CC-K-5-0.093    & 0.31  & Kerosene  & 5  & Coated Concrete   \\ \hline
+DSF7-C-CC-K-10-0.093   & 0.31  & Kerosene  & 10 & Coated Concrete   \\ \hline
+DSF8-C-CC-K-20-0.093   & 0.31  & Kerosene  & 20 & Coated Concrete   \\ \hline
+DSF9-C-CC-G-1-0.372    & 0.61  & Gasoline  & 1  & Coated Concrete   \\ \hline
+DSF10-C-CC-G-5-0.372   & 0.61  & Gasoline  & 5  & Coated Concrete   \\ \hline
+DSF11-C-CC-G-10-0.372  & 0.61  & Gasoline  & 10 & Coated Concrete   \\ \hline
+DSF12-C-CC-G-20-0.372  & 0.61  & Gasoline  & 20 & Coated Concrete   \\ \hline
+DSF13-C-CC-K-1-0.372   & 0.61  & Kerosene  & 1  & Coated Concrete   \\ \hline
+DSF14-C-CC-K-5-0.372   & 0.61  & Kerosene  & 5  & Coated Concrete   \\ \hline
+DSF15-C-CC-K-10-0.372  & 0.61  & Kerosene  & 10 & Coated Concrete   \\ \hline
+DSF16-C-CC-K-20-0.372  & 0.61  & Kerosene  & 20 & Coated Concrete   \\ \hline
+DSF17-C-CC-G-1-1.488   & 1.22  & Gasoline  & 1  & Coated Concrete   \\ \hline
+DSF18-C-CC-G-2-1.488   & 1.22  & Gasoline  & 2  & Coated Concrete   \\ \hline
+DSF19-C-CC-G-3-1.488   & 1.22  & Gasoline  & 3  & Coated Concrete   \\ \hline
+DSF20-C-CC-G-4-1.488   & 1.22  & Gasoline  & 4  & Coated Concrete   \\ \hline
+DSF21-C-CC-G-5-1.488   & 1.22  & Gasoline  & 5  & Coated Concrete   \\ \hline
+DSF22-C-CC-G-20-1.488  & 1.22  & Gasoline  & 20 & Coated Concrete   \\ \hline
+DSF25-C-V-G-1-0.093    & 0.31  & Gasoline  & 1  & Vinyl             \\ \hline
+DSF26-C-V-G-5-0.093    & 0.31  & Gasoline  & 5  & Vinyl             \\ \hline
+DSF27-C-V-G-10-0.093   & 0.31  & Gasoline  & 10 & Vinyl             \\ \hline
+DSF28-C-V-G-20-0.093   & 0.31  & Gasoline  & 20 & Vinyl             \\ \hline
+DSF29-C-V-K-1-0.093    & 0.31  & Kerosene  & 1  & Vinyl             \\ \hline
+DSF30-C-V-K-5-0.093    & 0.31  & Kerosene  & 5  & Vinyl             \\ \hline
+DSF31-C-V-K-10-0.093   & 0.31  & Kerosene  & 10 & Vinyl             \\ \hline
+DSF32-C-V-K-20-0.093   & 0.31  & Kerosene  & 20 & Vinyl             \\ \hline
+DSF33-C-V-G-1-0.372    & 0.61  & Gasoline  & 1  & Vinyl             \\ \hline
+DSF34-C-V-G-5-0.372    & 0.61  & Gasoline  & 5  & Vinyl             \\ \hline
+DSF35-C-V-G-10-0.372   & 0.61  & Gasoline  & 10 & Vinyl             \\ \hline
+DSF36-C-V-G-20-0.372   & 0.61  & Gasoline  & 20 & Vinyl             \\ \hline
+DSF37-C-V-K-1-0.372    & 0.61  & Kerosene  & 1  & Vinyl             \\ \hline
+DSF38-C-V-K-5-0.372    & 0.61  & Kerosene  & 5  & Vinyl             \\ \hline
+DSF39-C-V-K-10-0.372   & 0.61  & Kerosene  & 10 & Vinyl             \\ \hline
+DSF40-C-V-K-20-0.372   & 0.61  & Kerosene  & 20 & Vinyl             \\ \hline
+DSF41-C-V-G-1-1.488    & 1.22  & Gasoline  & 1  & Vinyl             \\ \hline
+DSF42-C-V-G-2-1.488    & 1.22  & Gasoline  & 2  & Vinyl             \\ \hline
+DSF43-C-V-G-3-1.488    & 1.22  & Gasoline  & 3  & Vinyl             \\ \hline
+DSF44-C-V-G-4-1.488    & 1.22  & Gasoline  & 4  & Vinyl             \\ \hline
+DSF45-C-V-G-5-1.488    & 1.22  & Gasoline  & 5  & Vinyl             \\ \hline
+DSF46-C-V-G-15-1.488   & 1.22  & Gasoline  & 15 & Vinyl             \\ \hline
+\end{tabular}
+\end{center}
+\label{DoJ_HAI_Matrix}
+\end{table}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/DoJ_HAI_Pool_Fires/DSF1} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/DoJ_HAI_Pool_Fires/DSF2} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/DoJ_HAI_Pool_Fires/DSF3} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/DoJ_HAI_Pool_Fires/DSF4} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/DoJ_HAI_Pool_Fires/DSF5} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/DoJ_HAI_Pool_Fires/DSF6} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/DoJ_HAI_Pool_Fires/DSF7} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/DoJ_HAI_Pool_Fires/DSF8}  
+\end{tabular*}
+\caption[DoJ/HAI Pool Fires, Tests 1-8]{DoJ/HAI Pool Fires, Tests 1-8.}
+\label{DoJ_HAI_Pool_Fires_1}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/DoJ_HAI_Pool_Fires/DSF9} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/DoJ_HAI_Pool_Fires/DSF10} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/DoJ_HAI_Pool_Fires/DSF11} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/DoJ_HAI_Pool_Fires/DSF12} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/DoJ_HAI_Pool_Fires/DSF13} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/DoJ_HAI_Pool_Fires/DSF14} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/DoJ_HAI_Pool_Fires/DSF15} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/DoJ_HAI_Pool_Fires/DSF16}
+\end{tabular*}
+\caption[DoJ/HAI Pool Fires, Tests 9-16]{DoJ/HAI Pool Fires, Tests 9-16.}
+\label{DoJ_HAI_Pool_Fires_2}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/DoJ_HAI_Pool_Fires/DSF17} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/DoJ_HAI_Pool_Fires/DSF18} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/DoJ_HAI_Pool_Fires/DSF19} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/DoJ_HAI_Pool_Fires/DSF20} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/DoJ_HAI_Pool_Fires/DSF21} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/DoJ_HAI_Pool_Fires/DSF22}
+\end{tabular*}
+\caption[DoJ/HAI Pool Fires, Tests 17-22]{DoJ/HAI Pool Fires, Tests 17-22.}
+\label{DoJ_HAI_Pool_Fires_3}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/DoJ_HAI_Pool_Fires/DSF25} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/DoJ_HAI_Pool_Fires/DSF26} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/DoJ_HAI_Pool_Fires/DSF27} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/DoJ_HAI_Pool_Fires/DSF28} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/DoJ_HAI_Pool_Fires/DSF29} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/DoJ_HAI_Pool_Fires/DSF30} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/DoJ_HAI_Pool_Fires/DSF31} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/DoJ_HAI_Pool_Fires/DSF32}
+\end{tabular*}
+\caption[DoJ/HAI Pool Fires, Tests 25-32]{DoJ/HAI Pool Fires, Tests 25-32.}
+\label{DoJ_HAI_Pool_Fires_4}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/DoJ_HAI_Pool_Fires/DSF33} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/DoJ_HAI_Pool_Fires/DSF34} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/DoJ_HAI_Pool_Fires/DSF35} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/DoJ_HAI_Pool_Fires/DSF36} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/DoJ_HAI_Pool_Fires/DSF37} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/DoJ_HAI_Pool_Fires/DSF38} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/DoJ_HAI_Pool_Fires/DSF39} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/DoJ_HAI_Pool_Fires/DSF40}
+\end{tabular*}
+\caption[DoJ/HAI Pool Fires, Tests 33-40]{DoJ/HAI Pool Fires, Tests 33-40.}
+\label{DoJ_HAI_Pool_Fires_5}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/DoJ_HAI_Pool_Fires/DSF41} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/DoJ_HAI_Pool_Fires/DSF42} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/DoJ_HAI_Pool_Fires/DSF43} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/DoJ_HAI_Pool_Fires/DSF44} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/DoJ_HAI_Pool_Fires/DSF45} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/DoJ_HAI_Pool_Fires/DSF46}
+\end{tabular*}
+\caption[DoJ/HAI Pool Fires, Tests 41-46]{DoJ/HAI Pool Fires, Tests 41-46.}
+\label{DoJ_HAI_Pool_Fires_6}
+\end{figure}
+
+
+\clearpage
 
 \subsection{Pool Fire Measurements}
 

@@ -122,7 +122,6 @@ sites, and the various utility programs that support FDS and Smokeview. This doc
 not affiliated with NIST, VTT, or its software development collaborators.
 
 
-% \chapter{Disclaimer}
 \input{../Bibliography/disclaimer}
 
 
@@ -130,11 +129,12 @@ not affiliated with NIST, VTT, or its software development collaborators.
 
 \label{acksection}
 
-The idea for this Guide originated with Jason Floyd, a co-developer of FDS and practicing engineer at Jensen Hughes. He readily saw the need for a clear description of the process of developing and maintaining FDS and Smokeview. Bryan Klein, currently with Thunderhead Engineering, Inc., instituted a number of the internet tools that are described in the Guide, including the source code repository, issue tracking system, and discussion group sites. Kristopher Overholt, currently with RStudio, developed the Firebot automated build and testing process.
+The idea for this Guide originated with Jason Floyd, a co-developer of FDS and practicing engineer at Jensen Hughes. He readily saw the need for a clear description of the process of developing and maintaining FDS and Smokeview. Bryan Klein, currently with Thunderhead Engineering, Inc., instituted a number of the internet tools that are described in the Guide, including the source code repository, issue tracking system, and discussion group sites. Kristopher Overholt, currently with RStudio, developed the original Firebot automated build and testing process.
 
 
-\newpage
-
+\cleardoublepage
+\phantomsection
+\addcontentsline{toc}{chapter}{Contents}
 \tableofcontents
 
 \mainmatter
@@ -226,7 +226,7 @@ FDS computes the temperature, density, pressure, velocity, chemical composition,
 \setlength{\itemsep}{0.0in}
 \item Gas temperature
 \item Gas velocity
-\item Gas species concentration (water vapor, CO$_2$, CO, ,O$_2$, N$_2$)
+\item Gas species concentration (water vapor, CO$_2$, CO, soot, O$_2$, N$_2$)
 \item Smoke concentration and visibility estimates
 \item Pressure
 \item Heat release rate per unit volume
@@ -319,7 +319,7 @@ The central location is known as the {\em Repository}.
 
 Starting in 2007 with FDS version 5, the FDS development team adopted GoogleCode, a free Internet service designed to assist open source software development by providing a repository for source code, revision control, program distribution, bug tracking, and various other very useful services. In 2015, Google terminated this service, and provided all of its projects a migration path to GitHub, a similar free service that uses Git, rather than Subversion, as its version control software.
 
-The FDS manuals are typeset using \LaTeX, specifically, PDF \LaTeX. The \LaTeX\ files are essentially text files that are under version control. The figures are either in the form of PDF or png files, depending on whether they are vector or raster format. There are a variety of \LaTeX\ packages available, including MiKTeX, that can be used to compile the \LaTeX into PDF files. The FDS developers edit the manuals as part of the day to day upkeep of the model. Different editions of the manuals are distinguished by a specific Git hash tag.
+The FDS manuals are typeset using \LaTeX, specifically, pdf\LaTeX. The \LaTeX\ files are essentially text files that are under version control. The figures are either PDF (Portable Document Format) or PNG (Portable Network Graphics) files, depending on whether they are vector or raster images. There are a variety of \LaTeX\ packages available, including MiKTeX, that can be used to compile the \LaTeX\ into PDF files. The FDS developers edit the manuals as part of the day to day upkeep of the model. Different editions of the manuals are distinguished by a specific Git hash tag.
 
 
 \subsection{Project Repository}
@@ -327,21 +327,18 @@ The FDS manuals are typeset using \LaTeX, specifically, PDF \LaTeX. The \LaTeX\ 
 Currently, FDS and Smokeview make use of GitHub, a free service to support software development for open source applications. GitHub uses Git version control software. Under this system a centralized repository containing all project files resides on an external server.   A record of version number when a specific file was last changed is maintained. As an open source program, any individual can obtain a copy of the repository or retrieve specific versions of the repository.
 
 Both FDS and Smokeview live within a GitHub \emph{organization} called ``Fire Models''.  The current location of the organization is available through the \emph{View on Github} button at \href{https://pages.nist.gov/fds/} {\textct{https://pages.nist.gov/fds/}}.  The repositories that are used by the FDS and Smokeview projects contain more than 6000 configuration items and are listed below along with a brief description:
-
-\vskip\baselineskip
-\begin{tabular}{ll}
-fds & FDS source code, verification and validation tests, wikis, and documentation \\
-smv & Smokeview source code, integration tests, and documentation \\
-exp & Repository of experimental data for model validation \\
-out & FDS output results for validation \\
-bot & Firebot (continuous integration system) source \\
-fds-smv & Web page html source \\
-fig & contains figures and other large files used in other repos under firemodels \\
-cad & contains large CAD geometry files that may be included with FDS input files
-\end{tabular}
-\vskip\baselineskip
-
-Each member of the FDS/Smokeview development team has an account and password access~\footnote{Access to the FDS/Smokeview repositories is by means of two-factor identification.} to the FDS/Smokeview repository. In addition, anonymous users can ``fork,'' or copy, the repository and receive the latest versions of the source code, manuals, and other items. Only Team Members described in the previous chapter can commit changes to the repository. All others may make changes to their own copy of the repository and can suggest these changes to the FDS/Smokeview developers by means of a ``pull request.'' which is then reviewed by the development team for inclusion into the repository.
+\begin{tabbing}
+fds \hspace{0.5in} \= FDS source code, verification and validation tests, wikis, and documentation \\
+smv                \> Smokeview source code, integration tests, and documentation \\
+exp                \> Experimental data for model validation \\
+out                \> FDS output results for validation \\
+bot                \> Firebot (continuous integration system) source \\
+radcal             \> Source code and documentation of the narrow-band radiation model, RadCal \\
+fds-smv            \> Web page html source \\
+fig                \> Figures and other large files used in other repos under firemodels \\
+cad                \> CAD geometry files that may be included with FDS input files
+\end{tabbing}
+Each member of the development team has an account and password access~\footnote{Access to the Fire Models repositories is by means of two-factor identification.} to the repositories. In addition, potential contributors can {\em fork}, i.e. copy, any or all repositories and receive the latest versions of the source code, manuals, and other items. Only Team Members described in the previous chapter can commit changes to the repository. All others may make changes to their personal forks and submit a {\em pull request} that is then reviewed by the development team for inclusion into the repository.
 
 In the event of an unexpected change to the GitHub service and/or the FDS repository, each member of the development team, plus interested third parties, has a copy of the repository on their local computer. At NIST, the staff computers are regularly backed up as well. Thus, there is very little chance that the project repository will be lost. If need be, the files could be moved to another open source software development site.
 
@@ -352,28 +349,23 @@ Additional details on the use of GitHub for the models are available on the wiki
 At the start of a simulation, FDS writes header information to the Smokeview output file, FDS output file, and the FDS log file.  This header information contains the version of FDS used to perform that simulation.
 
 Official versions of the model released by NIST are identified with specific version numbers tied to specific revisions in the repository and are identified on the download page for the model that can be compared to the version output from the model. For example, the following information is included on the FDS download website for FDS version 6.5.2
-
 \begin{lstlisting}
  Version          : FDS 6.5.2
  Revision         : Git-r21-0-g4e9103f
  Revision Date    : Wed Aug 24 16:29:46 2016 -0400
  Compilation Date : Aug 24, 2016  22:28:55
 \end{lstlisting}
-
 New versions of FDS and Smokeview are identified using a specific numbering convention consisting of three integers separated by periods, where the first number is the {\em major} release, the second is the {\em minor} release, and the third is the {\em maintenance} release. For example, FDS 6.5.3 indicates that this is FDS 6, the sixth major release. The 5 indicates a significant upgrade (a minor release), but still within the framework of FDS 6.  The 3 indicates the third maintenance release of 6.5, mostly bug fixes and minor user requests. All volumes of the FDS/Smokeview documentation are also automatically tagged with this information on the title page of each document providing documentation and traceability of a given version of the documents to a specific version of FDS/Smokeview and a specific repository revision. Release notes indicate whether the changes affect a particular model feature. Maintenance releases are either just bug fixes or the addition of minor enhancements (such as a new output quantity), and should not affect code functionality.
 
 
 
 \chapter{Software Requirements Identification, Design, Implementation, and Testing}
 
-Changes are made to the FDS source code daily, and tracked via revision control software. However, these daily changes do not constitute a change to the version number. After the developers determine that enough changes have been made to the source, they release a new minor upgrade, 6.2.12 to 6.2.13, for example. This happens every few weeks. A change from 6.2 to 6.3 might happen only a few times a year, when significant improvements have been made to the model physics or numerics.
+Changes are made to the FDS source code daily, and tracked via revision control software. However, these daily changes do not constitute a change to the version number. After the developers determine that enough changes have been made to the source code, they issue a {\em maintenance} upgrade, e.g. 6.2.12 to 6.2.13. This happens every few months. A {\em minor} release, e.g. 6.2 to 6.3, might happen only a few times a year, when significant improvements have been made to the model physics or numerics.
 
 The software development process for FDS/Smokeview is intentionally simple. The process can be defined in five basic steps:
-
 \begin{description}
-\item [1. Identify and document the need for a change:] The need for minor changes to FDS typically come from user inquiries. These may be reports of bugs in the software or requests for additional features or outputs from the model.
-
-    Significant changes to FDS/Smokeview, guided by available research road maps \linebreak (see \href{https://pages.nist.gov/fds/} {\textct{https://pages.nist.gov/fds/}}) are made based on the following criteria, in no particular order:
+\item [1. Identify and document the need for a change:] Improvements to FDS typically come from user inquiries. These may be reports of bugs in the software or requests for additional features or outputs from the model. Significant changes to FDS/Smokeview, guided by available research road maps \linebreak (see \href{https://pages.nist.gov/fds/} {\textct{https://pages.nist.gov/fds/}}), are made based on the following criteria, in no particular order:
 \begin{description}
 \item[Better Physics:] The goal of any model is to be {\em predictive}, but it also must be reliable. FDS is a blend of empirical and deterministic sub-models, chosen based on their robustness, consistency, and reliability. Any new sub-model must demonstrate that it is of comparable or superior accuracy to its empirical counterpart.
 \item[Modest CPU Increase:] If a proposed algorithm doubles the calculation time but yields only a marginal improvement in accuracy, it is likely to be rejected. Also, the various routines in FDS are expected to consume CPU time in proportion to their overall importance (Baum's Rule\footnote{After Howard Baum, NIST Fellow and one of the original developers of the mathematical foundation of FDS.}). For example, the radiation transport algorithm consumes about 25~\% of the CPU time, consistent with the fact that about one-fourth to one-third of the fire's energy is emitted as thermal radiation.
@@ -384,7 +376,7 @@ The software development process for FDS/Smokeview is intentionally simple. The 
 \item [2. Analyze, evaluate, and implement the change:] Algorithms for complex changes are typically documented by revisions to the FDS or Smokeview Technical Reference Guide and specific test cases to verify the correct operation of the model changes are included in the FDS or Smokeview Verification and Validation Guides. Software implementation then follows the equations included in the relevant Technical Reference Guide. Additional details of the process, tracking, and testing of changes is included in the sections below.
 \item [3. Review and approval of the change:] Before accepting any change into the repository, verification and validation tests are run to ensure desired results. All changes to the software and documentation are automatically tracked in the FDS and Smokeview repositories.
 \item [4. Verification and Validation:] A suite of simple verification calculations are run each night to ensure that the daily bug fixes have not altered any of the important algorithms. A suite of validation calculations are run each night. Any changes to the results are automatically flagged and emailed to developers for review. Additional details of the process is included in the sections below.
-\item [5. Release of new versions:] NIST policy requires review and approval of technical reports (all the FDS/Smokeview documentation) and software (the FDS/Smokeview software released on the FDS website). Additional details of the review process is included in the sections below.
+\item [5. Release of new versions:] NIST policy requires review and approval of technical reports, which includes all the FDS and Smokeview manuals. Additional details of the review process is included in the sections below.
 \end{description}
 
 \section{Problem Reporting and Resolution}
@@ -468,7 +460,7 @@ Upon completion of the automated build/test process, the results of the build/te
 
 \subsection*{Stage 1: Checkout of FDS-SMV codebase}
 
-In the first stage, the newest version of the FDS-SMV source code is retrieved from the FDS-SMV repository at GitHub. At this stage, the Firebot script ensures that all temporary files are removed and that a clean copy of the repository is used for the later stages, as if an end user were downloading the repository for the first time.
+In the first stage, the latest versions of the FDS and Smokeview source codes are retrieved from the Fire Models repositories at GitHub. At this stage, the Firebot script ensures that all temporary files are removed and that clean copies of all relevant repositories are used for the later stages, as if an end user were downloading the repositories for the first time.
 
 \subsection*{Stage 2: Compilation of FDS debug versions}
 
@@ -476,7 +468,7 @@ FDS is compiled with debugging flags enabled. This stage allows for errors in th
 
 \subsection*{Stage 3: Run verification suite (or validation set) in debug mode}
 
-All of the cases in the verification suite (or validation set) are invoked using the FDS debug versions that were compiled in Stage~2. The verification (or validation) cases are run for at least one time step to ensure that the cases start without errors. After all of the cases run for at least one time step, the cases are stopped using an FDS stop file. Then the FDS output logs are checked for Fortran errors, numerical instabilities, missing verification case files, or other FDS errors.
+All of the cases in the verification suite are invoked using the FDS debug versions that were compiled in Stage~2. The verification cases are run for at least one time step to ensure that the cases start without errors. After all of the cases run for at least one time step, the cases are stopped using an FDS stop file. Then the FDS output logs are checked for Fortran errors, numerical instabilities, missing verification case files, or other FDS errors.
 
 \subsection*{Stage 4: Compilation of FDS release versions}
 
@@ -484,13 +476,13 @@ The release version of FDS is compiled. Any compiler warnings are logged at this
 
 \subsection*{Stage 5: Run verification suite (or validation set) in release mode}
 
-All of the cases in the verification suite (or validation set) are invoked using the FDS release versions that were compiled in Stage~4. After all of the cases run to completion, the FDS output logs are checked for Fortran errors, numerical instabilities, missing verification case files, or other FDS errors. If validation mode is active and the simulations are free of errors, then the updated results are committed back to the repository.
+All of the cases in the verification suite are invoked using the FDS release versions that were compiled in Stage~4. After all of the cases run to completion, the FDS output logs are checked for Fortran errors, numerical instabilities, missing verification case files, or other FDS errors.
 
 \subsection*{Stage 6: Compilation of Smokeview and scripted generation of figures}
 
 The Smokeview debug and release versions are compiled along with the Smokeview utilities (smokezip, smokediff, and background). Any compiler warnings are logged at this time, and the build/test process continues after no major compilation errors are found.
 
-Additionally, scripts in the FDS and SMV verification suites are used to generate figures in Smokeview using automated Smokeview scripting commands. These figures are used in the FDS User~\cite{FDS_Users_Guide} and Verification~\cite{FDS_Verification_Guide} Guides as well as the SMV User and Verification Guides.
+Additionally, scripts in the FDS and Smokeview verification suites are used to generate figures using automated Smokeview scripting commands. These figures are used in the FDS User~\cite{FDS_Users_Guide} and Verification~\cite{FDS_Verification_Guide} Guides as well as the Smokeview User and Verification Guides.
 
 \subsection*{Stage 7: Generation of verification and validation plots and regression statistics}
 
@@ -498,7 +490,7 @@ Scripts in the FDS verification and validation suites are used to generate plots
 
 \subsection*{Stage 8: Compilation of FDS-SMV Guides}
 
-The FDS User~\cite{FDS_Users_Guide}, Technical Reference~\cite{FDS_Math_Guide}, Verification~\cite{FDS_Verification_Guide}, and Validation~\cite{FDS_Validation_Guide} Guides, FDS Configuration Management Plan, and SMV User, Technical, and Verification Guides are compiled to ensure that all figures and equations can be compiled without any \LaTeX\ errors.
+The FDS User~\cite{FDS_Users_Guide}, Technical Reference~\cite{FDS_Math_Guide}, Verification~\cite{FDS_Verification_Guide}, and Validation~\cite{FDS_Validation_Guide} Guides, FDS Configuration Management Plan, and Smokeview User, Technical, and Verification Guides are compiled to ensure that all figures and equations can be compiled without any \LaTeX\ errors.
 
 
 \section{Issuing New Releases}
@@ -537,7 +529,7 @@ These computer systems are available only to specified personnel, including the 
 
 \section{Supplier Control}
 
-NIST currently uses Microsoft Visual Studio and Intel Fortran and C++ for development\footnote{Certain commercial entities, equipment, or materials may be identified in this document in order to describe an experimental procedure or concept adequately. Such identification is not intended to imply recommendation or endorsement by the National Institute of Standards and Technology, nor is it intended to imply that the entities, materials, or equipment are necessarily the best available for the purpose.}. Some Intel redistributable libraries are part of the FDS installation packages.  Prior to any change to a different development system, a full test suite of test cases are compared to verify consistent operation of the model and model results.
+NIST currently uses the Intel oneAPI Base and HPC toolkits which include Fortran and C++ compilers along with various diagnostic tools\footnote{Certain commercial entities, equipment, or materials may be identified in this document in order to describe an experimental procedure or concept adequately. Such identification is not intended to imply recommendation or endorsement by the National Institute of Standards and Technology, nor is it intended to imply that the entities, materials, or equipment are necessarily the best available for the purpose.}. Some Intel redistributable libraries are part of the FDS installation packages.  Prior to any change in compilers, a full test suite of test cases are compared to verify consistent operation of the model and model results.
 
 \section{Records Collection, Maintenance, and Retention}
 
@@ -547,12 +539,7 @@ NIST management approval is required prior to destruction of old or out-of-date 
 
 \section{Training}
 
-No specific training is identified for use of this plan.  Details of training requirements for use of the model included in the FDS user's guide is applicable to developers of the model as well.
-
-
-
-
-
+No specific training is identified for use of this plan.  Details of training requirements for use of the model included in the FDS User's Guide is applicable to developers of the model as well.
 
 
 

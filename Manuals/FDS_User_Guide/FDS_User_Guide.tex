@@ -114,7 +114,6 @@ The FDS User's Guide contains limited information on how to operate Smokeview, t
 visualization program for FDS. Its full capability is described in the Smokeview User's Guide~\cite{Smokeview_Users_Guide}.
 
 
-% \chapter{Disclaimer}
 \input{../Bibliography/disclaimer}
 
 
@@ -218,7 +217,7 @@ Many of the changes in FDS~6 are improvements to the various sub-models that do 
 \subsubsection{Hydrodynamics and Turbulence}
 
    \begin{itemize}
-   \item Conservative, total variation diminishing (TVD) scalar transport is implemented: Superbee (LES default) and CHARM (DNS default). These schemes prevent over-shoots and under-shoots in species concentrations and temperature.
+   \item Conservative, total variation diminishing (TVD) scalar transport is implemented: Superbee (VLES default) and CHARM (LES and DNS default). These schemes prevent over-shoots and under-shoots in species concentrations and temperature.
    \item Improved models for the turbulent viscosity are implemented: Deardorff (default), Dynamic Smagorinsky, and Vreman. These models provide more dynamic range to the flow field for coarse resolution and converge to the correct solution at fine resolution.
    \item The conservative form of the sensible enthalpy equation is satisfied by construction in the FDS~6 formulation, eliminating temperature anomalies and energy conservation errors due to numerical mixing.
    \item The baroclinic torque is included by default.
@@ -1789,7 +1788,7 @@ This case demonstrates the use of baroclinic correction for an axially-symmetric
 
 A common application of FDS is tunnel fires, but simulations of fires in long, relatively tight tunnels that are made up of multiple meshes can exhibit spurious fluctuations in the pressure field that can lead to numerical instabilities. If a numerical instability occurs in a simulation involving a tunnel, you might try the following remedies, which are listed here in order of effectiveness:
 \begin{enumerate}
-\item If the tunnel is made up of multiple meshes that abut end to end, and there are no other meshes outside of the tunnel, and there are no {\ct OPEN} boundaries on the top, bottom or sides of the tunnel; set {\ct TUNNEL\_PRECONDITIONER=T} on the {\ct PRES} line. This option instructs FDS to solve a 1-D pressure equation that spans the entire tunnel. This 1-D solution can be thought of as an average pressure field which is added to the 3-D pressure fields that are solved for using the default FFT-based solver on each mesh. The 1-D global solution accelerates the convergence of the overall 3-D pressure field on the entire domain.
+\item If (1) the tunnel is made up of multiple meshes that abut end to end, (2) there are no other meshes outside of the tunnel, (3) there are no {\ct OPEN} boundaries on the top, bottom or sides of the tunnel, and (4) the number of MPI processes is equal to the number of meshes; set {\ct TUNNEL\_PRECONDITIONER=T} on the {\ct PRES} line. This option instructs FDS to solve a 1-D pressure equation that spans the entire tunnel. This 1-D solution can be thought of as an average pressure field which is added to the 3-D pressure fields that are solved for using the default FFT-based solver on each mesh. The 1-D global solution accelerates the convergence of the overall 3-D pressure field on the entire domain.
 \item You can increase the value of {\ct MAX\_PRESSURE\_ITERATIONS} which has a default value of 10 in most cases; 20 when the {\ct TUNNEL\_PRECONDITIONER} is invoked. If you experience a numerical instability in a tunnel scenario, try setting the {\ct MAX\_PRESSURE\_ITERATIONS} to 50 as a starting point, and monitor the number of pressure iterations per time step in the {\ct CHID.out} file.
 \item If you are using multiple meshes, reduce the value of {\ct VELOCITY\_TOLERANCE} on the {\ct PRES} line to force a tighter match of velocities at the mesh boundaries. The default value of {\ct VELOCITY\_TOLERANCE} (with units of m/s) is $\dx/2$. If you set {\ct TUNNEL\_PRECONDITIONER=T}, there is less of a need to decrease the {\ct VELOCITY\_TOLERANCE} from its default value, but it still may be necessary to increase the {\ct MAX\_PRESSURE\_ITERATIONS} to account for occasional excursions of pressure.
 \item Create {\ct OPEN} vents at various points along the length of the tunnel, near or at the floor. This models natural leakage in the tunnel, and alleviates, to some extent, wild oscillations in pressure. Note that even if the pressure equation is solved perfectly over the entire domain, the low Mach number assumption will still lead to fictitiously large fluctuations in pressure. The {\ct OPEN} boundaries can help relieve these pressure oscillations. If you do choose to create {\ct OPEN} boundaries along the length of the tunnel, you should {\em not} set {\ct TUNNEL\_PRECONDITIONER} to {\ct T}
@@ -2909,7 +2908,7 @@ A simple example is shown Fig~\ref{fig:obst_rotbox}.
 \begin{figure}[ht]
 \centering
 \includegraphics[width=.7\textwidth,trim={0 .5in 0 .5in},clip]{SCRIPT_FIGURES/obst_rotbox}
-\caption[Creating an {\ct OBST} cone using {\ct MULT} and {\ct SHAPE}]{Creating an {\ct OBST} rotated box using {\ct MULT} and {\ct SHAPE}.}
+\caption[Creating an {\ct OBST} rotated box using {\ct MULT} and {\ct SHAPE}]{Creating an {\ct OBST} rotated box using {\ct MULT} and {\ct SHAPE}.}
 \label{fig:obst_rotbox}
 \end{figure}
 
@@ -3724,7 +3723,7 @@ For a liquid fuel, the thermal properties are similar to those of a solid materi
 \end{lstlisting}
 The inclusion of {\ct BOILING\_TEMPERATURE} on the {\ct MATL} line tells FDS to use its liquid pyrolysis model. It also automatically sets {\ct N\_REACTIONS=1}, that is, the only ``reaction'' is the phase change from liquid to gaseous fuel. Thus, {\ct HEAT\_OF\_REACTION} in this case is the latent heat of vaporization. The thermal conductivity, density and specific heat are used to compute the loss of heat into the liquid via conduction using the same one-dimensional heat transfer equation that is used for solids. Obviously, the convection of the liquid is important, but is not considered in the model. The {\ct ABSORPTION\_COEFFICIENT} denotes the absorption in depth of thermal radiation into the liquid. Liquids do not just absorb radiation at the surface, but rather over a thin layer near the surface. Its effect on the burning rate can be significant.
 
-In this example, {\ct 'ETHANOL'} is a {\em known} species; that is, it is listed in Table~\ref{tab:gasspecies}. For this reason, you only need to specify its CO and soot yield. If it is not known, then you must furnish additional information. Section~\ref{user_defined_gas_species_props} contains details, but in brief, only the molecular weight of the gas species is of relevance for the liquid pool evaporation model.
+In this example, {\ct 'ETHANOL'} is a {\em known} species; that is, it is listed in Table~\ref{tab:gasspecies}. For this reason, you only need to specify its CO and soot yield. If it is not known, then you must furnish additional information. Section~\ref{user_defined_gas_species_props} contains details, but in brief, only the molecular weight of the gas species is of relevance for the liquid pool evaporation model. If the liquid has multiple components, like gasoline or kerosene, you can furnish an individual {\ct MATL} line for each component. For practical reasons, in such cases you might still want to assume only one gas phase fuel species; thus, each {\ct MATL} line would contain the same {\ct SPEC\_ID}. If this is the case, provide the liquid component molecular weights, {\ct MW}, with units of g/mol on the {\ct MATL} lines. These unique molecular weights are used when computing the evaporation rates of the individual liquid components.
 
 \subsubsection{Heat and Mass Transfer with Blowing}
 
@@ -5039,70 +5038,71 @@ If you are defining the primitive species of {\ct WATER VAPOR}, then {\ct MASS\_
 
 Gases and liquids whose properties are tabulated within FDS are listed in Table~\ref{tab:gasspecies}. The physical properties of these species are known and do not need to be specified. When using one of these gases you need only specify the correct {\ct ID} and provide, if needed, the initial mass fraction. FDS will then use precompiled data to compute the various thermophysical properties from 0 K to 5000 K.
 
-\begin{longtable}{@{\extracolsep{\fill}}|l|c|c|c|c|c|l|}
+\begin{longtable}{@{\extracolsep{\fill}}|l|c|c|c|c|c|c|l|}
 \caption[Pre-defined gas and liquid species]{Pre-defined gas and liquid species~\cite{Reid:1}}
 \label{tab:gasspecies}\\
 \hline
-Species &   Mol.~Wt.            & Chemical         & $\sigma$ & $\epsilon/k$   & Liquid   & RadCal                     \\
-        &   (g/mol)             & Formula          & (\AA)    & (K)            &          & Surrogate                  \\
+Species &   Mol.~Wt.            & Chemical         & $\sigma$ & $\epsilon/k$   & Liquid   &  Pr  & RadCal                     \\
+        &   (g/mol)             & Formula          & (\AA)    & (K)            &          &      & Surrogate                  \\
 \hline \hline
 \endfirsthead
 \caption[]{Optional gas and liquid species (continued).}\\
 \hline
-Species &   Mol.~Wt.            & Formula          & $\sigma$ & $\epsilon/k$   & Liquid   & RadCal                     \\
-        &   (g/mol)             &                  & (\AA)    & (K)            &          & Surrogate                  \\
+Species &   Mol.~Wt.            & Formula          & $\sigma$ & $\epsilon/k$   & Liquid   &  Pr  & RadCal                     \\
+        &   (g/mol)             &                  & (\AA)    & (K)            &          &      & Surrogate                  \\
 \hline \hline
 \endhead
-{\ct ACETONE}            & 58.07914   & C$_3$H$_6$O      & 4.6      & 560.2    &  Y       &  {\ct MMA}                 \\ \hline
-{\ct ACETYLENE}          & 26.037280  & C$_2$H$_2$       & 4.033    & 231.8    &          &  {\ct PROPYLENE}           \\ \hline
-{\ct ACROLEIN}           & 56.063260  & C$_3$H$_4$O      & 4.549    & 576.7    &  Y       &  {\ct MMA}                 \\ \hline
-{\ct AMMONIA}            & 17.03052  & NH$_3$            & 2.9      & 558.3    &  Y       &                            \\ \hline
-{\ct ARGON}              & 39.948000  & Ar               & 3.42     & 124.0    &  Y       &                            \\ \hline
-{\ct BENZENE}            & 78.11184   & C$_6$H$_6$       & 5.349    & 412.3    &  Y       &  {\ct TOLUENE}             \\ \hline
-{\ct BUTANE}             & 58.122200  & C$_4$H$_{10}$    & 4.687    & 531.4    &  Y       &  {\ct PROPANE}             \\ \hline
-{\ct CARBON}             & 12.0107    & C                & 2.94     & 74.8     &          &                            \\ \hline
-{\ct CARBON DIOXIDE}     & 44.009500  & CO$_2$           & 3.941    & 195.2    &          &  {\ct CARBON DIOXIDE}      \\ \hline
-{\ct CARBON MONOXIDE}    & 28.010100  & CO               & 3.690    & 91.7     &  Y       &  {\ct CARBON MONOXIDE}     \\ \hline
-{\ct CHLORINE}           & 70.906     & Cl$_2$           & 4.217    & 316.0    &  Y       &                            \\ \hline
-{\ct DODECANE}           & 170.33484  & C$_{12}$H$_{26}$ & 4.701    & 205.78   &  Y       &  {\ct N-HEPTANE}           \\ \hline
-{\ct ETHANE}             & 30.069040  & C$_2$H$_6$       & 4.443    & 215.7    &  Y       &  {\ct ETHANE}              \\ \hline
-{\ct ETHANOL}            & 46.068440  & C$_2$H$_5$OH     & 4.530    & 362.6    &  Y       &  {\ct METHANOL}            \\ \hline
-{\ct ETHYLENE}           & 28.053160  & C$_2$H$_4$       & 4.163    & 224.7    &  Y       &  {\ct ETHYLENE}            \\ \hline
-{\ct FORMALDEHYDE}       & 30.025980  & CH$_2$O          & 3.626    & 481.8    &  Y       &  {\ct METHANOL}            \\ \hline
-{\ct HELIUM}             & 4.002602   & He               & 2.551    & 10.22    &  Y       &                            \\ \hline
-{\ct HYDROGEN}           & 2.015880   & H$_2$            & 2.827    & 59.7     &  Y       &                            \\ \hline
-{\ct HYDROGEN ATOM}      & 1.007940   & H                & 2.31     & 123.6    &          &                            \\ \hline
-{\ct HYDROGEN BROMIDE}   & 80.911940  & HBr              & 3.353    & 449.0    &  Y       &                            \\ \hline
-{\ct HYDROGEN CHLORIDE}  & 36.460940  & HCl              & 3.339    & 344.7    &  Y       &                            \\ \hline
-{\ct HYDROGEN CYANIDE}   & 27.025340  & HCN              & 3.63     & 569.1    &  Y       &                            \\ \hline
-{\ct HYDROGEN FLUORIDE}  & 20.006343  & HF               & 3.148    & 330.0    &  Y       &                            \\ \hline
-{\ct HYDROGEN PEROXIDE}  & 34.014680  & H$_2$O$_2$       & 3.02     & 106.5    &  Y       &                            \\ \hline
-{\ct HYDROGEN SULFIDE}   & 34.08088   & H$_2$S           & 3.623    & 301.1    &  Y       &                            \\ \hline
-{\ct HYDROPEROXY RADICAL}& 33.006740  & HO$_2$           & 3.02     & 106.5    &          &                            \\ \hline
-{\ct HYDROXYL RADICAL}   & 17.007340  & OH               & 2.66     & 92.1     &          &                            \\ \hline
-{\ct ISOPROPANOL}        & 60.095020  & C$_3$H$_7$OH     & 4.549    & 576.7    &  Y       &  {\ct METHANOL}            \\ \hline
-{\ct LJ AIR}             & 28.854760  &                  & 3.711    & 78.6     &          &                            \\ \hline
-{\ct METHANE}            & 16.042460  & CH$_4$           & 3.758    & 148.6    &  Y       &  {\ct METHANE}             \\ \hline
-{\ct METHANOL}           & 32.041860  & CH$_3$OH         & 3.626    & 481.8    &  Y       &  {\ct METHANOL}            \\ \hline
-{\ct N-DECANE}           & 142.281680 & C$_{10}$H$_{22}$ & 5.233    & 226.46   &  Y       &  {\ct N-HEPTANE}           \\ \hline
-{\ct N-HEPTANE}          & 100.201940 & C$_7$H$_{16}$    & 4.701    & 205.75   &  Y       &  {\ct N-HEPTANE}           \\ \hline
-{\ct N-HEXANE}           & 86.175360  & C$_6$H$_{12}$    & 5.949    & 399.3    &  Y       &  {\ct N-HEPTANE}           \\ \hline
-{\ct N-OCTANE}           & 114.228520 & C$_8$H$_{18}$    & 4.892    & 231.16   &  Y       &  {\ct N-HEPTANE}           \\ \hline
-{\ct NITRIC OXIDE}       & 30.006100  & NO               & 3.492    & 116.7    &  Y       &                            \\ \hline
-{\ct NITROGEN}           & 28.013400  & N$_2$            & 3.798    & 71.4     &  Y       &                            \\ \hline
-{\ct NITROGEN ATOM}      & 14.006700  & N                & 2.66     & 92.1     &          &                            \\ \hline
-{\ct NITROGEN DIOXIDE}   & 46.05500   & NO$_2$           & 3.992    & 204.88   &  Y       &                            \\ \hline
-{\ct NITROUS OXIDE}      & 44.012800  & N$_2$O           & 3.828    & 232.4    &  Y       &                            \\ \hline
-{\ct OXYGEN}             & 31.998800  & O$_2$            & 3.467    & 106.7    &  Y       &                            \\ \hline
-{\ct OXYGEN ATOM}        & 15.999400  & O                & 2.66     & 92.1     &          &                            \\ \hline
-{\ct PROPANE}            & 44.095620  & C$_3$H$_8$       & 5.118    & 237.1    &  Y       &  {\ct PROPANE}             \\ \hline
-{\ct PROPYLENE}          & 42.079740  & C$_3$H$_6$       & 4.678    & 298.9    &  Y       &  {\ct PROPYLENE}           \\ \hline
-{\ct SOOT}               & 10.910420  & C$_{0.9}$H$_{0.1}$ & 3.798    & 71.4     &          &  {\ct SOOT}                \\ \hline
-{\ct SULFUR DIOXIDE}     & 64.063800  & SO$_2$           & 4.112    & 335.4    &  Y       &                            \\ \hline
-{\ct SULFUR HEXAFLUORIDE}& 146.055419 & SF$_6$           & 5.128    & 146.0    &          &                            \\ \hline
-{\ct TOLUENE}            & 92.138420  & C$_6$H$_5$CH$_3$ & 5.698    & 480.0    &  Y       &  {\ct TOLUENE}             \\ \hline
-{\ct WATER VAPOR}        & 18.015280  & H$_2$O           & 2.641    & 809.1    &  Y       &  {\ct WATER VAPOR}         \\ \hline
-{\ct XENON}              & 131.293    & Xe               & 4.047    & 231.0    &  Y       &                            \\ \hline
+{\ct ACETONE}            & 58.07914   & C$_3$H$_6$O      & 4.6      & 560.2    &  Y       & 0.87 &  {\ct MMA}                 \\ \hline
+{\ct ACETYLENE}          & 26.037280  & C$_2$H$_2$       & 4.033    & 231.8    &          & 0.78 &  {\ct PROPYLENE}           \\ \hline
+{\ct ACROLEIN}           & 56.063260  & C$_3$H$_4$O      & 4.549    & 576.7    &  Y       & 0.71 &  {\ct MMA}                 \\ \hline
+{\ct AMMONIA}            & 17.03052  & NH$_3$            & 2.9      & 558.3    &  Y       & 0.87 &                            \\ \hline
+{\ct ARGON}              & 39.948000  & Ar               & 3.42     & 124.0    &  Y       & 0.67 &                            \\ \hline
+{\ct BENZENE}            & 78.11184   & C$_6$H$_6$       & 5.349    & 412.3    &  Y       & 1.50 &  {\ct TOLUENE}             \\ \hline
+{\ct BUTANE}             & 58.122200  & C$_4$H$_{10}$    & 4.687    & 531.4    &  Y       & 0.83 &  {\ct PROPANE}             \\ \hline
+{\ct CARBON}             & 12.0107    & C                & 2.94     & 74.8     &          &       &                            \\ \hline
+{\ct CARBON DIOXIDE}     & 44.009500  & CO$_2$           & 3.941    & 195.2    &          & 0.75 &  {\ct CARBON DIOXIDE}      \\ \hline
+{\ct CARBON MONOXIDE}    & 28.010100  & CO               & 3.690    & 91.7     &  Y       & 0.73 &  {\ct CARBON MONOXIDE}     \\ \hline
+{\ct CHLORINE}           & 70.906     & Cl$_2$           & 4.217    & 316.0    &  Y       & 0.75 &                            \\ \hline
+{\ct DODECANE}           & 170.33484  & C$_{12}$H$_{26}$ & 4.701    & 205.78   &  Y       &      &  {\ct N-HEPTANE}           \\ \hline
+{\ct ETHANE}             & 30.069040  & C$_2$H$_6$       & 4.443    & 215.7    &  Y       & 0.84 &  {\ct ETHANE}              \\ \hline
+{\ct ETHANOL}            & 46.068440  & C$_2$H$_5$OH     & 4.530    & 362.6    &  Y       & 0.84 &  {\ct METHANOL}            \\ \hline
+{\ct ETHYLENE}           & 28.053160  & C$_2$H$_4$       & 4.163    & 224.7    &  Y       & 0.83 &  {\ct ETHYLENE}            \\ \hline
+{\ct FORMALDEHYDE}       & 30.025980  & CH$_2$O          & 3.626    & 481.8    &  Y       &      &  {\ct METHANOL}            \\ \hline
+{\ct HELIUM}             & 4.002602   & He               & 2.551    & 10.22    &  Y       & 0.68 &                            \\ \hline
+{\ct HYDROGEN}           & 2.015880   & H$_2$            & 2.827    & 59.7     &  Y       & 0.69 &                            \\ \hline
+{\ct HYDROGEN ATOM}      & 1.007940   & H                & 2.31     & 123.6    &          &      &                            \\ \hline
+{\ct HYDROGEN BROMIDE}   & 80.911940  & HBr              & 3.353    & 449.0    &  Y       & 0.69 &                            \\ \hline
+{\ct HYDROGEN CHLORIDE}  & 36.460940  & HCl              & 3.339    & 344.7    &  Y       & 0.75 &                            \\ \hline
+{\ct HYDROGEN CYANIDE}   & 27.025340  & HCN              & 3.63     & 569.1    &  Y       &      &                            \\ \hline
+{\ct HYDROGEN FLUORIDE}  & 20.006343  & HF               & 3.148    & 330.0    &  Y       & 0.71 &                            \\ \hline
+{\ct HYDROGEN PEROXIDE}  & 34.014680  & H$_2$O$_2$       & 3.02     & 106.5    &  Y       &      &                            \\ \hline
+{\ct HYDROGEN SULFIDE}   & 34.08088   & H$_2$S           & 3.623    & 301.1    &  Y       &      &                            \\ \hline
+{\ct HYDROPEROXY RADICAL}& 33.006740  & HO$_2$           & 3.02     & 106.5    &          &      &                            \\ \hline
+{\ct HYDROXYL RADICAL}   & 17.007340  & OH               & 2.66     & 92.1     &          &      &                            \\ \hline
+{\ct ISOPROPANOL}        & 60.095020  & C$_3$H$_7$OH     & 4.549    & 576.7    &  Y       &      &  {\ct METHANOL}            \\ \hline
+{\ct LJ AIR}             & 28.854760  &                  & 3.711    & 78.6     &          &      &                            \\ \hline
+{\ct METHANE}            & 16.042460  & CH$_4$           & 3.758    & 148.6    &  Y       & 0.70 &  {\ct METHANE}             \\ \hline
+{\ct METHANOL}           & 32.041860  & CH$_3$OH         & 3.626    & 481.8    &  Y       & 0.95 &  {\ct METHANOL}            \\ \hline
+{\ct N-DECANE}           & 142.281680 & C$_{10}$H$_{22}$ & 5.233    & 226.46   &  Y       &      &  {\ct N-HEPTANE}           \\ \hline
+{\ct N-HEPTANE}          & 100.201940 & C$_7$H$_{16}$    & 4.701    & 205.75   &  Y       & 0.83  &  {\ct N-HEPTANE}           \\ \hline
+{\ct N-HEXANE}           & 86.175360  & C$_6$H$_{12}$    & 5.949    & 399.3    &  Y       & 0.79 &  {\ct N-HEPTANE}           \\ \hline
+{\ct N-OCTANE}           & 114.228520 & C$_8$H$_{18}$    & 4.892    & 231.16   &  Y       & 0.64 &  {\ct N-HEPTANE}           \\ \hline
+{\ct N-PENTANE}          & 72.148780  & C$_5$H$_{12}$    & 5.784    & 341.1   &  Y       & 0.79 &  {\ct N-HEPTANE}           \\ \hline
+{\ct NITRIC OXIDE}       & 30.006100  & NO               & 3.492    & 116.7    &  Y       & 0.74 &                            \\ \hline
+{\ct NITROGEN}           & 28.013400  & N$_2$            & 3.798    & 71.4     &  Y       & 0.71 &                            \\ \hline
+{\ct NITROGEN ATOM}      & 14.006700  & N                & 2.66     & 92.1     &          & 0.71 &                            \\ \hline
+{\ct NITROGEN DIOXIDE}   & 46.05500   & NO$_2$           & 3.992    & 204.88   &  Y       & 6.10 &                            \\ \hline
+{\ct NITROUS OXIDE}      & 44.012800  & N$_2$O           & 3.828    & 232.4    &  Y       & 0.74 &                            \\ \hline
+{\ct OXYGEN}             & 31.998800  & O$_2$            & 3.467    & 106.7    &  Y       & 0.71 &                            \\ \hline
+{\ct OXYGEN ATOM}        & 15.999400  & O                & 2.66     & 92.1     &          &      &                            \\ \hline
+{\ct PROPANE}            & 44.095620  & C$_3$H$_8$       & 5.118    & 237.1    &  Y       & 0.80 &  {\ct PROPANE}             \\ \hline
+{\ct PROPYLENE}          & 42.079740  & C$_3$H$_6$       & 4.678    & 298.9    &  Y       & 0.82 &  {\ct PROPYLENE}           \\ \hline
+{\ct SOOT}               & 10.910420  & C$_{0.9}$H$_{0.1}$ & 3.798    & 71.4     &          &      &  {\ct SOOT}                \\ \hline
+{\ct SULFUR DIOXIDE}     & 64.063800  & SO$_2$           & 4.112    & 335.4    &  Y       & 0.91 &                            \\ \hline
+{\ct SULFUR HEXAFLUORIDE}& 146.055419 & SF$_6$           & 5.128    & 146.0    &          & 0.77 &                            \\ \hline
+{\ct TOLUENE}            & 92.138420  & C$_6$H$_5$CH$_3$ & 5.698    & 480.0    &  Y       &      &  {\ct TOLUENE}             \\ \hline
+{\ct WATER VAPOR}        & 18.015280  & H$_2$O           & 2.641    & 809.1    &  Y       & 1.00 &  {\ct WATER VAPOR}         \\ \hline
+{\ct XENON}              & 131.293    & Xe               & 4.047    & 231.0    &  Y       & 0.64 &                            \\ \hline
 \end{longtable}
 
 
@@ -5543,6 +5543,7 @@ Fuel              & Formula          & $X_{\rm OI}$    & $T_{\rm OI}$ ($^\circ$C
 {\ct N-HEPTANE}   & C$_7$H$_{16}$    & 0.134        & 1497 \\ \hline
 {\ct N-HEXANE}    & C$_6$H$_{14}$    & 0.134        & 1497 \\ \hline
 {\ct N-OCTANE}    & C$_8$H$_{18}$    & 0.134        & 1507 \\ \hline
+{\ct N-PENTANE}   & C$_5$H$_{12}$    & 0.134        & 1487 \\ \hline
 {\ct PROPANE}     & C$_3$H$_8$       & 0.127        & 1447 \\ \hline
 All other species &                  & 0.135        & 1427 \\ \hline
 \end{tabular}
@@ -7089,10 +7090,10 @@ In simulations where wind and atmospheric effects are of interest, you usually h
 
 &VENT MB='ZMIN', SURF_ID='GROUND' /
 &VENT MB='ZMAX', SURF_ID='OPEN' /
-&VENT PBY=..., SURF_ID='PERIODIC FLOW ONLY' /
-&VENT PBY=..., SURF_ID='PERIODIC FLOW ONLY' /
-&VENT PBX=..., SURF_ID='PERIODIC FLOW ONLY' /
-&VENT PBX=..., SURF_ID='PERIODIC FLOW ONLY' /
+&VENT MB='XMIN', SURF_ID='OPEN' /
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='YMIN', SURF_ID='OPEN' /
+&VENT MB='YMAX', SURF_ID='OPEN' /
 \end{lstlisting}
 It is assumed here that the wind speed is taken at a height 2~m off the ground and the temperature is the specified ambient ({\ct TMPA}). If it is not, set {\ct Z\_REF} (m) and {\ct TMP\_REF} ($^\circ$C) accordingly. The wind {\ct DIRECTION} follows the usual meteorological convention---a northerly wind has direction of 0$^\circ$ and blows from north to south, or in the negative $y$ direction in the FDS coordinate system. An easterly wind has a direction of 90$^\circ$ and blows from east to west, or in the negative $x$ direction.
 
@@ -8820,12 +8821,21 @@ This directs FDS to just add 20 devices to the on-going list, saving you from ha
 
 \subsubsection{Other Statistics for a Linear Array of Devices}
 
-By default, when you specify multiple {\ct POINTS} on a {\ct DEVC} line and you do not specify {\ct TIME\_HISTORY=T}, a running average of the specified {\ct QUANTITY} is saved at each point location and written to the file with suffix {\ct \_line.csv} with the accumulated values at the time {\ct STATISTICS\_END}. However, you can apply any other {\ct TEMPORAL\_STATISTIC} and compute, for example, the root-mean-square ({\ct 'RMS'}), minimum ({\ct 'MIN'}), or maximum ({\ct 'MAX'}) value over the specified time interval. You may also specify a {\ct SPATIAL\_STATISTIC} for each device in the line using {\ct XB} for the limits of the plane or volume over which the function is calculated.
+By default, when you specify multiple {\ct POINTS} on a {\ct DEVC} line and you do not specify {\ct TIME\_HISTORY=T}, a running average of the specified {\ct QUANTITY} is saved at each point location and written to the file with suffix {\ct \_line.csv} with the accumulated values at the time {\ct STATISTICS\_END}. However, you can apply any other {\ct TEMPORAL\_STATISTIC} and compute, for example, the root-mean-square ({\ct 'RMS'}), minimum ({\ct 'MIN'}), or maximum ({\ct 'MAX'}) value over the specified time interval.
+
+You may also specify a {\ct SPATIAL\_STATISTIC} for each device in the line as follows:
+\begin{lstlisting}
+&DEVC XBP=1,10,5,5,8,8, QUANTITY='TEMPERATURE', ID='Tmean', POINTS=20,
+      STATISTICS_START=20., STATISTICS_END=40.
+      SPATIAL_STATISTIC='MEAN', DX=0.1, DY=5.0, DZ=3.0 /
+\end{lstlisting}
+This input line specifies a linear array of 20 points starting at $\bx=(1,5,8)$ and ending at $\bx=(10,5,8)$. For each point in the array, $(x_i,y_i,z_i)$, FDS calculates the average temperature over the volume $x_i - \dx \le x \le x_i+\dx$; $y_i - \dy \le y \le y_i+\dy$; $z_i - \dz \le z \le z_i+\dz$. These average temperatures are then time-averaged over the time interval between 20~s and 40~s. In general, the spatial averaging is done first; that is, FDS reports the time-average of the spatially-averaged temperatures for each point in the linear array, not the spatial-average of the temporally-averaged temperatures.
+
 
 \subsubsection{Moving a Linear Array of Devices}
 \label{info:MOVE_ID}
 
-It is possible to translate and/or rotate a linear array of devices using parameters on a {\ct MOVE} line (see Section~\ref{info:MOVE}). To specify these parameters, use the character string {\ct MOVE\_ID} on the {\ct DEVC} line.
+It is possible to translate and/or rotate a linear array of devices using parameters on a {\ct MOVE} line (see Section~\ref{info:MOVE}). To specify these parameters, use the character string {\ct MOVE\_ID} on the {\ct DEVC} line. Note that if a {\ct SPATIAL\_STATISTIC} is specified, the spatial bounds, {\ct DX}, {\ct DY}, and/or {\ct DZ}, are not transformed.
 
 
 \subsection{Quantities at Certain Depth}
@@ -9787,6 +9797,10 @@ The {\ct TEMPORAL\_STATISTIC='TIME AVERAGE'} is typically applied by default, un
 
 The {\ct TEMPORAL\_STATISTIC='RUNNING AVERAGE'} outputs the running average value of the {\ct QUANTITY} over the time period starting at {\ct STATISTICS\_START} and ending at {\ct STATISTICS\_END}. This is the default behavior of ``line'' devices discussed in Section~\ref{info:line_file}.
 
+\subsubsection{Favre Average}
+
+The {\ct TEMPORAL\_STATISTIC='FAVRE AVERAGE'} outputs the Favre (density weighted) running average value of the {\ct QUANTITY} over the time period starting at {\ct STATISTICS\_START} and ending at {\ct STATISTICS\_END}. If the scalar quantity of interest is $\phi$ and the density if $\rho$ and the running average is defined by an overbar (that is, $\overline{\phi}$ is the running average of the scalar), then the Favre average is denoted with a tilde and computed as $\tilde{\phi} = \overline{\rho \phi}/\overline{\rho}$.
+
 \subsubsection{Instantaneous Value}
 
 For various reasons you might want to output the value of the {\ct QUANTITY} that has not been time-averaged or processed in any way. Sometimes this is important for device and control functions. To output the instantaneous value, set {\ct TEMPORAL\_STATISTIC} to {\ct 'INSTANT VALUE'}.
@@ -9880,7 +9894,7 @@ Instead of specifying a plane on which to draw contours of gas temperature, you 
 
 The second method of visualizing data on complex terrain is via a boundary ({\ct BNDF}) file. Specify a solid phase output quantity as you normally would, for example:
 \begin{lstlisting}
-&SLCF QUANTITY='WALL TEMPERATURE' /
+&BNDF QUANTITY='WALL TEMPERATURE' /
 \end{lstlisting}
 and add {\ct TERRAIN\_CASE=T} to the {\ct MISC} line. This will create two boundary files---one of which is the conventional one, and one will be listed as a ``slice'' file that conforms to the terrain.
 
@@ -10769,7 +10783,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 \multicolumn{5}{|c|}{{\ct DEVC} (Device Parameters)} \\
 \hline \hline
 \endhead
-{\ct ABSOLUTE\_VALUE}       & Logical         & Section~\ref{info:out:DEVC}                                     &       & {\ct F} \\ \hline
+{\ct ABSOLUTE\_VALUE}       & Logical         & Section~\ref{info:out:DEVC}                                     &       & {\ct F}       \\ \hline
 {\ct BYPASS\_FLOWRATE}      & Real            & Section~\ref{info:aspiration_detector}                          & kg/s  & 0             \\ \hline
 {\ct CONVERSION\_ADDEND}    & Real            & Section~\ref{info:out:DEVC}                                     &       & 0             \\ \hline
 {\ct CONVERSION\_FACTOR}    & Real            & Section~\ref{info:out:DEVC}                                     &       & 1             \\ \hline
@@ -10780,17 +10794,20 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct DEPTH}                 & Real            & Section~\ref{info:material_components}                          & m     & 0             \\ \hline
 {\ct DEVC\_ID}              & Character       & Sections~\ref{info:aspiration_detector} and \ref{info:RAMPDEVC} &       &               \\ \hline
 {\ct D\_ID}                 & Character       & Section~\ref{info:line_file}                                    &       &               \\ \hline
-{\ct DRY}                   & Logical         & Section~\ref{info:dry}                                          &       & {\ct F} \\ \hline
+{\ct DRY}                   & Logical         & Section~\ref{info:dry}                                          &       & {\ct F}       \\ \hline
 {\ct DUCT\_ID}              & Character       & Section~\ref{info:HVAC}                                         &       &               \\ \hline
-{\ct EVACUATION}            & Logical         & Reference~\cite{FDS_Evac_Users_Guide}                           &       & {\ct F} \\ \hline
+{\ct DX}                    & Real            & Section~\ref{info:line_file}                                    & m     & 0             \\ \hline
+{\ct DY}                    & Real            & Section~\ref{info:line_file}                                    & m     & 0             \\ \hline
+{\ct DZ}                    & Real            & Section~\ref{info:line_file}                                    & m     & 0             \\ \hline
+{\ct EVACUATION}            & Logical         & Reference~\cite{FDS_Evac_Users_Guide}                           &       & {\ct F}       \\ \hline
 {\ct FLOWRATE}              & Real            & Section~\ref{info:aspiration_detector}                          & kg/s  & 0             \\ \hline
 {\ct FORCE\_DIRECTION}      & Real(3)         & Section~\ref{info:distributed_forces}                           &       &               \\ \hline
-{\ct HIDE\_COORDINATES}     & Logical         & Section~\ref{info:line_file}                                    &       & {\ct F} \\ \hline
+{\ct HIDE\_COORDINATES}     & Logical         & Section~\ref{info:line_file}                                    &       & {\ct F}       \\ \hline
 {\ct ID}                    & Character       & Section~\ref{info:DEVC}                                         &       &               \\ \hline
-{\ct INITIAL\_STATE}        & Logical         & Section~\ref{info:basic_control}                                &       & {\ct F} \\ \hline
+{\ct INITIAL\_STATE}        & Logical         & Section~\ref{info:basic_control}                                &       & {\ct F}       \\ \hline
 {\ct INIT\_ID}              & Character       & Section~\ref{info:PART_SURF}                                    &       &               \\ \hline
 {\ct IOR}                   & Integer         & Section~\ref{info:DEVC}                                         &       &               \\ \hline
-{\ct LATCH}                 & Logical         & Section~\ref{info:basic_control}                                &       & {\ct T}  \\ \hline
+{\ct LATCH}                 & Logical         & Section~\ref{info:basic_control}                                &       & {\ct T}       \\ \hline
 {\ct MATL\_ID}              & Character       & Section~\ref{info:material_components}                          &       &               \\ \hline
 {\ct MOVE\_ID}              & Character       & Section~\ref{info:MOVE_ID}                                      &       &               \\ \hline
 {\ct N\_INTERVALS}          & Integer         & Section~\ref{info:time_integral}                                &       & 10            \\ \hline
@@ -10799,7 +10816,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct NO\_UPDATE\_DEVC\_ID}  & Character       & Section~\ref{info:freeze_device}                                &       &               \\ \hline
 {\ct ORIENTATION}           & Real Triplet    & Section~\ref{info:DEVC}                                         &       & 0,0,-1        \\ \hline
 {\ct ORIENTATION\_NUMBER}   & Integer         & Section~\ref{info:part_output}                                  &       & 1             \\ \hline
-{\ct OUTPUT}                & Logical         & Section~\ref{info:out:DEVC}                                     &       & {\ct T}  \\ \hline
+{\ct OUTPUT}                & Logical         & Section~\ref{info:out:DEVC}                                     &       & {\ct T}       \\ \hline
 {\ct PART\_ID}              & Character       & Section~\ref{info:outputquantities}                             &       &               \\ \hline
 {\ct PIPE\_INDEX}           & Integer         & Section~\ref{info:pressureramp}                                 &       &  1            \\ \hline
 {\ct POINTS}                & Integer         & Section~\ref{info:line_file}                                    &       & 1             \\ \hline
@@ -10808,7 +10825,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct QUANTITY2}             & Character       & Section~\ref{info:line_file}                                    &       &               \\ \hline
 {\ct QUANTITY\_RANGE}       & Real(2)         & Section~\ref{info:statistics}                                   &       & -1.E50,1.E50  \\ \hline
 {\ct REAC\_ID}              & Character       & Section~\ref{info:oddoutputquantities}                          &       &               \\ \hline
-{\ct RELATIVE}              & Logical         & Section~\ref{info:out:DEVC}                                     &       & {\ct F} \\ \hline
+{\ct RELATIVE}              & Logical         & Section~\ref{info:out:DEVC}                                     &       & {\ct F}       \\ \hline
 {\ct R\_ID}                 & Character       & Section~\ref{info:line_file}                                    &       &               \\ \hline
 {\ct ROTATION}              & Real            & Section~\ref{info:DEVC}                                         & deg.  & 0             \\ \hline
 {\ct SETPOINT}              & Real            & Section~\ref{info:basic_control}                                &       &               \\ \hline
@@ -11229,6 +11246,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct HEAT\_OF\_REACTION\_RAMP(:)}   & Char.~Array     & Section~\ref{info:RAMP_Temperature}   &                   &               \\ \hline
 {\ct ID}                            & Character       & Section~\ref{info:SURF_MATL_Basics}   &                   &               \\ \hline
 {\ct MATL\_ID(:,:)}                 & Character       & Section~\ref{info:solid_pyrolysis}    &                   &               \\ \hline
+{\ct MW}                            & Real            & Section~\ref{info:liquid_fuels}       & g/mol             &               \\ \hline
 {\ct N\_O2(:)}                      & Real Array      & Section~\ref{info:solid_pyrolysis}    &                   & 0.            \\ \hline
 {\ct N\_REACTIONS}                  & Integer         & Section~\ref{info:solid_pyrolysis}    &                   & 0             \\ \hline
 {\ct N\_S(:)}                       & Real Array      & Section~\ref{info:solid_pyrolysis}    &                   & 1.            \\ \hline
@@ -12410,14 +12428,14 @@ fds-smv & Web page html source
 \chapter{Compiling FDS}
 \label{info:compilation}
 
-If a compiled version of FDS exists for the machine on which the calculation is to be run and no changes have been made to the original source code, there is no need to re-compile the code. For example, the file {\ct fds.exe} is the compiled program for a Windows-based PC; thus PC users do not need a Fortran compiler and do not need to compile the source code. For machines for which an executable has not been compiled, you must compile the code. A Fortran 2008 compliant compiler is required.
+If a compiled version of FDS exists for the machine on which the calculation is to be run and no changes have been made to the original source code, there is no need to re-compile the code. For example, the file {\ct fds.exe} is the compiled program for a Windows-based PC; thus PC users do not need a Fortran compiler and do not need to compile the source code. For machines for which an executable has not been compiled, you must compile the code. A Fortran 2018 compliant compiler is required.
 
 \section{FDS Source Code}
 
-Table~\ref{tab:sourcefiles} lists the files that make up the FDS source code. Files with the ``.f90'' suffix contain free-form Fortran~90 instructions conforming to the ANSI and ISO standards (2008 edition). A {\ct makefile} is available in the Build directory of the fds Repository that contains platform specific options for compilation. Note the following:
+Table~\ref{tab:sourcefiles} lists the files that make up the FDS source code. Files with the ``.f90'' suffix contain free-form Fortran~90 instructions conforming to the ANSI and ISO standards (2018 edition). A {\ct makefile} is available in the Build directory of the fds Repository that contains platform specific options for compilation. Note the following:
 \begin{itemize}
 \item The source code consists entirely of Fortran statements organized into 33 files. Some compilers have a standard optimization level, plus various degrees of ``aggressive'' optimization. Be cautious in using the highest levels of optimization.
-\item To compile FDS, you need a Fortran compiler (2008 or greater) and MPI libraries. More details on MPI can be found at the FDS repository
+\item To compile FDS, you need a Fortran compiler (2018 or greater) and MPI libraries. More details on MPI can be found at the FDS repository
 \href{https://github.com/firemodels/fds}{{https://github.com/firemodels/fds}}.
 \end{itemize}
 

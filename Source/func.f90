@@ -784,8 +784,8 @@ STORAGE_INDEX_OPEN = HUGE(STORAGE_INDEX_OPEN)
 
 ! If there is a specified particle TAG, find its storage slot
 
-IF (PRESENT(TAG)) THEN
-   IF (PRESENT(NEW_TAG) .AND. .NOT.NEW_TAG) THEN
+IF (PRESENT(TAG) .AND. PRESENT(NEW_TAG)) THEN
+   IF (.NOT.NEW_TAG) THEN
       DO I=1,OS%N_STORAGE_SLOTS
          IF (OS%INTEGERS(1,I)==TAG) THEN
             STORAGE_INDEX_OLD = I
@@ -1648,6 +1648,10 @@ SORT_QUEUE: DO
       IF (IOR==0) CYCLE SEARCH_LOOP
 
       IC  = M%CELL_INDEX(III,JJJ,KKK)
+ 
+      IF (M%SOLID(IC)) THEN
+         IF (.NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE) CYCLE SEARCH_LOOP  ! Do not search within a non-removable solid
+      ENDIF
 
       SELECT CASE(IOR)
          CASE(-1)

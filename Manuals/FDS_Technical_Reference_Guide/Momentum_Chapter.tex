@@ -196,18 +196,6 @@ The basic idea behind Vreman's model is to expand the velocity field in a Taylor
 
 The model constant may be related to the Smagorinsky constant, $c \approx 2.5 \, C_{\rm s}^2$.  Since Vreman's model is most applicable to high resolution cases, we base the coefficient off of $C_{\rm s} = 0.17$, which yields accurate results for highly resolved decaying isotropic turbulence (see the FDS Verification Guide \cite{FDS_Verification_Guide}).  The default Vreman constant is therefore set to $c = 0.07$.
 
-\subsection{Renormalization Group (RNG) Model}
-\label{sec:rng}
-
-Renormalization group (RNG) theory \cite{Yakhot:1989} may be used to derive an effective eddy viscosity, $\mu_{\si{eff}} = \mu + \mu_t$, given by the cubic expression:
-\begin{equation}
-\label{eq:rng}
-\mu_{\si{eff}} = \mu\left[1 + H\left( \frac{\mu_s^2 \mu_{\si{eff}}}{\mu^3} - C \right)\right]^{1/3}
-\end{equation}
-Here, $\mu_s$ is the Smagorinsky eddy viscosity (with $C_s=0.2$) and $H(x)$ is the Heaviside function ($H(x)=x$ if $x>0$, $H(x)=0$ if $x\le0$).
-
-For regions of high turbulence intensity ($\mu_t \gg \mu$), RNG recovers the constant coefficient Smagorinsky model.  Unlike constant coefficient Smagorinsky, however, the RNG turns itself off in regions of low turbulence.  The cutoff constant, $C=10$, has been tuned to match the high wavenumber modes in the CBC experiment for the $64^3$ case (see FDS Verification Guide \cite{FDS_Verification_Guide}).
-
 \subsection{Wall-Adapting Local Eddy-viscosity (WALE) Model}
 \label{sec:wale}
 
@@ -283,8 +271,8 @@ where $\sigma_\alpha$ is the Lennard-Jones
 hard-sphere diameter ($\text{\AA}$) and $\Omega_v$ is the
 collision integral, an empirical function of the
 temperature $T$. The thermal conductivity of species $\alpha$ is given by
-\be k_\alpha = \frac{\mu_\alpha \, c_{p,\alpha}}{\PR}  \quad [=] \quad \si{W/(m.K)} \ee
-Note that the default value of the Prandtl number $\PR$ is 0.7.  However, this is an input property that can be set by the user.
+\be k_\alpha = \frac{\mu_\alpha \, c_{p,\alpha}}{\PR_\alpha}  \quad [=] \quad \si{W/(m.K)} \ee
+Note if $\PR_\alpha$ is not defined that the default value of 0.7 is assumed.
 The viscosity and thermal conductivity of a gas mixture are given by  ~\cite{Davidson:1993}
 \be \mu_{\hbox{\tiny DNS}} = \frac{\sum_\alpha \mu_\alpha \; X_\alpha \; M_\alpha ^{1/2}}{\sum_\alpha X_\alpha \; M_\alpha ^{1/2}}  \quad ; \quad k_{\hbox{\tiny DNS}} = \frac{\sum_\alpha k_\alpha \; X_\alpha \; M_\alpha ^{1/2}}{\sum_\alpha X_\alpha \; M_\alpha ^{1/2}}  \ee
 The binary diffusion coefficient of species $\alpha$

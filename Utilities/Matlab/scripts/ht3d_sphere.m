@@ -107,7 +107,7 @@ set(gca,'FontSize',Title_Font_Size)
 
 axis([0 0.105 20 60])
 xlabel('Radial Distance (m)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname',Font_Name)
-ylabel('Temperature (\circC)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname',Font_Name)
+ylabel('Temperature (°C)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname',Font_Name)
 lh=legend([Exact, t10, t20, t60, t120, t180], {'Analytical', 'FDS {\itt}=10 s', 'FDS {\itt}=20 s', 'FDS {\itt}=60 s', 'FDS {\itt}=120 s', 'FDS {\itt}=180 s'},'location','west');
 set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 
@@ -155,8 +155,8 @@ set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
 
 xlabel('{\it \Deltax} (m)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname',Font_Name)
-ylabel('{\it L}_{\infty} error (\circC)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname',Font_Name)
-lh=legend(hh,'FDS','{\it O(\Deltax)}','{\it O(\Deltax^2)}','location','northwest');
+ylabel('{\it L}_{\infty} error (°C)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname',Font_Name)
+lh=legend(hh,'FDS','{\it O(\Deltax)}','{\it O(\Deltax²)}','location','northwest');
 set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 
 % add version string if file is available
@@ -189,7 +189,7 @@ print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/ht3d_sphe
 % set(gca,'FontSize',Title_Font_Size)
 
 % xlabel('{\it \Deltax} (m)')
-% ylabel('L2 error (\circC)')
+% ylabel('L2 error (°C)')
 % lh=legend(hh,'FDS','{\it O(\Deltax)}','{\it O(\Deltax^2)}','location','northwest');
 % set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 

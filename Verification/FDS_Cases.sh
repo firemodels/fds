@@ -51,6 +51,7 @@ $QFDS -d Complex_Geometry geom_sphere3a.fds
 $QFDS -d Complex_Geometry geom_sphere3c.fds
 $QFDS -d Complex_Geometry geom_sphere3e.fds
 $QFDS -d Complex_Geometry geom_terrain.fds
+$QFDS -d Complex_Geometry geom_terrain2.fds
 $QFDS -d Complex_Geometry geom_texture.fds
 $QFDS -d Complex_Geometry geom_texture2.fds
 $QFDS -d Complex_Geometry geom_texture3a.fds
@@ -65,11 +66,11 @@ $QFDS -d Complex_Geometry sphere_leak.fds
 $QFDS -d Complex_Geometry saad_CC_explicit_512_cfl_p25.fds
 $QFDS -d Complex_Geometry saad_CC_explicit_512_cfl_p125.fds
 $QFDS -d Complex_Geometry saad_CC_explicit_512_cfl_p0625.fds
-$QFDS -d Complex_Geometry shunn3_32_cc_exp_cen.fds
-$QFDS -d Complex_Geometry shunn3_64_cc_exp_cen.fds
-$QFDS -d Complex_Geometry shunn3_128_cc_exp_cen.fds
-$QFDS -d Complex_Geometry shunn3_256_cc_exp_cen.fds
-$QFDS -d Complex_Geometry shunn3_384_cc_exp_cen.fds
+$QFDS -d Complex_Geometry shunn3_32_cc_exp_chm.fds
+$QFDS -d Complex_Geometry shunn3_64_cc_exp_chm.fds
+$QFDS -d Complex_Geometry shunn3_128_cc_exp_chm.fds
+$QFDS -d Complex_Geometry shunn3_256_cc_exp_chm.fds
+$QFDS -d Complex_Geometry shunn3_384_cc_exp_chm.fds
 $QFDS -d Complex_Geometry shunn3_32_cc_exp_gdv.fds
 $QFDS -d Complex_Geometry shunn3_64_cc_exp_gdv.fds
 $QFDS -d Complex_Geometry shunn3_128_cc_exp_gdv.fds
@@ -579,6 +580,7 @@ $QFDS -d Species humidity.fds
 $QFDS -d Species mass_flux_wall_yindex.fds
 $QFDS -d Species mass_flux_wall_zindex.fds
 $QFDS -p 8 -d Species mass_balance_reac.fds
+$QFDS -p 3 -d Species favre_test.fds
 
 $QFDS -d Sprinklers_and_Sprays activate_sprinklers.fds
 $QFDS -d Sprinklers_and_Sprays adiabatic_surf_temp_spray.fds
@@ -679,6 +681,8 @@ $QFDS -d Scalar_Analytical_Solution saad_512_cfl_p5.fds
 $QFDS -d Scalar_Analytical_Solution saad_512_cfl_p25.fds
 $QFDS -d Scalar_Analytical_Solution saad_512_cfl_p125.fds
 $QFDS -d Scalar_Analytical_Solution saad_512_cfl_p0625.fds
+$QFDS -d Scalar_Analytical_Solution shunn3_FavreZ_32.fds
+$QFDS -d Scalar_Analytical_Solution shunn3_FavreZ_64.fds
 $QFDS -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_32.fds
 $QFDS -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_64.fds
 $QFDS -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_128.fds
@@ -755,6 +759,14 @@ $QFDS -p 2 -d WUI ground_vegetation_load.fds
 $QFDS -p 2 -d WUI ground_vegetation_radi.fds
 $QFDS -d WUI hot_rods.fds
 $QFDS -d WUI level_set_fuel_model_1.fds
+$QFDS -d WUI Needle_TGA_A.fds
+$QFDS -d WUI Needle_TGA_B.fds
+$QFDS -d WUI Needle_TGA_C.fds
+$QFDS -d WUI Needle_TGA_D.fds
+$QFDS -d WUI Needle_TGA_E.fds
+$QFDS -d WUI Needle_TGA_F.fds
+$QFDS -d WUI Needle_TGA_G.fds
+$QFDS -d WUI Needle_TGA_H.fds
 $QFDS -d WUI pine_needles.fds
 $QFDS -d WUI radiation_gas-veg_consistency_gas.fds
 $QFDS -d WUI radiation_gas-veg_consistency_veg.fds
