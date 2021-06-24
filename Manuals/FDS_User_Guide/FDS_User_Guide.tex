@@ -10308,6 +10308,7 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct NUMBER OF PARTICLES}                       & Section~\ref{info:TIMING}                     &                & D            \\ \hline
 {\ct OPEN NOZZLES}                              & Section~\ref{info:TIMING}                     &                & D            \\ \hline
 {\ct OPTICAL DENSITY}                           & Section~\ref{info:visibility}                 & 1/m            & D,I,P,S      \\ \hline
+{\ct ORIENTED VELOCITY}$^5$                     & $(u,v,w)\cdot(n_x,n_y,n_z)$                   & m/s            & D            \\ \hline
 {\ct PATH OBSCURATION}                          & Section~\ref{info:beam_detector}              & \%             & D            \\ \hline
 {\ct PARTICLE AGE}                              & Section~\ref{info:part_output}                & s              & PA           \\ \hline
 {\ct PARTICLE DIAMETER}                         & Section~\ref{info:part_output}                & $\mu$m         & PA           \\ \hline
@@ -10375,7 +10376,8 @@ $^1$  \hspace{0.05in} \= Requires the specification of a gas species using {\ct 
 $^2$                  \> Requires the specification of a particle name using {\ct PART\_ID}. \\
 $^3$                  \> Add {\ct VELO\_INDEX=1} to the input line if you want to multiply the velocity by the sign of $u$. \\
                       \> Use the indices 2 and 3 for $v$ and $w$, respectively.\\
-$^4$                  \> Allows for an optional {\ct MATL\_ID}.
+$^4$                  \> Allows for an optional {\ct MATL\_ID}.\\
+$^5$                  \> Requires an {\ct ORIENTATION} on the {\ct DEVC} line.
 
 \end{tabbing}
 
