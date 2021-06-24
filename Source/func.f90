@@ -2264,10 +2264,11 @@ END FUNCTION CONE_MESH_INTERSECTION_VOLUME
 !> \param Y y-coordinate of the point (m)
 !> \param Z z-coordinate of the point (m)
 !> \param MOVE_INDEX Index of the set of parameters on a MOVE input line
+!> \param MODE Mode of transformation: 1 for a point, 2 for a vector
 
-SUBROUTINE TRANSFORM_COORDINATES(X,Y,Z,MOVE_INDEX)
+SUBROUTINE TRANSFORM_COORDINATES(X,Y,Z,MOVE_INDEX,MODE)
 
-INTEGER, INTENT(IN) :: MOVE_INDEX
+INTEGER, INTENT(IN) :: MOVE_INDEX,MODE
 REAL(EB), INTENT(INOUT) :: X,Y,Z
 REAL(EB) :: M(3,3),UP(3,1),S(3,3),UUT(3,3),IDENTITY(3,3),X_VECTOR(3,1),X_VECTOR_0(3,1),X_VECTOR_1(4,1),SCL(3,3)
 TYPE(MOVEMENT_TYPE), POINTER :: MV
@@ -2303,10 +2304,18 @@ SCL= RESHAPE((/ MV%SCALE*MV%SCALEX,0.0_EB,0.0_EB, &
 
 ! Scaling takes precedence over rotation transformation (applied first on the local axes):
 
-X_VECTOR = X_VECTOR_0 + MATMUL(MATMUL(M,SCL),X_VECTOR-X_VECTOR_0)
-X = X_VECTOR(1,1) + MV%DX
-Y = X_VECTOR(2,1) + MV%DY
-Z = X_VECTOR(3,1) + MV%DZ
+SELECT CASE(MODE)
+   CASE(1)
+      X_VECTOR = X_VECTOR_0 + MATMUL(MATMUL(M,SCL),X_VECTOR-X_VECTOR_0)
+      X = X_VECTOR(1,1) + MV%DX
+      Y = X_VECTOR(2,1) + MV%DY
+      Z = X_VECTOR(3,1) + MV%DZ
+   CASE(2)
+      X_VECTOR = MATMUL(MATMUL(M,SCL),X_VECTOR)
+      X = X_VECTOR(1,1)
+      Y = X_VECTOR(2,1)
+      Z = X_VECTOR(3,1)
+END SELECT
 
 END SUBROUTINE TRANSFORM_COORDINATES
 
