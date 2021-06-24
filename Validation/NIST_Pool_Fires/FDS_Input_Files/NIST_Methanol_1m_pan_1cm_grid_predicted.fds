@@ -15,12 +15,12 @@
 &MATL ID                     = 'METHANOL LIQUID'
       NU_SPEC                = 1.
       SPEC_ID                = 'METHANOL'
-      HEAT_OF_REACTION       = 1098.3
-      CONDUCTIVITY           = 0.2
-      SPECIFIC_HEAT          = 2.53
-      DENSITY                = 792
-      ABSORPTION_COEFFICIENT = 1140.
-      BOILING_TEMPERATURE    = 64.6 /
+      HEAT_OF_REACTION       = 1099
+      CONDUCTIVITY           = 0.20
+      SPECIFIC_HEAT          = 2.48
+      DENSITY                = 796
+      ABSORPTION_COEFFICIENT = 1500.
+      BOILING_TEMPERATURE    = 64.65 /
 
 &BNDF CELL_CENTERED=.TRUE., QUANTITY='BURNING RATE' /
 &BNDF CELL_CENTERED=.TRUE., QUANTITY='WALL TEMPERATURE' /

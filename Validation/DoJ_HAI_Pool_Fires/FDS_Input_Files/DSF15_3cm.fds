@@ -8,7 +8,7 @@
       MATL_MASS_FRACTION(1,1:7) = 0.04,0.19,0.12,0.15,0.11,0.09,0.30
       MATL_ID(2,1) = 'CONCRETE'
       MATL_MASS_FRACTION(2,1) = 1.
-      EXTERNAL_FLUX=25
+      EXTERNAL_FLUX=40
       RAMP_EF='flux'
       THICKNESS = 0.010,0.05 /
 &RAMP ID='flux', T= 0, F=1 /
@@ -21,6 +21,6 @@
 &OBST XB=-.30,0.30,-.30,-.30,0.00,0.10, SURF_ID='STEEL SHEET' /
 &OBST XB=-.30,0.30,0.30,0.30,0.00,0.10, SURF_ID='STEEL SHEET' /
 
-&CATF OTHER_FILES='mesh_3cm_grid_60cm_pan.fds','props.fds' /
+&CATF OTHER_FILES='mesh_3cm_grid_60cm_pan.fds','kerosene.fds','props.fds' /
 
 &TAIL /
