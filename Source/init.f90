@@ -2503,12 +2503,6 @@ ENDIF
 
 IF (WC%SURF_INDEX==TGA_SURF_INDEX) TGA_WALL_INDEX = IW
 
-! Fill array containing K index of terrain following slice, used in dump slice
-
-DO NSLICE=1,M%N_TERRAIN_SLCF
-   IF (IOR==3) M%K_AGL_SLICE(I,J,NSLICE) = MIN( M%KBAR , M%K_AGL_SLICE(I,J,NSLICE)+WC%ONE_D%KKG )
-ENDDO
-
 ! Do not assign normal velocities at boundaries of evacuation meshes
 
 IF (DO_EVACUATION) WC%ONE_D%U_NORMAL = 0._EB
