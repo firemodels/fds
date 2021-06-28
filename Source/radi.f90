@@ -3816,7 +3816,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
             ENDIF                                              ! (use information of the cell adjacent to the boundary)
             SF  => SURFACE(WALL(IW)%SURF_INDEX)
             DUMMY = WALL(IW)%ONE_D%EMISSIVITY*SIGMA*WALL(IW)%ONE_D%TMP_F**4
-            IF (.NOT. SF%INTERNAL_RADIATION)  WALL(IW)%ONE_D%Q_RAD_OUT = WALL(IW)%ONE_D%Q_RAD_OUT + BBF*DUMMY
+            IF (.NOT. SF%INTERNAL_RADIATION) WALL(IW)%ONE_D%Q_RAD_OUT = WALL(IW)%ONE_D%Q_RAD_OUT + BBF*DUMMY
             OUTRAD_W(IW) = BBF*RPI*DUMMY
          ENDIF
       ENDDO
