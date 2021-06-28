@@ -19564,8 +19564,7 @@ USE GEOMETRY_FUNCTIONS, ONLY: TRANSFORM_COORDINATES
          ENDIF
          DO IVERT=1,G%N_VERTS
             VEC(1:3) = G%VERTS_BASE(3*IVERT-2:3*IVERT)
-            CALL TRANSFORM_COORDINATES(VEC(1),VEC(2),VEC(3),MOVE_INDEX) ! Eventually, time varying motion dealt with
-                                                                        ! here.
+            CALL TRANSFORM_COORDINATES(VEC(1),VEC(2),VEC(3),MOVE_INDEX,1) ! Eventually, time varying motion dealt with here.
             G%VERTS(3*IVERT-2:3*IVERT) = VEC(1:3)
          ENDDO
       ELSE

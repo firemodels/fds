@@ -3725,6 +3725,34 @@ The inclusion of {\ct BOILING\_TEMPERATURE} on the {\ct MATL} line tells FDS to 
 
 In this example, {\ct 'ETHANOL'} is a {\em known} species; that is, it is listed in Table~\ref{tab:gasspecies}. For this reason, you only need to specify its CO and soot yield. If it is not known, then you must furnish additional information. Section~\ref{user_defined_gas_species_props} contains details, but in brief, only the molecular weight of the gas species is of relevance for the liquid pool evaporation model. If the liquid has multiple components, like gasoline or kerosene, you can furnish an individual {\ct MATL} line for each component. For practical reasons, in such cases you might still want to assume only one gas phase fuel species; thus, each {\ct MATL} line would contain the same {\ct SPEC\_ID}. If this is the case, provide the liquid component molecular weights, {\ct MW}, with units of g/mol on the {\ct MATL} lines. These unique molecular weights are used when computing the evaporation rates of the individual liquid components.
 
+
+\subsubsection{Liquid Mixtures}
+\label{liquid_mixture}
+
+Most liquid fuels of interest in fire protection engineering are not pure liquids, but rather blends, like gasoline. Each component liquid has a unique boiling point, heat of vaporization, molecular weight, and specific heat that affect its evaporation rate. It is possible to specify the individual liquid components, but have them all evaporate to form the same gaseous fuel vapor. The reason for this is to save on computing cost. If each component were to evaporate to form a unique gaseous fuel species, a separate transport equation and combustion reaction would needed for each. Consider the following example---a mixture of hydrocarbon fuels is mixed with water forming an emulsion. The pool is specified as follows:
+\begin{lstlisting}
+&SPEC ID='WATER VAPOR' /
+&REAC FUEL='N-HEXANE' /
+&SURF ID        = 'POOL'
+      COLOR     = 'YELLOW'
+      MATL_ID(1,1:6) = 'HEXANE','HEPTANE','OCTANE','DECANE','BENZENE','WATER'
+      MATL_MASS_FRACTION(1,1:6) = 0.521,0.054,0.063,0.023,0.200,0.139
+      THICKNESS = 0.002 /
+\end{lstlisting}
+Water is to evaporate and form {\ct 'WATER VAPOR'}, but the other components are all to form {\ct 'N-HEXANE'}. On each {\ct MATL} line for each liquid component, either {\ct 'WATER VAPOR'} or {\ct 'N-HEXANE'} is declared as the {\ct SPEC\_ID}, along with the {\ct BOILING\_TEMPERATURE}, {\ct MW}, {\ct SPECIFIC\_HEAT}, and {\ct HEAT\_OF\_REACTION} (i.e. the heat of vaporization). Additionally, a {\ct HEAT\_OF\_COMBUSTION} may be specified on the {\ct MATL} line to indicate that the liquid component has a different heat of combustion than n-hexane and FDS should adjust its evaporation rate accordingly.
+
+An example demonstrating evaporation of a liquid mixture is found in the {\ct Pyrolysis} folder and called {\ct liquid\_mixture.fds}. In this example, a 1~m by 1~m by 2~mm deep pool containing a mixture of hydrocarbon liquids and water is completely evaporated to form water vapor and the surrogate gaseous fuel vapor, n-hexane. Figure~\ref{liquid_mixture_plot} displays the mass of water and fuel vapor as a function of time.
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/liquid_mixture}
+\end{center}
+\caption[Results of the {\ct liquid\_mixture} test case]{Evaporated mass of water and fuel species from an emulsified liquid fuel.}
+\label{liquid_mixture_plot}
+\end{figure}
+
+
+
 \subsubsection{Heat and Mass Transfer with Blowing}
 
 To invoke the heat and mass transfer relationships from \cite{Sazhin:2006}, set {\ct BLOWING=T} on the {\ct SURF} line.  For example,
@@ -10308,6 +10336,7 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct NUMBER OF PARTICLES}                       & Section~\ref{info:TIMING}                     &                & D            \\ \hline
 {\ct OPEN NOZZLES}                              & Section~\ref{info:TIMING}                     &                & D            \\ \hline
 {\ct OPTICAL DENSITY}                           & Section~\ref{info:visibility}                 & 1/m            & D,I,P,S      \\ \hline
+{\ct ORIENTED VELOCITY}$^5$                     & $(u,v,w)\cdot(n_x,n_y,n_z)$                   & m/s            & D            \\ \hline
 {\ct PATH OBSCURATION}                          & Section~\ref{info:beam_detector}              & \%             & D            \\ \hline
 {\ct PARTICLE AGE}                              & Section~\ref{info:part_output}                & s              & PA           \\ \hline
 {\ct PARTICLE DIAMETER}                         & Section~\ref{info:part_output}                & $\mu$m         & PA           \\ \hline
@@ -10375,7 +10404,8 @@ $^1$  \hspace{0.05in} \= Requires the specification of a gas species using {\ct 
 $^2$                  \> Requires the specification of a particle name using {\ct PART\_ID}. \\
 $^3$                  \> Add {\ct VELO\_INDEX=1} to the input line if you want to multiply the velocity by the sign of $u$. \\
                       \> Use the indices 2 and 3 for $v$ and $w$, respectively.\\
-$^4$                  \> Allows for an optional {\ct MATL\_ID}.
+$^4$                  \> Allows for an optional {\ct MATL\_ID}.\\
+$^5$                  \> Requires an {\ct ORIENTATION} on the {\ct DEVC} line.
 
 \end{tabbing}
 

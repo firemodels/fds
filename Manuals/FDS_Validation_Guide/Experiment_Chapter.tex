@@ -437,6 +437,39 @@ The single level structure was instrumented with five bare-bead thermocouple arr
 
 The U.S. Department of Justice sponsored a series of liquid pool fire experiments performed by Hughes Associates, Inc.~\cite{Mealy:DoJ_HAI_Pool_Fires}. Hundreds of experiments were performed, involving six different liquid fuels, eight different substrates, a variety of pan sizes and pool depths. Of these, 44 experiments were chosen from the ``Diked Fire Test Series,'' where gasoline or kerosene was burned within 0.3~m, 0.6~m, or 1.2~m square pans with liquid depths ranging from 1~mm to 20~mm. The substrate was either coated concrete or vinyl, each of which was designed to avoid liquid absorption. The vinyl flooring material had a nominal thickness of 1.2~mm applied to a 14.7~mm plywood using a vinyl adhesive. Table~\ref{DoJ_HAI_Matrix} provides a summary of the experimental parameters.
 
+\subsubsection{Modeling Notes}
+
+The test report for the experiments does not explicitly list the components of the gasoline or kerosene. Rather, distillation curves are provided showing that the initial and final boiling points for gasoline are 45~$^\circ$C and 212~$^\circ$C, and for kerosene 170~$^\circ$C and 257~$^\circ$C. The density of the gasoline is 742~kg/m$^3$ and the kerosene 798~kg/m$^3$. From various industry documents, it is postulated that the gasoline is a mixture of n-hexane (0.521 by mass), n-heptane (0.054), n-octane (0.063), n-decane (0.023), benzene (0.20), and toluene (0.139). The kerosene is assumed to be a mixture of iso-octane (0.04), n-nonane (0.19), iso-nonane (0.12), n-decane (0.15), iso-decane (0.11), n-undecane (0.09), and cis-decalin (0.30). The relavant properties of these liquids are listed in Table~\ref{fuelprops}.
+
+A few additional assumptions are made concerning the mixtures. First, that the absorption coefficient of all components is set to 150~m$^{-1}$, a value that is typical of heavy hydrocarbon liquids. Seconds, the thermal conductivity of the components is set to an artificially low value of 0.02~W/m/K to roughly account for the buoyancy that drives heated liquid upwards towards the surface. Third, all liquid components are assumed to evaporate into a single gas phase species, n-hexane. If this were not assumed, additional transport equations and combustion reactions would be needed for all liquid components.
+
+Finally, to simulate the ignition of the liquid pools, an external flux is imposed at the surface for 10~s in the case of gasoline and 25~s for kerosene.
+ 
+\begin{table}[h!]
+\begin{center}
+\caption[Gasoline and kerosene components]{Gasoline and kerosene components~\cite{CRCHandbook:Enthalpy_of_Vaporization}.} 
+\label{fuelprops2}
+\begin{tabular}{|l|c|c|c|c|c|c|} \hline
+Fuel        & Chemical          & $W$         & $\rho$      & $c_p$              & $h_{\rm v}$        & $T_{\rm b}$     \\
+Component   & Formula           & (g/mol)     & (kg/m$^3$)  & (kJ/(kg$\cdot$K))  & (kJ/kg)            & $^\circ$C       \\
+\hline \hline
+Benzene     & C$_6$H$_{6}$      & 78.1        & 879         & 1.72              & 393                 & 80.1   \\ \hline
+cis-Decalin & C$_{10}$H$_{18}$  & 138.3       & 897         & 1.68              & 297                 & 195.8  \\ \hline
+iso-Decane  & C$_{10}$H$_{22}$  & 142.3       & 728         & 2.20              & 269                 & 167.0  \\ \hline
+n-Decane    & C$_{10}$H$_{22}$  & 142.3       & 730         & 2.21              & 278                 & 174.1  \\ \hline
+n-Heptane   & C$_7$H$_{16}$     & 100.2       & 684         & 2.24              & 317                 & 98.4   \\ \hline
+n-Hexane    & C$_6$H$_{14}$     & 86.2        & 659         & 2.27              & 335                 & 68.7   \\ \hline
+iso-Nonane  & C$_9$H$_{20}$     & 128.3       & 708         & 2.34              & 350                 & 143.0  \\ \hline
+n-Nonane    & C$_9$H$_{20}$     & 128.3       & 718         & 2.22              & 290                 & 150.8  \\ \hline
+iso-Octane  & C$_8$H$_{18}$     & 114.2       & 692         & 2.09              & 270                 & 99.2   \\ \hline
+n-Octane    & C$_8$H$_{18}$     & 114.2       & 702         & 2.23              & 301                 & 125.6  \\ \hline
+Toluene     & C$_7$H$_{8}$      & 92.1        & 867         & 1.67              & 360                 & 110.6  \\ \hline
+n-Undecane  & C$_{11}$H$_{24}$  & 156.3       & 740         & 2.21              & 268                 & 195.9  \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+
 \section{Droplet Evaporation}
 \label{Droplet_Evaporation_Description}
 

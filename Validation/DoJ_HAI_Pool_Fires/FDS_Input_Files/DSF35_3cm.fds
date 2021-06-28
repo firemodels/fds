@@ -21,6 +21,6 @@
 &OBST XB=-.30,0.30,-.30,-.30,0.00,0.10, SURF_ID='STEEL SHEET' /
 &OBST XB=-.30,0.30,0.30,0.30,0.00,0.10, SURF_ID='STEEL SHEET' /
 
-&CATF OTHER_FILES='mesh_3cm_grid_60cm_pan.fds','props.fds' /
+&CATF OTHER_FILES='mesh_3cm_grid_60cm_pan.fds','gasoline.fds','props.fds' /
 
 &TAIL /
