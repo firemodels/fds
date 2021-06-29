@@ -1648,9 +1648,12 @@ SORT_QUEUE: DO
       IF (IOR==0) CYCLE SEARCH_LOOP
 
       IC  = M%CELL_INDEX(III,JJJ,KKK)
- 
+
       IF (M%SOLID(IC)) THEN
          IF (.NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE) CYCLE SEARCH_LOOP  ! Do not search within a non-removable solid
+      ENDIF
+      IF (CC_IBM) THEN
+         IF(M%CCVAR(III,JJJ,KKK,1)==1) CYCLE SEARCH_LOOP  ! Cycle if cell is of type IBM_SOLID
       ENDIF
 
       SELECT CASE(IOR)
@@ -1716,6 +1719,10 @@ SORT_QUEUE: DO
       IF (CC_IBM) THEN
          ! Here IBM_CGSC=1, IBM_SOLID=1:
          IF(M%CCVAR(III,JJJ,KKK,1)==1 .AND. M%CCVAR(II,JJ,KK,1)/=1) CYCLE SEARCH_LOOP
+         IF(M%CCVAR(III,JJJ,KKK,1)==0 .AND. M%CCVAR(II,JJ,KK,1)==0) THEN
+            IF(IOR>0 .AND. M%FCVAR(III,JJJ,KKK,1,ABS(IOR))==1) CYCLE SEARCH_LOOP
+            IF(IOR<0 .AND. M%FCVAR( II, JJ, KK,1,ABS(IOR))==1) CYCLE SEARCH_LOOP
+         ENDIF
 
       ! If the current cell is not solid, but it is assigned another ZONE index, mark it as an overlap error and return
 
@@ -1762,7 +1769,7 @@ END SUBROUTINE ASSIGN_PRESSURE_ZONE
 !> \param N_LAYER_CELLS_MAX Maximum number of cells to assign to the layer
 !> \param N_CELLS Number of cells in the layer
 !> \param DX_MIN Minimum cell size
-!> \param DDSUM Divisor of LAYER_THICKNESS used to determine N_LAYER_CELLS 
+!> \param DDSUM Divisor of LAYER_THICKNESS used to determine N_LAYER_CELLS
 
 SUBROUTINE GET_N_LAYER_CELLS(DIFFUSIVITY,LAYER_THICKNESS,STRETCH_FACTOR,CELL_SIZE_FACTOR,N_LAYER_CELLS_MAX,N_CELLS,DX_MIN,DDSUM)
 
@@ -3547,7 +3554,7 @@ ELSE
       CASE(SURF_CARTESIAN)   ; I_GRAD = 1
       CASE(SURF_CYLINDRICAL) ; I_GRAD = 2
       CASE(SURF_SPHERICAL)   ; I_GRAD = 3
-   END SELECT   
+   END SELECT
    RHO_H = 0._EB
    RHO = 0._EB
    ITMP = MIN(I_MAX_TEMP-1,INT(TMP_S))
