@@ -3467,7 +3467,27 @@ MESH_LOOP_2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       IF(NOM>0) THEN
          IF(MESHES(NOM)%N_CUTFACE_MESH==0) CYCLE EXTERNAL_WALL_LOOP_2
       ENDIF
+
       IF(WC%BOUNDARY_TYPE == INTERPOLATED_BOUNDARY) THEN
+
+         ! Skip if no cut-faces present on this WC:
+         ! Define underlying Cartesian faces indexes:
+         SELECT CASE(IOR)
+         CASE( IAXIS) ! Lower X boundary for Mesh NM. Note we are using ghost cell II,JJ,KK.
+            IIF = II    ; JJF = JJ    ; KKF = KK
+         CASE(-IAXIS) ! Higher X boundary for Mesh NM.
+            IIF = II - 1; JJF = JJ    ; KKF = KK
+         CASE( JAXIS) ! Lower Y boundary for Mesh NM.
+            IIF = II    ; JJF = JJ    ; KKF = KK
+         CASE(-JAXIS) ! Higher Y boundary for Mesh NM.
+            IIF = II    ; JJF = JJ - 1; KKF = KK
+         CASE( KAXIS) ! Lower Z boundary for Mesh NM.
+            IIF = II    ; JJF = JJ    ; KKF = KK
+         CASE(-KAXIS) ! Higher Z boundary for Mesh NM.
+            IIF = II    ; JJF = JJ    ; KKF = KK - 1
+         END SELECT
+         X1AXIS = ABS(IOR)
+         IF(FCVAR(IIF,JJF,KKF,IBM_FGSC,X1AXIS) == IBM_SOLID) CYCLE EXTERNAL_WALL_LOOP_2
 
          IF (MESHES(NM)%CCVAR(II,JJ,KK,IBM_CGSC) == IBM_CUTCFE) THEN
             TEST_ICC = .TRUE.
@@ -3752,8 +3772,9 @@ END SUBROUTINE SET_CUTCELLS_3D
 
 ! --------------------- BLOCK_IBM_SOLID_EXTWALLCELLS -----------------------------
 
-SUBROUTINE BLOCK_IBM_SOLID_EXTWALLCELLS
+SUBROUTINE BLOCK_IBM_SOLID_EXTWALLCELLS(FIRST_CALL)
 
+LOGICAL, INTENT(IN) :: FIRST_CALL
 
 ! Local variables:
 INTEGER :: NM,IW,IIF,JJF,KKF,II,JJ,KK,IOR,X1AXIS
@@ -3763,8 +3784,12 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    CALL POINT_TO_MESH(NM)
    EXTERNAL_WALL_LOOP : DO IW=1,N_EXTERNAL_WALL_CELLS
       WC=>WALL(IW)
+      IF (FIRST_CALL) THEN
+      IF(.NOT.(WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY)) CYCLE EXTERNAL_WALL_LOOP
+      ELSE
       IF(.NOT.(WC%BOUNDARY_TYPE==OPEN_BOUNDARY .OR. WC%BOUNDARY_TYPE==SOLID_BOUNDARY)) CYCLE EXTERNAL_WALL_LOOP ! Here we might need
                                                                                                   !to add other EXT wall cell types.
+      ENDIF
       II     = WC%ONE_D%II
       JJ     = WC%ONE_D%JJ
       KK     = WC%ONE_D%KK
@@ -3786,7 +3811,11 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          IIF = II    ; JJF = JJ    ; KKF = KK - 1
       END SELECT
       ! Change BOUNDARY_TYPE to null:
+      IF (FIRST_CALL) THEN
+      IF(FCVAR(IIF,JJF,KKF,IBM_FGSC,X1AXIS) == IBM_SOLID) WC%BOUNDARY_TYPE = SOLID_BOUNDARY
+      ELSE
       IF(FCVAR(IIF,JJF,KKF,IBM_FGSC,X1AXIS) == IBM_SOLID) WC%BOUNDARY_TYPE = NULL_BOUNDARY
+      ENDIF
    ENDDO EXTERNAL_WALL_LOOP
 ENDDO MESH_LOOP
 
