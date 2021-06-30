@@ -245,6 +245,9 @@ INTEGER, PARAMETER :: NSCARC_RELAX_MSSOR             = 12        !< Type of prec
 INTEGER, PARAMETER :: NSCARC_RELAX_OPTIMIZED         = 13        !< Type of preconditioner: Optimized mixture of MKL and FFT
 INTEGER, PARAMETER :: NSCARC_RELAX_SSOR              = 14        !< Type of preconditioner: SSOR-methods
 
+INTEGER, PARAMETER :: NSCARC_POISSON_INSEPARABLE     =  0        !< Poisson equation type: inseparable
+INTEGER, PARAMETER :: NSCARC_POISSON_SEPARABLE       =  1        !< Poisson equation type: separable
+
 INTEGER, PARAMETER :: NSCARC_SCOPE_GLOBAL            =  0        !< Scope of current solver: global
 INTEGER, PARAMETER :: NSCARC_SCOPE_LOCAL             =  1        !< Scope of current solver: local
 
@@ -1102,6 +1105,7 @@ IMPLICIT NONE (TYPE,EXTERNAL)
 CHARACTER(40) :: SCARC_GRID               = 'STRUCTURED'         !< Type of discretization (STRUCTURED/UNSTRUCTURED)
 CHARACTER(40) :: SCARC_METHOD             = 'NONE'               !< Type of global ScaRC solver (Krylov/MULTIGRID)
 CHARACTER(40) :: SCARC_MATRIX             = 'NONE'               !< Type of matrix storage (COMPACT/BANDWISE)
+CHARACTER(40) :: SCARC_POISSON            = 'SEPARABLE'          !< Type of Poisson equation (SEPARABLE/INSEPARABLE)
 CHARACTER(40) :: SCARC_STENCIL            = 'VARIABLE'           !< Type of matrix stencil (CONSTANT/VARIABLE)
 CHARACTER(40) :: SCARC_TWOLEVEL           = 'NONE'               !< Type of two-level method (NONE/ADDITIVE/MULTIPLICATIVE)
 
@@ -1176,7 +1180,8 @@ CHARACTER(6)  :: SCARC_MKL_PRECISION      = 'DOUBLE'             !< Single/doubl
 
 ! ---------- Dump out of error information and error handling
  
-LOGICAL :: SCARC_ERROR_FILE  = .FALSE.                           !< Print ScaRC statistics into chid_scarc.csv (TRUE/FALSE)
+LOGICAL :: SCARC_ERROR_FILE = .FALSE.                            !< Print ScaRC statistics into chid_scarc.csv (TRUE/FALSE)
+LOGICAL :: SCARC_VERBOSE = .FALSE.                               !< Print additional verbose messages (TRUE/FALSE)
 INTEGER :: IERROR  = 0                                           !< General error flag - used at different positions
 
 
@@ -1234,6 +1239,7 @@ INTEGER :: TYPE_MKL(0:10)           = NSCARC_MKL_NONE            !< Type of use 
 INTEGER :: TYPE_MKL_PRECISION       = NSCARC_PRECISION_DOUBLE    !< Type of double precision MKL solver
 INTEGER :: TYPE_MULTIGRID           = NSCARC_MULTIGRID_GEOMETRIC !< Type of multigrid method 
 INTEGER :: TYPE_PARENT              = NSCARC_UNDEF_INT           !< Type of parent (calling) solver
+INTEGER :: TYPE_POISSON             = NSCARC_POISSON_SEPARABLE   !< Type of Poisson equation
 INTEGER :: TYPE_PRECON              = NSCARC_UNDEF_INT           !< Type of preconditioner for iterative solver
 INTEGER :: TYPE_RELAX               = NSCARC_UNDEF_INT           !< Type of preconditioner for iterative solver
 INTEGER :: TYPE_SCOPE(0:2)          = NSCARC_SCOPE_GLOBAL        !< Type of method scopes
@@ -1281,8 +1287,10 @@ PUBLIC :: SCARC_ITERATIONS                !< Final number of needed iterations f
 PUBLIC :: SCARC_MATRIX                    !< Selection parameter for requested matrix storage technique (compact/bandwise)
 PUBLIC :: SCARC_METHOD                    !< Selection parameter for requested ScaRC variant (Krylov/Multigrid/LU)
 PUBLIC :: SCARC_MKL_PRECISION             !< Selection parameter for requested MKL precision (double/single)
+PUBLIC :: SCARC_POISSON                   !< Type of Poisson equation (separable/inseparable)
 PUBLIC :: SCARC_RESIDUAL                  !< Final residual after call of ScaRC solver
 PUBLIC :: SCARC_TWOLEVEL                  !< Selection parameter for possible twolevel variant (additive/multiplicative)
+PUBLIC :: SCARC_VERBOSE                   !< Selection parameter for additional verbose messages
 
 PUBLIC :: SCARC_COARSE                    !< Selection parameter for type of coarse grid solver (iterative/direct)
 PUBLIC :: SCARC_COARSE_ACCURACY           !< Requested accuracy for coarse grid solver
@@ -3642,8 +3650,9 @@ USE SCARC_MESSAGES
 
 IMPLICIT NONE (TYPE,EXTERNAL)
   
-REAL(EB) :: DT                                  !< TS width 
-REAL(EB) :: DTI                                 !< Inverse of TS width 
+REAL(EB) :: T                                   !< current time 
+REAL(EB) :: DT                                  !< current time step width
+REAL(EB) :: DTI                                 !< Inverse of time step width 
 REAL(EB) :: OMEGA                               !< Relaxation parameter for current solver
 REAL(EB) :: EPS                                 !< Requested accuracy for current solver
 REAL(EB) :: RES                                 !< Current residual of current solver
@@ -3679,9 +3688,10 @@ CONTAINS
 ! --------------------------------------------------------------------------------------------------------------
 !> \brief Set current iteration state
 ! --------------------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_SET_ITERATION_STATE (DT_CURRENT)
-REAL(EB), INTENT(IN) :: DT_CURRENT
+SUBROUTINE SCARC_SET_ITERATION_STATE (T_CURRENT, DT_CURRENT)
+REAL(EB), INTENT(IN) :: T_CURRENT, DT_CURRENT
 
+T   = T_CURRENT
 DT  = DT_CURRENT
 DTI = 1.0_EB/DT_CURRENT
 
@@ -21907,18 +21917,18 @@ END SUBROUTINE SCARC_SETUP
 ! --------------------------------------------------------------------------------------------------------------------
 !> \brief Call of requested ScaRC solver 
 ! --------------------------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_SOLVER(DT_CURRENT)
+SUBROUTINE SCARC_SOLVER(T_CURRENT, DT_CURRENT)
 USE SCARC_CONVERGENCE
 USE SCARC_METHODS, ONLY: SCARC_METHOD_KRYLOV, SCARC_METHOD_MULTIGRID, SCARC_METHOD_MGM
 #ifdef WITH_MKL
 USE SCARC_METHODS, ONLY: SCARC_METHOD_MKL
 #endif
-REAL (EB), INTENT(IN) :: DT_CURRENT
+REAL (EB), INTENT(IN) :: T_CURRENT, DT_CURRENT
 REAL (EB) :: TNOW
 
 TNOW = CURRENT_TIME()
 
-CALL SCARC_SET_ITERATION_STATE (DT_CURRENT)
+CALL SCARC_SET_ITERATION_STATE (T_CURRENT, DT_CURRENT)
 
 
 SELECT_METHOD: SELECT CASE (TYPE_METHOD)
