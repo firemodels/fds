@@ -413,9 +413,11 @@ TYPE SCARC_MESSAGE_TYPE
    CHARACTER(60) :: FILE_CPU                               !< Output file name for CPU measurements
    CHARACTER(60) :: FILE_MEM                               !< Output file name for memory management information
    CHARACTER(60) :: FILE_STAT                              !< Output file name for convergence statistcis
+   CHARACTER(60) :: FILE_VERBOSE                           !< Output file name for verbose messages
    INTEGER :: LU_CPU                                       !< Logical unit for CPU measurements
    INTEGER :: LU_MEM                                       !< Logical unit for memory management information
    INTEGER :: LU_STAT                                      !< Logical unit for convergence statistics
+   INTEGER :: LU_VERBOSE                                   !< Logical unit for verbose messages
 
 END TYPE SCARC_MESSAGE_TYPE
 
@@ -1984,6 +1986,7 @@ CONTAINS
 !> \brief Setup debug file if requested
 ! --------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_SETUP_MESSAGES
+INTEGER :: NM, LASTID
 
 IF (SCARC_ERROR_FILE) HAS_CSV_DUMP = .TRUE.
 
@@ -1999,9 +2002,33 @@ IF (HAS_CSV_DUMP) THEN
    ENDIF
 ENDIF
 
+! If verbose flag is set, open additional files for dumping more information about different ScaRC components
+!  - memory file for logging the memory requirement of the different arrays 
+!  - log file for detailed convergence information of the different methods in use
+
+IF (SCARC_VERBOSE) THEN
+   IF (MY_RANK == 0) THEN
+      WRITE (MSG%FILE_MEM, '(A,A)') TRIM(CHID),'.mem'
+      MSG%LU_MEM = GET_FILE_NUMBER()
+      OPEN (MSG%LU_MEM, FILE=MSG%FILE_MEM)
+      WRITE(MSG%LU_MEM,1000) 'Number','Rank','Name of array','Calling routine', &
+                             'State','Type','Dimension','Left1','Right1', &
+                             'Left2','Right2','Left3','Right3','Size(array)', &
+                             'Sum(LOGICAL)','Sum(INTEGER)','Sum(REAL_EB)','Sum(REAL_FB)'
+   ENDIF
+   LASTID = -NSCARC_HUGE_INT
+   DO NM=LOWER_MESH_INDEX, UPPER_MESH_INDEX
+      IF (MY_RANK == LASTID) CYCLE
+      WRITE (MSG%FILE_VERBOSE, '(A,A,i3.3)') TRIM(CHID),'.log',MY_RANK+1
+      MSG%LU_VERBOSE = GET_FILE_NUMBER()
+      OPEN (MSG%LU_VERBOSE, FILE=MSG%FILE_VERBOSE, ACTION = 'readwrite')
+      LASTID = MY_RANK
+   ENDDO
+ENDIF
+
+1000 FORMAT(A8,',',A8,',',A30,',',A40,',',A10,',',A10,',',A10,',',A10,',',A10,',',A10,',',A10,',',&
+            A10,',',A10,',',A15,',',A15,',',A15,',',A15,',',A15)
 END SUBROUTINE SCARC_SETUP_MESSAGES
-
-
 
 END MODULE SCARC_MESSAGES
 
@@ -2692,6 +2719,13 @@ SELECT CASE (NSTATE)
       CSTATE = ' '
 END SELECT
 
+IF (SCARC_VERBOSE .AND. MY_RANK == 0) THEN
+   WRITE(MSG%LU_MEM,1000) STORAGE%N_ARRAYS, STORAGE%IP, TRIM(AL%CNAME), TRIM(AL%CSCOPE), TRIM(CSTATE), TRIM(CTYPE), TRIM(CDIM), &
+                          AL%LBND(1), AL%RBND(1), AL%LBND(2), AL%RBND(2), AL%LBND(3), AL%RBND(3), &
+                          NWORK, STORAGE%NWORK_LOG, STORAGE%NWORK_INT, STORAGE%NWORK_REAL_EB, STORAGE%NWORK_REAL_FB
+ENDIF
+1000 FORMAT(I8,',',I8,',',A30,',',A40,',',A10,',',A10,',',A10,',',I10,',',&
+            I10,',',I10,',',I10,',',I10,',',I10,',',I15,',',I15,',',I15,',',I15,',',I15)
 END SUBROUTINE SCARC_UPDATE_STORAGE
 
 ! --------------------------------------------------------------------------------------------------------------
@@ -3687,6 +3721,8 @@ DTI = 1.0_EB/DT_CURRENT
 ITE_PRES = ITE_PRES + 1
 ITE_GLOBAL = ICYC
 
+IF (SCARC_VERBOSE) WRITE(MSG%LU_VERBOSE,1000) ICYC, ITE_PRES, T
+1000 FORMAT('========> Entering ScaRC-solver: #Time iteration = ',I6,': #Pressure Solution= ', I6,': Simulation Time = ', E11.3,/)
 END SUBROUTINE SCARC_SET_ITERATION_STATE
 
 ! --------------------------------------------------------------------------------------------------------------
@@ -3717,6 +3753,8 @@ SCARC_CONVERGENCE_STATE = NSTATE
 
 IF (HAS_CSV_DUMP) CALL SCARC_DUMP_CSV(ISM, NS, NL)
 
+IF (SCARC_VERBOSE .AND.  TYPE_SOLVER == NSCARC_SOLVER_MAIN) WRITE(MSG%LU_VERBOSE,1000) STACK(NS)%SOLVER%CNAME, NL, ITE, RES
+1000 FORMAT (A30,': Level=',I6,': Iteration = ',I6,': Residual = ',E11.3)
 END FUNCTION SCARC_CONVERGENCE_STATE
 
 ! --------------------------------------------------------------------------------------------------------------
@@ -3753,6 +3791,8 @@ ENDIF
 
 CALL SCARC_DUMP_CSV(0, NS, NL)
 
+IF (SCARC_VERBOSE .AND. TYPE_SOLVER == NSCARC_SOLVER_MAIN) WRITE(MSG%LU_VERBOSE,1000) CAPPA
+1000 FORMAT (T54,'---> Convergence Rate = ',E11.3,/)
 END SUBROUTINE SCARC_CONVERGENCE_RATE
 
 ! --------------------------------------------------------------------------------------------------------------
@@ -17106,11 +17146,29 @@ DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          MGM%ITE_POISSON = ITE                   ! ITE, CAPPA contain statistics of preceding structured CG-solution
          MGM%CAPPA_POISSON = CAPPA
 
+         IF (SCARC_VERBOSE) THEN
+            WRITE(MSG%LU_VERBOSE, 1100) ICYC, PRESSURE_ITERATIONS, TOTAL_PRESSURE_ITERATIONS, &
+                                        MGM%ITE_POISSON, MGM%CAPPA_POISSON, MGM%ITE, VELOCITY_ERROR_GLOBAL
+         ENDIF
+
       ! MGM iteration - after each unstructured homogeneous Laplace solution
 
       CASE (1)
 
          MGM%ITE = ITE_MGM
+
+         IF (SCARC_VERBOSE) THEN
+            IF (TYPE_MGM_LAPLACE == NSCARC_MGM_LAPLACE_CG) THEN
+               WRITE(MSG%LU_VERBOSE, 1200) ICYC, PRESSURE_ITERATIONS, TOTAL_PRESSURE_ITERATIONS, &
+                                           MGM%ITE_POISSON, MGM%CAPPA_POISSON, &
+                                           ITE, CAPPA, MGM%ITE, VELOCITY_ERROR_GLOBAL
+            ELSE
+               WRITE(MSG%LU_VERBOSE, 1201) ICYC, PRESSURE_ITERATIONS, TOTAL_PRESSURE_ITERATIONS, &
+                                           MGM%ITE_POISSON, MGM%CAPPA_POISSON, &
+                                           MGM%ITE, VELOCITY_ERROR_GLOBAL
+            ENDIF
+         ENDIF
+
          IF (TYPE_MGM_LAPLACE == NSCARC_MGM_LAPLACE_CG .AND. ITE > MGM%ITE_LAPLACE) THEN
             MGM%ITE_LAPLACE = MAX(ITE, MGM%ITE_LAPLACE)            ! Store worst Laplace-CG statistics
             MGM%CAPPA_LAPLACE = CAPPA
@@ -17123,12 +17181,54 @@ DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          CAPPA = MGM%CAPPA_POISSON   ! Reset to Krylov statistics of Poisson solution for statistics in chid.out
          ITE   = MGM%ITE_POISSON
 
+         IF (SCARC_VERBOSE) THEN
+            IF (VELOCITY_ERROR_GLOBAL <= VELOCITY_ERROR_MGM) THEN
+               IF (TYPE_MGM_LAPLACE == NSCARC_MGM_LAPLACE_CG) THEN
+                  WRITE(MSG%LU_VERBOSE, 1300) ICYC, PRESSURE_ITERATIONS, TOTAL_PRESSURE_ITERATIONS, &
+                                              MGM%ITE_POISSON, MGM%CAPPA_POISSON, &
+                                              MGM%ITE_LAPLACE, MGM%CAPPA_LAPLACE, &
+                                              MGM%ITE, VELOCITY_ERROR_GLOBAL, ' ... success'
+               ELSE
+                  WRITE(MSG%LU_VERBOSE, 1301) ICYC, PRESSURE_ITERATIONS, TOTAL_PRESSURE_ITERATIONS, &
+                                              MGM%ITE_POISSON, MGM%CAPPA_POISSON, &
+                                              MGM%ITE, VELOCITY_ERROR_GLOBAL, ' ... success'
+               ENDIF
+            ELSE
+               IF (TYPE_MGM_LAPLACE == NSCARC_MGM_LAPLACE_CG) THEN
+                  WRITE(MSG%LU_VERBOSE, 1300) ICYC, PRESSURE_ITERATIONS, TOTAL_PRESSURE_ITERATIONS, &
+                                              MGM%ITE_POISSON, MGM%CAPPA_POISSON, &
+                                              MGM%ITE_LAPLACE, MGM%CAPPA_LAPLACE, &
+                                              MGM%ITE, VELOCITY_ERROR_GLOBAL, ' ... failure'
+               ELSE
+                  WRITE(MSG%LU_VERBOSE, 1301) ICYC, PRESSURE_ITERATIONS, TOTAL_PRESSURE_ITERATIONS, &
+                                              MGM%ITE_POISSON, MGM%CAPPA_POISSON, &
+                                              MGM%ITE, VELOCITY_ERROR_GLOBAL, ' ... failure'
+               ENDIF
+            ENDIF
+         ENDIF
 
    END SELECT
    IF (VELOCITY_ERROR_GLOBAL <= VELOCITY_ERROR_MGM) SCARC_MGM_CONVERGENCE_STATE = NSCARC_MGM_SUCCESS
 
 ENDDO
 
+1100 FORMAT('ICYC ',I6, ', #PI: ', I6,', #TPI: ', I6, &
+            ' , #POIS: ',    I5, ' , RATE: ',    F6.2, &
+            ' , #MGM: ',     I5, ' , VEL_ERR: ', E10.2, a14)
+1200 FORMAT('ICYC ',I6, ', #PI: ', I6,', #TPI: ', I6, &
+            ' , #POIS: ',    I5, ' , RATE: ',    F6.2, &
+            ' , #LAPL:    ',    I5, ' , RATE:    ',    F6.2, &
+            ' , #MGM: ',     I5, ' , VEL_ERR: ', E10.2, a14,/)
+1201 FORMAT('ICYC ',I6, ', #PI: ', I6,', #TPI: ', I6, &
+            ' , #POIS: ',    I5, ' , RATE: ',    F6.2, &
+            ' , #MGM: ',     I5, ' , VEL_ERR: ', E10.2, a14,/)
+1300 FORMAT('ICYC ',I6, ', #PI: ', I6,', #TPI: ', I6, &
+            ' , #POIS: ',    I5, ' , RATE: ',    F6.2, &
+            ' , #LAPLmax: ', I5, ' , RATEmax: ', F6.2, &
+            ' , #MGM: ',     I5, ' , VEL_ERR: ', E10.2, a14,/)
+1301 FORMAT('ICYC ',I6, ', #PI: ', I6,', #TPI: ', I6, &
+            ' , #POIS: ',    I5, ' , RATE: ',    F6.2, &
+            ' , #MGM: ',     I5, ' , VEL_ERR: ', E10.2, a14,/)
 END FUNCTION SCARC_MGM_CONVERGENCE_STATE
 
 
