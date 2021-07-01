@@ -1184,6 +1184,8 @@ INTEGER :: IERROR  = 0                                           !< General erro
 
 ! ---------- Logical indicators for different methods and mechanisms
   
+LOGICAL :: IS_SEPARABLE          = .TRUE.                        !< Flag for separable Poisson system
+LOGICAL :: IS_INSEPARABLE        = .FALSE.                       !< Flag for inseparable Poisson system
 LOGICAL :: IS_STRUCTURED         = .FALSE.                       !< Flag for structured discretization
 LOGICAL :: IS_UNSTRUCTURED       = .FALSE.                       !< Flag for unstructured discretization
 LOGICAL :: IS_PURE_NEUMANN       = .FALSE.                       !< Flag for pure Neumann system
@@ -4681,6 +4683,17 @@ SELECT CASE (TRIM(PRES_METHOD))
       CALL SCARC_ERROR(NSCARC_ERROR_PARSE_INPUT, SCARC_GRID, NSCARC_NONE)
 END SELECT
  
+! ------------ Set type of Poisson equation (INSEPARABLE/SEPARABLE)
+
+  SELECT CASE (TRIM(SCARC_POISSON))
+     CASE ('INSEPARABLE')
+        TYPE_POISSON = NSCARC_POISSON_INSEPARABLE
+     CASE ('SEPARABLE')
+        TYPE_POISSON = NSCARC_POISSON_SEPARABLE
+     CASE DEFAULT
+        CALL SCARC_ERROR(NSCARC_ERROR_PARSE_INPUT, SCARC_POISSON, NSCARC_NONE)
+  END SELECT
+
 ! ------------ Set type of matrix storage (COMPACT/BANDWISE)
  
 SELECT CASE (TRIM(SCARC_MATRIX))
@@ -5109,6 +5122,9 @@ END SELECT
 
 ! -------- Define some logical variables - just for notational convenience
  
+IS_SEPARABLE    = (TYPE_POISSON == NSCARC_POISSON_SEPARABLE)
+IS_INSEPARABLE  = (TYPE_POISSON == NSCARC_POISSON_INSEPARABLE)
+
 IS_STRUCTURED   = (TYPE_GRID == NSCARC_GRID_STRUCTURED)
 IS_UNSTRUCTURED = (TYPE_GRID == NSCARC_GRID_UNSTRUCTURED)
 
