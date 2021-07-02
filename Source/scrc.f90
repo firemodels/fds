@@ -903,6 +903,9 @@ TYPE SCARC_LEVEL_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION (:) :: DXL, DYL, DZL       !< Step size vectors in x-, y- and z-direction
    REAL(EB), ALLOCATABLE, DIMENSION (:) :: RDX, RDY, RDZ       !< Reciprocal of step widths between grid points
    REAL(EB), ALLOCATABLE, DIMENSION (:) :: RDXN, RDYN, RDZN    !< Reciprocal of step widths between midpoints
+   REAL(EB), ALLOCATABLE, DIMENSION (:,:) :: PXS, PXF          !< x-direction boundary values for inseparable Poisson system
+   REAL(EB), ALLOCATABLE, DIMENSION (:,:) :: PYS, PYF          !< y-direction boundary values for inseparable Poisson system
+   REAL(EB), ALLOCATABLE, DIMENSION (:,:) :: PZS, PZF          !< z-direction boundary values for inseparable Poisson system
    REAL(EB) :: DX , DY , DZ                                    !< Step sizes in x-, y- and z-direction
    REAL(EB) :: DX2, DY2, DZ2                                   !< Half step sizes in x-, y- and z-direction
    REAL(EB) :: DXH, DYH, DZH                                   !< Half step sizes in x-, y- and z-direction
@@ -1278,6 +1281,10 @@ REAL(EB) :: GLOBAL_REAL, RANK_REAL
 INTEGER :: FACE_ORIENTATION(6)  = (/1,-1,2,-2,3,-3/)        !< Coordinate direction related order of mesh faces
 
 CHARACTER(60) :: CNAME, CROUTINE
+
+REAL(EB), DIMENSION(:,:,:), ALLOCATABLE, TARGET :: SCARC_RHO   !< Density values depending on predictor/corrector with right overlap
+REAL(EB), DIMENSION(:,:,:), ALLOCATABLE, TARGET :: SCARC_P     !< Inseparable pressure solution - predictor stage
+REAL(EB), DIMENSION(:,:,:), ALLOCATABLE, TARGET :: SCARC_PS    !< Inseparable pressure solution - corrector stage
 
 ! ---------- Public variables
   
@@ -18536,6 +18543,36 @@ IMPLICIT NONE (TYPE,EXTERNAL)
 CONTAINS
 
 ! --------------------------------------------------------------------------------------------------------------
+!> \brief  Setup environment for solution of inseparable Poisson system if requested
+!  - workspace for the current version of RHO depending on predictor/corrector stage including correct overlaps
+!  - workspace for the inseparable pressure solution itself in both stages
+!  - workspace for the boundary conditions for the inseparable pressure solution
+! --------------------------------------------------------------------------------------------------------------
+SUBROUTINE SCARC_SETUP_INSEPARABLE_ENVIRONMENT
+USE SCARC_POINTERS, ONLY: L, SCARC_POINT_TO_LEVEL
+INTEGER :: NM
+CROUTINE = 'SCARC_SETUP_INSEPARABLE_ENVIRONMENT'
+
+DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
+
+   CALL SCARC_POINT_TO_LEVEL (NM, NLEVEL_MIN)
+
+   CALL SCARC_ALLOCATE_REAL3 (SCARC_RHO ,  0, L%NX+1, 0, L%NY+1, 0, L%NZ+1, NSCARC_INIT_ZERO, 'SCARC_RHO',   CROUTINE)
+   CALL SCARC_ALLOCATE_REAL3 (SCARC_P   ,  0, L%NX+1, 0, L%NY+1, 0, L%NZ+1, NSCARC_INIT_ZERO, 'SCARC_P',     CROUTINE)
+   CALL SCARC_ALLOCATE_REAL3 (SCARC_PS  ,  0, L%NX+1, 0, L%NY+1, 0, L%NZ+1, NSCARC_INIT_ZERO, 'SCARC_PS',    CROUTINE)
+
+   CALL SCARC_ALLOCATE_REAL2 (L%PXS, 1, L%NY, 1, L%NZ, NSCARC_INIT_ZERO, 'L%PXS', CROUTINE)
+   CALL SCARC_ALLOCATE_REAL2 (L%PXF, 1, L%NY, 1, L%NZ, NSCARC_INIT_ZERO, 'L%PXF', CROUTINE)
+   CALL SCARC_ALLOCATE_REAL2 (L%PYS, 1, L%NX, 1, L%NZ, NSCARC_INIT_ZERO, 'L%PYS', CROUTINE)
+   CALL SCARC_ALLOCATE_REAL2 (L%PYF, 1, L%NX, 1, L%NZ, NSCARC_INIT_ZERO, 'L%PYF', CROUTINE)
+   CALL SCARC_ALLOCATE_REAL2 (L%PZS, 1, L%NX, 1, L%NY, NSCARC_INIT_ZERO, 'L%PZS', CROUTINE)
+   CALL SCARC_ALLOCATE_REAL2 (L%PZF, 1, L%NX, 1, L%NY, NSCARC_INIT_ZERO, 'L%PZF', CROUTINE)
+
+ENDDO
+
+END SUBROUTINE SCARC_SETUP_INSEPARABLE_ENVIRONMENT
+
+! --------------------------------------------------------------------------------------------------------------
 !> \brief  Setup environment for global Krylov method to solve the overall Poisson problem
 ! This includes 
 !  - environment for the global Krylov method 
@@ -22009,14 +22046,21 @@ CALL SCARC_SETUP_EXCHANGES                            ; IF (STOP_STATUS==SETUP_S
 
 ! Setup information for Poisson systems of requested solver:
 ! - Determine memory requirement for Poisson matrices on all required grid levels
-! - Build Poisson systems on all required grid levels and make them globally acting
-! - In case of MKL preconditioning - also build their symmetric counterparts
+! - In case of separable Poisson system:   
+!     * The matrices (on all grid levels) are built up only once at this point during initialization 
+!     * In case of MKL preconditioning, also their symmetric counterparts are built
+! - In case of inseparable Poisson system: 
+!     * Only basic additional vectors are allocated here, the matrices themselves are rebuilt at each time step
 
 CALL SCARC_SETUP_POISSON_REQUIREMENTS                 ; IF (STOP_STATUS==SETUP_STOP) RETURN
-CALL SCARC_SETUP_POISSON_SYSTEMS                      ; IF (STOP_STATUS==SETUP_STOP) RETURN
+IF (IS_SEPARABLE) THEN
+   CALL SCARC_SETUP_POISSON_SYSTEMS                   ; IF (STOP_STATUS==SETUP_STOP) RETURN
 #ifdef WITH_MKL
-CALL SCARC_SETUP_POISSON_SYMMETRIC                    ; IF (STOP_STATUS==SETUP_STOP) RETURN
+   CALL SCARC_SETUP_POISSON_SYMMETRIC                 ; IF (STOP_STATUS==SETUP_STOP) RETURN
 #endif
+ELSE
+   CALL SCARC_SETUP_INSEPARABLE_ENVIRONMENT
+ENDIF
 
 ! Setup information for algebraic multigrid if requested as preconditioner or main solver
 
@@ -22061,6 +22105,7 @@ END SUBROUTINE SCARC_SETUP
 SUBROUTINE SCARC_SOLVER(T_CURRENT, DT_CURRENT)
 USE SCARC_CONVERGENCE
 USE SCARC_METHODS, ONLY: SCARC_METHOD_KRYLOV, SCARC_METHOD_MULTIGRID, SCARC_METHOD_MGM
+USE SCARC_MATRICES, ONLY: SCARC_SETUP_POISSON_SYSTEMS, SCARC_SETUP_POISSON_SYMMETRIC
 #ifdef WITH_MKL
 USE SCARC_METHODS, ONLY: SCARC_METHOD_MKL
 #endif
@@ -22071,7 +22116,17 @@ TNOW = CURRENT_TIME()
 
 CALL SCARC_SET_ITERATION_STATE (T_CURRENT, DT_CURRENT)
 
+! If the inseparable Poisson system is solved, the matrices have to be rebuilt (for the current density) in each time step
 
+IF (IS_INSEPARABLE) THEN
+   CALL SCARC_SETUP_POISSON_SYSTEMS                   ; IF (STOP_STATUS==SETUP_STOP) RETURN
+#ifdef WITH_MKL
+   CALL SCARC_SETUP_POISSON_SYMMETRIC                 ; IF (STOP_STATUS==SETUP_STOP) RETURN
+#endif
+ENDIF
+
+! Step into selected globally acting ScaRC solver
+ 
 SELECT_METHOD: SELECT CASE (TYPE_METHOD)
 
    CASE (NSCARC_METHOD_KRYLOV)
