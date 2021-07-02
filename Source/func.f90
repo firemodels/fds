@@ -1648,9 +1648,12 @@ SORT_QUEUE: DO
       IF (IOR==0) CYCLE SEARCH_LOOP
 
       IC  = M%CELL_INDEX(III,JJJ,KKK)
- 
+
       IF (M%SOLID(IC)) THEN
          IF (.NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE) CYCLE SEARCH_LOOP  ! Do not search within a non-removable solid
+      ENDIF
+      IF (CC_IBM) THEN
+         IF(M%CCVAR(III,JJJ,KKK,1)==1) CYCLE SEARCH_LOOP  ! Cycle if cell is of type IBM_SOLID
       ENDIF
 
       SELECT CASE(IOR)
@@ -1716,6 +1719,10 @@ SORT_QUEUE: DO
       IF (CC_IBM) THEN
          ! Here IBM_CGSC=1, IBM_SOLID=1:
          IF(M%CCVAR(III,JJJ,KKK,1)==1 .AND. M%CCVAR(II,JJ,KK,1)/=1) CYCLE SEARCH_LOOP
+         IF(M%CCVAR(III,JJJ,KKK,1)==0 .AND. M%CCVAR(II,JJ,KK,1)==0) THEN
+            IF(IOR>0 .AND. M%FCVAR(III,JJJ,KKK,1,ABS(IOR))==1) CYCLE SEARCH_LOOP
+            IF(IOR<0 .AND. M%FCVAR( II, JJ, KK,1,ABS(IOR))==1) CYCLE SEARCH_LOOP
+         ENDIF
 
       ! If the current cell is not solid, but it is assigned another ZONE index, mark it as an overlap error and return
 
@@ -1762,7 +1769,7 @@ END SUBROUTINE ASSIGN_PRESSURE_ZONE
 !> \param N_LAYER_CELLS_MAX Maximum number of cells to assign to the layer
 !> \param N_CELLS Number of cells in the layer
 !> \param DX_MIN Minimum cell size
-!> \param DDSUM Divisor of LAYER_THICKNESS used to determine N_LAYER_CELLS 
+!> \param DDSUM Divisor of LAYER_THICKNESS used to determine N_LAYER_CELLS
 
 SUBROUTINE GET_N_LAYER_CELLS(DIFFUSIVITY,LAYER_THICKNESS,STRETCH_FACTOR,CELL_SIZE_FACTOR,N_LAYER_CELLS_MAX,N_CELLS,DX_MIN,DDSUM)
 
@@ -2264,10 +2271,11 @@ END FUNCTION CONE_MESH_INTERSECTION_VOLUME
 !> \param Y y-coordinate of the point (m)
 !> \param Z z-coordinate of the point (m)
 !> \param MOVE_INDEX Index of the set of parameters on a MOVE input line
+!> \param MODE Mode of transformation: 1 for a point, 2 for a vector
 
-SUBROUTINE TRANSFORM_COORDINATES(X,Y,Z,MOVE_INDEX)
+SUBROUTINE TRANSFORM_COORDINATES(X,Y,Z,MOVE_INDEX,MODE)
 
-INTEGER, INTENT(IN) :: MOVE_INDEX
+INTEGER, INTENT(IN) :: MOVE_INDEX,MODE
 REAL(EB), INTENT(INOUT) :: X,Y,Z
 REAL(EB) :: M(3,3),UP(3,1),S(3,3),UUT(3,3),IDENTITY(3,3),X_VECTOR(3,1),X_VECTOR_0(3,1),X_VECTOR_1(4,1),SCL(3,3)
 TYPE(MOVEMENT_TYPE), POINTER :: MV
@@ -2303,10 +2311,18 @@ SCL= RESHAPE((/ MV%SCALE*MV%SCALEX,0.0_EB,0.0_EB, &
 
 ! Scaling takes precedence over rotation transformation (applied first on the local axes):
 
-X_VECTOR = X_VECTOR_0 + MATMUL(MATMUL(M,SCL),X_VECTOR-X_VECTOR_0)
-X = X_VECTOR(1,1) + MV%DX
-Y = X_VECTOR(2,1) + MV%DY
-Z = X_VECTOR(3,1) + MV%DZ
+SELECT CASE(MODE)
+   CASE(1)
+      X_VECTOR = X_VECTOR_0 + MATMUL(MATMUL(M,SCL),X_VECTOR-X_VECTOR_0)
+      X = X_VECTOR(1,1) + MV%DX
+      Y = X_VECTOR(2,1) + MV%DY
+      Z = X_VECTOR(3,1) + MV%DZ
+   CASE(2)
+      X_VECTOR = MATMUL(MATMUL(M,SCL),X_VECTOR)
+      X = X_VECTOR(1,1)
+      Y = X_VECTOR(2,1)
+      Z = X_VECTOR(3,1)
+END SELECT
 
 END SUBROUTINE TRANSFORM_COORDINATES
 
@@ -3538,7 +3554,7 @@ ELSE
       CASE(SURF_CARTESIAN)   ; I_GRAD = 1
       CASE(SURF_CYLINDRICAL) ; I_GRAD = 2
       CASE(SURF_SPHERICAL)   ; I_GRAD = 3
-   END SELECT   
+   END SELECT
    RHO_H = 0._EB
    RHO = 0._EB
    ITMP = MIN(I_MAX_TEMP-1,INT(TMP_S))

@@ -931,8 +931,6 @@ REAL(EB):: MIN_CC_VOL, MAX_CC_VOL
 
 LOGICAL, ALLOCATABLE, DIMENSION(:) :: CC_COMPUTE_MESH, CC_COMPUTE_MESH_AUX
 
-REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: GEOM_ZMAX_AUX
-
 REAL(EB) :: TNOW
 
 LOGICAL :: WRITE_CFACE_STATS = .FALSE.
@@ -1297,11 +1295,6 @@ MAIN_MESH_LOOP : DO NM=1,NMESHES
    MESHES(NM)%CCVAR = 0
    MESHES(NM)%CCVAR(:,:,:,IBM_CGSC) = IBM_GASPHASE
 
-   ! When TERRAIN_CASE = TRUE, allocate GEOM_ZMAX for the mesh:
-   IF (TERRAIN_CASE) THEN
-      ALLOCATE(GEOM_ZMAX_AUX(ISTR:IEND,JSTR:JEND)); GEOM_ZMAX_AUX = -1._EB/GEOMEPS
-   ENDIF
-
    ! Write Mesh number allocation if GET_CUTCELLS_VERBOSE:
    IF(GET_CUTCELLS_VERBOSE) THEN
       WRITE(LU_SETCC,'(A)') ' '
@@ -1526,10 +1519,6 @@ MAIN_MESH_LOOP : DO NM=1,NMESHES
                      ENDIF
                   ENDIF
 
-                  ! Highest Z crossing for I,J=KK,INDX1(X1AXIS) location, clip at ZF+DZ(KBAR):
-                  IF(TERRAIN_CASE .AND. X2AXIS==KAXIS .AND. IBM_N_CRS>0) &
-                  GEOM_ZMAX_AUX(KK,INDX1(X1AXIS)) = MIN(X2FACE(KBP1),IBM_SVAR_CRS(IBM_N_CRS))
-
                   ! Now for this ray, set vertex types in MESHES(NM)%VERTVAR(:,:,:,IBM_VGSC):
                   CALL GET_X2_VERTVAR(X1AXIS,X2LO,X2HI,NM,I,KK)
 
@@ -1605,19 +1594,6 @@ MAIN_MESH_LOOP : DO NM=1,NMESHES
    CALL GET_CARTCELL_CUTCELLS(NM)
 
    ENDIF SNAP_IF
-
-   ! Case of terrain, populate GEOM_ZMAX:
-   IF (TERRAIN_CASE) THEN
-      IF(ALLOCATED(MESHES(NM)%GEOM_ZMAX)) DEALLOCATE(MESHES(NM)%GEOM_ZMAX)
-      ALLOCATE(MESHES(NM)%GEOM_ZMAX(0:IBAR,0:JBAR))
-      DO J=0,JBAR
-         DO I=0,IBAR
-            ! Clip at ZS-DZ(1):
-            MESHES(NM)%GEOM_ZMAX(I,J) = MAX(ZFACE(-1),GEOM_ZMAX_AUX(I,J))
-         ENDDO
-      ENDDO
-      DEALLOCATE(GEOM_ZMAX_AUX)
-   ENDIF
 
    ! Deallocate arrays:
    ! Face centered positions and cell sizes:
@@ -3491,7 +3467,27 @@ MESH_LOOP_2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       IF(NOM>0) THEN
          IF(MESHES(NOM)%N_CUTFACE_MESH==0) CYCLE EXTERNAL_WALL_LOOP_2
       ENDIF
+
       IF(WC%BOUNDARY_TYPE == INTERPOLATED_BOUNDARY) THEN
+
+         ! Skip if no cut-faces present on this WC:
+         ! Define underlying Cartesian faces indexes:
+         SELECT CASE(IOR)
+         CASE( IAXIS) ! Lower X boundary for Mesh NM. Note we are using ghost cell II,JJ,KK.
+            IIF = II    ; JJF = JJ    ; KKF = KK
+         CASE(-IAXIS) ! Higher X boundary for Mesh NM.
+            IIF = II - 1; JJF = JJ    ; KKF = KK
+         CASE( JAXIS) ! Lower Y boundary for Mesh NM.
+            IIF = II    ; JJF = JJ    ; KKF = KK
+         CASE(-JAXIS) ! Higher Y boundary for Mesh NM.
+            IIF = II    ; JJF = JJ - 1; KKF = KK
+         CASE( KAXIS) ! Lower Z boundary for Mesh NM.
+            IIF = II    ; JJF = JJ    ; KKF = KK
+         CASE(-KAXIS) ! Higher Z boundary for Mesh NM.
+            IIF = II    ; JJF = JJ    ; KKF = KK - 1
+         END SELECT
+         X1AXIS = ABS(IOR)
+         IF(FCVAR(IIF,JJF,KKF,IBM_FGSC,X1AXIS) == IBM_SOLID) CYCLE EXTERNAL_WALL_LOOP_2
 
          IF (MESHES(NM)%CCVAR(II,JJ,KK,IBM_CGSC) == IBM_CUTCFE) THEN
             TEST_ICC = .TRUE.
@@ -3776,8 +3772,9 @@ END SUBROUTINE SET_CUTCELLS_3D
 
 ! --------------------- BLOCK_IBM_SOLID_EXTWALLCELLS -----------------------------
 
-SUBROUTINE BLOCK_IBM_SOLID_EXTWALLCELLS
+SUBROUTINE BLOCK_IBM_SOLID_EXTWALLCELLS(FIRST_CALL)
 
+LOGICAL, INTENT(IN) :: FIRST_CALL
 
 ! Local variables:
 INTEGER :: NM,IW,IIF,JJF,KKF,II,JJ,KK,IOR,X1AXIS
@@ -3787,8 +3784,12 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    CALL POINT_TO_MESH(NM)
    EXTERNAL_WALL_LOOP : DO IW=1,N_EXTERNAL_WALL_CELLS
       WC=>WALL(IW)
+      IF (FIRST_CALL) THEN
+      IF(.NOT.(WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY)) CYCLE EXTERNAL_WALL_LOOP
+      ELSE
       IF(.NOT.(WC%BOUNDARY_TYPE==OPEN_BOUNDARY .OR. WC%BOUNDARY_TYPE==SOLID_BOUNDARY)) CYCLE EXTERNAL_WALL_LOOP ! Here we might need
                                                                                                   !to add other EXT wall cell types.
+      ENDIF
       II     = WC%ONE_D%II
       JJ     = WC%ONE_D%JJ
       KK     = WC%ONE_D%KK
@@ -3810,7 +3811,11 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          IIF = II    ; JJF = JJ    ; KKF = KK - 1
       END SELECT
       ! Change BOUNDARY_TYPE to null:
+      IF (FIRST_CALL) THEN
+      IF(FCVAR(IIF,JJF,KKF,IBM_FGSC,X1AXIS) == IBM_SOLID) WC%BOUNDARY_TYPE = SOLID_BOUNDARY
+      ELSE
       IF(FCVAR(IIF,JJF,KKF,IBM_FGSC,X1AXIS) == IBM_SOLID) WC%BOUNDARY_TYPE = NULL_BOUNDARY
+      ENDIF
    ENDDO EXTERNAL_WALL_LOOP
 ENDDO MESH_LOOP
 
@@ -19588,8 +19593,7 @@ USE GEOMETRY_FUNCTIONS, ONLY: TRANSFORM_COORDINATES
          ENDIF
          DO IVERT=1,G%N_VERTS
             VEC(1:3) = G%VERTS_BASE(3*IVERT-2:3*IVERT)
-            CALL TRANSFORM_COORDINATES(VEC(1),VEC(2),VEC(3),MOVE_INDEX) ! Eventually, time varying motion dealt with
-                                                                        ! here.
+            CALL TRANSFORM_COORDINATES(VEC(1),VEC(2),VEC(3),MOVE_INDEX,1) ! Eventually, time varying motion dealt with here.
             G%VERTS(3*IVERT-2:3*IVERT) = VEC(1:3)
          ENDDO
       ELSE

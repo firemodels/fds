@@ -11,6 +11,8 @@ SFPE 4th Ed. Figure 3-4.24. pg 3-132
 
 &TIME T_END=1200., WALL_INCREMENT=1, DT=0.01 /
 
+&DUMP DT_DEVC=10. /
+
 &SPEC ID='WATER VAPOR' /
 
 &VENT XB = -0.05,0.05,-0.05,0.05,-0.1,-0.1, SURF_ID='SAMPLE' /
@@ -26,12 +28,11 @@ SFPE 4th Ed. Figure 3-4.24. pg 3-132
       BLOWING             = T/
 
 &MATL ID                     = 'WATER'
-      EMISSIVITY             = 0.95
       DENSITY                = 1000.
       SPEC_ID                = 'WATER VAPOR'
       NU_SPEC                = 1
       HEAT_OF_REACTION       = 2260
-      CONDUCTIVITY           = 2.51
+      CONDUCTIVITY           = 0.6
       SPECIFIC_HEAT          = 4.181
       BOILING_TEMPERATURE    = 100.
       ABSORPTION_COEFFICIENT = 140. /

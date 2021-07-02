@@ -4,8 +4,16 @@
 
 &SURF ID        = 'POOL'
       COLOR     = 'YELLOW'
-      MATL_ID   = 'GASOLINE','VINYL'
-      THICKNESS = 0.001,0.05 /
+      MATL_ID(1,1:6) = 'HEXANE','HEPTANE','OCTANE','DECANE','BENZENE','TOLUENE'
+      MATL_MASS_FRACTION(1,1:6) = 0.521,0.054,0.063,0.023,0.200,0.139
+      MATL_ID(2,1)   = 'VINYL'
+      MATL_MASS_FRACTION(2,1) = 1.
+      THICKNESS = 0.001,0.05
+      EXTERNAL_FLUX=10
+      RAMP_EF='flux' /
+&RAMP ID='flux', T= 0, F=1 /
+&RAMP ID='flux', T= 4, F=1 /
+&RAMP ID='flux', T= 5, F=0 /
 
 &OBST XB=-.15,0.15,-.15,0.15,0.00,0.05, SURF_IDS='POOL','STEEL SHEET','STEEL SHEET' /
 &OBST XB=-.15,-.15,-.15,0.15,0.00,0.10, SURF_ID='STEEL SHEET' /
@@ -13,6 +21,6 @@
 &OBST XB=-.15,0.15,-.15,-.15,0.00,0.10, SURF_ID='STEEL SHEET' /
 &OBST XB=-.15,0.15,0.15,0.15,0.00,0.10, SURF_ID='STEEL SHEET' /
 
-&CATF OTHER_FILES='mesh_3cm_grid_30cm_pan.fds','props.fds' /
+&CATF OTHER_FILES='mesh_3cm_grid_30cm_pan.fds','gasoline.fds','props.fds' /
 
 &TAIL /

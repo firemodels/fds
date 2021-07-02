@@ -3,8 +3,6 @@
 !> \brief Scalable Recursive Clustering (ScaRC): Collection of alternative pressure solvers for the FDS pressure equation
 !
 !===========================================================================================================================
-#define WITH_SCARC_AMG
-#undef WITH_SCARC_VERBOSE
 
 
 !=======================================================================================================================
@@ -245,6 +243,9 @@ INTEGER, PARAMETER :: NSCARC_RELAX_MSSOR             = 12        !< Type of prec
 INTEGER, PARAMETER :: NSCARC_RELAX_OPTIMIZED         = 13        !< Type of preconditioner: Optimized mixture of MKL and FFT
 INTEGER, PARAMETER :: NSCARC_RELAX_SSOR              = 14        !< Type of preconditioner: SSOR-methods
 
+INTEGER, PARAMETER :: NSCARC_POISSON_INSEPARABLE     =  0        !< Poisson equation type: inseparable
+INTEGER, PARAMETER :: NSCARC_POISSON_SEPARABLE       =  1        !< Poisson equation type: separable
+
 INTEGER, PARAMETER :: NSCARC_SCOPE_GLOBAL            =  0        !< Scope of current solver: global
 INTEGER, PARAMETER :: NSCARC_SCOPE_LOCAL             =  1        !< Scope of current solver: local
 
@@ -412,9 +413,11 @@ TYPE SCARC_MESSAGE_TYPE
    CHARACTER(60) :: FILE_CPU                               !< Output file name for CPU measurements
    CHARACTER(60) :: FILE_MEM                               !< Output file name for memory management information
    CHARACTER(60) :: FILE_STAT                              !< Output file name for convergence statistcis
+   CHARACTER(60) :: FILE_VERBOSE                           !< Output file name for verbose messages
    INTEGER :: LU_CPU                                       !< Logical unit for CPU measurements
    INTEGER :: LU_MEM                                       !< Logical unit for memory management information
    INTEGER :: LU_STAT                                      !< Logical unit for convergence statistics
+   INTEGER :: LU_VERBOSE                                   !< Logical unit for verbose messages
 
 END TYPE SCARC_MESSAGE_TYPE
 
@@ -677,11 +680,10 @@ TYPE SCARC_MULTIGRID_TYPE
    INTEGER :: CYCLING(2) = 0                               !< Counter for multigrid cycling
    INTEGER :: N_PRESMOOTH, N_POSTSMOOTH                    !< Number of pre- and post-processing steps
 
-#ifdef WITH_SCARC_AMG
    REAL(EB) :: APPROX_SPECTRAL_RADIUS = 2.0_EB             !< Relaxation parameter (AMG only)
    REAL(EB) :: AMG_TOL = 0.25_EB                           !< Tolerance for coarsening (AMG only)
    REAL(EB) :: THETA = 0.10_EB                             !< Threshold for aggregation process (AMG only)
-#endif
+
 END TYPE SCARC_MULTIGRID_TYPE
 
 !> \brief Information related to discretization type (structured/unstructured)
@@ -762,7 +764,6 @@ TYPE SCARC_GRID_TYPE
    INTEGER :: NLEN_BUFFER_STENCIL = NSCARC_ZERO_INT            !< Length for stencil layer length exchange on that level
    INTEGER :: NLEN_BUFFER_FULL    = NSCARC_ZERO_INT            !< Length for full length exchange on that level
 
-#ifdef WITH_SCARC_AMG
    TYPE (SCARC_CMATRIX_TYPE) :: GALERKIN                       !< Galerkin matrix (AMG only)
    TYPE (SCARC_CMATRIX_TYPE) :: CONNECTION                     !< Strength of connection matrix (AMG only)
    TYPE (SCARC_CMATRIX_TYPE) :: ZONES                          !< Aggregation Zones matrix (AMG only)
@@ -802,7 +803,6 @@ TYPE SCARC_GRID_TYPE
    INTEGER :: N_COARSE  = NSCARC_ZERO_INT                      !< Number of coarse cells (AMG only)
    INTEGER :: N_ZONES   = NSCARC_ZERO_INT                      !< Number of zones (AMG only)
    INTEGER :: N_STENCIL_MAX  = 25                              !< Max stencil size (AMG only)
-#endif
 
 END TYPE SCARC_GRID_TYPE
 
@@ -1102,6 +1102,7 @@ IMPLICIT NONE (TYPE,EXTERNAL)
 CHARACTER(40) :: SCARC_GRID               = 'STRUCTURED'         !< Type of discretization (STRUCTURED/UNSTRUCTURED)
 CHARACTER(40) :: SCARC_METHOD             = 'NONE'               !< Type of global ScaRC solver (Krylov/MULTIGRID)
 CHARACTER(40) :: SCARC_MATRIX             = 'NONE'               !< Type of matrix storage (COMPACT/BANDWISE)
+CHARACTER(40) :: SCARC_POISSON            = 'SEPARABLE'          !< Type of Poisson equation (SEPARABLE/INSEPARABLE)
 CHARACTER(40) :: SCARC_STENCIL            = 'VARIABLE'           !< Type of matrix stencil (CONSTANT/VARIABLE)
 CHARACTER(40) :: SCARC_TWOLEVEL           = 'NONE'               !< Type of two-level method (NONE/ADDITIVE/MULTIPLICATIVE)
 
@@ -1176,12 +1177,15 @@ CHARACTER(6)  :: SCARC_MKL_PRECISION      = 'DOUBLE'             !< Single/doubl
 
 ! ---------- Dump out of error information and error handling
  
-LOGICAL :: SCARC_ERROR_FILE  = .FALSE.                           !< Print ScaRC statistics into chid_scarc.csv (TRUE/FALSE)
+LOGICAL :: SCARC_ERROR_FILE = .FALSE.                            !< Print ScaRC statistics into chid_scarc.csv (TRUE/FALSE)
+LOGICAL :: SCARC_VERBOSE = .FALSE.                               !< Print additional verbose messages (TRUE/FALSE)
 INTEGER :: IERROR  = 0                                           !< General error flag - used at different positions
 
 
 ! ---------- Logical indicators for different methods and mechanisms
   
+LOGICAL :: IS_SEPARABLE          = .TRUE.                        !< Flag for separable Poisson system
+LOGICAL :: IS_INSEPARABLE        = .FALSE.                       !< Flag for inseparable Poisson system
 LOGICAL :: IS_STRUCTURED         = .FALSE.                       !< Flag for structured discretization
 LOGICAL :: IS_UNSTRUCTURED       = .FALSE.                       !< Flag for unstructured discretization
 LOGICAL :: IS_PURE_NEUMANN       = .FALSE.                       !< Flag for pure Neumann system
@@ -1234,6 +1238,7 @@ INTEGER :: TYPE_MKL(0:10)           = NSCARC_MKL_NONE            !< Type of use 
 INTEGER :: TYPE_MKL_PRECISION       = NSCARC_PRECISION_DOUBLE    !< Type of double precision MKL solver
 INTEGER :: TYPE_MULTIGRID           = NSCARC_MULTIGRID_GEOMETRIC !< Type of multigrid method 
 INTEGER :: TYPE_PARENT              = NSCARC_UNDEF_INT           !< Type of parent (calling) solver
+INTEGER :: TYPE_POISSON             = NSCARC_POISSON_SEPARABLE   !< Type of Poisson equation
 INTEGER :: TYPE_PRECON              = NSCARC_UNDEF_INT           !< Type of preconditioner for iterative solver
 INTEGER :: TYPE_RELAX               = NSCARC_UNDEF_INT           !< Type of preconditioner for iterative solver
 INTEGER :: TYPE_SCOPE(0:2)          = NSCARC_SCOPE_GLOBAL        !< Type of method scopes
@@ -1281,8 +1286,10 @@ PUBLIC :: SCARC_ITERATIONS                !< Final number of needed iterations f
 PUBLIC :: SCARC_MATRIX                    !< Selection parameter for requested matrix storage technique (compact/bandwise)
 PUBLIC :: SCARC_METHOD                    !< Selection parameter for requested ScaRC variant (Krylov/Multigrid/LU)
 PUBLIC :: SCARC_MKL_PRECISION             !< Selection parameter for requested MKL precision (double/single)
+PUBLIC :: SCARC_POISSON                   !< Type of Poisson equation (separable/inseparable)
 PUBLIC :: SCARC_RESIDUAL                  !< Final residual after call of ScaRC solver
 PUBLIC :: SCARC_TWOLEVEL                  !< Selection parameter for possible twolevel variant (additive/multiplicative)
+PUBLIC :: SCARC_VERBOSE                   !< Selection parameter for additional verbose messages
 
 PUBLIC :: SCARC_COARSE                    !< Selection parameter for type of coarse grid solver (iterative/direct)
 PUBLIC :: SCARC_COARSE_ACCURACY           !< Requested accuracy for coarse grid solver
@@ -1547,12 +1554,10 @@ L => NULL();  LF => NULL();  LC => NULL()
 G => NULL();  GF => NULL();  GC => NULL()
 F => NULL();  FF => NULL();  FC => NULL()
 A => NULL();  AF => NULL();  AC => NULL()
-#ifdef WITH_SCARC_AMG
 P => NULL();  PF => NULL();  PC => NULL()
 R => NULL();  RF => NULL();  RC => NULL()
 C => NULL();  CF => NULL();  CC => NULL()
 Z => NULL();  ZF => NULL();  ZC => NULL()
-#endif
 
 END SUBROUTINE SCARC_POINT_TO_NONE
 
@@ -1738,14 +1743,12 @@ SELECT CASE(NTYPE)
       SCARC_POINT_TO_CMATRIX => G%LOWER
    CASE (NSCARC_MATRIX_UPPER)
       SCARC_POINT_TO_CMATRIX => G%UPPER
-#ifdef WITH_SCARC_AMG
    CASE (NSCARC_MATRIX_POISSON_PROL)
       SCARC_POINT_TO_CMATRIX => G%POISSON_PROL
    CASE (NSCARC_MATRIX_CONNECTION)
       SCARC_POINT_TO_CMATRIX => G%CONNECTION
    CASE (NSCARC_MATRIX_ZONES)
       SCARC_POINT_TO_CMATRIX => G%ZONES
-#endif
 END SELECT
 
 END FUNCTION SCARC_POINT_TO_CMATRIX
@@ -1784,14 +1787,12 @@ SELECT CASE(NTYPE)
       SCARC_POINT_TO_OTHER_CMATRIX => OG%PROLONGATION
    CASE (NSCARC_MATRIX_RESTRICTION)
       SCARC_POINT_TO_OTHER_CMATRIX => OG%RESTRICTION
-#ifdef WITH_SCARC_AMG
    CASE (NSCARC_MATRIX_POISSON_PROL)
       SCARC_POINT_TO_OTHER_CMATRIX => OG%POISSON_PROL
    CASE (NSCARC_MATRIX_CONNECTION)
       SCARC_POINT_TO_OTHER_CMATRIX => OG%CONNECTION
    CASE (NSCARC_MATRIX_ZONES)
       SCARC_POINT_TO_OTHER_CMATRIX => OG%ZONES
-#endif
 END SELECT
 
 END FUNCTION SCARC_POINT_TO_OTHER_CMATRIX
@@ -1987,6 +1988,7 @@ CONTAINS
 !> \brief Setup debug file if requested
 ! --------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_SETUP_MESSAGES
+INTEGER :: NM, LASTID
 
 IF (SCARC_ERROR_FILE) HAS_CSV_DUMP = .TRUE.
 
@@ -2002,9 +2004,33 @@ IF (HAS_CSV_DUMP) THEN
    ENDIF
 ENDIF
 
+! If verbose flag is set, open additional files for dumping more information about different ScaRC components
+!  - memory file for logging the memory requirement of the different arrays 
+!  - log file for detailed convergence information of the different methods in use
+
+IF (SCARC_VERBOSE) THEN
+   IF (MY_RANK == 0) THEN
+      WRITE (MSG%FILE_MEM, '(A,A)') TRIM(CHID),'.mem'
+      MSG%LU_MEM = GET_FILE_NUMBER()
+      OPEN (MSG%LU_MEM, FILE=MSG%FILE_MEM)
+      WRITE(MSG%LU_MEM,1000) 'Number','Rank','Name of array','Calling routine', &
+                             'State','Type','Dimension','Left1','Right1', &
+                             'Left2','Right2','Left3','Right3','Size(array)', &
+                             'Sum(LOGICAL)','Sum(INTEGER)','Sum(REAL_EB)','Sum(REAL_FB)'
+   ENDIF
+   LASTID = -NSCARC_HUGE_INT
+   DO NM=LOWER_MESH_INDEX, UPPER_MESH_INDEX
+      IF (MY_RANK == LASTID) CYCLE
+      WRITE (MSG%FILE_VERBOSE, '(A,A,i3.3)') TRIM(CHID),'.log',MY_RANK+1
+      MSG%LU_VERBOSE = GET_FILE_NUMBER()
+      OPEN (MSG%LU_VERBOSE, FILE=MSG%FILE_VERBOSE, ACTION = 'readwrite')
+      LASTID = MY_RANK
+   ENDDO
+ENDIF
+
+1000 FORMAT(A8,',',A8,',',A30,',',A40,',',A10,',',A10,',',A10,',',A10,',',A10,',',A10,',',A10,',',&
+            A10,',',A10,',',A15,',',A15,',',A15,',',A15,',',A15)
 END SUBROUTINE SCARC_SETUP_MESSAGES
-
-
 
 END MODULE SCARC_MESSAGES
 
@@ -2695,6 +2721,13 @@ SELECT CASE (NSTATE)
       CSTATE = ' '
 END SELECT
 
+IF (SCARC_VERBOSE .AND. MY_RANK == 0) THEN
+   WRITE(MSG%LU_MEM,1000) STORAGE%N_ARRAYS, STORAGE%IP, TRIM(AL%CNAME), TRIM(AL%CSCOPE), TRIM(CSTATE), TRIM(CTYPE), TRIM(CDIM), &
+                          AL%LBND(1), AL%RBND(1), AL%LBND(2), AL%RBND(2), AL%LBND(3), AL%RBND(3), &
+                          NWORK, STORAGE%NWORK_LOG, STORAGE%NWORK_INT, STORAGE%NWORK_REAL_EB, STORAGE%NWORK_REAL_FB
+ENDIF
+1000 FORMAT(I8,',',I8,',',A30,',',A40,',',A10,',',A10,',',A10,',',I10,',',&
+            I10,',',I10,',',I10,',',I10,',',I10,',',I15,',',I15,',',I15,',',I15,',',I15)
 END SUBROUTINE SCARC_UPDATE_STORAGE
 
 ! --------------------------------------------------------------------------------------------------------------
@@ -3642,8 +3675,9 @@ USE SCARC_MESSAGES
 
 IMPLICIT NONE (TYPE,EXTERNAL)
   
-REAL(EB) :: DT                                  !< TS width 
-REAL(EB) :: DTI                                 !< Inverse of TS width 
+REAL(EB) :: T                                   !< current time 
+REAL(EB) :: DT                                  !< current time step width
+REAL(EB) :: DTI                                 !< Inverse of time step width 
 REAL(EB) :: OMEGA                               !< Relaxation parameter for current solver
 REAL(EB) :: EPS                                 !< Requested accuracy for current solver
 REAL(EB) :: RES                                 !< Current residual of current solver
@@ -3679,15 +3713,18 @@ CONTAINS
 ! --------------------------------------------------------------------------------------------------------------
 !> \brief Set current iteration state
 ! --------------------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_SET_ITERATION_STATE (DT_CURRENT)
-REAL(EB), INTENT(IN) :: DT_CURRENT
+SUBROUTINE SCARC_SET_ITERATION_STATE (T_CURRENT, DT_CURRENT)
+REAL(EB), INTENT(IN) :: T_CURRENT, DT_CURRENT
 
+T   = T_CURRENT
 DT  = DT_CURRENT
 DTI = 1.0_EB/DT_CURRENT
 
 ITE_PRES = ITE_PRES + 1
 ITE_GLOBAL = ICYC
 
+IF (SCARC_VERBOSE) WRITE(MSG%LU_VERBOSE,1000) ICYC, ITE_PRES, T
+1000 FORMAT('========> Entering ScaRC-solver: #Time iteration = ',I6,': #Pressure Solution= ', I6,': Simulation Time = ', E11.3,/)
 END SUBROUTINE SCARC_SET_ITERATION_STATE
 
 ! --------------------------------------------------------------------------------------------------------------
@@ -3718,6 +3755,8 @@ SCARC_CONVERGENCE_STATE = NSTATE
 
 IF (HAS_CSV_DUMP) CALL SCARC_DUMP_CSV(ISM, NS, NL)
 
+IF (SCARC_VERBOSE .AND.  TYPE_SOLVER == NSCARC_SOLVER_MAIN) WRITE(MSG%LU_VERBOSE,1000) STACK(NS)%SOLVER%CNAME, NL, ITE, RES
+1000 FORMAT (A30,': Level=',I6,': Iteration = ',I6,': Residual = ',E11.3)
 END FUNCTION SCARC_CONVERGENCE_STATE
 
 ! --------------------------------------------------------------------------------------------------------------
@@ -3754,6 +3793,8 @@ ENDIF
 
 CALL SCARC_DUMP_CSV(0, NS, NL)
 
+IF (SCARC_VERBOSE .AND. TYPE_SOLVER == NSCARC_SOLVER_MAIN) WRITE(MSG%LU_VERBOSE,1000) CAPPA
+1000 FORMAT (T54,'---> Convergence Rate = ',E11.3,/)
 END SUBROUTINE SCARC_CONVERGENCE_RATE
 
 ! --------------------------------------------------------------------------------------------------------------
@@ -4642,6 +4683,17 @@ SELECT CASE (TRIM(PRES_METHOD))
       CALL SCARC_ERROR(NSCARC_ERROR_PARSE_INPUT, SCARC_GRID, NSCARC_NONE)
 END SELECT
  
+! ------------ Set type of Poisson equation (INSEPARABLE/SEPARABLE)
+
+  SELECT CASE (TRIM(SCARC_POISSON))
+     CASE ('INSEPARABLE')
+        TYPE_POISSON = NSCARC_POISSON_INSEPARABLE
+     CASE ('SEPARABLE')
+        TYPE_POISSON = NSCARC_POISSON_SEPARABLE
+     CASE DEFAULT
+        CALL SCARC_ERROR(NSCARC_ERROR_PARSE_INPUT, SCARC_POISSON, NSCARC_NONE)
+  END SELECT
+
 ! ------------ Set type of matrix storage (COMPACT/BANDWISE)
  
 SELECT CASE (TRIM(SCARC_MATRIX))
@@ -5070,6 +5122,9 @@ END SELECT
 
 ! -------- Define some logical variables - just for notational convenience
  
+IS_SEPARABLE    = (TYPE_POISSON == NSCARC_POISSON_SEPARABLE)
+IS_INSEPARABLE  = (TYPE_POISSON == NSCARC_POISSON_INSEPARABLE)
+
 IS_STRUCTURED   = (TYPE_GRID == NSCARC_GRID_STRUCTURED)
 IS_UNSTRUCTURED = (TYPE_GRID == NSCARC_GRID_UNSTRUCTURED)
 
@@ -5443,11 +5498,9 @@ RECEIVE_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 
       SELECT_EXCHANGE_TYPE: SELECT CASE (NTYPE)
 
-#ifdef WITH_SCARC_AMG
          CASE (NSCARC_EXCHANGE_AUXILIARY)
             CALL SCARC_RECV_MESSAGE_REAL (NM, NOM, NL, NSCARC_BUFFER_LAYER2, 'AUXILIARY')
 
-#endif
          CASE (NSCARC_EXCHANGE_BASIC_SIZES)
             CALL SCARC_RECV_MESSAGE_INT (NM, NOM, NL, NSCARC_BUFFER_BASIC, 'BASIC SIZES')
 
@@ -5460,13 +5513,11 @@ RECEIVE_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          CASE (NSCARC_EXCHANGE_CELL_SIZES)
             CALL SCARC_RECV_MESSAGE_REAL (NM, NOM, NL, NSCARC_BUFFER_BASIC, 'CELL SIZES')
 
-#ifdef WITH_SCARC_AMG
          CASE (NSCARC_EXCHANGE_LAYER2_NUMS)
             CALL SCARC_RECV_MESSAGE_INT (NM, NOM, NL, NSCARC_BUFFER_LAYER1, 'LAYER2_NUMS')
 
          CASE (NSCARC_EXCHANGE_LAYER2_VALS)
             CALL SCARC_RECV_MESSAGE_REAL (NM, NOM, NL, NSCARC_BUFFER_LAYER1, 'LAYER2_VALS')
-#endif
 
          CASE (NSCARC_EXCHANGE_MATRIX_COLS)
             CALL SCARC_RECV_MESSAGE_INT (NM, NOM, NL, NSCARC_BUFFER_FULL, 'POISSON COLS')
@@ -5492,10 +5543,8 @@ RECEIVE_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          CASE (NSCARC_EXCHANGE_MGM_VELO)
             CALL SCARC_RECV_MESSAGE_REAL (NM, NOM, NL, NSCARC_BUFFER_LAYER2, 'MGM_VELO')
 
-#ifdef WITH_SCARC_AMG
          CASE (NSCARC_EXCHANGE_NULLSPACE)
             CALL SCARC_RECV_MESSAGE_REAL (NM, NOM, NL, NSCARC_BUFFER_LAYER2, 'NULLSPACE')
-#endif
 
          CASE (NSCARC_EXCHANGE_PRESSURE)
             CALL SCARC_RECV_MESSAGE_REAL (NM, NOM, NL, NSCARC_BUFFER_LAYER1, 'PRESSURE')
@@ -5509,13 +5558,11 @@ RECEIVE_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          CASE (NSCARC_EXCHANGE_VECTOR_PLAIN)
             CALL SCARC_RECV_MESSAGE_REAL (NM, NOM, NL, NSCARC_BUFFER_LAYER1, 'VECTOR PLAIN')
 
-#ifdef WITH_SCARC_AMG
          CASE (NSCARC_EXCHANGE_ZONE_NEIGHBORS)
             CALL SCARC_RECV_MESSAGE_INT (NM, NOM, NL, NSCARC_BUFFER_LAYER4, 'ZONE NEIGHBORS')
 
          CASE (NSCARC_EXCHANGE_ZONE_TYPES)
             CALL SCARC_RECV_MESSAGE_INT (NM, NOM, NL, NSCARC_BUFFER_LAYER2, 'ZONE TYPES')
-#endif
 
          CASE DEFAULT
             CALL SCARC_ERROR(NSCARC_ERROR_EXCHANGE_RECV, SCARC_NONE, TYPE_EXCHANGE)
@@ -5543,11 +5590,9 @@ SEND_PACK_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 
       SEND_PACK_OMESHES_SELECT: SELECT CASE (NTYPE)
 
-#ifdef WITH_SCARC_AMG
          CASE (NSCARC_EXCHANGE_AUXILIARY)
             CALL SCARC_PACK_AUXILIARY(NL)
             CALL SCARC_SEND_MESSAGE_REAL (NM, NOM, NL, NSCARC_BUFFER_LAYER2, 'AUXILIARY')
-#endif
 
          CASE (NSCARC_EXCHANGE_BASIC_SIZES)
             CALL SCARC_PACK_BASIC_SIZES
@@ -5565,7 +5610,6 @@ SEND_PACK_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
             CALL SCARC_PACK_CELL_SIZES
             CALL SCARC_SEND_MESSAGE_REAL (NM, NOM, NL, NSCARC_BUFFER_BASIC, 'CELL SIZES')
 
-#ifdef WITH_SCARC_AMG
          CASE (NSCARC_EXCHANGE_LAYER2_NUMS)
             CALL SCARC_PACK_LAYER2_NUMS
             CALL SCARC_SEND_MESSAGE_INT (NM, NOM, NL, NSCARC_BUFFER_LAYER1, 'LAYER2_NUMS')
@@ -5573,7 +5617,6 @@ SEND_PACK_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          CASE (NSCARC_EXCHANGE_LAYER2_VALS)
             CALL SCARC_PACK_LAYER2_VALS
             CALL SCARC_SEND_MESSAGE_REAL (NM, NOM, NL, NSCARC_BUFFER_LAYER1, 'LAYER2_VALS')
-#endif
 
          CASE (NSCARC_EXCHANGE_MATRIX_SIZES)
             CALL SCARC_PACK_MATRIX_SIZES(NL)
@@ -5607,11 +5650,9 @@ SEND_PACK_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
             CALL SCARC_PACK_MGM_VELO(NM)
             CALL SCARC_SEND_MESSAGE_REAL (NM, NOM, NL, NSCARC_BUFFER_LAYER1, 'MGM_VELO')
 
-#ifdef WITH_SCARC_AMG
          CASE (NSCARC_EXCHANGE_NULLSPACE)
             CALL SCARC_PACK_NULLSPACE(NL)
             CALL SCARC_SEND_MESSAGE_REAL (NM, NOM, NL, NSCARC_BUFFER_LAYER2, 'NULLSPACE')
-#endif
 
          CASE (NSCARC_EXCHANGE_PRESSURE)
             CALL SCARC_PACK_PRESSURE(NM)
@@ -5629,7 +5670,6 @@ SEND_PACK_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
             CALL SCARC_PACK_VECTOR_PLAIN(NM, NL, NPARAM)
             CALL SCARC_SEND_MESSAGE_REAL (NM, NOM, NL, NSCARC_BUFFER_LAYER1, 'VECTOR PLAIN')
 
-#ifdef WITH_SCARC_AMG
          CASE (NSCARC_EXCHANGE_ZONE_NEIGHBORS)
             CALL SCARC_PACK_ZONE_NEIGHBORS(NL)
             CALL SCARC_SEND_MESSAGE_INT (NM, NOM, NL, NSCARC_BUFFER_LAYER4, 'ZONE NEIGHBORS')
@@ -5637,7 +5677,6 @@ SEND_PACK_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          CASE (NSCARC_EXCHANGE_ZONE_TYPES)
             CALL SCARC_PACK_ZONE_TYPES
             CALL SCARC_SEND_MESSAGE_INT (NM, NOM, NL, NSCARC_BUFFER_LAYER2, 'ZONE TYPES')
-#endif
 
          CASE DEFAULT
             CALL SCARC_ERROR(NSCARC_ERROR_EXCHANGE_SEND, SCARC_NONE, TYPE_EXCHANGE)
@@ -5668,10 +5707,8 @@ SEND_UNPACK_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 
       SEND_UNPACK_OMESHES_SELECT: SELECT CASE (NTYPE)
 
-#ifdef WITH_SCARC_AMG
          CASE (NSCARC_EXCHANGE_AUXILIARY)
             CALL SCARC_UNPACK_AUXILIARY (NM, NOM, NL)
-#endif
 
          CASE (NSCARC_EXCHANGE_BASIC_SIZES)
             CALL SCARC_UNPACK_BASIC_SIZES (NM, NOM)
@@ -5685,13 +5722,11 @@ SEND_UNPACK_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          CASE (NSCARC_EXCHANGE_CELL_SIZES)
             CALL SCARC_UNPACK_CELL_SIZES(NM, NOM)
 
-#ifdef WITH_SCARC_AMG
          CASE (NSCARC_EXCHANGE_LAYER2_NUMS)
             CALL SCARC_UNPACK_LAYER2_NUMS (NM, NOM)
 
          CASE (NSCARC_EXCHANGE_LAYER2_VALS)
             CALL SCARC_UNPACK_LAYER2_VALS (NM, NOM)
-#endif
 
          CASE (NSCARC_EXCHANGE_MATRIX_COLS)
             CALL SCARC_UNPACK_MATRIX_COLS (NM, NOM, NPARAM)
@@ -5717,10 +5752,8 @@ SEND_UNPACK_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          CASE (NSCARC_EXCHANGE_MGM_VELO)
             CALL SCARC_UNPACK_MGM_VELO (NM, NOM)
 
-#ifdef WITH_SCARC_AMG
          CASE (NSCARC_EXCHANGE_NULLSPACE)
             CALL SCARC_UNPACK_NULLSPACE (NM, NOM, NL)
-#endif
          CASE (NSCARC_EXCHANGE_PRESSURE)
             CALL SCARC_UNPACK_PRESSURE (NM, NOM)
 
@@ -5733,13 +5766,11 @@ SEND_UNPACK_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          CASE (NSCARC_EXCHANGE_VECTOR_PLAIN)
             CALL SCARC_UNPACK_VECTOR_PLAIN (NM, NOM, NL, NPARAM)
 
-#ifdef WITH_SCARC_AMG
          CASE (NSCARC_EXCHANGE_ZONE_NEIGHBORS)
             CALL SCARC_UNPACK_ZONE_NEIGHBORS (NM, NOM, NL)
 
          CASE (NSCARC_EXCHANGE_ZONE_TYPES)
             CALL SCARC_UNPACK_ZONE_TYPES (NM, NOM)
-#endif
 
          CASE DEFAULT
             CALL SCARC_ERROR(NSCARC_ERROR_EXCHANGE_SEND, SCARC_NONE, TYPE_EXCHANGE)
@@ -7073,7 +7104,6 @@ ENDDO
 END SUBROUTINE SCARC_PACK_MATRIX_COLS
 
 
-#ifdef WITH_SCARC_AMG
 ! --------------------------------------------------------------------------------------------------------------
 !> \brief Pack overlapping auxiliary vector 
 ! --------------------------------------------------------------------------------------------------------------
@@ -7432,7 +7462,6 @@ DO IOR0 = -3, 3
 ENDDO
 
 END SUBROUTINE SCARC_UNPACK_ZONE_TYPES
-#endif
 
 END MODULE SCARC_MPI
 
@@ -10051,9 +10080,6 @@ DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
       ENDIF
    ENDIF
 ENDDO
-
-! Debug FACE, WALL and DISCRET structures - only if directive SCARC_DEBUG is set
-
 
 END SUBROUTINE SCARC_SETUP_WALLS
 
@@ -14254,7 +14280,6 @@ END SUBROUTINE SCARC_PROLONGATION
 END MODULE SCARC_GMG
 
 
-#ifdef WITH_SCARC_AMG
 !=======================================================================================================================
 !
 ! MODULE SCARC_AMG
@@ -16751,7 +16776,6 @@ END MODULE SCARC_AMG
 
 
 
-#endif
 !=======================================================================================================================
 !
 ! MODULE SCARC_MGM
@@ -17138,11 +17162,29 @@ DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          MGM%ITE_POISSON = ITE                   ! ITE, CAPPA contain statistics of preceding structured CG-solution
          MGM%CAPPA_POISSON = CAPPA
 
+         IF (SCARC_VERBOSE) THEN
+            WRITE(MSG%LU_VERBOSE, 1100) ICYC, PRESSURE_ITERATIONS, TOTAL_PRESSURE_ITERATIONS, &
+                                        MGM%ITE_POISSON, MGM%CAPPA_POISSON, MGM%ITE, VELOCITY_ERROR_GLOBAL
+         ENDIF
+
       ! MGM iteration - after each unstructured homogeneous Laplace solution
 
       CASE (1)
 
          MGM%ITE = ITE_MGM
+
+         IF (SCARC_VERBOSE) THEN
+            IF (TYPE_MGM_LAPLACE == NSCARC_MGM_LAPLACE_CG) THEN
+               WRITE(MSG%LU_VERBOSE, 1200) ICYC, PRESSURE_ITERATIONS, TOTAL_PRESSURE_ITERATIONS, &
+                                           MGM%ITE_POISSON, MGM%CAPPA_POISSON, &
+                                           ITE, CAPPA, MGM%ITE, VELOCITY_ERROR_GLOBAL
+            ELSE
+               WRITE(MSG%LU_VERBOSE, 1201) ICYC, PRESSURE_ITERATIONS, TOTAL_PRESSURE_ITERATIONS, &
+                                           MGM%ITE_POISSON, MGM%CAPPA_POISSON, &
+                                           MGM%ITE, VELOCITY_ERROR_GLOBAL
+            ENDIF
+         ENDIF
+
          IF (TYPE_MGM_LAPLACE == NSCARC_MGM_LAPLACE_CG .AND. ITE > MGM%ITE_LAPLACE) THEN
             MGM%ITE_LAPLACE = MAX(ITE, MGM%ITE_LAPLACE)            ! Store worst Laplace-CG statistics
             MGM%CAPPA_LAPLACE = CAPPA
@@ -17155,12 +17197,54 @@ DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          CAPPA = MGM%CAPPA_POISSON   ! Reset to Krylov statistics of Poisson solution for statistics in chid.out
          ITE   = MGM%ITE_POISSON
 
+         IF (SCARC_VERBOSE) THEN
+            IF (VELOCITY_ERROR_GLOBAL <= VELOCITY_ERROR_MGM) THEN
+               IF (TYPE_MGM_LAPLACE == NSCARC_MGM_LAPLACE_CG) THEN
+                  WRITE(MSG%LU_VERBOSE, 1300) ICYC, PRESSURE_ITERATIONS, TOTAL_PRESSURE_ITERATIONS, &
+                                              MGM%ITE_POISSON, MGM%CAPPA_POISSON, &
+                                              MGM%ITE_LAPLACE, MGM%CAPPA_LAPLACE, &
+                                              MGM%ITE, VELOCITY_ERROR_GLOBAL, ' ... success'
+               ELSE
+                  WRITE(MSG%LU_VERBOSE, 1301) ICYC, PRESSURE_ITERATIONS, TOTAL_PRESSURE_ITERATIONS, &
+                                              MGM%ITE_POISSON, MGM%CAPPA_POISSON, &
+                                              MGM%ITE, VELOCITY_ERROR_GLOBAL, ' ... success'
+               ENDIF
+            ELSE
+               IF (TYPE_MGM_LAPLACE == NSCARC_MGM_LAPLACE_CG) THEN
+                  WRITE(MSG%LU_VERBOSE, 1300) ICYC, PRESSURE_ITERATIONS, TOTAL_PRESSURE_ITERATIONS, &
+                                              MGM%ITE_POISSON, MGM%CAPPA_POISSON, &
+                                              MGM%ITE_LAPLACE, MGM%CAPPA_LAPLACE, &
+                                              MGM%ITE, VELOCITY_ERROR_GLOBAL, ' ... failure'
+               ELSE
+                  WRITE(MSG%LU_VERBOSE, 1301) ICYC, PRESSURE_ITERATIONS, TOTAL_PRESSURE_ITERATIONS, &
+                                              MGM%ITE_POISSON, MGM%CAPPA_POISSON, &
+                                              MGM%ITE, VELOCITY_ERROR_GLOBAL, ' ... failure'
+               ENDIF
+            ENDIF
+         ENDIF
 
    END SELECT
    IF (VELOCITY_ERROR_GLOBAL <= VELOCITY_ERROR_MGM) SCARC_MGM_CONVERGENCE_STATE = NSCARC_MGM_SUCCESS
 
 ENDDO
 
+1100 FORMAT('ICYC ',I6, ', #PI: ', I6,', #TPI: ', I6, &
+            ' , #POIS: ',    I5, ' , RATE: ',    F6.2, &
+            ' , #MGM: ',     I5, ' , VEL_ERR: ', E10.2, a14)
+1200 FORMAT('ICYC ',I6, ', #PI: ', I6,', #TPI: ', I6, &
+            ' , #POIS: ',    I5, ' , RATE: ',    F6.2, &
+            ' , #LAPL:    ',    I5, ' , RATE:    ',    F6.2, &
+            ' , #MGM: ',     I5, ' , VEL_ERR: ', E10.2, a14,/)
+1201 FORMAT('ICYC ',I6, ', #PI: ', I6,', #TPI: ', I6, &
+            ' , #POIS: ',    I5, ' , RATE: ',    F6.2, &
+            ' , #MGM: ',     I5, ' , VEL_ERR: ', E10.2, a14,/)
+1300 FORMAT('ICYC ',I6, ', #PI: ', I6,', #TPI: ', I6, &
+            ' , #POIS: ',    I5, ' , RATE: ',    F6.2, &
+            ' , #LAPLmax: ', I5, ' , RATEmax: ', F6.2, &
+            ' , #MGM: ',     I5, ' , VEL_ERR: ', E10.2, a14,/)
+1301 FORMAT('ICYC ',I6, ', #PI: ', I6,', #TPI: ', I6, &
+            ' , #POIS: ',    I5, ' , RATE: ',    F6.2, &
+            ' , #MGM: ',     I5, ' , VEL_ERR: ', E10.2, a14,/)
 END FUNCTION SCARC_MGM_CONVERGENCE_STATE
 
 
@@ -17721,9 +17805,6 @@ DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 
 ENDDO
 
-!#ifdef WITH_SCARC_DEBUG
-!1000 FORMAT (A, ': IX, IY, IZ =', 3I6, ': ICU =', I6, ': HP =', E14.6)
-!#endif
 END SUBROUTINE SCARC_MGM_STORE
 
 
@@ -21809,9 +21890,6 @@ SUBROUTINE SCARC_SETUP
 USE SCARC_PARSER
 USE SCARC_GRIDS
 USE SCARC_STORAGE, ONLY: SCARC_SETUP_STORAGE
-#ifdef WITH_SCARC_DEBUG
-USE SCARC_MESSAGES, ONLY: SCARC_SETUP_MESSAGES
-#endif
 USE SCARC_MPI, ONLY: SCARC_SETUP_EXCHANGES, SCARC_SETUP_GLOBALS
 USE SCARC_CPU, ONLY: SCARC_SETUP_CPU
 USE SCARC_STACK, ONLY: SCARC_SETUP_VECTORS
@@ -21819,12 +21897,7 @@ USE SCARC_MATRICES, ONLY: SCARC_SETUP_SYSTEMS
 #ifdef WITH_MKL
 USE SCARC_MKL, ONLY: SCARC_SETUP_MKL_ENVIRONMENT
 #endif
-#ifdef WITH_SCARC_AMG
 USE SCARC_AMG, ONLY: SCARC_SETUP_AMG_ENVIRONMENT
-#endif
-#ifdef WITH_SCARC_POSTPROCESSING
-USE SCARC_POSTPROCESSING, ONLY: SCARC_SETUP_PRESSURE
-#endif
 USE SCARC_METHODS, ONLY: SCARC_SETUP_KRYLOV_ENVIRONMENT, SCARC_SETUP_MULTIGRID_ENVIRONMENT, &
                          SCARC_SETUP_MGM_ENVIRONMENT
 REAL(EB) :: TNOW
@@ -21867,9 +21940,7 @@ CALL SCARC_SETUP_SYSTEMS                              ; IF (STOP_STATUS==SETUP_S
 
 ! Setup information for algebraic multigrid if needed as preconditioner or main solver
 
-#ifdef WITH_SCARC_AMG
 IF (HAS_AMG_LEVELS) CALL SCARC_SETUP_AMG_ENVIRONMENT          
-#endif
 
 ! Setup environment for requested solver
 
@@ -21907,18 +21978,18 @@ END SUBROUTINE SCARC_SETUP
 ! --------------------------------------------------------------------------------------------------------------------
 !> \brief Call of requested ScaRC solver 
 ! --------------------------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_SOLVER(DT_CURRENT)
+SUBROUTINE SCARC_SOLVER(T_CURRENT, DT_CURRENT)
 USE SCARC_CONVERGENCE
 USE SCARC_METHODS, ONLY: SCARC_METHOD_KRYLOV, SCARC_METHOD_MULTIGRID, SCARC_METHOD_MGM
 #ifdef WITH_MKL
 USE SCARC_METHODS, ONLY: SCARC_METHOD_MKL
 #endif
-REAL (EB), INTENT(IN) :: DT_CURRENT
+REAL (EB), INTENT(IN) :: T_CURRENT, DT_CURRENT
 REAL (EB) :: TNOW
 
 TNOW = CURRENT_TIME()
 
-CALL SCARC_SET_ITERATION_STATE (DT_CURRENT)
+CALL SCARC_SET_ITERATION_STATE (T_CURRENT, DT_CURRENT)
 
 
 SELECT_METHOD: SELECT CASE (TYPE_METHOD)

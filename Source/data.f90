@@ -208,6 +208,13 @@ OUTPUT_QUANTITY(31)%NAME = 'SPECIFIC HEAT'
 OUTPUT_QUANTITY(31)%UNITS = 'kJ/kg/K'
 OUTPUT_QUANTITY(31)%SHORT_NAME = 'c_p'
 
+OUTPUT_QUANTITY(32)%NAME = 'ORIENTED VELOCITY'
+OUTPUT_QUANTITY(32)%UNITS = 'm/s'
+OUTPUT_QUANTITY(32)%SHORT_NAME = 'vel'
+OUTPUT_QUANTITY(32)%SLCF_APPROPRIATE = .FALSE.
+OUTPUT_QUANTITY(32)%ISOF_APPROPRIATE = .FALSE.
+OUTPUT_QUANTITY(32)%BNDF_APPROPRIATE = .FALSE.
+
 OUTPUT_QUANTITY(33)%NAME = 'CONDUCTIVITY'
 OUTPUT_QUANTITY(33)%UNITS = 'W/m/K'
 OUTPUT_QUANTITY(33)%SHORT_NAME = 'k'
@@ -3943,32 +3950,32 @@ END SUBROUTINE CALC_GAS_PROPS
 
 SUBROUTINE LOOKUP_CHI_R(FUEL,CHI_R)
 
-! For a given FUEL, send back the radiative fraction
+! For a given FUEL, send back the radiative fraction. Source: 5th SFPE Handbook.
 
 CHARACTER(LABEL_LENGTH),INTENT(IN) :: FUEL
 REAL(EB), INTENT(OUT) :: CHI_R
 
 SELECT CASE(FUEL)
-   CASE('ACETONE')     ; CHI_R = 0.27_EB
-   CASE('ACETYLENE')   ; CHI_R = 0.49_EB
-   CASE('BENZENE')     ; CHI_R = 0.60_EB
-   CASE('BUTANE')      ; CHI_R = 0.30_EB
-   CASE('DODECANE')    ; CHI_R = 0.40_EB
-   CASE('ETHANE')      ; CHI_R = 0.25_EB
-   CASE('ETHANOL')     ; CHI_R = 0.26_EB
-   CASE('ETHYLENE')    ; CHI_R = 0.25_EB
-   CASE('HYDROGEN')    ; CHI_R = 0.20_EB
-   CASE('ISOPROPANOL') ; CHI_R = 0.29_EB
-   CASE('METHANE')     ; CHI_R = 0.20_EB
-   CASE('METHANOL')    ; CHI_R = 0.22_EB
-   CASE('N-DECANE')    ; CHI_R = 0.40_EB
-   CASE('N-HEPTANE')   ; CHI_R = 0.40_EB
-   CASE('N-HEXANE')    ; CHI_R = 0.40_EB
-   CASE('N-PENTANE')   ; CHI_R = 0.40_EB
-   CASE('N-OCTANE')    ; CHI_R = 0.40_EB
-   CASE('PROPANE')     ; CHI_R = 0.30_EB
-   CASE('PROPYLENE')   ; CHI_R = 0.37_EB
-   CASE('TOLUENE')     ; CHI_R = 0.40_EB
+   CASE('ACETONE')     ; CHI_R = 0.27_EB  ! Table A.39, Appendix 3
+   CASE('ACETYLENE')   ; CHI_R = 0.49_EB  ! Table A.39, Appendix 3
+   CASE('BENZENE')     ; CHI_R = 0.60_EB  ! Table A.39, Appendix 3
+   CASE('BUTANE')      ; CHI_R = 0.31_EB  ! Table A.39, Appendix 3
+   CASE('DODECANE')    ; CHI_R = 0.40_EB  ! Table 66.14, Beyler chapter
+   CASE('ETHANE')      ; CHI_R = 0.25_EB  ! Table A.39, Appendix 3
+   CASE('ETHANOL')     ; CHI_R = 0.25_EB  ! Table A.39, Appendix 3
+   CASE('ETHYLENE')    ; CHI_R = 0.34_EB  ! Table A.39, Appendix 3
+   CASE('HYDROGEN')    ; CHI_R = 0.20_EB  ! Table 66.14, Beyler chapter
+   CASE('ISOPROPANOL') ; CHI_R = 0.29_EB  ! Table A.39, Appendix 3
+   CASE('METHANE')     ; CHI_R = 0.20_EB  ! Table 66.14, Beyler chapter
+   CASE('METHANOL')    ; CHI_R = 0.21_EB  ! Buch et al., C&F 108: 118-126 (1997)
+   CASE('N-DECANE')    ; CHI_R = 0.40_EB  ! Table 66.14, Beyler chapter
+   CASE('N-HEPTANE')   ; CHI_R = 0.40_EB  ! Table 66.14, Beyler chapter
+   CASE('N-HEXANE')    ; CHI_R = 0.40_EB  ! Table 66.14, Beyler chapter
+   CASE('N-PENTANE')   ; CHI_R = 0.40_EB  ! Table 66.14, Beyler chapter
+   CASE('N-OCTANE')    ; CHI_R = 0.40_EB  ! Table 66.14, Beyler chapter
+   CASE('PROPANE')     ; CHI_R = 0.29_EB  ! Table A.39, Appendix 3
+   CASE('PROPYLENE')   ; CHI_R = 0.37_EB  ! Table A.39, Appendix 3
+   CASE('TOLUENE')     ; CHI_R = 0.40_EB  ! Table 66.14, Beyler chapter
    CASE DEFAULT        ; CHI_R = 0.35_EB
 END SELECT
 

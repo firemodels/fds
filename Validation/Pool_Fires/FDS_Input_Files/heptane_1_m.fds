@@ -5,7 +5,7 @@
 
 &TIME T_END=400., WALL_INCREMENT=1 /
 
-&DUMP DT_DEVC=5., DT_HRR=5., SIG_FIGS=4, SIG_FIGS_EXP=2 /
+&DUMP DT_DEVC=10., DT_HRR=10., SIG_FIGS=4, SIG_FIGS_EXP=2 /
 
 &REAC FUEL               = 'N-HEPTANE'
       FYI                = 'Heptane C_7 H_16'
@@ -13,14 +13,13 @@
       SOOT_YIELD         = 0.037 /
 
 &MATL ID                     = 'N-HEPTANE LIQUID'
-      EMISSIVITY             = 1.
       NU_SPEC                = 1.
       SPEC_ID                = 'N-HEPTANE'
       HEAT_OF_REACTION       = 317
       CONDUCTIVITY           = 0.14
       SPECIFIC_HEAT          = 2.24
       DENSITY                = 675
-      ABSORPTION_COEFFICIENT = 333
+      ABSORPTION_COEFFICIENT = 187.5
       BOILING_TEMPERATURE    = 98.35 /
 
 &MATL ID            = 'STEEL'
@@ -32,7 +31,12 @@
 &SURF ID        = 'N-HEPTANE POOL'
       COLOR     = 'YELLOW'
       MATL_ID   = 'N-HEPTANE LIQUID'
-      THICKNESS = 0.1 /
+      THICKNESS = 0.1
+      EXTERNAL_FLUX=10
+      RAMP_EF='flux' /
+&RAMP ID='flux', T= 0, F=1 /
+&RAMP ID='flux', T= 4, F=1 /
+&RAMP ID='flux', T= 5, F=0 /
 
 &SURF ID        = 'STEEL SHEET'
       COLOR     = 'BLACK'
