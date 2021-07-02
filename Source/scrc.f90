@@ -554,6 +554,8 @@ TYPE SCARC_CMATRIX_TYPE
 
    CHARACTER(40) :: CNAME                              !< Name of matrix
 
+   LOGICAL :: CONDENSING_REQUIRED = .FALSE.            !< Flag to check if condensing is required (purely Neumann BCs)
+
 END TYPE SCARC_CMATRIX_TYPE
 
 !> \brief Bandwise storage technique for matrices
@@ -895,10 +897,12 @@ TYPE SCARC_LEVEL_TYPE
    TYPE (SCARC_MKL_TYPE)       :: MKL                          !< MKL preconditioner based on Intel MKL
 #endif
 
-   ! Coordinate information
+   ! Coordinate information (arrays only allocated for coarser levels, otherwise there is a pointer to official counterparts)
    REAL(EB), ALLOCATABLE, DIMENSION (:) :: XCOR, YCOR, ZCOR    !< Coordinate vectors in x-, y- and z-direction
    REAL(EB), ALLOCATABLE, DIMENSION (:) :: XMID, YMID, ZMID    !< Midpoint vectors in x-, y- and z-direction
    REAL(EB), ALLOCATABLE, DIMENSION (:) :: DXL, DYL, DZL       !< Step size vectors in x-, y- and z-direction
+   REAL(EB), ALLOCATABLE, DIMENSION (:) :: RDX, RDY, RDZ       !< Reciprocal of step widths between grid points
+   REAL(EB), ALLOCATABLE, DIMENSION (:) :: RDXN, RDYN, RDZN    !< Reciprocal of step widths between midpoints
    REAL(EB) :: DX , DY , DZ                                    !< Step sizes in x-, y- and z-direction
    REAL(EB) :: DX2, DY2, DZ2                                   !< Half step sizes in x-, y- and z-direction
    REAL(EB) :: DXH, DYH, DZH                                   !< Half step sizes in x-, y- and z-direction
@@ -1487,6 +1491,14 @@ REAL(EB), POINTER, DIMENSION(:):: ZCOR=>NULL()              !< Pointer to vector
 REAL(EB), POINTER, DIMENSION(:):: XMID=>NULL()              !< Pointer to vector of cell midpoints in x-direction
 REAL(EB), POINTER, DIMENSION(:):: YMID=>NULL()              !< Pointer to vector of cell midpoints in y-direction
 REAL(EB), POINTER, DIMENSION(:):: ZMID=>NULL()              !< Pointer to vector of cell midpoints in z-direction
+
+REAL(EB), POINTER, DIMENSION(:):: RDX=>NULL()               !< Pointer to reciprocal widths between grid points in x-direction
+REAL(EB), POINTER, DIMENSION(:):: RDY=>NULL()               !< Pointer to reciprocal widths between grid points in y-direction
+REAL(EB), POINTER, DIMENSION(:):: RDZ=>NULL()               !< Pointer to reciprocal widths between grid points in z-direction
+
+REAL(EB), POINTER, DIMENSION(:):: RDXN=>NULL()              !< Pointer to reciprocal widths between midpoints in x-direction
+REAL(EB), POINTER, DIMENSION(:):: RDYN=>NULL()              !< Pointer to reciprocal widths between midpoints in y-direction
+REAL(EB), POINTER, DIMENSION(:):: RDZN=>NULL()              !< Pointer to reciprocal widths between midpoints in z-direction
 
 REAL(EB), POINTER, DIMENSION(:,:):: BXS=>NULL()             !< Pointer to boundary values at x-min face
 REAL(EB), POINTER, DIMENSION(:,:):: BXF=>NULL()             !< Pointer to boundary values at x-max face
@@ -8946,6 +8958,15 @@ MESHES_LOOP1: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
       CALL SCARC_ALLOCATE_REAL1 (L%DYL, 0, L%NY, NSCARC_INIT_ZERO, 'L%DYL', CROUTINE)
       CALL SCARC_ALLOCATE_REAL1 (L%DZL, 0, L%NZ, NSCARC_INIT_ZERO, 'L%DZL', CROUTINE)
 
+      CALL SCARC_ALLOCATE_REAL1 (L%RDX, 0, L%NX, NSCARC_INIT_ZERO, 'L%RDX', CROUTINE)
+      CALL SCARC_ALLOCATE_REAL1 (L%RDY, 0, L%NY, NSCARC_INIT_ZERO, 'L%RDY', CROUTINE)
+      CALL SCARC_ALLOCATE_REAL1 (L%RDZ, 0, L%NZ, NSCARC_INIT_ZERO, 'L%RDZ', CROUTINE)
+
+      CALL SCARC_ALLOCATE_REAL1 (L%RDXN, 0, L%NX, NSCARC_INIT_ZERO, 'L%RDXN', CROUTINE)
+      CALL SCARC_ALLOCATE_REAL1 (L%RDYN, 0, L%NY, NSCARC_INIT_ZERO, 'L%RDYN', CROUTINE)
+      CALL SCARC_ALLOCATE_REAL1 (L%RDZN, 0, L%NZ, NSCARC_INIT_ZERO, 'L%RDZN', CROUTINE)
+
+
       ! Set step sizes between cell midpoints, use interior step sizes for ghost cells as initial values
       ! correct sizes for ghost cells are exchanged later
 
@@ -11306,36 +11327,26 @@ CONTAINS
 
 
 ! ------------------------------------------------------------------------------------------------------------------
-!> \brief Setup system of equations (Poisson matrix + BC's) for different variants of ScaRC
-! Define matrix stencils and initialize matrices and boundary conditions on all needed levels
+!> \brief Setup sizes for Poisson matrices on requested grid levels
 ! ------------------------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_SETUP_SYSTEMS
-USE SCARC_POINTERS, ONLY: SCARC_POINT_TO_GRID
-#ifdef WITH_MKL
-USE SCARC_POINTERS, ONLY: L
-INTEGER :: TYPE_MKL_SAVE(0:1), TYPE_SCOPE_SAVE(0:1)
-#endif
-INTEGER :: NM, NL
-  
-CROUTINE = 'SCARC_SETUP_SYSTEMS'
+SUBROUTINE SCARC_SETUP_POISSON_REQUIREMENTS
+INTEGER :: NL
 
-! ------ Setup sizes for system matrices
-  
-SELECT_SCARC_METHOD_SIZES: SELECT CASE (TYPE_METHOD)
+SELECT CASE (TYPE_METHOD)
 
    ! -------- Global Krylov method
 
    CASE (NSCARC_METHOD_KRYLOV)
    
-      CALL SCARC_SET_GRID_TYPE (TYPE_GRID)                      ! process specified discretization type
-      CALL SCARC_SETUP_POISSON_SIZES (NLEVEL_MIN)               ! setup sizes on finest level
+      CALL SCARC_SET_GRID_TYPE (TYPE_GRID)                          ! Process specified discretization type
+      CALL SCARC_SETUP_POISSON_SIZES (NLEVEL_MIN)                   ! Setup sizes on finest level
    
       IF (HAS_TWO_LEVELS .AND. .NOT.HAS_AMG_LEVELS) &
-         CALL SCARC_SETUP_POISSON_SIZES (NLEVEL_MAX)            ! twolevel-precon: also setup size for coarse level
+         CALL SCARC_SETUP_POISSON_SIZES (NLEVEL_MAX)                ! If twolevel-preconditioner: also setup size for coarse level
    
       IF (IS_CG_GMG) THEN                                                   
          DO NL=NLEVEL_MIN+1, NLEVEL_MAX
-            CALL SCARC_SETUP_POISSON_SIZES (NL)                 ! GMG-precon: also setup size for all other levels
+            CALL SCARC_SETUP_POISSON_SIZES (NL)                     ! If GMG-preconditioner: also setup size for all other levels
          ENDDO
       ENDIF
    
@@ -11343,252 +11354,32 @@ SELECT_SCARC_METHOD_SIZES: SELECT CASE (TYPE_METHOD)
 
    CASE (NSCARC_METHOD_MULTIGRID)
    
-      CALL SCARC_SET_GRID_TYPE (TYPE_GRID)                      ! process specified discretization type
+      CALL SCARC_SET_GRID_TYPE (TYPE_GRID)                          ! Process specified discretization type
+
       SELECT CASE (TYPE_MULTIGRID)
          CASE (NSCARC_MULTIGRID_GEOMETRIC)                                   
             DO NL=NLEVEL_MIN, NLEVEL_MAX
-               CALL SCARC_SETUP_POISSON_SIZES (NL)              ! GMG: setup size for all levels
+            CALL SCARC_SETUP_POISSON_SIZES (NL)                     ! If geometric multigrid: setup size for all levels
             ENDDO
-         CASE (NSCARC_MULTIGRID_ALGEBRAIC)                                   
-            CALL SCARC_SETUP_POISSON_SIZES (NLEVEL_MIN)         ! AMG: setup sizes only on finest level
+         CASE (NSCARC_MULTIGRID_ALGEBRAIC)
+            CALL SCARC_SETUP_POISSON_SIZES (NLEVEL_MIN)             ! If algebraic multigrid: setup sizes only on finest level
       END SELECT
    
-   ! -------- Global MGM method - currently just proof of concept
+   ! -------- Global MGM method 
 
    CASE (NSCARC_METHOD_MGM)
    
-      CALL SCARC_SET_GRID_TYPE (NSCARC_GRID_STRUCTURED)         ! First process structured discretization
+      CALL SCARC_SET_GRID_TYPE (NSCARC_GRID_STRUCTURED)             ! First process structured discretization
       CALL SCARC_SETUP_POISSON_SIZES (NLEVEL_MIN)        
    
-      CALL SCARC_SET_GRID_TYPE (NSCARC_GRID_UNSTRUCTURED)       ! Then process unstructured discretization
+      CALL SCARC_SET_GRID_TYPE (NSCARC_GRID_UNSTRUCTURED)           ! Then process unstructured discretization
       IF (SCARC_MGM_CHECK_LAPLACE .OR. SCARC_MGM_EXACT_INITIAL) &
-         CALL SCARC_SETUP_POISSON_SIZES (NLEVEL_MIN)            ! ... for global Poisson matrix (only if requested)
-      CALL SCARC_SETUP_LOCAL_LAPLACE_SIZES (NLEVEL_MIN)         ! ... for local Laplace matrices
+         CALL SCARC_SETUP_POISSON_SIZES (NLEVEL_MIN)                ! ... for global Poisson matrix (only if requested)
+      CALL SCARC_SETUP_LOCAL_LAPLACE_SIZES (NLEVEL_MIN)             ! ... for local Laplace matrices
    
-END SELECT SELECT_SCARC_METHOD_SIZES
+END SELECT 
 
-! ------ Assemble system matrices on requested grid levels and set boundary conditions
-  
-MESHES_POISSON_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
-
-   SELECT_SCARC_METHOD: SELECT CASE (TYPE_METHOD)
-
-      ! ---------- Krylov method (CG) as main solver, different preconditioners possible
-
-      CASE (NSCARC_METHOD_KRYLOV)
-
-         ! For all different possible Krylov variants, first setup Poisson matrix on finest level including BC's 
-
-         CALL SCARC_SETUP_POISSON (NM, NLEVEL_MIN)
-         CALL SCARC_SETUP_BOUNDARY(NM, NLEVEL_MIN)
-
-         ! Depending on the requested preconditioner, also assemble the Poisson matrix with BC's on specific coarser levels
-
-         SELECT_KRYLOV_PRECON: SELECT CASE (TYPE_PRECON)
-
-            ! In case of multigrid as preconditioner:
-            ! only build higher level structures in case of geometric multigrid (algebraic variant is done elsewhere)
-
-            CASE (NSCARC_RELAX_GMG)
-
-               IF (IS_CG_GMG) THEN
-                  DO NL = NLEVEL_MIN+1, NLEVEL_MAX
-                     CALL SCARC_SETUP_POISSON (NM, NL)
-                     CALL SCARC_SETUP_BOUNDARY(NM, NL)
-                  ENDDO
-               ENDIF
-
-#ifdef WITH_MKL
-            ! In case of LU-decomposition as preconditioner
-            ! locally acting: PARDISO from MKL as preconditioners on fine level with possible coarse grid correction
-
-            CASE (NSCARC_RELAX_MKL)
-
-               IF (TYPE_SCOPE(1) == NSCARC_SCOPE_LOCAL .AND. HAS_TWO_LEVELS .AND. .NOT.HAS_AMG_LEVELS) THEN
-                  CALL SCARC_SETUP_POISSON (NM, NLEVEL_MAX)
-                  CALL SCARC_SETUP_BOUNDARY(NM, NLEVEL_MAX)
-               ENDIF
-#endif
-
-            ! in case of default preconditioners (JACOBI/SSOR/FFT/...):
-            ! if there is an additional coarse grid correction which is NOT AMG-based, 
-            ! then also assemble matrix on coarse grid level
-
-            CASE DEFAULT
-   
-               IF (HAS_TWO_LEVELS .AND. .NOT.HAS_AMG_LEVELS) THEN
-                  CALL SCARC_SETUP_POISSON (NM, NLEVEL_MAX)
-                  CALL SCARC_SETUP_BOUNDARY(NM, NLEVEL_MAX)
-               ENDIF
-
-         END SELECT SELECT_KRYLOV_PRECON
-
-      ! ---------- Multigrid as main solver
-
-      CASE (NSCARC_METHOD_MULTIGRID)
-
-         ! For all different possible multigrid-variants, first setup Poisson matrix on finest level including BC's 
-
-         CALL SCARC_SETUP_POISSON (NM, NLEVEL_MIN)
-         CALL SCARC_SETUP_BOUNDARY(NM, NLEVEL_MIN)
-
-         ! On case of a  geometric multigrid, assemble standard n-point-matrix hierarchy on all coarser levels, too
-         ! Note: in case of an algebraic multigrid, this will be done in a separate routine later
-
-         IF (TYPE_MULTIGRID == NSCARC_MULTIGRID_GEOMETRIC) THEN
-            DO NL = NLEVEL_MIN + 1, NLEVEL_MAX
-               CALL SCARC_SETUP_POISSON (NM, NL)
-               CALL SCARC_SETUP_BOUNDARY(NM, NL)
-            ENDDO
-         ENDIF
-
-
-      ! ---------- McKenny-Greengard-Mayo method:
-      ! Solving for the structured and unstructured Poisson matrix
-      ! Assemble both, the structured and unstructured Poisson matrix
-      ! temporarily they will be stored separately in matrices AC and ACU due to the different
-      ! settings along internal boundary cells,
-      ! in the medium term, a toggle mechanism will be implemented which only switches the corresponding
-      ! entries while keeping the entries which are the same for both discretization types
-
-      CASE (NSCARC_METHOD_MGM)
-   
-         ! First assemble structured matrix with inhomogeneous boundary conditions
-
-         TYPE_SCOPE(0) = NSCARC_SCOPE_GLOBAL
-         CALL SCARC_SET_GRID_TYPE (NSCARC_GRID_STRUCTURED)
-         CALL SCARC_SETUP_POISSON (NM, NLEVEL_MIN)
-         CALL SCARC_SETUP_BOUNDARY(NM, NLEVEL_MIN)
-
-         ! Then assemble unstructured matrix with homogeneous Dirichlet boundary conditions along
-         ! external boundaries and special MGM BC-settings along mesh interfaces
-
-         CALL SCARC_SET_GRID_TYPE (NSCARC_GRID_UNSTRUCTURED)
-         IF (SCARC_MGM_CHECK_LAPLACE .OR. SCARC_MGM_EXACT_INITIAL) THEN
-            CALL SCARC_SETUP_POISSON (NM, NLEVEL_MIN)
-            CALL SCARC_SETUP_BOUNDARY(NM, NLEVEL_MIN)
-         ENDIF
-
-         TYPE_SCOPE(0) = NSCARC_SCOPE_LOCAL
-         CALL SCARC_SETUP_LAPLACE (NM, NLEVEL_MIN)
-         CALL SCARC_SETUP_BOUNDARY_WITH_INTERFACES(NM, NLEVEL_MIN) 
-         CALL SCARC_SET_GRID_TYPE (NSCARC_GRID_STRUCTURED)
-
-   END SELECT SELECT_SCARC_METHOD
-
-ENDDO MESHES_POISSON_LOOP
-
-! Setup mappings for the global numbering of vectors and the Poisson matrix (compact storage technique only)
- 
-IF (TYPE_MATRIX == NSCARC_MATRIX_COMPACT) THEN
-   IF (IS_MGM) THEN
-
-      TYPE_SCOPE = NSCARC_SCOPE_GLOBAL
-      CALL SCARC_SET_GRID_TYPE(NSCARC_GRID_STRUCTURED)
-      CALL SCARC_SETUP_GLOBAL_CELL_MAPPING(NLEVEL_MIN)
-      CALL SCARC_SETUP_GLOBAL_POISSON_COLUMNS(NLEVEL_MIN)
-
-      IF (SCARC_MGM_CHECK_LAPLACE .OR. SCARC_MGM_EXACT_INITIAL) THEN
-         CALL SCARC_SET_GRID_TYPE(NSCARC_GRID_UNSTRUCTURED)
-         CALL SCARC_SETUP_GLOBAL_CELL_MAPPING(NLEVEL_MIN)
-         CALL SCARC_SETUP_GLOBAL_POISSON_COLUMNS(NLEVEL_MIN)
-      ENDIF
-
-   ELSE
-
-      CALL SCARC_SETUP_GLOBAL_CELL_MAPPING(NLEVEL_MIN)
-      CALL SCARC_SETUP_GLOBAL_POISSON_COLUMNS(NLEVEL_MIN)
-
-   ENDIF
-ENDIF
- 
-! If there is more than one mesh, exchange matrix values in overlapping parts
-! This must be done for all multilevel methods at least at the finest grid level
-! Furthermore also at all higher levels except for the AMG method,
-! in this case it will be done later in routine SETUP_ALGEBRAIC_MULTIGRID
-
-IF (SET_MATRIX_TYPE(NLEVEL_MIN) == NSCARC_MATRIX_COMPACT) CALL SCARC_SETUP_GLOBAL_POISSON_OVERLAPS(NLEVEL_MIN)
-
-MULTI_LEVEL_IF: IF (HAS_MULTIPLE_LEVELS .AND. .NOT.HAS_AMG_LEVELS) THEN
-   DO NL = NLEVEL_MIN+1, NLEVEL_MAX
-      IF (SET_MATRIX_TYPE(NL) /= NSCARC_MATRIX_COMPACT) CYCLE
-      CALL SCARC_SETUP_GLOBAL_CELL_MAPPING(NL)
-      CALL SCARC_SETUP_GLOBAL_POISSON_COLUMNS(NL)
-      CALL SCARC_SETUP_GLOBAL_POISSON_OVERLAPS(NL)
-   ENDDO 
-ENDIF MULTI_LEVEL_IF
-
-! ------ If MKL-solver is used on specific levels, then setup symmetric Poisson matrix there
-#ifdef WITH_MKL
-IF (.NOT. IS_MGM) THEN
-
-   DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
-
-      CALL SCARC_POINT_TO_GRID (NM, NLEVEL_MIN)
-      IF (TYPE_PRECON == NSCARC_RELAX_OPTIMIZED .OR. TYPE_SMOOTH == NSCARC_RELAX_OPTIMIZED) THEN
-         IF (.NOT.L%HAS_OBSTRUCTIONS) TYPE_MKL(NLEVEL_MIN) = NSCARC_MKL_NONE
-      ENDIF
-      IF (TYPE_MKL(NLEVEL_MIN) /= NSCARC_MKL_NONE) THEN
-         CALL SCARC_SETUP_MATRIX_MKL(NSCARC_MATRIX_POISSON, NM, NLEVEL_MIN)
-         CALL SCARC_SETUP_BOUNDARY_MKL(NSCARC_MATRIX_POISSON, NM, NLEVEL_MIN)
-      ENDIF
-
-      IF (HAS_GMG_LEVELS) THEN
-         DO NL = NLEVEL_MIN+1, NLEVEL_MAX
-            CALL SCARC_POINT_TO_GRID (NM, NL)
-            IF (TYPE_PRECON == NSCARC_RELAX_OPTIMIZED .OR. TYPE_SMOOTH == NSCARC_RELAX_OPTIMIZED) THEN
-               IF (.NOT.L%HAS_OBSTRUCTIONS) TYPE_MKL(NL) = NSCARC_MKL_NONE
-            ENDIF
-            IF (TYPE_MKL(NL) /= NSCARC_MKL_NONE)  CALL SCARC_SETUP_MATRIX_MKL  (NSCARC_MATRIX_POISSON, NM, NL)
-            IF (TYPE_MKL(NL) == NSCARC_MKL_LOCAL) CALL SCARC_SETUP_BOUNDARY_MKL(NSCARC_MATRIX_POISSON, NM, NL)
-         ENDDO
-      ENDIF
-
-   ENDDO 
-
-ELSE 
-
-   CALL SCARC_SET_GRID_TYPE (NSCARC_GRID_UNSTRUCTURED)
-
-   TYPE_SCOPE_SAVE(0:1) = TYPE_SCOPE(0:1)
-   TYPE_MKL_SAVE(0:1) = TYPE_MKL(0:1)
-   IF (SCARC_MGM_CHECK_LAPLACE .OR. SCARC_MGM_EXACT_INITIAL) THEN
-      TYPE_SCOPE(0) = NSCARC_SCOPE_GLOBAL
-      IF (TRIM(SCARC_PRECON) == 'CLUSTER') THEN
-         TYPE_MKL(NLEVEL_MIN) = NSCARC_MKL_GLOBAL
-      ELSE
-         TYPE_MKL(NLEVEL_MIN) = NSCARC_MKL_LOCAL
-      ENDIF
-      DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
-         CALL SCARC_POINT_TO_GRID (NM, NLEVEL_MIN)
-         CALL SCARC_SETUP_MATRIX_MKL(NSCARC_MATRIX_POISSON, NM, NLEVEL_MIN)
-         CALL SCARC_SETUP_BOUNDARY_MKL(NSCARC_MATRIX_POISSON, NM, NLEVEL_MIN)
-      ENDDO 
-   ENDIF
-
-   TYPE_SCOPE(0:1) = NSCARC_SCOPE_LOCAL
-   TYPE_MKL(0:1) = NSCARC_MKL_LOCAL
-   SELECT CASE (TYPE_MGM_LAPLACE)
-      CASE (NSCARC_MGM_LAPLACE_CG, NSCARC_MGM_LAPLACE_PARDISO) 
-         DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
-            CALL SCARC_POINT_TO_GRID (NM, NLEVEL_MIN)
-            CALL SCARC_SETUP_MATRIX_MKL (NSCARC_MATRIX_LAPLACE, NM, NLEVEL_MIN)
-         ENDDO 
-      CASE (NSCARC_MGM_LAPLACE_OPTIMIZED) 
-         DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
-            CALL SCARC_POINT_TO_GRID (NM, NLEVEL_MIN)
-            IF (L%STRUCTURED%NC > L%UNSTRUCTURED%NC) CALL SCARC_SETUP_MATRIX_MKL (NSCARC_MATRIX_LAPLACE, NM, NLEVEL_MIN)
-         ENDDO 
-   END SELECT
-   
-   TYPE_SCOPE(0:1) = TYPE_SCOPE_SAVE(0:1)
-   TYPE_MKL(0:1) = TYPE_MKL_SAVE(0:1)
-   CALL SCARC_SET_GRID_TYPE (NSCARC_GRID_STRUCTURED)
-
-ENDIF
-#endif
-
-END SUBROUTINE SCARC_SETUP_SYSTEMS
+END SUBROUTINE SCARC_SETUP_POISSON_REQUIREMENTS
 
 
 ! --------------------------------------------------------------------------------------------------------------
@@ -11766,6 +11557,171 @@ ENDDO MESHES_LOOP
 END SUBROUTINE SCARC_SETUP_LOCAL_LAPLACE_SIZES
 
 
+! ------------------------------------------------------------------------------------------------------------------
+!> \brief Build either separable or inseparable Poisson system with boundary conditions on requested grid levels 
+! ------------------------------------------------------------------------------------------------------------------
+SUBROUTINE SCARC_SETUP_POISSON_SYSTEMS
+INTEGER :: NM, NL
+
+MESHES_POISSON_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
+
+   SELECT_SCARC_METHOD: SELECT CASE (TYPE_METHOD)
+
+      ! ---------- Krylov method (CG) as main solver, different preconditioners possible
+
+      CASE (NSCARC_METHOD_KRYLOV)
+
+         ! For all different possible Krylov variants, first setup Poisson matrix on finest level including BC's 
+
+         CALL SCARC_SETUP_POISSON (NM, NLEVEL_MIN)
+         CALL SCARC_SETUP_BOUNDARY(NM, NLEVEL_MIN)
+
+         ! Depending on the requested preconditioner, also assemble the Poisson matrix with BC's on specific coarser levels
+
+         SELECT_KRYLOV_PRECON: SELECT CASE (TYPE_PRECON)
+
+            ! In case of multigrid as preconditioner:
+            ! only build higher level structures in case of geometric multigrid (algebraic variant is done elsewhere)
+
+            CASE (NSCARC_RELAX_GMG)
+
+               IF (IS_CG_GMG) THEN
+                  DO NL = NLEVEL_MIN+1, NLEVEL_MAX
+                     CALL SCARC_SETUP_POISSON (NM, NL)
+                     CALL SCARC_SETUP_BOUNDARY(NM, NL)
+                  ENDDO
+               ENDIF
+
+#ifdef WITH_MKL
+            ! In case of LU-decomposition as preconditioner
+            ! locally acting: PARDISO from MKL as preconditioners on fine level with possible coarse grid correction
+
+            CASE (NSCARC_RELAX_MKL)
+
+               IF (TYPE_SCOPE(1) == NSCARC_SCOPE_LOCAL .AND. HAS_TWO_LEVELS .AND. .NOT.HAS_AMG_LEVELS) THEN
+                  CALL SCARC_SETUP_POISSON (NM, NLEVEL_MAX)
+                  CALL SCARC_SETUP_BOUNDARY(NM, NLEVEL_MAX)
+               ENDIF
+#endif
+
+            ! in case of default preconditioners (JACOBI/SSOR/FFT/...):
+            ! if there is an additional coarse grid correction which is NOT AMG-based, 
+            ! then also assemble matrix on coarse grid level
+
+            CASE DEFAULT
+   
+               IF (HAS_TWO_LEVELS .AND. .NOT.HAS_AMG_LEVELS) THEN
+                  CALL SCARC_SETUP_POISSON (NM, NLEVEL_MAX)
+                  CALL SCARC_SETUP_BOUNDARY(NM, NLEVEL_MAX)
+               ENDIF
+
+         END SELECT SELECT_KRYLOV_PRECON
+
+      ! ---------- Multigrid as main solver
+
+      CASE (NSCARC_METHOD_MULTIGRID)
+
+         ! For all different possible multigrid-variants, first setup Poisson matrix on finest level including BC's 
+
+         CALL SCARC_SETUP_POISSON (NM, NLEVEL_MIN)
+         CALL SCARC_SETUP_BOUNDARY(NM, NLEVEL_MIN)
+
+         ! On case of a  geometric multigrid, assemble standard n-point-matrix hierarchy on all coarser levels, too
+         ! Note: in case of an algebraic multigrid, this will be done in a separate routine later
+
+         IF (TYPE_MULTIGRID == NSCARC_MULTIGRID_GEOMETRIC) THEN
+            DO NL = NLEVEL_MIN + 1, NLEVEL_MAX
+               CALL SCARC_SETUP_POISSON (NM, NL)
+               CALL SCARC_SETUP_BOUNDARY(NM, NL)
+            ENDDO
+         ENDIF
+
+      ! ---------- McKenny-Greengard-Mayo method:
+      ! Solving for the structured and unstructured Poisson matrix
+      ! Assemble both, the structured and unstructured Poisson matrix
+      ! temporarily they will be stored separately in matrices AC and ACU due to the different
+      ! settings along internal boundary cells,
+      ! in the medium term, a toggle mechanism will be implemented which only switches the corresponding
+      ! entries while keeping the entries which are the same for both discretization types
+
+      CASE (NSCARC_METHOD_MGM)
+   
+         ! First assemble structured matrix with inhomogeneous boundary conditions
+
+         TYPE_SCOPE(0) = NSCARC_SCOPE_GLOBAL
+         CALL SCARC_SET_GRID_TYPE (NSCARC_GRID_STRUCTURED)
+         CALL SCARC_SETUP_POISSON (NM, NLEVEL_MIN)
+         CALL SCARC_SETUP_BOUNDARY(NM, NLEVEL_MIN)
+
+         ! Then assemble unstructured matrix with homogeneous Dirichlet boundary conditions along
+         ! external boundaries and special MGM BC-settings along mesh interfaces
+
+         CALL SCARC_SET_GRID_TYPE (NSCARC_GRID_UNSTRUCTURED)
+         IF (SCARC_MGM_CHECK_LAPLACE .OR. SCARC_MGM_EXACT_INITIAL) THEN
+            CALL SCARC_SETUP_POISSON (NM, NLEVEL_MIN)
+            CALL SCARC_SETUP_BOUNDARY(NM, NLEVEL_MIN)
+         ENDIF
+
+         TYPE_SCOPE(0) = NSCARC_SCOPE_LOCAL
+         CALL SCARC_SETUP_LAPLACE (NM, NLEVEL_MIN)
+         CALL SCARC_SETUP_BOUNDARY_WITH_INTERFACES(NM, NLEVEL_MIN) 
+         CALL SCARC_SET_GRID_TYPE (NSCARC_GRID_STRUCTURED)
+
+   END SELECT SELECT_SCARC_METHOD
+
+ENDDO MESHES_POISSON_LOOP
+
+! Make Poisson matrices globally acting on the existing levels 
+ 
+CALL SCARC_MAKE_POISSON_GLOBAL
+
+END SUBROUTINE SCARC_SETUP_POISSON_SYSTEMS
+
+
+! --------------------------------------------------------------------------------------------------------------
+!> \brief Make Poisson matrix globally acting, that is, setup all overlapping information of global matrix
+! --------------------------------------------------------------------------------------------------------------
+SUBROUTINE SCARC_MAKE_POISSON_GLOBAL
+INTEGER :: NL
+ 
+! Setup mappings for the global numbering of vectors and Poisson matrix (compact storage technique only)
+
+IF (TYPE_MATRIX == NSCARC_MATRIX_COMPACT) THEN
+   IF (IS_MGM) THEN
+      TYPE_SCOPE = NSCARC_SCOPE_GLOBAL
+      CALL SCARC_SET_GRID_TYPE(NSCARC_GRID_STRUCTURED)
+      CALL SCARC_SETUP_GLOBAL_CELL_MAPPING(NLEVEL_MIN)
+      CALL SCARC_SETUP_GLOBAL_POISSON_COLUMNS(NLEVEL_MIN)
+      IF (SCARC_MGM_CHECK_LAPLACE .OR. SCARC_MGM_EXACT_INITIAL) THEN
+         CALL SCARC_SET_GRID_TYPE(NSCARC_GRID_UNSTRUCTURED)
+         CALL SCARC_SETUP_GLOBAL_CELL_MAPPING(NLEVEL_MIN)
+         CALL SCARC_SETUP_GLOBAL_POISSON_COLUMNS(NLEVEL_MIN)
+      ENDIF
+   ELSE
+      CALL SCARC_SETUP_GLOBAL_CELL_MAPPING(NLEVEL_MIN)
+      CALL SCARC_SETUP_GLOBAL_POISSON_COLUMNS(NLEVEL_MIN)
+   ENDIF
+ENDIF
+ 
+! If there is more than one mesh, exchange matrix values in overlapping parts
+! This must be done for all multilevel methods at least at the finest grid level
+! Furthermore also at all higher levels except for the AMG method,
+! in this case it will be done later in routine SETUP_ALGEBRAIC_MULTIGRID
+
+IF (SET_MATRIX_TYPE(NLEVEL_MIN) == NSCARC_MATRIX_COMPACT) CALL SCARC_SETUP_GLOBAL_POISSON_OVERLAPS(NLEVEL_MIN)
+
+MULTI_LEVEL_IF: IF (HAS_MULTIPLE_LEVELS .AND. .NOT.HAS_AMG_LEVELS) THEN
+   DO NL = NLEVEL_MIN+1, NLEVEL_MAX
+      IF (SET_MATRIX_TYPE(NL) /= NSCARC_MATRIX_COMPACT) CYCLE
+      CALL SCARC_SETUP_GLOBAL_CELL_MAPPING(NL)
+      CALL SCARC_SETUP_GLOBAL_POISSON_COLUMNS(NL)
+      CALL SCARC_SETUP_GLOBAL_POISSON_OVERLAPS(NL)
+   ENDDO 
+ENDIF MULTI_LEVEL_IF
+
+END SUBROUTINE SCARC_MAKE_POISSON_GLOBAL
+
+
 ! -------------------------------------------------------------------------------------------------------------
 !> \brief Get global numberings for compact column vector of Poisson matrix 
 ! -------------------------------------------------------------------------------------------------------------
@@ -11865,7 +11821,7 @@ END FUNCTION SCARC_CELL_WITHIN_MESH
 !    explanation to come ...
 ! --------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_SETUP_POISSON (NM, NL)
-USE SCARC_POINTERS, ONLY: S, L, G, A, AB, OA, OAB, &
+USE SCARC_POINTERS, ONLY: M, S, L, G, A, AB, OA, OAB, RDX, RDY, RDZ, RDXN, RDYN, RDZN, &
                           SCARC_POINT_TO_GRID,    SCARC_POINT_TO_OTHER_GRID, &
                           SCARC_POINT_TO_CMATRIX, SCARC_POINT_TO_OTHER_CMATRIX, &
                           SCARC_POINT_TO_BMATRIX, SCARC_POINT_TO_OTHER_BMATRIX
@@ -11890,6 +11846,14 @@ SELECT_STORAGE_TYPE: SELECT CASE (SET_MATRIX_TYPE(NL))
       CALL SCARC_POINT_TO_GRID (NM, NL)                                    
       A => SCARC_POINT_TO_CMATRIX (NSCARC_MATRIX_POISSON)
       CALL SCARC_ALLOCATE_CMATRIX (A, NL, NSCARC_PRECISION_DOUBLE, NSCARC_MATRIX_FULL, 'G%POISSON', CROUTINE)
+
+      IF (NL == NLEVEL_MIN) THEN
+         RDX  => M%RDX ;  RDY  => M%RDY ;  RDZ  => M%RDZ
+         RDXN => M%RDXN;  RDYN => M%RDYN;  RDZN => M%RDZN
+      ELSE
+         RDX  => L%RDX ;  RDY  => L%RDY ;  RDZ  => L%RDZ
+         RDXN => L%RDXN;  RDYN => L%RDYN;  RDZN => L%RDZN
+      ENDIF
 
       ! For every neighbor allocate small matrix on overlapping part of mesh
 
@@ -11932,6 +11896,7 @@ SELECT_STORAGE_TYPE: SELECT CASE (SET_MATRIX_TYPE(NL))
       A%N_VAL = IP
    
       CALL SCARC_GET_MATRIX_STENCIL_MAX(A, G%NC)
+      CALL SCARC_MATRIX_CHECK_NEUMANN(A, G%NC)
 
  
    ! ---------- bandwise storage technique
@@ -12564,7 +12529,113 @@ ENDDO
 END SUBROUTINE SCARC_GET_MATRIX_STENCIL_MAX
 
 
+! --------------------------------------------------------------------------------------------------------------
+!> \brief Check if matrix only has Neumann BCs and condensing will be required
+! --------------------------------------------------------------------------------------------------------------
+SUBROUTINE SCARC_MATRIX_CHECK_NEUMANN (A, NC)
+TYPE (SCARC_CMATRIX_TYPE), INTENT(INOUT) :: A
+REAL(EB):: ROW_SUM
+INTEGER, INTENT(IN) :: NC
+INTEGER :: IC, ICOL
+
+A%CONDENSING_REQUIRED = .TRUE.
+ROW_LOOP: DO IC = 1, NC
+   ROW_SUM = 0.0_EB
+   DO ICOL = A%ROW(IC), A%ROW(IC+1)-1
+      ROW_SUM = ROW_SUM + A%VAL(ICOL)
+   ENDDO
+   IF (ROW_SUM > TWO_EPSILON_EB) THEN
+      A%CONDENSING_REQUIRED = .FALSE.
+      EXIT ROW_LOOP
+   ENDIF
+ENDDO ROW_LOOP
+
+END SUBROUTINE SCARC_MATRIX_CHECK_NEUMANN
+
+
 #ifdef WITH_MKL
+! --------------------------------------------------------------------------------------------------------------
+!> \brief Setup symmetric version of Poisson matrix needed for all types of IntelMKL preconditioning (MKL only)
+! --------------------------------------------------------------------------------------------------------------
+SUBROUTINE SCARC_SETUP_POISSON_SYMMETRIC
+USE SCARC_POINTERS, ONLY: L, SCARC_POINT_TO_GRID
+INTEGER :: NM, NL, TYPE_MKL_SAVE(0:1), TYPE_SCOPE_SAVE(0:1)
+
+! Default version for all solvers except of MGM-method: Symmetrization must only be done for chosen grid type
+! (structured or unstructured) which is already correctly set at this point
+ 
+IF (.NOT. IS_MGM) THEN
+
+   DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
+
+      CALL SCARC_POINT_TO_GRID (NM, NLEVEL_MIN)                                    ! make finest level symmetric
+      IF (TYPE_PRECON == NSCARC_RELAX_OPTIMIZED .OR. TYPE_SMOOTH == NSCARC_RELAX_OPTIMIZED) THEN
+         IF (.NOT.L%HAS_OBSTRUCTIONS) TYPE_MKL(NLEVEL_MIN) = NSCARC_MKL_NONE       ! structured: use only FFT for optimized version
+      ENDIF
+      IF (TYPE_MKL(NLEVEL_MIN) /= NSCARC_MKL_NONE) THEN
+         CALL SCARC_SETUP_MATRIX_MKL(NSCARC_MATRIX_POISSON, NM, NLEVEL_MIN)
+         CALL SCARC_SETUP_BOUNDARY_MKL(NSCARC_MATRIX_POISSON, NM, NLEVEL_MIN)
+      ENDIF
+
+      IF (HAS_GMG_LEVELS) THEN                                                     ! if available also make coarser levels symmetric
+         DO NL = NLEVEL_MIN+1, NLEVEL_MAX
+            CALL SCARC_POINT_TO_GRID (NM, NLEVEL_MIN)
+            IF (TYPE_PRECON == NSCARC_RELAX_OPTIMIZED .OR. TYPE_SMOOTH == NSCARC_RELAX_OPTIMIZED) THEN
+               IF (.NOT.L%HAS_OBSTRUCTIONS) TYPE_MKL(NL) = NSCARC_MKL_NONE
+            ENDIF
+            IF (TYPE_MKL(NL) /= NSCARC_MKL_NONE)  CALL SCARC_SETUP_MATRIX_MKL  (NSCARC_MATRIX_POISSON, NM, NL)
+            IF (TYPE_MKL(NL) == NSCARC_MKL_LOCAL) CALL SCARC_SETUP_BOUNDARY_MKL(NSCARC_MATRIX_POISSON, NM, NL)
+         ENDDO
+      ENDIF
+
+   ENDDO 
+
+! Special MGM-version: Do symmetrization for the unstructured part of the method, the structured part basically uses FFT 
+
+ELSE 
+
+   CALL SCARC_SET_GRID_TYPE (NSCARC_GRID_UNSTRUCTURED)
+
+   TYPE_SCOPE_SAVE(0:1) = TYPE_SCOPE(0:1)
+   TYPE_MKL_SAVE(0:1)   = TYPE_MKL(0:1)
+   IF (SCARC_MGM_CHECK_LAPLACE .OR. SCARC_MGM_EXACT_INITIAL) THEN                   ! also do it for global system if requested
+      TYPE_SCOPE(0) = NSCARC_SCOPE_GLOBAL
+      IF (TRIM(SCARC_PRECON) == 'CLUSTER') THEN
+         TYPE_MKL(NLEVEL_MIN) = NSCARC_MKL_GLOBAL
+      ELSE
+         TYPE_MKL(NLEVEL_MIN) = NSCARC_MKL_LOCAL
+      ENDIF
+      DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
+         CALL SCARC_POINT_TO_GRID (NM, NLEVEL_MIN)
+         CALL SCARC_SETUP_MATRIX_MKL(NSCARC_MATRIX_POISSON, NM, NLEVEL_MIN)
+         CALL SCARC_SETUP_BOUNDARY_MKL(NSCARC_MATRIX_POISSON, NM, NLEVEL_MIN)
+      ENDDO 
+   ENDIF
+
+   TYPE_SCOPE(0:1) = NSCARC_SCOPE_LOCAL
+   TYPE_MKL(0:1)   = NSCARC_MKL_LOCAL
+   SELECT CASE (TYPE_MGM_LAPLACE)
+      CASE (NSCARC_MGM_LAPLACE_CG, NSCARC_MGM_LAPLACE_PARDISO)                      ! basically get MKL version for these solvers
+         DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
+            CALL SCARC_POINT_TO_GRID (NM, NLEVEL_MIN)
+            CALL SCARC_SETUP_MATRIX_MKL (NSCARC_MATRIX_LAPLACE, NM, NLEVEL_MIN)
+         ENDDO 
+      CASE (NSCARC_MGM_LAPLACE_OPTIMIZED)                                           ! only get MKL version for unstructured grids
+         DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
+            CALL SCARC_POINT_TO_GRID (NM, NLEVEL_MIN)
+            IF (L%STRUCTURED%NC > L%UNSTRUCTURED%NC) CALL SCARC_SETUP_MATRIX_MKL (NSCARC_MATRIX_LAPLACE, NM, NLEVEL_MIN)
+         ENDDO 
+   END SELECT
+   
+   TYPE_SCOPE(0:1) = TYPE_SCOPE_SAVE(0:1)
+   TYPE_MKL(0:1)   = TYPE_MKL_SAVE(0:1)
+   CALL SCARC_SET_GRID_TYPE (NSCARC_GRID_STRUCTURED)                                ! return to structured grid for further steps
+
+ENDIF
+
+END SUBROUTINE SCARC_SETUP_POISSON_SYMMETRIC
+
+
 ! --------------------------------------------------------------------------------------------------------------
 !> \brief Setup symmetric version of Poisson matrix for MKL solver in double precision
 ! --------------------------------------------------------------------------------------------------------------
@@ -21893,13 +21964,12 @@ USE SCARC_STORAGE, ONLY: SCARC_SETUP_STORAGE
 USE SCARC_MPI, ONLY: SCARC_SETUP_EXCHANGES, SCARC_SETUP_GLOBALS
 USE SCARC_CPU, ONLY: SCARC_SETUP_CPU
 USE SCARC_STACK, ONLY: SCARC_SETUP_VECTORS
-USE SCARC_MATRICES, ONLY: SCARC_SETUP_SYSTEMS
+USE SCARC_MATRICES, ONLY: SCARC_SETUP_POISSON_REQUIREMENTS, SCARC_SETUP_POISSON_SYSTEMS, SCARC_SETUP_POISSON_SYMMETRIC
 #ifdef WITH_MKL
 USE SCARC_MKL, ONLY: SCARC_SETUP_MKL_ENVIRONMENT
 #endif
 USE SCARC_AMG, ONLY: SCARC_SETUP_AMG_ENVIRONMENT
-USE SCARC_METHODS, ONLY: SCARC_SETUP_KRYLOV_ENVIRONMENT, SCARC_SETUP_MULTIGRID_ENVIRONMENT, &
-                         SCARC_SETUP_MGM_ENVIRONMENT
+USE SCARC_METHODS, ONLY: SCARC_SETUP_KRYLOV_ENVIRONMENT, SCARC_SETUP_MULTIGRID_ENVIRONMENT, SCARC_SETUP_MGM_ENVIRONMENT
 REAL(EB) :: TNOW
 
 TNOW = CURRENT_TIME()
@@ -21912,7 +21982,7 @@ CALL SCARC_SETUP_CPU
 
 ! Parse ScaRC related input parameters in &PRES namelist
 
-CALL SCARC_PARSE_INPUT                      ; IF (STOP_STATUS==SETUP_STOP) RETURN
+CALL SCARC_PARSE_INPUT                                ; IF (STOP_STATUS==SETUP_STOP) RETURN
 
 ! Setup different components of ScaRC solver
  
@@ -21936,9 +22006,19 @@ ENDIF
 ! Setup information for data exchanges and matrix systems
  
 CALL SCARC_SETUP_EXCHANGES                            ; IF (STOP_STATUS==SETUP_STOP) RETURN
-CALL SCARC_SETUP_SYSTEMS                              ; IF (STOP_STATUS==SETUP_STOP) RETURN
 
-! Setup information for algebraic multigrid if needed as preconditioner or main solver
+! Setup information for Poisson systems of requested solver:
+! - Determine memory requirement for Poisson matrices on all required grid levels
+! - Build Poisson systems on all required grid levels and make them globally acting
+! - In case of MKL preconditioning - also build their symmetric counterparts
+
+CALL SCARC_SETUP_POISSON_REQUIREMENTS                 ; IF (STOP_STATUS==SETUP_STOP) RETURN
+CALL SCARC_SETUP_POISSON_SYSTEMS                      ; IF (STOP_STATUS==SETUP_STOP) RETURN
+#ifdef WITH_MKL
+CALL SCARC_SETUP_POISSON_SYMMETRIC                    ; IF (STOP_STATUS==SETUP_STOP) RETURN
+#endif
+
+! Setup information for algebraic multigrid if requested as preconditioner or main solver
 
 IF (HAS_AMG_LEVELS) CALL SCARC_SETUP_AMG_ENVIRONMENT          
 
