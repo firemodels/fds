@@ -3,8 +3,6 @@
 !> \brief Scalable Recursive Clustering (ScaRC): Collection of alternative pressure solvers for the FDS pressure equation
 !
 !===========================================================================================================================
-#define WITH_SCARC_AMG
-#undef WITH_SCARC_VERBOSE
 
 
 !=======================================================================================================================
@@ -245,6 +243,9 @@ INTEGER, PARAMETER :: NSCARC_RELAX_MSSOR             = 12        !< Type of prec
 INTEGER, PARAMETER :: NSCARC_RELAX_OPTIMIZED         = 13        !< Type of preconditioner: Optimized mixture of MKL and FFT
 INTEGER, PARAMETER :: NSCARC_RELAX_SSOR              = 14        !< Type of preconditioner: SSOR-methods
 
+INTEGER, PARAMETER :: NSCARC_POISSON_INSEPARABLE     =  0        !< Poisson equation type: inseparable
+INTEGER, PARAMETER :: NSCARC_POISSON_SEPARABLE       =  1        !< Poisson equation type: separable
+
 INTEGER, PARAMETER :: NSCARC_SCOPE_GLOBAL            =  0        !< Scope of current solver: global
 INTEGER, PARAMETER :: NSCARC_SCOPE_LOCAL             =  1        !< Scope of current solver: local
 
@@ -412,9 +413,11 @@ TYPE SCARC_MESSAGE_TYPE
    CHARACTER(60) :: FILE_CPU                               !< Output file name for CPU measurements
    CHARACTER(60) :: FILE_MEM                               !< Output file name for memory management information
    CHARACTER(60) :: FILE_STAT                              !< Output file name for convergence statistcis
+   CHARACTER(60) :: FILE_VERBOSE                           !< Output file name for verbose messages
    INTEGER :: LU_CPU                                       !< Logical unit for CPU measurements
    INTEGER :: LU_MEM                                       !< Logical unit for memory management information
    INTEGER :: LU_STAT                                      !< Logical unit for convergence statistics
+   INTEGER :: LU_VERBOSE                                   !< Logical unit for verbose messages
 
 END TYPE SCARC_MESSAGE_TYPE
 
@@ -551,6 +554,8 @@ TYPE SCARC_CMATRIX_TYPE
 
    CHARACTER(40) :: CNAME                              !< Name of matrix
 
+   LOGICAL :: CONDENSING_REQUIRED = .FALSE.            !< Flag to check if condensing is required (purely Neumann BCs)
+
 END TYPE SCARC_CMATRIX_TYPE
 
 !> \brief Bandwise storage technique for matrices
@@ -677,11 +682,10 @@ TYPE SCARC_MULTIGRID_TYPE
    INTEGER :: CYCLING(2) = 0                               !< Counter for multigrid cycling
    INTEGER :: N_PRESMOOTH, N_POSTSMOOTH                    !< Number of pre- and post-processing steps
 
-#ifdef WITH_SCARC_AMG
    REAL(EB) :: APPROX_SPECTRAL_RADIUS = 2.0_EB             !< Relaxation parameter (AMG only)
    REAL(EB) :: AMG_TOL = 0.25_EB                           !< Tolerance for coarsening (AMG only)
    REAL(EB) :: THETA = 0.10_EB                             !< Threshold for aggregation process (AMG only)
-#endif
+
 END TYPE SCARC_MULTIGRID_TYPE
 
 !> \brief Information related to discretization type (structured/unstructured)
@@ -762,7 +766,6 @@ TYPE SCARC_GRID_TYPE
    INTEGER :: NLEN_BUFFER_STENCIL = NSCARC_ZERO_INT            !< Length for stencil layer length exchange on that level
    INTEGER :: NLEN_BUFFER_FULL    = NSCARC_ZERO_INT            !< Length for full length exchange on that level
 
-#ifdef WITH_SCARC_AMG
    TYPE (SCARC_CMATRIX_TYPE) :: GALERKIN                       !< Galerkin matrix (AMG only)
    TYPE (SCARC_CMATRIX_TYPE) :: CONNECTION                     !< Strength of connection matrix (AMG only)
    TYPE (SCARC_CMATRIX_TYPE) :: ZONES                          !< Aggregation Zones matrix (AMG only)
@@ -802,7 +805,6 @@ TYPE SCARC_GRID_TYPE
    INTEGER :: N_COARSE  = NSCARC_ZERO_INT                      !< Number of coarse cells (AMG only)
    INTEGER :: N_ZONES   = NSCARC_ZERO_INT                      !< Number of zones (AMG only)
    INTEGER :: N_STENCIL_MAX  = 25                              !< Max stencil size (AMG only)
-#endif
 
 END TYPE SCARC_GRID_TYPE
 
@@ -895,10 +897,15 @@ TYPE SCARC_LEVEL_TYPE
    TYPE (SCARC_MKL_TYPE)       :: MKL                          !< MKL preconditioner based on Intel MKL
 #endif
 
-   ! Coordinate information
+   ! Coordinate information (arrays only allocated for coarser levels, otherwise there is a pointer to official counterparts)
    REAL(EB), ALLOCATABLE, DIMENSION (:) :: XCOR, YCOR, ZCOR    !< Coordinate vectors in x-, y- and z-direction
    REAL(EB), ALLOCATABLE, DIMENSION (:) :: XMID, YMID, ZMID    !< Midpoint vectors in x-, y- and z-direction
    REAL(EB), ALLOCATABLE, DIMENSION (:) :: DXL, DYL, DZL       !< Step size vectors in x-, y- and z-direction
+   REAL(EB), ALLOCATABLE, DIMENSION (:) :: RDX, RDY, RDZ       !< Reciprocal of step widths between grid points
+   REAL(EB), ALLOCATABLE, DIMENSION (:) :: RDXN, RDYN, RDZN    !< Reciprocal of step widths between midpoints
+   REAL(EB), ALLOCATABLE, DIMENSION (:,:) :: PXS, PXF          !< x-direction boundary values for inseparable Poisson system
+   REAL(EB), ALLOCATABLE, DIMENSION (:,:) :: PYS, PYF          !< y-direction boundary values for inseparable Poisson system
+   REAL(EB), ALLOCATABLE, DIMENSION (:,:) :: PZS, PZF          !< z-direction boundary values for inseparable Poisson system
    REAL(EB) :: DX , DY , DZ                                    !< Step sizes in x-, y- and z-direction
    REAL(EB) :: DX2, DY2, DZ2                                   !< Half step sizes in x-, y- and z-direction
    REAL(EB) :: DXH, DYH, DZH                                   !< Half step sizes in x-, y- and z-direction
@@ -1102,6 +1109,7 @@ IMPLICIT NONE (TYPE,EXTERNAL)
 CHARACTER(40) :: SCARC_GRID               = 'STRUCTURED'         !< Type of discretization (STRUCTURED/UNSTRUCTURED)
 CHARACTER(40) :: SCARC_METHOD             = 'NONE'               !< Type of global ScaRC solver (Krylov/MULTIGRID)
 CHARACTER(40) :: SCARC_MATRIX             = 'NONE'               !< Type of matrix storage (COMPACT/BANDWISE)
+CHARACTER(40) :: SCARC_POISSON            = 'SEPARABLE'          !< Type of Poisson equation (SEPARABLE/INSEPARABLE)
 CHARACTER(40) :: SCARC_STENCIL            = 'VARIABLE'           !< Type of matrix stencil (CONSTANT/VARIABLE)
 CHARACTER(40) :: SCARC_TWOLEVEL           = 'NONE'               !< Type of two-level method (NONE/ADDITIVE/MULTIPLICATIVE)
 
@@ -1176,12 +1184,15 @@ CHARACTER(6)  :: SCARC_MKL_PRECISION      = 'DOUBLE'             !< Single/doubl
 
 ! ---------- Dump out of error information and error handling
  
-LOGICAL :: SCARC_ERROR_FILE  = .FALSE.                           !< Print ScaRC statistics into chid_scarc.csv (TRUE/FALSE)
+LOGICAL :: SCARC_ERROR_FILE = .FALSE.                            !< Print ScaRC statistics into chid_scarc.csv (TRUE/FALSE)
+LOGICAL :: SCARC_VERBOSE = .FALSE.                               !< Print additional verbose messages (TRUE/FALSE)
 INTEGER :: IERROR  = 0                                           !< General error flag - used at different positions
 
 
 ! ---------- Logical indicators for different methods and mechanisms
   
+LOGICAL :: IS_SEPARABLE          = .TRUE.                        !< Flag for separable Poisson system
+LOGICAL :: IS_INSEPARABLE        = .FALSE.                       !< Flag for inseparable Poisson system
 LOGICAL :: IS_STRUCTURED         = .FALSE.                       !< Flag for structured discretization
 LOGICAL :: IS_UNSTRUCTURED       = .FALSE.                       !< Flag for unstructured discretization
 LOGICAL :: IS_PURE_NEUMANN       = .FALSE.                       !< Flag for pure Neumann system
@@ -1234,6 +1245,7 @@ INTEGER :: TYPE_MKL(0:10)           = NSCARC_MKL_NONE            !< Type of use 
 INTEGER :: TYPE_MKL_PRECISION       = NSCARC_PRECISION_DOUBLE    !< Type of double precision MKL solver
 INTEGER :: TYPE_MULTIGRID           = NSCARC_MULTIGRID_GEOMETRIC !< Type of multigrid method 
 INTEGER :: TYPE_PARENT              = NSCARC_UNDEF_INT           !< Type of parent (calling) solver
+INTEGER :: TYPE_POISSON             = NSCARC_POISSON_SEPARABLE   !< Type of Poisson equation
 INTEGER :: TYPE_PRECON              = NSCARC_UNDEF_INT           !< Type of preconditioner for iterative solver
 INTEGER :: TYPE_RELAX               = NSCARC_UNDEF_INT           !< Type of preconditioner for iterative solver
 INTEGER :: TYPE_SCOPE(0:2)          = NSCARC_SCOPE_GLOBAL        !< Type of method scopes
@@ -1270,6 +1282,10 @@ INTEGER :: FACE_ORIENTATION(6)  = (/1,-1,2,-2,3,-3/)        !< Coordinate direct
 
 CHARACTER(60) :: CNAME, CROUTINE
 
+REAL(EB), DIMENSION(:,:,:), ALLOCATABLE, TARGET :: SCARC_RHO   !< Density values depending on predictor/corrector with right overlap
+REAL(EB), DIMENSION(:,:,:), ALLOCATABLE, TARGET :: SCARC_P     !< Inseparable pressure solution - predictor stage
+REAL(EB), DIMENSION(:,:,:), ALLOCATABLE, TARGET :: SCARC_PS    !< Inseparable pressure solution - corrector stage
+
 ! ---------- Public variables
   
 PUBLIC :: SCARC_ACCURACY                  !< Requested accuracy for ScaRC solver
@@ -1281,8 +1297,10 @@ PUBLIC :: SCARC_ITERATIONS                !< Final number of needed iterations f
 PUBLIC :: SCARC_MATRIX                    !< Selection parameter for requested matrix storage technique (compact/bandwise)
 PUBLIC :: SCARC_METHOD                    !< Selection parameter for requested ScaRC variant (Krylov/Multigrid/LU)
 PUBLIC :: SCARC_MKL_PRECISION             !< Selection parameter for requested MKL precision (double/single)
+PUBLIC :: SCARC_POISSON                   !< Type of Poisson equation (separable/inseparable)
 PUBLIC :: SCARC_RESIDUAL                  !< Final residual after call of ScaRC solver
 PUBLIC :: SCARC_TWOLEVEL                  !< Selection parameter for possible twolevel variant (additive/multiplicative)
+PUBLIC :: SCARC_VERBOSE                   !< Selection parameter for additional verbose messages
 
 PUBLIC :: SCARC_COARSE                    !< Selection parameter for type of coarse grid solver (iterative/direct)
 PUBLIC :: SCARC_COARSE_ACCURACY           !< Requested accuracy for coarse grid solver
@@ -1481,6 +1499,14 @@ REAL(EB), POINTER, DIMENSION(:):: XMID=>NULL()              !< Pointer to vector
 REAL(EB), POINTER, DIMENSION(:):: YMID=>NULL()              !< Pointer to vector of cell midpoints in y-direction
 REAL(EB), POINTER, DIMENSION(:):: ZMID=>NULL()              !< Pointer to vector of cell midpoints in z-direction
 
+REAL(EB), POINTER, DIMENSION(:):: RDX=>NULL()               !< Pointer to reciprocal widths between grid points in x-direction
+REAL(EB), POINTER, DIMENSION(:):: RDY=>NULL()               !< Pointer to reciprocal widths between grid points in y-direction
+REAL(EB), POINTER, DIMENSION(:):: RDZ=>NULL()               !< Pointer to reciprocal widths between grid points in z-direction
+
+REAL(EB), POINTER, DIMENSION(:):: RDXN=>NULL()              !< Pointer to reciprocal widths between midpoints in x-direction
+REAL(EB), POINTER, DIMENSION(:):: RDYN=>NULL()              !< Pointer to reciprocal widths between midpoints in y-direction
+REAL(EB), POINTER, DIMENSION(:):: RDZN=>NULL()              !< Pointer to reciprocal widths between midpoints in z-direction
+
 REAL(EB), POINTER, DIMENSION(:,:):: BXS=>NULL()             !< Pointer to boundary values at x-min face
 REAL(EB), POINTER, DIMENSION(:,:):: BXF=>NULL()             !< Pointer to boundary values at x-max face
 REAL(EB), POINTER, DIMENSION(:,:):: BYS=>NULL()             !< Pointer to boundary values at y-min face
@@ -1547,12 +1573,10 @@ L => NULL();  LF => NULL();  LC => NULL()
 G => NULL();  GF => NULL();  GC => NULL()
 F => NULL();  FF => NULL();  FC => NULL()
 A => NULL();  AF => NULL();  AC => NULL()
-#ifdef WITH_SCARC_AMG
 P => NULL();  PF => NULL();  PC => NULL()
 R => NULL();  RF => NULL();  RC => NULL()
 C => NULL();  CF => NULL();  CC => NULL()
 Z => NULL();  ZF => NULL();  ZC => NULL()
-#endif
 
 END SUBROUTINE SCARC_POINT_TO_NONE
 
@@ -1738,14 +1762,12 @@ SELECT CASE(NTYPE)
       SCARC_POINT_TO_CMATRIX => G%LOWER
    CASE (NSCARC_MATRIX_UPPER)
       SCARC_POINT_TO_CMATRIX => G%UPPER
-#ifdef WITH_SCARC_AMG
    CASE (NSCARC_MATRIX_POISSON_PROL)
       SCARC_POINT_TO_CMATRIX => G%POISSON_PROL
    CASE (NSCARC_MATRIX_CONNECTION)
       SCARC_POINT_TO_CMATRIX => G%CONNECTION
    CASE (NSCARC_MATRIX_ZONES)
       SCARC_POINT_TO_CMATRIX => G%ZONES
-#endif
 END SELECT
 
 END FUNCTION SCARC_POINT_TO_CMATRIX
@@ -1784,14 +1806,12 @@ SELECT CASE(NTYPE)
       SCARC_POINT_TO_OTHER_CMATRIX => OG%PROLONGATION
    CASE (NSCARC_MATRIX_RESTRICTION)
       SCARC_POINT_TO_OTHER_CMATRIX => OG%RESTRICTION
-#ifdef WITH_SCARC_AMG
    CASE (NSCARC_MATRIX_POISSON_PROL)
       SCARC_POINT_TO_OTHER_CMATRIX => OG%POISSON_PROL
    CASE (NSCARC_MATRIX_CONNECTION)
       SCARC_POINT_TO_OTHER_CMATRIX => OG%CONNECTION
    CASE (NSCARC_MATRIX_ZONES)
       SCARC_POINT_TO_OTHER_CMATRIX => OG%ZONES
-#endif
 END SELECT
 
 END FUNCTION SCARC_POINT_TO_OTHER_CMATRIX
@@ -1987,6 +2007,7 @@ CONTAINS
 !> \brief Setup debug file if requested
 ! --------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_SETUP_MESSAGES
+INTEGER :: NM, LASTID
 
 IF (SCARC_ERROR_FILE) HAS_CSV_DUMP = .TRUE.
 
@@ -2002,9 +2023,33 @@ IF (HAS_CSV_DUMP) THEN
    ENDIF
 ENDIF
 
+! If verbose flag is set, open additional files for dumping more information about different ScaRC components
+!  - memory file for logging the memory requirement of the different arrays 
+!  - log file for detailed convergence information of the different methods in use
+
+IF (SCARC_VERBOSE) THEN
+   IF (MY_RANK == 0) THEN
+      WRITE (MSG%FILE_MEM, '(A,A)') TRIM(CHID),'.mem'
+      MSG%LU_MEM = GET_FILE_NUMBER()
+      OPEN (MSG%LU_MEM, FILE=MSG%FILE_MEM)
+      WRITE(MSG%LU_MEM,1000) 'Number','Rank','Name of array','Calling routine', &
+                             'State','Type','Dimension','Left1','Right1', &
+                             'Left2','Right2','Left3','Right3','Size(array)', &
+                             'Sum(LOGICAL)','Sum(INTEGER)','Sum(REAL_EB)','Sum(REAL_FB)'
+   ENDIF
+   LASTID = -NSCARC_HUGE_INT
+   DO NM=LOWER_MESH_INDEX, UPPER_MESH_INDEX
+      IF (MY_RANK == LASTID) CYCLE
+      WRITE (MSG%FILE_VERBOSE, '(A,A,i3.3)') TRIM(CHID),'.log',MY_RANK+1
+      MSG%LU_VERBOSE = GET_FILE_NUMBER()
+      OPEN (MSG%LU_VERBOSE, FILE=MSG%FILE_VERBOSE, ACTION = 'readwrite')
+      LASTID = MY_RANK
+   ENDDO
+ENDIF
+
+1000 FORMAT(A8,',',A8,',',A30,',',A40,',',A10,',',A10,',',A10,',',A10,',',A10,',',A10,',',A10,',',&
+            A10,',',A10,',',A15,',',A15,',',A15,',',A15,',',A15)
 END SUBROUTINE SCARC_SETUP_MESSAGES
-
-
 
 END MODULE SCARC_MESSAGES
 
@@ -2695,6 +2740,13 @@ SELECT CASE (NSTATE)
       CSTATE = ' '
 END SELECT
 
+IF (SCARC_VERBOSE .AND. MY_RANK == 0) THEN
+   WRITE(MSG%LU_MEM,1000) STORAGE%N_ARRAYS, STORAGE%IP, TRIM(AL%CNAME), TRIM(AL%CSCOPE), TRIM(CSTATE), TRIM(CTYPE), TRIM(CDIM), &
+                          AL%LBND(1), AL%RBND(1), AL%LBND(2), AL%RBND(2), AL%LBND(3), AL%RBND(3), &
+                          NWORK, STORAGE%NWORK_LOG, STORAGE%NWORK_INT, STORAGE%NWORK_REAL_EB, STORAGE%NWORK_REAL_FB
+ENDIF
+1000 FORMAT(I8,',',I8,',',A30,',',A40,',',A10,',',A10,',',A10,',',I10,',',&
+            I10,',',I10,',',I10,',',I10,',',I10,',',I15,',',I15,',',I15,',',I15,',',I15)
 END SUBROUTINE SCARC_UPDATE_STORAGE
 
 ! --------------------------------------------------------------------------------------------------------------
@@ -3642,8 +3694,9 @@ USE SCARC_MESSAGES
 
 IMPLICIT NONE (TYPE,EXTERNAL)
   
-REAL(EB) :: DT                                  !< TS width 
-REAL(EB) :: DTI                                 !< Inverse of TS width 
+REAL(EB) :: T                                   !< current time 
+REAL(EB) :: DT                                  !< current time step width
+REAL(EB) :: DTI                                 !< Inverse of time step width 
 REAL(EB) :: OMEGA                               !< Relaxation parameter for current solver
 REAL(EB) :: EPS                                 !< Requested accuracy for current solver
 REAL(EB) :: RES                                 !< Current residual of current solver
@@ -3679,15 +3732,18 @@ CONTAINS
 ! --------------------------------------------------------------------------------------------------------------
 !> \brief Set current iteration state
 ! --------------------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_SET_ITERATION_STATE (DT_CURRENT)
-REAL(EB), INTENT(IN) :: DT_CURRENT
+SUBROUTINE SCARC_SET_ITERATION_STATE (T_CURRENT, DT_CURRENT)
+REAL(EB), INTENT(IN) :: T_CURRENT, DT_CURRENT
 
+T   = T_CURRENT
 DT  = DT_CURRENT
 DTI = 1.0_EB/DT_CURRENT
 
 ITE_PRES = ITE_PRES + 1
 ITE_GLOBAL = ICYC
 
+IF (SCARC_VERBOSE) WRITE(MSG%LU_VERBOSE,1000) ICYC, ITE_PRES, T
+1000 FORMAT('========> Entering ScaRC-solver: #Time iteration = ',I6,': #Pressure Solution= ', I6,': Simulation Time = ', E11.3,/)
 END SUBROUTINE SCARC_SET_ITERATION_STATE
 
 ! --------------------------------------------------------------------------------------------------------------
@@ -3718,6 +3774,8 @@ SCARC_CONVERGENCE_STATE = NSTATE
 
 IF (HAS_CSV_DUMP) CALL SCARC_DUMP_CSV(ISM, NS, NL)
 
+IF (SCARC_VERBOSE .AND.  TYPE_SOLVER == NSCARC_SOLVER_MAIN) WRITE(MSG%LU_VERBOSE,1000) STACK(NS)%SOLVER%CNAME, NL, ITE, RES
+1000 FORMAT (A30,': Level=',I6,': Iteration = ',I6,': Residual = ',E11.3)
 END FUNCTION SCARC_CONVERGENCE_STATE
 
 ! --------------------------------------------------------------------------------------------------------------
@@ -3754,6 +3812,8 @@ ENDIF
 
 CALL SCARC_DUMP_CSV(0, NS, NL)
 
+IF (SCARC_VERBOSE .AND. TYPE_SOLVER == NSCARC_SOLVER_MAIN) WRITE(MSG%LU_VERBOSE,1000) CAPPA
+1000 FORMAT (T54,'---> Convergence Rate = ',E11.3,/)
 END SUBROUTINE SCARC_CONVERGENCE_RATE
 
 ! --------------------------------------------------------------------------------------------------------------
@@ -4642,6 +4702,17 @@ SELECT CASE (TRIM(PRES_METHOD))
       CALL SCARC_ERROR(NSCARC_ERROR_PARSE_INPUT, SCARC_GRID, NSCARC_NONE)
 END SELECT
  
+! ------------ Set type of Poisson equation (INSEPARABLE/SEPARABLE)
+
+  SELECT CASE (TRIM(SCARC_POISSON))
+     CASE ('INSEPARABLE')
+        TYPE_POISSON = NSCARC_POISSON_INSEPARABLE
+     CASE ('SEPARABLE')
+        TYPE_POISSON = NSCARC_POISSON_SEPARABLE
+     CASE DEFAULT
+        CALL SCARC_ERROR(NSCARC_ERROR_PARSE_INPUT, SCARC_POISSON, NSCARC_NONE)
+  END SELECT
+
 ! ------------ Set type of matrix storage (COMPACT/BANDWISE)
  
 SELECT CASE (TRIM(SCARC_MATRIX))
@@ -5070,6 +5141,9 @@ END SELECT
 
 ! -------- Define some logical variables - just for notational convenience
  
+IS_SEPARABLE    = (TYPE_POISSON == NSCARC_POISSON_SEPARABLE)
+IS_INSEPARABLE  = (TYPE_POISSON == NSCARC_POISSON_INSEPARABLE)
+
 IS_STRUCTURED   = (TYPE_GRID == NSCARC_GRID_STRUCTURED)
 IS_UNSTRUCTURED = (TYPE_GRID == NSCARC_GRID_UNSTRUCTURED)
 
@@ -5443,11 +5517,9 @@ RECEIVE_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 
       SELECT_EXCHANGE_TYPE: SELECT CASE (NTYPE)
 
-#ifdef WITH_SCARC_AMG
          CASE (NSCARC_EXCHANGE_AUXILIARY)
             CALL SCARC_RECV_MESSAGE_REAL (NM, NOM, NL, NSCARC_BUFFER_LAYER2, 'AUXILIARY')
 
-#endif
          CASE (NSCARC_EXCHANGE_BASIC_SIZES)
             CALL SCARC_RECV_MESSAGE_INT (NM, NOM, NL, NSCARC_BUFFER_BASIC, 'BASIC SIZES')
 
@@ -5460,13 +5532,11 @@ RECEIVE_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          CASE (NSCARC_EXCHANGE_CELL_SIZES)
             CALL SCARC_RECV_MESSAGE_REAL (NM, NOM, NL, NSCARC_BUFFER_BASIC, 'CELL SIZES')
 
-#ifdef WITH_SCARC_AMG
          CASE (NSCARC_EXCHANGE_LAYER2_NUMS)
             CALL SCARC_RECV_MESSAGE_INT (NM, NOM, NL, NSCARC_BUFFER_LAYER1, 'LAYER2_NUMS')
 
          CASE (NSCARC_EXCHANGE_LAYER2_VALS)
             CALL SCARC_RECV_MESSAGE_REAL (NM, NOM, NL, NSCARC_BUFFER_LAYER1, 'LAYER2_VALS')
-#endif
 
          CASE (NSCARC_EXCHANGE_MATRIX_COLS)
             CALL SCARC_RECV_MESSAGE_INT (NM, NOM, NL, NSCARC_BUFFER_FULL, 'POISSON COLS')
@@ -5492,10 +5562,8 @@ RECEIVE_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          CASE (NSCARC_EXCHANGE_MGM_VELO)
             CALL SCARC_RECV_MESSAGE_REAL (NM, NOM, NL, NSCARC_BUFFER_LAYER2, 'MGM_VELO')
 
-#ifdef WITH_SCARC_AMG
          CASE (NSCARC_EXCHANGE_NULLSPACE)
             CALL SCARC_RECV_MESSAGE_REAL (NM, NOM, NL, NSCARC_BUFFER_LAYER2, 'NULLSPACE')
-#endif
 
          CASE (NSCARC_EXCHANGE_PRESSURE)
             CALL SCARC_RECV_MESSAGE_REAL (NM, NOM, NL, NSCARC_BUFFER_LAYER1, 'PRESSURE')
@@ -5509,13 +5577,11 @@ RECEIVE_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          CASE (NSCARC_EXCHANGE_VECTOR_PLAIN)
             CALL SCARC_RECV_MESSAGE_REAL (NM, NOM, NL, NSCARC_BUFFER_LAYER1, 'VECTOR PLAIN')
 
-#ifdef WITH_SCARC_AMG
          CASE (NSCARC_EXCHANGE_ZONE_NEIGHBORS)
             CALL SCARC_RECV_MESSAGE_INT (NM, NOM, NL, NSCARC_BUFFER_LAYER4, 'ZONE NEIGHBORS')
 
          CASE (NSCARC_EXCHANGE_ZONE_TYPES)
             CALL SCARC_RECV_MESSAGE_INT (NM, NOM, NL, NSCARC_BUFFER_LAYER2, 'ZONE TYPES')
-#endif
 
          CASE DEFAULT
             CALL SCARC_ERROR(NSCARC_ERROR_EXCHANGE_RECV, SCARC_NONE, TYPE_EXCHANGE)
@@ -5543,11 +5609,9 @@ SEND_PACK_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 
       SEND_PACK_OMESHES_SELECT: SELECT CASE (NTYPE)
 
-#ifdef WITH_SCARC_AMG
          CASE (NSCARC_EXCHANGE_AUXILIARY)
             CALL SCARC_PACK_AUXILIARY(NL)
             CALL SCARC_SEND_MESSAGE_REAL (NM, NOM, NL, NSCARC_BUFFER_LAYER2, 'AUXILIARY')
-#endif
 
          CASE (NSCARC_EXCHANGE_BASIC_SIZES)
             CALL SCARC_PACK_BASIC_SIZES
@@ -5565,7 +5629,6 @@ SEND_PACK_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
             CALL SCARC_PACK_CELL_SIZES
             CALL SCARC_SEND_MESSAGE_REAL (NM, NOM, NL, NSCARC_BUFFER_BASIC, 'CELL SIZES')
 
-#ifdef WITH_SCARC_AMG
          CASE (NSCARC_EXCHANGE_LAYER2_NUMS)
             CALL SCARC_PACK_LAYER2_NUMS
             CALL SCARC_SEND_MESSAGE_INT (NM, NOM, NL, NSCARC_BUFFER_LAYER1, 'LAYER2_NUMS')
@@ -5573,7 +5636,6 @@ SEND_PACK_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          CASE (NSCARC_EXCHANGE_LAYER2_VALS)
             CALL SCARC_PACK_LAYER2_VALS
             CALL SCARC_SEND_MESSAGE_REAL (NM, NOM, NL, NSCARC_BUFFER_LAYER1, 'LAYER2_VALS')
-#endif
 
          CASE (NSCARC_EXCHANGE_MATRIX_SIZES)
             CALL SCARC_PACK_MATRIX_SIZES(NL)
@@ -5607,11 +5669,9 @@ SEND_PACK_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
             CALL SCARC_PACK_MGM_VELO(NM)
             CALL SCARC_SEND_MESSAGE_REAL (NM, NOM, NL, NSCARC_BUFFER_LAYER1, 'MGM_VELO')
 
-#ifdef WITH_SCARC_AMG
          CASE (NSCARC_EXCHANGE_NULLSPACE)
             CALL SCARC_PACK_NULLSPACE(NL)
             CALL SCARC_SEND_MESSAGE_REAL (NM, NOM, NL, NSCARC_BUFFER_LAYER2, 'NULLSPACE')
-#endif
 
          CASE (NSCARC_EXCHANGE_PRESSURE)
             CALL SCARC_PACK_PRESSURE(NM)
@@ -5629,7 +5689,6 @@ SEND_PACK_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
             CALL SCARC_PACK_VECTOR_PLAIN(NM, NL, NPARAM)
             CALL SCARC_SEND_MESSAGE_REAL (NM, NOM, NL, NSCARC_BUFFER_LAYER1, 'VECTOR PLAIN')
 
-#ifdef WITH_SCARC_AMG
          CASE (NSCARC_EXCHANGE_ZONE_NEIGHBORS)
             CALL SCARC_PACK_ZONE_NEIGHBORS(NL)
             CALL SCARC_SEND_MESSAGE_INT (NM, NOM, NL, NSCARC_BUFFER_LAYER4, 'ZONE NEIGHBORS')
@@ -5637,7 +5696,6 @@ SEND_PACK_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          CASE (NSCARC_EXCHANGE_ZONE_TYPES)
             CALL SCARC_PACK_ZONE_TYPES
             CALL SCARC_SEND_MESSAGE_INT (NM, NOM, NL, NSCARC_BUFFER_LAYER2, 'ZONE TYPES')
-#endif
 
          CASE DEFAULT
             CALL SCARC_ERROR(NSCARC_ERROR_EXCHANGE_SEND, SCARC_NONE, TYPE_EXCHANGE)
@@ -5668,10 +5726,8 @@ SEND_UNPACK_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 
       SEND_UNPACK_OMESHES_SELECT: SELECT CASE (NTYPE)
 
-#ifdef WITH_SCARC_AMG
          CASE (NSCARC_EXCHANGE_AUXILIARY)
             CALL SCARC_UNPACK_AUXILIARY (NM, NOM, NL)
-#endif
 
          CASE (NSCARC_EXCHANGE_BASIC_SIZES)
             CALL SCARC_UNPACK_BASIC_SIZES (NM, NOM)
@@ -5685,13 +5741,11 @@ SEND_UNPACK_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          CASE (NSCARC_EXCHANGE_CELL_SIZES)
             CALL SCARC_UNPACK_CELL_SIZES(NM, NOM)
 
-#ifdef WITH_SCARC_AMG
          CASE (NSCARC_EXCHANGE_LAYER2_NUMS)
             CALL SCARC_UNPACK_LAYER2_NUMS (NM, NOM)
 
          CASE (NSCARC_EXCHANGE_LAYER2_VALS)
             CALL SCARC_UNPACK_LAYER2_VALS (NM, NOM)
-#endif
 
          CASE (NSCARC_EXCHANGE_MATRIX_COLS)
             CALL SCARC_UNPACK_MATRIX_COLS (NM, NOM, NPARAM)
@@ -5717,10 +5771,8 @@ SEND_UNPACK_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          CASE (NSCARC_EXCHANGE_MGM_VELO)
             CALL SCARC_UNPACK_MGM_VELO (NM, NOM)
 
-#ifdef WITH_SCARC_AMG
          CASE (NSCARC_EXCHANGE_NULLSPACE)
             CALL SCARC_UNPACK_NULLSPACE (NM, NOM, NL)
-#endif
          CASE (NSCARC_EXCHANGE_PRESSURE)
             CALL SCARC_UNPACK_PRESSURE (NM, NOM)
 
@@ -5733,13 +5785,11 @@ SEND_UNPACK_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          CASE (NSCARC_EXCHANGE_VECTOR_PLAIN)
             CALL SCARC_UNPACK_VECTOR_PLAIN (NM, NOM, NL, NPARAM)
 
-#ifdef WITH_SCARC_AMG
          CASE (NSCARC_EXCHANGE_ZONE_NEIGHBORS)
             CALL SCARC_UNPACK_ZONE_NEIGHBORS (NM, NOM, NL)
 
          CASE (NSCARC_EXCHANGE_ZONE_TYPES)
             CALL SCARC_UNPACK_ZONE_TYPES (NM, NOM)
-#endif
 
          CASE DEFAULT
             CALL SCARC_ERROR(NSCARC_ERROR_EXCHANGE_SEND, SCARC_NONE, TYPE_EXCHANGE)
@@ -7073,7 +7123,6 @@ ENDDO
 END SUBROUTINE SCARC_PACK_MATRIX_COLS
 
 
-#ifdef WITH_SCARC_AMG
 ! --------------------------------------------------------------------------------------------------------------
 !> \brief Pack overlapping auxiliary vector 
 ! --------------------------------------------------------------------------------------------------------------
@@ -7432,7 +7481,6 @@ DO IOR0 = -3, 3
 ENDDO
 
 END SUBROUTINE SCARC_UNPACK_ZONE_TYPES
-#endif
 
 END MODULE SCARC_MPI
 
@@ -8917,6 +8965,15 @@ MESHES_LOOP1: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
       CALL SCARC_ALLOCATE_REAL1 (L%DYL, 0, L%NY, NSCARC_INIT_ZERO, 'L%DYL', CROUTINE)
       CALL SCARC_ALLOCATE_REAL1 (L%DZL, 0, L%NZ, NSCARC_INIT_ZERO, 'L%DZL', CROUTINE)
 
+      CALL SCARC_ALLOCATE_REAL1 (L%RDX, 0, L%NX, NSCARC_INIT_ZERO, 'L%RDX', CROUTINE)
+      CALL SCARC_ALLOCATE_REAL1 (L%RDY, 0, L%NY, NSCARC_INIT_ZERO, 'L%RDY', CROUTINE)
+      CALL SCARC_ALLOCATE_REAL1 (L%RDZ, 0, L%NZ, NSCARC_INIT_ZERO, 'L%RDZ', CROUTINE)
+
+      CALL SCARC_ALLOCATE_REAL1 (L%RDXN, 0, L%NX, NSCARC_INIT_ZERO, 'L%RDXN', CROUTINE)
+      CALL SCARC_ALLOCATE_REAL1 (L%RDYN, 0, L%NY, NSCARC_INIT_ZERO, 'L%RDYN', CROUTINE)
+      CALL SCARC_ALLOCATE_REAL1 (L%RDZN, 0, L%NZ, NSCARC_INIT_ZERO, 'L%RDZN', CROUTINE)
+
+
       ! Set step sizes between cell midpoints, use interior step sizes for ghost cells as initial values
       ! correct sizes for ghost cells are exchanged later
 
@@ -10051,9 +10108,6 @@ DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
       ENDIF
    ENDIF
 ENDDO
-
-! Debug FACE, WALL and DISCRET structures - only if directive SCARC_DEBUG is set
-
 
 END SUBROUTINE SCARC_SETUP_WALLS
 
@@ -11280,36 +11334,26 @@ CONTAINS
 
 
 ! ------------------------------------------------------------------------------------------------------------------
-!> \brief Setup system of equations (Poisson matrix + BC's) for different variants of ScaRC
-! Define matrix stencils and initialize matrices and boundary conditions on all needed levels
+!> \brief Setup sizes for Poisson matrices on requested grid levels
 ! ------------------------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_SETUP_SYSTEMS
-USE SCARC_POINTERS, ONLY: SCARC_POINT_TO_GRID
-#ifdef WITH_MKL
-USE SCARC_POINTERS, ONLY: L
-INTEGER :: TYPE_MKL_SAVE(0:1), TYPE_SCOPE_SAVE(0:1)
-#endif
-INTEGER :: NM, NL
-  
-CROUTINE = 'SCARC_SETUP_SYSTEMS'
+SUBROUTINE SCARC_SETUP_POISSON_REQUIREMENTS
+INTEGER :: NL
 
-! ------ Setup sizes for system matrices
-  
-SELECT_SCARC_METHOD_SIZES: SELECT CASE (TYPE_METHOD)
+SELECT CASE (TYPE_METHOD)
 
    ! -------- Global Krylov method
 
    CASE (NSCARC_METHOD_KRYLOV)
    
-      CALL SCARC_SET_GRID_TYPE (TYPE_GRID)                      ! process specified discretization type
-      CALL SCARC_SETUP_POISSON_SIZES (NLEVEL_MIN)               ! setup sizes on finest level
+      CALL SCARC_SET_GRID_TYPE (TYPE_GRID)                          ! Process specified discretization type
+      CALL SCARC_SETUP_POISSON_SIZES (NLEVEL_MIN)                   ! Setup sizes on finest level
    
       IF (HAS_TWO_LEVELS .AND. .NOT.HAS_AMG_LEVELS) &
-         CALL SCARC_SETUP_POISSON_SIZES (NLEVEL_MAX)            ! twolevel-precon: also setup size for coarse level
+         CALL SCARC_SETUP_POISSON_SIZES (NLEVEL_MAX)                ! If twolevel-preconditioner: also setup size for coarse level
    
       IF (IS_CG_GMG) THEN                                                   
          DO NL=NLEVEL_MIN+1, NLEVEL_MAX
-            CALL SCARC_SETUP_POISSON_SIZES (NL)                 ! GMG-precon: also setup size for all other levels
+            CALL SCARC_SETUP_POISSON_SIZES (NL)                     ! If GMG-preconditioner: also setup size for all other levels
          ENDDO
       ENDIF
    
@@ -11317,252 +11361,32 @@ SELECT_SCARC_METHOD_SIZES: SELECT CASE (TYPE_METHOD)
 
    CASE (NSCARC_METHOD_MULTIGRID)
    
-      CALL SCARC_SET_GRID_TYPE (TYPE_GRID)                      ! process specified discretization type
+      CALL SCARC_SET_GRID_TYPE (TYPE_GRID)                          ! Process specified discretization type
+
       SELECT CASE (TYPE_MULTIGRID)
          CASE (NSCARC_MULTIGRID_GEOMETRIC)                                   
             DO NL=NLEVEL_MIN, NLEVEL_MAX
-               CALL SCARC_SETUP_POISSON_SIZES (NL)              ! GMG: setup size for all levels
+            CALL SCARC_SETUP_POISSON_SIZES (NL)                     ! If geometric multigrid: setup size for all levels
             ENDDO
-         CASE (NSCARC_MULTIGRID_ALGEBRAIC)                                   
-            CALL SCARC_SETUP_POISSON_SIZES (NLEVEL_MIN)         ! AMG: setup sizes only on finest level
+         CASE (NSCARC_MULTIGRID_ALGEBRAIC)
+            CALL SCARC_SETUP_POISSON_SIZES (NLEVEL_MIN)             ! If algebraic multigrid: setup sizes only on finest level
       END SELECT
    
-   ! -------- Global MGM method - currently just proof of concept
+   ! -------- Global MGM method 
 
    CASE (NSCARC_METHOD_MGM)
    
-      CALL SCARC_SET_GRID_TYPE (NSCARC_GRID_STRUCTURED)         ! First process structured discretization
+      CALL SCARC_SET_GRID_TYPE (NSCARC_GRID_STRUCTURED)             ! First process structured discretization
       CALL SCARC_SETUP_POISSON_SIZES (NLEVEL_MIN)        
    
-      CALL SCARC_SET_GRID_TYPE (NSCARC_GRID_UNSTRUCTURED)       ! Then process unstructured discretization
+      CALL SCARC_SET_GRID_TYPE (NSCARC_GRID_UNSTRUCTURED)           ! Then process unstructured discretization
       IF (SCARC_MGM_CHECK_LAPLACE .OR. SCARC_MGM_EXACT_INITIAL) &
-         CALL SCARC_SETUP_POISSON_SIZES (NLEVEL_MIN)            ! ... for global Poisson matrix (only if requested)
-      CALL SCARC_SETUP_LOCAL_LAPLACE_SIZES (NLEVEL_MIN)         ! ... for local Laplace matrices
+         CALL SCARC_SETUP_POISSON_SIZES (NLEVEL_MIN)                ! ... for global Poisson matrix (only if requested)
+      CALL SCARC_SETUP_LOCAL_LAPLACE_SIZES (NLEVEL_MIN)             ! ... for local Laplace matrices
    
-END SELECT SELECT_SCARC_METHOD_SIZES
+END SELECT 
 
-! ------ Assemble system matrices on requested grid levels and set boundary conditions
-  
-MESHES_POISSON_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
-
-   SELECT_SCARC_METHOD: SELECT CASE (TYPE_METHOD)
-
-      ! ---------- Krylov method (CG) as main solver, different preconditioners possible
-
-      CASE (NSCARC_METHOD_KRYLOV)
-
-         ! For all different possible Krylov variants, first setup Poisson matrix on finest level including BC's 
-
-         CALL SCARC_SETUP_POISSON (NM, NLEVEL_MIN)
-         CALL SCARC_SETUP_BOUNDARY(NM, NLEVEL_MIN)
-
-         ! Depending on the requested preconditioner, also assemble the Poisson matrix with BC's on specific coarser levels
-
-         SELECT_KRYLOV_PRECON: SELECT CASE (TYPE_PRECON)
-
-            ! In case of multigrid as preconditioner:
-            ! only build higher level structures in case of geometric multigrid (algebraic variant is done elsewhere)
-
-            CASE (NSCARC_RELAX_GMG)
-
-               IF (IS_CG_GMG) THEN
-                  DO NL = NLEVEL_MIN+1, NLEVEL_MAX
-                     CALL SCARC_SETUP_POISSON (NM, NL)
-                     CALL SCARC_SETUP_BOUNDARY(NM, NL)
-                  ENDDO
-               ENDIF
-
-#ifdef WITH_MKL
-            ! In case of LU-decomposition as preconditioner
-            ! locally acting: PARDISO from MKL as preconditioners on fine level with possible coarse grid correction
-
-            CASE (NSCARC_RELAX_MKL)
-
-               IF (TYPE_SCOPE(1) == NSCARC_SCOPE_LOCAL .AND. HAS_TWO_LEVELS .AND. .NOT.HAS_AMG_LEVELS) THEN
-                  CALL SCARC_SETUP_POISSON (NM, NLEVEL_MAX)
-                  CALL SCARC_SETUP_BOUNDARY(NM, NLEVEL_MAX)
-               ENDIF
-#endif
-
-            ! in case of default preconditioners (JACOBI/SSOR/FFT/...):
-            ! if there is an additional coarse grid correction which is NOT AMG-based, 
-            ! then also assemble matrix on coarse grid level
-
-            CASE DEFAULT
-   
-               IF (HAS_TWO_LEVELS .AND. .NOT.HAS_AMG_LEVELS) THEN
-                  CALL SCARC_SETUP_POISSON (NM, NLEVEL_MAX)
-                  CALL SCARC_SETUP_BOUNDARY(NM, NLEVEL_MAX)
-               ENDIF
-
-         END SELECT SELECT_KRYLOV_PRECON
-
-      ! ---------- Multigrid as main solver
-
-      CASE (NSCARC_METHOD_MULTIGRID)
-
-         ! For all different possible multigrid-variants, first setup Poisson matrix on finest level including BC's 
-
-         CALL SCARC_SETUP_POISSON (NM, NLEVEL_MIN)
-         CALL SCARC_SETUP_BOUNDARY(NM, NLEVEL_MIN)
-
-         ! On case of a  geometric multigrid, assemble standard n-point-matrix hierarchy on all coarser levels, too
-         ! Note: in case of an algebraic multigrid, this will be done in a separate routine later
-
-         IF (TYPE_MULTIGRID == NSCARC_MULTIGRID_GEOMETRIC) THEN
-            DO NL = NLEVEL_MIN + 1, NLEVEL_MAX
-               CALL SCARC_SETUP_POISSON (NM, NL)
-               CALL SCARC_SETUP_BOUNDARY(NM, NL)
-            ENDDO
-         ENDIF
-
-
-      ! ---------- McKenny-Greengard-Mayo method:
-      ! Solving for the structured and unstructured Poisson matrix
-      ! Assemble both, the structured and unstructured Poisson matrix
-      ! temporarily they will be stored separately in matrices AC and ACU due to the different
-      ! settings along internal boundary cells,
-      ! in the medium term, a toggle mechanism will be implemented which only switches the corresponding
-      ! entries while keeping the entries which are the same for both discretization types
-
-      CASE (NSCARC_METHOD_MGM)
-   
-         ! First assemble structured matrix with inhomogeneous boundary conditions
-
-         TYPE_SCOPE(0) = NSCARC_SCOPE_GLOBAL
-         CALL SCARC_SET_GRID_TYPE (NSCARC_GRID_STRUCTURED)
-         CALL SCARC_SETUP_POISSON (NM, NLEVEL_MIN)
-         CALL SCARC_SETUP_BOUNDARY(NM, NLEVEL_MIN)
-
-         ! Then assemble unstructured matrix with homogeneous Dirichlet boundary conditions along
-         ! external boundaries and special MGM BC-settings along mesh interfaces
-
-         CALL SCARC_SET_GRID_TYPE (NSCARC_GRID_UNSTRUCTURED)
-         IF (SCARC_MGM_CHECK_LAPLACE .OR. SCARC_MGM_EXACT_INITIAL) THEN
-            CALL SCARC_SETUP_POISSON (NM, NLEVEL_MIN)
-            CALL SCARC_SETUP_BOUNDARY(NM, NLEVEL_MIN)
-         ENDIF
-
-         TYPE_SCOPE(0) = NSCARC_SCOPE_LOCAL
-         CALL SCARC_SETUP_LAPLACE (NM, NLEVEL_MIN)
-         CALL SCARC_SETUP_BOUNDARY_WITH_INTERFACES(NM, NLEVEL_MIN) 
-         CALL SCARC_SET_GRID_TYPE (NSCARC_GRID_STRUCTURED)
-
-   END SELECT SELECT_SCARC_METHOD
-
-ENDDO MESHES_POISSON_LOOP
-
-! Setup mappings for the global numbering of vectors and the Poisson matrix (compact storage technique only)
- 
-IF (TYPE_MATRIX == NSCARC_MATRIX_COMPACT) THEN
-   IF (IS_MGM) THEN
-
-      TYPE_SCOPE = NSCARC_SCOPE_GLOBAL
-      CALL SCARC_SET_GRID_TYPE(NSCARC_GRID_STRUCTURED)
-      CALL SCARC_SETUP_GLOBAL_CELL_MAPPING(NLEVEL_MIN)
-      CALL SCARC_SETUP_GLOBAL_POISSON_COLUMNS(NLEVEL_MIN)
-
-      IF (SCARC_MGM_CHECK_LAPLACE .OR. SCARC_MGM_EXACT_INITIAL) THEN
-         CALL SCARC_SET_GRID_TYPE(NSCARC_GRID_UNSTRUCTURED)
-         CALL SCARC_SETUP_GLOBAL_CELL_MAPPING(NLEVEL_MIN)
-         CALL SCARC_SETUP_GLOBAL_POISSON_COLUMNS(NLEVEL_MIN)
-      ENDIF
-
-   ELSE
-
-      CALL SCARC_SETUP_GLOBAL_CELL_MAPPING(NLEVEL_MIN)
-      CALL SCARC_SETUP_GLOBAL_POISSON_COLUMNS(NLEVEL_MIN)
-
-   ENDIF
-ENDIF
- 
-! If there is more than one mesh, exchange matrix values in overlapping parts
-! This must be done for all multilevel methods at least at the finest grid level
-! Furthermore also at all higher levels except for the AMG method,
-! in this case it will be done later in routine SETUP_ALGEBRAIC_MULTIGRID
-
-IF (SET_MATRIX_TYPE(NLEVEL_MIN) == NSCARC_MATRIX_COMPACT) CALL SCARC_SETUP_GLOBAL_POISSON_OVERLAPS(NLEVEL_MIN)
-
-MULTI_LEVEL_IF: IF (HAS_MULTIPLE_LEVELS .AND. .NOT.HAS_AMG_LEVELS) THEN
-   DO NL = NLEVEL_MIN+1, NLEVEL_MAX
-      IF (SET_MATRIX_TYPE(NL) /= NSCARC_MATRIX_COMPACT) CYCLE
-      CALL SCARC_SETUP_GLOBAL_CELL_MAPPING(NL)
-      CALL SCARC_SETUP_GLOBAL_POISSON_COLUMNS(NL)
-      CALL SCARC_SETUP_GLOBAL_POISSON_OVERLAPS(NL)
-   ENDDO 
-ENDIF MULTI_LEVEL_IF
-
-! ------ If MKL-solver is used on specific levels, then setup symmetric Poisson matrix there
-#ifdef WITH_MKL
-IF (.NOT. IS_MGM) THEN
-
-   DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
-
-      CALL SCARC_POINT_TO_GRID (NM, NLEVEL_MIN)
-      IF (TYPE_PRECON == NSCARC_RELAX_OPTIMIZED .OR. TYPE_SMOOTH == NSCARC_RELAX_OPTIMIZED) THEN
-         IF (.NOT.L%HAS_OBSTRUCTIONS) TYPE_MKL(NLEVEL_MIN) = NSCARC_MKL_NONE
-      ENDIF
-      IF (TYPE_MKL(NLEVEL_MIN) /= NSCARC_MKL_NONE) THEN
-         CALL SCARC_SETUP_MATRIX_MKL(NSCARC_MATRIX_POISSON, NM, NLEVEL_MIN)
-         CALL SCARC_SETUP_BOUNDARY_MKL(NSCARC_MATRIX_POISSON, NM, NLEVEL_MIN)
-      ENDIF
-
-      IF (HAS_GMG_LEVELS) THEN
-         DO NL = NLEVEL_MIN+1, NLEVEL_MAX
-            CALL SCARC_POINT_TO_GRID (NM, NL)
-            IF (TYPE_PRECON == NSCARC_RELAX_OPTIMIZED .OR. TYPE_SMOOTH == NSCARC_RELAX_OPTIMIZED) THEN
-               IF (.NOT.L%HAS_OBSTRUCTIONS) TYPE_MKL(NL) = NSCARC_MKL_NONE
-            ENDIF
-            IF (TYPE_MKL(NL) /= NSCARC_MKL_NONE)  CALL SCARC_SETUP_MATRIX_MKL  (NSCARC_MATRIX_POISSON, NM, NL)
-            IF (TYPE_MKL(NL) == NSCARC_MKL_LOCAL) CALL SCARC_SETUP_BOUNDARY_MKL(NSCARC_MATRIX_POISSON, NM, NL)
-         ENDDO
-      ENDIF
-
-   ENDDO 
-
-ELSE 
-
-   CALL SCARC_SET_GRID_TYPE (NSCARC_GRID_UNSTRUCTURED)
-
-   TYPE_SCOPE_SAVE(0:1) = TYPE_SCOPE(0:1)
-   TYPE_MKL_SAVE(0:1) = TYPE_MKL(0:1)
-   IF (SCARC_MGM_CHECK_LAPLACE .OR. SCARC_MGM_EXACT_INITIAL) THEN
-      TYPE_SCOPE(0) = NSCARC_SCOPE_GLOBAL
-      IF (TRIM(SCARC_PRECON) == 'CLUSTER') THEN
-         TYPE_MKL(NLEVEL_MIN) = NSCARC_MKL_GLOBAL
-      ELSE
-         TYPE_MKL(NLEVEL_MIN) = NSCARC_MKL_LOCAL
-      ENDIF
-      DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
-         CALL SCARC_POINT_TO_GRID (NM, NLEVEL_MIN)
-         CALL SCARC_SETUP_MATRIX_MKL(NSCARC_MATRIX_POISSON, NM, NLEVEL_MIN)
-         CALL SCARC_SETUP_BOUNDARY_MKL(NSCARC_MATRIX_POISSON, NM, NLEVEL_MIN)
-      ENDDO 
-   ENDIF
-
-   TYPE_SCOPE(0:1) = NSCARC_SCOPE_LOCAL
-   TYPE_MKL(0:1) = NSCARC_MKL_LOCAL
-   SELECT CASE (TYPE_MGM_LAPLACE)
-      CASE (NSCARC_MGM_LAPLACE_CG, NSCARC_MGM_LAPLACE_PARDISO) 
-         DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
-            CALL SCARC_POINT_TO_GRID (NM, NLEVEL_MIN)
-            CALL SCARC_SETUP_MATRIX_MKL (NSCARC_MATRIX_LAPLACE, NM, NLEVEL_MIN)
-         ENDDO 
-      CASE (NSCARC_MGM_LAPLACE_OPTIMIZED) 
-         DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
-            CALL SCARC_POINT_TO_GRID (NM, NLEVEL_MIN)
-            IF (L%STRUCTURED%NC > L%UNSTRUCTURED%NC) CALL SCARC_SETUP_MATRIX_MKL (NSCARC_MATRIX_LAPLACE, NM, NLEVEL_MIN)
-         ENDDO 
-   END SELECT
-   
-   TYPE_SCOPE(0:1) = TYPE_SCOPE_SAVE(0:1)
-   TYPE_MKL(0:1) = TYPE_MKL_SAVE(0:1)
-   CALL SCARC_SET_GRID_TYPE (NSCARC_GRID_STRUCTURED)
-
-ENDIF
-#endif
-
-END SUBROUTINE SCARC_SETUP_SYSTEMS
+END SUBROUTINE SCARC_SETUP_POISSON_REQUIREMENTS
 
 
 ! --------------------------------------------------------------------------------------------------------------
@@ -11740,6 +11564,171 @@ ENDDO MESHES_LOOP
 END SUBROUTINE SCARC_SETUP_LOCAL_LAPLACE_SIZES
 
 
+! ------------------------------------------------------------------------------------------------------------------
+!> \brief Build either separable or inseparable Poisson system with boundary conditions on requested grid levels 
+! ------------------------------------------------------------------------------------------------------------------
+SUBROUTINE SCARC_SETUP_POISSON_SYSTEMS
+INTEGER :: NM, NL
+
+MESHES_POISSON_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
+
+   SELECT_SCARC_METHOD: SELECT CASE (TYPE_METHOD)
+
+      ! ---------- Krylov method (CG) as main solver, different preconditioners possible
+
+      CASE (NSCARC_METHOD_KRYLOV)
+
+         ! For all different possible Krylov variants, first setup Poisson matrix on finest level including BC's 
+
+         CALL SCARC_SETUP_POISSON (NM, NLEVEL_MIN)
+         CALL SCARC_SETUP_BOUNDARY(NM, NLEVEL_MIN)
+
+         ! Depending on the requested preconditioner, also assemble the Poisson matrix with BC's on specific coarser levels
+
+         SELECT_KRYLOV_PRECON: SELECT CASE (TYPE_PRECON)
+
+            ! In case of multigrid as preconditioner:
+            ! only build higher level structures in case of geometric multigrid (algebraic variant is done elsewhere)
+
+            CASE (NSCARC_RELAX_GMG)
+
+               IF (IS_CG_GMG) THEN
+                  DO NL = NLEVEL_MIN+1, NLEVEL_MAX
+                     CALL SCARC_SETUP_POISSON (NM, NL)
+                     CALL SCARC_SETUP_BOUNDARY(NM, NL)
+                  ENDDO
+               ENDIF
+
+#ifdef WITH_MKL
+            ! In case of LU-decomposition as preconditioner
+            ! locally acting: PARDISO from MKL as preconditioners on fine level with possible coarse grid correction
+
+            CASE (NSCARC_RELAX_MKL)
+
+               IF (TYPE_SCOPE(1) == NSCARC_SCOPE_LOCAL .AND. HAS_TWO_LEVELS .AND. .NOT.HAS_AMG_LEVELS) THEN
+                  CALL SCARC_SETUP_POISSON (NM, NLEVEL_MAX)
+                  CALL SCARC_SETUP_BOUNDARY(NM, NLEVEL_MAX)
+               ENDIF
+#endif
+
+            ! in case of default preconditioners (JACOBI/SSOR/FFT/...):
+            ! if there is an additional coarse grid correction which is NOT AMG-based, 
+            ! then also assemble matrix on coarse grid level
+
+            CASE DEFAULT
+   
+               IF (HAS_TWO_LEVELS .AND. .NOT.HAS_AMG_LEVELS) THEN
+                  CALL SCARC_SETUP_POISSON (NM, NLEVEL_MAX)
+                  CALL SCARC_SETUP_BOUNDARY(NM, NLEVEL_MAX)
+               ENDIF
+
+         END SELECT SELECT_KRYLOV_PRECON
+
+      ! ---------- Multigrid as main solver
+
+      CASE (NSCARC_METHOD_MULTIGRID)
+
+         ! For all different possible multigrid-variants, first setup Poisson matrix on finest level including BC's 
+
+         CALL SCARC_SETUP_POISSON (NM, NLEVEL_MIN)
+         CALL SCARC_SETUP_BOUNDARY(NM, NLEVEL_MIN)
+
+         ! On case of a  geometric multigrid, assemble standard n-point-matrix hierarchy on all coarser levels, too
+         ! Note: in case of an algebraic multigrid, this will be done in a separate routine later
+
+         IF (TYPE_MULTIGRID == NSCARC_MULTIGRID_GEOMETRIC) THEN
+            DO NL = NLEVEL_MIN + 1, NLEVEL_MAX
+               CALL SCARC_SETUP_POISSON (NM, NL)
+               CALL SCARC_SETUP_BOUNDARY(NM, NL)
+            ENDDO
+         ENDIF
+
+      ! ---------- McKenny-Greengard-Mayo method:
+      ! Solving for the structured and unstructured Poisson matrix
+      ! Assemble both, the structured and unstructured Poisson matrix
+      ! temporarily they will be stored separately in matrices AC and ACU due to the different
+      ! settings along internal boundary cells,
+      ! in the medium term, a toggle mechanism will be implemented which only switches the corresponding
+      ! entries while keeping the entries which are the same for both discretization types
+
+      CASE (NSCARC_METHOD_MGM)
+   
+         ! First assemble structured matrix with inhomogeneous boundary conditions
+
+         TYPE_SCOPE(0) = NSCARC_SCOPE_GLOBAL
+         CALL SCARC_SET_GRID_TYPE (NSCARC_GRID_STRUCTURED)
+         CALL SCARC_SETUP_POISSON (NM, NLEVEL_MIN)
+         CALL SCARC_SETUP_BOUNDARY(NM, NLEVEL_MIN)
+
+         ! Then assemble unstructured matrix with homogeneous Dirichlet boundary conditions along
+         ! external boundaries and special MGM BC-settings along mesh interfaces
+
+         CALL SCARC_SET_GRID_TYPE (NSCARC_GRID_UNSTRUCTURED)
+         IF (SCARC_MGM_CHECK_LAPLACE .OR. SCARC_MGM_EXACT_INITIAL) THEN
+            CALL SCARC_SETUP_POISSON (NM, NLEVEL_MIN)
+            CALL SCARC_SETUP_BOUNDARY(NM, NLEVEL_MIN)
+         ENDIF
+
+         TYPE_SCOPE(0) = NSCARC_SCOPE_LOCAL
+         CALL SCARC_SETUP_LAPLACE (NM, NLEVEL_MIN)
+         CALL SCARC_SETUP_BOUNDARY_WITH_INTERFACES(NM, NLEVEL_MIN) 
+         CALL SCARC_SET_GRID_TYPE (NSCARC_GRID_STRUCTURED)
+
+   END SELECT SELECT_SCARC_METHOD
+
+ENDDO MESHES_POISSON_LOOP
+
+! Make Poisson matrices globally acting on the existing levels 
+ 
+CALL SCARC_MAKE_POISSON_GLOBAL
+
+END SUBROUTINE SCARC_SETUP_POISSON_SYSTEMS
+
+
+! --------------------------------------------------------------------------------------------------------------
+!> \brief Make Poisson matrix globally acting, that is, setup all overlapping information of global matrix
+! --------------------------------------------------------------------------------------------------------------
+SUBROUTINE SCARC_MAKE_POISSON_GLOBAL
+INTEGER :: NL
+ 
+! Setup mappings for the global numbering of vectors and Poisson matrix (compact storage technique only)
+
+IF (TYPE_MATRIX == NSCARC_MATRIX_COMPACT) THEN
+   IF (IS_MGM) THEN
+      TYPE_SCOPE = NSCARC_SCOPE_GLOBAL
+      CALL SCARC_SET_GRID_TYPE(NSCARC_GRID_STRUCTURED)
+      CALL SCARC_SETUP_GLOBAL_CELL_MAPPING(NLEVEL_MIN)
+      CALL SCARC_SETUP_GLOBAL_POISSON_COLUMNS(NLEVEL_MIN)
+      IF (SCARC_MGM_CHECK_LAPLACE .OR. SCARC_MGM_EXACT_INITIAL) THEN
+         CALL SCARC_SET_GRID_TYPE(NSCARC_GRID_UNSTRUCTURED)
+         CALL SCARC_SETUP_GLOBAL_CELL_MAPPING(NLEVEL_MIN)
+         CALL SCARC_SETUP_GLOBAL_POISSON_COLUMNS(NLEVEL_MIN)
+      ENDIF
+   ELSE
+      CALL SCARC_SETUP_GLOBAL_CELL_MAPPING(NLEVEL_MIN)
+      CALL SCARC_SETUP_GLOBAL_POISSON_COLUMNS(NLEVEL_MIN)
+   ENDIF
+ENDIF
+ 
+! If there is more than one mesh, exchange matrix values in overlapping parts
+! This must be done for all multilevel methods at least at the finest grid level
+! Furthermore also at all higher levels except for the AMG method,
+! in this case it will be done later in routine SETUP_ALGEBRAIC_MULTIGRID
+
+IF (SET_MATRIX_TYPE(NLEVEL_MIN) == NSCARC_MATRIX_COMPACT) CALL SCARC_SETUP_GLOBAL_POISSON_OVERLAPS(NLEVEL_MIN)
+
+MULTI_LEVEL_IF: IF (HAS_MULTIPLE_LEVELS .AND. .NOT.HAS_AMG_LEVELS) THEN
+   DO NL = NLEVEL_MIN+1, NLEVEL_MAX
+      IF (SET_MATRIX_TYPE(NL) /= NSCARC_MATRIX_COMPACT) CYCLE
+      CALL SCARC_SETUP_GLOBAL_CELL_MAPPING(NL)
+      CALL SCARC_SETUP_GLOBAL_POISSON_COLUMNS(NL)
+      CALL SCARC_SETUP_GLOBAL_POISSON_OVERLAPS(NL)
+   ENDDO 
+ENDIF MULTI_LEVEL_IF
+
+END SUBROUTINE SCARC_MAKE_POISSON_GLOBAL
+
+
 ! -------------------------------------------------------------------------------------------------------------
 !> \brief Get global numberings for compact column vector of Poisson matrix 
 ! -------------------------------------------------------------------------------------------------------------
@@ -11839,7 +11828,7 @@ END FUNCTION SCARC_CELL_WITHIN_MESH
 !    explanation to come ...
 ! --------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_SETUP_POISSON (NM, NL)
-USE SCARC_POINTERS, ONLY: S, L, G, A, AB, OA, OAB, &
+USE SCARC_POINTERS, ONLY: M, S, L, G, A, AB, OA, OAB, RDX, RDY, RDZ, RDXN, RDYN, RDZN, &
                           SCARC_POINT_TO_GRID,    SCARC_POINT_TO_OTHER_GRID, &
                           SCARC_POINT_TO_CMATRIX, SCARC_POINT_TO_OTHER_CMATRIX, &
                           SCARC_POINT_TO_BMATRIX, SCARC_POINT_TO_OTHER_BMATRIX
@@ -11864,6 +11853,14 @@ SELECT_STORAGE_TYPE: SELECT CASE (SET_MATRIX_TYPE(NL))
       CALL SCARC_POINT_TO_GRID (NM, NL)                                    
       A => SCARC_POINT_TO_CMATRIX (NSCARC_MATRIX_POISSON)
       CALL SCARC_ALLOCATE_CMATRIX (A, NL, NSCARC_PRECISION_DOUBLE, NSCARC_MATRIX_FULL, 'G%POISSON', CROUTINE)
+
+      IF (NL == NLEVEL_MIN) THEN
+         RDX  => M%RDX ;  RDY  => M%RDY ;  RDZ  => M%RDZ
+         RDXN => M%RDXN;  RDYN => M%RDYN;  RDZN => M%RDZN
+      ELSE
+         RDX  => L%RDX ;  RDY  => L%RDY ;  RDZ  => L%RDZ
+         RDXN => L%RDXN;  RDYN => L%RDYN;  RDZN => L%RDZN
+      ENDIF
 
       ! For every neighbor allocate small matrix on overlapping part of mesh
 
@@ -11906,6 +11903,7 @@ SELECT_STORAGE_TYPE: SELECT CASE (SET_MATRIX_TYPE(NL))
       A%N_VAL = IP
    
       CALL SCARC_GET_MATRIX_STENCIL_MAX(A, G%NC)
+      CALL SCARC_MATRIX_CHECK_NEUMANN(A, G%NC)
 
  
    ! ---------- bandwise storage technique
@@ -12538,7 +12536,113 @@ ENDDO
 END SUBROUTINE SCARC_GET_MATRIX_STENCIL_MAX
 
 
+! --------------------------------------------------------------------------------------------------------------
+!> \brief Check if matrix only has Neumann BCs and condensing will be required
+! --------------------------------------------------------------------------------------------------------------
+SUBROUTINE SCARC_MATRIX_CHECK_NEUMANN (A, NC)
+TYPE (SCARC_CMATRIX_TYPE), INTENT(INOUT) :: A
+REAL(EB):: ROW_SUM
+INTEGER, INTENT(IN) :: NC
+INTEGER :: IC, ICOL
+
+A%CONDENSING_REQUIRED = .TRUE.
+ROW_LOOP: DO IC = 1, NC
+   ROW_SUM = 0.0_EB
+   DO ICOL = A%ROW(IC), A%ROW(IC+1)-1
+      ROW_SUM = ROW_SUM + A%VAL(ICOL)
+   ENDDO
+   IF (ROW_SUM > TWO_EPSILON_EB) THEN
+      A%CONDENSING_REQUIRED = .FALSE.
+      EXIT ROW_LOOP
+   ENDIF
+ENDDO ROW_LOOP
+
+END SUBROUTINE SCARC_MATRIX_CHECK_NEUMANN
+
+
 #ifdef WITH_MKL
+! --------------------------------------------------------------------------------------------------------------
+!> \brief Setup symmetric version of Poisson matrix needed for all types of IntelMKL preconditioning (MKL only)
+! --------------------------------------------------------------------------------------------------------------
+SUBROUTINE SCARC_SETUP_POISSON_SYMMETRIC
+USE SCARC_POINTERS, ONLY: L, SCARC_POINT_TO_GRID
+INTEGER :: NM, NL, TYPE_MKL_SAVE(0:1), TYPE_SCOPE_SAVE(0:1)
+
+! Default version for all solvers except of MGM-method: Symmetrization must only be done for chosen grid type
+! (structured or unstructured) which is already correctly set at this point
+ 
+IF (.NOT. IS_MGM) THEN
+
+   DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
+
+      CALL SCARC_POINT_TO_GRID (NM, NLEVEL_MIN)                                    ! make finest level symmetric
+      IF (TYPE_PRECON == NSCARC_RELAX_OPTIMIZED .OR. TYPE_SMOOTH == NSCARC_RELAX_OPTIMIZED) THEN
+         IF (.NOT.L%HAS_OBSTRUCTIONS) TYPE_MKL(NLEVEL_MIN) = NSCARC_MKL_NONE       ! structured: use only FFT for optimized version
+      ENDIF
+      IF (TYPE_MKL(NLEVEL_MIN) /= NSCARC_MKL_NONE) THEN
+         CALL SCARC_SETUP_MATRIX_MKL(NSCARC_MATRIX_POISSON, NM, NLEVEL_MIN)
+         CALL SCARC_SETUP_BOUNDARY_MKL(NSCARC_MATRIX_POISSON, NM, NLEVEL_MIN)
+      ENDIF
+
+      IF (HAS_GMG_LEVELS) THEN                                                     ! if available also make coarser levels symmetric
+         DO NL = NLEVEL_MIN+1, NLEVEL_MAX
+            CALL SCARC_POINT_TO_GRID (NM, NLEVEL_MIN)
+            IF (TYPE_PRECON == NSCARC_RELAX_OPTIMIZED .OR. TYPE_SMOOTH == NSCARC_RELAX_OPTIMIZED) THEN
+               IF (.NOT.L%HAS_OBSTRUCTIONS) TYPE_MKL(NL) = NSCARC_MKL_NONE
+            ENDIF
+            IF (TYPE_MKL(NL) /= NSCARC_MKL_NONE)  CALL SCARC_SETUP_MATRIX_MKL  (NSCARC_MATRIX_POISSON, NM, NL)
+            IF (TYPE_MKL(NL) == NSCARC_MKL_LOCAL) CALL SCARC_SETUP_BOUNDARY_MKL(NSCARC_MATRIX_POISSON, NM, NL)
+         ENDDO
+      ENDIF
+
+   ENDDO 
+
+! Special MGM-version: Do symmetrization for the unstructured part of the method, the structured part basically uses FFT 
+
+ELSE 
+
+   CALL SCARC_SET_GRID_TYPE (NSCARC_GRID_UNSTRUCTURED)
+
+   TYPE_SCOPE_SAVE(0:1) = TYPE_SCOPE(0:1)
+   TYPE_MKL_SAVE(0:1)   = TYPE_MKL(0:1)
+   IF (SCARC_MGM_CHECK_LAPLACE .OR. SCARC_MGM_EXACT_INITIAL) THEN                   ! also do it for global system if requested
+      TYPE_SCOPE(0) = NSCARC_SCOPE_GLOBAL
+      IF (TRIM(SCARC_PRECON) == 'CLUSTER') THEN
+         TYPE_MKL(NLEVEL_MIN) = NSCARC_MKL_GLOBAL
+      ELSE
+         TYPE_MKL(NLEVEL_MIN) = NSCARC_MKL_LOCAL
+      ENDIF
+      DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
+         CALL SCARC_POINT_TO_GRID (NM, NLEVEL_MIN)
+         CALL SCARC_SETUP_MATRIX_MKL(NSCARC_MATRIX_POISSON, NM, NLEVEL_MIN)
+         CALL SCARC_SETUP_BOUNDARY_MKL(NSCARC_MATRIX_POISSON, NM, NLEVEL_MIN)
+      ENDDO 
+   ENDIF
+
+   TYPE_SCOPE(0:1) = NSCARC_SCOPE_LOCAL
+   TYPE_MKL(0:1)   = NSCARC_MKL_LOCAL
+   SELECT CASE (TYPE_MGM_LAPLACE)
+      CASE (NSCARC_MGM_LAPLACE_CG, NSCARC_MGM_LAPLACE_PARDISO)                      ! basically get MKL version for these solvers
+         DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
+            CALL SCARC_POINT_TO_GRID (NM, NLEVEL_MIN)
+            CALL SCARC_SETUP_MATRIX_MKL (NSCARC_MATRIX_LAPLACE, NM, NLEVEL_MIN)
+         ENDDO 
+      CASE (NSCARC_MGM_LAPLACE_OPTIMIZED)                                           ! only get MKL version for unstructured grids
+         DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
+            CALL SCARC_POINT_TO_GRID (NM, NLEVEL_MIN)
+            IF (L%STRUCTURED%NC > L%UNSTRUCTURED%NC) CALL SCARC_SETUP_MATRIX_MKL (NSCARC_MATRIX_LAPLACE, NM, NLEVEL_MIN)
+         ENDDO 
+   END SELECT
+   
+   TYPE_SCOPE(0:1) = TYPE_SCOPE_SAVE(0:1)
+   TYPE_MKL(0:1)   = TYPE_MKL_SAVE(0:1)
+   CALL SCARC_SET_GRID_TYPE (NSCARC_GRID_STRUCTURED)                                ! return to structured grid for further steps
+
+ENDIF
+
+END SUBROUTINE SCARC_SETUP_POISSON_SYMMETRIC
+
+
 ! --------------------------------------------------------------------------------------------------------------
 !> \brief Setup symmetric version of Poisson matrix for MKL solver in double precision
 ! --------------------------------------------------------------------------------------------------------------
@@ -14254,7 +14358,6 @@ END SUBROUTINE SCARC_PROLONGATION
 END MODULE SCARC_GMG
 
 
-#ifdef WITH_SCARC_AMG
 !=======================================================================================================================
 !
 ! MODULE SCARC_AMG
@@ -16751,7 +16854,6 @@ END MODULE SCARC_AMG
 
 
 
-#endif
 !=======================================================================================================================
 !
 ! MODULE SCARC_MGM
@@ -17138,11 +17240,29 @@ DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          MGM%ITE_POISSON = ITE                   ! ITE, CAPPA contain statistics of preceding structured CG-solution
          MGM%CAPPA_POISSON = CAPPA
 
+         IF (SCARC_VERBOSE) THEN
+            WRITE(MSG%LU_VERBOSE, 1100) ICYC, PRESSURE_ITERATIONS, TOTAL_PRESSURE_ITERATIONS, &
+                                        MGM%ITE_POISSON, MGM%CAPPA_POISSON, MGM%ITE, VELOCITY_ERROR_GLOBAL
+         ENDIF
+
       ! MGM iteration - after each unstructured homogeneous Laplace solution
 
       CASE (1)
 
          MGM%ITE = ITE_MGM
+
+         IF (SCARC_VERBOSE) THEN
+            IF (TYPE_MGM_LAPLACE == NSCARC_MGM_LAPLACE_CG) THEN
+               WRITE(MSG%LU_VERBOSE, 1200) ICYC, PRESSURE_ITERATIONS, TOTAL_PRESSURE_ITERATIONS, &
+                                           MGM%ITE_POISSON, MGM%CAPPA_POISSON, &
+                                           ITE, CAPPA, MGM%ITE, VELOCITY_ERROR_GLOBAL
+            ELSE
+               WRITE(MSG%LU_VERBOSE, 1201) ICYC, PRESSURE_ITERATIONS, TOTAL_PRESSURE_ITERATIONS, &
+                                           MGM%ITE_POISSON, MGM%CAPPA_POISSON, &
+                                           MGM%ITE, VELOCITY_ERROR_GLOBAL
+            ENDIF
+         ENDIF
+
          IF (TYPE_MGM_LAPLACE == NSCARC_MGM_LAPLACE_CG .AND. ITE > MGM%ITE_LAPLACE) THEN
             MGM%ITE_LAPLACE = MAX(ITE, MGM%ITE_LAPLACE)            ! Store worst Laplace-CG statistics
             MGM%CAPPA_LAPLACE = CAPPA
@@ -17155,12 +17275,54 @@ DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          CAPPA = MGM%CAPPA_POISSON   ! Reset to Krylov statistics of Poisson solution for statistics in chid.out
          ITE   = MGM%ITE_POISSON
 
+         IF (SCARC_VERBOSE) THEN
+            IF (VELOCITY_ERROR_GLOBAL <= VELOCITY_ERROR_MGM) THEN
+               IF (TYPE_MGM_LAPLACE == NSCARC_MGM_LAPLACE_CG) THEN
+                  WRITE(MSG%LU_VERBOSE, 1300) ICYC, PRESSURE_ITERATIONS, TOTAL_PRESSURE_ITERATIONS, &
+                                              MGM%ITE_POISSON, MGM%CAPPA_POISSON, &
+                                              MGM%ITE_LAPLACE, MGM%CAPPA_LAPLACE, &
+                                              MGM%ITE, VELOCITY_ERROR_GLOBAL, ' ... success'
+               ELSE
+                  WRITE(MSG%LU_VERBOSE, 1301) ICYC, PRESSURE_ITERATIONS, TOTAL_PRESSURE_ITERATIONS, &
+                                              MGM%ITE_POISSON, MGM%CAPPA_POISSON, &
+                                              MGM%ITE, VELOCITY_ERROR_GLOBAL, ' ... success'
+               ENDIF
+            ELSE
+               IF (TYPE_MGM_LAPLACE == NSCARC_MGM_LAPLACE_CG) THEN
+                  WRITE(MSG%LU_VERBOSE, 1300) ICYC, PRESSURE_ITERATIONS, TOTAL_PRESSURE_ITERATIONS, &
+                                              MGM%ITE_POISSON, MGM%CAPPA_POISSON, &
+                                              MGM%ITE_LAPLACE, MGM%CAPPA_LAPLACE, &
+                                              MGM%ITE, VELOCITY_ERROR_GLOBAL, ' ... failure'
+               ELSE
+                  WRITE(MSG%LU_VERBOSE, 1301) ICYC, PRESSURE_ITERATIONS, TOTAL_PRESSURE_ITERATIONS, &
+                                              MGM%ITE_POISSON, MGM%CAPPA_POISSON, &
+                                              MGM%ITE, VELOCITY_ERROR_GLOBAL, ' ... failure'
+               ENDIF
+            ENDIF
+         ENDIF
 
    END SELECT
    IF (VELOCITY_ERROR_GLOBAL <= VELOCITY_ERROR_MGM) SCARC_MGM_CONVERGENCE_STATE = NSCARC_MGM_SUCCESS
 
 ENDDO
 
+1100 FORMAT('ICYC ',I6, ', #PI: ', I6,', #TPI: ', I6, &
+            ' , #POIS: ',    I5, ' , RATE: ',    F6.2, &
+            ' , #MGM: ',     I5, ' , VEL_ERR: ', E10.2, a14)
+1200 FORMAT('ICYC ',I6, ', #PI: ', I6,', #TPI: ', I6, &
+            ' , #POIS: ',    I5, ' , RATE: ',    F6.2, &
+            ' , #LAPL:    ',    I5, ' , RATE:    ',    F6.2, &
+            ' , #MGM: ',     I5, ' , VEL_ERR: ', E10.2, a14,/)
+1201 FORMAT('ICYC ',I6, ', #PI: ', I6,', #TPI: ', I6, &
+            ' , #POIS: ',    I5, ' , RATE: ',    F6.2, &
+            ' , #MGM: ',     I5, ' , VEL_ERR: ', E10.2, a14,/)
+1300 FORMAT('ICYC ',I6, ', #PI: ', I6,', #TPI: ', I6, &
+            ' , #POIS: ',    I5, ' , RATE: ',    F6.2, &
+            ' , #LAPLmax: ', I5, ' , RATEmax: ', F6.2, &
+            ' , #MGM: ',     I5, ' , VEL_ERR: ', E10.2, a14,/)
+1301 FORMAT('ICYC ',I6, ', #PI: ', I6,', #TPI: ', I6, &
+            ' , #POIS: ',    I5, ' , RATE: ',    F6.2, &
+            ' , #MGM: ',     I5, ' , VEL_ERR: ', E10.2, a14,/)
 END FUNCTION SCARC_MGM_CONVERGENCE_STATE
 
 
@@ -17721,9 +17883,6 @@ DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 
 ENDDO
 
-!#ifdef WITH_SCARC_DEBUG
-!1000 FORMAT (A, ': IX, IY, IZ =', 3I6, ': ICU =', I6, ': HP =', E14.6)
-!#endif
 END SUBROUTINE SCARC_MGM_STORE
 
 
@@ -18382,6 +18541,36 @@ USE SCARC_CONVERGENCE
 IMPLICIT NONE (TYPE,EXTERNAL)
 
 CONTAINS
+
+! --------------------------------------------------------------------------------------------------------------
+!> \brief  Setup environment for solution of inseparable Poisson system if requested
+!  - workspace for the current version of RHO depending on predictor/corrector stage including correct overlaps
+!  - workspace for the inseparable pressure solution itself in both stages
+!  - workspace for the boundary conditions for the inseparable pressure solution
+! --------------------------------------------------------------------------------------------------------------
+SUBROUTINE SCARC_SETUP_INSEPARABLE_ENVIRONMENT
+USE SCARC_POINTERS, ONLY: L, SCARC_POINT_TO_LEVEL
+INTEGER :: NM
+CROUTINE = 'SCARC_SETUP_INSEPARABLE_ENVIRONMENT'
+
+DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
+
+   CALL SCARC_POINT_TO_LEVEL (NM, NLEVEL_MIN)
+
+   CALL SCARC_ALLOCATE_REAL3 (SCARC_RHO ,  0, L%NX+1, 0, L%NY+1, 0, L%NZ+1, NSCARC_INIT_ZERO, 'SCARC_RHO',   CROUTINE)
+   CALL SCARC_ALLOCATE_REAL3 (SCARC_P   ,  0, L%NX+1, 0, L%NY+1, 0, L%NZ+1, NSCARC_INIT_ZERO, 'SCARC_P',     CROUTINE)
+   CALL SCARC_ALLOCATE_REAL3 (SCARC_PS  ,  0, L%NX+1, 0, L%NY+1, 0, L%NZ+1, NSCARC_INIT_ZERO, 'SCARC_PS',    CROUTINE)
+
+   CALL SCARC_ALLOCATE_REAL2 (L%PXS, 1, L%NY, 1, L%NZ, NSCARC_INIT_ZERO, 'L%PXS', CROUTINE)
+   CALL SCARC_ALLOCATE_REAL2 (L%PXF, 1, L%NY, 1, L%NZ, NSCARC_INIT_ZERO, 'L%PXF', CROUTINE)
+   CALL SCARC_ALLOCATE_REAL2 (L%PYS, 1, L%NX, 1, L%NZ, NSCARC_INIT_ZERO, 'L%PYS', CROUTINE)
+   CALL SCARC_ALLOCATE_REAL2 (L%PYF, 1, L%NX, 1, L%NZ, NSCARC_INIT_ZERO, 'L%PYF', CROUTINE)
+   CALL SCARC_ALLOCATE_REAL2 (L%PZS, 1, L%NX, 1, L%NY, NSCARC_INIT_ZERO, 'L%PZS', CROUTINE)
+   CALL SCARC_ALLOCATE_REAL2 (L%PZF, 1, L%NX, 1, L%NY, NSCARC_INIT_ZERO, 'L%PZF', CROUTINE)
+
+ENDDO
+
+END SUBROUTINE SCARC_SETUP_INSEPARABLE_ENVIRONMENT
 
 ! --------------------------------------------------------------------------------------------------------------
 !> \brief  Setup environment for global Krylov method to solve the overall Poisson problem
@@ -21809,24 +21998,15 @@ SUBROUTINE SCARC_SETUP
 USE SCARC_PARSER
 USE SCARC_GRIDS
 USE SCARC_STORAGE, ONLY: SCARC_SETUP_STORAGE
-#ifdef WITH_SCARC_DEBUG
-USE SCARC_MESSAGES, ONLY: SCARC_SETUP_MESSAGES
-#endif
 USE SCARC_MPI, ONLY: SCARC_SETUP_EXCHANGES, SCARC_SETUP_GLOBALS
 USE SCARC_CPU, ONLY: SCARC_SETUP_CPU
 USE SCARC_STACK, ONLY: SCARC_SETUP_VECTORS
-USE SCARC_MATRICES, ONLY: SCARC_SETUP_SYSTEMS
+USE SCARC_MATRICES, ONLY: SCARC_SETUP_POISSON_REQUIREMENTS, SCARC_SETUP_POISSON_SYSTEMS, SCARC_SETUP_POISSON_SYMMETRIC
 #ifdef WITH_MKL
 USE SCARC_MKL, ONLY: SCARC_SETUP_MKL_ENVIRONMENT
 #endif
-#ifdef WITH_SCARC_AMG
 USE SCARC_AMG, ONLY: SCARC_SETUP_AMG_ENVIRONMENT
-#endif
-#ifdef WITH_SCARC_POSTPROCESSING
-USE SCARC_POSTPROCESSING, ONLY: SCARC_SETUP_PRESSURE
-#endif
-USE SCARC_METHODS, ONLY: SCARC_SETUP_KRYLOV_ENVIRONMENT, SCARC_SETUP_MULTIGRID_ENVIRONMENT, &
-                         SCARC_SETUP_MGM_ENVIRONMENT
+USE SCARC_METHODS, ONLY: SCARC_SETUP_KRYLOV_ENVIRONMENT, SCARC_SETUP_MULTIGRID_ENVIRONMENT, SCARC_SETUP_MGM_ENVIRONMENT
 REAL(EB) :: TNOW
 
 TNOW = CURRENT_TIME()
@@ -21839,7 +22019,7 @@ CALL SCARC_SETUP_CPU
 
 ! Parse ScaRC related input parameters in &PRES namelist
 
-CALL SCARC_PARSE_INPUT                      ; IF (STOP_STATUS==SETUP_STOP) RETURN
+CALL SCARC_PARSE_INPUT                                ; IF (STOP_STATUS==SETUP_STOP) RETURN
 
 ! Setup different components of ScaRC solver
  
@@ -21863,13 +22043,28 @@ ENDIF
 ! Setup information for data exchanges and matrix systems
  
 CALL SCARC_SETUP_EXCHANGES                            ; IF (STOP_STATUS==SETUP_STOP) RETURN
-CALL SCARC_SETUP_SYSTEMS                              ; IF (STOP_STATUS==SETUP_STOP) RETURN
 
-! Setup information for algebraic multigrid if needed as preconditioner or main solver
+! Setup information for Poisson systems of requested solver:
+! - Determine memory requirement for Poisson matrices on all required grid levels
+! - In case of separable Poisson system:   
+!     * The matrices (on all grid levels) are built up only once at this point during initialization 
+!     * In case of MKL preconditioning, also their symmetric counterparts are built
+! - In case of inseparable Poisson system: 
+!     * Only basic additional vectors are allocated here, the matrices themselves are rebuilt at each time step
 
-#ifdef WITH_SCARC_AMG
-IF (HAS_AMG_LEVELS) CALL SCARC_SETUP_AMG_ENVIRONMENT          
+CALL SCARC_SETUP_POISSON_REQUIREMENTS                 ; IF (STOP_STATUS==SETUP_STOP) RETURN
+IF (IS_SEPARABLE) THEN
+   CALL SCARC_SETUP_POISSON_SYSTEMS                   ; IF (STOP_STATUS==SETUP_STOP) RETURN
+#ifdef WITH_MKL
+   CALL SCARC_SETUP_POISSON_SYMMETRIC                 ; IF (STOP_STATUS==SETUP_STOP) RETURN
 #endif
+ELSE
+   CALL SCARC_SETUP_INSEPARABLE_ENVIRONMENT
+ENDIF
+
+! Setup information for algebraic multigrid if requested as preconditioner or main solver
+
+IF (HAS_AMG_LEVELS) CALL SCARC_SETUP_AMG_ENVIRONMENT          
 
 ! Setup environment for requested solver
 
@@ -21907,20 +22102,31 @@ END SUBROUTINE SCARC_SETUP
 ! --------------------------------------------------------------------------------------------------------------------
 !> \brief Call of requested ScaRC solver 
 ! --------------------------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_SOLVER(DT_CURRENT)
+SUBROUTINE SCARC_SOLVER(T_CURRENT, DT_CURRENT)
 USE SCARC_CONVERGENCE
 USE SCARC_METHODS, ONLY: SCARC_METHOD_KRYLOV, SCARC_METHOD_MULTIGRID, SCARC_METHOD_MGM
+USE SCARC_MATRICES, ONLY: SCARC_SETUP_POISSON_SYSTEMS, SCARC_SETUP_POISSON_SYMMETRIC
 #ifdef WITH_MKL
 USE SCARC_METHODS, ONLY: SCARC_METHOD_MKL
 #endif
-REAL (EB), INTENT(IN) :: DT_CURRENT
+REAL (EB), INTENT(IN) :: T_CURRENT, DT_CURRENT
 REAL (EB) :: TNOW
 
 TNOW = CURRENT_TIME()
 
-CALL SCARC_SET_ITERATION_STATE (DT_CURRENT)
+CALL SCARC_SET_ITERATION_STATE (T_CURRENT, DT_CURRENT)
 
+! If the inseparable Poisson system is solved, the matrices have to be rebuilt (for the current density) in each time step
 
+IF (IS_INSEPARABLE) THEN
+   CALL SCARC_SETUP_POISSON_SYSTEMS                   ; IF (STOP_STATUS==SETUP_STOP) RETURN
+#ifdef WITH_MKL
+   CALL SCARC_SETUP_POISSON_SYMMETRIC                 ; IF (STOP_STATUS==SETUP_STOP) RETURN
+#endif
+ENDIF
+
+! Step into selected globally acting ScaRC solver
+ 
 SELECT_METHOD: SELECT CASE (TYPE_METHOD)
 
    CASE (NSCARC_METHOD_KRYLOV)

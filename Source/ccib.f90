@@ -3308,6 +3308,9 @@ IF (COMPUTE_CUTCELLS_ONLY) THEN
    RETURN
 ENDIF
 
+! Redefine interpolated external wall_cells inside Geoms: We assume them SOLID_BOUNDARY
+CALL BLOCK_IBM_SOLID_EXTWALLCELLS(FIRST_CALL)
+
 ELSE SET_CUTCELLS_CALL_IF
 
 IF (GET_CUTCELLS_VERBOSE .AND. MY_RANK==0) THEN
@@ -3317,7 +3320,7 @@ ENDIF
 ! Redefine wall_cells inside Geoms: This is done before EDGE info as edges with WALL_CELL type NULL_BOUNDARY will be taken
 ! care of by GEOM edges. Note EDGE_INDEX will be reassigned the IBEDGE position in OME_E, TAU_E arrays for velocity flux to
 ! be computed correctly.
-CALL BLOCK_IBM_SOLID_EXTWALLCELLS
+CALL BLOCK_IBM_SOLID_EXTWALLCELLS(FIRST_CALL)
 
 IF(CC_STRESS_METHOD) THEN
    ! ALLOCATE CELL_COUNT_CC, N_EDGES_DIM_CC:
