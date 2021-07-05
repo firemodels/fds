@@ -28,6 +28,7 @@ SFPE 4th Ed. Figure 3-4.24. pg 3-132
       BLOWING             = T/
 
 &MATL ID                     = 'WATER'
+      EMISSIVITY             = 1.
       DENSITY                = 1000.
       SPEC_ID                = 'WATER VAPOR'
       NU_SPEC                = 1
