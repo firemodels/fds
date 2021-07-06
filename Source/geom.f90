@@ -16604,7 +16604,7 @@ REAL(EB) :: SPHERE_ORIGIN(3),SPHERE_RADIUS,TEXTURE_ORIGIN(3),TEXTURE_SCALE(2),XB
             CYLINDER_RADIUS,CYLINDER_LENGTH,EXTRUDE
 
 INTEGER :: MAX_IDS=0,MAX_SURF_IDS=0,MAX_ZVALS=0,MAX_VERTS=0,MAX_FACES=0,MAX_VOLUS=0,MAX_POLY_VERTS=0,&
-           N_VERTS,N_FACES,N_FACES_TEMP,N_VOLUS,N_ZVALS,N_SURF_ID,N_POLY_VERTS,&
+           N_VERTS,N_FACES,N_FACES_TEMP,N_VOLUS,N_ZVALS,N_SURF_ID,N_SURF_ID2,N_POLY_VERTS,&
            MATL_INDEX,IOS,IZERO,N,I,J,K,IJ,FIRST_FACE_INDEX,I1,I2,I3,I4,&
            GEOM_TYPE,NXB,IJK(3),N_LEVELS,N_LAT,N_LONG,SPHERE_TYPE,BOXVERTLIST(8),NI,NIJ,IVOL,SORT_FACES,II,II1,II2,II3,&
            X1AXIS,NNN,CYLINDER_NSEG_THETA,CYLINDER_NSEG_AXIS,CYL_FIND(LOW_IND:HIGH_IND,1:3)
@@ -16715,13 +16715,20 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
    G%TRANSPARENCY = TRANSPARENCY
    N_VERTS=0
    N_FACES=0
-   N_SURF_ID = 0
    TFACES(1:6*MAX_FACES) = -1.0_EB
    N_VOLUS=0
    N_ZVALS=0
    N_POLY_VERTS=0
    IF(TRIM(BINARY_FILE)/='null') READ_BINARY = .TRUE. ! In case a binary name is provided, read the binary.
    G%READ_BINARY = READ_BINARY
+
+   ! Get number of SURF_IDs defined for the GEOM:
+   N_SURF_ID = 0
+   DO I = 1, MAX_SURF_IDS
+      IF( SURF_ID(I)=='null' ) EXIT ! First 'null'
+      N_SURF_ID = N_SURF_ID + 1
+   ENDDO
+
    READ_BIN_COND : IF (.NOT.READ_BINARY) THEN
       ! count VERTS
       DO I = 1, MAX_VERTS
@@ -16740,11 +16747,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
          IF (ALL(FACES(4*(I-1)+1:4*(I-1)+3)==0)) EXIT
          N_FACES = N_FACES+1
       ENDDO
-      ! Get number of SURF_IDs defined for the GEOM:
-      DO I = 1, MAX_SURF_IDS
-         IF( SURF_ID(I)=='null' ) EXIT ! First 'null'
-         N_SURF_ID = N_SURF_ID + 1
-      ENDDO
+
       ! Now split FACES array into FACES (connectivity), and SURFS, i.e. local surf ID:
       IF(N_FACES > 0) THEN
          IF(ALLOCATED(SURFS)) DEALLOCATE(SURFS); ALLOCATE(SURFS(N_FACES))
@@ -16791,13 +16794,21 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
       ! This is to add the SURF_IDS to SURF_ID for analytical geometries being read from bingeom:
       IF (TRIM(SURF_ID(1))=='null' .AND. TRIM(SURF_IDS(1))/='null') THEN ! Case of cylinders.
          SURF_ID(1:3) = SURF_IDS(1:3)
+         N_SURF_ID    = 3
+         DO I=2,3
+           IF (TRIM(SURF_ID(I))=='null') THEN
+              WRITE(MESSAGE,'(A,A,A)') 'ERROR: problem with GEOM ',TRIM(ID),&
+                                       ', SURF_IDS not defined properly.'
+              CALL SHUTDOWN(MESSAGE); RETURN
+           ENDIF
+         ENDDO
       ENDIF
 
       ! Read Binary
       OPEN(UNIT=731,FILE=TRIM(BINARY_FILE),STATUS='OLD',FORM='UNFORMATTED',ACTION='READ',ERR=221,IOSTAT=IOS)
       IF (IOS==0) THEN
          READ(731) GEOM_TYPE
-         READ(731) N_VERTS,N_FACES,N_SURF_ID,N_VOLUS
+         READ(731) N_VERTS,N_FACES,N_SURF_ID2,N_VOLUS
          IF(GEOM_TYPE==TERRAIN_GEOM_TYPE) THEN
             IS_TERRAIN=.TRUE.
          ELSE ! If GEOM is of any type other than terrains, set it to CAD type.
@@ -16826,6 +16837,20 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
                                        '. Add SURF_ID in said &GEOM line.'
           CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
+         IF(N_SURF_ID2 /= N_SURF_ID) THEN
+            WRITE(MESSAGE,'(A,A,A,I8,A,I8,A,A,A)') 'ERROR: problem with GEOM ',TRIM(ID),&
+                                      ', number of surfaces in SURF_ID field (',N_SURF_ID, &
+                                      ') not equal to number of surfaces (',N_SURF_ID2,&
+                                      ') defined in bingeom ',TRIM(BINARY_FILE),'.'
+            CALL SHUTDOWN(MESSAGE); RETURN
+         ENDIF
+         DO I = 1, N_FACES
+            IF(SURFS(I) > N_SURF_ID) THEN
+               WRITE(MESSAGE,'(A,A,A,I8,A)') 'ERROR: problem with GEOM ',TRIM(ID),&
+                                           ', local SURF_ID index for FACE ',I,'out of bounds.'
+               CALL SHUTDOWN(MESSAGE); RETURN
+            ENDIF
+         ENDDO
       ENDIF
 221   IF(IOS > 0) THEN
          WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR: could not read binary connectivity for GEOM ',TRIM(ID),&
