@@ -3725,7 +3725,6 @@ The inclusion of {\ct BOILING\_TEMPERATURE} on the {\ct MATL} line tells FDS to 
 
 In this example, {\ct 'ETHANOL'} is a {\em known} species; that is, it is listed in Table~\ref{tab:gasspecies}. For this reason, you only need to specify its CO and soot yield. If it is not known, then you must furnish additional information. Section~\ref{user_defined_gas_species_props} contains details, but in brief, only the molecular weight of the gas species is of relevance for the liquid pool evaporation model. If the liquid has multiple components, like gasoline or kerosene, you can furnish an individual {\ct MATL} line for each component. For practical reasons, in such cases you might still want to assume only one gas phase fuel species; thus, each {\ct MATL} line would contain the same {\ct SPEC\_ID}. If this is the case, provide the liquid component molecular weights, {\ct MW}, with units of g/mol on the {\ct MATL} lines. These unique molecular weights are used when computing the evaporation rates of the individual liquid components.
 
-
 \subsubsection{Evaporation of a Pure Liquid}
 \label{methanol_evaporation}
 
@@ -3767,6 +3766,10 @@ An example demonstrating evaporation of a liquid mixture is found in the {\ct Py
 \label{liquid_mixture_plot}
 \end{figure}
 
+\subsubsection{Bound on Liquid Burning Rate}
+\label{info:liquid_burning_rate_bound}
+
+The algorithm used by FDS for computing the liquid evaporation rate has a singularity at the liquid boiling point. That is, when the liquid temperature reaches the boiling point, in theory the evaporation rate is infinite unless the gas phase vapor pressure of the liquid is at its saturation point. To avoid unphysical burning rates of liquids near their boiling temperature, the evaporation rate is bounded by the parameter {\ct MAXIMUM\_LIQUID\_BURNING\_RATE} which is set on the {\ct CLIP} line. Its default value is 0.1~kg/m$^2$/s. Most liquid fuels evaporate at rates far less than this, but there might be fuels, like liquified natural gas, that require a higher upper bound.
 
 
 \subsubsection{Heat and Mass Transfer with Blowing}
@@ -10703,11 +10706,12 @@ properties be specified as well. Simply prescribing as many properties as possib
 \multicolumn{5}{|c|}{{\ct CLIP} (Specified Upper and Lower Limits)} \\
 \hline \hline
 \endhead
-{\ct CLIP\_DT\_RESTRICTIONS\_MAX}   & Integer        & Section~\ref{info:CLIP:dens}      &            & 5   \\ \hline
-{\ct MAXIMUM\_DENSITY}              & Real           & Section~\ref{info:CLIP:dens}      & kg/m$^3$   &     \\ \hline
-{\ct MAXIMUM\_TEMPERATURE}          & Real           & Section~\ref{info:CLIP:temp}      & $^\circ$C  &     \\ \hline
-{\ct MINIMUM\_DENSITY}              & Real           & Section~\ref{info:CLIP:dens}      & kg/m$^3$   &     \\ \hline
-{\ct MINIMUM\_TEMPERATURE}          & Real           & Section~\ref{info:CLIP:temp}      & $^\circ$C  &     \\ \hline
+{\ct CLIP\_DT\_RESTRICTIONS\_MAX}   & Integer        & Section~\ref{info:CLIP:dens}                 &            & 5      \\ \hline
+{\ct MAXIMUM\_DENSITY}              & Real           & Section~\ref{info:CLIP:dens}                 & kg/m$^3$   &        \\ \hline
+{\ct MAXIMUM\_LIQUID\_BURNING\_RATE}& Real           & Section~\ref{info:liquid_burning_rate_bound} & kg/m$^2$/s & 0.1    \\ \hline
+{\ct MAXIMUM\_TEMPERATURE}          & Real           & Section~\ref{info:CLIP:temp}                 & $^\circ$C  &        \\ \hline
+{\ct MINIMUM\_DENSITY}              & Real           & Section~\ref{info:CLIP:dens}                 & kg/m$^3$   &        \\ \hline
+{\ct MINIMUM\_TEMPERATURE}          & Real           & Section~\ref{info:CLIP:temp}                 & $^\circ$C  &        \\ \hline
 \end{longtable}
 
 \vspace{\baselineskip}

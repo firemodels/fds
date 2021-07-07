@@ -3907,7 +3907,8 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Loop over all materials in the cell (alpha subsc
 
             IF (DO_EVAPORATION) THEN
                IF (B_NUMBER>TWO_EPSILON_EB) THEN
-                  MFLUX = MAX(0._EB,MIN(0.1_EB,ONE_D%RHO_F*H_MASS*LOG(1._EB+B_NUMBER)*(Y_SV(N) + (Y_SV(N)-Y_GAS(N))/B_NUMBER)))
+                  MFLUX = MAX(0._EB,MIN(MAXIMUM_LIQUID_BURNING_RATE , &
+                                        ONE_D%RHO_F*H_MASS*LOG(1._EB+B_NUMBER)*(Y_SV(N) + (Y_SV(N)-Y_GAS(N))/B_NUMBER)))
                ELSE
                   MFLUX = 0._EB
                ENDIF
@@ -3940,14 +3941,14 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Loop over all materials in the cell (alpha subsc
 
                SELECT CASE(SF%GEOMETRY)
                   CASE DEFAULT
-                     MFLUX = MIN(0.1_EB,MFLUX + RHO_DOT_EXTRA*DX_S(SOLID_CELL_INDEX))
+                     MFLUX = MIN(MAXIMUM_LIQUID_BURNING_RATE , MFLUX + RHO_DOT_EXTRA*DX_S(SOLID_CELL_INDEX))
                      RHO_DOT = MIN(MFLUX/DX_S(SOLID_CELL_INDEX),ML%RHO_S/DT_BC)  ! kg/m3/s
                   CASE(SURF_SPHERICAL)
                      NWP = SUM(ONE_D%N_LAYER_CELLS(1:SF%N_LAYERS))
                      R_S_0 = SF%INNER_RADIUS + ONE_D%X(NWP) - ONE_D%X(0)
                      R_S_1 = SF%INNER_RADIUS + ONE_D%X(NWP) - ONE_D%X(1)
                      DR = (R_S_0**3-R_S_1**3)/(3._EB*R_S_0**2)
-                     MFLUX = MIN(0.1_EB,MFLUX + RHO_DOT_EXTRA*DR)
+                     MFLUX = MIN(MAXIMUM_LIQUID_BURNING_RATE , MFLUX + RHO_DOT_EXTRA*DR)
                      RHO_DOT = MIN(MFLUX/DR,ML%RHO_S/DT_BC)
                END SELECT
 
