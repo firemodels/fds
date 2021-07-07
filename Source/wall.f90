@@ -3741,7 +3741,7 @@ TYPE(SURFACE_TYPE), POINTER :: SF
 REAL(EB) :: DTMP,REACTION_RATE,Y_O2,X_O2,Q_DOT_S_PPP,MW(N_MATS),Y_GAS(N_MATS),Y_SV(N_MATS),X_SV(N_MATS),X_L(N_MATS),&
             D_AIR,H_MASS,RE_L,SHERWOOD,MFLUX,MU_AIR,SC_AIR,U_TANG,RDN,B_NUMBER,TMP_G,LENGTH,U2,V2,W2,VEL,&
             RHO_DOT,DR,R_S_0,R_S_1,H_R,H_R_B,H_S_B,H_S,LENGTH_SCALE,SUM_X_MW,SUM_Y_GAS,SUM_Y_SV,SUM_Y_SV_SMIX(N_TRACKED_SPECIES),&
-            SUM_X_SV,X_L_SUM,RHO_DOT_EXTRA
+            SUM_X_SV,X_L_SUM,RHO_DOT_EXTRA,NET_HEAT_FLUX,MFLUX_MAX
 LOGICAL :: LIQUID(N_MATS),SPEC_ID_ALREADY_USED(N_MATS),DO_EVAPORATION
 
 Q_DOT_S_PPP = 0._EB
@@ -3903,12 +3903,16 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Loop over all materials in the cell (alpha subsc
 
          CASE (PYROLYSIS_LIQUID)
 
+            ! Limit the burning rate to 1.2*qdot''/h_g 
+
+            NET_HEAT_FLUX = ONE_D%Q_RAD_IN - ONE_D%Q_RAD_OUT + ONE_D%Q_CON_F
+            MFLUX_MAX     = 1.2_EB*NET_HEAT_FLUX/ML%HEAT_OF_GASIFICATION
+
             ! Calculate the mass flux of liquid component N at the surface if this is a surface cell.
 
             IF (DO_EVAPORATION) THEN
                IF (B_NUMBER>TWO_EPSILON_EB) THEN
-                  MFLUX = MAX(0._EB,MIN(MAXIMUM_LIQUID_BURNING_RATE , &
-                                        ONE_D%RHO_F*H_MASS*LOG(1._EB+B_NUMBER)*(Y_SV(N) + (Y_SV(N)-Y_GAS(N))/B_NUMBER)))
+                  MFLUX = MAX(0._EB,MIN(MFLUX_MAX,ONE_D%RHO_F*H_MASS*LOG(1._EB+B_NUMBER)*(Y_SV(N) + (Y_SV(N)-Y_GAS(N))/B_NUMBER)))
                ELSE
                   MFLUX = 0._EB
                ENDIF
@@ -3941,14 +3945,14 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Loop over all materials in the cell (alpha subsc
 
                SELECT CASE(SF%GEOMETRY)
                   CASE DEFAULT
-                     MFLUX = MIN(MAXIMUM_LIQUID_BURNING_RATE , MFLUX + RHO_DOT_EXTRA*DX_S(SOLID_CELL_INDEX))
+                     MFLUX = MIN(MFLUX_MAX,MFLUX + RHO_DOT_EXTRA*DX_S(SOLID_CELL_INDEX))
                      RHO_DOT = MIN(MFLUX/DX_S(SOLID_CELL_INDEX),ML%RHO_S/DT_BC)  ! kg/m3/s
                   CASE(SURF_SPHERICAL)
                      NWP = SUM(ONE_D%N_LAYER_CELLS(1:SF%N_LAYERS))
                      R_S_0 = SF%INNER_RADIUS + ONE_D%X(NWP) - ONE_D%X(0)
                      R_S_1 = SF%INNER_RADIUS + ONE_D%X(NWP) - ONE_D%X(1)
                      DR = (R_S_0**3-R_S_1**3)/(3._EB*R_S_0**2)
-                     MFLUX = MIN(MAXIMUM_LIQUID_BURNING_RATE , MFLUX + RHO_DOT_EXTRA*DR)
+                     MFLUX = MIN(MFLUX_MAX,MFLUX + RHO_DOT_EXTRA*DR)
                      RHO_DOT = MIN(MFLUX/DR,ML%RHO_S/DT_BC)
                END SELECT
 

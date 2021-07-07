@@ -632,7 +632,6 @@ REAL(EB) :: TMPMIN                              !< Minimum gas phase temperature
 REAL(EB) :: TMPMAX                              !< Maximum gas phase temperature (K)
 REAL(EB) :: RHOMIN                              !< Minimum gas density (kg/m3)
 REAL(EB) :: RHOMAX                              !< Maximum gas density (kg/m3)
-REAL(EB) :: MAXIMUM_LIQUID_BURNING_RATE=0.1_EB  !< Maximum liquid evaporation rate (kg/m2/s)
 
 ! Flux limiter
 
