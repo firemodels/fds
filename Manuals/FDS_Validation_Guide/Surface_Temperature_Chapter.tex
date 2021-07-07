@@ -2075,9 +2075,11 @@ In addition to comparing the peak temperature predictions and measurements for e
 \section{Liquid Pool Surface Temperature}
 \label{sec:Liquid_Pool_Surf_Temp}
 
-This section presents results for liquid pool surface temperatures for a water pan evaporating under a constant heat flux and for a set of pool fire simulations presented in Ref.~\cite{Sikanen:2016}.  The first simulation deals with the evaporation of water in the ASTM~E2058 fire propagation apparatus, reported in Ref.~\cite{SFPE:Tewarson}, using the ``M1K2'' model described in Ref.~\cite{Sikanen:2016}. The pool fires are assumed to burn in a 1~m by 1~m square tray, and the fuel layer is 10~cm thick.  Further details of the setup and mass loss rate comparisons are shown in Sec.~\ref{sec:Liquid_Pool_Fires_MLR}.
+This section presents predicted liquid pool fire surface temperatures compared with the respective liquid boiling temperatures. Mass loss rate comparisons are shown in Section~\ref{sec:Liquid_Pool_Fires_MLR}.
 
-Figures \ref{NIST_Methanol_1m_pan_TSURF} and \ref{Waterloo_Methanol_TSURF} show the maximum surface tempature from the simulation compared with the boiling temperature for methanol (64.7 \si{\degreeCelsius}) for the 1 m NIST pool fire  \cite{Sung:TN2019} and 30 cm Waterloo pool fire \cite{Weckman:CF1996}, respectively.
+\subsection{Pool Fires}
+
+Figure~\ref{ASTM_E2058_Water_Evap} displays the surface temperature of a pan of boiling water. Figure~\ref{VTT_heptane_surface_temperature} displays the surface temperature of 1~m$^2$ and 2~m$^2$ heptane pool fires. Figure~\ref{Pool_Fire_Surf_Temp} displays the surface temperature of various other liquid pool fires.
 
 \begin{figure}[!h]
 \centering
@@ -2086,7 +2088,14 @@ Figures \ref{NIST_Methanol_1m_pan_TSURF} and \ref{Waterloo_Methanol_TSURF} show 
 \label{ASTM_E2058_Water_Evap}
 \end{figure}
 
-\newpage
+\begin{figure}[!h]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Pool_Fires/VTT_heptane_1_m2_Tsurf} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Pool_Fires/VTT_heptane_2_m2_Tsurf}
+\end{tabular*}
+\caption[VTT heptane pool fire surface temperatures]{VTT heptane pool fire surface temperatures.}
+\label{VTT_heptane_surface_temperature}
+\end{figure}
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -2101,23 +2110,20 @@ Figures \ref{NIST_Methanol_1m_pan_TSURF} and \ref{Waterloo_Methanol_TSURF} show 
 \label{Pool_Fire_Surf_Temp}
 \end{figure}
 
+\FloatBarrier
+
+\subsection{NIST Pool Fires and Waterloo Methanol}
+
+Figure~\ref{NIST_Methanol_1m_pan_TSURF} displays the mean surface temperature for the 1~m NIST methanol pool fire~\cite{Sung:TN2019} and the 30~cm Waterloo methanol pool fire~\cite{Weckman:CF1996}. The predicted surface temperatures are compared to the boiling temperature of methanol, 64.7~$^\circ$C.
+
 \begin{figure}[!h]
-\centering
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Pool_Fires/NIST_Methanol_1m_pan_TSURF}
-\caption[NIST 1 m methanol pool fire, surface temperature]{NIST 1 m methanol pool fire, surface temperature.}
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/NIST_Pool_Fires/NIST_Methanol_1m_pan_TSURF} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_TSURF}
+\end{tabular*}
+\caption[NIST 1 m and Waterloo 30 cm methanol pool fires, surface temperature]{NIST 1 m (left) and Waterloo 30 cm (right) methanol pool fires, surface temperature.}
 \label{NIST_Methanol_1m_pan_TSURF}
 \end{figure}
-
-\begin{figure}[!h]
-\centering
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Waterloo_Methanol/Waterloo_Methanol_TSURF}
-\caption[Waterloo 30 cm methanol pool fire, surface temperature]{Waterloo 30 cm methanol pool fire, surface temperature.}
-\label{Waterloo_Methanol_TSURF}
-\end{figure}
-
-
-
-\clearpage
 
 \subsection{Summary of Liquid Pool Surface Temperature Predictions}
 \label{Liquid Pool Surface Temperature}
