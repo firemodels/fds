@@ -3766,12 +3766,6 @@ An example demonstrating evaporation of a liquid mixture is found in the {\ct Py
 \label{liquid_mixture_plot}
 \end{figure}
 
-\subsubsection{Bound on Liquid Burning Rate}
-\label{info:liquid_burning_rate_bound}
-
-The algorithm used by FDS for computing the liquid evaporation rate has a singularity at the liquid boiling point. That is, when the liquid temperature reaches the boiling point, in theory the evaporation rate is infinite unless the gas phase vapor pressure of the liquid is at its saturation point. To avoid unphysical burning rates of liquids near their boiling temperature, the evaporation rate is bounded by the parameter {\ct MAXIMUM\_LIQUID\_BURNING\_RATE} which is set on the {\ct CLIP} line. Its default value is 0.1~kg/m$^2$/s. Most liquid fuels evaporate at rates far less than this, but there might be fuels, like liquified natural gas, that require a higher upper bound.
-
-
 \subsubsection{Heat and Mass Transfer with Blowing}
 
 To invoke the heat and mass transfer relationships from \cite{Sazhin:2006}, set {\ct BLOWING=T} on the {\ct SURF} line.  For example,
@@ -10708,8 +10702,6 @@ properties be specified as well. Simply prescribing as many properties as possib
 \endhead
 {\ct CLIP\_DT\_RESTRICTIONS\_MAX}   & Integer        & Section~\ref{info:CLIP:dens}                 &            & 5      \\ \hline
 {\ct MAXIMUM\_DENSITY}              & Real           & Section~\ref{info:CLIP:dens}                 & kg/m$^3$   &        \\ \hline
-{\ct MAXIMUM\_LIQUID\_BURNING\_RATE}& Real           & Section~\ref{info:liquid_burning_rate_bound} & kg/m$^2$/s & 0.1    \\ \hline
-{\ct MAXIMUM\_TEMPERATURE}          & Real           & Section~\ref{info:CLIP:temp}                 & $^\circ$C  &        \\ \hline
 {\ct MINIMUM\_DENSITY}              & Real           & Section~\ref{info:CLIP:dens}                 & kg/m$^3$   &        \\ \hline
 {\ct MINIMUM\_TEMPERATURE}          & Real           & Section~\ref{info:CLIP:temp}                 & $^\circ$C  &        \\ \hline
 \end{longtable}
