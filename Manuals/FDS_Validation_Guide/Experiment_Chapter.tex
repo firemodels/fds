@@ -1710,6 +1710,54 @@ Back, Beyler, DiNenno and Tatem~\cite{Back:IAFSS4} measured the heat flux from 9
 of gypsum board. The experiments were sponsored by the Naval Research Laboratory and conducted by Hughes Associates, Inc., of Baltimore, Maryland. The
 square sand burner ranged in size from 0.28~m to 0.70~m, and the fires ranged in size from 50~kW to 520~kW.
 
+
+\section{Pool Fires}
+\label{Pool_Fires_Description}
+
+The ``Pool Fires'' cases include a variety of flammable and non-flammable liquid evaporation experiments:
+\begin{enumerate}
+\item A variety of pure liquid pool fires compiled by Gottuk and White~\cite{SFPE:Gottuk_and_White} based on earlier compilations such as that by Mudan~\cite{Mudan:1984}. The liquids are listed in Table~\ref{fuelprops}.
+\item A single experiment involving the evaporation of water under a 50~kW/m$^2$ heat flux in the ASTM~E2058 fire propagration apparatus, reported in Ref.~\cite{SFPE:Tewarson}. 
+\item Two heptane pool fire experiments described in Ref.~\cite{Sikanen:2016}.
+\end{enumerate}
+
+\subsubsection{Modeling Notes}
+
+Because there are few details concerning the burning rates cited by Gottuk and White~\cite{SFPE:Gottuk_and_White}, the pans for the fuels listed in Table~\ref{fuelprops}, with the exception of water, are assumed to be 1~m square with a fuel depth of 10~cm.
+
+The simulations of the VTT heptane pool fires are performed in a 4~m by 4~m by 6~m domain with open boundaries, and a circular pool with steel (one cell high and thick) lip. The pool surface is 1~m above the floor.
+
+The burning rate of liquid hydrocarbon fuels has been found to correlate well with the ratio of the heat of combustion, $\Delta h_{\rm c}$, and the heat of gasification, $\Delta h_{\rm g}$:
+\begin{equation}
+\dot{m}''= 0.001 \; \frac{\Delta h_{\rm c}}{\Delta h_{\rm g}} \quad ; \quad \Delta h_{\rm g} = \Delta h_{\rm v} + \int_{T_0}^{T_{\rm b}} c_p \; dT
+\label{poolcorr}
+\end{equation}
+where $\Delta h_{\rm v}$ is the latent heat of vaporization, $T_0$ is the initial temperature, $T_{\rm b}$ is the boiling temperature, and $c_p$ is the specific heat of the liquid fuel. The heat of gasification is the amount of energy required to raise the fuel from its initial temperature to its boiling temperature and evaporate it. 
+
+Table~\ref{fuelprops} lists the liquid fuel properties used in the simulations. Note that the heats of vaporization are evaluated at the liquid boiling temperature. The thermal conductivities, $k$, are found in Ref.~\cite{CRCHandbook}, except for butane, which is found in Ref.~\cite{Webbook:FluidThermo}. The heats of combustion, $\Delta h_{\rm c}$, are computed in FDS based on the heats of formation of the reactants and products listed in Ref.~\cite{NIST_JANAF}. The heats of combustion account for the presence of products of incomplete combustion, like CO and soot.
+
+The effective absorption coefficients. $\kappa$, for benzene and ethanol are based on curve fits to experimental data as explained in Appendix~K of the FDS Technical Reference Guide. The absorption coefficient for methanol presented in Appendix~K is calculated with the assumption that the incoming radiation is approximately blackbody radiation. The absorption coefficient for ethanol is calculated based on experimentally determined spectrum of an ethanol flame. Since both methanol and ethanol flames are low sooting, the blackbody radiation assumption is not correct. Instead it is assumed that the absorption coefficient for methanol should be of similar magnitude as that for ethanol. For heptane, butane and acetone the absorption coefficients are simple order of magnitude estimates.
+
+\begin{table}[h!]
+\begin{center}
+\caption[Liquid fuel properties]{Liquid fuel properties.} \label{fuelprops}
+\begin{tabular}{|l|c|c|c|c|c|c|c|c|c|c|} \hline
+        & $\rho$               & $c_p$                        & $k$                &  $\Delta h_{\rm v}$         &  $\Delta h_{\rm c}$  & $\chi_{\rm r}$       & $y_{\rm CO}$         & $y_{\rm s}$          & $T_{\rm b}$                    & $\kappa$  \\
+Fuel    & \si{\kg/\m^3}        & \si{\kJ/(\kg.\K)}            & \si{\W/(\m.\K)}    & \si{\kJ/\kg}                & \si{\kJ/\kg}         &                      &  \si{\g/\g}          &  \si{\g/\g}          & $^\circ$C                      & m$^{-1}$  \\
+        & \cite{Babrauskas:1}  & \cite{Webbook:HeatCapacity}  & \cite{CRCHandbook} &  \cite{Webbook:FluidThermo} & See text             & \cite{SFPE:Tewarson} & \cite{SFPE:Tewarson} & \cite{SFPE:Tewarson} & \cite{Webbook:BoilingPoint}    & See text  \\
+\hline \hline
+Acetone  &  791  &  2.13   & 0.20  &   501   & 28555  & 0.27 & 0.003 & 0.014 & 56.15 & 100    \\ \hline
+Benzene  &  874  &  1.74   & 0.14  &   393   & 33823  & 0.60 & 0.067 & 0.181 & 80.15 & 123    \\ \hline
+Butane   &  573  &  2.28   & 0.12  &   385   & 44680  & 0.31 & 0.007 & 0.029 & 0     & 100    \\ \hline
+Ethanol  &  794  &  2.44   & 0.17  &   837   & 27474  & 0.25 & 0.001 & 0.008 & 78.35 & 1534.3 \\ \hline
+Heptane  &  675  &  2.24   & 0.14  &   317   & 43580  & 0.33 & 0.010 & 0.037 & 98.35 & 187.5  \\ \hline
+Methanol &  796  &  2.48   & 0.20  &   1099  & 20934  & 0.16 & 0.001 & 0.001 & 64.65 & 1500   \\ \hline
+Water    & 1000  &  4.18   & 0.60  &   2260  & N/A    & N/A  & N/A   & N/A   & 100.0 & 140    \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+
 \section{PRISME Project}
 \label{PRISME_Description}
 
@@ -1820,9 +1868,11 @@ The Fire Laboratory for Accreditation of Models by Experimentation (FLAME) facil
 
 \section{SETCOM Wall Condensation Experiments}
 \label{SETCOM_Cond_Description}
+
 The Separate Effect Test for Condensation Modeling (SETCOM) facility is located in J\"{u}lich, Germany \cite{setcom_cfd}. The facility is a recirculating duct containing a flow conditioning section for establishing temperature and humidity and a test section for performing condensation experiments. The condensation section contains a 4~m or 5~m long, water-cooled, aluminum plate for its floor with the remaining walls adiabatic. The condensation section can be tilted from horizontal to vertical to investigate the effects of orientation on condensation. A set of five experiments were performed using the 4~m test section that measured the condensation heat flux from hot, high humidity air. Temperature, humidity, and flow rate were varied.
 
-\subsection{Modeling notes}
+\subsubsection{Modeling Notes}
+
 Prior to running the validation cases, a set of five scoping simulations were run with no condensation. These simulations used a short length of the test section with {\ct PERIODIC} boundary conditions. These cases were used to determine the rms velocity as a function of the mean velocity.
 
 The condensation simulations included a 4~m portion of duct upstream to allow for flow development, and a 1 m portion of duct downstream to avoid boundary effects on the test section. The upstream boundary condition was set with the conditions shown in the table below along with synthetic eddy method inputs using the rms velocity determine from the scoping simulations. The outlet was defined as an {\ct OPEN} boundary. The experiments measured temperature 1.5~cm into the aluminum plate along the plate centerline. The test measured condensation heat transfer was used with the inside plate temperature to derive the plate surface temperature. The condensation plate {\ct TMP\_FRONT} was set to derived temperature as a function of length along the plate.
