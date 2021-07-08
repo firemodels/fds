@@ -16906,7 +16906,8 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
 
    !--- setup a 2D surface (terrain) object (ZVALS keyword )
    ZVALS_IF: IF (N_ZVALS>0) THEN
-      GEOM_TYPE = TERRAIN_GEOM_TYPE
+      GEOM_TYPE   = TERRAIN_GEOM_TYPE
+      TERRAIN_CASE= .TRUE.
       CALL CHECK_XB(XB)
       IF (N_ZVALS/=IJK(1)*IJK(2) ) THEN
          WRITE(MESSAGE,'(A,I4,A,I4)') 'ERROR: Expected ',IJK(1)*IJK(2),' Z values, found ',N_ZVALS
@@ -17199,7 +17200,8 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
 
    ELSEIF(IS_TERRAIN) THEN ZVALS_IF
 
-      GEOM_TYPE = TERRAIN_GEOM_TYPE
+      GEOM_TYPE   = TERRAIN_GEOM_TYPE
+      TERRAIN_CASE= .TRUE.
 
       ! Here estimate final number of Faces and if necessary reallocate FACE, VERTS, SURFS arrays:
       IF ( (2*N_FACES>MAX_FACES) .AND. .NOT.READ_BINARY) THEN
