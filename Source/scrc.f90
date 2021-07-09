@@ -1273,6 +1273,7 @@ INTEGER :: FACE_ORIENTATION(6)  = (/1,-1,2,-2,3,-3/)        !< Coordinate direct
 CHARACTER(60) :: CNAME, CROUTINE
 
 REAL(EB), DIMENSION(:,:,:), ALLOCATABLE, TARGET :: SCARC_RHO   !< Density values depending on predictor/corrector with right overlap
+REAL(EB), DIMENSION(:,:,:), ALLOCATABLE, TARGET :: SCARC_KRES  !< Resolved kinetic energy
 REAL(EB), DIMENSION(:,:,:), ALLOCATABLE, TARGET :: SCARC_P     !< Inseparable pressure solution - predictor stage
 REAL(EB), DIMENSION(:,:,:), ALLOCATABLE, TARGET :: SCARC_PS    !< Inseparable pressure solution - corrector stage
 
@@ -1546,9 +1547,11 @@ REAL(EB), POINTER, DIMENSION(:):: OUHL2=>NULL()             !< Pointer to other 
 
 REAL(EB), POINTER, DIMENSION(:,:,:):: PRHS=>NULL()          !< Pointer to right hand side vector
 
-REAL(EB), POINTER, DIMENSION(:,:,:):: UU=>NULL()            !< Pointer to u-velocity vector
-REAL(EB), POINTER, DIMENSION(:,:,:):: VV=>NULL()            !< Pointer to v-velocity vector
-REAL(EB), POINTER, DIMENSION(:,:,:):: WW=>NULL()            !< Pointer to w-velocity vector
+REAL(EB), POINTER, DIMENSION(:,:,:):: UU=>NULL()            !< Pointer to x-velocity vector
+REAL(EB), POINTER, DIMENSION(:,:,:):: VV=>NULL()            !< Pointer to y-velocity vector
+REAL(EB), POINTER, DIMENSION(:,:,:):: WW=>NULL()            !< Pointer to z-velocity vector
+REAL(EB), POINTER, DIMENSION(:,:,:):: RHOP=>NULL()          !< Pointer to density vector
+REAL(EB), POINTER, DIMENSION(:,:,:):: KRESP=>NULL()         !< Pointer to kres vector
 
 REAL(EB), POINTER, DIMENSION(:) ::  RECV_BUFFER_REAL        !< Pointer to double precision receive vector
 INTEGER,  POINTER, DIMENSION(:) ::  RECV_BUFFER_INT         !< Pointer to inter receive vector
@@ -2511,17 +2514,17 @@ INTEGER, INTENT(IN) :: IOR0, I, J, K
 
 SELECT CASE (IOR0)
    CASE ( 1)
-      DIRECTIONAL_MEAN = 0.5_EB*(V(I+1,J,K) + V(I,J,K))
-   CASE (-1)
       DIRECTIONAL_MEAN = 0.5_EB*(V(I-1,J,K) + V(I,J,K))
+   CASE (-1)
+      DIRECTIONAL_MEAN = 0.5_EB*(V(I+1,J,K) + V(I,J,K))
    CASE ( 2)
-      DIRECTIONAL_MEAN = 0.5_EB*(V(I,J+1,K) + V(I,J,K))
-   CASE (-2)
       DIRECTIONAL_MEAN = 0.5_EB*(V(I,J-1,K) + V(I,J,K))
+   CASE (-2)
+      DIRECTIONAL_MEAN = 0.5_EB*(V(I,J+1,K) + V(I,J,K))
    CASE ( 3)
-      DIRECTIONAL_MEAN = 0.5_EB*(V(I,J,K+1) + V(I,J,K))
-   CASE (-3)
       DIRECTIONAL_MEAN = 0.5_EB*(V(I,J,K-1) + V(I,J,K))
+   CASE (-3)
+      DIRECTIONAL_MEAN = 0.5_EB*(V(I,J,K+1) + V(I,J,K))
 END SELECT
 
 END FUNCTION DIRECTIONAL_MEAN 
@@ -2536,17 +2539,17 @@ INTEGER, INTENT(IN) :: IOR0, I, J, K
 
 SELECT CASE (ABS(IOR0))
    CASE ( 1)
-      RECIPROCAL_DIRECTIONAL_MEAN = 2.0_EB /(V(I+1,J,K) + V(I,J,K))
-   CASE (-1)
       RECIPROCAL_DIRECTIONAL_MEAN = 2.0_EB /(V(I-1,J,K) + V(I,J,K))
+   CASE (-1)
+      RECIPROCAL_DIRECTIONAL_MEAN = 2.0_EB /(V(I+1,J,K) + V(I,J,K))
    CASE ( 2)
-      RECIPROCAL_DIRECTIONAL_MEAN = 2.0_EB /(V(I,J+1,K) + V(I,J,K))
-   CASE (-2)
       RECIPROCAL_DIRECTIONAL_MEAN = 2.0_EB /(V(I,J-1,K) + V(I,J,K))
+   CASE (-2)
+      RECIPROCAL_DIRECTIONAL_MEAN = 2.0_EB /(V(I,J+1,K) + V(I,J,K))
    CASE ( 3)
-      RECIPROCAL_DIRECTIONAL_MEAN = 2.0_EB /(V(I,J,K+1) + V(I,J,K))
-   CASE (-3)
       RECIPROCAL_DIRECTIONAL_MEAN = 2.0_EB /(V(I,J,K-1) + V(I,J,K))
+   CASE (-3)
+      RECIPROCAL_DIRECTIONAL_MEAN = 2.0_EB /(V(I,J,K+1) + V(I,J,K))
 END SELECT
 
 END FUNCTION RECIPROCAL_DIRECTIONAL_MEAN 
@@ -19809,11 +19812,11 @@ SELECT_SOLVER_TYPE: SELECT CASE (SV%TYPE_SOLVER)
             HP => M%HS
          ENDIF
 
-         ! Get right hand side (PRHS from pres.f90) and initial vector (H or HS from last time step)
-
          BXS => M%BXS   ;  BXF => M%BXF
          BYS => M%BYS   ;  BYF => M%BYF
          BZS => M%BZS   ;  BZF => M%BZF
+
+         ! Get right hand side (PRHS from pres.f90) and initial vector (H or HS from last time step)
 
          !$OMP PARALLEL DO PRIVATE(IC) SCHEDULE(STATIC)
          DO IC = 1, G%NC
@@ -19822,88 +19825,12 @@ SELECT_SOLVER_TYPE: SELECT CASE (SV%TYPE_SOLVER)
          ENDDO                         
          !$OMP END PARALLEL DO
 
-         !!$OMP PARALLEL 
-         MAIN_INHOMOGENEOUS_LOOP: DO IOR0 = -3, 3, 1 
-      
-            IF (IOR0 == 0) CYCLE
-            F => SCARC(NM)%LEVEL(NL)%FACE(IOR0)
-            
-            IW1 = F%NCW0
-            IW2 = F%NCW0 + F%NCW - 1
-      
-            !!$OMP DO PRIVATE(IW, GWC, I, J, K, IC, VAL) SCHEDULE(STATIC)
-            MAIN_FACE_INHOMOGENEOUS_LOOP: DO IW = IW1, IW2
-      
-               GWC => G%WALL(IW)
-   
-               I = GWC%IXW
-               J = GWC%IYW
-               K = GWC%IZW
-   
-               IF (TWO_D .AND. J /= 1) CALL SCARC_ERROR(NSCARC_ERROR_GRID_INDEX, SCARC_NONE, J)
-               IF (IS_UNSTRUCTURED .AND. L%IS_SOLID(I, J, K)) CYCLE
-   
-               IC = G%CELL_NUMBER(I,J,K)
-   
-               ! ---------- Dirichlet BC's:
-               ! these are based on the SETTING in BTYPE
-               ! in the structured case this corresponds to the face-wise SETTING according to the FFT
-               ! (this allows to use local FFT's as preconditioners)
-               ! in the unstructured case only open boundary cells lead to Dirichlet BC's
-
-               MAIN_IF_DIRICHLET: IF (GWC%BTYPE == DIRICHLET) THEN
-   
-                  SELECT CASE (IOR0)
-                     CASE (1)
-                        ST%B(IC) = ST%B(IC) - 2.0_EB*RDX(I)*RDXN(I-1)*BXS(J,K)
-                     CASE (-1)
-                        ST%B(IC) = ST%B(IC) - 2.0_EB*RDX(I)*RDXN(I)  *BXF(J,K)
-                     CASE (2)
-                        ST%B(IC) = ST%B(IC) - 2.0_EB*RDY(J)*RDYN(J-1)*BYS(I,K)
-                     CASE (-2)
-                        ST%B(IC) = ST%B(IC) - 2.0_EB*RDY(J)*RDYN(J)  *BYF(I,K)
-                     CASE (3)
-                        ST%B(IC) = ST%B(IC) - 2.0_EB*RDZ(K)*RDZN(K-1)*BZS(I,J)
-                     CASE (-3)
-                        ST%B(IC) = ST%B(IC) - 2.0_EB*RDZ(K)*RDZN(K)  *BZF(I,J)
-                  END SELECT
-   
-               ENDIF MAIN_IF_DIRICHLET
-   
-               ! ---------- Neumann BC's:
-               ! Note for the unstructured case only:
-               ! Here, the matrix also contains Neumann BC's for those cells which have a
-               ! PRESSURE_BC_INDEX == DIRICHLET but are NOT open; these cells must be excluded below,
-               ! because BXS, BXF, ... contain the Dirichlet information from pres.f90 there;
-               ! excluding them corresponds to a homogeneous Neumann condition for these cells
-
-               MAIN_IF_NEUMANN: IF (GWC%BTYPE == NEUMANN) THEN
-   
-                  IF (IS_UNSTRUCTURED .AND. M%WALL(IW)%PRESSURE_BC_INDEX /= NEUMANN) CYCLE
-   
-                  SELECT CASE (IOR0)
-                     CASE (1)
-                        ST%B(IC) = ST%B(IC) + RDX(I)*BXS(J,K)
-                     CASE (-1)
-                        ST%B(IC) = ST%B(IC) - RDX(I)*BXF(J,K)
-                     CASE (2)
-                        ST%B(IC) = ST%B(IC) + RDY(J)*BYS(I,K)
-                     CASE (-2)
-                        ST%B(IC) = ST%B(IC) - RDY(J)*BYF(I,K)
-                     CASE (3)
-                        ST%B(IC) = ST%B(IC) + RDZ(K)*BZS(I,J)
-                     CASE (-3)
-                        ST%B(IC) = ST%B(IC) - RDZ(K)*BZF(I,J)
-                  END SELECT
-   
-               ENDIF MAIN_IF_NEUMANN
-      
-            ENDDO MAIN_FACE_INHOMOGENEOUS_LOOP
-            !!$OMP END DO
-
-         ENDDO MAIN_INHOMOGENEOUS_LOOP
-         !!$OMP END PARALLEL 
-   
+         SELECT CASE (TYPE_POISSON)
+            CASE (NSCARC_POISSON_SEPARABLE)                       ! set BC's according to separable Poisson system
+               CALL SCARC_SETUP_SEPARABLE_BOUNDARY
+            CASE (NSCARC_POISSON_INSEPARABLE)                     ! set BC's according to inseparable Poisson system
+               CALL SCARC_SETUP_INSEPARABLE_BOUNDARY
+         END SELECT
    
       ENDDO MAIN_MESHES_LOOP
       
@@ -20087,6 +20014,292 @@ SELECT_SOLVER_TYPE: SELECT CASE (SV%TYPE_SOLVER)
 END SELECT SELECT_SOLVER_TYPE
 
 END SUBROUTINE SCARC_SETUP_WORKSPACE
+
+
+! --------------------------------------------------------------------------------------------------------------
+!> \brief Update right hand side vector corresponding to boundary conditions of separable Poisson system
+! --------------------------------------------------------------------------------------------------------------
+SUBROUTINE SCARC_SETUP_SEPARABLE_BOUNDARY
+USE SCARC_POINTERS, ONLY: M, L, G, ST, GWC, RDX, RDY, RDZ, RDXN, RDYN, RDZN, BXS, BXF, BYS, BYF, BZS, BZF
+INTEGER :: IOR0, IW, IC, I, J, K 
+
+SEPARABLE_BOUNDARY_CELLS_LOOP: DO IW = 1, L%N_WALL_CELLS_EXT
+
+   GWC => G%WALL(IW)
+   IOR0 = GWC%IOR
+
+   I = GWC%IXW 
+   J = GWC%IYW 
+   K = GWC%IZW    
+
+   IF (TWO_D .AND. J /= 1) CALL SCARC_ERROR(NSCARC_ERROR_GRID_INDEX, SCARC_NONE, J)
+   IF (IS_UNSTRUCTURED .AND. L%IS_SOLID(I, J, K)) CYCLE
+
+   IC = G%CELL_NUMBER(I,J,K)           ! Number of mesh-internal cell
+      
+      ! ---------- Dirichlet BC's:
+      ! these are based on the SETTING in BTYPE
+      ! in the structured case this corresponds to the face-wise SETTING according to the FFT
+      ! (this allows to use local FFT's as preconditioners)
+      ! in the unstructured case only open boundary cells lead to Dirichlet BC's
+   
+      SEPARABLE_DIRICHLET_IF: IF (GWC%BTYPE == DIRICHLET) THEN
+      
+         SELECT CASE (IOR0)
+            CASE (1)
+               ST%B(IC) = ST%B(IC) - 2.0_EB*RDX(I)*RDXN(I-1)*BXS(J,K)
+            CASE (-1)
+               ST%B(IC) = ST%B(IC) - 2.0_EB*RDX(I)*RDXN(I)  *BXF(J,K)
+            CASE (2)
+               ST%B(IC) = ST%B(IC) - 2.0_EB*RDY(J)*RDYN(J-1)*BYS(I,K)
+            CASE (-2)
+               ST%B(IC) = ST%B(IC) - 2.0_EB*RDY(J)*RDYN(J)  *BYF(I,K)
+            CASE (3)
+               ST%B(IC) = ST%B(IC) - 2.0_EB*RDZ(K)*RDZN(K-1)*BZS(I,J)
+            CASE (-3)
+               ST%B(IC) = ST%B(IC) - 2.0_EB*RDZ(K)*RDZN(K)  *BZF(I,J)
+         END SELECT
+      
+      ENDIF SEPARABLE_DIRICHLET_IF
+      
+      ! ---------- Neumann BC's:
+      ! Note for the unstructured case only:
+      ! Here, the matrix also contains Neumann BC's for those cells which have a
+      ! PRESSURE_BC_INDEX == DIRICHLET but are NOT open; these cells must be excluded below,
+      ! because BXS, BXF, ... contain the Dirichlet information from pres.f90 there;
+      ! excluding them corresponds to a homogeneous Neumann condition for these cells
+   
+      SEPARABLE_NEUMANN_IF: IF (GWC%BTYPE == NEUMANN) THEN
+      
+         IF (IS_UNSTRUCTURED .AND. M%WALL(IW)%PRESSURE_BC_INDEX /= NEUMANN) CYCLE
+      
+         SELECT CASE (IOR0)
+            CASE (1)
+               ST%B(IC) = ST%B(IC) + RDX(I)*BXS(J,K)
+            CASE (-1)
+               ST%B(IC) = ST%B(IC) - RDX(I)*BXF(J,K)
+            CASE (2)
+               ST%B(IC) = ST%B(IC) + RDY(J)*BYS(I,K)
+            CASE (-2)
+               ST%B(IC) = ST%B(IC) - RDY(J)*BYF(I,K)
+            CASE (3)
+               ST%B(IC) = ST%B(IC) + RDZ(K)*BZS(I,J)
+            CASE (-3)
+               ST%B(IC) = ST%B(IC) - RDZ(K)*BZF(I,J)
+         END SELECT
+      
+      ENDIF SEPARABLE_NEUMANN_IF
+      
+   ENDDO SEPARABLE_BOUNDARY_CELLS_LOOP
+   
+
+END SUBROUTINE SCARC_SETUP_SEPARABLE_BOUNDARY
+
+
+! --------------------------------------------------------------------------------------------------------------
+!> \brief Update right hand side vector corresponding to boundary conditions of inseparable Poisson system
+! The following code is still very experimental (several versions are to be tested)
+! --------------------------------------------------------------------------------------------------------------
+SUBROUTINE SCARC_SETUP_INSEPARABLE_BOUNDARY
+USE SCARC_POINTERS, ONLY: M, L, G, ST, GWC, RDX, RDY, RDZ, RDXN, RDYN, RDZN, BXS, BXF, BYS, BYF, BZS, BZF, &
+                          UU, VV, WW, RHOP, KRESP
+USE TYPES, ONLY: VENTS_TYPE, WALL_TYPE
+USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
+INTEGER :: IOR0, IW, IW1, IW2, IC, I, J, K, IG, JG, KG
+REAL(EB) :: TSI, DUMMY, TIME_RAMP_FACTOR, P_EXTERNAL, VAL, SCAL, RHOM, RRHOM, KGRAD, KNABLA2
+TYPE (VENTS_TYPE), POINTER :: VT
+TYPE (WALL_TYPE), POINTER :: WC
+
+IF (PREDICTOR) THEN
+   UU => M%U
+   VV => M%V
+   WW => M%W
+!   RHOP=>M%RHO                             ! still experimental
+ELSE
+   UU => M%US
+   VV => M%VS
+   WW => M%WS
+!   RHOP=>M%RHOS
+ENDIF
+
+RHOP  => SCARC_RHO                          ! for now take own backup versions of these quantities
+KRESP => SCARC_KRES
+
+IW1 = 1
+IF (IS_STRUCTURED) THEN
+   IW2 = L%N_WALL_CELLS_EXT
+ELSE
+   IW2 = L%N_WALL_CELLS_EXT + L%N_WALL_CELLS_INT
+   !IW2 = L%N_WALL_CELLS_EXT
+ENDIF
+
+! Build correct RHS for inseparable pressure system by subtracting: nabla**2 (K)
+ 
+DO IC = 1, G%NC
+   I = G%ICX(IC) ; J = G%ICY(IC) ; K = G%ICZ(IC)
+   KNABLA2 =   ( (KRESP(I+1,J,K) - KRESP(I,J,K))*RDXN(I) - (KRESP(I,J,K) - KRESP(I-1,J,K))*RDXN(I-1) )*RDX(I)    &
+             + ( (KRESP(I,J+1,K) - KRESP(I,J,K))*RDYN(J) - (KRESP(I,J,K) - KRESP(I,J-1,K))*RDYN(J-1) )*RDY(J)    &
+             + ( (KRESP(I,J,K+1) - KRESP(I,J,K))*RDZN(K) - (KRESP(I,J,K) - KRESP(I,J,K-1))*RDZN(K-1) )*RDZ(K)
+   ST%B(IC) = ST%B(IC) - KNABLA2
+ENDDO
+
+INSEPARABLE_BOUNDARY_CELLS_LOOP: DO IW = IW1, IW2
+
+   GWC => G%WALL(IW)
+
+   IOR0 = GWC%IOR
+
+   IG = GWC%IXG ;  JG = GWC%IYG ; KG = GWC%IZG              ! Cell indices for IW on overlap
+   I  = GWC%IXW ;  J  = GWC%IYW ; K  = GWC%IZW              ! Cell indices for IW inside mesh
+
+   IF (TWO_D .AND. J /= 1) CALL SCARC_ERROR(NSCARC_ERROR_GRID_INDEX, SCARC_NONE, J)
+   IF (IS_UNSTRUCTURED .AND. L%IS_SOLID(I, J, K)) CYCLE
+
+   IC = G%CELL_NUMBER(I,J,K)           ! Number of mesh-internal cell
+
+   !IF (GWC%BOUNDARY_TYPE == OPEN_BOUNDARY) THEN                               ! still experimental code
+      RRHOM = RECIPROCAL_DIRECTIONAL_MEAN(RHOP, IOR0, I, J, K)                 ! reciprocal of density mean along IW
+   !ELSE
+   !   RRHOM = 1.0_EB/M%WALL(IW)%ONE_D%RHO_F                                   ! if not open use RHO_F values (?)
+   !ENDIF
+
+   ! ---------- Dirichlet BC's:
+   !
+   ! Use relation:   P = rho * (H - K) to compute P from H
+   !
+   ! Example: IOR = 1
+   !
+   !  b_1  =  b_1 - 1 / [dx_1 * 0.5*(dx_0 + dx_1)] * 2 * p_e / [0.5*(rho_0 + rho_1)]
+   !
+   INSEPARABLE_DIRICHLET_IF: IF (GWC%BTYPE == DIRICHLET) THEN
+      
+      WC => M%WALL(IW)
+      VT => M%VENTS(WC%VENT_INDEX)
+      IF (ABS(WC%ONE_D%T_IGN-T_BEGIN)<=TWO_EPSILON_EB .AND. VT%PRESSURE_RAMP_INDEX >=1) THEN
+         TSI = T
+      ELSE
+         TSI = T - T_BEGIN
+      ENDIF
+      TIME_RAMP_FACTOR = EVALUATE_RAMP(TSI,DUMMY,VT%PRESSURE_RAMP_INDEX)
+      P_EXTERNAL = TIME_RAMP_FACTOR*VT%DYNAMIC_PRESSURE
+
+      IF (IW > L%N_WALL_CELLS_EXT) CYCLE
+
+      VAL = P_EXTERNAL                                                            ! use external pressure value
+
+      SELECT CASE (IOR0)
+         CASE ( 1)
+            !VAL  = RHOP(I,J,K) * (BXS(J,K) - KRESP(I,J,K))                       ! recompute external pressure value
+            L%PXS(J,K) = VAL                                                      ! store boundary value for later use
+            SCAL  = 2.0_EB*RDX(I)*RDXN(IG)*RRHOM                                  ! scaling factor for BC used below
+         CASE (-1)
+            !VAL1  = RHOP(I,J,K) * (BXF(J,K) - KRESP(I,J,K))
+            L%PXF(J,K) = VAL
+            SCAL  = 2.0_EB*RDX(I)*RDXN(I)*RRHOM
+         CASE ( 2)
+            !VAL   = RHOP(I,J,K) * (BYS(I,K) - KRESP(I,J,K))
+            L%PYS(I,K) = VAL
+            SCAL  = 2.0_EB*RDY(J)*RDYN(JG)*RRHOM
+         CASE (-2)
+            !VAL   = RHOP(I,J,K) * (BYF(I,K) - KRESP(I,J,K))
+            L%PYF(I,K) = VAL
+            SCAL  = 2.0_EB*RDY(J)*RDYN(J)*RRHOM
+         CASE ( 3)
+            !VAL   = RHOP(I,J,K) * (BZS(I,J) - KRESP(I,J,K))
+            L%PZS(I,J) = VAL
+            SCAL  = 2.0_EB*RDZ(K)*RDZN(KG)*RRHOM
+         CASE (-3)
+            !VAL   = RHOP(I,J,K) * (BZF(I,J) - KRESP(I,J,K))
+            L%PZF(I,J) = VAL
+            SCAL  = 2.0_EB*RDZ(K)*RDZN(K)*RRHOM
+      END SELECT
+
+      ST%B(IC) = ST%B(IC) - SCAL * VAL
+
+   ENDIF INSEPARABLE_DIRICHLET_IF
+      
+   ! ---------- Neumann BC's:
+   !
+   ! Example IOR = 1:
+   !
+   ! b_1 = b_1 + 1/dx_1 * BB / (0.5*(rho_0 + rho_1))    
+   !
+   ! with  BB = 0.5*(rho_0 + rho_1) * (B - (K_1-K_0)/0.5*(dx_0+dx_1))     <--- rho*[B-nabla(K)]
+
+   INSEPARABLE_NEUMANN_IF: IF (GWC%BTYPE == NEUMANN) THEN
+      
+      RHOM = DIRECTIONAL_MEAN(RHOP, IOR0, I, J, K)                       ! density mean along IW
+
+      ! Caution mesh stretching not yet considered ... i.e. terms HX, HY, HZ, see definition of BC's in pres
+      SELECT CASE (IOR0)
+         CASE (1)
+            !KP = UU(0,J,K)                                              ! still experimental
+            KGRAD = (KRESP(I,J,K)-KRESP(IG,J,K))*M%RDXN(IG)              ! caution: take care of right direction!
+            IF (IW <= L%N_WALL_CELLS_EXT) THEN
+               VAL = RHOM*(BXS(J,K) - KGRAD)
+            ELSE
+               VAL = - RHOM*KGRAD
+            ENDIF
+            L%PXS(J,K) = VAL
+            SCAL = RDX(I)/RHOM                                           ! positive for ABS(IOR) > 0
+         CASE (-1)
+            !KP = UU(L%NX,J,K)
+            KGRAD = (KRESP(IG,J,K)-KRESP(I,J,K))*M%RDXN(I)
+            IF (IW <= L%N_WALL_CELLS_EXT) THEN
+               VAL = RHOM*(BXF(J,K) - KGRAD)
+            ELSE
+               VAL = -RHOM*KGRAD
+            ENDIF
+            L%PXF(J,K) = VAL
+            SCAL = -RDX(I)/RHOM                                          ! negative for ABS(IOR) < 0
+         CASE (2)
+            !KGRAD = VV(I,0,K)
+            KGRAD = (KRESP(I,J,K)-KRESP(I,JG,K))*M%RDYN(JG)
+            IF (IW <= L%N_WALL_CELLS_EXT) THEN
+               VAL = RHOM*(BYS(I,K) - KGRAD)
+            ELSE
+               VAL = -RHOM*KGRAD
+            ENDIF
+            L%PYS(I,K) = VAL
+            SCAL = RDY(J)/RHOM
+         CASE (-2)
+            !KGRAD = VV(I,L%NY,K)
+            KGRAD = (KRESP(I,JG,K)-KRESP(I,J,K))*M%RDYN(J)
+            IF (IW <= L%N_WALL_CELLS_EXT) THEN
+               VAL = RHOM*(BYF(I,K) - KGRAD) 
+            ELSE
+               VAL = -RHOM*KGRAD 
+            ENDIF
+            L%PYF(I,K) = VAL
+            SCAL = -RDY(J)/RHOM
+         CASE (3)
+            !KGRAD = WW(I,J,0)
+            KGRAD = (KRESP(I,J,K)-KRESP(I,J,KG))*M%RDZN(KG)
+            IF (IW <= L%N_WALL_CELLS_EXT) THEN
+               VAL = RHOM*(BZS(I,J) - KGRAD)
+            ELSE
+               VAL = -RHOM*KGRAD
+            ENDIF
+            L%PZS(I,J) = VAL
+            SCAL = RDZ(K)/RHOM
+         CASE (-3)
+            !KGRAD = WW(I,J,L%NZ)
+            KGRAD = (KRESP(I,J,KG)-KRESP(I,J,K))*M%RDZN(K)
+            IF (IW <= L%N_WALL_CELLS_EXT) THEN
+               VAL = RHOM*(BZF(I,J) - KGRAD)
+            ELSE
+               VAL = -RHOM*KGRAD
+            ENDIF
+            L%PZF(I,J) = VAL
+            SCAL = -RDZ(K)/RHOM
+      END SELECT
+   
+      ST%B(IC) = ST%B(IC) + SCAL * VAL
+      
+   ENDIF INSEPARABLE_NEUMANN_IF
+ENDDO INSEPARABLE_BOUNDARY_CELLS_LOOP
+
+END SUBROUTINE SCARC_SETUP_INSEPARABLE_BOUNDARY
 
 
 ! --------------------------------------------------------------------------------------------------------------
