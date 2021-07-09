@@ -14473,21 +14473,19 @@ MESH_LOOP: DO NM=1,NMESHES
       ! Define scalar quantity slices of type "INCLUDE_GEOM" if they cross the bounding box of a GEOM
       ! being handled.
       IF (.NOT. VECTOR) THEN
-         IF (PBX>-1.E5_EB .OR. PBY>-1.E5_EB .OR. PBZ>-1.E5_EB) THEN
-            DO IG=1,N_GEOMETRY
-               ! Check for Slice not crossing GEOM BBox.
-               IF (PBX>-1.E5_EB) THEN
-                  IF(PBX>GEOMETRY(IG)%GEOM_BOX(HIGH_IND,IAXIS) .OR. PBX<GEOMETRY(IG)%GEOM_BOX( LOW_IND,IAXIS)) CYCLE
-               ENDIF
-               IF (PBY>-1.E5_EB) THEN
-                  IF(PBY>GEOMETRY(IG)%GEOM_BOX(HIGH_IND,JAXIS) .OR. PBY<GEOMETRY(IG)%GEOM_BOX( LOW_IND,JAXIS)) CYCLE
-               ENDIF
-               IF (PBZ>-1.E5_EB) THEN
-                  IF(PBZ>GEOMETRY(IG)%GEOM_BOX(HIGH_IND,KAXIS) .OR. PBZ<GEOMETRY(IG)%GEOM_BOX( LOW_IND,KAXIS)) CYCLE
-               ENDIF
-               IF(TRIM(SLICETYPE)=='STRUCTURED') SLICETYPE = 'INCLUDE_GEOM'
-            ENDDO
-         ENDIF
+         DO IG=1,N_GEOMETRY
+            ! Check for Slice not crossing GEOM BBox.
+            IF (XB(2)-XB(1)<TWO_EPSILON_EB) THEN
+               IF(XB(1)>GEOMETRY(IG)%GEOM_BOX(HIGH_IND,IAXIS) .OR. XB(1)<GEOMETRY(IG)%GEOM_BOX( LOW_IND,IAXIS)) CYCLE
+            ENDIF
+            IF (XB(4)-XB(3)<TWO_EPSILON_EB) THEN
+               IF(XB(3)>GEOMETRY(IG)%GEOM_BOX(HIGH_IND,JAXIS) .OR. XB(3)<GEOMETRY(IG)%GEOM_BOX( LOW_IND,JAXIS)) CYCLE
+            ENDIF
+            IF (XB(6)-XB(5)<TWO_EPSILON_EB) THEN
+               IF(XB(5)>GEOMETRY(IG)%GEOM_BOX(HIGH_IND,KAXIS) .OR. XB(5)<GEOMETRY(IG)%GEOM_BOX( LOW_IND,KAXIS)) CYCLE
+            ENDIF
+            IF(TRIM(SLICETYPE)=='STRUCTURED') SLICETYPE = 'INCLUDE_GEOM'
+         ENDDO
       ENDIF
 
       XB(1) = MAX(XB(1),XS)
