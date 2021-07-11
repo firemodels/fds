@@ -4528,9 +4528,9 @@ Figure~\ref{cell_burn_away_fig} displays the computed and analytical burning rat
 \end{figure}
 
 
+\section{Evaporation of a Liquid Surface}
 
-
-\section{Evaporation of a Liquid Surface (\texorpdfstring{\textct{surf\_mass\_vent\_liquid}}{surf\_mass\_vent\_liquid})}
+\subsection{Mass Conservation (\texorpdfstring{\textct{surf\_mass\_vent\_liquid}}{surf\_mass\_vent\_liquid})}
 \label{surf_mass_vent_liquid_fuel}
 \label{surf_mass_vent_liquid_fuel_nonconforming}
 
@@ -4544,6 +4544,52 @@ To test the liquid fuel evaporation model, a 1~cm deep pool of heptane is expose
 \caption[The \textct{surf\_mass\_vent\_liquid\_fuel} test cases]{Comparison of analytical and predicted mass change for a liquid surface.}
 \label{surf_mass_vent_liquid}
 \end{figure}
+
+\FloatBarrier
+
+\subsection{Evaporation Rate (\texorpdfstring{\textct{water\_pool}}{water\_pool})}
+\label{water_pool}
+
+In this example, air with an $\rm{RH}=25$~\% relative humidity and temperature $T_{\rm a}=305$~K flows with velocity $U=0.15$~m/s over an $L=1.2$~m long, $W=1$~m wide pool of water with a surface temperature of $T_{\rm s}=293$~K. The evaporation rate of water is given by the following relation:
+\be
+\dot{m} = L \, W \, h_{\rm m} \, \rho_{\rm film} \, \ln \left( 1+B \right) \approx 1.37 \times 10^{-5} \; \hbox{kg/s}  \quad ; \quad B=\frac{ Y_{\rm sv}-Y_{\rm g} }{ 1- Y_{\rm sv} } \approx 0.00925 \label{mdot_alpha}
+\ee
+$h_{\rm m}$ is the mass transfer coefficient, $\rho_{\rm film}$ is the density within a thin surface layer, $B$ is the Spalding mass transfer number, $Y_{\rm sv}$ is the ``surface vapor'' mass fraction of water vapor at the liquid surface, and $Y_{\rm g}$ is the mass fraction of water vapor in the ambient air. The composition of the surface layer is obtained from the Clausius-Clapeyron equation for the equilibrium vapor pressure.  The volume and mass fraction of water vapor at the surface is:
+\be
+   X_{\rm sv} =  \exp \left[ -\frac{ h_{\rm v} W_{\rm H_2O}}\R \left(\frac{1}{T_{\rm s}}-\frac{1}{T_{\rm b}} \right) \right] \approx 0.0278 \quad ; \quad
+   Y_{\rm sv} = \frac{X_{\rm sv} W_{\rm H_2O} }{ X_{\rm sv} W_{\rm H_2O} + (1-X_{\rm sv}) W_{\rm air} } \approx 0.0175
+   \label{CC_liquid}
+\ee
+The volume and mass fraction of water vapor in the ambient air is:
+\be
+   X_{\rm g} =  \frac{{\rm RH}}{100} \exp \left[ -\frac{ h_{\rm v} W_{\rm H_2O}}\R \left(\frac{1}{T_{\rm a}}-\frac{1}{T_{\rm b}} \right) \right] \approx 0.0134  \quad ; \quad
+   Y_{\rm g} = \frac{X_{\rm g} W_{\rm H_2O} }{ X_{\rm g} W_{\rm H_2O} + (1-X_{\rm g}) W_{\rm air} } \approx 0.0084
+   \label{CC_liquid2}
+\ee
+Here $h_{\rm v}=2260$~kJ/kg is the heat of vaporization of water, $W_{\rm H_2O}=18$~kg/kmol is its molecular weight, and $T_{\rm b}=373$~K is its boiling temperature. $R=8.3145$~kJ/kmol/K is the gas constant and $W_{\rm air}=29$~kg/kmol is the molecular weight of air.  The mass transfer coefficient is given by
+\be
+h_{\rm m}= \frac{\SH \, D}{L} \approx 1.03 \times 10^{-3} \; \hbox{m/s}
+\ee
+Sh is the Sherwood number and $D=2.27 \times 10^{-5}$~m$^2$/s is the diffusivity of water vapor into air. An empirical correlation for the Sherwood number is
+\be
+\SH=0.037~\SC^{\frac{1}{3}} \RE^{\frac{4}{5}} \approx 54.4 \quad ; \quad {\rm Sc}=0.6 \quad ; \quad \RE= \frac{\rho_{\rm a} U L}{\mu} \approx 11274
+\ee
+where $\mu=1.85 \times 10^{-5}$~kg/m/s is the viscosity of air. The gas density at the liquid surface is given by
+\be
+   \rho_{\rm film} = \frac{ p_0 W_{\rm air} }{ 1000 R \, T_{\rm s} } \approx 1.21 \; \hbox{kg/m}^3
+\ee
+where $p_0=101325$~Pa.
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/water_pool}
+\caption[The \textct{water\_pool} test case]{Evaporation rate of a pool of water.}
+\label{water_pool_fig}
+\end{figure}
+
+Figure~\ref{water_pool_fig} compares the FDS predicted versus the theoretical evaporation rate. The prediction and theory are not exactly the same because the nominal parameters used above do not account for slight changes in surface temperature and water vapor concentration above the pool. Nevertheless, the two should be relatively close.
+
+\FloatBarrier
 
 
 \section{Change in Surface Emissivity (\texorpdfstring{\textct{emissivity}}{emissivity})}
@@ -4855,7 +4901,7 @@ It is assumed that the pine needle consists of moisture and three solid phase co
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/Needle_TGA_A_Mass} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/Needle_TGA_B_Mass} \\
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/Needle_TGA_A_MLR} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/Needle_TGA_B_MLR} 
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/Needle_TGA_B_MLR}
 \end{tabular*}
 \caption[Results of pine Needle\_TGA calibration exercise]{Results of TGA calibration exercise for a pine needle, Cases A (left) and B (right). (Top) Sample temperature vs time. (Middle) Sample mass fraction vs sample temperature. (Bottom) Sample mass loss rate vs sample temperature.}
 \label{Needle_TGA_plot_A_B}
