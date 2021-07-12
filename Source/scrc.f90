@@ -21120,6 +21120,108 @@ END SUBROUTINE SCARC_UPDATE_PRECONDITIONER
 
 
 ! ----------------------------------------------------------------------------------------------------------------------
+!> \brief Update solution of the inseparable Poisson system
+! For all mesh-inner cells, transfer the achieved (U)ScaRC solution to a predictor/corrector version of a pressure vector
+! For all ghost cells, compute the corresponding values based on some initially computed boundary vectors
+! ----------------------------------------------------------------------------------------------------------------------
+SUBROUTINE SCARC_UPDATE_INSEPARABLE_PRESSURE(NL)
+USE SCARC_POINTERS, ONLY: M, L, G, ST, PPP, HP, UU, VV, WW, RHOP, KRESP, GWC, DXN, DYN, DZN, SCARC_POINT_TO_GRID
+USE SCARC_VARIABLES, ONLY: SCARC_P, SCARC_PS
+INTEGER, INTENT(IN) :: NL
+INTEGER :: NM
+INTEGER :: I, J, K, IC, IW, IXW, IYW, IZW, IXG, IYG, IZG, IOR0
+
+PRESSURE_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
+
+   CALL SCARC_POINT_TO_GRID (NM, NL)                                    
+   ST  => L%STAGE(NSCARC_STAGE_ONE)
+
+   IF (PREDICTOR) THEN
+      HP  => M%H
+      UU  => M%U
+      VV  => M%V
+      WW  => M%W
+      PPP => SCARC_P
+   ELSE
+      HP  => M%HS
+      UU  => M%US
+      VV  => M%VS
+      WW  => M%WS
+      PPP => SCARC_PS
+   ENDIF
+   KRESP => SCARC_KRES
+   RHOP  => SCARC_RHO
+
+   ! First transfer the current (U)ScaRC solution to the inseparable Poisson system to corresponding pressure vector
+
+   DO K=1,L%NZ
+      DO J=1,L%NY
+         DO I=1,L%NX
+            IF (IS_UNSTRUCTURED .AND. L%IS_SOLID(I, J, K)) CYCLE
+            IC = G%CELL_NUMBER(I,J,K)
+            PPP(I,J,K) = ST%X(IC)
+         ENDDO
+      ENDDO
+   ENDDO
+
+   ! Then use the pressure boundary vectors PXS, PXF, ..., PZF (analogous to BXS, BXF, ... BZF for HP) in order to generate 
+   ! the values on the ghost cells depending on the boundary type 
+
+   PRESSURE_WALLCELLS_LOOP: DO IW = 1, L%N_WALL_CELLS_EXT
+
+      GWC => G%WALL(IW)
+
+      IXG = GWC%IXG ;  IYG = GWC%IYG ;  IZG = GWC%IZG
+      IXW = GWC%IXW ;  IYW = GWC%IYW ;  IZW = GWC%IZW
+
+      IOR0 = GWC%IOR
+
+      ! Dirichlet :  BCs correspond to P_EXTERNAL
+       
+      PRESSURE_DIRICHLET_IF: IF (GWC%BTYPE == DIRICHLET) THEN
+         SELECT CASE (IOR0)
+            CASE ( 1)
+               PPP(IXG,IYW,IZW) = -PPP(IXW,IYW,IZW) + 2.0_EB * L%PXS(IYW,IZW)
+            CASE (-1)
+               PPP(IXG,IYW,IZW) = -PPP(IXW,IYW,IZW) + 2.0_EB * L%PXF(IYW,IZW)
+            CASE ( 2)
+               PPP(IXW,IYG,IZW) = -PPP(IXW,IYW,IZW) + 2.0_EB * L%PYS(IXW,IZW)
+            CASE (-2)
+               PPP(IXW,IYG,IZW) = -PPP(IXW,IYW,IZW) + 2.0_EB * L%PYF(IXW,IZW)
+            CASE ( 3)
+               PPP(IXW,IYW,IZG) = -PPP(IXW,IYW,IZW) + 2.0_EB * L%PZS(IXW,IYW)
+            CASE (-3)
+               PPP(IXW,IYW,IZG) = -PPP(IXW,IYW,IZW) + 2.0_EB * L%PZF(IXW,IYW)
+         END SELECT
+      ENDIF PRESSURE_DIRICHLET_IF
+
+      ! Neumann :   BCs correspond to rho * (B.. - \nabla K) , where B.. are the original BXS, BXF, ... BZF vectors
+
+      PRESSURE_NEUMANN_IF: IF (GWC%BTYPE == NEUMANN) THEN
+         SELECT CASE (IOR0)
+            CASE ( 1)
+               PPP(IXG,IYW,IZW) =  PPP(IXW,IYW,IZW) - DXN(IXG) * L%PXS(IYW,IZW)
+            CASE (-1)
+               PPP(IXG,IYW,IZW) =  PPP(IXW,IYW,IZW) + DXN(IXW) * L%PXF(IYW,IZW)
+            CASE ( 2)
+               PPP(IXW,IYG,IZW) =  PPP(IXW,IYW,IZW) - DYN(IYG) * L%PYS(IXW,IZW)
+            CASE (-2)
+               PPP(IXW,IYG,IZW) =  PPP(IXW,IYW,IZW) + DYN(IYW) * L%PYF(IXW,IZW)
+            CASE ( 3)
+               PPP(IXW,IYW,IZG) =  PPP(IXW,IYW,IZW) - DZN(IZG) * L%PZS(IXW,IYW)
+            CASE (-3)
+               PPP(IXW,IYW,IZG) =  PPP(IXW,IYW,IZW) + DZN(IZW) * L%PZF(IXW,IYW)
+         END SELECT
+      ENDIF PRESSURE_NEUMANN_IF
+
+   ENDDO PRESSURE_WALLCELLS_LOOP
+
+ENDDO PRESSURE_MESHES_LOOP
+
+END SUBROUTINE SCARC_UPDATE_INSEPARABLE_PRESSURE
+
+
+! ----------------------------------------------------------------------------------------------------------------------
 !> \brief Transfer (U)Scarc solution for the separable Poisson problem into HP for all cells inside the mesh
 ! ----------------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_UPDATE_SEPARABLE_MAINCELLS(NL)
