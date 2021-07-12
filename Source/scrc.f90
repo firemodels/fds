@@ -17479,7 +17479,7 @@ END FUNCTION SCARC_MGM_CONVERGENCE_STATE
 ! --------------------------------------------------------------------------------------------------------------
 !> \brief Set correct boundary values at external and internal boundaries
 ! --------------------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_MGM_UPDATE_GHOSTCELLS(NTYPE)
+SUBROUTINE SCARC_MGM_UPDATE_SEPARABLE_GHOSTCELLS(NTYPE)
 USE SCARC_POINTERS, ONLY: M, L, G, GWC, HP, MGM, DX, DY, DZ, BXS, BXF, BYS, BYF, BZS, BZF, &
                           SCARC_POINT_TO_GRID
 INTEGER, INTENT(IN):: NTYPE
@@ -17651,7 +17651,7 @@ DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 
 ENDDO
 
-END SUBROUTINE SCARC_MGM_UPDATE_GHOSTCELLS
+END SUBROUTINE SCARC_MGM_UPDATE_SEPARABLE_GHOSTCELLS
 
 
 ! ------------------------------------------------------------------------------------------------------------------
@@ -20371,7 +20371,7 @@ ENDIF
 
 IF (TYPE_SOLVER == NSCARC_SOLVER_MAIN .AND. .NOT.IS_MGM) THEN
    CALL SCARC_UPDATE_SEPARABLE_MAINCELLS(NLEVEL_MIN)
-   CALL SCARC_UPDATE_GHOSTCELLS(NLEVEL_MIN)
+   CALL SCARC_UPDATE_SEPARABLE_GHOSTCELLS(NLEVEL_MIN)
 ENDIF
 
 
@@ -20398,7 +20398,7 @@ CALL SCARC_SET_SYSTEM_TYPE (NSCARC_GRID_STRUCTURED, NSCARC_MATRIX_POISSON)
 CALL SCARC_METHOD_KRYLOV (NSTACK, NSCARC_STACK_ZERO, NLEVEL_MIN)
 
 CALL SCARC_MGM_STORE (NSCARC_MGM_POISSON)                   ! store this structured inhomogeneous Poisson solution in MGM%SIP
-CALL SCARC_MGM_UPDATE_GHOSTCELLS (NSCARC_MGM_POISSON)       ! update ghost cell values correspondingly (global solution!)
+CALL SCARC_MGM_UPDATE_SEPARABLE_GHOSTCELLS (NSCARC_MGM_POISSON)       ! update ghost cell values correspondingly (global solution!)
 
 CALL SCARC_MGM_COPY (NSCARC_MGM_SIP_TO_UIP)                 ! Initialize unstructured inhomogeneous Poisson UIP with SIP
 
@@ -20422,13 +20422,13 @@ USE_CORRECT_INITIALIZATION = NMESHES > 1 .AND. SCARC_MGM_EXACT_INITIAL .AND. &
 IF (SCARC_MGM_CHECK_LAPLACE .OR. USE_CORRECT_INITIALIZATION) THEN
 
    CALL SCARC_MGM_STORE (NSCARC_MGM_SCARC)                                 
-   CALL SCARC_MGM_UPDATE_GHOSTCELLS (NSCARC_MGM_SCARC)    
+   CALL SCARC_MGM_UPDATE_SEPARABLE_GHOSTCELLS (NSCARC_MGM_SCARC)    
 
    CALL SCARC_SET_SYSTEM_TYPE (NSCARC_GRID_UNSTRUCTURED, NSCARC_MATRIX_POISSON)
    CALL SCARC_METHOD_KRYLOV (NSTACK, NSCARC_STACK_ZERO, NLEVEL_MIN)             ! compute UScaRC with unstructured CG-method 
 
    CALL SCARC_MGM_STORE (NSCARC_MGM_USCARC)                                
-   CALL SCARC_MGM_UPDATE_GHOSTCELLS (NSCARC_MGM_USCARC)                   
+   CALL SCARC_MGM_UPDATE_SEPARABLE_GHOSTCELLS (NSCARC_MGM_USCARC)                   
 
    CALL SCARC_MGM_DIFF (NSCARC_MGM_USCARC_VS_SCARC)                             ! build difference DSCARC of USCARC and SCARC
 
@@ -20510,7 +20510,7 @@ IF (STATE_MGM /= NSCARC_MGM_SUCCESS) THEN
             CALL SCARC_MGM_COPY (NSCARC_MGM_OUHL_TO_OUHL2)
       END SELECT
 
-      CALL SCARC_MGM_UPDATE_GHOSTCELLS (NSCARC_MGM_LAPLACE)
+      CALL SCARC_MGM_UPDATE_SEPARABLE_GHOSTCELLS (NSCARC_MGM_LAPLACE)
       CALL SCARC_MGM_STORE (NSCARC_MGM_MERGE)
    
       ! Get new velocities based on local Laplace solutions and compute corresponding velocity error
@@ -20854,7 +20854,7 @@ CALL SCARC_CONVERGENCE_RATE(NSTATE, NS, NL)
 SELECT CASE (TYPE_SOLVER)
    CASE (NSCARC_SOLVER_MAIN)
       CALL SCARC_UPDATE_SEPARABLE_MAINCELLS(NLEVEL_MIN)
-      CALL SCARC_UPDATE_GHOSTCELLS(NLEVEL_MIN)
+      CALL SCARC_UPDATE_SEPARABLE_GHOSTCELLS(NLEVEL_MIN)
    CASE (NSCARC_SOLVER_PRECON)
       CALL SCARC_UPDATE_PRECONDITIONER(NLEVEL_MIN)
 END SELECT
@@ -21030,7 +21030,7 @@ CALL SCARC_EXCHANGE (NSCARC_EXCHANGE_VECTOR_PLAIN, X, NL)
 
 IF (TYPE_SOLVER == NSCARC_SOLVER_MAIN) THEN
    CALL SCARC_UPDATE_SEPARABLE_MAINCELLS (NLEVEL_MIN)
-   CALL SCARC_UPDATE_GHOSTCELLS(NLEVEL_MIN)
+   CALL SCARC_UPDATE_SEPARABLE_GHOSTCELLS(NLEVEL_MIN)
 ENDIF
 
 CALL SCARC_RELEASE_SCOPE(NS, NP)
@@ -21098,7 +21098,7 @@ ENDDO MESHES_LOOP
 
 IF (TYPE_SOLVER == NSCARC_SOLVER_MAIN) THEN
    CALL SCARC_UPDATE_SEPARABLE_MAINCELLS (NLEVEL_MIN)
-   CALL SCARC_UPDATE_GHOSTCELLS(NLEVEL_MIN)
+   CALL SCARC_UPDATE_SEPARABLE_GHOSTCELLS(NLEVEL_MIN)
 ENDIF
 
 CALL SCARC_RELEASE_SCOPE(NSTACK, NPARENT)
@@ -21313,14 +21313,15 @@ END SUBROUTINE SCARC_UPDATE_INSEPARABLE_MAINCELLS
 
 
 ! --------------------------------------------------------------------------------------------------------------
-!> \brief Set correct boundary values at external and internal boundaries
+!> \brief Set boundary values for the solution of the separable Poisson system at external boundaries 
+! Along internal mesh interfaces the overlaps are consistent by construction of the (U)ScaRC solver
 ! --------------------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_UPDATE_GHOSTCELLS(NL)
-USE SCARC_POINTERS, ONLY: M, L, G, GWC, HP, DX, DY, DZ, SCARC_POINT_TO_GRID
+SUBROUTINE SCARC_UPDATE_SEPARABLE_GHOSTCELLS(NL)
+USE SCARC_POINTERS, ONLY: M, L, G, GWC, HP, DXN, DYN, DZN, SCARC_POINT_TO_GRID
 INTEGER, INTENT(IN) :: NL
 INTEGER :: NM, IW, IOR0, IXG, IYG, IZG, IXW, IYW, IZW 
 
-DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
+GHOSTCELLS_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 
    CALL SCARC_POINT_TO_GRID (NM, NL)                                    
 
@@ -21330,75 +21331,60 @@ DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
       HP => M%HS
    ENDIF
 
-   ! Compute ghost cell values
- 
-   !!$OMP PARALLEL DO SHARED(HP, M, L, G) PRIVATE(IW, IXG, IYG, IZG, IXW, IYW, IZW, IOR0, GWC) SCHEDULE(STATIC)
-   WALL_CELLS_LOOP: DO IW = 1, L%N_WALL_CELLS_EXT
+   GHOSTCELLS_WALL_LOOP: DO IW = 1, L%N_WALL_CELLS_EXT
 
       GWC => G%WALL(IW)
 
-      IXG = GWC%IXG
-      IYG = GWC%IYG
-      IZG = GWC%IZG
-
-      IXW = GWC%IXW
-      IYW = GWC%IYW
-      IZW = GWC%IZW
+      IXG = GWC%IXG ;  IYG = GWC%IYG ;  IZG = GWC%IZG
+      IXW = GWC%IXW ;  IYW = GWC%IYW ;  IZW = GWC%IZW
 
       IOR0 = GWC%IOR
 
-      SELECT CASE (IOR0)
-         CASE ( 1)
-            IF (GWC%BTYPE==DIRICHLET) THEN
+      GHOSTCELLS_DIRICHLET_IF: IF (GWC%BTYPE == DIRICHLET) THEN
+         SELECT CASE(IOR0)
+            CASE ( 1)
                HP(IXG,IYW,IZW) = -HP(IXW,IYW,IZW) +  2.0_EB*M%BXS(IYW,IZW)
-            ELSE IF (GWC%BTYPE==NEUMANN) THEN
-               HP(IXG,IYW,IZW) =  HP(IXW,IYW,IZW) - DX(IXW)*M%BXS(IYW,IZW)
-            ENDIF
-         CASE (-1)
-            IF (GWC%BTYPE==DIRICHLET) THEN
+            CASE (-1)
                HP(IXG,IYW,IZW) = -HP(IXW,IYW,IZW) +  2.0_EB*M%BXF(IYW,IZW)
-            ELSE IF (GWC%BTYPE==NEUMANN) THEN
-               HP(IXG,IYW,IZW) =  HP(IXW,IYW,IZW) + DX(IXW)*M%BXF(IYW,IZW)
-            ENDIF
-         CASE ( 2)
-            IF (GWC%BTYPE==DIRICHLET) THEN
+            CASE ( 2)
                HP(IXW,IYG,IZW) = -HP(IXW,IYW,IZW) +  2.0_EB*M%BYS(IXW,IZW)
-            ELSE IF (GWC%BTYPE==NEUMANN) THEN
-               HP(IXW,IYG,IZW) =  HP(IXW,IYW,IZW) - DY(IYW)*M%BYS(IXW,IZW)
-            ENDIF
-         CASE (-2)
-            IF (GWC%BTYPE==DIRICHLET) THEN
+            CASE (-2)
                HP(IXW,IYG,IZW) = -HP(IXW,IYW,IZW) +  2.0_EB*M%BYF(IXW,IZW)
-            ELSE IF (GWC%BTYPE==NEUMANN) THEN
-               HP(IXW,IYG,IZW) =  HP(IXW,IYW,IZW) + DY(IYW)*M%BYF(IXW,IZW)
-            ENDIF
-         CASE ( 3)
-            IF (GWC%BTYPE==DIRICHLET) THEN
+            CASE ( 3)
                HP(IXW,IYW,IZG) = -HP(IXW,IYW,IZW) +  2.0_EB*M%BZS(IXW,IYW)
-            ELSE IF (GWC%BTYPE==NEUMANN) THEN
-               HP(IXW,IYW,IZG) =  HP(IXW,IYW,IZW) - DZ(IZW)*M%BZS(IXW,IYW)
-            ENDIF
-         CASE (-3)
-            IF (GWC%BTYPE==DIRICHLET) THEN
+            CASE (-3)
                HP(IXW,IYW,IZG) = -HP(IXW,IYW,IZW) +  2.0_EB*M%BZF(IXW,IYW)
-            ELSE IF (GWC%BTYPE==NEUMANN) THEN
-               HP(IXW,IYW,IZG) =  HP(IXW,IYW,IZW) + DZ(IZW)*M%BZF(IXW,IYW)
-            ENDIF
-      END SELECT
+         END SELECT
+      ENDIF GHOSTCELLS_DIRICHLET_IF
 
-   ENDDO WALL_CELLS_LOOP
-   !!$OMP END PARALLEL DO
+      GHOSTCELLS_NEUMANN_IF: IF (GWC%BTYPE == NEUMANN) THEN
+         SELECT CASE(IOR0)
+            CASE ( 1)
+               HP(IXG,IYW,IZW) =  HP(IXW,IYW,IZW) - DXN(IXG)*M%BXS(IYW,IZW)
+            CASE (-1)
+               HP(IXG,IYW,IZW) =  HP(IXW,IYW,IZW) + DXN(IXW)*M%BXF(IYW,IZW)
+            CASE ( 2)
+               HP(IXW,IYG,IZW) =  HP(IXW,IYW,IZW) - DYN(IYG)*M%BYS(IXW,IZW)
+            CASE (-2)
+               HP(IXW,IYG,IZW) =  HP(IXW,IYW,IZW) + DYN(IYW)*M%BYF(IXW,IZW)
+            CASE ( 3)
+               HP(IXW,IYW,IZG) =  HP(IXW,IYW,IZW) - DZN(IZG)*M%BZS(IXW,IYW)
+            CASE (-3)
+               HP(IXW,IYW,IZG) =  HP(IXW,IYW,IZW) + DZN(IZW)*M%BZF(IXW,IYW)
+         END SELECT
+      ENDIF GHOSTCELLS_NEUMANN_IF
 
+   ENDDO GHOSTCELLS_WALL_LOOP
 
-ENDDO
+ENDDO GHOSTCELLS_MESHES_LOOP
 
 ! Perform data exchange to achieve consistency of ghost values along internal boundaries
-! Note: this is most probably no longer necessary because MESH_EXCHANGE(5) is used after the call of ScaRC
+! Note: this is most probably no longer necessary because MESH_EXCHANGE(5) is used after the call of ScaRC   TODO
 
 CALL SCARC_EXCHANGE(NSCARC_EXCHANGE_PRESSURE, NSCARC_NONE, NL)
-
    
-END SUBROUTINE SCARC_UPDATE_GHOSTCELLS
+END SUBROUTINE SCARC_UPDATE_SEPARABLE_GHOSTCELLS
+
    
 ! -------------------------------------------------------------------------------------------------------------
 !> \brief Preconditioning method which is based on the following input and output convention:
