@@ -3739,9 +3739,9 @@ INTEGER :: N,NN,J,NS,SMIX_INDEX(N_MATS),NWP,NP,NP2,ITMP
 TYPE(MATERIAL_TYPE), POINTER :: ML
 TYPE(SURFACE_TYPE), POINTER :: SF
 REAL(EB) :: DTMP,REACTION_RATE,Y_O2,X_O2,Q_DOT_S_PPP,MW(N_MATS),Y_GAS(N_MATS),Y_SV(N_MATS),X_SV(N_MATS),X_L(N_MATS),&
-            D_AIR,H_MASS,RE_L,SHERWOOD,MFLUX,MU_AIR,SC_AIR,U_TANG,RDN,B_NUMBER,TMP_G,LENGTH,U2,V2,W2,VEL,&
-            RHO_DOT,DR,R_S_0,R_S_1,H_R,H_R_B,H_S_B,H_S,LENGTH_SCALE,SUM_X_MW,SUM_Y_GAS,SUM_Y_SV,SUM_Y_SV_SMIX(N_TRACKED_SPECIES),&
-            SUM_X_SV,X_L_SUM,RHO_DOT_EXTRA,NET_HEAT_FLUX,MFLUX_MAX
+            D_FILM,H_MASS,RE_L,SHERWOOD,MFLUX,MU_FILM,MU_AIR,SC_FILM,U_TANG,RDN,B_NUMBER,TMP_FILM,TMP_G,LENGTH,U2,V2,W2,VEL,&
+            RHO_DOT,DR,R_S_0,R_S_1,H_R,H_R_B,H_S_B,H_S,LENGTH_SCALE,SUM_X_MW,SUM_Y_MW,SUM_Y_GAS,SUM_Y_SV,&
+            SUM_Y_SV_SMIX(N_TRACKED_SPECIES),SUM_X_SV,X_L_SUM,RHO_DOT_EXTRA,MFLUX_MAX,RHO_FILM
 LOGICAL :: LIQUID(N_MATS),SPEC_ID_ALREADY_USED(N_MATS),DO_EVAPORATION
 
 Q_DOT_S_PPP = 0._EB
@@ -3766,7 +3766,7 @@ ENDIF
 
 ! If this is surface liquid layer, calculate the Spalding B number and other liquid-specific variables
 
-IF_ANY_LIQUIDS_PRESENT: IF (DO_EVAPORATION) THEN
+IF_DO_EVAPORATION: IF (DO_EVAPORATION) THEN
 
    ! Calculate a sum needed to calculate the volume fraction of liquid components
 
@@ -3834,13 +3834,16 @@ IF_ANY_LIQUIDS_PRESENT: IF (DO_EVAPORATION) THEN
 
    SUM_Y_SV = 0._EB
    SUM_Y_SV_SMIX = 0._EB
+   SUM_Y_MW = 0._EB
    SUM_X_MW = SUM_X_MW + (1._EB-SUM_X_SV)*MW_AIR
    MATERIAL_LOOP_1: DO N=1,N_MATS
       IF (.NOT.LIQUID(N)) CYCLE MATERIAL_LOOP_1
       Y_SV(N)  = X_SV(N)*MW(N)/SUM_X_MW
       SUM_Y_SV = SUM_Y_SV + Y_SV(N)
+      SUM_Y_MW = SUM_Y_MW + Y_SV(N)/MW(N)
       SUM_Y_SV_SMIX(SMIX_INDEX(N)) = SUM_Y_SV_SMIX(SMIX_INDEX(N)) + Y_SV(N)
    ENDDO MATERIAL_LOOP_1
+   SUM_Y_MW = SUM_Y_MW + (1._EB-SUM_Y_SV)/MW_AIR
 
    IF (SUM_Y_SV<ALMOST_ONE) THEN
       B_NUMBER = MAX(0._EB,(SUM_Y_SV-SUM_Y_GAS)/(1._EB-SUM_Y_SV))
@@ -3848,29 +3851,37 @@ IF_ANY_LIQUIDS_PRESENT: IF (DO_EVAPORATION) THEN
       B_NUMBER = 1.E6_EB  ! Fictitiously high B number intended to push mass flux to its upper limit
    ENDIF
 
-   ! Compute an effective gas phase mass fraction corresponding to each liquid component.
-   ! Compute a mole-weighted diffusion coefficient.
+   ! Assume that the film temperature, TMP_FILM, is the same as the surface temperature, TMP_F
 
-   D_AIR = 0._EB
-   TMP_G = TMP(IIG,JJG,KKG)
-   ITMP  = NINT(TMP_G)
+   TMP_FILM = TMP_F
+
+   ! Compute an effective gas phase mass fraction, Y_GAS, corresponding to each liquid component, N
+   ! Compute the mole-weighted diffusion coefficient, D_FILM
+
+   ITMP     = NINT(TMP_FILM)
+   D_FILM   = 0._EB
    MATERIAL_LOOP_2: DO N=1,N_MATS
       IF (.NOT.LIQUID(N)) CYCLE MATERIAL_LOOP_2
       IF (SUM_Y_SV_SMIX(SMIX_INDEX(N))>TWO_EPSILON_EB) Y_GAS(N) = Y_SV(N)*Y_GAS(N)/SUM_Y_SV_SMIX(SMIX_INDEX(N))
-      D_AIR = D_AIR + D_Z(ITMP,SMIX_INDEX(N))*X_SV(N)/SUM_X_SV
+      D_FILM = D_FILM + D_Z(ITMP,SMIX_INDEX(N))*X_SV(N)/SUM_X_SV
    ENDDO MATERIAL_LOOP_2
 
    ! Compute mass transfer coefficient
 
    H_MASS_IF: IF (SF%HM_FIXED>=0._EB) THEN
+
       H_MASS = SF%HM_FIXED
+
    ELSEIF (SIM_MODE==DNS_MODE) THEN H_MASS_IF
+
       SELECT CASE(ABS(IOR))
-         CASE(1); H_MASS = 2._EB*D_AIR*RDX(IIG)
-         CASE(2); H_MASS = 2._EB*D_AIR*RDY(JJG)
-         CASE(3); H_MASS = 2._EB*D_AIR*RDZ(KKG)
+         CASE(1); H_MASS = 2._EB*D_FILM*RDX(IIG)
+         CASE(2); H_MASS = 2._EB*D_FILM*RDY(JJG)
+         CASE(3); H_MASS = 2._EB*D_FILM*RDZ(KKG)
       END SELECT
+
    ELSE H_MASS_IF
+
       IF (PRESENT(LPU) .AND. PRESENT(LPV) .AND. PRESENT(LPW)) THEN
          U2 = 0.5_EB*(U(IIG,JJG,KKG)+U(IIG-1,JJG,KKG))
          V2 = 0.5_EB*(V(IIG,JJG,KKG)+V(IIG,JJG-1,KKG))
@@ -3879,16 +3890,18 @@ IF_ANY_LIQUIDS_PRESENT: IF (DO_EVAPORATION) THEN
       ELSE
          VEL = SQRT(2._EB*KRES(IIG,JJG,KKG))
       ENDIF
-      CALL GET_VISCOSITY(ZZ_GET,MU_AIR,TMP_G)
+      CALL GET_VISCOSITY(ZZ_GET,MU_FILM,TMP_FILM)
       LENGTH   = SF%CONV_LENGTH
-      RE_L     = RHO(IIG,JJG,KKG)*VEL*LENGTH/MU_AIR
-      SC_AIR   = 0.6_EB  ! Incropera & DeWitt, Chap 7, External Flow
-      SHERWOOD = 0.037_EB*SC_AIR**ONTH*RE_L**0.8_EB
-      H_MASS   = SHERWOOD*D_AIR/LENGTH
+      RHO_FILM = PBAR(KKG,PRESSURE_ZONE(IIG,JJG,KKG))/(R0*TMP_FILM*SUM_Y_MW)
+      RE_L     = RHO_FILM*VEL*LENGTH/MU_FILM
+      SC_FILM  = MU_FILM/(RHO_FILM*D_FILM)
+      SHERWOOD = 0.037_EB*SC_FILM**ONTH*RE_L**0.8_EB
+      H_MASS   = SHERWOOD*D_FILM/LENGTH
 
    ENDIF H_MASS_IF
 
-ENDIF IF_ANY_LIQUIDS_PRESENT
+ENDIF IF_DO_EVAPORATION
+
 
 ! Calculate reaction rates for liquids, solids and vegetation
 
@@ -3903,16 +3916,15 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Loop over all materials in the cell (alpha subsc
 
          CASE (PYROLYSIS_LIQUID)
 
-            ! Limit the burning rate to 1.2*qdot''/h_g 
+            ! Limit the burning rate to (200 kW/m2) / h_g 
 
-            NET_HEAT_FLUX = ONE_D%Q_RAD_IN - ONE_D%Q_RAD_OUT + ONE_D%Q_CON_F
-            MFLUX_MAX     = 1.2_EB*NET_HEAT_FLUX/ML%HEAT_OF_GASIFICATION
+             MFLUX_MAX = 200E3_EB/ML%HEAT_OF_GASIFICATION
 
             ! Calculate the mass flux of liquid component N at the surface if this is a surface cell.
 
             IF (DO_EVAPORATION) THEN
                IF (B_NUMBER>TWO_EPSILON_EB) THEN
-                  MFLUX = MAX(0._EB,MIN(MFLUX_MAX,ONE_D%RHO_F*H_MASS*LOG(1._EB+B_NUMBER)*(Y_SV(N) + (Y_SV(N)-Y_GAS(N))/B_NUMBER)))
+                  MFLUX = MAX(0._EB,MIN(MFLUX_MAX,H_MASS*RHO_FILM*LOG(1._EB+B_NUMBER)*(Y_SV(N) + (Y_SV(N)-Y_GAS(N))/B_NUMBER)))
                ELSE
                   MFLUX = 0._EB
                ENDIF
