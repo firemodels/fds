@@ -1550,6 +1550,7 @@ REAL(EB), POINTER, DIMENSION(:,:,:):: PRHS=>NULL()          !< Pointer to right 
 REAL(EB), POINTER, DIMENSION(:,:,:):: UU=>NULL()            !< Pointer to x-velocity vector
 REAL(EB), POINTER, DIMENSION(:,:,:):: VV=>NULL()            !< Pointer to y-velocity vector
 REAL(EB), POINTER, DIMENSION(:,:,:):: WW=>NULL()            !< Pointer to z-velocity vector
+REAL(EB), POINTER, DIMENSION(:,:,:):: PPP=>NULL()           !< Pointer to inseparable pressure vector
 REAL(EB), POINTER, DIMENSION(:,:,:):: RHOP=>NULL()          !< Pointer to density vector
 REAL(EB), POINTER, DIMENSION(:,:,:):: KRESP=>NULL()         !< Pointer to kres vector
 
@@ -20369,7 +20370,7 @@ ENDIF
 
 
 IF (TYPE_SOLVER == NSCARC_SOLVER_MAIN .AND. .NOT.IS_MGM) THEN
-   CALL SCARC_UPDATE_MAINCELLS(NLEVEL_MIN)
+   CALL SCARC_UPDATE_SEPARABLE_MAINCELLS(NLEVEL_MIN)
    CALL SCARC_UPDATE_GHOSTCELLS(NLEVEL_MIN)
 ENDIF
 
@@ -20852,7 +20853,7 @@ CALL SCARC_CONVERGENCE_RATE(NSTATE, NS, NL)
 
 SELECT CASE (TYPE_SOLVER)
    CASE (NSCARC_SOLVER_MAIN)
-      CALL SCARC_UPDATE_MAINCELLS(NLEVEL_MIN)
+      CALL SCARC_UPDATE_SEPARABLE_MAINCELLS(NLEVEL_MIN)
       CALL SCARC_UPDATE_GHOSTCELLS(NLEVEL_MIN)
    CASE (NSCARC_SOLVER_PRECON)
       CALL SCARC_UPDATE_PRECONDITIONER(NLEVEL_MIN)
@@ -21028,7 +21029,7 @@ ENDDO MESHES_LOOP
 CALL SCARC_EXCHANGE (NSCARC_EXCHANGE_VECTOR_PLAIN, X, NL)
 
 IF (TYPE_SOLVER == NSCARC_SOLVER_MAIN) THEN
-   CALL SCARC_UPDATE_MAINCELLS (NLEVEL_MIN)
+   CALL SCARC_UPDATE_SEPARABLE_MAINCELLS (NLEVEL_MIN)
    CALL SCARC_UPDATE_GHOSTCELLS(NLEVEL_MIN)
 ENDIF
 
@@ -21096,7 +21097,7 @@ MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 ENDDO MESHES_LOOP
 
 IF (TYPE_SOLVER == NSCARC_SOLVER_MAIN) THEN
-   CALL SCARC_UPDATE_MAINCELLS (NLEVEL_MIN)
+   CALL SCARC_UPDATE_SEPARABLE_MAINCELLS (NLEVEL_MIN)
    CALL SCARC_UPDATE_GHOSTCELLS(NLEVEL_MIN)
 ENDIF
 
@@ -21119,9 +21120,9 @@ END SUBROUTINE SCARC_UPDATE_PRECONDITIONER
 
 
 ! ----------------------------------------------------------------------------------------------------------------------
-!> \brief Finalize data for pressure vector (predictor/corrector) when local ScaRC solver has finished
+!> \brief Transfer (U)Scarc solution for the separable Poisson problem into HP for all cells inside the mesh
 ! ----------------------------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_UPDATE_MAINCELLS(NL)
+SUBROUTINE SCARC_UPDATE_SEPARABLE_MAINCELLS(NL)
 USE SCARC_POINTERS, ONLY: M, G, L, ST, HP, SCARC_POINT_TO_GRID
 INTEGER, INTENT(IN) :: NL
 INTEGER :: NM, IC 
@@ -21146,7 +21147,67 @@ DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 
 ENDDO
 
-END SUBROUTINE SCARC_UPDATE_MAINCELLS
+END SUBROUTINE SCARC_UPDATE_SEPARABLE_MAINCELLS
+
+
+! ----------------------------------------------------------------------------------------------------------------------
+!> \brief Transfer (U)Scarc solution for the inseparable Poisson problem into HP for all cells inside the mesh
+! Note that ST%X (solution from chosen ScaRC solver) contains P here, not HP 
+! Now, HP must be derived by P by the relation H = P/RHO + KRES
+! This is only restricted to the internal grid cells (i.e. no ghost cells)
+! Afterwards this HP has to undergo the same mechanisms for the setting of ghost cells as is done in the separable case
+! ----------------------------------------------------------------------------------------------------------------------
+SUBROUTINE SCARC_UPDATE_INSEPARABLE_MAINCELLS(NL)
+USE SCARC_POINTERS, ONLY: M, L, G, ST, HP, PPP, RHOP, KRESP, SCARC_POINT_TO_GRID
+USE SCARC_VARIABLES, ONLY: SCARC_P, SCARC_PS
+REAL(EB), POINTER, DIMENSION(:,:,:) :: HPP                        ! still experimental
+INTEGER, INTENT(IN) :: NL
+INTEGER :: NM
+INTEGER :: I, J, K, IC
+
+DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
+
+   CALL SCARC_POINT_TO_GRID (NM, NL)                                    
+   ST  => L%STAGE(NSCARC_STAGE_ONE)
+
+   IF (PREDICTOR) THEN
+      !RHOP => M%RHO
+      HP  => M%H
+      PPP => SCARC_P
+   ELSE
+      !RHOP => M%RHOS
+      HP  => M%HS
+      PPP => SCARC_PS
+   ENDIF
+   KRESP => SCARC_KRES                 ! still experimental
+   RHOP  => SCARC_RHO
+
+   DO K=1,L%NZ
+      DO J=1,L%NY
+         DO I=1,L%NX
+            IF (IS_UNSTRUCTURED .AND. L%IS_SOLID(I, J, K)) CYCLE
+            IC = G%CELL_NUMBER(I,J,K)
+            HP(I,J,K) = ST%X(IC)/RHOP(I,J,K) + KRESP(I,J,K)
+         ENDDO
+      ENDDO
+   ENDDO
+
+   ! Still experimental to countercheck
+    
+   HPP  => M%WORK8
+   DO K=0,L%NZ+1
+         DO J=0,L%NY+1
+         DO I=0,L%NX+1
+            IF (IS_UNSTRUCTURED .AND. L%IS_SOLID(I, J, K)) CYCLE
+            IC = G%CELL_NUMBER(I,J,K)
+            HPP(I,J,K) = PPP(I,J,K)/RHOP(I,J,K) + KRESP(I,J,K)
+         ENDDO
+      ENDDO
+   ENDDO
+
+ENDDO
+
+END SUBROUTINE SCARC_UPDATE_INSEPARABLE_MAINCELLS
 
 
 ! --------------------------------------------------------------------------------------------------------------
