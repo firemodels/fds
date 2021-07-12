@@ -9925,21 +9925,19 @@ The histogram output file contains two-columns for each device. The first column
 \subsection{Complex Terrain and Related Quantities}
 \label{info:complex_terrain}
 
-Complex terrain for wind and wildland fire simulations can be generated either by using an array of rectangular {\ct OBST}stacles or an immersed boundary {\ct GEOM}etry. Visualizing output data on or just above complex terrain can be done in a few different ways.
+Complex terrain for wind and wildland fire simulations can be generated either by using an immersed boundary {\ct GEOM}etry. Visualizing output data on or just above complex terrain can be done in a few different ways.
 
 The first method is via a ``slice'' file that conforms to the terrain. The following line illustrates how to do it:
 \begin{lstlisting}
 &SLCF AGL_SLICE=10., QUANTITY='TEMPERATURE' /
 \end{lstlisting}
-Instead of specifying a plane on which to draw contours of gas temperature, you specify that the contour is to be located 10~m Above Ground Level (AGL). This works for both a scalar quantity or {\ct VECTOR=T}.
+Instead of specifying a plane on which to draw contours of gas temperature, you specify that the contour is to be located 10~m Above Ground Level (AGL). Adding {\ct VECTOR=T} adds the option of showing velocity vectors.
 
 The second method of visualizing data on complex terrain is via a boundary ({\ct BNDF}) file. Specify a solid phase output quantity as you normally would, for example:
 \begin{lstlisting}
 &BNDF QUANTITY='WALL TEMPERATURE' /
 \end{lstlisting}
-and add {\ct TERRAIN\_CASE=T} to the {\ct MISC} line. This will create two boundary files---one of which is the conventional one, and one will be listed as a ``slice'' file that conforms to the terrain.
-
-If {\ct TERRAIN\_CASE=T}, you may also specify an image file (.png) to overlay on the terrain via \linebreak[4]{\ct TERRAIN\_IMAGE}, also on the {\ct MISC} line.
+You may also specify an image file (.png) to overlay on the terrain via {\ct TERRAIN\_IMAGE} on the {\ct MISC} line.
 
 
 \subsection{Wind and the Pressure Coefficient}
@@ -11443,7 +11441,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SOOT\_DENSITY}                                 & Real         & Section~\ref{info:deposition}           &            & 1800              \\ \hline
 {\ct SOOT\_OXIDATION}                               & Logical      & Section~\ref{info:deposition}           &            & {\ct F}     \\ \hline
 {\ct TAU\_DEFAULT}                                  & Real         & Section~\ref{info:RAMP_Time}            & s          & 1.                \\ \hline
-{\ct TERRAIN\_CASE}                                 & Logical      & Section~\ref{info:complex_terrain}      &            & {\ct F}     \\ \hline
 {\ct TERRAIN\_IMAGE}                                & Character    & Section~\ref{info:complex_terrain}      &            &                   \\ \hline
 {\ct TEXTURE\_ORIGIN(3)}                            & Real Triplet & Section~\ref{info:texture_map}          & m          & (0.,0.,0.)        \\ \hline
 {\ct THERMOPHORETIC\_DEPOSITION}                    & Logical      & Section~\ref{info:deposition}           &            & {\ct T}      \\ \hline
