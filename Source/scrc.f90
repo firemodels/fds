@@ -18077,7 +18077,7 @@ END SUBROUTINE SCARC_SETUP_MGM_WORKSPACE
 ! --------------------------------------------------------------------------------------------------------------
 !> \brief Set interface boundary conditions for unstructured, homogeneous part of McKeeney-Greengard-Mayo method
 ! --------------------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_MGM_SET_INTERFACES(VB, NM)
+SUBROUTINE SCARC_MGM_SETUP_INTERFACES(VB, NM)
 USE SCARC_POINTERS, ONLY: L, F, G, OL, OG, MGM, UHL, UHL2, OUHL, OUHL2, BTYPE, RDX, RDY, RDZ, RDXN, RDYN, RDZN, &
                           SCARC_POINT_TO_MGM, SCARC_POINT_TO_OTHER_GRID
 INTEGER, INTENT(IN):: NM
@@ -18093,7 +18093,6 @@ IF (TYPE_MGM_BC == NSCARC_MGM_BC_EXPOL .AND. TOTAL_PRESSURE_ITERATIONS <= 2) ITY
 !   CALL SCARC_POINT_TO_MGM(NM, NL)
 !   G  => L%UNSTRUCTURED
    BTYPE => MGM%BTYPE
-
 
    MGM_FACE_LOOP: DO IFACE = 1, 6
 
@@ -18246,13 +18245,13 @@ IF (TYPE_MGM_BC == NSCARC_MGM_BC_EXPOL .AND. TOTAL_PRESSURE_ITERATIONS <= 2) ITY
    ENDDO MGM_FACE_LOOP
 !ENDDO MGM_MESH_LOOP
 
-END SUBROUTINE SCARC_MGM_SET_INTERFACES
+END SUBROUTINE SCARC_MGM_SETUP_INTERFACES
 
 
 ! --------------------------------------------------------------------------------------------------------------
 !> \brief Set BC's along internal obstructions for MGM method
 ! --------------------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_MGM_SET_OBSTRUCTIONS(VB)
+SUBROUTINE SCARC_MGM_SETUP_OBSTRUCTIONS(VB)
 USE SCARC_POINTERS, ONLY: L, G, MGM, UU, VV, WW, GWC, RDXI, RDYI, RDZI, SCARC_POINT_TO_MGM
 REAL(EB), DIMENSION(:), POINTER, INTENT(IN) :: VB
 INTEGER:: IW, I, J, K, IOR0, IC
@@ -18304,7 +18303,7 @@ REAL(EB):: VAL
 
 !ENDDO MGM_MESH_LOOP
 
-END SUBROUTINE SCARC_MGM_SET_OBSTRUCTIONS
+END SUBROUTINE SCARC_MGM_SETUP_OBSTRUCTIONS
 
 
 ! --------------------------------------------------------------------------------------------------------------
@@ -19785,13 +19784,11 @@ END SUBROUTINE SCARC_SETUP_INTERPOLATION
 !> \brief Set initial solution corresponding to boundary data in BXS, BXF, ...
 ! ------------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_SETUP_WORKSPACE(NS, NL)
-USE SCARC_POINTERS, ONLY: M, L, F, G, SV, ST, STP, GWC, PRHS, HP, MGM, VB, VX, &
-                          RDX, RDY, RDZ, RDXN, RDYN, RDZN, &
-                          BXS, BXF, BYS, BYF, BZS, BZF, &
+USE SCARC_POINTERS, ONLY: M, L, G, SV, ST, STP, PRHS, HP, MGM, VB, VX, BXS, BXF, BYS, BYF, BZS, BZF, &
                           SCARC_POINT_TO_GRID, SCARC_POINT_TO_MGM
-USE SCARC_MGM, ONLY: SCARC_MGM_SET_OBSTRUCTIONS, SCARC_MGM_SET_INTERFACES
+USE SCARC_MGM, ONLY: SCARC_MGM_SETUP_OBSTRUCTIONS, SCARC_MGM_SETUP_INTERFACES
 INTEGER, INTENT(IN) :: NS, NL
-INTEGER  :: NM, IW, IW1, IW2, IOR0, I, J, K, IC
+INTEGER  :: NM, IC
 
 SV => STACK(NS)%SOLVER
 SELECT_SOLVER_TYPE: SELECT CASE (SV%TYPE_SOLVER)
@@ -19827,9 +19824,9 @@ SELECT_SOLVER_TYPE: SELECT CASE (SV%TYPE_SOLVER)
 
          SELECT CASE (TYPE_POISSON)
             CASE (NSCARC_POISSON_SEPARABLE)                       ! set BC's according to separable Poisson system
-               CALL SCARC_SETUP_SEPARABLE_BOUNDARY
+               CALL SCARC_SETUP_SEPARABLE_BOUNDARY(ST%B)
             CASE (NSCARC_POISSON_INSEPARABLE)                     ! set BC's according to inseparable Poisson system
-               CALL SCARC_SETUP_INSEPARABLE_BOUNDARY
+               CALL SCARC_SETUP_INSEPARABLE_BOUNDARY(ST%B)
          END SELECT
    
       ENDDO MAIN_MESHES_LOOP
@@ -19890,13 +19887,6 @@ SELECT_SOLVER_TYPE: SELECT CASE (SV%TYPE_SOLVER)
          CALL SCARC_POINT_TO_MGM (NM, NL)                                    
          G => L%UNSTRUCTURED
    
-         BXS => MGM%BXS ;  BXS = 0.0_EB
-         BXF => MGM%BXF ;  BXF = 0.0_EB
-         BYS => MGM%BYS ;  BYS = 0.0_EB
-         BYF => MGM%BYF ;  BYF = 0.0_EB
-         BZS => MGM%BZS ;  BZS = 0.0_EB
-         BZF => MGM%BZF ;  BZF = 0.0_EB
-
          IF (TYPE_MGM_LAPLACE == NSCARC_MGM_LAPLACE_CG) THEN
             VB => ST%B ;  VB = 0.0_EB
             VX => ST%X ;  VX = 0.0_EB
@@ -19905,78 +19895,18 @@ SELECT_SOLVER_TYPE: SELECT CASE (SV%TYPE_SOLVER)
             VX => MGM%X ;  VX = 0.0_EB
          ENDIF
 
-         CALL SCARC_MGM_SET_INTERFACES (VB, NM)
-         CALL SCARC_MGM_SET_OBSTRUCTIONS (VB)
+         BXS => MGM%BXS ;  BXS = 0.0_EB
+         BXF => MGM%BXF ;  BXF = 0.0_EB
+         BYS => MGM%BYS ;  BYS = 0.0_EB
+         BYF => MGM%BYF ;  BYF = 0.0_EB
+         BZS => MGM%BZS ;  BZS = 0.0_EB
+         BZF => MGM%BZF ;  BZF = 0.0_EB
 
-         !!$OMP PARALLEL 
-         MGM_INHOMOGENEOUS_LOOP: DO IOR0 = -3, 3, 1 
-      
-            IF (IOR0 == 0) CYCLE
-            F => SCARC(NM)%LEVEL(NL)%FACE(IOR0)
-            
-            IW1 = F%NCW0
-            IW2 = F%NCW0 + F%NCW - 1
-      
-            !!$OMP DO PRIVATE(IW, GWC, I, J, K, IC, VAL) SCHEDULE(STATIC)
-            MGM_FACE_INHOMOGENEOUS_LOOP: DO IW = IW1, IW2
-      
-               GWC => G%WALL(IW)
-   
-               I = GWC%IXW
-               J = GWC%IYW
-               K = GWC%IZW
-   
-               IF (TWO_D .AND. J /= 1) CALL SCARC_ERROR(NSCARC_ERROR_GRID_INDEX, SCARC_NONE, J)
-               IF (L%IS_SOLID(I, J, K)) CYCLE
-   
-               IC = G%CELL_NUMBER(I,J,K)
-   
-               MGM_IF_DIRICHLET: IF (GWC%BTYPE == DIRICHLET) THEN
-   
-                  SELECT CASE (IOR0)
-                     CASE (1)
-                        VB(IC) = VB(IC) - 2.0_EB*RDX(I)*RDXN(I-1)*BXS(J,K)
-                     CASE (-1)
-                        VB(IC) = VB(IC) - 2.0_EB*RDX(I)*RDXN(I)  *BXF(J,K)
-                     CASE (2)
-                        VB(IC) = VB(IC) - 2.0_EB*RDY(J)*RDYN(J-1)*BYS(I,K)
-                     CASE (-2)
-                        VB(IC) = VB(IC) - 2.0_EB*RDY(J)*RDYN(J)  *BYF(I,K)
-                     CASE (3)
-                        VB(IC) = VB(IC) - 2.0_EB*RDZ(K)*RDZN(K-1)*BZS(I,J)
-                     CASE (-3)
-                        VB(IC) = VB(IC) - 2.0_EB*RDZ(K)*RDZN(K)  *BZF(I,J)
-                  END SELECT
-   
-               ENDIF MGM_IF_DIRICHLET
-   
-               MGM_IF_NEUMANN: IF (GWC%BTYPE == NEUMANN) THEN
-   
-                  IF (IS_UNSTRUCTURED .AND. M%WALL(IW)%PRESSURE_BC_INDEX /= NEUMANN) CYCLE
-   
-                  SELECT CASE (IOR0)
-                     CASE (1)
-                        VB(IC) = VB(IC) + RDX(I)*BXS(J,K)
-                     CASE (-1)
-                        VB(IC) = VB(IC) - RDX(I)*BXF(J,K)
-                     CASE (2)
-                        VB(IC) = VB(IC) + RDY(J)*BYS(I,K)
-                     CASE (-2)
-                        VB(IC) = VB(IC) - RDY(J)*BYF(I,K)
-                     CASE (3)
-                        VB(IC) = VB(IC) + RDZ(K)*BZS(I,J)
-                     CASE (-3)
-                        VB(IC) = VB(IC) - RDZ(K)*BZF(I,J)
-                  END SELECT
-   
-               ENDIF MGM_IF_NEUMANN
-      
-            ENDDO MGM_FACE_INHOMOGENEOUS_LOOP
-            !!$OMP END DO
+         CALL SCARC_MGM_SETUP_INTERFACES (VB, NM)
+         CALL SCARC_MGM_SETUP_OBSTRUCTIONS (VB)
 
-         ENDDO MGM_INHOMOGENEOUS_LOOP
-         !!$OMP END PARALLEL 
-   
+         CALL SCARC_SETUP_SEPARABLE_BOUNDARY(VB)
+
       ENDDO MGM_MESHES_LOOP
       
    ! ---------- If MG is used as Krylov preconditioner, vector R of main Krylov is the new RHS for MG
@@ -20019,8 +19949,9 @@ END SUBROUTINE SCARC_SETUP_WORKSPACE
 ! --------------------------------------------------------------------------------------------------------------
 !> \brief Update right hand side vector corresponding to boundary conditions of separable Poisson system
 ! --------------------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_SETUP_SEPARABLE_BOUNDARY
-USE SCARC_POINTERS, ONLY: M, L, G, ST, GWC, RDX, RDY, RDZ, RDXN, RDYN, RDZN, BXS, BXF, BYS, BYF, BZS, BZF
+SUBROUTINE SCARC_SETUP_SEPARABLE_BOUNDARY(VB)
+USE SCARC_POINTERS, ONLY: M, L, G, GWC, RDX, RDY, RDZ, RDXN, RDYN, RDZN, BXS, BXF, BYS, BYF, BZS, BZF
+REAL(EB), DIMENSION(:), INTENT(INOUT) :: VB
 INTEGER :: IOR0, IW, IC, I, J, K 
 
 SEPARABLE_BOUNDARY_CELLS_LOOP: DO IW = 1, L%N_WALL_CELLS_EXT
@@ -20037,60 +19968,60 @@ SEPARABLE_BOUNDARY_CELLS_LOOP: DO IW = 1, L%N_WALL_CELLS_EXT
 
    IC = G%CELL_NUMBER(I,J,K)           ! Number of mesh-internal cell
       
-      ! ---------- Dirichlet BC's:
-      ! these are based on the SETTING in BTYPE
-      ! in the structured case this corresponds to the face-wise SETTING according to the FFT
-      ! (this allows to use local FFT's as preconditioners)
-      ! in the unstructured case only open boundary cells lead to Dirichlet BC's
+   ! ---------- Dirichlet BC's:
+   ! these are based on the SETTING in BTYPE
+   ! in the structured case this corresponds to the face-wise SETTING according to the FFT
+   ! (this allows to use local FFT's as preconditioners)
+   ! in the unstructured case only open boundary cells lead to Dirichlet BC's
+
+   SEPARABLE_DIRICHLET_IF: IF (GWC%BTYPE == DIRICHLET) THEN
    
-      SEPARABLE_DIRICHLET_IF: IF (GWC%BTYPE == DIRICHLET) THEN
-      
-         SELECT CASE (IOR0)
-            CASE (1)
-               ST%B(IC) = ST%B(IC) - 2.0_EB*RDX(I)*RDXN(I-1)*BXS(J,K)
-            CASE (-1)
-               ST%B(IC) = ST%B(IC) - 2.0_EB*RDX(I)*RDXN(I)  *BXF(J,K)
-            CASE (2)
-               ST%B(IC) = ST%B(IC) - 2.0_EB*RDY(J)*RDYN(J-1)*BYS(I,K)
-            CASE (-2)
-               ST%B(IC) = ST%B(IC) - 2.0_EB*RDY(J)*RDYN(J)  *BYF(I,K)
-            CASE (3)
-               ST%B(IC) = ST%B(IC) - 2.0_EB*RDZ(K)*RDZN(K-1)*BZS(I,J)
-            CASE (-3)
-               ST%B(IC) = ST%B(IC) - 2.0_EB*RDZ(K)*RDZN(K)  *BZF(I,J)
-         END SELECT
-      
-      ENDIF SEPARABLE_DIRICHLET_IF
-      
-      ! ---------- Neumann BC's:
-      ! Note for the unstructured case only:
-      ! Here, the matrix also contains Neumann BC's for those cells which have a
-      ! PRESSURE_BC_INDEX == DIRICHLET but are NOT open; these cells must be excluded below,
-      ! because BXS, BXF, ... contain the Dirichlet information from pres.f90 there;
-      ! excluding them corresponds to a homogeneous Neumann condition for these cells
+      SELECT CASE (IOR0)
+         CASE (1)
+            VB(IC) = VB(IC) - 2.0_EB*RDX(I)*RDXN(I-1)*BXS(J,K)
+         CASE (-1)
+            VB(IC) = VB(IC) - 2.0_EB*RDX(I)*RDXN(I)  *BXF(J,K)
+         CASE (2)
+            VB(IC) = VB(IC) - 2.0_EB*RDY(J)*RDYN(J-1)*BYS(I,K)
+         CASE (-2)
+            VB(IC) = VB(IC) - 2.0_EB*RDY(J)*RDYN(J)  *BYF(I,K)
+         CASE (3)
+            VB(IC) = VB(IC) - 2.0_EB*RDZ(K)*RDZN(K-1)*BZS(I,J)
+         CASE (-3)
+            VB(IC) = VB(IC) - 2.0_EB*RDZ(K)*RDZN(K)  *BZF(I,J)
+      END SELECT
    
-      SEPARABLE_NEUMANN_IF: IF (GWC%BTYPE == NEUMANN) THEN
-      
-         IF (IS_UNSTRUCTURED .AND. M%WALL(IW)%PRESSURE_BC_INDEX /= NEUMANN) CYCLE
-      
-         SELECT CASE (IOR0)
-            CASE (1)
-               ST%B(IC) = ST%B(IC) + RDX(I)*BXS(J,K)
-            CASE (-1)
-               ST%B(IC) = ST%B(IC) - RDX(I)*BXF(J,K)
-            CASE (2)
-               ST%B(IC) = ST%B(IC) + RDY(J)*BYS(I,K)
-            CASE (-2)
-               ST%B(IC) = ST%B(IC) - RDY(J)*BYF(I,K)
-            CASE (3)
-               ST%B(IC) = ST%B(IC) + RDZ(K)*BZS(I,J)
-            CASE (-3)
-               ST%B(IC) = ST%B(IC) - RDZ(K)*BZF(I,J)
-         END SELECT
-      
-      ENDIF SEPARABLE_NEUMANN_IF
-      
-   ENDDO SEPARABLE_BOUNDARY_CELLS_LOOP
+   ENDIF SEPARABLE_DIRICHLET_IF
+   
+   ! ---------- Neumann BC's:
+   ! Note for the unstructured case only:
+   ! Here, the matrix also contains Neumann BC's for those cells which have a
+   ! PRESSURE_BC_INDEX == DIRICHLET but are NOT open; these cells must be excluded below,
+   ! because BXS, BXF, ... contain the Dirichlet information from pres.f90 there;
+   ! excluding them corresponds to a homogeneous Neumann condition for these cells
+
+   SEPARABLE_NEUMANN_IF: IF (GWC%BTYPE == NEUMANN) THEN
+   
+      IF (IS_UNSTRUCTURED .AND. M%WALL(IW)%PRESSURE_BC_INDEX /= NEUMANN) CYCLE
+   
+      SELECT CASE (IOR0)
+         CASE (1)
+            VB(IC) = VB(IC) + RDX(I)*BXS(J,K)
+         CASE (-1)
+            VB(IC) = VB(IC) - RDX(I)*BXF(J,K)
+         CASE (2)
+            VB(IC) = VB(IC) + RDY(J)*BYS(I,K)
+         CASE (-2)
+            VB(IC) = VB(IC) - RDY(J)*BYF(I,K)
+         CASE (3)
+            VB(IC) = VB(IC) + RDZ(K)*BZS(I,J)
+         CASE (-3)
+            VB(IC) = VB(IC) - RDZ(K)*BZF(I,J)
+      END SELECT
+   
+   ENDIF SEPARABLE_NEUMANN_IF
+   
+ENDDO SEPARABLE_BOUNDARY_CELLS_LOOP
    
 
 END SUBROUTINE SCARC_SETUP_SEPARABLE_BOUNDARY
@@ -20100,11 +20031,12 @@ END SUBROUTINE SCARC_SETUP_SEPARABLE_BOUNDARY
 !> \brief Update right hand side vector corresponding to boundary conditions of inseparable Poisson system
 ! The following code is still very experimental (several versions are to be tested)
 ! --------------------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_SETUP_INSEPARABLE_BOUNDARY
-USE SCARC_POINTERS, ONLY: M, L, G, ST, GWC, RDX, RDY, RDZ, RDXN, RDYN, RDZN, BXS, BXF, BYS, BYF, BZS, BZF, &
+SUBROUTINE SCARC_SETUP_INSEPARABLE_BOUNDARY(VB)
+USE SCARC_POINTERS, ONLY: M, L, G, GWC, RDX, RDY, RDZ, RDXN, RDYN, RDZN, BXS, BXF, BYS, BYF, BZS, BZF, &
                           UU, VV, WW, RHOP, KRESP
 USE TYPES, ONLY: VENTS_TYPE, WALL_TYPE
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
+REAL(EB), DIMENSION(:), INTENT(INOUT) :: VB
 INTEGER :: IOR0, IW, IW1, IW2, IC, I, J, K, IG, JG, KG
 REAL(EB) :: TSI, DUMMY, TIME_RAMP_FACTOR, P_EXTERNAL, VAL, SCAL, RHOM, RRHOM, KGRAD, KNABLA2
 TYPE (VENTS_TYPE), POINTER :: VT
@@ -20130,7 +20062,7 @@ IF (IS_STRUCTURED) THEN
    IW2 = L%N_WALL_CELLS_EXT
 ELSE
    IW2 = L%N_WALL_CELLS_EXT + L%N_WALL_CELLS_INT
-   !IW2 = L%N_WALL_CELLS_EXT
+   !IW2 = L%N_WALL_CELLS_EXT                ! still experimental
 ENDIF
 
 ! Build correct RHS for inseparable pressure system by subtracting: nabla**2 (K)
@@ -20140,7 +20072,7 @@ DO IC = 1, G%NC
    KNABLA2 =   ( (KRESP(I+1,J,K) - KRESP(I,J,K))*RDXN(I) - (KRESP(I,J,K) - KRESP(I-1,J,K))*RDXN(I-1) )*RDX(I)    &
              + ( (KRESP(I,J+1,K) - KRESP(I,J,K))*RDYN(J) - (KRESP(I,J,K) - KRESP(I,J-1,K))*RDYN(J-1) )*RDY(J)    &
              + ( (KRESP(I,J,K+1) - KRESP(I,J,K))*RDZN(K) - (KRESP(I,J,K) - KRESP(I,J,K-1))*RDZN(K-1) )*RDZ(K)
-   ST%B(IC) = ST%B(IC) - KNABLA2
+   VB(IC) = VB(IC) - KNABLA2
 ENDDO
 
 INSEPARABLE_BOUNDARY_CELLS_LOOP: DO IW = IW1, IW2
@@ -20214,7 +20146,7 @@ INSEPARABLE_BOUNDARY_CELLS_LOOP: DO IW = IW1, IW2
             SCAL  = 2.0_EB*RDZ(K)*RDZN(K)*RRHOM
       END SELECT
 
-      ST%B(IC) = ST%B(IC) - SCAL * VAL
+      VB(IC) = VB(IC) - SCAL * VAL
 
    ENDIF INSEPARABLE_DIRICHLET_IF
       
@@ -20294,7 +20226,7 @@ INSEPARABLE_BOUNDARY_CELLS_LOOP: DO IW = IW1, IW2
             SCAL = -RDZ(K)/RHOM
       END SELECT
    
-      ST%B(IC) = ST%B(IC) + SCAL * VAL
+      VB(IC) = VB(IC) + SCAL * VAL
       
    ENDIF INSEPARABLE_NEUMANN_IF
 ENDDO INSEPARABLE_BOUNDARY_CELLS_LOOP
