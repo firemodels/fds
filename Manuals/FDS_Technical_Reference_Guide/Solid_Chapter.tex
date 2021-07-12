@@ -401,7 +401,7 @@ Consider a liquid consisting of one or more components. The evaporation rate of 
 \be
 \dot{m}_\alpha'' = h_{\rm m} \, \rho_{\rm film} \, \ln \left( 1+B \right) \left( Y_{\alpha,{\rm sv}}+\frac{Y_{\alpha,{\rm sv}}-Y_{\alpha,{\rm g}}}{B} \right) \quad ; \quad B=\frac{\sum_{\alpha'} (Y_{\alpha',{\rm sv}}-Y_{\alpha',{\rm g}})}{1-\sum_{\alpha'} Y_{\alpha',{\rm sv}}}  \label{mdot_alpha}
 \ee
-$h_{\rm m}$ is the mass transfer coefficient, $\rho_{\rm film}$ is the density within a thin surface layer, $B$ is the Spalding mass transfer number, $Y_{\alpha,{\rm sv}}$ is the ``surface vapor'' mass fraction of component $\alpha$ at the liquid surface, and $Y_{\alpha,{\rm g}}$ is the mass fraction of component $\alpha$ in the gas away from the surface. The composition of the surface layer is obtained using Raoult's law with the Clausius-Clapeyron equation for the equilibrium vapor pressure.  The volume fraction of component $\alpha$ at the surface is:
+$h_{\rm m}$ is the mass transfer coefficient, $\rho_{\rm film}$ is the density within a thin surface layer, $B$ is the Spalding mass transfer number, $Y_{\alpha,{\rm sv}}$ is the ``surface vapor'' mass fraction of component $\alpha$ at the liquid surface, and $Y_{\alpha,{\rm g}}$ is the mass fraction of component $\alpha$ in the center of the grid cell adjacent to the liquid surface. The composition of the surface layer is obtained using Raoult's law with the Clausius-Clapeyron equation for the equilibrium vapor pressure.  The volume fraction of component $\alpha$ at the surface is:
 \be
    X_{\alpha,{\rm sv}} = X_{\alpha,\ell} \, \exp \left[ -\frac{ h_{\rm v,\alpha} W_{\alpha}}\R \left(\frac{1}{T_{\rm s}}-\frac{1}{T_{\rm b,\alpha}} \right) \right]  \quad ; \quad
    Y_{\alpha,{\rm sv}} = \frac{X_{\rm \alpha,sv} W_{\alpha} }{\sum_{\alpha'} X_{\rm \alpha',sv} W_{\alpha'} }
@@ -409,9 +409,17 @@ $h_{\rm m}$ is the mass transfer coefficient, $\rho_{\rm film}$ is the density w
 \ee
 Here $X_{\alpha,\ell}$ is the volume fraction of component $\alpha$ in the liquid, $h_{\rm v,\alpha}$ is its heat of vaporization, $W_\alpha$ is its molecular weight, $T_{\rm b,\alpha}$ is its boiling temperature, and $T_{\rm s}$ is the surface temperature.  The mass transfer coefficient is given by
 \be
-h_{\rm m}= \frac{\SH \, D}{L} \quad ; \quad \SH=0.037~\SC^{\frac{1}{3}} \RE^{\frac{4}{5}} \quad ; \quad {\rm Sc}=0.6 \quad ; \quad \RE= \frac{\rho~||\bu||~L}{\mu}
+h_{\rm m}= \frac{\SH \, D}{L} \quad ; \quad \SH=0.037~\SC^{\frac{1}{3}} \RE^{\frac{4}{5}} \quad ; \quad {\rm Sc}=\frac{ \mu_{\rm film} }{ \rho_{\rm film} \, D} \quad ; \quad \RE= \frac{\rho_{\rm film}~||\bu||~L}{\mu_{\rm film}}
 \ee
-Sh is the Sherwood number and $D$ is the mole-weighted gas phase diffusivity. The Reynolds number is calculated based on conditions in the gas phase grid cell adjacent to the surface. The length scale, $L$, is 1~m for a liquid pool unless specified otherwise.
+Sh is the Sherwood number and $D$ is the mole-weighted gas phase diffusivity:
+\be
+   D = \sum_\alpha X_{\alpha,{\rm sv}} D_\alpha
+\ee
+where $D_\alpha$ is the diffusivity of species $\alpha$ into air evaluated at the film temperature. The Reynolds number is based on the gas velocity in the gas cell adjacent to the surface, $||\bu||$, the length scale, $L$, and the density and viscosity of the surface film. The length scale, $L$, is 1~m for a liquid pool unless specified otherwise. The film density is
+\be
+   \rho_{\rm film} = \frac{ p_0 }{ \R \, T_{\rm film} \, \sum_\alpha (Y_{\alpha,{\rm sv}}/W_\alpha) }
+\ee
+It is assumed that the composition of the film layer consists of evaporated liquids and air.
 
 In practice, a liquid fuel may have multiple components, like gasoline or kerosene, but for the sake of reducing CPU time, all liquid components can be assumed to evaporate to form a common lumped gas species whose mass fraction is denoted $Z_{\rm g}$. In this case, the effective mass fraction of gas species $\alpha$ is assumed to be proportional to its value at the liquid surface:
 \be
@@ -421,7 +429,7 @@ The assumption of an assumed lumped gas species is not mandatory---one can evapo
 
 For simplicity, the liquid fuel itself is treated like a thermally-thick solid for the purpose of computing the heat conduction. There is no computation of the convection of the liquid within the pool. Obviously, this assumption has consequences. One of which is related to the fact that the evaporation rate expression ({\ref{mdot_alpha}) is applied only to the surface liquid layer. However, it is possible that an interior liquid layer may possess a temperature, $T_\ell$, in excess of the boiling temperature of an individual liquid component, $T_{\rm b,\alpha}$. If this is the case, an additional amount of component $\alpha$ is boiled off from the surface so as to drive the liquid temperature back towards the boiling point of component $\alpha$. This addition to the surface mass flux takes the form:
 \be
-   \dot{m}_\alpha'' = \frac{ \rho_{\ell,\alpha} \left( h(T_{\ell})-h(T_{\rm b,\alpha}) \right) \delta}{h_{\rm v,\alpha} \dt} \quad ; \quad  h(T) = \int_0^T  c_s(T') \d T' 
+   \dot{m}_\alpha'' = \frac{ \rho_{\ell,\alpha} \left( h(T_{\ell})-h(T_{\rm b,\alpha}) \right) \delta}{h_{\rm v,\alpha} \dt} \quad ; \quad  h(T) = \int_0^T  c_s(T') \d T'
 \ee
 where $\rho_{\ell,\alpha}$ is the mass per unit volume of liquid component $\alpha$, $h(T)$ is the enthalpy of the liquid, $\delta$ is the layer thickness, $h_{\rm v,\alpha}$ is the heat of vaporization of component $\alpha$, and $\dt$ is the time step.
 

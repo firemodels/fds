@@ -4552,7 +4552,7 @@ To test the liquid fuel evaporation model, a 1~cm deep pool of heptane is expose
 
 In this example, air with an $\rm{RH}=25$~\% relative humidity and temperature $T_{\rm a}=305$~K flows with velocity $U=0.15$~m/s over an $L=1.2$~m long, $W=1$~m wide pool of water with a surface temperature of $T_{\rm s}=293$~K. The evaporation rate of water is given by the following relation:
 \be
-\dot{m} = L \, W \, h_{\rm m} \, \rho_{\rm film} \, \ln \left( 1+B \right) \approx 1.37 \times 10^{-5} \; \hbox{kg/s}  \quad ; \quad B=\frac{ Y_{\rm sv}-Y_{\rm g} }{ 1- Y_{\rm sv} } \approx 0.00925 \label{mdot_alpha}
+\dot{m} = L \, W \, h_{\rm m} \, \rho_{\rm film} \, \ln \left( 1+B \right) \approx 1.42 \times 10^{-5} \; \hbox{kg/s}  \quad ; \quad B=\frac{ Y_{\rm sv}-Y_{\rm g} }{ 1- Y_{\rm sv} } \approx 0.00925 \label{mdot_alpha}
 \ee
 $h_{\rm m}$ is the mass transfer coefficient, $\rho_{\rm film}$ is the density within a thin surface layer, $B$ is the Spalding mass transfer number, $Y_{\rm sv}$ is the ``surface vapor'' mass fraction of water vapor at the liquid surface, and $Y_{\rm g}$ is the mass fraction of water vapor in the ambient air. The composition of the surface layer is obtained from the Clausius-Clapeyron equation for the equilibrium vapor pressure.  The volume and mass fraction of water vapor at the surface is:
 \be
@@ -4568,13 +4568,13 @@ The volume and mass fraction of water vapor in the ambient air is:
 \ee
 Here $h_{\rm v}=2260$~kJ/kg is the heat of vaporization of water, $W_{\rm H_2O}=18$~kg/kmol is its molecular weight, and $T_{\rm b}=373$~K is its boiling temperature. $R=8.3145$~kJ/kmol/K is the gas constant and $W_{\rm air}=29$~kg/kmol is the molecular weight of air.  The mass transfer coefficient is given by
 \be
-h_{\rm m}= \frac{\SH \, D}{L} \approx 1.03 \times 10^{-3} \; \hbox{m/s}
+h_{\rm m}= \frac{\SH \, D}{L} \approx 1.06 \times 10^{-3} \; \hbox{m/s}
 \ee
-Sh is the Sherwood number and $D=2.27 \times 10^{-5}$~m$^2$/s is the diffusivity of water vapor into air. An empirical correlation for the Sherwood number is
+Sh is the Sherwood number and $D=2.10 \times 10^{-5}$~m$^2$/s is the diffusivity of water vapor into air at $T=293$~K. An empirical correlation for the Sherwood number is
 \be
-\SH=0.037~\SC^{\frac{1}{3}} \RE^{\frac{4}{5}} \approx 54.4 \quad ; \quad {\rm Sc}=0.6 \quad ; \quad \RE= \frac{\rho_{\rm a} U L}{\mu} \approx 11274
+\SH=0.037~\SC^{\frac{1}{3}} \RE^{\frac{4}{5}} \approx 60.8 \quad ; \quad {\rm Sc}=0.71 \quad ; \quad \RE= \frac{\rho_{\rm a} U L}{\mu} \approx 12062
 \ee
-where $\mu=1.85 \times 10^{-5}$~kg/m/s is the viscosity of air. The gas density at the liquid surface is given by
+where $\mu=1.8 \times 10^{-5}$~kg/m/s is the viscosity of air at $T=293$~K. The gas density at the liquid surface is given by
 \be
    \rho_{\rm film} = \frac{ p_0 W_{\rm air} }{ 1000 R \, T_{\rm s} } \approx 1.21 \; \hbox{kg/m}^3
 \ee
