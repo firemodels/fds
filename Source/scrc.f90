@@ -1276,6 +1276,7 @@ REAL(EB), DIMENSION(:,:,:), ALLOCATABLE, TARGET :: SCARC_RHO   !< Density values
 REAL(EB), DIMENSION(:,:,:), ALLOCATABLE, TARGET :: SCARC_KRES  !< Resolved kinetic energy
 REAL(EB), DIMENSION(:,:,:), ALLOCATABLE, TARGET :: SCARC_P     !< Inseparable pressure solution - predictor stage
 REAL(EB), DIMENSION(:,:,:), ALLOCATABLE, TARGET :: SCARC_PS    !< Inseparable pressure solution - corrector stage
+LOGICAL :: SCARC_CHECK = .TRUE.                                !< Flag to crosscheck computations at different positions
 
 ! ---------- Public variables
   
@@ -21241,11 +21242,9 @@ DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
    ENDIF
 
    HP = 0.0_EB
-   !!$OMP PARALLEL DO PRIVATE(IC) SCHEDULE(STATIC)
    DO IC = 1, G%NC
-      HP (G%ICX(IC), G%ICY(IC), G%ICZ(IC)) = ST%X(IC)
+      HP(G%ICX(IC), G%ICY(IC), G%ICZ(IC)) = ST%X(IC)
    ENDDO
-   !!$OMP END PARALLEL DO 
 
 ENDDO
 
@@ -21260,33 +21259,34 @@ END SUBROUTINE SCARC_UPDATE_SEPARABLE_MAINCELLS
 ! Afterwards this HP has to undergo the same mechanisms for the setting of ghost cells as is done in the separable case
 ! ----------------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_UPDATE_INSEPARABLE_MAINCELLS(NL)
-USE SCARC_POINTERS, ONLY: M, L, G, ST, HP, PPP, RHOP, KRESP, SCARC_POINT_TO_GRID
+USE SCARC_POINTERS, ONLY: L, G, ST, HP, PPP, RHOP, KRESP, SCARC_POINT_TO_GRID
 USE SCARC_VARIABLES, ONLY: SCARC_P, SCARC_PS
-REAL(EB), POINTER, DIMENSION(:,:,:) :: HPP                        ! still experimental
+USE MESH_VARIABLES
+USE MESH_POINTERS
+REAL(EB), POINTER, DIMENSION(:,:,:) :: HPP                      
 INTEGER, INTENT(IN) :: NL
 INTEGER :: NM
 INTEGER :: I, J, K, IC
 
 DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 
+   CALL POINT_TO_MESH(NM)
    CALL SCARC_POINT_TO_GRID (NM, NL)                                    
    ST  => L%STAGE(NSCARC_STAGE_ONE)
 
    IF (PREDICTOR) THEN
-      !RHOP => M%RHO
-      HP  => M%H
+      HP  => H
       PPP => SCARC_P
    ELSE
-      !RHOP => M%RHOS
-      HP  => M%HS
+      HP  => HS
       PPP => SCARC_PS
    ENDIF
    KRESP => SCARC_KRES                 ! still experimental
    RHOP  => SCARC_RHO
 
-   DO K=1,L%NZ
-      DO J=1,L%NY
-         DO I=1,L%NX
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
             IF (IS_UNSTRUCTURED .AND. L%IS_SOLID(I, J, K)) CYCLE
             IC = G%CELL_NUMBER(I,J,K)
             HP(I,J,K) = ST%X(IC)/RHOP(I,J,K) + KRESP(I,J,K)
@@ -21296,16 +21296,24 @@ DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 
    ! Still experimental to countercheck
     
-   HPP  => M%WORK8
-   DO K=0,L%NZ+1
-         DO J=0,L%NY+1
-         DO I=0,L%NX+1
-            IF (IS_UNSTRUCTURED .AND. L%IS_SOLID(I, J, K)) CYCLE
-            IC = G%CELL_NUMBER(I,J,K)
-            HPP(I,J,K) = PPP(I,J,K)/RHOP(I,J,K) + KRESP(I,J,K)
+   INSEPARABLE_CHECK_IF: IF (SCARC_CHECK) THEN
+      HPP => WORK8
+      IF (PREDICTOR) THEN
+         RHOP => RHO
+      ELSE
+         RHOP => RHOS
+      ENDIF
+      KRESP => KRES
+      DO K=0,KBP1
+         DO J=0,JBP1
+            DO I=0,IBP1
+               IF (IS_UNSTRUCTURED .AND. L%IS_SOLID(I, J, K)) CYCLE
+               IC = G%CELL_NUMBER(I,J,K)
+               HPP(I,J,K) = PPP(I,J,K)/RHOP(I,J,K) + KRESP(I,J,K)
+            ENDDO
          ENDDO
       ENDDO
-   ENDDO
+   ENDIF INSEPARABLE_CHECK_IF
 
 ENDDO
 
@@ -21385,7 +21393,148 @@ CALL SCARC_EXCHANGE(NSCARC_EXCHANGE_PRESSURE, NSCARC_NONE, NL)
    
 END SUBROUTINE SCARC_UPDATE_SEPARABLE_GHOSTCELLS
 
+
+! --------------------------------------------------------------------------------------------------------------
+!> \brief Compute baroclinic torque term based on (U)ScaRC solution of inseparable Poisson system
+! --------------------------------------------------------------------------------------------------------------
+SUBROUTINE SCARC_COMPUTE_BAROCLINIC_TERM
+
+USE SCARC_POINTERS, ONLY: HP, RHOP, PPP, SCARC_POINT_TO_GRID
+USE SCARC_VARIABLES, ONLY: SCARC_P, SCARC_PS
+USE MESH_VARIABLES
+USE MESH_POINTERS
+REAL(EB), POINTER, DIMENSION(:,:,:) :: RRHO=>NULL(),RHMK=>NULL()
+REAL(EB) :: VAL, DIFF, DIFF_MAX
+INTEGER :: I_MAX, J_MAX, K_MAX
+INTEGER  :: I, J, K, NM
+
+BAROCLINIC_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
    
+   CALL POINT_TO_MESH(NM)
+
+   RRHO => WORK2
+   IF (PREDICTOR) THEN
+      HP   => H
+      PPP  => SCARC_P
+   ELSE
+      HP   => HS
+      PPP  => SCARC_PS
+   ENDIF
+   RHOP => SCARC_RHO                               ! still experimental
+   
+   ! Compute baroclinic term in the x momentum equation, p*d/dx(1/rho), based on inseparable pressure solution P
+   
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=0,IBAR
+            FVX_B(I,J,K) = -(PPP(I,J,K)*RHOP(I+1,J,K)+PPP(I+1,J,K)*RHOP(I,J,K))*(RRHO(I+1,J,K)-RRHO(I,J,K))*RDXN(I)/ &
+                            (RHOP(I+1,J,K)+RHOP(I,J,K))
+         ENDDO
+      ENDDO
+   ENDDO
+   
+   ! Compute baroclinic term in the y momentum equation, p*d/dy(1/rho), based on inseparable pressure solution P
+   
+   IF (.NOT.TWO_D) THEN
+      DO K=1,KBAR
+         DO J=0,JBAR
+            DO I=1,IBAR
+               FVY_B(I,J,K) = -(PPP(I,J,K)*RHOP(I,J+1,K)+PPP(I,J+1,K)*RHOP(I,J,K))*(RRHO(I,J+1,K)-RRHO(I,J,K))*RDYN(J)/ &
+                               (RHOP(I,J+1,K)+RHOP(I,J,K))
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDIF
+   
+   ! Compute baroclinic term in the z momentum equation, p*d/dz(1/rho), based on inseparable pressure solution P
+   
+   DO K=0,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            FVZ_B(I,J,K) = -(PPP(I,J,K)*RHOP(I,J,K+1)+PPP(I,J,K+1)*RHOP(I,J,K))*(RRHO(I,J,K+1)-RRHO(I,J,K))*RDZN(K)/ &
+                            (RHOP(I,J,K+1)+RHOP(I,J,K))
+         ENDDO
+      ENDDO
+   ENDDO
+
+   BAROCLINIC_CHECK_IF: IF (SCARC_CHECK) THEN
+
+      RHMK => WORK1
+      IF (PREDICTOR) THEN
+         RHOP => RHO
+      ELSE
+         RHOP => RHOS
+      ENDIF
+      DIFF_MAX = 0.0_EB
+ 
+      ! Compute 1/rho in each grid cell and recompute pressure from HP 
+
+      DO K=0,KBP1
+         DO J=0,JBP1
+            DO I=0,IBP1
+               RHMK(I,J,K) = RHOP(I,J,K) * (HP(I,J,K) - KRES(I,J,K))
+            ENDDO
+         ENDDO
+      ENDDO
+ 
+      ! Compute baroclinic term in the x momentum equation, p*d/dx(1/rho), based on HP
+ 
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=0,IBAR
+                VAL = -(RHMK(I,J,K)*RHOP(I+1,J,K)+RHMK(I+1,J,K)*RHOP(I,J,K))*(RRHO(I+1,J,K)-RRHO(I,J,K))*RDXN(I)/ &
+                       (RHOP(I+1,J,K)+RHOP(I,J,K))
+                DIFF = ABS(FVX_B(I,J,K) - VAL) 
+                IF (DIFF > DIFF_MAX) THEN
+                   DIFF_MAX = DIFF
+                   I_MAX = I ;  J_MAX = J;  K_MAX = K
+                ENDIF
+            ENDDO
+         ENDDO
+      ENDDO
+ 
+      ! Compute baroclinic term in the y momentum equation, p*d/dy(1/rho), based on HP
+ 
+      IF (.NOT.TWO_D) THEN
+         DO K=1,KBAR
+            DO J=0,JBAR
+               DO I=1,IBAR
+                   VAL = -(RHMK(I,J,K)*RHOP(I,J+1,K)+RHMK(I,J+1,K)*RHOP(I,J,K))*(RRHO(I,J+1,K)-RRHO(I,J,K))*RDYN(J)/ &
+                          (RHOP(I,J+1,K)+RHOP(I,J,K))
+                   IF (DIFF > DIFF_MAX) THEN
+                      DIFF_MAX = DIFF
+                      I_MAX = I ;  J_MAX = J;  K_MAX = K
+                   ENDIF
+               ENDDO
+            ENDDO
+         ENDDO
+      ENDIF
+ 
+      ! Compute baroclinic term in the z momentum equation, p*d/dz(1/rho), based on HP
+ 
+      DO K=0,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               VAL = -(RHMK(I,J,K)*RHOP(I,J,K+1)+RHMK(I,J,K+1)*RHOP(I,J,K))*(RRHO(I,J,K+1)-RRHO(I,J,K))*RDZN(K)/ &
+                       (RHOP(I,J,K+1)+RHOP(I,J,K))
+               IF (DIFF > DIFF_MAX) THEN
+                  DIFF_MAX = DIFF
+                  I_MAX = I ;  J_MAX = J;  K_MAX = K
+               ENDIF
+            ENDDO
+         ENDDO
+      ENDDO
+
+      IF (SCARC_VERBOSE) WRITE(MSG%LU_VERBOSE, 1000) DIFF_MAX, I_MAX, J_MAX, K_MAX
+
+   ENDIF BAROCLINIC_CHECK_IF
+
+ENDDO BAROCLINIC_MESHES_LOOP
+
+1000 FORMAT('Max difference for baroclinic term :', E11.3,' at positions (',i3,',',i3,',',i3,')')
+END SUBROUTINE SCARC_COMPUTE_BAROCLINIC_TERM
+
+
 ! -------------------------------------------------------------------------------------------------------------
 !> \brief Preconditioning method which is based on the following input and output convention:
 !  - the residual which has to be preconditioned is passed in via vector R
