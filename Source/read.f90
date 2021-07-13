@@ -14468,8 +14468,8 @@ MESH_LOOP: DO NM=1,NMESHES
       CALL CHECK_XB(XB)
 
       ! Define scalar quantity slices of type "INCLUDE_GEOM" if they cross the bounding box of a GEOM
-      ! being handled.
-      IF (.NOT. VECTOR) THEN
+      ! being handled, and are not of type AGL_SLICE.
+      IF (.NOT.VECTOR .AND. ABS(AGL_SLICE+1._EB)<TWO_EPSILON_EB) THEN 
          DO IG=1,N_GEOMETRY
             ! Check for Slice not crossing GEOM BBox.
             IF (XB(2)-XB(1)<TWO_EPSILON_EB) THEN
