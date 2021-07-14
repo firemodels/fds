@@ -2917,20 +2917,8 @@ MATL_LOOP: DO N=1,N_MATL
    IF (ML%FYI/='null') WRITE(LU_OUTPUT,'(5X,A)') TRIM(ML%FYI)
    WRITE(LU_OUTPUT,'(A,F8.3)')    '     Emissivity                   ',ML%EMISSIVITY
    WRITE(LU_OUTPUT,'(A,F8.1)')    '     Density (kg/m3)              ',ML%RHO_S
-
-   IF (ML%C_S>0._EB) THEN
-      WRITE(LU_OUTPUT,'(A,ES9.2)') '     Specific Heat (kJ/kg/K)     ',ML%C_S*0.001_EB
-   ELSE
-      NR = -NINT(ML%C_S)
-      WRITE(LU_OUTPUT,'(A,ES9.2)') '     Specific Heat (kJ/kg/K)     ',EVALUATE_RAMP(TMPA,0._EB,NR)*0.001_EB
-   ENDIF
-
-   IF (ML%K_S>0._EB) THEN
-      WRITE(LU_OUTPUT,'(A,ES9.2)') '     Conductivity (W/m/K)         ',ML%K_S
-   ELSE
-      NR = -NINT(ML%K_S)
-      WRITE(LU_OUTPUT,'(A,ES9.2)') '     Conductivity (W/m/K)         ',EVALUATE_RAMP(TMPA,0._EB,NR)
-   ENDIF
+   WRITE(LU_OUTPUT,'(A,ES9.2)')   '     Specific Heat (kJ/kg/K)      ',ML%C_S(NINT(TMPA))*0.001_EB
+   WRITE(LU_OUTPUT,'(A,ES9.2)')   '     Conductivity (W/m/K)         ',ML%K_S(NINT(TMPA))
 
    IF (ML%KAPPA_S<5.0E4_EB) THEN
       WRITE(LU_OUTPUT,'(A,F8.2)') '     Absorption coefficient (1/m) ',ML%KAPPA_S
@@ -2949,19 +2937,15 @@ MATL_LOOP: DO N=1,N_MATL
          ENDDO
          WRITE(LU_OUTPUT,'(A,ES9.2)')'        A (1/s)    : ',ML%A(NR)
          WRITE(LU_OUTPUT,'(A,ES9.2)')'        E (J/mol)  : ',ML%E(NR)/1000.
-            IF (ML%H_R_I(NR)>0) THEN
-            WRITE(LU_OUTPUT,'(A,ES9.2)')'        H_R (kJ/kg): ',EVALUATE_RAMP(TMPA,0._EB,ML%H_R_I(NR))/1000._EB
-         ELSE
-            WRITE(LU_OUTPUT,'(A,ES9.2)')'        H_R (kJ/kg): ',ML%H_R(NR)/1000._EB
-         ENDIF
+         WRITE(LU_OUTPUT,'(A,ES9.2)')'        H_R (kJ/kg): ',ML%H_R(NR,NINT(TMPA))/1000._EB
          WRITE(LU_OUTPUT,'(A,F8.2)') '        N_S        : ',ML%N_S(NR)
          IF (ML%N_O2(NR)>0._EB) THEN
             WRITE(LU_OUTPUT,'(A,F8.2)') '        N_O2       : ',ML%N_O2(NR)
-         WRITE(LU_OUTPUT,'(A,F8.4)') '        Gas diffusion depth (m): ',ML%GAS_DIFFUSION_DEPTH(NR)
+            WRITE(LU_OUTPUT,'(A,F8.4)') '        Gas diffusion depth (m): ',ML%GAS_DIFFUSION_DEPTH(NR)
          ENDIF
          IF (ML%TMP_THR(NR)>0._EB) THEN
-         WRITE(LU_OUTPUT,'(A,F8.2)') '        Threshold temperature (C): ',ML%TMP_THR(NR)-TMPM
-         WRITE(LU_OUTPUT,'(A,F8.2)') '        N_T        : ',ML%N_T(NR)
+            WRITE(LU_OUTPUT,'(A,F8.2)') '        Threshold temperature (C): ',ML%TMP_THR(NR)-TMPM
+            WRITE(LU_OUTPUT,'(A,F8.2)') '        N_T        : ',ML%N_T(NR)
          ENDIF
       ENDDO
    ENDIF
@@ -2970,14 +2954,10 @@ MATL_LOOP: DO N=1,N_MATL
       WRITE(LU_OUTPUT,'(A)')      '     Liquid evaporation reaction'
       WRITE(LU_OUTPUT,'(A)')      '        Gaseous Yields:'
       DO NS = 1,N_TRACKED_SPECIES
-      WRITE(LU_OUTPUT,'(A,A,A,F8.2)')'        ',SPECIES_MIXTURE(NS)%ID,': ',ML%NU_GAS(NS,1)
+         WRITE(LU_OUTPUT,'(A,A,A,F8.2)')'        ',SPECIES_MIXTURE(NS)%ID,': ',ML%NU_GAS(NS,1)
       ENDDO
       WRITE(LU_OUTPUT,'(A,F8.2)') '        Boiling temperature (C): ',ML%TMP_BOIL-TMPM
-      IF (ML%H_R_I(1) > 0) THEN
-         WRITE(LU_OUTPUT,'(A,ES9.2)')'        H_R (kJ/kg)            : ',EVALUATE_RAMP(TMPA,0._EB,ML%H_R_I(1))/1000._EB
-      ELSE
-         WRITE(LU_OUTPUT,'(A,ES9.2)')'        H_R (kJ/kg)            : ',ML%H_R(1)/1000._EB
-      ENDIF
+      WRITE(LU_OUTPUT,'(A,ES9.2)')'        H_R (kJ/kg)            : ',ML%H_R(1,NINT(TMPA))/1000._EB
    ENDIF
 
 ENDDO MATL_LOOP
@@ -8340,12 +8320,8 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
          IF (ONE_D%MATL_COMP(NN)%RHO(II1)<=TWO_EPSILON_EB) CYCLE MATERIAL_LOOP_CP
          ML  => MATERIAL(SF%MATL_INDEX(NN))
          VOLSUM = VOLSUM + ONE_D%MATL_COMP(NN)%RHO(II1)/ML%RHO_S
-         IF (ML%C_S>0._EB) THEN
-            SOLID_PHASE_OUTPUT = SOLID_PHASE_OUTPUT + ONE_D%MATL_COMP(NN)%RHO(II1)*ML%C_S/ML%RHO_S
-         ELSE
-            NR     = -NINT(ML%C_S)
-            SOLID_PHASE_OUTPUT = SOLID_PHASE_OUTPUT + ONE_D%MATL_COMP(NN)%RHO(II1)*EVALUATE_RAMP(ONE_D%TMP(II1),0._EB,NR)/ML%RHO_S
-         ENDIF
+         ITMP = MIN(I_MAX_TEMP,NINT(ONE_D%TMP(II1)))
+         SOLID_PHASE_OUTPUT = SOLID_PHASE_OUTPUT + ONE_D%MATL_COMP(NN)%RHO(II1)*ML%C_S(ITMP)/ML%RHO_S
       ENDDO MATERIAL_LOOP_CP
       SOLID_PHASE_OUTPUT = SOLID_PHASE_OUTPUT / VOLSUM * 0.001_EB
 
@@ -8373,12 +8349,8 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
          IF (ONE_D%MATL_COMP(NN)%RHO(II1)<=TWO_EPSILON_EB) CYCLE MATERIAL_LOOP_K
          ML => MATERIAL(SF%MATL_INDEX(NN))
          VOLSUM = VOLSUM + ONE_D%MATL_COMP(NN)%RHO(II1)/ML%RHO_S
-         IF (ML%K_S>0._EB) THEN
-            SOLID_PHASE_OUTPUT = SOLID_PHASE_OUTPUT + ONE_D%MATL_COMP(NN)%RHO(II1)*ML%K_S/ML%RHO_S
-         ELSE
-            NR = -NINT(ML%K_S)
-            SOLID_PHASE_OUTPUT = SOLID_PHASE_OUTPUT + ONE_D%MATL_COMP(NN)%RHO(II1)*EVALUATE_RAMP(ONE_D%TMP(II1),0._EB,NR)/ML%RHO_S
-         ENDIF
+         ITMP = MIN(I_MAX_TEMP,NINT(ONE_D%TMP(II1)))         
+         SOLID_PHASE_OUTPUT = SOLID_PHASE_OUTPUT + ONE_D%MATL_COMP(NN)%RHO(II1)*ML%K_S(ITMP)/ML%RHO_S
       ENDDO MATERIAL_LOOP_K
       SOLID_PHASE_OUTPUT = SOLID_PHASE_OUTPUT / VOLSUM
 
