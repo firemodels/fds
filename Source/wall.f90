@@ -3419,7 +3419,7 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
             ML  => MATERIAL(SF%MATL_INDEX(N))
             CALL INTERPOLATE_WALL_ARRAY(N_CELLS,NWP,NWP_NEW,INT_WGT,ONE_D%MATL_COMP(N)%RHO(1:N_CELLS))
             DO I=1,NWP_NEW
-               IF (ONE_D%MATL_COMP(N)%RHO(I)>0._EB .AND. MATERIAL(SF%MATL_INDEX(N))%C_S<=0._EB) CONST_C(I) = .FALSE.
+               IF (ONE_D%MATL_COMP(N)%RHO(I)>0._EB .AND. .NOT. MATERIAL(SF%MATL_INDEX(N))%CONST_C) CONST_C(I) = .FALSE.
             ENDDO
          ENDDO
 
@@ -3491,23 +3491,14 @@ E_FOUND = .FALSE.
 
 POINT_LOOP3: DO I=1,NWP
    VOLSUM = 0._EB
+   ITMP = MIN(I_MAX_TEMP-1,INT(ONE_D%TMP(I)))
    MATERIAL_LOOP3: DO N=1,SF%N_MATL
       IF (ONE_D%MATL_COMP(N)%RHO(I)<=TWO_EPSILON_EB) CYCLE MATERIAL_LOOP3
       ML  => MATERIAL(SF%MATL_INDEX(N))
       VOLSUM = VOLSUM + ONE_D%MATL_COMP(N)%RHO(I)/ML%RHO_S
-      IF (ML%K_S>0._EB) THEN
-         ONE_D%K_S(I) = ONE_D%K_S(I) + ONE_D%MATL_COMP(N)%RHO(I)*ML%K_S/ML%RHO_S
-      ELSE
-         NR = -NINT(ML%K_S)
-         ONE_D%K_S(I) = ONE_D%K_S(I) + ONE_D%MATL_COMP(N)%RHO(I)*EVALUATE_RAMP(ONE_D%TMP(I),0._EB,NR)/ML%RHO_S
-      ENDIF
+      ONE_D%K_S(I) = ONE_D%K_S(I) + ONE_D%MATL_COMP(N)%RHO(I)*ML%K_S(ITMP)
+      ONE_D%RHO_C_S(I) = ONE_D%RHO_C_S(I) + ONE_D%MATL_COMP(N)%RHO(I)*ML%C_S(ITMP)
 
-      IF (ML%C_S>0._EB) THEN
-         ONE_D%RHO_C_S(I) = ONE_D%RHO_C_S(I) + ONE_D%MATL_COMP(N)%RHO(I)*ML%C_S
-      ELSE
-         NR = -NINT(ML%C_S)
-         ONE_D%RHO_C_S(I) = ONE_D%RHO_C_S(I) + ONE_D%MATL_COMP(N)%RHO(I)*EVALUATE_RAMP(ONE_D%TMP(I),0._EB,NR)
-      ENDIF
       IF (.NOT.E_FOUND) ONE_D%EMISSIVITY = ONE_D%EMISSIVITY + ONE_D%MATL_COMP(N)%RHO(I)*ML%EMISSIVITY/ML%RHO_S
       RHO_S(I) = RHO_S(I) + ONE_D%MATL_COMP(N)%RHO(I)
       POROSITY(I) = POROSITY(I) + ONE_D%MATL_COMP(N)%RHO(I)*ML%POROSITY/ML%RHO_S
@@ -3812,11 +3803,7 @@ IF_DO_EVAPORATION: IF (DO_EVAPORATION) THEN
       ! Determine volume fraction of MATL N in the liquid and then the surface vapor layer
 
       T_BOIL_EFF = ML%TMP_BOIL
-      IF (ML%H_R_I(1) > 0) THEN 
-         CALL GET_EQUIL_DATA(MW(N),TMP_F,PBAR(KKG,PRESSURE_ZONE(IIG,JJG,KKG)),H_R,H_R_B,T_BOIL_EFF,X_SV(N),RAMP_INDEX=ML%H_R_I(1))
-      ELSE
-         CALL GET_EQUIL_DATA(MW(N),TMP_F,PBAR(KKG,PRESSURE_ZONE(IIG,JJG,KKG)),H_R,H_R_B,T_BOIL_EFF,X_SV(N),CONSTANT_H=ML%H_R(1))
-      ENDIF
+      CALL GET_EQUIL_DATA(MW(N),TMP_F,PBAR(KKG,PRESSURE_ZONE(IIG,JJG,KKG)),H_R,H_R_B,T_BOIL_EFF,X_SV(N),ML%H_R(1,:))
 
       X_L(N)  = RHO_S(N)/(ML%RHO_S*X_L_SUM)  ! Volume fraction of MATL component N in the liquid
       X_SV(N) = X_L(N)*X_SV(N)               ! Volume fraction of MATL component N in the surface vapor based on Raoult's law
@@ -3940,16 +3927,12 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Loop over all materials in the cell (alpha subsc
 
                RHO_DOT_EXTRA = 0._EB
                IF (TMP_S>ML%TMP_BOIL) THEN
-                  ITMP = INT(TMP_S)
+                  ITMP = MIN(I_MAX_TEMP,INT(TMP_S))
                   H_S = ML%H(ITMP) + (TMP_S-REAL(ITMP,EB))*(ML%H(ITMP+1)-ML%H(ITMP))
                   ITMP = INT(ML%TMP_BOIL)
                   H_S = H_S - (ML%H(ITMP) + (ML%TMP_BOIL-REAL(ITMP,EB))*(ML%H(ITMP+1)-ML%H(ITMP)))
                   H_S = H_S * RHO_S(N)
-                  IF (ML%H_R_I(1)>0) THEN
-                     H_R = EVALUATE_RAMP(TMP_S,0._EB,ML%H_R_I(1))
-                  ELSE
-                     H_R = ML%H_R(1)
-                  ENDIF
+                  H_R = ML%H_R(1,NINT(ML%TMP_BOIL))
                   RHO_DOT_EXTRA = H_S/(H_R*DT_BC)  ! kg/m3/s
                ENDIF
 
@@ -4002,11 +3985,8 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Loop over all materials in the cell (alpha subsc
             ENDIF
             ! Phase change reaction?
             IF (ML%PCR(J)) THEN
-               IF (ML%H_R_I(J) >0) THEN
-                  H_R = EVALUATE_RAMP(TMP_S,0._EB,ML%H_R_I(J))
-               ELSE
-                  H_R = ML%H_R(J)
-               ENDIF
+               ITMP = MIN(I_MAX_TEMP,NINT(TMP_S))
+               H_R = ML%H_R(J,ITMP)
                REACTION_RATE = REACTION_RATE / ((ABS(H_R)/1000._EB) * DT_BC)
             ENDIF
             ! Oxidation reaction?
@@ -4063,11 +4043,8 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Loop over all materials in the cell (alpha subsc
 
       ! Optional variable heat of reaction
 
-      IF (ML%H_R_I(J) >0) THEN
-         H_R = EVALUATE_RAMP(TMP_S,0._EB,ML%H_R_I(J))
-      ELSE
-         H_R = ML%H_R(J)
-      ENDIF
+      ITMP = MIN(I_MAX_TEMP,NINT(TMP_S))
+      H_R = ML%H_R(J,ITMP)
 
       ! Calculate various energy and mass source terms
 
@@ -4331,13 +4308,8 @@ HTC_MODEL_SELECT: SELECT CASE(SFX%HEAT_TRANSFER_MODEL)
          CALL GET_MW_RATIO(SMIX_INDEX,MW_RATIO,Z_IN=ZZ_GET)
       ENDIF
       T_BOIL_EFF=MLX%TMP_BOIL
-      IF (MLX%H_R_I(1) >0) THEN
-         CALL GET_EQUIL_DATA(SPECIES_MIXTURE(SMIX_INDEX)%MW,ONE_DX%TMP_F,PBAR(KKG,PRESSURE_ZONE(IIG,JJG,KKG)),&
-                                   H_R,H_R_B,T_BOIL_EFF,X_W,RAMP_INDEX=MLX%H_R_I(1))
-      ELSE
-         CALL GET_EQUIL_DATA(SPECIES_MIXTURE(SMIX_INDEX)%MW,ONE_DX%TMP_F,PBAR(KKG,PRESSURE_ZONE(IIG,JJG,KKG)),&
-                                   H_R,H_R_B,T_BOIL_EFF,X_W,CONSTANT_H=MLX%H_R(1))
-      ENDIF
+      CALL GET_EQUIL_DATA(SPECIES_MIXTURE(SMIX_INDEX)%MW,ONE_DX%TMP_F,PBAR(KKG,PRESSURE_ZONE(IIG,JJG,KKG)),&
+                          H_R,H_R_B,T_BOIL_EFF,X_W,MLX%H_R(1,:))
       Y_DROP = X_W/(MW_RATIO + (1._EB-MW_RATIO)*X_W)
       TMP_G = TMP(IIG,JJG,KKG)
       ! Compute effective Z at the film temperature location LC Eq (19). Skip if no evaporation will occur.
