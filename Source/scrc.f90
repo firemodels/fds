@@ -2539,9 +2539,6 @@ REAL(EB) FUNCTION RECIPROCAL_DIRECTIONAL_MEAN (V, IOR0, I, J, K)
 REAL(EB), DIMENSION(0:,0:,0:), INTENT(IN) :: V
 INTEGER, INTENT(IN) :: IOR0, I, J, K
 
-if (SCARC_VERBOSE) THEN
-    WRITE(MSG%LU_VERBOSE,*) '                IOR0, I,J,K:', IOR0, I,J,K
-endif
 SELECT CASE (ABS(IOR0))
    CASE ( 1)
       RECIPROCAL_DIRECTIONAL_MEAN = 2.0_EB /(V(I-1,J,K) + V(I,J,K))
@@ -12370,9 +12367,6 @@ USE SCARC_UTILITIES, ONLY: RECIPROCAL_DIRECTIONAL_MEAN
 INTEGER, INTENT(IN) :: IC, IX, IY, IZ
 INTEGER, INTENT(INOUT) :: IP
 
-IF (SCARC_VERBOSE) THEN
-   WRITE(MSG%LU_VERBOSE,*) 'MAINDIAG_INSEP: IC, IX, IY, IZ, IP:', IC, IX, IY, IZ, IP
-ENDIF
 A%VAL(IP) = - RDX(IX)*(RDXN(IX-1) * RECIPROCAL_DIRECTIONAL_MEAN(SCARC_RHO, 1, IX, IY, IZ) + &
                        RDXN(IX)   * RECIPROCAL_DIRECTIONAL_MEAN(SCARC_RHO,-1, IX, IY, IZ) )
 
@@ -17513,11 +17507,11 @@ DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
       
             GWC => G%WALL(IW)
       
-            IXG = GWC%IXG
+            IXG = GWC%IXG             ! ghost cell indices
             IYG = GWC%IYG
             IZG = GWC%IZG
       
-            IXW = GWC%IXW
+            IXW = GWC%IXW             ! mesh-inner indices
             IYW = GWC%IYW
             IZW = GWC%IZW
       
@@ -18717,9 +18711,10 @@ DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 
    CALL SCARC_POINT_TO_LEVEL (NM, NLEVEL_MIN)
 
-   CALL SCARC_ALLOCATE_REAL3 (SCARC_RHO ,  0, L%NX+1, 0, L%NY+1, 0, L%NZ+1, NSCARC_INIT_ZERO, 'SCARC_RHO',   CROUTINE)
-   CALL SCARC_ALLOCATE_REAL3 (SCARC_P   ,  0, L%NX+1, 0, L%NY+1, 0, L%NZ+1, NSCARC_INIT_ZERO, 'SCARC_P',     CROUTINE)
-   CALL SCARC_ALLOCATE_REAL3 (SCARC_PS  ,  0, L%NX+1, 0, L%NY+1, 0, L%NZ+1, NSCARC_INIT_ZERO, 'SCARC_PS',    CROUTINE)
+   CALL SCARC_ALLOCATE_REAL3 (SCARC_RHO ,  0, L%NX+1, 0, L%NY+1, 0, L%NZ+1, NSCARC_INIT_ZERO, 'SCARC_RHO',  CROUTINE)
+   CALL SCARC_ALLOCATE_REAL3 (SCARC_KRES,  0, L%NX+1, 0, L%NY+1, 0, L%NZ+1, NSCARC_INIT_ZERO, 'SCARC_KRES', CROUTINE)
+   CALL SCARC_ALLOCATE_REAL3 (SCARC_P   ,  0, L%NX+1, 0, L%NY+1, 0, L%NZ+1, NSCARC_INIT_ZERO, 'SCARC_P',    CROUTINE)
+   CALL SCARC_ALLOCATE_REAL3 (SCARC_PS  ,  0, L%NX+1, 0, L%NY+1, 0, L%NZ+1, NSCARC_INIT_ZERO, 'SCARC_PS',   CROUTINE)
 
    CALL SCARC_ALLOCATE_REAL2 (L%PXS, 1, L%NY, 1, L%NZ, NSCARC_INIT_ZERO, 'L%PXS', CROUTINE)
    CALL SCARC_ALLOCATE_REAL2 (L%PXF, 1, L%NY, 1, L%NZ, NSCARC_INIT_ZERO, 'L%PXF', CROUTINE)
@@ -21560,6 +21555,84 @@ ENDDO BAROCLINIC_MESHES_LOOP
 END SUBROUTINE SCARC_UPDATE_BAROCLINIC_TERM
 
 
+! --------------------------------------------------------------------------------------------------------------
+!> \brief Update current values of density and resolved kinetic enery used for the inseparable Poisson system
+! This is still experimental code which additionally uses and stores separate versions for these quantities
+! --------------------------------------------------------------------------------------------------------------
+SUBROUTINE SCARC_UPDATE_INSEPARABLE_ENVIRONMENT
+USE SCARC_POINTERS, ONLY: UU, VV, WW, RHOP
+USE MESH_VARIABLES
+USE MESH_POINTERS
+USE TYPES, ONLY: WALL_TYPE
+INTEGER :: NM, IOR0, I, J, K, IIG, JJG, KKG, IW
+REAL(EB) :: U2, V2, W2
+TYPE (WALL_TYPE), POINTER :: WC
+
+MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
+
+     CALL POINT_TO_MESH(NM)
+     IF (PREDICTOR) THEN
+        RHOP => RHO
+        UU   => U
+        VV   => V
+        WW   => W
+     ELSE
+        RHOP => RHOS
+        UU   => US
+        VV   => VS
+        WW   => WS
+     ENDIF
+
+     SCARC_RHO = RHOP
+
+     DO K=1,KBAR
+        DO J=1,JBAR
+           DO I=1,IBAR
+              IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+              U2 = 0.25_EB*(UU(I-1,J,K)+UU(I,J,K))**2
+              V2 = 0.25_EB*(VV(I,J-1,K)+VV(I,J,K))**2
+              W2 = 0.25_EB*(WW(I,J,K-1)+WW(I,J,K))**2
+              SCARC_KRES(I,J,K) = 0.5_EB*(U2+V2+W2)
+           ENDDO
+        ENDDO
+     ENDDO
+
+     WALL_LOOP: DO IW = 1, N_EXTERNAL_WALL_CELLS
+
+        WC => WALL(IW)
+        IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_LOOP
+
+        IOR0 = WC%ONE_D%IOR
+        I     = WC%ONE_D%II
+        J     = WC%ONE_D%JJ
+        K     = WC%ONE_D%KK
+        IIG   = WC%ONE_D%IIG
+        JJG   = WC%ONE_D%JJG
+        KKG   = WC%ONE_D%KKG
+
+        SELECT CASE (IOR0)
+           CASE (1)
+              SCARC_RHO(IIG-1,JJG,KKG) = 2*WC%ONE_D%RHO_F - SCARC_RHO(IIG,JJG,KKG)
+           CASE (-1)
+              SCARC_RHO(IIG+1,JJG,KKG) = 2*WC%ONE_D%RHO_F - SCARC_RHO(IIG,JJG,KKG)
+           CASE (2)
+              SCARC_RHO(IIG,JJG-1,KKG) = 2*WC%ONE_D%RHO_F - SCARC_RHO(IIG,JJG,KKG)
+           CASE (-2)
+              SCARC_RHO(IIG,JJG+1,KKG) = 2*WC%ONE_D%RHO_F - SCARC_RHO(IIG,JJG,KKG)
+           CASE (3)
+              SCARC_RHO(IIG,JJG,KKG-1) = 2*WC%ONE_D%RHO_F - SCARC_RHO(IIG,JJG,KKG)
+           CASE (-3)
+              SCARC_RHO(IIG,JJG,KKG+1) = 2*WC%ONE_D%RHO_F - SCARC_RHO(IIG,JJG,KKG)
+        END SELECT
+
+        IF (WC%BOUNDARY_TYPE == OPEN_BOUNDARY)  SCARC_KRES(I,J,K) = SCARC_KRES(IIG,JJG,KKG)
+
+     ENDDO WALL_LOOP
+
+ENDDO MESHES_LOOP
+
+END SUBROUTINE SCARC_UPDATE_INSEPARABLE_ENVIRONMENT
+
 ! -------------------------------------------------------------------------------------------------------------
 !> \brief Preconditioning method which is based on the following input and output convention:
 !  - the residual which has to be preconditioned is passed in via vector R
@@ -22723,6 +22796,7 @@ CALL SCARC_SET_ITERATION_STATE (T_CURRENT, DT_CURRENT)
 ! If the inseparable Poisson system is solved, the matrices have to be rebuilt for the current density in each time step
 
 IF (IS_INSEPARABLE) THEN
+   CALL SCARC_UPDATE_INSEPARABLE_ENVIRONMENT
    CALL SCARC_SETUP_POISSON_SYSTEMS                   ; IF (STOP_STATUS==SETUP_STOP) RETURN
 #ifdef WITH_MKL
    CALL SCARC_SETUP_POISSON_SYMMETRIC                 ; IF (STOP_STATUS==SETUP_STOP) RETURN
