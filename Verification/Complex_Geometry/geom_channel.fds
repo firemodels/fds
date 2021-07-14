@@ -16,22 +16,20 @@
 &MISC NOISE=F, STRATIFICATION=F / ! Stress method enabled by default.
 &SURF ID='INLET', FREE_SLIP=T, MASS_FRACTION(1)=1., SPEC_ID(1)='TRACER', VEL=-1, TAU_V=0./
 
-&PRES SOLVER='UGLMAT'/
-
 &VENT MB='XMIN', SURF_ID='INLET' /
 &VENT MB='XMAX', SURF_ID='OPEN' /
 
 &SURF ID='default wall', FREE_SLIP=T, DEFAULT=T, COLOR='GRAY' /  
 
-! &GEOM XB=-0.25,1.25,0.,1.,    1.00,1.25 , SURF_ID='default wall' / top
-! &GEOM XB=-0.25,1.25,0.,1.,   -0.25,0.00 , SURF_ID='default wall' / bottom
+&GEOM XB=-0.25,1.25,0.,1.,    1.00,1.25 , SURF_ID='default wall' / top
+&GEOM XB=-0.25,1.25,0.,1.,   -0.25,0.00 , SURF_ID='default wall' / bottom
 
-&OBST XB=-0.25,1.25,0.,1.,   1.00,1.25 , SURF_ID='default wall' / top
-&OBST XB=-0.25,1.25,0.,1.,  -0.25,0.00 , SURF_ID='default wall' / bottom
+! &OBST XB=-0.25,1.25,0.,1.,   1.00,1.25 , SURF_ID='default wall' / top
+! &OBST XB=-0.25,1.25,0.,1.,  -0.25,0.00 , SURF_ID='default wall' / bottom
 
 &SLCF DB='YMID', QUANTITY='VELOCITY', VECTOR=T /
-&SLCF DB='YMID', QUANTITY='TEMPERATURE' /
-&SLCF DB='YMID', QUANTITY='MASS FRACTION', SPEC_ID='TRACER' /
+&SLCF DB='YMID', QUANTITY='TEMPERATURE', CELL_CENTERED=T /
+&SLCF DB='YMID', QUANTITY='MASS FRACTION', SPEC_ID='TRACER', CELL_CENTERED=T /
 
 # Devices at inlet and x=0.5 covering the whole mesh section:
 &DEVC XB=-0.26,-0.24,0.,1.,-0.25,1.25, SURF_ID='INLET', QUANTITY='NORMAL VELOCITY', STATISTICS='SURFACE INTEGRAL', ID='U0' /
