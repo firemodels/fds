@@ -2511,7 +2511,7 @@ END FUNCTION IS_VALID_DIRECTION
 !> \brief Compute a vector's meanvalue in a given cell and the specified direction
 ! --------------------------------------------------------------------------------------------------------------
 REAL(EB) FUNCTION DIRECTIONAL_MEAN (V, IOR0, I, J, K)
-REAL(EB), DIMENSION(:,:,:), INTENT(IN) :: V
+REAL(EB), DIMENSION(0:,0:,0:), INTENT(IN) :: V
 INTEGER, INTENT(IN) :: IOR0, I, J, K
 
 SELECT CASE (IOR0)
@@ -2536,9 +2536,12 @@ END FUNCTION DIRECTIONAL_MEAN
 !> \brief Compute reciprocal of a vector's meanvalue in a given cell and the specified direction
 ! --------------------------------------------------------------------------------------------------------------
 REAL(EB) FUNCTION RECIPROCAL_DIRECTIONAL_MEAN (V, IOR0, I, J, K)
-REAL(EB), DIMENSION(:,:,:), INTENT(IN) :: V
+REAL(EB), DIMENSION(0:,0:,0:), INTENT(IN) :: V
 INTEGER, INTENT(IN) :: IOR0, I, J, K
 
+if (SCARC_VERBOSE) THEN
+    WRITE(MSG%LU_VERBOSE,*) '                IOR0, I,J,K:', IOR0, I,J,K
+endif
 SELECT CASE (ABS(IOR0))
    CASE ( 1)
       RECIPROCAL_DIRECTIONAL_MEAN = 2.0_EB /(V(I-1,J,K) + V(I,J,K))
@@ -12367,15 +12370,18 @@ USE SCARC_UTILITIES, ONLY: RECIPROCAL_DIRECTIONAL_MEAN
 INTEGER, INTENT(IN) :: IC, IX, IY, IZ
 INTEGER, INTENT(INOUT) :: IP
 
-A%VAL(IP) = - RDX(IX)*(RDXN(IX)   * RECIPROCAL_DIRECTIONAL_MEAN(SCARC_RHO, 1, IX, IY, IZ) + &
-                       RDXN(IX-1) * RECIPROCAL_DIRECTIONAL_MEAN(SCARC_RHO,-1, IX, IY, IZ) )
+IF (SCARC_VERBOSE) THEN
+   WRITE(MSG%LU_VERBOSE,*) 'MAINDIAG_INSEP: IC, IX, IY, IZ, IP:', IC, IX, IY, IZ, IP
+ENDIF
+A%VAL(IP) = - RDX(IX)*(RDXN(IX-1) * RECIPROCAL_DIRECTIONAL_MEAN(SCARC_RHO, 1, IX, IY, IZ) + &
+                       RDXN(IX)   * RECIPROCAL_DIRECTIONAL_MEAN(SCARC_RHO,-1, IX, IY, IZ) )
 
 IF (.NOT.TWO_D) &
-   A%VAL(IP) = A%VAL(IP) - RDY(IY)*(RDYN(IY)   * RECIPROCAL_DIRECTIONAL_MEAN(SCARC_RHO, 2, IX, IY, IZ) + &
-                                    RDYN(IY-1) * RECIPROCAL_DIRECTIONAL_MEAN(SCARC_RHO,-2, IX, IY, IZ) )
+   A%VAL(IP) = A%VAL(IP) - RDY(IY)*(RDYN(IY-1) * RECIPROCAL_DIRECTIONAL_MEAN(SCARC_RHO, 2, IX, IY, IZ) + &
+                                    RDYN(IY)   * RECIPROCAL_DIRECTIONAL_MEAN(SCARC_RHO,-2, IX, IY, IZ) )
 
-A%VAL(IP) = A%VAL(IP) - RDZ(IX)*(RDZN(IZ)   * RECIPROCAL_DIRECTIONAL_MEAN(SCARC_RHO, 3, IX, IY, IZ) + &
-                                 RDZN(IZ-1) * RECIPROCAL_DIRECTIONAL_MEAN(SCARC_RHO,-3, IX, IY, IZ) )
+A%VAL(IP) = A%VAL(IP) - RDZ(IX)*(RDZN(IZ-1) * RECIPROCAL_DIRECTIONAL_MEAN(SCARC_RHO, 3, IX, IY, IZ) + &
+                                 RDZN(IZ)   * RECIPROCAL_DIRECTIONAL_MEAN(SCARC_RHO,-3, IX, IY, IZ) )
 
 A%ROW(IC) = IP
 A%COL(IP) = IC
@@ -17480,7 +17486,7 @@ END FUNCTION SCARC_MGM_CONVERGENCE_STATE
 ! --------------------------------------------------------------------------------------------------------------
 !> \brief Set correct boundary values at external and internal boundaries
 ! --------------------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_MGM_UPDATE_SEPARABLE_GHOSTCELLS(NTYPE)
+SUBROUTINE SCARC_MGM_UPDATE_GHOSTCELLS(NTYPE)
 USE SCARC_POINTERS, ONLY: M, L, G, GWC, HP, MGM, DX, DY, DZ, BXS, BXF, BYS, BYF, BZS, BZF, &
                           SCARC_POINT_TO_GRID
 INTEGER, INTENT(IN):: NTYPE
@@ -17652,7 +17658,7 @@ DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 
 ENDDO
 
-END SUBROUTINE SCARC_MGM_UPDATE_SEPARABLE_GHOSTCELLS
+END SUBROUTINE SCARC_MGM_UPDATE_GHOSTCELLS
 
 
 ! ------------------------------------------------------------------------------------------------------------------
@@ -20356,26 +20362,48 @@ CG_LOOP: DO ITE = 1, NIT
 
 ENDDO CG_LOOP
 
-! ---------- Determine convergence rate and print corresponding information
-! In case of CG as main solver:
-!   - Transfer ScaRC solution vector X to FDS pressure vector
-!   - Set ghost cell values along external boundaries
-!   - Exchange values along internal boundaries
+! Determine convergence rate and print corresponding information
 
 CALL SCARC_CONVERGENCE_RATE(NSTATE, NS, NL)
+
+! If condensed system was used restore value on last cell and build mean value
 
 IF (N_DIRIC_GLOBAL(NLEVEL_MIN) == 0) THEN
    CALL RESTORE_LAST_CELL(X, NL)
    CALL FILTER_MEANVALUE(X, NL)
 ENDIF
 
-
 IF (TYPE_SOLVER == NSCARC_SOLVER_MAIN .AND. .NOT.IS_MGM) THEN
-   CALL SCARC_UPDATE_SEPARABLE_MAINCELLS(NLEVEL_MIN)
-   CALL SCARC_UPDATE_SEPARABLE_GHOSTCELLS(NLEVEL_MIN)
+
+   SELECT CASE (TYPE_POISSON)
+
+      ! Separable Poisson system: Krylov method was performed for HP itself
+      ! Transmit mesh-inner values of computed (U)ScaRC solution to the corresponding HP vector
+
+      CASE (NSCARC_POISSON_SEPARABLE)
+
+         CALL SCARC_UPDATE_MAINCELLS(NLEVEL_MIN)
+
+      ! Inseparable Poisson system: Krylov method was performed for inseparable P 
+      ! Transmit mesh-inner values of computed (U)ScaRC solution to the corresponding HP vector
+
+      CASE (NSCARC_POISSON_INSEPARABLE)
+
+         CALL SCARC_UPDATE_PRESSURE(NLEVEL_MIN)
+         CALL SCARC_UPDATE_BAROCLINIC_TERM
+         CALL SCARC_UPDATE_MAINCELLS(NLEVEL_MIN)
+
+   END SELECT
+
+   ! Finally, a corresponding HP solution is achieved, which still needs to get its correct ghost cell values
+   ! The resulting overlapping HP is finally passed to the calling PRESSURE_ITERATION_SCHEME
+
+   CALL SCARC_UPDATE_GHOSTCELLS(NLEVEL_MIN)
+
 ENDIF
 
-
+! Leave method gracefully 
+!
 CALL SCARC_RELEASE_SCOPE(NS, NP)
 
 END SUBROUTINE SCARC_METHOD_KRYLOV
@@ -20399,7 +20427,7 @@ CALL SCARC_SET_SYSTEM_TYPE (NSCARC_GRID_STRUCTURED, NSCARC_MATRIX_POISSON)
 CALL SCARC_METHOD_KRYLOV (NSTACK, NSCARC_STACK_ZERO, NLEVEL_MIN)
 
 CALL SCARC_MGM_STORE (NSCARC_MGM_POISSON)                   ! store this structured inhomogeneous Poisson solution in MGM%SIP
-CALL SCARC_MGM_UPDATE_SEPARABLE_GHOSTCELLS (NSCARC_MGM_POISSON)       ! update ghost cell values correspondingly (global solution!)
+CALL SCARC_MGM_UPDATE_GHOSTCELLS (NSCARC_MGM_POISSON)       ! update ghost cell values correspondingly (global solution!)
 
 CALL SCARC_MGM_COPY (NSCARC_MGM_SIP_TO_UIP)                 ! Initialize unstructured inhomogeneous Poisson UIP with SIP
 
@@ -20423,13 +20451,13 @@ USE_CORRECT_INITIALIZATION = NMESHES > 1 .AND. SCARC_MGM_EXACT_INITIAL .AND. &
 IF (SCARC_MGM_CHECK_LAPLACE .OR. USE_CORRECT_INITIALIZATION) THEN
 
    CALL SCARC_MGM_STORE (NSCARC_MGM_SCARC)                                 
-   CALL SCARC_MGM_UPDATE_SEPARABLE_GHOSTCELLS (NSCARC_MGM_SCARC)    
+   CALL SCARC_MGM_UPDATE_GHOSTCELLS (NSCARC_MGM_SCARC)    
 
    CALL SCARC_SET_SYSTEM_TYPE (NSCARC_GRID_UNSTRUCTURED, NSCARC_MATRIX_POISSON)
    CALL SCARC_METHOD_KRYLOV (NSTACK, NSCARC_STACK_ZERO, NLEVEL_MIN)             ! compute UScaRC with unstructured CG-method 
 
    CALL SCARC_MGM_STORE (NSCARC_MGM_USCARC)                                
-   CALL SCARC_MGM_UPDATE_SEPARABLE_GHOSTCELLS (NSCARC_MGM_USCARC)                   
+   CALL SCARC_MGM_UPDATE_GHOSTCELLS (NSCARC_MGM_USCARC)                   
 
    CALL SCARC_MGM_DIFF (NSCARC_MGM_USCARC_VS_SCARC)                             ! build difference DSCARC of USCARC and SCARC
 
@@ -20511,7 +20539,7 @@ IF (STATE_MGM /= NSCARC_MGM_SUCCESS) THEN
             CALL SCARC_MGM_COPY (NSCARC_MGM_OUHL_TO_OUHL2)
       END SELECT
 
-      CALL SCARC_MGM_UPDATE_SEPARABLE_GHOSTCELLS (NSCARC_MGM_LAPLACE)
+      CALL SCARC_MGM_UPDATE_GHOSTCELLS (NSCARC_MGM_LAPLACE)
       CALL SCARC_MGM_STORE (NSCARC_MGM_MERGE)
    
       ! Get new velocities based on local Laplace solutions and compute corresponding velocity error
@@ -20854,8 +20882,8 @@ CALL SCARC_CONVERGENCE_RATE(NSTATE, NS, NL)
 
 SELECT CASE (TYPE_SOLVER)
    CASE (NSCARC_SOLVER_MAIN)
-      CALL SCARC_UPDATE_SEPARABLE_MAINCELLS(NLEVEL_MIN)
-      CALL SCARC_UPDATE_SEPARABLE_GHOSTCELLS(NLEVEL_MIN)
+      CALL SCARC_UPDATE_MAINCELLS(NLEVEL_MIN)
+      CALL SCARC_UPDATE_GHOSTCELLS(NLEVEL_MIN)
    CASE (NSCARC_SOLVER_PRECON)
       CALL SCARC_UPDATE_PRECONDITIONER(NLEVEL_MIN)
 END SELECT
@@ -21030,8 +21058,8 @@ ENDDO MESHES_LOOP
 CALL SCARC_EXCHANGE (NSCARC_EXCHANGE_VECTOR_PLAIN, X, NL)
 
 IF (TYPE_SOLVER == NSCARC_SOLVER_MAIN) THEN
-   CALL SCARC_UPDATE_SEPARABLE_MAINCELLS (NLEVEL_MIN)
-   CALL SCARC_UPDATE_SEPARABLE_GHOSTCELLS(NLEVEL_MIN)
+   CALL SCARC_UPDATE_MAINCELLS (NLEVEL_MIN)
+   CALL SCARC_UPDATE_GHOSTCELLS(NLEVEL_MIN)
 ENDIF
 
 CALL SCARC_RELEASE_SCOPE(NS, NP)
@@ -21098,8 +21126,8 @@ MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 ENDDO MESHES_LOOP
 
 IF (TYPE_SOLVER == NSCARC_SOLVER_MAIN) THEN
-   CALL SCARC_UPDATE_SEPARABLE_MAINCELLS (NLEVEL_MIN)
-   CALL SCARC_UPDATE_SEPARABLE_GHOSTCELLS(NLEVEL_MIN)
+   CALL SCARC_UPDATE_MAINCELLS (NLEVEL_MIN)
+   CALL SCARC_UPDATE_GHOSTCELLS(NLEVEL_MIN)
 ENDIF
 
 CALL SCARC_RELEASE_SCOPE(NSTACK, NPARENT)
@@ -21125,7 +21153,7 @@ END SUBROUTINE SCARC_UPDATE_PRECONDITIONER
 ! For all mesh-inner cells, transfer the achieved (U)ScaRC solution to a predictor/corrector version of a pressure vector
 ! For all ghost cells, compute the corresponding values based on some initially computed boundary vectors
 ! ----------------------------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_UPDATE_INSEPARABLE_PRESSURE(NL)
+SUBROUTINE SCARC_UPDATE_PRESSURE(NL)
 USE SCARC_POINTERS, ONLY: M, L, G, ST, PPP, HP, UU, VV, WW, RHOP, KRESP, GWC, DXN, DYN, DZN, SCARC_POINT_TO_GRID
 USE SCARC_VARIABLES, ONLY: SCARC_P, SCARC_PS
 INTEGER, INTENT(IN) :: NL
@@ -21219,112 +21247,109 @@ PRESSURE_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 
 ENDDO PRESSURE_MESHES_LOOP
 
-END SUBROUTINE SCARC_UPDATE_INSEPARABLE_PRESSURE
+END SUBROUTINE SCARC_UPDATE_PRESSURE
 
 
 ! ----------------------------------------------------------------------------------------------------------------------
-!> \brief Transfer (U)Scarc solution for the separable Poisson problem into HP for all cells inside the mesh
+!> \brief Build vector HP from computed (U)Scarc solution and pass it to calling PRESSURE_ITERATION_SCHEME
 ! ----------------------------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_UPDATE_SEPARABLE_MAINCELLS(NL)
-USE SCARC_POINTERS, ONLY: M, G, L, ST, HP, SCARC_POINT_TO_GRID
-INTEGER, INTENT(IN) :: NL
-INTEGER :: NM, IC 
-
-DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
-
-   CALL SCARC_POINT_TO_GRID (NM, NL)                                    
-   ST  => L%STAGE(NSCARC_STAGE_ONE)
-
-   IF (PREDICTOR) THEN
-      HP => M%H
-   ELSE
-      HP => M%HS
-   ENDIF
-
-   HP = 0.0_EB
-   DO IC = 1, G%NC
-      HP(G%ICX(IC), G%ICY(IC), G%ICZ(IC)) = ST%X(IC)
-   ENDDO
-
-ENDDO
-
-END SUBROUTINE SCARC_UPDATE_SEPARABLE_MAINCELLS
-
-
-! ----------------------------------------------------------------------------------------------------------------------
-!> \brief Transfer (U)Scarc solution for the inseparable Poisson problem into HP for all cells inside the mesh
-! Note that ST%X (solution from chosen ScaRC solver) contains P here, not HP 
-! Now, HP must be derived by P by the relation H = P/RHO + KRES
-! This is only restricted to the internal grid cells (i.e. no ghost cells)
-! Afterwards this HP has to undergo the same mechanisms for the setting of ghost cells as is done in the separable case
-! ----------------------------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_UPDATE_INSEPARABLE_MAINCELLS(NL)
+SUBROUTINE SCARC_UPDATE_MAINCELLS(NL)
 USE SCARC_POINTERS, ONLY: L, G, ST, HP, PPP, RHOP, KRESP, SCARC_POINT_TO_GRID
 USE SCARC_VARIABLES, ONLY: SCARC_P, SCARC_PS
 USE MESH_VARIABLES
 USE MESH_POINTERS
-REAL(EB), POINTER, DIMENSION(:,:,:) :: HPP                      
 INTEGER, INTENT(IN) :: NL
-INTEGER :: NM
-INTEGER :: I, J, K, IC
+INTEGER :: NM, IC , I, J, K
+REAL(EB), POINTER, DIMENSION(:,:,:) :: HPP                      
 
-DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
+MAINCELLS_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 
    CALL POINT_TO_MESH(NM)
    CALL SCARC_POINT_TO_GRID (NM, NL)                                    
    ST  => L%STAGE(NSCARC_STAGE_ONE)
 
-   IF (PREDICTOR) THEN
-      HP  => H
-      PPP => SCARC_P
-   ELSE
-      HP  => HS
-      PPP => SCARC_PS
-   ENDIF
-   KRESP => SCARC_KRES                 ! still experimental
-   RHOP  => SCARC_RHO
+   SELECT CASE (TYPE_POISSON)
 
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IF (IS_UNSTRUCTURED .AND. L%IS_SOLID(I, J, K)) CYCLE
-            IC = G%CELL_NUMBER(I,J,K)
-            HP(I,J,K) = ST%X(IC)/RHOP(I,J,K) + KRESP(I,J,K)
+      ! Separable Poisson system: Krylov method was performed for HP itself
+      ! In this case the computed (U)ScaRC solution contained in ST%X already contains the right values,
+      ! so just transfer the mesh-inner cells of it to HP
+      ! the right ghost cells will be set by a subsequent routine
+
+      CASE (NSCARC_POISSON_SEPARABLE)
+
+         IF (PREDICTOR) THEN
+            HP => H
+         ELSE
+            HP => HS
+         ENDIF
+         HP = 0.0_EB
+
+         DO IC = 1, G%NC
+            HP(G%ICX(IC), G%ICY(IC), G%ICZ(IC)) = ST%X(IC)
          ENDDO
-      ENDDO
-   ENDDO
 
-   ! Still experimental to countercheck
-    
-   INSEPARABLE_CHECK_IF: IF (SCARC_CHECK) THEN
-      HPP => WORK8
-      IF (PREDICTOR) THEN
-         RHOP => RHO
-      ELSE
-         RHOP => RHOS
-      ENDIF
-      KRESP => KRES
-      DO K=0,KBP1
-         DO J=0,JBP1
-            DO I=0,IBP1
-               IF (IS_UNSTRUCTURED .AND. L%IS_SOLID(I, J, K)) CYCLE
-               IC = G%CELL_NUMBER(I,J,K)
-               HPP(I,J,K) = PPP(I,J,K)/RHOP(I,J,K) + KRESP(I,J,K)
+      ! Inseparable Poisson system: Krylov method was performed for inseparable P
+      ! In this case the computed (U)ScaRC solution ST%X contains P, not HP 
+      ! Now, HP must first be derived from P by the relation H = P/RHO + KRES
+      ! Afterwards this HP has to undergo the same mechanisms for the setting of ghost cells as is done in the separable case
+
+      CASE (NSCARC_POISSON_INSEPARABLE)
+
+         IF (PREDICTOR) THEN
+            HP  => H
+            PPP => SCARC_P
+         ELSE
+            HP  => HS
+            PPP => SCARC_PS
+         ENDIF
+         KRESP => SCARC_KRES                 ! still experimental
+         RHOP  => SCARC_RHO
+
+         ! Recompute HP values from relation    H = P/RHO - K
+          
+         DO K=1,KBAR
+            DO J=1,JBAR
+               DO I=1,IBAR
+                  IF (IS_UNSTRUCTURED .AND. L%IS_SOLID(I, J, K)) CYCLE
+                  IC = G%CELL_NUMBER(I,J,K)
+                  HP(I,J,K) = ST%X(IC)/RHOP(I,J,K) + KRESP(I,J,K)
+               ENDDO
             ENDDO
          ENDDO
-      ENDDO
-   ENDIF INSEPARABLE_CHECK_IF
+      
+         ! Still experimental to countercheck
+          
+         INSEPARABLE_CHECK_IF: IF (SCARC_CHECK) THEN
+            HPP => WORK8
+            IF (PREDICTOR) THEN
+               RHOP => RHO
+            ELSE
+               RHOP => RHOS
+            ENDIF
+            KRESP => KRES
+            DO K=0,KBP1
+               DO J=0,JBP1
+                  DO I=0,IBP1
+                     IF (IS_UNSTRUCTURED .AND. L%IS_SOLID(I, J, K)) CYCLE
+                     IC = G%CELL_NUMBER(I,J,K)
+                     HPP(I,J,K) = PPP(I,J,K)/RHOP(I,J,K) + KRESP(I,J,K)
+                  ENDDO
+               ENDDO
+            ENDDO
+         ENDIF INSEPARABLE_CHECK_IF
 
-ENDDO
+      END SELECT
 
-END SUBROUTINE SCARC_UPDATE_INSEPARABLE_MAINCELLS
+ENDDO MAINCELLS_MESHES_LOOP
+
+END SUBROUTINE SCARC_UPDATE_MAINCELLS
 
 
 ! --------------------------------------------------------------------------------------------------------------
 !> \brief Set boundary values for the solution of the separable Poisson system at external boundaries 
 ! Along internal mesh interfaces the overlaps are consistent by construction of the (U)ScaRC solver
 ! --------------------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_UPDATE_SEPARABLE_GHOSTCELLS(NL)
+SUBROUTINE SCARC_UPDATE_GHOSTCELLS(NL)
 USE SCARC_POINTERS, ONLY: M, L, G, GWC, HP, DXN, DYN, DZN, SCARC_POINT_TO_GRID
 INTEGER, INTENT(IN) :: NL
 INTEGER :: NM, IW, IOR0, IXG, IYG, IZG, IXW, IYW, IZW 
@@ -21391,13 +21416,13 @@ ENDDO GHOSTCELLS_MESHES_LOOP
 
 CALL SCARC_EXCHANGE(NSCARC_EXCHANGE_PRESSURE, NSCARC_NONE, NL)
    
-END SUBROUTINE SCARC_UPDATE_SEPARABLE_GHOSTCELLS
+END SUBROUTINE SCARC_UPDATE_GHOSTCELLS
 
 
 ! --------------------------------------------------------------------------------------------------------------
 !> \brief Compute baroclinic torque term based on (U)ScaRC solution of inseparable Poisson system
 ! --------------------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_COMPUTE_BAROCLINIC_TERM
+SUBROUTINE SCARC_UPDATE_BAROCLINIC_TERM
 
 USE SCARC_POINTERS, ONLY: HP, RHOP, PPP, SCARC_POINT_TO_GRID
 USE SCARC_VARIABLES, ONLY: SCARC_P, SCARC_PS
@@ -21532,7 +21557,7 @@ BAROCLINIC_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 ENDDO BAROCLINIC_MESHES_LOOP
 
 1000 FORMAT('Max difference for baroclinic term :', E11.3,' at positions (',i3,',',i3,',',i3,')')
-END SUBROUTINE SCARC_COMPUTE_BAROCLINIC_TERM
+END SUBROUTINE SCARC_UPDATE_BAROCLINIC_TERM
 
 
 ! -------------------------------------------------------------------------------------------------------------
