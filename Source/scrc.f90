@@ -229,7 +229,6 @@ INTEGER, PARAMETER :: NSCARC_PRECISION_SINGLE        =  1        !< Type of data
 INTEGER, PARAMETER :: NSCARC_PRECISION_DOUBLE        =  2        !< Type of data precision: double 
 
 INTEGER, PARAMETER :: NSCARC_RELAX_FFT               =  1        !< Type of preconditioner: FFT-methods
-INTEGER, PARAMETER :: NSCARC_RELAX_FFTO              =  2        !< Type of preconditioner: FFTO-methods (including overlap)
 INTEGER, PARAMETER :: NSCARC_RELAX_GMG               =  3        !< Type of preconditioner: multigrid methods
 INTEGER, PARAMETER :: NSCARC_RELAX_ILU               =  4        !< Type of preconditioner: ILU-decompositions (own)
 INTEGER, PARAMETER :: NSCARC_RELAX_JAC               =  5        !< Type of preconditioner: JACOBI-methods
@@ -1199,7 +1198,6 @@ LOGICAL :: IS_CG_MG              = .FALSE.                       !< Flag for Kry
 LOGICAL :: IS_CG_MUL1            = .FALSE.                       !< Flag for multiplicative1 Twolevel-Krylov method (fine last)
 LOGICAL :: IS_CG_MUL2            = .FALSE.                       !< Flag for multiplicative2 Twolevel-Krylov method (fine first) 
 LOGICAL :: IS_FFT                = .FALSE.                       !< Flag for FFT-method
-LOGICAL :: IS_FFTO               = .FALSE.                       !< Flag for FFTO-method
 LOGICAL :: IS_LAPLACE            = .FALSE.                       !< Flag for use of Laplace matrix (MGM only)
 LOGICAL :: IS_POISSON            = .TRUE.                        !< Flag for use of Poisson matrix (MGM only)
 LOGICAL :: IS_MKL                = .FALSE.                       !< Flag for MKL-method
@@ -4490,9 +4488,6 @@ SELECT CASE(TYPE_PRECON)
    CASE (NSCARC_RELAX_FFT)
       SV%CNAME = 'SCARC_PRECON_FFT'
       SV%OMEGA = 1.0_EB
-   CASE (NSCARC_RELAX_FFTO)
-      SV%CNAME = 'SCARC_PRECON_FFTO'
-      SV%OMEGA = 1.0_EB
    CASE (NSCARC_RELAX_GMG)
       SV%CNAME = 'SCARC_PRECON_GMG'
 #ifdef WITH_MKL
@@ -4580,9 +4575,6 @@ SELECT CASE(TYPE_SMOOTH)
       SV%CNAME = 'SCARC_SMOOTHER_ILU'
    CASE (NSCARC_RELAX_FFT)
       SV%CNAME = 'SCARC_SMOOTHER_FFT'
-      SV%OMEGA = 1.0_EB
-   CASE (NSCARC_RELAX_FFTO)
-      SV%CNAME = 'SCARC_SMOOTHER_FFTO'
       SV%OMEGA = 1.0_EB
 #ifdef WITH_MKL
    CASE (NSCARC_RELAX_MKL)
@@ -5014,13 +5006,6 @@ SELECT CASE (TRIM(SCARC_METHOD))
          CASE ('FFT')                                                ! FFT preconditioner
             IF (IS_UNSTRUCTURED) CALL SCARC_ERROR(NSCARC_ERROR_FFT_GRID, SCARC_NONE, NSCARC_NONE)
             TYPE_PRECON = NSCARC_RELAX_FFT
-         CASE ('FFTO')                                               ! FFT with overlap preconditioner
-            IF (IS_UNSTRUCTURED) CALL SCARC_ERROR(NSCARC_ERROR_FFT_GRID, SCARC_NONE, NSCARC_NONE)
-            IF (NMESHES == 1) THEN
-               TYPE_PRECON = NSCARC_RELAX_FFT
-            ELSE
-               TYPE_PRECON = NSCARC_RELAX_FFTO
-            ENDIF
          CASE ('OPTIMIZED')                                          ! LU preconditioner based on either FFT or PARDISO
 #ifdef WITH_MKL
             TYPE_PRECON   = NSCARC_RELAX_OPTIMIZED
@@ -5103,13 +5088,6 @@ SELECT CASE (TRIM(SCARC_METHOD))
          CASE ('FFT')
             IF (IS_UNSTRUCTURED) CALL SCARC_ERROR(NSCARC_ERROR_FFT_GRID, SCARC_NONE, NSCARC_NONE)
             TYPE_SMOOTH = NSCARC_RELAX_FFT
-         CASE ('FFTO')
-            IF (IS_UNSTRUCTURED) CALL SCARC_ERROR(NSCARC_ERROR_FFT_GRID, SCARC_NONE, NSCARC_NONE)
-            IF (NMESHES == 1) THEN
-               TYPE_SMOOTH = NSCARC_RELAX_FFT
-            ELSE
-               TYPE_SMOOTH = NSCARC_RELAX_FFTO
-            ENDIF
          CASE ('OPTIMIZED')
 #ifdef WITH_MKL
             TYPE_SMOOTH = NSCARC_RELAX_OPTIMIZED
@@ -5334,7 +5312,6 @@ IS_GMG = IS_MG .AND. (TYPE_MULTIGRID == NSCARC_MULTIGRID_GEOMETRIC)
 IS_AMG = IS_MG .AND. (TYPE_MULTIGRID == NSCARC_MULTIGRID_ALGEBRAIC)
 
 IS_FFT = (TYPE_PRECON == NSCARC_RELAX_FFT)  .OR. (TYPE_SMOOTH == NSCARC_RELAX_FFT)
-IS_FFTO= (TYPE_PRECON == NSCARC_RELAX_FFTO) .OR. (TYPE_SMOOTH == NSCARC_RELAX_FFTO)
 IS_MKL = (TYPE_PRECON >= NSCARC_RELAX_MKL)  .OR. (TYPE_SMOOTH >= NSCARC_RELAX_MKL) 
 
 IF (IS_CG .AND. (TYPE_PRECON /= NSCARC_RELAX_GMG)) THEN
@@ -10116,9 +10093,7 @@ IF (N_MPI_PROCESSES>1) &
    CALL MPI_ALLREDUCE(MPI_IN_PLACE, RANK_INT, 1, MPI_INTEGER, MPI_SUM, MPI_COMM_WORLD, IERROR)
 N_DIRIC_GLOBAL(NLEVEL_MIN) = RANK_INT
 
-IS_PURE_NEUMANN = N_DIRIC_GLOBAL(NLEVEL_MIN) == 0 .AND. &
-                  (TYPE_PRECON /= NSCARC_RELAX_FFT .OR. TYPE_PRECON /= NSCARC_RELAX_FFTO)
-
+IS_PURE_NEUMANN = N_DIRIC_GLOBAL(NLEVEL_MIN) == 0 .AND. TYPE_PRECON /= NSCARC_RELAX_FFT
 
  
 ! -------- Only for multi-level variants 
@@ -13486,9 +13461,7 @@ USE SCARC_POINTERS, ONLY: L, G, OG, F, OL, VC, A, ACO, AB, ABCO, &
 INTEGER, INTENT(IN) :: NV, NL, ITYPE
 INTEGER :: NM, NOM, IFACE, ICN, ICE, ICW, JC, NC, ICO, IOR0, IP, ICG, INBR
 
-IF (N_DIRIC_GLOBAL(NLEVEL_MIN) > 0 .OR. &
-    TYPE_PRECON == NSCARC_RELAX_FFT .OR. TYPE_PRECON == NSCARC_RELAX_FFTO) RETURN
-
+IF (N_DIRIC_GLOBAL(NLEVEL_MIN) > 0 .OR. TYPE_PRECON == NSCARC_RELAX_FFT) RETURN
  
 ! In last mesh:  subtract B*RHS(end) for internal legs of stencil
  
@@ -13927,141 +13900,7 @@ ENDIF
 
 END SUBROUTINE SCARC_SETUP_MGM_FFT
 
-
-! ------------------------------------------------------------------------------------------------------------------
-!> \brief Allocate and initialize vectors for blockwise FFT methods with overlap
-! New here: Perform own initialization of FFT based on H2CZIS/H3CZIS and use own SAVE and WORK arrays
-! ------------------------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_SETUP_FFTO(NLMIN, NLMAX)
-USE SCARC_POINTERS, ONLY: M, S, L, FFT, SCARC_POINT_TO_GRID
-USE POIS, ONLY: H2CZIS, H3CZIS
-INTEGER, INTENT(IN) :: NLMIN, NLMAX
-INTEGER :: NM, NL
-
-CROUTINE = 'SCARC_SEtUP_FFTO'
-
-! Allocate working space for FFT routine
- 
-MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
-   LEVEL_LOOP: DO NL = NLMIN, NLMAX
-
-      CALL SCARC_POINT_TO_GRID (NM, NL)                                    
-      FFT => SCARC(NM)%LEVEL(NL)%FFT
-
-      FFT%LBC = M%LBC
-      FFT%MBC = M%MBC
-      FFT%NBC = M%NBC
-
-      IF (NM == 1) THEN
-         FFT%IBAR = S%IBAR+1
-         FFT%XS = S%XS
-         FFT%XF = S%XF + L%DX(L%NX+1)
-      ELSE IF (NM == NMESHES) THEN
-         FFT%IBAR = S%IBAR+1
-         FFT%XS = S%XS - L%DX(0)
-         FFT%XF = S%XF
-      ELSE 
-         FFT%IBAR = S%IBAR+2
-         FFT%XS = S%XS - L%DX(0)
-         FFT%XF = S%XF + L%DX(L%NX+1)
-      ENDIF
-
-      FFT%JBAR = S%JBAR
-      FFT%KBAR = S%KBAR
-
-      FFT%YS = S%YS
-      FFT%YF = S%YF
-      FFT%ZS = S%ZS
-      FFT%ZF = S%ZF
-
-      FFT%ITRN = FFT%IBAR+1
-      IF (TWO_D) THEN
-         FFT%JTRN = 1
-      ELSE
-         FFT%JTRN = L%NY+1
-      ENDIF
-      FFT%KTRN = L%NZ+1
-
-      FFT%LSAVE = (FFT%ITRN+1)*FFT%JTRN*FFT%KTRN+7*FFT%ITRN+5*FFT%JTRN+6*FFT%KTRN+56
-      FFT%LWORK = (FFT%ITRN+1)*FFT%JTRN*FFT%KTRN
-
-      CALL SCARC_ALLOCATE_REAL1 (FFT%SAVE1, -3, FFT%LSAVE, NSCARC_INIT_ZERO, 'FFT%SAVE1', CROUTINE)
-      CALL SCARC_ALLOCATE_REAL1 (FFT%WORK ,  1, FFT%LWORK, NSCARC_INIT_ZERO, 'FFT%WORK', CROUTINE)
-
-      ! Allocate stretching vector (set to 1)
-
-      CALL SCARC_ALLOCATE_REAL1 (FFT%HX, 0, FFT%ITRN, NSCARC_INIT_ONE, 'FFT', CROUTINE)
-
-      ! Allocate RHS vector for FFT routine
-
-      IF (L%NY == 1) THEN
-         CALL SCARC_ALLOCATE_REAL3 (FFT%PRHS, 1, FFT%ITRN, 1,        1, 1, FFT%KTRN, NSCARC_INIT_ZERO, 'FFT%PRHS', CROUTINE)
-      ELSE
-         CALL SCARC_ALLOCATE_REAL3 (FFT%PRHS, 1, FFT%ITRN, 1, FFT%JTRN, 1, FFT%KTRN, NSCARC_INIT_ZERO, 'FFT%PRHS', CROUTINE)
-      ENDIF
-
-      ! Allocate boundary data vector for XS
-
-      IF (L%NZ>1) THEN
-         IF (L%NY  > 1) CALL SCARC_ALLOCATE_REAL2 (FFT%BXS, 1, FFT%JTRN, 1, FFT%KTRN, NSCARC_INIT_ZERO, 'FFT%BXS', CROUTINE)
-         IF (L%NY == 1) CALL SCARC_ALLOCATE_REAL2 (FFT%BXS, 1,        1, 1, FFT%KTRN, NSCARC_INIT_ZERO, 'FFT%BXS', CROUTINE)
-      ELSE
-         CALL SCARC_ALLOCATE_REAL2 (FFT%BXS, 1, FFT%JTRN, 1, 1, NSCARC_INIT_ZERO, 'FFT%BXS', CROUTINE)
-      ENDIF
-
-      ! Allocate boundary data vector for XF
-
-      IF (L%NZ>1) THEN
-         IF (L%NY  > 1) CALL SCARC_ALLOCATE_REAL2 (FFT%BXF, 1, FFT%JTRN, 1, FFT%KTRN, NSCARC_INIT_ZERO, 'FFT%BXF', CROUTINE)
-         IF (L%NY == 1) CALL SCARC_ALLOCATE_REAL2 (FFT%BXF, 1,        1, 1, FFT%KTRN, NSCARC_INIT_ZERO, 'FFT%BXF', CROUTINE)
-      ELSE
-         CALL SCARC_ALLOCATE_REAL2 (FFT%BXF, 1, FFT%JTRN, 1, 1, NSCARC_INIT_ZERO, 'FFT%BXF', CROUTINE)
-      ENDIF
-
-      ! Allocate boundary data vector for YS
-
-      IF (L%NZ > 1) THEN
-         CALL SCARC_ALLOCATE_REAL2 (FFT%BYS, 1, FFT%ITRN, 1, FFT%KTRN, NSCARC_INIT_ZERO, 'FFT%BYS', CROUTINE)
-      ELSE
-         CALL SCARC_ALLOCATE_REAL2 (FFT%BYS, 1, FFT%ITRN, 1,        1, NSCARC_INIT_ZERO, 'FFT%BYS', CROUTINE)
-      ENDIF
-
-      ! Allocate boundary data vector for YF
-
-      IF (L%NZ > 1) THEN
-         CALL SCARC_ALLOCATE_REAL2 (FFT%BYF, 1, FFT%ITRN,1, FFT%KTRN, NSCARC_INIT_ZERO, 'FFT%BYF', CROUTINE)
-      ELSE
-         CALL SCARC_ALLOCATE_REAL2 (FFT%BYF, 1, FFT%ITRN,1,        1, NSCARC_INIT_ZERO, 'FFT%BYF', CROUTINE)
-      ENDIF
-
-      ! Allocate boundary data vector for ZS
-
-      IF (L%NY  > 1) CALL SCARC_ALLOCATE_REAL2 (FFT%BZS, 1, FFT%ITRN, 1, FFT%JTRN, NSCARC_INIT_ZERO, 'FFT%BZS', CROUTINE)
-      IF (L%NY == 1) CALL SCARC_ALLOCATE_REAL2 (FFT%BZS, 1, FFT%ITRN, 1,        1, NSCARC_INIT_ZERO, 'FFT%BZS', CROUTINE)
-
-      ! Allocate boundary data vector for ZF
-
-      IF (L%NY  >1)  CALL SCARC_ALLOCATE_REAL2 (FFT%BZF, 1, FFT%ITRN, 1, FFT%JTRN, NSCARC_INIT_ZERO, 'FFT%BZF', CROUTINE)
-      IF (L%NY == 1) CALL SCARC_ALLOCATE_REAL2 (FFT%BZF, 1, FFT%ITRN, 1,        1, NSCARC_INIT_ZERO, 'FFT%BZF', CROUTINE)
-
-      IF (TWO_D) THEN
-         CALL H2CZIS(FFT%XS,FFT%XF,FFT%IBAR,FFT%LBC,&
-                     FFT%ZS,FFT%ZF,FFT%KBAR,FFT%NBC,&
-                     FFT%HX,FFT%XLM,FFT%ITRN,IERROR,FFT%SAVE1)
-      ELSE
-         CALL H3CZIS(FFT%XS,FFT%XF,FFT%IBAR,FFT%LBC,&
-                     FFT%YS,FFT%YF,FFT%JBAR,FFT%MBC,&
-                     FFT%ZS,FFT%ZF,FFT%KBAR,FFT%NBC,&
-                     FFT%HX,FFT%XLM,FFT%ITRN,FFT%JTRN,IERROR,FFT%SAVE1)
-      ENDIF
-
-   ENDDO LEVEL_LOOP
-ENDDO MESHES_LOOP
-
-END SUBROUTINE SCARC_SETUP_FFTO
-
 END MODULE SCARC_FFT
-
 
 
 !=======================================================================================================================
@@ -18734,7 +18573,7 @@ END SUBROUTINE SCARC_SETUP_INSEPARABLE_ENVIRONMENT
 !  - environment for the (mostly) local or global preconditioners 
 ! --------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_SETUP_KRYLOV_ENVIRONMENT
-USE SCARC_FFT, ONLY: SCARC_SETUP_FFT, SCARC_SETUP_FFTO
+USE SCARC_FFT, ONLY: SCARC_SETUP_FFT
 #ifdef WITH_MKL
 USE SCARC_MKL, ONLY: SCARC_SETUP_PARDISO, SCARC_SETUP_CLUSTER
 #endif
@@ -18787,10 +18626,6 @@ SELECT_KRYLOV_PRECON: SELECT CASE (TYPE_PRECON)
    CASE (NSCARC_RELAX_FFT)                                          ! FFT preconditioning
       CALL SCARC_SETUP_STACK_PRECON(NSTACK, NSCARC_SCOPE_LOCAL)
       CALL SCARC_SETUP_FFT(NLEVEL_MIN, NLEVEL_MIN)
-
-   CASE (NSCARC_RELAX_FFTO)                                         ! FFT preconditioning with overlap
-      CALL SCARC_SETUP_STACK_PRECON(NSTACK, NSCARC_SCOPE_LOCAL)
-      CALL SCARC_SETUP_FFTO(NLEVEL_MIN, NLEVEL_MIN)
 
 #ifdef WITH_MKL
    CASE (NSCARC_RELAX_MKL)                                          ! IntelMKL preconditioning
@@ -18895,7 +18730,7 @@ END SUBROUTINE SCARC_SETUP_OPTIMIZED
 !  - environment for the (mostly) local or global smoothers 
 ! --------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_SETUP_MULTIGRID_ENVIRONMENT
-USE SCARC_FFT, ONLY: SCARC_SETUP_FFT, SCARC_SETUP_FFTO
+USE SCARC_FFT, ONLY: SCARC_SETUP_FFT
 #ifdef WITH_MKL
 USE SCARC_MKL, ONLY: SCARC_SETUP_CLUSTER, SCARC_SETUP_PARDISO
 #endif
@@ -22242,158 +22077,7 @@ SELECT CASE (ITYPE)
       ENDDO
 
  
-   ! --------- Preconditioning by blockwise overlapping FFT based on Crayfishpak 
-   !           still test-version for tunnel-shaped geometries of type Mx1
- 
-   CASE (NSCARC_RELAX_FFTO)
-
-      ! Exchange overlapping parts
-
-      CALL SCARC_EXCHANGE (NSCARC_EXCHANGE_VECTOR_PLAIN, NV1, NL)
-
-      DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
-
-         CALL SCARC_POINT_TO_GRID (NM, NL)                                    
-         FFT => L%FFT
-
-         V1  => SCARC_POINT_TO_VECTOR(NM, NL, NV1)
-         V2  => SCARC_POINT_TO_VECTOR(NM, NL, NV2)
-
-         ! Feed corresponding right hand sides for FFT
- 
-         IF (NM == 1) THEN
-
-            !$OMP PARALLEL DO PRIVATE(IC) SCHEDULE(STATIC)
-            DO IC = 1, G%NC
-               FFT%PRHS(G%ICX(IC), G%ICY(IC), G%ICZ(IC)) = V1(IC)
-            ENDDO
-            !$OMP END PARALLEL DO
-
-            IC0 = G%NC+1
-            DO IZ = 1, L%NZ
-               DO IY = 1, L%NY
-                  FFT%PRHS(FFT%IBAR, IY, IZ) = V1(IC0)
-               IC0 = IC0 + 1
-               ENDDO
-            ENDDO
-
-         ELSE IF (NM == NMESHES) THEN
-
-            !$OMP PARALLEL DO PRIVATE(IC) SCHEDULE(STATIC)
-            DO IC = 1, G%NC
-               FFT%PRHS(G%ICX(IC)+1, G%ICY(IC), G%ICZ(IC)) = V1(IC)
-            ENDDO
-            !$OMP END PARALLEL DO
-
-            IC0 = G%NC+1
-            DO IZ = 1, L%NZ
-               DO IY = 1, L%NY
-                  FFT%PRHS(1, IY, IZ) = V1(IC0)
-                  IC0 = IC0 + 1
-               ENDDO
-            ENDDO
-
-         ELSE 
-
-            !$OMP PARALLEL DO PRIVATE(IC) SCHEDULE(STATIC)
-            DO IC = 1, G%NC
-               FFT%PRHS(G%ICX(IC)+1, G%ICY(IC), G%ICZ(IC)) = V1(IC)
-            ENDDO
-            !$OMP END PARALLEL DO
-
-            IC0 = G%NC+1
-            DO IZ = 1, L%NZ
-               DO IY = 1, L%NY
-                  FFT%PRHS(1, IY, IZ) = V1(IC0)
-                  IC0 = IC0 + 1
-               ENDDO
-            ENDDO
-            DO IZ = 1, L%NZ
-               DO IY = 1, L%NY
-                  FFT%PRHS(FFT%IBAR, IY, IZ) = V1(IC0)
-                  IC0 = IC0 + 1
-               ENDDO
-            ENDDO
-
-         ENDIF
-
-         ! Call corresponding FFT solver
- 
-         IF (TWO_D) THEN
-            CALL H2CZSS (FFT%BXS,  FFT%BXF, FFT%BZS, FFT%BZF, FFT%ITRN, &
-                         FFT%PRHS, FFT%POIS_PTB, FFT%SAVE1, FFT%WORK, FFT%HX)
-         ELSE
-            CALL H3CZSS (FFT%BXS,  FFT%BXF, FFT%BYS, FFT%BYF, FFT%BZS, FFT%BZF, FFT%ITRN, FFT%JTRN, &
-                         FFT%PRHS, FFT%POIS_PTB, FFT%SAVE1, FFT%WORK, FFT%HX)
-         ENDIF
-
-         ! Extract computed solution which is contained in FFT%PRHS
- 
-         IF (NM == 1) THEN
-            !$OMP PARALLEL DO PRIVATE(IC) SCHEDULE(STATIC)
-            DO IC = 1, G%NC
-               V2(IC) = FFT%PRHS(G%ICX(IC), G%ICY(IC), G%ICZ(IC)) 
-            ENDDO
-            !$OMP END PARALLEL DO 
-
-            IC0 = G%NC+1
-            DO IZ = 1, L%NZ
-               DO IY = 1, L%NY
-                  V2(IC0) = FFT%PRHS(FFT%IBAR, IY, IZ) 
-                  IC0 = IC0 + 1
-               ENDDO
-            ENDDO
-
-         ELSE IF (NM == NMESHES) THEN
-
-            !$OMP PARALLEL DO PRIVATE(IC) SCHEDULE(STATIC)
-            DO IC = 1, G%NC
-               V2(IC) = FFT%PRHS(G%ICX(IC)+1, G%ICY(IC), G%ICZ(IC)) 
-            ENDDO
-            !$OMP END PARALLEL DO 
-
-            IC0 = G%NC+1
-            DO IZ = 1, L%NZ
-               DO IY = 1, L%NY
-                  V2(IC0) = FFT%PRHS(1, IY, IZ) 
-                  IC0 = IC0 + 1
-               ENDDO
-            ENDDO
-
-         ELSE
-
-            !$OMP PARALLEL DO PRIVATE(IC) SCHEDULE(STATIC)
-            DO IC = 1, G%NC
-               V2(IC) = FFT%PRHS(G%ICX(IC)+1, G%ICY(IC), G%ICZ(IC)) 
-            ENDDO
-            !$OMP END PARALLEL DO 
-
-            IC0 = G%NC+1
-            DO IZ = 1, L%NZ
-               DO IY = 1, L%NY
-                  V2(IC0) = FFT%PRHS(1, IY, IZ) 
-                  IC0 = IC0 + 1
-               ENDDO
-            ENDDO
-            DO IZ = 1, L%NZ
-               DO IY = 1, L%NY
-                  V2(IC0) = FFT%PRHS(FFT%IBAR, IY, IZ) 
-                  IC0 = IC0 + 1
-               ENDDO
-            ENDDO
-
-         ENDIF
-
-      ENDDO
-
-      ! Exchange overlapping parts
-
-      CALL SCARC_EXCHANGE (NSCARC_EXCHANGE_VECTOR_MEAN, NV2, NL)
-
-
 #ifdef WITH_MKL
- 
-
    ! --------- Preconditioning by LU-decomposition
  
    CASE (NSCARC_RELAX_MKL)
