@@ -1534,8 +1534,6 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
 
             CFA%ONE_D%U_NORMAL_S = TIME_RAMP_FACTOR*CFA%ONE_D%U_NORMAL_0
 
-            print *,CFA%ONE_D%U_NORMAL_S
-
             ! Special Cases
             ! NEUMANN_IF: IF (SF%SPECIFIED_NORMAL_GRADIENT) THEN
             ! TO DO, following PREDICT_NORMAL_VELOCITY.
