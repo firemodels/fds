@@ -11465,7 +11465,6 @@ IMPLICIT NONE (TYPE,EXTERNAL)
 
 CONTAINS
 
-
 ! ------------------------------------------------------------------------------------------------------------------
 !> \brief Setup sizes for Poisson matrices on requested grid levels
 ! ------------------------------------------------------------------------------------------------------------------
@@ -11999,7 +11998,7 @@ SELECT_STORAGE_TYPE: SELECT CASE (SET_MATRIX_TYPE(NL))
       IP = 1
       SELECT_COMPACT_POISSON_TYPE: SELECT CASE (TYPE_POISSON)
 
-         CASE (NSCARC_POISSON_SEPARABLE)
+         CASE (NSCARC_POISSON_SEPARABLE)               ! Build separable Poisson system leading to constant matrix entries
 
             DO IZ = 1, L%NZ
                DO IY = 1, L%NY
@@ -12028,7 +12027,7 @@ SELECT_STORAGE_TYPE: SELECT CASE (SET_MATRIX_TYPE(NL))
                ENDDO
             ENDDO
          
-         CASE (NSCARC_POISSON_INSEPARABLE)
+         CASE (NSCARC_POISSON_INSEPARABLE)             ! Build inseparable Poisson system leading to variable matrix entries
 
            DO IZ = 1, L%NZ
               DO IY = 1, L%NY
@@ -12107,9 +12106,9 @@ SELECT_STORAGE_TYPE: SELECT CASE (SET_MATRIX_TYPE(NL))
 
          CASE (NSCARC_POISSON_INSEPARABLE)
 
-            CALL SHUTDOWN('SCARC_POISSON: Bandwise storage technique for inseparable Poisson system not yet implementing')
+            CALL SHUTDOWN('SCARC_SETUP_POISSON: Bandwise storage technique for inseparable Poisson system not yet implemented')
 
-         END SELECT SELECT_BANDWISE_POISSON_TYPE
+      END SELECT SELECT_BANDWISE_POISSON_TYPE
    
 END SELECT SELECT_STORAGE_TYPE
 
@@ -12300,7 +12299,6 @@ A%N_VAL = IP
 CALL SCARC_GET_MATRIX_STENCIL_MAX(A, G%NC)
 
 TYPE_SCOPE(0) = TYPE_SCOPE_SAVE
-
  
 END SUBROUTINE SCARC_SETUP_LAPLACE
 
@@ -12856,66 +12854,117 @@ END SUBROUTINE SCARC_SETUP_MATRIX_MKL
 ! --------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_SETUP_BOUNDARY (NM, NL)
 USE SCARC_POINTERS, ONLY: L, G, F, GWC, A, AB, ACO, ABCO, SCARC_POINT_TO_GRID
+USE SCARC_UTILITIES, ONLY: RECIPROCAL_DIRECTIONAL_MEAN
+USE COMP_FUNCTIONS, ONLY: SHUTDOWN
 INTEGER, INTENT(IN) :: NM, NL
-INTEGER :: I, J, K, IOR0, IW, IC, NOM, IP, ICO, ICOL
+INTEGER :: I, J, K, IG, JG, KG, IOR0, IW, IC, NOM, IP, ICO, ICOL
 
 CALL SCARC_POINT_TO_GRID (NM, NL)                                    
 
-SELECT CASE (SET_MATRIX_TYPE(NL))
+MATRIX_TYPE_SELECT: SELECT CASE (SET_MATRIX_TYPE(NL))
 
    ! ---------- Matrix in compact storage technique
  
-   CASE (NSCARC_MATRIX_COMPACT)
+   CASE (NSCARC_MATRIX_COMPACT) 
 
+      ! Setup condensing in purely Neumann case
+
+      IF (IS_PURE_NEUMANN) CALL SCARC_SETUP_CMATRIX_CONDENSED(NM)              
       A => G%POISSON
 
-      ! Setup condensing if there are no Dirichlet BC's 
+      COMPACT_POISSON_TYPE_SELECT: SELECT CASE (TYPE_POISSON)
 
-      IF (IS_PURE_NEUMANN) CALL SCARC_SETUP_CMATRIX_CONDENSED(NM)
-
-      ! Set correct boundary conditions 
-
-      DO IW = 1, G%NW
-
-         GWC => G%WALL(IW)
-         IOR0 = GWC%IOR
-         IF (TWO_D .AND. ABS(IOR0) == 2) CYCLE       
-
-         F  => L%FACE(IOR0)
-
-         I = GWC%IXW
-         J = GWC%IYW
-         K = GWC%IZW
-
-         IF (IS_UNSTRUCTURED .AND. L%IS_SOLID(I, J, K)) CYCLE
-
-         NOM = GWC%NOM
-         IC  = G%CELL_NUMBER(I, J, K)
-         GWC%ICW = IC
-
-         ! SPD-matrix with mixture of Dirichlet and Neumann BC's according to BTYPE
-
-         IF (N_DIRIC_GLOBAL(NLEVEL_MIN) > 0) THEN
-
-            IP = A%ROW(IC)
-            SELECT CASE (GWC%BTYPE)
-               CASE (DIRICHLET)
-                  A%VAL(IP) = A%VAL(IP) - F%MATRIX_SHARE
-               CASE (NEUMANN)
+         ! Set boundary condition of separable Poisson system for this wall cell
+         ! Note: the related value to add or substract from the main diagonal element for the respective face F
+         ! was already computed before in the routine SCARC_SETUP_FACE_BASICS and was stored I F%MATRIX_SHARE
+         ! e.g. IOR0 =  1:  F%MATRIX_SHARE = RDX(1)*RDXN(0)
+         !      IOR0 = -1:  F%MATRIX_SHARE = RDX(IBAR)*RDXN(IBAR)
+         ! In the Dirichlet-case this value has to be added, in the Neumann case it must be subtracted
+      
+         CASE (NSCARC_POISSON_SEPARABLE)   
+             
+            COMPACT_SEPARABLE_WALL_LOOP: DO IW = 1, G%NW
+      
+               GWC => G%WALL(IW)
+               IOR0 = GWC%IOR
+               IF (TWO_D .AND. ABS(IOR0) == 2) CYCLE       
+      
+               F  => L%FACE(IOR0)                             ! Face information associated with direction IOR0
+      
+               I = GWC%IXW
+               J = GWC%IYW
+               K = GWC%IZW
+      
+               IF (IS_UNSTRUCTURED .AND. L%IS_SOLID(I, J, K)) CYCLE
+      
+               NOM = GWC%NOM
+               IC  = G%CELL_NUMBER(I, J, K)
+               GWC%ICW = IC
+      
+               IP = A%ROW(IC)
+               IF (N_DIRIC_GLOBAL(NLEVEL_MIN) > 0) THEN
+      
+                  SELECT CASE (GWC%BTYPE)
+                     CASE (DIRICHLET)
+                        A%VAL(IP) = A%VAL(IP) - F%MATRIX_SHARE
+                     CASE (NEUMANN)
+                        A%VAL(IP) = A%VAL(IP) + F%MATRIX_SHARE
+                  END SELECT
+      
+               ! Purely Neumann matrix
+      
+               ELSE IF (GWC%BTYPE == NEUMANN) THEN
                   A%VAL(IP) = A%VAL(IP) + F%MATRIX_SHARE
-            END SELECT
+               ENDIF
+      
+            ENDDO COMPACT_SEPARABLE_WALL_LOOP
 
-         ! Purely Neumann matrix
+         ! Set boundary condition of inseparable Poisson system for this wall cell
+         ! Here the upper F%MATRIX_SHARE value must additionally be combined with the reciprocal directional mean value of the
+         ! density towards that face and again be added or subtracted depending on the BC type (Dirichlt/Neumann)
+      
+         CASE (NSCARC_POISSON_INSEPARABLE)
 
-         ELSE IF (GWC%BTYPE == NEUMANN) THEN
-            IP = A%ROW(IC)
-            A%VAL(IP) = A%VAL(IP) + F%MATRIX_SHARE
-         ENDIF
+            COMPACT_INSEPARABLE_WALL_LOOP: DO IW = 1, G%NW
+      
+               GWC => G%WALL(IW)
+               IOR0 = GWC%IOR
+               IF (TWO_D .AND. ABS(IOR0) == 2) CYCLE       
+      
+               F  => L%FACE(IOR0)
+      
+               I  = GWC%IXW ;  J  = GWC%IYW ;  K  = GWC%IZW           ! mesh-inner cells indices in ScaRC-structure
+               IG = GWC%IXG ;  JG = GWC%IYG ;  KG = GWC%IZG           ! ghost cell indices in ScaRC-structure
+      
+               IF (IS_UNSTRUCTURED .AND. L%IS_SOLID(I, J, K)) CYCLE
+      
+               NOM = GWC%NOM
+               IC  = G%CELL_NUMBER(I, J, K)
+               GWC%ICW = IC
+      
+               IP = A%ROW(IC)
+               IF (N_DIRIC_GLOBAL(NLEVEL_MIN) > 0) THEN
+      
+                  SELECT CASE (GWC%BTYPE)
+                     CASE (DIRICHLET)
+                        A%VAL(IP) = A%VAL(IP) - F%MATRIX_SHARE * RECIPROCAL_DIRECTIONAL_MEAN(SCARC_RHO, IOR0, I, J, K)
+                     CASE (NEUMANN)
+                        A%VAL(IP) = A%VAL(IP) + F%MATRIX_SHARE * RECIPROCAL_DIRECTIONAL_MEAN(SCARC_RHO, IOR0, I, J, K)
+                  END SELECT
 
-      ENDDO 
+      
+               ! Purely Neumann matrix
+      
+               ELSE IF (GWC%BTYPE == NEUMANN) THEN
+                  A%VAL(IP) = A%VAL(IP) + F%MATRIX_SHARE * RECIPROCAL_DIRECTIONAL_MEAN(SCARC_RHO, IOR0, I, J, K)
+               ENDIF
+      
+            ENDDO COMPACT_INSEPARABLE_WALL_LOOP
 
+      END SELECT COMPACT_POISSON_TYPE_SELECT
+      
       ! Transform into condensed system, if there are no Dirichlet BC's 
-
+      
       IF (IS_PURE_NEUMANN) THEN
          DO ICO = 1, A%N_CONDENSED
             ACO => A%CONDENSED(ICO)
@@ -12925,70 +12974,78 @@ SELECT CASE (SET_MATRIX_TYPE(NL))
             ENDDO
          ENDDO
       ENDIF 
-
+      
    ! ---------- Matrix in bandwise storage technique
  
-   CASE (NSCARC_MATRIX_BANDWISE)
+   CASE (NSCARC_MATRIX_BANDWISE) 
 
       ! Preset matrix switch if no Dirichlet BC's available
 
       AB => G%POISSONB
       IF (IS_PURE_NEUMANN) CALL SCARC_SETUP_BMATRIX_CONDENSED(NM)
 
-      ! Set right boundary conditions 
+      BANDWISE_POISSON_TYPE_SELECT: SELECT CASE (TYPE_POISSON)
 
-      DO IW = 1, G%NW
+         ! Set boundary condition of separable Poisson system for this wall cell
+         ! The same holds true as for the compactly stored matrix, but only the different storage scheme for the matrix 
+         ! must be considered; here, POS(0) corresponds to the diagonal matrix element
 
-         GWC => G%WALL(IW)
-         IOR0 = GWC%IOR
-         IF (TWO_D .AND. ABS(IOR0) == 2) CYCLE     
+         CASE (NSCARC_POISSON_SEPARABLE)     
+             
+            BANDWISE_SEPARABLE_WALL_LOOP: DO IW = 1, G%NW
 
-         F  => L%FACE(IOR0)
+               GWC => G%WALL(IW)
+               IOR0 = GWC%IOR
+               IF (TWO_D .AND. ABS(IOR0) == 2) CYCLE     
+      
+               F  => L%FACE(IOR0)
+      
+               I = GWC%IXW ;  J = GWC%IYW ;  K = GWC%IZW
+      
+               IF (IS_UNSTRUCTURED .AND. L%IS_SOLID(I, J, K)) CYCLE
+      
+               NOM  = GWC%NOM
+               GWC%ICW =G%CELL_NUMBER(I, J, K)
+               IC = G%CELL_NUMBER(I, J, K)
+      
+               IF (N_DIRIC_GLOBAL(NLEVEL_MIN) > 0) THEN
+      
+                  SELECT CASE (GWC%BTYPE)
+                     CASE (DIRICHLET)
+                        AB%VAL(IC, AB%POS(0)) = AB%VAL(IC, AB%POS(0)) - F%MATRIX_SHARE
+                     CASE (NEUMANN)
+                        AB%VAL(IC, AB%POS(0)) = AB%VAL(IC, AB%POS(0)) + F%MATRIX_SHARE
+                  END SELECT
+      
+               ! Purely Neumann matrix
+      
+               ELSE
+                  IF (GWC%BTYPE == NEUMANN) AB%VAL(IC, AB%POS(0)) = AB%VAL(IC, AB%POS(0)) + F%MATRIX_SHARE
+               ENDIF
+      
+            ENDDO BANDWISE_SEPARABLE_WALL_LOOP
+         
+            ! Transform into condensed system, if there are no Dirichlet BC's 
+      
+            IF (IS_PURE_NEUMANN) THEN
+               DO ICO = 1, AB%N_CONDENSED
+                  ABCO => AB%CONDENSED(ICO)
+                  IF (ICO == 1) THEN
+                     AB%VAL(ABCO%ICO, 1:AB%N_STENCIL) = ABCO%VAL2(1:AB%N_STENCIL)
+                  ELSE
+                     IP = AB%POS(ABCO%IOR0)
+                     AB%VAL(ABCO%ICO, IP) = ABCO%VAL2(IP)
+                  ENDIF
+               ENDDO
+            ENDIF 
 
-         I = GWC%IXW
-         J = GWC%IYW
-         K = GWC%IZW
-
-         IF (IS_UNSTRUCTURED .AND. L%IS_SOLID(I, J, K)) CYCLE
-
-         NOM  = GWC%NOM
-         GWC%ICW =G%CELL_NUMBER(I, J, K)
-         IC = G%CELL_NUMBER(I, J, K)
-
-         ! SPD-matrix with mixture of Dirichlet and Neumann BC's according to the SETTING of BTYPE
-
-         IF (N_DIRIC_GLOBAL(NLEVEL_MIN) > 0) THEN
-
-            SELECT CASE (GWC%BTYPE)
-               CASE (DIRICHLET)
-                  AB%VAL(IC, AB%POS(0)) = AB%VAL(IC, AB%POS(0)) - F%MATRIX_SHARE
-               CASE (NEUMANN)
-                  AB%VAL(IC, AB%POS(0)) = AB%VAL(IC, AB%POS(0)) + F%MATRIX_SHARE
-            END SELECT
-
-         ! Purely Neumann matrix
-
-         ELSE
-            IF (GWC%BTYPE == NEUMANN) AB%VAL(IC, AB%POS(0)) = AB%VAL(IC, AB%POS(0)) + F%MATRIX_SHARE
-         ENDIF
-
-      ENDDO 
-   
-      ! Transform into condensed system, if there are no Dirichlet BC's 
-
-      IF (IS_PURE_NEUMANN) THEN
-         DO ICO = 1, AB%N_CONDENSED
-            ABCO => AB%CONDENSED(ICO)
-            IF (ICO == 1) THEN
-               AB%VAL(ABCO%ICO, 1:AB%N_STENCIL) = ABCO%VAL2(1:AB%N_STENCIL)
-            ELSE
-               IP = AB%POS(ABCO%IOR0)
-               AB%VAL(ABCO%ICO, IP) = ABCO%VAL2(IP)
-            ENDIF
-         ENDDO
-      ENDIF 
+         CASE (NSCARC_POISSON_INSEPARABLE)  
  
-END SELECT 
+            CALL SHUTDOWN('SCARC_SETUP_BOUNDARY: Bandwise storage technique for inseparable Poisson system not yet implemented')
+
+      END SELECT BANDWISE_POISSON_TYPE_SELECT
+
+   END SELECT MATRIX_TYPE_SELECT
 
 END SUBROUTINE SCARC_SETUP_BOUNDARY
 
@@ -19872,6 +19929,7 @@ END SUBROUTINE SCARC_SETUP_SEPARABLE_BOUNDARY
 SUBROUTINE SCARC_SETUP_INSEPARABLE_BOUNDARY(VB)
 USE SCARC_POINTERS, ONLY: M, L, G, GWC, RDX, RDY, RDZ, RDXN, RDYN, RDZN, BXS, BXF, BYS, BYF, BZS, BZF, &
                           UU, VV, WW, RHOP, KRESP
+USE SCARC_UTILITIES, ONLY: RECIPROCAL_DIRECTIONAL_MEAN
 USE TYPES, ONLY: VENTS_TYPE, WALL_TYPE
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 REAL(EB), DIMENSION(:), INTENT(INOUT) :: VB
