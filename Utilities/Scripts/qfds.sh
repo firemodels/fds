@@ -131,6 +131,7 @@ function usage {
   echo " -x   - analyze the case with Intel Inspector"
   echo " -y dir - run case in directory dir"
   echo " -Y   - run case in directory casename where casename.fds is the case being run"
+  echo " -z   - use --hint=nomultithread on srun line"
   echo ""
   echo " Resource manager: $RESOURCE_MANAGER"
   exit
@@ -228,6 +229,7 @@ CHECK_DIRTY=
 USERMAX=
 casedir=
 use_default_casedir=
+MULTITHREAD=
 
 # by default maximize cores used if psm module is loaded
 MAX_MPI_PROCESSES_PER_NODE=
@@ -294,7 +296,7 @@ commandline=`echo $* | sed 's/-V//' | sed 's/-v//'`
 
 #*** read in parameters from command line
 
-while getopts 'Aa:b:c:Cd:D:e:Ef:ghHiIj:Lm:Mn:No:O:p:Pq:rsStT:U:vVw:xy:Y' OPTION
+while getopts 'Aa:b:c:Cd:D:e:Ef:ghHiIj:Lm:Mn:No:O:p:Pq:rsStT:U:vVw:xy:Yz' OPTION
 do
 case $OPTION  in
   A) # used by timing scripts to identify benchmark cases
@@ -447,7 +449,9 @@ case $OPTION  in
   Y)
    use_default_casedir=1
    ;;
-   
+  z)
+   MULTITHREAD="--hint=nomultithread"
+   ;;
 esac
 done
 shift $(($OPTIND-1))
@@ -844,7 +848,7 @@ else
 
   if [ "$RESOURCE_MANAGER" == "SLURM" ]; then
     QSUB="sbatch -p $queue --ignore-pbs"
-    MPIRUN="srun -N $nodes -n $n_mpi_processes --ntasks-per-node $n_mpi_processes_per_node"
+    MPIRUN="srun -N $nodes -n $n_mpi_processes --ntasks-per-node $n_mpi_processes_per_node $MULTITHREAD"
   fi
 
 #*** run without a queueing system
