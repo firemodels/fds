@@ -848,7 +848,7 @@ else
 
   if [ "$RESOURCE_MANAGER" == "SLURM" ]; then
     QSUB="sbatch -p $queue --ignore-pbs"
-    MPIRUN="srun -N $nodes -n $n_mpi_processes --ntasks-per-node $n_mpi_processes_per_node $MULTITHREAD"
+    MPIRUN="srun -N $nodes -n $n_mpi_processes --ntasks-per-node $n_mpi_processes_per_node"
   fi
 
 #*** run without a queueing system
@@ -901,6 +901,11 @@ if [ "$EMAIL" != "" ]; then
     cat << EOF >> $scriptfile
 #SBATCH --mail-user=$EMAIL
 #SBATCH --mail-type=ALL
+EOF
+fi
+if [ "$MULTITHREAD" != "" ]; then
+    cat << EOF >> $scriptfile
+#SBATCH $MULTITHREAD
 EOF
 fi
 
