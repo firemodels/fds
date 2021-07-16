@@ -1094,7 +1094,8 @@ ONE_D%BURN_DURATION   => OS%REALS(RC+33,STORAGE_INDEX) ; IF (NEW) ONE_D%BURN_DUR
 ONE_D%T_SCALE         => OS%REALS(RC+34,STORAGE_INDEX) ; IF (NEW) ONE_D%T_SCALE         = 0._EB
 ONE_D%Q_SCALE         => OS%REALS(RC+35,STORAGE_INDEX) ; IF (NEW) ONE_D%Q_SCALE         = 0._EB
 ONE_D%L_OBUKHOV       => OS%REALS(RC+36,STORAGE_INDEX) ; IF (NEW) ONE_D%L_OBUKHOV       = 0._EB
-ONE_D%T_MATL_PART     => OS%REALS(RC+36,STORAGE_INDEX) ; IF (NEW) ONE_D%T_MATL_PART     = 0._EB
+ONE_D%T_MATL_PART     => OS%REALS(RC+37,STORAGE_INDEX) ; IF (NEW) ONE_D%T_MATL_PART     = 0._EB
+ONE_D%B_NUMBER        => OS%REALS(RC+37,STORAGE_INDEX) ; IF (NEW) ONE_D%B_NUMBER     = 0._EB
 
 I1 = RC+1+N_ONE_D_SCALAR_REALS ; I2 = I1 + SF%ONE_D_REALS_ARRAY_SIZE(1) - 1
 ONE_D%M_DOT_G_PP_ACTUAL(1:I2-I1+1) => OS%REALS(I1:I2,STORAGE_INDEX)
@@ -3759,7 +3760,7 @@ ELSE THERMALLY_THICK_IF
             ENERGY_SELECT_2: SELECT CASE(MODE)
                CASE(2,3)
                   ML => MATERIAL(N)
-                  EPUM = ML%H(ITMP)+DTMP*(ML%H(ITMP+1)-ML%H(ITMP))
+                  EPUM = ML%H(ITMP)+DTMP*(ML%H(ITMP+1)-ML%H(ITMP))                  
             END SELECT ENERGY_SELECT_2
             SURFACE_DENSITY = SURFACE_DENSITY + ONE_D%MATL_COMP(N)%RHO(II2)*WGT*EPUM
          ENDDO
@@ -4149,13 +4150,13 @@ ENDIF
 END SUBROUTINE MONIN_OBUKHOV_STABILITY_CORRECTIONS
 
 
-!> \brief Computes the mass and heat transfer coeffiicents for a liquid droplet in air based on the selected EVAP_MODEL on MISC
+!> \brief Computes the mass and heat transfer coeffiicents for a liquid droplet in FILM based on the selected EVAP_MODEL on MISC
 !> \param H_MASS The mass transfer coefficient (m2/s)
 !> \param H_HEAT The dropelt heat transfer coefficient (W/m2/K)
-!> \param D_AIR Diffusivity in air of the droplet species in the gas cell with the droplet (m2/s)
-!> \param K_AIR Conductivity in the gas cell with the droplet (W/m/k)
-!> \param CP_AIR Specific heat in the gas cell with the droplet (J/kg/K)
-!> \param RHO_AIR Density in the gas cell with the droplet (kg/m3)
+!> \param D_FILM Diffusivity in the film (m2/s)
+!> \param K_FILM Conductivity in the film (W/m/k)
+!> \param CP_FILM Specific heat in the film (J/kg/K)
+!> \param RHO_FILM Density in in the film (kg/m3)
 !> \param LENGTH Length scale (m)
 !> \param Y_DROP Equilibrium vapor fraction for the current droplet temperature
 !> \param Y_GAS Mass fraction of vapor in the gas
@@ -4167,36 +4168,36 @@ END SUBROUTINE MONIN_OBUKHOV_STABILITY_CORRECTIONS
 !> \param ZZ_GET Tracked species mass fractions in the gas cell with the droplet
 !> \param Z_INDEX Droplet species index in ZZ
 
-SUBROUTINE DROPLET_H_MASS_H_HEAT_GAS(H_MASS,H_HEAT,D_AIR,K_AIR,CP_AIR,RHO_AIR,LENGTH,Y_DROP,Y_GAS,B_NUMBER,NU_FAC_GAS,SH_FAC_GAS, &
-                                     RE_L,TMP_FILM,ZZ_GET,Z_INDEX)
+SUBROUTINE DROPLET_H_MASS_H_HEAT_GAS(H_MASS,H_HEAT,D_FILM,K_FILM,CP_FILM,RHO_FILM,LENGTH,Y_DROP,Y_GAS,B_NUMBER,NU_FAC_GAS, &
+                                     SH_FAC_GAS,RE_L,TMP_FILM,ZZ_GET,Z_INDEX)
 USE MATH_FUNCTIONS, ONLY: F_B
-REAL(EB), INTENT(IN) :: D_AIR,CP_AIR,K_AIR,RHO_AIR,LENGTH,Y_DROP,Y_GAS,NU_FAC_GAS,SH_FAC_GAS,RE_L,TMP_FILM, &
+REAL(EB), INTENT(IN) :: D_FILM,CP_FILM,K_FILM,RHO_FILM,LENGTH,Y_DROP,Y_GAS,NU_FAC_GAS,SH_FAC_GAS,RE_L,TMP_FILM, &
                         ZZ_GET(1:N_TRACKED_SPECIES)
 INTEGER, INTENT(IN) :: Z_INDEX
 REAL(EB), INTENT(INOUT) :: B_NUMBER
 REAL(EB), INTENT(OUT) :: H_MASS,H_HEAT
-REAL(EB) :: NUSSELT,SHERWOOD,LEWIS,THETA,C_GAS_DROP,C_GAS_AIR,ZZ_GET2(1:N_TRACKED_SPECIES)
+REAL(EB) :: NUSSELT,SHERWOOD,LEWIS,THETA,C_GAS_DROP,C_GAS_FILM,ZZ_GET2(1:N_TRACKED_SPECIES)
 
 SELECT CASE (EVAP_MODEL)
    CASE(-1) ! Ranz Marshall
       NUSSELT  = 2._EB + NU_FAC_GAS*SQRT(RE_L)
-      H_HEAT   = NUSSELT*K_AIR/LENGTH
+      H_HEAT   = NUSSELT*K_FILM/LENGTH
       IF (Y_DROP <= Y_GAS) THEN
          H_MASS   = 0._EB
       ELSE
          SHERWOOD = 2._EB + SH_FAC_GAS*SQRT(RE_L)
-         H_MASS   = SHERWOOD*D_AIR/LENGTH
+         H_MASS   = SHERWOOD*D_FILM/LENGTH
       ENDIF
    CASE(0) ! Sazhin M0, Eq 106 + 109 with B_T=B_M. This is the default model.
       IF (Y_DROP <= Y_GAS) THEN
          NUSSELT  = 2._EB + NU_FAC_GAS*SQRT(RE_L)
-         H_HEAT   = NUSSELT*K_AIR/LENGTH
+         H_HEAT   = NUSSELT*K_FILM/LENGTH
          H_MASS   = 0._EB
       ELSE
          NUSSELT  = ( 2._EB + NU_FAC_GAS*SQRT(RE_L) )*LOG(1._EB+B_NUMBER)/B_NUMBER
-         H_HEAT   = NUSSELT*K_AIR/LENGTH
+         H_HEAT   = NUSSELT*K_FILM/LENGTH
          SHERWOOD = ( 2._EB + SH_FAC_GAS*SQRT(RE_L) )*LOG(1._EB+B_NUMBER)/(Y_DROP-Y_GAS)
-         H_MASS   = SHERWOOD*D_AIR/LENGTH
+         H_MASS   = SHERWOOD*D_FILM/LENGTH
          ! above we save a divide and multiply of B_NUMBER
          ! the full model corresponding to Sazhin (108) and (109) would be
          ! SH = SH_0 * LOG(1+B_M)/B_M
@@ -4205,38 +4206,38 @@ SELECT CASE (EVAP_MODEL)
    CASE(1) ! Sazhin M1, Eq 106 + 109 with eq 102.
       IF (Y_DROP <= Y_GAS) THEN
          NUSSELT  = 2._EB + NU_FAC_GAS*SQRT(RE_L)
-         H_HEAT   = NUSSELT*K_AIR/LENGTH
+         H_HEAT   = NUSSELT*K_FILM/LENGTH
          H_MASS   = 0._EB
       ELSE
          SHERWOOD = ( 2._EB + SH_FAC_GAS*SQRT(RE_L) )*LOG(1._EB+B_NUMBER)/(Y_DROP-Y_GAS)
-         H_MASS   = SHERWOOD*D_AIR/LENGTH
-         LEWIS    = K_AIR / (RHO_AIR * D_AIR * CP_AIR)
+         H_MASS   = SHERWOOD*D_FILM/LENGTH
+         LEWIS    = K_FILM / (RHO_FILM * D_FILM * CP_FILM)
          ZZ_GET2(1:N_TRACKED_SPECIES) = 0._EB
          ZZ_GET2(Z_INDEX) = 1._EB
          CALL GET_SPECIFIC_HEAT(ZZ_GET2,C_GAS_DROP,TMP_FILM)
-         CALL GET_SPECIFIC_HEAT(ZZ_GET,C_GAS_AIR,TMP_FILM)
-         THETA = C_GAS_DROP/C_GAS_AIR/LEWIS
+         CALL GET_SPECIFIC_HEAT(ZZ_GET,C_GAS_FILM,TMP_FILM)
+         THETA = C_GAS_DROP/C_GAS_FILM/LEWIS
          B_NUMBER = (1._EB+B_NUMBER)**THETA-1._EB
          NUSSELT  = ( 2._EB + NU_FAC_GAS*SQRT(RE_L) )*LOG(1._EB+B_NUMBER)/B_NUMBER
-         H_HEAT   = NUSSELT*K_AIR/LENGTH
+         H_HEAT   = NUSSELT*K_FILM/LENGTH
       ENDIF
    CASE(2) ! Sazhin M2, Eq 116 and 117 with eq 106, 109, and 102.
       IF (Y_DROP <= Y_GAS) THEN
          NUSSELT  = 2._EB + NU_FAC_GAS*SQRT(RE_L)
-         H_HEAT   = NUSSELT*K_AIR/LENGTH
+         H_HEAT   = NUSSELT*K_FILM/LENGTH
          H_MASS   = 0._EB
       ELSE
          SHERWOOD = ( 2._EB + SH_FAC_GAS*SQRT(RE_L) )*LOG(1._EB+B_NUMBER)/((Y_DROP-Y_GAS)*F_B(B_NUMBER))
-         H_MASS   = SHERWOOD*D_AIR/LENGTH
-         LEWIS    = K_AIR / (RHO_AIR * D_AIR * CP_AIR)
+         H_MASS   = SHERWOOD*D_FILM/LENGTH
+         LEWIS    = K_FILM / (RHO_FILM * D_FILM * CP_FILM)
          ZZ_GET2(1:N_TRACKED_SPECIES) = 0._EB
          ZZ_GET2(Z_INDEX) = 1._EB
          CALL GET_SPECIFIC_HEAT(ZZ_GET2,C_GAS_DROP,TMP_FILM)
-         CALL GET_SPECIFIC_HEAT(ZZ_GET,C_GAS_AIR,TMP_FILM)
-         THETA = C_GAS_DROP/C_GAS_AIR/LEWIS
+         CALL GET_SPECIFIC_HEAT(ZZ_GET,C_GAS_FILM,TMP_FILM)
+         THETA = C_GAS_DROP/C_GAS_FILM/LEWIS
          B_NUMBER = (1._EB+B_NUMBER)**THETA-1._EB
          NUSSELT  = ( 2._EB + NU_FAC_GAS*SQRT(RE_L) )*LOG(1._EB+B_NUMBER)/(B_NUMBER*F_B(B_NUMBER))
-         H_HEAT   = NUSSELT*K_AIR/LENGTH
+         H_HEAT   = NUSSELT*K_FILM/LENGTH
       ENDIF
 END SELECT
 
@@ -4265,6 +4266,128 @@ DO K=0,M%KBP1
 ENDDO
 
 END SUBROUTINE COMPUTE_WIND_COMPONENTS
+
+
+!> \brief Compute properties of the gas film for a liquid surface
+!> \param N_VAP Number of evaporating fluids
+!> \param FILM_FAC Linear factor for determining the filn conditions
+!> \param Y_VAP Mass fraciton of the liquid vapors at the surface
+!> \param Y_GAS Mass fraction of the liquid vapors in the gas cell
+!> \param ZZ_INDEX Array of tracked species indicies for the evaporating liquids
+!> \param TMP_S Temperature of the surface (K)
+!> \param TMP_GAS Temprature of the gas cell (K)
+!> \param ZZ_GAS Trakced species mass fractions in the gas cell
+!> \param PB Film pressure (Pa)
+!> \param TMP_FILM Film temperature (K)
+!> \param MU_FILM Film viscosity (kg/m/s)
+!> \param K_FILM Film conductivity (W/m/K)
+!> \param CP_FILM Film specific heat (kJ/kg/K)
+!> \param D_FILM Film diffusivity (m2/)
+!> \param RHO_FILM Film density (kg/m3)
+!> \param PR_FILM Film Prandtl number
+!> \param SC_FILM Film Schmidt number
+
+SUBROUTINE GET_FILM_PROPERTIES(N_VAP,FILM_FAC,Y_VAP,Y_GAS,ZZ_INDEX,TMP_S,TMP_GAS,ZZ_GAS,PB,TMP_FILM,MU_FILM,K_FILM,CP_FILM,D_FILM,&
+                               RHO_FILM,PR_FILM,SC_FILM)
+
+INTEGER, INTENT(IN) :: N_VAP,ZZ_INDEX(N_VAP)
+REAL(EB), INTENT(IN) :: FILM_FAC,Y_VAP(N_VAP),Y_GAS(N_VAP),TMP_S,TMP_GAS,ZZ_GAS(1:N_TRACKED_SPECIES),PB
+REAL(EB), INTENT(OUT) :: TMP_FILM,MU_FILM,K_FILM,CP_FILM,D_FILM,RHO_FILM,PR_FILM,SC_FILM
+REAL(EB) :: X_SUM,R_FILM,ZZ_FILM(1:N_TRACKED_SPECIES),Y_FILM(N_VAP),SUM_FILM,SUM_GAS,OM_SUM_FILM
+INTEGER :: I
+
+! Take liquid surface Y and gas cell Y and compoute film Y
+
+Y_FILM = Y_VAP + (1._EB-FILM_FAC)*(Y_GAS-Y_VAP)
+SUM_FILM = SUM(Y_VAP)
+SUM_GAS = SUM(Y_GAS)
+OM_SUM_FILM = 1._EB-SUM_FILM
+
+IF (OM_SUM_FILM<TWO_EPSILON_EB) THEN
+   ! If film is all vapor, just set the film Z to the vapor mass fractions.
+   ZZ_FILM = 0._EB
+   LOOP1: DO I=1,N_VAP
+      IF (ZZ_INDEX(I)==0) CYCLE LOOP1
+      ZZ_FILM(ZZ_INDEX(I)) = Y_FILM(I)
+   ENDDO LOOP1
+ELSE
+   ! Determine the additional mass fraction of tracked species for each vapor species present
+   ZZ_FILM = ZZ_GAS
+   LOOP2: DO I=1,N_VAP
+      IF (ZZ_INDEX(I)==0 .OR. Y_FILM(I)<TWO_EPSILON_EB) CYCLE LOOP2
+      ZZ_FILM(ZZ_INDEX(I)) = ZZ_GAS(ZZ_INDEX(I)) + &
+                             (Y_FILM(I)*(1._EB-SUM_GAS+Y_GAS(I))+Y_GAS(I)*(SUM_FILM-Y_FILM(I)-1._EB))/OM_SUM_FILM
+   ENDDO LOOP2
+   ZZ_FILM = ZZ_FILM/SUM(ZZ_FILM)
+ENDIF
+
+! Use film mass fractions to get properties and non-dimensional parameters. D is weighed by mole fraction.
+
+TMP_FILM = TMP_S + FILM_FAC*(TMP_GAS - TMP_S) ! LC Eq.(18)
+CALL GET_VISCOSITY(ZZ_FILM,MU_FILM,TMP_FILM)
+CALL GET_CONDUCTIVITY(ZZ_FILM,K_FILM,TMP_FILM)
+CALL GET_SPECIFIC_HEAT(ZZ_FILM,CP_FILM,TMP_FILM)
+CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_FILM,R_FILM)
+
+X_SUM = 0._EB
+LOOP3: DO I=1,N_VAP
+   IF (ZZ_INDEX(I)==0 .OR. Y_FILM(I)<TWO_EPSILON_EB) CYCLE LOOP3
+   D_FILM = D_Z(MIN(I_MAX_TEMP,NINT(TMP_S)),ZZ_INDEX(I))*ZZ_FILM(ZZ_INDEX(I))/SPECIES_MIXTURE(ZZ_INDEX(I))%MW
+   X_SUM=X_SUM+ZZ_FILM(ZZ_INDEX(I))/SPECIES_MIXTURE(ZZ_INDEX(I))%MW
+ENDDO LOOP3
+
+D_FILM = D_FILM/X_SUM
+PR_FILM = MU_FILM*CP_FILM/K_FILM
+RHO_FILM = PB/(R_FILM*TMP_FILM)
+PR_FILM = MU_FILM*CP_FILM/K_FILM
+SC_FILM = MU_FILM/(RHO_FILM*D_FILM)
+
+END SUBROUTINE GET_FILM_PROPERTIES
+
+!> \brief Converts an array of liquid vapor mole fractions into mass fractions
+!> \param N_MATS Number of liquids
+!> \param ZZ_GET Gas cell tracked species mass factions        
+!> \param X_SV Liquid surface liquid vapor mole fraction
+!> \param Y_SV Liquid surface liquid vapor mass fraction
+!> \param MW Liquid vapor molecular weights
+!> \param SMIX_INDEX Lookup for tracked species the liquids evaporate to
+
+SUBROUTINE GET_Y_SURF(N_MATS,ZZ_GET,X_SV,Y_SV,MW,SMIX_INDEX)
+INTEGER, INTENT(IN) :: N_MATS,SMIX_INDEX(N_MATS)
+REAL(EB), INTENT(IN) :: ZZ_GET(1:N_TRACKED_SPECIES),X_SV(N_MATS),MW(N_MATS)
+REAL(EB), INTENT(OUT) :: Y_SV(N_MATS)
+REAL(EB) :: ZZ_2(1:N_TRACKED_SPECIES),MW_DRY,MASS
+INTEGER :: I
+
+ZZ_2 = ZZ_GET
+Y_SV = 0._EB
+
+!Zero out tracked species that are liquid vapors and get the MW of what is left
+
+Y_ALL_LOOP: DO I=1,N_MATS
+   IF (X_SV(I) < TWO_EPSILON_EB) CYCLE
+   ZZ_2(SMIX_INDEX(I))=0._EB
+ENDDO Y_ALL_LOOP
+
+IF (SUM(ZZ_2) > TWO_EPSILON_EB) THEN
+   ZZ_2 = ZZ_2 / SUM(ZZ_2)
+   MW_DRY = 0._EB
+   DO I=1,N_TRACKED_SPECIES
+      MW_DRY = MW_DRY + ZZ_2(I)/SPECIES_MIXTURE(I)%MW
+   ENDDO
+   MW_DRY = 1._EB/MW_DRY
+ENDIF
+ 
+! Get mass based on mole fractions and MWs and convert X to Y
+MASS = (1._EB-SUM(X_SV))*MW_DRY
+DO I=1,N_MATS
+   Y_SV(I) = X_SV(I)*MW(I)
+   MASS = MASS + Y_SV(I)
+ENDDO
+
+Y_SV = Y_SV/MASS
+
+END SUBROUTINE GET_Y_SURF
 
 
 END MODULE PHYSICAL_FUNCTIONS
