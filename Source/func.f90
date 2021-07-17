@@ -4297,9 +4297,8 @@ REAL(EB) :: X_SUM,R_FILM,ZZ_FILM(1:N_TRACKED_SPECIES),Y_FILM(N_VAP),SUM_FILM,SUM
 INTEGER :: I
 
 ! Take liquid surface Y and gas cell Y and compoute film Y
-
-Y_FILM = Y_VAP + (1._EB-FILM_FAC)*(Y_GAS-Y_VAP)
-SUM_FILM = SUM(Y_VAP)
+Y_FILM = Y_VAP + FILM_FAC*(Y_GAS-Y_VAP)
+SUM_FILM = SUM(Y_FILM)
 SUM_GAS = SUM(Y_GAS)
 OM_SUM_FILM = 1._EB-SUM_FILM
 
@@ -4312,13 +4311,21 @@ IF (OM_SUM_FILM<TWO_EPSILON_EB) THEN
    ENDDO LOOP1
 ELSE
    ! Determine the additional mass fraction of tracked species for each vapor species present
-   ZZ_FILM = ZZ_GAS
-   LOOP2: DO I=1,N_VAP
-      IF (ZZ_INDEX(I)==0 .OR. Y_FILM(I)<TWO_EPSILON_EB) CYCLE LOOP2
-      ZZ_FILM(ZZ_INDEX(I)) = ZZ_GAS(ZZ_INDEX(I)) + &
-                             (Y_FILM(I)*(1._EB-SUM_GAS+Y_GAS(I))+Y_GAS(I)*(SUM_FILM-Y_FILM(I)-1._EB))/OM_SUM_FILM
-   ENDDO LOOP2
-   ZZ_FILM = ZZ_FILM/SUM(ZZ_FILM)
+   IF (ABS(SUM_GAS-1._EB) < TWO_EPSILON_EB) THEN
+      ZZ_FILM = 0._EB
+      DO I=1,N_VAP
+         ZZ_FILM(ZZ_INDEX(I)) = Y_FILM(I)
+      ENDDO
+      ZZ_FILM(1) = 1._EB - SUM_FILM
+   ELSE
+      ZZ_FILM = ZZ_GAS
+      LOOP2: DO I=1,N_VAP
+         IF (ZZ_INDEX(I)==0 .OR. Y_FILM(I)<TWO_EPSILON_EB) CYCLE LOOP2
+         ZZ_FILM(ZZ_INDEX(I)) = ZZ_GAS(ZZ_INDEX(I)) + &
+                                (Y_FILM(I)*(1._EB-SUM_GAS+Y_GAS(I))+Y_GAS(I)*(SUM_FILM-Y_FILM(I)-1._EB))/OM_SUM_FILM
+      ENDDO LOOP2
+      ZZ_FILM = ZZ_FILM/SUM(ZZ_FILM)
+   ENDIF
 ENDIF
 
 ! Use film mass fractions to get properties and non-dimensional parameters. D is weighed by mole fraction.
