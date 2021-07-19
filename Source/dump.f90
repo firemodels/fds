@@ -3622,6 +3622,16 @@ ENDIF
 
 WRITE(LU_ERR,'(A)') TRIM(SIMPLE_OUTPUT_ERR)
 
+! Write runtime diagnostics to the steps CSV file.
+
+CALL GET_DATE_ISO_8601(DATE)
+CALL CPU_TIME(CPUTIME)
+IF (ABS(T)<=999._EB) THEN
+   WRITE(LU_STEPS,'(I7,",",A,",",E12.3,",",F10.5,",",E12.3)') ICYC,TRIM(DATE),DT,T,CPUTIME - CPU_TIME_START
+ELSE
+   WRITE(LU_STEPS,'(I7,",",A,",",E12.3,",",F10.2,",",E12.3)') ICYC,TRIM(DATE),DT,T,CPUTIME - CPU_TIME_START
+ENDIF
+
 ! Write simple output string to .out file if the diagnostics are suppressed.
 
 IF (SUPPRESS_DIAGNOSTICS) THEN
@@ -3670,12 +3680,6 @@ IF (TRIM(PRES_METHOD) == 'SCARC' .OR. TRIM(PRES_METHOD) == 'USCARC') THEN
    ENDIF
 ENDIF
 WRITE(LU_OUTPUT,'(7X,A)') '---------------------------------------------------------------'
-
-! Write runtime diagnostics to the steps CSV file.
-CALL GET_DATE_ISO_8601(DATE)
-CALL CPU_TIME(CPUTIME)
-IF (ABS(T)<=999._EB) WRITE(LU_STEPS,'(I7,",",A,",",E12.3,",",F10.5,",",E12.3)') ICYC,TRIM(DATE),DT,T,CPUTIME - CPU_TIME_START
-IF (ABS(T)> 999._EB) WRITE(LU_STEPS,'(I7,",",A,",",E12.3,",",F10.2,",",E12.3)') ICYC,TRIM(DATE),DT,T,CPUTIME - CPU_TIME_START
 
 DO NM=1,NMESHES
    IF (EVACUATION_ONLY(NM)) CYCLE
