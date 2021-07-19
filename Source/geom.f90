@@ -16694,7 +16694,7 @@ COUNT_GEOM_LOOP: DO
    IF(N_GEOMETRY+1 > GEOM_LINE_SIZE) THEN
       ALLOCATE(GEOM_LINE2(GEOM_LINE_SIZE))
       GEOM_LINE2(1:GEOM_LINE_SIZE) = GEOM_LINE(1:GEOM_LINE_SIZE)
-      DEALLOCATE(GEOM_LINE) 
+      DEALLOCATE(GEOM_LINE)
       ALLOCATE(GEOM_LINE(GEOM_LINE_SIZE+DELTA_GEOM_LINE)); GEOM_LINE = 0
       GEOM_LINE(1:GEOM_LINE_SIZE) = GEOM_LINE2(1:GEOM_LINE_SIZE)
       GEOM_LINE_SIZE = SIZE(GEOM_LINE,DIM=1)
@@ -22067,39 +22067,111 @@ END FUNCTION INTERSECT_OBB_AABB
 !
 ! END SUBROUTINE POLYGON_CLOSE_TO_EDGE
 
+! ---------------------------- AVERAGE_FACE_VALUES ----------------------------------------
+
+! at each node, compute the average of those faces connected to that node
+
+SUBROUTINE AVERAGE_FACE_VALUES(VERT_UNIQUE, VERT_VALS, NVERTS, FACES, FACE_VALS, NFACES)
+INTEGER, INTENT(IN) :: NVERTS, NFACES
+INTEGER, INTENT(IN), TARGET :: FACES(3*NFACES), VERT_UNIQUE(NVERTS)
+REAL(EB), INTENT(IN) :: FACE_VALS(NFACES)
+REAL(EB), INTENT(OUT) :: VERT_VALS(NVERTS)
+
+INTEGER, DIMENSION(:), POINTER :: V
+INTEGER :: I
+INTEGER :: COUNT(NVERTS)
+
+VERT_VALS(1:NVERTS) = 0.0_EB
+COUNT(1:NVERTS) = 0
+DO I = 1, NFACES
+   V(1:3) => FACES(3*I-2:3*I)
+   V(1:3) = VERT_UNIQUE(V(1:3))
+   VERT_VALS(V(1)) = VERT_VALS(V(1)) + FACE_VALS(I)
+   COUNT(V(1)) = COUNT(V(1)) + 1
+   VERT_VALS(V(2)) = VERT_VALS(V(2)) + FACE_VALS(I)
+   COUNT(V(2)) = COUNT(V(2)) + 1
+   VERT_VALS(V(3)) = VERT_VALS(V(3)) + FACE_VALS(I)
+   COUNT(V(3)) = COUNT(V(3)) + 1
+ENDDO
+DO I = 1, NVERTS
+   IF (COUNT(I) .NE. 0) THEN
+      VERT_VALS(I) = VERT_VALS(I)/REAL(COUNT(I), EB)
+   ENDIF
+ENDDO
+DO I = 1, NVERTS
+   IF (VERT_UNIQUE(I) .NE. I) THEN
+      VERT_VALS(I) = VERT_VALS(VERT_UNIQUE(I))
+   ENDIF
+ENDDO
+
+END SUBROUTINE AVERAGE_FACE_VALUES
+
+! ---------------------------- GET_VERTS_UNIQUE ----------------------------------------
+
+! construct an array that points to first vertex in a vertex array when one or more vertices are identical
+
+SUBROUTINE GET_VERTS_UNIQUE(VERTS, PERM, VERT_UNIQUE, NVERTS)
+INTEGER, INTENT(IN) :: NVERTS
+REAL, INTENT(IN) :: VERTS(3*NVERTS)
+INTEGER, INTENT(IN) :: PERM(NVERTS)
+INTEGER, INTENT(OUT) :: VERT_UNIQUE(NVERTS)
+
+INTEGER :: I, RESULT
+
+DO I = 1, NVERTS
+   VERT_UNIQUE(I) = I
+END DO
+DO I = 1, NVERTS - 1
+   CALL COMPARE_VERTS(VERTS, NVERTS, PERM(I), PERM(I+1), RESULT)
+   IF (RESULT == 0) THEN
+      VERT_UNIQUE(PERM(I+1)) = VERT_UNIQUE(PERM(I))
+   ENDIF
+END DO
+
+END SUBROUTINE GET_VERTS_UNIQUE
+
+! ---------------------------- COMPARE_VERTS ----------------------------------------
+
+! returns -1, 0, 1 when a vertex I is less than, the same or greater than vertex J
+
 SUBROUTINE COMPARE_VERTS(VERTS, NVERTS, I, J, RESULT)
 INTEGER, INTENT(IN) :: NVERTS
 REAL, INTENT(IN) :: VERTS(3*NVERTS)
 INTEGER, INTENT(IN) :: I, J
 INTEGER, INTENT(OUT) :: RESULT
 
-IF(VERTS(3*I  ) < VERTS(3*J  ) - TWO_EPSILON_EB)THEN
+IF (VERTS(3*I  ) < VERTS(3*J  ) - GEOMEPS) THEN
    RESULT = -1
    RETURN
 ENDIF
-IF(VERTS(3*I  ) > VERTS(3*J  ) + TWO_EPSILON_EB)THEN
+IF (VERTS(3*I  ) > VERTS(3*J  ) + GEOMEPS) THEN
    RESULT = 1
    RETURN
 ENDIF
-IF(VERTS(3*I+1) < VERTS(3*J+1) - TWO_EPSILON_EB)THEN
+IF (VERTS(3*I+1) < VERTS(3*J+1) - GEOMEPS) THEN
    RESULT = -1
    RETURN
 ENDIF
-IF(VERTS(3*I+1) > VERTS(3*J+1) + TWO_EPSILON_EB)THEN
+IF (VERTS(3*I+1) > VERTS(3*J+1) + GEOMEPS) THEN
    RESULT = 1
    RETURN
 ENDIF
-IF(VERTS(3*I+2) < VERTS(3*J+2) - TWO_EPSILON_EB)THEN
+IF (VERTS(3*I+2) < VERTS(3*J+2) - GEOMEPS) THEN
    RESULT = -1
    RETURN
 ENDIF
-IF(VERTS(3*I+2) > VERTS(3*J+2) + TWO_EPSILON_EB)THEN
+IF (VERTS(3*I+2) > VERTS(3*J+2) + GEOMEPS) THEN
    RESULT = 1
    RETURN
 ENDIF
 RESULT = 0
 RETURN
 END SUBROUTINE COMPARE_VERTS
+
+! ---------------------------- MAKE_PERMUTATION_VECTOR ----------------------------------------
+
+! sort a vertex array in increasing order and store the order in a permutation array
+! PERM(1) is the vertex vertex, PERM(2) is the 2nd and so on
 
 RECURSIVE SUBROUTINE MAKE_PERMUTATION_VECTOR(VERTS, PERM, NVERTS, FIRST, LAST)
 INTEGER, INTENT(IN) :: NVERTS
@@ -22111,7 +22183,13 @@ INTEGER RESULT
 
 INTEGER :: MID, I, I1, I2, IP1, IP2, N, N1, N2
 
-IF(FIRST .EQ. LAST)RETURN  ! only one element in list so don't need to sort
+IF (FIRST .EQ. 1 .AND. LAST .EQ. NVERTS ) THEN
+   DO I = 1, NVERTS
+      PERM(I) = I
+   ENDDO
+ENDIF
+
+IF (FIRST .EQ. LAST)RETURN  ! only one element in list so don't need to sort
 
 ! FIRST .... LAST         original list
 ! FIRST ...  MID          first half of list
@@ -22146,7 +22224,7 @@ DO I = 1, N
    IP1 = PERM(FIRST + I1 - 1)
    IP2 = PERM(MID + I2)
    CALL COMPARE_VERTS(VERTS, NVERTS, IP1, IP2, RESULT)
-   IF (RESULT .EQ. -1)THEN ! sort in increasing order
+   IF (RESULT .EQ. -1) THEN ! sort in increasing order
       PERM_COPY(I) = IP1
       I1 = I1 + 1
    ELSE
