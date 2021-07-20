@@ -5205,7 +5205,7 @@ IF (NVERTS>0 .AND. NFACES>0) THEN
                            I1,I2,J1,J2,K1,K2,NFACES,NFACES_CUTCELLS,VALS,&
                            IND,IND2,Y_INDEX,Z_INDEX,PART_INDEX,VELO_INDEX,PIPE_INDEX,PROP_INDEX,REAC_INDEX,MATL_INDEX,T,DT,NM)
 
-! these two routines need to be moved nd called only once
+! these two routines need to be moved and called only once
          CALL GET_GEOMINFO(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NVERTS_CUTCELLS,NFACES,NFACES_CUTCELLS,VERTS,FACES,LOCATIONS)
          CALL MAKE_UNIQUE_VERT_ARRAY(VERTS, VERT_UNIQUE, NVERTS)
 
