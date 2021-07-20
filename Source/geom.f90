@@ -22102,7 +22102,8 @@ ENDDO
 
 END SUBROUTINE AVERAGE_FACE_VALUES
 
-! ---------------------------- GET_VERTS_UNIQUE ----------------------------------------
+
+! ---------------------------- MAKE_UNIQUE_VERT_ARRAY ----------------------------------------
 
 ! construct an array that points to first vertex in a vertex array when one or more vertices are identical
 
@@ -22165,7 +22166,7 @@ RESULT = 0
 RETURN
 END SUBROUTINE COMPARE_VERTS
 
-! ---------------------------- MAKE_PERMUTATION_VECTOR ----------------------------------------
+! ---------------------------- MAKE_PERMUTATION_ARRAY ----------------------------------------
 
 ! sort a vertex array in increasing order and store the order in a permutation array
 ! PERM(1) is the 1st vertex, PERM(2) is the 2nd and so on
