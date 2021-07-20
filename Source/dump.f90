@@ -5169,14 +5169,14 @@ INTEGER, ALLOCATABLE, DIMENSION(:)  :: VERT_UNIQUE
 REAL(FB), ALLOCATABLE, DIMENSION(:) :: VERTS
 INTEGER, ALLOCATABLE, DIMENSION(:)  :: FACES, LOCATIONS
 
-! set TEST_NODE_GEOM to 0 to skip over face averaging code (original behavior)
-! set TEST_NODE_GEOM to 1 to use dummy face averages (to test smokeview)
-! set TEST_NODE_GEOM to 2 to test face averaging code (to test both fds and smokeview)
-INTEGER :: TEST_NODE_GEOM=0
+! GEOM_SLICE_AVG=0 skip over face averaging code (original behavior)
+! GEOM_SLICE_AVG=1 use dummy face averages (to test smokeview)
+! GEOM_SLICE_AVG=2 test face averaging code (to test both fds and smokeview)
+
 
 CALL GET_GEOMSIZES(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NVERTS_CUTCELLS,NFACES,NFACES_CUTCELLS)
 IF (NVERTS>0 .AND. NFACES>0) THEN
-   IF (TEST_NODE_GEOM==0 .OR. CC_CELL_CENTERED) THEN
+   IF (GEOM_SLICE_AVG==0 .OR. CC_CELL_CENTERED) THEN
       NVALS = NFACES
       ALLOCATE(VALS(NFACES))
 ! get values at geometry faces
@@ -5187,14 +5187,14 @@ IF (NVERTS>0 .AND. NFACES>0) THEN
       NVALS = NVERTS
       ALLOCATE(VALS(MAX(NVERTS,NFACES)))
      ! use dummy values until GETGEOMVALS or equivalent is working for this case
-      IF (TEST_NODE_GEOM .EQ. 1 ) THEN
+      IF (GEOM_SLICE_AVG .EQ. 1 ) THEN
          DO I = 1, NVERTS
             VALS(I) = REAL(I,FB)/REAL(NVERTS, FB)
          ENDDO
       ENDIF
 
 ! get values at geometry nodes
-      IF (TEST_NODE_GEOM .EQ. 2 ) THEN
+      IF (GEOM_SLICE_AVG .EQ. 2 ) THEN
          ALLOCATE(VERTS(3*NVERTS))
          ALLOCATE(FACES(3*NFACES))
          ALLOCATE(LOCATIONS(NFACES))
@@ -5230,7 +5230,7 @@ IF (HEADER==1) THEN
    WRITE(FUNIT_DATA) VERSION
 ENDIF
 WRITE(FUNIT_DATA) STIME
-IF (TEST_NODE_GEOM==0 .OR. CC_CELL_CENTERED) THEN
+IF (GEOM_SLICE_AVG==0 .OR. CC_CELL_CENTERED) THEN
    WRITE(FUNIT_DATA) INTEGER_ZERO, INTEGER_ZERO, INTEGER_ZERO, NVALS
 ELSE
    WRITE(FUNIT_DATA) INTEGER_ZERO, INTEGER_ZERO, NVALS,        INTEGER_ZERO
