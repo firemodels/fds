@@ -22069,7 +22069,7 @@ END FUNCTION INTERSECT_OBB_AABB
 
 ! ---------------------------- AVERAGE_FACE_VALUES ----------------------------------------
 
-! at each node, compute the average of those faces connected to that node
+! for each node, compute the average values of faces connected to that node
 
 SUBROUTINE AVERAGE_FACE_VALUES(VERT_UNIQUE, VERT_VALS, NVERTS, FACES, FACE_VALS, NFACES)
 INTEGER, INTENT(IN) :: NVERTS, NFACES
@@ -22094,14 +22094,10 @@ DO I = 1, NFACES
    COUNT(V(3)) = COUNT(V(3)) + 1
 ENDDO
 DO I = 1, NVERTS
-   IF (COUNT(I) .NE. 0) THEN
-      VERT_VALS(I) = VERT_VALS(I)/REAL(COUNT(I), EB)
-   ENDIF
+   IF (COUNT(I) .NE. 0) VERT_VALS(I) = VERT_VALS(I)/REAL(COUNT(I), EB)
 ENDDO
 DO I = 1, NVERTS
-   IF (VERT_UNIQUE(I) .NE. I) THEN
-      VERT_VALS(I) = VERT_VALS(VERT_UNIQUE(I))
-   ENDIF
+   IF (VERT_UNIQUE(I) .NE. I) VERT_VALS(I) = VERT_VALS(VERT_UNIQUE(I))
 ENDDO
 
 END SUBROUTINE AVERAGE_FACE_VALUES
@@ -22110,25 +22106,26 @@ END SUBROUTINE AVERAGE_FACE_VALUES
 
 ! construct an array that points to first vertex in a vertex array when one or more vertices are identical
 
-SUBROUTINE GET_VERTS_UNIQUE(VERTS, PERM, VERT_UNIQUE, NVERTS)
+SUBROUTINE MAKE_UNIQUE_VERT_ARRAY(VERTS, VERT_UNIQUE, NVERTS)
 INTEGER, INTENT(IN) :: NVERTS
 REAL, INTENT(IN) :: VERTS(3*NVERTS)
-INTEGER, INTENT(IN) :: PERM(NVERTS)
 INTEGER, INTENT(OUT) :: VERT_UNIQUE(NVERTS)
 
+INTEGER :: PERM(NVERTS)
 INTEGER :: I, RESULT
 
 DO I = 1, NVERTS
+   PERM(I) = I
    VERT_UNIQUE(I) = I
-END DO
+ENDDO
+CALL MAKE_PERMUTATION_ARRAY(VERTS, PERM, NVERTS, 1, NVERTS)
+
 DO I = 1, NVERTS - 1
    CALL COMPARE_VERTS(VERTS, NVERTS, PERM(I), PERM(I+1), RESULT)
-   IF (RESULT == 0) THEN
-      VERT_UNIQUE(PERM(I+1)) = VERT_UNIQUE(PERM(I))
-   ENDIF
+   IF (RESULT == 0) VERT_UNIQUE(PERM(I+1)) = VERT_UNIQUE(PERM(I))
 END DO
 
-END SUBROUTINE GET_VERTS_UNIQUE
+END SUBROUTINE MAKE_UNIQUE_VERT_ARRAY
 
 ! ---------------------------- COMPARE_VERTS ----------------------------------------
 
@@ -22171,9 +22168,9 @@ END SUBROUTINE COMPARE_VERTS
 ! ---------------------------- MAKE_PERMUTATION_VECTOR ----------------------------------------
 
 ! sort a vertex array in increasing order and store the order in a permutation array
-! PERM(1) is the vertex vertex, PERM(2) is the 2nd and so on
+! PERM(1) is the 1st vertex, PERM(2) is the 2nd and so on
 
-RECURSIVE SUBROUTINE MAKE_PERMUTATION_VECTOR(VERTS, PERM, NVERTS, FIRST, LAST)
+RECURSIVE SUBROUTINE MAKE_PERMUTATION_ARRAY(VERTS, PERM, NVERTS, FIRST, LAST)
 INTEGER, INTENT(IN) :: NVERTS
 REAL, INTENT(IN) :: VERTS(3*NVERTS)
 INTEGER, INTENT(INOUT) :: PERM(NVERTS)
@@ -22183,12 +22180,6 @@ INTEGER RESULT
 
 INTEGER :: MID, I, I1, I2, IP1, IP2, N, N1, N2
 
-IF (FIRST .EQ. 1 .AND. LAST .EQ. NVERTS ) THEN
-   DO I = 1, NVERTS
-      PERM(I) = I
-   ENDDO
-ENDIF
-
 IF (FIRST .EQ. LAST)RETURN  ! only one element in list so don't need to sort
 
 ! FIRST .... LAST         original list
@@ -22197,8 +22188,8 @@ IF (FIRST .EQ. LAST)RETURN  ! only one element in list so don't need to sort
 
 MID = (FIRST + LAST)/2
 
-CALL MAKE_PERMUTATION_VECTOR(VERTS, PERM, NVERTS, FIRST,   MID)  ! sort first half of list
-CALL MAKE_PERMUTATION_VECTOR(VERTS, PERM, NVERTS, MID+1,   LAST) ! sort 2nd half of list
+CALL MAKE_PERMUTATION_ARRAY(VERTS, PERM, NVERTS, FIRST,   MID)  ! sort first half of list
+CALL MAKE_PERMUTATION_ARRAY(VERTS, PERM, NVERTS, MID+1,   LAST) ! sort 2nd half of list
 
 ! combine two lists into one
 I1 = 1
@@ -22236,6 +22227,6 @@ DO I = 1, N
    PERM(FIRST + I - 1) = PERM_COPY(I)
 END DO
 
-END SUBROUTINE MAKE_PERMUTATION_VECTOR
+END SUBROUTINE MAKE_PERMUTATION_ARRAY
 
 END MODULE COMPLEX_GEOMETRY
