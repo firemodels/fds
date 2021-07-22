@@ -6652,7 +6652,7 @@ Figure~\ref{hot_rods_image} displays the distribution of radii and the mass of r
 \subsection{Solid Particle Movement on Solid Surfaces}
 \label{info:surface_solid_particles}
 
-By default, solid particles do not ``stick'' or adhere to solid surfaces like liquid droplets do. However, you can make solid particles act like liquid droplets by setting {\ct ADHERE\_TO\_SOLID=T} on the {\ct PART} line, in which case the particles will stick and be reassigned a new speed and direction. If the surface is horizontal, the direction is randomly chosen. If vertical, the direction is downwards. The parameters {\ct HORIZONTAL\_VELOCITY} and {\ct VERTICAL\_VELOCITY} on the {\ct PART} line allow you to control the speed at which particles move horizontally or vertically (downward). The defaults are 0.2~m/s and 0.5~m/s, respectively. If you want the particle to truly stick and not move on a surface, set these values to 0.
+By default, solid particles do not ``stick'' or adhere to solid surfaces like liquid droplets do. However, you can make solid particles act like liquid droplets by setting {\ct ADHERE\_TO\_SOLID=1} on the {\ct PART} line, in which case the particles will stick and be reassigned a new speed and direction. If the surface is horizontal, the direction is randomly chosen. If vertical, the direction is downwards. The parameters {\ct HORIZONTAL\_VELOCITY} and {\ct VERTICAL\_VELOCITY} on the {\ct PART} line allow you to control the speed at which particles move horizontally or vertically (downward). The defaults are 0.2~m/s and 0.5~m/s, respectively. If you want the particle to truly stick and not move on a surface, set these values to 0.
 
 
 \subsection{Splitting Particles}
@@ -6989,7 +6989,7 @@ Modeling fire suppression by water has three principal components: transporting 
 \label{info:surface_droplets}
 \label{cascade}
 
-When a liquid\footnote{Solid particles do not stick to solid surfaces by default like liquid droplets. However, you can make solid particles act like liquid droplets by setting {\ct ADHERE\_TO\_SOLID=T} on the {\ct PART} line.} droplet strikes a solid surface\footnote{If you do not want droplets to accumulate on solid surfaces, set {\ct ALLOW\_SURFACE\_PARTICLES=F} on the {\ct MISC} line. It is normally {\ct T}}, it sticks and is reassigned a new speed and direction. If the surface is horizontal, the direction is randomly chosen. If vertical, the direction is downwards. The parameters {\ct HORIZONTAL\_VELOCITY} and {\ct VERTICAL\_VELOCITY} on the {\ct PART} line allow you to control the speed at which droplets move horizontally or vertically (downward). The defaults are 0.2~m/s and 0.5~m/s, respectively.
+When a liquid\footnote{Solid particles do not stick to solid surfaces by default like liquid droplets. However, you can make solid particles act like liquid droplets by setting {\ct ADHERE\_TO\_SOLID=1} on the {\ct PART} line.} droplet strikes a solid surface\footnote{If you do not want droplets to accumulate on solid surfaces, set {\ct ADHERE\_TO\_SOLID=-1} on the {\ct PART} line. It is normally 1 for liquid droplets, meaning that the droplets stick and are reassigned a new speed and direction. If the surface is horizontal, the direction is randomly chosen. If vertical, the direction is downwards. The parameters {\ct HORIZONTAL\_VELOCITY} and {\ct VERTICAL\_VELOCITY} on the {\ct PART} line allow you to control the speed at which droplets move horizontally or vertically (downward). The defaults are 0.2~m/s and 0.5~m/s, respectively.
 
 When a liquid droplet hits a solid surface, it is assumed to form a thin film that is assumed to be no less than 0.00001~m thick. This value, {\ct MINIMUM\_FILM\_THICKNESS} (m), can be changed on the {\ct MISC} line. The diameter of the droplet, once it strikes a solid surface, is not important because it is assumed to mix with other droplets forming the film. However, when the droplet leaves the solid surface in the form of a ``drip,'' it reforms into a droplet, and its new diameter is assumed to be 1000~$\mu$m unless you specify an alternative {\ct SURFACE\_DIAMETER} on the {\ct PART} line in units of $\mu$m.
 
@@ -11628,7 +11628,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct PART} (Lagrangian Particles/Droplets)} \\
 \hline \hline
 \endhead
-{\ct ADHERE\_TO\_SOLID}                  & Logical     & Section~\ref{info:surface_solid_particles}                            &                   & {\ct F}         \\ \hline
+{\ct ADHERE\_TO\_SOLID}                  & Integer     & Section~\ref{info:surface_solid_particles}                            &                   & 0                     \\ \hline
 {\ct AGE}                                & Real        & Section~\ref{info:part_output}                                        & s                 & $1\times 10^5$        \\ \hline
 {\ct BREAKUP}                            & Logical     & Section~\ref{info:secondary_breakup}                                  &                   & {\ct F}         \\ \hline
 {\ct BREAKUP\_CNF\_RAMP\_ID}             & Character   & Section~\ref{info:secondary_breakup}                                  &                   &                       \\ \hline
