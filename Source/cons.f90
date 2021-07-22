@@ -718,7 +718,8 @@ INTEGER , ALLOCATABLE, DIMENSION(:) :: DUCT_NE,DUCTNODE_NE,DUCT_DR,DUCTNODE_DR
 REAL(EB) :: HVAC_PRES_RELAX=0.5_EB,NODE_Z_MIN,NODE_Z_MAX
 LOGICAL :: HVAC_SOLVE=.FALSE.,HVAC_LOCAL_PRESSURE=.TRUE.
 
-REAL(EB), POINTER, DIMENSION(:,:) :: ORIENTATION_VECTOR !< Global array of orientation vectors
+REAL(EB), POINTER, DIMENSION(:,:) :: ORIENTATION_VECTOR       !< Global array of orientation vectors
+INTEGER, ALLOCATABLE, DIMENSION(:) :: NEAREST_RADIATION_ANGLE !< Index of the rad angle most opposite the given ORIENTATION_VECTOR
 INTEGER :: N_ORIENTATION_VECTOR                         !< Number of ORIENTATION_VECTORs
 
 INTEGER :: TGA_SURF_INDEX=-100             !< Surface properties to use for special TGA calculation
