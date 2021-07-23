@@ -1276,7 +1276,7 @@ REAL(EB), DIMENSION(:,:,:), ALLOCATABLE, TARGET :: SCARC_P     !< Inseparable pr
 REAL(EB), DIMENSION(:,:,:), ALLOCATABLE, TARGET :: SCARC_PS    !< Inseparable pressure solution - corrector stage
 
 LOGICAL :: SCARC_CHECK = .TRUE.                                !< Flag to crosscheck computations at different positions
-LOGICAL :: SCARC_TEST_RHO  = .FALSE.                           !< Flag for experimentally using own version of RHO
+LOGICAL :: SCARC_TEST_RHO  = .TRUE.                            !< Flag for experimentally using own version of RHO
 LOGICAL :: SCARC_TEST_KRES = .FALSE.                           !< Flag for experimentally using own version of KRES
 
 ! ---------- Public variables
@@ -2649,7 +2649,7 @@ REAL(EB) FUNCTION RECIPROCAL_DIRECTIONAL_MEAN (V, IOR0, I, J, K)
 REAL(EB), DIMENSION(0:,0:,0:), INTENT(IN) :: V
 INTEGER, INTENT(IN) :: IOR0, I, J, K
 
-SELECT CASE (ABS(IOR0))
+SELECT CASE (IOR0)
    CASE ( 1)
       RECIPROCAL_DIRECTIONAL_MEAN = 2.0_EB /(V(I-1,J,K) + V(I,J,K))
    CASE (-1)
@@ -20105,11 +20105,11 @@ INSEPARABLE_BOUNDARY_CELLS_LOOP: DO IW = IW1, IW2
 
    IC = G%CELL_NUMBER(I,J,K)           ! Number of mesh-internal cell
 
-   !IF (GWC%BOUNDARY_TYPE == OPEN_BOUNDARY) THEN                           ! still experimental code
+   IF (GWC%BOUNDARY_TYPE == OPEN_BOUNDARY) THEN                            ! still experimental code
       RRHOM = RECIPROCAL_DIRECTIONAL_MEAN(RHOP, IOR0, I, J, K)             ! reciprocal of density mean along IW in direction IOR0
-   !ELSE
-   !   RRHOM = 1.0_EB/M%WALL(IW)%ONE_D%RHO_F                               ! if not open use RHO_F values (?)
-   !ENDIF
+   ELSE
+      RRHOM = 1.0_EB/M%WALL(IW)%ONE_D%RHO_F                                ! if not open use RHO_F values (?)
+   ENDIF
 
    ! ---------- Dirichlet BC's:
    !
@@ -20138,7 +20138,7 @@ INSEPARABLE_BOUNDARY_CELLS_LOOP: DO IW = IW1, IW2
          CASE ( 1)
             VAL2  = RHOP(I,J,K) * (BXS(J,K) - KRESP(I,J,K))       ! experimentally: recompute external pressure value: P = rho*(H-K)
             PXS(J,K) = VAL                                        ! store boundary value for later use in SCARC_UPDATE_PRESSURE
-            SCAL  = -2.0_EB*RDX(I)*RDXN(IG)*RRHOM                  ! scaling factor setting ST%BC below
+            SCAL  = -2.0_EB*RDX(I)*RDXN(I-1)*RRHOM                ! scaling factor setting ST%BC below
          CASE (-1)
             VAL2  = RHOP(I,J,K) * (BXF(J,K) - KRESP(I,J,K))
             PXF(J,K) = VAL
@@ -20146,7 +20146,7 @@ INSEPARABLE_BOUNDARY_CELLS_LOOP: DO IW = IW1, IW2
          CASE ( 2)
             VAL2   = RHOP(I,J,K) * (BYS(I,K) - KRESP(I,J,K))
             PYS(I,K) = VAL
-            SCAL  = -2.0_EB*RDY(J)*RDYN(JG)*RRHOM
+            SCAL  = -2.0_EB*RDY(J)*RDYN(J-1)*RRHOM
          CASE (-2)
             VAL2   = RHOP(I,J,K) * (BYF(I,K) - KRESP(I,J,K))
             PYF(I,K) = VAL
@@ -20154,7 +20154,7 @@ INSEPARABLE_BOUNDARY_CELLS_LOOP: DO IW = IW1, IW2
          CASE ( 3)
             VAL2   = RHOP(I,J,K) * (BZS(I,J) - KRESP(I,J,K))
             PZS(I,J) = VAL
-            SCAL  = -2.0_EB*RDZ(K)*RDZN(KG)*RRHOM
+            SCAL  = -2.0_EB*RDZ(K)*RDZN(K-1)*RRHOM
          CASE (-3)
             VAL2   = RHOP(I,J,K) * (BZF(I,J) - KRESP(I,J,K))
             PZF(I,J) = VAL
@@ -20178,16 +20178,16 @@ INSEPARABLE_BOUNDARY_CELLS_LOOP: DO IW = IW1, IW2
       ! Caution mesh stretching not yet considered ... i.e. terms HX, HY, HZ, see definition of BC's in pres
       SELECT CASE (IOR0)
          CASE (1)
-            KGRAD = (KRESP(I,J,K)-KRESP(IG,J,K))*M%RDXN(IG)              ! caution: take care of right direction!
+            KGRAD = (KRESP(I,J,K)-KRESP(I-1,J,K))*M%RDXN(I-1)            ! caution: take care of right direction!
             IF (IW <= L%N_WALL_CELLS_EXT) THEN
-               VAL = RHOM*(BXS(J,K) - KGRAD)
+               VAL = RHOM*(BXS(J,K) - KGRAD)                             ! based on: \nabla p = rho*[-du/dt - F_A - \nabla K]
             ELSE
-               VAL = - RHOM*KGRAD                                        ! corresponding to homogeneous Neumann condition
+               VAL = - RHOM*KGRAD                                        ! corresponding to homogeneous Neumann condition at obsts
             ENDIF
-            PXS(J,K) = VAL
+            PXS(J,K) = VAL                                               ! store BC of inseparable pressure for later use
             SCAL = RDX(I)*RRHOM                                          ! positive for ABS(IOR) > 0
          CASE (-1)
-            KGRAD = (KRESP(IG,J,K)-KRESP(I,J,K))*M%RDXN(I)
+            KGRAD = (KRESP(I+1,J,K)-KRESP(I,J,K))*M%RDXN(I)
             IF (IW <= L%N_WALL_CELLS_EXT) THEN
                VAL = RHOM*(BXF(J,K) - KGRAD)
             ELSE
@@ -20196,7 +20196,7 @@ INSEPARABLE_BOUNDARY_CELLS_LOOP: DO IW = IW1, IW2
             PXF(J,K) = VAL
             SCAL = -RDX(I)*RRHOM                                          ! negative for ABS(IOR) < 0
          CASE (2)
-            KGRAD = (KRESP(I,J,K)-KRESP(I,JG,K))*M%RDYN(JG)
+            KGRAD = (KRESP(I,J,K)-KRESP(I,J-1,K))*M%RDYN(J-1)
             IF (IW <= L%N_WALL_CELLS_EXT) THEN
                VAL = RHOM*(BYS(I,K) - KGRAD)
             ELSE
@@ -20205,7 +20205,7 @@ INSEPARABLE_BOUNDARY_CELLS_LOOP: DO IW = IW1, IW2
             PYS(I,K) = VAL
             SCAL = RDY(J)*RRHOM
          CASE (-2)
-            KGRAD = (KRESP(I,JG,K)-KRESP(I,J,K))*M%RDYN(J)
+            KGRAD = (KRESP(I,J+1,K)-KRESP(I,J,K))*M%RDYN(J)
             IF (IW <= L%N_WALL_CELLS_EXT) THEN
                VAL = RHOM*(BYF(I,K) - KGRAD) 
             ELSE
@@ -20214,7 +20214,7 @@ INSEPARABLE_BOUNDARY_CELLS_LOOP: DO IW = IW1, IW2
             PYF(I,K) = VAL
             SCAL = -RDY(J)*RRHOM
          CASE (3)
-            KGRAD = (KRESP(I,J,K)-KRESP(I,J,KG))*M%RDZN(KG)
+            KGRAD = (KRESP(I,J,K)-KRESP(I,J,K-1))*M%RDZN(K-1)
             IF (IW <= L%N_WALL_CELLS_EXT) THEN
                VAL = RHOM*(BZS(I,J) - KGRAD)
             ELSE
@@ -20223,7 +20223,7 @@ INSEPARABLE_BOUNDARY_CELLS_LOOP: DO IW = IW1, IW2
             PZS(I,J) = VAL
             SCAL = RDZ(K)*RRHOM
          CASE (-3)
-            KGRAD = (KRESP(I,J,KG)-KRESP(I,J,K))*M%RDZN(K)
+            KGRAD = (KRESP(I,J,K+1)-KRESP(I,J,K))*M%RDZN(K)
             IF (IW <= L%N_WALL_CELLS_EXT) THEN
                VAL = RHOM*(BZF(I,J) - KGRAD)
             ELSE
