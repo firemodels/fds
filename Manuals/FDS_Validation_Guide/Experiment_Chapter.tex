@@ -858,6 +858,40 @@ In 1982 and 1983, Croce, Mudan, and Moorhouse conducted 13 liquified natural gas
 The experiments are simulated using the specified fuel burning rate. The fuel is assumed to be methane. The atmosphere is assumed to be neutral with a large Obukhov length, $L=1000000$, and the ground surface is flat with an assumed aerodynamic roughness, $z_0=0.1$~m. The relative humidity, ambient temperature and pressure, and wind speed at 9~m are specified in the report. The radiative fraction is assumed to 0.25 and the radiative path length is assumed to be 50~m; that is, the effective absorption coefficients of the various gas mixtures are evaluated over a distance of 50~m. The radiation source term is taken directly as 25~\% of the combustion energy release rate. The soot yield is assumed to be 0.005.
 
 
+\section{Loughborough Jet Fire Experiments}
+\label{Loughborough_Jet_Fires_Description}
+
+Researchers at Loughborough University, UK, conducted a series of six large-scale, high pressure jet fires using natural gas and natural gas/hydrogen mixtures. For each fuel, the gas was released horizontally at high pressure (approximately 60~bar) through 20~mm, 35~mm and 50~mm diameter holes at the end of a 15~cm diameter pipe. The jet fires engulfed a 0.9~m diameter, 16~m long pipe section normal to the flow direction. Heat flux measurements were made at various locations on the pipe and further afield. 
+
+Table~\ref{Loughborough_Parameters} lists the key parameters for the natural gas experiments which have been chosen for this study. Note that the direction of the jet was nominally to the east, parallel to the prevailing wind. The wind deviated slightly, as indicated in the table.
+
+\begin{table}[!ht]
+\caption[Summary of the Loughborough Jet Fire Experiments]{Summary of the Loughborough Jet Fire Experiments.}
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+Test    & Fuel     & Hole  & Dist.    & Wind          & Wind    & Mass   & Heat Rel.    & Flame     & Stand-Off  & Rad.      \\
+No.     & Type     & Diam. & to Pipe  & Dir.          & Speed   & Flow   & Rate         & Length    & Distance   & Frac.     \\ 
+        &          & (mm)  & (m)      & ($^\circ$)    & (m/s)   & (kg/s) & (MW)         & (m)       & (m)        & (\%)      \\ \hline
+1       & Nat.~Gas & 20    & 9.45     & 271           & 6.3     & 2.9    & 140          & 19.8      & 6.0        & 13.7      \\
+2       & Nat.~Gas & 35    & 15.45    & 297           & 6.2     & 9.6    & 462          & 37.8      & 7.5        & 17.9      \\
+3       & Nat.~Gas & 50    & 21.61    & 267           & 3.6     & 19.5   & 939          & 49.9      & 8.7        & 20.2      \\ \hline
+\end{tabular}
+\end{center}
+\label{Loughborough_Parameters}
+\end{table}
+
+\subsubsection{Modeling Notes}
+
+FDS is a low Mach number code and cannot model directly the supersonic flow at the jet orifice. Instead, cold (-160~$^\circ$C) droplets with a median volumetric diameter of 1000~$\mu$m are injected wtih an initial velocity of 1000~m/s and spray angle of 10$^\circ$. These droplets evaporate readily to form methane gas. No attempt is made to model the stand-off distance because there is no mechanism in FDS to account for flame suppression due to high shear.
+
+The grid resolution is 20~cm; thus, the circular pipe is modeled as a collection of 20~cm square rods with a cross section that is 0.8~m by 0.8~m, but with the corners removed. The velocity boundary condition is assumed to be free-slip because otherwise the polygonally-shaped obstruction would exert a fictitiously high drag force on the flow. The empirical heat transfer coefficient for the pipe is calculated using parameters appropriate for a cylindrical rather than a flat plate. 
+
+To resolve the radiation field at the far-field radiometers, 600~angles are used in solving the radiation transport equation rather than the default 100. The radiation absorption coefficients are calculated by RadCal assuming a path length of 100~m rather than the default value of 0.1~m. 
+
+
+
+
 \section{McCaffrey Plume Experiments}
 \label{McCaffrey_Plume_Description}
 
@@ -1860,6 +1894,12 @@ centerline of the room, and two horizontal arrays located 8.4~cm above the floor
 \caption[Geometry of Restivo's compartment]{Geometry of Restivo's compartment.}
 \label{Restivo_Drawing}
 \end{figure}
+
+\section{Sandia Methane Burner}
+\label{Sandia_Methane_Burner_Description}
+
+A series of 3~m diameter methane gas burner experiments were conducted in the Fire Laboratory for Accreditation of Models and Experiments (FLAME) facility in the Thermal Test Complex at Sandia National Laboratories~\cite{Blanchat:2011}. The test chamber is cylindrical with an inner diameter of 18.3~m and a height of 13.1~m at the perimeter. The ceiling slopes upwards to a height of 15.2~m at the center. The perimeter walls are made of steel channel sections that are water-cooled. The gas burner is surrounded by a 12.7~m diameter steel spill plate. Beyond the spill plate is steel grating through which air can flow from the basement.
+
 
 \section{Sandia Plume Experiments}
 \label{Sandia_Plume_Description}
