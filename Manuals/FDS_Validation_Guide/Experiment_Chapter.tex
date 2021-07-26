@@ -861,13 +861,12 @@ The experiments are simulated using the specified fuel burning rate. The fuel is
 \section{Loughborough Jet Fire Experiments}
 \label{Loughborough_Jet_Fires_Description}
 
-Researchers at Loughborough University, UK, conducted a series of six large-scale, high pressure jet fires using natural gas and natural gas/hydrogen mixtures. For each fuel, the gas was released horizontally at high pressure (approximately 60~bar) through 20~mm, 35~mm and 50~mm diameter holes at the end of a 15~cm diameter pipe. The jet fires engulfed a 0.9~m diameter, 16~m long pipe section normal to the flow direction. Heat flux measurements were made at various locations on the pipe and further afield. 
+Researchers at Loughborough University, UK, conducted a series of six large-scale, high pressure jet fire experiments using natural gas and natural gas/hydrogen mixtures. For each fuel, the gas was released horizontally at high pressure (approximately 60~bar) through 20~mm, 35~mm and 50~mm diameter holes at the end of a 15~cm diameter pipe. The jet fires engulfed a 0.9~m diameter, 16~m long pipe section perpendicular to the flow direction. Heat flux measurements were made at various locations on the pipe and further afield. 
 
-Table~\ref{Loughborough_Parameters} lists the key parameters for the natural gas experiments which have been chosen for this study. Note that the direction of the jet was nominally to the east, parallel to the prevailing wind. The wind deviated slightly, as indicated in the table.
+Table~\ref{Loughborough_Parameters} lists the key parameters for the natural gas experiments which have been chosen for this study. Note that the direction of the jet was nominally to the east, parallel to the prevailing wind. The wind deviated slightly in each experiment, as indicated in the table.
 
 \begin{table}[!ht]
 \caption[Summary of the Loughborough Jet Fire Experiments]{Summary of the Loughborough Jet Fire Experiments.}
-\begin{center}
 \begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|}
 \hline
 Test    & Fuel     & Hole  & Dist.    & Wind          & Wind    & Mass   & Heat Rel.    & Flame     & Stand-Off  & Rad.      \\
@@ -877,17 +876,22 @@ No.     & Type     & Diam. & to Pipe  & Dir.          & Speed   & Flow   & Rate 
 2       & Nat.~Gas & 35    & 15.45    & 297           & 6.2     & 9.6    & 462          & 37.8      & 7.5        & 17.9      \\
 3       & Nat.~Gas & 50    & 21.61    & 267           & 3.6     & 19.5   & 939          & 49.9      & 8.7        & 20.2      \\ \hline
 \end{tabular}
-\end{center}
 \label{Loughborough_Parameters}
 \end{table}
 
 \subsubsection{Modeling Notes}
 
-FDS is a low Mach number code and cannot model directly the supersonic flow at the jet orifice. Instead, cold (-160~$^\circ$C) droplets with a median volumetric diameter of 1000~$\mu$m are injected wtih an initial velocity of 1000~m/s and spray angle of 10$^\circ$. These droplets evaporate readily to form methane gas. No attempt is made to model the stand-off distance because there is no mechanism in FDS to account for flame suppression due to high shear.
+FDS is a low Mach number code and cannot model directly the supersonic flow at the pipe orifice. Instead, cold (-160~$^\circ$C) droplets with a median volumetric diameter of 1000~$\mu$m are injected wtih an initial velocity of 1000~m/s and spray angle of 10$^\circ$. These droplets evaporate readily to form methane gas. No attempt is made to model the stand-off distance because there is no mechanism in FDS to account for flame suppression due to high shear.
 
-The grid resolution is 20~cm; thus, the circular pipe is modeled as a collection of 20~cm square rods with a cross section that is 0.8~m by 0.8~m, but with the corners removed. The velocity boundary condition is assumed to be free-slip because otherwise the polygonally-shaped obstruction would exert a fictitiously high drag force on the flow. The empirical heat transfer coefficient for the pipe is calculated using parameters appropriate for a cylindrical rather than a flat plate. 
+The grid resolution is 20~cm; thus, the circular pipe is modeled as a collection of 20~cm square rods with a cross section that is 0.8~m by 0.8~m, but with the corners removed. The velocity boundary condition is assumed to be free-slip because otherwise the polygonally-shaped obstruction would exert a fictitiously high drag force on the flow. The empirical heat transfer coefficient for the pipe is calculated using parameters appropriate for a cylindrical rather than a flat plate. The Nusselt number is taken as 
+\be
+   \NU = 0.027 \, \RE^{0.805} \, \PR^{1/3} \quad ; \quad \RE = \frac{\rho D \|\bu_{\rm t}\| }{\mu} \quad ; \quad \PR=0.7
+\ee
+This correlation is appropriate for $40,000 < \RE < 400,000$~\cite{Incropera:1}.
 
 To resolve the radiation field at the far-field radiometers, 600~angles are used in solving the radiation transport equation rather than the default 100. The radiation absorption coefficients are calculated by RadCal assuming a path length of 100~m rather than the default value of 0.1~m. 
+
+The wind profile is based on measurements made 10.85~m above the relatively flat terrain. The aerodynamic roughness length, $z_0$, is set to 0.03~m, appropriate for relatively flat grasslands, prairies, farms, etc. The Obukhov length, $L$, is set to 100,000~m, typical of a neutral atmosphere. Synthetic turbulence is generated at the upstream boundary of the computational domain, with a characteristic eddy length scale of 1~m and root-mean-square velocity fluctuation of 0.1~m/s.
 
 
 
