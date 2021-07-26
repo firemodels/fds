@@ -396,6 +396,7 @@ CALL COMPUTE_WIND_COMPONENTS(T_BEGIN,NM)
 
 DO K=0,M%KBP1
    M%RHO(:,:,K) = M%RHO_0(K)
+   M%RHOS(:,:,K)= M%RHO_0(K)
    M%TMP(:,:,K) = M%TMP_0(K)
    M%U(:,:,K)   = M%U_WIND(K)
    M%V(:,:,K)   = M%V_WIND(K)
