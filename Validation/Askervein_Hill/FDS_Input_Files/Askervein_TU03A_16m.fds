@@ -1,4 +1,3 @@
-
 &HEAD CHID='Askervein_TU03A_mesh_test', TITLE='Wind flow over Askervein hill, TU03-A, Table 4.7 Ask83.' /
 
 &MESH IJK=32,32,32, XB=-1400,1800,-1800,1400,236,1000, TRNZ_ID='MY TRANSFORM', COLOR='BLUE', CHECK_MESH_ALIGNMENT=T / 1 mesh 4 m vertical resolution at interface
