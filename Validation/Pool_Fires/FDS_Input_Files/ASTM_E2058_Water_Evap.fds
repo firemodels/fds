@@ -21,13 +21,11 @@ SFPE 4th Ed. Figure 3-4.24. pg 3-132
       MATL_ID             = 'WATER','PYREX GLASS'
       COLOR               = 'BLUE'
       BACKING             = 'INSULATED'
-      THICKNESS           = 0.013845833,0.01
-      EXTERNAL_FLUX       = 50
-      CELL_SIZE_FACTOR    = 0.1
-      CONVECTION_LENGTH_SCALE = 0.025
-      BLOWING             = T/
+      THICKNESS           = 0.014,0.01
+      EXTERNAL_FLUX       = 50 /
 
 &MATL ID                     = 'WATER'
+      EMISSIVITY             = 1.
       DENSITY                = 1000.
       SPEC_ID                = 'WATER VAPOR'
       NU_SPEC                = 1

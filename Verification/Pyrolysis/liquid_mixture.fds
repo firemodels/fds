@@ -1,0 +1,99 @@
+&HEAD CHID='liquid_mixture', TITLE='Test mass conservation of evaporating liquid mixture' /
+
+&MESH IJK=20,20,20, XB=-1.0,1.0,-1.0,1.0,0.0,2.0 /
+
+&TIME T_END=600. /
+
+&SPEC ID='NITROGEN', BACKGROUND=T /
+&SPEC ID='WATER VAPOR' /
+&SPEC ID='N-HEXANE' /
+
+&SURF ID        = 'POOL'
+      COLOR     = 'YELLOW'
+      MATL_ID(1,1:6) = 'HEXANE','HEPTANE','OCTANE','DECANE','BENZENE','WATER'
+      MATL_MASS_FRACTION(1,1:6) = 0.521,0.054,0.063,0.023,0.200,0.139
+      BACKING = 'INSULATED'
+      THICKNESS = 0.002
+      EXTERNAL_FLUX=40 /
+
+&VENT XB=-0.5,0.5,-0.5,0.5,0.0,0.0, SURF_ID='POOL' /
+
+&DEVC XB=-0.60,0.60,-0.60,0.60,0.00,0.10, QUANTITY='MASS FLUX', SPATIAL_STATISTIC='MEAN', MATL_ID='HEXANE', SURF_ID='POOL', ID='mdot_hexane' /
+&DEVC XB=-0.60,0.60,-0.60,0.60,0.00,0.10, QUANTITY='MASS FLUX', SPATIAL_STATISTIC='MEAN', MATL_ID='HEPTANE', SURF_ID='POOL', ID='mdot_heptane' /
+&DEVC XB=-0.60,0.60,-0.60,0.60,0.00,0.10, QUANTITY='MASS FLUX', SPATIAL_STATISTIC='MEAN', MATL_ID='OCTANE', SURF_ID='POOL', ID='mdot_octane' /
+&DEVC XB=-0.60,0.60,-0.60,0.60,0.00,0.10, QUANTITY='MASS FLUX', SPATIAL_STATISTIC='MEAN', MATL_ID='DECANE', SURF_ID='POOL', ID='mdot_decane' /
+&DEVC XB=-0.60,0.60,-0.60,0.60,0.00,0.10, QUANTITY='MASS FLUX', SPATIAL_STATISTIC='MEAN', MATL_ID='BENZENE', SURF_ID='POOL', ID='mdot_benzene' /
+&DEVC XB=-0.60,0.60,-0.60,0.60,0.00,0.10, QUANTITY='MASS FLUX', SPATIAL_STATISTIC='MEAN', MATL_ID='WATER', SURF_ID='POOL', ID='mdot_water' /
+
+&DUMP DT_DEVC=1., DT_HRR=1., MASS_FILE=T /
+
+&MATL ID                     = 'WATER'
+      DENSITY                = 1000.
+      SPEC_ID                = 'WATER VAPOR'
+      NU_SPEC                = 1
+      HEAT_OF_REACTION       = 2260
+      CONDUCTIVITY           = 0.6
+      SPECIFIC_HEAT          = 4.181
+      BOILING_TEMPERATURE    = 100.
+      ABSORPTION_COEFFICIENT = 140. /
+
+&MATL ID                     = 'HEXANE'
+      MW                     = 86.2
+      NU_SPEC                = 1.
+      SPEC_ID                = 'N-HEXANE'
+      HEAT_OF_REACTION       = 335
+      CONDUCTIVITY           = 0.02
+      SPECIFIC_HEAT          = 2.27
+      DENSITY                = 659.
+      ABSORPTION_COEFFICIENT = 150.
+      BOILING_TEMPERATURE    = 68.7 /
+
+&MATL ID                     = 'HEPTANE'
+      MW                     = 100.2
+      NU_SPEC                = 1.
+      SPEC_ID                = 'N-HEXANE'
+      HEAT_OF_REACTION       = 317
+      CONDUCTIVITY           = 0.02
+      SPECIFIC_HEAT          = 2.24
+      DENSITY                = 684
+      ABSORPTION_COEFFICIENT = 150.
+      BOILING_TEMPERATURE    = 98.4 /
+
+&MATL ID                     = 'BENZENE'
+      MW                     = 78.1
+      NU_SPEC                = 1.
+      SPEC_ID                = 'N-HEXANE'
+      HEAT_OF_REACTION       = 393
+      CONDUCTIVITY           = 0.02
+      SPECIFIC_HEAT          = 1.72
+      DENSITY                = 879
+      ABSORPTION_COEFFICIENT = 150.
+      BOILING_TEMPERATURE    = 80.1 /
+
+&MATL ID                     = 'OCTANE'
+      MW                     = 114.2
+      NU_SPEC                = 1.
+      SPEC_ID                = 'N-HEXANE'
+      HEAT_OF_REACTION       = 301
+      CONDUCTIVITY           = 0.02
+      SPECIFIC_HEAT          = 2.23
+      DENSITY                = 702
+      ABSORPTION_COEFFICIENT = 150.
+      BOILING_TEMPERATURE    = 125.6 /
+
+&MATL ID                     = 'DECANE'
+      MW                     = 142.3
+      NU_SPEC                = 1.
+      SPEC_ID                = 'N-HEXANE'
+      HEAT_OF_REACTION       = 278
+      CONDUCTIVITY           = 0.02
+      SPECIFIC_HEAT          = 2.21
+      DENSITY                = 730
+      ABSORPTION_COEFFICIENT = 150.
+      BOILING_TEMPERATURE    = 174.1 /
+
+&SLCF PBY=0.001, QUANTITY='TEMPERATURE', CELL_CENTERED=T /
+&SLCF PBY=0.001, QUANTITY='VOLUME FRACTION', SPEC_ID='N-HEXANE', CELL_CENTERED=T /
+&SLCF PBY=0.001, QUANTITY='VOLUME FRACTION', SPEC_ID='WATER VAPOR', CELL_CENTERED=T /
+
+&TAIL /

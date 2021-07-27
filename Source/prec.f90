@@ -26,6 +26,7 @@ INTEGER, PARAMETER :: FORMULA_LENGTH=255             !< Maximum length of chemic
 INTEGER, PARAMETER :: CHID_LENGTH=50                 !< Maximum length of job ID
 INTEGER, PARAMETER :: MESH_STRING_LENGTH=LABEL_LENGTH + 80 !< Length for storage of strings
 INTEGER, PARAMETER :: N_OUTPUT_QUANTITIES=550        !< Dimension of array that holds names of output quantities
+INTEGER, PARAMETER :: POINTS_ARRAY_DIM=100           !< Dimension of arrays of linear device coordinates
 
 REAL(EB), PARAMETER :: ALMOST_ONE=1._EB-EPSILON(1._EB)     !< Largest number that is < 1 in 8 byte accuracy
 REAL(EB), PARAMETER :: MICRON=1.E-6_EB                     !< A relatively small length (m)

@@ -1094,7 +1094,8 @@ ONE_D%BURN_DURATION   => OS%REALS(RC+33,STORAGE_INDEX) ; IF (NEW) ONE_D%BURN_DUR
 ONE_D%T_SCALE         => OS%REALS(RC+34,STORAGE_INDEX) ; IF (NEW) ONE_D%T_SCALE         = 0._EB
 ONE_D%Q_SCALE         => OS%REALS(RC+35,STORAGE_INDEX) ; IF (NEW) ONE_D%Q_SCALE         = 0._EB
 ONE_D%L_OBUKHOV       => OS%REALS(RC+36,STORAGE_INDEX) ; IF (NEW) ONE_D%L_OBUKHOV       = 0._EB
-ONE_D%T_MATL_PART     => OS%REALS(RC+36,STORAGE_INDEX) ; IF (NEW) ONE_D%T_MATL_PART     = 0._EB
+ONE_D%T_MATL_PART     => OS%REALS(RC+37,STORAGE_INDEX) ; IF (NEW) ONE_D%T_MATL_PART     = 0._EB
+ONE_D%B_NUMBER        => OS%REALS(RC+37,STORAGE_INDEX) ; IF (NEW) ONE_D%B_NUMBER     = 0._EB
 
 I1 = RC+1+N_ONE_D_SCALAR_REALS ; I2 = I1 + SF%ONE_D_REALS_ARRAY_SIZE(1) - 1
 ONE_D%M_DOT_G_PP_ACTUAL(1:I2-I1+1) => OS%REALS(I1:I2,STORAGE_INDEX)
@@ -1648,9 +1649,12 @@ SORT_QUEUE: DO
       IF (IOR==0) CYCLE SEARCH_LOOP
 
       IC  = M%CELL_INDEX(III,JJJ,KKK)
- 
+
       IF (M%SOLID(IC)) THEN
          IF (.NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE) CYCLE SEARCH_LOOP  ! Do not search within a non-removable solid
+      ENDIF
+      IF (CC_IBM) THEN
+         IF(M%CCVAR(III,JJJ,KKK,1)==1) CYCLE SEARCH_LOOP  ! Cycle if cell is of type IBM_SOLID
       ENDIF
 
       SELECT CASE(IOR)
@@ -1716,6 +1720,10 @@ SORT_QUEUE: DO
       IF (CC_IBM) THEN
          ! Here IBM_CGSC=1, IBM_SOLID=1:
          IF(M%CCVAR(III,JJJ,KKK,1)==1 .AND. M%CCVAR(II,JJ,KK,1)/=1) CYCLE SEARCH_LOOP
+         IF(M%CCVAR(III,JJJ,KKK,1)==0 .AND. M%CCVAR(II,JJ,KK,1)==0) THEN
+            IF(IOR>0 .AND. M%FCVAR(III,JJJ,KKK,1,ABS(IOR))==1) CYCLE SEARCH_LOOP
+            IF(IOR<0 .AND. M%FCVAR( II, JJ, KK,1,ABS(IOR))==1) CYCLE SEARCH_LOOP
+         ENDIF
 
       ! If the current cell is not solid, but it is assigned another ZONE index, mark it as an overlap error and return
 
@@ -1762,7 +1770,7 @@ END SUBROUTINE ASSIGN_PRESSURE_ZONE
 !> \param N_LAYER_CELLS_MAX Maximum number of cells to assign to the layer
 !> \param N_CELLS Number of cells in the layer
 !> \param DX_MIN Minimum cell size
-!> \param DDSUM Divisor of LAYER_THICKNESS used to determine N_LAYER_CELLS 
+!> \param DDSUM Divisor of LAYER_THICKNESS used to determine N_LAYER_CELLS
 
 SUBROUTINE GET_N_LAYER_CELLS(DIFFUSIVITY,LAYER_THICKNESS,STRETCH_FACTOR,CELL_SIZE_FACTOR,N_LAYER_CELLS_MAX,N_CELLS,DX_MIN,DDSUM)
 
@@ -2264,10 +2272,11 @@ END FUNCTION CONE_MESH_INTERSECTION_VOLUME
 !> \param Y y-coordinate of the point (m)
 !> \param Z z-coordinate of the point (m)
 !> \param MOVE_INDEX Index of the set of parameters on a MOVE input line
+!> \param MODE Mode of transformation: 1 for a point, 2 for a vector
 
-SUBROUTINE TRANSFORM_COORDINATES(X,Y,Z,MOVE_INDEX)
+SUBROUTINE TRANSFORM_COORDINATES(X,Y,Z,MOVE_INDEX,MODE)
 
-INTEGER, INTENT(IN) :: MOVE_INDEX
+INTEGER, INTENT(IN) :: MOVE_INDEX,MODE
 REAL(EB), INTENT(INOUT) :: X,Y,Z
 REAL(EB) :: M(3,3),UP(3,1),S(3,3),UUT(3,3),IDENTITY(3,3),X_VECTOR(3,1),X_VECTOR_0(3,1),X_VECTOR_1(4,1),SCL(3,3)
 TYPE(MOVEMENT_TYPE), POINTER :: MV
@@ -2303,10 +2312,18 @@ SCL= RESHAPE((/ MV%SCALE*MV%SCALEX,0.0_EB,0.0_EB, &
 
 ! Scaling takes precedence over rotation transformation (applied first on the local axes):
 
-X_VECTOR = X_VECTOR_0 + MATMUL(MATMUL(M,SCL),X_VECTOR-X_VECTOR_0)
-X = X_VECTOR(1,1) + MV%DX
-Y = X_VECTOR(2,1) + MV%DY
-Z = X_VECTOR(3,1) + MV%DZ
+SELECT CASE(MODE)
+   CASE(1)
+      X_VECTOR = X_VECTOR_0 + MATMUL(MATMUL(M,SCL),X_VECTOR-X_VECTOR_0)
+      X = X_VECTOR(1,1) + MV%DX
+      Y = X_VECTOR(2,1) + MV%DY
+      Z = X_VECTOR(3,1) + MV%DZ
+   CASE(2)
+      X_VECTOR = MATMUL(MATMUL(M,SCL),X_VECTOR)
+      X = X_VECTOR(1,1)
+      Y = X_VECTOR(2,1)
+      Z = X_VECTOR(3,1)
+END SELECT
 
 END SUBROUTINE TRANSFORM_COORDINATES
 
@@ -3179,34 +3196,19 @@ ENDIF
 END SUBROUTINE GET_MW_RATIO
 
 
-SUBROUTINE GET_EQUIL_DATA(MW,TMP_L,PRES_IN,H_V,H_V_EFF,T_BOIL_EFF,X_EQ,H_V_LOWER,H_V_DATA,RAMP_INDEX,CONSTANT_H)
+SUBROUTINE GET_EQUIL_DATA(MW,TMP_L,PRES_IN,H_V,H_V_EFF,T_BOIL_EFF,X_EQ,H_V_DATA)
 
-USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP,INTERPOLATE1D_UNIFORM
 REAL(EB), INTENT(IN):: MW,TMP_L,PRES_IN
-REAL(EB), INTENT(IN), OPTIONAL :: H_V_DATA(:),CONSTANT_H
+REAL(EB), INTENT(IN) :: H_V_DATA(:)
 REAL(EB), INTENT(INOUT):: T_BOIL_EFF
 REAL(EB), INTENT(OUT):: H_V,H_V_EFF,X_EQ
-INTEGER, INTENT(IN), OPTIONAL:: H_V_LOWER, RAMP_INDEX
 REAL(EB):: DHOR
 
-IF (PRESENT(RAMP_INDEX)) THEN
-   H_V=EVALUATE_RAMP(TMP_L,0._EB,RAMP_INDEX)
-   H_V_EFF=EVALUATE_RAMP(T_BOIL_EFF,0._EB,RAMP_INDEX)
-   DHOR = H_V_EFF*MW/R0
-   T_BOIL_EFF = MAX(0._EB,DHOR*T_BOIL_EFF/(DHOR-T_BOIL_EFF*LOG(PRES_IN/P_STP)+TWO_EPSILON_EB))
-   H_V_EFF=EVALUATE_RAMP(T_BOIL_EFF,0._EB,RAMP_INDEX)
-ELSEIF (PRESENT(CONSTANT_H)) THEN
-   H_V=CONSTANT_H
-   H_V_EFF=CONSTANT_H
-   DHOR = H_V_EFF*MW/R0
-   T_BOIL_EFF = MAX(0._EB,DHOR*T_BOIL_EFF/(DHOR-T_BOIL_EFF*LOG(PRES_IN/P_STP)+TWO_EPSILON_EB))
-ELSE
-   CALL INTERPOLATE1D_UNIFORM(H_V_LOWER,H_V_DATA,TMP_L,H_V)
-   CALL INTERPOLATE1D_UNIFORM(H_V_LOWER,H_V_DATA,T_BOIL_EFF,H_V_EFF)
-   DHOR = H_V_EFF*MW/R0
-   T_BOIL_EFF = MAX(0._EB,DHOR*T_BOIL_EFF/(DHOR-T_BOIL_EFF*LOG(PRES_IN/P_STP)+TWO_EPSILON_EB))
-   CALL INTERPOLATE1D_UNIFORM(H_V_LOWER,H_V_DATA,T_BOIL_EFF,H_V_EFF)
-ENDIF
+H_V=H_V_DATA(MIN(I_MAX_TEMP,NINT(TMP_L)))
+H_V_EFF=H_V_DATA(MIN(I_MAX_TEMP,NINT(T_BOIL_EFF)))
+DHOR = H_V_EFF*MW/R0
+T_BOIL_EFF = MAX(0._EB,DHOR*T_BOIL_EFF/(DHOR-T_BOIL_EFF*LOG(PRES_IN/P_STP)+TWO_EPSILON_EB))
+H_V_EFF=H_V_DATA(MIN(I_MAX_TEMP,NINT(T_BOIL_EFF)))
 H_V_EFF = 0.5_EB*(H_V+H_V_EFF)
 X_EQ = MIN(1._EB,EXP(H_V_EFF*MW/R0*(1._EB/T_BOIL_EFF-1._EB/TMP_L)))
 
@@ -3387,7 +3389,7 @@ INTEGER, INTENT(IN), OPTIONAL :: OPT_MATL_INDEX,OPT_SURF_INDEX,OPT_I_IN,OPT_J_IN
 REAL(EB), INTENT(IN), OPTIONAL :: OPT_RHO_IN(1:N_MATL)
 REAL(EB), INTENT(IN) :: TMP_S
 REAL(EB), INTENT(OUT) :: K_OUT
-INTEGER :: N,NR,I_LOC,J_LOC,K_LOC
+INTEGER :: N,I_LOC,J_LOC,K_LOC,ITMP
 REAL(EB) :: VOLSUM
 TYPE(MATERIAL_TYPE), POINTER :: ML=>NULL()
 TYPE(SURFACE_TYPE), POINTER :: SF=>NULL()
@@ -3395,14 +3397,10 @@ TYPE(SURFACE_TYPE), POINTER :: SF=>NULL()
 !! K_OUT = 0.2_EB; RETURN ! PMMA debug
 
 K_OUT = 0._EB
+ITMP = MIN(I_MAX_TEMP,NINT(TMP_S))
 IF (PRESENT(OPT_MATL_INDEX)) THEN
    ML => MATERIAL(OPT_MATL_INDEX)
-   IF (ML%K_S>0._EB) THEN
-      K_OUT = ML%K_S
-   ELSE
-      NR = -NINT(ML%K_S)
-      K_OUT = EVALUATE_RAMP(TMP_S,0._EB,NR)
-   ENDIF
+   K_OUT = ML%K_S(ITMP)
 ELSEIF (PRESENT(OPT_SURF_INDEX)) THEN
    ! See FDS Tech Guide, Eqs. (7.22)-(7.25)
    SF => SURFACE(OPT_SURF_INDEX)
@@ -3412,12 +3410,7 @@ ELSEIF (PRESENT(OPT_SURF_INDEX)) THEN
       IF (OPT_RHO_IN(N)<TWO_EPSILON_EB) CYCLE
       ML => MATERIAL(SF%MATL_INDEX(N))
       VOLSUM = VOLSUM + OPT_RHO_IN(N)/ML%RHO_S
-      IF (ML%K_S>0._EB) THEN
-         K_OUT = K_OUT + OPT_RHO_IN(N)*ML%K_S/ML%RHO_S
-      ELSE
-         NR = -NINT(ML%K_S)
-         K_OUT = K_OUT + OPT_RHO_IN(N)*EVALUATE_RAMP(TMP_S,0._EB,NR)/ML%RHO_S
-      ENDIF
+      K_OUT = K_OUT + OPT_RHO_IN(N)*ML%K_S(ITMP)/ML%RHO_S
    ENDDO
    IF (VOLSUM>TWO_EPSILON_EB) THEN
       K_OUT = K_OUT/VOLSUM
@@ -3449,33 +3442,25 @@ INTEGER, INTENT(IN), OPTIONAL :: OPT_MATL_INDEX,OPT_SURF_INDEX
 REAL(EB), INTENT(IN), OPTIONAL :: OPT_RHO_IN(1:N_MATL)
 REAL(EB), INTENT(IN) :: TMP_S
 REAL(EB), INTENT(OUT) :: RHOCBAR_OUT
-INTEGER :: N,NR
+INTEGER :: N,ITMP
 TYPE(MATERIAL_TYPE), POINTER :: ML=>NULL()
 TYPE(SURFACE_TYPE), POINTER :: SF=>NULL()
 
 !! RHOCBAR_OUT = 2420000._EB; RETURN ! PMMA debug
 
 RHOCBAR_OUT = 0._EB
+ITMP = MIN(I_MAX_TEMP,NINT(TMP_S))
+
 IF (PRESENT(OPT_MATL_INDEX)) THEN
    ML => MATERIAL(OPT_MATL_INDEX)
-   IF (ML%C_S>0._EB) THEN
-      RHOCBAR_OUT = ML%RHO_S*ML%C_S
-   ELSE
-      NR = -NINT(ML%C_S)
-      RHOCBAR_OUT = ML%RHO_S*EVALUATE_RAMP(TMP_S,0._EB,NR)
-   ENDIF
+   RHOCBAR_OUT = ML%RHO_S*ML%C_S(ITMP)
 ELSEIF (PRESENT(OPT_SURF_INDEX)) THEN
    ! See FDS Tech Guide, Eq. (7.24)
    SF => SURFACE(OPT_SURF_INDEX)
    DO N=1,SF%N_MATL
       IF (OPT_RHO_IN(N)<TWO_EPSILON_EB) CYCLE
       ML => MATERIAL(SF%MATL_INDEX(N))
-      IF (ML%C_S>0._EB) THEN
-         RHOCBAR_OUT = RHOCBAR_OUT + OPT_RHO_IN(N)*ML%C_S
-      ELSE
-         NR = -NINT(ML%C_S)
-         RHOCBAR_OUT = RHOCBAR_OUT + OPT_RHO_IN(N)*EVALUATE_RAMP(TMP_S,0._EB,NR)
-      ENDIF
+      RHOCBAR_OUT = RHOCBAR_OUT + OPT_RHO_IN(N)*ML%C_S(ITMP)
    ENDDO
 ENDIF
 IF (RHOCBAR_OUT<=TWO_EPSILON_EB) RHOCBAR_OUT = 0.001_EB
@@ -3538,7 +3523,7 @@ ELSE
       CASE(SURF_CARTESIAN)   ; I_GRAD = 1
       CASE(SURF_CYLINDRICAL) ; I_GRAD = 2
       CASE(SURF_SPHERICAL)   ; I_GRAD = 3
-   END SELECT   
+   END SELECT
    RHO_H = 0._EB
    RHO = 0._EB
    ITMP = MIN(I_MAX_TEMP-1,INT(TMP_S))
@@ -3718,8 +3703,8 @@ REAL(EB) FUNCTION SURFACE_DENSITY(NM,MODE,WALL_INDEX,LAGRANGIAN_PARTICLE_INDEX,M
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 INTEGER, INTENT(IN) :: NM,MODE
 INTEGER, INTENT(IN), OPTIONAL :: WALL_INDEX,LAGRANGIAN_PARTICLE_INDEX,MATL_INDEX
-INTEGER :: I_GRAD=0,NWP,II2,N,NR
-REAL(EB) :: WGT,R_S(0:NWP_MAX),EPUM
+INTEGER :: I_GRAD=0,NWP,II2,N,ITMP
+REAL(EB) :: WGT,R_S(0:NWP_MAX),EPUM,DTMP
 TYPE(MESH_TYPE), POINTER :: M=>NULL()
 TYPE(ONE_D_M_AND_E_XFER_TYPE), POINTER :: ONE_D=>NULL()
 TYPE(SURFACE_TYPE), POINTER :: SF=>NULL()
@@ -3761,16 +3746,13 @@ ELSE THERMALLY_THICK_IF
       END SELECT AREA_VOLUME_SELECT
 
       EPUM = 1._EB ! energy per unit mass
+      ITMP = MIN(I_MAX_TEMP-1,INT(ONE_D%TMP(II2)))
+      DTMP = ONE_D%TMP(II2) - REAL(ITMP,EB)
       IF (PRESENT(MATL_INDEX)) THEN
          ENERGY_SELECT_1: SELECT CASE(MODE)
             CASE(2,3)
                ML => MATERIAL(MATL_INDEX)
-               IF (ML%C_S>0._EB) THEN
-                  EPUM = ML%C_S * ONE_D%TMP(II2)
-               ELSE
-                  NR = -NINT(ML%C_S)
-                  EPUM = EVALUATE_RAMP(ONE_D%TMP(II2),0._EB,NR) * ONE_D%TMP(II2)
-               ENDIF
+               EPUM = ML%H(ITMP)+DTMP*(ML%H(ITMP+1)-ML%H(ITMP))
          END SELECT ENERGY_SELECT_1
          SURFACE_DENSITY = SURFACE_DENSITY + ONE_D%MATL_COMP(MATL_INDEX)%RHO(II2)*WGT*EPUM
       ELSE
@@ -3778,12 +3760,7 @@ ELSE THERMALLY_THICK_IF
             ENERGY_SELECT_2: SELECT CASE(MODE)
                CASE(2,3)
                   ML => MATERIAL(N)
-                  IF (ML%C_S>0._EB) THEN
-                     EPUM = ML%C_S * ONE_D%TMP(II2)
-                  ELSE
-                     NR = -NINT(ML%C_S)
-                     EPUM = EVALUATE_RAMP(ONE_D%TMP(II2),0._EB,NR) * ONE_D%TMP(II2)
-                  ENDIF
+                  EPUM = ML%H(ITMP)+DTMP*(ML%H(ITMP+1)-ML%H(ITMP))                  
             END SELECT ENERGY_SELECT_2
             SURFACE_DENSITY = SURFACE_DENSITY + ONE_D%MATL_COMP(N)%RHO(II2)*WGT*EPUM
          ENDDO
@@ -4173,13 +4150,13 @@ ENDIF
 END SUBROUTINE MONIN_OBUKHOV_STABILITY_CORRECTIONS
 
 
-!> \brief Computes the mass and heat transfer coeffiicents for a liquid droplet in air based on the selected EVAP_MODEL on MISC
+!> \brief Computes the mass and heat transfer coeffiicents for a liquid droplet in FILM based on the selected EVAP_MODEL on MISC
 !> \param H_MASS The mass transfer coefficient (m2/s)
 !> \param H_HEAT The dropelt heat transfer coefficient (W/m2/K)
-!> \param D_AIR Diffusivity in air of the droplet species in the gas cell with the droplet (m2/s)
-!> \param K_AIR Conductivity in the gas cell with the droplet (W/m/k)
-!> \param CP_AIR Specific heat in the gas cell with the droplet (J/kg/K)
-!> \param RHO_AIR Density in the gas cell with the droplet (kg/m3)
+!> \param D_FILM Diffusivity in the film (m2/s)
+!> \param K_FILM Conductivity in the film (W/m/k)
+!> \param CP_FILM Specific heat in the film (J/kg/K)
+!> \param RHO_FILM Density in in the film (kg/m3)
 !> \param LENGTH Length scale (m)
 !> \param Y_DROP Equilibrium vapor fraction for the current droplet temperature
 !> \param Y_GAS Mass fraction of vapor in the gas
@@ -4191,36 +4168,36 @@ END SUBROUTINE MONIN_OBUKHOV_STABILITY_CORRECTIONS
 !> \param ZZ_GET Tracked species mass fractions in the gas cell with the droplet
 !> \param Z_INDEX Droplet species index in ZZ
 
-SUBROUTINE DROPLET_H_MASS_H_HEAT_GAS(H_MASS,H_HEAT,D_AIR,K_AIR,CP_AIR,RHO_AIR,LENGTH,Y_DROP,Y_GAS,B_NUMBER,NU_FAC_GAS,SH_FAC_GAS, &
-                                     RE_L,TMP_FILM,ZZ_GET,Z_INDEX)
+SUBROUTINE DROPLET_H_MASS_H_HEAT_GAS(H_MASS,H_HEAT,D_FILM,K_FILM,CP_FILM,RHO_FILM,LENGTH,Y_DROP,Y_GAS,B_NUMBER,NU_FAC_GAS, &
+                                     SH_FAC_GAS,RE_L,TMP_FILM,ZZ_GET,Z_INDEX)
 USE MATH_FUNCTIONS, ONLY: F_B
-REAL(EB), INTENT(IN) :: D_AIR,CP_AIR,K_AIR,RHO_AIR,LENGTH,Y_DROP,Y_GAS,NU_FAC_GAS,SH_FAC_GAS,RE_L,TMP_FILM, &
+REAL(EB), INTENT(IN) :: D_FILM,CP_FILM,K_FILM,RHO_FILM,LENGTH,Y_DROP,Y_GAS,NU_FAC_GAS,SH_FAC_GAS,RE_L,TMP_FILM, &
                         ZZ_GET(1:N_TRACKED_SPECIES)
 INTEGER, INTENT(IN) :: Z_INDEX
 REAL(EB), INTENT(INOUT) :: B_NUMBER
 REAL(EB), INTENT(OUT) :: H_MASS,H_HEAT
-REAL(EB) :: NUSSELT,SHERWOOD,LEWIS,THETA,C_GAS_DROP,C_GAS_AIR,ZZ_GET2(1:N_TRACKED_SPECIES)
+REAL(EB) :: NUSSELT,SHERWOOD,LEWIS,THETA,C_GAS_DROP,C_GAS_FILM,ZZ_GET2(1:N_TRACKED_SPECIES)
 
 SELECT CASE (EVAP_MODEL)
    CASE(-1) ! Ranz Marshall
       NUSSELT  = 2._EB + NU_FAC_GAS*SQRT(RE_L)
-      H_HEAT   = NUSSELT*K_AIR/LENGTH
+      H_HEAT   = NUSSELT*K_FILM/LENGTH
       IF (Y_DROP <= Y_GAS) THEN
          H_MASS   = 0._EB
       ELSE
          SHERWOOD = 2._EB + SH_FAC_GAS*SQRT(RE_L)
-         H_MASS   = SHERWOOD*D_AIR/LENGTH
+         H_MASS   = SHERWOOD*D_FILM/LENGTH
       ENDIF
    CASE(0) ! Sazhin M0, Eq 106 + 109 with B_T=B_M. This is the default model.
       IF (Y_DROP <= Y_GAS) THEN
          NUSSELT  = 2._EB + NU_FAC_GAS*SQRT(RE_L)
-         H_HEAT   = NUSSELT*K_AIR/LENGTH
+         H_HEAT   = NUSSELT*K_FILM/LENGTH
          H_MASS   = 0._EB
       ELSE
          NUSSELT  = ( 2._EB + NU_FAC_GAS*SQRT(RE_L) )*LOG(1._EB+B_NUMBER)/B_NUMBER
-         H_HEAT   = NUSSELT*K_AIR/LENGTH
+         H_HEAT   = NUSSELT*K_FILM/LENGTH
          SHERWOOD = ( 2._EB + SH_FAC_GAS*SQRT(RE_L) )*LOG(1._EB+B_NUMBER)/(Y_DROP-Y_GAS)
-         H_MASS   = SHERWOOD*D_AIR/LENGTH
+         H_MASS   = SHERWOOD*D_FILM/LENGTH
          ! above we save a divide and multiply of B_NUMBER
          ! the full model corresponding to Sazhin (108) and (109) would be
          ! SH = SH_0 * LOG(1+B_M)/B_M
@@ -4229,38 +4206,38 @@ SELECT CASE (EVAP_MODEL)
    CASE(1) ! Sazhin M1, Eq 106 + 109 with eq 102.
       IF (Y_DROP <= Y_GAS) THEN
          NUSSELT  = 2._EB + NU_FAC_GAS*SQRT(RE_L)
-         H_HEAT   = NUSSELT*K_AIR/LENGTH
+         H_HEAT   = NUSSELT*K_FILM/LENGTH
          H_MASS   = 0._EB
       ELSE
          SHERWOOD = ( 2._EB + SH_FAC_GAS*SQRT(RE_L) )*LOG(1._EB+B_NUMBER)/(Y_DROP-Y_GAS)
-         H_MASS   = SHERWOOD*D_AIR/LENGTH
-         LEWIS    = K_AIR / (RHO_AIR * D_AIR * CP_AIR)
+         H_MASS   = SHERWOOD*D_FILM/LENGTH
+         LEWIS    = K_FILM / (RHO_FILM * D_FILM * CP_FILM)
          ZZ_GET2(1:N_TRACKED_SPECIES) = 0._EB
          ZZ_GET2(Z_INDEX) = 1._EB
          CALL GET_SPECIFIC_HEAT(ZZ_GET2,C_GAS_DROP,TMP_FILM)
-         CALL GET_SPECIFIC_HEAT(ZZ_GET,C_GAS_AIR,TMP_FILM)
-         THETA = C_GAS_DROP/C_GAS_AIR/LEWIS
+         CALL GET_SPECIFIC_HEAT(ZZ_GET,C_GAS_FILM,TMP_FILM)
+         THETA = C_GAS_DROP/C_GAS_FILM/LEWIS
          B_NUMBER = (1._EB+B_NUMBER)**THETA-1._EB
          NUSSELT  = ( 2._EB + NU_FAC_GAS*SQRT(RE_L) )*LOG(1._EB+B_NUMBER)/B_NUMBER
-         H_HEAT   = NUSSELT*K_AIR/LENGTH
+         H_HEAT   = NUSSELT*K_FILM/LENGTH
       ENDIF
    CASE(2) ! Sazhin M2, Eq 116 and 117 with eq 106, 109, and 102.
       IF (Y_DROP <= Y_GAS) THEN
          NUSSELT  = 2._EB + NU_FAC_GAS*SQRT(RE_L)
-         H_HEAT   = NUSSELT*K_AIR/LENGTH
+         H_HEAT   = NUSSELT*K_FILM/LENGTH
          H_MASS   = 0._EB
       ELSE
          SHERWOOD = ( 2._EB + SH_FAC_GAS*SQRT(RE_L) )*LOG(1._EB+B_NUMBER)/((Y_DROP-Y_GAS)*F_B(B_NUMBER))
-         H_MASS   = SHERWOOD*D_AIR/LENGTH
-         LEWIS    = K_AIR / (RHO_AIR * D_AIR * CP_AIR)
+         H_MASS   = SHERWOOD*D_FILM/LENGTH
+         LEWIS    = K_FILM / (RHO_FILM * D_FILM * CP_FILM)
          ZZ_GET2(1:N_TRACKED_SPECIES) = 0._EB
          ZZ_GET2(Z_INDEX) = 1._EB
          CALL GET_SPECIFIC_HEAT(ZZ_GET2,C_GAS_DROP,TMP_FILM)
-         CALL GET_SPECIFIC_HEAT(ZZ_GET,C_GAS_AIR,TMP_FILM)
-         THETA = C_GAS_DROP/C_GAS_AIR/LEWIS
+         CALL GET_SPECIFIC_HEAT(ZZ_GET,C_GAS_FILM,TMP_FILM)
+         THETA = C_GAS_DROP/C_GAS_FILM/LEWIS
          B_NUMBER = (1._EB+B_NUMBER)**THETA-1._EB
          NUSSELT  = ( 2._EB + NU_FAC_GAS*SQRT(RE_L) )*LOG(1._EB+B_NUMBER)/(B_NUMBER*F_B(B_NUMBER))
-         H_HEAT   = NUSSELT*K_AIR/LENGTH
+         H_HEAT   = NUSSELT*K_FILM/LENGTH
       ENDIF
 END SELECT
 
@@ -4289,6 +4266,139 @@ DO K=0,M%KBP1
 ENDDO
 
 END SUBROUTINE COMPUTE_WIND_COMPONENTS
+
+
+!> \brief Compute properties of the gas film for a liquid surface
+!> \param N_VAP Number of evaporating fluids
+!> \param FILM_FAC Linear factor for determining the filn conditions
+!> \param Y_VAP Mass fraciton of the liquid vapors at the surface
+!> \param Y_GAS Mass fraction of the liquid vapors in the gas cell
+!> \param ZZ_INDEX Array of tracked species indicies for the evaporating liquids
+!> \param TMP_S Temperature of the surface (K)
+!> \param TMP_GAS Temprature of the gas cell (K)
+!> \param ZZ_GAS Trakced species mass fractions in the gas cell
+!> \param PB Film pressure (Pa)
+!> \param TMP_FILM Film temperature (K)
+!> \param MU_FILM Film viscosity (kg/m/s)
+!> \param K_FILM Film conductivity (W/m/K)
+!> \param CP_FILM Film specific heat (kJ/kg/K)
+!> \param D_FILM Film diffusivity (m2/)
+!> \param RHO_FILM Film density (kg/m3)
+!> \param PR_FILM Film Prandtl number
+!> \param SC_FILM Film Schmidt number
+
+SUBROUTINE GET_FILM_PROPERTIES(N_VAP,FILM_FAC,Y_VAP,Y_GAS,ZZ_INDEX,TMP_S,TMP_GAS,ZZ_GAS,PB,TMP_FILM,MU_FILM,K_FILM,CP_FILM,D_FILM,&
+                               RHO_FILM,PR_FILM,SC_FILM)
+
+INTEGER, INTENT(IN) :: N_VAP,ZZ_INDEX(N_VAP)
+REAL(EB), INTENT(IN) :: FILM_FAC,Y_VAP(N_VAP),Y_GAS(N_VAP),TMP_S,TMP_GAS,ZZ_GAS(1:N_TRACKED_SPECIES),PB
+REAL(EB), INTENT(OUT) :: TMP_FILM,MU_FILM,K_FILM,CP_FILM,D_FILM,RHO_FILM,PR_FILM,SC_FILM
+REAL(EB) :: X_SUM,R_FILM,ZZ_FILM(1:N_TRACKED_SPECIES),Y_FILM(N_VAP),SUM_FILM,SUM_GAS,OM_SUM_FILM
+INTEGER :: I
+
+! Take liquid surface Y and gas cell Y and compoute film Y
+Y_FILM = Y_VAP + FILM_FAC*(Y_GAS-Y_VAP)
+SUM_FILM = SUM(Y_FILM)
+SUM_GAS = SUM(Y_GAS)
+OM_SUM_FILM = 1._EB-SUM_FILM
+
+IF (OM_SUM_FILM<TWO_EPSILON_EB) THEN
+   ! If film is all vapor, just set the film Z to the vapor mass fractions.
+   ZZ_FILM = 0._EB
+   LOOP1: DO I=1,N_VAP
+      IF (ZZ_INDEX(I)==0) CYCLE LOOP1
+      ZZ_FILM(ZZ_INDEX(I)) = Y_FILM(I)
+   ENDDO LOOP1
+ELSE
+   ! Determine the additional mass fraction of tracked species for each vapor species present
+   IF (ABS(SUM_GAS-1._EB) < TWO_EPSILON_EB) THEN
+      ZZ_FILM = 0._EB
+      DO I=1,N_VAP
+         ZZ_FILM(ZZ_INDEX(I)) = Y_FILM(I)
+      ENDDO
+      ZZ_FILM(1) = 1._EB - SUM_FILM
+   ELSE
+      ZZ_FILM = ZZ_GAS
+      LOOP2: DO I=1,N_VAP
+         IF (ZZ_INDEX(I)==0 .OR. Y_FILM(I)<TWO_EPSILON_EB) CYCLE LOOP2
+         ZZ_FILM(ZZ_INDEX(I)) = ZZ_GAS(ZZ_INDEX(I)) + &
+                                (Y_FILM(I)*(1._EB-SUM_GAS+Y_GAS(I))+Y_GAS(I)*(SUM_FILM-Y_FILM(I)-1._EB))/OM_SUM_FILM
+      ENDDO LOOP2
+      ZZ_FILM = ZZ_FILM/SUM(ZZ_FILM)
+   ENDIF
+ENDIF
+
+! Use film mass fractions to get properties and non-dimensional parameters. D is weighed by mole fraction.
+
+TMP_FILM = TMP_S + FILM_FAC*(TMP_GAS - TMP_S) ! LC Eq.(18)
+CALL GET_VISCOSITY(ZZ_FILM,MU_FILM,TMP_FILM)
+CALL GET_CONDUCTIVITY(ZZ_FILM,K_FILM,TMP_FILM)
+CALL GET_SPECIFIC_HEAT(ZZ_FILM,CP_FILM,TMP_FILM)
+CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_FILM,R_FILM)
+
+X_SUM = 0._EB
+LOOP3: DO I=1,N_VAP
+   IF (ZZ_INDEX(I)==0 .OR. Y_FILM(I)<TWO_EPSILON_EB) CYCLE LOOP3
+   D_FILM = D_Z(MIN(I_MAX_TEMP,NINT(TMP_FILM)),ZZ_INDEX(I))*ZZ_FILM(ZZ_INDEX(I))/SPECIES_MIXTURE(ZZ_INDEX(I))%MW
+   X_SUM=X_SUM+ZZ_FILM(ZZ_INDEX(I))/SPECIES_MIXTURE(ZZ_INDEX(I))%MW
+ENDDO LOOP3
+
+IF (X_SUM > TWO_EPSILON_EB) THEN
+   D_FILM = D_FILM/X_SUM
+ELSE
+   D_FILM = D_Z(NINT(TMPA),1)
+ENDIF
+PR_FILM = MU_FILM*CP_FILM/K_FILM
+RHO_FILM = PB/(R_FILM*TMP_FILM)
+PR_FILM = MU_FILM*CP_FILM/K_FILM
+SC_FILM = MU_FILM/(RHO_FILM*D_FILM)
+
+END SUBROUTINE GET_FILM_PROPERTIES
+
+!> \brief Converts an array of liquid vapor mole fractions into mass fractions
+!> \param N_MATS Number of liquids
+!> \param ZZ_GET Gas cell tracked species mass factions        
+!> \param X_SV Liquid surface liquid vapor mole fraction
+!> \param Y_SV Liquid surface liquid vapor mass fraction
+!> \param MW Liquid vapor molecular weights
+!> \param SMIX_INDEX Lookup for tracked species the liquids evaporate to
+
+SUBROUTINE GET_Y_SURF(N_MATS,ZZ_GET,X_SV,Y_SV,MW,SMIX_INDEX)
+INTEGER, INTENT(IN) :: N_MATS,SMIX_INDEX(N_MATS)
+REAL(EB), INTENT(IN) :: ZZ_GET(1:N_TRACKED_SPECIES),X_SV(N_MATS),MW(N_MATS)
+REAL(EB), INTENT(OUT) :: Y_SV(N_MATS)
+REAL(EB) :: ZZ_2(1:N_TRACKED_SPECIES),MW_DRY,MASS
+INTEGER :: I
+
+ZZ_2 = ZZ_GET
+Y_SV = 0._EB
+
+!Zero out tracked species that are liquid vapors and get the MW of what is left
+
+Y_ALL_LOOP: DO I=1,N_MATS
+   IF (X_SV(I) < TWO_EPSILON_EB) CYCLE
+   ZZ_2(SMIX_INDEX(I))=0._EB
+ENDDO Y_ALL_LOOP
+
+IF (SUM(ZZ_2) > TWO_EPSILON_EB) THEN
+   ZZ_2 = ZZ_2 / SUM(ZZ_2)
+   MW_DRY = 0._EB
+   DO I=1,N_TRACKED_SPECIES
+      MW_DRY = MW_DRY + ZZ_2(I)/SPECIES_MIXTURE(I)%MW
+   ENDDO
+   MW_DRY = 1._EB/MW_DRY
+ENDIF
+ 
+! Get mass based on mole fractions and MWs and convert X to Y
+MASS = (1._EB-SUM(X_SV))*MW_DRY
+DO I=1,N_MATS
+   Y_SV(I) = X_SV(I)*MW(I)
+   MASS = MASS + Y_SV(I)
+ENDDO
+
+Y_SV = Y_SV/MASS
+
+END SUBROUTINE GET_Y_SURF
 
 
 END MODULE PHYSICAL_FUNCTIONS

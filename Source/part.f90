@@ -2112,7 +2112,7 @@ SUBROUTINE MOVE_IN_GAS
 
 USE PHYSICAL_FUNCTIONS, ONLY : DRAG, GET_VISCOSITY, LES_FILTER_WIDTH_FUNCTION
 USE MATH_FUNCTIONS, ONLY : AFILL2, EVALUATE_RAMP, RANDOM_CHOICE, BOX_MULLER
-REAL(EB) :: UBAR,VBAR,WBAR,RVC,UREL,VREL,WREL,QREL,RHO_G,TMP_G,MU_AIR, &
+REAL(EB) :: UBAR,VBAR,WBAR,RVC,UREL,VREL,WREL,QREL,RHO_G,TMP_G,MU_FILM, &
             U_OLD,V_OLD,W_OLD,ZZ_GET(1:N_TRACKED_SPECIES),WAKE_VEL,DROP_VOL_FRAC,RE_WAKE,&
             WE_G,T_BU_BAG,T_BU_STRIP,MPOM,SFAC,BREAKUP_RADIUS(0:NDC),&
             DD,DD_X,DD_Y,DD_Z,DW_X,DW_Y,DW_Z,K_TERM(3),Y_TERM(3),C_DRAG,A_DRAG,X_WGT,Y_WGT,Z_WGT,&
@@ -2233,10 +2233,10 @@ DRAG_LAW_SELECT: SELECT CASE (LPC%DRAG_LAW)
 
       TMP_G  = MAX(TMPMIN,TMP(IIG_OLD,JJG_OLD,KKG_OLD))
       ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(IIG_OLD,JJG_OLD,KKG_OLD,1:N_TRACKED_SPECIES)
-      CALL GET_VISCOSITY(ZZ_GET,MU_AIR,TMP_G)
-      LP%RE  = RHO_G*QREL*2._EB*R_D/MU_AIR
+      CALL GET_VISCOSITY(ZZ_GET,MU_FILM,TMP_G)
+      LP%RE  = RHO_G*QREL*2._EB*R_D/MU_FILM
       KN = 0._EB
-      IF (LP%RE<1._EB) KN = MU_AIR*SQRT(0.5_EB*PI/(PBAR(KKG_OLD,PRESSURE_ZONE(IIG_OLD,JJG_OLD,KKG_OLD))*RHO_G))/(2._EB*R_D)
+      IF (LP%RE<1._EB) KN = MU_FILM*SQRT(0.5_EB*PI/(PBAR(KKG_OLD,PRESSURE_ZONE(IIG_OLD,JJG_OLD,KKG_OLD))*RHO_G))/(2._EB*R_D)
       C_DRAG = DRAG(LP%RE,LPC%DRAG_LAW,KN)
 
       ! Primary break-up model
@@ -2267,7 +2267,7 @@ DRAG_LAW_SELECT: SELECT CASE (LPC%DRAG_LAW)
          SECONDARY_BREAKUP_IF: IF (LPC%BREAKUP) THEN
             ! Use undisturbed wake velocity for breakup calculations
             WAKE_VEL    = WAKE_VEL*QREL
-            RE_WAKE     = RHO_G*WAKE_VEL   *2._EB*R_D/MU_AIR
+            RE_WAKE     = RHO_G*WAKE_VEL   *2._EB*R_D/MU_FILM
             WE_G        = RHO_G*WAKE_VEL**2*2._EB*R_D/LPC%SURFACE_TENSION
             ! Shape Deformation
             C_DRAG = SHAPE_DEFORMATION(RE_WAKE,WE_G,C_DRAG)
@@ -2287,7 +2287,7 @@ DRAG_LAW_SELECT: SELECT CASE (LPC%DRAG_LAW)
                   END DO
                   R_D = MAX(R_D,1.1_EB*LPC%MINIMUM_DIAMETER/2._EB)
                ENDIF
-               LP%RE    = RHO_G*QREL*2._EB*R_D/MU_AIR
+               LP%RE    = RHO_G*QREL*2._EB*R_D/MU_FILM
                C_DRAG   = DRAG(LP%RE,LPC%DRAG_LAW)
                LP%PWT   = LP%PWT*(R_D_0/R_D)**3
                LP%T_INSERT = T
@@ -2303,7 +2303,7 @@ DRAG_LAW_SELECT: SELECT CASE (LPC%DRAG_LAW)
                ENDIF
                ! Change in drag coefficient due to deformation of PARTICLE shape (WE_G > 2)
                WAKE_VEL = WAKE_VEL*QREL
-               RE_WAKE  = RHO_G*WAKE_VEL   *2._EB*R_D/MU_AIR
+               RE_WAKE  = RHO_G*WAKE_VEL   *2._EB*R_D/MU_FILM
                WE_G     = RHO_G*WAKE_VEL**2*2._EB*R_D/LPC%SURFACE_TENSION
                ! Shape Deformation
                C_DRAG   = SHAPE_DEFORMATION(RE_WAKE,WE_G,C_DRAG)
@@ -2418,9 +2418,9 @@ ELSE PARTICLE_NON_STATIC_IF ! Drag calculation for stationary, airborne particle
          IF (QREL > 0.015_EB .AND. LPC%FREE_AREA_FRACTION < 1.0_EB ) THEN ! Testing shows below this can have instability
             TMP_G  = MAX(TMPMIN,TMP(IIG_OLD,JJG_OLD,KKG_OLD))
             ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(IIG_OLD,JJG_OLD,KKG_OLD,1:N_TRACKED_SPECIES)
-            CALL GET_VISCOSITY(ZZ_GET,MU_AIR,TMP_G)
+            CALL GET_VISCOSITY(ZZ_GET,MU_FILM,TMP_G)
             Y_TERM = LPC%DRAG_COEFFICIENT * RHO_G /SQRT(LPC%PERMEABILITY)*QREL*ABS(ORIENTATION_VECTOR(1:3,LPC%ORIENTATION_INDEX))
-            K_TERM = MU_AIR/LPC%PERMEABILITY*ABS(ORIENTATION_VECTOR(1:3,LPC%ORIENTATION_INDEX))
+            K_TERM = MU_FILM/LPC%PERMEABILITY*ABS(ORIENTATION_VECTOR(1:3,LPC%ORIENTATION_INDEX))
             SFAC = 2._EB*MAXVAL(LP%ONE_D%X(0:SF%N_CELLS_MAX))*RVC/RHO_G
             LP%ACCEL_X = -(K_TERM(1)+Y_TERM(1))*UBAR*DY(JJG_OLD)*DZ(KKG_OLD)*SFAC
             LP%ACCEL_Y = -(K_TERM(2)+Y_TERM(2))*VBAR*DX(IIG_OLD)*DZ(KKG_OLD)*SFAC
@@ -2436,9 +2436,9 @@ ELSE PARTICLE_NON_STATIC_IF ! Drag calculation for stationary, airborne particle
       CASE (POROUS_DRAG)
          TMP_G  = MAX(TMPMIN,TMP(IIG_OLD,JJG_OLD,KKG_OLD))
          ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(IIG_OLD,JJG_OLD,KKG_OLD,1:N_TRACKED_SPECIES)
-         CALL GET_VISCOSITY(ZZ_GET,MU_AIR,TMP_G)
+         CALL GET_VISCOSITY(ZZ_GET,MU_FILM,TMP_G)
          Y_TERM = LPC%DRAG_COEFFICIENT * RHO_G /SQRT(LPC%PERMEABILITY)*QREL
-         K_TERM = MU_AIR/LPC%PERMEABILITY
+         K_TERM = MU_FILM/LPC%PERMEABILITY
          SFAC = 1._EB/RHO_G
          LP%ACCEL_X = -(MIN(DX(IIG_OLD),LP%DX)/DX(IIG_OLD))*(K_TERM(1)+Y_TERM(1))*UBAR*SFAC
          LP%ACCEL_Y = -(MIN(DY(JJG_OLD),LP%DY)/DY(JJG_OLD))*(K_TERM(2)+Y_TERM(2))*VBAR*SFAC
@@ -2642,8 +2642,8 @@ END SUBROUTINE MOVE_PARTICLES
 
 SUBROUTINE PARTICLE_MASS_ENERGY_TRANSFER(T,DT,NM)
 
-USE PHYSICAL_FUNCTIONS, ONLY : GET_MASS_FRACTION,GET_AVERAGE_SPECIFIC_HEAT,GET_MOLECULAR_WEIGHT,GET_SPECIFIC_GAS_CONSTANT,&
-                               GET_SPECIFIC_HEAT,GET_MASS_FRACTION_ALL,GET_SENSIBLE_ENTHALPY,GET_VISCOSITY,GET_CONDUCTIVITY,&
+USE PHYSICAL_FUNCTIONS, ONLY : GET_FILM_PROPERTIES, GET_MASS_FRACTION,GET_AVERAGE_SPECIFIC_HEAT,&
+                               GET_MOLECULAR_WEIGHT,GET_SPECIFIC_HEAT,GET_MASS_FRACTION_ALL,GET_SENSIBLE_ENTHALPY,&
                                GET_MW_RATIO, GET_EQUIL_DATA,DROPLET_H_MASS_H_HEAT_GAS
 USE MATH_FUNCTIONS, ONLY: INTERPOLATE1D_UNIFORM,EVALUATE_RAMP,F_B
 USE COMP_FUNCTIONS, ONLY: SHUTDOWN
@@ -2668,44 +2668,42 @@ REAL(EB), POINTER, DIMENSION(:,:,:) :: TMP_INTERIM=>NULL()
 !< Current gas temperature (K)
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZ_INTERIM=>NULL()
 !< Current gas species mass fractions
-REAL(EB) :: ZZ_AIR(1:N_TRACKED_SPECIES) !< Species mass fractioms in the film
-REAL(EB) :: CP_AIR !< Specific heat of the film (J/kg/K) at the film temperature
-REAL(EB) :: D_AIR !< Diffusivity into air of the droplet species (m2/s) at the film temperature
-REAL(EB) :: K_AIR !< Conducitvity of the film (W/m/K) at the film temperature
-REAL(EB) :: R_AIR !< Specfic gas constant  the film (J/kg/K)
-REAL(EB) :: RHO_AIR !< Density of the film (kg/m3) at the film temperature
-REAL(EB) :: MU_AIR !< Viscosity of the film (kg/m/s) at the film temperature
-REAL(EB) :: PR_AIR !< Prandtl number of the film
-REAL(EB) :: SC_AIR !< Schmidt number of the film
-REAL(EB) :: Y_AIR !< Droplet species mass fraction in the film
-REAL(EB) :: CP !< Specific heat (J/kg/K)
-REAL(EB) :: DCPDT !< Temperature derivative of the specific heat (J/kg/K2)
 REAL(EB) :: C_DROP2 !< Specific heat of particle (J/kg/K)
+REAL(EB) :: CP !< Specific heat (J/kg/K)
 REAL(EB) :: CP_BAR !< Average specific heat (J/kg/K)
 REAL(EB) :: CP_BAR_2 !< Average specific heat (J/kg/K)
+REAL(EB) :: CP_FILM !< Specific heat of the film (J/kg/K) at the film temperature
+REAL(EB) :: D_FILM !< Diffusivity into air of the droplet species (m2/s) at the film temperature
+REAL(EB) :: DCPDT !< Temperature derivative of the specific heat (J/kg/K2)
+REAL(EB) :: DELTA_H_G !< H_S_B - H_S (J)
+REAL(EB) :: DH_V_A_DT !< Temperature derivative of H_VA (J/kg/K)
 REAL(EB) :: H1 !< Sensible enthalpy (J/kg/K)
 REAL(EB) :: H2 !< Sensible enthalpy (J/kg/K)
 REAL(EB) :: H_D_OLD !< Particle enthalpy (J) at the start of a sub time step
 REAL(EB) :: H_G_OLD !< Gas enthalpy (J) at the start of a sub time step
-REAL(EB) :: H_S_G_OLD !< Sensible enthalpy of the gas (J) at the start of a sub time step
+REAL(EB) :: H_HEAT !< Convection heat transfer coefficient between the particle and the gas (W/m2/K)
+REAL(EB) :: H_L !< Enthalpy of the particle (J)
+REAL(EB) :: H_MASS !< Mass transfer coefficient (m/s)
 REAL(EB) :: H_NEW !<  Total gas and particle enthalpy (J) at the end of a sub time step
+REAL(EB) :: H_S !< Sensible enthalpy of the vapor (J) at the gas temperature
+REAL(EB) :: H_S_B !< Sensible enthalpy of the vapor (J) at the particle temperature
+REAL(EB) :: H_S_G_OLD !< Sensible enthalpy of the gas (J) at the start of a sub time step
 REAL(EB) :: H_V !< Heat of vaporization at the particle temperature (J/kg)
 REAL(EB) :: H_V2 !< Heat of vaporization at the particle temperature (J/kg)
 REAL(EB) :: H_V_A !< Effective heat of vaporization for use in the Clasius-Clapeyron relation (J/kg)
-REAL(EB) :: DH_V_A_DT !< Temperature derivative of H_VA (J/kg/K)
 REAL(EB) :: H_V_REF !< Heat of vaporization at the species heat of vaporization reference temperature (J/kg)
-REAL(EB) :: H_L !< Enthalpy of the particle (J)
-REAL(EB) :: H_S !< Sensible enthalpy of the vapor (J) at the gas temperature
-REAL(EB) :: H_S_B !< Sensible enthalpy of the vapor (J) at the particle temperature
-REAL(EB) :: DELTA_H_G !< H_S_B - H_S (J)
+REAL(EB) :: H_WALL !< Convection heat transfer coefficient between the particle and a surface (W/m2/K)
+REAL(EB) :: K_FILM !< Conducitvity of the film (W/m/K) at the film temperature
 REAL(EB) :: M_GAS !< Mass of the gas (kg) in the grid cell
-REAL(EB) :: RHO_G !< Current gas density (kg/m3)
 REAL(EB) :: M_GAS_NEW !< Mass of gas (kg) in the grid cell at the end of a sub time step
 REAL(EB) :: M_GAS_OLD !< Mass of gas (kg) in a grid cell at the start of a sub time step
+REAL(EB) :: MU_FILM !< Viscosity of the film (kg/m/s) at the film temperature
 REAL(EB) :: MW_GAS !< Molecular weight (kg/kmol) of the gas
 REAL(EB) :: MW_RATIO !< Ratio of average gas molecular weigth to particle species molecular weight
-REAL(EB) :: RVC !< Inverse of the cell volume (1/m3)
-REAL(EB) :: WGT !< LAGRANGIAN_PARTICLE%PWT
+REAL(EB) :: NU_FAC_GAS !< Nusselt number of a particle in the gas
+REAL(EB) :: NU_FAC_WALL !< Nusselt number of a particle on a surface
+REAL(EB) :: NUSSELT !< Nusselt number
+REAL(EB) :: PR_FILM !< Prandtl number of the film
 REAL(EB) :: Q_CON_GAS !< Convective heat transfer between the particle and the gas (J)
 REAL(EB) :: Q_CON_SUM !< Sum of convective heat transfer between the particle and the surface over subtimesteps (J)
 REAL(EB) :: Q_CON_WALL !< Convective heat transfer between the particle and a surface (J)
@@ -2714,19 +2712,17 @@ REAL(EB) :: Q_FRAC !< Heat transfer adjustment factor when particle reaches boil
 REAL(EB) :: Q_RAD !< Net radiation heat transfer to the particle (J)
 REAL(EB) :: Q_RAD_SUM !< Sum of radiant heat transfer to the particle over subtimesteps (J)
 REAL(EB) :: Q_TOT !< Total heat transfer from convection and radiation to the particle (J)
-REAL(EB) :: H_HEAT !< Convection heat transfer coefficient between the particle and the gas (W/m2/K)
-REAL(EB) :: H_WALL !< Convection heat transfer coefficient between the particle and a surface (W/m2/K)
-REAL(EB) :: H_MASS !< Mass transfer coefficient (m/s)
+REAL(EB) :: RAYLEIGH !< Particle Rayleigh number
+REAL(EB) :: RHO_FILM !< Density of the film (kg/m3) at the film temperature
+REAL(EB) :: RHO_G !< Current gas density (kg/m3)
+REAL(EB) :: RVC !< Inverse of the cell volume (1/m3)
 REAL(EB) :: LENGTH !< Length scale used in computing SH and NU
 REAL(EB) :: GR !< Particle Grashof number
-REAL(EB) :: RAYLEIGH !< Particle Rayleigh number
 REAL(EB) :: RE_L !< Particle Reynolds number
-REAL(EB) :: NUSSELT !< Nusselt number
+REAL(EB) :: SC_FILM !< Schmidt number of the film
 REAL(EB) :: SHERWOOD !< Particle Sherwood number
 REAL(EB) :: SH_FAC_GAS !< Sherwood number of a particle in the gas
 REAL(EB) :: SH_FAC_WALL !< Sherwood number of a particle on a surface
-REAL(EB) :: NU_FAC_GAS !< Nusselt number of a particle in the gas
-REAL(EB) :: NU_FAC_WALL !< Nusselt number of a particle on a surface
 REAL(EB) :: M_VAP !< Mass evaporated (kg) from the particle in the current sub time step
 REAL(EB) :: M_VAP_MAX !< Maximum allowable evaporation (kg)
 REAL(EB) :: DEN_ADD !< Weighted drop mass divided by cell volume (kg/m3)
@@ -2734,8 +2730,10 @@ REAL(EB) :: AREA_ADD !< Weighted drop area divided by cell volume (1/m)
 REAL(EB) :: Y_ALL(1:N_SPECIES) !< Mass fraction of all primitive species
 REAL(EB) :: X_DROP !< Equilibirum vapor mole fraction at the particle temperature
 REAL(EB) :: Y_DROP !< Equilibrium vapor mass fraction at the particle temperature
+REAL(EB) :: Y_DROP_A(1) !< Equilibrium vapor mass fraction, array needed for GET_FILM_PROPERTIES
 REAL(EB) :: Y_COND !< Fraction of mass associated with any condensed vapor of the particle species
 REAL(EB) :: Y_GAS !< Vapor fraction of the particle species
+REAL(EB) :: Y_GAS_A(1) !< Vapor fraction of the particle species, array needed for GET_FILM_PROPERTIES
 REAL(EB) :: Y_GAS_NEW !< End of sub time step vapor fraction of the particle species
 REAL(EB) :: X_EQUIL !< Equilibrium vapor mole fraction
 REAL(EB) :: Y_EQUIL !< Equilibrium vapor mass fraction
@@ -2743,6 +2741,7 @@ REAL(EB) :: U2 !< Relative u-velocity (m/s)
 REAL(EB) :: V2 !< Relative v-velocity (m/s)
 REAL(EB) :: W2 !< Relative w-velocity (m/s)
 REAL(EB) :: VEL !< Relative velocity (m/s)
+REAL(EB) :: WGT !< LAGRANGIAN_PARTICLE%PWT
 REAL(EB) :: A_DROP !< Particle surface area (m2)
 REAL(EB) :: C_DROP !< Specific heat of the particle (J/kg/K) at the current temperature
 REAL(EB) :: DHOR !< Heat of vaporization divided by the gas constant (K).
@@ -2768,7 +2767,6 @@ REAL(EB) :: ZZ_GET2(1:N_TRACKED_SPECIES)
 REAL(EB) :: RHOCBAR ! Density of solid surface times specific heat the solid surface (J/m3/K)
 REAL(EB) :: MCBAR !< Particle mass time particle specific heat (J/K)
 REAL(EB) :: NU_LIQUID !< Kinematic viscosity of the particle species (m2/s)
-REAL(EB) :: B_NUMBER !< Particle B number
 REAL(EB) :: AGHRHO !< Collection of terms used in contstructing A_COL, B_COL, C_COL, and D_COL
 REAL(EB) :: DTGOG !< Collection of terms used in contstructing A_COL, B_COL, C_COL, and D_COL
 REAL(EB) :: DTGOP !< Collection of terms used in contstructing A_COL, B_COL, C_COL, and D_COL
@@ -2785,7 +2783,7 @@ REAL(EB) :: A_COL(3) !< Gas temperature terms in LHS of solution
 REAL(EB) :: B_COL(3) !< Particle temperatre terms in LHS of solution
 REAL(EB) :: C_COL(3) !< Wall temperature terms in LHS of solution
 REAL(EB) :: D_VEC(3) !< RHS of solution
-INTEGER :: IP,II,JJ,KK,IW,ICF,N_LPC,ITMP,ITMP2,ITCOUNT,Y_INDEX,Z_INDEX,I_BOIL,I_MELT,NMAT
+INTEGER :: IP,II,JJ,KK,IW,ICF,N_LPC,ITMP,ITMP2,ITCOUNT,Y_INDEX,Z_INDEX,Z_INDEX_A(1),I_BOIL,I_MELT,NMAT
 INTEGER :: ARRAY_CASE
 !< 1 = Particle in gas only, 2 = Particle on constant temperature surface, 3 = Particle on thermally thick surface
 LOGICAL :: TEMPITER !< Flag to continue temperature search iteration
@@ -2838,7 +2836,7 @@ ENDDO
 ! Loop over all types of evaporative species
 
 SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
-
+   Z_INDEX_A(1) = Z_INDEX
    ! Initialize quantities common to the evaporation index
 
    IF (.NOT.SPECIES_MIXTURE(Z_INDEX)%EVAPORATING) CYCLE SPECIES_LOOP
@@ -2940,8 +2938,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
             M_DROP   = FTPR*R_DROP**3
             TMP_DROP = LP%ONE_D%TMP(1)
             T_BOIL_EFF = SS%TMP_V
-            CALL GET_EQUIL_DATA(MW_DROP,TMP_DROP,PBAR(KK,PRESSURE_ZONE(II,JJ,KK)),H_V,H_V_A,T_BOIL_EFF,X_DROP,&
-                                H_V_LOWER=LBOUND(SS%H_V,1),H_V_DATA=SS%H_V)
+            CALL GET_EQUIL_DATA(MW_DROP,TMP_DROP,PBAR(KK,PRESSURE_ZONE(II,JJ,KK)),H_V,H_V_A,T_BOIL_EFF,X_DROP,SS%H_V)
             I_BOIL   = INT(T_BOIL_EFF)
 
             IF (H_V < 0._EB) THEN
@@ -3038,32 +3035,8 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                ZZ_GET(1:N_TRACKED_SPECIES) = ZZ_INTERIM(II,JJ,KK,1:N_TRACKED_SPECIES)
                ! Compute equilibrium PARTICLE vapor mass fraction, Y_DROP, and its derivative w.r.t. PARTICLE temperature
                Y_DROP  = X_DROP/(MW_RATIO + (1._EB-MW_RATIO)*X_DROP)
-               ! Compute effective Z at the film temperature location LC Eq (19). Skip if no evaporation will occur.
-               IF (Y_DROP > Y_GAS) THEN
-                  B_NUMBER = (Y_DROP - Y_GAS) / MAX(DY_MIN_BLOWING,1._EB-Y_DROP)
-                  Y_AIR = Y_DROP + EVAP_FILM_FAC * (Y_GAS - Y_DROP)
-                  ZZ_AIR = ZZ_GET
-                  ZZ_AIR(Z_INDEX) = ZZ_AIR(Z_INDEX) + (Y_AIR - Y_GAS)/(1-Y_AIR)
-                  ZZ_AIR = ZZ_AIR / SUM(ZZ_AIR)
-               ELSE
-                  ZZ_AIR = ZZ_GET
-               ENDIF
 
-               ! Compute thermal and transport properties except D at film temperature
-               CALL INTERPOLATE1D_UNIFORM(LBOUND(D_Z(:,Z_INDEX),1),D_Z(:,Z_INDEX),TMP_DROP,D_AIR)
-
-               TMP_FILM = TMP_DROP + EVAP_FILM_FAC*(TMP_G - TMP_DROP) ! LC Eq.(18)
-               CALL GET_VISCOSITY(ZZ_AIR,MU_AIR,TMP_FILM)
-               CALL GET_CONDUCTIVITY(ZZ_AIR,K_AIR,TMP_FILM)
-               CALL GET_SPECIFIC_HEAT(ZZ_AIR,CP_AIR,TMP_FILM)
-               CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_AIR,R_AIR)
-               PR_AIR = MU_AIR*CP_AIR/K_AIR
-               RHO_AIR = PBAR(0,PRESSURE_ZONE(II,JJ,KK))/(R_AIR*TMP_FILM)
-               SC_AIR = MU_AIR/(RHO_AIR*D_AIR)
-               SH_FAC_GAS             = 0.6_EB*SC_AIR**ONTH
-               NU_FAC_GAS             = 0.6_EB*PR_AIR**ONTH
-               SH_FAC_WALL            = 0.037_EB*SC_AIR**ONTH
-               NU_FAC_WALL            = 0.037_EB*PR_AIR**ONTH
+               IF (Y_DROP > Y_GAS) ONE_D%B_NUMBER = (Y_DROP - Y_GAS) / MAX(DY_MIN_BLOWING,1._EB-Y_DROP)
 
                ! Compute temperature deriviative of the vapor mass fraction
                DHOR     = H_V_A*MW_DROP/R0
@@ -3072,20 +3045,26 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
 
                ! Set variables for heat transfer on solid
 
+               Y_GAS_A = Y_GAS
+               Y_DROP_A = Y_DROP
+
                SOLID_OR_GAS_PHASE_2: IF (LP%ONE_D%IOR/=0 .AND. (LP%WALL_INDEX>0 .OR. LP%CFACE_INDEX>0)) THEN
+
+                  CALL GET_FILM_PROPERTIES(1,PLATE_FILM_FAC,Y_DROP_A,Y_GAS_A,Z_INDEX_A,TMP_DROP,TMP_G,ZZ_GET, &
+                                           PBAR(KK,PRESSURE_ZONE(II,JJ,KK)),TMP_FILM,MU_FILM,&
+                                           K_FILM,CP_FILM,D_FILM,RHO_FILM,PR_FILM,SC_FILM)
+
+                  SH_FAC_WALL = 0.037_EB*SC_FILM**ONTH
+                  NU_FAC_WALL = 0.037_EB*PR_FILM**ONTH
 
                   ! Compute mcbar = rho_w a_w cp_w dx_w for first wall cell for limiting convective heat transfer
 
                   IF (SF%THERMAL_BC_INDEX==THERMALLY_THICK) THEN
                      RHOCBAR = 0._EB
+                     ITMP = MIN(I_MAX_TEMP,NINT(TMP_WALL))
                      DO NMAT=1,SF%N_MATL
                         IF (ONE_D%MATL_COMP(NMAT)%RHO(1)<=TWO_EPSILON_EB) CYCLE
-                        IF (MATERIAL(SF%MATL_INDEX(NMAT))%C_S>0._EB) THEN
-                           RHOCBAR = RHOCBAR + ONE_D%MATL_COMP(NMAT)%RHO(1)*MATERIAL(SF%MATL_INDEX(NMAT))%C_S
-                        ELSE
-                           RHOCBAR = RHOCBAR + ONE_D%MATL_COMP(NMAT)%RHO(1)*&
-                              EVALUATE_RAMP(TMP_WALL,0._EB,-NINT(MATERIAL(SF%MATL_INDEX(NMAT))%C_S))
-                        ENDIF
+                        RHOCBAR = RHOCBAR + ONE_D%MATL_COMP(NMAT)%RHO(1)*MATERIAL(SF%MATL_INDEX(NMAT))%C_S(ITMP)
                      ENDDO
                      MCBAR = RHOCBAR*ONE_D%AREA*(ONE_D%X(1)-ONE_D%X(0))
                      ARRAY_CASE = 3
@@ -3116,13 +3095,13 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                            ! 4. McGraw-Hill, New York, 3rd edition, 1998.
                            NUSSELT = 0.560_EB*RAYLEIGH**(0.25_EB)/((1._EB+(0.492_EB/SS%PR_LIQUID)**(9._EB/16._EB))**(4._EB/9._EB))
                      END SELECT DIRECTION2
-                     RE_L     = MAX(5.E5_EB,RHO_G*VEL*LENGTH/MU_AIR)
+                     RE_L     = MAX(5.E5_EB,RHO_G*VEL*LENGTH/MU_FILM)
                      NUSSELT  = NU_FAC_WALL*RE_L**0.8_EB
                      SHERWOOD = SH_FAC_WALL*RE_L**0.8_EB
                      H_WALL   = NUSSELT*SS%K_LIQUID/LENGTH
                   ELSE
                      LENGTH   = 1._EB
-                     RE_L     = MAX(5.E5_EB,RHO_G*VEL*LENGTH/MU_AIR)
+                     RE_L     = MAX(5.E5_EB,RHO_G*VEL*LENGTH/MU_FILM)
 
                      ! Incropera and Dewitt, Fundamentals of Heat and Mass Transfer, 7th Edition
                      NUSSELT  = NU_FAC_WALL*RE_L**0.8_EB-871._EB
@@ -3130,25 +3109,33 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                      H_WALL   = LPC%HEAT_TRANSFER_COEFFICIENT_SOLID
 
                   ENDIF
-                  H_HEAT   = MAX(2._EB,NUSSELT)*K_AIR/LENGTH
+                  H_HEAT   = MAX(2._EB,NUSSELT)*K_FILM/LENGTH
                   IF (Y_DROP<=Y_GAS) THEN
                      H_MASS = 0._EB
                   ELSE
                      !M# expressions taken from Sazhin, Prog in Energy and Comb Sci 32 (2006) 162-214
                      SELECT CASE(EVAP_MODEL)
                         CASE(-1) ! Ranz Marshall
-                           H_MASS   = MAX(2._EB,SHERWOOD)*D_AIR/LENGTH
+                           H_MASS   = MAX(2._EB,SHERWOOD)*D_FILM/LENGTH
                         CASE(0:1) !Sazhin M0 - M1, see next code block for Refs
-                           H_MASS   = MAX(2._EB,SHERWOOD)*D_AIR/LENGTH*LOG(1._EB+B_NUMBER)/B_NUMBER
+                           H_MASS   = MAX(2._EB,SHERWOOD)*D_FILM/LENGTH*LOG(1._EB+ONE_D%B_NUMBER)/ONE_D%B_NUMBER
                         CASE(2) !Sazhin M2, see next code block for Refs
-                           H_MASS   = MAX(2._EB,SHERWOOD)*D_AIR/LENGTH*LOG(1._EB+B_NUMBER)/(B_NUMBER*F_B(B_NUMBER))
+                           H_MASS   = MAX(2._EB,SHERWOOD)*D_FILM/LENGTH*LOG(1._EB+ONE_D%B_NUMBER)/ &
+                                     (ONE_D%B_NUMBER*F_B(ONE_D%B_NUMBER))
                      END SELECT
                   ENDIF
                ELSE SOLID_OR_GAS_PHASE_2
+                  
+                  CALL GET_FILM_PROPERTIES(1,SPHERE_FILM_FAC,Y_DROP_A,Y_GAS_A,Z_INDEX_A,TMP_DROP,TMP_G,ZZ_GET,&
+                                           PBAR(KK,PRESSURE_ZONE(II,JJ,KK)),TMP_FILM,MU_FILM,&
+                                           K_FILM,CP_FILM,D_FILM,RHO_FILM,PR_FILM,SC_FILM)
+
+                  SH_FAC_GAS = 0.6_EB*SC_FILM**ONTH
+                  NU_FAC_GAS = 0.6_EB*PR_FILM**ONTH
                   LENGTH = 2._EB*R_DROP
-                  RE_L = RHO_AIR*VEL*LENGTH/MU_AIR
-                  CALL DROPLET_H_MASS_H_HEAT_GAS(H_MASS,H_HEAT,D_AIR,K_AIR,CP_AIR,RHO_AIR,LENGTH,Y_DROP,Y_GAS,B_NUMBER,NU_FAC_GAS, &
-                                                 SH_FAC_GAS,RE_L,TMP_FILM,ZZ_GET,Z_INDEX)
+                  RE_L = RHO_FILM*VEL*LENGTH/MU_FILM
+                  CALL DROPLET_H_MASS_H_HEAT_GAS(H_MASS,H_HEAT,D_FILM,K_FILM,CP_FILM,RHO_FILM,LENGTH,Y_DROP,Y_GAS,ONE_D%B_NUMBER, &
+                                                 NU_FAC_GAS,SH_FAC_GAS,RE_L,TMP_FILM,ZZ_GET,Z_INDEX)
                   H_WALL   = 0._EB
                   TMP_WALL = TMPA
                   ARRAY_CASE = 1
@@ -3161,7 +3148,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                ITMP = INT(TMP_G)
                H2 = H_SENS_Z(ITMP,Z_INDEX)+(TMP_G-REAL(ITMP,EB))*(H_SENS_Z(ITMP+1,Z_INDEX)-H_SENS_Z(ITMP,Z_INDEX))
 
-               AGHRHO = A_DROP*H_MASS*RHO_AIR/(1._EB+0.5_EB*RVC*DT_SUBSTEP*A_DROP*WGT*H_MASS*RHO_AIR*(1._EB-Y_GAS)/RHO_G)
+               AGHRHO = A_DROP*H_MASS*RHO_FILM/(1._EB+0.5_EB*RVC*DT_SUBSTEP*A_DROP*WGT*H_MASS*RHO_FILM*(1._EB-Y_GAS)/RHO_G)
 
                DTOG = DT_SUBSTEP*WGT/(M_GAS*CP)
                DTGOG = 0.5_EB*DTOG*A_DROP*H_HEAT
@@ -3280,8 +3267,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                ZZ_GET2(Z_INDEX) = ZZ_GET2(Z_INDEX) + WGT*M_VAP/M_GAS_NEW
 
                T_BOIL_EFF = SS%TMP_V
-               CALL GET_EQUIL_DATA(MW_DROP,TMP_DROP,PBAR(KK,PRESSURE_ZONE(II,JJ,KK)),H_V2,H_V_A,T_BOIL_EFF,X_EQUIL,&
-                                   H_V_LOWER=LBOUND(SS%H_V,1),H_V_DATA=SS%H_V)
+               CALL GET_EQUIL_DATA(MW_DROP,TMP_DROP,PBAR(KK,PRESSURE_ZONE(II,JJ,KK)),H_V2,H_V_A,T_BOIL_EFF,X_EQUIL,SS%H_V)
                Y_EQUIL  = X_EQUIL/(MW_RATIO + (1._EB-MW_RATIO)*X_EQUIL)
 
                ! Limit drop temperature decrease

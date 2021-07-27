@@ -20,14 +20,12 @@ K_LOWER_SKIP=1, K_UPPER_SKIP=3, K_UPPER=7 /
 # Time line:
 &TIME T_END=63. /
 
-&DUMP GET_CUTCELLS_VERBOSE=T, NFRAMES=3000, VELOCITY_ERROR_FILE=T, DT_DEVC=3.333/
-&MISC SIMULATION_MODE='LES' /
-&PRES VELOCITY_TOLERANCE=0.0005, MAX_PRESSURE_ITERATIONS=50 /
+&DUMP NFRAMES=3000, VELOCITY_ERROR_FILE=T, DT_DEVC=3.333/
+&MISC SIMULATION_MODE='LES'/
+&PRES VELOCITY_TOLERANCE=0.0001, MAX_PRESSURE_ITERATIONS=100 /
 
 # Fuel:
 &REAC FUEL='METHANE'/
-&COMB RADIATIVE_FRACTION=0.0
-      N_SIMPLE_CHEMISTRY_REACTIONS=2 /
 
 # Boundary conditions:
 &VENT PBX=-1.8, SURF_ID='OPEN'/
@@ -89,6 +87,16 @@ K_LOWER_SKIP=1, K_UPPER_SKIP=3, K_UPPER=7 /
 
 ! --- Geometric entities (from Blender Objects)
 ! Use CATF line, concatenate geometry file from cad repo:
-&CATF OTHER_FILES='../../../../cad/NIST_Calibration_Burners/NIST_8MW_Burner_Metric.geom' /
+! &CATF OTHER_FILES='../../../../cad/NIST_Calibration_Burners/NIST_8MW_Burner_Metric.geom' /
+
+&GEOM ID='Burner_1', SURF_ID='Steel','Burner', BINARY_FILE='../../../../cad/NIST_Calibration_Burners/NIST_8MW_Burner_Burner_1.bingeom' /
+&GEOM ID='Burner_2', SURF_ID='Steel','Burner', BINARY_FILE='../../../../cad/NIST_Calibration_Burners/NIST_8MW_Burner_Burner_2.bingeom' /
+&GEOM ID='Manifold_1', SURF_ID='Steel', BINARY_FILE='../../../../cad/NIST_Calibration_Burners/NIST_8MW_Burner_Manifold_1.bingeom' /
+&GEOM ID='Manifold_2', SURF_ID='Steel', BINARY_FILE='../../../../cad/NIST_Calibration_Burners/NIST_8MW_Burner_Manifold_2.bingeom' /
+&GEOM ID='Pilot_1', SURF_ID='Steel','Burner', BINARY_FILE='../../../../cad/NIST_Calibration_Burners/NIST_8MW_Burner_Pilot_1.bingeom' /
+&GEOM ID='Pilot_2', SURF_ID='Steel','Burner', BINARY_FILE='../../../../cad/NIST_Calibration_Burners/NIST_8MW_Burner_Pilot_2.bingeom' /
+&GEOM ID='Plate_1', SURF_ID='Plate', BINARY_FILE='../../../../cad/NIST_Calibration_Burners/NIST_8MW_Burner_Plate_1.bingeom' /
+&GEOM ID='Plate_2', SURF_ID='Plate', BINARY_FILE='../../../../cad/NIST_Calibration_Burners/NIST_8MW_Burner_Plate_2.bingeom' /
+&GEOM ID='Bottom_Plate', SURF_ID='Plate', BINARY_FILE='../../../../cad/NIST_Calibration_Burners/NIST_8MW_Burner_Bottom_Plate.bingeom' /
 
 &TAIL /

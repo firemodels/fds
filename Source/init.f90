@@ -396,6 +396,7 @@ CALL COMPUTE_WIND_COMPONENTS(T_BEGIN,NM)
 
 DO K=0,M%KBP1
    M%RHO(:,:,K) = M%RHO_0(K)
+   M%RHOS(:,:,K)= M%RHO_0(K)
    M%TMP(:,:,K) = M%TMP_0(K)
    M%U(:,:,K)   = M%U_WIND(K)
    M%V(:,:,K)   = M%V_WIND(K)
@@ -2161,7 +2162,6 @@ REAL(EB), INTENT(IN) :: TT
 REAL(EB) :: PX,PY,PZ,T_ACTIVATE,XIN,YIN,ZIN,DIST,XW,YW,ZW,RDN,AW,TSI,&
             ZZ_GET(1:N_TRACKED_SPECIES),RSUM_F,R1,RR,DELTA
 INTEGER  :: N,SURF_INDEX_NEW,IIG,JJG,KKG,IIO,JJO,KKO,IC,ICG,ICO,NOM_CHECK(0:1),BOUNDARY_TYPE
-INTEGER :: NSLICE
 LOGICAL :: VENT_FOUND,ALIGNED
 TYPE (MESH_TYPE), POINTER :: M,MM=>NULL()
 TYPE (OBSTRUCTION_TYPE), POINTER :: OBX=>NULL()
@@ -2502,12 +2502,6 @@ ENDIF
 ! If the simulation is only a TGA analysis, get the wall index
 
 IF (WC%SURF_INDEX==TGA_SURF_INDEX) TGA_WALL_INDEX = IW
-
-! Fill array containing K index of terrain following slice, used in dump slice
-
-DO NSLICE=1,M%N_TERRAIN_SLCF
-   IF (IOR==3) M%K_AGL_SLICE(I,J,NSLICE) = MIN( M%KBAR , M%K_AGL_SLICE(I,J,NSLICE)+WC%ONE_D%KKG )
-ENDDO
 
 ! Do not assign normal velocities at boundaries of evacuation meshes
 

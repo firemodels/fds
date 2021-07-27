@@ -34,13 +34,11 @@ K_UPPER=3 /
 
 &TIME T_END=65./
 
-&DUMP GET_CUTCELLS_VERBOSE=T, NFRAMES=10000, VELOCITY_ERROR_FILE=T, DT_DEVC=3.333 /
+&DUMP NFRAMES=10000, VELOCITY_ERROR_FILE=T, DT_DEVC=3.333 /
 &MISC SIMULATION_MODE='LES' /
-&PRES VELOCITY_TOLERANCE=0.0005, MAX_PRESSURE_ITERATIONS=50 /
+&PRES VELOCITY_TOLERANCE=0.0001, MAX_PRESSURE_ITERATIONS=100 /
 
 &REAC FUEL='METHANE'/
-&COMB RADIATIVE_FRACTION=0.0
-      N_SIMPLE_CHEMISTRY_REACTIONS=2 /
 
 ! Ramp roughly follows NFRL commissioning test video
 &RAMP ID='rampq', T= 0.00, F=0.00 /
@@ -103,6 +101,15 @@ K_UPPER=3 /
 
 ! --- Geometric entities (from Blender Objects)
 ! Use CATF line, concatenate geometry file from cad repo:
-&CATF OTHER_FILES='../../../../cad/NIST_Calibration_Burners/NIST_20MW_Burner_Metric.geom' /
+! &CATF OTHER_FILES='../../../../cad/NIST_Calibration_Burners/NIST_20MW_Burner_Metric.geom' /
+
+&GEOM ID='Burner_Pipe', SURF_ID='Steel','Burner', BINARY_FILE='../../../../cad/NIST_Calibration_Burners/NIST_20MW_Burner_Burner_Pipe.bingeom' /
+&GEOM ID='Manifold_1' SURF_ID='Steel', BINARY_FILE='../../../../cad/NIST_Calibration_Burners/NIST_20MW_Burner_Manifold_1.bingeom' /
+&GEOM ID='Manifold_2' SURF_ID='Steel', BINARY_FILE='../../../../cad/NIST_Calibration_Burners/NIST_20MW_Burner_Manifold_2.bingeom' /
+&GEOM ID='Pilot_1' SURF_ID='Steel','Burner', BINARY_FILE='../../../../cad/NIST_Calibration_Burners/NIST_20MW_Burner_Pilot_1.bingeom' /
+&GEOM ID='Pilot_2' SURF_ID='Steel','Burner', BINARY_FILE='../../../../cad/NIST_Calibration_Burners/NIST_20MW_Burner_Pilot_2.bingeom' /
+&GEOM ID='Plate', SURF_ID='Corrug Steel', BINARY_FILE='../../../../cad/NIST_Calibration_Burners/NIST_20MW_Burner_Plate.bingeom' /
+&GEOM ID='Small_Corrogated_Plate_1' SURF_ID='Corrug Steel', BINARY_FILE='../../../../cad/NIST_Calibration_Burners/NIST_20MW_Burner_Small_Corrogated_Plate_1.bingeom' /
+&GEOM ID='Small_Corrogated_Plate_2' SURF_ID='Corrug Steel', BINARY_FILE='../../../../cad/NIST_Calibration_Burners/NIST_20MW_Burner_Small_Corrogated_Plate_2.bingeom' /
 
 &TAIL /

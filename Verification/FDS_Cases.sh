@@ -396,6 +396,8 @@ $QFDS -d Pyrolysis cone_demo_2.fds
 $QFDS -d Pyrolysis birch_tga_1step_2.fds
 $QFDS -d Pyrolysis birch_tga_1step_20.fds
 $QFDS -d Pyrolysis enthalpy.fds
+$QFDS -d Pyrolysis liquid_mixture.fds
+$QFDS -p 8 -d Pyrolysis methanol_evaporation.fds
 $QFDS -d Pyrolysis pyrolysis_1.fds
 $QFDS -d Pyrolysis pyrolysis_2.fds
 $QFDS -d Pyrolysis specified_hrr.fds
@@ -440,7 +442,6 @@ $QFDS -d Pyrolysis surf_mass_two_species_spher.fds
 $QFDS -d Pyrolysis tga_analysis.fds
 $QFDS -d Pyrolysis tga_sample.fds
 $QFDS -d Pyrolysis two_step_solid_reaction.fds
-$QFDS -d Pyrolysis water_ice_water.fds
 $QFDS -d Pyrolysis pcm_slab.fds
 $QFDS -d Pyrolysis pyro3d_wood_char.fds
 $QFDS -d Pyrolysis pyro3d_vs_pyro1d.fds
@@ -449,6 +450,8 @@ $QFDS -d Pyrolysis pyro3d_transport.fds
 $QFDS -d Pyrolysis solid_particle_decomposition_1.fds
 $QFDS -d Pyrolysis solid_particle_decomposition_2.fds
 $QFDS -d Pyrolysis solid_particle_decomposition_3.fds
+$QFDS -d Pyrolysis water_ice_water.fds
+$QFDS -d Pyrolysis water_pool.fds
 
 $QFDS -d Radiation adiabatic_surface_temperature.fds
 $QFDS -d Radiation droplet_absorption_cart.fds

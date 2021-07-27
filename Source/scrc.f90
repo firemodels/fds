@@ -3,8 +3,6 @@
 !> \brief Scalable Recursive Clustering (ScaRC): Collection of alternative pressure solvers for the FDS pressure equation
 !
 !===========================================================================================================================
-#define WITH_SCARC_AMG
-#undef WITH_SCARC_VERBOSE
 
 
 !=======================================================================================================================
@@ -231,7 +229,6 @@ INTEGER, PARAMETER :: NSCARC_PRECISION_SINGLE        =  1        !< Type of data
 INTEGER, PARAMETER :: NSCARC_PRECISION_DOUBLE        =  2        !< Type of data precision: double 
 
 INTEGER, PARAMETER :: NSCARC_RELAX_FFT               =  1        !< Type of preconditioner: FFT-methods
-INTEGER, PARAMETER :: NSCARC_RELAX_FFTO              =  2        !< Type of preconditioner: FFTO-methods (including overlap)
 INTEGER, PARAMETER :: NSCARC_RELAX_GMG               =  3        !< Type of preconditioner: multigrid methods
 INTEGER, PARAMETER :: NSCARC_RELAX_ILU               =  4        !< Type of preconditioner: ILU-decompositions (own)
 INTEGER, PARAMETER :: NSCARC_RELAX_JAC               =  5        !< Type of preconditioner: JACOBI-methods
@@ -244,6 +241,9 @@ INTEGER, PARAMETER :: NSCARC_RELAX_MSOR              = 11        !< Type of prec
 INTEGER, PARAMETER :: NSCARC_RELAX_MSSOR             = 12        !< Type of preconditioner: MSSOR-methods (matrix form)
 INTEGER, PARAMETER :: NSCARC_RELAX_OPTIMIZED         = 13        !< Type of preconditioner: Optimized mixture of MKL and FFT
 INTEGER, PARAMETER :: NSCARC_RELAX_SSOR              = 14        !< Type of preconditioner: SSOR-methods
+
+INTEGER, PARAMETER :: NSCARC_POISSON_INSEPARABLE     =  0        !< Poisson equation type: inseparable
+INTEGER, PARAMETER :: NSCARC_POISSON_SEPARABLE       =  1        !< Poisson equation type: separable
 
 INTEGER, PARAMETER :: NSCARC_SCOPE_GLOBAL            =  0        !< Scope of current solver: global
 INTEGER, PARAMETER :: NSCARC_SCOPE_LOCAL             =  1        !< Scope of current solver: local
@@ -412,9 +412,11 @@ TYPE SCARC_MESSAGE_TYPE
    CHARACTER(60) :: FILE_CPU                               !< Output file name for CPU measurements
    CHARACTER(60) :: FILE_MEM                               !< Output file name for memory management information
    CHARACTER(60) :: FILE_STAT                              !< Output file name for convergence statistcis
+   CHARACTER(60) :: FILE_VERBOSE                           !< Output file name for verbose messages
    INTEGER :: LU_CPU                                       !< Logical unit for CPU measurements
    INTEGER :: LU_MEM                                       !< Logical unit for memory management information
    INTEGER :: LU_STAT                                      !< Logical unit for convergence statistics
+   INTEGER :: LU_VERBOSE                                   !< Logical unit for verbose messages
 
 END TYPE SCARC_MESSAGE_TYPE
 
@@ -434,20 +436,11 @@ END TYPE SCARC_SUBDIVISION_TYPE
  
 TYPE SCARC_FACE_TYPE
 
-   REAL(EB), POINTER, DIMENSION(:) :: DH              !< Step size vector between adjacent faces
-
-   REAL(EB) :: INCR_BOUNDARY                          !< Increment for boundary conditions
-   REAL(EB) :: INCR_FACE                              !< Increment for matrix subdiagonals on face
-   REAL(EB) :: INCR_INSIDE                            !< Increment for matrix subdiagonals between opposite faces
-
-   REAL(EB) :: SCAL_DIRICHLET                         !< Scaling factor for Dirichlet BC's
-   REAL(EB) :: SCAL_NEUMANN                           !< Scaling factor for Neumann BC's
-   REAL(EB) :: SCAL_MGM                               !< Scaling factor for MGM method
+   REAL(EB) :: MATRIX_SHARE                           !< share of Poisson matrix towards this face
 
    INTEGER, ALLOCATABLE, DIMENSION(:) :: NEIGHBORS    !< Adjacent neighbors at that face
    INTEGER  :: N_NEIGHBORS = 0                        !< Number of adjacent neighbors 
 
-   INTEGER  :: NOP = 0                                !< Number of cells between opposite faces
    INTEGER  :: NX = 0, NY = 0, NZ = 0                 !< Cells in different directions on that face
    INTEGER  :: NCW0 = 0, NCW = 0                      !< Number of first wall cell and total number of wall cells
    INTEGER  :: INCRX = 0, INCRY = 0, INCRZ = 0        !< Increments to next internal cell in that face direction
@@ -550,6 +543,8 @@ TYPE SCARC_CMATRIX_TYPE
    INTEGER :: NPREC = 0                                !< Precision type
 
    CHARACTER(40) :: CNAME                              !< Name of matrix
+
+   LOGICAL :: CONDENSING_REQUIRED = .FALSE.            !< Flag to check if condensing is required (purely Neumann BCs)
 
 END TYPE SCARC_CMATRIX_TYPE
 
@@ -677,11 +672,10 @@ TYPE SCARC_MULTIGRID_TYPE
    INTEGER :: CYCLING(2) = 0                               !< Counter for multigrid cycling
    INTEGER :: N_PRESMOOTH, N_POSTSMOOTH                    !< Number of pre- and post-processing steps
 
-#ifdef WITH_SCARC_AMG
    REAL(EB) :: APPROX_SPECTRAL_RADIUS = 2.0_EB             !< Relaxation parameter (AMG only)
    REAL(EB) :: AMG_TOL = 0.25_EB                           !< Tolerance for coarsening (AMG only)
    REAL(EB) :: THETA = 0.10_EB                             !< Threshold for aggregation process (AMG only)
-#endif
+
 END TYPE SCARC_MULTIGRID_TYPE
 
 !> \brief Information related to discretization type (structured/unstructured)
@@ -762,7 +756,6 @@ TYPE SCARC_GRID_TYPE
    INTEGER :: NLEN_BUFFER_STENCIL = NSCARC_ZERO_INT            !< Length for stencil layer length exchange on that level
    INTEGER :: NLEN_BUFFER_FULL    = NSCARC_ZERO_INT            !< Length for full length exchange on that level
 
-#ifdef WITH_SCARC_AMG
    TYPE (SCARC_CMATRIX_TYPE) :: GALERKIN                       !< Galerkin matrix (AMG only)
    TYPE (SCARC_CMATRIX_TYPE) :: CONNECTION                     !< Strength of connection matrix (AMG only)
    TYPE (SCARC_CMATRIX_TYPE) :: ZONES                          !< Aggregation Zones matrix (AMG only)
@@ -802,7 +795,6 @@ TYPE SCARC_GRID_TYPE
    INTEGER :: N_COARSE  = NSCARC_ZERO_INT                      !< Number of coarse cells (AMG only)
    INTEGER :: N_ZONES   = NSCARC_ZERO_INT                      !< Number of zones (AMG only)
    INTEGER :: N_STENCIL_MAX  = 25                              !< Max stencil size (AMG only)
-#endif
 
 END TYPE SCARC_GRID_TYPE
 
@@ -895,15 +887,19 @@ TYPE SCARC_LEVEL_TYPE
    TYPE (SCARC_MKL_TYPE)       :: MKL                          !< MKL preconditioner based on Intel MKL
 #endif
 
-   ! Coordinate information
-   REAL(EB), ALLOCATABLE, DIMENSION (:) :: XCOR, YCOR, ZCOR    !< Coordinate vectors in x-, y- and z-direction
-   REAL(EB), ALLOCATABLE, DIMENSION (:) :: XMID, YMID, ZMID    !< Midpoint vectors in x-, y- and z-direction
-   REAL(EB), ALLOCATABLE, DIMENSION (:) :: DXL, DYL, DZL       !< Step size vectors in x-, y- and z-direction
-   REAL(EB) :: DX , DY , DZ                                    !< Step sizes in x-, y- and z-direction
-   REAL(EB) :: DX2, DY2, DZ2                                   !< Half step sizes in x-, y- and z-direction
-   REAL(EB) :: DXH, DYH, DZH                                   !< Half step sizes in x-, y- and z-direction
-   REAL(EB) :: DXI, DYI, DZI                                   !< Inversed of step sizes in x-, y- and z-direction
-   REAL(EB) :: DXI2, DYI2, DZI2                                !< Squared and inversed step sizes in x-, y- and z-direction
+   ! Coordinate information (arrays only allocated for coarser levels, otherwise there is a pointer to official counterparts)
+   REAL(EB), ALLOCATABLE, DIMENSION (:) :: X, Y, Z             !< Coordinate vectors in x-, y- and z-direction
+   REAL(EB), ALLOCATABLE, DIMENSION (:) :: XC, YC, ZC          !< Midpoint vectors in x-, y- and z-direction
+   REAL(EB), ALLOCATABLE, DIMENSION (:) :: DX, DY, DZ          !< Step widths between grid points in x-, y- and z-direction
+   REAL(EB), ALLOCATABLE, DIMENSION (:) :: DXN, DYN, DZN       !< Step widths between midpoints in x-, y- and z-direction
+   REAL(EB), ALLOCATABLE, DIMENSION (:) :: RDX, RDY, RDZ       !< Reciprocal of step widths between grid points
+   REAL(EB), ALLOCATABLE, DIMENSION (:) :: RDXN, RDYN, RDZN    !< Reciprocal of step widths between midpoints
+   REAL(EB), ALLOCATABLE, DIMENSION (:,:) :: PXS, PXF          !< x-direction boundary values for inseparable Poisson system
+   REAL(EB), ALLOCATABLE, DIMENSION (:,:) :: PYS, PYF          !< y-direction boundary values for inseparable Poisson system
+   REAL(EB), ALLOCATABLE, DIMENSION (:,:) :: PZS, PZF          !< z-direction boundary values for inseparable Poisson system
+   REAL(EB) :: DXI , DYI , DZI                                 !< Step sizes in x-, y- and z-direction
+   REAL(EB) :: RDXI, RDYI, RDZI                                !< Inversed of step sizes in x-, y- and z-direction
+   REAL(EB) :: RDXI2, RDYI2, RDZI2                             !< Squared and inversed step sizes in x-, y- and z-direction
 
    ! Cell and wall index information:
    !    - on the finest level, the original arrays from FDS are used
@@ -1102,6 +1098,7 @@ IMPLICIT NONE (TYPE,EXTERNAL)
 CHARACTER(40) :: SCARC_GRID               = 'STRUCTURED'         !< Type of discretization (STRUCTURED/UNSTRUCTURED)
 CHARACTER(40) :: SCARC_METHOD             = 'NONE'               !< Type of global ScaRC solver (Krylov/MULTIGRID)
 CHARACTER(40) :: SCARC_MATRIX             = 'NONE'               !< Type of matrix storage (COMPACT/BANDWISE)
+CHARACTER(40) :: SCARC_POISSON            = 'SEPARABLE'          !< Type of Poisson equation (SEPARABLE/INSEPARABLE)
 CHARACTER(40) :: SCARC_STENCIL            = 'VARIABLE'           !< Type of matrix stencil (CONSTANT/VARIABLE)
 CHARACTER(40) :: SCARC_TWOLEVEL           = 'NONE'               !< Type of two-level method (NONE/ADDITIVE/MULTIPLICATIVE)
 
@@ -1176,12 +1173,15 @@ CHARACTER(6)  :: SCARC_MKL_PRECISION      = 'DOUBLE'             !< Single/doubl
 
 ! ---------- Dump out of error information and error handling
  
-LOGICAL :: SCARC_ERROR_FILE  = .FALSE.                           !< Print ScaRC statistics into chid_scarc.csv (TRUE/FALSE)
+LOGICAL :: SCARC_ERROR_FILE = .FALSE.                            !< Print ScaRC statistics into chid_scarc.csv (TRUE/FALSE)
+LOGICAL :: SCARC_VERBOSE = .FALSE.                               !< Print additional verbose messages (TRUE/FALSE)
 INTEGER :: IERROR  = 0                                           !< General error flag - used at different positions
 
 
 ! ---------- Logical indicators for different methods and mechanisms
   
+LOGICAL :: IS_SEPARABLE          = .TRUE.                        !< Flag for separable Poisson system
+LOGICAL :: IS_INSEPARABLE        = .FALSE.                       !< Flag for inseparable Poisson system
 LOGICAL :: IS_STRUCTURED         = .FALSE.                       !< Flag for structured discretization
 LOGICAL :: IS_UNSTRUCTURED       = .FALSE.                       !< Flag for unstructured discretization
 LOGICAL :: IS_PURE_NEUMANN       = .FALSE.                       !< Flag for pure Neumann system
@@ -1198,7 +1198,6 @@ LOGICAL :: IS_CG_MG              = .FALSE.                       !< Flag for Kry
 LOGICAL :: IS_CG_MUL1            = .FALSE.                       !< Flag for multiplicative1 Twolevel-Krylov method (fine last)
 LOGICAL :: IS_CG_MUL2            = .FALSE.                       !< Flag for multiplicative2 Twolevel-Krylov method (fine first) 
 LOGICAL :: IS_FFT                = .FALSE.                       !< Flag for FFT-method
-LOGICAL :: IS_FFTO               = .FALSE.                       !< Flag for FFTO-method
 LOGICAL :: IS_LAPLACE            = .FALSE.                       !< Flag for use of Laplace matrix (MGM only)
 LOGICAL :: IS_POISSON            = .TRUE.                        !< Flag for use of Poisson matrix (MGM only)
 LOGICAL :: IS_MKL                = .FALSE.                       !< Flag for MKL-method
@@ -1234,6 +1233,7 @@ INTEGER :: TYPE_MKL(0:10)           = NSCARC_MKL_NONE            !< Type of use 
 INTEGER :: TYPE_MKL_PRECISION       = NSCARC_PRECISION_DOUBLE    !< Type of double precision MKL solver
 INTEGER :: TYPE_MULTIGRID           = NSCARC_MULTIGRID_GEOMETRIC !< Type of multigrid method 
 INTEGER :: TYPE_PARENT              = NSCARC_UNDEF_INT           !< Type of parent (calling) solver
+INTEGER :: TYPE_POISSON             = NSCARC_POISSON_SEPARABLE   !< Type of Poisson equation
 INTEGER :: TYPE_PRECON              = NSCARC_UNDEF_INT           !< Type of preconditioner for iterative solver
 INTEGER :: TYPE_RELAX               = NSCARC_UNDEF_INT           !< Type of preconditioner for iterative solver
 INTEGER :: TYPE_SCOPE(0:2)          = NSCARC_SCOPE_GLOBAL        !< Type of method scopes
@@ -1270,6 +1270,15 @@ INTEGER :: FACE_ORIENTATION(6)  = (/1,-1,2,-2,3,-3/)        !< Coordinate direct
 
 CHARACTER(60) :: CNAME, CROUTINE
 
+REAL(EB), DIMENSION(:,:,:), ALLOCATABLE, TARGET :: SCARC_RHO   !< Density values depending on predictor/corrector with right overlap
+REAL(EB), DIMENSION(:,:,:), ALLOCATABLE, TARGET :: SCARC_KRES  !< Resolved kinetic energy
+REAL(EB), DIMENSION(:,:,:), ALLOCATABLE, TARGET :: SCARC_P     !< Inseparable pressure solution - predictor stage
+REAL(EB), DIMENSION(:,:,:), ALLOCATABLE, TARGET :: SCARC_PS    !< Inseparable pressure solution - corrector stage
+
+LOGICAL :: SCARC_CHECK = .TRUE.                                !< Flag to crosscheck computations at different positions
+LOGICAL :: SCARC_TEST_RHO  = .TRUE.                            !< Flag for experimentally using own version of RHO
+LOGICAL :: SCARC_TEST_KRES = .FALSE.                           !< Flag for experimentally using own version of KRES
+
 ! ---------- Public variables
   
 PUBLIC :: SCARC_ACCURACY                  !< Requested accuracy for ScaRC solver
@@ -1281,8 +1290,10 @@ PUBLIC :: SCARC_ITERATIONS                !< Final number of needed iterations f
 PUBLIC :: SCARC_MATRIX                    !< Selection parameter for requested matrix storage technique (compact/bandwise)
 PUBLIC :: SCARC_METHOD                    !< Selection parameter for requested ScaRC variant (Krylov/Multigrid/LU)
 PUBLIC :: SCARC_MKL_PRECISION             !< Selection parameter for requested MKL precision (double/single)
+PUBLIC :: SCARC_POISSON                   !< Type of Poisson equation (separable/inseparable)
 PUBLIC :: SCARC_RESIDUAL                  !< Final residual after call of ScaRC solver
 PUBLIC :: SCARC_TWOLEVEL                  !< Selection parameter for possible twolevel variant (additive/multiplicative)
+PUBLIC :: SCARC_VERBOSE                   !< Selection parameter for additional verbose messages
 
 PUBLIC :: SCARC_COARSE                    !< Selection parameter for type of coarse grid solver (iterative/direct)
 PUBLIC :: SCARC_COARSE_ACCURACY           !< Requested accuracy for coarse grid solver
@@ -1481,12 +1492,47 @@ REAL(EB), POINTER, DIMENSION(:):: XMID=>NULL()              !< Pointer to vector
 REAL(EB), POINTER, DIMENSION(:):: YMID=>NULL()              !< Pointer to vector of cell midpoints in y-direction
 REAL(EB), POINTER, DIMENSION(:):: ZMID=>NULL()              !< Pointer to vector of cell midpoints in z-direction
 
-REAL(EB), POINTER, DIMENSION(:,:):: BXS=>NULL()             !< Pointer to boundary values at x-min face
-REAL(EB), POINTER, DIMENSION(:,:):: BXF=>NULL()             !< Pointer to boundary values at x-max face
-REAL(EB), POINTER, DIMENSION(:,:):: BYS=>NULL()             !< Pointer to boundary values at y-min face
-REAL(EB), POINTER, DIMENSION(:,:):: BYF=>NULL()             !< Pointer to boundary values at y-max face
-REAL(EB), POINTER, DIMENSION(:,:):: BZS=>NULL()             !< Pointer to boundary values at z-min face
-REAL(EB), POINTER, DIMENSION(:,:):: BZF=>NULL()             !< Pointer to boundary values at z-max face
+REAL(EB), POINTER, DIMENSION(:):: DX=>NULL()                !< Pointer to widths between grid points in x-direction
+REAL(EB), POINTER, DIMENSION(:):: DY=>NULL()                !< Pointer to widths between grid points in y-direction
+REAL(EB), POINTER, DIMENSION(:):: DZ=>NULL()                !< Pointer to widths between grid points in z-direction
+
+REAL(EB), POINTER, DIMENSION(:):: DXN=>NULL()               !< Pointer to widths between midpoints in x-direction
+REAL(EB), POINTER, DIMENSION(:):: DYN=>NULL()               !< Pointer to widths between midpoints in y-direction
+REAL(EB), POINTER, DIMENSION(:):: DZN=>NULL()               !< Pointer to widths between midpoints in z-direction
+
+REAL(EB), POINTER, DIMENSION(:):: RDX=>NULL()               !< Pointer to reciprocal widths between grid points in x-direction
+REAL(EB), POINTER, DIMENSION(:):: RDY=>NULL()               !< Pointer to reciprocal widths between grid points in y-direction
+REAL(EB), POINTER, DIMENSION(:):: RDZ=>NULL()               !< Pointer to reciprocal widths between grid points in z-direction
+
+REAL(EB), POINTER, DIMENSION(:):: RDXN=>NULL()              !< Pointer to reciprocal widths between midpoints in x-direction
+REAL(EB), POINTER, DIMENSION(:):: RDYN=>NULL()              !< Pointer to reciprocal widths between midpoints in y-direction
+REAL(EB), POINTER, DIMENSION(:):: RDZN=>NULL()              !< Pointer to reciprocal widths between midpoints in z-direction
+
+REAL(EB), POINTER :: DXI=>NULL()                            !< Pointer to mean grid width in x-direction
+REAL(EB), POINTER :: DYI=>NULL()                            !< Pointer to mean grid width in y-direction
+REAL(EB), POINTER :: DZI=>NULL()                            !< Pointer to mean grid width in z-direction
+
+REAL(EB), POINTER :: RDXI=>NULL()                           !< Pointer to reciprocal mean grid width in x-direction
+REAL(EB), POINTER :: RDYI=>NULL()                           !< Pointer to reciprocal mean grid width in y-direction
+REAL(EB), POINTER :: RDZI=>NULL()                           !< Pointer to reciprocal mean grid width in z-direction
+
+INTEGER,  POINTER :: NX=>NULL()                             !< Pointer to number of cells in x-direction
+INTEGER,  POINTER :: NY=>NULL()                             !< Pointer to number of cells in y-direction
+INTEGER,  POINTER :: NZ=>NULL()                             !< Pointer to number of cells in z-direction
+
+REAL(EB), POINTER, DIMENSION(:,:):: BXS=>NULL()             !< Pointer to boundary values for separable Poisson problem at x-min 
+REAL(EB), POINTER, DIMENSION(:,:):: BXF=>NULL()             !< Pointer to boundary values for separable Poisson problem at x-max 
+REAL(EB), POINTER, DIMENSION(:,:):: BYS=>NULL()             !< Pointer to boundary values for separable Poisson problem at y-min 
+REAL(EB), POINTER, DIMENSION(:,:):: BYF=>NULL()             !< Pointer to boundary values for separable Poisson problem at y-max 
+REAL(EB), POINTER, DIMENSION(:,:):: BZS=>NULL()             !< Pointer to boundary values for separable Poisson problem at z-min 
+REAL(EB), POINTER, DIMENSION(:,:):: BZF=>NULL()             !< Pointer to boundary values for separable Poisson problem at z-max 
+
+REAL(EB), POINTER, DIMENSION(:,:):: PXS=>NULL()             !< Pointer to boundary values for inseparable Poisson problem at x-min
+REAL(EB), POINTER, DIMENSION(:,:):: PXF=>NULL()             !< Pointer to boundary values for inseparable Poisson problem at x-max
+REAL(EB), POINTER, DIMENSION(:,:):: PYS=>NULL()             !< Pointer to boundary values for inseparable Poisson problem at y-min
+REAL(EB), POINTER, DIMENSION(:,:):: PYF=>NULL()             !< Pointer to boundary values for inseparable Poisson problem at y-max
+REAL(EB), POINTER, DIMENSION(:,:):: PZS=>NULL()             !< Pointer to boundary values for inseparable Poisson problem at z-min
+REAL(EB), POINTER, DIMENSION(:,:):: PZF=>NULL()             !< Pointer to boundary values for inseparable Poisson problem at z-max
 
 INTEGER,  POINTER, DIMENSION(:,:):: BTYPE=>NULL()           !< Boundary type of face cell
 
@@ -1510,9 +1556,12 @@ REAL(EB), POINTER, DIMENSION(:):: OUHL2=>NULL()             !< Pointer to other 
 
 REAL(EB), POINTER, DIMENSION(:,:,:):: PRHS=>NULL()          !< Pointer to right hand side vector
 
-REAL(EB), POINTER, DIMENSION(:,:,:):: UU=>NULL()            !< Pointer to u-velocity vector
-REAL(EB), POINTER, DIMENSION(:,:,:):: VV=>NULL()            !< Pointer to v-velocity vector
-REAL(EB), POINTER, DIMENSION(:,:,:):: WW=>NULL()            !< Pointer to w-velocity vector
+REAL(EB), POINTER, DIMENSION(:,:,:):: UU=>NULL()            !< Pointer to x-velocity vector
+REAL(EB), POINTER, DIMENSION(:,:,:):: VV=>NULL()            !< Pointer to y-velocity vector
+REAL(EB), POINTER, DIMENSION(:,:,:):: WW=>NULL()            !< Pointer to z-velocity vector
+REAL(EB), POINTER, DIMENSION(:,:,:):: PPP=>NULL()           !< Pointer to inseparable pressure vector
+REAL(EB), POINTER, DIMENSION(:,:,:):: RHOP=>NULL()          !< Pointer to density vector
+REAL(EB), POINTER, DIMENSION(:,:,:):: KRESP=>NULL()         !< Pointer to kres vector
 
 REAL(EB), POINTER, DIMENSION(:) ::  RECV_BUFFER_REAL        !< Pointer to double precision receive vector
 INTEGER,  POINTER, DIMENSION(:) ::  RECV_BUFFER_INT         !< Pointer to inter receive vector
@@ -1547,12 +1596,22 @@ L => NULL();  LF => NULL();  LC => NULL()
 G => NULL();  GF => NULL();  GC => NULL()
 F => NULL();  FF => NULL();  FC => NULL()
 A => NULL();  AF => NULL();  AC => NULL()
-#ifdef WITH_SCARC_AMG
 P => NULL();  PF => NULL();  PC => NULL()
 R => NULL();  RF => NULL();  RC => NULL()
 C => NULL();  CF => NULL();  CC => NULL()
 Z => NULL();  ZF => NULL();  ZC => NULL()
-#endif
+
+NX   => NULL() ;  NY   => NULL() ;  NZ   => NULL()
+DXI  => NULL() ;  DYI  => NULL() ;  DZI  => NULL()
+RDXI => NULL() ;  RDYI => NULL() ;  DZI  => NULL()
+DX   => NULL() ;  DY   => NULL() ;  DZ   => NULL()
+RDX  => NULL() ;  RDY  => NULL() ;  RDZ  => NULL()
+DXN  => NULL() ;  DYN  => NULL() ;  DZN  => NULL()
+RDXN => NULL() ;  RDYN => NULL() ;  RDZN => NULL()
+BXS  => NULL() ;  BYS  => NULL() ;  BZS  => NULL()
+BXF  => NULL() ;  BYF  => NULL() ;  BZF  => NULL()
+PXS  => NULL() ;  PYS  => NULL() ;  PZS  => NULL()
+PXF  => NULL() ;  PYF  => NULL() ;  PZF  => NULL()
 
 END SUBROUTINE SCARC_POINT_TO_NONE
 
@@ -1581,27 +1640,9 @@ MGM => L%MGM
 END SUBROUTINE SCARC_POINT_TO_LEVEL
 
 ! --------------------------------------------------------------------------------------------------------------------------
-!> \brief Point to specified combination of mesh and grid level
-! --------------------------------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_POINT_TO_MGM(NM, NL)
-INTEGER, INTENT(IN):: NM, NL
-
-M   => MESHES(NM)
-S   => SCARC(NM)
-L   => S%LEVEL(NL)
-MGM => L%MGM
-
-SIP   => MGM%SIP
-UIP   => MGM%UIP
-UHL   => MGM%UHL
-UHL2  => MGM%UHL2
-OUHL  => MGM%OUHL
-OUHL2 => MGM%OUHL2
-
-END SUBROUTINE SCARC_POINT_TO_MGM
-
-! --------------------------------------------------------------------------------------------------------------------------
-!> \brief Point to specified combination of a mesh level and discretization type
+!> \brief Point to specified combination of a mesh level and discretization type - extensive version
+!> Same as SCARC_POINT_TO_GRID, but points to reciprocal grid widths, too
+!  If on finest level, simply point to official versions, on coarser levels use own versions
 ! --------------------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_POINT_TO_GRID (NM, NL)
 INTEGER, INTENT(IN) ::  NM, NL
@@ -1623,6 +1664,24 @@ END SELECT
 
 MGM => L%MGM
 W   => G%WALL
+
+IF (NL == NLEVEL_MIN) THEN
+   NX   => M%IBAR  ;  NY   => M%JBAR  ;  NZ   => M%KBAR
+   DXI  => M%DXI   ;  DYI  => M%DETA  ;  DZI  => M%DZETA
+   RDXI => M%RDXI  ;  RDYI => M%RDETA ;  RDZI => M%RDZETA
+   DX   => M%DX    ;  DY   => M%DY    ;  DZ   => M%DZ
+   DXN  => M%DXN   ;  DYN  => M%DYN   ;  DZN  => M%DZN
+   RDX  => M%RDX   ;  RDY  => M%RDY   ;  RDZ  => M%RDZ
+   RDXN => M%RDXN  ;  RDYN => M%RDYN  ;  RDZN => M%RDZN
+ELSE
+   NX   => L%NX    ;  NY   => L%NY    ;  NZ   => L%NZ
+   DXI  => L%DXI   ;  DYI  => L%DYI   ;  DZI  => L%DZI
+   RDXI => L%RDXI  ;  RDYI => L%RDYI  ;  RDZI => L%RDZI
+   DX   => L%DX    ;  DY   => L%DY    ;  DZ   => L%DZ
+   DXN  => L%DXN   ;  DYN  => L%DYN   ;  DZN  => L%DZN
+   RDX  => L%RDX   ;  RDY  => L%RDY   ;  RDZ  => L%RDZ
+   RDXN => L%RDXN  ;  RDYN => L%RDYN  ;  RDZN => L%RDZN
+ENDIF
 
 END SUBROUTINE SCARC_POINT_TO_GRID
 
@@ -1713,6 +1772,125 @@ END SELECT
 END SUBROUTINE SCARC_POINT_TO_OTHER_MULTIGRID
 
 ! --------------------------------------------------------------------------------------------------------------------------
+!> \brief Point to specified combination of mesh and grid level
+! --------------------------------------------------------------------------------------------------------------------------
+SUBROUTINE SCARC_POINT_TO_MGM(NM, NL)
+INTEGER, INTENT(IN):: NM, NL
+
+M   => MESHES(NM)
+S   => SCARC(NM)
+L   => S%LEVEL(NL)
+MGM => L%MGM
+
+SIP   => MGM%SIP
+UIP   => MGM%UIP
+UHL   => MGM%UHL
+UHL2  => MGM%UHL2
+OUHL  => MGM%OUHL
+OUHL2 => MGM%OUHL2
+
+IF (TYPE_MGM_LAPLACE == NSCARC_MGM_LAPLACE_CG) THEN
+   VB => ST%B 
+   VX => ST%X 
+ELSE
+   VB => MGM%B
+   VX => MGM%X 
+ENDIF
+
+BXS => MGM%BXS ;  BXS = 0.0_EB
+BXF => MGM%BXF ;  BXF = 0.0_EB
+BYS => MGM%BYS ;  BYS = 0.0_EB
+BYF => MGM%BYF ;  BYF = 0.0_EB
+BZS => MGM%BZS ;  BZS = 0.0_EB
+BZF => MGM%BZF ;  BZF = 0.0_EB
+
+END SUBROUTINE SCARC_POINT_TO_MGM
+
+! --------------------------------------------------------------------------------------------------------------------------
+!> \brief Point to quantities needed for the solution of the pressure Poisson system
+! --------------------------------------------------------------------------------------------------------------------------
+SUBROUTINE SCARC_POINT_TO_SEPARABLE_ENVIRONMENT(NM)
+INTEGER, INTENT(IN):: NM
+
+M => MESHES(NM)
+
+IF (PREDICTOR) THEN                                     
+   HP   => M%H                                           
+   RHOP => M%RHO
+   UU   => M%U
+   VV   => M%V
+   WW   => M%W
+ELSE
+   HP   => M%HS
+   RHOP => M%RHOS
+   UU   => M%US
+   VV   => M%VS
+   WW   => M%WS
+ENDIF
+
+PRHS  => M%PRHS
+KRESP => M%KRES                                          
+
+BXS => M%BXS ;  BXF => M%BXF
+BYS => M%BYS ;  BYF => M%BYF
+BZS => M%BZS ;  BZF => M%BZF
+
+END SUBROUTINE SCARC_POINT_TO_SEPARABLE_ENVIRONMENT
+
+! --------------------------------------------------------------------------------------------------------------------------
+!> \brief Point to additional quantities needed for the solution of the inseparable pressure Poisson system
+! --------------------------------------------------------------------------------------------------------------------------
+SUBROUTINE SCARC_POINT_TO_INSEPARABLE_ENVIRONMENT(NM)
+INTEGER, INTENT(IN) :: NM
+
+M => MESHES(NM)
+
+IF (PREDICTOR) THEN                                     
+   HP   => M%H                                           
+   UU   => M%U
+   VV   => M%V
+   WW   => M%W
+   PPP  => SCARC_P
+ELSE
+   HP   => M%HS
+   UU   => M%US
+   VV   => M%VS
+   WW   => M%WS
+   PPP   => SCARC_PS
+ENDIF
+
+PRHS  => M%PRHS
+
+IF (SCARC_TEST_RHO) THEN                          ! Experimental tests for using own density version
+   RHOP => SCARC_RHO
+ELSE
+   IF (PREDICTOR) THEN
+      RHOP => M%RHO
+      SCARC_RHO = M%RHO
+   ELSE
+      RHOP => M%RHOS
+      SCARC_RHO = M%RHOS
+   ENDIF
+ENDIF
+
+IF (SCARC_TEST_KRES) THEN                          ! Experimental tests for using own resolver kinetic energy version
+   KRESP => SCARC_KRES
+ELSE
+   KRESP => M%KRES
+   SCARC_KRES = M%KRES
+ENDIF
+
+BXS => M%BXS ;  BXF => M%BXF
+BYS => M%BYS ;  BYF => M%BYF
+BZS => M%BZS ;  BZF => M%BZF
+
+PXS => L%PXS ;  PXF => L%PXF
+PYS => L%PYS ;  PYF => L%PYF
+PZS => L%PZS ;  PZF => L%PZF
+
+END SUBROUTINE SCARC_POINT_TO_INSEPARABLE_ENVIRONMENT
+
+! --------------------------------------------------------------------------------------------------------------------------
 !> \brief Point to specified matrix in compact storage technique
 ! --------------------------------------------------------------------------------------------------------------------------
 FUNCTION SCARC_POINT_TO_CMATRIX (NTYPE)
@@ -1738,14 +1916,12 @@ SELECT CASE(NTYPE)
       SCARC_POINT_TO_CMATRIX => G%LOWER
    CASE (NSCARC_MATRIX_UPPER)
       SCARC_POINT_TO_CMATRIX => G%UPPER
-#ifdef WITH_SCARC_AMG
    CASE (NSCARC_MATRIX_POISSON_PROL)
       SCARC_POINT_TO_CMATRIX => G%POISSON_PROL
    CASE (NSCARC_MATRIX_CONNECTION)
       SCARC_POINT_TO_CMATRIX => G%CONNECTION
    CASE (NSCARC_MATRIX_ZONES)
       SCARC_POINT_TO_CMATRIX => G%ZONES
-#endif
 END SELECT
 
 END FUNCTION SCARC_POINT_TO_CMATRIX
@@ -1784,14 +1960,12 @@ SELECT CASE(NTYPE)
       SCARC_POINT_TO_OTHER_CMATRIX => OG%PROLONGATION
    CASE (NSCARC_MATRIX_RESTRICTION)
       SCARC_POINT_TO_OTHER_CMATRIX => OG%RESTRICTION
-#ifdef WITH_SCARC_AMG
    CASE (NSCARC_MATRIX_POISSON_PROL)
       SCARC_POINT_TO_OTHER_CMATRIX => OG%POISSON_PROL
    CASE (NSCARC_MATRIX_CONNECTION)
       SCARC_POINT_TO_OTHER_CMATRIX => OG%CONNECTION
    CASE (NSCARC_MATRIX_ZONES)
       SCARC_POINT_TO_OTHER_CMATRIX => OG%ZONES
-#endif
 END SELECT
 
 END FUNCTION SCARC_POINT_TO_OTHER_CMATRIX
@@ -1987,6 +2161,7 @@ CONTAINS
 !> \brief Setup debug file if requested
 ! --------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_SETUP_MESSAGES
+INTEGER :: NM, LASTID
 
 IF (SCARC_ERROR_FILE) HAS_CSV_DUMP = .TRUE.
 
@@ -2002,9 +2177,33 @@ IF (HAS_CSV_DUMP) THEN
    ENDIF
 ENDIF
 
+! If verbose flag is set, open additional files for dumping more information about different ScaRC components
+!  - memory file for logging the memory requirement of the different arrays 
+!  - log file for detailed convergence information of the different methods in use
+
+IF (SCARC_VERBOSE) THEN
+   IF (MY_RANK == 0) THEN
+      WRITE (MSG%FILE_MEM, '(A,A)') TRIM(CHID),'.mem'
+      MSG%LU_MEM = GET_FILE_NUMBER()
+      OPEN (MSG%LU_MEM, FILE=MSG%FILE_MEM)
+      WRITE(MSG%LU_MEM,1000) 'Number','Rank','Name of array','Calling routine', &
+                             'State','Type','Dimension','Left1','Right1', &
+                             'Left2','Right2','Left3','Right3','Size(array)', &
+                             'Sum(LOGICAL)','Sum(INTEGER)','Sum(REAL_EB)','Sum(REAL_FB)'
+   ENDIF
+   LASTID = -NSCARC_HUGE_INT
+   DO NM=LOWER_MESH_INDEX, UPPER_MESH_INDEX
+      IF (MY_RANK == LASTID) CYCLE
+      WRITE (MSG%FILE_VERBOSE, '(A,A,i3.3)') TRIM(CHID),'.log',MY_RANK+1
+      MSG%LU_VERBOSE = GET_FILE_NUMBER()
+      OPEN (MSG%LU_VERBOSE, FILE=MSG%FILE_VERBOSE, ACTION = 'readwrite')
+      LASTID = MY_RANK
+   ENDDO
+ENDIF
+
+1000 FORMAT(A8,',',A8,',',A30,',',A40,',',A10,',',A10,',',A10,',',A10,',',A10,',',A10,',',A10,',',&
+            A10,',',A10,',',A15,',',A15,',',A15,',',A15,',',A15)
 END SUBROUTINE SCARC_SETUP_MESSAGES
-
-
 
 END MODULE SCARC_MESSAGES
 
@@ -2114,10 +2313,6 @@ ELSE IF (NPARAM /= NSCARC_NONE) THEN
 ELSE
    IF (MY_RANK == 0) WRITE(LU_ERR,3000)  CERROR, TRIM(CHID)
 ENDIF
-
-! Also print verbose message if enabled
-
-
 
 STOP_STATUS = SETUP_STOP
 RETURN
@@ -2422,6 +2617,143 @@ RETURN
 END FUNCTION IS_VALID_DIRECTION
 
 
+! --------------------------------------------------------------------------------------------------------------
+!> \brief Compute a vector's meanvalue in a given cell and the specified direction
+! --------------------------------------------------------------------------------------------------------------
+REAL(EB) FUNCTION DIRECTIONAL_MEAN (V, IOR0, I, J, K)
+REAL(EB), DIMENSION(0:,0:,0:), INTENT(IN) :: V
+INTEGER, INTENT(IN) :: IOR0, I, J, K
+
+SELECT CASE (IOR0)
+   CASE ( 1)
+      DIRECTIONAL_MEAN = 0.5_EB*(V(I-1,J,K) + V(I,J,K))
+   CASE (-1)
+      DIRECTIONAL_MEAN = 0.5_EB*(V(I+1,J,K) + V(I,J,K))
+   CASE ( 2)
+      DIRECTIONAL_MEAN = 0.5_EB*(V(I,J-1,K) + V(I,J,K))
+   CASE (-2)
+      DIRECTIONAL_MEAN = 0.5_EB*(V(I,J+1,K) + V(I,J,K))
+   CASE ( 3)
+      DIRECTIONAL_MEAN = 0.5_EB*(V(I,J,K-1) + V(I,J,K))
+   CASE (-3)
+      DIRECTIONAL_MEAN = 0.5_EB*(V(I,J,K+1) + V(I,J,K))
+END SELECT
+
+END FUNCTION DIRECTIONAL_MEAN 
+
+
+! --------------------------------------------------------------------------------------------------------------
+!> \brief Compute reciprocal of a vector's meanvalue in a given cell and the specified direction
+! --------------------------------------------------------------------------------------------------------------
+REAL(EB) FUNCTION RECIPROCAL_DIRECTIONAL_MEAN (V, IOR0, I, J, K)
+REAL(EB), DIMENSION(0:,0:,0:), INTENT(IN) :: V
+INTEGER, INTENT(IN) :: IOR0, I, J, K
+
+SELECT CASE (IOR0)
+   CASE ( 1)
+      RECIPROCAL_DIRECTIONAL_MEAN = 2.0_EB /(V(I-1,J,K) + V(I,J,K))
+   CASE (-1)
+      RECIPROCAL_DIRECTIONAL_MEAN = 2.0_EB /(V(I+1,J,K) + V(I,J,K))
+   CASE ( 2)
+      RECIPROCAL_DIRECTIONAL_MEAN = 2.0_EB /(V(I,J-1,K) + V(I,J,K))
+   CASE (-2)
+      RECIPROCAL_DIRECTIONAL_MEAN = 2.0_EB /(V(I,J+1,K) + V(I,J,K))
+   CASE ( 3)
+      RECIPROCAL_DIRECTIONAL_MEAN = 2.0_EB /(V(I,J,K-1) + V(I,J,K))
+   CASE (-3)
+      RECIPROCAL_DIRECTIONAL_MEAN = 2.0_EB /(V(I,J,K+1) + V(I,J,K))
+END SELECT
+
+END FUNCTION RECIPROCAL_DIRECTIONAL_MEAN 
+
+
+! --------------------------------------------------------------------------------------------------------------
+!> \brief Compute single subdiagonal matrix entry for a given grid cell
+! Can be used for the separable and the inseparable system, in case of the inseparable system, the basic 
+! contribution based on the grid widths is additionally scaled by the density value passed as scaling parameter
+! --------------------------------------------------------------------------------------------------------------
+REAL(EB) FUNCTION SUBDIAG_ENTRY (IOR0, IX, IY, IZ, SCAL)
+USE SCARC_POINTERS, ONLY: RDX, RDY, RDZ, RDXN, RDYN, RDZN
+INTEGER, INTENT(IN) :: IOR0, IX, IY, IZ
+REAL(EB), INTENT(IN) :: SCAL
+REAL(EB) :: VAL = NSCARC_HUGE_REAL_EB
+
+SELECT CASE(IOR0)
+   CASE (1)
+      VAL = RDX(IX)*RDXN(IX-1)
+   CASE (-1)
+      VAL = RDX(IX)*RDXN(IX)
+   CASE (2)
+      VAL = RDY(IY)*RDYN(IY-1)
+   CASE (-2)
+      VAL = RDY(IY)*RDYN(IY)
+   CASE (3)
+      VAL = RDZ(IZ)*RDZN(IZ-1)
+   CASE (-3)
+      VAL = RDZ(IZ)*RDZN(IZ)
+END SELECT
+SUBDIAG_ENTRY = VAL*SCAL
+RETURN
+
+END FUNCTION SUBDIAG_ENTRY
+
+
+! --------------------------------------------------------------------------------------------------------------
+!> \brief Determine if cell has a neighbor and, if yes, return corresponding wall cell index
+! --------------------------------------------------------------------------------------------------------------
+INTEGER FUNCTION SUBDIAG_TYPE (IC, IOR0)
+USE SCARC_POINTERS, ONLY: L, G, F, GWC
+INTEGER, INTENT(IN) :: IC, IOR0
+INTEGER :: IXW, IYW, IZW
+INTEGER :: IXG, IYG, IZG
+INTEGER :: IW
+
+SUBDIAG_TYPE = -1
+
+F => L%FACE(IOR0)
+SEARCH_WALL_CELLS_LOOP: DO IW = F%NCW0, F%NCW0 + F%NCW - 1
+
+   GWC => G%WALL(IW)
+
+   IF (GWC%NOM == 0) CYCLE
+   IXW = GWC%IXW;  IYW = GWC%IYW;  IZW = GWC%IZW
+
+   IF (G%CELL_NUMBER(IXW, IYW, IZW) /= IC) CYCLE
+   IXG = GWC%IXG;  IYG = GWC%IYG;  IZG = GWC%IZG
+
+   IF (IS_UNSTRUCTURED.AND.L%IS_SOLID(IXG, IYG, IZG)) RETURN
+   SUBDIAG_TYPE = IW
+   RETURN
+
+ENDDO SEARCH_WALL_CELLS_LOOP
+
+END FUNCTION SUBDIAG_TYPE
+
+! --------------------------------------------------------------------------------------------------------------------------
+!> \brief Check whether a given cell is located directly near the single faces of a mesh or more
+! --------------------------------------------------------------------------------------------------------------------------
+LOGICAL FUNCTION IS_NOT_ADJACENT_TO_FACE(IOR0, IX, IY, IZ)
+USE SCARC_POINTERS, ONLY: NX, NY, NZ
+INTEGER, INTENT(IN) :: IOR0, IX, IY, IZ
+
+SELECT CASE (IOR0)
+   CASE ( 1)
+      IS_NOT_ADJACENT_TO_FACE = IX > 1
+   CASE (-1)
+      IS_NOT_ADJACENT_TO_FACE = IX < NX
+   CASE ( 2)
+      IS_NOT_ADJACENT_TO_FACE = IY > 1
+   CASE (-2)
+      IS_NOT_ADJACENT_TO_FACE = IY < NY
+   CASE ( 3)
+      IS_NOT_ADJACENT_TO_FACE = IZ > 1
+   CASE (-3)
+      IS_NOT_ADJACENT_TO_FACE = IZ < NZ
+END SELECT
+
+END FUNCTION IS_NOT_ADJACENT_TO_FACE
+
+
 ! ------------------------------------------------------------------------------------------------------------------
 !> \brief Get grid permutation (MGM only)
 ! ------------------------------------------------------------------------------------------------------------------
@@ -2695,6 +3027,13 @@ SELECT CASE (NSTATE)
       CSTATE = ' '
 END SELECT
 
+IF (SCARC_VERBOSE .AND. MY_RANK == 0) THEN
+   WRITE(MSG%LU_MEM,1000) STORAGE%N_ARRAYS, STORAGE%IP, TRIM(AL%CNAME), TRIM(AL%CSCOPE), TRIM(CSTATE), TRIM(CTYPE), TRIM(CDIM), &
+                          AL%LBND(1), AL%RBND(1), AL%LBND(2), AL%RBND(2), AL%LBND(3), AL%RBND(3), &
+                          NWORK, STORAGE%NWORK_LOG, STORAGE%NWORK_INT, STORAGE%NWORK_REAL_EB, STORAGE%NWORK_REAL_FB
+ENDIF
+1000 FORMAT(I8,',',I8,',',A30,',',A40,',',A10,',',A10,',',A10,',',I10,',',&
+            I10,',',I10,',',I10,',',I10,',',I10,',',I15,',',I15,',',I15,',',I15,',',I15)
 END SUBROUTINE SCARC_UPDATE_STORAGE
 
 ! --------------------------------------------------------------------------------------------------------------
@@ -3642,8 +3981,9 @@ USE SCARC_MESSAGES
 
 IMPLICIT NONE (TYPE,EXTERNAL)
   
-REAL(EB) :: DT                                  !< TS width 
-REAL(EB) :: DTI                                 !< Inverse of TS width 
+REAL(EB) :: T                                   !< current time 
+REAL(EB) :: DT                                  !< current time step width
+REAL(EB) :: DTI                                 !< Inverse of time step width 
 REAL(EB) :: OMEGA                               !< Relaxation parameter for current solver
 REAL(EB) :: EPS                                 !< Requested accuracy for current solver
 REAL(EB) :: RES                                 !< Current residual of current solver
@@ -3679,15 +4019,18 @@ CONTAINS
 ! --------------------------------------------------------------------------------------------------------------
 !> \brief Set current iteration state
 ! --------------------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_SET_ITERATION_STATE (DT_CURRENT)
-REAL(EB), INTENT(IN) :: DT_CURRENT
+SUBROUTINE SCARC_SET_ITERATION_STATE (T_CURRENT, DT_CURRENT)
+REAL(EB), INTENT(IN) :: T_CURRENT, DT_CURRENT
 
+T   = T_CURRENT
 DT  = DT_CURRENT
 DTI = 1.0_EB/DT_CURRENT
 
 ITE_PRES = ITE_PRES + 1
 ITE_GLOBAL = ICYC
 
+IF (SCARC_VERBOSE) WRITE(MSG%LU_VERBOSE,1000) ICYC, ITE_PRES, T
+1000 FORMAT('========> Entering ScaRC-solver: #Time iteration = ',I6,': #Pressure Solution= ', I6,': Simulation Time = ', E11.3,/)
 END SUBROUTINE SCARC_SET_ITERATION_STATE
 
 ! --------------------------------------------------------------------------------------------------------------
@@ -3718,6 +4061,8 @@ SCARC_CONVERGENCE_STATE = NSTATE
 
 IF (HAS_CSV_DUMP) CALL SCARC_DUMP_CSV(ISM, NS, NL)
 
+IF (SCARC_VERBOSE .AND.  TYPE_SOLVER == NSCARC_SOLVER_MAIN) WRITE(MSG%LU_VERBOSE,1000) STACK(NS)%SOLVER%CNAME, NL, ITE, RES
+1000 FORMAT (A30,': Level=',I6,': Iteration = ',I6,': Residual = ',E11.3)
 END FUNCTION SCARC_CONVERGENCE_STATE
 
 ! --------------------------------------------------------------------------------------------------------------
@@ -3754,6 +4099,8 @@ ENDIF
 
 CALL SCARC_DUMP_CSV(0, NS, NL)
 
+IF (SCARC_VERBOSE .AND. TYPE_SOLVER == NSCARC_SOLVER_MAIN) WRITE(MSG%LU_VERBOSE,1000) CAPPA
+1000 FORMAT (T54,'---> Convergence Rate = ',E11.3,/)
 END SUBROUTINE SCARC_CONVERGENCE_RATE
 
 ! --------------------------------------------------------------------------------------------------------------
@@ -4253,9 +4600,6 @@ SELECT CASE(TYPE_PRECON)
    CASE (NSCARC_RELAX_FFT)
       SV%CNAME = 'SCARC_PRECON_FFT'
       SV%OMEGA = 1.0_EB
-   CASE (NSCARC_RELAX_FFTO)
-      SV%CNAME = 'SCARC_PRECON_FFTO'
-      SV%OMEGA = 1.0_EB
    CASE (NSCARC_RELAX_GMG)
       SV%CNAME = 'SCARC_PRECON_GMG'
 #ifdef WITH_MKL
@@ -4343,9 +4687,6 @@ SELECT CASE(TYPE_SMOOTH)
       SV%CNAME = 'SCARC_SMOOTHER_ILU'
    CASE (NSCARC_RELAX_FFT)
       SV%CNAME = 'SCARC_SMOOTHER_FFT'
-      SV%OMEGA = 1.0_EB
-   CASE (NSCARC_RELAX_FFTO)
-      SV%CNAME = 'SCARC_SMOOTHER_FFTO'
       SV%OMEGA = 1.0_EB
 #ifdef WITH_MKL
    CASE (NSCARC_RELAX_MKL)
@@ -4642,6 +4983,17 @@ SELECT CASE (TRIM(PRES_METHOD))
       CALL SCARC_ERROR(NSCARC_ERROR_PARSE_INPUT, SCARC_GRID, NSCARC_NONE)
 END SELECT
  
+! ------------ Set type of Poisson equation (INSEPARABLE/SEPARABLE)
+
+  SELECT CASE (TRIM(SCARC_POISSON))
+     CASE ('INSEPARABLE')
+        TYPE_POISSON = NSCARC_POISSON_INSEPARABLE
+     CASE ('SEPARABLE')
+        TYPE_POISSON = NSCARC_POISSON_SEPARABLE
+     CASE DEFAULT
+        CALL SCARC_ERROR(NSCARC_ERROR_PARSE_INPUT, SCARC_POISSON, NSCARC_NONE)
+  END SELECT
+
 ! ------------ Set type of matrix storage (COMPACT/BANDWISE)
  
 SELECT CASE (TRIM(SCARC_MATRIX))
@@ -4766,13 +5118,6 @@ SELECT CASE (TRIM(SCARC_METHOD))
          CASE ('FFT')                                                ! FFT preconditioner
             IF (IS_UNSTRUCTURED) CALL SCARC_ERROR(NSCARC_ERROR_FFT_GRID, SCARC_NONE, NSCARC_NONE)
             TYPE_PRECON = NSCARC_RELAX_FFT
-         CASE ('FFTO')                                               ! FFT with overlap preconditioner
-            IF (IS_UNSTRUCTURED) CALL SCARC_ERROR(NSCARC_ERROR_FFT_GRID, SCARC_NONE, NSCARC_NONE)
-            IF (NMESHES == 1) THEN
-               TYPE_PRECON = NSCARC_RELAX_FFT
-            ELSE
-               TYPE_PRECON = NSCARC_RELAX_FFTO
-            ENDIF
          CASE ('OPTIMIZED')                                          ! LU preconditioner based on either FFT or PARDISO
 #ifdef WITH_MKL
             TYPE_PRECON   = NSCARC_RELAX_OPTIMIZED
@@ -4855,13 +5200,6 @@ SELECT CASE (TRIM(SCARC_METHOD))
          CASE ('FFT')
             IF (IS_UNSTRUCTURED) CALL SCARC_ERROR(NSCARC_ERROR_FFT_GRID, SCARC_NONE, NSCARC_NONE)
             TYPE_SMOOTH = NSCARC_RELAX_FFT
-         CASE ('FFTO')
-            IF (IS_UNSTRUCTURED) CALL SCARC_ERROR(NSCARC_ERROR_FFT_GRID, SCARC_NONE, NSCARC_NONE)
-            IF (NMESHES == 1) THEN
-               TYPE_SMOOTH = NSCARC_RELAX_FFT
-            ELSE
-               TYPE_SMOOTH = NSCARC_RELAX_FFTO
-            ENDIF
          CASE ('OPTIMIZED')
 #ifdef WITH_MKL
             TYPE_SMOOTH = NSCARC_RELAX_OPTIMIZED
@@ -5070,6 +5408,9 @@ END SELECT
 
 ! -------- Define some logical variables - just for notational convenience
  
+IS_SEPARABLE    = (TYPE_POISSON == NSCARC_POISSON_SEPARABLE)
+IS_INSEPARABLE  = (TYPE_POISSON == NSCARC_POISSON_INSEPARABLE)
+
 IS_STRUCTURED   = (TYPE_GRID == NSCARC_GRID_STRUCTURED)
 IS_UNSTRUCTURED = (TYPE_GRID == NSCARC_GRID_UNSTRUCTURED)
 
@@ -5083,7 +5424,6 @@ IS_GMG = IS_MG .AND. (TYPE_MULTIGRID == NSCARC_MULTIGRID_GEOMETRIC)
 IS_AMG = IS_MG .AND. (TYPE_MULTIGRID == NSCARC_MULTIGRID_ALGEBRAIC)
 
 IS_FFT = (TYPE_PRECON == NSCARC_RELAX_FFT)  .OR. (TYPE_SMOOTH == NSCARC_RELAX_FFT)
-IS_FFTO= (TYPE_PRECON == NSCARC_RELAX_FFTO) .OR. (TYPE_SMOOTH == NSCARC_RELAX_FFTO)
 IS_MKL = (TYPE_PRECON >= NSCARC_RELAX_MKL)  .OR. (TYPE_SMOOTH >= NSCARC_RELAX_MKL) 
 
 IF (IS_CG .AND. (TYPE_PRECON /= NSCARC_RELAX_GMG)) THEN
@@ -5443,11 +5783,9 @@ RECEIVE_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 
       SELECT_EXCHANGE_TYPE: SELECT CASE (NTYPE)
 
-#ifdef WITH_SCARC_AMG
          CASE (NSCARC_EXCHANGE_AUXILIARY)
             CALL SCARC_RECV_MESSAGE_REAL (NM, NOM, NL, NSCARC_BUFFER_LAYER2, 'AUXILIARY')
 
-#endif
          CASE (NSCARC_EXCHANGE_BASIC_SIZES)
             CALL SCARC_RECV_MESSAGE_INT (NM, NOM, NL, NSCARC_BUFFER_BASIC, 'BASIC SIZES')
 
@@ -5460,13 +5798,11 @@ RECEIVE_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          CASE (NSCARC_EXCHANGE_CELL_SIZES)
             CALL SCARC_RECV_MESSAGE_REAL (NM, NOM, NL, NSCARC_BUFFER_BASIC, 'CELL SIZES')
 
-#ifdef WITH_SCARC_AMG
          CASE (NSCARC_EXCHANGE_LAYER2_NUMS)
             CALL SCARC_RECV_MESSAGE_INT (NM, NOM, NL, NSCARC_BUFFER_LAYER1, 'LAYER2_NUMS')
 
          CASE (NSCARC_EXCHANGE_LAYER2_VALS)
             CALL SCARC_RECV_MESSAGE_REAL (NM, NOM, NL, NSCARC_BUFFER_LAYER1, 'LAYER2_VALS')
-#endif
 
          CASE (NSCARC_EXCHANGE_MATRIX_COLS)
             CALL SCARC_RECV_MESSAGE_INT (NM, NOM, NL, NSCARC_BUFFER_FULL, 'POISSON COLS')
@@ -5492,10 +5828,8 @@ RECEIVE_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          CASE (NSCARC_EXCHANGE_MGM_VELO)
             CALL SCARC_RECV_MESSAGE_REAL (NM, NOM, NL, NSCARC_BUFFER_LAYER2, 'MGM_VELO')
 
-#ifdef WITH_SCARC_AMG
          CASE (NSCARC_EXCHANGE_NULLSPACE)
             CALL SCARC_RECV_MESSAGE_REAL (NM, NOM, NL, NSCARC_BUFFER_LAYER2, 'NULLSPACE')
-#endif
 
          CASE (NSCARC_EXCHANGE_PRESSURE)
             CALL SCARC_RECV_MESSAGE_REAL (NM, NOM, NL, NSCARC_BUFFER_LAYER1, 'PRESSURE')
@@ -5509,13 +5843,11 @@ RECEIVE_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          CASE (NSCARC_EXCHANGE_VECTOR_PLAIN)
             CALL SCARC_RECV_MESSAGE_REAL (NM, NOM, NL, NSCARC_BUFFER_LAYER1, 'VECTOR PLAIN')
 
-#ifdef WITH_SCARC_AMG
          CASE (NSCARC_EXCHANGE_ZONE_NEIGHBORS)
             CALL SCARC_RECV_MESSAGE_INT (NM, NOM, NL, NSCARC_BUFFER_LAYER4, 'ZONE NEIGHBORS')
 
          CASE (NSCARC_EXCHANGE_ZONE_TYPES)
             CALL SCARC_RECV_MESSAGE_INT (NM, NOM, NL, NSCARC_BUFFER_LAYER2, 'ZONE TYPES')
-#endif
 
          CASE DEFAULT
             CALL SCARC_ERROR(NSCARC_ERROR_EXCHANGE_RECV, SCARC_NONE, TYPE_EXCHANGE)
@@ -5543,11 +5875,9 @@ SEND_PACK_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 
       SEND_PACK_OMESHES_SELECT: SELECT CASE (NTYPE)
 
-#ifdef WITH_SCARC_AMG
          CASE (NSCARC_EXCHANGE_AUXILIARY)
             CALL SCARC_PACK_AUXILIARY(NL)
             CALL SCARC_SEND_MESSAGE_REAL (NM, NOM, NL, NSCARC_BUFFER_LAYER2, 'AUXILIARY')
-#endif
 
          CASE (NSCARC_EXCHANGE_BASIC_SIZES)
             CALL SCARC_PACK_BASIC_SIZES
@@ -5565,7 +5895,6 @@ SEND_PACK_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
             CALL SCARC_PACK_CELL_SIZES
             CALL SCARC_SEND_MESSAGE_REAL (NM, NOM, NL, NSCARC_BUFFER_BASIC, 'CELL SIZES')
 
-#ifdef WITH_SCARC_AMG
          CASE (NSCARC_EXCHANGE_LAYER2_NUMS)
             CALL SCARC_PACK_LAYER2_NUMS
             CALL SCARC_SEND_MESSAGE_INT (NM, NOM, NL, NSCARC_BUFFER_LAYER1, 'LAYER2_NUMS')
@@ -5573,7 +5902,6 @@ SEND_PACK_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          CASE (NSCARC_EXCHANGE_LAYER2_VALS)
             CALL SCARC_PACK_LAYER2_VALS
             CALL SCARC_SEND_MESSAGE_REAL (NM, NOM, NL, NSCARC_BUFFER_LAYER1, 'LAYER2_VALS')
-#endif
 
          CASE (NSCARC_EXCHANGE_MATRIX_SIZES)
             CALL SCARC_PACK_MATRIX_SIZES(NL)
@@ -5607,11 +5935,9 @@ SEND_PACK_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
             CALL SCARC_PACK_MGM_VELO(NM)
             CALL SCARC_SEND_MESSAGE_REAL (NM, NOM, NL, NSCARC_BUFFER_LAYER1, 'MGM_VELO')
 
-#ifdef WITH_SCARC_AMG
          CASE (NSCARC_EXCHANGE_NULLSPACE)
             CALL SCARC_PACK_NULLSPACE(NL)
             CALL SCARC_SEND_MESSAGE_REAL (NM, NOM, NL, NSCARC_BUFFER_LAYER2, 'NULLSPACE')
-#endif
 
          CASE (NSCARC_EXCHANGE_PRESSURE)
             CALL SCARC_PACK_PRESSURE(NM)
@@ -5629,7 +5955,6 @@ SEND_PACK_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
             CALL SCARC_PACK_VECTOR_PLAIN(NM, NL, NPARAM)
             CALL SCARC_SEND_MESSAGE_REAL (NM, NOM, NL, NSCARC_BUFFER_LAYER1, 'VECTOR PLAIN')
 
-#ifdef WITH_SCARC_AMG
          CASE (NSCARC_EXCHANGE_ZONE_NEIGHBORS)
             CALL SCARC_PACK_ZONE_NEIGHBORS(NL)
             CALL SCARC_SEND_MESSAGE_INT (NM, NOM, NL, NSCARC_BUFFER_LAYER4, 'ZONE NEIGHBORS')
@@ -5637,7 +5962,6 @@ SEND_PACK_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          CASE (NSCARC_EXCHANGE_ZONE_TYPES)
             CALL SCARC_PACK_ZONE_TYPES
             CALL SCARC_SEND_MESSAGE_INT (NM, NOM, NL, NSCARC_BUFFER_LAYER2, 'ZONE TYPES')
-#endif
 
          CASE DEFAULT
             CALL SCARC_ERROR(NSCARC_ERROR_EXCHANGE_SEND, SCARC_NONE, TYPE_EXCHANGE)
@@ -5668,10 +5992,8 @@ SEND_UNPACK_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 
       SEND_UNPACK_OMESHES_SELECT: SELECT CASE (NTYPE)
 
-#ifdef WITH_SCARC_AMG
          CASE (NSCARC_EXCHANGE_AUXILIARY)
             CALL SCARC_UNPACK_AUXILIARY (NM, NOM, NL)
-#endif
 
          CASE (NSCARC_EXCHANGE_BASIC_SIZES)
             CALL SCARC_UNPACK_BASIC_SIZES (NM, NOM)
@@ -5685,13 +6007,11 @@ SEND_UNPACK_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          CASE (NSCARC_EXCHANGE_CELL_SIZES)
             CALL SCARC_UNPACK_CELL_SIZES(NM, NOM)
 
-#ifdef WITH_SCARC_AMG
          CASE (NSCARC_EXCHANGE_LAYER2_NUMS)
             CALL SCARC_UNPACK_LAYER2_NUMS (NM, NOM)
 
          CASE (NSCARC_EXCHANGE_LAYER2_VALS)
             CALL SCARC_UNPACK_LAYER2_VALS (NM, NOM)
-#endif
 
          CASE (NSCARC_EXCHANGE_MATRIX_COLS)
             CALL SCARC_UNPACK_MATRIX_COLS (NM, NOM, NPARAM)
@@ -5717,10 +6037,8 @@ SEND_UNPACK_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          CASE (NSCARC_EXCHANGE_MGM_VELO)
             CALL SCARC_UNPACK_MGM_VELO (NM, NOM)
 
-#ifdef WITH_SCARC_AMG
          CASE (NSCARC_EXCHANGE_NULLSPACE)
             CALL SCARC_UNPACK_NULLSPACE (NM, NOM, NL)
-#endif
          CASE (NSCARC_EXCHANGE_PRESSURE)
             CALL SCARC_UNPACK_PRESSURE (NM, NOM)
 
@@ -5733,13 +6051,11 @@ SEND_UNPACK_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          CASE (NSCARC_EXCHANGE_VECTOR_PLAIN)
             CALL SCARC_UNPACK_VECTOR_PLAIN (NM, NOM, NL, NPARAM)
 
-#ifdef WITH_SCARC_AMG
          CASE (NSCARC_EXCHANGE_ZONE_NEIGHBORS)
             CALL SCARC_UNPACK_ZONE_NEIGHBORS (NM, NOM, NL)
 
          CASE (NSCARC_EXCHANGE_ZONE_TYPES)
             CALL SCARC_UNPACK_ZONE_TYPES (NM, NOM)
-#endif
 
          CASE DEFAULT
             CALL SCARC_ERROR(NSCARC_ERROR_EXCHANGE_SEND, SCARC_NONE, TYPE_EXCHANGE)
@@ -6087,14 +6403,14 @@ END SUBROUTINE SCARC_UNPACK_CELL_NUMBERS
 !> \brief Pack cell width information 
 ! --------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_PACK_CELL_SIZES
-USE SCARC_POINTERS, ONLY: L, OS
+USE SCARC_POINTERS, ONLY: OS, NX, NY, NZ, DXN, DYN, DZN
 
-OS%SEND_BUFFER_REAL0(1) = L%DXL(0)
-OS%SEND_BUFFER_REAL0(2) = L%DXL(L%NX)
-OS%SEND_BUFFER_REAL0(3) = L%DYL(0)
-OS%SEND_BUFFER_REAL0(4) = L%DYL(L%NY)
-OS%SEND_BUFFER_REAL0(5) = L%DZL(0)
-OS%SEND_BUFFER_REAL0(6) = L%DZL(L%NZ)
+OS%SEND_BUFFER_REAL0(1) = DXN(0)
+OS%SEND_BUFFER_REAL0(2) = DXN(NX)
+OS%SEND_BUFFER_REAL0(3) = DYN(0)
+OS%SEND_BUFFER_REAL0(4) = DYN(NY)
+OS%SEND_BUFFER_REAL0(5) = DZN(0)
+OS%SEND_BUFFER_REAL0(6) = DZN(NZ)
 
 END SUBROUTINE SCARC_PACK_CELL_SIZES
 
@@ -6103,17 +6419,17 @@ END SUBROUTINE SCARC_PACK_CELL_SIZES
 !> \brief Unpack cell width information 
 ! --------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_UNPACK_CELL_SIZES (NM, NOM)
-USE SCARC_POINTERS, ONLY: L, OL, RECV_BUFFER_REAL, SCARC_POINT_TO_BUFFER_REAL
+USE SCARC_POINTERS, ONLY: OL, NX, NY, NZ, DXN, DYN, DZN, RECV_BUFFER_REAL, SCARC_POINT_TO_BUFFER_REAL
 INTEGER, INTENT(IN) :: NM, NOM
 
 RECV_BUFFER_REAL => SCARC_POINT_TO_BUFFER_REAL (NM, NOM, 0)
 
-IF (OL%GHOST_LASTW(-1) /= 0) L%DXL(0)    = 0.5_EB*(RECV_BUFFER_REAL(1) + L%DXL(0))
-IF (OL%GHOST_LASTW( 1) /= 0) L%DXL(L%NX) = 0.5_EB*(RECV_BUFFER_REAL(2) + L%DXL(L%NX))
-IF (OL%GHOST_LASTW(-2) /= 0) L%DYL(0)    = 0.5_EB*(RECV_BUFFER_REAL(3) + L%DYL(0))
-IF (OL%GHOST_LASTW( 2) /= 0) L%DYL(L%NY) = 0.5_EB*(RECV_BUFFER_REAL(4) + L%DYL(L%NY))
-IF (OL%GHOST_LASTW(-3) /= 0) L%DZL(0)    = 0.5_EB*(RECV_BUFFER_REAL(5) + L%DZL(0))
-IF (OL%GHOST_LASTW( 3) /= 0) L%DZL(L%NZ) = 0.5_EB*(RECV_BUFFER_REAL(6) + L%DZL(L%NZ))
+IF (OL%GHOST_LASTW(-1) /= 0) DXN(0)  = 0.5_EB*(RECV_BUFFER_REAL(1) + DXN(0))
+IF (OL%GHOST_LASTW( 1) /= 0) DXN(NX) = 0.5_EB*(RECV_BUFFER_REAL(2) + DXN(NX))
+IF (OL%GHOST_LASTW(-2) /= 0) DYN(0)  = 0.5_EB*(RECV_BUFFER_REAL(3) + DYN(0))
+IF (OL%GHOST_LASTW( 2) /= 0) DYN(NY) = 0.5_EB*(RECV_BUFFER_REAL(4) + DYN(NY))
+IF (OL%GHOST_LASTW(-3) /= 0) DZN(0)  = 0.5_EB*(RECV_BUFFER_REAL(5) + DZN(0))
+IF (OL%GHOST_LASTW( 3) /= 0) DZN(NZ) = 0.5_EB*(RECV_BUFFER_REAL(6) + DZN(NZ))
 
 END SUBROUTINE SCARC_UNPACK_CELL_SIZES
 
@@ -7073,7 +7389,6 @@ ENDDO
 END SUBROUTINE SCARC_PACK_MATRIX_COLS
 
 
-#ifdef WITH_SCARC_AMG
 ! --------------------------------------------------------------------------------------------------------------
 !> \brief Pack overlapping auxiliary vector 
 ! --------------------------------------------------------------------------------------------------------------
@@ -7432,7 +7747,6 @@ DO IOR0 = -3, 3
 ENDDO
 
 END SUBROUTINE SCARC_UNPACK_ZONE_TYPES
-#endif
 
 END MODULE SCARC_MPI
 
@@ -8214,8 +8528,8 @@ DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
             XMID => M%XC
             ZMID => M%ZC
          ELSE
-            XMID => L%XMID
-            ZMID => L%ZMID
+            XMID => L%XC
+            ZMID => L%ZC
          ENDIF
          VC(IC) = EXACT(XMID(I),ZMID(K))
       ENDDO
@@ -8246,15 +8560,14 @@ DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
             XMID => M%XC
             ZMID => M%ZC
          ELSE
-            XMID => L%XMID
-            ZMID => L%ZMID
+            XMID => L%XC
+            ZMID => L%ZC
          ENDIF
          IF (XMID(I) < 0.1_EB) THEN
             VC(IC) = 1000.0_EB
          ELSE
             VC(IC) = 0.0_EB
          ENDIF
- ! WRITE(MSG%LU_DEBUG,*) 'IC=',IC,':X=',XMID,':Z=',ZMID,': RHS=',VC(IC)
       ENDDO
    ENDDO
 ENDDO
@@ -8289,7 +8602,6 @@ DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          IC = G%CELL_NUMBER(I,1,K)
          X  = M%XC(I)
          Z  = M%ZC(K)
-         !WRITE(MSG%LU_DEBUG,'(A,i3,a,e10.2,a,e10.2,a,E14.6)') 'IC=',IC,':X=',X,':Z=',Z,': RHS=',VC(IC)
          VC(IC) = RHS(X,Z)
       ENDDO
    ENDDO
@@ -8310,7 +8622,7 @@ INTEGER, INTENT(IN) :: NV1, NV2, NL
 REAL(EB) :: TNOW
 INTEGER :: NM, NOM, IC, JC, IOR0, ICOL, INBR, ICE, ICW, ICG
 INTEGER :: I, J, K, IW, IS=0, IT=0, IL=0, INUM1, INUM2
-REAL(EB) :: TMP, VSAVE
+REAL(EB) :: VSAVE
 #ifdef WITH_MKL
 EXTERNAL :: DAXPBY, DAXPY
 #endif
@@ -8404,6 +8716,7 @@ SELECT_MATRIX_TYPE: SELECT CASE (SET_MATRIX_TYPE(NL))
                   CALL SCARC_DAXPY_VARIABLE(IL, AB%VAL(IT:IT+IL-1,AB%POS(IOR0)), V1(IS:IS+IL-1), V2(IT:IT+IL-1))
 
                ENDDO
+
                !!$OMP END PARALLEL
 
                IF (NM==NMESHES) VSAVE = V2(G%NC)                        ! save value in case of pure Neumann bdry
@@ -8416,7 +8729,7 @@ SELECT_MATRIX_TYPE: SELECT CASE (SET_MATRIX_TYPE(NL))
                      DO ICG = OL%GHOST_FIRSTW(IOR0), OL%GHOST_LASTW(IOR0)
                         ICW = OG%ICG_TO_ICW(ICG, 1)
                         ICE = OG%ICG_TO_ICE(ICG, 1)
-                        V2(ICW) = V2(ICW) + F%INCR_FACE * V1(ICE)
+                        V2(ICW) = V2(ICW) + F%MATRIX_SHARE * V1(ICE)
                      ENDDO
                   ENDDO
                ENDDO
@@ -8488,12 +8801,11 @@ SELECT_MATRIX_TYPE: SELECT CASE (SET_MATRIX_TYPE(NL))
                   ! SPD-matrix with mixture of Dirichlet and Neumann BC's according to the SETTING of BTYPE
 
                   IF (N_DIRIC_GLOBAL(NLEVEL_MIN) > 0) THEN
-                     TMP = V2(IC)
                      SELECT CASE (GWC%BTYPE)
                         CASE (DIRICHLET)
-                           V2(IC) = V2(IC) - F%INCR_BOUNDARY * V1(IC)
+                           V2(IC) = V2(IC) - F%MATRIX_SHARE * V1(IC)
                         CASE (NEUMANN)
-                           V2(IC) = V2(IC) + F%INCR_BOUNDARY * V1(IC)
+                           V2(IC) = V2(IC) + F%MATRIX_SHARE * V1(IC)            ! TODO: CHECK !!!
                      END SELECT
                   ENDIF 
             
@@ -8792,8 +9104,7 @@ END FUNCTION SCARC_GET_MAX_LEVEL
 !> \brief Setup discretization information
 ! --------------------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_SETUP_GRIDS
-USE SCARC_POINTERS, ONLY: M, S, L, G, XCOR, YCOR, ZCOR, XMID, YMID, ZMID, &
-                          SCARC_POINT_TO_MESH, SCARC_POINT_TO_GRID
+USE SCARC_POINTERS, ONLY: M, S, L, G, SCARC_POINT_TO_MESH, SCARC_POINT_TO_GRID
 INTEGER :: NL, NM, NC, IX, IY, IZ, IO
 INTEGER :: IBAR, JBAR, KBAR
 
@@ -8827,24 +9138,16 @@ MESHES_LOOP1: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
       L%N_WALL_CELLS_INT = M%N_INTERNAL_WALL_CELLS
       L%N_WALL_CELLS     = L%N_WALL_CELLS_EXT + L%N_WALL_CELLS_INT
 
-      ! Get coordination information
-
-      L%DX = (S%XF-S%XS)/REAL(L%NX,EB) ; L%DXH = 0.5_EB*L%DX ; L%DX2 = L%DX
-      L%DY = (S%YF-S%YS)/REAL(L%NY,EB) ; L%DYH = 0.5_EB*L%DY ; L%DY2 = L%DY
-      L%DZ = (S%ZF-S%ZS)/REAL(L%NZ,EB) ; L%DZH = 0.5_EB*L%DZ ; L%DZ2 = L%DZ
-
-      L%DXI  = 1.0_EB/L%DX;  L%DYI  = 1.0_EB/L%DY;  L%DZI =  1.0_EB/L%DZ
-      L%DXI2 = L%DXI**2;     L%DYI2 = L%DYI**2;     L%DZI2 = L%DZI**2
-
       ! Needed in case of GMG with multiple grid levels
 
       IBAR=IBAR/2
       IF (.NOT.TWO_D) JBAR=JBAR/2
       KBAR=KBAR/2
 
+      ! Only on finest grid level:
+      ! Store information about obstructions
+       
       IF (NL == NLEVEL_MIN) THEN
-
-         ! On finest level store information about obstructions
 
          L%N_OBST = M%N_OBST
          ALLOCATE(L%OBST(L%N_OBST), STAT=IERROR)
@@ -8859,84 +9162,116 @@ MESHES_LOOP1: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
             L%OBST(IO)%K2  = M%OBSTRUCTION(IO)%K2
          ENDDO
 
-         ! Point to already existing arrays from main FDS program
+         L%RDXI2 = M%RDXI**2
+         L%RDYI2 = M%RDETA**2
+         L%RDZI2 = M%RDZETA**2
 
-         XCOR => M%X ;  YCOR => M%Y ;  ZCOR => M%Z
-         XMID => M%XC;  YMID => M%YC;  ZMID => M%ZC
-
+      ! For all coarser grid levels:
+      ! Allocate and compute grid description arrays according to official code
+       
       ELSE
 
-         ! Allocate and compute coordinate information for coarser levels
+         CALL SCARC_ALLOCATE_REAL1 (L%X, 0, L%NX, NSCARC_INIT_NONE, 'L%X', CROUTINE)
+         CALL SCARC_ALLOCATE_REAL1 (L%Y, 0, L%NY, NSCARC_INIT_NONE, 'L%Y', CROUTINE)
+         CALL SCARC_ALLOCATE_REAL1 (L%Z, 0, L%NZ, NSCARC_INIT_NONE, 'L%Z', CROUTINE)
 
-         CALL SCARC_ALLOCATE_REAL1 (L%XCOR, 0, L%NX, NSCARC_INIT_NONE, 'L%XCOR', CROUTINE)
-         CALL SCARC_ALLOCATE_REAL1 (L%YCOR, 0, L%NY, NSCARC_INIT_NONE, 'L%YCOR', CROUTINE)
-         CALL SCARC_ALLOCATE_REAL1 (L%ZCOR, 0, L%NZ, NSCARC_INIT_NONE, 'L%ZCOR', CROUTINE)
+         CALL SCARC_ALLOCATE_REAL1 (L%XC, 0, L%NX+1, NSCARC_INIT_NONE, 'L%XC', CROUTINE)
+         CALL SCARC_ALLOCATE_REAL1 (L%YC, 0, L%NY+1, NSCARC_INIT_NONE, 'L%YC', CROUTINE)
+         CALL SCARC_ALLOCATE_REAL1 (L%ZC, 0, L%NZ+1, NSCARC_INIT_NONE, 'L%ZC', CROUTINE)
+
+         CALL SCARC_ALLOCATE_REAL1 (L%DX, 0, L%NX+1, NSCARC_INIT_ZERO, 'L%DX', CROUTINE)
+         CALL SCARC_ALLOCATE_REAL1 (L%DY, 0, L%NY+1, NSCARC_INIT_ZERO, 'L%DY', CROUTINE)
+         CALL SCARC_ALLOCATE_REAL1 (L%DZ, 0, L%NZ+1, NSCARC_INIT_ZERO, 'L%DZ', CROUTINE)
+   
+         CALL SCARC_ALLOCATE_REAL1 (L%DXN, 0, L%NX, NSCARC_INIT_ZERO, 'L%DXN', CROUTINE)
+         CALL SCARC_ALLOCATE_REAL1 (L%DYN, 0, L%NY, NSCARC_INIT_ZERO, 'L%DYN', CROUTINE)
+         CALL SCARC_ALLOCATE_REAL1 (L%DZN, 0, L%NZ, NSCARC_INIT_ZERO, 'L%DZN', CROUTINE)
+   
+         CALL SCARC_ALLOCATE_REAL1 (L%RDX, 0, L%NX+1, NSCARC_INIT_ZERO, 'L%RDX', CROUTINE)
+         CALL SCARC_ALLOCATE_REAL1 (L%RDY, 0, L%NY+1, NSCARC_INIT_ZERO, 'L%RDY', CROUTINE)
+         CALL SCARC_ALLOCATE_REAL1 (L%RDZ, 0, L%NZ+1, NSCARC_INIT_ZERO, 'L%RDZ', CROUTINE)
+   
+         CALL SCARC_ALLOCATE_REAL1 (L%RDXN, 0, L%NX, NSCARC_INIT_ZERO, 'L%RDXN', CROUTINE)
+         CALL SCARC_ALLOCATE_REAL1 (L%RDYN, 0, L%NY, NSCARC_INIT_ZERO, 'L%RDYN', CROUTINE)
+         CALL SCARC_ALLOCATE_REAL1 (L%RDZN, 0, L%NZ, NSCARC_INIT_ZERO, 'L%RDZN', CROUTINE)
+
+         ! Compute grid points and widhts between them for coarser grids
+
+         L%DXI = (S%XF - S%XS)/REAL(L%NX,EB)
+         L%DYI = (S%ZF - S%ZS)/REAL(L%NY,EB)
+         L%DZI = (S%ZF - S%ZS)/REAL(L%NZ,EB)
+
+         L%RDXI = 1.0_EB/L%DXI
+         L%RDYI = 1.0_EB/L%DYI
+         L%RDZI = 1.0_EB/L%DZI
+
+         L%RDXI2 = L%RDXI**2
+         L%RDYI2 = L%RDYI**2
+         L%RDZI2 = L%RDZI**2
 
          DO IX = 0, L%NX
-            L%XCOR(IX) = S%XS + IX*L%DX
+            L%X(IX) = S%XS + IX*L%DXI
+            IF (IX > 0) THEN
+               L%DX(IX) = L%X(IX) - L%X(IX-1)
+               L%RDX(IX) = 1.0_EB/L%DX(IX)
+            ENDIF
          ENDDO
+         L%DX(0)       = L%DX(1)
+         L%DX(L%NX+1)  = L%DX(L%NX)
+         L%RDX(0)      = 1.0_EB/L%DX(1)
+         L%RDX(L%NX+1) = 1.0_EB/L%DX(L%NX)
+
          DO IY = 0, L%NY
-            L%YCOR(IY) = S%YS + IY*L%DY
+            L%Y(IY) = S%YS + IY*L%DYI
+            IF (IY > 0) THEN
+               L%DY(IY) = L%Y(IY) - L%Y(IY-1)
+               L%RDY(IY) = 1.0_EB/L%DY(IY)
+            ENDIF
          ENDDO
+         L%DY(0)       = L%DY(1)
+         L%DY(L%NY+1)  = L%DY(L%NY)
+         L%RDY(0)      = 1.0_EB/L%DY(1)
+         L%RDY(L%NY+1) = 1.0_EB/L%DY(L%NY)
+
          DO IZ = 0, L%NZ
-            L%ZCOR(IZ) = S%ZS + IZ*L%DZ
+            L%Z(IZ) = S%ZS + IZ*L%DZI
+            IF (IZ > 0) THEN
+               L%DZ(IZ) = L%Z(IZ) - L%Z(IZ-1)
+               L%RDZ(IZ) = 1.0_EB/L%DZ(IZ)
+            ENDIF
          ENDDO
+         L%DZ(0)       = L%DZ(1)
+         L%DZ(L%NZ+1)  = L%DZ(L%NZ)
+         L%RDZ(0)      = 1.0_EB/L%DZ(1)
+         L%RDZ(L%NZ+1) = 1.0_EB/L%DZ(L%NZ)
 
-         ! Allocate and compute midpoint information for coarser levels
+         ! Compute midpoints and widths between them for coarser grids
 
-         CALL SCARC_ALLOCATE_REAL1 (L%XMID, 0, L%NX+1, NSCARC_INIT_NONE, 'L%XMID', CROUTINE)
-         CALL SCARC_ALLOCATE_REAL1 (L%YMID, 0, L%NY+1, NSCARC_INIT_NONE, 'L%YMID', CROUTINE)
-         CALL SCARC_ALLOCATE_REAL1 (L%ZMID, 0, L%NZ+1, NSCARC_INIT_NONE, 'L%ZMID', CROUTINE)
-
-         L%XMID(0) = S%XS - 0.5_EB*L%DX
-         DO IX = 1, L%NX
-            L%XMID(IX) = 0.5_EB*(L%XCOR(IX-1) + L%XCOR(IX))
+         DO IX = 0, L%NX
+            L%DXN(IX)  = 0.5_EB*(L%DX(IX) + L%DX(IX+1))
+            L%RDXN(IX) = 1.0_EB/L%DXN(IX)
+            IF (IX > 0) L%XC(IX) = 0.5_EB*(L%X(IX) + L%X(IX-1))
          ENDDO
-         L%XMID(L%NX+1) = S%XF + 0.5_EB*L%DX
+         L%XC(0)      = S%XS - 0.5_EB*L%DX(0)
+         L%XC(L%NX+1) = S%XF + 0.5_EB*L%DX(L%NX+1)
 
-         L%YMID(0) = S%YS - 0.5_EB*L%DY
-         DO IY = 1, L%NY
-            L%YMID(IY) = 0.5_EB*(L%YCOR(IY-1) + L%YCOR(IY))
+         DO IY = 0, L%NY
+            L%DYN(IY)  = 0.5_EB*(L%DY(IY) + L%DY(IY+1))
+            L%RDYN(IY) = 1.0_EB/L%DYN(IY)
+            IF (IY > 0) L%YC(IY) = 0.5_EB*(L%Y(IY) + L%Y(IY-1))
          ENDDO
-         L%YMID(L%NY+1) = S%YF + 0.5_EB*L%DY
+         L%YC(0)      = S%YS - 0.5_EB*L%DY(0)
+         L%YC(L%NY+1) = S%YF + 0.5_EB*L%DY(L%NY+1)
 
-         L%ZMID(0) = S%ZS - 0.5_EB*L%DZ
-         DO IZ = 1, L%NZ
-            L%ZMID(IZ) = 0.5_EB*(L%ZCOR(IZ-1) + L%ZCOR(IZ))
+         DO IZ = 0, L%NZ
+            L%DZN(IZ)  = 0.5_EB*(L%DZ(IZ) + L%DZ(IZ+1))
+            L%RDZN(IZ) = 1.0_EB/L%DZN(IZ)
+            IF (IZ > 0) L%ZC(IZ) = 0.5_EB*(L%Z(IZ) + L%Z(IZ-1))
          ENDDO
-         L%ZMID(L%NZ+1) = S%ZF + 0.5_EB*L%DZ
-
-         XCOR => L%XCOR;  YCOR => L%YCOR;  ZCOR => L%ZCOR
-         XMID => L%XMID;  YMID => L%YMID;  ZMID => L%ZMID
+         L%ZC(0)      = S%ZS - 0.5_EB*L%DZ(0)
+         L%ZC(L%NZ+1) = S%ZF + 0.5_EB*L%DZ(L%NZ+1)
 
       ENDIF
-
-      ! Allocate vectors for step sizes in different directions
-
-      CALL SCARC_ALLOCATE_REAL1 (L%DXL, 0, L%NX, NSCARC_INIT_ZERO, 'L%DXL', CROUTINE)
-      CALL SCARC_ALLOCATE_REAL1 (L%DYL, 0, L%NY, NSCARC_INIT_ZERO, 'L%DYL', CROUTINE)
-      CALL SCARC_ALLOCATE_REAL1 (L%DZL, 0, L%NZ, NSCARC_INIT_ZERO, 'L%DZL', CROUTINE)
-
-      ! Set step sizes between cell midpoints, use interior step sizes for ghost cells as initial values
-      ! correct sizes for ghost cells are exchanged later
-
-      DO IX = 1, L%NX-1
-         L%DXL(IX) = XMID(IX+1) - XMID(IX)
-      ENDDO
-      L%DXL(0)    = L%DXL(1)
-      L%DXL(L%NX) = L%DXL(L%NX-1)
-
-      DO IY = 1, L%NY-1
-         L%DYL(IY) = YMID(IY+1) - YMID(IY)
-      ENDDO
-      L%DYL(0)    = L%DYL(1)
-      L%DYL(L%NY) = L%DYL(L%NY-1)
-
-      DO IZ = 1, L%NZ-1
-         L%DZL(IZ) = ZMID(IZ+1) - ZMID(IZ)
-      ENDDO
-      L%DZL(0)    = L%DZL(1)
-      L%DZL(L%NZ) = L%DZL(L%NZ-1)
 
    ENDDO LEVEL_LOOP1
 ENDDO MESHES_LOOP1
@@ -9335,7 +9670,7 @@ MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
    N_FACE_NEIGHBORS = 0
    N_MESH_NEIGHBORS = 0
 
-   CALL SCARC_SETUP_FACE_BASICS(L)
+   CALL SCARC_SETUP_FACE_BASICS(NM, NLEVEL_MIN)
  
    ! Store first wall cell number for each face
  
@@ -9559,15 +9894,16 @@ END SUBROUTINE SCARC_SETUP_NEIGHBORS
 ! ------------------------------------------------------------------------------------------------------------------
 !> \brief Determine basic data for single faces (orientation, dimensions, numbers)
 ! ------------------------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_SETUP_FACE_BASICS(L)
-USE SCARC_POINTERS, ONLY: F
-TYPE (SCARC_LEVEL_TYPE), POINTER, INTENT(IN) :: L
+SUBROUTINE SCARC_SETUP_FACE_BASICS(NM, NL)
+USE SCARC_POINTERS, ONLY: L, F, NX, NY, NZ, RDX, RDY, RDZ, RDXN, RDYN, RDZN, SCARC_POINT_TO_GRID
+INTEGER, INTENT(IN) :: NM, NL
 INTEGER:: IOR0
 
 FACES_OF_MESH_LOOP: DO IOR0 = -3, 3
 
    IF (IOR0 == 0) CYCLE FACES_OF_MESH_LOOP
 
+   CALL SCARC_POINT_TO_GRID(NM, NL)
    F => L%FACE(IOR0)
    
    SELECT CASE (ABS(IOR0))
@@ -9576,29 +9912,20 @@ FACES_OF_MESH_LOOP: DO IOR0 = -3, 3
  
       CASE (1)
 
-         F%NOP =  L%NX                           ! number of cells between opposite mesh faces
+         F%NX  =  1                                ! number of cells in x-direction
+         F%NY  =  NY                               ! number of cells in y-direction
+         F%NZ  =  NZ                               ! number of cells in z-direction
 
-         F%NX  =  1                              ! number of cells in x-direction
-         F%NY  =  L%NY                           ! number of cells in y-direction
-         F%NZ  =  L%NZ                           ! number of cells in z-direction
-
-         F%NCW =  L%NY*L%NZ                      ! number of wall cells at that face
-         F%DH  => L%DXL                          ! step size vector between opposite mesh faces
-
-         F%INCR_BOUNDARY  = L%DXI2               ! contribution due to boundary condition 
-         F%SCAL_DIRICHLET = -2.0_EB * L%DXI2
+         F%NCW =  NY*NZ                            ! number of wall cells at that face
 
          F%INCRY =  0
          F%INCRZ =  0
+
          IF (IOR0 > 0) THEN
-            F%SCAL_NEUMANN = L%DXI
-            F%INCR_FACE    = 2.0_EB/(F%DH(0)*(F%DH(0)+F%DH(1)))
-            F%INCR_INSIDE  = 2.0_EB/(F%DH(1)*(F%DH(1)+F%DH(2)))
+            F%MATRIX_SHARE = RDX(1)*RDXN(0)
             F%INCRX =  1                           ! offset to next internal cell in that direction
          ELSE
-            F%SCAL_NEUMANN = -L%DXI
-            F%INCR_FACE    = 2.0_EB/(F%DH(F%NOP)  *(F%DH(F%NOP-1)+F%DH(F%NOP)))
-            F%INCR_INSIDE  = 2.0_EB/(F%DH(F%NOP-1)*(F%DH(F%NOP-2)+F%DH(F%NOP-1)))
+            F%MATRIX_SHARE = RDX(NX)*RDXN(NX)
             F%INCRX = -1
          ENDIF     
          IF (TWO_D) THEN
@@ -9606,38 +9933,26 @@ FACES_OF_MESH_LOOP: DO IOR0 = -3, 3
          ELSE
             F%INCR_STENCIL = (/ F%NY, 1, 0, 0, 0, -1, -F%NY /)
          ENDIF
- 
+
       ! ---------- Faces in y-direction
  
       CASE (2)
 
-         F%NOP =  L%NY                   ! dito
-
-         F%NX  =  L%NX
+         F%NX  =  NX
          F%NY  =  1
-         F%NZ  =  L%NZ
+         F%NZ  =  NZ
 
-         F%NCW =  L%NX*L%NZ
-         F%DH  => L%DYL
+         F%NCW =  NX*NZ
 
-         F%INCR_BOUNDARY  = L%DYI2
-         F%SCAL_DIRICHLET = -2.0_EB * L%DYI2
-
-         F%INCRX =  0                           ! offset to next internal cell in that direction
+         F%INCRX =  0                          
          F%INCRY =  0
          F%INCRZ =  0
-         IF (IOR0>0) THEN
-            F%SCAL_NEUMANN = L%DYI
-            IF (.NOT.TWO_D) THEN
-               F%INCR_FACE   = 2.0_EB/(F%DH(0)*(F%DH(0)+F%DH(1)))
-               F%INCR_INSIDE = 2.0_EB/(F%DH(1)*(F%DH(1)+F%DH(2)))
+         IF (.NOT.TWO_D) THEN
+            IF (IOR0>0) THEN
+               F%MATRIX_SHARE = RDY(1)*RDYN(0)
                F%INCRY = 1
-            ENDIF
-         ELSE
-            F%SCAL_NEUMANN = -L%DYI
-            IF (.NOT.TWO_D) THEN
-               F%INCR_FACE   =  2.0_EB/(F%DH(F%NOP)  *(F%DH(F%NOP-1)+F%DH(F%NOP)))
-               F%INCR_INSIDE =  2.0_EB/(F%DH(F%NOP-1)*(F%DH(F%NOP-2)+F%DH(F%NOP-1)))
+            ELSE
+               F%MATRIX_SHARE = RDY(NY)*RDYN(NY)
                F%INCRY = -1
             ENDIF
          ENDIF
@@ -9651,30 +9966,19 @@ FACES_OF_MESH_LOOP: DO IOR0 = -3, 3
  
       CASE (3)
 
-         F%NOP =  L%NZ                   ! dito
-
-         F%NX  =  L%NX
-         F%NY  =  L%NY
+         F%NX  =  NX
+         F%NY  =  NY
          F%NZ  =  1
 
-         F%NCW =  L%NX*L%NY
-         F%DH  => L%DZL
-
-         F%NX  = L%NX
-         F%INCR_BOUNDARY  = L%DZI2
-         F%SCAL_DIRICHLET = -2.0_EB * L%DZI2
+         F%NCW =  NX*NY
 
          F%INCRX =  0
          F%INCRY =  0
          IF (IOR0>0) THEN
-            F%SCAL_NEUMANN = L%DZI
-            F%INCR_FACE    = 2.0_EB/(F%DH(0)*(F%DH(0)+F%DH(1)))
-            F%INCR_INSIDE  = 2.0_EB/(F%DH(1)*(F%DH(1)+F%DH(2)))
+            F%MATRIX_SHARE = RDZ(1)*RDZN(0)
             F%INCRZ =  1
          ELSE
-            F%SCAL_NEUMANN = -L%DZI
-            F%INCR_FACE    =  2.0_EB/(F%DH(F%NOP)  *(F%DH(F%NOP-1)+F%DH(F%NOP)))
-            F%INCR_INSIDE  =  2.0_EB/(F%DH(F%NOP-1)*(F%DH(F%NOP-2)+F%DH(F%NOP-1)))
+            F%MATRIX_SHARE = RDZ(NZ)*RDZN(NZ)
             F%INCRZ = -1
          ENDIF
          IF (TWO_D) THEN
@@ -9901,9 +10205,7 @@ IF (N_MPI_PROCESSES>1) &
    CALL MPI_ALLREDUCE(MPI_IN_PLACE, RANK_INT, 1, MPI_INTEGER, MPI_SUM, MPI_COMM_WORLD, IERROR)
 N_DIRIC_GLOBAL(NLEVEL_MIN) = RANK_INT
 
-IS_PURE_NEUMANN = N_DIRIC_GLOBAL(NLEVEL_MIN) == 0 .AND. &
-                  (TYPE_PRECON /= NSCARC_RELAX_FFT .OR. TYPE_PRECON /= NSCARC_RELAX_FFTO)
-
+IS_PURE_NEUMANN = N_DIRIC_GLOBAL(NLEVEL_MIN) == 0 .AND. TYPE_PRECON /= NSCARC_RELAX_FFT
 
  
 ! -------- Only for multi-level variants 
@@ -9916,6 +10218,8 @@ MULTI_LEVEL_IF: IF (HAS_GMG_LEVELS) THEN
 
       IREFINE=1
       MULTI_LEVELS_LOOP: DO NL = NLEVEL_MIN+1, NLEVEL_MAX
+
+         CALL SCARC_SETUP_FACE_BASICS(NM, NL)
 
          CALL SCARC_POINT_TO_MULTIGRID (NM, NL-1, NL)
 
@@ -9951,8 +10255,6 @@ MULTI_LEVEL_IF: IF (HAS_GMG_LEVELS) THEN
 
          ! Setup basic face information for coarser mesh
  
-         CALL SCARC_SETUP_FACE_BASICS(LC)
-
          IWC = 1
          IWG = 1
          ICW = 1
@@ -10051,9 +10353,6 @@ DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
       ENDIF
    ENDIF
 ENDDO
-
-! Debug FACE, WALL and DISCRET structures - only if directive SCARC_DEBUG is set
-
 
 END SUBROUTINE SCARC_SETUP_WALLS
 
@@ -11278,38 +11577,27 @@ IMPLICIT NONE (TYPE,EXTERNAL)
 
 CONTAINS
 
-
 ! ------------------------------------------------------------------------------------------------------------------
-!> \brief Setup system of equations (Poisson matrix + BC's) for different variants of ScaRC
-! Define matrix stencils and initialize matrices and boundary conditions on all needed levels
+!> \brief Setup sizes for Poisson matrices on requested grid levels
 ! ------------------------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_SETUP_SYSTEMS
-USE SCARC_POINTERS, ONLY: SCARC_POINT_TO_GRID
-#ifdef WITH_MKL
-USE SCARC_POINTERS, ONLY: L
-INTEGER :: TYPE_MKL_SAVE(0:1), TYPE_SCOPE_SAVE(0:1)
-#endif
-INTEGER :: NM, NL
-  
-CROUTINE = 'SCARC_SETUP_SYSTEMS'
+SUBROUTINE SCARC_SETUP_POISSON_REQUIREMENTS
+INTEGER :: NL
 
-! ------ Setup sizes for system matrices
-  
-SELECT_SCARC_METHOD_SIZES: SELECT CASE (TYPE_METHOD)
+SELECT CASE (TYPE_METHOD)
 
    ! -------- Global Krylov method
 
    CASE (NSCARC_METHOD_KRYLOV)
    
-      CALL SCARC_SET_GRID_TYPE (TYPE_GRID)                      ! process specified discretization type
-      CALL SCARC_SETUP_POISSON_SIZES (NLEVEL_MIN)               ! setup sizes on finest level
+      CALL SCARC_SET_GRID_TYPE (TYPE_GRID)                          ! Process specified discretization type
+      CALL SCARC_SETUP_POISSON_SIZES (NLEVEL_MIN)                   ! Setup sizes on finest level
    
       IF (HAS_TWO_LEVELS .AND. .NOT.HAS_AMG_LEVELS) &
-         CALL SCARC_SETUP_POISSON_SIZES (NLEVEL_MAX)            ! twolevel-precon: also setup size for coarse level
+         CALL SCARC_SETUP_POISSON_SIZES (NLEVEL_MAX)                ! If twolevel-preconditioner: also setup size for coarse level
    
       IF (IS_CG_GMG) THEN                                                   
          DO NL=NLEVEL_MIN+1, NLEVEL_MAX
-            CALL SCARC_SETUP_POISSON_SIZES (NL)                 ! GMG-precon: also setup size for all other levels
+            CALL SCARC_SETUP_POISSON_SIZES (NL)                     ! If GMG-preconditioner: also setup size for all other levels
          ENDDO
       ENDIF
    
@@ -11317,252 +11605,32 @@ SELECT_SCARC_METHOD_SIZES: SELECT CASE (TYPE_METHOD)
 
    CASE (NSCARC_METHOD_MULTIGRID)
    
-      CALL SCARC_SET_GRID_TYPE (TYPE_GRID)                      ! process specified discretization type
+      CALL SCARC_SET_GRID_TYPE (TYPE_GRID)                          ! Process specified discretization type
+
       SELECT CASE (TYPE_MULTIGRID)
          CASE (NSCARC_MULTIGRID_GEOMETRIC)                                   
             DO NL=NLEVEL_MIN, NLEVEL_MAX
-               CALL SCARC_SETUP_POISSON_SIZES (NL)              ! GMG: setup size for all levels
+            CALL SCARC_SETUP_POISSON_SIZES (NL)                     ! If geometric multigrid: setup size for all levels
             ENDDO
-         CASE (NSCARC_MULTIGRID_ALGEBRAIC)                                   
-            CALL SCARC_SETUP_POISSON_SIZES (NLEVEL_MIN)         ! AMG: setup sizes only on finest level
+         CASE (NSCARC_MULTIGRID_ALGEBRAIC)
+            CALL SCARC_SETUP_POISSON_SIZES (NLEVEL_MIN)             ! If algebraic multigrid: setup sizes only on finest level
       END SELECT
    
-   ! -------- Global MGM method - currently just proof of concept
+   ! -------- Global MGM method 
 
    CASE (NSCARC_METHOD_MGM)
    
-      CALL SCARC_SET_GRID_TYPE (NSCARC_GRID_STRUCTURED)         ! First process structured discretization
+      CALL SCARC_SET_GRID_TYPE (NSCARC_GRID_STRUCTURED)             ! First process structured discretization
       CALL SCARC_SETUP_POISSON_SIZES (NLEVEL_MIN)        
    
-      CALL SCARC_SET_GRID_TYPE (NSCARC_GRID_UNSTRUCTURED)       ! Then process unstructured discretization
+      CALL SCARC_SET_GRID_TYPE (NSCARC_GRID_UNSTRUCTURED)           ! Then process unstructured discretization
       IF (SCARC_MGM_CHECK_LAPLACE .OR. SCARC_MGM_EXACT_INITIAL) &
-         CALL SCARC_SETUP_POISSON_SIZES (NLEVEL_MIN)            ! ... for global Poisson matrix (only if requested)
-      CALL SCARC_SETUP_LOCAL_LAPLACE_SIZES (NLEVEL_MIN)         ! ... for local Laplace matrices
+         CALL SCARC_SETUP_POISSON_SIZES (NLEVEL_MIN)                ! ... for global Poisson matrix (only if requested)
+      CALL SCARC_SETUP_LOCAL_LAPLACE_SIZES (NLEVEL_MIN)             ! ... for local Laplace matrices
    
-END SELECT SELECT_SCARC_METHOD_SIZES
+END SELECT 
 
-! ------ Assemble system matrices on requested grid levels and set boundary conditions
-  
-MESHES_POISSON_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
-
-   SELECT_SCARC_METHOD: SELECT CASE (TYPE_METHOD)
-
-      ! ---------- Krylov method (CG) as main solver, different preconditioners possible
-
-      CASE (NSCARC_METHOD_KRYLOV)
-
-         ! For all different possible Krylov variants, first setup Poisson matrix on finest level including BC's 
-
-         CALL SCARC_SETUP_POISSON (NM, NLEVEL_MIN)
-         CALL SCARC_SETUP_BOUNDARY(NM, NLEVEL_MIN)
-
-         ! Depending on the requested preconditioner, also assemble the Poisson matrix with BC's on specific coarser levels
-
-         SELECT_KRYLOV_PRECON: SELECT CASE (TYPE_PRECON)
-
-            ! In case of multigrid as preconditioner:
-            ! only build higher level structures in case of geometric multigrid (algebraic variant is done elsewhere)
-
-            CASE (NSCARC_RELAX_GMG)
-
-               IF (IS_CG_GMG) THEN
-                  DO NL = NLEVEL_MIN+1, NLEVEL_MAX
-                     CALL SCARC_SETUP_POISSON (NM, NL)
-                     CALL SCARC_SETUP_BOUNDARY(NM, NL)
-                  ENDDO
-               ENDIF
-
-#ifdef WITH_MKL
-            ! In case of LU-decomposition as preconditioner
-            ! locally acting: PARDISO from MKL as preconditioners on fine level with possible coarse grid correction
-
-            CASE (NSCARC_RELAX_MKL)
-
-               IF (TYPE_SCOPE(1) == NSCARC_SCOPE_LOCAL .AND. HAS_TWO_LEVELS .AND. .NOT.HAS_AMG_LEVELS) THEN
-                  CALL SCARC_SETUP_POISSON (NM, NLEVEL_MAX)
-                  CALL SCARC_SETUP_BOUNDARY(NM, NLEVEL_MAX)
-               ENDIF
-#endif
-
-            ! in case of default preconditioners (JACOBI/SSOR/FFT/...):
-            ! if there is an additional coarse grid correction which is NOT AMG-based, 
-            ! then also assemble matrix on coarse grid level
-
-            CASE DEFAULT
-   
-               IF (HAS_TWO_LEVELS .AND. .NOT.HAS_AMG_LEVELS) THEN
-                  CALL SCARC_SETUP_POISSON (NM, NLEVEL_MAX)
-                  CALL SCARC_SETUP_BOUNDARY(NM, NLEVEL_MAX)
-               ENDIF
-
-         END SELECT SELECT_KRYLOV_PRECON
-
-      ! ---------- Multigrid as main solver
-
-      CASE (NSCARC_METHOD_MULTIGRID)
-
-         ! For all different possible multigrid-variants, first setup Poisson matrix on finest level including BC's 
-
-         CALL SCARC_SETUP_POISSON (NM, NLEVEL_MIN)
-         CALL SCARC_SETUP_BOUNDARY(NM, NLEVEL_MIN)
-
-         ! On case of a  geometric multigrid, assemble standard n-point-matrix hierarchy on all coarser levels, too
-         ! Note: in case of an algebraic multigrid, this will be done in a separate routine later
-
-         IF (TYPE_MULTIGRID == NSCARC_MULTIGRID_GEOMETRIC) THEN
-            DO NL = NLEVEL_MIN + 1, NLEVEL_MAX
-               CALL SCARC_SETUP_POISSON (NM, NL)
-               CALL SCARC_SETUP_BOUNDARY(NM, NL)
-            ENDDO
-         ENDIF
-
-
-      ! ---------- McKenny-Greengard-Mayo method:
-      ! Solving for the structured and unstructured Poisson matrix
-      ! Assemble both, the structured and unstructured Poisson matrix
-      ! temporarily they will be stored separately in matrices AC and ACU due to the different
-      ! settings along internal boundary cells,
-      ! in the medium term, a toggle mechanism will be implemented which only switches the corresponding
-      ! entries while keeping the entries which are the same for both discretization types
-
-      CASE (NSCARC_METHOD_MGM)
-   
-         ! First assemble structured matrix with inhomogeneous boundary conditions
-
-         TYPE_SCOPE(0) = NSCARC_SCOPE_GLOBAL
-         CALL SCARC_SET_GRID_TYPE (NSCARC_GRID_STRUCTURED)
-         CALL SCARC_SETUP_POISSON (NM, NLEVEL_MIN)
-         CALL SCARC_SETUP_BOUNDARY(NM, NLEVEL_MIN)
-
-         ! Then assemble unstructured matrix with homogeneous Dirichlet boundary conditions along
-         ! external boundaries and special MGM BC-settings along mesh interfaces
-
-         CALL SCARC_SET_GRID_TYPE (NSCARC_GRID_UNSTRUCTURED)
-         IF (SCARC_MGM_CHECK_LAPLACE .OR. SCARC_MGM_EXACT_INITIAL) THEN
-            CALL SCARC_SETUP_POISSON (NM, NLEVEL_MIN)
-            CALL SCARC_SETUP_BOUNDARY(NM, NLEVEL_MIN)
-         ENDIF
-
-         TYPE_SCOPE(0) = NSCARC_SCOPE_LOCAL
-         CALL SCARC_SETUP_LAPLACE (NM, NLEVEL_MIN)
-         CALL SCARC_SETUP_BOUNDARY_WITH_INTERFACES(NM, NLEVEL_MIN) 
-         CALL SCARC_SET_GRID_TYPE (NSCARC_GRID_STRUCTURED)
-
-   END SELECT SELECT_SCARC_METHOD
-
-ENDDO MESHES_POISSON_LOOP
-
-! Setup mappings for the global numbering of vectors and the Poisson matrix (compact storage technique only)
- 
-IF (TYPE_MATRIX == NSCARC_MATRIX_COMPACT) THEN
-   IF (IS_MGM) THEN
-
-      TYPE_SCOPE = NSCARC_SCOPE_GLOBAL
-      CALL SCARC_SET_GRID_TYPE(NSCARC_GRID_STRUCTURED)
-      CALL SCARC_SETUP_GLOBAL_CELL_MAPPING(NLEVEL_MIN)
-      CALL SCARC_SETUP_GLOBAL_POISSON_COLUMNS(NLEVEL_MIN)
-
-      IF (SCARC_MGM_CHECK_LAPLACE .OR. SCARC_MGM_EXACT_INITIAL) THEN
-         CALL SCARC_SET_GRID_TYPE(NSCARC_GRID_UNSTRUCTURED)
-         CALL SCARC_SETUP_GLOBAL_CELL_MAPPING(NLEVEL_MIN)
-         CALL SCARC_SETUP_GLOBAL_POISSON_COLUMNS(NLEVEL_MIN)
-      ENDIF
-
-   ELSE
-
-      CALL SCARC_SETUP_GLOBAL_CELL_MAPPING(NLEVEL_MIN)
-      CALL SCARC_SETUP_GLOBAL_POISSON_COLUMNS(NLEVEL_MIN)
-
-   ENDIF
-ENDIF
- 
-! If there is more than one mesh, exchange matrix values in overlapping parts
-! This must be done for all multilevel methods at least at the finest grid level
-! Furthermore also at all higher levels except for the AMG method,
-! in this case it will be done later in routine SETUP_ALGEBRAIC_MULTIGRID
-
-IF (SET_MATRIX_TYPE(NLEVEL_MIN) == NSCARC_MATRIX_COMPACT) CALL SCARC_SETUP_GLOBAL_POISSON_OVERLAPS(NLEVEL_MIN)
-
-MULTI_LEVEL_IF: IF (HAS_MULTIPLE_LEVELS .AND. .NOT.HAS_AMG_LEVELS) THEN
-   DO NL = NLEVEL_MIN+1, NLEVEL_MAX
-      IF (SET_MATRIX_TYPE(NL) /= NSCARC_MATRIX_COMPACT) CYCLE
-      CALL SCARC_SETUP_GLOBAL_CELL_MAPPING(NL)
-      CALL SCARC_SETUP_GLOBAL_POISSON_COLUMNS(NL)
-      CALL SCARC_SETUP_GLOBAL_POISSON_OVERLAPS(NL)
-   ENDDO 
-ENDIF MULTI_LEVEL_IF
-
-! ------ If MKL-solver is used on specific levels, then setup symmetric Poisson matrix there
-#ifdef WITH_MKL
-IF (.NOT. IS_MGM) THEN
-
-   DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
-
-      CALL SCARC_POINT_TO_GRID (NM, NLEVEL_MIN)
-      IF (TYPE_PRECON == NSCARC_RELAX_OPTIMIZED .OR. TYPE_SMOOTH == NSCARC_RELAX_OPTIMIZED) THEN
-         IF (.NOT.L%HAS_OBSTRUCTIONS) TYPE_MKL(NLEVEL_MIN) = NSCARC_MKL_NONE
-      ENDIF
-      IF (TYPE_MKL(NLEVEL_MIN) /= NSCARC_MKL_NONE) THEN
-         CALL SCARC_SETUP_MATRIX_MKL(NSCARC_MATRIX_POISSON, NM, NLEVEL_MIN)
-         CALL SCARC_SETUP_BOUNDARY_MKL(NSCARC_MATRIX_POISSON, NM, NLEVEL_MIN)
-      ENDIF
-
-      IF (HAS_GMG_LEVELS) THEN
-         DO NL = NLEVEL_MIN+1, NLEVEL_MAX
-            CALL SCARC_POINT_TO_GRID (NM, NL)
-            IF (TYPE_PRECON == NSCARC_RELAX_OPTIMIZED .OR. TYPE_SMOOTH == NSCARC_RELAX_OPTIMIZED) THEN
-               IF (.NOT.L%HAS_OBSTRUCTIONS) TYPE_MKL(NL) = NSCARC_MKL_NONE
-            ENDIF
-            IF (TYPE_MKL(NL) /= NSCARC_MKL_NONE)  CALL SCARC_SETUP_MATRIX_MKL  (NSCARC_MATRIX_POISSON, NM, NL)
-            IF (TYPE_MKL(NL) == NSCARC_MKL_LOCAL) CALL SCARC_SETUP_BOUNDARY_MKL(NSCARC_MATRIX_POISSON, NM, NL)
-         ENDDO
-      ENDIF
-
-   ENDDO 
-
-ELSE 
-
-   CALL SCARC_SET_GRID_TYPE (NSCARC_GRID_UNSTRUCTURED)
-
-   TYPE_SCOPE_SAVE(0:1) = TYPE_SCOPE(0:1)
-   TYPE_MKL_SAVE(0:1) = TYPE_MKL(0:1)
-   IF (SCARC_MGM_CHECK_LAPLACE .OR. SCARC_MGM_EXACT_INITIAL) THEN
-      TYPE_SCOPE(0) = NSCARC_SCOPE_GLOBAL
-      IF (TRIM(SCARC_PRECON) == 'CLUSTER') THEN
-         TYPE_MKL(NLEVEL_MIN) = NSCARC_MKL_GLOBAL
-      ELSE
-         TYPE_MKL(NLEVEL_MIN) = NSCARC_MKL_LOCAL
-      ENDIF
-      DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
-         CALL SCARC_POINT_TO_GRID (NM, NLEVEL_MIN)
-         CALL SCARC_SETUP_MATRIX_MKL(NSCARC_MATRIX_POISSON, NM, NLEVEL_MIN)
-         CALL SCARC_SETUP_BOUNDARY_MKL(NSCARC_MATRIX_POISSON, NM, NLEVEL_MIN)
-      ENDDO 
-   ENDIF
-
-   TYPE_SCOPE(0:1) = NSCARC_SCOPE_LOCAL
-   TYPE_MKL(0:1) = NSCARC_MKL_LOCAL
-   SELECT CASE (TYPE_MGM_LAPLACE)
-      CASE (NSCARC_MGM_LAPLACE_CG, NSCARC_MGM_LAPLACE_PARDISO) 
-         DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
-            CALL SCARC_POINT_TO_GRID (NM, NLEVEL_MIN)
-            CALL SCARC_SETUP_MATRIX_MKL (NSCARC_MATRIX_LAPLACE, NM, NLEVEL_MIN)
-         ENDDO 
-      CASE (NSCARC_MGM_LAPLACE_OPTIMIZED) 
-         DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
-            CALL SCARC_POINT_TO_GRID (NM, NLEVEL_MIN)
-            IF (L%STRUCTURED%NC > L%UNSTRUCTURED%NC) CALL SCARC_SETUP_MATRIX_MKL (NSCARC_MATRIX_LAPLACE, NM, NLEVEL_MIN)
-         ENDDO 
-   END SELECT
-   
-   TYPE_SCOPE(0:1) = TYPE_SCOPE_SAVE(0:1)
-   TYPE_MKL(0:1) = TYPE_MKL_SAVE(0:1)
-   CALL SCARC_SET_GRID_TYPE (NSCARC_GRID_STRUCTURED)
-
-ENDIF
-#endif
-
-END SUBROUTINE SCARC_SETUP_SYSTEMS
+END SUBROUTINE SCARC_SETUP_POISSON_REQUIREMENTS
 
 
 ! --------------------------------------------------------------------------------------------------------------
@@ -11582,13 +11650,11 @@ MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
    
    SELECT_MATRIX_TYPE: SELECT CASE (SET_MATRIX_TYPE(NL))
  
-      ! -------- Matrix in compact storage technique
- 
       CASE (NSCARC_MATRIX_COMPACT)
 
-         A => SCARC_POINT_TO_CMATRIX (NSCARC_MATRIX_POISSON)
+         ! Allocate matrix in compact storage format for the mesh interior in the size calculated here
 
-         ! Assign IOR settings to corresponding positions in stencil
+         A => SCARC_POINT_TO_CMATRIX (NSCARC_MATRIX_POISSON)
 
          IF (TWO_D) THEN
             A%N_STENCIL = 5
@@ -11597,24 +11663,31 @@ MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
             A%N_STENCIL = 7
             A%POS(-3:3) = (/1,2,3,4,5,6,7/)
          ENDIF
-
          A%N_VAL  = G%NCE * A%N_STENCIL
          A%N_ROW  = G%NCE + 1
 
-         ! Allocate matrices on overlapping parts for later data exchanges with neighbors
+         CALL SCARC_ALLOCATE_CMATRIX (A, NL, NSCARC_PRECISION_DOUBLE, NSCARC_MATRIX_FULL, 'G%POISSON', CROUTINE)
+
+         ! Allocate little matrices in compact storage format for the overlapping parts in the size calculated here
 
          DO INBR = 1, SCARC(NM)%N_NEIGHBORS
+
             NOM = S%NEIGHBORS(INBR)
             CALL SCARC_POINT_TO_OTHER_GRID (NM, NOM, NL)
             OA => SCARC_POINT_TO_OTHER_CMATRIX (NSCARC_MATRIX_POISSON)
+
             OA%N_STENCIL = A%N_STENCIL
             OA%N_VAL = 4 * OG%NCG * A%N_STENCIL            ! TODO: CHECK LENGTH
             OA%N_ROW = OG%NCG + 1
+
+            CALL SCARC_ALLOCATE_CMATRIX (OA, NL, NSCARC_PRECISION_DOUBLE, NSCARC_MATRIX_FULL, 'OG%POISSON', CROUTINE)
+
          ENDDO
  
-      ! -------- Matrix in bandwise storage technique
  
       CASE (NSCARC_MATRIX_BANDWISE)
+
+         ! Allocate matrix in bandwise storage format for the mesh interior in the size calculated here 
 
          AB => SCARC_POINT_TO_BMATRIX (NSCARC_MATRIX_POISSON)
 
@@ -11689,22 +11762,29 @@ MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          AB%N_VAL  = G%NC * AB%N_STENCIL
          AB%N_DIAG = G%NC
 
-         ! Determine sizes of overlapping parts for later communication with corresponding neighbors
+         CALL SCARC_ALLOCATE_BMATRIX (AB, NL, 'G%POISSONB', CROUTINE)
+   
+         ! Allocate little matrices in bandwise storage format for the overlapping parts in the size calculated here 
 
          DO INBR = 1, SCARC(NM)%N_NEIGHBORS
+
             NOM = S%NEIGHBORS(INBR)
             CALL SCARC_POINT_TO_OTHER_GRID (NM, NOM, NL)
             OAB => SCARC_POINT_TO_OTHER_BMATRIX (NSCARC_MATRIX_POISSON)
+
             OAB%N_STENCIL = AB%N_STENCIL
             OAB%N_VAL     = OG%NCG * AB%N_STENCIL
             OAB%N_DIAG    = OG%NCG 
+
+            CALL SCARC_ALLOCATE_BMATRIX (OAB, NL, 'OG%POISSONB', CROUTINE)
+
          ENDDO
 
    END SELECT SELECT_MATRIX_TYPE
    
 ENDDO MESHES_LOOP
    
-! -------- Exchange matrix sizes in case of a multi-mesh geometry
+! Exchange matrix sizes in case of a multi-mesh geometry
  
 IF (NMESHES > 1) CALL SCARC_EXCHANGE (NSCARC_EXCHANGE_MATRIX_SIZES, NSCARC_MATRIX_POISSON, NL)
 
@@ -11738,6 +11818,171 @@ MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 ENDDO MESHES_LOOP
   
 END SUBROUTINE SCARC_SETUP_LOCAL_LAPLACE_SIZES
+
+
+! ------------------------------------------------------------------------------------------------------------------
+!> \brief Build either separable or inseparable Poisson system with boundary conditions on requested grid levels 
+! ------------------------------------------------------------------------------------------------------------------
+SUBROUTINE SCARC_SETUP_POISSON_SYSTEMS
+INTEGER :: NM, NL
+
+MESHES_POISSON_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
+
+   SELECT_SCARC_METHOD: SELECT CASE (TYPE_METHOD)
+
+      ! ---------- Krylov method (CG) as main solver, different preconditioners possible
+
+      CASE (NSCARC_METHOD_KRYLOV)
+
+         ! For all different possible Krylov variants, first setup Poisson matrix on finest level including BC's 
+
+         CALL SCARC_SETUP_POISSON (NM, NLEVEL_MIN)
+         CALL SCARC_SETUP_BOUNDARY(NM, NLEVEL_MIN)
+
+         ! Depending on the requested preconditioner, also assemble the Poisson matrix with BC's on specific coarser levels
+
+         SELECT_KRYLOV_PRECON: SELECT CASE (TYPE_PRECON)
+
+            ! In case of multigrid as preconditioner:
+            ! only build higher level structures in case of geometric multigrid (algebraic variant is done elsewhere)
+
+            CASE (NSCARC_RELAX_GMG)
+
+               IF (IS_CG_GMG) THEN
+                  DO NL = NLEVEL_MIN+1, NLEVEL_MAX
+                     CALL SCARC_SETUP_POISSON (NM, NL)
+                     CALL SCARC_SETUP_BOUNDARY(NM, NL)
+                  ENDDO
+               ENDIF
+
+#ifdef WITH_MKL
+            ! In case of LU-decomposition as preconditioner
+            ! locally acting: PARDISO from MKL as preconditioners on fine level with possible coarse grid correction
+
+            CASE (NSCARC_RELAX_MKL)
+
+               IF (TYPE_SCOPE(1) == NSCARC_SCOPE_LOCAL .AND. HAS_TWO_LEVELS .AND. .NOT.HAS_AMG_LEVELS) THEN
+                  CALL SCARC_SETUP_POISSON (NM, NLEVEL_MAX)
+                  CALL SCARC_SETUP_BOUNDARY(NM, NLEVEL_MAX)
+               ENDIF
+#endif
+
+            ! in case of default preconditioners (JACOBI/SSOR/FFT/...):
+            ! if there is an additional coarse grid correction which is NOT AMG-based, 
+            ! then also assemble matrix on coarse grid level
+
+            CASE DEFAULT
+   
+               IF (HAS_TWO_LEVELS .AND. .NOT.HAS_AMG_LEVELS) THEN
+                  CALL SCARC_SETUP_POISSON (NM, NLEVEL_MAX)
+                  CALL SCARC_SETUP_BOUNDARY(NM, NLEVEL_MAX)
+               ENDIF
+
+         END SELECT SELECT_KRYLOV_PRECON
+
+      ! ---------- Multigrid as main solver
+
+      CASE (NSCARC_METHOD_MULTIGRID)
+
+         ! For all different possible multigrid-variants, first setup Poisson matrix on finest level including BC's 
+
+         CALL SCARC_SETUP_POISSON (NM, NLEVEL_MIN)
+         CALL SCARC_SETUP_BOUNDARY(NM, NLEVEL_MIN)
+
+         ! On case of a  geometric multigrid, assemble standard n-point-matrix hierarchy on all coarser levels, too
+         ! Note: in case of an algebraic multigrid, this will be done in a separate routine later
+
+         IF (TYPE_MULTIGRID == NSCARC_MULTIGRID_GEOMETRIC) THEN
+            DO NL = NLEVEL_MIN + 1, NLEVEL_MAX
+               CALL SCARC_SETUP_POISSON (NM, NL)
+               CALL SCARC_SETUP_BOUNDARY(NM, NL)
+            ENDDO
+         ENDIF
+
+      ! ---------- McKenny-Greengard-Mayo method:
+      ! Solving for the structured and unstructured Poisson matrix
+      ! Assemble both, the structured and unstructured Poisson matrix
+      ! temporarily they will be stored separately in matrices AC and ACU due to the different
+      ! settings along internal boundary cells,
+      ! in the medium term, a toggle mechanism will be implemented which only switches the corresponding
+      ! entries while keeping the entries which are the same for both discretization types
+
+      CASE (NSCARC_METHOD_MGM)
+   
+         ! First assemble structured matrix with inhomogeneous boundary conditions
+
+         TYPE_SCOPE(0) = NSCARC_SCOPE_GLOBAL
+         CALL SCARC_SET_GRID_TYPE (NSCARC_GRID_STRUCTURED)
+         CALL SCARC_SETUP_POISSON (NM, NLEVEL_MIN)
+         CALL SCARC_SETUP_BOUNDARY(NM, NLEVEL_MIN)
+
+         ! Then assemble unstructured matrix with homogeneous Dirichlet boundary conditions along
+         ! external boundaries and special MGM BC-settings along mesh interfaces
+
+         CALL SCARC_SET_GRID_TYPE (NSCARC_GRID_UNSTRUCTURED)
+         IF (SCARC_MGM_CHECK_LAPLACE .OR. SCARC_MGM_EXACT_INITIAL) THEN
+            CALL SCARC_SETUP_POISSON (NM, NLEVEL_MIN)
+            CALL SCARC_SETUP_BOUNDARY(NM, NLEVEL_MIN)
+         ENDIF
+
+         TYPE_SCOPE(0) = NSCARC_SCOPE_LOCAL
+         CALL SCARC_SETUP_LAPLACE (NM, NLEVEL_MIN)
+         CALL SCARC_SETUP_BOUNDARY_WITH_INTERFACES(NM, NLEVEL_MIN) 
+         CALL SCARC_SET_GRID_TYPE (NSCARC_GRID_STRUCTURED)
+
+   END SELECT SELECT_SCARC_METHOD
+
+ENDDO MESHES_POISSON_LOOP
+
+! Make Poisson matrices globally acting on the existing levels 
+ 
+CALL SCARC_MAKE_POISSON_GLOBAL
+
+END SUBROUTINE SCARC_SETUP_POISSON_SYSTEMS
+
+
+! --------------------------------------------------------------------------------------------------------------
+!> \brief Make Poisson matrix globally acting, that is, setup all overlapping information of global matrix
+! --------------------------------------------------------------------------------------------------------------
+SUBROUTINE SCARC_MAKE_POISSON_GLOBAL
+INTEGER :: NL
+ 
+! Setup mappings for the global numbering of vectors and Poisson matrix (compact storage technique only)
+
+IF (TYPE_MATRIX == NSCARC_MATRIX_COMPACT) THEN
+   IF (IS_MGM) THEN
+      TYPE_SCOPE = NSCARC_SCOPE_GLOBAL
+      CALL SCARC_SET_GRID_TYPE(NSCARC_GRID_STRUCTURED)
+      CALL SCARC_SETUP_GLOBAL_CELL_MAPPING(NLEVEL_MIN)
+      CALL SCARC_SETUP_GLOBAL_POISSON_COLUMNS(NLEVEL_MIN)
+      IF (SCARC_MGM_CHECK_LAPLACE .OR. SCARC_MGM_EXACT_INITIAL) THEN
+         CALL SCARC_SET_GRID_TYPE(NSCARC_GRID_UNSTRUCTURED)
+         CALL SCARC_SETUP_GLOBAL_CELL_MAPPING(NLEVEL_MIN)
+         CALL SCARC_SETUP_GLOBAL_POISSON_COLUMNS(NLEVEL_MIN)
+      ENDIF
+   ELSE
+      CALL SCARC_SETUP_GLOBAL_CELL_MAPPING(NLEVEL_MIN)
+      CALL SCARC_SETUP_GLOBAL_POISSON_COLUMNS(NLEVEL_MIN)
+   ENDIF
+ENDIF
+ 
+! If there is more than one mesh, exchange matrix values in overlapping parts
+! This must be done for all multilevel methods at least at the finest grid level
+! Furthermore also at all higher levels except for the AMG method,
+! in this case it will be done later in routine SETUP_ALGEBRAIC_MULTIGRID
+
+IF (SET_MATRIX_TYPE(NLEVEL_MIN) == NSCARC_MATRIX_COMPACT) CALL SCARC_SETUP_GLOBAL_POISSON_OVERLAPS(NLEVEL_MIN)
+
+MULTI_LEVEL_IF: IF (HAS_MULTIPLE_LEVELS .AND. .NOT.HAS_AMG_LEVELS) THEN
+   DO NL = NLEVEL_MIN+1, NLEVEL_MAX
+      IF (SET_MATRIX_TYPE(NL) /= NSCARC_MATRIX_COMPACT) CYCLE
+      CALL SCARC_SETUP_GLOBAL_CELL_MAPPING(NL)
+      CALL SCARC_SETUP_GLOBAL_POISSON_COLUMNS(NL)
+      CALL SCARC_SETUP_GLOBAL_POISSON_OVERLAPS(NL)
+   ENDDO 
+ENDIF MULTI_LEVEL_IF
+
+END SUBROUTINE SCARC_MAKE_POISSON_GLOBAL
 
 
 ! -------------------------------------------------------------------------------------------------------------
@@ -11839,19 +12084,20 @@ END FUNCTION SCARC_CELL_WITHIN_MESH
 !    explanation to come ...
 ! --------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_SETUP_POISSON (NM, NL)
-USE SCARC_POINTERS, ONLY: S, L, G, A, AB, OA, OAB, &
-                          SCARC_POINT_TO_GRID,    SCARC_POINT_TO_OTHER_GRID, &
+USE SCARC_POINTERS, ONLY: L, G, A, AB, SCARC_POINT_TO_GRID, &
                           SCARC_POINT_TO_CMATRIX, SCARC_POINT_TO_OTHER_CMATRIX, &
-                          SCARC_POINT_TO_BMATRIX, SCARC_POINT_TO_OTHER_BMATRIX
+                          SCARC_POINT_TO_BMATRIX, SCARC_POINT_TO_OTHER_BMATRIX, &
+                          SCARC_POINT_TO_SEPARABLE_ENVIRONMENT, SCARC_POINT_TO_INSEPARABLE_ENVIRONMENT
+USE COMP_FUNCTIONS, ONLY: SHUTDOWN
 INTEGER, INTENT(IN) :: NM, NL
-INTEGER :: IX, IY, IZ, IC, IP, INBR, NOM
+INTEGER :: IX, IY, IZ, IC, IP
 
 CROUTINE = 'SCARC_SETUP_POISSON'
  
-! Compute single matrix entries and corresponding row and column pointers
-! Along internal boundaries use placeholders for the neighboring matrix entries
-! which will be communicated in a following step
- 
+! Depending on the type of the Poisson system (separable or inseparable),
+! compute single matrix entries and corresponding row and column pointers (resulting to be constant or variable)
+! Along internal boundaries use placeholders for the neighboring matrix entries which will be computed subsequently
+
 SELECT_STORAGE_TYPE: SELECT CASE (SET_MATRIX_TYPE(NL))
 
  
@@ -11859,101 +12105,129 @@ SELECT_STORAGE_TYPE: SELECT CASE (SET_MATRIX_TYPE(NL))
  
    CASE (NSCARC_MATRIX_COMPACT)
    
-      ! Allocate main matrix on non-overlapping part of mesh
-
       CALL SCARC_POINT_TO_GRID (NM, NL)                                    
       A => SCARC_POINT_TO_CMATRIX (NSCARC_MATRIX_POISSON)
-      CALL SCARC_ALLOCATE_CMATRIX (A, NL, NSCARC_PRECISION_DOUBLE, NSCARC_MATRIX_FULL, 'G%POISSON', CROUTINE)
-
-      ! For every neighbor allocate small matrix on overlapping part of mesh
-
-      DO INBR = 1, SCARC(NM)%N_NEIGHBORS
-         NOM = S%NEIGHBORS(INBR)
-         CALL SCARC_POINT_TO_OTHER_GRID (NM, NOM, NL)
-         OA => SCARC_POINT_TO_OTHER_CMATRIX (NSCARC_MATRIX_POISSON)
-         CALL SCARC_ALLOCATE_CMATRIX (OA, NL, NSCARC_PRECISION_DOUBLE, NSCARC_MATRIX_FULL, 'OG%POISSON', CROUTINE)
-      ENDDO
 
       IP = 1
-      DO IZ = 1, L%NZ
-         DO IY = 1, L%NY
-            DO IX = 1, L%NX
-   
-               IF (IS_UNSTRUCTURED .AND. L%IS_SOLID(IX, IY, IZ)) CYCLE
-               IC = G%CELL_NUMBER(IX, IY, IZ)
+      SELECT_COMPACT_POISSON_TYPE: SELECT CASE (TYPE_POISSON)
 
-               ! Main diagonal 
+         CASE (NSCARC_POISSON_SEPARABLE)               ! Build separable Poisson system leading to constant matrix entries
 
-               CALL SCARC_SETUP_MAINDIAG (IC, IX, IY, IZ, IP)
-   
-               ! Lower subdiagonals
+            CALL SCARC_POINT_TO_SEPARABLE_ENVIRONMENT(NM)
 
-               IF (IS_VALID_DIRECTION(IX, IY, IZ,  3)) CALL SCARC_SETUP_SUBDIAG(IC, IX, IY, IZ, IX  , IY  , IZ-1, IP,  3)
-               IF (IS_VALID_DIRECTION(IX, IY, IZ,  2)) CALL SCARC_SETUP_SUBDIAG(IC, IX, IY, IZ, IX  , IY-1, IZ  , IP,  2)
-               IF (IS_VALID_DIRECTION(IX, IY, IZ,  1)) CALL SCARC_SETUP_SUBDIAG(IC, IX, IY, IZ, IX-1, IY  , IZ  , IP,  1)
-   
-               ! Upper subdiagonals
-
-               IF (IS_VALID_DIRECTION(IX, IY, IZ, -1)) CALL SCARC_SETUP_SUBDIAG(IC, IX, IY, IZ, IX+1, IY  , IZ  , IP, -1)
-               IF (IS_VALID_DIRECTION(IX, IY, IZ, -2)) CALL SCARC_SETUP_SUBDIAG(IC, IX, IY, IZ, IX  , IY+1, IZ  , IP, -2)
-               IF (IS_VALID_DIRECTION(IX, IY, IZ, -3)) CALL SCARC_SETUP_SUBDIAG(IC, IX, IY, IZ, IX  , IY  , IZ+1, IP, -3)
-   
+            DO IZ = 1, L%NZ
+               DO IY = 1, L%NY
+                  DO IX = 1, L%NX
+         
+                     IF (IS_UNSTRUCTURED .AND. L%IS_SOLID(IX, IY, IZ)) CYCLE
+                     IC = G%CELL_NUMBER(IX, IY, IZ)
+      
+                     ! Main diagonal 
+      
+                     CALL SCARC_SETUP_MAINDIAG (IC, IX, IY, IZ, IP)
+         
+                     ! Lower subdiagonals
+      
+                     IF (IS_VALID_DIRECTION(IX, IY, IZ,  3)) CALL SCARC_SETUP_SUBDIAG(IC, IX, IY, IZ, IX  , IY  , IZ-1, IP,  3)
+                     IF (IS_VALID_DIRECTION(IX, IY, IZ,  2)) CALL SCARC_SETUP_SUBDIAG(IC, IX, IY, IZ, IX  , IY-1, IZ  , IP,  2)
+                     IF (IS_VALID_DIRECTION(IX, IY, IZ,  1)) CALL SCARC_SETUP_SUBDIAG(IC, IX, IY, IZ, IX-1, IY  , IZ  , IP,  1)
+         
+                     ! Upper subdiagonals
+      
+                     IF (IS_VALID_DIRECTION(IX, IY, IZ, -1)) CALL SCARC_SETUP_SUBDIAG(IC, IX, IY, IZ, IX+1, IY  , IZ  , IP, -1)
+                     IF (IS_VALID_DIRECTION(IX, IY, IZ, -2)) CALL SCARC_SETUP_SUBDIAG(IC, IX, IY, IZ, IX  , IY+1, IZ  , IP, -2)
+                     IF (IS_VALID_DIRECTION(IX, IY, IZ, -3)) CALL SCARC_SETUP_SUBDIAG(IC, IX, IY, IZ, IX  , IY  , IZ+1, IP, -3)
+         
+                  ENDDO
+               ENDDO
             ENDDO
-         ENDDO
-      ENDDO
+         
+         CASE (NSCARC_POISSON_INSEPARABLE)             ! Build inseparable Poisson system leading to variable matrix entries
+
+            CALL SCARC_POINT_TO_INSEPARABLE_ENVIRONMENT(NM)
+
+            DO IZ = 1, L%NZ
+               DO IY = 1, L%NY
+                  DO IX = 1, L%NX
+    
+                     IF (IS_UNSTRUCTURED .AND. L%IS_SOLID(IX, IY, IZ)) CYCLE
+                     IC = G%CELL_NUMBER(IX, IY, IZ)
+    
+                     ! Main diagonal
+    
+                     CALL SCARC_SETUP_MAINDIAG_INSEP (IC, IX, IY, IZ, IP)
+    
+                     ! Lower subdiagonals
+    
+                     IF (IS_VALID_DIRECTION(IX, IY, IZ,  3)) CALL SCARC_SETUP_SUBDIAG_INSEP(IC, IX, IY, IZ, IX  , IY  , IZ-1, IP, 3)
+                     IF (IS_VALID_DIRECTION(IX, IY, IZ,  2)) CALL SCARC_SETUP_SUBDIAG_INSEP(IC, IX, IY, IZ, IX  , IY-1, IZ  , IP, 2)
+                     IF (IS_VALID_DIRECTION(IX, IY, IZ,  1)) CALL SCARC_SETUP_SUBDIAG_INSEP(IC, IX, IY, IZ, IX-1, IY  , IZ  , IP, 1)
+    
+                     ! Upper subdiagonals
+    
+                     IF (IS_VALID_DIRECTION(IX, IY, IZ, -1)) CALL SCARC_SETUP_SUBDIAG_INSEP(IC, IX, IY, IZ, IX+1, IY  , IZ  , IP,-1)
+                     IF (IS_VALID_DIRECTION(IX, IY, IZ, -2)) CALL SCARC_SETUP_SUBDIAG_INSEP(IC, IX, IY, IZ, IX  , IY+1, IZ  , IP,-2)
+                     IF (IS_VALID_DIRECTION(IX, IY, IZ, -3)) CALL SCARC_SETUP_SUBDIAG_INSEP(IC, IX, IY, IZ, IX  , IY  , IZ+1, IP,-3)
+    
+                  ENDDO
+               ENDDO
+            ENDDO
    
+      END SELECT SELECT_COMPACT_POISSON_TYPE
+
       A%ROW(G%NC+1) = IP
       A%N_VAL = IP
    
       CALL SCARC_GET_MATRIX_STENCIL_MAX(A, G%NC)
+      CALL SCARC_MATRIX_CHECK_NEUMANN(A, G%NC)
 
  
    ! ---------- bandwise storage technique
  
    CASE (NSCARC_MATRIX_BANDWISE)
    
-      ! Allocate main matrix on non-overlapping part of mesh
-
       CALL SCARC_POINT_TO_GRID (NM, NL)                                    
       AB => SCARC_POINT_TO_BMATRIX (NSCARC_MATRIX_POISSON)
-      CALL SCARC_ALLOCATE_BMATRIX (AB, NL, 'G%POISSONB', CROUTINE)
-   
-      ! For every neighbor allocate little matrix on overlapping part of mesh
-
-      DO INBR = 1, SCARC(NM)%N_NEIGHBORS
-         NOM = S%NEIGHBORS(INBR)
-         CALL SCARC_POINT_TO_OTHER_GRID (NM, NOM, NL)
-         OAB => SCARC_POINT_TO_BMATRIX (NSCARC_MATRIX_POISSON)
-         CALL SCARC_ALLOCATE_BMATRIX (OAB, NL, 'OG%POISSONB', CROUTINE)
-      ENDDO
    
       IP  = 1
-      DO IZ = 1, L%NZ
-         DO IY = 1, L%NY
-            DO IX = 1, L%NX
-   
-               IF (IS_UNSTRUCTURED .AND. L%IS_SOLID(IX, IY, IZ)) CYCLE
-               IC = G%CELL_NUMBER(IX, IY, IZ)
-   
-               ! Lower subdiagonals
+      SELECT_BANDWISE_POISSON_TYPE: SELECT CASE (TYPE_POISSON)
 
-               IF (IS_VALID_DIRECTION(IX, IY, IZ,  3)) CALL SCARC_SETUP_SUBDIAGB(IC, IX, IY, IZ, IX  , IY  , IZ-1,  3)
-               IF (IS_VALID_DIRECTION(IX, IY, IZ,  2)) CALL SCARC_SETUP_SUBDIAGB(IC, IX, IY, IZ, IX  , IY-1, IZ  ,  2)
-               IF (IS_VALID_DIRECTION(IX, IY, IZ,  1)) CALL SCARC_SETUP_SUBDIAGB(IC, IX, IY, IZ, IX-1, IY  , IZ  ,  1)
+         CASE (NSCARC_POISSON_SEPARABLE)
+
+            CALL SCARC_POINT_TO_SEPARABLE_ENVIRONMENT(NM)
+
+            DO IZ = 1, L%NZ
+               DO IY = 1, L%NY
+                  DO IX = 1, L%NX
+         
+                     IF (IS_UNSTRUCTURED .AND. L%IS_SOLID(IX, IY, IZ)) CYCLE
+                     IC = G%CELL_NUMBER(IX, IY, IZ)
+         
+                     ! Lower subdiagonals
+
+                     IF (IS_VALID_DIRECTION(IX, IY, IZ,  3)) CALL SCARC_SETUP_SUBDIAG_BAND(IC, IX, IY, IZ, IX  , IY  , IZ-1,  3)
+                     IF (IS_VALID_DIRECTION(IX, IY, IZ,  2)) CALL SCARC_SETUP_SUBDIAG_BAND(IC, IX, IY, IZ, IX  , IY-1, IZ  ,  2)
+                     IF (IS_VALID_DIRECTION(IX, IY, IZ,  1)) CALL SCARC_SETUP_SUBDIAG_BAND(IC, IX, IY, IZ, IX-1, IY  , IZ  ,  1)
+         
+                     ! Main diagonal
+      
+                     CALL SCARC_SETUP_MAINDIAG_BAND (IC, IX, IY, IZ)
+      
+                     ! Upper subdiagonals
+      
+                     IF (IS_VALID_DIRECTION(IX, IY, IZ, -1)) CALL SCARC_SETUP_SUBDIAG_BAND(IC, IX, IY, IZ, IX+1, IY  , IZ  , -1)
+                     IF (IS_VALID_DIRECTION(IX, IY, IZ, -2)) CALL SCARC_SETUP_SUBDIAG_BAND(IC, IX, IY, IZ, IX  , IY+1, IZ  , -2)
+                     IF (IS_VALID_DIRECTION(IX, IY, IZ, -3)) CALL SCARC_SETUP_SUBDIAG_BAND(IC, IX, IY, IZ, IX  , IY  , IZ+1, -3)
    
-               ! Main diagonal
-
-               CALL SCARC_SETUP_MAINDIAGB (IC, IX, IY, IZ)
-
-               ! Upper subdiagonals
-
-               IF (IS_VALID_DIRECTION(IX, IY, IZ, -1)) CALL SCARC_SETUP_SUBDIAGB(IC, IX, IY, IZ, IX+1, IY  , IZ  , -1)
-               IF (IS_VALID_DIRECTION(IX, IY, IZ, -2)) CALL SCARC_SETUP_SUBDIAGB(IC, IX, IY, IZ, IX  , IY+1, IZ  , -2)
-               IF (IS_VALID_DIRECTION(IX, IY, IZ, -3)) CALL SCARC_SETUP_SUBDIAGB(IC, IX, IY, IZ, IX  , IY  , IZ+1, -3)
-   
+                  ENDDO
+               ENDDO
             ENDDO
-         ENDDO
-      ENDDO
+
+         CASE (NSCARC_POISSON_INSEPARABLE)
+
+            CALL SHUTDOWN('SCARC_SETUP_POISSON: Bandwise storage technique for inseparable Poisson system not yet implemented')
+
+      END SELECT SELECT_BANDWISE_POISSON_TYPE
    
 END SELECT SELECT_STORAGE_TYPE
 
@@ -11970,7 +12244,7 @@ END SUBROUTINE SCARC_SETUP_POISSON
 ! forward substitution process Ly=b only must start from the nonzero entries on
 ! --------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_SETUP_LAPLACE (NM, NL)
-USE SCARC_POINTERS, ONLY: L, G, A, GWC, SCARC_POINT_TO_GRID, SCARC_POINT_TO_CMATRIX
+USE SCARC_POINTERS, ONLY: L, G, A, GWC, SCARC_POINT_TO_GRID, SCARC_POINT_TO_CMATRIX, SCARC_POINT_TO_SEPARABLE_ENVIRONMENT
 INTEGER, INTENT(IN) :: NM, NL
 INTEGER :: IX, IY, IZ, IC, JC, KC, IOR0, IW, IP, KKC(-3:3), JJC(-3:3)
 INTEGER :: TYPE_SCOPE_SAVE
@@ -11979,7 +12253,6 @@ CROUTINE = 'SCARC_SETUP_LAPLACE'
 TYPE_SCOPE_SAVE = TYPE_SCOPE(0)
 TYPE_SCOPE(0) = NSCARC_SCOPE_LOCAL
  
-
 ! Point to unstructured grid
 
 CALL SCARC_SET_GRID_TYPE(NSCARC_GRID_UNSTRUCTURED)
@@ -12065,6 +12338,7 @@ ENDIF
 
 A => SCARC_POINT_TO_CMATRIX (NSCARC_MATRIX_LAPLACE)
 CALL SCARC_ALLOCATE_CMATRIX (A, NL, NSCARC_PRECISION_DOUBLE, NSCARC_MATRIX_FULL, 'G%LAPLACE', CROUTINE)
+CALL SCARC_POINT_TO_SEPARABLE_ENVIRONMENT(NM)
 
 ! Assemble Laplace matrix with grid permutation based on MGM-method 
 
@@ -12145,7 +12419,6 @@ A%N_VAL = IP
 CALL SCARC_GET_MATRIX_STENCIL_MAX(A, G%NC)
 
 TYPE_SCOPE(0) = TYPE_SCOPE_SAVE
-
  
 END SUBROUTINE SCARC_SETUP_LAPLACE
 
@@ -12157,13 +12430,13 @@ END SUBROUTINE SCARC_SETUP_LAPLACE
 ! If two meshes with different step sizes meet, we get a weighted stencil along internal wall cells
 ! --------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_SETUP_MAINDIAG (IC, IX, IY, IZ, IP)
-USE SCARC_POINTERS, ONLY: L, A
+USE SCARC_POINTERS, ONLY: A, RDX, RDY, RDZ, RDXN, RDYN, RDZN
 INTEGER, INTENT(IN) :: IC, IX, IY, IZ
 INTEGER, INTENT(INOUT) :: IP
 
-A%VAL(IP) = - 2.0_EB/(L%DXL(IX-1)*L%DXL(IX))
-IF (.NOT.TWO_D) A%VAL(IP) = A%VAL(IP) - 2.0_EB/(L%DYL(IY-1)*L%DYL(IY))
-A%VAL(IP) = A%VAL(IP) - 2.0_EB/(L%DZL(IZ-1)*L%DZL(IZ))
+A%VAL(IP) = - RDX(IX)*(RDXN(IX) + RDXN(IX-1))
+IF (.NOT.TWO_D) A%VAL(IP) = A%VAL(IP) - RDY(IY)*(RDYN(IY) + RDYN(IY-1))
+A%VAL(IP) = A%VAL(IP) - RDZ(IZ)*(RDZN(IZ) + RDZN(IZ-1))
 
 A%ROW(IC) = IP
 A%COL(IP) = IC
@@ -12175,74 +12448,75 @@ END SUBROUTINE SCARC_SETUP_MAINDIAG
 
 
 ! --------------------------------------------------------------------------------------------------------------
-!> \brief Determine if cell has a neighbor and, if yes, return corresponding wall cell index
+!> \brief Set main diagonal entry for Poisson matrix in compact storage technique
+! These values correspond to the full matrix of the global problem
+! In case of an equidistant grid, we get the usual 5-point (2d) and 7-point (3d) stencil
+! If two meshes with different step sizes meet, we get a weighted stencil along internal wall cells
 ! --------------------------------------------------------------------------------------------------------------
-INTEGER FUNCTION SCARC_ASSIGN_SUBDIAG_TYPE (IC, IOR0)
-USE SCARC_POINTERS, ONLY: L, G, F, GWC
-INTEGER, INTENT(IN) :: IC, IOR0
-INTEGER :: IXW, IYW, IZW
-INTEGER :: IXG, IYG, IZG
-INTEGER :: IW
+SUBROUTINE SCARC_SETUP_MAINDIAG_INSEP (IC, IX, IY, IZ, IP)
+USE SCARC_POINTERS, ONLY:  A, RDX, RDY, RDZ, RDXN, RDYN, RDZN, RHOP
+USE SCARC_UTILITIES, ONLY: RECIPROCAL_DIRECTIONAL_MEAN
+INTEGER, INTENT(IN) :: IC, IX, IY, IZ
+INTEGER, INTENT(INOUT) :: IP
 
-SCARC_ASSIGN_SUBDIAG_TYPE = -1
+A%VAL(IP) = - RDX(IX)*(RDXN(IX-1) * RECIPROCAL_DIRECTIONAL_MEAN(RHOP, 1, IX, IY, IZ) + &
+                       RDXN(IX)   * RECIPROCAL_DIRECTIONAL_MEAN(RHOP,-1, IX, IY, IZ) )
 
-F => L%FACE(IOR0)
-SEARCH_WALL_CELLS_LOOP: DO IW = F%NCW0, F%NCW0 + F%NCW - 1
+IF (.NOT.TWO_D) &
+   A%VAL(IP) = A%VAL(IP) - RDY(IY)*(RDYN(IY-1) * RECIPROCAL_DIRECTIONAL_MEAN(RHOP, 2, IX, IY, IZ) + &
+                                    RDYN(IY)   * RECIPROCAL_DIRECTIONAL_MEAN(RHOP,-2, IX, IY, IZ) )
 
-   GWC => G%WALL(IW)
+A%VAL(IP) = A%VAL(IP) - RDZ(IX)*(RDZN(IZ-1) * RECIPROCAL_DIRECTIONAL_MEAN(RHOP, 3, IX, IY, IZ) + &
+                                 RDZN(IZ)   * RECIPROCAL_DIRECTIONAL_MEAN(RHOP,-3, IX, IY, IZ) )
 
-   IF (GWC%NOM == 0) CYCLE
-   IXW = GWC%IXW
-   IYW = GWC%IYW
-   IZW = GWC%IZW
+A%ROW(IC) = IP
+A%COL(IP) = IC
 
-   IF (G%CELL_NUMBER(IXW, IYW, IZW) /= IC) CYCLE
-   IXG = GWC%IXG
-   IYG = GWC%IYG
-   IZG = GWC%IZG
+A%STENCIL(0) = A%VAL(IP)
+IP = IP + 1
 
-   IF (IS_UNSTRUCTURED.AND.L%IS_SOLID(IXG, IYG, IZG)) RETURN
-   SCARC_ASSIGN_SUBDIAG_TYPE = IW
-   RETURN
+END SUBROUTINE SCARC_SETUP_MAINDIAG_INSEP
 
-ENDDO SEARCH_WALL_CELLS_LOOP
 
-END FUNCTION SCARC_ASSIGN_SUBDIAG_TYPE
+! --------------------------------------------------------------------------------------------------------------
+!> \brief Set main diagonal entry for Poisson matrix in bandwise storage technique
+! These values correspond to the full matrix of the global problem
+! In case of an equidistant grid, we get the usual 5-point (2d) and 7-point (3d) stencil
+! If two meshes with different step sizes meet, we get a weighted stencil along internal wall cells
+! --------------------------------------------------------------------------------------------------------------
+SUBROUTINE SCARC_SETUP_MAINDIAG_BAND (IC, IX, IY, IZ)
+USE SCARC_POINTERS, ONLY: G, AB, RDX, RDY, RDZ, RDXN, RDYN, RDZN
+INTEGER, INTENT(IN)  :: IC, IX, IY, IZ
+INTEGER :: ID
+
+AB => G%POISSONB
+ID = AB%POS(0)               ! get column vector corresponding to matrix diagonal
+
+AB%VAL(IC, ID) = - RDX(IX)*(RDXN(IX) + RDXN(IX-1))
+IF (.NOT.TWO_D)  AB%VAL(IC, ID) = AB%VAL(IC, ID)  - RDY(IY)*(RDYN(IY) + RDYN(IY-1))
+AB%VAL(IC, ID) = AB%VAL(IC, ID) - RDZ(IZ)*(RDZN(IZ) + RDZN(IZ-1))
+
+AB%STENCIL(0) = AB%VAL(IC, ID)
+
+END SUBROUTINE SCARC_SETUP_MAINDIAG_BAND
 
 
 ! --------------------------------------------------------------------------------------------------------------
 !> \brief Set subdigonal entries for Poisson matrix in compact storage technique on specified face
 ! --------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_SETUP_SUBDIAG (IC, IX1, IY1, IZ1, IX2, IY2, IZ2, IP, IOR0)
-USE SCARC_POINTERS, ONLY: L, F, G, A
+USE SCARC_POINTERS, ONLY: L, G, A
+USE SCARC_UTILITIES, ONLY: IS_NOT_ADJACENT_TO_FACE, RECIPROCAL_DIRECTIONAL_MEAN
 INTEGER, INTENT(IN) :: IC, IX1, IY1, IZ1, IX2, IY2, IZ2, IOR0
 INTEGER, INTENT(INOUT) :: IP
 INTEGER :: IW
-LOGICAL :: IS_INTERNAL_CELL
 
-! Decide wheter cell is interior or exterior cell
+! If IC isn't directly adjacent to a face of the mesh, compute usual matrix contribution for corresponding subdiagonal
 
-F => L%FACE(IOR0)
-SELECT CASE (IOR0)
-   CASE ( 1)
-      IS_INTERNAL_CELL = IX1 > 1
-   CASE (-1)
-      IS_INTERNAL_CELL = IX1 < F%NOP
-   CASE ( 2)
-      IS_INTERNAL_CELL = IY1 > 1
-   CASE (-2)
-      IS_INTERNAL_CELL = IY1 < F%NOP
-   CASE ( 3)
-      IS_INTERNAL_CELL = IZ1 > 1
-   CASE (-3)
-      IS_INTERNAL_CELL = IZ1 < F%NOP
-END SELECT
-
-! If IC is an internal cell of the mesh, compute usual matrix contribution for corresponding subdiagonal
-IF (IS_INTERNAL_CELL) THEN
+IF (IS_NOT_ADJACENT_TO_FACE(IOR0, IX1, IY1, IZ1)) THEN
 
    IF (IS_STRUCTURED .OR. .NOT.L%IS_SOLID(IX2, IY2, IZ2)) THEN
-      A%VAL(IP) = A%VAL(IP) + F%INCR_INSIDE
+      A%VAL(IP) = SUBDIAG_ENTRY (IOR0, IX1, IY1, IZ1, 1.0_EB)     ! passing 1.0, resulting in constant entries
       A%COL(IP) = G%CELL_NUMBER(IX2, IY2, IZ2)
       A%STENCIL(-IOR0) = A%VAL(IP)
       IP = IP + 1
@@ -12250,14 +12524,14 @@ IF (IS_INTERNAL_CELL) THEN
       CALL SCARC_ERROR(NSCARC_ERROR_MATRIX_SUBDIAG, SCARC_NONE, NSCARC_NONE)
    ENDIF
 
-! If IC is a boundary cell of the mesh, compute matrix contribution only if there is a neighbor for that cell
+! If IC is adjacent to a face of the mesh, compute matrix contribution only if there is a neighbor for that cell
 
 ELSE IF (TYPE_SCOPE(0) == NSCARC_SCOPE_GLOBAL .AND. L%FACE(IOR0)%N_NEIGHBORS /= 0) THEN
 
-   IW = SCARC_ASSIGN_SUBDIAG_TYPE (IC, IOR0)           ! get IW of a possibly suitable neighbor at face IOR0
-   IF (IW > 0) then                                    ! if available, build corresponding subdiagonal entry
-      A%VAL(IP) = A%VAL(IP) + F%INCR_FACE
-      A%COL(IP) = G%WALL(IW)%ICE                       ! store its extended number in matrix column pointers
+   IW = SUBDIAG_TYPE (IC, IOR0)                                   ! get IW of a possibly suitable neighbor at face IOR0
+   IF (IW > 0) then                                               ! if available, build corresponding subdiagonal entry
+      A%VAL(IP) = SUBDIAG_ENTRY (IOR0, IX1, IY1, IZ1, 1.0_EB)
+      A%COL(IP) = G%WALL(IW)%ICE                                  ! store its extended number in matrix column pointers
       A%STENCIL(-IOR0) = A%VAL(IP)
       IP = IP + 1
    ENDIF
@@ -12268,254 +12542,91 @@ END SUBROUTINE SCARC_SETUP_SUBDIAG
 
 
 ! --------------------------------------------------------------------------------------------------------------
+!> \brief Set subdigonal entries for Poisson matrix in compact storage technique on specified face
+! --------------------------------------------------------------------------------------------------------------
+SUBROUTINE SCARC_SETUP_SUBDIAG_INSEP (IC, IX1, IY1, IZ1, IX2, IY2, IZ2, IP, IOR0)
+USE SCARC_POINTERS, ONLY: L, G, A, RHOP
+USE SCARC_UTILITIES, ONLY: IS_NOT_ADJACENT_TO_FACE, RECIPROCAL_DIRECTIONAL_MEAN
+INTEGER, INTENT(IN) :: IC, IX1, IY1, IZ1, IX2, IY2, IZ2, IOR0
+INTEGER, INTENT(INOUT) :: IP
+INTEGER :: IW
+REAL(EB) :: SCAL
+
+SCAL = RECIPROCAL_DIRECTIONAL_MEAN(RHOP, IOR0, IX1, IY1, IZ1)     ! get density mean for this cell combination
+
+! If IC isn't directly adjacent to a face of the mesh, compute usual matrix contribution for corresponding subdiagonal
+
+IF (IS_NOT_ADJACENT_TO_FACE(IOR0, IX1, IY1, IZ1)) THEN
+
+   IF (IS_STRUCTURED .OR. .NOT.L%IS_SOLID(IX2, IY2, IZ2)) THEN
+      A%VAL(IP) = SUBDIAG_ENTRY (IOR0, IX1, IY1, IZ1, SCAL)  
+      A%COL(IP) = G%CELL_NUMBER(IX2, IY2, IZ2)
+      A%STENCIL(-IOR0) = A%VAL(IP)
+      IP = IP + 1
+   ELSE
+      CALL SCARC_ERROR(NSCARC_ERROR_MATRIX_SUBDIAG, SCARC_NONE, NSCARC_NONE)
+   ENDIF
+
+! If IC is adjacent to a face of the mesh, compute matrix contribution only if there is a neighbor for that cell
+
+ELSE IF (TYPE_SCOPE(0) == NSCARC_SCOPE_GLOBAL .AND. L%FACE(IOR0)%N_NEIGHBORS /= 0) THEN
+
+   IW = SUBDIAG_TYPE (IC, IOR0)           ! get IW of a possibly suitable neighbor at face IOR0
+   IF (IW > 0) then                                    ! if available, build corresponding subdiagonal entry
+      A%VAL(IP) = SUBDIAG_ENTRY (IOR0, IX1, IY1, IZ1, SCAL)
+      A%COL(IP) = G%WALL(IW)%ICE                       ! store its extended number in matrix column pointers
+      A%STENCIL(-IOR0) = A%VAL(IP)
+      IP = IP + 1
+   ENDIF
+
+ENDIF
+
+END SUBROUTINE SCARC_SETUP_SUBDIAG_INSEP
+
+
+! --------------------------------------------------------------------------------------------------------------
+!> \brief Set subdigonal entries for Poisson matrix in bandwise storage technique on specified face
+! --------------------------------------------------------------------------------------------------------------
+SUBROUTINE SCARC_SETUP_SUBDIAG_BAND (IC, IX1, IY1, IZ1, IX2, IY2, IZ2, IOR0)
+USE SCARC_POINTERS, ONLY: L, AB
+USE SCARC_UTILITIES, ONLY: IS_NOT_ADJACENT_TO_FACE, SUBDIAG_ENTRY
+INTEGER, INTENT(IN) :: IC, IX1, IY1, IZ1, IX2, IY2, IZ2, IOR0
+INTEGER :: ID
+
+! If IC isn't directly adjacent to a mesh face, compute usual matrix contribution for corresponding subdiagonal
+ 
+ID = AB%POS(IOR0)                                
+IF (IS_NOT_ADJACENT_TO_FACE(IOR0, IX1, IY1, IZ1)) THEN
+   IF (IS_STRUCTURED .OR. .NOT.L%IS_SOLID(IX2, IY2, IZ2)) THEN
+      AB%VAL(IC, ID)   = AB%VAL(IC, ID) + SUBDIAG_ENTRY (IOR0, IX1, IY1, IZ1, 1.0_EB)
+      AB%STENCIL(IOR0) = AB%VAL(IC, ID)
+   ELSE
+      CALL SCARC_ERROR(NSCARC_ERROR_MATRIX_SUBDIAG, SCARC_NONE, NSCARC_NONE)
+   ENDIF
+ENDIF
+
+END SUBROUTINE SCARC_SETUP_SUBDIAG_BAND
+
+
+! --------------------------------------------------------------------------------------------------------------
 !> \brief Set subdigonal entries for permuted matrix in compact storage technique on specified face
 ! --------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_SETUP_SUBDIAG_PERM (IX1, IY1, IZ1, IX2, IY2, IZ2, ICOL, IP, IOR0)
-USE SCARC_POINTERS, ONLY: L, F, A
+USE SCARC_POINTERS, ONLY: L, A
+USE SCARC_UTILITIES, ONLY: IS_NOT_ADJACENT_TO_FACE, SUBDIAG_ENTRY
 INTEGER, INTENT(IN) :: IX1, IY1, IZ1, IX2, IY2, IZ2, IOR0, ICOL
 INTEGER, INTENT(INOUT) :: IP
-LOGICAL :: IS_INTERNAL_CELL
 
-!A => SCARC_POINT_TO_CMATRIX (NSCARC_MATRIX_POISSON)
+! If IC isn't directly adjacent to a face of the mesh, compute usual matrix contribution for corresponding subdiagonal
 
-! Decide wheter cell is interior or exterior cell
-
-F => L%FACE(IOR0)
-SELECT CASE (IOR0)
-   CASE ( 1)
-      IS_INTERNAL_CELL = IX1 > 1
-   CASE (-1)
-      IS_INTERNAL_CELL = IX1 < F%NOP
-   CASE ( 2)
-      IS_INTERNAL_CELL = IY1 > 1
-   CASE (-2)
-      IS_INTERNAL_CELL = IY1 < F%NOP
-   CASE ( 3)
-      IS_INTERNAL_CELL = IZ1 > 1
-   CASE (-3)
-      IS_INTERNAL_CELL = IZ1 < F%NOP
-END SELECT
-
-! If IC is an internal cell of the mesh, compute usual matrix contribution for corresponding subdiagonal
-IF (IS_INTERNAL_CELL .AND. .NOT.L%IS_SOLID(IX2, IY2, IZ2)) THEN
-   A%VAL(IP) = A%VAL(IP) + F%INCR_INSIDE
+IF (IS_NOT_ADJACENT_TO_FACE(IOR0, IX1, IY1, IZ1) .AND. .NOT.L%IS_SOLID(IX2, IY2, IZ2)) THEN
+   A%VAL(IP) = SUBDIAG_ENTRY (IOR0, IX1, IY1, IZ1, 1.0_EB)
    A%COL(IP) = ICOL
    A%STENCIL(-IOR0) = A%VAL(IP)
    IP = IP + 1
 ENDIF
 
 END SUBROUTINE SCARC_SETUP_SUBDIAG_PERM
-
-
-! --------------------------------------------------------------------------------------------------------------
-!> \brief Set boundary conditions including the interfaces between the meshes
-! --------------------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_SETUP_BOUNDARY_WITH_INTERFACES (NM, NL)
-USE SCARC_POINTERS, ONLY: L, G, F, GWC, A, SCARC_POINT_TO_GRID
-INTEGER, INTENT(IN) :: NM, NL
-INTEGER :: I, J, K, IOR0, IW, IC, NOM, IP
-INTEGER :: ICXM, ICXP, ICYM, ICYP, ICZM, ICZP
-
-CALL SCARC_POINT_TO_GRID (NM, NL)       
-
-A => G%LAPLACE
-
-SELECT CASE (TYPE_MGM_BC)
-
-   ! --------------------------------------------------------------------------
-   CASE (NSCARC_MGM_BC_TAYLOR)
-
-      !DO IW = MGM%NW1, MGM%NW2
-      DO IW = 1, G%NW
-
-         GWC => G%WALL(IW)
-         IOR0 = GWC%IOR
-         IF (TWO_D .AND. ABS(IOR0) == 2) CYCLE       
-
-         F  => L%FACE(IOR0)
-
-         I = GWC%IXW
-         J = GWC%IYW
-         K = GWC%IZW
-
-         IF (IS_UNSTRUCTURED .AND. L%IS_SOLID(I, J, K)) CYCLE
-
-         NOM = GWC%NOM
-         IC  = G%CELL_NUMBER(I, J, K)
-
-         ICXM  = G%CELL_NUMBER(I-1, J, K)
-         ICXP  = G%CELL_NUMBER(I+1, J, K)
-         IF (.NOT. TWO_D) THEN
-            ICYM  = G%CELL_NUMBER(I, J-1, K)
-            ICYP  = G%CELL_NUMBER(I, J+1, K)
-         ENDIF
-         ICZM  = G%CELL_NUMBER(I, J, K-1)
-         ICZP  = G%CELL_NUMBER(I, J, K+1)
-
-         GWC%ICW = IC
-
-         IP = A%ROW(IC)
-         A%VAL(IP) = 0.0_EB
-         SELECT CASE(ABS(IOR0))
-            CASE (1)
-               A%VAL(IP) = A%VAL(IP) - L%DXI2 - 5.0_EB/2.0_EB*L%DZI2
-               DO IP = A%ROW(IC)+1, A%ROW(IC+1)-1
-                  IF (ICXM <= G%NC .AND. A%COL(IP) == ICXM) THEN
-                     A%VAL(IP) = A%VAL(IP) + L%DXI2 
-                  ENDIF
-                  IF (ICXP <= G%NC .AND. A%COL(IP) == ICXP) THEN
-                     A%VAL(IP) = A%VAL(IP) + L%DXI2 
-                  ENDIF
-                  IF (ICZM <= G%NC .AND. A%COL(IP) == ICZM) THEN
-                     A%VAL(IP) = A%VAL(IP) + 5.0_EB/4.0_EB*L%DZI2
-                  ENDIF
-                  IF (ICZP <= G%NC .AND. A%COL(IP) == ICZP) THEN
-                        A%VAL(IP) = A%VAL(IP) + 5.0_EB/4.0_EB*L%DZI2
-                  ENDIF
-               ENDDO
-            CASE (2)
-               IF (.NOT. TWO_D) THEN
-                  WRITE(*,*) 'TAYLOR-3D: Not yet finished!'
-               ENDIF
-            CASE (3)
-               A%VAL(IP) = A%VAL(IP) - L%DZI2 - 5.0_EB/2.0_EB*L%DXI2
-               DO IP = A%ROW(IC)+1, A%ROW(IC+1)-1
-                  IF (ICZM <= G%NC .AND. A%COL(IP) == ICZM) THEN
-                     A%VAL(IP) = A%VAL(IP) + L%DZI2 
-                  ENDIF
-                  IF (ICZP <= G%NC .AND. A%COL(IP) == ICZP) THEN
-                     A%VAL(IP) = A%VAL(IP) + L%DZI2 
-                  ENDIF
-                  IF (ICXM <= G%NC .AND. A%COL(IP) == ICXM) THEN
-                     A%VAL(IP) = A%VAL(IP) + 5.0_EB/4.0_EB*L%DXI2
-                  ENDIF
-                  IF (ICXP <= G%NC .AND. A%COL(IP) == ICXP) THEN
-                     A%VAL(IP) = A%VAL(IP) + 5.0_EB/4.0_EB*L%DXI2
-                  ENDIF
-               ENDDO
-         END SELECT
-
-      ENDDO 
-
-   ! --------------------------------------------------------------------------
-   CASE DEFAULT
-
-      DO IW = 1, G%NW
-
-         GWC => G%WALL(IW)
-         IOR0 = GWC%IOR
-         IF (TWO_D .AND. ABS(IOR0) == 2) CYCLE       
-
-         F  => L%FACE(IOR0)
-
-         I = GWC%IXW
-         J = GWC%IYW
-         K = GWC%IZW
-
-         IF (IS_UNSTRUCTURED .AND. L%IS_SOLID(I, J, K)) CYCLE
-
-         NOM = GWC%NOM
-         IF (TYPE_MGM_LAPLACE == NSCARC_MGM_LAPLACE_LUPERM) THEN
-            IC  = G%PERM_FW(G%CELL_NUMBER(I, J, K))
-         ELSE
-            IC  = G%CELL_NUMBER(I, J, K)
-         ENDIF
-         !GWC%ICW = IC
-
-         IP = A%ROW(IC)
-         SELECT CASE (GWC%BTYPE)
-            CASE (DIRICHLET, INTERNAL)
-               A%VAL(IP) = A%VAL(IP) - F%INCR_BOUNDARY
-            CASE (NEUMANN)
-               A%VAL(IP) = A%VAL(IP) + F%INCR_BOUNDARY
-         END SELECT
-
-      ENDDO 
-
-END SELECT 
-
-
-END SUBROUTINE SCARC_SETUP_BOUNDARY_WITH_INTERFACES
-
-
-! --------------------------------------------------------------------------------------------------------------
-!> \brief Set main diagonal entry for Poisson matrix in bandwise storage technique
-! These values correspond to the full matrix of the global problem
-! In case of an equidistant grid, we get the usual 5-point (2d) and 7-point (3d) stencil
-! If two meshes with different step sizes meet, we get a weighted stencil along internal wall cells
-! --------------------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_SETUP_MAINDIAGB (IC, IX, IY, IZ)
-USE SCARC_POINTERS, ONLY: L, G, AB
-INTEGER, INTENT(IN)  :: IC, IX, IY, IZ
-INTEGER :: ID
-
-AB => G%POISSONB
-ID = AB%POS(0)               ! get column vector corresponding to matrix diagonal
-
-AB%VAL(IC, ID) = AB%VAL(IC, ID) - 2.0_EB/(L%DXL(IX-1)*L%DXL(IX))
-IF (.NOT.TWO_D)  AB%VAL(IC, ID) = AB%VAL(IC, ID) - 2.0_EB/(L%DYL(IY-1)*L%DYL(IY))
-AB%VAL(IC, ID) = AB%VAL(IC, ID) - 2.0_EB/(L%DZL(IZ-1)*L%DZL(IZ))
-
-AB%STENCIL(0) = AB%VAL(IC, ID)
-
-END SUBROUTINE SCARC_SETUP_MAINDIAGB
-
-
-! --------------------------------------------------------------------------------------------------------------
-!> \brief Set subdigonal entries for Poisson matrix in bandwise storage technique on specified face
-! --------------------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_SETUP_SUBDIAGB (IC, IX1, IY1, IZ1, IX2, IY2, IZ2, IOR0)
-USE SCARC_POINTERS, ONLY: L, F, G, AB
-INTEGER, INTENT(IN) :: IC, IX1, IY1, IZ1, IX2, IY2, IZ2, IOR0
-INTEGER :: IW, ID
-LOGICAL  :: IS_INTERNAL_CELL
-
-F => L%FACE(IOR0)
-
-! Decide wheter cell is interior or exterior cell
- 
-AB => G%POISSONB
-ID = AB%POS(IOR0)                                
-SELECT CASE (IOR0)
-   CASE ( 1)
-      IS_INTERNAL_CELL = IX1 > 1
-   CASE (-1)
-      IS_INTERNAL_CELL = IX1 < F%NOP
-   CASE ( 2)
-      IS_INTERNAL_CELL = IY1 > 1
-   CASE (-2)
-      IS_INTERNAL_CELL = IY1 < F%NOP
-   CASE ( 3)
-      IS_INTERNAL_CELL = IZ1 > 1
-   CASE (-3)
-      IS_INTERNAL_CELL = IZ1 < F%NOP
-END SELECT
-
-! If IC is an internal cell of the mesh, compute usual matrix contribution for corresponding subdiagonal
- 
-IF (IS_INTERNAL_CELL) THEN
-
-   IF (IS_STRUCTURED .OR. .NOT.L%IS_SOLID(IX2, IY2, IZ2)) THEN
-      AB%VAL(IC, ID)   = AB%VAL(IC, ID) + F%INCR_INSIDE
-      AB%STENCIL(IOR0) = AB%VAL(IC, ID)
-   ELSE
-      CALL SCARC_ERROR(NSCARC_ERROR_MATRIX_SUBDIAG, SCARC_NONE, NSCARC_NONE)
-   ENDIF
-
-! If IC is a boundary cell of the mesh, compute matrix contribution only if there is a neighbor for that cell
- 
-!ELSE IF (L%FACE(IOR0)%N_NEIGHBORS /= 0) THEN
-ELSE IF (L%FACE(IOR0)%N_NEIGHBORS == 123456) THEN       ! CAUTION: TO FIX AGAIN, ONLY FOR TESTING, IMPOSSIBLE CONDITION
-
-   IW = SCARC_ASSIGN_SUBDIAG_TYPE (IC, IOR0)            ! get IW of a possibly suitable neighbor at face IOR0
-   IF (IW /= 0) THEN
-      AB%VAL(IC, ID)   = AB%VAL(IC, ID) + F%INCR_FACE
-      AB%STENCIL(IOR0) = AB%VAL(IC, ID)
-   ENDIF
-
-ENDIF
-
-END SUBROUTINE SCARC_SETUP_SUBDIAGB
 
 
 ! --------------------------------------------------------------------------------------------------------------
@@ -12538,7 +12649,113 @@ ENDDO
 END SUBROUTINE SCARC_GET_MATRIX_STENCIL_MAX
 
 
+! --------------------------------------------------------------------------------------------------------------
+!> \brief Check if matrix only has Neumann BCs and condensing will be required
+! --------------------------------------------------------------------------------------------------------------
+SUBROUTINE SCARC_MATRIX_CHECK_NEUMANN (A, NC)
+TYPE (SCARC_CMATRIX_TYPE), INTENT(INOUT) :: A
+REAL(EB):: ROW_SUM
+INTEGER, INTENT(IN) :: NC
+INTEGER :: IC, ICOL
+
+A%CONDENSING_REQUIRED = .TRUE.
+ROW_LOOP: DO IC = 1, NC
+   ROW_SUM = 0.0_EB
+   DO ICOL = A%ROW(IC), A%ROW(IC+1)-1
+      ROW_SUM = ROW_SUM + A%VAL(ICOL)
+   ENDDO
+   IF (ROW_SUM > TWO_EPSILON_EB) THEN
+      A%CONDENSING_REQUIRED = .FALSE.
+      EXIT ROW_LOOP
+   ENDIF
+ENDDO ROW_LOOP
+
+END SUBROUTINE SCARC_MATRIX_CHECK_NEUMANN
+
+
 #ifdef WITH_MKL
+! --------------------------------------------------------------------------------------------------------------
+!> \brief Setup symmetric version of Poisson matrix needed for all types of IntelMKL preconditioning (MKL only)
+! --------------------------------------------------------------------------------------------------------------
+SUBROUTINE SCARC_SETUP_POISSON_SYMMETRIC
+USE SCARC_POINTERS, ONLY: L, SCARC_POINT_TO_GRID
+INTEGER :: NM, NL, TYPE_MKL_SAVE(0:1), TYPE_SCOPE_SAVE(0:1)
+
+! Default version for all solvers except of MGM-method: Symmetrization must only be done for chosen grid type
+! (structured or unstructured) which is already correctly set at this point
+ 
+IF (.NOT. IS_MGM) THEN
+
+   DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
+
+      CALL SCARC_POINT_TO_GRID (NM, NLEVEL_MIN)                                    ! make finest level symmetric
+      IF (TYPE_PRECON == NSCARC_RELAX_OPTIMIZED .OR. TYPE_SMOOTH == NSCARC_RELAX_OPTIMIZED) THEN
+         IF (.NOT.L%HAS_OBSTRUCTIONS) TYPE_MKL(NLEVEL_MIN) = NSCARC_MKL_NONE       ! structured: use only FFT for optimized version
+      ENDIF
+      IF (TYPE_MKL(NLEVEL_MIN) /= NSCARC_MKL_NONE) THEN
+         CALL SCARC_SETUP_MATRIX_MKL(NSCARC_MATRIX_POISSON, NM, NLEVEL_MIN)
+         CALL SCARC_SETUP_BOUNDARY_MKL(NSCARC_MATRIX_POISSON, NM, NLEVEL_MIN)
+      ENDIF
+
+      IF (HAS_GMG_LEVELS) THEN                                                     ! if available also make coarser levels symmetric
+         DO NL = NLEVEL_MIN+1, NLEVEL_MAX
+            CALL SCARC_POINT_TO_GRID (NM, NLEVEL_MIN)
+            IF (TYPE_PRECON == NSCARC_RELAX_OPTIMIZED .OR. TYPE_SMOOTH == NSCARC_RELAX_OPTIMIZED) THEN
+               IF (.NOT.L%HAS_OBSTRUCTIONS) TYPE_MKL(NL) = NSCARC_MKL_NONE
+            ENDIF
+            IF (TYPE_MKL(NL) /= NSCARC_MKL_NONE)  CALL SCARC_SETUP_MATRIX_MKL  (NSCARC_MATRIX_POISSON, NM, NL)
+            IF (TYPE_MKL(NL) == NSCARC_MKL_LOCAL) CALL SCARC_SETUP_BOUNDARY_MKL(NSCARC_MATRIX_POISSON, NM, NL)
+         ENDDO
+      ENDIF
+
+   ENDDO 
+
+! Special MGM-version: Do symmetrization for the unstructured part of the method, the structured part basically uses FFT 
+
+ELSE 
+
+   CALL SCARC_SET_GRID_TYPE (NSCARC_GRID_UNSTRUCTURED)
+
+   TYPE_SCOPE_SAVE(0:1) = TYPE_SCOPE(0:1)
+   TYPE_MKL_SAVE(0:1)   = TYPE_MKL(0:1)
+   IF (SCARC_MGM_CHECK_LAPLACE .OR. SCARC_MGM_EXACT_INITIAL) THEN                   ! also do it for global system if requested
+      TYPE_SCOPE(0) = NSCARC_SCOPE_GLOBAL
+      IF (TRIM(SCARC_PRECON) == 'CLUSTER') THEN
+         TYPE_MKL(NLEVEL_MIN) = NSCARC_MKL_GLOBAL
+      ELSE
+         TYPE_MKL(NLEVEL_MIN) = NSCARC_MKL_LOCAL
+      ENDIF
+      DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
+         CALL SCARC_POINT_TO_GRID (NM, NLEVEL_MIN)
+         CALL SCARC_SETUP_MATRIX_MKL(NSCARC_MATRIX_POISSON, NM, NLEVEL_MIN)
+         CALL SCARC_SETUP_BOUNDARY_MKL(NSCARC_MATRIX_POISSON, NM, NLEVEL_MIN)
+      ENDDO 
+   ENDIF
+
+   TYPE_SCOPE(0:1) = NSCARC_SCOPE_LOCAL
+   TYPE_MKL(0:1)   = NSCARC_MKL_LOCAL
+   SELECT CASE (TYPE_MGM_LAPLACE)
+      CASE (NSCARC_MGM_LAPLACE_CG, NSCARC_MGM_LAPLACE_PARDISO)                      ! basically get MKL version for these solvers
+         DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
+            CALL SCARC_POINT_TO_GRID (NM, NLEVEL_MIN)
+            CALL SCARC_SETUP_MATRIX_MKL (NSCARC_MATRIX_LAPLACE, NM, NLEVEL_MIN)
+         ENDDO 
+      CASE (NSCARC_MGM_LAPLACE_OPTIMIZED)                                           ! only get MKL version for unstructured grids
+         DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
+            CALL SCARC_POINT_TO_GRID (NM, NLEVEL_MIN)
+            IF (L%STRUCTURED%NC > L%UNSTRUCTURED%NC) CALL SCARC_SETUP_MATRIX_MKL (NSCARC_MATRIX_LAPLACE, NM, NLEVEL_MIN)
+         ENDDO 
+   END SELECT
+   
+   TYPE_SCOPE(0:1) = TYPE_SCOPE_SAVE(0:1)
+   TYPE_MKL(0:1)   = TYPE_MKL_SAVE(0:1)
+   CALL SCARC_SET_GRID_TYPE (NSCARC_GRID_STRUCTURED)                                ! return to structured grid for further steps
+
+ENDIF
+
+END SUBROUTINE SCARC_SETUP_POISSON_SYMMETRIC
+
+
 ! --------------------------------------------------------------------------------------------------------------
 !> \brief Setup symmetric version of Poisson matrix for MKL solver in double precision
 ! --------------------------------------------------------------------------------------------------------------
@@ -12755,67 +12972,123 @@ END SUBROUTINE SCARC_SETUP_MATRIX_MKL
 ! matrix entries in last column and row by the stored ones (zeros and one at diaonal position)
 ! --------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_SETUP_BOUNDARY (NM, NL)
-USE SCARC_POINTERS, ONLY: L, G, F, GWC, A, AB, ACO, ABCO, SCARC_POINT_TO_GRID
+USE SCARC_POINTERS, ONLY: L, G, F, GWC, A, AB, ACO, ABCO, RHOP, SCARC_POINT_TO_GRID, &
+                          SCARC_POINT_TO_SEPARABLE_ENVIRONMENT, SCARC_POINT_TO_INSEPARABLE_ENVIRONMENT
+USE SCARC_UTILITIES, ONLY: RECIPROCAL_DIRECTIONAL_MEAN
+USE COMP_FUNCTIONS, ONLY: SHUTDOWN
 INTEGER, INTENT(IN) :: NM, NL
-INTEGER :: I, J, K, IOR0, IW, IC, NOM, IP, ICO, ICOL
+INTEGER :: I, J, K, IG, JG, KG, IOR0, IW, IC, NOM, IP, ICO, ICOL
 
 CALL SCARC_POINT_TO_GRID (NM, NL)                                    
 
-SELECT CASE (SET_MATRIX_TYPE(NL))
+MATRIX_TYPE_SELECT: SELECT CASE (SET_MATRIX_TYPE(NL))
 
    ! ---------- Matrix in compact storage technique
  
-   CASE (NSCARC_MATRIX_COMPACT)
+   CASE (NSCARC_MATRIX_COMPACT) 
 
+      ! Setup condensing in purely Neumann case
+
+      IF (IS_PURE_NEUMANN) CALL SCARC_SETUP_CMATRIX_CONDENSED(NM)              
       A => G%POISSON
 
-      ! Setup condensing if there are no Dirichlet BC's 
+      COMPACT_POISSON_TYPE_SELECT: SELECT CASE (TYPE_POISSON)
 
-      IF (IS_PURE_NEUMANN) CALL SCARC_SETUP_CMATRIX_CONDENSED(NM)
+         ! Set boundary condition of separable Poisson system for this wall cell
+         ! Note: the related value to add or substract from the main diagonal element for the respective face F
+         ! was already computed before in the routine SCARC_SETUP_FACE_BASICS and was stored I F%MATRIX_SHARE
+         ! e.g. IOR0 =  1:  F%MATRIX_SHARE = RDX(1)*RDXN(0)
+         !      IOR0 = -1:  F%MATRIX_SHARE = RDX(IBAR)*RDXN(IBAR)
+         ! In the Dirichlet-case this value has to be added, in the Neumann case it must be subtracted
+      
+         CASE (NSCARC_POISSON_SEPARABLE)   
+             
+            CALL SCARC_POINT_TO_SEPARABLE_ENVIRONMENT(NM)
 
-      ! Set correct boundary conditions 
+            COMPACT_SEPARABLE_WALL_LOOP: DO IW = 1, G%NW
+      
+               GWC => G%WALL(IW)
+               IOR0 = GWC%IOR
+               IF (TWO_D .AND. ABS(IOR0) == 2) CYCLE       
+      
+               F  => L%FACE(IOR0)                             ! Face information associated with direction IOR0
+      
+               I = GWC%IXW
+               J = GWC%IYW
+               K = GWC%IZW
+      
+               IF (IS_UNSTRUCTURED .AND. L%IS_SOLID(I, J, K)) CYCLE
+      
+               NOM = GWC%NOM
+               IC  = G%CELL_NUMBER(I, J, K)
+               GWC%ICW = IC
+      
+               IP = A%ROW(IC)
+               IF (N_DIRIC_GLOBAL(NLEVEL_MIN) > 0) THEN
+      
+                  SELECT CASE (GWC%BTYPE)
+                     CASE (DIRICHLET)
+                        A%VAL(IP) = A%VAL(IP) - F%MATRIX_SHARE
+                     CASE (NEUMANN)
+                        A%VAL(IP) = A%VAL(IP) + F%MATRIX_SHARE
+                  END SELECT
+      
+               ! Purely Neumann matrix
+      
+               ELSE IF (GWC%BTYPE == NEUMANN) THEN
+                  A%VAL(IP) = A%VAL(IP) + F%MATRIX_SHARE
+               ENDIF
+      
+            ENDDO COMPACT_SEPARABLE_WALL_LOOP
 
-      DO IW = 1, G%NW
+         ! Set boundary condition of inseparable Poisson system for this wall cell
+         ! Here the upper F%MATRIX_SHARE value must additionally be combined with the reciprocal directional mean value of the
+         ! density towards that face and again be added or subtracted depending on the BC type (Dirichlt/Neumann)
+      
+         CASE (NSCARC_POISSON_INSEPARABLE)
 
-         GWC => G%WALL(IW)
-         IOR0 = GWC%IOR
-         IF (TWO_D .AND. ABS(IOR0) == 2) CYCLE       
+            CALL SCARC_POINT_TO_INSEPARABLE_ENVIRONMENT(NM)
 
-         F  => L%FACE(IOR0)
+            COMPACT_INSEPARABLE_WALL_LOOP: DO IW = 1, G%NW
+      
+               GWC => G%WALL(IW)
+               IOR0 = GWC%IOR
+               IF (TWO_D .AND. ABS(IOR0) == 2) CYCLE       
+      
+               F  => L%FACE(IOR0)
+      
+               I  = GWC%IXW ;  J  = GWC%IYW ;  K  = GWC%IZW           ! mesh-inner cells indices in ScaRC-structure
+               IG = GWC%IXG ;  JG = GWC%IYG ;  KG = GWC%IZG           ! ghost cell indices in ScaRC-structure
+      
+               IF (IS_UNSTRUCTURED .AND. L%IS_SOLID(I, J, K)) CYCLE
+      
+               NOM = GWC%NOM
+               IC  = G%CELL_NUMBER(I, J, K)
+               GWC%ICW = IC
+      
+               IP = A%ROW(IC)
+               IF (N_DIRIC_GLOBAL(NLEVEL_MIN) > 0) THEN
+      
+                  SELECT CASE (GWC%BTYPE)
+                     CASE (DIRICHLET)
+                        A%VAL(IP) = A%VAL(IP) - F%MATRIX_SHARE * RECIPROCAL_DIRECTIONAL_MEAN(RHOP, IOR0, I, J, K)
+                     CASE (NEUMANN)
+                        A%VAL(IP) = A%VAL(IP) + F%MATRIX_SHARE * RECIPROCAL_DIRECTIONAL_MEAN(RHOP, IOR0, I, J, K)
+                  END SELECT
 
-         I = GWC%IXW
-         J = GWC%IYW
-         K = GWC%IZW
+      
+               ! Purely Neumann matrix
+      
+               ELSE IF (GWC%BTYPE == NEUMANN) THEN
+                  A%VAL(IP) = A%VAL(IP) + F%MATRIX_SHARE * RECIPROCAL_DIRECTIONAL_MEAN(RHOP, IOR0, I, J, K)
+               ENDIF
+      
+            ENDDO COMPACT_INSEPARABLE_WALL_LOOP
 
-         IF (IS_UNSTRUCTURED .AND. L%IS_SOLID(I, J, K)) CYCLE
-
-         NOM = GWC%NOM
-         IC  = G%CELL_NUMBER(I, J, K)
-         GWC%ICW = IC
-
-         ! SPD-matrix with mixture of Dirichlet and Neumann BC's according to BTYPE
-
-         IF (N_DIRIC_GLOBAL(NLEVEL_MIN) > 0) THEN
-
-            IP = A%ROW(IC)
-            SELECT CASE (GWC%BTYPE)
-               CASE (DIRICHLET)
-                  A%VAL(IP) = A%VAL(IP) - F%INCR_BOUNDARY
-               CASE (NEUMANN)
-                  A%VAL(IP) = A%VAL(IP) + F%INCR_BOUNDARY
-            END SELECT
-
-         ! Purely Neumann matrix
-
-         ELSE IF (GWC%BTYPE == NEUMANN) THEN
-            IP = A%ROW(IC)
-            A%VAL(IP) = A%VAL(IP) + F%INCR_BOUNDARY
-         ENDIF
-
-      ENDDO 
-
+      END SELECT COMPACT_POISSON_TYPE_SELECT
+      
       ! Transform into condensed system, if there are no Dirichlet BC's 
-
+      
       IF (IS_PURE_NEUMANN) THEN
          DO ICO = 1, A%N_CONDENSED
             ACO => A%CONDENSED(ICO)
@@ -12825,71 +13098,78 @@ SELECT CASE (SET_MATRIX_TYPE(NL))
             ENDDO
          ENDDO
       ENDIF 
-
- 
+      
    ! ---------- Matrix in bandwise storage technique
  
-   CASE (NSCARC_MATRIX_BANDWISE)
+   CASE (NSCARC_MATRIX_BANDWISE) 
 
       ! Preset matrix switch if no Dirichlet BC's available
 
       AB => G%POISSONB
       IF (IS_PURE_NEUMANN) CALL SCARC_SETUP_BMATRIX_CONDENSED(NM)
 
-      ! Set right boundary conditions 
+      BANDWISE_POISSON_TYPE_SELECT: SELECT CASE (TYPE_POISSON)
 
-      DO IW = 1, G%NW
+         ! Set boundary condition of separable Poisson system for this wall cell
+         ! The same holds true as for the compactly stored matrix, but only the different storage scheme for the matrix 
+         ! must be considered; here, POS(0) corresponds to the diagonal matrix element
 
-         GWC => G%WALL(IW)
-         IOR0 = GWC%IOR
-         IF (TWO_D .AND. ABS(IOR0) == 2) CYCLE     
+         CASE (NSCARC_POISSON_SEPARABLE)     
+             
+            BANDWISE_SEPARABLE_WALL_LOOP: DO IW = 1, G%NW
 
-         F  => L%FACE(IOR0)
+               GWC => G%WALL(IW)
+               IOR0 = GWC%IOR
+               IF (TWO_D .AND. ABS(IOR0) == 2) CYCLE     
+      
+               F  => L%FACE(IOR0)
+      
+               I = GWC%IXW ;  J = GWC%IYW ;  K = GWC%IZW
+      
+               IF (IS_UNSTRUCTURED .AND. L%IS_SOLID(I, J, K)) CYCLE
+      
+               NOM  = GWC%NOM
+               GWC%ICW =G%CELL_NUMBER(I, J, K)
+               IC = G%CELL_NUMBER(I, J, K)
+      
+               IF (N_DIRIC_GLOBAL(NLEVEL_MIN) > 0) THEN
+      
+                  SELECT CASE (GWC%BTYPE)
+                     CASE (DIRICHLET)
+                        AB%VAL(IC, AB%POS(0)) = AB%VAL(IC, AB%POS(0)) - F%MATRIX_SHARE
+                     CASE (NEUMANN)
+                        AB%VAL(IC, AB%POS(0)) = AB%VAL(IC, AB%POS(0)) + F%MATRIX_SHARE
+                  END SELECT
+      
+               ! Purely Neumann matrix
+      
+               ELSE
+                  IF (GWC%BTYPE == NEUMANN) AB%VAL(IC, AB%POS(0)) = AB%VAL(IC, AB%POS(0)) + F%MATRIX_SHARE
+               ENDIF
+      
+            ENDDO BANDWISE_SEPARABLE_WALL_LOOP
+         
+            ! Transform into condensed system, if there are no Dirichlet BC's 
+      
+            IF (IS_PURE_NEUMANN) THEN
+               DO ICO = 1, AB%N_CONDENSED
+                  ABCO => AB%CONDENSED(ICO)
+                  IF (ICO == 1) THEN
+                     AB%VAL(ABCO%ICO, 1:AB%N_STENCIL) = ABCO%VAL2(1:AB%N_STENCIL)
+                  ELSE
+                     IP = AB%POS(ABCO%IOR0)
+                     AB%VAL(ABCO%ICO, IP) = ABCO%VAL2(IP)
+                  ENDIF
+               ENDDO
+            ENDIF 
 
-         I = GWC%IXW
-         J = GWC%IYW
-         K = GWC%IZW
-
-         IF (IS_UNSTRUCTURED .AND. L%IS_SOLID(I, J, K)) CYCLE
-
-         NOM  = GWC%NOM
-         GWC%ICW =G%CELL_NUMBER(I, J, K)
-         IC = G%CELL_NUMBER(I, J, K)
-
-         ! SPD-matrix with mixture of Dirichlet and Neumann BC's according to the SETTING of BTYPE
-
-         IF (N_DIRIC_GLOBAL(NLEVEL_MIN) > 0) THEN
-
-            SELECT CASE (GWC%BTYPE)
-               CASE (DIRICHLET)
-                  AB%VAL(IC, AB%POS(0)) = AB%VAL(IC, AB%POS(0)) - F%INCR_BOUNDARY
-               CASE (NEUMANN)
-                  AB%VAL(IC, AB%POS(0)) = AB%VAL(IC, AB%POS(0)) + F%INCR_BOUNDARY
-            END SELECT
-
-         ! Purely Neumann matrix
-
-         ELSE
-            IF (GWC%BTYPE == NEUMANN) AB%VAL(IC, AB%POS(0)) = AB%VAL(IC, AB%POS(0)) + F%INCR_BOUNDARY
-         ENDIF
-
-      ENDDO 
-   
-      ! Transform into condensed system, if there are no Dirichlet BC's 
-
-      IF (IS_PURE_NEUMANN) THEN
-         DO ICO = 1, AB%N_CONDENSED
-            ABCO => AB%CONDENSED(ICO)
-            IF (ICO == 1) THEN
-               AB%VAL(ABCO%ICO, 1:AB%N_STENCIL) = ABCO%VAL2(1:AB%N_STENCIL)
-            ELSE
-               IP = AB%POS(ABCO%IOR0)
-               AB%VAL(ABCO%ICO, IP) = ABCO%VAL2(IP)
-            ENDIF
-         ENDDO
-      ENDIF 
+         CASE (NSCARC_POISSON_INSEPARABLE)  
  
-END SELECT 
+            CALL SHUTDOWN('SCARC_SETUP_BOUNDARY: Bandwise storage technique for inseparable Poisson system not yet implemented')
+
+      END SELECT BANDWISE_POISSON_TYPE_SELECT
+
+   END SELECT MATRIX_TYPE_SELECT
 
 END SUBROUTINE SCARC_SETUP_BOUNDARY
 
@@ -12934,7 +13214,7 @@ SELECT CASE (TYPE_MKL_PRECISION)
          IC  = G%CELL_NUMBER(I, J, K)
       
          IP = AS%ROW(IC)
-         AS%VAL(IP) = AS%VAL(IP) - F%INCR_BOUNDARY
+         AS%VAL(IP) = AS%VAL(IP) - F%MATRIX_SHARE
       
       ENDDO 
       
@@ -12959,7 +13239,7 @@ SELECT CASE (TYPE_MKL_PRECISION)
          IC  = G%CELL_NUMBER(I, J, K)
       
          IP = AS%ROW(IC)
-         AS%VAL_FB(IP) = AS%VAL_FB(IP) - REAL(F%INCR_BOUNDARY, FB)
+         AS%VAL_FB(IP) = AS%VAL_FB(IP) - REAL(F%MATRIX_SHARE, FB)
       
       ENDDO 
 END SELECT
@@ -12967,6 +13247,137 @@ END SELECT
  
 END SUBROUTINE SCARC_SETUP_BOUNDARY_MKL
 #endif
+
+
+! --------------------------------------------------------------------------------------------------------------
+!> \brief Set boundary conditions including the interfaces between the meshes
+! --------------------------------------------------------------------------------------------------------------
+SUBROUTINE SCARC_SETUP_BOUNDARY_WITH_INTERFACES (NM, NL)
+USE SCARC_POINTERS, ONLY: L, G, F, GWC, A, SCARC_POINT_TO_GRID
+INTEGER, INTENT(IN) :: NM, NL
+INTEGER :: I, J, K, IOR0, IW, IC, NOM, IP
+INTEGER :: ICXM, ICXP, ICYM, ICYP, ICZM, ICZP
+
+CALL SCARC_POINT_TO_GRID (NM, NL)       
+
+A => G%LAPLACE
+
+SELECT CASE (TYPE_MGM_BC)
+
+   ! --------------------------------------------------------------------------
+   CASE (NSCARC_MGM_BC_TAYLOR)
+
+      !DO IW = MGM%NW1, MGM%NW2
+      DO IW = 1, G%NW
+
+         GWC => G%WALL(IW)
+         IOR0 = GWC%IOR
+         IF (TWO_D .AND. ABS(IOR0) == 2) CYCLE       
+
+         F  => L%FACE(IOR0)
+
+         I = GWC%IXW
+         J = GWC%IYW
+         K = GWC%IZW
+
+         IF (IS_UNSTRUCTURED .AND. L%IS_SOLID(I, J, K)) CYCLE
+
+         NOM = GWC%NOM
+         IC  = G%CELL_NUMBER(I, J, K)
+
+         ICXM  = G%CELL_NUMBER(I-1, J, K)
+         ICXP  = G%CELL_NUMBER(I+1, J, K)
+         IF (.NOT. TWO_D) THEN
+            ICYM  = G%CELL_NUMBER(I, J-1, K)
+            ICYP  = G%CELL_NUMBER(I, J+1, K)
+         ENDIF
+         ICZM  = G%CELL_NUMBER(I, J, K-1)
+         ICZP  = G%CELL_NUMBER(I, J, K+1)
+
+         GWC%ICW = IC
+
+         IP = A%ROW(IC)
+         A%VAL(IP) = 0.0_EB
+
+         SELECT CASE(ABS(IOR0))
+            CASE (1)
+               A%VAL(IP) = A%VAL(IP) - L%RDXI2 - 5.0_EB/2.0_EB*L%RDZI2
+               DO IP = A%ROW(IC)+1, A%ROW(IC+1)-1
+                  IF (ICXM <= G%NC .AND. A%COL(IP) == ICXM) THEN
+                     A%VAL(IP) = A%VAL(IP) + L%RDXI2 
+                  ENDIF
+                  IF (ICXP <= G%NC .AND. A%COL(IP) == ICXP) THEN
+                     A%VAL(IP) = A%VAL(IP) + L%RDXI2 
+                  ENDIF
+                  IF (ICZM <= G%NC .AND. A%COL(IP) == ICZM) THEN
+                     A%VAL(IP) = A%VAL(IP) + 5.0_EB/4.0_EB*L%RDZI2
+                  ENDIF
+                  IF (ICZP <= G%NC .AND. A%COL(IP) == ICZP) THEN
+                        A%VAL(IP) = A%VAL(IP) + 5.0_EB/4.0_EB*L%RDZI2
+                  ENDIF
+               ENDDO
+            CASE (2)
+               IF (.NOT. TWO_D) THEN
+                  WRITE(*,*) 'TAYLOR-3D: Not yet finished!'
+               ENDIF
+            CASE (3)
+               A%VAL(IP) = A%VAL(IP) - L%RDZI2 - 5.0_EB/2.0_EB*L%RDXI2
+               DO IP = A%ROW(IC)+1, A%ROW(IC+1)-1
+                  IF (ICZM <= G%NC .AND. A%COL(IP) == ICZM) THEN
+                     A%VAL(IP) = A%VAL(IP) + L%RDZI2 
+                  ENDIF
+                  IF (ICZP <= G%NC .AND. A%COL(IP) == ICZP) THEN
+                     A%VAL(IP) = A%VAL(IP) + L%RDZI2 
+                  ENDIF
+                  IF (ICXM <= G%NC .AND. A%COL(IP) == ICXM) THEN
+                     A%VAL(IP) = A%VAL(IP) + 5.0_EB/4.0_EB*L%RDXI2
+                  ENDIF
+                  IF (ICXP <= G%NC .AND. A%COL(IP) == ICXP) THEN
+                     A%VAL(IP) = A%VAL(IP) + 5.0_EB/4.0_EB*L%RDXI2
+                  ENDIF
+               ENDDO
+         END SELECT
+
+      ENDDO 
+
+   ! --------------------------------------------------------------------------
+   CASE DEFAULT
+
+      DO IW = 1, G%NW
+
+         GWC => G%WALL(IW)
+         IOR0 = GWC%IOR
+         IF (TWO_D .AND. ABS(IOR0) == 2) CYCLE       
+
+         F  => L%FACE(IOR0)
+
+         I = GWC%IXW
+         J = GWC%IYW
+         K = GWC%IZW
+
+         IF (IS_UNSTRUCTURED .AND. L%IS_SOLID(I, J, K)) CYCLE
+
+         NOM = GWC%NOM
+         IF (TYPE_MGM_LAPLACE == NSCARC_MGM_LAPLACE_LUPERM) THEN
+            IC  = G%PERM_FW(G%CELL_NUMBER(I, J, K))
+         ELSE
+            IC  = G%CELL_NUMBER(I, J, K)
+         ENDIF
+         !GWC%ICW = IC
+
+         IP = A%ROW(IC)
+         SELECT CASE (GWC%BTYPE)
+            CASE (DIRICHLET, INTERNAL)
+               A%VAL(IP) = A%VAL(IP) - F%MATRIX_SHARE
+            CASE (NEUMANN)
+               A%VAL(IP) = A%VAL(IP) + F%MATRIX_SHARE
+         END SELECT
+
+      ENDDO 
+
+END SELECT 
+
+END SUBROUTINE SCARC_SETUP_BOUNDARY_WITH_INTERFACES
 
 
 ! --------------------------------------------------------------------------------------------------------------
@@ -13231,9 +13642,7 @@ USE SCARC_POINTERS, ONLY: L, G, OG, F, OL, VC, A, ACO, AB, ABCO, &
 INTEGER, INTENT(IN) :: NV, NL, ITYPE
 INTEGER :: NM, NOM, IFACE, ICN, ICE, ICW, JC, NC, ICO, IOR0, IP, ICG, INBR
 
-IF (N_DIRIC_GLOBAL(NLEVEL_MIN) > 0 .OR. &
-    TYPE_PRECON == NSCARC_RELAX_FFT .OR. TYPE_PRECON == NSCARC_RELAX_FFTO) RETURN
-
+IF (N_DIRIC_GLOBAL(NLEVEL_MIN) > 0 .OR. TYPE_PRECON == NSCARC_RELAX_FFT) RETURN
  
 ! In last mesh:  subtract B*RHS(end) for internal legs of stencil
  
@@ -13322,7 +13731,7 @@ DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 
             IF (ICN /= SCARC(NMESHES)%NC) CYCLE            ! if no relation to last cell in last mesh, cycle
 
-            VC(ICW) = VC(ICW) - F%INCR_FACE * SCARC(NM)%RHS_END
+            VC(ICW) = VC(ICW) - F%MATRIX_SHARE * SCARC(NM)%RHS_END
 
          ENDDO
 
@@ -13672,141 +14081,7 @@ ENDIF
 
 END SUBROUTINE SCARC_SETUP_MGM_FFT
 
-
-! ------------------------------------------------------------------------------------------------------------------
-!> \brief Allocate and initialize vectors for blockwise FFT methods with overlap
-! New here: Perform own initialization of FFT based on H2CZIS/H3CZIS and use own SAVE and WORK arrays
-! ------------------------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_SETUP_FFTO(NLMIN, NLMAX)
-USE SCARC_POINTERS, ONLY: M, S, L, FFT, SCARC_POINT_TO_GRID
-USE POIS, ONLY: H2CZIS, H3CZIS
-INTEGER, INTENT(IN) :: NLMIN, NLMAX
-INTEGER :: NM, NL
-
-CROUTINE = 'SCARC_SEtUP_FFTO'
-
-! Allocate working space for FFT routine
- 
-MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
-   LEVEL_LOOP: DO NL = NLMIN, NLMAX
-
-      CALL SCARC_POINT_TO_GRID (NM, NL)                                    
-      FFT => SCARC(NM)%LEVEL(NL)%FFT
-
-      FFT%LBC = M%LBC
-      FFT%MBC = M%MBC
-      FFT%NBC = M%NBC
-
-      IF (NM == 1) THEN
-         FFT%IBAR = S%IBAR+1
-         FFT%XS = S%XS
-         FFT%XF = S%XF + L%DX
-      ELSE IF (NM == NMESHES) THEN
-         FFT%IBAR = S%IBAR+1
-         FFT%XS = S%XS - L%DX
-         FFT%XF = S%XF
-      ELSE 
-         FFT%IBAR = S%IBAR+2
-         FFT%XS = S%XS - L%DX
-         FFT%XF = S%XF + L%DX
-      ENDIF
-
-      FFT%JBAR = S%JBAR
-      FFT%KBAR = S%KBAR
-
-      FFT%YS = S%YS
-      FFT%YF = S%YF
-      FFT%ZS = S%ZS
-      FFT%ZF = S%ZF
-
-      FFT%ITRN = FFT%IBAR+1
-      IF (TWO_D) THEN
-         FFT%JTRN = 1
-      ELSE
-         FFT%JTRN = L%NY+1
-      ENDIF
-      FFT%KTRN = L%NZ+1
-
-      FFT%LSAVE = (FFT%ITRN+1)*FFT%JTRN*FFT%KTRN+7*FFT%ITRN+5*FFT%JTRN+6*FFT%KTRN+56
-      FFT%LWORK = (FFT%ITRN+1)*FFT%JTRN*FFT%KTRN
-
-      CALL SCARC_ALLOCATE_REAL1 (FFT%SAVE1, -3, FFT%LSAVE, NSCARC_INIT_ZERO, 'FFT%SAVE1', CROUTINE)
-      CALL SCARC_ALLOCATE_REAL1 (FFT%WORK ,  1, FFT%LWORK, NSCARC_INIT_ZERO, 'FFT%WORK', CROUTINE)
-
-      ! Allocate stretching vector (set to 1)
-
-      CALL SCARC_ALLOCATE_REAL1 (FFT%HX, 0, FFT%ITRN, NSCARC_INIT_ONE, 'FFT', CROUTINE)
-
-      ! Allocate RHS vector for FFT routine
-
-      IF (L%NY == 1) THEN
-         CALL SCARC_ALLOCATE_REAL3 (FFT%PRHS, 1, FFT%ITRN, 1,        1, 1, FFT%KTRN, NSCARC_INIT_ZERO, 'FFT%PRHS', CROUTINE)
-      ELSE
-         CALL SCARC_ALLOCATE_REAL3 (FFT%PRHS, 1, FFT%ITRN, 1, FFT%JTRN, 1, FFT%KTRN, NSCARC_INIT_ZERO, 'FFT%PRHS', CROUTINE)
-      ENDIF
-
-      ! Allocate boundary data vector for XS
-
-      IF (L%NZ>1) THEN
-         IF (L%NY  > 1) CALL SCARC_ALLOCATE_REAL2 (FFT%BXS, 1, FFT%JTRN, 1, FFT%KTRN, NSCARC_INIT_ZERO, 'FFT%BXS', CROUTINE)
-         IF (L%NY == 1) CALL SCARC_ALLOCATE_REAL2 (FFT%BXS, 1,        1, 1, FFT%KTRN, NSCARC_INIT_ZERO, 'FFT%BXS', CROUTINE)
-      ELSE
-         CALL SCARC_ALLOCATE_REAL2 (FFT%BXS, 1, FFT%JTRN, 1, 1, NSCARC_INIT_ZERO, 'FFT%BXS', CROUTINE)
-      ENDIF
-
-      ! Allocate boundary data vector for XF
-
-      IF (L%NZ>1) THEN
-         IF (L%NY  > 1) CALL SCARC_ALLOCATE_REAL2 (FFT%BXF, 1, FFT%JTRN, 1, FFT%KTRN, NSCARC_INIT_ZERO, 'FFT%BXF', CROUTINE)
-         IF (L%NY == 1) CALL SCARC_ALLOCATE_REAL2 (FFT%BXF, 1,        1, 1, FFT%KTRN, NSCARC_INIT_ZERO, 'FFT%BXF', CROUTINE)
-      ELSE
-         CALL SCARC_ALLOCATE_REAL2 (FFT%BXF, 1, FFT%JTRN, 1, 1, NSCARC_INIT_ZERO, 'FFT%BXF', CROUTINE)
-      ENDIF
-
-      ! Allocate boundary data vector for YS
-
-      IF (L%NZ > 1) THEN
-         CALL SCARC_ALLOCATE_REAL2 (FFT%BYS, 1, FFT%ITRN, 1, FFT%KTRN, NSCARC_INIT_ZERO, 'FFT%BYS', CROUTINE)
-      ELSE
-         CALL SCARC_ALLOCATE_REAL2 (FFT%BYS, 1, FFT%ITRN, 1,        1, NSCARC_INIT_ZERO, 'FFT%BYS', CROUTINE)
-      ENDIF
-
-      ! Allocate boundary data vector for YF
-
-      IF (L%NZ > 1) THEN
-         CALL SCARC_ALLOCATE_REAL2 (FFT%BYF, 1, FFT%ITRN,1, FFT%KTRN, NSCARC_INIT_ZERO, 'FFT%BYF', CROUTINE)
-      ELSE
-         CALL SCARC_ALLOCATE_REAL2 (FFT%BYF, 1, FFT%ITRN,1,        1, NSCARC_INIT_ZERO, 'FFT%BYF', CROUTINE)
-      ENDIF
-
-      ! Allocate boundary data vector for ZS
-
-      IF (L%NY  > 1) CALL SCARC_ALLOCATE_REAL2 (FFT%BZS, 1, FFT%ITRN, 1, FFT%JTRN, NSCARC_INIT_ZERO, 'FFT%BZS', CROUTINE)
-      IF (L%NY == 1) CALL SCARC_ALLOCATE_REAL2 (FFT%BZS, 1, FFT%ITRN, 1,        1, NSCARC_INIT_ZERO, 'FFT%BZS', CROUTINE)
-
-      ! Allocate boundary data vector for ZF
-
-      IF (L%NY  >1)  CALL SCARC_ALLOCATE_REAL2 (FFT%BZF, 1, FFT%ITRN, 1, FFT%JTRN, NSCARC_INIT_ZERO, 'FFT%BZF', CROUTINE)
-      IF (L%NY == 1) CALL SCARC_ALLOCATE_REAL2 (FFT%BZF, 1, FFT%ITRN, 1,        1, NSCARC_INIT_ZERO, 'FFT%BZF', CROUTINE)
-
-      IF (TWO_D) THEN
-         CALL H2CZIS(FFT%XS,FFT%XF,FFT%IBAR,FFT%LBC,&
-                     FFT%ZS,FFT%ZF,FFT%KBAR,FFT%NBC,&
-                     FFT%HX,FFT%XLM,FFT%ITRN,IERROR,FFT%SAVE1)
-      ELSE
-         CALL H3CZIS(FFT%XS,FFT%XF,FFT%IBAR,FFT%LBC,&
-                     FFT%YS,FFT%YF,FFT%JBAR,FFT%MBC,&
-                     FFT%ZS,FFT%ZF,FFT%KBAR,FFT%NBC,&
-                     FFT%HX,FFT%XLM,FFT%ITRN,FFT%JTRN,IERROR,FFT%SAVE1)
-      ENDIF
-
-   ENDDO LEVEL_LOOP
-ENDDO MESHES_LOOP
-
-END SUBROUTINE SCARC_SETUP_FFTO
-
 END MODULE SCARC_FFT
-
 
 
 !=======================================================================================================================
@@ -14254,7 +14529,6 @@ END SUBROUTINE SCARC_PROLONGATION
 END MODULE SCARC_GMG
 
 
-#ifdef WITH_SCARC_AMG
 !=======================================================================================================================
 !
 ! MODULE SCARC_AMG
@@ -16751,7 +17025,6 @@ END MODULE SCARC_AMG
 
 
 
-#endif
 !=======================================================================================================================
 !
 ! MODULE SCARC_MGM
@@ -16990,12 +17263,12 @@ DO IW = 1, MGM%NWE
    IF (TWO_D) THEN
       SX = REAL(CNT(IC, 1) + CNT(IC, -1) - 2, EB)
       SZ = REAL(CNT(IC, 3) + CNT(IC, -3) - 2, EB)
-      MGM%WEIGHT(IW) = 1.0_EB/(SX*L%DXI2+SZ*L%DZI2)
+      MGM%WEIGHT(IW) = 1.0_EB/(SX*L%RDXI2 + SZ*L%RDZI2)       ! TODO: check settings of RD.I
    ELSE
       SX = REAL(CNT(IC, 1) + CNT(IC, -1) - 2, EB)
       SY = REAL(CNT(IC, 2) + CNT(IC, -2) - 2, EB)
       SZ = REAL(CNT(IC, 3) + CNT(IC, -3) - 2, EB)
-      MGM%WEIGHT(IW) = 1.0_EB/(SX*L%DXI2+SY*L%DYI2+SZ*L%DZI2)
+      MGM%WEIGHT(IW) = 1.0_EB/(SX*L%RDXI2 + SY*L%RDYI+SZ*L%RDZI2)
    ENDIF
    
 ENDDO
@@ -17138,11 +17411,29 @@ DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          MGM%ITE_POISSON = ITE                   ! ITE, CAPPA contain statistics of preceding structured CG-solution
          MGM%CAPPA_POISSON = CAPPA
 
+         IF (SCARC_VERBOSE) THEN
+            WRITE(MSG%LU_VERBOSE, 1100) ICYC, PRESSURE_ITERATIONS, TOTAL_PRESSURE_ITERATIONS, &
+                                        MGM%ITE_POISSON, MGM%CAPPA_POISSON, MGM%ITE, VELOCITY_ERROR_GLOBAL
+         ENDIF
+
       ! MGM iteration - after each unstructured homogeneous Laplace solution
 
       CASE (1)
 
          MGM%ITE = ITE_MGM
+
+         IF (SCARC_VERBOSE) THEN
+            IF (TYPE_MGM_LAPLACE == NSCARC_MGM_LAPLACE_CG) THEN
+               WRITE(MSG%LU_VERBOSE, 1200) ICYC, PRESSURE_ITERATIONS, TOTAL_PRESSURE_ITERATIONS, &
+                                           MGM%ITE_POISSON, MGM%CAPPA_POISSON, &
+                                           ITE, CAPPA, MGM%ITE, VELOCITY_ERROR_GLOBAL
+            ELSE
+               WRITE(MSG%LU_VERBOSE, 1201) ICYC, PRESSURE_ITERATIONS, TOTAL_PRESSURE_ITERATIONS, &
+                                           MGM%ITE_POISSON, MGM%CAPPA_POISSON, &
+                                           MGM%ITE, VELOCITY_ERROR_GLOBAL
+            ENDIF
+         ENDIF
+
          IF (TYPE_MGM_LAPLACE == NSCARC_MGM_LAPLACE_CG .AND. ITE > MGM%ITE_LAPLACE) THEN
             MGM%ITE_LAPLACE = MAX(ITE, MGM%ITE_LAPLACE)            ! Store worst Laplace-CG statistics
             MGM%CAPPA_LAPLACE = CAPPA
@@ -17155,12 +17446,54 @@ DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          CAPPA = MGM%CAPPA_POISSON   ! Reset to Krylov statistics of Poisson solution for statistics in chid.out
          ITE   = MGM%ITE_POISSON
 
+         IF (SCARC_VERBOSE) THEN
+            IF (VELOCITY_ERROR_GLOBAL <= VELOCITY_ERROR_MGM) THEN
+               IF (TYPE_MGM_LAPLACE == NSCARC_MGM_LAPLACE_CG) THEN
+                  WRITE(MSG%LU_VERBOSE, 1300) ICYC, PRESSURE_ITERATIONS, TOTAL_PRESSURE_ITERATIONS, &
+                                              MGM%ITE_POISSON, MGM%CAPPA_POISSON, &
+                                              MGM%ITE_LAPLACE, MGM%CAPPA_LAPLACE, &
+                                              MGM%ITE, VELOCITY_ERROR_GLOBAL, ' ... success'
+               ELSE
+                  WRITE(MSG%LU_VERBOSE, 1301) ICYC, PRESSURE_ITERATIONS, TOTAL_PRESSURE_ITERATIONS, &
+                                              MGM%ITE_POISSON, MGM%CAPPA_POISSON, &
+                                              MGM%ITE, VELOCITY_ERROR_GLOBAL, ' ... success'
+               ENDIF
+            ELSE
+               IF (TYPE_MGM_LAPLACE == NSCARC_MGM_LAPLACE_CG) THEN
+                  WRITE(MSG%LU_VERBOSE, 1300) ICYC, PRESSURE_ITERATIONS, TOTAL_PRESSURE_ITERATIONS, &
+                                              MGM%ITE_POISSON, MGM%CAPPA_POISSON, &
+                                              MGM%ITE_LAPLACE, MGM%CAPPA_LAPLACE, &
+                                              MGM%ITE, VELOCITY_ERROR_GLOBAL, ' ... failure'
+               ELSE
+                  WRITE(MSG%LU_VERBOSE, 1301) ICYC, PRESSURE_ITERATIONS, TOTAL_PRESSURE_ITERATIONS, &
+                                              MGM%ITE_POISSON, MGM%CAPPA_POISSON, &
+                                              MGM%ITE, VELOCITY_ERROR_GLOBAL, ' ... failure'
+               ENDIF
+            ENDIF
+         ENDIF
 
    END SELECT
    IF (VELOCITY_ERROR_GLOBAL <= VELOCITY_ERROR_MGM) SCARC_MGM_CONVERGENCE_STATE = NSCARC_MGM_SUCCESS
 
 ENDDO
 
+1100 FORMAT('ICYC ',I6, ', #PI: ', I6,', #TPI: ', I6, &
+            ' , #POIS: ',    I5, ' , RATE: ',    F6.2, &
+            ' , #MGM: ',     I5, ' , VEL_ERR: ', E10.2, a14)
+1200 FORMAT('ICYC ',I6, ', #PI: ', I6,', #TPI: ', I6, &
+            ' , #POIS: ',    I5, ' , RATE: ',    F6.2, &
+            ' , #LAPL:    ',    I5, ' , RATE:    ',    F6.2, &
+            ' , #MGM: ',     I5, ' , VEL_ERR: ', E10.2, a14,/)
+1201 FORMAT('ICYC ',I6, ', #PI: ', I6,', #TPI: ', I6, &
+            ' , #POIS: ',    I5, ' , RATE: ',    F6.2, &
+            ' , #MGM: ',     I5, ' , VEL_ERR: ', E10.2, a14,/)
+1300 FORMAT('ICYC ',I6, ', #PI: ', I6,', #TPI: ', I6, &
+            ' , #POIS: ',    I5, ' , RATE: ',    F6.2, &
+            ' , #LAPLmax: ', I5, ' , RATEmax: ', F6.2, &
+            ' , #MGM: ',     I5, ' , VEL_ERR: ', E10.2, a14,/)
+1301 FORMAT('ICYC ',I6, ', #PI: ', I6,', #TPI: ', I6, &
+            ' , #POIS: ',    I5, ' , RATE: ',    F6.2, &
+            ' , #MGM: ',     I5, ' , VEL_ERR: ', E10.2, a14,/)
 END FUNCTION SCARC_MGM_CONVERGENCE_STATE
 
 
@@ -17168,7 +17501,8 @@ END FUNCTION SCARC_MGM_CONVERGENCE_STATE
 !> \brief Set correct boundary values at external and internal boundaries
 ! --------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_MGM_UPDATE_GHOSTCELLS(NTYPE)
-USE SCARC_POINTERS, ONLY: M, L, G, GWC, HP, MGM, BXS, BXF, BYS, BYF, BZS, BZF, SCARC_POINT_TO_GRID
+USE SCARC_POINTERS, ONLY: M, L, G, GWC, HP, MGM, DX, DY, DZ, BXS, BXF, BYS, BYF, BZS, BZF, &
+                          SCARC_POINT_TO_GRID
 INTEGER, INTENT(IN):: NTYPE
 INTEGER:: NM, IW, IOR0, IXG, IYG, IZG, IXW, IYW, IZW 
 
@@ -17184,7 +17518,7 @@ DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
         
       CASE (NSCARC_MGM_LAPLACE)
 
-         HP => MGM%UHL
+         HP  => MGM%UHL
          BXS => MGM%BXS ; BXF => MGM%BXF
          BYS => MGM%BYS ; BYF => MGM%BYF
          BZS => MGM%BZS ; BZF => MGM%BZF
@@ -17193,11 +17527,11 @@ DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
       
             GWC => G%WALL(IW)
       
-            IXG = GWC%IXG
+            IXG = GWC%IXG             ! ghost cell indices
             IYG = GWC%IYG
             IZG = GWC%IZG
       
-            IXW = GWC%IXW
+            IXW = GWC%IXW             ! mesh-inner indices
             IYW = GWC%IYW
             IZW = GWC%IZW
       
@@ -17296,39 +17630,39 @@ DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
             SELECT CASE (IOR0)
                CASE ( 1)
                   IF (GWC%BTYPE == DIRICHLET) THEN
-                     HP(IXG, IYW, IZW) = -HP(IXW, IYW, IZW) + 2.0_EB*BXS(IYW, IZW)
+                     HP(IXG, IYW, IZW) = -HP(IXW, IYW, IZW) +  2.0_EB*BXS(IYW, IZW)
                   ELSE IF (GWC%BTYPE == NEUMANN) THEN
-                     HP(IXG, IYW, IZW) =  HP(IXW, IYW, IZW) - L%DX*BXS(IYW, IZW)
+                     HP(IXG, IYW, IZW) =  HP(IXW, IYW, IZW) - DX(IXW)*BXS(IYW, IZW)
                   ENDIF
                CASE (-1)
                   IF (GWC%BTYPE == DIRICHLET) THEN
-                     HP(IXG, IYW, IZW) = -HP(IXW, IYW, IZW) + 2.0_EB*BXF(IYW, IZW)
+                     HP(IXG, IYW, IZW) = -HP(IXW, IYW, IZW) +  2.0_EB*BXF(IYW, IZW)
                   ELSE IF (GWC%BTYPE == NEUMANN) THEN
-                     HP(IXG, IYW, IZW) =  HP(IXW, IYW, IZW) + L%DX*BXF(IYW, IZW)
+                     HP(IXG, IYW, IZW) =  HP(IXW, IYW, IZW) + DX(IXW)*BXF(IYW, IZW)
                   ENDIF
                CASE ( 2)
                   IF (GWC%BTYPE == DIRICHLET) THEN
-                     HP(IXW, IYG, IZW) = -HP(IXW, IYW, IZW) + 2.0_EB*BYS(IXW, IZW)
+                     HP(IXW, IYG, IZW) = -HP(IXW, IYW, IZW) +  2.0_EB*BYS(IXW, IZW)
                   ELSE IF (GWC%BTYPE == NEUMANN) THEN
-                     HP(IXW, IYG, IZW) =  HP(IXW, IYW, IZW) - L%DY*BYS(IXW, IZW)
+                     HP(IXW, IYG, IZW) =  HP(IXW, IYW, IZW) - DY(IYW)*BYS(IXW, IZW)
                   ENDIF
                CASE (-2)
                   IF (GWC%BTYPE == DIRICHLET) THEN
-                     HP(IXW, IYG, IZW) = -HP(IXW, IYW, IZW) + 2.0_EB*BYF(IXW, IZW)
+                     HP(IXW, IYG, IZW) = -HP(IXW, IYW, IZW) +  2.0_EB*BYF(IXW, IZW)
                   ELSE IF (GWC%BTYPE == NEUMANN) THEN
-                     HP(IXW, IYG, IZW) =  HP(IXW, IYW, IZW) + L%DY*BYF(IXW, IZW)
+                     HP(IXW, IYG, IZW) =  HP(IXW, IYW, IZW) + DY(IYW)*BYF(IXW, IZW)
                   ENDIF
                CASE ( 3)
                   IF (GWC%BTYPE == DIRICHLET) THEN
-                     HP(IXW, IYW, IZG) = -HP(IXW, IYW, IZW) + 2.0_EB*BZS(IXW, IYW)
+                     HP(IXW, IYW, IZG) = -HP(IXW, IYW, IZW) +  2.0_EB*BZS(IXW, IYW)
                   ELSE IF (GWC%BTYPE == NEUMANN) THEN
-                     HP(IXW, IYW, IZG) =  HP(IXW, IYW, IZW) - L%DZ*BZS(IXW, IYW)
+                     HP(IXW, IYW, IZG) =  HP(IXW, IYW, IZW) - DZ(IZW)*BZS(IXW, IYW)
                   ENDIF
                CASE (-3)
                   IF (GWC%BTYPE == DIRICHLET) THEN
-                     HP(IXW, IYW, IZG) = -HP(IXW, IYW, IZW) + 2.0_EB*BZF(IXW, IYW)
+                     HP(IXW, IYW, IZG) = -HP(IXW, IYW, IZW) +  2.0_EB*BZF(IXW, IYW)
                   ELSE IF (GWC%BTYPE == NEUMANN) THEN
-                     HP(IXW, IYW, IZG) =  HP(IXW, IYW, IZW) + L%DZ*BZF(IXW, IYW)
+                     HP(IXW, IYW, IZG) =  HP(IXW, IYW, IZW) + DZ(IZW)*BZF(IXW, IYW)
                   ENDIF
             END SELECT
       
@@ -17721,9 +18055,6 @@ DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 
 ENDDO
 
-!#ifdef WITH_SCARC_DEBUG
-!1000 FORMAT (A, ': IX, IY, IZ =', 3I6, ': ICU =', I6, ': HP =', E14.6)
-!#endif
 END SUBROUTINE SCARC_MGM_STORE
 
 
@@ -17768,8 +18099,8 @@ END SUBROUTINE SCARC_SETUP_MGM_WORKSPACE
 ! --------------------------------------------------------------------------------------------------------------
 !> \brief Set interface boundary conditions for unstructured, homogeneous part of McKeeney-Greengard-Mayo method
 ! --------------------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_MGM_SET_INTERFACES(VB, NM)
-USE SCARC_POINTERS, ONLY: L, F, G, OL, OG, MGM, UHL, UHL2, OUHL, OUHL2, BTYPE, &
+SUBROUTINE SCARC_MGM_SETUP_INTERFACES(VB, NM)
+USE SCARC_POINTERS, ONLY: L, F, G, OL, OG, MGM, UHL, UHL2, OUHL, OUHL2, BTYPE, RDX, RDY, RDZ, RDXN, RDYN, RDZN, &
                           SCARC_POINT_TO_MGM, SCARC_POINT_TO_OTHER_GRID
 INTEGER, INTENT(IN):: NM
 REAL(EB), DIMENSION(:),   INTENT(IN), POINTER :: VB
@@ -17784,7 +18115,6 @@ IF (TYPE_MGM_BC == NSCARC_MGM_BC_EXPOL .AND. TOTAL_PRESSURE_ITERATIONS <= 2) ITY
 !   CALL SCARC_POINT_TO_MGM(NM, NL)
 !   G  => L%UNSTRUCTURED
    BTYPE => MGM%BTYPE
-
 
    MGM_FACE_LOOP: DO IFACE = 1, 6
 
@@ -17903,9 +18233,9 @@ IF (TYPE_MGM_BC == NSCARC_MGM_BC_EXPOL .AND. TOTAL_PRESSURE_ITERATIONS <= 2) ITY
                   END SELECT MGM_TRUE_IOR_SELECT
 
                   IF (TWO_D) THEN
-                     VAL = (L%DXI2*(HB(1)+HB(-1)) + L%DZI2*(HB(3)+HB(-3))) * MGM%WEIGHT(IWG)
+                     VAL = (L%RDXI2*(HB(1)+HB(-1)) + L%RDZI2*(HB(3)+HB(-3))) * MGM%WEIGHT(IWG)
                   ELSE
-                     VAL = (L%DXI2*(HB(1)+HB(-1)) + L%DYI2*(HB(2)+HB(-2)) + L%DZI2*(HB(3)+HB(-3))) * MGM%WEIGHT(IWG)
+                     VAL = (L%RDXI2*(HB(1)+HB(-1)) + L%RDYI2*(HB(2)+HB(-2)) + L%RDZI2*(HB(3)+HB(-3))) * MGM%WEIGHT(IWG)
                   ENDIF
 
 
@@ -17913,34 +18243,38 @@ IF (TYPE_MGM_BC == NSCARC_MGM_BC_EXPOL .AND. TOTAL_PRESSURE_ITERATIONS <= 2) ITY
 
             SELECT CASE (IOR0)
                CASE ( 1)
+                  VB(ICW) = VB(ICW) - 2.0_EB*RDX(I)*RDXN(I-1)*VAL    
                   MGM%BXS(J,K) = VAL
                CASE (-1)
+                  VB(ICW) = VB(ICW) - 2.0_EB*RDX(I)*RDXN(I)  *VAL    
                   MGM%BXF(J,K) = VAL
                CASE ( 2)
+                  VB(ICW) = VB(ICW) - 2.0_EB*RDY(J)*RDYN(J-1)*VAL    
                   MGM%BYS(I,K) = VAL
                CASE (-2)
+                  VB(ICW) = VB(ICW) - 2.0_EB*RDY(J)*RDYN(J)  *VAL    
                   MGM%BYF(I,K) = VAL
                CASE ( 3)
+                  VB(ICW) = VB(ICW) - 2.0_EB*RDZ(K)*RDZN(K-1)*VAL    
                   MGM%BZS(I,J) = VAL
                CASE (-3)
+                  VB(ICW) = VB(ICW) - 2.0_EB*RDZ(K)*RDZN(K)  *VAL    
                   MGM%BZF(I,J) = VAL
             END SELECT
-
-            VB(ICW) = VB(ICW) + F%SCAL_DIRICHLET * VAL    
 
          ENDDO MGM_CELL_LOOP
       ENDDO MGM_NBR_LOOP
    ENDDO MGM_FACE_LOOP
 !ENDDO MGM_MESH_LOOP
 
-END SUBROUTINE SCARC_MGM_SET_INTERFACES
+END SUBROUTINE SCARC_MGM_SETUP_INTERFACES
 
 
 ! --------------------------------------------------------------------------------------------------------------
 !> \brief Set BC's along internal obstructions for MGM method
 ! --------------------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_MGM_SET_OBSTRUCTIONS(VB)
-USE SCARC_POINTERS, ONLY: L, G, MGM, UU, VV, WW, GWC, SCARC_POINT_TO_MGM
+SUBROUTINE SCARC_MGM_SETUP_OBSTRUCTIONS(VB)
+USE SCARC_POINTERS, ONLY: L, G, MGM, UU, VV, WW, GWC, RDXI, RDYI, RDZI, SCARC_POINT_TO_MGM
 REAL(EB), DIMENSION(:), POINTER, INTENT(IN) :: VB
 INTEGER:: IW, I, J, K, IOR0, IC
 REAL(EB):: VAL
@@ -17970,18 +18304,17 @@ REAL(EB):: VAL
       
       SELECT CASE (IOR0)
          CASE(1)
-            VAL =  L%DXI*DTI*UU(I-1, J, K)
+            VAL =  RDXI*DTI*UU(I-1,J,K)
          CASE(-1)
-            VAL = -L%DXI*DTI*UU(I, J, K)
+            VAL = -RDXI*DTI*UU(I,J,K)
          CASE(2)
-            VAL =  L%DYI*DTI*VV(I, J-1, K)
-
+            VAL =  RDYI*DTI*VV(I,J-1,K)
          CASE(-2)
-            VAL = -L%DYI*DTI*VV(I, J, K)
+            VAL = -RDYI*DTI*VV(I,J,K)
          CASE(3)
-            VAL =  L%DZI*DTI*WW(I, J, K-1)
+            VAL =  RDZI*DTI*WW(I,J,K-1)
          CASE(-3)
-            VAL = -L%DZI*DTI*WW(I, J, K)
+            VAL = -RDZI*DTI*WW(I,J,K)
       END SELECT
 
       !IF (BFIRST_WORKSPACE) VB(IC) = VB(IC) + VAL             ! Variant A
@@ -17992,14 +18325,14 @@ REAL(EB):: VAL
 
 !ENDDO MGM_MESH_LOOP
 
-END SUBROUTINE SCARC_MGM_SET_OBSTRUCTIONS
+END SUBROUTINE SCARC_MGM_SETUP_OBSTRUCTIONS
 
 
 ! --------------------------------------------------------------------------------------------------------------
 !> \brief Update velocities after either the first or second pass of the MGM method
 ! --------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_MGM_UPDATE_VELOCITY(NTYPE)
-USE SCARC_POINTERS, ONLY: M, L, GWC, MGM, UU, VV, WW, HP, SCARC_POINT_TO_MGM
+USE SCARC_POINTERS, ONLY: M, L, GWC, MGM, UU, VV, WW, HP, RDXN, RDYN, RDZN, SCARC_POINT_TO_MGM
 INTEGER, INTENT(IN):: NTYPE
 INTEGER  :: NM, I, J, K, IW, IOR0
 
@@ -18027,7 +18360,7 @@ DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          DO K = 1, M%KBAR
             DO J = 1, M%JBAR
                DO I = 0, M%IBAR
-                  MGM%U1(I, J, K) = UU(I, J, K) - DT*( M%FVX(I, J, K) + M%RDXN(I)*(HP(I+1, J, K)-HP(I, J, K)) )
+                  MGM%U1(I, J, K) = UU(I, J, K) - DT*( M%FVX(I, J, K) + RDXN(I)*(HP(I+1, J, K)-HP(I, J, K)) )
                ENDDO
             ENDDO
          ENDDO
@@ -18035,7 +18368,7 @@ DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          DO K = 1, M%KBAR
             DO J = 0, M%JBAR
                DO I = 1, M%IBAR
-                  MGM%V1(I, J, K) = VV(I, J, K) - DT*( M%FVY(I, J, K) + M%RDYN(J)*(HP(I, J+1, K)-HP(I, J, K)) )
+                  MGM%V1(I, J, K) = VV(I, J, K) - DT*( M%FVY(I, J, K) + RDYN(J)*(HP(I, J+1, K)-HP(I, J, K)) )
                ENDDO
             ENDDO
          ENDDO
@@ -18043,7 +18376,7 @@ DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          DO K = 0, M%KBAR
             DO J = 1, M%JBAR
                DO I = 1, M%IBAR
-                  MGM%W1(I, J, K) = WW(I, J, K) - DT*( M%FVZ(I, J, K) + M%RDZN(K)*(HP(I, J, K+1)-HP(I, J, K)) )
+                  MGM%W1(I, J, K) = WW(I, J, K) - DT*( M%FVZ(I, J, K) + RDZN(K)*(HP(I, J, K+1)-HP(I, J, K)) )
                ENDDO
             ENDDO
          ENDDO
@@ -18061,7 +18394,7 @@ DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          DO K = 1, M%KBAR
             DO J = 1, M%JBAR
                DO I = 0, M%IBAR
-                  MGM%U2(I, J, K) = - DT*M%RDXN(I)*(HP(I+1, J, K)-HP(I, J, K))
+                  MGM%U2(I, J, K) = - DT*RDXN(I)*(HP(I+1, J, K)-HP(I, J, K))
                ENDDO
             ENDDO
          ENDDO
@@ -18070,7 +18403,7 @@ DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          DO K = 1, M%KBAR
             DO J = 0, M%JBAR
                DO I = 1, M%IBAR
-                  MGM%V2(I, J, K) = - DT*M%RDYN(J)*(HP(I, J+1, K)-HP(I, J, K))
+                  MGM%V2(I, J, K) = - DT*RDYN(J)*(HP(I, J+1, K)-HP(I, J, K))
                ENDDO
             ENDDO
          ENDDO
@@ -18079,7 +18412,7 @@ DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          DO K = 0, M%KBAR
             DO J = 1, M%JBAR
                DO I = 1, M%IBAR
-                  MGM%W2(I, J, K) = - DT*M%RDZN(K)*(HP(I, J, K+1)-HP(I, J, K))
+                  MGM%W2(I, J, K) = - DT*RDZN(K)*(HP(I, J, K+1)-HP(I, J, K))
                ENDDO
             ENDDO
          ENDDO
@@ -18127,7 +18460,7 @@ END SUBROUTINE SCARC_MGM_UPDATE_VELOCITY
 !> \brief Set internal boundary conditions for unstructured, homogeneous part of McKeeney-Greengard-Mayo method
 ! --------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_MGM_COMPUTE_VELOCITY_ERROR(NTYPE)
-USE SCARC_POINTERS, ONLY: M, L, MGM, GWC, EWC, HP, SCARC_POINT_TO_MGM
+USE SCARC_POINTERS, ONLY: M, L, MGM, GWC, EWC, HP, RDXN, RDYN, RDZN, SCARC_POINT_TO_MGM
 INTEGER, INTENT(IN) ::  NTYPE
 INTEGER:: NM, I, J, K, IW, IOR0, IIO1, IIO2, JJO1, JJO2, KKO1, KKO2, IIO, JJO, KKO, ITYPE
 REAL(EB):: UN_NEW_OTHER, UN_NEW, DUDT, DVDT, DWDT
@@ -18173,17 +18506,17 @@ MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 
             SELECT CASE(IOR0)
                CASE( 1)
-                  UN_NEW = M%U(I, J, K)   - DT*(M%FVX(I, J, K)   + M%RDXN(I)  *(HP(I+1, J, K)-HP(I, J, K)))
+                  UN_NEW = M%U(I, J, K)   - DT*(M%FVX(I, J, K)   + RDXN(I)  *(HP(I+1, J, K)-HP(I, J, K)))
                CASE(-1)
-                  UN_NEW = M%U(I-1, J, K) - DT*(M%FVX(I-1, J, K) + M%RDXN(I-1)*(HP(I, J, K)-HP(I-1, J, K)))
+                  UN_NEW = M%U(I-1, J, K) - DT*(M%FVX(I-1, J, K) + RDXN(I-1)*(HP(I, J, K)-HP(I-1, J, K)))
                CASE( 2)
-                  UN_NEW = M%V(I, J, K)   - DT*(M%FVY(I, J, K)   + M%RDYN(J)  *(HP(I, J+1, K)-HP(I, J, K)))
+                  UN_NEW = M%V(I, J, K)   - DT*(M%FVY(I, J, K)   + RDYN(J)  *(HP(I, J+1, K)-HP(I, J, K)))
                CASE(-2)
-                  UN_NEW = M%V(I, J-1, K) - DT*(M%FVY(I, J-1, K) + M%RDYN(J-1)*(HP(I, J, K)-HP(I, J-1, K)))
+                  UN_NEW = M%V(I, J-1, K) - DT*(M%FVY(I, J-1, K) + RDYN(J-1)*(HP(I, J, K)-HP(I, J-1, K)))
                CASE( 3)
-                  UN_NEW = M%W(I, J, K)   - DT*(M%FVZ(I, J, K)   + M%RDZN(K)  *(HP(I, J, K+1)-HP(I, J, K)))
+                  UN_NEW = M%W(I, J, K)   - DT*(M%FVZ(I, J, K)   + RDZN(K)  *(HP(I, J, K+1)-HP(I, J, K)))
                CASE(-3)
-                  UN_NEW = M%W(I, J, K-1) - DT*(M%FVZ(I, J, K-1) + M%RDZN(K-1)*(HP(I, J, K)-HP(I, J, K-1)))
+                  UN_NEW = M%W(I, J, K-1) - DT*(M%FVZ(I, J, K-1) + RDZN(K-1)*(HP(I, J, K)-HP(I, J, K-1)))
             END SELECT
 
             IF (M%WALL(IW)%BOUNDARY_TYPE == INTERPOLATED_BOUNDARY) THEN
@@ -18294,22 +18627,22 @@ MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
             UN_NEW_OTHER = 0.0_EB
             SELECT CASE(IOR0)
                CASE( 1)
-                  !UN_NEW = M%U(I, J, K)   - DT*(M%FVX(I, J, K)   + M%RDXN(I)  *(HP(I+1, J, K)-HP(I, J, K))*DHFCT)
+                  !UN_NEW = M%U(I, J, K)   - DT*(M%FVX(I, J, K)   + RDXN(I)  *(HP(I+1, J, K)-HP(I, J, K))*DHFCT)
                   UN_NEW = MGM%UVEL(I, J, K)
                CASE(-1)
-                  !UN_NEW = M%U(I-1, J, K) - DT*(M%FVX(I-1, J, K) + M%RDXN(I-1)*(HP(I, J, K)-HP(I-1, J, K))*DHFCT)
+                  !UN_NEW = M%U(I-1, J, K) - DT*(M%FVX(I-1, J, K) + RDXN(I-1)*(HP(I, J, K)-HP(I-1, J, K))*DHFCT)
                   UN_NEW = MGM%UVEL(I-1, J, K)
                CASE( 2)
-                  !UN_NEW = M%V(I, J, K)   - DT*(M%FVY(I, J, K)   + M%RDYN(J)  *(HP(I, J+1, K)-HP(I, J, K))*DHFCT)
+                  !UN_NEW = M%V(I, J, K)   - DT*(M%FVY(I, J, K)   + RDYN(J)  *(HP(I, J+1, K)-HP(I, J, K))*DHFCT)
                   UN_NEW = MGM%VVEL(I, J, K)
                CASE(-2)
-                  !UN_NEW = M%V(I, J-1, K) - DT*(M%FVY(I, J-1, K) + M%RDYN(J-1)*(HP(I, J, K)-HP(I, J-1, K))*DHFCT)
+                  !UN_NEW = M%V(I, J-1, K) - DT*(M%FVY(I, J-1, K) + RDYN(J-1)*(HP(I, J, K)-HP(I, J-1, K))*DHFCT)
                   UN_NEW = MGM%VVEL(I, J-1, K)
                CASE( 3)
-                  !UN_NEW = M%W(I, J, K)   - DT*(M%FVZ(I, J, K)   + M%RDZN(K)  *(HP(I, J, K+1)-HP(I, J, K))*DHFCT)
+                  !UN_NEW = M%W(I, J, K)   - DT*(M%FVZ(I, J, K)   + RDZN(K)  *(HP(I, J, K+1)-HP(I, J, K))*DHFCT)
                   UN_NEW = MGM%WVEL(I, J, K) 
                CASE(-3)
-                  !UN_NEW = M%W(I, J, K-1) - DT*(M%FVZ(I, J, K-1) + M%RDZN(K-1)*(HP(I, J, K)-HP(I, J, K-1))*DHFCT)
+                  !UN_NEW = M%W(I, J, K-1) - DT*(M%FVZ(I, J, K-1) + RDZN(K-1)*(HP(I, J, K)-HP(I, J, K-1))*DHFCT)
                   UN_NEW = MGM%WVEL(I, J, K-1) 
             END SELECT
 
@@ -18384,13 +18717,44 @@ IMPLICIT NONE (TYPE,EXTERNAL)
 CONTAINS
 
 ! --------------------------------------------------------------------------------------------------------------
+!> \brief  Setup environment for solution of inseparable Poisson system if requested
+!  - workspace for the current version of RHO depending on predictor/corrector stage including correct overlaps
+!  - workspace for the inseparable pressure solution itself in both stages
+!  - workspace for the boundary conditions for the inseparable pressure solution
+! --------------------------------------------------------------------------------------------------------------
+SUBROUTINE SCARC_SETUP_INSEPARABLE_ENVIRONMENT
+USE SCARC_POINTERS, ONLY: L, SCARC_POINT_TO_LEVEL
+INTEGER :: NM
+CROUTINE = 'SCARC_SETUP_INSEPARABLE_ENVIRONMENT'
+
+DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
+
+   CALL SCARC_POINT_TO_LEVEL (NM, NLEVEL_MIN)
+
+   CALL SCARC_ALLOCATE_REAL3 (SCARC_RHO ,  0, L%NX+1, 0, L%NY+1, 0, L%NZ+1, NSCARC_INIT_ZERO, 'SCARC_RHO',  CROUTINE)
+   CALL SCARC_ALLOCATE_REAL3 (SCARC_KRES,  0, L%NX+1, 0, L%NY+1, 0, L%NZ+1, NSCARC_INIT_ZERO, 'SCARC_KRES', CROUTINE)
+   CALL SCARC_ALLOCATE_REAL3 (SCARC_P   ,  0, L%NX+1, 0, L%NY+1, 0, L%NZ+1, NSCARC_INIT_ZERO, 'SCARC_P',    CROUTINE)
+   CALL SCARC_ALLOCATE_REAL3 (SCARC_PS  ,  0, L%NX+1, 0, L%NY+1, 0, L%NZ+1, NSCARC_INIT_ZERO, 'SCARC_PS',   CROUTINE)
+
+   CALL SCARC_ALLOCATE_REAL2 (L%PXS, 1, L%NY, 1, L%NZ, NSCARC_INIT_ZERO, 'L%PXS', CROUTINE)
+   CALL SCARC_ALLOCATE_REAL2 (L%PXF, 1, L%NY, 1, L%NZ, NSCARC_INIT_ZERO, 'L%PXF', CROUTINE)
+   CALL SCARC_ALLOCATE_REAL2 (L%PYS, 1, L%NX, 1, L%NZ, NSCARC_INIT_ZERO, 'L%PYS', CROUTINE)
+   CALL SCARC_ALLOCATE_REAL2 (L%PYF, 1, L%NX, 1, L%NZ, NSCARC_INIT_ZERO, 'L%PYF', CROUTINE)
+   CALL SCARC_ALLOCATE_REAL2 (L%PZS, 1, L%NX, 1, L%NY, NSCARC_INIT_ZERO, 'L%PZS', CROUTINE)
+   CALL SCARC_ALLOCATE_REAL2 (L%PZF, 1, L%NX, 1, L%NY, NSCARC_INIT_ZERO, 'L%PZF', CROUTINE)
+
+ENDDO
+
+END SUBROUTINE SCARC_SETUP_INSEPARABLE_ENVIRONMENT
+
+! --------------------------------------------------------------------------------------------------------------
 !> \brief  Setup environment for global Krylov method to solve the overall Poisson problem
 ! This includes 
 !  - environment for the global Krylov method 
 !  - environment for the (mostly) local or global preconditioners 
 ! --------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_SETUP_KRYLOV_ENVIRONMENT
-USE SCARC_FFT, ONLY: SCARC_SETUP_FFT, SCARC_SETUP_FFTO
+USE SCARC_FFT, ONLY: SCARC_SETUP_FFT
 #ifdef WITH_MKL
 USE SCARC_MKL, ONLY: SCARC_SETUP_PARDISO, SCARC_SETUP_CLUSTER
 #endif
@@ -18443,10 +18807,6 @@ SELECT_KRYLOV_PRECON: SELECT CASE (TYPE_PRECON)
    CASE (NSCARC_RELAX_FFT)                                          ! FFT preconditioning
       CALL SCARC_SETUP_STACK_PRECON(NSTACK, NSCARC_SCOPE_LOCAL)
       CALL SCARC_SETUP_FFT(NLEVEL_MIN, NLEVEL_MIN)
-
-   CASE (NSCARC_RELAX_FFTO)                                         ! FFT preconditioning with overlap
-      CALL SCARC_SETUP_STACK_PRECON(NSTACK, NSCARC_SCOPE_LOCAL)
-      CALL SCARC_SETUP_FFTO(NLEVEL_MIN, NLEVEL_MIN)
 
 #ifdef WITH_MKL
    CASE (NSCARC_RELAX_MKL)                                          ! IntelMKL preconditioning
@@ -18551,7 +18911,7 @@ END SUBROUTINE SCARC_SETUP_OPTIMIZED
 !  - environment for the (mostly) local or global smoothers 
 ! --------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_SETUP_MULTIGRID_ENVIRONMENT
-USE SCARC_FFT, ONLY: SCARC_SETUP_FFT, SCARC_SETUP_FFTO
+USE SCARC_FFT, ONLY: SCARC_SETUP_FFT
 #ifdef WITH_MKL
 USE SCARC_MKL, ONLY: SCARC_SETUP_CLUSTER, SCARC_SETUP_PARDISO
 #endif
@@ -19284,7 +19644,7 @@ END SUBROUTINE SCARC_SETUP_ILU
 !> \brief Setup onedirectional Poisson-preconditioner
 ! --------------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_SETUP_PRECON_XMEAN(NL)
-USE SCARC_POINTERS, ONLY: M, L, PRE, SCARC_POINT_TO_LEVEL
+USE SCARC_POINTERS, ONLY: M, L, PRE, RDX, RDXN, SCARC_POINT_TO_LEVEL
 INTEGER, INTENT(IN) :: NL
 INTEGER :: II, IX, NM
 
@@ -19314,9 +19674,9 @@ MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 
    DO IX = 1, L%NX
       II = NX_OFFSET(NM) + IX  
-      PRE%DIAG(II) = -M%RDX(IX)*(M%RDXN(IX)+M%RDXN(IX-1))  ! Main diagonal
-      PRE%UP(II)   =  M%RDX(IX)*M%RDXN(IX)                 ! Upper diagonal 
-      PRE%LOW(II)  =  M%RDX(IX)*M%RDXN(IX-1)               ! Lower diagonal 
+      PRE%DIAG(II) = -RDX(IX)*(RDXN(IX)+RDXN(IX-1))  ! Main diagonal
+      PRE%UP(II)   =  RDX(IX)*RDXN(IX)                 ! Upper diagonal 
+      PRE%LOW(II)  =  RDX(IX)*RDXN(IX-1)               ! Lower diagonal 
    ENDDO
       
    ! Apply boundary conditions at end of tunnel to the matrix components
@@ -19440,20 +19800,17 @@ END SUBROUTINE SCARC_SETUP_INTERPOLATION
 
 
 ! ------------------------------------------------------------------------------------------------------------------
-!> \brief Set initial solution corresponding to boundary data in BXS, BXF, ...
+!> \brief Setup Poisson system for (U)ScaRC based on current vectors PRHS, BXS, BXF, ... from pres.f90
 ! ------------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_SETUP_WORKSPACE(NS, NL)
-USE SCARC_POINTERS, ONLY: M, L, F, G, SV, ST, STP, GWC, PRHS, HP, MGM, VB, VX, &
-                          BXS, BXF, BYS, BYF, BZS, BZF, &
-                          SCARC_POINT_TO_GRID, SCARC_POINT_TO_MGM
-USE SCARC_MGM, ONLY: SCARC_MGM_SET_OBSTRUCTIONS, SCARC_MGM_SET_INTERFACES
+USE SCARC_POINTERS, ONLY: L, G, SV, ST, STP, MGM, VB, VX, &
+                          SCARC_POINT_TO_GRID, SCARC_POINT_TO_MGM, &
+                          SCARC_POINT_TO_SEPARABLE_ENVIRONMENT, SCARC_POINT_TO_INSEPARABLE_ENVIRONMENT
+USE SCARC_MGM, ONLY: SCARC_MGM_SETUP_OBSTRUCTIONS, SCARC_MGM_SETUP_INTERFACES
 INTEGER, INTENT(IN) :: NS, NL
-REAL(EB) :: VAL
-INTEGER  :: NM, IW, IW1, IW2, IOR0, I, J, K, IC
-
+INTEGER  :: NM
 
 SV => STACK(NS)%SOLVER
-
 SELECT_SOLVER_TYPE: SELECT CASE (SV%TYPE_SOLVER)
 
    ! ---------- If used as main solver use values from pressure-routine as initialization
@@ -19463,113 +19820,20 @@ SELECT_SOLVER_TYPE: SELECT CASE (SV%TYPE_SOLVER)
       MAIN_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
    
          CALL SCARC_POINT_TO_GRID (NM, NL)                                    
-         ST => SCARC(NM)%LEVEL(NL)%STAGE(SV%TYPE_STAGE)
-   
-         PRHS => M%PRHS
-         IF (PREDICTOR) THEN
-            HP => M%H
-         ELSE
-            HP => M%HS
-         ENDIF
+         CALL SCARC_POINT_TO_SEPARABLE_ENVIRONMENT(NM)                   
 
-         ! Get right hand side (PRHS from pres.f90) and initial vector (H or HS from last time step)
-
-         BXS => M%BXS   ;  BXF => M%BXF
-         BYS => M%BYS   ;  BYF => M%BYF
-         BZS => M%BZS   ;  BZF => M%BZF
-
-         !$OMP PARALLEL DO PRIVATE(IC) SCHEDULE(STATIC)
-         DO IC = 1, G%NC
-            ST%X(IC) = HP(G%ICX(IC), G%ICY(IC), G%ICZ(IC))        ! use last iterate as initial solution
-            ST%B(IC) = PRHS(G%ICX(IC), G%ICY(IC), G%ICZ(IC))      ! get new RHS from surrounding code
-         ENDDO                         
-         !$OMP END PARALLEL DO
-
-         !!$OMP PARALLEL 
-         MAIN_INHOMOGENEOUS_LOOP: DO IOR0 = -3, 3, 1 
+         ST => SCARC(NM)%LEVEL(NL)%STAGE(SV%TYPE_STAGE)                 
+         VB => ST%B
+         VX => ST%X
       
-            IF (IOR0 == 0) CYCLE
-            F => SCARC(NM)%LEVEL(NL)%FACE(IOR0)
-            
-            IW1 = F%NCW0
-            IW2 = F%NCW0 + F%NCW - 1
-      
-            !!$OMP DO PRIVATE(IW, GWC, I, J, K, IC, VAL) SCHEDULE(STATIC)
-            MAIN_FACE_INHOMOGENEOUS_LOOP: DO IW = IW1, IW2
-      
-               GWC => G%WALL(IW)
-   
-               I = GWC%IXW
-               J = GWC%IYW
-               K = GWC%IZW
-   
-               IF (TWO_D .AND. J /= 1) CALL SCARC_ERROR(NSCARC_ERROR_GRID_INDEX, SCARC_NONE, J)
-               IF (IS_UNSTRUCTURED .AND. L%IS_SOLID(I, J, K)) CYCLE
-   
-               IC = G%CELL_NUMBER(I,J,K)
-   
-               ! ---------- Dirichlet BC's:
-               ! these are based on the SETTING in BTYPE
-               ! in the structured case this corresponds to the face-wise SETTING according to the FFT
-               ! (this allows to use local FFT's as preconditioners)
-               ! in the unstructured case only open boundary cells lead to Dirichlet BC's
+         ! set RHS including BC's according to separable/inseparable Poisson system
 
-               MAIN_IF_DIRICHLET: IF (GWC%BTYPE == DIRICHLET) THEN
-   
-                  SELECT CASE (IOR0)
-                     CASE (1)
-                        VAL =  BXS(J,K)
-                     CASE (-1)
-                        VAL =  BXF(J,K)
-                     CASE (2)
-                        VAL =  BYS(I,K)
-                     CASE (-2)
-                        VAL =  BYF(I,K)
-                     CASE (3)
-                        VAL =  BZS(I,J)
-                     CASE (-3)
-                        VAL =  BZF(I,J)
-                  END SELECT
-   
-                  ST%B(IC) = ST%B(IC) + F%SCAL_DIRICHLET * VAL
-               ENDIF MAIN_IF_DIRICHLET
-   
-               ! ---------- Neumann BC's:
-               ! Note for the unstructured case only:
-               ! Here, the matrix also contains Neumann BC's for those cells which have a
-               ! PRESSURE_BC_INDEX == DIRICHLET but are NOT open; these cells must be excluded below,
-               ! because BXS, BXF, ... contain the Dirichlet information from pres.f90 there;
-               ! excluding them corresponds to a homogeneous Neumann condition for these cells
-
-               MAIN_IF_NEUMANN: IF (GWC%BTYPE == NEUMANN) THEN
-   
-                  IF (IS_UNSTRUCTURED .AND. M%WALL(IW)%PRESSURE_BC_INDEX /= NEUMANN) CYCLE
-   
-                  SELECT CASE (IOR0)
-                     CASE (1)
-                        VAL =  BXS(J,K)
-                     CASE (-1)
-                        VAL =  BXF(J,K)
-                     CASE (2)
-                        VAL =  BYS(I,K)
-                     CASE (-2)
-                        VAL =  BYF(I,K)
-                     CASE (3)
-                        VAL =  BZS(I,J)
-                     CASE (-3)
-                        VAL =  BZF(I,J)
-                  END SELECT
-   
-                  ST%B(IC) = ST%B(IC) + F%SCAL_NEUMANN * VAL
-
-               ENDIF MAIN_IF_NEUMANN
-      
-            ENDDO MAIN_FACE_INHOMOGENEOUS_LOOP
-            !!$OMP END DO
-
-         ENDDO MAIN_INHOMOGENEOUS_LOOP
-         !!$OMP END PARALLEL 
-   
+         SELECT CASE (TYPE_POISSON)
+            CASE (NSCARC_POISSON_SEPARABLE)                   
+               CALL SCARC_SETUP_SEPARABLE_POISSON(NM)
+            CASE (NSCARC_POISSON_INSEPARABLE)                  
+               CALL SCARC_SETUP_INSEPARABLE_POISSON(NM)
+         END SELECT
    
       ENDDO MAIN_MESHES_LOOP
       
@@ -19627,15 +19891,8 @@ SELECT_SOLVER_TYPE: SELECT CASE (SV%TYPE_SOLVER)
       MGM_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
    
          CALL SCARC_POINT_TO_MGM (NM, NL)                                    
-         G => L%UNSTRUCTURED
-   
-         BXS => MGM%BXS ;  BXS = 0.0_EB
-         BXF => MGM%BXF ;  BXF = 0.0_EB
-         BYS => MGM%BYS ;  BYS = 0.0_EB
-         BYF => MGM%BYF ;  BYF = 0.0_EB
-         BZS => MGM%BZS ;  BZS = 0.0_EB
-         BZF => MGM%BZF ;  BZF = 0.0_EB
 
+         G => L%UNSTRUCTURED
          IF (TYPE_MGM_LAPLACE == NSCARC_MGM_LAPLACE_CG) THEN
             VB => ST%B ;  VB = 0.0_EB
             VX => ST%X ;  VX = 0.0_EB
@@ -19644,83 +19901,11 @@ SELECT_SOLVER_TYPE: SELECT CASE (SV%TYPE_SOLVER)
             VX => MGM%X ;  VX = 0.0_EB
          ENDIF
 
-         CALL SCARC_MGM_SET_INTERFACES (VB, NM)
-         CALL SCARC_MGM_SET_OBSTRUCTIONS (VB)
+         CALL SCARC_MGM_SETUP_INTERFACES (VB, NM)
+         CALL SCARC_MGM_SETUP_OBSTRUCTIONS (VB)
 
-         !!$OMP PARALLEL 
-         MGM_INHOMOGENEOUS_LOOP: DO IOR0 = -3, 3, 1 
-      
-            IF (IOR0 == 0) CYCLE
-            F => SCARC(NM)%LEVEL(NL)%FACE(IOR0)
-            
-            IW1 = F%NCW0
-            IW2 = F%NCW0 + F%NCW - 1
-      
-            !!$OMP DO PRIVATE(IW, GWC, I, J, K, IC, VAL) SCHEDULE(STATIC)
-            MGM_FACE_INHOMOGENEOUS_LOOP: DO IW = IW1, IW2
-      
-               GWC => G%WALL(IW)
-   
-               I = GWC%IXW
-               J = GWC%IYW
-               K = GWC%IZW
-   
-               IF (TWO_D .AND. J /= 1) CALL SCARC_ERROR(NSCARC_ERROR_GRID_INDEX, SCARC_NONE, J)
-               IF (L%IS_SOLID(I, J, K)) CYCLE
-   
-               IC = G%CELL_NUMBER(I,J,K)
-   
-               MGM_IF_DIRICHLET: IF (GWC%BTYPE == DIRICHLET) THEN
-   
-                  SELECT CASE (IOR0)
-                     CASE (1)
-                        VAL =  BXS(J,K)
-                     CASE (-1)
-                        VAL =  BXF(J,K)
-                     CASE (2)
-                        VAL =  BYS(I,K)
-                     CASE (-2)
-                        VAL =  BYF(I,K)
-                     CASE (3)
-                        VAL =  BZS(I,J)
-                     CASE (-3)
-                        VAL =  BZF(I,J)
-                  END SELECT
-   
-                  VB(IC) = VB(IC) + F%SCAL_DIRICHLET * VAL
-   
-               ENDIF MGM_IF_DIRICHLET
-   
-               MGM_IF_NEUMANN: IF (GWC%BTYPE == NEUMANN) THEN
-   
-                  IF (IS_UNSTRUCTURED .AND. M%WALL(IW)%PRESSURE_BC_INDEX /= NEUMANN) CYCLE
-   
-                  SELECT CASE (IOR0)
-                     CASE (1)
-                        VAL =  BXS(J,K)
-                     CASE (-1)
-                        VAL =  BXF(J,K)
-                     CASE (2)
-                        VAL =  BYS(I,K)
-                     CASE (-2)
-                        VAL =  BYF(I,K)
-                     CASE (3)
-                        VAL =  BZS(I,J)
-                     CASE (-3)
-                        VAL =  BZF(I,J)
-                  END SELECT
-   
-                  VB(IC) = VB(IC) + F%SCAL_NEUMANN * VAL
+         CALL SCARC_SETUP_SEPARABLE_POISSON(NM)
 
-   
-               ENDIF MGM_IF_NEUMANN
-      
-            ENDDO MGM_FACE_INHOMOGENEOUS_LOOP
-            !!$OMP END DO
-
-         ENDDO MGM_INHOMOGENEOUS_LOOP
-         !!$OMP END PARALLEL 
-   
       ENDDO MGM_MESHES_LOOP
       
    ! ---------- If MG is used as Krylov preconditioner, vector R of main Krylov is the new RHS for MG
@@ -19743,19 +19928,320 @@ SELECT_SOLVER_TYPE: SELECT CASE (SV%TYPE_SOLVER)
  
    CASE (NSCARC_SOLVER_COARSE)
    
-      DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
-         ST => SCARC(NM)%LEVEL(NL)%STAGE(SV%TYPE_STAGE)
-         ST%X = 0.0_EB
-         ST%D = 0.0_EB
-         ST%R = 0.0_EB
-         ST%V = 0.0_EB
-         ST%Y = 0.0_EB
-         ST%Z = 0.0_EB
-      ENDDO
+      IF (TYPE_COARSE == NSCARC_COARSE_ITERATIVE) THEN
+         DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
+            ST => SCARC(NM)%LEVEL(NL)%STAGE(SV%TYPE_STAGE)
+            ST%X = 0.0_EB
+            ST%D = 0.0_EB
+            ST%R = 0.0_EB
+            ST%V = 0.0_EB
+            ST%Y = 0.0_EB
+            ST%Z = 0.0_EB
+         ENDDO
+      ENDIF
          
 END SELECT SELECT_SOLVER_TYPE
 
 END SUBROUTINE SCARC_SETUP_WORKSPACE
+
+
+! --------------------------------------------------------------------------------------------------------------
+!> \brief Setup right hand side vector with corresponding boundary conditions for separable Poisson system
+! --------------------------------------------------------------------------------------------------------------
+SUBROUTINE SCARC_SETUP_SEPARABLE_POISSON(NM)
+USE SCARC_POINTERS, ONLY: M, L, G, ST, HP, PRHS, GWC, &
+                          RDX, RDY, RDZ, RDXN, RDYN, RDZN, BXS, BXF, BYS, BYF, BZS, BZF, &
+                          SCARC_POINT_TO_SEPARABLE_ENVIRONMENT
+INTEGER, INTENT(IN) :: NM
+INTEGER :: IOR0, IW, IC, I, J, K 
+
+CALL SCARC_POINT_TO_SEPARABLE_ENVIRONMENT(NM)
+
+! Get right hand side (PRHS from pres.f90) and initial vector (H or HS from last time step)
+
+!$OMP PARALLEL DO PRIVATE(IC) SCHEDULE(STATIC)
+DO IC = 1, G%NC
+   ST%X(IC) = HP(G%ICX(IC), G%ICY(IC), G%ICZ(IC))      
+   ST%B(IC) = PRHS(G%ICX(IC), G%ICY(IC), G%ICZ(IC))     
+ENDDO                         
+!$OMP END PARALLEL DO
+
+! Set correct boundary conditions related to Dirichlet or Neumann boundaries for separable system
+
+!$OMP PARALLEL DO PRIVATE(IC) SCHEDULE(STATIC)
+SEPARABLE_BOUNDARY_CELLS_LOOP: DO IW = 1, L%N_WALL_CELLS_EXT
+
+   GWC => G%WALL(IW)
+   IOR0 = GWC%IOR
+
+   I = GWC%IXW 
+   J = GWC%IYW 
+   K = GWC%IZW    
+
+   IF (TWO_D .AND. J /= 1) CALL SCARC_ERROR(NSCARC_ERROR_GRID_INDEX, SCARC_NONE, J)
+   IF (IS_UNSTRUCTURED .AND. L%IS_SOLID(I, J, K)) CYCLE
+
+   IC = G%CELL_NUMBER(I,J,K)           ! Number of mesh-internal cell
+      
+   ! ---------- Dirichlet BC's:
+   ! these are based on the SETTING in BTYPE
+   ! in the structured case this corresponds to the face-wise SETTING according to the FFT
+   ! (this allows to use local FFT's as preconditioners)
+   ! in the unstructured case only open boundary cells lead to Dirichlet BC's
+
+   SEPARABLE_DIRICHLET_IF: IF (GWC%BTYPE == DIRICHLET) THEN
+   
+      SELECT CASE (IOR0)
+         CASE (1)
+            ST%B(IC) = ST%B(IC) - 2.0_EB*RDX(I)*RDXN(I-1)*BXS(J,K)
+         CASE (-1)
+            ST%B(IC) = ST%B(IC) - 2.0_EB*RDX(I)*RDXN(I)  *BXF(J,K)
+         CASE (2)
+            ST%B(IC) = ST%B(IC) - 2.0_EB*RDY(J)*RDYN(J-1)*BYS(I,K)
+         CASE (-2)
+            ST%B(IC) = ST%B(IC) - 2.0_EB*RDY(J)*RDYN(J)  *BYF(I,K)
+         CASE (3)
+            ST%B(IC) = ST%B(IC) - 2.0_EB*RDZ(K)*RDZN(K-1)*BZS(I,J)
+         CASE (-3)
+            ST%B(IC) = ST%B(IC) - 2.0_EB*RDZ(K)*RDZN(K)  *BZF(I,J)
+      END SELECT
+   
+   ENDIF SEPARABLE_DIRICHLET_IF
+   
+   ! ---------- Neumann BC's:
+   ! Note for the unstructured case only:
+   ! Here, the matrix also contains Neumann BC's for those cells which have a
+   ! PRESSURE_BC_INDEX == DIRICHLET but are NOT open; these cells must be excluded below,
+   ! because BXS, BXF, ... contain the Dirichlet information from pres.f90 there;
+   ! excluding them corresponds to a homogeneous Neumann condition for these cells
+
+   SEPARABLE_NEUMANN_IF: IF (GWC%BTYPE == NEUMANN) THEN
+   
+      IF (IS_UNSTRUCTURED .AND. M%WALL(IW)%PRESSURE_BC_INDEX /= NEUMANN) CYCLE
+   
+      SELECT CASE (IOR0)
+         CASE (1)
+            ST%B(IC) = ST%B(IC) + RDX(I)*BXS(J,K)
+         CASE (-1)
+            ST%B(IC) = ST%B(IC) - RDX(I)*BXF(J,K)
+         CASE (2)
+            ST%B(IC) = ST%B(IC) + RDY(J)*BYS(I,K)
+         CASE (-2)
+            ST%B(IC) = ST%B(IC) - RDY(J)*BYF(I,K)
+         CASE (3)
+            ST%B(IC) = ST%B(IC) + RDZ(K)*BZS(I,J)
+         CASE (-3)
+            ST%B(IC) = ST%B(IC) - RDZ(K)*BZF(I,J)
+      END SELECT
+   
+   ENDIF SEPARABLE_NEUMANN_IF
+   
+ENDDO SEPARABLE_BOUNDARY_CELLS_LOOP
+
+END SUBROUTINE SCARC_SETUP_SEPARABLE_POISSON
+
+
+! --------------------------------------------------------------------------------------------------------------
+!> \brief Setup right hand side vector with corresponding boundary conditions for inseparable Poisson system
+!> \brief Update right hand side vector corresponding to boundary conditions of inseparable Poisson system
+! --------------------------------------------------------------------------------------------------------------
+SUBROUTINE SCARC_SETUP_INSEPARABLE_POISSON(NM)
+USE SCARC_POINTERS, ONLY: M, L, G, GWC, ST, PRHS, RHOP, KRESP, PPP, &
+                          RDX, RDY, RDZ, RDXN, RDYN, RDZN, &
+                          BXS, BXF, BYS, BYF, BZS, BZF, &
+                          PXS, PXF, PYS, PYF, PZS, PZF, &
+                          SCARC_POINT_TO_INSEPARABLE_ENVIRONMENT
+USE TYPES, ONLY: VENTS_TYPE, WALL_TYPE
+USE SCARC_MESSAGES
+USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
+INTEGER, INTENT(IN) :: NM
+INTEGER :: IOR0, IW, IW1, IW2, IC, I, J, K, IG, JG, KG
+REAL(EB) :: TSI, DUMMY, TIME_RAMP_FACTOR, P_EXTERNAL, VAL, SCAL, RHOM, RRHOM, KGRAD, KNABLA2, VAL2
+TYPE (VENTS_TYPE), POINTER :: VT
+TYPE (WALL_TYPE), POINTER :: WC
+
+CALL SCARC_POINT_TO_INSEPARABLE_ENVIRONMENT(NM)
+
+! First get 'separable' right hand side (PRHS from pres.f90) and use last iterate as initial vector
+
+!$OMP PARALLEL DO PRIVATE(IC) SCHEDULE(STATIC)
+DO IC = 1, G%NC
+   ST%X(IC) = PPP(G%ICX(IC), G%ICY(IC), G%ICZ(IC))    
+   ST%B(IC) = PRHS(G%ICX(IC), G%ICY(IC), G%ICZ(IC))    
+ENDDO                         
+!$OMP END PARALLEL DO
+
+! Set correct boundary conditions related to Dirichlet or Neumann boundaries for inseparable system
+
+IW1 = 1
+IF (IS_STRUCTURED) THEN
+   IW2 = L%N_WALL_CELLS_EXT
+ELSE
+   IW2 = L%N_WALL_CELLS_EXT + L%N_WALL_CELLS_INT
+   !IW2 = L%N_WALL_CELLS_EXT                ! still experimental
+ENDIF
+
+! Build correct RHS for inseparable pressure system by subtracting: nabla**2 (K)
+ 
+DO IC = 1, G%NC
+   I = G%ICX(IC) ; J = G%ICY(IC) ; K = G%ICZ(IC)
+   KNABLA2 =   ( (KRESP(I+1,J,K) - KRESP(I,J,K))*RDXN(I) - (KRESP(I,J,K) - KRESP(I-1,J,K))*RDXN(I-1) )*RDX(I)    &
+             + ( (KRESP(I,J+1,K) - KRESP(I,J,K))*RDYN(J) - (KRESP(I,J,K) - KRESP(I,J-1,K))*RDYN(J-1) )*RDY(J)    &
+             + ( (KRESP(I,J,K+1) - KRESP(I,J,K))*RDZN(K) - (KRESP(I,J,K) - KRESP(I,J,K-1))*RDZN(K-1) )*RDZ(K)
+   ST%B(IC) = ST%B(IC) - KNABLA2
+ENDDO
+
+INSEPARABLE_BOUNDARY_CELLS_LOOP: DO IW = IW1, IW2
+
+   GWC => G%WALL(IW)
+
+   IOR0 = GWC%IOR
+
+   IG = GWC%IXG ;  JG = GWC%IYG ; KG = GWC%IZG              ! Cell indices for IW on overlap
+   I  = GWC%IXW ;  J  = GWC%IYW ; K  = GWC%IZW              ! Cell indices for IW inside mesh
+
+   IF (TWO_D .AND. J /= 1) CALL SCARC_ERROR(NSCARC_ERROR_GRID_INDEX, SCARC_NONE, J)
+   IF (IS_UNSTRUCTURED .AND. L%IS_SOLID(I, J, K)) CYCLE
+
+   IC = G%CELL_NUMBER(I,J,K)           ! Number of mesh-internal cell
+
+   IF (GWC%BOUNDARY_TYPE == OPEN_BOUNDARY) THEN                            ! still experimental code
+      RRHOM = RECIPROCAL_DIRECTIONAL_MEAN(RHOP, IOR0, I, J, K)             ! reciprocal of density mean along IW in direction IOR0
+   ELSE
+      RRHOM = 1.0_EB/M%WALL(IW)%ONE_D%RHO_F                                ! if not open use RHO_F values (?)
+   ENDIF
+
+   ! ---------- Dirichlet BC's:
+   !
+   ! Use relation:   P = rho * (H - K) to compute P from H
+   !
+   ! Example: IOR = 1 (note that only the indices for x-direction are displayed, the rest ',jk' is omitted for readability
+   !
+   !  b_1  =>  b_1 - 1 / [dx_1 * 0.5*(dx_0 + dx_1)] * 2 * p_e / [0.5*(rho_0 + rho_1)]
+   !
+   INSEPARABLE_DIRICHLET_IF: IF (GWC%BTYPE == DIRICHLET) THEN
+      
+      WC => M%WALL(IW)
+      VT => M%VENTS(WC%VENT_INDEX)
+      IF (ABS(WC%ONE_D%T_IGN-T_BEGIN)<=TWO_EPSILON_EB .AND. VT%PRESSURE_RAMP_INDEX >=1) THEN
+         TSI = T
+      ELSE
+         TSI = T - T_BEGIN
+      ENDIF
+      TIME_RAMP_FACTOR = EVALUATE_RAMP(TSI,DUMMY,VT%PRESSURE_RAMP_INDEX)
+      P_EXTERNAL = TIME_RAMP_FACTOR*VT%DYNAMIC_PRESSURE
+
+      IF (IW > L%N_WALL_CELLS_EXT) CYCLE
+      VAL = P_EXTERNAL                                            ! use external pressure value as Dirichlet BC's
+
+      SELECT CASE (IOR0)
+         CASE ( 1)
+            VAL2  = RHOP(I,J,K) * (BXS(J,K) - KRESP(I,J,K))       ! experimentally: recompute external pressure value: P = rho*(H-K)
+            PXS(J,K) = VAL                                        ! store boundary value for later use in SCARC_UPDATE_PRESSURE
+            SCAL  = -2.0_EB*RDX(I)*RDXN(I-1)*RRHOM                ! scaling factor setting ST%BC below
+         CASE (-1)
+            VAL2  = RHOP(I,J,K) * (BXF(J,K) - KRESP(I,J,K))
+            PXF(J,K) = VAL
+            SCAL  = -2.0_EB*RDX(I)*RDXN(I)*RRHOM
+         CASE ( 2)
+            VAL2   = RHOP(I,J,K) * (BYS(I,K) - KRESP(I,J,K))
+            PYS(I,K) = VAL
+            SCAL  = -2.0_EB*RDY(J)*RDYN(J-1)*RRHOM
+         CASE (-2)
+            VAL2   = RHOP(I,J,K) * (BYF(I,K) - KRESP(I,J,K))
+            PYF(I,K) = VAL
+            SCAL  = -2.0_EB*RDY(J)*RDYN(J)*RRHOM
+         CASE ( 3)
+            VAL2   = RHOP(I,J,K) * (BZS(I,J) - KRESP(I,J,K))
+            PZS(I,J) = VAL
+            SCAL  = -2.0_EB*RDZ(K)*RDZN(K-1)*RRHOM
+         CASE (-3)
+            VAL2   = RHOP(I,J,K) * (BZF(I,J) - KRESP(I,J,K))
+            PZF(I,J) = VAL
+            SCAL  = -2.0_EB*RDZ(K)*RDZN(K)*RRHOM
+      END SELECT
+
+   ENDIF INSEPARABLE_DIRICHLET_IF
+      
+   ! ---------- Neumann BC's:
+   !
+   ! Example IOR = 1: (again, only the indices for x-direction are displayed in the subsequent comment)
+   !
+   ! b_1 => b_1 + 1/dx_1 * BB / (0.5*(rho_0 + rho_1))    
+   !
+   ! with  BB = 0.5*(rho_0 + rho_1) * (B - (K_1-K_0)/0.5*(dx_0+dx_1))     <--- rho*[B-nabla(K)]
+
+   INSEPARABLE_NEUMANN_IF: IF (GWC%BTYPE == NEUMANN) THEN
+      
+      RHOM = DIRECTIONAL_MEAN(RHOP, IOR0, I, J, K)                       ! density mean along IW
+
+      ! Caution mesh stretching not yet considered ... i.e. terms HX, HY, HZ, see definition of BC's in pres
+      SELECT CASE (IOR0)
+         CASE (1)
+            KGRAD = (KRESP(I,J,K)-KRESP(I-1,J,K))*M%RDXN(I-1)            ! caution: take care of right direction!
+            IF (IW <= L%N_WALL_CELLS_EXT) THEN
+               VAL = RHOM*(BXS(J,K) - KGRAD)                             ! based on: \nabla p = rho*[-du/dt - F_A - \nabla K]
+            ELSE
+               VAL = - RHOM*KGRAD                                        ! corresponding to homogeneous Neumann condition at obsts
+            ENDIF
+            PXS(J,K) = VAL                                               ! store BC of inseparable pressure for later use
+            SCAL = RDX(I)*RRHOM                                          ! positive for ABS(IOR) > 0
+         CASE (-1)
+            KGRAD = (KRESP(I+1,J,K)-KRESP(I,J,K))*M%RDXN(I)
+            IF (IW <= L%N_WALL_CELLS_EXT) THEN
+               VAL = RHOM*(BXF(J,K) - KGRAD)
+            ELSE
+               VAL = -RHOM*KGRAD             
+            ENDIF
+            PXF(J,K) = VAL
+            SCAL = -RDX(I)*RRHOM                                          ! negative for ABS(IOR) < 0
+         CASE (2)
+            KGRAD = (KRESP(I,J,K)-KRESP(I,J-1,K))*M%RDYN(J-1)
+            IF (IW <= L%N_WALL_CELLS_EXT) THEN
+               VAL = RHOM*(BYS(I,K) - KGRAD)
+            ELSE
+               VAL = -RHOM*KGRAD
+            ENDIF
+            PYS(I,K) = VAL
+            SCAL = RDY(J)*RRHOM
+         CASE (-2)
+            KGRAD = (KRESP(I,J+1,K)-KRESP(I,J,K))*M%RDYN(J)
+            IF (IW <= L%N_WALL_CELLS_EXT) THEN
+               VAL = RHOM*(BYF(I,K) - KGRAD) 
+            ELSE
+               VAL = -RHOM*KGRAD 
+            ENDIF
+            PYF(I,K) = VAL
+            SCAL = -RDY(J)*RRHOM
+         CASE (3)
+            KGRAD = (KRESP(I,J,K)-KRESP(I,J,K-1))*M%RDZN(K-1)
+            IF (IW <= L%N_WALL_CELLS_EXT) THEN
+               VAL = RHOM*(BZS(I,J) - KGRAD)
+            ELSE
+               VAL = -RHOM*KGRAD
+            ENDIF
+            PZS(I,J) = VAL
+            SCAL = RDZ(K)*RRHOM
+         CASE (-3)
+            KGRAD = (KRESP(I,J,K+1)-KRESP(I,J,K))*M%RDZN(K)
+            IF (IW <= L%N_WALL_CELLS_EXT) THEN
+               VAL = RHOM*(BZF(I,J) - KGRAD)
+            ELSE
+               VAL = -RHOM*KGRAD
+            ENDIF
+            PZF(I,J) = VAL
+            SCAL = -RDZ(K)*RRHOM
+      END SELECT
+   
+   ENDIF INSEPARABLE_NEUMANN_IF
+
+   ST%B(IC) = ST%B(IC) + SCAL * VAL                    ! set new value of RHS based on previous computed SCAL and VAL
+
+ENDDO INSEPARABLE_BOUNDARY_CELLS_LOOP
+
+END SUBROUTINE SCARC_SETUP_INSEPARABLE_POISSON
+
+
 
 
 ! --------------------------------------------------------------------------------------------------------------
@@ -19878,26 +20364,48 @@ CG_LOOP: DO ITE = 1, NIT
 
 ENDDO CG_LOOP
 
-! ---------- Determine convergence rate and print corresponding information
-! In case of CG as main solver:
-!   - Transfer ScaRC solution vector X to FDS pressure vector
-!   - Set ghost cell values along external boundaries
-!   - Exchange values along internal boundaries
+! Determine convergence rate and print corresponding information
 
 CALL SCARC_CONVERGENCE_RATE(NSTATE, NS, NL)
+
+! If condensed system was used restore value on last cell and build mean value
 
 IF (N_DIRIC_GLOBAL(NLEVEL_MIN) == 0) THEN
    CALL RESTORE_LAST_CELL(X, NL)
    CALL FILTER_MEANVALUE(X, NL)
 ENDIF
 
-
 IF (TYPE_SOLVER == NSCARC_SOLVER_MAIN .AND. .NOT.IS_MGM) THEN
-   CALL SCARC_UPDATE_MAINCELLS(NLEVEL_MIN)
+
+   SELECT CASE (TYPE_POISSON)
+
+      ! Separable Poisson system: Krylov method was performed for HP itself
+      ! Transmit mesh-inner values of computed (U)ScaRC solution to the corresponding HP vector
+
+      CASE (NSCARC_POISSON_SEPARABLE)
+
+         CALL SCARC_UPDATE_MAINCELLS(NLEVEL_MIN)
+
+      ! Inseparable Poisson system: Krylov method was performed for inseparable P 
+      ! Transmit mesh-inner values of computed (U)ScaRC solution to the corresponding HP vector
+
+      CASE (NSCARC_POISSON_INSEPARABLE)
+
+         CALL SCARC_UPDATE_PRESSURE(NLEVEL_MIN)
+         CALL SCARC_UPDATE_BAROCLINIC_TERM
+         CALL SCARC_UPDATE_MAINCELLS(NLEVEL_MIN)
+
+   END SELECT
+
+   ! Finally, a corresponding HP solution is achieved, which still needs to get its correct ghost cell values
+   ! The resulting overlapping HP is finally passed to the calling PRESSURE_ITERATION_SCHEME
+
    CALL SCARC_UPDATE_GHOSTCELLS(NLEVEL_MIN)
+
 ENDIF
 
-
+! Leave method gracefully 
+!
 CALL SCARC_RELEASE_SCOPE(NS, NP)
 
 END SUBROUTINE SCARC_METHOD_KRYLOV
@@ -20292,7 +20800,6 @@ CALL SCARC_SETUP_WORKSPACE(NS, NL)
 CALL SCARC_MATVEC_PRODUCT (X, V, NL)                                  !  V := A*X
 CALL SCARC_VECTOR_SUM (B, V, 1.0_EB, -1.0_EB, NL)                     !  V := B - V
 
-
 RES    = SCARC_L2NORM (V, NL)                                         !  RESIN := ||V||
 RESIN  = RES
 NSTATE = SCARC_CONVERGENCE_STATE (0, NS, NL)                          !  RES < TOL already ??
@@ -20644,126 +21151,466 @@ END SUBROUTINE SCARC_UPDATE_PRECONDITIONER
 
 
 ! ----------------------------------------------------------------------------------------------------------------------
-!> \brief Finalize data for pressure vector (predictor/corrector) when local ScaRC solver has finished
+!> \brief Update solution of the inseparable Poisson system
+! For all mesh-inner cells, transfer the achieved (U)ScaRC solution to a predictor/corrector version of a pressure vector
+! For all ghost cells, compute the corresponding values based on some initially computed boundary vectors
 ! ----------------------------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_UPDATE_MAINCELLS(NL)
-USE SCARC_POINTERS, ONLY: M, G, L, ST, HP, SCARC_POINT_TO_GRID
+SUBROUTINE SCARC_UPDATE_PRESSURE(NL)
+USE SCARC_POINTERS, ONLY: L, G, ST, PPP, GWC, DXN, DYN, DZN, &
+                          SCARC_POINT_TO_GRID, SCARC_POINT_TO_SEPARABLE_ENVIRONMENT, SCARC_POINT_TO_INSEPARABLE_ENVIRONMENT
 INTEGER, INTENT(IN) :: NL
-INTEGER :: NM, IC 
+INTEGER :: NM
+INTEGER :: I, J, K, IC, IW, IXW, IYW, IZW, IXG, IYG, IZG, IOR0
 
-DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
+PRESSURE_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 
    CALL SCARC_POINT_TO_GRID (NM, NL)                                    
+   CALL SCARC_POINT_TO_INSEPARABLE_ENVIRONMENT (NM)                                    
    ST  => L%STAGE(NSCARC_STAGE_ONE)
 
-   IF (PREDICTOR) THEN
-      HP => M%H
-   ELSE
-      HP => M%HS
-   ENDIF
+   ! First transfer the current (U)ScaRC solution to the inseparable Poisson system to corresponding pressure vector
 
-
-   HP = 0.0_EB
-   !!$OMP PARALLEL DO PRIVATE(IC) SCHEDULE(STATIC)
-   DO IC = 1, G%NC
-      HP (G%ICX(IC), G%ICY(IC), G%ICZ(IC)) = ST%X(IC)
+   DO K=1,L%NZ
+      DO J=1,L%NY
+         DO I=1,L%NX
+            IF (IS_UNSTRUCTURED .AND. L%IS_SOLID(I, J, K)) CYCLE
+            IC = G%CELL_NUMBER(I,J,K)
+            PPP(I,J,K) = ST%X(IC)
+         ENDDO
+      ENDDO
    ENDDO
-   !!$OMP END PARALLEL DO 
+
+   ! Then use the pressure boundary vectors PXS, PXF, ..., PZF (analogous to BXS, BXF, ... BZF for HP) in order to generate 
+   ! the values on the ghost cells depending on the boundary type 
+
+   PRESSURE_WALLCELLS_LOOP: DO IW = 1, L%N_WALL_CELLS_EXT
+
+      GWC => G%WALL(IW)
+
+      IXG = GWC%IXG ;  IYG = GWC%IYG ;  IZG = GWC%IZG
+      IXW = GWC%IXW ;  IYW = GWC%IYW ;  IZW = GWC%IZW
+
+      IOR0 = GWC%IOR
+
+      ! Dirichlet :  BCs correspond to P_EXTERNAL
+       
+      PRESSURE_DIRICHLET_IF: IF (GWC%BTYPE == DIRICHLET) THEN
+         SELECT CASE (IOR0)
+            CASE ( 1)
+               PPP(IXG,IYW,IZW) = -PPP(IXW,IYW,IZW) + 2.0_EB * L%PXS(IYW,IZW)
+            CASE (-1)
+               PPP(IXG,IYW,IZW) = -PPP(IXW,IYW,IZW) + 2.0_EB * L%PXF(IYW,IZW)
+            CASE ( 2)
+               PPP(IXW,IYG,IZW) = -PPP(IXW,IYW,IZW) + 2.0_EB * L%PYS(IXW,IZW)
+            CASE (-2)
+               PPP(IXW,IYG,IZW) = -PPP(IXW,IYW,IZW) + 2.0_EB * L%PYF(IXW,IZW)
+            CASE ( 3)
+               PPP(IXW,IYW,IZG) = -PPP(IXW,IYW,IZW) + 2.0_EB * L%PZS(IXW,IYW)
+            CASE (-3)
+               PPP(IXW,IYW,IZG) = -PPP(IXW,IYW,IZW) + 2.0_EB * L%PZF(IXW,IYW)
+         END SELECT
+      ENDIF PRESSURE_DIRICHLET_IF
+
+      ! Neumann :   BCs correspond to rho * (B.. - \nabla K) , where B.. are the original BXS, BXF, ... BZF vectors
+
+      PRESSURE_NEUMANN_IF: IF (GWC%BTYPE == NEUMANN) THEN
+         SELECT CASE (IOR0)
+            CASE ( 1)
+               PPP(IXG,IYW,IZW) =  PPP(IXW,IYW,IZW) - DXN(IXG) * L%PXS(IYW,IZW)
+            CASE (-1)
+               PPP(IXG,IYW,IZW) =  PPP(IXW,IYW,IZW) + DXN(IXW) * L%PXF(IYW,IZW)
+            CASE ( 2)
+               PPP(IXW,IYG,IZW) =  PPP(IXW,IYW,IZW) - DYN(IYG) * L%PYS(IXW,IZW)
+            CASE (-2)
+               PPP(IXW,IYG,IZW) =  PPP(IXW,IYW,IZW) + DYN(IYW) * L%PYF(IXW,IZW)
+            CASE ( 3)
+               PPP(IXW,IYW,IZG) =  PPP(IXW,IYW,IZW) - DZN(IZG) * L%PZS(IXW,IYW)
+            CASE (-3)
+               PPP(IXW,IYW,IZG) =  PPP(IXW,IYW,IZW) + DZN(IZW) * L%PZF(IXW,IYW)
+         END SELECT
+      ENDIF PRESSURE_NEUMANN_IF
+
+   ENDDO PRESSURE_WALLCELLS_LOOP
+
+ENDDO PRESSURE_MESHES_LOOP
+
+END SUBROUTINE SCARC_UPDATE_PRESSURE
 
 
-ENDDO
+! ----------------------------------------------------------------------------------------------------------------------
+!> \brief Build vector HP from computed (U)Scarc solution and pass it to calling PRESSURE_ITERATION_SCHEME
+! ----------------------------------------------------------------------------------------------------------------------
+SUBROUTINE SCARC_UPDATE_MAINCELLS(NL)
+USE SCARC_POINTERS, ONLY: L, G, ST, HP, RHOP, KRESP, &
+                          SCARC_POINT_TO_GRID, SCARC_POINT_TO_SEPARABLE_ENVIRONMENT, SCARC_POINT_TO_INSEPARABLE_ENVIRONMENT
+USE MESH_VARIABLES
+USE MESH_POINTERS
+INTEGER, INTENT(IN) :: NL
+INTEGER :: NM, IC , I, J, K
+
+MAINCELLS_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
+
+   CALL POINT_TO_MESH(NM)
+   CALL SCARC_POINT_TO_GRID (NM, NL)                                    
+
+   ST  => L%STAGE(NSCARC_STAGE_ONE)
+
+   SELECT CASE (TYPE_POISSON)
+
+      ! Separable Poisson system: Krylov method was performed for HP itself
+      ! In this case the computed (U)ScaRC solution contained in ST%X already contains the right values,
+      ! so just transfer the mesh-inner cells of it to HP
+      ! the right ghost cells will be set by a subsequent routine
+
+      CASE (NSCARC_POISSON_SEPARABLE)
+
+         CALL SCARC_POINT_TO_SEPARABLE_ENVIRONMENT (NM)
+         DO IC = 1, G%NC
+            HP(G%ICX(IC), G%ICY(IC), G%ICZ(IC)) = ST%X(IC)
+         ENDDO
+
+      ! Inseparable Poisson system: Krylov method was performed for inseparable P
+      ! In this case the computed (U)ScaRC solution ST%X contains P, not HP 
+      ! Now, HP must first be derived from P by the relation H = P/RHO + KRES
+      ! Afterwards this HP has to undergo the same mechanisms for the setting of ghost cells as is done in the separable case
+
+      CASE (NSCARC_POISSON_INSEPARABLE)
+
+         CALL SCARC_POINT_TO_INSEPARABLE_ENVIRONMENT (NM)
+
+         ! Recompute HP values from relation    H = P/RHO - K
+          
+         DO K=1,KBAR
+            DO J=1,JBAR
+               DO I=1,IBAR
+                  IF (IS_UNSTRUCTURED .AND. L%IS_SOLID(I, J, K)) CYCLE
+                  IC = G%CELL_NUMBER(I,J,K)
+                  HP(I,J,K) = ST%X(IC)/RHOP(I,J,K) + KRESP(I,J,K)
+               ENDDO
+            ENDDO
+         ENDDO
+      
+      END SELECT
+
+ENDDO MAINCELLS_MESHES_LOOP
 
 END SUBROUTINE SCARC_UPDATE_MAINCELLS
 
 
 ! --------------------------------------------------------------------------------------------------------------
-!> \brief Set correct boundary values at external and internal boundaries
+!> \brief Set boundary values for the solution of the separable Poisson system at external boundaries 
+! Along internal mesh interfaces the overlaps are consistent by construction of the (U)ScaRC solver
 ! --------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_UPDATE_GHOSTCELLS(NL)
-USE SCARC_POINTERS, ONLY: M, L, G, GWC, HP, SCARC_POINT_TO_GRID
+USE SCARC_POINTERS, ONLY: M, L, G, GWC, HP, DXN, DYN, DZN, SCARC_POINT_TO_GRID, SCARC_POINT_TO_SEPARABLE_ENVIRONMENT
 INTEGER, INTENT(IN) :: NL
-INTEGER :: NM, IW, IOR0, IXG, IYG, IZG, IXW, IYW, IZW 
+INTEGER :: NM, IW, IOR0, IXG, IYG, IZG, IXW, IYW, IZW
 
-DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
+GHOSTCELLS_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 
    CALL SCARC_POINT_TO_GRID (NM, NL)                                    
+   CALL SCARC_POINT_TO_SEPARABLE_ENVIRONMENT (NM)
 
-   IF (PREDICTOR) THEN
-      HP => M%H
-   ELSE
-      HP => M%HS
-   ENDIF
-
-   ! Compute ghost cell values
- 
-   !!$OMP PARALLEL DO SHARED(HP, M, L, G) PRIVATE(IW, IXG, IYG, IZG, IXW, IYW, IZW, IOR0, GWC) SCHEDULE(STATIC)
-   WALL_CELLS_LOOP: DO IW = 1, L%N_WALL_CELLS_EXT
+   GHOSTCELLS_WALL_LOOP: DO IW = 1, L%N_WALL_CELLS_EXT
 
       GWC => G%WALL(IW)
 
-      IXG = GWC%IXG
-      IYG = GWC%IYG
-      IZG = GWC%IZG
-
-      IXW = GWC%IXW
-      IYW = GWC%IYW
-      IZW = GWC%IZW
+      IXG = GWC%IXG ;  IYG = GWC%IYG ;  IZG = GWC%IZG
+      IXW = GWC%IXW ;  IYW = GWC%IYW ;  IZW = GWC%IZW
 
       IOR0 = GWC%IOR
 
-      SELECT CASE (IOR0)
-         CASE ( 1)
-            IF (GWC%BTYPE==DIRICHLET) THEN
-               HP(IXG,IYW,IZW) = -HP(IXW,IYW,IZW) + 2.0_EB * M%BXS(IYW,IZW)
-            ELSE IF (GWC%BTYPE==NEUMANN) THEN
-               HP(IXG,IYW,IZW) =  HP(IXW,IYW,IZW) - L%DX *M%BXS(IYW,IZW)
-            ENDIF
-         CASE (-1)
-            IF (GWC%BTYPE==DIRICHLET) THEN
-               HP(IXG,IYW,IZW) = -HP(IXW,IYW,IZW) + 2.0_EB * M%BXF(IYW,IZW)
-            ELSE IF (GWC%BTYPE==NEUMANN) THEN
-               HP(IXG,IYW,IZW) =  HP(IXW,IYW,IZW) + L%DX *M%BXF(IYW,IZW)
-            ENDIF
-         CASE ( 2)
-            IF (GWC%BTYPE==DIRICHLET) THEN
-               HP(IXW,IYG,IZW) = -HP(IXW,IYW,IZW) + 2.0_EB * M%BYS(IXW,IZW)
-            ELSE IF (GWC%BTYPE==NEUMANN) THEN
-               HP(IXW,IYG,IZW) =  HP(IXW,IYW,IZW) - L%DY *M%BYS(IXW,IZW)
-            ENDIF
-         CASE (-2)
-            IF (GWC%BTYPE==DIRICHLET) THEN
-               HP(IXW,IYG,IZW) = -HP(IXW,IYW,IZW) + 2.0_EB * M%BYF(IXW,IZW)
-            ELSE IF (GWC%BTYPE==NEUMANN) THEN
-               HP(IXW,IYG,IZW) =  HP(IXW,IYW,IZW) + L%DY *M%BYF(IXW,IZW)
-            ENDIF
-         CASE ( 3)
-            IF (GWC%BTYPE==DIRICHLET) THEN
-               HP(IXW,IYW,IZG) = -HP(IXW,IYW,IZW) + 2.0_EB * M%BZS(IXW,IYW)
-            ELSE IF (GWC%BTYPE==NEUMANN) THEN
-               HP(IXW,IYW,IZG) =  HP(IXW,IYW,IZW) - L%DZ *M%BZS(IXW,IYW)
-            ENDIF
-         CASE (-3)
-            IF (GWC%BTYPE==DIRICHLET) THEN
-               HP(IXW,IYW,IZG) = -HP(IXW,IYW,IZW) + 2.0_EB * M%BZF(IXW,IYW)
-            ELSE IF (GWC%BTYPE==NEUMANN) THEN
-               HP(IXW,IYW,IZG) =  HP(IXW,IYW,IZW) + L%DZ *M%BZF(IXW,IYW)
-            ENDIF
-      END SELECT
+      GHOSTCELLS_DIRICHLET_IF: IF (GWC%BTYPE == DIRICHLET) THEN
+         SELECT CASE(IOR0)
+            CASE ( 1)
+               HP(IXG,IYW,IZW) = -HP(IXW,IYW,IZW) +  2.0_EB*M%BXS(IYW,IZW)
+            CASE (-1)
+               HP(IXG,IYW,IZW) = -HP(IXW,IYW,IZW) +  2.0_EB*M%BXF(IYW,IZW)
+            CASE ( 2)
+               HP(IXW,IYG,IZW) = -HP(IXW,IYW,IZW) +  2.0_EB*M%BYS(IXW,IZW)
+            CASE (-2)
+               HP(IXW,IYG,IZW) = -HP(IXW,IYW,IZW) +  2.0_EB*M%BYF(IXW,IZW)
+            CASE ( 3)
+               HP(IXW,IYW,IZG) = -HP(IXW,IYW,IZW) +  2.0_EB*M%BZS(IXW,IYW)
+            CASE (-3)
+               HP(IXW,IYW,IZG) = -HP(IXW,IYW,IZW) +  2.0_EB*M%BZF(IXW,IYW)
+         END SELECT
+      ENDIF GHOSTCELLS_DIRICHLET_IF
 
-   ENDDO WALL_CELLS_LOOP
-   !!$OMP END PARALLEL DO
+      GHOSTCELLS_NEUMANN_IF: IF (GWC%BTYPE == NEUMANN) THEN
+         SELECT CASE(IOR0)
+            CASE ( 1)
+               HP(IXG,IYW,IZW) =  HP(IXW,IYW,IZW) - DXN(IXG)*M%BXS(IYW,IZW)
+            CASE (-1)
+               HP(IXG,IYW,IZW) =  HP(IXW,IYW,IZW) + DXN(IXW)*M%BXF(IYW,IZW)
+            CASE ( 2)
+               HP(IXW,IYG,IZW) =  HP(IXW,IYW,IZW) - DYN(IYG)*M%BYS(IXW,IZW)
+            CASE (-2)
+               HP(IXW,IYG,IZW) =  HP(IXW,IYW,IZW) + DYN(IYW)*M%BYF(IXW,IZW)
+            CASE ( 3)
+               HP(IXW,IYW,IZG) =  HP(IXW,IYW,IZW) - DZN(IZG)*M%BZS(IXW,IYW)
+            CASE (-3)
+               HP(IXW,IYW,IZG) =  HP(IXW,IYW,IZW) + DZN(IZW)*M%BZF(IXW,IYW)
+         END SELECT
+      ENDIF GHOSTCELLS_NEUMANN_IF
 
+   ENDDO GHOSTCELLS_WALL_LOOP
 
-ENDDO
+ENDDO GHOSTCELLS_MESHES_LOOP
 
 ! Perform data exchange to achieve consistency of ghost values along internal boundaries
-! Note: this is most probably no longer necessary because MESH_EXCHANGE(5) is used after the call of ScaRC
+! Note: this is most probably no longer necessary because MESH_EXCHANGE(5) is used after the call of ScaRC   TODO
 
 CALL SCARC_EXCHANGE(NSCARC_EXCHANGE_PRESSURE, NSCARC_NONE, NL)
-
    
 END SUBROUTINE SCARC_UPDATE_GHOSTCELLS
+
+
+! --------------------------------------------------------------------------------------------------------------
+!> \brief Compute baroclinic torque term based on (U)ScaRC solution of inseparable Poisson system
+! --------------------------------------------------------------------------------------------------------------
+SUBROUTINE SCARC_UPDATE_BAROCLINIC_TERM
+USE SCARC_POINTERS, ONLY: HP, RHOP, PPP, SCARC_POINT_TO_GRID, SCARC_POINT_TO_INSEPARABLE_ENVIRONMENT
+USE MESH_VARIABLES
+USE MESH_POINTERS
+REAL(EB), POINTER, DIMENSION(:,:,:) :: RRHO=>NULL(),RHMK=>NULL()
+REAL(EB) :: VAL, DIFF, DIFF_MAX
+INTEGER :: I_MAX, J_MAX, K_MAX
+INTEGER  :: I, J, K, NM
+
+BAROCLINIC_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
    
+   CALL SCARC_POINT_TO_INSEPARABLE_ENVIRONMENT(NM)
+
+   ! Compute 1/rho in each grid cell
+
+   RRHO => WORK2
+   DO K=0,KBP1
+      DO J=0,JBP1
+         DO I=0,IBP1
+            RRHO(I,J,K) = 1._EB/RHOP(I,J,K)
+  !         RRHO(I,J,K) = 1._EB/0.1195253017817356E+01            !SUSI
+         ENDDO
+      ENDDO
+   ENDDO
+
+   ! Compute baroclinic term in the x momentum equation, p*d/dx(1/rho), based on inseparable pressure solution P
+   
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=0,IBAR
+            FVX_B(I,J,K) = -(PPP(I,J,K)*RHOP(I+1,J,K)+PPP(I+1,J,K)*RHOP(I,J,K))*(RRHO(I+1,J,K)-RRHO(I,J,K))*RDXN(I)/ &
+                            (RHOP(I+1,J,K)+RHOP(I,J,K))
+         ENDDO
+      ENDDO
+   ENDDO
+   
+   ! Compute baroclinic term in the y momentum equation, p*d/dy(1/rho), based on inseparable pressure solution P
+   
+   IF (.NOT.TWO_D) THEN
+      DO K=1,KBAR
+         DO J=0,JBAR
+            DO I=1,IBAR
+               FVY_B(I,J,K) = -(PPP(I,J,K)*RHOP(I,J+1,K)+PPP(I,J+1,K)*RHOP(I,J,K))*(RRHO(I,J+1,K)-RRHO(I,J,K))*RDYN(J)/ &
+                               (RHOP(I,J+1,K)+RHOP(I,J,K))
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDIF
+   
+   ! Compute baroclinic term in the z momentum equation, p*d/dz(1/rho), based on inseparable pressure solution P
+   
+   DO K=0,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            FVZ_B(I,J,K) = -(PPP(I,J,K)*RHOP(I,J,K+1)+PPP(I,J,K+1)*RHOP(I,J,K))*(RRHO(I,J,K+1)-RRHO(I,J,K))*RDZN(K)/ &
+                            (RHOP(I,J,K+1)+RHOP(I,J,K))
+         ENDDO
+      ENDDO
+   ENDDO
+
+   BAROCLINIC_CHECK_IF: IF (SCARC_CHECK) THEN
+
+      RHMK => WORK1
+      IF (PREDICTOR) THEN
+         RHOP => RHO
+      ELSE
+         RHOP => RHOS
+      ENDIF
+      DIFF_MAX = 0.0_EB
+      I_MAX = 0 ;  J_MAX = 0 ;  K_MAX = 0
+ 
+      ! Recompute pressure from HP 
+
+      DO K=0,KBP1
+         DO J=0,JBP1
+            DO I=0,IBP1
+               RHMK(I,J,K) = RHOP(I,J,K) * (HP(I,J,K) - KRES(I,J,K))
+            ENDDO
+         ENDDO
+      ENDDO
+ 
+      ! Compute baroclinic term in the x momentum equation, p*d/dx(1/rho), based on HP
+ 
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=0,IBAR
+                VAL = -(RHMK(I,J,K)*RHOP(I+1,J,K)+RHMK(I+1,J,K)*RHOP(I,J,K))*(RRHO(I+1,J,K)-RRHO(I,J,K))*RDXN(I)/ &
+                       (RHOP(I+1,J,K)+RHOP(I,J,K))
+                DIFF = ABS(FVX_B(I,J,K) - VAL) 
+                IF (DIFF > DIFF_MAX) THEN
+                   DIFF_MAX = DIFF
+                   I_MAX = I ;  J_MAX = J;  K_MAX = K
+                ENDIF
+            ENDDO
+         ENDDO
+      ENDDO
+ 
+      ! Compute baroclinic term in the y momentum equation, p*d/dy(1/rho), based on HP
+ 
+      IF (.NOT.TWO_D) THEN
+         DO K=1,KBAR
+            DO J=0,JBAR
+               DO I=1,IBAR
+                   VAL = -(RHMK(I,J,K)*RHOP(I,J+1,K)+RHMK(I,J+1,K)*RHOP(I,J,K))*(RRHO(I,J+1,K)-RRHO(I,J,K))*RDYN(J)/ &
+                          (RHOP(I,J+1,K)+RHOP(I,J,K))
+                   IF (DIFF > DIFF_MAX) THEN
+                      DIFF_MAX = DIFF
+                      I_MAX = I ;  J_MAX = J;  K_MAX = K
+                   ENDIF
+               ENDDO
+            ENDDO
+         ENDDO
+      ENDIF
+ 
+      ! Compute baroclinic term in the z momentum equation, p*d/dz(1/rho), based on HP
+ 
+      DO K=0,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               VAL = -(RHMK(I,J,K)*RHOP(I,J,K+1)+RHMK(I,J,K+1)*RHOP(I,J,K))*(RRHO(I,J,K+1)-RRHO(I,J,K))*RDZN(K)/ &
+                       (RHOP(I,J,K+1)+RHOP(I,J,K))
+               IF (DIFF > DIFF_MAX) THEN
+                  DIFF_MAX = DIFF
+                  I_MAX = I ;  J_MAX = J;  K_MAX = K
+               ENDIF
+            ENDDO
+         ENDDO
+      ENDDO
+
+      IF (SCARC_VERBOSE) WRITE(MSG%LU_VERBOSE, 1000) DIFF_MAX, I_MAX, J_MAX, K_MAX
+
+   ENDIF BAROCLINIC_CHECK_IF
+
+ENDDO BAROCLINIC_MESHES_LOOP
+
+1000 FORMAT('Max difference for baroclinic term :', E11.3,' at positions (',i3,',',i3,',',i3,')')
+END SUBROUTINE SCARC_UPDATE_BAROCLINIC_TERM
+
+
+! --------------------------------------------------------------------------------------------------------------
+!> \brief Update current values of density and resolved kinetic enery used for the inseparable Poisson system
+! This is still experimental code which additionally uses and stores separate versions for these quantities
+! --------------------------------------------------------------------------------------------------------------
+SUBROUTINE SCARC_UPDATE_INSEPARABLE_ENVIRONMENT
+USE SCARC_POINTERS, ONLY: M, UU, VV, WW, RHOP, KRESP, SCARC_POINT_TO_INSEPARABLE_ENVIRONMENT
+USE MESH_VARIABLES
+USE MESH_POINTERS
+USE TYPES, ONLY: WALL_TYPE
+INTEGER :: NM, IOR0, I, J, K, IIG, JJG, KKG, IW
+REAL(EB) :: U2, V2, W2
+TYPE (WALL_TYPE), POINTER :: WC
+
+MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
+
+   CALL POINT_TO_MESH(NM)
+   CALL SCARC_POINT_TO_INSEPARABLE_ENVIRONMENT(NM)
+
+   TEST_KRES_IF: IF (SCARC_TEST_KRES) THEN
+      KRESP => SCARC_KRES                         ! Experimental: Overwrite settings by upper point_to_inseparable_environment
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+               U2 = 0.25_EB*(UU(I-1,J,K)+UU(I,J,K))**2
+               V2 = 0.25_EB*(VV(I,J-1,K)+VV(I,J,K))**2
+               W2 = 0.25_EB*(WW(I,J,K-1)+WW(I,J,K))**2
+               KRESP(I,J,K) = 0.5_EB*(U2+V2+W2)
+            ENDDO
+         ENDDO
+      ENDDO
+
+      KRES_WALL_LOOP: DO IW = 1, N_EXTERNAL_WALL_CELLS
+         WC => WALL(IW)
+         IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE KRES_WALL_LOOP
+         IOR0 = WC%ONE_D%IOR
+         I     = WC%ONE_D%II
+         J     = WC%ONE_D%JJ
+         K     = WC%ONE_D%KK
+         IIG   = WC%ONE_D%IIG
+         JJG   = WC%ONE_D%JJG
+         KKG   = WC%ONE_D%KKG
+         IF (WC%BOUNDARY_TYPE == OPEN_BOUNDARY)  KRESP(I,J,K) = KRESP(IIG,JJG,KKG)
+      ENDDO KRES_WALL_LOOP
+
+   ELSE
+      KRESP => M%KRES                        
+   ENDIF TEST_KRES_IF
+
+   TEST_RHO_IF: IF (SCARC_TEST_RHO) THEN              ! Experimental: Overwrite settings by upper point_to_inseparable_environment
+
+      IF (PREDICTOR) THEN
+         SCARC_RHO = M%RHO
+      ELSE
+         SCARC_RHO = M%RHOS
+      ENDIF
+      RHOP => SCARC_RHO
+
+      RHO_WALL_LOOP: DO IW = 1, N_EXTERNAL_WALL_CELLS
+
+         WC => WALL(IW)
+         IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE RHO_WALL_LOOP
+   
+         IOR0 = WC%ONE_D%IOR
+         I    = WC%ONE_D%II
+         J    = WC%ONE_D%JJ
+         K    = WC%ONE_D%KK
+         IIG  = WC%ONE_D%IIG
+         JJG  = WC%ONE_D%JJG
+         KKG  = WC%ONE_D%KKG
+   
+         SELECT CASE (IOR0)
+            CASE (1)
+               RHOP(I,J,K) = 2*WC%ONE_D%RHO_F - RHOP(IIG,JJG,KKG)           ! Set overlaps on own RHO version based on RHO_F
+            CASE (-1)
+               RHOP(I,J,K) = 2*WC%ONE_D%RHO_F - RHOP(IIG,JJG,KKG)
+            CASE (2)
+               RHOP(I,J,K) = 2*WC%ONE_D%RHO_F - RHOP(IIG,JJG,KKG)
+            CASE (-2)
+               RHOP(I,J,K) = 2*WC%ONE_D%RHO_F - RHOP(IIG,JJG,KKG)
+            CASE (3)
+               RHOP(I,J,K) = 2*WC%ONE_D%RHO_F - RHOP(IIG,JJG,KKG)
+            CASE (-3)
+               RHOP(I,J,K) = 2*WC%ONE_D%RHO_F - RHOP(IIG,JJG,KKG)
+         END SELECT
+
+      ENDDO RHO_WALL_LOOP
+
+   ELSE
+
+      IF (PREDICTOR) THEN   
+         RHOP => M%RHO
+      ELSE
+         RHOP => M%RHOS
+      ENDIF
+
+   ENDIF TEST_RHO_IF
+
+ENDDO MESHES_LOOP
+
+END SUBROUTINE SCARC_UPDATE_INSEPARABLE_ENVIRONMENT
+
+
 ! -------------------------------------------------------------------------------------------------------------
 !> \brief Preconditioning method which is based on the following input and output convention:
 !  - the residual which has to be preconditioned is passed in via vector R
@@ -21000,7 +21847,7 @@ USE POIS, ONLY: H2CZSS, H3CZSS
 REAL(EB) :: AUX, OMEGA_SSOR = 1.5_EB
 REAL (EB) :: TNOW
 INTEGER, INTENT(IN) :: NV1, NV2, NS, NP, NL
-INTEGER :: NM, NP0, IC, JC, ICOL, ITYPE, IDIAG, IPTR, INCR, IOR0, IC0, IY, IZ
+INTEGER :: NM, NP0, IC, JC, ICOL, ITYPE, IDIAG, IPTR, INCR, IOR0
 
 TNOW = CURRENT_TIME()
 ITYPE = STACK(NS-1)%SOLVER%TYPE_RELAX
@@ -21373,158 +22220,7 @@ SELECT CASE (ITYPE)
       ENDDO
 
  
-   ! --------- Preconditioning by blockwise overlapping FFT based on Crayfishpak 
-   !           still test-version for tunnel-shaped geometries of type Mx1
- 
-   CASE (NSCARC_RELAX_FFTO)
-
-      ! Exchange overlapping parts
-
-      CALL SCARC_EXCHANGE (NSCARC_EXCHANGE_VECTOR_PLAIN, NV1, NL)
-
-      DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
-
-         CALL SCARC_POINT_TO_GRID (NM, NL)                                    
-         FFT => L%FFT
-
-         V1  => SCARC_POINT_TO_VECTOR(NM, NL, NV1)
-         V2  => SCARC_POINT_TO_VECTOR(NM, NL, NV2)
-
-         ! Feed corresponding right hand sides for FFT
- 
-         IF (NM == 1) THEN
-
-            !$OMP PARALLEL DO PRIVATE(IC) SCHEDULE(STATIC)
-            DO IC = 1, G%NC
-               FFT%PRHS(G%ICX(IC), G%ICY(IC), G%ICZ(IC)) = V1(IC)
-            ENDDO
-            !$OMP END PARALLEL DO
-
-            IC0 = G%NC+1
-            DO IZ = 1, L%NZ
-               DO IY = 1, L%NY
-                  FFT%PRHS(FFT%IBAR, IY, IZ) = V1(IC0)
-               IC0 = IC0 + 1
-               ENDDO
-            ENDDO
-
-         ELSE IF (NM == NMESHES) THEN
-
-            !$OMP PARALLEL DO PRIVATE(IC) SCHEDULE(STATIC)
-            DO IC = 1, G%NC
-               FFT%PRHS(G%ICX(IC)+1, G%ICY(IC), G%ICZ(IC)) = V1(IC)
-            ENDDO
-            !$OMP END PARALLEL DO
-
-            IC0 = G%NC+1
-            DO IZ = 1, L%NZ
-               DO IY = 1, L%NY
-                  FFT%PRHS(1, IY, IZ) = V1(IC0)
-                  IC0 = IC0 + 1
-               ENDDO
-            ENDDO
-
-         ELSE 
-
-            !$OMP PARALLEL DO PRIVATE(IC) SCHEDULE(STATIC)
-            DO IC = 1, G%NC
-               FFT%PRHS(G%ICX(IC)+1, G%ICY(IC), G%ICZ(IC)) = V1(IC)
-            ENDDO
-            !$OMP END PARALLEL DO
-
-            IC0 = G%NC+1
-            DO IZ = 1, L%NZ
-               DO IY = 1, L%NY
-                  FFT%PRHS(1, IY, IZ) = V1(IC0)
-                  IC0 = IC0 + 1
-               ENDDO
-            ENDDO
-            DO IZ = 1, L%NZ
-               DO IY = 1, L%NY
-                  FFT%PRHS(FFT%IBAR, IY, IZ) = V1(IC0)
-                  IC0 = IC0 + 1
-               ENDDO
-            ENDDO
-
-         ENDIF
-
-         ! Call corresponding FFT solver
- 
-         IF (TWO_D) THEN
-            CALL H2CZSS (FFT%BXS,  FFT%BXF, FFT%BZS, FFT%BZF, FFT%ITRN, &
-                         FFT%PRHS, FFT%POIS_PTB, FFT%SAVE1, FFT%WORK, FFT%HX)
-         ELSE
-            CALL H3CZSS (FFT%BXS,  FFT%BXF, FFT%BYS, FFT%BYF, FFT%BZS, FFT%BZF, FFT%ITRN, FFT%JTRN, &
-                         FFT%PRHS, FFT%POIS_PTB, FFT%SAVE1, FFT%WORK, FFT%HX)
-         ENDIF
-
-         ! Extract computed solution which is contained in FFT%PRHS
- 
-         IF (NM == 1) THEN
-            !$OMP PARALLEL DO PRIVATE(IC) SCHEDULE(STATIC)
-            DO IC = 1, G%NC
-               V2(IC) = FFT%PRHS(G%ICX(IC), G%ICY(IC), G%ICZ(IC)) 
-            ENDDO
-            !$OMP END PARALLEL DO 
-
-            IC0 = G%NC+1
-            DO IZ = 1, L%NZ
-               DO IY = 1, L%NY
-                  V2(IC0) = FFT%PRHS(FFT%IBAR, IY, IZ) 
-                  IC0 = IC0 + 1
-               ENDDO
-            ENDDO
-
-         ELSE IF (NM == NMESHES) THEN
-
-            !$OMP PARALLEL DO PRIVATE(IC) SCHEDULE(STATIC)
-            DO IC = 1, G%NC
-               V2(IC) = FFT%PRHS(G%ICX(IC)+1, G%ICY(IC), G%ICZ(IC)) 
-            ENDDO
-            !$OMP END PARALLEL DO 
-
-            IC0 = G%NC+1
-            DO IZ = 1, L%NZ
-               DO IY = 1, L%NY
-                  V2(IC0) = FFT%PRHS(1, IY, IZ) 
-                  IC0 = IC0 + 1
-               ENDDO
-            ENDDO
-
-         ELSE
-
-            !$OMP PARALLEL DO PRIVATE(IC) SCHEDULE(STATIC)
-            DO IC = 1, G%NC
-               V2(IC) = FFT%PRHS(G%ICX(IC)+1, G%ICY(IC), G%ICZ(IC)) 
-            ENDDO
-            !$OMP END PARALLEL DO 
-
-            IC0 = G%NC+1
-            DO IZ = 1, L%NZ
-               DO IY = 1, L%NY
-                  V2(IC0) = FFT%PRHS(1, IY, IZ) 
-                  IC0 = IC0 + 1
-               ENDDO
-            ENDDO
-            DO IZ = 1, L%NZ
-               DO IY = 1, L%NY
-                  V2(IC0) = FFT%PRHS(FFT%IBAR, IY, IZ) 
-                  IC0 = IC0 + 1
-               ENDDO
-            ENDDO
-
-         ENDIF
-
-      ENDDO
-
-      ! Exchange overlapping parts
-
-      CALL SCARC_EXCHANGE (NSCARC_EXCHANGE_VECTOR_MEAN, NV2, NL)
-
-
 #ifdef WITH_MKL
- 
-
    ! --------- Preconditioning by LU-decomposition
  
    CASE (NSCARC_RELAX_MKL)
@@ -21780,7 +22476,6 @@ END SUBROUTINE SCARC_PRECON_XMEAN
 END MODULE SCARC_METHODS
 
 
-
 !=======================================================================================================================
 !
 ! MODULE SCRC
@@ -21809,24 +22504,16 @@ SUBROUTINE SCARC_SETUP
 USE SCARC_PARSER
 USE SCARC_GRIDS
 USE SCARC_STORAGE, ONLY: SCARC_SETUP_STORAGE
-#ifdef WITH_SCARC_DEBUG
-USE SCARC_MESSAGES, ONLY: SCARC_SETUP_MESSAGES
-#endif
 USE SCARC_MPI, ONLY: SCARC_SETUP_EXCHANGES, SCARC_SETUP_GLOBALS
 USE SCARC_CPU, ONLY: SCARC_SETUP_CPU
 USE SCARC_STACK, ONLY: SCARC_SETUP_VECTORS
-USE SCARC_MATRICES, ONLY: SCARC_SETUP_SYSTEMS
+USE SCARC_MATRICES, ONLY: SCARC_SETUP_POISSON_REQUIREMENTS, SCARC_SETUP_POISSON_SYSTEMS
 #ifdef WITH_MKL
 USE SCARC_MKL, ONLY: SCARC_SETUP_MKL_ENVIRONMENT
+USE SCARC_MATRICES, ONLY: SCARC_SETUP_POISSON_SYMMETRIC
 #endif
-#ifdef WITH_SCARC_AMG
 USE SCARC_AMG, ONLY: SCARC_SETUP_AMG_ENVIRONMENT
-#endif
-#ifdef WITH_SCARC_POSTPROCESSING
-USE SCARC_POSTPROCESSING, ONLY: SCARC_SETUP_PRESSURE
-#endif
-USE SCARC_METHODS, ONLY: SCARC_SETUP_KRYLOV_ENVIRONMENT, SCARC_SETUP_MULTIGRID_ENVIRONMENT, &
-                         SCARC_SETUP_MGM_ENVIRONMENT
+USE SCARC_METHODS, ONLY: SCARC_SETUP_KRYLOV_ENVIRONMENT, SCARC_SETUP_MULTIGRID_ENVIRONMENT, SCARC_SETUP_MGM_ENVIRONMENT
 REAL(EB) :: TNOW
 
 TNOW = CURRENT_TIME()
@@ -21839,7 +22526,7 @@ CALL SCARC_SETUP_CPU
 
 ! Parse ScaRC related input parameters in &PRES namelist
 
-CALL SCARC_PARSE_INPUT                      ; IF (STOP_STATUS==SETUP_STOP) RETURN
+CALL SCARC_PARSE_INPUT                                ; IF (STOP_STATUS==SETUP_STOP) RETURN
 
 ! Setup different components of ScaRC solver
  
@@ -21863,33 +22550,44 @@ ENDIF
 ! Setup information for data exchanges and matrix systems
  
 CALL SCARC_SETUP_EXCHANGES                            ; IF (STOP_STATUS==SETUP_STOP) RETURN
-CALL SCARC_SETUP_SYSTEMS                              ; IF (STOP_STATUS==SETUP_STOP) RETURN
 
-! Setup information for algebraic multigrid if needed as preconditioner or main solver
+! Setup information for Poisson systems of requested solver:
+! - Determine memory requirement for Poisson matrices on all grid levels involved
+! - In case of separable Poisson system:   
+!     * The matrices (on all grid levels) are built up only once at this initial point 
+!     * In case of MKL preconditioning, also their symmetric counterparts must be built
+! - In case of inseparable Poisson system: 
+!     * Only the related workspace is allocated here, the matrices themselves are rebuilt at each time step
 
-#ifdef WITH_SCARC_AMG
-IF (HAS_AMG_LEVELS) CALL SCARC_SETUP_AMG_ENVIRONMENT          
+CALL SCARC_SETUP_POISSON_REQUIREMENTS                 ; IF (STOP_STATUS==SETUP_STOP) RETURN
+IF (IS_SEPARABLE) THEN
+   CALL SCARC_SETUP_POISSON_SYSTEMS                   ; IF (STOP_STATUS==SETUP_STOP) RETURN
+#ifdef WITH_MKL
+   CALL SCARC_SETUP_POISSON_SYMMETRIC                 ; IF (STOP_STATUS==SETUP_STOP) RETURN
 #endif
+ELSE
+   CALL SCARC_SETUP_INSEPARABLE_ENVIRONMENT
+ENDIF
 
-! Setup environment for requested solver
+! Setup information for algebraic multigrid if requested as preconditioner or main solver
+
+IF (HAS_AMG_LEVELS) CALL SCARC_SETUP_AMG_ENVIRONMENT          
+
+! Setup environment for requested globally acting (U)ScaRC-solver
 
 SELECT_METHOD: SELECT CASE(TYPE_METHOD)
 
-   ! Global Krylov method
-   CASE (NSCARC_METHOD_KRYLOV)
+   CASE (NSCARC_METHOD_KRYLOV)                              ! Krylov method
       CALL SCARC_SETUP_KRYLOV_ENVIRONMENT
 
-   ! Global multigrid method
-    CASE (NSCARC_METHOD_MULTIGRID)
+   CASE (NSCARC_METHOD_MULTIGRID)                           ! Multigrid method
        CALL SCARC_SETUP_MULTIGRID_ENVIRONMENT
 
-   ! Global McKeeney-Greengard-Mayo method
-   CASE (NSCARC_METHOD_MGM)
+   CASE (NSCARC_METHOD_MGM)                                 ! McKeeney-Greengard-Mayo method
        CALL SCARC_SETUP_MGM_ENVIRONMENT
 
 #ifdef WITH_MKL
-   ! Global Intel-MKL related method
-   CASE (NSCARC_METHOD_LU)
+   CASE (NSCARC_METHOD_LU)                                  ! Intel-MKL based LU-decomposition method
        CALL SCARC_SETUP_MKL_ENVIRONMENT
 #endif
 END SELECT SELECT_METHOD
@@ -21907,38 +22605,50 @@ END SUBROUTINE SCARC_SETUP
 ! --------------------------------------------------------------------------------------------------------------------
 !> \brief Call of requested ScaRC solver 
 ! --------------------------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_SOLVER(DT_CURRENT)
+SUBROUTINE SCARC_SOLVER(T_CURRENT, DT_CURRENT)
 USE SCARC_CONVERGENCE
-USE SCARC_METHODS, ONLY: SCARC_METHOD_KRYLOV, SCARC_METHOD_MULTIGRID, SCARC_METHOD_MGM
+USE SCARC_METHODS, ONLY: SCARC_METHOD_KRYLOV, SCARC_METHOD_MULTIGRID, SCARC_METHOD_MGM, SCARC_UPDATE_INSEPARABLE_ENVIRONMENT
+USE SCARC_MATRICES, ONLY: SCARC_SETUP_POISSON_SYSTEMS
 #ifdef WITH_MKL
 USE SCARC_METHODS, ONLY: SCARC_METHOD_MKL
+USE SCARC_MATRICES, ONLY: SCARC_SETUP_POISSON_SYMMETRIC
 #endif
-REAL (EB), INTENT(IN) :: DT_CURRENT
+REAL (EB), INTENT(IN) :: T_CURRENT, DT_CURRENT
 REAL (EB) :: TNOW
 
 TNOW = CURRENT_TIME()
 
-CALL SCARC_SET_ITERATION_STATE (DT_CURRENT)
+CALL SCARC_SET_ITERATION_STATE (T_CURRENT, DT_CURRENT)
 
+! If the inseparable Poisson system is solved, the matrices have to be rebuilt for the current density in each time step
 
+IF (IS_INSEPARABLE) THEN
+   CALL SCARC_UPDATE_INSEPARABLE_ENVIRONMENT
+   CALL SCARC_SETUP_POISSON_SYSTEMS                   ; IF (STOP_STATUS==SETUP_STOP) RETURN
+#ifdef WITH_MKL
+   CALL SCARC_SETUP_POISSON_SYMMETRIC                 ; IF (STOP_STATUS==SETUP_STOP) RETURN
+#endif
+ENDIF
+
+! Step into selected globally acting (U)ScaRC solver
+ 
 SELECT_METHOD: SELECT CASE (TYPE_METHOD)
 
-   CASE (NSCARC_METHOD_KRYLOV)
+   CASE (NSCARC_METHOD_KRYLOV)                              ! Krylov method
       CALL SCARC_METHOD_KRYLOV (NSCARC_STACK_ROOT, NSCARC_STACK_ZERO, NLEVEL_MIN)
    
-   CASE (NSCARC_METHOD_MULTIGRID)
+   CASE (NSCARC_METHOD_MULTIGRID)                           ! Multigrid method
       CALL SCARC_METHOD_MULTIGRID(NSCARC_STACK_ROOT, NSCARC_STACK_ZERO, NLEVEL_MIN)
    
-   CASE (NSCARC_METHOD_MGM)
+   CASE (NSCARC_METHOD_MGM)                                 ! McKeeney-Greengard-Mayo method
       CALL SCARC_METHOD_MGM(NSCARC_STACK_ROOT)
 
 #ifdef WITH_MKL
-   CASE (NSCARC_METHOD_LU)
+   CASE (NSCARC_METHOD_LU)                                  ! Intel-MKL based LU-decomposition method
       CALL SCARC_METHOD_MKL(NSCARC_STACK_ROOT, NSCARC_STACK_ZERO, NLEVEL_MIN)
 #endif
    
 END SELECT SELECT_METHOD
-
 
 IF (STOP_STATUS==SETUP_STOP) RETURN
 
