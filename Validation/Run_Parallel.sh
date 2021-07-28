@@ -45,6 +45,7 @@ cd Pool_Fires;  ./Run_All.sh $OPTIONS; cd ..
 cd Purdue_Flames;  ./Run_All.sh $OPTIONS; cd ..
 cd Sandia_Methane_Burner;  ./Run_All.sh $OPTIONS; cd ..
 cd Sandia_Plumes;  ./Run_All.sh $OPTIONS; cd ..
+cd Shell_LNG_Fireballs;  ./Run_All.sh $OPTIONS; cd ..
 cd Sippola_Aerosol_Deposition; ./Run_All.sh $OPTIONS; cd ..
 cd Smyth_Slot_Burner;  ./Run_All.sh $OPTIONS; cd ..
 cd SWJTU_Tunnels;  ./Run_All.sh $OPTIONS; cd ..
