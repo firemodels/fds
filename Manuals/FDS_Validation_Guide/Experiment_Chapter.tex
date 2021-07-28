@@ -1938,6 +1938,28 @@ The condensation simulations included a 4~m portion of duct upstream to allow fo
 	\label{SETCOM_condensation_Summary}
 \end{table}
 
+\FloatBarrier
+
+
+\section{Shell LNG Fireball Experiments}
+\label{Shell_LNG_Fireballs_Description}
+
+Shell Research Ltd.~commissioned four large-scale BLEVE (Boiling Liquid Expanding Vapor Explosion) experiments using LNG (Liquified Natural Gas) at the DNV (Det Norske Veritas) GL test facility at Spadeadam, UK~\cite{Betteridge:2015}. For Experiments 2-4, the cylindrical containment vessel was constructed of 6~mm stainless steel plates and had a length of approximately 6.5 m and diameter of approximately 1~m, with a total volume of 5.055~m$^3$. The mass of LNG for Experiments~2-4 was approximately 681~kg, 1306~kg, and 1251~kg, respectively. The LNG consisted of 96.7~\% methane, 3.0~\% ethane, 0.2~\% nitrogen, and 0.1~\% propane, by volume. The reservoir pressure for Experiments~2-4 was maintained at 13.01~bar, 6.07~bar, and 13.62~bar; and the temperatures were $-115 \; ^\circ$C, $-131 \; ^\circ$C, and $-115 \; ^\circ$C, respectively.
+
+The rupture of the vessels was initiated by an explosive cutting charge designed to rip open the vessel from end to end. Commercial fireworks were ignited just prior to the explosive charge to ensure ignition of the released gas.
+
+Radiometers and pressure transducers were positioned at various distances from the vessel. Only a fraction of the data has been made public, including radiometer measurements at distances of 40~m, 70~m, and 100~m.
+
+\subsubsection{Modeling Notes}
+
+The FDS simulations of the three BLEVE experiments are performed with 0.5~m resolution spanning a volume that is 160~m long, 100~m wide, and 120~m high. The specified mass of LNG is injected uniformly for 0.2~s at the ground over an area 6.4~m long and 3.2~m wide. An inert obstruction that is 3.2~m long by 1.6~m wide and 0.8~m tall is suspended above the spill region to represent the remains of the containment vessel. No attempt is made to model the destuction of the vessel or the subsequent spill of LNG. 
+
+Approximately 600 angles are used in the radiative transport solver rather than the default 100. A radiative fraction of 30~\% is used, rather than the default of 20~\% for methane.
+
+
+
+
+
 \section{Sippola Aerosol Deposition Experiments}
 \label{Sippola_Aerosol_Deposition_Description}
 
