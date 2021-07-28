@@ -955,7 +955,7 @@ LOGICAL :: SNAP_TO_GRID
 LOGICAL, SAVE :: FIRST_CALL_ARG=.TRUE., FIRST_CALL_ARG2=.TRUE.
 
 REAL(EB):: VERT_AUX(IAXIS:KAXIS)
-INTEGER :: ING,INOD,IWSEL,IEL,FACE_AUX(NOD1:NOD3),VOL_AUX(NOD1:NOD4)
+INTEGER :: ING,INOD,IWSEL,IEL,FACE_AUX(NOD1:NOD3),VOL_AUX(NOD1:NOD4),N_SPCELL_TOT
 CHARACTER(100) :: FILENAME
 
 IF (MY_RANK==0 .AND. GET_CUTCELLS_VERBOSE) THEN
@@ -1044,6 +1044,30 @@ DEBUG_SET_CUTCELLS_COND : IF (DEBUG_SET_CUTCELLS) THEN
       DO IEL=1,GEOMETRY(ING)%N_VOLUS
          VOL_AUX(NOD1:NOD4)=GEOMETRY(ING)%VOLUS(NODS_VLEL*(IEL-1)+1:NODS_VLEL*IEL)
          WRITE(33,'(4I10)') VOL_AUX(NOD1:NOD4)
+      ENDDO
+      CLOSE(33)
+
+      ! Write Edges:
+      WRITE(FILENAME,'(A,A,I4.4,A)') TRIM(CHID),'_geometry_',ING,'_edges.dat'
+      OPEN(UNIT=33, file=TRIM(FILENAME), status='unknown')
+      DO IEL=1,GEOMETRY(ING)%N_EDGES
+         WRITE(33,'(2I10)') GEOMETRY(ING)%EDGES(NOD1:NOD2,IEL)
+      ENDDO
+      CLOSE(33)
+
+      ! Write FACE_EDGES:
+      WRITE(FILENAME,'(A,A,I4.4,A)') TRIM(CHID),'_geometry_',ING,'_fcedg.dat'
+      OPEN(UNIT=33, file=TRIM(FILENAME), status='unknown')
+      DO IEL=1,GEOMETRY(ING)%N_FACES
+         WRITE(33,'(3I10)') GEOMETRY(ING)%FACE_EDGES(NOD1:NOD3,IEL)
+      ENDDO
+      CLOSE(33)
+
+      ! Write EDGE_FACES:
+      WRITE(FILENAME,'(A,A,I4.4,A)') TRIM(CHID),'_geometry_',ING,'_edfac.dat'
+      OPEN(UNIT=33, file=TRIM(FILENAME), status='unknown')
+      DO IEL=1,GEOMETRY(ING)%N_EDGES
+         WRITE(33,'(5I10)') GEOMETRY(ING)%EDGE_FACES(NOD1:NOD4+1,IEL)
       ENDDO
       CLOSE(33)
 
@@ -1938,6 +1962,18 @@ CCVERBOSE_COND : IF(GET_CUTCELLS_VERBOSE) THEN
       ENDDO
    ENDIF
    DEALLOCATE(GEOM_AREA_SURF, GEOM_SURF)
+
+   ! Write out special cells info:
+   N_SPCELL_TOT=0
+   DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+      N_SPCELL_TOT = N_SPCELL_TOT + MESHES(NM)%N_SPCELL
+      WRITE(LU_SETCC,"(A,2I8)") 'MESH, Number of Special Cells=',NM,MESHES(NM)%N_SPCELL
+      DO ICC1=1,MESHES(NM)%N_SPCELL
+         WRITE(LU_SETCC,"(A,2I8,A,3I8)") 'NM,CELL IJK=',NM,ICC1,':',MESHES(NM)%SPCELL_LIST(IAXIS:KAXIS,ICC1)
+      ENDDO
+   ENDDO
+   CALL MPI_ALLREDUCE(MPI_IN_PLACE, N_SPCELL_TOT,      1, MPI_INTEGER,          MPI_SUM, MPI_COMM_WORLD, IERR)
+   IF (MY_RANK==0) WRITE(LU_ERR,"(A,1I8)") 'Total Number of Special Cells=',N_SPCELL_TOT
 
    ! Write out more detailed stats:
    WRITE_CFACE_STATS_COND : IF (WRITE_CFACE_STATS) THEN
@@ -9279,8 +9315,7 @@ SEGS_LOOP : DO ISEG=1,BODINT_PLANE%NSEGS
                ENDIF
                MESHES(NM)%CUT_EDGE(CEI)%INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,NEDGE+1) = &
                                BODINT_PLANE%INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,ISEG)
-               MESHES(NM)%CUT_EDGE(CEI)%INDSEG(  IBM_MAX_WSTRIANG_SEG+3,NEDGE+1) = &
-                               -SUM(BODINT_PLANE%SEGTYPE(NOD1:NOD2,ISEG))/2
+               MESHES(NM)%CUT_EDGE(CEI)%INDSEG(  IBM_MAX_WSTRIANG_SEG+3,NEDGE+1) = 0 !Edges in face boundary counted once.
                MESHES(NM)%CUT_EDGE(CEI)%NVERT = NVERT
                MESHES(NM)%CUT_EDGE(CEI)%NEDGE = NEDGE+1
                MESHES(NM)%CUT_EDGE(CEI)%NEDGE1= MESHES(NM)%CUT_EDGE(CEI)%NEDGE
@@ -9437,8 +9472,7 @@ SEGS_LOOP : DO ISEG=1,BODINT_PLANE%NSEGS
                ENDIF
                MESHES(NM)%CUT_EDGE(CEI)%INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,NEDGE+1) = &
                                BODINT_PLANE%INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,ISEG)
-               MESHES(NM)%CUT_EDGE(CEI)%INDSEG(  IBM_MAX_WSTRIANG_SEG+3,NEDGE+1) = &
-                               -SUM(BODINT_PLANE%SEGTYPE(NOD1:NOD2,ISEG))/2
+               MESHES(NM)%CUT_EDGE(CEI)%INDSEG(  IBM_MAX_WSTRIANG_SEG+3,NEDGE+1) = 0 !Edges in face boundary counted once.
                MESHES(NM)%CUT_EDGE(CEI)%NVERT = NVERT
                MESHES(NM)%CUT_EDGE(CEI)%NEDGE = NEDGE+1
                MESHES(NM)%CUT_EDGE(CEI)%NEDGE1= MESHES(NM)%CUT_EDGE(CEI)%NEDGE
@@ -10111,7 +10145,8 @@ REAL(EB), DIMENSION(IBM_MAXCFELEM_FACE)                        ::   AREAV  ! Cut
 REAL(EB), DIMENSION(IAXIS:KAXIS,1:IBM_MAXCFELEM_FACE)          ::  XYZCEN  ! Cut-faces centroid locations.
 REAL(EB), DIMENSION(IAXIS:KAXIS,1:IBM_MAXCFELEM_FACE)          ::  INXAREA, INXSQAREA
 INTEGER,  DIMENSION(IBM_MAXCFELEM_FACE) :: FINFACE
-INTEGER :: IBNDINT,BNDINT_LOW,BNDINT_HIGH,ILOC,BODNUM(1:IBM_MAXCEELEM_FACE),SEGTYPE(IBM_MAXCEELEM_FACE),VEC(2),IDUM,IBOD,STYPE
+INTEGER :: IBNDINT,BNDINT_LOW,BNDINT_HIGH,ILOC,BODNUM(1:IBM_MAXCEELEM_FACE),&
+SEGTYPE(IBM_MAXCEELEM_FACE),SEGTYPEAUX(IBM_MAXCEELEM_FACE),VEC(2),IDUM,IBOD,STYPE
 LOGICAL, ALLOCATABLE, SAVE, DIMENSION(:,:,:,:) :: IJK_COUNTED
 
 INTEGER :: NSSEG, NSVERT, NSFACE, NSFACE2
@@ -10630,27 +10665,19 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
                 ENDDO
              ENDIF
 
-             ! Here expand SEG_FACE to contain all halfedges of STYPE=1:
-             COUNT = 0
-             SEG_FACEAUX (NOD1:NOD2,1:IBM_MAXCEELEM_FACE)             = IBM_UNDEFINED
-             ANGSEGAUX(1:IBM_MAXCEELEM_FACE)                          = 0._EB
-             DO ISEG=1,NSEG
-                 COUNT = COUNT + 1
-                 SEG_FACEAUX (NOD1:NOD2,COUNT) = SEG_FACE(NOD1:NOD2,ISEG)
-                 ANGSEGAUX(COUNT) = ANGSEG(ISEG)
-                 IF (SEGTYPE(ISEG)==1) THEN
-                     COUNT = COUNT + 1
-                     SEG_FACEAUX (NOD1:NOD2,COUNT) = SEG_FACE( (/ NOD2, NOD1 /),ISEG)
-                     IF (ANGSEG(ISEG) > 0._EB) THEN
-                        ANGSEGAUX(COUNT) = ANGSEG(ISEG) - PI
-                     ELSE
-                        ANGSEGAUX(COUNT) = ANGSEG(ISEG) + PI
-                     ENDIF
-                 ENDIF
-             ENDDO
-             NSEG     = COUNT
-             SEG_FACE = SEG_FACEAUX
-             ANGSEG   = ANGSEGAUX
+
+             ! IF(INDI==14 .AND. INDJ==2 .AND. INDK==5 .AND. X1AXIS==KAXIS) THEN
+             !    OPEN(666,FILE='VERTS_FC0.txt',STATUS='REPLACE')
+             !    DO IDUM=1,NVERT
+             !       WRITE(666,*) XYZVERT(1:3,IDUM)
+             !    ENDDO
+             !    CLOSE(666)
+             !    OPEN(666,FILE='SEGS_FC0.txt',STATUS='REPLACE')
+             !    DO ISEG=1,NSEG
+             !       WRITE(666,*) SEG_FACE(NOD1:NOD2,ISEG),ANGSEG(ISEG),SEGTYPE(ISEG)
+             !    ENDDO
+             !    CLOSE(666)
+             ! ENDIF
 
              NOTDONE = .TRUE.
              DO WHILE(NOTDONE)
@@ -10671,6 +10698,7 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
                 COUNT = 0
                 SEG_FACEAUX (NOD1:NOD2,1:IBM_MAXCEELEM_FACE)             = IBM_UNDEFINED
                 ANGSEGAUX(1:IBM_MAXCEELEM_FACE)                          = 0._EB
+                SEGTYPEAUX(1:IBM_MAXCEELEM_FACE)                         = IBM_UNDEFINED
                 DO ISEG=1,NSEG
                    NUMNOD1 = NUMEDG_NODE(SEG_FACE(NOD1,ISEG))
                    NUMNOD2 = NUMEDG_NODE(SEG_FACE(NOD2,ISEG))
@@ -10678,6 +10706,7 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
                       COUNT = COUNT + 1
                       SEG_FACEAUX(NOD1:NOD2,COUNT) = SEG_FACE(NOD1:NOD2,ISEG)
                       ANGSEGAUX(COUNT) = ANGSEG(ISEG)
+                      SEGTYPEAUX(COUNT)= SEGTYPE(ISEG)
                    ELSE
                       NOTDONE = .TRUE.
                    ENDIF
@@ -10685,6 +10714,7 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
                 NSEG = COUNT
                 SEG_FACE = SEG_FACEAUX
                 ANGSEG   = ANGSEGAUX
+                SEGTYPE  = SEGTYPEAUX
              ENDDO
 
              ! Discard face with no conected edges:
@@ -10697,19 +10727,25 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
              ! Add segments which have both ends attached to more than two segs:
              count = 0
              DO ISEG=1,NSEG
-                NUMNOD1 = NUMEDG_NODE(SEG_FACE(NOD1,ISEG))
-                NUMNOD2 = NUMEDG_NODE(SEG_FACE(NOD2,ISEG))
-                IF ((NUMNOD1 > 2) .AND. (NUMNOD2 > 2)) THEN
-                   COUNT = COUNT + 1
-                   SEG_FACE(NOD1:NOD2,NSEG+COUNT) = SEG_FACE( (/ NOD2, NOD1 /) ,ISEG)
-                   IF (ANGSEG(ISEG) >= 0._EB) THEN
-                      ANGSEG(NSEG+COUNT) = ANGSEG(ISEG) - PI
-                   ELSE
-                      ANGSEG(NSEG+COUNT) = ANGSEG(ISEG) + PI
-                   ENDIF
-                ENDIF
+                 COUNT = COUNT + 1
+                 SEG_FACEAUX (NOD1:NOD2,COUNT) = SEG_FACE(NOD1:NOD2,ISEG)
+                 ANGSEGAUX(COUNT) = ANGSEG(ISEG)
+                 !SEGTYPEAUX(COUNT)= SEGTYPE(ISEG)
+                 IF (SEGTYPE(ISEG)==1) THEN
+                     COUNT = COUNT + 1
+                     SEG_FACEAUX (NOD1:NOD2,COUNT) = SEG_FACE( (/ NOD2, NOD1 /),ISEG)
+                     !SEGTYPEAUX(COUNT)= SEGTYPE(ISEG)
+                     IF (ANGSEG(ISEG) > 0._EB) THEN
+                        ANGSEGAUX(COUNT) = ANGSEG(ISEG) - PI
+                     ELSE
+                        ANGSEGAUX(COUNT) = ANGSEG(ISEG) + PI
+                     ENDIF
+                 ENDIF
              ENDDO
-             NSEG = NSEG + COUNT
+             NSEG     = COUNT
+             SEG_FACE = SEG_FACEAUX
+             ANGSEG   = ANGSEGAUX
+             !SEGTYPE = SEGTYPEAUX
 
              ! Fill NODEDG_FACE(IEDGE,INOD), where iedge are edges
              ! that contain inod as first node. This assumes edges are
@@ -14271,7 +14307,7 @@ DO K=KLO,KHI
          ! Ear clipping algorithm by TRIANGLE and BODY:
          ! 1. Define closed 3D polyline:
          CALL GET_CLOSED_POLYLINES(SIZE_CEELEM_SEG_CELL,NSEG,SEG_CELL,SEG_POS,IFLG,NPOLY,ILO_POLY,NSG_POLY)
-         IF (IFLG) WRITE(LU_ERR,*) 'IFLG ~=0, could not close polyline, ',BNDINT_FLAG,': ',I,J,K
+         IF (IFLG .AND. GET_CUTCELLS_VERBOSE) WRITE(LU_ERR,*) 'IFLG ~=0, could not close polyline, ',BNDINT_FLAG,': ',NM,I,J,K
 
          ! 2. Define triangles by Body and triangle, all triangles generated
          !    point outside of solid region:
@@ -15078,6 +15114,21 @@ DO K=KLO,KHI
             ENDDO
          ENDIF
 
+         ! IF(I==14 .AND. J==2 .AND. K==6) THEN
+         !    WRITE(LU_ERR,*) 'CC 1 I,J,K,INB NFACE,NFACE_CELL=',I,J,K,&
+         !    MESHES(NM)%CUT_FACE(CEI)%NFACE,NFACE_CELL
+         !    OPEN(666,FILE='VERTS.txt',STATUS='REPLACE')
+         !    DO IP=1,NVERT_CELL
+         !       WRITE(666,*) XYZVERT(1:3,IP)
+         !    ENDDO
+         !    CLOSE(666)
+         !    IFACE=MAXVAL(FACE_CELL(1,1:NFACE_CELL))
+         !    OPEN(666,FILE='FACES.txt',STATUS='REPLACE')
+         !    DO IP=1,NFACE_CELL
+         !       WRITE(666,*) FACE_CELL(1:IFACE+1,IP),FACE_LIST(1,IP)
+         !    ENDDO
+         !    CLOSE(666)
+         ! ENDIF
 
          ! Here we have in XYZvert all the vertices that define the
          ! cut-cells within Cartesian cell I,J,K. We have the faces,
