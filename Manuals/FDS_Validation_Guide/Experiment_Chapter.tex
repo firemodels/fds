@@ -104,6 +104,16 @@ The two-step simple chemistry combustion scheme is applied, where an infinitely 
 
 A minimum auto-ignition temperature is specified for each fuel~\cite{SFPE:Beyler} to prevent the fuel vapor from igniting at the layer interface. This restriction is relaxed in the grid cells just above the burner surface to allow for ignition without a secondary heat source. In addition, a critical flame temperature of 500~$^\circ$C is applied in all cases to account for local flame extinction. The grid is too coarse to support the actual values, and the chosen value is a placeholder until a better flame extinction model is developed.
 
+\section{BGC GRI LNG Fire Experiments}
+\label{BGC_GRI_LNG_Fires_Description}
+
+In 1982 and 1983, P.A. Croce and K.S. Mudan of Arthur D. Little, Inc., and J. Moorhouse of the British Gas Corporation (BGC) supervised 13 liquified natural gas (LNG) trench fire experiments conducted by BGC on behalf of the Gas Research Institute (GRI)~\cite{Croce:GRI}. Thirteen experiments were performed with nominal trench sizes ranging from 0.8~m by 4.4~m to 3.9~m by 52~m and aspect ratios ranging from approximately 5 to 30. Wind speeds varied from approximately 1~m/s to almost 10~m/s. Measurements made during the tests included flame geometry, radiative heat flux, emissive power, burning rate, LNG liquid and vapor compositions, and meteorological data. The fires were observed to exhibit substantial flame drag and flame breakup, unlike low aspect ratio pools. Steady burning was achieved in all tests.
+
+\subsubsection{Modeling Notes}
+
+The experiments are simulated using the specified fuel burning rate. The fuel is assumed to be methane. The atmosphere is assumed to be neutral with a large Obukhov length, $L=1000000$, and the ground surface is flat with an assumed aerodynamic roughness, $z_0=0.1$~m. The relative humidity, ambient temperature and pressure, and wind speed at 9~m are specified in the report. The radiative fraction is assumed to 0.25 and the radiative path length is assumed to be 50~m; that is, the effective absorption coefficients of the various gas mixtures are evaluated over a distance of 50~m. The radiation source term is taken directly as 25~\% of the combustion energy release rate. The soot yield is assumed to be 0.005.
+
+
 
 \section{Bittern Sprinkler Experiments}
 \label{Bittern_Sprinkler_Description}
@@ -847,15 +857,6 @@ $^\dag$ The Falcon experiments involved 4 separated spills
 \label{tab:LNG_Dispersion}
 \end{sidewaystable}
 
-
-\section{LNG Fire Experiments}
-\label{LNG_Fires_Description}
-
-In 1982 and 1983, Croce, Mudan, and Moorhouse conducted 13 liquified natural gas (LNG) trench fire experiments on behalf of the Gas Research Institute~\cite{Croce:GRI}. Thirteen experiments were performed with nominal trench sizes ranging from 0.8~m by 4.4~m to 3.9~m by 52~m and aspect ratios ranging from approximately 5 to 30. Wind speeds varied from approximately 1~m/s to almost 10~m/s. Measurements made during the tests included flame geometry, radiative heat flux, emissive power, burning rate, LNG liquid and vapor compositions, and meteorological data. The fires were observed to exhibit substantial flame drag and flame breakup, unlike low aspect ratio pools. Steady burning was achieved in all tests.
-
-\subsubsection{Modeling Notes}
-
-The experiments are simulated using the specified fuel burning rate. The fuel is assumed to be methane. The atmosphere is assumed to be neutral with a large Obukhov length, $L=1000000$, and the ground surface is flat with an assumed aerodynamic roughness, $z_0=0.1$~m. The relative humidity, ambient temperature and pressure, and wind speed at 9~m are specified in the report. The radiative fraction is assumed to 0.25 and the radiative path length is assumed to be 50~m; that is, the effective absorption coefficients of the various gas mixtures are evaluated over a distance of 50~m. The radiation source term is taken directly as 25~\% of the combustion energy release rate. The soot yield is assumed to be 0.005.
 
 
 \section{Loughborough Jet Fire Experiments}
