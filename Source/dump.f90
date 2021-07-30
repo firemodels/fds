@@ -3194,7 +3194,7 @@ WRITE_RADIATION: IF (RADIATION .AND. ALLOCATED(RSA)) THEN
          WRITE(LU_OUTPUT,'(A,I4)')  '   Number of spectral bands is ', NUMBER_SPECTRAL_BANDS
       ELSE
          WRITE(LU_OUTPUT,'(A,I4)')  '   Using gray gas absorption.'
-         WRITE(LU_OUTPUT,'(A,F6.3,A)')'   Mean beam length ',PATH_LENGTH,' m'
+         WRITE(LU_OUTPUT,'(A,ES10.3,A)')'   Mean beam length ',PATH_LENGTH,' m'
       ENDIF
    ELSEIF (KAPPA0 >= 0._EB) THEN
       WRITE(LU_OUTPUT,'(A,F7.3,A)')'   Using constant absorption coefficient of ',KAPPA0,' 1/m'
