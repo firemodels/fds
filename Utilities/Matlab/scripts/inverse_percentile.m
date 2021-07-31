@@ -7,9 +7,9 @@ for i=2:n
 end
 psum(1) = 0.;
 
-k = min(find(psum>0.95*psum(n)));
+k = min(find(psum>0.90*psum(n)));
 if (k>1)
-   x0 = x(k-1) + (x(k)-x(k-1))*(0.95*psum(n)-psum(k-1))/(psum(k)-psum(k-1));
+   x0 = x(k-1) + (x(k)-x(k-1))*(0.90*psum(n)-psum(k-1))/(psum(k)-psum(k-1));
 else
    x0 = x(1);
 end
