@@ -17603,7 +17603,6 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
          !             ' geometry number ',N,' zero thickness found in Z direction.'
          ! CALL SHUTDOWN(MESSAGE); RETURN
       ENDIF
-      WRITE(LU_ERR,*) 'XMIN,MAX in Z=',XB(5),XB(6)
 
       ! Here all processes have read the GEOM with SNAP_TO_GRID:
       G%XB_ORIG = XB
