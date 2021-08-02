@@ -43,11 +43,11 @@ outdir = '../../../out/Askervein_Hill/';
 filename = 'Askervein_TU03A_16m_devc.csv';
 A = importdata([outdir,filename], ",", 2);
 
-%Defines a new name for the output file(ASW-ANE Output specifically)
-NewName = strrep(filename,'devc','devc_read');
+% !!OLD Defines a new name for the output file(ASW-ANE Output specifically)
+% NewName = strrep(filename,'devc','devc_read');
 
-% isolates unique part of device file name for easeir version comparisons
-% ID = strrep(strrep(filename,'Askervein_TU03A_',''),'_devc.csv','');
+% isolates unique part of device file name for easeir resolution comparisons
+ ID = strrep(strrep(filename,'Askervein_TU03A_',''),'_devc.csv','');
 
 %Time_Stop allows the user to change what time they want from the table
 %It's currently set up to automatically take the latest avarege
@@ -61,8 +61,7 @@ slot = find( A.data(:,(strcmp(A.colheaders,'Time'))) > TimeStop1 & ...
 
 % A Line 10m height
 % ----------------------------------------------------------------
-%NewName ='ASW-ANE_TU03A_read.csv';
-% NewName = strcat('ASW-ANE_TU03A_',ID,'_read.csv');
+NewName =strcat('ASW-ANE_TU03A_',ID,'.csv');
 % Create Distance from hiltop column. 
 DIST = ["(m)", "DIST", -85, -60, -50, -35, -20, -10, 0, 10, 20, 40]';
          
@@ -163,7 +162,8 @@ writematrix(FINAL,[outdir, NewName])
 % AA Line
 % ----------------------------------------------------------------
 %SPEED
-NewName ='AASW-AANE_TU03A_10m.csv';
+NewName =strcat('AASW-AANE_TU03A_',ID,'.csv');
+%NewName ='AASW-AANE_TU03A_10m.csv';
 DIST = ["(m)","DIST",-90,-80,-70,-60,-50,-40,-30,-20,-10,0,0,10,20,30,40,50,60]';
 CP_BSE40 = A.data(slot,find(strcmp(A.colheaders,'"SPEED CP BSE 40"')));
 AACP0 = A.data(slot,find(strcmp(A.colheaders,'"SPEED CP UK mf"')));
@@ -195,7 +195,8 @@ writematrix(FINAL,[outdir, NewName])
 % B Line
 % ----------------------------------------------------------------
 %SPEED
-NewName ='BNW-BSE_TU03A_10m.csv';
+NewName =strcat('BNW-BSE_TU03A_',ID,'.csv');
+% NewName ='BNW-BSE_TU03A_10m.csv';
 DIST = ["(m)","DIST",-20,-10,0,10,20,30,40,40,50,60,70,80,90,100,110,130]';
 HT_0 = A.data(slot,find(strcmp(A.colheaders,'"SPEED HT 10 m mf"')));
 BNW10 = A.data(slot,find(strcmp(A.colheaders,'"SPEED BNW10"')));
@@ -222,7 +223,8 @@ writematrix(FINAL,[outdir, NewName])
 % AA Line MF
 % ----------------------------------------------------------------
 %Mean Flow MF
-NewName ='AASW-AANE_mf_TU03A.csv';
+NewName =strcat('AASW-AANE_mf_TU03A_',ID,'.csv');
+% NewName ='AASW-AANE_mf_TU03A.csv';
 DIST = ["(m)", "DIST", -50, -30, -10, 0]';
 AASW0 = A.data(slot,find(strcmp(A.colheaders,'"SPEED CP FRG mf"')));
 AASW10 = A.data(slot,find(strcmp(A.colheaders,'"SPEED AASW10 mf"')));
@@ -254,9 +256,10 @@ AVG_SPEED = ["(m/s)";"SPEED";SPEED'];
 
 FINAL = [DIST DIRECTION AVG_SPEED SIGM_SPEED];
 writematrix(FINAL,[outdir, NewName])
-
+% ---------------------------------------------------
 % TU Mean Flow (MF)
-NewName ='AASW-AANE_t_TU03A.csv';
+NewName =strcat('AASW-AANE_t_TU03A_',ID,'.csv');
+% NewName ='AASW-AANE_t_TU03A.csv';
 DIST = ["(m)", "DIST", -50, -30, -10,]';
 
 AASW10 = A.data(slot,find(strcmp(A.colheaders,'"SPEED AASW10 t"')));
@@ -302,7 +305,8 @@ writematrix(FINAL,[outdir, NewName])
 % Vertical Profile
 % ----------------------------------------------------------------
 %50m Tower
-NewName ='HT_50m_TU03A_vert.csv';
+NewName =strcat('HT_50m_TU03A_vert_',ID,'.csv');
+% NewName ='HT_50m_TU03A_vert.csv';
 DIST = ["(m)", "DZ", 1, 3, 5, 8, 15, 24, 34, 49]';
 HT_1 = A.data(slot,find(strcmp(A.colheaders,'"SPEED HT tower 1 m"')));
 HT_3 = A.data(slot,find(strcmp(A.colheaders,'"SPEED HT tower 3 m"')));
