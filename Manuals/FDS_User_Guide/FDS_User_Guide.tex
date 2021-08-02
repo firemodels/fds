@@ -8463,6 +8463,7 @@ For any object for which a {\ct DEVC\_ID} can be specified (such as {\ct OBST} o
 {\ct MAX}                         & Maximum value of the {\ct INPUT}s \\ \hline
 {\ct MIN}                         & Minimum value of the {\ct INPUT}s \\ \hline
 {\ct PID}                         & A Proportional-Integral-Derivative control for the {\ct INPUT}\\ \hline
+{\ct PERCENTILE}                  & Calculate the user-specified percentile for a function \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
@@ -8622,6 +8623,35 @@ The PID controller can be used to time integrate the mass loss from a pyrolyzing
 &DEVC ID='PYROLYZATE', XYZ=..., QUANTITY='CONTROL VALUE', CTRL_ID='MY PID'/
 \end{lstlisting}
 Here, the {\ct 'PYROLYZATE'} column of the {\ct \_devc.csv} file will have units of \si{kg}.
+
+
+\subsection{Control Function: \texorpdfstring{{\tt PERCENTILE}}{PERCENTILE} }
+\label{info:PERCENTILE}
+
+Consider the cumulative distribution function, $F(x)$:
+\be
+   \left. F(x) = \int_{-\infty}^x f(x') \, \d x' \middle/  \int_{-\infty}^\infty f(x') \, \d x' \right.
+\ee
+The {\ct PERCENTILE} control function returns the value of $x$ for which $F(x)=p$, where $p$ is a value between 0 and 1. In discretized form, the function $f(x)$ is represented by the pairs $(x_i,f_i)$ for $1\le i \le N$. The $p$th percentile is then given by
+\be 
+   x(p) = \bar{x}_{k-1} + (\bar{x}_k-\bar{x}_{k-1}) \, \frac{p F_N-F_{k-1}}{F_k-F_{k-1}}  
+\ee
+where 
+\be  
+   F_k = \sum_{i=1}^k f_i \, \delta \bar{x}_i  \quad ; \quad \bar{x}_i=\frac{x_{i+1}+x_i}{2} \quad ; \quad \delta \bar{x}_i = \bar{x_i}-\bar{x}_{i-1}   \quad ; \quad
+   k = \min_n \left( F_n > p \, F_N  \right)
+\ee
+It is assumed that the values $x_i$ are mid-points of the discretized function;  that is, $f_i$ is the average value of the function over the interval $(\bar{x}_{i-1},\bar{x}_i)$.
+
+The {\ct PERCENTILE} function is useful for computing flame heights. Consider the following input lines:
+\begin{lstlisting}
+&DEVC XB=0,0,0,0,0.05,4.95, QUANTITY='HRRPUL', POINTS=50, Z_ID='z', ID='qdot' /
+&CTRL ID='pct', FUNCTION_TYPE='PERCENTILE', INPUT_ID='qdot', PERCENTILE=0.95 /
+&DEVC ID='L_F', XYZ=0,0,0, QUANTITY='CONTROL VALUE', CTRL_ID='pct', UNITS='m' /
+\end{lstlisting}
+The first {\ct DEVC} line represents a vertical profile of {\ct 'HRRPUL'} or Heat Release Rate Per Unit Length (kW/m). These 50 values result from integrating the heat release rate per unit volume over the two horizontal directions. The {\ct CTRL} function takes these 50 values at 50 uniformly spaced heights between 0.05~m and 4.95~m and calculates the height at which 95~\% of the fire's energy has been released. Note that for a 10~cm grid, the vertical array of points are located at cell centers, which is why the discretized integration is done the way it is described above. The second {\ct DEVC} line simply takes the value calculated by the control function and prints it out in the file of time histories, {\ct CHID\_devc.csv}. The 50 values of {\ct 'HRRPUL'} are time-averaged and written to the file, {\ct CHID\_line.csv}. Note that the flame heights written to {\ct CHID\_devc.csv} are time-averaged over the time interval between printouts, {\ct DT\_DEVC}. If you set {\ct DT\_DEVC} to a very small value (i.e. less than the time step), you will obtain a time-history of instantaneous flame heights.
+
+
 
 
 \subsection{Combining Control Functions: A Deluge System}
