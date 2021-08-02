@@ -1,0 +1,14 @@
+submitted at Mon Aug  2 11:50:44 EDT 2021
+         Input file:zero_thick_roof.fds
+         Executable:/home/idp/Firemodels_fork/fds/Build/impi_intel_linux_64/fds_impi_intel_linux_64
+           Intel MPI
+            Modules:git/218
+   Resource Manager:SLURM
+              Queue:batch
+              Nodes:1
+          Processes:1
+ Processes per node:1
+Submitted batch job 2652077
+----------------
+started running at Mon Aug  2 11:50:45 EDT 2021
+finished running at Mon Aug  2 11:50:46 EDT 2021
