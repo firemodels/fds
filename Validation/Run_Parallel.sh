@@ -25,6 +25,7 @@ cd Heated_Channel_Flow;  ./Run_All.sh $OPTIONS; cd ..
 cd Juelich_SETCOM;  ./Run_All.sh $OPTIONS; cd ..
 cd LNG_Fires;  ./Run_All.sh $OPTIONS; cd ..
 cd LNG_Dispersion;  ./Run_All.sh $OPTIONS; cd ..
+cd Loughborough_Jet_Fires;  ./Run_All.sh $OPTIONS; cd ..
 cd McCaffrey_Plume;  ./Run_All.sh $OPTIONS; cd ..
 cd Moody_Chart; ./Run_All.sh $OPTIONS; cd ..
 cd NBS_Multi-Room;  ./Run_All.sh $OPTIONS; cd ..
@@ -42,7 +43,9 @@ cd NIST_Vent_Study;  ./Run_All.sh $OPTIONS; cd ..
 cd NRCC_Smoke_Tower;  ./Run_All.sh $OPTIONS; cd ..
 cd Pool_Fires;  ./Run_All.sh $OPTIONS; cd ..
 cd Purdue_Flames;  ./Run_All.sh $OPTIONS; cd ..
+cd Sandia_Methane_Burner;  ./Run_All.sh $OPTIONS; cd ..
 cd Sandia_Plumes;  ./Run_All.sh $OPTIONS; cd ..
+cd Shell_LNG_Fireballs;  ./Run_All.sh $OPTIONS; cd ..
 cd Sippola_Aerosol_Deposition; ./Run_All.sh $OPTIONS; cd ..
 cd Smyth_Slot_Burner;  ./Run_All.sh $OPTIONS; cd ..
 cd SWJTU_Tunnels;  ./Run_All.sh $OPTIONS; cd ..

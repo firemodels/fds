@@ -260,6 +260,8 @@ for i=2:n_plots
                     Save_Measured_Metric(i,j,1) = min(M(indices,d1_Dep_Col));
                 elseif strcmp(Metric,'area')
                     Save_Measured_Metric(i,j,1) = trapz(M(indices,d1_Ind_Col), M(indices,d1_Dep_Col))-d1_Initial_Value;
+                elseif strcmp(Metric,'ipct')
+                    Save_Measured_Metric(i,j,1) = inverse_percentile(M(indices,d1_Ind_Col), M(indices,d1_Dep_Col))-d1_Initial_Value;
                 elseif strcmp(Metric,'end')
                     Save_Measured_Metric(i,j,1) = M(indices(end),d1_Dep_Col)-d1_Initial_Value;
                 % If end_x_y is specified for a plot with multiple curves,
@@ -395,6 +397,8 @@ for i=2:n_plots
                     Save_Predicted_Metric(i,j,1) = min(M_Dep)-d2_Initial_Value;
                 elseif strcmp(Metric,'area')
                     Save_Predicted_Metric(i,j,1) = trapz(M_Ind,M_Dep)-d2_Initial_Value;
+                elseif strcmp(Metric,'ipct')
+                    Save_Predicted_Metric(i,j,1) = inverse_percentile(M_Ind,M_Dep)-d2_Initial_Value;
                 elseif strcmp(Metric,'end')
                     Save_Predicted_Metric(i,j,1) = M_Dep(end)-d2_Initial_Value;
                 % If end_x_y is specified for a plot with multiple curves,

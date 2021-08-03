@@ -517,8 +517,8 @@ PUBLIC :: BLOCK_IBM_SOLID_EXTWALLCELLS,GEOFCT,CALL_FOR_GLMAT,CALL_FROM_GLMAT_SET
           JA_H, A_H, H_MATRIX_INDEFINITE, F_H, X_H, PT_H, IPARM, POINT_IN_POLYGON,SEARCH_OTHER_MESHES_FACE,&
           SET_CUTCELLS_TIME_INDEX,SET_CUTCELLS_3D,TRIANGULATE,TRILINEAR, VALID_TRIANGLE, &
           VAL_TESTX_LOW,VAL_TESTX_HIGH,VAL_TESTY_LOW,VAL_TESTY_HIGH,VAL_TESTZ_LOW,VAL_TESTZ_HIGH, &
-          T_CC_USED, WRITE_SET_CUTCELLS_TIMINGS
-
+          T_CC_USED, WRITE_SET_CUTCELLS_TIMINGS, &
+          MAKE_UNIQUE_VERT_ARRAY, AVERAGE_FACE_VALUES
 
 CONTAINS
 
@@ -931,6 +931,8 @@ REAL(EB):: MIN_CC_VOL, MAX_CC_VOL
 
 LOGICAL, ALLOCATABLE, DIMENSION(:) :: CC_COMPUTE_MESH, CC_COMPUTE_MESH_AUX
 
+REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: GEOM_ZMAX_AUX
+
 REAL(EB) :: TNOW
 
 LOGICAL :: WRITE_CFACE_STATS = .FALSE.
@@ -953,7 +955,7 @@ LOGICAL :: SNAP_TO_GRID
 LOGICAL, SAVE :: FIRST_CALL_ARG=.TRUE., FIRST_CALL_ARG2=.TRUE.
 
 REAL(EB):: VERT_AUX(IAXIS:KAXIS)
-INTEGER :: ING,INOD,IWSEL,IEL,FACE_AUX(NOD1:NOD3),VOL_AUX(NOD1:NOD4)
+INTEGER :: ING,INOD,IWSEL,IEL,FACE_AUX(NOD1:NOD3),VOL_AUX(NOD1:NOD4),N_SPCELL_TOT
 CHARACTER(100) :: FILENAME
 
 IF (MY_RANK==0 .AND. GET_CUTCELLS_VERBOSE) THEN
@@ -1042,6 +1044,30 @@ DEBUG_SET_CUTCELLS_COND : IF (DEBUG_SET_CUTCELLS) THEN
       DO IEL=1,GEOMETRY(ING)%N_VOLUS
          VOL_AUX(NOD1:NOD4)=GEOMETRY(ING)%VOLUS(NODS_VLEL*(IEL-1)+1:NODS_VLEL*IEL)
          WRITE(33,'(4I10)') VOL_AUX(NOD1:NOD4)
+      ENDDO
+      CLOSE(33)
+
+      ! Write Edges:
+      WRITE(FILENAME,'(A,A,I4.4,A)') TRIM(CHID),'_geometry_',ING,'_edges.dat'
+      OPEN(UNIT=33, file=TRIM(FILENAME), status='unknown')
+      DO IEL=1,GEOMETRY(ING)%N_EDGES
+         WRITE(33,'(2I10)') GEOMETRY(ING)%EDGES(NOD1:NOD2,IEL)
+      ENDDO
+      CLOSE(33)
+
+      ! Write FACE_EDGES:
+      WRITE(FILENAME,'(A,A,I4.4,A)') TRIM(CHID),'_geometry_',ING,'_fcedg.dat'
+      OPEN(UNIT=33, file=TRIM(FILENAME), status='unknown')
+      DO IEL=1,GEOMETRY(ING)%N_FACES
+         WRITE(33,'(3I10)') GEOMETRY(ING)%FACE_EDGES(NOD1:NOD3,IEL)
+      ENDDO
+      CLOSE(33)
+
+      ! Write EDGE_FACES:
+      WRITE(FILENAME,'(A,A,I4.4,A)') TRIM(CHID),'_geometry_',ING,'_edfac.dat'
+      OPEN(UNIT=33, file=TRIM(FILENAME), status='unknown')
+      DO IEL=1,GEOMETRY(ING)%N_EDGES
+         WRITE(33,'(5I10)') GEOMETRY(ING)%EDGE_FACES(NOD1:NOD4+1,IEL)
       ENDDO
       CLOSE(33)
 
@@ -1295,6 +1321,11 @@ MAIN_MESH_LOOP : DO NM=1,NMESHES
    MESHES(NM)%CCVAR = 0
    MESHES(NM)%CCVAR(:,:,:,IBM_CGSC) = IBM_GASPHASE
 
+   ! When TERRAIN_CASE = TRUE, allocate GEOM_ZMAX for the mesh:
+   IF (TERRAIN_CASE) THEN
+      ALLOCATE(GEOM_ZMAX_AUX(ISTR:IEND,JSTR:JEND)); GEOM_ZMAX_AUX = -1._EB/GEOMEPS
+   ENDIF
+
    ! Write Mesh number allocation if GET_CUTCELLS_VERBOSE:
    IF(GET_CUTCELLS_VERBOSE) THEN
       WRITE(LU_SETCC,'(A)') ' '
@@ -1519,6 +1550,10 @@ MAIN_MESH_LOOP : DO NM=1,NMESHES
                      ENDIF
                   ENDIF
 
+                  ! Highest Z crossing for I,J=KK,INDX1(X1AXIS) location, clip at ZF+DZ(KBAR):
+                  IF(TERRAIN_CASE .AND. X2AXIS==KAXIS .AND. IBM_N_CRS>0) &
+                  GEOM_ZMAX_AUX(KK,INDX1(X1AXIS)) = MIN(X2FACE(KBP1),IBM_SVAR_CRS(IBM_N_CRS))
+
                   ! Now for this ray, set vertex types in MESHES(NM)%VERTVAR(:,:,:,IBM_VGSC):
                   CALL GET_X2_VERTVAR(X1AXIS,X2LO,X2HI,NM,I,KK)
 
@@ -1594,6 +1629,19 @@ MAIN_MESH_LOOP : DO NM=1,NMESHES
    CALL GET_CARTCELL_CUTCELLS(NM)
 
    ENDIF SNAP_IF
+
+   ! Case of terrain, populate GEOM_ZMAX:
+   IF (TERRAIN_CASE) THEN
+      IF(ALLOCATED(MESHES(NM)%GEOM_ZMAX)) DEALLOCATE(MESHES(NM)%GEOM_ZMAX)
+      ALLOCATE(MESHES(NM)%GEOM_ZMAX(0:IBAR,0:JBAR))
+      DO J=0,JBAR
+         DO I=0,IBAR
+            ! Clip at ZS-DZ(1):
+            MESHES(NM)%GEOM_ZMAX(I,J) = MAX(ZFACE(-1),GEOM_ZMAX_AUX(I,J))
+         ENDDO
+      ENDDO
+      DEALLOCATE(GEOM_ZMAX_AUX)
+   ENDIF
 
    ! Deallocate arrays:
    ! Face centered positions and cell sizes:
@@ -1914,6 +1962,18 @@ CCVERBOSE_COND : IF(GET_CUTCELLS_VERBOSE) THEN
       ENDDO
    ENDIF
    DEALLOCATE(GEOM_AREA_SURF, GEOM_SURF)
+
+   ! Write out special cells info:
+   N_SPCELL_TOT=0
+   DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+      N_SPCELL_TOT = N_SPCELL_TOT + MESHES(NM)%N_SPCELL
+      WRITE(LU_SETCC,"(A,2I8)") 'MESH, Number of Special Cells=',NM,MESHES(NM)%N_SPCELL
+      DO ICC1=1,MESHES(NM)%N_SPCELL
+         WRITE(LU_SETCC,"(A,2I8,A,3I8)") 'NM,CELL IJK=',NM,ICC1,':',MESHES(NM)%SPCELL_LIST(IAXIS:KAXIS,ICC1)
+      ENDDO
+   ENDDO
+   CALL MPI_ALLREDUCE(MPI_IN_PLACE, N_SPCELL_TOT,      1, MPI_INTEGER,          MPI_SUM, MPI_COMM_WORLD, IERR)
+   IF (MY_RANK==0) WRITE(LU_ERR,"(A,1I8)") 'Total Number of Special Cells=',N_SPCELL_TOT
 
    ! Write out more detailed stats:
    WRITE_CFACE_STATS_COND : IF (WRITE_CFACE_STATS) THEN
@@ -9255,8 +9315,7 @@ SEGS_LOOP : DO ISEG=1,BODINT_PLANE%NSEGS
                ENDIF
                MESHES(NM)%CUT_EDGE(CEI)%INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,NEDGE+1) = &
                                BODINT_PLANE%INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,ISEG)
-               MESHES(NM)%CUT_EDGE(CEI)%INDSEG(  IBM_MAX_WSTRIANG_SEG+3,NEDGE+1) = &
-                               -SUM(BODINT_PLANE%SEGTYPE(NOD1:NOD2,ISEG))/2
+               MESHES(NM)%CUT_EDGE(CEI)%INDSEG(  IBM_MAX_WSTRIANG_SEG+3,NEDGE+1) = 0 !Edges in face boundary counted once.
                MESHES(NM)%CUT_EDGE(CEI)%NVERT = NVERT
                MESHES(NM)%CUT_EDGE(CEI)%NEDGE = NEDGE+1
                MESHES(NM)%CUT_EDGE(CEI)%NEDGE1= MESHES(NM)%CUT_EDGE(CEI)%NEDGE
@@ -9413,8 +9472,7 @@ SEGS_LOOP : DO ISEG=1,BODINT_PLANE%NSEGS
                ENDIF
                MESHES(NM)%CUT_EDGE(CEI)%INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,NEDGE+1) = &
                                BODINT_PLANE%INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,ISEG)
-               MESHES(NM)%CUT_EDGE(CEI)%INDSEG(  IBM_MAX_WSTRIANG_SEG+3,NEDGE+1) = &
-                               -SUM(BODINT_PLANE%SEGTYPE(NOD1:NOD2,ISEG))/2
+               MESHES(NM)%CUT_EDGE(CEI)%INDSEG(  IBM_MAX_WSTRIANG_SEG+3,NEDGE+1) = 0 !Edges in face boundary counted once.
                MESHES(NM)%CUT_EDGE(CEI)%NVERT = NVERT
                MESHES(NM)%CUT_EDGE(CEI)%NEDGE = NEDGE+1
                MESHES(NM)%CUT_EDGE(CEI)%NEDGE1= MESHES(NM)%CUT_EDGE(CEI)%NEDGE
@@ -10087,7 +10145,8 @@ REAL(EB), DIMENSION(IBM_MAXCFELEM_FACE)                        ::   AREAV  ! Cut
 REAL(EB), DIMENSION(IAXIS:KAXIS,1:IBM_MAXCFELEM_FACE)          ::  XYZCEN  ! Cut-faces centroid locations.
 REAL(EB), DIMENSION(IAXIS:KAXIS,1:IBM_MAXCFELEM_FACE)          ::  INXAREA, INXSQAREA
 INTEGER,  DIMENSION(IBM_MAXCFELEM_FACE) :: FINFACE
-INTEGER :: IBNDINT,BNDINT_LOW,BNDINT_HIGH,ILOC,BODNUM(1:IBM_MAXCEELEM_FACE),SEGTYPE(IBM_MAXCEELEM_FACE),VEC(2),IDUM,IBOD,STYPE
+INTEGER :: IBNDINT,BNDINT_LOW,BNDINT_HIGH,ILOC,BODNUM(1:IBM_MAXCEELEM_FACE),&
+SEGTYPE(IBM_MAXCEELEM_FACE),SEGTYPEAUX(IBM_MAXCEELEM_FACE),VEC(2),IDUM,IBOD,STYPE
 LOGICAL, ALLOCATABLE, SAVE, DIMENSION(:,:,:,:) :: IJK_COUNTED
 
 INTEGER :: NSSEG, NSVERT, NSFACE, NSFACE2
@@ -10606,27 +10665,19 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
                 ENDDO
              ENDIF
 
-             ! Here expand SEG_FACE to contain all halfedges of STYPE=1:
-             COUNT = 0
-             SEG_FACEAUX (NOD1:NOD2,1:IBM_MAXCEELEM_FACE)             = IBM_UNDEFINED
-             ANGSEGAUX(1:IBM_MAXCEELEM_FACE)                          = 0._EB
-             DO ISEG=1,NSEG
-                 COUNT = COUNT + 1
-                 SEG_FACEAUX (NOD1:NOD2,COUNT) = SEG_FACE(NOD1:NOD2,ISEG)
-                 ANGSEGAUX(COUNT) = ANGSEG(ISEG)
-                 IF (SEGTYPE(ISEG)==1) THEN
-                     COUNT = COUNT + 1
-                     SEG_FACEAUX (NOD1:NOD2,COUNT) = SEG_FACE( (/ NOD2, NOD1 /),ISEG)
-                     IF (ANGSEG(ISEG) > 0._EB) THEN
-                        ANGSEGAUX(COUNT) = ANGSEG(ISEG) - PI
-                     ELSE
-                        ANGSEGAUX(COUNT) = ANGSEG(ISEG) + PI
-                     ENDIF
-                 ENDIF
-             ENDDO
-             NSEG     = COUNT
-             SEG_FACE = SEG_FACEAUX
-             ANGSEG   = ANGSEGAUX
+
+             ! IF(INDI==14 .AND. INDJ==2 .AND. INDK==5 .AND. X1AXIS==KAXIS) THEN
+             !    OPEN(666,FILE='VERTS_FC0.txt',STATUS='REPLACE')
+             !    DO IDUM=1,NVERT
+             !       WRITE(666,*) XYZVERT(1:3,IDUM)
+             !    ENDDO
+             !    CLOSE(666)
+             !    OPEN(666,FILE='SEGS_FC0.txt',STATUS='REPLACE')
+             !    DO ISEG=1,NSEG
+             !       WRITE(666,*) SEG_FACE(NOD1:NOD2,ISEG),ANGSEG(ISEG),SEGTYPE(ISEG)
+             !    ENDDO
+             !    CLOSE(666)
+             ! ENDIF
 
              NOTDONE = .TRUE.
              DO WHILE(NOTDONE)
@@ -10647,6 +10698,7 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
                 COUNT = 0
                 SEG_FACEAUX (NOD1:NOD2,1:IBM_MAXCEELEM_FACE)             = IBM_UNDEFINED
                 ANGSEGAUX(1:IBM_MAXCEELEM_FACE)                          = 0._EB
+                SEGTYPEAUX(1:IBM_MAXCEELEM_FACE)                         = IBM_UNDEFINED
                 DO ISEG=1,NSEG
                    NUMNOD1 = NUMEDG_NODE(SEG_FACE(NOD1,ISEG))
                    NUMNOD2 = NUMEDG_NODE(SEG_FACE(NOD2,ISEG))
@@ -10654,6 +10706,7 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
                       COUNT = COUNT + 1
                       SEG_FACEAUX(NOD1:NOD2,COUNT) = SEG_FACE(NOD1:NOD2,ISEG)
                       ANGSEGAUX(COUNT) = ANGSEG(ISEG)
+                      SEGTYPEAUX(COUNT)= SEGTYPE(ISEG)
                    ELSE
                       NOTDONE = .TRUE.
                    ENDIF
@@ -10661,6 +10714,7 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
                 NSEG = COUNT
                 SEG_FACE = SEG_FACEAUX
                 ANGSEG   = ANGSEGAUX
+                SEGTYPE  = SEGTYPEAUX
              ENDDO
 
              ! Discard face with no conected edges:
@@ -10673,19 +10727,25 @@ IBNDINT_LOOP : DO IBNDINT=BNDINT_LOW,BNDINT_HIGH ! 1,2 refers to block boundary 
              ! Add segments which have both ends attached to more than two segs:
              count = 0
              DO ISEG=1,NSEG
-                NUMNOD1 = NUMEDG_NODE(SEG_FACE(NOD1,ISEG))
-                NUMNOD2 = NUMEDG_NODE(SEG_FACE(NOD2,ISEG))
-                IF ((NUMNOD1 > 2) .AND. (NUMNOD2 > 2)) THEN
-                   COUNT = COUNT + 1
-                   SEG_FACE(NOD1:NOD2,NSEG+COUNT) = SEG_FACE( (/ NOD2, NOD1 /) ,ISEG)
-                   IF (ANGSEG(ISEG) >= 0._EB) THEN
-                      ANGSEG(NSEG+COUNT) = ANGSEG(ISEG) - PI
-                   ELSE
-                      ANGSEG(NSEG+COUNT) = ANGSEG(ISEG) + PI
-                   ENDIF
-                ENDIF
+                 COUNT = COUNT + 1
+                 SEG_FACEAUX (NOD1:NOD2,COUNT) = SEG_FACE(NOD1:NOD2,ISEG)
+                 ANGSEGAUX(COUNT) = ANGSEG(ISEG)
+                 !SEGTYPEAUX(COUNT)= SEGTYPE(ISEG)
+                 IF (SEGTYPE(ISEG)==1) THEN
+                     COUNT = COUNT + 1
+                     SEG_FACEAUX (NOD1:NOD2,COUNT) = SEG_FACE( (/ NOD2, NOD1 /),ISEG)
+                     !SEGTYPEAUX(COUNT)= SEGTYPE(ISEG)
+                     IF (ANGSEG(ISEG) > 0._EB) THEN
+                        ANGSEGAUX(COUNT) = ANGSEG(ISEG) - PI
+                     ELSE
+                        ANGSEGAUX(COUNT) = ANGSEG(ISEG) + PI
+                     ENDIF
+                 ENDIF
              ENDDO
-             NSEG = NSEG + COUNT
+             NSEG     = COUNT
+             SEG_FACE = SEG_FACEAUX
+             ANGSEG   = ANGSEGAUX
+             !SEGTYPE = SEGTYPEAUX
 
              ! Fill NODEDG_FACE(IEDGE,INOD), where iedge are edges
              ! that contain inod as first node. This assumes edges are
@@ -14247,7 +14307,7 @@ DO K=KLO,KHI
          ! Ear clipping algorithm by TRIANGLE and BODY:
          ! 1. Define closed 3D polyline:
          CALL GET_CLOSED_POLYLINES(SIZE_CEELEM_SEG_CELL,NSEG,SEG_CELL,SEG_POS,IFLG,NPOLY,ILO_POLY,NSG_POLY)
-         IF (IFLG) WRITE(LU_ERR,*) 'IFLG ~=0, could not close polyline, ',BNDINT_FLAG,': ',I,J,K
+         IF (IFLG .AND. GET_CUTCELLS_VERBOSE) WRITE(LU_ERR,*) 'IFLG ~=0, could not close polyline, ',BNDINT_FLAG,': ',NM,I,J,K
 
          ! 2. Define triangles by Body and triangle, all triangles generated
          !    point outside of solid region:
@@ -15054,6 +15114,21 @@ DO K=KLO,KHI
             ENDDO
          ENDIF
 
+         ! IF(I==14 .AND. J==2 .AND. K==6) THEN
+         !    WRITE(LU_ERR,*) 'CC 1 I,J,K,INB NFACE,NFACE_CELL=',I,J,K,&
+         !    MESHES(NM)%CUT_FACE(CEI)%NFACE,NFACE_CELL
+         !    OPEN(666,FILE='VERTS.txt',STATUS='REPLACE')
+         !    DO IP=1,NVERT_CELL
+         !       WRITE(666,*) XYZVERT(1:3,IP)
+         !    ENDDO
+         !    CLOSE(666)
+         !    IFACE=MAXVAL(FACE_CELL(1,1:NFACE_CELL))
+         !    OPEN(666,FILE='FACES.txt',STATUS='REPLACE')
+         !    DO IP=1,NFACE_CELL
+         !       WRITE(666,*) FACE_CELL(1:IFACE+1,IP),FACE_LIST(1,IP)
+         !    ENDDO
+         !    CLOSE(666)
+         ! ENDIF
 
          ! Here we have in XYZvert all the vertices that define the
          ! cut-cells within Cartesian cell I,J,K. We have the faces,
@@ -16604,7 +16679,7 @@ REAL(EB) :: SPHERE_ORIGIN(3),SPHERE_RADIUS,TEXTURE_ORIGIN(3),TEXTURE_SCALE(2),XB
             CYLINDER_RADIUS,CYLINDER_LENGTH,EXTRUDE
 
 INTEGER :: MAX_IDS=0,MAX_SURF_IDS=0,MAX_ZVALS=0,MAX_VERTS=0,MAX_FACES=0,MAX_VOLUS=0,MAX_POLY_VERTS=0,&
-           N_VERTS,N_FACES,N_FACES_TEMP,N_VOLUS,N_ZVALS,N_SURF_ID,N_POLY_VERTS,&
+           N_VERTS,N_FACES,N_FACES_TEMP,N_VOLUS,N_ZVALS,N_SURF_ID,N_SURF_ID2,N_POLY_VERTS,&
            MATL_INDEX,IOS,IZERO,N,I,J,K,IJ,FIRST_FACE_INDEX,I1,I2,I3,I4,&
            GEOM_TYPE,NXB,IJK(3),N_LEVELS,N_LAT,N_LONG,SPHERE_TYPE,BOXVERTLIST(8),NI,NIJ,IVOL,SORT_FACES,II,II1,II2,II3,&
            X1AXIS,NNN,CYLINDER_NSEG_THETA,CYLINDER_NSEG_AXIS,CYL_FIND(LOW_IND:HIGH_IND,1:3)
@@ -16647,6 +16722,10 @@ INTEGER :: INOD, ILINE, IERR
 
 INTEGER :: IG, IVERT
 
+INTEGER, ALLOCATABLE, DIMENSION(:) :: GEOM_LINE,GEOM_LINE2
+INTEGER, PARAMETER :: DELTA_GEOM_LINE=1000
+INTEGER :: GEOM_LINE_SIZE
+
 NAMELIST /GEOM/ AUTO_TEXTURE,BNDF_GEOM,BINARY_FILE,COLOR,CYLINDER_ORIGIN,CYLINDER_AXIS,&
                 CYLINDER_RADIUS,CYLINDER_LENGTH,CYLINDER_NSEG_THETA,CYLINDER_NSEG_AXIS,&
                 EXTRUDE,EXTEND_TERRAIN,FACES,ID,IJK,IS_TERRAIN,MOVE_ID,MATL_ID,N_LAT,N_LEVELS,N_LONG,POLY,PROP_ID,&
@@ -16657,12 +16736,24 @@ NAMELIST /GEOM/ AUTO_TEXTURE,BNDF_GEOM,BINARY_FILE,COLOR,CYLINDER_ORIGIN,CYLINDE
 ! first pass - count number of &GEOM lines.
 
 N_GEOMETRY=0
+ALLOCATE(GEOM_LINE(DELTA_GEOM_LINE)); GEOM_LINE = 0
+GEOM_LINE_SIZE = SIZE(GEOM_LINE,DIM=1)
 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
 COUNT_GEOM_LOOP: DO
    CALL CHECKREAD('GEOM',LU_INPUT,IOS)  ; IF (STOP_STATUS==SETUP_STOP) RETURN
    IF (IOS==1) EXIT COUNT_GEOM_LOOP
+   IF(N_GEOMETRY+1 > GEOM_LINE_SIZE) THEN
+      ALLOCATE(GEOM_LINE2(GEOM_LINE_SIZE))
+      GEOM_LINE2(1:GEOM_LINE_SIZE) = GEOM_LINE(1:GEOM_LINE_SIZE)
+      DEALLOCATE(GEOM_LINE)
+      ALLOCATE(GEOM_LINE(GEOM_LINE_SIZE+DELTA_GEOM_LINE)); GEOM_LINE = 0
+      GEOM_LINE(1:GEOM_LINE_SIZE) = GEOM_LINE2(1:GEOM_LINE_SIZE)
+      GEOM_LINE_SIZE = SIZE(GEOM_LINE,DIM=1)
+      DEALLOCATE(GEOM_LINE2)
+   ENDIF
    READ(LU_INPUT,'(A)')BUFFER
    N_GEOMETRY=N_GEOMETRY+1
+   GEOM_LINE(N_GEOMETRY) = INPUT_FILE_LINE_NUMBER
 ENDDO COUNT_GEOM_LOOP
 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
 IF (N_GEOMETRY==0) RETURN
@@ -16703,7 +16794,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
             CALL SHUTDOWN(TRIM(BUFFER))
             RETURN
          ENDIF
-         REWIND(LU_INPUT); DO ILINE=1,INPUT_FILE_LINE_NUMBER-1; READ(LU_INPUT,*); ENDDO
+         REWIND(LU_INPUT); DO ILINE=1,GEOM_LINE(N)-1; READ(LU_INPUT,'(A)') BUFFER; ENDDO
       ENDIF
       IF (DONE) EXIT GEO_RESIZE_DO
    ENDDO GEO_RESIZE_DO
@@ -16715,13 +16806,20 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
    G%TRANSPARENCY = TRANSPARENCY
    N_VERTS=0
    N_FACES=0
-   N_SURF_ID = 0
    TFACES(1:6*MAX_FACES) = -1.0_EB
    N_VOLUS=0
    N_ZVALS=0
    N_POLY_VERTS=0
    IF(TRIM(BINARY_FILE)/='null') READ_BINARY = .TRUE. ! In case a binary name is provided, read the binary.
    G%READ_BINARY = READ_BINARY
+
+   ! Get number of SURF_IDs defined for the GEOM:
+   N_SURF_ID = 0
+   DO I = 1, MAX_SURF_IDS
+      IF( SURF_ID(I)=='null' ) EXIT ! First 'null'
+      N_SURF_ID = N_SURF_ID + 1
+   ENDDO
+
    READ_BIN_COND : IF (.NOT.READ_BINARY) THEN
       ! count VERTS
       DO I = 1, MAX_VERTS
@@ -16740,11 +16838,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
          IF (ALL(FACES(4*(I-1)+1:4*(I-1)+3)==0)) EXIT
          N_FACES = N_FACES+1
       ENDDO
-      ! Get number of SURF_IDs defined for the GEOM:
-      DO I = 1, MAX_SURF_IDS
-         IF( SURF_ID(I)=='null' ) EXIT ! First 'null'
-         N_SURF_ID = N_SURF_ID + 1
-      ENDDO
+
       ! Now split FACES array into FACES (connectivity), and SURFS, i.e. local surf ID:
       IF(N_FACES > 0) THEN
          IF(ALLOCATED(SURFS)) DEALLOCATE(SURFS); ALLOCATE(SURFS(N_FACES))
@@ -16791,13 +16885,21 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
       ! This is to add the SURF_IDS to SURF_ID for analytical geometries being read from bingeom:
       IF (TRIM(SURF_ID(1))=='null' .AND. TRIM(SURF_IDS(1))/='null') THEN ! Case of cylinders.
          SURF_ID(1:3) = SURF_IDS(1:3)
+         N_SURF_ID    = 3
+         DO I=2,3
+           IF (TRIM(SURF_ID(I))=='null') THEN
+              WRITE(MESSAGE,'(A,A,A)') 'ERROR: problem with GEOM ',TRIM(ID),&
+                                       ', SURF_IDS not defined properly.'
+              CALL SHUTDOWN(MESSAGE); RETURN
+           ENDIF
+         ENDDO
       ENDIF
 
       ! Read Binary
       OPEN(UNIT=731,FILE=TRIM(BINARY_FILE),STATUS='OLD',FORM='UNFORMATTED',ACTION='READ',ERR=221,IOSTAT=IOS)
       IF (IOS==0) THEN
          READ(731) GEOM_TYPE
-         READ(731) N_VERTS,N_FACES,N_SURF_ID,N_VOLUS
+         READ(731) N_VERTS,N_FACES,N_SURF_ID2,N_VOLUS
          IF(GEOM_TYPE==TERRAIN_GEOM_TYPE) THEN
             IS_TERRAIN=.TRUE.
          ELSE ! If GEOM is of any type other than terrains, set it to CAD type.
@@ -16826,6 +16928,20 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
                                        '. Add SURF_ID in said &GEOM line.'
           CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
+         IF(N_SURF_ID2 /= N_SURF_ID) THEN
+            WRITE(MESSAGE,'(A,A,A,I8,A,I8,A,A,A)') 'ERROR: problem with GEOM ',TRIM(ID),&
+                                      ', number of surfaces in SURF_ID field (',N_SURF_ID, &
+                                      ') not equal to number of surfaces (',N_SURF_ID2,&
+                                      ') defined in bingeom ',TRIM(BINARY_FILE),'.'
+            CALL SHUTDOWN(MESSAGE); RETURN
+         ENDIF
+         DO I = 1, N_FACES
+            IF(SURFS(I) > N_SURF_ID) THEN
+               WRITE(MESSAGE,'(A,A,A,I8,A)') 'ERROR: problem with GEOM ',TRIM(ID),&
+                                           ', local SURF_ID index for FACE ',I,'out of bounds.'
+               CALL SHUTDOWN(MESSAGE); RETURN
+            ENDIF
+         ENDDO
       ENDIF
 221   IF(IOS > 0) THEN
          WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR: could not read binary connectivity for GEOM ',TRIM(ID),&
@@ -16841,7 +16957,8 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
 
    !--- setup a 2D surface (terrain) object (ZVALS keyword )
    ZVALS_IF: IF (N_ZVALS>0) THEN
-      GEOM_TYPE = TERRAIN_GEOM_TYPE
+      GEOM_TYPE   = TERRAIN_GEOM_TYPE
+      TERRAIN_CASE= .TRUE.
       CALL CHECK_XB(XB)
       IF (N_ZVALS/=IJK(1)*IJK(2) ) THEN
          WRITE(MESSAGE,'(A,I4,A,I4)') 'ERROR: Expected ',IJK(1)*IJK(2),' Z values, found ',N_ZVALS
@@ -17134,7 +17251,8 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
 
    ELSEIF(IS_TERRAIN) THEN ZVALS_IF
 
-      GEOM_TYPE = TERRAIN_GEOM_TYPE
+      GEOM_TYPE   = TERRAIN_GEOM_TYPE
+      TERRAIN_CASE= .TRUE.
 
       ! Here estimate final number of Faces and if necessary reallocate FACE, VERTS, SURFS arrays:
       IF ( (2*N_FACES>MAX_FACES) .AND. .NOT.READ_BINARY) THEN
@@ -18205,6 +18323,8 @@ IF(ALLOCATED(SURFS)) DEALLOCATE(SURFS)
 IF(ALLOCATED(VERTS)) DEALLOCATE(VERTS)
 IF(ALLOCATED(ZVALS)) DEALLOCATE(ZVALS)
 IF(ALLOCATED(TFACES))DEALLOCATE(TFACES)
+
+DEALLOCATE(GEOM_LINE)
 
 CONTAINS
 
@@ -21997,5 +22117,169 @@ END FUNCTION INTERSECT_OBB_AABB
 ! ENDIF
 !
 ! END SUBROUTINE POLYGON_CLOSE_TO_EDGE
+
+! ---------------------------- AVERAGE_FACE_VALUES ----------------------------------------
+
+! for each node, compute the average values of faces connected to that node
+
+SUBROUTINE AVERAGE_FACE_VALUES(VERT_UNIQUE, VERT_VALS, NVERTS, FACES, FACE_VALS, NFACES)
+INTEGER, INTENT(IN) :: NVERTS, NFACES
+INTEGER, INTENT(IN), TARGET :: FACES(3*NFACES), VERT_UNIQUE(NVERTS)
+REAL(FB), INTENT(IN) :: FACE_VALS(NFACES)
+REAL(FB), INTENT(OUT) :: VERT_VALS(NVERTS)
+
+INTEGER, DIMENSION(:), POINTER :: V
+INTEGER :: I
+INTEGER :: COUNT(NVERTS)
+
+VERT_VALS(1:NVERTS) = 0.0_FB
+COUNT(1:NVERTS) = 0
+DO I = 1, NFACES
+   V(1:3) => FACES(3*I-2:3*I)
+   V(1:3) = VERT_UNIQUE(V(1:3))
+   VERT_VALS(V(1)) = VERT_VALS(V(1)) + FACE_VALS(I)
+   COUNT(V(1)) = COUNT(V(1)) + 1
+   VERT_VALS(V(2)) = VERT_VALS(V(2)) + FACE_VALS(I)
+   COUNT(V(2)) = COUNT(V(2)) + 1
+   VERT_VALS(V(3)) = VERT_VALS(V(3)) + FACE_VALS(I)
+   COUNT(V(3)) = COUNT(V(3)) + 1
+ENDDO
+DO I = 1, NVERTS
+   IF (COUNT(I) .GT. 1) VERT_VALS(I) = VERT_VALS(I)/REAL(COUNT(I), FB)
+ENDDO
+DO I = 1, NVERTS
+   IF (VERT_UNIQUE(I) .NE. I) VERT_VALS(I) = VERT_VALS(VERT_UNIQUE(I))
+ENDDO
+
+END SUBROUTINE AVERAGE_FACE_VALUES
+
+
+! ---------------------------- MAKE_UNIQUE_VERT_ARRAY ----------------------------------------
+
+! construct an array that points to first vertex in a vertex array when one or more vertices are identical
+
+SUBROUTINE MAKE_UNIQUE_VERT_ARRAY(VERTS, VERT_UNIQUE, NVERTS)
+INTEGER, INTENT(IN) :: NVERTS
+REAL(FB), INTENT(IN) :: VERTS(3*NVERTS)
+INTEGER, INTENT(OUT) :: VERT_UNIQUE(NVERTS)
+
+INTEGER :: PERM(NVERTS)
+INTEGER :: I, RESULT
+
+DO I = 1, NVERTS
+   PERM(I) = I
+   VERT_UNIQUE(I) = I
+ENDDO
+CALL MAKE_PERMUTATION_ARRAY(VERTS, PERM, NVERTS, 1, NVERTS)
+
+DO I = 1, NVERTS - 1
+   CALL COMPARE_VERTS(VERTS, NVERTS, PERM(I), PERM(I+1), RESULT)
+   IF (RESULT == 0) VERT_UNIQUE(PERM(I+1)) = VERT_UNIQUE(PERM(I))
+END DO
+
+END SUBROUTINE MAKE_UNIQUE_VERT_ARRAY
+
+! ---------------------------- COMPARE_VERTS ----------------------------------------
+
+! returns -1, 0, 1 when a vertex I is less than, the same or greater than vertex J
+
+SUBROUTINE COMPARE_VERTS(VERTS, NVERTS, I, J, RESULT)
+INTEGER, INTENT(IN) :: NVERTS
+REAL(FB), INTENT(IN) :: VERTS(3*NVERTS)
+INTEGER, INTENT(IN) :: I, J
+INTEGER, INTENT(OUT) :: RESULT
+REAL(FB) :: TOLERANCE=0.00001_FB
+
+IF (VERTS(3*I-2) < VERTS(3*J-2) - TOLERANCE) THEN
+   RESULT = -1
+   RETURN
+ENDIF
+IF (VERTS(3*I-2) > VERTS(3*J-2) + TOLERANCE) THEN
+   RESULT = 1
+   RETURN
+ENDIF
+IF (VERTS(3*I-1) < VERTS(3*J-1) - TOLERANCE) THEN
+   RESULT = -1
+   RETURN
+ENDIF
+IF (VERTS(3*I-1) > VERTS(3*J-1) + TOLERANCE) THEN
+   RESULT = 1
+   RETURN
+ENDIF
+IF (VERTS(3*I  ) < VERTS(3*J  ) - TOLERANCE) THEN
+   RESULT = -1
+   RETURN
+ENDIF
+IF (VERTS(3*I  ) > VERTS(3*J  ) + TOLERANCE) THEN
+   RESULT = 1
+   RETURN
+ENDIF
+RESULT = 0
+RETURN
+END SUBROUTINE COMPARE_VERTS
+
+! ---------------------------- MAKE_PERMUTATION_ARRAY ----------------------------------------
+
+! sort a vertex array in increasing order and store the order in a permutation array
+! PERM(1) is the 1st vertex, PERM(2) is the 2nd and so on
+
+RECURSIVE SUBROUTINE MAKE_PERMUTATION_ARRAY(VERTS, PERM, NVERTS, FIRST, LAST)
+INTEGER, INTENT(IN) :: NVERTS
+REAL(FB), INTENT(IN) :: VERTS(3*NVERTS)
+INTEGER, INTENT(INOUT) :: PERM(NVERTS)
+INTEGER, INTENT(IN) :: FIRST, LAST
+INTEGER :: PERM_COPY(NVERTS)
+INTEGER RESULT
+
+INTEGER :: MID, I, I1, I2, IP1, IP2, N, N1, N2
+
+IF (FIRST .EQ. LAST)RETURN  ! only one element in list so don't need to sort
+
+! FIRST .... LAST         original list
+! FIRST ...  MID          first half of list
+! MID+1 ...  LAST         2nd half of list
+
+MID = (FIRST + LAST)/2
+
+CALL MAKE_PERMUTATION_ARRAY(VERTS, PERM, NVERTS, FIRST,   MID)  ! sort first half of list
+CALL MAKE_PERMUTATION_ARRAY(VERTS, PERM, NVERTS, MID+1,   LAST) ! sort 2nd half of list
+
+! combine two lists into one
+I1 = 1
+I2 = 1
+N1 = MID + 1 - FIRST
+N2 = LAST - MID
+N = LAST + 1 - FIRST
+DO I = 1, N
+   IF (I1 .GT. N1 ) THEN ! no more in 1st half so copy item from 2nd half
+      IP2 = PERM(MID + I2)
+      PERM_COPY(I) = IP2
+      I2 = I2 + 1
+      CYCLE
+   ENDIF
+
+   IF (I2 .GT. N2 ) THEN ! no more in 2nd half so copy item from first half
+      IP1 = PERM(FIRST + I1 - 1)
+      PERM_COPY(I) = IP1
+      I1 = I1 + 1
+      CYCLE
+   ENDIF
+
+   IP1 = PERM(FIRST + I1 - 1)
+   IP2 = PERM(MID + I2)
+   CALL COMPARE_VERTS(VERTS, NVERTS, IP1, IP2, RESULT)
+   IF (RESULT .EQ. -1) THEN ! sort in increasing order
+      PERM_COPY(I) = IP1
+      I1 = I1 + 1
+   ELSE
+      PERM_COPY(I) = IP2
+      I2 = I2 + 1
+   ENDIF
+END DO
+DO I = 1, N
+   PERM(FIRST + I - 1) = PERM_COPY(I)
+END DO
+
+END SUBROUTINE MAKE_PERMUTATION_ARRAY
 
 END MODULE COMPLEX_GEOMETRY
