@@ -2649,6 +2649,7 @@ Contains
     Else If ( which == 3 ) Then
 
        a = 5.0D+00
+       fx = 0.0D+00
        ! Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
        Call dinvr ( status, a, fx, qleft, qhi, 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
        status = 0
