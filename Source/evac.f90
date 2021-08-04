@@ -13250,7 +13250,7 @@ CONTAINS
       IF (PNX%T_Stop < Tin) RETURN
       IF (PNX%Max_Humans < 0) THEN
          NR     = -PNX%Max_Humans
-         IF (PNX%ICOUNT >= INT(EVALUATE_RAMP(Tin,0._EB,NR))) RETURN
+         IF (PNX%ICOUNT >= INT(EVALUATE_RAMP(Tin,NR))) RETURN
       ELSE
          IF (PNX%ICOUNT >= PNX%Max_Humans) RETURN
          IF ( (Tin-PNX%T_last) < (1.0_EB/Max(0.0001_EB,PNX%Flow)) ) RETURN
