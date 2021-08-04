@@ -1343,38 +1343,20 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
             KK               = WC%ONE_D%KK
             DELTA_P          = PBAR_P(KK,SF%DUCT_PATH(1)) - PBAR_P(KK,SF%DUCT_PATH(2))
             PRES_RAMP_FACTOR = SIGN(1._EB,SF%MAX_PRESSURE-DELTA_P)*SQRT(ABS((DELTA_P-SF%MAX_PRESSURE)/SF%MAX_PRESSURE))
-            SELECT CASE(IOR)
-               CASE( 1)
-                  WC%ONE_D%U_NORMAL_S = TIME_RAMP_FACTOR*WC%ONE_D%U_NORMAL_0
-               CASE(-1)
-                  WC%ONE_D%U_NORMAL_S = TIME_RAMP_FACTOR*WC%ONE_D%U_NORMAL_0
-               CASE( 2)
-                  WC%ONE_D%U_NORMAL_S = TIME_RAMP_FACTOR*WC%ONE_D%U_NORMAL_0
-               CASE(-2)
-                  WC%ONE_D%U_NORMAL_S = TIME_RAMP_FACTOR*WC%ONE_D%U_NORMAL_0
-               CASE( 3)
-                  WC%ONE_D%U_NORMAL_S = TIME_RAMP_FACTOR*WC%ONE_D%U_NORMAL_0
-               CASE(-3)
-                  WC%ONE_D%U_NORMAL_S = TIME_RAMP_FACTOR*WC%ONE_D%U_NORMAL_0
-            END SELECT
+            WC%ONE_D%U_NORMAL_S = TIME_RAMP_FACTOR*WC%ONE_D%U_NORMAL_0
+
             ! Special Cases
             NEUMANN_IF: IF (SF%SPECIFIED_NORMAL_GRADIENT) THEN
                IIG = WC%ONE_D%IIG
                JJG = WC%ONE_D%JJG
                KKG = WC%ONE_D%KKG
                SELECT CASE(IOR)
-                  CASE( 1)
-                     WC%ONE_D%U_NORMAL_S =-(U(IIG,JJG,KKG)   + SF%VEL_GRAD*WC%ONE_D%RDN)
-                  CASE(-1)
-                     WC%ONE_D%U_NORMAL_S = (U(IIG-1,JJG,KKG) + SF%VEL_GRAD*WC%ONE_D%RDN)
-                  CASE( 2)
-                     WC%ONE_D%U_NORMAL_S =-(V(IIG,JJG,KKG)   + SF%VEL_GRAD*WC%ONE_D%RDN)
-                  CASE(-2)
-                     WC%ONE_D%U_NORMAL_S = (V(IIG,JJG-1,KKG) + SF%VEL_GRAD*WC%ONE_D%RDN)
-                  CASE( 3)
-                     WC%ONE_D%U_NORMAL_S =-(W(IIG,JJG,KKG)   + SF%VEL_GRAD*WC%ONE_D%RDN)
-                  CASE(-3)
-                     WC%ONE_D%U_NORMAL_S = (W(IIG,JJG,KKG-1) + SF%VEL_GRAD*WC%ONE_D%RDN)
+                  CASE( 1); WC%ONE_D%U_NORMAL_S =-(U(IIG,JJG,KKG)   + SF%VEL_GRAD*WC%ONE_D%RDN)
+                  CASE(-1); WC%ONE_D%U_NORMAL_S = (U(IIG-1,JJG,KKG) + SF%VEL_GRAD*WC%ONE_D%RDN)
+                  CASE( 2); WC%ONE_D%U_NORMAL_S =-(V(IIG,JJG,KKG)   + SF%VEL_GRAD*WC%ONE_D%RDN)
+                  CASE(-2); WC%ONE_D%U_NORMAL_S = (V(IIG,JJG-1,KKG) + SF%VEL_GRAD*WC%ONE_D%RDN)
+                  CASE( 3); WC%ONE_D%U_NORMAL_S =-(W(IIG,JJG,KKG)   + SF%VEL_GRAD*WC%ONE_D%RDN)
+                  CASE(-3); WC%ONE_D%U_NORMAL_S = (W(IIG,JJG,KKG-1) + SF%VEL_GRAD*WC%ONE_D%RDN)
                END SELECT
             ENDIF NEUMANN_IF
             IF (ABS(SURFACE(WC%SURF_INDEX)%MASS_FLUX_TOTAL)>=TWO_EPSILON_EB) WC%ONE_D%U_NORMAL_S = &
@@ -1391,18 +1373,12 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
                      PROFILE_FACTOR = 1._EB
                   ENDIF
                   SELECT CASE(IOR)
-                     CASE( 1)
-                        WC%ONE_D%U_NORMAL_S = WC%ONE_D%U_NORMAL_S - TIME_RAMP_FACTOR*VT%U_EDDY(JJ,KK)*PROFILE_FACTOR
-                     CASE(-1)
-                        WC%ONE_D%U_NORMAL_S = WC%ONE_D%U_NORMAL_S + TIME_RAMP_FACTOR*VT%U_EDDY(JJ,KK)*PROFILE_FACTOR
-                     CASE( 2)
-                        WC%ONE_D%U_NORMAL_S = WC%ONE_D%U_NORMAL_S - TIME_RAMP_FACTOR*VT%V_EDDY(II,KK)*PROFILE_FACTOR
-                     CASE(-2)
-                        WC%ONE_D%U_NORMAL_S = WC%ONE_D%U_NORMAL_S + TIME_RAMP_FACTOR*VT%V_EDDY(II,KK)*PROFILE_FACTOR
-                     CASE( 3)
-                        WC%ONE_D%U_NORMAL_S = WC%ONE_D%U_NORMAL_S - TIME_RAMP_FACTOR*VT%W_EDDY(II,JJ)*PROFILE_FACTOR
-                     CASE(-3)
-                        WC%ONE_D%U_NORMAL_S = WC%ONE_D%U_NORMAL_S + TIME_RAMP_FACTOR*VT%W_EDDY(II,JJ)*PROFILE_FACTOR
+                     CASE( 1); WC%ONE_D%U_NORMAL_S = WC%ONE_D%U_NORMAL_S - TIME_RAMP_FACTOR*VT%U_EDDY(JJ,KK)*PROFILE_FACTOR
+                     CASE(-1); WC%ONE_D%U_NORMAL_S = WC%ONE_D%U_NORMAL_S + TIME_RAMP_FACTOR*VT%U_EDDY(JJ,KK)*PROFILE_FACTOR
+                     CASE( 2); WC%ONE_D%U_NORMAL_S = WC%ONE_D%U_NORMAL_S - TIME_RAMP_FACTOR*VT%V_EDDY(II,KK)*PROFILE_FACTOR
+                     CASE(-2); WC%ONE_D%U_NORMAL_S = WC%ONE_D%U_NORMAL_S + TIME_RAMP_FACTOR*VT%V_EDDY(II,KK)*PROFILE_FACTOR
+                     CASE( 3); WC%ONE_D%U_NORMAL_S = WC%ONE_D%U_NORMAL_S - TIME_RAMP_FACTOR*VT%W_EDDY(II,JJ)*PROFILE_FACTOR
+                     CASE(-3); WC%ONE_D%U_NORMAL_S = WC%ONE_D%U_NORMAL_S + TIME_RAMP_FACTOR*VT%W_EDDY(II,JJ)*PROFILE_FACTOR
                   END SELECT
                ENDIF
                EVACUATION_BC_IF: IF (EVACUATION_ONLY(NM)) THEN
@@ -1418,23 +1394,16 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
             ENDIF VENT_IF
 
          CASE(OPEN_BOUNDARY,INTERPOLATED_BOUNDARY)
-
             II = WC%ONE_D%II
             JJ = WC%ONE_D%JJ
             KK = WC%ONE_D%KK
             SELECT CASE(IOR)
-               CASE( 1)
-                  WC%ONE_D%U_NORMAL_S = -U(II,JJ,KK)
-               CASE(-1)
-                  WC%ONE_D%U_NORMAL_S =  U(II-1,JJ,KK)
-               CASE( 2)
-                  WC%ONE_D%U_NORMAL_S = -V(II,JJ,KK)
-               CASE(-2)
-                  WC%ONE_D%U_NORMAL_S =  V(II,JJ-1,KK)
-               CASE( 3)
-                  WC%ONE_D%U_NORMAL_S = -W(II,JJ,KK)
-               CASE(-3)
-                  WC%ONE_D%U_NORMAL_S =  W(II,JJ,KK-1)
+               CASE( 1); WC%ONE_D%U_NORMAL_S = -U(II,JJ,KK)
+               CASE(-1); WC%ONE_D%U_NORMAL_S =  U(II-1,JJ,KK)
+               CASE( 2); WC%ONE_D%U_NORMAL_S = -V(II,JJ,KK)
+               CASE(-2); WC%ONE_D%U_NORMAL_S =  V(II,JJ-1,KK)
+               CASE( 3); WC%ONE_D%U_NORMAL_S = -W(II,JJ,KK)
+               CASE(-3); WC%ONE_D%U_NORMAL_S =  W(II,JJ,KK-1)
             END SELECT
 
       END SELECT WALL_CELL_TYPE
