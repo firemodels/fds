@@ -8205,6 +8205,8 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
          IND1 = CFA%CUT_FACE_IND1
          IND2 = CFA%CUT_FACE_IND2
          CALL GET_PRES_CFACE(PRESS,IND1,IND2,ONE_D)
+      ELSE
+         PRESS = 0._EB
       ENDIF
       SOLID_PHASE_OUTPUT = PRESS/(0.5_EB*RHOA*PY%CHARACTERISTIC_VELOCITY**2)
    CASE(12) ! BACK WALL TEMPERATURE
@@ -8301,13 +8303,13 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
       IF (M_INDEX>0) THEN
          IF (PRESENT(OPT_LP_INDEX)) THEN
             SOLID_PHASE_OUTPUT = SURFACE_DENSITY(NM,0,LAGRANGIAN_PARTICLE_INDEX=OPT_LP_INDEX,MATL_INDEX=M_INDEX)
-         ELSE
+         ELSEIF (PRESENT(OPT_WALL_INDEX)) THEN
             SOLID_PHASE_OUTPUT = SURFACE_DENSITY(NM,0,WALL_INDEX=IWX,MATL_INDEX=M_INDEX)
          ENDIF
       ELSE
          IF (PRESENT(OPT_LP_INDEX)) THEN
             SOLID_PHASE_OUTPUT = SURFACE_DENSITY(NM,0,LAGRANGIAN_PARTICLE_INDEX=OPT_LP_INDEX)
-         ELSE
+         ELSEIF (PRESENT(OPT_WALL_INDEX)) THEN
             SOLID_PHASE_OUTPUT = SURFACE_DENSITY(NM,0,WALL_INDEX=IWX)
          ENDIF
       ENDIF
@@ -8774,53 +8776,30 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
          KKG = CUT_CELL(ICC)%IJK(3)
       ENDIF
 
-      DN  = 1._EB/ONE_D%RDN
-      SF => SURFACE(SURF_INDEX)
-
-      ! velocity vector in the centroid of the gas (cut) cell
-      VEL_CELL = (/U_CELL,V_CELL,W_CELL/) ! (/1._EB,0._EB,0._EB/) ! test
-
-      ! velocity vector of the surface
-      IF(SF%VELOCITY_BC_INDEX == FREE_SLIP_BC) THEN
-         ! U_NORMAL velocity in Normal direction, same tangential velocities as VEL_CELL:
-         VEL_WALL = -ONE_D%U_NORMAL*NVEC + ( VEL_CELL - DOT_PRODUCT(VEL_CELL,NVEC)*NVEC )
-      ELSE
-         VEL_WALL = -ONE_D%U_NORMAL*NVEC + SF%VEL_T(1)*TVEC1 + SF%VEL_T(2)*TVEC2
-      ENDIF
-
-      RHO_WALL = ONE_D%RHO_F
-
-      CALL TAU_WALL_IJ(TAU_IJ,SVEC,VEL_CELL,VEL_WALL,NVEC,DN,D(IIG,JJG,KKG),MU_WALL,RHO_WALL,SF%ROUGHNESS)
-
-      DO I=1,3
-         FVEC(I) = DOT_PRODUCT(TAU_IJ(I,:),NVEC(:))
-      ENDDO
-
-      SOLID_PHASE_OUTPUT = DOT_PRODUCT(FVEC,SVEC)
-
-      ! print *,'I,J,K: ',IIG,JJG,KKG
-      ! print *,'V CELL: ',VEL_CELL
-      ! print *,'V WALL: ',VEL_WALL
-      ! print *,TAU_IJ(1,:)
-      ! print *,TAU_IJ(2,:)
-      ! print *,TAU_IJ(3,:)
-      ! print *,TAU_IJ(1,1)+TAU_IJ(2,2)+TAU_IJ(3,3)
-      ! print *
-      ! print *,'NVEC: ',NVEC
-      ! print *,'SVEC: ',SVEC
-      ! print *,'FVEC: ',FVEC
-      ! print *
-      ! print *,'FS: ', SOLID_PHASE_OUTPUT
-      ! print *
-
-     IF(FROM_BNDF) RETURN
-
-      IF (ASSOCIATED(DV)) THEN
-         IF (NORM2(DV%DFVEC)>TWO_EPSILON_EB) THEN
-            SOLID_PHASE_OUTPUT = DOT_PRODUCT(FVEC,DV%DFVEC)
-            ! print *,'FO: ', SOLID_PHASE_OUTPUT
-            ! print *
+      IF (PRESENT(OPT_WALL_INDEX) .OR. PRESENT(OPT_CFACE_INDEX)) THEN
+         DN  = 1._EB/ONE_D%RDN
+         SF => SURFACE(SURF_INDEX)
+         ! velocity vector in the centroid of the gas (cut) cell
+         VEL_CELL = (/U_CELL,V_CELL,W_CELL/)
+         ! velocity vector of the surface
+         IF (SF%VELOCITY_BC_INDEX == FREE_SLIP_BC) THEN
+            ! U_NORMAL velocity in Normal direction, same tangential velocities as VEL_CELL:
+            VEL_WALL = -ONE_D%U_NORMAL*NVEC + ( VEL_CELL - DOT_PRODUCT(VEL_CELL,NVEC)*NVEC )
+         ELSE
+            VEL_WALL = -ONE_D%U_NORMAL*NVEC + SF%VEL_T(1)*TVEC1 + SF%VEL_T(2)*TVEC2
          ENDIF
+         RHO_WALL = ONE_D%RHO_F
+         CALL TAU_WALL_IJ(TAU_IJ,SVEC,VEL_CELL,VEL_WALL,NVEC,DN,D(IIG,JJG,KKG),MU_WALL,RHO_WALL,SF%ROUGHNESS)
+         DO I=1,3
+            FVEC(I) = DOT_PRODUCT(TAU_IJ(I,:),NVEC(:))
+         ENDDO
+         SOLID_PHASE_OUTPUT = DOT_PRODUCT(FVEC,SVEC)
+         IF (FROM_BNDF) RETURN
+         IF (ASSOCIATED(DV)) THEN
+            IF (NORM2(DV%DFVEC)>TWO_EPSILON_EB) SOLID_PHASE_OUTPUT = DOT_PRODUCT(FVEC,DV%DFVEC)
+         ENDIF
+      ELSE
+         SOLID_PHASE_OUTPUT = 0._EB
       ENDIF
 
    CASE(67) ! WALL PRESSURE TEST (takes optional FORCE_DIRECTION vector)
