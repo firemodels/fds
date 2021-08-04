@@ -11,7 +11,6 @@ The grid is stretched (approx. 6%) in the vertical direction.  The transforms fo
 Towers commented out for clarity:
 The block of towers at the begining is commented out because they are not inside the domain of the mesh
 HT Hill Top and CP Centre Point are commented out for clarity because they are not anemometer towers, they are locations
-CP BSE 40 is commented out because it is the same tower as BSE 40.
 
 Notes on tower lables as the relate to the table of towers in the report on page 144:
 -towers labled t provide turbulence data, (DIR,UPWASH,SPEED,SIGMu,SIGMv,SIGMw,uv,uw,vw) and
