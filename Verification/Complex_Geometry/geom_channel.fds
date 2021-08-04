@@ -14,9 +14,9 @@
 &SPEC ID='TRACER', SPEC_ID(1)='LJ AIR', MASS_FRACTION(1)=1. /
 
 ! use for interpolating geometry slice files
-MISC GEOM_SLICE_AVG=2, NOISE=F, STRATIFICATION=F / ! Stress method enabled by default.
+&MISC GEOM_SLICE_AVG=2, NOISE=F, STRATIFICATION=F / ! Stress method enabled by default.
 
-&MISC NOISE=F, STRATIFICATION=F / ! Stress method enabled by default.
+MISC NOISE=F, STRATIFICATION=F / ! Stress method enabled by default.
 &SURF ID='INLET', FREE_SLIP=T, MASS_FRACTION(1)=1., SPEC_ID(1)='TRACER', VEL=-1, TAU_V=0./
 
 &VENT MB='XMIN', SURF_ID='INLET' /
