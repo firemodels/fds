@@ -11020,6 +11020,9 @@ CONTAINS
       REAL(EB) :: DIST_TO_DOOR, DIST_TO_DOOR_TMP, X_NODE, Y_NODE, WIDTH, T_TMP1
       REAL(EB) :: ANGLE_HR, ANGLE_XYZ, ANGLE_XB, D_NEW, RN
 
+      HR_SPEED = 1._EB
+      TPRE = 0._EB
+
       HR=>HUMAN(I)
       KKZ = 1
       ! HR%I_FFIELD is the flow field mesh index for this agent
