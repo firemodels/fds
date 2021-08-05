@@ -2408,7 +2408,7 @@ Contains
     Real ( kind = 8 ) bound
     Real ( kind = 8 ) ccum
     Real ( kind = 8 ) cum
-    Real ( kind = 8 ) fx
+    Real ( kind = 8 ) :: fx = 0.0D+00
     Real ( kind = 8 ), Parameter :: inf = 1.0D+300
     Real ( kind = 8 ) p
     Real ( kind = 8 ) q
