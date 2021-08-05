@@ -8299,6 +8299,10 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
                EXIT
             ENDIF
          ENDDO
+         IF (M_INDEX==0) THEN  ! There is none of the specified MATL within the surface
+            SOLID_PHASE_OUTPUT = 0._EB
+            RETURN
+         ENDIF
       ENDIF
       IF (M_INDEX>0) THEN
          IF (PRESENT(OPT_LP_INDEX)) THEN
