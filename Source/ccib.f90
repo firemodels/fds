@@ -72,6 +72,13 @@ INTEGER, SAVE :: STENCIL_INTERPOLATION        = IBM_LINEAR_INTERPOLATION ! Set t
 
 LOGICAL, PARAMETER :: CFACE_INTERPOLATE = .TRUE.
 
+! Stress method TYPE implementation:
+! CC_STM_TYPE :
+! = 0 Do not Split F in STRESS and IBM forces. Use only Stress Method F computed using cartesian face velocities.
+! = 1 Split F in STRESS and IBM forces. Use only Stress Method F computed using cartesian face velocities.
+! = 2 Split F in STRESS and IBM forces. Use only Stress Method F computed using cut-face velocities.
+INTEGER, PARAMETER :: CC_STM_TYPE=0
+
 ! IBEDGE stress definition stencil variables:
 REAL(EB), PARAMETER :: THRES_FCT_EP = 0.49999_EB
 INTEGER, PARAMETER  :: N_INT_EP_FVARS=1 ! Only INT_VEL_IND=1
@@ -99,7 +106,7 @@ PRIVATE
 
 PUBLIC :: ADD_INPLACE_NNZ_H_WHLDOM,CALL_FOR_GLMAT,CALL_FROM_GLMAT_SETUP,CCCOMPUTE_RADIATION,&
           CCREGION_DIVERGENCE_PART_1,CCIBM_CHECK_DIVERGENCE,CCIBM_COMPUTE_VELOCITY_ERROR, &
-          CCIBM_END_STEP,CCIBM_H_INTERP,CCIBM_INTERP_FACE_VEL,CCIBM_NO_FLUX, &
+          CCIBM_END_STEP,CCIBM_H_INTERP,CCIBM_INTERP_FACE_VEL,CCIBM_NO_FLUX,CCIBM_STORE_FACE_FV, &
           CCIBM_RHO0W_INTERP,CCIBM_SET_DATA,CCIBM_TARGET_VELOCITY,CCIBM_VELOCITY_BC,CCIBM_VELOCITY_CUTFACES,CCIBM_VELOCITY_FLUX, &
           CCIBM_VELOCITY_NO_GRADH,CCREGION_DENSITY,CCREGION_COMPUTE_VISCOSITY,ADD_Q_DOT_CUTCELLS,CFACE_THERMAL_GASVARS,&
           CFACE_PREDICT_NORMAL_VELOCITY,CHECK_SPEC_TRANSPORT_CONSERVE,COPY_CC_UNKH_TO_HS, COPY_CC_HS_TO_UNKH, &
@@ -9384,6 +9391,8 @@ REAL(EB) :: NU,MU_FACE,RHO_FACE,DXN_STRM_UB,SLIP_FACTOR,SRGH,U_TAU,Y_PLUS,TNOW,M
             DUIDXJ(-2:2),MU_DUIDXJ(-2:2),DXX(2),DF, DE, UE, UF, UB
 TYPE(IBM_EDGE_TYPE), POINTER :: IBM_EDGE
 LOGICAL :: IS_RCEDGE
+REAL(EB), SAVE :: AFCT=1._EB, THRESF=100._EB
+
 
 TNOW = T
 TNOW = CURRENT_TIME()
@@ -9484,10 +9493,13 @@ ORIENTATION_LOOP: DO IS=1,3
                CASE( 1); IIF=II  ; JJF=JJ+1; KKF=KK  ; FAXIS=KAXIS
                CASE( 2); IIF=II  ; JJF=JJ  ; KKF=KK+1; FAXIS=JAXIS
             END SELECT
+            DXX(1)  = DY(JJF); DXX(2)  = DZ(KKF)
             IF (FAXIS==JAXIS) THEN
-                VEL_GAS(ICD_SGN)   = VV(IIF,JJF,KKF)
+                IF(CC_STM_TYPE==2) AFCT = MIN(THRESF,DXX(2)/(XB_IB(ICD_SGN)+TWO_EPSILON_EB)) ! Rescale to CF veloc.  
+                VEL_GAS(ICD_SGN)   = VV(IIF,JJF,KKF) * AFCT
             ELSE ! IF(FAXIS==KAXIS) THEN
-                VEL_GAS(ICD_SGN)   = WW(IIF,JJF,KKF)
+                IF(CC_STM_TYPE==2) AFCT = MIN(THRESF,DXX(1)/(XB_IB(ICD_SGN)+TWO_EPSILON_EB)) ! Rescale to CF veloc. 
+                VEL_GAS(ICD_SGN)   = WW(IIF,JJF,KKF) * AFCT
             ENDIF
 
          CASE(JAXIS)
@@ -9498,10 +9510,13 @@ ORIENTATION_LOOP: DO IS=1,3
                CASE( 1); IIF=II  ; JJF=JJ  ; KKF=KK+1; FAXIS=IAXIS
                CASE( 2); IIF=II+1; JJF=JJ  ; KKF=KK  ; FAXIS=KAXIS
             END SELECT
+            DXX(1)  = DZ(KKF); DXX(2)  = DX(IIF)
             IF (FAXIS==KAXIS) THEN
-               VEL_GAS(ICD_SGN)   = WW(IIF,JJF,KKF)
+               IF(CC_STM_TYPE==2) AFCT = MIN(THRESF,DXX(2)/(XB_IB(ICD_SGN)+TWO_EPSILON_EB)) ! Rescale to CF veloc.
+               VEL_GAS(ICD_SGN)   = WW(IIF,JJF,KKF) * AFCT
             ELSE ! IF(FAXIS==IAXIS) THEN
-               VEL_GAS(ICD_SGN)   = UU(IIF,JJF,KKF)
+               IF(CC_STM_TYPE==2) AFCT = MIN(THRESF,DXX(1)/(XB_IB(ICD_SGN)+TWO_EPSILON_EB)) ! Rescale to CF veloc. 
+               VEL_GAS(ICD_SGN)   = UU(IIF,JJF,KKF) * AFCT
             ENDIF
 
          CASE(KAXIS)
@@ -9512,10 +9527,13 @@ ORIENTATION_LOOP: DO IS=1,3
                CASE( 1); IIF=II+1; JJF=JJ  ; KKF=KK  ; FAXIS=JAXIS
                CASE( 2); IIF=II  ; JJF=JJ+1; KKF=KK  ; FAXIS=IAXIS
             END SELECT
+            DXX(1)  = DX(IIF); DXX(2)  = DY(JJF)
             IF (FAXIS==IAXIS) THEN
-               VEL_GAS(ICD_SGN)   = UU(IIF,JJF,KKF)
+               IF(CC_STM_TYPE==2) AFCT = MIN(THRESF,DXX(2)/(XB_IB(ICD_SGN)+TWO_EPSILON_EB)) ! Rescale to CF veloc.
+               VEL_GAS(ICD_SGN)   = UU(IIF,JJF,KKF) * AFCT
             ELSE ! IF(FAXIS==JAXIS) THEN
-               VEL_GAS(ICD_SGN)   = VV(IIF,JJF,KKF)
+               IF(CC_STM_TYPE==2) AFCT = MIN(THRESF,DXX(1)/(XB_IB(ICD_SGN)+TWO_EPSILON_EB)) ! Rescale to CF veloc. 
+               VEL_GAS(ICD_SGN)   = VV(IIF,JJF,KKF) * AFCT
             ENDIF
 
       END SELECT IEC_SELECT
@@ -9681,7 +9699,8 @@ ORIENTATION_LOOP: DO IS=1,3
                ! Linear :
                DF     = DXX(2) - ABS(XB_IB)
                DE     = DXN_STRM_UB
-               UF     = VV(IIF,JJF,KKF);  UE     = UF
+               IF(CC_STM_TYPE==2) AFCT = MIN(THRESF,DE/(DF+TWO_EPSILON_EB))
+               UF     = VV(IIF,JJF,KKF)*AFCT;  UE     = UF
                IF (.NOT.( (KKF+I_SGN>KBP1) .OR. (KKF+I_SGN<0) )) THEN
                   DE     = DZ(KKF+I_SGN) ! Should be one up from DXX(2).
                   UE     = VV(IIF,JJF,KKF+I_SGN)
@@ -9703,7 +9722,8 @@ ORIENTATION_LOOP: DO IS=1,3
                ! Linear :
                DF     = DXX(1) - ABS(XB_IB)
                DE     = DXN_STRM_UB
-               UF     = WW(IIF,JJF,KKF);  UE     = UF
+               IF(CC_STM_TYPE==2) AFCT = MIN(THRESF,DE/(DF+TWO_EPSILON_EB))
+               UF     = WW(IIF,JJF,KKF)*AFCT;  UE     = UF
                IF (.NOT.( (JJF+I_SGN>JBP1) .OR. (JJF+I_SGN<0) )) THEN
                   DE     = DY(JJF+I_SGN) ! Should be one up from DXX(1).
                   UE     = WW(IIF,JJF+I_SGN,KKF)
@@ -9784,7 +9804,8 @@ ORIENTATION_LOOP: DO IS=1,3
                ! Linear :
                DF     = DXX(2) - ABS(XB_IB)
                DE     = DXN_STRM_UB
-               UF     = WW(IIF,JJF,KKF);  UE     = UF
+               IF(CC_STM_TYPE==2) AFCT = MIN(THRESF,DE/(DF+TWO_EPSILON_EB))
+               UF     = WW(IIF,JJF,KKF)*AFCT;  UE     = UF
                IF (.NOT.( (IIF+I_SGN>IBP1) .OR. (IIF+I_SGN<0) )) THEN
                   DE     = DX(IIF+I_SGN) ! Should be one up from DXX(2).
                   UE     = WW(IIF+I_SGN,JJF,KKF)
@@ -9806,7 +9827,8 @@ ORIENTATION_LOOP: DO IS=1,3
                ! Linear :
                DF     = DXX(1) - ABS(XB_IB)
                DE     = DXN_STRM_UB
-               UF     = UU(IIF,JJF,KKF);  UE     = UF
+               IF(CC_STM_TYPE==2) AFCT = MIN(THRESF,DE/(DF+TWO_EPSILON_EB))
+               UF     = UU(IIF,JJF,KKF)*AFCT;  UE     = UF
                IF (.NOT.( (KKF+I_SGN>KBP1) .OR. (KKF+I_SGN<0) )) THEN
                   DE     = DZ(KKF+I_SGN) ! Should be one up from DXX(1).
                   UE     = UU(IIF,JJF,KKF+I_SGN)
@@ -9895,7 +9917,8 @@ ORIENTATION_LOOP: DO IS=1,3
                ! Linear :
                DF     = DXX(2) - ABS(XB_IB)
                DE     = DXN_STRM_UB
-               UF     = UU(IIF,JJF,KKF);  UE     = UF
+               IF(CC_STM_TYPE==2) AFCT = MIN(THRESF,DE/(DF+TWO_EPSILON_EB))
+               UF     = UU(IIF,JJF,KKF)*AFCT;  UE     = UF
                IF (.NOT.( (JJF+I_SGN>JBP1) .OR. (JJF+I_SGN<0) )) THEN
                   DE     = DY(JJF+I_SGN) ! Should be one up from DXX(2).
                   UE     = UU(IIF,JJF+I_SGN,KKF)
@@ -9917,7 +9940,8 @@ ORIENTATION_LOOP: DO IS=1,3
                ! Linear :
                DF     = DXX(1) - ABS(XB_IB)
                DE     = DXN_STRM_UB
-               UF     = VV(IIF,JJF,KKF);  UE     = UF
+               IF(CC_STM_TYPE==2) AFCT = MIN(THRESF,DE/(DF+TWO_EPSILON_EB))
+               UF     = VV(IIF,JJF,KKF)*AFCT;  UE     = UF
                IF (.NOT.( (IIF+I_SGN>IBP1) .OR. (IIF+I_SGN<0) )) THEN
                   DE     = DX(IIF+I_SGN) ! Should be one up from DXX(1).
                   UE     = VV(IIF+I_SGN,JJF,KKF)
@@ -10563,7 +10587,7 @@ LOGICAL, INTENT(IN) :: FORCE_FLG
 
 ! Local Variables:
 REAL(EB), POINTER, DIMENSION(:,:,:) :: HP
-REAL(EB):: U_IBM,V_IBM,W_IBM,DUUDT,DVVDT,DWWDT,RFODT,TNOW
+REAL(EB):: U_IBM,V_IBM,W_IBM,DUUDT,DVVDT,DWWDT,RFODT,TNOW,FCT
 INTEGER :: I,J,K,II,JJ,KK,IOR,IW,ICF,X1AXIS
 TYPE(WALL_TYPE), POINTER :: WC
 TYPE(EXTERNAL_WALL_TYPE), POINTER :: EWC
@@ -10672,30 +10696,60 @@ ENDIF FORCE_GAS_FACE_IF
 
 IF(CC_STRESS_METHOD) THEN
    U_IBM = 0._EB; V_IBM = 0._EB; W_IBM = 0._EB
-   CUTFACE_LOOP_2 : DO ICF=1,MESHES(NM)%N_CUTFACE_MESH
-      IF ( CUT_FACE(ICF)%STATUS /= IBM_GASPHASE) CYCLE CUTFACE_LOOP_2
-      I      = CUT_FACE(ICF)%IJK(IAXIS)
-      J      = CUT_FACE(ICF)%IJK(JAXIS)
-      K      = CUT_FACE(ICF)%IJK(KAXIS)
-      X1AXIS = CUT_FACE(ICF)%IJK(KAXIS+1)
-      SELECT CASE(X1AXIS)
-            CASE(IAXIS)
-               IF (SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))/(DY(J)*DZ(K)) > A_THRESH_FORCING) CYCLE CUTFACE_LOOP_2
-               IF (PREDICTOR) DUUDT = (U_IBM-U(I,J,K))/DT
-               IF (CORRECTOR) DUUDT = (2._EB*U_IBM-(U(I,J,K)+US(I,J,K)))/DT
-               FVX(I,J,K) = -RDXN(I)*(HP(I+1,J,K)-HP(I,J,K)) - DUUDT
-            CASE(JAXIS)
-               IF (SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))/(DX(I)*DZ(K)) > A_THRESH_FORCING) CYCLE CUTFACE_LOOP_2
-               IF (PREDICTOR) DVVDT = (V_IBM-V(I,J,K))/DT
-               IF (CORRECTOR) DVVDT = (2._EB*V_IBM-(V(I,J,K)+VS(I,J,K)))/DT
-               FVY(I,J,K) = -RDYN(J)*(HP(I,J+1,K)-HP(I,J,K)) - DVVDT
-            CASE(KAXIS)
-               IF (SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))/(DX(I)*DY(J)) > A_THRESH_FORCING) CYCLE CUTFACE_LOOP_2
-               IF (PREDICTOR) DWWDT = (W_IBM-W(I,J,K))/DT
-               IF (CORRECTOR) DWWDT = (2._EB*W_IBM-(W(I,J,K)+WS(I,J,K)))/DT
-               FVZ(I,J,K) = -RDZN(K)*(HP(I,J,K+1)-HP(I,J,K)) - DWWDT
-         END SELECT
-   ENDDO CUTFACE_LOOP_2
+   IF (CC_STM_TYPE==0) THEN
+      CUTFACE_LOOP_2 : DO ICF=1,MESHES(NM)%N_CUTFACE_MESH
+         IF ( CUT_FACE(ICF)%STATUS /= IBM_GASPHASE) CYCLE CUTFACE_LOOP_2
+         I      = CUT_FACE(ICF)%IJK(IAXIS)
+         J      = CUT_FACE(ICF)%IJK(JAXIS)
+         K      = CUT_FACE(ICF)%IJK(KAXIS)
+         X1AXIS = CUT_FACE(ICF)%IJK(KAXIS+1)
+         SELECT CASE(X1AXIS)
+               CASE(IAXIS)
+                  IF (SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))/(DY(J)*DZ(K)) > A_THRESH_FORCING) CYCLE CUTFACE_LOOP_2
+                  IF (PREDICTOR) DUUDT = (U_IBM-U(I,J,K))/DT
+                  IF (CORRECTOR) DUUDT = (2._EB*U_IBM-(U(I,J,K)+US(I,J,K)))/DT
+                  FVX(I,J,K) = -RDXN(I)*(HP(I+1,J,K)-HP(I,J,K)) - DUUDT
+               CASE(JAXIS)
+                  IF (SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))/(DX(I)*DZ(K)) > A_THRESH_FORCING) CYCLE CUTFACE_LOOP_2
+                  IF (PREDICTOR) DVVDT = (V_IBM-V(I,J,K))/DT
+                  IF (CORRECTOR) DVVDT = (2._EB*V_IBM-(V(I,J,K)+VS(I,J,K)))/DT
+                  FVY(I,J,K) = -RDYN(J)*(HP(I,J+1,K)-HP(I,J,K)) - DVVDT
+               CASE(KAXIS)
+                  IF (SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))/(DX(I)*DY(J)) > A_THRESH_FORCING) CYCLE CUTFACE_LOOP_2
+                  IF (PREDICTOR) DWWDT = (W_IBM-W(I,J,K))/DT
+                  IF (CORRECTOR) DWWDT = (2._EB*W_IBM-(W(I,J,K)+WS(I,J,K)))/DT
+                  FVZ(I,J,K) = -RDZN(K)*(HP(I,J,K+1)-HP(I,J,K)) - DWWDT
+            END SELECT
+      ENDDO CUTFACE_LOOP_2
+   ELSEIF(CC_STM_TYPE==1 .OR. CC_STM_TYPE==2) THEN
+      IF(PRESSURE_ITERATIONS==1) CALL CCIBM_STORE_FACE_FV(NM)
+      ! For CC_STM_TYPE==1, force on the cartesian velocity component is a combination of the STM FV and the IBM forcing. 
+      ! The factors used to combine forces correspond to the relative areas of gas cut-face and solid in the cartesian face.
+      CUTFACE_LOOP_3 : DO ICF=1,MESHES(NM)%N_CUTFACE_MESH
+         IF ( CUT_FACE(ICF)%STATUS /= IBM_GASPHASE) CYCLE CUTFACE_LOOP_3
+         I      = CUT_FACE(ICF)%IJK(IAXIS)
+         J      = CUT_FACE(ICF)%IJK(JAXIS)
+         K      = CUT_FACE(ICF)%IJK(KAXIS)
+         X1AXIS = CUT_FACE(ICF)%IJK(KAXIS+1)
+         SELECT CASE(X1AXIS)
+               CASE(IAXIS)
+                  FCT=SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))/(DY(J)*DZ(K))
+                  IF (PREDICTOR) DUUDT = (U_IBM-U(I,J,K))/DT
+                  IF (CORRECTOR) DUUDT = (2._EB*US(I,J,K)-(U(I,J,K)+US(I,J,K)))/DT !(2._EB*U_IBM-(U(I,J,K)+US(I,J,K)))/DT
+                  FVX(I,J,K) = FCT*CUT_FACE(ICF)%FV + (1._EB-FCT)*(DUUDT)  ! (1._EB-FCT)*(-RDXN(I)*(HP(I+1,J,K)-HP(I,J,K))- DUUDT)
+               CASE(JAXIS)
+                  FCT=SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))/(DX(I)*DZ(K))
+                  IF (PREDICTOR) DVVDT = (V_IBM-V(I,J,K))/DT
+                  IF (CORRECTOR) DVVDT = (2._EB*VS(I,J,K)-(V(I,J,K)+VS(I,J,K)))/DT !(2._EB*V_IBM-(V(I,J,K)+VS(I,J,K)))/DT
+                  FVY(I,J,K) = FCT*CUT_FACE(ICF)%FV + (1._EB-FCT)*(DVVDT)  ! (1._EB-FCT)*(-RDYN(J)*(HP(I,J+1,K)-HP(I,J,K))- DVVDT)
+               CASE(KAXIS)
+                  FCT=SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))/(DX(I)*DY(J))
+                  IF (PREDICTOR) DWWDT = (W_IBM-W(I,J,K))/DT
+                  IF (CORRECTOR) DWWDT = (2._EB*WS(I,J,K)-(W(I,J,K)+WS(I,J,K)))/DT !(2._EB*W_IBM-(W(I,J,K)+WS(I,J,K)))/DT
+                  FVZ(I,J,K) = FCT*CUT_FACE(ICF)%FV + (1._EB-FCT)*(DWWDT)  ! (1._EB-FCT)*(-RDZN(K)*(HP(I,J,K+1)-HP(I,J,K))- DWWDT)
+            END SELECT
+      ENDDO CUTFACE_LOOP_3
+   ENDIF
 ENDIF
 
 ELSE FORCE_IF
@@ -10736,6 +10790,32 @@ IF (TIME_CC_IBM) T_CC_USED(CCIBM_NO_FLUX_TIME_INDEX) = T_CC_USED(CCIBM_NO_FLUX_T
 RETURN
 END SUBROUTINE CCIBM_NO_FLUX
 
+
+
+
+SUBROUTINE CCIBM_STORE_FACE_FV(NM)
+
+INTEGER, INTENT(IN) :: NM
+
+INTEGER :: ICF, I, J, K, X1AXIS
+CUTFACE_LOOP : DO ICF=1,MESHES(NM)%N_CUTFACE_MESH
+   IF ( CUT_FACE(ICF)%STATUS /= IBM_GASPHASE) CYCLE CUTFACE_LOOP
+   I      = CUT_FACE(ICF)%IJK(IAXIS)
+   J      = CUT_FACE(ICF)%IJK(JAXIS)
+   K      = CUT_FACE(ICF)%IJK(KAXIS)
+   X1AXIS = CUT_FACE(ICF)%IJK(KAXIS+1)
+   SELECT CASE(X1AXIS)
+         CASE(IAXIS)
+            CUT_FACE(ICF)%FV = FVX(I,J,K)
+         CASE(JAXIS)
+            CUT_FACE(ICF)%FV = FVY(I,J,K)
+         CASE(KAXIS)
+            CUT_FACE(ICF)%FV = FVZ(I,J,K)
+      END SELECT
+ENDDO CUTFACE_LOOP
+
+RETURN
+END SUBROUTINE CCIBM_STORE_FACE_FV
 
 ! ------------------------- CCIBM_COMPUTE_VELOCITY_ERROR -------------------------
 
