@@ -166,11 +166,7 @@ SPECIES_LOOP: DO N=1,N_TOTAL_SCALARS
                ! ///   II   ///  II+1  |  II+2  | ...
                !                       ^ WALL_INDEX(II+1,+1)
                IF ((UU(II+1,JJ,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II+1,JJ,KK),+1)>0)) THEN
-                  IF (OW_ADVFLX_USE_WALL) THEN
-                     ZZZ(1:4) = (/WC%ONE_D%RHO_F*WC%ONE_D%ZZ_F(N),RHO_Z_P(II+1:II+2,JJ,KK),DUMMY/)
-                  ELSE
-                     ZZZ(1:4) = (/RHO_Z_P(II+1,JJ,KK),RHO_Z_P(II+1:II+2,JJ,KK),DUMMY/)
-                  ENDIF
+                  ZZZ(1:4) = (/RHO_Z_P(II+1,JJ,KK),RHO_Z_P(II+1:II+2,JJ,KK),DUMMY/)
                   FX(II+1,JJ,KK,N) = SCALAR_FACE_VALUE(UU(II+1,JJ,KK),ZZZ,I_FLUX_LIMITER)
                ENDIF
             CASE(-1) OFF_WALL_SELECT_2
@@ -178,47 +174,27 @@ SPECIES_LOOP: DO N=1,N_TOTAL_SCALARS
                ! ... |  II-2  |  II-1  ///   II   ///
                !              ^ WALL_INDEX(II-1,-1)
                IF ((UU(II-2,JJ,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II-1,JJ,KK),-1)>0)) THEN
-                  IF (OW_ADVFLX_USE_WALL) THEN
-                     ZZZ(1:4) = (/DUMMY,RHO_Z_P(II-2:II-1,JJ,KK),WC%ONE_D%RHO_F*WC%ONE_D%ZZ_F(N)/)
-                  ELSE
-                     ZZZ(1:4) = (/DUMMY,RHO_Z_P(II-2:II-1,JJ,KK),RHO_Z_P(II-1,JJ,KK)/)
-                  ENDIF
+                  ZZZ(1:4) = (/DUMMY,RHO_Z_P(II-2:II-1,JJ,KK),RHO_Z_P(II-1,JJ,KK)/)
                   FX(II-2,JJ,KK,N) = SCALAR_FACE_VALUE(UU(II-2,JJ,KK),ZZZ,I_FLUX_LIMITER)
                ENDIF
             CASE( 2) OFF_WALL_SELECT_2
                IF ((VV(II,JJ+1,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ+1,KK),+2)>0)) THEN
-                  IF (OW_ADVFLX_USE_WALL) THEN
-                     ZZZ(1:4) = (/WC%ONE_D%RHO_F*WC%ONE_D%ZZ_F(N),RHO_Z_P(II,JJ+1:JJ+2,KK),DUMMY/)
-                  ELSE
-                     ZZZ(1:4) = (/RHO_Z_P(II,JJ+1,KK),RHO_Z_P(II,JJ+1:JJ+2,KK),DUMMY/)
-                  ENDIF
+                  ZZZ(1:4) = (/RHO_Z_P(II,JJ+1,KK),RHO_Z_P(II,JJ+1:JJ+2,KK),DUMMY/)
                   FY(II,JJ+1,KK,N) = SCALAR_FACE_VALUE(VV(II,JJ+1,KK),ZZZ,I_FLUX_LIMITER)
                ENDIF
             CASE(-2) OFF_WALL_SELECT_2
                IF ((VV(II,JJ-2,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ-1,KK),-2)>0)) THEN
-                  IF (OW_ADVFLX_USE_WALL) THEN
-                     ZZZ(1:4) = (/DUMMY,RHO_Z_P(II,JJ-2:JJ-1,KK),WC%ONE_D%RHO_F*WC%ONE_D%ZZ_F(N)/)
-                  ELSE
-                     ZZZ(1:4) = (/DUMMY,RHO_Z_P(II,JJ-2:JJ-1,KK),RHO_Z_P(II,JJ-1,KK)/)
-                  ENDIF
+                  ZZZ(1:4) = (/DUMMY,RHO_Z_P(II,JJ-2:JJ-1,KK),RHO_Z_P(II,JJ-1,KK)/)
                   FY(II,JJ-2,KK,N) = SCALAR_FACE_VALUE(VV(II,JJ-2,KK),ZZZ,I_FLUX_LIMITER)
                ENDIF
             CASE( 3) OFF_WALL_SELECT_2
                IF ((WW(II,JJ,KK+1)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK+1),+3)>0)) THEN
-                  IF (OW_ADVFLX_USE_WALL) THEN
-                     ZZZ(1:4) = (/WC%ONE_D%RHO_F*WC%ONE_D%ZZ_F(N),RHO_Z_P(II,JJ,KK+1:KK+2),DUMMY/)
-                  ELSE
-                     ZZZ(1:4) = (/RHO_Z_P(II,JJ,KK+1),RHO_Z_P(II,JJ,KK+1:KK+2),DUMMY/)
-                  ENDIF
+                  ZZZ(1:4) = (/RHO_Z_P(II,JJ,KK+1),RHO_Z_P(II,JJ,KK+1:KK+2),DUMMY/)
                   FZ(II,JJ,KK+1,N) = SCALAR_FACE_VALUE(WW(II,JJ,KK+1),ZZZ,I_FLUX_LIMITER)
                ENDIF
             CASE(-3) OFF_WALL_SELECT_2
                IF ((WW(II,JJ,KK-2)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK-1),-3)>0)) THEN
-                  IF (OW_ADVFLX_USE_WALL) THEN
-                     ZZZ(1:4) = (/DUMMY,RHO_Z_P(II,JJ,KK-2:KK-1),WC%ONE_D%RHO_F*WC%ONE_D%ZZ_F(N)/)
-                  ELSE
-                     ZZZ(1:4) = (/DUMMY,RHO_Z_P(II,JJ,KK-2:KK-1),RHO_Z_P(II,JJ,KK-1)/)
-                  ENDIF
+                  ZZZ(1:4) = (/DUMMY,RHO_Z_P(II,JJ,KK-2:KK-1),RHO_Z_P(II,JJ,KK-1)/)
                   FZ(II,JJ,KK-2,N) = SCALAR_FACE_VALUE(WW(II,JJ,KK-2),ZZZ,I_FLUX_LIMITER)
                ENDIF
          END SELECT OFF_WALL_SELECT_2
