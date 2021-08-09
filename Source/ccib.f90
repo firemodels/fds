@@ -72,6 +72,13 @@ INTEGER, SAVE :: STENCIL_INTERPOLATION        = IBM_LINEAR_INTERPOLATION ! Set t
 
 LOGICAL, PARAMETER :: CFACE_INTERPOLATE = .TRUE.
 
+! Stress method TYPE implementation:
+! CC_STM_TYPE :
+! = 0 Do not Split F in STRESS and IBM forces. Use only Stress Method F computed using cartesian face velocities.
+! = 1 Split F in STRESS and IBM forces. Use only Stress Method F computed using cartesian face velocities.
+! = 2 Split F in STRESS and IBM forces. Use only Stress Method F computed using cut-face velocities.
+INTEGER, PARAMETER :: CC_STM_TYPE=0
+
 ! IBEDGE stress definition stencil variables:
 REAL(EB), PARAMETER :: THRES_FCT_EP = 0.49999_EB
 INTEGER, PARAMETER  :: N_INT_EP_FVARS=1 ! Only INT_VEL_IND=1
@@ -99,7 +106,7 @@ PRIVATE
 
 PUBLIC :: ADD_INPLACE_NNZ_H_WHLDOM,CALL_FOR_GLMAT,CALL_FROM_GLMAT_SETUP,CCCOMPUTE_RADIATION,&
           CCREGION_DIVERGENCE_PART_1,CCIBM_CHECK_DIVERGENCE,CCIBM_COMPUTE_VELOCITY_ERROR, &
-          CCIBM_END_STEP,CCIBM_H_INTERP,CCIBM_INTERP_FACE_VEL,CCIBM_NO_FLUX, &
+          CCIBM_END_STEP,CCIBM_H_INTERP,CCIBM_INTERP_FACE_VEL,CCIBM_NO_FLUX,CCIBM_STORE_FACE_FV, &
           CCIBM_RHO0W_INTERP,CCIBM_SET_DATA,CCIBM_TARGET_VELOCITY,CCIBM_VELOCITY_BC,CCIBM_VELOCITY_CUTFACES,CCIBM_VELOCITY_FLUX, &
           CCIBM_VELOCITY_NO_GRADH,CCREGION_DENSITY,CCREGION_COMPUTE_VISCOSITY,ADD_Q_DOT_CUTCELLS,CFACE_THERMAL_GASVARS,&
           CFACE_PREDICT_NORMAL_VELOCITY,CHECK_SPEC_TRANSPORT_CONSERVE,COPY_CC_UNKH_TO_HS, COPY_CC_HS_TO_UNKH, &
@@ -2503,7 +2510,7 @@ SUBROUTINE CCIBM_VELOCITY_CUTFACES
 
 ! Local Variables:
 INTEGER  :: NM,ICC,ICF,I,J,K,X1AXIS,NFACE,INDADD,INDF,JCC,IFC,IFACE,IFACE2,CFACE_IND
-REAL(EB) :: AREATOT, VEL_CART, FLX_FCT, FSCU
+REAL(EB) :: AREATOT, VEL_CART, FLX_FCT, FSCU, A_CART
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UP,VP,WP
 
 IF (.NOT. PRES_ON_CARTESIAN) RETURN
@@ -2520,7 +2527,7 @@ MESH_LOOP : DO NM=1,NMESHES
       VP => VS
       WP => WS
    ELSE
-      UP => U ! Corrector final velocities.
+      UP => U  ! Corrector final velocities.
       VP => V
       WP => W
    ENDIF
@@ -2546,23 +2553,26 @@ MESH_LOOP : DO NM=1,NMESHES
       SELECT CASE(X1AXIS)
       CASE(IAXIS)
          VEL_CART = UP(I,J,K)
-         FLX_FCT  = DY(J)*DZ(K)/AREATOT  ! This is Area Cartesian / Sum of cut-face areas.
+         A_CART   = DY(J)*DZ(K)
+         FLX_FCT  = A_CART/AREATOT  ! This is Area Cartesian / Sum of cut-face areas.
 
       CASE(JAXIS)
          VEL_CART = VP(I,J,K)
-         FLX_FCT  = DX(I)*DZ(K)/AREATOT  ! This is Area Cartesian / Sum of cut-face areas.
+         A_CART   = DX(I)*DZ(K)
+         FLX_FCT  = A_CART/AREATOT  ! This is Area Cartesian / Sum of cut-face areas.
 
       CASE(KAXIS)
          VEL_CART = WP(I,J,K)
-         FLX_FCT  = DY(J)*DX(I)/AREATOT  ! This is Area Cartesian / Sum of cut-face areas.
+         A_CART   = DY(J)*DX(I)
+         FLX_FCT  = A_CART/AREATOT  ! This is Area Cartesian / Sum of cut-face areas.
 
       END SELECT
       ENDIF
       IF (PREDICTOR) THEN
-         ! For now assign to all cut-faces same velocity:
+         ! Assign to all cut-faces same velocity:
          CUT_FACE(ICF)%VELS(1:NFACE) = FLX_FCT*VEL_CART
       ELSE
-         CUT_FACE(ICF)%VEL(1:NFACE) = FLX_FCT*VEL_CART
+         CUT_FACE(ICF)%VEL(1:NFACE)  = FLX_FCT*VEL_CART
       ENDIF
 
    ENDDO CUTFACE_LOOP
@@ -3181,6 +3191,9 @@ TNOW2 = CURRENT_TIME()
 
 SET_CUTCELLS_CALL_IF : IF(FIRST_CALL) THEN
 
+! Select divergence sut-cell treatment:
+IF(DIV_RESCALE_FLG==1) CC_CART_VOLAREA= .TRUE.
+
 ! Plane by plane Evaluation of stesses for IBEDGES, a la OBSTS.
 IF(CC_STRESS_METHOD) CC_ONLY_IBEDGES_FLAG=.FALSE.
 
@@ -3696,7 +3709,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       ENDDO
    ENDDO
 
-   ! Gasphase Cut-faces inherit underlying Cartesian face values of Velocity (flux matched):
+   ! Gasphase Cut-faces inherit underlying Cartesian face values of Velocity (flux matched or not):
    PERIODIC_TEST_COND : IF (PERIODIC_TEST /= 21 .AND. PERIODIC_TEST /= 22) THEN
 
       ! First GASPHASe cut-faces:
@@ -3711,19 +3724,53 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          AREAT  = SUM( CUT_FACE(ICF)%AREA(1:NFACE) )
 
          ! Flux matched U to cut-face centroids, they all get same velocity:
-
-         SELECT CASE(X1AXIS)
-            CASE(IAXIS)
-               VEL_CF = U(I,J,K)
-            CASE(JAXIS)
-               VEL_CF = V(I,J,K)
-            CASE(KAXIS)
-               VEL_CF = W(I,J,K)
-         END SELECT
+         IF(RESTART) THEN
+            SELECT CASE(X1AXIS)
+            CASE(IAXIS); VEL_CF = (DY(J)*DZ(K))/(AREAT+TWO_EPSILON_EB) * U(I,J,K)
+            CASE(JAXIS); VEL_CF = (DX(I)*DZ(K))/(AREAT+TWO_EPSILON_EB) * V(I,J,K)
+            CASE(KAXIS); VEL_CF = (DX(I)*DY(J))/(AREAT+TWO_EPSILON_EB) * W(I,J,K)
+            END SELECT
+         ELSE
+            SELECT CASE(X1AXIS)
+            CASE(IAXIS); VEL_CF = U(I,J,K)
+            CASE(JAXIS); VEL_CF = V(I,J,K)
+            CASE(KAXIS); VEL_CF = W(I,J,K)
+            END SELECT
+         ENDIF
 
          CUT_FACE(ICF)%VEL(1:NFACE)  = VEL_CF
          CUT_FACE(ICF)%VELS(1:NFACE) = VEL_CF
       ENDDO CUTFACE_LOOP
+
+      ! Force U velocities in IBM_SOLID faces to zero
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=0,IBAR
+               IF (MESHES(NM)%FCVAR(I,J,K,IBM_FGSC,IAXIS) /= IBM_SOLID ) CYCLE
+               U(I,J,K) = 0._EB; US(I,J,K)= 0._EB
+            ENDDO
+         ENDDO
+      ENDDO
+
+      ! Force V velocities in IBM_SOLID faces to zero
+      DO K=1,KBAR
+         DO J=0,JBAR
+            DO I=1,IBAR
+               IF (MESHES(NM)%FCVAR(I,J,K,IBM_FGSC,JAXIS) /= IBM_SOLID ) CYCLE
+               V(I,J,K) = 0._EB; VS(I,J,K)= 0._EB
+            ENDDO
+         ENDDO
+      ENDDO
+
+      ! Force W velocities in IBM_SOLID faces to zero
+      DO K=0,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               IF (MESHES(NM)%FCVAR(I,J,K,IBM_FGSC,KAXIS) /= IBM_SOLID ) CYCLE
+               W(I,J,K) = 0._EB; WS(I,J,K)= 0._EB
+            ENDDO
+         ENDDO
+      ENDDO
 
       ! Then INBOUNDARY cut-faces:
       ICC_LOOP : DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
@@ -4404,7 +4451,7 @@ REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_GET
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW
 TYPE(SPECIES_MIXTURE_TYPE), POINTER :: SM
 
-REAL(EB) :: VCELL, VCCELL, DIVVOL, MINVOL, DUMMY, RTRMVOL, DIVVOL_BC
+REAL(EB) :: VCELL, VCCELL, DIVVOL, DUMMY, RTRMVOL, DIVVOL_BC
 
 LOGICAL, PARAMETER :: DO_CONDUCTION_HEAT_FLUX=.TRUE.
 INTEGER :: DIFFHFLX_IND, JFLX_IND
@@ -4467,6 +4514,7 @@ DO K=1,KBAR
       DO I=1,IBAR
          IF ((CCVAR(I,J,K,IBM_CGSC) == IBM_GASPHASE) .AND. (CCVAR(I,J,K,IBM_UNKZ) <= 0)) CYCLE
          DPVOL(I,J,K) = 0._EB
+         DEL_RHO_D_DEL_Z(I,J,K,1:N_TOTAL_SCALARS) = 0._EB
       ENDDO
    ENDDO
 ENDDO
@@ -4799,186 +4847,140 @@ MMS_IF: IF (PERIODIC_TEST==7) THEN
 ENDIF MMS_IF
 
 ! Assign divergence and 1/(rho*Cp*T) on Cartesian Cells:
-AVERAGE_LINKDIV_IF: IF (AVERAGE_LINKDIV) THEN
+! Average divergence on linked cells:
+ALLOCATE ( DIVRG_VEC(1:NUNKZ_LOCAL) , VOLDVRG(1:NUNKZ_LOCAL), RTRM_VEC(1:NUNKZ_LOCAL) )
+DIVRG_VEC(:) = 0._EB
+VOLDVRG(:)   = 0._EB
+RTRM_VEC(:)  = 0._EB
 
-   ! Average divergence on linked cells:
-   ALLOCATE ( DIVRG_VEC(1:NUNKZ_LOCAL) , VOLDVRG(1:NUNKZ_LOCAL), RTRM_VEC(1:NUNKZ_LOCAL) )
-   DIVRG_VEC(:) = 0._EB
-   VOLDVRG(:)   = 0._EB
-   RTRM_VEC(:)  = 0._EB
-
-   ! Add div*vol for all cells and cut-cells on implicit region:
-   ! Regular cells:
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IF (CCVAR(I,J,K,IBM_UNKZ) <= 0) CYCLE
-            ! Unknown number:
-            INDZ  = CCVAR(I,J,K,IBM_UNKZ) - UNKZ_IND(NM_START) ! All row indexes must refer to ind_loc.
-            DIVRG_VEC(INDZ) =  DIVRG_VEC(INDZ) + DPVOL(I,J,K)
-            RTRM_VEC(INDZ)  =  RTRM_VEC(INDZ)  + RTRM(I,J,K)*(DX(I)*DY(J)*DZ(K))
-            VOLDVRG(INDZ)   =  VOLDVRG(INDZ)   + (DX(I)*DY(J)*DZ(K))
-         ENDDO
+! Add div*vol for all cells and cut-cells on implicit region:
+! Regular cells:
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=1,IBAR
+         IF (CCVAR(I,J,K,IBM_UNKZ) <= 0) CYCLE
+         ! Unknown number:
+         INDZ  = CCVAR(I,J,K,IBM_UNKZ) - UNKZ_IND(NM_START) ! All row indexes must refer to ind_loc.
+         DIVRG_VEC(INDZ) =  DIVRG_VEC(INDZ) + DPVOL(I,J,K)
+         RTRM_VEC(INDZ)  =  RTRM_VEC(INDZ)  + RTRM(I,J,K)*(DX(I)*DY(J)*DZ(K))
+         VOLDVRG(INDZ)   =  VOLDVRG(INDZ)   + (DX(I)*DY(J)*DZ(K))
       ENDDO
    ENDDO
+ENDDO
 
-   If (PREDICTOR) THEN
-      DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
-         I      = CUT_CELL(ICC)%IJK(IAXIS)
-         J      = CUT_CELL(ICC)%IJK(JAXIS)
-         K      = CUT_CELL(ICC)%IJK(KAXIS)
-         IF(SOLID(CELL_INDEX(I,J,K))) CYCLE
-         DO JCC=1,CUT_CELL(ICC)%NCELL
-            INDZ = CUT_CELL(ICC)%UNKZ(JCC) - UNKZ_IND(NM_START)
-            DIVRG_VEC(INDZ) =  DIVRG_VEC(INDZ) + CUT_CELL(ICC)%DVOL(JCC)
-            RTRM_VEC(INDZ)  =  RTRM_VEC(INDZ)  + CUT_CELL(ICC)%RTRM(JCC)*CUT_CELL(ICC)%VOLUME(JCC)
-            VOLDVRG(INDZ)   =  VOLDVRG(INDZ)   + CUT_CELL(ICC)%VOLUME(JCC)
-         ENDDO
-      ENDDO
-   ELSE ! CORRECTOR
-      DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
-         I      = CUT_CELL(ICC)%IJK(IAXIS)
-         J      = CUT_CELL(ICC)%IJK(JAXIS)
-         K      = CUT_CELL(ICC)%IJK(KAXIS)
-         IF(SOLID(CELL_INDEX(I,J,K))) CYCLE
-         DO JCC=1,CUT_CELL(ICC)%NCELL
-            INDZ = CUT_CELL(ICC)%UNKZ(JCC) - UNKZ_IND(NM_START)
-            DIVRG_VEC(INDZ) =  DIVRG_VEC(INDZ) + CUT_CELL(ICC)%DVOL(JCC)
-            RTRM_VEC(INDZ)  =  RTRM_VEC(INDZ)  + CUT_CELL(ICC)%RTRM(JCC)*CUT_CELL(ICC)%VOLUME(JCC)
-            VOLDVRG(INDZ)   =  VOLDVRG(INDZ)   + CUT_CELL(ICC)%VOLUME(JCC)
-         ENDDO
-      ENDDO
-   ENDIF
-
-   ! Here there should be a mesh exchange (add) of div*vol for cases where cut-cells are linked to cells
-   ! that belong to other meshes.
-
-   ! Compute final divergence:
-   DO INDZ=UNKZ_ILC(NM)+1,UNKZ_ILC(NM)+NUNKZ_LOC(NM)
-      DIVRG_VEC(INDZ)=DIVRG_VEC(INDZ)/VOLDVRG(INDZ)
-      RTRM_VEC(INDZ) = RTRM_VEC(INDZ)/VOLDVRG(INDZ)
-   ENDDO
-
-   ! Finally load final thermodynamic divergence to corresponding cells:
-   ! Regular cells:
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IF (CCVAR(I,J,K,IBM_UNKZ) <= 0) CYCLE
-            INDZ  = CCVAR(I,J,K,IBM_UNKZ) - UNKZ_IND(NM_START)
-            DP(I,J,K)   = DIVRG_VEC(INDZ) ! Previously divided by VOL.
-            RTRM(I,J,K) = RTRM_VEC(INDZ)  ! Previously divided by VOL.
-            DEL_RHO_D_DEL_Z(I,J,K,1:N_TRACKED_SPECIES) = DEL_RHO_D_DEL_Z(I,J,K,1:N_TRACKED_SPECIES)/(DX(I)*DY(J)*DZ(K))
-         ENDDO
+If (PREDICTOR) THEN
+   DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+      I      = CUT_CELL(ICC)%IJK(IAXIS)
+      J      = CUT_CELL(ICC)%IJK(JAXIS)
+      K      = CUT_CELL(ICC)%IJK(KAXIS)
+      IF(SOLID(CELL_INDEX(I,J,K))) CYCLE
+      DO JCC=1,CUT_CELL(ICC)%NCELL
+         INDZ = CUT_CELL(ICC)%UNKZ(JCC) - UNKZ_IND(NM_START)
+         DIVRG_VEC(INDZ) =  DIVRG_VEC(INDZ) + CUT_CELL(ICC)%DVOL(JCC)
+         RTRM_VEC(INDZ)  =  RTRM_VEC(INDZ)  + CUT_CELL(ICC)%RTRM(JCC)*CUT_CELL(ICC)%VOLUME(JCC)
+         VOLDVRG(INDZ)   =  VOLDVRG(INDZ)   + CUT_CELL(ICC)%VOLUME(JCC)
       ENDDO
    ENDDO
-
-   IF (PREDICTOR) THEN
-      DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
-         I      = CUT_CELL(ICC)%IJK(IAXIS)
-         J      = CUT_CELL(ICC)%IJK(JAXIS)
-         K      = CUT_CELL(ICC)%IJK(KAXIS)
-         IF(SOLID(CELL_INDEX(I,J,K))) CYCLE
-         DIVVOL = 0._EB
-         RTRMVOL= 0._EB
-         DO JCC=1,CUT_CELL(ICC)%NCELL
-            INDZ = CUT_CELL(ICC)%UNKZ(JCC) - UNKZ_IND(NM_START)
-            CUT_CELL(ICC)%DVOL(JCC)= DIVRG_VEC(INDZ)*CUT_CELL(ICC)%VOLUME(JCC)
-            CUT_CELL(ICC)%DS(JCC)  = DIVRG_VEC(INDZ)
-            CUT_CELL(ICC)%RTRM(JCC)= RTRM_VEC(INDZ)
-            DIVVOL = DIVVOL + CUT_CELL(ICC)%DVOL(JCC)
-            RTRMVOL= RTRMVOL+ CUT_CELL(ICC)%RTRM(JCC)*CUT_CELL(ICC)%VOLUME(JCC)
-         ENDDO
-
-         ! Now get sum(un*ACFace) and add to divergence:
-         DIVVOL_BC=0._EB
-         ICF = CCVAR(I,J,K,IBM_IDCF) ! Get CUT_FACE array index which contains INBOUNDARY cut-faces inside cell I,J,K.
-         IF(ICF>0) THEN
-            DO JCF=1,CUT_FACE(ICF)%NFACE ! Loop all cut-faces inside cell I,J,K
-               ICFACE    = CUT_FACE(ICF)%CFACE_INDEX(JCF)  ! Find corresponding CFACE index for this boundary cut-face.
-               DIVVOL_BC = DIVVOL_BC - CFACE(ICFACE)%ONE_D%U_NORMAL_S * CFACE(ICFACE)%AREA ! Add flux to BC divergence.
-            ENDDO
-         ENDIF
-         CUT_CELL(ICC)%DIVVOL_BC = DIVVOL_BC
-         DP(I,J,K)  = (DIVVOL+DIVVOL_BC)/(DX(I)*DY(J)*DZ(K)) ! Now push Divergence to underlying Cartesian cell.
-         RTRM(I,J,K)= RTRMVOL/(DX(I)*DY(J)*DZ(K))
-      ENDDO
-   ELSE ! CORRECTOR
-      DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
-         I      = CUT_CELL(ICC)%IJK(IAXIS)
-         J      = CUT_CELL(ICC)%IJK(JAXIS)
-         K      = CUT_CELL(ICC)%IJK(KAXIS)
-         IF(SOLID(CELL_INDEX(I,J,K))) CYCLE
-         DIVVOL = 0._EB
-         RTRMVOL= 0._EB
-         DO JCC=1,CUT_CELL(ICC)%NCELL
-            INDZ = CUT_CELL(ICC)%UNKZ(JCC) - UNKZ_IND(NM_START)
-            CUT_CELL(ICC)%DVOL(JCC)= DIVRG_VEC(INDZ)*CUT_CELL(ICC)%VOLUME(JCC)
-            CUT_CELL(ICC)%D(JCC)   = DIVRG_VEC(INDZ)
-            CUT_CELL(ICC)%RTRM(JCC)= RTRM_VEC(INDZ)
-            DIVVOL = DIVVOL + CUT_CELL(ICC)%DVOL(JCC)
-            RTRMVOL= RTRMVOL+ CUT_CELL(ICC)%RTRM(JCC)*CUT_CELL(ICC)%VOLUME(JCC)
-         ENDDO
-
-         ! Now get sum(un*ACFace) and add to divergence:
-         DIVVOL_BC=0._EB
-         ICF = CCVAR(I,J,K,IBM_IDCF)
-         IF(ICF>0) THEN
-            DO JCF=1,CUT_FACE(ICF)%NFACE
-               ICFACE    = CUT_FACE(ICF)%CFACE_INDEX(JCF)
-               DIVVOL_BC = DIVVOL_BC - CFACE(ICFACE)%ONE_D%U_NORMAL * CFACE(ICFACE)%AREA
-            ENDDO
-         ENDIF
-         CUT_CELL(ICC)%DIVVOL_BC = DIVVOL_BC
-         DP(I,J,K) = (DIVVOL+DIVVOL_BC)/(DX(I)*DY(J)*DZ(K))
-         RTRM(I,J,K)= RTRMVOL/(DX(I)*DY(J)*DZ(K))
-      ENDDO
-   ENDIF
-   DEALLOCATE ( DIVRG_VEC, VOLDVRG, RTRM_VEC )
-
-ELSE AVERAGE_LINKDIV_IF
-
-   ! Regular cells:
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IF (CCVAR(I,J,K,IBM_UNKZ) <= 0) CYCLE
-            DP(I,J,K) = DPVOL(I,J,K)/(DX(I)*DY(J)*DZ(K))
-            DEL_RHO_D_DEL_Z(I,J,K,1:N_TRACKED_SPECIES) = DEL_RHO_D_DEL_Z(I,J,K,1:N_TRACKED_SPECIES)/(DX(I)*DY(J)*DZ(K))
-         ENDDO
+ELSE ! CORRECTOR
+   DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+      I      = CUT_CELL(ICC)%IJK(IAXIS)
+      J      = CUT_CELL(ICC)%IJK(JAXIS)
+      K      = CUT_CELL(ICC)%IJK(KAXIS)
+      IF(SOLID(CELL_INDEX(I,J,K))) CYCLE
+      DO JCC=1,CUT_CELL(ICC)%NCELL
+         INDZ = CUT_CELL(ICC)%UNKZ(JCC) - UNKZ_IND(NM_START)
+         DIVRG_VEC(INDZ) =  DIVRG_VEC(INDZ) + CUT_CELL(ICC)%DVOL(JCC)
+         RTRM_VEC(INDZ)  =  RTRM_VEC(INDZ)  + CUT_CELL(ICC)%RTRM(JCC)*CUT_CELL(ICC)%VOLUME(JCC)
+         VOLDVRG(INDZ)   =  VOLDVRG(INDZ)   + CUT_CELL(ICC)%VOLUME(JCC)
       ENDDO
    ENDDO
+ENDIF
 
-   If (PREDICTOR) THEN
-      DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
-         I      = CUT_CELL(ICC)%IJK(IAXIS)
-         J      = CUT_CELL(ICC)%IJK(JAXIS)
-         K      = CUT_CELL(ICC)%IJK(KAXIS)
-         IF(SOLID(CELL_INDEX(I,J,K))) CYCLE
-         DIVVOL = 0._EB
-         DO JCC=1,CUT_CELL(ICC)%NCELL
-            DIVVOL = DIVVOL + CUT_CELL(ICC)%DVOL(JCC)
-         ENDDO
-         DP(I,J,K) = DIVVOL/(DX(I)*DY(J)*DZ(K))
+! Here there should be a mesh exchange (add) of div*vol for cases where cut-cells are linked to cells
+! that belong to other meshes.
+
+! Compute final divergence:
+DO INDZ=UNKZ_ILC(NM)+1,UNKZ_ILC(NM)+NUNKZ_LOC(NM)
+   DIVRG_VEC(INDZ)=DIVRG_VEC(INDZ)/VOLDVRG(INDZ)
+   RTRM_VEC(INDZ) = RTRM_VEC(INDZ)/VOLDVRG(INDZ)
+ENDDO
+
+! Finally load final thermodynamic divergence to corresponding cells:
+! Regular cells:
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=1,IBAR
+         IF (CCVAR(I,J,K,IBM_UNKZ) <= 0) CYCLE
+         INDZ  = CCVAR(I,J,K,IBM_UNKZ) - UNKZ_IND(NM_START)
+         DP(I,J,K)   = DIVRG_VEC(INDZ) ! Previously divided by VOL.
+         RTRM(I,J,K) = RTRM_VEC(INDZ)  ! Previously divided by VOL.
+         DEL_RHO_D_DEL_Z(I,J,K,1:N_TRACKED_SPECIES) = DEL_RHO_D_DEL_Z(I,J,K,1:N_TRACKED_SPECIES)/(DX(I)*DY(J)*DZ(K))
       ENDDO
-   ELSE ! CORRECTOR
-      MINVOL=10000._EB
-      DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
-         I      = CUT_CELL(ICC)%IJK(IAXIS)
-         J      = CUT_CELL(ICC)%IJK(JAXIS)
-         K      = CUT_CELL(ICC)%IJK(KAXIS)
-         IF(SOLID(CELL_INDEX(I,J,K))) CYCLE
-         DIVVOL = 0._EB
-         DO JCC=1,CUT_CELL(ICC)%NCELL
-            DIVVOL = DIVVOL + CUT_CELL(ICC)%DVOL(JCC)
-            MINVOL=MIN(MINVOL,CUT_CELL(ICC)%VOLUME(JCC))
-         ENDDO
-         DP(I,J,K) = DIVVOL/(DX(I)*DY(J)*DZ(K))
+   ENDDO
+ENDDO
+
+IF (PREDICTOR) THEN
+   DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+      I      = CUT_CELL(ICC)%IJK(IAXIS)
+      J      = CUT_CELL(ICC)%IJK(JAXIS)
+      K      = CUT_CELL(ICC)%IJK(KAXIS)
+      IF(SOLID(CELL_INDEX(I,J,K))) CYCLE
+      DIVVOL = 0._EB
+      RTRMVOL= 0._EB
+      DO JCC=1,CUT_CELL(ICC)%NCELL
+         INDZ = CUT_CELL(ICC)%UNKZ(JCC) - UNKZ_IND(NM_START)
+         CUT_CELL(ICC)%DVOL(JCC)= DIVRG_VEC(INDZ)*CUT_CELL(ICC)%VOLUME(JCC)
+         CUT_CELL(ICC)%DS(JCC)  = DIVRG_VEC(INDZ)
+         CUT_CELL(ICC)%RTRM(JCC)= RTRM_VEC(INDZ)
+         DIVVOL = DIVVOL + CUT_CELL(ICC)%DVOL(JCC)
+         RTRMVOL= RTRMVOL+ CUT_CELL(ICC)%RTRM(JCC)*CUT_CELL(ICC)%VOLUME(JCC)
       ENDDO
-   ENDIF
 
-ENDIF AVERAGE_LINKDIV_IF
+      ! Now get sum(un*ACFace) and add to divergence:
+      DIVVOL_BC=0._EB
+      ICF = CCVAR(I,J,K,IBM_IDCF) ! Get CUT_FACE array index which contains INBOUNDARY cut-faces inside cell I,J,K.
+      IF(ICF>0) THEN
+         DO JCF=1,CUT_FACE(ICF)%NFACE ! Loop all cut-faces inside cell I,J,K
+            ICFACE    = CUT_FACE(ICF)%CFACE_INDEX(JCF)  ! Find corresponding CFACE index for this boundary cut-face.
+            DIVVOL_BC = DIVVOL_BC - CFACE(ICFACE)%ONE_D%U_NORMAL_S * CFACE(ICFACE)%AREA ! Add flux to BC divergence.
+         ENDDO
+      ENDIF
+      CUT_CELL(ICC)%DIVVOL_BC = DIVVOL_BC
+      DP(I,J,K)  = (DIVVOL+DIVVOL_BC)/(DX(I)*DY(J)*DZ(K)) ! Now push Divergence to underlying Cartesian cell.
+      RTRM(I,J,K)= RTRMVOL/(DX(I)*DY(J)*DZ(K))
+   ENDDO
+ELSE ! CORRECTOR
+   DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+      I      = CUT_CELL(ICC)%IJK(IAXIS)
+      J      = CUT_CELL(ICC)%IJK(JAXIS)
+      K      = CUT_CELL(ICC)%IJK(KAXIS)
+      IF(SOLID(CELL_INDEX(I,J,K))) CYCLE
+      DIVVOL = 0._EB
+      RTRMVOL= 0._EB
+      DO JCC=1,CUT_CELL(ICC)%NCELL
+         INDZ = CUT_CELL(ICC)%UNKZ(JCC) - UNKZ_IND(NM_START)
+         CUT_CELL(ICC)%DVOL(JCC)= DIVRG_VEC(INDZ)*CUT_CELL(ICC)%VOLUME(JCC)
+         CUT_CELL(ICC)%D(JCC)   = DIVRG_VEC(INDZ)
+         CUT_CELL(ICC)%RTRM(JCC)= RTRM_VEC(INDZ)
+         DIVVOL = DIVVOL + CUT_CELL(ICC)%DVOL(JCC)
+         RTRMVOL= RTRMVOL+ CUT_CELL(ICC)%RTRM(JCC)*CUT_CELL(ICC)%VOLUME(JCC)
+      ENDDO
 
+      ! Now get sum(un*ACFace) and add to divergence:
+      DIVVOL_BC=0._EB
+      ICF = CCVAR(I,J,K,IBM_IDCF)
+      IF(ICF>0) THEN
+         DO JCF=1,CUT_FACE(ICF)%NFACE
+            ICFACE    = CUT_FACE(ICF)%CFACE_INDEX(JCF)
+            DIVVOL_BC = DIVVOL_BC - CFACE(ICFACE)%ONE_D%U_NORMAL * CFACE(ICFACE)%AREA
+         ENDDO
+      ENDIF
+      CUT_CELL(ICC)%DIVVOL_BC = DIVVOL_BC
+      DP(I,J,K) = (DIVVOL+DIVVOL_BC)/(DX(I)*DY(J)*DZ(K))
+      RTRM(I,J,K)= RTRMVOL/(DX(I)*DY(J)*DZ(K))
+   ENDDO
+ENDIF
+DEALLOCATE ( DIVRG_VEC , VOLDVRG, RTRM_VEC )
 DEALLOCATE(ZZ_GET)
 
 T_USED(14) = T_USED(14) + CURRENT_TIME() - TNOW
@@ -9389,6 +9391,8 @@ REAL(EB) :: NU,MU_FACE,RHO_FACE,DXN_STRM_UB,SLIP_FACTOR,SRGH,U_TAU,Y_PLUS,TNOW,M
             DUIDXJ(-2:2),MU_DUIDXJ(-2:2),DXX(2),DF, DE, UE, UF, UB
 TYPE(IBM_EDGE_TYPE), POINTER :: IBM_EDGE
 LOGICAL :: IS_RCEDGE
+REAL(EB), SAVE :: AFCT=1._EB, THRESF=100._EB
+
 
 TNOW = T
 TNOW = CURRENT_TIME()
@@ -9443,6 +9447,7 @@ SUBROUTINE IBM_RCEDGE_DUIDXJ
 
 INTEGER :: IOE
 REAL(EB):: VEL_GAS(-2:2),XB_IB(-2:2),MU_RC,DEL_RC
+LOGICAL :: IOEFLG
 
 IE = IBM_EDGE%IE
 II     = IJKE( 1,IE)
@@ -9488,10 +9493,13 @@ ORIENTATION_LOOP: DO IS=1,3
                CASE( 1); IIF=II  ; JJF=JJ+1; KKF=KK  ; FAXIS=KAXIS
                CASE( 2); IIF=II  ; JJF=JJ  ; KKF=KK+1; FAXIS=JAXIS
             END SELECT
+            DXX(1)  = DY(JJF); DXX(2)  = DZ(KKF)
             IF (FAXIS==JAXIS) THEN
-                VEL_GAS(ICD_SGN)   = VV(IIF,JJF,KKF)
+                IF(CC_STM_TYPE==2) AFCT = MIN(THRESF,DXX(2)/(XB_IB(ICD_SGN)+TWO_EPSILON_EB)) ! Rescale to CF veloc.  
+                VEL_GAS(ICD_SGN)   = VV(IIF,JJF,KKF) * AFCT
             ELSE ! IF(FAXIS==KAXIS) THEN
-                VEL_GAS(ICD_SGN)   = WW(IIF,JJF,KKF)
+                IF(CC_STM_TYPE==2) AFCT = MIN(THRESF,DXX(1)/(XB_IB(ICD_SGN)+TWO_EPSILON_EB)) ! Rescale to CF veloc. 
+                VEL_GAS(ICD_SGN)   = WW(IIF,JJF,KKF) * AFCT
             ENDIF
 
          CASE(JAXIS)
@@ -9502,10 +9510,13 @@ ORIENTATION_LOOP: DO IS=1,3
                CASE( 1); IIF=II  ; JJF=JJ  ; KKF=KK+1; FAXIS=IAXIS
                CASE( 2); IIF=II+1; JJF=JJ  ; KKF=KK  ; FAXIS=KAXIS
             END SELECT
+            DXX(1)  = DZ(KKF); DXX(2)  = DX(IIF)
             IF (FAXIS==KAXIS) THEN
-               VEL_GAS(ICD_SGN)   = WW(IIF,JJF,KKF)
+               IF(CC_STM_TYPE==2) AFCT = MIN(THRESF,DXX(2)/(XB_IB(ICD_SGN)+TWO_EPSILON_EB)) ! Rescale to CF veloc.
+               VEL_GAS(ICD_SGN)   = WW(IIF,JJF,KKF) * AFCT
             ELSE ! IF(FAXIS==IAXIS) THEN
-               VEL_GAS(ICD_SGN)   = UU(IIF,JJF,KKF)
+               IF(CC_STM_TYPE==2) AFCT = MIN(THRESF,DXX(1)/(XB_IB(ICD_SGN)+TWO_EPSILON_EB)) ! Rescale to CF veloc. 
+               VEL_GAS(ICD_SGN)   = UU(IIF,JJF,KKF) * AFCT
             ENDIF
 
          CASE(KAXIS)
@@ -9516,10 +9527,13 @@ ORIENTATION_LOOP: DO IS=1,3
                CASE( 1); IIF=II+1; JJF=JJ  ; KKF=KK  ; FAXIS=JAXIS
                CASE( 2); IIF=II  ; JJF=JJ+1; KKF=KK  ; FAXIS=IAXIS
             END SELECT
+            DXX(1)  = DX(IIF); DXX(2)  = DY(JJF)
             IF (FAXIS==IAXIS) THEN
-               VEL_GAS(ICD_SGN)   = UU(IIF,JJF,KKF)
+               IF(CC_STM_TYPE==2) AFCT = MIN(THRESF,DXX(2)/(XB_IB(ICD_SGN)+TWO_EPSILON_EB)) ! Rescale to CF veloc.
+               VEL_GAS(ICD_SGN)   = UU(IIF,JJF,KKF) * AFCT
             ELSE ! IF(FAXIS==JAXIS) THEN
-               VEL_GAS(ICD_SGN)   = VV(IIF,JJF,KKF)
+               IF(CC_STM_TYPE==2) AFCT = MIN(THRESF,DXX(1)/(XB_IB(ICD_SGN)+TWO_EPSILON_EB)) ! Rescale to CF veloc. 
+               VEL_GAS(ICD_SGN)   = VV(IIF,JJF,KKF) * AFCT
             ENDIF
 
       END SELECT IEC_SELECT
@@ -9540,8 +9554,23 @@ END SELECT
 ! IEC = JAXIS : DUDZ (IOE=1), DWDX (IOE=2):
 ! IEC = KAXIS : DUDY (IOE=1), DVDX (IOE=2):
 DO IOE = 1,2
-   DEL_RC= XB_IB(-IOE)+XB_IB(IOE) ! Sum of 1/2*DY (IOE=1) or, 1/2*DZ (IOE=2), when IEC=IAXIS, etc.
-   IBM_EDGE%DUIDXJ((/-IOE,IOE/))    = (VEL_GAS(IOE)-VEL_GAS(-IOE))/DEL_RC
+   IOEFLG = .TRUE.
+   IF (IBM_EDGE%SURF_INDEX(-IOE)>-1) THEN
+       IF(SURFACE(IBM_EDGE%SURF_INDEX(-IOE))%VELOCITY_BC_INDEX==FREE_SLIP_BC) THEN
+          IBM_EDGE%DUIDXJ((/-IOE,IOE/))    = 0._EB
+          IOEFLG = .FALSE.
+       ENDIF
+   ENDIF
+   IF (IBM_EDGE%SURF_INDEX(IOE)>-1) THEN
+       IF(SURFACE(IBM_EDGE%SURF_INDEX( IOE))%VELOCITY_BC_INDEX==FREE_SLIP_BC) THEN
+          IBM_EDGE%DUIDXJ((/-IOE,IOE/))    = 0._EB
+          IOEFLG = .FALSE.
+       ENDIF
+   ENDIF
+   IF (IOEFLG) THEN
+     DEL_RC= XB_IB(-IOE)+XB_IB(IOE) ! Sum of 1/2*DY (IOE=1) or, 1/2*DZ (IOE=2), when IEC=IAXIS, etc.
+     IBM_EDGE%DUIDXJ((/-IOE,IOE/))    = (VEL_GAS(IOE)-VEL_GAS(-IOE))/DEL_RC
+   ENDIF
    IBM_EDGE%MU_DUIDXJ((/-IOE,IOE/)) = MU_RC*IBM_EDGE%DUIDXJ((/-IOE,IOE/))
 ENDDO
 
@@ -9670,7 +9699,8 @@ ORIENTATION_LOOP: DO IS=1,3
                ! Linear :
                DF     = DXX(2) - ABS(XB_IB)
                DE     = DXN_STRM_UB
-               UF     = VV(IIF,JJF,KKF);  UE     = UF
+               IF(CC_STM_TYPE==2) AFCT = MIN(THRESF,DE/(DF+TWO_EPSILON_EB))
+               UF     = VV(IIF,JJF,KKF)*AFCT;  UE     = UF
                IF (.NOT.( (KKF+I_SGN>KBP1) .OR. (KKF+I_SGN<0) )) THEN
                   DE     = DZ(KKF+I_SGN) ! Should be one up from DXX(2).
                   UE     = VV(IIF,JJF,KKF+I_SGN)
@@ -9692,7 +9722,8 @@ ORIENTATION_LOOP: DO IS=1,3
                ! Linear :
                DF     = DXX(1) - ABS(XB_IB)
                DE     = DXN_STRM_UB
-               UF     = WW(IIF,JJF,KKF);  UE     = UF
+               IF(CC_STM_TYPE==2) AFCT = MIN(THRESF,DE/(DF+TWO_EPSILON_EB))
+               UF     = WW(IIF,JJF,KKF)*AFCT;  UE     = UF
                IF (.NOT.( (JJF+I_SGN>JBP1) .OR. (JJF+I_SGN<0) )) THEN
                   DE     = DY(JJF+I_SGN) ! Should be one up from DXX(1).
                   UE     = WW(IIF,JJF+I_SGN,KKF)
@@ -9773,7 +9804,8 @@ ORIENTATION_LOOP: DO IS=1,3
                ! Linear :
                DF     = DXX(2) - ABS(XB_IB)
                DE     = DXN_STRM_UB
-               UF     = WW(IIF,JJF,KKF);  UE     = UF
+               IF(CC_STM_TYPE==2) AFCT = MIN(THRESF,DE/(DF+TWO_EPSILON_EB))
+               UF     = WW(IIF,JJF,KKF)*AFCT;  UE     = UF
                IF (.NOT.( (IIF+I_SGN>IBP1) .OR. (IIF+I_SGN<0) )) THEN
                   DE     = DX(IIF+I_SGN) ! Should be one up from DXX(2).
                   UE     = WW(IIF+I_SGN,JJF,KKF)
@@ -9795,7 +9827,8 @@ ORIENTATION_LOOP: DO IS=1,3
                ! Linear :
                DF     = DXX(1) - ABS(XB_IB)
                DE     = DXN_STRM_UB
-               UF     = UU(IIF,JJF,KKF);  UE     = UF
+               IF(CC_STM_TYPE==2) AFCT = MIN(THRESF,DE/(DF+TWO_EPSILON_EB))
+               UF     = UU(IIF,JJF,KKF)*AFCT;  UE     = UF
                IF (.NOT.( (KKF+I_SGN>KBP1) .OR. (KKF+I_SGN<0) )) THEN
                   DE     = DZ(KKF+I_SGN) ! Should be one up from DXX(1).
                   UE     = UU(IIF,JJF,KKF+I_SGN)
@@ -9884,7 +9917,8 @@ ORIENTATION_LOOP: DO IS=1,3
                ! Linear :
                DF     = DXX(2) - ABS(XB_IB)
                DE     = DXN_STRM_UB
-               UF     = UU(IIF,JJF,KKF);  UE     = UF
+               IF(CC_STM_TYPE==2) AFCT = MIN(THRESF,DE/(DF+TWO_EPSILON_EB))
+               UF     = UU(IIF,JJF,KKF)*AFCT;  UE     = UF
                IF (.NOT.( (JJF+I_SGN>JBP1) .OR. (JJF+I_SGN<0) )) THEN
                   DE     = DY(JJF+I_SGN) ! Should be one up from DXX(2).
                   UE     = UU(IIF,JJF+I_SGN,KKF)
@@ -9906,7 +9940,8 @@ ORIENTATION_LOOP: DO IS=1,3
                ! Linear :
                DF     = DXX(1) - ABS(XB_IB)
                DE     = DXN_STRM_UB
-               UF     = VV(IIF,JJF,KKF);  UE     = UF
+               IF(CC_STM_TYPE==2) AFCT = MIN(THRESF,DE/(DF+TWO_EPSILON_EB))
+               UF     = VV(IIF,JJF,KKF)*AFCT;  UE     = UF
                IF (.NOT.( (IIF+I_SGN>IBP1) .OR. (IIF+I_SGN<0) )) THEN
                   DE     = DX(IIF+I_SGN) ! Should be one up from DXX(1).
                   UE     = VV(IIF+I_SGN,JJF,KKF)
@@ -10552,7 +10587,7 @@ LOGICAL, INTENT(IN) :: FORCE_FLG
 
 ! Local Variables:
 REAL(EB), POINTER, DIMENSION(:,:,:) :: HP
-REAL(EB):: U_IBM,V_IBM,W_IBM,DUUDT,DVVDT,DWWDT,RFODT,TNOW
+REAL(EB):: U_IBM,V_IBM,W_IBM,DUUDT,DVVDT,DWWDT,RFODT,TNOW,FCT
 INTEGER :: I,J,K,II,JJ,KK,IOR,IW,ICF,X1AXIS
 TYPE(WALL_TYPE), POINTER :: WC
 TYPE(EXTERNAL_WALL_TYPE), POINTER :: EWC
@@ -10661,30 +10696,60 @@ ENDIF FORCE_GAS_FACE_IF
 
 IF(CC_STRESS_METHOD) THEN
    U_IBM = 0._EB; V_IBM = 0._EB; W_IBM = 0._EB
-   CUTFACE_LOOP_2 : DO ICF=1,MESHES(NM)%N_CUTFACE_MESH
-      IF ( CUT_FACE(ICF)%STATUS /= IBM_GASPHASE) CYCLE CUTFACE_LOOP_2
-      I      = CUT_FACE(ICF)%IJK(IAXIS)
-      J      = CUT_FACE(ICF)%IJK(JAXIS)
-      K      = CUT_FACE(ICF)%IJK(KAXIS)
-      X1AXIS = CUT_FACE(ICF)%IJK(KAXIS+1)
-      SELECT CASE(X1AXIS)
-            CASE(IAXIS)
-               IF (SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))/(DY(J)*DZ(K)) > A_THRESH_FORCING) CYCLE CUTFACE_LOOP_2
-               IF (PREDICTOR) DUUDT = (U_IBM-U(I,J,K))/DT
-               IF (CORRECTOR) DUUDT = (2._EB*U_IBM-(U(I,J,K)+US(I,J,K)))/DT
-               FVX(I,J,K) = -RDXN(I)*(HP(I+1,J,K)-HP(I,J,K)) - DUUDT
-            CASE(JAXIS)
-               IF (SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))/(DX(I)*DZ(K)) > A_THRESH_FORCING) CYCLE CUTFACE_LOOP_2
-               IF (PREDICTOR) DVVDT = (V_IBM-V(I,J,K))/DT
-               IF (CORRECTOR) DVVDT = (2._EB*V_IBM-(V(I,J,K)+VS(I,J,K)))/DT
-               FVY(I,J,K) = -RDYN(J)*(HP(I,J+1,K)-HP(I,J,K)) - DVVDT
-            CASE(KAXIS)
-               IF (SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))/(DX(I)*DY(J)) > A_THRESH_FORCING) CYCLE CUTFACE_LOOP_2
-               IF (PREDICTOR) DWWDT = (W_IBM-W(I,J,K))/DT
-               IF (CORRECTOR) DWWDT = (2._EB*W_IBM-(W(I,J,K)+WS(I,J,K)))/DT
-               FVZ(I,J,K) = -RDZN(K)*(HP(I,J,K+1)-HP(I,J,K)) - DWWDT
-         END SELECT
-   ENDDO CUTFACE_LOOP_2
+   IF (CC_STM_TYPE==0) THEN
+      CUTFACE_LOOP_2 : DO ICF=1,MESHES(NM)%N_CUTFACE_MESH
+         IF ( CUT_FACE(ICF)%STATUS /= IBM_GASPHASE) CYCLE CUTFACE_LOOP_2
+         I      = CUT_FACE(ICF)%IJK(IAXIS)
+         J      = CUT_FACE(ICF)%IJK(JAXIS)
+         K      = CUT_FACE(ICF)%IJK(KAXIS)
+         X1AXIS = CUT_FACE(ICF)%IJK(KAXIS+1)
+         SELECT CASE(X1AXIS)
+               CASE(IAXIS)
+                  IF (SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))/(DY(J)*DZ(K)) > A_THRESH_FORCING) CYCLE CUTFACE_LOOP_2
+                  IF (PREDICTOR) DUUDT = (U_IBM-U(I,J,K))/DT
+                  IF (CORRECTOR) DUUDT = (2._EB*U_IBM-(U(I,J,K)+US(I,J,K)))/DT
+                  FVX(I,J,K) = -RDXN(I)*(HP(I+1,J,K)-HP(I,J,K)) - DUUDT
+               CASE(JAXIS)
+                  IF (SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))/(DX(I)*DZ(K)) > A_THRESH_FORCING) CYCLE CUTFACE_LOOP_2
+                  IF (PREDICTOR) DVVDT = (V_IBM-V(I,J,K))/DT
+                  IF (CORRECTOR) DVVDT = (2._EB*V_IBM-(V(I,J,K)+VS(I,J,K)))/DT
+                  FVY(I,J,K) = -RDYN(J)*(HP(I,J+1,K)-HP(I,J,K)) - DVVDT
+               CASE(KAXIS)
+                  IF (SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))/(DX(I)*DY(J)) > A_THRESH_FORCING) CYCLE CUTFACE_LOOP_2
+                  IF (PREDICTOR) DWWDT = (W_IBM-W(I,J,K))/DT
+                  IF (CORRECTOR) DWWDT = (2._EB*W_IBM-(W(I,J,K)+WS(I,J,K)))/DT
+                  FVZ(I,J,K) = -RDZN(K)*(HP(I,J,K+1)-HP(I,J,K)) - DWWDT
+            END SELECT
+      ENDDO CUTFACE_LOOP_2
+   ELSEIF(CC_STM_TYPE==1 .OR. CC_STM_TYPE==2) THEN
+      IF(PRESSURE_ITERATIONS==1) CALL CCIBM_STORE_FACE_FV(NM)
+      ! For CC_STM_TYPE==1, force on the cartesian velocity component is a combination of the STM FV and the IBM forcing. 
+      ! The factors used to combine forces correspond to the relative areas of gas cut-face and solid in the cartesian face.
+      CUTFACE_LOOP_3 : DO ICF=1,MESHES(NM)%N_CUTFACE_MESH
+         IF ( CUT_FACE(ICF)%STATUS /= IBM_GASPHASE) CYCLE CUTFACE_LOOP_3
+         I      = CUT_FACE(ICF)%IJK(IAXIS)
+         J      = CUT_FACE(ICF)%IJK(JAXIS)
+         K      = CUT_FACE(ICF)%IJK(KAXIS)
+         X1AXIS = CUT_FACE(ICF)%IJK(KAXIS+1)
+         SELECT CASE(X1AXIS)
+               CASE(IAXIS)
+                  FCT=SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))/(DY(J)*DZ(K))
+                  IF (PREDICTOR) DUUDT = (U_IBM-U(I,J,K))/DT
+                  IF (CORRECTOR) DUUDT = (2._EB*US(I,J,K)-(U(I,J,K)+US(I,J,K)))/DT !(2._EB*U_IBM-(U(I,J,K)+US(I,J,K)))/DT
+                  FVX(I,J,K) = FCT*CUT_FACE(ICF)%FV + (1._EB-FCT)*(DUUDT)  ! (1._EB-FCT)*(-RDXN(I)*(HP(I+1,J,K)-HP(I,J,K))- DUUDT)
+               CASE(JAXIS)
+                  FCT=SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))/(DX(I)*DZ(K))
+                  IF (PREDICTOR) DVVDT = (V_IBM-V(I,J,K))/DT
+                  IF (CORRECTOR) DVVDT = (2._EB*VS(I,J,K)-(V(I,J,K)+VS(I,J,K)))/DT !(2._EB*V_IBM-(V(I,J,K)+VS(I,J,K)))/DT
+                  FVY(I,J,K) = FCT*CUT_FACE(ICF)%FV + (1._EB-FCT)*(DVVDT)  ! (1._EB-FCT)*(-RDYN(J)*(HP(I,J+1,K)-HP(I,J,K))- DVVDT)
+               CASE(KAXIS)
+                  FCT=SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))/(DX(I)*DY(J))
+                  IF (PREDICTOR) DWWDT = (W_IBM-W(I,J,K))/DT
+                  IF (CORRECTOR) DWWDT = (2._EB*WS(I,J,K)-(W(I,J,K)+WS(I,J,K)))/DT !(2._EB*W_IBM-(W(I,J,K)+WS(I,J,K)))/DT
+                  FVZ(I,J,K) = FCT*CUT_FACE(ICF)%FV + (1._EB-FCT)*(DWWDT)  ! (1._EB-FCT)*(-RDZN(K)*(HP(I,J,K+1)-HP(I,J,K))- DWWDT)
+            END SELECT
+      ENDDO CUTFACE_LOOP_3
+   ENDIF
 ENDIF
 
 ELSE FORCE_IF
@@ -10725,6 +10790,32 @@ IF (TIME_CC_IBM) T_CC_USED(CCIBM_NO_FLUX_TIME_INDEX) = T_CC_USED(CCIBM_NO_FLUX_T
 RETURN
 END SUBROUTINE CCIBM_NO_FLUX
 
+
+
+
+SUBROUTINE CCIBM_STORE_FACE_FV(NM)
+
+INTEGER, INTENT(IN) :: NM
+
+INTEGER :: ICF, I, J, K, X1AXIS
+CUTFACE_LOOP : DO ICF=1,MESHES(NM)%N_CUTFACE_MESH
+   IF ( CUT_FACE(ICF)%STATUS /= IBM_GASPHASE) CYCLE CUTFACE_LOOP
+   I      = CUT_FACE(ICF)%IJK(IAXIS)
+   J      = CUT_FACE(ICF)%IJK(JAXIS)
+   K      = CUT_FACE(ICF)%IJK(KAXIS)
+   X1AXIS = CUT_FACE(ICF)%IJK(KAXIS+1)
+   SELECT CASE(X1AXIS)
+         CASE(IAXIS)
+            CUT_FACE(ICF)%FV = FVX(I,J,K)
+         CASE(JAXIS)
+            CUT_FACE(ICF)%FV = FVY(I,J,K)
+         CASE(KAXIS)
+            CUT_FACE(ICF)%FV = FVZ(I,J,K)
+      END SELECT
+ENDDO CUTFACE_LOOP
+
+RETURN
+END SUBROUTINE CCIBM_STORE_FACE_FV
 
 ! ------------------------- CCIBM_COMPUTE_VELOCITY_ERROR -------------------------
 
@@ -15840,12 +15931,8 @@ USE MPI_F08
 ! Local variables:
 INTEGER :: NM, I, IPROC, IERR
 
-! Explicit CC time integration: Set threshold volume of linked cells to 0.95 of Cartesian cell vol.
-CCVOL_LINK=0.95_EB
-
 ! 1. Define unknown numbers for Scalars:
 CALL GET_MATRIX_INDEXES_Z
-
 
 ! 2. For each IBM_GASPHASE (cut or regular) face, find global numeration of the volumes
 ! that share it, store a list of areas and centroids for diffussion operator in FV form.

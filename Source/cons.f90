@@ -676,7 +676,7 @@ LOGICAL :: CC_ONLY_IBEDGES_FLAG=.TRUE.
 ! Threshold factor for volume of cut-cells respect to volume of Cartesian cells:
 ! Currently used in the thermo div definition of cut-cells.
 
-REAL(EB) :: CCVOL_LINK=0.15_EB
+REAL(EB) :: CCVOL_LINK=0.95_EB
 LOGICAL  :: GET_CUTCELLS_VERBOSE=.FALSE.
 
 INTEGER, PARAMETER :: LOW_IND   = 1
