@@ -948,6 +948,7 @@ WC%JD11_INDEX         => OS%INTEGERS(11,STORAGE_INDEX) ; IF (NEW) WC%JD11_INDEX 
 WC%JD12_INDEX         => OS%INTEGERS(12,STORAGE_INDEX) ; IF (NEW) WC%JD12_INDEX = 0
 WC%JD21_INDEX         => OS%INTEGERS(13,STORAGE_INDEX) ; IF (NEW) WC%JD21_INDEX = 0
 WC%JD22_INDEX         => OS%INTEGERS(14,STORAGE_INDEX) ; IF (NEW) WC%JD22_INDEX = 0
+WC%CUT_FACE_INDEX     => OS%INTEGERS(15,STORAGE_INDEX) ; IF (NEW) WC%CUT_FACE_INDEX = 0
 
 ! Assign and initialize reals
 
@@ -3757,7 +3758,7 @@ ELSE THERMALLY_THICK_IF
             ENERGY_SELECT_2: SELECT CASE(MODE)
                CASE(2,3)
                   ML => MATERIAL(N)
-                  EPUM = ML%H(ITMP)+DTMP*(ML%H(ITMP+1)-ML%H(ITMP))                  
+                  EPUM = ML%H(ITMP)+DTMP*(ML%H(ITMP+1)-ML%H(ITMP))
             END SELECT ENERGY_SELECT_2
             SURFACE_DENSITY = SURFACE_DENSITY + ONE_D%MATL_COMP(N)%RHO(II2)*WGT*EPUM
          ENDDO
@@ -4353,7 +4354,7 @@ END SUBROUTINE GET_FILM_PROPERTIES
 
 !> \brief Converts an array of liquid vapor mole fractions into mass fractions
 !> \param N_MATS Number of liquids
-!> \param ZZ_GET Gas cell tracked species mass factions        
+!> \param ZZ_GET Gas cell tracked species mass factions
 !> \param X_SV Liquid surface liquid vapor mole fraction
 !> \param Y_SV Liquid surface liquid vapor mass fraction
 !> \param MW Liquid vapor molecular weights
@@ -4384,7 +4385,7 @@ IF (SUM(ZZ_2) > TWO_EPSILON_EB) THEN
    ENDDO
    MW_DRY = 1._EB/MW_DRY
 ENDIF
- 
+
 ! Get mass based on mole fractions and MWs and convert X to Y
 MASS = (1._EB-SUM(X_SV))*MW_DRY
 DO I=1,N_MATS
