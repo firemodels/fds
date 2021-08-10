@@ -6212,6 +6212,7 @@ DEVICE_LOOP: DO N=1,N_DEVC
                            IF (.NOT.OB%HT3D) CYCLE I_DEVICE_CELL_LOOP
                         ENDIF
                         VOL = DX(I)*RC(I)*DY(J)*DZ(K)
+                        CFACE_AREA = 0._EB
                         CC_IBM_IF: IF (CC_IBM) THEN
                            IF (CCVAR(I,J,K,IBM_CGSC) == IBM_SOLID) THEN
                               CYCLE I_DEVICE_CELL_LOOP
@@ -6220,7 +6221,6 @@ DEVICE_LOOP: DO N=1,N_DEVC
                               VOL=SUM(CUT_CELL(ICC)%VOLUME(1:CUT_CELL(ICC)%NCELL))
                            ENDIF
                            ! face-centered quanties
-                           CFACE_AREA = 0._EB
                            AXIS = ABS(OUTPUT_QUANTITY(DV%QUANTITY_INDEX(1))%IOR)
                            AXIS_IF: IF (AXIS>0) THEN
                               FCVAR_IF: IF (FCVAR(I,J,K,IBM_IDCF,AXIS)>0) THEN
