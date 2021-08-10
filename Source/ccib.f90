@@ -3191,7 +3191,7 @@ TNOW2 = CURRENT_TIME()
 
 SET_CUTCELLS_CALL_IF : IF(FIRST_CALL) THEN
 
-! Select divergence sut-cell treatment:
+! Select divergence cut-cell treatment:
 IF(DIV_RESCALE_FLG==1) CC_CART_VOLAREA= .TRUE.
 
 ! Plane by plane Evaluation of stesses for IBEDGES, a la OBSTS.
@@ -9495,10 +9495,10 @@ ORIENTATION_LOOP: DO IS=1,3
             END SELECT
             DXX(1)  = DY(JJF); DXX(2)  = DZ(KKF)
             IF (FAXIS==JAXIS) THEN
-                IF(CC_STM_TYPE==2) AFCT = MIN(THRESF,DXX(2)/(XB_IB(ICD_SGN)+TWO_EPSILON_EB)) ! Rescale to CF veloc.  
+                IF(CC_STM_TYPE==2) AFCT = MIN(THRESF,DXX(2)/(XB_IB(ICD_SGN)+TWO_EPSILON_EB)) ! Rescale to CF veloc.
                 VEL_GAS(ICD_SGN)   = VV(IIF,JJF,KKF) * AFCT
             ELSE ! IF(FAXIS==KAXIS) THEN
-                IF(CC_STM_TYPE==2) AFCT = MIN(THRESF,DXX(1)/(XB_IB(ICD_SGN)+TWO_EPSILON_EB)) ! Rescale to CF veloc. 
+                IF(CC_STM_TYPE==2) AFCT = MIN(THRESF,DXX(1)/(XB_IB(ICD_SGN)+TWO_EPSILON_EB)) ! Rescale to CF veloc.
                 VEL_GAS(ICD_SGN)   = WW(IIF,JJF,KKF) * AFCT
             ENDIF
 
@@ -9515,7 +9515,7 @@ ORIENTATION_LOOP: DO IS=1,3
                IF(CC_STM_TYPE==2) AFCT = MIN(THRESF,DXX(2)/(XB_IB(ICD_SGN)+TWO_EPSILON_EB)) ! Rescale to CF veloc.
                VEL_GAS(ICD_SGN)   = WW(IIF,JJF,KKF) * AFCT
             ELSE ! IF(FAXIS==IAXIS) THEN
-               IF(CC_STM_TYPE==2) AFCT = MIN(THRESF,DXX(1)/(XB_IB(ICD_SGN)+TWO_EPSILON_EB)) ! Rescale to CF veloc. 
+               IF(CC_STM_TYPE==2) AFCT = MIN(THRESF,DXX(1)/(XB_IB(ICD_SGN)+TWO_EPSILON_EB)) ! Rescale to CF veloc.
                VEL_GAS(ICD_SGN)   = UU(IIF,JJF,KKF) * AFCT
             ENDIF
 
@@ -9532,7 +9532,7 @@ ORIENTATION_LOOP: DO IS=1,3
                IF(CC_STM_TYPE==2) AFCT = MIN(THRESF,DXX(2)/(XB_IB(ICD_SGN)+TWO_EPSILON_EB)) ! Rescale to CF veloc.
                VEL_GAS(ICD_SGN)   = UU(IIF,JJF,KKF) * AFCT
             ELSE ! IF(FAXIS==JAXIS) THEN
-               IF(CC_STM_TYPE==2) AFCT = MIN(THRESF,DXX(1)/(XB_IB(ICD_SGN)+TWO_EPSILON_EB)) ! Rescale to CF veloc. 
+               IF(CC_STM_TYPE==2) AFCT = MIN(THRESF,DXX(1)/(XB_IB(ICD_SGN)+TWO_EPSILON_EB)) ! Rescale to CF veloc.
                VEL_GAS(ICD_SGN)   = VV(IIF,JJF,KKF) * AFCT
             ENDIF
 
@@ -10723,7 +10723,7 @@ IF(CC_STRESS_METHOD) THEN
       ENDDO CUTFACE_LOOP_2
    ELSEIF(CC_STM_TYPE==1 .OR. CC_STM_TYPE==2) THEN
       IF(PRESSURE_ITERATIONS==1) CALL CCIBM_STORE_FACE_FV(NM)
-      ! For CC_STM_TYPE==1, force on the cartesian velocity component is a combination of the STM FV and the IBM forcing. 
+      ! For CC_STM_TYPE==1, force on the cartesian velocity component is a combination of the STM FV and the IBM forcing.
       ! The factors used to combine forces correspond to the relative areas of gas cut-face and solid in the cartesian face.
       CUTFACE_LOOP_3 : DO ICF=1,MESHES(NM)%N_CUTFACE_MESH
          IF ( CUT_FACE(ICF)%STATUS /= IBM_GASPHASE) CYCLE CUTFACE_LOOP_3

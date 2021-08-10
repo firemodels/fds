@@ -8515,11 +8515,11 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
                KKG=K
                SELECT CASE(DV%IOR)
                   ! convention here is: inflow is positive (adds mass to domain), outflow is negative (subtracts mass)
-                  CASE( 1); UN =  U(I,J,K); IIG=IIG+1
+                  CASE( 1); UN =  U(I-1,J,K)
                   CASE(-1); UN = -U(I,J,K)
-                  CASE( 2); UN =  V(I,J,K); JJG=JJG+1
+                  CASE( 2); UN =  V(I,J-1,K)
                   CASE(-2); UN = -V(I,J,K)
-                  CASE( 3); UN =  W(I,J,K); KKG=KKG+1
+                  CASE( 3); UN =  W(I,J,K-1)
                   CASE(-3); UN = -W(I,J,K)
                END SELECT
                IW = WALL_INDEX(CELL_INDEX(IIG,JJG,KKG),-DV%IOR)
