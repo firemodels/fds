@@ -6040,8 +6040,8 @@ USE MEMORY_FUNCTIONS, ONLY : GET_LAGRANGIAN_PARTICLE_INDEX
 USE TRAN, ONLY: GET_IJK
 REAL(EB), INTENT(IN) :: T,DT
 INTEGER, INTENT(IN) :: NM
-REAL(EB) :: VALUE,VOL,XI,YJ,ZK,X_CENTER,Y_CENTER,Z_CENTER,WGT
-INTEGER :: N,I,J,K,IW,ICC,SURF_INDEX,LP_INDEX,ICF,IP
+REAL(EB) :: VALUE,VOL,AREA,CFACE_AREA,XI,YJ,ZK,X_CENTER,Y_CENTER,Z_CENTER,WGT
+INTEGER :: N,I,J,K,IW,ICC,ICF,SURF_INDEX,LP_INDEX,IP,AXIS
 TYPE(ONE_D_M_AND_E_XFER_TYPE), POINTER :: ONE_D
 
 CALL POINT_TO_MESH(NM)
@@ -6208,18 +6208,28 @@ DEVICE_LOOP: DO N=1,N_DEVC
                   J_DEVICE_CELL_LOOP: DO J=SDV%J1,SDV%J2
                      I_DEVICE_CELL_LOOP: DO I=SDV%I1,SDV%I2
                         IF (SOLID(CELL_INDEX(I,J,K))) THEN
-                            OB => OBSTRUCTION(OBST_INDEX_C(CELL_INDEX(I,J,K)))
-                            IF (.NOT.OB%HT3D) CYCLE I_DEVICE_CELL_LOOP
+                           OB => OBSTRUCTION(OBST_INDEX_C(CELL_INDEX(I,J,K)))
+                           IF (.NOT.OB%HT3D) CYCLE I_DEVICE_CELL_LOOP
                         ENDIF
                         VOL = DX(I)*RC(I)*DY(J)*DZ(K)
-                        IF (CC_IBM) THEN
-                            IF (CCVAR(I,J,K,IBM_CGSC) == IBM_SOLID) THEN
-                               CYCLE I_DEVICE_CELL_LOOP
-                            ELSEIF(CCVAR(I,J,K,IBM_CGSC) == IBM_CUTCFE) THEN
-                               ICC=CCVAR(I,J,K,IBM_IDCC)
-                               VOL=SUM(CUT_CELL(ICC)%VOLUME(1:CUT_CELL(ICC)%NCELL))
-                            ENDIF
-                        ENDIF
+                        CC_IBM_IF: IF (CC_IBM) THEN
+                           IF (CCVAR(I,J,K,IBM_CGSC) == IBM_SOLID) THEN
+                              CYCLE I_DEVICE_CELL_LOOP
+                           ELSEIF(CCVAR(I,J,K,IBM_CGSC) == IBM_CUTCFE) THEN
+                              ICC=CCVAR(I,J,K,IBM_IDCC)
+                              VOL=SUM(CUT_CELL(ICC)%VOLUME(1:CUT_CELL(ICC)%NCELL))
+                           ENDIF
+                           ! face-centered quanties
+                           CFACE_AREA = 0._EB
+                           AXIS = ABS(OUTPUT_QUANTITY(DV%QUANTITY_INDEX(1))%IOR)
+                           AXIS_IF: IF (AXIS>0) THEN
+                              FCVAR_IF: IF (FCVAR(I,J,K,IBM_IDCF,AXIS)>0) THEN
+                                 ! face centered quantities
+                                 ICF=FCVAR(I,J,K,IBM_IDCF,AXIS)
+                                 CFACE_AREA = SUM( CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE) )
+                              ENDIF FCVAR_IF
+                           ENDIF AXIS_IF
+                        ENDIF CC_IBM_IF
                         VALUE = GAS_PHASE_OUTPUT(T,DT,NM,I,J,K,DV%QUANTITY_INDEX(1),0,DV%Y_INDEX,DV%Z_INDEX,DV%PART_CLASS_INDEX,&
                                                  DV%VELO_INDEX,DV%PIPE_INDEX,DV%PROP_INDEX,DV%REAC_INDEX,DV%MATL_INDEX)
                         STATISTICS_SELECT: SELECT CASE(DV%SPATIAL_STATISTIC)
@@ -6252,27 +6262,19 @@ DEVICE_LOOP: DO N=1,N_DEVC
                            CASE('MASS INTEGRAL')
                               IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) &
                                  SDV%VALUE_1 = SDV%VALUE_1 + VALUE*VOL*RHO(I,J,K)
-                           CASE('AREA INTEGRAL')
+                           CASE('AREA INTEGRAL','AREA')
+                              IF (DV%SPATIAL_STATISTIC=='AREA') VALUE=1._EB
                               IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) THEN
-                                 SELECT CASE (ABS(DV%IOR_ASSUMED))
-                                    CASE(1)
-                                       SDV%VALUE_1 = SDV%VALUE_1 + RC(I)*DY(J)*DZ(K)*VALUE
-                                    CASE(2)
-                                       SDV%VALUE_1 = SDV%VALUE_1 + DX(I)*DZ(K)*VALUE
-                                    CASE(3)
-                                       SDV%VALUE_1 = SDV%VALUE_1 + DX(I)*RC(I)*DY(J)*VALUE
+                                 IF (CFACE_AREA>TWO_EPSILON_EB) THEN
+                                    AREA = CFACE_AREA
+                                 ELSE
+                                    SELECT CASE (ABS(DV%IOR_ASSUMED))
+                                       CASE(1); AREA=RC(I)*DY(J)*DZ(K)
+                                       CASE(2); AREA=DX(I)*DZ(K)
+                                       CASE(3); AREA=DX(I)*RC(I)*DY(J)
                                     END SELECT
-                              ENDIF
-                           CASE('AREA')
-                              IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) THEN
-                                 SELECT CASE (ABS(DV%IOR_ASSUMED))
-                                    CASE(1)
-                                       SDV%VALUE_1 = SDV%VALUE_1 + RC(I)*DY(J)*DZ(K)
-                                    CASE(2)
-                                       SDV%VALUE_1 = SDV%VALUE_1 + DX(I)*DZ(K)
-                                    CASE(3)
-                                       SDV%VALUE_1 = SDV%VALUE_1 + DX(I)*RC(I)*DY(J)
-                                    END SELECT
+                                 ENDIF
+                                 SDV%VALUE_1 = SDV%VALUE_1 + AREA*VALUE
                               ENDIF
                            CASE('VOLUME')
                               IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) &
