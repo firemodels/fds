@@ -17385,7 +17385,8 @@ MAIN_MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             IF ( LOWHIGH                          /=  LOWHIGH_TEST_G) CYCLE ! In same side as EWC from internal cell
             IF ( CUT_CELL(ICC)%FACE_LIST(3,IFACE) /= X1AXIS) CYCLE ! Normal to same axis as EWC
             ICF1    = CUT_CELL(ICC)%FACE_LIST(4,IFACE)
-            CUT_FACE(ICF1)%IWC = IW ! Rest of info from internal cut-cell has been filled in previous ICC loop.
+            CUT_FACE(ICF1)%IWC = IW   ! Rest of info from internal cut-cell has been filled in previous ICC loop.
+            WC%CUT_FACE_INDEX  = ICF1 ! Add CUT_FACE index in WALL(:) array.
          ENDDO
       ENDDO
 
