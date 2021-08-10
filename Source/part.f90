@@ -872,7 +872,7 @@ END SUBROUTINE PARTICLE_FACE_INSERT
 
 SUBROUTINE INSERT_VOLUMETRIC_PARTICLES
 
-INTEGER :: IIP,N_INSERT,I1,J1,K1,I2,J2,K2,N,N_PARTICLES_INSERT
+INTEGER :: IIP,N_INSERT,I1,J1,K1,I2,J2,K2,N,N_PARTICLES_INSERT,ND
 REAL(EB) :: XC1,XC2,YC1,YC2,ZC1,ZC2,X0,Y0,Z0,RR,HH,INSERT_VOLUME,INPUT_VOLUME,VOLUME_SPLIT_FACTOR,LP_X,LP_Y,LP_Z,RAMP_FACTOR
 
 VOLUME_INSERT_LOOP: DO IB=1,N_INIT
@@ -1010,6 +1010,16 @@ VOLUME_INSERT_LOOP: DO IB=1,N_INIT
                   LP_X = IN%X1 + (IP-1)*IN%DX
                   LP_Y = IN%Y1 + (IP-1)*IN%DY
                   LP_Z = IN%Z1 + (IP-1)*IN%DZ
+                  IF (LPC%ID=='RESERVED TARGET PARTICLE') THEN
+                     DO ND=1,N_DEVC
+                        DV => DEVICE(ND)
+                        IF (IN%ID==DV%INIT_ID .AND. IP==DV%POINT) THEN
+                           LP_X = DV%X
+                           LP_Y = DV%Y
+                           LP_Z = DV%Z
+                        ENDIF
+                     ENDDO
+                  ENDIF
             END SELECT
 
             ! Reject particles that are not in the current mesh.
