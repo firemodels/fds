@@ -12030,7 +12030,7 @@ INIT_LOOP: DO N=1,N_INIT_READ+N_INIT_RESERVED
 
    ! If an offset has been specified, set the SHAPE to LINE.
 
-   IF (DX>0._EB .OR. DY>0._EB .OR. DZ>0._EB) SHAPE = 'LINE'
+   IF (DX/=0._EB .OR. DY/=0._EB .OR. DZ/=0._EB) SHAPE = 'LINE'
 
    IF (N_PARTICLES>0 .AND. SHAPE=='LINE') THEN
       XB(2) = XB(1) + DX*(N_PARTICLES-1)
