@@ -540,8 +540,8 @@ MESH_LOOP: DO NM=1,NMESHES
       IF (EMESH_INDEX(NM)>0) THEN
          LU_PART(NM) = GET_FILE_NUMBER()
          LU_PART(NM+NMESHES) = GET_FILE_NUMBER()
-         WRITE(FN_PART(NM),'(A,I0,A)') TRIM(CHID)//'_evac_',NM-NFM,'.prt5'
-         WRITE(FN_PART(NM+NMESHES),'(A,I0,A)') TRIM(CHID)//'_evac_',NM-NFM,'.prt5.bnd'
+         WRITE(FN_PART(NM),'(A,I0,A)') TRIM(CHID)//'_',NM-NFM,'.prt5'
+         WRITE(FN_PART(NM+NMESHES),'(A,I0,A)') TRIM(CHID)//'_',NM-NFM,'.prt5.bnd'
       ENDIF
    ENDIF
 
