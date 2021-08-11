@@ -468,7 +468,7 @@ where {\ct BXF} is the name of the boundary condition array sent to the pressure
 Note that for Neumann pressure boundary, there are several options for computing the boundary force term (it could even be set to zero).  What matters is, whatever value is used for the force here, the same value must be used in the velocity predictor and corrector steps, Eqs. (\ref{eqn_RK1}) and (\ref{eqn_RK2}).  We choose to compute the boundary force term using the previous value of the normal pressure gradient, just as we would for an immersed boundary surface:
 \be
 F_{x,I,jk}^{n,k} =  - \frac{ \cH_{I+1,jk}^{n,k-1} - \cH_{I,jk}^{n,k-1} }{\dx} - \frac{ u_{I,jk}^{*} - u_{I,jk}^n}{\dt}
-\label{Fspec}
+\label{Fboundary}
 \ee
 
 For the corrector step:
