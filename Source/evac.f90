@@ -5436,15 +5436,21 @@ CONTAINS
     ! Evacuation files
 
     LU_EVACCSV = GET_FILE_NUMBER()
-    FN_EVACCSV = TRIM(CHID)//'_evac.csv'
+    FN_EVACCSV = TRIM(CHID)//'.csv'
     LU_EVACEFF = GET_FILE_NUMBER()
-    FN_EVACEFF = TRIM(CHID)//'_evac.eff'
+    FN_EVACEFF = TRIM(CHID)//'.eff'
     LU_EVACXYZ = GET_FILE_NUMBER()
-    FN_EVACXYZ = TRIM(CHID)//'_evac.xyz'
     LU_EVACFED = GET_FILE_NUMBER()
-    FN_EVACFED = TRIM(CHID)//'_evac.fed'
+    IF (EVACUATION_WRITE_FED) THEN
+       ! Phase A and C have modified CHID that already contains _evac
+       FN_EVACXYZ = TRIM(CHID)//'_evac.xyz'
+       FN_EVACFED = TRIM(CHID)//'_evac.fed'
+    ELSE
+       FN_EVACXYZ = TRIM(CHID)//'.xyz'
+       FN_EVACFED = TRIM(CHID)//'.fed'
+    ENDIF
     LU_EVACOUT = GET_FILE_NUMBER()
-    FN_EVACOUT = TRIM(CHID)//'_evac.out'
+    FN_EVACOUT = TRIM(CHID)//'_info.out'
     LU_EVAC_CB = GET_FILE_NUMBER()
 
     L_fed_read = BTEST(I_EVAC,3)
@@ -11020,11 +11026,10 @@ CONTAINS
       REAL(EB) :: DIST_TO_DOOR, DIST_TO_DOOR_TMP, X_NODE, Y_NODE, WIDTH, T_TMP1
       REAL(EB) :: ANGLE_HR, ANGLE_XYZ, ANGLE_XB, D_NEW, RN
 
-      HR_SPEED = 1._EB
-      TPRE = 0._EB
-
       HR=>HUMAN(I)
       KKZ = 1
+      HR_SPEED = HR%SPEED
+      TPRE = HR%TPRE
       ! HR%I_FFIELD is the flow field mesh index for this agent
       NM_NOW = MAX(1,HR%I_FFIELD)
       IF (.NOT.EVACUATION_ONLY(NM_NOW) .OR. HR%I_FFIELD < 1) THEN
@@ -13458,7 +13463,7 @@ CONTAINS
          WRITE (LU_EVACOUT,fmt='(a,i6,a,f8.2,a,3a)') ' EVAC: Person n:o', HR%ILABEL, ' inserted ', Tin, &
               ' s, entry ', TRIM(PNX%ID),' ffield ', TRIM(HR%FFIELD_NAME)
          WRITE (LU_EVACOUT,fmt='(a,a)') ' person     x       y       z    Tpre    Tdet  ', &
-         ' dia    v0   tau   i_gr i_ff'
+         ' dia    v0   tau   i_gr i_ff COLOR_INDEX'
          WRITE (LU_EVACOUT,fmt='(i6,5f8.2,3f6.2,i6,i4,i4)') HR%ILABEL, &
               HR%X, HR%Y, HR%Z, HR%Tpre, HR%Tdet,2.0_EB*HR%Radius, &
               HR%Speed, HR%Tau, HR%GROUP_ID, HR%i_ffield, HR%COLOR_INDEX
