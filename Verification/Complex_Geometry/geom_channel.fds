@@ -6,7 +6,7 @@
 # Mesh aligned:
 #&MESH IJK=12,1,12, XB=-0.25,1.25,0.,1.,-0.25,1.25 /
 
-&TIME T_END=10.   /
+&TIME T_END=10. /
 &DUMP DT_DEVC=1. /
 
 &SPEC ID='LJ AIR', LUMPED_COMPONENT_ONLY=T / 
@@ -20,7 +20,7 @@
 &VENT MB='XMIN', SURF_ID='INLET' /
 &VENT MB='XMAX', SURF_ID='OPEN' /
 
-&SURF ID='default wall', FREE_SLIP=T, DEFAULT=T, COLOR='GRAY' /  
+&SURF ID='default wall', FREE_SLIP=T, DEFAULT=T, COLOR='GRAY' /
 
 &GEOM XB=-0.25,1.25,0.,1.,    1.00,1.25 , SURF_ID='default wall' / top
 &GEOM XB=-0.25,1.25,0.,1.,   -0.25,0.00 , SURF_ID='default wall' / bottom
