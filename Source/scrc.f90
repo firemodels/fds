@@ -9918,7 +9918,7 @@ USE SCARC_POINTERS, ONLY: M, L, LF, LC, FF, FC, OL, OLF, OLC, G, GC, GF, OG, OGC
 INTEGER, INTENT(IN) :: NGRID_TYPE
 INTEGER :: NL, NM, NOM
 INTEGER :: IREFINE, IFACE, IOR0, JOR0, INBR, IWG, IWC, ICW, IW
-LOGICAL :: IS_KNOWN(-3:3), IS_DIRIC, IS_OPEN
+LOGICAL :: IS_KNOWN(-3:3)
 
 CROUTINE = 'SCARC_SETUP_WALLS'
  
@@ -10053,21 +10053,16 @@ MESHES_LOOP1: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
       !             - in the unstructured case Dirichlet BC's are only used for open boundary cells
       ! NEUMANN   : is used for the rest
  
-      IS_DIRIC = MWC%PRESSURE_BC_INDEX == DIRICHLET
-      IS_OPEN  = MWC%BOUNDARY_TYPE     == OPEN_BOUNDARY
-
       GWC => G%WALL(IWG)
-
       IF (EWC%NOM /= 0) THEN
          GWC%BTYPE = INTERNAL
-      ELSE IF ((IS_STRUCTURED .AND. IS_DIRIC) .OR. (IS_UNSTRUCTURED .AND. IS_OPEN)) THEN
+      ELSE IF (MWC%BOUNDARY_TYPE == OPEN_BOUNDARY) THEN
          GWC%BTYPE = DIRICHLET
          G%N_DIRIC = G%N_DIRIC + 1
       ELSE
          GWC%BTYPE = NEUMANN
          G%N_NEUMANN = G%N_NEUMANN + 1
       ENDIF
-
       GWC%BOUNDARY_TYPE = MWC%BOUNDARY_TYPE
 
       GWC%IXG = MWC%ONE_D%II                                 ! ghost cell indices
@@ -12938,18 +12933,14 @@ MATRIX_TYPE_SELECT: SELECT CASE (SET_MATRIX_TYPE(NL))
                GWC%ICW = IC
       
                IP = A%ROW(IC)
-               IF (N_DIRIC_GLOBAL(NLEVEL_MIN) > 0) THEN
-      
+               IF (N_DIRIC_GLOBAL(NLEVEL_MIN) > 0) THEN       ! Dirichlet boundary cells available
                   SELECT CASE (GWC%BTYPE)
                      CASE (DIRICHLET)
                         A%VAL(IP) = A%VAL(IP) - F%MATRIX_SHARE
                      CASE (NEUMANN)
                         A%VAL(IP) = A%VAL(IP) + F%MATRIX_SHARE
                   END SELECT
-      
-               ! Purely Neumann matrix
-      
-               ELSE IF (GWC%BTYPE == NEUMANN) THEN
+               ELSE IF (GWC%BTYPE == NEUMANN) THEN            ! Purely Neumann matrix
                   A%VAL(IP) = A%VAL(IP) + F%MATRIX_SHARE
                ENDIF
       
@@ -12981,19 +12972,14 @@ MATRIX_TYPE_SELECT: SELECT CASE (SET_MATRIX_TYPE(NL))
                GWC%ICW = IC
       
                IP = A%ROW(IC)
-               IF (N_DIRIC_GLOBAL(NLEVEL_MIN) > 0) THEN
-      
+               IF (N_DIRIC_GLOBAL(NLEVEL_MIN) > 0) THEN               ! Dirichlet boundary cells available
                   SELECT CASE (GWC%BTYPE)
                      CASE (DIRICHLET)
                         A%VAL(IP) = A%VAL(IP) - F%MATRIX_SHARE * RECIPROCAL_DIRECTIONAL_MEAN(RHOP, IOR0, I, J, K)
                      CASE (NEUMANN)
                         A%VAL(IP) = A%VAL(IP) + F%MATRIX_SHARE * RECIPROCAL_DIRECTIONAL_MEAN(RHOP, IOR0, I, J, K)
                   END SELECT
-
-      
-               ! Purely Neumann matrix
-      
-               ELSE IF (GWC%BTYPE == NEUMANN) THEN
+               ELSE IF (GWC%BTYPE == NEUMANN) THEN                    ! Purely Neumann matrix
                   A%VAL(IP) = A%VAL(IP) + F%MATRIX_SHARE * RECIPROCAL_DIRECTIONAL_MEAN(RHOP, IOR0, I, J, K)
                ENDIF
       
@@ -19863,7 +19849,7 @@ END SUBROUTINE SCARC_SETUP_WORKSPACE
 !> \brief Setup right hand side vector with corresponding boundary conditions for separable Poisson system
 ! --------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_SETUP_SEPARABLE_POISSON(NM)
-USE SCARC_POINTERS, ONLY: M, L, G, ST, HP, PRHS, GWC, &
+USE SCARC_POINTERS, ONLY: L,  G, ST, HP, PRHS, GWC, &
                           RDX, RDY, RDZ, RDXN, RDYN, RDZN, BXS, BXF, BYS, BYF, BZS, BZF, &
                           SCARC_POINT_TO_SEPARABLE_ENVIRONMENT
 INTEGER, INTENT(IN) :: NM
@@ -19931,7 +19917,7 @@ SEPARABLE_BOUNDARY_CELLS_LOOP: DO IW = 1, L%N_WALL_CELLS_EXT
 
    SEPARABLE_NEUMANN_IF: IF (GWC%BTYPE == NEUMANN) THEN
    
-      IF (IS_UNSTRUCTURED .AND. M%WALL(IW)%PRESSURE_BC_INDEX /= NEUMANN) CYCLE
+      IF (GWC%BOUNDARY_TYPE == SOLID_BOUNDARY) CYCLE        ! homogeneous Neumann, nothing to be done
    
       SELECT CASE (IOR0)
          CASE (1)
@@ -19971,6 +19957,7 @@ USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 INTEGER, INTENT(IN) :: NM
 INTEGER :: IOR0, IW, IW1, IW2, IC, I, J, K, IG, JG, KG
 REAL(EB) :: TSI, TIME_RAMP_FACTOR, P_EXTERNAL, VAL, SCAL, RHOM, RRHOM, KGRAD, KNABLA2, VAL2
+LOGICAL :: IS_HOMOGENEOUS
 TYPE (VENTS_TYPE), POINTER :: VT
 TYPE (WALL_TYPE), POINTER :: WC
 
@@ -20089,59 +20076,61 @@ INSEPARABLE_BOUNDARY_CELLS_LOOP: DO IW = IW1, IW2
       
       RHOM = DIRECTIONAL_MEAN(RHOP, IOR0, I, J, K)                       ! density mean along IW
 
+      IS_HOMOGENEOUS = (GWC%BOUNDARY_TYPE == SOLID_BOUNDARY) .OR. (IW > L%N_WALL_CELLS_EXT)
+
       ! Caution mesh stretching not yet considered ... i.e. terms HX, HY, HZ, see definition of BC's in pres
       SELECT CASE (IOR0)
          CASE (1)
             KGRAD = (KRESP(I,J,K)-KRESP(I-1,J,K))*M%RDXN(I-1)            ! caution: take care of right direction!
-            IF (IW <= L%N_WALL_CELLS_EXT) THEN
-               VAL = RHOM*(BXS(J,K) - KGRAD)                             ! based on: \nabla p = rho*[-du/dt - F_A - \nabla K]
-            ELSE
+            IF (IS_HOMOGENEOUS) THEN
                VAL = - RHOM*KGRAD                                        ! corresponding to homogeneous Neumann condition at obsts
+            ELSE
+               VAL = RHOM*(BXS(J,K) - KGRAD)                             ! based on: \nabla p = rho*[-du/dt - F_A - \nabla K]
             ENDIF
             PXS(J,K) = VAL                                               ! store BC of inseparable pressure for later use
             SCAL = RDX(I)*RRHOM                                          ! positive for ABS(IOR) > 0
          CASE (-1)
             KGRAD = (KRESP(I+1,J,K)-KRESP(I,J,K))*M%RDXN(I)
-            IF (IW <= L%N_WALL_CELLS_EXT) THEN
-               VAL = RHOM*(BXF(J,K) - KGRAD)
-            ELSE
+            IF (IS_HOMOGENEOUS) THEN
                VAL = -RHOM*KGRAD             
+            ELSE
+               VAL = RHOM*(BXF(J,K) - KGRAD)
             ENDIF
             PXF(J,K) = VAL
             SCAL = -RDX(I)*RRHOM                                          ! negative for ABS(IOR) < 0
          CASE (2)
             KGRAD = (KRESP(I,J,K)-KRESP(I,J-1,K))*M%RDYN(J-1)
-            IF (IW <= L%N_WALL_CELLS_EXT) THEN
-               VAL = RHOM*(BYS(I,K) - KGRAD)
-            ELSE
+            IF (IS_HOMOGENEOUS) THEN
                VAL = -RHOM*KGRAD
+            ELSE
+               VAL = RHOM*(BYS(I,K) - KGRAD)
             ENDIF
             PYS(I,K) = VAL
             SCAL = RDY(J)*RRHOM
          CASE (-2)
             KGRAD = (KRESP(I,J+1,K)-KRESP(I,J,K))*M%RDYN(J)
-            IF (IW <= L%N_WALL_CELLS_EXT) THEN
-               VAL = RHOM*(BYF(I,K) - KGRAD) 
-            ELSE
+            IF (IS_HOMOGENEOUS) THEN
                VAL = -RHOM*KGRAD 
+            ELSE
+               VAL = RHOM*(BYF(I,K) - KGRAD) 
             ENDIF
             PYF(I,K) = VAL
             SCAL = -RDY(J)*RRHOM
          CASE (3)
             KGRAD = (KRESP(I,J,K)-KRESP(I,J,K-1))*M%RDZN(K-1)
-            IF (IW <= L%N_WALL_CELLS_EXT) THEN
-               VAL = RHOM*(BZS(I,J) - KGRAD)
-            ELSE
+            IF (IS_HOMOGENEOUS) THEN
                VAL = -RHOM*KGRAD
+            ELSE
+               VAL = RHOM*(BZS(I,J) - KGRAD)
             ENDIF
             PZS(I,J) = VAL
             SCAL = RDZ(K)*RRHOM
          CASE (-3)
             KGRAD = (KRESP(I,J,K+1)-KRESP(I,J,K))*M%RDZN(K)
-            IF (IW <= L%N_WALL_CELLS_EXT) THEN
-               VAL = RHOM*(BZF(I,J) - KGRAD)
-            ELSE
+            IF (IS_HOMOGENEOUS) THEN
                VAL = -RHOM*KGRAD
+            ELSE
+               VAL = RHOM*(BZF(I,J) - KGRAD)
             ENDIF
             PZF(I,J) = VAL
             SCAL = -RDZ(K)*RRHOM
@@ -20154,8 +20143,6 @@ INSEPARABLE_BOUNDARY_CELLS_LOOP: DO IW = IW1, IW2
 ENDDO INSEPARABLE_BOUNDARY_CELLS_LOOP
 
 END SUBROUTINE SCARC_SETUP_INSEPARABLE_POISSON
-
-
 
 
 ! --------------------------------------------------------------------------------------------------------------
@@ -21128,20 +21115,39 @@ PRESSURE_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
       ! Neumann :   BCs correspond to rho * (B.. - \nabla K) , where B.. are the original BXS, BXF, ... BZF vectors
 
       PRESSURE_NEUMANN_IF: IF (GWC%BTYPE == NEUMANN) THEN
-         SELECT CASE (IOR0)
-            CASE ( 1)
-               PPP(IXG,IYW,IZW) =  PPP(IXW,IYW,IZW) - DXN(IXG) * L%PXS(IYW,IZW)
-            CASE (-1)
-               PPP(IXG,IYW,IZW) =  PPP(IXW,IYW,IZW) + DXN(IXW) * L%PXF(IYW,IZW)
-            CASE ( 2)
-               PPP(IXW,IYG,IZW) =  PPP(IXW,IYW,IZW) - DYN(IYG) * L%PYS(IXW,IZW)
-            CASE (-2)
-               PPP(IXW,IYG,IZW) =  PPP(IXW,IYW,IZW) + DYN(IYW) * L%PYF(IXW,IZW)
-            CASE ( 3)
-               PPP(IXW,IYW,IZG) =  PPP(IXW,IYW,IZW) - DZN(IZG) * L%PZS(IXW,IYW)
-            CASE (-3)
-               PPP(IXW,IYW,IZG) =  PPP(IXW,IYW,IZW) + DZN(IZW) * L%PZF(IXW,IYW)
-         END SELECT
+
+         PRESSURE_NEUMANN_SOLID_IF: IF (GWC%BOUNDARY_TYPE == SOLID_BOUNDARY) THEN
+            SELECT CASE (IOR0)
+               CASE ( 1)
+                  PPP(IXG,IYW,IZW) = PPP(IXW,IYW,IZW) 
+               CASE (-1)
+                  PPP(IXG,IYW,IZW) = PPP(IXW,IYW,IZW) 
+               CASE ( 2)
+                  PPP(IXW,IYG,IZW) = PPP(IXW,IYW,IZW) 
+               CASE (-2)
+                  PPP(IXW,IYG,IZW) = PPP(IXW,IYW,IZW) 
+               CASE ( 3)
+                  PPP(IXW,IYW,IZG) = PPP(IXW,IYW,IZW) 
+               CASE (-3)
+                  PPP(IXW,IYW,IZG) = PPP(IXW,IYW,IZW) 
+            END SELECT
+         ELSE
+            SELECT CASE (IOR0)
+               CASE ( 1)
+                  PPP(IXG,IYW,IZW) = PPP(IXW,IYW,IZW) - DXN(IXG) * L%PXS(IYW,IZW)
+               CASE (-1)
+                  PPP(IXG,IYW,IZW) = PPP(IXW,IYW,IZW) + DXN(IXW) * L%PXF(IYW,IZW)
+               CASE ( 2)
+                  PPP(IXW,IYG,IZW) = PPP(IXW,IYW,IZW) - DYN(IYG) * L%PYS(IXW,IZW)
+               CASE (-2)
+                  PPP(IXW,IYG,IZW) = PPP(IXW,IYW,IZW) + DYN(IYW) * L%PYF(IXW,IZW)
+               CASE ( 3)
+                  PPP(IXW,IYW,IZG) = PPP(IXW,IYW,IZW) - DZN(IZG) * L%PZS(IXW,IYW)
+               CASE (-3)
+                  PPP(IXW,IYW,IZG) = PPP(IXW,IYW,IZW) + DZN(IZW) * L%PZF(IXW,IYW)
+            END SELECT
+         ENDIF PRESSURE_NEUMANN_SOLID_IF
+
       ENDIF PRESSURE_NEUMANN_IF
 
    ENDDO PRESSURE_WALLCELLS_LOOP
@@ -21252,20 +21258,40 @@ GHOSTCELLS_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
       ENDIF GHOSTCELLS_DIRICHLET_IF
 
       GHOSTCELLS_NEUMANN_IF: IF (GWC%BTYPE == NEUMANN) THEN
-         SELECT CASE(IOR0)
-            CASE ( 1)
-               HP(IXG,IYW,IZW) =  HP(IXW,IYW,IZW) - DXN(IXG)*M%BXS(IYW,IZW)
-            CASE (-1)
-               HP(IXG,IYW,IZW) =  HP(IXW,IYW,IZW) + DXN(IXW)*M%BXF(IYW,IZW)
-            CASE ( 2)
-               HP(IXW,IYG,IZW) =  HP(IXW,IYW,IZW) - DYN(IYG)*M%BYS(IXW,IZW)
-            CASE (-2)
-               HP(IXW,IYG,IZW) =  HP(IXW,IYW,IZW) + DYN(IYW)*M%BYF(IXW,IZW)
-            CASE ( 3)
-               HP(IXW,IYW,IZG) =  HP(IXW,IYW,IZW) - DZN(IZG)*M%BZS(IXW,IYW)
-            CASE (-3)
-               HP(IXW,IYW,IZG) =  HP(IXW,IYW,IZW) + DZN(IZW)*M%BZF(IXW,IYW)
-         END SELECT
+
+         GHOSTCELLS_NEUMANN_SOLID_IF: IF (GWC%BOUNDARY_TYPE == SOLID_BOUNDARY) THEN 
+            SELECT CASE(IOR0)                                     ! homogenous Neumann BC's
+               CASE ( 1)
+                  HP(IXG,IYW,IZW) =  HP(IXW,IYW,IZW) 
+               CASE (-1)
+                  HP(IXG,IYW,IZW) =  HP(IXW,IYW,IZW) 
+               CASE ( 2)
+                  HP(IXW,IYG,IZW) =  HP(IXW,IYW,IZW) 
+               CASE (-2)
+                  HP(IXW,IYG,IZW) =  HP(IXW,IYW,IZW) 
+               CASE ( 3)
+                  HP(IXW,IYW,IZG) =  HP(IXW,IYW,IZW) 
+               CASE (-3)
+                  HP(IXW,IYW,IZG) =  HP(IXW,IYW,IZW) 
+            END SELECT
+         ELSE
+            SELECT CASE(IOR0)
+               CASE ( 1)
+                  HP(IXG,IYW,IZW) =  HP(IXW,IYW,IZW) - DXN(IXG)*M%BXS(IYW,IZW)
+               CASE (-1)
+                  HP(IXG,IYW,IZW) =  HP(IXW,IYW,IZW) + DXN(IXW)*M%BXF(IYW,IZW)
+               CASE ( 2)
+                  HP(IXW,IYG,IZW) =  HP(IXW,IYW,IZW) - DYN(IYG)*M%BYS(IXW,IZW)
+               CASE (-2)
+                  HP(IXW,IYG,IZW) =  HP(IXW,IYW,IZW) + DYN(IYW)*M%BYF(IXW,IZW)
+               CASE ( 3)
+                  HP(IXW,IYW,IZG) =  HP(IXW,IYW,IZW) - DZN(IZG)*M%BZS(IXW,IYW)
+               CASE (-3)
+                  HP(IXW,IYW,IZG) =  HP(IXW,IYW,IZW) + DZN(IZW)*M%BZF(IXW,IYW)
+            END SELECT
+
+         ENDIF GHOSTCELLS_NEUMANN_SOLID_IF
+
       ENDIF GHOSTCELLS_NEUMANN_IF
 
    ENDDO GHOSTCELLS_WALL_LOOP
