@@ -12375,7 +12375,7 @@ IF (.NOT.TWO_D) &
    A%VAL(IP) = A%VAL(IP) - RDY(IY)*(RDYN(IY-1) * RECIPROCAL_DIRECTIONAL_MEAN(RHOP, 2, IX, IY, IZ) + &
                                     RDYN(IY)   * RECIPROCAL_DIRECTIONAL_MEAN(RHOP,-2, IX, IY, IZ) )
 
-A%VAL(IP) = A%VAL(IP) - RDZ(IX)*(RDZN(IZ-1) * RECIPROCAL_DIRECTIONAL_MEAN(RHOP, 3, IX, IY, IZ) + &
+A%VAL(IP) = A%VAL(IP) - RDZ(IZ)*(RDZN(IZ-1) * RECIPROCAL_DIRECTIONAL_MEAN(RHOP, 3, IX, IY, IZ) + &
                                  RDZN(IZ)   * RECIPROCAL_DIRECTIONAL_MEAN(RHOP,-3, IX, IY, IZ) )
 
 A%ROW(IC) = IP
@@ -20011,6 +20011,8 @@ INSEPARABLE_BOUNDARY_CELLS_LOOP: DO IW = IW1, IW2
    ELSE
       RRHOM = 1.0_EB/M%WALL(IW)%ONE_D%RHO_F                                ! if not open use RHO_F values (?)
    ENDIF
+   SCAL = 0.0_EB
+   VAL  = 0.0_EB
 
    ! ---------- Dirichlet BC's:
    !
