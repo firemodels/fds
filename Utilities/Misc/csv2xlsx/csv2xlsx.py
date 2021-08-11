@@ -41,7 +41,6 @@ for i in range(0,len(params)):
         for col in range(new_col,new_col+1):
             _ = ws.cell(column=col, row=row, value=round(float(data[row-offset][orig_col]),2))
 
-    data.clear()
     csv_file.close()
 
 wb.save('LNG_database_validation_comparison_modified.xlsx')
