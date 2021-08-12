@@ -22,13 +22,14 @@ YL3 = L.data(3,find(strcmp(L.colheaders,'YTILDE_O2')));
 % brute force integration
 
 M = importdata([datadir,'favre_test_devc.csv'],',',2);
-t = M.data(find(M.data(:,1)>5),1);
-RHO1 = M.data(find(M.data(:,1)>5),find(strcmp(M.colheaders,'"RHO_1"')));
-RHO2 = M.data(find(M.data(:,1)>5),find(strcmp(M.colheaders,'"RHO_2"')));
-RHO3 = M.data(find(M.data(:,1)>5),find(strcmp(M.colheaders,'"RHO_3"')));
-Y1 = M.data(find(M.data(:,1)>5),find(strcmp(M.colheaders,'"YO2_1"')));
-Y2 = M.data(find(M.data(:,1)>5),find(strcmp(M.colheaders,'"YO2_2"')));
-Y3 = M.data(find(M.data(:,1)>5),find(strcmp(M.colheaders,'"YO2_3"')));
+t_stats_start = 5;
+t = M.data(find(M.data(:,1)>t_stats_start),1);
+RHO1 = M.data(find(M.data(:,1)>t_stats_start),find(strcmp(M.colheaders,'"RHO_1"')));
+RHO2 = M.data(find(M.data(:,1)>t_stats_start),find(strcmp(M.colheaders,'"RHO_2"')));
+RHO3 = M.data(find(M.data(:,1)>t_stats_start),find(strcmp(M.colheaders,'"RHO_3"')));
+Y1 = M.data(find(M.data(:,1)>t_stats_start),find(strcmp(M.colheaders,'"YO2_1"')));
+Y2 = M.data(find(M.data(:,1)>t_stats_start),find(strcmp(M.colheaders,'"YO2_2"')));
+Y3 = M.data(find(M.data(:,1)>t_stats_start),find(strcmp(M.colheaders,'"YO2_3"')));
 
 NUM1 = 0;
 NUM2 = 0;
@@ -55,7 +56,7 @@ e1 = abs(YL1-YTILDE1);
 e2 = abs(YL2-YTILDE2);
 e3 = abs(YL3-YTILDE3);
 
-tol = 1.E-4;
+tol = 1.E-5;
 if e1>tol; disp(['Matlab Warning: e1 = ',num2str(e1),' in Species/favre_test']); end
 if e2>tol; disp(['Matlab Warning: e2 = ',num2str(e2),' in Species/favre_test']); end
 if e3>tol; disp(['Matlab Warning: e3 = ',num2str(e3),' in Species/favre_test']); end
