@@ -3157,7 +3157,7 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
          REGRID_SUM = REGRID_SUM + ONE_D%MATL_COMP(N)%RHO(I)/ML%RHO_S
       ENDDO MATERIAL_LOOP1a
       IF (REGRID_SUM <= 1._EB) REGRID_FACTOR(I) = REGRID_SUM
-      IF (REGRID_MAX >= ALMOST_ONE) REGRID_FACTOR(I) = REGRID_MAX
+      IF (REGRID_MAX >= ALMOST_ONE_EB) REGRID_FACTOR(I) = REGRID_MAX
 
       ! If there is any non-shrinking material, the material matrix will remain, and no shrinking is allowed
 
@@ -3831,7 +3831,7 @@ IF_DO_EVAPORATION: IF (DO_EVAPORATION) THEN
       SUM_Y_SV_SMIX(SMIX_INDEX(N)) = SUM_Y_SV_SMIX(SMIX_INDEX(N)) + Y_SV(N)
    ENDDO MATERIAL_LOOP_1
    
-   IF (SUM_Y_SV<ALMOST_ONE) THEN
+   IF (SUM_Y_SV<ALMOST_ONE_EB) THEN
       B_NUMBER = MAX(0._EB,(SUM_Y_SV-SUM(Y_GAS))/(1._EB-SUM_Y_SV))
    ELSE
       B_NUMBER = 1.E6_EB  ! Fictitiously high B number intended to push mass flux to its upper limit
