@@ -246,7 +246,6 @@ LOGICAL :: POSITIVE_ERROR_TEST=.FALSE.
 LOGICAL :: OBST_SHAPE_AREA_ADJUST=.FALSE.
 LOGICAL :: STORE_SPECIES_FLUX=.FALSE.
 LOGICAL :: CHAR_OXIDATION=.FALSE.
-LOGICAL :: STORE_DIVERGENCE_CORRECTION=.FALSE.
 LOGICAL :: PERIODIC_DOMAIN_X=.FALSE.                !< The domain is periodic \f$ x \f$
 LOGICAL :: PERIODIC_DOMAIN_Y=.FALSE.                !< The domain is periodic \f$ y \f$
 LOGICAL :: PERIODIC_DOMAIN_Z=.FALSE.                !< The domain is periodic \f$ z \f$
