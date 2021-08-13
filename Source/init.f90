@@ -1350,7 +1350,7 @@ CALL INITIALIZE_EDGES
 ! Initialize Pressure solver
 
 IF (.NOT.FREEZE_VELOCITY) CALL INITIALIZE_POISSON_SOLVER
-!CALL INITIALIZE_LAPLACE_SOLVER
+
 IF (IERR/=0) RETURN
 
 ! Initialize Mesh Exchange
@@ -1763,37 +1763,6 @@ IF (IERR/=0) THEN
 ENDIF
 
 END SUBROUTINE INITIALIZE_POISSON_SOLVER
-
-
-!SUBROUTINE INITIALIZE_LAPLACE_SOLVER
-!USE PRES, ONLY: BUILD_SPARSE_MATRIX_LAPLACE
-!USE MKL_DSS
-!TYPE(MKL_DSS_HANDLE) :: handle
-!INTEGER :: IERR,perm(1)
-!
-!IF (.NOT.LAPLACE_PRESSURE_CORRECTION) RETURN
-!
-!CALL BUILD_SPARSE_MATRIX_LAPLACE(NM)
-!
-!! Initialize the solver
-!IERR = dss_create( handle, MKL_DSS_DEFAULTS )
-!
-!! Define the non-zero structure of the matrix
-!IERR = dss_define_structure( handle, MKL_DSS_SYMMETRIC, M%A_ROW_INDEX, M%A_N_ROWS, M%A_N_COLS, M%A_COLUMNS, M%A_N_ELEMENTS )
-!print *,'dss_define_structure complete...'
-!
-!! Reorder the matrix
-!perm(1)=0
-!IERR = dss_reorder( handle, MKL_DSS_DEFAULTS, perm )
-!print *,'dss_reorder complete...'
-!
-!! Factor the matrix
-!IERR = dss_factor_real( handle, MKL_DSS_DEFAULTS, M%A_VALUES )
-!print *,'dss_factor_real complete...'
-!
-!stop
-!
-!END SUBROUTINE INITIALIZE_LAPLACE_SOLVER
 
 
 SUBROUTINE INITIALIZE_INTERPOLATION
