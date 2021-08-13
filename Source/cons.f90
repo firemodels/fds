@@ -250,7 +250,6 @@ LOGICAL :: PERIODIC_DOMAIN_X=.FALSE.                !< The domain is periodic \f
 LOGICAL :: PERIODIC_DOMAIN_Y=.FALSE.                !< The domain is periodic \f$ y \f$
 LOGICAL :: PERIODIC_DOMAIN_Z=.FALSE.                !< The domain is periodic \f$ z \f$
 LOGICAL :: OPEN_WIND_BOUNDARY=.FALSE.               !< There is a prevailing wind
-LOGICAL :: TEST_NEW_WAKE_REDUCTION=.FALSE.
 
 INTEGER, ALLOCATABLE, DIMENSION(:) :: CHANGE_TIME_STEP_INDEX      !< Flag to indicate if a mesh needs to change time step
 INTEGER, ALLOCATABLE, DIMENSION(:) :: SETUP_PRESSURE_ZONES_INDEX  !< Flag to indicate if a mesh needs to keep searching for ZONEs
