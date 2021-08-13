@@ -58,7 +58,6 @@ TYPE MESH_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: Q_DOT_PPP_S !< Heat release rate per unit volume in 3D pyrolysis model
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: PR_T        !< Turbulent Prandtl number (experimental)
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: TMP_FLAME   !< Flame temperature (K) (experimental)
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: FLAME_INDEX
 
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: ZZ               !< Lumped species, current time step, \f$ Z_{\alpha,ijk}^n \f$
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: ZZS              !< Lumped species, next time step, \f$ Z_{\alpha,ijk}^* \f$
@@ -339,7 +338,7 @@ IMPLICIT NONE (TYPE,EXTERNAL)
 REAL(EB), POINTER, DIMENSION(:,:,:) :: &
    U,V,W,US,VS,WS,DDDT,D,DS,H,HS,H_PRIME,KRES,FVX,FVY,FVZ,FVX_B,FVY_B,FVZ_B,RHO,RHOS, &
    MU,MU_DNS,TMP,Q,KAPPA_GAS,CHI_R,QR,QR_W,UII,RSUM,D_SOURCE,U_OLD,V_OLD,W_OLD, &
-   CSD2,MTR,MSR,WEM,MIX_TIME,CHEM_SUBIT,STRAIN_RATE,D_Z_MAX,Q_DOT_PPP_S,PR_T,TMP_FLAME,FLAME_INDEX
+   CSD2,MTR,MSR,WEM,MIX_TIME,CHEM_SUBIT,STRAIN_RATE,D_Z_MAX,Q_DOT_PPP_S,PR_T,TMP_FLAME
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZ,ZZS,REAC_SOURCE_TERM,DEL_RHO_D_DEL_Z,FX,FY,FZ, &
                                          SCALAR_WORK1,SCALAR_WORK2,SCALAR_WORK3,SCALAR_WORK4, &
                                          Q_REAC,AVG_DROP_DEN,AVG_DROP_TMP,AVG_DROP_RAD,AVG_DROP_AREA, &
@@ -509,7 +508,6 @@ QR_W=>M%QR_W
 KAPPA_GAS=>M%KAPPA_GAS
 UII=>M%UII
 TRI_COR=>M%TRI_COR
-FLAME_INDEX=>M%FLAME_INDEX
 TMP_FLAME=>M%TMP_FLAME
 M_DOT_PPP=>M%M_DOT_PPP
 AVG_DROP_DEN=>M%AVG_DROP_DEN
