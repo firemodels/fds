@@ -3789,10 +3789,6 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
       ENDDO SLOOP
    ENDIF
 
-   ! Turbulence-Radiation Interaction (TRI) model (under construction)
-
-   IF (TRI_MODEL) KFST4_GAS = KFST4_GAS * TRI_COR(:,:,:,IBND)
-
    ! Calculate extinction coefficient
 
    EXTCOE = KAPPA_GAS + KAPPA_PART + (SCAEFF+SCAEFF_G)*RSA_RAT
