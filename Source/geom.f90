@@ -4239,13 +4239,6 @@ CASE(INTEGER_THREE)
 
          ! Assign normal velocity to CFACE from wall cell:
          CFACE(CFACE_INDEX)%ONE_D%U_NORMAL_0 = WC%ONE_D%U_NORMAL_0
-
-         ! Here downscale velocity if CC_UNSTRUCTURED_FDIV:
-         IF(CC_UNSTRUCTURED_FDIV) THEN
-            IF (IFACE==CUT_FACE(ICF)%NFACE) WC%ONE_D%U_NORMAL_0 = &
-            WC%ONE_D%U_NORMAL_0 * SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))*WC%ONE_D%AREA
-         ENDIF
-
          ! Vegetation T_IGN setup:
          CFACE(CFACE_INDEX)%ONE_D%T_IGN      = WC%ONE_D%T_IGN
          ! Back wall cells:
