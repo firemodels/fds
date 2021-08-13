@@ -108,7 +108,6 @@ TYPE MESH_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: PBAR_S    !< Background pressure, estimated, \f$ \overline{p}_m^*(z,t) \f$ (Pa)
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: R_PBAR    !< \f$ 1/\overline{p}_m(z,t) \f$
    INTEGER, ALLOCATABLE, DIMENSION(:,:,:) :: PRESSURE_ZONE !< Index of the pressure zone for cell (I,J,K)
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: DCOR !< Divergence correction term, \f$ \nabla \cdot (\bar{\mathbf{u}}-\mathbf{u}) \f$
 
    ! Work arrays
 
@@ -354,7 +353,6 @@ REAL(EB), POINTER, DIMENSION(:) :: P_0,RHO_0,TMP_0,D_PBAR_DT,D_PBAR_DT_S,U_LEAK,
 REAL(EB), POINTER, DIMENSION(:,:) :: PBAR,PBAR_S,R_PBAR
 INTEGER, POINTER, DIMENSION(:,:,:) :: PRESSURE_ZONE
 REAL(EB), POINTER, DIMENSION(:,:,:) :: WORK1,WORK2,WORK3,WORK4,WORK5,WORK6,WORK7,WORK8,WORK9
-REAL(EB), POINTER, DIMENSION(:,:,:) :: DCOR
 INTEGER, POINTER, DIMENSION(:,:,:) :: IWORK1
 
 REAL(EB),     POINTER, DIMENSION(:,:,:) :: PWORK1,PWORK2,PWORK3,PWORK4
@@ -601,7 +599,6 @@ WORK6=>M%WORK6
 WORK7=>M%WORK7
 WORK8=>M%WORK8
 WORK9=>M%WORK9
-DCOR=>M%DCOR
 IWORK1=>M%IWORK1
 PWORK1=>M%PWORK1
 PWORK2=>M%PWORK2
