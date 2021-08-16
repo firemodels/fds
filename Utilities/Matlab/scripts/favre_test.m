@@ -56,7 +56,7 @@ e1 = abs(YL1-YTILDE1);
 e2 = abs(YL2-YTILDE2);
 e3 = abs(YL3-YTILDE3);
 
-tol = 1.E-5;
+tol = 1.E-4;
 if e1>tol; disp(['Matlab Warning: e1 = ',num2str(e1),' in Species/favre_test']); end
 if e2>tol; disp(['Matlab Warning: e2 = ',num2str(e2),' in Species/favre_test']); end
 if e3>tol; disp(['Matlab Warning: e3 = ',num2str(e3),' in Species/favre_test']); end
