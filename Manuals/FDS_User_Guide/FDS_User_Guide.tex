@@ -8633,11 +8633,11 @@ Consider the cumulative distribution function, $F(x)$:
    \left. F(x) = \int_{-\infty}^x f(x') \, \d x' \middle/  \int_{-\infty}^\infty f(x') \, \d x' \right.
 \ee
 The {\ct PERCENTILE} control function returns the value of $x$ for which $F(x)=p$, where $p$ is a value between 0 and 1. In discretized form, the function $f(x)$ is represented by the pairs $(x_i,f_i)$ for $1\le i \le N$. The $p$th percentile is then given by
-\be 
-   x(p) = \bar{x}_{k-1} + (\bar{x}_k-\bar{x}_{k-1}) \, \frac{p F_N-F_{k-1}}{F_k-F_{k-1}}  
+\be
+   x(p) = \bar{x}_{k-1} + (\bar{x}_k-\bar{x}_{k-1}) \, \frac{p F_N-F_{k-1}}{F_k-F_{k-1}}
 \ee
-where 
-\be  
+where
+\be
    F_k = \sum_{i=1}^k f_i \, \delta \bar{x}_i  \quad ; \quad \bar{x}_i=\frac{x_{i+1}+x_i}{2} \quad ; \quad \delta \bar{x}_i = \bar{x_i}-\bar{x}_{i-1}   \quad ; \quad
    k = \min_n \left( F_n > p \, F_N  \right)
 \ee
@@ -10780,8 +10780,6 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct TAU\_FLAME}                      & Real       & Section~\ref{info:turbulent_combustion}      &           & 1.E10                \\ \hline
 \end{longtable}
 
-% Undocumented: FLAME_INDEX_MODEL (RJM)
-
 \vspace{\baselineskip}
 
 
@@ -11498,10 +11496,10 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \end{longtable}
 
 % Undocumented: AEROSOL_AL2O3, AEROSOL_SCRUBBING, CC_IBM(MV), CCVOL_LINK(MV), CC_SLIPIBM_VELO(MV,debug), CC_ZEROIBM_VELO(MV,debug), CHECK_MASS_CONSERVE(MV), COMPUTE_CUTCELLS_ONLY(MV),
-% DO_IMPLICIT_CCREGION (MV), ENTHALPY_TRANSPORT (RJM),
+% DO_IMPLICIT_CCREGION (MV),
 % EVAP_MODEL, HT3D_TEST (RJM), MAXIMUM_GEOMETRY_FACES(MV), MAXIMUM_GEOMETRY_ZVALS(MV), NUCLEATION_SITES, PERIODIC_TEST (RJM),
-% POSITIVE_ERROR_TEST, PROFILING, QFAN_BETA_TEST, TENSOR_DIFFUSIVITY (RJM), TURB_INIT_CLOCK (RJM),
-% UVW_FILE (RJM), STORE_DIVERGENCE_CORRECTION (RJM), PROJECTION (RJM)
+% POSITIVE_ERROR_TEST, PROFILING, QFAN_BETA_TEST, TURB_INIT_CLOCK (RJM),
+% UVW_FILE (RJM)
 
 \vspace{\baselineskip}
 
@@ -11520,11 +11518,11 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct MOVE} (Coordinate Transformation Parameters)} \\
 \hline \hline
 \endhead
-{\ct AXIS(3)}         & Real Array  & Axis of rotation                                         &        & (0.,0.,1.)                    \\ \hline
-{\ct SCALE}         & Real            & Scaling in all directions                            &          & 1.                         \\ \hline
-{\ct SCALEX}      & Real            & Scaling in the unrotated $x$ direction      &          & 1.                         \\ \hline
-{\ct SCALEY}      & Real            & Scaling in the unrotated $y$ direction      &          & 1.                         \\ \hline
-{\ct SCALEZ}      & Real            & Scaling in the unrotated $z$ direction      &          & 1.                         \\ \hline
+{\ct AXIS(3)}         & Real Array       & Axis of rotation                                &        & (0.,0.,1.)                 \\ \hline
+{\ct SCALE}           & Real             & Scaling in all directions                       &        & 1.                         \\ \hline
+{\ct SCALEX}          & Real             & Scaling in the unrotated $x$ direction          &        & 1.                         \\ \hline
+{\ct SCALEY}          & Real             & Scaling in the unrotated $y$ direction          &        & 1.                         \\ \hline
+{\ct SCALEZ}          & Real             & Scaling in the unrotated $z$ direction          &        & 1.                         \\ \hline
 {\ct DX}              & Real             & Translation in the $x$ direction                & m      & 0.                         \\ \hline
 {\ct DY}              & Real             & Translation in the $y$ direction                & m      & 0.                         \\ \hline
 {\ct DZ}              & Real             & Translation in the $z$ direction                & m      & 0.                         \\ \hline
@@ -11917,8 +11915,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \end{longtable}
 
 \vspace{\baselineskip}
-
-% Undocumented: TRI_MODEL (RJM)
 
 
 \section{\texorpdfstring{{\tt RAMP}}{RAMP} (Ramp Function Parameters)}

@@ -296,7 +296,7 @@ END TYPE STORAGE_TYPE
 
 ! Note: If you change the number of scalar variables in WALL_TYPE, adjust the numbers below
 
-INTEGER, PARAMETER :: N_WALL_SCALAR_REALS=7,N_WALL_SCALAR_INTEGERS=15,N_WALL_SCALAR_LOGICALS=0
+INTEGER, PARAMETER :: N_WALL_SCALAR_REALS=7,N_WALL_SCALAR_INTEGERS=14,N_WALL_SCALAR_LOGICALS=0
 
 !> \brief Variables associated with a WALL cell
 
@@ -321,7 +321,6 @@ TYPE WALL_TYPE
    INTEGER, POINTER :: SURF_INDEX_ORIG         !< Original SURFace index for this cell
    INTEGER, POINTER :: VENT_INDEX              !< Index of the VENT containing this cell
    INTEGER, POINTER :: WALL_INDEX              !< Self-identifier
-   INTEGER, POINTER :: LAPLACE_BC_INDEX
    INTEGER, POINTER :: JD11_INDEX
    INTEGER, POINTER :: JD12_INDEX
    INTEGER, POINTER :: JD21_INDEX

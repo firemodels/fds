@@ -220,12 +220,9 @@ LOGICAL :: INIT_HRRPUV=.FALSE.              !< Assume an initial spatial distrib
 LOGICAL :: SYNTHETIC_EDDY_METHOD=.FALSE.
 LOGICAL :: UVW_RESTART=.FALSE.              !< Initialize velocity field with values from a file
 LOGICAL :: PARTICLE_CFL=.FALSE.             !< Include particle velocity as a constraint on time step
-LOGICAL :: IBM_FEM_COUPLING=.FALSE.
-LOGICAL :: ENTHALPY_TRANSPORT=.TRUE.
 LOGICAL :: POTENTIAL_TEMPERATURE_CORRECTION=.FALSE.
 LOGICAL :: RTE_SOURCE_CORRECTION=.TRUE.     !< Apply a correction to the radiation source term to achieve desired rad fraction
 LOGICAL :: OBST_CREATED_OR_REMOVED=.FALSE.  !< An obstruction has just been created or removed and wall cells must be reassigned
-LOGICAL :: LAPLACE_PRESSURE_CORRECTION=.FALSE.
 LOGICAL :: CHECK_REALIZABILITY=.FALSE.
 LOGICAL :: MIN_DEVICES_EXIST=.FALSE.
 LOGICAL :: MAX_DEVICES_EXIST=.FALSE.
@@ -245,16 +242,12 @@ LOGICAL :: QFAN_BETA_TEST=.FALSE.
 LOGICAL :: USE_ATMOSPHERIC_INTERPOLATION=.FALSE.
 LOGICAL :: POSITIVE_ERROR_TEST=.FALSE.
 LOGICAL :: OBST_SHAPE_AREA_ADJUST=.FALSE.
-LOGICAL :: TRI_MODEL=.FALSE.
-LOGICAL :: FLAME_INDEX_MODEL=.FALSE.
 LOGICAL :: STORE_SPECIES_FLUX=.FALSE.
 LOGICAL :: CHAR_OXIDATION=.FALSE.
-LOGICAL :: STORE_DIVERGENCE_CORRECTION=.FALSE.
 LOGICAL :: PERIODIC_DOMAIN_X=.FALSE.                !< The domain is periodic \f$ x \f$
 LOGICAL :: PERIODIC_DOMAIN_Y=.FALSE.                !< The domain is periodic \f$ y \f$
 LOGICAL :: PERIODIC_DOMAIN_Z=.FALSE.                !< The domain is periodic \f$ z \f$
 LOGICAL :: OPEN_WIND_BOUNDARY=.FALSE.               !< There is a prevailing wind
-LOGICAL :: TEST_NEW_WAKE_REDUCTION=.FALSE.
 
 INTEGER, ALLOCATABLE, DIMENSION(:) :: CHANGE_TIME_STEP_INDEX      !< Flag to indicate if a mesh needs to change time step
 INTEGER, ALLOCATABLE, DIMENSION(:) :: SETUP_PRESSURE_ZONES_INDEX  !< Flag to indicate if a mesh needs to keep searching for ZONEs
@@ -672,6 +665,7 @@ LOGICAL :: CC_ZEROIBM_VELO=.FALSE.
 LOGICAL :: CC_SLIPIBM_VELO=.FALSE.
 LOGICAL :: CC_STRESS_METHOD=.TRUE.
 LOGICAL :: CC_ONLY_IBEDGES_FLAG=.TRUE.
+LOGICAL :: CC_UNSTRUCTURED_FDIV=.FALSE.
 
 ! Threshold factor for volume of cut-cells respect to volume of Cartesian cells:
 ! Currently used in the thermo div definition of cut-cells.
