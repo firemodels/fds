@@ -2205,7 +2205,7 @@ IF (EVACUATION_ALL_STEPS) THEN
    ENDIF
    WRITE(CHID_EVAC,'(A)') TRIM(CHID)//'_evac'
    CHID_EVAC = TRIM(CHID_EVAC)
-   DO_EVACUATION        = .TRUE.
+   DO_EVACUATION = .TRUE.
 
    INQUIRE(FILE=TRIM(TRIM(CHID_EVAC)//'.eff'),EXIST=EX)
    IF (EX) THEN
@@ -2229,7 +2229,7 @@ IF (EVACUATION_ALL_STEPS) THEN
                EVACUATION_MC_MODE        = .FALSE.
                EVACUATION_WRITE_FED      = .TRUE. ! fire calculation, save FED
                EVACUATION_INITIALIZATION = .FALSE.
-               WRITE(MESSAGE,'(A)') ' FDS+Evac: FIRE CALCUALATION.'
+               WRITE(MESSAGE,'(A)') ' FDS+Evac: FIRE CALCULATION.'
                IF (MY_RANK==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
             ELSE
                EVACUATION_MC_MODE        = .FALSE.
@@ -2294,7 +2294,7 @@ IF (EVACUATION_MC_MODE) THEN ! Read FED and EFF (if not a drill) files
            CHID_LENGTH-4,' CHARACTERS'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
-   WRITE(CHID_EVAC,'(A)') TRIM(CHID)//'_evac'
+   WRITE(CHID_EVAC,'(A)') TRIM(CHID)//'_evmc'
    CHID_EVAC = TRIM(CHID_EVAC)
    CHID = TRIM(CHID_EVAC)
 ENDIF
