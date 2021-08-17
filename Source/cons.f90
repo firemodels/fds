@@ -220,12 +220,9 @@ LOGICAL :: INIT_HRRPUV=.FALSE.              !< Assume an initial spatial distrib
 LOGICAL :: SYNTHETIC_EDDY_METHOD=.FALSE.
 LOGICAL :: UVW_RESTART=.FALSE.              !< Initialize velocity field with values from a file
 LOGICAL :: PARTICLE_CFL=.FALSE.             !< Include particle velocity as a constraint on time step
-LOGICAL :: IBM_FEM_COUPLING=.FALSE.
-LOGICAL :: ENTHALPY_TRANSPORT=.TRUE.
 LOGICAL :: POTENTIAL_TEMPERATURE_CORRECTION=.FALSE.
 LOGICAL :: RTE_SOURCE_CORRECTION=.TRUE.     !< Apply a correction to the radiation source term to achieve desired rad fraction
 LOGICAL :: OBST_CREATED_OR_REMOVED=.FALSE.  !< An obstruction has just been created or removed and wall cells must be reassigned
-LOGICAL :: LAPLACE_PRESSURE_CORRECTION=.FALSE.
 LOGICAL :: CHECK_REALIZABILITY=.FALSE.
 LOGICAL :: MIN_DEVICES_EXIST=.FALSE.
 LOGICAL :: MAX_DEVICES_EXIST=.FALSE.
@@ -245,16 +242,12 @@ LOGICAL :: QFAN_BETA_TEST=.FALSE.
 LOGICAL :: USE_ATMOSPHERIC_INTERPOLATION=.FALSE.
 LOGICAL :: POSITIVE_ERROR_TEST=.FALSE.
 LOGICAL :: OBST_SHAPE_AREA_ADJUST=.FALSE.
-LOGICAL :: TRI_MODEL=.FALSE.
-LOGICAL :: FLAME_INDEX_MODEL=.FALSE.
 LOGICAL :: STORE_SPECIES_FLUX=.FALSE.
 LOGICAL :: CHAR_OXIDATION=.FALSE.
-LOGICAL :: STORE_DIVERGENCE_CORRECTION=.FALSE.
 LOGICAL :: PERIODIC_DOMAIN_X=.FALSE.                !< The domain is periodic \f$ x \f$
 LOGICAL :: PERIODIC_DOMAIN_Y=.FALSE.                !< The domain is periodic \f$ y \f$
 LOGICAL :: PERIODIC_DOMAIN_Z=.FALSE.                !< The domain is periodic \f$ z \f$
 LOGICAL :: OPEN_WIND_BOUNDARY=.FALSE.               !< There is a prevailing wind
-LOGICAL :: TEST_NEW_WAKE_REDUCTION=.FALSE.
 
 INTEGER, ALLOCATABLE, DIMENSION(:) :: CHANGE_TIME_STEP_INDEX      !< Flag to indicate if a mesh needs to change time step
 INTEGER, ALLOCATABLE, DIMENSION(:) :: SETUP_PRESSURE_ZONES_INDEX  !< Flag to indicate if a mesh needs to keep searching for ZONEs
@@ -340,7 +333,8 @@ REAL(EB) :: GRAV=9.80665_EB                    !< Acceleration of gravity (m/s2)
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: H_V_H2O !< Heat of vaporization for water (J/kg)
 REAL(EB) :: CHI_R_MIN=0._EB                    !< Lower bound for radiative fraction
 REAL(EB) :: CHI_R_MAX=1._EB                    !< Upper bound for radiative fraction
-REAL(EB) :: EVAP_FILM_FAC=1._EB/3._EB          !< Factor used in droplet evaporation algorithm
+REAL(EB) :: SPHERE_FILM_FAC=ONTH               !< Factor used in droplet evaporation algorithm for droplets
+REAL(EB) :: PLATE_FILM_FAC=ONTH                !< Factor used in droplet evaporation algorithm for walls
 REAL(EB) :: ORIGIN_LAT=-1.E6_EB                !< Latitude of terrain map
 REAL(EB) :: ORIGIN_LON=-1.E6_EB                !< Longitude of terrain map
 REAL(EB) :: NORTH_BEARING=0._EB                !< North bearing for terrain map
@@ -628,13 +622,15 @@ REAL(EB) :: PRESSURE_RELAX_TIME=1._EB
 
 ! Clipping values
 
-REAL(EB) :: TMPMIN,TMPMAX,RHOMIN,RHOMAX
+REAL(EB) :: TMPMIN                              !< Minimum gas phase temperature (K)
+REAL(EB) :: TMPMAX                              !< Maximum gas phase temperature (K)
+REAL(EB) :: RHOMIN                              !< Minimum gas density (kg/m3)
+REAL(EB) :: RHOMAX                              !< Maximum gas density (kg/m3)
 
 ! Flux limiter
 
 INTEGER, PARAMETER :: CENTRAL_LIMITER=0,GODUNOV_LIMITER=1,SUPERBEE_LIMITER=2,MINMOD_LIMITER=3,CHARM_LIMITER=4,MP5_LIMITER=5
 INTEGER :: I_FLUX_LIMITER=SUPERBEE_LIMITER,CFL_VELOCITY_NORM=2
-LOGICAL, PARAMETER :: OW_ADVFLX_USE_WALL=.TRUE.
 
 ! Numerical quadrature (used in TEST_FILTER)
 
@@ -658,6 +654,7 @@ INTEGER :: N_FACE=0,N_GEOM=0
 REAL(EB):: DT_BNDC=1.E10_EB
 
 LOGICAL :: CC_IBM=.FALSE.
+REAL(EB):: GEOM_DEFAULT_THICKNESS=0.1_EB ! 10 cm.
 LOGICAL :: CHECK_MASS_CONSERVE =.FALSE.
 LOGICAL :: GLMAT_SOLVER =.FALSE.
 LOGICAL :: GLMAT_VERBOSE=.FALSE.
@@ -668,11 +665,12 @@ LOGICAL :: CC_ZEROIBM_VELO=.FALSE.
 LOGICAL :: CC_SLIPIBM_VELO=.FALSE.
 LOGICAL :: CC_STRESS_METHOD=.TRUE.
 LOGICAL :: CC_ONLY_IBEDGES_FLAG=.TRUE.
+LOGICAL :: CC_UNSTRUCTURED_FDIV=.FALSE.
 
 ! Threshold factor for volume of cut-cells respect to volume of Cartesian cells:
 ! Currently used in the thermo div definition of cut-cells.
 
-REAL(EB) :: CCVOL_LINK=0.15_EB
+REAL(EB) :: CCVOL_LINK=0.95_EB
 LOGICAL  :: GET_CUTCELLS_VERBOSE=.FALSE.
 
 INTEGER, PARAMETER :: LOW_IND   = 1
@@ -714,7 +712,8 @@ INTEGER , ALLOCATABLE, DIMENSION(:) :: DUCT_NE,DUCTNODE_NE,DUCT_DR,DUCTNODE_DR
 REAL(EB) :: HVAC_PRES_RELAX=0.5_EB,NODE_Z_MIN,NODE_Z_MAX
 LOGICAL :: HVAC_SOLVE=.FALSE.,HVAC_LOCAL_PRESSURE=.TRUE.
 
-REAL(EB), POINTER, DIMENSION(:,:) :: ORIENTATION_VECTOR !< Global array of orientation vectors
+REAL(EB), POINTER, DIMENSION(:,:) :: ORIENTATION_VECTOR       !< Global array of orientation vectors
+INTEGER, ALLOCATABLE, DIMENSION(:) :: NEAREST_RADIATION_ANGLE !< Index of the rad angle most opposite the given ORIENTATION_VECTOR
 INTEGER :: N_ORIENTATION_VECTOR                         !< Number of ORIENTATION_VECTORs
 
 INTEGER :: TGA_SURF_INDEX=-100             !< Surface properties to use for special TGA calculation

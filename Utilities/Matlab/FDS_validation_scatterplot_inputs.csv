@@ -12,7 +12,7 @@ Compartment Over-Pressure,Measured Pressure Rise (Pa),Predicted Pressure Rise (P
 Target Temperature,Measured Temperature Rise (°C),Predicted Temperature Rise (°C),1,1300,0.03 0.95,EastOutside,1.5,7,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Target_Temperature
 Surface Temperature,Measured Temperature Rise (°C),Predicted Temperature Rise (°C),1,2000,0.03 0.95,EastOutside,1.5,7,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Surface_Temperature
 Liquid Pool Surface Temperature,Measured Temperature Rise (°C),Predicted Temperature Rise (°C),1,500,0.03 0.95,EastOutside,1.6,7,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Liquid_Pool_Surface_Temperature
-Target Heat Flux,Measured Heat Flux (kW/m²),Predicted Heat Flux (kW/m²),0.1,200,0.03 0.95,EastOutside,1.5,11,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Target_Heat_Flux
+Target Heat Flux,Measured Heat Flux (kW/m²),Predicted Heat Flux (kW/m²),0.1,500,0.03 0.95,EastOutside,1.5,11,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Target_Heat_Flux
 Surface Heat Flux,Measured Heat Flux (kW/m²),Predicted Heat Flux (kW/m²),0.1,200,0.03 0.95,EastOutside,1.5,11,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Surface_Heat_Flux
 Velocity,Measured Velocity (m/s),Predicted Velocity (m/s),0.1,10,0.03 0.95,EastOutside,1.5,8,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Velocity
 Sprinkler Activation Time,Measured Time to Activation (s),Predicted Time to Activation (s),10,500,0.03 0.95,EastOutside,1.6,6,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Sprinkler_Actuation_Time
@@ -32,6 +32,7 @@ Smoke Obscuration,Measured Obscuration (%/m),Predicted Obscuration (%/m),1,100,0
 Mass Flow Rate,Measured Mass Flow Rate (kg/s),Predicted Mass Flow Rate (kg/s),0.01,1,0.03 0.95,EastOutside,1.5,8,no,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Convective_Heat_Flux
 Atmospheric Dispersion,Measured Concentration (%),Predicted Concentration (%),0.1,100,0.03 0.95,EastOutside,1.5,50,no,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Atmospheric_Dispersion
 Minimum Extinguishing Concentration,Measured MEC (mol/mol),Predicted MEC (mol/mol),0.05,1,0.03 0.95,,1,6,no,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Minimum_Extinguishing_Concentration
+Flame Height,Measured Flame Height (m),Predicted Flame Height (m),0.1,500,0.03 0.95,EastOutside,1.5,10,no,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Flame_Height
 Plume Height,Empirical Plume Height (m),Predicted Plume Height (m),10,1000,0.03 0.96,,1,-1,no,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Plume_Height
 Rate of Spread,Measured Rate of Spread (m/s),Predicted Rate of Spread (m/s),0.001,3,0.03 0.96,EastOutside,1.6,10,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Rate_of_Spread
 Condensation,Measured Heat Flux (kW/m²),Predicted Heat Flux (kW/m²),0,12,0.03 0.96,EastOutside,1.5,12,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Condensation

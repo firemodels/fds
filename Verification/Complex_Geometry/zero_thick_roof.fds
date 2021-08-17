@@ -1,0 +1,35 @@
+&HEAD CHID='zero_thick_roof', TITLE='Test zero thickness.' /
+
+&MISC GEOM_DEFAULT_THICKNESS=0.3 /
+
+&MULT ID='mult', DX=3., I_UPPER=0, DY=3., J_UPPER=0, DZ=3., K_UPPER=0 /
+&MESH ID='mesh', IJK=30,30,30, XB=-1.5,1.5,-1.5,1.5,-1.5,1.5, MULT_ID='mult'/
+
+&VENT MB='XMIN', SURF_ID='OPEN' /
+
+! OBST box:
+#&OBST XB=-0.6,-0.5,-0.6, 0.6,-1.5,0.0 / ! Low X wall.
+#&OBST XB= 0.5, 0.6,-0.6, 0.6,-1.5,0.0 / ! Hi  X wall.
+#&OBST XB=-0.5, 0.5,-0.6,-0.5,-1.5,0.0 / ! Low Y wall.
+#&OBST XB=-0.5, 0.5, 0.5, 0.6,-1.5,0.0 / ! Hi  Y wall.
+#&OBST XB=-0.5, 0.5,-0.5, 0.5, 0.0,0.1 / ! Roof. 
+
+! GEOM box:
+&GEOM XB=-0.6,-0.5,-0.6, 0.6,-1.5,0.0 / ! Low X wall.
+&GEOM XB= 0.5, 0.6,-0.6, 0.6,-1.5,0.0 / ! Hi  X wall.
+&GEOM XB=-0.5, 0.5,-0.6,-0.5,-1.5,0.0 / ! Low Y wall.
+&GEOM XB=-0.5, 0.5, 0.5, 0.6,-1.5,0.0 / ! Hi  Y wall.
+&GEOM XB=-0.5, 0.5,-0.5, 0.5, 0.05,0.05 / ! Roof. 
+
+! GEOM box 1 cell taller:
+#&GEOM XB=-0.6,-0.5,-0.6, 0.6,-1.5,0.1 / ! Low X wall.
+#&GEOM XB= 0.5, 0.6,-0.6, 0.6,-1.5,0.1 / ! Hi  X wall.
+#&GEOM XB=-0.5, 0.5,-0.6,-0.5,-1.5,0.1 / ! Low Y wall.
+#&GEOM XB=-0.5, 0.5, 0.5, 0.6,-1.5,0.1 / ! Hi  Y wall.
+#&GEOM XB=-0.5, 0.5,-0.5, 0.5, 0.1,0.2 / ! Roof.
+
+
+&SLCF PBY=0., QUANTITY='PRESSURE ZONE', CELL_CENTERED=T/
+
+&TAIL/ 
+ 

@@ -33,11 +33,11 @@
       MATL_ID   = 'BUTANE LIQUID'
       THICKNESS = 0.1
       TMP_INNER = -10.0 
-      EXTERNAL_FLUX=10
+      EXTERNAL_FLUX=20
       RAMP_EF='flux' /
 &RAMP ID='flux', T= 0, F=1 /
-&RAMP ID='flux', T= 4, F=1 /
-&RAMP ID='flux', T= 5, F=0 /
+&RAMP ID='flux', T=14, F=1 /
+&RAMP ID='flux', T=25, F=0 /
 
 &SURF ID        = 'STEEL SHEET'
       COLOR     = 'BLACK'

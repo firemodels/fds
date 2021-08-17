@@ -70,7 +70,9 @@ PROCESS LEMTA_Spray
 PROCESS LLNL_Enclosure
 PROCESS LNG_Dispersion
 PROCESS LNG_Fires
+PROCESS Loughborough_Jet_Fires
 PROCESS McCaffrey_Plume
+PROCESS Montoir_LNG_Fires
 PROCESS Moody_Chart
 PROCESS MPI_Scaling_Tests
 PROCESS NBS_Multi-Room
@@ -96,7 +98,9 @@ PROCESS PRISME
 PROCESS Purdue_Flames
 PROCESS Ranz_Marshall
 PROCESS Restivo_Experiment
+PROCESS Sandia_Methane_Burner
 PROCESS Sandia_Plumes
+PROCESS Shell_LNG_Fireballs
 PROCESS Sippola_Aerosol_Deposition
 PROCESS Smyth_Slot_Burner
 PROCESS SP_AST

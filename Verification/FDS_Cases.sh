@@ -28,6 +28,7 @@ $QFDS -p 32 -n 8 -d Atmospheric_Effects wind_example_32.fds
 $QFDS -d Atmospheric_Effects MO_velocity_profile_stable.fds
 $QFDS -d Atmospheric_Effects MO_velocity_profile_unstable.fds
 
+$QFDS -d Complex_Geometry geom_channel.fds
 $QFDS -d Complex_Geometry geom_extruded_poly.fds
 $QFDS -d Complex_Geometry geom_intersection.fds
 $QFDS -d Complex_Geometry geom_bad_inverted_normals.fds
@@ -132,6 +133,7 @@ $QFDS -d Complex_Geometry rotated_cube_45deg_256_stm.fds
 $QFDS -o 2 -d Complex_Geometry rotated_cube_45deg_384_ibm.fds
 $QFDS -o 2 -d Complex_Geometry rotated_cube_45deg_384_stm.fds
 
+$QFDS -d Complex_Geometry zero_thick_roof.fds
 $QFDS -d Complex_Geometry cone_1mesh.fds
 $QFDS -d Complex_Geometry geom_mass_file_test.fds
 
@@ -442,7 +444,6 @@ $QFDS -d Pyrolysis surf_mass_two_species_spher.fds
 $QFDS -d Pyrolysis tga_analysis.fds
 $QFDS -d Pyrolysis tga_sample.fds
 $QFDS -d Pyrolysis two_step_solid_reaction.fds
-$QFDS -d Pyrolysis water_ice_water.fds
 $QFDS -d Pyrolysis pcm_slab.fds
 $QFDS -d Pyrolysis pyro3d_wood_char.fds
 $QFDS -d Pyrolysis pyro3d_vs_pyro1d.fds
@@ -451,6 +452,8 @@ $QFDS -d Pyrolysis pyro3d_transport.fds
 $QFDS -d Pyrolysis solid_particle_decomposition_1.fds
 $QFDS -d Pyrolysis solid_particle_decomposition_2.fds
 $QFDS -d Pyrolysis solid_particle_decomposition_3.fds
+$QFDS -d Pyrolysis water_ice_water.fds
+$QFDS -d Pyrolysis water_pool.fds
 
 $QFDS -d Radiation adiabatic_surface_temperature.fds
 $QFDS -d Radiation droplet_absorption_cart.fds
