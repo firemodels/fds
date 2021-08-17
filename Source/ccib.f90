@@ -1724,7 +1724,8 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
 
 ELSE PREDICT_NORMALS
 
-   ! In the CORRECTOR step, the normal component of velocity, U_NORMAL, is the same as the predicted value, U_NORMAL_S. However, for species mass fluxes and HVAC, U_NORMAL is computed elsewhere (wall.f90).
+   ! In the CORRECTOR step, the normal component of velocity, U_NORMAL, is the same as the predicted value, U_NORMAL_S.
+   ! However, for species mass fluxes and HVAC, U_NORMAL is computed elsewhere (wall.f90).
 
    CFACE_LOOPC: DO ICF=1,N_EXTERNAL_CFACE_CELLS+N_INTERNAL_CFACE_CELLS
       CFA => CFACE(ICF)
