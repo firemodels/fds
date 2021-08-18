@@ -6,7 +6,7 @@ export SVNROOT=`pwd`/../..
 source $SVNROOT/Validation/Common_Run_All.sh
 
 $QFDS $DEBUG -p 25  $QUEUE -d $INDIR Croce_01.fds
-$QFDS $DEBUG -p 16  $QUEUE -d $INDIR Croce_02.fds
+$QFDS $DEBUG -p 19  $QUEUE -d $INDIR Croce_02.fds
 $QFDS $DEBUG -p 20  $QUEUE -d $INDIR Croce_03.fds
 $QFDS $DEBUG -p 25  $QUEUE -d $INDIR Croce_04.fds
 $QFDS $DEBUG -p 28  $QUEUE -d $INDIR Croce_05.fds
