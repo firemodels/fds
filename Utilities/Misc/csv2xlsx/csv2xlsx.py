@@ -33,13 +33,14 @@ for i in range(0,len(params)):
     new_row = int(params[i][5])
     new_col = int(params[i][6])
     length  = int(params[i][3])
-    offset  = new_row - orig_row
  
     ws = wb[params[i][4]]
 
-    for row in range(new_row,new_row+length):
-        for col in range(new_col,new_col+1):
-            _ = ws.cell(column=col, row=row, value=round(float(data[row-offset][orig_col]),2))
+    for counter in range(0,abs(length)):
+        if length > 0:
+            _ = ws.cell(row=new_row+counter, column=new_col, value=round(float(data[orig_row+counter][orig_col]),2))
+        else:
+            _ = ws.cell(row=new_row+counter, column=new_col, value=round(float(data[orig_row][orig_col+counter]),2))
 
     csv_file.close()
 

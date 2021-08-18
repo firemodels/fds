@@ -4243,7 +4243,7 @@ CASE(INTEGER_THREE)
          ! Here downscale velocity if CC_UNSTRUCTURED_FDIV:
          IF(CC_UNSTRUCTURED_FDIV) THEN
             IF (IFACE==CUT_FACE(ICF)%NFACE) WC%ONE_D%U_NORMAL_0 = &
-            WC%ONE_D%U_NORMAL_0 * SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))*WC%ONE_D%AREA
+            WC%ONE_D%U_NORMAL_0 * SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))/WC%ONE_D%AREA
          ENDIF
 
          ! Vegetation T_IGN setup:

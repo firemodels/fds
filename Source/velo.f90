@@ -30,7 +30,7 @@ SUBROUTINE COMPUTE_VISCOSITY(T,NM,APPLY_TO_ESTIMATED_VARIABLES)
 USE PHYSICAL_FUNCTIONS, ONLY: GET_VISCOSITY,LES_FILTER_WIDTH_FUNCTION,GET_POTENTIAL_TEMPERATURE,GET_CONDUCTIVITY,GET_SPECIFIC_HEAT
 USE TURBULENCE, ONLY: VARDEN_DYNSMAG,TEST_FILTER,FILL_EDGES,WALL_MODEL,WALE_VISCOSITY,ABL_WALL_MODEL
 USE MATH_FUNCTIONS, ONLY:EVALUATE_RAMP
-USE CC_SCALARS_IBM, ONLY : CCREGION_COMPUTE_VISCOSITY
+USE CC_SCALARS_IBM, ONLY : CCREGION_COMPUTE_KRES,CCREGION_COMPUTE_VISCOSITY
 REAL(EB), INTENT(IN) :: T
 INTEGER, INTENT(IN) :: NM
 LOGICAL, INTENT(IN) :: APPLY_TO_ESTIMATED_VARIABLES
@@ -39,7 +39,7 @@ REAL(EB) :: NU_EDDY,DELTA,KSGS,U2,V2,W2,AA,A_IJ(3,3),BB,B_IJ(3,3),&
             DUDX,DUDY,DUDZ,DVDX,DVDY,DVDZ,DWDX,DWDY,DWDZ,SLIP_COEF,VEL_GAS,VEL_T,RAMP_T,TSI,&
             VDF,LS,THETA_0,THETA_1,THETA_2,DTDZBAR,WGT,T_NOW
 REAL(EB), PARAMETER :: RAPLUS=1._EB/26._EB, C_LS=0.76_EB
-INTEGER :: I,J,K,IIG,JJG,KKG,II,JJ,KK,IW,IOR
+INTEGER :: I,J,K,IIG,JJG,KKG,II,JJ,KK,IW,IOR,IC
 REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP=>NULL(),UP=>NULL(),VP=>NULL(),WP=>NULL(), &
                                        UP_HAT=>NULL(),VP_HAT=>NULL(),WP_HAT=>NULL(), &
                                        UU=>NULL(),VV=>NULL(),WW=>NULL(),DTDZ=>NULL()
@@ -325,6 +325,12 @@ DO K=1,KBAR
    ENDDO
 ENDDO
 
+IF (CC_IBM) THEN
+   T_USED(4) = T_USED(4) + CURRENT_TIME() - T_NOW
+   CALL CCREGION_COMPUTE_KRES(NM,UU,VV,WW)
+   T_NOW = CURRENT_TIME()
+ENDIF
+
 ! Mirror viscosity into solids and exterior boundary cells
 
 CELL_COUNTER => IWORK1 ; CELL_COUNTER = 0
@@ -336,11 +342,14 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    II  = WC%ONE_D%II
    JJ  = WC%ONE_D%JJ
    KK  = WC%ONE_D%KK
+   IC  = CELL_INDEX(II,JJ,KK)
    IOR = WC%ONE_D%IOR
    IIG = WC%ONE_D%IIG
    JJG = WC%ONE_D%JJG
    KKG = WC%ONE_D%KKG
    SF=>SURFACE(WC%SURF_INDEX)
+
+   IF (SOLID(IC) .OR. EXTERIOR(IC)) KRES(II,JJ,KK) = KRES(IIG,JJG,KKG)
 
    SELECT CASE(WC%BOUNDARY_TYPE)
 
@@ -405,7 +414,6 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       CASE(OPEN_BOUNDARY,MIRROR_BOUNDARY)
 
          MU(II,JJ,KK) = MU(IIG,JJG,KKG)
-         KRES(II,JJ,KK) = KRES(IIG,JJG,KKG)
 
    END SELECT
 
@@ -1567,7 +1575,7 @@ SUBROUTINE VELOCITY_PREDICTOR(T,DT,DT_NEW,NM)
 
 USE TURBULENCE, ONLY: COMPRESSION_WAVE
 USE MANUFACTURED_SOLUTIONS, ONLY: UF_MMS,WF_MMS,VD2D_MMS_U,VD2D_MMS_V
-USE CC_SCALARS_IBM, ONLY : CCIBM_VELOCITY_NO_GRADH
+USE CC_SCALARS_IBM, ONLY : CCIBM_VELOCITY_NO_GRADH, CCIBM_RESCALE_VELOCITY
 
 REAL(EB) :: T_NOW,XHAT,ZHAT
 INTEGER  :: I,J,K
@@ -1615,6 +1623,7 @@ ELSE FREEZE_VELOCITY_IF
       ENDDO
    ENDDO
 
+   IF (CC_IBM) CALL CCIBM_RESCALE_VELOCITY(DT,STORE_FLG=.FALSE.)
    IF (PRES_METHOD == 'GLMAT' .OR. PRES_METHOD == 'USCARC') CALL WALL_VELOCITY_NO_GRADH(DT,.FALSE.)
    IF (CC_IBM) CALL CCIBM_VELOCITY_NO_GRADH(DT,.FALSE.)
 
@@ -1667,7 +1676,7 @@ SUBROUTINE VELOCITY_CORRECTOR(T,DT,NM)
 
 USE TURBULENCE, ONLY: COMPRESSION_WAVE
 USE MANUFACTURED_SOLUTIONS, ONLY: UF_MMS,WF_MMS,VD2D_MMS_U,VD2D_MMS_V
-USE CC_SCALARS_IBM, ONLY : CCIBM_VELOCITY_NO_GRADH
+USE CC_SCALARS_IBM, ONLY : CCIBM_VELOCITY_NO_GRADH,CCIBM_RESCALE_VELOCITY
 
 REAL(EB) :: T_NOW,XHAT,ZHAT
 INTEGER  :: I,J,K
@@ -1695,6 +1704,7 @@ ELSE FREEZE_VELOCITY_IF
       W_OLD = W
    ENDIF
 
+   IF (CC_IBM) CALL CCIBM_RESCALE_VELOCITY(DT,.TRUE.)
    IF (PRES_METHOD == 'GLMAT' .OR. PRES_METHOD == 'USCARC') THEN
       CALL WALL_VELOCITY_NO_GRADH(DT,.TRUE.)                    ! Store U velocities on OBST surfaces.
       IF (CC_IBM) CALL CCIBM_VELOCITY_NO_GRADH(DT,.TRUE.)       ! Store velocities on GEOM SOLID faces.
@@ -1724,6 +1734,7 @@ ELSE FREEZE_VELOCITY_IF
       ENDDO
    ENDDO
 
+   IF (CC_IBM) CALL CCIBM_RESCALE_VELOCITY(DT,.FALSE.)
    IF (PRES_METHOD == 'GLMAT' .OR. PRES_METHOD == 'USCARC') THEN
       CALL WALL_VELOCITY_NO_GRADH(DT,.FALSE.)
       IF (CC_IBM) CALL CCIBM_VELOCITY_NO_GRADH(DT,.FALSE.)
@@ -3204,8 +3215,8 @@ SUBROUTINE WALL_VELOCITY_NO_GRADH(DT,STORE_UN)
 
 REAL(EB), INTENT(IN) :: DT
 LOGICAL, INTENT(IN) :: STORE_UN
-INTEGER :: IIG,JJG,KKG,IOR,IW,N_INTERNAL_WALL_CELLS_AUX
-REAL(EB) :: DHDN, VEL_N
+INTEGER :: IIG,JJG,KKG,IOR,IW,N_INTERNAL_WALL_CELLS_AUX,ICF
+REAL(EB) :: DHDN, VEL_N, DWSCL
 TYPE (WALL_TYPE), POINTER :: WC
 REAL(EB), SAVE, ALLOCATABLE, DIMENSION(:) :: UN_WALLS
 
@@ -3267,19 +3278,25 @@ PREDICTOR_COND : IF (PREDICTOR) THEN
 
      DHDN=0._EB ! Set the normal derivative of H to zero for solids.
 
+     DWSCL=1._EB ! Area factor for downscaling to cartesian velocity.
+     IF (CC_UNSTRUCTURED_FDIV .AND. IW<=N_EXTERNAL_WALL_CELLS) THEN
+        ICF=WC%CUT_FACE_INDEX
+        IF(ICF>0) DWSCL = SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))/WC%ONE_D%AREA
+     ENDIF
+
      SELECT CASE(IOR)
      CASE( IAXIS)
-        US(IIG-1,JJG  ,KKG  ) = (U(IIG-1,JJG  ,KKG  ) - DT*( FVX(IIG-1,JJG  ,KKG  ) + DHDN ))
+        US(IIG-1,JJG  ,KKG  ) = (U(IIG-1,JJG  ,KKG  ) - DT*( FVX(IIG-1,JJG  ,KKG  ) + DHDN )*DWSCL)
      CASE(-IAXIS)
-        US(IIG  ,JJG  ,KKG  ) = (U(IIG  ,JJG  ,KKG  ) - DT*( FVX(IIG  ,JJG  ,KKG  ) + DHDN ))
+        US(IIG  ,JJG  ,KKG  ) = (U(IIG  ,JJG  ,KKG  ) - DT*( FVX(IIG  ,JJG  ,KKG  ) + DHDN )*DWSCL)
      CASE( JAXIS)
-        VS(IIG  ,JJG-1,KKG  ) = (V(IIG  ,JJG-1,KKG  ) - DT*( FVY(IIG  ,JJG-1,KKG  ) + DHDN ))
+        VS(IIG  ,JJG-1,KKG  ) = (V(IIG  ,JJG-1,KKG  ) - DT*( FVY(IIG  ,JJG-1,KKG  ) + DHDN )*DWSCL)
      CASE(-JAXIS)
-        VS(IIG  ,JJG  ,KKG  ) = (V(IIG  ,JJG  ,KKG  ) - DT*( FVY(IIG  ,JJG  ,KKG  ) + DHDN ))
+        VS(IIG  ,JJG  ,KKG  ) = (V(IIG  ,JJG  ,KKG  ) - DT*( FVY(IIG  ,JJG  ,KKG  ) + DHDN )*DWSCL)
      CASE( KAXIS)
-        WS(IIG  ,JJG  ,KKG-1) = (W(IIG  ,JJG  ,KKG-1) - DT*( FVZ(IIG  ,JJG  ,KKG-1) + DHDN ))
+        WS(IIG  ,JJG  ,KKG-1) = (W(IIG  ,JJG  ,KKG-1) - DT*( FVZ(IIG  ,JJG  ,KKG-1) + DHDN )*DWSCL)
      CASE(-KAXIS)
-        WS(IIG  ,JJG  ,KKG  ) = (W(IIG  ,JJG  ,KKG  ) - DT*( FVZ(IIG  ,JJG  ,KKG  ) + DHDN ))
+        WS(IIG  ,JJG  ,KKG  ) = (W(IIG  ,JJG  ,KKG  ) - DT*( FVZ(IIG  ,JJG  ,KKG  ) + DHDN )*DWSCL)
      END SELECT
 
   ENDDO WALL_CELL_LOOP_1
@@ -3300,28 +3317,34 @@ ELSE ! Corrector
 
      DHDN=0._EB ! Set the normal derivative of H to zero for solids.
 
+     DWSCL=1._EB
+     IF (CC_UNSTRUCTURED_FDIV .AND. IW<=N_EXTERNAL_WALL_CELLS) THEN
+        ICF=WC%CUT_FACE_INDEX
+        IF(ICF>0) DWSCL = SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))/WC%ONE_D%AREA
+     ENDIF
+
      VEL_N = UN_WALLS(IW)
 
      SELECT CASE(IOR)
      CASE( IAXIS)                                 ! | - Problem with this is it was modified in VELOCITY_CORRECTOR,
                                                   ! V   => Store the untouched U normal on internal WALLs.
          U(IIG-1,JJG  ,KKG  ) = 0.5_EB*(                      VEL_N + US(IIG-1,JJG  ,KKG  ) - &
-                                        DT*( FVX(IIG-1,JJG  ,KKG  ) + DHDN ))
+                                        DT*( FVX(IIG-1,JJG  ,KKG  ) + DHDN )*DWSCL)
      CASE(-IAXIS)
          U(IIG  ,JJG  ,KKG  ) = 0.5_EB*(                      VEL_N + US(IIG  ,JJG  ,KKG  ) - &
-                                        DT*( FVX(IIG  ,JJG  ,KKG  ) + DHDN ))
+                                        DT*( FVX(IIG  ,JJG  ,KKG  ) + DHDN )*DWSCL)
      CASE( JAXIS)
          V(IIG  ,JJG-1,KKG  ) = 0.5_EB*(                      VEL_N + VS(IIG  ,JJG-1,KKG  ) - &
-                                        DT*( FVY(IIG  ,JJG-1,KKG  ) + DHDN ))
+                                        DT*( FVY(IIG  ,JJG-1,KKG  ) + DHDN )*DWSCL)
      CASE(-JAXIS)
          V(IIG  ,JJG  ,KKG  ) = 0.5_EB*(                      VEL_N + VS(IIG  ,JJG  ,KKG  ) - &
-                                        DT*( FVY(IIG  ,JJG  ,KKG  ) + DHDN ))
+                                        DT*( FVY(IIG  ,JJG  ,KKG  ) + DHDN )*DWSCL)
      CASE( KAXIS)
          W(IIG  ,JJG  ,KKG-1) = 0.5_EB*(                      VEL_N + WS(IIG  ,JJG  ,KKG-1) - &
-                                        DT*( FVZ(IIG  ,JJG  ,KKG-1) + DHDN ))
+                                        DT*( FVZ(IIG  ,JJG  ,KKG-1) + DHDN )*DWSCL)
      CASE(-KAXIS)
          W(IIG  ,JJG  ,KKG  ) = 0.5_EB*(                      VEL_N + WS(IIG  ,JJG  ,KKG  ) - &
-                                        DT*( FVZ(IIG  ,JJG  ,KKG  ) + DHDN ))
+                                        DT*( FVZ(IIG  ,JJG  ,KKG  ) + DHDN )*DWSCL)
      END SELECT
 
   ENDDO WALL_CELL_LOOP_2
