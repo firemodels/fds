@@ -1521,9 +1521,8 @@ ENDIF
 
 OPEN(LU_SMV,FILE=FN_SMV,FORM='FORMATTED',STATUS='REPLACE')
 
-IF (EVACUATION_MC_MODE) THEN
+IF (EVACUATION_MC_MODE .AND. .NOT.EVACUATION_DRILL) THEN
    ! Evacuation smv file format: evacuation stuff appended to the fire smv file
-
    
    I = LEN_TRIM(CHID)-5
    FN_EVACFED = TRIM(CHID(1:I))//'_evac.fed'
@@ -1533,7 +1532,6 @@ IF (EVACUATION_MC_MODE) THEN
    READ (LU_EVACFED) ntmp2, ntmp2, ntmp3, ntmp4, ntmp5, ntmp6
    N_FIRE_MESHES_IN_FED = ntmp5  ! Number of meshes in the fire calculation
    CLOSE (LU_EVACFED)
-
    I = LEN_TRIM(CHID)-5
    LU_EVACXYZ = GET_FILE_NUMBER()
    FN_EVACXYZ = TRIM(CHID(1:I))//'.smv'
@@ -1550,6 +1548,7 @@ IF (EVACUATION_MC_MODE) THEN
    ENDDO
 30 CONTINUE
    CLOSE (LU_EVACXYZ)
+
 ENDIF
 
 
