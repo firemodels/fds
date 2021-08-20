@@ -1,7 +1,7 @@
 @echo off
 
 IF "%SETUP_IFORT_COMPILER_64%"=="1" GOTO envexist
-IF  X"%SETVARS_COMPLETED%" == X1 GOTO oneapi_envexist
+IF  X%SETVARS_COMPLETED% == X1 GOTO oneapi_envexist
 
   set SETUP_IFORT_COMPILER_64=1
 
