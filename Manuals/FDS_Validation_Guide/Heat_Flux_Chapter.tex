@@ -1210,66 +1210,81 @@ No.      & (m)      & (m)        & (kW)        &  (kg/s)               &  (kW/m$
 
 \subsection{BGC/GRI LNG Fires}
 
-A description of the 13 LNG trench fire experiments is given in Section~\ref{BGC_GRI_LNG_Fires_Description}. On the following pages are plots comparing predicted and measured heat fluxes to radiometers at various distances from the trench fire. Measurements from two types of radiometers are compared to the model. The first (labelled with an ``L'') is a wide-angle, slow-response type (thermopile) for measuring incident flux levels at positions upwind, crosswind, and downwind of the fire. The second (labelled with a ``B'') is a fast-response, wide-angle type (thermistor) for measuring the average surface emissive power of the visible flames from various locations.
+A description of the 13 LNG trench fire experiments is given in Section~\ref{BGC_GRI_LNG_Fires_Description}. 
 
-\begin{figure}[!h]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/BGC_GRI_LNG_Fires/Croce_01_Heat_Flux_1} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/BGC_GRI_LNG_Fires/Croce_01_Heat_Flux_2} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/BGC_GRI_LNG_Fires/Croce_02_Heat_Flux_1} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/BGC_GRI_LNG_Fires/Croce_02_Heat_Flux_2}
-\end{tabular*}
-\caption[BGC/GRI LNG Fires, heat flux for Tests 1-2]
-{BGC/GRI LNG Fires, heat flux for Tests 1-2}
-\label{Croce_Heat_Flux_1}
+Figures~\ref{Croce_Heat_Flux_1} and \ref{Croce_Heat_Flux_2} compare predicted and measured heat fluxes to radiometers at various distances from the LNG trench fire. The general layout of the facility is shown in Fig.~\ref{BGC_Layout}. The radiometers were positioned approximately 1.2~m off the ground along the axis lines shown in the figure. The wind direction was typically perpendicular to the longer dimension of the trench.
+
+
+\begin{figure}[!ht]
+\begin{minipage}{10cm}
+\setlength{\unitlength}{1.0cm}
+\begin{picture}(8.0,8.0)(0.0,0.0)
+\thicklines
+\put(5.0,3.75){\framebox(3.0,0.5){}}
+\thinlines
+\put(6.5,4.0){\circle*{0.1}}
+\put(6.5,4.0){\vector(-1,0){6.5}}
+\put(1.0,3.5){Lateral Radiometers}
+\put(6.5,4.0){\vector(0,-1){4.0}}
+\put(2.5,2.0){Upwind Radiometers}
+\put(6.5,4.0){\vector(0,1){4.0}}
+\put(2.5,6.0){Downwind Radiometers}
+\put(6.7,3.85){Trench}
+\end{picture}
+\end{minipage}
+\hfill
+\begin{minipage}{6cm}
+\begin{tabular}{|c|c|c|}
+\hline
+\multicolumn{3}{|c|}{Trench Dimensions} \\ \hline
+Test & Length (m) & Width (m) \\ \hline
+1    & 23.53      & 1.81      \\
+2    & 15.52      & 1.81      \\
+3    & 9.23       & 1.83      \\
+4    & 23.50      & 1.83      \\
+5    & 9.05       & 1.82      \\
+6    & 23.45      & 3.94      \\
+7    & 23.45      & 0.82      \\
+8    & 11.82      & 0.82      \\
+9    & 9.10       & 0.82      \\
+10   & 52.05      & 3.89      \\
+11   & 4.37       & 0.81      \\
+12   & 52.15      & 1.82      \\
+13   & 23.10      & 0.77      \\
+\hline
+\end{tabular}
+\end{minipage}
+\caption[Schematic diagram of BGC/GRI test facility]{Schematic diagram of BGC/GRI test facility.}
+\label{BGC_Layout}
 \end{figure}
 
 \newpage
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/BGC_GRI_LNG_Fires/Croce_03_Heat_Flux_1} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/BGC_GRI_LNG_Fires/Croce_03_Heat_Flux_2} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/BGC_GRI_LNG_Fires/Croce_04_Heat_Flux_1} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/BGC_GRI_LNG_Fires/Croce_04_Heat_Flux_2} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/BGC_GRI_LNG_Fires/Croce_05_Heat_Flux_1} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/BGC_GRI_LNG_Fires/Croce_05_Heat_Flux_2} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/BGC_GRI_LNG_Fires/Croce_06_Heat_Flux_1} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/BGC_GRI_LNG_Fires/Croce_06_Heat_Flux_2}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/BGC_GRI_LNG_Fires/Croce_01_Heat_Flux_Profile} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/BGC_GRI_LNG_Fires/Croce_02_Heat_Flux_Profile} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/BGC_GRI_LNG_Fires/Croce_03_Heat_Flux_Profile} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/BGC_GRI_LNG_Fires/Croce_04_Heat_Flux_Profile} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/BGC_GRI_LNG_Fires/Croce_05_Heat_Flux_Profile} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/BGC_GRI_LNG_Fires/Croce_06_Heat_Flux_Profile} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/BGC_GRI_LNG_Fires/Croce_07_Heat_Flux_Profile} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/BGC_GRI_LNG_Fires/Croce_08_Heat_Flux_Profile}
 \end{tabular*}
-\caption[BGC/GRI LNG Fires, heat flux for Tests 3-6]
-{BGC/GRI LNG Fires, heat flux for Tests 3-6}
+\caption[BGC/GRI LNG Fires, heat flux profiles for Tests 1-8]{BGC/GRI LNG Fires, heat flux profiles for Tests 1-8.}
+\label{Croce_Heat_Flux_1}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/BGC_GRI_LNG_Fires/Croce_09_Heat_Flux_Profile} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/BGC_GRI_LNG_Fires/Croce_10_Heat_Flux_Profile} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/BGC_GRI_LNG_Fires/Croce_11_Heat_Flux_Profile} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/BGC_GRI_LNG_Fires/Croce_12_Heat_Flux_Profile} \\
+\multicolumn{2}{c}{\includegraphics[height=2.15in]{SCRIPT_FIGURES/BGC_GRI_LNG_Fires/Croce_13_Heat_Flux_Profile} }
+\end{tabular*}
+\caption[BGC/GRI LNG Fires, heat flux profiles for Tests 9-13]{BGC/GRI LNG Fires, heat flux profiles for Tests 9-13.}
 \label{Croce_Heat_Flux_2}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/BGC_GRI_LNG_Fires/Croce_07_Heat_Flux_1} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/BGC_GRI_LNG_Fires/Croce_07_Heat_Flux_2} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/BGC_GRI_LNG_Fires/Croce_08_Heat_Flux_1} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/BGC_GRI_LNG_Fires/Croce_08_Heat_Flux_2} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/BGC_GRI_LNG_Fires/Croce_09_Heat_Flux_1} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/BGC_GRI_LNG_Fires/Croce_09_Heat_Flux_2} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/BGC_GRI_LNG_Fires/Croce_10_Heat_Flux_1} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/BGC_GRI_LNG_Fires/Croce_10_Heat_Flux_2}
-\end{tabular*}
-\caption[BGC/GRI LNG Fires, heat flux for Tests 7-10]
-{BGC/GRI LNG Fires, heat flux for Tests 7-10}
-\label{Croce_Heat_Flux_3}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/BGC_GRI_LNG_Fires/Croce_11_Heat_Flux_1} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/BGC_GRI_LNG_Fires/Croce_11_Heat_Flux_2} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/BGC_GRI_LNG_Fires/Croce_12_Heat_Flux_1} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/BGC_GRI_LNG_Fires/Croce_12_Heat_Flux_2} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/BGC_GRI_LNG_Fires/Croce_13_Heat_Flux_1} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/BGC_GRI_LNG_Fires/Croce_13_Heat_Flux_2}
-\end{tabular*}
-\caption[BGC/GRI LNG Fires, heat flux for Tests 11-13]
-{BGC/GRI LNG Fires, heat flux for Tests 11-13}
-\label{Croce_Heat_Flux_4}
 \end{figure}
 
 
@@ -1440,20 +1455,67 @@ No.      & (N,W)  & (N,W)   & (N,W)   & (S,W)   & (S,W)   & (S,W)   & (S,W)   & 
 \end{figure}
 
 
+\clearpage
+
+\subsection{Montoir LNG Fires}
+\label{Montoir_LNG_Fires_Heat_Flux}
+
+A brief description of these experiments can be found in Section~\ref{Montoir_LNG_Fires_Description}.
+
+\newpage
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Montoir_LNG_Fires/Montoir01_HF_0} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Montoir_LNG_Fires/Montoir01_HF_33} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Montoir_LNG_Fires/Montoir01_HF_61} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Montoir_LNG_Fires/Montoir01_HF_90} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Montoir_LNG_Fires/Montoir01_HF_120} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Montoir_LNG_Fires/Montoir01_HF_225} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Montoir_LNG_Fires/Montoir01_HF_270} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Montoir_LNG_Fires/Montoir01_HF_315} 
+\end{tabular*}
+\caption[Montoir LNG Fires, far-field radiometers, Test~1]{Montoir LNG Fires, far-field radiometers, Test~1.}
+\label{Montoir_HF_1}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Montoir_LNG_Fires/Montoir02_HF_0} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Montoir_LNG_Fires/Montoir02_HF_33} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Montoir_LNG_Fires/Montoir02_HF_61} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Montoir_LNG_Fires/Montoir02_HF_90} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Montoir_LNG_Fires/Montoir02_HF_120} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Montoir_LNG_Fires/Montoir02_HF_225} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Montoir_LNG_Fires/Montoir02_HF_270} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Montoir_LNG_Fires/Montoir02_HF_315}
+\end{tabular*}
+\caption[Montoir LNG Fires, far-field radiometers, Test~2]{Montoir LNG Fires, far-field radiometers, Test~2.}
+\label{Montoir_HF_2}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Montoir_LNG_Fires/Montoir03_HF_0} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Montoir_LNG_Fires/Montoir03_HF_33} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Montoir_LNG_Fires/Montoir03_HF_61} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Montoir_LNG_Fires/Montoir03_HF_90} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Montoir_LNG_Fires/Montoir03_HF_120} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Montoir_LNG_Fires/Montoir03_HF_225} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Montoir_LNG_Fires/Montoir03_HF_270} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Montoir_LNG_Fires/Montoir03_HF_315}
+\end{tabular*}
+\caption[Montoir LNG Fires, far-field radiometers, Test~3]{Montoir LNG Fires, far-field radiometers, Test~3.}
+\label{Montoir_HF_3}
+\end{figure}
+
+
 
 \clearpage
 
 \subsection{NIST/NRC Experiments}
 
-Cables in various types (power and control), and configurations (horizontal, vertical, in trays or free-hanging), were installed in
-the test compartment. For each of the four cable targets considered, measurements of the radiative and total heat flux were made with
-gauges positioned near the cables themselves.  The following pages display comparisons of these heat flux predictions and measurements for Control Cable B, Horizontal Cable Tray D, Power Cable F and Vertical Cable Tray G.
-
-\newpage
-
-Cables in various types (power and control), and configurations (horizontal, vertical, in trays or free-hanging), were installed in
-the test compartment. For each of the four cable targets considered, measurements of the radiative and total heat flux were made with
-gauges positioned near the cables themselves.  The following pages display comparisons of these heat flux predictions and measurements for Control Cable B, Horizontal Cable Tray D, Power Cable F and Vertical Cable Tray G.
+Cables of various types (power and control), and configurations (horizontal, vertical, in trays or free-hanging), were installed in the test compartment. For each of the four cable targets considered, measurements of the radiative and total heat flux were made with gauges positioned near the cables themselves.  The following pages display comparisons of these heat flux predictions and measurements for Control Cable B, Horizontal Cable Tray D, Power Cable F and Vertical Cable Tray G.
 
 \newpage
 

@@ -75,15 +75,15 @@ TYPE DEVICE_TYPE
                OVEC(3),DFVEC(3),CELL_L=-1._EB,RMS_VALUE=0._EB,RMS_VALUE2=0._EB,&
                COV_VALUE=0._EB,AVERAGE_VALUE=0._EB,AVERAGE_VALUE2=0._EB,&
                PDPA_NUMER=0._EB,PDPA_DENUM=0._EB,Z_INT,TMP_UP,TMP_LOW,TIME_PERIOD=-1._EB, &
-               VALUE_1_PREVIOUS=0._EB,VALUE_2_PREVIOUS=0._EB,VALUE_3_PREVIOUS=0._EB
+               VALUE_1_PREVIOUS=0._EB,VALUE_2_PREVIOUS=0._EB,VALUE_3_PREVIOUS=0._EB,DL
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: TIME_ARRAY,TIME_MAX_VALUE,TIME_MIN_VALUE
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: YY_SOOT
    REAL(EB), POINTER, DIMENSION(:) :: T_E,Y_E
    INTEGER  :: N_SUBDEVICES=0,IOR,IOR_ASSUMED=0,WALL_INDEX=-1,ORDINAL,MESH,&
                I_DEPTH,N_T_E,PROP_INDEX,ORIENTATION_INDEX=0,TRIP_DIRECTION,CTRL_INDEX=-1,N_INPUTS,SURF_INDEX=-1,&
                Z_INDEX=-999,Y_INDEX=-999,MATL_INDEX=-999,PART_CLASS_INDEX=0,REAC_INDEX=0,VELO_INDEX=0,&
-               NO_UPDATE_DEVC_INDEX=-1,NO_UPDATE_CTRL_INDEX=-1,CFACE_INDEX=-1,FED_ACTIVITY=2,&
-               DUCT_INDEX=-1,NODE_INDEX(2)=-1,POINT=1,LINE=0,LINE_COORD_CODE=123,PIPE_INDEX=1,LP_TAG=0,ORIENTATION_NUMBER=0,&
+               NO_UPDATE_DEVC_INDEX=-1,NO_UPDATE_CTRL_INDEX=-1,CFACE_INDEX=-1,FED_ACTIVITY=2,DUCT_INDEX=-1,NODE_INDEX(2)=-1,&
+               N_POINTS=1,POINT=1,LINE=0,LINE_COORD_CODE=123,PIPE_INDEX=1,LP_TAG=0,ORIENTATION_NUMBER=0,&
                DUCT_CELL_INDEX=-1,LOWEST_MESH=0,N_INTERVALS=-1,N_QUANTITY=1
    INTEGER, ALLOCATABLE, DIMENSION(:) :: DEVC_INDEX,SUBDEVICE_INDEX,QUANTITY_INDEX,I,J,K
    CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: QUANTITY
@@ -135,7 +135,8 @@ IMPLICIT NONE (TYPE,EXTERNAL)
 !> Parameter defining the type of control function for CONTROL\%CONTROL_INDEX
 INTEGER, PARAMETER :: AND_GATE=1, OR_GATE=2, XOR_GATE=3, X_OF_N_GATE=4, TIME_DELAY=5, DEADBAND=6, CYCLING=7, &
                       CUSTOM=8,KILL=9,CORE_DUMP=10,CF_SUM=11,CF_SUBTRACT=12,CF_MULTIPLY=13,CF_DIVIDE=14,CF_POWER=15,CF_PID=16,&
-                      CF_EXP=17,CF_LOG=18,CF_SIN=19,CF_COS=20,CF_ASIN=21,CF_ACOS=22,CF_MIN=23,CF_MAX=24, CF_ABS=25
+                      CF_EXP=17,CF_LOG=18,CF_SIN=19,CF_COS=20,CF_ASIN=21,CF_ACOS=22,CF_MIN=23,CF_MAX=24, CF_ABS=25, &
+                      CF_PERCENTILE=26
 !> !\}
 !> !\{
 !> Parameter used to define the type of input for CONTROL\%INPUT_TYPE
@@ -177,9 +178,13 @@ TYPE CONTROL_TYPE
    REAL(EB) :: PROPORTIONAL_GAIN !<Proportional gain for a PID control function
    REAL(EB) :: INTEGRAL_GAIN !<Intregal gain for a PID control function
    REAL(EB) :: DIFFERENTIAL_GAIN !<Differential gain for a PID control function
+   REAL(EB) :: PERCENTILE        !< Percentile value for PERCENTILE function
    REAL(EB) :: PREVIOUS_VALUE=-9.E30_EB !<Prior timestep value used in computing the time derivative term for a PID control function
    REAL(EB) :: INTEGRAL=0._EB !<Current value of the time integral term for a PID control function
    REAL(EB) :: TARGET_VALUE = -9.E30_EB !<Desired target used to compute error value for input to a PID control function
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: PSUM  ! Array used in PERCENTILE calculation to sum point device values
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: LSUM  ! Array used in PERCENTILE calculation to indicate length along a linear array
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: DL    ! Array used in PERCENTILE calculation to indicate length segment
    CHARACTER(LABEL_LENGTH) :: ID='null' !<Name of control function
    CHARACTER(LABEL_LENGTH) :: RAMP_ID='null' !<Name of RAMP used for a CUSTOM control function
    CHARACTER(LABEL_LENGTH) :: INPUT_ID(40)='null' !<Array of DEVC\%ID or CTRL\%ID

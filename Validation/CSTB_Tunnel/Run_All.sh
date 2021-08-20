@@ -5,7 +5,7 @@
 export SVNROOT=`pwd`/../..
 source $SVNROOT/Validation/Common_Run_All.sh
 
-$QFDS -p 12 -n 6 $DEBUG $QUEUE -d $INDIR CSTB_Tunnel_Test_2.fds
-$QFDS -p 12 -n 6 $DEBUG $QUEUE -d $INDIR CSTB_Tunnel_Test_27.fds
+$QFDS -p 12 $DEBUG $QUEUE -d $INDIR CSTB_Tunnel_Test_2.fds
+$QFDS -p 12 $DEBUG $QUEUE -d $INDIR CSTB_Tunnel_Test_27.fds
 
 echo FDS cases submitted

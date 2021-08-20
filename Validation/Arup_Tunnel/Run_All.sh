@@ -5,6 +5,6 @@
 export SVNROOT=`pwd`/../..
 source $SVNROOT/Validation/Common_Run_All.sh
 
-$QFDS $DEBUG $QUEUE -p 5 -n 5 -d $INDIR Arup_Tunnel.fds
+$QFDS $DEBUG $QUEUE -p 5 -d $INDIR Arup_Tunnel.fds
 
 echo FDS cases submitted

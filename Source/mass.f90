@@ -25,14 +25,13 @@ USE GLOBAL_CONSTANTS, ONLY: N_TOTAL_SCALARS,PREDICTOR,DO_EVACUATION,SOLID_PHASE_
 USE MATH_FUNCTIONS, ONLY: SCALAR_FACE_VALUE
 
 INTEGER, INTENT(IN) :: NM
-REAL(EB) :: TNOW,ZZZ(1:4),GRAD_ZZ_FUEL(3),GRAD_ZZ_AIR(3),GZF_DOT_GZA
+REAL(EB) :: TNOW,ZZZ(1:4)
 REAL(EB), PARAMETER :: DUMMY=0._EB
 INTEGER  :: I,J,K,N,IOR,IW,IIG,JJG,KKG,II,JJ,KK
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP=>NULL()
 REAL(EB), POINTER, DIMENSION(:,:,:) :: RHO_Z_P=>NULL()
 LOGICAL :: THIN_OBSTRUCTION
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
-TYPE(REACTION_TYPE), POINTER :: R1=>NULL()
 
 IF (DO_EVACUATION .OR. SOLID_PHASE_ONLY) RETURN
 
@@ -166,11 +165,7 @@ SPECIES_LOOP: DO N=1,N_TOTAL_SCALARS
                ! ///   II   ///  II+1  |  II+2  | ...
                !                       ^ WALL_INDEX(II+1,+1)
                IF ((UU(II+1,JJ,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II+1,JJ,KK),+1)>0)) THEN
-                  IF (OW_ADVFLX_USE_WALL) THEN
-                     ZZZ(1:4) = (/WC%ONE_D%RHO_F*WC%ONE_D%ZZ_F(N),RHO_Z_P(II+1:II+2,JJ,KK),DUMMY/)
-                  ELSE
-                     ZZZ(1:4) = (/RHO_Z_P(II+1,JJ,KK),RHO_Z_P(II+1:II+2,JJ,KK),DUMMY/)
-                  ENDIF
+                  ZZZ(1:4) = (/RHO_Z_P(II+1,JJ,KK),RHO_Z_P(II+1:II+2,JJ,KK),DUMMY/)
                   FX(II+1,JJ,KK,N) = SCALAR_FACE_VALUE(UU(II+1,JJ,KK),ZZZ,I_FLUX_LIMITER)
                ENDIF
             CASE(-1) OFF_WALL_SELECT_2
@@ -178,47 +173,27 @@ SPECIES_LOOP: DO N=1,N_TOTAL_SCALARS
                ! ... |  II-2  |  II-1  ///   II   ///
                !              ^ WALL_INDEX(II-1,-1)
                IF ((UU(II-2,JJ,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II-1,JJ,KK),-1)>0)) THEN
-                  IF (OW_ADVFLX_USE_WALL) THEN
-                     ZZZ(1:4) = (/DUMMY,RHO_Z_P(II-2:II-1,JJ,KK),WC%ONE_D%RHO_F*WC%ONE_D%ZZ_F(N)/)
-                  ELSE
-                     ZZZ(1:4) = (/DUMMY,RHO_Z_P(II-2:II-1,JJ,KK),RHO_Z_P(II-1,JJ,KK)/)
-                  ENDIF
+                  ZZZ(1:4) = (/DUMMY,RHO_Z_P(II-2:II-1,JJ,KK),RHO_Z_P(II-1,JJ,KK)/)
                   FX(II-2,JJ,KK,N) = SCALAR_FACE_VALUE(UU(II-2,JJ,KK),ZZZ,I_FLUX_LIMITER)
                ENDIF
             CASE( 2) OFF_WALL_SELECT_2
                IF ((VV(II,JJ+1,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ+1,KK),+2)>0)) THEN
-                  IF (OW_ADVFLX_USE_WALL) THEN
-                     ZZZ(1:4) = (/WC%ONE_D%RHO_F*WC%ONE_D%ZZ_F(N),RHO_Z_P(II,JJ+1:JJ+2,KK),DUMMY/)
-                  ELSE
-                     ZZZ(1:4) = (/RHO_Z_P(II,JJ+1,KK),RHO_Z_P(II,JJ+1:JJ+2,KK),DUMMY/)
-                  ENDIF
+                  ZZZ(1:4) = (/RHO_Z_P(II,JJ+1,KK),RHO_Z_P(II,JJ+1:JJ+2,KK),DUMMY/)
                   FY(II,JJ+1,KK,N) = SCALAR_FACE_VALUE(VV(II,JJ+1,KK),ZZZ,I_FLUX_LIMITER)
                ENDIF
             CASE(-2) OFF_WALL_SELECT_2
                IF ((VV(II,JJ-2,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ-1,KK),-2)>0)) THEN
-                  IF (OW_ADVFLX_USE_WALL) THEN
-                     ZZZ(1:4) = (/DUMMY,RHO_Z_P(II,JJ-2:JJ-1,KK),WC%ONE_D%RHO_F*WC%ONE_D%ZZ_F(N)/)
-                  ELSE
-                     ZZZ(1:4) = (/DUMMY,RHO_Z_P(II,JJ-2:JJ-1,KK),RHO_Z_P(II,JJ-1,KK)/)
-                  ENDIF
+                  ZZZ(1:4) = (/DUMMY,RHO_Z_P(II,JJ-2:JJ-1,KK),RHO_Z_P(II,JJ-1,KK)/)
                   FY(II,JJ-2,KK,N) = SCALAR_FACE_VALUE(VV(II,JJ-2,KK),ZZZ,I_FLUX_LIMITER)
                ENDIF
             CASE( 3) OFF_WALL_SELECT_2
                IF ((WW(II,JJ,KK+1)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK+1),+3)>0)) THEN
-                  IF (OW_ADVFLX_USE_WALL) THEN
-                     ZZZ(1:4) = (/WC%ONE_D%RHO_F*WC%ONE_D%ZZ_F(N),RHO_Z_P(II,JJ,KK+1:KK+2),DUMMY/)
-                  ELSE
-                     ZZZ(1:4) = (/RHO_Z_P(II,JJ,KK+1),RHO_Z_P(II,JJ,KK+1:KK+2),DUMMY/)
-                  ENDIF
+                  ZZZ(1:4) = (/RHO_Z_P(II,JJ,KK+1),RHO_Z_P(II,JJ,KK+1:KK+2),DUMMY/)
                   FZ(II,JJ,KK+1,N) = SCALAR_FACE_VALUE(WW(II,JJ,KK+1),ZZZ,I_FLUX_LIMITER)
                ENDIF
             CASE(-3) OFF_WALL_SELECT_2
                IF ((WW(II,JJ,KK-2)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK-1),-3)>0)) THEN
-                  IF (OW_ADVFLX_USE_WALL) THEN
-                     ZZZ(1:4) = (/DUMMY,RHO_Z_P(II,JJ,KK-2:KK-1),WC%ONE_D%RHO_F*WC%ONE_D%ZZ_F(N)/)
-                  ELSE
-                     ZZZ(1:4) = (/DUMMY,RHO_Z_P(II,JJ,KK-2:KK-1),RHO_Z_P(II,JJ,KK-1)/)
-                  ENDIF
+                  ZZZ(1:4) = (/DUMMY,RHO_Z_P(II,JJ,KK-2:KK-1),RHO_Z_P(II,JJ,KK-1)/)
                   FZ(II,JJ,KK-2,N) = SCALAR_FACE_VALUE(WW(II,JJ,KK-2),ZZZ,I_FLUX_LIMITER)
                ENDIF
          END SELECT OFF_WALL_SELECT_2
@@ -228,35 +203,6 @@ SPECIES_LOOP: DO N=1,N_TOTAL_SCALARS
    ENDDO WALL_LOOP_2
 
 ENDDO SPECIES_LOOP
-
-! Flame index model (under construction)
-
-IF (FLAME_INDEX_MODEL .AND. PREDICTOR) THEN
-   FLAME_INDEX = -1._EB
-   R1=>REACTION(1)
-   !$OMP DO SCHEDULE(STATIC)
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            GRAD_ZZ_FUEL(1) = FX(I,J,K,R1%FUEL_SMIX_INDEX) - FX(I-1,J,K,R1%FUEL_SMIX_INDEX)
-            GRAD_ZZ_FUEL(2) = FY(I,J,K,R1%FUEL_SMIX_INDEX) - FY(I,J-1,K,R1%FUEL_SMIX_INDEX)
-            GRAD_ZZ_FUEL(3) = FZ(I,J,K,R1%FUEL_SMIX_INDEX) - FZ(I,J,K-1,R1%FUEL_SMIX_INDEX)
-
-            GRAD_ZZ_AIR(1) = FX(I,J,K,R1%AIR_SMIX_INDEX) - FX(I-1,J,K,R1%AIR_SMIX_INDEX)
-            GRAD_ZZ_AIR(2) = FY(I,J,K,R1%AIR_SMIX_INDEX) - FY(I,J-1,K,R1%AIR_SMIX_INDEX)
-            GRAD_ZZ_AIR(3) = FZ(I,J,K,R1%AIR_SMIX_INDEX) - FZ(I,J,K-1,R1%AIR_SMIX_INDEX)
-
-            GZF_DOT_GZA = DOT_PRODUCT(GRAD_ZZ_FUEL,GRAD_ZZ_AIR)
-            IF (ABS(GZF_DOT_GZA)>TWO_EPSILON_EB) THEN
-               FLAME_INDEX(I,J,K) = MIN(1._EB,MAX(-1._EB,GZF_DOT_GZA/ABS(GZF_DOT_GZA)))
-            ELSE
-               FLAME_INDEX(I,J,K) = 0._EB
-            ENDIF
-         ENDDO
-      ENDDO
-   ENDDO
-   !$OMP END DO NOWAIT
-ENDIF
 
 T_USED(3)=T_USED(3)+CURRENT_TIME()-TNOW
 

@@ -196,7 +196,9 @@ Centre of Finland, which is fully embedded in Fire Dynamics Simulator
 (FDS).  This manual applies to the FDS+Evac version 2.6.0, which is
 embedded in the current FDS version (\gitrevision).
 
-% The most up to date version of this manual can be obtained from the FDS+Evac web page at \texttt{http://www.vtt.fi/}\linebreak[4]\texttt{fdsevac/}.
+% The most up to date version of this manual can be obtained from the
+% FDS+Evac web page at
+% \texttt{http://www.vtt.fi/}\linebreak[4]\texttt{fdsevac/}.
 
 This FDS+Evac Technical Reference and User's Guide does not contain
 information on how to operate FDS nor Smokeview, the companion
@@ -318,7 +320,7 @@ single thread (process).
 
 
 The evacuation module, FDS+Evac, is embedded in the latest released
-version of FDS (FDS 6.5.3), which can be obtained from the URL
+version of FDS (FDS 6.7.6), which can be obtained from the URL
 \begin{verbatim}
 https://pages.nist.gov/fds-smv/
 \end{verbatim}
@@ -331,16 +333,41 @@ FDS+Evac simulations can be visualized using the Smokeview programme
 similarly as the fire results.
 
 
-The home page of FDS+Evac is 
-\begin{verbatim}
-http://www.vtt.fi/fdsevac/
-\end{verbatim}
-This page contains the most recent version of this combined Technical
-Reference and User's Guide of FDS+Evac and some examples on the use of
-FDS+Evac.  This web site is also used to store the validation and
-verification test cases including the input files.  This (printed)
-manual refers to FDS 6.6.0 + Evac 2.5.2 (GIT FDS6.6.0-986-g47260e6).
 
+The text-only copy of the obsolete home page of FDS+Evac is 
+\begin{verbatim}
+http://virtual.vtt.fi/virtual/proj6/fdsevac/documents/FDS+Evac_textbased_homepage.txt
+\end{verbatim}
+This page contains information related to the FDS version 6.6.0, Evac
+2.5.2, including an earlier copy of this combined Technical Reference
+and User's Guide of FDS+Evac and some examples on the use of FDS+Evac.
+This web site is also used to store the validation and verification
+test cases including the input files.  Most of the things of the
+obsolete versiona aply also to the most resent version of FDS+Evac,
+but the user input has been changed a little bit so that the old input
+files do not work anymore.  Some small changes on the \Timtt{MISC}
+namelist should be done.
+
+This most upto date (printed) manual refers to FDS 6.7.6 + Evac 2.6.0
+(GIT FDS6.7.6-336-gf2e836c15).  The LaTeX file of this manual
+including the figures can be found at GitHub:
+\begin{verbatim}
+https://github.com/firemodels/fds/tree/master/Manuals/FDS_Evacuation_Guide
+\end{verbatim}
+The various input file (examples, V\&V files) can be found at:
+\begin{verbatim}
+https://github.com/tkorhon1/FDS-Evac-Guide/tree/master/InputFiles
+\end{verbatim}
+The most upto date Readme file can be found at:
+\begin{verbatim}
+https://github.com/tkorhon1/FDS-Evac-Guide/tree/master/Manual/Readme.txt
+\end{verbatim}
+The most upto date Readme\_InputErrors file can be found at:
+\begin{verbatim}
+http://virtual.vtt.fi/virtual/proj6/fdsevac/documents/Readme_InputErrors.txt
+\end{verbatim}
+Note, that this file is refering to FDS 6.6.0 version, but it should
+more or less apply to the present version also.
 
 \section{Features of Limited Functionality}\label{Sec_SpecFeatures}
 
@@ -515,7 +542,8 @@ capability in the code to read the ``old'' evacuation input style.
 
 \subsection{Most recent changes, version 2.6.0 vs 2.5.2}
 \label{Sec_260vs252}
-\noindent A new fire+evacuation strategy are implemented where fire and evacuation meshes are separated.
+\noindent A new fire+evacuation strategy are implemented where fire
+and evacuation meshes are separated.
  
 
 \subsection{Most recent changes, version 2.5.2 vs 2.5.0}
@@ -527,7 +555,14 @@ much from the version 2.5.0.  Just some bugs are corrected.
 \subsection{Most recent changes, version 2.5.0 vs 2.4.1}
 \label{Sec_250vs241} 
 
-\noindent The version 2.5.0 of the evacuation module does not differ much from the version 2.4.1.  Just some bugs are corrected and some old user input are disabled.  This version does not support anymore FDS 5 style evacuation inputs, and \Timtt{EVAC\_FDS6=.FALSE.} is not supported anymore.  Now just the main evacuation meshes are defined by the user and no ``outflow'' vents are defined.  The \Timtt{STRS} namelist for the staircases is more automatic, it defines its own mesh(es) automatically.
+\noindent The version 2.5.0 of the evacuation module does not differ
+much from the version 2.4.1.  Just some bugs are corrected and some
+old user input are disabled.  This version does not support anymore
+FDS 5 style evacuation inputs, and \Timtt{EVAC\_FDS6=.FALSE.} is not
+supported anymore.  Now just the main evacuation meshes are defined by
+the user and no ``outflow'' vents are defined.  The \Timtt{STRS}
+namelist for the staircases is more automatic, it defines its own
+mesh(es) automatically.
 
 The main evacuation meshes can have many separated (sealed) evacuation
 zones, older versions had the constraint that the (main) evacuation
@@ -710,14 +745,19 @@ on the web page {\tt http://www.vtt.fi/fdsevac/}.
 
 \section{Type of the Model}
 
-\noindent FDS+Evac is a fire simulation tool combined with an evacuation module.  
-The fire simulation is based on a well-established Computational Fluid Dynamics 
-(CFD) model of fire-driven fluid flow, and the evacuation simulation is based on multi=agent modelling of pedestrian crowd.  The fire and evacuation components are interacting in several aspects, while each component can also be run independently.  In other words, FDS+Evac can also be used just to calculate the egress problem without any fire-driven fluid flow calculation, \emph{e.g.}, it can be used to
-simulate fire drills.  FDS+Evac models the egress of the agents using
-continuous space and time, but the building geometry is fitted to the
-underlying rectilinear mesh.  FDS+Evac uses simple rules and
-artificial intelligence to model the exit selection processes of the
-evacuees.
+\noindent FDS+Evac is a fire simulation tool combined with an
+evacuation module.  The fire simulation is based on a well-established
+Computational Fluid Dynamics (CFD) model of fire-driven fluid flow,
+and the evacuation simulation is based on multi=agent modelling of
+pedestrian crowd.  The fire and evacuation components are interacting
+in several aspects, while each component can also be run
+independently.  In other words, FDS+Evac can also be used just to
+calculate the egress problem without any fire-driven fluid flow
+calculation, \emph{e.g.}, it can be used to simulate fire drills.
+FDS+Evac models the egress of the agents using continuous space and
+time, but the building geometry is fitted to the underlying
+rectilinear mesh.  FDS+Evac uses simple rules and artificial
+intelligence to model the exit selection processes of the evacuees.
 
 
 \section{Model Developers}
@@ -848,7 +888,7 @@ modelled; only its hyperventilation factor is included.
 \textbf{Exit Route Selection:} The exit door selection algorithm is
 still a relatively simple one.  Users specify the agent type and
 initialize how agents are familiar with each door and exit (i.e.,
-KNOWN_DOOR_PROB), and the algorithm will assign the proper door and
+KNOWN\_DOOR\_PROB), and the algorithm will assign the proper door and
 exit for each agent.  The target door and exit are dynamically changed
 in egress simulation while the smoke condition in fire simulation is also
 taken into account.  This feature can be listed as a benefit of the model,
@@ -856,7 +896,7 @@ but the requirements for user's responsibility and expertise should be
 recognised.  The present version of the programme includes some new models 
 to characterize herding and following type behaviours of agents.  Users 
 can partly control the model and algorithm by usng parameters in PERS namelist 
-(i.e., I_HERDING_TYPE, AGENT_TYPE), but these new models of social type 
+(i.e., I\_HERDING\_TYPE, AGENT\_TYPE), but these new models of social type 
 behaviours are not yet validated.
 
 
@@ -1718,10 +1758,16 @@ out.  Just one person was enough to trigger the use of an emergency
 exit.
 
 
-Many prescriptive fire codes implicitly assume that the total exit 
-capacities of buildings are evenly used in egress.  Herding behavior, 
-as well as people's tendency to favor the familiar routes, may easily lead to
-outcomes against these assumptions, and thus a common scenario is that some exits are overcrowded while others are underused.  In order to exhibit these kinds of phenomena the exit selection algorithm of FDS+Evac was modified and three new agent types were introduced.  So now there are four types of agents: conservative type, active type, herding type and follower type.  The conservative type is the original agent type used in the early version of FDS+Evac.  
+Many prescriptive fire codes implicitly assume that the total exit
+capacities of buildings are evenly used in egress.  Herding behavior,
+as well as people's tendency to favor the familiar routes, may easily
+lead to outcomes against these assumptions, and thus a common scenario
+is that some exits are overcrowded while others are underused.  In
+order to exhibit these kinds of phenomena the exit selection algorithm
+of FDS+Evac was modified and three new agent types were introduced.
+So now there are four types of agents: conservative type, active type,
+herding type and follower type.  The conservative type is the original
+agent type used in the early version of FDS+Evac.
 
 
 The exit selection algorithm of FDS+Evac is based on a game theoretic
@@ -1758,7 +1804,19 @@ selected their target exits using this algorithm.  This original agent
 type of FDS+Evac is the conservative agent type.
 
 
-The first new type of agents are active agents. Different from conservative agents, active agents use a new preference order to select exits.  Active agents regard all visible exits also to be in the same preference group as familiar exits. The second new type of agents are herding agents.  Herding agents only use the familiar exits given by users. If no familiar exit is given at the current floor, herding agents look several of their nearest neighbors and try to follow them. The third new type of agents are follower agents. Follower agents look several of their nearest neighbors in front of them and check if the neighbors' exit choices are better than their own choices, i.e., the follower agent treats its neighbors’ target exit doors as familiar doors, and uses the best door among all the choices. 
+The first new type of agents are active agents. Different from
+conservative agents, active agents use a new preference order to
+select exits.  Active agents regard all visible exits also to be in
+the same preference group as familiar exits. The second new type of
+agents are herding agents.  Herding agents only use the familiar exits
+given by users. If no familiar exit is given at the current floor,
+herding agents look several of their nearest neighbors and try to
+follow them. The third new type of agents are follower
+agents. Follower agents look several of their nearest neighbors in
+front of them and check if the neighbors' exit choices are better than
+their own choices, i.e., the follower agent treats its neighbors'
+target exit doors as familiar doors, and uses the best door among all
+the choices.
 
 
 The familiarity of each exit for each agent can be determined by the
@@ -2088,11 +2146,11 @@ otherwise stated.  In many cases the simulation runs were also done
 using a value of $\lambda_i=0.5$ for the anisotropy parameter of the
 social force instead of the default value of $\lambda_i=0.3$, see
 Eq.~(\ref{Eq_socialforce}).  An archive of the verification tests of
-FDS+Evac are at the FDS+Evac web
-pages\footnote{http://www.vtt.fi/fdsevac/}.  This manual contains only
-a short summary of these test and it might not be up to date, so more
-interested reader should visit the web pages to get the most recent
-information.
+FDS+Evac are at the FDS+Evac GitHub
+pages\footnote{https://github.com/tkorhon1/FDS-Evac-Guide/tree/master/InputFiles}.
+This manual contains only a short summary of these test and it might
+not be up to date, so more interested reader should visit the web
+pages to get the most recent information.
 
 
 Note, that most of the results reported below are just based on one
@@ -2266,7 +2324,7 @@ see ``by own eyes'' that the programme is working as it should.
 %
 \begin{figure}[!tb]
   \centerline{\includegraphics[clip=true,
-  width=100mm]{FIGURES/Test_Fds660Evac252_FED}} 
+  width=100mm]{FIGURES/Test_Fds676Evac260_FED}} 
   \caption{A FED test.}\label{Fig_FED_Test}
 \end{figure}
 %
@@ -2292,7 +2350,7 @@ see ``by own eyes'' that the programme is working as it should.
 %
 \begin{figure}[!tb]
   \centerline{\includegraphics[clip=true,
-  width=100mm]{FIGURES/Fds660Evac252_Smoke_vs_Speed}}   
+  width=100mm]{FIGURES/Fds676Evac260_Smoke_vs_Speed}}   
   \caption{A smoke vs speed test.}\label{Fig_SmokeSpeedTest}
 \end{figure}
 %
@@ -2306,7 +2364,7 @@ in a comprehensible manner the complete range of model capabilities
 and inherent assumptions and give a guide to the correct use of the
 capabilities.  It is left to the reader to decide if this manual, the
 FDS+Evac web pages, and the open source code of the programme hosted
-by Google Code\footnote{http://code.google.com/p/fds-smv/} satisfy
+by GitHub\footnote{https://github.com/firemodels/fds} satisfy
 this criterion.
 
 
@@ -2493,10 +2551,11 @@ methods are examined and reported.  The tests presented here were done
 in a ``fire drill'' mode, \emph{i.e.}, the egress processes were
 simulated without any fire calculation.  Note that many of these
 sensitivity studies are done using program version: FDS 6.0.0, Evac
-2.4.1.  These results should also apply to the current version (FDS
-6.5.3, Evac 2.5.2), because the basic movement algorithm has not been
-changed and the (default) parameters of the movement models are the
-same.
+2.4.1.  The some of the door and corridor flow studies are done using
+FDS 6.5.2, Evac 2.5.2 version.  These old results should also apply to
+the current version (FDS 6.7.6, Evac 2.6.0), because the basic
+movement algorithm has not been changed and the (default) parameters
+of the movement models are the same.
 
 
 \section{Numerical Mesh Sensitivity}\label{Sec_GridSensi}
@@ -2887,9 +2946,9 @@ to the predictions of some other evacuation models.
 \noindent This chapter lists three test cases, where the FDS+Evac
 predictions are compared to experimental data on human flows on
 horizontal paths and stairs.  Most of the calculations were done using
-FDS version 6.5.3 (Evac version 2.5.2).  The specific flows through
+FDS version 6.7.6 (Evac version 2.5.2).  The specific flows through
 doors and corridors were done using FDS version 6.5.2 (Evac version
-2.5.2). These should be valid for the version 6.5.3, because the
+2.5.2). These should be valid for the version 6.7.6, because the
 evacuation calculation should be the same (except some minor bug fixes
 etc.) and these test cases are done in ``fire drill mode'', i.e., no
 fire meshes are defined.
@@ -3007,8 +3066,8 @@ A speed reduction factor $\gtrsim$0.5 seems to produce more or less
 quite constant flow at the exit door, \emph{i.e.}, at these speed
 reduction values the stairs are feeding the front door fast enough.
 For the case with $\lambda_i$=0.3 the specific flow in FDS+Evac
-simulations is about 1.16~p/s/m and for the case with $\lambda_i$=0.5
-the flow is about 1.30~p/s/m at the final exit door (speed factor
+simulations is about 1.21~p/s/m and for the case with $\lambda_i$=0.5
+the flow is about 1.28~p/s/m at the final exit door (speed factor
 0.75).  The observed flow rate at the final exit door (width 1.07~m)
 was 1.35 p/s in the experiment.
 % Numbers are for fds6.5.3Evac2.5.2
@@ -3036,8 +3095,8 @@ $\gtrsim$0.7 seems to give a good agreement with the observations.
 Note that there exists some queuing at the final exit door opening to
 the street in the experiment and this is also seen in the simulation
 results, when the speed reduction parameter is not too low.  For the
-case with $\lambda_i$=0.3 the specific flow is about 1.17~p/s/m and
-for the case with $\lambda_i$=0.5 the flow is about 1.30~p/s/m at the
+case with $\lambda_i$=0.3 the specific flow is about 1.22~p/s/m and
+for the case with $\lambda_i$=0.5 the flow is about 1.27~p/s/m at the
 final exit door (speed factor 0.75).  Similar flows were also obtained
 when using the simple staircase model (type 1).  When a speed
 reduction factor $\gtrsim$0.7 is used seems to produce more or less
@@ -3057,8 +3116,8 @@ $\gtrsim$0.6 seems to give a good agreement with the observations.
 Note that there exists some queuing at the final exit door opening to
 the street in the experiment and this is also seen in the simulation
 results, when the speed reduction parameter is not too low.  For the
-case with $\lambda_i$=0.3 the specific flow is about 1.18~p/s/m and
-for the case with $\lambda_i$=0.5 the flow is about 1.40~p/s/m at the
+case with $\lambda_i$=0.3 the specific flow is about 1.19~p/s/m and
+for the case with $\lambda_i$=0.5 the flow is about 1.39~p/s/m at the
 final exit door (speed factor 0.75).  Similar flows were also obtained
 when using the other staircase models.  When a speed reduction factor
 $\gtrsim$0.6 is used seems to produce more or less quite constant flow
@@ -3153,7 +3212,7 @@ models using four different geometries.  The FDS+Evac results and
 corresponding input files are on the FDS+Evac web pages and some of
 these cases are also discussed in the summary report of the FDS+Evac
 development project~\cite{Hostikka07a}.  These calculations were done
-using FDS+Evac version 2.5.2.
+using FDS+Evac version 2.6.0.
 %
 
 
@@ -3203,7 +3262,7 @@ using FDS+Evac version 2.5.2.
   %
   \begin{figure}[!tb]
     \centerline{\includegraphics[clip=true,
-      width=100mm]{FIGURES/SportHall_Results_FDS660_Evac252}}
+      width=100mm]{FIGURES/SportHall_Results_FDS676_Evac260}}
     \caption{The comparison of FDS+Evac to Simulex in a sport hall
       case.  The average of five different simulations are shown for
       each case.}\label{Fig_SportResults}
@@ -3245,7 +3304,7 @@ using FDS+Evac version 2.5.2.
 %
 \begin{figure}[!b]
   \centerline{\includegraphics[clip=true,
-  width=100mm]{FIGURES/Office_Results_FDS660_Evac252}} 
+  width=100mm]{FIGURES/Office_Results_FDS676_Evac260}} 
   \caption{The comparison of FDS+Evac to Simulex in an open floor
     office case.}\label{Fig_OpenFloorResults} 
 \end{figure}
@@ -3318,8 +3377,8 @@ using FDS+Evac version 2.5.2.
   and standard input.  (An advanced user of these codes might be able
   to get different results by using some additional features.)  The
   results of FDS+Evac model look more realistic.  The calculated
-  specific flows (1/p/m) are: Simulex 0.47, Exodus 0.69, FDS+Evac 1.23
-  ($\lambda_i=0.3$), and 1.57 ($\lambda_i=0.5$).
+  specific flows (1/p/m) are: Simulex 0.47, Exodus 0.69, FDS+Evac 1.24
+  ($\lambda_i=0.3$), and 1.58 ($\lambda_i=0.5$).
   % Numbers are for fds6.5.3Evac2.5.2
   
   In Figure~\ref{Fig_AssemblyResults} also shown are the results of
@@ -3328,13 +3387,13 @@ using FDS+Evac version 2.5.2.
   wall of the room.  In this case, the agreement between the different
   evacuation programmes is much better.  The calculated specific flows
   (1/p/m) are: Simulex 1.59, Exodus 1.95, FDS+Evac 1.62
-  ($\lambda_i=0.3$), and 2.01 ($\lambda_i=0.5$).
+  ($\lambda_i=0.3$), and 2.02 ($\lambda_i=0.5$).
   % Numbers are for fds6.5.3Evac2.5.2
 
 %
 \begin{figure}[!tb]
   \centerline{\includegraphics[clip=true,
-  width=100mm]{FIGURES/AssSpace_Results_FDS660_Evac252}} 
+  width=100mm]{FIGURES/AssSpace_Results_FDS676_Evac260}} 
   \caption{The comparison of FDS+Evac to buildingExodus
     and Simulex in an assembly space.}\label{Fig_AssemblyResults}
 \end{figure}
@@ -3435,24 +3494,61 @@ common prefix.
 
 
 In Chapter~\ref{Sec_SampleFile}, two example input files will be presented. 
-% Several other example files exist at the FDS+Evac web site \verb+http://www.vtt.fi/fdsevac+.  
-It is suggested that a new user starts with an existing input file, runs it as is, and then makes the appropriate changes to the input file for the desired scenario.  By running a sample case, the user will become familiar with the procedure, learn how to examine the results, and ensure that her/his computer is up to the task before embarking on learning how to create new input files.
+% Several other example files exist at the FDS+Evac web site
+% \verb+http://www.vtt.fi/fdsevac+.
+It is suggested that a new user starts with an existing input file,
+runs it as is, and then makes the appropriate changes to the input
+file for the desired scenario.  By running a sample case, the user
+will become familiar with the procedure, learn how to examine the
+results, and ensure that her/his computer is up to the task before
+embarking on learning how to create new input files.
 
-If the user wants to do a combined fire and evacuation simulation, she/he should first learn how to do fire simulations using FDS. If the user is not experienced on doing FDS fire simulations, it is suggested that the user uses FDS+Evac just to simulate ``fire drills'', \emph{i.e.}, simulate only the egress part of the problem. Even in this case the user should read carefully the User's Guide of FDS~\cite{FDS_UserGuide}, because the evacuation simulation geometry is constructed similarly as the fire simulation geometry.  The evacuation geometry is constructed using two-dimensional horizontal cuts of the true three-dimensional (fire) geometry.  The evacuation geometry should contain the walls but not the floors or ceilings. One should keep this in mind when defining the $z$-coordinates of the evacuation meshes. The floor and ceiling should be outside of the $z$-range of the evacuation mesh in question.
+If the user wants to do a combined fire and evacuation simulation,
+she/he should first learn how to do fire simulations using FDS. If the
+user is not experienced on doing FDS fire simulations, it is suggested
+that the user uses FDS+Evac just to simulate ``fire drills'',
+\emph{i.e.}, simulate only the egress part of the problem. Even in
+this case the user should read carefully the User's Guide of
+FDS~\cite{FDS_UserGuide}, because the evacuation simulation geometry
+is constructed similarly as the fire simulation geometry.  The
+evacuation geometry is constructed using two-dimensional horizontal
+cuts of the true three-dimensional (fire) geometry.  The evacuation
+geometry should contain the walls but not the floors or ceilings. One
+should keep this in mind when defining the $z$-coordinates of the
+evacuation meshes. The floor and ceiling should be outside of the
+$z$-range of the evacuation mesh in question.
 
 \section{Starting a FDS+Evac Calculation} 
 \label{Sec_StartingCalculation}
 
-\noindent A FDS+Evac simulation is run similarly as a FDS fire simulation, so read the User's Guide of FDS~\cite{FDS_UserGuide}, where you can find information on how to run the fire simulation and see the results by using Smokeview~\cite{SV_UserGuide}.
+\noindent A FDS+Evac simulation is run similarly as a FDS fire
+simulation, so read the User's Guide of FDS~\cite{FDS_UserGuide},
+where you can find information on how to run the fire simulation and
+see the results by using Smokeview~\cite{SV_UserGuide}.
 
 % Below is a short description how to run FDS+Evac on MS Windows.
 
-With version 2.6.0, a new fire+evacuation strategy are implemented. Fire and evacuation meshes are separated. The fire and evacuation simulation is divided into three phases:
+With version 2.6.0, a new fire+evacuation strategy are
+implemented. Fire and evacuation meshes are separated. The fire and
+evacuation simulation is divided into three phases:
 
 \begin{enumerate}
-\item With \Timts{EVACUATION\_INITIALIZATION = .TRUE.} at the \timts{MISC} namelist, an evacuation drill calculation according to the inputs will be started. The guiding flow fields (\Timts{CHID\_evac.eff}) for evacuation movement are written. The fire informations for evacuation calculations are written to \Timts{CHID\_evac.xyz}. 
-\item With \Timts{EVACUATION\_WRITE\_FED = .TRUE.} at the \timts{MISC} namelist, an ordinary fire calculation according to the inputs will be started. The fire informations stored in file \Timts{CHID\_evac.xyz} are read in and the file \Timts{CHID\_evac.fed} is written for phase 3, where the evacuation calculation uses fire data.
-\item With \Timts{EVACUATION\_MC\_MODE = .TRUE.}, an evacuation calculation with fire information will be started. The files \Timts{CHID\_evac.eff} and \Timts{CHID\_evac.fed} are read in. If \Timts{EVACUATION\_DRILL = .TRUE.}, no fire data is used. 
+\item With \Timts{EVACUATION\_INITIALIZATION = .TRUE.} at the
+  \Timts{MISC} namelist, an evacuation drill calculation according to
+  the inputs will be started. The guiding flow fields
+  (\Timts{CHID\_evac.eff}) for evacuation movement are written. The
+  fire informations for evacuation calculations are written to
+  \Timts{CHID\_evac.xyz}.
+\item With \Timts{EVACUATION\_WRITE\_FED = .TRUE.} at the \Timts{MISC}
+  namelist, an ordinary fire calculation according to the inputs will
+  be started. The fire informations stored in file
+  \Timts{CHID\_evac.xyz} are read in and the file
+  \Timts{CHID\_evac.fed} is written for phase 3, where the evacuation
+  calculation uses fire data.
+\item With \Timts{EVACUATION\_MC\_MODE = .TRUE.}, an evacuation
+  calculation with fire information will be started. The files
+  \Timts{CHID\_evac.eff} and \Timts{CHID\_evac.fed} are read in. If
+  \Timts{EVACUATION\_DRILL = .TRUE.}, no fire data is used.
 \end{enumerate}
 
 %Assuming that an input file called \Timtt{CHID.fds} exists in some
@@ -3510,57 +3606,187 @@ With version 2.6.0, a new fire+evacuation strategy are implemented. Fire and eva
 \section{Updating an Existing FDS Input File to a FDS+Evac Input File}
 \label{Sec_UpdatingInput} 
 
-\noindent Note that one can not do an evacuation calculation that utilizes fire information from a fire calculation, which did not have any evacuation meshes (and geometry) present.  The evacuation meshes are needed in the input file to guide the fire calculation to save evacuation related fire information to the hard drive.  So before starting a fire calculation one should make the evacuation geometry and check that it is correct. 
+\noindent Note that one can not do an evacuation calculation that
+utilizes fire information from a fire calculation, which did not have
+any evacuation meshes (and geometry) present.  The evacuation meshes
+are needed in the input file to guide the fire calculation to save
+evacuation related fire information to the hard drive.  So before
+starting a fire calculation one should make the evacuation geometry
+and check that it is correct.
 % Then one can run the fire calculation with the evacuation meshes to produce fire information for further evacuation simulations. In these runs one could set the number of evacuees to zero to speed up the fire calculation (no evacuation movement at all, because no agents), but the evacuation geometry information is needed in order to correctly write the \Timtt{CHID\_evac.fed} file that contains the fire data needed by the evacuation calculation.  The properties of the agents and their initial positions and how many agents there are do not interfere with the saving of the fire related data for evacuation calculation, it is just the evacuation geometry, which should be there before the FDS simulation.  This is similar to the ordinary FDS fire simulation, where the user should know prior the calculation which output data he/she wants and add this information to the input file.
 
 Thus, a good advice is to do first a fire drill case, where one just
 calculates the evacuation case and see if it goes like it should.
-(Set \Timtt{EVACUATION\_INITIALIZATION=.TRUE.} and \Timtt{EVACUATION\_DRILL=.TRUE.} at the \Timtt{MISC} namelist to force a fire drill calculation.) After the fire drill case seems to work correctly, you should follow the the fire+evacuation strategy described in section \ref{Sec_StartingCalculation}. Usually the fire calculation takes much more CPU time, so one does not want to do the fire calculation many times due to some mistakes in the evacuation input geometry.
+(Set \Timtt{EVACUATION\_INITIALIZATION=.TRUE.} and
+\Timtt{EVACUATION\_DRILL=.TRUE.} at the \Timtt{MISC} namelist to force
+a fire drill calculation.) After the fire drill case seems to work
+correctly, you should follow the the fire+evacuation strategy
+described in section \ref{Sec_StartingCalculation}. Usually the fire
+calculation takes much more CPU time, so one does not want to do the
+fire calculation many times due to some mistakes in the evacuation
+input geometry.
 
 \begin{itemize}
 
-\item Make a FDS fire input file for your project and do some fire/smoke spread test calculations using the FDS executable to see that your input for the fire case is correct. 
+\item Make a FDS fire input file for your project and do some
+  fire/smoke spread test calculations using the FDS executable to see
+  that your input for the fire case is correct.
 % If the memory requirements of your fire calculation demand the use of the MPI version of FDS then you can do simultaneous fire and evacuation simulation using the parallel version so that the different fire meshes can be divided to different processor and the evacuation calculation to some other processor.  If you are going to run FDS+Evac only in the ``fire drill mode'' then it is best to use the serial version of the executable, because all evacuation meshes are always calculated as a single thread, \emph{i.e.,} evacuation calculation utilises just one processor.  Note: If you plan to do an evacuation simulation which uses smoke then you should not perform a full fire simulation before than you have specified the evacuation geometry input to your calculation.  You need to know before any FDS simulations which output you want to save and the fire information for evacuation simulations is similar.  This is specifically true if your fire simulation needs really much CPU time.
 
-\item Save the fire input file to some other name (and change also the \Timtt{CHID} on the \Timtt{HEAD} namelist group).
+\item Save the fire input file to some other name (and change also the
+  \Timtt{CHID} on the \Timtt{HEAD} namelist group).
 
-\item Define the evacuation meshes with the \Timtt{MESH} namelist groups, which have both the \Timtt{EVAC\_HUMANS} and the \Timtt{EVACUATION} keywords set to \Timtt{.TRUE.}  Each floor of the building should have its own main evacuation mesh.  Use the \Timtt{ID} keyword to give unique names for the evacuation meshes. The $z$ coordinates for these meshes should span a level, where the most obstacles for the movement are, usually about one meter above the floor.  The \Timtt{EVAC\_Z\_OFFSET} parameter defines the floor level of this mesh measured from the mid $z$ level of the mesh.  See Fig.~\ref{Fig_EvacGrid} and Sec.~\ref{Sec_EvacGrid}. Note, that the smoke and other fire related quantities are taken at the level defined by the \Timtt{HUMAN\_SMOKE\_HEIGHT} parameter on (some) \Timtt{PERS} namelist.  Try to make the mesh division such that the mesh cell sizes $dx$ and $dy$ in the $x$ and $y$ directions are nice round numbers, like 0.25~m, 0.35~m, 0.5~m, \emph{etc}, depending on the widths of the egress paths.  Note: Do not include floors or ceilings accidentally to the evacuation geometry, the \Timtt{XB} of the evacuation meshes should not be touching a floor nor a ceiling. All obstacles, even if partly, in the XB range are thickened in the $z$ direction.
+\item Define the evacuation meshes with the \Timtt{MESH} namelist
+  groups, which have both the \Timtt{EVAC\_HUMANS} and the
+  \Timtt{EVACUATION} keywords set to \Timtt{.TRUE.}  Each floor of the
+  building should have its own main evacuation mesh.  Use the
+  \Timtt{ID} keyword to give unique names for the evacuation
+  meshes. The $z$ coordinates for these meshes should span a level,
+  where the most obstacles for the movement are, usually about one
+  meter above the floor.  The \Timtt{EVAC\_Z\_OFFSET} parameter
+  defines the floor level of this mesh measured from the mid $z$ level
+  of the mesh.  See Fig.~\ref{Fig_EvacGrid} and
+  Sec.~\ref{Sec_EvacGrid}. Note, that the smoke and other fire related
+  quantities are taken at the level defined by the
+  \Timtt{HUMAN\_SMOKE\_HEIGHT} parameter on (some) \Timtt{PERS}
+  namelist.  Try to make the mesh division such that the mesh cell
+  sizes $dx$ and $dy$ in the $x$ and $y$ directions are nice round
+  numbers, like 0.25~m, 0.35~m, 0.5~m, \emph{etc}, depending on the
+  widths of the egress paths.  Note: Do not include floors or ceilings
+  accidentally to the evacuation geometry, the \Timtt{XB} of the
+  evacuation meshes should not be touching a floor nor a ceiling. All
+  obstacles, even if partly, in the XB range are thickened in the $z$
+  direction.
 
 %\item If your are using the parallel version of FDS, then note that the evacuation meshes should be defined after all fire meshes in the input file.  This order of meshes is assumed by the programme when it assigns processes for different meshes.
 
-\item Put \Timtt{T\_END=0.0} on the \Timtt{TIME} namelist group and add \Timtt{EVACUATION\_DRILL=.TRUE.} on the \Timtt{MISC} namelist, and run FDS+Evac.  Use Smokeview to see, if  the 2D geometry is looking right.  You can play around with the $z_\mathrm{min}$ and $z_\mathrm{max}$ to take the evacuation layout at different heights.  
+\item Put \Timtt{T\_END=0.0} on the \Timtt{TIME} namelist group and
+  add \Timtt{EVACUATION\_DRILL=.TRUE.} on the \Timtt{MISC} namelist,
+  and run FDS+Evac.  Use Smokeview to see, if the 2D geometry is
+  looking right.  You can play around with the $z_\mathrm{min}$ and
+  $z_\mathrm{max}$ to take the evacuation layout at different heights.
   % Note also that you can give a logical keyword \Timtt{NO\_EVACUATION=.TRUE.} on the \Timtt{MISC} namelist, if you want just to (re)run the plain fire calculation after you have added the evacuation meshes.
 
-\item Define additional obstacles with \verb|EVACUATION=.TRUE.|, where you do not want agents walking.  No need to define \Timtt{SURF\_ID} for evacuation obstacles, because all obstacles in the evacuation meshes use same default boundary condition (\Timtt{INERT}), which produces a default inert coloring in Smokeview, that might not be nice looking.  This may be changed by giving \Timtt{EVAC\_DEFAULT} on some \Timtt{SURF} namelist and using \Timtt{COLOR} or \Timtt{RGB} to give some other coloring information.  You can add also \Timtt{COLOR} or \Timtt{RGB} on the additional obstacles namelist to see (recognise) these better in Smokeview.  Usually these additional obstacles are needed to close some holes in the fire geometry, \emph{e.g.}  open windows, which the agents should not be using as egress paths.
+\item Define additional obstacles with \verb|EVACUATION=.TRUE.|, where
+  you do not want agents walking.  No need to define \Timtt{SURF\_ID}
+  for evacuation obstacles, because all obstacles in the evacuation
+  meshes use same default boundary condition (\Timtt{INERT}), which
+  produces a default inert coloring in Smokeview, that might not be
+  nice looking.  This may be changed by giving \Timtt{EVAC\_DEFAULT}
+  on some \Timtt{SURF} namelist and using \Timtt{COLOR} or \Timtt{RGB}
+  to give some other coloring information.  You can add also
+  \Timtt{COLOR} or \Timtt{RGB} on the additional obstacles namelist to
+  see (recognise) these better in Smokeview.  Usually these additional
+  obstacles are needed to close some holes in the fire geometry,
+  \emph{e.g.}  open windows, which the agents should not be using as
+  egress paths.
 
-\item Make additional holes with \verb|EVACUATION=.TRUE.|, where they are needed.  Usually these are needed at internal doors of a floor.
+\item Make additional holes with \verb|EVACUATION=.TRUE.|, where they
+  are needed.  Usually these are needed at internal doors of a floor.
 
-\item Run FDS+Evac (\Timtt{T\_END=0.0}) and see if the 2D geometry is looking correct.  If not, correct it by adding more \Timtt{OBST}s and \Timtt{HOLE}s.
+\item Run FDS+Evac (\Timtt{T\_END=0.0}) and see if the 2D geometry is
+  looking correct.  If not, correct it by adding more \Timtt{OBST}s
+  and \Timtt{HOLE}s.
 
-\item Define your doors, exits, stairs, and entries using the \Timtt{DOOR}, \Timtt{EXIT}, \Timtt{CORR}, \Timtt{EVSS}, and \Timtt{ENTR} namelists, respectively.  Set \Timtt{T\_END}=0.0 and do a run to see these in Smokeview.  Activate grid locations in smokeview to see the actual positions of your obstacles in the evacuation meshes, which might be a little bit different than the values given in the input file due to the fact that FDS moves \Timtt{OBST}s, \Timtt{HOLE}s, and \Timtt{VENT}s to match the mesh cell boundaries.  Note, that the also the \Timtt{DOOR}, \Timtt{EXIT}, and \Timtt{ENTR} objects are forced to match the underlying grid.
+\item Define your doors, exits, stairs, and entries using the
+  \Timtt{DOOR}, \Timtt{EXIT}, \Timtt{CORR}, \Timtt{EVSS}, and
+  \Timtt{ENTR} namelists, respectively.  Set \Timtt{T\_END}=0.0 and do
+  a run to see these in Smokeview.  Activate grid locations in
+  smokeview to see the actual positions of your obstacles in the
+  evacuation meshes, which might be a little bit different than the
+  values given in the input file due to the fact that FDS moves
+  \Timtt{OBST}s, \Timtt{HOLE}s, and \Timtt{VENT}s to match the mesh
+  cell boundaries.  Note, that the also the \Timtt{DOOR},
+  \Timtt{EXIT}, and \Timtt{ENTR} objects are forced to match the
+  underlying grid.
 
 \item Define slice output files at your evacuation mesh heights,
-  \emph{e.g.}, \\ 
+  \emph{e.g.}, \\
   \verb|&SLCF PBZ=x.x, QUANTITY='VELOCITY', VECTOR=.TRUE.,|\\
   \verb|      EVACUATION=.TRUE./|\\
-  There is no need to change the \Timtt{DT\_SLCF} keyword for these  plots, because FDS+Evac outputs these evacuation flow fields for all   time steps during the initialization phase.  These slices will   produce the output for the guiding flow fields towards different exits and doors.
+  There is no need to change the \Timtt{DT\_SLCF} keyword for these
+  plots, because FDS+Evac outputs these evacuation flow fields for all
+  time steps during the initialization phase.  These slices will
+  produce the output for the guiding flow fields towards different
+  exits and doors.
 
-\item Run a short simulation (\Timtt{T\_END=0.1}).  Check the evacuation flow fields by using Smokeview, \emph{i.e.}, open the velocity vector slice files of the evacuation meshes.  Check also that your evacuation geometry looks fine.  There should be no ``leaks'' at the outer walls of the evacuation floor, except those at the \Timtt{EXIT}s and \Timtt{DOOR}s.  There should also be no narrow paths, say below 0.6~m, in the evacuation geometry, because of the shoulder widths of the agents.  Add obstacles or holes to the evacuation calculation to block too narrow paths and any other places where the agents should not go.  The guiding flow fields for evacuation meshes should be like arrows painted to the floor that lead to a specific exit (or door).
+\item Run a short simulation (\Timtt{T\_END=0.1}).  Check the
+  evacuation flow fields by using Smokeview, \emph{i.e.}, open the
+  velocity vector slice files of the evacuation meshes.  Check also
+  that your evacuation geometry looks fine.  There should be no
+  ``leaks'' at the outer walls of the evacuation floor, except those
+  at the \Timtt{EXIT}s and \Timtt{DOOR}s.  There should also be no
+  narrow paths, say below 0.6~m, in the evacuation geometry, because
+  of the shoulder widths of the agents.  Add obstacles or holes to the
+  evacuation calculation to block too narrow paths and any other
+  places where the agents should not go.  The guiding flow fields for
+  evacuation meshes should be like arrows painted to the floor that
+  lead to a specific exit (or door).
 
-\item Define your person classes, the \Timtt{PERS} namelist groups. These namelists define the properties of the agents in the model. Usually the predefined person classes ``Adult'', ``Male'', ``Female'', ``Child'', and ``Elderly'' are sufficient.  The detection and reaction time distributions are given on these namelist groups, so if you have different groups of agents, which have different detection and reaction time distributions, then you should define a \Timtt{PERS} namelist for each of these.  Note that the detection and reaction time distributions can also be given on the \Timtt{EVAC} namelists and these values override the \Timtt{PERS} namelist values.
+\item Define your person classes, the \Timtt{PERS} namelist
+  groups. These namelists define the properties of the agents in the
+  model. Usually the predefined person classes ``Adult'', ``Male'',
+  ``Female'', ``Child'', and ``Elderly'' are sufficient.  The
+  detection and reaction time distributions are given on these
+  namelist groups, so if you have different groups of agents, which
+  have different detection and reaction time distributions, then you
+  should define a \Timtt{PERS} namelist for each of these.  Note that
+  the detection and reaction time distributions can also be given on
+  the \Timtt{EVAC} namelists and these values override the
+  \Timtt{PERS} namelist values.
 
-\item Place the agents inside the building using \Timtt{EVAC} namelists and use \Timtt{EVHO} namelists where you do not want to put the agents (similarly like \Timtt{OBST}s and \Timtt{HOLE}s).
+\item Place the agents inside the building using \Timtt{EVAC}
+  namelists and use \Timtt{EVHO} namelists where you do not want to
+  put the agents (similarly like \Timtt{OBST}s and \Timtt{HOLE}s).
 
-\item Once again, run a short simulation.  See, that your agents have correct initial positions.  You can change the way how agents are shown in Smokeview by using the menu ``Show/Hide'' and choosing different ``Avatars''.  The colouring method can be changed by using the menu ``Show/Hide'' and choosing ``Humans'' submenu.  Note that not all avatars support colouring by the data.
+\item Once again, run a short simulation.  See, that your agents have
+  correct initial positions.  You can change the way how agents are
+  shown in Smokeview by using the menu ``Show/Hide'' and choosing
+  different ``Avatars''.  The colouring method can be changed by using
+  the menu ``Show/Hide'' and choosing ``Humans'' submenu.  Note that
+  not all avatars support colouring by the data.
 
-\item Run a longer simulation and see that the agents are moving correctly, \emph{i.e.}, they are following correct flow fields and the exits, stairs, and doors are working correctly.  You can speed up the calculation by just entering only a few agents in the calculation.  Note that the reaction and detection time distributions given on the \Timtt{PERS} lines should be shorter than the simulation time to see some movement (pre-evacuation time = detection time + reaction time).
+\item Run a longer simulation and see that the agents are moving
+  correctly, \emph{i.e.}, they are following correct flow fields and
+  the exits, stairs, and doors are working correctly.  You can speed
+  up the calculation by just entering only a few agents in the
+  calculation.  Note that the reaction and detection time
+  distributions given on the \Timtt{PERS} lines should be shorter than
+  the simulation time to see some movement (pre-evacuation time =
+  detection time + reaction time).
 %
-\item Do a full evacuation calculation and save the results, \emph{i.e.}, the \Timtt{CHID\_evac.csv} and \Timtt{CHID\_evac.out} files.  Repeat this step a dozen or so times and collect the results to some spreadsheet programme, where you can plot the results. Note, that the results are not exactly similar, because the agents have random properties and initial positions.  These simulations  correspond to a fire drill.  
+\item Do a full evacuation calculation and save the results,
+  \emph{i.e.}, the \Timtt{CHID\_evac.csv} and \Timtt{CHID\_evac.out}
+  files.  Repeat this step a dozen or so times and collect the results
+  to some spreadsheet programme, where you can plot the results. Note,
+  that the results are not exactly similar, because the agents have
+  random properties and initial positions.  These simulations
+  correspond to a fire drill.
   % After this do a full FDS+Evac simulation (both the fire and evacuation, i.e., \Timtt{EVACUATION\_DRILL=.FALSE.}, which is the default value.  Now the fire and evacuation simulations are done at the same time and a file \Timtt{CHID\_evac.fed} is written to the hard drive. 
-The file \Timtt{CHID\_evac.fed} can be used to run many evacuation simulations per one fire simulation, \emph{i.e.}, no need to calculate the same fire for many times. 
+  The file \Timtt{CHID\_evac.fed} can be used to run many evacuation
+  simulations per one fire simulation, \emph{i.e.}, no need to
+  calculate the same fire for many times.
 % Note, that the \Timtt{CHID\_evac.eff} file is always (re)calculated when there are active fire meshes and it is also (re)calculated by default if there are only evacuation meshes.  By setting \Timtt{EVACUATION\_MC\_MODE=.TRUE.} just the evacuation calculation is done and the file \Timtt{CHID\_evac.eff} is read in if it exists.  If not, it is recalculated.  If \Timtt{EVACUATION\_DRILL=.FALSE.} (the default) then also the file \Timtt{CHID\_evac.fed} is tried to read in. If successful, then the evacuation calculation is equal to a real fire+evacuation calculation, just much faster, because the fire is not calculated but just the fire results are read in.
 
-\item If you are doing more than one evacuation calculation per one fire scenario (as you should) then save the \Timtt{CHID\_evac.eff} and \Timtt{CHID\_evac.fed} files after the previous step, where fire and evacuation calculations were done.  Add a keyword \Timtt{EVACUATION\_MC\_MODE=.TRUE.} on the \Timtt{MISC} namelist, which will direct the FDS+Evac to read the \Timtt{CHID\_evac.eff} file from the hard disk, if it exists. The programme tries to read the smoke and fire information (the \Timtt{CHID\_evac.fed} file) from the hard disk if it exists.  Copy the results (\Timtt{CHID\_evac.csv}) to some other name or collect them directly to a spreadsheet and rerun once again, \emph{etc}. For a given fire, you should run the evacuation part a couple of dozen times, because the FDS+Evac is not deterministic model.  After the runs, examine the results: plot the number of agents vs time, calculate averages, variances, \emph{etc}.  Compare the results with and without the smoke/fed effects.  Note that the keyword \Timtt{EVACUATION\_DRILL} on the \Timtt{MISC} namelist forces a fire drill mode and no smoke (fed) information is read from the disk and all fire informations are skipped.
+\item If you are doing more than one evacuation calculation per one
+  fire scenario (as you should) then save the \Timtt{CHID\_evac.eff}
+  and \Timtt{CHID\_evac.fed} files after the previous step, where fire
+  and evacuation calculations were done.  Add a keyword
+  \Timtt{EVACUATION\_MC\_MODE=.TRUE.} on the \Timtt{MISC} namelist,
+  which will direct the FDS+Evac to read the \Timtt{CHID\_evac.eff}
+  file from the hard disk, if it exists. The programme tries to read
+  the smoke and fire information (the \Timtt{CHID\_evac.fed} file)
+  from the hard disk if it exists.  Copy the results
+  (\Timtt{CHID\_evac.csv}) to some other name or collect them directly
+  to a spreadsheet and rerun once again, \emph{etc}. For a given fire,
+  you should run the evacuation part a couple of dozen times, because
+  the FDS+Evac is not deterministic model.  After the runs, examine
+  the results: plot the number of agents vs time, calculate averages,
+  variances, \emph{etc}.  Compare the results with and without the
+  smoke/fed effects.  Note that the keyword \Timtt{EVACUATION\_DRILL}
+  on the \Timtt{MISC} namelist forces a fire drill mode and no smoke
+  (fed) information is read from the disk and all fire informations
+  are skipped.
 %
 \end{itemize}
 
@@ -3568,7 +3794,9 @@ The file \Timtt{CHID\_evac.fed} can be used to run many evacuation simulations p
 \section{Getting Help, Error Statements, Bug
   Reports}\label{Sec_ErrorsBugs} 
 
-\noindent It is not unusual over the course of a project to run into various problems. Along with the FDS User's Guide, there are resources available on the Internet.
+\noindent It is not unusual over the course of a project to run into
+various problems. Along with the FDS User's Guide, there are resources
+available on the Internet.
 
 \begin{itemize}
 
@@ -3584,9 +3812,22 @@ The file \Timtt{CHID\_evac.fed} can be used to run many evacuation simulations p
 
 \end{itemize}
 
-If the run stops early and the error message ``ERROR: FDS improperly set up'' is printed on stderr then the initialisation of agents may be failed, \emph{i.e.}, FDS+Evac was not able to put the agents on the areas specified in the input file.  Check that you are not trying to put too many agents on a too small area.  See the positions of those agents that FDS+Evac was able to generate by using Smokeview and check the diagnostic text file of the evacuation calculation, \Timtt{CHID\_evac.out}.  
+If the run stops early and the error message ``ERROR: FDS improperly
+set up'' is printed on stderr then the initialisation of agents may be
+failed, \emph{i.e.}, FDS+Evac was not able to put the agents on the
+areas specified in the input file.  Check that you are not trying to
+put too many agents on a too small area.  See the positions of those
+agents that FDS+Evac was able to generate by using Smokeview and check
+the diagnostic text file of the evacuation calculation,
+\Timtt{CHID\_evac.out}.
 
-Note, that in some runs with the exactly same input file you might get the error message and in some other runs not.  The reason for this is that FDS+Evac uses random numbers to generate the properties of agents and their initial positions.  The keyword \Timtt{DENS\_INIT} on the \Timtt{PERS} namelist may be given a large value and the FDS+Evac will then try to put the agents more densely, but this is not helping to get more than about four agents per square metre.
+Note, that in some runs with the exactly same input file you might get
+the error message and in some other runs not.  The reason for this is
+that FDS+Evac uses random numbers to generate the properties of agents
+and their initial positions.  The keyword \Timtt{DENS\_INIT} on the
+\Timtt{PERS} namelist may be given a large value and the FDS+Evac will
+then try to put the agents more densely, but this is not helping to
+get more than about four agents per square metre.
 
 \clearpage
 
@@ -3906,13 +4147,23 @@ meshes present in the calculation.
 
 \begin{description}
 % \item[\Timts{NO\_EVACUATION}] If set to true then no evacuation calculation is done.  If there are no fire meshes defined, then ``ERROR: No MESH line(s) defined'' is printed on the screen output. The default is \Timtt{.FALSE.}, \emph{i.e.,} the default mode is fire+evacuation calculation.
-\item[\Timts{EVACUATION\_INITIALIZATION}] If set to true then an evacuation calculation according to the inputs is done.
+\item[\Timts{EVACUATION\_INITIALIZATION}] If set to true then an
+  evacuation calculation according to the inputs is done.
 
-\item[\Timts{EVACUATION\_WRITE\_FED}] If set to true then an ordinary fire calculation according to the inputs.
+\item[\Timts{EVACUATION\_WRITE\_FED}] If set to true then an ordinary
+  fire calculation according to the inputs.
 %
-\item[\Timts{EVACUATION\_MC\_MODE}] If set to true then the EFF and FED files are tried to read from the hard disk if they exist. The default is \Timtt{.FALSE.}, \emph{i.e.,} (re)calculate the FED and EFF files, if appropriate.  If \Timts{EVACUATION\_DRILL} is also set true then the FED file is not used.
+\item[\Timts{EVACUATION\_MC\_MODE}] If set to true then the EFF and
+  FED files are tried to read from the hard disk if they exist. The
+  default is \Timtt{.FALSE.}, \emph{i.e.,} (re)calculate the FED and
+  EFF files, if appropriate.  If \Timts{EVACUATION\_DRILL} is also set
+  true then the FED file is not used.
 %
-\item[\Timts{EVACUATION\_DRILL}] If set to true then no fire meshes are read in and no fire calculation is done. The EFF file is recalculated and no smoke information (the FED file) is used in the calculation.  The default is \Timtt{.FALSE.}. % \emph{i.e., (re)calculate the FED and EFF files, if appropriate.
+\item[\Timts{EVACUATION\_DRILL}] If set to true then no fire meshes
+  are read in and no fire calculation is done. The EFF file is
+  recalculated and no smoke information (the FED file) is used in the
+  calculation.  The default is
+  \Timtt{.FALSE.}. % \emph{i.e., (re)calculate the FED and EFF files, if appropriate.
 %
 \item[\Timts{EVAC\_PRESSURE\_ITERATIONS}] is the number of Poisson
   solver iterations at each evacuation flow field time step.  If you
@@ -4591,9 +4842,15 @@ be safe.
   unusable.  The default is that the exit is always categorized as
   usable in the exit selection algorithm.
 %
-\item[\Timts{LOCKED\_WHEN\_CLOSED}] If it is set \Timts{TRUE} then the agents stop at the exit line if the exit is closed. In normal mode the agents can go through closed exits, but they do not use closed exits in the door selection algorithm.
+\item[\Timts{LOCKED\_WHEN\_CLOSED}] If it is set \Timts{TRUE} then the
+  agents stop at the exit line if the exit is closed. In normal mode
+  the agents can go through closed exits, but they do not use closed
+  exits in the door selection algorithm.
 %
-\item[\Timts{TARGET\_WHEN\_CLOSED}] If it is set \Timts{TRUE} then the exit is included in the door selection algorithm even if it is closed. The agents will go towards closed exits and will go through the closed exits if \Timts{TARGET\_WHEN\_CLOSED} is not set to true.
+\item[\Timts{TARGET\_WHEN\_CLOSED}] If it is set \Timts{TRUE} then the
+  exit is included in the door selection algorithm even if it is
+  closed. The agents will go towards closed exits and will go through
+  the closed exits if \Timts{TARGET\_WHEN\_CLOSED} is not set to true.
 %
 \item[\Timts{SHOW}] A logical switch used to control if the exit is
   shown in Smokeview or not.  This switch has only effect on the real
@@ -4800,9 +5057,15 @@ part of the calculation, \emph{e.g.}, to stairs or to a different
   unusable.  The default is that the door is always categorized as
   usable in the exit selection algorithm.
 %
-\item[\Timts{LOCKED\_WHEN\_CLOSED}] If it is set \Timts{TRUE} then the agents stop at the door line if the door is closed. In normal mode the agents can go through closed doors, but they do not use closed doors in the door selection algorithm.
+\item[\Timts{LOCKED\_WHEN\_CLOSED}] If it is set \Timts{TRUE} then the
+  agents stop at the door line if the door is closed. In normal mode
+  the agents can go through closed doors, but they do not use closed
+  doors in the door selection algorithm.
 %
-\item[\Timts{TARGET\_WHEN\_CLOSED}] If it is set \Timts{TRUE} then the door is included in the door selection algorithm even if it is closed. The agents will go towards closed doors and will go through the closed doors if \Timts{TARGET\_WHEN\_CLOSED} is not set to true.
+\item[\Timts{TARGET\_WHEN\_CLOSED}] If it is set \Timts{TRUE} then the
+  door is included in the door selection algorithm even if it is
+  closed. The agents will go towards closed doors and will go through
+  the closed doors if \Timts{TARGET\_WHEN\_CLOSED} is not set to true.
 %
 \item[\Timts{SHOW}] A logical switch used to control if the door is
   shown in Smokeview or not.  The default is \Timtt{.TRUE.}.

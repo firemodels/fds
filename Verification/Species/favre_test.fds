@@ -1,6 +1,6 @@
 &HEAD CHID='favre_test', TITLE='NIST Propane Fire, 37 cm square pan, 2 cm resolution Favre avg' /
 
-&MESH XB=-0.3,0.3,-0.3,0.3,-0.04,0.16, IJK=30,30,10, MULT_ID='m1' /
+&MESH XB=-0.3,0.3,-0.3,0.3,-0.04,0.16, IJK=31,31,11, MULT_ID='m1' /
 &MULT ID='m1', DX=0.6, DY=0.6, DZ=0.2, K_UPPER=2 / 3 mesh
 
 &TIME T_END=10. /
