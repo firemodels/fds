@@ -1757,6 +1757,25 @@ of gypsum board. The experiments were sponsored by the Naval Research Laboratory
 square sand burner ranged in size from 0.28~m to 0.70~m, and the fires ranged in size from 50~kW to 520~kW.
 
 
+\section{Phoenix LNG Fires}
+\label{Phoenix_LNG_Fires_Description}
+
+In 2009, Sandia National Laboratories conducted two large-scale LNG pool fire experiments in a 120~m diameter pond in its Area III test complex in Albuquerque, New Mexico~\cite{Blanchat:2011}. The fires were approximately 21~m and 83~m in diameter. Measurements of flame height, smoke production, burn rate, and heat flux were performed. A photograph of Test~2 is shown in Fig.~\ref{Phoenix_Photo}.
+
+\subsubsection{Modeling Notes}
+
+The simulation of the Test~1 uses 1~m grid cells, while Test~2 uses 2~m cells. The computational domain for both simulations forms the shape of a cross that includes the fire and the radiometers to the north, south, east and west. Methane is the specified fuel, with a soot yield of 0.01 and radiative fraction of 0.25. Both values are estimates. 
+
+There are 1200 solid angles, rather than the default 100, used in the radiative transport equation to uniformly distribute the fire's radiative energy outward approximately 250~m. The value of 1200 is based on an assessment of the contours of the integrated radiative intensity. 
+
+\begin{figure}[p]
+\includegraphics[width=\textwidth]{FIGURES/Phoenix_LNG_Fires/Phoenix02_photo}
+\caption[Photograph of Phoenix LNG Fire Test 2]{Photograph of Phoenix LNG Fire Test 2~\cite{Blanchat:2011}.}
+\label{Phoenix_Photo}
+\end{figure}
+
+\FloatBarrier
+
 \section{Pool Fires}
 \label{Pool_Fires_Description}
 
