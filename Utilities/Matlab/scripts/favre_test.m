@@ -22,14 +22,14 @@ YL3 = L.data(3,find(strcmp(L.colheaders,'YTILDE_O2')));
 % brute force integration
 
 M = importdata([datadir,'favre_test_devc.csv'],',',2);
-t_stats_start = 5;
+t_stats_start = M.data(end,1)/2;
 t = M.data(find(M.data(:,1)>t_stats_start),1);
 RHO1 = M.data(find(M.data(:,1)>t_stats_start),find(strcmp(M.colheaders,'"RHO_1"')));
 RHO2 = M.data(find(M.data(:,1)>t_stats_start),find(strcmp(M.colheaders,'"RHO_2"')));
 RHO3 = M.data(find(M.data(:,1)>t_stats_start),find(strcmp(M.colheaders,'"RHO_3"')));
-Y1 = M.data(find(M.data(:,1)>t_stats_start),find(strcmp(M.colheaders,'"YO2_1"')));
-Y2 = M.data(find(M.data(:,1)>t_stats_start),find(strcmp(M.colheaders,'"YO2_2"')));
-Y3 = M.data(find(M.data(:,1)>t_stats_start),find(strcmp(M.colheaders,'"YO2_3"')));
+RHOYO2_1 = M.data(find(M.data(:,1)>t_stats_start),find(strcmp(M.colheaders,'"RHOYO2_1"')));
+RHOYO2_2 = M.data(find(M.data(:,1)>t_stats_start),find(strcmp(M.colheaders,'"RHOYO2_2"')));
+RHOYO2_3 = M.data(find(M.data(:,1)>t_stats_start),find(strcmp(M.colheaders,'"RHOYO2_3"')));
 
 NUM1 = 0;
 NUM2 = 0;
@@ -39,9 +39,9 @@ DENOM2 = 0;
 DENOM3 = 0;
 for i=2:length(t)
     dt = t(i)-t(i-1);
-    NUM1 = NUM1 + RHO1(i)*Y1(i)*dt;
-    NUM2 = NUM2 + RHO2(i)*Y2(i)*dt;
-    NUM3 = NUM3 + RHO3(i)*Y3(i)*dt;
+    NUM1 = NUM1 + RHOYO2_1(i)*dt;
+    NUM2 = NUM2 + RHOYO2_2(i)*dt;
+    NUM3 = NUM3 + RHOYO2_3(i)*dt;
     DENOM1 = DENOM1 + RHO1(i)*dt;
     DENOM2 = DENOM2 + RHO2(i)*dt;
     DENOM3 = DENOM3 + RHO3(i)*dt;
