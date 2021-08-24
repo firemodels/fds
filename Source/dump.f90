@@ -6297,7 +6297,8 @@ DEVICE_LOOP: DO N=1,N_DEVC
                               SDV%VALUE_2 = SDV%VALUE_2 + 1._EB
                            CASE('INTERPOLATION')
                               WGT = (1._EB-ABS(DV%X-XC(I))*RDX(I))*(1._EB-ABS(DV%Y-YC(J))*RDY(J))*(1._EB-ABS(DV%Z-ZC(K))*RDZ(K))
-                              IF (DV%TEMPORAL_STATISTIC=='FAVRE AVERAGE') WGT = WGT*RHO(I,J,K)*VOL
+                              IF (DV%TEMPORAL_STATISTIC=='FAVRE AVERAGE' .OR. &
+                                  DV%TEMPORAL_STATISTIC=='FAVRE RMS')         WGT = WGT*VOL*RHO(I,J,K)
                               SDV%VALUE_1 = SDV%VALUE_1 + VALUE*WGT
                               SDV%VALUE_2 = SDV%VALUE_2 + WGT
                            CASE('VOLUME INTEGRAL')
@@ -6330,8 +6331,8 @@ DEVICE_LOOP: DO N=1,N_DEVC
                               SDV%VALUE_1 = SDV%VALUE_1 + VALUE*VOL
                               SDV%VALUE_2 = SDV%VALUE_2 + VOL
                            CASE('MASS MEAN')
-                              SDV%VALUE_1 = SDV%VALUE_1 + VALUE*RHO(I,J,K)*VOL
-                              SDV%VALUE_2 = SDV%VALUE_2 + RHO(I,J,K)*VOL
+                              SDV%VALUE_1 = SDV%VALUE_1 + VALUE*VOL*RHO(I,J,K)
+                              SDV%VALUE_2 = SDV%VALUE_2 + VOL*RHO(I,J,K)
                            CASE('SUM')
                               IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) &
                               SDV%VALUE_1 = SDV%VALUE_1 + VALUE
@@ -6602,6 +6603,14 @@ DEVICE_LOOP: DO N=1,N_DEVC
          DV%AVERAGE_VALUE = (1._EB-WGT)*DV%AVERAGE_VALUE + WGT*DV%VALUE_1
          DV%AVERAGE_VALUE2 = (1._EB-WGT)*DV%AVERAGE_VALUE2 + WGT*DV%VALUE_2
          DV%VALUE = DV%AVERAGE_VALUE/DV%AVERAGE_VALUE2
+         DV%TIME_INTERVAL = 1._EB
+      CASE('FAVRE RMS')
+         WGT = DT/MAX(DT,T-DV%STATISTICS_START)
+         DV%AVERAGE_VALUE = (1._EB-WGT)*DV%AVERAGE_VALUE + WGT*DV%VALUE_1
+         DV%AVERAGE_VALUE2 = (1._EB-WGT)*DV%AVERAGE_VALUE2 + WGT*DV%VALUE_2
+         WGT_UNBIASED = DT/MAX(DT,T-DV%STATISTICS_START+DT)
+         DV%RMS_VALUE = (1._EB-WGT_UNBIASED)*DV%RMS_VALUE + WGT_UNBIASED*(DV%INSTANT_VALUE-DV%AVERAGE_VALUE/DV%AVERAGE_VALUE2)**2
+         DV%VALUE = SQRT(DV%RMS_VALUE)
          DV%TIME_INTERVAL = 1._EB
    END SELECT
 
