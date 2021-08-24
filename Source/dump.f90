@@ -6297,6 +6297,7 @@ DEVICE_LOOP: DO N=1,N_DEVC
                               SDV%VALUE_2 = SDV%VALUE_2 + 1._EB
                            CASE('INTERPOLATION')
                               WGT = (1._EB-ABS(DV%X-XC(I))*RDX(I))*(1._EB-ABS(DV%Y-YC(J))*RDY(J))*(1._EB-ABS(DV%Z-ZC(K))*RDZ(K))
+                              IF (DV%TEMPORAL_STATISTIC=='FAVRE AVERAGE') WGT = WGT*RHO(I,J,K)*VOL
                               SDV%VALUE_1 = SDV%VALUE_1 + VALUE*WGT
                               SDV%VALUE_2 = SDV%VALUE_2 + WGT
                            CASE('VOLUME INTEGRAL')
@@ -6330,7 +6331,7 @@ DEVICE_LOOP: DO N=1,N_DEVC
                               SDV%VALUE_2 = SDV%VALUE_2 + VOL
                            CASE('MASS MEAN')
                               SDV%VALUE_1 = SDV%VALUE_1 + VALUE*RHO(I,J,K)*VOL
-                              SDV%VALUE_2 = SDV%VALUE_2 + VOL*RHO(I,J,K)
+                              SDV%VALUE_2 = SDV%VALUE_2 + RHO(I,J,K)*VOL
                            CASE('SUM')
                               IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) &
                               SDV%VALUE_1 = SDV%VALUE_1 + VALUE
