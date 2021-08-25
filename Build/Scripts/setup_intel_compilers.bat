@@ -4,8 +4,7 @@ IF  X%SETVARS_COMPLETED% == X1 GOTO intel_envexist
 
   IF NOT DEFINED ONEAPI_ROOT goto intel_notexist
 
-  echo Defining Intel compiler environment
-  call "%ONEAPI_ROOT%\setvars" intel64>Nul
+  call "%ONEAPI_ROOT%\setvars" intel64
 
   IF  X%SETVARS_COMPLETED% == X1 GOTO intel_envexist
 
