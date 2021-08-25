@@ -3094,7 +3094,7 @@ ENDDO SURFLOOP
 
 ! Print out information about all Devices
 
-IF (N_PROP > 0) WRITE(LU_OUTPUT,'(//A,I2)')  ' Device Properties'
+IF (N_PROP > 0) WRITE(LU_OUTPUT,'(//A,I2)')  ' PROPerty Information'
 
 PROPERTY_LOOP: DO N=1,N_PROP
    PY => PROPERTY(N)
@@ -3135,25 +3135,19 @@ WRITE(LU_OUTPUT,'(A,ES10.3,A)') '    Maximum Density: ',RHOMAX,' kg/m3'
 ! Print out DEVICE locations and info
 
 IF (N_DEVC>0) THEN
-   WRITE(LU_OUTPUT,'(//A/)')   ' Device Coordinates'
+   WRITE(LU_OUTPUT,'(//A/)')   ' Device Information'
    DO N=1,N_DEVC
       DV => DEVICE(N)
-      IF (DV%Y_INDEX>0) THEN
-         WRITE(LU_OUTPUT,'(I6,A,3F14.6,A,A,A,A,A,A,A,A)') N,' Coords:',DV%X,DV%Y,DV%Z, &
-            ', Make: ',TRIM(PROPERTY(DV%PROP_INDEX)%ID), ', ID: ',TRIM(DV%ID), ', Quantity: ',TRIM(DV%QUANTITY(1)), &
-            ', Species: ',TRIM(SPECIES(DV%Y_INDEX)%ID)
-      ELSEIF (DV%Z_INDEX>=0) THEN
-         WRITE(LU_OUTPUT,'(I6,A,3F14.6,A,A,A,A,A,A,A,A)') N,' Coords:',DV%X,DV%Y,DV%Z, &
-            ', Make: ',TRIM(PROPERTY(DV%PROP_INDEX)%ID), ', ID: ',TRIM(DV%ID), ', Quantity: ',TRIM(DV%QUANTITY(1)), &
-            ', Species: ',TRIM(SPECIES_MIXTURE(DV%Z_INDEX)%ID)
-      ELSEIF (DV%PART_CLASS_INDEX>0) THEN
-         WRITE(LU_OUTPUT,'(I6,A,3F14.6,A,A,A,A,A,A,A,A)') N,' Coords:',DV%X,DV%Y,DV%Z, &
-            ', Make: ',TRIM(PROPERTY(DV%PROP_INDEX)%ID), ', ID: ',TRIM(DV%ID), ', Quantity: ',TRIM(DV%QUANTITY(1)), &
-            ', Particle Class: ',TRIM(LAGRANGIAN_PARTICLE_CLASS(DV%PART_CLASS_INDEX)%ID)
-      ELSE
-         WRITE(LU_OUTPUT,'(I6,A,3F14.6,A,A,A,A,A,A)') N,' Coords:',DV%X,DV%Y,DV%Z, &
-            ', Make: ',TRIM(PROPERTY(DV%PROP_INDEX)%ID), ', ID: ',TRIM(DV%ID), ', Quantity: ',TRIM(DV%QUANTITY(1))
-      ENDIF
+      WRITE(LU_OUTPUT,'(I4,A,A)') N,' ID: ',TRIM(DV%ID)
+      WRITE(LU_OUTPUT,'(4X,A,A)') ' QUANTITY: ',TRIM(DV%QUANTITY(1))
+      IF (DV%Y_INDEX>0) WRITE(LU_OUTPUT,'(4X,A,A)') ' Species ID: ',TRIM(SPECIES(DV%Y_INDEX)%ID)
+      IF (DV%Z_INDEX>0) WRITE(LU_OUTPUT,'(4X,A,A)') ' Species ID: ',TRIM(SPECIES_MIXTURE(DV%Z_INDEX)%ID)
+      WRITE(LU_OUTPUT,'(4X,A,3E12.3)') ' Coordinates (X,Y,Z):',DV%X,DV%Y,DV%Z
+      IF (DV%SPATIAL_STATISTIC/='null') WRITE(LU_OUTPUT,'(4X,A,A)')   ' SPATIAL STATISTIC: ',TRIM(DV%SPATIAL_STATISTIC)
+      IF (DV%TEMPORAL_STATISTIC/='null') WRITE(LU_OUTPUT,'(4X,A,A)')   ' TEMPORAL STATISTIC: ',TRIM(DV%TEMPORAL_STATISTIC)
+      IF (DV%PROP_INDEX>0) WRITE(LU_OUTPUT,'(A,A)') '  Property ID: ',TRIM(PROPERTY(DV%PROP_INDEX)%ID)
+      IF (DV%PART_CLASS_INDEX>0) WRITE(LU_OUTPUT,'(4X,A,A)') ' Particle Class: ',&
+         TRIM(LAGRANGIAN_PARTICLE_CLASS(DV%PART_CLASS_INDEX)%ID)
    ENDDO
 ENDIF
 
