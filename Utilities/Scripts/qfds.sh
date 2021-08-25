@@ -97,12 +97,9 @@ function usage {
     exit
   fi
   echo "Other options:"
-  echo " -a - use vtune"
   echo " -b email_address - send an email to email_address when jobs starts, aborts and finishes"
-  echo " -c file - loads Intel Trace Collector configuration file "
   echo " -C   - use modules currently loaded rather than modules loaded when fds was built."
   echo " -d dir - specify directory where the case is found [default: .]"
-  echo " -D n - delay the case submission by n seconds"
   echo " -E - use tcp transport (only available with the Intel compiled versions of fds)"
   echo "      This options adds export I_MPI_FABRICS=shm:tcp to the run script"
   echo " -f repository root - name and location of repository where FDS is located"
@@ -119,7 +116,6 @@ function usage {
   echo "        MIN ( number of cores, number of mpi processes)"
   echo " -O n - run cases casea.fds, caseb.fds, ... using 1, ..., N OpenMP threads"
   echo "        where case is specified on the command line. N can be at most 9."
-  echo " -r   - use Intel Trace Collector"
   echo " -s   - stop job"
   echo " -S   - use startup files to set the environment, do not load modules"
   echo " -t   - used for timing studies, run a job alone on a node (reserving $NCORES_COMPUTENODE cores)"
@@ -128,7 +124,6 @@ function usage {
   echo " -U n - only allow n jobs owned by `whoami` to run at a time"
   echo " -V   - show command line used to invoke qfds.sh"
   echo " -w time - walltime, where time is hh:mm for PBS and dd-hh:mm:ss for SLURM. [default: $walltime]"
-  echo " -x   - analyze the case with Intel Inspector"
   echo " -y dir - run case in directory dir"
   echo " -Y   - run case in directory casename where casename.fds is the case being run"
   echo " -z   - use --hint=nomultithread on srun line"
@@ -212,18 +207,10 @@ else
 max_processes_per_node=1
 fi
 n_openmp_threads=1
-use_trace=
 use_installed=
 use_debug=
 use_devel=
-use_inspect=
-use_advise=
-use_vtune=
 use_intel_mpi=1
-iinspectargs=
-vtuneresdir=
-vtuneargs=
-use_config=""
 EMAIL=
 CHECK_DIRTY=
 USERMAX=
@@ -297,30 +284,20 @@ commandline=`echo $* | sed 's/-V//' | sed 's/-v//'`
 
 #*** read in parameters from command line
 
-while getopts 'Aa:b:c:Cd:D:e:Ef:ghHiIj:Lm:Mn:No:O:p:Pq:rsStT:U:vVw:xy:Yz' OPTION
+while getopts 'Ab:Cd:e:Ef:ghHiIj:Lm:Mn:No:O:p:Pq:sStT:U:vVw:y:Yz' OPTION
 do
 case $OPTION  in
   A) # used by timing scripts to identify benchmark cases
    DUMMY=1
    ;;
-  a)
-   vtuneresdir="$OPTARG"
-   use_vtune=1
-   ;;
   b)
    EMAIL="$OPTARG"
-   ;;
-  c)
-   use_config="$OPTARG"
    ;;
   C)
    FDS_MODULE_OPTION=
    ;;
   d)
    dir="$OPTARG"
-   ;;
-  D)
-   SLEEP="sleep $OPTARG"
    ;;
   e)
    exe="$OPTARG"
@@ -391,9 +368,6 @@ case $OPTION  in
   q)
    queue="$OPTARG"
    ;;
-  r)
-   use_trace=1
-   ;;
   s)
    stopjob=1
    ;;
@@ -425,9 +399,6 @@ case $OPTION  in
    ;;
   w)
    walltime="$OPTARG"
-   ;;
-  x)
-   use_inspect=1
    ;;
   y)
    casedir="$OPTARG"
@@ -530,17 +501,6 @@ else
   fi
   if [ "$use_devel" == "1" ]; then
     DB=_dv
-  fi
-  if [ "$use_inspect" == "1" ]; then
-    iinspectargs="inspxe-cl -collect ti2 --"
-  fi
-  if [ "$use_advise" == "1" ]; then
-    DB=_advise
-  fi
-  if [ "$use_vtune" == "1" ]; then
-    if [ "$vtuneresdir" != "" ]; then
-    vtuneargs="amplxe-cl -collect hpc-performance -result-dir $vtuneresdir --"
-    fi
   fi
   if [ "$use_intel_mpi" == "1" ]; then
     if [ "$exe" == "" ]; then
@@ -931,15 +891,6 @@ module load $MODULES
 EOF
 fi
 
-if [ "$use_trace" == "1" ]; then
-  cat << EOF >> $scriptfile
-export LD_PRELOAD=/opt/intel/oneapi/itac/latest/slib/libVT.so
-export VT_LOGFILE_FORMAT=stfsingle
-export VT_PCTRACE=5
-export VT_CONFIG=$FDSROOT/fds/Build/Scripts/fds_trace.conf
-EOF
-fi
-
 if [ "$OPENMPCASES" == "" ]; then
 cat << EOF >> $scriptfile
 export OMP_NUM_THREADS=$n_openmp_threads
@@ -963,13 +914,6 @@ if [ "$TCP" != "" ]; then
 export I_MPI_FABRICS=shm:tcp
 EOF
 fi
-
-if [ "$use_config" != "" ]; then
-  cat << EOF >> $scriptfile
-export VT_CONFIG=$use_config
-EOF
-fi
-
 
 if [ "$PROVIDER" != "" ]; then
 cat << EOF >> $scriptfile
@@ -1013,13 +957,13 @@ EOF
 
 if [ "$OPENMPCASES" == "" ]; then
 cat << EOF >> $scriptfile
-$MPIRUN $iinspectargs $exe $in $OUT2ERROR
+$MPIRUN $exe $in $OUT2ERROR
 EOF
 else
 for i in `seq 1 $OPENMPCASES`; do
 cat << EOF >> $scriptfile
 export OMP_NUM_THREADS=${nthreads[$i]}
-$MPIRUN $iinspectargs $exe ${files[$i]} $OUT2ERROR
+$MPIRUN $exe ${files[$i]} $OUT2ERROR
 EOF
 done
 fi
@@ -1104,7 +1048,6 @@ fi
 
 #*** run script
 
-$SLEEP
 echo 
 chmod +x $scriptfile
 
