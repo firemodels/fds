@@ -252,7 +252,8 @@ else
   missing_torque=`cat $STATUS_FILE | tail -1 | grep "not found" | wc -l`
   rm -f $STATUS_FILE
   if [ $missing_torque -eq 0 ]; then
-    RESOURCE_MANAGER="TORQUE"
+    error "***Error: torque resource manager not supported"
+    exit
   fi
 fi
 if [ "$RESOURCE_MANAGER" == "SLURM" ]; then
@@ -377,11 +378,6 @@ case $OPTION  in
    fi
    n_mpi_process=1
    benchmark="yes"
-   if [ "$RESOURCE_MANAGER" == "TORQUE" ]; then
-     if [ "$NCORES_COMPUTENODE" != "" ]; then
-       n_mpi_processes_per_node="$NCORES_COMPUTENODE"
-     fi
-   fi
    ;;
   p)
    n_mpi_processes="$OPTARG"
@@ -391,11 +387,6 @@ case $OPTION  in
    OPENMPTEST="1"
    benchmark="yes"
    n_mpi_process=1
-   if [ "$RESOURCE_MANAGER" == "TORQUE" ]; then
-     if [ "$NCORES_COMPUTENODE" != "" ]; then
-       n_mpi_processes_per_node="$NCORES_COMPUTENODE"
-     fi
-   fi  
    ;;
   q)
    queue="$OPTARG"
@@ -411,11 +402,6 @@ case $OPTION  in
    ;;
   t)
    benchmark="yes"
-   if [ "$RESOURCE_MANAGER" == "TORQUE" ]; then
-     if [ "$NCORES_COMPUTENODE" != "" ]; then
-       n_mpi_processes_per_node="$NCORES_COMPUTENODE"
-     fi
-   fi
    ;;
   T)
    TYPE="$OPTARG"
@@ -877,15 +863,15 @@ cat << EOF > $scriptfile
 # $0 $commandline
 EOF
 
-USE_SLURM_PBS=1
+USE_SLURM=1
 if [ "$queue" == "none" ]; then
-  USE_SLURM_PBS=
+  USE_SLURM=
 fi
 if [ "$queue" == "terminal" ]; then
-  USE_SLURM_PBS=
+  USE_SLURM=
 fi
 
-if [ "$USE_SLURM_PBS" == "1" ]; then
+if [ "$USE_SLURM" == "1" ]; then
   if [ "$RESOURCE_MANAGER" == "SLURM" ]; then
     cat << EOF >> $scriptfile
 #SBATCH -J $JOBPREFIX$infile
@@ -932,31 +918,6 @@ fi
       cat << EOF >> $scriptfile
 #SBATCH $walltimestring_slurm
 
-EOF
-    fi
-
-  else
-    cat << EOF >> $scriptfile
-#PBS -N $JOBPREFIX$TITLE
-#PBS -W umask=0022
-#PBS -e $outerr
-#PBS -o $outlog
-#PBS -l nodes=$nodes:ppn=$ppn
-EOF
-if [ "$EMAIL" != "" ]; then
-    cat << EOF >> $scriptfile
-#PBS -m abe
-#PBS -M $EMAIL
-EOF
-fi
-    if [ "$walltimestring_pbs" != "" ]; then
-      cat << EOF >> $scriptfile
-#PBS $walltimestring_pbs
-EOF
-    fi
-    if [[ $n_openmp_threads -gt 1 ]] && [[ "$use_intel_mpi" == "1" ]]; then
-      cat << EOF >> $scriptfile
-#PBS -l naccesspolicy=SINGLEJOB -n
 EOF
     fi
   fi
