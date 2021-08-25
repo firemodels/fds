@@ -106,8 +106,6 @@ function usage {
   echo " -m m - reserve m processes per node [default: 1]"
   echo " -M   -  add --mca plm_rsh_agent /usr/bin/ssh to mpirun command "
   echo " -n n - number of MPI processes per node [default: 1]"
-  echo " -N   - run as many MPI processes on a node as possible"
-  echo "        MIN ( number of cores, number of mpi processes)"
   echo " -O n - run cases casea.fds, caseb.fds, ... using 1, ..., N OpenMP threads"
   echo "        where case is specified on the command line. N can be at most 9."
   echo " -s   - stop job"
@@ -196,11 +194,8 @@ casedir=
 use_default_casedir=
 MULTITHREAD=
 
-# by default maximize cores used if psm module is loaded
-MAX_MPI_PROCESSES_PER_NODE=
-if [ "$USE_PSM" != "" ]; then
-  MAX_MPI_PROCESSES_PER_NODE=1
-fi
+# use maximum number of mpi procceses possible per node
+MAX_MPI_PROCESSES_PER_NODE=1
 
 # determine which resource manager is running (or none)
 
@@ -246,7 +241,7 @@ commandline=`echo $* | sed 's/-V//' | sed 's/-v//'`
 
 #*** read in parameters from command line
 
-while getopts 'Ab:Cd:e:Ef:ghHiIj:Lm:Mn:No:O:p:Pq:sStT:U:vVw:y:Yz' OPTION
+while getopts 'Ab:Cd:e:Ef:ghHiIj:Lm:Mn:o:O:p:Pq:sStT:U:vVw:y:Yz' OPTION
 do
 case $OPTION  in
   A) # used by timing scripts to identify benchmark cases
@@ -303,9 +298,6 @@ case $OPTION  in
   n)
    n_mpi_processes_per_node="$OPTARG"
    MAX_MPI_PROCESSES_PER_NODE=
-   ;;
-  N)
-   MAX_MPI_PROCESSES_PER_NODE=1
    ;;
   o)
    n_openmp_threads="$OPTARG"
