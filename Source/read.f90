@@ -12915,7 +12915,8 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
 
    POINTS_LOOP: DO I_POINT=1,POINTS
 
-      MESH_DEVICE = 0
+      MESH_DEVICE = 0               ! MESH_DEVICE(NM)=1 means that the device involves mesh NM
+      IF (I_POINT>1) XB = -1.E6_EB  ! Reset XB for new point along a linear array of POINTS
 
       ! Create a straight line of point devices
 
