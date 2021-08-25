@@ -1,11 +1,5 @@
 #!/bin/bash
 
-#*** environment varables
-
-#*** environment variables used by the bots
-# BACKGROUND_PROG  - defines location of background program
-#                    ( if the 'none' queue is also specified)
-
 # ---------------------------- stop_fds_if_requested ----------------------------------
 
 function stop_fds_if_requested {
@@ -152,30 +146,18 @@ fi
 
 platform="linux"
 if [ "$WINDIR" != "" ]; then
-  platform="win"
-  if [ "$I_MPI_ROOT" != "" ]; then
-    echo $I_MPI_ROOT | sed 's/\\/\//g' -  | sed 's/C:/\/C/g' -  > var.out.$$
-    I_MPI_ROOT=`head -1 var.out.$$`
-    rm var.out.$$
-  fi
+  echo "***Error: only Linux platforms are supported"
+  exit
 fi
 if [ "`uname`" == "Darwin" ] ; then
-  platform="osx"
+  echo "***Error: only Linux platforms are supported"
+  exit
 fi
 
 #*** determine number of cores and default queue
 
-if [ "$platform" == "osx" ]; then
-  queue=none
-  ncores=`system_profiler SPHardwareDataType|grep Cores|awk -F' ' '{print $5}'`
-else
-  if [ "$platform" == "win" ]; then
-    queue=terminal
-  else
-    queue=batch
-  fi
-  ncores=`grep processor /proc/cpuinfo | wc -l`
-fi
+queue=batch
+ncores=`grep processor /proc/cpuinfo | wc -l`
 if [ "$NCORES_COMPUTENODE" == "" ]; then
   NCORES_COMPUTENODE=$ncores
 else
@@ -201,11 +183,7 @@ fi
 
 n_mpi_processes=1
 n_mpi_processes_per_node=2
-if [ "$platform" == "linux" ]; then
 max_processes_per_node=`cat /proc/cpuinfo | grep cores | wc -l`
-else
-max_processes_per_node=1
-fi
 n_openmp_threads=1
 use_installed=
 use_debug=
@@ -235,21 +213,15 @@ RESOURCE_MANAGER="NONE"
 if [ $missing_slurm -eq 0 ]; then
   RESOURCE_MANAGER="SLURM"
 else
-  echo | qmgr -n >& $STATUS_FILE
-  missing_torque=`cat $STATUS_FILE | tail -1 | grep "not found" | wc -l`
-  rm -f $STATUS_FILE
-  if [ $missing_torque -eq 0 ]; then
-    error "***Error: torque resource manager not supported"
-    exit
-  fi
+  echo "***error: The slurm resource manager was not found."
+  echo "          The slurm resource manager is required."
+  exit
 fi
-if [ "$RESOURCE_MANAGER" == "SLURM" ]; then
-  if [ "$SLURM_MEM" != "" ]; then
-   SLURM_MEM="#SBATCH --mem=$SLURM_MEM"
-  fi
-  if [ "$SLURM_MEMPERCPU" != "" ]; then
-   SLURM_MEM="#SBATCH --mem-per-cpu=$SLURM_MEMPERCPU"
-  fi
+if [ "$SLURM_MEM" != "" ]; then
+ SLURM_MEM="#SBATCH --mem=$SLURM_MEM"
+fi
+if [ "$SLURM_MEMPERCPU" != "" ]; then
+ SLURM_MEM="#SBATCH --mem-per-cpu=$SLURM_MEMPERCPU"
 fi
 
 # the mac doesn't have Intel MPI
@@ -268,16 +240,6 @@ fi
 
 if [ $# -lt 1 ]; then
   usage
-fi
-
-if [ "$BACKGROUND_PROG" == "" ]; then
-   BACKGROUND_PROG=background
-fi
-if [ "$BACKGROUND_DELAY" == "" ]; then
-   BACKGROUND_DELAY=10
-fi
-if [ "$BACKGROUND_LOAD" == "" ]; then
-   BACKGROUND_LOAD=75
 fi
 
 commandline=`echo $* | sed 's/-V//' | sed 's/-v//'`
@@ -472,11 +434,7 @@ fi
 #*** parse options
 
 if [ "$walltime" == "" ]; then
-    if [ "$RESOURCE_MANAGER" == "SLURM" ]; then
-	walltime=99-99:99:99
-    else
-	walltime=999:0:0
-    fi
+  walltime=99-99:99:99
 fi
 
 #*** define executable
@@ -769,41 +727,10 @@ fi
 
 stop_fds_if_requested
 
-QSUB="qsub -q $queue"
+#*** setup for SLURM
 
-#*** use the queue none and the program background on systems
-#    without a queing system
-
-if [ "$queue" == "none" ]; then
-  OUT2ERROR=" 2> $outerr"
-  notfound=`$BACKGROUND_PROG -help 2>&1 | tail -1 | grep "not found" | wc -l`
-  if [ "$showinput" == "0" ]; then
-    if [ "$notfound" == "1" ];  then
-      echo "The program $BACKGROUND_PROG was not found."
-      echo "Install FDS which has the background utility."
-      echo "Run aborted"
-      exit
-    fi
-  fi
-  MPIRUN=
-  QSUB="$BACKGROUND_PROG -u $BACKGROUND_LOAD -d $BACKGROUND_DELAY "
-  USE_BACKGROUND=1
-else
-
-#*** setup for SLURM (alternative to torque)
-
-  if [ "$RESOURCE_MANAGER" == "SLURM" ]; then
-    QSUB="sbatch -p $queue --ignore-pbs"
-    MPIRUN="srun -N $nodes -n $n_mpi_processes --ntasks-per-node $n_mpi_processes_per_node"
-  fi
-
-#*** run without a queueing system
-
-  if [ "$queue" == "terminal" ]; then
-    QSUB=
-    MPIRUN=
-  fi
-fi
+QSUB="sbatch -p $queue --ignore-pbs"
+MPIRUN="srun -N $nodes -n $n_mpi_processes --ntasks-per-node $n_mpi_processes_per_node"
 
 #*** Set walltime parameter only if walltime is specified as input argument
 
@@ -814,7 +741,7 @@ if [ "$walltime" != "" ]; then
   walltimestring_slurm="--time=$walltime"
 fi
 
-#*** create a random script file for submitting jobs
+#*** create a random script filename for submitting jobs
 
 scriptfile=`mktemp /tmp/script.$$.XXXXXX`
 
@@ -823,17 +750,7 @@ cat << EOF > $scriptfile
 # $0 $commandline
 EOF
 
-USE_SLURM=1
-if [ "$queue" == "none" ]; then
-  USE_SLURM=
-fi
-if [ "$queue" == "terminal" ]; then
-  USE_SLURM=
-fi
-
-if [ "$USE_SLURM" == "1" ]; then
-  if [ "$RESOURCE_MANAGER" == "SLURM" ]; then
-    cat << EOF >> $scriptfile
+cat << EOF >> $scriptfile
 #SBATCH -J $JOBPREFIX$infile
 #SBATCH -e $outerr
 #SBATCH -o $outlog
@@ -874,13 +791,11 @@ $SLURM_PSM
 EOF
 fi
 
-    if [ "$walltimestring_slurm" != "" ]; then
+if [ "$walltimestring_slurm" != "" ]; then
       cat << EOF >> $scriptfile
 #SBATCH $walltimestring_slurm
 
 EOF
-    fi
-  fi
 fi
 
 if [[ "$MODULES" != "" ]]; then
