@@ -103,7 +103,6 @@ function usage {
   echo " -j prefix - specify a job prefix"
   echo " -L use Open MPI version of fds"
   echo " -m m - reserve m processes per node [default: 1]"
-  echo " -M   -  add --mca plm_rsh_agent /usr/bin/ssh to mpirun command "
   echo " -n n - number of MPI processes per node [default: 1]"
   echo " -O n - run cases casea.fds, caseb.fds, ... using 1, ..., N OpenMP threads"
   echo "        where case is specified on the command line. N can be at most 9."
@@ -111,7 +110,6 @@ function usage {
   echo " -t   - used for timing studies, run a job alone on a node (reserving $NCORES_COMPUTENODE cores)"
   echo " -T type - run dv (development) or db (debug) version of fds"
   echo "           if -T is not specified then the release version of fds is used"
-  echo " -U n - only allow n jobs owned by `whoami` to run at a time"
   echo " -V   - show command line used to invoke qfds.sh"
   echo " -w time - walltime, where time is hh:mm for PBS and dd-hh:mm:ss for SLURM. [default: $walltime]"
   echo " -y dir - run case in directory dir"
@@ -169,12 +167,8 @@ ABORTRUN=n
 DB=
 OUT2ERROR=
 stopjob=0
-MCA=
 OPENMPCASES=
 OPENMPTEST=
-if [ "$MPIRUN_MCA" != "" ]; then
-  MCA=$MPIRUN_MCA
-fi
 
 n_mpi_processes=1
 n_mpi_processes_per_node=2
@@ -186,7 +180,6 @@ use_devel=
 use_intel_mpi=1
 EMAIL=
 CHECK_DIRTY=
-USERMAX=
 casedir=
 use_default_casedir=
 MULTITHREAD=
@@ -232,7 +225,7 @@ commandline=`echo $* | sed 's/-V//' | sed 's/-v//'`
 
 #*** read in parameters from command line
 
-while getopts 'Ab:d:e:Ef:ghHiIj:Lm:Mn:o:O:p:Pq:stT:U:vVw:y:Yz' OPTION
+while getopts 'Ab:d:e:Ef:ghHiIj:Lm:n:o:O:p:Pq:stT:vVw:y:Yz' OPTION
 do
 case $OPTION  in
   A) # used by timing scripts to identify benchmark cases
@@ -276,9 +269,6 @@ case $OPTION  in
    ;;
   L)
    use_intel_mpi=
-   ;;
-  M)
-   MCA="--mca plm_rsh_agent /usr/bin/ssh "
    ;;
   m)
    max_processes_per_node="$OPTARG"
@@ -326,9 +316,6 @@ case $OPTION  in
    if [ "$TYPE" == "db" ]; then
      use_debug=1
    fi
-   ;;
-  U)
-   USERMAX="$OPTARG"
    ;;
   v)
    showinput=1
@@ -603,7 +590,7 @@ else                                 # using OpenMPI
 fi
 
 TITLE="$infile"
-MPIRUN="$MPIRUNEXE $REPORT_BINDINGS $SOCKET_OPTION $MCA -np $n_mpi_processes"
+MPIRUN="$MPIRUNEXE $REPORT_BINDINGS $SOCKET_OPTION -np $n_mpi_processes"
 
 cd $dir
 fulldir=`pwd`
@@ -873,16 +860,6 @@ if [ "$showinput" == "1" ]; then
   cat $scriptfile
   echo
   exit
-fi
-
-# wait until number of jobs running alread by user is less than USERMAX
-if [ "$USERMAX" != "" ]; then
-  nuser=`squeue | grep -v JOBID | awk '{print $2 $4}' | grep $queue | grep $USER | wc -l`
-  while [ $nuser -gt $USERMAX ]
-  do
-    nuser=`squeue | grep -v JOBID | awk '{print $2 $4}' | grep $queue | grep $USER | wc -l`
-    sleep 10
-  done
 fi
 
 #*** output info to screen
