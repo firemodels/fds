@@ -1936,8 +1936,22 @@ centerline of the room, and two horizontal arrays located 8.4~cm above the floor
 \section{Sandia Methane Burner}
 \label{Sandia_Methane_Burner_Description}
 
-A series of 3~m diameter methane gas burner experiments were conducted in the Fire Laboratory for Accreditation of Models and Experiments (FLAME) facility in the Thermal Test Complex at Sandia National Laboratories~\cite{Blanchat:2011}. The test chamber is cylindrical with an inner diameter of 18.3~m and a height of 13.1~m at the perimeter. The ceiling slopes upwards to a height of 15.2~m at the center. The perimeter walls are made of steel channel sections that are water-cooled. The gas burner is surrounded by a 12.7~m diameter steel spill plate. Beyond the spill plate is steel grating through which air can flow from the basement.
+A series of 3~m diameter methane gas burner experiments were conducted in the Fire Laboratory for Accreditation of Models and Experiments (FLAME) facility in the Thermal Test Complex at Sandia National Laboratories~\cite{Blanchat:2011}. The test chamber (Fig.~\ref{FRH_Cutaway}) is cylindrical with an inner diameter of 18.3~m and a height of 13.1~m at the perimeter. The ceiling slopes upwards to a height of 15.2~m at the center. The perimeter walls are made of steel channel sections that are water-cooled. The gas burner is surrounded by a 12.7~m diameter steel spill plate. Beyond the spill plate is steel grating through which air can flow from the basement.
 
+\begin{figure}[!ht]
+\includegraphics[width=\textwidth]{FIGURES/Sandia_Methane_Burner/FRH_Cutaway}
+\caption[Cutaway view of the Sandia FLAME test cell]{Cutaway view of the Sandia FLAME test cell.}
+\label{FRH_Cutaway}
+\end{figure}
+
+\subsubsection{Modeling Notes}
+
+The simulations of the 3~m methane fires are done with 10~cm grid resolution in an open domain. That is, the walls of the cylindrical test cell are not modeled. 
+
+The radiative fraction is specified at 0.35 rather than the default 0.20 for methane because the large fire is far more sooty and luminous than a small methane flame. 600 solid angles are used to solve the radiative transport equation rather than the default 100 so as to resolve the radiative flux 9~m from the fire. 
+
+
+\FloatBarrier
 
 \section{Sandia Plume Experiments}
 \label{Sandia_Plume_Description}
