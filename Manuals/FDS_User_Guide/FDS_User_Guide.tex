@@ -9267,6 +9267,47 @@ The gas phase output quantity {\ct 'EXTINCTION COEFFICIENT'} is $K$. A similar q
 Note that FDS cannot report a visibility of infinity, but rather reports a {\ct MAXIMUM\_VISIBILITY} that you can control via the {\ct MISC} line. The default is 30~m.
 
 
+\subsection{Flame Height and Flame Tilt}
+\label{info:flameheight}
+
+The ``flame height,'' and to some extent the ``flame tilt,'' are common quantities used to assess the hazard from a large fire. FDS does not output these quantities directly, but there is a combination of devices and controls that yield these values. This is all best explained with an example. Suppose you are simulating a fire in a domain that is 10~m high with a grid resolution of 0.2~m. The fire is centered about the point $(x,y)=(0,0)$ at $z=0$. The following input lines compute the flame height and tilt:
+\begin{lstlisting}
+&DEVC ID='HRR', Z_ID='z', XBP=0.0,0.0,0.0,0.0,0.1,9.9, QUANTITY='HRRPUV', 
+      SPATIAL_STATISTIC='VOLUME INTEGRAL', DX=5, DY=5, DZ=0.1, POINTS=100, 
+      STATISTICS_START=10. /
+&CTRL ID='H', FUNCTION_TYPE='PERCENTILE', INPUT_ID='HRR', PERCENTILE=0.97 /
+&DEVC ID='x_max', XB=-5,5,-5,5,9.0,9.2, QUANTITY='TEMPERATURE', 
+      SPATIAL_STATISTIC='MAXLOC X' /
+&DEVC ID='y_max', XB=-5,5,-5,5,9.0,9.2, QUANTITY='TEMPERATURE', 
+      SPATIAL_STATISTIC='MAXLOC Y' /
+&CTRL ID='x2', FUNCTION_TYPE='POWER', INPUT_ID='x_max','CONSTANT', CONSTANT=2 /
+&CTRL ID='y2', FUNCTION_TYPE='POWER', INPUT_ID='y_max','CONSTANT', CONSTANT=2 /
+&CTRL ID='r2', FUNCTION_TYPE='SUM', INPUT_ID='x2','y2' /
+&CTRL ID='r',  FUNCTION_TYPE='POWER', INPUT_ID='r2','CONSTANT', CONSTANT=0.5 /
+&CTRL ID='r/9', FUNCTION_TYPE='DIVIDE', INPUT_ID='d','CONSTANT', CONSTANT=9 /
+&CTRL ID='tilt_rad', FUNCTION_TYPE='ATAN', INPUT_ID='r/9' /
+&CTRL ID='tilt_deg', FUNCTION_TYPE='MULTIPLY', INPUT_ID='tilt_rad','CONSTANT', 
+      CONSTANT=57.296 /
+&CTRL ID='cos_theta', FUNCTION_TYPE='COS', INPUT_ID='tilt_rad' /
+&CTRL ID='L', FUNCTION_TYPE='DIVIDE', INPUT_ID='H','cos_theta' /
+&DEVC ID='L_F', CTRL_ID='L', XYZ=0,0,0, QUANTITY='CONTROL VALUE', 
+      TEMPORAL_STATISTIC='RUNNING AVERAGE', STATISTICS_START=10, UNITS='m' /
+&DEVC ID='tilt', CTRL_ID='tilt_deg', XYZ=0,0,0, QUANTITY='CONTROL VALUE', 
+      TEMPORAL_STATISTIC='RUNNING AVERAGE', STATISTICS_START=10, UNITS='deg' /
+\end{lstlisting}
+\begin{description}
+\item[{\ct ID='HRR'}] Compute a vertical array of heat release rates over horizontal slices that are one cell thick. 
+\item[{\ct ID='H'}] Take the function {\ct ('z','HRR')} and compute the height below which 97~\% of the fire's energy is released. 
+\item[{\ct ID='x\_max'}] Find the $x$ coordinate of the point of maximum temperature within the volume defined by {\ct XB}. Do the same for the $y$ coordinate.
+\item[{\ct ID='x2','y2','r2','r','r/9'}] Determine the radial distance from the origin to the point of maximum temperature. Divide this distance by the height of the slice within which you located the maximum temperature, $z=9$. 
+\item[{\ct ID='tilt\_rad','tilt\_deg'}] Calculate the arctangent of {\ct 'r/9'} to determine the tilt angle in radians. Then convert this value to degrees.
+\item[{\ct ID='cos\_theta'}] Calulate the cosine of the tilt angle.
+\item[{\ct ID='L'}] Divide the vertical flame height by the cosine of the tilt angle to arrive at the length of the flame.
+\item[{\ct ID='L\_F','tilt'}] Print out the flame length and tilt angle to the device file using a running average to smooth the noisy data.
+\end{description}
+To better understand the control logic, see Section~\ref{info:basic_control}. Pay particular attention to the averaging periods, start times, etc. You do not want to begin a running average until the fire plume has stabilized. Practice with some simple cases before implementing this in a complex simulation.
+
+
 \subsection{Layer Height and the Average Upper and Lower Layer Temperatures}
 \label{info:layerheight}
 
