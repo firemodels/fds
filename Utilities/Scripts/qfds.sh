@@ -92,9 +92,8 @@ function usage {
   fi
   echo "Other options:"
   echo " -b email_address - send an email to email_address when jobs starts, aborts and finishes"
-  echo " -C   - use modules currently loaded rather than modules loaded when fds was built."
   echo " -d dir - specify directory where the case is found [default: .]"
-  echo " -E - use tcp transport (only available with the Intel compiled versions of fds)"
+  echo " -E - use tcp transport (only available with Intel compiled versions of fds)"
   echo "      This options adds export I_MPI_FABRICS=shm:tcp to the run script"
   echo " -f repository root - name and location of repository where FDS is located"
   echo "    [default: $FDSROOT]"
@@ -109,7 +108,6 @@ function usage {
   echo " -O n - run cases casea.fds, caseb.fds, ... using 1, ..., N OpenMP threads"
   echo "        where case is specified on the command line. N can be at most 9."
   echo " -s   - stop job"
-  echo " -S   - use startup files to set the environment, do not load modules"
   echo " -t   - used for timing studies, run a job alone on a node (reserving $NCORES_COMPUTENODE cores)"
   echo " -T type - run dv (development) or db (debug) version of fds"
   echo "           if -T is not specified then the release version of fds is used"
@@ -166,7 +164,6 @@ fi
 
 showcommandline=
 HELP=
-FDS_MODULE_OPTION=1
 MPIRUN=
 ABORTRUN=n
 DB=
@@ -208,8 +205,7 @@ RESOURCE_MANAGER="NONE"
 if [ $missing_slurm -eq 0 ]; then
   RESOURCE_MANAGER="SLURM"
 else
-  echo "***error: The slurm resource manager was not found."
-  echo "          The slurm resource manager is required."
+  echo "***error: The slurm resource manager was not found and is required."
   exit
 fi
 if [ "$SLURM_MEM" != "" ]; then
@@ -228,11 +224,6 @@ benchmark=no
 showinput=0
 exe=
 
-STARTUP=
-if [ "$QFDS_STARTUP" != "" ]; then
-  STARTUP=$QFDS_STARTUP
-fi
-
 if [ $# -lt 1 ]; then
   usage
 fi
@@ -241,7 +232,7 @@ commandline=`echo $* | sed 's/-V//' | sed 's/-v//'`
 
 #*** read in parameters from command line
 
-while getopts 'Ab:Cd:e:Ef:ghHiIj:Lm:Mn:o:O:p:Pq:sStT:U:vVw:y:Yz' OPTION
+while getopts 'Ab:d:e:Ef:ghHiIj:Lm:Mn:o:O:p:Pq:stT:U:vVw:y:Yz' OPTION
 do
 case $OPTION  in
   A) # used by timing scripts to identify benchmark cases
@@ -249,9 +240,6 @@ case $OPTION  in
    ;;
   b)
    EMAIL="$OPTARG"
-   ;;
-  C)
-   FDS_MODULE_OPTION=
    ;;
   d)
    dir="$OPTARG"
@@ -324,9 +312,6 @@ case $OPTION  in
    ;;
   s)
    stopjob=1
-   ;;
-  S)
-   STARTUP=1
    ;;
   t)
    benchmark="yes"
@@ -402,8 +387,8 @@ if [ "$casedir" != "" ]; then
 fi
 
 if [[ "$TCP" != "" ]] && [[ "$use_intel_mpi" == "" ]]; then
-  echo "***error: -The E option for specifying tcp transport is only available"
-  echo "          with Intel the compiled versions of fds"
+  echo "***error: The -E option for specifying tcp transport is only available"
+  echo "          with Intel compiled versions of fds"
   exit
 fi
 
@@ -475,25 +460,22 @@ fi
 
 #*** modules loaded currently
 
-if [ "$STARTUP" == "" ]; then
-
-  CURRENT_LOADED_MODULES=`echo $LOADEDMODULES | tr ':' ' '`
+CURRENT_LOADED_MODULES=`echo $LOADEDMODULES | tr ':' ' '`
 
 # modules loaded when fds was built
 
-  if [ "$exe" != "" ]; then  # first look for file that contains the list
-    FDSDIR=$(dirname "$exe")
-    if [ -e $FDSDIR/.fdsinfo ]; then
-      FDS_LOADED_MODULES=`tail -1 $FDSDIR/.fdsinfo`
-      OPENMPI_PATH=`head -1 $FDSDIR/.fdsinfo`
-    fi
+if [ "$exe" != "" ]; then  # first look for file that contains the list
+  FDSDIR=$(dirname "$exe")
+  if [ -e $FDSDIR/.fdsinfo ]; then
+    FDS_LOADED_MODULES=`tail -1 $FDSDIR/.fdsinfo`
+    OPENMPI_PATH=`head -1 $FDSDIR/.fdsinfo`
   fi
+fi
 
-  if [[ "$FDS_MODULE_OPTION" == "1" ]] && [[ "$FDS_LOADED_MODULES" != "" ]]; then
-    MODULES=$FDS_LOADED_MODULES               # modules loaded when fds was built
-  else
-    MODULES=$CURRENT_LOADED_MODULES
-  fi
+if [[ "$FDS_LOADED_MODULES" != "" ]]; then
+  MODULES=$FDS_LOADED_MODULES               # modules loaded when fds was built
+else
+  MODULES=$CURRENT_LOADED_MODULES
 fi
 
 #*** define number of nodes
@@ -925,21 +907,7 @@ fi
     echo "           Intel MPI"              | tee -a $qlog
   fi
 
-#*** output currently loaded modules and modules when fds was built if the
-#    1) -C option was selected and
-#    2) currently loaded modules and fds loaded modules are diffent
-
-  if [ "$FDS_MODULE_OPTION" == "" ]; then
-    if [[ "$FDS_LOADED_MODULES" != "" ]] && [[ "$CURRENT_LOADED_MODULES" != "" ]]; then
-      if [ "$FDS_LOADED_MODULES" != "$CURRENT_LOADED_MODULES" ]; then
-        echo "  Modules(when run):$CURRENT_LOADED_MODULES" | tee -a $qlog
-        echo "Modules(when built):$FDS_LOADED_MODULES"     | tee -a $qlog
-        MODULES_OUT=1
-      fi
-    fi
-  fi
-
-#*** otherwise output modules used when fds is run
+#*** output modules used when fds is run
   if [[ "$MODULES" != "" ]] && [[ "$MODULES_OUT" == "" ]]; then
     echo "            Modules:$MODULES"                    | tee -a $qlog
   fi
