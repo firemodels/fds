@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# define FIREMODELS in your .bashrc 
+# FIREMODELS is the repo root directory containing fds, smv bot repos. For example:
+#   export FIREMODELS=/home/username/FireModels_fork
+
 # ---------------------------- stop_fds_if_requested ----------------------------------
 
 function stop_fds_if_requested {
@@ -95,8 +99,6 @@ function usage {
   echo " -d dir - specify directory where the case is found [default: .]"
   echo " -E - use tcp transport (only available with Intel compiled versions of fds)"
   echo "      This options adds export I_MPI_FABRICS=shm:tcp to the run script"
-  echo " -f repository root - name and location of repository where FDS is located"
-  echo "    [default: $FDSROOT]"
   echo " -g   - only run if input file and executable are not dirty"
   echo " -i use installed fds"
   echo " -I use Intel MPI version of fds"
@@ -225,7 +227,7 @@ commandline=`echo $* | sed 's/-V//' | sed 's/-v//'`
 
 #*** read in parameters from command line
 
-while getopts 'Ab:d:e:Ef:ghHiIj:Lm:n:o:O:p:Pq:stT:vVw:y:Yz' OPTION
+while getopts 'Ab:d:e:EghHiIj:Lm:n:o:O:p:Pq:stT:vVw:y:Yz' OPTION
 do
 case $OPTION  in
   A) # used by timing scripts to identify benchmark cases
@@ -242,9 +244,6 @@ case $OPTION  in
    ;;
   E)
    TCP=1
-   ;;
-  f)
-   FDSROOT="$OPTARG"
    ;;
   g)
    CHECK_DIRTY=1
