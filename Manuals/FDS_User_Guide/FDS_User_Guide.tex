@@ -9878,7 +9878,7 @@ The {\ct TEMPORAL\_STATISTIC='RUNNING AVERAGE'} outputs the running average valu
 
 \subsubsection{Favre Average}
 
-The {\ct TEMPORAL\_STATISTIC='FAVRE AVERAGE'} outputs the Favre (density weighted) running average value of the {\ct QUANTITY} over the time period starting at {\ct STATISTICS\_START} and ending at {\ct STATISTICS\_END}. If the scalar quantity of interest is $\phi$ and the density if $\rho$ and the running average is defined by an overbar (that is, $\overline{\phi}$ is the running average of the scalar), then the Favre average is denoted with a tilde and computed as $\tilde{\phi} = \overline{\rho \phi}/\overline{\rho}$.
+The {\ct TEMPORAL\_STATISTIC='FAVRE AVERAGE'} outputs the Favre (density weighted) running average value of the {\ct QUANTITY} over the time period starting at {\ct STATISTICS\_START} and ending at {\ct STATISTICS\_END}. If the scalar quantity of interest is $\phi$ and the density if $\rho$ and the running average is defined by an overbar (that is, $\overline{\phi}$ is the running average of the scalar), then the Favre average is denoted with a tilde and computed as $\tilde{\phi} = \overline{\rho \phi}/\overline{\rho}$.  This output is not compatible with {\ct INITIAL\_VALUE}.
 
 \subsubsection{Instantaneous Value}
 
@@ -9914,6 +9914,14 @@ which represents the probability\footnote{Note that the parameterless form of th
    \phi_{\rm rms} = \sqrt{ \frac{ \sum_{i=1}^n (\phi_i - \overline{\phi})^2 }{n-1} }
 \ee
 The computation starts at {\ct STATISTICS\_START} and ends at {\ct STATISTICS\_END}.
+
+\subsubsection{Favre Root Mean Square}
+
+{\ct TEMPORAL\_STATISTIC='FAVRE RMS'} produces the unbiased estimate of the density-weighted {\em root mean square} of the {\ct QUANTITY} $\phi$:
+\be
+   \tilde{\phi}_{\rm rms} = \sqrt{ \frac{ \sum_{i=1}^n (\phi_i - \tilde{\phi})^2 }{n-1} } \quad ; \quad \tilde{\phi} = \overline{\rho \phi}/\overline{\rho}
+\ee
+The computation starts at {\ct STATISTICS\_START} and ends at {\ct STATISTICS\_END}.  This output is not compatible with {\ct INITIAL\_VALUE}.
 
 \subsubsection{Covariance}
 \label{info:covariance}
