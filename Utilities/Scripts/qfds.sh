@@ -108,7 +108,6 @@ function usage {
   echo " -O n - run cases casea.fds, caseb.fds, ... using 1, ..., N OpenMP threads"
   echo "        where case is specified on the command line. N can be at most 9."
   echo " -s   - stop job"
-  echo " -S   - use startup files to set the environment, do not load modules"
   echo " -t   - used for timing studies, run a job alone on a node (reserving $NCORES_COMPUTENODE cores)"
   echo " -T type - run dv (development) or db (debug) version of fds"
   echo "           if -T is not specified then the release version of fds is used"
@@ -225,11 +224,6 @@ benchmark=no
 showinput=0
 exe=
 
-STARTUP=
-if [ "$QFDS_STARTUP" != "" ]; then
-  STARTUP=$QFDS_STARTUP
-fi
-
 if [ $# -lt 1 ]; then
   usage
 fi
@@ -238,7 +232,7 @@ commandline=`echo $* | sed 's/-V//' | sed 's/-v//'`
 
 #*** read in parameters from command line
 
-while getopts 'Ab:d:e:Ef:ghHiIj:Lm:Mn:o:O:p:Pq:sStT:U:vVw:y:Yz' OPTION
+while getopts 'Ab:d:e:Ef:ghHiIj:Lm:Mn:o:O:p:Pq:stT:U:vVw:y:Yz' OPTION
 do
 case $OPTION  in
   A) # used by timing scripts to identify benchmark cases
@@ -318,9 +312,6 @@ case $OPTION  in
    ;;
   s)
    stopjob=1
-   ;;
-  S)
-   STARTUP=1
    ;;
   t)
    benchmark="yes"
@@ -469,25 +460,22 @@ fi
 
 #*** modules loaded currently
 
-if [ "$STARTUP" == "" ]; then
-
-  CURRENT_LOADED_MODULES=`echo $LOADEDMODULES | tr ':' ' '`
+CURRENT_LOADED_MODULES=`echo $LOADEDMODULES | tr ':' ' '`
 
 # modules loaded when fds was built
 
-  if [ "$exe" != "" ]; then  # first look for file that contains the list
-    FDSDIR=$(dirname "$exe")
-    if [ -e $FDSDIR/.fdsinfo ]; then
-      FDS_LOADED_MODULES=`tail -1 $FDSDIR/.fdsinfo`
-      OPENMPI_PATH=`head -1 $FDSDIR/.fdsinfo`
-    fi
+if [ "$exe" != "" ]; then  # first look for file that contains the list
+  FDSDIR=$(dirname "$exe")
+  if [ -e $FDSDIR/.fdsinfo ]; then
+    FDS_LOADED_MODULES=`tail -1 $FDSDIR/.fdsinfo`
+    OPENMPI_PATH=`head -1 $FDSDIR/.fdsinfo`
   fi
+fi
 
-  if [[ "$FDS_LOADED_MODULES" != "" ]]; then
-    MODULES=$FDS_LOADED_MODULES               # modules loaded when fds was built
-  else
-    MODULES=$CURRENT_LOADED_MODULES
-  fi
+if [[ "$FDS_LOADED_MODULES" != "" ]]; then
+  MODULES=$FDS_LOADED_MODULES               # modules loaded when fds was built
+else
+  MODULES=$CURRENT_LOADED_MODULES
 fi
 
 #*** define number of nodes
