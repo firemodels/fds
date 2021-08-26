@@ -862,7 +862,13 @@ $^\dag$ The Falcon experiments involved 4 separated spills
 \section{Loughborough Jet Fire Experiments}
 \label{Loughborough_Jet_Fires_Description}
 
-Researchers at Loughborough University, UK, conducted a series of six large-scale, high pressure jet fire experiments using natural gas and natural gas/hydrogen mixtures. For each fuel, the gas was released horizontally at high pressure (approximately 60~bar) through 20~mm, 35~mm and 50~mm diameter holes at the end of a 15~cm diameter pipe. The jet fires engulfed a 0.9~m diameter, 16~m long pipe section perpendicular to the flow direction. Heat flux measurements were made at various locations on the pipe and further afield. 
+Researchers at Loughborough University, UK, conducted a series of six large-scale, high pressure jet fire experiments using natural gas and natural gas/hydrogen mixtures at the GL Noble Denton Spadeadam Test Site in Cumbria, UK~\cite{Lowesmith:PSEP2012}. For each fuel, the gas was released horizontally at high pressure (approximately 60~bar) through 20~mm, 35~mm and 50~mm diameter holes at the end of a 15~cm diameter pipe. The jet fires engulfed a 0.9~m diameter, 16~m long pipe section perpendicular to the flow direction. Heat flux measurements were made at various locations on the pipe and further afield. A typical jet fire experiment at the facility is shown in Fig.~\ref{jet_photo}.
+
+\begin{figure}[!ht]
+\includegraphics[width=\textwidth]{FIGURES/Loughborough_Jet_Fires/Safety-Fig-03_497x335}
+\caption[Photograph of a jet fire experiment at the Spadeadam Test Site]{Photograph of a jet fire experiment at the Spadeadam Test Site.}
+\label{jet_photo}
+\end{figure}
 
 Table~\ref{Loughborough_Parameters} lists the key parameters for the natural gas experiments which have been chosen for this study. Note that the direction of the jet was nominally to the east, parallel to the prevailing wind. The wind deviated slightly in each experiment, as indicated in the table.
 
@@ -895,6 +901,7 @@ To resolve the radiation field at the far-field radiometers, 600~angles are used
 The wind profile is based on measurements made 10.85~m above the relatively flat terrain. The aerodynamic roughness length, $z_0$, is set to 0.03~m, appropriate for relatively flat grasslands, prairies, farms, etc. The Obukhov length, $L$, is set to 100,000~m, typical of a neutral atmosphere. Synthetic turbulence is generated at the upstream boundary of the computational domain, with a characteristic eddy length scale of 1~m and root-mean-square velocity fluctuation of 0.1~m/s.
 
 
+\FloatBarrier
 
 
 \section{McCaffrey Plume Experiments}
@@ -1971,7 +1978,14 @@ The condensation simulations included a 4~m portion of duct upstream to allow fo
 \section{Shell LNG Fireball Experiments}
 \label{Shell_LNG_Fireballs_Description}
 
-Shell Research Ltd.~commissioned four large-scale BLEVE (Boiling Liquid Expanding Vapor Explosion) experiments using LNG (Liquified Natural Gas) at the DNV (Det Norske Veritas) GL test facility at Spadeadam, UK~\cite{Betteridge:2015}. For Experiments 2-4, the cylindrical containment vessel was constructed of 6~mm stainless steel plates and had a length of approximately 6.5 m and diameter of approximately 1~m, with a total volume of 5.055~m$^3$. The mass of LNG for Experiments~2-4 was approximately 681~kg, 1306~kg, and 1251~kg, respectively. The LNG consisted of 96.7~\% methane, 3.0~\% ethane, 0.2~\% nitrogen, and 0.1~\% propane, by volume. The reservoir pressure for Experiments~2-4 was maintained at 13.01~bar, 6.07~bar, and 13.62~bar; and the temperatures were $-115 \; ^\circ$C, $-131 \; ^\circ$C, and $-115 \; ^\circ$C, respectively.
+Shell Research Ltd.~commissioned four large-scale BLEVE (Boiling Liquid Expanding Vapor Explosion) experiments using LNG (Liquified Natural Gas) at the DNV (Det Norske Veritas) GL test facility at Spadeadam, UK~\cite{Betteridge:2015}. For Experiments 2-4, the cylindrical containment vessel (Fig.~\ref{Shell_LNG_Fireball_Photos}) was constructed of 6~mm stainless steel plates and had a length of approximately 6.5 m and diameter of approximately 1~m, with a total volume of 5.055~m$^3$. The mass of LNG for Experiments~2-4 was approximately 681~kg, 1306~kg, and 1251~kg, respectively. The LNG consisted of 96.7~\% methane, 3.0~\% ethane, 0.2~\% nitrogen, and 0.1~\% propane, by volume. The reservoir pressure for Experiments~2-4 was maintained at 13.01~bar, 6.07~bar, and 13.62~bar; and the temperatures were $-115 \; ^\circ$C, $-131 \; ^\circ$C, and $-115 \; ^\circ$C, respectively.
+
+\begin{figure}[!ht]
+\includegraphics[width=\textwidth]{FIGURES/Shell_LNG_Fireballs/LNG_Tank}
+\includegraphics[width=\textwidth]{FIGURES/Shell_LNG_Fireballs/Fireball_Images}
+\caption[Photographs of the Shell LNG Fireball experiments]{(Top) Pressure vessel used in the Shell LNG Fireball experiments. (Bottom) Photographs of Tests 2, 3, and 4, respectively~\cite{Betteridge:2015}.}
+\label{Shell_LNG_Fireball_Photos}
+\end{figure}
 
 The rupture of the vessels was initiated by an explosive cutting charge designed to rip open the vessel from end to end. Commercial fireworks were ignited just prior to the explosive charge to ensure ignition of the released gas.
 
@@ -1983,7 +1997,7 @@ The FDS simulations of the three BLEVE experiments are performed with 0.5~m reso
 
 Approximately 600 angles are used in the radiative transport solver rather than the default 100. A radiative fraction of 30~\% is used, rather than the default of 20~\% for methane.
 
-
+\FloatBarrier
 
 
 
