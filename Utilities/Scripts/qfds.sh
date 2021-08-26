@@ -94,7 +94,7 @@ function usage {
   echo " -b email_address - send an email to email_address when jobs starts, aborts and finishes"
   echo " -C   - use modules currently loaded rather than modules loaded when fds was built."
   echo " -d dir - specify directory where the case is found [default: .]"
-  echo " -E - use tcp transport (only available with the Intel compiled versions of fds)"
+  echo " -E - use tcp transport (only available with Intel compiled versions of fds)"
   echo "      This options adds export I_MPI_FABRICS=shm:tcp to the run script"
   echo " -f repository root - name and location of repository where FDS is located"
   echo "    [default: $FDSROOT]"
@@ -208,8 +208,7 @@ RESOURCE_MANAGER="NONE"
 if [ $missing_slurm -eq 0 ]; then
   RESOURCE_MANAGER="SLURM"
 else
-  echo "***error: The slurm resource manager was not found."
-  echo "          The slurm resource manager is required."
+  echo "***error: The slurm resource manager was not found and is required."
   exit
 fi
 if [ "$SLURM_MEM" != "" ]; then
@@ -402,8 +401,8 @@ if [ "$casedir" != "" ]; then
 fi
 
 if [[ "$TCP" != "" ]] && [[ "$use_intel_mpi" == "" ]]; then
-  echo "***error: -The E option for specifying tcp transport is only available"
-  echo "          with Intel the compiled versions of fds"
+  echo "***error: The -E option for specifying tcp transport is only available"
+  echo "          with Intel compiled versions of fds"
   exit
 fi
 
