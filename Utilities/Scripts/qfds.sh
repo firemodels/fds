@@ -92,7 +92,6 @@ function usage {
   fi
   echo "Other options:"
   echo " -b email_address - send an email to email_address when jobs starts, aborts and finishes"
-  echo " -C   - use modules currently loaded rather than modules loaded when fds was built."
   echo " -d dir - specify directory where the case is found [default: .]"
   echo " -E - use tcp transport (only available with Intel compiled versions of fds)"
   echo "      This options adds export I_MPI_FABRICS=shm:tcp to the run script"
@@ -166,7 +165,6 @@ fi
 
 showcommandline=
 HELP=
-FDS_MODULE_OPTION=1
 MPIRUN=
 ABORTRUN=n
 DB=
@@ -240,7 +238,7 @@ commandline=`echo $* | sed 's/-V//' | sed 's/-v//'`
 
 #*** read in parameters from command line
 
-while getopts 'Ab:Cd:e:Ef:ghHiIj:Lm:Mn:o:O:p:Pq:sStT:U:vVw:y:Yz' OPTION
+while getopts 'Ab:d:e:Ef:ghHiIj:Lm:Mn:o:O:p:Pq:sStT:U:vVw:y:Yz' OPTION
 do
 case $OPTION  in
   A) # used by timing scripts to identify benchmark cases
@@ -248,9 +246,6 @@ case $OPTION  in
    ;;
   b)
    EMAIL="$OPTARG"
-   ;;
-  C)
-   FDS_MODULE_OPTION=
    ;;
   d)
    dir="$OPTARG"
@@ -488,7 +483,7 @@ if [ "$STARTUP" == "" ]; then
     fi
   fi
 
-  if [[ "$FDS_MODULE_OPTION" == "1" ]] && [[ "$FDS_LOADED_MODULES" != "" ]]; then
+  if [[ "$FDS_LOADED_MODULES" != "" ]]; then
     MODULES=$FDS_LOADED_MODULES               # modules loaded when fds was built
   else
     MODULES=$CURRENT_LOADED_MODULES
@@ -924,21 +919,7 @@ fi
     echo "           Intel MPI"              | tee -a $qlog
   fi
 
-#*** output currently loaded modules and modules when fds was built if the
-#    1) -C option was selected and
-#    2) currently loaded modules and fds loaded modules are diffent
-
-  if [ "$FDS_MODULE_OPTION" == "" ]; then
-    if [[ "$FDS_LOADED_MODULES" != "" ]] && [[ "$CURRENT_LOADED_MODULES" != "" ]]; then
-      if [ "$FDS_LOADED_MODULES" != "$CURRENT_LOADED_MODULES" ]; then
-        echo "  Modules(when run):$CURRENT_LOADED_MODULES" | tee -a $qlog
-        echo "Modules(when built):$FDS_LOADED_MODULES"     | tee -a $qlog
-        MODULES_OUT=1
-      fi
-    fi
-  fi
-
-#*** otherwise output modules used when fds is run
+#*** output modules used when fds is run
   if [[ "$MODULES" != "" ]] && [[ "$MODULES_OUT" == "" ]]; then
     echo "            Modules:$MODULES"                    | tee -a $qlog
   fi
