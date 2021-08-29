@@ -9946,6 +9946,11 @@ For some applications you might need to predict a minimum or maximum value of th
 \ee
 which represents the probability\footnote{Note that the parameterless form of the distribution is intended for extrapolation only.} of the value $\phi$ not being exceeded in the given time interval, $(t_1-t_0)/N$. The probabilities for each of the $N$ ascending maximum values are assumed to be $m/(N+1)$. Plotting $\phi$ versus the expression on the right yields an approximate straight line from which we can estimate the value of $\phi$ appropriate for the longer {\ct TIME\_PERIOD}; that is, the value for which the probability of not being exceeded in the relatively short time interval $(t_1-t_0)/N$ is very close to 1. Returning to the example from wind engineering, the probability of not exceeding the 50~year wind speed in a given year is $1-1/50=0.98$.
 
+\subsubsection{Time to Reach Minimum and Maximum Value}
+
+The time at which the given {\ct QUANTITY} achieves its maximum or minimum value is specified by the {\ct TEMPORAL\_STATISTIC} {\ct 'MAX TIME'} or {\ct 'MIN TIME'}, respectively.
+
+
 \subsubsection{Root Mean Square}
 \label{info:rms}
 \label{info:rmscovcorr}
