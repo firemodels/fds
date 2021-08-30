@@ -9799,25 +9799,31 @@ If you are interested in the average value over a plane, give the {\ct XB} volum
 \subsubsection{Volume-Weighted Mean}
 
 For a gas phase scalar quantity, $\phi(x,y,z)$, {\ct SPATIAL\_STATISTIC='VOLUME MEAN'} produces the discrete analog of
-\be \frac{1}{V} \; \int \phi(x,y,z) \; \d x \, \d y \, \d z \ee
+\be \frac{1}{V} \; \iiint \phi(x,y,z) \; \d x \, \d y \, \d z \ee
 which is very similar to {\ct 'MEAN'}, but it weights the values according to the relative size of the mesh cell. Note that this statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the coordinate parameters, {\ct XB}, which can extend into multiple meshes.
 
 \subsubsection{Mass-Weighted Mean}
 
 For a gas phase scalar quantity, $\phi(x,y,z)$, {\ct SPATIAL\_STATISTIC='MASS MEAN'} produces the discrete analog of
-\be \frac{ \int \rho(x,y,z) \; \phi(x,y,z) \; \d x \, \d y \, \d z}{\int \rho \; \d x \, \d y \, \d z}  \ee
+\be \frac{ \iiint \rho(x,y,z) \; \phi(x,y,z) \; \d x \, \d y \, \d z}{\iiint \rho \; \d x \, \d y \, \d z}  \ee
 which is similar to {\ct 'VOLUME MEAN'}, but it weights the values according to the relative mass of the mesh cell. Note that this statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the coordinate parameters, {\ct XB}, which can extend into multiple meshes.
+
+\subsubsection{Centroids}
+
+For a gas phase scalar quantity, $\phi(x,y,z)$, {\ct SPATIAL\_STATISTIC='CENTROID X'} produces the discrete analog of
+\be \frac{ \iiint x \, \phi(x,y,z) \; \d x \, \d y \, \d z}{\iiint \phi(x,y,z) \; \d x \, \d y \, \d z}  \ee
+Similar calculations are performed for {\ct 'CENTROID Y'} and {\ct 'CENTROID Z'}. Note that this statistic is only appropriate for gas phase quantities, and you must specify a volume to sum over via the coordinate parameters, {\ct XB}.
 
 \subsubsection{Volume Integral}
 
 For a gas phase scalar quantity, $\phi(x,y,z)$, {\ct SPATIAL\_STATISTIC='VOLUME INTEGRAL'} produces the discrete analog of
-\be \int \phi(x,y,z) \; \d x \, \d y \, \d z \ee
+\be \iiint \phi(x,y,z) \; \d x \, \d y \, \d z \ee
 This statistic is only appropriate for gas phase quantities, in particular those whose units involve m$^{-3}$. For example, heat release rate per unit volume is an appropriate output quantity. This statistic can also be used on a {\ct DEVC} line with an output quantity of {\ct DENSITY} to output the total mass within the volume bound by {\ct XB}. In all cases, you must specify a volume to sum over via the coordinate parameters, {\ct XB}, which can extend into multiple meshes.
 
 \subsubsection{Mass Integral}
 
 For a given gas phase output quantity, $\phi(x,y,z)$, {\ct SPATIAL\_STATISTIC='MASS INTEGRAL'} produces the discrete analog of
-\be \int \, \rho(x,y,z) \; \phi(x,y,z) \; \d x \, \d y \, \d z \ee
+\be \iiint \, \rho(x,y,z) \; \phi(x,y,z) \; \d x \, \d y \, \d z \ee
 Note that this statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the coordinate parameters, {\ct XB}, which can extend into multiple meshes.
 
 \subsubsection{Area Integral}
