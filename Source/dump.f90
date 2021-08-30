@@ -6335,6 +6335,15 @@ DEVICE_LOOP: DO N=1,N_DEVC
                            CASE('MASS MEAN')
                               SDV%VALUE_1 = SDV%VALUE_1 + VALUE*VOL*RHO(I,J,K)
                               SDV%VALUE_2 = SDV%VALUE_2 + VOL*RHO(I,J,K)
+                           CASE('CENTROID X')
+                              SDV%VALUE_1 = SDV%VALUE_1 + VALUE*VOL*XC(I)
+                              SDV%VALUE_2 = SDV%VALUE_2 + VALUE*VOL
+                           CASE('CENTROID Y')
+                              SDV%VALUE_1 = SDV%VALUE_1 + VALUE*VOL*YC(J)
+                              SDV%VALUE_2 = SDV%VALUE_2 + VALUE*VOL
+                           CASE('CENTROID Z')
+                              SDV%VALUE_1 = SDV%VALUE_1 + VALUE*VOL*ZC(K)
+                              SDV%VALUE_2 = SDV%VALUE_2 + VALUE*VOL
                            CASE('SUM')
                               IF (VALUE <= DV%QUANTITY_RANGE(2) .AND. VALUE >=DV%QUANTITY_RANGE(1)) &
                               SDV%VALUE_1 = SDV%VALUE_1 + VALUE
@@ -6463,8 +6472,12 @@ DEVICE_LOOP: DO N=1,N_DEVC
    SELECT CASE (DV%SPATIAL_STATISTIC)
       CASE DEFAULT
          DV%INSTANT_VALUE = DV%VALUE_1
-      CASE('MASS MEAN','VOLUME MEAN','MEAN','INTERPOLATION')
-         DV%INSTANT_VALUE = DV%VALUE_1 / DV%VALUE_2
+      CASE('MASS MEAN','VOLUME MEAN','MEAN','INTERPOLATION','CENTROID X','CENTROID Y','CENTROID Z')
+         IF (ABS(DV%VALUE_2)>TWO_EPSILON_EB) THEN
+            DV%INSTANT_VALUE = DV%VALUE_1 / DV%VALUE_2
+         ELSE
+            DV%INSTANT_VALUE = 0._EB
+         ENDIF
    END SELECT
 
    ! Special spacially-integrated devices
