@@ -2967,7 +2967,7 @@ ENDIF
 
 ! Print out information about materials
 
-WRITE(LU_OUTPUT,'(//A,I2)')  ' Material Information'
+WRITE(LU_OUTPUT,'(//A)')  ' Material Information'
 
 MATL_LOOP: DO N=1,N_MATL
 
@@ -3024,7 +3024,7 @@ ENDDO MATL_LOOP
 
 ! Print out information about surface types
 
-WRITE(LU_OUTPUT,'(//A,I2)')  ' Surface Conditions'
+WRITE(LU_OUTPUT,'(//A)')  ' Surface Conditions'
 
 SURFLOOP: DO N=0,N_SURF
 
@@ -3102,6 +3102,19 @@ SURFLOOP: DO N=0,N_SURF
    ENDIF
 
 ENDDO SURFLOOP
+
+! Print out information about particle classes
+
+WRITE(LU_OUTPUT,'(//A)')  ' Lagrangian Particle Classes'
+
+PARTLOOP: DO N=1,N_LAGRANGIAN_CLASSES
+   LPC => LAGRANGIAN_PARTICLE_CLASS(N)
+   WRITE(LU_OUTPUT,'(/I4,1X,A)')  N,TRIM(LPC%ID)
+   WRITE(LU_OUTPUT,'(4X,A,A)')   ' SURFace ID: ',TRIM(SURFACE(LPC%SURF_INDEX)%ID)
+   WRITE(LU_OUTPUT,'(4X,A,I0)')  ' # Reals: ',LPC%N_STORAGE_REALS
+   WRITE(LU_OUTPUT,'(4X,A,I0)')  ' # Integers: ',LPC%N_STORAGE_INTEGERS
+   WRITE(LU_OUTPUT,'(4X,A,I0)')  ' # Logicals: ',LPC%N_STORAGE_LOGICALS
+ENDDO PARTLOOP
 
 ! Print out information about all Devices
 
