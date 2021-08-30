@@ -9,7 +9,6 @@
 CURDIR=`pwd`
 
 cd $SVNROOT/..
-REPO=`pwd`
 
 cd $SVNROOT/Utilities/Scripts/
 SCRIPTDIR=`pwd`
@@ -157,7 +156,7 @@ if [ "$EXE" != "" ]; then
   EXE="-e $full_filepath"
 fi
 
-export QFDS="$SCRIPTDIR/qfds.sh $CHECK_DIRTY -f $REPO $walltime $showcommandline $showscript $DV $INTEL $EXE"
+export QFDS="$SCRIPTDIR/qfds.sh $CHECK_DIRTY $walltime $showcommandline $showscript $DV $INTEL $EXE"
 if [ "$CHECK" != "" ]; then
   export QFDS="$SVNROOT/fds/Verification/scripts/Check_FDS_Cases.sh"
 fi
