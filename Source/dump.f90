@@ -1522,8 +1522,9 @@ ENDIF
 OPEN(LU_SMV,FILE=FN_SMV,FORM='FORMATTED',STATUS='REPLACE')
 
 EVACUATION_SMV_APPEND: IF (EVACUATION_MC_MODE .AND. .NOT.EVACUATION_DRILL) THEN
-   ! Evacuation smv file format: evacuation stuff appended to the fire smv file
-   
+   ! Evacuation smv file format: Evacuation smv appended after the fire mesh information in smv file.
+   !                             Later the rest of fire smv file (strings) are appended to smv.
+   J = 0
    I = LEN_TRIM(CHID)-5
    FN_EVACFED = TRIM(CHID(1:I))//'_evac.fed'
    LU_EVACFED = GET_FILE_NUMBER()
@@ -1536,7 +1537,7 @@ EVACUATION_SMV_APPEND: IF (EVACUATION_MC_MODE .AND. .NOT.EVACUATION_DRILL) THEN
    LU_EVACXYZ = GET_FILE_NUMBER()
    FN_EVACXYZ = TRIM(CHID(1:I))//'.smv'
    OPEN (LU_EVACXYZ,FILE=FN_EVACXYZ,FORM='FORMATTED', STATUS='OLD')
-   DO
+   EVAC_SMV_DO: DO
       READ (LU_EVACXYZ,FMT='(A)',END=30) SMV_LINE
       IF (TRIM(SMV_LINE)=='NMESHES') THEN
          WRITE(LU_SMV,FMT='(A)') TRIM(SMV_LINE)
@@ -1545,7 +1546,17 @@ EVACUATION_SMV_APPEND: IF (EVACUATION_MC_MODE .AND. .NOT.EVACUATION_DRILL) THEN
       ELSE
          WRITE(LU_SMV,FMT='(A)') TRIM(SMV_LINE)
       ENDIF
-   ENDDO
+      IF (TRIM(SMV_LINE)=='CVENT') THEN
+         J = J + 1 ! counter: fire meshes copied
+         IF (J==N_FIRE_MESHES_IN_FED) THEN
+            EVAC_SMV_CVENT_DO: DO
+               READ (LU_EVACXYZ,FMT='(A)',END=30) SMV_LINE
+               WRITE(LU_SMV,FMT='(A)') TRIM(SMV_LINE)
+               IF (TRIM(SMV_LINE)=='') EXIT EVAC_SMV_DO ! Last fire CVENT lines copied
+            ENDDO EVAC_SMV_CVENT_DO
+         ENDIF
+      ENDIF
+   ENDDO EVAC_SMV_DO
 30 CONTINUE
    CLOSE (LU_EVACXYZ)
 
