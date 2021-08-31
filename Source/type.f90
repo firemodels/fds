@@ -163,11 +163,7 @@ TYPE ONE_D_M_AND_E_XFER_TYPE
    REAL(EB), POINTER, DIMENSION(:) :: ZZ_F                !< (1:N_TRACKED_SPECIES) Species mixture mass fraction at surface
    REAL(EB), POINTER, DIMENSION(:) :: RHO_D_F             !< (1:N_TRACKED_SPECIES) Diffusion at surface, \f$ \rho D_\alpha \f$
    REAL(EB), POINTER, DIMENSION(:) :: RHO_D_DZDN_F        !< \f$ \rho D_\alpha \partial Z_\alpha / \partial n \f$
-   REAL(EB), POINTER, DIMENSION(:) :: A_LP_MPUA           !< Accumulated liquid droplet mass per unit area (kg/m2)
    REAL(EB), POINTER, DIMENSION(:) :: AWM_AEROSOL         !< Accumulated aerosol mass per unit area (kg/m2)
-   REAL(EB), POINTER, DIMENSION(:) :: LP_CPUA             !< Liquid droplet cooling rate unit area (W/m2)
-   REAL(EB), POINTER, DIMENSION(:) :: LP_MPUA             !< Liquid droplet mass per unit area (kg/m2)
-   REAL(EB), POINTER, DIMENSION(:) :: LP_TEMP             !< Liquid droplet mean temperature (K)
    REAL(EB), POINTER, DIMENSION(:) :: RHO_C_S             !< Solid density times specific heat (J/m3/K)
    REAL(EB), POINTER, DIMENSION(:) :: K_S                 !< Solid conductivity (W/m/K)
    REAL(EB), POINTER, DIMENSION(:) :: DDSUM               !< Scaling factor to get minimum cell size
@@ -236,6 +232,25 @@ TYPE ONE_D_M_AND_E_XFER_TYPE
 
 END TYPE ONE_D_M_AND_E_XFER_TYPE
 
+! Note: If you change the number of scalar variables in BOUNDARY_PROPERTY_TYPE, adjust the numbers below
+
+INTEGER, PARAMETER :: N_BOUNDARY_PROPERTY_SCALAR_REALS=0,N_BOUNDARY_PROPERTY_SCALAR_INTEGERS=0,N_BOUNDARY_PROPERTY_SCALAR_LOGICALS=0
+INTEGER, DIMENSION(30) :: BOUNDARY_PROPERTY_REALS_ARRAY_SIZE=0,BOUNDARY_PROPERTY_INTEGERS_ARRAY_SIZE=0,&
+                          BOUNDARY_PROPERTY_LOGICALS_ARRAY_SIZE=0
+INTEGER :: N_BOUNDARY_PROPERTY_STORAGE_REALS,N_BOUNDARY_PROPERTY_STORAGE_INTEGERS,N_BOUNDARY_PROPERTY_STORAGE_LOGICALS
+
+!> \brief Property variables associated with a WALL or CFACE boundary cell
+
+TYPE BOUNDARY_PROPERTY_TYPE
+
+   REAL(EB), POINTER, DIMENSION(:) :: A_LP_MPUA           !< Accumulated liquid droplet mass per unit area (kg/m2)
+   REAL(EB), POINTER, DIMENSION(:) :: LP_CPUA             !< Liquid droplet cooling rate unit area (W/m2)
+   REAL(EB), POINTER, DIMENSION(:) :: LP_MPUA             !< Liquid droplet mass per unit area (kg/m2)
+   REAL(EB), POINTER, DIMENSION(:) :: LP_TEMP             !< Liquid droplet mean temperature (K)
+
+END TYPE BOUNDARY_PROPERTY_TYPE
+
+
 ! Note: If you change the number of scalar variables in LAGRANGIAN_PARTICLE_TYPE, adjust the numbers below
 
 INTEGER, PARAMETER :: N_PARTICLE_SCALAR_REALS=19,N_PARTICLE_SCALAR_INTEGERS=11,N_PARTICLE_SCALAR_LOGICALS=4
@@ -303,6 +318,7 @@ INTEGER, PARAMETER :: N_WALL_SCALAR_REALS=7,N_WALL_SCALAR_INTEGERS=14,N_WALL_SCA
 TYPE WALL_TYPE
 
    TYPE (ONE_D_M_AND_E_XFER_TYPE) :: ONE_D     !< Derived type carrying most of the solid boundary conditions
+   TYPE (BOUNDARY_PROPERTY_TYPE) :: BOUNDARY_PROPERTY !< Derived type carrying most of the surface boundary conditions
 
    REAL(EB), POINTER :: DUNDT                  !< \f$ \partial u_n / \partial t \f$
    REAL(EB), POINTER :: Q_LEAK                 !< Heat production of leaking gas (W/m3)
@@ -923,6 +939,7 @@ INTEGER, PARAMETER :: N_CFACE_SCALAR_REALS=11,N_CFACE_SCALAR_INTEGERS=8,N_CFACE_
 
 TYPE CFACE_TYPE
    TYPE (ONE_D_M_AND_E_XFER_TYPE) :: ONE_D
+   TYPE (BOUNDARY_PROPERTY_TYPE) :: BOUNDARY_PROPERTY !< Derived type carrying most of the surface boundary conditions
    REAL(EB), POINTER :: AREA,X,Y,Z,NVEC(:),VEL_ERR_NEW,V_DEP,Q_LEAK,DUNDT
    INTEGER, POINTER :: CFACE_INDEX,SURF_INDEX,VENT_INDEX,BACK_MESH,BACK_INDEX,BOUNDARY_TYPE,CUT_FACE_IND1,CUT_FACE_IND2
 END TYPE CFACE_TYPE

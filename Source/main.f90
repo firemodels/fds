@@ -963,6 +963,10 @@ IF (PRES_METHOD == 'GLMAT') CALL FINISH_GLMAT_SOLVER_H
 
 IF (CC_IBM) CALL FINISH_CCIBM
 
+! Finish the smv file (fire+evacuation results) write for the evacuation MC mode
+
+IF (EVACUATION_MC_MODE .AND. .NOT.EVACUATION_DRILL) CALL FINISH_EVACUATION_SMV
+
 ! Stop the calculation
 
 CALL END_FDS

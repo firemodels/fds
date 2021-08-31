@@ -8460,6 +8460,7 @@ For any object for which a {\ct DEVC\_ID} can be specified (such as {\ct OBST} o
 {\ct SIN}                         & The sine of the {\ct INPUT} \\ \hline
 {\ct ACOS}                        & The arccosine of the {\ct INPUT} \\ \hline
 {\ct ASIN}                        & The arcsine of the {\ct INPUT} \\ \hline
+{\ct ATAN}                        & The arctangent of the {\ct INPUT} \\ \hline
 {\ct MAX}                         & Maximum value of the {\ct INPUT}s \\ \hline
 {\ct MIN}                         & Minimum value of the {\ct INPUT}s \\ \hline
 {\ct PID}                         & A Proportional-Integral-Derivative control for the {\ct INPUT}\\ \hline
@@ -9266,6 +9267,47 @@ The gas phase output quantity {\ct 'EXTINCTION COEFFICIENT'} is $K$. A similar q
 Note that FDS cannot report a visibility of infinity, but rather reports a {\ct MAXIMUM\_VISIBILITY} that you can control via the {\ct MISC} line. The default is 30~m.
 
 
+\subsection{Flame Height and Flame Tilt}
+\label{info:flameheight}
+
+The ``flame height,'' and to some extent the ``flame tilt,'' are common quantities used to assess the hazard from a large fire. FDS does not output these quantities directly, but there is a combination of devices and controls that yield these values. This is all best explained with an example. Suppose you are simulating a fire in a domain that is 10~m high with a grid resolution of 0.2~m. The fire is centered about the point $(x,y)=(0,0)$ at $z=0$. The following input lines compute the flame height and tilt:
+\begin{lstlisting}
+&DEVC ID='HRR', Z_ID='z', XBP=0.0,0.0,0.0,0.0,0.1,9.9, QUANTITY='HRRPUV', 
+      SPATIAL_STATISTIC='VOLUME INTEGRAL', DX=5, DY=5, DZ=0.1, POINTS=100, 
+      STATISTICS_START=10. /
+&CTRL ID='H', FUNCTION_TYPE='PERCENTILE', INPUT_ID='HRR', PERCENTILE=0.97 /
+&DEVC ID='x_max', XB=-5,5,-5,5,9.0,9.2, QUANTITY='TEMPERATURE', 
+      SPATIAL_STATISTIC='MAXLOC X' /
+&DEVC ID='y_max', XB=-5,5,-5,5,9.0,9.2, QUANTITY='TEMPERATURE', 
+      SPATIAL_STATISTIC='MAXLOC Y' /
+&CTRL ID='x2', FUNCTION_TYPE='POWER', INPUT_ID='x_max','CONSTANT', CONSTANT=2 /
+&CTRL ID='y2', FUNCTION_TYPE='POWER', INPUT_ID='y_max','CONSTANT', CONSTANT=2 /
+&CTRL ID='r2', FUNCTION_TYPE='SUM', INPUT_ID='x2','y2' /
+&CTRL ID='r',  FUNCTION_TYPE='POWER', INPUT_ID='r2','CONSTANT', CONSTANT=0.5 /
+&CTRL ID='r/9', FUNCTION_TYPE='DIVIDE', INPUT_ID='d','CONSTANT', CONSTANT=9 /
+&CTRL ID='tilt_rad', FUNCTION_TYPE='ATAN', INPUT_ID='r/9' /
+&CTRL ID='tilt_deg', FUNCTION_TYPE='MULTIPLY', INPUT_ID='tilt_rad','CONSTANT', 
+      CONSTANT=57.296 /
+&CTRL ID='cos_theta', FUNCTION_TYPE='COS', INPUT_ID='tilt_rad' /
+&CTRL ID='L', FUNCTION_TYPE='DIVIDE', INPUT_ID='H','cos_theta' /
+&DEVC ID='L_F', CTRL_ID='L', XYZ=0,0,0, QUANTITY='CONTROL VALUE', 
+      TEMPORAL_STATISTIC='RUNNING AVERAGE', STATISTICS_START=10, UNITS='m' /
+&DEVC ID='tilt', CTRL_ID='tilt_deg', XYZ=0,0,0, QUANTITY='CONTROL VALUE', 
+      TEMPORAL_STATISTIC='RUNNING AVERAGE', STATISTICS_START=10, UNITS='deg' /
+\end{lstlisting}
+\begin{description}
+\item[{\ct ID='HRR'}] Compute a vertical array of heat release rates over horizontal slices that are one cell thick. 
+\item[{\ct ID='H'}] Take the function {\ct ('z','HRR')} and compute the height below which 97~\% of the fire's energy is released. 
+\item[{\ct ID='x\_max'}] Find the $x$ coordinate of the point of maximum temperature within the volume defined by {\ct XB}. Do the same for the $y$ coordinate.
+\item[{\ct ID='x2','y2','r2','r','r/9'}] Determine the radial distance from the origin to the point of maximum temperature. Divide this distance by the height of the slice within which you located the maximum temperature, $z=9$. 
+\item[{\ct ID='tilt\_rad','tilt\_deg'}] Calculate the arctangent of {\ct 'r/9'} to determine the tilt angle in radians. Then convert this value to degrees.
+\item[{\ct ID='cos\_theta'}] Calulate the cosine of the tilt angle.
+\item[{\ct ID='L'}] Divide the vertical flame height by the cosine of the tilt angle to arrive at the length of the flame.
+\item[{\ct ID='L\_F','tilt'}] Print out the flame length and tilt angle to the device file using a running average to smooth the noisy data.
+\end{description}
+To better understand the control logic, see Section~\ref{info:basic_control}. Pay particular attention to the averaging periods, start times, etc. You do not want to begin a running average until the fire plume has stabilized. Practice with some simple cases before implementing this in a complex simulation.
+
+
 \subsection{Layer Height and the Average Upper and Lower Layer Temperatures}
 \label{info:layerheight}
 
@@ -9757,25 +9799,31 @@ If you are interested in the average value over a plane, give the {\ct XB} volum
 \subsubsection{Volume-Weighted Mean}
 
 For a gas phase scalar quantity, $\phi(x,y,z)$, {\ct SPATIAL\_STATISTIC='VOLUME MEAN'} produces the discrete analog of
-\be \frac{1}{V} \; \int \phi(x,y,z) \; \d x \, \d y \, \d z \ee
+\be \frac{1}{V} \; \iiint \phi(x,y,z) \; \d x \, \d y \, \d z \ee
 which is very similar to {\ct 'MEAN'}, but it weights the values according to the relative size of the mesh cell. Note that this statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the coordinate parameters, {\ct XB}, which can extend into multiple meshes.
 
 \subsubsection{Mass-Weighted Mean}
 
 For a gas phase scalar quantity, $\phi(x,y,z)$, {\ct SPATIAL\_STATISTIC='MASS MEAN'} produces the discrete analog of
-\be \frac{ \int \rho(x,y,z) \; \phi(x,y,z) \; \d x \, \d y \, \d z}{\int \rho \; \d x \, \d y \, \d z}  \ee
+\be \frac{ \iiint \rho(x,y,z) \; \phi(x,y,z) \; \d x \, \d y \, \d z}{\iiint \rho \; \d x \, \d y \, \d z}  \ee
 which is similar to {\ct 'VOLUME MEAN'}, but it weights the values according to the relative mass of the mesh cell. Note that this statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the coordinate parameters, {\ct XB}, which can extend into multiple meshes.
+
+\subsubsection{Centroids}
+
+For a gas phase scalar quantity, $\phi(x,y,z)$, {\ct SPATIAL\_STATISTIC='CENTROID X'} produces the discrete analog of
+\be \frac{ \iiint x \, \phi(x,y,z) \; \d x \, \d y \, \d z}{\iiint \phi(x,y,z) \; \d x \, \d y \, \d z}  \ee
+Similar calculations are performed for {\ct 'CENTROID Y'} and {\ct 'CENTROID Z'}. Note that this statistic is only appropriate for gas phase quantities, and you must specify a volume to sum over via the coordinate parameters, {\ct XB}.
 
 \subsubsection{Volume Integral}
 
 For a gas phase scalar quantity, $\phi(x,y,z)$, {\ct SPATIAL\_STATISTIC='VOLUME INTEGRAL'} produces the discrete analog of
-\be \int \phi(x,y,z) \; \d x \, \d y \, \d z \ee
+\be \iiint \phi(x,y,z) \; \d x \, \d y \, \d z \ee
 This statistic is only appropriate for gas phase quantities, in particular those whose units involve m$^{-3}$. For example, heat release rate per unit volume is an appropriate output quantity. This statistic can also be used on a {\ct DEVC} line with an output quantity of {\ct DENSITY} to output the total mass within the volume bound by {\ct XB}. In all cases, you must specify a volume to sum over via the coordinate parameters, {\ct XB}, which can extend into multiple meshes.
 
 \subsubsection{Mass Integral}
 
 For a given gas phase output quantity, $\phi(x,y,z)$, {\ct SPATIAL\_STATISTIC='MASS INTEGRAL'} produces the discrete analog of
-\be \int \, \rho(x,y,z) \; \phi(x,y,z) \; \d x \, \d y \, \d z \ee
+\be \iiint \, \rho(x,y,z) \; \phi(x,y,z) \; \d x \, \d y \, \d z \ee
 Note that this statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the coordinate parameters, {\ct XB}, which can extend into multiple meshes.
 
 \subsubsection{Area Integral}
@@ -9877,7 +9925,7 @@ The {\ct TEMPORAL\_STATISTIC='RUNNING AVERAGE'} outputs the running average valu
 
 \subsubsection{Favre Average}
 
-The {\ct TEMPORAL\_STATISTIC='FAVRE AVERAGE'} outputs the Favre (density weighted) running average value of the {\ct QUANTITY} over the time period starting at {\ct STATISTICS\_START} and ending at {\ct STATISTICS\_END}. If the scalar quantity of interest is $\phi$ and the density if $\rho$ and the running average is defined by an overbar (that is, $\overline{\phi}$ is the running average of the scalar), then the Favre average is denoted with a tilde and computed as $\tilde{\phi} = \overline{\rho \phi}/\overline{\rho}$.
+The {\ct TEMPORAL\_STATISTIC='FAVRE AVERAGE'} outputs the Favre (density weighted) running average value of the {\ct QUANTITY} over the time period starting at {\ct STATISTICS\_START} and ending at {\ct STATISTICS\_END}. If the scalar quantity of interest is $\phi$ and the density if $\rho$ and the running average is defined by an overbar (that is, $\overline{\phi}$ is the running average of the scalar), then the Favre average is denoted with a tilde and computed as $\tilde{\phi} = \overline{\rho \phi}/\overline{\rho}$.  This output is not compatible with {\ct INITIAL\_VALUE}.
 
 \subsubsection{Instantaneous Value}
 
@@ -9904,6 +9952,11 @@ For some applications you might need to predict a minimum or maximum value of th
 \ee
 which represents the probability\footnote{Note that the parameterless form of the distribution is intended for extrapolation only.} of the value $\phi$ not being exceeded in the given time interval, $(t_1-t_0)/N$. The probabilities for each of the $N$ ascending maximum values are assumed to be $m/(N+1)$. Plotting $\phi$ versus the expression on the right yields an approximate straight line from which we can estimate the value of $\phi$ appropriate for the longer {\ct TIME\_PERIOD}; that is, the value for which the probability of not being exceeded in the relatively short time interval $(t_1-t_0)/N$ is very close to 1. Returning to the example from wind engineering, the probability of not exceeding the 50~year wind speed in a given year is $1-1/50=0.98$.
 
+\subsubsection{Time to Reach Minimum and Maximum Value}
+
+The time at which the given {\ct QUANTITY} achieves its maximum or minimum value is specified by the {\ct TEMPORAL\_STATISTIC} {\ct 'MAX TIME'} or {\ct 'MIN TIME'}, respectively.
+
+
 \subsubsection{Root Mean Square}
 \label{info:rms}
 \label{info:rmscovcorr}
@@ -9913,6 +9966,14 @@ which represents the probability\footnote{Note that the parameterless form of th
    \phi_{\rm rms} = \sqrt{ \frac{ \sum_{i=1}^n (\phi_i - \overline{\phi})^2 }{n-1} }
 \ee
 The computation starts at {\ct STATISTICS\_START} and ends at {\ct STATISTICS\_END}.
+
+\subsubsection{Favre Root Mean Square}
+
+{\ct TEMPORAL\_STATISTIC='FAVRE RMS'} produces the unbiased estimate of the density-weighted {\em root mean square} of the {\ct QUANTITY} $\phi$:
+\be
+   \tilde{\phi}_{\rm rms} = \sqrt{ \frac{ \sum_{i=1}^n (\phi_i - \tilde{\phi})^2 }{n-1} } \quad ; \quad \tilde{\phi} = \overline{\rho \phi}/\overline{\rho}
+\ee
+The computation starts at {\ct STATISTICS\_START} and ends at {\ct STATISTICS\_END}.  This output is not compatible with {\ct INITIAL\_VALUE}.
 
 \subsubsection{Covariance}
 \label{info:covariance}
