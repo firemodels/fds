@@ -158,7 +158,6 @@ TYPE ONE_D_M_AND_E_XFER_TYPE
    REAL(EB), POINTER, DIMENSION(:) :: M_DOT_G_PP_ACTUAL   !< (1:N_TRACKED_SPECIES) Actual mass production rate per unit area
    REAL(EB), POINTER, DIMENSION(:) :: M_DOT_S_PP          !< (1:SF\%N_MATL) Mass production rate of solid species
    REAL(EB), POINTER, DIMENSION(:) :: M_DOT_G_PP_ADJUST   !< (1:N_TRACKED_SPECIES) Adjusted mass production rate per unit area
-   REAL(EB), POINTER, DIMENSION(:) :: IL                  !< (1:NSB) Radiance (W/m2/sr); output only
    REAL(EB), POINTER, DIMENSION(:) :: ZZ_G                !< (1:N_TRACKED_SPECIES) Species mixture mass fraction in gas grid cell
    REAL(EB), POINTER, DIMENSION(:) :: ZZ_F                !< (1:N_TRACKED_SPECIES) Species mixture mass fraction at surface
    REAL(EB), POINTER, DIMENSION(:) :: RHO_D_F             !< (1:N_TRACKED_SPECIES) Diffusion at surface, \f$ \rho D_\alpha \f$
@@ -173,7 +172,7 @@ TYPE ONE_D_M_AND_E_XFER_TYPE
 
    TYPE(MATL_COMP_TYPE), ALLOCATABLE, DIMENSION(:) :: MATL_COMP !< (1:SF\%N_MATL) Material component
    TYPE(SPEC_COMP_TYPE), ALLOCATABLE, DIMENSION(:) :: SPEC_COMP !< (1:SF\%N_SPEC) Gas component
-   TYPE(BAND_TYPE), ALLOCATABLE, DIMENSION(:) :: BAND           !< 1:NSB) Radiation wavelength band
+
    INTEGER, POINTER, DIMENSION(:) :: N_LAYER_CELLS              !< (1:SF\%N_LAYERS) Number of cells in the layer
 
    INTEGER, POINTER :: ARRAY_INDEX    !< WALL, LAGRANGIAN_PARTICLE, or CFACE index
@@ -247,6 +246,9 @@ TYPE BOUNDARY_PROPERTY_TYPE
    REAL(EB), POINTER, DIMENSION(:) :: LP_CPUA             !< Liquid droplet cooling rate unit area (W/m2)
    REAL(EB), POINTER, DIMENSION(:) :: LP_MPUA             !< Liquid droplet mass per unit area (kg/m2)
    REAL(EB), POINTER, DIMENSION(:) :: LP_TEMP             !< Liquid droplet mean temperature (K)
+   REAL(EB), POINTER, DIMENSION(:) :: IL                  !< (1:NSB) Radiance (W/m2/sr); output only
+
+   TYPE(BAND_TYPE), ALLOCATABLE, DIMENSION(:) :: BAND     !< (1:NSB) Radiation wavelength band
 
 END TYPE BOUNDARY_PROPERTY_TYPE
 
@@ -259,7 +261,10 @@ INTEGER, PARAMETER :: N_PARTICLE_SCALAR_REALS=19,N_PARTICLE_SCALAR_INTEGERS=11,N
 
 TYPE LAGRANGIAN_PARTICLE_TYPE
 
-   TYPE (ONE_D_M_AND_E_XFER_TYPE) :: ONE_D  !< Most of the particle properties are contained within this derived type
+   TYPE (ONE_D_M_AND_E_XFER_TYPE) :: ONE_D             !< Variables devoted to 1-D heat conduction in depth
+   TYPE(BAND_TYPE), ALLOCATABLE, DIMENSION(:) :: BAND  !< (1:NSB) Radiation wavelength band
+
+   REAL(EB), POINTER, DIMENSION(:) :: IL               !< (1:NSB) Radiance (W/m2/sr); output only
 
    LOGICAL, POINTER :: SHOW                 !< Show the particle in Smokeview
    LOGICAL, POINTER :: SPLAT                !< The liquid droplet has hit a solid
@@ -619,7 +624,7 @@ TYPE SURFACE_TYPE
    INTEGER, DIMENSION(2) :: LEAK_PATH,DUCT_PATH
    INTEGER :: THERMAL_BC_INDEX,NPPC,SPECIES_BC_INDEX,VELOCITY_BC_INDEX,SURF_TYPE,N_CELLS_INI,N_CELLS_MAX=0, &
               PART_INDEX,PROP_INDEX=-1,RAMP_T_I_INDEX=-1, RAMP_T_B_INDEX=0
-   INTEGER :: PYROLYSIS_MODEL,NRA,NSB
+   INTEGER :: PYROLYSIS_MODEL
    INTEGER :: N_LAYERS,N_MATL,SUBSTEP_POWER=2,N_SPEC=0,N_LPC=0
    INTEGER :: N_ONE_D_STORAGE_REALS,N_ONE_D_STORAGE_INTEGERS,N_ONE_D_STORAGE_LOGICALS
    INTEGER :: N_WALL_STORAGE_REALS,N_WALL_STORAGE_INTEGERS,N_WALL_STORAGE_LOGICALS
