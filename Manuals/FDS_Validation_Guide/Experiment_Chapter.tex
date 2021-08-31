@@ -1956,7 +1956,13 @@ The radiative fraction is specified at 0.35 rather than the default 0.20 for met
 \section{Sandia Plume Experiments}
 \label{Sandia_Plume_Description}
 
-The Fire Laboratory for Accreditation of Models by Experimentation (FLAME) facility \cite{OHern:2005,Blanchat:2001} at Sandia National Laboratories in Albuquerque, New Mexico, is designed specifically for validating models of buoyant fire plumes.  The plume source is 1 m in diameter surrounded by a 0.5 m steel `ground plane'. PIV/PLIF techniques are used to obtain instantaneous joint scalar and velocity fields.  O'Hern et al.~\cite{OHern:2005} studied a turbulent buoyant helium plume in the FLAME facility. Earlier work to model this experiment has been performed by DesJardin et al.~\cite{DesJardin:2004}. Tieszen et al.~\cite{Tieszen:2004,Tieszen:2002} studied methane and hydrogen pool fires.
+The Fire Laboratory for Accreditation of Models by Experimentation (FLAME) facility \cite{OHern:2005,Blanchat:2001} at Sandia National Laboratories in Albuquerque, New Mexico, is designed specifically for validating models of buoyant fire plumes.  The plume source is 1 m in diameter surrounded by a 0.5 m steel `ground plane'.  O'Hern et al.~\cite{OHern:2005} studied a turbulent buoyant helium plume in the FLAME facility. PIV/PLIF techniques are used to obtain instantaneous joint scalar and velocity fields and thus obtain Favre averaged velocity fields. Earlier work to model this experiment has been performed by DesJardin et al.~\cite{DesJardin:2004}. Tieszen et al.~\cite{Tieszen:2004,Tieszen:2002} studied methane and hydrogen pool fires.
+
+\subsubsection{Modeling Notes}
+
+The data in the experimental repository for the helium plume is Favre averaged.  The ``helium'' was actually a mixture of 96.4 vol \% (0.7075 mass fraction) helium, 1.7 vol \% (0.1809 mass fraction) acetone, and 1.9 vol \% (0.1116 mass fraction) oxygen; this mixture is referred to as the ``plume fluid'' \cite{OHern:2005}.  The data for ``mass fraction'' in the experimental repository is for Favre averaged plume fluid mass fraction.  To account for any effect of differential diffusion, we separately transport helium, acetone, and oxygen in the simulations.  Then the plume fluid mass fraction is obtained using the conversion $Y_{\mathrm{plume\;fluid}} = Y_{\mathrm{acetone}}/0.1809$.
+
+Note that the velocity fields in the methane and hydrogen fire plumes were obtained directly from PIV and are therefore ensemble averaged \cite{Tieszen:2004,Tieszen:2002}.
 
 \section{SETCOM Wall Condensation Experiments}
 \label{SETCOM_Cond_Description}
