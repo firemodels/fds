@@ -152,14 +152,13 @@ radi.obj: FFLAGS += $(FOPENMPFLAGS)
 scrc.obj: FFLAGS += $(FOPENMPFLAGS)
 main.obj: FFLAGS += $(FOPENMPFLAGS)
 
-# Windows Intel Compiler
+# Windows Intel Fortran Compiler and Intel MPI
 
-#*** note: the following scripts (located in ..\Scripts directory) must be run before running make with this target
-#    ..\Scripts\ifortvars intel64
+#*** Note: the script, Build\Scripts\setup_intel_compilers.bat, must be run before running make with this target
 
 impi_intel_win_64 : MPILIB = "$(IMPI_RELEASE_ROOT)\impi.lib"
 impi_intel_win_64 : MPIINCLUDE = "$(IMPI_INCLUDE)"
-impi_intel_win_64 : FFLAGS = /Qipo /O2 /I$(MPIINCLUDE) /traceback /debug:full /wrap-margin- $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL)
+impi_intel_win_64 : FFLAGS = /Qipo /O2 /I$(MPIINCLUDE) /wrap-margin- $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL)
 impi_intel_win_64 : FOPENMPFLAGS = /Qopenmp
 impi_intel_win_64 : FCOMPL = ifort
 impi_intel_win_64 : obj = fds_impi_win_64
@@ -184,8 +183,9 @@ impi_intel_win_64_db : obj = fds_impi_win_64_db
 impi_intel_win_64_db : setup_win $(objwin_mpi)
 	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB) $(LFLAGSMKL_INTEL)
 
-# Intel Compiler for Linux
-impi_intel_linux_64 : FFLAGS = -m64 -O2 -ipo -g -traceback -no-wrap-margin $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL)
+# Linux Intel Fortran Compiler and Intel MPI
+ 
+impi_intel_linux_64 : FFLAGS = -m64 -O2 -ipo -no-wrap-margin $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL)
 impi_intel_linux_64 : LFLAGSMKL = $(LFLAGSMKL_INTEL)
 impi_intel_linux_64 : LFLAGS =
 impi_intel_linux_64 : FCOMPL = mpiifort
@@ -212,7 +212,9 @@ impi_intel_linux_64_dv : obj = fds_impi_intel_linux_64_dv
 impi_intel_linux_64_dv : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
-mpi_intel_linux_64 : FFLAGS = -m64 -O2 -ipo -g -traceback -no-wrap-margin $(GITINFO) $(OPENMPI_COMPINFO) $(FFLAGSMKL_OPENMPI)
+# Linux Intel Fortran Compiler and Open MPI
+ 
+mpi_intel_linux_64 : FFLAGS = -m64 -O2 -ipo -no-wrap-margin $(GITINFO) $(OPENMPI_COMPINFO) $(FFLAGSMKL_OPENMPI)
 mpi_intel_linux_64 : LFLAGSMKL = $(LFLAGSMKL_OPENMPI)
 mpi_intel_linux_64 : LFLAGS =
 mpi_intel_linux_64 : FCOMPL = mpifort
@@ -239,7 +241,8 @@ mpi_intel_linux_64_db : obj = fds_mpi_intel_linux_64_db
 mpi_intel_linux_64_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
-# OSX
+# OSX Intel Fortran and Open MPI
+ 
 mpi_intel_osx_64 : FFLAGS = -m64 -O2 -ipo -stand:f18 -no-wrap-margin $(GITINFO) $(OPENMPI_COMPINFO) $(FFLAGSMKL_CUSTOM)
 mpi_intel_osx_64 : LFLAGSMKL = $(LFLAGSMKL_CUSTOM)
 mpi_intel_osx_64 : LFLAGS = -static-intel
