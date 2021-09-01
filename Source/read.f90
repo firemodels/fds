@@ -987,13 +987,14 @@ ENDDO
 ! Mesh counter NM_EVAC is now fire meshes plus main evac meshes
 IF (DO_EVACUATION) CALL DEFINE_EVACUATION_MESHES(NM_EVAC)
 
-! Determine mesh neighbors. MESH_SEPARATION_DISTANCE is a very small distance
-! beyond which two meshes are considered separate. NEIGHBOR_SEPARATION_DISANCE
+! Determine mesh neighbors. MESH_SEPARATION_DISTANCE is a very small length
+! used to determine if there are periodic boundaries. NEIGHBOR_SEPARATION_DISANCE
 ! is the distance beyond which no information or message passing is assumed
-! between the meshes.
+! between the meshes. Its value is deliberately complicated to avoid having two
+! meshes separated by exactly that distance.
 
 MESH_SEPARATION_DISTANCE = MIN(1.E-3_EB,0.05_EB*CHARACTERISTIC_CELL_SIZE)
-NEIGHBOR_SEPARATION_DISTANCE = 5._EB*CHARACTERISTIC_CELL_SIZE
+NEIGHBOR_SEPARATION_DISTANCE = 4.56789_EB*CHARACTERISTIC_CELL_SIZE
 
 ! Search through the input file for any mention of the word PERIODIC. If not found, this simplifies neighbor selection.
 
