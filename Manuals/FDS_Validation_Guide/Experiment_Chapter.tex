@@ -862,7 +862,13 @@ $^\dag$ The Falcon experiments involved 4 separated spills
 \section{Loughborough Jet Fire Experiments}
 \label{Loughborough_Jet_Fires_Description}
 
-Researchers at Loughborough University, UK, conducted a series of six large-scale, high pressure jet fire experiments using natural gas and natural gas/hydrogen mixtures. For each fuel, the gas was released horizontally at high pressure (approximately 60~bar) through 20~mm, 35~mm and 50~mm diameter holes at the end of a 15~cm diameter pipe. The jet fires engulfed a 0.9~m diameter, 16~m long pipe section perpendicular to the flow direction. Heat flux measurements were made at various locations on the pipe and further afield. 
+Researchers at Loughborough University, UK, conducted a series of six large-scale, high pressure jet fire experiments using natural gas and natural gas/hydrogen mixtures at the GL Noble Denton Spadeadam Test Site in Cumbria, UK~\cite{Lowesmith:PSEP2012}. For each fuel, the gas was released horizontally at high pressure (approximately 60~bar) through 20~mm, 35~mm and 50~mm diameter holes at the end of a 15~cm diameter pipe. The jet fires engulfed a 0.9~m diameter, 16~m long pipe section perpendicular to the flow direction. Heat flux measurements were made at various locations on the pipe and further afield. A typical jet fire experiment at the facility is shown in Fig.~\ref{jet_photo}.
+
+\begin{figure}[!ht]
+\includegraphics[width=\textwidth]{FIGURES/Loughborough_Jet_Fires/Safety-Fig-03_497x335}
+\caption[Photograph of a jet fire experiment at the Spadeadam Test Site]{Photograph of a jet fire experiment at the Spadeadam Test Site.}
+\label{jet_photo}
+\end{figure}
 
 Table~\ref{Loughborough_Parameters} lists the key parameters for the natural gas experiments which have been chosen for this study. Note that the direction of the jet was nominally to the east, parallel to the prevailing wind. The wind deviated slightly in each experiment, as indicated in the table.
 
@@ -895,6 +901,7 @@ To resolve the radiation field at the far-field radiometers, 600~angles are used
 The wind profile is based on measurements made 10.85~m above the relatively flat terrain. The aerodynamic roughness length, $z_0$, is set to 0.03~m, appropriate for relatively flat grasslands, prairies, farms, etc. The Obukhov length, $L$, is set to 100,000~m, typical of a neutral atmosphere. Synthetic turbulence is generated at the upstream boundary of the computational domain, with a characteristic eddy length scale of 1~m and root-mean-square velocity fluctuation of 0.1~m/s.
 
 
+\FloatBarrier
 
 
 \section{McCaffrey Plume Experiments}
@@ -1757,6 +1764,25 @@ of gypsum board. The experiments were sponsored by the Naval Research Laboratory
 square sand burner ranged in size from 0.28~m to 0.70~m, and the fires ranged in size from 50~kW to 520~kW.
 
 
+\section{Phoenix LNG Fires}
+\label{Phoenix_LNG_Fires_Description}
+
+In 2009, Sandia National Laboratories conducted two large-scale LNG pool fire experiments in a 120~m diameter pond in its Area III test complex in Albuquerque, New Mexico~\cite{Blanchat:2011}. The fires were approximately 21~m and 83~m in diameter. Measurements of flame height, smoke production, burn rate, and heat flux were performed. A photograph of Test~2 is shown in Fig.~\ref{Phoenix_Photo}.
+
+\subsubsection{Modeling Notes}
+
+The simulation of the Test~1 uses 1~m grid cells, while Test~2 uses 2~m cells. The computational domain for both simulations forms the shape of a cross that includes the fire and the radiometers to the north, south, east and west. Methane is the specified fuel, with a soot yield of 0.01 and radiative fraction of 0.25. Both values are estimates. 
+
+There are 1200 solid angles, rather than the default 100, used in the radiative transport equation to uniformly distribute the fire's radiative energy outward approximately 250~m. The value of 1200 is based on an assessment of the contours of the integrated radiative intensity. 
+
+\begin{figure}[p]
+\includegraphics[width=\textwidth]{FIGURES/Phoenix_LNG_Fires/Phoenix02_photo}
+\caption[Photograph of Phoenix LNG Fire Test 2]{Photograph of Phoenix LNG Fire Test 2~\cite{Blanchat:2011}.}
+\label{Phoenix_Photo}
+\end{figure}
+
+\FloatBarrier
+
 \section{Pool Fires}
 \label{Pool_Fires_Description}
 
@@ -1910,8 +1936,22 @@ centerline of the room, and two horizontal arrays located 8.4~cm above the floor
 \section{Sandia Methane Burner}
 \label{Sandia_Methane_Burner_Description}
 
-A series of 3~m diameter methane gas burner experiments were conducted in the Fire Laboratory for Accreditation of Models and Experiments (FLAME) facility in the Thermal Test Complex at Sandia National Laboratories~\cite{Blanchat:2011}. The test chamber is cylindrical with an inner diameter of 18.3~m and a height of 13.1~m at the perimeter. The ceiling slopes upwards to a height of 15.2~m at the center. The perimeter walls are made of steel channel sections that are water-cooled. The gas burner is surrounded by a 12.7~m diameter steel spill plate. Beyond the spill plate is steel grating through which air can flow from the basement.
+A series of 3~m diameter methane gas burner experiments were conducted in the Fire Laboratory for Accreditation of Models and Experiments (FLAME) facility in the Thermal Test Complex at Sandia National Laboratories~\cite{Blanchat:2011}. The test chamber (Fig.~\ref{FRH_Cutaway}) is cylindrical with an inner diameter of 18.3~m and a height of 13.1~m at the perimeter. The ceiling slopes upwards to a height of 15.2~m at the center. The perimeter walls are made of steel channel sections that are water-cooled. The gas burner is surrounded by a 12.7~m diameter steel spill plate. Beyond the spill plate is steel grating through which air can flow from the basement.
 
+\begin{figure}[!ht]
+\includegraphics[width=\textwidth]{FIGURES/Sandia_Methane_Burner/FRH_Cutaway}
+\caption[Cutaway view of the Sandia FLAME test cell]{Cutaway view of the Sandia FLAME test cell.}
+\label{FRH_Cutaway}
+\end{figure}
+
+\subsubsection{Modeling Notes}
+
+The simulations of the 3~m methane fires are done with 10~cm grid resolution in an open domain. That is, the walls of the cylindrical test cell are not modeled. 
+
+The radiative fraction is specified at 0.35 rather than the default 0.20 for methane because the large fire is far more sooty and luminous than a small methane flame. 600 solid angles are used to solve the radiative transport equation rather than the default 100 so as to resolve the radiative flux 9~m from the fire. 
+
+
+\FloatBarrier
 
 \section{Sandia Plume Experiments}
 \label{Sandia_Plume_Description}
@@ -1952,7 +1992,14 @@ The condensation simulations included a 4~m portion of duct upstream to allow fo
 \section{Shell LNG Fireball Experiments}
 \label{Shell_LNG_Fireballs_Description}
 
-Shell Research Ltd.~commissioned four large-scale BLEVE (Boiling Liquid Expanding Vapor Explosion) experiments using LNG (Liquified Natural Gas) at the DNV (Det Norske Veritas) GL test facility at Spadeadam, UK~\cite{Betteridge:2015}. For Experiments 2-4, the cylindrical containment vessel was constructed of 6~mm stainless steel plates and had a length of approximately 6.5 m and diameter of approximately 1~m, with a total volume of 5.055~m$^3$. The mass of LNG for Experiments~2-4 was approximately 681~kg, 1306~kg, and 1251~kg, respectively. The LNG consisted of 96.7~\% methane, 3.0~\% ethane, 0.2~\% nitrogen, and 0.1~\% propane, by volume. The reservoir pressure for Experiments~2-4 was maintained at 13.01~bar, 6.07~bar, and 13.62~bar; and the temperatures were $-115 \; ^\circ$C, $-131 \; ^\circ$C, and $-115 \; ^\circ$C, respectively.
+Shell Research Ltd.~commissioned four large-scale BLEVE (Boiling Liquid Expanding Vapor Explosion) experiments using LNG (Liquified Natural Gas) at the DNV (Det Norske Veritas) GL test facility at Spadeadam, UK~\cite{Betteridge:2015}. For Experiments 2-4, the cylindrical containment vessel (Fig.~\ref{Shell_LNG_Fireball_Photos}) was constructed of 6~mm stainless steel plates and had a length of approximately 6.5 m and diameter of approximately 1~m, with a total volume of 5.055~m$^3$. The mass of LNG for Experiments~2-4 was approximately 681~kg, 1306~kg, and 1251~kg, respectively. The LNG consisted of 96.7~\% methane, 3.0~\% ethane, 0.2~\% nitrogen, and 0.1~\% propane, by volume. The reservoir pressure for Experiments~2-4 was maintained at 13.01~bar, 6.07~bar, and 13.62~bar; and the temperatures were $-115 \; ^\circ$C, $-131 \; ^\circ$C, and $-115 \; ^\circ$C, respectively.
+
+\begin{figure}[!ht]
+\includegraphics[width=\textwidth]{FIGURES/Shell_LNG_Fireballs/LNG_Tank}
+\includegraphics[width=\textwidth]{FIGURES/Shell_LNG_Fireballs/Fireball_Images}
+\caption[Photographs of the Shell LNG Fireball experiments]{(Top) Pressure vessel used in the Shell LNG Fireball experiments. (Bottom) Photographs of Tests 2, 3, and 4, respectively~\cite{Betteridge:2015}.}
+\label{Shell_LNG_Fireball_Photos}
+\end{figure}
 
 The rupture of the vessels was initiated by an explosive cutting charge designed to rip open the vessel from end to end. Commercial fireworks were ignited just prior to the explosive charge to ensure ignition of the released gas.
 
@@ -1964,7 +2011,7 @@ The FDS simulations of the three BLEVE experiments are performed with 0.5~m reso
 
 Approximately 600 angles are used in the radiative transport solver rather than the default 100. A radiative fraction of 30~\% is used, rather than the default of 20~\% for methane.
 
-
+\FloatBarrier
 
 
 

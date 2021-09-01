@@ -72,7 +72,7 @@ MODULE EVAC
 
   ! Public subprograms (called from the main program or read or dump)
 
-  PUBLIC EVACUATE_HUMANS, INITIALIZE_EVACUATION, INIT_EVAC_GROUPS
+  PUBLIC EVACUATE_HUMANS, INITIALIZE_EVACUATION, INIT_EVAC_GROUPS, FINISH_EVACUATION_SMV
   PUBLIC READ_EVAC, DUMP_EVAC, DUMP_EVAC_CSV, PREPARE_TO_EVACUATE, CLEAN_AFTER_EVACUATE
   PUBLIC EVAC_MESH_EXCHANGE, INITIALIZE_EVAC_DUMPS
   ! Public variables (needed in the main program or dump):
@@ -16677,5 +16677,48 @@ CONTAINS
     END IF
 
   END SUBROUTINE Change_Target_Door
+  
+  SUBROUTINE FINISH_EVACUATION_SMV
+    ! Append the fire smv file strings to the end of the _evmc.smv file
 
+    ! Local variables
+    INTEGER :: I, J
+    CHARACTER(300) :: SMV_LINE
+
+    IF (EVACUATION_MC_MODE .AND. .NOT.EVACUATION_DRILL) THEN
+       ! Evacuation smv file format: Evacuation smv appended after the fire mesh information in smv file.
+       !                             Later the rest of fire smv file (strings) are appended to smv.
+       J = 0
+       ! N_FIRE_MESHES_IN_FED ! Number of meshes in the fire calculation
+       I = LEN_TRIM(CHID)-5
+       LU_EVACXYZ = GET_FILE_NUMBER()
+       FN_EVACXYZ = TRIM(CHID(1:I))//'.smv'
+       OPEN (LU_EVACXYZ,FILE=FN_EVACXYZ,FORM='FORMATTED', STATUS='OLD')  ! fire smv file
+       EVAC_SMV_DO: DO
+          READ (LU_EVACXYZ,FMT='(A)',END=30) SMV_LINE
+          IF (TRIM(SMV_LINE)=='CVENT') THEN
+             J = J + 1 ! counter: fire meshes
+             IF (J==N_FIRE_MESHES_IN_FED) THEN
+                EVAC_SMV_CVENT_DO: DO
+                   READ (LU_EVACXYZ,FMT='(A)',END=30) SMV_LINE
+                   WRITE(LU_SMV,FMT='(A)') TRIM(SMV_LINE)
+                   IF (TRIM(SMV_LINE)=='') EXIT EVAC_SMV_DO ! Last fire CVENT line position
+                ENDDO EVAC_SMV_CVENT_DO
+             ENDIF
+          ENDIF
+       ENDDO EVAC_SMV_DO
+30     CONTINUE
+       ! Now fire smv read is at the correct location (strings after the mesh information)
+
+       ! Copy the rest of fire smv file to the end of _evmc.smv file
+       EVAC_SMV_DO2: DO
+          READ (LU_EVACXYZ,FMT='(A)',END=40) SMV_LINE
+          WRITE(LU_SMV,FMT='(A)') TRIM(SMV_LINE)
+       ENDDO EVAC_SMV_DO2
+40     CONTINUE
+       CLOSE (LU_EVACXYZ)
+
+    ENDIF
+  END SUBROUTINE FINISH_EVACUATION_SMV
+  
 END MODULE EVAC

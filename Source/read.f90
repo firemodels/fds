@@ -3539,7 +3539,7 @@ TRACKED_SPEC_LOOP_1: DO WHILE (N_FOUND <= N_TRACKED_SPECIES .OR. .NOT. DEFINED_B
          SM => SPECIES_MIXTURE(N)
          IF (TRIM(SM%ID)==TRIM(REACTION(1)%FUEL)) THEN
             FUEL_SMIX_INDEX = N
-            IF (ABS(SM%ATOMS(1)+SM%ATOMS(6)+SM%ATOMS(7)+SM%ATOMS(8) - SUM(SM%ATOMS)) > SPACING(SUM(SM%ATOMS))) THEN
+            IF (ANY(SM%ATOMS(2:5)>0._EB) .OR. ANY(SM%ATOMS(9:)>0._EB)) THEN
                WRITE(MESSAGE,'(A)') 'ERROR: Fuel FORMULA for SIMPLE_CHEMISTRY can only contain C,H,O, and N'
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ELSE
@@ -4753,7 +4753,7 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
          ENDIF
          IF (L_TMP) THEN
             SIMPLE_FUEL_DEFINED = .TRUE.
-            IF (ATOM_COUNTS(1)+ATOM_COUNTS(6)+ATOM_COUNTS(7)+ATOM_COUNTS(8) - SUM(ATOM_COUNTS) > SPACING(SUM(ATOM_COUNTS))) THEN
+            IF (ANY(ATOM_COUNTS(2:5)>0._EB) .OR. ANY(ATOM_COUNTS(9:)>0._EB)) THEN            
                WRITE(MESSAGE,'(A)') 'ERROR: Fuel FORMULA for SIMPLE_CHEMISTRY can only contain C,H,O, and N'
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ELSE
@@ -12811,7 +12811,10 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
       CASE('TIME INTEGRAL')   ; TEMPORAL_STATISTIC = 'TIME INTEGRAL'
       CASE('TIME MAX')        ; TEMPORAL_STATISTIC = 'MAX'
       CASE('TIME MIN')        ; TEMPORAL_STATISTIC = 'MIN'
+      CASE('MAX TIME')        ; TEMPORAL_STATISTIC = 'MAX TIME'
+      CASE('MIN TIME')        ; TEMPORAL_STATISTIC = 'MIN TIME'
       CASE('RMS')             ; TEMPORAL_STATISTIC = 'RMS'
+      CASE('FAVRE RMS')       ; TEMPORAL_STATISTIC = 'FAVRE RMS'
       CASE('COV')             ; TEMPORAL_STATISTIC = 'COV'
       CASE('CORRCOEF')        ; TEMPORAL_STATISTIC = 'CORRCOEF'
 
@@ -12824,6 +12827,9 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
       CASE('SURFACE AREA')     ; SPATIAL_STATISTIC = 'SURFACE AREA'
       CASE('MASS INTEGRAL')    ; SPATIAL_STATISTIC = 'MASS INTEGRAL'
       CASE('MASS MEAN')        ; SPATIAL_STATISTIC = 'MASS MEAN'
+      CASE('CENTROID X')       ; SPATIAL_STATISTIC = 'CENTROID X'
+      CASE('CENTROID Y')       ; SPATIAL_STATISTIC = 'CENTROID Y'
+      CASE('CENTROID Z')       ; SPATIAL_STATISTIC = 'CENTROID Z'
       CASE('MASS')             ; SPATIAL_STATISTIC = 'MASS'
       CASE('MAX')              ; SPATIAL_STATISTIC = 'MAX'
       CASE('MAXLOC X')         ; SPATIAL_STATISTIC = 'MAXLOC X'
@@ -12910,41 +12916,12 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
       ORIENTATION_INDEX = N_ORIENTATION_VECTOR
    ENDIF
 
-   ! Check if there are any devices with specified XB that do not fall within a mesh.
-
-   IF (POINTS==1 .AND. XB(1)>-1.E5_EB) THEN
-
-      IF (QUANTITY/='PATH OBSCURATION' .AND. QUANTITY/='TRANSMISSION') CALL CHECK_XB(XB)
-
-      MESH_DEVICE = 0
-
-      BAD = .TRUE.
-      CHECK_MESH_LOOP: DO NM=1,NMESHES
-         IF (DO_EVACUATION) CYCLE CHECK_MESH_LOOP
-         M=>MESHES(NM)
-         OVERLAPPING_X = .TRUE.
-         OVERLAPPING_Y = .TRUE.
-         OVERLAPPING_Z = .TRUE.
-         IF (XB(1)==XB(2) .AND. (XB(1)> M%XF .OR. XB(2)< M%XS)) OVERLAPPING_X = .FALSE.
-         IF (XB(1)/=XB(2) .AND. (XB(1)>=M%XF .OR. XB(2)<=M%XS)) OVERLAPPING_X = .FALSE.
-         IF (XB(3)==XB(4) .AND. (XB(3)> M%YF .OR. XB(4)< M%YS)) OVERLAPPING_Y = .FALSE.
-         IF (XB(3)/=XB(4) .AND. (XB(3)>=M%YF .OR. XB(4)<=M%YS)) OVERLAPPING_Y = .FALSE.
-         IF (XB(5)==XB(6) .AND. (XB(5)> M%ZF .OR. XB(6)< M%ZS)) OVERLAPPING_Z = .FALSE.
-         IF (XB(5)/=XB(6) .AND. (XB(5)>=M%ZF .OR. XB(6)<=M%ZS)) OVERLAPPING_Z = .FALSE.
-         IF (OVERLAPPING_X .AND. OVERLAPPING_Y .AND. OVERLAPPING_Z) THEN
-            BAD = .FALSE.
-            IF (PROCESS(NM)==MY_RANK) MESH_DEVICE(NM) = 1
-            MESH_NUMBER = NM
-         ENDIF
-      ENDDO CHECK_MESH_LOOP
-
-   ENDIF
-
    ! Process the point devices along a line, if necessary
 
    POINTS_LOOP: DO I_POINT=1,POINTS
 
-      IF (POINTS>1 .OR. XB(1)<-1.E5_EB) MESH_DEVICE = 0
+      MESH_DEVICE = 0               ! MESH_DEVICE(NM)=1 means that the device involves mesh NM
+      IF (I_POINT>1) XB = -1.E6_EB  ! Reset XB for new point along a linear array of POINTS
 
       ! Create a straight line of point devices
 
@@ -12965,6 +12942,31 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
             XB(5) = XYZ(3) - DZ
             XB(6) = XYZ(3) + DZ
          ENDIF
+      ENDIF
+
+      ! Check if there are any devices with specified XB that do not fall within a mesh.
+
+      IF (XB(1)>-1.E5_EB) THEN
+         IF (QUANTITY/='PATH OBSCURATION' .AND. QUANTITY/='TRANSMISSION') CALL CHECK_XB(XB)
+         BAD = .TRUE.
+         CHECK_MESH_LOOP: DO NM=1,NMESHES
+            IF (DO_EVACUATION) CYCLE CHECK_MESH_LOOP
+            M=>MESHES(NM)
+            OVERLAPPING_X = .TRUE.
+            OVERLAPPING_Y = .TRUE.
+            OVERLAPPING_Z = .TRUE.
+            IF (XB(1)==XB(2) .AND. (XB(1)> M%XF .OR. XB(2)< M%XS)) OVERLAPPING_X = .FALSE.
+            IF (XB(1)/=XB(2) .AND. (XB(1)>=M%XF .OR. XB(2)<=M%XS)) OVERLAPPING_X = .FALSE.
+            IF (XB(3)==XB(4) .AND. (XB(3)> M%YF .OR. XB(4)< M%YS)) OVERLAPPING_Y = .FALSE.
+            IF (XB(3)/=XB(4) .AND. (XB(3)>=M%YF .OR. XB(4)<=M%YS)) OVERLAPPING_Y = .FALSE.
+            IF (XB(5)==XB(6) .AND. (XB(5)> M%ZF .OR. XB(6)< M%ZS)) OVERLAPPING_Z = .FALSE.
+            IF (XB(5)/=XB(6) .AND. (XB(5)>=M%ZF .OR. XB(6)<=M%ZS)) OVERLAPPING_Z = .FALSE.
+            IF (OVERLAPPING_X .AND. OVERLAPPING_Y .AND. OVERLAPPING_Z) THEN
+               BAD = .FALSE.
+               IF (PROCESS(NM)==MY_RANK) MESH_DEVICE(NM) = 1
+               MESH_NUMBER = NM
+            ENDIF
+         ENDDO CHECK_MESH_LOOP
       ENDIF
 
       ! Assign a dummy XYZ triplet for devices that use a SPATIAL_STATISTIC
@@ -12997,12 +12999,12 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
          CALL SEARCH_OTHER_MESHES(XYZ(1),XYZ(2),XYZ(3),NM,IIG,JJG,KKG,XI,YJ,ZK)
          IF (IIG>0 .AND. JJG>0 .AND. KKG>0) THEN
             M => MESHES(NM)
-            XB(1) = M%X(NINT(XI)) - M%DX(IIG)
-            XB(2) = M%X(NINT(XI)) + M%DX(IIG)
-            XB(3) = M%Y(NINT(YJ)) - M%DY(JJG)
-            XB(4) = M%Y(NINT(YJ)) + M%DY(JJG)
-            XB(5) = M%Z(NINT(ZK)) - M%DZ(KKG)
-            XB(6) = M%Z(NINT(ZK)) + M%DZ(KKG)
+            XB(1) = M%X(NINT(XI)) - 0.5_EB*M%DX(IIG)
+            XB(2) = M%X(NINT(XI)) + 0.5_EB*M%DX(IIG)
+            XB(3) = M%Y(NINT(YJ)) - 0.5_EB*M%DY(JJG)
+            XB(4) = M%Y(NINT(YJ)) + 0.5_EB*M%DY(JJG)
+            XB(5) = M%Z(NINT(ZK)) - 0.5_EB*M%DZ(KKG)
+            XB(6) = M%Z(NINT(ZK)) + 0.5_EB*M%DZ(KKG)
          ELSE
             XB = 0._EB
          ENDIF
@@ -13010,7 +13012,8 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
 
       ! Force MASS MEAN spatial statistic for FAVRE average
 
-      IF (TEMPORAL_STATISTIC=='FAVRE AVERAGE') THEN
+      IF ( (TEMPORAL_STATISTIC=='FAVRE AVERAGE' .OR. TEMPORAL_STATISTIC=='FAVRE RMS') &
+         .AND. SPATIAL_STATISTIC/='INTERPOLATION') THEN
          SPATIAL_STATISTIC='MASS MEAN'
          CALL SEARCH_OTHER_MESHES(XYZ(1),XYZ(2),XYZ(3),NM,IIG,JJG,KKG,XI,YJ,ZK)
          IF (IIG>0 .AND. JJG>0 .AND. KKG>0) THEN
@@ -13285,19 +13288,17 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
       IF (TRIM(DV%QUANTITY(1)) == 'CHEMISTRY SUBITERATIONS') OUTPUT_CHEM_IT = .TRUE.
       IF (TRIM(DV%QUANTITY(1)) == 'REAC SOURCE TERM' .OR. TRIM(DV%QUANTITY(1)) == 'HRRPUV REAC') REAC_SOURCE_CHECK=.TRUE.
       IF (TRIM(QUANTITY)=='DUDT' .OR. TRIM(QUANTITY)=='DVDT' .OR. TRIM(QUANTITY)=='DWDT') STORE_OLD_VELOCITY=.TRUE.
-      IF (TRIM(DV%QUANTITY(1))=='HRRPUV REAC' .AND. TRIM(DV%SPATIAL_STATISTIC)=='VOLUME INTEGRAL' .AND. &
-          TRIM(DV%TEMPORAL_STATISTIC)=='TIME INTEGRAL' .AND. TRIM(DV%UNITS)=='kg') DV%USE_PREVIOUS_VALUE=.TRUE.
 
       IF (DV%SPATIAL_STATISTIC(1:3)=='MIN') MIN_DEVICES_EXIST = .TRUE.
       IF (DV%SPATIAL_STATISTIC(1:3)=='MAX') MAX_DEVICES_EXIST = .TRUE.
 
-      IF (DV%TEMPORAL_STATISTIC=='MIN' .OR. DV%TEMPORAL_STATISTIC=='MAX') THEN
+      IF (DV%TEMPORAL_STATISTIC(1:3)=='MIN' .OR. DV%TEMPORAL_STATISTIC(1:3)=='MAX') THEN
          IF (DV%TIME_PERIOD>0._EB) THEN
             IF (DV%N_INTERVALS<0) DV%N_INTERVALS = 10
          ELSE
             DV%N_INTERVALS = 1
          ENDIF
-         IF (DV%TEMPORAL_STATISTIC=='MIN') THEN
+         IF (DV%TEMPORAL_STATISTIC(1:3)=='MIN') THEN
             ALLOCATE(DV%TIME_MIN_VALUE(DV%N_INTERVALS))
             DV%TIME_MIN_VALUE = 1.E20_EB
          ELSE
@@ -13576,6 +13577,8 @@ READ_CTRL_LOOP: DO NC=1,N_CTRL
          CF%CONTROL_INDEX = CF_ASIN
       CASE('ACOS')
          CF%CONTROL_INDEX = CF_ACOS
+      CASE('ATAN')
+         CF%CONTROL_INDEX = CF_ATAN
       CASE('MIN')
          CF%CONTROL_INDEX = CF_MIN
       CASE('MAX')
