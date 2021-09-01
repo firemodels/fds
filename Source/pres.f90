@@ -489,8 +489,14 @@ CONTAINS
 SUBROUTINE TUNNEL_POISSON_SOLVER
 
 USE MPI_F08
-REAL(EB) :: RR
+REAL(EB) :: RR,DXO
 INTEGER :: IERR,II
+REAL(EB), POINTER, DIMENSION(:) :: RDXNP
+
+RDXNP(0:IBAR) => WORK2(0:IBAR,0,0)
+RDXNP(0:IBAR) = RDXN(0:IBAR)
+IF (NM>1)       RDXNP(0)    = 2._EB/(MESHES(NM-1)%DX(MESHES(NM-1)%IBAR)+DX(1))
+IF (NM<NMESHES) RDXNP(IBAR) = 2._EB/(MESHES(NM+1)%DX(1)             +DX(IBAR))
 
 DO I=1,IBAR
    II = I_OFFSET(NM) + I  ! Spatial index of the entire tunnel, not just this mesh
@@ -501,9 +507,9 @@ DO I=1,IBAR
       ENDDO
    ENDDO
    TP_CC(II) = TP_CC(II)/((YF-YS)*(ZF-ZS))  ! RHS linear system of equations
-   TP_DD(II) = -RDX(I)*(RDXN(I)+RDXN(I-1))  ! Diagonal of tri-diagonal matrix
-   TP_AA(II) =  RDX(I)*RDXN(I)    ! Upper band of matrix
-   TP_BB(II) =  RDX(I)*RDXN(I-1)  ! Lower band of matrix
+   TP_DD(II) = -RDX(I)*(RDXNP(I)+RDXNP(I-1))  ! Diagonal of tri-diagonal matrix
+   TP_AA(II) =  RDX(I)*RDXNP(I)    ! Upper band of matrix
+   TP_BB(II) =  RDX(I)*RDXNP(I-1)  ! Lower band of matrix
    PRHS(I,1:JBAR,1:KBAR) = PRHS(I,1:JBAR,1:KBAR) - TP_CC(II)  ! New RHS of the 3-D Poisson equation
 ENDDO
 
@@ -583,10 +589,16 @@ CALL MPI_BCAST(TP_CC,TUNNEL_NXP,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,IERR)
 
 H_BAR(1:TUNNEL_NXP) = TP_CC(1:TUNNEL_NXP)
 
-! Apply Dirichlet BCs at mesh interfaces
+! Apply Dirichlet BCs at mesh interfaces. These are linear interpolations of the values of H_BAR on either side of mesh interface.
 
-IF (NM/=1)       BXS_BAR = 0.5_EB*(H_BAR(I_OFFSET(NM))     +H_BAR(I_OFFSET(NM)+1))
-IF (NM/=NMESHES) BXF_BAR = 0.5_EB*(H_BAR(I_OFFSET(NM)+IBAR)+H_BAR(I_OFFSET(NM)+IBP1))
+IF (NM/=1) THEN
+   DXO = MESHES(NM-1)%DX(MESHES(NM-1)%IBAR)  ! Width of rightmost cell in the mesh to the left of current mesh
+   BXS_BAR = (H_BAR(I_OFFSET(NM))*DX(1) + H_BAR(I_OFFSET(NM)+1)*DXO)/(DX(1)+DXO)
+ENDIF
+IF (NM/=NMESHES) THEN
+   DXO = MESHES(NM+1)%DX(1)  ! Width of leftmost cell in the mesh to the right of current mesh
+   BXF_BAR = (H_BAR(I_OFFSET(NM)+IBP1)*DX(IBAR) + H_BAR(I_OFFSET(NM)+IBAR)*DXO)/(DX(IBAR)+DXO)
+ENDIF
 
 END SUBROUTINE TUNNEL_POISSON_SOLVER
 
