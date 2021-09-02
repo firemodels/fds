@@ -13645,22 +13645,22 @@ PROC_CTRL_LOOP: DO NC = 1, N_CTRL
    END DO INPUT_COUNT
    CF%N_INPUTS=NN-1
    IF (CF%N_INPUTS==0) THEN
-      WRITE(MESSAGE,'(A,I0,A)')  'ERROR: CTRL ',NC,' must have at least one input'
+      WRITE(MESSAGE,'(A,A,A)')  'ERROR: CTRL ',TRIM(CF%ID),' must have at least one input'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
    SELECT CASE (CF%CONTROL_INDEX)
       CASE (CF_SUBTRACT,CF_DIVIDE,CF_POWER)
          IF (CF%N_INPUTS /= 2) THEN
-            WRITE(MESSAGE,'(A,I0,A)')  'ERROR: CTRL ',NC,' must have at only two inputs'
+            WRITE(MESSAGE,'(A,A,A)')  'ERROR: CTRL ',TRIM(CF%ID),' must have only two inputs'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
-      CASE (CF_SUM,CF_MULTIPLY)
+      CASE (CF_SUM,CF_MULTIPLY,CF_MIN,CF_MAX)
       CASE DEFAULT
          IF (ANY(CF%INPUT_ID=='CONSTANT')) THEN
-            WRITE(MESSAGE,'(A,I0,A)')  'ERROR: CTRL ',NC,' the INTPUT_ID of CONSTANT cannot be used'
+            WRITE(MESSAGE,'(A,A,A)')  'ERROR: CTRL ',TRIM(CF%ID),' cannot use a CONSTANT INPUT_ID'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
-      END SELECT
+   END SELECT
    ALLOCATE (CF%INPUT(CF%N_INPUTS),STAT=IZERO)
    CALL ChkMemErr('READ','CF%INPUT',IZERO)
    ALLOCATE (CF%INPUT_TYPE(CF%N_INPUTS),STAT=IZERO)
@@ -13669,16 +13669,16 @@ PROC_CTRL_LOOP: DO NC = 1, N_CTRL
 
    BUILD_INPUT: DO NN = 1, CF%N_INPUTS
       IF (TRIM(CF%INPUT_ID(NN))==TRIM(CF%ID)) THEN
-         WRITE(MESSAGE,'(A,I0,A)')  'ERROR: CTRL ',NC,' cannot use a control function as an input to itself'
+         WRITE(MESSAGE,'(A,A,A)')  'ERROR: CTRL ',TRIM(CF%ID),' cannot use a control function as an input to itself'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
       IF (CF%INPUT_ID(NN)=='CONSTANT') THEN
          IF (CONSTANT_SPECIFIED) THEN
-            WRITE(MESSAGE,'(A,I0,A)')  'ERROR: CTRL ',NC,' can only specify one input as a constant value'
+            WRITE(MESSAGE,'(A,A,A)')  'ERROR: CTRL ',TRIM(CF%ID),' can only specify one input as a constant value'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          IF (CF%CONSTANT < -8.E30_EB) THEN
-            WRITE(MESSAGE,'(A,I0,A)')  'ERROR: CTRL ',NC,' has the INPUT_ID CONSTANT but no constant value was specified'
+            WRITE(MESSAGE,'(A,I0,A)')  'ERROR: CTRL ',TRIM(CF%ID),' has the INPUT_ID CONSTANT but no constant value was specified'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          CF%INPUT_TYPE(NN) = CONSTANT_INPUT
@@ -13690,7 +13690,7 @@ PROC_CTRL_LOOP: DO NC = 1, N_CTRL
             CF%INPUT(NN) = NNN
             CF%INPUT_TYPE(NN) = CONTROL_INPUT
             IF (CF%CONTROL_INDEX == CUSTOM) THEN
-               WRITE(MESSAGE,'(A,I0,A)')  'ERROR: CUSTOM CTRL ',NC,' cannot have another CTRL as input'
+               WRITE(MESSAGE,'(A,A,A)')  'ERROR: CUSTOM CTRL ',TRIM(CF%ID),' cannot have another CTRL as input'
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
             EXIT CTRL_LOOP
@@ -13700,7 +13700,7 @@ PROC_CTRL_LOOP: DO NC = 1, N_CTRL
          IF (DEVICE(NNN)%ID == CF%INPUT_ID(NN)) THEN
             IF (ANY(DEVICE(NNN)%QUANTITY_INDEX==41)) TSF_WARNING=.TRUE.
             IF (CF%INPUT_TYPE(NN) > 0) THEN
-               WRITE(MESSAGE,'(A,I0,A,I0,A)')  'ERROR: CTRL ',NC,' input ',NN,' is the ID for both a DEVC and a CTRL'
+               WRITE(MESSAGE,'(A,A,A,I0,A)')  'ERROR: CTRL ',TRIM(CF%ID),' input ',NN,' is the ID for both a DEVC and a CTRL'
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
             CF%INPUT(NN) = NNN
@@ -13709,7 +13709,7 @@ PROC_CTRL_LOOP: DO NC = 1, N_CTRL
          ENDIF
       END DO DEVC_LOOP
       IF (CF%INPUT_TYPE(NN) > 0) CYCLE BUILD_INPUT
-      WRITE(MESSAGE,'(A,I0,A,A)')  'ERROR: CTRL ',NC,' cannot locate item for input ', TRIM(CF%INPUT_ID(NN))
+      WRITE(MESSAGE,'(A,A,A,A)')  'ERROR: CTRL ',TRIM(CF%ID),' cannot locate item for input ',TRIM(CF%INPUT_ID(NN))
       CALL SHUTDOWN(MESSAGE) ; RETURN
       IF (DO_EVACUATION) CYCLE BUILD_INPUT
    END DO BUILD_INPUT
