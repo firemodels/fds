@@ -1852,9 +1852,9 @@ In 2009, Sandia National Laboratories conducted two large-scale LNG pool fire ex
 
 \subsubsection{Modeling Notes}
 
-The simulation of the Test~1 uses 1~m grid cells, while Test~2 uses 2~m cells. The computational domain for both simulations forms the shape of a cross that includes the fire and the radiometers to the north, south, east and west. Methane is the specified fuel, with a soot yield of 0.01 and radiative fraction of 0.25. Both values are estimates. 
+The simulation of Test~1 uses 1~m grid cells, while Test~2 uses 2~m cells. The computational domain for both simulations forms the shape of a cross that includes the fire and the radiometers to the north, south, east and west. Methane is the specified fuel, with a soot yield of 0.01 and radiative fraction of 0.25. Both values are estimates. 
 
-There are 1200 solid angles, rather than the default 100, used in the radiative transport equation to uniformly distribute the fire's radiative energy outward approximately 250~m. The value of 1200 is based on an assessment of the contours of the integrated radiative intensity. 
+There are 1200 solid angles, rather than the default 100, used in the radiative transport equation to uniformly distribute the fire's radiative energy outward approximately 250~m. The value of 1200 is based on an assessment of the contours of the integrated radiative intensity. Also, both wide and narrow-angle radiometer measurements were made at distances ranging from 100~m to 250~m from the pool center, with various inclination angles. For the narrow-angle measurements, FDS chooses the nearest discrete radiation angle to represent the narrow-angle heat flux. At such large distances, it is difficult to ``find'' an angle that emanates from the fire to the location of the device.
 
 \begin{description}
 \item[Flame Height Results:] Section~\ref{Flame Height} 
