@@ -991,26 +991,36 @@ $Q$ (kW) & $Q^*$    & $D^*$ (m)   & HRRPUA (kW/m$^2$)  & $\chi_r$ & $T_{\rm surf
 \section{Montoir LNG Fires}
 \label{Montoir_LNG_Fires_Description}
 
-In 1987, British Gas, British Petroleum, Shell, Elf Aquitaine, Total CFP, and Gaz de France conducted 35~m diameter LNG pool fire experiments~\cite{Nedelka:1990}. The construction of the test facility was carried out by Gaz de France near the Montoir de Bretagne methane terminal. Three fire experiments were performed under different wind conditions. The Montoir site was selected because the ground is level and obstruction free. Wide angle radiation measurements were made at various locations around the fires, extending outwards approximately 300~m. A bund constructed of lightweight concrete and sand, approximately 1~m tall, surrounded the 35~m pool. A summary of the key test parameters is given in Table~\ref{Montoir_Summary}.
+In 1987, British Gas, British Petroleum, Shell, Elf Aquitaine, Total CFP, and Gaz de France conducted 35~m diameter LNG pool fire experiments~\cite{Nedelka:1990}. The construction of the test facility was carried out by Gaz de France near the Montoir de Bretagne methane terminal. Three fire experiments were performed under different wind conditions. The Montoir site was selected because the ground is level and obstruction free. Wide angle radiation measurements were made at various locations around the fires, extending outwards approximately 300~m. A bund constructed of lightweight concrete and sand, approximately 1~m tall, surrounded the 35~m pool. 
+
+A summary of the key test parameters is given in Table~\ref{Montoir_Summary}. Note that results were compiled for specific time intervals during each experiment.
 
 \begin{table}[!ht]
 \centering
 \caption[Summary of the Montoir LNG Fire Experiments]{Summary of the Montoir LNG Fire Experiments.}
 \label{Montoir_Summary}
-\begin{tabular}{|c|c|c|c|c|c|c|c|c|}
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
 \hline
-Test   & Volume  & Discharge  & Initial   & Fire      & Wind     & Amb.        & Rel.      & Atm.   \\
-No.    & LNG     & Time       & Depth     & Duration  & Speed    & Temp.       & Hum.      & Pres.  \\
-       & (m$^3$) & (min)      & (mm)      & (s)       & (m/s)    & ($^\circ$C) & (\%)      & (mbar) \\ \hline
-1      & 238     & 235        & 80        & 400       & 2.7-4.8  & 25          & 53        & 1022   \\  
-2      & 198     & 125        & 90        & 450       & 7.0-10.1 & 21          & 54        & 1015   \\
-3      & 196     & 67         & 110       & 500       & 2.8-4.8  & 14          & 85        & 1009   \\ \hline
+                            & Time    & Burning      & Wind      & 9~m Wind & Amb.                & Rel.                & Atm.                    \\
+Test                        & Interval& Rate         & Direction & Speed    & Temp.               & Hum.                & Pres.                   \\
+                            & (s)     & (kg/m$^2$/s) & (deg)     & (m/s)    & ($^\circ$C)         & (\%)                & (mbar)                  \\ \hline \hline
+\multirow{2}{*}{1}          & 60-100  & 0.12         & 59        & 2.5      & \multirow{2}{*}{25} & \multirow{2}{*}{53} & \multirow{2}{*}{1022}   \\  
+                            & 130-170 & 0.13         & 70        & 4.8      &                     &                     &                         \\ \hline
+\multirow{4}{*}{2}          & 35-50   & 0.14         & 268       & 6.8      & \multirow{4}{*}{21} & \multirow{4}{*}{54} & \multirow{4}{*}{1015}   \\
+                            & 65-85   & 0.15         & 263       & 9.8      &                     &                     &                         \\
+                            & 100-130 & 0.16         & 260       & 10.3     &                     &                     &                         \\
+                            & 165-185 & 0.15         & 257       & 9.1      &                     &                     &                         \\ \hline
+\multirow{3}{*}{3}          & 57-70   & 0.11         & 87        & 1.9      & \multirow{3}{*}{14} & \multirow{3}{*}{85} & \multirow{3}{*}{1009}   \\
+                            & 90-120  & 0.13         & 79        & 3.5      &                     &                     &                         \\
+                            & 130-160 & 0.13         & 82        & 4.2      &                     &                     &                         \\ \hline
 \end{tabular}
 \end{table}
 
 \subsubsection{Modeling Notes}
 
-The experiments are simulated using the specified fuel burning rate. The fuel is assumed to be methane. The atmosphere is assumed to be unstable with an Obukhov length, $L=-350$, and the ground surface is roughly open with an assumed aerodynamic roughness, $z_0=0.1$~m. The relative humidity, ambient temperature and pressure, and wind speed at 9~m are specified in the report. The radiative fraction is assumed to 0.14 based on field estimates and the radiative path length is assumed to be 300~m; that is, the effective absorption coefficients of the various gas mixtures are evaluated over a distance of 300~m. The soot yield is assumed to be 0.01.
+The experiments are simulated using the specified fuel burning rates for the several time periods during each experiment. The fuel is assumed to be methane. The atmosphere is assumed to be unstable with an Obukhov length, $L=-350$, and the ground surface is roughly open with an assumed aerodynamic roughness, $z_0=0.1$~m. The relative humidity, ambient temperature and pressure, and wind speed at 9~m are specified in Table~\ref{Montoir_Summary}. 
+
+The radiative fraction is assumed to 0.14 based on field estimates and the radiative path length is assumed to be 300~m; that is, the effective absorption coefficients of the various gas mixtures are evaluated over a distance of 300~m. 600 solid angles, rather than the default 100, are used to solve the radiative transport equation. The soot yield is assumed to be 0.01.
 
 \begin{description}
 \item[Flame Height Results:] Section~\ref{Flame Height}
@@ -1842,9 +1852,9 @@ In 2009, Sandia National Laboratories conducted two large-scale LNG pool fire ex
 
 \subsubsection{Modeling Notes}
 
-The simulation of the Test~1 uses 1~m grid cells, while Test~2 uses 2~m cells. The computational domain for both simulations forms the shape of a cross that includes the fire and the radiometers to the north, south, east and west. Methane is the specified fuel, with a soot yield of 0.01 and radiative fraction of 0.25. Both values are estimates. 
+The simulation of Test~1 uses 1~m grid cells, while Test~2 uses 2~m cells. The computational domain for both simulations forms the shape of a cross that includes the fire and the radiometers to the north, south, east and west. Methane is the specified fuel, with a soot yield of 0.01 and radiative fraction of 0.25. Both values are estimates. 
 
-There are 1200 solid angles, rather than the default 100, used in the radiative transport equation to uniformly distribute the fire's radiative energy outward approximately 250~m. The value of 1200 is based on an assessment of the contours of the integrated radiative intensity. 
+There are 1200 solid angles, rather than the default 100, used in the radiative transport equation to uniformly distribute the fire's radiative energy outward approximately 250~m. The value of 1200 is based on an assessment of the contours of the integrated radiative intensity. Also, both wide and narrow-angle radiometer measurements were made at distances ranging from 100~m to 250~m from the pool center, with various inclination angles. For the narrow-angle measurements, FDS chooses the nearest discrete radiation angle to represent the narrow-angle heat flux. At such large distances, it is difficult to ``find'' an angle that emanates from the fire to the location of the device.
 
 \begin{description}
 \item[Flame Height Results:] Section~\ref{Flame Height} 

@@ -5697,13 +5697,9 @@ READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
       ENDDO
    ENDIF
    LPC%FREE_AREA_FRACTION = FREE_AREA_FRACTION
+   LPC%POROUS_VOLUME_FRACTION = POROUS_VOLUME_FRACTION
 
    ! Drag laws
-
-   IF (TRIM(DRAG_LAW)=='SCREEN' .AND. LPC%N_ORIENTATION/=1) THEN
-      WRITE(MESSAGE,'(A,I0,A)') 'ERROR: PART line ',N,'. Must specify exactly one ORIENTATION for SCREEN drag law.'
-      CALL SHUTDOWN(MESSAGE) ; RETURN
-   ENDIF
 
    IF (ANY(DRAG_COEFFICIENT>0._EB) .AND. (DRAG_LAW=='SPHERE' .OR.  DRAG_LAW=='CYLINDER')) THEN
       WRITE(MESSAGE,'(A,I0,A)') 'ERROR: PART line ',N,'. Do not specify a DRAG_COEFFICIENT for a SPHERE or CYLINDER DRAG_LAW'
@@ -5720,6 +5716,14 @@ READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
       CASE('USER')
          LPC%DRAG_LAW = USER_DRAG
       CASE('SCREEN')
+         IF (LPC%N_ORIENTATION/=1) THEN
+            WRITE(MESSAGE,'(A,I0,A)') 'ERROR: PART line ',N,'. Must specify exactly one ORIENTATION for SCREEN drag law.'
+            CALL SHUTDOWN(MESSAGE) ; RETURN
+         ENDIF
+         IF (LPC%FREE_AREA_FRACTION < 0._EB) THEN
+            WRITE(MESSAGE,'(A,I0,A)') 'ERROR: PART line ',N,'. Must specify FREE_AREA_FRACTION for SCREEN drag law.'
+            CALL SHUTDOWN(MESSAGE) ; RETURN
+         ENDIF
          LPC%DRAG_LAW = SCREEN_DRAG
          LPC%PERMEABILITY(1:3) = 3.44E-9_EB*LPC%FREE_AREA_FRACTION**1.6_EB
          LPC%DRAG_COEFFICIENT(1:3) = 4.30E-2_EB*LPC%FREE_AREA_FRACTION**2.13_EB
@@ -5731,7 +5735,6 @@ READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
          ENDIF
          LPC%DRAG_LAW = POROUS_DRAG
          LPC%PERMEABILITY = PERMEABILITY
-         LPC%POROUS_VOLUME_FRACTION = POROUS_VOLUME_FRACTION
       CASE DEFAULT
          WRITE(MESSAGE,'(A)') 'ERROR: unrecognized drag law on PART line'
          CALL SHUTDOWN(MESSAGE) ; RETURN
@@ -5853,6 +5856,8 @@ EMBER_DENSITY_THRESHOLD  = 0._EB
 EMBER_VELOCITY_THRESHOLD = 1000._EB
 PRIMARY_BREAKUP_LENGTH   = -1._EB
 PRIMARY_BREAKUP_DRAG_REDUCTION_FACTOR = 1._EB
+POROUS_VOLUME_FRACTION = -1._EB
+FREE_AREA_FRACTION = -1._EB
 
 END SUBROUTINE SET_PART_DEFAULTS
 
@@ -12491,6 +12496,9 @@ DO NN=1,N_INIT
       IF (LPC%DENSITY < 0._EB) THEN
          WRITE(MESSAGE,'(A,A,A)') 'INIT ERROR: PARTicle class ',TRIM(LPC%ID),' requires a density'
          CALL SHUTDOWN(MESSAGE) ; RETURN
+      ELSE
+         IF (LPC%DRAG_LAW == POROUS_DRAG .AND. IN%MASS_PER_VOLUME>0._EB) &
+            LPC%POROUS_VOLUME_FRACTION = IN%MASS_PER_VOLUME / LPC%DENSITY
       ENDIF
       IF (LPC%SURF_INDEX>0) THEN
          MOIST_FRAC = SURFACE(LPC%SURF_INDEX)%MOISTURE_FRACTION(1)
@@ -12502,6 +12510,14 @@ DO NN=1,N_INIT
             IN%MASS_PER_TIME   = IN%MASS_PER_TIME  *(1._EB+MOIST_FRAC)
             IN%MASS_PER_VOLUME = IN%MASS_PER_VOLUME*(1._EB+MOIST_FRAC)
          ENDIF
+      ENDIF
+   ENDIF
+   IF (IN%PART_INDEX >0) THEN
+      LPC => LAGRANGIAN_PARTICLE_CLASS(IN%PART_INDEX)
+      IF (LPC%DRAG_LAW == POROUS_DRAG .AND. LPC%POROUS_VOLUME_FRACTION <= 0._EB) THEN
+         WRITE(MESSAGE,'(A,A,A)') 'INIT ERROR: PARTicle class ',TRIM(LPC%ID),&
+                                  ' requires a PART POROUS_VOLUME_FRACTION or INIT MASS_PER_VOLUME'
+         CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
    ENDIF
 ENDDO
@@ -13536,8 +13552,6 @@ READ_CTRL_LOOP: DO NC=1,N_CTRL
          CF%CONTROL_INDEX = TIME_DELAY
       CASE('DEADBAND')
          CF%CONTROL_INDEX = DEADBAND
-      CASE('CYCLING')
-         CF%CONTROL_INDEX = CYCLING
       CASE('CUSTOM')
          CF%CONTROL_INDEX = CUSTOM
          CALL GET_RAMP_INDEX(RAMP_ID,'CONTROL',CF%RAMP_INDEX)
@@ -13645,22 +13659,39 @@ PROC_CTRL_LOOP: DO NC = 1, N_CTRL
    END DO INPUT_COUNT
    CF%N_INPUTS=NN-1
    IF (CF%N_INPUTS==0) THEN
-      WRITE(MESSAGE,'(A,I0,A)')  'ERROR: CTRL ',NC,' must have at least one input'
+      WRITE(MESSAGE,'(A,A,A)')  'ERROR: CTRL ',TRIM(CF%ID),' must have at least one input'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
    SELECT CASE (CF%CONTROL_INDEX)
-      CASE (CF_SUBTRACT,CF_DIVIDE,CF_POWER)
+      CASE (1:50,101:199)
+         IF (CF%N_INPUTS /= 1) THEN
+            WRITE(MESSAGE,'(A,A,A)')  'ERROR: CTRL ',TRIM(CF%ID),' must have only one input'
+            CALL SHUTDOWN(MESSAGE) ; RETURN
+         ENDIF
+         IF (CF%CONTROL_INDEX/=CUSTOM .AND. ANY(CF%INPUT_ID=='CONSTANT')) THEN
+            WRITE(MESSAGE,'(A,A,A)')  'ERROR: CTRL ',TRIM(CF%ID),' cannot use a CONSTANT INPUT_ID'
+            CALL SHUTDOWN(MESSAGE) ; RETURN
+         ENDIF
+      CASE (51:100,301:399)
+         IF (CF%N_INPUTS < 2) THEN
+            WRITE(MESSAGE,'(A,A,A)')  'ERROR: CTRL ',TRIM(CF%ID),' must have at least two inputs'
+            CALL SHUTDOWN(MESSAGE) ; RETURN
+         ENDIF
+      CASE (201:299)
          IF (CF%N_INPUTS /= 2) THEN
-            WRITE(MESSAGE,'(A,I0,A)')  'ERROR: CTRL ',NC,' must have at only two inputs'
+            WRITE(MESSAGE,'(A,A,A)')  'ERROR: CTRL ',TRIM(CF%ID),' must have only two inputs'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
-      CASE (CF_SUM,CF_MULTIPLY)
-      CASE DEFAULT
+      CASE (401:499)
          IF (ANY(CF%INPUT_ID=='CONSTANT')) THEN
-            WRITE(MESSAGE,'(A,I0,A)')  'ERROR: CTRL ',NC,' the INTPUT_ID of CONSTANT cannot be used'
+            WRITE(MESSAGE,'(A,A,A)')  'ERROR: CTRL ',TRIM(CF%ID),' cannot use a CONSTANT INPUT_ID'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
-      END SELECT
+         IF (CF%N_INPUTS /= 1) THEN
+            WRITE(MESSAGE,'(A,A,A)')  'ERROR: CTRL ',TRIM(CF%ID),' must have only one input'
+            CALL SHUTDOWN(MESSAGE) ; RETURN
+         ENDIF
+   END SELECT
    ALLOCATE (CF%INPUT(CF%N_INPUTS),STAT=IZERO)
    CALL ChkMemErr('READ','CF%INPUT',IZERO)
    ALLOCATE (CF%INPUT_TYPE(CF%N_INPUTS),STAT=IZERO)
@@ -13669,16 +13700,16 @@ PROC_CTRL_LOOP: DO NC = 1, N_CTRL
 
    BUILD_INPUT: DO NN = 1, CF%N_INPUTS
       IF (TRIM(CF%INPUT_ID(NN))==TRIM(CF%ID)) THEN
-         WRITE(MESSAGE,'(A,I0,A)')  'ERROR: CTRL ',NC,' cannot use a control function as an input to itself'
+         WRITE(MESSAGE,'(A,A,A)')  'ERROR: CTRL ',TRIM(CF%ID),' cannot use a control function as an input to itself'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
       IF (CF%INPUT_ID(NN)=='CONSTANT') THEN
          IF (CONSTANT_SPECIFIED) THEN
-            WRITE(MESSAGE,'(A,I0,A)')  'ERROR: CTRL ',NC,' can only specify one input as a constant value'
+            WRITE(MESSAGE,'(A,A,A)')  'ERROR: CTRL ',TRIM(CF%ID),' can only specify one input as a constant value'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          IF (CF%CONSTANT < -8.E30_EB) THEN
-            WRITE(MESSAGE,'(A,I0,A)')  'ERROR: CTRL ',NC,' has the INPUT_ID CONSTANT but no constant value was specified'
+            WRITE(MESSAGE,'(A,I0,A)')  'ERROR: CTRL ',TRIM(CF%ID),' has the INPUT_ID CONSTANT but no constant value was specified'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          CF%INPUT_TYPE(NN) = CONSTANT_INPUT
@@ -13689,8 +13720,12 @@ PROC_CTRL_LOOP: DO NC = 1, N_CTRL
          IF (CONTROL(NNN)%ID == CF%INPUT_ID(NN)) THEN
             CF%INPUT(NN) = NNN
             CF%INPUT_TYPE(NN) = CONTROL_INPUT
-            IF (CF%CONTROL_INDEX == CUSTOM) THEN
-               WRITE(MESSAGE,'(A,I0,A)')  'ERROR: CUSTOM CTRL ',NC,' cannot have another CTRL as input'
+            IF (CF%CONTROL_INDEX == CF_PERCENTILE) THEN
+               WRITE(MESSAGE,'(A,A,A)')  'ERROR: PRECENTILE CTRL ',TRIM(CF%ID),' must have a DEVC as input'
+               CALL SHUTDOWN(MESSAGE) ; RETURN
+            ENDIF
+            IF (CF%CONTROL_INDEX == CUSTOM .AND. CONTROL(NNN)%CONTROL_INDEX < 101) THEN
+               WRITE(MESSAGE,'(A,A,A)')  'ERROR: CUSTOM CTRL ',TRIM(CF%ID),' must have a DEVC or math CTRL as input'
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
             EXIT CTRL_LOOP
@@ -13700,7 +13735,7 @@ PROC_CTRL_LOOP: DO NC = 1, N_CTRL
          IF (DEVICE(NNN)%ID == CF%INPUT_ID(NN)) THEN
             IF (ANY(DEVICE(NNN)%QUANTITY_INDEX==41)) TSF_WARNING=.TRUE.
             IF (CF%INPUT_TYPE(NN) > 0) THEN
-               WRITE(MESSAGE,'(A,I0,A,I0,A)')  'ERROR: CTRL ',NC,' input ',NN,' is the ID for both a DEVC and a CTRL'
+               WRITE(MESSAGE,'(A,A,A,I0,A)')  'ERROR: CTRL ',TRIM(CF%ID),' input ',NN,' is the ID for both a DEVC and a CTRL'
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
             CF%INPUT(NN) = NNN
@@ -13709,7 +13744,7 @@ PROC_CTRL_LOOP: DO NC = 1, N_CTRL
          ENDIF
       END DO DEVC_LOOP
       IF (CF%INPUT_TYPE(NN) > 0) CYCLE BUILD_INPUT
-      WRITE(MESSAGE,'(A,I0,A,A)')  'ERROR: CTRL ',NC,' cannot locate item for input ', TRIM(CF%INPUT_ID(NN))
+      WRITE(MESSAGE,'(A,A,A,A)')  'ERROR: CTRL ',TRIM(CF%ID),' cannot locate item for input ',TRIM(CF%INPUT_ID(NN))
       CALL SHUTDOWN(MESSAGE) ; RETURN
       IF (DO_EVACUATION) CYCLE BUILD_INPUT
    END DO BUILD_INPUT
@@ -14131,21 +14166,28 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
 
       CASE ('CONTROL')
 
-         DO NN=1,N_CTRL
-            IF (CONTROL(NN)%ID==DV%CTRL_ID) DV%CTRL_INDEX = NN
-         ENDDO
+         C1: DO NN=1,N_CTRL
+            IF (CONTROL(NN)%ID==DV%CTRL_ID) THEN 
+               DV%CTRL_INDEX = NN
+               EXIT C1
+            ENDIF
+         ENDDO C1
          IF (DV%CTRL_ID/='null' .AND. DV%CTRL_INDEX<=0) THEN
-            WRITE(MESSAGE,'(A,A,A)')  'ERROR: CONTROL ',TRIM(DV%CTRL_ID),' does not exist'
+            WRITE(MESSAGE,'(A,A,A,A)')  'ERROR: CONTROL ',TRIM(DV%CTRL_ID),' does not exist for DEVC ',TRIM(DV%ID)
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
+            
          DV%SETPOINT = 0.5
          DV%TRIP_DIRECTION = 1
 
       CASE ('CONTROL VALUE')
 
-         DO NN=1,N_CTRL
-            IF (CONTROL(NN)%ID==DV%CTRL_ID) DV%CTRL_INDEX = NN
-         ENDDO
+         C2: DO NN=1,N_CTRL
+            IF (CONTROL(NN)%ID==DV%CTRL_ID) THEN 
+               DV%CTRL_INDEX = NN
+               EXIT C2
+            ENDIF
+         ENDDO C2
          IF (DV%CTRL_ID/='null' .AND. DV%CTRL_INDEX<=0) THEN
             WRITE(MESSAGE,'(A,A,A)')  'ERROR: CONTROL ',TRIM(DV%CTRL_ID),' does not exist'
             CALL SHUTDOWN(MESSAGE) ; RETURN
