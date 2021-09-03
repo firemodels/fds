@@ -1342,23 +1342,27 @@ IF (LPC%SOLID_PARTICLE) THEN
                  ABS(ORIENTATION_VECTOR(3,LPC%ORIENTATION_INDEX))*DX(ONE_D%IIG)*DY(ONE_D%JJG)) * &
                  LAGRANGIAN_PARTICLE_CLASS(LP%CLASS_INDEX)%FREE_AREA_FRACTION
          SELECT CASE (SF%GEOMETRY)
-            CASE (SURF_CARTESIAN)
+         CASE (SURF_CARTESIAN)
                LP%ONE_D%AREA = AREA
+               LPC%LENGTH = SQRT(AREA)               
                IF (SF%THERMAL_BC_INDEX==THERMALLY_THICK) THEN
                   DO N=1,SF%N_LAYERS
-                     LP%MASS = LP%MASS + AREA*SF%LAYER_THICKNESS(N)*SF%LAYER_DENSITY(N)
+                     LP%MASS = LP%MASS + SF%LAYER_THICKNESS(N)*SF%LAYER_DENSITY(N)
                   END DO
+                  LP%MASS = LP%MASS*AREA
                ENDIF
             CASE (SURF_CYLINDRICAL)
                LP%ONE_D%AREA = AREA*PI
+               X1 = SUM(SF%LAYER_THICKNESS)+SF%INNER_RADIUS
+               LPC%LENGTH = 0.5_EB * AREA / X1
                IF (SF%THERMAL_BC_INDEX==THERMALLY_THICK) THEN
-                  X1 = SUM(SF%LAYER_THICKNESS)+SF%INNER_RADIUS
                   LENGTH = AREA / (2._EB*X1)
                   DO N=SF%N_LAYERS,1,-1
                      X2 = X1 - SF%LAYER_THICKNESS(N)
-                     LP%MASS = LP%MASS + LENGTH*SF%LAYER_DENSITY(N)*PI*(X1**2-X2**2)
+                     LP%MASS = LP%MASS + SF%LAYER_DENSITY(N)*PI*(X1**2-X2**2)
                      X1 = X2
                   END DO
+                  LP%MASS = LP%MASS*LPC%LENGTH
                ENDIF
             CASE (SURF_SPHERICAL)
                LP%ONE_D%AREA = AREA*4._EB
@@ -1382,6 +1386,7 @@ IF (LPC%SOLID_PARTICLE) THEN
          SELECT CASE (SF%GEOMETRY)
             CASE (SURF_CARTESIAN)
                LP%ONE_D%AREA = LP_VOLUME/SF%THICKNESS
+               LPC%LENGTH = SQRT(LP%ONE_D%AREA )                              
                IF (SF%THERMAL_BC_INDEX==THERMALLY_THICK) THEN
                   DO N=1,SF%N_LAYERS
                      LP%MASS = LP%MASS + SF%LAYER_THICKNESS(N)*SF%LAYER_DENSITY(N)
@@ -1389,15 +1394,16 @@ IF (LPC%SOLID_PARTICLE) THEN
                   LP%MASS = LP%MASS*LP%ONE_D%AREA
                ENDIF
             CASE (SURF_CYLINDRICAL)
-               LP%ONE_D%AREA = 2._EB*LP_VOLUME/(SF%THICKNESS+SF%INNER_RADIUS)
+               X1 = SUM(SF%LAYER_THICKNESS)+SF%INNER_RADIUS
+               LP%ONE_D%AREA = 2._EB*LP_VOLUME/X1
+               LPC%LENGTH = LP_VOLUME /(PI*X1**2)
                IF (SF%THERMAL_BC_INDEX==THERMALLY_THICK) THEN
-                  X1 = SUM(SF%LAYER_THICKNESS)+SF%INNER_RADIUS
-                  LENGTH = LP_VOLUME/(PI*X1**2)
                   DO N=SF%N_LAYERS,1,-1
                      X2 = X1 - SF%LAYER_THICKNESS(N)
-                     LP%MASS = LP%MASS + LENGTH*SF%LAYER_DENSITY(N)*PI*(X1**2-X2**2)
+                     LP%MASS = LP%MASS + SF%LAYER_DENSITY(N)*PI*(X1**2-X2**2)
                      X1 = X2
                   END DO
+                  LP%MASS = LP%MASS*LPC%LENGTH
                ENDIF
             CASE (SURF_SPHERICAL)
                LP%ONE_D%AREA = 3._EB*LP_VOLUME/(SF%THICKNESS+SF%INNER_RADIUS)
