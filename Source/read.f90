@@ -13552,8 +13552,6 @@ READ_CTRL_LOOP: DO NC=1,N_CTRL
          CF%CONTROL_INDEX = TIME_DELAY
       CASE('DEADBAND')
          CF%CONTROL_INDEX = DEADBAND
-      CASE('CYCLING')
-         CF%CONTROL_INDEX = CYCLING
       CASE('CUSTOM')
          CF%CONTROL_INDEX = CUSTOM
          CALL GET_RAMP_INDEX(RAMP_ID,'CONTROL',CF%RAMP_INDEX)
@@ -13665,15 +13663,32 @@ PROC_CTRL_LOOP: DO NC = 1, N_CTRL
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
    SELECT CASE (CF%CONTROL_INDEX)
-      CASE (CF_SUBTRACT,CF_DIVIDE,CF_POWER)
+      CASE (1:50,101:199)
+         IF (CF%N_INPUTS /= 1) THEN
+            WRITE(MESSAGE,'(A,A,A)')  'ERROR: CTRL ',TRIM(CF%ID),' must have only one input'
+            CALL SHUTDOWN(MESSAGE) ; RETURN
+         ENDIF
+         IF (CF%CONTROL_INDEX/=CUSTOM .AND. ANY(CF%INPUT_ID=='CONSTANT')) THEN
+            WRITE(MESSAGE,'(A,A,A)')  'ERROR: CTRL ',TRIM(CF%ID),' cannot use a CONSTANT INPUT_ID'
+            CALL SHUTDOWN(MESSAGE) ; RETURN
+         ENDIF
+      CASE (51:100,301:399)
+         IF (CF%N_INPUTS < 2) THEN
+            WRITE(MESSAGE,'(A,A,A)')  'ERROR: CTRL ',TRIM(CF%ID),' must have at least two inputs'
+            CALL SHUTDOWN(MESSAGE) ; RETURN
+         ENDIF
+      CASE (201:299)
          IF (CF%N_INPUTS /= 2) THEN
             WRITE(MESSAGE,'(A,A,A)')  'ERROR: CTRL ',TRIM(CF%ID),' must have only two inputs'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
-      CASE (CF_SUM,CF_MULTIPLY,CF_MIN,CF_MAX)
-      CASE DEFAULT
+      CASE (401:499)
          IF (ANY(CF%INPUT_ID=='CONSTANT')) THEN
             WRITE(MESSAGE,'(A,A,A)')  'ERROR: CTRL ',TRIM(CF%ID),' cannot use a CONSTANT INPUT_ID'
+            CALL SHUTDOWN(MESSAGE) ; RETURN
+         ENDIF
+         IF (CF%N_INPUTS /= 1) THEN
+            WRITE(MESSAGE,'(A,A,A)')  'ERROR: CTRL ',TRIM(CF%ID),' must have only one input'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
    END SELECT
@@ -13705,8 +13720,12 @@ PROC_CTRL_LOOP: DO NC = 1, N_CTRL
          IF (CONTROL(NNN)%ID == CF%INPUT_ID(NN)) THEN
             CF%INPUT(NN) = NNN
             CF%INPUT_TYPE(NN) = CONTROL_INPUT
-            IF (CF%CONTROL_INDEX == CUSTOM) THEN
-               WRITE(MESSAGE,'(A,A,A)')  'ERROR: CUSTOM CTRL ',TRIM(CF%ID),' cannot have another CTRL as input'
+            IF (CF%CONTROL_INDEX == CF_PERCENTILE) THEN
+               WRITE(MESSAGE,'(A,A,A)')  'ERROR: PRECENTILE CTRL ',TRIM(CF%ID),' must have a DEVC as input'
+               CALL SHUTDOWN(MESSAGE) ; RETURN
+            ENDIF
+            IF (CF%CONTROL_INDEX == CUSTOM .AND. CONTROL(NNN)%CONTROL_INDEX < 101) THEN
+               WRITE(MESSAGE,'(A,A,A)')  'ERROR: CUSTOM CTRL ',TRIM(CF%ID),' must have a DEVC or math CTRL as input'
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
             EXIT CTRL_LOOP
@@ -14147,21 +14166,28 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
 
       CASE ('CONTROL')
 
-         DO NN=1,N_CTRL
-            IF (CONTROL(NN)%ID==DV%CTRL_ID) DV%CTRL_INDEX = NN
-         ENDDO
+         C1: DO NN=1,N_CTRL
+            IF (CONTROL(NN)%ID==DV%CTRL_ID) THEN 
+               DV%CTRL_INDEX = NN
+               EXIT C1
+            ENDIF
+         ENDDO C1
          IF (DV%CTRL_ID/='null' .AND. DV%CTRL_INDEX<=0) THEN
-            WRITE(MESSAGE,'(A,A,A)')  'ERROR: CONTROL ',TRIM(DV%CTRL_ID),' does not exist'
+            WRITE(MESSAGE,'(A,A,A,A)')  'ERROR: CONTROL ',TRIM(DV%CTRL_ID),' does not exist for DEVC ',TRIM(DV%ID)
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
+            
          DV%SETPOINT = 0.5
          DV%TRIP_DIRECTION = 1
 
       CASE ('CONTROL VALUE')
 
-         DO NN=1,N_CTRL
-            IF (CONTROL(NN)%ID==DV%CTRL_ID) DV%CTRL_INDEX = NN
-         ENDDO
+         C2: DO NN=1,N_CTRL
+            IF (CONTROL(NN)%ID==DV%CTRL_ID) THEN 
+               DV%CTRL_INDEX = NN
+               EXIT C2
+            ENDIF
+         ENDDO C2
          IF (DV%CTRL_ID/='null' .AND. DV%CTRL_INDEX<=0) THEN
             WRITE(MESSAGE,'(A,A,A)')  'ERROR: CONTROL ',TRIM(DV%CTRL_ID),' does not exist'
             CALL SHUTDOWN(MESSAGE) ; RETURN
