@@ -13672,7 +13672,12 @@ PROC_CTRL_LOOP: DO NC = 1, N_CTRL
             WRITE(MESSAGE,'(A,A,A)')  'ERROR: CTRL ',TRIM(CF%ID),' cannot use a CONSTANT INPUT_ID'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
-      CASE (51:100,301:399)
+      CASE (51:100)
+         IF (CF%N_INPUTS < 1) THEN
+            WRITE(MESSAGE,'(A,A,A)')  'ERROR: CTRL ',TRIM(CF%ID),' must have at least one input'
+            CALL SHUTDOWN(MESSAGE) ; RETURN
+         ENDIF
+      CASE (301:399)
          IF (CF%N_INPUTS < 2) THEN
             WRITE(MESSAGE,'(A,A,A)')  'ERROR: CTRL ',TRIM(CF%ID),' must have at least two inputs'
             CALL SHUTDOWN(MESSAGE) ; RETURN

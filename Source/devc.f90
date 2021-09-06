@@ -132,8 +132,8 @@ IMPLICIT NONE (TYPE,EXTERNAL)
 !> !\{
 !> Parameter defining the type of control function for CONTROL\%CONTROL_INDEX
 ! When adding more functions:
-! 1-50 are fucntions with a logical output that have one input
-! 51-100 are fucntions with a logical output that have multiple inputs
+! 1-50 are fucntions with a logical output that have only one input
+! 51-100 are fucntions with a logical output that at least one inputs
 ! 101-200 are functions with one input only
 ! 201-300 are functions with two inputs only
 ! 301-400 are functions with two or more inputs

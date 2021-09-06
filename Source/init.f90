@@ -534,7 +534,7 @@ ENDDO
 ! Allocate lagrangian particle storage array and compute the dimensions of its components
 
 M%NLP = 0
-M%NLPDIM = 1000
+M%NLPDIM = 50
 M%PARTICLE_TAG = NM
 
 IF (PARTICLE_FILE .AND. .NOT.DO_EVACUATION) THEN
