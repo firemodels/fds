@@ -306,6 +306,7 @@ INTEGER :: IIG,IW,JJG,IC
 INTEGER :: KDUM,KWIND,ICF,IKT
 REAL(EB) :: UMF_TMP,PHX,PHY,MAG_PHI,PHI_W_X,PHI_W_Y,UMF_X,UMF_Y,UMAG,ROS_MAG,UMF_MAG,ROTH_FACTOR
 TYPE (ONE_D_M_AND_E_XFER_TYPE), POINTER :: ONE_D
+TYPE (BOUNDARY_PROPERTY_TYPE), POINTER :: BP
 TYPE (SURFACE_TYPE), POINTER :: SF
 
 T_NOW = CURRENT_TIME()
@@ -475,12 +476,13 @@ IF (.NOT.PREDICTOR) THEN
             SF => SURFACE(LS_SURF_INDEX(IIG,JJG))
             IF (.NOT. SF%VEG_LSET_SPREAD) CYCLE
             DO IKT=LS_KLO_TERRAIN(IIG,JJG),K_LS(IIG,JJG)
-               ! Loop over all CFACEs corresponding to IIG,JJG and set ONE_D%T_IGN and ONE_D%PHI_LS as below
+               ! Loop over all CFACEs corresponding to IIG,JJG and set ONE_D%T_IGN and BP%PHI_LS as below
                ICF = CCVAR(IIG,JJG,IKT,3); IF(ICF<1) CYCLE  ! IBM_IDCF = 3 CUT_FCE container for this cell.
                DO IW=1,CUT_FACE(ICF)%NFACE ! All IBM_INBOUNDARY CFACES on this cell.
-                  ONE_D => CFACE( CUT_FACE(ICF)%CFACE_INDEX(IW) ) % ONE_D
+                  ONE_D => CFACE( CUT_FACE(ICF)%CFACE_INDEX(IW) )%ONE_D
                   IF (PHI_LS(IIG,JJG)>=0._EB .AND. ONE_D%T_IGN>1.E5_EB) CALL IGNITE_GRID_CELL
-                  ONE_D%PHI_LS = PHI_LS(IIG,JJG)
+                  BP => CFACE( CUT_FACE(ICF)%CFACE_INDEX(IW) )%BOUNDARY_PROPERTY
+                  BP%PHI_LS = PHI_LS(IIG,JJG)
                ENDDO
             ENDDO
          ENDDO
@@ -495,7 +497,8 @@ IF (.NOT.PREDICTOR) THEN
             IW = WALL_INDEX(IC,-3)
             ONE_D => WALL(IW)%ONE_D
             IF (PHI_LS(IIG,JJG)>=0._EB .AND. ONE_D%T_IGN>1.E5_EB) CALL IGNITE_GRID_CELL
-            ONE_D%PHI_LS = PHI_LS(IIG,JJG)
+            BP => WALL(IW)%BOUNDARY_PROPERTY
+            BP%PHI_LS = PHI_LS(IIG,JJG)
          ENDDO
       ENDDO
    ENDIF

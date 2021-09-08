@@ -147,7 +147,7 @@ END TYPE BAND_TYPE
 
 ! Note: If you change the number of scalar variables in ONE_D_M_AND_E_XFER_TYPE, adjust the numbers below
 
-INTEGER, PARAMETER :: N_ONE_D_SCALAR_REALS=38,N_ONE_D_SCALAR_INTEGERS=12,N_ONE_D_SCALAR_LOGICALS=1
+INTEGER, PARAMETER :: N_ONE_D_SCALAR_REALS=30,N_ONE_D_SCALAR_INTEGERS=12,N_ONE_D_SCALAR_LOGICALS=1
 
 !> \brief Variables associated with a WALL, PARTICLE, or CFACE boundary cell
 
@@ -211,20 +211,12 @@ TYPE ONE_D_M_AND_E_XFER_TYPE
    REAL(EB), POINTER :: RDN             !< \f$ 1/ \delta n \f$ at the surface (1/m)
    REAL(EB), POINTER :: MU_G            !< Viscosity, \f$ \mu \f$, in adjacent gas phase cell
    REAL(EB), POINTER :: K_G             !< Thermal conductivity, \f$ k \f$, in adjacent gas phase cell
-   REAL(EB), POINTER :: U_TAU           !< Friction velocity (m/s)
-   REAL(EB), POINTER :: Y_PLUS          !< Dimensionless boundary layer thickness unit
-   REAL(EB), POINTER :: Z_STAR          !< Dimensionless boundary layer unit
-   REAL(EB), POINTER :: PHI_LS          !< Level Set value for output only
-   REAL(EB), POINTER :: WORK1           !< Work array
-   REAL(EB), POINTER :: WORK2           !< Work array
    REAL(EB), POINTER :: Q_DOT_G_PP      !< Heat release rate per unit area (W/m2)
    REAL(EB), POINTER :: Q_DOT_O2_PP     !< Heat release rate per unit area (W/m2) due to oxygen consumption
    REAL(EB), POINTER :: Q_CONDENSE      !< Heat release rate per unit area (W/m2) due to gas condensation
-   REAL(EB), POINTER :: K_SUPPRESSION   !< Suppression coefficent (m2/kg/s)
    REAL(EB), POINTER :: BURN_DURATION   !< Duration of a specified fire (s)
    REAL(EB), POINTER :: T_SCALE         !< Scaled time for a surface with CONE_HEAT_FLUX (s)
    REAL(EB), POINTER :: Q_SCALE         !< Scaled integrated heat release for a surface with CONE_HEAT_FLUX
-   REAL(EB), POINTER :: L_OBUKHOV       !< Obukhov length (m)
    REAL(EB), POINTER :: T_MATL_PART     !< Time interval for current value in PART_MASS and PART_ENTHALPY arrays (s)
    REAL(EB), POINTER :: B_NUMBER        !< B number for droplet or wall
 
@@ -234,7 +226,7 @@ END TYPE ONE_D_M_AND_E_XFER_TYPE
 
 ! Note: If you change the number of scalar variables in BOUNDARY_PROPERTY_TYPE, adjust the numbers below
 
-INTEGER, PARAMETER :: N_BOUNDARY_PROPERTY_SCALAR_REALS=0,N_BOUNDARY_PROPERTY_SCALAR_INTEGERS=0,N_BOUNDARY_PROPERTY_SCALAR_LOGICALS=0
+INTEGER, PARAMETER :: N_BOUNDARY_PROPERTY_SCALAR_REALS=8,N_BOUNDARY_PROPERTY_SCALAR_INTEGERS=0,N_BOUNDARY_PROPERTY_SCALAR_LOGICALS=0
 INTEGER, DIMENSION(30) :: BOUNDARY_PROPERTY_REALS_ARRAY_SIZE=0,BOUNDARY_PROPERTY_INTEGERS_ARRAY_SIZE=0,&
                           BOUNDARY_PROPERTY_LOGICALS_ARRAY_SIZE=0
 INTEGER :: N_BOUNDARY_PROPERTY_STORAGE_REALS,N_BOUNDARY_PROPERTY_STORAGE_INTEGERS,N_BOUNDARY_PROPERTY_STORAGE_LOGICALS
@@ -250,6 +242,15 @@ TYPE BOUNDARY_PROPERTY_TYPE
    REAL(EB), POINTER, DIMENSION(:) :: IL                  !< (1:NSB) Radiance (W/m2/sr); output only
 
    TYPE(BAND_TYPE), ALLOCATABLE, DIMENSION(:) :: BAND     !< (1:NSB) Radiation wavelength band
+
+   REAL(EB), POINTER :: U_TAU           !< Friction velocity (m/s)
+   REAL(EB), POINTER :: Y_PLUS          !< Dimensionless boundary layer thickness unit
+   REAL(EB), POINTER :: Z_STAR          !< Dimensionless boundary layer unit
+   REAL(EB), POINTER :: PHI_LS          !< Level Set value for output only
+   REAL(EB), POINTER :: WORK1           !< Work array
+   REAL(EB), POINTER :: WORK2           !< Work array
+   REAL(EB), POINTER :: K_SUPPRESSION   !< Suppression coefficent (m2/kg/s)
+   REAL(EB), POINTER :: L_OBUKHOV       !< Obukhov length (m)
 
 END TYPE BOUNDARY_PROPERTY_TYPE
 
