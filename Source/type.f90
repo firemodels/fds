@@ -147,7 +147,7 @@ END TYPE BAND_TYPE
 
 ! Note: If you change the number of scalar variables in ONE_D_M_AND_E_XFER_TYPE, adjust the numbers below
 
-INTEGER, PARAMETER :: N_ONE_D_SCALAR_REALS=30,N_ONE_D_SCALAR_INTEGERS=12,N_ONE_D_SCALAR_LOGICALS=1
+INTEGER, PARAMETER :: N_ONE_D_SCALAR_REALS=30,N_ONE_D_SCALAR_INTEGERS=10,N_ONE_D_SCALAR_LOGICALS=1
 
 !> \brief Variables associated with a WALL, PARTICLE, or CFACE boundary cell
 
@@ -176,8 +176,6 @@ TYPE ONE_D_M_AND_E_XFER_TYPE
 
    INTEGER, POINTER, DIMENSION(:) :: N_LAYER_CELLS              !< (1:SF\%N_LAYERS) Number of cells in the layer
 
-   INTEGER, POINTER :: ARRAY_INDEX    !< WALL, LAGRANGIAN_PARTICLE, or CFACE index
-   INTEGER, POINTER :: STORAGE_INDEX  !< Index in the WALL, LP, or CFACE storate array
    INTEGER, POINTER :: II             !< Ghost cell \f$ x \f$ index
    INTEGER, POINTER :: JJ             !< Ghost cell \f$ y \f$ index
    INTEGER, POINTER :: KK             !< Ghost cell \f$ z \f$ index
@@ -259,7 +257,7 @@ END TYPE BOUNDARY_PROPERTY_TYPE
 
 INTEGER, PARAMETER :: N_PARTICLE_SCALAR_REALS=19,N_PARTICLE_SCALAR_INTEGERS=11,N_PARTICLE_SCALAR_LOGICALS=4
 
-!> \brief Variables assoicated with a single Lagrangian particle
+!> \brief Variables associated with a single Lagrangian particle
 
 TYPE LAGRANGIAN_PARTICLE_TYPE
 
