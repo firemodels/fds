@@ -376,7 +376,7 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
             DELTA = LES_FILTER_WIDTH_FUNCTION(DX(IIG),DY(JJG),DZ(KKG))
             SELECT CASE(NEAR_WALL_TURB_MODEL)
                CASE DEFAULT ! Constant Smagorinsky with Van Driest damping
-                  VDF = 1._EB-EXP(-WC%ONE_D%Y_PLUS*RAPLUS)
+                  VDF = 1._EB-EXP(-WC%BOUNDARY_PROPERTY%Y_PLUS*RAPLUS)
                   NU_EDDY = (VDF*C_SMAGORINSKY*DELTA)**2*STRAIN_RATE(IIG,JJG,KKG)
                CASE(WALE)
                   ! compute velocity gradient tensor
@@ -407,8 +407,8 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
          IF (SF%ABL_MODEL) THEN
             ! set friction velocity and viscous wall units in HEAT_TRANSFER_COEFFICIENT
          ELSE
-            CALL WALL_MODEL(SLIP_COEF,WC%ONE_D%U_TAU,WC%ONE_D%Y_PLUS,MU_DNS(IIG,JJG,KKG)/RHO(IIG,JJG,KKG),SF%ROUGHNESS,&
-                            0.5_EB/WC%ONE_D%RDN,VEL_GAS-VEL_T)
+            CALL WALL_MODEL(SLIP_COEF,WC%BOUNDARY_PROPERTY%U_TAU,WC%BOUNDARY_PROPERTY%Y_PLUS,&
+                            MU_DNS(IIG,JJG,KKG)/RHO(IIG,JJG,KKG),SF%ROUGHNESS,0.5_EB/WC%ONE_D%RDN,VEL_GAS-VEL_T)
          ENDIF
 
       CASE(OPEN_BOUNDARY,MIRROR_BOUNDARY)
