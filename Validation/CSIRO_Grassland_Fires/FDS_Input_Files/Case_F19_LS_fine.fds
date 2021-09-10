@@ -11,14 +11,7 @@
 &REAC FUEL='CELLULOSE', C=6, H=10, O=5, SOOT_YIELD=0.001, HEAT_OF_COMBUSTION=15600. /
 
 &SURF ID='IGNITION', VEG_LSET_IGNITE_TIME=0. /
-&SURF ID='LINE',
-      VEG_LSET_ROS_00           = 1
-      HRRPUA                    = 200.
-      RAMP_Q                    = 'fire' /
-&RAMP ID='fire', T= 0., F=0. /
-&RAMP ID='fire', T= 1., F=1. /
-&RAMP ID='fire', T= 9., F=1. /
-&RAMP ID='fire', T=10., F=0. /
+&SURF ID='LINE', VEG_LSET_ROS_00 = 1./
 
 &VENT XB=-5.0,0.0, -5., 5.,0.,0., SURF_ID='IGNITION' /
 &VENT XB=-5.0,0.0,-90.,-5.,0.,0., SURF_ID='LINE' /
