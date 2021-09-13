@@ -61,10 +61,10 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
 
    WC => WALL(IW)
    EWC => EXTERNAL_WALL(IW)
-   I   = WC%ONE_D%II
-   J   = WC%ONE_D%JJ
-   K   = WC%ONE_D%KK
-   IOR = WC%ONE_D%IOR
+   I   = WC%BOUNDARY_COORD%II
+   J   = WC%BOUNDARY_COORD%JJ
+   K   = WC%BOUNDARY_COORD%KK
+   IOR = WC%BOUNDARY_COORD%IOR
 
    ! Apply pressure gradients at NEUMANN boundaries: dH/dn = -F_n - d(u_n)/dt
 
@@ -745,10 +745,10 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       M2 => MESHES(EWC%NOM)
    ENDIF
 
-   II  = WC%ONE_D%II
-   JJ  = WC%ONE_D%JJ
-   KK  = WC%ONE_D%KK
-   IOR = WC%ONE_D%IOR
+   II  = WC%BOUNDARY_COORD%II
+   JJ  = WC%BOUNDARY_COORD%JJ
+   KK  = WC%BOUNDARY_COORD%KK
+   IOR = WC%BOUNDARY_COORD%IOR
 
    DHFCT = 1._EB
    IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
@@ -1110,10 +1110,10 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       IF_NEUMANN: IF (WC%PRESSURE_BC_INDEX==NEUMANN) THEN
 
          ! Gasphase cell indexes:
-         IIG   = WC%ONE_D%IIG
-         JJG   = WC%ONE_D%JJG
-         KKG   = WC%ONE_D%KKG
-         IOR   = WC%ONE_D%IOR
+         IIG   = WC%BOUNDARY_COORD%IIG
+         JJG   = WC%BOUNDARY_COORD%JJG
+         KKG   = WC%BOUNDARY_COORD%KKG
+         IOR   = WC%BOUNDARY_COORD%IOR
 
          ! Define cell size, normal to WC:
          SELECT CASE (IOR)
@@ -1161,10 +1161,10 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                                                         ! global solve.
 
          ! Gasphase cell indexes:
-         IIG   = WC%ONE_D%IIG
-         JJG   = WC%ONE_D%JJG
-         KKG   = WC%ONE_D%KKG
-         IOR   = WC%ONE_D%IOR
+         IIG   = WC%BOUNDARY_COORD%IIG
+         JJG   = WC%BOUNDARY_COORD%JJG
+         KKG   = WC%BOUNDARY_COORD%KKG
+         IOR   = WC%BOUNDARY_COORD%IOR
 
          ! Define cell size, normal to WC:
          SELECT CASE (IOR)
@@ -1467,13 +1467,13 @@ MESH_LOOP_2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       IF_NEUMANN2: IF (WC%PRESSURE_BC_INDEX==NEUMANN) THEN
 
          ! Gasphase cell indexes:
-         I   = WC%ONE_D%II
-         J   = WC%ONE_D%JJ
-         K   = WC%ONE_D%KK
-         IIG   = WC%ONE_D%IIG
-         JJG   = WC%ONE_D%JJG
-         KKG   = WC%ONE_D%KKG
-         IOR   = WC%ONE_D%IOR
+         I   = WC%BOUNDARY_COORD%II
+         J   = WC%BOUNDARY_COORD%JJ
+         K   = WC%BOUNDARY_COORD%KK
+         IIG   = WC%BOUNDARY_COORD%IIG
+         JJG   = WC%BOUNDARY_COORD%JJG
+         KKG   = WC%BOUNDARY_COORD%KKG
+         IOR   = WC%BOUNDARY_COORD%IOR
 
          ! Define cell size, normal to WC:
          SELECT CASE (IOR)
@@ -1501,13 +1501,13 @@ MESH_LOOP_2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                                                              ! global solve.
 
          ! Gasphase cell indexes:
-         I   = WC%ONE_D%II
-         J   = WC%ONE_D%JJ
-         K   = WC%ONE_D%KK
-         IIG   = WC%ONE_D%IIG
-         JJG   = WC%ONE_D%JJG
-         KKG   = WC%ONE_D%KKG
-         IOR   = WC%ONE_D%IOR
+         I   = WC%BOUNDARY_COORD%II
+         J   = WC%BOUNDARY_COORD%JJ
+         K   = WC%BOUNDARY_COORD%KK
+         IIG   = WC%BOUNDARY_COORD%IIG
+         JJG   = WC%BOUNDARY_COORD%JJG
+         KKG   = WC%BOUNDARY_COORD%KKG
+         IOR   = WC%BOUNDARY_COORD%IOR
 
          ! Define cell size, normal to WC:
          IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
@@ -1898,10 +1898,10 @@ PREDCORR_LOOP : IF (PREDICTOR) THEN
             IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE EXTERNAL_WALL_LOOP_1
          ENDIF
 
-         II  = WC%ONE_D%II
-         JJ  = WC%ONE_D%JJ
-         KK  = WC%ONE_D%KK
-         IOR = WC%ONE_D%IOR
+         II  = WC%BOUNDARY_COORD%II
+         JJ  = WC%BOUNDARY_COORD%JJ
+         KK  = WC%BOUNDARY_COORD%KK
+         IOR = WC%BOUNDARY_COORD%IOR
          NOM = EWC%NOM
          ! Here if NOM==0 means it is an OBST laying on an external boundary -> CYCLE
          IF(NOM < 1) CYCLE
@@ -1955,10 +1955,10 @@ ELSE ! PREDCORR_LOOP
             IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE EXTERNAL_WALL_LOOP_2
          ENDIF
 
-         II  = WC%ONE_D%II
-         JJ  = WC%ONE_D%JJ
-         KK  = WC%ONE_D%KK
-         IOR = WC%ONE_D%IOR
+         II  = WC%BOUNDARY_COORD%II
+         JJ  = WC%BOUNDARY_COORD%JJ
+         KK  = WC%BOUNDARY_COORD%KK
+         IOR = WC%BOUNDARY_COORD%IOR
          NOM = EWC%NOM
          ! Here if NOM==0 means it is an OBST laying on an external boundary -> CYCLE
          IF(NOM < 1) CYCLE
@@ -2036,10 +2036,10 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE EXTERNAL_WALL_LOOP
          ENDIF
 
-         II  = WC%ONE_D%II
-         JJ  = WC%ONE_D%JJ
-         KK  = WC%ONE_D%KK
-         IOR = WC%ONE_D%IOR
+         II  = WC%BOUNDARY_COORD%II
+         JJ  = WC%BOUNDARY_COORD%JJ
+         KK  = WC%BOUNDARY_COORD%KK
+         IOR = WC%BOUNDARY_COORD%IOR
          NOM = EWC%NOM
          ! Here if NOM==0 means it is an OBST laying on an external boundary -> CYCLE
          IF(NOM < 1) CYCLE EXTERNAL_WALL_LOOP
@@ -2375,8 +2375,8 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       ! unstructured domain. Everything else leads to Neuman BCs on H, no need to modify D_MAT_HP.
       IF ( WC%BOUNDARY_TYPE/=OPEN_BOUNDARY ) CYCLE
 
-      IIG = WC%ONE_D%IIG; JJG = WC%ONE_D%JJG; KKG = WC%ONE_D%KKG
-      II  = WC%ONE_D%II;  JJ  = WC%ONE_D%JJ;  KK  = WC%ONE_D%KK
+      IIG = WC%BOUNDARY_COORD%IIG; JJG = WC%BOUNDARY_COORD%JJG; KKG = WC%BOUNDARY_COORD%KKG
+      II  = WC%BOUNDARY_COORD%II;  JJ  = WC%BOUNDARY_COORD%JJ;  KK  = WC%BOUNDARY_COORD%KK
       ! Unknowns on related cells:
       IF(CCVAR(IIG,JJG,KKG,CGSC)==IS_GASPHASE .OR. PRES_ON_WHOLE_DOMAIN) THEN
          IND(LOW_IND)  = CCVAR(IIG,JJG,KKG,UNKH)  ! internal cell.
@@ -2387,7 +2387,7 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       ENDIF
 
       IND_LOC(LOW_IND) = IND(LOW_IND) - UNKH_IND(NM1) ! All row indexes must refer to ind_loc.
-      SELECT CASE(WC%ONE_D%IOR)
+      SELECT CASE(WC%BOUNDARY_COORD%IOR)
       CASE( IAXIS)
          AF = ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*R(IIG-1)) * DZ(KKG);            IDX= 1._EB/DXN(IIG-1)
       CASE(-IAXIS)
@@ -2599,10 +2599,10 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       WC_JD(2,1) = WC%JD21_INDEX
       WC_JD(2,2) = WC%JD22_INDEX
 
-      IIG = WC%ONE_D%IIG; JJG = WC%ONE_D%JJG; KKG = WC%ONE_D%KKG
-      II  = WC%ONE_D%II;  JJ  = WC%ONE_D%JJ;  KK  = WC%ONE_D%KK
+      IIG = WC%BOUNDARY_COORD%IIG; JJG = WC%BOUNDARY_COORD%JJG; KKG = WC%BOUNDARY_COORD%KKG
+      II  = WC%BOUNDARY_COORD%II;  JJ  = WC%BOUNDARY_COORD%JJ;  KK  = WC%BOUNDARY_COORD%KK
 
-      IOR = WC%ONE_D%IOR
+      IOR = WC%BOUNDARY_COORD%IOR
       ! Check if CC_IBM -> If either IIG,JJG,KKG or II,JJ,KK cell is type IS_CUTCFE or IS_SOLID cycle:
       IF ( .NOT.PRES_ON_WHOLE_DOMAIN .AND. CC_IBM ) THEN
          IF(CCVAR(II ,JJ ,KK ,IBM_CGSC) /= IS_GASPHASE) CYCLE
@@ -2778,8 +2778,8 @@ MESH_LOOP_1 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
      ! Here if NOM==0 means it is an OBST laying on an external boundary -> CYCLE
      IF(EWC%NOM < 1) CYCLE
 
-     IIG = WC%ONE_D%IIG; JJG = WC%ONE_D%JJG; KKG = WC%ONE_D%KKG
-     II  = WC%ONE_D%II;  JJ  = WC%ONE_D%JJ;  KK  = WC%ONE_D%KK
+     IIG = WC%BOUNDARY_COORD%IIG; JJG = WC%BOUNDARY_COORD%JJG; KKG = WC%BOUNDARY_COORD%KKG
+     II  = WC%BOUNDARY_COORD%II;  JJ  = WC%BOUNDARY_COORD%JJ;  KK  = WC%BOUNDARY_COORD%KK
 
      ! Check if CC_IBM -> If either IIG,JJG,KKG or II,JJ,KK cell is type IS_CUTCFE or IS_SOLID cycle:
      IF (  .NOT.PRES_ON_WHOLE_DOMAIN .AND. CC_IBM ) THEN
@@ -2925,8 +2925,8 @@ MESH_LOOP_2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          EWC=>EXTERNAL_WALL(IW); IF(EWC%NOM < 1) CYCLE
       ENDIF
 
-      IIG = WC%ONE_D%IIG; JJG = WC%ONE_D%JJG; KKG = WC%ONE_D%KKG
-      II  = WC%ONE_D%II;  JJ  = WC%ONE_D%JJ;  KK  = WC%ONE_D%KK
+      IIG = WC%BOUNDARY_COORD%IIG; JJG = WC%BOUNDARY_COORD%JJG; KKG = WC%BOUNDARY_COORD%KKG
+      II  = WC%BOUNDARY_COORD%II;  JJ  = WC%BOUNDARY_COORD%JJ;  KK  = WC%BOUNDARY_COORD%KK
 
       ! Check if CC_IBM -> If either IIG,JJG,KKG or II,JJ,KK cell is type IS_CUTCFE or IS_SOLID cycle:
       IF (  .NOT.PRES_ON_WHOLE_DOMAIN .AND. CC_IBM ) THEN
@@ -3021,9 +3021,9 @@ MAIN_MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    WALL_LOOP_1 : DO IW=N_EXTERNAL_WALL_CELLS+1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS_AUX
       WC => WALL(IW)
       IF (WC%BOUNDARY_TYPE/=SOLID_BOUNDARY) CYCLE
-      IIG = WC%ONE_D%IIG; JJG = WC%ONE_D%JJG; KKG = WC%ONE_D%KKG
+      IIG = WC%BOUNDARY_COORD%IIG; JJG = WC%BOUNDARY_COORD%JJG; KKG = WC%BOUNDARY_COORD%KKG
 
-      IOR = WC%ONE_D%IOR
+      IOR = WC%BOUNDARY_COORD%IOR
       SELECT CASE(IOR)
       CASE( IAXIS)
          LOG_INTWC(IIG-1,JJG  ,KKG  ,IAXIS) = .TRUE.
