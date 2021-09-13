@@ -1248,7 +1248,8 @@ RECV_MESH_LOOP: DO NOM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                EWC=>M%EXTERNAL_WALL(IW)
                IF (.NOT.(WC%BOUNDARY_TYPE == INTERPOLATED_BOUNDARY)) CYCLE EXTERNAL_WALL_LOOP_1
                IF (EWC%NOM/=NM) CYCLE EXTERNAL_WALL_LOOP_1
-               IF (M%CCVAR(WC%ONE_D%II,WC%ONE_D%JJ,WC%ONE_D%KK,IBM_CGSC) /= IBM_CUTCFE) CYCLE EXTERNAL_WALL_LOOP_1
+               IF (M%CCVAR(WC%BOUNDARY_COORD%II,WC%BOUNDARY_COORD%JJ,WC%BOUNDARY_COORD%KK,IBM_CGSC) /= IBM_CUTCFE) &
+                  CYCLE EXTERNAL_WALL_LOOP_1
                DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
                   DO JJO=EWC%JJO_MIN,EWC%JJO_MAX
                      DO IIO=EWC%IIO_MIN,EWC%IIO_MAX
@@ -1339,7 +1340,8 @@ RECV_MESH_LOOP: DO NOM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                IF (.NOT.(WC%BOUNDARY_TYPE == INTERPOLATED_BOUNDARY)) CYCLE EXTERNAL_WALL_LOOP_2
                EWC=>M%EXTERNAL_WALL(IW)
                IF (EWC%NOM/=NM) CYCLE EXTERNAL_WALL_LOOP_2
-               IF (M%CCVAR(WC%ONE_D%II,WC%ONE_D%JJ,WC%ONE_D%KK,IBM_CGSC) /= IBM_CUTCFE) CYCLE EXTERNAL_WALL_LOOP_2
+               IF (M%CCVAR(WC%BOUNDARY_COORD%II,WC%BOUNDARY_COORD%JJ,WC%BOUNDARY_COORD%KK,IBM_CGSC) /= IBM_CUTCFE) &
+                  CYCLE EXTERNAL_WALL_LOOP_2
                DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
                   DO JJO=EWC%JJO_MIN,EWC%JJO_MAX
                      DO IIO=EWC%IIO_MIN,EWC%IIO_MAX
@@ -2506,7 +2508,7 @@ IWSEL=CUT_FACE(IND1)%BODTRI(2,IND2)
 NVEC(IAXIS:KAXIS) = GEOMETRY(IBOD)%FACES_NORMAL(IAXIS:KAXIS,IWSEL)
 ABS_NVEC(IAXIS:KAXIS) = ABS(NVEC(IAXIS:KAXIS))
 X1AXIS = MAXLOC(ABS_NVEC(IAXIS:KAXIS),DIM=1)
-ONE_D%IOR = INT(SIGN(1._EB,NVEC(X1AXIS)))*X1AXIS
+CFACE(ICF)%BOUNDARY_COORD%IOR = INT(SIGN(1._EB,NVEC(X1AXIS)))*X1AXIS
 
 IF(CFACE_INTERPOLATE) THEN
 
@@ -3736,7 +3738,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       WC=>WALL(IW)
       IF (.NOT.(WC%BOUNDARY_TYPE == INTERPOLATED_BOUNDARY)) CYCLE EXTERNAL_WALL_LOOP
       EWC=>EXTERNAL_WALL(IW)
-      IF (CCVAR(WC%ONE_D%II,WC%ONE_D%JJ,WC%ONE_D%KK,IBM_CGSC) /= IBM_CUTCFE) CYCLE EXTERNAL_WALL_LOOP
+      IF (CCVAR(WC%BOUNDARY_COORD%II,WC%BOUNDARY_COORD%JJ,WC%BOUNDARY_COORD%KK,IBM_CGSC) /= IBM_CUTCFE) CYCLE EXTERNAL_WALL_LOOP
       ! Do volume average to a cell container for ghost cell II,JJ,KK:
       NOM = EWC%NOM
       OM  => MESHES(NM)%OMESH(NOM)
@@ -3763,15 +3765,15 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                  ENDDO
               ELSEIF(MESHES(NOM)%CCVAR(IIO,JJO,KKO,IBM_CGSC) == IBM_GASPHASE) THEN ! Regular cell:
                  VCELL = MESHES(NOM)%DX(IIO)*MESHES(NOM)%DY(JJO)*MESHES(NOM)%DZ(KKO)
-                 RHO_CC  = RHO_CC  + (        PRFCT*RHOS(WC%ONE_D%II,WC%ONE_D%JJ,WC%ONE_D%KK) + &
-                                      (1._EB-PRFCT)*RHO(WC%ONE_D%II,WC%ONE_D%JJ,WC%ONE_D%KK))*VCELL
-                 TMP_CC  = TMP_CC  + TMP(WC%ONE_D%II,WC%ONE_D%JJ,WC%ONE_D%KK)*VCELL
-                 !RSUM_CC = RSUM_CC + RSUM(WC%ONE_D%II,WC%ONE_D%JJ,WC%ONE_D%KK)*VCELL
-                 D_CC    = D_CC    + (        PRFCT*D(WC%ONE_D%II,WC%ONE_D%JJ,WC%ONE_D%KK) + &
-                                      (1._EB-PRFCT)*DS(WC%ONE_D%II,WC%ONE_D%JJ,WC%ONE_D%KK))*VCELL
+                 RHO_CC  = RHO_CC  + (      PRFCT*RHOS(WC%BOUNDARY_COORD%II,WC%BOUNDARY_COORD%JJ,WC%BOUNDARY_COORD%KK) + &
+                                     (1._EB-PRFCT)*RHO(WC%BOUNDARY_COORD%II,WC%BOUNDARY_COORD%JJ,WC%BOUNDARY_COORD%KK))*VCELL
+                 TMP_CC  = TMP_CC  + TMP(WC%BOUNDARY_COORD%II,WC%BOUNDARY_COORD%JJ,WC%BOUNDARY_COORD%KK)*VCELL
+                 !RSUM_CC = RSUM_CC + RSUM(WC%BOUNDARY_COORD%II,WC%BOUNDARY_COORD%JJ,WC%BOUNDARY_COORD%KK)*VCELL
+                 D_CC    = D_CC    + (      PRFCT*D(WC%BOUNDARY_COORD%II,WC%BOUNDARY_COORD%JJ,WC%BOUNDARY_COORD%KK) + &
+                                     (1._EB-PRFCT)*DS(WC%BOUNDARY_COORD%II,WC%BOUNDARY_COORD%JJ,WC%BOUNDARY_COORD%KK))*VCELL
                  DO NN=1,N_TOTAL_SCALARS
-                    ZZ_CC(NN) = ZZ_CC(NN) + (       PRFCT *ZZS(WC%ONE_D%II,WC%ONE_D%JJ,WC%ONE_D%KK,NN) &
-                                          +  (1._EB-PRFCT)*ZZ(WC%ONE_D%II,WC%ONE_D%JJ,WC%ONE_D%KK,NN) )*VCELL
+                    ZZ_CC(NN)=ZZ_CC(NN)+(      PRFCT *ZZS(WC%BOUNDARY_COORD%II,WC%BOUNDARY_COORD%JJ,WC%BOUNDARY_COORD%KK,NN) &
+                                       +(1._EB-PRFCT)*ZZ(WC%BOUNDARY_COORD%II,WC%BOUNDARY_COORD%JJ,WC%BOUNDARY_COORD%KK,NN) )*VCELL
                  ENDDO
                  VOL     = VOL + VCELL
               ENDIF
@@ -3779,7 +3781,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          ENDDO
       ENDDO
       ! Add volume averaged variables into ghost cut-cell:
-      ICC   = CCVAR(WC%ONE_D%II,WC%ONE_D%JJ,WC%ONE_D%KK,IBM_IDCC)
+      ICC   = CCVAR(WC%BOUNDARY_COORD%II,WC%BOUNDARY_COORD%JJ,WC%BOUNDARY_COORD%KK,IBM_IDCC)
       IF (PREDICTOR) THEN
          DO JCC=1,CUT_CELL(ICC)%NCELL
             CUT_CELL(ICC)%RHOS(JCC) = RHO_CC/VOL
@@ -5662,7 +5664,7 @@ DO IFACE=1,MESHES(NM)%IBM_NBBREGFACE_Z(X1AXIS)
    J  = IBM_REGFACE_IAXIS_Z(IFACE)%IJK(JAXIS)
    K  = IBM_REGFACE_IAXIS_Z(IFACE)%IJK(KAXIS)
    WC => WALL(IW)
-   IOR = WC%ONE_D%IOR
+   IOR = WC%BOUNDARY_COORD%IOR
    ! This expression is such that when sign of IOR is -1 -> use Low Side cell  -> ISIDE=-1,
    !                              when sign of IOR is  1 -> use High Side cell -> ISIDE= 0 .
    ISIDE = -1 + (SIGN(1,IOR)+1) / 2
@@ -5693,7 +5695,7 @@ DO IFACE=1,MESHES(NM)%IBM_NBBREGFACE_Z(X1AXIS)
    J  = IBM_REGFACE_JAXIS_Z(IFACE)%IJK(JAXIS)
    K  = IBM_REGFACE_JAXIS_Z(IFACE)%IJK(KAXIS)
    WC => WALL(IW)
-   IOR = WC%ONE_D%IOR
+   IOR = WC%BOUNDARY_COORD%IOR
    ! This expression is such that when sign of IOR is -1 -> use Low Side cell  -> ISIDE=-1,
    !                              when sign of IOR is  1 -> use High Side cell -> ISIDE= 0 .
    ISIDE = -1 + (SIGN(1,IOR)+1) / 2
@@ -5724,7 +5726,7 @@ DO IFACE=1,MESHES(NM)%IBM_NBBREGFACE_Z(X1AXIS)
    J  = IBM_REGFACE_KAXIS_Z(IFACE)%IJK(JAXIS)
    K  = IBM_REGFACE_KAXIS_Z(IFACE)%IJK(KAXIS)
    WC => WALL(IW)
-   IOR = WC%ONE_D%IOR
+   IOR = WC%BOUNDARY_COORD%IOR
    ! This expression is such that when sign of IOR is -1 ->G use Low Side cell  -> ISIDE=-1,
    !                              when sign of IOR is  1 -> use High Side cell -> ISIDE= 0 .
    ISIDE = -1 + (SIGN(1,IOR)+1) / 2
@@ -5752,7 +5754,7 @@ DO IFACE=1,MESHES(NM)%IBM_NBBRCFACE_Z
    K      = IBM_RCFACE_Z(IFACE)%IJK(KAXIS)
    X1AXIS = IBM_RCFACE_Z(IFACE)%IJK(KAXIS+1)
    WC => WALL(IW)
-   IOR = WC%ONE_D%IOR
+   IOR = WC%BOUNDARY_COORD%IOR
    ! This expression is such that when sign of IOR is -1 -> use Low Side cell  -> ISIDE=-1,
    !                              when sign of IOR is  1 -> use High Side cell -> ISIDE= 0 .
    ISIDE = -1 + (SIGN(1,IOR)+1) / 2
@@ -5833,7 +5835,7 @@ DO ICF = 1,MESHES(NM)%N_BBCUTFACE_MESH
    IW = CUT_FACE(ICF)%IWC
    IF( WALL(IW)%BOUNDARY_TYPE==NULL_BOUNDARY ) CYCLE
    WC => WALL(IW)
-   IOR = WC%ONE_D%IOR
+   IOR = WC%BOUNDARY_COORD%IOR
    FN_ZZ           = WC%ONE_D%RHO_F*WC%ONE_D%ZZ_F(N)
    ! This expression is such that when sign of IOR is -1 -> use Low Side cell  -> ISIDE=-1,
    !                              when sign of IOR is  1 -> use High Side cell -> ISIDE= 0 .
@@ -6271,7 +6273,7 @@ DO IFACE=1,MESHES(NM)%IBM_NBBREGFACE_Z(X1AXIS)
    J  = IBM_REGFACE_IAXIS_Z(IFACE)%IJK(JAXIS)
    K  = IBM_REGFACE_IAXIS_Z(IFACE)%IJK(KAXIS)
    WC => WALL(IW)
-   IOR = WC%ONE_D%IOR
+   IOR = WC%BOUNDARY_COORD%IOR
    ! This expression is such that when sign of IOR is -1 -> use Low Side cell  -> ISIDE=-1,
    !                              when sign of IOR is  1 -> use High Side cell -> ISIDE= 0 .
    ISIDE = -1 + (SIGN(1,IOR)+1) / 2
@@ -6309,7 +6311,7 @@ DO IFACE=1,MESHES(NM)%IBM_NBBREGFACE_Z(X1AXIS)
    J  = IBM_REGFACE_JAXIS_Z(IFACE)%IJK(JAXIS)
    K  = IBM_REGFACE_JAXIS_Z(IFACE)%IJK(KAXIS)
    WC => WALL(IW)
-   IOR = WC%ONE_D%IOR
+   IOR = WC%BOUNDARY_COORD%IOR
    ! This expression is such that when sign of IOR is -1 -> use Low Side cell  -> ISIDE=-1,
    !                              when sign of IOR is  1 -> use High Side cell -> ISIDE= 0 .
    ISIDE = -1 + (SIGN(1,IOR)+1) / 2
@@ -6347,7 +6349,7 @@ DO IFACE=1,MESHES(NM)%IBM_NBBREGFACE_Z(X1AXIS)
    J  = IBM_REGFACE_KAXIS_Z(IFACE)%IJK(JAXIS)
    K  = IBM_REGFACE_KAXIS_Z(IFACE)%IJK(KAXIS)
    WC => WALL(IW)
-   IOR = WC%ONE_D%IOR
+   IOR = WC%BOUNDARY_COORD%IOR
    ! This expression is such that when sign of IOR is -1 -> use Low Side cell  -> ISIDE=-1,
    !                              when sign of IOR is  1 -> use High Side cell -> ISIDE= 0 .
    ISIDE = -1 + (SIGN(1,IOR)+1) / 2
@@ -6383,7 +6385,7 @@ DO IFACE=1,MESHES(NM)%IBM_NBBRCFACE_Z
    K      = IBM_RCFACE_Z(IFACE)%IJK(KAXIS)
    X1AXIS = IBM_RCFACE_Z(IFACE)%IJK(KAXIS+1)
    WC => WALL(IW)
-   IOR = WC%ONE_D%IOR
+   IOR = WC%BOUNDARY_COORD%IOR
    ! This expression is such that when sign of IOR is -1 -> use Low Side cell  -> ISIDE=-1,
    !                              when sign of IOR is  1 -> use High Side cell -> ISIDE= 0 .
    ISIDE = -1 + (SIGN(1,IOR)+1) / 2
@@ -6483,7 +6485,7 @@ DO ICF = 1,MESHES(NM)%N_BBCUTFACE_MESH
    IW = CUT_FACE(ICF)%IWC
    IF( WALL(IW)%BOUNDARY_TYPE==NULL_BOUNDARY ) CYCLE
    WC => WALL(IW)
-   IOR = WC%ONE_D%IOR
+   IOR = WC%BOUNDARY_COORD%IOR
    ! Flux limited face value bar{rho*hs}_F, the ONE_D variable values fo TMP, RHOP, ZZ and RSUM have been averaged to
    ! the cartesian cell location in CCREGION_DENSITY:
    VELC2     = PRFCT*WC%ONE_D%U_NORMAL + (1._EB-PRFCT)*WC%ONE_D%U_NORMAL_S
@@ -6825,7 +6827,7 @@ SPECIES_LOOP2: DO N=1,N_TOTAL_SCALARS
 
       ! Add H_RHO_D_DZDN dot n to corresponding cell DP:
       AF = DY(J)*DZ(K)
-      SELECT CASE(WC%ONE_D%IOR)
+      SELECT CASE(WC%BOUNDARY_COORD%IOR)
       CASE(-IAXIS) ! Low side cell. Add to int(DEL_RHO_D_DEL_Z)dv in FV form:
       IF (.NOT.IBM_REGFACE_IAXIS_Z(IFACE)%DO_LO_IND) CYCLE
       DPVOL(I  ,J,K)             =             DPVOL(I  ,J,K) + IBM_REGFACE_IAXIS_Z(IFACE)%H_RHO_D_DZDN(N) * AF ! +ve dot
@@ -6857,7 +6859,7 @@ SPECIES_LOOP2: DO N=1,N_TOTAL_SCALARS
 
       ! Add H_RHO_D_DZDN dot n to corresponding cell DP:
       AF = DX(I)*DZ(K)
-      SELECT CASE(WC%ONE_D%IOR)
+      SELECT CASE(WC%BOUNDARY_COORD%IOR)
       CASE(-JAXIS) ! Low side cell. Add to int(DEL_RHO_D_DEL_Z)dv in FV form:
       IF (.NOT.IBM_REGFACE_JAXIS_Z(IFACE)%DO_LO_IND) CYCLE
       DPVOL(I,J  ,K)             =             DPVOL(I,J  ,K) + IBM_REGFACE_JAXIS_Z(IFACE)%H_RHO_D_DZDN(N) * AF ! +ve dot
@@ -6889,7 +6891,7 @@ SPECIES_LOOP2: DO N=1,N_TOTAL_SCALARS
 
       ! Add H_RHO_D_DZDN dot n to corresponding cell DP:
       AF = DX(I)*DY(J)
-      SELECT CASE(WC%ONE_D%IOR)
+      SELECT CASE(WC%BOUNDARY_COORD%IOR)
       CASE(-KAXIS) ! Low side cell. Add to int(DEL_RHO_D_DEL_Z)dv in FV form:
       IF (.NOT.IBM_REGFACE_KAXIS_Z(IFACE)%DO_LO_IND) CYCLE
       DPVOL(I,J,K  )             =             DPVOL(I,J,K  ) + IBM_REGFACE_KAXIS_Z(IFACE)%H_RHO_D_DZDN(N) * AF ! +ve dot
@@ -6916,10 +6918,10 @@ DO IFACE=1,MESHES(NM)%IBM_NBBRCFACE_Z
    TMP_G  = IBM_RCFACE_Z(IFACE)%TMP_FACE
 
    WC => WALL(IW)
-   IIG = WC%ONE_D%IIG
-   JJG = WC%ONE_D%JJG
-   KKG = WC%ONE_D%KKG
-   IOR = WC%ONE_D%IOR
+   IIG = WC%BOUNDARY_COORD%IIG
+   JJG = WC%BOUNDARY_COORD%JJG
+   KKG = WC%BOUNDARY_COORD%KKG
+   IOR = WC%BOUNDARY_COORD%IOR
    ! H_RHO_D_DZDN
    DO N=1,N_TOTAL_SCALARS
       CALL GET_SENSIBLE_ENTHALPY_Z(N,TMP_G,H_S)
@@ -6965,7 +6967,7 @@ DO ICF = 1,MESHES(NM)%N_BBCUTFACE_MESH
    K = CUT_FACE(ICF)%IJK(KAXIS)
    X1AXIS = CUT_FACE(ICF)%IJK(KAXIS+1)
    WC => WALL(IW)
-   IOR = WC%ONE_D%IOR
+   IOR = WC%BOUNDARY_COORD%IOR
    ! This expression is such that when sign of IOR is -1 -> use Low Side cell  -> ISIDE=-1,
    !                              when sign of IOR is  1 -> use High Side cell -> ISIDE= 0 .
    ISIDE = -1 + (SIGN(1,IOR)+1) / 2
@@ -7306,9 +7308,9 @@ DO IFACE=1,MESHES(NM)%IBM_NBBREGFACE_Z(X1AXIS)
        WALL(IW)%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY .OR. &
        WALL(IW)%BOUNDARY_TYPE==PERIODIC_BOUNDARY ) CYCLE ! Already done on previous loops.
    WC => WALL(IW)
-   IIG = WC%ONE_D%IIG
-   JJG = WC%ONE_D%JJG
-   KKG = WC%ONE_D%KKG
+   IIG = WC%BOUNDARY_COORD%IIG
+   JJG = WC%BOUNDARY_COORD%JJG
+   KKG = WC%BOUNDARY_COORD%KKG
    AF  = DY(JJG)*DZ(KKG)
    ! Q_LEAK accounts for enthalpy moving through leakage paths
    DPVOL(IIG,JJG,KKG) = DPVOL(IIG,JJG,KKG) - ( WC%ONE_D%Q_CON_F ) * AF  + WC%Q_LEAK * (DX(IIG)*DY(JJG)*DZ(KKG))
@@ -7322,9 +7324,9 @@ DO IFACE=1,MESHES(NM)%IBM_NBBREGFACE_Z(X1AXIS)
        WALL(IW)%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY .OR. &
        WALL(IW)%BOUNDARY_TYPE==PERIODIC_BOUNDARY ) CYCLE ! Already done on previous loops.
    WC => WALL(IW)
-   IIG = WC%ONE_D%IIG
-   JJG = WC%ONE_D%JJG
-   KKG = WC%ONE_D%KKG
+   IIG = WC%BOUNDARY_COORD%IIG
+   JJG = WC%BOUNDARY_COORD%JJG
+   KKG = WC%BOUNDARY_COORD%KKG
    AF  = DX(IIG)*DZ(KKG)
    ! Q_LEAK accounts for enthalpy moving through leakage paths
    DPVOL(IIG,JJG,KKG) = DPVOL(IIG,JJG,KKG) - ( WC%ONE_D%Q_CON_F ) * AF  + WC%Q_LEAK * (DX(IIG)*DY(JJG)*DZ(KKG))
@@ -7338,9 +7340,9 @@ DO IFACE=1,MESHES(NM)%IBM_NBBREGFACE_Z(X1AXIS)
        WALL(IW)%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY .OR. &
        WALL(IW)%BOUNDARY_TYPE==PERIODIC_BOUNDARY ) CYCLE ! Already done on previous loops.
    WC => WALL(IW)
-   IIG = WC%ONE_D%IIG
-   JJG = WC%ONE_D%JJG
-   KKG = WC%ONE_D%KKG
+   IIG = WC%BOUNDARY_COORD%IIG
+   JJG = WC%BOUNDARY_COORD%JJG
+   KKG = WC%BOUNDARY_COORD%KKG
    AF  = DX(IIG)*DY(JJG)
    ! Q_LEAK accounts for enthalpy moving through leakage paths
    DPVOL(IIG,JJG,KKG) = DPVOL(IIG,JJG,KKG) - ( WC%ONE_D%Q_CON_F ) * AF  + WC%Q_LEAK * (DX(IIG)*DY(JJG)*DZ(KKG))
@@ -7354,10 +7356,10 @@ DO IFACE=1,MESHES(NM)%IBM_NBBRCFACE_Z
        WALL(IW)%BOUNDARY_TYPE==PERIODIC_BOUNDARY ) CYCLE
    X1AXIS = IBM_RCFACE_Z(IFACE)%IJK(KAXIS+1)
    WC => WALL(IW)
-   IIG = WC%ONE_D%IIG
-   JJG = WC%ONE_D%JJG
-   KKG = WC%ONE_D%KKG
-   IOR = WC%ONE_D%IOR
+   IIG = WC%BOUNDARY_COORD%IIG
+   JJG = WC%BOUNDARY_COORD%JJG
+   KKG = WC%BOUNDARY_COORD%KKG
+   IOR = WC%BOUNDARY_COORD%IOR
    SELECT CASE(X1AXIS)
        CASE(IAXIS)
           AF=DY(JJG)*DZ(KKG)
@@ -7396,7 +7398,7 @@ DO ICF = 1,MESHES(NM)%N_BBCUTFACE_MESH
    K = CUT_FACE(ICF)%IJK(KAXIS)
    X1AXIS = CUT_FACE(ICF)%IJK(KAXIS+1)
    WC => WALL(IW)
-   IOR = WC%ONE_D%IOR
+   IOR = WC%BOUNDARY_COORD%IOR
    ! This expression is such that when sign of IOR is -1 -> use Low Side cell  -> ISIDE=-1,
    !                              when sign of IOR is  1 -> use High Side cell -> ISIDE= 0 .
    ISIDE = -1 + (SIGN(1,IOR)+1) / 2
@@ -7408,7 +7410,7 @@ DO ICF = 1,MESHES(NM)%N_BBCUTFACE_MESH
          CASE(IBM_FTYPE_CFGAS) ! Cut-cell -> use Temperature value from CUT_CELL data struct:
             AF = CUT_FACE(ICF)%AREA(IFACE)
             X1F= CUT_FACE(ICF)%XYZCEN(X1AXIS,IFACE)
-            IF (WC%ONE_D%IOR > 0) THEN
+            IF (WC%BOUNDARY_COORD%IOR > 0) THEN
                IDX= 0.5_EB/(CUT_FACE(ICF)%XCENHIGH(X1AXIS,IFACE)-X1F) ! Assumes DX twice the distance from WALL_CELL
                                                                       ! to internal cut-cell centroid.
             ELSE
@@ -7859,7 +7861,7 @@ DIFFUSIVE_FLUX_LOOP: DO N=1,N_TOTAL_SCALARS
          ! Run over local cut-faces:
          DO IFACE=1,CUT_FACE(ICF)%NFACE
             X1F= CUT_FACE(ICF)%XYZCEN(X1AXIS,IFACE)
-            IF (WALL(IW)%ONE_D%IOR > 0) THEN
+            IF (WALL(IW)%BOUNDARY_COORD%IOR > 0) THEN
                IDX= 0.5_EB/(CUT_FACE(ICF)%XCENHIGH(X1AXIS,IFACE)-X1F) ! Assumes DX twice the distance from WALL_CELL to
                                                                       ! internal cut-cell centroid.
             ELSE
@@ -7945,10 +7947,10 @@ TYPE(WALL_TYPE), POINTER :: WC=>NULL()
 INTEGER :: IIG, JJG, KKG, IOR, N_ZZ_MAX
 REAL(EB) :: RHO_D_DZDN_GET(1:N_TRACKED_SPECIES)
 WC => WALL(IW)
-IIG = WC%ONE_D%IIG
-JJG = WC%ONE_D%JJG
-KKG = WC%ONE_D%KKG
-IOR = WC%ONE_D%IOR
+IIG = WC%BOUNDARY_COORD%IIG
+JJG = WC%BOUNDARY_COORD%JJG
+KKG = WC%BOUNDARY_COORD%KKG
+IOR = WC%BOUNDARY_COORD%IOR
 N_ZZ_MAX = MAXLOC(WC%ONE_D%ZZ_F(1:N_TRACKED_SPECIES),1)
 RHO_D_DZDN = 2._EB*WC%ONE_D%RHO_D_F(N)*(ZZP(IIG,JJG,KKG,N)-WC%ONE_D%ZZ_F(N))*WC%ONE_D%RDN
 IF (N==N_ZZ_MAX) THEN
@@ -7967,10 +7969,10 @@ INTEGER :: IIG, JJG, KKG, IOR, N_ZZ_MAX
 REAL(EB) :: ZZ_G, ZZ_GV(1:N_TRACKED_SPECIES),RHO_D_DZDN_GET(1:N_TRACKED_SPECIES)
 
 WC => WALL(IW)
-IIG = WC%ONE_D%IIG
-JJG = WC%ONE_D%JJG
-KKG = WC%ONE_D%KKG
-IOR = WC%ONE_D%IOR
+IIG = WC%BOUNDARY_COORD%IIG
+JJG = WC%BOUNDARY_COORD%JJG
+KKG = WC%BOUNDARY_COORD%KKG
+IOR = WC%BOUNDARY_COORD%IOR
 ! This expression is such that when sign of IOR is -1 -> use Low Side cell  -> ISIDE=-1,
 !                              when sign of IOR is  1 -> use High Side cell -> ISIDE= 0 .
 ISIDE = -1 + (SIGN(1,IOR)+1) / 2
@@ -8024,7 +8026,7 @@ INTEGER :: IOR, N_ZZ_MAX
 REAL(EB) :: ZZ_G, ZZ_GV(1:N_TRACKED_SPECIES),RHO_D_DZDN_GET(1:N_TRACKED_SPECIES)
 
 WC => WALL(IW)
-IOR = WC%ONE_D%IOR
+IOR = WC%BOUNDARY_COORD%IOR
 
 X1F= CUT_FACE(ICF)%XYZCEN(X1AXIS,IFACE)
 IF (IOR > 0) THEN
@@ -8469,10 +8471,10 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
          WC=>WALL(IW)
          IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE WALL_LOOP
-         IIG = WC%ONE_D%IIG
-         JJG = WC%ONE_D%JJG
-         KKG = WC%ONE_D%KKG
-         IOR = WC%ONE_D%IOR
+         IIG = WC%BOUNDARY_COORD%IIG
+         JJG = WC%BOUNDARY_COORD%JJG
+         KKG = WC%BOUNDARY_COORD%KKG
+         IOR = WC%BOUNDARY_COORD%IOR
          SELECT CASE(WC%BOUNDARY_TYPE)
             CASE DEFAULT; CYCLE WALL_LOOP
             ! SOLID_BOUNDARY is not currently functional here, but keep for testing
@@ -8499,10 +8501,10 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       WALL_LOOP_2: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
          WC=>WALL(IW)
          IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE WALL_LOOP_2
-         IIG = WC%ONE_D%IIG
-         JJG = WC%ONE_D%JJG
-         KKG = WC%ONE_D%KKG
-         IOR = WC%ONE_D%IOR
+         IIG = WC%BOUNDARY_COORD%IIG
+         JJG = WC%BOUNDARY_COORD%JJG
+         KKG = WC%BOUNDARY_COORD%KKG
+         IOR = WC%BOUNDARY_COORD%IOR
          SELECT CASE(WC%BOUNDARY_TYPE)
             CASE DEFAULT; CYCLE WALL_LOOP_2
             ! SOLID_BOUNDARY is not currently functional here, but keep for testing
@@ -9472,7 +9474,7 @@ MESH_LOOP_DBND : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       LOCROW_1 = LOW_IND
       LOCROW_2 = HIGH_IND
 
-      IOR = WC%ONE_D%IOR
+      IOR = WC%BOUNDARY_COORD%IOR
       ! This expression is such that when sign of IOR is -1 -> use Low Side cell  -> ILOC=1,
       !                              when sign of IOR is  1 -> use High Side cell -> ILOC=2.
       ILOC = 1 + (SIGN(1,IOR)+1) / 2
@@ -9510,7 +9512,7 @@ MESH_LOOP_DBND : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       IF ( MESHES(NM)%CUT_FACE(ICF)%STATUS /= IBM_GASPHASE ) CYCLE ICF_LOOP1
       IW=MESHES(NM)%CUT_FACE(ICF)%IWC
       WC=>WALL(IW); IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY ) CYCLE ICF_LOOP1
-      IOR = WC%ONE_D%IOR
+      IOR = WC%BOUNDARY_COORD%IOR
       FN_ZZ           = WC%ONE_D%RHO_F*WC%ONE_D%ZZ_F(N) ! These have been Flux limited in wall.f90
       ! This expression is such that when sign of IOR is -1 -> use Low Side cell  -> ILOC=1,
       !                              when sign of IOR is  1 -> use High Side cell -> ILOC=2 .
@@ -10959,10 +10961,10 @@ CC_UNSTRUCTURED_FDIV_COND : IF (CC_UNSTRUCTURED_FDIV) THEN
 
       IF (CFA%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY .OR. CFA%BOUNDARY_TYPE==OPEN_BOUNDARY) CYCLE EXT_CFACE_LOOP
       NOM = EXTERNAL_WALL(IW)%NOM
-      II  = CFA%ONE_D%II
-      JJ  = CFA%ONE_D%JJ
-      KK  = CFA%ONE_D%KK
-      IOR = WALL(IW)%ONE_D%IOR
+      II  = CFA%BOUNDARY_COORD%II
+      JJ  = CFA%BOUNDARY_COORD%JJ
+      KK  = CFA%BOUNDARY_COORD%KK
+      IOR = WALL(IW)%BOUNDARY_COORD%IOR
 
       DHFCT=1._EB
       IF ( (.NOT. PRES_ON_WHOLE_DOMAIN) .OR. (GLMAT_ON_WHOLE_DOMAIN .AND.  IW<=N_EXTERNAL_WALL_CELLS) ) DHFCT=0._EB
@@ -11033,10 +11035,10 @@ EWC_LOOP : DO IW=1,N_EXTERNAL_WALL_CELLS
    IF (.NOT.(WC%BOUNDARY_TYPE==NULL_BOUNDARY .OR. WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY)) CYCLE
    EWC=>EXTERNAL_WALL(IW)
 
-   II  = WC%ONE_D%II
-   JJ  = WC%ONE_D%JJ
-   KK  = WC%ONE_D%KK
-   IOR = WC%ONE_D%IOR
+   II  = WC%BOUNDARY_COORD%II
+   JJ  = WC%BOUNDARY_COORD%JJ
+   KK  = WC%BOUNDARY_COORD%KK
+   IOR = WC%BOUNDARY_COORD%IOR
 
    SELECT CASE(IOR)
    CASE( IAXIS)
@@ -11728,10 +11730,10 @@ MESH_LOOP3 : DO NM=1,NMESHES
 
       ! WRITE(LU_ERR,*) size(EXTERNAL_WALL(IW)%FVN,DIM=1)
 
-      II  = WC%ONE_D%II
-      JJ  = WC%ONE_D%JJ
-      KK  = WC%ONE_D%KK
-      IOR = WC%ONE_D%IOR
+      II  = WC%BOUNDARY_COORD%II
+      JJ  = WC%BOUNDARY_COORD%JJ
+      KK  = WC%BOUNDARY_COORD%KK
+      IOR = WC%BOUNDARY_COORD%IOR
 
       ! Do SSPRK2 integral of fluxes across EXTERNAL wall cell, DELTAMASS=0 for time level n:
       !                         DT*(ADV+DIFF)^n
@@ -11824,10 +11826,10 @@ EWALL_LOOP : DO IW=1,N_EXTERNAL_WALL_CELLS
        WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) CYCLE
    EWC=>EXTERNAL_WALL(IW)
 
-   II  = WC%ONE_D%II
-   JJ  = WC%ONE_D%JJ
-   KK  = WC%ONE_D%KK
-   IOR = WC%ONE_D%IOR
+   II  = WC%BOUNDARY_COORD%II
+   JJ  = WC%BOUNDARY_COORD%JJ
+   KK  = WC%BOUNDARY_COORD%KK
+   IOR = WC%BOUNDARY_COORD%IOR
 
    IF (PREDCORR) THEN
       ! Diffusive fluxes related to ZZ
@@ -11902,15 +11904,15 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
 
       EWC=>EXTERNAL_WALL(IW)
 
-      II  = WC%ONE_D%II
-      JJ  = WC%ONE_D%JJ
-      KK  = WC%ONE_D%KK
+      II  = WC%BOUNDARY_COORD%II
+      JJ  = WC%BOUNDARY_COORD%JJ
+      KK  = WC%BOUNDARY_COORD%KK
 
-      IIG = WC%ONE_D%IIG
-      JJG = WC%ONE_D%JJG
-      KKG = WC%ONE_D%KKG
+      IIG = WC%BOUNDARY_COORD%IIG
+      JJG = WC%BOUNDARY_COORD%JJG
+      KKG = WC%BOUNDARY_COORD%KKG
 
-      IOR = WC%ONE_D%IOR
+      IOR = WC%BOUNDARY_COORD%IOR
 
       IF (WC%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
 
@@ -12025,10 +12027,10 @@ MESHES_LOOP : DO NM=1,NMESHES
       IF_NEUMANN: IF (WC%PRESSURE_BC_INDEX==NEUMANN) THEN
 
          ! Gasphase cell indexes:
-         IIG   = WC%ONE_D%IIG
-         JJG   = WC%ONE_D%JJG
-         KKG   = WC%ONE_D%KKG
-         IOR   = WC%ONE_D%IOR
+         IIG   = WC%BOUNDARY_COORD%IIG
+         JJG   = WC%BOUNDARY_COORD%JJG
+         KKG   = WC%BOUNDARY_COORD%KKG
+         IOR   = WC%BOUNDARY_COORD%IOR
 
          DHDXN = -WC%ONE_D%U_NORMAL_0
 
@@ -12067,10 +12069,10 @@ MESHES_LOOP : DO NM=1,NMESHES
       IF_DIRICHLET: IF (WC%PRESSURE_BC_INDEX==DIRICHLET) THEN
 
          ! Gasphase cell indexes:
-         IIG   = WC%ONE_D%IIG
-         JJG   = WC%ONE_D%JJG
-         KKG   = WC%ONE_D%KKG
-         IOR   = WC%ONE_D%IOR
+         IIG   = WC%BOUNDARY_COORD%IIG
+         JJG   = WC%BOUNDARY_COORD%JJG
+         KKG   = WC%BOUNDARY_COORD%KKG
+         IOR   = WC%BOUNDARY_COORD%IOR
 
          ! Define cell size, normal to WC:
          HVAL= 0._EB ! Same sign for all cases.
@@ -14696,9 +14698,9 @@ MESHES_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       EWC=>EXTERNAL_WALL(IW)
       IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE EXT_WALL_LOOP
 
-      II  = WC%ONE_D%II
-      JJ  = WC%ONE_D%JJ
-      KK  = WC%ONE_D%KK
+      II  = WC%BOUNDARY_COORD%II
+      JJ  = WC%BOUNDARY_COORD%JJ
+      KK  = WC%BOUNDARY_COORD%KK
       NOM = EWC%NOM
       IF (NOM <= 0) CYCLE EXT_WALL_LOOP
 
@@ -16322,7 +16324,8 @@ DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                       WC%BOUNDARY_TYPE == MIRROR_BOUNDARY) ) CYCLE EXTERNAL_WALL_LOOP_1
             IF ( WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY ) THEN
                IF (EWC%NOM/=NOM) CYCLE EXTERNAL_WALL_LOOP_1
-               IF (CCVAR(WC%ONE_D%II,WC%ONE_D%JJ,WC%ONE_D%KK,IBM_CGSC) /= IBM_CUTCFE) CYCLE EXTERNAL_WALL_LOOP_1
+               IF (CCVAR(WC%BOUNDARY_COORD%II,WC%BOUNDARY_COORD%JJ,WC%BOUNDARY_COORD%KK,IBM_CGSC) /= IBM_CUTCFE) &
+                  CYCLE EXTERNAL_WALL_LOOP_1
                DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
                   DO JJO=EWC%JJO_MIN,EWC%JJO_MAX
                      DO IIO=EWC%IIO_MIN,EWC%IIO_MAX
@@ -16336,11 +16339,12 @@ DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                ENDDO
             ELSEIF ( WC%BOUNDARY_TYPE==MIRROR_BOUNDARY ) THEN
                IF (NM/=NOM) CYCLE EXTERNAL_WALL_LOOP_1
-               IF (CCVAR(WC%ONE_D%II,WC%ONE_D%JJ,WC%ONE_D%KK,IBM_CGSC) /= IBM_CUTCFE) CYCLE EXTERNAL_WALL_LOOP_1
-               IIO = WC%ONE_D%IIG
-               JJO = WC%ONE_D%JJG
-               KKO = WC%ONE_D%KKG
-               IOR = WC%ONE_D%IOR
+               IF (CCVAR(WC%BOUNDARY_COORD%II,WC%BOUNDARY_COORD%JJ,WC%BOUNDARY_COORD%KK,IBM_CGSC) /= IBM_CUTCFE) &
+                  CYCLE EXTERNAL_WALL_LOOP_1
+               IIO = WC%BOUNDARY_COORD%IIG
+               JJO = WC%BOUNDARY_COORD%JJG
+               KKO = WC%BOUNDARY_COORD%KKG
+               IOR = WC%BOUNDARY_COORD%IOR
                ! CYCLE if OBJECT face is in the Mirror Boundary, normal out into ghost-cell:
                SELECT CASE(IOR)
                CASE( IAXIS)
@@ -16533,7 +16537,7 @@ DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       IF (.NOT.(WC%BOUNDARY_TYPE == INTERPOLATED_BOUNDARY .OR. &
                 WC%BOUNDARY_TYPE == MIRROR_BOUNDARY) ) CYCLE EXTERNAL_WALL_LOOP_2
       IF ( WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY ) THEN
-         IF (CCVAR(WC%ONE_D%II,WC%ONE_D%JJ,WC%ONE_D%KK,IBM_CGSC) /= IBM_CUTCFE) CYCLE EXTERNAL_WALL_LOOP_2
+         IF (CCVAR(WC%BOUNDARY_COORD%II,WC%BOUNDARY_COORD%JJ,WC%BOUNDARY_COORD%KK,IBM_CGSC) /= IBM_CUTCFE) CYCLE EXTERNAL_WALL_LOOP_2
          NOM = EWC%NOM
          DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
             DO JJO=EWC%JJO_MIN,EWC%JJO_MAX
@@ -16549,12 +16553,12 @@ DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             ENDDO
          ENDDO
       ELSEIF ( WC%BOUNDARY_TYPE==MIRROR_BOUNDARY ) THEN
-         IIO = WC%ONE_D%IIG
-         JJO = WC%ONE_D%JJG
-         KKO = WC%ONE_D%KKG
+         IIO = WC%BOUNDARY_COORD%IIG
+         JJO = WC%BOUNDARY_COORD%JJG
+         KKO = WC%BOUNDARY_COORD%KKG
          NOM = NM
-         IF (CCVAR(WC%ONE_D%II,WC%ONE_D%JJ,WC%ONE_D%KK,IBM_CGSC) /= IBM_CUTCFE) CYCLE EXTERNAL_WALL_LOOP_2
-         IOR = WC%ONE_D%IOR
+         IF (CCVAR(WC%BOUNDARY_COORD%II,WC%BOUNDARY_COORD%JJ,WC%BOUNDARY_COORD%KK,IBM_CGSC) /= IBM_CUTCFE) CYCLE EXTERNAL_WALL_LOOP_2
+         IOR = WC%BOUNDARY_COORD%IOR
          ! CYCLE if OBJECT face is in the Mirror Boundary, normal out into ghost-cell:
          SELECT CASE(IOR)
          CASE( IAXIS)
@@ -17480,10 +17484,10 @@ MAIN_MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       WC=>WALL(IW)
       IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE GUARD_CUT_CELL_LOOP
 
-      II  = WC%ONE_D%II
-      JJ  = WC%ONE_D%JJ
-      KK  = WC%ONE_D%KK
-      IOR = WC%ONE_D%IOR
+      II  = WC%BOUNDARY_COORD%II
+      JJ  = WC%BOUNDARY_COORD%JJ
+      KK  = WC%BOUNDARY_COORD%KK
+      IOR = WC%BOUNDARY_COORD%IOR
 
       ! Drop if face is not of type IBM_CUTCFE:
       X1AXIS=ABS(IOR)
@@ -17605,10 +17609,10 @@ MAIN_MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    GUARD_CUT_CELL_LOOP :  DO IW=1,N_EXTERNAL_WALL_CELLS
       WC=>WALL(IW)
 
-      II  = WC%ONE_D%II
-      JJ  = WC%ONE_D%JJ
-      KK  = WC%ONE_D%KK
-      IOR = WC%ONE_D%IOR
+      II  = WC%BOUNDARY_COORD%II
+      JJ  = WC%BOUNDARY_COORD%JJ
+      KK  = WC%BOUNDARY_COORD%KK
+      IOR = WC%BOUNDARY_COORD%IOR
 
       ! Drop if face is not of type IBM_CUTCFE:
       X1AXIS=ABS(IOR)
@@ -17641,9 +17645,9 @@ MAIN_MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
       IF (FCVAR(IIF,JJF,KKF,IBM_FGSC,X1AXIS) /= IBM_CUTCFE) CYCLE GUARD_CUT_CELL_LOOP
 
-      IIG  = WC%ONE_D%IIG
-      JJG  = WC%ONE_D%JJG
-      KKG  = WC%ONE_D%KKG
+      IIG  = WC%BOUNDARY_COORD%IIG
+      JJG  = WC%BOUNDARY_COORD%JJG
+      KKG  = WC%BOUNDARY_COORD%KKG
 
       ! Add IWC field to CUT_FACE from internal cell:
       ICC = MESHES(NM)%CCVAR(IIG,JJG,KKG,IBM_IDCC)
@@ -17838,10 +17842,10 @@ ENDDO
 ! Now Apply external wall cell loop for guard-cell cut cells:
 GUARD_CUT_CELL_LOOP_1 :  DO IW=1,N_EXTERNAL_WALL_CELLS
    WC=>WALL(IW)
-   II  = WC%ONE_D%II
-   JJ  = WC%ONE_D%JJ
-   KK  = WC%ONE_D%KK
-   IOR = WC%ONE_D%IOR
+   II  = WC%BOUNDARY_COORD%II
+   JJ  = WC%BOUNDARY_COORD%JJ
+   KK  = WC%BOUNDARY_COORD%KK
+   IOR = WC%BOUNDARY_COORD%IOR
 
    ! Which face:
    X1AXIS=ABS(IOR)
@@ -17864,9 +17868,9 @@ GUARD_CUT_CELL_LOOP_1 :  DO IW=1,N_EXTERNAL_WALL_CELLS
       ! Drop if FACE is not type IBM_GASPHASE
       IF (FCVAR(IIF,JJF,KKF,IBM_FGSC,X1AXIS) /= IBM_GASPHASE) CYCLE GUARD_CUT_CELL_LOOP_1
 
-      IIG  = WC%ONE_D%IIG
-      JJG  = WC%ONE_D%JJG
-      KKG  = WC%ONE_D%KKG
+      IIG  = WC%BOUNDARY_COORD%IIG
+      JJG  = WC%BOUNDARY_COORD%JJG
+      KKG  = WC%BOUNDARY_COORD%KKG
 
       ! Is this an actual RCFACE_VEL laying on the mesh boundary, where the cut-cell is in the guard-cell region?
       FLGIN = (CCVAR(II,JJ,KK,IBM_CGSC)==IBM_CUTCFE) .AND. (CCVAR(IIG,JJG,KKG,IBM_CGSC)==IBM_GASPHASE)
@@ -18219,10 +18223,10 @@ GUARD_CUT_CELL_LOOP_2 :  DO IW=1,N_EXTERNAL_WALL_CELLS
    IF (.NOT.(WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY .OR. WC%BOUNDARY_TYPE==PERIODIC_BOUNDARY)) &
    CYCLE GUARD_CUT_CELL_LOOP_2
 
-   II  = WC%ONE_D%II
-   JJ  = WC%ONE_D%JJ
-   KK  = WC%ONE_D%KK
-   IOR = WC%ONE_D%IOR
+   II  = WC%BOUNDARY_COORD%II
+   JJ  = WC%BOUNDARY_COORD%JJ
+   KK  = WC%BOUNDARY_COORD%KK
+   IOR = WC%BOUNDARY_COORD%IOR
 
    ! Which face:
    X1AXIS=ABS(IOR)
@@ -18250,9 +18254,9 @@ GUARD_CUT_CELL_LOOP_2 :  DO IW=1,N_EXTERNAL_WALL_CELLS
    ! Drop if FACE is not type IBM_GASPHASE
    IF (FCVAR(IIF,JJF,KKF,IBM_FGSC,X1AXIS) /= IBM_GASPHASE) CYCLE GUARD_CUT_CELL_LOOP_2
 
-   IIG  = WC%ONE_D%IIG
-   JJG  = WC%ONE_D%JJG
-   KKG  = WC%ONE_D%KKG
+   IIG  = WC%BOUNDARY_COORD%IIG
+   JJG  = WC%BOUNDARY_COORD%JJG
+   KKG  = WC%BOUNDARY_COORD%KKG
 
    ! Is this an actual RCFACE_H laying on the mesh boundary, where the cut-cell is in the guard-cell region?
    FLGIN = (CCVAR(II,JJ,KK,IBM_CGSC)==IBM_CUTCFE) .AND. (CCVAR(IIG,JJG,KKG,IBM_UNKH) > 0)
@@ -18687,10 +18691,10 @@ MAIN_MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    GUARD_CUT_CELL_LOOP_1A :  DO IW=1,N_EXTERNAL_WALL_CELLS
       WC=>WALL(IW)
 
-      II  = WC%ONE_D%II
-      JJ  = WC%ONE_D%JJ
-      KK  = WC%ONE_D%KK
-      IOR = WC%ONE_D%IOR
+      II  = WC%BOUNDARY_COORD%II
+      JJ  = WC%BOUNDARY_COORD%JJ
+      KK  = WC%BOUNDARY_COORD%KK
+      IOR = WC%BOUNDARY_COORD%IOR
 
       ! Which face:
       X1AXIS=ABS(IOR)
@@ -18718,9 +18722,9 @@ MAIN_MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       ! Drop if FACE is not type IBM_GASPHASE
       IF (FCVAR(IIF,JJF,KKF,IBM_FGSC,X1AXIS) /= IBM_GASPHASE) CYCLE GUARD_CUT_CELL_LOOP_1A
 
-      IIG  = WC%ONE_D%IIG
-      JJG  = WC%ONE_D%JJG
-      KKG  = WC%ONE_D%KKG
+      IIG  = WC%BOUNDARY_COORD%IIG
+      JJG  = WC%BOUNDARY_COORD%JJG
+      KKG  = WC%BOUNDARY_COORD%KKG
 
       ! Is this an actual RCFACE laying on the mesh boundary, where the cut-cell is in the guard-cell region?
       FLGIN = (CCVAR(II,JJ,KK,IBM_CGSC)==IBM_CUTCFE) ! Note that this will overrride the Cut-cell to cut-cell case in
@@ -18763,10 +18767,10 @@ MAIN_MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    ! Start with external wall cells:
    GUARD_CUT_CELL_LOOP_1B :  DO IW=1,N_EXTERNAL_WALL_CELLS
       WC=>WALL(IW)
-      II  = WC%ONE_D%II
-      JJ  = WC%ONE_D%JJ
-      KK  = WC%ONE_D%KK
-      IOR = WC%ONE_D%IOR
+      II  = WC%BOUNDARY_COORD%II
+      JJ  = WC%BOUNDARY_COORD%JJ
+      KK  = WC%BOUNDARY_COORD%KK
+      IOR = WC%BOUNDARY_COORD%IOR
 
       ! Which face:
       X1AXIS=ABS(IOR)
@@ -19288,10 +19292,10 @@ IF (PRES_ON_CARTESIAN) THEN ! Use Underlying Cartesian cells: Method 2.
       EWC=>EXTERNAL_WALL(IW)
       IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE EXTERNAL_WALL_LOOP
 
-      II  = WC%ONE_D%II
-      JJ  = WC%ONE_D%JJ
-      KK  = WC%ONE_D%KK
-      IOR = WC%ONE_D%IOR
+      II  = WC%BOUNDARY_COORD%II
+      JJ  = WC%BOUNDARY_COORD%JJ
+      KK  = WC%BOUNDARY_COORD%KK
+      IOR = WC%BOUNDARY_COORD%IOR
       NOM = EWC%NOM
       OM => OMESH(NOM)
 

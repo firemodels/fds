@@ -9620,7 +9620,7 @@ MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
    EXTERNAL_WALL_CELLS_LOOP: DO IWG = 1, L%N_WALL_CELLS_EXT
 
       NOM  = M%EXTERNAL_WALL(IWG)%NOM
-      IOR0 = M%WALL(IWG)%ONE_D%IOR
+      IOR0 = M%WALL(IWG)%BOUNDARY_COORD%IOR
 
       IF (NOM /= 0) THEN
          IS_KNOWN = .FALSE.
@@ -9961,7 +9961,7 @@ MESHES_LOOP1: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
       EWC => M%EXTERNAL_WALL(IWG)
 
       NOM  =  EWC%NOM
-      IOR0 =  MWC%ONE_D%IOR
+      IOR0 =  MWC%BOUNDARY_COORD%IOR
 
       GWC => G%WALL(IWG)
       GWC%NOM  = NOM                                    ! store number of neighbor in wall cell
@@ -10003,19 +10003,19 @@ MESHES_LOOP1: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
       MWC => M%WALL(IWG)
       GWC => G%WALL(IWG)
 
-      GWC%IOR  = MWC%ONE_D%IOR
+      GWC%IOR  = MWC%BOUNDARY_COORD%IOR
       GWC%NOM  = 0
 
       GWC%BTYPE = NEUMANN
       GWC%BOUNDARY_TYPE = M%WALL(IWG)%BOUNDARY_TYPE
 
-      GWC%IXG =  MWC%ONE_D%II                        ! ghost cell indices
-      GWC%IYG =  MWC%ONE_D%JJ
-      GWC%IZG =  MWC%ONE_D%KK
+      GWC%IXG =  MWC%BOUNDARY_COORD%II                        ! ghost cell indices
+      GWC%IYG =  MWC%BOUNDARY_COORD%JJ
+      GWC%IZG =  MWC%BOUNDARY_COORD%KK
 
-      GWC%IXW =  MWC%ONE_D%IIG                       ! (internal) wall cell indices
-      GWC%IYW =  MWC%ONE_D%JJG
-      GWC%IZW =  MWC%ONE_D%KKG
+      GWC%IXW =  MWC%BOUNDARY_COORD%IIG                       ! (internal) wall cell indices
+      GWC%IYW =  MWC%BOUNDARY_COORD%JJG
+      GWC%IZW =  MWC%BOUNDARY_COORD%KKG
 
    ENDDO INTERNAL_WALL_CELLS_LOOP1
 
@@ -10083,13 +10083,13 @@ MESHES_LOOP1: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
       ENDIF
       GWC%BOUNDARY_TYPE = MWC%BOUNDARY_TYPE
 
-      GWC%IXG = MWC%ONE_D%II                                 ! ghost cell indices
-      GWC%IYG = MWC%ONE_D%JJ
-      GWC%IZG = MWC%ONE_D%KK
+      GWC%IXG = MWC%BOUNDARY_COORD%II                                 ! ghost cell indices
+      GWC%IYG = MWC%BOUNDARY_COORD%JJ
+      GWC%IZG = MWC%BOUNDARY_COORD%KK
 
-      GWC%IXW = MWC%ONE_D%IIG                                ! (internal) wall cell indices
-      GWC%IYW = MWC%ONE_D%JJG
-      GWC%IZW = MWC%ONE_D%KKG
+      GWC%IXW = MWC%BOUNDARY_COORD%IIG                                ! (internal) wall cell indices
+      GWC%IYW = MWC%BOUNDARY_COORD%JJG
+      GWC%IZW = MWC%BOUNDARY_COORD%KKG
 
       ! If there exists a neighbor for that wall cell, setup corresponding neighborship information
       IF (NOM /= 0) CALL SCARC_SETUP_WALL_NEIGHBOR(G, OG, &
