@@ -909,8 +909,9 @@ TYPE SCARC_LEVEL_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION (:,:,:) :: RHOS            !< Density values corrector (for coarser grid levels only)
    REAL(EB), ALLOCATABLE, DIMENSION (:)     :: RHOM            !< Density mean values in x-direction (for mean preconditioner only)
 
-   REAL(EB), ALLOCATABLE, DIMENSION (:,:,:) :: FVX, FVY, FVZ         !< Stored force terms (inseparable Poisson system only)
-   REAL(EB), ALLOCATABLE, DIMENSION (:,:,:) :: FVX_B, FVY_B, FVZ_B   !< Baroclinic force terms (inseparable Poisson system only)
+   REAL(EB), ALLOCATABLE, DIMENSION (:,:,:) :: FVX_H           !< Backup of x-force term (inseparable Poisson system only)
+   REAL(EB), ALLOCATABLE, DIMENSION (:,:,:) :: FVY_H           !< Backup of y-force term (inseparable Poisson system only)
+   REAL(EB), ALLOCATABLE, DIMENSION (:,:,:) :: FVZ_H           !< Backup of z-force term (inseparable Poisson system only)
 
    REAL(EB) :: DXI , DYI , DZI                                 !< Step sizes in x-, y- and z-direction
    REAL(EB) :: RDXI, RDYI, RDZI                                !< Inversed of step sizes in x-, y- and z-direction
@@ -1195,8 +1196,6 @@ INTEGER :: IERROR  = 0                                           !< General erro
 
 ! ---------- Logical indicators for different methods and mechanisms
   
-LOGICAL :: IS_SEPARABLE          = .TRUE.                        !< Flag for separable Poisson system
-LOGICAL :: IS_INSEPARABLE        = .FALSE.                       !< Flag for inseparable Poisson system
 LOGICAL :: IS_STRUCTURED         = .FALSE.                       !< Flag for structured discretization
 LOGICAL :: IS_UNSTRUCTURED       = .FALSE.                       !< Flag for unstructured discretization
 LOGICAL :: IS_PURE_NEUMANN       = .FALSE.                       !< Flag for pure Neumann system
@@ -1568,6 +1567,7 @@ REAL(EB), POINTER, DIMENSION(:,:,:):: WW=>NULL()            !< Pointer to z-velo
 REAL(EB), POINTER, DIMENSION(:,:,:):: PPP=>NULL()           !< Pointer to inseparable pressure vector
 REAL(EB), POINTER, DIMENSION(:,:,:):: RHOP=>NULL()          !< Pointer to density vector
 REAL(EB), POINTER, DIMENSION(:,:,:):: RRHO=>NULL()          !< Pointer to reciprocal of density vector
+REAL(EB), POINTER, DIMENSION(:,:,:):: RHMK=>NULL()          !< Pointer to H-based pressure vector
 REAL(EB), POINTER, DIMENSION(:,:,:):: KRESP=>NULL()         !< Pointer to kres vector
 
 REAL(EB), POINTER, DIMENSION(:) ::  RECV_BUFFER_REAL        !< Pointer to double precision receive vector
@@ -4915,17 +4915,6 @@ SELECT CASE (TRIM(PRES_METHOD))
       CALL SCARC_ERROR(NSCARC_ERROR_PARSE_INPUT, SCARC_GRID, NSCARC_NONE)
 END SELECT
  
-! ------------ Set type of Poisson equation (INSEPARABLE/SEPARABLE)
-
-  SELECT CASE (TRIM(SCARC_POISSON))
-     CASE ('INSEPARABLE')
-        TYPE_POISSON = NSCARC_POISSON_INSEPARABLE
-     CASE ('SEPARABLE')
-        TYPE_POISSON = NSCARC_POISSON_SEPARABLE
-     CASE DEFAULT
-        CALL SCARC_ERROR(NSCARC_ERROR_PARSE_INPUT, SCARC_POISSON, NSCARC_NONE)
-  END SELECT
-
 ! ------------ Set type of matrix storage (COMPACT/BANDWISE)
  
 SELECT CASE (TRIM(SCARC_MATRIX))
@@ -5338,11 +5327,17 @@ SELECT CASE (TRIM(SCARC_MKL_PRECISION))
       CALL SCARC_ERROR(NSCARC_ERROR_PARSE_INPUT, SCARC_MKL_PRECISION, NSCARC_NONE)
 END SELECT
 
+! Set type of Poisson solver depending on global variable INSEPARABLE_POISSON
+
+IF (INSEPARABLE_POISSON) THEN
+   TYPE_POISSON = NSCARC_POISSON_INSEPARABLE
+   TYPE_MATRIX  = NSCARC_MATRIX_COMPACT             ! only temporarily, bandwise technique will also be available
+ELSE
+   TYPE_POISSON = NSCARC_POISSON_SEPARABLE
+ENDIF
+
 ! -------- Define some logical variables - just for notational convenience
  
-IS_SEPARABLE    = (TYPE_POISSON == NSCARC_POISSON_SEPARABLE)
-IS_INSEPARABLE  = (TYPE_POISSON == NSCARC_POISSON_INSEPARABLE)
-
 IS_STRUCTURED   = (TYPE_GRID == NSCARC_GRID_STRUCTURED)
 IS_UNSTRUCTURED = (TYPE_GRID == NSCARC_GRID_UNSTRUCTURED)
 
@@ -18652,13 +18647,9 @@ DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
    CALL SCARC_ALLOCATE_REAL3 (L%PRES ,  0, L%NX+1, 0, L%NY+1, 0, L%NZ+1, NSCARC_INIT_ZERO, 'L%PRES',  CROUTINE)
    CALL SCARC_ALLOCATE_REAL3 (L%PRESS,  0, L%NX+1, 0, L%NY+1, 0, L%NZ+1, NSCARC_INIT_ZERO, 'L%PRESS', CROUTINE)
 
-   CALL SCARC_ALLOCATE_REAL3 (L%FVX,  0, L%NX+1, 0, L%NY+1, 0, L%NZ+1, NSCARC_INIT_ZERO, 'L%FVX', CROUTINE)
-   CALL SCARC_ALLOCATE_REAL3 (L%FVY,  0, L%NX+1, 0, L%NY+1, 0, L%NZ+1, NSCARC_INIT_ZERO, 'L%FVY', CROUTINE)
-   CALL SCARC_ALLOCATE_REAL3 (L%FVZ,  0, L%NX+1, 0, L%NY+1, 0, L%NZ+1, NSCARC_INIT_ZERO, 'L%FVZ', CROUTINE)
-
-   CALL SCARC_ALLOCATE_REAL3 (L%FVX_B,  0, L%NX+1, 0, L%NY+1, 0, L%NZ+1, NSCARC_INIT_ZERO, 'L%FVX_B', CROUTINE)
-   CALL SCARC_ALLOCATE_REAL3 (L%FVY_B,  0, L%NX+1, 0, L%NY+1, 0, L%NZ+1, NSCARC_INIT_ZERO, 'L%FVY_B', CROUTINE)
-   CALL SCARC_ALLOCATE_REAL3 (L%FVZ_B,  0, L%NX+1, 0, L%NY+1, 0, L%NZ+1, NSCARC_INIT_ZERO, 'L%FVZ_B', CROUTINE)
+   CALL SCARC_ALLOCATE_REAL3 (L%FVX_H,  0, L%NX+1, 0, L%NY+1, 0, L%NZ+1, NSCARC_INIT_ZERO, 'L%FVX_H', CROUTINE)
+   CALL SCARC_ALLOCATE_REAL3 (L%FVY_H,  0, L%NX+1, 0, L%NY+1, 0, L%NZ+1, NSCARC_INIT_ZERO, 'L%FVY_H', CROUTINE)
+   CALL SCARC_ALLOCATE_REAL3 (L%FVZ_H,  0, L%NX+1, 0, L%NY+1, 0, L%NZ+1, NSCARC_INIT_ZERO, 'L%FVZ_H', CROUTINE)
 
    CALL SCARC_ALLOCATE_REAL2 (L%PXS, 1, L%NY, 1, L%NZ, NSCARC_INIT_ZERO, 'L%PXS', CROUTINE)
    CALL SCARC_ALLOCATE_REAL2 (L%PXF, 1, L%NY, 1, L%NZ, NSCARC_INIT_ZERO, 'L%PXF', CROUTINE)
@@ -21380,63 +21371,62 @@ END SUBROUTINE SCARC_UPDATE_BOUNDARY
 ! Build complete force term based on previously stored F_A parts and new F_B parts for later velocity correction
 ! --------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_UPDATE_BAROCLINIC_TERM
-USE SCARC_POINTERS, ONLY: M, L, RHOP, RRHO, PPP, RDXN, RDYN, RDZN, &
+USE SCARC_POINTERS, ONLY: M, L, HP, KRESP, RHOP, RRHO, RHMK, RDXN, RDYN, RDZN, &
                           SCARC_POINT_TO_GRID, SCARC_POINT_TO_INSEPARABLE_ENVIRONMENT
 INTEGER :: I, J, K, NM
 
 BAROCLINIC_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
    
    CALL SCARC_POINT_TO_GRID(NM, NLEVEL_MIN)
-   CALL SCARC_POINT_TO_INSEPARABLE_ENVIRONMENT(NM)          ! PPP points to inseparable ScaRC pressure solution
+   CALL SCARC_POINT_TO_INSEPARABLE_ENVIRONMENT(NM)          
 
    ! Compute 1/rho in each grid cell
 
    RRHO => M%WORK7
+   RHMK => M%WORK8
    DO K=0,M%KBP1
       DO J=0,M%JBP1
          DO I=0,M%IBP1
             RRHO(I,J,K) = 1._EB/RHOP(I,J,K)
+            RHMK(I,J,K) = RHOP(I,J,K)*(HP(I,J,K)-KRESP(I,J,K))
          ENDDO
       ENDDO
    ENDDO
 
-   ! Compute baroclinic term in the x momentum equation, p*d/dx(1/rho), based on PPP and accumulate full force term
+   ! Compute baroclinic term in the x momentum equation, p*d/dx(1/rho), based on RHMK and accumulate full force term
    
    DO K=1,M%KBAR
       DO J=1,M%JBAR
          DO I=0,M%IBAR
-            L%FVX_B(I,J,K) = -(PPP(I,J,K)*RHOP(I+1,J,K)+PPP(I+1,J,K)*RHOP(I,J,K))*(RRHO(I+1,J,K)-RRHO(I,J,K))*RDXN(I)/ &
+            M%FVX_B(I,J,K) = -(RHMK(I,J,K)*RHOP(I+1,J,K)+RHMK(I+1,J,K)*RHOP(I,J,K))*(RRHO(I+1,J,K)-RRHO(I,J,K))*RDXN(I)/ &
                               (RHOP(I+1,J,K)+RHOP(I,J,K))
-            M%FVX(I,J,K)   = L%FVX(I,J,K) + L%FVX_B(I,J,K)
-            M%FVX_B(I,J,K) = L%FVX_B(I,J,K)
+            M%FVX(I,J,K)   = L%FVX_H(I,J,K) + M%FVX_B(I,J,K)
          ENDDO
       ENDDO
    ENDDO
    
-   ! Compute baroclinic term in the y momentum equation, p*d/dy(1/rho), based on PPP
+   ! Compute baroclinic term in the y momentum equation, p*d/dy(1/rho), based on RHMK
    
    IF (.NOT.TWO_D) THEN
       DO K=1,M%KBAR
          DO J=0,M%JBAR
             DO I=1,M%IBAR
-               L%FVY_B(I,J,K) = -(PPP(I,J,K)*RHOP(I,J+1,K)+PPP(I,J+1,K)*RHOP(I,J,K))*(RRHO(I,J+1,K)-RRHO(I,J,K))*RDYN(J)/ &
+               M%FVY_B(I,J,K) = -(RHMK(I,J,K)*RHOP(I,J+1,K)+RHMK(I,J+1,K)*RHOP(I,J,K))*(RRHO(I,J+1,K)-RRHO(I,J,K))*RDYN(J)/ &
                                  (RHOP(I,J+1,K)+RHOP(I,J,K))
-               M%FVY(I,J,K)   = L%FVY(I,J,K) + L%FVY_B(I,J,K)
-               M%FVY_B(I,J,K) = L%FVY_B(I,J,K)
+               M%FVY(I,J,K)   = L%FVY_H(I,J,K) + M%FVY_B(I,J,K)
             ENDDO
          ENDDO
       ENDDO
    ENDIF
    
-   ! Compute baroclinic term in the z momentum equation, p*d/dz(1/rho), based on PPP
+   ! Compute baroclinic term in the z momentum equation, p*d/dz(1/rho), based on RHMK
    
    DO K=0,M%KBAR
       DO J=1,M%JBAR
          DO I=1,M%IBAR
-            L%FVZ_B(I,J,K) = -(PPP(I,J,K)*RHOP(I,J,K+1)+PPP(I,J,K+1)*RHOP(I,J,K))*(RRHO(I,J,K+1)-RRHO(I,J,K))*RDZN(K)/ &
+            M%FVZ_B(I,J,K) = -(RHMK(I,J,K)*RHOP(I,J,K+1)+RHMK(I,J,K+1)*RHOP(I,J,K))*(RRHO(I,J,K+1)-RRHO(I,J,K))*RDZN(K)/ &
                               (RHOP(I,J,K+1)+RHOP(I,J,K))
-            M%FVZ(I,J,K)   = L%FVZ(I,J,K) + L%FVZ_B(I,J,K)
-            M%FVZ_B(I,J,K) = L%FVZ_B(I,J,K)
+            M%FVZ(I,J,K)   = L%FVZ_H(I,J,K) + M%FVZ_B(I,J,K)
          ENDDO
       ENDDO
    ENDDO
@@ -22395,7 +22385,7 @@ CALL SCARC_SETUP_EXCHANGES                            ; IF (STOP_STATUS==SETUP_S
 !     * Only the related workspace is allocated here, the matrices themselves are rebuilt at each time step
 
 CALL SCARC_SETUP_POISSON_REQUIREMENTS                 ; IF (STOP_STATUS==SETUP_STOP) RETURN
-IF (IS_SEPARABLE) THEN
+IF (.NOT.INSEPARABLE_POISSON) THEN
    CALL SCARC_SETUP_POISSON_SYSTEMS                   ; IF (STOP_STATUS==SETUP_STOP) RETURN
 #ifdef WITH_MKL
    CALL SCARC_SETUP_POISSON_SYMMETRIC                 ; IF (STOP_STATUS==SETUP_STOP) RETURN
@@ -22457,7 +22447,7 @@ CALL SCARC_SET_ITERATION_STATE (T_CURRENT, DT_CURRENT)
 
 ! If the inseparable Poisson system is solved, the matrices have to be rebuilt for the current density in each time step
 
-IF (IS_INSEPARABLE) THEN
+IF (INSEPARABLE_POISSON) THEN
    CALL SCARC_SETUP_POISSON_SYSTEMS                   ; IF (STOP_STATUS==SETUP_STOP) RETURN
 #ifdef WITH_MKL
    CALL SCARC_SETUP_POISSON_SYMMETRIC                 ; IF (STOP_STATUS==SETUP_STOP) RETURN
