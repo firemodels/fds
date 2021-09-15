@@ -20388,6 +20388,12 @@ CALL SCARC_RELEASE_SCOPE(NS, NP)
 
 END SUBROUTINE SCARC_METHOD_KRYLOV
 
+! --------------------------------------------------------------------------------------------------------------
+!> \brief Finalize ghost cell computation in case of inseparable Poisson solver based on new baroclinic term
+! --------------------------------------------------------------------------------------------------------------
+SUBROUTINE SCARC_FINALIZE_INSEPARABLE_POISSON
+IF (TYPE_SOLVER == NSCARC_SOLVER_MAIN .AND. .NOT.IS_MGM) CALL SCARC_UPDATE_GHOSTCELLS(NLEVEL_MIN)
+END SUBROUTINE SCARC_FINALIZE_INSEPARABLE_POISSON
 
 ! --------------------------------------------------------------------------------------------------------------
 !> \brief Perform McKeeney-Greengard-Mayo (MGM) method
@@ -21495,7 +21501,6 @@ END SUBROUTINE SCARC_UPDATE_GHOSTCELLS
 SUBROUTINE SCARC_UPDATE_BAROCLINIC_TERM
 USE SCARC_POINTERS, ONLY: M, L, HP, KRESP, RHOP, RRHO, RHMK, RDXN, RDYN, RDZN, &
                           SCARC_POINT_TO_GRID, SCARC_POINT_TO_INSEPARABLE_ENVIRONMENT
-USE VELO, ONLY: NO_FLUX 
 INTEGER :: I, J, K, NM
 
 BAROCLINIC_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
@@ -21553,11 +21558,6 @@ BAROCLINIC_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          ENDDO
       ENDDO
    ENDDO
-
-   ! Set no-flux conditions on final F = F_A + F_B, where F_B is up-to-date to current time step
-   ! This will then be used in the velocity predictor/corrector routines
-
-   CALL NO_FLUX(DT, NM)
 
 ENDDO BAROCLINIC_MESHES_LOOP
 
