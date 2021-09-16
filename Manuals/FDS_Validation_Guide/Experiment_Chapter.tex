@@ -544,6 +544,22 @@ Maqua, Castanet, and Lemoine measured the temperature of falling droplets of eth
 
 Taflin measured the diameter of suspended water droplets in dry air~\cite{Snegirev:1}. One droplet was initially 43.9~$\mu$m and the other was 56.6~$\mu$m.
 
+\section{Edinburgh Vegetation Drag}
+\label{Edinburgh_Veg_Drag_Description}
+
+Mueller et al.~\cite{Mueller:TIPM2021} characterized the pressure drop through beds of randomly oriented pine needles and used the results to parameterize a drag model following the form of the Forchheimer equation. They then measured the development of velocity profiles within and above these pine needle beds, using a hotwire anemometer, and compared the results to FDS predictions using the parameterized model. Fuel beds with bulk densities of 20~kg/m$^3$, 40~kg/m$^3$, and 60~kg/m$^3$ were tested, with inlet velocities in the range of 0.5-2.0~m/s. A condensed version of the comparison is reproduced in this guide, which serves to test the ability of the model to represent the general features of flow in sparse multiphase media.
+
+\subsubsection{Modeling Notes}
+
+In the experiment, the test section extended 400~mm beyond the vegetation layer. This extent of the domain is reproduced in the simulations in order to avoid possible influence of the downstream boundary condition. The upstream boundary condition is set using the measurements located at $x=-75$~mm, which allows for the reproduction of a slight non-uniformity in the flowfield. Due to difficulties in compacting the high bulk density case, the fuel layer is set to extend to 55~mm in the 60~kg/m$^3$ simulations.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.5\textwidth]{FIGURES/Edinburgh_Vegetation_Drag/domain_schematic}
+\caption[Geometry of the Edinburgh Vegetation Drag experiments]{Geometry of the wind tunnel test section for the Edinburgh Vegetation Drag experiments. Vegetation filled the lower half of the 150~mm x 100~mm test section, starting from $x=0$~mm. Circles indicate the locations of velocity measurements, with the filled circles corresponding to those used for comparison in this guide.}
+\label{Ed_Veg_Drag_Layout}
+\end{figure}
+
 \section{FAA Cargo Compartments}
 \label{FAA_Cargo_Description}
 
