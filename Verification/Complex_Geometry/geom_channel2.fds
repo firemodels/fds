@@ -1,4 +1,4 @@
-&HEAD CHID='geom_channel3', TITLE='Test of mass flux in channel case made of geometries.' /
+&HEAD CHID='geom_channel2', TITLE='Test of mass flux in channel case made of geometries.' /
 
 # Mesh 1 (OBST):
 &MESH IJK=11,1,8, XB=-0.125,1.25,0,1,0,1 /
