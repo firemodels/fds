@@ -1750,6 +1750,8 @@ ELSEIF (CORRECTOR) THEN
    DP=>D
 ENDIF
 
+IF(STORE_CARTESIAN_DIVERGENCE) CARTVELDIV = DP
+
 RESMAX = 0._EB
 DIVMX  = -10000._EB
 DIVMN  =  10000._EB
@@ -1770,6 +1772,7 @@ DO K=1,KBAR
                DIV = (R(I)*UU(I,J,K)-R(I-1)*UU(I-1,J,K))*RDX(I)*RRN(I) +  &
                      (WW(I,J,K)-WW(I,J,K-1))*RDZ(K)
          END SELECT
+         IF(STORE_CARTESIAN_DIVERGENCE) CARTVELDIV(I,J,K) = DIV
          RES = ABS(DIV-DP(I,J,K))
          IF (ABS(RES)>=RESMAX) THEN
             RESMAX = ABS(RES)
