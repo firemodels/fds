@@ -2231,9 +2231,9 @@ and where {\ct ZVALS} defines elevation data in this region.
 In this example {\ct ivals}\ values occur along the x dimension and {\ct jval}\ values occur along the y dimension.
 The {\ct ZVALS} keyword is used to specify elevations at each $(x,y)$ location.
 The elevation data specified after the {\ct ZVALS}\ keyword is arranged in row major order.
-The first row contains {\ct ivals} elevation values occurring at the the ymax position from xmin to xmax.
+The first row contains {\ct ivals} elevation values occurring at the the ymin position from xmin to xmax.
 Similarly, the last row contains
-{\ct ivals}\ elevation values for the ymin position again from xmin to xmax.
+{\ct ivals}\ elevation values for the ymax position again from xmin to xmax.
 There are then {\ct jvals}\ rows and {\ct ivals}\ columns of elevation data.
 The optional fields {\ct EXTEND\_TERRAIN} and {\ct ZVAL\_HORIZON} are used in the following form. If the computational domain is set larger than the {\ct XB} defined terrain patch, such that it contains the terrain completely, setting {\ct etlog=T} allows for the terrain to be extended to the domain boundaries. This can be helpful when trying to reduce boundary effects on a calculation.
 If, additionally, the real number {\ct zvhr} is defined for {\ct ZVAL\_HORIZON} on the {\ct \&GEOM} line, this elevation will be used on the domain boundaries when extending the domain.
