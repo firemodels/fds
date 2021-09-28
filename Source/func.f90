@@ -2405,8 +2405,8 @@ FDS_VOLUME = 0._EB
 DO K=1,M%KBAR
    DO J=1,M%JBAR
       DO I=1,M%IBAR
-         IF (M%XC(I)>X1_C .AND. M%XC(I)<X2_C .AND. M%YC(J)>Y1_C .AND. M%YC(J)<Y2_C .AND. M%ZC(K)>Z1_C .AND. M%ZC(K)<Z2_C) &
-            FDS_VOLUME = FDS_VOLUME + M%DX(I)*M%DY(J)*M%DZ(K)
+         IF (M%XC(I)<X1_C .OR. M%XC(I)>X2_C .OR. M%YC(J)<Y1_C .OR. M%YC(J)>Y2_C .OR. M%ZC(K)<Z1_C .OR. M%ZC(K)>Z2_C) CYCLE
+         FDS_VOLUME = FDS_VOLUME + M%DX(I)*M%DY(J)*M%DZ(K)
       ENDDO
    ENDDO
 ENDDO
