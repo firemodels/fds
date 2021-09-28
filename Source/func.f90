@@ -2367,6 +2367,55 @@ ENDDO SEARCH_LOOP
 END SUBROUTINE UNIFORM_RING
 
 
+!> \brief Compute the volume of the intersection of a given rectangular volume and a given mesh
+!> \param NM Mesh number
+!> \param X1 Lower x-coordinate of the rectangular volume (m)
+!> \param X2 Upper x-coordinate of the rectangular volume (m)
+!> \param Y1 Lower y-coordinate of the rectangular volume (m)
+!> \param Y2 Upper y-coordinate of the rectangular volume (m)
+!> \param Z1 Lower z-coordinate of the rectangular volume (m)
+!> \param Z2 Upper z-coordinate of the rectangular volume (m)
+!> \param VOLUME_ADJUST Multiplicative factor to account for mismatch between block volume and FDS mesh volume
+
+SUBROUTINE BLOCK_MESH_INTERSECTION_VOLUME(NM,X1,X2,Y1,Y2,Z1,Z2,VOLUME_ADJUST)
+
+INTEGER, INTENT(IN) :: NM
+REAL(EB), INTENT(IN) :: X1,X2,Y1,Y2,Z1,Z2
+REAL(EB), INTENT(OUT) :: VOLUME_ADJUST
+REAL(EB) :: X1_C,X2_C,Y1_C,Y2_C,Z1_C,Z2_C,ACTUAL_VOLUME,FDS_VOLUME
+INTEGER :: I,J,K
+TYPE(MESH_TYPE), POINTER :: M
+
+M => MESHES(NM)
+
+VOLUME_ADJUST = 1._EB
+
+IF (X1>=M%XF .OR. X2<=M%XS .OR. Y1>=M%YF .OR. Y2<=M%YS .OR. Z1>=M%ZF .OR. Z2<=M%ZS) RETURN
+
+X1_C = MAX(X1,M%XS)
+X2_C = MIN(X2,M%XF)
+Y1_C = MAX(Y1,M%YS)
+Y2_C = MIN(Y2,M%YF)
+Z1_C = MAX(Z1,M%ZS)
+Z2_C = MIN(Z2,M%ZF)
+
+ACTUAL_VOLUME = (X2_C-X1_C)*(Y2_C-Y1_C)*(Z2_C-Z1_C)
+FDS_VOLUME = 0._EB
+
+DO K=1,M%KBAR
+   DO J=1,M%JBAR
+      DO I=1,M%IBAR
+         IF (M%XC(I)>X1_C .AND. M%XC(I)<X2_C .AND. M%YC(J)>Y1_C .AND. M%YC(J)<Y2_C .AND. M%ZC(K)>Z1_C .AND. M%ZC(K)<Z2_C) &
+            FDS_VOLUME = FDS_VOLUME + M%DX(I)*M%DY(J)*M%DZ(K)
+      ENDDO
+   ENDDO
+ENDDO
+
+IF (FDS_VOLUME>TWO_EPSILON_EB) VOLUME_ADJUST = ACTUAL_VOLUME/FDS_VOLUME
+
+END SUBROUTINE BLOCK_MESH_INTERSECTION_VOLUME
+
+
 !> \brief Estimate area of intersection of circle and rectangle
 !> \param X0 x-coordinate of the center of the circle (m)
 !> \param Y0 y-coordinate of the center of the circle (m)

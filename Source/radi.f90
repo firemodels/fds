@@ -4479,12 +4479,12 @@ DO N=1,N_INIT
                   IF ((XC(I)-IN%X0)**2+(YC(J)-IN%Y0)**2>RR**2) CYCLE
             END SELECT
             IF (MODE==1) THEN
-               Q(I,J,K) = Q(I,J,K) + TIME_RAMP_FACTOR*IN%HRRPUV
-               KFST4_GAS(I,J,K) = KFST4_GAS(I,J,K) + IN%CHI_R*TIME_RAMP_FACTOR*IN%HRRPUV
+               Q(I,J,K) = Q(I,J,K) + TIME_RAMP_FACTOR*IN%HRRPUV*IN%VOLUME_ADJUST(NM)
+               KFST4_GAS(I,J,K) = KFST4_GAS(I,J,K) + IN%CHI_R*TIME_RAMP_FACTOR*IN%HRRPUV*IN%VOLUME_ADJUST(NM)
             ELSEIF (MODE==2) THEN
-               Q(I,J,K) = Q(I,J,K) - TIME_RAMP_FACTOR*IN%HRRPUV
+               Q(I,J,K) = Q(I,J,K) - TIME_RAMP_FACTOR*IN%HRRPUV*IN%VOLUME_ADJUST(NM)
             ELSE
-               Q(I,J,K) = Q(I,J,K) + TIME_RAMP_FACTOR*IN%HRRPUV
+               Q(I,J,K) = Q(I,J,K) + TIME_RAMP_FACTOR*IN%HRRPUV*IN%VOLUME_ADJUST(NM)
             ENDIF
          ENDDO
       ENDDO
