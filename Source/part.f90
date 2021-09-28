@@ -125,7 +125,7 @@ USE DEVICE_VARIABLES
 USE CONTROL_VARIABLES
 REAL(EB), INTENT(IN) :: T
 INTEGER, INTENT(IN) :: NM
-REAL     :: RN,RN2
+REAL     :: RN,RN2,RN3
 REAL(EB) :: PHI_RN,FLOW_RATE,THETA_RN,SPHI,CPHI,MASS_SUM,D_PRES_FACTOR, &
             STHETA,CTHETA,PWT0,PARTICLE_SPEED,SHIFT1,SHIFT2,XTMP,YTMP,ZTMP,VLEN, &
             TRIGT1,TRIGT2,TNOW,TSI,PIPE_PRESSURE,X1,X2,Y1,Y2,Z1,Z2, &
@@ -559,6 +559,10 @@ ILPC_IF: IF (ILPC > 0) THEN
    IF (T < ONE_D%T_IGN)                                   RETURN
    IF (T < SF%PARTICLE_INSERT_CLOCK(NM))                  RETURN
    IF (SF%PARTICLE_SURFACE_DENSITY>0._EB .AND. T>T_BEGIN) RETURN
+   IF (ANY(SF%EMBER_GENERATION_HEIGHT>=0._EB)) THEN
+      ! specify generation only for regions of burning
+      IF (.NOT. ONE_D%M_DOT_G_PP_ADJUST(REACTION(1)%FUEL_SMIX_INDEX)>0._EB) RETURN
+   ENDIF
 
    LPC => LAGRANGIAN_PARTICLE_CLASS(ILPC)
 
@@ -600,6 +604,10 @@ ILPC_IF: IF (ILPC > 0) THEN
          LP=>MESHES(NM)%LAGRANGIAN_PARTICLE(NLP)
          LAGRANGIAN_PARTICLE => MESHES(NM)%LAGRANGIAN_PARTICLE
 
+         ! Ember flag to be used for outputs
+
+         IF (ANY(SF%EMBER_GENERATION_HEIGHT>=0._EB)) LP%EMBER=.TRUE.
+
          ! Assign particle position on the cell face
 
          CALL RANDOM_NUMBER(RN)
@@ -618,7 +626,14 @@ ILPC_IF: IF (ILPC > 0) THEN
                   LP%BOUNDARY_COORD%X = X(II-1) + DX(II)*REAL(RN,EB)
                   LP%BOUNDARY_COORD%Z = Z(KK-1) + DZ(KK)*REAL(RN2,EB)
                CASE(3)
-                  IF (IOR== 3) LP%BOUNDARY_COORD%Z = Z(KK)   + VENT_OFFSET*DZ(KK+1)
+                  IF (IOR== 3) THEN 
+                     LP%BOUNDARY_COORD%Z = Z(KK)   + VENT_OFFSET*DZ(KK+1)
+                     IF (ANY(SF%EMBER_GENERATION_HEIGHT>=0._EB)) THEN
+                        CALL RANDOM_NUMBER(RN3)
+                        LP%BOUNDARY_COORD%Z = Z(KK) + SF%EMBER_GENERATION_HEIGHT(1) + &
+                           (SF%EMBER_GENERATION_HEIGHT(2)-SF%EMBER_GENERATION_HEIGHT(1))*REAL(RN3,EB)
+                     ENDIF
+                  ENDIF
                   IF (IOR==-3) LP%BOUNDARY_COORD%Z = Z(KK-1) - VENT_OFFSET*DZ(KK-1)
                   LP%BOUNDARY_COORD%X = X(II-1) + DX(II)*REAL(RN,EB)
                   LP%BOUNDARY_COORD%Y = Y(JJ-1) + DY(JJ)*REAL(RN2,EB)
@@ -662,6 +677,11 @@ ILPC_IF: IF (ILPC > 0) THEN
             LP%BOUNDARY_COORD%X = CFA_X + CFA%NVEC(1)*VENT_OFFSET*DX(IIG)
             LP%BOUNDARY_COORD%Y = CFA_Y + CFA%NVEC(2)*VENT_OFFSET*DY(JJG)
             LP%BOUNDARY_COORD%Z = CFA_Z + CFA%NVEC(3)*VENT_OFFSET*DZ(KKG)
+            IF (ANY(SF%EMBER_GENERATION_HEIGHT>=0._EB)) THEN
+               CALL RANDOM_NUMBER(RN3)
+               LP%BOUNDARY_COORD%Z = CFA_Z + SF%EMBER_GENERATION_HEIGHT(1) + &
+                  (SF%EMBER_GENERATION_HEIGHT(2)-SF%EMBER_GENERATION_HEIGHT(1))*REAL(RN3,EB)
+            ENDIF
             LP%U = DOT_PRODUCT(CFA%NVEC,(/-ONE_D%U_NORMAL,SF%VEL_T(1),SF%VEL_T(2)/))
             LP%V = DOT_PRODUCT(CFA%NVEC,(/SF%VEL_T(1),-ONE_D%U_NORMAL,SF%VEL_T(2)/))
             LP%W = DOT_PRODUCT(CFA%NVEC,(/SF%VEL_T(1),SF%VEL_T(2),-ONE_D%U_NORMAL/))
@@ -670,6 +690,14 @@ ILPC_IF: IF (ILPC > 0) THEN
          LP%BOUNDARY_COORD%IIG = IIG
          LP%BOUNDARY_COORD%JJG = JJG
          LP%BOUNDARY_COORD%KKG = KKG
+
+         ! Embers may not be generated in wall-adjacent cell
+         IF (LP%EMBER) THEN
+            CALL GET_IJK(LP%BOUNDARY_COORD%X,LP%BOUNDARY_COORD%Y,LP%BOUNDARY_COORD%Z,NM,XI,YJ,ZK,IIG,JJG,KKG)
+            LP%BOUNDARY_COORD%IIG = IIG
+            LP%BOUNDARY_COORD%JJG = JJG
+            LP%BOUNDARY_COORD%KKG = KKG
+         ENDIF 
 
          ! Save the insertion time (TP) and scalar property (SP) for the particle
 
