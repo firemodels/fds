@@ -1247,6 +1247,7 @@ TYPE INITIALIZATION_TYPE
    REAL(EB) :: CHI_R            !< Radiative fraction of HRRPUV
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: PARTICLE_INSERT_CLOCK  !< Time of last particle insertion (s)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: MASS_FRACTION          !< Mass fraction of gas components
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: VOLUME_ADJUST          !< Multiplicative factor to account for FDS grid snap
    INTEGER  :: PART_INDEX=0     !< Particle class index of inserted particles
    INTEGER  :: N_PARTICLES      !< Number of particles to insert
    INTEGER  :: DEVC_INDEX=0     !< Index of the device that uses this INITIALIZATION variable
