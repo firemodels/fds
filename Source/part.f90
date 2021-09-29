@@ -2305,6 +2305,8 @@ DRAG_LAW_SELECT: SELECT CASE (LPC%DRAG_LAW)
       LP%RE  = RHO_G*QREL*2._EB*R_D/MU_FILM
       KN = 0._EB
       IF (LP%RE<1._EB) KN = MU_FILM*SQRT(0.5_EB*PI/(PBAR(KKG_OLD,PRESSURE_ZONE(IIG_OLD,JJG_OLD,KKG_OLD))*RHO_G))/(2._EB*R_D)
+      ! Reynolds number based on hydraulic diameter for circular or square disk
+      IF (LPC%DRAG_LAW==DISK_DRAG) LP%RE = RHO_G*QREL*SQRT(LP%ONE_D%AREA/2._EB)/MU_FILM
       C_DRAG = DRAG(LP%RE,LPC%DRAG_LAW,KN)
 
       ! Primary break-up model
@@ -2384,6 +2386,8 @@ IF (LPC%DRAG_LAW/=SCREEN_DRAG .AND. LPC%DRAG_LAW/=POROUS_DRAG) THEN
       SELECT CASE(SF%GEOMETRY)
          CASE(SURF_CARTESIAN)
             A_DRAG = 2._EB*SF%LENGTH*SF%WIDTH*LPC%SHAPE_FACTOR
+            ! For disk drag, allow for different area for each particle
+            IF (LPC%DRAG_LAW==DISK_DRAG) A_DRAG = LP%ONE_D%AREA/2._EB
          CASE(SURF_CYLINDRICAL)
             A_DRAG = 2._EB*PI*R_D*SF%LENGTH*LPC%SHAPE_FACTOR
          CASE(SURF_SPHERICAL)
