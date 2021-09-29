@@ -3901,6 +3901,10 @@ SELECT CASE(DRAG_LAW)
          DRAG = 1._EB
       ENDIF
 
+   ! see Hoerner 1965, Fig. 3-26
+   CASE(DISK_DRAG)
+      DRAG=20.37_EB/RE+1.17_EB/(1._EB+1._EB/RE)
+
    CASE(USER_DRAG)
       DRAG = 1._EB ! PC%DRAG_COEFFICIENT set elsewhere
 

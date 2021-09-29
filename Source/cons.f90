@@ -127,6 +127,7 @@ INTEGER, PARAMETER :: CYLINDER_DRAG=2                  !< Flag for LPC\%DRAG_LAW
 INTEGER, PARAMETER :: USER_DRAG=3                      !< Flag for LPC\%DRAG_LAW: User-specified constant drag coefficient
 INTEGER, PARAMETER :: SCREEN_DRAG=4                    !< Flag for LPC\%DRAG_LAW: Special drag model for screens
 INTEGER, PARAMETER :: POROUS_DRAG=5                    !< Flag for LPC\%DRAG_LAW: Special drag model for porous media
+INTEGER, PARAMETER :: DISK_DRAG=6                      !< Flag for LPC\%DRAG_LAW: Disk drag for cartesian particles
 
 INTEGER, PARAMETER :: OLD=1                            !< Argument for DUCT()\%VEL()
 INTEGER, PARAMETER :: NEW=2                            !< Argument for DUCT()\%VEL()
