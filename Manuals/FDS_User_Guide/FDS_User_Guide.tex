@@ -6829,7 +6829,7 @@ It is not unusual to include hundreds of thousands of particles in a simulation.
 \label{info:particle_flux}
 \label{particle_flux}
 
-There are two ways of introducing particles at a solid surface. You can specify a particle mass flux and inject particles regularly in time, or you can specify a particle surface density and introduce the particles at the start of the simulation.
+There are three ways of introducing particles at a solid surface. You can specify a particle mass flux and inject particles regularly in time, you can restrict the production of particles to actively burning surfaces (as a means of generating embers), or you can specify a particle surface density and introduce the particles at the start of the simulation.
 
 \subsubsection{Particles specified using a mass flux}
 
@@ -6850,6 +6850,12 @@ creates an obstruction that ejects particles out of its sides at a rate of 0.1~\
 \end{figure}
 
 Note also that you can independently control particles that emanate from a solid surface. For example, a device might control the activation of a fan, but you can over-ride the device and control the particles separately. To do this, specify either a device or controller via a {\ct DEVC\_ID} or {\ct CTRL\_ID} on the {\ct PART} line that defines the particles. For more information on devices and controls, see Sections~\ref{info:basic_control}~and~\ref{info:CTRL}.
+
+\subsubsection{Particles specified using an ember generation height}
+
+If you specify an {\ct EMBER\_GENERATION\_HEIGHT} (m), particles are assumed to represent embers (or firebrands) and are only generated at surfaces that are actively burning (non-zero fuel mass flux). The height parameter dictates the vertical offset distance from the burning surface at which particles are produced. This is important in cases where the vertical fuel structure may not be resolved, such as level set fire spread (Section~\ref{info:level_set}), but the height of ember production plays a role in the lofting potential. If a single number is provided for the {\ct EMBER\_GENERATION\_HEIGHT}, all particles are generated at that offset distance. If two numbers are provided, particles are randomly generated within the specified offset range, following a uniform distribution. For example, if {\ct EMBER\_GENERATION\_HEIGHT=0.0,1.0} then particles will be produced anywhere up to 1.0~m above the burning surface. 
+
+The rate of ember production can then be set using the method described previously. A number flux can be set using {\ct DT\_INSERT} and {\ct NPPC}, and these particles can be weighted to match a specified {\ct PARTICLE\_MASS\_FLUX}. It is recommended to set {\ct VEL\_PART=0.0} when modeling ember generation in this way, so that particles start from rest and are naturally lofted by the surrounding flow. 
 
 \subsubsection{Particles specified using a surface density}
 
@@ -12205,6 +12211,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct DRAG\_COEFFICIENT}                                   & Real            & Section~\ref{info:boundary_fuel_model}    &                     & 2.8                     \\ \hline
 {\ct DT\_INSERT}                                          & Real            & Section~\ref{info:particle_flux}          & s                   & 0.01                    \\ \hline
 {\ct E\_COEFFICIENT}                                      & Real            & Section~\ref{info:suppression}            & \si{m^2/(kg.s)}     &                         \\ \hline
+{\ct EMBER\_GENERATION\_HEIGHT(2)}                          & Real            & Section~\ref{info:particle_flux}          & m                   &                        \\ \hline
 {\ct EMISSIVITY}                                          & Real            & Section~\ref{info:convection}             &                     & 0.9                     \\ \hline
 {\ct EMISSIVITY\_BACK}                                    & Real            & Section~\ref{info:BACKING}                &                     &                         \\ \hline
 {\ct EVAC\_DEFAULT}                                       & Logical         & Reference~\cite{FDS_Evac_Users_Guide}     &                     & {\ct F}           \\ \hline
