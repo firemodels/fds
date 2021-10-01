@@ -7,6 +7,15 @@ USE GLOBAL_CONSTANTS, ONLY : IAXIS,JAXIS,KAXIS,MAX_DIM,LOW_IND,HIGH_IND
 
 IMPLICIT NONE (TYPE,EXTERNAL)
 
+!> \brief Arrays to hold derived type (WALL, CFACE, or PARTICLE) components for I/O or MPI exchanges
+
+TYPE STORAGE_TYPE
+   INTEGER :: N_STORAGE_SLOTS=0
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: REALS
+   INTEGER, ALLOCATABLE, DIMENSION(:,:) :: INTEGERS
+   LOGICAL, ALLOCATABLE, DIMENSION(:,:) :: LOGICALS
+END TYPE STORAGE_TYPE
+
 !> \brief Parameters associated with an entire class of Lagrangian particles
 
 TYPE LAGRANGIAN_PARTICLE_CLASS_TYPE
@@ -119,6 +128,8 @@ TYPE LAGRANGIAN_PARTICLE_CLASS_TYPE
    LOGICAL :: DUCT_PARTICLE=.FALSE.         !< Flag indicating if particles can pass through a duct
    LOGICAL :: EMBER_PARTICLE=.FALSE.        !< Flag indicating if particles can become flying embers
    LOGICAL :: ADHERE_TO_SOLID=.FALSE.       !< Flag indicating if particles can stick to a solid
+
+   TYPE(STORAGE_TYPE) :: PARTICLE_STORAGE
 
 END TYPE LAGRANGIAN_PARTICLE_CLASS_TYPE
 
@@ -321,15 +332,12 @@ TYPE LAGRANGIAN_PARTICLE_TYPE
 END TYPE LAGRANGIAN_PARTICLE_TYPE
 
 
-TYPE STORAGE_TYPE
-   INTEGER :: N_STORAGE_SLOTS=0,NEXT_AVAILABLE_SLOT=1
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: REALS
-   INTEGER, ALLOCATABLE, DIMENSION(:,:) :: INTEGERS
-   LOGICAL, ALLOCATABLE, DIMENSION(:,:) :: LOGICALS
-END TYPE STORAGE_TYPE
-
-
 !> \brief Variables associated with a WALL cell
+!> \details If you change the number of scalar variables in WALL_TYPE, adjust the numbers below
+
+INTEGER, PARAMETER :: N_WALL_SCALAR_REALS=4
+INTEGER, PARAMETER :: N_WALL_SCALAR_INTEGERS=17
+INTEGER, PARAMETER :: N_WALL_SCALAR_LOGICALS=0
 
 TYPE WALL_TYPE
 
@@ -342,14 +350,14 @@ TYPE WALL_TYPE
    INTEGER :: BC_INDEX=0              !< Index within the array BOUNDARY_COORD
    INTEGER :: OD_INDEX=0              !< Index within the array BOUNDARY_ONE_D
    INTEGER :: BP_INDEX=0              !< Index within the array BOUNDARY_PROPERTY
-   INTEGER :: BACK_INDEX=0                 !< WALL index of back side of obstruction or exterior wall cell
-   INTEGER :: BACK_MESH                    !< Mesh number on back side of obstruction or exterior wall cell
-   INTEGER :: BOUNDARY_TYPE=0              !< Descriptor: SOLID, MIRROR, OPEN, INTERPOLATED, etc
-   INTEGER :: OBST_INDEX=0                 !< Index of the OBSTruction
-   INTEGER :: PRESSURE_BC_INDEX            !< Poisson boundary condition, NEUMANN or DIRICHLET
-   INTEGER :: SURF_INDEX=0                 !< Index of the SURFace conditions
-   INTEGER :: SURF_INDEX_ORIG=0            !< Original SURFace index for this cell
-   INTEGER :: VENT_INDEX=0                 !< Index of the VENT containing this cell
+   INTEGER :: SURF_INDEX=0            !< Index of the SURFace conditions
+   INTEGER :: BACK_INDEX=0            !< WALL index of back side of obstruction or exterior wall cell
+   INTEGER :: BACK_MESH               !< Mesh number on back side of obstruction or exterior wall cell
+   INTEGER :: BOUNDARY_TYPE=0         !< Descriptor: SOLID, MIRROR, OPEN, INTERPOLATED, etc
+   INTEGER :: SURF_INDEX_ORIG=0       !< Original SURFace index for this cell
+   INTEGER :: OBST_INDEX=0            !< Index of the OBSTruction
+   INTEGER :: PRESSURE_BC_INDEX       !< Poisson boundary condition, NEUMANN or DIRICHLET
+   INTEGER :: VENT_INDEX=0            !< Index of the VENT containing this cell
    INTEGER :: JD11_INDEX=0
    INTEGER :: JD12_INDEX=0
    INTEGER :: JD21_INDEX=0
@@ -656,6 +664,8 @@ TYPE SURFACE_TYPE
    LOGICAL :: INCLUDE_BOUNDARY_COORD_TYPE=.TRUE.     !< This surface requires basic coordinate information
    LOGICAL :: INCLUDE_BOUNDARY_PROPERTY_TYPE=.TRUE.  !< This surface requires surface variables for heat and mass transfer
    LOGICAL :: INCLUDE_ONE_D_TYPE=.TRUE.              !< This surface requires in-depth 1-D conduction/reaction arrays
+   INTEGER :: N_WALL_STORAGE_REALS=0,N_WALL_STORAGE_INTEGERS=0,N_WALL_STORAGE_LOGICALS=0
+   INTEGER :: N_CFACE_STORAGE_REALS=0,N_CFACE_STORAGE_INTEGERS=0,N_CFACE_STORAGE_LOGICALS=0
    INTEGER :: GEOMETRY,BACKING,PROFILE,HEAT_TRANSFER_MODEL=0
    CHARACTER(LABEL_LENGTH) :: PART_ID,RAMP_Q,RAMP_V,RAMP_T,RAMP_EF,RAMP_PART,RAMP_V_X,RAMP_V_Y,RAMP_V_Z,RAMP_T_B,RAMP_T_I
    CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: RAMP_MF
@@ -679,6 +689,8 @@ TYPE SURFACE_TYPE
 
    !HTC Custom
    REAL(EB) :: C_FORCED_CONSTANT=0._EB,C_FORCED_PR_EXP=0._EB,C_FORCED_RE=0._EB,C_FORCED_RE_EXP=0._EB,C_HORIZONTAL,C_VERTICAL
+
+   TYPE(STORAGE_TYPE) :: WALL_STORAGE,CFACE_STORAGE
 
 END TYPE SURFACE_TYPE
 
@@ -947,6 +959,12 @@ TYPE RAD_CFACE_TYPE
    INTEGER, ALLOCATABLE, DIMENSION(:,:) :: ASSIGNED_CFACES_RADI
 END TYPE RAD_CFACE_TYPE
 
+
+! Note: If you change the number of scalar variables in CFACE_TYPE, adjust the numbers below
+
+INTEGER, PARAMETER :: N_CFACE_SCALAR_REALS=8
+INTEGER, PARAMETER :: N_CFACE_SCALAR_INTEGERS=11
+INTEGER, PARAMETER :: N_CFACE_SCALAR_LOGICALS=0
 
 TYPE CFACE_TYPE
    INTEGER :: CFACE_INDEX=0              !< Index of itself -- used to determine if the CFACE cell has been assigned
