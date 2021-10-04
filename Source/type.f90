@@ -115,19 +115,22 @@ TYPE LAGRANGIAN_PARTICLE_CLASS_TYPE
    INTEGER, ALLOCATABLE, DIMENSION(:) :: STRATUM_INDEX_LOWER  !< Lower index of size distribution band
    INTEGER, ALLOCATABLE, DIMENSION(:) :: STRATUM_INDEX_UPPER  !< Upper index of size distribution band
 
-   LOGICAL :: STATIC=.FALSE.                !< Flag indicating if particles move or not
-   LOGICAL :: MASSLESS_TRACER=.FALSE.       !< Flag indicating if particles are just tracers for visualization
-   LOGICAL :: MASSLESS_TARGET=.FALSE.       !< Flag indicating if particles are just targets for an output quantity
-   LOGICAL :: LIQUID_DROPLET=.FALSE.        !< Flag indicating if particles are liquid droplets
-   LOGICAL :: SOLID_PARTICLE=.FALSE.        !< Flag indicating if particles are solid, not liquid
-   LOGICAL :: MONODISPERSE=.FALSE.          !< Flag indicating if particle size is monodisperse
-   LOGICAL :: TURBULENT_DISPERSION=.FALSE.  !< Flag indicating if subgrid-scale turbulence is applied
-   LOGICAL :: BREAKUP=.FALSE.               !< Flag indicating if paricles or droplets break-up
-   LOGICAL :: CHECK_DISTRIBUTION=.FALSE.    !< Flag indicating if diagnostic output on size distribution is specified
-   LOGICAL :: FUEL=.FALSE.                  !< Flag indicating if droplets evaporate into fuel gas
-   LOGICAL :: DUCT_PARTICLE=.FALSE.         !< Flag indicating if particles can pass through a duct
-   LOGICAL :: EMBER_PARTICLE=.FALSE.        !< Flag indicating if particles can become flying embers
-   LOGICAL :: ADHERE_TO_SOLID=.FALSE.       !< Flag indicating if particles can stick to a solid
+   LOGICAL :: STATIC=.FALSE.                         !< Flag indicating if particles move or not
+   LOGICAL :: MASSLESS_TRACER=.FALSE.                !< Flag indicating if particles are just tracers for visualization
+   LOGICAL :: MASSLESS_TARGET=.FALSE.                !< Flag indicating if particles are just targets for an output quantity
+   LOGICAL :: LIQUID_DROPLET=.FALSE.                 !< Flag indicating if particles are liquid droplets
+   LOGICAL :: SOLID_PARTICLE=.FALSE.                 !< Flag indicating if particles are solid, not liquid
+   LOGICAL :: MONODISPERSE=.FALSE.                   !< Flag indicating if particle size is monodisperse
+   LOGICAL :: TURBULENT_DISPERSION=.FALSE.           !< Flag indicating if subgrid-scale turbulence is applied
+   LOGICAL :: BREAKUP=.FALSE.                        !< Flag indicating if paricles or droplets break-up
+   LOGICAL :: CHECK_DISTRIBUTION=.FALSE.             !< Flag indicating if diagnostic output on size distribution is specified
+   LOGICAL :: FUEL=.FALSE.                           !< Flag indicating if droplets evaporate into fuel gas
+   LOGICAL :: DUCT_PARTICLE=.FALSE.                  !< Flag indicating if particles can pass through a duct
+   LOGICAL :: EMBER_PARTICLE=.FALSE.                 !< Flag indicating if particles can become flying embers
+   LOGICAL :: ADHERE_TO_SOLID=.FALSE.                !< Flag indicating if particles can stick to a solid
+   LOGICAL :: INCLUDE_BOUNDARY_COORD_TYPE=.TRUE.     !< This particle requires basic coordinate information
+   LOGICAL :: INCLUDE_BOUNDARY_PROPERTY_TYPE=.FALSE. !< This particle requires surface variables for heat and mass transfer
+   LOGICAL :: INCLUDE_BOUNDARY_ONE_D_TYPE=.TRUE.     !< This particle requires in-depth 1-D conduction/reaction arrays
 
    TYPE(STORAGE_TYPE) :: PARTICLE_STORAGE
 
@@ -284,16 +287,17 @@ END TYPE BOUNDARY_PROPERTY_TYPE
 
 ! Note: If you change the number of scalar variables in LAGRANGIAN_PARTICLE_TYPE, adjust the numbers below
 
-INTEGER, PARAMETER :: N_PARTICLE_SCALAR_REALS=16,N_PARTICLE_SCALAR_INTEGERS=12,N_PARTICLE_SCALAR_LOGICALS=4
+INTEGER, PARAMETER :: N_PARTICLE_SCALAR_REALS=16,N_PARTICLE_SCALAR_INTEGERS=13,N_PARTICLE_SCALAR_LOGICALS=4
 
 !> \brief Variables associated with a single Lagrangian particle
 
 TYPE LAGRANGIAN_PARTICLE_TYPE
 
+   INTEGER :: LP_INDEX=0             !< Self-identifier
    INTEGER :: BC_INDEX=0             !< Coordinate variables
    INTEGER :: OD_INDEX=0             !< Variables devoted to 1-D heat conduction in depth
+   INTEGER :: BP_INDEX=0             !< Variables devoted to surface properties
    INTEGER :: TAG                    !< Unique integer identifier for the particle
-   INTEGER :: LP_INDEX=0             !< Self-identifier
    INTEGER :: CLASS_INDEX=0          !< LAGRANGIAN_PARTICLE_CLASS of particle
    INTEGER :: ORIENTATION_INDEX=0    !< Index in the array of all ORIENTATIONs
    INTEGER :: WALL_INDEX=0           !< If liquid droplet has stuck to a wall, this is the WALL cell index
@@ -663,7 +667,7 @@ TYPE SURFACE_TYPE
               HT3D=.FALSE., MT1D=.FALSE.
    LOGICAL :: INCLUDE_BOUNDARY_COORD_TYPE=.TRUE.     !< This surface requires basic coordinate information
    LOGICAL :: INCLUDE_BOUNDARY_PROPERTY_TYPE=.TRUE.  !< This surface requires surface variables for heat and mass transfer
-   LOGICAL :: INCLUDE_ONE_D_TYPE=.TRUE.              !< This surface requires in-depth 1-D conduction/reaction arrays
+   LOGICAL :: INCLUDE_BOUNDARY_ONE_D_TYPE=.TRUE.     !< This surface requires in-depth 1-D conduction/reaction arrays
    INTEGER :: N_WALL_STORAGE_REALS=0,N_WALL_STORAGE_INTEGERS=0,N_WALL_STORAGE_LOGICALS=0
    INTEGER :: N_CFACE_STORAGE_REALS=0,N_CFACE_STORAGE_INTEGERS=0,N_CFACE_STORAGE_LOGICALS=0
    INTEGER :: GEOMETRY,BACKING,PROFILE,HEAT_TRANSFER_MODEL=0

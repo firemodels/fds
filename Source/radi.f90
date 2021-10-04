@@ -3538,7 +3538,7 @@ IF (WIDE_BAND_MODEL .OR. WSGG_MODEL) QR = 0._EB
 IF (UPDATE_INTENSITY) THEN
    DO IW=1,N_INTERNAL_WALL_CELLS+N_EXTERNAL_WALL_CELLS
       WC => WALL(IW)
-      IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE
+      IF (WC%OD_INDEX==0) CYCLE
       ONE_D => BOUNDARY_ONE_D(WC%OD_INDEX)
       ONE_D%Q_RAD_IN = 0._EB
       SF  => SURFACE(WALL(IW)%SURF_INDEX)
@@ -3546,11 +3546,13 @@ IF (UPDATE_INTENSITY) THEN
    ENDDO
    DO IP=1,NLP
       LP => LAGRANGIAN_PARTICLE(IP)
+      IF (LP%OD_INDEX==0) CYCLE
       ONE_D => BOUNDARY_ONE_D(LP%OD_INDEX)
       ONE_D%Q_RAD_IN = 0._EB
    ENDDO
    DO ICF=N_EXTERNAL_CFACE_CELLS+1,N_EXTERNAL_CFACE_CELLS+N_INTERNAL_CFACE_CELLS
       CFA => CFACE(ICF)
+      IF (CFA%OD_INDEX==0) CYCLE
       ONE_D => BOUNDARY_ONE_D(CFA%OD_INDEX)
       ONE_D%Q_RAD_IN = 0._EB
       SF  => SURFACE(CFA%SURF_INDEX)
@@ -4048,18 +4050,21 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                      IF (MODULO(N,NRP(1))==1) AYD = 0._EB  ! Zero out the terms involving symmetric overhang
                      IF (MODULO(N,NRP(1))==0) AYU = 0._EB
                      IF (IC/=0) THEN
-                        IW = WALL_INDEX(IC,-ISTEP)
-                        WC => WALL(IW)
-                        BP => BOUNDARY_PROPERTY(WC%BP_INDEX)
-                        IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY) ILXU = BP%BAND(IBND)%ILW(N)
-                        IW = WALL_INDEX(IC,-JSTEP*2)
-                        WC => WALL(IW)
-                        BP => BOUNDARY_PROPERTY(WC%BP_INDEX)
-                        IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY) ILYU = BP%BAND(IBND)%ILW(N)
-                        IW = WALL_INDEX(IC,-KSTEP*3)
-                        WC => WALL(IW)
-                        BP => BOUNDARY_PROPERTY(WC%BP_INDEX)
-                        IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY) ILZU = BP%BAND(IBND)%ILW(N)
+                        WC => WALL(WALL_INDEX(IC,-ISTEP))
+                        IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
+                           BP => BOUNDARY_PROPERTY(WC%BP_INDEX)
+                           ILXU = BP%BAND(IBND)%ILW(N)
+                        ENDIF
+                        WC => WALL(WALL_INDEX(IC,-JSTEP*2))
+                        IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
+                           BP => BOUNDARY_PROPERTY(WC%BP_INDEX)
+                           ILYU = BP%BAND(IBND)%ILW(N)
+                        ENDIF
+                        WC => WALL(WALL_INDEX(IC,-KSTEP*3))
+                        IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
+                           BP => BOUNDARY_PROPERTY(WC%BP_INDEX)
+                           ILZU = BP%BAND(IBND)%ILW(N)
+                        ENDIF
                      ENDIF
                      AIU_SUM = AXU*ILXU + AYU*ILYU + AZ*ILZU
                      A_SUM = AXD + AYD + AZ
@@ -4083,14 +4088,16 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                      AX  =         DZ(K) * ABS(DLX(N))
                      AZ  = DX(I)         * ABS(DLZ(N))
                      IF (IC/=0) THEN
-                        IW = WALL_INDEX(IC,-ISTEP)
-                        WC => WALL(IW)
-                        BP => BOUNDARY_PROPERTY(WC%BP_INDEX)
-                        IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY) ILXU = BP%BAND(IBND)%ILW(N)
-                        IW = WALL_INDEX(IC,-KSTEP*3)
-                        WC => WALL(IW)
-                        BP => BOUNDARY_PROPERTY(WC%BP_INDEX)
-                        IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY) ILZU = BP%BAND(IBND)%ILW(N)
+                        WC => WALL(WALL_INDEX(IC,-ISTEP))
+                        IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
+                           BP => BOUNDARY_PROPERTY(WC%BP_INDEX)
+                           ILXU = BP%BAND(IBND)%ILW(N)
+                        ENDIF
+                        WC => WALL(WALL_INDEX(IC,-KSTEP*3))
+                        IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
+                           BP => BOUNDARY_PROPERTY(WC%BP_INDEX)
+                           ILZU = BP%BAND(IBND)%ILW(N)
+                        ENDIF
                      ENDIF
                      AIU_SUM = AX*ILXU + AZ*ILZU
                      A_SUM = AX + AZ
@@ -4149,18 +4156,21 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                      AY  = DX(I) * AY1
                      AZ  = DX(I) * AZ1
                      IF (IC/=0) THEN
-                        IW = WALL_INDEX(IC,-ISTEP)
-                        WC => WALL(IW)
-                        BP => BOUNDARY_PROPERTY(WC%BP_INDEX)
-                        IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY) ILXU = BP%BAND(IBND)%ILW(N)
-                        IW = WALL_INDEX(IC,-JSTEP*2)
-                        WC => WALL(IW)
-                        BP => BOUNDARY_PROPERTY(WC%BP_INDEX)
-                        IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY) ILYU = BP%BAND(IBND)%ILW(N)
-                        IW = WALL_INDEX(IC,-KSTEP*3)
-                        WC => WALL(IW)
-                        BP => BOUNDARY_PROPERTY(WC%BP_INDEX)
-                        IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY) ILZU = BP%BAND(IBND)%ILW(N)
+                        WC => WALL(WALL_INDEX(IC,-ISTEP))
+                        IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
+                           BP => BOUNDARY_PROPERTY(WC%BP_INDEX)
+                           ILXU = BP%BAND(IBND)%ILW(N)
+                        ENDIF
+                        WC => WALL(WALL_INDEX(IC,-JSTEP*2))
+                        IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
+                           BP => BOUNDARY_PROPERTY(WC%BP_INDEX)
+                           ILYU = BP%BAND(IBND)%ILW(N)
+                        ENDIF
+                        WC => WALL(WALL_INDEX(IC,-KSTEP*3))
+                        IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
+                           BP => BOUNDARY_PROPERTY(WC%BP_INDEX)
+                           ILZU = BP%BAND(IBND)%ILW(N)
+                        ENDIF
                      ENDIF
                      IF (CC_IBM) THEN
                         IF (CCVAR(I,J,K,IBM_CGSC) == IBM_SOLID) CYCLE SLICE_LOOP
