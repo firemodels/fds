@@ -4186,18 +4186,22 @@ CASE(INTEGER_THREE)
 
                   ! Loop NOM CUT_FACE array to find BACKING CFACE index:
                   IF(BACK_CFACE_FOUND) THEN
-                     ICFACE=0;
+                     ICFACE=0
                      ICF3_LOOP : DO ICF3=1,MESHES(NOM)%N_CUTFACE_MESH
                         IF(MESHES(NOM)%CUT_FACE(ICF3)%STATUS/=IBM_INBOUNDARY) CYCLE ICF3_LOOP
                         DO JCF3=1,MESHES(NOM)%CUT_FACE(ICF3)%NFACE
-                           ICFACE=ICFACE+1
-                           IF(ICFF==ICF3 .AND. JCF2==JCF3) EXIT ICF3_LOOP
+                           IF(ICFF==ICF3 .AND. JCF2==JCF3) THEN
+                             ICFACE=MESHES(NOM)%CUT_FACE(ICF3)%CFACE_INDEX(JCF3)
+                             EXIT ICF3_LOOP
+                           ENDIF
                         ENDDO
                      ENDDO ICF3_LOOP
 
                      ! Define BACK_MESH, BACK_INDEX:
-                     CFACE(CFACE_INDEX)%BACK_MESH  = NOM
-                     CFACE(CFACE_INDEX)%BACK_INDEX = ICFACE
+                     IF (ICFACE>0) THEN
+                        CFACE(CFACE_INDEX)%BACK_MESH  = NOM
+                        CFACE(CFACE_INDEX)%BACK_INDEX = ICFACE
+                     ENDIF
                      !WRITE(LU_ERR,*) CFACE_INDEX,'BACK_MESH, BACK_INDEX=', &
                      !CFACE(CFACE_INDEX)%BACK_MESH,CFACE(CFACE_INDEX)%BACK_INDEX
 
