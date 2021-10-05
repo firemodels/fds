@@ -129,7 +129,7 @@ TYPE LAGRANGIAN_PARTICLE_CLASS_TYPE
    LOGICAL :: EMBER_PARTICLE=.FALSE.                 !< Flag indicating if particles can become flying embers
    LOGICAL :: ADHERE_TO_SOLID=.FALSE.                !< Flag indicating if particles can stick to a solid
    LOGICAL :: INCLUDE_BOUNDARY_COORD_TYPE=.TRUE.     !< This particle requires basic coordinate information
-   LOGICAL :: INCLUDE_BOUNDARY_PROPERTY_TYPE=.TRUE.  !< This particle requires surface variables for heat and mass transfer
+   LOGICAL :: INCLUDE_BOUNDARY_PROPS_TYPE=.TRUE.  !< This particle requires surface variables for heat and mass transfer
    LOGICAL :: INCLUDE_BOUNDARY_ONE_D_TYPE=.TRUE.     !< This particle requires in-depth 1-D conduction/reaction arrays
    LOGICAL :: INCLUDE_BOUNDARY_RADIA_TYPE=.FALSE.    !< This particle requires angular-specific radiation intensities
 
@@ -256,17 +256,17 @@ TYPE ONE_D_M_AND_E_XFER_TYPE
 END TYPE ONE_D_M_AND_E_XFER_TYPE
 
 !> \brief Property variables associated with a WALL or CFACE boundary cell
-!> \details If you change the number of scalar variables in BOUNDARY_PROPERTY_TYPE, adjust the numbers below
+!> \details If you change the number of scalar variables in BOUNDARY_PROPS_TYPE, adjust the numbers below
 
-INTEGER, PARAMETER :: N_BOUNDARY_PROPERTY_SCALAR_REALS=8
-INTEGER, PARAMETER :: N_BOUNDARY_PROPERTY_SCALAR_INTEGERS=0
-INTEGER, PARAMETER :: N_BOUNDARY_PROPERTY_SCALAR_LOGICALS=0
-INTEGER, DIMENSION(10) :: BOUNDARY_PROPERTY_REALS_ARRAY_SIZE=0, &
-                          BOUNDARY_PROPERTY_INTEGERS_ARRAY_SIZE=0, &
-                          BOUNDARY_PROPERTY_LOGICALS_ARRAY_SIZE=0
-INTEGER :: N_BOUNDARY_PROPERTY_STORAGE_REALS,N_BOUNDARY_PROPERTY_STORAGE_INTEGERS,N_BOUNDARY_PROPERTY_STORAGE_LOGICALS
+INTEGER, PARAMETER :: N_BOUNDARY_PROPS_SCALAR_REALS=8
+INTEGER, PARAMETER :: N_BOUNDARY_PROPS_SCALAR_INTEGERS=0
+INTEGER, PARAMETER :: N_BOUNDARY_PROPS_SCALAR_LOGICALS=0
+INTEGER, DIMENSION(10) :: BOUNDARY_PROPS_REALS_ARRAY_SIZE=0, &
+                          BOUNDARY_PROPS_INTEGERS_ARRAY_SIZE=0, &
+                          BOUNDARY_PROPS_LOGICALS_ARRAY_SIZE=0
+INTEGER :: N_BOUNDARY_PROPS_STORAGE_REALS,N_BOUNDARY_PROPS_STORAGE_INTEGERS,N_BOUNDARY_PROPS_STORAGE_LOGICALS
 
-TYPE BOUNDARY_PROPERTY_TYPE
+TYPE BOUNDARY_PROPS_TYPE
 
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: A_LP_MPUA           !< Accumulated liquid droplet mass per unit area (kg/m2)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: LP_CPUA             !< Liquid droplet cooling rate unit area (W/m2)
@@ -282,7 +282,7 @@ TYPE BOUNDARY_PROPERTY_TYPE
    REAL(EB) :: K_SUPPRESSION=0._EB   !< Suppression coefficent (m2/kg/s)
    REAL(EB) :: L_OBUKHOV=0._EB       !< Obukhov length (m)
 
-END TYPE BOUNDARY_PROPERTY_TYPE
+END TYPE BOUNDARY_PROPS_TYPE
 
 
 !> \brief Angular radiation intensities associated with a WALL, CFACE, or LAGRANGIAN_PARTICLE
@@ -371,7 +371,7 @@ TYPE WALL_TYPE
    INTEGER :: WALL_INDEX=0            !< Index of itself -- used to determine if the WALL cell has been assigned
    INTEGER :: BC_INDEX=0              !< Index within the array BOUNDARY_COORD
    INTEGER :: OD_INDEX=0              !< Index within the array BOUNDARY_ONE_D
-   INTEGER :: BP_INDEX=0              !< Index within the array BOUNDARY_PROPERTY
+   INTEGER :: BP_INDEX=0              !< Index within the array BOUNDARY_PROPS
    INTEGER :: BR_INDEX=0              !< Index within the array BOUNDARY_RADIA
    INTEGER :: SURF_INDEX=0            !< Index of the SURFace conditions
    INTEGER :: BACK_INDEX=0            !< WALL index of back side of obstruction or exterior wall cell
@@ -685,7 +685,7 @@ TYPE SURFACE_TYPE
               IMPERMEABLE=.FALSE.,BOUNDARY_FUEL_MODEL=.FALSE.,BLOWING=.FALSE.,BLOWING_2=.FALSE.,ABL_MODEL=.FALSE., &
               HT3D=.FALSE., MT1D=.FALSE.
    LOGICAL :: INCLUDE_BOUNDARY_COORD_TYPE=.TRUE.     !< This surface requires basic coordinate information
-   LOGICAL :: INCLUDE_BOUNDARY_PROPERTY_TYPE=.TRUE.  !< This surface requires surface variables for heat and mass transfer
+   LOGICAL :: INCLUDE_BOUNDARY_PROPS_TYPE=.TRUE.  !< This surface requires surface variables for heat and mass transfer
    LOGICAL :: INCLUDE_BOUNDARY_ONE_D_TYPE=.TRUE.     !< This surface requires in-depth 1-D conduction/reaction arrays
    LOGICAL :: INCLUDE_BOUNDARY_RADIA_TYPE=.TRUE.     !< This surface requires angular-specific radiation intensities
    INTEGER :: N_WALL_STORAGE_REALS=0,N_WALL_STORAGE_INTEGERS=0,N_WALL_STORAGE_LOGICALS=0
