@@ -108,9 +108,9 @@ TYPE LAGRANGIAN_PARTICLE_CLASS_TYPE
    INTEGER :: NEAREST_RAD_ANGLE_INDEX=0   !< Index of the radiation angle nearest the given orientation vector
    INTEGER :: CNF_RAMP_INDEX=-1           !< Ramp index for Cumulative Number Fraction function
    INTEGER :: BREAKUP_CNF_RAMP_INDEX=-1   !< Ramp index for break-up Cumulative Number Fraction function
-   INTEGER :: N_STORAGE_REALS             !< Number of reals to store for this particle class
-   INTEGER :: N_STORAGE_INTEGERS          !< Number of integers to store for this particle class
-   INTEGER :: N_STORAGE_LOGICALS          !< Number of logicals to store for this particle class
+   INTEGER :: N_STORAGE_REALS=0           !< Number of reals to store for this particle class
+   INTEGER :: N_STORAGE_INTEGERS=0        !< Number of integers to store for this particle class
+   INTEGER :: N_STORAGE_LOGICALS=0        !< Number of logicals to store for this particle class
 
    INTEGER, ALLOCATABLE, DIMENSION(:) :: STRATUM_INDEX_LOWER  !< Lower index of size distribution band
    INTEGER, ALLOCATABLE, DIMENSION(:) :: STRATUM_INDEX_UPPER  !< Upper index of size distribution band
@@ -129,8 +129,9 @@ TYPE LAGRANGIAN_PARTICLE_CLASS_TYPE
    LOGICAL :: EMBER_PARTICLE=.FALSE.                 !< Flag indicating if particles can become flying embers
    LOGICAL :: ADHERE_TO_SOLID=.FALSE.                !< Flag indicating if particles can stick to a solid
    LOGICAL :: INCLUDE_BOUNDARY_COORD_TYPE=.TRUE.     !< This particle requires basic coordinate information
-   LOGICAL :: INCLUDE_BOUNDARY_PROPERTY_TYPE=.FALSE. !< This particle requires surface variables for heat and mass transfer
+   LOGICAL :: INCLUDE_BOUNDARY_PROPERTY_TYPE=.TRUE.  !< This particle requires surface variables for heat and mass transfer
    LOGICAL :: INCLUDE_BOUNDARY_ONE_D_TYPE=.TRUE.     !< This particle requires in-depth 1-D conduction/reaction arrays
+   LOGICAL :: INCLUDE_BOUNDARY_RADIA_TYPE=.FALSE.    !< This particle requires angular-specific radiation intensities
 
    TYPE(STORAGE_TYPE) :: PARTICLE_STORAGE
 
@@ -271,9 +272,6 @@ TYPE BOUNDARY_PROPERTY_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: LP_CPUA             !< Liquid droplet cooling rate unit area (W/m2)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: LP_MPUA             !< Liquid droplet mass per unit area (kg/m2)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: LP_TEMP             !< Liquid droplet mean temperature (K)
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: IL                  !< (1:NSB) Radiance (W/m2/sr); output only
-
-   TYPE(BAND_TYPE), ALLOCATABLE, DIMENSION(:) :: BAND     !< (1:NSB) Radiation wavelength band
 
    REAL(EB) :: U_TAU=0._EB           !< Friction velocity (m/s)
    REAL(EB) :: Y_PLUS=1._EB          !< Dimensionless boundary layer thickness unit
@@ -287,11 +285,31 @@ TYPE BOUNDARY_PROPERTY_TYPE
 END TYPE BOUNDARY_PROPERTY_TYPE
 
 
+!> \brief Angular radiation intensities associated with a WALL, CFACE, or LAGRANGIAN_PARTICLE
+!> \details If you change the number of scalar variables in BOUNDARY_RADIA_TYPE, adjust the numbers below
+
+INTEGER, PARAMETER :: N_BOUNDARY_RADIA_SCALAR_REALS=0
+INTEGER, PARAMETER :: N_BOUNDARY_RADIA_SCALAR_INTEGERS=0
+INTEGER, PARAMETER :: N_BOUNDARY_RADIA_SCALAR_LOGICALS=0
+INTEGER, DIMENSION(10) :: BOUNDARY_RADIA_REALS_ARRAY_SIZE=0, &
+                          BOUNDARY_RADIA_INTEGERS_ARRAY_SIZE=0, &
+                          BOUNDARY_RADIA_LOGICALS_ARRAY_SIZE=0
+INTEGER :: N_BOUNDARY_RADIA_STORAGE_REALS,N_BOUNDARY_RADIA_STORAGE_INTEGERS,N_BOUNDARY_RADIA_STORAGE_LOGICALS
+
+TYPE BOUNDARY_RADIA_TYPE
+
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: IL                  !< (1:NSB) Radiance (W/m2/sr); output only
+
+   TYPE(BAND_TYPE), ALLOCATABLE, DIMENSION(:) :: BAND     !< (1:NSB) Radiation wavelength band
+
+END TYPE BOUNDARY_RADIA_TYPE
+
+
 !> \brief Variables associated with a single Lagrangian particle
 !> \details If you change the number of scalar variables in LAGRANGIAN_PARTICLE_TYPE, adjust the numbers below
 
 INTEGER, PARAMETER :: N_PARTICLE_SCALAR_REALS=16
-INTEGER, PARAMETER :: N_PARTICLE_SCALAR_INTEGERS=13
+INTEGER, PARAMETER :: N_PARTICLE_SCALAR_INTEGERS=14
 INTEGER, PARAMETER :: N_PARTICLE_SCALAR_LOGICALS=4
 
 TYPE LAGRANGIAN_PARTICLE_TYPE
@@ -300,6 +318,7 @@ TYPE LAGRANGIAN_PARTICLE_TYPE
    INTEGER :: BC_INDEX=0             !< Coordinate variables
    INTEGER :: OD_INDEX=0             !< Variables devoted to 1-D heat conduction in depth
    INTEGER :: BP_INDEX=0             !< Variables devoted to surface properties
+   INTEGER :: BR_INDEX=0             !< Variables devoted to radiation intensities
    INTEGER :: TAG                    !< Unique integer identifier for the particle
    INTEGER :: CLASS_INDEX=0          !< LAGRANGIAN_PARTICLE_CLASS of particle
    INTEGER :: ORIENTATION_INDEX=0    !< Index in the array of all ORIENTATIONs
@@ -309,10 +328,6 @@ TYPE LAGRANGIAN_PARTICLE_TYPE
    INTEGER :: DUCT_CELL_INDEX=0      !< Index of duct cell
    INTEGER :: CFACE_INDEX=0          !< Index of immersed boundary CFACE that the droplet has attached to
    INTEGER :: PROP_INDEX=0           !< Index of the PROPERTY_TYPE assigned to the particle
-
-   TYPE(BAND_TYPE), ALLOCATABLE, DIMENSION(:) :: BAND  !< (1:NSB) Radiation wavelength band
-
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: IL               !< (1:NSB) Radiance (W/m2/sr); output only
 
    LOGICAL :: SHOW=.FALSE.         !< Show the particle in Smokeview
    LOGICAL :: SPLAT=.FALSE.        !< The liquid droplet has hit a solid
@@ -343,7 +358,7 @@ END TYPE LAGRANGIAN_PARTICLE_TYPE
 !> \details If you change the number of scalar variables in WALL_TYPE, adjust the numbers below
 
 INTEGER, PARAMETER :: N_WALL_SCALAR_REALS=4
-INTEGER, PARAMETER :: N_WALL_SCALAR_INTEGERS=17
+INTEGER, PARAMETER :: N_WALL_SCALAR_INTEGERS=18
 INTEGER, PARAMETER :: N_WALL_SCALAR_LOGICALS=0
 
 TYPE WALL_TYPE
@@ -357,6 +372,7 @@ TYPE WALL_TYPE
    INTEGER :: BC_INDEX=0              !< Index within the array BOUNDARY_COORD
    INTEGER :: OD_INDEX=0              !< Index within the array BOUNDARY_ONE_D
    INTEGER :: BP_INDEX=0              !< Index within the array BOUNDARY_PROPERTY
+   INTEGER :: BR_INDEX=0              !< Index within the array BOUNDARY_RADIA
    INTEGER :: SURF_INDEX=0            !< Index of the SURFace conditions
    INTEGER :: BACK_INDEX=0            !< WALL index of back side of obstruction or exterior wall cell
    INTEGER :: BACK_MESH               !< Mesh number on back side of obstruction or exterior wall cell
@@ -671,6 +687,7 @@ TYPE SURFACE_TYPE
    LOGICAL :: INCLUDE_BOUNDARY_COORD_TYPE=.TRUE.     !< This surface requires basic coordinate information
    LOGICAL :: INCLUDE_BOUNDARY_PROPERTY_TYPE=.TRUE.  !< This surface requires surface variables for heat and mass transfer
    LOGICAL :: INCLUDE_BOUNDARY_ONE_D_TYPE=.TRUE.     !< This surface requires in-depth 1-D conduction/reaction arrays
+   LOGICAL :: INCLUDE_BOUNDARY_RADIA_TYPE=.TRUE.     !< This surface requires angular-specific radiation intensities
    INTEGER :: N_WALL_STORAGE_REALS=0,N_WALL_STORAGE_INTEGERS=0,N_WALL_STORAGE_LOGICALS=0
    INTEGER :: N_CFACE_STORAGE_REALS=0,N_CFACE_STORAGE_INTEGERS=0,N_CFACE_STORAGE_LOGICALS=0
    INTEGER :: GEOMETRY,BACKING,PROFILE,HEAT_TRANSFER_MODEL=0
@@ -970,7 +987,7 @@ END TYPE RAD_CFACE_TYPE
 ! Note: If you change the number of scalar variables in CFACE_TYPE, adjust the numbers below
 
 INTEGER, PARAMETER :: N_CFACE_SCALAR_REALS=8
-INTEGER, PARAMETER :: N_CFACE_SCALAR_INTEGERS=11
+INTEGER, PARAMETER :: N_CFACE_SCALAR_INTEGERS=12
 INTEGER, PARAMETER :: N_CFACE_SCALAR_LOGICALS=0
 
 TYPE CFACE_TYPE
@@ -978,6 +995,7 @@ TYPE CFACE_TYPE
    INTEGER :: BC_INDEX=0                 !< Derived type carrying coordinate variables
    INTEGER :: OD_INDEX=0                 !< Derived type carrying 1-D solid info
    INTEGER :: BP_INDEX=0                 !< Derived type carrying most of the surface boundary conditions
+   INTEGER :: BR_INDEX=0                 !< Derived type carrying angular-specific radiation intensities
    INTEGER :: SURF_INDEX=0
    INTEGER :: VENT_INDEX=0
    INTEGER :: BACK_MESH=0

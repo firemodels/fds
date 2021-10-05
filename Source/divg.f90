@@ -157,7 +157,7 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
 
       ! Store max diffusivity for stability check
 
-      IF (CHECK_VN) D_Z_MAX = MAX(D_Z_MAX,RHO_D/RHOP)
+      IF (CHECK_VN) D_Z_MAX = MAX(D_Z_MAX,RHO_D/(RHOP+TWO_EPSILON_EB))
 
       ! Compute rho*D del Z
 
