@@ -18397,6 +18397,13 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
             ELSE
                G%SURFS(I) = SURF_ID_IND(SURFS(I))
             ENDIF
+            ! HERE do tests on surfaces, is not supperted by GEOMs throw error:
+            UNSUPPERTED_SURF_FIELD : IF(SURFACE(G%SURFS(I))%BURN_AWAY) THEN
+               WRITE(MESSAGE,'(5A)') 'ERROR: GEOM: ',TRIM(ID),&
+               ', has currently unsupported BURN_AWAY feature in surface : ',TRIM(SURFACE(G%SURFS(I))%ID),'.'
+               CALL SHUTDOWN(MESSAGE)
+               RETURN
+            ENDIF UNSUPPERTED_SURF_FIELD
          ENDDO
          DEALLOCATE(SURF_ID_IND)
       ELSE
