@@ -4206,18 +4206,23 @@ CASE(INTEGER_THREE)
 
                   ! Loop NOM CUT_FACE array to find BACKING CFACE index:
                   IF(BACK_CFACE_FOUND) THEN
-                     ICFACE=0;
+                     ICFACE=0
                      ICF3_LOOP : DO ICF3=1,MESHES(NOM)%N_CUTFACE_MESH
                         IF(MESHES(NOM)%CUT_FACE(ICF3)%STATUS/=IBM_INBOUNDARY) CYCLE ICF3_LOOP
                         DO JCF3=1,MESHES(NOM)%CUT_FACE(ICF3)%NFACE
-                           ICFACE=ICFACE+1
-                           IF(ICFF==ICF3 .AND. JCF2==JCF3) EXIT ICF3_LOOP
+                           IF(ICFF==ICF3 .AND. JCF2==JCF3) THEN
+                             ICFACE=MESHES(NOM)%CUT_FACE(ICF3)%CFACE_INDEX(JCF3)
+                             EXIT ICF3_LOOP
+                           ENDIF
                         ENDDO
                      ENDDO ICF3_LOOP
 
                      ! Define BACK_MESH, BACK_INDEX:
-                     CFA%BACK_MESH  = NOM
-                     CFA%BACK_INDEX = ICFACE
+
+                     IF (ICFACE>0) THEN
+                        CFA%BACK_MESH  = NOM
+                        CFA%BACK_INDEX = ICFACE
+                     ENDIF
 
                      ! Write error for testing:
                   ELSE
@@ -18411,6 +18416,13 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
             ELSE
                G%SURFS(I) = SURF_ID_IND(SURFS(I))
             ENDIF
+            ! HERE do tests on surfaces, is not supperted by GEOMs throw error:
+            UNSUPPERTED_SURF_FIELD : IF(SURFACE(G%SURFS(I))%BURN_AWAY) THEN
+               WRITE(MESSAGE,'(5A)') 'ERROR: GEOM: ',TRIM(ID),&
+               ', has currently unsupported BURN_AWAY feature in surface : ',TRIM(SURFACE(G%SURFS(I))%ID),'.'
+               CALL SHUTDOWN(MESSAGE)
+               RETURN
+            ENDIF UNSUPPERTED_SURF_FIELD
          ENDDO
          DEALLOCATE(SURF_ID_IND)
       ELSE
