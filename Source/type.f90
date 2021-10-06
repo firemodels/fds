@@ -129,7 +129,7 @@ TYPE LAGRANGIAN_PARTICLE_CLASS_TYPE
    LOGICAL :: EMBER_PARTICLE=.FALSE.                 !< Flag indicating if particles can become flying embers
    LOGICAL :: ADHERE_TO_SOLID=.FALSE.                !< Flag indicating if particles can stick to a solid
    LOGICAL :: INCLUDE_BOUNDARY_COORD_TYPE=.TRUE.     !< This particle requires basic coordinate information
-   LOGICAL :: INCLUDE_BOUNDARY_PROPS_TYPE=.TRUE.  !< This particle requires surface variables for heat and mass transfer
+   LOGICAL :: INCLUDE_BOUNDARY_PROPS_TYPE=.FALSE.    !< This particle requires surface variables for heat and mass transfer
    LOGICAL :: INCLUDE_BOUNDARY_ONE_D_TYPE=.TRUE.     !< This particle requires in-depth 1-D conduction/reaction arrays
    LOGICAL :: INCLUDE_BOUNDARY_RADIA_TYPE=.FALSE.    !< This particle requires angular-specific radiation intensities
 
@@ -185,13 +185,13 @@ END TYPE BOUNDARY_COORD_TYPE
 
 
 !> \brief Variables associated with a WALL, PARTICLE, or CFACE boundary cell
-!> \details If you change the number of scalar variables in ONE_D_M_AND_E_XFER_TYPE, adjust the numbers below
+!> \details If you change the number of scalar variables in BOUNDARY_ONE_D_TYPE_TYPE, adjust the numbers below
 
 INTEGER, PARAMETER :: N_ONE_D_SCALAR_REALS=30
 INTEGER, PARAMETER :: N_ONE_D_SCALAR_INTEGERS=3
 INTEGER, PARAMETER :: N_ONE_D_SCALAR_LOGICALS=1
 
-TYPE ONE_D_M_AND_E_XFER_TYPE
+TYPE BOUNDARY_ONE_D_TYPE_TYPE
 
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: TMP                 !< Temperature in center of each solid cell, \f$ T_{{\rm s},i} \f$
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: LAYER_THICKNESS     !< (1:SF\%N_LAYERS) Thickness of layer (m)
@@ -253,7 +253,7 @@ TYPE ONE_D_M_AND_E_XFER_TYPE
 
    LOGICAL :: BURNAWAY=.FALSE.       !< Indicater if cell can burn away when fuel is exhausted
 
-END TYPE ONE_D_M_AND_E_XFER_TYPE
+END TYPE BOUNDARY_ONE_D_TYPE_TYPE
 
 !> \brief Property variables associated with a WALL or CFACE boundary cell
 !> \details If you change the number of scalar variables in BOUNDARY_PROPS_TYPE, adjust the numbers below
@@ -308,7 +308,7 @@ END TYPE BOUNDARY_RADIA_TYPE
 !> \brief Variables associated with a single Lagrangian particle
 !> \details If you change the number of scalar variables in LAGRANGIAN_PARTICLE_TYPE, adjust the numbers below
 
-INTEGER, PARAMETER :: N_PARTICLE_SCALAR_REALS=16
+INTEGER, PARAMETER :: N_PARTICLE_SCALAR_REALS=14
 INTEGER, PARAMETER :: N_PARTICLE_SCALAR_INTEGERS=14
 INTEGER, PARAMETER :: N_PARTICLE_SCALAR_LOGICALS=4
 
@@ -344,11 +344,9 @@ TYPE LAGRANGIAN_PARTICLE_TYPE
    REAL(EB) :: RE=0._EB            !< Reynolds number based on particle diameter
    REAL(EB) :: MASS=0._EB          !< Particle mass (kg)
    REAL(EB) :: T_INSERT=0._EB      !< Time when particle was inserted (s)
-   REAL(EB) :: DX=0._EB            !< Length scale used in POROUS_DRAG calculation (m)
-   REAL(EB) :: DY=0._EB            !< Length scale used in POROUS_DRAG calculation (m)
-   REAL(EB) :: DZ=0._EB            !< Length scale used in POROUS_DRAG calculation (m)
-   REAL(EB) :: M_DOT=0._EB         !< Particle mass evaporation rate (kg/s)
-   REAL(EB) :: HTC_LIMIT=1.E6_EB   !< Limiter for the heat transfer coefficient (W/m2/K)
+   REAL(EB) :: DX=1.               !< Length factor used in POROUS_DRAG calculation (m)
+   REAL(EB) :: DY=1.               !< Length factor used in POROUS_DRAG calculation (m)
+   REAL(EB) :: DZ=1.               !< Length factor used in POROUS_DRAG calculation (m)
    REAL(EB) :: C_DRAG=0._EB        !< Drag coefficient
 
 END TYPE LAGRANGIAN_PARTICLE_TYPE
@@ -640,19 +638,64 @@ TYPE (MATERIAL_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: MATERIAL
 !> \brief Variables associated with a surface type
 
 TYPE SURFACE_TYPE
+
    REAL(EB) :: AREA_MULTIPLIER=1._EB                     !< Factor for manual surface area adjustment
-   REAL(EB) :: TMP_FRONT=-1._EB,TMP_BACK=-1._EB,TMP_INNER_HT3D=-1._EB,VEL,VEL_GRAD,PLE, &
-               Z0,Z_0,CONVECTIVE_HEAT_FLUX,NET_HEAT_FLUX, &
-               VOLUME_FLOW,HRRPUA,MLRPUA,T_IGN,SURFACE_DENSITY,CELL_SIZE_FACTOR, &
-               E_COEFFICIENT,TEXTURE_WIDTH,TEXTURE_HEIGHT,THICKNESS,EXTERNAL_FLUX, &
-               DXF,DXB,MASS_FLUX_TOTAL,PARTICLE_MASS_FLUX,EMISSIVITY,MAX_PRESSURE, &
-               TMP_IGN,TMP_EXT,H_V,LAYER_DIVIDE,ROUGHNESS,LENGTH=-1._EB,WIDTH=-1._EB, &
-               DT_INSERT,H_FIXED=-1._EB,H_FIXED_B=-1._EB,HM_FIXED=-1._EB,EMISSIVITY_BACK, &
-               CONV_LENGTH,XYZ(3),FIRE_SPREAD_RATE, &
-               MINIMUM_LAYER_THICKNESS,INNER_RADIUS=0._EB,MASS_FLUX_VAR=-1._EB,VEL_BULK,VEL_PART, &
-               PARTICLE_SURFACE_DENSITY=-1._EB,DRAG_COEFFICIENT=2.8_EB,SHAPE_FACTOR=0.25_EB,&
-               MINIMUM_BURNOUT_TIME=1.E6_EB,DELTA_TMP_MAX=10._EB,BURN_DURATION=1.E6_EB,CONE_HEAT_FLUX=-1._EB,&
-               PARTICLE_EXTRACTION_VELOCITY=1.E6_EB
+   REAL(EB) :: TMP_FRONT=-1._EB                          !< Specified front surface temperture (K)
+   REAL(EB) :: TMP_BACK=-1._EB                           !< Specified back surface gas temperature (K)
+   REAL(EB) :: TMP_INNER_HT3D=-1._EB                     !< Specified inner temperature for 3D heating (K)
+   REAL(EB) :: VEL                                       !< Specified normal velocity (m/s)
+   REAL(EB) :: VEL_GRAD
+   REAL(EB) :: PLE                                       !< Exponent for boundary layer velocity profile
+   REAL(EB) :: Z0                                        !< Reference height for boundary layer profile (m)
+   REAL(EB) :: Z_0                                       !< Surface roughness (m)
+   REAL(EB) :: CONVECTIVE_HEAT_FLUX                      !< Specified convective heat flux at surface (W/m2)
+   REAL(EB) :: NET_HEAT_FLUX                             !< Specified net heat flux at surface (W/m2)
+   REAL(EB) :: VOLUME_FLOW                               !< Specified volume flow (m3/s)
+   REAL(EB) :: HRRPUA                                    !< Specified Heat Release Rate Per Unit Volume (W/m3)
+   REAL(EB) :: MLRPUA                                    !< Specified Mass Loss Rate Per Unit Area (kg/m2/s)
+   REAL(EB) :: T_IGN                                     !< Specified ignition time (s)
+   REAL(EB) :: SURFACE_DENSITY                           !< Mass per unit area (kg/m2)
+   REAL(EB) :: CELL_SIZE_FACTOR
+   REAL(EB) :: E_COEFFICIENT
+   REAL(EB) :: TEXTURE_WIDTH
+   REAL(EB) :: TEXTURE_HEIGHT
+   REAL(EB) :: THICKNESS
+   REAL(EB) :: EXTERNAL_FLUX
+   REAL(EB) :: DXF
+   REAL(EB) :: DXB
+   REAL(EB) :: MASS_FLUX_TOTAL
+   REAL(EB) :: PARTICLE_MASS_FLUX
+   REAL(EB) :: EMISSIVITY
+   REAL(EB) :: MAX_PRESSURE
+   REAL(EB) :: TMP_IGN
+   REAL(EB) :: TMP_EXT
+   REAL(EB) :: H_V
+   REAL(EB) :: LAYER_DIVIDE
+   REAL(EB) :: ROUGHNESS
+   REAL(EB) :: LENGTH=-1._EB
+   REAL(EB) :: WIDTH=-1._EB
+   REAL(EB) :: DT_INSERT
+   REAL(EB) :: H_FIXED=-1._EB
+   REAL(EB) :: H_FIXED_B=-1._EB
+   REAL(EB) :: HM_FIXED=-1._EB
+   REAL(EB) :: EMISSIVITY_BACK
+   REAL(EB) :: CONV_LENGTH
+   REAL(EB) :: XYZ(3)
+   REAL(EB) :: FIRE_SPREAD_RATE
+   REAL(EB) :: MINIMUM_LAYER_THICKNESS
+   REAL(EB) :: INNER_RADIUS=0._EB
+   REAL(EB) :: MASS_FLUX_VAR=-1._EB
+   REAL(EB) :: VEL_BULK
+   REAL(EB) :: VEL_PART
+   REAL(EB) :: PARTICLE_SURFACE_DENSITY=-1._EB
+   REAL(EB) :: DRAG_COEFFICIENT=2.8_EB
+   REAL(EB) :: SHAPE_FACTOR=0.25_EB
+   REAL(EB) :: MINIMUM_BURNOUT_TIME=1.E6_EB
+   REAL(EB) :: DELTA_TMP_MAX=10._EB
+   REAL(EB) :: BURN_DURATION=1.E6_EB
+   REAL(EB) :: CONE_HEAT_FLUX=-1._EB
+   REAL(EB) :: PARTICLE_EXTRACTION_VELOCITY=1.E6_EB
+
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: DX,RDX,RDXN,X_S,DX_WGT,MF_FRAC,PARTICLE_INSERT_CLOCK
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: RHO_0
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: MASS_FRACTION,MASS_FLUX,TAU,ADJUST_BURN_RATE,DDSUM,SMALLEST_CELL_SIZE
