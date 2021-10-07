@@ -6853,9 +6853,9 @@ Note also that you can independently control particles that emanate from a solid
 
 \subsubsection{Particles specified using an ember generation height}
 
-If you specify an {\ct EMBER\_GENERATION\_HEIGHT} (m), particles are assumed to represent embers (or firebrands) and are only generated at surfaces that are actively burning (non-zero fuel mass flux). The height parameter dictates the vertical offset distance from the burning surface at which particles are produced. This is important in cases where the vertical fuel structure may not be resolved, such as level set fire spread (Section~\ref{info:level_set}), but the height of ember production plays a role in the lofting potential. If a single number is provided for the {\ct EMBER\_GENERATION\_HEIGHT}, all particles are generated at that offset distance. If two numbers are provided, particles are randomly generated within the specified offset range, following a uniform distribution. For example, if {\ct EMBER\_GENERATION\_HEIGHT=0.0,1.0} then particles will be produced anywhere up to 1.0~m above the burning surface. 
+If you specify an {\ct EMBER\_GENERATION\_HEIGHT} (m), particles are assumed to represent embers (or firebrands) and are only generated at surfaces that are actively burning (non-zero fuel mass flux). The height parameter dictates the vertical offset distance from the burning surface at which particles are produced. This is important in cases where the vertical fuel structure may not be resolved, such as level set fire spread (Section~\ref{info:level_set}), but the height of ember production plays a role in the lofting potential. If a single number is provided for the {\ct EMBER\_GENERATION\_HEIGHT}, all particles are generated at that offset distance. If two numbers are provided, particles are randomly generated within the specified offset range, following a uniform distribution. For example, if {\ct EMBER\_GENERATION\_HEIGHT=0.0,1.0} then particles will be produced anywhere up to 1.0~m above the burning surface.
 
-The rate of ember production can then be set using the method described previously. A number flux can be set using {\ct DT\_INSERT} and {\ct NPPC}, and these particles can be weighted to match a specified {\ct PARTICLE\_MASS\_FLUX}. It is recommended to set {\ct VEL\_PART=0.0} when modeling ember generation in this way, so that particles start from rest and are naturally lofted by the surrounding flow. 
+The rate of ember production can then be set using the method described previously. A number flux can be set using {\ct DT\_INSERT} and {\ct NPPC}, and these particles can be weighted to match a specified {\ct PARTICLE\_MASS\_FLUX}. It is recommended to set {\ct VEL\_PART=0.0} when modeling ember generation in this way, so that particles start from rest and are naturally lofted by the surrounding flow.
 
 \subsubsection{Particles specified using a surface density}
 
@@ -12592,6 +12592,7 @@ Table~\ref{tab:sourcefiles} lists the files that make up the FDS source code. Fi
 \begin{tabular}{|l|l|}
 \hline
 File Name  & Description  \\ \hline \hline
+{\ct ccib.f90}   & Complex computational geometry engine \\ \hline
 {\ct cons.f90}   & Global arrays and constants \\ \hline
 {\ct ctrl.f90}   & Definitions and routines for control functions \\ \hline
 {\ct data.f90}   & Data for output quantities and thermophysical properties\\ \hline
@@ -12601,12 +12602,11 @@ File Name  & Description  \\ \hline \hline
 {\ct evac.f90}   & Egress computations (future capability) \\ \hline
 {\ct fire.f90}   & Combustion routines \\ \hline
 {\ct func.f90}   & Global functions and subroutines \\ \hline
-{\ct geom.f90}   & Routines supporting complex, unstructured geometry (under development) \\ \hline
-{\ct gsmv.f90}   & Routines supporting complex, unstructured geometry (under development) \\ \hline
+{\ct geom.f90}   & Complex geometry physics routines \\ \hline
+{\ct gsmv.f90}   & Complex geometry visualization routines \\ \hline
 {\ct hvac.f90}   & Heating, Ventilation, and Air Conditioning \\ \hline
 {\ct ieva.f90}   & Support routines for evac.f90 \\ \hline
 {\ct init.f90}   & Initialize variables and Poisson solver \\ \hline
-{\ct irad.f90}   & Functions needed for radiation solver, including RadCal \\ \hline
 {\ct main.f90}   & Main program \\ \hline
 {\ct mass.f90}   & Mass equation(s) and thermal boundary conditions \\ \hline
 {\ct mesh.f90}   & Arrays and constants associated with each mesh \\ \hline
@@ -12615,6 +12615,7 @@ File Name  & Description  \\ \hline \hline
 {\ct prec.f90}   & Specification of numerical precision \\ \hline
 {\ct pres.f90}   & Spatial discretization of pressure (Poisson) equation \\ \hline
 {\ct radi.f90}   & Radiation solver  \\ \hline
+{\ct rcal.f90}   & Functions needed for radiation solver, including RadCal \\ \hline
 {\ct read.f90}   & Read input parameters \\ \hline
 {\ct samr.f90}   & Simplified Adaptive Mesh Refinement (under development) \\ \hline
 {\ct scrc.f90}   & Alternative pressure solver (under development) \\ \hline
