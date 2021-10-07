@@ -102,7 +102,7 @@ endif # OS test
 endif # MKLROOT test
 
 obj_mpi = prec.o cons.o devc.o type.o data.o mesh.o func.o gsmv.o smvv.o rcal.o turb.o soot.o \
-          ieva.o pois.o evac.o geom.o ccib.o radi.o part.o vege.o ctrl.o samr.o hvac.o mass.o \
+          ieva.o pois.o evac.o geom.o ccib.o radi.o part.o vege.o ctrl.o hvac.o mass.o \
           wall.o fire.o velo.o scrc.o pres.o init.o dump.o read.o divg.o main.o
 
 objwin_mpi = $(obj_mpi:.o=.obj)
@@ -376,7 +376,6 @@ radi.o : func.o prec.o cons.o type.o mesh.o rcal.o geom.o
 part.o : func.o prec.o cons.o type.o mesh.o devc.o data.o geom.o soot.o
 vege.o : func.o prec.o cons.o type.o mesh.o geom.o
 ctrl.o : prec.o cons.o type.o mesh.o func.o
-samr.o : prec.o cons.o mesh.o turb.o
 hvac.o : func.o prec.o cons.o type.o mesh.o ctrl.o
 mass.o : func.o prec.o cons.o type.o mesh.o turb.o soot.o geom.o ccib.o
 wall.o : func.o prec.o cons.o type.o mesh.o hvac.o mass.o soot.o geom.o ccib.o
@@ -411,7 +410,6 @@ radi.obj : func.obj prec.obj cons.obj type.obj mesh.obj rcal.obj geom.obj
 part.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj data.obj geom.obj soot.obj
 vege.obj : func.obj prec.obj cons.obj type.obj mesh.obj geom.obj
 ctrl.obj : prec.obj cons.obj type.obj mesh.obj func.obj
-samr.obj : prec.obj cons.obj mesh.obj turb.obj
 hvac.obj : func.obj prec.obj cons.obj type.obj mesh.obj ctrl.obj
 mass.obj : func.obj prec.obj cons.obj type.obj mesh.obj turb.obj soot.obj geom.obj ccib.obj
 wall.obj : func.obj prec.obj cons.obj type.obj mesh.obj hvac.obj mass.obj soot.obj geom.obj ccib.obj
