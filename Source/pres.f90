@@ -214,37 +214,37 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
 
          SELECT CASE(IOR)
             CASE( 1)
-               IF (UU(0,J,K)<0._EB) THEN
+               IF (UU(0,J,K)<0._EB .OR. INSEPARABLE_POISSON) THEN
                   BXS(J,K) = P_EXTERNAL/ONE_D%RHO_F + KRES(1,J,K)
                ELSE
                   BXS(J,K) = P_EXTERNAL/ONE_D%RHO_F + H0
                ENDIF
             CASE(-1)
-               IF (UU(IBAR,J,K)>0._EB) THEN
+               IF (UU(IBAR,J,K)>0._EB .OR. INSEPARABLE_POISSON) THEN
                   BXF(J,K) = P_EXTERNAL/ONE_D%RHO_F + KRES(IBAR,J,K)
                ELSE
                   BXF(J,K) = P_EXTERNAL/ONE_D%RHO_F + H0
                ENDIF
             CASE( 2)
-               IF (VV(I,0,K)<0._EB) THEN
+               IF (VV(I,0,K)<0._EB .OR. INSEPARABLE_POISSON) THEN
                   BYS(I,K) = P_EXTERNAL/ONE_D%RHO_F + KRES(I,1,K)
                ELSE
                   BYS(I,K) = P_EXTERNAL/ONE_D%RHO_F + H0
                ENDIF
             CASE(-2)
-               IF (VV(I,JBAR,K)>0._EB) THEN
+               IF (VV(I,JBAR,K)>0._EB .OR. INSEPARABLE_POISSON) THEN
                   BYF(I,K) = P_EXTERNAL/ONE_D%RHO_F + KRES(I,JBAR,K)
                ELSE
                   BYF(I,K) = P_EXTERNAL/ONE_D%RHO_F + H0
                ENDIF
             CASE( 3)
-               IF (WW(I,J,0)<0._EB) THEN
+               IF (WW(I,J,0)<0._EB .OR. INSEPARABLE_POISSON) THEN
                   BZS(I,J) = P_EXTERNAL/ONE_D%RHO_F + KRES(I,J,1)
                ELSE
                   BZS(I,J) = P_EXTERNAL/ONE_D%RHO_F + H0
                ENDIF
             CASE(-3)
-               IF (WW(I,J,KBAR)>0._EB) THEN
+               IF (WW(I,J,KBAR)>0._EB .OR. INSEPARABLE_POISSON) THEN
                   BZF(I,J) = P_EXTERNAL/ONE_D%RHO_F + KRES(I,J,KBAR)
                ELSE
                   BZF(I,J) = P_EXTERNAL/ONE_D%RHO_F + H0
