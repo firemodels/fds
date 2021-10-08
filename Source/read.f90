@@ -537,6 +537,9 @@ USE EVAC, ONLY: N_DOORS, N_EXITS, N_CO_EXITS, EVAC_EMESH_EXITS_TYPE, EMESH_EXITS
                 EMESH_NM, N_DOOR_MESHES, EMESH_NFIELDS, HUMAN_SMOKE_HEIGHT, EVAC_DELTA_SEE, &
                 EMESH_STAIRS, EVAC_EMESH_STAIRS_TYPE, N_STRS, INPUT_EVAC_GRIDS, NO_EVAC_MESHES
 INTEGER, INTENT(IN) :: IMODE
+REAL :: NMESHES_R, N_MPI_PROCESSES_R
+INTEGER :: MESH_COUNTER 
+INTEGER :: MESHES_PER_PROCESS, MIN_PROCESS
 INTEGER :: IJK(3),NM,NM2,CURRENT_MPI_PROCESS,MPI_PROCESS,RGB(3),LEVEL,N_MESH_NEW,N,II,JJ,KK,NMESHES_READ,NNN,NEVAC_MESHES, &
            NMESHES_EVAC, NMESHES_FIRE, NM_EVAC, N_THREADS, JBAR_OLD_VALUE
 INTEGER, ALLOCATABLE, DIMENSION(:) :: NEIGHBOR_LIST
@@ -692,6 +695,7 @@ ENDIF
 
 ALLOCATE(MESHES(NMESHES),STAT=IZERO) ; CALL ChkMemErr('READ','MESHES',IZERO)
 ALLOCATE(PROCESS(NMESHES),STAT=IZERO) ; CALL ChkMemErr('READ','PROCESS',IZERO)
+PROCESS = -1
 ALLOCATE(MESH_NAME(NMESHES),STAT=IZERO) ; CALL ChkMemErr('READ','MESH_NAME',IZERO)
 ALLOCATE(CHANGE_TIME_STEP_INDEX(NMESHES),STAT=IZERO) ; CALL ChkMemErr('READ','CHANGE_TIME_STEP_INDEX',IZERO)
 CHANGE_TIME_STEP_INDEX = 0
@@ -787,24 +791,6 @@ MESH_LOOP: DO N=1,NMESHES_READ
 
             NM = NM + 1
 
-            ! Determine which PROCESS to assign the MESH to
-
-            IF (MPI_PROCESS>-1) THEN
-               CURRENT_MPI_PROCESS = MPI_PROCESS
-               IF (CURRENT_MPI_PROCESS>N_MPI_PROCESSES-1) THEN
-                  IF (N_MPI_PROCESSES > 1) THEN
-                     WRITE(MESSAGE,'(A,I0,A)') 'ERROR: MPI_PROCESS for MESH ',NM,' greater than total number of processes'
-                     CALL SHUTDOWN(MESSAGE) ; RETURN
-                  ELSE
-                     ! Prevents fatal error when testing a run on a single core with MPI_PROCESS set for meshes
-                     WRITE(MESSAGE,'(A,I0,A)') 'WARNING: MPI_PROCESS set for MESH ',NM,' and only one MPI process exists'
-                     IF (MY_RANK==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
-                     CURRENT_MPI_PROCESS=0
-                  ENDIF
-               ENDIF
-            ELSE
-               CURRENT_MPI_PROCESS = MIN(NM-1,N_MPI_PROCESSES-1)
-            ENDIF
 
             ! Fill in MESH related variables
 
@@ -820,6 +806,25 @@ MESH_LOOP: DO N=1,NMESHES_READ
             JBAR_MAX = MAX(JBAR_MAX,M%JBAR)
             KBAR_MAX = MAX(KBAR_MAX,M%KBAR)
             M%N_EXTERNAL_WALL_CELLS = 2*M%IBAR*M%JBAR+2*M%IBAR*M%KBAR+2*M%JBAR*M%KBAR
+
+            ! If the meshes are manually allocated to a particular process set
+            ! that now. If it is not manually allocated we do nothing, and defer
+            ! allocation until later.
+            IF (MPI_PROCESS>-1) THEN
+               IF (MPI_PROCESS>N_MPI_PROCESSES-1) THEN
+                  IF (N_MPI_PROCESSES > 1) THEN
+                     WRITE(MESSAGE,'(A,I0,A)') 'ERROR: MPI_PROCESS for MESH ',NM,' greater than total number of processes'
+                     CALL SHUTDOWN(MESSAGE) ; RETURN
+                  ELSE
+                     ! Prevents fatal error when testing a run on a single core with MPI_PROCESS set for meshes
+                     WRITE(MESSAGE,'(A,I0,A)') 'WARNING: MPI_PROCESS set for MESH ',NM,' and only one MPI process exists'
+                     IF (MY_RANK==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
+                     PROCESS(NM) = 0
+                  ENDIF
+               ELSE
+                  PROCESS(NM) = MPI_PROCESS
+               ENDIF
+            ENDIF
 
             IF (EVACUATION)  EVACUATION_ONLY(NM) = .TRUE.
             IF (EVAC_HUMANS) EVACUATION_SKIP(NM) = .TRUE.
@@ -839,18 +844,6 @@ MESH_LOOP: DO N=1,NMESHES_READ
                WRITE(MESSAGE,'(A)') 'ERROR: IJK(3) must be 1 for all evacuation grids'
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
-
-            ! Associate the MESH with the PROCESS
-
-            IF (MY_RANK==CURRENT_MPI_PROCESS) THEN
-               LOWER_MESH_INDEX = MIN(LOWER_MESH_INDEX,NM)
-               UPPER_MESH_INDEX = MAX(UPPER_MESH_INDEX,NM)
-            ENDIF
-
-            PROCESS(NM) = CURRENT_MPI_PROCESS
-            IF (MY_RANK==0 .AND. VERBOSE) &
-               WRITE(LU_ERR,'(A,I0,A,I0)') ' Mesh ',NM,' is assigned to MPI Process ',PROCESS(NM)
-            IF (EVACUATION_ONLY(NM) .AND. (N_MPI_PROCESSES>1)) EVAC_PROCESS = N_MPI_PROCESSES-1
 
             ! Check the number of OMP threads for a valid value (positive, larger than 0), -1 indicates default unchanged value
             IF (N_THREADS < 1 .AND. N_THREADS /= -1) THEN
@@ -960,6 +953,39 @@ MESH_LOOP: DO N=1,NMESHES_READ
    ENDDO K_MULT_LOOP
 
 ENDDO MESH_LOOP
+
+! Determine which PROCESS to assign the MESH to
+CURRENT_MPI_PROCESS = 0
+NMESHES_R = NMESHES
+N_MPI_PROCESSES_R = N_MPI_PROCESSES
+MESHES_PER_PROCESS = CEILING(NMESHES_R/N_MPI_PROCESSES_R)
+MIN_PROCESS = 0
+MESH_COUNTER = 0
+PROCESS_ALLOCATION_LOOP: DO NM=1,NMESHES
+   IF (MESH_COUNTER >= MESHES_PER_PROCESS) THEN
+      CURRENT_MPI_PROCESS = MIN(CURRENT_MPI_PROCESS+1,N_MPI_PROCESSES)
+      MESH_COUNTER = 0
+   ENDIF
+   ! If a process has already been allocated, we can skip this mesh and bump the
+   ! minimum process id
+   IF (PROCESS(NM)>0) THEN
+      MIN_PROCESS = PROCESS(NM)
+      CYCLE
+   ENDIF
+   ! TODO: some processes won't be touched this way, need to determine if this
+   ! is an issue.
+   PROCESS(NM) = MAX(CURRENT_MPI_PROCESS,MIN_PROCESS)
+   MESH_COUNTER = MESH_COUNTER + 1
+   IF (MY_RANK==CURRENT_MPI_PROCESS) THEN
+      LOWER_MESH_INDEX = MIN(LOWER_MESH_INDEX,NM)
+      UPPER_MESH_INDEX = MAX(UPPER_MESH_INDEX,NM)
+   ENDIF
+
+   IF (MY_RANK==0 .AND. VERBOSE) &
+      WRITE(LU_ERR,'(A,I0,A,I0)') ' Mesh ',NM,' is assigned to MPI Process ',PROCESS(NM)
+   IF (EVACUATION_ONLY(NM) .AND. (N_MPI_PROCESSES>1)) EVAC_PROCESS = N_MPI_PROCESSES-1
+ENDDO PROCESS_ALLOCATION_LOOP
+
 
 NM_EVAC = NM
 IF (DO_EVACUATION) PROCESS(:)=MAX(0,EVAC_PROCESS)
