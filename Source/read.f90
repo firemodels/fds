@@ -537,12 +537,10 @@ USE EVAC, ONLY: N_DOORS, N_EXITS, N_CO_EXITS, EVAC_EMESH_EXITS_TYPE, EMESH_EXITS
                 EMESH_NM, N_DOOR_MESHES, EMESH_NFIELDS, HUMAN_SMOKE_HEIGHT, EVAC_DELTA_SEE, &
                 EMESH_STAIRS, EVAC_EMESH_STAIRS_TYPE, N_STRS, INPUT_EVAC_GRIDS, NO_EVAC_MESHES
 INTEGER, INTENT(IN) :: IMODE
-REAL :: NMESHES_R, N_MPI_PROCESSES_R
-INTEGER :: MESH_COUNTER 
-INTEGER :: MESHES_PER_PROCESS, MIN_PROCESS
 INTEGER :: IJK(3),NM,NM2,CURRENT_MPI_PROCESS,MPI_PROCESS,RGB(3),LEVEL,N_MESH_NEW,N,II,JJ,KK,NMESHES_READ,NNN,NEVAC_MESHES, &
            NMESHES_EVAC, NMESHES_FIRE, NM_EVAC, N_THREADS, JBAR_OLD_VALUE
 INTEGER, ALLOCATABLE, DIMENSION(:) :: NEIGHBOR_LIST
+INTEGER, ALLOCATABLE, DIMENSION(:) :: OMP_THREADS !< Stores the value of the N_THREADS parameter for each mesh for future use.
 LOGICAL :: EVACUATION, EVAC_HUMANS,OVERLAPPING_X,OVERLAPPING_Y,OVERLAPPING_Z,POSSIBLY_PERIODIC,CYLINDRICAL_OLD_VALUE, &
            PERIODIC_FOUND_IN_FILE
 REAL(EB) :: EVAC_Z_OFFSET,XB1,XB2,XB3,XB4,XB5,XB6
@@ -696,6 +694,8 @@ ENDIF
 ALLOCATE(MESHES(NMESHES),STAT=IZERO) ; CALL ChkMemErr('READ','MESHES',IZERO)
 ALLOCATE(PROCESS(NMESHES),STAT=IZERO) ; CALL ChkMemErr('READ','PROCESS',IZERO)
 PROCESS = -1
+ALLOCATE(OMP_THREADS(NMESHES),STAT=IZERO) ; CALL ChkMemErr('READ','OMP_THREADS',IZERO)
+OMP_THREADS = -1
 ALLOCATE(MESH_NAME(NMESHES),STAT=IZERO) ; CALL ChkMemErr('READ','MESH_NAME',IZERO)
 ALLOCATE(CHANGE_TIME_STEP_INDEX(NMESHES),STAT=IZERO) ; CALL ChkMemErr('READ','CHANGE_TIME_STEP_INDEX',IZERO)
 CHANGE_TIME_STEP_INDEX = 0
@@ -791,6 +791,31 @@ MESH_LOOP: DO N=1,NMESHES_READ
 
             NM = NM + 1
 
+            ! If the meshes are manually allocated to a particular process set
+            ! that now. If it is not manually allocated we do nothing, and defer
+            ! allocation until later.
+            IF (MPI_PROCESS>-1) THEN
+               ! Needed for evac
+               CURRENT_MPI_PROCESS = MPI_PROCESS
+               IF (MPI_PROCESS>N_MPI_PROCESSES-1) THEN
+                  IF (N_MPI_PROCESSES > 1) THEN
+                     WRITE(MESSAGE,'(A,I0,A)') 'ERROR: MPI_PROCESS for MESH ',NM,' greater than total number of processes'
+                     CALL SHUTDOWN(MESSAGE) ; RETURN
+                  ELSE
+                     ! Prevents fatal error when testing a run on a single core with MPI_PROCESS set for meshes
+                     WRITE(MESSAGE,'(A,I0,A)') 'WARNING: MPI_PROCESS set for MESH ',NM,' and only one MPI process exists'
+                     IF (MY_RANK==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
+                     ! Needed for evac
+                     CURRENT_MPI_PROCESS = 0
+                     PROCESS(NM) = 0
+                  ENDIF
+               ELSE
+                  PROCESS(NM) = MPI_PROCESS
+               ENDIF
+            ELSE
+               ! Needed for evac
+               CURRENT_MPI_PROCESS = MIN(NM-1,N_MPI_PROCESSES-1)
+            ENDIF
 
             ! Fill in MESH related variables
 
@@ -806,25 +831,6 @@ MESH_LOOP: DO N=1,NMESHES_READ
             JBAR_MAX = MAX(JBAR_MAX,M%JBAR)
             KBAR_MAX = MAX(KBAR_MAX,M%KBAR)
             M%N_EXTERNAL_WALL_CELLS = 2*M%IBAR*M%JBAR+2*M%IBAR*M%KBAR+2*M%JBAR*M%KBAR
-
-            ! If the meshes are manually allocated to a particular process set
-            ! that now. If it is not manually allocated we do nothing, and defer
-            ! allocation until later.
-            IF (MPI_PROCESS>-1) THEN
-               IF (MPI_PROCESS>N_MPI_PROCESSES-1) THEN
-                  IF (N_MPI_PROCESSES > 1) THEN
-                     WRITE(MESSAGE,'(A,I0,A)') 'ERROR: MPI_PROCESS for MESH ',NM,' greater than total number of processes'
-                     CALL SHUTDOWN(MESSAGE) ; RETURN
-                  ELSE
-                     ! Prevents fatal error when testing a run on a single core with MPI_PROCESS set for meshes
-                     WRITE(MESSAGE,'(A,I0,A)') 'WARNING: MPI_PROCESS set for MESH ',NM,' and only one MPI process exists'
-                     IF (MY_RANK==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
-                     PROCESS(NM) = 0
-                  ENDIF
-               ELSE
-                  PROCESS(NM) = MPI_PROCESS
-               ENDIF
-            ENDIF
 
             IF (EVACUATION)  EVACUATION_ONLY(NM) = .TRUE.
             IF (EVAC_HUMANS) EVACUATION_SKIP(NM) = .TRUE.
@@ -850,29 +856,7 @@ MESH_LOOP: DO N=1,NMESHES_READ
                WRITE(MESSAGE, '(A)') 'ERROR: N_THREADS must be at least 1'
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
-
-            ! If OMP number of threads is explicitly set for this mesh and the mesh is assigned to this MPI process,
-            ! then set this value
-            IF (MY_RANK == PROCESS(NM) .AND. N_THREADS > 0) THEN
-               ! Check if OPENMP is active
-               IF (USE_OPENMP .NEQV. .TRUE.) THEN
-                  WRITE(MESSAGE, '(A)') 'ERROR: setting N_THREADS, but OPENMP is not active'
-                  CALL SHUTDOWN(MESSAGE) ; RETURN
-               END IF
-
-               ! Check if the process' thread number was already set in a previous mesh definition
-               IF (OPENMP_USER_SET_THREADS .EQV. .TRUE.) THEN
-                  ! Check if previous definitions are consistent
-                  IF (N_THREADS .NE. OPENMP_USED_THREADS) THEN
-                     WRITE(MESSAGE, '(A)') 'ERROR: N_THREADS not consistent for MPI process'
-                     CALL SHUTDOWN(MESSAGE) ; RETURN
-                  END IF
-               END IF
-
-               ! set the value-changed-flag and the new thread number
-               OPENMP_USER_SET_THREADS = .TRUE.
-               OPENMP_USED_THREADS     = N_THREADS
-            END IF
+            OMP_THREADS(NM) = N_THREADS
 
             ! Mesh boundary colors
 
@@ -954,38 +938,10 @@ MESH_LOOP: DO N=1,NMESHES_READ
 
 ENDDO MESH_LOOP
 
-! Determine which PROCESS to assign the MESH to
-CURRENT_MPI_PROCESS = 0
-NMESHES_R = NMESHES
-N_MPI_PROCESSES_R = N_MPI_PROCESSES
-MESHES_PER_PROCESS = CEILING(NMESHES_R/N_MPI_PROCESSES_R)
-MIN_PROCESS = 0
-MESH_COUNTER = 0
-PROCESS_ALLOCATION_LOOP: DO NM=1,NMESHES
-   IF (MESH_COUNTER >= MESHES_PER_PROCESS) THEN
-      CURRENT_MPI_PROCESS = MIN(CURRENT_MPI_PROCESS+1,N_MPI_PROCESSES)
-      MESH_COUNTER = 0
-   ENDIF
-   ! If a process has already been allocated, we can skip this mesh and bump the
-   ! minimum process id
-   IF (PROCESS(NM)>0) THEN
-      MIN_PROCESS = PROCESS(NM)
-      CYCLE
-   ENDIF
-   ! TODO: some processes won't be touched this way, need to determine if this
-   ! is an issue.
-   PROCESS(NM) = MAX(CURRENT_MPI_PROCESS,MIN_PROCESS)
-   MESH_COUNTER = MESH_COUNTER + 1
-   IF (MY_RANK==CURRENT_MPI_PROCESS) THEN
-      LOWER_MESH_INDEX = MIN(LOWER_MESH_INDEX,NM)
-      UPPER_MESH_INDEX = MAX(UPPER_MESH_INDEX,NM)
-   ENDIF
-
-   IF (MY_RANK==0 .AND. VERBOSE) &
-      WRITE(LU_ERR,'(A,I0,A,I0)') ' Mesh ',NM,' is assigned to MPI Process ',PROCESS(NM)
-   IF (EVACUATION_ONLY(NM) .AND. (N_MPI_PROCESSES>1)) EVAC_PROCESS = N_MPI_PROCESSES-1
-ENDDO PROCESS_ALLOCATION_LOOP
-
+! Determine which PROCESS to assign MESHes to
+CALL ASSIGN_MESHES
+! OMP_THREADS is no longer necessary
+DEALLOCATE(OMP_THREADS)
 
 NM_EVAC = NM
 IF (DO_EVACUATION) PROCESS(:)=MAX(0,EVAC_PROCESS)
@@ -1321,6 +1277,86 @@ ENDIF
 
 RETURN
 END SUBROUTINE DEFINE_EVACUATION_MESHES
+
+! Assign meshes and threads that have not been manually assigned to MPI processes.
+SUBROUTINE ASSIGN_MESHES
+   REAL :: NMESHES_R !< Number of meshes as a real
+   INTEGER :: CURRENT_MPI_PROCESS = 0
+   INTEGER :: MESH_COUNTER = 0 !< The number of meshes assigned to CURRENT_MPI_PROCESS
+   INTEGER :: MIN_PROCESS = 0 !< The minimum process id that the next mesh must be assigned
+   INTEGER :: MESHES_PER_PROCESS !< The number of meshes to assign to each process (approximately)
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: PROCESS_MESHES !< The number of meshes assigned to each process
+
+   ALLOCATE(PROCESS_MESHES(N_MPI_PROCESSES),STAT=IZERO) ; CALL ChkMemErr('READ','PROCESS_MESHES',IZERO)
+   PROCESS_MESHES = 0
+
+   ! Calculate an approximate number of meshes to assign to each process. Note,
+   ! that this does not currently consider the size of each mesh.
+   NMESHES_R = NMESHES
+   MESHES_PER_PROCESS = NINT(NMESHES_R/N_MPI_PROCESSES)
+   DO NM=1,NMESHES
+      IF (MESH_COUNTER >= MESHES_PER_PROCESS) THEN
+         CURRENT_MPI_PROCESS = MIN(CURRENT_MPI_PROCESS+1,N_MPI_PROCESSES-1)
+         MESH_COUNTER = 0
+      ENDIF
+      IF (PROCESS(NM)>0) THEN
+         ! If a process has already been allocated, we can skip this mesh and bump the
+         ! minimum process id
+         MIN_PROCESS = PROCESS(NM)
+      ELSE
+         ! Otherwise assign a process
+         PROCESS(NM) = MAX(CURRENT_MPI_PROCESS,MIN_PROCESS)
+         ! Add one to the number of meshes assigned to this process.
+      ENDIF
+      PROCESS_MESHES(PROCESS(NM)+1) = PROCESS_MESHES(PROCESS(NM)+1) + 1
+      MESH_COUNTER = MESH_COUNTER + 1
+      IF (MY_RANK==PROCESS(NM)) THEN
+         LOWER_MESH_INDEX = MIN(LOWER_MESH_INDEX,NM)
+         UPPER_MESH_INDEX = MAX(UPPER_MESH_INDEX,NM)
+      ENDIF
+
+      ! If OMP number of threads is explicitly set for this mesh and the mesh is assigned to this MPI process,
+      ! then set this value
+      IF (MY_RANK == PROCESS(NM) .AND. OMP_THREADS(NM) > 0) THEN
+         ! Check if OPENMP is active
+         IF (USE_OPENMP .NEQV. .TRUE.) THEN
+            WRITE(MESSAGE, '(A)') 'ERROR: setting N_THREADS, but OPENMP is not active'
+            CALL SHUTDOWN(MESSAGE) ; RETURN
+         END IF
+
+         ! Check if the process' thread number was already set in a previous mesh definition
+         IF (OPENMP_USER_SET_THREADS .EQV. .TRUE.) THEN
+            ! Check if previous definitions are consistent
+            IF (OMP_THREADS(NM) .NE. OPENMP_USED_THREADS) THEN
+               WRITE(MESSAGE, '(A)') 'ERROR: N_THREADS not consistent for MPI process'
+               CALL SHUTDOWN(MESSAGE) ; RETURN
+            END IF
+         END IF
+
+         ! set the value-changed-flag and the new thread number
+         OPENMP_USER_SET_THREADS = .TRUE.
+         OPENMP_USED_THREADS     = OMP_THREADS(NM) 
+      END IF
+   
+      IF (MY_RANK==0 .AND. VERBOSE) &
+         WRITE(LU_ERR,'(A,I0,A,I0)') ' Mesh ',NM,' is assigned to MPI Process ',PROCESS(NM)
+      IF (EVACUATION_ONLY(NM) .AND. (N_MPI_PROCESSES>1)) EVAC_PROCESS = N_MPI_PROCESSES-1
+   ENDDO
+   
+   ! Check that all MPI processes are are assigned at least one mesh. If not, exit
+   ! with an error.
+   DO N=1,N_MPI_PROCESSES
+      IF (MY_RANK==0 .AND. VERBOSE) THEN
+         WRITE(LU_ERR,'(A,I0,A,I0,A)') ' MPI_PROCESS ', N-1,' is assigned ', PROCESS_MESHES(N),' meshes '
+      ENDIF
+      IF (PROCESS_MESHES(N) <= 0) THEN
+         WRITE(MESSAGE,'(A,I0,A)') 'ERROR: MPI_PROCESS ', N-1,' is not assigned any meshes '
+         CALL SHUTDOWN(MESSAGE) ; RETURN
+      ENDIF
+   ENDDO
+   
+   DEALLOCATE(PROCESS_MESHES)
+END SUBROUTINE ASSIGN_MESHES
 
 END SUBROUTINE READ_MESH
 
