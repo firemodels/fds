@@ -1919,6 +1919,7 @@ DO K=1,KBAR
             ZZ(I,J,K,1:N_TRACKED_SPECIES) = RHO_ZZ_G_S(I,J,K,1:N_TRACKED_SPECIES)/RHO(I,J,K)
          ELSE
             ZZ(I,J,K,1:N_TRACKED_SPECIES) = 0._EB
+            RHO(I,J,K) = TWO_EPSILON_EB
          ENDIF
 
       ENDDO
