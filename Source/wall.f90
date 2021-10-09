@@ -1909,22 +1909,12 @@ DO K=1,KBAR
             ZZ(I,J,K,1:N_TRACKED_SPECIES) = RHO_ZZ_G_S(I,J,K,1:N_TRACKED_SPECIES)/RHO(I,J,K)
          ELSE
             ZZ(I,J,K,1:N_TRACKED_SPECIES) = 0._EB
+            RHO(I,J,K) = TWO_EPSILON_EB
          ENDIF
 
       ENDDO
    ENDDO
 ENDDO
-
-! ! stability check
-
-! IF (DT_SUB*VN_MT3D > VN_MAX) THEN
-!    print *, 'VN:', DT_SUB*VN_MT3D
-! ENDIF
-
-! ! debug
-! print *,'ORPHAN METHANE    : ', ORPHAN_METHANE
-! print *,'TOTAL METHANE FLUX: ', TOTAL_METHANE_FLUX
-! print *,'TOTAL METHANE GEN : ', TOTAL_METHANE_GEN
 
 END SUBROUTINE SOLID_MASS_TRANSFER_3D
 
