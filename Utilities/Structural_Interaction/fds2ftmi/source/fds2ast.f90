@@ -171,9 +171,13 @@ LOOP_FDS2AST:DO P=1,COUNTER
    NX=N(P,2)
    NY=N(P,3)
    NZ=N(P,4)
-   IF (ABS(NX)<(MAX(ABS(NY),ABS(NZ))/50)) NX=0
+   IF (ABS(NX)<(MAX(ABS(NY),ABS(NZ))/50)) NX=0 
    IF (ABS(NY)<(MAX(ABS(NX),ABS(NZ))/50)) NY=0
    IF (ABS(NZ)<(MAX(ABS(NY),ABS(NX))/50)) NZ=0
+!* changing to make Zhi cases   
+!   IF (ABS(NX)<(MAX(ABS(NY),ABS(NZ))/6)) NX=0
+!   IF (ABS(NY)<(MAX(ABS(NX),ABS(NZ))/6)) NY=0
+!   IF (ABS(NZ)<(MAX(ABS(NY),ABS(NX))/6)) NZ=0
    N_DIR=0.D0
    IF (NX/=0) N_DIR=N_DIR+1
    IF (NY/=0) N_DIR=N_DIR+1

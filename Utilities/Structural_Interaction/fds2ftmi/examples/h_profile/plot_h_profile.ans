@@ -31,7 +31,7 @@ EPLOT
 /TRIAD,OFF 
 ! /DEV,FONT,LEGEND,MENU 
 /dev,font,1,Arial,400,0,-27,0,0,,,  
-/CONT,1,10,425, ,725
+/CONT,1,10,300, ,600
 /UDOC,1,CNTR,RIGH 
 !*  
 /POST1  

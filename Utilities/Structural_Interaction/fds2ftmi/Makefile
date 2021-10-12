@@ -30,7 +30,7 @@ setup_win:
 # ------------- Win 32 ----------------
 #  32 bit windows
 
-intel_win_32 : FFLAGS    = -O3 /fp:source /CB
+intel_win_32 : FFLAGS    = -O3 /fp:source /CB -fast -qopenmp
 intel_win_32 : FC        = ifort
 intel_win_32 : obj       = fds2ftmi_win_32
 intel_win_32 : setup_win $(objwin)
@@ -50,7 +50,7 @@ intel_win_64 : setup_win $(objwin)
 # ----------- debug Win 64 --------------
 #  64 bit windows
 
-intel_win_64_db : FFLAGS    = /CB -auto -WB -traceback -fltconsistency -stand:f08
+intel_win_64_db : FFLAGS    = /CB -auto -WB -traceback -fltconsistency -stand:f08  
 intel_win_64_db : FC        = ifort
 intel_win_64_db : obj       = fds2ftmi_win_64_db
 

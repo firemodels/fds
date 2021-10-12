@@ -848,6 +848,17 @@ MESH_LOOP: DO N=1,NMESHES_READ
             ENDIF
 
             PROCESS(NM) = CURRENT_MPI_PROCESS
+            IF (NM>1) THEN
+               IF (PROCESS(NM)-PROCESS(NM-1)>1 .OR. PROCESS(NM-1)>PROCESS(NM)) THEN
+                  WRITE(MESSAGE, '(A)') 'ERROR: MPI_PROCESS must be continuous and monotonically increasing'
+                  CALL SHUTDOWN(MESSAGE) ; RETURN
+               ENDIF
+            ELSE
+               IF (PROCESS(NM)/=0) THEN
+                  WRITE(MESSAGE, '(A)') 'ERROR: MESH 1 must be assigned to MPI_PROCESS 0'
+                  CALL SHUTDOWN(MESSAGE) ; RETURN
+               ENDIF
+            ENDIF
             IF (MY_RANK==0 .AND. VERBOSE) &
                WRITE(LU_ERR,'(A,I0,A,I0)') ' Mesh ',NM,' is assigned to MPI Process ',PROCESS(NM)
             IF (EVACUATION_ONLY(NM) .AND. (N_MPI_PROCESSES>1)) EVAC_PROCESS = N_MPI_PROCESSES-1
