@@ -1,14 +1,17 @@
 &HEAD CHID='PMMA_60_kW', TITLE='Parallel Panel Test, PMMA, Propane, 60 kW' /
 
-&MESH IJK=15,20,20, XB=-0.60,-0.30,-0.40,0.00,-0.30,0.10, MULT_ID='mesh' /
-&MULT ID='mesh', DX=0.3, DY=0.4, DZ=0.4, I_UPPER=3, J_UPPER=1, K_UPPER=11 /
+&MULT ID='mesh', DX=0.4, DY=0.4, DZ=0.8, I_UPPER=6, J_UPPER=5, K_UPPER=9 /
+&MESH ID      = 'Mesh',
+      IJK     = 20,20,40,
+      MULT_ID = 'mesh',
+      XB=-1.400000,-1.000000,-1.200000,-0.800000,-0.300000,0.500000 /
 
 &TIME T_END=900.0 /
 
 &REAC SOOT_YIELD=0.022
-      FUEL='MMA' 
-      FORMULA='C5H8O2' 
-      HEAT_OF_COMBUSTION=25610. 
+      FUEL='MMA'
+      FORMULA='C5H8O2'
+      HEAT_OF_COMBUSTION=25610.
       FUEL_RADCAL_ID='MMA' /  4th SFPE Handbook, HoC, Table C.2; Soot, Table 3-4.16
 
 &MATL ID = 'GRAVEL'
@@ -71,7 +74,7 @@
 &MATL ID            = 'STEEL'
       EMISSIVITY    = 0.9
       DENSITY       = 7800.
-      SPECIFIC_HEAT = 0.465        
+      SPECIFIC_HEAT = 0.465
       CONDUCTIVITY  = 43. /
 
 &SURF ID            = 'STEEL'
@@ -99,5 +102,5 @@
 &DUMP DT_SLCF=0.2, DT_BNDF=1., DT_DEVC=15., DT_HRR=15., SIG_FIGS=4, SIG_FIGS_EXP=2 /
 
 &SLCF PBX=0.00 QUANTITY='TEMPERATURE', VECTOR=.TRUE. /
- 
+
 &TAIL /
