@@ -134,16 +134,18 @@ END SUBROUTINE SHUTDOWN
 
 
 !> \brief Return current system memory usage.
-!>
-!> Return the memory used by the given process at the time of the call. It only works on a Linux machine because
-!> it searches for the system file called '/proc/PID/status' and reads the VmRSS value (kB).
+!> \param VALUE_RSS Resident stack size
+!> Return the memory used by the given process at the time of the call. This only works under Linux because
+!> the system file called '/proc/PID/status' is queried for the VmRSS value (kB).
 !> The DEVC output QUANTITY 'RAM' outputs this value in units of MB.
-!> Normally, this routine just returns 0 because it is non-standard Fortran and we have disconnected the GETPID call.
-!> To invoke it, uncomment the GETPID statement, and the 'USE IFPORT' statement if compiling with Intel Fortran.
+!> For non-linux or non-Intel builds, this routine just returns 0 because it is non-standard Fortran and it makes use
+!> of linux system files.
 
 SUBROUTINE SYSTEM_MEM_USAGE(VALUE_RSS)
 
-!USE IFPORT  ! Intel Fortran extension library. This is needed for GETPID.
+#ifdef USE_IFPORT
+   USE IFPORT  ! Intel Fortran extension library. This is needed for GETPID.
+#endif
 INTEGER, INTENT(OUT) :: VALUE_RSS
 CHARACTER(200):: FILENAME=' '
 CHARACTER(80) :: LINE
@@ -154,7 +156,11 @@ LOGICAL :: IFXST
 VALUE_RSS=0  ! return zero if the memory file is not found
 
 PID = 0
-!PID = GETPID() ! GETPID is non-standard Fortran. Leave it commented out for the moment.
+#ifdef USE_IFPORT
+   PID = GETPID() ! GETPID is non-standard Fortran.
+#endif
+
+IF (PID==0) RETURN
 
 WRITE(PID_CHAR,'(I8)') PID
 FILENAME = '/proc/'//TRIM(ADJUSTL(PID_CHAR))//'/status'
