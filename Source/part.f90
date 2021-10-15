@@ -318,8 +318,6 @@ SPRINKLER_INSERT_LOOP: DO KS=1,N_DEVC
       PARTICLE_TAG = PARTICLE_TAG + NMESHES
       LP%TAG = PARTICLE_TAG
       LP%T_INSERT = T
-      CALL RANDOM_NUMBER(RN)
-      IF (RN < 1._EB/REAL(LPC%SAMPLING_FACTOR,EB)) LP%SHOW = .TRUE.
 
       ! Randomly choose particle direction angles, theta and phi
 
@@ -715,8 +713,6 @@ ILPC_IF: IF (ILPC > 0) THEN
 
          ! Save the insertion time (TP) and scalar property (SP) for the particle
 
-         CALL RANDOM_NUMBER(RN)
-         IF (RN < 1._EB/REAL(LPC%SAMPLING_FACTOR,EB)) LP%SHOW = .TRUE.
          LP%T_INSERT = T
 
          CALL INITIALIZE_SINGLE_PARTICLE
@@ -893,8 +889,6 @@ N_LPC_IF: IF (SF%N_LPC>0) THEN
 
          ! Save the insertion time (TP) and scalar property (SP) for the particle
 
-         CALL RANDOM_NUMBER(RN)
-         IF (RN < 1._EB/REAL(LPC%SAMPLING_FACTOR,EB)) LP%SHOW = .TRUE.
          LP%T_INSERT = T
 
          CALL INITIALIZE_SINGLE_PARTICLE
@@ -1336,8 +1330,6 @@ ENDIF
 ! Save insert time and other miscellaneous attributes
 
 LP%T_INSERT = T
-CALL RANDOM_NUMBER(RN)
-IF (RN < 1._EB/REAL(LPC%SAMPLING_FACTOR,EB)) LP%SHOW = .TRUE.
 
 ! Get the particle ORIENTATION from the PART line
 
@@ -1389,6 +1381,20 @@ REAL(EB) :: X1,X2,AREA,LENGTH,SCALE_FACTOR,RADIUS,MPUA,LP_VOLUME,X_POS
 INTEGER :: N,I
 TYPE(BOUNDARY_ONE_D_TYPE_TYPE), POINTER :: LP_ONE_D
 TYPE(SURFACE_TYPE), POINTER :: LP_SF
+
+LP%PWT  = 1._EB
+LP%ACCEL_X = 0._EB
+LP%ACCEL_Y = 0._EB
+LP%ACCEL_Z = 0._EB
+LP%RE = 0._EB
+LP%C_DRAG = 0._EB
+
+CALL RANDOM_NUMBER(RN)
+IF (RN < 1._EB/REAL(LPC%SAMPLING_FACTOR,EB)) THEN
+   LP%SHOW = .TRUE.
+ELSE
+   LP%SHOW = .FALSE.
+ENDIF
 
 IF (LPC%MASSLESS_TRACER) RETURN
 
