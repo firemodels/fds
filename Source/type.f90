@@ -188,24 +188,24 @@ END TYPE BOUNDARY_COORD_TYPE
 !> \details If you change the number of scalar variables in BOUNDARY_ONE_D_TYPE_TYPE, adjust the numbers below
 
 INTEGER, PARAMETER :: N_ONE_D_SCALAR_REALS=30
-INTEGER, PARAMETER :: N_ONE_D_SCALAR_INTEGERS=3
+INTEGER, PARAMETER :: N_ONE_D_SCALAR_INTEGERS=4
 INTEGER, PARAMETER :: N_ONE_D_SCALAR_LOGICALS=1
 
 TYPE BOUNDARY_ONE_D_TYPE_TYPE
 
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: TMP                 !< Temperature in center of each solid cell, \f$ T_{{\rm s},i} \f$
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: LAYER_THICKNESS     !< (1:SF\%N_LAYERS) Thickness of layer (m)
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: X                   !< (0:NWP) Depth (m), \f$ x_{{\rm s},i} \f$
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: M_DOT_G_PP_ACTUAL   !< (1:N_TRACKED_SPECIES) Actual mass production rate per unit area
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: M_DOT_S_PP          !< (1:SF\%N_MATL) Mass production rate of solid species
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: M_DOT_G_PP_ADJUST   !< (1:N_TRACKED_SPECIES) Adjusted mass production rate per unit area
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: X                   !< (0:NWP) Depth (m), \f$ x_{{\rm s},i} \f$
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: TMP                 !< Temperature in center of each solid cell, \f$ T_{{\rm s},i} \f$
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: LAYER_THICKNESS     !< (1:SF\%N_LAYERS) Thickness of layer (m)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_G                !< (1:N_TRACKED_SPECIES) Species mixture mass fraction in gas
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_F                !< (1:N_TRACKED_SPECIES) Species mixture mass fraction at surface
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHO_D_F             !< (1:N_TRACKED_SPECIES) Diffusion at surface, \f$ \rho D_\alpha \f$
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHO_D_DZDN_F        !< \f$ \rho D_\alpha \partial Z_\alpha / \partial n \f$
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: AWM_AEROSOL         !< Accumulated aerosol mass per unit area (kg/m2)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHO_C_S             !< Solid density times specific heat (J/m3/K)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: K_S                 !< Solid conductivity (W/m/K)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: AWM_AEROSOL         !< Accumulated aerosol mass per unit area (kg/m2)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: DDSUM               !< Scaling factor to get minimum cell size
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: SMALLEST_CELL_SIZE  !< Minimum cell size (m)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: PART_MASS           !< Accumulated mass of particles waiting to be injected (kg/m2)
@@ -216,6 +216,7 @@ TYPE BOUNDARY_ONE_D_TYPE_TYPE
 
    INTEGER, ALLOCATABLE, DIMENSION(:) :: N_LAYER_CELLS              !< (1:SF\%N_LAYERS) Number of cells in the layer
 
+   INTEGER :: SURF_INDEX=-1    !< SURFACE index
    INTEGER :: PRESSURE_ZONE=0  !< Pressure ZONE of the adjacent gas phase cell
    INTEGER :: NODE_INDEX=0     !< HVAC node index associated with surface
    INTEGER :: N_SUBSTEPS=1     !< Number of substeps in the 1-D conduction/reaction update
@@ -259,7 +260,7 @@ END TYPE BOUNDARY_ONE_D_TYPE_TYPE
 !> \details If you change the number of scalar variables in BOUNDARY_PROPS_TYPE, adjust the numbers below
 
 INTEGER, PARAMETER :: N_BOUNDARY_PROPS_SCALAR_REALS=8
-INTEGER, PARAMETER :: N_BOUNDARY_PROPS_SCALAR_INTEGERS=0
+INTEGER, PARAMETER :: N_BOUNDARY_PROPS_SCALAR_INTEGERS=1
 INTEGER, PARAMETER :: N_BOUNDARY_PROPS_SCALAR_LOGICALS=0
 INTEGER, DIMENSION(10) :: BOUNDARY_PROPS_REALS_ARRAY_SIZE=0, &
                           BOUNDARY_PROPS_INTEGERS_ARRAY_SIZE=0, &
@@ -281,6 +282,8 @@ TYPE BOUNDARY_PROPS_TYPE
    REAL(EB) :: WORK2=0._EB           !< Work array
    REAL(EB) :: K_SUPPRESSION=0._EB   !< Suppression coefficent (m2/kg/s)
    REAL(EB) :: L_OBUKHOV=0._EB       !< Obukhov length (m)
+
+   INTEGER  :: SURF_INDEX=-1         !< Surface index
 
 END TYPE BOUNDARY_PROPS_TYPE
 
