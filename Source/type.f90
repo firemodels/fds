@@ -185,13 +185,13 @@ END TYPE BOUNDARY_COORD_TYPE
 
 
 !> \brief Variables associated with a WALL, PARTICLE, or CFACE boundary cell
-!> \details If you change the number of scalar variables in BOUNDARY_ONE_D_TYPE_TYPE, adjust the numbers below
+!> \details If you change the number of scalar variables in BOUNDARY_ONE_D_TYPE, adjust the numbers below
 
 INTEGER, PARAMETER :: N_ONE_D_SCALAR_REALS=30
 INTEGER, PARAMETER :: N_ONE_D_SCALAR_INTEGERS=4
 INTEGER, PARAMETER :: N_ONE_D_SCALAR_LOGICALS=1
 
-TYPE BOUNDARY_ONE_D_TYPE_TYPE
+TYPE BOUNDARY_ONE_D_TYPE
 
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: M_DOT_G_PP_ACTUAL   !< (1:N_TRACKED_SPECIES) Actual mass production rate per unit area
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: M_DOT_S_PP          !< (1:SF\%N_MATL) Mass production rate of solid species
@@ -254,7 +254,7 @@ TYPE BOUNDARY_ONE_D_TYPE_TYPE
 
    LOGICAL :: BURNAWAY=.FALSE.       !< Indicater if cell can burn away when fuel is exhausted
 
-END TYPE BOUNDARY_ONE_D_TYPE_TYPE
+END TYPE BOUNDARY_ONE_D_TYPE
 
 !> \brief Property variables associated with a WALL or CFACE boundary cell
 !> \details If you change the number of scalar variables in BOUNDARY_PROPS_TYPE, adjust the numbers below
