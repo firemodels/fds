@@ -10830,7 +10830,6 @@ REAL(EB), POINTER, DIMENSION(:,:,:) :: HP
 REAL(EB):: U_IBM,V_IBM,W_IBM,DUUDT,DVVDT,DWWDT,RFODT,TNOW,FCT,DHFCT,UN,AFCT
 INTEGER :: I,J,K,II,JJ,KK,IOR,IW,ICF,X1AXIS,NOM
 REAL(EB), PARAMETER :: A_THRESH_FORCING = 0.001_EB
-LOGICAL :: GLMAT_ON_WHOLE_DOMAIN
 
 ! This is the CCIBM forcing routine for momentum eqns.
 
@@ -10994,7 +10993,6 @@ ELSE FORCE_IF
 
 ! Here for External CFACEs use the unstructured acceleration in defining F:
 CC_UNSTRUCTURED_FDIV_COND : IF (CC_UNSTRUCTURED_FDIV) THEN
-   GLMAT_ON_WHOLE_DOMAIN = (PRES_METHOD=='GLMAT') .AND. PRES_ON_WHOLE_DOMAIN
    EXT_CFACE_LOOP : DO ICF=1,N_EXTERNAL_CFACE_CELLS
       CFA=>CFACE(ICF)
       ONE_D => BOUNDARY_ONE_D(CFA%OD_INDEX)
@@ -11009,7 +11007,10 @@ CC_UNSTRUCTURED_FDIV_COND : IF (CC_UNSTRUCTURED_FDIV) THEN
       IOR = BC%IOR
 
       DHFCT=1._EB
-      IF ( (.NOT. PRES_ON_WHOLE_DOMAIN) .OR. (GLMAT_ON_WHOLE_DOMAIN .AND.  IW<=N_EXTERNAL_WALL_CELLS) ) DHFCT=0._EB
+      SELECT CASE(PRES_FLAG)
+         CASE(UGLMAT_FLAG,USCARC_FLAG); DHFCT=0._EB
+         CASE(GLMAT_FLAG); IF (IW<=N_EXTERNAL_WALL_CELLS) DHFCT=0._EB
+      END SELECT
       IF (NOM/=0 .OR. CFA%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. CFA%BOUNDARY_TYPE==NULL_BOUNDARY) THEN
          IF (PREDICTOR) THEN
             UN = -SIGN(1._EB,REAL(IOR,EB))*ONE_D%U_NORMAL_S
@@ -17477,7 +17478,7 @@ MAIN_MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    CALL POINT_TO_MESH(NM)
 
    ! Now Pressure:
-   if ( PRES_ON_WHOLE_DOMAIN ) CYCLE ! No need to build matrix this way, i.e. fft solver/structured solve
+   IF ( PRES_ON_WHOLE_DOMAIN ) CYCLE ! No need to build matrix this way, i.e. fft solver/structured solve
                                      ! will be used for pressure.
 
    DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
@@ -17781,8 +17782,10 @@ INTEGER :: IW,II,JJ,KK,IIF,JJF,KKF,IOR,LOWHIGH_TEST,IIG,JJG,KKG
 LOGICAL :: FLGIN
 
 ! Test for Pressure Solver:
-IF ( (PRES_METHOD /= "GLMAT") .OR. (PRES_ON_WHOLE_DOMAIN) ) RETURN ! No need to build matrix as
-                                                                   ! unstructured.
+SELECT CASE(PRES_FLAG)
+   CASE DEFAULT; RETURN ! no need to build unstructured matrix
+   CASE (UGLMAT_FLAG,ULMAT_FLAG)
+END SELECT
 
 ! Mesh sizes:
 NXB=IBAR; NYB=JBAR; NZB=KBAR

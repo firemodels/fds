@@ -8999,6 +8999,7 @@ SELECT CASE(TRIM(SOLVER))
 
    CASE('USCARC')
       PRES_METHOD = 'USCARC'
+      PRES_FLAG   = USCARC_FLAG
       PRES_ON_WHOLE_DOMAIN = .FALSE.
       IF (INSEPARABLE_POISSON) BAROCLINIC = .FALSE.                ! Don't perform baroclinic correction in inseparable Poisson mode
       IF (SCARC_METHOD == 'NONE') SCARC_METHOD = 'KRYLOV'          ! Use Krylov as default solver for USCARC
@@ -9007,6 +9008,7 @@ SELECT CASE(TRIM(SOLVER))
 
    CASE('SCARC')
       PRES_METHOD = 'SCARC'
+      PRES_FLAG   = SCARC_FLAG
       PRES_ON_WHOLE_DOMAIN = .TRUE.
       IF (INSEPARABLE_POISSON) BAROCLINIC = .FALSE.                ! Don't perform baroclinic correction in inseparable Poisson mode
       IF (SCARC_METHOD == 'NONE') SCARC_METHOD = 'KRYLOV'          ! Use Krylov default solver for SCARC
@@ -9014,19 +9016,24 @@ SELECT CASE(TRIM(SOLVER))
       IF (SCARC_MATRIX == 'NONE') SCARC_MATRIX = 'BANDWISE'        ! Use bandwise matrix storage technique
 
    CASE('UGLMAT')
-      PRES_METHOD = 'GLMAT'
-      GLMAT_SOLVER = .TRUE.
+      PRES_METHOD = 'UGLMAT'
+      PRES_FLAG   = UGLMAT_FLAG
       PRES_ON_WHOLE_DOMAIN = .FALSE.
       IF (CHECK_POISSON) GLMAT_VERBOSE=.TRUE.
 
    CASE('GLMAT')
       PRES_METHOD = 'GLMAT'
-      GLMAT_SOLVER = .TRUE.
+      PRES_FLAG   = GLMAT_FLAG
       PRES_ON_WHOLE_DOMAIN = .TRUE.
       IF (CHECK_POISSON) GLMAT_VERBOSE=.TRUE.
 
+   CASE('ULMAT')
+      PRES_METHOD = 'ULMAT'
+      PRES_FLAG   = ULMAT_FLAG
+      PRES_ON_WHOLE_DOMAIN = .FALSE.
+
    CASE('FFT')
-      ! Nothing to do. By default PRES_METHOD is set to 'FFT' in cons.f90
+      ! Nothing to do. By default PRES_FLAG is set to FFT_FLAG in cons.f90
    CASE DEFAULT
       ! Here the user added an unknown name to SOLVER, stop:
       CALL SHUTDOWN('ERROR: Pressure solver '//TRIM(SOLVER)//' not known.') ; RETURN
