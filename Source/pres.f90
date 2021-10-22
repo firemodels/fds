@@ -983,7 +983,8 @@ MODULE LOCMAT_SOLVER
 
 ! Unstructured Poisson solver with Pardiso by MESH
 ! Using this solver eliminates penetration errors on solid boundaries,
-! but still requires iteration to reduce mesh-to-mesh velocity errors
+! but still requires iteration to reduce mesh-to-mesh velocity errors.
+! This solver allows for coarse-fine mesh interfaces (GLMAT does not).
 
 USE PRECISION_PARAMETERS
 USE GLOBAL_CONSTANTS
@@ -991,10 +992,166 @@ USE MESH_VARIABLES
 USE MESH_POINTERS
 
 #ifdef WITH_MKL
-USE MKL_CLUSTER_SPARSE_SOLVER
+USE MKL_PARDISO
 #endif /* WITH_MKL */
 
 IMPLICIT NONE (TYPE,EXTERNAL)
+
+PRIVATE
+
+PUBLIC ULMAT_SOLVER_H
+
+CONTAINS
+
+
+SUBROUTINE ULMAT_SOLVER_H
+
+!.. Internal solver memory pointer
+TYPE(MKL_PARDISO_HANDLE), ALLOCATABLE  :: PT(:)
+!.. All other variables
+INTEGER MAXFCT, MNUM, MTYPE, PHASE, N, NRHS, ERROR, MSGLVL, NNZ
+INTEGER ERROR1
+INTEGER, ALLOCATABLE :: IPARM( : )
+INTEGER, ALLOCATABLE :: IA( : )
+INTEGER, ALLOCATABLE :: JA( : )
+REAL(EB), ALLOCATABLE :: A( : )
+REAL(EB), ALLOCATABLE :: B( : )
+REAL(EB), ALLOCATABLE :: X( : )
+INTEGER :: I, IDUM(1)
+REAL(EB) :: DDUM(1)
+
+!.. Fill all arrays containing matrix data.
+N = 8
+NNZ = 18
+NRHS = 1
+MAXFCT = 1
+MNUM = 1
+ALLOCATE(IA(N + 1))
+IA = (/ 1, 5, 8, 10, 12, 15, 17, 18, 19 /)
+ALLOCATE(JA(NNZ))
+JA = (/ 1,    3,       6, 7,    &
+           2, 3,    5,          &
+              3,             8, &
+                 4,       7,    &
+                    5, 6, 7,    &
+                       6,    8, &
+                          7,    &
+                             8 /)
+ALLOCATE(A(NNZ))
+A = (/ 7._EB,        1._EB,              2._EB,  7._EB,         &
+             -4._EB, 8._EB,       2._EB,                        &
+                     1._EB,                             5._EB,  &
+                           7._EB,                9._EB,         &
+                                  5._EB, 1._EB,  5._EB,         &
+                                        -1._EB,         5._EB,  &
+                                                11._EB,         &
+                                                        5._EB /)
+ALLOCATE(B(N))
+ALLOCATE(X(N))
+!..
+!.. SET UP PARDISO CONTROL PARAMETER
+!..
+ALLOCATE(IPARM(64))
+
+DO I = 1, 64
+   IPARM(I) = 0
+END DO
+
+IPARM(1) = 1   ! no solver default
+IPARM(2) = 2   ! fill-in reordering from METIS
+IPARM(4) = 0   ! no iterative-direct algorithm
+IPARM(5) = 0   ! no user fill-in reducing permutation
+IPARM(6) = 0   ! =0 solution on the first n components of x
+IPARM(8) = 2   ! numbers of iterative refinement steps
+IPARM(10) = 13 ! perturb the pivot elements with 1E-13
+IPARM(11) = 1  ! use nonsymmetric permutation and scaling MPS
+IPARM(13) = 0  ! maximum weighted matching algorithm is switched-off (default for symmetric).
+               ! Try IPARM(13) = 1 in case of inappropriate accuracy
+IPARM(14) = 0  ! Output: number of perturbed pivots
+IPARM(18) = -1 ! Output: number of nonzeros in the factor LU
+IPARM(19) = -1 ! Output: Mflops for LU factorization
+IPARM(20) = 0  ! Output: Numbers of CG Iterations
+
+ERROR  = 0     ! initialize error flag
+MSGLVL = 1     ! print statistical information
+MTYPE  = -2    ! symmetric, indefinite
+
+!.. Initialize the internal solver memory pointer. This is only
+! necessary for the FIRST call of the PARDISO solver.
+
+ALLOCATE (PT(64))
+DO I = 1, 64
+   PT(I)%DUMMY = 0
+END DO
+
+!.. Reordering and Symbolic Factorization, This step also allocates
+! all memory that is necessary for the factorization
+
+PHASE = 11 ! only reordering and symbolic factorization
+
+CALL PARDISO (PT, MAXFCT, MNUM, MTYPE, PHASE, N, A, IA, JA, &
+              IDUM, NRHS, IPARM, MSGLVL, DDUM, DDUM, ERROR)
+
+WRITE(LU_ERR,*) 'Reordering completed ... '
+IF (ERROR /= 0) THEN
+   WRITE(LU_ERR,*) 'The following ERROR was detected: ', ERROR
+   GOTO 1000
+END IF
+WRITE(LU_ERR,*) 'Number of nonzeros in factors = ',IPARM(18)
+WRITE(LU_ERR,*) 'Number of factorization MFLOPS = ',IPARM(19)
+
+!.. Factorization.
+PHASE = 22 ! only factorization
+CALL PARDISO (PT, MAXFCT, MNUM, MTYPE, PHASE, N, A, IA, JA, &
+              IDUM, NRHS, IPARM, MSGLVL, DDUM, DDUM, ERROR)
+WRITE(LU_ERR,*) 'Factorization completed ... '
+IF (ERROR /= 0) THEN
+   WRITE(LU_ERR,*) 'The following ERROR was detected: ', ERROR
+   GOTO 1000
+ENDIF
+
+!.. Back substitution and iterative refinement
+IPARM(8) = 2 ! max numbers of iterative refinement steps
+PHASE = 33   ! only solving
+DO I = 1, N
+   B(I) = 1._EB
+END DO
+CALL PARDISO (PT, MAXFCT, MNUM, MTYPE, PHASE, N, A, IA, JA, &
+              IDUM, NRHS, IPARM, MSGLVL, B, X, ERROR)
+WRITE(LU_ERR,*) 'Solve completed ... '
+IF (ERROR /= 0) THEN
+   WRITE(LU_ERR,*) 'The following ERROR was detected: ', ERROR
+   GOTO 1000
+ENDIF
+WRITE(LU_ERR,*) 'The solution of the system is '
+DO I = 1, N
+   WRITE(LU_ERR,*) ' x(',I,') = ', X(I)
+END DO
+
+1000 CONTINUE
+!.. Termination and release of memory
+PHASE = -1 ! release internal memory
+CALL PARDISO (PT, MAXFCT, MNUM, MTYPE, PHASE, N, DDUM, IDUM, IDUM, &
+              IDUM, NRHS, IPARM, MSGLVL, DDUM, DDUM, ERROR1)
+
+IF (ALLOCATED(IA))      DEALLOCATE(IA)
+IF (ALLOCATED(JA))      DEALLOCATE(JA)
+IF (ALLOCATED(A))       DEALLOCATE(A)
+IF (ALLOCATED(B))       DEALLOCATE(B)
+IF (ALLOCATED(X))       DEALLOCATE(X)
+IF (ALLOCATED(IPARM))   DEALLOCATE(IPARM)
+
+IF (ERROR1 /= 0) THEN
+   WRITE(LU_ERR,*) 'The following ERROR on release stage was detected: ', ERROR1
+   STOP 1
+ENDIF
+
+IF (ERROR /= 0) STOP 1
+
+
+STOP_STATUS=SETUP_STOP ! on testing
+END SUBROUTINE ULMAT_SOLVER_H
+
 
 END MODULE LOCMAT_SOLVER
 
