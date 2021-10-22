@@ -8999,19 +8999,19 @@ SELECT CASE(TRIM(SOLVER))
       PRES_METHOD = 'USCARC'
       PRES_FLAG   = USCARC_FLAG
       PRES_ON_WHOLE_DOMAIN = .FALSE.
-      IF (INSEPARABLE_POISSON) BAROCLINIC = .FALSE.                ! Don't perform baroclinic correction in inseparable Poisson mode
-      IF (SCARC_METHOD == 'NONE') SCARC_METHOD = 'KRYLOV'          ! Use Krylov as default solver for USCARC
-      IF (SCARC_PRECON == 'NONE') SCARC_PRECON = 'PARDISO'         ! Use PARDISO as default preconditioner for USCARC
-      IF (SCARC_MATRIX == 'NONE') SCARC_MATRIX = 'COMPACT'         ! Use compact matrix storage technique
+      IF (INSEPARABLE_POISSON) BAROCLINIC = .FALSE.          ! Don't perform baroclinic correction in inseparable Poisson mode
+      IF (SCARC_METHOD == 'NONE') SCARC_METHOD = 'KRYLOV'    ! Use Krylov as default solver for USCARC
+      IF (SCARC_PRECON == 'NONE') SCARC_PRECON = 'PARDISO'   ! Use PARDISO as default preconditioner for USCARC
+      IF (SCARC_MATRIX == 'NONE') SCARC_MATRIX = 'COMPACT'   ! Use compact matrix storage technique
 
    CASE('SCARC')
       PRES_METHOD = 'SCARC'
       PRES_FLAG   = SCARC_FLAG
       PRES_ON_WHOLE_DOMAIN = .TRUE.
-      IF (INSEPARABLE_POISSON) BAROCLINIC = .FALSE.                ! Don't perform baroclinic correction in inseparable Poisson mode
-      IF (SCARC_METHOD == 'NONE') SCARC_METHOD = 'KRYLOV'          ! Use Krylov default solver for SCARC
-      IF (SCARC_PRECON == 'NONE') SCARC_PRECON = 'FFT'             ! Use FFT as default preconditioner for SCARC
-      IF (SCARC_MATRIX == 'NONE') SCARC_MATRIX = 'BANDWISE'        ! Use bandwise matrix storage technique
+      IF (INSEPARABLE_POISSON) BAROCLINIC = .FALSE.          ! Don't perform baroclinic correction in inseparable Poisson mode
+      IF (SCARC_METHOD == 'NONE') SCARC_METHOD = 'KRYLOV'    ! Use Krylov default solver for SCARC
+      IF (SCARC_PRECON == 'NONE') SCARC_PRECON = 'FFT'       ! Use FFT as default preconditioner for SCARC
+      IF (SCARC_MATRIX == 'NONE') SCARC_MATRIX = 'BANDWISE'  ! Use bandwise matrix storage technique
 
    CASE('UGLMAT')
       PRES_METHOD = 'UGLMAT'
