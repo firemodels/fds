@@ -982,10 +982,6 @@ USE GLOBAL_CONSTANTS
 USE MESH_VARIABLES
 USE MESH_POINTERS
 
-#ifdef WITH_MKL
-USE MKL_PARDISO
-#endif /* WITH_MKL */
-
 IMPLICIT NONE (TYPE,EXTERNAL)
 
 PRIVATE
@@ -997,27 +993,28 @@ CONTAINS
 
 SUBROUTINE ULMAT_SOLVER_H
 
-!.. Internal solver memory pointer
-TYPE(MKL_PARDISO_HANDLE), ALLOCATABLE  :: PT(:)
 !.. All other variables
-INTEGER MAXFCT, MNUM, MTYPE, PHASE, N, NRHS, ERROR, MSGLVL, NNZ
-INTEGER ERROR1
+INTEGER MAXFCT, MNUM, MTYPE, PHASE, NRHS, MSGLVL, NNZ
+INTEGER ERROR1, ERROR
 INTEGER, ALLOCATABLE :: IPARM( : )
 INTEGER, ALLOCATABLE :: IA( : )
 INTEGER, ALLOCATABLE :: JA( : )
-REAL(EB), ALLOCATABLE :: A( : )
-REAL(EB), ALLOCATABLE :: B( : )
-REAL(EB), ALLOCATABLE :: X( : )
+REAL(EB), ALLOCATABLE :: A_H( : )
+REAL(EB), ALLOCATABLE :: F_H( : )
+REAL(EB), ALLOCATABLE :: X_H( : )
 INTEGER :: I, IDUM(1)
 REAL(EB) :: DDUM(1)
+TYPE(ZONE_MESH_TYPE), POINTER :: ZM
+
+ZM=>MESHES(1)%ZONE_MESH(1)
 
 !.. Fill all arrays containing matrix data.
-N = 8
+ZM%NUNKH = 8
 NNZ = 18
 NRHS = 1
 MAXFCT = 1
 MNUM = 1
-ALLOCATE(IA(N + 1))
+ALLOCATE(IA(ZM%NUNKH + 1))
 IA = (/ 1, 5, 8, 10, 12, 15, 17, 18, 19 /)
 ALLOCATE(JA(NNZ))
 JA = (/ 1,    3,       6, 7,    &
@@ -1028,17 +1025,17 @@ JA = (/ 1,    3,       6, 7,    &
                        6,    8, &
                           7,    &
                              8 /)
-ALLOCATE(A(NNZ))
-A = (/ 7._EB,        1._EB,              2._EB,  7._EB,         &
-             -4._EB, 8._EB,       2._EB,                        &
-                     1._EB,                             5._EB,  &
-                           7._EB,                9._EB,         &
-                                  5._EB, 1._EB,  5._EB,         &
-                                        -1._EB,         5._EB,  &
-                                                11._EB,         &
-                                                        5._EB /)
-ALLOCATE(B(N))
-ALLOCATE(X(N))
+ALLOCATE(A_H(NNZ))
+A_H = (/ 7._EB,        1._EB,              2._EB,  7._EB,         &
+               -4._EB, 8._EB,       2._EB,                        &
+                       1._EB,                             5._EB,  &
+                             7._EB,                9._EB,         &
+                                    5._EB, 1._EB,  5._EB,         &
+                                          -1._EB,         5._EB,  &
+                                                  11._EB,         &
+                                                          5._EB /)
+ALLOCATE(F_H(ZM%NUNKH))
+ALLOCATE(X_H(ZM%NUNKH))
 !..
 !.. SET UP PARDISO CONTROL PARAMETER
 !..
@@ -1070,18 +1067,17 @@ MTYPE  = -2    ! symmetric, indefinite
 !.. Initialize the internal solver memory pointer. This is only
 ! necessary for the FIRST call of the PARDISO solver.
 
-ALLOCATE (PT(64))
+ALLOCATE (ZM%PT_H(64))
 DO I = 1, 64
-   PT(I)%DUMMY = 0
+   ZM%PT_H(I)%DUMMY = 0
 END DO
 
 !.. Reordering and Symbolic Factorization, This step also allocates
 ! all memory that is necessary for the factorization
 
 PHASE = 11 ! only reordering and symbolic factorization
-
-CALL PARDISO (PT, MAXFCT, MNUM, MTYPE, PHASE, N, A, IA, JA, &
-              IDUM, NRHS, IPARM, MSGLVL, DDUM, DDUM, ERROR)
+CALL PARDISO(ZM%PT_H, MAXFCT, MNUM, MTYPE, PHASE, ZM%NUNKH, A_H, IA, JA, &
+             IDUM, NRHS, IPARM, MSGLVL, DDUM, DDUM, ERROR)
 
 WRITE(LU_ERR,*) 'Reordering completed ... '
 IF (ERROR /= 0) THEN
@@ -1093,8 +1089,8 @@ WRITE(LU_ERR,*) 'Number of factorization MFLOPS = ',IPARM(19)
 
 !.. Factorization.
 PHASE = 22 ! only factorization
-CALL PARDISO (PT, MAXFCT, MNUM, MTYPE, PHASE, N, A, IA, JA, &
-              IDUM, NRHS, IPARM, MSGLVL, DDUM, DDUM, ERROR)
+CALL PARDISO(ZM%PT_H, MAXFCT, MNUM, MTYPE, PHASE, ZM%NUNKH, A_H, IA, JA, &
+             IDUM, NRHS, IPARM, MSGLVL, DDUM, DDUM, ERROR)
 WRITE(LU_ERR,*) 'Factorization completed ... '
 IF (ERROR /= 0) THEN
    WRITE(LU_ERR,*) 'The following ERROR was detected: ', ERROR
@@ -1104,32 +1100,32 @@ ENDIF
 !.. Back substitution and iterative refinement
 IPARM(8) = 2 ! max numbers of iterative refinement steps
 PHASE = 33   ! only solving
-DO I = 1, N
-   B(I) = 1._EB
+DO I = 1, ZM%NUNKH
+   F_H(I) = 1._EB
 END DO
-CALL PARDISO (PT, MAXFCT, MNUM, MTYPE, PHASE, N, A, IA, JA, &
-              IDUM, NRHS, IPARM, MSGLVL, B, X, ERROR)
+CALL PARDISO(ZM%PT_H, MAXFCT, MNUM, MTYPE, PHASE, ZM%NUNKH, A_H, IA, JA, &
+             IDUM, NRHS, IPARM, MSGLVL, F_H, X_H, ERROR)
 WRITE(LU_ERR,*) 'Solve completed ... '
 IF (ERROR /= 0) THEN
    WRITE(LU_ERR,*) 'The following ERROR was detected: ', ERROR
    GOTO 1000
 ENDIF
 WRITE(LU_ERR,*) 'The solution of the system is '
-DO I = 1, N
-   WRITE(LU_ERR,*) ' x(',I,') = ', X(I)
+DO I = 1, ZM%NUNKH
+   WRITE(LU_ERR,*) ' x(',I,') = ', X_H(I)
 END DO
 
 1000 CONTINUE
 !.. Termination and release of memory
 PHASE = -1 ! release internal memory
-CALL PARDISO (PT, MAXFCT, MNUM, MTYPE, PHASE, N, DDUM, IDUM, IDUM, &
-              IDUM, NRHS, IPARM, MSGLVL, DDUM, DDUM, ERROR1)
+CALL PARDISO(ZM%PT_H, MAXFCT, MNUM, MTYPE, PHASE, ZM%NUNKH, DDUM, IDUM, IDUM, &
+             IDUM, NRHS, IPARM, MSGLVL, DDUM, DDUM, ERROR1)
 
 IF (ALLOCATED(IA))      DEALLOCATE(IA)
 IF (ALLOCATED(JA))      DEALLOCATE(JA)
-IF (ALLOCATED(A))       DEALLOCATE(A)
-IF (ALLOCATED(B))       DEALLOCATE(B)
-IF (ALLOCATED(X))       DEALLOCATE(X)
+IF (ALLOCATED(A_H))     DEALLOCATE(A_H)
+IF (ALLOCATED(F_H))     DEALLOCATE(F_H)
+IF (ALLOCATED(X_H))     DEALLOCATE(X_H)
 IF (ALLOCATED(IPARM))   DEALLOCATE(IPARM)
 
 IF (ERROR1 /= 0) THEN
@@ -1140,7 +1136,7 @@ ENDIF
 IF (ERROR /= 0) STOP 1
 
 
-STOP_STATUS=SETUP_STOP ! on testing
+STOP_STATUS=USER_STOP ! on testing
 END SUBROUTINE ULMAT_SOLVER_H
 
 

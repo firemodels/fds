@@ -87,7 +87,7 @@ TYPE MESH_TYPE
 
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: U_EDGE_Y,U_EDGE_Z,V_EDGE_X,V_EDGE_Z,W_EDGE_X,W_EDGE_Y
 
-   REAL(EB) :: POIS_PTB,POIS_ERR,LAPLACE_PTB,LAPLACE_ERR
+   REAL(EB) :: POIS_PTB,POIS_ERR
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: SAVE1,SAVE2,WORK
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: PRHS !< Right hand side of Poisson (pressure) equation
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: BXS,BXF,BYS,BYF,BZS,BZF, BXST,BXFT,BYST,BYFT,BZST,BZFT
@@ -107,7 +107,8 @@ TYPE MESH_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: PBAR      !< Background pressure, current, \f$ \overline{p}_m^n(z,t) \f$ (Pa)
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: PBAR_S    !< Background pressure, estimated, \f$ \overline{p}_m^*(z,t) \f$ (Pa)
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: R_PBAR    !< \f$ 1/\overline{p}_m(z,t) \f$
-   INTEGER, ALLOCATABLE, DIMENSION(:,:,:) :: PRESSURE_ZONE !< Index of the pressure zone for cell (I,J,K)
+   INTEGER, ALLOCATABLE, DIMENSION(:,:,:) :: PRESSURE_ZONE        !< Index of the pressure zone for cell (I,J,K)
+   TYPE (ZONE_MESH_TYPE), ALLOCATABLE, DIMENSION(:) :: ZONE_MESH  !< Stores Pardiso parameters for specific ZONE on a MESH
 
    ! Work arrays
 
@@ -236,7 +237,8 @@ TYPE MESH_TYPE
                                                         REGFACE_JAXIS_H, &
                                                         REGFACE_KAXIS_H
 
-   !---------------------- STR: CC_IBM mesh Arrays ------------------------------------------
+   ! CC_IBM mesh arrays
+
    INTEGER :: N_EDGE_CROSS=0,  N_CUTEDGE_MESH=0, N_CUTFACE_MESH=0, N_CUTCELL_MESH=0
    INTEGER :: N_BBCUTFACE_MESH=0, N_GCCUTFACE_MESH=0, N_GCCUTCELL_MESH=0
    INTEGER, ALLOCATABLE, DIMENSION(:,:,:,:) :: VERTVAR, CCVAR
@@ -273,7 +275,7 @@ TYPE MESH_TYPE
    INTEGER :: N_SPCELL=0, N_SPCELL_CF=0
    INTEGER, ALLOCATABLE, DIMENSION(:,:) :: SPCELL_LIST
 
-   !---------------------- END: CC_IBM mesh Arrays ------------------------------------------
+   ! ...
 
    INTEGER :: N_WALL_CELLS,N_WALL_CELLS_DIM,N_INTERNAL_WALL_CELLS,N_EXTERNAL_WALL_CELLS,WALL_COUNTER,WALL_COUNTER_HT3D
    INTEGER :: N_EXTERNAL_CFACE_CELLS=0,N_INTERNAL_CFACE_CELLS=0,N_CFACE_CELLS_DIM
@@ -316,10 +318,6 @@ TYPE MESH_TYPE
                                             ROS_HEAD,ROS_FLANK,WIND_EXP, &
                                             SR_X_LS,SR_Y_LS,U_LS,V_LS,Z_LS,DZTDX,DZTDY,MAG_ZT, &
                                             PHI_WS,UMF,THETA_ELPS,PHI_S,PHI_S_X,PHI_S_Y,PHI_W,LS_WORK1,LS_WORK2
-
-   ! Embedded Mesh
-
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: SCALAR_SAVE1,SCALAR_SAVE2,SCALAR_SAVE3
 
 END TYPE MESH_TYPE
 
@@ -449,10 +447,6 @@ REAL(EB), POINTER, DIMENSION(:,:) :: FLUX0_LS,FLUX1_LS,PHI_LS,PHI1_LS,ROS_BACKU,
                                      SR_X_LS,SR_Y_LS,U_LS,V_LS,Z_LS,DZTDX,DZTDY,MAG_ZT, &
                                      PHI_WS,UMF,THETA_ELPS,PHI_S,PHI_S_X,PHI_S_Y,PHI_W,LS_WORK1,LS_WORK2
 
-! Embedded Mesh
-
-REAL(EB), POINTER, DIMENSION(:,:,:,:) :: SCALAR_SAVE1,SCALAR_SAVE2,SCALAR_SAVE3
-
 
 CONTAINS
 
@@ -531,9 +525,6 @@ POIS_PTB=>M%POIS_PTB
 POIS_ERR=>M%POIS_ERR
 SAVE1=>M%SAVE1
 SAVE2=>M%SAVE2
-SCALAR_SAVE1=>M%SCALAR_SAVE1
-SCALAR_SAVE2=>M%SCALAR_SAVE2
-SCALAR_SAVE3=>M%SCALAR_SAVE3
 ADV_FX=>M%ADV_FX
 ADV_FY=>M%ADV_FY
 ADV_FZ=>M%ADV_FZ
