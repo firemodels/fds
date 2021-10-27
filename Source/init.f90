@@ -989,10 +989,6 @@ IF (SOLID_MT3D) THEN
    ALLOCATE(M%RHO_ZZ_G_S(0:IBP1,0:JBP1,0:KBP1,1:N_TRACKED_SPECIES),STAT=IZERO)
    CALL ChkMemErr('INIT','RHO_ZZ_G_S',IZERO)
    M%RHO_ZZ_G_S = 0._EB
-   ! !! debug !!
-   ! ALLOCATE(M%SCALAR_SAVE1(0:IBP1,0:JBP1,0:KBP1,1:N_TRACKED_SPECIES),STAT=IZERO)
-   ! CALL ChkMemErr('INIT','SCALAR_SAVE1',IZERO)
-   ! M%SCALAR_SAVE1 = 0._EB
 ENDIF
 
 ! Store old velocity components for special output quantities
@@ -1099,6 +1095,13 @@ IF (N_ZONE > 0) THEN
          ENDDO
       ENDDO
    ENDDO N_ZONE_LOOP
+ENDIF
+
+! Allocate ZONE_MESH array for LOCMAT_SOLVER
+
+IF (PRES_FLAG==ULMAT_FLAG) THEN
+   ALLOCATE(  M%ZONE_MESH(MAX(1,N_ZONE)),STAT=IZERO)
+   CALL ChkMemErr('INIT','ZONE_MESH',IZERO)
 ENDIF
 
 ! Loop through WALL and CFACE cells and assign PRESSURE_ZONE. Also, check for

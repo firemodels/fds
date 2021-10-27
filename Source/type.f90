@@ -5,6 +5,10 @@ MODULE TYPES
 USE PRECISION_PARAMETERS
 USE GLOBAL_CONSTANTS, ONLY : IAXIS,JAXIS,KAXIS,MAX_DIM,LOW_IND,HIGH_IND
 
+#ifdef WITH_MKL
+USE MKL_PARDISO
+#endif /* WITH_MKL */
+
 IMPLICIT NONE (TYPE,EXTERNAL)
 
 !> \brief Parameters associated with an entire class of Lagrangian particles
@@ -1300,6 +1304,14 @@ TYPE P_ZONE_TYPE
 END TYPE P_ZONE_TYPE
 
 TYPE (P_ZONE_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: P_ZONE
+
+
+!> \brief Parameters associated with a ZONE within a MESH, used in LOCMAT_SOLVER unstructured pressure solver
+
+TYPE ZONE_MESH_TYPE
+   TYPE(MKL_PARDISO_HANDLE), ALLOCATABLE  :: PT_H(:)  !< Internal solver memory pointer
+   INTEGER :: NUNKH                                   !< Number of unknowns in pressure solution for a given ZONE_MESH
+END TYPE ZONE_MESH_TYPE
 
 
 !> \brief Parameters associated with a MOVE line, used to rotate or translate OBSTructions
