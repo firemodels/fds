@@ -803,6 +803,11 @@ MESH_LOOP: DO N=1,NMESHES_READ
                   ENDIF
                ENDIF
             ELSE
+               IF (N_MPI_PROCESSES>1 .AND. NM>N_MPI_PROCESSES) THEN
+                  WRITE(MESSAGE,'(A,A)') 'ERROR: Number of meshes exceeds number of MPI processes. Set MPI_PROCESS on each MESH ',&
+                                         'line so that each MESH is assigned to a specific MPI process'
+                  CALL SHUTDOWN(MESSAGE) ; RETURN
+               ENDIF
                CURRENT_MPI_PROCESS = MIN(NM-1,N_MPI_PROCESSES-1)
             ENDIF
 
