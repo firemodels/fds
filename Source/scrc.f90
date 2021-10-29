@@ -94,27 +94,28 @@ INTEGER, PARAMETER :: NSCARC_ERROR_VECTOR_LENGTH     = 36        !< Type of erro
 
 INTEGER, PARAMETER :: NSCARC_EXCHANGE_AUXILIARY      =  1        !< Type of data exchange: various auxiliary data 
 INTEGER, PARAMETER :: NSCARC_EXCHANGE_BASIC_SIZES    =  2        !< Type of data exchange: basic sizes during setup
-INTEGER, PARAMETER :: NSCARC_EXCHANGE_CELL_NEIGHBORS =  3        !< Type of data exchange: neighboring cells
-INTEGER, PARAMETER :: NSCARC_EXCHANGE_CELL_NUMBERS   =  4        !< Type of data exchange: neighboring cell numbers
-INTEGER, PARAMETER :: NSCARC_EXCHANGE_CELL_SIZES     =  5        !< Type of data exchange: neighboring cell sizes
-INTEGER, PARAMETER :: NSCARC_EXCHANGE_LAYER2_NUMS    =  6        !< Type of data exchange: numbers of second layer cells
-INTEGER, PARAMETER :: NSCARC_EXCHANGE_LAYER2_VALS    =  7        !< Type of data exchange: values of second layer cells
-INTEGER, PARAMETER :: NSCARC_EXCHANGE_MATRIX_COLS    =  8        !< Type of data exchange: (local) columns of Poisson matrix
-INTEGER, PARAMETER :: NSCARC_EXCHANGE_MATRIX_COLSG   =  9        !< Type of data exchange: global columns of Poisson matrix
-INTEGER, PARAMETER :: NSCARC_EXCHANGE_MATRIX_DIAGS   = 10        !< Type of data exchange: diagonal of Poisson matrix
-INTEGER, PARAMETER :: NSCARC_EXCHANGE_MATRIX_SIZES   = 11        !< Type of data exchange: size of Poisson matrix 
-INTEGER, PARAMETER :: NSCARC_EXCHANGE_MATRIX_VALS    = 12        !< Type of data exchange: values of Poisson matrix
-INTEGER, PARAMETER :: NSCARC_EXCHANGE_MGM_SINGLE     = 13        !< Type of data exchange: MGM - Mean value interface
-INTEGER, PARAMETER :: NSCARC_EXCHANGE_MGM_DOUBLE     = 14        !< Type of data exchange: MGM - True approximate interface
-INTEGER, PARAMETER :: NSCARC_EXCHANGE_MGM_VELO       = 15        !< Type of data exchange: MGM - Velocity interface
-INTEGER, PARAMETER :: NSCARC_EXCHANGE_MGM_TRUE       = 16        !< Type of data exchange: MGM - Velocity interface
-INTEGER, PARAMETER :: NSCARC_EXCHANGE_NULLSPACE      = 17        !< Type of data exchange: nullspace entries (AMG only)
-INTEGER, PARAMETER :: NSCARC_EXCHANGE_PRESSURE       = 18        !< Type of data exchange: pressure values
-INTEGER, PARAMETER :: NSCARC_EXCHANGE_SOLIDS         = 19        !< Type of data exchange: pressure values
-INTEGER, PARAMETER :: NSCARC_EXCHANGE_VECTOR_MEAN    = 20        !< Type of data exchange: mean values of a vector
-INTEGER, PARAMETER :: NSCARC_EXCHANGE_VECTOR_PLAIN   = 21        !< Type of data exchange: plain values of a vector
-INTEGER, PARAMETER :: NSCARC_EXCHANGE_ZONE_NEIGHBORS = 22        !< Type of data exchange: aggregation zones (AMG only)
-INTEGER, PARAMETER :: NSCARC_EXCHANGE_ZONE_TYPES     = 23        !< Type of data exchange: aggregation zones types (AMG only)
+INTEGER, PARAMETER :: NSCARC_EXCHANGE_BERNOULLI      =  3        !< Type of data exchange: Bernoulli pressure H
+INTEGER, PARAMETER :: NSCARC_EXCHANGE_CELL_NEIGHBORS =  4        !< Type of data exchange: neighboring cells
+INTEGER, PARAMETER :: NSCARC_EXCHANGE_CELL_NUMBERS   =  5        !< Type of data exchange: neighboring cell numbers
+INTEGER, PARAMETER :: NSCARC_EXCHANGE_CELL_SIZES     =  6        !< Type of data exchange: neighboring cell sizes
+INTEGER, PARAMETER :: NSCARC_EXCHANGE_LAYER2_NUMS    =  7        !< Type of data exchange: numbers of second layer cells
+INTEGER, PARAMETER :: NSCARC_EXCHANGE_LAYER2_VALS    =  8        !< Type of data exchange: values of second layer cells
+INTEGER, PARAMETER :: NSCARC_EXCHANGE_MATRIX_COLS    =  9        !< Type of data exchange: (local) columns of Poisson matrix
+INTEGER, PARAMETER :: NSCARC_EXCHANGE_MATRIX_COLSG   = 10        !< Type of data exchange: global columns of Poisson matrix
+INTEGER, PARAMETER :: NSCARC_EXCHANGE_MATRIX_DIAGS   = 11        !< Type of data exchange: diagonal of Poisson matrix
+INTEGER, PARAMETER :: NSCARC_EXCHANGE_MATRIX_SIZES   = 12        !< Type of data exchange: size of Poisson matrix 
+INTEGER, PARAMETER :: NSCARC_EXCHANGE_MATRIX_VALS    = 13        !< Type of data exchange: values of Poisson matrix
+INTEGER, PARAMETER :: NSCARC_EXCHANGE_MGM_SINGLE     = 14        !< Type of data exchange: MGM - Mean value interface
+INTEGER, PARAMETER :: NSCARC_EXCHANGE_MGM_DOUBLE     = 15        !< Type of data exchange: MGM - True approximate interface
+INTEGER, PARAMETER :: NSCARC_EXCHANGE_MGM_VELO       = 16        !< Type of data exchange: MGM - Velocity interface
+INTEGER, PARAMETER :: NSCARC_EXCHANGE_MGM_TRUE       = 17        !< Type of data exchange: MGM - Velocity interface
+INTEGER, PARAMETER :: NSCARC_EXCHANGE_NULLSPACE      = 18        !< Type of data exchange: nullspace entries (AMG only)
+INTEGER, PARAMETER :: NSCARC_EXCHANGE_PRESSURE       = 19        !< Type of data exchange: inseparable pressure
+INTEGER, PARAMETER :: NSCARC_EXCHANGE_SOLIDS         = 20        !< Type of data exchange: solid cell information
+INTEGER, PARAMETER :: NSCARC_EXCHANGE_VECTOR_MEAN    = 21        !< Type of data exchange: mean values of a vector
+INTEGER, PARAMETER :: NSCARC_EXCHANGE_VECTOR_PLAIN   = 22        !< Type of data exchange: plain values of a vector
+INTEGER, PARAMETER :: NSCARC_EXCHANGE_ZONE_NEIGHBORS = 23        !< Type of data exchange: aggregation zones (AMG only)
+INTEGER, PARAMETER :: NSCARC_EXCHANGE_ZONE_TYPES     = 24        !< Type of data exchange: aggregation zones types (AMG only)
 
 INTEGER, PARAMETER :: NSCARC_GRID_STRUCTURED         =  1        !< Type of discretization: structured 
 INTEGER, PARAMETER :: NSCARC_GRID_UNSTRUCTURED       =  2        !< Type of discretization: unstructured 
@@ -296,8 +297,10 @@ INTEGER, PARAMETER :: NSCARC_VECTOR_TWO_V            = 13        !< Flag for 1D-
 INTEGER, PARAMETER :: NSCARC_VECTOR_TWO_Y            = 14        !< Flag for 1D-vector on stage 2: Y                
 INTEGER, PARAMETER :: NSCARC_VECTOR_TWO_Z            = 15        !< Flag for 1D-vector on stage 2: Z
 INTEGER, PARAMETER :: NSCARC_VECTOR_TWO_E            = 16        !< Flag for 1D-vector on stage 2: E
-INTEGER, PARAMETER :: NSCARC_VECTOR_H                = 17        !< Flag for 3D-vector H 
-INTEGER, PARAMETER :: NSCARC_VECTOR_HS               = 18        !< Flag for 3D-vector HS
+INTEGER, PARAMETER :: NSCARC_VECTOR_H                = 17        !< Flag for 3D-vector H  - predictor stage
+INTEGER, PARAMETER :: NSCARC_VECTOR_HS               = 18        !< Flag for 3D-vector HS - corrector stage
+INTEGER, PARAMETER :: NSCARC_VECTOR_P                = 19        !< Flag for 3D-vector P  - predictor stage
+INTEGER, PARAMETER :: NSCARC_VECTOR_PS               = 20        !< Flag for 3D-vector PS - corrector stage
 
 INTEGER, PARAMETER :: NSCARC_WARNING_NO_MKL_PRECON   =  1        !< Type of warning message: No MKL preconditioner available
 INTEGER, PARAMETER :: NSCARC_WARNING_NO_MKL_SMOOTH   =  2        !< Type of warning message: No MKL smoother available
@@ -544,7 +547,8 @@ TYPE SCARC_CMATRIX_TYPE
 
    CHARACTER(40) :: CNAME                              !< Name of matrix
 
-   LOGICAL :: CONDENSING_REQUIRED = .FALSE.            !< Flag to check if condensing is required (purely Neumann BCs)
+   LOGICAL :: CONDENSING_REQUIRED = .FALSE.            !< Check if condensing is required (purely Neumann BCs)
+   LOGICAL :: ALREADY_ALLOCATED = .FALSE.              !< Check if matrix is already allocated (inseparable Poisson only)
 
 END TYPE SCARC_CMATRIX_TYPE
 
@@ -580,6 +584,8 @@ TYPE SCARC_BMATRIX_TYPE
    INTEGER :: N_CONDENSED = 0                              !< Number of condensed entries in matrix
    INTEGER :: N_VAL = 0                                    !< Number of matrix values in general and symmetric cass
    INTEGER :: N_DIAG = 0                                   !< Length of main diagonal
+
+   LOGICAL :: ALREADY_ALLOCATED = .FALSE.                  !< Check if matrix is already allocated (inseparable Poisson only)
 
 END TYPE SCARC_BMATRIX_TYPE
 
@@ -894,9 +900,25 @@ TYPE SCARC_LEVEL_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION (:) :: DXN, DYN, DZN       !< Step widths between midpoints in x-, y- and z-direction
    REAL(EB), ALLOCATABLE, DIMENSION (:) :: RDX, RDY, RDZ       !< Reciprocal of step widths between grid points
    REAL(EB), ALLOCATABLE, DIMENSION (:) :: RDXN, RDYN, RDZN    !< Reciprocal of step widths between midpoints
+
    REAL(EB), ALLOCATABLE, DIMENSION (:,:) :: PXS, PXF          !< x-direction boundary values for inseparable Poisson system
    REAL(EB), ALLOCATABLE, DIMENSION (:,:) :: PYS, PYF          !< y-direction boundary values for inseparable Poisson system
    REAL(EB), ALLOCATABLE, DIMENSION (:,:) :: PZS, PZF          !< z-direction boundary values for inseparable Poisson system
+
+   REAL(EB), ALLOCATABLE, DIMENSION (:,:,:) :: PRES            !< Inseparable pressure solution - predictor stage
+   REAL(EB), ALLOCATABLE, DIMENSION (:,:,:) :: PRESS           !< Inseparable pressure solution - corrector stage
+   REAL(EB), ALLOCATABLE, DIMENSION (:,:,:) :: RHO             !< Density values predictor (for coarser grid levels only)
+   REAL(EB), ALLOCATABLE, DIMENSION (:,:,:) :: RHOS            !< Density values corrector (for coarser grid levels only)
+   REAL(EB), ALLOCATABLE, DIMENSION (:)     :: RHOM            !< Density mean values in x-direction (for mean preconditioner only)
+
+   REAL(EB), ALLOCATABLE, DIMENSION (:,:,:) :: FVX_B           !< Backup of x-force term (inseparable Poisson system only)
+   REAL(EB), ALLOCATABLE, DIMENSION (:,:,:) :: FVY_B           !< Backup of y-force term (inseparable Poisson system only)
+   REAL(EB), ALLOCATABLE, DIMENSION (:,:,:) :: FVZ_B           !< Backup of z-force term (inseparable Poisson system only)
+
+   REAL(EB), ALLOCATABLE, DIMENSION (:,:,:) :: FVX_H           !< Backup of x-force term (inseparable Poisson system only)
+   REAL(EB), ALLOCATABLE, DIMENSION (:,:,:) :: FVY_H           !< Backup of y-force term (inseparable Poisson system only)
+   REAL(EB), ALLOCATABLE, DIMENSION (:,:,:) :: FVZ_H           !< Backup of z-force term (inseparable Poisson system only)
+
    REAL(EB) :: DXI , DYI , DZI                                 !< Step sizes in x-, y- and z-direction
    REAL(EB) :: RDXI, RDYI, RDZI                                !< Inversed of step sizes in x-, y- and z-direction
    REAL(EB) :: RDXI2, RDYI2, RDZI2                             !< Squared and inversed step sizes in x-, y- and z-direction
@@ -1180,8 +1202,6 @@ INTEGER :: IERROR  = 0                                           !< General erro
 
 ! ---------- Logical indicators for different methods and mechanisms
   
-LOGICAL :: IS_SEPARABLE          = .TRUE.                        !< Flag for separable Poisson system
-LOGICAL :: IS_INSEPARABLE        = .FALSE.                       !< Flag for inseparable Poisson system
 LOGICAL :: IS_STRUCTURED         = .FALSE.                       !< Flag for structured discretization
 LOGICAL :: IS_UNSTRUCTURED       = .FALSE.                       !< Flag for unstructured discretization
 LOGICAL :: IS_PURE_NEUMANN       = .FALSE.                       !< Flag for pure Neumann system
@@ -1269,15 +1289,6 @@ REAL(EB) :: GLOBAL_REAL, RANK_REAL
 INTEGER :: FACE_ORIENTATION(6)  = (/1,-1,2,-2,3,-3/)        !< Coordinate direction related order of mesh faces
 
 CHARACTER(60) :: CNAME, CROUTINE
-
-REAL(EB), DIMENSION(:,:,:), ALLOCATABLE, TARGET :: SCARC_RHO   !< Density values depending on predictor/corrector with right overlap
-REAL(EB), DIMENSION(:,:,:), ALLOCATABLE, TARGET :: SCARC_KRES  !< Resolved kinetic energy
-REAL(EB), DIMENSION(:,:,:), ALLOCATABLE, TARGET :: SCARC_P     !< Inseparable pressure solution - predictor stage
-REAL(EB), DIMENSION(:,:,:), ALLOCATABLE, TARGET :: SCARC_PS    !< Inseparable pressure solution - corrector stage
-
-LOGICAL :: SCARC_CHECK = .TRUE.                                !< Flag to crosscheck computations at different positions
-LOGICAL :: SCARC_TEST_RHO  = .TRUE.                            !< Flag for experimentally using own version of RHO
-LOGICAL :: SCARC_TEST_KRES = .FALSE.                           !< Flag for experimentally using own version of KRES
 
 ! ---------- Public variables
   
@@ -1561,6 +1572,8 @@ REAL(EB), POINTER, DIMENSION(:,:,:):: VV=>NULL()            !< Pointer to y-velo
 REAL(EB), POINTER, DIMENSION(:,:,:):: WW=>NULL()            !< Pointer to z-velocity vector
 REAL(EB), POINTER, DIMENSION(:,:,:):: PPP=>NULL()           !< Pointer to inseparable pressure vector
 REAL(EB), POINTER, DIMENSION(:,:,:):: RHOP=>NULL()          !< Pointer to density vector
+REAL(EB), POINTER, DIMENSION(:,:,:):: RRHO=>NULL()          !< Pointer to reciprocal of density vector
+REAL(EB), POINTER, DIMENSION(:,:,:):: RHMK=>NULL()          !< Pointer to H-based pressure vector
 REAL(EB), POINTER, DIMENSION(:,:,:):: KRESP=>NULL()         !< Pointer to kres vector
 
 REAL(EB), POINTER, DIMENSION(:) ::  RECV_BUFFER_REAL        !< Pointer to double precision receive vector
@@ -1851,35 +1864,22 @@ IF (PREDICTOR) THEN
    UU   => M%U
    VV   => M%V
    WW   => M%W
-   PPP  => SCARC_P
+   PPP  => L%PRES
 ELSE
    HP   => M%HS
    UU   => M%US
    VV   => M%VS
    WW   => M%WS
-   PPP   => SCARC_PS
+   PPP  => L%PRESS
 ENDIF
 
 PRHS  => M%PRHS
-
-IF (SCARC_TEST_RHO) THEN                          ! Experimental tests for using own density version
-   RHOP => SCARC_RHO
+IF (PREDICTOR) THEN
+   RHOP => M%RHO
 ELSE
-   IF (PREDICTOR) THEN
-      RHOP => M%RHO
-      SCARC_RHO = M%RHO
-   ELSE
-      RHOP => M%RHOS
-      SCARC_RHO = M%RHOS
-   ENDIF
+   RHOP => M%RHOS
 ENDIF
-
-IF (SCARC_TEST_KRES) THEN                          ! Experimental tests for using own resolver kinetic energy version
-   KRESP => SCARC_KRES
-ELSE
-   KRESP => M%KRES
-   SCARC_KRES = M%KRES
-ENDIF
+KRESP => M%KRES
 
 BXS => M%BXS ;  BXF => M%BXF
 BYS => M%BYS ;  BYF => M%BYF
@@ -2118,7 +2118,7 @@ END SELECT
 END FUNCTION SCARC_POINT_TO_VECTOR_FB
 
 ! ----------------------------------------------------------------------------------------------------------------------
-!> \brief Point to pressure vector in predictor or corrector
+!> \brief Point to Bernoulli integral vector H in predictor or corrector
 ! ----------------------------------------------------------------------------------------------------------------------
 FUNCTION SCARC_POINT_TO_HVECTOR(NM, NV)
 REAL(EB), POINTER, DIMENSION(:,:,:):: SCARC_POINT_TO_HVECTOR
@@ -2130,6 +2130,20 @@ SELECT CASE (NV)
       SCARC_POINT_TO_HVECTOR => MESHES(NM)%HS
 END SELECT
 END FUNCTION SCARC_POINT_TO_HVECTOR
+
+! ----------------------------------------------------------------------------------------------------------------------
+!> \brief Point to inseparable pressure vector in predictor or corrector
+! ----------------------------------------------------------------------------------------------------------------------
+FUNCTION SCARC_POINT_TO_PVECTOR(NM, NV)
+REAL(EB), POINTER, DIMENSION(:,:,:):: SCARC_POINT_TO_PVECTOR
+INTEGER, INTENT(IN):: NM, NV
+SELECT CASE (NV)
+   CASE (NSCARC_VECTOR_P)
+      SCARC_POINT_TO_PVECTOR => SCARC(NM)%LEVEL(NLEVEL_MIN)%PRES
+   CASE (NSCARC_VECTOR_PS)
+      SCARC_POINT_TO_PVECTOR => SCARC(NM)%LEVEL(NLEVEL_MIN)%PRESS
+END SELECT
+END FUNCTION SCARC_POINT_TO_PVECTOR
 
 END MODULE SCARC_POINTERS
 
@@ -2205,6 +2219,35 @@ ENDIF
 1000 FORMAT(A8,',',A8,',',A30,',',A40,',',A10,',',A10,',',A10,',',A10,',',A10,',',A10,',',A10,',',&
             A10,',',A10,',',A15,',',A15,',',A15,',',A15,',',A15)
 END SUBROUTINE SCARC_SETUP_MESSAGES
+
+! --------------------------------------------------------------------------------------------------------------
+!> \brief Debugging purposes only: Print out specified vector in verbose file
+! --------------------------------------------------------------------------------------------------------------
+SUBROUTINE SCARC_VERBOSE_VECTOR3 (V, NM, CMSG)
+INTEGER, INTENT(IN) :: NM
+REAL(EB), DIMENSION(0:,0:,0:), INTENT(IN) :: V
+CHARACTER(*), INTENT(IN) :: CMSG
+INTEGER :: IX, IY, IZ, IY1, IY2
+WRITE(MSG%LU_VERBOSE,*) '============================================================='
+IF (PREDICTOR) THEN
+   WRITE(MSG%LU_VERBOSE,*) CMSG, '   : TPI=', TOTAL_PRESSURE_ITERATIONS, '  PREDICTOR'
+ELSE
+   WRITE(MSG%LU_VERBOSE,*) CMSG, '   : TPI=', TOTAL_PRESSURE_ITERATIONS, '  CORRECTOR'
+ENDIF
+WRITE(MSG%LU_VERBOSE,*) '============================================================='
+IF (TWO_D) THEN
+   IY1 = 1 ; IY2 = 1
+ ELSE
+   IY1 = MESHES(NM)%JBP1 ; IY2 = 0
+ENDIF
+DO IY = IY1, IY2, -1
+   DO IZ = MESHES(NM)%KBP1, 0, -1
+      WRITE(MSG%LU_VERBOSE,'(10E24.16)') (V(IX, IY, IZ), IX = 0, MIN(9,MESHES(NM)%IBP1))
+   ENDDO
+   WRITE(MSG%LU_VERBOSE,*) '----------------------------------------------------'
+ENDDO
+WRITE(MSG%LU_VERBOSE,*) '============================================================='
+END SUBROUTINE SCARC_VERBOSE_VECTOR3
 
 END MODULE SCARC_MESSAGES
 
@@ -3088,11 +3131,10 @@ IF (.NOT.ALLOCATED(WORKSPACE)) THEN
       CASE (NSCARC_INIT_HUGE)
          WORKSPACE = NSCARC_HUGE_INT
    END SELECT
+   CALL SCARC_UPDATE_STORAGE(NSCARC_DATA_INTEGER, NSCARC_STORAGE_CREATE, 1, NINIT, NL1, NR1, -1, -1, -1, -1, CID, CSCOPE)
 ELSE
    IF (SIZE(WORKSPACE,1) /= NR1-NL1+1) CALL SCARC_ERROR(NSCARC_ERROR_VECTOR_LENGTH, CID, NSCARC_NONE)
 ENDIF
-
-CALL SCARC_UPDATE_STORAGE(NSCARC_DATA_INTEGER, NSCARC_STORAGE_CREATE, 1, NINIT, NL1, NR1, -1, -1, -1, -1, CID, CSCOPE)
 
 END SUBROUTINE SCARC_ALLOCATE_INT1
 
@@ -3118,14 +3160,13 @@ IF (.NOT.ALLOCATED(WORKSPACE)) THEN
       CASE (NSCARC_INIT_HUGE)
          WORKSPACE = NSCARC_HUGE_INT
    END SELECT
+   CALL SCARC_UPDATE_STORAGE(NSCARC_DATA_INTEGER, NSCARC_STORAGE_CREATE, 2, NINIT, NL1, NR1, NL2, NR2, -1, -1, CID, CSCOPE)
 ELSE
    IF (SIZE(WORKSPACE,1) /= NR1-NL1+1 .OR. &
       SIZE(WORKSPACE,2) /= NR2-NL2+1) THEN
       CALL SCARC_ERROR(NSCARC_ERROR_VECTOR_LENGTH, CID, NSCARC_NONE)
    ENDIF
 ENDIF
-
-CALL SCARC_UPDATE_STORAGE(NSCARC_DATA_INTEGER, NSCARC_STORAGE_CREATE, 2, NINIT, NL1, NR1, NL2, NR2, -1, -1, CID, CSCOPE)
 
 END SUBROUTINE SCARC_ALLOCATE_INT2
 
@@ -3151,6 +3192,7 @@ IF (.NOT.ALLOCATED(WORKSPACE)) THEN
       CASE (NSCARC_INIT_HUGE)
          WORKSPACE = NSCARC_HUGE_INT
    END SELECT
+   CALL SCARC_UPDATE_STORAGE(NSCARC_DATA_INTEGER, NSCARC_STORAGE_CREATE, 3, NINIT, NL1, NR1, NL2, NR2, NL3, NR3, CID, CSCOPE)
 ELSE
    IF (SIZE(WORKSPACE,1) /= NR1-NL1+1 .OR. &
       SIZE(WORKSPACE,2) /= NR2-NL2+1 .OR. &
@@ -3158,8 +3200,6 @@ ELSE
       CALL SCARC_ERROR(NSCARC_ERROR_VECTOR_LENGTH, CID, NSCARC_NONE)
    ENDIF
 ENDIF
-
-CALL SCARC_UPDATE_STORAGE(NSCARC_DATA_INTEGER, NSCARC_STORAGE_CREATE, 3, NINIT, NL1, NR1, NL2, NR2, NL3, NR3, CID, CSCOPE)
 
 END SUBROUTINE SCARC_ALLOCATE_INT3
 
@@ -3181,13 +3221,12 @@ IF (.NOT.ALLOCATED(WORKSPACE)) THEN
       CASE (NSCARC_INIT_FALSE)
          WORKSPACE = .FALSE.
    END SELECT
+   CALL SCARC_UPDATE_STORAGE(NSCARC_DATA_LOGICAL, NSCARC_STORAGE_CREATE, 1, NINIT, NL1, NR1, -1, -1, -1, -1, CID, CSCOPE)
 ELSE
    IF (SIZE(WORKSPACE,1) /= NR1-NL1+1) THEN
       CALL SCARC_ERROR(NSCARC_ERROR_VECTOR_LENGTH, CID, NSCARC_NONE)
    ENDIF
 ENDIF
-
-CALL SCARC_UPDATE_STORAGE(NSCARC_DATA_LOGICAL, NSCARC_STORAGE_CREATE, 1, NINIT, NL1, NR1, -1, -1, -1, -1, CID, CSCOPE)
 
 END SUBROUTINE SCARC_ALLOCATE_LOG1
 
@@ -3209,14 +3248,13 @@ IF (.NOT.ALLOCATED(WORKSPACE)) THEN
       CASE (NSCARC_INIT_FALSE)
          WORKSPACE = .FALSE.
    END SELECT
+   CALL SCARC_UPDATE_STORAGE(NSCARC_DATA_LOGICAL, NSCARC_STORAGE_CREATE, 2, NINIT, NL1, NR1, NL2, NR2, -1, -1, CID, CSCOPE)
 ELSE
    IF (SIZE(WORKSPACE,1) /= NR1-NL1+1 .OR. &
       SIZE(WORKSPACE,2) /= NR2-NL2+1) THEN
       CALL SCARC_ERROR(NSCARC_ERROR_VECTOR_LENGTH, CID, NSCARC_NONE)
    ENDIF
 ENDIF
-
-CALL SCARC_UPDATE_STORAGE(NSCARC_DATA_LOGICAL, NSCARC_STORAGE_CREATE, 2, NINIT, NL1, NR1, NL2, NR2, -1, -1, CID, CSCOPE)
 
 END SUBROUTINE SCARC_ALLOCATE_LOG2
 
@@ -3238,6 +3276,7 @@ IF (.NOT.ALLOCATED(WORKSPACE)) THEN
       CASE (NSCARC_INIT_FALSE)
          WORKSPACE = .FALSE.
    END SELECT
+   CALL SCARC_UPDATE_STORAGE(NSCARC_DATA_LOGICAL, NSCARC_STORAGE_CREATE, 3, NINIT, NL1, NR1, NL2, NR2, NL3, NR3, CID, CSCOPE)
 ELSE
    IF (SIZE(WORKSPACE,1) /= NR1-NL1+1 .OR. &
       SIZE(WORKSPACE,2) /= NR2-NL2+1 .OR. &
@@ -3245,8 +3284,6 @@ ELSE
       CALL SCARC_ERROR(NSCARC_ERROR_VECTOR_LENGTH, CID, NSCARC_NONE)
    ENDIF
 ENDIF
-
-CALL SCARC_UPDATE_STORAGE(NSCARC_DATA_LOGICAL, NSCARC_STORAGE_CREATE, 3, NINIT, NL1, NR1, NL2, NR2, NL3, NR3, CID, CSCOPE)
 
 END SUBROUTINE SCARC_ALLOCATE_LOG3
 
@@ -3261,10 +3298,8 @@ INTEGER, INTENT(IN) :: NL1, NR1, NINIT
 CHARACTER(*), INTENT(IN) :: CID, CSCOPE
 
 IF (.NOT.ALLOCATED(WORKSPACE)) THEN
-
    ALLOCATE (WORKSPACE(NL1:NR1), STAT=IERROR)
    CALL CHKMEMERR ('SCARC_ALLOCATE_REAL1', CID, IERROR)
-
    SELECT CASE (NINIT)
       CASE (NSCARC_INIT_UNDEF)
          WORKSPACE = NSCARC_UNDEF_REAL_EB
@@ -3275,13 +3310,10 @@ IF (.NOT.ALLOCATED(WORKSPACE)) THEN
       CASE (NSCARC_INIT_HUGE)
          WORKSPACE = NSCARC_HUGE_REAL_EB
    END SELECT
-
+   CALL SCARC_UPDATE_STORAGE(NSCARC_DATA_REAL_EB, NSCARC_STORAGE_CREATE, 1, NINIT, NL1, NR1, -1, -1, -1, -1, CID, CSCOPE)
 ELSE
-   IF (SIZE(WORKSPACE,1) /= NR1-NL1+1) &
-      CALL SCARC_ERROR(NSCARC_ERROR_VECTOR_LENGTH, CID, NSCARC_NONE)
+   IF (SIZE(WORKSPACE,1) /= NR1-NL1+1) CALL SCARC_ERROR(NSCARC_ERROR_VECTOR_LENGTH, CID, NSCARC_NONE)
 ENDIF
-
-CALL SCARC_UPDATE_STORAGE(NSCARC_DATA_REAL_EB, NSCARC_STORAGE_CREATE, 1, NINIT, NL1, NR1, -1, -1, -1, -1, CID, CSCOPE)
 
 END SUBROUTINE SCARC_ALLOCATE_REAL1
 
@@ -3308,12 +3340,11 @@ IF (.NOT.ALLOCATED(WORKSPACE)) THEN
       CASE (NSCARC_INIT_HUGE)
          WORKSPACE = NSCARC_HUGE_REAL_FB
    END SELECT
+   CALL SCARC_UPDATE_STORAGE(NSCARC_DATA_REAL_FB, NSCARC_STORAGE_CREATE, 1, NINIT, NL1, NR1, -1, -1, -1, -1, CID, CSCOPE)
 ELSE
-   IF (SIZE(WORKSPACE,1) /= NR1-NL1+1) &
-      CALL SCARC_ERROR(NSCARC_ERROR_VECTOR_LENGTH, CID, NSCARC_NONE)
+   IF (SIZE(WORKSPACE,1) /= NR1-NL1+1) CALL SCARC_ERROR(NSCARC_ERROR_VECTOR_LENGTH, CID, NSCARC_NONE)
 ENDIF
 
-CALL SCARC_UPDATE_STORAGE(NSCARC_DATA_REAL_FB, NSCARC_STORAGE_CREATE, 1, NINIT, NL1, NR1, -1, -1, -1, -1, CID, CSCOPE)
 
 END SUBROUTINE SCARC_ALLOCATE_REAL1_FB
 
@@ -3340,14 +3371,13 @@ IF (.NOT.ALLOCATED(WORKSPACE)) THEN
       CASE (NSCARC_INIT_HUGE)
          WORKSPACE = NSCARC_HUGE_REAL_EB
    END SELECT
+   CALL SCARC_UPDATE_STORAGE(NSCARC_DATA_REAL_EB, NSCARC_STORAGE_CREATE, 2, NINIT, NL1, NR1, NL2, NR2, -1, -1, CID, CSCOPE)
 ELSE
    IF (SIZE(WORKSPACE,1) /= NR1-NL1+1 .OR. &
       SIZE(WORKSPACE,2) /= NR2-NL2+1) THEN
       CALL SCARC_ERROR(NSCARC_ERROR_VECTOR_LENGTH, CID, NSCARC_NONE)
    ENDIF
 ENDIF
-
-CALL SCARC_UPDATE_STORAGE(NSCARC_DATA_REAL_EB, NSCARC_STORAGE_CREATE, 2, NINIT, NL1, NR1, NL2, NR2, -1, -1, CID, CSCOPE)
 
 END SUBROUTINE SCARC_ALLOCATE_REAL2
 
@@ -3374,6 +3404,7 @@ IF (.NOT.ALLOCATED(WORKSPACE)) THEN
       CASE (NSCARC_INIT_HUGE)
          WORKSPACE = NSCARC_HUGE_REAL_EB
    END SELECT
+   CALL SCARC_UPDATE_STORAGE(NSCARC_DATA_REAL_EB, NSCARC_STORAGE_CREATE, 3, NINIT, NL1, NR1, NL2, NR2, NL3, NR3, CID, CSCOPE)
 ELSE
    IF (SIZE(WORKSPACE,1) /= NR1-NL1+1 .OR. &
       SIZE(WORKSPACE,2) /= NR2-NL2+1 .OR. &
@@ -3381,8 +3412,6 @@ ELSE
       CALL SCARC_ERROR(NSCARC_ERROR_VECTOR_LENGTH, CID, NSCARC_NONE)
    ENDIF
 ENDIF
-
-CALL SCARC_UPDATE_STORAGE(NSCARC_DATA_REAL_EB, NSCARC_STORAGE_CREATE, 3, NINIT, NL1, NR1, NL2, NR2, NL3, NR3, CID, CSCOPE)
 
 END SUBROUTINE SCARC_ALLOCATE_REAL3
 
@@ -3392,7 +3421,7 @@ END SUBROUTINE SCARC_ALLOCATE_REAL3
 SUBROUTINE SCARC_DEALLOCATE_INT1 (WORKSPACE, CID, CSCOPE)
 INTEGER, ALLOCATABLE, DIMENSION(:), INTENT(INOUT) :: WORKSPACE
 CHARACTER(*), INTENT(IN) :: CID, CSCOPE
-DEALLOCATE(WORKSPACE) 
+IF (ALLOCATED(WORKSPACE)) DEALLOCATE(WORKSPACE) 
 CALL SCARC_UPDATE_STORAGE(NSCARC_DATA_INTEGER, NSCARC_STORAGE_REMOVE, 1, -1, -1, -1, -1, -1, -1, -1, CID, CSCOPE)
 END SUBROUTINE SCARC_DEALLOCATE_INT1
 
@@ -3402,7 +3431,7 @@ END SUBROUTINE SCARC_DEALLOCATE_INT1
 SUBROUTINE SCARC_DEALLOCATE_INT2 (WORKSPACE, CID, CSCOPE)
 INTEGER, ALLOCATABLE, DIMENSION(:,:), INTENT(INOUT) :: WORKSPACE
 CHARACTER(*), INTENT(IN) :: CID, CSCOPE
-DEALLOCATE(WORKSPACE) 
+IF (ALLOCATED(WORKSPACE)) DEALLOCATE(WORKSPACE) 
 CALL SCARC_UPDATE_STORAGE(NSCARC_DATA_INTEGER, NSCARC_STORAGE_REMOVE, 2, -1, -1, -1, -1, -1, -1, -1, CID, CSCOPE)
 END SUBROUTINE SCARC_DEALLOCATE_INT2
 
@@ -3412,7 +3441,7 @@ END SUBROUTINE SCARC_DEALLOCATE_INT2
 SUBROUTINE SCARC_DEALLOCATE_INT3 (WORKSPACE, CID, CSCOPE)
 INTEGER, ALLOCATABLE, DIMENSION(:,:,:), INTENT(INOUT) :: WORKSPACE
 CHARACTER(*), INTENT(IN) :: CID, CSCOPE
-DEALLOCATE(WORKSPACE) 
+IF (ALLOCATED(WORKSPACE)) DEALLOCATE(WORKSPACE) 
 CALL SCARC_UPDATE_STORAGE(NSCARC_DATA_INTEGER, NSCARC_STORAGE_REMOVE, 3, -1, -1, -1, -1, -1, -1, -1, CID, CSCOPE)
 END SUBROUTINE SCARC_DEALLOCATE_INT3
 
@@ -3422,7 +3451,7 @@ END SUBROUTINE SCARC_DEALLOCATE_INT3
 SUBROUTINE SCARC_DEALLOCATE_LOG1 (WORKSPACE, CID, CSCOPE)
 LOGICAL, ALLOCATABLE, DIMENSION(:), INTENT(INOUT) :: WORKSPACE
 CHARACTER(*), INTENT(IN) :: CID, CSCOPE
-DEALLOCATE(WORKSPACE) 
+IF (ALLOCATED(WORKSPACE)) DEALLOCATE(WORKSPACE) 
 CALL SCARC_UPDATE_STORAGE(NSCARC_DATA_LOGICAL, NSCARC_STORAGE_REMOVE, 1, -1, -1, -1, -1, -1, -1, -1, CID, CSCOPE)
 END SUBROUTINE SCARC_DEALLOCATE_LOG1
 
@@ -3432,7 +3461,7 @@ END SUBROUTINE SCARC_DEALLOCATE_LOG1
 SUBROUTINE SCARC_DEALLOCATE_LOG2 (WORKSPACE, CID, CSCOPE)
 LOGICAL, ALLOCATABLE, DIMENSION(:,:), INTENT(INOUT) :: WORKSPACE
 CHARACTER(*), INTENT(IN) :: CID, CSCOPE
-DEALLOCATE(WORKSPACE) 
+IF (ALLOCATED(WORKSPACE)) DEALLOCATE(WORKSPACE) 
 CALL SCARC_UPDATE_STORAGE(NSCARC_DATA_LOGICAL, NSCARC_STORAGE_REMOVE, 2, -1, -1, -1, -1, -1, -1, -1, CID, CSCOPE)
 END SUBROUTINE SCARC_DEALLOCATE_LOG2
 
@@ -3442,7 +3471,7 @@ END SUBROUTINE SCARC_DEALLOCATE_LOG2
 SUBROUTINE SCARC_DEALLOCATE_LOG3 (WORKSPACE, CID, CSCOPE)
 LOGICAL, ALLOCATABLE, DIMENSION(:,:,:), INTENT(INOUT) :: WORKSPACE
 CHARACTER(*), INTENT(IN) :: CID, CSCOPE
-DEALLOCATE(WORKSPACE) 
+IF (ALLOCATED(WORKSPACE)) DEALLOCATE(WORKSPACE) 
 CALL SCARC_UPDATE_STORAGE(NSCARC_DATA_LOGICAL, NSCARC_STORAGE_REMOVE, 3, -1, -1, -1, -1, -1, -1, -1, CID, CSCOPE)
 END SUBROUTINE SCARC_DEALLOCATE_LOG3
 
@@ -3452,7 +3481,7 @@ END SUBROUTINE SCARC_DEALLOCATE_LOG3
 SUBROUTINE SCARC_DEALLOCATE_REAL1 (WORKSPACE, CID, CSCOPE)
 REAL(EB), ALLOCATABLE, DIMENSION(:), INTENT(INOUT) :: WORKSPACE
 CHARACTER(*), INTENT(IN) :: CID, CSCOPE
-DEALLOCATE(WORKSPACE) 
+IF (ALLOCATED(WORKSPACE)) DEALLOCATE(WORKSPACE) 
 CALL SCARC_UPDATE_STORAGE(NSCARC_DATA_REAL_EB, NSCARC_STORAGE_REMOVE, 1, -1, -1, -1, -1, -1, -1, -1, CID, CSCOPE)
 END SUBROUTINE SCARC_DEALLOCATE_REAL1
 
@@ -3462,7 +3491,7 @@ END SUBROUTINE SCARC_DEALLOCATE_REAL1
 SUBROUTINE SCARC_DEALLOCATE_REAL2 (WORKSPACE, CID, CSCOPE)
 REAL(EB), ALLOCATABLE, DIMENSION(:,:), INTENT(INOUT) :: WORKSPACE
 CHARACTER(*), INTENT(IN) :: CID, CSCOPE
-DEALLOCATE(WORKSPACE) 
+IF (ALLOCATED(WORKSPACE)) DEALLOCATE(WORKSPACE) 
 CALL SCARC_UPDATE_STORAGE(NSCARC_DATA_REAL_EB, NSCARC_STORAGE_REMOVE, 2, -1, -1, -1, -1, -1, -1, -1, CID, CSCOPE)
 END SUBROUTINE SCARC_DEALLOCATE_REAL2
 
@@ -3472,7 +3501,7 @@ END SUBROUTINE SCARC_DEALLOCATE_REAL2
 SUBROUTINE SCARC_DEALLOCATE_REAL3 (WORKSPACE, CID, CSCOPE)
 REAL(EB), ALLOCATABLE, DIMENSION(:,:,:), INTENT(INOUT) :: WORKSPACE
 CHARACTER(*), INTENT(IN) :: CID, CSCOPE
-DEALLOCATE(WORKSPACE) 
+IF (ALLOCATED(WORKSPACE)) DEALLOCATE(WORKSPACE) 
 CALL SCARC_UPDATE_STORAGE(NSCARC_DATA_REAL_EB, NSCARC_STORAGE_REMOVE, 3, -1, -1, -1, -1, -1, -1, -1, CID, CSCOPE)
 END SUBROUTINE SCARC_DEALLOCATE_REAL3
 
@@ -3482,7 +3511,7 @@ END SUBROUTINE SCARC_DEALLOCATE_REAL3
 SUBROUTINE SCARC_DEALLOCATE_REAL1_FB (WORKSPACE, CID, CSCOPE)
 REAL(FB), ALLOCATABLE, DIMENSION(:), INTENT(INOUT) :: WORKSPACE
 CHARACTER(*), INTENT(IN) :: CID, CSCOPE
-DEALLOCATE(WORKSPACE) 
+IF (ALLOCATED(WORKSPACE)) DEALLOCATE(WORKSPACE) 
 CALL SCARC_UPDATE_STORAGE(NSCARC_DATA_REAL_EB, NSCARC_STORAGE_REMOVE, 1, -1, -1, -1, -1, -1, -1, -1, CID, CSCOPE)
 END SUBROUTINE SCARC_DEALLOCATE_REAL1_FB
 
@@ -3492,7 +3521,7 @@ END SUBROUTINE SCARC_DEALLOCATE_REAL1_FB
 SUBROUTINE SCARC_DEALLOCATE_REAL2_FB (WORKSPACE, CID, CSCOPE)
 REAL(FB), ALLOCATABLE, DIMENSION(:,:), INTENT(INOUT) :: WORKSPACE
 CHARACTER(*), INTENT(IN) :: CID, CSCOPE
-DEALLOCATE(WORKSPACE) 
+IF (ALLOCATED(WORKSPACE)) DEALLOCATE(WORKSPACE) 
 CALL SCARC_UPDATE_STORAGE(NSCARC_DATA_REAL_EB, NSCARC_STORAGE_REMOVE, 2, -1, -1, -1, -1, -1, -1, -1, CID, CSCOPE)
 END SUBROUTINE SCARC_DEALLOCATE_REAL2_FB
 
@@ -3502,7 +3531,7 @@ END SUBROUTINE SCARC_DEALLOCATE_REAL2_FB
 SUBROUTINE SCARC_DEALLOCATE_REAL3_FB (WORKSPACE, CID, CSCOPE)
 REAL(FB), ALLOCATABLE, DIMENSION(:,:,:), INTENT(INOUT) :: WORKSPACE
 CHARACTER(*), INTENT(IN) :: CID, CSCOPE
-DEALLOCATE(WORKSPACE) 
+IF (ALLOCATED(WORKSPACE)) DEALLOCATE(WORKSPACE) 
 CALL SCARC_UPDATE_STORAGE(NSCARC_DATA_REAL_EB, NSCARC_STORAGE_REMOVE, 3, -1, -1, -1, -1, -1, -1, -1, CID, CSCOPE)
 END SUBROUTINE SCARC_DEALLOCATE_REAL3_FB
 
@@ -3624,6 +3653,8 @@ INTEGER, INTENT(IN) :: NPREC, NTYPE, NL
 CHARACTER(*), INTENT(IN) :: CID, CSCOPE
 INTEGER :: NDUMMY
 
+IF (A%ALREADY_ALLOCATED) RETURN
+
 A%CNAME = TRIM(CID)
 A%NTYPE = NTYPE
 A%NPREC = NPREC
@@ -3645,6 +3676,8 @@ IF (NTYPE /= NSCARC_MATRIX_MINIMAL) THEN
       CALL SCARC_ALLOCATE_REAL1 (A%VAL, 1, A%N_VAL, NSCARC_INIT_ZERO, 'A%VAL', CSCOPE)
    ENDIF
 ENDIF
+
+A%ALREADY_ALLOCATED = .TRUE.
 
 END SUBROUTINE SCARC_ALLOCATE_CMATRIX
 
@@ -3777,14 +3810,13 @@ INTEGER :: NVAL_CURRENT, NVAL_ALLOCATED
 NVAL_CURRENT = A%ROW(A%N_ROW)
 NVAL_ALLOCATED = SIZE(A%COL)
 
-CALL SCARC_UPDATE_STORAGE(NSCARC_DATA_CMATRIX, NSCARC_STORAGE_RESIZE, -1, -1, -1, -1, -1, -1, -1, -1, CID, CSCOPE)
-
 ! If the matrix already has the desired size or specified values are to small, return or shutdown
 IF (NVAL_ALLOCATED == NVAL_CURRENT) THEN
    RETURN
 ELSE IF (NVAL_ALLOCATED < NVAL_CURRENT) THEN
    CALL SCARC_ERROR(NSCARC_ERROR_MATRIX_SIZE, CID, NSCARC_NONE)
 ENDIF
+CALL SCARC_UPDATE_STORAGE(NSCARC_DATA_CMATRIX, NSCARC_STORAGE_RESIZE, -1, -1, -1, -1, -1, -1, -1, -1, CID, CSCOPE)
 
 ! If the allocated size of the matrix values workspace is too large, reduce it to the real size
 IF (NVAL_CURRENT < SIZE(A%COL)) THEN
@@ -3838,6 +3870,7 @@ CHARACTER(*), INTENT(IN) :: CID, CSCOPE
 INTEGER, INTENT(IN) :: NL
 CHARACTER(40) :: CINFO
 
+IF (A%ALREADY_ALLOCATED) RETURN
 A%CNAME = CID
 
 CALL SCARC_UPDATE_STORAGE(NSCARC_DATA_BMATRIX, NSCARC_STORAGE_CREATE, -1, -1, -1, -1, -1, -1, -1, -1, CID, CSCOPE)
@@ -3846,6 +3879,8 @@ WRITE(CINFO,'(A,A,I2.2,A)') TRIM(CID),'_LEV',NL,'.AUX'
 CALL SCARC_ALLOCATE_REAL1 (A%AUX, 1, A%N_DIAG, NSCARC_INIT_ZERO, CINFO, CSCOPE)
 WRITE(CINFO,'(A,A,I2.2,A)') TRIM(CID),'_LEV',NL,'.VAL'
 CALL SCARC_ALLOCATE_REAL2 (A%VAL, 1, A%N_DIAG, 1, A%N_STENCIL, NSCARC_INIT_ZERO, CINFO, CSCOPE)
+
+A%ALREADY_ALLOCATED = .TRUE.
 
 END SUBROUTINE SCARC_ALLOCATE_BMATRIX
 
@@ -4883,6 +4918,7 @@ ITERATE_PRESSURE = .TRUE.  ! Although there is no need to do pressure iterations
                            ! velocity error leave it .TRUE. to write out velocity error diagnostics
  
 ! ------------- Set type of discretization
+
  
 SELECT CASE (TRIM(PRES_METHOD))
    CASE ('SCARC')
@@ -4897,17 +4933,6 @@ SELECT CASE (TRIM(PRES_METHOD))
       CALL SCARC_ERROR(NSCARC_ERROR_PARSE_INPUT, SCARC_GRID, NSCARC_NONE)
 END SELECT
  
-! ------------ Set type of Poisson equation (INSEPARABLE/SEPARABLE)
-
-  SELECT CASE (TRIM(SCARC_POISSON))
-     CASE ('INSEPARABLE')
-        TYPE_POISSON = NSCARC_POISSON_INSEPARABLE
-     CASE ('SEPARABLE')
-        TYPE_POISSON = NSCARC_POISSON_SEPARABLE
-     CASE DEFAULT
-        CALL SCARC_ERROR(NSCARC_ERROR_PARSE_INPUT, SCARC_POISSON, NSCARC_NONE)
-  END SELECT
-
 ! ------------ Set type of matrix storage (COMPACT/BANDWISE)
  
 SELECT CASE (TRIM(SCARC_MATRIX))
@@ -5320,11 +5345,25 @@ SELECT CASE (TRIM(SCARC_MKL_PRECISION))
       CALL SCARC_ERROR(NSCARC_ERROR_PARSE_INPUT, SCARC_MKL_PRECISION, NSCARC_NONE)
 END SELECT
 
+! Set type of Poisson solver depending on global variable INSEPARABLE_POISSON
+
+IF (INSEPARABLE_POISSON) THEN
+   TYPE_POISSON = NSCARC_POISSON_INSEPARABLE
+   TYPE_MATRIX  = NSCARC_MATRIX_COMPACT             ! only temporarily, bandwise technique will also be available
+ELSE
+   TYPE_POISSON = NSCARC_POISSON_SEPARABLE
+ENDIF
+
+! Only temporarily until better preconditioners/smoothers for the inseparable case are available
+! The usual unstructured MKL-based preconditioning is too expensive because the matrix has to be rebuilt in every timestep
+
+IF (IS_UNSTRUCTURED .AND. INSEPARABLE_POISSON) THEN
+   IF (TYPE_METHOD == NSCARC_METHOD_KRYLOV) TYPE_PRECON = NSCARC_RELAX_SSOR
+   IF (TYPE_METHOD == NSCARC_METHOD_MULTIGRID) TYPE_SMOOTH = NSCARC_RELAX_SSOR
+ENDIF
+
 ! -------- Define some logical variables - just for notational convenience
  
-IS_SEPARABLE    = (TYPE_POISSON == NSCARC_POISSON_SEPARABLE)
-IS_INSEPARABLE  = (TYPE_POISSON == NSCARC_POISSON_INSEPARABLE)
-
 IS_STRUCTURED   = (TYPE_GRID == NSCARC_GRID_STRUCTURED)
 IS_UNSTRUCTURED = (TYPE_GRID == NSCARC_GRID_UNSTRUCTURED)
 
@@ -5650,6 +5689,7 @@ END SUBROUTINE SCARC_SETUP_EXCHANGES
 ! 
 ! NSCARC_EXCHANGE_AUXILIARY       :  exchange various auxiliary information (AMG only)
 ! NSCARC_EXCHANGE_BASIC_SIZES     :  exchange initial information about interface sizes
+! NSCARC_EXCHANGE_BERNOULLI       :  exchange Bernoulli integral pressure values along internal boundaries
 ! NSCARC_EXCHANGE_CELL_NEIGHBORS  :  exchange neighboring cell numbers 
 ! NSCARC_EXCHANGE_CELL_NUMBERS    :  exchange neighboring grid widths 
 ! NSCARC_EXCHANGE_CELL_SIZES      :  exchange neighboring grid widths 
@@ -5664,7 +5704,7 @@ END SUBROUTINE SCARC_SETUP_EXCHANGES
 ! NSCARC_EXCHANGE_MGM_SINGLE      :  exchange single neighbouring layer for all other BC settings of MGM method
 ! NSCARC_EXCHANGE_MGM_VELO        :  exchange neighboring velocity entries in MGM method
 ! NSCARC_EXCHANGE_NULLSPACE       :  exchange sum of nullspace entries (AMG only)
-! NSCARC_EXCHANGE_PRESSURE        :  exchange pressure values (3d-vector) along internal boundaries 
+! NSCARC_EXCHANGE_PRESSURE        :  exchange inseparable pressure values (3d-vector) along internal boundaries 
 ! NSCARC_EXCHANGE_SOLIDS          :  exchange information about adjacent solids
 ! NSCARC_EXCHANGE_VECTOR_MEAN     :  exchange vector and build mean of neighboring and own data
 ! NSCARC_EXCHANGE_VECTOR_PLAIN    :  exchange plain vector and only use neighboring data
@@ -5702,6 +5742,9 @@ RECEIVE_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 
          CASE (NSCARC_EXCHANGE_BASIC_SIZES)
             CALL SCARC_RECV_MESSAGE_INT (NM, NOM, NL, NSCARC_BUFFER_BASIC, 'BASIC SIZES')
+
+         CASE (NSCARC_EXCHANGE_BERNOULLI)
+            CALL SCARC_RECV_MESSAGE_REAL (NM, NOM, NL, NSCARC_BUFFER_LAYER1, 'BERNOULLI')
 
          CASE (NSCARC_EXCHANGE_CELL_NEIGHBORS)
             CALL SCARC_RECV_MESSAGE_INT (NM, NOM, NL, NSCARC_BUFFER_LAYER4, 'CELL NEIGHBORS')
@@ -5796,6 +5839,10 @@ SEND_PACK_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          CASE (NSCARC_EXCHANGE_BASIC_SIZES)
             CALL SCARC_PACK_BASIC_SIZES
             CALL SCARC_SEND_MESSAGE_INT (NM, NOM, NL, NSCARC_BUFFER_BASIC, 'BASIC SIZES')
+
+         CASE (NSCARC_EXCHANGE_BERNOULLI)
+            CALL SCARC_PACK_BERNOULLI(NM)
+            CALL SCARC_SEND_MESSAGE_REAL (NM, NOM, NL, NSCARC_BUFFER_LAYER1, 'BERNOULLI')
 
          CASE (NSCARC_EXCHANGE_CELL_NEIGHBORS)
             CALL SCARC_PACK_CELL_NEIGHBORS (NL)
@@ -5911,6 +5958,9 @@ SEND_UNPACK_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 
          CASE (NSCARC_EXCHANGE_BASIC_SIZES)
             CALL SCARC_UNPACK_BASIC_SIZES (NM, NOM)
+
+         CASE (NSCARC_EXCHANGE_BERNOULLI)
+            CALL SCARC_UNPACK_BERNOULLI (NM, NOM)
 
          CASE (NSCARC_EXCHANGE_CELL_NEIGHBORS)
             CALL SCARC_UNPACK_CELL_NEIGHBORS (NM, NOM, NL)
@@ -6722,11 +6772,12 @@ END SUBROUTINE SCARC_UNPACK_MATRIX_DIAGS
 
 
 ! --------------------------------------------------------------------------------------------------------------
-!> \brief Pack overlapping parts of specified pressure vector (predictor/corrector)
+!> \brief Pack overlapping parts of specified Bernoulli integral pressure vector (predictor/corrector)
 ! Note: Vector VC is numbered via I, J, K values
 ! --------------------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_PACK_PRESSURE(NM)
+SUBROUTINE SCARC_PACK_BERNOULLI(NM)
 USE SCARC_POINTERS, ONLY: G, OS, OL, OG, OS, SCARC_POINT_TO_HVECTOR
+USE SCARC_MESSAGES
 INTEGER, INTENT(IN) :: NM
 REAL(EB), DIMENSION(:,:,:), POINTER :: VC
 INTEGER :: IOR0, ICG, IWG
@@ -6744,15 +6795,16 @@ DO IOR0 = -3, 3
       OS%SEND_BUFFER_REAL(ICG) = VC(G%WALL(IWG)%IXW, G%WALL(IWG)%IYW, G%WALL(IWG)%IZW)
    ENDDO
 ENDDO
-END SUBROUTINE SCARC_PACK_PRESSURE
+END SUBROUTINE SCARC_PACK_BERNOULLI
 
 
 ! --------------------------------------------------------------------------------------------------------------
-!> \brief Unpack overlapping parts of specified pressure vector (predictor/corrector)
+!> \brief Unpack overlapping parts of specified Bernoulli integral pressure vector (predictor/corrector)
 ! Note: Vector VC is numbered via I, J, K values
 ! --------------------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_UNPACK_PRESSURE(NM, NOM)
+SUBROUTINE SCARC_UNPACK_BERNOULLI(NM, NOM)
 USE SCARC_POINTERS, ONLY: G, OL, OG, RECV_BUFFER_REAL, SCARC_POINT_TO_BUFFER_REAL, SCARC_POINT_TO_HVECTOR
+USE SCARC_MESSAGES
 INTEGER, INTENT(IN) :: NM, NOM
 REAL(EB), DIMENSION(:,:,:), POINTER :: VC
 INTEGER :: LL, IOR0, IWG, IXG, IYG, IZG, ICG
@@ -6762,6 +6814,65 @@ IF (PREDICTOR) THEN
    VC => SCARC_POINT_TO_HVECTOR (NM, NSCARC_VECTOR_H)
 ELSE
    VC => SCARC_POINT_TO_HVECTOR (NM, NSCARC_VECTOR_HS)
+ENDIF
+LL = 1
+DO IOR0 = -3, 3
+   IF (OL%GHOST_LASTW(IOR0) == 0) CYCLE
+   UNPACK_BERNOULLI: DO ICG = OL%GHOST_FIRSTE(IOR0), OL%GHOST_LASTE(IOR0)
+      IWG = OG%ICG_TO_IWG(ICG)
+      IXG=G%WALL(IWG)%IXG
+      IYG=G%WALL(IWG)%IYG
+      IZG=G%WALL(IWG)%IZG
+      VC(IXG, IYG, IZG) = RECV_BUFFER_REAL(LL)
+      LL = LL + 1
+   ENDDO UNPACK_BERNOULLI
+ENDDO
+END SUBROUTINE SCARC_UNPACK_BERNOULLI
+
+
+! --------------------------------------------------------------------------------------------------------------
+!> \brief Pack overlapping parts of specified pressure vector (predictor/corrector)
+! Note: Vector VC is numbered via I, J, K values
+! --------------------------------------------------------------------------------------------------------------
+SUBROUTINE SCARC_PACK_PRESSURE(NM)
+USE SCARC_POINTERS, ONLY: G, OS, OL, OG, OS, SCARC_POINT_TO_PVECTOR
+USE SCARC_MESSAGES
+INTEGER, INTENT(IN) :: NM
+REAL(EB), DIMENSION(:,:,:), POINTER :: VC
+INTEGER :: IOR0, ICG, IWG
+
+IF (PREDICTOR) THEN
+   VC => SCARC_POINT_TO_PVECTOR (NM, NSCARC_VECTOR_P)
+ELSE
+   VC => SCARC_POINT_TO_PVECTOR (NM, NSCARC_VECTOR_PS)
+ENDIF
+OS%SEND_BUFFER_REAL = NSCARC_HUGE_REAL_EB
+DO IOR0 = -3, 3
+   IF (OL%GHOST_LASTW(IOR0) == 0) CYCLE
+   DO ICG = OL%GHOST_FIRSTW(IOR0), OL%GHOST_LASTW(IOR0)
+      IWG = OG%ICG_TO_IWG(ICG)
+      OS%SEND_BUFFER_REAL(ICG) = VC(G%WALL(IWG)%IXW, G%WALL(IWG)%IYW, G%WALL(IWG)%IZW)
+   ENDDO
+ENDDO
+END SUBROUTINE SCARC_PACK_PRESSURE
+
+
+! --------------------------------------------------------------------------------------------------------------
+!> \brief Unpack overlapping parts of specified pressure vector (predictor/corrector)
+! Note: Vector VC is numbered via I, J, K values
+! --------------------------------------------------------------------------------------------------------------
+SUBROUTINE SCARC_UNPACK_PRESSURE(NM, NOM)
+USE SCARC_POINTERS, ONLY: G, OL, OG, RECV_BUFFER_REAL, SCARC_POINT_TO_BUFFER_REAL, SCARC_POINT_TO_PVECTOR
+USE SCARC_MESSAGES
+INTEGER, INTENT(IN) :: NM, NOM
+REAL(EB), DIMENSION(:,:,:), POINTER :: VC
+INTEGER :: LL, IOR0, IWG, IXG, IYG, IZG, ICG
+
+RECV_BUFFER_REAL => SCARC_POINT_TO_BUFFER_REAL (NM, NOM, 1)
+IF (PREDICTOR) THEN
+   VC => SCARC_POINT_TO_PVECTOR (NM, NSCARC_VECTOR_P)
+ELSE
+   VC => SCARC_POINT_TO_PVECTOR (NM, NSCARC_VECTOR_PS)
 ENDIF
 LL = 1
 DO IOR0 = -3, 3
@@ -9204,13 +9315,13 @@ MESHES_LOOP2: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
    ! Allocate and initialize IS_SOLID array which indicates the state of a cell (gasphase/solid)
 
    CALL SCARC_ALLOCATE_LOG3 (L%IS_SOLID, 0, L%NX+1, 0, L%NY+1, 0, L%NZ+1, NSCARC_INIT_TRUE, 'L%IS_SOLID', CROUTINE)
-   L%IS_SOLID (1:L%NX, 1:L%NY, 1:L%NZ) = .FALSE.
+   L%IS_SOLID = .FALSE.
 
    ! Identify and mark solid obstruction cells in IS_SOLID-part of the discretization
 
-   DO IZ = 1, L%NZ
-      DO IY = 1, L%NY
-         DO IX = 1, L%NX
+   DO IZ = 0, L%NZ+1
+      DO IY = 0, L%NY+1
+         DO IX = 0, L%NX+1
             IF (M%SOLID(M%CELL_INDEX(IX, IY, IZ))) L%IS_SOLID(IX, IY, IZ) = .TRUE.
          ENDDO
       ENDDO
@@ -9602,7 +9713,7 @@ MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
    EXTERNAL_WALL_CELLS_LOOP: DO IWG = 1, L%N_WALL_CELLS_EXT
 
       NOM  = M%EXTERNAL_WALL(IWG)%NOM
-      IOR0 = M%WALL(IWG)%ONE_D%IOR
+      IOR0 = M%WALL(IWG)%BOUNDARY_COORD%IOR
 
       IF (NOM /= 0) THEN
          IS_KNOWN = .FALSE.
@@ -9939,11 +10050,11 @@ MESHES_LOOP1: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
  
    EXTERNAL_WALL_CELLS_LOOP1: DO IWG = 1, L%N_WALL_CELLS_EXT
 
-      MWC => M%WALL(IWG)
+      MWC => M%WALL(IWG)                          
       EWC => M%EXTERNAL_WALL(IWG)
 
       NOM  =  EWC%NOM
-      IOR0 =  MWC%ONE_D%IOR
+      IOR0 =  MWC%BOUNDARY_COORD%IOR
 
       GWC => G%WALL(IWG)
       GWC%NOM  = NOM                                    ! store number of neighbor in wall cell
@@ -9982,22 +10093,22 @@ MESHES_LOOP1: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
  
    INTERNAL_WALL_CELLS_LOOP1: DO IWG = L%N_WALL_CELLS_EXT+1, L%N_WALL_CELLS_EXT+L%N_WALL_CELLS_INT
 
-      MWC => M%WALL(IWG)
-      GWC => G%WALL(IWG)
+      GWC => G%WALL(IWG)                                                    ! ScaRC-internal wall structure
+      MWC => M%WALL(IWG)                                                    ! FDS-original wall structure
 
-      GWC%IOR  = MWC%ONE_D%IOR
+      GWC%IOR  = MWC%BOUNDARY_COORD%IOR
       GWC%NOM  = 0
 
       GWC%BTYPE = NEUMANN
       GWC%BOUNDARY_TYPE = M%WALL(IWG)%BOUNDARY_TYPE
 
-      GWC%IXG =  MWC%ONE_D%II                        ! ghost cell indices
-      GWC%IYG =  MWC%ONE_D%JJ
-      GWC%IZG =  MWC%ONE_D%KK
+      GWC%IXG =  MWC%BOUNDARY_COORD%II                        ! ghost cell indices
+      GWC%IYG =  MWC%BOUNDARY_COORD%JJ
+      GWC%IZG =  MWC%BOUNDARY_COORD%KK
 
-      GWC%IXW =  MWC%ONE_D%IIG                       ! (internal) wall cell indices
-      GWC%IYW =  MWC%ONE_D%JJG
-      GWC%IZW =  MWC%ONE_D%KKG
+      GWC%IXW =  MWC%BOUNDARY_COORD%IIG                       ! (internal) wall cell indices
+      GWC%IYW =  MWC%BOUNDARY_COORD%JJG
+      GWC%IZW =  MWC%BOUNDARY_COORD%KKG
 
    ENDDO INTERNAL_WALL_CELLS_LOOP1
 
@@ -10065,13 +10176,13 @@ MESHES_LOOP1: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
       ENDIF
       GWC%BOUNDARY_TYPE = MWC%BOUNDARY_TYPE
 
-      GWC%IXG = MWC%ONE_D%II                                 ! ghost cell indices
-      GWC%IYG = MWC%ONE_D%JJ
-      GWC%IZG = MWC%ONE_D%KK
+      GWC%IXG = MWC%BOUNDARY_COORD%II                                 ! ghost cell indices
+      GWC%IYG = MWC%BOUNDARY_COORD%JJ
+      GWC%IZG = MWC%BOUNDARY_COORD%KK
 
-      GWC%IXW = MWC%ONE_D%IIG                                ! (internal) wall cell indices
-      GWC%IYW = MWC%ONE_D%JJG
-      GWC%IZW = MWC%ONE_D%KKG
+      GWC%IXW = MWC%BOUNDARY_COORD%IIG                                ! (internal) wall cell indices
+      GWC%IYW = MWC%BOUNDARY_COORD%JJG
+      GWC%IZW = MWC%BOUNDARY_COORD%KKG
 
       ! If there exists a neighbor for that wall cell, setup corresponding neighborship information
       IF (NOM /= 0) CALL SCARC_SETUP_WALL_NEIGHBOR(G, OG, &
@@ -18624,17 +18735,23 @@ CONTAINS
 ! --------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_SETUP_INSEPARABLE_ENVIRONMENT
 USE SCARC_POINTERS, ONLY: L, SCARC_POINT_TO_LEVEL
-INTEGER :: NM
+INTEGER :: NM, NL
 CROUTINE = 'SCARC_SETUP_INSEPARABLE_ENVIRONMENT'
 
 DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 
    CALL SCARC_POINT_TO_LEVEL (NM, NLEVEL_MIN)
 
-   CALL SCARC_ALLOCATE_REAL3 (SCARC_RHO ,  0, L%NX+1, 0, L%NY+1, 0, L%NZ+1, NSCARC_INIT_ZERO, 'SCARC_RHO',  CROUTINE)
-   CALL SCARC_ALLOCATE_REAL3 (SCARC_KRES,  0, L%NX+1, 0, L%NY+1, 0, L%NZ+1, NSCARC_INIT_ZERO, 'SCARC_KRES', CROUTINE)
-   CALL SCARC_ALLOCATE_REAL3 (SCARC_P   ,  0, L%NX+1, 0, L%NY+1, 0, L%NZ+1, NSCARC_INIT_ZERO, 'SCARC_P',    CROUTINE)
-   CALL SCARC_ALLOCATE_REAL3 (SCARC_PS  ,  0, L%NX+1, 0, L%NY+1, 0, L%NZ+1, NSCARC_INIT_ZERO, 'SCARC_PS',   CROUTINE)
+   CALL SCARC_ALLOCATE_REAL3 (L%PRES ,  0, L%NX+1, 0, L%NY+1, 0, L%NZ+1, NSCARC_INIT_ZERO, 'L%PRES',  CROUTINE)
+   CALL SCARC_ALLOCATE_REAL3 (L%PRESS,  0, L%NX+1, 0, L%NY+1, 0, L%NZ+1, NSCARC_INIT_ZERO, 'L%PRESS', CROUTINE)
+
+   CALL SCARC_ALLOCATE_REAL3 (L%FVX_H,  0, L%NX+1, 0, L%NY+1, 0, L%NZ+1, NSCARC_INIT_ZERO, 'L%FVX_H', CROUTINE)
+   CALL SCARC_ALLOCATE_REAL3 (L%FVY_H,  0, L%NX+1, 0, L%NY+1, 0, L%NZ+1, NSCARC_INIT_ZERO, 'L%FVY_H', CROUTINE)
+   CALL SCARC_ALLOCATE_REAL3 (L%FVZ_H,  0, L%NX+1, 0, L%NY+1, 0, L%NZ+1, NSCARC_INIT_ZERO, 'L%FVZ_H', CROUTINE)
+
+   CALL SCARC_ALLOCATE_REAL3 (L%FVX_B,  0, L%NX+1, 0, L%NY+1, 0, L%NZ+1, NSCARC_INIT_ZERO, 'L%FVX_B', CROUTINE)
+   CALL SCARC_ALLOCATE_REAL3 (L%FVY_B,  0, L%NX+1, 0, L%NY+1, 0, L%NZ+1, NSCARC_INIT_ZERO, 'L%FVY_B', CROUTINE)
+   CALL SCARC_ALLOCATE_REAL3 (L%FVZ_B,  0, L%NX+1, 0, L%NY+1, 0, L%NZ+1, NSCARC_INIT_ZERO, 'L%FVZ_B', CROUTINE)
 
    CALL SCARC_ALLOCATE_REAL2 (L%PXS, 1, L%NY, 1, L%NZ, NSCARC_INIT_ZERO, 'L%PXS', CROUTINE)
    CALL SCARC_ALLOCATE_REAL2 (L%PXF, 1, L%NY, 1, L%NZ, NSCARC_INIT_ZERO, 'L%PXF', CROUTINE)
@@ -18644,6 +18761,19 @@ DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
    CALL SCARC_ALLOCATE_REAL2 (L%PZF, 1, L%NX, 1, L%NY, NSCARC_INIT_ZERO, 'L%PZF', CROUTINE)
 
 ENDDO
+
+
+! If also coarser grid levels are needed in case of a multigrid or two-level method, then also workspace
+! for coarsened density vectors is needed
+IF (HAS_MULTIPLE_LEVELS) THEN
+   DO NL = NLEVEL_MIN+1, NLEVEL_MAX
+      DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
+         CALL SCARC_POINT_TO_LEVEL (NM, NL)
+         CALL SCARC_ALLOCATE_REAL3 (L%RHO ,  0, L%NX+1, 0, L%NY+1, 0, L%NZ+1, NSCARC_INIT_ZERO, 'L%RHO',  CROUTINE)
+         CALL SCARC_ALLOCATE_REAL3 (L%RHOS,  0, L%NX+1, 0, L%NY+1, 0, L%NZ+1, NSCARC_INIT_ZERO, 'L%RHOS', CROUTINE)
+      ENDDO
+   ENDDO
+ENDIF
 
 END SUBROUTINE SCARC_SETUP_INSEPARABLE_ENVIRONMENT
 
@@ -19868,7 +19998,7 @@ ENDDO
 
 ! Set correct boundary conditions related to Dirichlet or Neumann boundaries for separable system
 
-!$OMP PARALLEL DO PRIVATE(IC) SCHEDULE(STATIC)
+!$OMP PARALLEL DO PRIVATE(IOR0,I,J,K,IC) SCHEDULE(STATIC)
 SEPARABLE_BOUNDARY_CELLS_LOOP: DO IW = 1, L%N_WALL_CELLS_EXT
 
    GWC => G%WALL(IW)
@@ -19937,6 +20067,7 @@ SEPARABLE_BOUNDARY_CELLS_LOOP: DO IW = 1, L%N_WALL_CELLS_EXT
    ENDIF SEPARABLE_NEUMANN_IF
    
 ENDDO SEPARABLE_BOUNDARY_CELLS_LOOP
+!$OMP END PARALLEL DO
 
 END SUBROUTINE SCARC_SETUP_SEPARABLE_POISSON
 
@@ -19946,20 +20077,18 @@ END SUBROUTINE SCARC_SETUP_SEPARABLE_POISSON
 !> \brief Update right hand side vector corresponding to boundary conditions of inseparable Poisson system
 ! --------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_SETUP_INSEPARABLE_POISSON(NM)
-USE SCARC_POINTERS, ONLY: M, L, G, GWC, ST, PRHS, RHOP, KRESP, PPP, &
+USE SCARC_POINTERS, ONLY: M, L, G, GWC, MWC, ST, PRHS, RHOP, KRESP, &
                           RDX, RDY, RDZ, RDXN, RDYN, RDZN, &
                           BXS, BXF, BYS, BYF, BZS, BZF, &
-                          PXS, PXF, PYS, PYF, PZS, PZF, &
                           SCARC_POINT_TO_INSEPARABLE_ENVIRONMENT
 USE TYPES, ONLY: VENTS_TYPE, WALL_TYPE
 USE SCARC_MESSAGES
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 INTEGER, INTENT(IN) :: NM
-INTEGER :: IOR0, IW, IW1, IW2, IC, I, J, K, IG, JG, KG
-REAL(EB) :: TSI, TIME_RAMP_FACTOR, P_EXTERNAL, VAL, SCAL, RHOM, RRHOM, KGRAD, KNABLA2, VAL2
-LOGICAL :: IS_HOMOGENEOUS
+INTEGER :: IOR0, IW, IC, I, J, K, IG, JG, KG
+REAL(EB) :: TSI, TIME_RAMP_FACTOR, P_EXTERNAL, VAL, SCAL, RHOM, RRHOM, KNABLA2, DUNDT
+REAL(EB) :: KXM, KXP, KYM, KYP, KZM, KZP
 TYPE (VENTS_TYPE), POINTER :: VT
-TYPE (WALL_TYPE), POINTER :: WC
 
 CALL SCARC_POINT_TO_INSEPARABLE_ENVIRONMENT(NM)
 
@@ -19967,52 +20096,72 @@ CALL SCARC_POINT_TO_INSEPARABLE_ENVIRONMENT(NM)
 
 !$OMP PARALLEL DO PRIVATE(IC) SCHEDULE(STATIC)
 DO IC = 1, G%NC
-   ST%X(IC) = PPP(G%ICX(IC), G%ICY(IC), G%ICZ(IC))    
    ST%B(IC) = PRHS(G%ICX(IC), G%ICY(IC), G%ICZ(IC))    
 ENDDO                         
 !$OMP END PARALLEL DO
-
-! Set correct boundary conditions related to Dirichlet or Neumann boundaries for inseparable system
-
-IW1 = 1
-IF (IS_STRUCTURED) THEN
-   IW2 = L%N_WALL_CELLS_EXT
-ELSE
-   IW2 = L%N_WALL_CELLS_EXT + L%N_WALL_CELLS_INT
-   !IW2 = L%N_WALL_CELLS_EXT                ! still experimental
-ENDIF
+ST%X = 0.0_EB
 
 ! Build correct RHS for inseparable pressure system by subtracting: nabla**2 (K)
+! The non-simplified momentum equation looks like
+!
+!     del dot ((1/rho) del p) = - dD/dt - del dot F_A - del^2 K
+!
+! In the routine PRESSURE_SOLVER_COMPUTE_RHS the first both components were already computed 
+! and they were already copied to the right hand side vector ST%B of ScaRC above,
+! thus only the term -del^2 K is missing which will be added here
  
-DO IC = 1, G%NC
-   I = G%ICX(IC) ; J = G%ICY(IC) ; K = G%ICZ(IC)
-   KNABLA2 =   ( (KRESP(I+1,J,K) - KRESP(I,J,K))*RDXN(I) - (KRESP(I,J,K) - KRESP(I-1,J,K))*RDXN(I-1) )*RDX(I)    &
-             + ( (KRESP(I,J+1,K) - KRESP(I,J,K))*RDYN(J) - (KRESP(I,J,K) - KRESP(I,J-1,K))*RDYN(J-1) )*RDY(J)    &
-             + ( (KRESP(I,J,K+1) - KRESP(I,J,K))*RDZN(K) - (KRESP(I,J,K) - KRESP(I,J,K-1))*RDZN(K-1) )*RDZ(K)
-   ST%B(IC) = ST%B(IC) - KNABLA2
-ENDDO
+SELECT CASE(TYPE_GRID)
 
-INSEPARABLE_BOUNDARY_CELLS_LOOP: DO IW = IW1, IW2
+   CASE (NSCARC_GRID_STRUCTURED)
 
-   GWC => G%WALL(IW)
+      DO IC = 1, G%NC
+         I = G%ICX(IC) ; J = G%ICY(IC) ; K = G%ICZ(IC)
+         KNABLA2 =   ( (KRESP(I+1,J,K) - KRESP(I,J,K))*RDXN(I) - (KRESP(I,J,K) - KRESP(I-1,J,K))*RDXN(I-1) )*RDX(I)    &
+                   + ( (KRESP(I,J+1,K) - KRESP(I,J,K))*RDYN(J) - (KRESP(I,J,K) - KRESP(I,J-1,K))*RDYN(J-1) )*RDY(J)    &
+                   + ( (KRESP(I,J,K+1) - KRESP(I,J,K))*RDZN(K) - (KRESP(I,J,K) - KRESP(I,J,K-1))*RDZN(K-1) )*RDZ(K)
+         ST%B(IC) = ST%B(IC) - KNABLA2
+      ENDDO
+
+   CASE (NSCARC_GRID_UNSTRUCTURED)
+
+      DO IC = 1, G%NC
+         I = G%ICX(IC) ; J = G%ICY(IC) ; K = G%ICZ(IC)
+         KXP = 0.0_EB; KXM = 0.0_EB; KYP = 0.0_EB; KYM = 0.0_EB; KZP = 0.0_EB; KZM = 0.0_EB
+         IF (.NOT.L%IS_SOLID(I+1,J,K)) KXP = KRESP(I+1,J,K) - KRESP(I,J,K)
+         IF (.NOT.L%IS_SOLID(I-1,J,K)) KXM = KRESP(I,J,K) - KRESP(I-1,J,K)
+         IF (.NOT.L%IS_SOLID(I,J+1,K)) KYP = KRESP(I,J+1,K) - KRESP(I,J,K)
+         IF (.NOT.L%IS_SOLID(I,J-1,K)) KYM = KRESP(I,J,K) - KRESP(I,J-1,K)
+         IF (.NOT.L%IS_SOLID(I,J,K+1)) KZP = KRESP(I,J,K+1) - KRESP(I,J,K)
+         IF (.NOT.L%IS_SOLID(I,J,K-1)) KZM = KRESP(I,J,K) - KRESP(I,J,K-1)
+         KNABLA2 =   (KXP*RDXN(I)-KXM*RDXN(I-1))*RDX(I) + &
+                     (KYP*RDYN(J)-KYM*RDYN(J-1))*RDY(J) + &
+                     (KZP*RDZN(K)-KZM*RDZN(K-1))*RDZ(K)
+         ST%B(IC) = ST%B(IC) - KNABLA2
+      ENDDO
+
+END SELECT
+   
+! For each external wall cell determine correct value with corresponding scaling factor which has to be subtracted from RHS
+! to set Dirichlet oder Neumann boundary condition, respectively 
+
+INSEPARABLE_BOUNDARY_CELLS_LOOP: DO IW = 1, L%N_WALL_CELLS_EXT
+
+   GWC => G%WALL(IW)                                             ! ScaRC-internal wall structure
+   MWC => M%WALL(IW)                                             ! FDS-original wall structure
 
    IOR0 = GWC%IOR
 
-   IG = GWC%IXG ;  JG = GWC%IYG ; KG = GWC%IZG              ! Cell indices for IW on overlap
-   I  = GWC%IXW ;  J  = GWC%IYW ; K  = GWC%IZW              ! Cell indices for IW inside mesh
+   IG = GWC%IXG ;  JG = GWC%IYG ; KG = GWC%IZG                   ! Cell indices for IW on overlap
+   I  = GWC%IXW ;  J  = GWC%IYW ; K  = GWC%IZW                   ! Cell indices for IW inside mesh
 
    IF (TWO_D .AND. J /= 1) CALL SCARC_ERROR(NSCARC_ERROR_GRID_INDEX, SCARC_NONE, J)
    IF (IS_UNSTRUCTURED .AND. L%IS_SOLID(I, J, K)) CYCLE
 
-   IC = G%CELL_NUMBER(I,J,K)           ! Number of mesh-internal cell
+   IC = G%CELL_NUMBER(I,J,K)           
 
-   IF (GWC%BOUNDARY_TYPE == OPEN_BOUNDARY) THEN                            ! still experimental code
-      RRHOM = RECIPROCAL_DIRECTIONAL_MEAN(RHOP, IOR0, I, J, K)             ! reciprocal of density mean along IW in direction IOR0
-   ELSE
-      RRHOM = 1.0_EB/M%WALL(IW)%ONE_D%RHO_F                                ! if not open use RHO_F values (?)
-   ENDIF
-   SCAL = 0.0_EB
-   VAL  = 0.0_EB
+   SCAL  = 0.0_EB
+   VAL   = 0.0_EB
+   RRHOM = RECIPROCAL_DIRECTIONAL_MEAN(RHOP, IOR0, I, J, K)      ! reciprocal of density mean along IW in direction IOR0
 
    ! ---------- Dirichlet BC's:
    !
@@ -20022,46 +20171,36 @@ INSEPARABLE_BOUNDARY_CELLS_LOOP: DO IW = IW1, IW2
    !
    !  b_1  =>  b_1 - 1 / [dx_1 * 0.5*(dx_0 + dx_1)] * 2 * p_e / [0.5*(rho_0 + rho_1)]
    !
-   INSEPARABLE_DIRICHLET_IF: IF (GWC%BTYPE == DIRICHLET) THEN
+   INSEPARABLE_DIRICHLET_IF: IF (MWC%PRESSURE_BC_INDEX == DIRICHLET) THEN
+
+      IF (MWC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY .OR. &
+          MWC%BOUNDARY_TYPE==NULL_BOUNDARY         .OR. &
+          MWC%BOUNDARY_TYPE==SOLID_BOUNDARY) CYCLE    
       
-      WC => M%WALL(IW)
-      VT => M%VENTS(WC%VENT_INDEX)
-      IF (ABS(WC%ONE_D%T_IGN-T_BEGIN)<=TWO_EPSILON_EB .AND. VT%PRESSURE_RAMP_INDEX >=1) THEN
+      VT => M%VENTS(MWC%VENT_INDEX)
+      IF (ABS(MWC%ONE_D%T_IGN-T_BEGIN)<=TWO_EPSILON_EB .AND. VT%PRESSURE_RAMP_INDEX >=1) THEN
          TSI = T
       ELSE
          TSI = T - T_BEGIN
       ENDIF
       TIME_RAMP_FACTOR = EVALUATE_RAMP(TSI,VT%PRESSURE_RAMP_INDEX)
       P_EXTERNAL = TIME_RAMP_FACTOR*VT%DYNAMIC_PRESSURE
+      IF (P_EXTERNAL <= TWO_EPSILON_EB) CYCLE                     ! Zero boundary, nothing to add to RHS, save computing power
 
-      IF (IW > L%N_WALL_CELLS_EXT) CYCLE
       VAL = P_EXTERNAL                                            ! use external pressure value as Dirichlet BC's
-
       SELECT CASE (IOR0)
          CASE ( 1)
-            VAL2  = RHOP(I,J,K) * (BXS(J,K) - KRESP(I,J,K))       ! experimentally: recompute external pressure value: P = rho*(H-K)
-            PXS(J,K) = VAL                                        ! store boundary value for later use in SCARC_UPDATE_PRESSURE
             SCAL  = -2.0_EB*RDX(I)*RDXN(I-1)*RRHOM                ! scaling factor setting ST%BC below
          CASE (-1)
-            VAL2  = RHOP(I,J,K) * (BXF(J,K) - KRESP(I,J,K))
-            PXF(J,K) = VAL
-            SCAL  = -2.0_EB*RDX(I)*RDXN(I)*RRHOM
+            SCAL  = -2.0_EB*RDX(I)*RDXN(I)  *RRHOM
          CASE ( 2)
-            VAL2   = RHOP(I,J,K) * (BYS(I,K) - KRESP(I,J,K))
-            PYS(I,K) = VAL
             SCAL  = -2.0_EB*RDY(J)*RDYN(J-1)*RRHOM
          CASE (-2)
-            VAL2   = RHOP(I,J,K) * (BYF(I,K) - KRESP(I,J,K))
-            PYF(I,K) = VAL
-            SCAL  = -2.0_EB*RDY(J)*RDYN(J)*RRHOM
+            SCAL  = -2.0_EB*RDY(J)*RDYN(J)  *RRHOM
          CASE ( 3)
-            VAL2   = RHOP(I,J,K) * (BZS(I,J) - KRESP(I,J,K))
-            PZS(I,J) = VAL
             SCAL  = -2.0_EB*RDZ(K)*RDZN(K-1)*RRHOM
          CASE (-3)
-            VAL2   = RHOP(I,J,K) * (BZF(I,J) - KRESP(I,J,K))
-            PZF(I,J) = VAL
-            SCAL  = -2.0_EB*RDZ(K)*RDZN(K)*RRHOM
+            SCAL  = -2.0_EB*RDZ(K)*RDZN(K)  *RRHOM
       END SELECT
 
    ENDIF INSEPARABLE_DIRICHLET_IF
@@ -20074,71 +20213,92 @@ INSEPARABLE_BOUNDARY_CELLS_LOOP: DO IW = IW1, IW2
    !
    ! with  BB = 0.5*(rho_0 + rho_1) * (B - (K_1-K_0)/0.5*(dx_0+dx_1))     <--- rho*[B-nabla(K)]
 
-   INSEPARABLE_NEUMANN_IF: IF (GWC%BTYPE == NEUMANN) THEN
+   SELECT_NEUMANN_GRIDTYPE: SELECT CASE (TYPE_GRID)
+
+      CASE (NSCARC_GRID_STRUCTURED)
+
+         INSEPARABLE_STRUCTURED_NEUMANN_IF: IF (MWC%PRESSURE_BC_INDEX == NEUMANN) THEN
+            
+            RHOM = DIRECTIONAL_MEAN(RHOP, IOR0, I, J, K)                       ! density mean along IW
+            DUNDT = MWC%DUNDT
       
-      RHOM = DIRECTIONAL_MEAN(RHOP, IOR0, I, J, K)                       ! density mean along IW
+            SELECT CASE (IOR0)
+               CASE (1)
+                  VAL  =  RHOM*(BXS(J,K) - (KRESP(I,J,K)-KRESP(I-1,J,K))*M%RDXN(I-1))           
+                  SCAL =  RDX(I)*RRHOM       
+               CASE (-1)
+                  VAL  =  RHOM*(BXF(J,K) - (KRESP(I+1,J,K)-KRESP(I,J,K))*M%RDXN(I)  )
+                  SCAL = -RDX(I)*RRHOM     
+               CASE (2)
+                  VAL  =  RHOM*(BYS(I,K) - (KRESP(I,J,K)-KRESP(I,J-1,K))*M%RDYN(J-1))
+                  SCAL =  RDY(J)*RRHOM
+               CASE (-2)
+                  VAL  =  RHOM*(BYF(I,K) - (KRESP(I,J+1,K)-KRESP(I,J,K))*M%RDYN(J)  )
+                  SCAL = -RDY(J)*RRHOM
+               CASE (3)
+                  VAL  =  RHOM*(BZS(I,J) - (KRESP(I,J,K)-KRESP(I,J,K-1))*M%RDZN(K-1))
+                  SCAL =  RDZ(K)*RRHOM
+               CASE (-3)
+                  VAL  =  RHOM*(BZF(I,J) - (KRESP(I,J,K+1)-KRESP(I,J,K))*M%RDZN(K)  )
+                  SCAL = -RDZ(K)*RRHOM
+            END SELECT
+         
+         ENDIF INSEPARABLE_STRUCTURED_NEUMANN_IF
+      
+      CASE (NSCARC_GRID_UNSTRUCTURED)
 
-      IS_HOMOGENEOUS = (GWC%BOUNDARY_TYPE == SOLID_BOUNDARY) .OR. (IW > L%N_WALL_CELLS_EXT)
+         INSEPARABLE_UNSTRUCTURED_NEUMANN_IF: IF (MWC%PRESSURE_BC_INDEX == NEUMANN) THEN
+            
+            RHOM = DIRECTIONAL_MEAN(RHOP, IOR0, I, J, K)                       ! density mean along IW
+      
+            SELECT CASE (IOR0)
+               CASE (1)
+                  IF (L%IS_SOLID(I-1,J,K)) THEN
+                     VAL = RHOM*BXS(J,K) 
+                  ELSE
+                     VAL = RHOM*(BXS(J,K) - (KRESP(I,J,K)-KRESP(I-1,J,K))*M%RDXN(I-1))           
+                  ENDIF
+                  SCAL =  RDX(I)*RRHOM       
+               CASE (-1)
+                  IF (L%IS_SOLID(I+1,J,K)) THEN
+                     VAL = RHOM*BXF(J,K) 
+                  ELSE
+                     VAL = RHOM*(BXF(J,K) - (KRESP(I+1,J,K)-KRESP(I,J,K))*M%RDXN(I)  )
+                  ENDIF
+                  SCAL = -RDX(I)*RRHOM     
+               CASE (2)
+                  IF (L%IS_SOLID(I,J-1,K)) THEN
+                     VAL = RHOM*BYS(I,K) 
+                  ELSE
+                     VAL = RHOM*(BYS(I,K) - (KRESP(I,J,K)-KRESP(I,J-1,K))*M%RDYN(J-1))
+                  ENDIF
+                  SCAL =  RDY(J)*RRHOM
+               CASE (-2)
+                  IF (L%IS_SOLID(I,J+1,K)) THEN
+                     VAL = RHOM*BYF(I,K)
+                  ELSE
+                     VAL = RHOM*(BYF(I,K) - (KRESP(I,J+1,K)-KRESP(I,J,K))*M%RDYN(J)  )
+                  ENDIF
+                  SCAL = -RDY(J)*RRHOM
+               CASE (3)
+                  IF (L%IS_SOLID(I,J,K-1)) THEN
+                     VAL = RHOM*BZS(I,J)
+                  ELSE
+                     VAL = RHOM*(BZS(I,J) - (KRESP(I,J,K)-KRESP(I,J,K-1))*M%RDZN(K-1))
+                  ENDIF
+                  SCAL =  RDZ(K)*RRHOM
+               CASE (-3)
+                  IF (L%IS_SOLID(I,J,K+1)) THEN
+                     VAL = RHOM*BZF(I,J)
+                  ELSE
+                     VAL = RHOM*(BZF(I,J) - (KRESP(I,J,K+1)-KRESP(I,J,K))*M%RDZN(K)  )
+                  ENDIF
+                  SCAL = -RDZ(K)*RRHOM
+            END SELECT
+         
+         ENDIF INSEPARABLE_UNSTRUCTURED_NEUMANN_IF
 
-      ! Caution mesh stretching not yet considered ... i.e. terms HX, HY, HZ, see definition of BC's in pres
-      SELECT CASE (IOR0)
-         CASE (1)
-            KGRAD = (KRESP(I,J,K)-KRESP(I-1,J,K))*M%RDXN(I-1)            ! caution: take care of right direction!
-            IF (IS_HOMOGENEOUS) THEN
-               VAL = - RHOM*KGRAD                                        ! corresponding to homogeneous Neumann condition at obsts
-            ELSE
-               VAL = RHOM*(BXS(J,K) - KGRAD)                             ! based on: \nabla p = rho*[-du/dt - F_A - \nabla K]
-            ENDIF
-            PXS(J,K) = VAL                                               ! store BC of inseparable pressure for later use
-            SCAL = RDX(I)*RRHOM                                          ! positive for ABS(IOR) > 0
-         CASE (-1)
-            KGRAD = (KRESP(I+1,J,K)-KRESP(I,J,K))*M%RDXN(I)
-            IF (IS_HOMOGENEOUS) THEN
-               VAL = -RHOM*KGRAD             
-            ELSE
-               VAL = RHOM*(BXF(J,K) - KGRAD)
-            ENDIF
-            PXF(J,K) = VAL
-            SCAL = -RDX(I)*RRHOM                                          ! negative for ABS(IOR) < 0
-         CASE (2)
-            KGRAD = (KRESP(I,J,K)-KRESP(I,J-1,K))*M%RDYN(J-1)
-            IF (IS_HOMOGENEOUS) THEN
-               VAL = -RHOM*KGRAD
-            ELSE
-               VAL = RHOM*(BYS(I,K) - KGRAD)
-            ENDIF
-            PYS(I,K) = VAL
-            SCAL = RDY(J)*RRHOM
-         CASE (-2)
-            KGRAD = (KRESP(I,J+1,K)-KRESP(I,J,K))*M%RDYN(J)
-            IF (IS_HOMOGENEOUS) THEN
-               VAL = -RHOM*KGRAD 
-            ELSE
-               VAL = RHOM*(BYF(I,K) - KGRAD) 
-            ENDIF
-            PYF(I,K) = VAL
-            SCAL = -RDY(J)*RRHOM
-         CASE (3)
-            KGRAD = (KRESP(I,J,K)-KRESP(I,J,K-1))*M%RDZN(K-1)
-            IF (IS_HOMOGENEOUS) THEN
-               VAL = -RHOM*KGRAD
-            ELSE
-               VAL = RHOM*(BZS(I,J) - KGRAD)
-            ENDIF
-            PZS(I,J) = VAL
-            SCAL = RDZ(K)*RRHOM
-         CASE (-3)
-            KGRAD = (KRESP(I,J,K+1)-KRESP(I,J,K))*M%RDZN(K)
-            IF (IS_HOMOGENEOUS) THEN
-               VAL = -RHOM*KGRAD
-            ELSE
-               VAL = RHOM*(BZF(I,J) - KGRAD)
-            ENDIF
-            PZF(I,J) = VAL
-            SCAL = -RDZ(K)*RRHOM
-      END SELECT
-   
-   ENDIF INSEPARABLE_NEUMANN_IF
+   END SELECT SELECT_NEUMANN_GRIDTYPE
 
    ST%B(IC) = ST%B(IC) + SCAL * VAL                    ! set new value of RHS based on previous computed SCAL and VAL
 
@@ -20160,7 +20320,6 @@ SELECT CASE (TYPE_COARSE)
 
    CASE (NSCARC_COARSE_DIRECT)
 #ifdef WITH_MKL
-      !IF (STACK(NPARENT)%SOLVER%TYPE_SCOPE(0) == NSCARC_SCOPE_GLOBAL .AND. NMESHES > 1) THEN
       IF (NMESHES > 1) THEN
          CALL SCARC_METHOD_CLUSTER (NSCARC_MATRIX_POISSON_SYM, NSTACK, NPARENT, NLEVEL)
       ELSE
@@ -20278,37 +20437,28 @@ IF (N_DIRIC_GLOBAL(NLEVEL_MIN) == 0) THEN
    CALL FILTER_MEANVALUE(X, NL)
 ENDIF
 
+! Separable Poisson system: 
+!    - Krylov method was performed for Bernoulli integral pressure HP 
+!    - Transmit computed solution to corresponding HP vector and set ghost values
+! Inseparable Poisson system: 
+!    - Krylov method was performed for inseparable pressure P
+!    - Recompute HP from computed solution, get baroclinic term based on it and set correct ghost values
+
 IF (TYPE_SOLVER == NSCARC_SOLVER_MAIN .AND. .NOT.IS_MGM) THEN
-
    SELECT CASE (TYPE_POISSON)
-
-      ! Separable Poisson system: Krylov method was performed for HP itself
-      ! Transmit mesh-inner values of computed (U)ScaRC solution to the corresponding HP vector
-
       CASE (NSCARC_POISSON_SEPARABLE)
-
          CALL SCARC_UPDATE_MAINCELLS(NLEVEL_MIN)
-
-      ! Inseparable Poisson system: Krylov method was performed for inseparable P 
-      ! Transmit mesh-inner values of computed (U)ScaRC solution to the corresponding HP vector
-
+         CALL SCARC_UPDATE_GHOSTCELLS(NLEVEL_MIN)
       CASE (NSCARC_POISSON_INSEPARABLE)
-
          CALL SCARC_UPDATE_PRESSURE(NLEVEL_MIN)
+         CALL SCARC_UPDATE_GHOSTCELLS(NLEVEL_MIN)
          CALL SCARC_UPDATE_BAROCLINIC_TERM
-         CALL SCARC_UPDATE_MAINCELLS(NLEVEL_MIN)
-
+!         CALL SCARC_UPDATE_GHOSTCELLS(NLEVEL_MIN)
    END SELECT
-
-   ! Finally, a corresponding HP solution is achieved, which still needs to get its correct ghost cell values
-   ! The resulting overlapping HP is finally passed to the calling PRESSURE_ITERATION_SCHEME
-
-   CALL SCARC_UPDATE_GHOSTCELLS(NLEVEL_MIN)
-
 ENDIF
 
-! Leave method gracefully 
-!
+! Leave method gracefully - calling routine PRESSURE_ITERATION_SCHEME receives final vector HP
+ 
 CALL SCARC_RELEASE_SCOPE(NS, NP)
 
 END SUBROUTINE SCARC_METHOD_KRYLOV
@@ -21059,102 +21209,39 @@ END SUBROUTINE SCARC_UPDATE_PRECONDITIONER
 ! For all ghost cells, compute the corresponding values based on some initially computed boundary vectors
 ! ----------------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_UPDATE_PRESSURE(NL)
-USE SCARC_POINTERS, ONLY: L, G, ST, PPP, GWC, DXN, DYN, DZN, &
-                          SCARC_POINT_TO_GRID, SCARC_POINT_TO_SEPARABLE_ENVIRONMENT, SCARC_POINT_TO_INSEPARABLE_ENVIRONMENT
+USE SCARC_POINTERS, ONLY: M, L, G, ST, RHOP, HP, KRESP, SCARC_POINT_TO_GRID, SCARC_POINT_TO_INSEPARABLE_ENVIRONMENT
 INTEGER, INTENT(IN) :: NL
-INTEGER :: NM
-INTEGER :: I, J, K, IC, IW, IXW, IYW, IZW, IXG, IYG, IZG, IOR0
+INTEGER :: NM, I, J, K, IC
 
 PRESSURE_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 
    CALL SCARC_POINT_TO_GRID (NM, NL)                                    
    CALL SCARC_POINT_TO_INSEPARABLE_ENVIRONMENT (NM)                                    
-   ST  => L%STAGE(NSCARC_STAGE_ONE)
+   ST => L%STAGE(NSCARC_STAGE_ONE)
 
    ! First transfer the current (U)ScaRC solution to the inseparable Poisson system to corresponding pressure vector
+   ! and temporarily save HP from previous time step
 
-   DO K=1,L%NZ
-      DO J=1,L%NY
-         DO I=1,L%NX
+   M%WORK2 = HP                                     
+   HP = 0.0_EB
+   DO K=1,M%KBAR
+      DO J=1,M%JBAR
+         DO I=1,M%IBAR
             IF (IS_UNSTRUCTURED .AND. L%IS_SOLID(I, J, K)) CYCLE
             IC = G%CELL_NUMBER(I,J,K)
-            PPP(I,J,K) = ST%X(IC)
+            HP(I,J,K) = ST%X(IC)/RHOP(I,J,K) + KRESP(I,J,K)
          ENDDO
       ENDDO
    ENDDO
 
-   ! Then use the pressure boundary vectors PXS, PXF, ..., PZF (analogous to BXS, BXF, ... BZF for HP) in order to generate 
-   ! the values on the ghost cells depending on the boundary type 
-
-   PRESSURE_WALLCELLS_LOOP: DO IW = 1, L%N_WALL_CELLS_EXT
-
-      GWC => G%WALL(IW)
-
-      IXG = GWC%IXG ;  IYG = GWC%IYG ;  IZG = GWC%IZG
-      IXW = GWC%IXW ;  IYW = GWC%IYW ;  IZW = GWC%IZW
-
-      IOR0 = GWC%IOR
-
-      ! Dirichlet :  BCs correspond to P_EXTERNAL
-       
-      PRESSURE_DIRICHLET_IF: IF (GWC%BTYPE == DIRICHLET) THEN
-         SELECT CASE (IOR0)
-            CASE ( 1)
-               PPP(IXG,IYW,IZW) = -PPP(IXW,IYW,IZW) + 2.0_EB * L%PXS(IYW,IZW)
-            CASE (-1)
-               PPP(IXG,IYW,IZW) = -PPP(IXW,IYW,IZW) + 2.0_EB * L%PXF(IYW,IZW)
-            CASE ( 2)
-               PPP(IXW,IYG,IZW) = -PPP(IXW,IYW,IZW) + 2.0_EB * L%PYS(IXW,IZW)
-            CASE (-2)
-               PPP(IXW,IYG,IZW) = -PPP(IXW,IYW,IZW) + 2.0_EB * L%PYF(IXW,IZW)
-            CASE ( 3)
-               PPP(IXW,IYW,IZG) = -PPP(IXW,IYW,IZW) + 2.0_EB * L%PZS(IXW,IYW)
-            CASE (-3)
-               PPP(IXW,IYW,IZG) = -PPP(IXW,IYW,IZW) + 2.0_EB * L%PZF(IXW,IYW)
-         END SELECT
-      ENDIF PRESSURE_DIRICHLET_IF
-
-      ! Neumann :   BCs correspond to rho * (B.. - \nabla K) , where B.. are the original BXS, BXF, ... BZF vectors
-
-      PRESSURE_NEUMANN_IF: IF (GWC%BTYPE == NEUMANN) THEN
-
-         PRESSURE_NEUMANN_SOLID_IF: IF (GWC%BOUNDARY_TYPE == SOLID_BOUNDARY) THEN
-            SELECT CASE (IOR0)
-               CASE ( 1)
-                  PPP(IXG,IYW,IZW) = PPP(IXW,IYW,IZW) 
-               CASE (-1)
-                  PPP(IXG,IYW,IZW) = PPP(IXW,IYW,IZW) 
-               CASE ( 2)
-                  PPP(IXW,IYG,IZW) = PPP(IXW,IYW,IZW) 
-               CASE (-2)
-                  PPP(IXW,IYG,IZW) = PPP(IXW,IYW,IZW) 
-               CASE ( 3)
-                  PPP(IXW,IYW,IZG) = PPP(IXW,IYW,IZW) 
-               CASE (-3)
-                  PPP(IXW,IYW,IZG) = PPP(IXW,IYW,IZW) 
-            END SELECT
-         ELSE
-            SELECT CASE (IOR0)
-               CASE ( 1)
-                  PPP(IXG,IYW,IZW) = PPP(IXW,IYW,IZW) - DXN(IXG) * L%PXS(IYW,IZW)
-               CASE (-1)
-                  PPP(IXG,IYW,IZW) = PPP(IXW,IYW,IZW) + DXN(IXW) * L%PXF(IYW,IZW)
-               CASE ( 2)
-                  PPP(IXW,IYG,IZW) = PPP(IXW,IYW,IZW) - DYN(IYG) * L%PYS(IXW,IZW)
-               CASE (-2)
-                  PPP(IXW,IYG,IZW) = PPP(IXW,IYW,IZW) + DYN(IYW) * L%PYF(IXW,IZW)
-               CASE ( 3)
-                  PPP(IXW,IYW,IZG) = PPP(IXW,IYW,IZW) - DZN(IZG) * L%PZS(IXW,IYW)
-               CASE (-3)
-                  PPP(IXW,IYW,IZG) = PPP(IXW,IYW,IZW) + DZN(IZW) * L%PZF(IXW,IYW)
-            END SELECT
-         ENDIF PRESSURE_NEUMANN_SOLID_IF
-
-      ENDIF PRESSURE_NEUMANN_IF
-
-   ENDDO PRESSURE_WALLCELLS_LOOP
+  IF (SCARC_VERBOSE) THEN
+      CALL SCARC_VERBOSE_VECTOR3(HP, NM, 'HP AFTER PRESSURE SOLUTION')
+      CALL SCARC_VERBOSE_VECTOR3(RHOP, NM, 'RHOP AFTER PRESSURE SOLUTION')
+   ENDIF
 
 ENDDO PRESSURE_MESHES_LOOP
+
+CALL SCARC_EXCHANGE(NSCARC_EXCHANGE_BERNOULLI, NSCARC_NONE, NL)
 
 END SUBROUTINE SCARC_UPDATE_PRESSURE
 
@@ -21187,6 +21274,7 @@ MAINCELLS_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
       CASE (NSCARC_POISSON_SEPARABLE)
 
          CALL SCARC_POINT_TO_SEPARABLE_ENVIRONMENT (NM)
+
          DO IC = 1, G%NC
             HP(G%ICX(IC), G%ICY(IC), G%ICZ(IC)) = ST%X(IC)
          ENDDO
@@ -21200,14 +21288,12 @@ MAINCELLS_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 
          CALL SCARC_POINT_TO_INSEPARABLE_ENVIRONMENT (NM)
 
-         ! Recompute HP values from relation    H = P/RHO - K
-          
          DO K=1,KBAR
             DO J=1,JBAR
                DO I=1,IBAR
                   IF (IS_UNSTRUCTURED .AND. L%IS_SOLID(I, J, K)) CYCLE
                   IC = G%CELL_NUMBER(I,J,K)
-                  HP(I,J,K) = ST%X(IC)/RHOP(I,J,K) + KRESP(I,J,K)
+                  HP(I,J,K) = ST%X(IC)/RHOP(I,J,K) + KRESP(I,J,K)     
                ENDDO
             ENDDO
          ENDDO
@@ -21224,333 +21310,428 @@ END SUBROUTINE SCARC_UPDATE_MAINCELLS
 ! Along internal mesh interfaces the overlaps are consistent by construction of the (U)ScaRC solver
 ! --------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_UPDATE_GHOSTCELLS(NL)
-USE SCARC_POINTERS, ONLY: M, L, G, GWC, HP, DXN, DYN, DZN, SCARC_POINT_TO_GRID, SCARC_POINT_TO_SEPARABLE_ENVIRONMENT
+USE SCARC_POINTERS, ONLY: M, L, G, GWC, MWC, HP, DXN, DYN, DZN, &
+                          SCARC_POINT_TO_GRID, SCARC_POINT_TO_SEPARABLE_ENVIRONMENT, SCARC_POINT_TO_INSEPARABLE_ENVIRONMENT
+USE SCARC_UTILITIES, ONLY: RECIPROCAL_DIRECTIONAL_MEAN
 INTEGER, INTENT(IN) :: NL
 INTEGER :: NM, IW, IOR0, IXG, IYG, IZG, IXW, IYW, IZW
 
 GHOSTCELLS_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 
    CALL SCARC_POINT_TO_GRID (NM, NL)                                    
-   CALL SCARC_POINT_TO_SEPARABLE_ENVIRONMENT (NM)
+   CALL SCARC_POINT_TO_SEPARABLE_ENVIRONMENT (NM)         ! enough here, even in case of inseparable Poisson problem
 
-   GHOSTCELLS_WALL_LOOP: DO IW = 1, L%N_WALL_CELLS_EXT
+   GHOSTCELLS_LOOP: DO IW = 1, L%N_WALL_CELLS_EXT
 
-      GWC => G%WALL(IW)
+      GWC => G%WALL(IW)                                   ! ScaRC-internal wall structure
+      MWC => M%WALL(IW)                                   ! FDS-original wall structure
 
       IXG = GWC%IXG ;  IYG = GWC%IYG ;  IZG = GWC%IZG
       IXW = GWC%IXW ;  IYW = GWC%IYW ;  IZW = GWC%IZW
 
       IOR0 = GWC%IOR
 
-      GHOSTCELLS_DIRICHLET_IF: IF (GWC%BTYPE == DIRICHLET) THEN
-         SELECT CASE(IOR0)
-            CASE ( 1)
-               HP(IXG,IYW,IZW) = -HP(IXW,IYW,IZW) +  2.0_EB*M%BXS(IYW,IZW)
-            CASE (-1)
-               HP(IXG,IYW,IZW) = -HP(IXW,IYW,IZW) +  2.0_EB*M%BXF(IYW,IZW)
-            CASE ( 2)
-               HP(IXW,IYG,IZW) = -HP(IXW,IYW,IZW) +  2.0_EB*M%BYS(IXW,IZW)
-            CASE (-2)
-               HP(IXW,IYG,IZW) = -HP(IXW,IYW,IZW) +  2.0_EB*M%BYF(IXW,IZW)
-            CASE ( 3)
-               HP(IXW,IYW,IZG) = -HP(IXW,IYW,IZW) +  2.0_EB*M%BZS(IXW,IYW)
-            CASE (-3)
-               HP(IXW,IYW,IZG) = -HP(IXW,IYW,IZW) +  2.0_EB*M%BZF(IXW,IYW)
-         END SELECT
-      ENDIF GHOSTCELLS_DIRICHLET_IF
-
-      GHOSTCELLS_NEUMANN_IF: IF (GWC%BTYPE == NEUMANN) THEN
-
-         GHOSTCELLS_NEUMANN_SOLID_IF: IF (GWC%BOUNDARY_TYPE == SOLID_BOUNDARY) THEN 
-            SELECT CASE(IOR0)                                     ! homogenous Neumann BC's
+      GHOSTCELLS_DIRICHLET_IF: IF (MWC%PRESSURE_BC_INDEX == DIRICHLET) THEN
+         IF (MWC%BOUNDARY_TYPE == INTERPOLATED_BOUNDARY .OR. MWC%BOUNDARY_TYPE == NULL_BOUNDARY ) CYCLE 
+         IF (MWC%BOUNDARY_TYPE == SOLID_BOUNDARY) THEN
+            SELECT CASE(IOR0)
                CASE ( 1)
-                  HP(IXG,IYW,IZW) =  HP(IXW,IYW,IZW) 
+                  HP(IXG,IYW,IZW) = HP(IXW,IYW,IZW)
                CASE (-1)
-                  HP(IXG,IYW,IZW) =  HP(IXW,IYW,IZW) 
+                  HP(IXG,IYW,IZW) = HP(IXW,IYW,IZW)
                CASE ( 2)
-                  HP(IXW,IYG,IZW) =  HP(IXW,IYW,IZW) 
+                  HP(IXW,IYG,IZW) = HP(IXW,IYW,IZW)
                CASE (-2)
-                  HP(IXW,IYG,IZW) =  HP(IXW,IYW,IZW) 
+                  HP(IXW,IYG,IZW) = HP(IXW,IYW,IZW)
                CASE ( 3)
-                  HP(IXW,IYW,IZG) =  HP(IXW,IYW,IZW) 
+                  HP(IXW,IYW,IZG) = HP(IXW,IYW,IZW)
                CASE (-3)
-                  HP(IXW,IYW,IZG) =  HP(IXW,IYW,IZW) 
+                  HP(IXW,IYW,IZG) = HP(IXW,IYW,IZW)
             END SELECT
          ELSE
             SELECT CASE(IOR0)
                CASE ( 1)
-                  HP(IXG,IYW,IZW) =  HP(IXW,IYW,IZW) - DXN(IXG)*M%BXS(IYW,IZW)
+                  HP(IXG,IYW,IZW) = -HP(IXW,IYW,IZW) + 2.0_EB*M%BXS(IYW,IZW)
                CASE (-1)
-                  HP(IXG,IYW,IZW) =  HP(IXW,IYW,IZW) + DXN(IXW)*M%BXF(IYW,IZW)
+                  HP(IXG,IYW,IZW) = -HP(IXW,IYW,IZW) + 2.0_EB*M%BXF(IYW,IZW)
                CASE ( 2)
-                  HP(IXW,IYG,IZW) =  HP(IXW,IYW,IZW) - DYN(IYG)*M%BYS(IXW,IZW)
+                  HP(IXW,IYG,IZW) = -HP(IXW,IYW,IZW) + 2.0_EB*M%BYS(IXW,IZW)
                CASE (-2)
-                  HP(IXW,IYG,IZW) =  HP(IXW,IYW,IZW) + DYN(IYW)*M%BYF(IXW,IZW)
+                  HP(IXW,IYG,IZW) = -HP(IXW,IYW,IZW) + 2.0_EB*M%BYF(IXW,IZW)
                CASE ( 3)
-                  HP(IXW,IYW,IZG) =  HP(IXW,IYW,IZW) - DZN(IZG)*M%BZS(IXW,IYW)
+                  HP(IXW,IYW,IZG) = -HP(IXW,IYW,IZW) + 2.0_EB*M%BZS(IXW,IYW)
                CASE (-3)
-                  HP(IXW,IYW,IZG) =  HP(IXW,IYW,IZW) + DZN(IZW)*M%BZF(IXW,IYW)
+                  HP(IXW,IYW,IZG) = -HP(IXW,IYW,IZW) + 2.0_EB*M%BZF(IXW,IYW)
             END SELECT
+         ENDIF
+      ENDIF GHOSTCELLS_DIRICHLET_IF
 
-         ENDIF GHOSTCELLS_NEUMANN_SOLID_IF
-
+      GHOSTCELLS_NEUMANN_IF: IF (MWC%PRESSURE_BC_INDEX == NEUMANN) THEN
+         SELECT CASE(IOR0)
+            CASE ( 1)
+               HP(IXG,IYW,IZW) =  HP(IXW,IYW,IZW) - DXN(IXG)*M%BXS(IYW,IZW)
+            CASE (-1)
+               HP(IXG,IYW,IZW) =  HP(IXW,IYW,IZW) + DXN(IXW)*M%BXF(IYW,IZW)
+            CASE ( 2)
+               HP(IXW,IYG,IZW) =  HP(IXW,IYW,IZW) - DYN(IYG)*M%BYS(IXW,IZW)
+            CASE (-2)
+               HP(IXW,IYG,IZW) =  HP(IXW,IYW,IZW) + DYN(IYW)*M%BYF(IXW,IZW)
+            CASE ( 3)
+               HP(IXW,IYW,IZG) =  HP(IXW,IYW,IZW) - DZN(IZG)*M%BZS(IXW,IYW)
+            CASE (-3)
+               HP(IXW,IYW,IZG) =  HP(IXW,IYW,IZW) + DZN(IZW)*M%BZF(IXW,IYW)
+         END SELECT
+         IF (MWC%BOUNDARY_TYPE == SOLID_BOUNDARY) HP(IXG,IYG,IZG) = HP(IXW,IYW,IZW)
       ENDIF GHOSTCELLS_NEUMANN_IF
 
-   ENDDO GHOSTCELLS_WALL_LOOP
+   ENDDO GHOSTCELLS_LOOP
+
+   CALL SCARC_EXCHANGE(NSCARC_EXCHANGE_BERNOULLI, NSCARC_NONE, NL)
 
 ENDDO GHOSTCELLS_MESHES_LOOP
 
-! Perform data exchange to achieve consistency of ghost values along internal boundaries
-! Note: this is most probably no longer necessary because MESH_EXCHANGE(5) is used after the call of ScaRC   TODO
-
-CALL SCARC_EXCHANGE(NSCARC_EXCHANGE_PRESSURE, NSCARC_NONE, NL)
-   
 END SUBROUTINE SCARC_UPDATE_GHOSTCELLS
 
 
 ! --------------------------------------------------------------------------------------------------------------
-!> \brief Compute baroclinic torque term based on (U)ScaRC solution of inseparable Poisson system
+!> \brief Compute current baroclinic torque part F_B based on (U)ScaRC solution of inseparable Poisson system
+! Build complete force term based on previously stored F_A parts and new F_B parts for later velocity correction
 ! --------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_UPDATE_BAROCLINIC_TERM
-USE SCARC_POINTERS, ONLY: HP, RHOP, PPP, SCARC_POINT_TO_GRID, SCARC_POINT_TO_INSEPARABLE_ENVIRONMENT
-USE MESH_VARIABLES
-USE MESH_POINTERS
-REAL(EB), POINTER, DIMENSION(:,:,:) :: RRHO=>NULL(),RHMK=>NULL()
-REAL(EB) :: VAL, DIFF, DIFF_MAX
-INTEGER :: I_MAX, J_MAX, K_MAX
-INTEGER  :: I, J, K, NM
+USE SCARC_POINTERS, ONLY: M, L, HP, KRESP, RHOP, RRHO, RHMK, RDXN, RDYN, RDZN, &
+                          SCARC_POINT_TO_GRID, SCARC_POINT_TO_INSEPARABLE_ENVIRONMENT
+USE VELO, ONLY: NO_FLUX 
+INTEGER :: I, J, K, NM
 
 BAROCLINIC_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
    
-   CALL SCARC_POINT_TO_INSEPARABLE_ENVIRONMENT(NM)
+   CALL SCARC_POINT_TO_GRID(NM, NLEVEL_MIN)
+   CALL SCARC_POINT_TO_INSEPARABLE_ENVIRONMENT(NM)          
 
-   ! Compute 1/rho in each grid cell
+   ! Compute 1/rho and p = rho*(H-K) in each grid cell
 
-   RRHO => WORK2
-   DO K=0,KBP1
-      DO J=0,JBP1
-         DO I=0,IBP1
+   RRHO => M%WORK7
+   RHMK => M%WORK8
+
+   DO K=0,M%KBP1
+      DO J=0,M%JBP1
+         DO I=0,M%IBP1
             RRHO(I,J,K) = 1._EB/RHOP(I,J,K)
-  !         RRHO(I,J,K) = 1._EB/0.1195253017817356E+01            !SUSI
+            RHMK(I,J,K) = RHOP(I,J,K)*(HP(I,J,K)-KRESP(I,J,K))
          ENDDO
       ENDDO
    ENDDO
 
-   ! Compute baroclinic term in the x momentum equation, p*d/dx(1/rho), based on inseparable pressure solution P
+   ! Compute baroclinic term in the x momentum equation, p*d/dx(1/rho), based on RHMK and accumulate full force term
    
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=0,IBAR
-            FVX_B(I,J,K) = -(PPP(I,J,K)*RHOP(I+1,J,K)+PPP(I+1,J,K)*RHOP(I,J,K))*(RRHO(I+1,J,K)-RRHO(I,J,K))*RDXN(I)/ &
-                            (RHOP(I+1,J,K)+RHOP(I,J,K))
+   DO K=1,M%KBAR
+      DO J=1,M%JBAR
+         DO I=0,M%IBAR
+            M%FVX_B(I,J,K) = -(RHMK(I,J,K)*RHOP(I+1,J,K)+RHMK(I+1,J,K)*RHOP(I,J,K))*(RRHO(I+1,J,K)-RRHO(I,J,K))*RDXN(I)/ &
+                              (RHOP(I+1,J,K)+RHOP(I,J,K))
+            M%FVX(I,J,K)   = L%FVX_H(I,J,K) + M%FVX_B(I,J,K)
          ENDDO
       ENDDO
    ENDDO
    
-   ! Compute baroclinic term in the y momentum equation, p*d/dy(1/rho), based on inseparable pressure solution P
+   ! Compute baroclinic term in the y momentum equation, p*d/dy(1/rho), based on RHMK
    
    IF (.NOT.TWO_D) THEN
-      DO K=1,KBAR
-         DO J=0,JBAR
-            DO I=1,IBAR
-               FVY_B(I,J,K) = -(PPP(I,J,K)*RHOP(I,J+1,K)+PPP(I,J+1,K)*RHOP(I,J,K))*(RRHO(I,J+1,K)-RRHO(I,J,K))*RDYN(J)/ &
-                               (RHOP(I,J+1,K)+RHOP(I,J,K))
+      DO K=1,M%KBAR
+         DO J=0,M%JBAR
+            DO I=1,M%IBAR
+               M%FVY_B(I,J,K) = -(RHMK(I,J,K)*RHOP(I,J+1,K)+RHMK(I,J+1,K)*RHOP(I,J,K))*(RRHO(I,J+1,K)-RRHO(I,J,K))*RDYN(J)/ &
+                                 (RHOP(I,J+1,K)+RHOP(I,J,K))
+               M%FVY(I,J,K)   = L%FVY_H(I,J,K) + M%FVY_B(I,J,K)
             ENDDO
          ENDDO
       ENDDO
    ENDIF
    
-   ! Compute baroclinic term in the z momentum equation, p*d/dz(1/rho), based on inseparable pressure solution P
+   ! Compute baroclinic term in the z momentum equation, p*d/dz(1/rho), based on RHMK
    
-   DO K=0,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            FVZ_B(I,J,K) = -(PPP(I,J,K)*RHOP(I,J,K+1)+PPP(I,J,K+1)*RHOP(I,J,K))*(RRHO(I,J,K+1)-RRHO(I,J,K))*RDZN(K)/ &
-                            (RHOP(I,J,K+1)+RHOP(I,J,K))
+   DO K=0,M%KBAR
+      DO J=1,M%JBAR
+         DO I=1,M%IBAR
+            M%FVZ_B(I,J,K) = -(RHMK(I,J,K)*RHOP(I,J,K+1)+RHMK(I,J,K+1)*RHOP(I,J,K))*(RRHO(I,J,K+1)-RRHO(I,J,K))*RDZN(K)/ &
+                              (RHOP(I,J,K+1)+RHOP(I,J,K))
+            M%FVZ(I,J,K)   = L%FVZ_H(I,J,K) + M%FVZ_B(I,J,K)
          ENDDO
       ENDDO
    ENDDO
 
-   BAROCLINIC_CHECK_IF: IF (SCARC_CHECK) THEN
+   ! Set no-flux conditions on final F = F_A + F_B, where F_B is up-to-date to current time step
+   ! This will then be used in the velocity predictor/corrector routines
 
-      RHMK => WORK1
-      IF (PREDICTOR) THEN
-         RHOP => RHO
-      ELSE
-         RHOP => RHOS
-      ENDIF
-      DIFF_MAX = 0.0_EB
-      I_MAX = 0 ;  J_MAX = 0 ;  K_MAX = 0
- 
-      ! Recompute pressure from HP 
-
-      DO K=0,KBP1
-         DO J=0,JBP1
-            DO I=0,IBP1
-               RHMK(I,J,K) = RHOP(I,J,K) * (HP(I,J,K) - KRES(I,J,K))
-            ENDDO
-         ENDDO
-      ENDDO
- 
-      ! Compute baroclinic term in the x momentum equation, p*d/dx(1/rho), based on HP
- 
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=0,IBAR
-                VAL = -(RHMK(I,J,K)*RHOP(I+1,J,K)+RHMK(I+1,J,K)*RHOP(I,J,K))*(RRHO(I+1,J,K)-RRHO(I,J,K))*RDXN(I)/ &
-                       (RHOP(I+1,J,K)+RHOP(I,J,K))
-                DIFF = ABS(FVX_B(I,J,K) - VAL) 
-                IF (DIFF > DIFF_MAX) THEN
-                   DIFF_MAX = DIFF
-                   I_MAX = I ;  J_MAX = J;  K_MAX = K
-                ENDIF
-            ENDDO
-         ENDDO
-      ENDDO
- 
-      ! Compute baroclinic term in the y momentum equation, p*d/dy(1/rho), based on HP
- 
-      IF (.NOT.TWO_D) THEN
-         DO K=1,KBAR
-            DO J=0,JBAR
-               DO I=1,IBAR
-                   VAL = -(RHMK(I,J,K)*RHOP(I,J+1,K)+RHMK(I,J+1,K)*RHOP(I,J,K))*(RRHO(I,J+1,K)-RRHO(I,J,K))*RDYN(J)/ &
-                          (RHOP(I,J+1,K)+RHOP(I,J,K))
-                   IF (DIFF > DIFF_MAX) THEN
-                      DIFF_MAX = DIFF
-                      I_MAX = I ;  J_MAX = J;  K_MAX = K
-                   ENDIF
-               ENDDO
-            ENDDO
-         ENDDO
-      ENDIF
- 
-      ! Compute baroclinic term in the z momentum equation, p*d/dz(1/rho), based on HP
- 
-      DO K=0,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               VAL = -(RHMK(I,J,K)*RHOP(I,J,K+1)+RHMK(I,J,K+1)*RHOP(I,J,K))*(RRHO(I,J,K+1)-RRHO(I,J,K))*RDZN(K)/ &
-                       (RHOP(I,J,K+1)+RHOP(I,J,K))
-               IF (DIFF > DIFF_MAX) THEN
-                  DIFF_MAX = DIFF
-                  I_MAX = I ;  J_MAX = J;  K_MAX = K
-               ENDIF
-            ENDDO
-         ENDDO
-      ENDDO
-
-      IF (SCARC_VERBOSE) WRITE(MSG%LU_VERBOSE, 1000) DIFF_MAX, I_MAX, J_MAX, K_MAX
-
-   ENDIF BAROCLINIC_CHECK_IF
+   M%WORK3 = HP                                         ! store new HP which was built in update_pressure routine
+   HP = M%WORK2                                         ! use former HP temporarily for no_flux computation 
+   CALL NO_FLUX(DT, NM)
+   HP = M%WORK3                                         ! restore new HP
 
 ENDDO BAROCLINIC_MESHES_LOOP
 
-1000 FORMAT('Max difference for baroclinic term :', E11.3,' at positions (',i3,',',i3,',',i3,')')
 END SUBROUTINE SCARC_UPDATE_BAROCLINIC_TERM
 
 
 ! --------------------------------------------------------------------------------------------------------------
-!> \brief Update current values of density and resolved kinetic enery used for the inseparable Poisson system
-! This is still experimental code which additionally uses and stores separate versions for these quantities
+!> \brief Set momentum fluxes inside and on the surface of solid obstructions to maintain user-specified flux
+! This is based on the original, non-simplified momentum equation
+!     dU/dt + del K + (1/rho) del p = - F_A
 ! --------------------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_UPDATE_INSEPARABLE_ENVIRONMENT
-USE SCARC_POINTERS, ONLY: M, UU, VV, WW, RHOP, KRESP, SCARC_POINT_TO_INSEPARABLE_ENVIRONMENT
-USE MESH_VARIABLES
+SUBROUTINE SCARC_NO_FLUX(DT0, NM)
+USE SCARC_POINTERS, ONLY: M, L, G, GWC, MWC, HP, RHOP, RHMK, SCARC_POINT_TO_GRID, SCARC_POINT_TO_INSEPARABLE_ENVIRONMENT
+USE SCARC_MESSAGES
 USE MESH_POINTERS
-USE TYPES, ONLY: WALL_TYPE
-INTEGER :: NM, IOR0, I, J, K, IIG, JJG, KKG, IW
-REAL(EB) :: U2, V2, W2
-TYPE (WALL_TYPE), POINTER :: WC
+INTEGER, INTENT(IN) :: NM
+REAL(EB), INTENT(IN) :: DT0
+REAL(EB) :: RFODT,DUUDT,DVVDT,DWWDT,UN,KGRAD,PGRAD
+INTEGER  :: IC2,IC1,N,I,J,K,IW,II,JJ,KK,IOR, NOM, IIG, JJG, KKG
+LOGICAL  :: USE_GRADIENTS
+TYPE (OBSTRUCTION_TYPE), POINTER :: OB
 
-MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
+IF (SOLID_PHASE_ONLY .OR. FREEZE_VELOCITY) RETURN
 
-   CALL POINT_TO_MESH(NM)
-   CALL SCARC_POINT_TO_INSEPARABLE_ENVIRONMENT(NM)
+CALL POINT_TO_MESH(NM)
+CALL SCARC_POINT_TO_GRID(NM, NLEVEL_MIN)
+CALL SCARC_POINT_TO_INSEPARABLE_ENVIRONMENT(NM)
 
-   TEST_KRES_IF: IF (SCARC_TEST_KRES) THEN
-      KRESP => SCARC_KRES                         ! Experimental: Overwrite settings by upper point_to_inseparable_environment
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-               U2 = 0.25_EB*(UU(I-1,J,K)+UU(I,J,K))**2
-               V2 = 0.25_EB*(VV(I,J-1,K)+VV(I,J,K))**2
-               W2 = 0.25_EB*(WW(I,J,K-1)+WW(I,J,K))**2
-               KRESP(I,J,K) = 0.5_EB*(U2+V2+W2)
-            ENDDO
+! Store force_A terms before call of ScaRC (inseparable Poisson only)
+! If the inseparable ScaRC solution is done, the resulting baroclinic force_B terms (that are up to date to
+! the current time step) will be added to these stored force_A terms in routine SCARC_UPDATE_BAROCLINIC_TERM
+! such that finally the full force terms are available for the later velocity correction
+
+L%FVX_H = FVX
+L%FVY_H = FVY
+L%FVZ_H = FVZ
+
+! Recompute inseparable pressure from HP
+
+RFODT = RELAXATION_FACTOR/DT0
+RHMK => WORK1
+
+DO K=0,KBP1
+   DO J=0,JBP1
+      DO I=0,IBP1
+         RHMK(I,J,K) = RHOP(I,J,K)*(HP(I,J,K)-KRES(I,J,K))
+      ENDDO
+   ENDDO
+ENDDO
+
+! Set the no-flux conditions for obstructions 
+! Pressure- and KRES-gradients only comes into play in the structured case
+ 
+OBST_LOOP: DO N=1,N_OBST
+
+   OB=>OBSTRUCTION(N)
+
+   DO K=OB%K1+1,OB%K2
+      DO J=OB%J1+1,OB%J2
+         DO I=OB%I1,OB%I2
+            IC1 = CELL_INDEX(I,J,K)
+            IC2 = CELL_INDEX(I+1,J,K)
+            IF (SOLID(IC1) .AND. SOLID(IC2)) THEN
+               IF (PREDICTOR) THEN
+                  DUUDT = -RFODT*U(I,J,K)
+               ELSE
+                  DUUDT = -RFODT*(U(I,J,K)+US(I,J,K))
+               ENDIF
+               IF (IS_STRUCTURED) THEN
+                  KGRAD = (KRES(I+1,J,K)-KRES(I,J,K))*RDXN(I)
+                  PGRAD = -2.0_EB/(RHOP(I+1,J,K)+RHOP(I,J,K))*(RHMK(I+1,J,K)-RHMK(I,J,K))*RDXN(I)
+                  FVX(I,J,K) = PGRAD -KGRAD -DUUDT
+               ELSE
+                  FVX(I,J,K) = -DUUDT
+               ENDIF
+            ENDIF
          ENDDO
       ENDDO
+   ENDDO
 
-      KRES_WALL_LOOP: DO IW = 1, N_EXTERNAL_WALL_CELLS
-         WC => WALL(IW)
-         IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE KRES_WALL_LOOP
-         IOR0 = WC%ONE_D%IOR
-         I     = WC%ONE_D%II
-         J     = WC%ONE_D%JJ
-         K     = WC%ONE_D%KK
-         IIG   = WC%ONE_D%IIG
-         JJG   = WC%ONE_D%JJG
-         KKG   = WC%ONE_D%KKG
-         IF (WC%BOUNDARY_TYPE == OPEN_BOUNDARY)  KRESP(I,J,K) = KRESP(IIG,JJG,KKG)
-      ENDDO KRES_WALL_LOOP
+   DO K=OB%K1+1,OB%K2
+      DO J=OB%J1  ,OB%J2
+         DO I=OB%I1+1,OB%I2
+            IC1 = CELL_INDEX(I,J,K)
+            IC2 = CELL_INDEX(I,J+1,K)
+            IF (SOLID(IC1) .AND. SOLID(IC2)) THEN
+               IF (PREDICTOR) THEN
+                  DVVDT = -RFODT*V(I,J,K)
+               ELSE
+                  DVVDT = -RFODT*(V(I,J,K)+VS(I,J,K))
+               ENDIF
+               IF (IS_STRUCTURED) THEN
+                  KGRAD = (KRES(I,J+1,K)-KRES(I,J,K))*RDYN(J)
+                  PGRAD = -2.0_EB/(RHOP(I,J+1,K)+RHOP(I,J,K))*(RHMK(I,J+1,K)-RHMK(I,J,K))*RDYN(J)
+                  M%FVY(I,J,K) = PGRAD -KGRAD -DVVDT
+               ELSE
+                  M%FVY(I,J,K) = -DVVDT
+               ENDIF
+            ENDIF
+         ENDDO
+      ENDDO
+   ENDDO
 
+   DO K=OB%K1  ,OB%K2
+      DO J=OB%J1+1,OB%J2
+         DO I=OB%I1+1,OB%I2
+            IC1 = CELL_INDEX(I,J,K)
+            IC2 = CELL_INDEX(I,J,K+1)
+            IF (SOLID(IC1) .AND. SOLID(IC2)) THEN
+               IF (PREDICTOR) THEN
+                  DWWDT = -RFODT*W(I,J,K)
+               ELSE
+                  DWWDT = -RFODT*(W(I,J,K)+WS(I,J,K))
+               ENDIF
+               IF (IS_STRUCTURED) THEN
+                  KGRAD = (KRES(I,J,K+1)-KRES(I,J,K))*RDZN(K)
+                  PGRAD = -2.0_EB/(RHOP(I,J,K+1)+RHOP(I,J,K))*(RHMK(I,J,K+1)-RHMK(I,J,K))*RDZN(K)
+                  M%FVZ(I,J,K) = PGRAD -KGRAD -DWWDT
+               ELSE
+                  M%FVZ(I,J,K) = -DWWDT
+               ENDIF
+            ENDIF
+         ENDDO
+      ENDDO
+   ENDDO
+
+ENDDO OBST_LOOP
+
+! Set FVX, FVY and FVZ to drive the normal velocity at solid boundaries towards the specified value (U_NORMAL or U_NORMAL_S)
+! Pressure gradient only comes into play in the structured case
+
+WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+
+   GWC => G%WALL(IW)                                         ! ScaRC-internal wall structure
+   MWC => M%WALL(IW)                                         ! FDS-original wall structure
+
+   IF (MWC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY .OR. MWC%BOUNDARY_TYPE==OPEN_BOUNDARY) CYCLE WALL_LOOP
+
+   IF (IW<=N_EXTERNAL_WALL_CELLS) THEN
+      NOM = EXTERNAL_WALL(IW)%NOM
    ELSE
-      KRESP => M%KRES                        
-   ENDIF TEST_KRES_IF
+      NOM = 0
+   ENDIF
 
-   TEST_RHO_IF: IF (SCARC_TEST_RHO) THEN              ! Experimental: Overwrite settings by upper point_to_inseparable_environment
+   IF (IW>N_EXTERNAL_WALL_CELLS .AND. MWC%BOUNDARY_TYPE==NULL_BOUNDARY .AND. NOM==0) CYCLE WALL_LOOP
+
+   II  = MWC%BOUNDARY_COORD%II
+   JJ  = MWC%BOUNDARY_COORD%JJ
+   KK  = MWC%BOUNDARY_COORD%KK
+   IIG = MWC%BOUNDARY_COORD%IIG
+   JJG = MWC%BOUNDARY_COORD%JJG
+   KKG = MWC%BOUNDARY_COORD%KKG
+   IOR = MWC%BOUNDARY_COORD%IOR
+
+   USE_GRADIENTS = .NOT. (IS_UNSTRUCTURED .OR. IW<=N_EXTERNAL_WALL_CELLS) 
+   IF (NOM/=0 .OR. MWC%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. MWC%BOUNDARY_TYPE==NULL_BOUNDARY) THEN
 
       IF (PREDICTOR) THEN
-         SCARC_RHO = M%RHO
+         UN = -SIGN(1._EB,REAL(IOR,EB))*MWC%ONE_D%U_NORMAL_S
       ELSE
-         SCARC_RHO = M%RHOS
-      ENDIF
-      RHOP => SCARC_RHO
-
-      RHO_WALL_LOOP: DO IW = 1, N_EXTERNAL_WALL_CELLS
-
-         WC => WALL(IW)
-         IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE RHO_WALL_LOOP
-   
-         IOR0 = WC%ONE_D%IOR
-         I    = WC%ONE_D%II
-         J    = WC%ONE_D%JJ
-         K    = WC%ONE_D%KK
-         IIG  = WC%ONE_D%IIG
-         JJG  = WC%ONE_D%JJG
-         KKG  = WC%ONE_D%KKG
-   
-         SELECT CASE (IOR0)
-            CASE (1)
-               RHOP(I,J,K) = 2*WC%ONE_D%RHO_F - RHOP(IIG,JJG,KKG)           ! Set overlaps on own RHO version based on RHO_F
-            CASE (-1)
-               RHOP(I,J,K) = 2*WC%ONE_D%RHO_F - RHOP(IIG,JJG,KKG)
-            CASE (2)
-               RHOP(I,J,K) = 2*WC%ONE_D%RHO_F - RHOP(IIG,JJG,KKG)
-            CASE (-2)
-               RHOP(I,J,K) = 2*WC%ONE_D%RHO_F - RHOP(IIG,JJG,KKG)
-            CASE (3)
-               RHOP(I,J,K) = 2*WC%ONE_D%RHO_F - RHOP(IIG,JJG,KKG)
-            CASE (-3)
-               RHOP(I,J,K) = 2*WC%ONE_D%RHO_F - RHOP(IIG,JJG,KKG)
-         END SELECT
-
-      ENDDO RHO_WALL_LOOP
-
-   ELSE
-
-      IF (PREDICTOR) THEN   
-         RHOP => M%RHO
-      ELSE
-         RHOP => M%RHOS
+         UN = -SIGN(1._EB,REAL(IOR,EB))*MWC%ONE_D%U_NORMAL
       ENDIF
 
-   ENDIF TEST_RHO_IF
+      SELECT CASE(IOR)
+         CASE( 1)
+            IF (PREDICTOR) THEN
+               DUUDT = RFODT*(UN-U(II,JJ,KK))
+            ELSE
+               DUUDT = 2._EB*RFODT*(UN-0.5_EB*(U(II,JJ,KK)+US(II,JJ,KK)) )
+            ENDIF
+            IF (USE_GRADIENTS) THEN
+               KGRAD =  (KRES(II+1,JJ,KK)-KRES(II,JJ,KK))*RDXN(II)
+               PGRAD = -(RHMK(II+1,JJ,KK)-RHMK(II,JJ,KK))*RDXN(II)
+               FVX(II,JJ,KK) = PGRAD/MWC%ONE_D%RHO_F - KGRAD - DUUDT
+            ELSE
+               FVX(II,JJ,KK) = - DUUDT
+            ENDIF
+         CASE(-1)
+            IF (PREDICTOR) THEN
+               DUUDT = RFODT*(UN-U(II-1,JJ,KK))
+            ELSE
+               DUUDT = 2._EB*RFODT*(UN-0.5_EB*(U(II-1,JJ,KK)+US(II-1,JJ,KK)) )
+            ENDIF
+            IF (USE_GRADIENTS) THEN
+               KGRAD =  (KRES(II,JJ,KK)-KRES(II-1,JJ,KK))*RDXN(II-1)
+               PGRAD = -(RHMK(II,JJ,KK)-RHMK(II-1,JJ,KK))*RDXN(II-1)
+               FVX(II-1,JJ,KK) = PGRAD/MWC%ONE_D%RHO_F - KGRAD - DUUDT
+            ELSE
+               FVX(II-1,JJ,KK) = - DUUDT
+            ENDIF
+         CASE( 2)
+            IF (PREDICTOR) THEN
+               DVVDT = RFODT*(UN-V(II,JJ,KK))
+            ELSE
+               DVVDT = 2._EB*RFODT*(UN-0.5_EB*(V(II,JJ,KK)+VS(II,JJ,KK)) )
+            ENDIF
+            IF (USE_GRADIENTS) THEN
+               KGRAD =  (KRES(II,JJ+1,KK)-KRES(II,JJ,KK))*RDYN(JJ)
+               PGRAD = -(RHMK(II,JJ+1,KK)-RHMK(II,JJ,KK))*RDYN(JJ)
+               M%FVY(II,JJ,KK) = PGRAD/MWC%ONE_D%RHO_F - KGRAD - DVVDT
+            ELSE
+               M%FVY(II,JJ,KK) = - DVVDT
+            ENDIF
+         CASE(-2)
+            IF (PREDICTOR) THEN
+               DVVDT = RFODT*(UN-V(II,JJ-1,KK))
+            ELSE
+               DVVDT = 2._EB*RFODT*(UN-0.5_EB*(V(II,JJ-1,KK)+VS(II,JJ-1,KK)) )
+            ENDIF
+            IF (USE_GRADIENTS) THEN
+               KGRAD =  (KRES(II,JJ,KK)-KRES(II,JJ-1,KK))*RDYN(JJ-1)
+               PGRAD = -(RHMK(II,JJ,KK)-RHMK(II,JJ-1,KK))*RDYN(JJ-1)
+               M%FVY(II,JJ-1,KK) = PGRAD/MWC%ONE_D%RHO_F - KGRAD - DVVDT
+            ELSE
+               M%FVY(II,JJ-1,KK) = - DVVDT
+            ENDIF
+         CASE( 3)
+            IF (PREDICTOR) THEN
+               DWWDT = RFODT*(UN-W(II,JJ,KK))
+            ELSE
+               DWWDT = 2._EB*RFODT*(UN-0.5_EB*(W(II,JJ,KK)+WS(II,JJ,KK)) )
+            ENDIF
+            IF (USE_GRADIENTS) THEN
+               KGRAD =  (KRES(II,JJ,KK+1)-KRES(II,JJ,KK))*RDZN(KK)
+               PGRAD = -(RHMK(II,JJ,KK+1)-RHMK(II,JJ,KK))*RDZN(KK)
+               M%FVZ(II,JJ,KK) = PGRAD/MWC%ONE_D%RHO_F - KGRAD - DWWDT
+            ELSE
+               M%FVZ(II,JJ,KK) = - DWWDT
+            ENDIF
+         CASE(-3)
+            IF (PREDICTOR) THEN
+               DWWDT = RFODT*(UN-W(II,JJ,KK-1))
+            ELSE
+               DWWDT = 2._EB*RFODT*(UN-0.5_EB*(W(II,JJ,KK-1)+WS(II,JJ,KK-1)) )
+            ENDIF
+            IF (USE_GRADIENTS) THEN
+               KGRAD =  (KRES(II,JJ,KK)-KRES(II,JJ,KK-1))*RDZN(KK-1)
+               PGRAD = -(RHMK(II,JJ,KK)-RHMK(II,JJ,KK-1))*RDZN(KK-1)
+               M%FVZ(II,JJ,KK-1) = PGRAD/MWC%ONE_D%RHO_F - KGRAD - DWWDT
+            ELSE
+               M%FVZ(II,JJ,KK-1) = - DWWDT
+            ENDIF
+      END SELECT
+   ENDIF
 
-ENDDO MESHES_LOOP
+   IF (MWC%BOUNDARY_TYPE==MIRROR_BOUNDARY) THEN
+      SELECT CASE(IOR)
+         CASE( 1)
+            FVX(II  ,JJ,KK) = 0._EB
+         CASE(-1)
+            FVX(II-1,JJ,KK) = 0._EB
+         CASE( 2)
+            FVY(II  ,JJ,KK) = 0._EB
+         CASE(-2)
+            FVY(II,JJ-1,KK) = 0._EB
+         CASE( 3)
+            FVZ(II  ,JJ,KK) = 0._EB
+         CASE(-3)
+            FVZ(II,JJ,KK-1) = 0._EB
+      END SELECT
+   ENDIF
 
-END SUBROUTINE SCARC_UPDATE_INSEPARABLE_ENVIRONMENT
+ENDDO WALL_LOOP
+
+END SUBROUTINE SCARC_NO_FLUX
 
 
 ! -------------------------------------------------------------------------------------------------------------
@@ -22502,7 +22683,7 @@ CALL SCARC_SETUP_EXCHANGES                            ; IF (STOP_STATUS==SETUP_S
 !     * Only the related workspace is allocated here, the matrices themselves are rebuilt at each time step
 
 CALL SCARC_SETUP_POISSON_REQUIREMENTS                 ; IF (STOP_STATUS==SETUP_STOP) RETURN
-IF (IS_SEPARABLE) THEN
+IF (.NOT.INSEPARABLE_POISSON) THEN
    CALL SCARC_SETUP_POISSON_SYSTEMS                   ; IF (STOP_STATUS==SETUP_STOP) RETURN
 #ifdef WITH_MKL
    CALL SCARC_SETUP_POISSON_SYMMETRIC                 ; IF (STOP_STATUS==SETUP_STOP) RETURN
@@ -22549,7 +22730,7 @@ END SUBROUTINE SCARC_SETUP
 ! --------------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_SOLVER(T_CURRENT, DT_CURRENT)
 USE SCARC_CONVERGENCE
-USE SCARC_METHODS, ONLY: SCARC_METHOD_KRYLOV, SCARC_METHOD_MULTIGRID, SCARC_METHOD_MGM, SCARC_UPDATE_INSEPARABLE_ENVIRONMENT
+USE SCARC_METHODS, ONLY: SCARC_METHOD_KRYLOV, SCARC_METHOD_MULTIGRID, SCARC_METHOD_MGM
 USE SCARC_MATRICES, ONLY: SCARC_SETUP_POISSON_SYSTEMS
 #ifdef WITH_MKL
 USE SCARC_METHODS, ONLY: SCARC_METHOD_MKL
@@ -22564,8 +22745,7 @@ CALL SCARC_SET_ITERATION_STATE (T_CURRENT, DT_CURRENT)
 
 ! If the inseparable Poisson system is solved, the matrices have to be rebuilt for the current density in each time step
 
-IF (IS_INSEPARABLE) THEN
-   CALL SCARC_UPDATE_INSEPARABLE_ENVIRONMENT
+IF (INSEPARABLE_POISSON) THEN
    CALL SCARC_SETUP_POISSON_SYSTEMS                   ; IF (STOP_STATUS==SETUP_STOP) RETURN
 #ifdef WITH_MKL
    CALL SCARC_SETUP_POISSON_SYMMETRIC                 ; IF (STOP_STATUS==SETUP_STOP) RETURN

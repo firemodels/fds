@@ -544,6 +544,22 @@ Maqua, Castanet, and Lemoine measured the temperature of falling droplets of eth
 
 Taflin measured the diameter of suspended water droplets in dry air~\cite{Snegirev:1}. One droplet was initially 43.9~$\mu$m and the other was 56.6~$\mu$m.
 
+\section{Edinburgh Vegetation Drag}
+\label{Edinburgh_Veg_Drag_Description}
+
+Mueller et al.~\cite{Mueller:TIPM2021} characterized the pressure drop through beds of randomly oriented pine needles and used the results to parameterize a drag model following the form of the Forchheimer equation. They then measured the development of velocity profiles within and above these pine needle beds, using a hotwire anemometer, and compared the results to FDS predictions using the parameterized model. Fuel beds with bulk densities of 20~kg/m$^3$, 40~kg/m$^3$, and 60~kg/m$^3$ were tested, with inlet velocities in the range of 0.5-2.0~m/s. A condensed version of the comparison is reproduced in this guide, which serves to test the ability of the model to represent the general features of flow in sparse multiphase media.
+
+\subsubsection{Modeling Notes}
+
+In the experiment, the test section extended 400~mm beyond the vegetation layer. This extent of the domain is reproduced in the simulations in order to avoid possible influence of the downstream boundary condition. The upstream boundary condition is set using the measurements located at $x=-75$~mm, which allows for the reproduction of a slight non-uniformity in the flowfield. Due to difficulties in compacting the high bulk density case, the fuel layer is set to extend to 55~mm in the 60~kg/m$^3$ simulations.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.5\textwidth]{FIGURES/Edinburgh_Vegetation_Drag/domain_schematic}
+\caption[Geometry of the Edinburgh Vegetation Drag experiments]{Geometry of the wind tunnel test section for the Edinburgh Vegetation Drag experiments. Vegetation filled the lower half of the 150~mm x 100~mm test section, starting from $x=0$~mm. Circles indicate the locations of velocity measurements, with the filled circles corresponding to those used for comparison in this guide.}
+\label{Ed_Veg_Drag_Layout}
+\end{figure}
+
 \section{FAA Cargo Compartments}
 \label{FAA_Cargo_Description}
 
@@ -2683,7 +2699,7 @@ II-12 & C  & All Open at Start       & 23 & 0:58 & 4:55 & 119.0 &246.2 \\ \hline
 \section{UL/NIJ House Experiments}
 \label{UL_NIJ_Description}
 
-The Firefighter Safety Research Institute (FSRI) of Underwriters Laboratory (UL), with support from the National Institute of Justice (NIJ), conducted fire experiments in a one-story ranch-style house and a two-story colonial-style house in the large fire facility at Northbrook, Illinois, in 2016 and 2017~\cite{Madrzykowski:2019}. The goal of the experiments was to determine the effect of ventilation on fire patterns in fully-furnished homes. As part of the project, a natural gas burner was positioned within the unfurnished structures to evaluate changes in flow patterns as various doors and windows were opened and closed. The test structures were instrumented with thermocouple trees, pressure transducers, and bi-directional probes. The floor plan for the single story ranch-style house is included in Fig.~\ref{Ranch_layout}, and plans for the two story colonial-style house in Fig.~\ref{Colonial_layout}. The ceiling was 2.4~m above the floor in the ranch-style house. The colonial-style house featured an atrium with a 5.6~m ceiling height. The first story ceiling in the colonial-style house was 2.5~m above the floor, and the second story ceiling was 2.8~m above the floor.
+The Firefighter Safety Research Institute (FSRI) of Underwriters Laboratory (UL), with support from the National Institute of Justice (NIJ), conducted fire experiments in a one-story ranch-style house and a two-story colonial-style house in the large fire facility at Northbrook, Illinois, in 2016 and 2017~\cite{Madrzykowski:2019}. In addition to this validation guide, modeling of the experiments is also reported in \cite{McKinnon:FISJ2021}.  The goal of the experiments was to determine the effect of ventilation on fire patterns in fully-furnished homes. As part of the project, a natural gas burner was positioned within the unfurnished structures to evaluate changes in flow patterns as various doors and windows were opened and closed. The test structures were instrumented with thermocouple trees, pressure transducers, and bi-directional probes. The floor plan for the single story ranch-style house is included in Fig.~\ref{Ranch_layout}, and plans for the two story colonial-style house in Fig.~\ref{Colonial_layout}. The ceiling was 2.4~m above the floor in the ranch-style house. The colonial-style house featured an atrium with a 5.6~m ceiling height. The first story ceiling in the colonial-style house was 2.5~m above the floor, and the second story ceiling was 2.8~m above the floor.
 
 The leakage area in the single story structure was measured to be 0.08~m$^2$ at 10~Pa. The leakage area in the two story structure was measured to be 0.18~m$^2$ at 10~Pa.
 

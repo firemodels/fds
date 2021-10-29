@@ -2018,7 +2018,7 @@ from three vertices. The user can assign a specific boundary condition to each o
 
 A simple form of the {\ct GEOM}\ namelist defining an unstructured solid is given by
 
-\begin{verbatim}
+\begin{lstlisting}
 &GEOM ID='UNSTRUCTURED_SOLID'
       SURF_ID='FIRE','INERT'
       VERTS= -1.0, -1.0,  0.0,
@@ -2030,14 +2030,14 @@ A simple form of the {\ct GEOM}\ namelist defining an unstructured solid is give
              3,4,2, 1,
              2,4,1, 0,
 /
-\end{verbatim}
+\end{lstlisting}
 
 \noindent where {\ct ID}\ specifies the solid name, in this case {\ct UNSTRUCTURED\_SOLID},
-{\ct VERTS}\ specifies the $(x_1,y_1,z_1, \quad x_2,y_2,z_2, \quad ...)$ coordinates of the vertices,
+{\ct VERTS}\ specifies the ($x_1$,$y_1$,$z_1$, $x_2$,$y_2$,$z_2$, ...) coordinates of the vertices,
 and {\ct FACES}\ specifies a list of triangular faces and the {\ct SURF\_ID}\ that should be
 assigned to each of them.
 
-A triangular face is defined by 3 vertex indices and one boundary condition index: $(v_1,v_2,v_3,b)$.
+A triangular face is defined by 3 vertex indices and one boundary condition index: ($v_1$,$v_2$,$v_3$,$b$).
 Each vertex index $(v_i)$ ranges from 1 to the number of vertices found in the {\ct VERTS} parameter.
 The order of the 3 vertex indices in the face defines which side of the triangle is considered facing
 the outside of the solid. Observed from the outside, the vertices of each triangle should always appear
@@ -2079,9 +2079,9 @@ If the previous conditions are respected, a well-formed {\ct GEOM}\ namelist is 
 
 \pagebreak
 Whenever one of the checks on these conditions fails, FDS outputs an error message describing the problem and its location in the domain. For example:\nopagebreak
-\begin{verbatim}
+\begin{lstlisting}
 ERROR: GEOM ID='Cube': Non manifold geometry at edge: ...
-\end{verbatim}
+\end{lstlisting}
 
 \begin{figure}
   \centering
@@ -2148,7 +2148,6 @@ Several types of intersections can happen between {\ct GEOM}s and between {\ct G
 \begin{itemize}
   \item {\ct GEOM} - {\ct GEOM} and {\ct GEOM} - {\ct OBST}: whenever these types of intersection happen, FDS performs a geometric boolean operation uniting the two volumes, respecting the boundary conditions of the surfaces. If the geometry is too complex, this operation can fail. In that case FDS will print out a warning to the screen (or to standard error) and fill the corresponding cell with a solid condition;
   \item {\ct GEOM} - {\ct HOLE}: currently there is no interaction.
-  \item {\ct GEOM} - {\ct VENT}: it is currently not possible to set boundary condition patches on {\ct GEOM} surfaces with {\ct VENT} namelists.
 \end{itemize}
 
 Currently no control logic is available on {\ct GEOM} namelists.
@@ -2165,12 +2164,12 @@ and a 2D terrain elevations using {\ct ZVALS}. FDS generates vertices and faces 
 \subsubsection{Blocks}
 A {\ct GEOM}\ namelist defining a block is given by
 
-\begin{verbatim}
+\begin{lstlisting}
 &GEOM ID='block'
       SURF_ID='S1'
       XB=0.0,1.0,0.0,1.0,0.0,1.0
 /
-\end{verbatim}
+\end{lstlisting}
 
 \noindent where {\ct XB=xmin,xmax,ymin,ymax,zmin,zmax} defines the min and max bounds of the block.
 The {\ct XB}\ parameter is used in the same way as on an {\ct OBST}\ or {\ct VENT}\ line.
@@ -2184,12 +2183,12 @@ The {\ct SURF\_ID}\ parameter assigns the specified boundary condition to all th
 \subsubsection{Spheres}
 A {\ct GEOM}\ namelist defining a sphere centered at $(0,0,0)$ with radius $1$ is given by
 
-\begin{verbatim}
+\begin{lstlisting}
 &GEOM ID='sphere'
       SURF_ID='S1'
       SPHERE_ORIGIN=0.0,0.0,0.0, SPHERE_RADIUS=1.0
 /
-\end{verbatim}
+\end{lstlisting}
 
 \noindent Spheres are discretized by default so that each face is consistent in size with the grid resolution.
 One may specify a {\ct N\_LEVEL}\ parameter which defines the number of times the sphere is split.
@@ -2200,7 +2199,7 @@ One may specify a {\ct N\_LEVEL}\ parameter which defines the number of times th
 
 A {\ct GEOM} namelist defining a cylinder geometry with centroid at {\ct CYLINDER\_ORIGIN}$=(0,0,0)$, axis {\ct CYLINDER\_AXIS}$=(1.,0,0)$, length {\ct CYLINDER\_LENGTH}$=2.$ and radius {\ct CYLINDER\_RADIUS}$=0.5$ is given by
 
-\begin{verbatim}
+\begin{lstlisting}
 &GEOM ID='cylinder', SURF_ID='S1',
               CYLINDER_LENGTH=2.,
               CYLINDER_RADIUS=.5,
@@ -2208,7 +2207,7 @@ A {\ct GEOM} namelist defining a cylinder geometry with centroid at {\ct CYLINDE
               CYLINDER_AXIS=1.,0.,0.,
               CYLINDER_NSEG_AXIS=6,
               CYLINDER_NSEG_THETA=48 /
- \end{verbatim}
+ \end{lstlisting}
 
 where the cylinder is discretized using 6 segments along its axis and 48 segments across its circumference. The keyword {\ct SURF\_ID} can be replaced by {\ct SURF\_IDS='S1','S2','S3'}, where the strings {\ct 'S1','S2','S3'} correspond to the surface IDs of top, sides and bottom surfaces respectively.
 
@@ -2216,14 +2215,14 @@ where the cylinder is discretized using 6 segments along its axis and 48 segment
 \subsubsection{2D Terrain elevations}
 A {\ct GEOM}\ namelist defining a 2D terrain elevation is given by
 
-\begin{verbatim}
+\begin{lstlisting}
 &GEOM ID='terrain'
       SURF_ID='S1'
       IJK=ivals,jvals, XB=xmin,xmax,ymin,ymax,
       EXTEND_TERRAIN=etlog, ZVAL_HORIZON=zvhr,
       ZVALS=...
 /
-\end{verbatim}
+\end{lstlisting}
 
 \noindent where {\ct XB}\ defines a rectangular region bounded by $(x_{\rm min}, y_{\rm min})$  and $(x_{\rm max}, y_{\rm max})$
 and where {\ct ZVALS} defines elevation data in this region.
@@ -2231,9 +2230,9 @@ and where {\ct ZVALS} defines elevation data in this region.
 In this example {\ct ivals}\ values occur along the x dimension and {\ct jval}\ values occur along the y dimension.
 The {\ct ZVALS} keyword is used to specify elevations at each $(x,y)$ location.
 The elevation data specified after the {\ct ZVALS}\ keyword is arranged in row major order.
-The first row contains {\ct ivals} elevation values occurring at the the ymax position from xmin to xmax.
+The first row contains {\ct ivals} elevation values occurring at the the ymin position from xmin to xmax.
 Similarly, the last row contains
-{\ct ivals}\ elevation values for the ymin position again from xmin to xmax.
+{\ct ivals}\ elevation values for the ymax position again from xmin to xmax.
 There are then {\ct jvals}\ rows and {\ct ivals}\ columns of elevation data.
 The optional fields {\ct EXTEND\_TERRAIN} and {\ct ZVAL\_HORIZON} are used in the following form. If the computational domain is set larger than the {\ct XB} defined terrain patch, such that it contains the terrain completely, setting {\ct etlog=T} allows for the terrain to be extended to the domain boundaries. This can be helpful when trying to reduce boundary effects on a calculation.
 If, additionally, the real number {\ct zvhr} is defined for {\ct ZVAL\_HORIZON} on the {\ct \&GEOM} line, this elevation will be used on the domain boundaries when extending the domain.
@@ -2246,7 +2245,7 @@ Additionally, terrain geometries can be specified defining a triangulation with 
 
 In this case, a geometry can be defined specifying the {\ct VERTS}, connectivity {\ct POLY}, and extrusion distance {\ct EXTRUDE}. For example:
 
-\begin{verbatim}
+\begin{lstlisting}
 &GEOM ID='ExtPoly', SURF_ID='Poly1',
 VERTS =
    -1.0, -1.0,  1.0,
@@ -2257,7 +2256,7 @@ VERTS =
    -1.0,  1.0,  1.0,
 POLY = 1, 2, 4, 3, 5, 6,
 EXTRUDE=0.5 /
-\end{verbatim}
+\end{lstlisting}
 
 The polygon defined by {\ct POLY} must be simple, non degenerate (no segment intersections, no repeated vertices) and all segments must lay on the same plane in three dimensional space. It can have a maximum of 1000 vertices. The value of {\ct EXTRUDE} can be a positive or negative real, but not zero. A single surface ID can be provided, or top, sides and bottom surface IDs through a  {\ct SURF\_IDS} field, in the same manner as the cylinders of section~\ref{info:GEOM_cyls}. Note that the bottom surface in {\ct SURF\_IDS} always refers to the polygon defined in {\ct POLY}, from where the extrusion operation is performed.
 
@@ -2280,12 +2279,12 @@ Links to these tools can be found at the project home page at https://pages.nist
 %These surfaces consist of a collection of triangular faces where each face consists of three vertices.
 %A simple form of the {\ct GEOM}\ namelist defining one triangular face is given by
 %
-%\begin{verbatim}
+%\begin{lstlisting}
 %&GEOM ID='triangle'
 %      VERTS=0.0,0.0,0.0, 1.0,0.0,0.0, 1.0,0.0,1.0,
 %      FACES=1,2,3
 %/
-%\end{verbatim}
+%\end{lstlisting}
 %
 %\noindent where {\ct ID}\ specifies the object name, in this case {\ct triangle},
 %{\ct VERTS}\ specifies a list of one or more $(x,y,z)$ coordinates and {\ct FACES}\ specifies a list of vertices, 3 vertex indices for each
@@ -2298,10 +2297,10 @@ Links to these tools can be found at the project home page at https://pages.nist
 %\subsubsection{Blocks}
 %A {\ct GEOM}\ namelist defining a block is given by
 %
-%\begin{verbatim}
+%\begin{lstlisting}
 %&GEOM ID='block'
 %      XB=0.0,1.0,0.0,1.0,0.0,1.0 /
-%\end{verbatim}
+%\end{lstlisting}
 %
 %\noindent where {\ct XB=xmin,xmax,ymin,ymax,zmin,zmax} defines the min and max bounds of the block.
 %The {\ct XB}\ parameter is used in the same way as on an {\ct OBST}\ or {\ct VENT}\ line.
@@ -2314,10 +2313,10 @@ Links to these tools can be found at the project home page at https://pages.nist
 %\subsubsection{Spheres}
 %A {\ct GEOM}\ namelist defining a sphere centered at $(0,0,0)$ with radius $1$ is given by
 %
-%\begin{verbatim}
+%\begin{lstlisting}
 %&GEOM ID='sphere'
 %      SPHERE_ORIGIN=0.0,0.0,0.0,SPHERE_RADIUS=1.0 /
-%\end{verbatim}
+%\end{lstlisting}
 %
 %\noindent Spheres are discretized by default so that each face is consistent in size with the grid resolution.
 %One may specify a {\ct N\_LEVEL}\ parameter which specifies the number of times the sphere is split.
@@ -2325,10 +2324,10 @@ Links to these tools can be found at the project home page at https://pages.nist
 %\subsubsection{2D Surfaces}
 %A {\ct GEOM}\ namelist defining a 2D surface is given by
 %
-%\begin{verbatim}
+%\begin{lstlisting}
 %&GEOM ID='terrain'
 %      IJK=ivals,jvals,XB=xmin,xmax,ymin,ymax,ZVALS=..... /
-%\end{verbatim}
+%\end{lstlisting}
 %
 %\noindent where {\ct XB}\ defines a rectangular region bounded by xmin, xmax, ymin and ymax where elevation data is defined with {\ct ZVALS}.
 %{\ct IJK}\ specifies how many vertices occur in this region along each dimension in this region.
@@ -2348,12 +2347,12 @@ Links to these tools can be found at the project home page at https://pages.nist
 %These solids consist of a collection of tetrahedrons where each tetrahedron consists of four vertices.
 %A simple form of the {\ct GEOM}\ namelist defining one tetrahedron is given by
 %
-%\begin{verbatim}
+%\begin{lstlisting}
 %&GEOM ID='tetrahedron'
 %      VERTS=0.0,0.0,0.0, 1.0,0.0,0.0, 1.0,1.0,0.0,  1.0,1.0,1.0,
 %      VOLUS=1,2,3,4
 %/
-%\end{verbatim}
+%\end{lstlisting}
 %
 %\noindent where {\ct ID}\ specifies the object name, in this case {\ct tetrahedron},
 %{\ct VERTS}\ specifies a list of one or more $(x,y,z)$ coordinates and {\ct VOLUS}\ specifies a list of vertices, 4 vertex indices for each
@@ -2366,7 +2365,7 @@ It  may be translated using {\ct XYZ}, scaled using {\ct SCALE} and rotated abou
 For example, in the following {\ct GEOM}\ namelist,
 
 {\small
-\begin{verbatim}
+\begin{lstlisting}
 &MOVE ID='ChairMove', AXIS=...,...,..., ROTATION_ANGLE=..., DX=, /
 &GEOM ID='chair'
       SURF_ID='woodSID','apholsterySID',
@@ -2374,7 +2373,7 @@ For example, in the following {\ct GEOM}\ namelist,
       FACES=F1_1,F1_2,F1_3,F1_SID...,FN_1,FN_2,FN_3,F2_SID
       MOVE_ID='ChairMove'
 /
-\end{verbatim}
+\end{lstlisting}
 }
 
 \noindent the chair object is translated and rotated using a reference to the $\&MOVE$ namelist, defined and explained in section XX.
@@ -2388,13 +2387,13 @@ Consider the chair geometry defined in the previous section. When a geometry is 
 
 Then, supposing the case ID is {\ct CHID='DiningRoom'}, the next time the case is run, the geometry line can be modified to:
 {\small
-\begin{verbatim}
+\begin{lstlisting}
 &GEOM ID='chair',
       SURF_ID='woodSID','apholsterySID',
       BINARY_FILE='DiningRoom_chair.bingeom',
       MOVE_ID='ChairMove'
 /
-\end{verbatim}
+\end{lstlisting}
 }
 
 \noindent where the presence of {\ct BINARY\_FILE} instructs FDS to read nodes and faces from the binary geometry file.
@@ -6603,6 +6602,7 @@ The drag force exerted by moving or stationary particles is detailed in the FDS 
 {\ct DRAG\_LAW}           & Reference   \\ \hline\hline
 {\ct 'SPHERE'} (default)  & FDS Tech Guide \cite{FDS_Math_Guide}   \\ \hline
 {\ct 'CYLINDER'}          & FDS Tech Guide \cite{FDS_Math_Guide}   \\ \hline
+{\ct 'DISK'}              & FDS Tech Guide \cite{FDS_Math_Guide}   \\ \hline
 {\ct 'POROUS MEDIA'}      & Sec.~\ref{info:porous_media}           \\ \hline
 {\ct 'SCREEN'}            & Sec.~\ref{info:particle_screen}        \\ \hline
 \end{tabular}
@@ -6829,7 +6829,7 @@ It is not unusual to include hundreds of thousands of particles in a simulation.
 \label{info:particle_flux}
 \label{particle_flux}
 
-There are two ways of introducing particles at a solid surface. You can specify a particle mass flux and inject particles regularly in time, or you can specify a particle surface density and introduce the particles at the start of the simulation.
+There are three ways of introducing particles at a solid surface. You can specify a particle mass flux and inject particles regularly in time, you can restrict the production of particles to actively burning surfaces (as a means of generating embers), or you can specify a particle surface density and introduce the particles at the start of the simulation.
 
 \subsubsection{Particles specified using a mass flux}
 
@@ -6850,6 +6850,12 @@ creates an obstruction that ejects particles out of its sides at a rate of 0.1~\
 \end{figure}
 
 Note also that you can independently control particles that emanate from a solid surface. For example, a device might control the activation of a fan, but you can over-ride the device and control the particles separately. To do this, specify either a device or controller via a {\ct DEVC\_ID} or {\ct CTRL\_ID} on the {\ct PART} line that defines the particles. For more information on devices and controls, see Sections~\ref{info:basic_control}~and~\ref{info:CTRL}.
+
+\subsubsection{Particles specified using an ember generation height}
+
+If you specify an {\ct EMBER\_GENERATION\_HEIGHT} (m), particles are assumed to represent embers (or firebrands) and are only generated at surfaces that are actively burning (non-zero fuel mass flux). The height parameter dictates the vertical offset distance from the burning surface at which particles are produced. This is important in cases where the vertical fuel structure may not be resolved, such as level set fire spread (Section~\ref{info:level_set}), but the height of ember production plays a role in the lofting potential. If a single number is provided for the {\ct EMBER\_GENERATION\_HEIGHT}, all particles are generated at that offset distance. If two numbers are provided, particles are randomly generated within the specified offset range, following a uniform distribution. For example, if {\ct EMBER\_GENERATION\_HEIGHT=0.0,1.0} then particles will be produced anywhere up to 1.0~m above the burning surface.
+
+The rate of ember production can then be set using the method described previously. A number flux can be set using {\ct DT\_INSERT} and {\ct NPPC}, and these particles can be weighted to match a specified {\ct PARTICLE\_MASS\_FLUX}. It is recommended to set {\ct VEL\_PART=0.0} when modeling ember generation in this way, so that particles start from rest and are naturally lofted by the surrounding flow.
 
 \subsubsection{Particles specified using a surface density}
 
@@ -9272,13 +9278,13 @@ Note that FDS cannot report a visibility of infinity, but rather reports a {\ct 
 
 The ``flame height,'' and to some extent the ``flame tilt,'' are common quantities used to assess the hazard from a large fire. FDS does not output these quantities directly, but there is a combination of devices and controls that yield these values. This is all best explained with an example. Suppose you are simulating a fire in a domain that is 10~m high with a grid resolution of 0.2~m. The fire is centered about the point $(x,y)=(0,0)$ at $z=0$. The following input lines compute the flame height and tilt:
 \begin{lstlisting}
-&DEVC ID='HRR', Z_ID='z', XBP=0.0,0.0,0.0,0.0,0.1,9.9, QUANTITY='HRRPUV', 
-      SPATIAL_STATISTIC='VOLUME INTEGRAL', DX=5, DY=5, DZ=0.1, POINTS=100, 
+&DEVC ID='HRR', Z_ID='z', XBP=0.0,0.0,0.0,0.0,0.1,9.9, QUANTITY='HRRPUV',
+      SPATIAL_STATISTIC='VOLUME INTEGRAL', DX=5, DY=5, DZ=0.1, POINTS=100,
       STATISTICS_START=10. /
 &CTRL ID='H', FUNCTION_TYPE='PERCENTILE', INPUT_ID='HRR', PERCENTILE=0.97 /
-&DEVC ID='x_max', XB=-5,5,-5,5,9.0,9.2, QUANTITY='TEMPERATURE', 
+&DEVC ID='x_max', XB=-5,5,-5,5,9.0,9.2, QUANTITY='TEMPERATURE',
       SPATIAL_STATISTIC='MAXLOC X' /
-&DEVC ID='y_max', XB=-5,5,-5,5,9.0,9.2, QUANTITY='TEMPERATURE', 
+&DEVC ID='y_max', XB=-5,5,-5,5,9.0,9.2, QUANTITY='TEMPERATURE',
       SPATIAL_STATISTIC='MAXLOC Y' /
 &CTRL ID='x2', FUNCTION_TYPE='POWER', INPUT_ID='x_max','CONSTANT', CONSTANT=2 /
 &CTRL ID='y2', FUNCTION_TYPE='POWER', INPUT_ID='y_max','CONSTANT', CONSTANT=2 /
@@ -9286,20 +9292,20 @@ The ``flame height,'' and to some extent the ``flame tilt,'' are common quantiti
 &CTRL ID='r',  FUNCTION_TYPE='POWER', INPUT_ID='r2','CONSTANT', CONSTANT=0.5 /
 &CTRL ID='r/9', FUNCTION_TYPE='DIVIDE', INPUT_ID='d','CONSTANT', CONSTANT=9 /
 &CTRL ID='tilt_rad', FUNCTION_TYPE='ATAN', INPUT_ID='r/9' /
-&CTRL ID='tilt_deg', FUNCTION_TYPE='MULTIPLY', INPUT_ID='tilt_rad','CONSTANT', 
+&CTRL ID='tilt_deg', FUNCTION_TYPE='MULTIPLY', INPUT_ID='tilt_rad','CONSTANT',
       CONSTANT=57.296 /
 &CTRL ID='cos_theta', FUNCTION_TYPE='COS', INPUT_ID='tilt_rad' /
 &CTRL ID='L', FUNCTION_TYPE='DIVIDE', INPUT_ID='H','cos_theta' /
-&DEVC ID='L_F', CTRL_ID='L', XYZ=0,0,0, QUANTITY='CONTROL VALUE', 
+&DEVC ID='L_F', CTRL_ID='L', XYZ=0,0,0, QUANTITY='CONTROL VALUE',
       TEMPORAL_STATISTIC='RUNNING AVERAGE', STATISTICS_START=10, UNITS='m' /
-&DEVC ID='tilt', CTRL_ID='tilt_deg', XYZ=0,0,0, QUANTITY='CONTROL VALUE', 
+&DEVC ID='tilt', CTRL_ID='tilt_deg', XYZ=0,0,0, QUANTITY='CONTROL VALUE',
       TEMPORAL_STATISTIC='RUNNING AVERAGE', STATISTICS_START=10, UNITS='deg' /
 \end{lstlisting}
 \begin{description}
-\item[{\ct ID='HRR'}] Compute a vertical array of heat release rates over horizontal slices that are one cell thick. 
-\item[{\ct ID='H'}] Take the function {\ct ('z','HRR')} and compute the height below which 97~\% of the fire's energy is released. 
+\item[{\ct ID='HRR'}] Compute a vertical array of heat release rates over horizontal slices that are one cell thick.
+\item[{\ct ID='H'}] Take the function {\ct ('z','HRR')} and compute the height below which 97~\% of the fire's energy is released.
 \item[{\ct ID='x\_max'}] Find the $x$ coordinate of the point of maximum temperature within the volume defined by {\ct XB}. Do the same for the $y$ coordinate.
-\item[{\ct ID='x2','y2','r2','r','r/9'}] Determine the radial distance from the origin to the point of maximum temperature. Divide this distance by the height of the slice within which you located the maximum temperature, $z=9$. 
+\item[{\ct ID='x2','y2','r2','r','r/9'}] Determine the radial distance from the origin to the point of maximum temperature. Divide this distance by the height of the slice within which you located the maximum temperature, $z=9$.
 \item[{\ct ID='tilt\_rad','tilt\_deg'}] Calculate the arctangent of {\ct 'r/9'} to determine the tilt angle in radians. Then convert this value to degrees.
 \item[{\ct ID='cos\_theta'}] Calulate the cosine of the tilt angle.
 \item[{\ct ID='L'}] Divide the vertical flame height by the cosine of the tilt angle to arrive at the length of the flame.
@@ -9762,7 +9768,7 @@ A useful feature of a device ({\ct DEVC}) is to specify an output quantity along
 \begin{lstlisting}
 &DEVC XB=..., QUANTITY='TEMPERATURE', ID='maxT', SPATIAL_STATISTIC='MAX' /
 \end{lstlisting}
-causes FDS to write out the maximum gas phase temperature over the volume bounded by {\ct XB}. Other {\ct SPATIAL\_STATISTIC}'s are discussed below.  Some are appropriate for gas phase output quantities, some for solid phase, and some for both.
+causes FDS to write out the maximum gas phase temperature over the volume bounded by {\ct XB}. Other {\ct SPATIAL\_STATISTIC}'s are discussed below.  Some are appropriate for gas phase output quantities, some for solid phase, and some for both. Note that if {\ct XB} is used for a point device without a {\ct SPATIAL\_STATISTIC}, then FDS will define {\ct XYZ} to be the center of the volume defined by {\ct XB}. 
 
 For solid phase output quantities, like heat fluxes and surface temperatures, the specification of a {\ct SURF\_ID} along with the appropriate statistic limits the calculation to only those surfaces. You can further limit the search by using the sextuplet of coordinates {\ct XB} to force FDS to only compute statistics for surface cells within the given volume. Be careful to account for the fact that the solid surface might shift to conform to the underlying numerical grid. Note that you do not (and should not) specify an orientation via the parameter {\ct IOR} when using a spatial statistic. {\ct IOR} is only needed to find a specific point on the solid surface.
 
@@ -12138,7 +12144,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MASS\_FRACTION\_0}             & Real              & Section~\ref{info:SPEC_Basics}          &                   & 0             \\ \hline
 {\ct MASS\_FRACTION\_COND\_0}       & Real              & Section~\ref{info:condensation}         &                   & 0             \\ \hline
 {\ct MAX\_DIAMETER}                 & Real              & Section~\ref{info:agglomeration}        &    m              &               \\ \hline
-{\ct MEAN\_DIAMETER}                & Real              & Section~\ref{info:deposition}           & m                 & 1.E-6         \\ \hline
+{\ct MEAN\_DIAMETER}                & Real              & Section~\ref{info:deposition}           & m                 &               \\ \hline
 {\ct MELTING\_TEMPERATURE}          & Real              & Section~\ref{thermal_part_props}        & $^\circ$C         &               \\ \hline
 {\ct MIN\_DIAMETER}                 & Real              & Section~\ref{info:agglomeration}        & m                 &               \\ \hline
 {\ct MW}                            & Real              & Section~\ref{gas_species_props}         & g/mol             & 29.           \\ \hline
@@ -12205,6 +12211,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct DRAG\_COEFFICIENT}                                   & Real            & Section~\ref{info:boundary_fuel_model}    &                     & 2.8                     \\ \hline
 {\ct DT\_INSERT}                                          & Real            & Section~\ref{info:particle_flux}          & s                   & 0.01                    \\ \hline
 {\ct E\_COEFFICIENT}                                      & Real            & Section~\ref{info:suppression}            & \si{m^2/(kg.s)}     &                         \\ \hline
+{\ct EMBER\_GENERATION\_HEIGHT(2)}                          & Real            & Section~\ref{info:particle_flux}          & m                   &                        \\ \hline
 {\ct EMISSIVITY}                                          & Real            & Section~\ref{info:convection}             &                     & 0.9                     \\ \hline
 {\ct EMISSIVITY\_BACK}                                    & Real            & Section~\ref{info:BACKING}                &                     &                         \\ \hline
 {\ct EVAC\_DEFAULT}                                       & Logical         & Reference~\cite{FDS_Evac_Users_Guide}     &                     & {\ct F}           \\ \hline
@@ -12585,6 +12592,7 @@ Table~\ref{tab:sourcefiles} lists the files that make up the FDS source code. Fi
 \begin{tabular}{|l|l|}
 \hline
 File Name  & Description  \\ \hline \hline
+{\ct ccib.f90}   & Complex computational geometry engine \\ \hline
 {\ct cons.f90}   & Global arrays and constants \\ \hline
 {\ct ctrl.f90}   & Definitions and routines for control functions \\ \hline
 {\ct data.f90}   & Data for output quantities and thermophysical properties\\ \hline
@@ -12594,12 +12602,11 @@ File Name  & Description  \\ \hline \hline
 {\ct evac.f90}   & Egress computations (future capability) \\ \hline
 {\ct fire.f90}   & Combustion routines \\ \hline
 {\ct func.f90}   & Global functions and subroutines \\ \hline
-{\ct geom.f90}   & Routines supporting complex, unstructured geometry (under development) \\ \hline
-{\ct gsmv.f90}   & Routines supporting complex, unstructured geometry (under development) \\ \hline
+{\ct geom.f90}   & Complex geometry physics routines \\ \hline
+{\ct gsmv.f90}   & Complex geometry visualization routines \\ \hline
 {\ct hvac.f90}   & Heating, Ventilation, and Air Conditioning \\ \hline
 {\ct ieva.f90}   & Support routines for evac.f90 \\ \hline
 {\ct init.f90}   & Initialize variables and Poisson solver \\ \hline
-{\ct irad.f90}   & Functions needed for radiation solver, including RadCal \\ \hline
 {\ct main.f90}   & Main program \\ \hline
 {\ct mass.f90}   & Mass equation(s) and thermal boundary conditions \\ \hline
 {\ct mesh.f90}   & Arrays and constants associated with each mesh \\ \hline
@@ -12608,8 +12615,8 @@ File Name  & Description  \\ \hline \hline
 {\ct prec.f90}   & Specification of numerical precision \\ \hline
 {\ct pres.f90}   & Spatial discretization of pressure (Poisson) equation \\ \hline
 {\ct radi.f90}   & Radiation solver  \\ \hline
+{\ct rcal.f90}   & Functions needed for radiation solver, including RadCal \\ \hline
 {\ct read.f90}   & Read input parameters \\ \hline
-{\ct samr.f90}   & Simplified Adaptive Mesh Refinement (under development) \\ \hline
 {\ct scrc.f90}   & Alternative pressure solver (under development) \\ \hline
 {\ct smvv.f90}   & Routines for computing and outputting 3D smoke and isosurfaces \\ \hline
 {\ct soot.f90}   & Soot agglomeration and aerosol deposition \\ \hline

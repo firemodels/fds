@@ -6,9 +6,10 @@ set OUTPUT_DIR=%FDS2FTMI_DIR%/scripts/output
 set ERROR_LOG=%OUTPUT_DIR%/errors
 set WARNING_LOG=%OUTPUT_DIR%/warnings
 
-:: Get Git Hash
-for /f "delims=" %%i in ('git describe --long') do set GIT_HASH=%%i 
-echo %GIT_HASH%
+:: Get Git Revision
+git describe --long > gitinfo.txt
+set /p gitrevision=<gitinfo.txt
+echo \newcommand^{\gitrevision^}^{%gitrevision%^} > gitrevision.tex
 
 :: Clean outputs
 cd %FIREBOT_DIR%
@@ -31,15 +32,15 @@ echo Y | make_fds.bat
 
 :: Compile fds2ftmi_win_64
 cd %FDS2FTMI_DIR%\intel_win_64
-echo Y | make_fds2ascii.bat
+echo Y | make_fds2ftmi.bat
 
 :: Print the FDS revision number on User Guide
 cd %FDS2FTMI_DIR%
-sed -i "s:.*Git Hash.*:%GIT_HASH%:" fds2ftmi_user_guide.tex
+sed -i "s:.*Git Hash.*:%gitrevision%:" fds2ftmi_user_guide.tex
 
 :: Print the FDS revision number on python scripts
 cd %FIREBOT_DIR%
-sed -i "s:.*GIT=.*:GIT='%GIT_HASH%':" generate_plots.py
+sed -i "s:.*GIT=.*:GIT='%gitrevision%':" generate_plots.py
 
 :: Run Verification Cases
 cd %FDS2FTMI_DIR%\examples\simple_panel_hot

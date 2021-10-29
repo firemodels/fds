@@ -53,6 +53,7 @@ PROCESS CSTB_Tunnel
 PROCESS Cup_Burner
 PROCESS DelCo_Trainers
 PROCESS Droplet_Evaporation
+PROCESS Edinburgh_Vegetation_Drag
 PROCESS FAA_Cargo_Compartments
 PROCESS FAA_Polymers
 PROCESS Fleury_Heat_Flux

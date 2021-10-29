@@ -5,6 +5,10 @@ MODULE TYPES
 USE PRECISION_PARAMETERS
 USE GLOBAL_CONSTANTS, ONLY : IAXIS,JAXIS,KAXIS,MAX_DIM,LOW_IND,HIGH_IND
 
+#ifdef WITH_MKL
+USE MKL_PARDISO
+#endif /* WITH_MKL */
+
 IMPLICIT NONE (TYPE,EXTERNAL)
 
 !> \brief Parameters associated with an entire class of Lagrangian particles
@@ -145,9 +149,35 @@ TYPE BAND_TYPE
    REAL(EB), POINTER, DIMENSION(:) :: ILW !< (1:NRA) Radiation intensity (W/m2/sr)
 END TYPE BAND_TYPE
 
+! Note: If you change the number of scalar variables in BOUNDARY_COORD_TYPE, adjust the numbers below
+
+INTEGER, PARAMETER :: N_BOUNDARY_COORD_SCALAR_REALS=3,N_BOUNDARY_COORD_SCALAR_INTEGERS=7,N_BOUNDARY_COORD_SCALAR_LOGICALS=0
+INTEGER, DIMENSION(30) :: BOUNDARY_COORD_REALS_ARRAY_SIZE=0,BOUNDARY_COORD_INTEGERS_ARRAY_SIZE=0,&
+                          BOUNDARY_COORD_LOGICALS_ARRAY_SIZE=0
+INTEGER :: N_BOUNDARY_COORD_STORAGE_REALS,N_BOUNDARY_COORD_STORAGE_INTEGERS,N_BOUNDARY_COORD_STORAGE_LOGICALS
+
+!> \brief Coordinate variables associated with a WALL or CFACE boundary cell
+
+TYPE BOUNDARY_COORD_TYPE
+
+   REAL(EB), POINTER :: X                      !< \f$ x \f$ coordinate of boundary cell center
+   REAL(EB), POINTER :: Y                      !< \f$ y \f$ coordinate of boundary cell center
+   REAL(EB), POINTER :: Z                      !< \f$ z \f$ coordinate of boundary cell center
+
+   INTEGER, POINTER :: II             !< Ghost cell \f$ x \f$ index
+   INTEGER, POINTER :: JJ             !< Ghost cell \f$ y \f$ index
+   INTEGER, POINTER :: KK             !< Ghost cell \f$ z \f$ index
+   INTEGER, POINTER :: IIG            !< Gas cell \f$ x \f$ index
+   INTEGER, POINTER :: JJG            !< Gas cell \f$ y \f$ index
+   INTEGER, POINTER :: KKG            !< Gas cell \f$ z \f$ index
+   INTEGER, POINTER :: IOR            !< Index of orientation of the WALL cell
+
+END TYPE BOUNDARY_COORD_TYPE
+
+
 ! Note: If you change the number of scalar variables in ONE_D_M_AND_E_XFER_TYPE, adjust the numbers below
 
-INTEGER, PARAMETER :: N_ONE_D_SCALAR_REALS=30,N_ONE_D_SCALAR_INTEGERS=12,N_ONE_D_SCALAR_LOGICALS=1
+INTEGER, PARAMETER :: N_ONE_D_SCALAR_REALS=30,N_ONE_D_SCALAR_INTEGERS=3,N_ONE_D_SCALAR_LOGICALS=1
 
 !> \brief Variables associated with a WALL, PARTICLE, or CFACE boundary cell
 
@@ -176,15 +206,6 @@ TYPE ONE_D_M_AND_E_XFER_TYPE
 
    INTEGER, POINTER, DIMENSION(:) :: N_LAYER_CELLS              !< (1:SF\%N_LAYERS) Number of cells in the layer
 
-   INTEGER, POINTER :: ARRAY_INDEX    !< WALL, LAGRANGIAN_PARTICLE, or CFACE index
-   INTEGER, POINTER :: STORAGE_INDEX  !< Index in the WALL, LP, or CFACE storate array
-   INTEGER, POINTER :: II             !< Ghost cell \f$ x \f$ index
-   INTEGER, POINTER :: JJ             !< Ghost cell \f$ y \f$ index
-   INTEGER, POINTER :: KK             !< Ghost cell \f$ z \f$ index
-   INTEGER, POINTER :: IIG            !< Gas cell \f$ x \f$ index
-   INTEGER, POINTER :: JJG            !< Gas cell \f$ y \f$ index
-   INTEGER, POINTER :: KKG            !< Gas cell \f$ z \f$ index
-   INTEGER, POINTER :: IOR            !< Index of orientation of the WALL cell
    INTEGER, POINTER :: PRESSURE_ZONE  !< Pressure ZONE of the adjacent gas phase cell
    INTEGER, POINTER :: NODE_INDEX     !< HVAC node index associated with surface
    INTEGER, POINTER :: N_SUBSTEPS     !< Number of substeps in the 1-D conduction/reaction update
@@ -257,13 +278,14 @@ END TYPE BOUNDARY_PROPERTY_TYPE
 
 ! Note: If you change the number of scalar variables in LAGRANGIAN_PARTICLE_TYPE, adjust the numbers below
 
-INTEGER, PARAMETER :: N_PARTICLE_SCALAR_REALS=19,N_PARTICLE_SCALAR_INTEGERS=11,N_PARTICLE_SCALAR_LOGICALS=4
+INTEGER, PARAMETER :: N_PARTICLE_SCALAR_REALS=16,N_PARTICLE_SCALAR_INTEGERS=11,N_PARTICLE_SCALAR_LOGICALS=4
 
-!> \brief Variables assoicated with a single Lagrangian particle
+!> \brief Variables associated with a single Lagrangian particle
 
 TYPE LAGRANGIAN_PARTICLE_TYPE
 
-   TYPE (ONE_D_M_AND_E_XFER_TYPE) :: ONE_D             !< Variables devoted to 1-D heat conduction in depth
+   TYPE(BOUNDARY_COORD_TYPE) :: BOUNDARY_COORD         !< Coordinate variables
+   TYPE(ONE_D_M_AND_E_XFER_TYPE) :: ONE_D              !< Variables devoted to 1-D heat conduction in depth
    TYPE(BAND_TYPE), ALLOCATABLE, DIMENSION(:) :: BAND  !< (1:NSB) Radiation wavelength band
 
    REAL(EB), POINTER, DIMENSION(:) :: IL               !< (1:NSB) Radiance (W/m2/sr); output only
@@ -273,9 +295,6 @@ TYPE LAGRANGIAN_PARTICLE_TYPE
    LOGICAL, POINTER :: EMBER                !< The particle can break away and become a burning ember
    LOGICAL, POINTER :: PATH_PARTICLE
 
-   REAL(EB), POINTER :: X                   !< \f$ x \f$ coordinate of particle (m)
-   REAL(EB), POINTER :: Y                   !< \f$ y \f$ coordinate of particle (m)
-   REAL(EB), POINTER :: Z                   !< \f$ z \f$ coordinate of particle (m)
    REAL(EB), POINTER :: U                   !< \f$ x \f$ velocity component of particle (m/s)
    REAL(EB), POINTER :: V                   !< \f$ y \f$ velocity component of particle (m/s)
    REAL(EB), POINTER :: W                   !< \f$ z \f$ velocity component of particle (m/s)
@@ -318,23 +337,22 @@ END TYPE STORAGE_TYPE
 
 ! Note: If you change the number of scalar variables in WALL_TYPE, adjust the numbers below
 
-INTEGER, PARAMETER :: N_WALL_SCALAR_REALS=7,N_WALL_SCALAR_INTEGERS=14,N_WALL_SCALAR_LOGICALS=0
+INTEGER, PARAMETER :: N_WALL_SCALAR_REALS=4,N_WALL_SCALAR_INTEGERS=14,N_WALL_SCALAR_LOGICALS=0
 
 !> \brief Variables associated with a WALL cell
 
 TYPE WALL_TYPE
 
-   TYPE (ONE_D_M_AND_E_XFER_TYPE) :: ONE_D     !< Derived type carrying most of the solid boundary conditions
+   TYPE (BOUNDARY_COORD_TYPE) :: BOUNDARY_COORD       !< Derived type carrying coordinate info
+   TYPE (ONE_D_M_AND_E_XFER_TYPE) :: ONE_D            !< Derived type carrying most of the solid boundary conditions
    TYPE (BOUNDARY_PROPERTY_TYPE) :: BOUNDARY_PROPERTY !< Derived type carrying most of the surface boundary conditions
 
    REAL(EB), POINTER :: DUNDT                  !< \f$ \partial u_n / \partial t \f$
    REAL(EB), POINTER :: Q_LEAK                 !< Heat production of leaking gas (W/m3)
    REAL(EB), POINTER :: V_DEP                  !< Deposition velocity (m/s)
    REAL(EB), POINTER :: VEL_ERR_NEW            !< Velocity mismatch at mesh or solid boundary (m/s)
-   REAL(EB), POINTER :: X                      !< \f$ x \f$ coordinate of boundary cell center
-   REAL(EB), POINTER :: Y                      !< \f$ y \f$ coordinate of boundary cell center
-   REAL(EB), POINTER :: Z                      !< \f$ z \f$ coordinate of boundary cell center
 
+   INTEGER, POINTER :: WALL_INDEX              !< WALL index of front side of obstruction or exterior wall cell
    INTEGER, POINTER :: BACK_INDEX              !< WALL index of back side of obstruction or exterior wall cell
    INTEGER, POINTER :: BACK_MESH               !< Mesh number on back side of obstruction or exterior wall cell
    INTEGER, POINTER :: BOUNDARY_TYPE           !< Descriptor: SOLID, MIRROR, OPEN, INTERPOLATED, etc
@@ -343,7 +361,6 @@ TYPE WALL_TYPE
    INTEGER, POINTER :: SURF_INDEX              !< Index of the SURFace conditions
    INTEGER, POINTER :: SURF_INDEX_ORIG         !< Original SURFace index for this cell
    INTEGER, POINTER :: VENT_INDEX              !< Index of the VENT containing this cell
-   INTEGER, POINTER :: WALL_INDEX              !< Self-identifier
    INTEGER, POINTER :: JD11_INDEX
    INTEGER, POINTER :: JD12_INDEX
    INTEGER, POINTER :: JD21_INDEX
@@ -622,7 +639,7 @@ TYPE SURFACE_TYPE
    INTEGER,  ALLOCATABLE, DIMENSION(:) :: RAMP_INDEX
    INTEGER, DIMENSION(3) :: RGB
    REAL(EB) :: TRANSPARENCY
-   REAL(EB), DIMENSION(2) :: VEL_T
+   REAL(EB), DIMENSION(2) :: VEL_T,EMBER_GENERATION_HEIGHT=-1._EB
    INTEGER, DIMENSION(2) :: LEAK_PATH,DUCT_PATH
    INTEGER :: THERMAL_BC_INDEX,NPPC,SPECIES_BC_INDEX,VELOCITY_BC_INDEX,SURF_TYPE,N_CELLS_INI,N_CELLS_MAX=0, &
               PART_INDEX,PROP_INDEX=-1,RAMP_T_I_INDEX=-1, RAMP_T_B_INDEX=0
@@ -649,6 +666,9 @@ TYPE SURFACE_TYPE
               SPECIFIED_NORMAL_GRADIENT=.FALSE.,CONVERT_VOLUME_TO_MASS=.FALSE.,SPECIFIED_HEAT_SOURCE=.FALSE.,&
               IMPERMEABLE=.FALSE.,BOUNDARY_FUEL_MODEL=.FALSE.,BLOWING=.FALSE.,BLOWING_2=.FALSE.,ABL_MODEL=.FALSE., &
               HT3D=.FALSE., MT1D=.FALSE.
+   LOGICAL :: INCLUDE_BOUNDARY_COORD_TYPE=.TRUE.     !< This surface requires basic coordinate information
+   LOGICAL :: INCLUDE_BOUNDARY_PROPERTY_TYPE=.TRUE.  !< This surface requires surface variables for heat and mass transfer
+   LOGICAL :: INCLUDE_ONE_D_TYPE=.TRUE.              !< This surface requires in-depth 1-D conduction/reaction arrays
    INTEGER :: GEOMETRY,BACKING,PROFILE,HEAT_TRANSFER_MODEL=0
    CHARACTER(LABEL_LENGTH) :: PART_ID,RAMP_Q,RAMP_V,RAMP_T,RAMP_EF,RAMP_PART,RAMP_V_X,RAMP_V_Y,RAMP_V_Z,RAMP_T_B,RAMP_T_I
    CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: RAMP_MF
@@ -942,16 +962,18 @@ END TYPE RAD_CFACE_TYPE
 
 ! Note: If you change the number of scalar variables in CFACE_TYPE, adjust the numbers below
 
-INTEGER, PARAMETER :: N_CFACE_SCALAR_REALS=11,N_CFACE_SCALAR_INTEGERS=8,N_CFACE_SCALAR_LOGICALS=0
+INTEGER, PARAMETER :: N_CFACE_SCALAR_REALS=8,N_CFACE_SCALAR_INTEGERS=8,N_CFACE_SCALAR_LOGICALS=0
 
 TYPE CFACE_TYPE
+   TYPE (BOUNDARY_COORD_TYPE) :: BOUNDARY_COORD       !< Derived type carrying coordinate variables
    TYPE (ONE_D_M_AND_E_XFER_TYPE) :: ONE_D
    TYPE (BOUNDARY_PROPERTY_TYPE) :: BOUNDARY_PROPERTY !< Derived type carrying most of the surface boundary conditions
-   REAL(EB), POINTER :: AREA,X,Y,Z,NVEC(:),VEL_ERR_NEW,V_DEP,Q_LEAK,DUNDT
+   REAL(EB), POINTER :: AREA,NVEC(:),VEL_ERR_NEW,V_DEP,Q_LEAK,DUNDT
    INTEGER, POINTER :: CFACE_INDEX,SURF_INDEX,VENT_INDEX,BACK_MESH,BACK_INDEX,BOUNDARY_TYPE,CUT_FACE_IND1,CUT_FACE_IND2
 END TYPE CFACE_TYPE
 
 ! Cartesian Cells Cut-Cells data structure:
+
 INTEGER, PARAMETER :: IBM_MAXVERTS_CELL   =3072
 INTEGER, PARAMETER :: IBM_NPARAM_CCFACE   =   5 ! [face_type side iaxis cei icf]
 
@@ -1229,6 +1251,7 @@ TYPE INITIALIZATION_TYPE
    REAL(EB) :: CHI_R            !< Radiative fraction of HRRPUV
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: PARTICLE_INSERT_CLOCK  !< Time of last particle insertion (s)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: MASS_FRACTION          !< Mass fraction of gas components
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: VOLUME_ADJUST          !< Multiplicative factor to account for FDS grid snap
    INTEGER  :: PART_INDEX=0     !< Particle class index of inserted particles
    INTEGER  :: N_PARTICLES      !< Number of particles to insert
    INTEGER  :: DEVC_INDEX=0     !< Index of the device that uses this INITIALIZATION variable
@@ -1281,6 +1304,14 @@ TYPE P_ZONE_TYPE
 END TYPE P_ZONE_TYPE
 
 TYPE (P_ZONE_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: P_ZONE
+
+
+!> \brief Parameters associated with a ZONE within a MESH, used in LOCMAT_SOLVER unstructured pressure solver
+
+TYPE ZONE_MESH_TYPE
+   TYPE(MKL_PARDISO_HANDLE), ALLOCATABLE  :: PT_H(:)  !< Internal solver memory pointer
+   INTEGER :: NUNKH                                   !< Number of unknowns in pressure solution for a given ZONE_MESH
+END TYPE ZONE_MESH_TYPE
 
 
 !> \brief Parameters associated with a MOVE line, used to rotate or translate OBSTructions
