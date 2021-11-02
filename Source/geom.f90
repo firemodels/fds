@@ -3919,14 +3919,14 @@ CASE(INTEGER_THREE)
       ! To DO.
 
       ! Set TMP_F to Surface value and rest to ambient in underlying cartesian cell.
-      ONE_D%TMP_G = TMP_0(CUT_FACE(ICF)%IJK(KAXIS))
+      CFA%TMP_G = TMP_0(CUT_FACE(ICF)%IJK(KAXIS))
       IF (SURFACE(SURF_INDEX)%TMP_FRONT > 0._EB) THEN
          ONE_D%TMP_F = SURFACE(SURF_INDEX)%TMP_FRONT
       ELSE
-         ONE_D%TMP_F = ONE_D%TMP_G
+         ONE_D%TMP_F = CFA%TMP_G
       ENDIF
       ONE_D%RHO_F = CUT_CELL(ICC)%RHO(JCC)
-      ONE_D%RHO_G = CUT_CELL(ICC)%RHO(JCC)
+      CFA%RHO_G = CUT_CELL(ICC)%RHO(JCC)
       ONE_D%ZZ_F(1:N_TOTAL_SCALARS)  = CUT_CELL(ICC)%ZZ(1:N_TOTAL_SCALARS,JCC)
 
       ! Assign normal velocity to CFACE from SURF input:
@@ -4059,11 +4059,12 @@ CASE(INTEGER_THREE)
          WC => M%WALL(IW)
          IOR = M%BOUNDARY_COORD(WC%BC_INDEX)%IOR
          WC_ONE_D => M%BOUNDARY_ONE_D(WC%OD_INDEX)
+         WC_BC => M%BOUNDARY_COORD(WC%BC_INDEX)
          ! Set TMP_F to Surface value and rest to ambient in underlying cartesian cell.
-         ONE_D%TMP_G = WC_ONE_D%TMP_G
+         CFA%TMP_G = TMP(WC_BC%IIG,WC_BC%JJG,WC_BC%KKG)
          ONE_D%TMP_F = WC_ONE_D%TMP_F
          ONE_D%RHO_F = WC_ONE_D%RHO_F
-         ONE_D%RHO_G = WC_ONE_D%RHO_G
+         CFA%RHO_G = RHO(WC_BC%IIG,WC_BC%JJG,WC_BC%KKG)
          ONE_D%ZZ_F(1:N_TOTAL_SCALARS) = WC_ONE_D%ZZ_F(1:N_TOTAL_SCALARS)
 
          ! Assign normal velocity to CFACE from wall cell:
