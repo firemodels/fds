@@ -131,10 +131,20 @@ IMPLICIT NONE (TYPE,EXTERNAL)
 
 !> !\{
 !> Parameter defining the type of control function for CONTROL\%CONTROL_INDEX
-INTEGER, PARAMETER :: AND_GATE=1, OR_GATE=2, XOR_GATE=3, X_OF_N_GATE=4, TIME_DELAY=5, DEADBAND=6, CYCLING=7, &
-                      CUSTOM=8,KILL=9,CORE_DUMP=10,CF_SUM=11,CF_SUBTRACT=12,CF_MULTIPLY=13,CF_DIVIDE=14,CF_POWER=15,CF_PID=16,&
-                      CF_EXP=17,CF_LOG=18,CF_SIN=19,CF_COS=20,CF_ASIN=21,CF_ACOS=22,CF_MIN=23,CF_MAX=24, CF_ABS=25, &
-                      CF_PERCENTILE=26,CF_ATAN=27
+! When adding more functions:
+! 1-50 are fucntions with a logical output that have only one input
+! 51-100 are fucntions with a logical output that at least one inputs
+! 101-200 are functions with one input only
+! 201-300 are functions with two inputs only
+! 301-400 are functions with two or more inputs
+! 401-500 are functions with only a single DEVC input
+INTEGER, PARAMETER :: TIME_DELAY=1,DEADBAND=2,CUSTOM=3,KILL=4,CORE_DUMP=5,&
+                      AND_GATE=51,OR_GATE=52,XOR_GATE=53,X_OF_N_GATE=54,&
+                      CF_EXP=101,CF_LOG=102,CF_PID=103,CF_SIN=104,CF_COS=105,CF_TAN=106,CF_ASIN=107,CF_ACOS=108,CF_ATAN=109,&
+                      CF_ABS=110,&
+                      CF_POWER=201,CF_DIVIDE=202,&
+                      CF_SUM=301,CF_SUBTRACT=302,CF_MULTIPLY=303,CF_MIN=304,CF_MAX=305,&
+                      CF_PERCENTILE=401
 !> !\}
 !> !\{
 !> Parameter used to define the type of input for CONTROL\%INPUT_TYPE

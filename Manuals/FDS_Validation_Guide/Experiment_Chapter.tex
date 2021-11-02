@@ -109,10 +109,44 @@ A minimum auto-ignition temperature is specified for each fuel~\cite{SFPE:Beyler
 
 In 1982 and 1983, P.A. Croce and K.S. Mudan of Arthur D. Little, Inc., and J. Moorhouse of the British Gas Corporation (BGC) supervised 13 liquified natural gas (LNG) trench fire experiments conducted by BGC on behalf of the Gas Research Institute (GRI)~\cite{Croce:GRI}. Thirteen experiments were performed with nominal trench sizes ranging from 0.8~m by 4.4~m to 3.9~m by 52~m and aspect ratios ranging from approximately 5 to 30. Wind speeds varied from approximately 1~m/s to almost 10~m/s. Measurements made during the tests included flame geometry, radiative heat flux, emissive power, burning rate, LNG liquid and vapor compositions, and meteorological data. The fires were observed to exhibit substantial flame drag and flame breakup, unlike low aspect ratio pools. Steady burning was achieved in all tests.
 
+The key parameters for each experiment are listed in Table~\ref{BGC_sum}. The Flame Tilt angle is the measured deflection of the flame from the vertical. The Flame Drag Ratio is the distance that the flame drags along the ground outside of the trench added to the trench width, and then divided by the trench width. The Avg.~Flame Length denotes the time-averaged flame length, while the Max.~Flame Length refers to the time-averaged extent of the fluctuating flame tips.
+
+\begin{table}[!ht]
+\centering
+\caption[BGC/GRI LNG Fires test parameters]{BGC/GRI LNG Fires test parameters.}
+\label{BGC_sum}
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|}
+\hline
+Test  & Trench     & Trench    & Aspect  & Wind        & Burning           & Flame       & Flame       & Avg.~Flame  & Max.~Flame  \\
+No.   & Length     & Width     & Ratio   & Speed       & Rate              & Tilt        & Drag        & Length      & Length      \\ 
+      &        (m) &       (m) &         & (m/s)       & (kg/m$^2$/s)      & (deg)       & Ratio       &        (m)  &        (m)  \\ \hline
+1     & 23.53      & 1.81      & 13.00   & 3.8         & 0.064             & 56.3        & 2.57        & 4.4         & 8.9         \\ \hline
+2     & 15.52      & 1.81      & 8.57    & 1.5         & 0.069             & 56.1        & 2.30        & 3.8         & 7.3         \\ \hline
+3     & 9.23       & 1.83      & 5.04    & 1.0         & 0.098             & 45.2        & 1.21        & 7.1         & 11.4        \\ \hline
+4     & 23.50      & 1.83      & 12.84   & 8.36        & 0.054             & 56.8        & 2.96        & 3.4         & 7.3         \\ \hline
+5     & 9.05       & 1.82      & 4.97    & 9.31        & 0.060             & 60.5        & 2.96        & 4.2         & 8.2         \\ \hline
+6     & 23.45      & 3.94      & 5.95    & 4.98        & 0.082             & 59.6        & 2.62        & 6.9         & 16.8        \\ \hline
+7     & 23.45      & 0.82      & 28.60   & 3.80        & 0.049             & 48.3        & 3.98        & 2.0         & 4.3         \\ \hline
+8     & 11.82      & 0.82      & 14.41   & 2.05        & 0.058             & 49.8        & 3.77        & 2.1         & 4.6         \\ \hline
+9     & 9.10       & 0.82      & 11.10   & 5.40        & 0.051             & 47.0        & 3.68        & 1.5         & 3.7         \\ \hline
+10    & 52.05      & 3.89      & l3.38   & 7.05        & 0.060             & 61.3        & 2.83        & 7.9         & 20.3        \\ \hline
+11    & 4.37       & 0.81      & 5.40    & 5.90        & 0.052             & 49.9        & 4.16        & 1.8         & 3.6         \\ \hline
+12    & 52.15      & 1.82      & 28.65   & 8.60        & 0.046             & 61.3        & 3.70        & 3.3         & 8.1         \\ \hline
+13    & 23.10      & 0.77      & 30.00   & 3.69        & 0.043             & 55.7        & 4.23        & 2.1         & 5.3         \\ \hline
+\end{tabular}
+\end{table}
+
 \subsubsection{Modeling Notes}
 
 The experiments are simulated using the specified fuel burning rate. The fuel is assumed to be methane. The atmosphere is assumed to be neutral with a large Obukhov length, $L=1000000$, and the ground surface is flat with an assumed aerodynamic roughness, $z_0=0.1$~m. The relative humidity, ambient temperature and pressure, and wind speed at 9~m are specified in the report. The radiative fraction is assumed to 0.25 and the radiative path length is assumed to be 50~m; that is, the effective absorption coefficients of the various gas mixtures are evaluated over a distance of 50~m. The radiation source term is taken directly as 25~\% of the combustion energy release rate. The soot yield is assumed to be 0.005.
 
+\begin{description}
+\item[Flame Height Results:] Section~\ref{Flame Height} 
+\item[Flame Tilt Results:] Section~\ref{Flame Tilt} 
+\item[Heat Flux Results:] Section~\ref{BGC_GRI_LNG_Fires_Heat_Flux} 
+\end{description}
+
+\FloatBarrier
 
 
 \section{Bittern Sprinkler Experiments}
@@ -510,6 +544,22 @@ Maqua, Castanet, and Lemoine measured the temperature of falling droplets of eth
 
 Taflin measured the diameter of suspended water droplets in dry air~\cite{Snegirev:1}. One droplet was initially 43.9~$\mu$m and the other was 56.6~$\mu$m.
 
+\section{Edinburgh Vegetation Drag}
+\label{Edinburgh_Veg_Drag_Description}
+
+Mueller et al.~\cite{Mueller:TIPM2021} characterized the pressure drop through beds of randomly oriented pine needles and used the results to parameterize a drag model following the form of the Forchheimer equation. They then measured the development of velocity profiles within and above these pine needle beds, using a hotwire anemometer, and compared the results to FDS predictions using the parameterized model. Fuel beds with bulk densities of 20~kg/m$^3$, 40~kg/m$^3$, and 60~kg/m$^3$ were tested, with inlet velocities in the range of 0.5-2.0~m/s. A condensed version of the comparison is reproduced in this guide, which serves to test the ability of the model to represent the general features of flow in sparse multiphase media.
+
+\subsubsection{Modeling Notes}
+
+In the experiment, the test section extended 400~mm beyond the vegetation layer. This extent of the domain is reproduced in the simulations in order to avoid possible influence of the downstream boundary condition. The upstream boundary condition is set using the measurements located at $x=-75$~mm, which allows for the reproduction of a slight non-uniformity in the flowfield. Due to difficulties in compacting the high bulk density case, the fuel layer is set to extend to 55~mm in the 60~kg/m$^3$ simulations.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.5\textwidth]{FIGURES/Edinburgh_Vegetation_Drag/domain_schematic}
+\caption[Geometry of the Edinburgh Vegetation Drag experiments]{Geometry of the wind tunnel test section for the Edinburgh Vegetation Drag experiments. Vegetation filled the lower half of the 150~mm x 100~mm test section, starting from $x=0$~mm. Circles indicate the locations of velocity measurements, with the filled circles corresponding to those used for comparison in this guide.}
+\label{Ed_Veg_Drag_Layout}
+\end{figure}
+
 \section{FAA Cargo Compartments}
 \label{FAA_Cargo_Description}
 
@@ -720,8 +770,8 @@ where $\rho_\infty$, $c_p$, and $T_\infty$ are the ambient density, specific hea
 
 Paudel et al.~\cite{Paudel:2020} studied small-scale fire resistance tests for 30 different types of stone wool insulation varying in density, thickness, and organic content. During each test, a 60~cm square sample of insulation covered by a 1~mm thick steel plate was mounted to the opening of a small combustion chamber. Thus, one side of the sample was exposed to ambient ($ T_\infty $) conditions, and the other side was attached to the steel plate whose temperature followed the ISO 834 standard fire curve,
 \begin{equation}
-	T_\textrm{h}(t) = T_\infty + 345 \, \textrm{log}_{10}(8t + 1)
-	\label{eq:isocurve}
+   T_\textrm{h}(t) = T_\infty + 345 \, \textrm{log}_{10}(8t + 1)
+   \label{eq:isocurve}
 \end{equation}
 with time, $t$, in minutes and exposure temperature, $T_{\textrm{h}}$, in $^\circ$C. The temperature measurements were made using K-type thermocouples covered with 30~mm square inorganic insulating pads. The pads were attached to the back side of the sample using heat-resistant glue or pins.
 
@@ -896,9 +946,14 @@ The grid resolution is 20~cm; thus, the circular pipe is modeled as a collection
 \ee
 This correlation is appropriate for $40,000 < \RE < 400,000$~\cite{Incropera:1}.
 
-To resolve the radiation field at the far-field radiometers, 600~angles are used in solving the radiation transport equation rather than the default 100. The radiation absorption coefficients are calculated by RadCal assuming a path length of 100~m rather than the default value of 0.1~m. 
+The values of radiative fraction in the model are based on the measured values reported in Table~\ref{Loughborough_Parameters}. To resolve the radiation field at the far-field radiometers, 600~angles are used in solving the radiation transport equation rather than the default 100. The radiation absorption coefficients are calculated by RadCal assuming a path length of 100~m rather than the default value of 0.1~m. 
 
 The wind profile is based on measurements made 10.85~m above the relatively flat terrain. The aerodynamic roughness length, $z_0$, is set to 0.03~m, appropriate for relatively flat grasslands, prairies, farms, etc. The Obukhov length, $L$, is set to 100,000~m, typical of a neutral atmosphere. Synthetic turbulence is generated at the upstream boundary of the computational domain, with a characteristic eddy length scale of 1~m and root-mean-square velocity fluctuation of 0.1~m/s.
+
+\begin{description}
+\item[Flame Length Results:] Section~\ref{Flame Height}
+\item[Heat Flux Results:] Section~\ref{Loughborough_Jet_Fires_Heat_Flux}
+\end{description}
 
 
 \FloatBarrier
@@ -952,9 +1007,44 @@ $Q$ (kW) & $Q^*$    & $D^*$ (m)   & HRRPUA (kW/m$^2$)  & $\chi_r$ & $T_{\rm surf
 \section{Montoir LNG Fires}
 \label{Montoir_LNG_Fires_Description}
 
-In 1987, British Gas, British Petroleum, Shell, Elf Aquitaine, Total CFP, and Gaz de France conducted 35~m diameter LNG pool fire experiments~\cite{Nedelka:1990}. The construction of the test facility was carried out by Gaz de France near the Montoir de Bretagne methane terminal. Three fire experiments were performed under different wind conditions. The Montoir site was selected because the ground is level and obstruction free. Wide angle radiation measurements were made at various locations around the fires, extending outwards approximately 300~m. A bund constructed of lightweight concrete and sand, approximately 1~m tall, surrounded the 35~m pool.
+In 1987, British Gas, British Petroleum, Shell, Elf Aquitaine, Total CFP, and Gaz de France conducted 35~m diameter LNG pool fire experiments~\cite{Nedelka:1990}. The construction of the test facility was carried out by Gaz de France near the Montoir de Bretagne methane terminal. Three fire experiments were performed under different wind conditions. The Montoir site was selected because the ground is level and obstruction free. Wide angle radiation measurements were made at various locations around the fires, extending outwards approximately 300~m. A bund constructed of lightweight concrete and sand, approximately 1~m tall, surrounded the 35~m pool. 
 
+A summary of the key test parameters is given in Table~\ref{Montoir_Summary}. Note that results were compiled for specific time intervals during each experiment.
 
+\begin{table}[!ht]
+\centering
+\caption[Summary of the Montoir LNG Fire Experiments]{Summary of the Montoir LNG Fire Experiments.}
+\label{Montoir_Summary}
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+                            & Time    & Burning      & Wind      & 9~m Wind & Amb.                & Rel.                & Atm.                    \\
+Test                        & Interval& Rate         & Direction & Speed    & Temp.               & Hum.                & Pres.                   \\
+                            & (s)     & (kg/m$^2$/s) & (deg)     & (m/s)    & ($^\circ$C)         & (\%)                & (mbar)                  \\ \hline \hline
+\multirow{2}{*}{1}          & 60-100  & 0.12         & 59        & 2.5      & \multirow{2}{*}{25} & \multirow{2}{*}{53} & \multirow{2}{*}{1022}   \\  
+                            & 130-170 & 0.13         & 70        & 4.8      &                     &                     &                         \\ \hline
+\multirow{4}{*}{2}          & 35-50   & 0.14         & 268       & 6.8      & \multirow{4}{*}{21} & \multirow{4}{*}{54} & \multirow{4}{*}{1015}   \\
+                            & 65-85   & 0.15         & 263       & 9.8      &                     &                     &                         \\
+                            & 100-130 & 0.16         & 260       & 10.3     &                     &                     &                         \\
+                            & 165-185 & 0.15         & 257       & 9.1      &                     &                     &                         \\ \hline
+\multirow{3}{*}{3}          & 57-70   & 0.11         & 87        & 1.9      & \multirow{3}{*}{14} & \multirow{3}{*}{85} & \multirow{3}{*}{1009}   \\
+                            & 90-120  & 0.13         & 79        & 3.5      &                     &                     &                         \\
+                            & 130-160 & 0.13         & 82        & 4.2      &                     &                     &                         \\ \hline
+\end{tabular}
+\end{table}
+
+\subsubsection{Modeling Notes}
+
+The experiments are simulated using the specified fuel burning rates for the several time periods during each experiment. The fuel is assumed to be methane. The atmosphere is assumed to be unstable with an Obukhov length, $L=-350$, and the ground surface is roughly open with an assumed aerodynamic roughness, $z_0=0.1$~m. The relative humidity, ambient temperature and pressure, and wind speed at 9~m are specified in Table~\ref{Montoir_Summary}. 
+
+The radiative fraction is assumed to 0.14 based on field estimates and the radiative path length is assumed to be 300~m; that is, the effective absorption coefficients of the various gas mixtures are evaluated over a distance of 300~m. 600 solid angles, rather than the default 100, are used to solve the radiative transport equation. The soot yield is assumed to be 0.01.
+
+\begin{description}
+\item[Flame Height Results:] Section~\ref{Flame Height}
+\item[Flame Tilt Results:] Section~\ref{Flame Tilt}
+\item[Heat Flux Results:] Section~\ref{Montoir_LNG_Fires_Heat_Flux}
+\end{description}
+
+\FloatBarrier
 
 
 \section{NBS Multi-Room Experiments}
@@ -1769,17 +1859,24 @@ square sand burner ranged in size from 0.28~m to 0.70~m, and the fires ranged in
 
 In 2009, Sandia National Laboratories conducted two large-scale LNG pool fire experiments in a 120~m diameter pond in its Area III test complex in Albuquerque, New Mexico~\cite{Blanchat:2011}. The fires were approximately 21~m and 83~m in diameter. Measurements of flame height, smoke production, burn rate, and heat flux were performed. A photograph of Test~2 is shown in Fig.~\ref{Phoenix_Photo}.
 
-\subsubsection{Modeling Notes}
-
-The simulation of the Test~1 uses 1~m grid cells, while Test~2 uses 2~m cells. The computational domain for both simulations forms the shape of a cross that includes the fire and the radiometers to the north, south, east and west. Methane is the specified fuel, with a soot yield of 0.01 and radiative fraction of 0.25. Both values are estimates. 
-
-There are 1200 solid angles, rather than the default 100, used in the radiative transport equation to uniformly distribute the fire's radiative energy outward approximately 250~m. The value of 1200 is based on an assessment of the contours of the integrated radiative intensity. 
-
 \begin{figure}[p]
 \includegraphics[width=\textwidth]{FIGURES/Phoenix_LNG_Fires/Phoenix02_photo}
 \caption[Photograph of Phoenix LNG Fire Test 2]{Photograph of Phoenix LNG Fire Test 2~\cite{Blanchat:2011}.}
 \label{Phoenix_Photo}
 \end{figure}
+
+
+\subsubsection{Modeling Notes}
+
+The simulation of Test~1 uses 1~m grid cells, while Test~2 uses 2~m cells. The computational domain for both simulations forms the shape of a cross that includes the fire and the radiometers to the north, south, east and west. Methane is the specified fuel, with a soot yield of 0.01 and radiative fraction of 0.25. Both values are estimates. 
+
+There are 1200 solid angles, rather than the default 100, used in the radiative transport equation to uniformly distribute the fire's radiative energy outward approximately 250~m. The value of 1200 is based on an assessment of the contours of the integrated radiative intensity. Also, both wide and narrow-angle radiometer measurements were made at distances ranging from 100~m to 250~m from the pool center, with various inclination angles. For the narrow-angle measurements, FDS chooses the nearest discrete radiation angle to represent the narrow-angle heat flux. At such large distances, it is difficult to ``find'' an angle that emanates from the fire to the location of the device.
+
+\begin{description}
+\item[Flame Height Results:] Section~\ref{Flame Height} 
+\item[Flame Tilt Results:] Section~\ref{Flame Tilt} 
+\item[Heat Flux Results:] Section~\ref{Phoenix_LNG_Fires_Heat_Flux} 
+\end{description}
 
 \FloatBarrier
 
@@ -1950,13 +2047,23 @@ The simulations of the 3~m methane fires are done with 10~cm grid resolution in 
 
 The radiative fraction is specified at 0.35 rather than the default 0.20 for methane because the large fire is far more sooty and luminous than a small methane flame. 600 solid angles are used to solve the radiative transport equation rather than the default 100 so as to resolve the radiative flux 9~m from the fire. 
 
+\begin{description}
+\item[Flame Height Results:] Section~\ref{Flame Height} 
+\item[Heat Flux Results:] Section~\ref{Sandia_Methane_Burner_Heat_Flux} 
+\end{description}
 
 \FloatBarrier
 
 \section{Sandia Plume Experiments}
 \label{Sandia_Plume_Description}
 
-The Fire Laboratory for Accreditation of Models by Experimentation (FLAME) facility \cite{OHern:2005,Blanchat:2001} at Sandia National Laboratories in Albuquerque, New Mexico, is designed specifically for validating models of buoyant fire plumes.  The plume source is 1 m in diameter surrounded by a 0.5 m steel `ground plane'. PIV/PLIF techniques are used to obtain instantaneous joint scalar and velocity fields.  O'Hern et al.~\cite{OHern:2005} studied a turbulent buoyant helium plume in the FLAME facility. Earlier work to model this experiment has been performed by DesJardin et al.~\cite{DesJardin:2004}. Tieszen et al.~\cite{Tieszen:2004,Tieszen:2002} studied methane and hydrogen pool fires.
+The Fire Laboratory for Accreditation of Models by Experimentation (FLAME) facility \cite{OHern:2005,Blanchat:2001} at Sandia National Laboratories in Albuquerque, New Mexico, is designed specifically for validating models of buoyant fire plumes.  The plume source is 1 m in diameter surrounded by a 0.5 m steel `ground plane'.  O'Hern et al.~\cite{OHern:2005} studied a turbulent buoyant helium plume in the FLAME facility. PIV/PLIF techniques are used to obtain instantaneous joint scalar and velocity fields and thus obtain Favre averaged velocity fields. Earlier work to model this experiment has been performed by DesJardin et al.~\cite{DesJardin:2004}. Tieszen et al.~\cite{Tieszen:2004,Tieszen:2002} studied methane and hydrogen pool fires.
+
+\subsubsection{Modeling Notes}
+
+The data in the experimental repository for the helium plume is Favre averaged.  The ``helium'' was actually a mixture of 96.4 vol \% (0.7075 mass fraction) helium, 1.7 vol \% (0.1809 mass fraction) acetone, and 1.9 vol \% (0.1116 mass fraction) oxygen; this mixture is referred to as the ``plume fluid'' \cite{OHern:2005}.  The data for ``mass fraction'' in the experimental repository is for Favre averaged plume fluid mass fraction.  To account for any effect of differential diffusion, we separately transport helium, acetone, and oxygen in the simulations.  Then the plume fluid mass fraction is obtained using the conversion $Y_{\mathrm{plume\;fluid}} = Y_{\mathrm{acetone}}/0.1809$.
+
+Note that the velocity fields in the methane and hydrogen fire plumes were obtained directly from PIV and are therefore ensemble averaged \cite{Tieszen:2004,Tieszen:2002}.
 
 \section{SETCOM Wall Condensation Experiments}
 \label{SETCOM_Cond_Description}
@@ -2007,9 +2114,13 @@ Radiometers and pressure transducers were positioned at various distances from t
 
 \subsubsection{Modeling Notes}
 
-The FDS simulations of the three BLEVE experiments are performed with 0.5~m resolution spanning a volume that is 160~m long, 100~m wide, and 120~m high. The specified mass of LNG is injected uniformly for 0.2~s at the ground over an area 6.4~m long and 3.2~m wide. An inert obstruction that is 3.2~m long by 1.6~m wide and 0.8~m tall is suspended above the spill region to represent the remains of the containment vessel. No attempt is made to model the destuction of the vessel or the subsequent spill of LNG. 
+The FDS simulations of the three BLEVE experiments are performed with 1~m resolution spanning a volume that is 200~m long, 120~m wide, and 200~m high. The specified mass of LNG is injected uniformly for 0.2~s at the ground over an area 4~m long and 4~m wide. An inert obstruction that is 1~m long by 1~m wide and 1~m tall is suspended 1~m above the spill region to represent the remains of the containment vessel. No attempt is made to model the destuction of the vessel or the subsequent spill of LNG. 
 
 Approximately 600 angles are used in the radiative transport solver rather than the default 100. A radiative fraction of 30~\% is used, rather than the default of 20~\% for methane.
+
+\begin{description}
+\item[Heat Flux Results:] Section~\ref{Shell_LNG_Fireballs_Heat_Flux} 
+\end{description}
 
 \FloatBarrier
 
@@ -2588,7 +2699,7 @@ II-12 & C  & All Open at Start       & 23 & 0:58 & 4:55 & 119.0 &246.2 \\ \hline
 \section{UL/NIJ House Experiments}
 \label{UL_NIJ_Description}
 
-The Firefighter Safety Research Institute (FSRI) of Underwriters Laboratory (UL), with support from the National Institute of Justice (NIJ), conducted fire experiments in a one-story ranch-style house and a two-story colonial-style house in the large fire facility at Northbrook, Illinois, in 2016 and 2017~\cite{Madrzykowski:2019}. The goal of the experiments was to determine the effect of ventilation on fire patterns in fully-furnished homes. As part of the project, a natural gas burner was positioned within the unfurnished structures to evaluate changes in flow patterns as various doors and windows were opened and closed. The test structures were instrumented with thermocouple trees, pressure transducers, and bi-directional probes. The floor plan for the single story ranch-style house is included in Fig.~\ref{Ranch_layout}, and plans for the two story colonial-style house in Fig.~\ref{Colonial_layout}. The ceiling was 2.4~m above the floor in the ranch-style house. The colonial-style house featured an atrium with a 5.6~m ceiling height. The first story ceiling in the colonial-style house was 2.5~m above the floor, and the second story ceiling was 2.8~m above the floor.
+The Firefighter Safety Research Institute (FSRI) of Underwriters Laboratory (UL), with support from the National Institute of Justice (NIJ), conducted fire experiments in a one-story ranch-style house and a two-story colonial-style house in the large fire facility at Northbrook, Illinois, in 2016 and 2017~\cite{Madrzykowski:2019}. In addition to this validation guide, modeling of the experiments is also reported in \cite{McKinnon:FISJ2021}.  The goal of the experiments was to determine the effect of ventilation on fire patterns in fully-furnished homes. As part of the project, a natural gas burner was positioned within the unfurnished structures to evaluate changes in flow patterns as various doors and windows were opened and closed. The test structures were instrumented with thermocouple trees, pressure transducers, and bi-directional probes. The floor plan for the single story ranch-style house is included in Fig.~\ref{Ranch_layout}, and plans for the two story colonial-style house in Fig.~\ref{Colonial_layout}. The ceiling was 2.4~m above the floor in the ranch-style house. The colonial-style house featured an atrium with a 5.6~m ceiling height. The first story ceiling in the colonial-style house was 2.5~m above the floor, and the second story ceiling was 2.8~m above the floor.
 
 The leakage area in the single story structure was measured to be 0.08~m$^2$ at 10~Pa. The leakage area in the two story structure was measured to be 0.18~m$^2$ at 10~Pa.
 

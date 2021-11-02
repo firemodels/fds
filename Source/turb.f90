@@ -442,10 +442,10 @@ ENDDO
 ! Set normal velocity on external and internal boundaries (follows divg)
 
 DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-   IOR = WALL(IW)%ONE_D%IOR
-   II  = WALL(IW)%ONE_D%II
-   JJ  = WALL(IW)%ONE_D%JJ
-   KK  = WALL(IW)%ONE_D%KK
+   IOR = WALL(IW)%BOUNDARY_COORD%IOR
+   II  = WALL(IW)%BOUNDARY_COORD%II
+   JJ  = WALL(IW)%BOUNDARY_COORD%JJ
+   KK  = WALL(IW)%BOUNDARY_COORD%KK
    SELECT CASE(IOR)
       CASE( 1)
          WALL(IW)%ONE_D%U_NORMAL_S = -U(II,JJ,KK)
@@ -2378,10 +2378,10 @@ MESH_LOOP_2: DO IM = 1,NMESHES
 
       WC=>M%WALL(IW)
       EWC=>M%EXTERNAL_WALL(IW)
-      IOR = WC%ONE_D%IOR
-      II = WC%ONE_D%II
-      JJ = WC%ONE_D%JJ
-      KK = WC%ONE_D%KK
+      IOR = WC%BOUNDARY_COORD%IOR
+      II  = WC%BOUNDARY_COORD%II
+      JJ  = WC%BOUNDARY_COORD%JJ
+      KK  = WC%BOUNDARY_COORD%KK
 
       ! assumes no refinement
       IIO = EWC%IIO_MIN

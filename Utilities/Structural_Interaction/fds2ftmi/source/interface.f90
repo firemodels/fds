@@ -229,6 +229,7 @@ IF (ROUND==1) THEN
       READ(*,'(a)') INTFILE
    ENDIF
    OPEN(70,FILE=TRIM(INTFILE)//'.dat',FORM='FORMATTED',STATUS='UNKNOWN')
+   OPEN(71,FILE=TRIM(INTFILE)//'_loads.dat',FORM='FORMATTED',STATUS='UNKNOWN')
 ENDIF
 !************** CREATE EXTRA NODES *********************
 WRITE(70,'(A)') '/PREP7' 
@@ -236,6 +237,9 @@ IF (VARIABLE==1 .OR. VARIABLE==2) THEN
    DO I=1,NUMEL
       WRITE(70,'(A, I8, A, F7.3, A, F7.3, A, F7.3, A)') "N,", INT(NOMASTER(I,1)), ",", NOMASTER(I,2), ",", &
       NOMASTER(I,3), ",", NOMASTER(I,4), ",,,,"
+! Zhi Transformations      
+!      WRITE(70,'(A, I8, A, F10.3, A, F10.3, A, F10.3, A)') "N,", INT(NOMASTER(I,1)), ",", NOMASTER(I,3), ",", &
+!      NOMASTER(I,4), ",", NOMASTER(I,2), ",,,,"      
 !     N,"NODE NUMBER","COORD X","COORD Y","COORD Z",,,,
    ENDDO
 ENDIF
@@ -362,57 +366,60 @@ CALL FDS2AST (CHID,NOMASTER,C_SIZE,TBEG,TEND,TINT,NUMEL,VARIABLE,N,N_AVERAGE,T_A
 !!WORKING!!
 !*********** APPLYING TABLES AS NODAL LOADS **********
 IF (VARIABLE==1 .OR. VARIABLE==2) THEN
-   WRITE(70,'(A)') "/PREP7"
+   WRITE(71,'(A)') "/PREP7"
    PRINT *, 'LOOP_CARGAS'
    LOOP_CARGAS:DO I=1,NUMEL
       WRITE (INTFILE2,'(g8.0)') INT(NOMASTER(I,1))
       PRINT *, INTFILE2
-      WRITE(70,'(A)') "!*"
-      WRITE(70,'(A, A, A, A, A)') "D,",INTFILE2,", , %A", INTFILE2, "% , , , ,TEMP, , , , ,"
+      WRITE(71,'(A)') "!*"
+      WRITE(71,'(A, A, A, A, A)') "D,",INTFILE2,", , %A", INTFILE2, "% , , , ,TEMP, , , , ,"
    ENDDO LOOP_CARGAS
 ENDIF
 !*******************************
 !!WORKING!!
 !*********** APPLYING TABLES AS CONVECTIVE HEAT TRANSFER COEFFICIENT **********
 IF (VARIABLE==2) THEN
-   WRITE(70,'(A)') "/PREP7"
+   WRITE(71,'(A)') "/PREP7"
    PRINT *, 'LOOP_HEAT_TRANSFER'
    LOOP_HEAT2:DO I=1,NUMEL
       WRITE (INTFILE2,'(g8.0)') INT(NOMASTER(I,1))
       PRINT *, INTFILE2
       WRITE (INTFILE3,'(g8.0)') INT(ELEMENTOS(I,1))
       PRINT *, INTFILE3
-      WRITE(70,'(A,A,A,A,A)') "SFE,",INTFILE3,",1,CONV,0,%H",INTFILE2,"%"
+      WRITE(71,'(A,A,A,A,A)') "SFE,",INTFILE3,",1,CONV,0,%H",INTFILE2,"%"
    ENDDO LOOP_HEAT2
 ENDIF
 IF (VARIABLE==1) THEN
-   WRITE(70,'(A)') "/PREP7"
+   WRITE(71,'(A)') "/PREP7"
    PRINT *, 'LOOP_HEAT_TRANSFER'
    LOOP_HEAT1:DO I=1,NUMEL
       WRITE (INTFILE2,'(g8.0)') INT(NOMASTER(I,1))
       PRINT *, INTFILE2
       WRITE (INTFILE3,'(g8.0)') INT(ELEMENTOS(I,1))
       PRINT *, INTFILE3
-      WRITE(70,'(A,A,A,F7.3)') "SFE,",INTFILE3,",1,CONV,0,",HC
+      WRITE(71,'(A,A,A,F7.3)') "SFE,",INTFILE3,",1,CONV,0,",HC
    ENDDO LOOP_HEAT1
 ENDIF
 !*******************************
 !*********** APPLYING TABLES AS CONVECTIVE HEAT TRANSFER COEFFICIENT **********
 IF (VARIABLE==3) THEN
-   WRITE(70,'(A)') "/PREP7"
+   WRITE(71,'(A)') "/PREP7"
    PRINT *, 'LOOP_HEAT_FLUX'
    LOOP_HEAT3:DO I=1,NUMEL
       WRITE (INTFILE2,'(g8.0)') INT(NOMASTER(I,1))
       PRINT *, INTFILE2
       WRITE (INTFILE3,'(g8.0)') INT(ELEMENTOS(I,1))
       PRINT *, INTFILE3
-      WRITE(70,'(A,A,A,A,A)') "SFE,",INTFILE3,",1,HFLUX,0,%A",INTFILE2,"%"
+      WRITE(71,'(A,A,A,A,A)') "SFE,",INTFILE3,",1,HFLUX,0,%A",INTFILE2,"%"
    ENDDO LOOP_HEAT3
 ENDIF
 !*******************************
 READ(2,'(a)') FILE_END
 IF (FILE_END=='END') THEN
    WRITE(6,*) FILE_END
+   !******* INPUT OF THE LOADS FILE
+   WRITE(70,'(A,A,A)') "/input,",TRIM(INTFILE),"_loads,dat"
+   !*******************************
 ELSE
    DEALLOCATE (NOMASTER)
    DEALLOCATE (N)

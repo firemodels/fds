@@ -127,6 +127,7 @@ INTEGER, PARAMETER :: CYLINDER_DRAG=2                  !< Flag for LPC\%DRAG_LAW
 INTEGER, PARAMETER :: USER_DRAG=3                      !< Flag for LPC\%DRAG_LAW: User-specified constant drag coefficient
 INTEGER, PARAMETER :: SCREEN_DRAG=4                    !< Flag for LPC\%DRAG_LAW: Special drag model for screens
 INTEGER, PARAMETER :: POROUS_DRAG=5                    !< Flag for LPC\%DRAG_LAW: Special drag model for porous media
+INTEGER, PARAMETER :: DISK_DRAG=6                      !< Flag for LPC\%DRAG_LAW: Disk drag for cartesian particles
 
 INTEGER, PARAMETER :: OLD=1                            !< Argument for DUCT()\%VEL()
 INTEGER, PARAMETER :: NEW=2                            !< Argument for DUCT()\%VEL()
@@ -483,6 +484,7 @@ CHARACTER(LABEL_LENGTH), DIMENSION(:), ALLOCATABLE :: MESH_NAME
 LOGICAL :: ITERATE_PRESSURE=.FALSE.                              !< Flag indicating if pressure solution is iterated
 LOGICAL :: ITERATE_BAROCLINIC_TERM                               !< Flag indicating if baroclinic term is iterated
 LOGICAL :: SUSPEND_PRESSURE_ITERATIONS=.TRUE.                    !< Flag for stopping pressure iterations
+LOGICAL :: INSEPARABLE_POISSON=.FALSE.                           !< Flag for solving the inseparable Poisson equation
 REAL(EB) :: VELOCITY_TOLERANCE=0._EB                             !< Error tolerance for normal velocity at solids or boundaries
 REAL(EB) :: PRESSURE_TOLERANCE=0._EB                             !< Error tolerance for iteration of baroclinic pressure term
 REAL(EB) :: ITERATION_SUSPEND_FACTOR=0.95_EB                     !< If new velocity error is not this value of old, stop iteration
@@ -493,7 +495,14 @@ INTEGER, ALLOCATABLE, DIMENSION(:,:) :: PRESSURE_ERROR_MAX_LOC   !< Indices of m
 INTEGER :: PRESSURE_ITERATIONS=0                                 !< Counter for pressure iterations
 INTEGER :: MAX_PRESSURE_ITERATIONS=10                            !< Max pressure iterations per pressure solve
 INTEGER :: TOTAL_PRESSURE_ITERATIONS=0                           !< Counter for total pressure iterations
-CHARACTER(LABEL_LENGTH):: PRES_METHOD = 'FFT'                    !< Pressure solver method
+CHARACTER(LABEL_LENGTH) :: PRES_METHOD='FFT'                     !< Pressure solver method
+INTEGER, PARAMETER :: FFT_FLAG=0                                 !< Integer pressure solver parameter FFT
+INTEGER, PARAMETER :: GLMAT_FLAG=1                               !< Integer pressure solver parameter GLMAT
+INTEGER, PARAMETER :: UGLMAT_FLAG=2                              !< Integer pressure solver parameter UGLMAT
+INTEGER, PARAMETER :: ULMAT_FLAG=3                               !< Integer pressure solver parameter ULMAT
+INTEGER, PARAMETER :: SCARC_FLAG=4                               !< Integer pressure solver parameter SCARC
+INTEGER, PARAMETER :: USCARC_FLAG=5                              !< Integer pressure solver parameter USCARC
+INTEGER :: PRES_FLAG = FFT_FLAG                                  !< Pressure solver
 LOGICAL :: TUNNEL_PRECONDITIONER=.FALSE.                         !< Use special pressure preconditioner for tunnels
 INTEGER :: TUNNEL_NXP                                            !< Number of x points in the entire tunnel
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: TP_AA                     !< Upper off-diagonal of tri-diagonal matrix for tunnel pressure
@@ -653,10 +662,12 @@ INTEGER :: N_CSVF=0  !< Number of external velocity (.csv) files
 INTEGER :: N_FACE=0,N_GEOM=0
 REAL(EB):: DT_BNDC=1.E10_EB
 
+LOGICAL :: STORE_CUTCELL_DIVERGENCE = .FALSE.
+LOGICAL :: STORE_CARTESIAN_DIVERGENCE=.FALSE.
+
 LOGICAL :: CC_IBM=.FALSE.
 REAL(EB):: GEOM_DEFAULT_THICKNESS=0.1_EB ! 10 cm.
 LOGICAL :: CHECK_MASS_CONSERVE =.FALSE.
-LOGICAL :: GLMAT_SOLVER =.FALSE.
 LOGICAL :: GLMAT_VERBOSE=.FALSE.
 LOGICAL :: PRES_ON_WHOLE_DOMAIN=.TRUE.
 LOGICAL :: PRES_ON_CARTESIAN=.TRUE.

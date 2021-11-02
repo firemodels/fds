@@ -1209,6 +1209,7 @@ No.      & (m)      & (m)        & (kW)        &  (kg/s)               &  (kW/m$
 \clearpage
 
 \subsection{BGC/GRI LNG Fires}
+\label{BGC_GRI_LNG_Fires_Heat_Flux}
 
 A description of the 13 LNG trench fire experiments is given in Section~\ref{BGC_GRI_LNG_Fires_Description}. 
 
@@ -1291,6 +1292,7 @@ Test & Length (m) & Width (m) \\ \hline
 \clearpage
 
 \subsection{Loughborough Jet Fire Experiments}
+\label{Loughborough_Jet_Fires_Heat_Flux}
 
 A brief description of the experiments and modeling is found in Section~\ref{Loughborough_Jet_Fires_Description}.
 
@@ -1460,7 +1462,36 @@ No.      & (N,W)  & (N,W)   & (N,W)   & (S,W)   & (S,W)   & (S,W)   & (S,W)   & 
 \subsection{Montoir LNG Fires}
 \label{Montoir_LNG_Fires_Heat_Flux}
 
-A brief description of these experiments can be found in Section~\ref{Montoir_LNG_Fires_Description}.
+A brief description of these experiments can be found in Section~\ref{Montoir_LNG_Fires_Description}. Figure~\ref{Montoir_Layout} indicates the radial lines emanating outwards from the 35~m pool along which the radiometers were positioned. Figures~\ref{Montoir_HF_1} through \ref{Montoir_HF_3} display the results of measured and predicted heat fluxes along the radial lines.
+
+\begin{figure}[!ht]
+\begin{minipage}{16cm}
+\setlength{\unitlength}{1.0cm}
+\begin{picture}(8.0,8.0)(-4.0,0.0)
+\thicklines
+\put(4.0,4.0){\circle{0.35}}
+\thinlines
+\put(4.000,4.200){\line( 0, 1){2.8}}
+\put(4.100,4.173){\line( 3, 5){1.4}}
+\put(4.173,4.100){\line( 5, 3){2.4}}
+\put(4.200,4.000){\line( 1, 0){2.8}}
+\put(4.173,3.900){\line( 5,-3){2.4}}
+\put(3.858,3.858){\line(-1,-1){2.0}}
+\put(3.800,4.000){\line(-1, 0){2.8}}
+\put(3.858,4.141){\line(-1, 1){2.0}}
+\put(3.900,7.500){0$^\circ$}
+\put(5.750,7.031){33$^\circ$}
+\put(7.031,5.750){61$^\circ$}
+\put(7.500,3.900){90$^\circ$}
+\put(7.031,2.050){120$^\circ$}
+\put(1.325,1.325){225$^\circ$}
+\put(0.100,3.900){270$^\circ$}
+\put(1.325,6.475){315$^\circ$}
+\end{picture}
+\end{minipage}
+\caption[Layout of the Montoir LNG Fires]{Layout of the Montoir LNG Fires.}
+\label{Montoir_Layout}
+\end{figure}
 
 \newpage
 
@@ -1697,10 +1728,14 @@ A description of the NIST Pool Fire experiments and modeling is given in Section
 \clearpage
 
 \subsection{Phoenix LNG Fires}
+\label{Phoenix_LNG_Fires_Heat_Flux}
 
 A description of the two LNG pool fire experiments is given in Section~\ref{Phoenix_LNG_Fires_Description}.
 
-Figure~\ref{Phoenix_Heat_Flux} compares predicted and measured heat fluxes to radiometers at various distances from the LNG pool fires. The general layout of the facility is shown in Fig.~\ref{Phoenix_Layout}. The radiometers were positioned at various heights off the ground and at various inclination angles along the axes shown in the figure.
+The general layout of the facility is shown in Fig.~\ref{Phoenix_Layout}. Wide-angle and narrow-angle radiometers were positioned at various heights off the ground and at various inclination angles along the axes shown in the figure.
+
+Figure~\ref{Phoenix_Heat_Flux} compares predicted and measured heat fluxes for the wide-angle radiometers as a function of distance from the LNG pool fires. These radiometers were positioned along all four directional axes. Figure~\ref{Phoenix_Narrow_Angle_Heat_Flux} compares predicted and measured heat flux for the narrow-angle radiometers along the north and south axes. There were three measurement towers along each axis. The nearest tower contained five narrow-angle radiometers at various inclination angles. The further two towers contained one narrow-angle radiometer each, along with one wide-angle radiometer. The vertical axes of the plots in Fig.~\ref{Phoenix_Heat_Flux} represent the ``spot height'' of the radiometers; that is, the height of the fire plume at which the radiometers were aimed. The ``spot diameter'' of the various radiometers ranged from 5~m to 15~m. 
+
 
 \begin{figure}[!ht]
 \begin{minipage}{16cm}
@@ -1737,13 +1772,23 @@ Figure~\ref{Phoenix_Heat_Flux} compares predicted and measured heat fluxes to ra
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/Phoenix_LNG_Fires/Phoenix01_Heat_Flux_Profile} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/Phoenix_LNG_Fires/Phoenix02_Heat_Flux_Profile} 
 \end{tabular*}
-\caption[Phoenix LNG Fires, radial profiles of heat flux]{Phoenix LNG Fires, radial profiles of heat flux.}
+\caption[Phoenix LNG Fires, radial profiles of wide-angle heat flux]{Phoenix LNG Fires, radial profiles of wide-angle heat flux.}
 \label{Phoenix_Heat_Flux}
+\end{figure}
+
+\begin{figure}[!ht]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Phoenix_LNG_Fires/Phoenix01_Narrow_Angle_Heat_Flux_Profile} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Phoenix_LNG_Fires/Phoenix02_Narrow_Angle_Heat_Flux_Profile}
+\end{tabular*}
+\caption[Phoenix LNG Fires, vertical profiles of narrow-angle heat flux]{Phoenix LNG Fires, vertical profiles of narrow-angle heat flux.}
+\label{Phoenix_Narrow_Angle_Heat_Flux}
 \end{figure}
 
 \clearpage
 
 \subsection{Sandia Methane Burner Experiments}
+\label{Sandia_Methane_Burner_Heat_Flux}
 
 A brief summary of these experiments and the modeling strategy is found in Section~\ref{Sandia_Methane_Burner_Description}. 
 
@@ -1859,6 +1904,7 @@ On the following pages are comparisons of vertical profiles of the measured and 
 \clearpage
 
 \subsection{Shell LNG Fireballs}
+\label{Shell_LNG_Fireballs_Heat_Flux}
 
 A brief description of the experiments and modeling assumptions is given in Section~\ref{Shell_LNG_Fireballs_Description}. 
 
