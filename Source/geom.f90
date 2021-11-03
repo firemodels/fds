@@ -4071,8 +4071,8 @@ CASE(INTEGER_THREE)
          ! Assign normal velocity to CFACE from wall cell:
          ONE_D%U_NORMAL_0 = WC_ONE_D%U_NORMAL_0
 
-         ! Here downscale velocity if CC_UNSTRUCTURED_FDIV:
-         IF (CC_UNSTRUCTURED_FDIV .OR. CC_UNSTRUCTURED_PROJECTION) THEN
+         ! Here downscale velocity if CC_UNSTRUCTURED_PROJECTION:
+         IF (CC_UNSTRUCTURED_PROJECTION) THEN
             IF (IFACE==CUT_FACE(ICF)%NFACE) WC_ONE_D%U_NORMAL_0 = &
             WC_ONE_D%U_NORMAL_0 * SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))/WC_ONE_D%AREA
          ENDIF

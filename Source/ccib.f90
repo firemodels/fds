@@ -634,11 +634,11 @@ REAL(EB), SAVE, ALLOCATABLE, DIMENSION(:,:,:) :: U_STORE,V_STORE,W_STORE
 INTEGER :: I,J,K,ICF,JCF,NFACE,IZERO,X1AXIS,IFACE
 REAL(EB):: IDX
 
-IF(.NOT. (CC_UNSTRUCTURED_FDIV .OR. CC_UNSTRUCTURED_PROJECTION) ) RETURN ! No need to downscale velocity.
+IF(.NOT. (CC_UNSTRUCTURED_PROJECTION) ) RETURN ! No need to downscale velocity.
 
 STORE_IF : IF (STORE_FLG) THEN
 
-   IF (CC_UNSTRUCTURED_FDIV .OR. (CC_UNSTRUCTURED_PROJECTION .AND. .NOT.GRADH_ON_CARTESIAN)) THEN
+   IF (CC_UNSTRUCTURED_PROJECTION .AND. .NOT.GRADH_ON_CARTESIAN) THEN
       ALLOCATE(U_STORE(0:IBP1,0:JBP1,0:KBP1),STAT=IZERO); CALL ChkMemErr('CCIB','U_STORE',IZERO)
       ALLOCATE(V_STORE(0:IBP1,0:JBP1,0:KBP1),STAT=IZERO); CALL ChkMemErr('CCIB','V_STORE',IZERO)
       ALLOCATE(W_STORE(0:IBP1,0:JBP1,0:KBP1),STAT=IZERO); CALL ChkMemErr('CCIB','W_STORE',IZERO)
@@ -652,42 +652,15 @@ ELSE STORE_IF
 
    PRED_CORR_IF : IF (PREDICTOR) THEN
 
-      CC_UNSTRUCTURED_IF_1 : IF (CC_UNSTRUCTURED_FDIV) THEN
+      CC_UNSTRUCTURED_IF_1 : IF(CC_UNSTRUCTURED_PROJECTION) THEN
 
-         DO K=1,KBAR
-            DO J=1,JBAR
-               DO I=0,IBAR
-                  ICF = FCVAR(I,J,K,IBM_IDCF,IAXIS)
-                  IF (ICF>0) &
-                  US(I,J,K) = U(I,J,K) - DT*( FVX(I,J,K) + RDXN(I)*(H(I+1,J,K)-H(I,J,K)) ) * &
-                                         SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))/(DY(J)*DZ(K))
-               ENDDO
+         ! Update INBOUNDARY faces:
+         DO ICF=1,MESHES(NM)%N_CUTFACE_MESH
+            IF(CUT_FACE(ICF)%STATUS /= IBM_INBOUNDARY) CYCLE
+            DO JCF=1,CUT_FACE(ICF)%NFACE
+               CUT_FACE(ICF)%VELS(JCF) = CUT_FACE(ICF)%VEL(JCF) - DT*CUT_FACE(ICF)%FN(JCF)
             ENDDO
          ENDDO
-
-         DO K=1,KBAR
-            DO J=0,JBAR
-               DO I=1,IBAR
-                  ICF = FCVAR(I,J,K,IBM_IDCF,JAXIS)
-                  IF (ICF>0) &
-                  VS(I,J,K) = V(I,J,K) - DT*( FVY(I,J,K) + RDYN(J)*(H(I,J+1,K)-H(I,J,K)) ) * &
-                                         SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))/(DX(I)*DZ(K))
-               ENDDO
-            ENDDO
-         ENDDO
-
-         DO K=0,KBAR
-            DO J=1,JBAR
-               DO I=1,IBAR
-                  ICF = FCVAR(I,J,K,IBM_IDCF,KAXIS)
-                  IF (ICF>0) &
-                  WS(I,J,K) = W(I,J,K) - DT*( FVZ(I,J,K) + RDZN(K)*(H(I,J,K+1)-H(I,J,K)) ) * &
-                                         SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))/(DX(I)*DY(J))
-               ENDDO
-            ENDDO
-         ENDDO
-
-      ELSEIF(CC_UNSTRUCTURED_PROJECTION) THEN CC_UNSTRUCTURED_IF_1
 
          GRADH_ON_CARTESIAN_IF_1 : IF(GRADH_ON_CARTESIAN) THEN
             DO K=1,KBAR
@@ -845,47 +818,15 @@ ELSE STORE_IF
 
    ELSE PRED_CORR_IF
 
-      CC_UNSTRUCTURED_IF_2 : IF (CC_UNSTRUCTURED_FDIV) THEN
+      CC_UNSTRUCTURED_IF_2 : IF(CC_UNSTRUCTURED_PROJECTION) THEN
 
-         DO K=1,KBAR
-            DO J=1,JBAR
-               DO I=0,IBAR
-                  ICF = FCVAR(I,J,K,IBM_IDCF,IAXIS)
-                  IF (ICF>0) &
-                  U(I,J,K) = 0.5_EB*( U_STORE(I,J,K) + US(I,J,K) - &
-                                      DT*(FVX(I,J,K) + RDXN(I)*(HS(I+1,J,K)-HS(I,J,K))) * &
-                                      SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))/(DY(J)*DZ(K)) )
-               ENDDO
+         ! Update INBOUNDARY faces:
+         DO ICF=1,MESHES(NM)%N_CUTFACE_MESH
+            IF(CUT_FACE(ICF)%STATUS /= IBM_INBOUNDARY) CYCLE
+            DO JCF=1,CUT_FACE(ICF)%NFACE
+               CUT_FACE(ICF)%VEL(JCF) = 0.5_EB*(CUT_FACE(ICF)%VEL(JCF)+CUT_FACE(ICF)%VELS(JCF)-DT*CUT_FACE(ICF)%FN(JCF))
             ENDDO
          ENDDO
-
-         DO K=1,KBAR
-            DO J=0,JBAR
-               DO I=1,IBAR
-                  ICF = FCVAR(I,J,K,IBM_IDCF,JAXIS)
-                  IF (ICF>0) &
-                  V(I,J,K) = 0.5_EB*( V_STORE(I,J,K) + VS(I,J,K) - &
-                                      DT*(FVY(I,J,K) + RDYN(J)*(HS(I,J+1,K)-HS(I,J,K))) * &
-                                      SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))/(DX(I)*DZ(K)) )
-               ENDDO
-            ENDDO
-         ENDDO
-
-         DO K=0,KBAR
-            DO J=1,JBAR
-               DO I=1,IBAR
-                  ICF = FCVAR(I,J,K,IBM_IDCF,KAXIS)
-                  IF (ICF>0) &
-                  W(I,J,K) = 0.5_EB*( W_STORE(I,J,K) + WS(I,J,K) - &
-                                      DT*(FVZ(I,J,K) + RDZN(K)*(HS(I,J,K+1)-HS(I,J,K))) * &
-                                      SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))/(DX(I)*DY(J)) )
-               ENDDO
-            ENDDO
-         ENDDO
-
-         DEALLOCATE(U_STORE,V_STORE,W_STORE)
-
-      ELSEIF(CC_UNSTRUCTURED_PROJECTION) THEN CC_UNSTRUCTURED_IF_2
 
          GRADH_ON_CARTESIAN_IF_2 : IF(GRADH_ON_CARTESIAN) THEN
             DO K=1,KBAR
@@ -1056,7 +997,7 @@ REAL(EB), INTENT(IN), POINTER, DIMENSION(:,:,:) :: UU,VV,WW
 INTEGER :: ICC,I,J,K,IADD,ICF
 REAL(EB):: AU,AV,AW,UVEL,VVEL,WVEL
 
-IF(.NOT.(CC_UNSTRUCTURED_FDIV .OR. CC_UNSTRUCTURED_PROJECTION)) RETURN
+IF(.NOT.CC_UNSTRUCTURED_PROJECTION) RETURN
 
 CUTCELL_DO : DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
    I = CUT_CELL(ICC)%IJK(IAXIS)
@@ -5937,15 +5878,17 @@ IF (PREDICTOR) THEN
 
       ! Now get sum(un*ACFace) and add to divergence:
       DIVVOL_BC=0._EB
-      ICF = CCVAR(I,J,K,IBM_IDCF) ! Get CUT_FACE array index which contains INBOUNDARY cut-faces inside cell I,J,K.
-      IF(ICF>0) THEN
-         DO JCF=1,CUT_FACE(ICF)%NFACE ! Loop all cut-faces inside cell I,J,K
-            ICFACE    = CUT_FACE(ICF)%CFACE_INDEX(JCF)  ! Find corresponding CFACE index for this boundary cut-face.
-            DIVVOL_BC = DIVVOL_BC - BOUNDARY_ONE_D(CFACE(ICFACE)%OD_INDEX)%U_NORMAL_S * CFACE(ICFACE)%AREA ! Add flux to BC divg.
-         ENDDO
+      IF (.NOT.CC_UNSTRUCTURED_PROJECTION) THEN
+         ICF = CCVAR(I,J,K,IBM_IDCF) ! Get CUT_FACE array index which contains INBOUNDARY cut-faces inside cell I,J,K.
+         IF (ICF>0) THEN
+            DO JCF=1,CUT_FACE(ICF)%NFACE ! Loop all cut-faces inside cell I,J,K
+               ICFACE    = CUT_FACE(ICF)%CFACE_INDEX(JCF)  ! Find corresponding CFACE index for this boundary cut-face.
+               DIVVOL_BC = DIVVOL_BC - BOUNDARY_ONE_D(CFACE(ICFACE)%OD_INDEX)%U_NORMAL_S * CFACE(ICFACE)%AREA ! Add flux to BC divg.
+            ENDDO
+         ENDIF
       ENDIF
       CUT_CELL(ICC)%DIVVOL_BC = DIVVOL_BC
-      IF(CC_UNSTRUCTURED_FDIV) THEN
+      IF(CC_UNSTRUCTURED_PROJECTION) THEN
          DP(I,J,K)  = (DIVVOL+DIVVOL_BC)/CCVOL
          RTRM(I,J,K)= RTRMVOL/CCVOL
       ELSE
@@ -5974,15 +5917,17 @@ ELSE ! CORRECTOR
 
       ! Now get sum(un*ACFace) and add to divergence:
       DIVVOL_BC=0._EB
-      ICF = CCVAR(I,J,K,IBM_IDCF)
-      IF(ICF>0) THEN
-         DO JCF=1,CUT_FACE(ICF)%NFACE
-            ICFACE    = CUT_FACE(ICF)%CFACE_INDEX(JCF)
-            DIVVOL_BC = DIVVOL_BC - BOUNDARY_ONE_D(CFACE(ICFACE)%OD_INDEX)%U_NORMAL * CFACE(ICFACE)%AREA
-         ENDDO
+      IF (.NOT.CC_UNSTRUCTURED_PROJECTION) THEN
+         ICF = CCVAR(I,J,K,IBM_IDCF)
+         IF (ICF>0) THEN
+            DO JCF=1,CUT_FACE(ICF)%NFACE
+               ICFACE    = CUT_FACE(ICF)%CFACE_INDEX(JCF)
+               DIVVOL_BC = DIVVOL_BC - BOUNDARY_ONE_D(CFACE(ICFACE)%OD_INDEX)%U_NORMAL * CFACE(ICFACE)%AREA
+            ENDDO
+         ENDIF
       ENDIF
       CUT_CELL(ICC)%DIVVOL_BC = DIVVOL_BC
-      IF(CC_UNSTRUCTURED_FDIV) THEN
+      IF(CC_UNSTRUCTURED_PROJECTION) THEN
          DP(I,J,K)  = (DIVVOL+DIVVOL_BC)/CCVOL
          RTRM(I,J,K)= RTRMVOL/CCVOL
       ELSE
@@ -10102,6 +10047,8 @@ INTEGER, INTENT(IN) :: N
 INTEGER :: NM,I,J,K,ICC,JCC,ICF,ICF2,IFC,IFACE,NFACE,IROW_LOC
 REAL(EB):: AREAI
 
+IF(.NOT.PRES_ON_CARTESIAN) RETURN
+
 ! Loop meshes:
 MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
@@ -11654,7 +11601,7 @@ LOGICAL, INTENT(IN) :: FORCE_FLG
 
 ! Local Variables:
 REAL(EB), POINTER, DIMENSION(:,:,:) :: HP
-REAL(EB):: U_IBM,V_IBM,W_IBM,DUUDT,DVVDT,DWWDT,RFODT,TNOW,FCT,DHFCT,UN,AFCT
+REAL(EB):: U_IBM,V_IBM,W_IBM,DUUDT,DVVDT,DWWDT,RFODT,TNOW,FCT,UN,AFCT
 INTEGER :: I,J,K,II,JJ,KK,IOR,IW,ICF,X1AXIS,NOM,IFACE,JFACE
 TYPE(WALL_TYPE), POINTER :: WC
 TYPE(EXTERNAL_WALL_TYPE), POINTER :: EWC
@@ -11841,86 +11788,7 @@ ENDIF
 ELSE FORCE_IF
 
 ! Here for External CFACEs use the unstructured acceleration in defining F:
-CC_UNSTRUCTURED_FDIV_COND : IF (CC_UNSTRUCTURED_FDIV) THEN
-   EXT_CFACE_LOOP : DO ICF=1,N_EXTERNAL_CFACE_CELLS
-      CFA=>CFACE(ICF)
-      ONE_D => BOUNDARY_ONE_D(CFA%OD_INDEX)
-      IW  =CUT_FACE(CFA%CUT_FACE_IND1)%IWC ! Index of underlaying wall cell.
 
-      IF (CFA%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY .OR. CFA%BOUNDARY_TYPE==OPEN_BOUNDARY) CYCLE EXT_CFACE_LOOP
-      NOM = EXTERNAL_WALL(IW)%NOM
-      BC=>BOUNDARY_COORD(CFA%BC_INDEX)
-      II = BC%II
-      JJ = BC%JJ
-      KK = BC%KK
-      IOR = BC%IOR
-
-      DHFCT=1._EB
-      SELECT CASE(PRES_FLAG)
-         CASE(UGLMAT_FLAG,USCARC_FLAG); DHFCT=0._EB
-         CASE(GLMAT_FLAG); IF (IW<=N_EXTERNAL_WALL_CELLS) DHFCT=0._EB
-      END SELECT
-      IF (NOM/=0 .OR. CFA%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. CFA%BOUNDARY_TYPE==NULL_BOUNDARY) THEN
-         IF (PREDICTOR) THEN
-            UN = -SIGN(1._EB,REAL(IOR,EB))*ONE_D%U_NORMAL_S
-         ELSE
-            UN = -SIGN(1._EB,REAL(IOR,EB))*ONE_D%U_NORMAL
-         ENDIF
-         SELECT CASE(IOR)
-            CASE( 1)
-               AFCT = DY(JJ)*DZ(KK)/SUM(CUT_FACE(CFA%CUT_FACE_IND1)%AREA(1:CUT_FACE(CFA%CUT_FACE_IND1)%NFACE))
-               IF (PREDICTOR) THEN
-                  DUUDT = RFODT*(UN-U(II,JJ,KK)*AFCT)
-               ELSE
-                  DUUDT = 2._EB*RFODT*(UN-0.5_EB*(U(II,JJ,KK)+US(II,JJ,KK))*AFCT )
-               ENDIF
-               FVX(II,JJ,KK) = -RDXN(II)*(HP(II+1,JJ,KK)-HP(II,JJ,KK))*DHFCT - DUUDT
-            CASE(-1)
-               AFCT = DY(JJ)*DZ(KK)/SUM(CUT_FACE(CFA%CUT_FACE_IND1)%AREA(1:CUT_FACE(CFA%CUT_FACE_IND1)%NFACE))
-               IF (PREDICTOR) THEN
-                  DUUDT = RFODT*(UN-U(II-1,JJ,KK)*AFCT)
-               ELSE
-                  DUUDT = 2._EB*RFODT*(UN-0.5_EB*(U(II-1,JJ,KK)+US(II-1,JJ,KK))*AFCT )
-               ENDIF
-               FVX(II-1,JJ,KK) = -RDXN(II-1)*(HP(II,JJ,KK)-HP(II-1,JJ,KK))*DHFCT - DUUDT
-            CASE( 2)
-               AFCT = DX(II)*DZ(KK)/SUM(CUT_FACE(CFA%CUT_FACE_IND1)%AREA(1:CUT_FACE(CFA%CUT_FACE_IND1)%NFACE))
-               IF (PREDICTOR) THEN
-                  DVVDT = RFODT*(UN-V(II,JJ,KK)*AFCT)
-               ELSE
-                  DVVDT = 2._EB*RFODT*(UN-0.5_EB*(V(II,JJ,KK)+VS(II,JJ,KK))*AFCT )
-               ENDIF
-               FVY(II,JJ,KK) = -RDYN(JJ)*(HP(II,JJ+1,KK)-HP(II,JJ,KK))*DHFCT - DVVDT
-            CASE(-2)
-               AFCT = DX(II)*DZ(KK)/SUM(CUT_FACE(CFA%CUT_FACE_IND1)%AREA(1:CUT_FACE(CFA%CUT_FACE_IND1)%NFACE))
-               IF (PREDICTOR) THEN
-                  DVVDT = RFODT*(UN-V(II,JJ-1,KK)*AFCT)
-               ELSE
-                  DVVDT = 2._EB*RFODT*(UN-0.5_EB*(V(II,JJ-1,KK)+VS(II,JJ-1,KK))*AFCT )
-               ENDIF
-               FVY(II,JJ-1,KK) = -RDYN(JJ-1)*(HP(II,JJ,KK)-HP(II,JJ-1,KK))*DHFCT - DVVDT
-            CASE( 3)
-               AFCT = DX(II)*DY(JJ)/SUM(CUT_FACE(CFA%CUT_FACE_IND1)%AREA(1:CUT_FACE(CFA%CUT_FACE_IND1)%NFACE))
-               IF (PREDICTOR) THEN
-                  DWWDT = RFODT*(UN-W(II,JJ,KK)*AFCT)
-               ELSE
-                  DWWDT = 2._EB*RFODT*(UN-0.5_EB*(W(II,JJ,KK)+WS(II,JJ,KK))*AFCT )
-               ENDIF
-               FVZ(II,JJ,KK) = -RDZN(KK)*(HP(II,JJ,KK+1)-HP(II,JJ,KK))*DHFCT - DWWDT
-            CASE(-3)
-               AFCT = DX(II)*DY(JJ)/SUM(CUT_FACE(CFA%CUT_FACE_IND1)%AREA(1:CUT_FACE(CFA%CUT_FACE_IND1)%NFACE))
-               IF (PREDICTOR) THEN
-                  DWWDT = RFODT*(UN-W(II,JJ,KK-1)*AFCT)
-               ELSE
-                  DWWDT = 2._EB*RFODT*(UN-0.5_EB*(W(II,JJ,KK-1)+WS(II,JJ,KK-1))*AFCT )
-               ENDIF
-               FVZ(II,JJ,KK-1) = -RDZN(KK-1)*(HP(II,JJ,KK)-HP(II,JJ,KK-1))*DHFCT - DWWDT
-         END SELECT
-      ENDIF
-   ENDDO EXT_CFACE_LOOP
-ENDIF CC_UNSTRUCTURED_FDIV_COND
-
-! Here for External CFACEs use the unstructured acceleration in defining F:
 CC_UNSTRUCTURED_PROJ_COND : IF (CC_UNSTRUCTURED_PROJECTION) THEN
    CFACE_LOOP : DO ICF=1,N_EXTERNAL_CFACE_CELLS+N_INTERNAL_CFACE_CELLS
       CFA  =>CFACE(ICF)
@@ -12000,6 +11868,8 @@ INTEGER, INTENT(IN) :: NM
 INTEGER :: ICF, I, J, K, X1AXIS
 CUTFACE_LOOP : DO ICF=1,MESHES(NM)%N_CUTFACE_MESH
    IF ( CUT_FACE(ICF)%STATUS /= IBM_GASPHASE) CYCLE CUTFACE_LOOP
+   CUT_FACE(ICF)%FV = 0._EB
+   IF(CUT_FACE(ICF)%IWC>0) THEN; IF(WALL(CUT_FACE(ICF)%IWC)%BOUNDARY_TYPE==MIRROR_BOUNDARY) CYCLE CUTFACE_LOOP; ENDIF
    I      = CUT_FACE(ICF)%IJK(IAXIS)
    J      = CUT_FACE(ICF)%IJK(JAXIS)
    K      = CUT_FACE(ICF)%IJK(KAXIS)
@@ -12494,8 +12364,12 @@ IFC_LOOP : DO IFC=1,CUT_CELL(ICC)%CCELEM(1,JCC)
       IFACE2  = CUT_CELL(ICC)%FACE_LIST(5,IFACE)
       ICFA    = CUT_FACE(IFC2)%CFACE_INDEX(IFACE2)
       AF      = CUT_FACE(IFC2)%AREA(IFACE2)
-      VELN    = FCT*((1._EB-PRFCT)*(CUT_FACE(IFC2)%VEL( IFACE2)+BOUNDARY_ONE_D(CFACE(ICFA)%OD_INDEX)%U_NORMAL) + &
-                            PRFCT *(CUT_FACE(IFC2)%VELS(IFACE2)+BOUNDARY_ONE_D(CFACE(ICFA)%OD_INDEX)%U_NORMAL_S))
+      IF(.NOT.CC_UNSTRUCTURED_PROJECTION) THEN
+         VELN    = FCT*((1._EB-PRFCT)*(CUT_FACE(IFC2)%VEL( IFACE2)+BOUNDARY_ONE_D(CFACE(ICFA)%OD_INDEX)%U_NORMAL) + &
+                               PRFCT *(CUT_FACE(IFC2)%VELS(IFACE2)+BOUNDARY_ONE_D(CFACE(ICFA)%OD_INDEX)%U_NORMAL_S))
+      ELSE
+         VELN    = FCT*((1._EB-PRFCT)*CUT_FACE(IFC2)%VEL( IFACE2) + PRFCT *CUT_FACE(IFC2)%VELS(IFACE2))
+      ENDIF
    END SELECT
    DIV_JCC = DIV_JCC + AF*VELN
 ENDDO IFC_LOOP
@@ -12553,9 +12427,8 @@ IFC_LOOP : DO IFC=1,CUT_CELL(ICC)%CCELEM(1,JCC)
       IFACE2  = CUT_CELL(ICC)%FACE_LIST(5,IFACE)
       AF      = CUT_FACE(IFC2)%AREA(IFACE2)
       FN      = FCT*CUT_FACE(IFC2)%FN( IFACE2)
-   CASE(IBM_FTYPE_CFINB) ! INBOUNDARY CUT FACE: Note here we add U_NORMAL with Transpiration velocity due to
-                         ! Poisson solver velocity error.
-      FCT     = 1._EB    ! Normal velocity defined into the body.
+   CASE(IBM_FTYPE_CFINB) ! INBOUNDARY CUT FACE
+      FCT     = 1._EB    ! Normal vector defined into the body.
       IFC2    = CUT_CELL(ICC)%FACE_LIST(4,IFACE)
       IFACE2  = CUT_CELL(ICC)%FACE_LIST(5,IFACE)
       ICFA    = CUT_FACE(IFC2)%CFACE_INDEX(IFACE2)
