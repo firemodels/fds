@@ -3860,7 +3860,7 @@ CASE(INTEGER_ONE) ! Geometry information for CFACE.
          CASE(KAXIS); MESHES(NM)%CFACE(CFACE_INDEX)%NVEC(IAXIS:KAXIS) = (/ 0._EB, 0._EB, REAL(SIGN(1,IOR),EB) /)
          END SELECT
          MESHES(NM)%CFACE(CFACE_INDEX)%BOUNDARY_COORD%IOR = IOR
-         
+
          ! External mesh boundary CFACES inherit the underlaying WALL type.
          MESHES(NM)%CFACE(CFACE_INDEX)%BOUNDARY_TYPE = WC%BOUNDARY_TYPE
 
@@ -4050,8 +4050,8 @@ CASE(INTEGER_THREE)
          ! Assign normal velocity to CFACE from wall cell:
          CFACE(CFACE_INDEX)%ONE_D%U_NORMAL_0 = WC%ONE_D%U_NORMAL_0
 
-         ! Here downscale velocity if CC_UNSTRUCTURED_FDIV:
-         IF(CC_UNSTRUCTURED_FDIV .OR. CC_UNSTRUCTURED_PROJECTION) THEN
+         ! Here downscale velocity if CC_UNSTRUCTURED_PROJECTION:
+         IF(CC_UNSTRUCTURED_PROJECTION) THEN
             IF (IFACE==CUT_FACE(ICF)%NFACE) WC%ONE_D%U_NORMAL_0 = &
             WC%ONE_D%U_NORMAL_0 * SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))/WC%ONE_D%AREA
          ENDIF

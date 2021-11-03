@@ -3219,8 +3219,8 @@ SUBROUTINE WALL_VELOCITY_NO_GRADH(DT,STORE_UN)
 
 REAL(EB), INTENT(IN) :: DT
 LOGICAL, INTENT(IN) :: STORE_UN
-INTEGER :: IIG,JJG,KKG,IOR,IW,N_INTERNAL_WALL_CELLS_AUX,ICF
-REAL(EB) :: DHDN, VEL_N, DWSCL
+INTEGER :: IIG,JJG,KKG,IOR,IW,N_INTERNAL_WALL_CELLS_AUX
+REAL(EB) :: DHDN, VEL_N
 TYPE (WALL_TYPE), POINTER :: WC
 REAL(EB), SAVE, ALLOCATABLE, DIMENSION(:) :: UN_WALLS
 
@@ -3282,25 +3282,19 @@ PREDICTOR_COND : IF (PREDICTOR) THEN
 
      DHDN=0._EB ! Set the normal derivative of H to zero for solids.
 
-     DWSCL=1._EB ! Area factor for downscaling to cartesian velocity.
-     IF (CC_UNSTRUCTURED_FDIV .AND. IW<=N_EXTERNAL_WALL_CELLS) THEN
-        ICF=WC%CUT_FACE_INDEX
-        IF(ICF>0) DWSCL = SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))/WC%ONE_D%AREA
-     ENDIF
-
      SELECT CASE(IOR)
      CASE( IAXIS)
-        US(IIG-1,JJG  ,KKG  ) = (U(IIG-1,JJG  ,KKG  ) - DT*( FVX(IIG-1,JJG  ,KKG  ) + DHDN )*DWSCL)
+        US(IIG-1,JJG  ,KKG  ) = (U(IIG-1,JJG  ,KKG  ) - DT*( FVX(IIG-1,JJG  ,KKG  ) + DHDN ))
      CASE(-IAXIS)
-        US(IIG  ,JJG  ,KKG  ) = (U(IIG  ,JJG  ,KKG  ) - DT*( FVX(IIG  ,JJG  ,KKG  ) + DHDN )*DWSCL)
+        US(IIG  ,JJG  ,KKG  ) = (U(IIG  ,JJG  ,KKG  ) - DT*( FVX(IIG  ,JJG  ,KKG  ) + DHDN ))
      CASE( JAXIS)
-        VS(IIG  ,JJG-1,KKG  ) = (V(IIG  ,JJG-1,KKG  ) - DT*( FVY(IIG  ,JJG-1,KKG  ) + DHDN )*DWSCL)
+        VS(IIG  ,JJG-1,KKG  ) = (V(IIG  ,JJG-1,KKG  ) - DT*( FVY(IIG  ,JJG-1,KKG  ) + DHDN ))
      CASE(-JAXIS)
-        VS(IIG  ,JJG  ,KKG  ) = (V(IIG  ,JJG  ,KKG  ) - DT*( FVY(IIG  ,JJG  ,KKG  ) + DHDN )*DWSCL)
+        VS(IIG  ,JJG  ,KKG  ) = (V(IIG  ,JJG  ,KKG  ) - DT*( FVY(IIG  ,JJG  ,KKG  ) + DHDN ))
      CASE( KAXIS)
-        WS(IIG  ,JJG  ,KKG-1) = (W(IIG  ,JJG  ,KKG-1) - DT*( FVZ(IIG  ,JJG  ,KKG-1) + DHDN )*DWSCL)
+        WS(IIG  ,JJG  ,KKG-1) = (W(IIG  ,JJG  ,KKG-1) - DT*( FVZ(IIG  ,JJG  ,KKG-1) + DHDN ))
      CASE(-KAXIS)
-        WS(IIG  ,JJG  ,KKG  ) = (W(IIG  ,JJG  ,KKG  ) - DT*( FVZ(IIG  ,JJG  ,KKG  ) + DHDN )*DWSCL)
+        WS(IIG  ,JJG  ,KKG  ) = (W(IIG  ,JJG  ,KKG  ) - DT*( FVZ(IIG  ,JJG  ,KKG  ) + DHDN ))
      END SELECT
 
   ENDDO WALL_CELL_LOOP_1
@@ -3321,34 +3315,28 @@ ELSE ! Corrector
 
      DHDN=0._EB ! Set the normal derivative of H to zero for solids.
 
-     DWSCL=1._EB
-     IF (CC_UNSTRUCTURED_FDIV .AND. IW<=N_EXTERNAL_WALL_CELLS) THEN
-        ICF=WC%CUT_FACE_INDEX
-        IF(ICF>0) DWSCL = SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))/WC%ONE_D%AREA
-     ENDIF
-
      VEL_N = UN_WALLS(IW)
 
      SELECT CASE(IOR)
      CASE( IAXIS)                                 ! | - Problem with this is it was modified in VELOCITY_CORRECTOR,
                                                   ! V   => Store the untouched U normal on internal WALLs.
          U(IIG-1,JJG  ,KKG  ) = 0.5_EB*(                      VEL_N + US(IIG-1,JJG  ,KKG  ) - &
-                                        DT*( FVX(IIG-1,JJG  ,KKG  ) + DHDN )*DWSCL)
+                                        DT*( FVX(IIG-1,JJG  ,KKG  ) + DHDN ))
      CASE(-IAXIS)
          U(IIG  ,JJG  ,KKG  ) = 0.5_EB*(                      VEL_N + US(IIG  ,JJG  ,KKG  ) - &
-                                        DT*( FVX(IIG  ,JJG  ,KKG  ) + DHDN )*DWSCL)
+                                        DT*( FVX(IIG  ,JJG  ,KKG  ) + DHDN ))
      CASE( JAXIS)
          V(IIG  ,JJG-1,KKG  ) = 0.5_EB*(                      VEL_N + VS(IIG  ,JJG-1,KKG  ) - &
-                                        DT*( FVY(IIG  ,JJG-1,KKG  ) + DHDN )*DWSCL)
+                                        DT*( FVY(IIG  ,JJG-1,KKG  ) + DHDN ))
      CASE(-JAXIS)
          V(IIG  ,JJG  ,KKG  ) = 0.5_EB*(                      VEL_N + VS(IIG  ,JJG  ,KKG  ) - &
-                                        DT*( FVY(IIG  ,JJG  ,KKG  ) + DHDN )*DWSCL)
+                                        DT*( FVY(IIG  ,JJG  ,KKG  ) + DHDN ))
      CASE( KAXIS)
          W(IIG  ,JJG  ,KKG-1) = 0.5_EB*(                      VEL_N + WS(IIG  ,JJG  ,KKG-1) - &
-                                        DT*( FVZ(IIG  ,JJG  ,KKG-1) + DHDN )*DWSCL)
+                                        DT*( FVZ(IIG  ,JJG  ,KKG-1) + DHDN ))
      CASE(-KAXIS)
          W(IIG  ,JJG  ,KKG  ) = 0.5_EB*(                      VEL_N + WS(IIG  ,JJG  ,KKG  ) - &
-                                        DT*( FVZ(IIG  ,JJG  ,KKG  ) + DHDN )*DWSCL)
+                                        DT*( FVZ(IIG  ,JJG  ,KKG  ) + DHDN ))
      END SELECT
 
   ENDDO WALL_CELL_LOOP_2
