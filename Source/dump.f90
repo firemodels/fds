@@ -8157,7 +8157,7 @@ CC_IBM_IF: IF (CC_IBM) THEN
                GAS_PHASE_OUTPUT_CC = GAS_PHASE_OUTPUT_CC + &
                   ( PBAR(KK,PRESSURE_ZONE(II,JJ,KK)) + CUT_CELL(ICC)%RHO(JCC)*(CUT_CELL(ICC)%H(JCC)-KRES(II,JJ,KK)) ) &
                                                                                             * CUT_CELL(ICC)%VOLUME(JCC)
-            CASE(550)
+            CASE(550) ! CUTCELL VELOCITY DIVERGENCE
                GAS_PHASE_OUTPUT_CC = GAS_PHASE_OUTPUT_CC + CCVELDIV(II,JJ,KK)*CUT_CELL(ICC)%VOLUME(JCC)
          END SELECT IND_SELECT_2
       ENDDO CC_LOOP

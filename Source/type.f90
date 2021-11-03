@@ -69,7 +69,7 @@ TYPE LAGRANGIAN_PARTICLE_CLASS_TYPE
    REAL(EB) :: PRIMARY_BREAKUP_DRAG_REDUCTION_FACTOR   !< Drag reduction factor
    REAL(EB) :: RUNNING_AVERAGE_FACTOR_WALL             !< Fraction of old value used in summations of droplets stuck to walls
    REAL(EB) :: LENGTH                     !< Cylinder or plate length used for POROUS_DRAG or SCREEN_DRAG (m)
- 
+
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: R_CNF         !< Independent variable (radius) in particle size distribution
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: CNF           !< Cumulative Number Fraction particle size distribution
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: CVF           !< Cumulative Volume Fraction particle size distribution
@@ -962,13 +962,13 @@ END TYPE RAD_CFACE_TYPE
 
 ! Note: If you change the number of scalar variables in CFACE_TYPE, adjust the numbers below
 
-INTEGER, PARAMETER :: N_CFACE_SCALAR_REALS=8,N_CFACE_SCALAR_INTEGERS=8,N_CFACE_SCALAR_LOGICALS=0
+INTEGER, PARAMETER :: N_CFACE_SCALAR_REALS=9,N_CFACE_SCALAR_INTEGERS=8,N_CFACE_SCALAR_LOGICALS=0
 
 TYPE CFACE_TYPE
    TYPE (BOUNDARY_COORD_TYPE) :: BOUNDARY_COORD       !< Derived type carrying coordinate variables
    TYPE (ONE_D_M_AND_E_XFER_TYPE) :: ONE_D
    TYPE (BOUNDARY_PROPERTY_TYPE) :: BOUNDARY_PROPERTY !< Derived type carrying most of the surface boundary conditions
-   REAL(EB), POINTER :: AREA,NVEC(:),VEL_ERR_NEW,V_DEP,Q_LEAK,DUNDT
+   REAL(EB), POINTER :: AREA,NVEC(:),VEL_ERR_NEW,V_DEP,Q_LEAK,DUNDT,PRES_BXN
    INTEGER, POINTER :: CFACE_INDEX,SURF_INDEX,VENT_INDEX,BACK_MESH,BACK_INDEX,BOUNDARY_TYPE,CUT_FACE_IND1,CUT_FACE_IND2
 END TYPE CFACE_TYPE
 
@@ -1012,7 +1012,7 @@ TYPE IBM_CUTCELL_TYPE
    LOGICAL,  ALLOCATABLE, DIMENSION(:)                       :: USE_CC_VOL
    INTEGER :: N_NOMICC=0
    INTEGER,  ALLOCATABLE, DIMENSION(:,:) :: NOMICC
-   REAL(EB):: DIVVOL_BC=0._EB
+   REAL(EB):: DIVVOL_PR=0._EB, DIVVOL_BC=0._EB, DDDTVOL=0._EB
 END TYPE IBM_CUTCELL_TYPE
 
 
