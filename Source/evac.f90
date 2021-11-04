@@ -5645,7 +5645,6 @@ CONTAINS
           ELSE
              OPEN (LU_EVACFED,file=FN_EVACFED,form='unformatted', status='old')
              READ (LU_EVACFED,Iostat=ios) ntmp1
-             N_FIRE_MESHES_IN_FED = ntmp2
              IF (ios/=0) THEN
                 WRITE(MESSAGE,'(A)') 'ERROR: Init Evac Dumps: FED READ ERROR'
                 CLOSE (LU_EVACFED)
