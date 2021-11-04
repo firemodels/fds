@@ -60,7 +60,7 @@
 &OBST XB=0.6096,0.6858,-0.3810,0.3810,1.6002,2.2098,SURF_ID='CABINET'/rear partition vertical upper (gap to prevent pressure compt)
 &OBST XB=0.9144,0.9906,-0.3810,0.3810,0.0000,0.2286,SURF_ID='CABINET'/ small breaker toe area
 &OBST XB=0.9906,1.0668,-0.3810,0.3810,0.2286,0.3810,SURF_ID='CABINET'/ small breaker toe area
-&OBST XB=1.2954,1.9812,-0.3048,0.3048,0.0000,1.4478,SURF_ID='BREAKER'/
+&OBST XB=1.3716,1.9812,-0.3048,0.3048,0.0000,1.4478,SURF_ID='BREAKER'/
 
 ! RADCAL_ID='SOOT' makes the SPEC use the SOOT radiation properties which the MISC line has changed to those for AL2O3
 ! RAMPs used instead of built in cp data for N2, CO2, and O2 to extend temperature to 20,000 K
