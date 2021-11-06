@@ -4,7 +4,6 @@ MODULE INIT
 
 USE PRECISION_PARAMETERS
 USE MESH_VARIABLES
-USE MESH_POINTERS
 USE GLOBAL_CONSTANTS
 USE OUTPUT_DATA
 USE TRAN
@@ -40,7 +39,7 @@ INTEGER :: N,NN,I,J,K,IW,IC,SURF_INDEX,IOR,IERR,IZERO,II,JJ,KK,I_OBST
 REAL(EB), INTENT(IN) :: DT
 INTEGER, INTENT(IN) :: NM
 REAL(EB) :: MU_N,ZZ_GET(1:N_TRACKED_SPECIES),CS,DELTA,INTEGRAL,TEMP,ZSW
-INTEGER, POINTER :: IBP1, JBP1, KBP1,IBAR, JBAR, KBAR, N_EDGES
+INTEGER, POINTER :: IBP1, JBP1, KBP1,IBAR, JBAR, KBAR
 REAL(EB),POINTER :: XS,XF,YS,YF,ZS,ZF
 TYPE (INITIALIZATION_TYPE), POINTER :: IN=>NULL()
 TYPE (VENTS_TYPE), POINTER :: VT=>NULL()
@@ -62,7 +61,6 @@ KBP1 =>M%KBP1
 IBAR =>M%IBAR
 JBAR =>M%JBAR
 KBAR =>M%KBAR
-N_EDGES=>M%N_EDGES
 XS=>M%XS
 YS=>M%YS
 ZS=>M%ZS
@@ -956,8 +954,8 @@ ENDIF OBST_SHAPE_IF
 NOT_EVAC_IF_3: IF (.NOT.DO_EVACUATION) THEN
 ! Solid 3D heat and mass transfer
 
-IF (ANY(OBSTRUCTION%HT3D)) SOLID_HT3D=.TRUE.
-IF (ANY(OBSTRUCTION%MT3D)) SOLID_MT3D=.TRUE.
+IF (ANY(M%OBSTRUCTION%HT3D)) SOLID_HT3D=.TRUE.
+IF (ANY(M%OBSTRUCTION%MT3D)) SOLID_MT3D=.TRUE.
 
 ! Solid phase chemical heat source term
 
@@ -1050,9 +1048,9 @@ USE CONTROL_VARIABLES
 INTEGER :: N,I,J,K,II,JJ,KK,IPTS,JPTS,KPTS,N_EDGES_DIM,IW,IC,ICG,IOR,IERR,IPZ,NOM,ITER,IZERO,IIG,JJG,KKG,ICF,NSLICE
 INTEGER, INTENT(IN) :: NM
 REAL(EB) :: ZZ_GET(1:N_TRACKED_SPECIES),VC,RTRM,CP,XXC,YYC,ZZC
-INTEGER, POINTER :: IBP1, JBP1, KBP1,IBAR, JBAR, KBAR, N_EDGES
+INTEGER :: IBP1,JBP1,KBP1,IBAR,JBAR,KBAR
 INTEGER, ALLOCATABLE, DIMENSION(:) :: IW_EXPORT
-REAL(EB),POINTER :: XS,XF,YS,YF,ZS,ZF
+REAL(EB) :: XS,XF,YS,YF,ZS,ZF
 TYPE (MESH_TYPE), POINTER :: M
 TYPE (WALL_TYPE), POINTER :: WC
 TYPE (BOUNDARY_COORD_TYPE), POINTER :: BC
@@ -1067,19 +1065,18 @@ LOGICAL :: SOLID_CELL
 
 IERR = 0
 M => MESHES(NM)
-IBP1 =>M%IBP1
-JBP1 =>M%JBP1
-KBP1 =>M%KBP1
-IBAR =>M%IBAR
-JBAR =>M%JBAR
-KBAR =>M%KBAR
-N_EDGES=>M%N_EDGES
-XS=>M%XS
-YS=>M%YS
-ZS=>M%ZS
-XF=>M%XF
-YF=>M%YF
-ZF=>M%ZF
+IBP1 = M%IBP1
+JBP1 = M%JBP1
+KBP1 = M%KBP1
+IBAR = M%IBAR
+JBAR = M%JBAR
+KBAR = M%KBAR
+XS = M%XS
+YS = M%YS
+ZS = M%ZS
+XF = M%XF
+YF = M%YF
+ZF = M%ZF
 
 ! Surface work arrays
 
@@ -1165,7 +1162,7 @@ WALL_LOOP_0: DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
          RETURN
       ENDIF
       IF (WC%VENT_INDEX>0 .AND. WC%OBST_INDEX>0) THEN
-         VT => VENTS(WC%VENT_INDEX)
+         VT => M%VENTS(WC%VENT_INDEX)
          IF (VT%BOUNDARY_TYPE==HVAC_BOUNDARY) THEN
             WRITE(LU_ERR,'(A,A,A,I0)') 'ERROR: VENT ',TRIM(VT%ID),' cannot be applied to a thin obstruction, OBST #',&
                                     M%OBSTRUCTION(WC%OBST_INDEX)%ORDINAL
@@ -1190,9 +1187,9 @@ ENDDO CFACE_LOOP_0
 IF (CC_IBM) THEN
    DO NSLICE = 1, M%N_TERRAIN_SLCF
       DO ICF=1,M%N_CUTFACE_MESH
-         IF (CUT_FACE(ICF)%STATUS/=2 .OR. CUT_FACE(ICF)%NFACE<1) CYCLE
-         IW  = MAXLOC(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE),DIM=1)
-         CFA => M%CFACE( CUT_FACE(ICF)%CFACE_INDEX(IW) )
+         IF (M%CUT_FACE(ICF)%STATUS/=2 .OR. M%CUT_FACE(ICF)%NFACE<1) CYCLE
+         IW  = MAXLOC(M%CUT_FACE(ICF)%AREA(1:M%CUT_FACE(ICF)%NFACE),DIM=1)
+         CFA => M%CFACE( M%CUT_FACE(ICF)%CFACE_INDEX(IW) )
          BC  => M%BOUNDARY_COORD(CFA%BC_INDEX)
          IF (CFA%NVEC(KAXIS)>-TWO_EPSILON_EB .AND.  CFA%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
             IF (BC%KKG > M%K_AGL_SLICE(BC%IIG,BC%JJG,NSLICE)) THEN
@@ -1384,43 +1381,39 @@ SUBROUTINE INITIALIZE_EDGES
 
 ! Set up edge arrays for velocity boundary conditions
 
-INTEGER I,J,K,N
-
-CALL POINT_TO_MESH(NM)
-
-N_EDGES = 0
+M%N_EDGES = 0
 
 ! Arguments for DEFINE_EDGE(I,J,K,IOR,IEC,NM,OBST_INDEX)
 
-DO K=0,KBAR
-   DO J=0,JBAR
-      IF (J>0) CALL DEFINE_EDGE(   0,J,K, 1,2,NM,0,IERR)
-      IF (J>0) CALL DEFINE_EDGE(IBAR,J,K,-1,2,NM,0,IERR)
-      IF (K>0) CALL DEFINE_EDGE(   0,J,K, 1,3,NM,0,IERR)
-      IF (K>0) CALL DEFINE_EDGE(IBAR,J,K,-1,3,NM,0,IERR)
+DO K=0,M%KBAR
+   DO J=0,M%JBAR
+      IF (J>0) CALL DEFINE_EDGE(     0,J,K, 1,2,NM,0,IERR)
+      IF (J>0) CALL DEFINE_EDGE(M%IBAR,J,K,-1,2,NM,0,IERR)
+      IF (K>0) CALL DEFINE_EDGE(     0,J,K, 1,3,NM,0,IERR)
+      IF (K>0) CALL DEFINE_EDGE(M%IBAR,J,K,-1,3,NM,0,IERR)
    ENDDO
 ENDDO
-DO K=0,KBAR
-   DO I=0,IBAR
-      IF (I>0) CALL DEFINE_EDGE(I,   0,K, 2,1,NM,0,IERR)
-      IF (I>0) CALL DEFINE_EDGE(I,JBAR,K,-2,1,NM,0,IERR)
-      IF (K>0) CALL DEFINE_EDGE(I,   0,K, 2,3,NM,0,IERR)
-      IF (K>0) CALL DEFINE_EDGE(I,JBAR,K,-2,3,NM,0,IERR)
+DO K=0,M%KBAR
+   DO I=0,M%IBAR
+      IF (I>0) CALL DEFINE_EDGE(I,     0,K, 2,1,NM,0,IERR)
+      IF (I>0) CALL DEFINE_EDGE(I,M%JBAR,K,-2,1,NM,0,IERR)
+      IF (K>0) CALL DEFINE_EDGE(I,     0,K, 2,3,NM,0,IERR)
+      IF (K>0) CALL DEFINE_EDGE(I,M%JBAR,K,-2,3,NM,0,IERR)
    ENDDO
 ENDDO
-DO J=0,JBAR
-   DO I=0,IBAR
-      IF (I>0) CALL DEFINE_EDGE(I,J,   0, 3,1,NM,0,IERR)
-      IF (I>0) CALL DEFINE_EDGE(I,J,KBAR,-3,1,NM,0,IERR)
-      IF (J>0) CALL DEFINE_EDGE(I,J,   0, 3,2,NM,0,IERR)
-      IF (J>0) CALL DEFINE_EDGE(I,J,KBAR,-3,2,NM,0,IERR)
+DO J=0,M%JBAR
+   DO I=0,M%IBAR
+      IF (I>0) CALL DEFINE_EDGE(I,J,     0, 3,1,NM,0,IERR)
+      IF (I>0) CALL DEFINE_EDGE(I,J,M%KBAR,-3,1,NM,0,IERR)
+      IF (J>0) CALL DEFINE_EDGE(I,J,     0, 3,2,NM,0,IERR)
+      IF (J>0) CALL DEFINE_EDGE(I,J,M%KBAR,-3,2,NM,0,IERR)
    ENDDO
 ENDDO
 
 IF (IERR/=0) RETURN
 
-OBST_LOOP_3: DO N=1,N_OBST
-   OB => OBSTRUCTION(N)
+OBST_LOOP_3: DO N=1,M%N_OBST
+   OB => M%OBSTRUCTION(N)
    DO K=OB%K1,OB%K2
       DO J=OB%J1,OB%J2
          IF (J>OB%J1) CALL DEFINE_EDGE(OB%I1,J,K,-1,2,NM,N,IERR)
@@ -1447,13 +1440,262 @@ OBST_LOOP_3: DO N=1,N_OBST
    ENDDO
 ENDDO OBST_LOOP_3
 
-IF (N_EDGES>N_EDGES_DIM .AND. DO_EVACUATION) THEN
-   WRITE(LU_ERR,'(A,I2,A,2I8)') 'ERROR: Edges memory; Mesh: ',NM,', n_edges, n_edges_dim ',N_EDGES, N_EDGES_DIM
+IF (M%N_EDGES>N_EDGES_DIM .AND. DO_EVACUATION) THEN
+   WRITE(LU_ERR,'(A,I2,A,2I8)') 'ERROR: Edges memory; Mesh: ',NM,', n_edges, n_edges_dim ',M%N_EDGES, N_EDGES_DIM
    STOP_STATUS = SETUP_STOP
    IERR = 1
 ENDIF
 
 END SUBROUTINE INITIALIZE_EDGES
+
+
+SUBROUTINE DEFINE_EDGE(II,JJ,KK,IOR,IEC,NM,OBST_INDEX,IERR)
+
+! Set up edge arrays for velocity boundary conditions
+
+INTEGER, INTENT(IN) :: II,JJ,KK,IOR,IEC,NM
+INTEGER :: NOM,ICMM,ICMP,ICPM,ICPP,OBST_INDEX,IE,IW,IIO,JJO,KKO,IW1,IW2,IERR
+REAL(EB) :: XI,YJ,ZK
+TYPE (MESH_TYPE), POINTER :: MM
+
+IF (OBST_INDEX>0) OB=>M%OBSTRUCTION(OBST_INDEX)
+
+! Find the wall cells on each side of the edge
+
+IW1 = -1
+IW2 = -1
+
+EDGE_DIRECTION_1: SELECT CASE(IEC)
+   CASE(1) EDGE_DIRECTION_1
+      SELECT CASE(IOR)
+         CASE(-2)
+            IW1 = M%WALL_INDEX(M%CELL_INDEX(II,JJ,KK)  ,2)
+            IW2 = M%WALL_INDEX(M%CELL_INDEX(II,JJ,KK+1),2)
+         CASE( 2)
+            IW1 = M%WALL_INDEX(M%CELL_INDEX(II,JJ+1,KK)  ,-2)
+            IW2 = M%WALL_INDEX(M%CELL_INDEX(II,JJ+1,KK+1),-2)
+         CASE(-3)
+            IW1 = M%WALL_INDEX(M%CELL_INDEX(II,JJ  ,KK),3)
+            IW2 = M%WALL_INDEX(M%CELL_INDEX(II,JJ+1,KK),3)
+         CASE( 3)
+            IW1 = M%WALL_INDEX(M%CELL_INDEX(II,JJ  ,KK+1),-3)
+            IW2 = M%WALL_INDEX(M%CELL_INDEX(II,JJ+1,KK+1),-3)
+      END SELECT
+   CASE(2) EDGE_DIRECTION_1
+      SELECT CASE(IOR)
+         CASE(-1)
+            IW1 = M%WALL_INDEX(M%CELL_INDEX(II,JJ,KK)  ,1)
+            IW2 = M%WALL_INDEX(M%CELL_INDEX(II,JJ,KK+1),1)
+         CASE( 1)
+            IW1 = M%WALL_INDEX(M%CELL_INDEX(II+1,JJ,KK)  ,-1)
+            IW2 = M%WALL_INDEX(M%CELL_INDEX(II+1,JJ,KK+1),-1)
+         CASE(-3)
+            IW1 = M%WALL_INDEX(M%CELL_INDEX(II  ,JJ,KK),3)
+            IW2 = M%WALL_INDEX(M%CELL_INDEX(II+1,JJ,KK),3)
+         CASE( 3)
+            IW1 = M%WALL_INDEX(M%CELL_INDEX(II  ,JJ,KK+1),-3)
+            IW2 = M%WALL_INDEX(M%CELL_INDEX(II+1,JJ,KK+1),-3)
+      END SELECT
+   CASE(3) EDGE_DIRECTION_1
+      SELECT CASE(IOR)
+         CASE(-1)
+            IW1 = M%WALL_INDEX(M%CELL_INDEX(II,JJ  ,KK),1)
+            IW2 = M%WALL_INDEX(M%CELL_INDEX(II,JJ+1,KK),1)
+         CASE( 1)
+            IW1 = M%WALL_INDEX(M%CELL_INDEX(II+1,JJ  ,KK),-1)
+            IW2 = M%WALL_INDEX(M%CELL_INDEX(II+1,JJ+1,KK),-1)
+         CASE(-2)
+            IW1 = M%WALL_INDEX(M%CELL_INDEX(II  ,JJ,KK),2)
+            IW2 = M%WALL_INDEX(M%CELL_INDEX(II+1,JJ,KK),2)
+         CASE( 2)
+            IW1 = M%WALL_INDEX(M%CELL_INDEX(II  ,JJ+1,KK),-2)
+            IW2 = M%WALL_INDEX(M%CELL_INDEX(II+1,JJ+1,KK),-2)
+      END SELECT
+END SELECT EDGE_DIRECTION_1
+
+! Decide what to do based on whether or not adjacent tiles exist
+
+IF (IW1==-1 .OR. IW2==-1) THEN
+   WRITE(LU_ERR,'(A,I2,A,3I3)') 'ERROR: Edge initialization failed; Mesh: ',NM,', Cell: ',II,JJ,KK
+   STOP_STATUS = SETUP_STOP
+   IERR = 1
+   RETURN
+ENDIF
+
+IF (IW1==0 .AND. IW2==0) RETURN
+IF (IW1> 0 .AND. IW2==0) IW = IW1
+IF (IW1==0 .AND. IW2> 0) IW = IW2
+IF (IW1> 0 .AND. IW2> 0) THEN
+   IW = IW2
+   IF (IW1<=M%N_EXTERNAL_WALL_CELLS) THEN
+      IF (M%EXTERNAL_WALL(IW1)%NOM>0) IW = IW1
+   ENDIF
+   IF (IW2<=M%N_EXTERNAL_WALL_CELLS) THEN
+      IF (M%EXTERNAL_WALL(IW2)%NOM>0) IW = IW2
+   ENDIF
+ENDIF
+
+! Assign the Index of the Edge (IE) and add to the list
+
+ICMM = M%CELL_INDEX(II,JJ,KK)
+SELECT CASE(IEC)
+   CASE(1)
+      IE = M%EDGE_INDEX( 4,ICMM)
+   CASE(2)
+      IE = M%EDGE_INDEX( 8,ICMM)
+   CASE(3)
+      IE = M%EDGE_INDEX(12,ICMM)
+END SELECT
+
+IF (IE==0) THEN
+   M%N_EDGES = M%N_EDGES + 1
+   IE = M%N_EDGES
+ENDIF
+
+! Determine the wall index of the adjacent wall tile
+
+NOM = 0
+IIO = 0
+JJO = 0
+KKO = 0
+
+IF (IW<=M%N_EXTERNAL_WALL_CELLS) THEN
+   IF (M%EXTERNAL_WALL(IW)%NOM>0) THEN
+      NOM = M%EXTERNAL_WALL(IW)%NOM
+      IIO = M%EXTERNAL_WALL(IW)%IIO_MIN
+      JJO = M%EXTERNAL_WALL(IW)%JJO_MIN
+      KKO = M%EXTERNAL_WALL(IW)%KKO_MIN
+   ENDIF
+ENDIF
+
+! Fill up array IJKE with edge parameters
+
+M%IJKE(1,IE) = II
+M%IJKE(2,IE) = JJ
+M%IJKE(3,IE) = KK
+M%IJKE(4,IE) = IEC
+
+! Fill in EDGE_INDEX and the rest of IJKE
+
+EDGE_DIRECTION_2: SELECT CASE(IEC)
+
+   CASE (1) EDGE_DIRECTION_2
+
+      ICPM = M%CELL_INDEX(II,JJ+1,KK)
+      ICPP = M%CELL_INDEX(II,JJ+1,KK+1)
+      ICMP = M%CELL_INDEX(II,JJ,KK+1)
+      M%IJKE(5,IE) = ICMM
+      M%IJKE(6,IE) = ICPM
+      M%IJKE(7,IE) = ICMP
+      M%IJKE(8,IE) = ICPP
+      M%EDGE_INDEX(1,ICPP) = IE
+      M%EDGE_INDEX(2,ICMP) = IE
+      M%EDGE_INDEX(3,ICPM) = IE
+      M%EDGE_INDEX(4,ICMM) = IE
+      IF (NOM/=0) THEN
+         SELECT CASE(ABS(IOR))
+            CASE(2)
+               IF (IOR>0) M%IJKE( 9,IE) = -NOM
+               IF (IOR<0) M%IJKE( 9,IE) =  NOM
+               M%IJKE(10,IE) = IIO
+               M%IJKE(11,IE) = JJO
+               MM => MESHES(NOM)
+               ZK  = MIN( REAL(MM%KBAR,EB)+ALMOST_ONE , MM%CELLSK(NINT((M%Z(KK)-MM%ZS)*MM%RDZINT))+1._EB )
+               KKO = MAX(1,FLOOR(ZK))
+               M%EDGE_INTERPOLATION_FACTOR(IE,1) = ZK-KKO
+               M%IJKE(12,IE) = KKO
+            CASE(3)
+               IF (IOR>0) M%IJKE(13,IE) = -NOM
+               IF (IOR<0) M%IJKE(13,IE) =  NOM
+               M%IJKE(14,IE) = IIO
+               MM => MESHES(NOM)
+               YJ  = MIN( REAL(MM%JBAR,EB)+ALMOST_ONE , MM%CELLSJ(NINT((M%Y(JJ)-MM%YS)*MM%RDYINT))+1._EB )
+               JJO = MAX(1,FLOOR(YJ))
+               M%EDGE_INTERPOLATION_FACTOR(IE,2) = YJ-JJO
+               M%IJKE(15,IE) = JJO
+               M%IJKE(16,IE) = KKO
+         END SELECT
+      ENDIF
+
+   CASE (2) EDGE_DIRECTION_2
+
+      ICMP = M%CELL_INDEX(II+1,JJ,KK)
+      ICPP = M%CELL_INDEX(II+1,JJ,KK+1)
+      ICPM = M%CELL_INDEX(II,JJ,KK+1)
+      M%IJKE(5,IE) = ICMM
+      M%IJKE(6,IE) = ICPM
+      M%IJKE(7,IE) = ICMP
+      M%IJKE(8,IE) = ICPP
+      M%EDGE_INDEX(5,ICPP) = IE
+      M%EDGE_INDEX(6,ICPM) = IE
+      M%EDGE_INDEX(7,ICMP) = IE
+      M%EDGE_INDEX(8,ICMM) = IE
+      IF (NOM/=0) THEN
+         SELECT CASE(ABS(IOR))
+            CASE( 1)
+               IF (IOR>0) M%IJKE(13,IE) = -NOM
+               IF (IOR<0) M%IJKE(13,IE) =  NOM
+               M%IJKE(14,IE) = IIO
+               M%IJKE(15,IE) = JJO
+               MM => MESHES(NOM)
+               ZK  = MIN( REAL(MM%KBAR,EB)+ALMOST_ONE , MM%CELLSK(NINT((M%Z(KK)-MM%ZS)*MM%RDZINT))+1._EB )
+               KKO = MAX(1,FLOOR(ZK))
+               M%EDGE_INTERPOLATION_FACTOR(IE,2) = ZK-KKO
+               M%IJKE(16,IE) = KKO
+            CASE( 3)
+               IF (IOR>0) M%IJKE( 9,IE) = -NOM
+               IF (IOR<0) M%IJKE( 9,IE) =  NOM
+               MM => MESHES(NOM)
+               XI  = MIN( REAL(MM%IBAR,EB)+ALMOST_ONE , MM%CELLSI(NINT((M%X(II)-MM%XS)*MM%RDXINT))+1._EB )
+               IIO = MAX(1,FLOOR(XI))
+               M%EDGE_INTERPOLATION_FACTOR(IE,1) = XI-IIO
+               M%IJKE(10,IE) = IIO
+               M%IJKE(11,IE) = JJO
+               M%IJKE(12,IE) = KKO
+         END SELECT
+      ENDIF
+
+   CASE (3) EDGE_DIRECTION_2
+
+      ICPM = M%CELL_INDEX(II+1,JJ,KK)
+      ICPP = M%CELL_INDEX(II+1,JJ+1,KK)
+      ICMP = M%CELL_INDEX(II,JJ+1,KK)
+      M%IJKE(5,IE) = ICMM
+      M%IJKE(6,IE) = ICPM
+      M%IJKE(7,IE) = ICMP
+      M%IJKE(8,IE) = ICPP
+      M%EDGE_INDEX( 9,ICPP) = IE
+      M%EDGE_INDEX(10,ICMP) = IE
+      M%EDGE_INDEX(11,ICPM) = IE
+      M%EDGE_INDEX(12,ICMM) = IE
+      IF (NOM/=0) THEN
+         SELECT CASE(ABS(IOR))
+            CASE( 1)
+               IF (IOR>0) M%IJKE( 9,IE) = -NOM
+               IF (IOR<0) M%IJKE( 9,IE) =  NOM
+               M%IJKE(10,IE) = IIO
+               MM => MESHES(NOM)
+               YJ  = MIN( REAL(MM%JBAR,EB)+ALMOST_ONE , MM%CELLSJ(NINT((M%Y(JJ)-MM%YS)*MM%RDYINT))+1._EB )
+               JJO = MAX(1,FLOOR(YJ))
+               M%EDGE_INTERPOLATION_FACTOR(IE,1) = YJ-JJO
+               M%IJKE(11,IE) = JJO
+               M%IJKE(12,IE) = KKO
+            CASE( 2)
+               IF (IOR>0) M%IJKE(13,IE) = -NOM
+               IF (IOR<0) M%IJKE(13,IE) =  NOM
+               MM => MESHES(NOM)
+               XI  = MIN( REAL(MM%IBAR,EB)+ALMOST_ONE , MM%CELLSI(NINT((M%X(II)-MM%XS)*MM%RDXINT))+1._EB )
+               IIO = MAX(1,FLOOR(XI))
+               M%EDGE_INTERPOLATION_FACTOR(IE,2) = XI-IIO
+               M%IJKE(14,IE) = IIO
+               M%IJKE(15,IE) = JJO
+               M%IJKE(16,IE) = KKO
+         END SELECT
+      ENDIF
+
+END SELECT EDGE_DIRECTION_2
+
+END SUBROUTINE DEFINE_EDGE
 
 
 SUBROUTINE INITIALIZE_POISSON_SOLVER
@@ -1474,9 +1716,6 @@ KTRN =>M%KTRN
 LBC =>M%LBC
 MBC =>M%MBC
 NBC =>M%NBC
-LBC2 =>M%LBC2
-MBC2 =>M%MBC2
-NBC2 =>M%NBC2
 NOC=>TRANS(NM)%NOC
 IF (NOC(1)==0 .AND. NOC(2)==0 .AND. NOC(3)==0) M%IPS=0
 IF (NOC(1)/=0 .AND. NOC(2)==0 .AND. NOC(3)==0) M%IPS=1
@@ -1860,12 +2099,12 @@ DEVICE_LOOP: DO N=1,N_DEVC
          ! our task is to find the first gas phase cell (IIG,JJG,KKG) in direction IOR,
          ! currently assumes II and IIG, etc., are on the same mesh
          SELECT CASE (IOR)
-            CASE ( 1); DO IIG=II,IBP1; IF (.NOT.M%SOLID(M%CELL_INDEX(IIG,JJG,KKG))) EXIT; ENDDO
-            CASE (-1); DO IIG=II,0,-1; IF (.NOT.M%SOLID(M%CELL_INDEX(IIG,JJG,KKG))) EXIT; ENDDO
-            CASE ( 2); DO JJG=JJ,JBP1; IF (.NOT.M%SOLID(M%CELL_INDEX(IIG,JJG,KKG))) EXIT; ENDDO
-            CASE (-2); DO JJG=JJ,0,-1; IF (.NOT.M%SOLID(M%CELL_INDEX(IIG,JJG,KKG))) EXIT; ENDDO
-            CASE ( 3); DO KKG=KK,KBP1; IF (.NOT.M%SOLID(M%CELL_INDEX(IIG,JJG,KKG))) EXIT; ENDDO
-            CASE (-3); DO KKG=KK,0,-1; IF (.NOT.M%SOLID(M%CELL_INDEX(IIG,JJG,KKG))) EXIT; ENDDO
+            CASE ( 1); DO IIG=II,M%IBP1; IF (.NOT.M%SOLID(M%CELL_INDEX(IIG,JJG,KKG))) EXIT; ENDDO
+            CASE (-1); DO IIG=II,  0,-1; IF (.NOT.M%SOLID(M%CELL_INDEX(IIG,JJG,KKG))) EXIT; ENDDO
+            CASE ( 2); DO JJG=JJ,M%JBP1; IF (.NOT.M%SOLID(M%CELL_INDEX(IIG,JJG,KKG))) EXIT; ENDDO
+            CASE (-2); DO JJG=JJ,  0,-1; IF (.NOT.M%SOLID(M%CELL_INDEX(IIG,JJG,KKG))) EXIT; ENDDO
+            CASE ( 3); DO KKG=KK,M%KBP1; IF (.NOT.M%SOLID(M%CELL_INDEX(IIG,JJG,KKG))) EXIT; ENDDO
+            CASE (-3); DO KKG=KK,  0,-1; IF (.NOT.M%SOLID(M%CELL_INDEX(IIG,JJG,KKG))) EXIT; ENDDO
          END SELECT
       ENDIF
 
@@ -2771,6 +3010,7 @@ SUBROUTINE OPEN_AND_CLOSE(T,NM)
 
 ! Check to see if a cell or OBSTruction is to be created or removed, or a VENT activated of deactivated
 
+USE MESH_POINTERS
 USE MEMORY_FUNCTIONS, ONLY : RE_ALLOCATE_STRINGS
 USE CONTROL_VARIABLES, ONLY : CONTROL
 USE DEVICE_VARIABLES, ONLY : DEVICE
@@ -3119,6 +3359,7 @@ SUBROUTINE CREATE_OR_REMOVE_OBST(NM,I1,I2,J1,J2,K1,K2,CR_INDEX,OBST_INDEX)
 
 ! Create or remove the obstruction whose NODES (not cells) are given by I1, I2, etc.
 
+USE MESH_POINTERS
 USE GEOMETRY_FUNCTIONS, ONLY : BLOCK_CELL
 INTEGER :: I1,I2,J1,J2,K1,K2,I,J,K
 INTEGER, INTENT(IN) :: NM,CR_INDEX,OBST_INDEX
@@ -3163,6 +3404,7 @@ END SUBROUTINE CREATE_OR_REMOVE_OBST
 
 SUBROUTINE REASSIGN_WALL_CELLS(T,NM)
 
+USE MESH_POINTERS
 USE COMP_FUNCTIONS, ONLY : CURRENT_TIME
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T
@@ -3443,261 +3685,11 @@ END SUBROUTINE REDEFINE_EDGE
 END SUBROUTINE REASSIGN_WALL_CELLS
 
 
-SUBROUTINE DEFINE_EDGE(II,JJ,KK,IOR,IEC,NM,OBST_INDEX,IERR)
-
-! Set up edge arrays for velocity boundary conditions
-
-INTEGER, INTENT(IN) :: II,JJ,KK,IOR,IEC,NM
-INTEGER :: NOM,ICMM,ICMP,ICPM,ICPP,OBST_INDEX,IE,IW,IIO,JJO,KKO,IW1,IW2,IERR
-REAL(EB) :: XI,YJ,ZK
-TYPE (MESH_TYPE), POINTER :: M,MM
-TYPE (OBSTRUCTION_TYPE), POINTER :: OB
-
-M => MESHES(NM)
-IF (OBST_INDEX>0) OB=>OBSTRUCTION(OBST_INDEX)
-
-! Find the wall cells on each side of the edge
-
-IW1 = -1
-IW2 = -1
-
-EDGE_DIRECTION_1: SELECT CASE(IEC)
-   CASE(1) EDGE_DIRECTION_1
-      SELECT CASE(IOR)
-         CASE(-2)
-            IW1 = WALL_INDEX(CELL_INDEX(II,JJ,KK)  ,2)
-            IW2 = WALL_INDEX(CELL_INDEX(II,JJ,KK+1),2)
-         CASE( 2)
-            IW1 = WALL_INDEX(CELL_INDEX(II,JJ+1,KK)  ,-2)
-            IW2 = WALL_INDEX(CELL_INDEX(II,JJ+1,KK+1),-2)
-         CASE(-3)
-            IW1 = WALL_INDEX(CELL_INDEX(II,JJ  ,KK),3)
-            IW2 = WALL_INDEX(CELL_INDEX(II,JJ+1,KK),3)
-         CASE( 3)
-            IW1 = WALL_INDEX(CELL_INDEX(II,JJ  ,KK+1),-3)
-            IW2 = WALL_INDEX(CELL_INDEX(II,JJ+1,KK+1),-3)
-      END SELECT
-   CASE(2) EDGE_DIRECTION_1
-      SELECT CASE(IOR)
-         CASE(-1)
-            IW1 = WALL_INDEX(CELL_INDEX(II,JJ,KK)  ,1)
-            IW2 = WALL_INDEX(CELL_INDEX(II,JJ,KK+1),1)
-         CASE( 1)
-            IW1 = WALL_INDEX(CELL_INDEX(II+1,JJ,KK)  ,-1)
-            IW2 = WALL_INDEX(CELL_INDEX(II+1,JJ,KK+1),-1)
-         CASE(-3)
-            IW1 = WALL_INDEX(CELL_INDEX(II  ,JJ,KK),3)
-            IW2 = WALL_INDEX(CELL_INDEX(II+1,JJ,KK),3)
-         CASE( 3)
-            IW1 = WALL_INDEX(CELL_INDEX(II  ,JJ,KK+1),-3)
-            IW2 = WALL_INDEX(CELL_INDEX(II+1,JJ,KK+1),-3)
-      END SELECT
-   CASE(3) EDGE_DIRECTION_1
-      SELECT CASE(IOR)
-         CASE(-1)
-            IW1 = WALL_INDEX(CELL_INDEX(II,JJ  ,KK),1)
-            IW2 = WALL_INDEX(CELL_INDEX(II,JJ+1,KK),1)
-         CASE( 1)
-            IW1 = WALL_INDEX(CELL_INDEX(II+1,JJ  ,KK),-1)
-            IW2 = WALL_INDEX(CELL_INDEX(II+1,JJ+1,KK),-1)
-         CASE(-2)
-            IW1 = WALL_INDEX(CELL_INDEX(II  ,JJ,KK),2)
-            IW2 = WALL_INDEX(CELL_INDEX(II+1,JJ,KK),2)
-         CASE( 2)
-            IW1 = WALL_INDEX(CELL_INDEX(II  ,JJ+1,KK),-2)
-            IW2 = WALL_INDEX(CELL_INDEX(II+1,JJ+1,KK),-2)
-      END SELECT
-END SELECT EDGE_DIRECTION_1
-
-! Decide what to do based on whether or not adjacent tiles exist
-
-IF (IW1==-1 .OR. IW2==-1) THEN
-   WRITE(LU_ERR,'(A,I2,A,3I3)') 'ERROR: Edge initialization failed; Mesh: ',NM,', Cell: ',II,JJ,KK
-   STOP_STATUS = SETUP_STOP
-   IERR = 1
-   RETURN
-ENDIF
-
-IF (IW1==0 .AND. IW2==0) RETURN
-IF (IW1> 0 .AND. IW2==0) IW = IW1
-IF (IW1==0 .AND. IW2> 0) IW = IW2
-IF (IW1> 0 .AND. IW2> 0) THEN
-   IW = IW2
-   IF (IW1<=N_EXTERNAL_WALL_CELLS) THEN
-      IF (EXTERNAL_WALL(IW1)%NOM>0) IW = IW1
-   ENDIF
-   IF (IW2<=N_EXTERNAL_WALL_CELLS) THEN
-      IF (EXTERNAL_WALL(IW2)%NOM>0) IW = IW2
-   ENDIF
-ENDIF
-
-! Assign the Index of the Edge (IE) and add to the list
-
-ICMM = CELL_INDEX(II,JJ,KK)
-SELECT CASE(IEC)
-   CASE(1)
-      IE = EDGE_INDEX( 4,ICMM)
-   CASE(2)
-      IE = EDGE_INDEX( 8,ICMM)
-   CASE(3)
-      IE = EDGE_INDEX(12,ICMM)
-END SELECT
-
-IF (IE==0) THEN
-   N_EDGES = N_EDGES + 1
-   IE = N_EDGES
-ENDIF
-
-! Determine the wall index of the adjacent wall tile
-
-NOM = 0
-IIO = 0
-JJO = 0
-KKO = 0
-
-IF (IW<=N_EXTERNAL_WALL_CELLS) THEN
-   IF (EXTERNAL_WALL(IW)%NOM>0) THEN
-      NOM = EXTERNAL_WALL(IW)%NOM
-      IIO = EXTERNAL_WALL(IW)%IIO_MIN
-      JJO = EXTERNAL_WALL(IW)%JJO_MIN
-      KKO = EXTERNAL_WALL(IW)%KKO_MIN
-   ENDIF
-ENDIF
-
-! Fill up array IJKE with edge parameters
-
-IJKE(1,IE) = II
-IJKE(2,IE) = JJ
-IJKE(3,IE) = KK
-IJKE(4,IE) = IEC
-
-! Fill in EDGE_INDEX and the rest of IJKE
-
-EDGE_DIRECTION_2: SELECT CASE(IEC)
-
-   CASE (1) EDGE_DIRECTION_2
-
-      ICPM = CELL_INDEX(II,JJ+1,KK)
-      ICPP = CELL_INDEX(II,JJ+1,KK+1)
-      ICMP = CELL_INDEX(II,JJ,KK+1)
-      IJKE(5,IE) = ICMM
-      IJKE(6,IE) = ICPM
-      IJKE(7,IE) = ICMP
-      IJKE(8,IE) = ICPP
-      EDGE_INDEX(1,ICPP) = IE
-      EDGE_INDEX(2,ICMP) = IE
-      EDGE_INDEX(3,ICPM) = IE
-      EDGE_INDEX(4,ICMM) = IE
-      IF (NOM/=0) THEN
-         SELECT CASE(ABS(IOR))
-            CASE(2)
-               IF (IOR>0) IJKE( 9,IE) = -NOM
-               IF (IOR<0) IJKE( 9,IE) =  NOM
-               IJKE(10,IE) = IIO
-               IJKE(11,IE) = JJO
-               MM => MESHES(NOM)
-               ZK  = MIN( REAL(MM%KBAR,EB)+ALMOST_ONE , MM%CELLSK(NINT((Z(KK)-MM%ZS)*MM%RDZINT))+1._EB )
-               KKO = MAX(1,FLOOR(ZK))
-               M%EDGE_INTERPOLATION_FACTOR(IE,1) = ZK-KKO
-               IJKE(12,IE) = KKO
-            CASE(3)
-               IF (IOR>0) IJKE(13,IE) = -NOM
-               IF (IOR<0) IJKE(13,IE) =  NOM
-               IJKE(14,IE) = IIO
-               MM => MESHES(NOM)
-               YJ  = MIN( REAL(MM%JBAR,EB)+ALMOST_ONE , MM%CELLSJ(NINT((Y(JJ)-MM%YS)*MM%RDYINT))+1._EB )
-               JJO = MAX(1,FLOOR(YJ))
-               M%EDGE_INTERPOLATION_FACTOR(IE,2) = YJ-JJO
-               IJKE(15,IE) = JJO
-               IJKE(16,IE) = KKO
-         END SELECT
-      ENDIF
-
-   CASE (2) EDGE_DIRECTION_2
-
-      ICMP = CELL_INDEX(II+1,JJ,KK)
-      ICPP = CELL_INDEX(II+1,JJ,KK+1)
-      ICPM = CELL_INDEX(II,JJ,KK+1)
-      IJKE(5,IE) = ICMM
-      IJKE(6,IE) = ICPM
-      IJKE(7,IE) = ICMP
-      IJKE(8,IE) = ICPP
-      EDGE_INDEX(5,ICPP) = IE
-      EDGE_INDEX(6,ICPM) = IE
-      EDGE_INDEX(7,ICMP) = IE
-      EDGE_INDEX(8,ICMM) = IE
-      IF (NOM/=0) THEN
-         SELECT CASE(ABS(IOR))
-            CASE( 1)
-               IF (IOR>0) IJKE(13,IE) = -NOM
-               IF (IOR<0) IJKE(13,IE) =  NOM
-               IJKE(14,IE) = IIO
-               IJKE(15,IE) = JJO
-               MM => MESHES(NOM)
-               ZK  = MIN( REAL(MM%KBAR,EB)+ALMOST_ONE , MM%CELLSK(NINT((Z(KK)-MM%ZS)*MM%RDZINT))+1._EB )
-               KKO = MAX(1,FLOOR(ZK))
-               M%EDGE_INTERPOLATION_FACTOR(IE,2) = ZK-KKO
-               IJKE(16,IE) = KKO
-            CASE( 3)
-               IF (IOR>0) IJKE( 9,IE) = -NOM
-               IF (IOR<0) IJKE( 9,IE) =  NOM
-               MM => MESHES(NOM)
-               XI  = MIN( REAL(MM%IBAR,EB)+ALMOST_ONE , MM%CELLSI(NINT((X(II)-MM%XS)*MM%RDXINT))+1._EB )
-               IIO = MAX(1,FLOOR(XI))
-               M%EDGE_INTERPOLATION_FACTOR(IE,1) = XI-IIO
-               IJKE(10,IE) = IIO
-               IJKE(11,IE) = JJO
-               IJKE(12,IE) = KKO
-         END SELECT
-      ENDIF
-
-   CASE (3) EDGE_DIRECTION_2
-
-      ICPM = CELL_INDEX(II+1,JJ,KK)
-      ICPP = CELL_INDEX(II+1,JJ+1,KK)
-      ICMP = CELL_INDEX(II,JJ+1,KK)
-      IJKE(5,IE) = ICMM
-      IJKE(6,IE) = ICPM
-      IJKE(7,IE) = ICMP
-      IJKE(8,IE) = ICPP
-      EDGE_INDEX( 9,ICPP) = IE
-      EDGE_INDEX(10,ICMP) = IE
-      EDGE_INDEX(11,ICPM) = IE
-      EDGE_INDEX(12,ICMM) = IE
-      IF (NOM/=0) THEN
-         SELECT CASE(ABS(IOR))
-            CASE( 1)
-               IF (IOR>0) IJKE( 9,IE) = -NOM
-               IF (IOR<0) IJKE( 9,IE) =  NOM
-               IJKE(10,IE) = IIO
-               MM => MESHES(NOM)
-               YJ  = MIN( REAL(MM%JBAR,EB)+ALMOST_ONE , MM%CELLSJ(NINT((Y(JJ)-MM%YS)*MM%RDYINT))+1._EB )
-               JJO = MAX(1,FLOOR(YJ))
-               M%EDGE_INTERPOLATION_FACTOR(IE,1) = YJ-JJO
-               IJKE(11,IE) = JJO
-               IJKE(12,IE) = KKO
-            CASE( 2)
-               IF (IOR>0) IJKE(13,IE) = -NOM
-               IF (IOR<0) IJKE(13,IE) =  NOM
-               MM => MESHES(NOM)
-               XI  = MIN( REAL(MM%IBAR,EB)+ALMOST_ONE , MM%CELLSI(NINT((X(II)-MM%XS)*MM%RDXINT))+1._EB )
-               IIO = MAX(1,FLOOR(XI))
-               M%EDGE_INTERPOLATION_FACTOR(IE,2) = XI-IIO
-               IJKE(14,IE) = IIO
-               IJKE(15,IE) = JJO
-               IJKE(16,IE) = KKO
-         END SELECT
-      ENDIF
-
-END SELECT EDGE_DIRECTION_2
-
-END SUBROUTINE DEFINE_EDGE
-
-
 SUBROUTINE INITIAL_NOISE(NM)
 
 ! Generate random noise at the start of the simulation
 
+USE MESH_POINTERS
 REAL     :: RN2
 REAL(EB) :: RN
 INTEGER  :: I,J,K,SIZE_RND,IZERO
@@ -3778,6 +3770,7 @@ SUBROUTINE UVW_INIT(NM,FN_UVW)
 
 ! Read UVW file
 
+USE MESH_POINTERS
 USE COMP_FUNCTIONS, ONLY: GET_FILE_NUMBER,SHUTDOWN
 INTEGER  :: I,J,K,II,JJ,KK,IW,IOR,LU_UVW,IERROR,IMIN,IMAX,JMIN,JMAX,KMIN,KMAX
 INTEGER, INTENT(IN) :: NM
