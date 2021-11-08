@@ -1055,9 +1055,9 @@ VOLUME_INSERT_LOOP: DO IB=1,N_INIT
                   RR = 0.5_EB*(IN%X2-IN%X1)
                   LP_Z = IN%Z1
                   IF (IN%UNIFORM) THEN
-                     CALL UNIFORM_RING(NM,LP_X,LP_Y,X0,Y0,RR,IP,N_PARTICLES_INSERT)
+                     CALL UNIFORM_RING(LP_X,LP_Y,X0,Y0,RR,IP,N_PARTICLES_INSERT)
                   ELSE
-                     CALL RANDOM_RING(NM,LP_X,LP_Y,X0,Y0,RR)
+                     CALL RANDOM_RING(LP_X,LP_Y,X0,Y0,RR)
                   ENDIF
                CASE('LINE')
                   LP_X = IN%X1 + (IP-1)*IN%DX
