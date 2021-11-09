@@ -2356,7 +2356,7 @@ MB_FACTOR(2,MY_RANK) = NUNKH_LOCAL
 IF(N_MPI_PROCESSES > 1) &
 CALL MPI_ALLREDUCE(MPI_IN_PLACE, MB_FACTOR, 2*N_MPI_PROCESSES, MPI_INTEGER, MPI_SUM, MPI_COMM_WORLD, IERR)
 ! Write to output file:
-IF(MY_RANK==0) THEN
+IF(MY_RANK==0 .AND. GLMAT_VERBOSE) THEN
    IPROC=MAXLOC(MB_FACTOR(1,0:N_MPI_PROCESSES-1),DIM=1) - 1 ! MaxLoc defines which element in the array, not index.
    WRITE(LU_OUTPUT,*) '   MPI Process, H unknowns =',IPROC,MB_FACTOR(2,IPROC), &
       ', Peak Factorization Memory Required (MB)=',MB_FACTOR(1,IPROC)
@@ -2754,7 +2754,7 @@ NUNKH_LOCAL = sum(NUNKH_LOC(1:NMESHES)) ! Filled in GET_MATRIX_INDEXES_H, only n
                                         ! that belong to this process.
 
 ! Write number of pressure unknowns to output:
-IF (MY_RANK==0) THEN
+IF (MY_RANK==0 .AND. GLMAT_VERBOSE) THEN
    WRITE(LU_OUTPUT,'(A)') '   Using GLMAT as pressure solver. List of H unknown numbers per proc:'
 ENDIF
 
