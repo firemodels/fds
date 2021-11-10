@@ -2319,16 +2319,22 @@ END SUBROUTINE RANDOM_CONE
 !> \param Y0 y-coordinate of the center of the ring (m)
 !> \param RR0 Radius of the ring (m)
 
-SUBROUTINE RANDOM_RING(XX,YY,X0,Y0,RR0)
+SUBROUTINE RANDOM_RING(NM,XX,YY,X0,Y0,RR0)
 
+INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: X0,Y0,RR0
 REAL(EB), INTENT(OUT) :: XX,YY
 REAL(EB) :: THETA,RN
+TYPE (MESH_TYPE), POINTER :: M
 
-CALL RANDOM_NUMBER(RN)
-THETA = TWOPI*RN
-XX = X0 + RR0*COS(THETA)
-YY = Y0 + RR0*SIN(THETA)
+M => MESHES(NM)
+SEARCH_LOOP: DO
+   CALL RANDOM_NUMBER(RN)
+   THETA = TWOPI*RN
+   XX = X0 + RR0*COS(THETA)
+   YY = Y0 + RR0*SIN(THETA)
+   IF (XX>=M%XS .AND. XX<=M%XF .AND. YY>=M%YS .AND. YY<=M%YF) EXIT SEARCH_LOOP
+ENDDO SEARCH_LOOP
 
 END SUBROUTINE RANDOM_RING
 
@@ -2488,6 +2494,35 @@ ENDDO
 
 END FUNCTION CONE_MESH_INTERSECTION_VOLUME
 
+
+!> \brief Calculate arc length of the interaction of MESH NM with a ring
+!> \param NM Mesh number
+!> \param X0 x-coordinate of the center of the ring (m)
+!> \param Y0 y-coordinate of the center of the ring (m)
+!> \param RR0 Radius of the ring (m)
+
+REAL(EB) FUNCTION RING_MESH_INTERSECTION_ARC(NM,X0,Y0,RR0)
+
+INTEGER, INTENT(IN) :: NM
+REAL(EB), INTENT(IN) :: X0,Y0,RR0
+REAL(EB) :: XX,YY,THETA
+INTEGER :: IR,N_ITER
+TYPE (MESH_TYPE), POINTER :: M
+
+RING_MESH_INTERSECTION_ARC = 0._EB
+N_ITER = 1000
+M => MESHES(NM)
+
+DO IR=1,N_ITER
+   THETA = TWOPI*REAL(IR,EB)/REAL(N_ITER,EB)
+   XX = X0 + RR0*COS(THETA)
+   YY = Y0 + RR0*SIN(THETA)
+   IF (XX>M%XS .AND. XX<M%XF .AND. YY>M%YS .AND. YY<M%YF) &
+      RING_MESH_INTERSECTION_ARC = RING_MESH_INTERSECTION_ARC + 1
+ENDDO
+RING_MESH_INTERSECTION_ARC = RING_MESH_INTERSECTION_ARC/REAL(N_ITER,EB)*TWOPI*RR0
+
+END FUNCTION RING_MESH_INTERSECTION_ARC
 
 !> \brief Rotate and translate a point using the parameters of MOVE input line
 !> \param X x-coordinate of the point (m)
