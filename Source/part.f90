@@ -119,7 +119,8 @@ END SUBROUTINE GENERATE_PARTICLE_DISTRIBUTIONS
 SUBROUTINE INSERT_ALL_PARTICLES(T,NM)
 
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP,RANDOM_CHOICE
-USE GEOMETRY_FUNCTIONS, ONLY: RANDOM_RECTANGLE,RANDOM_CONE,RANDOM_RING,CONE_MESH_INTERSECTION_VOLUME,UNIFORM_RING
+USE GEOMETRY_FUNCTIONS, ONLY: RANDOM_RECTANGLE,RANDOM_CONE,RANDOM_RING,CONE_MESH_INTERSECTION_VOLUME,UNIFORM_RING,&
+                              RING_MESH_INTERSECTION_ARC
 USE TRAN, ONLY: GET_IJK
 USE DEVICE_VARIABLES
 USE CONTROL_VARIABLES
@@ -975,6 +976,9 @@ VOLUME_INSERT_LOOP: DO IB=1,N_INIT
    ! Cut off parts of the INIT region that are outside the current mesh
 
    IF (IN%X1>XF .OR. IN%X2<XS .OR. IN%Y1>YF .OR. IN%Y2<YS .OR. IN%Z1>ZF .OR. IN%Z2<ZS) CYCLE VOLUME_INSERT_LOOP
+   ! Skip mesh than is contained completely within a ring
+   IF (IN%SHAPE=='RING' .AND. IN%X1<XS .AND. IN%X2>XF .AND. IN%Y1<YS .AND. IN%Y2>YF &
+      .AND. IN%Z1<ZS .AND. IN%Z2>ZF) CYCLE VOLUME_INSERT_LOOP
    X1 = MAX(IN%X1,XS)
    X2 = MIN(IN%X2,XF)
    Y1 = MAX(IN%Y1,YS)
@@ -1001,7 +1005,20 @@ VOLUME_INSERT_LOOP: DO IB=1,N_INIT
             INSERT_VOLUME = CONE_MESH_INTERSECTION_VOLUME(NM,X0,Y0,Z0,RR,HH,0)
             INPUT_VOLUME  = PI*(0.5_EB*(IN%X2-IN%X1))**2*(IN%Z2-IN%Z1)
          ENDIF
-      CASE('RING','LINE')
+      CASE('RING')
+         IF (IN%UNIFORM) THEN
+            INSERT_VOLUME = 0._EB
+            INPUT_VOLUME  = 0._EB
+         ELSE
+            ! proportion of the circle arc length within mesh (length not volume in this case)
+            X0 = 0.5_EB*(IN%X1+IN%X2)
+            Y0 = 0.5_EB*(IN%Y1+IN%Y2)
+            RR = 0.5_EB*(IN%X2-IN%X1)
+            INSERT_VOLUME = RING_MESH_INTERSECTION_ARC(NM,X0,Y0,RR)
+            INPUT_VOLUME  = TWOPI*RR
+         ENDIF
+      CASE('LINE')
+         ! proportion of the circle bounding box within mesh
          INSERT_VOLUME = 0._EB
          INPUT_VOLUME  = 0._EB
    END SELECT
@@ -1057,7 +1074,7 @@ VOLUME_INSERT_LOOP: DO IB=1,N_INIT
                   IF (IN%UNIFORM) THEN
                      CALL UNIFORM_RING(LP_X,LP_Y,X0,Y0,RR,IP,N_PARTICLES_INSERT)
                   ELSE
-                     CALL RANDOM_RING(LP_X,LP_Y,X0,Y0,RR)
+                     CALL RANDOM_RING(NM,LP_X,LP_Y,X0,Y0,RR)
                   ENDIF
                CASE('LINE')
                   LP_X = IN%X1 + (IP-1)*IN%DX
