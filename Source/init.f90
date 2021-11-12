@@ -1075,14 +1075,14 @@ ENDDO
 ! Initialize PSUM for zone cases
 
 IF (N_ZONE > 0) THEN
-   N_ZONE_LOOP: DO IPZ = 1,N_ZONE
+   ZONE_LOOP: DO IPZ = 1,N_ZONE
       PSUM(IPZ,NM) = 0._EB
-      IF (DO_EVACUATION) EXIT N_ZONE_LOOP
+      IF (DO_EVACUATION) EXIT ZONE_LOOP
       DO K=1,M%KBAR
          DO J=1,M%JBAR
             DO I=1,M%IBAR
                IF (M%PRESSURE_ZONE(I,J,K) /= IPZ) CYCLE
-               IF (M%SOLID(M%CELL_INDEX(I,J,K)))    CYCLE
+               IF (M%SOLID(M%CELL_INDEX(I,J,K)))  CYCLE
                VC   = M%DX(I)*M%RC(I)*M%DY(J)*M%DZ(K)
                ZZ_GET(1:N_TRACKED_SPECIES) = M%ZZ(I,J,K,1:N_TRACKED_SPECIES)
                CALL GET_SPECIFIC_HEAT(ZZ_GET,CP,M%TMP(I,J,K))
@@ -1091,14 +1091,26 @@ IF (N_ZONE > 0) THEN
             ENDDO
          ENDDO
       ENDDO
-   ENDDO N_ZONE_LOOP
+   ENDDO ZONE_LOOP
 ENDIF
 
 ! Allocate ZONE_MESH array for LOCMAT_SOLVER
 
 IF (PRES_FLAG==ULMAT_FLAG) THEN
-   ALLOCATE(  M%ZONE_MESH(MAX(1,N_ZONE)),STAT=IZERO)
+   ALLOCATE(M%ZONE_MESH(0:N_ZONE),STAT=IZERO)
    CALL ChkMemErr('INIT','ZONE_MESH',IZERO)
+   ZONE_LOOP_2: DO IPZ = 0,N_ZONE
+      IF (DO_EVACUATION) EXIT ZONE_LOOP_2
+      DO K=1,M%KBAR
+         DO J=1,M%JBAR
+            DO I=1,M%IBAR
+               IF (M%PRESSURE_ZONE(I,J,K) /= IPZ) CYCLE
+               IF (M%SOLID(M%CELL_INDEX(I,J,K)))  CYCLE
+               M%ZONE_MESH(IPZ)%ZONE_IN_MESH=.TRUE.
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDDO ZONE_LOOP_2
 ENDIF
 
 ! Loop through WALL and CFACE cells and assign PRESSURE_ZONE. Also, check for

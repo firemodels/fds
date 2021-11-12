@@ -9037,6 +9037,7 @@ SELECT CASE(TRIM(SOLVER))
       PRES_METHOD = 'ULMAT'
       PRES_FLAG   = ULMAT_FLAG
       PRES_ON_WHOLE_DOMAIN = .FALSE.
+      IF (CHECK_POISSON) GLMAT_VERBOSE=.TRUE.
 
    CASE('FFT')
       ! Nothing to do. By default PRES_FLAG is set to FFT_FLAG in cons.f90
