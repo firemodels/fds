@@ -1405,6 +1405,7 @@ TYPE ZONE_MESH_TYPE
    INTEGER, ALLOCATABLE :: PT_H(:)
 #endif /* WITH_MKL */
    INTEGER :: NUNKH                                   !< Number of unknowns in pressure solution for a given ZONE_MESH
+   LOGICAL :: ZONE_IN_MESH=.FALSE.                    !< ZONE is in MESH
 END TYPE ZONE_MESH_TYPE
 
 

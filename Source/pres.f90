@@ -989,10 +989,12 @@ PUBLIC ULMAT_SOLVER_H
 CONTAINS
 
 
-SUBROUTINE ULMAT_SOLVER_H
+SUBROUTINE ULMAT_SOLVER_H(NM)
+
+INTEGER, INTENT(IN) :: NM
 
 !.. All other variables
-INTEGER MAXFCT, MNUM, MTYPE, NRHS, MSGLVL, NNZ
+INTEGER MAXFCT, MNUM, MTYPE, NRHS, MSGLVL, NNZ, IPZ
 INTEGER :: ERROR1=-666, ERROR=-666
 INTEGER, ALLOCATABLE :: IPARM( : )
 INTEGER, ALLOCATABLE :: IA( : )
@@ -1007,141 +1009,155 @@ REAL(EB) :: DDUM(1)
 #endif
 TYPE(ZONE_MESH_TYPE), POINTER :: ZM
 
-ZM=>MESHES(1)%ZONE_MESH(1)
+! Loop over zones within MESH NM and solve the unstructured Poisson problem directly.
 
-!.. Fill all arrays containing matrix data.
-ZM%NUNKH = 8
-NNZ = 18
-NRHS = 1
-MAXFCT = 1
-MNUM = 1
-ALLOCATE(IA(ZM%NUNKH + 1))
-IA = (/ 1, 5, 8, 10, 12, 15, 17, 18, 19 /)
-ALLOCATE(JA(NNZ))
-JA = (/ 1,    3,       6, 7,    &
-           2, 3,    5,          &
-              3,             8, &
-                 4,       7,    &
-                    5, 6, 7,    &
-                       6,    8, &
-                          7,    &
-                             8 /)
-ALLOCATE(A_H(NNZ))
-A_H = (/ 7._EB,        1._EB,              2._EB,  7._EB,         &
-               -4._EB, 8._EB,       2._EB,                        &
-                       1._EB,                             5._EB,  &
-                             7._EB,                9._EB,         &
-                                    5._EB, 1._EB,  5._EB,         &
-                                          -1._EB,         5._EB,  &
-                                                  11._EB,         &
-                                                          5._EB /)
-ALLOCATE(F_H(ZM%NUNKH))
-ALLOCATE(X_H(ZM%NUNKH))
-!..
-!.. SET UP PARDISO CONTROL PARAMETER
-!..
-ALLOCATE(IPARM(64))
+ZONE_MESH_LOOP: DO IPZ=0,N_ZONE
 
-DO I = 1, 64
-   IPARM(I) = 0
-END DO
+   ZM=>MESHES(NM)%ZONE_MESH(IPZ)
 
-IPARM(1) = 1   ! no solver default
-IPARM(2) = 2   ! fill-in reordering from METIS
-IPARM(4) = 0   ! no iterative-direct algorithm
-IPARM(5) = 0   ! no user fill-in reducing permutation
-IPARM(6) = 0   ! =0 solution on the first n components of x
-IPARM(8) = 2   ! numbers of iterative refinement steps
-IPARM(10) = 13 ! perturb the pivot elements with 1E-13
-IPARM(11) = 1  ! use nonsymmetric permutation and scaling MPS
-IPARM(13) = 0  ! maximum weighted matching algorithm is switched-off (default for symmetric).
-               ! Try IPARM(13) = 1 in case of inappropriate accuracy
-IPARM(14) = 0  ! Output: number of perturbed pivots
-IPARM(18) = -1 ! Output: number of nonzeros in the factor LU
-IPARM(19) = -1 ! Output: Mflops for LU factorization
-IPARM(20) = 0  ! Output: Numbers of CG Iterations
+   IF (.NOT.ZM%ZONE_IN_MESH) CYCLE ZONE_MESH_LOOP
 
-ERROR  = 0     ! initialize error flag
-MSGLVL = 1     ! print statistical information
-MTYPE  = -2    ! symmetric, indefinite
+   !.. Fill all arrays containing matrix data.
+   ZM%NUNKH = 8
+   NNZ = 18
+   NRHS = 1
+   MAXFCT = 1
+   MNUM = 1
+   ALLOCATE(IA(ZM%NUNKH + 1))
+   IA = (/ 1, 5, 8, 10, 12, 15, 17, 18, 19 /)
+   ALLOCATE(JA(NNZ))
+   JA = (/ 1,    3,       6, 7,    &
+              2, 3,    5,          &
+                 3,             8, &
+                    4,       7,    &
+                       5, 6, 7,    &
+                          6,    8, &
+                             7,    &
+                                8 /)
+   ALLOCATE(A_H(NNZ))
+   A_H = (/ 7._EB,        1._EB,              2._EB,  7._EB,         &
+                  -4._EB, 8._EB,       2._EB,                        &
+                          1._EB,                             5._EB,  &
+                                7._EB,                9._EB,         &
+                                       5._EB, 1._EB,  5._EB,         &
+                                             -1._EB,         5._EB,  &
+                                                     11._EB,         &
+                                                             5._EB /)
+   ALLOCATE(F_H(ZM%NUNKH))
+   ALLOCATE(X_H(ZM%NUNKH))
+   !..
+   !.. SET UP PARDISO CONTROL PARAMETER
+   !..
+   ALLOCATE(IPARM(64))
 
-!.. Initialize the internal solver memory pointer. This is only
-! necessary for the FIRST call of the PARDISO solver.
+   DO I = 1, 64
+      IPARM(I) = 0
+   END DO
 
-ALLOCATE (ZM%PT_H(64))
+   IPARM(1) = 1   ! no solver default
+   IPARM(2) = 2   ! fill-in reordering from METIS
+   IPARM(4) = 0   ! no iterative-direct algorithm
+   IPARM(5) = 0   ! no user fill-in reducing permutation
+   IPARM(6) = 0   ! =0 solution on the first n components of x
+   IPARM(8) = 2   ! numbers of iterative refinement steps
+   IPARM(10) = 13 ! perturb the pivot elements with 1E-13
+   IPARM(11) = 1  ! use nonsymmetric permutation and scaling MPS
+   IPARM(13) = 0  ! maximum weighted matching algorithm is switched-off (default for symmetric).
+                  ! Try IPARM(13) = 1 in case of inappropriate accuracy
+   IPARM(14) = 0  ! Output: number of perturbed pivots
+   IPARM(18) = -1 ! Output: number of nonzeros in the factor LU
+   IPARM(19) = -1 ! Output: Mflops for LU factorization
+   IPARM(20) = 0  ! Output: Numbers of CG Iterations
+
+   ERROR  = 0     ! initialize error flag
+   MSGLVL = 0     ! don't print statistical information
+   IF (GLMAT_VERBOSE) MSGLVL = 1     ! print statistical information
+   MTYPE  = -2    ! symmetric, indefinite
+
+   !.. Initialize the internal solver memory pointer. This is only
+   ! necessary for the FIRST call of the PARDISO solver.
+
+   ALLOCATE (ZM%PT_H(64))
 
 #ifdef WITH_MKL
-DO I = 1, 64
-   ZM%PT_H(I)%DUMMY = 0
-END DO
+   DO I = 1, 64
+      ZM%PT_H(I)%DUMMY = 0
+   END DO
 
-!.. Reordering and Symbolic Factorization, This step also allocates
-! all memory that is necessary for the factorization
+   !.. Reordering and Symbolic Factorization, This step also allocates
+   ! all memory that is necessary for the factorization
 
-PHASE = 11 ! only reordering and symbolic factorization
-CALL PARDISO(ZM%PT_H, MAXFCT, MNUM, MTYPE, PHASE, ZM%NUNKH, A_H, IA, JA, &
-             IDUM, NRHS, IPARM, MSGLVL, DDUM, DDUM, ERROR)
+   PHASE = 11 ! only reordering and symbolic factorization
+   CALL PARDISO(ZM%PT_H, MAXFCT, MNUM, MTYPE, PHASE, ZM%NUNKH, A_H, IA, JA, &
+                IDUM, NRHS, IPARM, MSGLVL, DDUM, DDUM, ERROR)
 
-WRITE(LU_ERR,*) 'Reordering completed ... '
-IF (ERROR /= 0) THEN
-   WRITE(LU_ERR,*) 'The following ERROR was detected: ', ERROR
-   GOTO 1000
-END IF
-WRITE(LU_ERR,*) 'Number of nonzeros in factors = ',IPARM(18)
-WRITE(LU_ERR,*) 'Number of factorization MFLOPS = ',IPARM(19)
+   IF (GLMAT_VERBOSE) THEN
+      WRITE(LU_ERR,*) 'Reordering completed ... '
+      IF (ERROR /= 0) THEN
+         WRITE(LU_ERR,*) 'The following ERROR was detected: ', ERROR
+         GOTO 1000
+      END IF
+      WRITE(LU_ERR,*) 'Number of nonzeros in factors = ',IPARM(18)
+      WRITE(LU_ERR,*) 'Number of factorization MFLOPS = ',IPARM(19)
+   ENDIF
 
-!.. Factorization.
-PHASE = 22 ! only factorization
-CALL PARDISO(ZM%PT_H, MAXFCT, MNUM, MTYPE, PHASE, ZM%NUNKH, A_H, IA, JA, &
-             IDUM, NRHS, IPARM, MSGLVL, DDUM, DDUM, ERROR)
-WRITE(LU_ERR,*) 'Factorization completed ... '
-IF (ERROR /= 0) THEN
-   WRITE(LU_ERR,*) 'The following ERROR was detected: ', ERROR
-   GOTO 1000
-ENDIF
+   !.. Factorization.
+   PHASE = 22 ! only factorization
+   CALL PARDISO(ZM%PT_H, MAXFCT, MNUM, MTYPE, PHASE, ZM%NUNKH, A_H, IA, JA, &
+                IDUM, NRHS, IPARM, MSGLVL, DDUM, DDUM, ERROR)
+   IF (GLMAT_VERBOSE) WRITE(LU_ERR,*) 'Factorization completed ... '
+   IF (ERROR /= 0) THEN
+      WRITE(LU_ERR,*) 'The following ERROR was detected: ', ERROR
+      GOTO 1000
+   ENDIF
 
-!.. Back substitution and iterative refinement
-IPARM(8) = 2 ! max numbers of iterative refinement steps
-PHASE = 33   ! only solving
-DO I = 1, ZM%NUNKH
-   F_H(I) = 1._EB
-END DO
-CALL PARDISO(ZM%PT_H, MAXFCT, MNUM, MTYPE, PHASE, ZM%NUNKH, A_H, IA, JA, &
-             IDUM, NRHS, IPARM, MSGLVL, F_H, X_H, ERROR)
-WRITE(LU_ERR,*) 'Solve completed ... '
-IF (ERROR /= 0) THEN
-   WRITE(LU_ERR,*) 'The following ERROR was detected: ', ERROR
-   GOTO 1000
-ENDIF
-WRITE(LU_ERR,*) 'The solution of the system is '
-DO I = 1, ZM%NUNKH
-   WRITE(LU_ERR,*) ' x(',I,') = ', X_H(I)
-END DO
+   !.. Back substitution and iterative refinement
+   IPARM(8) = 2 ! max numbers of iterative refinement steps
+   PHASE = 33   ! only solving
+   DO I = 1, ZM%NUNKH
+      F_H(I) = 1._EB
+   END DO
+   CALL PARDISO(ZM%PT_H, MAXFCT, MNUM, MTYPE, PHASE, ZM%NUNKH, A_H, IA, JA, &
+                IDUM, NRHS, IPARM, MSGLVL, F_H, X_H, ERROR)
+   IF (GLMAT_VERBOSE) WRITE(LU_ERR,*) 'Solve completed ... '
+   IF (ERROR /= 0) THEN
+      WRITE(LU_ERR,*) 'The following ERROR was detected: ', ERROR
+      GOTO 1000
+   ENDIF
+   IF (GLMAT_VERBOSE) THEN
+      WRITE(LU_ERR,*) 'The solution of the system is '
+      DO I = 1, ZM%NUNKH
+         WRITE(LU_ERR,*) ' x(',I,') = ', X_H(I)
+      END DO
+   ENDIF
 
-1000 CONTINUE
-!.. Termination and release of memory
-PHASE = -1 ! release internal memory
-CALL PARDISO(ZM%PT_H, MAXFCT, MNUM, MTYPE, PHASE, ZM%NUNKH, DDUM, IDUM, IDUM, &
-             IDUM, NRHS, IPARM, MSGLVL, DDUM, DDUM, ERROR1)
+   1000 CONTINUE
+   !.. Termination and release of memory
+   PHASE = -1 ! release internal memory
+   CALL PARDISO(ZM%PT_H, MAXFCT, MNUM, MTYPE, PHASE, ZM%NUNKH, DDUM, IDUM, IDUM, &
+                IDUM, NRHS, IPARM, MSGLVL, DDUM, DDUM, ERROR1)
 
 #endif /* WITH_MKL */
 
-IF (ALLOCATED(IA))      DEALLOCATE(IA)
-IF (ALLOCATED(JA))      DEALLOCATE(JA)
-IF (ALLOCATED(A_H))     DEALLOCATE(A_H)
-IF (ALLOCATED(F_H))     DEALLOCATE(F_H)
-IF (ALLOCATED(X_H))     DEALLOCATE(X_H)
-IF (ALLOCATED(IPARM))   DEALLOCATE(IPARM)
+   IF (ALLOCATED(IA))      DEALLOCATE(IA)
+   IF (ALLOCATED(JA))      DEALLOCATE(JA)
+   IF (ALLOCATED(A_H))     DEALLOCATE(A_H)
+   IF (ALLOCATED(F_H))     DEALLOCATE(F_H)
+   IF (ALLOCATED(X_H))     DEALLOCATE(X_H)
+   IF (ALLOCATED(IPARM))   DEALLOCATE(IPARM)
 
-IF (ERROR1 /= 0) THEN
-   WRITE(LU_ERR,*) 'The following ERROR on release stage was detected: ', ERROR1
-   STOP 1
-ENDIF
+   IF (ERROR1 /= 0) THEN
+      WRITE(LU_ERR,*) 'The following ERROR on release stage was detected: ', ERROR1
+      STOP 1
+   ENDIF
 
-IF (ERROR /= 0) STOP 1
+   IF (ERROR /= 0) STOP 1
 
+   print *,'MESH: ',NM,', ZONE: ',IPZ
 
-STOP_STATUS=USER_STOP ! on testing
+ENDDO ZONE_MESH_LOOP
+
+! STOP_STATUS=USER_STOP ! on testing
 END SUBROUTINE ULMAT_SOLVER_H
 
 
