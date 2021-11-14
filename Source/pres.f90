@@ -3,17 +3,18 @@ MODULE PRES
 ! Find the perturbation pressure by solving Poisson's Equation
 
 USE PRECISION_PARAMETERS
-USE MESH_POINTERS
+USE MESH_VARIABLES
 
 IMPLICIT NONE (TYPE,EXTERNAL)
 PRIVATE
 
-PUBLIC PRESSURE_SOLVER_COMPUTE_RHS,PRESSURE_SOLVER_FFT,PRESSURE_SOLVER_CHECK_RESIDUALS,COMPUTE_VELOCITY_ERROR
+PUBLIC PRESSURE_SOLVER_COMPUTE_RHS,PRESSURE_SOLVER_FFT,TUNNEL_POISSON_SOLVER,PRESSURE_SOLVER_CHECK_RESIDUALS,COMPUTE_VELOCITY_ERROR
 
 CONTAINS
 
 SUBROUTINE PRESSURE_SOLVER_COMPUTE_RHS(T,DT,NM)
 
+USE MESH_POINTERS
 USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 USE COMPLEX_GEOMETRY, ONLY: IBM_IDCF
@@ -337,6 +338,7 @@ END SUBROUTINE PRESSURE_SOLVER_COMPUTE_RHS
 
 SUBROUTINE PRESSURE_SOLVER_FFT(NM)
 
+USE MESH_POINTERS
 USE POIS, ONLY: H3CZSS,H2CZSS,H2CYSS,H3CSSS
 USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
 USE GLOBAL_CONSTANTS
@@ -345,7 +347,6 @@ INTEGER, INTENT(IN) :: NM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: HP
 INTEGER :: I,J,K
 REAL(EB) :: TNOW
-REAL(EB) :: BXS_BAR,BXF_BAR
 
 IF (SOLID_PHASE_ONLY) RETURN
 IF (FREEZE_VELOCITY)  RETURN
@@ -358,10 +359,6 @@ IF (PREDICTOR) THEN
 ELSE
    HP => HS
 ENDIF
-
-! For tunnel geometries, solve a 1-D Poisson equation for average pressure
-
-IF (TUNNEL_PRECONDITIONER) CALL TUNNEL_POISSON_SOLVER
 
 ! Call the Poisson solver
 
@@ -475,76 +472,91 @@ DO J=1,JBAR
 ENDDO
 
 T_USED(5)=T_USED(5)+CURRENT_TIME()-TNOW
+END SUBROUTINE PRESSURE_SOLVER_FFT
 
-CONTAINS
 
-
-!> \brief Solve a special 1-D Poisson equation for a tunnel
+!> \brief Solve a special 1-D Poisson equation for a tunnel to be used as a preconditioner for the 3-D Poisson solver
+!> \details For details, refer to the Appendix in the FDS Technical Reference Guide entitled "A Special Preconditioning 
+!> Scheme for Solving the Poisson Equation in Tunnels."
 
 SUBROUTINE TUNNEL_POISSON_SOLVER
 
 USE MPI_F08
+USE GLOBAL_CONSTANTS
+USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
 REAL(EB) :: RR,DXO
-INTEGER :: IERR,II
+INTEGER :: IERR,II,NM,I,J,K
+REAL(EB) :: TNOW
 REAL(EB), POINTER, DIMENSION(:) :: RDXNP
+TYPE (MESH_TYPE), POINTER :: M
 
-RDXNP(0:IBAR) => WORK2(0:IBAR,0,0)
-RDXNP(0:IBAR) = RDXN(0:IBAR)
-IF (NM>1)       RDXNP(0)    = 2._EB/(MESHES(NM-1)%DX(MESHES(NM-1)%IBAR)+DX(1))
-IF (NM<NMESHES) RDXNP(IBAR) = 2._EB/(MESHES(NM+1)%DX(1)             +DX(IBAR))
+TNOW=CURRENT_TIME()
 
-DO I=1,IBAR
-   II = I_OFFSET(NM) + I  ! Spatial index of the entire tunnel, not just this mesh
-   TP_CC(II) = 0._EB
-   DO K=1,KBAR
-      DO J=1,JBAR
-         TP_CC(II) = TP_CC(II) + PRHS(I,J,K)*DY(J)*DZ(K)
+! For each mesh, compute the diagonal, off-diagonal, and right hand side terms of the tri-diagonal linear system of equations
+
+MESH_LOOP_1: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+
+   M => MESHES(NM)
+
+   RDXNP(0:M%IBAR) => M%WORK2(0:M%IBAR,0,0)
+   RDXNP(0:M%IBAR) = M%RDXN(0:M%IBAR)
+   IF (NM>1)       RDXNP(0)      = 2._EB/(MESHES(NM-1)%DX(MESHES(NM-1)%IBAR)+M%DX(1))
+   IF (NM<NMESHES) RDXNP(M%IBAR) = 2._EB/(MESHES(NM+1)%DX(1)                +M%DX(M%IBAR))
+
+   DO I=1,M%IBAR
+      II = I_OFFSET(NM) + I  ! Spatial index of the entire tunnel, not just this mesh
+      TP_CC(II) = 0._EB
+      DO K=1,M%KBAR
+         DO J=1,M%JBAR
+            TP_CC(II) = TP_CC(II) + M%PRHS(I,J,K)*M%DY(J)*M%DZ(K)
+         ENDDO
+      ENDDO
+      TP_CC(II) = TP_CC(II)/((M%YF-M%YS)*(M%ZF-M%ZS))  ! RHS linear system of equations
+      TP_DD(II) = -M%RDX(I)*(RDXNP(I)+RDXNP(I-1))  ! Diagonal of tri-diagonal matrix
+      TP_AA(II) =  M%RDX(I)*RDXNP(I)    ! Upper band of matrix
+      TP_BB(II) =  M%RDX(I)*RDXNP(I-1)  ! Lower band of matrix
+      M%PRHS(I,1:M%JBAR,1:M%KBAR) = M%PRHS(I,1:M%JBAR,1:M%KBAR) - TP_CC(II)  ! New RHS of the 3-D Poisson equation
+   ENDDO
+
+   ! Subtract average BCs (BXS_BAR, BXF_BAR) from the 3-D BCs (BXS and BXF) for all meshes, including tunnel ends.
+
+   M%BXS_BAR = 0._EB
+   M%BXF_BAR = 0._EB
+   DO K=1,M%KBAR
+     DO J=1,M%JBAR
+         M%BXS_BAR = M%BXS_BAR + M%BXS(J,K)*M%DY(J)*M%DZ(K)
+         M%BXF_BAR = M%BXF_BAR + M%BXF(J,K)*M%DY(J)*M%DZ(K)
       ENDDO
    ENDDO
-   TP_CC(II) = TP_CC(II)/((YF-YS)*(ZF-ZS))  ! RHS linear system of equations
-   TP_DD(II) = -RDX(I)*(RDXNP(I)+RDXNP(I-1))  ! Diagonal of tri-diagonal matrix
-   TP_AA(II) =  RDX(I)*RDXNP(I)    ! Upper band of matrix
-   TP_BB(II) =  RDX(I)*RDXNP(I-1)  ! Lower band of matrix
-   PRHS(I,1:JBAR,1:KBAR) = PRHS(I,1:JBAR,1:KBAR) - TP_CC(II)  ! New RHS of the 3-D Poisson equation
-ENDDO
+   M%BXS_BAR = M%BXS_BAR/((M%YF-M%YS)*(M%ZF-M%ZS))  ! Left boundary condition, bar(b)_x,1
+   M%BXF_BAR = M%BXF_BAR/((M%YF-M%YS)*(M%ZF-M%ZS))  ! Right boundary condition, bar(b)_x,2
+   
+   M%BXS = M%BXS - M%BXS_BAR  ! This new BXS (b_x,1(j,k)) will be used for the 3-D pressure solve
+   M%BXF = M%BXF - M%BXF_BAR  ! This new BXF (b_x,2(j,k)) will be used for the 3-D pressure solve
+   
+   ! Apply boundary conditions at end of tunnel to the matrix components
 
-! Create new left and right boundary condition arrays (BXS and BXF) for all meshes, including tunnel ends.
-
-BXS_BAR = 0._EB
-BXF_BAR = 0._EB
-DO K=1,KBAR
-  DO J=1,JBAR
-      BXS_BAR = BXS_BAR + BXS(J,K)*DY(J)*DZ(K)
-      BXF_BAR = BXF_BAR + BXF(J,K)*DY(J)*DZ(K)
-   ENDDO
-ENDDO
-BXS_BAR = BXS_BAR/((YF-YS)*(ZF-ZS))  ! Left boundary condition
-BXF_BAR = BXF_BAR/((YF-YS)*(ZF-ZS))  ! Right boundary condition
-
-BXS = BXS - BXS_BAR  ! This new BXS will be used for the 3-D pressure solve
-BXF = BXF - BXF_BAR  ! This new BXF will be used for the 3-D pressure solve
-
-! Apply boundary conditions at end of tunnel to the matrix components
-
-IF (NM==1) THEN
-   IF (LBC==FISHPAK_BC_NEUMANN_NEUMANN .OR. LBC==FISHPAK_BC_NEUMANN_DIRICHLET) THEN  ! Neumann BC
-      TP_CC(1) = TP_CC(1) + DXI*BXS_BAR*TP_BB(1)
-      TP_DD(1) = TP_DD(1) + TP_BB(1)
-   ELSE  ! Dirichlet BC
-      TP_CC(1) = TP_CC(1) - 2._EB*BXS_BAR*TP_BB(1)
-      TP_DD(1) = TP_DD(1) - TP_BB(1)
+   IF (NM==1) THEN
+      IF (M%LBC==FISHPAK_BC_NEUMANN_NEUMANN .OR. M%LBC==FISHPAK_BC_NEUMANN_DIRICHLET) THEN  ! Neumann BC
+         TP_CC(1) = TP_CC(1) + M%DXI*M%BXS_BAR*TP_BB(1)
+         TP_DD(1) = TP_DD(1) + TP_BB(1)
+      ELSE  ! Dirichlet BC
+         TP_CC(1) = TP_CC(1) - 2._EB*M%BXS_BAR*TP_BB(1)
+         TP_DD(1) = TP_DD(1) - TP_BB(1)
+      ENDIF
    ENDIF
-ENDIF
 
-IF (NM==NMESHES) THEN
-   IF (LBC==FISHPAK_BC_NEUMANN_NEUMANN .OR. LBC==FISHPAK_BC_DIRICHLET_NEUMANN) THEN  ! Neumann BC
-      TP_CC(TUNNEL_NXP) = TP_CC(TUNNEL_NXP) - DXI*BXF_BAR*TP_AA(TUNNEL_NXP)
-      TP_DD(TUNNEL_NXP) = TP_DD(TUNNEL_NXP) + TP_AA(TUNNEL_NXP)
-   ELSE  ! Dirichet BC
-      TP_CC(TUNNEL_NXP) = TP_CC(TUNNEL_NXP) - 2._EB*BXF_BAR*TP_AA(TUNNEL_NXP)
-      TP_DD(TUNNEL_NXP) = TP_DD(TUNNEL_NXP) - TP_AA(TUNNEL_NXP)
+   IF (NM==NMESHES) THEN
+      IF (M%LBC==FISHPAK_BC_NEUMANN_NEUMANN .OR. M%LBC==FISHPAK_BC_DIRICHLET_NEUMANN) THEN  ! Neumann BC
+         TP_CC(TUNNEL_NXP) = TP_CC(TUNNEL_NXP) - M%DXI*M%BXF_BAR*TP_AA(TUNNEL_NXP)
+         TP_DD(TUNNEL_NXP) = TP_DD(TUNNEL_NXP) + TP_AA(TUNNEL_NXP)
+      ELSE  ! Dirichet BC
+         TP_CC(TUNNEL_NXP) = TP_CC(TUNNEL_NXP) - 2._EB*M%BXF_BAR*TP_AA(TUNNEL_NXP)
+         TP_DD(TUNNEL_NXP) = TP_DD(TUNNEL_NXP) - TP_AA(TUNNEL_NXP)
+      ENDIF
    ENDIF
-ENDIF
+   
+ENDDO MESH_LOOP_1
 
 IF (MY_RANK>0) THEN  ! MPI processes greater than 0 send their matrix components to MPI process 0
 
@@ -586,22 +598,28 @@ H_BAR(1:TUNNEL_NXP) = TP_CC(1:TUNNEL_NXP)
 
 ! Apply Dirichlet BCs at mesh interfaces. These are linear interpolations of the values of H_BAR on either side of mesh interface.
 
-IF (NM/=1) THEN
-   DXO = MESHES(NM-1)%DX(MESHES(NM-1)%IBAR)  ! Width of rightmost cell in the mesh to the left of current mesh
-   BXS_BAR = (H_BAR(I_OFFSET(NM))*DX(1) + H_BAR(I_OFFSET(NM)+1)*DXO)/(DX(1)+DXO)
-ENDIF
-IF (NM/=NMESHES) THEN
-   DXO = MESHES(NM+1)%DX(1)  ! Width of leftmost cell in the mesh to the right of current mesh
-   BXF_BAR = (H_BAR(I_OFFSET(NM)+IBP1)*DX(IBAR) + H_BAR(I_OFFSET(NM)+IBAR)*DXO)/(DX(IBAR)+DXO)
-ENDIF
+MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
+   M => MESHES(NM)
+
+   IF (NM/=1) THEN
+      DXO = MESHES(NM-1)%DX(MESHES(NM-1)%IBAR)  ! Width of rightmost cell in the mesh to the left of current mesh
+      M%BXS_BAR = (H_BAR(I_OFFSET(NM))*M%DX(1) + H_BAR(I_OFFSET(NM)+1)*DXO)/(M%DX(1)+DXO)
+   ENDIF
+   IF (NM/=NMESHES) THEN
+      DXO = MESHES(NM+1)%DX(1)  ! Width of leftmost cell in the mesh to the right of current mesh
+      M%BXF_BAR = (H_BAR(I_OFFSET(NM)+M%IBP1)*M%DX(M%IBAR) + H_BAR(I_OFFSET(NM)+M%IBAR)*DXO)/(M%DX(M%IBAR)+DXO)
+   ENDIF
+
+ENDDO MESH_LOOP_2
+
+T_USED(5)=T_USED(5)+CURRENT_TIME()-TNOW
 END SUBROUTINE TUNNEL_POISSON_SOLVER
-
-END SUBROUTINE PRESSURE_SOLVER_FFT
 
 
 SUBROUTINE PRESSURE_SOLVER_CHECK_RESIDUALS(NM)
 
+USE MESH_POINTERS
 USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
 USE GLOBAL_CONSTANTS
 
@@ -690,6 +708,7 @@ SUBROUTINE COMPUTE_VELOCITY_ERROR(DT,NM)
 
 ! Check the maximum velocity error at a solid boundary
 
+USE MESH_POINTERS
 USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
 USE GLOBAL_CONSTANTS, ONLY: PREDICTOR,VELOCITY_ERROR_MAX,SOLID_BOUNDARY,INTERPOLATED_BOUNDARY,VELOCITY_ERROR_MAX_LOC,T_USED,&
                             PRES_FLAG,FREEZE_VELOCITY,SOLID_PHASE_ONLY,GLMAT_FLAG,UGLMAT_FLAG,USCARC_FLAG
@@ -1227,6 +1246,7 @@ CONTAINS
 
 SUBROUTINE GLMAT_SOLVER_H(T,DT)
 
+USE MESH_POINTERS
 USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
 USE CC_SCALARS_IBM, ONLY : GET_CUTCELL_FH,GET_CUTCELL_HP,GET_CC_IROW,GET_PRES_CFACE_BCS,GET_FH_FROM_PRHS_AND_BCS
 USE COMPLEX_GEOMETRY, ONLY : IBM_IDCC,IBM_IDCF
@@ -1732,6 +1752,7 @@ END SUBROUTINE GLMAT_SOLVER_SETUP_H
 SUBROUTINE CHECK_UNSUPPORTED_MESH(SUPPORTED_MESH)
 
 USE MPI_F08
+USE MESH_POINTERS
 USE GLOBAL_CONSTANTS, ONLY : N_MPI_PROCESSES
 USE TRAN, ONLY : TRANS
 
@@ -2073,6 +2094,7 @@ END SUBROUTINE COPY_H_OMESH_TO_MESH
 
 SUBROUTINE COPY_HS_IN_CCVAR(VAR_CC)
 
+USE MESH_POINTERS
 INTEGER, INTENT(IN) :: VAR_CC
 
 ! Local Variables:
@@ -2144,6 +2166,7 @@ END SUBROUTINE COPY_HS_IN_CCVAR
 
 SUBROUTINE COPY_CCVAR_IN_HS(VAR_CC)
 
+USE MESH_POINTERS
 INTEGER, INTENT(IN) :: VAR_CC
 
 ! Local Variables:
@@ -2416,6 +2439,7 @@ END SUBROUTINE GET_H_MATRIX_LUDCMP
 SUBROUTINE GET_BCS_H_MATRIX
 
 USE MPI_F08
+USE MESH_POINTERS
 USE CC_SCALARS_IBM, ONLY : GET_CC_UNKH, GET_CFACE_OPEN_BC_COEF
 
 ! Local Variables:
@@ -2526,6 +2550,7 @@ END SUBROUTINE GET_BCS_H_MATRIX
 
 SUBROUTINE GET_H_MATRIX
 
+USE MESH_POINTERS
 USE CC_SCALARS_IBM, ONLY : GET_H_MATRIX_CC
 
 ! Local Variables:
@@ -2738,6 +2763,7 @@ END SUBROUTINE GET_H_MATRIX
 
 SUBROUTINE GET_MATRIXGRAPH_H_WHLDOM
 
+USE MESH_POINTERS
 USE CC_SCALARS_IBM, ONLY : GET_CC_MATRIXGRAPH_H, ADD_INPLACE_NNZ_H_WHLDOM
 USE MPI_F08
 
@@ -3047,6 +3073,7 @@ END SUBROUTINE GET_MATRIXGRAPH_H_WHLDOM
 
 SUBROUTINE GET_H_REGFACES
 
+USE MESH_POINTERS
 USE CC_SCALARS_IBM, ONLY : GET_RCFACES_H
 
 ! Local Variables:
@@ -3213,6 +3240,7 @@ END SUBROUTINE GET_H_REGFACES
 
 SUBROUTINE GET_MATRIX_INDEXES_H
 
+USE MESH_POINTERS
 USE CC_SCALARS_IBM, ONLY : NUMBER_UNKH_CUTCELLS
 USE MPI_F08
 
@@ -3462,6 +3490,7 @@ END SUBROUTINE SET_CCVAR_CGSC_H
 
 SUBROUTINE PRESSURE_SOLVER_CHECK_RESIDUALS_U(NM)
 
+USE MESH_POINTERS
 USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
 USE GLOBAL_CONSTANTS
 
