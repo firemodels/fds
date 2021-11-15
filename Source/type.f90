@@ -1309,8 +1309,13 @@ TYPE (P_ZONE_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: P_ZONE
 !> \brief Parameters associated with a ZONE within a MESH, used in LOCMAT_SOLVER unstructured pressure solver
 
 TYPE ZONE_MESH_TYPE
+#ifdef WITH_MKL
    TYPE(MKL_PARDISO_HANDLE), ALLOCATABLE  :: PT_H(:)  !< Internal solver memory pointer
+#else
+   INTEGER, ALLOCATABLE :: PT_H(:)
+#endif /* WITH_MKL */
    INTEGER :: NUNKH                                   !< Number of unknowns in pressure solution for a given ZONE_MESH
+   LOGICAL :: ZONE_IN_MESH=.FALSE.                    !< ZONE is in MESH
 END TYPE ZONE_MESH_TYPE
 
 

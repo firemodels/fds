@@ -1,167 +1,21 @@
 &HEAD CHID='SP_Test_6', TITLE='SP small-scale pallets in a tunnel' /
 
+&CATF OTHER_FILES='props.fds' /
+
 &MISC TMPA=22. /
 
-&MESH XB=0.0,1.0,0.0,0.6,0.0,0.4, IJK=25,15,10, MULT_ID='mesh' /
-&MULT ID='mesh', DX=1.0, I_UPPER=9 /
-
 &TIME T_END=720. /    
-
-&CLIP MINIMUM_DENSITY=0.05 /  Account for high temps due to charring
-
-&DUMP DT_DEVC=5, DT_HRR=5 /
-
-&REAC FUEL='CELLULOSE',
-      SOOT_YIELD=0.01, 
-      C=3.4,
-      H=6.2,
-      O=2.5,
-      HEAT_OF_COMBUSTION=18100 /
-   
-&SPEC ID='WATER VAPOR' /
-
-&SURF ID='IGNITER', HRRPUA=1000, RAMP_Q='IG', TMP_FRONT=98, COLOR='RED'  /
-&RAMP ID='IG', T=0,    F=0 /
-&RAMP ID='IG', T=10,   F=1 /
-&RAMP ID='IG', T=75,   F=1 /
-&RAMP ID='IG', T=90,   F=0 /
-&OBST XB=2.84,2.88,0.28,0.32,0.040,0.080, SURF_IDS='IGNITER','IGNITER','Promatect H Board' /
 
 &OBST XB=2.8,3.3,0.1,0.5,0.040,0.040 /
 &OBST XB=3.6,4.1,0.1,0.5,0.040,0.040 /
 &OBST XB=4.7,5.2,0.1,0.5,0.040,0.040 /
 &OBST XB=5.9,6.4,0.1,0.5,0.040,0.040 /
 
-&VENT PBX=10.0, SURF_ID='OPEN'  /
-&VENT PBX=0.0, SURF_ID='FAN' /
 &SURF ID='FAN', VEL=-0.6, COLOR='INVISIBLE' /
-
-&SURF ID='Promatect H Board', 
-      DEFAULT = .TRUE.
-      THICKNESS=0.015,
-      COLOR='GRAY'
-      MATL_ID='Promatect H' /
- 
-&MATL ID='Promatect H',
-      DENSITY=870,
-      SPECIFIC_HEAT=1.13,
-      CONDUCTIVITY=0.175 /
-  
-&SURF ID='PINE', 
-      MATL_ID = 'PINE'
-      COLOR = 'BROWN'
-      BACKING = 'INSULATED'
-      MOISTURE_FRACTION = 0.02
-      SURFACE_VOLUME_RATIO = 460.
-      GEOMETRY = 'CARTESIAN'
-      LENGTH = 0.01
-      WIDTH = 0.01 /
-
-&MATL ID                 = 'PINE'
-      EMISSIVITY         = 0.95
-      DENSITY            = 370.
-      CONDUCTIVITY_RAMP  = 'wood_k'
-      SPECIFIC_HEAT_RAMP = 'wood_cp'
-      A                  = 1.413E5
-      E                  = 90.73E3
-      N_S                = 1.69
-      MATL_ID            = 'char'
-      NU_MATL            = 0.20
-      SPEC_ID            = 'CELLULOSE'
-      NU_SPEC            = 0.80
-      HEAT_OF_REACTION   = 250. /
-
-&MATL ID                 = 'char'
-      EMISSIVITY         = 1.
-      DENSITY            = 135.
-      CONDUCTIVITY_RAMP  = 'char_k'
-      SPECIFIC_HEAT_RAMP = 'char_cp'
-      N_S                = 0.
-      NU_O2_CHAR         = 1.65
-      BETA_CHAR          = 0.2
-      A                  = 430.
-      E                  = 74800.
-      MATL_ID            = 'ash'
-      NU_MATL            = 0.02
-      SPEC_ID            = 'PRODUCTS','AIR'
-      NU_SPEC            = 8.18,-7.2
-      HEAT_OF_REACTION   = -32000. /
-
-&MATL ID            = 'ash'
-      DENSITY       = 67.
-      CONDUCTIVITY  = 0.1
-      SPECIFIC_HEAT = 2.0 /
-
-Wood k from Koufpanos 
-Self-measured wood Cp
-Char k correlation from Hankalin et al (1988) = wood-char and char
-Char Cp Gupta et al.
-&RAMP ID = 'wood_k', T = 20,  F = 0.096 /
-&RAMP ID = 'wood_k', T = 800, F = 0.370 /
-
-&RAMP ID = 'wood_cp', T = 20.,  F = 0.90 /
-&RAMP ID = 'wood_cp', T = 800., F = 2.73 /
-
-&RAMP ID = 'char_k', T = 20.,  F = 0.11 /
-&RAMP ID = 'char_k', T = 800., F = 0.35 /
-
-&RAMP ID = 'char_cp', T = 20, F = 0.8 /
-&RAMP ID = 'char_cp', T = 120, F =1.4 /
-&RAMP ID = 'char_cp', T = 220, F =2.0 /
-&RAMP ID = 'char_cp', T = 320, F =2.6 /
-&RAMP ID = 'char_cp', T = 420, F =3.2 /
-&RAMP ID = 'char_cp', T = 520, F =3.8 /
-&RAMP ID = 'char_cp', T = 620, F =4.4 /
-&RAMP ID = 'char_cp', T = 720, F =5.0 /
-&RAMP ID = 'char_cp', T = 800, F =5.6 / 
-
-&PART ID             = 'PINE'
-      DRAG_COEFFICIENT = 2.8
-      COLOR          = 'BROWN'
-      SURF_ID        = 'PINE'
-      QUANTITIES     = 'PARTICLE TEMPERATURE','PARTICLE MASS'
-      STATIC         = .TRUE. /
 
 &INIT PART_ID='PINE', XB=2.9,3.2,0.2,0.4,0.040,0.220, N_PARTICLES_PER_CELL=1, CELL_CENTERED=T, PACKING_RATIO=0.42 /
 &INIT PART_ID='PINE', XB=3.7,4.0,0.2,0.4,0.040,0.220, N_PARTICLES_PER_CELL=1, CELL_CENTERED=T, PACKING_RATIO=0.42 /
 &INIT PART_ID='PINE', XB=4.8,5.1,0.2,0.4,0.040,0.220, N_PARTICLES_PER_CELL=1, CELL_CENTERED=T, PACKING_RATIO=0.42 /
 &INIT PART_ID='PINE', XB=6.0,6.3,0.2,0.4,0.040,0.220, N_PARTICLES_PER_CELL=1, CELL_CENTERED=T, PACKING_RATIO=0.42 /
-
-&SLCF QUANTITY='TEMPERATURE', PBY=0.3, VECTOR=.TRUE. /
-&SLCF QUANTITY='HRRPUV',      PBY=0.3 /
-&SLCF QUANTITY='VOLUME FRACTION',SPEC_ID='OXYGEN', PBY=0.3,  /
-
-&PROP ID='TCK', EMISSIVITY=0.9,  DIAMETER=0.00025 /
-
-&DEVC ID='T1', QUANTITY='THERMOCOUPLE', PROP_ID='TCK',  XYZ=1.3,0.3,0.36 /
-&DEVC ID='T2', QUANTITY='THERMOCOUPLE', PROP_ID='TCK',  XYZ=1.8,0.3,0.36 /
-&DEVC ID='T3', QUANTITY='THERMOCOUPLE', PROP_ID='TCK',  XYZ=2.3,0.3,0.36 /
-&DEVC ID='T4', QUANTITY='THERMOCOUPLE', PROP_ID='TCK',  XYZ=2.8,0.3,0.36 /
-&DEVC ID='T5', QUANTITY='THERMOCOUPLE', PROP_ID='TCK',  XYZ=3.3,0.3,0.36 /
-&DEVC ID='T6', QUANTITY='THERMOCOUPLE', PROP_ID='TCK',  XYZ=3.7,0.3,0.36 /   This should be at 3.5m. 
-&DEVC ID='T7', QUANTITY='THERMOCOUPLE', PROP_ID='TCK',  XYZ=4.2,0.3,0.36 /
-&DEVC ID='T9', QUANTITY='THERMOCOUPLE', PROP_ID='TCK',  XYZ=5.3,0.3,0.36 / This is above the second pile.
-&DEVC ID='T10', QUANTITY='THERMOCOUPLE', PROP_ID='TCK', XYZ=6.25,0.3,0.36 / This is 950mm away from the second pile.
-&DEVC ID='T11', QUANTITY='THERMOCOUPLE', PROP_ID='TCK', XYZ=7.4,0.3,0.36 / This is 1250mm away from the last one.
-&DEVC ID='T13', QUANTITY='THERMOCOUPLE', PROP_ID='TCK', XYZ=1.3,0.3,0.12 /  At the same position as TC1, different height. 
-
-&DEVC ID='TP1-1', QUANTITY='THERMOCOUPLE', PROP_ID='TCK', XYZ=4.64,0.3, 0.04, /  
-&DEVC ID='TP1-2', QUANTITY='THERMOCOUPLE', PROP_ID='TCK', XYZ=4.64,0.3, 0.12, /
-&DEVC ID='TP1-3', QUANTITY='THERMOCOUPLE', PROP_ID='TCK', XYZ=4.64,0.3, 0.20, /
-&DEVC ID='TP1-4', QUANTITY='THERMOCOUPLE', PROP_ID='TCK', XYZ=4.64,0.3, 0.28, /
-&DEVC ID='TP1-5', QUANTITY='THERMOCOUPLE', PROP_ID='TCK', XYZ=4.64,0.3, 0.36, /   T8, included in the pile
-
-&DEVC ID='TP2-1', QUANTITY='THERMOCOUPLE', PROP_ID='TCK', XYZ=8.72,0.3, 0.04 /  
-&DEVC ID='TP2-2', QUANTITY='THERMOCOUPLE', PROP_ID='TCK', XYZ=8.72,0.3, 0.12 /
-&DEVC ID='TP2-3', QUANTITY='THERMOCOUPLE', PROP_ID='TCK', XYZ=8.72,0.3, 0.20 /
-&DEVC ID='TP2-4', QUANTITY='THERMOCOUPLE', PROP_ID='TCK', XYZ=8.72,0.3, 0.28 /
-&DEVC ID='TP2-5', QUANTITY='THERMOCOUPLE', PROP_ID='TCK', XYZ=8.72,0.3, 0.36 /  T12, included in the pile
-
-&DEVC ID='B22', QUANTITY='U-VELOCITY', XYZ=1.3,0.3,0.2 /  
-&DEVC ID='B23', QUANTITY='U-VELOCITY', XYZ=8.75,0.3,0.2 /
-
-&DEVC ID='O2', QUANTITY='VOLUME FRACTION', SPEC_ID='OXYGEN', XYZ=8.8,0.3,0.2 /
-&DEVC ID='CO', QUANTITY='VOLUME FRACTION', SPEC_ID='CARBON MONOXIDE', XYZ=8.8,0.3,0.2 /
-&DEVC ID='CO2', QUANTITY='VOLUME FRACTION', SPEC_ID='CARBON DIOXIDE', XYZ=8.8,0.3,0.2 /
 
 &TAIL /

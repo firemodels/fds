@@ -3,17 +3,18 @@ MODULE PRES
 ! Find the perturbation pressure by solving Poisson's Equation
 
 USE PRECISION_PARAMETERS
-USE MESH_POINTERS
+USE MESH_VARIABLES
 
 IMPLICIT NONE (TYPE,EXTERNAL)
 PRIVATE
 
-PUBLIC PRESSURE_SOLVER_COMPUTE_RHS,PRESSURE_SOLVER_FFT,PRESSURE_SOLVER_CHECK_RESIDUALS,COMPUTE_VELOCITY_ERROR
+PUBLIC PRESSURE_SOLVER_COMPUTE_RHS,PRESSURE_SOLVER_FFT,TUNNEL_POISSON_SOLVER,PRESSURE_SOLVER_CHECK_RESIDUALS,COMPUTE_VELOCITY_ERROR
 
 CONTAINS
 
 SUBROUTINE PRESSURE_SOLVER_COMPUTE_RHS(T,DT,NM)
 
+USE MESH_POINTERS
 USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 USE COMPLEX_GEOMETRY, ONLY: IBM_IDCF
@@ -24,8 +25,7 @@ REAL(EB), INTENT(IN) :: T,DT
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,HP,RHOP
 INTEGER :: I,J,K,IW,IOR,NOM,N_INT_CELLS,IIO,JJO,KKO,ICF
 REAL(EB) :: TRM1,TRM2,TRM3,TRM4,H_OTHER,TNOW, &
-            TSI,TIME_RAMP_FACTOR,DX_OTHER,DY_OTHER,DZ_OTHER,P_EXTERNAL, &
-            VEL_EDDY,DUNDT
+            TSI,TIME_RAMP_FACTOR,DX_OTHER,DY_OTHER,DZ_OTHER,P_EXTERNAL,VEL_EDDY
 TYPE (VENTS_TYPE), POINTER :: VT
 TYPE (WALL_TYPE), POINTER :: WC
 TYPE (EXTERNAL_WALL_TYPE), POINTER :: EWC
@@ -70,23 +70,19 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
 
    IF_NEUMANN: IF (WC%PRESSURE_BC_INDEX==NEUMANN) THEN
 
-      DUNDT = WC%DUNDT
-      ICF=WC%CUT_FACE_INDEX
-      IF (CC_UNSTRUCTURED_FDIV .AND. ICF>0) DUNDT = CFACE(CUT_FACE(ICF)%CFACE_INDEX(1))%DUNDT
-
       SELECT CASE(IOR)
          CASE( 1)
-            BXS(J,K) = HX(0)   *(-FVX(0,J,K)    + DUNDT)
+            BXS(J,K) = HX(0)   *(-FVX(0,J,K)    + WC%DUNDT)
          CASE(-1)
-            BXF(J,K) = HX(IBP1)*(-FVX(IBAR,J,K) - DUNDT)
+            BXF(J,K) = HX(IBP1)*(-FVX(IBAR,J,K) - WC%DUNDT)
          CASE( 2)
-            BYS(I,K) = HY(0)   *(-FVY(I,0,K)    + DUNDT)
+            BYS(I,K) = HY(0)   *(-FVY(I,0,K)    + WC%DUNDT)
          CASE(-2)
-            BYF(I,K) = HY(JBP1)*(-FVY(I,JBAR,K) - DUNDT)
+            BYF(I,K) = HY(JBP1)*(-FVY(I,JBAR,K) - WC%DUNDT)
          CASE( 3)
-            BZS(I,J) = HZ(0)   *(-FVZ(I,J,0)    + DUNDT)
+            BZS(I,J) = HZ(0)   *(-FVZ(I,J,0)    + WC%DUNDT)
          CASE(-3)
-            BZF(I,J) = HZ(KBP1)*(-FVZ(I,J,KBAR) - DUNDT)
+            BZF(I,J) = HZ(KBP1)*(-FVZ(I,J,KBAR) - WC%DUNDT)
       END SELECT
    ENDIF IF_NEUMANN
 
@@ -342,6 +338,7 @@ END SUBROUTINE PRESSURE_SOLVER_COMPUTE_RHS
 
 SUBROUTINE PRESSURE_SOLVER_FFT(NM)
 
+USE MESH_POINTERS
 USE POIS, ONLY: H3CZSS,H2CZSS,H2CYSS,H3CSSS
 USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
 USE GLOBAL_CONSTANTS
@@ -350,7 +347,6 @@ INTEGER, INTENT(IN) :: NM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: HP
 INTEGER :: I,J,K
 REAL(EB) :: TNOW
-REAL(EB) :: BXS_BAR,BXF_BAR
 
 IF (SOLID_PHASE_ONLY) RETURN
 IF (FREEZE_VELOCITY)  RETURN
@@ -363,10 +359,6 @@ IF (PREDICTOR) THEN
 ELSE
    HP => HS
 ENDIF
-
-! For tunnel geometries, solve a 1-D Poisson equation for average pressure
-
-IF (TUNNEL_PRECONDITIONER) CALL TUNNEL_POISSON_SOLVER
 
 ! Call the Poisson solver
 
@@ -480,76 +472,91 @@ DO J=1,JBAR
 ENDDO
 
 T_USED(5)=T_USED(5)+CURRENT_TIME()-TNOW
+END SUBROUTINE PRESSURE_SOLVER_FFT
 
-CONTAINS
 
-
-!> \brief Solve a special 1-D Poisson equation for a tunnel
+!> \brief Solve a special 1-D Poisson equation for a tunnel to be used as a preconditioner for the 3-D Poisson solver
+!> \details For details, refer to the Appendix in the FDS Technical Reference Guide entitled "A Special Preconditioning 
+!> Scheme for Solving the Poisson Equation in Tunnels."
 
 SUBROUTINE TUNNEL_POISSON_SOLVER
 
 USE MPI_F08
+USE GLOBAL_CONSTANTS
+USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
 REAL(EB) :: RR,DXO
-INTEGER :: IERR,II
+INTEGER :: IERR,II,NM,I,J,K
+REAL(EB) :: TNOW
 REAL(EB), POINTER, DIMENSION(:) :: RDXNP
+TYPE (MESH_TYPE), POINTER :: M
 
-RDXNP(0:IBAR) => WORK2(0:IBAR,0,0)
-RDXNP(0:IBAR) = RDXN(0:IBAR)
-IF (NM>1)       RDXNP(0)    = 2._EB/(MESHES(NM-1)%DX(MESHES(NM-1)%IBAR)+DX(1))
-IF (NM<NMESHES) RDXNP(IBAR) = 2._EB/(MESHES(NM+1)%DX(1)             +DX(IBAR))
+TNOW=CURRENT_TIME()
 
-DO I=1,IBAR
-   II = I_OFFSET(NM) + I  ! Spatial index of the entire tunnel, not just this mesh
-   TP_CC(II) = 0._EB
-   DO K=1,KBAR
-      DO J=1,JBAR
-         TP_CC(II) = TP_CC(II) + PRHS(I,J,K)*DY(J)*DZ(K)
+! For each mesh, compute the diagonal, off-diagonal, and right hand side terms of the tri-diagonal linear system of equations
+
+MESH_LOOP_1: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+
+   M => MESHES(NM)
+
+   RDXNP(0:M%IBAR) => M%WORK2(0:M%IBAR,0,0)
+   RDXNP(0:M%IBAR) = M%RDXN(0:M%IBAR)
+   IF (NM>1)       RDXNP(0)      = 2._EB/(MESHES(NM-1)%DX(MESHES(NM-1)%IBAR)+M%DX(1))
+   IF (NM<NMESHES) RDXNP(M%IBAR) = 2._EB/(MESHES(NM+1)%DX(1)                +M%DX(M%IBAR))
+
+   DO I=1,M%IBAR
+      II = I_OFFSET(NM) + I  ! Spatial index of the entire tunnel, not just this mesh
+      TP_CC(II) = 0._EB
+      DO K=1,M%KBAR
+         DO J=1,M%JBAR
+            TP_CC(II) = TP_CC(II) + M%PRHS(I,J,K)*M%DY(J)*M%DZ(K)
+         ENDDO
+      ENDDO
+      TP_CC(II) = TP_CC(II)/((M%YF-M%YS)*(M%ZF-M%ZS))  ! RHS linear system of equations
+      TP_DD(II) = -M%RDX(I)*(RDXNP(I)+RDXNP(I-1))  ! Diagonal of tri-diagonal matrix
+      TP_AA(II) =  M%RDX(I)*RDXNP(I)    ! Upper band of matrix
+      TP_BB(II) =  M%RDX(I)*RDXNP(I-1)  ! Lower band of matrix
+      M%PRHS(I,1:M%JBAR,1:M%KBAR) = M%PRHS(I,1:M%JBAR,1:M%KBAR) - TP_CC(II)  ! New RHS of the 3-D Poisson equation
+   ENDDO
+
+   ! Subtract average BCs (BXS_BAR, BXF_BAR) from the 3-D BCs (BXS and BXF) for all meshes, including tunnel ends.
+
+   M%BXS_BAR = 0._EB
+   M%BXF_BAR = 0._EB
+   DO K=1,M%KBAR
+     DO J=1,M%JBAR
+         M%BXS_BAR = M%BXS_BAR + M%BXS(J,K)*M%DY(J)*M%DZ(K)
+         M%BXF_BAR = M%BXF_BAR + M%BXF(J,K)*M%DY(J)*M%DZ(K)
       ENDDO
    ENDDO
-   TP_CC(II) = TP_CC(II)/((YF-YS)*(ZF-ZS))  ! RHS linear system of equations
-   TP_DD(II) = -RDX(I)*(RDXNP(I)+RDXNP(I-1))  ! Diagonal of tri-diagonal matrix
-   TP_AA(II) =  RDX(I)*RDXNP(I)    ! Upper band of matrix
-   TP_BB(II) =  RDX(I)*RDXNP(I-1)  ! Lower band of matrix
-   PRHS(I,1:JBAR,1:KBAR) = PRHS(I,1:JBAR,1:KBAR) - TP_CC(II)  ! New RHS of the 3-D Poisson equation
-ENDDO
+   M%BXS_BAR = M%BXS_BAR/((M%YF-M%YS)*(M%ZF-M%ZS))  ! Left boundary condition, bar(b)_x,1
+   M%BXF_BAR = M%BXF_BAR/((M%YF-M%YS)*(M%ZF-M%ZS))  ! Right boundary condition, bar(b)_x,2
+   
+   M%BXS = M%BXS - M%BXS_BAR  ! This new BXS (b_x,1(j,k)) will be used for the 3-D pressure solve
+   M%BXF = M%BXF - M%BXF_BAR  ! This new BXF (b_x,2(j,k)) will be used for the 3-D pressure solve
+   
+   ! Apply boundary conditions at end of tunnel to the matrix components
 
-! Create new left and right boundary condition arrays (BXS and BXF) for all meshes, including tunnel ends.
-
-BXS_BAR = 0._EB
-BXF_BAR = 0._EB
-DO K=1,KBAR
-  DO J=1,JBAR
-      BXS_BAR = BXS_BAR + BXS(J,K)*DY(J)*DZ(K)
-      BXF_BAR = BXF_BAR + BXF(J,K)*DY(J)*DZ(K)
-   ENDDO
-ENDDO
-BXS_BAR = BXS_BAR/((YF-YS)*(ZF-ZS))  ! Left boundary condition
-BXF_BAR = BXF_BAR/((YF-YS)*(ZF-ZS))  ! Right boundary condition
-
-BXS = BXS - BXS_BAR  ! This new BXS will be used for the 3-D pressure solve
-BXF = BXF - BXF_BAR  ! This new BXF will be used for the 3-D pressure solve
-
-! Apply boundary conditions at end of tunnel to the matrix components
-
-IF (NM==1) THEN
-   IF (LBC==FISHPAK_BC_NEUMANN_NEUMANN .OR. LBC==FISHPAK_BC_NEUMANN_DIRICHLET) THEN  ! Neumann BC
-      TP_CC(1) = TP_CC(1) + DXI*BXS_BAR*TP_BB(1)
-      TP_DD(1) = TP_DD(1) + TP_BB(1)
-   ELSE  ! Dirichlet BC
-      TP_CC(1) = TP_CC(1) - 2._EB*BXS_BAR*TP_BB(1)
-      TP_DD(1) = TP_DD(1) - TP_BB(1)
+   IF (NM==1) THEN
+      IF (M%LBC==FISHPAK_BC_NEUMANN_NEUMANN .OR. M%LBC==FISHPAK_BC_NEUMANN_DIRICHLET) THEN  ! Neumann BC
+         TP_CC(1) = TP_CC(1) + M%DXI*M%BXS_BAR*TP_BB(1)
+         TP_DD(1) = TP_DD(1) + TP_BB(1)
+      ELSE  ! Dirichlet BC
+         TP_CC(1) = TP_CC(1) - 2._EB*M%BXS_BAR*TP_BB(1)
+         TP_DD(1) = TP_DD(1) - TP_BB(1)
+      ENDIF
    ENDIF
-ENDIF
 
-IF (NM==NMESHES) THEN
-   IF (LBC==FISHPAK_BC_NEUMANN_NEUMANN .OR. LBC==FISHPAK_BC_DIRICHLET_NEUMANN) THEN  ! Neumann BC
-      TP_CC(TUNNEL_NXP) = TP_CC(TUNNEL_NXP) - DXI*BXF_BAR*TP_AA(TUNNEL_NXP)
-      TP_DD(TUNNEL_NXP) = TP_DD(TUNNEL_NXP) + TP_AA(TUNNEL_NXP)
-   ELSE  ! Dirichet BC
-      TP_CC(TUNNEL_NXP) = TP_CC(TUNNEL_NXP) - 2._EB*BXF_BAR*TP_AA(TUNNEL_NXP)
-      TP_DD(TUNNEL_NXP) = TP_DD(TUNNEL_NXP) - TP_AA(TUNNEL_NXP)
+   IF (NM==NMESHES) THEN
+      IF (M%LBC==FISHPAK_BC_NEUMANN_NEUMANN .OR. M%LBC==FISHPAK_BC_DIRICHLET_NEUMANN) THEN  ! Neumann BC
+         TP_CC(TUNNEL_NXP) = TP_CC(TUNNEL_NXP) - M%DXI*M%BXF_BAR*TP_AA(TUNNEL_NXP)
+         TP_DD(TUNNEL_NXP) = TP_DD(TUNNEL_NXP) + TP_AA(TUNNEL_NXP)
+      ELSE  ! Dirichet BC
+         TP_CC(TUNNEL_NXP) = TP_CC(TUNNEL_NXP) - 2._EB*M%BXF_BAR*TP_AA(TUNNEL_NXP)
+         TP_DD(TUNNEL_NXP) = TP_DD(TUNNEL_NXP) - TP_AA(TUNNEL_NXP)
+      ENDIF
    ENDIF
-ENDIF
+   
+ENDDO MESH_LOOP_1
 
 IF (MY_RANK>0) THEN  ! MPI processes greater than 0 send their matrix components to MPI process 0
 
@@ -591,22 +598,28 @@ H_BAR(1:TUNNEL_NXP) = TP_CC(1:TUNNEL_NXP)
 
 ! Apply Dirichlet BCs at mesh interfaces. These are linear interpolations of the values of H_BAR on either side of mesh interface.
 
-IF (NM/=1) THEN
-   DXO = MESHES(NM-1)%DX(MESHES(NM-1)%IBAR)  ! Width of rightmost cell in the mesh to the left of current mesh
-   BXS_BAR = (H_BAR(I_OFFSET(NM))*DX(1) + H_BAR(I_OFFSET(NM)+1)*DXO)/(DX(1)+DXO)
-ENDIF
-IF (NM/=NMESHES) THEN
-   DXO = MESHES(NM+1)%DX(1)  ! Width of leftmost cell in the mesh to the right of current mesh
-   BXF_BAR = (H_BAR(I_OFFSET(NM)+IBP1)*DX(IBAR) + H_BAR(I_OFFSET(NM)+IBAR)*DXO)/(DX(IBAR)+DXO)
-ENDIF
+MESH_LOOP_2: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
+   M => MESHES(NM)
+
+   IF (NM/=1) THEN
+      DXO = MESHES(NM-1)%DX(MESHES(NM-1)%IBAR)  ! Width of rightmost cell in the mesh to the left of current mesh
+      M%BXS_BAR = (H_BAR(I_OFFSET(NM))*M%DX(1) + H_BAR(I_OFFSET(NM)+1)*DXO)/(M%DX(1)+DXO)
+   ENDIF
+   IF (NM/=NMESHES) THEN
+      DXO = MESHES(NM+1)%DX(1)  ! Width of leftmost cell in the mesh to the right of current mesh
+      M%BXF_BAR = (H_BAR(I_OFFSET(NM)+M%IBP1)*M%DX(M%IBAR) + H_BAR(I_OFFSET(NM)+M%IBAR)*DXO)/(M%DX(M%IBAR)+DXO)
+   ENDIF
+
+ENDDO MESH_LOOP_2
+
+T_USED(5)=T_USED(5)+CURRENT_TIME()-TNOW
 END SUBROUTINE TUNNEL_POISSON_SOLVER
-
-END SUBROUTINE PRESSURE_SOLVER_FFT
 
 
 SUBROUTINE PRESSURE_SOLVER_CHECK_RESIDUALS(NM)
 
+USE MESH_POINTERS
 USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
 USE GLOBAL_CONSTANTS
 
@@ -695,14 +708,15 @@ SUBROUTINE COMPUTE_VELOCITY_ERROR(DT,NM)
 
 ! Check the maximum velocity error at a solid boundary
 
+USE MESH_POINTERS
 USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
 USE GLOBAL_CONSTANTS, ONLY: PREDICTOR,VELOCITY_ERROR_MAX,SOLID_BOUNDARY,INTERPOLATED_BOUNDARY,VELOCITY_ERROR_MAX_LOC,T_USED,&
-                            PRES_FLAG,FREEZE_VELOCITY,SOLID_PHASE_ONLY,CC_UNSTRUCTURED_FDIV,GLMAT_FLAG,UGLMAT_FLAG,USCARC_FLAG
+                            PRES_FLAG,FREEZE_VELOCITY,SOLID_PHASE_ONLY,GLMAT_FLAG,UGLMAT_FLAG,USCARC_FLAG
 
 REAL(EB), INTENT(IN) :: DT
 INTEGER, INTENT(IN) :: NM
-INTEGER :: IW,IOR,II,JJ,KK,IIO,JJO,KKO,N_INT_CELLS,IIO1,IIO2,JJO1,JJO2,KKO1,KKO2,ICF
-REAL(EB) :: TNOW,UN_NEW,UN_NEW_OTHER,VELOCITY_ERROR,DUDT,DVDT,DWDT,ITERATIVE_FACTOR,DHFCT,DWSCL
+INTEGER :: IW,IOR,II,JJ,KK,IIO,JJO,KKO,N_INT_CELLS,IIO1,IIO2,JJO1,JJO2,KKO1,KKO2
+REAL(EB) :: TNOW,UN_NEW,UN_NEW_OTHER,VELOCITY_ERROR,DUDT,DVDT,DWDT,ITERATIVE_FACTOR,DHFCT
 TYPE(OMESH_TYPE), POINTER :: OM
 TYPE(MESH_TYPE), POINTER :: M2
 TYPE(WALL_TYPE), POINTER :: WC
@@ -752,43 +766,37 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       END SELECT
    ENDIF
 
-   DWSCL=1._EB ! Area factor for downscaling to cartesian velocity.
-   IF (CC_UNSTRUCTURED_FDIV .AND. IW<=N_EXTERNAL_WALL_CELLS) THEN
-      ICF=WC%CUT_FACE_INDEX
-      IF(ICF>0) DWSCL = SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))/WC%ONE_D%AREA
-   ENDIF
-
    ! Update normal component of velocity at the mesh boundary
 
    IF (PREDICTOR) THEN
       SELECT CASE(IOR)
          CASE( 1)
-            UN_NEW = U(II,JJ,KK)   - DT*(FVX(II,JJ,KK)   + RDXN(II)  *(H(II+1,JJ,KK)-H(II,JJ,KK))*DHFCT)*DWSCL
+            UN_NEW = U(II,JJ,KK)   - DT*(FVX(II,JJ,KK)   + RDXN(II)  *(H(II+1,JJ,KK)-H(II,JJ,KK))*DHFCT)
          CASE(-1)
-            UN_NEW = U(II-1,JJ,KK) - DT*(FVX(II-1,JJ,KK) + RDXN(II-1)*(H(II,JJ,KK)-H(II-1,JJ,KK))*DHFCT)*DWSCL
+            UN_NEW = U(II-1,JJ,KK) - DT*(FVX(II-1,JJ,KK) + RDXN(II-1)*(H(II,JJ,KK)-H(II-1,JJ,KK))*DHFCT)
          CASE( 2)
-            UN_NEW = V(II,JJ,KK)   - DT*(FVY(II,JJ,KK)   + RDYN(JJ)  *(H(II,JJ+1,KK)-H(II,JJ,KK))*DHFCT)*DWSCL
+            UN_NEW = V(II,JJ,KK)   - DT*(FVY(II,JJ,KK)   + RDYN(JJ)  *(H(II,JJ+1,KK)-H(II,JJ,KK))*DHFCT)
          CASE(-2)
-            UN_NEW = V(II,JJ-1,KK) - DT*(FVY(II,JJ-1,KK) + RDYN(JJ-1)*(H(II,JJ,KK)-H(II,JJ-1,KK))*DHFCT)*DWSCL
+            UN_NEW = V(II,JJ-1,KK) - DT*(FVY(II,JJ-1,KK) + RDYN(JJ-1)*(H(II,JJ,KK)-H(II,JJ-1,KK))*DHFCT)
          CASE( 3)
-            UN_NEW = W(II,JJ,KK)   - DT*(FVZ(II,JJ,KK)   + RDZN(KK)  *(H(II,JJ,KK+1)-H(II,JJ,KK))*DHFCT)*DWSCL
+            UN_NEW = W(II,JJ,KK)   - DT*(FVZ(II,JJ,KK)   + RDZN(KK)  *(H(II,JJ,KK+1)-H(II,JJ,KK))*DHFCT)
          CASE(-3)
-            UN_NEW = W(II,JJ,KK-1) - DT*(FVZ(II,JJ,KK-1) + RDZN(KK-1)*(H(II,JJ,KK)-H(II,JJ,KK-1))*DHFCT)*DWSCL
+            UN_NEW = W(II,JJ,KK-1) - DT*(FVZ(II,JJ,KK-1) + RDZN(KK-1)*(H(II,JJ,KK)-H(II,JJ,KK-1))*DHFCT)
       END SELECT
    ELSE
       SELECT CASE(IOR)
          CASE( 1)
-            UN_NEW =0.5_EB*(U(II,JJ,KK)+US(II,JJ,KK)    -DT*(FVX(II,JJ,KK)  +RDXN(II)  *(HS(II+1,JJ,KK)-HS(II,JJ,KK))*DHFCT)*DWSCL)
+            UN_NEW =0.5_EB*(U(II,JJ,KK)+US(II,JJ,KK)    -DT*(FVX(II,JJ,KK)  +RDXN(II)  *(HS(II+1,JJ,KK)-HS(II,JJ,KK))*DHFCT))
          CASE(-1)
-            UN_NEW =0.5_EB*(U(II-1,JJ,KK)+US(II-1,JJ,KK)-DT*(FVX(II-1,JJ,KK)+RDXN(II-1)*(HS(II,JJ,KK)-HS(II-1,JJ,KK))*DHFCT)*DWSCL)
+            UN_NEW =0.5_EB*(U(II-1,JJ,KK)+US(II-1,JJ,KK)-DT*(FVX(II-1,JJ,KK)+RDXN(II-1)*(HS(II,JJ,KK)-HS(II-1,JJ,KK))*DHFCT))
          CASE( 2)
-            UN_NEW =0.5_EB*(V(II,JJ,KK)+VS(II,JJ,KK)    -DT*(FVY(II,JJ,KK)  +RDYN(JJ)  *(HS(II,JJ+1,KK)-HS(II,JJ,KK))*DHFCT)*DWSCL)
+            UN_NEW =0.5_EB*(V(II,JJ,KK)+VS(II,JJ,KK)    -DT*(FVY(II,JJ,KK)  +RDYN(JJ)  *(HS(II,JJ+1,KK)-HS(II,JJ,KK))*DHFCT))
          CASE(-2)
-            UN_NEW =0.5_EB*(V(II,JJ-1,KK)+VS(II,JJ-1,KK)-DT*(FVY(II,JJ-1,KK)+RDYN(JJ-1)*(HS(II,JJ,KK)-HS(II,JJ-1,KK))*DHFCT)*DWSCL)
+            UN_NEW =0.5_EB*(V(II,JJ-1,KK)+VS(II,JJ-1,KK)-DT*(FVY(II,JJ-1,KK)+RDYN(JJ-1)*(HS(II,JJ,KK)-HS(II,JJ-1,KK))*DHFCT))
          CASE( 3)
-            UN_NEW =0.5_EB*(W(II,JJ,KK)+WS(II,JJ,KK)    -DT*(FVZ(II,JJ,KK)  +RDZN(KK)  *(HS(II,JJ,KK+1)-HS(II,JJ,KK))*DHFCT)*DWSCL)
+            UN_NEW =0.5_EB*(W(II,JJ,KK)+WS(II,JJ,KK)    -DT*(FVZ(II,JJ,KK)  +RDZN(KK)  *(HS(II,JJ,KK+1)-HS(II,JJ,KK))*DHFCT))
          CASE(-3)
-            UN_NEW =0.5_EB*(W(II,JJ,KK-1)+WS(II,JJ,KK-1)-DT*(FVZ(II,JJ,KK-1)+RDZN(KK-1)*(HS(II,JJ,KK)-HS(II,JJ,KK-1))*DHFCT)*DWSCL)
+            UN_NEW =0.5_EB*(W(II,JJ,KK-1)+WS(II,JJ,KK-1)-DT*(FVZ(II,JJ,KK-1)+RDZN(KK-1)*(HS(II,JJ,KK)-HS(II,JJ,KK-1))*DHFCT))
       END SELECT
    ENDIF
 
@@ -991,152 +999,175 @@ PUBLIC ULMAT_SOLVER_H
 CONTAINS
 
 
-SUBROUTINE ULMAT_SOLVER_H
+SUBROUTINE ULMAT_SOLVER_H(NM)
+
+INTEGER, INTENT(IN) :: NM
 
 !.. All other variables
-INTEGER MAXFCT, MNUM, MTYPE, PHASE, NRHS, MSGLVL, NNZ
-INTEGER ERROR1, ERROR
+INTEGER MAXFCT, MNUM, MTYPE, NRHS, MSGLVL, NNZ, IPZ
+INTEGER :: ERROR1=-666, ERROR=-666
 INTEGER, ALLOCATABLE :: IPARM( : )
 INTEGER, ALLOCATABLE :: IA( : )
 INTEGER, ALLOCATABLE :: JA( : )
 REAL(EB), ALLOCATABLE :: A_H( : )
 REAL(EB), ALLOCATABLE :: F_H( : )
 REAL(EB), ALLOCATABLE :: X_H( : )
-INTEGER :: I, IDUM(1)
+INTEGER :: I
+#ifdef WITH_MKL
+INTEGER :: PHASE, IDUM(1)
 REAL(EB) :: DDUM(1)
+#endif
 TYPE(ZONE_MESH_TYPE), POINTER :: ZM
 
-ZM=>MESHES(1)%ZONE_MESH(1)
+! Loop over zones within MESH NM and solve the unstructured Poisson problem directly.
 
-!.. Fill all arrays containing matrix data.
-ZM%NUNKH = 8
-NNZ = 18
-NRHS = 1
-MAXFCT = 1
-MNUM = 1
-ALLOCATE(IA(ZM%NUNKH + 1))
-IA = (/ 1, 5, 8, 10, 12, 15, 17, 18, 19 /)
-ALLOCATE(JA(NNZ))
-JA = (/ 1,    3,       6, 7,    &
-           2, 3,    5,          &
-              3,             8, &
-                 4,       7,    &
-                    5, 6, 7,    &
-                       6,    8, &
-                          7,    &
-                             8 /)
-ALLOCATE(A_H(NNZ))
-A_H = (/ 7._EB,        1._EB,              2._EB,  7._EB,         &
-               -4._EB, 8._EB,       2._EB,                        &
-                       1._EB,                             5._EB,  &
-                             7._EB,                9._EB,         &
-                                    5._EB, 1._EB,  5._EB,         &
-                                          -1._EB,         5._EB,  &
-                                                  11._EB,         &
-                                                          5._EB /)
-ALLOCATE(F_H(ZM%NUNKH))
-ALLOCATE(X_H(ZM%NUNKH))
-!..
-!.. SET UP PARDISO CONTROL PARAMETER
-!..
-ALLOCATE(IPARM(64))
+ZONE_MESH_LOOP: DO IPZ=0,N_ZONE
 
-DO I = 1, 64
-   IPARM(I) = 0
-END DO
+   ZM=>MESHES(NM)%ZONE_MESH(IPZ)
 
-IPARM(1) = 1   ! no solver default
-IPARM(2) = 2   ! fill-in reordering from METIS
-IPARM(4) = 0   ! no iterative-direct algorithm
-IPARM(5) = 0   ! no user fill-in reducing permutation
-IPARM(6) = 0   ! =0 solution on the first n components of x
-IPARM(8) = 2   ! numbers of iterative refinement steps
-IPARM(10) = 13 ! perturb the pivot elements with 1E-13
-IPARM(11) = 1  ! use nonsymmetric permutation and scaling MPS
-IPARM(13) = 0  ! maximum weighted matching algorithm is switched-off (default for symmetric).
-               ! Try IPARM(13) = 1 in case of inappropriate accuracy
-IPARM(14) = 0  ! Output: number of perturbed pivots
-IPARM(18) = -1 ! Output: number of nonzeros in the factor LU
-IPARM(19) = -1 ! Output: Mflops for LU factorization
-IPARM(20) = 0  ! Output: Numbers of CG Iterations
+   IF (.NOT.ZM%ZONE_IN_MESH) CYCLE ZONE_MESH_LOOP
 
-ERROR  = 0     ! initialize error flag
-MSGLVL = 1     ! print statistical information
-MTYPE  = -2    ! symmetric, indefinite
+   !.. Fill all arrays containing matrix data.
+   ZM%NUNKH = 8
+   NNZ = 18
+   NRHS = 1
+   MAXFCT = 1
+   MNUM = 1
+   ALLOCATE(IA(ZM%NUNKH + 1))
+   IA = (/ 1, 5, 8, 10, 12, 15, 17, 18, 19 /)
+   ALLOCATE(JA(NNZ))
+   JA = (/ 1,    3,       6, 7,    &
+              2, 3,    5,          &
+                 3,             8, &
+                    4,       7,    &
+                       5, 6, 7,    &
+                          6,    8, &
+                             7,    &
+                                8 /)
+   ALLOCATE(A_H(NNZ))
+   A_H = (/ 7._EB,        1._EB,              2._EB,  7._EB,         &
+                  -4._EB, 8._EB,       2._EB,                        &
+                          1._EB,                             5._EB,  &
+                                7._EB,                9._EB,         &
+                                       5._EB, 1._EB,  5._EB,         &
+                                             -1._EB,         5._EB,  &
+                                                     11._EB,         &
+                                                             5._EB /)
+   ALLOCATE(F_H(ZM%NUNKH))
+   ALLOCATE(X_H(ZM%NUNKH))
+   !..
+   !.. SET UP PARDISO CONTROL PARAMETER
+   !..
+   ALLOCATE(IPARM(64))
 
-!.. Initialize the internal solver memory pointer. This is only
-! necessary for the FIRST call of the PARDISO solver.
+   DO I = 1, 64
+      IPARM(I) = 0
+   END DO
 
-ALLOCATE (ZM%PT_H(64))
-DO I = 1, 64
-   ZM%PT_H(I)%DUMMY = 0
-END DO
+   IPARM(1) = 1   ! no solver default
+   IPARM(2) = 2   ! fill-in reordering from METIS
+   IPARM(4) = 0   ! no iterative-direct algorithm
+   IPARM(5) = 0   ! no user fill-in reducing permutation
+   IPARM(6) = 0   ! =0 solution on the first n components of x
+   IPARM(8) = 2   ! numbers of iterative refinement steps
+   IPARM(10) = 13 ! perturb the pivot elements with 1E-13
+   IPARM(11) = 1  ! use nonsymmetric permutation and scaling MPS
+   IPARM(13) = 0  ! maximum weighted matching algorithm is switched-off (default for symmetric).
+                  ! Try IPARM(13) = 1 in case of inappropriate accuracy
+   IPARM(14) = 0  ! Output: number of perturbed pivots
+   IPARM(18) = -1 ! Output: number of nonzeros in the factor LU
+   IPARM(19) = -1 ! Output: Mflops for LU factorization
+   IPARM(20) = 0  ! Output: Numbers of CG Iterations
 
-!.. Reordering and Symbolic Factorization, This step also allocates
-! all memory that is necessary for the factorization
+   ERROR  = 0     ! initialize error flag
+   MSGLVL = 0     ! don't print statistical information
+   IF (GLMAT_VERBOSE) MSGLVL = 1     ! print statistical information
+   MTYPE  = -2    ! symmetric, indefinite
 
-PHASE = 11 ! only reordering and symbolic factorization
-CALL PARDISO(ZM%PT_H, MAXFCT, MNUM, MTYPE, PHASE, ZM%NUNKH, A_H, IA, JA, &
-             IDUM, NRHS, IPARM, MSGLVL, DDUM, DDUM, ERROR)
+   !.. Initialize the internal solver memory pointer. This is only
+   ! necessary for the FIRST call of the PARDISO solver.
 
-WRITE(LU_ERR,*) 'Reordering completed ... '
-IF (ERROR /= 0) THEN
-   WRITE(LU_ERR,*) 'The following ERROR was detected: ', ERROR
-   GOTO 1000
-END IF
-WRITE(LU_ERR,*) 'Number of nonzeros in factors = ',IPARM(18)
-WRITE(LU_ERR,*) 'Number of factorization MFLOPS = ',IPARM(19)
+   ALLOCATE (ZM%PT_H(64))
 
-!.. Factorization.
-PHASE = 22 ! only factorization
-CALL PARDISO(ZM%PT_H, MAXFCT, MNUM, MTYPE, PHASE, ZM%NUNKH, A_H, IA, JA, &
-             IDUM, NRHS, IPARM, MSGLVL, DDUM, DDUM, ERROR)
-WRITE(LU_ERR,*) 'Factorization completed ... '
-IF (ERROR /= 0) THEN
-   WRITE(LU_ERR,*) 'The following ERROR was detected: ', ERROR
-   GOTO 1000
-ENDIF
+#ifdef WITH_MKL
+   DO I = 1, 64
+      ZM%PT_H(I)%DUMMY = 0
+   END DO
 
-!.. Back substitution and iterative refinement
-IPARM(8) = 2 ! max numbers of iterative refinement steps
-PHASE = 33   ! only solving
-DO I = 1, ZM%NUNKH
-   F_H(I) = 1._EB
-END DO
-CALL PARDISO(ZM%PT_H, MAXFCT, MNUM, MTYPE, PHASE, ZM%NUNKH, A_H, IA, JA, &
-             IDUM, NRHS, IPARM, MSGLVL, F_H, X_H, ERROR)
-WRITE(LU_ERR,*) 'Solve completed ... '
-IF (ERROR /= 0) THEN
-   WRITE(LU_ERR,*) 'The following ERROR was detected: ', ERROR
-   GOTO 1000
-ENDIF
-WRITE(LU_ERR,*) 'The solution of the system is '
-DO I = 1, ZM%NUNKH
-   WRITE(LU_ERR,*) ' x(',I,') = ', X_H(I)
-END DO
+   !.. Reordering and Symbolic Factorization, This step also allocates
+   ! all memory that is necessary for the factorization
 
-1000 CONTINUE
-!.. Termination and release of memory
-PHASE = -1 ! release internal memory
-CALL PARDISO(ZM%PT_H, MAXFCT, MNUM, MTYPE, PHASE, ZM%NUNKH, DDUM, IDUM, IDUM, &
-             IDUM, NRHS, IPARM, MSGLVL, DDUM, DDUM, ERROR1)
+   PHASE = 11 ! only reordering and symbolic factorization
+   CALL PARDISO(ZM%PT_H, MAXFCT, MNUM, MTYPE, PHASE, ZM%NUNKH, A_H, IA, JA, &
+                IDUM, NRHS, IPARM, MSGLVL, DDUM, DDUM, ERROR)
 
-IF (ALLOCATED(IA))      DEALLOCATE(IA)
-IF (ALLOCATED(JA))      DEALLOCATE(JA)
-IF (ALLOCATED(A_H))     DEALLOCATE(A_H)
-IF (ALLOCATED(F_H))     DEALLOCATE(F_H)
-IF (ALLOCATED(X_H))     DEALLOCATE(X_H)
-IF (ALLOCATED(IPARM))   DEALLOCATE(IPARM)
+   IF (GLMAT_VERBOSE) THEN
+      WRITE(LU_ERR,*) 'Reordering completed ... '
+      IF (ERROR /= 0) THEN
+         WRITE(LU_ERR,*) 'The following ERROR was detected: ', ERROR
+         GOTO 1000
+      END IF
+      WRITE(LU_ERR,*) 'Number of nonzeros in factors = ',IPARM(18)
+      WRITE(LU_ERR,*) 'Number of factorization MFLOPS = ',IPARM(19)
+   ENDIF
 
-IF (ERROR1 /= 0) THEN
-   WRITE(LU_ERR,*) 'The following ERROR on release stage was detected: ', ERROR1
-   STOP 1
-ENDIF
+   !.. Factorization.
+   PHASE = 22 ! only factorization
+   CALL PARDISO(ZM%PT_H, MAXFCT, MNUM, MTYPE, PHASE, ZM%NUNKH, A_H, IA, JA, &
+                IDUM, NRHS, IPARM, MSGLVL, DDUM, DDUM, ERROR)
+   IF (GLMAT_VERBOSE) WRITE(LU_ERR,*) 'Factorization completed ... '
+   IF (ERROR /= 0) THEN
+      WRITE(LU_ERR,*) 'The following ERROR was detected: ', ERROR
+      GOTO 1000
+   ENDIF
 
-IF (ERROR /= 0) STOP 1
+   !.. Back substitution and iterative refinement
+   IPARM(8) = 2 ! max numbers of iterative refinement steps
+   PHASE = 33   ! only solving
+   DO I = 1, ZM%NUNKH
+      F_H(I) = 1._EB
+   END DO
+   CALL PARDISO(ZM%PT_H, MAXFCT, MNUM, MTYPE, PHASE, ZM%NUNKH, A_H, IA, JA, &
+                IDUM, NRHS, IPARM, MSGLVL, F_H, X_H, ERROR)
+   IF (GLMAT_VERBOSE) WRITE(LU_ERR,*) 'Solve completed ... '
+   IF (ERROR /= 0) THEN
+      WRITE(LU_ERR,*) 'The following ERROR was detected: ', ERROR
+      GOTO 1000
+   ENDIF
+   IF (GLMAT_VERBOSE) THEN
+      WRITE(LU_ERR,*) 'The solution of the system is '
+      DO I = 1, ZM%NUNKH
+         WRITE(LU_ERR,*) ' x(',I,') = ', X_H(I)
+      END DO
+   ENDIF
 
+   1000 CONTINUE
+   !.. Termination and release of memory
+   PHASE = -1 ! release internal memory
+   CALL PARDISO(ZM%PT_H, MAXFCT, MNUM, MTYPE, PHASE, ZM%NUNKH, DDUM, IDUM, IDUM, &
+                IDUM, NRHS, IPARM, MSGLVL, DDUM, DDUM, ERROR1)
 
-STOP_STATUS=USER_STOP ! on testing
+#endif /* WITH_MKL */
+
+   IF (ALLOCATED(IA))      DEALLOCATE(IA)
+   IF (ALLOCATED(JA))      DEALLOCATE(JA)
+   IF (ALLOCATED(A_H))     DEALLOCATE(A_H)
+   IF (ALLOCATED(F_H))     DEALLOCATE(F_H)
+   IF (ALLOCATED(X_H))     DEALLOCATE(X_H)
+   IF (ALLOCATED(IPARM))   DEALLOCATE(IPARM)
+
+   IF (ERROR1 /= 0) THEN
+      WRITE(LU_ERR,*) 'The following ERROR on release stage was detected: ', ERROR1
+      STOP 1
+   ENDIF
+
+   IF (ERROR /= 0) STOP 1
+
+   print *,'MESH: ',NM,', ZONE: ',IPZ
+
+ENDDO ZONE_MESH_LOOP
+
+! STOP_STATUS=USER_STOP ! on testing
 END SUBROUTINE ULMAT_SOLVER_H
 
 
@@ -1215,6 +1246,7 @@ CONTAINS
 
 SUBROUTINE GLMAT_SOLVER_H(T,DT)
 
+USE MESH_POINTERS
 USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
 USE CC_SCALARS_IBM, ONLY : GET_CUTCELL_FH,GET_CUTCELL_HP,GET_CC_IROW,GET_PRES_CFACE_BCS,GET_FH_FROM_PRHS_AND_BCS
 USE COMPLEX_GEOMETRY, ONLY : IBM_IDCC,IBM_IDCF
@@ -1720,6 +1752,7 @@ END SUBROUTINE GLMAT_SOLVER_SETUP_H
 SUBROUTINE CHECK_UNSUPPORTED_MESH(SUPPORTED_MESH)
 
 USE MPI_F08
+USE MESH_POINTERS
 USE GLOBAL_CONSTANTS, ONLY : N_MPI_PROCESSES
 USE TRAN, ONLY : TRANS
 
@@ -2061,6 +2094,7 @@ END SUBROUTINE COPY_H_OMESH_TO_MESH
 
 SUBROUTINE COPY_HS_IN_CCVAR(VAR_CC)
 
+USE MESH_POINTERS
 INTEGER, INTENT(IN) :: VAR_CC
 
 ! Local Variables:
@@ -2132,6 +2166,7 @@ END SUBROUTINE COPY_HS_IN_CCVAR
 
 SUBROUTINE COPY_CCVAR_IN_HS(VAR_CC)
 
+USE MESH_POINTERS
 INTEGER, INTENT(IN) :: VAR_CC
 
 ! Local Variables:
@@ -2350,7 +2385,7 @@ MB_FACTOR(2,MY_RANK) = NUNKH_LOCAL
 IF(N_MPI_PROCESSES > 1) &
 CALL MPI_ALLREDUCE(MPI_IN_PLACE, MB_FACTOR, 2*N_MPI_PROCESSES, MPI_INTEGER, MPI_SUM, MPI_COMM_WORLD, IERR)
 ! Write to output file:
-IF(MY_RANK==0) THEN
+IF(MY_RANK==0 .AND. GLMAT_VERBOSE) THEN
    IPROC=MAXLOC(MB_FACTOR(1,0:N_MPI_PROCESSES-1),DIM=1) - 1 ! MaxLoc defines which element in the array, not index.
    WRITE(LU_OUTPUT,*) '   MPI Process, H unknowns =',IPROC,MB_FACTOR(2,IPROC), &
       ', Peak Factorization Memory Required (MB)=',MB_FACTOR(1,IPROC)
@@ -2404,6 +2439,7 @@ END SUBROUTINE GET_H_MATRIX_LUDCMP
 SUBROUTINE GET_BCS_H_MATRIX
 
 USE MPI_F08
+USE MESH_POINTERS
 USE CC_SCALARS_IBM, ONLY : GET_CC_UNKH, GET_CFACE_OPEN_BC_COEF
 
 ! Local Variables:
@@ -2514,6 +2550,7 @@ END SUBROUTINE GET_BCS_H_MATRIX
 
 SUBROUTINE GET_H_MATRIX
 
+USE MESH_POINTERS
 USE CC_SCALARS_IBM, ONLY : GET_H_MATRIX_CC
 
 ! Local Variables:
@@ -2726,6 +2763,7 @@ END SUBROUTINE GET_H_MATRIX
 
 SUBROUTINE GET_MATRIXGRAPH_H_WHLDOM
 
+USE MESH_POINTERS
 USE CC_SCALARS_IBM, ONLY : GET_CC_MATRIXGRAPH_H, ADD_INPLACE_NNZ_H_WHLDOM
 USE MPI_F08
 
@@ -2745,7 +2783,7 @@ NUNKH_LOCAL = sum(NUNKH_LOC(1:NMESHES)) ! Filled in GET_MATRIX_INDEXES_H, only n
                                         ! that belong to this process.
 
 ! Write number of pressure unknowns to output:
-IF (MY_RANK==0) THEN
+IF (MY_RANK==0 .AND. GLMAT_VERBOSE) THEN
    WRITE(LU_OUTPUT,'(A)') '   Using GLMAT as pressure solver. List of H unknown numbers per proc:'
 ENDIF
 
@@ -3035,6 +3073,7 @@ END SUBROUTINE GET_MATRIXGRAPH_H_WHLDOM
 
 SUBROUTINE GET_H_REGFACES
 
+USE MESH_POINTERS
 USE CC_SCALARS_IBM, ONLY : GET_RCFACES_H
 
 ! Local Variables:
@@ -3201,6 +3240,7 @@ END SUBROUTINE GET_H_REGFACES
 
 SUBROUTINE GET_MATRIX_INDEXES_H
 
+USE MESH_POINTERS
 USE CC_SCALARS_IBM, ONLY : NUMBER_UNKH_CUTCELLS
 USE MPI_F08
 
@@ -3450,6 +3490,7 @@ END SUBROUTINE SET_CCVAR_CGSC_H
 
 SUBROUTINE PRESSURE_SOLVER_CHECK_RESIDUALS_U(NM)
 
+USE MESH_POINTERS
 USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
 USE GLOBAL_CONSTANTS
 
