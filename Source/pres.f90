@@ -480,7 +480,7 @@ END SUBROUTINE PRESSURE_SOLVER_FFT
 
 
 !> \brief Solve a special 1-D Poisson equation for a tunnel to be used as a preconditioner for the 3-D Poisson solver
-!> \details For details, refer to the Appendix in the FDS Technical Reference Guide entitled "A Special Preconditioning 
+!> \details For details, refer to the Appendix in the FDS Technical Reference Guide entitled "A Special Preconditioning
 !> Scheme for Solving the Poisson Equation in Tunnels."
 
 SUBROUTINE TUNNEL_POISSON_SOLVER
@@ -534,10 +534,10 @@ MESH_LOOP_1: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    ENDDO
    M%BXS_BAR = M%BXS_BAR/((M%YF-M%YS)*(M%ZF-M%ZS))  ! Left boundary condition, bar(b)_x,1
    M%BXF_BAR = M%BXF_BAR/((M%YF-M%YS)*(M%ZF-M%ZS))  ! Right boundary condition, bar(b)_x,2
-   
+
    M%BXS = M%BXS - M%BXS_BAR  ! This new BXS (b_x,1(j,k)) will be used for the 3-D pressure solve
    M%BXF = M%BXF - M%BXF_BAR  ! This new BXF (b_x,2(j,k)) will be used for the 3-D pressure solve
-   
+
    ! Apply boundary conditions at end of tunnel to the matrix components
 
    IF (NM==1) THEN
@@ -559,7 +559,7 @@ MESH_LOOP_1: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          TP_DD(TUNNEL_NXP) = TP_DD(TUNNEL_NXP) - TP_AA(TUNNEL_NXP)
       ENDIF
    ENDIF
-   
+
 ENDDO MESH_LOOP_1
 
 IF (MY_RANK>0) THEN  ! MPI processes greater than 0 send their matrix components to MPI process 0
@@ -1153,8 +1153,8 @@ ZONE_MESH_LOOP: DO IPZ=0,N_ZONE
    1000 CONTINUE
    !.. Termination and release of memory
    PHASE = -1 ! release internal memory
-   CALL PARDISO(ZM%PT_H, MAXFCT, MNUM, MTYPE, PHASE, ZM%NUNKH, DDUM, IDUM, IDUM, &
-                IDUM, NRHS, IPARM, MSGLVL, DDUM, DDUM, ERROR1)
+   CALL PARDISO(ZM%PT_H, MAXFCT, MNUM, MTYPE, PHASE, ZM%NUNKH, A_H, IA, JA, &
+                IDUM, NRHS, IPARM, MSGLVL, F_H, X_H, ERROR1)
 
 #endif /* WITH_MKL */
 
