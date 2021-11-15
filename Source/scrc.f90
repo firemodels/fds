@@ -19855,7 +19855,7 @@ SELECT_SOLVER_TYPE: SELECT CASE (SV%TYPE_SOLVER)
          CALL SCARC_POINT_TO_GRID (NM, NL)                                    
          CALL SCARC_POINT_TO_SEPARABLE_ENVIRONMENT(NM)                   
 
-         ST => SCARC(NM)%LEVEL(NL)%STAGE(SV%TYPE_STAGE)                 
+         ST => L%STAGE(SV%TYPE_STAGE)                 
          VB => ST%B
          VX => ST%X
       
@@ -19874,8 +19874,8 @@ SELECT_SOLVER_TYPE: SELECT CASE (SV%TYPE_SOLVER)
 
       IF (IS_CG.OR.IS_MGM.OR.HAS_TWO_LEVELS) THEN
          DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
-            L  => SCARC(NM)%LEVEL(NL)
-            ST => SCARC(NM)%LEVEL(NL)%STAGE(SV%TYPE_STAGE)
+            CALL SCARC_POINT_TO_GRID (NM, NL)                                    
+            ST => L%STAGE(SV%TYPE_STAGE)
             ST%D(1:G%NCE) = 0.0_EB
             ST%R(1:G%NCE) = 0.0_EB
             ST%V(1:G%NCE) = 0.0_EB
@@ -19889,8 +19889,8 @@ SELECT_SOLVER_TYPE: SELECT CASE (SV%TYPE_SOLVER)
 
       IF (IS_GMG) THEN
          DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
-            L  => SCARC(NM)%LEVEL(NL)
-            ST => SCARC(NM)%LEVEL(NL)%STAGE(SV%TYPE_STAGE)
+            CALL SCARC_POINT_TO_GRID (NM, NL)                                    
+            ST => L%STAGE(SV%TYPE_STAGE)
             ST%V(1:G%NCE) = 0.0_EB
             ST%Z(1:G%NCE) = 0.0_EB
          ENDDO
@@ -19901,8 +19901,8 @@ SELECT_SOLVER_TYPE: SELECT CASE (SV%TYPE_SOLVER)
 
       IF (N_DIRIC_GLOBAL(NLEVEL_MIN) == 0) THEN
          IF (UPPER_MESH_INDEX == NMESHES) THEN
-            L  => SCARC(NMESHES)%LEVEL(NL)
-            ST => SCARC(NMESHES)%LEVEL(NL)%STAGE(SV%TYPE_STAGE)
+            CALL SCARC_POINT_TO_GRID (NMESHES, NL)                                    
+            ST => L%STAGE(SV%TYPE_STAGE)
             MESH_REAL = ST%B(G%NC)
          ELSE
             MESH_REAL = 0.0_EB
@@ -19924,8 +19924,9 @@ SELECT_SOLVER_TYPE: SELECT CASE (SV%TYPE_SOLVER)
       MGM_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
    
          CALL SCARC_POINT_TO_MGM (NM, NL)                                    
-
          G => L%UNSTRUCTURED
+         ST => L%STAGE(SV%TYPE_STAGE)
+
          IF (TYPE_MGM_LAPLACE == NSCARC_MGM_LAPLACE_CG) THEN
             VB => ST%B ;  VB = 0.0_EB
             VX => ST%X ;  VX = 0.0_EB
@@ -19947,9 +19948,9 @@ SELECT_SOLVER_TYPE: SELECT CASE (SV%TYPE_SOLVER)
    
       IF (IS_CG_MG) THEN
          DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
-            L   => SCARC(NM)%LEVEL(NL)
-            ST  => SCARC(NM)%LEVEL(NL)%STAGE(SV%TYPE_STAGE)              ! current stage
-            STP => SCARC(NM)%LEVEL(NL)%STAGE(NSCARC_STAGE_ONE)           ! parent stage
+            CALL SCARC_POINT_TO_GRID (NM, NL)                                    
+            ST  => L%STAGE(SV%TYPE_STAGE)              ! current stage
+            STP => L%STAGE(NSCARC_STAGE_ONE)           ! parent stage
             ST%X(1:G%NCE) = 0.0_EB
             ST%B(1:G%NCE) = STP%R(1:G%NCE)                                                
             ST%V(1:G%NCE) = 0.0_EB
@@ -19963,7 +19964,8 @@ SELECT_SOLVER_TYPE: SELECT CASE (SV%TYPE_SOLVER)
    
       IF (TYPE_COARSE == NSCARC_COARSE_ITERATIVE) THEN
          DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
-            ST => SCARC(NM)%LEVEL(NL)%STAGE(SV%TYPE_STAGE)
+            CALL SCARC_POINT_TO_GRID (NM, NL)                                    
+            ST => L%STAGE(SV%TYPE_STAGE)
             ST%X = 0.0_EB
             ST%D = 0.0_EB
             ST%R = 0.0_EB
@@ -19992,16 +19994,13 @@ CALL SCARC_POINT_TO_SEPARABLE_ENVIRONMENT(NM)
 
 ! Get right hand side (PRHS from pres.f90) and initial vector (H or HS from last time step)
 
-!$OMP PARALLEL DO PRIVATE(IC) SCHEDULE(STATIC)
 DO IC = 1, G%NC
    ST%X(IC) = HP(G%ICX(IC), G%ICY(IC), G%ICZ(IC))      
    ST%B(IC) = PRHS(G%ICX(IC), G%ICY(IC), G%ICZ(IC))     
 ENDDO                         
-!$OMP END PARALLEL DO
 
 ! Set correct boundary conditions related to Dirichlet or Neumann boundaries for separable system
 
-!$OMP PARALLEL DO PRIVATE(IOR0,I,J,K,IC) SCHEDULE(STATIC)
 SEPARABLE_BOUNDARY_CELLS_LOOP: DO IW = 1, L%N_WALL_CELLS_EXT
 
    GWC => G%WALL(IW)
@@ -20070,7 +20069,6 @@ SEPARABLE_BOUNDARY_CELLS_LOOP: DO IW = 1, L%N_WALL_CELLS_EXT
    ENDIF SEPARABLE_NEUMANN_IF
    
 ENDDO SEPARABLE_BOUNDARY_CELLS_LOOP
-!$OMP END PARALLEL DO
 
 END SUBROUTINE SCARC_SETUP_SEPARABLE_POISSON
 
@@ -20097,11 +20095,9 @@ CALL SCARC_POINT_TO_INSEPARABLE_ENVIRONMENT(NM)
 
 ! First get 'separable' right hand side (PRHS from pres.f90) and use last iterate as initial vector
 
-!$OMP PARALLEL DO PRIVATE(IC) SCHEDULE(STATIC)
 DO IC = 1, G%NC
    ST%B(IC) = PRHS(G%ICX(IC), G%ICY(IC), G%ICZ(IC))    
 ENDDO                         
-!$OMP END PARALLEL DO
 ST%X = 0.0_EB
 
 ! Build correct RHS for inseparable pressure system by subtracting: nabla**2 (K)
