@@ -909,7 +909,7 @@ INTEGER, PARAMETER :: IBM_MAXCFELEM_FACE =3072 ! Size definition parameter. Max 
 INTEGER, PARAMETER :: IBM_MAXVERT_CUTFACE=  24 ! Size definition parameter.
 INTEGER, PARAMETER :: MAX_INTERP_POINTS_PLANE = 4
 TYPE IBM_CUTFACE_TYPE
-   INTEGER :: IWC=0
+   INTEGER :: IWC=0,PRES_ZONE=-1
    INTEGER :: NVERT=0, NSVERT=0, NFACE=0, NSFACE=0, STATUS !Local Vertices, cut-faces and status of this Cartesian face.
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)           :: XYZVERT  ! Locations of vertices.
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)           ::  CFELEM  ! Cut-faces connectivities.
@@ -1017,6 +1017,7 @@ END TYPE IBM_CUTCELL_TYPE
 
 
 TYPE IBM_REGFACE_TYPE
+   INTEGER:: PRES_ZONE=-1
    INTEGER,  DIMENSION(MAX_DIM)                                    ::       IJK
    INTEGER,  DIMENSION(1:2,1:2)                                    ::        JD
 END TYPE IBM_REGFACE_TYPE
@@ -1034,6 +1035,7 @@ TYPE IBM_REGFACEZ_TYPE
 END TYPE IBM_REGFACEZ_TYPE
 
 TYPE IBM_RCFACE_TYPE
+   INTEGER:: PRES_ZONE=-1
    INTEGER,  DIMENSION(MAX_DIM+1)                                  ::       IJK ! [ I J K x1axis]
    INTEGER,  DIMENSION(LOW_IND:HIGH_IND)                           ::       UNK
    REAL(EB), DIMENSION(MAX_DIM,LOW_IND:HIGH_IND)                   ::      XCEN
@@ -1314,7 +1316,7 @@ TYPE ZONE_MESH_TYPE
 #else
    INTEGER, ALLOCATABLE :: PT_H(:)
 #endif /* WITH_MKL */
-   INTEGER :: NUNKH                                   !< Number of unknowns in pressure solution for a given ZONE_MESH
+   INTEGER :: NUNKH=0                                 !< Number of unknowns in pressure solution for a given ZONE_MESH
    LOGICAL :: ZONE_IN_MESH=.FALSE.                    !< ZONE is in MESH
 END TYPE ZONE_MESH_TYPE
 
