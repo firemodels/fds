@@ -1003,12 +1003,73 @@ IMPLICIT NONE (TYPE,EXTERNAL)
 
 PRIVATE
 
-PUBLIC ULMAT_SOLVER_H
+PUBLIC ULMAT_SOLVER, ULMAT_SOLVER_SETUP
 
 CONTAINS
 
+SUBROUTINE ULMAT_SOLVER_SETUP(NM)
 
-SUBROUTINE ULMAT_SOLVER_H(NM)
+INTEGER, INTENT(IN) :: NM
+
+! Local Variables:
+INTEGER :: I,J,K,IPZ
+
+TYPE(ZONE_MESH_TYPE), POINTER :: ZM
+
+CALL POINT_TO_MESH(NM)
+
+! Here test if FFT solver can be used for this mesh:
+! Randy : Test for all GAS cells, single pressure zone and same WC%BOUNDARY_TYPE on each mesh side.
+! MESHES(NM)%MESH_PRES_FLAG = FFT_FLAG?
+MESHES(NM)%MESH_PRES_FLAG = ULMAT_FLAG
+
+! IF mesh solver is NOT ULMAT, return:
+IF(MESHES(NM)%MESH_PRES_FLAG/=ULMAT_FLAG) RETURN
+
+
+! If mesh solver is ULMAT, initialize:
+! 1. Allocate MUNKH(1:IBAR,1:JBAR,1:KBAR) integer array for the mesh.
+ALLOCATE(MESHES(NM)%MUNKH(MESHES(NM)%IBAR,MESHES(NM)%JBAR,MESHES(NM)%KBAR)); MESHES(NM)%MUNKH = -11
+
+! 2. POINT to mesh again.
+CALL POINT_TO_MESH(NM)
+
+! 3. Initialize:
+ZONE_MESH_LOOP: DO IPZ=0,N_ZONE
+   ZM=>MESHES(NM)%ZONE_MESH(IPZ)
+   IF (.NOT.ZM%ZONE_IN_MESH) CYCLE ZONE_MESH_LOOP
+
+   ! 3.a Add index per zone in MUNKH array, the test goes by PRESSURE_ZONE(I,J,K), and MUNKH(I,J,K).
+   !     Similar to GET_MATRIX_INDEXES_H in GLOBMAT_SOLVER. Count number of unknowns ZM%NUNKH.
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            !...
+
+         ENDDO
+      ENDDO
+   ENDDO
+
+   ! 3.b Per pressure zone build REGFACE_H arrays. These face arrays are defined per mesh and axis and have
+   !     an integer field PRES_ZONE that provides the pressure zone the face is immersed in.
+   ! ...
+
+   ! 3.c If CC_IBM, per pressure zone build RCFACE_H and add PRES_ZONE value to cut-faces, etc.
+
+   ! 3.d With faces build zone matrix to be stored in ZM%A_H, IA_H, JA_H.
+
+   ! 3.e Apply BCs to matrix.
+
+   ! 3.f Call PARDISO for symbolic and numerical factorization of ZM%A_H.
+   ! ...
+
+ENDDO ZONE_MESH_LOOP
+
+RETURN
+END SUBROUTINE ULMAT_SOLVER_SETUP
+
+
+SUBROUTINE ULMAT_SOLVER(NM)
 
 INTEGER, INTENT(IN) :: NM
 
@@ -1177,7 +1238,7 @@ ZONE_MESH_LOOP: DO IPZ=0,N_ZONE
 ENDDO ZONE_MESH_LOOP
 
 ! STOP_STATUS=USER_STOP ! on testing
-END SUBROUTINE ULMAT_SOLVER_H
+END SUBROUTINE ULMAT_SOLVER
 
 
 END MODULE LOCMAT_SOLVER
@@ -1247,13 +1308,13 @@ REAL(EB):: TNOW
 
 PRIVATE
 
-PUBLIC GLMAT_SOLVER_SETUP_H,GLMAT_SOLVER_H,COPY_H_OMESH_TO_MESH,FINISH_GLMAT_SOLVER_H,PRESSURE_SOLVER_CHECK_RESIDUALS_U
+PUBLIC GLMAT_SOLVER_SETUP,GLMAT_SOLVER,COPY_H_OMESH_TO_MESH,FINISH_GLMAT_SOLVER,PRESSURE_SOLVER_CHECK_RESIDUALS_U
 
 CONTAINS
 
-! --------------------------- GLMAT_SOLVER_H -------------------------------------
+! --------------------------- GLMAT_SOLVER -------------------------------------
 
-SUBROUTINE GLMAT_SOLVER_H(T,DT)
+SUBROUTINE GLMAT_SOLVER(T,DT)
 
 USE MESH_POINTERS
 USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
@@ -1420,7 +1481,7 @@ CALL CLUSTER_SPARSE_SOLVER(PT_H, MAXFCT, MNUM, MTYPE, PHASE, NUNKH_TOTAL, &
 #endif
 #endif
 IF (ERROR /= 0) &
-WRITE(0,*) 'GLMAT_SOLVER_H: The following ERROR was detected: ', ERROR
+WRITE(0,*) 'GLMAT_SOLVER: The following ERROR was detected: ', ERROR
 
 IF (H_MATRIX_INDEFINITE) THEN
    WHOLE_DOM_IF2 : IF(.NOT.PRES_ON_WHOLE_DOMAIN) THEN
@@ -1657,11 +1718,11 @@ ENDDO MESH_LOOP_2
 T_USED(5)=T_USED(5)+CURRENT_TIME()-TNOW
 
 RETURN
-END SUBROUTINE GLMAT_SOLVER_H
+END SUBROUTINE GLMAT_SOLVER
 
 ! ------------------------- GLMAT_SOLVER_SETUP ----------------------------------
 
-SUBROUTINE GLMAT_SOLVER_SETUP_H(STAGE_FLAG)
+SUBROUTINE GLMAT_SOLVER_SETUP(STAGE_FLAG)
 
 USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
 
@@ -1756,7 +1817,7 @@ END SELECT
 T_USED(5)=T_USED(5)+CURRENT_TIME()-TNOW
 
 RETURN
-END SUBROUTINE GLMAT_SOLVER_SETUP_H
+END SUBROUTINE GLMAT_SOLVER_SETUP
 
 
 ! ---------------------------- CHECK_UNSUPPORTED_MESH -------------------------------
@@ -3633,9 +3694,9 @@ T_USED(5)=T_USED(5)+CURRENT_TIME()-TNOW
 END SUBROUTINE PRESSURE_SOLVER_CHECK_RESIDUALS_U
 
 
-! --------------------------- FINISH_GLMAT_SOLVER_H --------------------------------
+! --------------------------- FINISH_GLMAT_SOLVER --------------------------------
 
-SUBROUTINE FINISH_GLMAT_SOLVER_H
+SUBROUTINE FINISH_GLMAT_SOLVER
 
 USE MPI_F08
 
@@ -3671,7 +3732,7 @@ CALL CLUSTER_SPARSE_SOLVER(PT_H, MAXFCT, MNUM, MTYPE, PHASE, NUNKH_TOTAL, &
 #endif /* WITH_MKL */
 
 RETURN
-END SUBROUTINE FINISH_GLMAT_SOLVER_H
+END SUBROUTINE FINISH_GLMAT_SOLVER
 
 
 END MODULE GLOBMAT_SOLVER
