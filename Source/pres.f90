@@ -1002,14 +1002,61 @@ SUBROUTINE ULMAT_SOLVER_SETUP(NM)
 
 INTEGER, INTENT(IN) :: NM
 
-INTEGER :: DUM
+! Local Variables:
+INTEGER :: I,J,K,IPZ
 
-DUM=NM
+TYPE(ZONE_MESH_TYPE), POINTER :: ZM
+
+CALL POINT_TO_MESH(NM)
+
+! Here test if FFT solver can be used for this mesh:
+! Randy : Test for all GAS cells, single pressure zone and same WC%BOUNDARY_TYPE on each mesh side.
+! MESHES(NM)%MESH_PRES_FLAG = FFT_FLAG?
+MESHES(NM)%MESH_PRES_FLAG = ULMAT_FLAG
+
+! IF mesh solver is NOT ULMAT, return:
+IF(MESHES(NM)%MESH_PRES_FLAG/=ULMAT_FLAG) RETURN
 
 
+! If mesh solver is ULMAT, initialize:
+! 1. Allocate MUNKH(1:IBAR,1:JBAR,1:KBAR) integer array for the mesh.
+ALLOCATE(MESHES(NM)%MUNKH(MESHES(NM)%IBAR,MESHES(NM)%JBAR,MESHES(NM)%KBAR)); MESHES(NM)%MUNKH = -11
 
+! 2. POINT to mesh again.
+CALL POINT_TO_MESH(NM)
 
+! 3. Initialize:
+ZONE_MESH_LOOP: DO IPZ=0,N_ZONE
+   ZM=>MESHES(NM)%ZONE_MESH(IPZ)
+   IF (.NOT.ZM%ZONE_IN_MESH) CYCLE ZONE_MESH_LOOP
 
+   ! 3.a Add index per zone in MUNKH array, the test goes by PRESSURE_ZONE(I,J,K), and MUNKH(I,J,K).
+   !     Similar to GET_MATRIX_INDEXES_H in GLOBMAT_SOLVER. Count number of unknowns ZM%NUNKH.
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            !...
+
+         ENDDO
+      ENDDO
+   ENDDO
+
+   ! 3.b Per pressure zone build REGFACE_H arrays. These face arrays are defined per mesh and axis and have
+   !     an integer field PRES_ZONE that provides the pressure zone the face is immersed in.
+   ! ...
+
+   ! 3.c If CC_IBM, per pressure zone build RCFACE_H and add PRES_ZONE value to cut-faces, etc.
+
+   ! 3.d With faces build zone matrix to be stored in ZM%A_H, IA_H, JA_H.
+
+   ! 3.e Apply BCs to matrix.
+
+   ! 3.f Call PARDISO for symbolic and numerical factorization of ZM%A_H.
+   ! ...
+
+ENDDO ZONE_MESH_LOOP
+
+RETURN
 END SUBROUTINE ULMAT_SOLVER_SETUP
 
 
