@@ -1009,61 +1009,89 @@ CONTAINS
 
 SUBROUTINE ULMAT_SOLVER_SETUP(NM)
 
+USE COMPLEX_GEOMETRY, ONLY : IBM_SOLID,IBM_CGSC,IBM_IDCC
+
 INTEGER, INTENT(IN) :: NM
 
 ! Local Variables:
-INTEGER :: I,J,K,IPZ
-
+INTEGER :: I,J,K,IPZ,ICC,IROW
+INTEGER, POINTER :: IBAR=>NULL(),JBAR=>NULL(),KBAR=>NULL()
 TYPE(ZONE_MESH_TYPE), POINTER :: ZM
+TYPE (MESH_TYPE), POINTER :: M=>NULL()
 
-CALL POINT_TO_MESH(NM)
+M    =>MESHES(NM)
+IBAR =>M%IBAR
+JBAR =>M%JBAR
+KBAR =>M%KBAR
 
 ! Here test if FFT solver can be used for this mesh:
 ! Randy : Test for all GAS cells, single pressure zone and same WC%BOUNDARY_TYPE on each mesh side.
-! MESHES(NM)%MESH_PRES_FLAG = FFT_FLAG?
-MESHES(NM)%MESH_PRES_FLAG = ULMAT_FLAG
+ZONE_MESH_LOOP_1 : DO IPZ=0,N_ZONE
+   ZM=>M%ZONE_MESH(IPZ)
+   IF (.NOT.ZM%ZONE_IN_MESH) CYCLE ZONE_MESH_LOOP_1
 
-! IF mesh solver is NOT ULMAT, return:
-IF(MESHES(NM)%MESH_PRES_FLAG/=ULMAT_FLAG) RETURN
+   ! Test: Does this zone in the mesh take all GAS cells, single pressure zone and same
+   ! WC%BOUNDARY_TYPE on each mesh side.
+   ! If so: ZM%USE_FFT=.TRUE. and RETURN
+
+ENDDO ZONE_MESH_LOOP_1
+
 
 
 ! If mesh solver is ULMAT, initialize:
-! 1. Allocate MUNKH(1:IBAR,1:JBAR,1:KBAR) integer array for the mesh.
-ALLOCATE(MESHES(NM)%MUNKH(MESHES(NM)%IBAR,MESHES(NM)%JBAR,MESHES(NM)%KBAR)); MESHES(NM)%MUNKH = -11
-
-! 2. POINT to mesh again.
-CALL POINT_TO_MESH(NM)
-
 ! 3. Initialize:
-ZONE_MESH_LOOP: DO IPZ=0,N_ZONE
-   ZM=>MESHES(NM)%ZONE_MESH(IPZ)
-   IF (.NOT.ZM%ZONE_IN_MESH) CYCLE ZONE_MESH_LOOP
-
-   ! 3.a Add index per zone in MUNKH array, the test goes by PRESSURE_ZONE(I,J,K), and MUNKH(I,J,K).
-   !     Similar to GET_MATRIX_INDEXES_H in GLOBMAT_SOLVER. Count number of unknowns ZM%NUNKH.
+! 3.a Add index per zone in MUNKH array, the test goes by PRESSURE_ZONE(I,J,K), and MUNKH(I,J,K).
+!     Similar to GET_MATRIX_INDEXES_H in GLOBMAT_SOLVER. Count number of unknowns ZM%NUNKH.
+ALLOCATE(M%MUNKH(1:IBAR,1:JBAR,1:KBAR)); M%MUNKH = -11
+CALL POINT_TO_MESH(NM)
+ZONE_MESH_LOOP_3: DO IPZ=0,N_ZONE
+   ZM=>ZONE_MESH(IPZ)
+   IF (.NOT.ZM%ZONE_IN_MESH) CYCLE ZONE_MESH_LOOP_3
+   ! count NUNKH:
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            !...
-
+            IF(PRESSURE_ZONE(I,J,K)/=IPZ) CYCLE
+            IF(SOLID(CELL_INDEX(I,J,K))) CYCLE
+            IF (CC_IBM) THEN; IF(CCVAR(I,J,K,IBM_CGSC)==IBM_SOLID) CYCLE; ENDIF
+            ZM%NUNKH                  = ZM%NUNKH + 1
          ENDDO
       ENDDO
    ENDDO
+   ALLOCATE(ZM%MESH_IJK(1:3,1:ZM%NUNKH))
+   IROW = 0
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            IF(PRESSURE_ZONE(I,J,K)/=IPZ) CYCLE
+            IF(SOLID(CELL_INDEX(I,J,K))) CYCLE
+            IF (CC_IBM) THEN; IF(CCVAR(I,J,K,IBM_CGSC)==IBM_SOLID) CYCLE; ENDIF
+            IROW                  = IROW + 1
+            ZM%MESH_IJK(1:3,IROW) = (/ I, J, K/)
+            MUNKH(I,J,K)        = IROW
+            ! Add UNKH to all cut-cells in I,J,K cell.
+            IF (CC_IBM) THEN
+               ICC = CCVAR(I,J,K,IBM_IDCC)
+               IF(ICC>0) CUT_CELL(ICC)%UNKH(1:CUT_CELL(ICC)%NCELL) = IROW
+            ENDIF
+         ENDDO
+      ENDDO
+   ENDDO
+ENDDO ZONE_MESH_LOOP_3
 
-   ! 3.b Per pressure zone build REGFACE_H arrays. These face arrays are defined per mesh and axis and have
-   !     an integer field PRES_ZONE that provides the pressure zone the face is immersed in.
-   ! ...
+! 3.b Build REGFACE_H, RCFACE_H arrays. These face arrays are defined per mesh and axis and have
+!     an integer field PRES_ZONE that provides the pressure zone the face is immersed in.
+CALL ULMAT_GET_H_REGFACES(NM)
 
-   ! 3.c If CC_IBM, per pressure zone build RCFACE_H and add PRES_ZONE value to cut-faces, etc.
+! 3.c If CC_IBM, per pressure zone build RCFACE_H and add PRES_ZONE value to cut-faces, etc.
 
-   ! 3.d With faces build zone matrix to be stored in ZM%A_H, IA_H, JA_H.
 
-   ! 3.e Apply BCs to matrix.
+! 3.d With faces build zone matrix to be stored in ZM%A_H, IA_H, JA_H.
 
-   ! 3.f Call PARDISO for symbolic and numerical factorization of ZM%A_H.
-   ! ...
+! 3.e Apply BCs to matrix.
 
-ENDDO ZONE_MESH_LOOP
+! 3.f Call PARDISO for symbolic and numerical factorization of ZM%A_H.
+! ...
 
 RETURN
 END SUBROUTINE ULMAT_SOLVER_SETUP
@@ -1239,6 +1267,137 @@ ENDDO ZONE_MESH_LOOP
 
 ! STOP_STATUS=USER_STOP ! on testing
 END SUBROUTINE ULMAT_SOLVER
+
+! -------------------------ULMAT_GET_H_REGFACES ---------------------------------
+
+SUBROUTINE ULMAT_GET_H_REGFACES(NM)
+
+USE MESH_POINTERS
+USE CC_SCALARS_IBM, ONLY : GET_RCFACES_H
+
+INTEGER, INTENT(IN) :: NM
+
+! Local Variables:
+INTEGER :: ILO,IHI,JLO,JHI,KLO,KHI
+INTEGER :: I,J,K,II,IREG,X1AXIS
+INTEGER, ALLOCATABLE, DIMENSION(:,:) :: IJKBUFFER
+INTEGER :: IW, IIG, JJG, KKG, IOR
+LOGICAL, ALLOCATABLE, DIMENSION(:,:,:,:) :: LOG_INTWC
+TYPE(WALL_TYPE), POINTER :: WC=>NULL()
+
+! Set starting number of regular faces for NM to zero:
+MESHES(NM)%NREGFACE_H(IAXIS:KAXIS) = 0
+
+! 1. Regular GASPHASE faces connected to Gasphase cells:
+ALLOCATE(IJKBUFFER(IAXIS:KAXIS,1:(IBAR+1)*(JBAR+1)*(KBAR+1)))
+
+! Check internal SOLID_BOUNDARY faces:
+ALLOCATE(LOG_INTWC(0:IBAR,0:JBAR,0:KBAR,IAXIS:KAXIS)); LOG_INTWC(:,:,:,:) = .FALSE.
+WALL_LOOP_1 : DO IW=N_EXTERNAL_WALL_CELLS+1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+   WC => WALL(IW)
+   IF (WC%BOUNDARY_TYPE/=SOLID_BOUNDARY) CYCLE
+   IIG = WC%BOUNDARY_COORD%IIG
+   JJG = WC%BOUNDARY_COORD%JJG
+   KKG = WC%BOUNDARY_COORD%KKG
+   IOR = WC%BOUNDARY_COORD%IOR
+   SELECT CASE(IOR)
+   CASE( 1); LOG_INTWC(IIG-1,JJG  ,KKG  ,IAXIS) = .TRUE.
+   CASE(-1); LOG_INTWC(IIG  ,JJG  ,KKG  ,IAXIS) = .TRUE.
+   CASE( 2); LOG_INTWC(IIG  ,JJG-1,KKG  ,JAXIS) = .TRUE.
+   CASE(-2); LOG_INTWC(IIG  ,JJG  ,KKG  ,JAXIS) = .TRUE.
+   CASE( 3); LOG_INTWC(IIG  ,JJG  ,KKG-1,KAXIS) = .TRUE.
+   CASE(-3); LOG_INTWC(IIG  ,JJG  ,KKG  ,KAXIS) = .TRUE.
+   END SELECT
+ENDDO WALL_LOOP_1
+
+! Regular faces in axis = IAXIS : External boundary faces not counted.
+X1AXIS = IAXIS
+ILO = 1; IHI = IBAR-1
+JLO = 1; JHI = JBAR
+KLO = 1; KHI = KBAR
+! First count for allocation:
+IREG = 0
+DO K=KLO,KHI
+   DO J=JLO,JHI
+      DO I=ILO,IHI
+         IF (LOG_INTWC(I,J,K,X1AXIS))   CYCLE ! Wall cell in X face.
+         IF (PRESSURE_ZONE(I,J,K)/=PRESSURE_ZONE(I+1,J,K)) CYCLE ! Solid face in X face.
+         IF (MUNKH(I  ,J,K) <= 0) CYCLE ! No UNKH defined at low cell.
+         IF (MUNKH(I+1,J,K) <= 0) CYCLE ! No UNKH defined at high cell.
+         IREG = IREG + 1
+         IJKBUFFER(IAXIS:KAXIS,IREG) = (/ I, J, K /)
+      ENDDO
+   ENDDO
+ENDDO
+MESHES(NM)%NREGFACE_H(X1AXIS) = IREG
+NULLIFY(REGFACE_IAXIS_H) ! Nullify pointer to mesh variable M%REGFACE_IAXIS_H, we are about to allocate it.
+IF(ALLOCATED(MESHES(NM)%REGFACE_IAXIS_H)) DEALLOCATE(MESHES(NM)%REGFACE_IAXIS_H)
+ALLOCATE(MESHES(NM)%REGFACE_IAXIS_H(IREG))
+DO II=1,IREG
+   MESHES(NM)%REGFACE_IAXIS_H(II)%IJK(IAXIS:KAXIS) = IJKBUFFER(IAXIS:KAXIS,II)
+ENDDO
+
+! Regular faces in axis = JAXIS : External boundary faces not counted.
+X1AXIS = JAXIS
+ILO = 1; IHI = IBAR
+JLO = 1; JHI = JBAR-1
+KLO = 1; KHI = KBAR
+! First count for allocation:
+IREG = 0
+DO K=KLO,KHI
+   DO J=JLO,JHI
+      DO I=ILO,IHI
+         IF (LOG_INTWC(I,J,K,X1AXIS)) CYCLE
+         IF (PRESSURE_ZONE(I,J,K)/=PRESSURE_ZONE(I,J+1,K)) CYCLE ! Solid face in Y face.
+         IF (MUNKH(I,J  ,K) <= 0) CYCLE
+         IF (MUNKH(I,J+1,K) <= 0) CYCLE
+         IREG = IREG + 1
+         IJKBUFFER(IAXIS:KAXIS,IREG) = (/ I, J, K /)
+      ENDDO
+   ENDDO
+ENDDO
+MESHES(NM)%NREGFACE_H(X1AXIS) = IREG
+NULLIFY(REGFACE_JAXIS_H) ! Nullify pointer to mesh variable M%REGFACE_JAXIS_H, we are about to allocate it.
+IF(ALLOCATED(MESHES(NM)%REGFACE_JAXIS_H)) DEALLOCATE(MESHES(NM)%REGFACE_JAXIS_H)
+ALLOCATE(MESHES(NM)%REGFACE_JAXIS_H(IREG))
+DO II=1,IREG
+   MESHES(NM)%REGFACE_JAXIS_H(II)%IJK(IAXIS:KAXIS) = IJKBUFFER(IAXIS:KAXIS,II)
+ENDDO
+
+! Regular faces in axis = KAXIS : External boundary faces not counted.
+X1AXIS = KAXIS
+ILO = 1; IHI = IBAR
+JLO = 1; JHI = JBAR
+KLO = 1; KHI = KBAR-1
+! Loop on Cartesian cells, define cut cells and solid cells CGSC:
+! First count for allocation:
+IREG = 0
+DO K=KLO,KHI
+   DO J=JLO,JHI
+      DO I=ILO,IHI
+         IF (LOG_INTWC(I,J,K,X1AXIS))        CYCLE
+         IF (PRESSURE_ZONE(I,J,K)/=PRESSURE_ZONE(I,J,K+1)) CYCLE ! Solid face in Z face.
+         IF (MUNKH(I,J,K  ) <= 0) CYCLE
+         IF (MUNKH(I,J,K+1) <= 0) CYCLE
+         IREG = IREG + 1
+         IJKBUFFER(IAXIS:KAXIS,IREG) = (/ I, J, K /)
+      ENDDO
+   ENDDO
+ENDDO
+MESHES(NM)%NREGFACE_H(X1AXIS) = IREG
+NULLIFY(REGFACE_KAXIS_H) ! Nullify pointer to mesh variable M%REGFACE_KAXIS_H, we are about to allocate it.
+IF(ALLOCATED(MESHES(NM)%REGFACE_KAXIS_H)) DEALLOCATE(MESHES(NM)%REGFACE_KAXIS_H)
+ALLOCATE(MESHES(NM)%REGFACE_KAXIS_H(IREG))
+DO II=1,IREG
+   MESHES(NM)%REGFACE_KAXIS_H(II)%IJK(IAXIS:KAXIS) = IJKBUFFER(IAXIS:KAXIS,II)
+ENDDO
+
+! 2. Lists of Regular Gasphase faces, connected to one regular gasphase and one cut-cell:
+IF (CC_IBM) CALL GET_RCFACES_H(NM)
+
+DEALLOCATE(IJKBUFFER,LOG_INTWC)
+
+END SUBROUTINE ULMAT_GET_H_REGFACES
 
 
 END MODULE LOCMAT_SOLVER
