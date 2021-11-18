@@ -1316,10 +1316,10 @@ TYPE ZONE_MESH_TYPE
 #else
    INTEGER, ALLOCATABLE :: PT_H(:)
 #endif /* WITH_MKL */
-   LOGICAL :: USE_FFT=.FALSE.                         !< Flag for use of FFT solver.
    INTEGER :: NUNKH=0                                 !< Number of unknowns in pressure solution for a given ZONE_MESH
    LOGICAL :: ZONE_IN_MESH=.FALSE.                    !< ZONE is in MESH
-   INTEGER, ALLOCATABLE, DIMENSION(:,:) :: MESH_IJK   !< I,J,K positions of cell with unknown row IROW. (1:3,1:NUNKH)
+   LOGICAL :: USE_FFT=.TRUE.                          !< Flag for use of FFT solver
+   INTEGER, ALLOCATABLE, DIMENSION(:,:) :: MESH_IJK   !< I,J,K positions of cell with unknown row IROW (1:3,1:NUNKH)
 END TYPE ZONE_MESH_TYPE
 
 
