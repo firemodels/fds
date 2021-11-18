@@ -1005,7 +1005,7 @@ USE COMPLEX_GEOMETRY, ONLY : IBM_SOLID,IBM_CGSC,IBM_IDCC
 INTEGER, INTENT(IN) :: NM
 
 ! Local Variables:
-INTEGER :: I,J,K,IPZ,ICC,IROW,IW,IOR,ZBTYPE_LAST(-3:3),WALL_BTYPE
+INTEGER :: I,J,K,IPZ,ICC,IROW,IW,IOR,ZBTYPE_LAST(-3:3),WALL_BTYPE,NZIM,IPZIM
 INTEGER, POINTER :: IBAR=>NULL(),JBAR=>NULL(),KBAR=>NULL()
 TYPE(ZONE_MESH_TYPE), POINTER :: ZM
 TYPE (MESH_TYPE), POINTER :: M=>NULL()
@@ -1019,9 +1019,15 @@ KBAR =>M%KBAR
 
 ! Test if FFT solver can be used for this MESH
 
+NZIM=0
 ZONE_MESH_LOOP: DO IPZ=0,N_ZONE
    ZM=>M%ZONE_MESH(IPZ)
    IF (.NOT.ZM%ZONE_IN_MESH) CYCLE ZONE_MESH_LOOP
+
+   ! Test for multiple zones in MESH
+   NZIM=NZIM+1
+   IPZIM=IPZ
+   IF (NZIM>1) ZM%USE_FFT=.FALSE.
 
    ! Test for internal wall cells
    IF (M%N_INTERNAL_WALL_CELLS>0) ZM%USE_FFT=.FALSE.
@@ -1048,26 +1054,10 @@ ZONE_MESH_LOOP: DO IPZ=0,N_ZONE
       ENDDO WALL_LOOP
    ENDIF
 
-   ! Test internal cells for multiple PRESSURE_ZONEs on the MESH
-   IF (ZM%USE_FFT) THEN
-      KLOOP: DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               IF (M%PRESSURE_ZONE(I,J,K)/=IPZ) THEN
-                  ZM%USE_FFT=.FALSE.
-                  EXIT KLOOP
-               ENDIF
-            ENDDO
-         ENDDO
-      ENDDO KLOOP
-   ENDIF
-
-   ! No need for further setup if the mesh will use the FFT solver
-   IF (ZM%USE_FFT) RETURN
-
 ENDDO ZONE_MESH_LOOP
 
-
+! FFT solver will be used for this mesh, no further setup required
+IF (NZIM==1 .AND. M%ZONE_MESH(IPZIM)%USE_FFT) RETURN
 
 ! If mesh solver is ULMAT, initialize:
 ! 3. Initialize:
