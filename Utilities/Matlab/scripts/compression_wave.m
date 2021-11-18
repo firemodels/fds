@@ -164,7 +164,7 @@ H(3)=plot(t_FL4_64,rho_fds_FL4_64,'b--','LineWidth',Line_Width); hold on
 H(4)=plot(t_FL4_128,rho_fds_FL4_128,'r--','LineWidth',Line_Width); hold on
 
 xlabel('Time (s)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'FontName',Font_Name)
-ylabel('Density (kg/m^3)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'FontName',Font_Name)
+ylabel('Density (kg/m³)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'FontName',Font_Name)
 axis([0 12.5 0 8])
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
@@ -206,7 +206,7 @@ H(5)=loglog(h,.1*h,'k--','LineWidth',Line_Width);
 H(6)=loglog(h,.1*h.^2,'k-','LineWidth',Line_Width);
 
 xlabel('Grid Spacing (m)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'FontName',Font_Name)
-ylabel('L2 Error (kg/m^3)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'FontName',Font_Name)
+ylabel('L2 Error (kg/m³)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'FontName',Font_Name)
 axis([1e-2 1e0 1e-4 1e-1])
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
