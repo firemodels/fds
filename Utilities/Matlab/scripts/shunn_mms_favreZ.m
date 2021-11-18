@@ -91,8 +91,8 @@ set(gca,'FontSize',Title_Font_Size)
 
 xlabel('Time (s)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname',Font_Name)
 ylabel('Mass Fraction','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname',Font_Name)
-lh=legend(hh,'Analytical Favre {\itZ}','Analytical Average {\itZ}', ...
-    'FDS 32 Favre {\itZ}','FDS 32 Average {\itZ}','FDS 64 Favre {\itZ}','FDS 64 Average {\itZ}','location','southeast');
+lh=legend(hh,'Analytical Favre','Analytical Average', ...
+    'FDS 32 Favre','FDS 32 Average','FDS 64 Favre','FDS 64 Average','location','southeast');
 set(lh,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname',Font_Name)
 
 % add Git version if file is available

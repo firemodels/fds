@@ -36,7 +36,7 @@ set(gca,'FontSize',Title_Font_Size)
 set(gca,'XGrid','on')
 set(gca,'YGrid','on')
 axis([-10 20 -1000 1000])
-xlabel('Volume Flow Rate (m^3/s)','Interpreter',Font_Interpreter,'FontName',Font_Name,'FontSize',Label_Font_Size)
+xlabel('Volume Flow Rate (m³/s)','Interpreter',Font_Interpreter,'FontName',Font_Name,'FontSize',Label_Font_Size)
 ylabel('Static Pressure (Pa)','Interpreter',Font_Interpreter,'FontName',Font_Name,'FontSize',Label_Font_Size)
 lh=legend(K,XLegendStr,'Location','Southwest');
 set(lh,'FontSize',Key_Font_Size)

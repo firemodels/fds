@@ -87,8 +87,8 @@ for i_plot=1:2
 
     if i_plot==1
        h=plot(t,xf,'k-',t_fds,dmin,'b--',t_fds,dmax,'r--');
-       xlabel('Time (s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
-       ylabel('Phase interface, {\itx}_f (m)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
+       xlabel('Time (s)','Interpreter','LaTeX','FontSize',Label_Font_Size)
+       ylabel('Phase interface, $x_{\rm f}$ (m)','Interpreter','LaTeX','FontSize',Label_Font_Size)
        legend('Analytical','FDS min','FDS max','Location','SouthEast')
     else
        h=plot(t,T(:,1),'k-',t,T(:,2),'r-',t,T(:,3),'g-'); hold on
