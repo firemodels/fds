@@ -1005,29 +1005,59 @@ USE COMPLEX_GEOMETRY, ONLY : IBM_SOLID,IBM_CGSC,IBM_IDCC
 INTEGER, INTENT(IN) :: NM
 
 ! Local Variables:
-INTEGER :: I,J,K,IPZ,ICC,IROW
+INTEGER :: I,J,K,IPZ,ICC,IROW,IW,IOR,ZBTYPE_LAST(-3:3),WALL_BTYPE,NZIM,IPZIM
 INTEGER, POINTER :: IBAR=>NULL(),JBAR=>NULL(),KBAR=>NULL()
 TYPE(ZONE_MESH_TYPE), POINTER :: ZM
 TYPE (MESH_TYPE), POINTER :: M=>NULL()
+TYPE (WALL_TYPE), POINTER :: WC=>NULL()
+INTEGER, PARAMETER :: NULL_BTYPE=0,DIRICHLET_BTYPE=1,NEUMANN_BTYPE=2,PERIODIC_BTYPE=3
 
 M    =>MESHES(NM)
 IBAR =>M%IBAR
 JBAR =>M%JBAR
 KBAR =>M%KBAR
 
-! Here test if FFT solver can be used for this mesh:
-! Randy : Test for all GAS cells, single pressure zone and same WC%BOUNDARY_TYPE on each mesh side.
-ZONE_MESH_LOOP_1 : DO IPZ=0,N_ZONE
+! Test if FFT solver can be used for this MESH
+
+NZIM=0
+ZONE_MESH_LOOP: DO IPZ=0,N_ZONE
    ZM=>M%ZONE_MESH(IPZ)
-   IF (.NOT.ZM%ZONE_IN_MESH) CYCLE ZONE_MESH_LOOP_1
+   IF (.NOT.ZM%ZONE_IN_MESH) CYCLE ZONE_MESH_LOOP
 
-   ! Test: Does this zone in the mesh take all GAS cells, single pressure zone and same
-   ! WC%BOUNDARY_TYPE on each mesh side.
-   ! If so: ZM%USE_FFT=.TRUE. and RETURN
+   ! Test for multiple zones in MESH
+   NZIM=NZIM+1
+   IPZIM=IPZ
+   IF (NZIM>1) ZM%USE_FFT=.FALSE.
 
-ENDDO ZONE_MESH_LOOP_1
+   ! Test for internal wall cells
+   IF (M%N_INTERNAL_WALL_CELLS>0) ZM%USE_FFT=.FALSE.
 
+   ! Marcos: IF number of CFACES>0 set ZM%USE_FFT=.FALSE.
 
+   ! Test external wall loop for inhomogeneous boundary types
+   IF (ZM%USE_FFT) THEN
+      ZBTYPE_LAST=NULL_BTYPE
+      WALL_LOOP: DO IW=1,M%N_EXTERNAL_WALL_CELLS
+         WC=>M%WALL(IW)
+         IOR = WC%BOUNDARY_COORD%IOR
+         SELECT CASE(WC%BOUNDARY_TYPE)
+            CASE(SOLID_BOUNDARY,MIRROR_BOUNDARY)      ; WALL_BTYPE=NEUMANN_BTYPE
+            CASE(OPEN_BOUNDARY,INTERPOLATED_BOUNDARY) ; WALL_BTYPE=DIRICHLET_BTYPE
+            CASE(PERIODIC_BOUNDARY)                   ; WALL_BTYPE=PERIODIC_BTYPE
+         END SELECT
+         IF (ZBTYPE_LAST(IOR)==NULL_BTYPE) THEN
+            ZBTYPE_LAST(IOR)=WALL_BTYPE
+         ELSEIF (WALL_BTYPE/=ZBTYPE_LAST(IOR)) THEN
+            ZM%USE_FFT=.FALSE.
+            EXIT WALL_LOOP
+         ENDIF
+      ENDDO WALL_LOOP
+   ENDIF
+
+ENDDO ZONE_MESH_LOOP
+
+! FFT solver will be used for this mesh, no further setup required
+IF (NZIM==1 .AND. M%ZONE_MESH(IPZIM)%USE_FFT) RETURN
 
 ! If mesh solver is ULMAT, initialize:
 ! 3. Initialize:
@@ -1035,9 +1065,9 @@ ENDDO ZONE_MESH_LOOP_1
 !     Similar to GET_MATRIX_INDEXES_H in GLOBMAT_SOLVER. Count number of unknowns ZM%NUNKH.
 ALLOCATE(M%MUNKH(1:IBAR,1:JBAR,1:KBAR)); M%MUNKH = -11
 CALL POINT_TO_MESH(NM)
-ZONE_MESH_LOOP_3: DO IPZ=0,N_ZONE
+ZONE_MESH_LOOP_2: DO IPZ=0,N_ZONE
    ZM=>ZONE_MESH(IPZ)
-   IF (.NOT.ZM%ZONE_IN_MESH) CYCLE ZONE_MESH_LOOP_3
+   IF (.NOT.ZM%ZONE_IN_MESH) CYCLE ZONE_MESH_LOOP_2
    ! count NUNKH:
    DO K=1,KBAR
       DO J=1,JBAR
@@ -1068,7 +1098,7 @@ ZONE_MESH_LOOP_3: DO IPZ=0,N_ZONE
          ENDDO
       ENDDO
    ENDDO
-ENDDO ZONE_MESH_LOOP_3
+ENDDO ZONE_MESH_LOOP_2
 
 ! 3.b Build REGFACE_H, RCFACE_H arrays. These face arrays are defined per mesh and axis and have
 !     an integer field PRES_ZONE that provides the pressure zone the face is immersed in.
