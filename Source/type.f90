@@ -1317,9 +1317,13 @@ TYPE ZONE_MESH_TYPE
    INTEGER, ALLOCATABLE :: PT_H(:)
 #endif /* WITH_MKL */
    INTEGER :: NUNKH=0                                 !< Number of unknowns in pressure solution for a given ZONE_MESH
+   INTEGER :: MTYPE=0                                 !< Matrix type (symmetric indefinite, or symm positive definite)
    LOGICAL :: ZONE_IN_MESH=.FALSE.                    !< ZONE is in MESH
    LOGICAL :: USE_FFT=.TRUE.                          !< Flag for use of FFT solver
    INTEGER, ALLOCATABLE, DIMENSION(:,:) :: MESH_IJK   !< I,J,K positions of cell with unknown row IROW (1:3,1:NUNKH)
+   REAL(EB),ALLOCATABLE, DIMENSION(:)   :: A_H        !< Matrix coefficients for ZONE_MESH, up triang part, CSR format.
+   INTEGER ,ALLOCATABLE, DIMENSION(:)   :: IA_H,JA_H  !< Matrix indexes for ZONE_MESH, up triang part, CSR format.
+   REAL(EB),ALLOCATABLE, DIMENSION(:)   :: F_H,X_H    !< RHS and Solution containers for the ZONE_MESH.
 END TYPE ZONE_MESH_TYPE
 
 
