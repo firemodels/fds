@@ -11,6 +11,7 @@ expdir = '../../../exp/Submodules/macfp-db/Gaseous_Pool_Fires/McCaffrey_Flames/C
 pltdir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/McCaffrey_Plume/';
 
 plot_style
+Font_Interpreter='LaTeX';
 
 Q = [14.4 21.7 33.0 44.9 57.5]; % kW
 g = 9.8; % m/s2
@@ -80,20 +81,20 @@ for i=1:length(chid)
     set(gca,'FontName',Font_Name)
     set(gca,'FontSize',Label_Font_Size)
 
-    xlabel('{\itz/Q}^{2/5}','FontSize',Label_Font_Size)
-    ylabel('\Delta{\itT} (\circC)','FontSize',Label_Font_Size)
+    xlabel('${z/Q}^{2/5}$','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
+    ylabel('$\Delta{T}$ ($^\circ$C)','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
 
     axis([.008 1 100 1200])
 
-    lh = legend(h1,key{i},'({\itz/Q}^{2/5})^\eta','Least Squares Fit','Location','SouthWest');
-    set(lh,'FontSize',Key_Font_Size)
+    lh = legend(h1,key{i},'(${z/Q}^{2/5})^\eta$','Least Squares Fit','Location','SouthWest');
+    set(lh,'FontSize',Key_Font_Size,'Interpreter',Font_Interpreter)
 
     text(.01,1000,['McCaffrey Centerline Temperature Data, ',key{i}],'FontName',Font_Name,'FontSize',Title_Font_Size)
-    text(.03,650,'\eta=0','FontSize',Label_Font_Size,'FontName',Font_Name)
-    text(.08,425,'\eta=-1','FontSize',Label_Font_Size,'FontName',Font_Name)
-    text(.18,125,'\eta=-5/3','FontSize',Label_Font_Size,'FontName',Font_Name)
+    text(.03,650,'$\eta=0$','FontSize',Label_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
+    text(.06,425,'$\eta=-1$','FontSize',Label_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
+    text(.09,175,'$\eta=-5/3$','FontSize',Label_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
 
-    text(.009,400,['{\itT}_{SURF}=',num2str(T_SURF,'%4.0f'),' \circC'],'FontSize',Label_Font_Size,'FontName',Font_Name)
+    text(.009,400,['$\mathrm{T}\_{\mathrm{SURF}}$=',num2str(T_SURF,'%3.0f'),' $^\circ$C'],'FontSize',Label_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
 
     set(gcf,'Visible',Figure_Visibility);
     set(gcf,'Units',Paper_Units);

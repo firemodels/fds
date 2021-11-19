@@ -153,7 +153,7 @@ set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 plot(x,rho,'r--'); hold on
 plot(x,rho_3,'r-')
 xlabel('{\it x} (m)','FontName',Font_Name,'FontSize',Label_Font_Size)
-ylabel('density (kg/m^3)','FontName',Font_Name,'FontSize',Label_Font_Size)
+ylabel('density (kg/m³)','FontName',Font_Name,'FontSize',Label_Font_Size)
 lh=legend('initial field','final field','location','northeast');
 set(lh,'FontName',Font_Name,'FontSize',Label_Font_Size)
 addverstr(gca,Git_Filename,'linear')
@@ -174,7 +174,7 @@ set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 plot(x,f,'b--'); hold on
 plot(x,Z_3,'b-')
 xlabel('{\it x} (m)','FontName',Font_Name,'FontSize',Label_Font_Size)
-ylabel('mixture fraction, {\it Z}','FontName',Font_Name,'FontSize',Label_Font_Size)
+ylabel('mixture fraction','FontName',Font_Name,'FontSize',Label_Font_Size)
 lh=legend('initial field','final field','location','northwest');
 set(lh,'FontName',Font_Name,'FontSize',Label_Font_Size)
 addverstr(gca,Git_Filename,'linear')
@@ -195,7 +195,7 @@ set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
 plot(x,rho_3-rho_2,'b-'); hold on
 plot(x,rho_2-rho_1,'r-')
 xlabel('{\it x} (m)','FontName',Font_Name,'FontSize',Label_Font_Size)
-ylabel('density difference (kg/m^3) ','FontName',Font_Name,'FontSize',Label_Font_Size)
+ylabel('density difference (kg/m³) ','FontName',Font_Name,'FontSize',Label_Font_Size)
 lh=legend('\rho_3-\rho_2','\rho_2-\rho_1','location','northeast');
 set(lh,'FontName',Font_Name,'FontSize',Label_Font_Size)
 addverstr(gca,Git_Filename,'linear')

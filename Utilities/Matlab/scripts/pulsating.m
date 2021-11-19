@@ -134,7 +134,7 @@ H(3)=plot(t_FL2_64,rho_fds_FL2_64,'b--','LineWidth',Line_Width); hold on
 H(4)=plot(t_FL2_128,rho_fds_FL2_128,'r--','LineWidth',Line_Width); hold on
 
 xlabel('Time (s)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'FontName',Font_Name)
-ylabel('Density (kg/m^3)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'FontName',Font_Name)
+ylabel('Density (kg/m³)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'FontName',Font_Name)
 axis([0 12.5 0 2])
 legend_handle=legend(H,'FDS N=16','FDS N=32','FDS N=64','FDS N=128','Analytical Solution','Location','NorthEast');
 set(legend_handle,'Interpreter',Font_Interpreter);
@@ -174,7 +174,7 @@ H(4)=loglog(h,.1*h,'k--','LineWidth',Line_Width);
 H(5)=loglog(h,.1*h.^2,'k-','LineWidth',Line_Width);
 
 xlabel('Grid Spacing (m)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'FontName',Font_Name)
-ylabel('L2 Error (kg/m^3)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'FontName',Font_Name)
+ylabel('L2 Error (kg/m³)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'FontName',Font_Name)
 axis([1e-2 1e0 1e-6 1e-1])
 legend_handle=legend(H(1:5),'FDS Central','FDS Superbee','FDS CHARM','{\it O}({\it\deltax})','{\it O}({\it\deltax^2})','Location','NorthWest');
 set(legend_handle,'Interpreter',Font_Interpreter);
