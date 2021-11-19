@@ -234,7 +234,7 @@ TYPE MESH_TYPE
    LOGICAL, ALLOCATABLE, DIMENSION(:) :: EXTERIOR                   !< T or F if cell with CELL_INDEX(I,J,K) is outside mesh
    LOGICAL, ALLOCATABLE, DIMENSION(:) :: CONNECTED_MESH             !< T or F if cell is within another mesh
 
-   INTEGER :: NREGFACE_H(MAX_DIM)
+   INTEGER :: NREGFACE_H(MAX_DIM)=0
    TYPE(IBM_REGFACE_TYPE), ALLOCATABLE, DIMENSION(:) :: REGFACE_IAXIS_H, &
                                                         REGFACE_JAXIS_H, &
                                                         REGFACE_KAXIS_H
