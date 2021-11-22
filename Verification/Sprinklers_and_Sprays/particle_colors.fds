@@ -5,7 +5,7 @@
 &TIME T_END=20.0 /
 
 &SURF ID='INFLOW_AND_TRACERS',VEL=-0.25,PART_ID='inflow_blue' /
-&PART ID='inflow_blue',MASSLESS=.TRUE.,QUANTITIES(1)='PARTICLE TEMPERATURE',RGB=0,0,255 / Lagrangian particles
+&PART ID='inflow_blue',MASSLESS=.TRUE.,RGB=0,0,255 / Lagrangian particles
 
 &VENT XB=0.0, 0.0, 0.0, 1.0, 0.5, 1.0 SURF_ID='INFLOW_AND_TRACERS' /
 &VENT XB=2.0, 2.0, 0.0, 1.0, 0.0, 2.0 SURF_ID='OPEN' /
