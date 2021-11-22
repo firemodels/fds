@@ -1,4 +1,9 @@
 !> \brief A collection of major derived types used in FDS.
+!> \details There are several TYPEs that require special attention. WALL, CFACE, and PARTICLE TYPES reference other
+!> derived types that start with BOUNDARY, like BOUNDARY_COORD or BOUNDARY_ONE_D. The number of real, integer, and logical scalar 
+!> and array components of these derived types are denoted like this, for example: N_BOUNDARY_COORD_SCALAR_INTEGERS. You must
+!> adjust this value if you add or subtract components from the derived type. You should then use an existing component 
+!> as a guide and trace it through func.f90 to see how to initialize this component.
 
 MODULE TYPES
 
