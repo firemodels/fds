@@ -715,7 +715,7 @@ SUBROUTINE COMPUTE_VELOCITY_ERROR(DT,NM)
 USE MESH_POINTERS
 USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
 USE GLOBAL_CONSTANTS, ONLY: PREDICTOR,VELOCITY_ERROR_MAX,SOLID_BOUNDARY,INTERPOLATED_BOUNDARY,VELOCITY_ERROR_MAX_LOC,T_USED,&
-                            PRES_FLAG,FREEZE_VELOCITY,SOLID_PHASE_ONLY,GLMAT_FLAG,UGLMAT_FLAG,USCARC_FLAG
+                            PRES_FLAG,FREEZE_VELOCITY,SOLID_PHASE_ONLY,GLMAT_FLAG,UGLMAT_FLAG,ULMAT_FLAG,USCARC_FLAG
 
 REAL(EB), INTENT(IN) :: DT
 INTEGER, INTENT(IN) :: NM
@@ -770,8 +770,8 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    DHFCT = 1._EB
    IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
       SELECT CASE(PRES_FLAG)
-         CASE(UGLMAT_FLAG,USCARC_FLAG); DHFCT=0._EB
-         CASE(GLMAT_FLAG); IF (IW<=N_EXTERNAL_WALL_CELLS) DHFCT=0._EB
+      CASE(UGLMAT_FLAG,ULMAT_FLAG,USCARC_FLAG); DHFCT=0._EB
+      CASE(GLMAT_FLAG); IF (IW<=N_EXTERNAL_WALL_CELLS) DHFCT=0._EB
       END SELECT
    ENDIF
 
@@ -1012,6 +1012,8 @@ INTEGER, ALLOCATABLE, DIMENSION(:,:) ::  JD_H_MAT
 REAL(EB),ALLOCATABLE, DIMENSION(:,:) ::   D_H_MAT
 
 ! PARDISO solver control parameters:
+INTEGER, PARAMETER :: SYMM_INDEFINITE       =-2
+INTEGER, PARAMETER :: SYMM_POSITIVE_DEFINITE= 2
 INTEGER, ALLOCATABLE :: IPARM( : )
 
 ! Message level:
@@ -1031,7 +1033,7 @@ CONTAINS
 
 SUBROUTINE ULMAT_SOLVER_SETUP(NM)
 
-USE COMPLEX_GEOMETRY, ONLY : IBM_SOLID,IBM_CGSC,IBM_IDCC
+USE COMPLEX_GEOMETRY, ONLY : IBM_GASPHASE,IBM_CGSC,IBM_IDCC
 USE CC_SCALARS_IBM, ONLY : GET_H_CUTFACES
 INTEGER, INTENT(IN) :: NM
 
@@ -1116,7 +1118,7 @@ IF (NZIM==1 .AND. M%ZONE_MESH(IPZIM)%USE_FFT) RETURN
 ALLOCATE(M%MUNKH(1:IBAR,1:JBAR,1:KBAR)); M%MUNKH=IS_UNDEFINED
 CALL POINT_TO_MESH(NM)
 ZONE_MESH_LOOP_2: DO IPZ=0,N_ZONE
-   ZM=>ZONE_MESH(IPZ)
+   ZM=>MESHES(NM)%ZONE_MESH(IPZ)
    IF (.NOT.ZM%ZONE_IN_MESH) CYCLE ZONE_MESH_LOOP_2
    ! count NUNKH:
    DO K=1,KBAR
@@ -1124,10 +1126,17 @@ ZONE_MESH_LOOP_2: DO IPZ=0,N_ZONE
          DO I=1,IBAR
             IF(PRESSURE_ZONE(I,J,K)/=IPZ) CYCLE
             IF(SOLID(CELL_INDEX(I,J,K))) CYCLE
-            IF (CC_IBM) THEN; IF(CCVAR(I,J,K,IBM_CGSC)==IBM_SOLID) CYCLE; ENDIF
-            ZM%NUNKH                  = ZM%NUNKH + 1
+            IF (CC_IBM) THEN; IF(CCVAR(I,J,K,IBM_CGSC)/=IBM_GASPHASE) CYCLE; ENDIF
+            ZM%NUNKH = ZM%NUNKH + 1
          ENDDO
       ENDDO
+   ENDDO
+   ZM%NUNKH_CART=ZM%NUNKH
+   DO ICC=1,M%N_CUTCELL_MESH
+      I = CUT_CELL(ICC)%IJK(IAXIS); J = CUT_CELL(ICC)%IJK(JAXIS); K = CUT_CELL(ICC)%IJK(KAXIS)
+      IF(PRESSURE_ZONE(I,J,K)/=IPZ) CYCLE
+      IF(SOLID(CELL_INDEX(I,J,K))) CYCLE
+      ZM%NUNKH = ZM%NUNKH + 1
    ENDDO
    ALLOCATE(ZM%MESH_IJK(1:3,1:ZM%NUNKH))
    IROW = 0
@@ -1136,17 +1145,20 @@ ZONE_MESH_LOOP_2: DO IPZ=0,N_ZONE
          DO I=1,IBAR
             IF(PRESSURE_ZONE(I,J,K)/=IPZ) CYCLE
             IF(SOLID(CELL_INDEX(I,J,K))) CYCLE
-            IF (CC_IBM) THEN; IF(CCVAR(I,J,K,IBM_CGSC)==IBM_SOLID) CYCLE; ENDIF
+            IF (CC_IBM) THEN; IF(CCVAR(I,J,K,IBM_CGSC)/=IBM_GASPHASE) CYCLE; ENDIF
             IROW                  = IROW + 1
             ZM%MESH_IJK(1:3,IROW) = (/ I, J, K/)
-            MUNKH(I,J,K)        = IROW
-            ! Add UNKH to all cut-cells in I,J,K cell.
-            IF (CC_IBM) THEN
-               ICC = CCVAR(I,J,K,IBM_IDCC)
-               IF(ICC>0) CUT_CELL(ICC)%UNKH(1:CUT_CELL(ICC)%NCELL) = IROW
-            ENDIF
+            MUNKH(I,J,K)          = IROW
          ENDDO
       ENDDO
+   ENDDO
+   DO ICC=1,M%N_CUTCELL_MESH
+      I = CUT_CELL(ICC)%IJK(IAXIS); J = CUT_CELL(ICC)%IJK(JAXIS); K = CUT_CELL(ICC)%IJK(KAXIS)
+      IF(PRESSURE_ZONE(I,J,K)/=IPZ) CYCLE
+      IF(SOLID(CELL_INDEX(I,J,K))) CYCLE
+      IROW                  = IROW + 1
+      ZM%MESH_IJK(1:3,IROW) = (/ I, J, K/)
+      CUT_CELL(ICC)%UNKH(1:CUT_CELL(ICC)%NCELL) = IROW
    ENDDO
 ENDDO ZONE_MESH_LOOP_2
 
@@ -1159,8 +1171,9 @@ IF(CC_IBM) CALL GET_H_CUTFACES(ONE_NM=NM)
 CALL ULMAT_DEFINE_IPARM
 
 ! Build zone matrix, apply BCs to it and factorize with PARDISO:
+CALL POINT_TO_MESH(NM)
 ZONE_MESH_LOOP_4: DO IPZ=0,N_ZONE
-   ZM=>ZONE_MESH(IPZ)
+   ZM=>MESHES(NM)%ZONE_MESH(IPZ)
    IF (.NOT.ZM%ZONE_IN_MESH) CYCLE ZONE_MESH_LOOP_4
 
    ! 3.c Per pressure zone add PRES_ZONE value to REG, RC and cut-faces, etc.
@@ -1186,25 +1199,26 @@ RETURN
 END SUBROUTINE ULMAT_SOLVER_SETUP
 
 
-SUBROUTINE ULMAT_SOLVER(NM)
+! ------------------------------- ULMAT_SOLVER -----------------------------------
+
+SUBROUTINE ULMAT_SOLVER(NM,T,DT)
+
+USE PRES, ONLY : PRESSURE_SOLVER_FFT
+USE CC_SCALARS_IBM, ONLY : GET_PRES_CFACE_BCS
 
 INTEGER, INTENT(IN) :: NM
+REAL(EB),INTENT(IN) :: T,DT
 
-!.. All other variables
-INTEGER MAXFCT, MNUM, MTYPE, NRHS, NNZ, IPZ
-INTEGER :: ERROR1=-666, ERROR=-666
-INTEGER, ALLOCATABLE :: IPARM( : )
-INTEGER, ALLOCATABLE :: IA( : )
-INTEGER, ALLOCATABLE :: JA( : )
-REAL(EB), ALLOCATABLE :: A_H( : )
-REAL(EB), ALLOCATABLE :: F_H( : )
-REAL(EB), ALLOCATABLE :: X_H( : )
-INTEGER :: I
-#ifdef WITH_MKL
-INTEGER :: PHASE, IDUM(1)
-REAL(EB) :: DDUM(1)
-#endif
+! Local variables
+INTEGER :: IPZ
 TYPE(ZONE_MESH_TYPE), POINTER :: ZM
+
+
+IF (FREEZE_VELOCITY .OR. SOLID_PHASE_ONLY) RETURN
+CALL POINT_TO_MESH(NM)
+
+! Pressure Boundary conditions due to CFACES change BXS, BXF, BYS, BYF.. in external CFACES, and
+CALL GET_PRES_CFACE_BCS(NM,T,DT)
 
 ! Loop over zones within MESH NM and solve the unstructured Poisson problem directly.
 
@@ -1214,148 +1228,392 @@ ZONE_MESH_LOOP: DO IPZ=0,N_ZONE
 
    IF (.NOT.ZM%ZONE_IN_MESH) CYCLE ZONE_MESH_LOOP
 
-   !.. Fill all arrays containing matrix data.
-   ZM%NUNKH = 8
-   NNZ = 18
-   NRHS = 1
-   MAXFCT = 1
-   MNUM = 1
-   ALLOCATE(IA(ZM%NUNKH + 1))
-   IA = (/ 1, 5, 8, 10, 12, 15, 17, 18, 19 /)
-   ALLOCATE(JA(NNZ))
-   JA = (/ 1,    3,       6, 7,    &
-              2, 3,    5,          &
-                 3,             8, &
-                    4,       7,    &
-                       5, 6, 7,    &
-                          6,    8, &
-                             7,    &
-                                8 /)
-   ALLOCATE(A_H(NNZ))
-   A_H = (/ 7._EB,        1._EB,              2._EB,  7._EB,         &
-                  -4._EB, 8._EB,       2._EB,                        &
-                          1._EB,                             5._EB,  &
-                                7._EB,                9._EB,         &
-                                       5._EB, 1._EB,  5._EB,         &
-                                             -1._EB,         5._EB,  &
-                                                     11._EB,         &
-                                                             5._EB /)
-   ALLOCATE(F_H(ZM%NUNKH))
-   ALLOCATE(X_H(ZM%NUNKH))
-   !..
-   !.. SET UP PARDISO CONTROL PARAMETER
-   !..
-   ALLOCATE(IPARM(64))
-
-   DO I = 1, 64
-      IPARM(I) = 0
-   END DO
-
-   IPARM(1) = 1   ! no solver default
-   IPARM(2) = 2   ! fill-in reordering from METIS
-   IPARM(4) = 0   ! no iterative-direct algorithm
-   IPARM(5) = 0   ! no user fill-in reducing permutation
-   IPARM(6) = 0   ! =0 solution on the first n components of x
-   IPARM(8) = 2   ! numbers of iterative refinement steps
-   IPARM(10) = 13 ! perturb the pivot elements with 1E-13
-   IPARM(11) = 1  ! use nonsymmetric permutation and scaling MPS
-   IPARM(13) = 0  ! maximum weighted matching algorithm is switched-off (default for symmetric).
-                  ! Try IPARM(13) = 1 in case of inappropriate accuracy
-   IPARM(14) = 0  ! Output: number of perturbed pivots
-   IPARM(18) = -1 ! Output: number of nonzeros in the factor LU
-   IPARM(19) = -1 ! Output: Mflops for LU factorization
-   IPARM(20) = 0  ! Output: Numbers of CG Iterations
-
-   ERROR  = 0     ! initialize error flag
-   MSGLVL = 0     ! don't print statistical information
-   IF (GLMAT_VERBOSE) MSGLVL = 1     ! print statistical information
-   MTYPE  = -2    ! symmetric, indefinite
-
-   !.. Initialize the internal solver memory pointer. This is only
-   ! necessary for the FIRST call of the PARDISO solver.
-
-   ALLOCATE (ZM%PT_H(64))
-
-#ifdef WITH_MKL
-   DO I = 1, 64
-      ZM%PT_H(I)%DUMMY = 0
-   END DO
-
-   !.. Reordering and Symbolic Factorization, This step also allocates
-   ! all memory that is necessary for the factorization
-
-   PHASE = 11 ! only reordering and symbolic factorization
-   CALL PARDISO(ZM%PT_H, MAXFCT, MNUM, MTYPE, PHASE, ZM%NUNKH, A_H, IA, JA, &
-                IDUM, NRHS, IPARM, MSGLVL, DDUM, DDUM, ERROR)
-
-   IF (GLMAT_VERBOSE) THEN
-      WRITE(LU_ERR,*) 'Reordering completed ... '
-      IF (ERROR /= 0) THEN
-         WRITE(LU_ERR,*) 'The following ERROR was detected: ', ERROR
-         GOTO 1000
-      END IF
-      WRITE(LU_ERR,*) 'Number of nonzeros in factors = ',IPARM(18)
-      WRITE(LU_ERR,*) 'Number of factorization MFLOPS = ',IPARM(19)
+   IF (ZM%USE_FFT) THEN
+      CALL PRESSURE_SOLVER_FFT(NM)
+      RETURN
+   ELSE
+      CALL ULMAT_SOLVE_ZONE(NM,IPZ)
    ENDIF
-
-   !.. Factorization.
-   PHASE = 22 ! only factorization
-   CALL PARDISO(ZM%PT_H, MAXFCT, MNUM, MTYPE, PHASE, ZM%NUNKH, A_H, IA, JA, &
-                IDUM, NRHS, IPARM, MSGLVL, DDUM, DDUM, ERROR)
-   IF (GLMAT_VERBOSE) WRITE(LU_ERR,*) 'Factorization completed ... '
-   IF (ERROR /= 0) THEN
-      WRITE(LU_ERR,*) 'The following ERROR was detected: ', ERROR
-      GOTO 1000
-   ENDIF
-
-   !.. Back substitution and iterative refinement
-   IPARM(8) = 2 ! max numbers of iterative refinement steps
-   PHASE = 33   ! only solving
-   DO I = 1, ZM%NUNKH
-      F_H(I) = 1._EB
-   END DO
-   CALL PARDISO(ZM%PT_H, MAXFCT, MNUM, MTYPE, PHASE, ZM%NUNKH, A_H, IA, JA, &
-                IDUM, NRHS, IPARM, MSGLVL, F_H, X_H, ERROR)
-   IF (GLMAT_VERBOSE) WRITE(LU_ERR,*) 'Solve completed ... '
-   IF (ERROR /= 0) THEN
-      WRITE(LU_ERR,*) 'The following ERROR was detected: ', ERROR
-      GOTO 1000
-   ENDIF
-   IF (GLMAT_VERBOSE) THEN
-      WRITE(LU_ERR,*) 'The solution of the system is '
-      DO I = 1, ZM%NUNKH
-         WRITE(LU_ERR,*) ' x(',I,') = ', X_H(I)
-      END DO
-   ENDIF
-
-   1000 CONTINUE
-   !.. Termination and release of memory
-   PHASE = -1 ! release internal memory
-   CALL PARDISO(ZM%PT_H, MAXFCT, MNUM, MTYPE, PHASE, ZM%NUNKH, A_H, IA, JA, &
-                IDUM, NRHS, IPARM, MSGLVL, F_H, X_H, ERROR1)
-
-#endif /* WITH_MKL */
-
-   IF (ALLOCATED(IA))      DEALLOCATE(IA)
-   IF (ALLOCATED(JA))      DEALLOCATE(JA)
-   IF (ALLOCATED(A_H))     DEALLOCATE(A_H)
-   IF (ALLOCATED(F_H))     DEALLOCATE(F_H)
-   IF (ALLOCATED(X_H))     DEALLOCATE(X_H)
-   IF (ALLOCATED(IPARM))   DEALLOCATE(IPARM)
-
-   IF (ERROR1 /= 0) THEN
-      WRITE(LU_ERR,*) 'The following ERROR on release stage was detected: ', ERROR1
-      STOP 1
-   ENDIF
-
-   IF (ERROR /= 0) STOP 1
-
-   print *,'MESH: ',NM,', ZONE: ',IPZ
 
 ENDDO ZONE_MESH_LOOP
 
 ! STOP_STATUS=USER_STOP ! on testing
 END SUBROUTINE ULMAT_SOLVER
+
+! -------------------------- ULMAT_SOLVE_ZONE -----------------------------------
+
+SUBROUTINE ULMAT_SOLVE_ZONE(NM,IPZ)
+
+USE COMPLEX_GEOMETRY, ONLY : IBM_IDCC
+USE CC_SCALARS_IBM, ONLY : GET_FN_DIVERGENCE_CUTCELL,GRADH_ON_CARTESIAN
+
+INTEGER, INTENT(IN) :: NM, IPZ
+
+! Local Variables:
+INTEGER :: NRHS,MAXFCT,MNUM,ERROR,I,J,K,ICC,JCC,IIG,JJG,KKG,IOR,IW,IROW,NCELL,ICFACE,IFACE,JFACE
+REAL(EB):: SUM_FH(1:2),MEAN_FH,SUM_XH(1:2),MEAN_XH,DIV_FN_VOL,DIV_FN,IDX,AF,VAL
+TYPE(ZONE_MESH_TYPE), POINTER :: ZM
+TYPE (WALL_TYPE),  POINTER :: WC
+TYPE (CFACE_TYPE), POINTER :: CFA
+TYPE (BOUNDARY_COORD_TYPE), POINTER :: BC
+REAL(EB), POINTER, DIMENSION(:,:,:) :: HP=>NULL()
+#ifdef WITH_MKL
+INTEGER :: PHASE, PERM(1)
+#endif
+
+TNOW=CURRENT_TIME()
+
+! Solve:
+NRHS   =  1
+MAXFCT =  1
+MNUM   =  1
+ERROR  =  0 ! initialize error flag
+
+ZM=>MESHES(NM)%ZONE_MESH(IPZ)
+
+! Build FH(:):
+ZM%F_H(:) = 0._EB
+! First Source on Cartesian cells:
+DO IROW=1,ZM%NUNKH_CART ! Regular Cartesian cells.
+   I=ZM%MESH_IJK(IAXIS,IROW); J=ZM%MESH_IJK(JAXIS,IROW); K=ZM%MESH_IJK(KAXIS,IROW)
+   ZM%F_H(IROW) = ZM%F_H(IROW) + PRHS(I,J,K) * ((1._EB-CYL_FCT)*DY(J) + CYL_FCT*RC(I))*DX(I)*DZ(K)
+ENDDO
+! Then source from cut-cells:
+IF (.NOT.PRES_ON_CARTESIAN) THEN
+   DO IROW=ZM%NUNKH_CART+1,ZM%NUNKH ! Cut-cells.
+      I=ZM%MESH_IJK(IAXIS,IROW); J=ZM%MESH_IJK(JAXIS,IROW); K=ZM%MESH_IJK(KAXIS,IROW)
+      ICC=CCVAR(I,J,K,IBM_IDCC);  NCELL=CUT_CELL(ICC)%NCELL
+      ! Here we add div(F) in the cut-cell and DDDT:
+      DIV_FN_VOL = 0._EB
+      DO JCC=1,NCELL
+        CALL GET_FN_DIVERGENCE_CUTCELL(ICC,JCC,DIV_FN)
+        DIV_FN_VOL = DIV_FN_VOL + DIV_FN*CUT_CELL(ICC)%VOLUME(JCC)
+      ENDDO
+      ! Add to F_H:
+      ZM%F_H(IROW) = -(CUT_CELL(ICC)%DDDTVOL + DIV_FN_VOL)
+   ENDDO
+ELSE
+   DO IROW=ZM%NUNKH_CART+1,ZM%NUNKH ! Cut-cells.
+      I=ZM%MESH_IJK(IAXIS,IROW); J=ZM%MESH_IJK(JAXIS,IROW); K=ZM%MESH_IJK(KAXIS,IROW)
+      ZM%F_H(IROW) = ZM%F_H(IROW) + PRHS(I,J,K) * DX(I)*DY(J)*DZ(K)
+   ENDDO
+ENDIF
+! Finally Boundary condition corrections to RHS:
+! Compute FV in boundary and external CFACEs with DIRICHLET external BCs:
+NOT_PRES_ON_CARTESIAN_IF :IF (.NOT.PRES_ON_CARTESIAN) THEN
+   CFACE_LOOP : DO ICFACE=1,N_EXTERNAL_CFACE_CELLS
+      CFA => CFACE(ICFACE)
+      ! Here case where SOLID and OPEN or interpolated are mixed on a boundary:
+      IF( CFA%BOUNDARY_TYPE==NULL_BOUNDARY .OR. CFA%BOUNDARY_TYPE==SOLID_BOUNDARY) CYCLE CFACE_LOOP
+      IFACE= CFA%CUT_FACE_IND1
+      JFACE= CFA%CUT_FACE_IND2
+      WC  => WALL(CUT_FACE(IFACE)%IWC)
+      BC  => BOUNDARY_COORD(WC%BC_INDEX)
+      ! DIRICHLET boundaries:
+      IF_CFACE_DIRICHLET: IF (WC%PRESSURE_BC_INDEX==DIRICHLET) THEN
+         ! Gasphase cell indexes:
+         IIG = BC%IIG; JJG = BC%JJG; KKG = BC%KKG
+         IF(PRESSURE_ZONE(IIG,JJG,KKG)/=IPZ) CYCLE CFACE_LOOP
+         IROW = MUNKH(IIG,JJG,KKG)
+         IF (IROW <= 0 .AND. CC_IBM) THEN
+            ICC = CCVAR(I,J,K,IBM_IDCC)
+            IF (ICC > 0) THEN; IROW = CUT_CELL(ICC)%UNKH(1); ELSE; CYCLE CFACE_LOOP; ENDIF
+         ENDIF
+         IOR   = BC%IOR
+
+         ! Define centroid to centroid distance, normal to WC:
+         IF(.NOT.GRADH_ON_CARTESIAN) THEN
+            IDX=1._EB/(CUT_FACE(IFACE)%XCENHIGH(ABS(IOR),JFACE)-CUT_FACE(IFACE)%XCENLOW(ABS(IOR),JFACE))
+         ELSE
+            SELECT CASE (IOR)
+            CASE(-1); IDX = 1._EB / DXN(IIG);
+            CASE( 1); IDX = 1._EB / DXN(IIG-1)
+            CASE(-2); IDX = 1._EB / DYN(JJG)
+            CASE( 2); IDX = 1._EB / DYN(JJG-1)
+            CASE(-3); IDX = 1._EB / DZN(KKG)
+            CASE( 3); IDX = 1._EB / DZN(KKG-1)
+            END SELECT
+         ENDIF
+         VAL  = -2._EB*IDX * CFA%AREA * CFA%PRES_BXN
+         ! Add to F_H:
+         ZM%F_H(IROW) = ZM%F_H(IROW) + VAL
+      ENDIF IF_CFACE_DIRICHLET
+   ENDDO CFACE_LOOP
+ENDIF NOT_PRES_ON_CARTESIAN_IF
+
+! Finally add External Wall cell BCs:
+WALL_CELL_LOOP_1 : DO IW=1,N_EXTERNAL_WALL_CELLS
+   WC => WALL(IW)
+   ! Drop if unstructured solve and this is a cut-face. Dealt with external CFACE.
+   IF (.NOT.PRES_ON_CARTESIAN    .AND. WC%CUT_FACE_INDEX>0) CYCLE WALL_CELL_LOOP_1
+   ! Drop if not whole mesh solution and boundary type is NULL.
+   IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_CELL_LOOP_1
+   BC  => BOUNDARY_COORD(WC%BC_INDEX)
+   ! Gasphase cell indexes:
+   IIG = BC%IIG; JJG = BC%JJG; KKG = BC%KKG; IOR = BC%IOR
+   IF(PRESSURE_ZONE(IIG,JJG,KKG)/=IPZ) CYCLE WALL_CELL_LOOP_1
+   ! NEUMANN boundaries:
+   IF_NEUMANN_1: IF (WC%PRESSURE_BC_INDEX==NEUMANN) THEN
+
+      IROW = MUNKH(IIG,JJG,KKG)
+      IF (IROW <= 0 .AND. CC_IBM) THEN
+         ICC = CCVAR(I,J,K,IBM_IDCC)
+         IF (ICC > 0) THEN; IROW = CUT_CELL(ICC)%UNKH(1); ELSE; CYCLE WALL_CELL_LOOP_1; ENDIF
+      ENDIF
+
+      ! Define cell size, normal to WC:
+      SELECT CASE (IOR)
+      CASE(-1) ! -IAXIS oriented, high face of IIG cell.
+         AF  =  ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*R(IIG  )) * DZ(KKG)
+         VAL = -BXF(JJG,KKG)*AF
+      CASE( 1) ! +IAXIS oriented, low face of IIG cell.
+         AF  =  ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*R(IIG-1)) * DZ(KKG)
+         VAL =  BXS(JJG,KKG)*AF
+      CASE(-2) ! -JAXIS oriented, high face of JJG cell.
+         AF  =  DX(IIG)*DZ(KKG)
+         VAL = -BYF(IIG,KKG)*AF
+      CASE( 2) ! +JAXIS oriented, low face of JJG cell.
+         AF  =  DX(IIG)*DZ(KKG)
+         VAL =  BYS(IIG,KKG)*AF
+      CASE(-3) ! -KAXIS oriented, high face of KKG cell.
+         AF  =  ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*RC(IIG  ))* DX(IIG)
+         VAL = -BZF(IIG,JJG)*AF
+      CASE( 3) ! +KAXIS oriented, low face of KKG cell.
+         AF  =  ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*RC(IIG  ))* DX(IIG)
+         VAL =  BZS(IIG,JJG)*AF
+      END SELECT
+      ! Add to F_H:
+      ZM%F_H(IROW) = ZM%F_H(IROW) + VAL
+   ENDIF IF_NEUMANN_1
+
+   ! DIRICHLET boundaries:
+   IF_DIRICHLET_1: IF (WC%PRESSURE_BC_INDEX==DIRICHLET) THEN
+      ! Here case where SOLID and OPEN or interpolated are mixed on a boundary:
+      IF( WC%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. WC%BOUNDARY_TYPE==MIRROR_BOUNDARY) CYCLE WALL_CELL_LOOP_1
+      IROW = MUNKH(IIG,JJG,KKG)
+      IF (IROW <= 0 .AND. CC_IBM) THEN
+         ICC = CCVAR(I,J,K,IBM_IDCC)
+         IF (ICC > 0) THEN; IROW = CUT_CELL(ICC)%UNKH(1); ELSE; CYCLE WALL_CELL_LOOP_1; ENDIF
+      ENDIF
+      ! Define cell size, normal to WC:
+      SELECT CASE (IOR)
+      CASE(-1) ! -IAXIS oriented, high face of IIG cell.
+         IDX = 1._EB / DXN(IIG)
+         AF  =  ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*R(IIG  )) * DZ(KKG)
+         VAL = -2._EB*IDX*AF*BXF(JJG,KKG)
+      CASE( 1) ! +IAXIS oriented, low face of IIG cell.
+         IDX = 1._EB / DXN(IIG-1)
+         AF  =  ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*R(IIG-1)) * DZ(KKG)
+         VAL = -2._EB*IDX*AF*BXS(JJG,KKG)
+      CASE(-2) ! -JAXIS oriented, high face of JJG cell.
+         IDX = 1._EB / DYN(JJG)
+         AF  =  DX(IIG)*DZ(KKG)
+         VAL = -2._EB*IDX*AF*BYF(IIG,KKG)
+      CASE( 2) ! +JAXIS oriented, low face of JJG cell.
+         IDX = 1._EB / DYN(JJG-1)
+         AF  =  DX(IIG)*DZ(KKG)
+         VAL = -2._EB*IDX*AF*BYS(IIG,KKG)
+      CASE(-3) ! -KAXIS oriented, high face of KKG cell.
+         IDX = 1._EB / DZN(KKG)
+         AF  =  ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*RC(IIG  ))* DX(IIG)
+         VAL = -2._EB*IDX*AF*BZF(IIG,JJG)
+      CASE( 3) ! +KAXIS oriented, low face of KKG cell.
+         IDX = 1._EB / DZN(KKG-1)
+         AF  =  ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*RC(IIG  ))* DX(IIG)
+         VAL = -2._EB*IDX*AF*BZS(IIG,JJG)
+      END SELECT
+      ! Add to F_H:
+      ZM%F_H(IROW) = ZM%F_H(IROW) + VAL
+   ENDIF IF_DIRICHLET_1
+ENDDO WALL_CELL_LOOP_1
+
+! For indefinite matrices substract mean of source F_H:
+H_INDEFINITE_IF_1 : IF (ZM%MTYPE==SYMM_INDEFINITE ) THEN
+   SUM_FH(1:2) = 0._EB; MEAN_FH = 0._EB
+   ! Get Arithmetic Mean of F_H:
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            IF (MUNKH(I,J,K)<=0 .OR. PRESSURE_ZONE(I,J,K)/=IPZ) CYCLE ! Gasphase Cartesian cells.
+            SUM_FH(1) = SUM_FH(1) + ZM%F_H(MUNKH(I,J,K))
+            SUM_FH(2) = SUM_FH(2) + 1._EB
+         ENDDO
+      ENDDO
+   ENDDO
+   ! Add cut-cell region contribution:
+   DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+      I = CUT_CELL(ICC)%IJK(IAXIS); J = CUT_CELL(ICC)%IJK(JAXIS); K = CUT_CELL(ICC)%IJK(KAXIS)
+      IF (CUT_CELL(ICC)%UNKH(1)<=0 .OR. PRESSURE_ZONE(I,J,K)/=IPZ) CYCLE
+      SUM_FH(1) = SUM_FH(1) + ZM%F_H(CUT_CELL(ICC)%UNKH(1))
+      SUM_FH(2) = SUM_FH(2) + 1._EB
+   ENDDO
+   MEAN_FH = SUM_FH(1)/SUM_FH(2)
+   ! IF (MY_RANK==0) WRITE(LU_ERR,*) PREDICTOR,'INDEFINITE POISSON MATRIX, IPZ, MEAN(RHS), SUM(RHS)=',&
+   !                                 IPZ,MEAN_FH,SUM_FH(1:2)
+   ! Substract Mean:
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            IF (MUNKH(I,J,K)<=0 .OR. PRESSURE_ZONE(I,J,K)/=IPZ) CYCLE ! Gasphase Cartesian cells.
+            ZM%F_H(MUNKH(I,J,K)) = ZM%F_H(MUNKH(I,J,K)) - MEAN_FH
+         ENDDO
+      ENDDO
+   ENDDO
+   ! Add cut-cell region contribution:
+   DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+      I = CUT_CELL(ICC)%IJK(IAXIS); J = CUT_CELL(ICC)%IJK(JAXIS); K = CUT_CELL(ICC)%IJK(KAXIS)
+      IF (CUT_CELL(ICC)%UNKH(1)<=0 .OR. PRESSURE_ZONE(I,J,K)/=IPZ) CYCLE
+      ZM%F_H(CUT_CELL(ICC)%UNKH(1)) = ZM%F_H(CUT_CELL(ICC)%UNKH(1)) - MEAN_FH
+   ENDDO
+ENDIF H_INDEFINITE_IF_1
+
+!.. Back substitution and iterative refinement
+IPARM(8) =  0 ! max numbers of iterative refinement steps
+#ifdef WITH_MKL
+PHASE    = 33 ! only solving
+CALL PARDISO(ZM%PT_H, MAXFCT, MNUM, ZM%MTYPE, PHASE, ZM%NUNKH, &
+             ZM%A_H, ZM%IA_H, ZM%JA_H, PERM, NRHS, IPARM, MSGLVL, ZM%F_H, ZM%X_H, ERROR)
+#endif
+IF (ERROR /= 0) WRITE(0,*) 'ULMAT_SOLVER: The following ERROR was detected: ', ERROR
+
+! For indefinite matrices, substract mean of solution X_H:
+H_INDEFINITE_IF_2 : IF (ZM%MTYPE==SYMM_INDEFINITE ) THEN
+   SUM_XH(1:2) = 0._EB; MEAN_XH = 0._EB
+   ! Get Arithmetic Mean of H:
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            IF (MUNKH(I,J,K)<=0 .OR. PRESSURE_ZONE(I,J,K)/=IPZ) CYCLE ! Gasphase Cartesian cells.
+            SUM_XH(1) = SUM_XH(1) + ZM%X_H(MUNKH(I,J,K))
+            SUM_XH(2) = SUM_XH(2) + 1._EB
+         ENDDO
+      ENDDO
+   ENDDO
+   ! Add cut-cell region contribution:
+   DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+      I = CUT_CELL(ICC)%IJK(IAXIS); J = CUT_CELL(ICC)%IJK(JAXIS); K = CUT_CELL(ICC)%IJK(KAXIS)
+      IF (CUT_CELL(ICC)%UNKH(1)<=0 .OR. PRESSURE_ZONE(I,J,K)/=IPZ) CYCLE
+      SUM_XH(1) = SUM_XH(1) + ZM%X_H(CUT_CELL(ICC)%UNKH(1))
+      SUM_XH(2) = SUM_XH(2) + 1._EB
+   ENDDO
+   MEAN_XH = SUM_XH(1)/SUM_XH(2)
+   ! IF (MY_RANK==0) WRITE(LU_ERR,*) PREDICTOR,'INDEFINITE POISSON MATRIX, IPZ, MEAN(H),SUM(H)=',&
+   !                                 IPZ,MEAN_XH,SUM_XH(1:2)
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            IF (MUNKH(I,J,K)<=0 .OR. PRESSURE_ZONE(I,J,K)/=IPZ) CYCLE ! Gasphase Cartesian cells.
+            ZM%X_H(MUNKH(I,J,K)) = ZM%X_H(MUNKH(I,J,K)) - MEAN_XH
+         ENDDO
+      ENDDO
+   ENDDO
+   ! Add cut-cell region contribution:
+   DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+      I = CUT_CELL(ICC)%IJK(IAXIS); J = CUT_CELL(ICC)%IJK(JAXIS); K = CUT_CELL(ICC)%IJK(KAXIS)
+      IF (CUT_CELL(ICC)%UNKH(1)<=0 .OR. PRESSURE_ZONE(I,J,K)/=IPZ) CYCLE
+      ZM%X_H(CUT_CELL(ICC)%UNKH(1)) = ZM%X_H(CUT_CELL(ICC)%UNKH(1)) - MEAN_XH
+   ENDDO
+ENDIF H_INDEFINITE_IF_2
+
+! WRITE(LU_ERR,*) 'SUM_XH=',SUM(ZM%X_H),SUM(ZM%A_H(1:ZM%IA_H(ZM%NUNKH+1)))
+
+! Dump result back to mesh containers:
+IF (PREDICTOR) THEN
+   HP => H
+ELSE
+   HP => HS
+ENDIF
+
+! First Source on Cartesian cells with IBM_UNKH > 0:
+DO IROW=1,ZM%NUNKH_CART ! Regular Cartesian cells.
+   I=ZM%MESH_IJK(IAXIS,IROW); J=ZM%MESH_IJK(JAXIS,IROW); K=ZM%MESH_IJK(KAXIS,IROW)
+   HP(I,J,K) = -ZM%X_H(MUNKH(I,J,K))
+ENDDO
+IF (PREDICTOR) THEN
+   DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+      I = CUT_CELL(ICC)%IJK(IAXIS); J = CUT_CELL(ICC)%IJK(JAXIS); K = CUT_CELL(ICC)%IJK(KAXIS)
+      IF (CUT_CELL(ICC)%UNKH(1)<=0 .OR. PRESSURE_ZONE(I,J,K)/=IPZ) CYCLE
+      CUT_CELL(ICC)%H(1:MESHES(NM)%CUT_CELL(ICC)%NCELL) = -ZM%X_H(CUT_CELL(ICC)%UNKH(1))
+      HP(I,J,K) = -ZM%X_H(CUT_CELL(ICC)%UNKH(1))
+   ENDDO
+ELSE
+   DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+      I = CUT_CELL(ICC)%IJK(IAXIS); J = CUT_CELL(ICC)%IJK(JAXIS); K = CUT_CELL(ICC)%IJK(KAXIS)
+      IF (CUT_CELL(ICC)%UNKH(1)<=0 .OR. PRESSURE_ZONE(I,J,K)/=IPZ) CYCLE
+      CUT_CELL(ICC)%HS(1:MESHES(NM)%CUT_CELL(ICC)%NCELL) = -ZM%X_H(CUT_CELL(ICC)%UNKH(1))
+      HP(I,J,K) = -ZM%X_H(CUT_CELL(ICC)%UNKH(1))
+   ENDDO
+ENDIF
+
+! Fill external boundary conditions for Mesh, if necesary:
+WALL_CELL_LOOP_2 : DO IW=1,N_EXTERNAL_WALL_CELLS
+   WC => WALL(IW)
+   BC => BOUNDARY_COORD(WC%BC_INDEX)
+   ! Gasphase cell indexes:
+   IIG = BC%IIG; JJG = BC%JJG; KKG = BC%KKG; IOR = BC%IOR
+   IF(PRESSURE_ZONE(IIG,JJG,KKG)/=IPZ) CYCLE WALL_CELL_LOOP_2
+   ! NEUMANN boundaries:
+   IF_NEUMANN_2 : IF (WC%PRESSURE_BC_INDEX==NEUMANN) THEN
+      I   = BC%II;  J   = BC%JJ;  K   = BC%KK
+      ! Define cell size, normal to WC:
+      SELECT CASE (IOR)
+         CASE(-1) ! -IAXIS oriented, high face of IIG cell.
+            HP(I,J,K) = HP(IIG,JJG,KKG) + DXN(IIG)*BXF(J,K)
+         CASE( 1) ! +IAXIS oriented, low face of IIG cell.
+            HP(I,J,K) = HP(IIG,JJG,KKG) - DXN(IIG-1)*BXS(J,K)
+         CASE(-2) ! -JAXIS oriented, high face of JJG cell.
+            HP(I,J,K) = HP(IIG,JJG,KKG) + DYN(JJG)*BYF(I,K)
+         CASE( 2) ! +JAXIS oriented, low face of JJG cell.
+            HP(I,J,K) = HP(IIG,JJG,KKG) - DYN(JJG-1)*BYS(I,K)
+         CASE(-3) ! -KAXIS oriented, high face of KKG cell.
+            HP(I,J,K) = HP(IIG,JJG,KKG) + DZN(KKG)*BZF(I,J)
+         CASE( 3) ! +KAXIS oriented, low face of KKG cell.
+            HP(I,J,K) = HP(IIG,JJG,KKG) - DZN(KKG-1)*BZS(I,J)
+      END SELECT
+   ENDIF IF_NEUMANN_2
+
+   ! DIRICHLET boundaries:
+   IF_DIRICHLET_2 : IF (WC%PRESSURE_BC_INDEX==DIRICHLET) THEN
+      I   = BC%II;  J   = BC%JJ;  K   = BC%KK
+      ! Define cell size, normal to WC:
+      IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
+         SELECT CASE (IOR) ! Set Homogeneous Neumann in external SOLID_BOUNDARY.
+            CASE(-1) ! -IAXIS oriented, high face of IIG cell.
+               HP(I,J,K) =HP(IIG,JJG,KKG)
+            CASE( 1) ! +IAXIS oriented, low face of IIG cell.
+               HP(I,J,K) =HP(IIG,JJG,KKG)
+            CASE(-2) ! -JAXIS oriented, high face of JJG cell.
+               HP(I,J,K) =HP(IIG,JJG,KKG)
+            CASE( 2) ! +JAXIS oriented, low face of JJG cell.
+               HP(I,J,K) =HP(IIG,JJG,KKG)
+            CASE(-3) ! -KAXIS oriented, high face of KKG cell.
+               HP(I,J,K) =HP(IIG,JJG,KKG)
+            CASE( 3) ! +KAXIS oriented, low face of KKG cell.
+               HP(I,J,K) =HP(IIG,JJG,KKG)
+         END SELECT
+      ELSE
+         SELECT CASE (IOR)
+            CASE(-1) ! -IAXIS oriented, high face of IIG cell.
+               HP(I,J,K) =-HP(IIG,JJG,KKG) + 2._EB*BXF(J,K)
+            CASE( 1) ! +IAXIS oriented, low face of IIG cell.
+               HP(I,J,K) =-HP(IIG,JJG,KKG) + 2._EB*BXS(J,K)
+            CASE(-2) ! -JAXIS oriented, high face of JJG cell.
+               HP(I,J,K) =-HP(IIG,JJG,KKG) + 2._EB*BYF(I,K)
+            CASE( 2) ! +JAXIS oriented, low face of JJG cell.
+               HP(I,J,K) =-HP(IIG,JJG,KKG) + 2._EB*BYS(I,K)
+            CASE(-3) ! -KAXIS oriented, high face of KKG cell.
+               HP(I,J,K) =-HP(IIG,JJG,KKG) + 2._EB*BZF(I,J)
+            CASE( 3) ! +KAXIS oriented, low face of KKG cell.
+               HP(I,J,K) =-HP(IIG,JJG,KKG) + 2._EB*BZS(I,J)
+         END SELECT
+      ENDIF
+   ENDIF IF_DIRICHLET_2
+ENDDO WALL_CELL_LOOP_2
+
+T_USED(5)=T_USED(5)+CURRENT_TIME()-TNOW
+
+RETURN
+END SUBROUTINE ULMAT_SOLVE_ZONE
 
 ! -------------------------ULMAT_GET_H_REGFACES ---------------------------------
 
@@ -1517,9 +1775,9 @@ ALLOCATE( JD_H_MAT(1:NNZ_STENCIL_H,1:NUNKH) ); JD_H_MAT(:,:) = HUGE(I) ! Contain
 ! Regular faces:
 DO X1AXIS=IAXIS,KAXIS
    SELECT CASE(X1AXIS)
-   CASE(IAXIS); REGFACE_H=>REGFACE_IAXIS_H
-   CASE(JAXIS); REGFACE_H=>REGFACE_JAXIS_H
-   CASE(KAXIS); REGFACE_H=>REGFACE_KAXIS_H
+   CASE(IAXIS); REGFACE_H=>MESHES(NM)%REGFACE_IAXIS_H
+   CASE(JAXIS); REGFACE_H=>MESHES(NM)%REGFACE_JAXIS_H
+   CASE(KAXIS); REGFACE_H=>MESHES(NM)%REGFACE_KAXIS_H
    END SELECT
    DO IFACE=1,MESHES(NM)%NREGFACE_H(X1AXIS)
       I =REGFACE_H(IFACE)%IJK(IAXIS) ! Low Side cell
@@ -1552,17 +1810,17 @@ AXIS_LOOP_1 : DO X1AXIS=IAXIS,KAXIS
    NREG = MESHES(NM)%NREGFACE_H(X1AXIS)
    SELECT CASE(X1AXIS)
    CASE(IAXIS)
-      REGFACE_H => REGFACE_IAXIS_H
+      REGFACE_H => MESHES(NM)%REGFACE_IAXIS_H
       IIM =   0; JJM = 0; KKM = 0
       IIP =   1; JJP = 0; KKP = 0
       LOW_FACE=0; HIGH_FACE=IBAR
    CASE(JAXIS)
-      REGFACE_H => REGFACE_JAXIS_H
+      REGFACE_H => MESHES(NM)%REGFACE_JAXIS_H
       IIM = 0; JJM =   0; KKM = 0
       IIP = 0; JJP =   1; KKP = 0
       LOW_FACE=0; HIGH_FACE=JBAR
    CASE(KAXIS)
-      REGFACE_H => REGFACE_KAXIS_H
+      REGFACE_H => MESHES(NM)%REGFACE_KAXIS_H
       IIM = 0; JJM = 0; KKM =   0
       IIP = 0; JJP = 0; KKP =   1
       LOW_FACE=0; HIGH_FACE=KBAR
@@ -1678,17 +1936,17 @@ AXIS_LOOP_2 : DO X1AXIS=IAXIS,KAXIS
    NREG = MESHES(NM)%NREGFACE_H(X1AXIS)
    SELECT CASE(X1AXIS)
    CASE(IAXIS)
-      REGFACE_H => REGFACE_IAXIS_H
+      REGFACE_H => MESHES(NM)%REGFACE_IAXIS_H
       IIM =   0; JJM = 0; KKM = 0
       IIP =   1; JJP = 0; KKP = 0
       LOW_FACE=0; HIGH_FACE=IBAR
    CASE(JAXIS)
-      REGFACE_H => REGFACE_JAXIS_H
+      REGFACE_H => MESHES(NM)%REGFACE_JAXIS_H
       IIM = 0; JJM =   0; KKM = 0
       IIP = 0; JJP =   1; KKP = 0
       LOW_FACE=0; HIGH_FACE=JBAR
    CASE(KAXIS)
-      REGFACE_H => REGFACE_KAXIS_H
+      REGFACE_H => MESHES(NM)%REGFACE_KAXIS_H
       IIM = 0; JJM = 0; KKM =   0
       IIP = 0; JJP = 0; KKP =   1
       LOW_FACE=0; HIGH_FACE=KBAR
@@ -1935,7 +2193,7 @@ TYPE(IBM_RCFACE_TYPE),  POINTER, DIMENSION(:) ::  RCFACE_H=>NULL()
 TYPE(ZONE_MESH_TYPE), POINTER :: ZM
 REAL(EB), POINTER, DIMENSION(:)   :: DX1,DX2,DX3
 
-ZM=>ZONE_MESH(IPZ)
+ZM=>MESHES(NM)%ZONE_MESH(IPZ)
 NUNKH=ZM%NUNKH
 
 ! Allocate D_H_MAT:
@@ -1946,7 +2204,7 @@ AXIS_LOOP_1 : DO X1AXIS=IAXIS,KAXIS
    NREG = MESHES(NM)%NREGFACE_H(X1AXIS)
    SELECT CASE(X1AXIS)
    CASE(IAXIS)
-      REGFACE_H => REGFACE_IAXIS_H
+      REGFACE_H => MESHES(NM)%REGFACE_IAXIS_H
       IIM = 0; JJM = 0; KKM = 0
       IIP = 1; JJP = 0; KKP = 0
       LOW_FACE=0; HIGH_FACE=IBAR
@@ -1955,7 +2213,7 @@ AXIS_LOOP_1 : DO X1AXIS=IAXIS,KAXIS
       DX2 => DY
       DX3 => DZ
    CASE(JAXIS)
-      REGFACE_H => REGFACE_JAXIS_H
+      REGFACE_H => MESHES(NM)%REGFACE_JAXIS_H
       IIM = 0; JJM =   0; KKM = 0
       IIP = 0; JJP =   1; KKP = 0
       LOW_FACE=0; HIGH_FACE=JBAR
@@ -1964,7 +2222,7 @@ AXIS_LOOP_1 : DO X1AXIS=IAXIS,KAXIS
       DX2 => DZ
       DX3 => DX
    CASE(KAXIS)
-      REGFACE_H => REGFACE_KAXIS_H
+      REGFACE_H => MESHES(NM)%REGFACE_KAXIS_H
       IIM = 0; JJM = 0; KKM =   0
       IIP = 0; JJP = 0; KKP =   1
       LOW_FACE=0; HIGH_FACE=KBAR
@@ -2168,7 +2426,7 @@ TYPE(ZONE_MESH_TYPE), POINTER :: ZM
 INTEGER :: IIG,JJG,KKG,II,JJ,KK,IW
 
 DUM=NM
-ZM=>ZONE_MESH(IPZ)
+ZM=>MESHES(NM)%ZONE_MESH(IPZ)
 
 ! Dirichlet condition counter, to define if matrix is positive definite or indefinite.
 H_MAT_IVEC = 0
@@ -2177,7 +2435,7 @@ WALL_LOOP_1 : DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    WC => WALL(IW)
    ! Only OPEN_BOUNDARY or INTERPOLATED_BOUNDARY leads to a Dirichlet BC for H.
    ! Everything else leads to Neuman BCs on H, no need to modify D_MAT_HP.
-   IF ( .NOT.(WC%BOUNDARY_TYPE/=OPEN_BOUNDARY .OR. WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) ) CYCLE WALL_LOOP_1
+   IF ( .NOT.(WC%BOUNDARY_TYPE==OPEN_BOUNDARY .OR. WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) ) CYCLE WALL_LOOP_1
    BC => BOUNDARY_COORD(WC%BC_INDEX)
    IIG = BC%IIG; JJG = BC%JJG; KKG = BC%KKG
    IF (PRESSURE_ZONE(IIG,JJG,KKG)/=IPZ .OR. MUNKH(IIG,JJG,KKG)<=0) CYCLE WALL_LOOP_1
@@ -2222,8 +2480,8 @@ WALL_LOOP_1 : DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 ENDDO WALL_LOOP_1
 
 ! Now change PARDISO Matrix type of matrix either positive definite of indefinite:
-ZM%MTYPE   = -2 ! Initialize to real symmetric indefinite.
-IF (H_MAT_IVEC>0) ZM%MTYPE   = 2 ! Real symmetric positive definite.
+ZM%MTYPE   = SYMM_INDEFINITE ! Initialize to real symmetric indefinite.
+IF (H_MAT_IVEC>0) ZM%MTYPE   = SYMM_POSITIVE_DEFINITE ! Real symmetric positive definite.
 
 RETURN
 END SUBROUTINE ULMAT_BCS_H_MATRIX
@@ -2235,6 +2493,7 @@ SUBROUTINE ULMAT_DEFINE_IPARM
 !..
 !.. SET UP PARDISO CONTROL PARAMETER
 !..
+IF(ALLOCATED(IPARM)) RETURN
 ALLOCATE(IPARM(64)); IPARM(:) = 0
 
 IPARM(1) = 1   ! no solver default
@@ -2274,15 +2533,17 @@ INTEGER MAXFCT, MNUM, NRHS, ERROR, TOT_NNZ_H
 TYPE(ZONE_MESH_TYPE), POINTER :: ZM
 
 INNZ=NM
-ZM=>ZONE_MESH(IPZ)
+ZM=>MESHES(NM)%ZONE_MESH(IPZ)
 ! Define parameters:
 NRHS   = 1
 MAXFCT = 1
 MNUM   = 1
 
 ! Set level MSG to 1 for factorization:
-IF(CHECK_POISSON) MSGLVL = 1
-
+IF(CHECK_POISSON) THEN
+   MSGLVL = 1
+   IF(MY_RANK==0) WRITE(LU_ERR,*) 'ULMAT : PARDISO factorization for MESH,ZONE=',NM,IPZ
+ENDIF
 ERROR     = 0 ! initialize error flag
 
 ! Each MPI process builds its local set of rows.
@@ -2306,20 +2567,27 @@ DO IROW=1,ZM%NUNKH
 ENDDO
 ZM%IA_H(ZM%NUNKH+1) = INNZ + 1
 
-! Deallocate NNZ_H_MAT, D_H_MAT, JD_H_MAT:
-DEALLOCATE(NNZ_H_MAT, D_H_MAT, JD_H_MAT)
+! OPEN(unit=20,file="IJKUNKH_H_ULMAT.txt",action="write",status="replace")
+! DO IROW=1,ZM%NUNKH
+!    WRITE(20,'(4I6)') ZM%MESH_IJK(IAXIS:KAXIS,IROW),IROW
+! ENDDO
+! CLOSE(20)
+! WRITE(0,*) 'IJKUNKH file written...'
+! STOP
 
-! OPEN(unit=20,file="Matrix_H.txt",action="write",status="replace")
-! DO IROW=1,NUNKH_LOCAL
-!    DO JCOL=1,NNZ_D_MAT_H(IROW)
-!       WRITE(20,'(2I6,F18.12)') IROW,JD_MAT_H(JCOL,IROW),D_MAT_H(JCOL,IROW)
+! OPEN(unit=20,file="Matrix_H_ULMAT.txt",action="write",status="replace")
+! DO IROW=1,ZM%NUNKH
+!    DO JCOL=1,NNZ_H_MAT(IROW)
+!       WRITE(20,'(2I6,F18.12)') IROW,JD_H_MAT(JCOL,IROW),D_H_MAT(JCOL,IROW)
 !    ENDDO
 ! ENDDO
 ! ! WRITE(20,'(A)') 'EOF'
 ! CLOSE(20)
 ! WRITE(0,*) 'H Matrix file written...'
-! PAUSE
+! STOP
 
+! Deallocate NNZ_H_MAT, D_H_MAT, JD_H_MAT:
+DEALLOCATE(NNZ_H_MAT, D_H_MAT, JD_H_MAT)
 
 ! Allocate Solution and RHS vectors:
 ALLOCATE( ZM%X_H(ZM%NUNKH) , ZM%F_H(ZM%NUNKH) ); ZM%F_H(:) = 0._EB; ZM%X_H(:) = 0._EB
@@ -3476,7 +3744,21 @@ DO IROW=1,NUNKH_LOCAL
 ENDDO
 IA_H(NUNKH_LOCAL+1) = INNZ + 1
 
-! OPEN(unit=20,file="Matrix_H.txt",action="write",status="replace")
+
+! OPEN(unit=20,file="IJKUNKH_H_UGLMAT.txt",action="write",status="replace")
+! DO K=1,KBAR
+!    DO J=1,JBAR
+!       DO I=1,IBAR
+!          IF(SOLID(CELL_INDEX(I,J,K))) CYCLE
+!          WRITE(20,'(4I6)') I,J,K,CCVAR(I,J,K,UNKH)
+!       ENDDO
+!    ENDDO
+! ENDDO
+! CLOSE(20)
+! WRITE(0,*) 'UGLMAT IJKUNKH file written...'
+! STOP
+
+! OPEN(unit=20,file="Matrix_H_UGLMAT.txt",action="write",status="replace")
 ! DO IROW=1,NUNKH_LOCAL
 !    DO JCOL=1,NNZ_D_MAT_H(IROW)
 !       WRITE(20,'(2I6,F18.12)') IROW,JD_MAT_H(JCOL,IROW),D_MAT_H(JCOL,IROW)
@@ -3485,7 +3767,7 @@ IA_H(NUNKH_LOCAL+1) = INNZ + 1
 ! ! WRITE(20,'(A)') 'EOF'
 ! CLOSE(20)
 ! WRITE(0,*) 'H Matrix file written...'
-! PAUSE
+! STOP
 
 ! Here each process defines de beginning and end rows in global numeration, for the equations
 ! it has assembled:
@@ -4703,14 +4985,25 @@ SUBROUTINE PRESSURE_SOLVER_CHECK_RESIDUALS_U(NM)
 USE MESH_POINTERS
 USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
 USE GLOBAL_CONSTANTS
+USE PRES, ONLY : PRESSURE_SOLVER_CHECK_RESIDUALS
 
 INTEGER, INTENT(IN) :: NM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: HP,RHOP,P,RESIDUAL
-INTEGER :: I,J,K
+INTEGER :: I,J,K,IPZ
 REAL(EB) :: LHSS,RHSS,IMFCT,JMFCT,KMFCT,IPFCT,JPFCT,KPFCT
 
 IF (SOLID_PHASE_ONLY) RETURN
 IF (FREEZE_VELOCITY)  RETURN
+
+IF (PRES_FLAG==ULMAT_FLAG) THEN
+   DO IPZ=0,N_ZONE
+      IF (.NOT.MESHES(NM)%ZONE_MESH(IPZ)%ZONE_IN_MESH) CYCLE
+      IF (MESHES(NM)%ZONE_MESH(IPZ)%USE_FFT) THEN
+         CALL PRESSURE_SOLVER_CHECK_RESIDUALS(NM)
+         RETURN
+      ENDIF
+   ENDDO
+ENDIF
 
 TNOW=CURRENT_TIME()
 CALL POINT_TO_MESH(NM)

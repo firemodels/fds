@@ -1412,6 +1412,7 @@ TYPE ZONE_MESH_TYPE
    INTEGER, ALLOCATABLE :: PT_H(:)
 #endif /* WITH_MKL */
    INTEGER :: NUNKH=0                                 !< Number of unknowns in pressure solution for a given ZONE_MESH
+   INTEGER :: NUNKH_CART=0                            !< Number of unknowns in Cartesian cells of ZONE_MESH
    INTEGER :: MTYPE=0                                 !< Matrix type (symmetric indefinite, or symm positive definite)
    LOGICAL :: ZONE_IN_MESH=.FALSE.                    !< ZONE is in MESH
    LOGICAL :: USE_FFT=.TRUE.                          !< Flag for use of FFT solver
