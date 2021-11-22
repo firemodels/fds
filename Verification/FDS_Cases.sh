@@ -387,6 +387,8 @@ $QFDS -p 8 -d Pressure_Solver pressure_iteration3d_tight.fds
 $QFDS -p 8 -d Pressure_Solver pressure_iteration3d_scarc.fds
 $QFDS -p 8 -d Pressure_Solver pressure_iteration3d_scarc_tight.fds
 $QFDS -p 8 -d Pressure_Solver pressure_iteration3d_uscarc.fds
+$QFDS -p 2 -d Pressure_Solver ulmat_2zone.fds
+
 
 $QFDS -d Pyrolysis cable_11_insulation_mcc.fds
 $QFDS -d Pyrolysis cable_23_insulation_mcc.fds
