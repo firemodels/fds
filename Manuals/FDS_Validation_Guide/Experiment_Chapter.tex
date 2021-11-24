@@ -2229,71 +2229,58 @@ Hansen and Ingason burned piles of reduced-scale wood pallets in a reduced-scale
 
 \subsubsection{Modeling Notes}
 
-The piles of pallets are modeled as an array of Lagrangian particles in lieu of solid obstructions so that a relatively coarse grid of 4~cm can be used. The simulations have previously been performed with partially resolved obstructions~\cite{Janardhan:FT2019}, but such simulations cannot be performed on relatively coarse grids.
-
-The modeling strategy is very similar to that used for vegetation in wildfire simulations. The wood planks are characterized as a homogenous collection of flat disks with a surface area to volume ratio $\sigma=460$~m$^{-1}$ and a packing ratio $\beta=0.42$. The packing ratio is the bulk crib mass per unit volume divided by the density of the wood, $m'''/\rho_{\rm wood}$. The average mass of a pile of pallets is 1.7~kg.
+The FDS simulations of these experiments were originally performed by Janardhan and Hostikka~\cite{Janardhan:FT2019,Janardhan:FSJ2021} using a variety of pyrolysis models in which the pallets are partially resolved. Here, however, the piles of pallets are modeled as an array of Lagrangian particles in lieu of solid obstructions so that a relatively coarse grid of 4~cm can be used. The modeling strategy is very similar to that used for vegetation in wildfire simulations. The wood planks are characterized as a homogenous collection of flat disks with a surface area to volume ratio $\sigma=460$~m$^{-1}$ and a packing ratio $\beta=0.42$. The packing ratio is the bulk crib mass per unit volume divided by the density of the wood, $m'''/\rho_{\rm wood}$. The average mass of a pile of pallets is 1.7~kg.
 
 The radiation absorption coefficient is taken as $\kappa=C_{\rm s} \sigma \beta$, where the shape factor, or ratio of plate surface area to projected area, is $C_{\rm s}=0.25$. The absorption coefficient, $\kappa$, also appears in the formula for wind drag, where the pressure drop, $\Delta p$, over a distance, $L$, is given by $\Delta p / L = 0.5 \rho C_{\rm d} \kappa u^2$. The drag coefficient, $C_{\rm d}=2.8$, was measured by Falkenstein-Smith~et~al.~\cite{Falkenstein-Smith:2018} in a study of vegetation. Its application to wood cribs has not been validated.
 
-The wood is assumed to pyrolyze, forming C$_{3.4}$H$_{6.2}$O$_{2.5}$~\cite{Ritchie:1}, according to the following reaction scheme:
+The wood is assumed to pyrolyze, forming C$_{3.4}$H$_{6.2}$O$_{2.5}$~\cite{Ritchie:1} with a heat of combustion of 18.1~MJ/kg~\cite{Hansen:2010}, according to the following reaction scheme~\cite{Janardhan:FSJ2021}:
 \begin{eqnarray}
  {\rm Wet\ Wood} & \rightarrow & \frac{M}{1+M} \, {\rm H_2O} + \frac{1}{1+M} \, {\rm Dry\ Wood} \\[.1in]
- {\rm Dry\ Wood} & \rightarrow & \chi_{\rm char} \, {\rm Char} + (1-\chi_{\rm char}) \, {\rm Fuel\ Gas} \\[.1in]
- {\rm Char} + \nu_{\rm O_2, char} \, {\rm O_2} & \rightarrow & (1+ \nu_{\rm O_2,char} - \chi_{\rm ash}) \, {\rm CO_2} + \chi_{\rm ash} \, {\rm Ash}
+ {\rm Dry\ Wood} & \rightarrow & \nu_{\rm char} \, {\rm Char} + (1-\nu_{\rm char}) \, {\rm Fuel\ Gas} \\[.1in]
 \end{eqnarray}
-The reaction rates are given by:
+The reaction rates are given by~\cite{Janardhan:FSJ2021}:
 \begin{eqnarray}
-  r_{\rm H_2O} &=& \left( \frac{\rho_{\rm s,H_2O}}{\rho_{\rm s,0}} \right)        \, A_{\rm H_2O} \, T^{-\frac{1}{2}} \exp \left(  -\frac{E_{\rm H_2O}}{R \, T} \right)  \\[.1in]
-  r_{\rm wood} &=& \left( \frac{\rho_{\rm s,wood}}{\rho_{\rm s,0}} \right)^{1.69} \, A_{\rm wood} \,                  \exp \left(  -\frac{E_{\rm wood}}{R \, T} \right)   \\[.1in]
-  r_{\rm char} &=& \left( \frac{\rho_{\rm s,char}}{\rho_{\rm s,0}} \right)^0      \, A_{\rm char} \,                  \exp \left(  -\frac{E_{\rm char}}{R \, T} \right) \,
-  \frac{ \rho \, Y_{\rm O_2} \, \sigma \, \left( 1+\beta_{\rm char}\sqrt{\RE} \right) }{\nu_{\rm O_2,char} \, \rho_{\rm s,0} }
+  r_{\rm H_2O} &=& \left( \frac{\rho_{\rm s,H_2O}}{\rho_{\rm s,0}} \right)^{3.31} \, A_{\rm H_2O} \, \exp \left( -\frac{E_{\rm H_2O}}{R \, T} \right)  \\[.1in]
+  r_{\rm wood} &=& \left( \frac{\rho_{\rm s,wood}}{\rho_{\rm s,0}} \right)^{1.69} \, A_{\rm wood} \, \exp \left( -\frac{E_{\rm wood}}{R \, T} \right)
 \end{eqnarray}
 The equation governing the temperature of the solid is
 \be
-\rho_{\rm s} \, c \, \frac{\partial T}{\partial t} = -\rho_{\rm s,0} \left( \Delta{h_{\rm H_2O}}\ r_{\rm H_2O} + \Delta {h_{\rm wood}}\ r_{\rm wood} +  \Delta{h_{\rm char}}\ r_{\rm char} \right) + \nabla \cdot{\mathbf{\dot{q}}}''_{\rm c}  +  \nabla \cdot{\mathbf{\dot{q}}}''_{\rm r}
+\rho_{\rm s} \, c \, \frac{\partial T}{\partial t} = -\rho_{\rm s,0} \left( \Delta{h_{\rm H_2O}}\ r_{\rm H_2O} + \Delta {h_{\rm wood}}\ r_{\rm wood} \right) + \nabla \cdot{\mathbf{\dot{q}}}''_{\rm c}  +  \nabla \cdot{\mathbf{\dot{q}}}''_{\rm r}
 \ee
 The parameters for the pyrolysis model are listed in Table~\ref{Pine_Properties}.
 
-\begin{table}[p]
-\caption[Parameters for SP Wood Cribs simulations]{Parameters for SP Wood Cribs simulations.}
+\begin{table}[!ht]
+\caption[Parameters for SP Wood Cribs simulations]{Parameters for SP Wood Cribs simulations~\cite{Janardhan:FSJ2021}.}
 \begin{center}
-\begin{tabular}{|l|c|c|l|}
+\begin{tabular}{|l|c|c|}
 \hline
-Property                &      Units    &      Value                         & Reference                      \\ \hline \hline
-$M$                     &               & 0.016                              & \cite{Hansen:2010}             \\ \hline
-$\rho_{\rm H_2O}$       &     kg/m$^3$  & 1000                               & \cite{Porterie:2000PhysFluids} \\ \hline
-$c_{\rm H_2O}$          &    kJ/kg/K    & 4.184                              & \cite{Porterie:2000PhysFluids} \\ \hline
-$k_{\rm H_2O}$          &      W/m/K    & 0.62                               & \cite{Porterie:2000PhysFluids} \\ \hline
-$A_{\rm H_2O}$          & $\sqrt{K}$/s  & 600000                             & \cite{Porterie:2000PhysFluids} \\ \hline
-$E_{\rm H_2O}$          & J/mol         & 48200                              & \cite{Porterie:2000PhysFluids} \\ \hline
-$\Delta h_{\rm H_2O}$   & kJ/kg         & 2259                               & \cite{Porterie:2000PhysFluids} \\ \hline \hline
-$\rho_{\rm wood}$       &     kg/m$^3$  & 370                                &                                \\ \hline
-$c_{\rm wood}$          &    kJ/kg/K    & $0.90+0.00235(T-20)$               &                                \\ \hline
-$k_{\rm wood}$          &      W/m/K    & $0.10+0.00035(T-20)$               &                                \\ \hline
-$\epsilon_{\rm wood}$   &               & 0.95                               & \cite{Ritchie:1}               \\ \hline
-$A_{\rm wood}$          & s$^{-1}$      & 141300                             &                                \\ \hline
-$E_{\rm wood}$          & J/mol         & 90730                              &                                \\ \hline
-$\Delta h_{\rm wood}$   & kJ/kg         & 250                                &                                \\ \hline \hline
-$\rho_{\rm char}$       &     kg/m$^3$  & 135                                &                                \\ \hline
-$c_{\rm char}$          &    kJ/kg/K    & $0.80+0.00615(T-20)$               &                                \\ \hline
-$k_{\rm char}$          &      W/m/K    & $0.11+0.000308(T-20)$              &                                \\ \hline
-$\epsilon_{\rm char}$   &               & 1.0                                & Assumption                     \\ \hline
-$A_{\rm char}$          & s$^{-1}$      & 430                                & \cite{Porterie:2000PhysFluids} \\ \hline
-$E_{\rm char}$          & J/mol         & 74800                              & \cite{Porterie:2000PhysFluids} \\ \hline
-$\chi_{\rm char}$       & g/g           & 0.20                               & Assumption                     \\ \hline
-$\beta_{\rm char}$      &               & 0.20                               & \cite{Porterie:2006}           \\ \hline
-$\nu_{\rm O_2, char}$   & g/g           & 1.65                               & \cite{Porterie:2006}           \\ \hline
-$\Delta h_{\rm char}$   & kJ/kg         & -32800                             & \cite{SFPE}                    \\ \hline \hline
-$\chi_{\rm ash}$        & g/g           & 0.02                               & Assumption                     \\ \hline
-$\rho_{\rm ash}$        &     kg/m$^3$  & 67                                 & Assumption                     \\ \hline
-$c_{\rm ash}$           &    kJ/kg/K    & 2.0                                & Assumption                     \\ \hline
-$k_{\rm char}$          &      W/m/K    & 0.1                                & Assumption                     \\ \hline \hline
-$\Delta h$              &      kJ/kg    & 18100                              & \cite{Hansen:2010}             \\ \hline
+Property                &      Units    &      Value                           \\ \hline \hline
+$M$                     &    kg/kg      & 0.016                                \\ \hline
+$\rho_{\rm H_2O}$       &     kg/m$^3$  & 1000                                 \\ \hline
+$c_{\rm H_2O}$          &    kJ/kg/K    & 4.18                                 \\ \hline
+$k_{\rm H_2O}$          &      W/m/K    & 0.1                                  \\ \hline
+$A_{\rm H_2O}$          &               & $9.57 \times 10^{22}$                \\ \hline
+$E_{\rm H_2O}$          & J/mol         & 136000                               \\ \hline
+$\Delta h_{\rm H_2O}$   & kJ/kg         & 2500                                 \\ \hline \hline
+$\rho_{\rm wood}$       &     kg/m$^3$  & 393                                  \\ \hline
+$c_{\rm wood}$          &    kJ/kg/K    & $0.85+0.00241(T-20)$                 \\ \hline
+$k_{\rm wood}$          &      W/m/K    & $0.07+0.00038(T-20)$                 \\ \hline
+$\epsilon_{\rm wood}$   &               & 0.95                                 \\ \hline
+$A_{\rm wood}$          &               & 141000                               \\ \hline
+$E_{\rm wood}$          & J/mol         & 89700                                \\ \hline
+$\Delta h_{\rm wood}$   & kJ/kg         & 250                                  \\ \hline \hline
+$\rho_{\rm char}$       &     kg/m$^3$  & 135                                  \\ \hline
+$c_{\rm char}$          &    kJ/kg/K    & (see Ref.~\cite{Janardhan:FSJ2021})  \\ \hline
+$k_{\rm char}$          &      W/m/K    & $0.11+0.00031(T-20)$                 \\ \hline
+$\epsilon_{\rm char}$   &               & 1.0                                  \\ \hline
+$\nu_{\rm char}$        & g/g           & 0.195                                \\ \hline
 \end{tabular}
 \end{center}
 \label{Pine_Properties}
 \end{table}
 
+
+\FloatBarrier
 
 \section{Steckler Compartment Experiments}
 \label{Steckler_Description}

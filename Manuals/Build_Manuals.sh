@@ -17,7 +17,7 @@ cp FDS_User_Guide.pdf $manuals_dir/.
 cd $manuals_dir/FDS_Technical_Reference_Guide
 echo "Building FDS Technical Reference Guide at: " $manuals_dir/FDS_Technical_Reference_Guide
 ./make_guide.sh
-cp FDS_FDS_Technical_Reference_Guide.pdf $manuals_dir/.
+cp FDS_Technical_Reference_Guide.pdf $manuals_dir/.
 
 cd $manuals_dir/FDS_Verification_Guide
 echo "Building FDS Verification Guide at: " $manuals_dir/FDS_Verification_Guide

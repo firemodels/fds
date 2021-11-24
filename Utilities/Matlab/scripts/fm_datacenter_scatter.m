@@ -109,8 +109,8 @@ set(lh,'FontSize',Key_Font_Size)
 
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Scat_Label_Font_Size)
-xtitle = ['Measured Soot Concentration (mg/m^3)'];
-ytitle = ['Predicted Soot Concentration (mg/m^3)'];
+xtitle = ['Measured Soot Concentration (mg/m³)'];
+ytitle = ['Predicted Soot Concentration (mg/m³)'];
 xlabel(xtitle,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
 ylabel(ytitle,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
 

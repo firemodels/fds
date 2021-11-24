@@ -65,12 +65,13 @@ for i_O2=1:4;
    end
 end
 
+% THIS DATA NOW STORED IN MACFP REPO
 
-expdir = '../../../exp/Submodules/macfp-db/Extinction/FM_Burner/Experimental_Data/Radiation_global/';
+% expdir = '../../../exp/Submodules/macfp-db/Extinction/FM_Burner/Experimental_Data/Radiation_global/';
 
-CHIR = importdata([expdir,'Radiant_fraction.csv'],',',1);
-rfid = fopen([expdir,'Radiant_fraction2.csv'],'wt','n');
-fprintf(rfid,'%s\n','Time,20p9 percent,19p0 percent,17p0 percent,15p0 percent');
-fprintf(rfid,'%5.3f,%6.3f,%6.3f,%6.3f,%6.3f\n',   0.,CHIR.data(1:4,2));
-fprintf(rfid,'%5.3f,%6.3f,%6.3f,%6.3f,%6.3f\n',1000.,CHIR.data(1:4,2));
-fclose(rfid);
+% CHIR = importdata([expdir,'Radiant_fraction.csv'],',',1);
+% rfid = fopen([expdir,'Radiant_fraction2.csv'],'wt','n');
+% fprintf(rfid,'%s\n','Time,20p9 percent,19p0 percent,17p0 percent,15p0 percent');
+% fprintf(rfid,'%5.3f,%6.3f,%6.3f,%6.3f,%6.3f\n',   0.,CHIR.data(1:4,2));
+% fprintf(rfid,'%5.3f,%6.3f,%6.3f,%6.3f,%6.3f\n',1000.,CHIR.data(1:4,2));
+% fclose(rfid);

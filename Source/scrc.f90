@@ -1384,7 +1384,7 @@ MODULE SCARC_POINTERS
 
 USE GLOBAL_CONSTANTS
 USE PRECISION_PARAMETERS, ONLY: EB, FB
-USE MESH_VARIABLES, ONLY: MESHES, MESH_TYPE, OMESH_TYPE, WALL_TYPE, EXTERNAL_WALL_TYPE
+USE MESH_VARIABLES, ONLY: MESHES, MESH_TYPE, OMESH_TYPE, WALL_TYPE, EXTERNAL_WALL_TYPE,BOUNDARY_COORD_TYPE
 USE SCARC_CONSTANTS
 USE SCARC_TYPES
 USE SCARC_VARIABLES
@@ -1394,6 +1394,7 @@ IMPLICIT NONE (TYPE,EXTERNAL)
 TYPE (MESH_TYPE), POINTER:: M=>NULL()                  !< Pointer to specified mesh (based on MESHES from base code)
 TYPE (OMESH_TYPE), POINTER:: OM=>NULL()                !< Pointer to specified neighboring mesh (based on OMESH from base code)
 TYPE (WALL_TYPE), POINTER:: MWC=>NULL()                !< Pointer to specified wall cell (based on WALL from base code)
+TYPE (BOUNDARY_COORD_TYPE), POINTER:: WC_BC=>NULL()    !< Pointer to specified wall cell coordinates
 
 TYPE (EXTERNAL_WALL_TYPE), POINTER:: EWC=>NULL()       !< Pointer to specified external wall cell
 
@@ -9713,7 +9714,7 @@ MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
    EXTERNAL_WALL_CELLS_LOOP: DO IWG = 1, L%N_WALL_CELLS_EXT
 
       NOM  = M%EXTERNAL_WALL(IWG)%NOM
-      IOR0 = M%WALL(IWG)%BOUNDARY_COORD%IOR
+      IOR0 = M%BOUNDARY_COORD(M%WALL(IWG)%BC_INDEX)%IOR
 
       IF (NOM /= 0) THEN
          IS_KNOWN = .FALSE.
@@ -10025,7 +10026,7 @@ END SUBROUTINE SCARC_SETUP_FACE_BASICS
 SUBROUTINE SCARC_SETUP_WALLS(NGRID_TYPE)
 USE SCARC_POINTERS, ONLY: M, L, LF, LC, FF, FC, OL, OLF, OLC, G, GC, GF, OG, OGC, OGF, GWC, MWC, EWC, &
                           SCARC_POINT_TO_GRID, SCARC_POINT_TO_OTHER_GRID, SCARC_POINT_TO_MULTIGRID, &  
-                          SCARC_POINT_TO_OTHER_MULTIGRID
+                          SCARC_POINT_TO_OTHER_MULTIGRID, WC_BC
 INTEGER, INTENT(IN) :: NGRID_TYPE
 INTEGER :: NL, NM, NOM
 INTEGER :: IREFINE, IFACE, IOR0, JOR0, INBR, IWG, IWC, ICW, IW
@@ -10054,7 +10055,7 @@ MESHES_LOOP1: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
       EWC => M%EXTERNAL_WALL(IWG)
 
       NOM  =  EWC%NOM
-      IOR0 =  MWC%BOUNDARY_COORD%IOR
+      IOR0 =  M%BOUNDARY_COORD(MWC%BC_INDEX)%IOR
 
       GWC => G%WALL(IWG)
       GWC%NOM  = NOM                                    ! store number of neighbor in wall cell
@@ -10093,22 +10094,23 @@ MESHES_LOOP1: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
  
    INTERNAL_WALL_CELLS_LOOP1: DO IWG = L%N_WALL_CELLS_EXT+1, L%N_WALL_CELLS_EXT+L%N_WALL_CELLS_INT
 
-      GWC => G%WALL(IWG)                                                    ! ScaRC-internal wall structure
-      MWC => M%WALL(IWG)                                                    ! FDS-original wall structure
+      MWC => M%WALL(IWG)
+      GWC => G%WALL(IWG)
+      WC_BC => M%BOUNDARY_COORD(MWC%BC_INDEX)
 
-      GWC%IOR  = MWC%BOUNDARY_COORD%IOR
+      GWC%IOR  = WC_BC%IOR
       GWC%NOM  = 0
 
       GWC%BTYPE = NEUMANN
       GWC%BOUNDARY_TYPE = M%WALL(IWG)%BOUNDARY_TYPE
 
-      GWC%IXG =  MWC%BOUNDARY_COORD%II                        ! ghost cell indices
-      GWC%IYG =  MWC%BOUNDARY_COORD%JJ
-      GWC%IZG =  MWC%BOUNDARY_COORD%KK
+      GWC%IXG =  WC_BC%II                        ! ghost cell indices
+      GWC%IYG =  WC_BC%JJ
+      GWC%IZG =  WC_BC%KK
 
-      GWC%IXW =  MWC%BOUNDARY_COORD%IIG                       ! (internal) wall cell indices
-      GWC%IYW =  MWC%BOUNDARY_COORD%JJG
-      GWC%IZW =  MWC%BOUNDARY_COORD%KKG
+      GWC%IXW =  WC_BC%IIG                       ! (internal) wall cell indices
+      GWC%IYW =  WC_BC%JJG
+      GWC%IZW =  WC_BC%KKG
 
    ENDDO INTERNAL_WALL_CELLS_LOOP1
 
@@ -10155,6 +10157,7 @@ MESHES_LOOP1: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 
       MWC => M%WALL(IWG)
       EWC => M%EXTERNAL_WALL(IWG)
+      WC_BC => M%BOUNDARY_COORD(MWC%BC_INDEX)
 
  
       ! Preset ScaRC's boundary type indicator BTYPE
@@ -10176,13 +10179,13 @@ MESHES_LOOP1: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
       ENDIF
       GWC%BOUNDARY_TYPE = MWC%BOUNDARY_TYPE
 
-      GWC%IXG = MWC%BOUNDARY_COORD%II                                 ! ghost cell indices
-      GWC%IYG = MWC%BOUNDARY_COORD%JJ
-      GWC%IZG = MWC%BOUNDARY_COORD%KK
+      GWC%IXG = WC_BC%II                                 ! ghost cell indices
+      GWC%IYG = WC_BC%JJ
+      GWC%IZG = WC_BC%KK
 
-      GWC%IXW = MWC%BOUNDARY_COORD%IIG                                ! (internal) wall cell indices
-      GWC%IYW = MWC%BOUNDARY_COORD%JJG
-      GWC%IZW = MWC%BOUNDARY_COORD%KKG
+      GWC%IXW = WC_BC%IIG                                ! (internal) wall cell indices
+      GWC%IYW = WC_BC%JJG
+      GWC%IZW = WC_BC%KKG
 
       ! If there exists a neighbor for that wall cell, setup corresponding neighborship information
       IF (NOM /= 0) CALL SCARC_SETUP_WALL_NEIGHBOR(G, OG, &
@@ -18605,7 +18608,7 @@ MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
             ENDIF
 
             IF (M%WALL(IW)%BOUNDARY_TYPE == SOLID_BOUNDARY) THEN
-               UN_NEW_OTHER = -SIGN(1._EB, REAL(IOR0, EB))*MESHES(NM)%WALL(IW)%ONE_D%U_NORMAL_S
+               UN_NEW_OTHER = -SIGN(1._EB, REAL(IOR0, EB))*M%BOUNDARY_ONE_D(M%WALL(IW)%OD_INDEX)%U_NORMAL_S
             ENDIF
 
             ! Compute velocity difference
@@ -18669,7 +18672,7 @@ MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
             ENDIF
 
             IF (GWC%BOUNDARY_TYPE == SOLID_BOUNDARY) THEN
-               UN_NEW_OTHER = -SIGN(1._EB, REAL(IOR0, EB))*MESHES(NM)%WALL(IW)%ONE_D%U_NORMAL_S
+               UN_NEW_OTHER = -SIGN(1._EB, REAL(IOR0, EB))*MESHES(NM)%BOUNDARY_ONE_D(MESHES(NM)%WALL(IW)%OD_INDEX)%U_NORMAL_S
             ENDIF
 
             ! Compute velocity difference
@@ -19852,7 +19855,7 @@ SELECT_SOLVER_TYPE: SELECT CASE (SV%TYPE_SOLVER)
          CALL SCARC_POINT_TO_GRID (NM, NL)                                    
          CALL SCARC_POINT_TO_SEPARABLE_ENVIRONMENT(NM)                   
 
-         ST => SCARC(NM)%LEVEL(NL)%STAGE(SV%TYPE_STAGE)                 
+         ST => L%STAGE(SV%TYPE_STAGE)                 
          VB => ST%B
          VX => ST%X
       
@@ -19871,8 +19874,8 @@ SELECT_SOLVER_TYPE: SELECT CASE (SV%TYPE_SOLVER)
 
       IF (IS_CG.OR.IS_MGM.OR.HAS_TWO_LEVELS) THEN
          DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
-            L  => SCARC(NM)%LEVEL(NL)
-            ST => SCARC(NM)%LEVEL(NL)%STAGE(SV%TYPE_STAGE)
+            CALL SCARC_POINT_TO_GRID (NM, NL)                                    
+            ST => L%STAGE(SV%TYPE_STAGE)
             ST%D(1:G%NCE) = 0.0_EB
             ST%R(1:G%NCE) = 0.0_EB
             ST%V(1:G%NCE) = 0.0_EB
@@ -19886,8 +19889,8 @@ SELECT_SOLVER_TYPE: SELECT CASE (SV%TYPE_SOLVER)
 
       IF (IS_GMG) THEN
          DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
-            L  => SCARC(NM)%LEVEL(NL)
-            ST => SCARC(NM)%LEVEL(NL)%STAGE(SV%TYPE_STAGE)
+            CALL SCARC_POINT_TO_GRID (NM, NL)                                    
+            ST => L%STAGE(SV%TYPE_STAGE)
             ST%V(1:G%NCE) = 0.0_EB
             ST%Z(1:G%NCE) = 0.0_EB
          ENDDO
@@ -19898,8 +19901,8 @@ SELECT_SOLVER_TYPE: SELECT CASE (SV%TYPE_SOLVER)
 
       IF (N_DIRIC_GLOBAL(NLEVEL_MIN) == 0) THEN
          IF (UPPER_MESH_INDEX == NMESHES) THEN
-            L  => SCARC(NMESHES)%LEVEL(NL)
-            ST => SCARC(NMESHES)%LEVEL(NL)%STAGE(SV%TYPE_STAGE)
+            CALL SCARC_POINT_TO_GRID (NMESHES, NL)                                    
+            ST => L%STAGE(SV%TYPE_STAGE)
             MESH_REAL = ST%B(G%NC)
          ELSE
             MESH_REAL = 0.0_EB
@@ -19921,8 +19924,9 @@ SELECT_SOLVER_TYPE: SELECT CASE (SV%TYPE_SOLVER)
       MGM_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
    
          CALL SCARC_POINT_TO_MGM (NM, NL)                                    
-
          G => L%UNSTRUCTURED
+         ST => L%STAGE(SV%TYPE_STAGE)
+
          IF (TYPE_MGM_LAPLACE == NSCARC_MGM_LAPLACE_CG) THEN
             VB => ST%B ;  VB = 0.0_EB
             VX => ST%X ;  VX = 0.0_EB
@@ -19944,9 +19948,9 @@ SELECT_SOLVER_TYPE: SELECT CASE (SV%TYPE_SOLVER)
    
       IF (IS_CG_MG) THEN
          DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
-            L   => SCARC(NM)%LEVEL(NL)
-            ST  => SCARC(NM)%LEVEL(NL)%STAGE(SV%TYPE_STAGE)              ! current stage
-            STP => SCARC(NM)%LEVEL(NL)%STAGE(NSCARC_STAGE_ONE)           ! parent stage
+            CALL SCARC_POINT_TO_GRID (NM, NL)                                    
+            ST  => L%STAGE(SV%TYPE_STAGE)              ! current stage
+            STP => L%STAGE(NSCARC_STAGE_ONE)           ! parent stage
             ST%X(1:G%NCE) = 0.0_EB
             ST%B(1:G%NCE) = STP%R(1:G%NCE)                                                
             ST%V(1:G%NCE) = 0.0_EB
@@ -19960,7 +19964,8 @@ SELECT_SOLVER_TYPE: SELECT CASE (SV%TYPE_SOLVER)
    
       IF (TYPE_COARSE == NSCARC_COARSE_ITERATIVE) THEN
          DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
-            ST => SCARC(NM)%LEVEL(NL)%STAGE(SV%TYPE_STAGE)
+            CALL SCARC_POINT_TO_GRID (NM, NL)                                    
+            ST => L%STAGE(SV%TYPE_STAGE)
             ST%X = 0.0_EB
             ST%D = 0.0_EB
             ST%R = 0.0_EB
@@ -19989,16 +19994,13 @@ CALL SCARC_POINT_TO_SEPARABLE_ENVIRONMENT(NM)
 
 ! Get right hand side (PRHS from pres.f90) and initial vector (H or HS from last time step)
 
-!$OMP PARALLEL DO PRIVATE(IC) SCHEDULE(STATIC)
 DO IC = 1, G%NC
    ST%X(IC) = HP(G%ICX(IC), G%ICY(IC), G%ICZ(IC))      
    ST%B(IC) = PRHS(G%ICX(IC), G%ICY(IC), G%ICZ(IC))     
 ENDDO                         
-!$OMP END PARALLEL DO
 
 ! Set correct boundary conditions related to Dirichlet or Neumann boundaries for separable system
 
-!$OMP PARALLEL DO PRIVATE(IOR0,I,J,K,IC) SCHEDULE(STATIC)
 SEPARABLE_BOUNDARY_CELLS_LOOP: DO IW = 1, L%N_WALL_CELLS_EXT
 
    GWC => G%WALL(IW)
@@ -20067,7 +20069,6 @@ SEPARABLE_BOUNDARY_CELLS_LOOP: DO IW = 1, L%N_WALL_CELLS_EXT
    ENDIF SEPARABLE_NEUMANN_IF
    
 ENDDO SEPARABLE_BOUNDARY_CELLS_LOOP
-!$OMP END PARALLEL DO
 
 END SUBROUTINE SCARC_SETUP_SEPARABLE_POISSON
 
@@ -20094,11 +20095,9 @@ CALL SCARC_POINT_TO_INSEPARABLE_ENVIRONMENT(NM)
 
 ! First get 'separable' right hand side (PRHS from pres.f90) and use last iterate as initial vector
 
-!$OMP PARALLEL DO PRIVATE(IC) SCHEDULE(STATIC)
 DO IC = 1, G%NC
    ST%B(IC) = PRHS(G%ICX(IC), G%ICY(IC), G%ICZ(IC))    
 ENDDO                         
-!$OMP END PARALLEL DO
 ST%X = 0.0_EB
 
 ! Build correct RHS for inseparable pressure system by subtracting: nabla**2 (K)
@@ -20178,7 +20177,7 @@ INSEPARABLE_BOUNDARY_CELLS_LOOP: DO IW = 1, L%N_WALL_CELLS_EXT
           MWC%BOUNDARY_TYPE==SOLID_BOUNDARY) CYCLE    
       
       VT => M%VENTS(MWC%VENT_INDEX)
-      IF (ABS(MWC%ONE_D%T_IGN-T_BEGIN)<=TWO_EPSILON_EB .AND. VT%PRESSURE_RAMP_INDEX >=1) THEN
+      IF (ABS(M%BOUNDARY_ONE_D(MWC%OD_INDEX)%T_IGN-T_BEGIN)<=TWO_EPSILON_EB .AND. VT%PRESSURE_RAMP_INDEX >=1) THEN
          TSI = T
       ELSE
          TSI = T - T_BEGIN
@@ -21479,7 +21478,7 @@ END SUBROUTINE SCARC_UPDATE_BAROCLINIC_TERM
 !     dU/dt + del K + (1/rho) del p = - F_A
 ! --------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_NO_FLUX(DT0, NM)
-USE SCARC_POINTERS, ONLY: M, L, G, GWC, MWC, HP, RHOP, RHMK, SCARC_POINT_TO_GRID, SCARC_POINT_TO_INSEPARABLE_ENVIRONMENT
+USE SCARC_POINTERS, ONLY: M, L, G, GWC, MWC, HP, RHOP, RHMK, SCARC_POINT_TO_GRID, SCARC_POINT_TO_INSEPARABLE_ENVIRONMENT, WC_BC
 USE SCARC_MESSAGES
 USE MESH_POINTERS
 INTEGER, INTENT(IN) :: NM
@@ -21488,6 +21487,7 @@ REAL(EB) :: RFODT,DUUDT,DVVDT,DWWDT,UN,KGRAD,PGRAD
 INTEGER  :: IC2,IC1,N,I,J,K,IW,II,JJ,KK,IOR, NOM, IIG, JJG, KKG
 LOGICAL  :: USE_GRADIENTS
 TYPE (OBSTRUCTION_TYPE), POINTER :: OB
+TYPE (BOUNDARY_ONE_D_TYPE), POINTER :: ONE_D
 
 IF (SOLID_PHASE_ONLY .OR. FREEZE_VELOCITY) RETURN
 
@@ -21613,21 +21613,23 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
    IF (IW>N_EXTERNAL_WALL_CELLS .AND. MWC%BOUNDARY_TYPE==NULL_BOUNDARY .AND. NOM==0) CYCLE WALL_LOOP
 
-   II  = MWC%BOUNDARY_COORD%II
-   JJ  = MWC%BOUNDARY_COORD%JJ
-   KK  = MWC%BOUNDARY_COORD%KK
-   IIG = MWC%BOUNDARY_COORD%IIG
-   JJG = MWC%BOUNDARY_COORD%JJG
-   KKG = MWC%BOUNDARY_COORD%KKG
-   IOR = MWC%BOUNDARY_COORD%IOR
+   ONE_D => BOUNDARY_ONE_D(MWC%OD_INDEX)
+   WC_BC => BOUNDARY_COORD(MWC%BC_INDEX)
+   II  = WC_BC%II
+   JJ  = WC_BC%JJ
+   KK  = WC_BC%KK
+   IIG = WC_BC%IIG
+   JJG = WC_BC%JJG
+   KKG = WC_BC%KKG
+   IOR = WC_BC%IOR
 
    USE_GRADIENTS = .NOT. (IS_UNSTRUCTURED .OR. IW<=N_EXTERNAL_WALL_CELLS) 
    IF (NOM/=0 .OR. MWC%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. MWC%BOUNDARY_TYPE==NULL_BOUNDARY) THEN
 
       IF (PREDICTOR) THEN
-         UN = -SIGN(1._EB,REAL(IOR,EB))*MWC%ONE_D%U_NORMAL_S
+         UN = -SIGN(1._EB,REAL(IOR,EB))*ONE_D%U_NORMAL_S
       ELSE
-         UN = -SIGN(1._EB,REAL(IOR,EB))*MWC%ONE_D%U_NORMAL
+         UN = -SIGN(1._EB,REAL(IOR,EB))*ONE_D%U_NORMAL
       ENDIF
 
       SELECT CASE(IOR)
@@ -21640,7 +21642,7 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
             IF (USE_GRADIENTS) THEN
                KGRAD =  (KRES(II+1,JJ,KK)-KRES(II,JJ,KK))*RDXN(II)
                PGRAD = -(RHMK(II+1,JJ,KK)-RHMK(II,JJ,KK))*RDXN(II)
-               FVX(II,JJ,KK) = PGRAD/MWC%ONE_D%RHO_F - KGRAD - DUUDT
+               FVX(II,JJ,KK) = PGRAD/ONE_D%RHO_F - KGRAD - DUUDT
             ELSE
                FVX(II,JJ,KK) = - DUUDT
             ENDIF
@@ -21653,7 +21655,7 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
             IF (USE_GRADIENTS) THEN
                KGRAD =  (KRES(II,JJ,KK)-KRES(II-1,JJ,KK))*RDXN(II-1)
                PGRAD = -(RHMK(II,JJ,KK)-RHMK(II-1,JJ,KK))*RDXN(II-1)
-               FVX(II-1,JJ,KK) = PGRAD/MWC%ONE_D%RHO_F - KGRAD - DUUDT
+               FVX(II-1,JJ,KK) = PGRAD/ONE_D%RHO_F - KGRAD - DUUDT
             ELSE
                FVX(II-1,JJ,KK) = - DUUDT
             ENDIF
@@ -21666,7 +21668,7 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
             IF (USE_GRADIENTS) THEN
                KGRAD =  (KRES(II,JJ+1,KK)-KRES(II,JJ,KK))*RDYN(JJ)
                PGRAD = -(RHMK(II,JJ+1,KK)-RHMK(II,JJ,KK))*RDYN(JJ)
-               M%FVY(II,JJ,KK) = PGRAD/MWC%ONE_D%RHO_F - KGRAD - DVVDT
+               M%FVY(II,JJ,KK) = PGRAD/ONE_D%RHO_F - KGRAD - DVVDT
             ELSE
                M%FVY(II,JJ,KK) = - DVVDT
             ENDIF
@@ -21679,7 +21681,7 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
             IF (USE_GRADIENTS) THEN
                KGRAD =  (KRES(II,JJ,KK)-KRES(II,JJ-1,KK))*RDYN(JJ-1)
                PGRAD = -(RHMK(II,JJ,KK)-RHMK(II,JJ-1,KK))*RDYN(JJ-1)
-               M%FVY(II,JJ-1,KK) = PGRAD/MWC%ONE_D%RHO_F - KGRAD - DVVDT
+               M%FVY(II,JJ-1,KK) = PGRAD/ONE_D%RHO_F - KGRAD - DVVDT
             ELSE
                M%FVY(II,JJ-1,KK) = - DVVDT
             ENDIF
@@ -21692,7 +21694,7 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
             IF (USE_GRADIENTS) THEN
                KGRAD =  (KRES(II,JJ,KK+1)-KRES(II,JJ,KK))*RDZN(KK)
                PGRAD = -(RHMK(II,JJ,KK+1)-RHMK(II,JJ,KK))*RDZN(KK)
-               M%FVZ(II,JJ,KK) = PGRAD/MWC%ONE_D%RHO_F - KGRAD - DWWDT
+               M%FVZ(II,JJ,KK) = PGRAD/ONE_D%RHO_F - KGRAD - DWWDT
             ELSE
                M%FVZ(II,JJ,KK) = - DWWDT
             ENDIF
@@ -21705,7 +21707,7 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
             IF (USE_GRADIENTS) THEN
                KGRAD =  (KRES(II,JJ,KK)-KRES(II,JJ,KK-1))*RDZN(KK-1)
                PGRAD = -(RHMK(II,JJ,KK)-RHMK(II,JJ,KK-1))*RDZN(KK-1)
-               M%FVZ(II,JJ,KK-1) = PGRAD/MWC%ONE_D%RHO_F - KGRAD - DWWDT
+               M%FVZ(II,JJ,KK-1) = PGRAD/ONE_D%RHO_F - KGRAD - DWWDT
             ELSE
                M%FVZ(II,JJ,KK-1) = - DWWDT
             ENDIF
