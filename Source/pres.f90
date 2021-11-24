@@ -1316,7 +1316,7 @@ NOT_PRES_ON_CARTESIAN_IF :IF (.NOT.PRES_ON_CARTESIAN) THEN
          IF(PRESSURE_ZONE(IIG,JJG,KKG)/=IPZ) CYCLE CFACE_LOOP
          IROW = MUNKH(IIG,JJG,KKG)
          IF (IROW <= 0 .AND. CC_IBM) THEN
-            ICC = CCVAR(I,J,K,IBM_IDCC)
+            ICC = CCVAR(IIG,JJG,KKG,IBM_IDCC)
             IF (ICC > 0) THEN; IROW = CUT_CELL(ICC)%UNKH(1); ELSE; CYCLE CFACE_LOOP; ENDIF
          ENDIF
          IOR   = BC%IOR
@@ -1357,7 +1357,7 @@ WALL_CELL_LOOP_1 : DO IW=1,N_EXTERNAL_WALL_CELLS
 
       IROW = MUNKH(IIG,JJG,KKG)
       IF (IROW <= 0 .AND. CC_IBM) THEN
-         ICC = CCVAR(I,J,K,IBM_IDCC)
+         ICC = CCVAR(IIG,JJG,KKG,IBM_IDCC)
          IF (ICC > 0) THEN; IROW = CUT_CELL(ICC)%UNKH(1); ELSE; CYCLE WALL_CELL_LOOP_1; ENDIF
       ENDIF
 
@@ -1392,7 +1392,7 @@ WALL_CELL_LOOP_1 : DO IW=1,N_EXTERNAL_WALL_CELLS
       IF( WC%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. WC%BOUNDARY_TYPE==MIRROR_BOUNDARY) CYCLE WALL_CELL_LOOP_1
       IROW = MUNKH(IIG,JJG,KKG)
       IF (IROW <= 0 .AND. CC_IBM) THEN
-         ICC = CCVAR(I,J,K,IBM_IDCC)
+         ICC = CCVAR(IIG,JJG,KKG,IBM_IDCC)
          IF (ICC > 0) THEN; IROW = CUT_CELL(ICC)%UNKH(1); ELSE; CYCLE WALL_CELL_LOOP_1; ENDIF
       ENDIF
       ! Define cell size, normal to WC:
@@ -1748,14 +1748,14 @@ END SUBROUTINE ULMAT_GET_H_REGFACES
 
 SUBROUTINE ULMAT_MATRIXGRAPH_H(NM,IPZ)
 
-USE COMPLEX_GEOMETRY, ONLY : IBM_GASPHASE,IBM_CGSC
+USE COMPLEX_GEOMETRY, ONLY : IBM_GASPHASE,IBM_CGSC,IBM_IDCC
 USE CC_SCALARS_IBM, ONLY : GET_CC_MATRIXGRAPH_H
 
 INTEGER, INTENT(IN) :: NM,IPZ
 
 ! Local Variables:
 INTEGER :: X1AXIS,IFACE,I,J,K,ICF,IND(LOW_IND:HIGH_IND)
-INTEGER :: LOCROW,LOCROW_1,LOCROW_2,IIND,NII,ILOC,NUNKH
+INTEGER :: LOCROW,LOCROW_1,LOCROW_2,IIND,NII,ILOC,NUNKH,IROW,ICC
 INTEGER :: NREG,IIM,JJM,KKM,IIP,JJP,KKP,LOW_FACE,HIGH_FACE,IW,II,JJ,KK,IIG,JJG,KKG
 TYPE(IBM_REGFACE_TYPE), POINTER, DIMENSION(:) :: REGFACE_H=>NULL()
 TYPE(IBM_RCFACE_TYPE),  POINTER, DIMENSION(:) ::  RCFACE_H=>NULL()
@@ -1984,13 +1984,14 @@ WALL_LOOP_2 : DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    IIG = BC%IIG; JJG = BC%JJG; KKG = BC%KKG
    IF(PRESSURE_ZONE(IIG,JJG,KKG)/=IPZ) CYCLE WALL_LOOP_2 ! Cycle if pressure zone not IPZ.
    II  = BC%II;  JJ  = BC%JJ;  KK  = BC%KK
-   ! Check if CC_IBM -> If either IIG,JJG,KKG or II,JJ,KK cell is type IS_CUTCFE or IS_SOLID cycle:
-   IF ( CC_IBM ) THEN
-      IF(CCVAR(II ,JJ ,KK ,IBM_CGSC) /= IBM_GASPHASE) CYCLE WALL_LOOP_2
-      IF(CCVAR(IIG,JJG,KKG,IBM_CGSC) /= IBM_GASPHASE) CYCLE WALL_LOOP_2
+   IROW = MUNKH(IIG,JJG,KKG)
+   IF (IROW <= 0 .AND. CC_IBM) THEN
+      ICC = CCVAR(IIG,JJG,KKG,IBM_IDCC)
+      IF (ICC > 0) THEN; IROW = CUT_CELL(ICC)%UNKH(1); ELSE; CYCLE WALL_LOOP_2; ENDIF
    ENDIF
    ! Unknowns on related cells:
-   IND(LOW_IND)   = MUNKH(IIG,JJG,KKG)  ! internal.
+   IND(LOW_IND)   = IROW  ! internal.
+
    WC_JD(1:2,1:2) = IS_UNDEFINED
    DO IIND=LOW_IND,HIGH_IND
       NII = NNZ_H_MAT(IND(LOCROW))
@@ -2413,6 +2414,7 @@ END SUBROUTINE ULMAT_H_MATRIX
 ! -------------------------------- ULMAT_BCS_H_MATRIX ----------------------------------
 SUBROUTINE ULMAT_BCS_H_MATRIX(NM,IPZ)
 
+USE COMPLEX_GEOMETRY, ONLY : IBM_IDCC
 USE CC_SCALARS_IBM, ONLY : GET_CFACE_OPEN_BC_COEF
 INTEGER, INTENT(IN) :: NM,IPZ
 
@@ -2423,7 +2425,7 @@ REAL(EB):: AF,IDX,BIJ
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
 TYPE (BOUNDARY_COORD_TYPE), POINTER :: BC
 TYPE(ZONE_MESH_TYPE), POINTER :: ZM
-INTEGER :: IIG,JJG,KKG,II,JJ,KK,IW
+INTEGER :: IIG,JJG,KKG,II,JJ,KK,IW,IROW,ICC
 
 DUM=NM
 ZM=>MESHES(NM)%ZONE_MESH(IPZ)
@@ -2438,10 +2440,15 @@ WALL_LOOP_1 : DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    IF ( .NOT.(WC%BOUNDARY_TYPE==OPEN_BOUNDARY .OR. WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) ) CYCLE WALL_LOOP_1
    BC => BOUNDARY_COORD(WC%BC_INDEX)
    IIG = BC%IIG; JJG = BC%JJG; KKG = BC%KKG
-   IF (PRESSURE_ZONE(IIG,JJG,KKG)/=IPZ .OR. MUNKH(IIG,JJG,KKG)<=0) CYCLE WALL_LOOP_1
+   IF (PRESSURE_ZONE(IIG,JJG,KKG)/=IPZ) CYCLE WALL_LOOP_1
    II  = BC%II;  JJ  = BC%JJ;  KK  = BC%KK
    ! Unknowns on related cells:
-   IND(LOW_IND)  = MUNKH(IIG,JJG,KKG)
+   IROW = MUNKH(IIG,JJG,KKG)
+   IF (IROW <= 0 .AND. CC_IBM) THEN
+      ICC = CCVAR(IIG,JJG,KKG,IBM_IDCC)
+      IF (ICC > 0) THEN; IROW = CUT_CELL(ICC)%UNKH(1); ELSE; CYCLE WALL_LOOP_1; ENDIF
+   ENDIF
+   IND(LOW_IND)  = IROW
    SELECT CASE(BC%IOR)
    CASE( IAXIS)
       AF = ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*R(IIG-1)) * DZ(KKG);            IDX= 1._EB/DXN(IIG-1)
@@ -2496,13 +2503,13 @@ SUBROUTINE ULMAT_DEFINE_IPARM
 IF(ALLOCATED(IPARM)) RETURN
 ALLOCATE(IPARM(64)); IPARM(:) = 0
 
-IPARM(1) = 1   ! no solver default
-IPARM(2) = 2   ! fill-in reordering from METIS
-IPARM(4) = 0   ! no iterative-direct algorithm
-IPARM(5) = 0   ! no user fill-in reducing permutation
-IPARM(6) = 0   ! =0 solution on the first n components of x
-IPARM(8) = 2   ! numbers of iterative refinement steps
-IPARM(10) = 13 ! perturb the pivot elements with 1E-13
+IPARM(1)  = 1  ! no solver default
+IPARM(2)  = 2  ! fill-in reordering from METIS
+IPARM(4)  = 0  ! no iterative-direct algorithm
+IPARM(5)  = 0  ! no user fill-in reducing permutation
+IPARM(6)  = 0  ! =0 solution on the first n components of x
+IPARM(8)  = 0  ! numbers of iterative refinement steps
+IPARM(10) =13  ! perturb the pivot elements with 1E-13
 IPARM(11) = 1  ! use nonsymmetric permutation and scaling MPS
 IPARM(13) = 1  ! maximum weighted matching algorithm is switched-off (default for symmetric).
               ! Try IPARM(13) = 1 in case of inappropriate accuracy
@@ -2512,7 +2519,7 @@ IPARM(19) = 0  ! -1 Output: Mflops for LU factorization
 IPARM(20) = 0  ! Output: Numbers of CG Iterations
 IPARM(21) = 1  ! 1x1 diagonal pivoting for symmetric indefinite matrices.
 IPARM(24) = 0
-IPARM(27) = 1 ! Check matrix
+IPARM(27) = 1  ! Check matrix
 
 RETURN
 END SUBROUTINE ULMAT_DEFINE_IPARM
@@ -2731,7 +2738,6 @@ REAL(EB), POINTER, DIMENSION(:,:,:)   :: HP
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: SUM_FH, SUM_XH ! For use in cases with all compartments without OPEN boundaries.
 REAL(EB), ALLOCATABLE, DIMENSION(:)   :: MEAN_FH, MEAN_XH
 INTEGER :: IERR
-REAL(EB):: VOL
 
 ! CHARACTER(30) :: FILE_NAME
 ! INTEGER :: ICC, IERR
@@ -2786,10 +2792,9 @@ IF (H_MATRIX_INDEFINITE) THEN
                   IF (CCVAR(I,J,K,UNKH)<=0 .OR. PRESSURE_ZONE(I,J,K)<=0) CYCLE ! Gasphase Cartesian cells.
                   ! Row number:
                   IROW = CCVAR(I,J,K,UNKH) - UNKH_IND(NM_START) ! Local numeration.
-                  VOL = DX(I)*DY(J)*DZ(K)
                   ! Sum FH:
-                  SUM_FH(1,PRESSURE_ZONE(I,J,K)) = SUM_FH(1,PRESSURE_ZONE(I,J,K)) + F_H(IROW)*VOL
-                  SUM_FH(2,PRESSURE_ZONE(I,J,K)) = SUM_FH(2,PRESSURE_ZONE(I,J,K)) + VOL
+                  SUM_FH(1,PRESSURE_ZONE(I,J,K)) = SUM_FH(1,PRESSURE_ZONE(I,J,K)) + F_H(IROW)
+                  SUM_FH(2,PRESSURE_ZONE(I,J,K)) = SUM_FH(2,PRESSURE_ZONE(I,J,K)) + 1._EB
                ENDDO
             ENDDO
          ENDDO
@@ -2800,10 +2805,8 @@ IF (H_MATRIX_INDEFINITE) THEN
             K = CUT_CELL(ICC)%IJK(KAXIS)
             IF (PRESSURE_ZONE(I,J,K)<=0) CYCLE
             IROW     = MESHES(NM)%CUT_CELL(ICC)%UNKH(1) - UNKH_IND(NM_START) ! Local numeration.
-            VOL = DX(I)*DY(J)*DZ(K)
-            IF(.NOT.PRES_ON_CARTESIAN) VOL = SUM(CUT_CELL(ICC)%VOLUME(1:CUT_CELL(ICC)%NCELL))
-            SUM_FH(1,PRESSURE_ZONE(I,J,K)) = SUM_FH(1,PRESSURE_ZONE(I,J,K)) + F_H(IROW)*VOL
-            SUM_FH(2,PRESSURE_ZONE(I,J,K)) = SUM_FH(2,PRESSURE_ZONE(I,J,K)) + VOL
+            SUM_FH(1,PRESSURE_ZONE(I,J,K)) = SUM_FH(1,PRESSURE_ZONE(I,J,K)) + F_H(IROW)
+            SUM_FH(2,PRESSURE_ZONE(I,J,K)) = SUM_FH(2,PRESSURE_ZONE(I,J,K)) + 1._EB
          ENDDO
       ENDDO
 
@@ -2891,9 +2894,8 @@ IF (H_MATRIX_INDEFINITE) THEN
                   ! Row number:
                   IROW = CCVAR(I,J,K,UNKH) - UNKH_IND(NM_START) ! Local numeration.
                   ! Sum FH:
-                  VOL = DX(I)*DY(J)*DZ(K)
-                  SUM_XH(1,PRESSURE_ZONE(I,J,K)) = SUM_XH(1,PRESSURE_ZONE(I,J,K)) + X_H(IROW)*VOL
-                  SUM_XH(2,PRESSURE_ZONE(I,J,K)) = SUM_XH(2,PRESSURE_ZONE(I,J,K)) + VOL
+                  SUM_XH(1,PRESSURE_ZONE(I,J,K)) = SUM_XH(1,PRESSURE_ZONE(I,J,K)) + X_H(IROW)
+                  SUM_XH(2,PRESSURE_ZONE(I,J,K)) = SUM_XH(2,PRESSURE_ZONE(I,J,K)) + 1._EB
                ENDDO
             ENDDO
          ENDDO
@@ -2904,10 +2906,8 @@ IF (H_MATRIX_INDEFINITE) THEN
             K = CUT_CELL(ICC)%IJK(KAXIS)
             IF (PRESSURE_ZONE(I,J,K)<=0) CYCLE
             IROW     = MESHES(NM)%CUT_CELL(ICC)%UNKH(1) - UNKH_IND(NM_START) ! Local numeration.
-            VOL = DX(I)*DY(J)*DZ(K)
-            IF(.NOT.PRES_ON_CARTESIAN) VOL = SUM(CUT_CELL(ICC)%VOLUME(1:CUT_CELL(ICC)%NCELL))
-            SUM_XH(1,PRESSURE_ZONE(I,J,K)) = SUM_XH(1,PRESSURE_ZONE(I,J,K)) + X_H(IROW)*VOL
-            SUM_XH(2,PRESSURE_ZONE(I,J,K)) = SUM_XH(2,PRESSURE_ZONE(I,J,K)) + VOL
+            SUM_XH(1,PRESSURE_ZONE(I,J,K)) = SUM_XH(1,PRESSURE_ZONE(I,J,K)) + X_H(IROW)
+            SUM_XH(2,PRESSURE_ZONE(I,J,K)) = SUM_XH(2,PRESSURE_ZONE(I,J,K)) + 1._EB
          ENDDO
       ENDDO
 
