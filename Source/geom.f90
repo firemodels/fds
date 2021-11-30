@@ -5132,6 +5132,7 @@ ENDIF
 
 ! Finally repeat search process and assign edge and cell values to cut-cell region entities:
 ECOUNT = N_EDGES_DIM_CC(1,NM); IBM_ECOUNT=0
+CELL_COUNT_CC(NM) = CCOUNT + CELL_COUNT_NM - CELL_COUNT(NM) ! REGULAR + IB edges.
 CCOUNT = CELL_COUNT_NM;
 
 ! X axis edges:
