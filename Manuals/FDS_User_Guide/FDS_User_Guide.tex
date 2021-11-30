@@ -9450,15 +9450,31 @@ where $\epsilon_{\rm TC}$ is the emissivity of the thermocouple, $U$ is the inte
 \subsection{Volume Flow}
 \label{info:volume_flow}
 
-A common quantity related to heating and ventilation systems is {\em volume flow}, typically denoted $\dot{V}$ and expressed in units of m$^3$/s or ft$^3$/min. It is the integral of the normal component of velocity over an area:
+A common quantity related to heating and ventilation systems is {\em volume flow}, typically denoted $\dot{V}$ and expressed in units of m$^3$/s or ft$^3$/min. The way volume flow output is specified depends on whether it is at a boundary or completely within the gas phase.
+
+\subsubsection{Volume Flow in the Gas Phase}
+
+Consider a flow of gases through a window located at $x=x_0$ and bounded by $y_1 \le y \le y_2$ and $z_1 \le z \le z_2$. Its volume flow is given by:
 \be
-   \dot{V} = \int \bu \cdot \d \mathbf{S} 
+   \dot{V}(t) = \int_{z_1}^{z_2} \int_{y_1}^{y_2} u(x_0,y,z) \, \d y \, \d z \approx 
+   \sum_{k=k_1}^{k_2} \sum _{j=j_1}^{j_2} \, u_{ijk} \, \delta y \, \delta z
+   \label{volumeflow}
 \ee
 To specify volume flow as an output, use an input line like the following:
 \begin{lstlisting}
-&DEVC ID='Vdot', XB=5,6,6,7,9,9, QUANTITY='W-VELOCITY', SPATIAL_STATISTIC='AREA INTEGRAL' /
+&DEVC ID='Vdot', XB=X0,X0,Y1,Y2,Z1,Z2, QUANTITY='U-VELOCITY', 
+      SPATIAL_STATISTIC='AREA INTEGRAL' /
 \end{lstlisting}
-This produces a column in the {\ct CHID\_devc.csv} containing the time history of the volume flow (m$^3$/s) upwards through a 1~m by 1~m plane representing, for example, a window, vent, duct, etc.
+This produces a column in the {\ct CHID\_devc.csv} containing the time history of the volume flow (m$^3$/s) through the window. Note that if the gas is flowing in the positive coordinate direction, the volume flow is positive. You can reverse the sign by adding {\ct CONVERSION\_FACTOR=-1} to the {\ct DEVC} line. If you want to distinguish the inflow from the outflow through the same window, use the parameters {\ct QUANTITY\_RANGE(1:2)} to set upper or lower bounds. For example, if you only want to record the volume flow in the negative coordinate direction, set {\ct QUANTITY\_RANGE(2)=0}, meaning that positive values of velocity are not counted in the summation.
+
+\subsubsection{Volume Flow at a Boundary}
+
+To record the volume flow at a solid surface or vent, add a line like the following:
+\begin{lstlisting}
+&DEVC ID='Vdot', XB=..., QUANTITY='NORMAL VELOCITY', SURF_ID='...',
+      SPATIAL_STATISTIC='SURFACE INTEGRAL' /
+\end{lstlisting}
+This line instructs FDS to sum the normal component of velocity over any surface with the given {\ct SURF\_ID} within the volume bounded by {\ct XB}. Note that a flow entering into the computational domain is negative.
 
 
 
@@ -9472,7 +9488,7 @@ There are several output options for mass flux and mass flow depending on whethe
 The mass flow of gas species $\alpha$ through a window located at $x=x_0$ and bounded by $y_1 \le y \le y_2$ and $z_1 \le z \le z_2$ is given by:
 \be
    \dot{m}_\alpha(t) = \int_{z_1}^{z_2} \int_{y_1}^{y_2} \rho Y_\alpha u \, \d y \, \d z \approx 
-   \sum_{k=k_1}^{k_2} \sum _{j=j_1}^{j_2} \frac{\rho_{ijk}Y_{ijk}+\rho_{i+1,jk}Y_{i+1,jk}}{2} \, u_{i,j,k} \, \delta y \, \delta z
+   \sum_{k=k_1}^{k_2} \sum _{j=j_1}^{j_2} \frac{\rho_{ijk}Y_{ijk}+\rho_{i+1,jk}Y_{i+1,jk}}{2} \, u_{ijk} \, \delta y \, \delta z
    \label{mass_flow}
 \ee
 To instruct FDS to output this quantity, use the input line:
@@ -9498,6 +9514,30 @@ There are two quantities that may be used for measuring mass flux on boundaries:
    \dot{m}_\alpha = \rho Y_\alpha u_n - \rho D_\alpha \partial Y_\alpha / \partial n
 \ee
 where $\mathbf{n}$ is the normal direction of the surface.  The convention used here is that positive fluxes are entering the computational domain. The quantity may be applied at a solid surface, a flow vent, or an {\ct OPEN} boundary.  
+
+
+\subsection{Enthalpy Flow}
+\label{info:enthalpy_flux}
+ 
+
+\subsubsection{Enthalpy Flow in the Gas Phase}
+
+The flow of enthalpy through a window located at $x=x_0$ and bounded by $y_1 \le y \le y_2$ and $z_1 \le z \le z_2$ is given by:
+\begin{eqnarray}
+&& \dot{q}(t) = \int_{z_1}^{z_2} \int_{y_1}^{y_2} \left[ \rho \large( h_{\rm s}(T)-h_{\rm s}(T_\infty) \large) u - k \dod{T}{x} \right] \, \d y \, \d z \approx \nonumber \\
+&& \quad \quad \quad \quad \sum_{k=k_1}^{k_2} \sum _{j=j_1}^{j_2} \left[ \rho_{i+\ha,jk} \left( h_{\rm s}(T_{i+\ha,jk})-h_{\rm s}(T_\infty) \right) \, u_{ijk} - k_{ijk} \frac{T_{i+1,jk}-T_{ijk}}{\dx} \right] \, \delta y \, \delta z
+   \label{enthalpy_flow}
+\end{eqnarray}
+To instruct FDS to output this quantity, use the input line:
+\begin{lstlisting}
+&DEVC ID='q-dot', XB=x0,x0,y1,y2,z1,z2, QUANTITY='ENTHALPY FLUX X',
+      SPATIAL_STATISTIC='AREA INTEGRAL' /
+\end{lstlisting}
+
+
+\subsubsection{Enthalpy Flow at a Boundary}
+
+See {\ct 'ADVECTIVE HEAT FLUX'} in Section~\ref{info:heat_flux}.
 
 
 \subsection{Heat Flux}
@@ -10324,6 +10364,9 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct DIVERGENCE}                                & $\nabla \cdot \bu$                            & 1/s            & D,I,P,S      \\ \hline
 {\ct DROPLET VOLUME FRACTION}$^2$               & Section~\ref{info:part_output}                &                & D,P,S        \\ \hline
 {\ct ENTHALPY}                                  & Section~\ref{info:Enthalpy}                   & kJ/m$^3$       & D,I,P,S      \\ \hline
+{\ct ENTHALPY FLUX X}                           & Section~\ref{info:enthalpy_flux}              & kW/m$^2$       & D,I,P,S   \\ \hline
+{\ct ENTHALPY FLUX Y}                           & Section~\ref{info:enthalpy_flux}              & kW/m$^2$       & D,I,P,S   \\ \hline
+{\ct ENTHALPY FLUX Z}                           & Section~\ref{info:enthalpy_flux}              & kW/m$^2$       & D,I,P,S   \\ \hline
 {\ct EXTINCTION COEFFICIENT}                    & Section~\ref{info:visibility}                 & 1/m            & D,I,P,S      \\ \hline
 {\ct FED}                                       & Section~\ref{info:FED}                        &                & D            \\ \hline
 {\ct FIC}                                       & Section~\ref{info:FED}                        &                & D,S          \\ \hline
