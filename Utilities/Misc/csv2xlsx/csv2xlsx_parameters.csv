@@ -211,14 +211,14 @@
 /home4/mcgratta/firemodels/out/Montoir_LNG_Fires/Montoir03_devc.csv,21,10,1,Montoir T3,8,22
 /home4/mcgratta/firemodels/out/Montoir_LNG_Fires/Montoir03_devc.csv,21,11,1,Montoir T3,8,24
 /home4/mcgratta/firemodels/out/Montoir_LNG_Fires/Montoir03_devc.csv,21,12,1,Montoir T3,8,26
-/home4/mcgratta/firemodels/out/Shell_LNG_Fireballs/Exp_2_devc.csv,103,10,1,Shell fireball T2,6,17
-/home4/mcgratta/firemodels/out/Shell_LNG_Fireballs/Exp_2_devc.csv,103,13,1,Shell fireball T2,6,20
-/home4/mcgratta/firemodels/out/Shell_LNG_Fireballs/Exp_3_devc.csv,103,10,1,Shell fireball T3,6,17
-/home4/mcgratta/firemodels/out/Shell_LNG_Fireballs/Exp_3_devc.csv,103,13,1,Shell fireball T3,6,20
-/home4/mcgratta/firemodels/out/Shell_LNG_Fireballs/Exp_4_devc.csv,103,4,1,Shell fireball T4,6,19
-/home4/mcgratta/firemodels/out/Shell_LNG_Fireballs/Exp_4_devc.csv,103,7,1,Shell fireball T4,6,20
-/home4/mcgratta/firemodels/out/Shell_LNG_Fireballs/Exp_4_devc.csv,103,10,1,Shell fireball T4,6,21
-/home4/mcgratta/firemodels/out/Shell_LNG_Fireballs/Exp_4_devc.csv,103,13,1,Shell fireball T4,6,24
+/home4/mcgratta/firemodels/out/Shell_LNG_Fireballs/Exp_2_devc.csv,103,10,1,Shell fireball T2,6,15
+/home4/mcgratta/firemodels/out/Shell_LNG_Fireballs/Exp_2_devc.csv,103,13,1,Shell fireball T2,6,18
+/home4/mcgratta/firemodels/out/Shell_LNG_Fireballs/Exp_3_devc.csv,103,10,1,Shell fireball T3,6,15
+/home4/mcgratta/firemodels/out/Shell_LNG_Fireballs/Exp_3_devc.csv,103,13,1,Shell fireball T3,6,18
+/home4/mcgratta/firemodels/out/Shell_LNG_Fireballs/Exp_4_devc.csv,103,4,1,Shell fireball T4,6,17
+/home4/mcgratta/firemodels/out/Shell_LNG_Fireballs/Exp_4_devc.csv,103,7,1,Shell fireball T4,6,18
+/home4/mcgratta/firemodels/out/Shell_LNG_Fireballs/Exp_4_devc.csv,103,10,1,Shell fireball T4,6,19
+/home4/mcgratta/firemodels/out/Shell_LNG_Fireballs/Exp_4_devc.csv,103,13,1,Shell fireball T4,6,22
 /home4/mcgratta/firemodels/out/Loughborough_Jet_Fires/jet1_devc.csv,9,2,-40,LU Jet fire T1,6,17
 /home4/mcgratta/firemodels/out/Loughborough_Jet_Fires/jet1_devc.csv,9,42,-4,LU Jet fire T1,6,20
 /home4/mcgratta/firemodels/out/Loughborough_Jet_Fires/jet1_devc.csv,9,46,-9,LU Jet fire T1,6,23
@@ -231,76 +231,76 @@
 /home4/mcgratta/firemodels/out/Loughborough_Jet_Fires/jet3_devc.csv,9,42,-4,LU Jet fire T3,6,20
 /home4/mcgratta/firemodels/out/Loughborough_Jet_Fires/jet3_devc.csv,9,46,-9,LU Jet fire T3,6,23
 /home4/mcgratta/firemodels/out/Loughborough_Jet_Fires/jet3_devc.csv,9,55,1,LU Jet fire T3,6,25
-/home4/mcgratta/firemodels/out/Phoenix_LNG_Fires/Phoenix01_devc.csv,15,2,-12,Phoenix T1,6,17
-/home4/mcgratta/firemodels/out/Phoenix_LNG_Fires/Phoenix01_devc.csv,15,14,-14,Phoenix T1,6,14
-/home4/mcgratta/firemodels/out/Phoenix_LNG_Fires/Phoenix01_devc.csv,15,30,1,Phoenix T1,6,19
-/home4/mcgratta/firemodels/out/Phoenix_LNG_Fires/Phoenix01_devc.csv,15,31,1,Phoenix T1,6,21
-/home4/mcgratta/firemodels/out/Phoenix_LNG_Fires/Phoenix02_devc.csv,15,2,-12,Phoenix T2,6,17
-/home4/mcgratta/firemodels/out/Phoenix_LNG_Fires/Phoenix02_devc.csv,15,14,-14,Phoenix T2,6,14
-/home4/mcgratta/firemodels/out/Phoenix_LNG_Fires/Phoenix02_devc.csv,15,30,1,Phoenix T2,6,19
-/home4/mcgratta/firemodels/out/Phoenix_LNG_Fires/Phoenix02_devc.csv,15,31,1,Phoenix T2,6,21
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_01_devc.csv,15,2,-12,BGC trench T1,6,15
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_02_devc.csv,15,2,-12,BGC trench T2,6,15
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_03_devc.csv,15,2,-12,BGC trench T3,6,15
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_04_devc.csv,15,2,-12,BGC trench T4,6,15
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_05_devc.csv,15,2,-14,BGC trench T5,6,15
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_06_devc.csv,15,2,-12,BGC trench T6,6,15
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_07_devc.csv,15,2,-12,BGC trench T7,6,15
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_08_devc.csv,15,2,-12,BGC trench T8,6,15
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_09_devc.csv,15,2,-12,BGC trench T9,6,15
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_10_devc.csv,15,2,-13,BGC trench T10,6,15
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_11_devc.csv,15,2,-13,BGC trench T11,6,15
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_12_devc.csv,15,2,-13,BGC trench T12,6,15
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_13_devc.csv,15,2,-13,BGC trench T13,6,15
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_01_devc.csv,15,15,1,BGC trench T1,26,12
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_02_devc.csv,15,15,1,BGC trench T2,26,12
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_03_devc.csv,15,15,1,BGC trench T3,26,12
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_04_devc.csv,15,15,1,BGC trench T4,26,12
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_05_devc.csv,15,17,1,BGC trench T5,26,12
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_06_devc.csv,15,15,1,BGC trench T6,26,12
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_07_devc.csv,15,15,1,BGC trench T7,26,12
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_08_devc.csv,15,15,1,BGC trench T8,26,12
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_09_devc.csv,15,15,1,BGC trench T9,26,12
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_10_devc.csv,15,16,1,BGC trench T10,26,12
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_11_devc.csv,15,16,1,BGC trench T11,26,12
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_12_devc.csv,15,16,1,BGC trench T12,26,12
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_13_devc.csv,15,16,1,BGC trench T13,26,12
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_01_devc.csv,15,18,1,BGC trench T1,26,13
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_02_devc.csv,15,18,1,BGC trench T2,26,13
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_03_devc.csv,15,18,1,BGC trench T3,26,13
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_04_devc.csv,15,18,1,BGC trench T4,26,13
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_05_devc.csv,15,20,1,BGC trench T5,26,13
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_06_devc.csv,15,18,1,BGC trench T6,26,13
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_07_devc.csv,15,18,1,BGC trench T7,26,13
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_08_devc.csv,15,18,1,BGC trench T8,26,13
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_09_devc.csv,15,18,1,BGC trench T9,26,13
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_10_devc.csv,15,19,1,BGC trench T10,26,13
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_11_devc.csv,15,19,1,BGC trench T11,26,13
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_12_devc.csv,15,19,1,BGC trench T12,26,13
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_13_devc.csv,15,19,1,BGC trench T13,26,13
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_01_devc.csv,15,17,1,BGC trench T1,26,14
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_02_devc.csv,15,17,1,BGC trench T2,26,14
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_03_devc.csv,15,17,1,BGC trench T3,26,14
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_04_devc.csv,15,17,1,BGC trench T4,26,14
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_05_devc.csv,15,19,1,BGC trench T5,26,14
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_06_devc.csv,15,17,1,BGC trench T6,26,14
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_07_devc.csv,15,17,1,BGC trench T7,26,14
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_08_devc.csv,15,17,1,BGC trench T8,26,14
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_09_devc.csv,15,17,1,BGC trench T9,26,14
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_10_devc.csv,15,18,1,BGC trench T10,26,14
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_11_devc.csv,15,18,1,BGC trench T11,26,14
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_12_devc.csv,15,18,1,BGC trench T12,26,14
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_13_devc.csv,15,18,1,BGC trench T13,26,14
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_01_devc.csv,15,16,1,BGC trench T1,26,15
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_02_devc.csv,15,16,1,BGC trench T2,26,15
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_03_devc.csv,15,16,1,BGC trench T3,26,15
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_04_devc.csv,15,16,1,BGC trench T4,26,15
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_05_devc.csv,15,18,1,BGC trench T5,26,15
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_06_devc.csv,15,16,1,BGC trench T6,26,15
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_07_devc.csv,15,16,1,BGC trench T7,26,15
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_08_devc.csv,15,16,1,BGC trench T8,26,15
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_09_devc.csv,15,16,1,BGC trench T9,26,15
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_10_devc.csv,15,17,1,BGC trench T10,26,15
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_11_devc.csv,15,17,1,BGC trench T11,26,15
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_12_devc.csv,15,17,1,BGC trench T12,26,15
-/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_13_devc.csv,15,17,1,BGC trench T13,26,15
+/home4/mcgratta/firemodels/out/Phoenix_LNG_Fires/Phoenix01_devc.csv,15,2,-12,Phoenix T1,6,16
+/home4/mcgratta/firemodels/out/Phoenix_LNG_Fires/Phoenix01_devc.csv,15,14,-14,Phoenix T1,6,13
+/home4/mcgratta/firemodels/out/Phoenix_LNG_Fires/Phoenix01_devc.csv,15,30,1,Phoenix T1,6,18
+/home4/mcgratta/firemodels/out/Phoenix_LNG_Fires/Phoenix01_devc.csv,15,31,1,Phoenix T1,6,20
+/home4/mcgratta/firemodels/out/Phoenix_LNG_Fires/Phoenix02_devc.csv,15,2,-12,Phoenix T2,6,16
+/home4/mcgratta/firemodels/out/Phoenix_LNG_Fires/Phoenix02_devc.csv,15,14,-14,Phoenix T2,6,13
+/home4/mcgratta/firemodels/out/Phoenix_LNG_Fires/Phoenix02_devc.csv,15,30,1,Phoenix T2,6,18
+/home4/mcgratta/firemodels/out/Phoenix_LNG_Fires/Phoenix02_devc.csv,15,31,1,Phoenix T2,6,20
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_01_devc.csv,15,2,-12,BGC trench T1,6,14
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_02_devc.csv,15,2,-12,BGC trench T2,6,14
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_03_devc.csv,15,2,-12,BGC trench T3,6,14
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_04_devc.csv,15,2,-12,BGC trench T4,6,14
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_05_devc.csv,15,2,-14,BGC trench T5,6,14
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_06_devc.csv,15,2,-12,BGC trench T6,6,14
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_07_devc.csv,15,2,-12,BGC trench T7,6,14
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_08_devc.csv,15,2,-12,BGC trench T8,6,14
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_09_devc.csv,15,2,-12,BGC trench T9,6,14
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_10_devc.csv,15,2,-13,BGC trench T10,6,14
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_11_devc.csv,15,2,-13,BGC trench T11,6,14
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_12_devc.csv,15,2,-13,BGC trench T12,6,14
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_13_devc.csv,15,2,-13,BGC trench T13,6,14
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_01_devc.csv,15,15,1,BGC trench T1,7,17
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_02_devc.csv,15,15,1,BGC trench T2,7,17
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_03_devc.csv,15,15,1,BGC trench T3,7,17
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_04_devc.csv,15,15,1,BGC trench T4,7,17
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_05_devc.csv,15,17,1,BGC trench T5,7,17
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_06_devc.csv,15,15,1,BGC trench T6,7,17
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_07_devc.csv,15,15,1,BGC trench T7,7,17
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_08_devc.csv,15,15,1,BGC trench T8,7,17
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_09_devc.csv,15,15,1,BGC trench T9,7,17
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_10_devc.csv,15,16,1,BGC trench T10,7,17
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_11_devc.csv,15,16,1,BGC trench T11,7,17
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_12_devc.csv,15,16,1,BGC trench T12,7,17
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_13_devc.csv,15,16,1,BGC trench T13,7,17
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_01_devc.csv,15,18,1,BGC trench T1,7,18
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_02_devc.csv,15,18,1,BGC trench T2,7,18
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_03_devc.csv,15,18,1,BGC trench T3,7,18
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_04_devc.csv,15,18,1,BGC trench T4,7,18
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_05_devc.csv,15,20,1,BGC trench T5,7,18
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_06_devc.csv,15,18,1,BGC trench T6,7,18
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_07_devc.csv,15,18,1,BGC trench T7,7,18
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_08_devc.csv,15,18,1,BGC trench T8,7,18
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_09_devc.csv,15,18,1,BGC trench T9,7,18
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_10_devc.csv,15,19,1,BGC trench T10,7,18
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_11_devc.csv,15,19,1,BGC trench T11,7,18
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_12_devc.csv,15,19,1,BGC trench T12,7,18
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_13_devc.csv,15,19,1,BGC trench T13,7,18
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_01_devc.csv,15,17,1,BGC trench T1,7,19
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_02_devc.csv,15,17,1,BGC trench T2,7,19
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_03_devc.csv,15,17,1,BGC trench T3,7,19
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_04_devc.csv,15,17,1,BGC trench T4,7,19
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_05_devc.csv,15,19,1,BGC trench T5,7,19
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_06_devc.csv,15,17,1,BGC trench T6,7,19
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_07_devc.csv,15,17,1,BGC trench T7,7,19
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_08_devc.csv,15,17,1,BGC trench T8,7,19
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_09_devc.csv,15,17,1,BGC trench T9,7,19
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_10_devc.csv,15,18,1,BGC trench T10,7,19
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_11_devc.csv,15,18,1,BGC trench T11,7,19
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_12_devc.csv,15,18,1,BGC trench T12,7,19
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_13_devc.csv,15,18,1,BGC trench T13,7,19
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_01_devc.csv,15,16,1,BGC trench T1,7,20
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_02_devc.csv,15,16,1,BGC trench T2,7,20
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_03_devc.csv,15,16,1,BGC trench T3,7,20
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_04_devc.csv,15,16,1,BGC trench T4,7,20
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_05_devc.csv,15,18,1,BGC trench T5,7,20
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_06_devc.csv,15,16,1,BGC trench T6,7,20
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_07_devc.csv,15,16,1,BGC trench T7,7,20
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_08_devc.csv,15,16,1,BGC trench T8,7,20
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_09_devc.csv,15,16,1,BGC trench T9,7,20
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_10_devc.csv,15,17,1,BGC trench T10,7,20
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_11_devc.csv,15,17,1,BGC trench T11,7,20
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_12_devc.csv,15,17,1,BGC trench T12,7,20
+/home4/mcgratta/firemodels/out/BGC_GRI_LNG_Fires/Croce_13_devc.csv,15,17,1,BGC trench T13,7,20
