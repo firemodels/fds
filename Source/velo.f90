@@ -52,8 +52,6 @@ REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP=>NULL(),UP=>NULL(),VP=>NULL(),WP=>NU
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP=>NULL()
 INTEGER, POINTER, DIMENSION(:,:,:) :: CELL_COUNTER=>NULL()
 
-IF (DO_EVACUATION) RETURN ! No need to update viscosity, use initial one
-
 T_NOW = CURRENT_TIME()
 
 CALL POINT_TO_MESH(NM)
@@ -882,11 +880,6 @@ ENDDO
 !$OMP END DO NOWAIT
 !$OMP END PARALLEL
 
-IF (DO_EVACUATION) THEN
-   FVZ = 0._EB
-   RETURN
-END IF
-
 ! Restore previous substep velocities to gas cut-faces underlaying Cartesian faces.
 IF (CC_IBM) THEN
    T_USED(4) = T_USED(4) + CURRENT_TIME() - T_NOW
@@ -1653,10 +1646,6 @@ IF (PERIODIC_TEST==7 .AND. .FALSE.) THEN
    ENDDO
 ENDIF
 
-! No vertical velocity in Evacuation meshes
-
-IF (DO_EVACUATION) WS = 0._EB
-
 ! Check the stability criteria, and if the time step is too small, send back a signal to kill the job
 
 CALL CHECK_STABILITY(DT,DT_NEW,NM)
@@ -1768,10 +1757,6 @@ IF (PERIODIC_TEST==7 .AND. .FALSE.) THEN
    ENDDO
 ENDIF
 
-! No vertical velocity in Evacuation meshes
-
-IF (DO_EVACUATION) W = 0._EB
-
 T_USED(4)=T_USED(4)+CURRENT_TIME()-T_NOW
 END SUBROUTINE VELOCITY_CORRECTOR
 
@@ -1876,14 +1861,6 @@ EDGE_LOOP: DO IE=1,N_EDGES
       ENDIF
    ENDDO
    IF (.NOT.PROCESS_EDGE) CYCLE EDGE_LOOP
-
-   ! If the edge is to be "smoothed," set tau and omega to zero and cycle
-
-   IF (DO_EVACUATION) THEN
-      OME_E(:,IE) = 0._EB
-      TAU_E(:,IE) = 0._EB
-      CYCLE EDGE_LOOP
-   ENDIF
 
    ! Unpack indices for the edge
 
@@ -2552,7 +2529,6 @@ TYPE (OMESH_TYPE), POINTER :: OM
 TYPE (MESH_TYPE), POINTER :: M2
 
 IF (SOLID_PHASE_ONLY) RETURN
-IF (DO_EVACUATION) RETURN
 
 T_NOW = CURRENT_TIME()
 
@@ -2764,7 +2740,6 @@ TYPE (MESH_TYPE), POINTER :: M2
 
 IF (NMESHES==1) RETURN
 IF (SOLID_PHASE_ONLY) RETURN
-IF (DO_EVACUATION) RETURN
 
 T_NOW = CURRENT_TIME()
 
@@ -2918,8 +2893,6 @@ REAL(EB) :: UODX,VODY,WODZ,UVW,UVWMAX,R_DX2,MU_MAX,MUTRM,PART_CFL,MU_TMP, UVWMAX
 REAL(EB) :: DT_NEW(NMESHES)
 INTEGER  :: I,J,K,IW,IIG,JJG,KKG, ICFL_TMP, JCFL_TMP, KCFL_TMP
 REAL(EB), PARAMETER :: DT_EPS = 1.E-10_EB
-
-IF (DO_EVACUATION) RETURN
 
 UVWMAX = 0._EB
 VN     = 0._EB
