@@ -286,15 +286,15 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
    IF (STORE_SPECIES_FLUX) THEN
       IF (PREDICTOR) THEN
          DO N=1,N_TOTAL_SCALARS
-            DIF_FX(:,:,:,N) = 0.5_EB*( DIF_FXS(:,:,:,N) - RHO_D_DZDX(:,:,:,N) )
-            DIF_FY(:,:,:,N) = 0.5_EB*( DIF_FYS(:,:,:,N) - RHO_D_DZDY(:,:,:,N) )
-            DIF_FZ(:,:,:,N) = 0.5_EB*( DIF_FZS(:,:,:,N) - RHO_D_DZDZ(:,:,:,N) )
+            DIF_FX(:,:,:,N) = -RHO_D_DZDX(:,:,:,N)
+            DIF_FY(:,:,:,N) = -RHO_D_DZDY(:,:,:,N)
+            DIF_FZ(:,:,:,N) = -RHO_D_DZDZ(:,:,:,N)
          ENDDO
       ELSE
          DO N=1,N_TOTAL_SCALARS
-            DIF_FXS(:,:,:,N) = -RHO_D_DZDX(:,:,:,N)
-            DIF_FYS(:,:,:,N) = -RHO_D_DZDY(:,:,:,N)
-            DIF_FZS(:,:,:,N) = -RHO_D_DZDZ(:,:,:,N)
+            DIF_FX(:,:,:,N) = 0.5_EB*( DIF_FX(:,:,:,N) - RHO_D_DZDX(:,:,:,N) )
+            DIF_FY(:,:,:,N) = 0.5_EB*( DIF_FY(:,:,:,N) - RHO_D_DZDY(:,:,:,N) )
+            DIF_FZ(:,:,:,N) = 0.5_EB*( DIF_FZ(:,:,:,N) - RHO_D_DZDZ(:,:,:,N) )
          ENDDO
       ENDIF
    ENDIF
@@ -383,6 +383,28 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
             RHO_D_DZDN = -(SUM(RHO_D_DZDN_GET(:))-RHO_D_DZDN)
          ENDIF
          ONE_D%RHO_D_DZDN_F(N) = RHO_D_DZDN
+
+         IF (STORE_SPECIES_FLUX) THEN
+            IF (PREDICTOR) THEN
+               SELECT CASE(IOR)
+                  CASE(-1) ; DIF_FX(IIG  ,JJG,KKG,N) = -RHO_D_DZDN
+                  CASE( 1) ; DIF_FX(IIG-1,JJG,KKG,N) = -RHO_D_DZDN
+                  CASE(-2) ; DIF_FY(IIG,JJG  ,KKG,N) = -RHO_D_DZDN
+                  CASE( 2) ; DIF_FY(IIG,JJG-1,KKG,N) = -RHO_D_DZDN
+                  CASE(-3) ; DIF_FZ(IIG,JJG,KKG  ,N) = -RHO_D_DZDN
+                  CASE( 3) ; DIF_FZ(IIG,JJG,KKG-1,N) = -RHO_D_DZDN
+               END SELECT
+            ELSE
+               SELECT CASE(IOR)
+                  CASE(-1) ; DIF_FX(IIG  ,JJG,KKG,N) = 0.5_EB*(DIF_FX(IIG  ,JJG,KKG,N)-RHO_D_DZDN)
+                  CASE( 1) ; DIF_FX(IIG-1,JJG,KKG,N) = 0.5_EB*(DIF_FX(IIG-1,JJG,KKG,N)-RHO_D_DZDN)
+                  CASE(-2) ; DIF_FY(IIG,JJG  ,KKG,N) = 0.5_EB*(DIF_FY(IIG,JJG  ,KKG,N)-RHO_D_DZDN)
+                  CASE( 2) ; DIF_FY(IIG,JJG-1,KKG,N) = 0.5_EB*(DIF_FY(IIG,JJG-1,KKG,N)-RHO_D_DZDN)
+                  CASE(-3) ; DIF_FZ(IIG,JJG,KKG  ,N) = 0.5_EB*(DIF_FZ(IIG,JJG,KKG  ,N)-RHO_D_DZDN)
+                  CASE( 3) ; DIF_FZ(IIG,JJG,KKG-1,N) = 0.5_EB*(DIF_FZ(IIG,JJG,KKG-1,N)-RHO_D_DZDN)
+               END SELECT
+            ENDIF
+         ENDIF
 
          IF (PREDICTOR) THEN
             UN_P = ONE_D%U_NORMAL_S
