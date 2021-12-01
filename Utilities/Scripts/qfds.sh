@@ -117,6 +117,7 @@ function usage {
   echo " -y dir - run case in directory dir"
   echo " -Y   - run case in directory casename where casename.fds is the case being run"
   echo " -z   - use --hint=nomultithread on srun line"
+  echo " -Z smokezip_path - compress fds output using smokezip found at smokezip_path" 
   echo ""
   echo " Resource manager: $RESOURCE_MANAGER"
   exit
@@ -218,6 +219,7 @@ dir=.
 benchmark=no
 showinput=0
 exe=
+SMVZIP=
 
 if [ $# -lt 1 ]; then
   usage
@@ -227,7 +229,7 @@ commandline=`echo $* | sed 's/-V//' | sed 's/-v//'`
 
 #*** read in parameters from command line
 
-while getopts 'Ab:d:e:EghHiIj:Lm:n:o:O:p:Pq:stT:vVw:y:Yz' OPTION
+while getopts 'Ab:d:e:EghHiIj:Lm:n:o:O:p:Pq:stT:vVw:y:YzZ:' OPTION
 do
 case $OPTION  in
   A) # used by timing scripts to identify benchmark cases
@@ -333,6 +335,9 @@ case $OPTION  in
    ;;
   z)
    MULTITHREAD="--hint=nomultithread"
+   ;;
+  Z)
+   SMVZIP="$OPTARG"
    ;;
 esac
 done
@@ -532,6 +537,14 @@ fi
 if [ "$queue" == "none" ]; then
  SOCKET_OPTION=
  REPORT_BINDINGS=
+fi
+
+if [ "$SMVZIP" != "" ]; then
+  if [ ! -e $SMVZIP ]; then
+    echo "smokezip not found at $SMVZIP"
+    SMVZIP=
+    ABORTRUN=y
+  fi
 fi
 
 #*** define MPIRUNEXE and do some error checking
@@ -834,6 +847,11 @@ if [ "$OPENMPCASES" == "" ]; then
 cat << EOF >> $scriptfile
 $MPIRUN $exe $in $OUT2ERROR
 EOF
+if [ "$SMVZIP" != "" ]; then
+cat << EOF >> $scriptfile
+$SMVZIP -t $n_mpi_processes_per_node $infile
+EOF
+fi
 else
 for i in `seq 1 $OPENMPCASES`; do
 cat << EOF >> $scriptfile
