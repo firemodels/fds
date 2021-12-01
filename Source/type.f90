@@ -1394,7 +1394,6 @@ TYPE P_ZONE_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: LEAK_PRESSURE_EXPONENT   !< Array of leak reference exponents
    INTEGER :: N_DUCTNODES                                          !< Number of duct nodes in the ZONE
    INTEGER :: MESH_INDEX=0                                         !< Index of the MESH where the ZONE is located
-   LOGICAL :: EVACUATION=.FALSE.
    LOGICAL :: PERIODIC=.FALSE.                                     !< Indicator if the ZONE boundary is periodic
    INTEGER, ALLOCATABLE, DIMENSION(:) :: NODE_INDEX                !< Array of NODE indices connected to the ZONE
    CHARACTER(LABEL_LENGTH) :: ID='null'                            !< Identifier

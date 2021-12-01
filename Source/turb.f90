@@ -31,7 +31,6 @@ INTEGER, INTENT(IN) :: NM
 INTEGER :: IZERO
 TYPE (MESH_TYPE), POINTER :: M
 
-IF (DO_EVACUATION) RETURN
 CALL POINT_TO_MESH(NM)
 M => MESHES(NM)
 
@@ -105,7 +104,6 @@ REAL(EB) :: UP,WP
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),WW=>NULL(),RHOP=>NULL()
 REAL(EB), PARAMETER :: AA=2._EB
 
-IF (DO_EVACUATION) RETURN
 CALL POINT_TO_MESH(NM)
 
 SELECT CASE(RK_STAGE)
@@ -511,7 +509,6 @@ REAL(EB), PARAMETER :: ALPHA = 6.0_EB ! See Lund, 1997 CTR briefs.
 ! is important because we overwrite pointers several times to conserve memory.
 ! *****************************************************************************
 
-IF (DO_EVACUATION) RETURN
 CALL POINT_TO_MESH(NM)
 
 IF (PREDICTOR) THEN
@@ -1969,7 +1966,6 @@ TYPE(VENTS_TYPE), POINTER :: VT=>NULL()
 INTEGER :: NE,NV,IERROR
 REAL(EB), POINTER, DIMENSION(:,:) :: A_IJ=>NULL(),R_IJ=>NULL()
 
-IF (DO_EVACUATION) RETURN
 VENT_LOOP: DO NV=1,MESHES(NM)%N_VENT
    VT => MESHES(NM)%VENTS(NV)
    IF (VT%N_EDDY==0) CYCLE VENT_LOOP
@@ -2043,7 +2039,6 @@ INTEGER, PARAMETER :: SHAPE_CODE=1 ! 1=tent, 2=tophat
 !
 ! See Chapter 4: The Synthetic Eddy Method
 
-IF (DO_EVACUATION) RETURN
 CALL POINT_TO_MESH(NM)
 
 VENT_LOOP: DO NV=1,N_VENT

@@ -93,7 +93,7 @@ TYPE DEVICE_TYPE
                     INIT_ID='null',NO_UPDATE_DEVC_ID='null',NO_UPDATE_CTRL_ID='null',REAC_ID='null'
    CHARACTER(LABEL_LENGTH) :: SMOKEVIEW_LABEL
    LOGICAL :: INITIAL_STATE,CURRENT_STATE,LATCH,PRIOR_STATE,DRY=.FALSE.,HIDE_COORDINATES=.FALSE., &
-              EVACUATION=.FALSE.,RELATIVE=.FALSE.,OUTPUT=.TRUE.,ABSOLUTE_VALUE=.FALSE.,UNITS_SPECIFIED=.FALSE.
+              RELATIVE=.FALSE.,OUTPUT=.TRUE.,ABSOLUTE_VALUE=.FALSE.,UNITS_SPECIFIED=.FALSE.
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: HISTOGRAM_COUNTS
 END TYPE DEVICE_TYPE
 
@@ -162,7 +162,6 @@ TYPE CONTROL_TYPE
    LOGICAL :: PRIOR_STATE=.FALSE.   !< Prior timestep logical state of the control function
    LOGICAL :: LATCH=.TRUE.          !< Control function can only change state once
    LOGICAL :: UPDATED=.FALSE.       !< Control function has been updatead in the current timestep
-   LOGICAL :: EVACUATION=.FALSE.    !< Control function is used by EVAC
    INTEGER :: CONTROL_INDEX=0       !< Indicates the type of control function
    INTEGER :: N_INPUTS=0            !< Number of inputs to the control function
    INTEGER :: RAMP_INDEX=0          !< Index of a RAMP used for the CUSTOM control function
