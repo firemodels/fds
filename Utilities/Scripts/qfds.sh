@@ -546,7 +546,7 @@ if [ "$use_intel_mpi" == "1" ]; then
         echo "$fdsdir/INTEL/mpi/intel64/bin/mpiexec or"
         echo "$fdsdir/bin/mpiexec"
         echo "Run aborted"
-        ABORT=y
+        ABORTRUN=y
       fi
     fi
   else
