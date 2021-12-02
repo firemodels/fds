@@ -2144,6 +2144,18 @@ Figure \ref{fig:H2O_mass_balance} shows the results of two cases that test the m
 \label{fig:H2O_mass_balance}
 \end{figure}
 
+\subsection{Mass Balance on a Gas Control Volume (\texorpdfstring{\textct{mass\_balance\_gas\_volume}}{mass\_balance\_gas\_volume})}
+\label{mass_balance_gas_volume}
+
+Using the same computational setup as the {\ct mass\_flux\_wall} series above, the {\ct mass\_balance\_gas\_volume} test case defines a control volume (CV) internal to the computational domain, 6 m on a side (from 2 m to 8 m in each direction).  The mass of water in the CV is output using a {\ct SPATIAL\_STATISTIC=`VOLUME INTEGRAL`} with {\ct QUANTITY=`DENSITY`} of the lumped species for water and the flows into and out of the CV are obtained using {\ct QUANTITY=`TOTAL MASS FLUX X`}, etc., with {\ct SPATIAL\_STATISTIC=`AREA INTEGRAL`}. Figure \ref{fig:mass_balance_gas_volume} shows the resulting balance of accumulation (dm/dt) and the inflow and outflow of the control volume.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/mass_balance_gas_volume}
+\caption[The \textct{mass\_balance\_gas\_volume} test case]{Results of the \textct{mass\_balance\_gas\_volume} test case showing the balance between mass accumulation (dm/dt) and the flow in and out of the control volume.}
+\label{fig:mass_balance_gas_volume}
+\end{figure}
+
 \subsection{Mass Balance for Species in a Reacting Flow (\texorpdfstring{\textct{mass\_balance\_reac}}{mass\_balance\_reac})}
 \label{mass_balance_reac}
 
