@@ -384,6 +384,28 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
          ENDIF
          ONE_D%RHO_D_DZDN_F(N) = RHO_D_DZDN
 
+         IF (STORE_SPECIES_FLUX) THEN
+            IF (CORRECTOR) THEN
+               SELECT CASE(IOR)
+                  CASE(-1) ; DIF_FXS(IIG  ,JJG,KKG,N) = -RHO_D_DZDN
+                  CASE( 1) ; DIF_FXS(IIG-1,JJG,KKG,N) = -RHO_D_DZDN
+                  CASE(-2) ; DIF_FYS(IIG,JJG  ,KKG,N) = -RHO_D_DZDN
+                  CASE( 2) ; DIF_FYS(IIG,JJG-1,KKG,N) = -RHO_D_DZDN
+                  CASE(-3) ; DIF_FZS(IIG,JJG,KKG  ,N) = -RHO_D_DZDN
+                  CASE( 3) ; DIF_FZS(IIG,JJG,KKG-1,N) = -RHO_D_DZDN
+               END SELECT
+            ELSE
+               SELECT CASE(IOR)
+                  CASE(-1) ; DIF_FX(IIG  ,JJG,KKG,N) = 0.5_EB*(DIF_FXS(IIG , JJG,KKG,N)-RHO_D_DZDN)
+                  CASE( 1) ; DIF_FX(IIG-1,JJG,KKG,N) = 0.5_EB*(DIF_FXS(IIG-1,JJG,KKG,N)-RHO_D_DZDN)
+                  CASE(-2) ; DIF_FY(IIG,JJG  ,KKG,N) = 0.5_EB*(DIF_FYS(IIG,JJG  ,KKG,N)-RHO_D_DZDN)
+                  CASE( 2) ; DIF_FY(IIG,JJG-1,KKG,N) = 0.5_EB*(DIF_FYS(IIG,JJG-1,KKG,N)-RHO_D_DZDN)
+                  CASE(-3) ; DIF_FZ(IIG,JJG,KKG  ,N) = 0.5_EB*(DIF_FZS(IIG,JJG,KKG  ,N)-RHO_D_DZDN)
+                  CASE( 3) ; DIF_FZ(IIG,JJG,KKG-1,N) = 0.5_EB*(DIF_FZS(IIG,JJG,KKG-1,N)-RHO_D_DZDN)
+               END SELECT
+            ENDIF
+         ENDIF
+
          IF (PREDICTOR) THEN
             UN_P = ONE_D%U_NORMAL_S
          ELSE
