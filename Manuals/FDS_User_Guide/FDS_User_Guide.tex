@@ -4139,14 +4139,11 @@ This test case also uses the atmospheric boundary layer (ABL) wall model (see Se
 \subsection{Random Mass Flux Variation}
 \label{info:MASS_FLUX_VAR}
 
-The current implementation of the Synthetic Eddy Method does not allow variation in mass flux defined on a {\ct SURF} line.  For example, {\ct HRRPUA} and {\ct MASS\_FLUX} boundary conditions are by default taken as constant for a given {\ct SURF}.  In reality, of course, this is rarely the case---generally there is some level of random variation in the mass flux on the surface.  In an attempt to accommodate this effect, we have implemented an experimental feature where the user may specify a mass flux variation as a fractional value with the parameter {\ct MASS\_FLUX\_VAR}.  For example, if you want a 10 \% variation in a heat release rate per unit area of 100 \si{kW/m^2} then use
-
+The current implementation of the Synthetic Eddy Method does not allow variation in mass flux defined on a {\ct SURF} line.  For example, the parameters {\ct HRRPUA} and {\ct MASS\_FLUX} follow a user-specified time history which does not include random fluctuations. However, you may specify a mass flux variation using the parameter {\ct MASS\_FLUX\_VAR}. For example, if you want a 10~\% variation in a heat release rate per unit area of 100 \si{kW/m^2} then use
 \begin{lstlisting}
 &SURF ID='burner', HRRPUA=100., MASS_FLUX_VAR=0.1 /
 \end{lstlisting}
-
-It may be helpful to use the boundary file output quantity {\ct MASS FLUX WALL CELL} to visualize the variation.  For example,
-
+It may be helpful to use the boundary file output quantity {\ct 'MASS FLUX'} to visualize the variation.  For example,
 \begin{lstlisting}
 &BNDF QUANTITY='MASS FLUX WALL CELL', CELL_CENTERED=T /
 \end{lstlisting}
@@ -8745,7 +8742,7 @@ The namelist group {\ct DUMP} contains parameters (Table \ref{tbl:DUMP}) that co
 
 \section{Device Output: The \texorpdfstring{{\tt DEVC}}{DEVC} Namelist Group}
 
-Every device ({\ct DEVC}) contains a {\ct QUANTITY} that it monitors. Usually this {\ct QUANTITY} is written out to a comma-delimited spreadsheet file with the suffix {\ct \_devc.csv}. The quantities are listed in Table~\ref{tab:output}. Some quantities, such as {\ct MASS FLUX} and {\ct VOLUME FRACTION}, are marked with an asterisk in Table~\ref{tab:output} meaning that they require additional input, like a {\ct SPEC\_ID}, to be specified. Refer to Section~\ref{info:outputquantities} for more details.
+Every device ({\ct DEVC}) contains a {\ct QUANTITY} that it monitors. Usually this {\ct QUANTITY} is written out to a comma-delimited spreadsheet file with the suffix {\ct \_devc.csv}. The quantities are listed in Table~\ref{tab:output}. Some quantities, such as {\ct 'MASS FLUX'} and {\ct 'VOLUME FRACTION'}, are marked with an asterisk in Table~\ref{tab:output} meaning that they require additional input, like a {\ct SPEC\_ID}, to be specified. Refer to Section~\ref{info:outputquantities} for more details.
 
 There are two types of {\ct DEVC} output. The first is a time history of the given {\ct QUANTITY} over the course of the simulation. The second is a time-averaged profile consisting of a linear array of point devices. Each is explained below.
 
@@ -9509,11 +9506,13 @@ If you want more precise output that includes the diffusive component of the mas
 \subsubsection{Mass Flow at a Boundary}
 \label{info:wallflux}
 
-There are two quantities that may be used for measuring mass flux on boundaries: {\ct 'MASS FLUX'} and {\ct 'MASS FLUX WALL'}.  Each takes a {\ct SPEC\_ID} if a certain species is desired; otherwise the total mass flux is given.  The difference between the two outputs is that {\ct 'MASS FLUX'} refers to the generation rate of a gas species or solid material component at a solid boundary, whether it be user-specified or the result of a pyrolysis model. {\ct 'MASS FLUX WALL'}, on the other hand, is the actual computed mass flux which might be slightly different than {\ct 'MASS FLUX'} due to small numerical error in the normal component of velocity at a solid wall. That is, {\ct 'MASS FLUX WALL'} is a direct computation of
+There are three quantities that may be used for recording the mass flux of a particular gas species at boundaries: {\ct 'MASS FLUX'}, {\ct 'MASS FLUX WALL'}, and {\ct TOTAL MASS FLUX WALL'. Each takes a {\ct SPEC\_ID} if a certain species is desired; otherwise the sum of all gas components is given. The difference between the two outputs is that {\ct 'MASS FLUX'} refers to the generation rate of a gas species or solid material component at a solid boundary, whether it be user-specified or the result of a pyrolysis model. {\ct 'MASS FLUX WALL'}, on the other hand, is the actual computed mass flux which might be slightly different than {\ct 'MASS FLUX'} due to small numerical error in the normal component of velocity at a solid wall. That is, {\ct 'MASS FLUX WALL'} is a direct computation of
 \be
    \dot{m}_\alpha = \rho Y_\alpha u_n - \rho D_\alpha \partial Y_\alpha / \partial n
 \ee
-where $\mathbf{n}$ is the normal direction of the surface.  The convention used here is that positive fluxes are entering the computational domain. The quantity may be applied at a solid surface, a flow vent, or an {\ct OPEN} boundary.  
+where $\mathbf{n}$ is the normal direction of the surface. The third mass flux output is called {\ct 'TOTAL MASS FLUX WALL'}. This quantity is very similar to {\ct 'MASS FLUX WALL'} except that it combines the predicted and corrected mass flux over a single time step. It is the boundary analog of the gas phase quantities {\ct 'TOTAL MASS FLUX X/Y/Z'}. 
+
+The convention used for all forms of the boundary mass flux is that a positive value means that mass is entering the computational domain. The quantity may be applied at a solid surface, a flow vent, or an {\ct OPEN} boundary.  
 
 
 \subsection{Enthalpy Flow}
