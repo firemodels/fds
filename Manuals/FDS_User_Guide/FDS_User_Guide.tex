@@ -9505,14 +9505,24 @@ If you want more precise output that includes the diffusive component of the mas
 
 \subsubsection{Mass Flow at a Boundary}
 \label{info:wallflux}
+\label{mass_balance_1}
 
-There are three quantities that may be used for recording the mass flux of a particular gas species at boundaries: {\ct 'MASS FLUX'}, {\ct 'MASS FLUX WALL'}, and {\ct TOTAL MASS FLUX WALL'. Each takes a {\ct SPEC\_ID} if a certain species is desired; otherwise the sum of all gas components is given. The difference between the two outputs is that {\ct 'MASS FLUX'} refers to the generation rate of a gas species or solid material component at a solid boundary, whether it be user-specified or the result of a pyrolysis model. {\ct 'MASS FLUX WALL'}, on the other hand, is the actual computed mass flux which might be slightly different than {\ct 'MASS FLUX'} due to small numerical error in the normal component of velocity at a solid wall. That is, {\ct 'MASS FLUX WALL'} is a direct computation of
+There are three quantities that may be used for recording the mass flux of a particular gas species at a boundary: {\ct 'MASS FLUX'}, {\ct 'MASS FLUX WALL'}, and {\ct TOTAL MASS FLUX WALL'}. Each takes a {\ct SPEC\_ID} if a particular gas species is desired; otherwise the sum of all gas species is given. The difference between the outputs is that {\ct 'MASS FLUX'} refers to the generation rate of a gas species or solid material component at a solid boundary, whether it be user-specified or the result of a pyrolysis model. {\ct 'MASS FLUX WALL'}, on the other hand, is the actual computed mass flux which might be slightly different than {\ct 'MASS FLUX'} due to small numerical error in the normal component of velocity at a solid wall. That is, {\ct 'MASS FLUX WALL'} is a direct computation of
 \be
    \dot{m}_\alpha = \rho Y_\alpha u_n - \rho D_\alpha \partial Y_\alpha / \partial n
 \ee
-where $\mathbf{n}$ is the normal direction of the surface. The third mass flux output is called {\ct 'TOTAL MASS FLUX WALL'}. This quantity is very similar to {\ct 'MASS FLUX WALL'} except that it combines the predicted and corrected mass flux over a single time step. It is the boundary analog of the gas phase quantities {\ct 'TOTAL MASS FLUX X/Y/Z'}. 
+where $\mathbf{n}$ is the normal direction of the surface. The third mass flux output option is called {\ct 'TOTAL MASS FLUX WALL'}. This quantity is very similar to {\ct 'MASS FLUX WALL'} except that it combines the predicted and corrected mass flux over a single time step. It is the boundary analog of the gas phase quantities {\ct 'TOTAL MASS FLUX X/Y/Z'}. 
 
-The convention used for all forms of the boundary mass flux is that a positive value means that mass is entering the computational domain. The quantity may be applied at a solid surface, a flow vent, or an {\ct OPEN} boundary.  
+For each form of the boundary mass flux, a positive value means that mass is entering the computational domain. These quantities may be applied at a solid surface or vent. {\ct 'MASS FLUX WALL'} and {\ct 'TOTAL MASS FLUX WALL'} can also be applied at an {\ct OPEN} boundary.  
+
+To demonstrate the difference between these various forms of mass flux output, consider Fig.~\ref{mass_balance_1_fig}. These plots show the spatially integrated mass flux of gas from a solid surface, where the mass flux has been ramped up linearly for 10~s, held steady for 20~s, and ramped down to zero linearly for 10~s. The {\ct 'MASS FLUX'} output merely mimics this specified curve. The {\ct 'MASS FLUX WALL'} and {\ct 'TOTAL MASS FLUX WALL'} output exhibit fluctuations caused by the fact that the mass flux is not perfectly applied at the solid surface---there are small fluctuations in the normal component of velocity caused by the inexact velocity-pressure coupling at the boundary. These flucuations are minor and average out close to the specified value, but sometimes it is useful to use the more exact output quantities for diagnostic purposes.
+
+\begin{figure}[ht]
+\includegraphics[width=3in]{SCRIPT_FIGURES/mass_balance_1}
+\includegraphics[width=3in]{SCRIPT_FIGURES/mass_balance_1b}
+\caption[Results of the {\ct mass\_balance\_1} test case]{(Left) Mass flow rate of a gas from a solid boundary. (Right) Close-up view.}
+\label{mass_balance_1_fig}
+\end{figure}
 
 
 \subsection{Enthalpy Flow}

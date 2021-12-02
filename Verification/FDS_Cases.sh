@@ -165,10 +165,6 @@ $QFDS -d Energy_Budget energy_budget_particles.fds
 $QFDS -d Energy_Budget energy_budget_solid.fds
 $QFDS -d Energy_Budget energy_budget_tmix.fds
 
-#$QFDS -d Evacuation evac_smv_testcase0.fds
-#$QFDS -d Evacuation evac_smv_testcase2.fds
-#$QFDS -p 3 -d Evacuation evac_smv_testcase1.fds
-
 $QFDS -d Extinction extinction_1.fds
 $QFDS -d Extinction extinction_2.fds
 
@@ -324,6 +320,8 @@ $QFDS -d HVAC leak_enthalpy.fds
 $QFDS -p 2 -d HVAC leak_test_3.fds
 $QFDS -d HVAC leak_test_4.fds
 $QFDS -d HVAC HVAC_leak_exponent.fds
+
+$QFDS -d Mass_Balance mass_balance_1.fds
 
 $QFDS -d Miscellaneous layer_1mesh.fds
 $QFDS -p 3 -d Miscellaneous layer_4mesh.fds
