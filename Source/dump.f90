@@ -8287,6 +8287,33 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
       CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,ONE_D%TMP_F)
       SOLID_PHASE_OUTPUT = -ONE_D%RHO_F*H_S*ONE_D%U_NORMAL*0.001_EB
 
+   CASE(60)  ! MASS FLUX COMP
+      IF (PRESENT(OPT_WALL_INDEX)) THEN
+         SELECT CASE(BC%IOR)
+            CASE(-1) ; UN = -U(BC%IIG  ,BC%JJG,BC%KKG)
+            CASE( 1) ; UN =  U(BC%IIG-1,BC%JJG,BC%KKG)
+            CASE(-2) ; UN = -V(BC%IIG,BC%JJG  ,BC%KKG)
+            CASE( 2) ; UN =  V(BC%IIG,BC%JJG-1,BC%KKG)
+            CASE(-3) ; UN = -W(BC%IIG,BC%JJG,BC%KKG  )
+            CASE( 3) ; UN =  W(BC%IIG,BC%JJG,BC%KKG-1)
+         END SELECT
+      ELSE
+         UN  = -ONE_D%U_NORMAL
+      ENDIF
+      IF (Z_INDEX > 0) THEN
+         Y_SPECIES = ONE_D%ZZ_F(Z_INDEX)
+         RHO_D_DYDN = ONE_D%RHO_D_DZDN_F(Z_INDEX)
+      ELSEIF (Y_INDEX > 0) THEN
+         ZZ_GET(1:N_TRACKED_SPECIES) = ONE_D%ZZ_F(1:N_TRACKED_SPECIES)
+         CALL GET_MASS_FRACTION(ZZ_GET,Y_INDEX,Y_SPECIES)
+         RHO_D_DYDN = DOT_PRODUCT(Z2Y(Y_INDEX,1:N_TRACKED_SPECIES),ONE_D%RHO_D_DZDN_F(1:N_TRACKED_SPECIES))
+      ELSE
+         Y_SPECIES = 1._EB
+         RHO_D_DYDN = 0._EB
+      ENDIF
+      ! convention here is: inflow is positive (adds mass to domain), outflow is negative (subtracts mass)
+      SOLID_PHASE_OUTPUT = Y_SPECIES*ONE_D%RHO_F*UN - RHO_D_DYDN
+
    CASE(61) ! GAS DENSITY
       IF (Z_INDEX > 0) THEN
          Y_SPECIES = ZZ(BC%IIG,BC%JJG,BC%KKG,Z_INDEX)
