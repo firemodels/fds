@@ -13340,7 +13340,7 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
          DO NN=1,N_DEVC
             IF (DEVICE(NN)%ID==DV%DEVC_ID) DV%DEVC_INDEX(1) = NN
          ENDDO
-         IF (DV%DEVC_INDEX(1)==0) THEN
+         IF (DV%DEVC_ID=='null' .OR. DV%DEVC_INDEX(1)==0) THEN
             WRITE(MESSAGE,'(A)') 'ERROR: A VELOCITY PATCH DEVC line needs a DEVC_ID to control it'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
