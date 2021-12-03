@@ -4145,7 +4145,7 @@ The current implementation of the Synthetic Eddy Method does not allow variation
 \end{lstlisting}
 It may be helpful to use the boundary file output quantity {\ct 'MASS FLUX'} to visualize the variation.  For example,
 \begin{lstlisting}
-&BNDF QUANTITY='MASS FLUX WALL CELL', CELL_CENTERED=T /
+&BNDF QUANTITY='MASS FLUX', CELL_CENTERED=T /
 \end{lstlisting}
 
 \section{HVAC Systems: The \texorpdfstring{{\tt HVAC}}{HVAC} Namelist Group (Table \ref{tbl:HVAC})}
@@ -9505,7 +9505,7 @@ If you want more precise output that includes the diffusive component of the mas
 
 \subsubsection{Mass Flow at a Boundary}
 \label{info:wallflux}
-\label{mass_balance_1}
+\label{mass_flux_comparison}
 
 There are three quantities that may be used for recording the mass flux of a particular gas species at a boundary: {\ct 'MASS FLUX'}, {\ct 'MASS FLUX WALL'}, and {\ct TOTAL MASS FLUX WALL'}. Each takes a {\ct SPEC\_ID} if a particular gas species is desired; otherwise the sum of all gas species is given. The difference between the outputs is that {\ct 'MASS FLUX'} refers to the generation rate of a gas species or solid material component at a solid boundary, whether it be user-specified or the result of a pyrolysis model. {\ct 'MASS FLUX WALL'}, on the other hand, is the actual computed mass flux which might be slightly different than {\ct 'MASS FLUX'} due to small numerical error in the normal component of velocity at a solid wall. That is, {\ct 'MASS FLUX WALL'} is a direct computation of
 \be
@@ -9515,13 +9515,13 @@ where $\mathbf{n}$ is the normal direction of the surface. The third mass flux o
 
 For each form of the boundary mass flux, a positive value means that mass is entering the computational domain. These quantities may be applied at a solid surface or vent. {\ct 'MASS FLUX WALL'} and {\ct 'TOTAL MASS FLUX WALL'} can also be applied at an {\ct OPEN} boundary.  
 
-To demonstrate the difference between these various forms of mass flux output, consider Fig.~\ref{mass_balance_1_fig}. These plots show the spatially integrated mass flux of gas from a solid surface, where the mass flux has been ramped up linearly for 10~s, held steady for 20~s, and ramped down to zero linearly for 10~s. The {\ct 'MASS FLUX'} output merely mimics this specified curve. The {\ct 'MASS FLUX WALL'} and {\ct 'TOTAL MASS FLUX WALL'} output exhibit fluctuations caused by the fact that the mass flux is not perfectly applied at the solid surface---there are small fluctuations in the normal component of velocity caused by the inexact velocity-pressure coupling at the boundary. These flucuations are minor and average out close to the specified value, but sometimes it is useful to use the more exact output quantities for diagnostic purposes.
+To demonstrate the difference between these various forms of mass flux output, consider Fig.~\ref{mass_flux_comparison_fig}. These plots show the spatially integrated mass flux of gas from a solid surface, where the mass flux has been ramped up linearly for 10~s, held steady for 20~s, and ramped down to zero linearly for 10~s. The {\ct 'MASS FLUX'} output merely mimics this specified curve. The {\ct 'MASS FLUX WALL'} and {\ct 'TOTAL MASS FLUX WALL'} output exhibit fluctuations caused by the fact that the mass flux is not perfectly applied at the solid surface---there are small fluctuations in the normal component of velocity caused by the inexact velocity-pressure coupling at the boundary. These flucuations are minor and average out close to the specified value, but sometimes it is useful to use the more exact output quantities for diagnostic purposes.
 
 \begin{figure}[ht]
-\includegraphics[width=3in]{SCRIPT_FIGURES/mass_balance_1}
-\includegraphics[width=3in]{SCRIPT_FIGURES/mass_balance_1b}
-\caption[Results of the {\ct mass\_balance\_1} test case]{(Left) Mass flow rate of a gas from a solid boundary. (Right) Close-up view.}
-\label{mass_balance_1_fig}
+\includegraphics[width=3in]{SCRIPT_FIGURES/mass_flux_comparison}
+\includegraphics[width=3in]{SCRIPT_FIGURES/mass_flux_comparisonb}
+\caption[Results of the {\ct mass\_flux\_comparison} test case]{(Left) Mass flow rate of a gas from a solid boundary. (Right) Close-up view.}
+\label{mass_flux_comparison_fig}
 \end{figure}
 
 
@@ -10583,6 +10583,7 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct SUBSTEPS}                                  & Section~\ref{info:solid_phase_stability}          &                & B,D          \\ \hline
 {\ct SUM LUMPED MASS FRACTIONS}                 & $\sum_i Z_i$ (should be 1)                        &                & D,S          \\ \hline
 {\ct SUM PRIMITIVE MASS FRACTIONS}              & $\sum_\alpha Y_\alpha$ (should be 1)              &                & D,S          \\ \hline
+{\ct TOTAL MASS FLUX WALL}$^1$ & $\overline{\rho Y_\alpha} u_n + \rho D_\alpha \partial Y_\alpha/\partial n$, Sec.~\ref{info:wallflux} & kg/s/m$^2$ & D,S      \\ \hline
 {\ct TOTAL MASS FLUX X}$^1$ & $\overline{\rho Y_\alpha} u + \rho D_\alpha \partial Y_\alpha/\partial x$, Sec.~\ref{info:mass_flow} & kg/s/m$^2$ & D,I,P,S      \\ \hline
 {\ct TOTAL MASS FLUX Y}$^1$ & $\overline{\rho Y_\alpha} v + \rho D_\alpha \partial Y_\alpha/\partial y$, Sec.~\ref{info:mass_flow} & kg/s/m$^2$ & D,I,P,S      \\ \hline
 {\ct TOTAL MASS FLUX Z}$^1$ & $\overline{\rho Y_\alpha} w + \rho D_\alpha \partial Y_\alpha/\partial z$, Sec.~\ref{info:mass_flow} & kg/s/m$^2$ & D,I,P,S      \\ \hline
