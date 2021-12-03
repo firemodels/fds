@@ -321,8 +321,6 @@ $QFDS -p 2 -d HVAC leak_test_3.fds
 $QFDS -d HVAC leak_test_4.fds
 $QFDS -d HVAC HVAC_leak_exponent.fds
 
-$QFDS -d Mass_Balance mass_balance_1.fds
-
 $QFDS -d Miscellaneous layer_1mesh.fds
 $QFDS -p 3 -d Miscellaneous layer_4mesh.fds
 $QFDS -d Miscellaneous pyramid.fds
@@ -541,6 +539,7 @@ $QFDS -d Species burke_schumann.fds
 $QFDS -d Species FED_FIC.fds
 $QFDS -d Species FED_FIC_SMIX.fds
 $QFDS -d Species FED_CO_HCN.fds
+$QFDS -d Species mass_flux_comparison.fds
 $QFDS -d Species methane_flame_simple.fds
 $QFDS -d Species methane_flame_simple_2.fds
 $QFDS -d Species methane_flame_primitive.fds
