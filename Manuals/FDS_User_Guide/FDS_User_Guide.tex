@@ -9543,10 +9543,14 @@ To instruct FDS to output this quantity, use the input line:
       SPATIAL_STATISTIC='AREA INTEGRAL' /
 \end{lstlisting}
 
-
 \subsubsection{Enthalpy Flow at a Boundary}
 
-See {\ct 'ADVECTIVE HEAT FLUX'} in Section~\ref{info:heat_flux}.
+{\ct 'ENTHALPY FLUX WALL'} is the equivalent of {\ct 'ENTHALPY FLUX X/Y/Z'} at a boundary. It is the rate of energy advected {\em into} the domain at a vent or open boundary: 
+\begin{equation}
+   \dot{q}_{\mathrm{w}}'' = -\rho_{\rm w} \, h_s(T_{\rm w}) \, \bu \cdot \bn - k \dod{T}{n}
+\end{equation}
+where $n$ is the coordinate direction pointing into the boundary; that is, out of the computational domain. Note that the enthalpy flux at a boundary is defined using the density, temperature, and sensible enthalpy of the gas mixture at the boundary, and is not relative to ambient conditions like its gas phase counterparts. For this reason, this quantity is often used in energy budget calculations to track the flow of enthalpy into and out of the computational domain. The quantity is positive for gas flow into the domain.
+
 
 
 \subsection{Heat Flux}
@@ -9571,9 +9575,6 @@ where $\dot{q}_{\rm inc,rad}''$ is the {\em incident} radiative heat flux, $\eps
 
 \item[\ct 'INCIDENT HEAT FLUX']
 \hspace{1in} \newline This is the term $\dq_{\rm inc,rad}''$ in Eq.~(\ref{net_flux}).
-
-\item[\ct 'ADVECTIVE HEAT FLUX']
-\hspace{1in} \newline The rate of energy advected into the domain at a vent or open boundary, $-\dot{q}_{\mathrm{w}}'' = \rho \, h_s(T) \, \bu \cdot \bn$. Note that the advective heat flux at a boundary is defined using the sensible enthalpy of the mixture whose composition is taken at the boundary and is not relative to ambient conditions. For this reason, this quantity is often used in energy budget calculations to track the flow of enthalpy into and out of the computational domain. The quantity is positive for gas flow into the domain.
 
 \item[\ct 'GAUGE HEAT FLUX']
 \hspace{1in} \newline This quantity simulates a measurement made with a water-cooled heat flux gauge:
@@ -10373,15 +10374,15 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct DIVERGENCE}                                & $\nabla \cdot \bu$                            & 1/s            & D,I,P,S      \\ \hline
 {\ct DROPLET VOLUME FRACTION}$^2$               & Section~\ref{info:part_output}                &                & D,P,S        \\ \hline
 {\ct ENTHALPY}                                  & Section~\ref{info:Enthalpy}                   & kJ/m$^3$       & D,I,P,S      \\ \hline
-{\ct ENTHALPY FLUX X}                           & Section~\ref{info:enthalpy_flux}              & kW/m$^2$       & D,I,P,S   \\ \hline
-{\ct ENTHALPY FLUX Y}                           & Section~\ref{info:enthalpy_flux}              & kW/m$^2$       & D,I,P,S   \\ \hline
-{\ct ENTHALPY FLUX Z}                           & Section~\ref{info:enthalpy_flux}              & kW/m$^2$       & D,I,P,S   \\ \hline
+{\ct ENTHALPY FLUX X}                           & Section~\ref{info:enthalpy_flux}              & kW/m$^2$       & D,I,P,S      \\ \hline
+{\ct ENTHALPY FLUX Y}                           & Section~\ref{info:enthalpy_flux}              & kW/m$^2$       & D,I,P,S      \\ \hline
+{\ct ENTHALPY FLUX Z}                           & Section~\ref{info:enthalpy_flux}              & kW/m$^2$       & D,I,P,S      \\ \hline
 {\ct EXTINCTION COEFFICIENT}                    & Section~\ref{info:visibility}                 & 1/m            & D,I,P,S      \\ \hline
 {\ct FED}                                       & Section~\ref{info:FED}                        &                & D            \\ \hline
 {\ct FIC}                                       & Section~\ref{info:FED}                        &                & D,S          \\ \hline
 {\ct FRICTION VELOCITY}                         & Section~\ref{info:yplus}                      & m/s            & B,D          \\ \hline
 {\ct GAUGE HEAT FLUX}                           & Section~\ref{info:heat_flux}                  & kW/m$^2$       & B,D          \\ \hline
-{\ct ADVECTIVE HEAT FLUX}                       & Section~\ref{info:heat_flux}                  & kW/m$^2$       & B,D          \\ \hline
+{\ct ENTHALPY FLUX WALL}                        & Section~\ref{info:enthalpy_flux}              & kW/m$^2$       & B,D          \\ \hline
 {\ct TOTAL HEAT FLUX}                           & Section~\ref{info:heat_flux}                  & kW/m$^2$       & B,D          \\ \hline
 {\ct HRR}                                       & $\int \dq''' \; \d V$                         & kW             & D            \\ \hline
 {\ct HRRPUA}                                    & $\dq''$                                       & kW/m$^2$       & D            \\ \hline
@@ -10395,7 +10396,6 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct LAYER HEIGHT}                              & Section~\ref{info:layerheight}                & m              & D            \\ \hline
 {\ct LINK TEMPERATURE}                          & Section~\ref{info:heat_detectors}             & $^\circ$C      & D            \\ \hline
 {\ct LOWER TEMPERATURE}                         & Section~\ref{info:layerheight}                & $^\circ$C      & D            \\ \hline
-{\ct ADVECTIVE MASS FLUX}                       & Section~\ref{info:mass_flow}                  & \si{kg/(m$^2$.s)} & B,D          \\ \hline
 {\ct MASS FLUX}$^{1,4}$                         & Section~\ref{info:wallflux}                   & \si{kg/(m$^2$.s)} & B,D       \\ \hline
 {\ct MASS FLUX WALL}$^1$                        & Section~\ref{info:wallflux}                   & \si{kg/(m$^2$.s)} & B,D       \\ \hline
 {\ct MASS FLUX X}$^1$                           & Section~\ref{info:mass_flow}                  & \si{kg/(m$^2$.s)} & D,I,P,S   \\ \hline
