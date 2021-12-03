@@ -2382,33 +2382,24 @@ This case tests the ability of FDS to properly conserve the total of the solid p
 \end{figure}
 
 
+
 \subsection{Energy Conservation at Walls (\texorpdfstring\textct{mass\_heat\_wall\_device\_test}{mass\_heat\_wall\_device\_test})}
 \label{mass_heat_wall_device_test}
 \label{mass_heat_wall_device_test_2}
 
-To obtain tight mass and energy balances it is important to output the actual values used for boundary conditions in the transport equations in FDS.  To do this a user applies the WALL variants of the flow devices.  In Figs.~\ref{mass_heat_wall_device_mass_flow} and \ref{mass_heat_wall_device_heat_flow} we show the results for two cases.  These cases are the same except that the vents have opposite {\ct IOR} (orientation) values.  Each case has a prescribed outflow mass flux of 1 \si{kg/(m^2.s)} and exhaust vent area of 4 \si{m^2}.  The inflow balances the outflow with both equal to 4 \si{kg/s}.  The specific heat of the air is set to 1 \si{kJ/(kg.K)}.  The ambient temperature is 100 \si{\degreeCelsius}.  The reference temperature is 25 \si{\degreeCelsius}.  The heat flow at the vent is, therefore, (4 \si{kg/s})(1 \si{kJ/(kg.K)})(75 K) = 300 kW.
+To obtain tight mass and energy balances it is important to output the actual values used for boundary conditions in the transport equations in FDS. Shown in Fig.~\ref{mass_heat_wall_device_flow} are the results for two cases.  These cases are the same except that the vents have opposite {\ct IOR} (orientation) values.  Each case has a prescribed outflow mass flux of 1~\si{kg/(m^2.s)} and exhaust vent area of 4~\si{m^2}. The inflow balances the outflow with both equal to 4 \si{kg/s}.  The specific heat of the air is set to 1~\si{kJ/(kg.K)}.  The ambient temperature is 100~\si{\degreeCelsius}.  The reference temperature is 25~\si{\degreeCelsius}.  The heat flow at the vent is, therefore, (4~\si{kg/s})(1~\si{kJ/(kg.K)})(75~K) = 300 kW.
 
-\begin{figure}[p]
+\begin{figure}[!ht]
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/wall_device_test_massflow_in} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/wall_device_test_massflow_out} \\
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/wall_device_test_massflow_in_2} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/wall_device_test_massflow_out_2}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/wall_device_test_massflow} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/wall_device_test_heatflow} \\
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/wall_device_test_massflow_2} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/wall_device_test_heatflow_2}
 \end{tabular*}
-\caption[The \textct{mass\_heat\_wall\_device\_test} mass flow results]{The \textct{mass\_heat\_wall\_device\_test} mass flow results.}
-\label{mass_heat_wall_device_mass_flow}
+\caption[The \textct{mass\_heat\_wall\_device\_test} results]{The \textct{mass\_heat\_wall\_device\_test} flow results.}
+\label{mass_heat_wall_device_flow}
 \end{figure}
 
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{lr}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/wall_device_test_heatflow_in} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/wall_device_test_heatflow_out} \\
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/wall_device_test_heatflow_in_2} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/wall_device_test_heatflow_out_2}
-\end{tabular*}
-\caption[The \textct{mass\_heat\_wall\_device\_test} heat flow results]{The \textct{mass\_heat\_wall\_device\_test} heat flow results.}
-\label{mass_heat_wall_device_heat_flow}
-\end{figure}
 
 \FloatBarrier
 
