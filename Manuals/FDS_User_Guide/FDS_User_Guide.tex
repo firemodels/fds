@@ -7083,7 +7083,7 @@ In the example called {\ct wind\_example\_32} there are various rectangular bloc
 
 The wind {\ct SPEED} and {\ct DIRECTION} can be made a function of time and/or height using {\ct RAMP} functions. With respect to time, consider the following lines of input:
 \begin{lstlisting}
-&WIND SPEED=1., RAMP_SPEED='spd', RAMP_DIRECTION='dir' /
+&WIND SPEED=1., RAMP_SPEED_T='spd', RAMP_DIRECTION_T='dir' /
 
 &RAMP ID='dir', T=   0, F=300 /
 &RAMP ID='dir', T= 600, F=330 /
@@ -7096,7 +7096,7 @@ The wind {\ct SPEED} and {\ct DIRECTION} can be made a function of time and/or h
 .
 .
 \end{lstlisting}
-These lines direct FDS to vary the wind speed and direction according to the {\ct RAMP} functions {\ct 'spd'} and {\ct 'dir'}, respectively. The parameter {\ct T} is the time in s. For the direction ramp function, {\ct F} represents the direction angle in degrees from the north (positive $y$ direction). For the speed ramp function, {\ct F} represents a multiplier of the base {\ct SPEED}, which in this case is unity. An alternative to specifying the wind speed and direction is to specify the velocity components, ({\ct U0},{\ct V0}) separately, along with time ramps {\ct RAMP\_U0\_T} and {\ct RAMP\_V0\_T}.
+These lines direct FDS to vary the wind speed and direction according to the {\ct RAMP} functions {\ct 'spd'} and {\ct 'dir'}, respectively. The parameter {\ct T} is the time in s. For the direction ramp function, {\ct F} represents the direction angle in degrees from the north (positive $y$ direction). For the speed ramp function, {\ct F} represents a multiplier of the base {\ct SPEED}, which in this case is unity.
 
 You can also vary the wind velocity components with height using the ramp functions {\ct RAMP\_U0\_Z}, {\ct RAMP\_V0\_Z}, and {\ct RAMP\_W0\_Z}.
 \begin{lstlisting}
@@ -12422,11 +12422,11 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct LAPSE\_RATE}                               & Real          & Section~\ref{info:stratification}             & $^\circ$C/m   & 0                 \\ \hline
 {\ct LATITUDE}                                  & Real          & Section~\ref{info:coriolis_force}             & degrees       &                   \\ \hline
 {\ct POTENTIAL\_TEMPERATURE\_CORRECTION}        & Logical       & Section~\ref{info:potential_temperature_correction} &         & {\ct F}     \\ \hline
-{\ct RAMP\_DIRECTION}                           & Character     & Section~\ref{info:WIND}                       &               &                   \\ \hline
+{\ct RAMP\_DIRECTION\_T}                        & Character     & Section~\ref{info:WIND}                       &               &                   \\ \hline
 {\ct RAMP\_FVX\_T}                              & Character     & Section~\ref{info:force_vector}               &               &                   \\ \hline
 {\ct RAMP\_FVY\_T}                              & Character     & Section~\ref{info:force_vector}               &               &                   \\ \hline
 {\ct RAMP\_FVZ\_T}                              & Character     & Section~\ref{info:force_vector}               &               &                   \\ \hline
-{\ct RAMP\_SPEED}                               & Character     & Section~\ref{info:wind_ramps}                 &               &                   \\ \hline
+{\ct RAMP\_SPEED\_T}                            & Character     & Section~\ref{info:wind_ramps}                 &               &                   \\ \hline
 {\ct RAMP\_TMP0\_Z}                             & Character     & Section~\ref{info:stratification}             &               &                   \\ \hline
 {\ct RAMP\_U0\_T}                               & Character     & Section~\ref{info:wind_ramps}                 &               &                   \\ \hline
 {\ct RAMP\_U0\_Z}                               & Character     & Section~\ref{info:wind_ramps}                 &               &                   \\ \hline
