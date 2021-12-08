@@ -7096,15 +7096,24 @@ The wind {\ct SPEED} and {\ct DIRECTION} can be made a function of time and/or h
 .
 .
 \end{lstlisting}
-These lines direct FDS to vary the wind speed and direction according to the {\ct RAMP} functions {\ct 'spd'} and {\ct 'dir'}, respectively. The parameter {\ct T} is the time in s. For the direction ramp function, {\ct F} represents the direction angle in degrees from the north (positive $y$ direction). For the speed ramp function, {\ct F} represents a multiplier of the base {\ct SPEED}, which in this case is unity.
+These lines direct FDS to vary the wind speed and direction over time, according to the {\ct RAMP} functions {\ct 'spd'} and {\ct 'dir'}, respectively. The parameter {\ct T} is the time in s. For the direction ramp function, {\ct F} represents the direction angle in degrees from the north (positive $y$ direction). For the speed ramp function, {\ct F} represents a multiplier of the base {\ct SPEED}, which in this case is unity.
 
-You can also vary the wind velocity components with height using the ramp functions {\ct RAMP\_U0\_Z}, {\ct RAMP\_V0\_Z}, and {\ct RAMP\_W0\_Z}.
+You can also vary the wind velocity components with height using the ramp functions {\ct RAMP\_SPEED\_Z} and {\ct RAMP\_DIRECTION\_Z}.
 \begin{lstlisting}
-&RAMP ID='z-ramp', Z=  0., F=1.0 /
-&RAMP ID='z-ramp', Z=200., F=1.5 /
-&RAMP ID='z-ramp', Z=500., F=1.8 /
+&WIND SPEED=1., RAMP_SPEED_Z='spd', RAMP_DIRECTION_Z='dir' /
+
+&RAMP ID='dir', Z=   0, F=300 /
+&RAMP ID='dir', Z= 200, F=330 /
+&RAMP ID='dir', Z= 500, F=350 /
+.
+.
+&RAMP ID='spd', Z=   0, F=1.0 /
+&RAMP ID='spd', Z= 200, F=1.5 /
+&RAMP ID='spd', Z= 500, F=1.8 /
+.
+.
 \end{lstlisting}
-The parameter {\ct Z} represents the height (m) and {\ct F} the fraction of the given velocity component value. Note that if you use Monin-Obukhov similarity parameters, you should not specify the vertical profile of the wind. It will be calculated automatically.
+The parameter {\ct Z} represents the height (m). As with the time functions above, for the direction ramp function, {\ct F} represents the direction angle in degrees from the north (positive $y$ direction). This value is added to any time-varying value set by {\ct RAMP\_DIRECTION\_T}. For the speed ramp function, {\ct F} represents a multiplier of the base {\ct SPEED}. This value is multiplied by any time-varying value set by {\ct RAMP\_SPEED\_T}. Note that if you use Monin-Obukhov similarity parameters, you should not specify the vertical profile of the wind. It will be calculated automatically. 
 
 Often for longer simulations lasting hours, you may not know exactly how the wind {\ct DIRECTION} varies, but you might have some estimate based on the {\em stability class} of the atmosphere. Using the terminology of the atmospheric dispersion community~\cite{Hanna:1982}, the perturbation to the wind {\ct DIRECTION} can be modeled as:
 \be
@@ -12421,12 +12430,14 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct L}                                         & Real          & Section~\ref{info:WIND}                       & m             & 0                 \\ \hline
 {\ct LAPSE\_RATE}                               & Real          & Section~\ref{info:stratification}             & $^\circ$C/m   & 0                 \\ \hline
 {\ct LATITUDE}                                  & Real          & Section~\ref{info:coriolis_force}             & degrees       &                   \\ \hline
-{\ct POTENTIAL\_TEMPERATURE\_CORRECTION}        & Logical       & Section~\ref{info:potential_temperature_correction} &         & {\ct F}     \\ \hline
+{\ct POTENTIAL\_TEMPERATURE\_CORRECTION}        & Logical       & Section~\ref{info:potential_temperature_correction} &         & {\ct F}           \\ \hline
 {\ct RAMP\_DIRECTION\_T}                        & Character     & Section~\ref{info:WIND}                       &               &                   \\ \hline
+{\ct RAMP\_DIRECTION\_Z}                        & Character     & Section~\ref{info:WIND}                       &               &                   \\ \hline
 {\ct RAMP\_FVX\_T}                              & Character     & Section~\ref{info:force_vector}               &               &                   \\ \hline
 {\ct RAMP\_FVY\_T}                              & Character     & Section~\ref{info:force_vector}               &               &                   \\ \hline
 {\ct RAMP\_FVZ\_T}                              & Character     & Section~\ref{info:force_vector}               &               &                   \\ \hline
 {\ct RAMP\_SPEED\_T}                            & Character     & Section~\ref{info:wind_ramps}                 &               &                   \\ \hline
+{\ct RAMP\_SPEED\_Z}                            & Character     & Section~\ref{info:wind_ramps}                 &               &                   \\ \hline
 {\ct RAMP\_TMP0\_Z}                             & Character     & Section~\ref{info:stratification}             &               &                   \\ \hline
 {\ct RAMP\_U0\_T}                               & Character     & Section~\ref{info:wind_ramps}                 &               &                   \\ \hline
 {\ct RAMP\_U0\_Z}                               & Character     & Section~\ref{info:wind_ramps}                 &               &                   \\ \hline
