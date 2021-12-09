@@ -7215,7 +7215,7 @@ An alternative to using Monin-Obukhov similarity theory in specifying a wind is 
 
 To specify a ``wall of wind'', set {\ct PROFILE='ATMOSPHERIC'} on the {\ct SURF} line that is assigned to an exterior lateral boundary of the computational domain. This generates a power law atmospheric wind profile of the form $u=u_0 (z/z_0)^p$ where $z$ is the height above the ground. If an atmospheric profile is prescribed, also prescribe {\ct Z0} for $z_0$  and {\ct PLE} for $p$. {\ct VEL} specifies the reference velocity $u_0$. Note that $z_0$ is not the ground, but rather the height above the ground where the wind speed is measured, like an elevated weather station. It is assumed that the ground is located at 0~m; to change this assumption, set {\ct GROUND\_LEVEL} on the {\ct WIND} line to be the appropriate elevation. Be careful not to apply an atmospheric velocity profile (e.g. negative $z$) below {\ct GROUND\_LEVEL} or FDS will stop with an error.
 
-Sometimes when using a wall of wind, you may want to initialize the flow to the chosen wind speed throughout the domain, but you may not want this initial wind field to persist indefinitely. In such cases, specify your initial flow components {\ct U0}, {\ct V0}, and/or {\ct W0} directly and do not use the parameter {\ct SPEED}. Setting the velocity components directly will initialize the simulation with a constant flow field, but the flow field will die off unless you add a blower somewhere in the domain.
+Sometimes when using a wall of wind, you may want to initialize the flow to the chosen wind speed throughout the domain, but you may not want this initial wind field to persist indefinitely. In such cases, specify your initial flow components {\ct U0}, {\ct V0}, and/or {\ct W0} directly and do not use the parameter {\ct SPEED}. Setting the velocity components directly will initialize the simulation with a constant flow field, but the flow field will die off unless you add a blower somewhere in the domain. You can specify vertical profiles of these initial components with {\ct RAMP\_U0\_Z}, {\ct RAMP\_V0\_Z}, and {\ct RAMP\_W0\_Z}.
 
 
 
@@ -12439,12 +12439,10 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RAMP\_SPEED\_T}                            & Character     & Section~\ref{info:wind_ramps}                 &               &                   \\ \hline
 {\ct RAMP\_SPEED\_Z}                            & Character     & Section~\ref{info:wind_ramps}                 &               &                   \\ \hline
 {\ct RAMP\_TMP0\_Z}                             & Character     & Section~\ref{info:stratification}             &               &                   \\ \hline
-{\ct RAMP\_U0\_T}                               & Character     & Section~\ref{info:wind_ramps}                 &               &                   \\ \hline
-{\ct RAMP\_U0\_Z}                               & Character     & Section~\ref{info:wind_ramps}                 &               &                   \\ \hline
-{\ct RAMP\_V0\_T}                               & Character     & Section~\ref{info:wind_ramps}                 &               &                   \\ \hline
-{\ct RAMP\_V0\_Z}                               & Character     & Section~\ref{info:wind_ramps}                 &               &                   \\ \hline
+{\ct RAMP\_U0\_Z}                               & Character     & Section~\ref{info:wall_of_wind}               &               &                   \\ \hline
+{\ct RAMP\_V0\_Z}                               & Character     & Section~\ref{info:wall_of_wind}               &               &                   \\ \hline
 {\ct RAMP\_W0\_T}                               & Character     & Section~\ref{info:wind_ramps}                 &               &                   \\ \hline
-{\ct RAMP\_W0\_Z}                               & Character     & Section~\ref{info:wind_ramps}                 &               &                   \\ \hline
+{\ct RAMP\_W0\_Z}                               & Character     & Section~\ref{info:wall_of_wind}               &               &                   \\ \hline
 {\ct SIGMA\_THETA}                              & Real          & Section~\ref{info:wind_ramps}                 & degrees       &                   \\ \hline
 {\ct SPEED}                                     & Real          & Section~\ref{info:WIND}                       & m/s           & 0.                \\ \hline
 {\ct STRATIFICATION}                            & Logical       & Section~\ref{info:stratification}             &               & {\ct T}      \\ \hline
