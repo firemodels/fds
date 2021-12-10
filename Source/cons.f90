@@ -350,8 +350,11 @@ INTEGER :: UPPER_MESH_INDEX=-1000000000                     !< Upper bound of me
 LOGICAL :: PROFILING=.FALSE.
 INTEGER, ALLOCATABLE, DIMENSION(:) :: PROCESS               !< The MPI process of the given mesh index
 INTEGER, ALLOCATABLE, DIMENSION(:) :: FILE_COUNTER          !< Counter for the number of output files currently opened
-TYPE (MPI_COMM), ALLOCATABLE, DIMENSION(:) :: MPI_COMM_MESH !< MPI communicator for the a given mesh and its neighbors
-INTEGER, ALLOCATABLE, DIMENSION(:) :: MPI_COMM_MESH_ROOT    !< The rank of the given mesh within the MPI communicator
+
+TYPE (MPI_COMM), ALLOCATABLE, DIMENSION(:) :: MPI_COMM_NEIGHBORS       !< MPI communicator for the a given mesh and its neighbors
+TYPE (MPI_COMM), ALLOCATABLE, DIMENSION(:) :: MPI_COMM_CLOSE_NEIGHBORS !< MPI communicator for the a given mesh and its neighbors
+INTEGER, ALLOCATABLE, DIMENSION(:) :: MPI_COMM_NEIGHBORS_ROOT          !< The rank of the given mesh within the MPI communicator
+INTEGER, ALLOCATABLE, DIMENSION(:) :: MPI_COMM_CLOSE_NEIGHBORS_ROOT    !< The rank of the given mesh within the MPI communicator
 
 ! Time parameters
 
@@ -473,6 +476,7 @@ LOGICAL :: ITERATE_BAROCLINIC_TERM                               !< Flag indicat
 LOGICAL :: SUSPEND_PRESSURE_ITERATIONS=.TRUE.                    !< Flag for stopping pressure iterations
 LOGICAL :: INSEPARABLE_POISSON=.FALSE.                           !< Flag for solving the inseparable Poisson equation
 LOGICAL :: POISSON_ITERATION_ACCELERATOR=.FALSE.                 !< Flag for solving a Poisson equation at mesh interfaces
+INTEGER :: POISSON_PATCH_WIDTH=2                                 !< Width of patch used to speed Poisson iterations
 REAL(EB) :: VELOCITY_TOLERANCE=0._EB                             !< Error tolerance for normal velocity at solids or boundaries
 REAL(EB) :: PRESSURE_TOLERANCE=0._EB                             !< Error tolerance for iteration of baroclinic pressure term
 REAL(EB) :: ITERATION_SUSPEND_FACTOR=0.95_EB                     !< If new velocity error is not this value of old, stop iteration
