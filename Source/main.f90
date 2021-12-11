@@ -1092,7 +1092,6 @@ SELECT CASE(TASK_NUMBER)
             ENDIF
             IF (NM==NOM) MPI_COMM_NEIGHBORS_ROOT(NM) = NN
          ENDDO
-            if (my_rank==0) write(0,*) 'mesh',nm,' neighbor processes:',members(0:nn)
          CALL MPI_GROUP_INCL(GROUP_WORLD,NN+1,MEMBERS(0:NN),SUBGROUP,IERR)  ! Create the new sub-group of GROUP_WORLD
          CALL MPI_COMM_CREATE(MPI_COMM_WORLD,SUBGROUP,MPI_COMM_NEIGHBORS(NM),IERR) ! Create the new communicator
       ENDDO
@@ -1264,36 +1263,6 @@ SELECT CASE(TASK_NUMBER)
       ENDDO
 
       IF (N_REQ>0 .AND. N_MPI_PROCESSES>1) CALL MPI_WAITALL(N_REQ,REQ(1:N_REQ),MPI_STATUSES_IGNORE,IERR)
-
-!     ! Create MPI communicators (sub-groups of MPI_COMM_WORLD) for each mesh
-!     ! that consists of the MPI processes that control it and the neighboring meshes with which it exchanges info.
-!     ! MPI_COMM_CLOSE_NEIGHBORS(NM) is the name of the communicator for mesh NM
-!     ! MPI_COMM_CLOSE_NEIGHBORS_ROOT(NM) is the rank within MPI_COMM_CLOSE_NEIGHBORS(NM) of the process that controls mesh NM
-
-!     ALLOCATE(MPI_COMM_CLOSE_NEIGHBORS(NMESHES))
-!     ALLOCATE(MPI_COMM_CLOSE_NEIGHBORS_ROOT(NMESHES))
-
-!     CALL MPI_COMM_GROUP(MPI_COMM_WORLD,GROUP_WORLD,IERR)  ! Get the group handle for MPI_COMM_WORLD
-
-!     DO NM=1,NMESHES
-!        M => MESHES(NM)
-!        NN = -1
-!        DO N=1,M%N_NEIGHBORING_MESHES
-!           NOM = M%NEIGHBORING_MESH(N)
-!           M2 => MESHES(NOM)
-!           NN = NN + 1
-!           IF (NN==0) THEN
-!              MEMBERS(NN) = PROCESS(NOM)
-!           ELSEIF (NN>0 .AND. MEMBERS(NN-1)/=PROCESS(NOM)) THEN
-!              MEMBERS(NN) = PROCESS(NOM)  ! The ranks within MPI_COMM_WORLD to include in the new communicator; i.e. the neighbors
-!           ELSE
-!              NN = NN - 1
-!           ENDIF
-!           IF (NM==NOM) MPI_COMM_CLOSE_NEIGHBORS_ROOT(NM) = NN
-!        ENDDO
-!        CALL MPI_GROUP_INCL(GROUP_WORLD,NN+1,MEMBERS(0:NN),SUBGROUP,IERR)  ! Create the new sub-group of GROUP_WORLD
-!        CALL MPI_COMM_CREATE(MPI_COMM_WORLD,SUBGROUP,MPI_COMM_CLOSE_NEIGHBORS(NM),IERR) ! Create the new communicator
-!     ENDDO
 
       CASE(6)
 
