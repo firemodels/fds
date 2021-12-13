@@ -64,7 +64,7 @@ text(xl(1)+0.05*(xl(2)-xl(1)),yl(1)+0.9*(yl(2)-yl(1)),title_text,'FontSize',Titl
 % check balance and report error
 
 mass_error = abs(mean(bal))/m(end); % error normalized by the total mass in the domain
-if mass_error > 1e-3
+if mass_error > 1.1e-3
     disp(['Matlab Warning: mass error = ',num2str(mass_error),' in ',chid,' for species ',mass_id])
 end
 

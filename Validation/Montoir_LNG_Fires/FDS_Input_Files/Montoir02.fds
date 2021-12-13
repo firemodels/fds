@@ -14,7 +14,7 @@
 
 &MISC TMPA=21, P_INF=101500, HUMIDITY=54 /
 
-&WIND SPEED=1, L=-350, Z_REF=9, Z_0=0.1, RAMP_SPEED='speed', RAMP_DIRECTION='direction' /
+&WIND SPEED=1, L=-350, Z_REF=9, Z_0=0.1, RAMP_SPEED_T='speed', RAMP_DIRECTION_T='direction' /
 &RAMP ID='speed', T=  0., F=6.8 /
 &RAMP ID='speed', T= 30., F=6.8 /
 &RAMP ID='speed', T= 40., F=9.8 /

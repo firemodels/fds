@@ -35,10 +35,10 @@ set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
 axis([0.01 0.2 0.00005 0.01])
 
-xlabel('Grid Spacing, {\it\deltaz} (m)','Interpreter',Font_Interpreter,'Fontname','Times')
+xlabel('Grid Spacing, $\delta z$ (m)','Interpreter','LaTeX')
 ylabel('Friction Factor Error')
-h = legend(H,'FDS','{\itO}({\it\deltaz})','{\itO}({\it\deltaz}^2)','Location','Southeast');
-set(h,'Interpreter',Font_Interpreter)
+h = legend(H,'FDS','$\mathcal{O}(\delta z)$','$\mathcal{O}(\delta z)^2$','Location','Southeast');
+set(h,'Interpreter','LateX')
 
 % add Git revision if file is available
 

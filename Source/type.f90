@@ -1,4 +1,9 @@
 !> \brief A collection of major derived types used in FDS.
+!> \details There are several TYPEs that require special attention. WALL, CFACE, and PARTICLE TYPES reference other
+!> derived types that start with BOUNDARY, like BOUNDARY_COORD or BOUNDARY_ONE_D. The number of real, integer, and logical scalar 
+!> and array components of these derived types are denoted like this, for example: N_BOUNDARY_COORD_SCALAR_INTEGERS. You must
+!> adjust this value if you add or subtract components from the derived type. You should then use an existing component 
+!> as a guide and trace it through func.f90 to see how to initialize this component.
 
 MODULE TYPES
 
@@ -10,6 +15,15 @@ USE MKL_PARDISO
 #endif /* WITH_MKL */
 
 IMPLICIT NONE (TYPE,EXTERNAL)
+
+!> \brief Arrays to hold derived type (WALL, CFACE, or PARTICLE) components for I/O or MPI exchanges
+
+TYPE STORAGE_TYPE
+   INTEGER :: N_STORAGE_SLOTS=0
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: REALS
+   INTEGER, ALLOCATABLE, DIMENSION(:,:) :: INTEGERS
+   LOGICAL, ALLOCATABLE, DIMENSION(:,:) :: LOGICALS
+END TYPE STORAGE_TYPE
 
 !> \brief Parameters associated with an entire class of Lagrangian particles
 
@@ -103,26 +117,32 @@ TYPE LAGRANGIAN_PARTICLE_CLASS_TYPE
    INTEGER :: NEAREST_RAD_ANGLE_INDEX=0   !< Index of the radiation angle nearest the given orientation vector
    INTEGER :: CNF_RAMP_INDEX=-1           !< Ramp index for Cumulative Number Fraction function
    INTEGER :: BREAKUP_CNF_RAMP_INDEX=-1   !< Ramp index for break-up Cumulative Number Fraction function
-   INTEGER :: N_STORAGE_REALS             !< Number of reals to store for this particle class
-   INTEGER :: N_STORAGE_INTEGERS          !< Number of integers to store for this particle class
-   INTEGER :: N_STORAGE_LOGICALS          !< Number of logicals to store for this particle class
+   INTEGER :: N_STORAGE_REALS=0           !< Number of reals to store for this particle class
+   INTEGER :: N_STORAGE_INTEGERS=0        !< Number of integers to store for this particle class
+   INTEGER :: N_STORAGE_LOGICALS=0        !< Number of logicals to store for this particle class
 
    INTEGER, ALLOCATABLE, DIMENSION(:) :: STRATUM_INDEX_LOWER  !< Lower index of size distribution band
    INTEGER, ALLOCATABLE, DIMENSION(:) :: STRATUM_INDEX_UPPER  !< Upper index of size distribution band
 
-   LOGICAL :: STATIC=.FALSE.                !< Flag indicating if particles move or not
-   LOGICAL :: MASSLESS_TRACER=.FALSE.       !< Flag indicating if particles are just tracers for visualization
-   LOGICAL :: MASSLESS_TARGET=.FALSE.       !< Flag indicating if particles are just targets for an output quantity
-   LOGICAL :: LIQUID_DROPLET=.FALSE.        !< Flag indicating if particles are liquid droplets
-   LOGICAL :: SOLID_PARTICLE=.FALSE.        !< Flag indicating if particles are solid, not liquid
-   LOGICAL :: MONODISPERSE=.FALSE.          !< Flag indicating if particle size is monodisperse
-   LOGICAL :: TURBULENT_DISPERSION=.FALSE.  !< Flag indicating if subgrid-scale turbulence is applied
-   LOGICAL :: BREAKUP=.FALSE.               !< Flag indicating if paricles or droplets break-up
-   LOGICAL :: CHECK_DISTRIBUTION=.FALSE.    !< Flag indicating if diagnostic output on size distribution is specified
-   LOGICAL :: FUEL=.FALSE.                  !< Flag indicating if droplets evaporate into fuel gas
-   LOGICAL :: DUCT_PARTICLE=.FALSE.         !< Flag indicating if particles can pass through a duct
-   LOGICAL :: EMBER_PARTICLE=.FALSE.        !< Flag indicating if particles can become flying embers
-   LOGICAL :: ADHERE_TO_SOLID=.FALSE.       !< Flag indicating if particles can stick to a solid
+   LOGICAL :: STATIC=.FALSE.                         !< Flag indicating if particles move or not
+   LOGICAL :: MASSLESS_TRACER=.FALSE.                !< Flag indicating if particles are just tracers for visualization
+   LOGICAL :: MASSLESS_TARGET=.FALSE.                !< Flag indicating if particles are just targets for an output quantity
+   LOGICAL :: LIQUID_DROPLET=.FALSE.                 !< Flag indicating if particles are liquid droplets
+   LOGICAL :: SOLID_PARTICLE=.FALSE.                 !< Flag indicating if particles are solid, not liquid
+   LOGICAL :: MONODISPERSE=.FALSE.                   !< Flag indicating if particle size is monodisperse
+   LOGICAL :: TURBULENT_DISPERSION=.FALSE.           !< Flag indicating if subgrid-scale turbulence is applied
+   LOGICAL :: BREAKUP=.FALSE.                        !< Flag indicating if paricles or droplets break-up
+   LOGICAL :: CHECK_DISTRIBUTION=.FALSE.             !< Flag indicating if diagnostic output on size distribution is specified
+   LOGICAL :: FUEL=.FALSE.                           !< Flag indicating if droplets evaporate into fuel gas
+   LOGICAL :: DUCT_PARTICLE=.FALSE.                  !< Flag indicating if particles can pass through a duct
+   LOGICAL :: EMBER_PARTICLE=.FALSE.                 !< Flag indicating if particles can become flying embers
+   LOGICAL :: ADHERE_TO_SOLID=.FALSE.                !< Flag indicating if particles can stick to a solid
+   LOGICAL :: INCLUDE_BOUNDARY_COORD_TYPE=.TRUE.     !< This particle requires basic coordinate information
+   LOGICAL :: INCLUDE_BOUNDARY_PROPS_TYPE=.FALSE.    !< This particle requires surface variables for heat and mass transfer
+   LOGICAL :: INCLUDE_BOUNDARY_ONE_D_TYPE=.TRUE.     !< This particle requires in-depth 1-D conduction/reaction arrays
+   LOGICAL :: INCLUDE_BOUNDARY_RADIA_TYPE=.FALSE.    !< This particle requires angular-specific radiation intensities
+
+   TYPE(STORAGE_TYPE) :: PARTICLE_STORAGE
 
 END TYPE LAGRANGIAN_PARTICLE_CLASS_TYPE
 
@@ -132,240 +152,245 @@ TYPE (LAGRANGIAN_PARTICLE_CLASS_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: LAGR
 !> \brief Solid material density for 1-D pyrolysis/conduction algorithm
 
 TYPE MATL_COMP_TYPE
-   REAL(EB), POINTER, DIMENSION(:) :: RHO !< (1:NWP) Solid density (kg/m3)
-   REAL(EB), POINTER, DIMENSION(:) :: RHO_DOT !< (1:NWP) Change in solid density (kg/m3/s)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHO !< (1:NWP) Solid density (kg/m3)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHO_DOT !< (1:NWP) Change in solid density (kg/m3/s)
 END TYPE MATL_COMP_TYPE
 
 !> \brief Gas mass concentration in solid for 1-D mass transfer
-TYPE SPEC_COMP_TYPE
-   REAL(EB), POINTER, DIMENSION(:) :: RHO_ZZ !< (0:NWP+1) Gas concentratoin (kg/m3)
-!   REAL(EB), POINTER, DIMENSION(:) :: RHO_DOT !< (1:NWP) Change in gas concentration (kg/m3/s)
-END TYPE SPEC_COMP_TYPE
 
+TYPE SPEC_COMP_TYPE
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHO_ZZ !< (0:NWP+1) Gas concentratoin (kg/m3)
+END TYPE SPEC_COMP_TYPE
 
 !> \brief Radiation intensity at a boundary for a given wavelength band
 
 TYPE BAND_TYPE
-   REAL(EB), POINTER, DIMENSION(:) :: ILW !< (1:NRA) Radiation intensity (W/m2/sr)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: ILW !< (1:NRA) Radiation intensity (W/m2/sr)
 END TYPE BAND_TYPE
 
-! Note: If you change the number of scalar variables in BOUNDARY_COORD_TYPE, adjust the numbers below
-
-INTEGER, PARAMETER :: N_BOUNDARY_COORD_SCALAR_REALS=3,N_BOUNDARY_COORD_SCALAR_INTEGERS=7,N_BOUNDARY_COORD_SCALAR_LOGICALS=0
-INTEGER, DIMENSION(30) :: BOUNDARY_COORD_REALS_ARRAY_SIZE=0,BOUNDARY_COORD_INTEGERS_ARRAY_SIZE=0,&
-                          BOUNDARY_COORD_LOGICALS_ARRAY_SIZE=0
-INTEGER :: N_BOUNDARY_COORD_STORAGE_REALS,N_BOUNDARY_COORD_STORAGE_INTEGERS,N_BOUNDARY_COORD_STORAGE_LOGICALS
-
 !> \brief Coordinate variables associated with a WALL or CFACE boundary cell
+!> \details If you change the number of scalar variables in BOUNDARY_COORD_TYPE, adjust the numbers below
+
+INTEGER, PARAMETER :: N_BOUNDARY_COORD_SCALAR_REALS=3
+INTEGER, PARAMETER :: N_BOUNDARY_COORD_SCALAR_INTEGERS=7
+INTEGER, PARAMETER :: N_BOUNDARY_COORD_SCALAR_LOGICALS=0
+INTEGER :: N_BOUNDARY_COORD_STORAGE_REALS,N_BOUNDARY_COORD_STORAGE_INTEGERS,N_BOUNDARY_COORD_STORAGE_LOGICALS
 
 TYPE BOUNDARY_COORD_TYPE
 
-   REAL(EB), POINTER :: X                      !< \f$ x \f$ coordinate of boundary cell center
-   REAL(EB), POINTER :: Y                      !< \f$ y \f$ coordinate of boundary cell center
-   REAL(EB), POINTER :: Z                      !< \f$ z \f$ coordinate of boundary cell center
+   INTEGER :: II             !< Ghost cell \f$ x \f$ index
+   INTEGER :: JJ             !< Ghost cell \f$ y \f$ index
+   INTEGER :: KK             !< Ghost cell \f$ z \f$ index
+   INTEGER :: IIG            !< Gas cell \f$ x \f$ index
+   INTEGER :: JJG            !< Gas cell \f$ y \f$ index
+   INTEGER :: KKG            !< Gas cell \f$ z \f$ index
+   INTEGER :: IOR=0          !< Index of orientation of the WALL cell
 
-   INTEGER, POINTER :: II             !< Ghost cell \f$ x \f$ index
-   INTEGER, POINTER :: JJ             !< Ghost cell \f$ y \f$ index
-   INTEGER, POINTER :: KK             !< Ghost cell \f$ z \f$ index
-   INTEGER, POINTER :: IIG            !< Gas cell \f$ x \f$ index
-   INTEGER, POINTER :: JJG            !< Gas cell \f$ y \f$ index
-   INTEGER, POINTER :: KKG            !< Gas cell \f$ z \f$ index
-   INTEGER, POINTER :: IOR            !< Index of orientation of the WALL cell
+   REAL(EB) :: X             !< \f$ x \f$ coordinate of boundary cell center
+   REAL(EB) :: Y             !< \f$ y \f$ coordinate of boundary cell center
+   REAL(EB) :: Z             !< \f$ z \f$ coordinate of boundary cell center
 
 END TYPE BOUNDARY_COORD_TYPE
 
 
-! Note: If you change the number of scalar variables in ONE_D_M_AND_E_XFER_TYPE, adjust the numbers below
-
-INTEGER, PARAMETER :: N_ONE_D_SCALAR_REALS=30,N_ONE_D_SCALAR_INTEGERS=3,N_ONE_D_SCALAR_LOGICALS=1
-
 !> \brief Variables associated with a WALL, PARTICLE, or CFACE boundary cell
+!> \details If you change the number of scalar variables in BOUNDARY_ONE_D_TYPE, adjust the numbers below
 
-TYPE ONE_D_M_AND_E_XFER_TYPE
+INTEGER, PARAMETER :: N_ONE_D_SCALAR_REALS=26
+INTEGER, PARAMETER :: N_ONE_D_SCALAR_INTEGERS=4
+INTEGER, PARAMETER :: N_ONE_D_SCALAR_LOGICALS=1
 
-   REAL(EB), POINTER, DIMENSION(:) :: TMP                 !< Temperature in center of each solid cell, \f$ T_{{\rm s},i} \f$
-   REAL(EB), POINTER, DIMENSION(:) :: LAYER_THICKNESS     !< (1:SF\%N_LAYERS) Thickness of layer (m)
-   REAL(EB), POINTER, DIMENSION(:) :: X                   !< (0:NWP) Depth (m), \f$ x_{{\rm s},i} \f$
-   REAL(EB), POINTER, DIMENSION(:) :: M_DOT_G_PP_ACTUAL   !< (1:N_TRACKED_SPECIES) Actual mass production rate per unit area
-   REAL(EB), POINTER, DIMENSION(:) :: M_DOT_S_PP          !< (1:SF\%N_MATL) Mass production rate of solid species
-   REAL(EB), POINTER, DIMENSION(:) :: M_DOT_G_PP_ADJUST   !< (1:N_TRACKED_SPECIES) Adjusted mass production rate per unit area
-   REAL(EB), POINTER, DIMENSION(:) :: ZZ_G                !< (1:N_TRACKED_SPECIES) Species mixture mass fraction in gas grid cell
-   REAL(EB), POINTER, DIMENSION(:) :: ZZ_F                !< (1:N_TRACKED_SPECIES) Species mixture mass fraction at surface
-   REAL(EB), POINTER, DIMENSION(:) :: RHO_D_F             !< (1:N_TRACKED_SPECIES) Diffusion at surface, \f$ \rho D_\alpha \f$
-   REAL(EB), POINTER, DIMENSION(:) :: RHO_D_DZDN_F        !< \f$ \rho D_\alpha \partial Z_\alpha / \partial n \f$
-   REAL(EB), POINTER, DIMENSION(:) :: AWM_AEROSOL         !< Accumulated aerosol mass per unit area (kg/m2)
-   REAL(EB), POINTER, DIMENSION(:) :: RHO_C_S             !< Solid density times specific heat (J/m3/K)
-   REAL(EB), POINTER, DIMENSION(:) :: K_S                 !< Solid conductivity (W/m/K)
-   REAL(EB), POINTER, DIMENSION(:) :: DDSUM               !< Scaling factor to get minimum cell size
-   REAL(EB), POINTER, DIMENSION(:) :: SMALLEST_CELL_SIZE  !< Minimum cell size (m)
-   REAL(EB), POINTER, DIMENSION(:) :: PART_MASS           !< Accumulated mass of particles waiting to be injected (kg/m2)
-   REAL(EB), POINTER, DIMENSION(:) :: PART_ENTHALPY       !< Accumulated enthalpy of particles waiting to be injected (kJ/m2)
+TYPE BOUNDARY_ONE_D_TYPE
+
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: M_DOT_G_PP_ACTUAL   !< (1:N_TRACKED_SPECIES) Actual mass production rate per unit area
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: M_DOT_S_PP          !< (1:SF\%N_MATL) Mass production rate of solid species
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: M_DOT_G_PP_ADJUST   !< (1:N_TRACKED_SPECIES) Adjusted mass production rate per unit area
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: X                   !< (0:NWP) Depth (m), \f$ x_{{\rm s},i} \f$
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: TMP                 !< Temperature in center of each solid cell, \f$ T_{{\rm s},i} \f$
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: LAYER_THICKNESS     !< (1:SF\%N_LAYERS) Thickness of layer (m)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_F                !< (1:N_TRACKED_SPECIES) Species mixture mass fraction at surface
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHO_D_F             !< (1:N_TRACKED_SPECIES) Diffusion at surface, \f$ \rho D_\alpha \f$
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHO_D_DZDN_F        !< \f$ \rho D_\alpha \partial Z_\alpha / \partial n \f$
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHO_C_S             !< Solid density times specific heat (J/m3/K)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: K_S                 !< Solid conductivity (W/m/K)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: AWM_AEROSOL         !< Accumulated aerosol mass per unit area (kg/m2)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: DDSUM               !< Scaling factor to get minimum cell size
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: SMALLEST_CELL_SIZE  !< Minimum cell size (m)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: PART_MASS           !< Accumulated mass of particles waiting to be injected (kg/m2)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: PART_ENTHALPY       !< Accumulated enthalpy of particles waiting to be injected (kJ/m2)
 
    TYPE(MATL_COMP_TYPE), ALLOCATABLE, DIMENSION(:) :: MATL_COMP !< (1:SF\%N_MATL) Material component
    TYPE(SPEC_COMP_TYPE), ALLOCATABLE, DIMENSION(:) :: SPEC_COMP !< (1:SF\%N_SPEC) Gas component
 
-   INTEGER, POINTER, DIMENSION(:) :: N_LAYER_CELLS              !< (1:SF\%N_LAYERS) Number of cells in the layer
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: N_LAYER_CELLS              !< (1:SF\%N_LAYERS) Number of cells in the layer
 
-   INTEGER, POINTER :: PRESSURE_ZONE  !< Pressure ZONE of the adjacent gas phase cell
-   INTEGER, POINTER :: NODE_INDEX     !< HVAC node index associated with surface
-   INTEGER, POINTER :: N_SUBSTEPS     !< Number of substeps in the 1-D conduction/reaction update
+   INTEGER :: SURF_INDEX=-1    !< SURFACE index
+   INTEGER :: PRESSURE_ZONE=0  !< Pressure ZONE of the adjacent gas phase cell
+   INTEGER :: NODE_INDEX=0     !< HVAC node index associated with surface
+   INTEGER :: N_SUBSTEPS=1     !< Number of substeps in the 1-D conduction/reaction update
 
-   REAL(EB), POINTER :: AREA            !< Face area (m2)
-   REAL(EB), POINTER :: HEAT_TRANS_COEF !< Heat transfer coefficient (W/m2/K)
-   REAL(EB), POINTER :: Q_CON_F         !< Convective heat flux at surface (W/m2)
-   REAL(EB), POINTER :: Q_RAD_IN        !< Incoming radiative flux (W/m2)
-   REAL(EB), POINTER :: Q_RAD_OUT       !< Outgoing radiative flux (W/m2)
-   REAL(EB), POINTER :: EMISSIVITY      !< Surface emissivity
-   REAL(EB), POINTER :: AREA_ADJUST     !< Ratio of actual surface area to grid cell face area
-   REAL(EB), POINTER :: T_IGN           !< Ignition time (s)
-   REAL(EB), POINTER :: TMP_F           !< Surface temperature (K)
-   REAL(EB), POINTER :: TMP_F_OLD       !< Holding value for surface temperature (K)
-   REAL(EB), POINTER :: TMP_B           !< Back surface temperature (K)
-   REAL(EB), POINTER :: U_NORMAL        !< Normal component of velocity (m/s) at surface, start of time step
-   REAL(EB), POINTER :: U_NORMAL_S      !< Estimated normal component of velocity (m/s) at next time step
-   REAL(EB), POINTER :: U_NORMAL_0      !< Initial or specified normal component of velocity (m/s) at surface
-   REAL(EB), POINTER :: RSUM_G          !< \f$ R_0 \sum_\alpha Z_\alpha/W_\alpha \f$ in first gas phase cell
-   REAL(EB), POINTER :: TMP_G           !< Temperature (K) in adjacent gas phase cell
-   REAL(EB), POINTER :: RHO_G           !< Gas density (kg/m3) in adjacent gas phase cell
-   REAL(EB), POINTER :: U_TANG          !< Tangential velocity (m/s) near surface
-   REAL(EB), POINTER :: RHO_F           !< Gas density at the wall (kg/m3)
-   REAL(EB), POINTER :: RDN             !< \f$ 1/ \delta n \f$ at the surface (1/m)
-   REAL(EB), POINTER :: MU_G            !< Viscosity, \f$ \mu \f$, in adjacent gas phase cell
-   REAL(EB), POINTER :: K_G             !< Thermal conductivity, \f$ k \f$, in adjacent gas phase cell
-   REAL(EB), POINTER :: Q_DOT_G_PP      !< Heat release rate per unit area (W/m2)
-   REAL(EB), POINTER :: Q_DOT_O2_PP     !< Heat release rate per unit area (W/m2) due to oxygen consumption
-   REAL(EB), POINTER :: Q_CONDENSE      !< Heat release rate per unit area (W/m2) due to gas condensation
-   REAL(EB), POINTER :: BURN_DURATION   !< Duration of a specified fire (s)
-   REAL(EB), POINTER :: T_SCALE         !< Scaled time for a surface with CONE_HEAT_FLUX (s)
-   REAL(EB), POINTER :: Q_SCALE         !< Scaled integrated heat release for a surface with CONE_HEAT_FLUX
-   REAL(EB), POINTER :: T_MATL_PART     !< Time interval for current value in PART_MASS and PART_ENTHALPY arrays (s)
-   REAL(EB), POINTER :: B_NUMBER        !< B number for droplet or wall
+   REAL(EB) :: AREA=0._EB            !< Face area (m2)
+   REAL(EB) :: HEAT_TRANS_COEF=0._EB !< Heat transfer coefficient (W/m2/K)
+   REAL(EB) :: Q_CON_F=0._EB         !< Convective heat flux at surface (W/m2)
+   REAL(EB) :: Q_RAD_IN=0._EB        !< Incoming radiative flux (W/m2)
+   REAL(EB) :: Q_RAD_OUT=0._EB       !< Outgoing radiative flux (W/m2)
+   REAL(EB) :: EMISSIVITY=1._EB      !< Surface emissivity
+   REAL(EB) :: AREA_ADJUST=1._EB     !< Ratio of actual surface area to grid cell face area
+   REAL(EB) :: T_IGN=0._EB           !< Ignition time (s)
+   REAL(EB) :: TMP_F                 !< Surface temperature (K)
+   REAL(EB) :: TMP_F_OLD             !< Holding value for surface temperature (K)
+   REAL(EB) :: TMP_B                 !< Back surface temperature (K)
+   REAL(EB) :: U_NORMAL=0._EB        !< Normal component of velocity (m/s) at surface, start of time step
+   REAL(EB) :: U_NORMAL_S=0._EB      !< Estimated normal component of velocity (m/s) at next time step
+   REAL(EB) :: U_NORMAL_0=0._EB      !< Initial or specified normal component of velocity (m/s) at surface
+   REAL(EB) :: U_TANG=0._EB          !< Tangential velocity (m/s) near surface
+   REAL(EB) :: RHO_F                 !< Gas density at the wall (kg/m3)
+   REAL(EB) :: RDN=1._EB             !< \f$ 1/ \delta n \f$ at the surface (1/m)
+   REAL(EB) :: K_G=0.1_EB            !< Thermal conductivity, \f$ k \f$, in adjacent gas phase cell
+   REAL(EB) :: Q_DOT_G_PP=0._EB      !< Heat release rate per unit area (W/m2)
+   REAL(EB) :: Q_DOT_O2_PP=0._EB     !< Heat release rate per unit area (W/m2) due to oxygen consumption
+   REAL(EB) :: Q_CONDENSE=0._EB      !< Heat release rate per unit area (W/m2) due to gas condensation
+   REAL(EB) :: BURN_DURATION=0._EB   !< Duration of a specified fire (s)
+   REAL(EB) :: T_SCALE=0._EB         !< Scaled time for a surface with CONE_HEAT_FLUX (s)
+   REAL(EB) :: Q_SCALE=0._EB         !< Scaled integrated heat release for a surface with CONE_HEAT_FLUX
+   REAL(EB) :: T_MATL_PART=0._EB     !< Time interval for current value in PART_MASS and PART_ENTHALPY arrays (s)
+   REAL(EB) :: B_NUMBER=0._EB        !< B number for droplet or wall
 
-   LOGICAL, POINTER :: BURNAWAY         !< Indicater if cell can burn away when fuel is exhausted
+   LOGICAL :: BURNAWAY=.FALSE.       !< Indicater if cell can burn away when fuel is exhausted
 
-END TYPE ONE_D_M_AND_E_XFER_TYPE
-
-! Note: If you change the number of scalar variables in BOUNDARY_PROPERTY_TYPE, adjust the numbers below
-
-INTEGER, PARAMETER :: N_BOUNDARY_PROPERTY_SCALAR_REALS=8,N_BOUNDARY_PROPERTY_SCALAR_INTEGERS=0,N_BOUNDARY_PROPERTY_SCALAR_LOGICALS=0
-INTEGER, DIMENSION(30) :: BOUNDARY_PROPERTY_REALS_ARRAY_SIZE=0,BOUNDARY_PROPERTY_INTEGERS_ARRAY_SIZE=0,&
-                          BOUNDARY_PROPERTY_LOGICALS_ARRAY_SIZE=0
-INTEGER :: N_BOUNDARY_PROPERTY_STORAGE_REALS,N_BOUNDARY_PROPERTY_STORAGE_INTEGERS,N_BOUNDARY_PROPERTY_STORAGE_LOGICALS
+END TYPE BOUNDARY_ONE_D_TYPE
 
 !> \brief Property variables associated with a WALL or CFACE boundary cell
+!> \details If you change the number of scalar variables in BOUNDARY_PROPS_TYPE, adjust the numbers below
 
-TYPE BOUNDARY_PROPERTY_TYPE
+INTEGER, PARAMETER :: N_BOUNDARY_PROPS_SCALAR_REALS=8
+INTEGER, PARAMETER :: N_BOUNDARY_PROPS_SCALAR_INTEGERS=1
+INTEGER, PARAMETER :: N_BOUNDARY_PROPS_SCALAR_LOGICALS=0
+INTEGER, DIMENSION(10) :: BOUNDARY_PROPS_REALS_ARRAY_SIZE=0, &
+                          BOUNDARY_PROPS_INTEGERS_ARRAY_SIZE=0, &
+                          BOUNDARY_PROPS_LOGICALS_ARRAY_SIZE=0
+INTEGER :: N_BOUNDARY_PROPS_STORAGE_REALS,N_BOUNDARY_PROPS_STORAGE_INTEGERS,N_BOUNDARY_PROPS_STORAGE_LOGICALS
 
-   REAL(EB), POINTER, DIMENSION(:) :: A_LP_MPUA           !< Accumulated liquid droplet mass per unit area (kg/m2)
-   REAL(EB), POINTER, DIMENSION(:) :: LP_CPUA             !< Liquid droplet cooling rate unit area (W/m2)
-   REAL(EB), POINTER, DIMENSION(:) :: LP_MPUA             !< Liquid droplet mass per unit area (kg/m2)
-   REAL(EB), POINTER, DIMENSION(:) :: LP_TEMP             !< Liquid droplet mean temperature (K)
-   REAL(EB), POINTER, DIMENSION(:) :: IL                  !< (1:NSB) Radiance (W/m2/sr); output only
+TYPE BOUNDARY_PROPS_TYPE
+
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: A_LP_MPUA           !< Accumulated liquid droplet mass per unit area (kg/m2)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: LP_CPUA             !< Liquid droplet cooling rate unit area (W/m2)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: LP_MPUA             !< Liquid droplet mass per unit area (kg/m2)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: LP_TEMP             !< Liquid droplet mean temperature (K)
+
+   REAL(EB) :: U_TAU=0._EB           !< Friction velocity (m/s)
+   REAL(EB) :: Y_PLUS=1._EB          !< Dimensionless boundary layer thickness unit
+   REAL(EB) :: Z_STAR=1._EB          !< Dimensionless boundary layer unit
+   REAL(EB) :: PHI_LS=-1._EB         !< Level Set value for output only
+   REAL(EB) :: WORK1=0._EB           !< Work array
+   REAL(EB) :: WORK2=0._EB           !< Work array
+   REAL(EB) :: K_SUPPRESSION=0._EB   !< Suppression coefficent (m2/kg/s)
+   REAL(EB) :: L_OBUKHOV=0._EB       !< Obukhov length (m)
+
+   INTEGER  :: SURF_INDEX=-1         !< Surface index
+
+END TYPE BOUNDARY_PROPS_TYPE
+
+
+!> \brief Angular radiation intensities associated with a WALL, CFACE, or LAGRANGIAN_PARTICLE
+!> \details If you change the number of scalar variables in BOUNDARY_RADIA_TYPE, adjust the numbers below
+
+INTEGER, PARAMETER :: N_BOUNDARY_RADIA_SCALAR_REALS=0
+INTEGER, PARAMETER :: N_BOUNDARY_RADIA_SCALAR_INTEGERS=0
+INTEGER, PARAMETER :: N_BOUNDARY_RADIA_SCALAR_LOGICALS=0
+INTEGER, DIMENSION(10) :: BOUNDARY_RADIA_REALS_ARRAY_SIZE=0, &
+                          BOUNDARY_RADIA_INTEGERS_ARRAY_SIZE=0, &
+                          BOUNDARY_RADIA_LOGICALS_ARRAY_SIZE=0
+INTEGER :: N_BOUNDARY_RADIA_STORAGE_REALS,N_BOUNDARY_RADIA_STORAGE_INTEGERS,N_BOUNDARY_RADIA_STORAGE_LOGICALS
+
+TYPE BOUNDARY_RADIA_TYPE
+
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: IL                  !< (1:NSB) Radiance (W/m2/sr); output only
 
    TYPE(BAND_TYPE), ALLOCATABLE, DIMENSION(:) :: BAND     !< (1:NSB) Radiation wavelength band
 
-   REAL(EB), POINTER :: U_TAU           !< Friction velocity (m/s)
-   REAL(EB), POINTER :: Y_PLUS          !< Dimensionless boundary layer thickness unit
-   REAL(EB), POINTER :: Z_STAR          !< Dimensionless boundary layer unit
-   REAL(EB), POINTER :: PHI_LS          !< Level Set value for output only
-   REAL(EB), POINTER :: WORK1           !< Work array
-   REAL(EB), POINTER :: WORK2           !< Work array
-   REAL(EB), POINTER :: K_SUPPRESSION   !< Suppression coefficent (m2/kg/s)
-   REAL(EB), POINTER :: L_OBUKHOV       !< Obukhov length (m)
+END TYPE BOUNDARY_RADIA_TYPE
 
-END TYPE BOUNDARY_PROPERTY_TYPE
-
-
-! Note: If you change the number of scalar variables in LAGRANGIAN_PARTICLE_TYPE, adjust the numbers below
-
-INTEGER, PARAMETER :: N_PARTICLE_SCALAR_REALS=16,N_PARTICLE_SCALAR_INTEGERS=11,N_PARTICLE_SCALAR_LOGICALS=4
 
 !> \brief Variables associated with a single Lagrangian particle
+!> \details If you change the number of scalar variables in LAGRANGIAN_PARTICLE_TYPE, adjust the numbers below
+
+INTEGER, PARAMETER :: N_PARTICLE_SCALAR_REALS=14
+INTEGER, PARAMETER :: N_PARTICLE_SCALAR_INTEGERS=14
+INTEGER, PARAMETER :: N_PARTICLE_SCALAR_LOGICALS=4
 
 TYPE LAGRANGIAN_PARTICLE_TYPE
 
-   TYPE(BOUNDARY_COORD_TYPE) :: BOUNDARY_COORD         !< Coordinate variables
-   TYPE(ONE_D_M_AND_E_XFER_TYPE) :: ONE_D              !< Variables devoted to 1-D heat conduction in depth
-   TYPE(BAND_TYPE), ALLOCATABLE, DIMENSION(:) :: BAND  !< (1:NSB) Radiation wavelength band
+   INTEGER :: LP_INDEX=0             !< Self-identifier
+   INTEGER :: BC_INDEX=0             !< Coordinate variables
+   INTEGER :: OD_INDEX=0             !< Variables devoted to 1-D heat conduction in depth
+   INTEGER :: BP_INDEX=0             !< Variables devoted to surface properties
+   INTEGER :: BR_INDEX=0             !< Variables devoted to radiation intensities
+   INTEGER :: TAG                    !< Unique integer identifier for the particle
+   INTEGER :: CLASS_INDEX=0          !< LAGRANGIAN_PARTICLE_CLASS of particle
+   INTEGER :: ORIENTATION_INDEX=0    !< Index in the array of all ORIENTATIONs
+   INTEGER :: WALL_INDEX=0           !< If liquid droplet has stuck to a wall, this is the WALL cell index
+   INTEGER :: DUCT_INDEX=0           !< Index of duct
+   INTEGER :: INIT_INDEX=0           !< Index of INIT line
+   INTEGER :: DUCT_CELL_INDEX=0      !< Index of duct cell
+   INTEGER :: CFACE_INDEX=0          !< Index of immersed boundary CFACE that the droplet has attached to
+   INTEGER :: PROP_INDEX=0           !< Index of the PROPERTY_TYPE assigned to the particle
 
-   REAL(EB), POINTER, DIMENSION(:) :: IL               !< (1:NSB) Radiance (W/m2/sr); output only
+   LOGICAL :: SHOW=.FALSE.         !< Show the particle in Smokeview
+   LOGICAL :: SPLAT=.FALSE.        !< The liquid droplet has hit a solid
+   LOGICAL :: EMBER=.FALSE.        !< The particle can break away and become a burning ember
+   LOGICAL :: PATH_PARTICLE =.FALSE.
 
-   LOGICAL, POINTER :: SHOW                 !< Show the particle in Smokeview
-   LOGICAL, POINTER :: SPLAT                !< The liquid droplet has hit a solid
-   LOGICAL, POINTER :: EMBER                !< The particle can break away and become a burning ember
-   LOGICAL, POINTER :: PATH_PARTICLE
-
-   REAL(EB), POINTER :: U                   !< \f$ x \f$ velocity component of particle (m/s)
-   REAL(EB), POINTER :: V                   !< \f$ y \f$ velocity component of particle (m/s)
-   REAL(EB), POINTER :: W                   !< \f$ z \f$ velocity component of particle (m/s)
-   REAL(EB), POINTER :: PWT                 !< Weight factor of particle; i.e. the number of real particles it represents
-   REAL(EB), POINTER :: ACCEL_X             !< Contribution to acceleration of gas in \f$ x \f$ direction (m/s2)
-   REAL(EB), POINTER :: ACCEL_Y             !< Contribution to acceleration of gas in \f$ y \f$ direction (m/s2)
-   REAL(EB), POINTER :: ACCEL_Z             !< Contribution to acceleration of gas in \f$ z \f$ direction (m/s2)
-   REAL(EB), POINTER :: RE                  !< Reynolds number based on particle diameter
-   REAL(EB), POINTER :: MASS                !< Particle mass (kg)
-   REAL(EB), POINTER :: T_INSERT            !< Time when particle was inserted (s)
-   REAL(EB), POINTER :: DX                  !< Length scale used in POROUS_DRAG calculation (m)
-   REAL(EB), POINTER :: DY                  !< Length scale used in POROUS_DRAG calculation (m)
-   REAL(EB), POINTER :: DZ                  !< Length scale used in POROUS_DRAG calculation (m)
-   REAL(EB), POINTER :: M_DOT               !< Particle mass evaporation rate (kg/s)
-   REAL(EB), POINTER :: HTC_LIMIT           !< Limiter for the heat transfer coefficient (W/m2/K)
-   REAL(EB), POINTER :: C_DRAG              !< Drag coefficient
-
-   INTEGER, POINTER :: TAG                  !< Unique integer identifier for the particle
-   INTEGER, POINTER :: ARRAY_INDEX          !< Index in the array of evaporating particles
-   INTEGER, POINTER :: STORAGE_INDEX        !< Index in the large storage array of all particles
-   INTEGER, POINTER :: CLASS_INDEX          !< LAGRANGIAN_PARTICLE_CLASS of particle
-   INTEGER, POINTER :: ORIENTATION_INDEX    !< Index in the array of all ORIENTATIONs
-   INTEGER, POINTER :: WALL_INDEX           !< If liquid droplet has stuck to a wall, this is the WALL cell index
-   INTEGER, POINTER :: DUCT_INDEX           !< Index of duct
-   INTEGER, POINTER :: INIT_INDEX           !< Index of INIT line
-   INTEGER, POINTER :: DUCT_CELL_INDEX      !< Index of duct cell
-   INTEGER, POINTER :: CFACE_INDEX          !< Index of immersed boundary CFACE that the droplet has attached to
-   INTEGER, POINTER :: PROP_INDEX           !< Index of the PROPERTY_TYPE assigned to the particle
+   REAL(EB) :: U=0._EB             !< \f$ x \f$ velocity component of particle (m/s)
+   REAL(EB) :: V=0._EB             !< \f$ y \f$ velocity component of particle (m/s)
+   REAL(EB) :: W=0._EB             !< \f$ z \f$ velocity component of particle (m/s)
+   REAL(EB) :: PWT=1._EB           !< Weight factor of particle; i.e. the number of real particles it represents
+   REAL(EB) :: ACCEL_X=0._EB       !< Contribution to acceleration of gas in \f$ x \f$ direction (m/s2)
+   REAL(EB) :: ACCEL_Y=0._EB       !< Contribution to acceleration of gas in \f$ y \f$ direction (m/s2)
+   REAL(EB) :: ACCEL_Z=0._EB       !< Contribution to acceleration of gas in \f$ z \f$ direction (m/s2)
+   REAL(EB) :: RE=0._EB            !< Reynolds number based on particle diameter
+   REAL(EB) :: MASS=0._EB          !< Particle mass (kg)
+   REAL(EB) :: T_INSERT=0._EB      !< Time when particle was inserted (s)
+   REAL(EB) :: DX=1.               !< Length factor used in POROUS_DRAG calculation (m)
+   REAL(EB) :: DY=1.               !< Length factor used in POROUS_DRAG calculation (m)
+   REAL(EB) :: DZ=1.               !< Length factor used in POROUS_DRAG calculation (m)
+   REAL(EB) :: C_DRAG=0._EB        !< Drag coefficient
 
 END TYPE LAGRANGIAN_PARTICLE_TYPE
 
 
-TYPE STORAGE_TYPE
-   INTEGER :: N_STORAGE_SLOTS=0,NEXT_AVAILABLE_SLOT=1
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: REALS
-   INTEGER, ALLOCATABLE, DIMENSION(:,:) :: INTEGERS
-   LOGICAL, ALLOCATABLE, DIMENSION(:,:) :: LOGICALS
-END TYPE STORAGE_TYPE
-
-
-! Note: If you change the number of scalar variables in WALL_TYPE, adjust the numbers below
-
-INTEGER, PARAMETER :: N_WALL_SCALAR_REALS=4,N_WALL_SCALAR_INTEGERS=14,N_WALL_SCALAR_LOGICALS=0
-
 !> \brief Variables associated with a WALL cell
+!> \details If you change the number of scalar variables in WALL_TYPE, adjust the numbers below
+
+INTEGER, PARAMETER :: N_WALL_SCALAR_REALS=4
+INTEGER, PARAMETER :: N_WALL_SCALAR_INTEGERS=18
+INTEGER, PARAMETER :: N_WALL_SCALAR_LOGICALS=0
 
 TYPE WALL_TYPE
 
-   TYPE (BOUNDARY_COORD_TYPE) :: BOUNDARY_COORD       !< Derived type carrying coordinate info
-   TYPE (ONE_D_M_AND_E_XFER_TYPE) :: ONE_D            !< Derived type carrying most of the solid boundary conditions
-   TYPE (BOUNDARY_PROPERTY_TYPE) :: BOUNDARY_PROPERTY !< Derived type carrying most of the surface boundary conditions
+   REAL(EB) :: DUNDT=0._EB            !< \f$ \partial u_n / \partial t \f$
+   REAL(EB) :: Q_LEAK=0._EB           !< Heat production of leaking gas (W/m3)
+   REAL(EB) :: V_DEP=0._EB            !< Deposition velocity (m/s)
+   REAL(EB) :: VEL_ERR_NEW=0._EB      !< Velocity mismatch at mesh or solid boundary (m/s)
 
-   REAL(EB), POINTER :: DUNDT                  !< \f$ \partial u_n / \partial t \f$
-   REAL(EB), POINTER :: Q_LEAK                 !< Heat production of leaking gas (W/m3)
-   REAL(EB), POINTER :: V_DEP                  !< Deposition velocity (m/s)
-   REAL(EB), POINTER :: VEL_ERR_NEW            !< Velocity mismatch at mesh or solid boundary (m/s)
-
-   INTEGER, POINTER :: WALL_INDEX              !< WALL index of front side of obstruction or exterior wall cell
-   INTEGER, POINTER :: BACK_INDEX              !< WALL index of back side of obstruction or exterior wall cell
-   INTEGER, POINTER :: BACK_MESH               !< Mesh number on back side of obstruction or exterior wall cell
-   INTEGER, POINTER :: BOUNDARY_TYPE           !< Descriptor: SOLID, MIRROR, OPEN, INTERPOLATED, etc
-   INTEGER, POINTER :: OBST_INDEX              !< Index of the OBSTruction
-   INTEGER, POINTER :: PRESSURE_BC_INDEX       !< Poisson boundary condition, NEUMANN or DIRICHLET
-   INTEGER, POINTER :: SURF_INDEX              !< Index of the SURFace conditions
-   INTEGER, POINTER :: SURF_INDEX_ORIG         !< Original SURFace index for this cell
-   INTEGER, POINTER :: VENT_INDEX              !< Index of the VENT containing this cell
-   INTEGER, POINTER :: JD11_INDEX
-   INTEGER, POINTER :: JD12_INDEX
-   INTEGER, POINTER :: JD21_INDEX
-   INTEGER, POINTER :: JD22_INDEX
-   INTEGER, POINTER :: CUT_FACE_INDEX
+   INTEGER :: WALL_INDEX=0            !< Index of itself -- used to determine if the WALL cell has been assigned
+   INTEGER :: BC_INDEX=0              !< Index within the array BOUNDARY_COORD
+   INTEGER :: OD_INDEX=0              !< Index within the array BOUNDARY_ONE_D
+   INTEGER :: BP_INDEX=0              !< Index within the array BOUNDARY_PROPS
+   INTEGER :: BR_INDEX=0              !< Index within the array BOUNDARY_RADIA
+   INTEGER :: SURF_INDEX=0            !< Index of the SURFace conditions
+   INTEGER :: BACK_INDEX=0            !< WALL index of back side of obstruction or exterior wall cell
+   INTEGER :: BACK_MESH               !< Mesh number on back side of obstruction or exterior wall cell
+   INTEGER :: BOUNDARY_TYPE=0         !< Descriptor: SOLID, MIRROR, OPEN, INTERPOLATED, etc
+   INTEGER :: SURF_INDEX_ORIG=0       !< Original SURFace index for this cell
+   INTEGER :: OBST_INDEX=0            !< Index of the OBSTruction
+   INTEGER :: PRESSURE_BC_INDEX       !< Poisson boundary condition, NEUMANN or DIRICHLET
+   INTEGER :: VENT_INDEX=0            !< Index of the VENT containing this cell
+   INTEGER :: JD11_INDEX=0
+   INTEGER :: JD12_INDEX=0
+   INTEGER :: JD21_INDEX=0
+   INTEGER :: JD22_INDEX=0
+   INTEGER :: CUT_FACE_INDEX=0
 
 END TYPE WALL_TYPE
 
@@ -620,19 +645,64 @@ TYPE (MATERIAL_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: MATERIAL
 !> \brief Variables associated with a surface type
 
 TYPE SURFACE_TYPE
+
    REAL(EB) :: AREA_MULTIPLIER=1._EB                     !< Factor for manual surface area adjustment
-   REAL(EB) :: TMP_FRONT=-1._EB,TMP_BACK=-1._EB,TMP_INNER_HT3D=-1._EB,VEL,VEL_GRAD,PLE, &
-               Z0,Z_0,CONVECTIVE_HEAT_FLUX,NET_HEAT_FLUX, &
-               VOLUME_FLOW,HRRPUA,MLRPUA,T_IGN,SURFACE_DENSITY,CELL_SIZE_FACTOR, &
-               E_COEFFICIENT,TEXTURE_WIDTH,TEXTURE_HEIGHT,THICKNESS,EXTERNAL_FLUX, &
-               DXF,DXB,MASS_FLUX_TOTAL,PARTICLE_MASS_FLUX,EMISSIVITY,MAX_PRESSURE, &
-               TMP_IGN,TMP_EXT,H_V,LAYER_DIVIDE,ROUGHNESS,LENGTH=-1._EB,WIDTH=-1._EB, &
-               DT_INSERT,H_FIXED=-1._EB,H_FIXED_B=-1._EB,HM_FIXED=-1._EB,EMISSIVITY_BACK, &
-               CONV_LENGTH,XYZ(3),FIRE_SPREAD_RATE, &
-               MINIMUM_LAYER_THICKNESS,INNER_RADIUS=0._EB,MASS_FLUX_VAR=-1._EB,VEL_BULK,VEL_PART, &
-               PARTICLE_SURFACE_DENSITY=-1._EB,DRAG_COEFFICIENT=2.8_EB,SHAPE_FACTOR=0.25_EB,&
-               MINIMUM_BURNOUT_TIME=1.E6_EB,DELTA_TMP_MAX=10._EB,BURN_DURATION=1.E6_EB,CONE_HEAT_FLUX=-1._EB,&
-               PARTICLE_EXTRACTION_VELOCITY=1.E6_EB
+   REAL(EB) :: TMP_FRONT=-1._EB                          !< Specified front surface temperture (K)
+   REAL(EB) :: TMP_BACK=-1._EB                           !< Specified back surface gas temperature (K)
+   REAL(EB) :: TMP_INNER_HT3D=-1._EB                     !< Specified inner temperature for 3D heating (K)
+   REAL(EB) :: VEL                                       !< Specified normal velocity (m/s)
+   REAL(EB) :: VEL_GRAD
+   REAL(EB) :: PLE                                       !< Exponent for boundary layer velocity profile
+   REAL(EB) :: Z0                                        !< Reference height for boundary layer profile (m)
+   REAL(EB) :: Z_0                                       !< Surface roughness (m)
+   REAL(EB) :: CONVECTIVE_HEAT_FLUX                      !< Specified convective heat flux at surface (W/m2)
+   REAL(EB) :: NET_HEAT_FLUX                             !< Specified net heat flux at surface (W/m2)
+   REAL(EB) :: VOLUME_FLOW                               !< Specified volume flow (m3/s)
+   REAL(EB) :: HRRPUA                                    !< Specified Heat Release Rate Per Unit Volume (W/m3)
+   REAL(EB) :: MLRPUA                                    !< Specified Mass Loss Rate Per Unit Area (kg/m2/s)
+   REAL(EB) :: T_IGN                                     !< Specified ignition time (s)
+   REAL(EB) :: SURFACE_DENSITY                           !< Mass per unit area (kg/m2)
+   REAL(EB) :: CELL_SIZE_FACTOR
+   REAL(EB) :: E_COEFFICIENT
+   REAL(EB) :: TEXTURE_WIDTH
+   REAL(EB) :: TEXTURE_HEIGHT
+   REAL(EB) :: THICKNESS
+   REAL(EB) :: EXTERNAL_FLUX
+   REAL(EB) :: DXF
+   REAL(EB) :: DXB
+   REAL(EB) :: MASS_FLUX_TOTAL
+   REAL(EB) :: PARTICLE_MASS_FLUX
+   REAL(EB) :: EMISSIVITY
+   REAL(EB) :: MAX_PRESSURE
+   REAL(EB) :: TMP_IGN
+   REAL(EB) :: TMP_EXT
+   REAL(EB) :: H_V
+   REAL(EB) :: LAYER_DIVIDE
+   REAL(EB) :: ROUGHNESS
+   REAL(EB) :: LENGTH=-1._EB
+   REAL(EB) :: WIDTH=-1._EB
+   REAL(EB) :: DT_INSERT
+   REAL(EB) :: H_FIXED=-1._EB
+   REAL(EB) :: H_FIXED_B=-1._EB
+   REAL(EB) :: HM_FIXED=-1._EB
+   REAL(EB) :: EMISSIVITY_BACK
+   REAL(EB) :: CONV_LENGTH
+   REAL(EB) :: XYZ(3)
+   REAL(EB) :: FIRE_SPREAD_RATE
+   REAL(EB) :: MINIMUM_LAYER_THICKNESS
+   REAL(EB) :: INNER_RADIUS=0._EB
+   REAL(EB) :: MASS_FLUX_VAR=-1._EB
+   REAL(EB) :: VEL_BULK
+   REAL(EB) :: VEL_PART
+   REAL(EB) :: PARTICLE_SURFACE_DENSITY=-1._EB
+   REAL(EB) :: DRAG_COEFFICIENT=2.8_EB
+   REAL(EB) :: SHAPE_FACTOR=0.25_EB
+   REAL(EB) :: MINIMUM_BURNOUT_TIME=1.E6_EB
+   REAL(EB) :: DELTA_TMP_MAX=10._EB
+   REAL(EB) :: BURN_DURATION=1.E6_EB
+   REAL(EB) :: CONE_HEAT_FLUX=-1._EB
+   REAL(EB) :: PARTICLE_EXTRACTION_VELOCITY=1.E6_EB
+
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: DX,RDX,RDXN,X_S,DX_WGT,MF_FRAC,PARTICLE_INSERT_CLOCK
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: RHO_0
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: MASS_FRACTION,MASS_FLUX,TAU,ADJUST_BURN_RATE,DDSUM,SMALLEST_CELL_SIZE
@@ -646,8 +716,6 @@ TYPE SURFACE_TYPE
    INTEGER :: PYROLYSIS_MODEL
    INTEGER :: N_LAYERS,N_MATL,SUBSTEP_POWER=2,N_SPEC=0,N_LPC=0
    INTEGER :: N_ONE_D_STORAGE_REALS,N_ONE_D_STORAGE_INTEGERS,N_ONE_D_STORAGE_LOGICALS
-   INTEGER :: N_WALL_STORAGE_REALS,N_WALL_STORAGE_INTEGERS,N_WALL_STORAGE_LOGICALS
-   INTEGER :: N_CFACE_STORAGE_REALS,N_CFACE_STORAGE_INTEGERS,N_CFACE_STORAGE_LOGICALS
    INTEGER, DIMENSION(30) :: ONE_D_REALS_ARRAY_SIZE=0,ONE_D_INTEGERS_ARRAY_SIZE=0,ONE_D_LOGICALS_ARRAY_SIZE=0
    INTEGER, ALLOCATABLE, DIMENSION(:) :: N_LAYER_CELLS,LAYER_INDEX,MATL_INDEX,MATL_PART_INDEX
    INTEGER, DIMENSION(MAX_LAYERS,MAX_MATERIALS) :: LAYER_MATL_INDEX
@@ -664,11 +732,14 @@ TYPE SURFACE_TYPE
    LOGICAL :: BURN_AWAY,ADIABATIC,INTERNAL_RADIATION,USER_DEFINED=.TRUE., &
               FREE_SLIP=.FALSE.,NO_SLIP=.FALSE.,SPECIFIED_NORMAL_VELOCITY=.FALSE.,SPECIFIED_TANGENTIAL_VELOCITY=.FALSE., &
               SPECIFIED_NORMAL_GRADIENT=.FALSE.,CONVERT_VOLUME_TO_MASS=.FALSE.,SPECIFIED_HEAT_SOURCE=.FALSE.,&
-              IMPERMEABLE=.FALSE.,BOUNDARY_FUEL_MODEL=.FALSE.,BLOWING=.FALSE.,BLOWING_2=.FALSE.,ABL_MODEL=.FALSE., &
+              IMPERMEABLE=.FALSE.,BOUNDARY_FUEL_MODEL=.FALSE.,BLOWING=.FALSE.,ABL_MODEL=.FALSE., &
               HT3D=.FALSE., MT1D=.FALSE.
    LOGICAL :: INCLUDE_BOUNDARY_COORD_TYPE=.TRUE.     !< This surface requires basic coordinate information
-   LOGICAL :: INCLUDE_BOUNDARY_PROPERTY_TYPE=.TRUE.  !< This surface requires surface variables for heat and mass transfer
-   LOGICAL :: INCLUDE_ONE_D_TYPE=.TRUE.              !< This surface requires in-depth 1-D conduction/reaction arrays
+   LOGICAL :: INCLUDE_BOUNDARY_PROPS_TYPE=.TRUE.  !< This surface requires surface variables for heat and mass transfer
+   LOGICAL :: INCLUDE_BOUNDARY_ONE_D_TYPE=.TRUE.     !< This surface requires in-depth 1-D conduction/reaction arrays
+   LOGICAL :: INCLUDE_BOUNDARY_RADIA_TYPE=.TRUE.     !< This surface requires angular-specific radiation intensities
+   INTEGER :: N_WALL_STORAGE_REALS=0,N_WALL_STORAGE_INTEGERS=0,N_WALL_STORAGE_LOGICALS=0
+   INTEGER :: N_CFACE_STORAGE_REALS=0,N_CFACE_STORAGE_INTEGERS=0,N_CFACE_STORAGE_LOGICALS=0
    INTEGER :: GEOMETRY,BACKING,PROFILE,HEAT_TRANSFER_MODEL=0
    CHARACTER(LABEL_LENGTH) :: PART_ID,RAMP_Q,RAMP_V,RAMP_T,RAMP_EF,RAMP_PART,RAMP_V_X,RAMP_V_Y,RAMP_V_Z,RAMP_T_B,RAMP_T_I
    CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: RAMP_MF
@@ -692,6 +763,8 @@ TYPE SURFACE_TYPE
 
    !HTC Custom
    REAL(EB) :: C_FORCED_CONSTANT=0._EB,C_FORCED_PR_EXP=0._EB,C_FORCED_RE=0._EB,C_FORCED_RE_EXP=0._EB,C_HORIZONTAL,C_VERTICAL
+
+   TYPE(STORAGE_TYPE) :: WALL_STORAGE,CFACE_STORAGE
 
 END TYPE SURFACE_TYPE
 
@@ -909,7 +982,7 @@ INTEGER, PARAMETER :: IBM_MAXCFELEM_FACE =3072 ! Size definition parameter. Max 
 INTEGER, PARAMETER :: IBM_MAXVERT_CUTFACE=  24 ! Size definition parameter.
 INTEGER, PARAMETER :: MAX_INTERP_POINTS_PLANE = 4
 TYPE IBM_CUTFACE_TYPE
-   INTEGER :: IWC=0
+   INTEGER :: IWC=0,PRES_ZONE=-1
    INTEGER :: NVERT=0, NSVERT=0, NFACE=0, NSFACE=0, STATUS !Local Vertices, cut-faces and status of this Cartesian face.
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)           :: XYZVERT  ! Locations of vertices.
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)           ::  CFELEM  ! Cut-faces connectivities.
@@ -960,16 +1033,38 @@ TYPE RAD_CFACE_TYPE
    INTEGER, ALLOCATABLE, DIMENSION(:,:) :: ASSIGNED_CFACES_RADI
 END TYPE RAD_CFACE_TYPE
 
+
 ! Note: If you change the number of scalar variables in CFACE_TYPE, adjust the numbers below
 
-INTEGER, PARAMETER :: N_CFACE_SCALAR_REALS=9,N_CFACE_SCALAR_INTEGERS=8,N_CFACE_SCALAR_LOGICALS=0
+INTEGER, PARAMETER :: N_CFACE_SCALAR_REALS=13
+INTEGER, PARAMETER :: N_CFACE_SCALAR_INTEGERS=12
+INTEGER, PARAMETER :: N_CFACE_SCALAR_LOGICALS=0
 
 TYPE CFACE_TYPE
-   TYPE (BOUNDARY_COORD_TYPE) :: BOUNDARY_COORD       !< Derived type carrying coordinate variables
-   TYPE (ONE_D_M_AND_E_XFER_TYPE) :: ONE_D
-   TYPE (BOUNDARY_PROPERTY_TYPE) :: BOUNDARY_PROPERTY !< Derived type carrying most of the surface boundary conditions
-   REAL(EB), POINTER :: AREA,NVEC(:),VEL_ERR_NEW,V_DEP,Q_LEAK,DUNDT,PRES_BXN
-   INTEGER, POINTER :: CFACE_INDEX,SURF_INDEX,VENT_INDEX,BACK_MESH,BACK_INDEX,BOUNDARY_TYPE,CUT_FACE_IND1,CUT_FACE_IND2
+   INTEGER :: CFACE_INDEX=0              !< Index of itself -- used to determine if the CFACE cell has been assigned
+   INTEGER :: BC_INDEX=0                 !< Derived type carrying coordinate variables
+   INTEGER :: OD_INDEX=0                 !< Derived type carrying 1-D solid info
+   INTEGER :: BP_INDEX=0                 !< Derived type carrying most of the surface boundary conditions
+   INTEGER :: BR_INDEX=0                 !< Derived type carrying angular-specific radiation intensities
+   INTEGER :: SURF_INDEX=0
+   INTEGER :: VENT_INDEX=0
+   INTEGER :: BACK_MESH=0
+   INTEGER :: BACK_INDEX=0
+   INTEGER :: BOUNDARY_TYPE=0
+   INTEGER :: CUT_FACE_IND1=-11
+   INTEGER :: CUT_FACE_IND2=-11
+   REAL(EB) :: AREA=0._EB
+   REAL(EB) :: NVEC(3)=0._EB
+   REAL(EB) :: VEL_ERR_NEW=0._EB
+   REAL(EB) :: V_DEP=0._EB
+   REAL(EB) :: Q_LEAK=0._EB
+   REAL(EB) :: DUNDT=0._EB
+   REAL(EB) :: RSUM_G=0._EB                     !< \f$ R_0 \sum_\alpha Z_\alpha/W_\alpha \f$ in first gas phase cell
+   REAL(EB) :: TMP_G                            !< Temperature (K) in adjacent gas phase cell
+   REAL(EB) :: RHO_G                            !< Gas density (kg/m3) in adjacent gas phase cell
+   REAL(EB) :: MU_G=0.1_EB                      !< Viscosity, \f$ \mu \f$, in adjacent gas phase cell
+   REAL(EB) :: PRES_BXN
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_G  !< (1:N_TRACKED_SPECIES) Species mixture mass fraction in gas
 END TYPE CFACE_TYPE
 
 ! Cartesian Cells Cut-Cells data structure:
@@ -1017,6 +1112,7 @@ END TYPE IBM_CUTCELL_TYPE
 
 
 TYPE IBM_REGFACE_TYPE
+   INTEGER:: PRES_ZONE=-1
    INTEGER,  DIMENSION(MAX_DIM)                                    ::       IJK
    INTEGER,  DIMENSION(1:2,1:2)                                    ::        JD
 END TYPE IBM_REGFACE_TYPE
@@ -1034,6 +1130,7 @@ TYPE IBM_REGFACEZ_TYPE
 END TYPE IBM_REGFACEZ_TYPE
 
 TYPE IBM_RCFACE_TYPE
+   INTEGER:: PRES_ZONE=-1
    INTEGER,  DIMENSION(MAX_DIM+1)                                  ::       IJK ! [ I J K x1axis]
    INTEGER,  DIMENSION(LOW_IND:HIGH_IND)                           ::       UNK
    REAL(EB), DIMENSION(MAX_DIM,LOW_IND:HIGH_IND)                   ::      XCEN
@@ -1297,7 +1394,6 @@ TYPE P_ZONE_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: LEAK_PRESSURE_EXPONENT   !< Array of leak reference exponents
    INTEGER :: N_DUCTNODES                                          !< Number of duct nodes in the ZONE
    INTEGER :: MESH_INDEX=0                                         !< Index of the MESH where the ZONE is located
-   LOGICAL :: EVACUATION=.FALSE.
    LOGICAL :: PERIODIC=.FALSE.                                     !< Indicator if the ZONE boundary is periodic
    INTEGER, ALLOCATABLE, DIMENSION(:) :: NODE_INDEX                !< Array of NODE indices connected to the ZONE
    CHARACTER(LABEL_LENGTH) :: ID='null'                            !< Identifier
@@ -1314,8 +1410,15 @@ TYPE ZONE_MESH_TYPE
 #else
    INTEGER, ALLOCATABLE :: PT_H(:)
 #endif /* WITH_MKL */
-   INTEGER :: NUNKH                                   !< Number of unknowns in pressure solution for a given ZONE_MESH
+   INTEGER :: NUNKH=0                                 !< Number of unknowns in pressure solution for a given ZONE_MESH
+   INTEGER :: NUNKH_CART=0                            !< Number of unknowns in Cartesian cells of ZONE_MESH
+   INTEGER :: MTYPE=0                                 !< Matrix type (symmetric indefinite, or symm positive definite)
    LOGICAL :: ZONE_IN_MESH=.FALSE.                    !< ZONE is in MESH
+   LOGICAL :: USE_FFT=.TRUE.                          !< Flag for use of FFT solver
+   INTEGER, ALLOCATABLE, DIMENSION(:,:) :: MESH_IJK   !< I,J,K positions of cell with unknown row IROW (1:3,1:NUNKH)
+   REAL(EB),ALLOCATABLE, DIMENSION(:)   :: A_H        !< Matrix coefficients for ZONE_MESH, up triang part, CSR format.
+   INTEGER ,ALLOCATABLE, DIMENSION(:)   :: IA_H,JA_H  !< Matrix indexes for ZONE_MESH, up triang part, CSR format.
+   REAL(EB),ALLOCATABLE, DIMENSION(:)   :: F_H,X_H    !< RHS and Solution containers for the ZONE_MESH.
 END TYPE ZONE_MESH_TYPE
 
 

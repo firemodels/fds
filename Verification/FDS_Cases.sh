@@ -24,7 +24,7 @@ $QFDS -d Atmospheric_Effects stack_effect.fds
 $QFDS -d Atmospheric_Effects lapse_rate.fds
 $QFDS -p 8 -d Atmospheric_Effects wind_example_5.fds
 $QFDS -p 8 -d Atmospheric_Effects wind_example_10.fds
-$QFDS -p 32 -n 8 -d Atmospheric_Effects wind_example_32.fds
+$QFDS -p 32 -d Atmospheric_Effects wind_example_32.fds
 $QFDS -d Atmospheric_Effects MO_velocity_profile_stable.fds
 $QFDS -d Atmospheric_Effects MO_velocity_profile_unstable.fds
 
@@ -165,10 +165,6 @@ $QFDS -d Energy_Budget energy_budget_particles.fds
 $QFDS -d Energy_Budget energy_budget_solid.fds
 $QFDS -d Energy_Budget energy_budget_tmix.fds
 
-#$QFDS -d Evacuation evac_smv_testcase0.fds
-#$QFDS -d Evacuation evac_smv_testcase2.fds
-#$QFDS -p 3 -d Evacuation evac_smv_testcase1.fds
-
 $QFDS -d Extinction extinction_1.fds
 $QFDS -d Extinction extinction_2.fds
 
@@ -187,7 +183,6 @@ $QFDS -d Fires box_burn_away1_pyro3d_transport.fds
 $QFDS -d Fires couch.fds
 $QFDS -p 2 -d Fires couch2.fds
 $QFDS -d Fires fire_const_gamma.fds
-$QFDS -d Fires fire_whirl_pool.fds
 $QFDS -d Fires spray_burner.fds
 $QFDS -d Fires HoC_Ideal.fds
 $QFDS -d Fires HoC_NonIdeal.fds
@@ -388,6 +383,8 @@ $QFDS -p 8 -d Pressure_Solver pressure_iteration3d_tight.fds
 $QFDS -p 8 -d Pressure_Solver pressure_iteration3d_scarc.fds
 $QFDS -p 8 -d Pressure_Solver pressure_iteration3d_scarc_tight.fds
 $QFDS -p 8 -d Pressure_Solver pressure_iteration3d_uscarc.fds
+$QFDS -p 2 -d Pressure_Solver ulmat_2zone.fds
+
 
 $QFDS -d Pyrolysis cable_11_insulation_mcc.fds
 $QFDS -d Pyrolysis cable_23_insulation_mcc.fds
@@ -542,6 +539,7 @@ $QFDS -d Species burke_schumann.fds
 $QFDS -d Species FED_FIC.fds
 $QFDS -d Species FED_FIC_SMIX.fds
 $QFDS -d Species FED_CO_HCN.fds
+$QFDS -d Species mass_flux_comparison.fds
 $QFDS -d Species methane_flame_simple.fds
 $QFDS -d Species methane_flame_simple_2.fds
 $QFDS -d Species methane_flame_primitive.fds
@@ -587,6 +585,7 @@ $QFDS -d Species wall_cond.fds
 $QFDS -d Species humidity.fds
 $QFDS -d Species mass_flux_wall_yindex.fds
 $QFDS -d Species mass_flux_wall_zindex.fds
+$QFDS -d Species mass_balance_gas_volume.fds
 $QFDS -p 8 -d Species mass_balance_reac.fds
 $QFDS -d Species mass_balance_reac_2.fds
 $QFDS -p 3 -d Species favre_test.fds
