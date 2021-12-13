@@ -203,7 +203,7 @@ impi_intel_linux_64_db : obj = fds_impi_intel_linux_64_db
 impi_intel_linux_64_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
-impi_intel_linux_64_dv : FFLAGS = -m64 -warn unused -O1 -g -traceback -no-wrap-margin $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL) -DUSE_IFPORT
+impi_intel_linux_64_dv : FFLAGS = -m64 -warn unused -O1 -g -traceback -no-wrap-margin $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL) -DUSE_IFPORT -DNO_SCARC
 impi_intel_linux_64_dv : LFLAGSMKL = $(LFLAGSMKL_INTEL)
 impi_intel_linux_64_dv : LFLAGS =
 impi_intel_linux_64_dv : FCOMPL = mpiifort
