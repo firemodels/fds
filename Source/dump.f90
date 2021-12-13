@@ -2678,10 +2678,6 @@ MATL_LOOP: DO N=1,N_MATL
       WRITE(LU_OUTPUT,'(A,F8.2)') '     Absorption coefficient (1/m) ',ML%KAPPA_S
    ENDIF
 
-   IF (ML%POROSITY>0._EB) THEN
-      WRITE(LU_OUTPUT,'(A,F8.4)') '     Porosity (-)                 ',ML%POROSITY
-   ENDIF
-
    IF (ML%PYROLYSIS_MODEL==PYROLYSIS_SOLID .OR. ML%PYROLYSIS_MODEL==PYROLYSIS_VEGETATION) THEN
       DO NR=1,ML%N_REACTIONS
          WRITE(LU_OUTPUT,'(A,I2)')   '     Reaction ', NR
@@ -2754,14 +2750,6 @@ SURFLOOP: DO N=0,N_SURF
          DO NN=1,SF%N_LAYER_MATL(NL)
             WRITE(LU_OUTPUT,'(8X,A,A,F7.2)') TRIM(SF%LAYER_MATL_NAME(NL,NN)),', Mass fraction: ',SF%LAYER_MATL_FRAC(NL,NN)
          ENDDO
-         IF (SF%LAYER_POROSITY(NL)>0._EB) THEN
-            WRITE(LU_OUTPUT,'(A,F8.2)') '        Porosity       : ',SF%LAYER_POROSITY(NL)
-            DO NN=1,SF%N_SPEC
-               IF (SF%LAYER_SPEC_FRAC(NL,NN) > 0._EB) THEN
-                  WRITE(LU_OUTPUT,'(8X,A,A,F7.2)') TRIM(SPECIES_MIXTURE(NN)%ID),', Mass fraction: ',SF%LAYER_SPEC_FRAC(NL,NN)
-               ENDIF
-            ENDDO
-         ENDIF
       ENDDO
       WRITE(LU_OUTPUT,'(A,F9.3,A)')     '     Total surface density ', SF%SURFACE_DENSITY, ' kg/m2'
       IF (SF%LAYER_DIVIDE<=SF%N_LAYERS) &
@@ -8331,27 +8319,6 @@ SOLID_PHASE_SELECT: SELECT CASE(INDX)
       ENDIF
       SOLID_PHASE_OUTPUT = RHO(BC%IIG,BC%JJG,BC%KKG)*Y_SPECIES
 
-      SF => SURFACE(SURF_INDEX)
-      II1 = DV%I_DEPTH
-      IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
-         IF (DV%DEPTH > TWO_EPSILON_EB) THEN
-            DEPTH = DV%DEPTH
-         ELSE
-            DEPTH = MAX(0._EB,SUM(ONE_D%LAYER_THICKNESS)+DV%DEPTH)
-         ENDIF
-         II2 = SUM(ONE_D%N_LAYER_CELLS)
-         IF (DEPTH>SUM(ONE_D%LAYER_THICKNESS)) THEN
-            SOLID_PHASE_OUTPUT = 0._EB
-            RETURN
-         ELSE
-            DO II2=II2,1,-1
-               IF (DEPTH<=ONE_D%X(II2)) II1 = II2
-            ENDDO
-         ENDIF
-      ENDIF
-      ! not finalized
-      !SOLID_PHASE_OUTPUT = ONE_D%SPEC_COMP(Z_INDEX)%RHO_ZZ(II1)
-
    CASE(62) ! SOLID CELL TEMPERATURE
 
       !              X(II-1)      X(II)      X(IIG-1)
@@ -9225,20 +9192,20 @@ END SUBROUTINE DUMP_CONTROLS
 
 SUBROUTINE DUMP_PROF(T,NM)
 
-USE PHYSICAL_FUNCTIONS, ONLY: GET_MASS_FRACTION
 USE GEOMETRY_FUNCTIONS, ONLY: GET_WALL_NODE_WEIGHTS
 USE MEMORY_FUNCTIONS, ONLY: GET_LAGRANGIAN_PARTICLE_INDEX
 REAL(EB), INTENT(IN) :: T
 REAL(FB) :: STIME
 INTEGER, INTENT(IN)  :: NM
 INTEGER :: I,N,NN,IW,SURF_INDEX,NWP,LP_INDEX
-REAL(EB) :: DXF,DXB,THICKNESS,ZZ_GET(1:N_TRACKED_SPECIES),Y_TMP
+REAL(EB) :: DXF,DXB,THICKNESS
 TYPE (PROFILE_TYPE), POINTER :: PF
 
 PROF_LOOP: DO N=1,N_PROF
 
    PF => PROFILE(N)
    IF (NM/=PF%MESH) CYCLE PROF_LOOP
+
    IF (PF%WALL_INDEX>0) THEN
       IW  =  PF%WALL_INDEX
       WC  => MESHES(NM)%WALL(IW)
@@ -9299,30 +9266,13 @@ PROF_LOOP: DO N=1,N_PROF
       ENDIF
    ELSE
       RHO_S = 0._EB
-      IF (PF%Z_INDEX>=0) THEN
-         DO I=1,NWP
-            RHO_S(I) = ONE_D%SPEC_COMP(PF%Z_INDEX)%RHO_ZZ(I)
-         ENDDO
-      ELSEIF (PF%Y_INDEX>=0) THEN
-         DO I=1,NWP
-            DO NN=1,N_TRACKED_SPECIES 
-               RHO_S(I)=RHO_S(I) + ONE_D%SPEC_COMP(NN)%RHO_ZZ(I)
-               ZZ_GET(NN) = ONE_D%SPEC_COMP(NN)%RHO_ZZ(I)
+      DO NN=1,SF%N_MATL
+         IF (PF%QUANTITY==SF%MATL_NAME(NN) .OR. PF%QUANTITY=='DENSITY') THEN
+            DO I=1,NWP
+               RHO_S(I) = RHO_S(I) + ONE_D%MATL_COMP(NN)%RHO(I)
             ENDDO
-            ZZ_GET = ZZ_GET/RHO_S(I)
-            CALL GET_MASS_FRACTION(ZZ_GET,PF%Y_INDEX,Y_TMP)
-            RHO_S(I) = RHO_S(I)*Y_TMP
-         ENDDO
-      ELSE
-         DO NN=1,SF%N_MATL
-            IF (PF%QUANTITY==SF%MATL_NAME(NN) .OR. PF%QUANTITY=='DENSITY') THEN
-               DO I=1,NWP
-                  RHO_S(I) = RHO_S(I) + ONE_D%MATL_COMP(NN)%RHO(I)
-               ENDDO
-            ENDIF
-         ENDDO
-      ENDIF
-
+         ENDIF
+      ENDDO
       RHO_S(0)     = RHO_S(1)
       RHO_S(NWP+1) = RHO_S(NWP)
       IF (PF%CELL_CENTERED) THEN

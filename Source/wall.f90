@@ -3175,7 +3175,7 @@ IF (ICYC>WALL_INCREMENT) THEN
    DELTA_TMP(1)   = (DT_BC/ONE_D%RHO_C_S(1))*&
                     (RDX_S(1)*(ONE_D%K_S(1)*RDXN_S(1)*(ONE_D%TMP(2)-ONE_D%TMP(1))+Q_NET_F) + Q_S(1))
    DELTA_TMP(NWP) = (DT_BC/ONE_D%RHO_C_S(NWP))*&
-        (RDX_S(NWP)*(-Q_NET_B-ONE_D%K_S(NWP-1)*RDXN_S(NWP-1)*(ONE_D%TMP(NWP)-ONE_D%TMP(NWP-1))) + Q_S(NWP))
+                    (RDX_S(NWP)*(-Q_NET_B-ONE_D%K_S(NWP-1)*RDXN_S(NWP-1)*(ONE_D%TMP(NWP)-ONE_D%TMP(NWP-1))) + Q_S(NWP))
    TMP_RATIO = MAX(TWO_EPSILON_EB,MAXVAL(ABS(DELTA_TMP(1:NWP)))/SF%DELTA_TMP_MAX)
    EXPON     = MIN(MAX(0,CEILING(LOG(TMP_RATIO)/LOG(2._EB))),SF%SUBSTEP_POWER)
    DT_BC_SUB = DT_BC/2._EB**EXPON
@@ -3239,6 +3239,7 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
       ENDDO MATERIAL_LOOP1a
       IF (REGRID_SUM <= 1._EB) REGRID_FACTOR(I) = REGRID_SUM
       IF (REGRID_MAX >= ALMOST_ONE) REGRID_FACTOR(I) = REGRID_MAX
+
       ! If there is any non-shrinking material, the material matrix will remain, and no shrinking is allowed
 
       MATERIAL_LOOP1b: DO N=1,SF%N_MATL
@@ -3269,6 +3270,7 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
             IF(REGRID_FACTOR(I)>TWO_EPSILON_EB) ONE_D%MATL_COMP(N)%RHO(I) = ONE_D%MATL_COMP(N)%RHO(I)/REGRID_FACTOR(I)
          ENDDO MATERIAL_LOOP1d
       ENDIF
+
    ENDDO POINT_LOOP2
 
    ! Compute new coordinates if the solid changes thickness. Save new coordinates in X_S_NEW.
@@ -4079,7 +4081,6 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Loop over all materials in the cell (alpha subsc
                H_R = ML%H_R(J,ITMP)
                REACTION_RATE = REACTION_RATE / ((ABS(H_R)/1000._EB) * DT_BC)
             ENDIF
-
             ! Oxidation reaction?
             IF ( (ML%N_O2(J)>0._EB) .AND. (O2_INDEX > 0)) THEN
                ! Get oxygen mass fraction
