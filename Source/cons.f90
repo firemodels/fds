@@ -350,8 +350,11 @@ INTEGER :: UPPER_MESH_INDEX=-1000000000                     !< Upper bound of me
 LOGICAL :: PROFILING=.FALSE.
 INTEGER, ALLOCATABLE, DIMENSION(:) :: PROCESS               !< The MPI process of the given mesh index
 INTEGER, ALLOCATABLE, DIMENSION(:) :: FILE_COUNTER          !< Counter for the number of output files currently opened
-TYPE (MPI_COMM), ALLOCATABLE, DIMENSION(:) :: MPI_COMM_MESH !< MPI communicator for the a given mesh and its neighbors
-INTEGER, ALLOCATABLE, DIMENSION(:) :: MPI_COMM_MESH_ROOT    !< The rank of the given mesh within the MPI communicator
+
+TYPE (MPI_COMM), ALLOCATABLE, DIMENSION(:) :: MPI_COMM_NEIGHBORS       !< MPI communicator for the a given mesh and its neighbors
+TYPE (MPI_COMM), ALLOCATABLE, DIMENSION(:) :: MPI_COMM_CLOSE_NEIGHBORS !< MPI communicator for the a given mesh and its neighbors
+INTEGER, ALLOCATABLE, DIMENSION(:) :: MPI_COMM_NEIGHBORS_ROOT          !< The rank of the given mesh within the MPI communicator
+INTEGER, ALLOCATABLE, DIMENSION(:) :: MPI_COMM_CLOSE_NEIGHBORS_ROOT    !< The rank of the given mesh within the MPI communicator
 
 ! Time parameters
 
