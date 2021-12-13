@@ -1056,18 +1056,6 @@ SELECT CASE(TASK_NUMBER)
                ALLOCATE(M4%PRESSURE_ZONE(0:M4%IBP1,0:M4%JBP1,0:M4%KBP1))
                M4%PRESSURE_ZONE = -1
             ENDIF
-            IF (POISSON_ITERATION_ACCELERATOR) THEN
-               IF (TWO_D) THEN ; JDIM=1 ; ELSE ; JDIM=M4%JBP1 ; ENDIF
-               IF (.NOT.ALLOCATED(M4%H) )    ALLOCATE(M4%H(0:M4%IBP1,0:M4%JBP1,0:M4%KBP1))
-               IF (.NOT.ALLOCATED(M4%HS))    ALLOCATE(M4%HS(0:M4%IBP1,0:M4%JBP1,0:M4%KBP1))
-               IF (.NOT.ALLOCATED(M4%PRHS))  ALLOCATE(M4%PRHS(M4%IBP1,   JDIM,M4%KBP1))
-               IF (.NOT.ALLOCATED(M4%BXS))   ALLOCATE(M4%BXS(   JDIM,M4%KBP1))
-               IF (.NOT.ALLOCATED(M4%BXF))   ALLOCATE(M4%BXF(   JDIM,M4%KBP1))
-               IF (.NOT.ALLOCATED(M4%BYS))   ALLOCATE(M4%BYS(M4%IBP1,M4%KBP1))
-               IF (.NOT.ALLOCATED(M4%BYF))   ALLOCATE(M4%BYF(M4%IBP1,M4%KBP1))
-               IF (.NOT.ALLOCATED(M4%BZS))   ALLOCATE(M4%BZS(M4%IBP1,   JDIM))
-               IF (.NOT.ALLOCATED(M4%BZF))   ALLOCATE(M4%BZF(M4%IBP1,   JDIM))
-            ENDIF
          ENDDO
       ENDDO
 
@@ -1355,26 +1343,6 @@ PRESSURE_ITERATION_LOOP: DO
       IF (PRESSURE_ITERATIONS==1) MESHES(NM)%WALL_WORK1 = 0._EB
       CALL PRESSURE_SOLVER_COMPUTE_RHS(T,DT,NM)
    ENDDO
-
-   IF (POISSON_ITERATION_ACCELERATOR) THEN
-      CALL EXCHANGE_POISSON_INFO
-      CALL MESH_EXCHANGE(55)  ! Exchange PRHS, BXS, etc, and H or HS
-      DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-         M => MESHES(NM)
-         DO NNN=1,M%N_NEIGHBORING_MESHES
-            NOM = M%NEIGHBORING_MESH(NNN)
-            M3 => M%OMESH(NOM)
-            IF (NOM==NM .OR. M3%NIC_S==0) CYCLE
-            M2 => MESHES(NOM)
-            IF (M%XS< M2%XS .AND. M%YS==M2%YS .AND. M%ZS==M2%ZS) CALL GET_BOUNDARY_PRESSURE(NM,NOM,1)
-            IF (M%XS> M2%XS .AND. M%YS==M2%YS .AND. M%ZS==M2%ZS) CALL GET_BOUNDARY_PRESSURE(NOM,NM,1)
-            IF (M%XS==M2%XS .AND. M%YS< M2%YS .AND. M%ZS==M2%ZS) CALL GET_BOUNDARY_PRESSURE(NM,NOM,2)
-            IF (M%XS==M2%XS .AND. M%YS> M2%YS .AND. M%ZS==M2%ZS) CALL GET_BOUNDARY_PRESSURE(NOM,NM,2)
-            IF (M%XS==M2%XS .AND. M%YS==M2%YS .AND. M%ZS< M2%ZS) CALL GET_BOUNDARY_PRESSURE(NM,NOM,3)
-            IF (M%XS==M2%XS .AND. M%YS==M2%YS .AND. M%ZS> M2%ZS) CALL GET_BOUNDARY_PRESSURE(NOM,NM,3)
-         ENDDO
-      ENDDO
-   ENDIF
 
    ! Solve the Poission equation using either FFT, SCARC, or GLMAT
 
@@ -1701,29 +1669,6 @@ DO NM=1,NMESHES
 ENDDO
 
 END SUBROUTINE EXCHANGE_GEOMETRY_INFO
-
-
-!> \brief Broadcast Poisson equation info for the POISSON_ITERATION_ACCELERATOR
-
-SUBROUTINE EXCHANGE_POISSON_INFO
-
-REAL(EB) :: TNOW
-
-IF (N_MPI_PROCESSES==1) RETURN
-IF (ICYC>1) RETURN
-
-TNOW = CURRENT_TIME()
-
-DO NM=1,NMESHES
-   IF (MPI_COMM_NEIGHBORS(NM)==MPI_COMM_NULL) CYCLE
-   M => MESHES(NM)
-   CALL MPI_BCAST(M%LBC,1            ,MPI_INTEGER         ,MPI_COMM_NEIGHBORS_ROOT(NM),MPI_COMM_NEIGHBORS(NM),IERR)
-   CALL MPI_BCAST(M%MBC,1            ,MPI_INTEGER         ,MPI_COMM_NEIGHBORS_ROOT(NM),MPI_COMM_NEIGHBORS(NM),IERR)
-   CALL MPI_BCAST(M%NBC,1            ,MPI_INTEGER         ,MPI_COMM_NEIGHBORS_ROOT(NM),MPI_COMM_NEIGHBORS(NM),IERR)
-ENDDO
-
-T_USED(11)=T_USED(11) + CURRENT_TIME() - TNOW
-END SUBROUTINE EXCHANGE_POISSON_INFO
 
 
 !> \brief Exchange information mesh to mesh needed for divergence integrals
@@ -2372,7 +2317,6 @@ MESH_LOOP: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             ALLOCATE(M3%REAL_RECV_PKG5(NRA_MAX*NUMBER_SPECTRAL_BANDS*M3%NIC_R))
             ALLOCATE(M3%REAL_RECV_PKG7(M3%NIC_R*3))
             ALLOCATE(M3%REAL_RECV_PKG8(M3%NIC_R*2))
-            ALLOCATE(M3%REAL_RECV_PKG9(M3%NIC_R*2*(POISSON_PATCH_WIDTH+1)+2*(M4%JBAR*M4%KBAR+M4%IBAR*M4%KBAR+M4%IBAR*M4%JBAR)))
 
             IF (SOLID_HT3D) ALLOCATE(M3%REAL_RECV_PKG4(M3%NIC_R*2))
 
@@ -2410,12 +2354,6 @@ MESH_LOOP: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             CALL MPI_RECV_INIT(M3%REAL_RECV_PKG7(1),SIZE(M3%REAL_RECV_PKG7),MPI_DOUBLE_PRECISION,SNODE,NOM,MPI_COMM_WORLD,&
                                REQ7(N_REQ7),IERR)
         
-            IF (POISSON_ITERATION_ACCELERATOR) THEN
-               N_REQ9 = N_REQ9 + 1
-               CALL MPI_RECV_INIT(M3%REAL_RECV_PKG9(1),SIZE(M3%REAL_RECV_PKG9),MPI_DOUBLE_PRECISION,SNODE,NOM,MPI_COMM_WORLD,&
-                                  REQ9(N_REQ9),IERR)
-            ENDIF
-
             IF (RADIATION) THEN
                N_REQ5 = N_REQ5 + 1
                CALL MPI_RECV_INIT(M3%REAL_RECV_PKG5(1),SIZE(M3%REAL_RECV_PKG5),MPI_DOUBLE_PRECISION,SNODE,NOM,MPI_COMM_WORLD,&
@@ -2566,7 +2504,6 @@ SENDING_MESH_LOOP: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             ALLOCATE(M3%REAL_SEND_PKG3(IJK_SIZE*4))
             ALLOCATE(M3%REAL_SEND_PKG5(NRA_MAX*NUMBER_SPECTRAL_BANDS*M3%NIC_S))
             ALLOCATE(M3%REAL_SEND_PKG7(M3%NIC_S*3))
-            ALLOCATE(M3%REAL_SEND_PKG9(M3%NIC_S*2*(POISSON_PATCH_WIDTH+1)+2*(M4%JBAR*M4%KBAR+M4%IBAR*M4%KBAR+M4%IBAR*M4%JBAR)))
 
             IF (SOLID_HT3D) ALLOCATE(M3%REAL_SEND_PKG4(M3%NIC_S*2))
 
@@ -2607,12 +2544,6 @@ SENDING_MESH_LOOP: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             N_REQ7 = N_REQ7 + 1
             CALL MPI_SEND_INIT(M3%REAL_SEND_PKG7(1),SIZE(M3%REAL_SEND_PKG7),MPI_DOUBLE_PRECISION,RNODE,NM,MPI_COMM_WORLD,&
                                REQ7(N_REQ7),IERR)
-
-            IF (POISSON_ITERATION_ACCELERATOR) THEN
-               N_REQ9 = N_REQ9 + 1
-               CALL MPI_SEND_INIT(M3%REAL_SEND_PKG9(1),SIZE(M3%REAL_SEND_PKG9),MPI_DOUBLE_PRECISION,RNODE,NM,MPI_COMM_WORLD,&
-                                  REQ9(N_REQ9),IERR)
-            ENDIF
 
             IF (RADIATION) THEN
                N_REQ5 = N_REQ5 + 1
@@ -2753,53 +2684,6 @@ SENDING_MESH_LOOP: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             M2%FVZ(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX) = M%FVZ(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)
             HP2(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)    = HP(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)
          ENDIF
-      ENDIF
-
-      ! Exchange velocity/pressure info for ITERATE_PRESSURE
-
-      IF (CODE==55 .AND. M3%NIC_S>0) THEN
-         IF (PREDICTOR) THEN
-            HP => M%H
-         ELSE
-            HP => M%HS
-         ENDIF
-         PW = POISSON_PATCH_WIDTH
-         PACK_REAL_SEND_PKG9: DO LL=1,M3%NIC_S
-            II=M3%IIO_S(LL) ; JJ=M3%JJO_S(LL) ; KK=M3%KKO_S(LL) ; TPW=2*(PW+1)*(LL-1)+1
-            SELECT CASE(M3%IOR_S(LL))
-               CASE( 1) ; M3%REAL_SEND_PKG9(TPW     :TPW+PW)     = M%PRHS(II-PW:II,JJ,KK)
-                          M3%REAL_SEND_PKG9(TPW+PW+1:TPW+2*PW+1) =     HP(II-PW:II,JJ,KK)
-               CASE(-1) ; M3%REAL_SEND_PKG9(TPW     :TPW+PW)     = M%PRHS(II:II+PW,JJ,KK)
-                          M3%REAL_SEND_PKG9(TPW+PW+1:TPW+2*PW+1) =     HP(II:II+PW,JJ,KK)
-               CASE( 2) ; M3%REAL_SEND_PKG9(TPW     :TPW+PW)     = M%PRHS(II,JJ-PW:JJ,KK)
-                          M3%REAL_SEND_PKG9(TPW+PW+1:TPW+2*PW+1) =     HP(II,JJ-PW:JJ,KK)
-               CASE(-2) ; M3%REAL_SEND_PKG9(TPW     :TPW+PW)     = M%PRHS(II,JJ:JJ+PW,KK)
-                          M3%REAL_SEND_PKG9(TPW+PW+1:TPW+2*PW+1) =     HP(II,JJ:JJ+PW,KK)
-               CASE( 3) ; M3%REAL_SEND_PKG9(TPW     :TPW+PW)     = M%PRHS(II,JJ,KK-PW:KK)
-                          M3%REAL_SEND_PKG9(TPW+PW+1:TPW+2*PW+1) =     HP(II,JJ,KK-PW:KK)
-               CASE(-3) ; M3%REAL_SEND_PKG9(TPW     :TPW+PW)     = M%PRHS(II,JJ,KK:KK+PW)
-                          M3%REAL_SEND_PKG9(TPW+PW+1:TPW+2*PW+1) =     HP(II,JJ,KK:KK+PW)
-            END SELECT
-         ENDDO PACK_REAL_SEND_PKG9
-         LL = M3%NIC_S*2*(PW+1)
-         DO K=1,M%KBAR
-            DO J=1,M%JBAR
-               LL = LL+1 ; M3%REAL_SEND_PKG9(LL) = M%BXS(J,K)
-               LL = LL+1 ; M3%REAL_SEND_PKG9(LL) = M%BXF(J,K)
-            ENDDO
-         ENDDO
-         DO K=1,M%KBAR
-            DO I=1,M%IBAR
-               LL = LL+1 ; M3%REAL_SEND_PKG9(LL) = M%BYS(I,K)
-               LL = LL+1 ; M3%REAL_SEND_PKG9(LL) = M%BYF(I,K)
-            ENDDO
-         ENDDO
-         DO J=1,M%JBAR
-            DO I=1,M%IBAR
-               LL = LL+1 ; M3%REAL_SEND_PKG9(LL) = M%BZS(I,J)
-               LL = LL+1 ; M3%REAL_SEND_PKG9(LL) = M%BZF(I,J)
-            ENDDO
-         ENDDO
       ENDIF
 
       ! Send pressure information at the end of the PREDICTOR (CODE=3) or CORRECTOR (CODE=6) stage of the time step
@@ -3169,54 +3053,6 @@ RECV_MESH_LOOP: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                               HP(M2%IIO_R(LL)  ,M2%JJO_R(LL)  ,M2%KKO_R(LL)+1) = M2%REAL_RECV_PKG7(3*LL  )
             END SELECT
          ENDDO UNPACK_REAL_RECV_PKG7
-      ENDIF
-
-      ! Unpack densities and species mass fractions following PREDICTOR exchange
-
-      IF (CODE==55 .AND. M2%NIC_R>0 .AND. RNODE/=SNODE) THEN
-         M4 => MESHES(NOM)
-         IF (PREDICTOR) THEN
-            HP => M4%H
-         ELSE
-            HP => M4%HS
-         ENDIF
-         PW = POISSON_PATCH_WIDTH
-         UNPACK_REAL_RECV_PKG9: DO LL=1,M2%NIC_R
-            II=M2%IIO_R(LL) ; JJ=M2%JJO_R(LL) ; KK=M2%KKO_R(LL) ; TPW=2*(PW+1)*(LL-1)+1
-            SELECT CASE(M2%IOR_R(LL))
-               CASE( 1) ; M4%PRHS(II-PW:II,JJ,KK) = M2%REAL_RECV_PKG9(TPW     :TPW+PW)
-                               HP(II-PW:II,JJ,KK) = M2%REAL_RECV_PKG9(TPW+PW+1:TPW+2*PW+1)
-               CASE(-1) ; M4%PRHS(II:II+PW,JJ,KK) = M2%REAL_RECV_PKG9(TPW     :TPW+PW)
-                               HP(II:II+PW,JJ,KK) = M2%REAL_RECV_PKG9(TPW+PW+1:TPW+2*PW+1)
-               CASE( 2) ; M4%PRHS(II,JJ-PW:JJ,KK) = M2%REAL_RECV_PKG9(TPW     :TPW+PW)
-                               HP(II,JJ-PW:JJ,KK) = M2%REAL_RECV_PKG9(TPW+PW+1:TPW+2*PW+1)
-               CASE(-2) ; M4%PRHS(II,JJ:JJ+PW,KK) = M2%REAL_RECV_PKG9(TPW     :TPW+PW)
-                               HP(II,JJ:JJ+PW,KK) = M2%REAL_RECV_PKG9(TPW+PW+1:TPW+2*PW+1)
-               CASE( 3) ; M4%PRHS(II,JJ,KK-PW:KK) = M2%REAL_RECV_PKG9(TPW     :TPW+PW)
-                               HP(II,JJ,KK-PW:KK) = M2%REAL_RECV_PKG9(TPW+PW+1:TPW+2*PW+1)
-               CASE(-3) ; M4%PRHS(II,JJ,KK:KK+PW) = M2%REAL_RECV_PKG9(TPW     :TPW+PW)
-                               HP(II,JJ,KK:KK+PW) = M2%REAL_RECV_PKG9(TPW+PW+1:TPW+2*PW+1)
-            END SELECT
-         ENDDO UNPACK_REAL_RECV_PKG9
-         LL = M2%NIC_R*2*(PW+1)
-         DO K=1,M4%KBAR
-            DO J=1,M4%JBAR
-               LL = LL+1 ; M4%BXS(J,K) = M2%REAL_RECV_PKG9(LL)
-               LL = LL+1 ; M4%BXF(J,K) = M2%REAL_RECV_PKG9(LL)
-            ENDDO
-         ENDDO
-         DO K=1,M4%KBAR
-            DO I=1,M4%IBAR
-               LL = LL+1 ; M4%BYS(I,K) = M2%REAL_RECV_PKG9(LL)
-               LL = LL+1 ; M4%BYF(I,K) = M2%REAL_RECV_PKG9(LL)
-            ENDDO
-         ENDDO
-         DO J=1,M4%JBAR
-            DO I=1,M4%IBAR
-               LL = LL+1 ; M4%BZS(I,J) = M2%REAL_RECV_PKG9(LL)
-               LL = LL+1 ; M4%BZF(I,J) = M2%REAL_RECV_PKG9(LL)
-            ENDDO
-         ENDDO
       ENDIF
 
       ! Unpack pressure following PREDICTOR stage of time step
