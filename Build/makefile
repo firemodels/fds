@@ -261,7 +261,7 @@ mpi_intel_osx_64_db : obj = fds_mpi_intel_osx_64_db
 mpi_intel_osx_64_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
-mpi_intel_osx_64_dv : FFLAGS = -m64 -warn unused -O1 -g -traceback -stand:f18 -no-wrap-margin  $(GITINFO) $(OPENMPI_COMPINFO) $(FFLAGSMKL_CUSTOM)
+mpi_intel_osx_64_dv : FFLAGS = -m64 -warn unused -O1 -g -traceback -stand:f18 -no-wrap-margin  $(GITINFO) $(OPENMPI_COMPINFO) $(FFLAGSMKL_CUSTOM) -DNO_SCARC
 mpi_intel_osx_64_dv : LFLAGSMKL = $(LFLAGSMKL_CUSTOM)
 mpi_intel_osx_64_dv : LFLAGS = -static-intel
 mpi_intel_osx_64_dv : FOPENMPFLAGS = -qopenmp -qopenmp-link static
