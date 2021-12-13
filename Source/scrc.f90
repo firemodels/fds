@@ -1,3 +1,4 @@
+#ifndef NO_SCARC
 !===========================================================================================================================
 !
 !> \brief Scalable Recursive Clustering (ScaRC): Collection of alternative pressure solvers for the FDS pressure equation
@@ -22783,5 +22784,5 @@ CPU(MY_RANK)%OVERALL=CPU(MY_RANK)%OVERALL+CURRENT_TIME()-TNOW
 END SUBROUTINE SCARC_SOLVER
 
 END MODULE SCRC
-
+#endif
 

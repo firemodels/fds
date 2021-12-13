@@ -1,7 +1,7 @@
 &HEAD CHID='ribbed_channel_160', TITLE='Ribbed channel flow at Re_D=40,000' /
 
-&MULT ID='m1', DX=0.25, I_UPPER=3 /
-&MESH IJK=40,48,48, XB=-.4,-.15,-.15,.15,0,.3, MULT_ID='m1' /
+&MULT ID='m1', DX=0.125,DY=0.15,DZ=0.15, I_UPPER=7,J_UPPER=1,K_UPPER=1 / 32 mesh
+&MESH IJK=20,28,28, XB=-.4,-.275,-.15,0,0,.15, MULT_ID='m1' /
 
 &TIME T_END=100. /
 &MISC CONSTANT_SPECIFIC_HEAT_RATIO=.TRUE. /
