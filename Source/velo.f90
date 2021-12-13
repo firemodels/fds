@@ -2306,6 +2306,10 @@ EDGE_LOOP: DO IE=1,N_EDGES
                      ENDIF
                      ! SLIP_COEF = -1, no slip, VEL_GHOST=-VEL_GAS
                      ! SLIP_COEF =  1, free slip, VEL_GHOST=VEL_T
+                     ! Notes: This curious definition of VEL_GHOST was chosen to improve the treatment of edge vorticity
+                     ! espeicially at corners.  The stress still comes directly from U_TAU (i.e., the WALL_MODEL).
+                     ! DUIDXJ is used to compute the vorticity at the edge.  Without this definition, the ribbed_channel
+                     ! test series does not achieve the correct MEAN or RMS profiles without very high grid resolution.
                      VEL_GHOST = VEL_T + 0.5_EB*(SLIP_COEF-1._EB)*(VEL_GAS-VEL_T)
                      DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
                      MU_DUIDXJ(ICD_SGN) = RHO_WALL*U_TAU**2 * SIGN(1._EB,I_SGN*(VEL_GAS-VEL_T))
