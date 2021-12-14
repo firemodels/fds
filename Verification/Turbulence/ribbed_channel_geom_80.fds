@@ -1,6 +1,7 @@
 &HEAD CHID='ribbed_channel_geom_80', TITLE='Ribbed channel flow at Re_D=40,000' /
 
-&MESH IJK=80,24,24, XB=-.4,.6,-.15,.15,0,.3 /
+&MULT ID='m1', DX=0.25, I_UPPER=3/
+&MESH IJK=20,24,24, XB=-.4,-.15,-.15,.15,0,.3, MULT_ID='m1' /
 
 &TIME T_END=100. /
 &MISC CC_STRESS_METHOD=T, CONSTANT_SPECIFIC_HEAT_RATIO=.TRUE. /
