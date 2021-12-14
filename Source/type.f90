@@ -655,6 +655,7 @@ TYPE SURFACE_TYPE
    REAL(EB) :: PLE                                       !< Exponent for boundary layer velocity profile
    REAL(EB) :: Z0                                        !< Reference height for boundary layer profile (m)
    REAL(EB) :: Z_0                                       !< Surface roughness (m)
+   REAL(EB) :: NEAR_WALL_EDDY_VISCOSITY                  !< Used with CONSTANT KINEMATIC EDDY VISCOSITY (m2/s)
    REAL(EB) :: CONVECTIVE_HEAT_FLUX                      !< Specified convective heat flux at surface (W/m2)
    REAL(EB) :: NET_HEAT_FLUX                             !< Specified net heat flux at surface (W/m2)
    REAL(EB) :: VOLUME_FLOW                               !< Specified volume flow (m3/s)
@@ -735,7 +736,7 @@ TYPE SURFACE_TYPE
               IMPERMEABLE=.FALSE.,BOUNDARY_FUEL_MODEL=.FALSE.,BLOWING=.FALSE.,ABL_MODEL=.FALSE., &
               HT3D=.FALSE., MT1D=.FALSE.
    LOGICAL :: INCLUDE_BOUNDARY_COORD_TYPE=.TRUE.     !< This surface requires basic coordinate information
-   LOGICAL :: INCLUDE_BOUNDARY_PROPS_TYPE=.TRUE.  !< This surface requires surface variables for heat and mass transfer
+   LOGICAL :: INCLUDE_BOUNDARY_PROPS_TYPE=.TRUE.     !< This surface requires surface variables for heat and mass transfer
    LOGICAL :: INCLUDE_BOUNDARY_ONE_D_TYPE=.TRUE.     !< This surface requires in-depth 1-D conduction/reaction arrays
    LOGICAL :: INCLUDE_BOUNDARY_RADIA_TYPE=.TRUE.     !< This surface requires angular-specific radiation intensities
    INTEGER :: N_WALL_STORAGE_REALS=0,N_WALL_STORAGE_INTEGERS=0,N_WALL_STORAGE_LOGICALS=0

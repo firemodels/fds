@@ -374,6 +374,8 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
             SELECT CASE(SF%NEAR_WALL_TURB_MODEL)
                CASE DEFAULT
                   NU_EDDY = 0._EB
+               CASE(CONSTANT_EDDY_VISCOSITY)
+                  NU_EDDY = SF%NEAR_WALL_EDDY_VISCOSITY
                CASE(CONSMAG) ! Constant Smagorinsky with Van Driest damping
                   VDF = 1._EB-EXP(-BP%Y_PLUS*RAPLUS)
                   NU_EDDY = (VDF*C_SMAGORINSKY*DELTA)**2*STRAIN_RATE(IIG,JJG,KKG)
