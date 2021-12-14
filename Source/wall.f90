@@ -4092,6 +4092,7 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Loop over all materials in the cell (alpha subsc
                X_O2 = X_O2 * EXP(-DEPTH/(TWO_EPSILON_EB+ML%GAS_DIFFUSION_DEPTH(J)))
                REACTION_RATE = REACTION_RATE * X_O2**ML%N_O2(J)
             ENDIF
+            REACTION_RATE = MIN(REACTION_RATE,ML%MAX_REACTION_RATE(J))  ! User-specified limit
             RHO_DOT = MIN(RHO_S0*REACTION_RATE,RHO_S(N)/DT_BC)  ! Tech Guide: rho_s(0)*r_alpha,beta kg/m3/s
 
          CASE (PYROLYSIS_VEGETATION)
@@ -4115,16 +4116,12 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Loop over all materials in the cell (alpha subsc
                RE_L   = RHO(IIG,JJG,KKG)*U_TANG*LENGTH_SCALE/MU_AIR
                REACTION_RATE = REACTION_RATE * RHO(IIG,JJG,KKG)*Y_O2*(4._EB/LENGTH_SCALE) * &
                                (1._EB+ML%BETA_CHAR(J)*SQRT(RE_L))/(RHO_S0*ML%NU_O2_CHAR(J))
-               REACTION_RATE = MIN(1._EB,REACTION_RATE)
             ENDIF
+            REACTION_RATE = MIN(REACTION_RATE,ML%MAX_REACTION_RATE(J))  ! User-specified limit
             RHO_DOT = MIN(RHO_S0*REACTION_RATE , RHO_S(N)/DT_BC)  ! Tech Guide: rho_s(0)*r_alpha,beta kg/m3/s
 
       END SELECT
 
-      ! User limiting the reaction rate
-
-      RHO_DOT = MIN(RHO_DOT, ML%MAX_REACTION_RATE(J)) 
-      
       ! Optional limiting of fuel burnout time
 
       IF (SF%MINIMUM_BURNOUT_TIME<1.E5_EB) RHO_DOT = MIN(RHO_DOT,RHO_S0/SF%MINIMUM_BURNOUT_TIME)
