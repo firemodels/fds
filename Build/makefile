@@ -135,7 +135,6 @@ pois.o: FFLAGS += $(FOPENMPFLAGS)
 pres.o: FFLAGS += $(FOPENMPFLAGS)
 turb.o: FFLAGS += $(FOPENMPFLAGS)
 velo.o: FFLAGS += $(FOPENMPFLAGS)
-rcal.o: FFLAGS += $(FOPENMPFLAGS)
 radi.o: FFLAGS += $(FOPENMPFLAGS)
 scrc.o: FFLAGS += $(FOPENMPFLAGS)
 main.o: FFLAGS += $(FOPENMPFLAGS)
@@ -147,7 +146,6 @@ pois.obj: FFLAGS += $(FOPENMPFLAGS)
 pres.obj: FFLAGS += $(FOPENMPFLAGS)
 turb.obj: FFLAGS += $(FOPENMPFLAGS)
 velo.obj: FFLAGS += $(FOPENMPFLAGS)
-rcal.obj: FFLAGS += $(FOPENMPFLAGS)
 radi.obj: FFLAGS += $(FOPENMPFLAGS)
 scrc.obj: FFLAGS += $(FOPENMPFLAGS)
 main.obj: FFLAGS += $(FOPENMPFLAGS)
@@ -185,7 +183,7 @@ impi_intel_win_64_db : setup_win $(objwin_mpi)
 
 # Linux Intel Fortran Compiler and Intel MPI
  
-impi_intel_linux_64 : FFLAGS = -m64 -O2 -ipo -no-wrap-margin $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL) -DUSE_IFPORT
+impi_intel_linux_64 : FFLAGS = -fc=ifx -m64 -O2 -ipo -no-wrap-margin $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL) -DUSE_IFPORT
 impi_intel_linux_64 : LFLAGSMKL = $(LFLAGSMKL_INTEL)
 impi_intel_linux_64 : LFLAGS =
 impi_intel_linux_64 : FCOMPL = mpiifort
@@ -194,7 +192,7 @@ impi_intel_linux_64 : obj = fds_impi_intel_linux_64
 impi_intel_linux_64 : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
-impi_intel_linux_64_db : FFLAGS = -m64 -check all -warn all -O0 -g -traceback -fpe0 -nofltconsistency -stand:f18 -no-wrap-margin $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL) -DUSE_IFPORT
+impi_intel_linux_64_db : FFLAGS = -fc=ifx -m64 -check all -warn all -O0 -g -traceback -fpe0 -nofltconsistency -stand:f18 -no-wrap-margin $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL) -DUSE_IFPORT
 impi_intel_linux_64_db : LFLAGSMKL = $(LFLAGSMKL_INTEL)
 impi_intel_linux_64_db : LFLAGS =
 impi_intel_linux_64_db : FCOMPL = mpiifort
