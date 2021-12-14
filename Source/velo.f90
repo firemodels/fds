@@ -2264,74 +2264,64 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
             ! Choose the appropriate boundary condition to apply
 
-!            HVAC_IF: IF (HVAC_TANGENTIAL)  THEN
-!
-!               VEL_GHOST = 2._EB*VEL_T - VEL_GAS
-!               DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
-!               MU_DUIDXJ(ICD_SGN) = MUA*DUIDXJ(ICD_SGN)
-!               ALTERED_GRADIENT(ICD_SGN) = .TRUE.
-!
-!            ELSE HVAC_IF
 
-               BOUNDARY_CONDITION: SELECT CASE(VELOCITY_BC_INDEX)
+            BOUNDARY_CONDITION: SELECT CASE(VELOCITY_BC_INDEX)
 
-                  CASE (FREE_SLIP_BC) BOUNDARY_CONDITION
+               CASE (FREE_SLIP_BC) BOUNDARY_CONDITION
 
-                     VEL_GHOST = VEL_GAS
-                     DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
-                     MU_DUIDXJ(ICD_SGN) = MUA*DUIDXJ(ICD_SGN)
-                     ALTERED_GRADIENT(ICD_SGN) = .TRUE.
+                  VEL_GHOST = VEL_GAS
+                  DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
+                  MU_DUIDXJ(ICD_SGN) = MUA*DUIDXJ(ICD_SGN)
+                  ALTERED_GRADIENT(ICD_SGN) = .TRUE.
 
-                  CASE (NO_SLIP_BC) BOUNDARY_CONDITION
+               CASE (NO_SLIP_BC) BOUNDARY_CONDITION
 
-                     VEL_GHOST = 2._EB*VEL_T - VEL_GAS
-                     DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
-                     MU_DUIDXJ(ICD_SGN) = MUA*DUIDXJ(ICD_SGN)
-                     ALTERED_GRADIENT(ICD_SGN) = .TRUE.
+                  VEL_GHOST = 2._EB*VEL_T - VEL_GAS
+                  DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
+                  MU_DUIDXJ(ICD_SGN) = MUA*DUIDXJ(ICD_SGN)
+                  ALTERED_GRADIENT(ICD_SGN) = .TRUE.
 
-                  CASE (WALL_MODEL_BC) BOUNDARY_CONDITION
+               CASE (WALL_MODEL_BC) BOUNDARY_CONDITION
 
-                     ITMP = MIN(I_MAX_TEMP,NINT(0.5_EB*(TMP(IIGM,JJGM,KKGM)+TMP(IIGP,JJGP,KKGP))))
-                     MU_WALL = MU_RSQMW_Z(ITMP,1)/RSQ_MW_Z(1)
-                     RHO_WALL = 0.5_EB*( RHOP(IIGM,JJGM,KKGM) + RHOP(IIGP,JJGP,KKGP) )
+                  ITMP = MIN(I_MAX_TEMP,NINT(0.5_EB*(TMP(IIGM,JJGM,KKGM)+TMP(IIGP,JJGP,KKGP))))
+                  MU_WALL = MU_RSQMW_Z(ITMP,1)/RSQ_MW_Z(1)
+                  RHO_WALL = 0.5_EB*( RHOP(IIGM,JJGM,KKGM) + RHOP(IIGP,JJGP,KKGP) )
 
-                     IF (SF%ABL_MODEL) THEN
-                        TMP_F = 0.5_EB*(WCM_ONE_D%TMP_F+WCP_ONE_D%TMP_F)
-                        TMP_G = 0.5_EB*(TMP(IIGM,JJGM,KKGM)+TMP(IIGP,JJGP,KKGP))
-                        ZZ_GET(1:N_TRACKED_SPECIES) = 0.5_EB*( ZZP(IIGM,JJGM,KKGM,1:N_TRACKED_SPECIES) &
-                                                             + ZZP(IIGP,JJGP,KKGP,1:N_TRACKED_SPECIES) )
-                        CALL GET_CONDUCTIVITY(ZZ_GET,K_G,TMP_G)
-                        CALL GET_SPECIFIC_HEAT(ZZ_GET,CP_G,TMP_G)
+                  IF (SF%ABL_MODEL) THEN
+                     TMP_F = 0.5_EB*(WCM_ONE_D%TMP_F+WCP_ONE_D%TMP_F)
+                     TMP_G = 0.5_EB*(TMP(IIGM,JJGM,KKGM)+TMP(IIGP,JJGP,KKGP))
+                     ZZ_GET(1:N_TRACKED_SPECIES) = 0.5_EB*( ZZP(IIGM,JJGM,KKGM,1:N_TRACKED_SPECIES) &
+                                                            + ZZP(IIGP,JJGP,KKGP,1:N_TRACKED_SPECIES) )
+                     CALL GET_CONDUCTIVITY(ZZ_GET,K_G,TMP_G)
+                     CALL GET_SPECIFIC_HEAT(ZZ_GET,CP_G,TMP_G)
 
-                        CALL ABL_WALL_MODEL(SLIP_COEF,HTC,U_TAU,LOB,VEL_GAS-VEL_T,&
-                             SF%Z_0,0.5_EB*DXX(ICD),ZC(KKGM),TMP_G,TMP_F,MUA,RHO_WALL,CP_G,K_G)
-                     ELSE
-                        CALL WALL_MODEL(SLIP_COEF,U_TAU,Y_PLUS,MU_WALL/RHO_WALL,SF%ROUGHNESS,0.5_EB*DXX(ICD),VEL_GAS-VEL_T)
-                     ENDIF
-                     ! SLIP_COEF = -1, no slip, VEL_GHOST=-VEL_GAS
-                     ! SLIP_COEF =  1, free slip, VEL_GHOST=VEL_T
-                     ! Notes: This curious definition of VEL_GHOST was chosen to improve the treatment of edge vorticity
-                     ! especially at corners.  The stress still comes directly from U_TAU (i.e., the WALL_MODEL).
-                     ! DUIDXJ is used to compute the vorticity at the edge.  Without this definition, the ribbed_channel
-                     ! test series does not achieve the correct MEAN or RMS profiles without very high grid resolution.
-                     VEL_GHOST = VEL_T + 0.5_EB*(SLIP_COEF-1._EB)*(VEL_GAS-VEL_T)
-                     DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
-                     MU_DUIDXJ(ICD_SGN) = RHO_WALL*U_TAU**2 * SIGN(1._EB,I_SGN*(VEL_GAS-VEL_T))
-                     ALTERED_GRADIENT(ICD_SGN) = .TRUE.
+                     CALL ABL_WALL_MODEL(SLIP_COEF,HTC,U_TAU,LOB,VEL_GAS-VEL_T,&
+                           SF%Z_0,0.5_EB*DXX(ICD),ZC(KKGM),TMP_G,TMP_F,MUA,RHO_WALL,CP_G,K_G)
+                  ELSE
+                     CALL WALL_MODEL(SLIP_COEF,U_TAU,Y_PLUS,MU_WALL/RHO_WALL,SF%ROUGHNESS,0.5_EB*DXX(ICD),VEL_GAS-VEL_T)
+                  ENDIF
+                  ! SLIP_COEF = -1, no slip, VEL_GHOST=-VEL_GAS
+                  ! SLIP_COEF =  1, free slip, VEL_GHOST=VEL_T
+                  ! Notes: This curious definition of VEL_GHOST was chosen to improve the treatment of edge vorticity
+                  ! especially at corners.  The stress still comes directly from U_TAU (i.e., the WALL_MODEL).
+                  ! DUIDXJ is used to compute the vorticity at the edge.  Without this definition, the ribbed_channel
+                  ! test series does not achieve the correct MEAN or RMS profiles without very high grid resolution.
+                  VEL_GHOST = VEL_T + 0.5_EB*(SLIP_COEF-1._EB)*(VEL_GAS-VEL_T)
+                  DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
+                  MU_DUIDXJ(ICD_SGN) = RHO_WALL*U_TAU**2 * SIGN(1._EB,I_SGN*(VEL_GAS-VEL_T))
+                  ALTERED_GRADIENT(ICD_SGN) = .TRUE.
 
-                  CASE (BOUNDARY_FUEL_MODEL_BC) BOUNDARY_CONDITION
+               CASE (BOUNDARY_FUEL_MODEL_BC) BOUNDARY_CONDITION
 
-                     RHO_WALL = 0.5_EB*( RHOP(IIGM,JJGM,KKGM) + RHOP(IIGP,JJGP,KKGP) )
-                     VEL_T = SQRT(UU(IIGM,JJGM,KKGM)**2 + VV(IIGM,JJGM,KKGM)**2)
-                     VEL_GHOST = VEL_GAS
-                     DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
-                     MU_DUIDXJ(ICD_SGN) = I_SGN*0.5_EB*RHO_WALL*SF%DRAG_COEFFICIENT*SF%SHAPE_FACTOR*SF%LAYER_THICKNESS(1)*&
-                                          SF%PACKING_RATIO(1)*SF%SURFACE_VOLUME_RATIO(1)*VEL_GAS*VEL_T
-                     ALTERED_GRADIENT(ICD_SGN) = .TRUE.
+                  RHO_WALL = 0.5_EB*( RHOP(IIGM,JJGM,KKGM) + RHOP(IIGP,JJGP,KKGP) )
+                  VEL_T = SQRT(UU(IIGM,JJGM,KKGM)**2 + VV(IIGM,JJGM,KKGM)**2)
+                  VEL_GHOST = VEL_GAS
+                  DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
+                  MU_DUIDXJ(ICD_SGN) = I_SGN*0.5_EB*RHO_WALL*SF%DRAG_COEFFICIENT*SF%SHAPE_FACTOR*SF%LAYER_THICKNESS(1)*&
+                                       SF%PACKING_RATIO(1)*SF%SURFACE_VOLUME_RATIO(1)*VEL_GAS*VEL_T
+                  ALTERED_GRADIENT(ICD_SGN) = .TRUE.
 
                END SELECT BOUNDARY_CONDITION
-
-!            ENDIF HVAC_IF
 
          ELSE INTERPOLATION_IF  ! Use data from another mesh
 
