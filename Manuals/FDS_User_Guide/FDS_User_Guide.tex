@@ -1270,7 +1270,7 @@ The turbulent Prandtl number $\PR_t$ and the turbulent Schmidt number $\SC_t$ ar
 
 By default, FDS uses the WALE model of Nicoud and Ducros \cite{Nicoud:1999} for the eddy viscosity in the first off-wall grid cell because the test filtering operation for the Deardorff model is ill-defined near a wall.  The WALE model has the advantage that the eddy viscosity tends to zero at the correct rate as you approach the wall where the no slip condition applies.
 
-As an alternative, you may choose to use the constant coefficient Smagorinsky \cite{Smagorinsky:1} model with Van Driest damping (see \cite{Wilcox:1}).  To invoke this model, set {\ct NEAR\_WALL\_TURBULENCE\_MODEL='VAN DRIEST'} on the {\ct MISC} line.
+As an alternative, you may choose to use the constant coefficient Smagorinsky \cite{Smagorinsky:1} model with Van Driest damping (see \cite{Wilcox:1}).  To invoke this model, set {\ct NEAR\_WALL\_TURBULENCE\_MODEL='VAN DRIEST'} on the {\ct SURF} line.
 
 Note that the near-wall turbulence model sets the eddy viscosity, $\mu_\mathrm{t}$, near the wall, \emph{not} the wall stress, $\tau_\mathrm{w}$.  The wall stress depends on the choice of wall function, as discussed in Sec.~\ref{info:WALL_MODEL}.
 
@@ -7116,7 +7116,7 @@ You can also vary the wind velocity components with height using the ramp functi
 .
 .
 \end{lstlisting}
-The parameter {\ct Z} represents the height (m). As with the time functions above, for the direction ramp function, {\ct F} represents the direction angle in degrees from the north (positive $y$ direction). This value is added to any time-varying value set by {\ct RAMP\_DIRECTION\_T}. For the speed ramp function, {\ct F} represents a multiplier of the base {\ct SPEED}. This value is multiplied by any time-varying value set by {\ct RAMP\_SPEED\_T}. Note that if you use Monin-Obukhov similarity parameters, you should not specify the vertical profile of the wind. It will be calculated automatically. 
+The parameter {\ct Z} represents the height (m). As with the time functions above, for the direction ramp function, {\ct F} represents the direction angle in degrees from the north (positive $y$ direction). This value is added to any time-varying value set by {\ct RAMP\_DIRECTION\_T}. For the speed ramp function, {\ct F} represents a multiplier of the base {\ct SPEED}. This value is multiplied by any time-varying value set by {\ct RAMP\_SPEED\_T}. Note that if you use Monin-Obukhov similarity parameters, you should not specify the vertical profile of the wind. It will be calculated automatically.
 
 Often for longer simulations lasting hours, you may not know exactly how the wind {\ct DIRECTION} varies, but you might have some estimate based on the {\em stability class} of the atmosphere. Using the terminology of the atmospheric dispersion community~\cite{Hanna:1982}, the perturbation to the wind {\ct DIRECTION} can be modeled as:
 \be
@@ -8822,7 +8822,7 @@ A useful feature of a device ({\ct DEVC}) is to specify an output quantity along
 \begin{lstlisting}
 &DEVC XB=..., QUANTITY='TEMPERATURE', ID='maxT', SPATIAL_STATISTIC='MAX' /
 \end{lstlisting}
-causes FDS to write out the maximum gas phase temperature over the volume bounded by {\ct XB}. Other {\ct SPATIAL\_STATISTIC}'s are discussed below.  Some are appropriate for gas phase output quantities, some for solid phase, and some for both. Note that if {\ct XB} is used for a point device without a {\ct SPATIAL\_STATISTIC}, then FDS will define {\ct XYZ} to be the center of the volume defined by {\ct XB}. 
+causes FDS to write out the maximum gas phase temperature over the volume bounded by {\ct XB}. Other {\ct SPATIAL\_STATISTIC}'s are discussed below.  Some are appropriate for gas phase output quantities, some for solid phase, and some for both. Note that if {\ct XB} is used for a point device without a {\ct SPATIAL\_STATISTIC}, then FDS will define {\ct XYZ} to be the center of the volume defined by {\ct XB}.
 
 For solid phase output quantities, like heat fluxes and surface temperatures, the specification of a {\ct SURF\_ID} along with the appropriate statistic limits the calculation to only those surfaces. You can further limit the search by using the sextuplet of coordinates {\ct XB} to force FDS to only compute statistics for surface cells within the given volume. Be careful to account for the fact that the solid surface might shift to conform to the underlying numerical grid. Note that you do not (and should not) specify an orientation via the parameter {\ct IOR} when using a spatial statistic. {\ct IOR} is only needed to find a specific point on the solid surface.
 
@@ -8889,8 +8889,8 @@ Note that this statistic is only appropriate for gas phase quantities. Note also
 \subsubsection{Area Integral}
 
 For a gas phase scalar quantity, $\phi(x,y,z)$, {\ct SPATIAL\_STATISTIC='AREA INTEGRAL'} produces the discrete analog of
-\be 
-   \int \phi(x,y,z) \; \d A 
+\be
+   \int \phi(x,y,z) \; \d A
 \ee
 where $dA$ depends on the coordinates you specify for {\ct XB}. Note that this statistic is only appropriate for gas phase quantities, in particular those whose units involve m$^{-2}$. For example, the quantity {\ct 'MASS FLUX X'} along with {\ct SPEC\_ID='my gas'} is an appropriate output quantity if you want to know the mass flux of the gas species that you have named {\ct 'my gas'} through an area normal to the $x$ direction. Note also that you must specify an area to sum over via the coordinate parameters, {\ct XB}, which can extend into multiple meshes.
 
@@ -9465,13 +9465,13 @@ A common quantity related to heating and ventilation systems is {\em volume flow
 
 Consider a flow of gases through a window located at $x=x_0$ and bounded by $y_1 \le y \le y_2$ and $z_1 \le z \le z_2$. Its volume flow is given by:
 \be
-   \dot{V}(t) = \int_{z_1}^{z_2} \int_{y_1}^{y_2} u(x_0,y,z) \, \d y \, \d z \approx 
+   \dot{V}(t) = \int_{z_1}^{z_2} \int_{y_1}^{y_2} u(x_0,y,z) \, \d y \, \d z \approx
    \sum_{k=k_1}^{k_2} \sum _{j=j_1}^{j_2} \, u_{ijk} \, \delta y \, \delta z
    \label{volumeflow}
 \ee
 To specify volume flow as an output, use an input line like the following:
 \begin{lstlisting}
-&DEVC ID='Vdot', XB=X0,X0,Y1,Y2,Z1,Z2, QUANTITY='U-VELOCITY', 
+&DEVC ID='Vdot', XB=X0,X0,Y1,Y2,Z1,Z2, QUANTITY='U-VELOCITY',
       SPATIAL_STATISTIC='AREA INTEGRAL' /
 \end{lstlisting}
 This produces a column in the {\ct CHID\_devc.csv} containing the time history of the volume flow (m$^3$/s) through the window. Note that if the gas is flowing in the positive coordinate direction, the volume flow is positive. You can reverse the sign by adding {\ct CONVERSION\_FACTOR=-1} to the {\ct DEVC} line. If you want to distinguish the inflow from the outflow through the same window, use the parameters {\ct QUANTITY\_RANGE(1:2)} to set upper or lower bounds. For example, if you only want to record the volume flow in the negative coordinate direction, set {\ct QUANTITY\_RANGE(2)=0}, meaning that positive values of velocity are not counted in the summation.
@@ -9496,20 +9496,20 @@ There are several output options for mass flux and mass flow depending on whethe
 
 The mass flow of gas species $\alpha$ through a window located at $x=x_0$ and bounded by $y_1 \le y \le y_2$ and $z_1 \le z \le z_2$ is given by:
 \be
-   \dot{m}_\alpha(t) = \int_{z_1}^{z_2} \int_{y_1}^{y_2} \rho Y_\alpha u \, \d y \, \d z \approx 
+   \dot{m}_\alpha(t) = \int_{z_1}^{z_2} \int_{y_1}^{y_2} \rho Y_\alpha u \, \d y \, \d z \approx
    \sum_{k=k_1}^{k_2} \sum _{j=j_1}^{j_2} \frac{\rho_{ijk}Y_{ijk}+\rho_{i+1,jk}Y_{i+1,jk}}{2} \, u_{ijk} \, \delta y \, \delta z
    \label{mass_flow}
 \ee
 To instruct FDS to output this quantity, use the input line:
 \begin{lstlisting}
-&DEVC ID='m-dot', XB=x0,x0,y1,y2,z1,z2, QUANTITY='MASS FLUX X', SPEC_ID='ALPHA', 
+&DEVC ID='m-dot', XB=x0,x0,y1,y2,z1,z2, QUANTITY='MASS FLUX X', SPEC_ID='ALPHA',
       SPATIAL_STATISTIC='AREA INTEGRAL' /
 \end{lstlisting}
 To limit the integration to only flow in the positive or negative coordinate direction, set {\ct QUANTITY\_RANGE(1)} or {\ct QUANTITY\_RANGE(2)} to zero. If you want the total mass flow, omit the {\ct SPEC\_ID}.
 
 {\ct 'MASS FLUX X'} and its $y$ and $z$ counterparts are only estimates of the actual computed mass flux for two reasons.
 \begin{enumerate}
-\item These quantities use an estimate of the flux-limiting mass flux terms that are computed by FDS. Notice in Eq.~(\ref{mass_flow}) that the density $\rho$ and mass fraction $Y_\alpha$ are approximated at the forward $x$ face of cell $ijk$ with a simple average. The actual discrete approximation is more complicated than this, but these flux-limiting mass flux terms are normally not saved outside of the routine where they are computed. 
+\item These quantities use an estimate of the flux-limiting mass flux terms that are computed by FDS. Notice in Eq.~(\ref{mass_flow}) that the density $\rho$ and mass fraction $Y_\alpha$ are approximated at the forward $x$ face of cell $ijk$ with a simple average. The actual discrete approximation is more complicated than this, but these flux-limiting mass flux terms are normally not saved outside of the routine where they are computed.
 \item If a {\ct SPEC\_ID} is specified, Eq.~(\ref{mass_flow}) represents only the {\em advective} component of the total mass flux. In turbulent flows, the diffusive component, which includes turbulent diffusion, can be significant.
 \end{enumerate}
 If you want more precise output that includes the diffusive component of the mass flux and the exact flux limiter for the advective component, specify {\ct 'TOTAL MASS FLUX X'} rather than {\ct 'MASS FLUX X'} (or the $y$ or $z$ coordinate analogs). If you want to get a breakdown of the components, specify {\ct 'ADVECTIVE MASS FLUX X'} and {\ct 'DIFFUSIVE MASS FLUX X'} as well. Take care to specify {\ct XB} in unambiguous cell locations (i.e., not directly on a cell face or boundary).  With a {\ct DEVC} in cell ({\ct I,J,K}) the flux will be reported from the ({\ct I+1/2,J,K}) face, etc., on the staggered grid.
@@ -9523,9 +9523,9 @@ There are three quantities that may be used for recording the mass flux of a par
 \be
    \dot{m}_\alpha = \rho Y_\alpha u_n - \rho D_\alpha \partial Y_\alpha / \partial n
 \ee
-where $\mathbf{n}$ is the normal direction of the surface. The third mass flux output option is called {\ct 'TOTAL MASS FLUX WALL'}. This quantity is very similar to {\ct 'MASS FLUX WALL'} except that it combines the predicted and corrected mass flux over a single time step. It is the boundary analog of the gas phase quantities {\ct 'TOTAL MASS FLUX X/Y/Z'}. 
+where $\mathbf{n}$ is the normal direction of the surface. The third mass flux output option is called {\ct 'TOTAL MASS FLUX WALL'}. This quantity is very similar to {\ct 'MASS FLUX WALL'} except that it combines the predicted and corrected mass flux over a single time step. It is the boundary analog of the gas phase quantities {\ct 'TOTAL MASS FLUX X/Y/Z'}.
 
-For each form of the boundary mass flux, a positive value means that mass is entering the computational domain. These quantities may be applied at a solid surface or vent. {\ct 'MASS FLUX WALL'} and {\ct 'TOTAL MASS FLUX WALL'} can also be applied at an {\ct OPEN} boundary.  
+For each form of the boundary mass flux, a positive value means that mass is entering the computational domain. These quantities may be applied at a solid surface or vent. {\ct 'MASS FLUX WALL'} and {\ct 'TOTAL MASS FLUX WALL'} can also be applied at an {\ct OPEN} boundary.
 
 To demonstrate the difference between these various forms of mass flux output, consider Fig.~\ref{mass_flux_comparison_fig}. These plots show the spatially integrated mass flux of gas from a solid surface, where the mass flux has been ramped up linearly for 10~s, held steady for 20~s, and ramped down to zero linearly for 10~s. The {\ct 'MASS FLUX'} output merely mimics this specified curve. The {\ct 'MASS FLUX WALL'} and {\ct 'TOTAL MASS FLUX WALL'} output exhibit fluctuations caused by the fact that the mass flux is not perfectly applied at the solid surface---there are small fluctuations in the normal component of velocity caused by the inexact velocity-pressure coupling at the boundary. These flucuations are minor and average out close to the specified value, but sometimes it is useful to use the more exact output quantities for diagnostic purposes.
 
@@ -9539,7 +9539,7 @@ To demonstrate the difference between these various forms of mass flux output, c
 
 \subsection{Enthalpy Flow}
 \label{info:enthalpy_flux}
- 
+
 
 \subsubsection{Enthalpy Flow in the Gas Phase}
 
@@ -9557,7 +9557,7 @@ To instruct FDS to output this quantity, use the input line:
 
 \subsubsection{Enthalpy Flow at a Boundary}
 
-{\ct 'ENTHALPY FLUX WALL'} is the equivalent of {\ct 'ENTHALPY FLUX X/Y/Z'} at a boundary. It is the rate of energy advected {\em into} the domain at a vent or open boundary: 
+{\ct 'ENTHALPY FLUX WALL'} is the equivalent of {\ct 'ENTHALPY FLUX X/Y/Z'} at a boundary. It is the rate of energy advected {\em into} the domain at a vent or open boundary:
 \begin{equation}
    \dot{q}_{\mathrm{w}}'' = -\rho_{\rm w} \, h_s(T_{\rm w}) \, \bu \cdot \bn - k \dod{T}{n}
 \end{equation}
@@ -11477,7 +11477,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MAX\_LEAK\_PATHS}                              & Integer      & Section~\ref{info:Leaks}                &            &  200              \\ \hline
 {\ct MINIMUM\_FILM\_THICKNESS}                      & Real         & Section~\ref{info:surface_droplets}     &  m         & 0.00001           \\ \hline
 {\ct MPI\_TIMEOUT}                                  & Real         & Section~\ref{info:TIMING}               &  s         & 10.               \\ \hline
-{\ct NEAR\_WALL\_TURBULENCE\_MODEL}                 & Character    & Section~\ref{info:LES}                  &            &                   \\ \hline
 {\ct NOISE}                                         & Logical      & Section~\ref{info:NOISE}                &            & {\ct T}      \\ \hline
 {\ct NOISE\_VELOCITY}                               & Real         & Section~\ref{info:NOISE}                &  m/s       & 0.005             \\ \hline
 {\ct NORTH\_BEARING}                                & Real         & Section~\ref{info:earth}                & deg.       &                   \\ \hline
@@ -12197,6 +12196,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MLRPUA }                                             & Real            & Section~\ref{info:gas_burner}             & \si{kg/(m^2.s)}     &                         \\ \hline
 {\ct MOISTURE\_FRACTION(:)}                               & Real Array      & Section~\ref{info:vegetation}             &                     & 0.                      \\ \hline
 {\ct N\_LAYER\_CELLS\_MAX}                                & Integer Array   & Section~\ref{info:solid_phase_stability}  &                     & 1000                    \\ \hline
+{\ct NEAR\_WALL\_TURBULENCE\_MODEL}                       & Character       & Section~\ref{info:LES}                    &                     &                        \\ \hline
 {\ct NET\_HEAT\_FLUX}                                     & Real            & Section~\ref{info:convection}             & kW/m$^2$            &                         \\ \hline
 {\ct NO\_SLIP}                                            & Logical         & Section~\ref{info:WALL_MODEL}             &                     & {\ct F}           \\ \hline
 {\ct NPPC}                                                & Integer         & Section~\ref{info:particle_flux}          &                     & 1                       \\ \hline
