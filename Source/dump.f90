@@ -2407,7 +2407,7 @@ WRITE(LU_OUTPUT,'(A,F8.1)')   '   Simulation Start Time (s)     ',T_BEGIN
 WRITE(LU_OUTPUT,'(A,F8.1)')   '   Simulation End Time (s)       ',(T_END-T_BEGIN) * TIME_SHRINK_FACTOR + T_BEGIN
 IF (SIM_MODE/=DNS_MODE) THEN
    WRITE(LU_OUTPUT,'(A)')     '   LES Calculation'
-   TURB_MODEL_SELECT: SELECT CASE (TURB_MODEL)
+   SELECT CASE (TURB_MODEL)
       CASE(CONSMAG)
          WRITE(LU_OUTPUT,'(A,F4.2,A)')    '   Eddy Viscosity:           Smagorinsky (C_SMAGORINSKY = ',C_SMAGORINSKY,')'
       CASE(DYNSMAG)
@@ -2418,14 +2418,17 @@ IF (SIM_MODE/=DNS_MODE) THEN
          WRITE(LU_OUTPUT,'(A,F4.2,A)')    '   Eddy Viscosity:           Vreman Model (C_VREMAN = ',C_VREMAN,')'
       CASE(WALE)
          WRITE(LU_OUTPUT,'(A,F4.2,A)')    '   Eddy Viscosity:           WALE Model (C_WALE = ',C_WALE,')'
-   END SELECT TURB_MODEL_SELECT
-   NEAR_WALL_SELECT: SELECT CASE (NEAR_WALL_TURB_MODEL)
-      CASE DEFAULT
-         WRITE(LU_OUTPUT,'(A,F4.2,A)')    '   Near-wall Eddy Viscosity: Smagorinsky with Van Driest damping (C_SMAGORINSKY = ',&
-            C_SMAGORINSKY,')'
-      CASE(WALE)
-         WRITE(LU_OUTPUT,'(A,F4.2,A)')    '   Near-wall Eddy Viscosity: WALE Model (C_WALE = ',C_WALE,')'
-   END SELECT NEAR_WALL_SELECT
+   END SELECT
+   DO N=0,N_SURF
+      SF=>SURFACE(N)
+      SELECT CASE (SF%NEAR_WALL_TURB_MODEL)
+         CASE(CONSMAG)
+            WRITE(LU_OUTPUT,'(A,A,A,F4.2,A)') '   Surface ',TRIM(SF%ID), &
+               ' Eddy Viscosity: Smagorinsky with Van Driest damping (C_SMAGORINSKY = ',C_SMAGORINSKY,')'
+         CASE(WALE)
+            WRITE(LU_OUTPUT,'(A,A,A,F4.2,A)') '   Surface ',TRIM(SF%ID),' Eddy Viscosity: WALE Model (C_WALE = ',C_WALE,')'
+      END SELECT
+   ENDDO
    IF (POTENTIAL_TEMPERATURE_CORRECTION) THEN
       WRITE(LU_OUTPUT,'(A)')        '   Turbulent Prandtl Number:      Dynamic (Deardorff Model)'
       WRITE(LU_OUTPUT,'(A)')        '   Turbulent Schmidt Number:      Dynamic (Deardorff Model)'

@@ -371,8 +371,10 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
          IF (SIM_MODE/=DNS_MODE) THEN
             DELTA = LES_FILTER_WIDTH_FUNCTION(DX(IIG),DY(JJG),DZ(KKG))
-            SELECT CASE(NEAR_WALL_TURB_MODEL)
-               CASE DEFAULT ! Constant Smagorinsky with Van Driest damping
+            SELECT CASE(SF%NEAR_WALL_TURB_MODEL)
+               CASE DEFAULT
+                  NU_EDDY = 0._EB
+               CASE(CONSMAG) ! Constant Smagorinsky with Van Driest damping
                   VDF = 1._EB-EXP(-BP%Y_PLUS*RAPLUS)
                   NU_EDDY = (VDF*C_SMAGORINSKY*DELTA)**2*STRAIN_RATE(IIG,JJG,KKG)
                CASE(WALE)
@@ -2307,7 +2309,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
                      ! SLIP_COEF = -1, no slip, VEL_GHOST=-VEL_GAS
                      ! SLIP_COEF =  1, free slip, VEL_GHOST=VEL_T
                      ! Notes: This curious definition of VEL_GHOST was chosen to improve the treatment of edge vorticity
-                     ! espeicially at corners.  The stress still comes directly from U_TAU (i.e., the WALL_MODEL).
+                     ! especially at corners.  The stress still comes directly from U_TAU (i.e., the WALL_MODEL).
                      ! DUIDXJ is used to compute the vorticity at the edge.  Without this definition, the ribbed_channel
                      ! test series does not achieve the correct MEAN or RMS profiles without very high grid resolution.
                      VEL_GHOST = VEL_T + 0.5_EB*(SLIP_COEF-1._EB)*(VEL_GAS-VEL_T)
