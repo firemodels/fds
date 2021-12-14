@@ -32,6 +32,7 @@ INTEGER, PARAMETER :: DYNSMAG=2                  !< Flag for TURB_MODEL: Dynamic
 INTEGER, PARAMETER :: DEARDORFF=3                !< Flag for TURB_MODEL: Deardorff turbulence model
 INTEGER, PARAMETER :: VREMAN=4                   !< Flag for TURB_MODEL: Vreman turbulence model
 INTEGER, PARAMETER :: WALE=5                     !< Flag for TURB_MODEL: Wall-Adapting Local Eddy viscosity turbulence model
+INTEGER, PARAMETER :: CONSTANT_EDDY_VISCOSITY=6  !< Flag for NEAR_WALL_TURB_MODEL: specified near wall eddy viscosity
 
 INTEGER, PARAMETER :: MEAN_LES_FILTER_WIDTH=1    !< Flag for LES_FILTER_WIDTH_TYPE: geometric mean filter width
 INTEGER, PARAMETER :: MAX_LES_FILTER_WIDTH=2     !< Flag for LES_FILTER_WIDTH_TYPE: take max of DX,DY,DZ
