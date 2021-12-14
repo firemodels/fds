@@ -4121,6 +4121,10 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Loop over all materials in the cell (alpha subsc
 
       END SELECT
 
+      ! User limiting the reaction rate
+
+      RHO_DOT = MIN(RHO_DOT, ML%MAX_REACTION_RATE(J)) 
+      
       ! Optional limiting of fuel burnout time
 
       IF (SF%MINIMUM_BURNOUT_TIME<1.E5_EB) RHO_DOT = MIN(RHO_DOT,RHO_S0/SF%MINIMUM_BURNOUT_TIME)
