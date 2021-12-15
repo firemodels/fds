@@ -12,7 +12,7 @@ An ISO 9701 compartment with a fan blowing into it, a small fire, and a crack un
 
 &SURF ID='BURNER', COLOR='YELLOW', HRRPUA=1000. /
 &REAC SOOT_YIELD=0.01,FUEL='PROPANE'/
-&ZONE XB=-1.25, 1.45,-1.05, 1.05, 0.00, 2.05, LEAK_AREA(0)=0.002 /  
+&ZONE XYZ=-1.1,0.0,1.0, LEAK_AREA(0)=0.002 /  
 
 &OBST XB=-1.40, 1.60,-1.20,-1.00, 0.00, 2.20 / Left Wall
 &OBST XB=-1.40, 1.60, 1.00, 1.20, 0.00, 2.20 / Right Wall
