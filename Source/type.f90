@@ -1,8 +1,8 @@
 !> \brief A collection of major derived types used in FDS.
 !> \details There are several TYPEs that require special attention. WALL, CFACE, and PARTICLE TYPES reference other
-!> derived types that start with BOUNDARY, like BOUNDARY_COORD or BOUNDARY_ONE_D. The number of real, integer, and logical scalar 
+!> derived types that start with BOUNDARY, like BOUNDARY_COORD or BOUNDARY_ONE_D. The number of real, integer, and logical scalar
 !> and array components of these derived types are denoted like this, for example: N_BOUNDARY_COORD_SCALAR_INTEGERS. You must
-!> adjust this value if you add or subtract components from the derived type. You should then use an existing component 
+!> adjust this value if you add or subtract components from the derived type. You should then use an existing component
 !> as a guide and trace it through func.f90 to see how to initialize this component.
 
 MODULE TYPES
@@ -1030,12 +1030,12 @@ TYPE IBM_CUTFACE_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)           ::  XCENLOW, XCENHIGH
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)           ::  RHO
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)           ::  ZZ_FACE, RHO_D
-   REAL(EB), ALLOCATABLE, DIMENSION(:)             :: TMP_FACE
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)           :: RHO_D_DZDN, H_RHO_D_DZDN
-   REAL(EB), ALLOCATABLE, DIMENSION(:)             ::  VEL, VELS, DHDX, FN, VELNP1, VELINT
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:,:)         ::  JDZ, JDH
-   REAL(EB) :: VELINT_CRF,FV
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:,:)                         ::      CELL_LIST ! [RC_TYPE I J K ]
+   REAL(EB), ALLOCATABLE, DIMENSION(:)             ::  TMP_FACE
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)           ::  RHO_D_DZDN, H_RHO_D_DZDN
+   REAL(EB), ALLOCATABLE, DIMENSION(:)             ::  VEL, VELS, FN, FN_B, VELINT
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:,:)         ::  JDH
+   REAL(EB) :: VELINT_CRF=0._EB,FV=0._EB,FV_B=0._EB,ALPHA_CF=1._EB
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:,:)         ::  CELL_LIST ! [RC_TYPE I J K ]
 
    ! Here: VIND=IAXIS:KAXIS, EP=1:INT_N_EXT_PTS,
    ! INT_VEL_IND = 1; INT_VELS_IND = 2; INT_FV_IND = 3; INT_DHDX_IND = 4; N_INT_FVARS = 4;
@@ -1056,9 +1056,9 @@ TYPE IBM_CUTFACE_TYPE
    ! INT_H_IND=1, etc. N_INT_CVARS=INT_P_IND+N_TRACKED_SPECIES
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: INT_CVARS      ! (1:N_INT_CVARS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
 
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)            :: RHOPVN
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: RHOPVN
    INTEGER :: NOMICF(2)=0  ! [NOM icf]
-   INTEGER,  ALLOCATABLE, DIMENSION(:)              :: CFACE_INDEX, SURF_INDEX
+   INTEGER,  ALLOCATABLE, DIMENSION(:)        :: CFACE_INDEX, SURF_INDEX
 END TYPE IBM_CUTFACE_TYPE
 
 
@@ -1115,17 +1115,17 @@ TYPE IBM_CUTCELL_TYPE
    INTEGER,  DIMENSION(MAX_DIM)                              ::       IJK ! [ i j k ]
    REAL(EB), ALLOCATABLE, DIMENSION(:)                       :: RHO, RHOS ! Cut cells densities.
    REAL(EB), ALLOCATABLE, DIMENSION(:)                       ::  RSUM,TMP ! Cut cells temperatures.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)                       ::    D,  DS, DVOL ! Cut cell thermodynamic divg.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)                       ::Q,QR,D_SOURCE ! Q,Thermo divg reaction component.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)                       :: D,DS,DVOL ! Cut cell thermodynamic divg.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)                       :: Q,QR,D_SOURCE ! Q,Thermo divg reaction component.
    REAL(EB), ALLOCATABLE, DIMENSION(:)                       :: CHI_R,MIX_TIME ! Cut-cell combustion
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)                     ::    Q_REAC          ! variables.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)                     ::    Q_REAC      ! variables.
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)                     :: REAC_SOURCE_TERM   !
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)                     ::   ZZ, ZZS, M_DOT_PPP ! Cut cells species mass
                                                                                 ! fractions and rho*D_z,reaction source.
    INTEGER,  ALLOCATABLE, DIMENSION(:)                       :: UNKH,UNKZ ! Unknown number for pressure H,
                                                                           ! and scalars.
    REAL(EB), ALLOCATABLE, DIMENSION(:)                       ::      H,HS ! Pressure H containers.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)                       ::  RTRM,R_H_G,RHO_0,WVEL
+   REAL(EB), ALLOCATABLE, DIMENSION(:)                       :: RTRM,R_H_G,RHO_0,WVEL
 
    ! Here: VIND=0, EP=1:INT_N_EXT_PTS
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)      :: INT_IJK        ! (IAXIS:KAXIS,INT_NPE_LO+1:INT_NPE_LO+INT_NPE_HI)
