@@ -7836,9 +7836,10 @@ END FUNCTION GAS_PHASE_OUTPUT
 !> \param PART_INDEX Index of Lagrangian particle class
 !> \param OPT_WALL_INDEX Index of WALL boundary cell
 !> \param OPT_LP_INDEX Index of Lagrangian particle
-!> \param OPT_CFACE_INDEX Index of immersed boundary cell face
-!> \param OPT_BNDF_INDEX Index of boundary file
+!> \param OPT_BNDF_INDEX Index of the boundary file
 !> \param OPT_DEVC_INDEX Index of device
+!> \param OPT_CFACE_INDEX Index of immersed boundary cell face
+!> \param OPT_CUT_FACE_INDEX Index of the cut face
 
 REAL(EB) FUNCTION SOLID_PHASE_OUTPUT(NM,INDX,Y_INDEX,Z_INDEX,PART_INDEX,OPT_WALL_INDEX,OPT_LP_INDEX,OPT_BNDF_INDEX,&
                                      OPT_DEVC_INDEX,OPT_CFACE_INDEX,OPT_CUT_FACE_INDEX)

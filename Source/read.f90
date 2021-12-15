@@ -6199,7 +6199,6 @@ READ_MATL_LOOP: DO N=1,N_MATL
    ML%NU_PART              = NU_PART
    ML%PART_ID              = PART_ID
    ML%NU_SPEC              = NU_SPEC
-   ML%PERMEABILITY         = PERMEABILITY
    ML%POROSITY             = POROSITY
    ML%SPEC_ID              = SPEC_ID
    ML%RAMP_H_R             = HEAT_OF_REACTION_RAMP
@@ -6244,6 +6243,7 @@ READ_MATL_LOOP: DO N=1,N_MATL
       CHAR_OXIDATION     = .TRUE.
       WALL_INCREMENT     = 1  ! Do pyrolysis every time step
       ML%PYROLYSIS_MODEL = PYROLYSIS_VEGETATION
+      IF (ML%MAX_REACTION_RATE(1)>1.E6_EB) ML%MAX_REACTION_RATE(1) = 1._EB  ! Limits run-away char reaction
    ELSE
       ML%PYROLYSIS_MODEL = PYROLYSIS_SOLID
    ENDIF
@@ -6353,7 +6353,6 @@ NU_SPEC                = 0._EB
 NU_MATL                = 0._EB
 PART_ID                = 'null'
 PCR                    = .FALSE.
-PERMEABILITY           = 0._EB
 POROSITY               = 0._EB
 REFERENCE_RATE         = -1._EB
 REFERENCE_TEMPERATURE  = -1000._EB

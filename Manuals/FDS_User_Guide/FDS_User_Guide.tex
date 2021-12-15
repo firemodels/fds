@@ -3413,7 +3413,7 @@ X_{\rm O_2}(x) = X_{\rm O_2,g}\exp(-x/L_{\rm g})
 \ee
 where $L_{\rm g}$ is the gas diffusion length scale. $n_{{\rm O_2},ij}$ is prescribed under the name {\ct N\_O2(j)} on the {\ct MATL} line of the $i$th material. It is zero by default. $L_{\rm g}$ is prescribed under the name {\ct GAS\_DIFFUSION\_DEPTH(j)}, and it is 0.001 m by default.
 
-You can specity {\ct MAX\_REACTION\_RATE(j)} to limit the reaction rate $r_{ij}$ below certain value.
+You can specity {\ct MAX\_REACTION\_RATE(j)} (1/s) to limit the reaction rate, $r_{ij}$, below a specified value.
 
 
 \subsubsection{Estimating Kinetic Parameters}
@@ -7352,6 +7352,8 @@ The reaction rates for evaporation of H$_2$O, pyrolysis of the dry vegetation, a
   \frac{ \rho \, Y_{\rm O_2} \, \sigma \, \left( 1+\beta_{\rm char}\sqrt{\RE} \right) }{\nu_{\rm O_2,char} \, \rho_{\rm s}(0)} \label{r_char}
 \end{eqnarray}
 where $T$ is the temperature of the vegetation. Note that the exponent -1/2 in Eq.~(\ref{r_H2O}) is specified using {\ct N\_T=-0.5} on the {\ct MATL} line for water, and the exponent 0 in Eq.~(\ref{r_char}) is specified using {\ct N\_S=0} on the {\ct MATL} line for the char species. The default values of the kinetic constants are given in Table~\ref{tab:veg_kinetics}. The Reynolds number is $\RE = \rho U D_{\rm v} / \mu $ where $\rho$ is the gas density, $U$ is the gas velocity, and $D_{\rm v} = 4/\sigma$ for a cylinder, where $\sigma$ is the surface area to volume ratio. The term containing $\RE$ is included to account for the oxygen blowing effects on char oxidation and the constant $\beta_{\rm char}$ ({\ct BETA\_CHAR}) is equal to 0.2 by default, which is the value used by Porterie~et~al.~\cite{Porterie:2006}.
+
+The reaction rate for char oxidation, $r_{\rm char}$, is susceptible to very large values if the oxygen concentration in the vicinity of the solid is relatively high, a common result of coarse resolution grids used for wildland fire simulations. To prevent thermal runaway in the char reaction, an upper bound of 1~s$^{-1}$ is applied to $r_{\rm char}$.
 
 \begin{table}[!ht]
 \caption[Default vegetation kinetic constants]{Default vegetation kinetic constants (from Porterie et al.~\cite{Porterie:2006})}
@@ -11358,7 +11360,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct HEAT\_OF\_REACTION\_RAMP(:)}   & Char.~Array     & Section~\ref{info:RAMP_Temperature}   &                   &               \\ \hline
 {\ct ID}                            & Character       & Section~\ref{info:SURF_MATL_Basics}   &                   &               \\ \hline
 {\ct MATL\_ID(:,:)}                 & Character       & Section~\ref{info:solid_pyrolysis}    &                   &               \\ \hline
-{\ct MAX\_REACTION\_RATE(:)}        & Real Array      & Section~\ref{info:solid_pyrolysis}    &                   & Huge          \\ \hline
+{\ct MAX\_REACTION\_RATE(:)}        & Real Array      & Section~\ref{sec:reaction_rates}      &                   & $\infty$      \\ \hline
 {\ct MW}                            & Real            & Section~\ref{info:liquid_fuels}       & g/mol             &               \\ \hline
 {\ct N\_O2(:)}                      & Real Array      & Section~\ref{info:solid_pyrolysis}    &                   & 0.            \\ \hline
 {\ct N\_REACTIONS}                  & Integer         & Section~\ref{info:solid_pyrolysis}    &                   & 0             \\ \hline
