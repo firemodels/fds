@@ -2785,27 +2785,6 @@ By setting $T_0=0$~\si{\degree C}, $\Delta t =0.01$~s, $m =0.01$~kg, and $c_p =1
 \end{figure}
 
 
-
-\section{Radiation Absorbed by Solid Particles (\texorpdfstring{\textct{particle\_absorption}}{particle\_absorption}) }
-\label{particle_absorption}
-\label{particle_absorption_cart_surf_cart}
-\label{particle_absorption_cart_surf_cyl}
-\label{particle_absorption_cart_surf_sph}
-
-Tests similar to those in Section~\ref{droplet_absorption} are performed for solid particles with Cartesian (flat plate), cylindrical and spherical geometries. All the relevant properties are the same, along with a high thermal conductivity, 100~W/(m$\cdot$K), because solid particles are not assumed to be thermally-thin like liquid droplets. Figure~\ref{particle_absorption_figures} shows comparisons of the predicted and expected mass-averaged particle temperatures. By default, the radiation is expressed in terms of an integrated average over the entire particle surface, but there is an option to ``split'' the particles into multiple parts that absorb radiation impinging from different directions. In this case, the cylindrical and spherical particles are split in half along the $x$, $y$ and $z$ axes. The plate particles are split into two halves facing upwards and downwards, or into 5 randomly selected fragments to test for asymmetry bugs.
-
-\begin{figure}[h]
-\noindent
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/particle_absorption_cart_surf_cart} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/particle_absorption_cart_surf_cyl}\\
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/particle_absorption_cart_surf_sph}
-\end{tabular*}
-\caption[Radiation absorbed by solid particles]{Temperature increase of solid particles due to absorbed radiation.}
-\label{particle_absorption_figures}
-\end{figure}
-
-
 \section{Consistency of Particle Absorbed Energy and the Radiative Loss Term}
 \label{particle_isotropic_radi}
 \label{particle_anisotropic_radi}
@@ -4385,67 +4364,6 @@ The analytical and computed results for charring material are compared in Fig.~\
 \label{surf_mass_part_nonchar}
 \end{figure}
 
-
-
-\subsubsection{Multiple Particles}
-\label{surf_mass_part_char_cyl_gas_advanced}
-
-This is a test case for mass conservation involving multiple particles. The case has three meshes, and each mesh has the same mass of charring cylindrical particles as the cases above. Because the length of the cylindrical particles is four times 0.1~m, the cylinder diameter is only half of the value used above.
-\begin{description}
-\item[Mesh 1] has four 0.1 m long cylinders with 5 mm radius. The locations are randomly chosen from a plane defined by the \textct{INIT} statement.
-\item[Mesh 2] has eight 0.05 m long cylinders, initialized using the \textct{INIT} and \textct{MULT} statements.
-\item[Mesh 3] has eight 0.05 m long cylinders, initialized using the \textct{INIT} and \textct{MULT} statements. The cylinders are split in two sections using the
-\textct{NUMBER\_RADIATIVE\_ANGLES} feature of the \textct{PART} class.
-\end{description}
-The analytical and computed results are compared in Fig.~\ref{surf_mass_part_char_advanced}. The readability of the figure is improved by setting the external heat fluxes for Meshes 1, 2, and 3 to 50 \si{kW/m^2}, 45 \si{kW/m^2}, and 40 \si{kW/m^2}, respectively.
-\begin{figure}[!htb]
-\centering
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_part_char_cyl_gas_advanced}
-\caption[The \textct{surf\_mass\_part\_char\_cyl\_gas\_advanced} test case]{Comparison of analytical and predicted mass change for a charring, cylindrical surface associated with particles in three variations.}
-\label{surf_mass_part_char_advanced}
-\end{figure}
-
-\subsubsection{Split Particles}
-\label{surf_mass_part_char_cart_fuel_split}
-\label{surf_mass_part_nonchar_cart_fuel_split}
-\label{surf_mass_part_char_cyl_fuel_split}
-\label{surf_mass_part_nonchar_cyl_fuel_split}
-\label{surf_mass_part_char_spher_fuel_split}
-\label{surf_mass_part_nonchar_spher_fuel_split}
-\label{surf_mass_part_char_cart_fuel_energy_split}
-\label{surf_mass_part_nonchar_cart_fuel_energy_split}
-\label{surf_mass_part_char_cyl_fuel_energy_split}
-\label{surf_mass_part_nonchar_cyl_fuel_energy_split}
-\label{surf_mass_part_char_spher_fuel_energy_split}
-\label{surf_mass_part_nonchar_spher_fuel_energy_split}
-
-``Split'' particles are Lagrangian particles that are allowed to have more than one orientation. For example, a sphere might be split in two halves, with its upper hemisphere pointing upwards and its lower hemisphere pointing downwards. In the test cases, particles in the shape of plates, cylinders and spheres are split in the $x$, $y$, and $z$ coordinate directions, respectively. The mass conservation results are shown in Fig.~\ref{surf_mass_part_fuel_split}, and the total energy conservation results are shown in Fig.~\ref{surf_mass_part_fuel_energy_split}.
-
-\begin{figure}[!htb]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_part_char_cart_fuel_split} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_part_nonchar_cart_fuel_split} \\
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_part_char_cyl_fuel_split} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_part_nonchar_cyl_fuel_split} \\
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_part_char_spher_fuel_split} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_part_nonchar_spher_fuel_split}
-\end{tabular*}
-\caption[The \textct{surf\_mass\_part\_fuel\_split} test cases, mass conservation]{Comparison of analytical and predicted mass change for split particle surfaces.}
-\label{surf_mass_part_fuel_split}
-\end{figure}
-
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_part_char_cart_fuel_energy_split} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_part_nonchar_cart_fuel_energy_split} \\
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_part_char_cyl_fuel_energy_split} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_part_nonchar_cyl_fuel_energy_split} \\
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_part_char_spher_fuel_energy_split} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_part_nonchar_spher_fuel_energy_split}
-\end{tabular*}
-\caption[The \textct{surf\_mass\_part\_fuel\_split} test cases, energy conservation]{Comparison of analytical and predicted total energy release for split particle surfaces.}
-\label{surf_mass_part_fuel_energy_split}
-\end{figure}
 
 
 \subsubsection{Particles that Generate Multiple Gas Species}

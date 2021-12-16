@@ -410,7 +410,6 @@ $QFDS -d Pyrolysis surf_mass_part_char_cart_fuel.fds
 $QFDS -d Pyrolysis surf_mass_part_char_cart_gas.fds
 $QFDS -d Pyrolysis surf_mass_part_char_cyl_fuel.fds
 $QFDS -d Pyrolysis surf_mass_part_char_cyl_gas.fds
-$QFDS -d Pyrolysis surf_mass_part_char_cyl_gas_advanced.fds
 $QFDS -d Pyrolysis surf_mass_part_char_spher_fuel.fds
 $QFDS -d Pyrolysis surf_mass_part_char_spher_gas.fds
 $QFDS -d Pyrolysis surf_mass_part_nonchar_cart_fuel.fds
@@ -431,12 +430,6 @@ $QFDS -d Pyrolysis surf_mass_vent_nonchar_cyl_fuel.fds
 $QFDS -d Pyrolysis surf_mass_vent_nonchar_cyl_gas.fds
 $QFDS -d Pyrolysis surf_mass_vent_nonchar_spher_fuel.fds
 $QFDS -d Pyrolysis surf_mass_vent_nonchar_spher_gas.fds
-$QFDS -d Pyrolysis surf_mass_part_char_cart_fuel_split.fds
-$QFDS -d Pyrolysis surf_mass_part_char_cyl_fuel_split.fds
-$QFDS -d Pyrolysis surf_mass_part_char_spher_fuel_split.fds
-$QFDS -d Pyrolysis surf_mass_part_nonchar_cart_fuel_split.fds
-$QFDS -d Pyrolysis surf_mass_part_nonchar_cyl_fuel_split.fds
-$QFDS -d Pyrolysis surf_mass_part_nonchar_spher_fuel_split.fds
 $QFDS -d Pyrolysis surf_mass_part_specified.fds
 $QFDS -d Pyrolysis surf_mass_two_species_cart.fds
 $QFDS -d Pyrolysis surf_mass_two_species_cyl.fds
@@ -458,9 +451,6 @@ $QFDS -d Pyrolysis water_pool.fds
 $QFDS -d Radiation adiabatic_surface_temperature.fds
 $QFDS -d Radiation droplet_absorption_cart.fds
 $QFDS -d Radiation droplet_absorption_cyl.fds
-$QFDS -d Radiation particle_absorption_cart_surf_cart.fds
-$QFDS -d Radiation particle_absorption_cart_surf_cyl.fds
-$QFDS -d Radiation particle_absorption_cart_surf_sph.fds
 $QFDS -d Radiation emissivity.fds
 $QFDS -p 2 -d Radiation geom_rad.fds
 $QFDS -p 8 -d Radiation geom_rad_2.fds
