@@ -3442,15 +3442,15 @@ IF (ITERATE_PRESSURE) THEN
    II = VELOCITY_ERROR_MAX_LOC(1,NM)
    JJ = VELOCITY_ERROR_MAX_LOC(2,NM)
    KK = VELOCITY_ERROR_MAX_LOC(3,NM)
-   WRITE(LU_OUTPUT,'(7X,A,I6)') 'Pressure Iterations: ',PRESSURE_ITERATIONS
-   WRITE(LU_OUTPUT,'(7X,A,E9.2,A,I3,A,3I4,A)') 'Maximum Velocity Error: ',MAXVAL(VELOCITY_ERROR_MAX), &
-                                               ' on Mesh ',NM,' at (',II,JJ,KK,')'
+   WRITE(LU_OUTPUT,'(7X,A,I0)') 'Pressure Iterations: ',PRESSURE_ITERATIONS
+   WRITE(LU_OUTPUT,'(7X,A,E9.2,A,4(I0,A))') 'Maximum Velocity Error: ',MAXVAL(VELOCITY_ERROR_MAX), &
+                                            ' on Mesh ',NM,' at (',II,',',JJ,',',KK,')'
    NM = MAXLOC(PRESSURE_ERROR_MAX,1)
    II = PRESSURE_ERROR_MAX_LOC(1,NM)
    JJ = PRESSURE_ERROR_MAX_LOC(2,NM)
    KK = PRESSURE_ERROR_MAX_LOC(3,NM)
-   WRITE(LU_OUTPUT,'(7X,A,E9.2,A,I3,A,3I4,A)') 'Maximum Pressure Error: ',MAXVAL(PRESSURE_ERROR_MAX), &
-                                               ' on Mesh ',NM,' at (',II,JJ,KK,')'
+   WRITE(LU_OUTPUT,'(7X,A,E9.2,A,4(I0,A))') 'Maximum Pressure Error: ',MAXVAL(PRESSURE_ERROR_MAX), &
+                                            ' on Mesh ',NM,' at (',II,',',JJ,',',KK,')'
 ENDIF
 #ifndef NO_SCARC
 IF (TRIM(PRES_METHOD) == 'SCARC' .OR. TRIM(PRES_METHOD) == 'USCARC') THEN
@@ -3493,15 +3493,15 @@ WRITE(LU_OUTPUT,*)
 151 FORMAT(6X,' Step Size: ',E12.3,' s, Total Time: ',F10.4,' s')
 152 FORMAT(6X,' Step Size: ',E12.3,' s, Total Time: ',F10.3,' s')
 153 FORMAT(6X,' Step Size: ',E12.3,' s, Total Time: ',F10.2,' s')
-154 FORMAT(6X,' Max CFL number: ',E9.2,' at (',I4,',',I4,',',I4,')'/ &
-           6X,' Max divergence: ',E9.2,' at (',I4,',',I4,',',I4,')'/ &
-           6X,' Min divergence: ',E9.2,' at (',I4,',',I4,',',I4,')')
-133 FORMAT(6X,' Max div. error: ',E9.2,' at (',I4,',',I4,',',I4,')')
-230 FORMAT(6X,' Max VN number:  ',E9.2,' at (',I4,',',I4,',',I4,')')
+154 FORMAT(6X,' Max CFL number: ',E9.2,' at (',I0,',',I0,',',I0,')'/ &
+           6X,' Max divergence: ',E9.2,' at (',I0,',',I0,',',I0,')'/ &
+           6X,' Min divergence: ',E9.2,' at (',I0,',',I0,',',I0,')')
+133 FORMAT(6X,' Max div. error: ',E9.2,' at (',I0,',',I0,',',I0,')')
+230 FORMAT(6X,' Max VN number:  ',E9.2,' at (',I0,',',I0,',',I0,')')
 119 FORMAT(6X,' Total Heat Release Rate:      ',F13.3,' kW')
 120 FORMAT(6X,' Radiation Loss to Boundaries: ',F13.3,' kW')
-141 FORMAT(6X,' No. of Lagrangian Particles:  ',I12)
-121 FORMAT(6X,' No. of CLIP DT restrictions:  ',I2)
+141 FORMAT(6X,' No. of Lagrangian Particles:  ',I0)
+121 FORMAT(6X,' No. of CLIP DT restrictions:  ',I0)
 
 T_USED(7) = T_USED(7) + CURRENT_TIME() - TNOW
 
