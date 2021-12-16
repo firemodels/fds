@@ -4704,7 +4704,21 @@ TNOW2 = CURRENT_TIME()
 SET_CUTCELLS_CALL_IF : IF(FIRST_CALL) THEN
 
 ! Select divergence cut-cell treatment:
-IF(DIV_RESCALE_FLG==1) CC_CART_VOLAREA= .TRUE.
+IF(DIV_RESCALE_FLG==1) THEN
+   CC_CART_VOLAREA= .TRUE.
+   DO IG=1,N_GEOMETRY
+      GEOMETRY(IG)%EXPAND_CUTCELLS=.TRUE.
+   ENDDO
+ENDIF
+! Case of one geometry with expand cutcells defined. Expand cut-cells in all of them.
+DO IG=1,N_GEOMETRY
+   IF(GEOMETRY(IG)%EXPAND_CUTCELLS) THEN
+      CC_CART_VOLAREA= .TRUE.
+      EXIT
+   ENDIF
+ENDDO
+
+! Now check if
 
 ! Plane by plane Evaluation of stesses for IBEDGES, a la OBSTS.
 IF(CC_STRESS_METHOD) THEN
