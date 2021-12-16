@@ -4312,7 +4312,7 @@ Below are sample inputs for the three types of fans supported by FDS.
 \noindent where:
 
 \begin{description}
-\item[{\ct LOSS}] is the loss coefficient for flow through the fan when it is not operational.
+\item[{\ct LOSS}] is the loss coefficient for flow through the fan when it is not operational. FDS assumes a default value of 1.
 \item[{\ct MAX\_FLOW}] is the maximum volumetric flow of the fan in m$^3$/s.  This input activates a quadratic fan model.
 \item[{\ct MAX\_PRESSURE}] is the stall pressure of the fan in units of Pa.  This input activates a quadratic fan model.
 \item[{\ct RAMP\_ID}] identifies the {\ct RAMP} that contains a table of pressure drop across the fan (Pa) versus the volumetric flow rates (m$^3$/s) for a user-defined fan curve.
@@ -4484,6 +4484,15 @@ To avoid the possibility of there being no available initialization data for a d
 You can increase or decrease the number of cells each discretized duct has, to increase solution accuracy or decrease simulation time respectively. The default value is set based upon a cell size of \SI{100}{\milli\meter}. Where the duct is not divisible by \SI{100}{\milli\meter}, the number of cells is rounded up to the nearest integer (e.g. a duct with a length of \SI{1.05}{\meter} will have \num{11} cells). Ducts with a length of less than \SI{100}{\milli\meter} adopt a cell number of 2. If {\ct N\_CELLS=1} is assigned to a duct then, even if {\ct HVAC\_MASS\_TRANSPORT=T}, the HVAC mass transport subroutine will not be called for this duct.
 
 If you are using {\ct DEVC}s to output spatially-integrated statistics as per Section~\ref{info:statistics} (such as {\ct VOLUME MEAN}, {\ct VOLUME INTEGRAL} or {\ct MASS INTEGRAL}) then be aware that, even if the integration volume bound by {\ct XB} encapsulates the spatial location of a duct, the quantity in the duct will not be recorded by the {\ct DEVC}. For example, if there is \SI{1}{\meter\cubed} of species~\num{1} initialized in an upstream FDS compartment which is transported to a downstream FDS compartment via an HVAC network with a total volume greater than \SI{1}{\meter\cubed}, the value of total mass of species~\num{1} output by a {\ct DEVC} recording the {\ct VOLUME INTEGRAL} of {\ct DENSITY} will reduce to zero during the time for which it is in the HVAC network domain.
+
+\subsection{Specified Flow vs. Unspecified Flow}
+\label{info:hvacspecified}
+
+There are two basic approaches for defining HVAC networks in FDS.
+
+In the first approach, one can specify enough {\ct VOLUME\_FLOW} and {\ct MASS\_FLOW} inputs such that all flows everywhere in the network are known. For example, if a tee has three ducts and two of the ducts have specified flow, then the third duct flow is known based on conservation of mass at that node. If all flows are specified everywhere in the HVAC network, then {\ct LOSS} inputs for ducts and nodes are not needed.
+
+In the second approach, one or more ducts have flows that are not specified, in this case FDS must solve for the pressures at either end of the duct to determine the flow through the duct. As one example, if a tee has three ducts and only one of the ducts has a specified flow, then FDS will use the relative pressure drops along the two other ducts to determine the flow. If no {\ct LOSS} inputs are given, then FDS may not correctly solve for the flow. As another example, losses in the HVAC network limit how quickly flow in the ducts can change over time. If there is a single duct connecting two rooms with no {\ct LOSS} inputs given, then small pressure changes can lead to large changes in duct velocity and increase the risk of a numerical instability. If you specify an HVAC network where flow is being solved for by FDS, then you must provided {\ct LOSS} inputs for each possible flow path. FDS will perform a check at startup and return an error message if it finds insufficient losses have been specified; however, this check may not discover all cases.
 
 \section{Pressure-Related Effects: The \texorpdfstring{{\tt ZONE}}{ZONE} Namelist Group (Table \ref{tbl:VENT})}
 \label{info:ZONE}
