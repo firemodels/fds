@@ -16,9 +16,9 @@
 
 &SURF ID='WALL', TMP_FRONT=500., TAU_T=0.01, DEFAULT=.TRUE. /
 
-&PART ID='small ball',  SURF_ID='ball 1', ORIENTATION(1:3,1)=0,0,1, STATIC=.TRUE. /
-&PART ID='medium ball', SURF_ID='ball 2', ORIENTATION(1:3,1)=0,0,1, STATIC=.TRUE. /
-&PART ID='big ball',    SURF_ID='ball 3', ORIENTATION(1:3,1)=0,0,1, STATIC=.TRUE. /
+&PART ID='small ball',  SURF_ID='ball 1', ORIENTATION=0,0,1, STATIC=.TRUE. /
+&PART ID='medium ball', SURF_ID='ball 2', ORIENTATION=0,0,1, STATIC=.TRUE. /
+&PART ID='big ball',    SURF_ID='ball 3', ORIENTATION=0,0,1, STATIC=.TRUE. /
 
 &INIT ID='ball 1', XYZ=0.25,0.25,0.25, PART_ID='small ball',  N_PARTICLES=1 /
 &INIT ID='ball 2', XYZ=0.25,0.75,0.25, PART_ID='medium ball', N_PARTICLES=1 /

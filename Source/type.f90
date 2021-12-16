@@ -92,7 +92,6 @@ TYPE LAGRANGIAN_PARTICLE_CLASS_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: BREAKUP_CVF   !< CVF of new distribution after particle break-up
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: W_CNF         !< Weighting factor in particle size distribution
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: R50           !< Array of median particle diameters for Mie calculation
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: SOLID_ANGLE   !< Array of solid angles for particle with multiple orientations
 
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: WQABS       !< Absorption efficiency factor array
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: WQSCA       !< Scattering efficiency factor array

@@ -6474,7 +6474,7 @@ This means that during the temperature update of a particular grid cell in Mesh~
 
 Lagrangian particles can represent a wide variety of subgrid-scale objects, from office clutter to vegetation. To create solid, non-liquid particles, you must add a {\ct SURF\_ID} to the {\ct PART} line. The specified {\ct SURF} line contains the parameters that describe the thermophysical properties and geometric parameters of the particle. These properties are the same as those you would apply to an {\ct OBST} or {\ct VENT}. FDS uses the same solid phase conduction and pyrolysis algorithm for particles as it does for solid walls.
 
-If the {\ct SURF} line that is associated with the particle class calls for it, the particles will heat up due to convection from the surrounding gases and radiation from near and distant sources. The convective heat transfer coefficient takes into account the particle geometry, and the radiative heat flux is based on the integrated intensity. That is, the radiation heat flux is the average over all angles. However, you can specify unique directions for the particle if the source of heating does not surround the particles. More about particle splitting is explained in Section~\ref{info:particle_split}.
+If the {\ct SURF} line that is associated with the particle class calls for it, the particles will heat up due to convection from the surrounding gases and radiation from near and distant sources. The convective heat transfer coefficient takes into account the particle geometry, and the radiative heat flux is based on the integrated intensity. That is, the radiation heat flux is the average over all angles. 
 
 
 \subsection{Basic Geometry and Boundary Conditions}
@@ -6573,31 +6573,8 @@ By default, solid particles do not ``stick'' or adhere to solid surfaces like li
 \subsection{Splitting Particles}
 \label{info:particle_split}
 
-If the radiation heat flux is not uniformly distributed about the particle, it may be useful to split the particle into pieces, each with its own orientation. This can be done by using the parameter {\ct ORIENTATION} to specify  more than one outward facing directions for the particle. For example,
-\begin{lstlisting}
-&PART ..., ORIENTATION(1:3,1)=0,0,-1, ORIENTATION(1:3,2)=0,0,1 /
-\end{lstlisting}
-specifies that half the particle is facing downwards and half is facing upwards. FDS now essentially tracks two particles. The radiative flux to the downward facing particle is the integrated average over the southern hemisphere; the flux to the upward facing particle is the average over the northern hemisphere. The particle mass and the surface area are scaled by the number of orientations. The splitting along the coordinate axis is demonstrated for all geometries in Fig.~\ref{part_split}. The orientation direction does not have to align with the coordinate axes. In fact, the {\ct ORIENTATION}s do not have to be symmetric or come in pairs, even though for most applications it makes sense to do it this way. For a Cartesian particle (i.e., a plate), only the orientations that are perpendicular to the plate make physical sense. Keep in mind that the heat conducted within the different facets does not transfer through to the other facets. The heat conduction is still only one dimensional, in the direction normal to the face and towards the center.
+If an {\ct ORIENTATION} vector is assigned on a {\ct PART} line, the radiative flux to the particle is calculated as if there is a flat plate normal to the direction of the vector, like a conventional heat flux gauge. That is, the heat flux is not an integrated average over the entire particle but rather the directional heat flux with the given orientation. The reason for this exception to the general rule is that often single particles are used as ``targets'' to record a heat flux at a given point in the domain with a given orientation. These particles can be thought of as tiny heat flux gauges that do not disturb the flow.
 
-\begin{figure}[p]
-\begin{center}
-\includegraphics[height=2.0in]{FIGURES/FDS_User_Guide_Cartesian_Particle_Drawing}
-
-\vspace{0.5in}
-
-\includegraphics[height=2.8in]{FIGURES/FDS_User_Guide_Cylindrical_Particle_Drawing}
-
-\vspace{0.5in}
-
-\includegraphics[height=2.5in]{FIGURES/FDS_User_Guide_Sphere_Particle_Drawing}
-\end{center}
-\caption[Examples of particle splitting]{Examples of a Cartesian (plate), cylindrical, and spherical particle split into multiple parts.}
-\label{part_split}
-\end{figure}
-
-Note that if only a single {\ct ORIENTATION} vector is assigned on a {\ct PART} line, the radiative flux to the particle is calculated as if there is a flat plate normal to the direction of the vector, like a conventional heat flux gauge. That is, the heat flux is not an integrated average over the entire particle but rather the directional heat flux with the given orientation. The reason for this exception to the general rule is that often single particles are used as ``targets'' to record a heat flux at a given point in the domain with a given orientation. These particles can be thought of as tiny heat flux gauges that do not disturb the flow.
-
-\FloatBarrier
 
 \subsection{Gas Generating Particles}
 \label{info:particle_mass_generation}
@@ -6673,7 +6650,7 @@ A 2-D array of particles can be used to represent the drag exerted by a window s
 &INIT N_PARTICLES_PER_CELL=1, CELL_CENTERED=T, PART_ID='SCREEN',
       XB=1.01,1.02,0.0,1.0,0.0,1.0/
 &PART ID='SCREEN', DRAG_LAW='SCREEN', FREE_AREA_FRACTION=0.4, STATIC=T,
-      SURF_ID='SCREEN', ORIENTATION(1:3,1)=1,0,0 /
+      SURF_ID='SCREEN', ORIENTATION=1,0,0 /
 &SURF ID='SCREEN', THICKNESS=0.00015, GEOMETRY='CYLINDRICAL',
       MATL_ID='ALUMINUM' /
 &MATL ID='ALUMINUM', DENSITY=2700., CONDUCTIVITY=200., SPECIFIC_HEAT=0.9 /
@@ -6712,13 +6689,13 @@ To use the THIEF model in FDS, add lines similar to the following to the input f
 &MATL ID='plastic', DENSITY=2535., CONDUCTIVITY=0.2, SPECIFIC_HEAT=1.5 /
 &SURF ID='cylinder', THICKNESS=0.00815, LENGTH=0.1, MATL_ID='plastic',
       GEOMETRY='CYLINDRICAL' /
-&PART ID='Cable Segment', SURF_ID='cylinder', ORIENTATION(1:3,1)=0.,0.,1.,
+&PART ID='Cable Segment', SURF_ID='cylinder', ORIENTATION=0,0,1,
       STATIC=T /
 &INIT ID='Cable', XB=0.01,0.01,0.,0.,0.,0., N_PARTICLES=1, PART_ID='Cable Segment' /
 &DEVC ID='Cable Temp', INIT_ID='Cable',
       QUANTITY='INSIDE WALL TEMPERATURE', DEPTH=0.0015 /
 \end{lstlisting}
-The THIEF model assumes that the cable plastic material has a thermal conductivity of 0.2~\si{W/(m.K)} and a specific heat of 1.5~\si{kJ/(kg.K)}. If you change these values, you are no longer using the THIEF model. The density is the mass per unit length of the cable divided by its cross sectional area. The {\ct THICKNESS} is the radius of the cylindrical cable in units of m. The {\ct LENGTH}, in m, is needed by FDS because it assumes that the cable is a cylindrical segment of a certain length. It has no impact on the simulation, and its value it typically the size of a grid cell. The {\ct ORIENTATION} tells FDS the direction of the prevailing radiative source. The second argument indicates that there can be more than one {\ct ORIENTATION}. {\ct STATIC=T} prevents the cable from moving. The {\ct INIT} line is used to position the cable within the computational domain. The {\ct DEVC} line records the cables inner temperature, in this case 1.5~mm below the surface. This is typically the jacket thickness.
+The THIEF model assumes that the cable plastic material has a thermal conductivity of 0.2~\si{W/(m.K)} and a specific heat of 1.5~\si{kJ/(kg.K)}. If you change these values, you are no longer using the THIEF model. The density is the mass per unit length of the cable divided by its cross sectional area. The {\ct THICKNESS} is the radius of the cylindrical cable in units of m. The {\ct LENGTH}, in m, is needed by FDS because it assumes that the cable is a cylindrical segment of a certain length. It has no impact on the simulation, and its value it typically the size of a grid cell. The {\ct ORIENTATION} tells FDS the direction of the prevailing radiative source. {\ct STATIC=T} prevents the cable from moving. The {\ct INIT} line is used to position the cable within the computational domain. The {\ct DEVC} line records the cables inner temperature, in this case 1.5~mm below the surface. This is typically the jacket thickness.
 
 
 \clearpage
@@ -9278,8 +9255,6 @@ You may output properties of a single solid particle using a {\ct DEVC} (device)
 \end{lstlisting}
 output the surface temperature of a single particle that has been introduced into the simulation via an {\ct INIT} line.
 
-If the particle is split (by means of multiple {\ct ORIENTATION} vectors on the {\ct PART} line), you can specify which of the particle fragments you want using the parameter {\ct ORIENTATION\_NUMBER} on the {\ct DEVC} line.
-
 If the {\ct INIT} line has a {\ct MULT\_ID}; that is, an array of particles is introduced via this single {\ct INIT} line, then the {\ct INIT\_ID} for each takes the form {\ct '[ID]-00308'}, where {\ct ID} is that of the {\ct INIT} line, and 308 refers to the 308-th {\ct INIT} line generated by the multiplicative sequence. The {\ct INIT} lines are generated by looping over the $x$ indices, then $y$, then $z$. For example, the following input lines
 \begin{lstlisting}
 &INIT ID='P', PART_ID='CRIB1', XYZ=0.005,0.005,0.005 ,
@@ -10937,7 +10912,6 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct NO\_UPDATE\_CTRL\_ID}  & Character       & Section~\ref{info:freeze_device}                                &       &               \\ \hline
 {\ct NO\_UPDATE\_DEVC\_ID}  & Character       & Section~\ref{info:freeze_device}                                &       &               \\ \hline
 {\ct ORIENTATION}           & Real Triplet    & Section~\ref{info:DEVC}                                         &       & 0,0,-1        \\ \hline
-{\ct ORIENTATION\_NUMBER}   & Integer         & Section~\ref{info:part_output}                                  &       & 1             \\ \hline
 {\ct OUTPUT}                & Logical         & Section~\ref{info:out:DEVC}                                     &       & {\ct T}       \\ \hline
 {\ct PART\_ID}              & Character       & Section~\ref{info:outputquantities}                             &       &               \\ \hline
 {\ct PIPE\_INDEX}           & Integer         & Section~\ref{info:pressureramp}                                 &       &  1            \\ \hline
