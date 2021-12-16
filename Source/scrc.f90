@@ -174,10 +174,8 @@ INTEGER, PARAMETER :: NSCARC_MGM_USCARC_VS_SCARC     = 41        !< Type of MGM 
 INTEGER, PARAMETER :: NSCARC_MGM_UHL_VS_DSCARC       = 42        !< Type of MGM difference: UScaRC-ScaRC vs unstruct hom Laplace
 INTEGER, PARAMETER :: NSCARC_MGM_UIP_VS_USCARC       = 43        !< Type of MGM difference: UScaRC vs unstruct inhom Poisson
 INTEGER, PARAMETER :: NSCARC_MGM_LAPLACE_CG          = 52        !< Type of MGM Laplace solver: CG method
-INTEGER, PARAMETER :: NSCARC_MGM_LAPLACE_PARDISO     = 53        !< Type of MGM Laplace solver: IntelMKL-Pardiso solver
+INTEGER, PARAMETER :: NSCARC_MGM_LAPLACE_MKL     = 53        !< Type of MGM Laplace solver: IntelMKL-Pardiso solver
 INTEGER, PARAMETER :: NSCARC_MGM_LAPLACE_FFT         = 54        !< Type of MGM Laplace solver: Crayfishpak FFT solver
-INTEGER, PARAMETER :: NSCARC_MGM_LAPLACE_LU          = 55        !< Type of MGM Laplace solver: Own LU method
-INTEGER, PARAMETER :: NSCARC_MGM_LAPLACE_LUPERM      = 56        !< Type of MGM Laplace solver: Own permuted LU method
 INTEGER, PARAMETER :: NSCARC_MGM_LAPLACE_OPTIMIZED   = 57        !< Type of MGM Laplace solver: Best optimized method (FFT/PARDISO)
 INTEGER, PARAMETER :: NSCARC_MGM_INTERPOL_LINEAR     = 61        !< Type of MGM interpolation: Use linear interpolation for BC's
 INTEGER, PARAMETER :: NSCARC_MGM_INTERPOL_SQUARE     = 62        !< Type of MGM interpolation: Use quadratic interpolation for BC's
@@ -609,10 +607,6 @@ TYPE SCARC_GRID_TYPE
    INTEGER, ALLOCATABLE, DIMENSION (:,:) :: ICG_TO_ICE         !< Mapping from ICG to ICE 
    INTEGER, ALLOCATABLE, DIMENSION (:)   :: ICG_TO_IWG         !< Mapping from ICG to IWG
 
-   ! Forward and backward permutation vectors for grid renumbering strategies (MGM only)
-   INTEGER, ALLOCATABLE, DIMENSION (:)   :: PERM_FW            !< Permutation vector for LU - forward direction
-   INTEGER, ALLOCATABLE, DIMENSION (:)   :: PERM_BW            !< Permutation vector for LU - backward direction
-   INTEGER :: NONZERO = 1                                      !< Index of first nonzero entry in RHS vector for permuted LU
 
    ! Assignment of cell coordinates
    INTEGER, ALLOCATABLE, DIMENSION (:)   :: ICX                !< I-coordinate of cell IC
@@ -625,6 +619,7 @@ TYPE SCARC_GRID_TYPE
    ! Cell numbers of all meshes and offsets between meshes
    INTEGER, ALLOCATABLE, DIMENSION (:) :: NC_LOCAL             !< Number of cells in local meshes
    INTEGER, ALLOCATABLE, DIMENSION (:) :: NC_OFFSET            !< Offset in cell numbering between meshes
+
    INTEGER :: NC_GLOBAL   = NSCARC_ZERO_INT                    !< Global number of cells in all meshes
    INTEGER :: NC_GALERKIN = NSCARC_ZERO_INT                    !< Number of cells with influence on Galerkin matrix
 
@@ -1006,7 +1001,7 @@ INTEGER       :: SCARC_MULTIGRID_POSTSMOOTH  = 4                 !< Number of po
 REAL(EB)      :: SCARC_MGM_ACCURACY         = 1.E-4_EB           !< Requested accuracy for interface velocity error 
 CHARACTER(40) :: SCARC_MGM_BC               = 'MEAN'             !< Type of interface boundary condition for local Laplace problems
 CHARACTER(40) :: SCARC_MGM_INTERPOLATION    = 'LINEAR'           !< Type of interpolation for Laplace BC settings
-CHARACTER(40) :: SCARC_MGM_LAPLACE_SOLVER   = 'LUPERM'           !< Type of solver for local Laplace problems
+CHARACTER(40) :: SCARC_MGM_LAPLACE_SOLVER   = 'OPTIMIZED'        !< Type of solver for local Laplace problems
 INTEGER       :: SCARC_MGM_ITERATIONS       = 20                 !< Maximum allowed number of Laplace iterations 
 LOGICAL       :: SCARC_MGM_CHECK_LAPLACE    = .FALSE.            !< Requested check of Laplace solutions against ScaRC-UScaRC diff
 LOGICAL       :: SCARC_MGM_EXACT_INITIAL    = .FALSE.            !< Exact solutions for initialization of interface BCs are used
@@ -1063,37 +1058,37 @@ LOGICAL :: IS_MGM                = .FALSE.                       !< Flag for McK
 
 LOGICAL :: HAS_CSV_DUMP          = .FALSE.                       !< Flag for CSV-file to be dumped out
 LOGICAL :: HAS_MULTIPLE_GRIDS    = .FALSE.                       !< Flag for multiple discretization types
-LOGICAL :: HAS_COARSE_LEVEL        = .FALSE.                       !< Flag for two grid levels
+LOGICAL :: HAS_COARSE_LEVEL        = .FALSE.                     !< Flag for two grid levels
 LOGICAL :: HAS_XMEAN_LEVELS      = .FALSE.                       !< Flag for two-level xmean values preconditioning
 LOGICAL :: HAS_MULTIPLE_LEVELS   = .FALSE.                       !< Flag for multiple grid levels
 
 ! ---------- Globally used types for different solvers parameters
   
-INTEGER :: TYPE_ACCURACY            = NSCARC_ACCURACY_ABSOLUTE   !< Type of requested accuracy
-INTEGER :: TYPE_COARSE              = NSCARC_COARSE_DIRECT       !< Type of coarse grid solver 
-INTEGER :: TYPE_GRID                = NSCARC_GRID_STRUCTURED     !< Type of discretization 
-INTEGER :: TYPE_EXCHANGE            = NSCARC_UNDEF_INT           !< Type of data exchange
-INTEGER :: TYPE_EXCHANGE_MATRIX     = NSCARC_MATRIX_POISSON      !< Type of matrix for exchange
-INTEGER :: TYPE_INTERPOL            = NSCARC_INTERPOL_CONSTANT   !< Type of interpolation method
-INTEGER :: TYPE_LEVEL(0:2)          = NSCARC_UNDEF_INT           !< Type of levels
-INTEGER :: TYPE_MATVEC              = NSCARC_MATVEC_GLOBAL       !< Type of matrix-vector multiplication
-INTEGER :: TYPE_METHOD              = NSCARC_METHOD_KRYLOV       !< Type of ScaRC method
-INTEGER :: TYPE_MGM_BC              = NSCARC_MGM_BC_MEAN         !< Type of internal MGM boundary conditions
-INTEGER :: TYPE_MGM_LAPLACE         = NSCARC_MGM_LAPLACE_LUPERM  !< Type of solver for local Laplace problems
-INTEGER :: TYPE_MGM_INTERPOL        = NSCARC_MGM_INTERPOL_LINEAR !< Type of internal MGM boundary conditions
-INTEGER :: TYPE_MKL(0:10)           = NSCARC_MKL_NONE            !< Type of use of MKL solvers
-INTEGER :: TYPE_MKL_PRECISION       = NSCARC_PRECISION_DOUBLE    !< Type of double precision MKL solver
-INTEGER :: TYPE_MULTIGRID           = NSCARC_MULTIGRID_GEOMETRIC !< Type of multigrid method 
-INTEGER :: TYPE_PARENT              = NSCARC_UNDEF_INT           !< Type of parent (calling) solver
-INTEGER :: TYPE_POISSON             = NSCARC_POISSON_SEPARABLE   !< Type of Poisson equation
-INTEGER :: TYPE_PRECON              = NSCARC_UNDEF_INT           !< Type of preconditioner for iterative solver
-INTEGER :: TYPE_RELAX               = NSCARC_UNDEF_INT           !< Type of preconditioner for iterative solver
-INTEGER :: TYPE_SCOPE(0:2)          = NSCARC_SCOPE_GLOBAL        !< Type of method scopes
-INTEGER :: TYPE_SOLVER              = NSCARC_SOLVER_MAIN         !< Type of surrounding solver stage
-INTEGER :: TYPE_STAGE               = NSCARC_STAGE_ONE           !< Type of surrounding solver stage
-INTEGER :: TYPE_STENCIL             = NSCARC_STENCIL_VARIABLE    !< Type of storage for matrix
-INTEGER :: TYPE_TWOLEVEL            = NSCARC_TWOLEVEL_NONE       !< Type of twolevel method
-INTEGER :: TYPE_VECTOR              = NSCARC_UNDEF_INT           !< Type of vector to point to
+INTEGER :: TYPE_ACCURACY            = NSCARC_ACCURACY_ABSOLUTE       !< Type of requested accuracy
+INTEGER :: TYPE_COARSE              = NSCARC_COARSE_DIRECT           !< Type of coarse grid solver 
+INTEGER :: TYPE_GRID                = NSCARC_GRID_STRUCTURED         !< Type of discretization 
+INTEGER :: TYPE_EXCHANGE            = NSCARC_UNDEF_INT               !< Type of data exchange
+INTEGER :: TYPE_EXCHANGE_MATRIX     = NSCARC_MATRIX_POISSON          !< Type of matrix for exchange
+INTEGER :: TYPE_INTERPOL            = NSCARC_INTERPOL_CONSTANT       !< Type of interpolation method
+INTEGER :: TYPE_LEVEL(0:2)          = NSCARC_UNDEF_INT               !< Type of levels
+INTEGER :: TYPE_MATVEC              = NSCARC_MATVEC_GLOBAL           !< Type of matrix-vector multiplication
+INTEGER :: TYPE_METHOD              = NSCARC_METHOD_KRYLOV           !< Type of ScaRC method
+INTEGER :: TYPE_MGM_BC              = NSCARC_MGM_BC_MEAN             !< Type of internal MGM boundary conditions
+INTEGER :: TYPE_MGM_LAPLACE         = NSCARC_MGM_LAPLACE_OPTIMIZED   !< Type of solver for local Laplace problems
+INTEGER :: TYPE_MGM_INTERPOL        = NSCARC_MGM_INTERPOL_LINEAR     !< Type of internal MGM boundary conditions
+INTEGER :: TYPE_MKL(0:10)           = NSCARC_MKL_NONE                !< Type of use of MKL solvers
+INTEGER :: TYPE_MKL_PRECISION       = NSCARC_PRECISION_DOUBLE        !< Type of double precision MKL solver
+INTEGER :: TYPE_MULTIGRID           = NSCARC_MULTIGRID_GEOMETRIC     !< Type of multigrid method 
+INTEGER :: TYPE_PARENT              = NSCARC_UNDEF_INT               !< Type of parent (calling) solver
+INTEGER :: TYPE_POISSON             = NSCARC_POISSON_SEPARABLE       !< Type of Poisson equation
+INTEGER :: TYPE_PRECON              = NSCARC_UNDEF_INT               !< Type of preconditioner for iterative solver
+INTEGER :: TYPE_RELAX               = NSCARC_UNDEF_INT               !< Type of preconditioner for iterative solver
+INTEGER :: TYPE_SCOPE(0:2)          = NSCARC_SCOPE_GLOBAL            !< Type of method scopes
+INTEGER :: TYPE_SOLVER              = NSCARC_SOLVER_MAIN             !< Type of surrounding solver stage
+INTEGER :: TYPE_STAGE               = NSCARC_STAGE_ONE               !< Type of surrounding solver stage
+INTEGER :: TYPE_STENCIL             = NSCARC_STENCIL_VARIABLE        !< Type of storage for matrix
+INTEGER :: TYPE_TWOLEVEL            = NSCARC_TWOLEVEL_NONE           !< Type of twolevel method
+INTEGER :: TYPE_VECTOR              = NSCARC_UNDEF_INT               !< Type of vector to point to
 
 ! ---------- Globally used parameters
  
@@ -2419,26 +2414,26 @@ END FUNCTION DIRECTIONAL_MEAN
 ! --------------------------------------------------------------------------------------------------------------
 !> \brief Compute reciprocal of a vector's meanvalue in a given cell and the specified direction
 ! --------------------------------------------------------------------------------------------------------------
-REAL(EB) FUNCTION RECIPROCAL_DIRECTIONAL_MEAN (V, IOR0, I, J, K)
+REAL(EB) FUNCTION RDM (V, IOR0, I, J, K)
 REAL(EB), DIMENSION(0:,0:,0:), INTENT(IN) :: V
 INTEGER, INTENT(IN) :: IOR0, I, J, K
 
 SELECT CASE (IOR0)
    CASE ( 1)
-      RECIPROCAL_DIRECTIONAL_MEAN = 2.0_EB /(V(I-1,J,K) + V(I,J,K))
+      RDM = 2.0_EB /(V(I-1,J,K) + V(I,J,K))
    CASE (-1)
-      RECIPROCAL_DIRECTIONAL_MEAN = 2.0_EB /(V(I+1,J,K) + V(I,J,K))
+      RDM = 2.0_EB /(V(I+1,J,K) + V(I,J,K))
    CASE ( 2)
-      RECIPROCAL_DIRECTIONAL_MEAN = 2.0_EB /(V(I,J-1,K) + V(I,J,K))
+      RDM = 2.0_EB /(V(I,J-1,K) + V(I,J,K))
    CASE (-2)
-      RECIPROCAL_DIRECTIONAL_MEAN = 2.0_EB /(V(I,J+1,K) + V(I,J,K))
+      RDM = 2.0_EB /(V(I,J+1,K) + V(I,J,K))
    CASE ( 3)
-      RECIPROCAL_DIRECTIONAL_MEAN = 2.0_EB /(V(I,J,K-1) + V(I,J,K))
+      RDM = 2.0_EB /(V(I,J,K-1) + V(I,J,K))
    CASE (-3)
-      RECIPROCAL_DIRECTIONAL_MEAN = 2.0_EB /(V(I,J,K+1) + V(I,J,K))
+      RDM = 2.0_EB /(V(I,J,K+1) + V(I,J,K))
 END SELECT
 
-END FUNCTION RECIPROCAL_DIRECTIONAL_MEAN 
+END FUNCTION RDM 
 
 
 ! --------------------------------------------------------------------------------------------------------------
@@ -2535,7 +2530,7 @@ INTEGER FUNCTION GET_PERM(JC)
 USE SCARC_POINTERS, ONLY : G
 INTEGER, INTENT(IN) :: JC
 GET_PERM = -1
-IF (JC > 0 .AND. JC <= G%NC) GET_PERM = G%PERM_FW(JC)
+IF (JC > 0 .AND. JC <= G%NC) GET_PERM = JC
 END FUNCTION GET_PERM
 
 
@@ -4162,13 +4157,9 @@ SV%OMEGA =  SCARC_PRECON_OMEGA
 SELECT CASE(TYPE_MGM_LAPLACE)
    CASE (NSCARC_MGM_LAPLACE_CG)
       SV%CNAME = 'SCARC_MGM_LAPLACE_CG'
-   CASE (NSCARC_MGM_LAPLACE_LU)
-      SV%CNAME = 'SCARC_MGM_LAPLACE_LU'
-   CASE (NSCARC_MGM_LAPLACE_LUPERM)
-      SV%CNAME = 'SCARC_MGM_LAPLACE_LUPERM'
 #ifdef WITH_MKL
-   CASE (NSCARC_MGM_LAPLACE_PARDISO)
-      SV%CNAME = 'SCARC_MGM_LAPLACE_PARDISO'
+   CASE (NSCARC_MGM_LAPLACE_MKL)
+      SV%CNAME = 'SCARC_MGM_LAPLACE_MKL'
    CASE (NSCARC_MGM_LAPLACE_OPTIMIZED)
       SV%CNAME = 'SCARC_MGM_LAPLACE_OPTIMIZED'
 #endif
@@ -4453,14 +4444,10 @@ SELECT CASE (TRIM(SCARC_METHOD))
             TYPE_MGM_LAPLACE = NSCARC_MGM_LAPLACE_CG
          CASE ('FFT')
             TYPE_MGM_LAPLACE = NSCARC_MGM_LAPLACE_FFT
-         CASE ('LU')
-            TYPE_MGM_LAPLACE = NSCARC_MGM_LAPLACE_LU
-         CASE ('LUPERM')
-            TYPE_MGM_LAPLACE = NSCARC_MGM_LAPLACE_LUPERM
          CASE ('OPTIMIZED')
             TYPE_MGM_LAPLACE = NSCARC_MGM_LAPLACE_OPTIMIZED
          CASE ('PARDISO')
-            TYPE_MGM_LAPLACE = NSCARC_MGM_LAPLACE_PARDISO
+            TYPE_MGM_LAPLACE = NSCARC_MGM_LAPLACE_MKL
          CASE DEFAULT
             CALL SCARC_ERROR(NSCARC_ERROR_PARSE_INPUT, SCARC_MGM_LAPLACE_SOLVER, NSCARC_NONE)
       END SELECT
@@ -9068,6 +9055,7 @@ INTEGER, INTENT(IN) :: NM, NL
 INTEGER :: IX, IY, IZ, IC, IP
 
 CROUTINE = 'SCARC_SETUP_POISSON'
+IP = 1
  
 ! Depending on the type of the Poisson system (separable or inseparable),
 ! compute single matrix entries and corresponding row and column pointers (resulting to be constant or variable)
@@ -9076,73 +9064,40 @@ CROUTINE = 'SCARC_SETUP_POISSON'
 CALL SCARC_POINT_TO_GRID (NM, NL)                                    
 A => SCARC_POINT_TO_MATRIX (NSCARC_MATRIX_POISSON)
 
-IP = 1
-SELECT_COMPACT_POISSON_TYPE: SELECT CASE (TYPE_POISSON)
-
-   CASE (NSCARC_POISSON_SEPARABLE)               ! Build separable Poisson system leading to constant matrix entries
-
+SELECT CASE (TYPE_POISSON)
+   CASE (NSCARC_POISSON_SEPARABLE)          
       CALL SCARC_POINT_TO_SEPARABLE_ENVIRONMENT(NM)
-
-      DO IZ = 1, L%NZ
-         DO IY = 1, L%NY
-            DO IX = 1, L%NX
-   
-               IF (IS_UNSTRUCTURED .AND. L%IS_SOLID(IX, IY, IZ)) CYCLE
-               IC = G%CELL_NUMBER(IX, IY, IZ)
-
-               ! Main diagonal 
-
-               CALL SCARC_SETUP_MAINDIAG (IC, IX, IY, IZ, IP)
-   
-               ! Lower subdiagonals
-
-               IF (IS_VALID_DIRECTION(IX, IY, IZ,  3)) CALL SCARC_SETUP_SUBDIAG(IC, IX, IY, IZ, IX  , IY  , IZ-1, IP,  3)
-               IF (IS_VALID_DIRECTION(IX, IY, IZ,  2)) CALL SCARC_SETUP_SUBDIAG(IC, IX, IY, IZ, IX  , IY-1, IZ  , IP,  2)
-               IF (IS_VALID_DIRECTION(IX, IY, IZ,  1)) CALL SCARC_SETUP_SUBDIAG(IC, IX, IY, IZ, IX-1, IY  , IZ  , IP,  1)
-   
-               ! Upper subdiagonals
-
-               IF (IS_VALID_DIRECTION(IX, IY, IZ, -1)) CALL SCARC_SETUP_SUBDIAG(IC, IX, IY, IZ, IX+1, IY  , IZ  , IP, -1)
-               IF (IS_VALID_DIRECTION(IX, IY, IZ, -2)) CALL SCARC_SETUP_SUBDIAG(IC, IX, IY, IZ, IX  , IY+1, IZ  , IP, -2)
-               IF (IS_VALID_DIRECTION(IX, IY, IZ, -3)) CALL SCARC_SETUP_SUBDIAG(IC, IX, IY, IZ, IX  , IY  , IZ+1, IP, -3)
-   
-            ENDDO
-         ENDDO
-      ENDDO
-   
-   CASE (NSCARC_POISSON_INSEPARABLE)             ! Build inseparable Poisson system leading to variable matrix entries
-
+   CASE (NSCARC_POISSON_INSEPARABLE)          
       CALL SCARC_POINT_TO_INSEPARABLE_ENVIRONMENT(NM)
+END SELECT
 
-      DO IZ = 1, L%NZ
-         DO IY = 1, L%NY
-            DO IX = 1, L%NX
+DO IZ = 1, L%NZ
+   DO IY = 1, L%NY
+      DO IX = 1, L%NX
 
-               IF (IS_UNSTRUCTURED .AND. L%IS_SOLID(IX, IY, IZ)) CYCLE
-               IC = G%CELL_NUMBER(IX, IY, IZ)
+         IF (IS_UNSTRUCTURED .AND. L%IS_SOLID(IX, IY, IZ)) CYCLE
+         IC = G%CELL_NUMBER(IX, IY, IZ)
 
-               ! Main diagonal
+         ! Main diagonal 
 
-               CALL SCARC_SETUP_MAINDIAG_INSEP (IC, IX, IY, IZ, IP)
+         CALL SCARC_SETUP_MATRIX_MAIN (IC, IX, IY, IZ, IP)
 
-               ! Lower subdiagonals
+         ! Lower subdiagonals
 
-               IF (IS_VALID_DIRECTION(IX, IY, IZ,  3)) CALL SCARC_SETUP_SUBDIAG_INSEP(IC, IX, IY, IZ, IX  , IY  , IZ-1, IP, 3)
-               IF (IS_VALID_DIRECTION(IX, IY, IZ,  2)) CALL SCARC_SETUP_SUBDIAG_INSEP(IC, IX, IY, IZ, IX  , IY-1, IZ  , IP, 2)
-               IF (IS_VALID_DIRECTION(IX, IY, IZ,  1)) CALL SCARC_SETUP_SUBDIAG_INSEP(IC, IX, IY, IZ, IX-1, IY  , IZ  , IP, 1)
+         IF (IS_VALID_DIRECTION(IX, IY, IZ,  3)) CALL SCARC_SETUP_MATRIX_SUB(IC, IX, IY, IZ, IX  , IY  , IZ-1, IP,  3)
+         IF (IS_VALID_DIRECTION(IX, IY, IZ,  2)) CALL SCARC_SETUP_MATRIX_SUB(IC, IX, IY, IZ, IX  , IY-1, IZ  , IP,  2)
+         IF (IS_VALID_DIRECTION(IX, IY, IZ,  1)) CALL SCARC_SETUP_MATRIX_SUB(IC, IX, IY, IZ, IX-1, IY  , IZ  , IP,  1)
 
-               ! Upper subdiagonals
+         ! Upper subdiagonals
 
-               IF (IS_VALID_DIRECTION(IX, IY, IZ, -1)) CALL SCARC_SETUP_SUBDIAG_INSEP(IC, IX, IY, IZ, IX+1, IY  , IZ  , IP,-1)
-               IF (IS_VALID_DIRECTION(IX, IY, IZ, -2)) CALL SCARC_SETUP_SUBDIAG_INSEP(IC, IX, IY, IZ, IX  , IY+1, IZ  , IP,-2)
-               IF (IS_VALID_DIRECTION(IX, IY, IZ, -3)) CALL SCARC_SETUP_SUBDIAG_INSEP(IC, IX, IY, IZ, IX  , IY  , IZ+1, IP,-3)
+         IF (IS_VALID_DIRECTION(IX, IY, IZ, -1)) CALL SCARC_SETUP_MATRIX_SUB(IC, IX, IY, IZ, IX+1, IY  , IZ  , IP, -1)
+         IF (IS_VALID_DIRECTION(IX, IY, IZ, -2)) CALL SCARC_SETUP_MATRIX_SUB(IC, IX, IY, IZ, IX  , IY+1, IZ  , IP, -2)
+         IF (IS_VALID_DIRECTION(IX, IY, IZ, -3)) CALL SCARC_SETUP_MATRIX_SUB(IC, IX, IY, IZ, IX  , IY  , IZ+1, IP, -3)
 
-            ENDDO
-         ENDDO
       ENDDO
-
-END SELECT SELECT_COMPACT_POISSON_TYPE
-
+   ENDDO
+ENDDO
+   
 A%ROW(G%NC+1) = IP
 A%N_VAL = IP
 
@@ -9162,9 +9117,9 @@ END SUBROUTINE SCARC_SETUP_POISSON
 ! forward substitution process Ly=b only must start from the nonzero entries on
 ! --------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_SETUP_LAPLACE (NM, NL)
-USE SCARC_POINTERS, ONLY: L, G, A, GWC, SCARC_POINT_TO_GRID, SCARC_POINT_TO_MATRIX, SCARC_POINT_TO_SEPARABLE_ENVIRONMENT
+USE SCARC_POINTERS, ONLY: L, G, A, SCARC_POINT_TO_GRID, SCARC_POINT_TO_MATRIX, SCARC_POINT_TO_SEPARABLE_ENVIRONMENT
 INTEGER, INTENT(IN) :: NM, NL
-INTEGER :: IX, IY, IZ, IC, JC, KC, IOR0, IW, IP, KKC(-3:3), JJC(-3:3)
+INTEGER :: IX, IY, IZ, IC, IP
 INTEGER :: TYPE_SCOPE_SAVE
 
 CROUTINE = 'SCARC_SETUP_LAPLACE'
@@ -9176,83 +9131,7 @@ TYPE_SCOPE(0) = NSCARC_SCOPE_LOCAL
 CALL SCARC_SET_GRID_TYPE(NSCARC_GRID_UNSTRUCTURED)
 CALL SCARC_POINT_TO_GRID (NM, NL)              
 
-! Allocate permutation vectors 
-
-CALL SCARC_ALLOCATE_INT1 (G%PERM_FW , 1, G%NC, NSCARC_INIT_ZERO, 'G%PERM_FW', CROUTINE)
-CALL SCARC_ALLOCATE_INT1 (G%PERM_BW , 1, G%NC, NSCARC_INIT_ZERO, 'G%PERM_BW', CROUTINE)
-   
-! Obstruction cells are numbered last such that they appear at the end of a vector
-
-IF (TYPE_MGM_LAPLACE == NSCARC_MGM_LAPLACE_LUPERM) THEN
-
-   JC = G%NC
-   DO IW = L%N_WALL_CELLS_EXT+1, L%N_WALL_CELLS_EXT + L%N_WALL_CELLS_INT
-      
-      GWC => G%WALL(IW)
-      
-      IX = GWC%IXW ;  IY = GWC%IYW ;  IZ = GWC%IZW
-      
-      IF (IS_UNSTRUCTURED .AND. L%IS_SOLID(IX, IY, IZ)) CYCLE
-      
-      IOR0 = GWC%IOR
-      IC   = G%CELL_NUMBER(IX, IY, IZ)
-
-      G%PERM_FW(IC) = JC
-      G%PERM_BW(JC) = IC
-      JC = JC - 1
-
-   ENDDO
-
-   ! Interface cells are numbered second last
-
-   DO IW = 1, L%N_WALL_CELLS_EXT
-      
-      GWC => G%WALL(IW)
-      IF (GWC%BTYPE /= INTERNAL) CYCLE
-      
-      IX = GWC%IXW ;  IY = GWC%IYW ;  IZ = GWC%IZW
-      
-      IF (IS_UNSTRUCTURED .AND. L%IS_SOLID(IX, IY, IZ)) CYCLE
-      
-      IOR0 = GWC%IOR
-      IC   = G%CELL_NUMBER(IX,IY,IZ)
-
-      IF (G%PERM_FW(IC) == 0) THEN
-         G%PERM_FW(IC) = JC
-         G%PERM_BW(JC) = IC
-         JC = JC - 1
-      ENDIF
-
-   ENDDO
-
-   ! The rest is used from beginning to first interface cell
-
-   KC = 1
-   DO IC = 1, G%NC
-      IF (G%PERM_FW(IC) /= 0) CYCLE
-      G%PERM_BW(KC) = IC
-      G%PERM_FW(IC) = KC
-      KC = KC + 1
-   ENDDO
-   IF (KC /= JC + 1) THEN
-      WRITE(*,*) 'KC =', KC,': JC =', JC
-      CALL SCARC_ERROR(NSCARC_ERROR_MGM_PERMUTATION, SCARC_NONE, NSCARC_NONE)
-   ENDIF
-
-   G%NONZERO = KC
-
-ELSE
-
-   DO IC = 1, G%NC
-      G%PERM_BW(IC) = IC
-      G%PERM_FW(IC) = IC
-   ENDDO
-
-   G%NONZERO = 1
-
-ENDIF
-
-! Allocate Laplace matrix on non-overlapping part of mesh
+! Allocate Laplace matrix on non-overlapping part of mesh 
 
 A => SCARC_POINT_TO_MATRIX (NSCARC_MATRIX_LAPLACE)
 CALL SCARC_ALLOCATE_MATRIX (A, NL, NSCARC_PRECISION_DOUBLE, NSCARC_MATRIX_FULL, 'G%LAPLACE', CROUTINE)
@@ -9261,76 +9140,33 @@ CALL SCARC_POINT_TO_SEPARABLE_ENVIRONMENT(NM)
 ! Assemble Laplace matrix with grid permutation based on MGM-method 
 
 IP = 1
-IF (TYPE_MGM_LAPLACE == NSCARC_MGM_LAPLACE_LUPERM) THEN
+DO IZ = 1, L%NZ
+   DO IY = 1, L%NY
+      DO IX = 1, L%NX
 
-   DO IC = 1, G%NC
+         IF (IS_UNSTRUCTURED .AND. L%IS_SOLID(IX, IY, IZ)) CYCLE
+         IC = G%CELL_NUMBER(IX, IY, IZ)
 
-      JJC = -1
-      KKC = -1
+         ! Main diagonal 
 
-      JJC(0) = G%PERM_BW(IC);  KKC(0) = G%PERM_FW(JJC(0))
-      
-      IX = G%ICX(JJC(0)); IY = G%ICY(JJC(0)); IZ = G%ICZ(JJC(0))
+         CALL SCARC_SETUP_MATRIX_MAIN (IC, IX, IY, IZ, IP)
 
-      JJC(-3) = G%CELL_NUMBER(IX  , IY, IZ+1)     ; KKC(-3) = GET_PERM(JJC(-3))  
-      JJC(-1) = G%CELL_NUMBER(IX+1, IY, IZ  )     ; KKC(-1) = GET_PERM(JJC(-1))   
-      JJC( 1) = G%CELL_NUMBER(IX-1, IY, IZ  )     ; KKC( 1) = GET_PERM(JJC( 1))    
-      JJC( 3) = G%CELL_NUMBER(IX  , IY, IZ-1)     ; KKC( 3) = GET_PERM(JJC( 3))     
-      IF (.NOT.TWO_D) THEN
-        JJC(-2) = G%CELL_NUMBER(IX, IY+1, IZ)     ; KKC(-2) = GET_PERM(JJC(-2))     
-        JJC( 2) = G%CELL_NUMBER(IX, IY-1, IZ)     ; KKC( 2) = GET_PERM(JJC( 2))     
-      ENDIF
+         ! Lower subdiagonals
 
-      ! Main diagonal 
-      CALL SCARC_SETUP_MAINDIAG (IC, IX, IY, IZ, IP)
-         
-      ! Lower subdiagonals
+         IF (IS_VALID_DIRECTION(IX, IY, IZ,  3)) CALL SCARC_SETUP_MATRIX_SUB(IC, IX, IY, IZ, IX  , IY  , IZ-1, IP,  3)
+         IF (IS_VALID_DIRECTION(IX, IY, IZ,  2)) CALL SCARC_SETUP_MATRIX_SUB(IC, IX, IY, IZ, IX  , IY-1, IZ  , IP,  2)
+         IF (IS_VALID_DIRECTION(IX, IY, IZ,  1)) CALL SCARC_SETUP_MATRIX_SUB(IC, IX, IY, IZ, IX-1, IY  , IZ  , IP,  1)
 
-      IF (IS_VALID_DIRECTION(IX, IY, IZ,  3)) CALL SCARC_SETUP_SUBDIAG_PERM(IX, IY, IZ, IX  , IY  , IZ-1, KKC( 3), IP,  3)
-      IF (IS_VALID_DIRECTION(IX, IY, IZ,  2)) CALL SCARC_SETUP_SUBDIAG_PERM(IX, IY, IZ, IX  , IY-1, IZ  , KKC( 2), IP,  2)
-      IF (IS_VALID_DIRECTION(IX, IY, IZ,  1)) CALL SCARC_SETUP_SUBDIAG_PERM(IX, IY, IZ, IX-1, IY  , IZ  , KKC( 1), IP,  1)
+         ! Upper subdiagonals
 
-      ! Upper subdiagonals
+         IF (IS_VALID_DIRECTION(IX, IY, IZ, -1)) CALL SCARC_SETUP_MATRIX_SUB(IC, IX, IY, IZ, IX+1, IY  , IZ  , IP, -1)
+         IF (IS_VALID_DIRECTION(IX, IY, IZ, -2)) CALL SCARC_SETUP_MATRIX_SUB(IC, IX, IY, IZ, IX  , IY+1, IZ  , IP, -2)
+         IF (IS_VALID_DIRECTION(IX, IY, IZ, -3)) CALL SCARC_SETUP_MATRIX_SUB(IC, IX, IY, IZ, IX  , IY  , IZ+1, IP, -3)
 
-      IF (IS_VALID_DIRECTION(IX, IY, IZ, -1)) CALL SCARC_SETUP_SUBDIAG_PERM(IX, IY, IZ, IX+1, IY  , IZ  , KKC(-1), IP, -1)
-      IF (IS_VALID_DIRECTION(IX, IY, IZ, -2)) CALL SCARC_SETUP_SUBDIAG_PERM(IX, IY, IZ, IX  , IY+1, IZ  , KKC(-2), IP, -2)
-      IF (IS_VALID_DIRECTION(IX, IY, IZ, -3)) CALL SCARC_SETUP_SUBDIAG_PERM(IX, IY, IZ, IX  , IY  , IZ+1, KKC(-3), IP, -3)
-
-   ENDDO
-      
-! Assemble Laplace matrix without grid permutation 
-
-ELSE
-
-   DO IZ = 1, L%NZ
-      DO IY = 1, L%NY
-         DO IX = 1, L%NX
-
-            IF (IS_UNSTRUCTURED .AND. L%IS_SOLID(IX, IY, IZ)) CYCLE
-            IC = G%CELL_NUMBER(IX, IY, IZ)
-
-            ! Main diagonal 
-
-            CALL SCARC_SETUP_MAINDIAG (IC, IX, IY, IZ, IP)
-
-            ! Lower subdiagonals
-
-            IF (IS_VALID_DIRECTION(IX, IY, IZ,  3)) CALL SCARC_SETUP_SUBDIAG(IC, IX, IY, IZ, IX  , IY  , IZ-1, IP,  3)
-            IF (IS_VALID_DIRECTION(IX, IY, IZ,  2)) CALL SCARC_SETUP_SUBDIAG(IC, IX, IY, IZ, IX  , IY-1, IZ  , IP,  2)
-            IF (IS_VALID_DIRECTION(IX, IY, IZ,  1)) CALL SCARC_SETUP_SUBDIAG(IC, IX, IY, IZ, IX-1, IY  , IZ  , IP,  1)
-
-            ! Upper subdiagonals
-
-            IF (IS_VALID_DIRECTION(IX, IY, IZ, -1)) CALL SCARC_SETUP_SUBDIAG(IC, IX, IY, IZ, IX+1, IY  , IZ  , IP, -1)
-            IF (IS_VALID_DIRECTION(IX, IY, IZ, -2)) CALL SCARC_SETUP_SUBDIAG(IC, IX, IY, IZ, IX  , IY+1, IZ  , IP, -2)
-            IF (IS_VALID_DIRECTION(IX, IY, IZ, -3)) CALL SCARC_SETUP_SUBDIAG(IC, IX, IY, IZ, IX  , IY  , IZ+1, IP, -3)
-
-         ENDDO
       ENDDO
    ENDDO
+ENDDO
       
-ENDIF
-
 A%ROW(G%NC+1) = IP
 A%N_VAL = IP
       
@@ -9347,112 +9183,63 @@ END SUBROUTINE SCARC_SETUP_LAPLACE
 ! In case of an equidistant grid, we get the usual 5-point (2d) and 7-point (3d) stencil
 ! If two meshes with different step sizes meet, we get a weighted stencil along internal wall cells
 ! --------------------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_SETUP_MAINDIAG (IC, IX, IY, IZ, IP)
-USE SCARC_POINTERS, ONLY: A, RDX, RDY, RDZ, RDXN, RDYN, RDZN
+SUBROUTINE SCARC_SETUP_MATRIX_MAIN (IC, IX, IY, IZ, IP)
+USE SCARC_POINTERS, ONLY: A, RDX, RDY, RDZ, RDXN, RDYN, RDZN, RHOP
+USE SCARC_UTILITIES, ONLY: RDM
 INTEGER, INTENT(IN) :: IC, IX, IY, IZ
 INTEGER, INTENT(INOUT) :: IP
 
-A%VAL(IP) = - RDX(IX)*(RDXN(IX) + RDXN(IX-1))
-IF (.NOT.TWO_D) A%VAL(IP) = A%VAL(IP) - RDY(IY)*(RDYN(IY) + RDYN(IY-1))
-A%VAL(IP) = A%VAL(IP) - RDZ(IZ)*(RDZN(IZ) + RDZN(IZ-1))
+SELECT CASE (TYPE_POISSON)
+
+   CASE (NSCARC_POISSON_SEPARABLE) 
+
+      A%VAL(IP) = - RDX(IX)*(RDXN(IX) + RDXN(IX-1))
+      IF (.NOT.TWO_D) A%VAL(IP) = A%VAL(IP) - RDY(IY)*(RDYN(IY) + RDYN(IY-1))
+      A%VAL(IP) = A%VAL(IP) - RDZ(IZ)*(RDZN(IZ) + RDZN(IZ-1))
+      
+   CASE (NSCARC_POISSON_INSEPARABLE) 
+
+      A%VAL(IP) = - RDX(IX)*(RDXN(IX-1) * RDM(RHOP, 1, IX, IY, IZ) + &
+                             RDXN(IX)   * RDM(RHOP,-1, IX, IY, IZ) )
+      IF (.NOT.TWO_D) &
+         A%VAL(IP) = A%VAL(IP) - RDY(IY)*(RDYN(IY-1) * RDM(RHOP, 2, IX, IY, IZ) + &
+                                          RDYN(IY)   * RDM(RHOP,-2, IX, IY, IZ) )
+      A%VAL(IP) = A%VAL(IP) - RDZ(IZ)*(RDZN(IZ-1) * RDM(RHOP, 3, IX, IY, IZ) + &
+                                       RDZN(IZ)   * RDM(RHOP,-3, IX, IY, IZ) )
+
+END SELECT
 
 A%ROW(IC) = IP
 A%COL(IP) = IC
-
 A%STENCIL(0) = A%VAL(IP)
 
 IP = IP + 1
-END SUBROUTINE SCARC_SETUP_MAINDIAG
-
-
-! --------------------------------------------------------------------------------------------------------------
-!> \brief Set main diagonal entry for Poisson matrix in compact storage technique
-! These values correspond to the full matrix of the global problem
-! In case of an equidistant grid, we get the usual 5-point (2d) and 7-point (3d) stencil
-! If two meshes with different step sizes meet, we get a weighted stencil along internal wall cells
-! --------------------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_SETUP_MAINDIAG_INSEP (IC, IX, IY, IZ, IP)
-USE SCARC_POINTERS, ONLY:  A, RDX, RDY, RDZ, RDXN, RDYN, RDZN, RHOP
-USE SCARC_UTILITIES, ONLY: RECIPROCAL_DIRECTIONAL_MEAN
-INTEGER, INTENT(IN) :: IC, IX, IY, IZ
-INTEGER, INTENT(INOUT) :: IP
-
-A%VAL(IP) = - RDX(IX)*(RDXN(IX-1) * RECIPROCAL_DIRECTIONAL_MEAN(RHOP, 1, IX, IY, IZ) + &
-                       RDXN(IX)   * RECIPROCAL_DIRECTIONAL_MEAN(RHOP,-1, IX, IY, IZ) )
-
-IF (.NOT.TWO_D) &
-   A%VAL(IP) = A%VAL(IP) - RDY(IY)*(RDYN(IY-1) * RECIPROCAL_DIRECTIONAL_MEAN(RHOP, 2, IX, IY, IZ) + &
-                                    RDYN(IY)   * RECIPROCAL_DIRECTIONAL_MEAN(RHOP,-2, IX, IY, IZ) )
-
-A%VAL(IP) = A%VAL(IP) - RDZ(IZ)*(RDZN(IZ-1) * RECIPROCAL_DIRECTIONAL_MEAN(RHOP, 3, IX, IY, IZ) + &
-                                 RDZN(IZ)   * RECIPROCAL_DIRECTIONAL_MEAN(RHOP,-3, IX, IY, IZ) )
-
-A%ROW(IC) = IP
-A%COL(IP) = IC
-
-A%STENCIL(0) = A%VAL(IP)
-IP = IP + 1
-
-END SUBROUTINE SCARC_SETUP_MAINDIAG_INSEP
+END SUBROUTINE SCARC_SETUP_MATRIX_MAIN
 
 ! --------------------------------------------------------------------------------------------------------------
 !> \brief Set subdigonal entries for Poisson matrix in compact storage technique on specified face
 ! --------------------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_SETUP_SUBDIAG (IC, IX1, IY1, IZ1, IX2, IY2, IZ2, IP, IOR0)
-USE SCARC_POINTERS, ONLY: L, G, A
-USE SCARC_UTILITIES, ONLY: IS_NOT_ADJACENT_TO_FACE, RECIPROCAL_DIRECTIONAL_MEAN
-INTEGER, INTENT(IN) :: IC, IX1, IY1, IZ1, IX2, IY2, IZ2, IOR0
-INTEGER, INTENT(INOUT) :: IP
-INTEGER :: IW
-
-! If IC isn't directly adjacent to a face of the mesh, compute usual matrix contribution for corresponding subdiagonal
-
-IF (IS_NOT_ADJACENT_TO_FACE(IOR0, IX1, IY1, IZ1)) THEN
-
-   IF (IS_STRUCTURED .OR. .NOT.L%IS_SOLID(IX2, IY2, IZ2)) THEN
-      A%VAL(IP) = SUBDIAG_ENTRY (IOR0, IX1, IY1, IZ1, 1.0_EB)     ! passing 1.0, resulting in constant entries
-      A%COL(IP) = G%CELL_NUMBER(IX2, IY2, IZ2)
-      A%STENCIL(-IOR0) = A%VAL(IP)
-      IP = IP + 1
-   ELSE
-      CALL SCARC_ERROR(NSCARC_ERROR_MATRIX_SUBDIAG, SCARC_NONE, NSCARC_NONE)
-   ENDIF
-
-! If IC is adjacent to a face of the mesh, compute matrix contribution only if there is a neighbor for that cell
-
-ELSE IF (TYPE_SCOPE(0) == NSCARC_SCOPE_GLOBAL .AND. L%FACE(IOR0)%N_NEIGHBORS /= 0) THEN
-
-   IW = SUBDIAG_TYPE (IC, IOR0)                                   ! get IW of a possibly suitable neighbor at face IOR0
-   IF (IW > 0) then                                               ! if available, build corresponding subdiagonal entry
-      A%VAL(IP) = SUBDIAG_ENTRY (IOR0, IX1, IY1, IZ1, 1.0_EB)
-      A%COL(IP) = G%WALL(IW)%ICE                                  ! store its extended number in matrix column pointers
-      A%STENCIL(-IOR0) = A%VAL(IP)
-      IP = IP + 1
-   ENDIF
-
-ENDIF
-
-END SUBROUTINE SCARC_SETUP_SUBDIAG
-
-! --------------------------------------------------------------------------------------------------------------
-!> \brief Set subdigonal entries for Poisson matrix in compact storage technique on specified face
-! --------------------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_SETUP_SUBDIAG_INSEP (IC, IX1, IY1, IZ1, IX2, IY2, IZ2, IP, IOR0)
+SUBROUTINE SCARC_SETUP_MATRIX_SUB (IC, IX1, IY1, IZ1, IX2, IY2, IZ2, IP, IOR0)
 USE SCARC_POINTERS, ONLY: L, G, A, RHOP
-USE SCARC_UTILITIES, ONLY: IS_NOT_ADJACENT_TO_FACE, RECIPROCAL_DIRECTIONAL_MEAN
+USE SCARC_UTILITIES, ONLY: IS_NOT_ADJACENT_TO_FACE, RDM
 INTEGER, INTENT(IN) :: IC, IX1, IY1, IZ1, IX2, IY2, IZ2, IOR0
 INTEGER, INTENT(INOUT) :: IP
-INTEGER :: IW
-REAL(EB) :: SCAL
+INTEGER  :: IW
+REAL(EB) :: VAL
 
-SCAL = RECIPROCAL_DIRECTIONAL_MEAN(RHOP, IOR0, IX1, IY1, IZ1)     ! get density mean for this cell combination
+SELECT CASE (TYPE_POISSON)
+   CASE (NSCARC_POISSON_SEPARABLE) 
+      VAL = 1.0_EB                             ! passing 1.0, resulting in constant entries
+   CASE (NSCARC_POISSON_INSEPARABLE) 
+      VAL = RDM(RHOP, IOR0, IX1, IY1, IZ1)     ! get density mean for this cell combination
+END SELECT
 
 ! If IC isn't directly adjacent to a face of the mesh, compute usual matrix contribution for corresponding subdiagonal
 
 IF (IS_NOT_ADJACENT_TO_FACE(IOR0, IX1, IY1, IZ1)) THEN
 
    IF (IS_STRUCTURED .OR. .NOT.L%IS_SOLID(IX2, IY2, IZ2)) THEN
-      A%VAL(IP) = SUBDIAG_ENTRY (IOR0, IX1, IY1, IZ1, SCAL)  
+      A%VAL(IP) = SUBDIAG_ENTRY (IOR0, IX1, IY1, IZ1, VAL)  
       A%COL(IP) = G%CELL_NUMBER(IX2, IY2, IZ2)
       A%STENCIL(-IOR0) = A%VAL(IP)
       IP = IP + 1
@@ -9464,37 +9251,17 @@ IF (IS_NOT_ADJACENT_TO_FACE(IOR0, IX1, IY1, IZ1)) THEN
 
 ELSE IF (TYPE_SCOPE(0) == NSCARC_SCOPE_GLOBAL .AND. L%FACE(IOR0)%N_NEIGHBORS /= 0) THEN
 
-   IW = SUBDIAG_TYPE (IC, IOR0)           ! get IW of a possibly suitable neighbor at face IOR0
-   IF (IW > 0) then                                    ! if available, build corresponding subdiagonal entry
-      A%VAL(IP) = SUBDIAG_ENTRY (IOR0, IX1, IY1, IZ1, SCAL)
-      A%COL(IP) = G%WALL(IW)%ICE                       ! store its extended number in matrix column pointers
+   IW = SUBDIAG_TYPE (IC, IOR0)                                 ! get IW of a possibly suitable neighbor at face IOR0
+   IF (IW > 0) then                                             ! if available, build corresponding subdiagonal entry
+      A%VAL(IP) = SUBDIAG_ENTRY (IOR0, IX1, IY1, IZ1, VAL)
+      A%COL(IP) = G%WALL(IW)%ICE                                ! store its extended number in matrix column pointers
       A%STENCIL(-IOR0) = A%VAL(IP)
       IP = IP + 1
    ENDIF
 
 ENDIF
 
-END SUBROUTINE SCARC_SETUP_SUBDIAG_INSEP
-
-! --------------------------------------------------------------------------------------------------------------
-!> \brief Set subdigonal entries for permuted matrix in compact storage technique on specified face
-! --------------------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_SETUP_SUBDIAG_PERM (IX1, IY1, IZ1, IX2, IY2, IZ2, ICOL, IP, IOR0)
-USE SCARC_POINTERS, ONLY: L, A
-USE SCARC_UTILITIES, ONLY: IS_NOT_ADJACENT_TO_FACE, SUBDIAG_ENTRY
-INTEGER, INTENT(IN) :: IX1, IY1, IZ1, IX2, IY2, IZ2, IOR0, ICOL
-INTEGER, INTENT(INOUT) :: IP
-
-! If IC isn't directly adjacent to a face of the mesh, compute usual matrix contribution for corresponding subdiagonal
-
-IF (IS_NOT_ADJACENT_TO_FACE(IOR0, IX1, IY1, IZ1) .AND. .NOT.L%IS_SOLID(IX2, IY2, IZ2)) THEN
-   A%VAL(IP) = SUBDIAG_ENTRY (IOR0, IX1, IY1, IZ1, 1.0_EB)
-   A%COL(IP) = ICOL
-   A%STENCIL(-IOR0) = A%VAL(IP)
-   IP = IP + 1
-ENDIF
-
-END SUBROUTINE SCARC_SETUP_SUBDIAG_PERM
+END SUBROUTINE SCARC_SETUP_MATRIX_SUB
 
 ! --------------------------------------------------------------------------------------------------------------
 !> \brief Get maximum stencil size in specified matrix 
@@ -9597,7 +9364,7 @@ ELSE
    TYPE_SCOPE(0:1) = NSCARC_SCOPE_LOCAL
    TYPE_MKL(0:1)   = NSCARC_MKL_LOCAL
    SELECT CASE (TYPE_MGM_LAPLACE)
-      CASE (NSCARC_MGM_LAPLACE_CG, NSCARC_MGM_LAPLACE_PARDISO)                      ! basically get MKL version for these solvers
+      CASE (NSCARC_MGM_LAPLACE_CG, NSCARC_MGM_LAPLACE_MKL)                      ! basically get MKL version for these solvers
          DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
             CALL SCARC_POINT_TO_GRID (NM, NLEVEL_MIN)
             CALL SCARC_SETUP_MATRIX_MKL (NSCARC_MATRIX_LAPLACE, NM, NLEVEL_MIN)
@@ -9836,7 +9603,7 @@ END SUBROUTINE SCARC_SETUP_MATRIX_MKL
 SUBROUTINE SCARC_SETUP_BOUNDARY (NM, NL)
 USE SCARC_POINTERS, ONLY: L, G, F, GWC, A, ACO, RHOP, SCARC_POINT_TO_GRID, &
                           SCARC_POINT_TO_SEPARABLE_ENVIRONMENT, SCARC_POINT_TO_INSEPARABLE_ENVIRONMENT
-USE SCARC_UTILITIES, ONLY: RECIPROCAL_DIRECTIONAL_MEAN
+USE SCARC_UTILITIES, ONLY: RDM
 USE COMP_FUNCTIONS, ONLY: SHUTDOWN
 INTEGER, INTENT(IN) :: NM, NL
 INTEGER :: I, J, K, IG, JG, KG, IOR0, IW, IC, NOM, IP, ICO, ICOL
@@ -9922,12 +9689,12 @@ COMPACT_POISSON_TYPE_SELECT: SELECT CASE (TYPE_POISSON)
          IF (N_DIRIC_GLOBAL(NLEVEL_MIN) > 0) THEN               ! Dirichlet boundary cells available
             SELECT CASE (GWC%BTYPE)
                CASE (DIRICHLET)
-                  A%VAL(IP) = A%VAL(IP) - F%MATRIX_SHARE * RECIPROCAL_DIRECTIONAL_MEAN(RHOP, IOR0, I, J, K)
+                  A%VAL(IP) = A%VAL(IP) - F%MATRIX_SHARE * RDM(RHOP, IOR0, I, J, K)
                CASE (NEUMANN)
-                  A%VAL(IP) = A%VAL(IP) + F%MATRIX_SHARE * RECIPROCAL_DIRECTIONAL_MEAN(RHOP, IOR0, I, J, K)
+                  A%VAL(IP) = A%VAL(IP) + F%MATRIX_SHARE * RDM(RHOP, IOR0, I, J, K)
             END SELECT
          ELSE IF (GWC%BTYPE == NEUMANN) THEN                    ! Purely Neumann matrix
-            A%VAL(IP) = A%VAL(IP) + F%MATRIX_SHARE * RECIPROCAL_DIRECTIONAL_MEAN(RHOP, IOR0, I, J, K)
+            A%VAL(IP) = A%VAL(IP) + F%MATRIX_SHARE * RDM(RHOP, IOR0, I, J, K)
          ENDIF
 
       ENDDO COMPACT_INSEPARABLE_WALL_LOOP
@@ -10133,12 +9900,7 @@ SELECT CASE (TYPE_MGM_BC)
          IF (IS_UNSTRUCTURED .AND. L%IS_SOLID(I, J, K)) CYCLE
 
          NOM = GWC%NOM
-         IF (TYPE_MGM_LAPLACE == NSCARC_MGM_LAPLACE_LUPERM) THEN
-            IC  = G%PERM_FW(G%CELL_NUMBER(I, J, K))
-         ELSE
-            IC  = G%CELL_NUMBER(I, J, K)
-         ENDIF
-         !GWC%ICW = IC
+         IC  = G%CELL_NUMBER(I, J, K)
 
          IP = A%ROW(IC)
          SELECT CASE (GWC%BTYPE)
@@ -10813,7 +10575,7 @@ CONTAINS
 !> \brief Allocate vectors and define variables needed for McKeeney-Greengard-Mayo method
 ! ------------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_SETUP_MGM (NL)
-USE SCARC_POINTERS, ONLY: L, G, MGM, LO, UP, SCARC_POINT_TO_MGM, SCARC_POINT_TO_GRID, SCARC_POINT_TO_MATRIX
+USE SCARC_POINTERS, ONLY: L, G, MGM, SCARC_POINT_TO_MGM, SCARC_POINT_TO_GRID, SCARC_POINT_TO_MATRIX
 USE SCARC_CONVERGENCE, ONLY: VELOCITY_ERROR_MGM, NIT_MGM
 INTEGER, INTENT(IN):: NL
 INTEGER:: NM
@@ -10934,23 +10696,6 @@ DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          CALL SCARC_ALLOCATE_REAL1_FB (MGM%B_FB, 1, G%NC, NSCARC_INIT_ZERO, 'B', CROUTINE)
       ENDIF
 #endif
-
-   ENDIF
-
-   ! The following code is still experimental and addresses the solution of the LU method compactly stored matrices
-
-   IF (TYPE_MGM_LAPLACE == NSCARC_MGM_LAPLACE_LU .OR. TYPE_MGM_LAPLACE == NSCARC_MGM_LAPLACE_LUPERM) THEN
-
-      LO => SCARC_POINT_TO_MATRIX (NSCARC_MATRIX_LOWER)
-      UP => SCARC_POINT_TO_MATRIX (NSCARC_MATRIX_UPPER)
-
-      CALL SCARC_ALLOCATE_REAL1 (MGM%Y, 1, G%NC, NSCARC_INIT_ZERO, 'Y', CROUTINE)
-
-      CALL SCARC_SETUP_MGM_PASS2_SIZES(NM, NLEVEL_MIN)             ! TODO
-      CALL SCARC_ALLOCATE_MATRIX (LO, NLEVEL_MIN, NSCARC_PRECISION_DOUBLE, NSCARC_MATRIX_LIGHT, 'LO', CROUTINE)
-      CALL SCARC_ALLOCATE_MATRIX (UP, NLEVEL_MIN, NSCARC_PRECISION_DOUBLE, NSCARC_MATRIX_LIGHT, 'UP', CROUTINE)
-   
-      CALL SCARC_SETUP_MGM_PASS2(NM, NLEVEL_MIN)
 
    ENDIF
 
@@ -11717,16 +11462,6 @@ DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
                      ENDDO
                   ENDDO
                ENDDO
-            CASE (NSCARC_MGM_LAPLACE_LUPERM)
-               DO IZ = 1, L%NZ
-                  DO IY = 1, L%NY
-                     DO IX = 1, L%NX
-                        IF (L%IS_SOLID(IX, IY, IZ)) CYCLE
-                        ICU = G%PERM_FW(G%CELL_NUMBER(IX, IY, IZ))    ! unstructured permuted cell number
-                        MGM%UHL(IX, IY, IZ) = MGM%X(ICU)              ! solution contained in MGM%X
-                     ENDDO
-                  ENDDO
-               ENDDO
             CASE DEFAULT
                DO IZ = 1, L%NZ
                   DO IY = 1, L%NY
@@ -11744,7 +11479,6 @@ DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 
       CASE (NSCARC_MGM_MERGE)
 
-
          DO IZ = 0, L%NZ+1
             DO IY = 0, L%NY+1
                DO IX = 0, L%NX+1
@@ -11752,9 +11486,6 @@ DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
                ENDDO
             ENDDO
          ENDDO
-
-
-
 
       ! ---------- Terminate MGM method and extract predictor/corrector solution for FDS code
 
@@ -12732,16 +12463,11 @@ SELECT_LAPLACE_SOLVER: SELECT CASE (TYPE_MGM_LAPLACE)
       CALL SCARC_WARNING (NSCARC_WARNING_NO_MKL_PRECON, SCARC_NONE, NSCARC_NONE)
 #endif
 
-   ! Setup local LU or permuted LU solvers
-
-   CASE (NSCARC_MGM_LAPLACE_LU, NSCARC_MGM_LAPLACE_LUPERM)
-      CALL SCARC_SETUP_STACK_MGM(NSTACK, NSCARC_SCOPE_LOCAL)
-
 #ifdef WITH_MKL
 
    ! Setup local IntelMKL-PARDISO solvers 
 
-   CASE (NSCARC_MGM_LAPLACE_PARDISO)
+   CASE (NSCARC_MGM_LAPLACE_MKL)
 
       CALL SCARC_SETUP_STACK_MGM(NSTACK, NSCARC_SCOPE_LOCAL)
       DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
@@ -13303,7 +13029,7 @@ INSEPARABLE_BOUNDARY_CELLS_LOOP: DO IW = 1, L%N_WALL_CELLS_EXT
 
    SCAL  = 0.0_EB
    VAL   = 0.0_EB
-   RRHOM = RECIPROCAL_DIRECTIONAL_MEAN(RHOP, IOR0, I, J, K)      ! reciprocal of density mean along IW in direction IOR0
+   RRHOM = RDM(RHOP, IOR0, I, J, K)      ! reciprocal of density mean along IW in direction IOR0
 
    ! ---------- Dirichlet BC's:
    !
@@ -13711,10 +13437,8 @@ IF (STATE_MGM /= NSCARC_MGM_SUCCESS) THEN
       SELECT CASE (TYPE_MGM_LAPLACE)
          CASE (NSCARC_MGM_LAPLACE_CG)
             CALL SCARC_METHOD_KRYLOV (N_STACK_LAPLACE, NSCARC_STACK_ZERO, NLEVEL_MIN)
-         CASE (NSCARC_MGM_LAPLACE_LU, NSCARC_MGM_LAPLACE_LUPERM)
-            CALL SCARC_METHOD_MGM_LU(N_STACK_LAPLACE, NSCARC_STACK_ZERO, NLEVEL_MIN)
 #ifdef WITH_MKL
-         CASE (NSCARC_MGM_LAPLACE_PARDISO)
+         CASE (NSCARC_MGM_LAPLACE_MKL)
             CALL SCARC_METHOD_MGM_PARDISO(N_STACK_LAPLACE, NSCARC_STACK_ZERO, NLEVEL_MIN)
          CASE (NSCARC_MGM_LAPLACE_OPTIMIZED)
             CALL SCARC_METHOD_MGM_OPTIMIZED(N_STACK_LAPLACE, NSCARC_STACK_ZERO, NLEVEL_MIN)
@@ -13799,8 +13523,8 @@ DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
    ST  => L%STAGE(STACK(NS)%SOLVER%TYPE_STAGE)
 
 
-   DO IC = G%NONZERO, G%NC
-      MGM%Y(IC) = MGM%B(G%PERM_BW(IC))
+   DO IC = 1, G%NC
+      MGM%Y(IC) = MGM%B(IC)
       DO JC = 1, IC-1
          MGM%Y(IC) = MGM%Y(IC) - SCARC_EVALUATE_MATRIX(LO, IC, JC) * MGM%Y(JC)
       ENDDO
@@ -14317,7 +14041,7 @@ END SUBROUTINE SCARC_UPDATE_MAINCELLS
 SUBROUTINE SCARC_UPDATE_GHOSTCELLS(NL)
 USE SCARC_POINTERS, ONLY: M, L, G, GWC, MWC, HP, DXN, DYN, DZN, &
                           SCARC_POINT_TO_GRID, SCARC_POINT_TO_SEPARABLE_ENVIRONMENT, SCARC_POINT_TO_INSEPARABLE_ENVIRONMENT
-USE SCARC_UTILITIES, ONLY: RECIPROCAL_DIRECTIONAL_MEAN
+USE SCARC_UTILITIES, ONLY: RDM
 INTEGER, INTENT(IN) :: NL
 INTEGER :: NM, IW, IOR0, IXG, IYG, IZG, IXW, IYW, IZW
 
