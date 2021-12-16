@@ -617,7 +617,7 @@ TYPE MATERIAL_TYPE
    REAL(EB) :: THERMAL_DIFFUSIVITY                      !< Thermal diffusivity (m2/s)
    REAL(EB) :: KAPPA_S                                  !< Absorption coefficient (1/m)
    REAL(EB) :: TMP_BOIL                                 !< Boiling temperature (K) of a liquid
-   REAL(EB) :: REFRACTIVE_INDEX                         
+   REAL(EB) :: REFRACTIVE_INDEX
    REAL(EB) :: POROSITY=0._EB                           !< Porosity
    REAL(EB) :: MW=-1._EB                                !< Molecular weight (g/mol)
    REAL(EB) :: HEAT_OF_GASIFICATION                     !< Heat of gasification (J/kg)
@@ -767,7 +767,7 @@ TYPE SURFACE_TYPE
               FREE_SLIP=.FALSE.,NO_SLIP=.FALSE.,SPECIFIED_NORMAL_VELOCITY=.FALSE.,SPECIFIED_TANGENTIAL_VELOCITY=.FALSE., &
               SPECIFIED_NORMAL_GRADIENT=.FALSE.,CONVERT_VOLUME_TO_MASS=.FALSE.,SPECIFIED_HEAT_SOURCE=.FALSE.,&
               IMPERMEABLE=.FALSE.,BOUNDARY_FUEL_MODEL=.FALSE.,BLOWING=.FALSE.,ABL_MODEL=.FALSE., &
-              HT3D=.FALSE., MT1D=.FALSE.
+              HT3D=.FALSE., MT1D=.FALSE.,SET_H=.FALSE.
    LOGICAL :: INCLUDE_BOUNDARY_COORD_TYPE=.TRUE.     !< This surface requires basic coordinate information
    LOGICAL :: INCLUDE_BOUNDARY_PROPS_TYPE=.TRUE.     !< This surface requires surface variables for heat and mass transfer
    LOGICAL :: INCLUDE_BOUNDARY_ONE_D_TYPE=.TRUE.     !< This surface requires in-depth 1-D conduction/reaction arrays
