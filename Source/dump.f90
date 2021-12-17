@@ -838,8 +838,8 @@ IF (LU_DEVC_CTRL > 0) THEN
       OPEN(LU_DEVC_CTRL,FILE=FN_DEVC_CTRL,FORM='FORMATTED',STATUS='OLD',POSITION='APPEND')
    ELSE
       OPEN(LU_DEVC_CTRL,FILE=FN_DEVC_CTRL,FORM='FORMATTED',STATUS='REPLACE')
+      WRITE(LU_DEVC_CTRL,'(A,",",A,",",A,",",A,",",A,",",A)') 'Time (s)','Type','ID','State','Value','Units'
    ENDIF
-   WRITE(LU_DEVC_CTRL,'(A,",",A,",",A,",",A,",",A,",",A)') 'Time (s)','Type','ID','State','Value','Units'
 ENDIF
 
 T_USED(7) = T_USED(7) + CURRENT_TIME() - TNOW
