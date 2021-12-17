@@ -6465,8 +6465,6 @@ MESHES_LOOP1: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 
    CALL SCARC_POINT_TO_MESH(NM)
 
-   ! Store bounds of mesh in SCARC-structure
-
    S%XS = M%XS;  S%XF = M%XF
    S%YS = M%YS;  S%YF = M%YF
    S%ZS = M%ZS;  S%ZF = M%ZF
@@ -6474,130 +6472,14 @@ MESHES_LOOP1: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
    S%IBAR = M%IBAR;  S%JBAR = M%JBAR;  S%KBAR = M%KBAR
    IBAR   = M%IBAR;  JBAR   = M%JBAR;  KBAR   = M%KBAR
 
-   LEVEL_LOOP1: DO NL = NLEVEL_MIN, NLEVEL_MAX
+   CALL SCARC_POINT_TO_GRID (NM, NLEVEL_MIN)                                    
 
-      CALL SCARC_POINT_TO_GRID (NM, NL)                                    
+   L%NX = IBAR;  L%NY = JBAR;  L%NZ = KBAR
 
-      L%NX = IBAR;  L%NY = JBAR;  L%NZ = KBAR
+   L%N_WALL_CELLS_EXT = M%N_EXTERNAL_WALL_CELLS
+   L%N_WALL_CELLS_INT = M%N_INTERNAL_WALL_CELLS
+   L%N_WALL_CELLS     = L%N_WALL_CELLS_EXT + L%N_WALL_CELLS_INT
 
-      L%N_WALL_CELLS_EXT = M%N_EXTERNAL_WALL_CELLS
-      L%N_WALL_CELLS_INT = M%N_INTERNAL_WALL_CELLS
-      L%N_WALL_CELLS     = L%N_WALL_CELLS_EXT + L%N_WALL_CELLS_INT
-
-      ! Needed in case of multiple grid levels
-
-      IBAR=IBAR/2
-      IF (.NOT.TWO_D) JBAR=JBAR/2
-      KBAR=KBAR/2
-
-      ! Only on finest grid level:
-      ! Store information about obstructions
-       
-      IF (NL /= NLEVEL_MIN) THEN
-
-         CALL SCARC_ALLOCATE_REAL1 (L%X, 0, L%NX, NSCARC_INIT_NONE, 'L%X', CROUTINE)
-         CALL SCARC_ALLOCATE_REAL1 (L%Y, 0, L%NY, NSCARC_INIT_NONE, 'L%Y', CROUTINE)
-         CALL SCARC_ALLOCATE_REAL1 (L%Z, 0, L%NZ, NSCARC_INIT_NONE, 'L%Z', CROUTINE)
-
-         CALL SCARC_ALLOCATE_REAL1 (L%XC, 0, L%NX+1, NSCARC_INIT_NONE, 'L%XC', CROUTINE)
-         CALL SCARC_ALLOCATE_REAL1 (L%YC, 0, L%NY+1, NSCARC_INIT_NONE, 'L%YC', CROUTINE)
-         CALL SCARC_ALLOCATE_REAL1 (L%ZC, 0, L%NZ+1, NSCARC_INIT_NONE, 'L%ZC', CROUTINE)
-
-         CALL SCARC_ALLOCATE_REAL1 (L%DX, 0, L%NX+1, NSCARC_INIT_ZERO, 'L%DX', CROUTINE)
-         CALL SCARC_ALLOCATE_REAL1 (L%DY, 0, L%NY+1, NSCARC_INIT_ZERO, 'L%DY', CROUTINE)
-         CALL SCARC_ALLOCATE_REAL1 (L%DZ, 0, L%NZ+1, NSCARC_INIT_ZERO, 'L%DZ', CROUTINE)
-   
-         CALL SCARC_ALLOCATE_REAL1 (L%DXN, 0, L%NX, NSCARC_INIT_ZERO, 'L%DXN', CROUTINE)
-         CALL SCARC_ALLOCATE_REAL1 (L%DYN, 0, L%NY, NSCARC_INIT_ZERO, 'L%DYN', CROUTINE)
-         CALL SCARC_ALLOCATE_REAL1 (L%DZN, 0, L%NZ, NSCARC_INIT_ZERO, 'L%DZN', CROUTINE)
-   
-         CALL SCARC_ALLOCATE_REAL1 (L%RDX, 0, L%NX+1, NSCARC_INIT_ZERO, 'L%RDX', CROUTINE)
-         CALL SCARC_ALLOCATE_REAL1 (L%RDY, 0, L%NY+1, NSCARC_INIT_ZERO, 'L%RDY', CROUTINE)
-         CALL SCARC_ALLOCATE_REAL1 (L%RDZ, 0, L%NZ+1, NSCARC_INIT_ZERO, 'L%RDZ', CROUTINE)
-   
-         CALL SCARC_ALLOCATE_REAL1 (L%RDXN, 0, L%NX, NSCARC_INIT_ZERO, 'L%RDXN', CROUTINE)
-         CALL SCARC_ALLOCATE_REAL1 (L%RDYN, 0, L%NY, NSCARC_INIT_ZERO, 'L%RDYN', CROUTINE)
-         CALL SCARC_ALLOCATE_REAL1 (L%RDZN, 0, L%NZ, NSCARC_INIT_ZERO, 'L%RDZN', CROUTINE)
-
-         ! Compute grid points and widhts between them for coarser grids
-
-         L%DXI = (S%XF - S%XS)/REAL(L%NX,EB)
-         L%DYI = (S%ZF - S%ZS)/REAL(L%NY,EB)
-         L%DZI = (S%ZF - S%ZS)/REAL(L%NZ,EB)
-
-         L%RDXI = 1.0_EB/L%DXI
-         L%RDYI = 1.0_EB/L%DYI
-         L%RDZI = 1.0_EB/L%DZI
-
-         L%RDXI2 = L%RDXI**2
-         L%RDYI2 = L%RDYI**2
-         L%RDZI2 = L%RDZI**2
-
-         DO IX = 0, L%NX
-            L%X(IX) = S%XS + IX*L%DXI
-            IF (IX > 0) THEN
-               L%DX(IX) = L%X(IX) - L%X(IX-1)
-               L%RDX(IX) = 1.0_EB/L%DX(IX)
-            ENDIF
-         ENDDO
-         L%DX(0)       = L%DX(1)
-         L%DX(L%NX+1)  = L%DX(L%NX)
-         L%RDX(0)      = 1.0_EB/L%DX(1)
-         L%RDX(L%NX+1) = 1.0_EB/L%DX(L%NX)
-
-         DO IY = 0, L%NY
-            L%Y(IY) = S%YS + IY*L%DYI
-            IF (IY > 0) THEN
-               L%DY(IY) = L%Y(IY) - L%Y(IY-1)
-               L%RDY(IY) = 1.0_EB/L%DY(IY)
-            ENDIF
-         ENDDO
-         L%DY(0)       = L%DY(1)
-         L%DY(L%NY+1)  = L%DY(L%NY)
-         L%RDY(0)      = 1.0_EB/L%DY(1)
-         L%RDY(L%NY+1) = 1.0_EB/L%DY(L%NY)
-
-         DO IZ = 0, L%NZ
-            L%Z(IZ) = S%ZS + IZ*L%DZI
-            IF (IZ > 0) THEN
-               L%DZ(IZ) = L%Z(IZ) - L%Z(IZ-1)
-               L%RDZ(IZ) = 1.0_EB/L%DZ(IZ)
-            ENDIF
-         ENDDO
-         L%DZ(0)       = L%DZ(1)
-         L%DZ(L%NZ+1)  = L%DZ(L%NZ)
-         L%RDZ(0)      = 1.0_EB/L%DZ(1)
-         L%RDZ(L%NZ+1) = 1.0_EB/L%DZ(L%NZ)
-
-         ! Compute midpoints and widths between them for coarser grids
-
-         DO IX = 0, L%NX
-            L%DXN(IX)  = 0.5_EB*(L%DX(IX) + L%DX(IX+1))
-            L%RDXN(IX) = 1.0_EB/L%DXN(IX)
-            IF (IX > 0) L%XC(IX) = 0.5_EB*(L%X(IX) + L%X(IX-1))
-         ENDDO
-         L%XC(0)      = S%XS - 0.5_EB*L%DX(0)
-         L%XC(L%NX+1) = S%XF + 0.5_EB*L%DX(L%NX+1)
-
-         DO IY = 0, L%NY
-            L%DYN(IY)  = 0.5_EB*(L%DY(IY) + L%DY(IY+1))
-            L%RDYN(IY) = 1.0_EB/L%DYN(IY)
-            IF (IY > 0) L%YC(IY) = 0.5_EB*(L%Y(IY) + L%Y(IY-1))
-         ENDDO
-         L%YC(0)      = S%YS - 0.5_EB*L%DY(0)
-         L%YC(L%NY+1) = S%YF + 0.5_EB*L%DY(L%NY+1)
-
-         DO IZ = 0, L%NZ
-            L%DZN(IZ)  = 0.5_EB*(L%DZ(IZ) + L%DZ(IZ+1))
-            L%RDZN(IZ) = 1.0_EB/L%DZN(IZ)
-            IF (IZ > 0) L%ZC(IZ) = 0.5_EB*(L%Z(IZ) + L%Z(IZ-1))
-         ENDDO
-         L%ZC(0)      = S%ZS - 0.5_EB*L%DZ(0)
-         L%ZC(L%NZ+1) = S%ZF + 0.5_EB*L%DZ(L%NZ+1)
-
-      ENDIF
-
-   ENDDO LEVEL_LOOP1
 ENDDO MESHES_LOOP1
 
 ! On finest grid level:
