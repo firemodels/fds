@@ -6368,10 +6368,10 @@ SELECT_SCARC_METHOD: SELECT CASE (TYPE_METHOD)
          CASE (NSCARC_PRECON_MKL)
 
             IF (HAS_COARSE_LEVEL) THEN
-               CALL SCARC_GET_NUMBER_OF_LEVELS(NSCARC_LEVEL_MULTI)
+               NLEVEL_MIN = 1 ; NLEVEL_MAX = 2
                IF (TYPE_COARSE == NSCARC_COARSE_DIRECT) TYPE_MKL(NLEVEL_MAX) = NSCARC_MKL_GLOBAL
             ELSE
-               CALL SCARC_GET_NUMBER_OF_LEVELS(NSCARC_LEVEL_SINGLE)
+               NLEVEL_MIN = 1 ; NLEVEL_MAX = 1
             ENDIF
 
             IF (TYPE_SCOPE(1) == NSCARC_SCOPE_GLOBAL) THEN
@@ -6383,10 +6383,10 @@ SELECT_SCARC_METHOD: SELECT CASE (TYPE_METHOD)
          CASE (NSCARC_PRECON_OPT)
 
             IF (HAS_COARSE_LEVEL) THEN
-               CALL SCARC_GET_NUMBER_OF_LEVELS(NSCARC_LEVEL_MULTI)
+               NLEVEL_MIN = 1 ; NLEVEL_MAX = 2
                IF (TYPE_COARSE == NSCARC_COARSE_DIRECT) TYPE_MKL(NLEVEL_MAX) = NSCARC_MKL_GLOBAL
             ELSE
-               CALL SCARC_GET_NUMBER_OF_LEVELS(NSCARC_LEVEL_SINGLE)
+               NLEVEL_MIN = 1 ; NLEVEL_MAX = 1
             ENDIF
             TYPE_MKL(NLEVEL_MIN) = NSCARC_MKL_LOCAL
 #endif
@@ -6395,12 +6395,12 @@ SELECT_SCARC_METHOD: SELECT CASE (TYPE_METHOD)
  
          CASE DEFAULT
             IF (HAS_COARSE_LEVEL) THEN
-               CALL SCARC_GET_NUMBER_OF_LEVELS(NSCARC_LEVEL_MULTI)
+               NLEVEL_MIN = 1 ; NLEVEL_MAX = 2
 #ifdef WITH_MKL
 IF (TYPE_COARSE == NSCARC_COARSE_DIRECT) TYPE_MKL(NLEVEL_MAX) = NSCARC_MKL_GLOBAL
 #endif
             ELSE
-               CALL SCARC_GET_NUMBER_OF_LEVELS(NSCARC_LEVEL_SINGLE)
+               NLEVEL_MIN = 1 ; NLEVEL_MAX = 1
             ENDIF
 
       END SELECT SELECT_KRYLOV_PRECON
@@ -6409,7 +6409,7 @@ IF (TYPE_COARSE == NSCARC_COARSE_DIRECT) TYPE_MKL(NLEVEL_MAX) = NSCARC_MKL_GLOBA
  
    CASE (NSCARC_METHOD_MGM)
 
-      CALL SCARC_GET_NUMBER_OF_LEVELS(NSCARC_LEVEL_SINGLE)
+       NLEVEL_MIN = 1 ; NLEVEL_MAX = 1             ! may be extended 
 
 END SELECT SELECT_SCARC_METHOD
 
@@ -6423,26 +6423,6 @@ DO NL = NLEVEL_MIN, NLEVEL_MAX
 ENDDO
 #endif
 END SUBROUTINE SCARC_SETUP_LEVELS
-
-! --------------------------------------------------------------------------------------------------------------
-!> \brief Setup single level in case of default Krylov method
-! --------------------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_GET_NUMBER_OF_LEVELS(NTYPE)
-INTEGER, INTENT(IN) :: NTYPE
-INTEGER :: KLEVEL(3), KLEVEL_MIN, NM, NLEVEL
-
-SELECT_LEVEL_TYPE: SELECT CASE (NTYPE)
-   CASE(NSCARC_LEVEL_SINGLE)
-      NLEVEL     = 1
-      NLEVEL_MIN = 1
-      NLEVEL_MAX = 1
-   CASE(NSCARC_LEVEL_MULTI)
-      NLEVEL     = 2
-      NLEVEL_MIN = 1
-      NLEVEL_MAX = 2
-END SELECT SELECT_LEVEL_TYPE
-
-END SUBROUTINE SCARC_GET_NUMBER_OF_LEVELS
 
 ! --------------------------------------------------------------------------------------------------------------
 !> \brief Determine maximum number of possible levels
