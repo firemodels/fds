@@ -842,12 +842,10 @@ LOGICAL :: IS_STRUCTURED         = .FALSE.                       !< Flag for str
 LOGICAL :: IS_UNSTRUCTURED       = .FALSE.                       !< Flag for unstructured discretization
 LOGICAL :: IS_PURE_NEUMANN       = .FALSE.                       !< Flag for pure Neumann system
 LOGICAL :: IS_CG                 = .FALSE.                       !< Flag for Krylov method
-LOGICAL :: IS_FFT                = .FALSE.                       !< Flag for FFT-method
+LOGICAL :: IS_MGM                = .FALSE.                       !< Flag for McKeeney-Greengard-Mayo method
 LOGICAL :: IS_LAPLACE            = .FALSE.                       !< Flag for use of Laplace matrix (MGM only)
 LOGICAL :: IS_POISSON            = .TRUE.                        !< Flag for use of Poisson matrix (MGM only)
-LOGICAL :: IS_MKL                = .FALSE.                       !< Flag for MKL-method
 LOGICAL :: IS_MKL_LEVEL(2)       = .FALSE.                       !< Flag for level-dependent MKL method
-LOGICAL :: IS_MGM                = .FALSE.                       !< Flag for McKeeney-Greengard-Mayo method
 
 LOGICAL :: HAS_CSV_DUMP          = .FALSE.                       !< Flag for CSV-file to be dumped out
 LOGICAL :: HAS_MULTIPLE_MESHES   = .FALSE.                       !< Flag for multiple discretization types
@@ -3130,7 +3128,7 @@ ITE_PRES = ITE_PRES + 1
 ITE_GLOBAL = ICYC
 
 IF (SCARC_VERBOSE) WRITE(MSG%LU_VERBOSE,1000) ICYC, ITE_PRES, T
-1000 FORMAT('========> Entering (U)ScaRC-solver: #Time iteration = ',I6,': #Pressure Solution= ', I6,': Simulation Time = ', E11.3,/)
+1000 FORMAT('========> Entering (U)ScaRC: #Time iteration = ',I6,': #Pressure Solution= ', I6,': Simulation Time = ', E11.3,/)
 END SUBROUTINE SCARC_SET_ITERATION_STATE
 
 ! --------------------------------------------------------------------------------------------------------------
@@ -3880,6 +3878,7 @@ SELECT CASE (TRIM(SCARC_METHOD))
       END SELECT
 
       HAS_MULTIPLE_MESHES = .TRUE.
+      IS_MGM = .TRUE.
 
    CASE DEFAULT
       CALL SCARC_ERROR(NSCARC_ERROR_PARSE_INPUT, SCARC_METHOD, NSCARC_NONE)
