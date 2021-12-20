@@ -22,7 +22,6 @@ No in-depth radiation absorption.
 &VENT MB='ZMAX', SURF_ID='OPEN' /
 
 &MATL ID='BLACKPMMA 1D'
-      N_REACTIONS=1
       A(1) = 8.5E12
       E(1) = 188000
       EMISSIVITY=0.85
@@ -44,7 +43,6 @@ No in-depth radiation absorption.
       BACKING='INSULATED' /
 
 &MATL ID='BLACKPMMA 3D'
-      N_REACTIONS=1
       A(1) = 8.5E12
       E(1) = 188000
       EMISSIVITY=0.85
