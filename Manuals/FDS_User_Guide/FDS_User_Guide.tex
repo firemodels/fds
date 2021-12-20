@@ -2901,7 +2901,7 @@ If you want to specify the convective heat transfer coefficient, you can set it 
 
 \subsubsection{Specifying the Heat Flux at a Solid Surface}
 
-Instead of altering the convective heat transfer coefficient, you may specify a fixed heat flux directly.  Two methods are available to do this.  The first is to specify a {\ct NET\_HEAT\_FLUX} in units of kW/m$^2$.  When this is specified FDS will compute the surface temperature required to ensure that the combined radiative and convective heat flux from the surface is equal to the {\ct NET\_HEAT\_FLUX}. The second method is to specify the {\ct CONVECTIVE\_HEAT\_FLUX}, in units of kW/m$^2$. The radiative flux is then determined based on the {\ct EMISSIVITY} on the {\ct SURF} line and the wall temperature needed to get the desired {\ct CONVECTIVE\_HEAT\_FLUX}. Note that if you wish there to be only a convective heat flux from a surface, then the {\ct EMISSIVITY} should be set to zero.  If {\ct NET\_HEAT\_FLUX} or {\ct CONVECTIVE\_HEAT\_FLUX} is positive, the wall heats up the surrounding gases. If {\ct NET\_HEAT\_FLUX} or {\ct CONVECTIVE\_HEAT\_FLUX} is negative, the wall cools the surrounding gases. You cannot specify {\ct TMP\_FRONT} with either {\ct NET\_HEAT\_FLUX} or {\ct CONVECTIVE\_HEAT\_FLUX} since both inputs require FDS to compute the wall temperature to get the desired flux.
+Instead of altering the convective heat transfer coefficient, you may specify a fixed heat flux directly.  Two methods are available to do this.  The first is to specify a {\ct NET\_HEAT\_FLUX} in units of kW/m$^2$.  When this is specified FDS will compute the surface temperature required to ensure that the combined radiative and convective heat flux from the surface is equal to the {\ct NET\_HEAT\_FLUX}. The second method is to specify the {\ct CONVECTIVE\_HEAT\_FLUX}, in units of kW/m$^2$. The radiative flux is then determined based on the {\ct EMISSIVITY} on the {\ct SURF} line and the wall temperature needed to get the desired {\ct CONVECTIVE\_HEAT\_FLUX}. Note that if you wish there to be only a convective heat flux from a surface, then the {\ct EMISSIVITY} should be set to zero.  If {\ct NET\_HEAT\_FLUX} or {\ct CONVECTIVE\_HEAT\_FLUX} is positive, the wall heats up the surrounding gases. If {\ct NET\_HEAT\_FLUX} or {\ct CONVECTIVE\_HEAT\_FLUX} is negative, the wall cools the surrounding gases. You cannot specify {\ct TMP\_FRONT} with either {\ct NET\_HEAT\_FLUX} since NET\_HEAT\_FLUX combines radiative and convective flux and FDS must compute the wall temperature to get the desired flux. IF you specify {\ct TMP\_FRONT} and {\ct CONVECTIVE\_HEAT\_FLUX}, then FDS will use the gas temperature adjacent to wall cell to set the convection heat transfer coefficient to achieve the desired {\ct CONVECTIVE\_HEAT\_FLUX}.
 
 \subsubsection{Logarithmic Law of the Wall}
 
@@ -8265,6 +8265,8 @@ When using a {\ct DEVC} output to control FDS, the instantaneous value of the {\
 \ee
 where n is the time step, $x$ is the instantaneous device output and $\bar{x}$ is the smoothed output.  The \linebreak[4]{\ct SMOOTHING\_FACTOR} defaults to 0 which means no smoothing is performed.  Note that {\ct SMOOTHING\_FACTOR} only changes the value passed to control functions; it has no effect on the value of the {\ct DEVC} written to the {\ct CHID\_devc.csv} file.
 
+Each state change of a device is recorded to a log file, see Section~\ref{out:DEVC_CTRL_log}.
+
 \subsection{Creating and Removing Obstructions}
 \label{info:create_remove}
 
@@ -8384,6 +8386,7 @@ If you want a {\ct DEVC} to operate based on the logical state of a {\ct CTRL}, 
 
 The output value of a numerical control function is defined by a {\ct DEVC} line with {\ct QUANTITY='CONTROL VALUE'} and {\ct CTRL\_ID} set equal to the {\ct ID} of the control function.  You can then use {\ct SETPOINT} to have the {\ct DEVC} operate a particular output value of the control function.
 
+Each state change of a control function is recorded to a log file, see Section~\ref{out:DEVC_CTRL_log}.
 
 \subsection{Control Functions: \texorpdfstring{{\tt ANY}}{ANY}, \texorpdfstring{{\tt ALL}}{ALL}, \texorpdfstring{{\tt ONLY}}{ONLY}, and
 \texorpdfstring{{\tt AT\_LEAST}}{AT\_LEAST}}
@@ -8928,6 +8931,10 @@ The {\ct TEMPORAL\_STATISTIC='FAVRE AVERAGE'} outputs the Favre (density weighte
 \subsubsection{Instantaneous Value}
 
 For various reasons you might want to output the value of the {\ct QUANTITY} that has not been time-averaged or processed in any way. Sometimes this is important for device and control functions. To output the instantaneous value, set {\ct TEMPORAL\_STATISTIC} to {\ct 'INSTANT VALUE'}.
+
+\subsubsection{Smoothed Value}
+
+Control functions that use devices as inputs use the value of the devices determined by the {\ct SMOOTHING\_FACTOR} for each device. To output this smoothed value of the device, set {\ct TEMPORAL\_STATISTIC} to {\ct 'SMOOTHED'}. This statistic outputs the instantaneous smoothed value, and it does not time-average the smoothed value over the output interval.
 
 \subsubsection{Time Integral}
 
@@ -10618,7 +10625,7 @@ $^7$                 \> Requires {\ct POTENTIAL\_TEMPERATURE\_CORRECTION=T} on {
 \label{info:hvacoutputquantities}
 
 Table~\ref{tab:hvacoutput} summarizes the various Output Quantities for HVAC systems.  HVAC output quantities do not require an {\ct XYZ} or {\ct XB}. Quantities for a duct require the specification
-of a {\ct DUCT\_ID}, quantities for a node require the specification of a {\ct NODE\_ID} and quantities for a duct cell (when {\ct HVAC\_MASS\_TRANSPORT=T}) require specification of both a {\ct DUCT\_ID} and a {\ct CELL\_L} (distance along the duct in meters where the desired cell is located).  Mass and volume fraction outputs also require the specification of a {\ct SPEC\_ID}. Fan and aircoil outputs require the {\ct DUCT\_ID} of the duct they are located in. Filter outputs require the {\ct NODE\_ID} of the node they are located in. The quantity {\ct NODE PRESSSURE DIFFERENCE} requires that one specify both elements of the array {\ct NODE\_ID}, and the pressure difference is calculated by subtracting the first node from the second.
+of a {\ct DUCT\_ID}, quantities for a node require the specification of a {\ct NODE\_ID} and quantities for a duct cell (when {\ct HVAC\_MASS\_TRANSPORT=T}) require specification of both a {\ct DUCT\_ID} and a {\ct CELL\_L} (distance along the duct in meters where the desired cell is located).  Mass and volume fraction outputs also require the specification of a {\ct SPEC\_ID}. Fan and aircoil outputs require the {\ct DUCT\_ID} of the duct they are located in. Filter outputs require the {\ct NODE\_ID} of the node they are located in. The quantity {\ct DUCT ENTHALPY FLOW} applies Eq.~\ref{enthalpy_flow}. To have the node output {\ct NODE ENTHALPY} reflect the duct quantity set {\ct RELATIVE=.TRUE} for the node output. The quantity {\ct NODE PRESSSURE DIFFERENCE} requires that one specify both elements of the array {\ct NODE\_ID}, and the pressure difference is calculated by subtracting the first node from the second.
  Note that HVAC output quantities can only be used with a {\ct DEVC}.
 
 \begin{longtable}{|l|l|l|l|@{\extracolsep{\fill}}}
@@ -10639,7 +10646,7 @@ of a {\ct DUCT\_ID}, quantities for a node require the specification of a {\ct N
 {\ct DUCT CELL MASS FRACTION}                   & Mass fraction of a species in a duct cell   &  kg/kg             & D   \\ \hline
 {\ct DUCT CELL TEMPERATURE}                     & Gas temperature in a duct cell              &  $^\circ$C         & D   \\ \hline
 {\ct DUCT CELL VOLUME FRACTION}                 & Volume fraction of a species in a duct cell &  mol/mol           & D   \\ \hline
-{\ct DUCT ENERGY FLOW}                          & Energy flow in a duct                       &  kW                & D   \\ \hline
+{\ct DUCT ENTHALPY FLOW}                        & Enthalpy flow in a duct                     &  kW                & D   \\ \hline
 {\ct DUCT MASS FLOW}                            & Mass flow in a duct                         &  kg/s              & D   \\ \hline
 {\ct DUCT MASS FRACTION}                        & Mass fraction of a species in a duct        &  kg/kg             & D   \\ \hline
 {\ct DUCT TEMPERATURE}                          & Temperature of the flow in a duct           & $^\circ$C          & D   \\ \hline
@@ -10651,6 +10658,7 @@ of a {\ct DUCT\_ID}, quantities for a node require the specification of a {\ct N
 {\ct FILTER LOSS}                               & Flow loss through a filter                  &                    & D   \\ \hline
 {\ct NODE DENSITY}                              & Density of the flow through a node          &  kg/m$^3$          & D   \\ \hline
 {\ct NODE ENTHALPY}                             & Enthalpy of a node                          &  kJ/kg             & D   \\ \hline
+{\ct NODE SENSIBLE ENTHALPY}                    & Sensible Enthalpy of a node                 &  kJ/kg             & D   \\ \hline
 {\ct NODE MASS FRACTION}                        & Mass fraction of a species in a node        &  kg/kg             & D   \\ \hline
 {\ct NODE PRESSURE}                             & Pressure of a node                          &       Pa           & D   \\ \hline
 {\ct NODE PRESSURE DIFFERENCE}                  & Pressure difference between two nodes       &       Pa           & D   \\ \hline
@@ -12630,6 +12638,18 @@ T(1) , -001   , 001    , ... , -001
             .
 \end{lstlisting}
 where {\ct N\_CTRL} is the number of controllers, {\ct ID(I)} is the user-defined ID of the {\ct I}th control function, and plus or minus 1's represent the state {\ct -1 = F and +1 = T} of the {\ct I}th control function at the particular time. The files can be imported into Microsoft Excel or almost any other spreadsheet program. If the number of control columns exceeds {\ct CTRL\_COLUMN\_LIMIT}, the file will automatically be split into smaller files.
+
+\section{Device and Control Log File}
+\label{out:DEVC_CTRL_log}
+
+Each time a device or control function changes its logical state, an event is recorded in a comma delimited format in a file called {\ct CHID\_devc\_ctrl\_log.csv}. A row is created for each state change. The format of the file is as follows:
+\begin{lstlisting}
+	Time (s) , Type    , ID    , State   , Value , Units
+	T(1)     , Type(1) , ID(1) , State(1), Val(1), Units(1)
+	.
+	.
+\end{lstlisting}
+where for the {\ct I}th state change {\ct T(I)} is the time of the state change, {\ct Type(I)} is type of the item that changed state (either {\ct DEVC} or {\ct CTRL}), {\ct ID(I)} is the {\ct ID} of item, {\ct State(I)} is the logical state of the item after the state change ({\ct T} for true or {\ct F} for false), {\ct Val(I)} is item value at the state change, and {\ct Units(I)} are the units associated with the value. No {\ct Value} is written for a logical control function (e.g. a {\ct FUNCTION\_TYPE} or {\ct ALL}, {\ct ANY}, {\ct ONLY}, {\ct AT\_LEAST}, {\ct X\_OF\_N}, {\ct KILL}, or {\ct RESTART}). For {\ct FUNCTION\_TYPE}s of {\ct DEADBAND} and {\ct CUSTOM} the input value to the function is written. No {\ct Units} value is written for a control function. If the device or control function does not have an {\ct ID} defined, then the number of the device or control function is written (i.e, if the item was the 5th device in the input file, then 5 would be written).
 
 \section{CPU Usage Data}
 \label{out:CPU}
