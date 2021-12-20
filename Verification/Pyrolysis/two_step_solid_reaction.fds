@@ -104,10 +104,8 @@ I = 1,2,3 in any of the internal wall points.
       CONDUCTIVITY=0.1
       SPECIFIC_HEAT= 1.0
       DENSITY= 1. 
-      N_REACTIONS = 1
       A = 0.389
       E = 0.
-      N_S = 1.
       NU_MATL = 1.0
       MATL_ID = 'MAT_B'/
 
@@ -115,10 +113,8 @@ I = 1,2,3 in any of the internal wall points.
       CONDUCTIVITY=0.1
       SPECIFIC_HEAT= 1.0
       DENSITY= 1. 
-      N_REACTIONS = 1
       A = 0.262
       E = 0.
-      N_S = 1.
       NU_MATL = 1.0
       MATL_ID = 'MAT_C'/
 

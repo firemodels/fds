@@ -20,10 +20,8 @@
 	DENSITY 	= 360.
 	CONDUCTIVITY	= 0.05
 	SPECIFIC_HEAT	= 1.0
-	N_REACTIONS	= 1
 	A		= 1E20
 	E 		= 1.6E5
-	N_S		= 1
         SPEC_ID(1,1)    ='fuel_gas'    
 	NU_SPEC(1,1)	= 0.5
 	NU_MATL   	= 0.5

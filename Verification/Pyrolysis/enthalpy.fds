@@ -28,7 +28,6 @@ curve after 80 degC.
       CONDUCTIVITY=10.0
       SPECIFIC_HEAT_RAMP = 'c_ramp'
       DENSITY= 30.0 
-      N_REACTIONS = 1
       A = 0.2
       E = 0.
       N_S = 0.

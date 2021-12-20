@@ -26,7 +26,6 @@
       DENSITY 	            = 1000.
       CONDUCTIVITY          = 0.20
       SPECIFIC_HEAT         = 4.184 
-      N_REACTIONS           = 1
       REFERENCE_TEMPERATURE = 100.
       PYROLYSIS_RANGE       = 10.
       NU_SPEC               = 1.
@@ -38,7 +37,6 @@
       DENSITY 	            = 500.
       CONDUCTIVITY          = 0.20
       SPECIFIC_HEAT         = 1.0 
-      N_REACTIONS           = 1
       REFERENCE_TEMPERATURE = 300.
       PYROLYSIS_RANGE       = 80.
       NU_SPEC 	            = 0.8
