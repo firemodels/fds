@@ -782,12 +782,14 @@ MAIN_LOOP: DO
 
    ! Exchange mass loss information for OBSTs abutting interpolated boundaries
 
-   CALL MESH_EXCHANGE(15)  ! Exchange number of OBSTs that have mass info to exchange across mesh boundaries
-   CALL POST_RECEIVES(16)
-   CALL MESH_EXCHANGE(16)  ! Satellite meshes send mass losses to meshes that actually contain the OBSTstruction
-   CALL MESH_EXCHANGE(17)  ! Mesh containing the OBSTruction packs up its new mass to be sent to satellite meshes
-   CALL POST_RECEIVES(18)
-   CALL MESH_EXCHANGE(18)  ! Satellite meshes receive the new mass of OBSTructions that live in neighboring mesh
+   IF (EXCHANGE_OBST_MASS) THEN
+      CALL MESH_EXCHANGE(15)  ! Exchange number of OBSTs that have mass info to exchange across mesh boundaries
+      CALL POST_RECEIVES(16)
+      CALL MESH_EXCHANGE(16)  ! Satellite meshes send mass losses to meshes that actually contain the OBSTstruction
+      CALL MESH_EXCHANGE(17)  ! Mesh containing the OBSTruction packs up its new mass to be sent to satellite meshes
+      CALL POST_RECEIVES(18)
+      CALL MESH_EXCHANGE(18)  ! Satellite meshes receive the new mass of OBSTructions that live in neighboring mesh
+   ENDIF
 
    ! Finish computing the divergence
 
@@ -1257,7 +1259,7 @@ SELECT CASE(TASK_NUMBER)
          N_REQ = 0
       ENDIF
 
-      CASE(6)
+   CASE(6)
 
       ! Allocate a few arrays needed to exchange divergence and pressure info among meshes
 
@@ -1279,6 +1281,10 @@ SELECT CASE(TASK_NUMBER)
       ALLOCATE(DSUM(N_ZONE,NMESHES),STAT=IZERO) ; CALL ChkMemErr('MAIN','DSUM',IZERO) ; DSUM = 0._EB
       ALLOCATE(PSUM(N_ZONE,NMESHES),STAT=IZERO) ; CALL ChkMemErr('MAIN','PSUM',IZERO) ; PSUM = 0._EB
       ALLOCATE(USUM(N_ZONE,NMESHES),STAT=IZERO) ; CALL ChkMemErr('MAIN','USUM',IZERO) ; USUM = 0._EB
+
+      ! Determine if consumable OBST masses are to be exchanged
+
+      CALL MPI_ALLREDUCE(MPI_IN_PLACE,EXCHANGE_OBST_MASS,INTEGER_ONE,MPI_LOGICAL,MPI_LOR,MPI_COMM_WORLD,IERR)
 
 END SELECT
 
@@ -1639,7 +1645,9 @@ DO I=1,N_REQ5  ; CALL MPI_REQUEST_FREE(REQ5(I) ,IERR) ; ENDDO
 DO I=1,N_REQ6  ; CALL MPI_REQUEST_FREE(REQ6(I) ,IERR) ; ENDDO
 DO I=1,N_REQ7  ; CALL MPI_REQUEST_FREE(REQ7(I) ,IERR) ; ENDDO
 DO I=1,N_REQ14 ; CALL MPI_REQUEST_FREE(REQ14(I),IERR) ; ENDDO
-DO I=1,N_REQ15 ; CALL MPI_REQUEST_FREE(REQ15(I),IERR) ; ENDDO
+IF (EXCHANGE_OBST_MASS) THEN
+   DO I=1,N_REQ15 ; CALL MPI_REQUEST_FREE(REQ15(I),IERR) ; ENDDO
+ENDIF
 
 ! Shutdown MPI
 
@@ -2290,8 +2298,6 @@ MESH_LOOP: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
       INITIALIZATION_IF: IF (CODE==0) THEN
 
-         IJK_SIZE = (M3%I_MAX_R-M3%I_MIN_R+1)*(M3%J_MAX_R-M3%J_MIN_R+1)*(M3%K_MAX_R-M3%K_MIN_R+1)
-
          IF (M3%NIC_R>0) THEN
 
             ! Determine the maximum number of radiation angles that are to be received
@@ -2311,6 +2317,7 @@ MESH_LOOP: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
             ! Allocate the 1-D arrays that hold the big mesh variables that are to be received
 
+            IJK_SIZE = (M3%I_MAX_R-M3%I_MIN_R+1)*(M3%J_MAX_R-M3%J_MIN_R+1)*(M3%K_MAX_R-M3%K_MIN_R+1)
             ALLOCATE(M3%REAL_RECV_PKG1(M3%NIC_R*(6+2*N_TOTAL_SCALARS)))
             ALLOCATE(M3%REAL_RECV_PKG3(IJK_SIZE*4))
             ALLOCATE(M3%REAL_RECV_PKG5(NRA_MAX*NUMBER_SPECTRAL_BANDS*M3%NIC_R))
@@ -2336,8 +2343,10 @@ MESH_LOOP: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             CALL MPI_RECV_INIT(M3%REAL_RECV_PKG1(1),SIZE(M3%REAL_RECV_PKG1),MPI_DOUBLE_PRECISION,SNODE,NOM,MPI_COMM_WORLD,&
                                REQ1(N_REQ1),IERR)
 
-            N_REQ15 = N_REQ15 + 1
-            CALL MPI_RECV_INIT(M3%N_INTERNAL_OBST,INTEGER_ONE,MPI_INTEGER,SNODE,NOM,MPI_COMM_WORLD,REQ15(N_REQ15),IERR)
+            IF (EXCHANGE_OBST_MASS) THEN
+               N_REQ15 = N_REQ15 + 1
+               CALL MPI_RECV_INIT(M3%N_INTERNAL_OBST,INTEGER_ONE,MPI_INTEGER,SNODE,NOM,MPI_COMM_WORLD,REQ15(N_REQ15),IERR)
+            ENDIF
 
             N_REQ3 = N_REQ3 + 1
             CALL MPI_RECV_INIT(M3%REAL_RECV_PKG3(1),SIZE(M3%REAL_RECV_PKG3),MPI_DOUBLE_PRECISION,SNODE,NOM,MPI_COMM_WORLD,&
@@ -2466,14 +2475,14 @@ SENDING_MESH_LOOP: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
       RNODE = PROCESS(NOM)
 
-      IMIN = M3%I_MIN_S
-      IMAX = M3%I_MAX_S
-      JMIN = M3%J_MIN_S
-      JMAX = M3%J_MAX_S
-      KMIN = M3%K_MIN_S
-      KMAX = M3%K_MAX_S
-
-      IJK_SIZE = (IMAX-IMIN+1)*(JMAX-JMIN+1)*(KMAX-KMIN+1)
+      IF (RNODE==SNODE) THEN
+         IMIN = M3%I_MIN_S
+         IMAX = M3%I_MAX_S
+         JMIN = M3%J_MIN_S
+         JMAX = M3%J_MAX_S
+         KMIN = M3%K_MIN_S
+         KMAX = M3%K_MAX_S
+      ENDIF
 
       ! Set up sends for one-time exchanges or persistent send/receives.
 
@@ -2498,6 +2507,7 @@ SENDING_MESH_LOOP: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
             ! Allocate 1-D arrays to hold major mesh variables that are to be sent to neighboring meshes
 
+            IJK_SIZE = (M3%I_MAX_S-M3%I_MIN_S+1)*(M3%J_MAX_S-M3%J_MIN_S+1)*(M3%K_MAX_S-M3%K_MIN_S+1)
             ALLOCATE(M3%REAL_SEND_PKG1(M3%NIC_S*(6+2*N_TOTAL_SCALARS)))
             ALLOCATE(M3%REAL_SEND_PKG3(IJK_SIZE*4))
             ALLOCATE(M3%REAL_SEND_PKG5(NRA_MAX*NUMBER_SPECTRAL_BANDS*M3%NIC_S))
@@ -2526,8 +2536,10 @@ SENDING_MESH_LOOP: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             CALL MPI_SEND_INIT(M3%REAL_SEND_PKG1(1),SIZE(M3%REAL_SEND_PKG1),MPI_DOUBLE_PRECISION,RNODE,NM,MPI_COMM_WORLD,&
                                REQ1(N_REQ1),IERR)
 
-            N_REQ15 = N_REQ15 + 1
-            CALL MPI_SEND_INIT(M3%N_EXTERNAL_OBST,INTEGER_ONE,MPI_INTEGER,RNODE,NM,MPI_COMM_WORLD,REQ15(N_REQ15),IERR)
+            IF (EXCHANGE_OBST_MASS) THEN
+               N_REQ15 = N_REQ15 + 1
+               CALL MPI_SEND_INIT(M3%N_EXTERNAL_OBST,INTEGER_ONE,MPI_INTEGER,RNODE,NM,MPI_COMM_WORLD,REQ15(N_REQ15),IERR)
+            ENDIF
 
             N_REQ3 = N_REQ3 + 1
             CALL MPI_SEND_INIT(M3%REAL_SEND_PKG3(1),SIZE(M3%REAL_SEND_PKG3),MPI_DOUBLE_PRECISION,RNODE,NM,MPI_COMM_WORLD,&
@@ -2694,9 +2706,9 @@ SENDING_MESH_LOOP: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          ENDIF
          IF (RNODE/=SNODE) THEN
             LL = 0
-            DO KK=KMIN,KMAX
-               DO JJ=JMIN,JMAX
-                  DO II=IMIN,IMAX
+            DO KK=M3%K_MIN_S,M3%K_MAX_S
+               DO JJ=M3%J_MIN_S,M3%J_MAX_S
+                  DO II=M3%I_MIN_S,M3%I_MAX_S
                      M3%REAL_SEND_PKG3(LL+1) = HP(II,JJ,KK)
                      M3%REAL_SEND_PKG3(LL+2) = UP(II,JJ,KK)
                      M3%REAL_SEND_PKG3(LL+3) = VP(II,JJ,KK)
@@ -2895,7 +2907,7 @@ SENDING_MESH_LOOP: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
 ENDDO SENDING_MESH_LOOP
 
-! Halt communications until all processes are ready to receive the data.
+! Start the communications
 
 IF (N_MPI_PROCESSES>1 .AND. N_REQ>0) THEN
    CALL TIMEOUT('REQ',N_REQ,REQ(1:N_REQ))
@@ -2962,13 +2974,6 @@ RECV_MESH_LOOP: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       IF (NOM==NM .AND. M2%NIC_R==0) CYCLE SEND_MESH_LOOP
 
       SNODE = PROCESS(NOM)
-
-      IMIN = M2%I_MIN_R
-      IMAX = M2%I_MAX_R
-      JMIN = M2%J_MIN_R
-      JMAX = M2%J_MAX_R
-      KMIN = M2%K_MIN_R
-      KMAX = M2%K_MAX_R
 
       ! Unpack densities and species mass fractions in the PREDICTOR (CODE=1) and CORRECTOR (CODE=4) step
 
@@ -3045,9 +3050,9 @@ RECV_MESH_LOOP: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             HP2 => M2%H  ; UP2 => M2%U  ; VP2 => M2%V  ; WP2 => M2%W
          ENDIF
          LL = 0
-         DO KK=KMIN,KMAX
-            DO JJ=JMIN,JMAX
-               DO II=IMIN,IMAX
+         DO KK=M2%K_MIN_R,M2%K_MAX_R
+            DO JJ=M2%J_MIN_R,M2%J_MAX_R
+               DO II=M2%I_MIN_R,M2%I_MAX_R
                   HP2(II,JJ,KK) = M2%REAL_RECV_PKG3(LL+1)
                   UP2(II,JJ,KK) = M2%REAL_RECV_PKG3(LL+2)
                   VP2(II,JJ,KK) = M2%REAL_RECV_PKG3(LL+3)

@@ -170,6 +170,7 @@ REAL(EB) :: FUEL_N_TO_HCN_FRACTION=0.2_EB   !< Fraction of nitrogen atoms in the
 
 LOGICAL :: RADIATION=.TRUE.                 !< Perform radiation transport
 LOGICAL :: EXCHANGE_RADIATION=.FALSE.       !< Do an MPI radiation exchange at this time step
+LOGICAL :: EXCHANGE_OBST_MASS=.FALSE.       !< Exchange mass loss information for obstructions bordering interpolated meshes
 LOGICAL :: CYLINDRICAL=.FALSE.              !< Cylindrical domain option
 LOGICAL :: NOISE=.TRUE.                     !< Initialize velocity field with a small amount of divergence-free motion
 LOGICAL :: PREDICTOR                        !< The first half of the second-order accurate time-step

@@ -2630,6 +2630,13 @@ CHECK_MESHES: IF (IW<=M%N_EXTERNAL_WALL_CELLS) THEN
          VENT_INDEX = 0
       ENDIF
 
+      ! Determine if masses from consumable obstructions need to be exchanged
+
+      IF (M%SOLID(ICG) .OR. MM%SOLID(ICO)) THEN
+         IF (M%OBSTRUCTION(M%OBST_INDEX_C(ICG))%CONSUMABLE .OR. MM%OBSTRUCTION(MM%OBST_INDEX_C(ICO))%CONSUMABLE) &
+            EXCHANGE_OBST_MASS = .TRUE.
+      ENDIF
+
       ! Do not allow a MIRROR boundary to sit on a mesh interface
 
       IF (VENT_INDEX>0) THEN
