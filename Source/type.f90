@@ -1,8 +1,8 @@
 !> \brief A collection of major derived types used in FDS.
 !> \details There are several TYPEs that require special attention. WALL, CFACE, and PARTICLE TYPES reference other
-!> derived types that start with BOUNDARY, like BOUNDARY_COORD or BOUNDARY_ONE_D. The number of real, integer, and logical scalar
+!> derived types that start with BOUNDARY, like BOUNDARY_COORD or BOUNDARY_ONE_D. The number of real, integer, and logical scalar 
 !> and array components of these derived types are denoted like this, for example: N_BOUNDARY_COORD_SCALAR_INTEGERS. You must
-!> adjust this value if you add or subtract components from the derived type. You should then use an existing component
+!> adjust this value if you add or subtract components from the derived type. You should then use an existing component 
 !> as a guide and trace it through func.f90 to see how to initialize this component.
 
 MODULE TYPES
@@ -151,7 +151,7 @@ TYPE (LAGRANGIAN_PARTICLE_CLASS_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: LAGR
 !> \brief Solid material density for 1-D pyrolysis/conduction algorithm
 
 TYPE MATL_COMP_TYPE
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHO     !< (1:NWP) Solid density (kg/m3)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHO !< (1:NWP) Solid density (kg/m3)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHO_DOT !< (1:NWP) Change in solid density (kg/m3/s)
 END TYPE MATL_COMP_TYPE
 
@@ -334,9 +334,9 @@ TYPE LAGRANGIAN_PARTICLE_TYPE
    INTEGER :: CFACE_INDEX=0          !< Index of immersed boundary CFACE that the droplet has attached to
    INTEGER :: PROP_INDEX=0           !< Index of the PROPERTY_TYPE assigned to the particle
 
-   LOGICAL :: SHOW=.FALSE.           !< Show the particle in Smokeview
-   LOGICAL :: SPLAT=.FALSE.          !< The liquid droplet has hit a solid
-   LOGICAL :: EMBER=.FALSE.          !< The particle can break away and become a burning ember
+   LOGICAL :: SHOW=.FALSE.         !< Show the particle in Smokeview
+   LOGICAL :: SPLAT=.FALSE.        !< The liquid droplet has hit a solid
+   LOGICAL :: EMBER=.FALSE.        !< The particle can break away and become a burning ember
    LOGICAL :: PATH_PARTICLE =.FALSE. !< Indicator of a particle with a specified path
 
    REAL(EB) :: U=0._EB             !< \f$ x \f$ velocity component of particle (m/s)
@@ -616,7 +616,7 @@ TYPE MATERIAL_TYPE
    REAL(EB) :: THERMAL_DIFFUSIVITY                      !< Thermal diffusivity (m2/s)
    REAL(EB) :: KAPPA_S                                  !< Absorption coefficient (1/m)
    REAL(EB) :: TMP_BOIL                                 !< Boiling temperature (K) of a liquid
-   REAL(EB) :: REFRACTIVE_INDEX
+   REAL(EB) :: REFRACTIVE_INDEX                         
    REAL(EB) :: POROSITY=0._EB                           !< Porosity
    REAL(EB) :: MW=-1._EB                                !< Molecular weight (g/mol)
    REAL(EB) :: HEAT_OF_GASIFICATION                     !< Heat of gasification (J/kg)
@@ -768,7 +768,7 @@ TYPE SURFACE_TYPE
               IMPERMEABLE=.FALSE.,BOUNDARY_FUEL_MODEL=.FALSE.,BLOWING=.FALSE.,ABL_MODEL=.FALSE., &
               HT3D=.FALSE., MT1D=.FALSE.,SET_H=.FALSE.
    LOGICAL :: INCLUDE_BOUNDARY_COORD_TYPE=.TRUE.     !< This surface requires basic coordinate information
-   LOGICAL :: INCLUDE_BOUNDARY_PROPS_TYPE=.TRUE.     !< This surface requires surface variables for heat and mass transfer
+   LOGICAL :: INCLUDE_BOUNDARY_PROPS_TYPE=.TRUE.  !< This surface requires surface variables for heat and mass transfer
    LOGICAL :: INCLUDE_BOUNDARY_ONE_D_TYPE=.TRUE.     !< This surface requires in-depth 1-D conduction/reaction arrays
    LOGICAL :: INCLUDE_BOUNDARY_RADIA_TYPE=.TRUE.     !< This surface requires angular-specific radiation intensities
    INTEGER :: N_WALL_STORAGE_REALS=0,N_WALL_STORAGE_INTEGERS=0,N_WALL_STORAGE_LOGICALS=0
@@ -1502,75 +1502,185 @@ END TYPE MULTIPLIER_TYPE
 
 TYPE (MULTIPLIER_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: MULTIPLIER
 
+!> \brief Parameters associated with HVAC TYPE_ID FILTER
+
 TYPE FILTER_TYPE
-   INTEGER :: RAMP_INDEX = -1
-   CHARACTER(LABEL_LENGTH) :: ID,TABLE_ID
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: EFFICIENCY,MULTIPLIER
-   REAL(EB) :: CLEAN_LOSS,LOADING_LOSS
+   INTEGER :: RAMP_INDEX = -1                             !< Table of loading vs. loss coefficient
+   CHARACTER(LABEL_LENGTH) :: ID                          !< Name of the filter
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: EFFICIENCY      !< Array giving species filtering efficiency
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: MULTIPLIER      !< Array containing species multiplier used to compute loading
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: INITIAL_LOADING !< Array of containing initial filter loading (kg) for each species
+   REAL(EB) :: CLEAN_LOSS                                 !< Loss coefficient of a filter when the loading is 0 kg.
+   REAL(EB) :: LOADING_LOSS                               !< Multiplier applied to loading to determine filter loss
 END TYPE FILTER_TYPE
 
 TYPE (FILTER_TYPE), DIMENSION(:), ALLOCATABLE,  TARGET :: FILTER
 
+!> \brief Parameters associated with HVAC TYPE_ID NODE
+
 TYPE DUCTNODE_TYPE
-   INTEGER :: FILTER_INDEX=-1, N_DUCTS,VENT_INDEX = -1, MESH_INDEX = -1,ZONE_INDEX=-1
-   INTEGER, ALLOCATABLE, DIMENSION(:) :: DUCT_INDEX
-   CHARACTER(LABEL_LENGTH) :: ID,TABLE_ID,VENT_ID='null'
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: LOSS_ARRAY,FILTER_LOADING
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ,DIR,ZZ_V
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_OLD
-   REAL(EB) :: LOSS, P,TMP=273.15_EB,RHO,RSUM,CP,XYZ(3),FILTER_LOSS,TMP_V,RHO_V,RSUM_V,CP_V
-   REAL(EB) :: P_OLD,TMP_OLD,RHO_OLD,CP_OLD,RSUM_OLD
-   LOGICAL :: UPDATED, READ_IN, FIXED, AMBIENT = .FALSE.,LEAKAGE=.FALSE.,VENT=.FALSE.,TRANSPORT_PARTICLES=.FALSE.
-   LOGICAL, ALLOCATABLE, DIMENSION(:) :: IN_MESH
+   INTEGER :: FILTER_INDEX=-1                              !< Index of a filter contained in the node
+   INTEGER :: N_DUCTS                                      !< Number of ducts attached to the node
+   INTEGER :: VENT_INDEX = -1                              !< Index of a VENT the node is attached to
+   INTEGER :: ZONE_INDEX=-1                                !< Pressure zone containing the node
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: DUCT_INDEX        !< List of ducts attached to the node
+   CHARACTER(LABEL_LENGTH) :: ID                           !< Name of the node
+   CHARACTER(LABEL_LENGTH) :: VENT_ID='null'               !< Name of a VENT the node is attached to
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: LOSS_ARRAY     !< (i,j) Flow loss for flow from duct i to duct j
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: FILTER_LOADING !< (loading for each species, old/new/guess)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ               !< Current species mass fractions at the node
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: DIR              !< (i) Duct i lists the node first (-1) or second (+1)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_V             !< Current species mass fractions at an attached CENT
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_OLD           !< Prior iteration species at the node
+   REAL(EB) :: LOSS                                        !< Current node flow loss
+   REAL(EB) :: TMP=273.15_EB                               !< Current node temperature (K)
+   REAL(EB) :: TMP_OLD                                     !< Prior timestep node temperature (K)
+   REAL(EB) :: TMP_V                                       !< Temperature of VENT connected to node (K)
+   REAL(EB) :: RHO                                         !< Current node density (kg/m3)
+   REAL(EB) :: RHO_OLD                                     !< Prior timestep node density (kg/m3)
+   REAL(EB) :: RHO_V                                       !< Node density of VENT connected to node (kg/m3)
+   REAL(EB) :: RSUM                                        !< Specfiic gas constant of node (J/kg/K)
+   REAL(EB) :: RSUM_OLD                                    !< Prior timestep specfic gas constant (J/kg/K)
+   REAL(EB) :: RSUM_V                                      !< Specific gas constant of VENT connected to node (J/kg/K)
+   REAL(EB) :: CP                                          !< Specific heat of node (J/kg/K)
+   REAL(EB) :: CP_OLD                                      !< Prior timestep specific heat of node (J/kg/K)
+   REAL(EB) :: CP_V                                        !< Specific heat of VENT connected to node (J/kg/K)
+   REAL(EB) :: XYZ(3)                                      !< Node (x,y,z) coordinate (m)
+   REAL(EB) :: FILTER_LOSS                                 !< Current loss for a filter in the node
+   REAL(EB) :: P                                           !< Pressure at the node (Pa)
+   REAL(EB) :: P_OLD                                       !< Prior timestep pressure at the node (Pa)
+   REAL(EB) :: P_EXTRAP                                    !< Extrapolated pressure at the node (Pa)
+   LOGICAL :: UPDATED                                      !< Node has been updated in the current timestep
+   LOGICAL :: READ_IN                                      !< Node defintion is explicit in the input file
+   LOGICAL :: FIXED                                        !< Attached ducts have fully defined flow rates
+   LOGICAL :: AMBIENT = .FALSE.                            !< Node is connected to the ambient
+   LOGICAL :: LEAKAGE=.FALSE.                              !< Node is being used for leakage
+   LOGICAL :: VENT=.FALSE.                                 !< Node has an attached vent
+   LOGICAL :: TRANSPORT_PARTICLES=.FALSE.                  !< Particles will be transported through the vent attached to the node
+   LOGICAL, ALLOCATABLE, DIMENSION(:) :: IN_MESH           !< (i) Flag indicating node is present in mesh i
 END TYPE DUCTNODE_TYPE
 
 TYPE (DUCTNODE_TYPE), DIMENSION(:), ALLOCATABLE,  TARGET :: DUCTNODE
 
+!> \brief Parameters associated with aggregating node boundary conditions over the area of a VENT
+
 TYPE NODE_BC_TYPE
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_V
-   REAL(EB) :: TMP_V,RHO_V,RSUM_V,CP_V, P
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_V !< Stores aggregated species mass fraction
+   REAL(EB) :: TMP_V                           !< Stores aggreated temperature
+   REAL(EB) :: RHO_V                           !< Stores aggreated density
+   REAL(EB) :: RSUM_V                          !< Stores aggreated gas constant
+   REAL(EB) :: CP_V                            !< Stores aggreated specific heat
+   REAL(EB) :: P                               !< Stores aggreated pressure
 END TYPE NODE_BC_TYPE
 
+!> \brief Parameters associated with HVAC TYPE_ID DUCT
+
 TYPE DUCT_TYPE
-   INTEGER :: NODE_INDEX(2)=-1,DEVC_INDEX=-1,CTRL_INDEX=-1,FAN_INDEX=-1,AIRCOIL_INDEX=-1,RAMP_INDEX=0,RAMP_LOSS_INDEX=0,&
-              N_CELLS=1,DUCT_INTERP_TYPE_INDEX,SURF_INDEX=-1,LPC_INDEX=-1,QFAN_N=-1
-   REAL(EB) :: AREA,AREA_INITIAL,COIL_Q=0._EB,CP_D,DIAMETER,DP_FAN(2)=0._EB,DX=-1._EB,LENGTH,MASS_FLOW_INITIAL=1.E6_EB,&
-               RHO_D,ROUGHNESS,RSUM_D=0._EB,TAU=-1._EB,TMP_D=273.15_EB,TOTAL_LOSS=0._EB,VEL(4)=0._EB,VOLUME_FLOW=1.E6_EB,&
-               VOLUME_FLOW_INITIAL=1.E6_EB,LOSS(2)=0._EB
-   REAL(EB) :: CP_D_OLD,RHO_D_OLD,RSUM_D_OLD
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: CP_C,RHO_C,TMP_C,ZZ,PART_INDEX,PART_CELL_INDEX
-   REAL(EB), ALLOCATABLE, DIMENSION(:) :: CP_C_OLD,RHO_C_OLD,TMP_C_OLD,ZZ_OLD
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: ZZ_C
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: ZZ_C_OLD
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: VEL_SYSTEM
-   LOGICAL :: ROUND = .TRUE.,SQUARE = .FALSE.,DAMPER = .FALSE.,DAMPER_OPEN = .TRUE.,FAN_OPERATING=.TRUE.,COIL_OPERATING=.TRUE.,&
-              FIXED=.FALSE.,REVERSE=.FALSE.,UPDATED,LEAKAGE=.FALSE.,LEAK_ENTHALPY=.FALSE.,LOCALIZED_LEAKAGE=.FALSE.
-   CHARACTER(LABEL_LENGTH) :: ID
-   REAL(EB) :: FAN_ON_TIME = 1.E10_EB,COIL_ON_TIME = 1.E10_EB
+   INTEGER :: NODE_INDEX(2)=-1                            !< Nodes connected to ends of duct
+   INTEGER :: DEVC_INDEX=-1                               !< Index for DEVC controlling fan, damper, or aircoil
+   INTEGER :: CTRL_INDEX=-1                               !< Index for CTRL controlling fan, damper, or aircoil
+   INTEGER :: FAN_INDEX=-1                                !< Type of fan present in duct
+   INTEGER :: AIRCOIL_INDEX=-1                            !< Type of aircoil present in fuct
+   INTEGER :: RAMP_INDEX=0                                !< Index of RAMP used for MASS_FLOW or VOLUME_FLOW
+   INTEGER :: RAMP_LOSS_INDEX=0                           !< Ramp for damper flow loss
+   INTEGER :: N_CELLS=1                                   !< Number of duct segments for HVAC mass transport
+   INTEGER :: DUCT_INTERP_TYPE_INDEX                      !< Method of interpolation for HVAC mass transport
+   INTEGER :: SURF_INDEX=-1                               !< Current node density (kg/m3)
+   INTEGER :: LPC_INDEX=-1                                !< Particle class for visualization
+   INTEGER :: QFAN_N=-1                                   !< Number of fans in a ductrun
+   REAL(EB) :: AREA                                       !< Current duct cross sectional area (m2)
+   REAL(EB) :: AREA_INITIAL                               !< Input duct cross sectional area (m2)
+   REAL(EB) :: COIL_Q=0._EB                               !< Current heat rate from an aircoil (W)
+   REAL(EB) :: CP_D                                       !< Upstream specific heat (J/kg/K)
+   REAL(EB) :: CP_D_OLD                                   !< Prior timestep upstream specific heat (J/kg/K)
+   REAL(EB) :: DIAMETER                                   !< Duct diamater (m)
+   REAL(EB) :: DP_FAN(2)=0._EB                            !< Prior and current fan pressure (Pa)
+   REAL(EB) :: DX=-1._EB                                  !< Duct segment length (m)
+   REAL(EB) :: LENGTH                                     !< Duct length (m)
+   REAL(EB) :: MASS_FLOW_INITIAL=1.E6_EB                  !< Input duct mass flow (kg/m3)
+   REAL(EB) :: RHO_D                                      !< Upstream density (kg/m3)
+   REAL(EB) :: RHO_D_OLD                                  !< Prior timestep upstream density (kg/m3)
+   REAL(EB) :: ROUGHNESS                                  !< Wall roughness (m)
+   REAL(EB) :: RSUM_D=0._EB                               !< Upstream specific gas constant (J/kg/K)
+   REAL(EB) :: RSUM_D_OLD                                 !< Prior timestep upstream specific gas constant (J/kg/K)
+   REAL(EB) :: TAU=-1._EB                                 !< TANH or t2 ramp for flow 
+   REAL(EB) :: TMP_D=273.15_EB                            !< Upstream duct temperature (K)
+   REAL(EB) :: TOTAL_LOSS=0._EB                           !< Current flow loss in duct
+   REAL(EB) :: VEL(4)=0._EB                               !< Velocity in duct (old,new,guess,previous) (m/s)
+   REAL(EB) :: VOLUME_FLOW=1.E6_EB                        !< Current duct volume flow (m3/s)
+   REAL(EB) :: VOLUME_FLOW_INITIAL=1.E6_EB                !< Input duct volume flow (m3/s)
+   REAL(EB) :: LOSS(2)=0._EB                              !< Upstream specific heat (J/kg/K)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: CP_C            !< Current specific heat in each duct segment (J/kg/K)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: CP_C_OLD        !< Prior timestep specific heat in each duct segment (J/kg/K)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHO_C           !< Current density in each duct segment (kg/m3)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHO_C_OLD       !< Prior timestep density in each duct segment (kg/m3)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: TMP_C           !< Current temperature in each duct segment (K)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: TMP_C_OLD       !< Prior timestep temperature in each duct segment (K)
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ              !< Current species mass fractions in duct
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_OLD          !< Prior timestep species mass fractions in duct
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: ZZ_C          !< Current species mass fractions in each duct segment
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: ZZ_C_OLD      !< Prior timestep species mass fractions in each duct segment
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:) :: VEL_SYSTEM  !< Storage array for duct run velocites (m/s)
+   LOGICAL :: ROUND = .TRUE.                              !< Duct has a round cross-section
+   LOGICAL :: SQUARE = .FALSE.                            !< Duct has a square cross-section
+   LOGICAL :: DAMPER = .FALSE.                            !< Duct contains a damper
+   LOGICAL :: DAMPER_OPEN = .TRUE.                        !< Duct damper is open
+   LOGICAL :: FAN_OPERATING=.TRUE.                        !< Duct fan is operating
+   LOGICAL :: COIL_OPERATING=.TRUE.                       !< Duct aircoil is operating
+   LOGICAL :: FIXED=.FALSE.                               !< Duct has flow defined
+   LOGICAL :: REVERSE=.FALSE.                             !< Fan direction is opposite that implied by the node order
+   LOGICAL :: UPDATED                                     !< Duct solution has been updated in the current timestep
+   LOGICAL :: LEAK_ENTHALPY=.FALSE.                       !< Conserve enthalpy for leakage flow
+   LOGICAL :: LEAKAGE=.FALSE.                             !< Duct is being used for bulk leakage
+   LOGICAL :: LOCALIZED_LEAKAGE=.FALSE.                   !< Duct is being used for localized leakage
+   CHARACTER(LABEL_LENGTH) :: ID                          !< Name of duct
+   REAL(EB) :: FAN_ON_TIME = 1.E10_EB                     !< Time fan in duct is turned on
+   REAL(EB) :: COIL_ON_TIME = 1.E10_EB                    !< Time aircoil in duct is turned on
 END TYPE DUCT_TYPE
 
 TYPE (DUCT_TYPE), DIMENSION(:), ALLOCATABLE,  TARGET :: DUCT
 
+!> \brief Parameters associated with HVAC TYPE_ID FAN
+
 TYPE FAN_TYPE
-   INTEGER :: FAN_TYPE,RAMP_INDEX,SPIN_INDEX=0
-   REAL(EB) :: VOL_FLOW,MAX_FLOW,MAX_PRES,OFF_LOSS=0._EB,TAU=0._EB
-   CHARACTER(LABEL_LENGTH) :: ID,FAN_RAMP
+   INTEGER :: FAN_TYPE                 !< Constant flow = 1, quadratic flow = 2, fan curve = 3
+   INTEGER :: RAMP_INDEX               !< Index of RAMP containing fan curve used for FAN_TYPE=3
+   INTEGER :: SPIN_INDEX=0             !< Indicates use of t2 or tanh ramp
+   REAL(EB) :: VOL_FLOW                !< Constant volume flow (m3/s) used for FAN_TYPE=1
+   REAL(EB) :: MAX_FLOW                !< Maximum fan flow (m3/s) used for FAN_TYPE=2
+   REAL(EB) :: MAX_PRES                !< Maximum fan pressure (Pa) used for FAN_TYPE=2
+   REAL(EB) :: OFF_LOSS=1._EB          !< Flow loss through fan when it is not running
+   REAL(EB) :: TAU=0._EB               !< t2 or tanh time constant for spinning up fan speed
+   CHARACTER(LABEL_LENGTH) :: ID       !< Name of fan
+   CHARACTER(LABEL_LENGTH) :: FAN_RAMP !< Name of RAMP containing fan curve
 END TYPE FAN_TYPE
 
 TYPE(FAN_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: FAN
 
+!> \brief Parameters associated with HVAC TYPE_ID AIRCOIL
+
 TYPE AIRCOIL_TYPE
-   REAL(EB) :: COOLANT_TEMPERATURE=293.15_EB,COOLANT_SPECIFIC_HEAT=4186._EB, EFFICIENCY, COOLANT_MASS_FLOW=-9999._EB, &
-               FIXED_Q=-1.E10_EB,TAU=0._EB
-   INTEGER :: RAMP_INDEX=0
-   CHARACTER(LABEL_LENGTH) :: ID
+   REAL(EB) :: COOLANT_TEMPERATURE=293.15_EB  !< Temperature of working fluid in aircoil (K)
+   REAL(EB) :: COOLANT_SPECIFIC_HEAT=4186._EB !< Specific heat of working fluid in aircoil (J/kg/K)
+   REAL(EB) :: COOLANT_MASS_FLOW=-9999._EB    !< Mass flow rate of working fluid in aircoil (kg/s)
+   REAL(EB) :: FIXED_Q=-1.E10_EB              !< Fixed heating/cooling rate for aircoil (W)
+   REAL(EB) :: TAU=0._EB                      !< TANH or t2 ramp time for aircoil when turned on
+   REAL(EB) :: EFFICIENCY                     !< Aircoil heat exchange efficiency
+   INTEGER :: RAMP_INDEX=0                    !< Index of RAMP for FIXED_Q
+   CHARACTER(LABEL_LENGTH) :: ID              !< Name of aircoil
 END TYPE AIRCOIL_TYPE
 
 TYPE(AIRCOIL_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: AIRCOIL
 
+!> \brief Parameters defining independent HVAC networks
+
 TYPE NETWORK_TYPE
-   INTEGER :: N_DUCTS,N_DUCTNODES,N_MATRIX
-   INTEGER, ALLOCATABLE, DIMENSION(:) :: DUCT_INDEX,NODE_INDEX,MATRIX_INDEX
+   INTEGER :: N_DUCTS                                 !< Number of ducts in network
+   INTEGER :: N_DUCTNODES                             !< Number of nodes in netowrk
+   INTEGER :: N_MATRIX                                !< Number of element ins solution matrix for network
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: DUCT_INDEX   !< List of ducts in network
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: NODE_INDEX   !< List of nodes in netwwork
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: MATRIX_INDEX !< Position of ducts and nodes in solution matrix
 END TYPE NETWORK_TYPE
 
 TYPE(NETWORK_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: NETWORK

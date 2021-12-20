@@ -62,7 +62,7 @@ CONTAINS
 
 SUBROUTINE READ_HVAC
 
-USE MATH_FUNCTIONS, ONLY: GET_RAMP_INDEX,GET_TABLE_INDEX
+USE MATH_FUNCTIONS, ONLY: GET_RAMP_INDEX
 USE MISC_FUNCTIONS, ONLY: SEARCH_CONTROLLER
 INTEGER , PARAMETER :: MAX_DUCTS = 20 !< Maximum number of ducts connected to a node
 INTEGER :: IOS !< Used for returning the status of a READ statement
@@ -462,23 +462,6 @@ DO NN=1,N_HVAC_READ
             DN%LOSS_ARRAY(1,2) = LOSS(1,1)
             DN%LOSS_ARRAY(2,1) = LOSS(2,1)
          ENDIF
-         IF (TRIM(FILTER_ID)/='null') THEN
-            ALLOCATE(DN%FILTER_LOADING(1:N_TRACKED_SPECIES,3))
-            DN%FILTER_LOADING = 0._EB
-            SPEC_LOOP1: DO N=1,N_TRACKED_SPECIES
-               IF (TRIM(SPEC_ID(N))=='null') EXIT SPEC_LOOP1
-               DO NS = 1,N_TRACKED_SPECIES
-                  IF (TRIM(SPECIES_MIXTURE(NS)%ID)==TRIM(SPEC_ID(N))) THEN
-                     DN%FILTER_LOADING(NS,1) = LOADING(N)
-                     EXIT
-                  ENDIF
-                  IF (NS==N_TRACKED_SPECIES) THEN
-                     WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR: Problem with ductnode:',TRIM(ID),' SPEC ',TRIM(SPEC_ID(N)),' not found'
-                     CALL SHUTDOWN(MESSAGE); RETURN
-                  ENDIF
-               ENDDO
-            ENDDO SPEC_LOOP1
-         ENDIF
 
       CASE('FAN')
          I_FAN = I_FAN + 1
@@ -539,6 +522,7 @@ DO NN=1,N_HVAC_READ
                IF (TRIM(SPECIES_MIXTURE(NS)%ID)==TRIM(SPEC_ID(N))) THEN
                   FILTER(I_FILTER)%EFFICIENCY(NS)   = EFFICIENCY(N)
                   FILTER(I_FILTER)%MULTIPLIER(NS) = LOADING_MULTIPLIER(N)
+                  FILTER(I_FILTER)%INITIAL_LOADING(NS) = LOADING(N)
                   EXIT
                ENDIF
                IF (NS==N_TRACKED_SPECIES) THEN
@@ -990,6 +974,12 @@ NODE_LOOP: DO NN = 1, N_DUCTNODES
          ENDIF
       ENDDO
    ENDIF
+
+   ALLOCATE(DN%FILTER_LOADING(1:N_TRACKED_SPECIES,3))
+   DN%FILTER_LOADING(1:N_TRACKED_SPECIES,1) = FILTER(DN%FILTER_INDEX)%INITIAL_LOADING(1:N_TRACKED_SPECIES)
+   DN%FILTER_LOADING(1:N_TRACKED_SPECIES,2) = FILTER(DN%FILTER_INDEX)%INITIAL_LOADING(1:N_TRACKED_SPECIES)
+   DN%FILTER_LOADING(1:N_TRACKED_SPECIES,3) = FILTER(DN%FILTER_INDEX)%INITIAL_LOADING(1:N_TRACKED_SPECIES)
+
 ENDDO NODE_LOOP
 
 !Temp arrays for input processing
@@ -3215,7 +3205,6 @@ DO NZ1 = 0, N_ZONE
          DN1%DUCT_INDEX = I_DUCT
          DN1%LEAKAGE = .TRUE.
          DN1%ZONE_INDEX=NZ1
-         DN1%MESH_INDEX = 1
          DN1%N_DUCTS = 1
          DN1%RSUM = RSUM0
          DN1%TMP = TMPA
@@ -3233,7 +3222,6 @@ DO NZ1 = 0, N_ZONE
          DN2%LEAKAGE = .TRUE.
          DN2%ZONE_INDEX=NZ2
          DN2%XYZ = (/0._EB,0._EB,0._EB/)
-         DN2%MESH_INDEX = 1
          DN2%N_DUCTS = 1
          DN2%RSUM = RSUM0
          DN2%TMP = TMPA
