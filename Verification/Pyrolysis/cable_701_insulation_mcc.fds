@@ -27,7 +27,6 @@
       DENSITY               = 1000.
       CONDUCTIVITY          = 0.2
       SPECIFIC_HEAT         = 1.5
-      N_REACTIONS           = 1
       REFERENCE_TEMPERATURE = 300.
       REFERENCE_RATE        = 0.0272
       HEATING_RATE          = 60.
@@ -43,7 +42,6 @@
       DENSITY               = 1000.
       CONDUCTIVITY          = 0.2
       SPECIFIC_HEAT         = 1.5
-      N_REACTIONS           = 1
       REFERENCE_TEMPERATURE = 460.
       REFERENCE_RATE        = 0.0124
       HEATING_RATE          = 60.

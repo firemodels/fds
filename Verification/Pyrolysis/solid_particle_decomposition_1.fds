@@ -30,10 +30,8 @@
       DENSITY          = 2200.
       CONDUCTIVITY     = 0.20
       SPECIFIC_HEAT    = 0.90
-      N_REACTIONS      = 1
       A(1)             = 3.4E11
       E(1)             = 103000
-      N_S(1)           = 1.
       SPEC_ID(1:2,1)   = 'WATER VAPOR','CARBON DIOXIDE'
       NU_SPEC(1:2,1)   = 0.21,0.79
       HEAT_OF_REACTION(1) = 0./
