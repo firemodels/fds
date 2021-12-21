@@ -201,8 +201,6 @@ ENDIF
 ! If any of the newly inserted particles finds itself in a neighboring mesh, set a flag to indicate that an MPI exchange must
 ! be done to transfer that particle to the MPI process that controls the neighboring mesh.
 
-EXCHANGE_INSERTED_PARTICLES = .FALSE.
-
 DO N=1,N_NEIGHBORING_MESHES
    IF (ANY(OMESH(NEIGHBORING_MESH(N))%N_PART_ORPHANS>0)) EXCHANGE_INSERTED_PARTICLES = .TRUE.
 ENDDO
