@@ -511,13 +511,9 @@ TYPE SCARC_MESH_TYPE
    INTEGER :: NW   = NSCARC_INT_ZERO                           !< Number of wall cells
    INTEGER :: NCG  = NSCARC_INT_ZERO                           !< Number of ghost cells 
    INTEGER :: NCGI = NSCARC_INT_ZERO                           !< Number of ghost zones in internal direction
-   INTEGER :: NCGE = NSCARC_INT_ZERO                           !< Number of ghost zones in external direction
-   INTEGER :: NZG  = NSCARC_INT_ZERO                           !< Number of ghost zones 
    INTEGER :: NCE  = NSCARC_INT_ZERO                           !< Number of extended cells
-   INTEGER :: NCE2 = NSCARC_INT_ZERO                           !< Number of extended cells, second layer
    INTEGER :: ICG  = NSCARC_INT_ZERO                           !< Ghost cell pointer for first layer
    INTEGER :: ICE  = NSCARC_INT_ZERO                           !< Ghost cell pointer for extended cells
-   INTEGER :: ICE2 = NSCARC_INT_ZERO                           !< Counter for extended cells, second layer
 
    INTEGER :: NBUF_LAYER1  = NSCARC_INT_ZERO                   !< Length for exchange of one layer
    INTEGER :: NBUF_LAYER2  = NSCARC_INT_ZERO                   !< Length for exchange of two layers
@@ -637,7 +633,6 @@ TYPE SCARC_LEVEL_TYPE
 
    ! Number of discretizations and obstructions
    INTEGER :: N_DISCRET = 0                                      !< Number of discretization types used
-   INTEGER :: N_OBST = 0                                         !< Number of obstructions
    INTEGER :: N_CELLS = 0                                        !< Number of cells
    INTEGER :: N_CELL_INDEX = 0                                   !< Number of entries in CELL_INDEX array
    INTEGER :: N_WALL_CELLS = 0                                   !< Number of wall cells
@@ -913,20 +908,19 @@ PUBLIC :: SCARC_RESIDUAL                  !< Final residual after call of (U)Sca
 PUBLIC :: SCARC_TOLERANCE                 !< Requested overall tolerance for (U)ScaRC solver
 PUBLIC :: SCARC_VERBOSE                   !< Selection parameter for additional verbose messages
 
-PUBLIC :: SCARC_KRYLOV_TOLERANCE          !< Requested tolerance for Krylov solver
-PUBLIC :: SCARC_KRYLOV_ITERATIONS         !< Maximum number of allowed Krylov iterations
 PUBLIC :: SCARC_KRYLOV_INTERPOL           !< Selection parameter for interpolation type in case of a twolevel Krylov variant
+PUBLIC :: SCARC_KRYLOV_ITERATIONS         !< Maximum number of allowed Krylov iterations
+PUBLIC :: SCARC_KRYLOV_TOLERANCE          !< Requested tolerance for Krylov solver
 
 PUBLIC :: SCARC_MGM_BOUNDARY              !< Interface boundary conditions for Laplace problems of MGM method
-PUBLIC :: SCARC_MGM_TOLERANCE             !< Requested tolerance for velocity error of MGM method
-PUBLIC :: SCARC_MGM_INTERPOLATION         !< Interpolation type for BC definition
 PUBLIC :: SCARC_MGM_ITERATIONS            !< Maximum number of allowed Laplace iterations for MGM method
+PUBLIC :: SCARC_MGM_TOLERANCE             !< Requested tolerance for velocity error of MGM method
 
 PUBLIC :: SCARC_PRECON                    !< Selection parameter for preconditioner
-PUBLIC :: SCARC_PRECON_TOLERANCE          !< Requested accuracy for preconditioner 
 PUBLIC :: SCARC_PRECON_ITERATIONS         !< Maximum number of allowed iterations for preconditioner
 PUBLIC :: SCARC_PRECON_OMEGA              !< Relaxation parameter for preconditioner
 PUBLIC :: SCARC_PRECON_SCOPE              !< Scope of activity for preconditioner (global/local)
+PUBLIC :: SCARC_PRECON_TOLERANCE          !< Requested accuracy for preconditioner 
 
 ! ---------- Type declarations
   
@@ -4498,7 +4492,6 @@ END SUBROUTINE SCARC_SEND_MESSAGE_REAL
 ! --------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_PACK_BASIC_SIZES
 OS%SEND_BUFFER_INT0(1)=OG%NCG
-OS%SEND_BUFFER_INT0(2)=OG%NZG
 END SUBROUTINE SCARC_PACK_BASIC_SIZES
 
 ! --------------------------------------------------------------------------------------------------------------
@@ -4508,7 +4501,6 @@ SUBROUTINE SCARC_UNPACK_BASIC_SIZES (NM, NOM)
 INTEGER, INTENT(IN) :: NM, NOM
 RECV_BUFFER_INT => SCARC_POINT_TO_BUFFER_INT (NM, NOM, 0)
 OG%NCG = RECV_BUFFER_INT(1)
-OG%NZG = RECV_BUFFER_INT(2)
 END SUBROUTINE SCARC_UNPACK_BASIC_SIZES
 
 ! --------------------------------------------------------------------------------------------------------------
@@ -6315,7 +6307,6 @@ MESHES_LOOP2: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
       ENDDO
       G%NC   = G%NC_LOCAL(NM)
       G%NCE  = G%NC_LOCAL(NM)
-      G%NCE2 = G%NC_LOCAL(NM)
  
       ! ---------------- Then process unstructured discretization
  
@@ -6360,7 +6351,6 @@ MESHES_LOOP2: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
       ENDDO
       G%NC   = G%NC_LOCAL(NM)
       G%NCE  = G%NC_LOCAL(NM)
-      G%NCE2 = G%NC_LOCAL(NM)
       
       ! Check whether the current meshes contains obstructions or not
       ! This information can be used to replace local preconditioning by the faster FFT for structured meshes
@@ -6415,7 +6405,6 @@ MESHES_LOOP2: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
       ENDDO
       G%NC   = G%NC_LOCAL(NM)
       G%NCE  = G%NC_LOCAL(NM)
-      G%NCE2 = G%NC_LOCAL(NM)
 
       ! Check whether the current meshes contains obstructions or not
       ! This information can be used to replace local preconditioning by the faster FFT for structured meshes
