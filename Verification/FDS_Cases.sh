@@ -168,8 +168,7 @@ $QFDS -d Energy_Budget energy_budget_tmix.fds
 $QFDS -d Extinction extinction_1.fds
 $QFDS -d Extinction extinction_2.fds
 
-$QFDS -d Fires box_burn_away1.fds
-$QFDS -p 4 -d Fires box_burn_away1b.fds
+$QFDS -p 4 -d Fires box_burn_away1.fds
 $QFDS -d Fires box_burn_away2.fds
 $QFDS -d Fires box_burn_away3.fds
 $QFDS -d Fires box_burn_away4.fds

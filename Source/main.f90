@@ -586,6 +586,7 @@ MAIN_LOOP: DO
             CALL MESH_EXCHANGE(7)
             CALL POST_RECEIVES(11)
             CALL MESH_EXCHANGE(11)
+            EXCHANGE_INSERTED_PARTICLES = .FALSE.
          ENDIF
       ENDIF
 
