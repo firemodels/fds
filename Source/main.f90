@@ -1,9 +1,7 @@
-!> \brief FDS is a computational fluid dynamics (CFD) code designed to model
+!> \brief Fire Dynamics Simulator (FDS) is a computational fluid dynamics (CFD) code designed to model
 !> fire and other thermal phenomena.
 
 PROGRAM FDS
-
-! Fire Dynamics Simulator, Main Program, Multiple CPU version.
 
 USE PRECISION_PARAMETERS
 USE MESH_VARIABLES
@@ -234,10 +232,10 @@ CALL MPI_INITIALIZATION_CHORES(6)
 ! Allocate and initialize OMESH arrays to hold "other mesh" data for a given mesh
 
 DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-   CALL INITIALIZE_MESH_EXCHANGE_2(NM)
+   CALL INITIALIZE_RADIATION_EXCHANGE(NM)
 ENDDO
 
-IF (MY_RANK==0 .AND. VERBOSE) WRITE(LU_ERR,'(A)') ' Completed INITIALIZE_MESH_EXCHANGE_2'
+IF (MY_RANK==0 .AND. VERBOSE) WRITE(LU_ERR,'(A)') ' Completed INITIALIZE_RADIATION_EXCHANGE'
 
 ! Initialize persistent MPI sends and receives and allocate buffer arrays.
 
@@ -361,9 +359,11 @@ DO ITER=1,INITIAL_RADIATION_ITERATIONS
          IF (CC_IBM) CALL CCCOMPUTE_RADIATION(T_BEGIN,NM,ITER)
       ENDIF
    ENDDO
-   DO ANG_INC_COUNTER=1,ANGLE_INCREMENT
-      CALL MESH_EXCHANGE(2) ! Exchange radiation intensity at interpolated boundaries
-   ENDDO
+   IF (RADIATION .AND. EXCHANGE_RADIATION) THEN
+      DO ANG_INC_COUNTER=1,ANGLE_INCREMENT
+         CALL MESH_EXCHANGE(2)
+      ENDDO
+   ENDIF
 ENDDO
 IF (MY_RANK==0 .AND. VERBOSE) WRITE(LU_ERR,'(A)') ' Initialized Radiation'
 
@@ -759,7 +759,8 @@ MAIN_LOOP: DO
          CALL COMPUTE_RADIATION(T,NM,ITER)
          IF (CC_IBM) CALL CCCOMPUTE_RADIATION(T,NM,ITER)
       ENDDO
-      IF (RADIATION_ITERATIONS>1) THEN  ! Only do an MPI exchange of radiation intensity if multiple iterations are requested.
+      IF (RADIATION .AND. EXCHANGE_RADIATION .AND. RADIATION_ITERATIONS>1) THEN
+         ! Only do an MPI exchange of radiation intensity if multiple iterations are requested.
          DO ANG_INC_COUNTER=1,ANGLE_INCREMENT
             CALL MESH_EXCHANGE(2)
             IF (ICYC>1) EXIT
@@ -820,8 +821,8 @@ MAIN_LOOP: DO
    CALL MESH_EXCHANGE(6)
 
    ! Exchange radiation intensity at interpolated boundaries if only one iteration of the solver is requested.
-
-   IF (RADIATION_ITERATIONS==1) THEN
+  
+   IF (RADIATION .AND. EXCHANGE_RADIATION .AND. RADIATION_ITERATIONS==1) THEN
       DO ANG_INC_COUNTER=1,ANGLE_INCREMENT
          CALL MESH_EXCHANGE(2)
          IF (ICYC>1) EXIT
@@ -923,9 +924,9 @@ CALL END_FDS
 CONTAINS
 
 
-SUBROUTINE CHECK_MPI
+!> \brief Check the MPI threading support level
 
-! Check the threading support level
+SUBROUTINE CHECK_MPI
 
 IF (PROVIDED<REQUIRED) THEN
    IF (MY_RANK==0) WRITE(LU_ERR,'(A)') ' WARNING:  This MPI implementation provides insufficient threading support.'
@@ -934,6 +935,9 @@ ENDIF
 
 END SUBROUTINE CHECK_MPI
 
+
+!> \brief A collection of miscellaneous initializations
+!> \param TASK_NUMBER Integer denoting which sets of tasks to do
 
 SUBROUTINE MPI_INITIALIZATION_CHORES(TASK_NUMBER)
 
@@ -1294,9 +1298,9 @@ IF (MY_RANK==0 .AND. VERBOSE) WRITE(LU_ERR,'(A,I2)') ' Completed Initialization 
 END SUBROUTINE MPI_INITIALIZATION_CHORES
 
 
-SUBROUTINE PRESSURE_ITERATION_SCHEME
+!> \brief Perform multiple pressure solves until velocity tolerance is satisfied
 
-! Iterate calls to pressure solver until velocity tolerance is satisfied
+SUBROUTINE PRESSURE_ITERATION_SCHEME
 
 INTEGER :: NM_MAX_V,NM_MAX_P
 REAL(EB) :: TNOW,VELOCITY_ERROR_MAX_OLD,PRESSURE_ERROR_MAX_OLD
@@ -1447,9 +1451,9 @@ ENDDO PRESSURE_ITERATION_LOOP
 END SUBROUTINE PRESSURE_ITERATION_SCHEME
 
 
-SUBROUTINE CALCULATE_RTE_SOURCE_CORRECTION_FACTOR
+!> \brief Compute a running average of the source correction factor for the radiative transport scheme.
 
-! This routine computes a running average of the source correction factor for the radiative transport scheme.
+SUBROUTINE CALCULATE_RTE_SOURCE_CORRECTION_FACTOR
 
 REAL(EB), PARAMETER :: WGT=0.5_EB
 REAL(EB) :: RAD_Q_SUM_ALL,KFST4_SUM_ALL,TNOW
@@ -1481,7 +1485,6 @@ END SUBROUTINE CALCULATE_RTE_SOURCE_CORRECTION_FACTOR
 
 
 !> \brief Create or remove obstructions if necessary
-!>
 !> \details Check if any obstructions are to be created or removed, and if so, call REASSIGN_WALL_CELLS to reset the WALL
 !> boundary conditions where obstructions have been removed or created
 
@@ -1504,10 +1507,10 @@ ENDIF
 END SUBROUTINE CREATE_OR_REMOVE_OBSTRUCTIONS
 
 
-SUBROUTINE WRITE_CFL_FILE
+!> \brief Gather all the CFL values and mesh indices to node 0 and then
+!> write out to a special file the max value and mesh and indices of the max value.
 
-! This routine gathers all the CFL values and mesh indices to node 0, which then
-! writes out the max value and mesh and indices of the max value.
+SUBROUTINE WRITE_CFL_FILE
 
 REAL(EB), DIMENSION(NMESHES) :: CFL_VALUES,VN_VALUES
 INTEGER :: NM_CFL_MAX,NM_VN_MAX
@@ -1559,12 +1562,12 @@ ENDIF
 END SUBROUTINE WRITE_CFL_FILE
 
 
+!> \brief Make sure that all MPI processes have the same STOP_STATUS
+
 SUBROUTINE STOP_CHECK(END_CODE)
 
 INTEGER, INTENT(IN) :: END_CODE
 REAL(EB) :: TNOW
-
-! Make sure that all MPI processes have the same STOP_STATUS
 
 IF (N_MPI_PROCESSES>1) THEN
    TNOW = CURRENT_TIME()
@@ -1585,9 +1588,9 @@ IF (END_CODE==1) CALL END_FDS
 END SUBROUTINE STOP_CHECK
 
 
-SUBROUTINE END_FDS
+!> \brief End FDS gracefully, even if there is an error
 
-! End the calculation gracefully, even if there is an error
+SUBROUTINE END_FDS
 
 CHARACTER(255) :: MESSAGE
 
@@ -1995,20 +1998,20 @@ ENDIF
 END SUBROUTINE INITIALIZE_MESH_EXCHANGE_1
 
 
-SUBROUTINE INITIALIZE_MESH_EXCHANGE_2(NM)
+!> \brief Allocate arrays used for MPI exchange of radiation data
+!> \param NM Mesh number
+!> \details Allocate arrays to send (IL_S) and receive (IL_R) the radiation intensity (IL) at interpolated boundaries.
+!> MESHES(NM)%OMESH(NOM)%IL_S are the intensities in mesh NM that are just outside the boundary of mesh NOM. IL_S is populated
+!> in radi.f90 and then sent to MESHES(NOM)%OMESH(NM)%IL_R in MESH_EXCHANGE. IL_R holds the intensities until they are
+!> transferred to the ghost cells of MESHES(NOM)%IL in radi.f90. The IL_S and IL_R arrays are indexed by NIC_S and NIC_R.
 
-! Create arrays by which info is to exchanged across meshes. In this routine, allocate arrays that involve NIC_R and NIC_S arrays.
+SUBROUTINE INITIALIZE_RADIATION_EXCHANGE(NM)
 
 INTEGER :: NOM
 INTEGER, INTENT(IN) :: NM
 TYPE (MESH_TYPE), POINTER :: M
 
 M=>MESHES(NM)
-
-! Allocate arrays to send (IL_S) and receive (IL_R) the radiation intensity (IL) at interpolated boundaries.
-! MESHES(NM)%OMESH(NOM)%IL_S are the intensities in mesh NM that are just outside the boundary of mesh NOM. IL_S is populated
-! in radi.f90 and then sent to MESHES(NOM)%OMESH(NM)%IL_R in MESH_EXCHANGE. IL_R holds the intensities until they are
-! transferred to the ghost cells of MESHES(NOM)%IL in radi.f90. The IL_S and IL_R arrays are indexed by NIC_S and NIC_R.
 
 DO NOM=1,NMESHES
    IF (M%OMESH(NOM)%NIC_S>0) THEN
@@ -2021,7 +2024,7 @@ DO NOM=1,NMESHES
    ENDIF
 ENDDO
 
-END SUBROUTINE INITIALIZE_MESH_EXCHANGE_2
+END SUBROUTINE INITIALIZE_RADIATION_EXCHANGE
 
 
 !> \brief Bordering meshes tell their neighbors how many exposed back wall cells they expect information for.
@@ -2263,6 +2266,8 @@ END SUBROUTINE ZONE_BOUNDARY_EXCHANGE
 
 
 !> \brief Set up receive buffers for MPI calls.
+!> \details This subroutine loops over meshes (NM) that are to receive MPI sends from neighboring meshes (NOM).
+!> When CODE=0, initializations are done, in particular the set up of persistent receives.
 
 SUBROUTINE POST_RECEIVES(CODE)
 
@@ -2273,27 +2278,18 @@ TYPE (LAGRANGIAN_PARTICLE_CLASS_TYPE), POINTER :: LPC
 
 TNOW = CURRENT_TIME()
 
-! Initialize the number of non-persistent send/receive requests.
-
-N_REQ = 0
-
-! Loop over all receive meshes (NM) and look for the send meshes (NOM).
-
-MESH_LOOP: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+RECEIVING_MESH_LOOP: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
    RNODE = PROCESS(NM)
    M => MESHES(NM)
 
-   OTHER_MESH_LOOP: DO NN=1,M%N_NEIGHBORING_MESHES
+   SENDING_MESH_LOOP: DO NN=1,M%N_NEIGHBORING_MESHES
 
       NOM = M%NEIGHBORING_MESH(NN)
-      M3=>MESHES(NM)%OMESH(NOM)
-      IF (NOM==NM .AND. M3%NIC_R==0) CYCLE OTHER_MESH_LOOP
-
       SNODE = PROCESS(NOM)
-      IF (RNODE==SNODE) CYCLE OTHER_MESH_LOOP
+      IF (RNODE==SNODE) CYCLE SENDING_MESH_LOOP
 
-      M4=>MESHES(NOM)
+      M3=>MESHES(NM)%OMESH(NOM)
 
       ! Set up receives for one-time exchanges or persistent send/receives.
 
@@ -2428,17 +2424,18 @@ MESH_LOOP: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          CALL MPI_IRECV(M3%REAL_RECV_PKG8(1),2*M3%N_EXTERNAL_OBST,MPI_DOUBLE_PRECISION,SNODE,NOM,MPI_COMM_WORLD,REQ(N_REQ),IERR)
       ENDIF
 
-   ENDDO OTHER_MESH_LOOP
+   ENDDO SENDING_MESH_LOOP
 
-ENDDO MESH_LOOP
+ENDDO RECEIVING_MESH_LOOP
 
 T_USED(11)=T_USED(11) + CURRENT_TIME() - TNOW
 END SUBROUTINE POST_RECEIVES
 
 
-SUBROUTINE MESH_EXCHANGE(CODE)
+!> \brief Send and receive the major MPI packages
+!> \details For each mesh, NM, controlled by MPI process, SNODE, send data to other meshes, NOM.
 
-! Exchange Information between Meshes
+SUBROUTINE MESH_EXCHANGE(CODE)
 
 REAL(EB) :: TNOW
 INTEGER, INTENT(IN) :: CODE
@@ -2453,15 +2450,9 @@ TYPE (WALL_TYPE), POINTER :: WC
 TYPE (BOUNDARY_COORD_TYPE), POINTER :: BC
 TYPE (BOUNDARY_ONE_D_TYPE), POINTER :: ONE_D
 
-IF(CC_IBM) CALL MESH_CC_EXCHANGE(CODE)
+IF (CC_IBM) CALL MESH_CC_EXCHANGE(CODE)
 
 TNOW = CURRENT_TIME()
-
-! Special circumstances when doing the radiation exchange (CODE=2)
-
-IF (CODE==2 .AND. (.NOT.EXCHANGE_RADIATION .OR. .NOT.RADIATION)) RETURN
-
-! For each mesh, NM, controlled by MPI process, SNODE, send data to other meshes, NOM.
 
 SENDING_MESH_LOOP: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
@@ -2908,7 +2899,7 @@ SENDING_MESH_LOOP: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
 ENDDO SENDING_MESH_LOOP
 
-! Start the communications
+! Start the communications. Note that MPI_STARTALL starts the persistent send/receives
 
 IF (N_MPI_PROCESSES>1 .AND. N_REQ>0) THEN
    CALL TIMEOUT('REQ',N_REQ,REQ(1:N_REQ))
@@ -3206,9 +3197,13 @@ RECV_MESH_LOOP: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 ENDDO RECV_MESH_LOOP
 
 T_USED(11)=T_USED(11) + CURRENT_TIME() - TNOW
-
 END SUBROUTINE MESH_EXCHANGE
 
+
+!> \brief Probe MPI communications until complete. Write error if the communication does not complete.
+!> \param RNAME Name given to the array of MPI_REQUESTs
+!> \param NR Number of MPI_REQUESTs
+!> \param RR Array of MPI_REQUESTs
 
 SUBROUTINE TIMEOUT(RNAME,NR,RR)
 
@@ -3245,9 +3240,9 @@ ENDIF
 END SUBROUTINE TIMEOUT
 
 
-SUBROUTINE DUMP_TIMERS
+!> \brief Write out the file CHID_cpu.csv containing the CPU time used by the major subroutines for each MPI process.
 
-! Write out the file CHID_cpu.csv containing the timing breakdown of each MPI process.
+SUBROUTINE DUMP_TIMERS
 
 INTEGER, PARAMETER :: LINE_LENGTH = 5 + (N_TIMERS+1)*11
 CHARACTER(LEN=LINE_LENGTH) :: LINE
@@ -3281,9 +3276,9 @@ ENDIF
 END SUBROUTINE DUMP_TIMERS
 
 
-SUBROUTINE WRITE_STRINGS
+!> \brief Write character strings out to the Smokeview (.smv) file
 
-! Write character strings out to the .smv file
+SUBROUTINE WRITE_STRINGS
 
 INTEGER :: N,NOM,N_STRINGS_DUM
 CHARACTER(MESH_STRING_LENGTH), ALLOCATABLE, DIMENSION(:) :: STRING_DUM
@@ -3338,6 +3333,8 @@ ENDDO
 T_USED(11) = T_USED(11) + CURRENT_TIME() - TNOW
 END SUBROUTINE WRITE_STRINGS
 
+
+!> \brief MPI exchanges of diagnostic output
 
 SUBROUTINE EXCHANGE_DIAGNOSTICS
 
@@ -3439,9 +3436,9 @@ T_USED(11) = T_USED(11) + CURRENT_TIME() - TNOW
 END SUBROUTINE EXCHANGE_DIAGNOSTICS
 
 
-SUBROUTINE EXCHANGE_GLOBAL_OUTPUTS
+!> \brief Gather HRR, mass, and device data to node 0
 
-! Gather HRR, mass, and device data to node 0
+SUBROUTINE EXCHANGE_GLOBAL_OUTPUTS
 
 REAL(EB) :: TNOW
 INTEGER :: NN,N,I_STATE,OP_INDEX,NM,DISP,DIM_FAC
@@ -3670,9 +3667,9 @@ ENDIF
 END SUBROUTINE GATHER_Q_AND_M
 
 
-SUBROUTINE DUMP_GLOBAL_OUTPUTS
+!> \brief Dump HRR data to CHID_hrr.csv, MASS data to CHID_mass.csv, DEVICE data to _devc.csv
 
-! Dump HRR data to CHID_hrr.csv, MASS data to CHID_mass.csv, DEVICE data to _devc.csv
+SUBROUTINE DUMP_GLOBAL_OUTPUTS
 
 REAL(EB) :: TNOW
 TYPE(DEVICE_TYPE), POINTER :: DV
@@ -3783,9 +3780,9 @@ T_USED(7) = T_USED(7) + CURRENT_TIME() - TNOW
 END SUBROUTINE DUMP_GLOBAL_OUTPUTS
 
 
-SUBROUTINE EXCHANGE_HVAC_BC
+!> \brief Exchange information needed for performing the HVAC computation
 
-! Exchange information mesh to mesh needed for performing the HVAC computation
+SUBROUTINE EXCHANGE_HVAC_BC
 
 USE HVAC_ROUTINES, ONLY: NODE_H,NODE_P,NODE_RHO,NODE_TMP,NODE_X,NODE_Y,NODE_Z,NODE_ZZ
 INTEGER :: NN
@@ -3841,9 +3838,9 @@ T_USED(11)=T_USED(11) + CURRENT_TIME() - TNOW
 END SUBROUTINE EXCHANGE_HVAC_BC
 
 
-SUBROUTINE EXCHANGE_HVAC_SOLUTION
+!> \brief Exchange information needed for performing the HVAC computation
 
-! Exchange information mesh to mesh needed for performing the HVAC computation
+SUBROUTINE EXCHANGE_HVAC_SOLUTION
 
 USE HVAC_ROUTINES, ONLY: NODE_AREA_EX,NODE_TMP_EX,NODE_ZZ_EX,DUCT_MF
 REAL(EB) :: TNOW
@@ -3886,16 +3883,20 @@ IF (FREEZE_VELOCITY) CHECK_FREEZE_VELOCITY = .FALSE.
 END SUBROUTINE CHECK_FREEZE_VELOCITY_STATUS
 
 
+!> \brief Gather revision dates, etc, from subroutines
+!> \param REVISION String containing the revision number
+!> \param REVISION_DATE String containing the date of the last code revision
+!> \param COMPILE_DATE String containing the date of the last code compilation
+!> \details Unlike svn, the revisioning system git does not perform keyword substitution.
+!> To perform this function,  a script named expand_file is called before FDS is
+!> built that expands the following keywords ($Revision, $RevisionDate and
+!> $CompileDate) with their proper values. Another script named contract_file is
+!> called after FDS is built to return these keywords back to their original
+!> values (so the revisioning system will not think this file has changed).
+
 SUBROUTINE GET_INFO (REVISION,REVISION_DATE,COMPILE_DATE)
+
 CHARACTER(LEN=255), INTENT(OUT) :: REVISION, REVISION_DATE, COMPILE_DATE
-
-! Unlike svn, the revisioning system git does not perform keyword substitution.
-! To perform this function,  a script named expand_file is called before FDS is
-! built that expands the following keywords ($Revision, $RevisionDate and
-! $CompileDate) with their proper values. Another script named contract_file is
-! called after FDS is built to return these keywords back to their original
-! values (so the revisioning system will not think this file has changed).
-
 CHARACTER(255), PARAMETER :: GREVISION='$Revision$'
 CHARACTER(255), PARAMETER :: GREVISION_DATE='$RevisionDate: unknown $'
 CHARACTER(255), PARAMETER :: GCOMPILE_DATE='$CompileDate: unknown $'
@@ -3903,7 +3904,7 @@ CHARACTER(255), PARAMETER :: GCOMPILE_DATE='$CompileDate: unknown $'
 WRITE(REVISION,'(A)')      GREVISION(INDEX(GREVISION,':')+2:LEN_TRIM(GREVISION)-2)
 WRITE(REVISION_DATE,'(A)') GREVISION_DATE(INDEX(GREVISION_DATE,':')+2:LEN_TRIM(GREVISION_DATE)-2)
 WRITE(COMPILE_DATE,'(A)')  GCOMPILE_DATE(INDEX(GCOMPILE_DATE,':')+2:LEN_TRIM(GCOMPILE_DATE)-2)
-RETURN
+
 END SUBROUTINE GET_INFO
 
 END PROGRAM FDS
