@@ -2213,18 +2213,12 @@ EDGE_LOOP: DO IE=1,N_EDGES
             ! Check for HVAC tangential velocity
 
             HVAC_TANGENTIAL = .FALSE.
-            IF (IWM>0 .OR. IWP>0) THEN
-               IF (WCM%VENT_INDEX>0) THEN
+            IF (IWM>0 .AND. IWP>0) THEN
+               IF (WCM%VENT_INDEX==WCP%VENT_INDEX) THEN
+                  IF (WCM%VENT_INDEX>0) THEN
                      VT=>VENTS(WCM%VENT_INDEX)
-                     IF (VT%NODE_INDEX > 0) THEN
-                        IF (WCM_ONE_D%U_NORMAL < 0 .AND. ALL(VT%UVW > -1.E12_EB)) HVAC_TANGENTIAL = .TRUE.
-                     ENDIF
-               ENDIF
-               IF (.NOT. HVAC_TANGENTIAL .AND. WCP%VENT_INDEX>0) THEN
-                     VT=>VENTS(WCP%VENT_INDEX)
-                     IF (VT%NODE_INDEX > 0) THEN
-                        IF (WCP_ONE_D%U_NORMAL < 0 .AND. ALL(VT%UVW > -1.E12_EB)) HVAC_TANGENTIAL = .TRUE.
-                     ENDIF
+                     IF (ALL(VT%UVW > -1.E12_EB) .AND. VT%NODE_INDEX > 0) HVAC_TANGENTIAL = .TRUE.
+                  ENDIF
                ENDIF
             ENDIF
 
@@ -2239,6 +2233,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
                   TSI=T-SF%T_IGN
                ENDIF
                PROFILE_FACTOR = 1._EB
+               IF (HVAC_TANGENTIAL .AND. 0.5_EB*(WCM_ONE_D%U_NORMAL_S+WCP_ONE_D%U_NORMAL_S) > 0._EB) HVAC_TANGENTIAL = .FALSE.
                IF (HVAC_TANGENTIAL) THEN
                   VEL_T = 0._EB
                   IEC_SELECT: SELECT CASE(IEC) ! edge orientation
@@ -2264,14 +2259,14 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
             ! Choose the appropriate boundary condition to apply
 
-!            HVAC_IF: IF (HVAC_TANGENTIAL)  THEN
-!
-!               VEL_GHOST = 2._EB*VEL_T - VEL_GAS
-!               DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
-!               MU_DUIDXJ(ICD_SGN) = MUA*DUIDXJ(ICD_SGN)
-!               ALTERED_GRADIENT(ICD_SGN) = .TRUE.
-!
-!            ELSE HVAC_IF
+            HVAC_IF: IF (HVAC_TANGENTIAL)  THEN
+
+               VEL_GHOST = 2._EB*VEL_T - VEL_GAS
+               DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
+               MU_DUIDXJ(ICD_SGN) = MUA*DUIDXJ(ICD_SGN)
+               ALTERED_GRADIENT(ICD_SGN) = .TRUE.
+
+            ELSE HVAC_IF
 
                BOUNDARY_CONDITION: SELECT CASE(VELOCITY_BC_INDEX)
 
@@ -2331,7 +2326,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
                END SELECT BOUNDARY_CONDITION
 
-!            ENDIF HVAC_IF
+            ENDIF HVAC_IF
 
          ELSE INTERPOLATION_IF  ! Use data from another mesh
 
