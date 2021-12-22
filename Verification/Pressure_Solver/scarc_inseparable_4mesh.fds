@@ -1,10 +1,11 @@
-&HEAD CHID='scarc_inseparable',TITLE='Simple constant density flow to check inseparable ScaRC Poisson solver' /
+&HEAD CHID='scarc_inseparable_4mesh',TITLE='Simple constant density flow to check inseparable ScaRC Poisson solver' /
 
-&MESH IJK=8,1,8  XB=0.0,0.8,-0.01,0.01,0.0,0.8 /
+&MESH IJK=8,1,32  XB=0.0,0.2,-0.01,0.01,0.0,0.8, MULT_ID='mesh' /
+&MULT ID='mesh', DX=0.2, DY=0.02, DZ=0.8, I_UPPER=3, J_UPPER=0, K_UPPER=0 /
 
 &MISC NOISE = .FALSE. , STRATIFICATION = .FALSE. /
 
-&TIME T_END=1.0 /
+&TIME T_END=0.5 /
 
 &PRES SOLVER = 'SCARC', INSEPARABLE_POISSON = .TRUE. /
 
