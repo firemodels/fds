@@ -51,7 +51,7 @@ GFORTRAN_OPTIONS=
 
 ifeq ($(shell echo "check_quotes"),"check_quotes")
 # windows
-  INTELMPI_COMPVERSION := $(shell ..\Scripts\intel_compversion)
+  INTELMPI_COMPVERSION := $(shell ..\Scripts\intel_compversion $(INTEL_IFORT))
   GNU_COMPVERSION := $(shell ..\Scripts\gnu_compversion)
 else
 # linux/osx
@@ -164,7 +164,7 @@ impi_intel_win_64 : MPILIB = "$(IMPI_RELEASE_ROOT)\impi.lib"
 impi_intel_win_64 : MPIINCLUDE = "$(IMPI_INCLUDE)"
 impi_intel_win_64 : FFLAGS = /Qipo /O2 /I$(MPIINCLUDE) /wrap-margin- $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL)
 impi_intel_win_64 : FOPENMPFLAGS = /Qopenmp
-impi_intel_win_64 : FCOMPL = ifort
+impi_intel_win_64 : FCOMPL = $(I_IFORT)
 impi_intel_win_64 : obj = fds_impi_win_64
 impi_intel_win_64 : setup_win $(objwin_mpi)
 	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB) $(LFLAGSMKL_INTEL)
@@ -173,7 +173,7 @@ impi_intel_win_64_dv : MPILIB = "$(IMPI_RELEASE_ROOT)\impi.lib"
 impi_intel_win_64_dv : MPIINCLUDE = "$(IMPI_INCLUDE)"
 impi_intel_win_64_dv : FFLAGS = /O1 /I$(MPIINCLUDE) /traceback /debug:full /wrap-margin- $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL)
 impi_intel_win_64_dv : FOPENMPFLAGS = /Qopenmp
-impi_intel_win_64_dv : FCOMPL = ifort
+impi_intel_win_64_dv : FCOMPL = $(I_IFORT)
 impi_intel_win_64_dv : obj = fds_impi_win_64_dv
 impi_intel_win_64_dv : setup_win $(objwin_mpi)
 	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB) $(LFLAGSMKL_INTEL)
@@ -182,7 +182,7 @@ impi_intel_win_64_db : MPILIB = "$(IMPI_DEBUG_ROOT)\impi.lib"
 impi_intel_win_64_db : MPIINCLUDE = "$(IMPI_INCLUDE)"
 impi_intel_win_64_db : FFLAGS = /Od /nologo /debug:all /I$(MPIINCLUDE) /Z7 /extend-source:132 /warn:unused /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f18 /wrap-margin- $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL)
 impi_intel_win_64_db : FOPENMPFLAGS = /Qopenmp
-impi_intel_win_64_db : FCOMPL = ifort
+impi_intel_win_64_db : FCOMPL = $(I_IFORT)
 impi_intel_win_64_db : obj = fds_impi_win_64_db
 impi_intel_win_64_db : setup_win $(objwin_mpi)
 	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB) $(LFLAGSMKL_INTEL)
