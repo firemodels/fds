@@ -1,4 +1,5 @@
 #!/bin/bash
+INTEL_FORT_LOCAL=$1
 
 #---------------------------------------------
 #                   is_file_installed
@@ -25,5 +26,5 @@ if [ $ifort_installed -eq 0 ]; then
   exit
 fi
 
-IFORTVERSION=`mpiifort -v |&  grep version | awk '{print $3}' `
-echo "\"Intel ifort $IFORTVERSION\""
+IFORTVERSION=`mpiifort -fc=$INTEL_FORT_LOCAL -v |&  grep version`
+echo "\"$IFORTVERSION\""

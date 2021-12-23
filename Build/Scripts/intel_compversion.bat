@@ -1,9 +1,10 @@
 @echo off
 setlocal enabledelayedexpansion
+set prog=%1
 
-call :is_file_installed ifort || exit /b 1
+call :is_file_installed %prog% || exit /b 1
 
-ifort > f_version.txt 2>&1
+%prog% /version > f_version.txt 2>&1
 set /p vers=<f_version.txt
 
 set nargs=0
@@ -14,7 +15,7 @@ for %%a in ("%vers: =" "%") do (
 )
 
 FOR /L %%i IN (0,1,%nargs%) DO (
-  if !vector[%%i]! == "Version"     echo "Intel ifort !vector2[%%i]!"
+  if !vector[%%i]! == "Version"     echo "Intel %prog% !vector2[%%i]!"
 )
 
 erase f_version.txt

@@ -11,6 +11,13 @@
 
 VPATH = ../Source
 
+# set compiler type 
+
+I_IFORT=ifort
+ifdef INTEL_IFORT
+   I_IFORT=$(INTEL_IFORT)
+endif
+
 ifeq ($(shell echo "check_quotes"),"check_quotes")
 # windows
   GIT_HASH := $(shell ..\Scripts\githash)
@@ -44,12 +51,11 @@ GFORTRAN_OPTIONS=
 
 ifeq ($(shell echo "check_quotes"),"check_quotes")
 # windows
-  INTELMPI_COMPVERSION := $(shell ..\Scripts\intel_compversion)
+  INTELMPI_COMPVERSION := $(shell ..\Scripts\intel_compversion $(INTEL_IFORT))
   GNU_COMPVERSION := $(shell ..\Scripts\gnu_compversion)
 else
 # linux/osx
-  INTELMPI_COMPVERSION := $(shell ../Scripts/intelmpi_compversion.sh)
-  INTELMAJOR_COMPVERSION := $(shell ../Scripts/intelmajor_compversion.sh)
+  INTELMPI_COMPVERSION := $(shell ../Scripts/intelmpi_compversion.sh $(INTEL_IFORT))
   OPENMPI_COMPVERSION := $(shell ../Scripts/openmpi_compversion.sh)
   GNU_COMPVERSION := $(shell ../Scripts/gnu_compversion.sh)
   ifeq ($(shell ../Scripts/gnu_compmajorversion.sh),10)
@@ -158,7 +164,7 @@ impi_intel_win_64 : MPILIB = "$(IMPI_RELEASE_ROOT)\impi.lib"
 impi_intel_win_64 : MPIINCLUDE = "$(IMPI_INCLUDE)"
 impi_intel_win_64 : FFLAGS = /Qipo /O2 /I$(MPIINCLUDE) /wrap-margin- $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL)
 impi_intel_win_64 : FOPENMPFLAGS = /Qopenmp
-impi_intel_win_64 : FCOMPL = ifort
+impi_intel_win_64 : FCOMPL = $(I_IFORT)
 impi_intel_win_64 : obj = fds_impi_win_64
 impi_intel_win_64 : setup_win $(objwin_mpi)
 	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB) $(LFLAGSMKL_INTEL)
@@ -167,7 +173,7 @@ impi_intel_win_64_dv : MPILIB = "$(IMPI_RELEASE_ROOT)\impi.lib"
 impi_intel_win_64_dv : MPIINCLUDE = "$(IMPI_INCLUDE)"
 impi_intel_win_64_dv : FFLAGS = /O1 /I$(MPIINCLUDE) /traceback /debug:full /wrap-margin- $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL)
 impi_intel_win_64_dv : FOPENMPFLAGS = /Qopenmp
-impi_intel_win_64_dv : FCOMPL = ifort
+impi_intel_win_64_dv : FCOMPL = $(I_IFORT)
 impi_intel_win_64_dv : obj = fds_impi_win_64_dv
 impi_intel_win_64_dv : setup_win $(objwin_mpi)
 	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB) $(LFLAGSMKL_INTEL)
@@ -176,14 +182,14 @@ impi_intel_win_64_db : MPILIB = "$(IMPI_DEBUG_ROOT)\impi.lib"
 impi_intel_win_64_db : MPIINCLUDE = "$(IMPI_INCLUDE)"
 impi_intel_win_64_db : FFLAGS = /Od /nologo /debug:all /I$(MPIINCLUDE) /Z7 /extend-source:132 /warn:unused /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f18 /wrap-margin- $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL)
 impi_intel_win_64_db : FOPENMPFLAGS = /Qopenmp
-impi_intel_win_64_db : FCOMPL = ifort
+impi_intel_win_64_db : FCOMPL = $(I_IFORT)
 impi_intel_win_64_db : obj = fds_impi_win_64_db
 impi_intel_win_64_db : setup_win $(objwin_mpi)
 	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB) $(LFLAGSMKL_INTEL)
 
 # Linux Intel Fortran Compiler and Intel MPI
  
-impi_intel_linux_64 : FFLAGS = -m64 -O2 -ipo -no-wrap-margin $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL) -DUSE_IFPORT
+impi_intel_linux_64 : FFLAGS = -m64 -fc=$(I_IFORT) -O2 -ipo -no-wrap-margin $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL) -DUSE_IFPORT
 impi_intel_linux_64 : LFLAGSMKL = $(LFLAGSMKL_INTEL)
 impi_intel_linux_64 : LFLAGS =
 impi_intel_linux_64 : FCOMPL = mpiifort
@@ -192,7 +198,7 @@ impi_intel_linux_64 : obj = fds_impi_intel_linux_64
 impi_intel_linux_64 : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
-impi_intel_linux_64_db : FFLAGS = -m64 -check all -warn all -O0 -g -traceback -fpe0 -nofltconsistency -stand:f18 -no-wrap-margin $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL) -DUSE_IFPORT
+impi_intel_linux_64_db : FFLAGS = -m64 -fc=$(I_IFORT) -check all -warn all -O0 -g -traceback -fpe0 -nofltconsistency -stand:f18 -no-wrap-margin $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL) -DUSE_IFPORT
 impi_intel_linux_64_db : LFLAGSMKL = $(LFLAGSMKL_INTEL)
 impi_intel_linux_64_db : LFLAGS =
 impi_intel_linux_64_db : FCOMPL = mpiifort
@@ -201,7 +207,7 @@ impi_intel_linux_64_db : obj = fds_impi_intel_linux_64_db
 impi_intel_linux_64_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
-impi_intel_linux_64_dv : FFLAGS = -m64 -warn unused -O1 -g -traceback -no-wrap-margin $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL) -DUSE_IFPORT -DNO_SCARC
+impi_intel_linux_64_dv : FFLAGS = -m64 -fc=$(I_IFORT) -warn unused -O1 -g -traceback -no-wrap-margin $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL) -DUSE_IFPORT -DNO_SCARC
 impi_intel_linux_64_dv : LFLAGSMKL = $(LFLAGSMKL_INTEL)
 impi_intel_linux_64_dv : LFLAGS =
 impi_intel_linux_64_dv : FCOMPL = mpiifort
