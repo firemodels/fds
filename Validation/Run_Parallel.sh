@@ -36,6 +36,7 @@ cd NIST_Deposition_Gauge;  ./Run_All.sh $OPTIONS; cd ..
 cd NIST_Douglas_Firs;  ./Run_All.sh $OPTIONS; cd ..
 cd NIST_E119_Compartment;  ./Run_All.sh $OPTIONS; cd ..
 cd NIST_FSE_2008;  ./Run_All.sh $OPTIONS; cd ..
+cd NIST_NRC;  ./Run_All.sh $OPTIONS; cd ..
 cd NIST_NRC_Corner_Effects;  ./Run_All.sh $OPTIONS; cd ..
 cd NIST_NRC_Parallel_Panels;  ./Run_All.sh $OPTIONS; cd ..
 cd NIST_Pool_Fires;  ./Run_All.sh $OPTIONS; cd ..
