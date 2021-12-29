@@ -1549,7 +1549,6 @@ TYPE DUCTNODE_TYPE
    REAL(EB) :: FILTER_LOSS                                 !< Current loss for a filter in the node
    REAL(EB) :: P                                           !< Pressure at the node (Pa)
    REAL(EB) :: P_OLD                                       !< Prior timestep pressure at the node (Pa)
-   REAL(EB) :: P_EXTRAP                                    !< Extrapolated pressure at the node (Pa)
    LOGICAL :: UPDATED                                      !< Node has been updated in the current timestep
    LOGICAL :: READ_IN                                      !< Node defintion is explicit in the input file
    LOGICAL :: FIXED                                        !< Attached ducts have fully defined flow rates
