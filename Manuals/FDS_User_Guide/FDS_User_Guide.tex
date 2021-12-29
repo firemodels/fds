@@ -291,98 +291,6 @@ Many of the changes in FDS~6 are improvements to the various sub-models that do 
 
 
 
-\section{Changes to Input Parameters in FDS 6}
-
-This section describes the changes in the input parameters between FDS version~5 and version~6. Table~\ref{tbl:Changes} lists in alphabetical order parameters from FDS~5 that have changed. Note that this table does not list new parameters in FDS~6.
-
-There has been a limited amount of backward compatibility programmed into FDS 6. In other words, several commonly used parameters and conventions from previous versions still
-work, but you are encouraged to gradually modify your input files to conform to the new conventions. Gradually, obsolescent features will be removed. Some of the more notable changes
-in FDS 6 are:
-\begin{itemize}
-\item If you want to model a fire, you {\em must} include a {\ct REAC} line with a specified {\ct FUEL}. See Chapter~\ref{info:REAC} for details.
-\item The output quantity {\ct 'MIXTURE\_FRACTION'} has been replaced with {\ct 'MIXTURE FRACTION'} and is only usable if there is a single {\ct REAC} input of the form ${\rm A} \; + \; {\rm B} \rightarrow {\rm C}$ and {\ct INITIAL\_UNMIXED\_FRACTION=0}.
-\item There is no longer a {\ct STATE\_FILE} because there is no longer a simple mixture fraction model.
-\item {\ct PRESSURE\_CORRECTION} has been eliminated. See Section~\ref{info:PRES} for ways to improve the performance of the pressure solver.
-\item Species mass and volume fraction outputs are no longer invoked using {\ct QUANTITY='species name'}. Use {\ct QUANTITY='MASS FRACTION'} or {\ct QUANTITY='VOLUME FRACTION'} along with {\ct SPEC\_ID} instead.  Also note that all predefined species (Table~\ref{tab:gasspecies}) are now referenced with all uppercase letters.
-\item The output quantity {\ct 'SOOT VOLUME FRACTION'} is now {\ct 'AEROSOL VOLUME FRACTION'} along with {\ct SPEC\_ID} to identify the name of the species.
-\end{itemize}
-
-
-\begin{sidewaystable}[p]
-\caption[List of changes to input parameters for FDS 6]{Changes to input parameters, FDS version 5 to 6.}
-\label{tbl:Changes}
-\centering
-\begin{tabular}{@{\extracolsep{\fill}}|c|l|c|l|l|}
-\hline
-Namelist  & FDS 5 Parameter & Namelist  & FDS 6 Parameter & Notes \\ \hline \hline
-{\ct BNDF}    & {\ct RECOUNT\_DRIP}                 &              & Eliminated                                  &                                              \\ \hline
-{\ct CLIP}    & {\ct MAXIMUM\_MASS\_FRACTION}       &              & Eliminated                                  & Section~\ref{info:CLIP}                      \\ \hline
-{\ct CLIP}    & {\ct MINIMUM\_MASS\_FRACTION}       &              & Eliminated                                  &  Section~\ref{info:CLIP}                     \\ \hline
-{\ct DUMP}    & {\ct MAXIMUM\_DROPLETS}             &  {\ct DUMP}  &  {\ct MAXIMUM\_PARTICLES}                   &  Section~\ref{info:DUMP}                  \\ \hline
-{\ct DUMP}    & {\ct STATE\_FILE}                   &              & Eliminated                                  &                                              \\ \hline
-{\ct INIT}    & {\ct NUMBER\_INITIAL\_DROPLETS}     &  {\ct INIT}  &  {\ct N\_PARTICLES},  {\ct N\_PARTICLES\_PER\_CELL} &  Section~\ref{info:initial_droplets}                  \\ \hline
-{\ct MATL}    & {\ct NU\_FUEL}                      &  {\ct MATL}  & {\ct NU\_SPEC} +  {\ct SPEC\_ID}            & Section~\ref{info:solid_pyrolysis}       \\ \hline
-{\ct MATL}    & {\ct NU\_GAS}                       &  {\ct MATL}  & {\ct NU\_SPEC} +  {\ct SPEC\_ID}            & Section~\ref{info:solid_pyrolysis}       \\ \hline
-{\ct MATL}    & {\ct NU\_RESIDUE}                   &  {\ct MATL}  & {\ct NU\_MATL}                              & Section~\ref{info:solid_pyrolysis}       \\ \hline
-{\ct MATL}    & {\ct NU\_WATER}                     &  {\ct MATL}  & {\ct NU\_SPEC} +  {\ct SPEC\_ID}            & Section~\ref{info:solid_pyrolysis}       \\ \hline
-{\ct MATL}    & {\ct RESIDUE}                       &  {\ct MATL}  & {\ct MATL\_ID}                              & Section~\ref{info:solid_pyrolysis}       \\ \hline
-{\ct MISC}    & {\ct BACKGROUND\_SPECIES}           &  {\ct SPEC}  & {\ct BACKGROUND=T}                     & Section~\ref{info:SPEC}                  \\ \hline
-{\ct MISC}    & {\ct CONDUCTIVITY}                  &  {\ct SPEC}  & {\ct CONDUCTIVITY}                          & Section~\ref{info:SPEC}                  \\ \hline
-{\ct MISC}    & {\ct CO\_PRODUCTION}                &              & New procedure                               & Section~\ref{info:finite}                \\ \hline
-{\ct MISC}    & {\ct CSMAG}                         &  {\ct MISC}  & {\ct C\_SMAGORINSKY}                        & Section~\ref{info:LES}                   \\ \hline
-{\ct MISC}    & {\ct MW}                            &  {\ct SPEC}  & {\ct MW}                                    & Section~\ref{info:SPEC}                  \\ \hline
-{\ct MISC}    & {\ct PRESSURE\_CORRECTION}          &  {\ct PRES}  & {\ct VELOCITY\_TOLERANCE}                   & Section~\ref{info:PRES}                  \\ \hline
-{\ct MISC}    & {\ct RADIATION}                     &  {\ct RADI}  & {\ct RADIATION}                             & Section~\ref{info:RADI}                  \\ \hline
-{\ct MISC}    & {\ct EVAC\_SURF\_DEFAULT}           &  {\ct SURF}  & {\ct EVAC\_DEFAULT}                         & Section~\ref{info:SURF}                  \\ \hline
-{\ct MISC}    & {\ct SURF\_DEFAULT}                 &  {\ct SURF}  & {\ct DEFAULT}                               & Section~\ref{info:SURF}                  \\ \hline
-{\ct MISC}    & {\ct VISCOSITY}                     &  {\ct SPEC}  &  {\ct VISCOSITY}                            & Section~\ref{info:SPEC}                  \\ \hline
-{\ct OBST}    & {\ct SAWTOOTH}                      &  {\ct SURF}  & Eliminated                                  & Section~\ref{info:WALL_MODEL}            \\ \hline
-{\ct PART}    & {\ct FUEL}                          &  {\ct PART}  & {\ct SPEC\_ID='[FUEL]'}                     & Section~\ref{info:fuel_droplets}         \\ \hline
-{\ct PART}    & {\ct HEAT\_OF\_VAPORIZATION}        &  {\ct SPEC}  &  {\ct HEAT\_OF\_VAPORIZATION}               & Section~\ref{thermal_part_props}         \\ \hline
-{\ct PART}    & {\ct H\_V\_REFERENCE\_TEMPERATURE}  &  {\ct SPEC}  &   {\ct H\_V\_REFERENCE\_TEMPERATURE}        & Section~\ref{thermal_part_props}         \\ \hline
-{\ct PART}    & {\ct MELTING\_TEMPERATURE}          &  {\ct SPEC}  & {\ct MELTING\_TEMPERATURE}                  & Section~\ref{thermal_part_props}         \\ \hline
-{\ct PART}    & {\ct NUMBER\_INITIAL\_DROPLETS}     &  {\ct INIT}  & {\ct N\_PARTICLES}                          & Section~\ref{info:initial_droplets}      \\ \hline
-{\ct PART}    & {\ct PARTICLES\_PER\_SECOND}        &  {\ct PROP}  & {\ct PARTICLES\_PER\_SECOND}                & Section~\ref{info:sprinkler_droplets}    \\ \hline
-\end{tabular}
-\end{sidewaystable}
-
-\begin{sidewaystable}[p]
-\caption[List of changes to input parameters for FDS 6 (continued)]{Changes to input parameters, FDS version 5 to 6 (continued).}
-\label{tbl:Changes2}
-\centering
-\begin{tabular}{@{\extracolsep{\fill}}|c|l|c|l|l|}
-\hline
-Namelist      & FDS 5 Parameter                     & Namelist     & FDS 6 Parameter & Notes \\ \hline \hline
-{\ct PART}    & {\ct SPECIFIC\_HEAT}                &  {\ct SPEC}  & {\ct SPECIFIC\_HEAT\_LIQUID}                & Section~\ref{thermal_part_props}        \\ \hline
-{\ct PART}    & {\ct VAPORIZATION\_TEMPERATURE}     &  {\ct SPEC}  & {\ct VAPORIZATION\_TEMPERATURE}             & Section~\ref{thermal_part_props}        \\ \hline
-{\ct PART}    & {\ct WATER}                         &  {\ct PART}  & {\ct SPEC\_ID='WATER VAPOR'}                & Section~\ref{info:PART_Basics}          \\ \hline
-{\ct PROP}    & {\ct CABLE\_DIAMETER}               &              & New procedure                               & Section~\ref{info:THIEF}                \\ \hline
-{\ct PROP}    & {\ct CABLE\_FAILURE\_TEMPERATURE}   &              & New procedure                               & Section~\ref{info:THIEF}                \\ \hline
-{\ct PROP}    & {\ct CABLE\_JACKET\_THICKNESS}      &              & New procedure                               & Section~\ref{info:THIEF}                \\ \hline
-{\ct PROP}    & {\ct CABLE\_MASS\_PER\_LENGTH}      &              & New procedure                               & Section~\ref{info:THIEF}                \\ \hline
-{\ct PROP}    & {\ct CONDUIT\_DIAMETER}             &              & New procedure                               & Section~\ref{info:THIEF}                \\ \hline
-{\ct PROP}    & {\ct CONDUIT\_THICKNESS}            &              & New procedure                               & Section~\ref{info:THIEF}                \\ \hline
-{\ct PROP}    & {\ct DROPLETS\_PER\_SECOND}         &  {\ct PROP}  & {\ct PARTICLES\_PER\_SECOND}                & Section~\ref{info:sprinkler_droplets}   \\ \hline
-{\ct PROP}    & {\ct DROPLET\_VELOCITY}             &  {\ct PROP}  & {\ct PARTICLE\_VELOCITY}                    & Section~\ref{info:sprinklers}           \\ \hline
-{\ct PROP}    & {\ct DT\_INSERT}                    &              & New procedure                               & Section~\ref{info:controlling_droplets} \\ \hline
-{\ct RADI}    & {\ct CH4\_BANDS}                    &              & Eliminated                                  &                                         \\ \hline
-{\ct RADI}    & {\ct RADIATIVE\_FRACTION}           &  {\ct REAC}  & {\ct RADIATIVE\_FRACTION}                   & Section ~\ref{info:CHI_R}               \\ \hline
-{\ct REAC}    & {\ct BOF}                           &  {\ct REAC}  & {\ct A}                                     & Section~\ref{info:finite}               \\ \hline
-{\ct REAC}    & {\ct ID}                            &  {\ct REAC}  & {\ct FUEL}                                  & Section~\ref{info:simple_chemistry}     \\ \hline
-{\ct REAC}    & {\ct MASS\_EXTINCTION\_COEFFICIENT} &  {\ct SPEC}  & {\ct MASS\_EXTINCTION\_COEFFICIENT}         & Section~\ref{info:visibility}           \\ \hline
-{\ct REAC}    & {\ct MAXIMUM\_VISIBILITY}           &  {\ct MISC}  & {\ct MAXIMUM\_VISIBILITY}                   & Section~\ref{info:visibility}           \\ \hline
-{\ct REAC}    & {\ct OXIDIZER}                      &              & New procedure                               & Section~\ref{info:REAC_Diagnostics}     \\ \hline
-{\ct REAC}    & {\ct VISIBILITY\_FACTOR}            &  {\ct MISC}  & {\ct VISIBILITY\_FACTOR}                    & Section~\ref{info:visibility}           \\ \hline
-{\ct SPEC}    & {\ct ABSORBING}                     &  {\ct SPEC}  & {\ct RADCAL\_ID }                           & Section~\ref{info:radiative_spec_props} \\ \hline
-{\ct SURF}    & {\ct H\_FIXED}                      &  {\ct SURF}  & {\ct HEAT\_TRANSFER\_COEFFICIENT}           & Section~\ref{info:convection}           \\ \hline
-{\ct SURF}    & {\ct POROUS}                        &              & New procedure                               & Section~\ref{info:HVACfan}              \\ \hline
-{\ct SURF}    & {\ct VOLUME\_FLUX}                  &  {\ct SURF}  & {\ct VOLUME\_FLOW}                          & Section~\ref{info:MASS_FLUX}            \\ \hline
-{\ct TIME}    & {\ct TWFIN}                         &  {\ct TIME}  & {\ct T\_END}                                & Section~\ref{info:TIME}                 \\ \hline
-{\ct VENT}    & {\ct MASS\_FRACTION}                &              & Eliminated                                  &                                         \\ \hline
-\end{tabular}
-\end{sidewaystable}
-
-
 \section{A Note on Longer Run Times in FDS 6}
 
 A number of changes made in FDS 6 are aimed at improving the robustness and accuracy of the simulations. However, these improvements come at increased cost in both CPU time and memory usage. Some of this increased cost is offset by increasingly faster computers and improved parallel processing. In particular, starting with FDS~6.1.0, the default released version of FDS will employ OpenMP~\cite{Chapman:OpenMP} by default. OpenMP is a programming interface that enables FDS to exploit multiple processing units on a given computer. Most Windows-based personal computers now come with multi-core processors, but past versions of FDS could only exploit a single core for a given calculation. With this new release and the increasingly faster processors available on the market, FDS~6 ought to maintain and eventually surpass the computing speed of past versions.
@@ -1356,13 +1264,11 @@ The turbulent Prandtl number $\PR_t$ and the turbulent Schmidt number $\SC_t$ ar
 
 \subsubsection*{Near-Wall Turbulence Model}
 
-% By default, FDS uses constant coefficient Smagorinsky \cite{Smagorinsky:1} with Van Driest damping (see \cite{Wilcox:1}) for the eddy viscosity in the first off-wall grid cell because the test filtering operation for the Deardorff model is ill-defined near the wall.  The damping function is added to the eddy viscosity so that the viscosity goes to zero at the correct rate as you approach the wall where the no slip condition applies.
-
-% An alternative to the damping function is to use the WALE model of Nicoud and Ducros \cite{Nicoud:1999}.  To implement WALE as the near-wall model use {\ct NEAR\_WALL\_TURBULENCE\_MODEL='WALE'} on the {\ct MISC} line.  Note that even if you have set WALE as the bulk turbulence model, you must also explicitly set WALE as the near-wall turbulence model if that is desired.
-
 By default, FDS uses the WALE model of Nicoud and Ducros \cite{Nicoud:1999} for the eddy viscosity in the first off-wall grid cell because the test filtering operation for the Deardorff model is ill-defined near a wall.  The WALE model has the advantage that the eddy viscosity tends to zero at the correct rate as you approach the wall where the no slip condition applies.
 
-As an alternative, you may choose to use the constant coefficient Smagorinsky \cite{Smagorinsky:1} model with Van Driest damping (see \cite{Wilcox:1}).  To invoke this model, set {\ct NEAR\_WALL\_TURBULENCE\_MODEL='VAN DRIEST'} on the {\ct MISC} line.
+As an alternative, you may choose to use the constant coefficient Smagorinsky \cite{Smagorinsky:1} model with Van Driest damping (see \cite{Wilcox:1}).  To invoke this model, set {\ct NEAR\_WALL\_TURBULENCE\_MODEL='VAN DRIEST'} on the {\ct SURF} line.
+
+For diagnostic purposes, or in cases where neither of the other wall models above is appropriate, it is possible to set a constant value of the near wall kinematic eddy viscosity for a given {\ct SURF} using {\ct NEAR\_WALL\_EDDY\_VISCOSITY}.
 
 Note that the near-wall turbulence model sets the eddy viscosity, $\mu_\mathrm{t}$, near the wall, \emph{not} the wall stress, $\tau_\mathrm{w}$.  The wall stress depends on the choice of wall function, as discussed in Sec.~\ref{info:WALL_MODEL}.
 
@@ -2995,7 +2901,7 @@ If you want to specify the convective heat transfer coefficient, you can set it 
 
 \subsubsection{Specifying the Heat Flux at a Solid Surface}
 
-Instead of altering the convective heat transfer coefficient, you may specify a fixed heat flux directly.  Two methods are available to do this.  The first is to specify a {\ct NET\_HEAT\_FLUX} in units of kW/m$^2$.  When this is specified FDS will compute the surface temperature required to ensure that the combined radiative and convective heat flux from the surface is equal to the {\ct NET\_HEAT\_FLUX}. The second method is to specify the {\ct CONVECTIVE\_HEAT\_FLUX}, in units of kW/m$^2$. The radiative flux is then determined based on the {\ct EMISSIVITY} on the {\ct SURF} line and the wall temperature needed to get the desired {\ct CONVECTIVE\_HEAT\_FLUX}. Note that if you wish there to be only a convective heat flux from a surface, then the {\ct EMISSIVITY} should be set to zero.  If {\ct NET\_HEAT\_FLUX} or {\ct CONVECTIVE\_HEAT\_FLUX} is positive, the wall heats up the surrounding gases. If {\ct NET\_HEAT\_FLUX} or {\ct CONVECTIVE\_HEAT\_FLUX} is negative, the wall cools the surrounding gases. You cannot specify {\ct TMP\_FRONT} with either {\ct NET\_HEAT\_FLUX} or {\ct CONVECTIVE\_HEAT\_FLUX} since both inputs require FDS to compute the wall temperature to get the desired flux.
+Instead of altering the convective heat transfer coefficient, you may specify a fixed heat flux directly.  Two methods are available to do this.  The first is to specify a {\ct NET\_HEAT\_FLUX} in units of kW/m$^2$.  When this is specified FDS will compute the surface temperature required to ensure that the combined radiative and convective heat flux from the surface is equal to the {\ct NET\_HEAT\_FLUX}. The second method is to specify the {\ct CONVECTIVE\_HEAT\_FLUX}, in units of kW/m$^2$. The radiative flux is then determined based on the {\ct EMISSIVITY} on the {\ct SURF} line and the wall temperature needed to get the desired {\ct CONVECTIVE\_HEAT\_FLUX}. Note that if you wish there to be only a convective heat flux from a surface, then the {\ct EMISSIVITY} should be set to zero.  If {\ct NET\_HEAT\_FLUX} or {\ct CONVECTIVE\_HEAT\_FLUX} is positive, the wall heats up the surrounding gases. If {\ct NET\_HEAT\_FLUX} or {\ct CONVECTIVE\_HEAT\_FLUX} is negative, the wall cools the surrounding gases. You cannot specify {\ct TMP\_FRONT} with either {\ct NET\_HEAT\_FLUX} since NET\_HEAT\_FLUX combines radiative and convective flux and FDS must compute the wall temperature to get the desired flux. IF you specify {\ct TMP\_FRONT} and {\ct CONVECTIVE\_HEAT\_FLUX}, then FDS will use the gas temperature adjacent to wall cell to set the convection heat transfer coefficient to achieve the desired {\ct CONVECTIVE\_HEAT\_FLUX}.
 
 \subsubsection{Logarithmic Law of the Wall}
 
@@ -3506,6 +3412,9 @@ The fourth term of the reaction rate equation (\ref{rr}) can be used to simulate
 X_{\rm O_2}(x) = X_{\rm O_2,g}\exp(-x/L_{\rm g})
 \ee
 where $L_{\rm g}$ is the gas diffusion length scale. $n_{{\rm O_2},ij}$ is prescribed under the name {\ct N\_O2(j)} on the {\ct MATL} line of the $i$th material. It is zero by default. $L_{\rm g}$ is prescribed under the name {\ct GAS\_DIFFUSION\_DEPTH(j)}, and it is 0.001 m by default.
+
+You can specity {\ct MAX\_REACTION\_RATE(j)} (1/s) to limit the reaction rate, $r_{ij}$, below a specified value.
+
 
 \subsubsection{Estimating Kinetic Parameters}
 \label{info:kinetic_parameters}
@@ -4231,16 +4140,13 @@ This test case also uses the atmospheric boundary layer (ABL) wall model (see Se
 \subsection{Random Mass Flux Variation}
 \label{info:MASS_FLUX_VAR}
 
-The current implementation of the Synthetic Eddy Method does not allow variation in mass flux defined on a {\ct SURF} line.  For example, {\ct HRRPUA} and {\ct MASS\_FLUX} boundary conditions are by default taken as constant for a given {\ct SURF}.  In reality, of course, this is rarely the case---generally there is some level of random variation in the mass flux on the surface.  In an attempt to accommodate this effect, we have implemented an experimental feature where the user may specify a mass flux variation as a fractional value with the parameter {\ct MASS\_FLUX\_VAR}.  For example, if you want a 10 \% variation in a heat release rate per unit area of 100 \si{kW/m^2} then use
-
+The current implementation of the Synthetic Eddy Method does not allow variation in mass flux defined on a {\ct SURF} line.  For example, the parameters {\ct HRRPUA} and {\ct MASS\_FLUX} follow a user-specified time history which does not include random fluctuations. However, you may specify a mass flux variation using the parameter {\ct MASS\_FLUX\_VAR}. For example, if you want a 10~\% variation in a heat release rate per unit area of 100 \si{kW/m^2} then use
 \begin{lstlisting}
 &SURF ID='burner', HRRPUA=100., MASS_FLUX_VAR=0.1 /
 \end{lstlisting}
-
-It may be helpful to use the boundary file output quantity {\ct MASS FLUX WALL CELL} to visualize the variation.  For example,
-
+It may be helpful to use the boundary file output quantity {\ct 'MASS FLUX'} to visualize the variation.  For example,
 \begin{lstlisting}
-&BNDF QUANTITY='MASS FLUX WALL CELL', CELL_CENTERED=T /
+&BNDF QUANTITY='MASS FLUX', CELL_CENTERED=T /
 \end{lstlisting}
 
 \section{HVAC Systems: The \texorpdfstring{{\tt HVAC}}{HVAC} Namelist Group (Table \ref{tbl:HVAC})}
@@ -4406,7 +4312,7 @@ Below are sample inputs for the three types of fans supported by FDS.
 \noindent where:
 
 \begin{description}
-\item[{\ct LOSS}] is the loss coefficient for flow through the fan when it is not operational.
+\item[{\ct LOSS}] is the loss coefficient for flow through the fan when it is not operational. FDS assumes a default value of 1.
 \item[{\ct MAX\_FLOW}] is the maximum volumetric flow of the fan in m$^3$/s.  This input activates a quadratic fan model.
 \item[{\ct MAX\_PRESSURE}] is the stall pressure of the fan in units of Pa.  This input activates a quadratic fan model.
 \item[{\ct RAMP\_ID}] identifies the {\ct RAMP} that contains a table of pressure drop across the fan (Pa) versus the volumetric flow rates (m$^3$/s) for a user-defined fan curve.
@@ -4579,6 +4485,15 @@ You can increase or decrease the number of cells each discretized duct has, to i
 
 If you are using {\ct DEVC}s to output spatially-integrated statistics as per Section~\ref{info:statistics} (such as {\ct VOLUME MEAN}, {\ct VOLUME INTEGRAL} or {\ct MASS INTEGRAL}) then be aware that, even if the integration volume bound by {\ct XB} encapsulates the spatial location of a duct, the quantity in the duct will not be recorded by the {\ct DEVC}. For example, if there is \SI{1}{\meter\cubed} of species~\num{1} initialized in an upstream FDS compartment which is transported to a downstream FDS compartment via an HVAC network with a total volume greater than \SI{1}{\meter\cubed}, the value of total mass of species~\num{1} output by a {\ct DEVC} recording the {\ct VOLUME INTEGRAL} of {\ct DENSITY} will reduce to zero during the time for which it is in the HVAC network domain.
 
+\subsection{Specified Flow vs. Unspecified Flow}
+\label{info:hvacspecified}
+
+There are two basic approaches for defining HVAC networks in FDS.
+
+In the first approach, one can specify enough {\ct VOLUME\_FLOW} and {\ct MASS\_FLOW} inputs such that all flows everywhere in the network are known. For example, if a tee has three ducts and two of the ducts have specified flow, then the third duct flow is known based on conservation of mass at that node. If all flows are specified everywhere in the HVAC network, then {\ct LOSS} inputs for ducts and nodes are not needed.
+
+In the second approach, one or more ducts have flows that are not specified, in this case FDS must solve for the pressures at either end of the duct to determine the flow through the duct. As one example, if a tee has three ducts and only one of the ducts has a specified flow, then FDS will use the relative pressure drops along the two other ducts to determine the flow. If no {\ct LOSS} inputs are given, then FDS may not correctly solve for the flow. As another example, losses in the HVAC network limit how quickly flow in the ducts can change over time. If there is a single duct connecting two rooms with no {\ct LOSS} inputs given, then small pressure changes can lead to large changes in duct velocity and increase the risk of a numerical instability. If you specify an HVAC network where flow is being solved for by FDS, then you must provided {\ct LOSS} inputs for each possible flow path. FDS will perform a check at startup and return an error message if it finds insufficient losses have been specified; however, this check may not discover all cases.
+
 \section{Pressure-Related Effects: The \texorpdfstring{{\tt ZONE}}{ZONE} Namelist Group (Table \ref{tbl:VENT})}
 \label{info:ZONE}
 
@@ -4591,7 +4506,7 @@ A pressure zone can be any region within the computational domain that is separa
 \begin{lstlisting}
 &ZONE XYZ=1.2,3.4,5.6, LEAK_AREA(0)=0.001 /
 \end{lstlisting}
-The parameter {\ct XYZ}\footnote{Past versions of FDS also made use of the sextuplet {\ct XB} to specify a pressure zone. This parameter still works, but {\ct XYZ} is preferred.} specifies a single point $(1.2,3.4,5.6)$ that is within a sealed compartment, and it is not embedded within a solid obstruction. There can be multiple {\ct ZONE}s declared. The indices of the zones, which are required for the specification of leaks and fans, are determined simply by the order in which they are specified in the input file. By default, the exterior of the computational domain is Zone~0. If there are no {\ct OPEN} boundaries, the entire computational domain will be assumed to be Zone~1.
+The parameter {\ct XYZ}\footnote{Past versions of FDS also made use of the sextuplet {\ct XB} to specify a pressure zone. This parameter has been deprecated.} specifies a single point $(1.2,3.4,5.6)$ that is within a sealed compartment, and it is not embedded within a solid obstruction. There can be multiple {\ct ZONE}s declared. The indices of the zones, which are required for the specification of leaks and fans, are determined simply by the order in which they are specified in the input file. By default, the exterior of the computational domain is Zone~0. If there are no {\ct OPEN} boundaries, the entire computational domain will be assumed to be Zone~1.
 
 There are several restrictions to assigning pressure zones. First, the declared pressure zones must be completely within a region of the domain that is bordered by solid obstructions. It is possible to ``break'' pressure zones by removing obstructions between them. An example of how to break pressure zones is given below. Second, pressure zones can span multiple meshes, but it is recommended that you check the pressure in each mesh to ensure consistency. If the {\ct ZONE} does span multiple meshes, you do {\em not}\footnote{Past versions of FDS required you to specify a separate {\ct XYZ} point for each mesh spanned by the pressure zone. This is no longer required.} need to add multiple {\ct XYZ} points for each mesh. A search algorithm will determine all other grid cells belonging to that pressure zone.
 
@@ -6559,7 +6474,7 @@ This means that during the temperature update of a particular grid cell in Mesh~
 
 Lagrangian particles can represent a wide variety of subgrid-scale objects, from office clutter to vegetation. To create solid, non-liquid particles, you must add a {\ct SURF\_ID} to the {\ct PART} line. The specified {\ct SURF} line contains the parameters that describe the thermophysical properties and geometric parameters of the particle. These properties are the same as those you would apply to an {\ct OBST} or {\ct VENT}. FDS uses the same solid phase conduction and pyrolysis algorithm for particles as it does for solid walls.
 
-If the {\ct SURF} line that is associated with the particle class calls for it, the particles will heat up due to convection from the surrounding gases and radiation from near and distant sources. The convective heat transfer coefficient takes into account the particle geometry, and the radiative heat flux is based on the integrated intensity. That is, the radiation heat flux is the average over all angles. However, you can specify unique directions for the particle if the source of heating does not surround the particles. More about particle splitting is explained in Section~\ref{info:particle_split}.
+If the {\ct SURF} line that is associated with the particle class calls for it, the particles will heat up due to convection from the surrounding gases and radiation from near and distant sources. The convective heat transfer coefficient takes into account the particle geometry, and the radiative heat flux is based on the integrated intensity. That is, the radiation heat flux is the average over all angles. 
 
 
 \subsection{Basic Geometry and Boundary Conditions}
@@ -6658,31 +6573,8 @@ By default, solid particles do not ``stick'' or adhere to solid surfaces like li
 \subsection{Splitting Particles}
 \label{info:particle_split}
 
-If the radiation heat flux is not uniformly distributed about the particle, it may be useful to split the particle into pieces, each with its own orientation. This can be done by using the parameter {\ct ORIENTATION} to specify  more than one outward facing directions for the particle. For example,
-\begin{lstlisting}
-&PART ..., ORIENTATION(1:3,1)=0,0,-1, ORIENTATION(1:3,2)=0,0,1 /
-\end{lstlisting}
-specifies that half the particle is facing downwards and half is facing upwards. FDS now essentially tracks two particles. The radiative flux to the downward facing particle is the integrated average over the southern hemisphere; the flux to the upward facing particle is the average over the northern hemisphere. The particle mass and the surface area are scaled by the number of orientations. The splitting along the coordinate axis is demonstrated for all geometries in Fig.~\ref{part_split}. The orientation direction does not have to align with the coordinate axes. In fact, the {\ct ORIENTATION}s do not have to be symmetric or come in pairs, even though for most applications it makes sense to do it this way. For a Cartesian particle (i.e., a plate), only the orientations that are perpendicular to the plate make physical sense. Keep in mind that the heat conducted within the different facets does not transfer through to the other facets. The heat conduction is still only one dimensional, in the direction normal to the face and towards the center.
+If an {\ct ORIENTATION} vector is assigned on a {\ct PART} line, the radiative flux to the particle is calculated as if there is a flat plate normal to the direction of the vector, like a conventional heat flux gauge. That is, the heat flux is not an integrated average over the entire particle but rather the directional heat flux with the given orientation. The reason for this exception to the general rule is that often single particles are used as ``targets'' to record a heat flux at a given point in the domain with a given orientation. These particles can be thought of as tiny heat flux gauges that do not disturb the flow.
 
-\begin{figure}[p]
-\begin{center}
-\includegraphics[height=2.0in]{FIGURES/FDS_User_Guide_Cartesian_Particle_Drawing}
-
-\vspace{0.5in}
-
-\includegraphics[height=2.8in]{FIGURES/FDS_User_Guide_Cylindrical_Particle_Drawing}
-
-\vspace{0.5in}
-
-\includegraphics[height=2.5in]{FIGURES/FDS_User_Guide_Sphere_Particle_Drawing}
-\end{center}
-\caption[Examples of particle splitting]{Examples of a Cartesian (plate), cylindrical, and spherical particle split into multiple parts.}
-\label{part_split}
-\end{figure}
-
-Note that if only a single {\ct ORIENTATION} vector is assigned on a {\ct PART} line, the radiative flux to the particle is calculated as if there is a flat plate normal to the direction of the vector, like a conventional heat flux gauge. That is, the heat flux is not an integrated average over the entire particle but rather the directional heat flux with the given orientation. The reason for this exception to the general rule is that often single particles are used as ``targets'' to record a heat flux at a given point in the domain with a given orientation. These particles can be thought of as tiny heat flux gauges that do not disturb the flow.
-
-\FloatBarrier
 
 \subsection{Gas Generating Particles}
 \label{info:particle_mass_generation}
@@ -6758,7 +6650,7 @@ A 2-D array of particles can be used to represent the drag exerted by a window s
 &INIT N_PARTICLES_PER_CELL=1, CELL_CENTERED=T, PART_ID='SCREEN',
       XB=1.01,1.02,0.0,1.0,0.0,1.0/
 &PART ID='SCREEN', DRAG_LAW='SCREEN', FREE_AREA_FRACTION=0.4, STATIC=T,
-      SURF_ID='SCREEN', ORIENTATION(1:3,1)=1,0,0 /
+      SURF_ID='SCREEN', ORIENTATION=1,0,0 /
 &SURF ID='SCREEN', THICKNESS=0.00015, GEOMETRY='CYLINDRICAL',
       MATL_ID='ALUMINUM' /
 &MATL ID='ALUMINUM', DENSITY=2700., CONDUCTIVITY=200., SPECIFIC_HEAT=0.9 /
@@ -6797,13 +6689,13 @@ To use the THIEF model in FDS, add lines similar to the following to the input f
 &MATL ID='plastic', DENSITY=2535., CONDUCTIVITY=0.2, SPECIFIC_HEAT=1.5 /
 &SURF ID='cylinder', THICKNESS=0.00815, LENGTH=0.1, MATL_ID='plastic',
       GEOMETRY='CYLINDRICAL' /
-&PART ID='Cable Segment', SURF_ID='cylinder', ORIENTATION(1:3,1)=0.,0.,1.,
+&PART ID='Cable Segment', SURF_ID='cylinder', ORIENTATION=0,0,1,
       STATIC=T /
 &INIT ID='Cable', XB=0.01,0.01,0.,0.,0.,0., N_PARTICLES=1, PART_ID='Cable Segment' /
 &DEVC ID='Cable Temp', INIT_ID='Cable',
       QUANTITY='INSIDE WALL TEMPERATURE', DEPTH=0.0015 /
 \end{lstlisting}
-The THIEF model assumes that the cable plastic material has a thermal conductivity of 0.2~\si{W/(m.K)} and a specific heat of 1.5~\si{kJ/(kg.K)}. If you change these values, you are no longer using the THIEF model. The density is the mass per unit length of the cable divided by its cross sectional area. The {\ct THICKNESS} is the radius of the cylindrical cable in units of m. The {\ct LENGTH}, in m, is needed by FDS because it assumes that the cable is a cylindrical segment of a certain length. It has no impact on the simulation, and its value it typically the size of a grid cell. The {\ct ORIENTATION} tells FDS the direction of the prevailing radiative source. The second argument indicates that there can be more than one {\ct ORIENTATION}. {\ct STATIC=T} prevents the cable from moving. The {\ct INIT} line is used to position the cable within the computational domain. The {\ct DEVC} line records the cables inner temperature, in this case 1.5~mm below the surface. This is typically the jacket thickness.
+The THIEF model assumes that the cable plastic material has a thermal conductivity of 0.2~\si{W/(m.K)} and a specific heat of 1.5~\si{kJ/(kg.K)}. If you change these values, you are no longer using the THIEF model. The density is the mass per unit length of the cable divided by its cross sectional area. The {\ct THICKNESS} is the radius of the cylindrical cable in units of m. The {\ct LENGTH}, in m, is needed by FDS because it assumes that the cable is a cylindrical segment of a certain length. It has no impact on the simulation, and its value it typically the size of a grid cell. The {\ct ORIENTATION} tells FDS the direction of the prevailing radiative source. {\ct STATIC=T} prevents the cable from moving. The {\ct INIT} line is used to position the cable within the computational domain. The {\ct DEVC} line records the cables inner temperature, in this case 1.5~mm below the surface. This is typically the jacket thickness.
 
 
 \clearpage
@@ -7178,7 +7070,7 @@ In the example called {\ct wind\_example\_32} there are various rectangular bloc
 
 The wind {\ct SPEED} and {\ct DIRECTION} can be made a function of time and/or height using {\ct RAMP} functions. With respect to time, consider the following lines of input:
 \begin{lstlisting}
-&WIND SPEED=1., RAMP_SPEED='spd', RAMP_DIRECTION='dir' /
+&WIND SPEED=1., RAMP_SPEED_T='spd', RAMP_DIRECTION_T='dir' /
 
 &RAMP ID='dir', T=   0, F=300 /
 &RAMP ID='dir', T= 600, F=330 /
@@ -7191,15 +7083,24 @@ The wind {\ct SPEED} and {\ct DIRECTION} can be made a function of time and/or h
 .
 .
 \end{lstlisting}
-These lines direct FDS to vary the wind speed and direction according to the {\ct RAMP} functions {\ct 'spd'} and {\ct 'dir'}, respectively. The parameter {\ct T} is the time in s. For the direction ramp function, {\ct F} represents the direction angle in degrees from the north (positive $y$ direction). For the speed ramp function, {\ct F} represents a multiplier of the base {\ct SPEED}, which in this case is unity. An alternative to specifying the wind speed and direction is to specify the velocity components, ({\ct U0},{\ct V0}) separately, along with time ramps {\ct RAMP\_U0\_T} and {\ct RAMP\_V0\_T}.
+These lines direct FDS to vary the wind speed and direction over time, according to the {\ct RAMP} functions {\ct 'spd'} and {\ct 'dir'}, respectively. The parameter {\ct T} is the time in s. For the direction ramp function, {\ct F} represents the direction angle in degrees from the north (positive $y$ direction). For the speed ramp function, {\ct F} represents a multiplier of the base {\ct SPEED}, which in this case is unity.
 
-You can also vary the wind velocity components with height using the ramp functions {\ct RAMP\_U0\_Z}, {\ct RAMP\_V0\_Z}, and {\ct RAMP\_W0\_Z}.
+You can also vary the wind velocity components with height using the ramp functions {\ct RAMP\_SPEED\_Z} and {\ct RAMP\_DIRECTION\_Z}.
 \begin{lstlisting}
-&RAMP ID='z-ramp', Z=  0., F=1.0 /
-&RAMP ID='z-ramp', Z=200., F=1.5 /
-&RAMP ID='z-ramp', Z=500., F=1.8 /
+&WIND SPEED=1., RAMP_SPEED_Z='spd', RAMP_DIRECTION_Z='dir' /
+
+&RAMP ID='dir', Z=   0, F=300 /
+&RAMP ID='dir', Z= 200, F=330 /
+&RAMP ID='dir', Z= 500, F=350 /
+.
+.
+&RAMP ID='spd', Z=   0, F=1.0 /
+&RAMP ID='spd', Z= 200, F=1.5 /
+&RAMP ID='spd', Z= 500, F=1.8 /
+.
+.
 \end{lstlisting}
-The parameter {\ct Z} represents the height (m) and {\ct F} the fraction of the given velocity component value. Note that if you use Monin-Obukhov similarity parameters, you should not specify the vertical profile of the wind. It will be calculated automatically.
+The parameter {\ct Z} represents the height (m). As with the time functions above, for the direction ramp function, {\ct F} represents the direction angle in degrees from the north (positive $y$ direction). This value is added to any time-varying value set by {\ct RAMP\_DIRECTION\_T}. For the speed ramp function, {\ct F} represents a multiplier of the base {\ct SPEED}. This value is multiplied by any time-varying value set by {\ct RAMP\_SPEED\_T}. Note that if you use Monin-Obukhov similarity parameters, you should not specify the vertical profile of the wind. It will be calculated automatically.
 
 Often for longer simulations lasting hours, you may not know exactly how the wind {\ct DIRECTION} varies, but you might have some estimate based on the {\em stability class} of the atmosphere. Using the terminology of the atmospheric dispersion community~\cite{Hanna:1982}, the perturbation to the wind {\ct DIRECTION} can be modeled as:
 \be
@@ -7301,7 +7202,7 @@ An alternative to using Monin-Obukhov similarity theory in specifying a wind is 
 
 To specify a ``wall of wind'', set {\ct PROFILE='ATMOSPHERIC'} on the {\ct SURF} line that is assigned to an exterior lateral boundary of the computational domain. This generates a power law atmospheric wind profile of the form $u=u_0 (z/z_0)^p$ where $z$ is the height above the ground. If an atmospheric profile is prescribed, also prescribe {\ct Z0} for $z_0$  and {\ct PLE} for $p$. {\ct VEL} specifies the reference velocity $u_0$. Note that $z_0$ is not the ground, but rather the height above the ground where the wind speed is measured, like an elevated weather station. It is assumed that the ground is located at 0~m; to change this assumption, set {\ct GROUND\_LEVEL} on the {\ct WIND} line to be the appropriate elevation. Be careful not to apply an atmospheric velocity profile (e.g. negative $z$) below {\ct GROUND\_LEVEL} or FDS will stop with an error.
 
-Sometimes when using a wall of wind, you may want to initialize the flow to the chosen wind speed throughout the domain, but you may not want this initial wind field to persist indefinitely. In such cases, specify your initial flow components {\ct U0}, {\ct V0}, and/or {\ct W0} directly and do not use the parameter {\ct SPEED}. Setting the velocity components directly will initialize the simulation with a constant flow field, but the flow field will die off unless you add a blower somewhere in the domain.
+Sometimes when using a wall of wind, you may want to initialize the flow to the chosen wind speed throughout the domain, but you may not want this initial wind field to persist indefinitely. In such cases, specify your initial flow components {\ct U0}, {\ct V0}, and/or {\ct W0} directly and do not use the parameter {\ct SPEED}. Setting the velocity components directly will initialize the simulation with a constant flow field, but the flow field will die off unless you add a blower somewhere in the domain. You can specify vertical profiles of these initial components with {\ct RAMP\_U0\_Z}, {\ct RAMP\_V0\_Z}, and {\ct RAMP\_W0\_Z}.
 
 
 
@@ -7437,6 +7338,8 @@ The reaction rates for evaporation of H$_2$O, pyrolysis of the dry vegetation, a
   \frac{ \rho \, Y_{\rm O_2} \, \sigma \, \left( 1+\beta_{\rm char}\sqrt{\RE} \right) }{\nu_{\rm O_2,char} \, \rho_{\rm s}(0)} \label{r_char}
 \end{eqnarray}
 where $T$ is the temperature of the vegetation. Note that the exponent -1/2 in Eq.~(\ref{r_H2O}) is specified using {\ct N\_T=-0.5} on the {\ct MATL} line for water, and the exponent 0 in Eq.~(\ref{r_char}) is specified using {\ct N\_S=0} on the {\ct MATL} line for the char species. The default values of the kinetic constants are given in Table~\ref{tab:veg_kinetics}. The Reynolds number is $\RE = \rho U D_{\rm v} / \mu $ where $\rho$ is the gas density, $U$ is the gas velocity, and $D_{\rm v} = 4/\sigma$ for a cylinder, where $\sigma$ is the surface area to volume ratio. The term containing $\RE$ is included to account for the oxygen blowing effects on char oxidation and the constant $\beta_{\rm char}$ ({\ct BETA\_CHAR}) is equal to 0.2 by default, which is the value used by Porterie~et~al.~\cite{Porterie:2006}.
+
+The reaction rate for char oxidation, $r_{\rm char}$, is susceptible to very large values if the oxygen concentration in the vicinity of the solid is relatively high, a common result of coarse resolution grids used for wildland fire simulations. To prevent thermal runaway in the char reaction, an upper bound of 1~s$^{-1}$ is applied to $r_{\rm char}$.
 
 \begin{table}[!ht]
 \caption[Default vegetation kinetic constants]{Default vegetation kinetic constants (from Porterie et al.~\cite{Porterie:2006})}
@@ -8362,6 +8265,8 @@ When using a {\ct DEVC} output to control FDS, the instantaneous value of the {\
 \ee
 where n is the time step, $x$ is the instantaneous device output and $\bar{x}$ is the smoothed output.  The \linebreak[4]{\ct SMOOTHING\_FACTOR} defaults to 0 which means no smoothing is performed.  Note that {\ct SMOOTHING\_FACTOR} only changes the value passed to control functions; it has no effect on the value of the {\ct DEVC} written to the {\ct CHID\_devc.csv} file.
 
+Each state change of a device is recorded to a log file, see Section~\ref{out:DEVC_CTRL_log}.
+
 \subsection{Creating and Removing Obstructions}
 \label{info:create_remove}
 
@@ -8481,6 +8386,7 @@ If you want a {\ct DEVC} to operate based on the logical state of a {\ct CTRL}, 
 
 The output value of a numerical control function is defined by a {\ct DEVC} line with {\ct QUANTITY='CONTROL VALUE'} and {\ct CTRL\_ID} set equal to the {\ct ID} of the control function.  You can then use {\ct SETPOINT} to have the {\ct DEVC} operate a particular output value of the control function.
 
+Each state change of a control function is recorded to a log file, see Section~\ref{out:DEVC_CTRL_log}.
 
 \subsection{Control Functions: \texorpdfstring{{\tt ANY}}{ANY}, \texorpdfstring{{\tt ALL}}{ALL}, \texorpdfstring{{\tt ONLY}}{ONLY}, and
 \texorpdfstring{{\tt AT\_LEAST}}{AT\_LEAST}}
@@ -8837,13 +8743,13 @@ The namelist group {\ct DUMP} contains parameters (Table \ref{tbl:DUMP}) that co
 
 \section{Device Output: The \texorpdfstring{{\tt DEVC}}{DEVC} Namelist Group}
 
-Every device ({\ct DEVC}) contains a {\ct QUANTITY} that it monitors. Usually this {\ct QUANTITY} is written out to a comma-delimited spreadsheet file with the suffix {\ct \_devc.csv}. The quantities are listed in Table~\ref{tab:output}. Some quantities, such as {\ct MASS FLUX} and {\ct VOLUME FRACTION}, are marked with an asterisk in Table~\ref{tab:output} meaning that they require additional input, like a {\ct SPEC\_ID}, to be specified. Refer to Section~\ref{info:outputquantities} for more details.
+Every device ({\ct DEVC}) contains a {\ct QUANTITY} that it monitors. Usually this {\ct QUANTITY} is written out to a comma-delimited spreadsheet file with the suffix {\ct \_devc.csv}. The quantities are listed in Table~\ref{tab:output}. Some quantities, such as {\ct 'MASS FLUX'} and {\ct 'VOLUME FRACTION'}, are marked with an asterisk in Table~\ref{tab:output} meaning that they require additional input, like a {\ct SPEC\_ID}, to be specified. Refer to Section~\ref{info:outputquantities} for more details.
 
 There are two types of {\ct DEVC} output. The first is a time history of the given {\ct QUANTITY} over the course of the simulation. The second is a time-averaged profile consisting of a linear array of point devices. Each is explained below.
 
-\subsection{Single Point Output}
+\subsection{Gas Phase Quantity at a Single Point}
 
-If you just want to record the time history of the temperature at a given point, add a line like:
+If you just want to record the time history of, say, the temperature at a particular point in the gas, add a line like:
 \begin{lstlisting}
 &DEVC XYZ=6.7,2.9,2.1, QUANTITY='TEMPERATURE', ID='T-1' /
 \end{lstlisting}
@@ -8851,7 +8757,7 @@ and a column will be added to the output file {\ct CHID\_devc.csv} under the lab
 
 In cases where the {\ct QUANTITY} is defined on a cell face, like {\ct 'U-VELOCITY'}, FDS chooses the nearest cell face and reports the corresponding value.
 
-\subsubsection{Devices on Solid Surfaces}
+\subsection{Solid Phase Quantity at a Single Point}
 
 When prescribing a solid phase quantity, be sure to position the device at a solid surface. It is not always obvious where the solid surface is since the mesh does not always align with the input obstruction locations. To help locate the appropriate surface, the parameter {\ct IOR} {\em must} be included when designating a solid phase quantity, except when using one of the spatial statistics options that are described in Section~\ref{info:statistics} in which case the output quantity is not associated with just a single point on the surface. If the orientation of the solid surface is in the positive $x$ direction, set {\ct IOR=1}. If it is in the negative $x$ direction, set {\ct IOR=-1}, and so for the $y$ and $z$ directions. For example, the line
 \begin{lstlisting}
@@ -8859,13 +8765,244 @@ When prescribing a solid phase quantity, be sure to position the device at a sol
 \end{lstlisting}
 designates the surface temperature of a wall facing the negative $y$ direction. There are still instances where FDS cannot determine which solid surface is being designated, in which case an error message appears in the diagnostic output file. Re-position the device and try again. It is best to position the device, via the real triplet {\ct XYZ}, such that the device location is either at or within a cell width {\it outside} of the solid surface. The search algorithm in FDS will look for the nearest solid surface in the direction opposite to that indicated by {\ct IOR}.
 
-\subsubsection{Integrated Quantities}
+\subsubsection{Solid Phase Quantity In-Depth}
+\label{info:DEPTH}
 
-In addition to point measurements, the {\ct DEVC} group can be used to report integrated quantities (See Table~\ref{tab:output}). For example, you may want to know the mass flow out of a door or window. To report this, add the line
+To record the temperature inside the surface, you can use a device as follows:
 \begin{lstlisting}
-&DEVC XB=0.3,0.5,2.1,2.5,3.0,3.0, QUANTITY='MASS FLOW', ID='whatever' /
+&DEVC XYZ=..., QUANTITY='INSIDE WALL TEMPERATURE', DEPTH=0.005, ID='Temp_1', IOR=3 /
 \end{lstlisting}
-Note that in this case, a plane is specified rather than a point. The sextuplet {\ct XB} is used for this purpose. Notice when a flow is desired, two of the six coordinates need to be the same. Another {\ct QUANTITY}, {\ct HRR}, can be used to compute the total heat release rate within a subset of the domain. In this case, the sextuplet {\ct XB} ought to define a volume rather than a plane. Specification of the plane or volume over which the integration is to take place can only be done using {\ct XB}---avoid planes or volumes that cross multiple mesh boundaries. FDS has to decide which mesh to use in the integration, and it chooses the finest mesh overlapping the centroid of the designated plane or volume.
+The parameter {\ct DEPTH} (m) indicates the distance inside the solid surface. If {\ct DEPTH} is positive FDS outputs the temperature at the wall node given by moving {\ct DEPTH} from the front face of the surface. If negative, it is measured from the back surface (e.g. the location from the front given by the current solid surface thickness + {\ct DEPTH}). Note that if the wall thickness is decreasing over time due to the solid phase reactions, and the distance is measured from the current front surface, the measurement point will be moving towards the back side of the solid. Eventually, the measurement point may emerge from the solid, in which case it starts to show ambient temperature. Measuring the distance from the back surface can then be better suited for the purpose.
+
+Note that {\ct DEPTH} may not perfectly align with the discrete spatial position of the center corresponding to the solid cell temperature being output by {\ct 'INSIDE WALL TEMPERATURE'}.  Given the stretching and re-meshing done by the solid phase routines, it difficult to compute the local discrete cell position by hand.  If the discrete solid cell center position is needed, it may be output using
+\begin{lstlisting}
+&DEVC XYZ=..., QUANTITY='INSIDE WALL DEPTH', DEPTH=0.005, ID='XC_1', IOR=3 /
+\end{lstlisting}
+The output should lie within half a solid grid cell distance from the specified {\ct DEPTH}.
+
+To record the material component's density with time, use the output quantity {\ct 'SOLID DENSITY'} in the following way:
+\begin{lstlisting}
+&DEVC ID='...', XYZ=..., IOR=3, QUANTITY='SOLID DENSITY', MATL_ID='wood', DEPTH=0.001 /
+\end{lstlisting}
+This produces a time history of the density of the material referred to as {\ct 'wood'} on a {\ct MATL} line. The density is recorded 1~mm beneath the surface which is oriented in the positive $z$ direction. Note that if {\ct 'wood'} is part of a mixture, the density represents the mass of {\ct 'wood'} per unit volume of the mixture.
+
+To record the solid conductivity, use {\ct QUANTITY='SOLID CONDUCTIVITY'}. To record the solid specific heat, use {\ct QUANTITY='SOLID SPECIFIC HEAT'}. These quantities do not need the {\ct MATL\_ID} keyword.
+
+Note that these quantities are allowed only as a {\ct DEVC}, not a {\ct BNDF}, output.
+
+\subsubsection{Back Surface Temperature}
+\label{info:BACK}
+
+If you just want to know the temperature of the back surface of the ``wall,'' then use
+\begin{lstlisting}
+&DEVC XYZ=..., QUANTITY='BACK WALL TEMPERATURE', ID='Temp_b', IOR=3 /
+\end{lstlisting}
+Note that this quantity is only meaningful if the front or exposed surface of the ``wall'' has the attribute {\ct BACKING='EXPOSED'} on the {\ct SURF} line that defines it. The coordinates, {\ct XYZ}, and orientation, {\ct IOR}, refer to the front surface. To check that the heat conduction calculation is being done properly, you can add the additional line
+\begin{lstlisting}
+&DEVC XYZ=..., QUANTITY='WALL TEMPERATURE', ID='Temp_f', IOR=-3 /
+\end{lstlisting}
+where now {\ct XYZ} and {\ct IOR} refer to the coordinates and orientation of the back side of the wall. These two wall temperatures ought to be the same. Remember that the ``wall'' in this case can only be at most one mesh cell thick, and its {\ct THICKNESS} need not be the same as the mesh cell width. Rather, the {\ct THICKNESS} ought to be the actual thickness of the ``wall'' through which FDS performs a 1-D heat conduction calculation.
+
+
+\subsection{Spatially-Integrated Outputs}
+\label{info:statistics}
+
+A useful feature of a device ({\ct DEVC}) is to specify an output quantity along with a desired statistic. For example,
+\begin{lstlisting}
+&DEVC XB=..., QUANTITY='TEMPERATURE', ID='maxT', SPATIAL_STATISTIC='MAX' /
+\end{lstlisting}
+causes FDS to write out the maximum gas phase temperature over the volume bounded by {\ct XB}. Other {\ct SPATIAL\_STATISTIC}'s are discussed below.  Some are appropriate for gas phase output quantities, some for solid phase, and some for both. Note that if {\ct XB} is used for a point device without a {\ct SPATIAL\_STATISTIC}, then FDS will define {\ct XYZ} to be the center of the volume defined by {\ct XB}.
+
+For solid phase output quantities, like heat fluxes and surface temperatures, the specification of a {\ct SURF\_ID} along with the appropriate statistic limits the calculation to only those surfaces. You can further limit the search by using the sextuplet of coordinates {\ct XB} to force FDS to only compute statistics for surface cells within the given volume. Be careful to account for the fact that the solid surface might shift to conform to the underlying numerical grid. Note that you do not (and should not) specify an orientation via the parameter {\ct IOR} when using a spatial statistic. {\ct IOR} is only needed to find a specific point on the solid surface.
+
+Note that a shortcut for specifying the six {\ct XB} values on the {\ct DEVC} line is to instead use {\ct DB='WHOLE DOMAIN'} ({\ct DB} stands for ``Domain Boundary'').
+
+\subsubsection{Linearly Interpolated Value}
+
+By default, FDS reports a given gas-phase {\ct QUANTITY} at a given point {\ct XYZ} to be the value computed at the center of the cell containing the point. However, in some instances, you might want to report a linearly-interpolated value over the nearest eight grid cells:
+\begin{lstlisting}
+&DEVC XYZ=..., QUANTITY='TEMPERATURE', ID='T', SPATIAL_STATISTIC='INTERPOLATION' /
+\end{lstlisting}
+Be careful when using this option near a thin obstruction or a collection of stair-stepped obstructions because the average value might include data from the opposite side of the obstructions. A notable example would be a sprinkler ``device'' located under a stair-stepped ceiling.
+
+
+\subsubsection{Minimum or Maximum Value}
+
+For a scalar quantity defined at the center of gas or solid phase cells, $\phi_{ijk}$, set {\ct SPATIAL\_STATISTIC} to {\ct 'MIN'} or {\ct 'MAX'} to compute the minimum or maximum value, respectively, over the cells that are included in the specified volume bounded by {\ct XB}:
+\be
+   \min_{ijk} \, \phi_{ijk} \quad ; \quad  \max_{ijk} \, \phi_{ijk}
+\ee
+Note also that you must specify a volume to sum over via the coordinate parameters, {\ct XB}, which can extend into multiple meshes.
+
+If you want to know where the specified {\ct QUANTITY} achieves its minimum or maximum value over the specified volume {\ct XB}, set {\ct SPATIAL\_STATISTIC} to {\ct 'MINLOC X'} or {\ct 'MAXLOC X'} for the $x$ coordinate. Substitute {\ct Y} or {\ct Z} if you desire the $y$ or $z$ coordinate, in m.
+
+
+\subsubsection{Average Value}
+
+For a gas phase scalar quantity defined at the center of each grid cell, $\phi_{ijk}$, the {\ct SPATIAL\_STATISTIC} {\ct 'MEAN'} computes the average value,
+\be \frac{1}{N} \; \sum_{ijk} \phi_{ijk}  \ee
+over the cells that are included in the specified volume bounded by {\ct XB}. Note that this statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the coordinate parameters, {\ct XB}, which can extend into multiple meshes.
+
+If you are interested in the average value over a plane, give the {\ct XB} volume a small thickness to either side of the plane location encompassing the storage locations of the values of interest.  For example, scalars like temperatures live at the cell center, so locate the plane at the cell center and add a small delta to either side of that plane for the {\ct XB}.
+
+\subsubsection{Volume-Weighted Mean}
+
+For a gas phase scalar quantity, $\phi(x,y,z)$, {\ct SPATIAL\_STATISTIC='VOLUME MEAN'} produces the discrete analog of
+\be \frac{1}{V} \; \iiint \phi(x,y,z) \; \d x \, \d y \, \d z \ee
+which is very similar to {\ct 'MEAN'}, but it weights the values according to the relative size of the mesh cell. Note that this statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the coordinate parameters, {\ct XB}, which can extend into multiple meshes.
+
+\subsubsection{Mass-Weighted Mean}
+
+For a gas phase scalar quantity, $\phi(x,y,z)$, {\ct SPATIAL\_STATISTIC='MASS MEAN'} produces the discrete analog of
+\be \frac{ \iiint \rho(x,y,z) \; \phi(x,y,z) \; \d x \, \d y \, \d z}{\iiint \rho \; \d x \, \d y \, \d z}  \ee
+which is similar to {\ct 'VOLUME MEAN'}, but it weights the values according to the relative mass of the mesh cell. Note that this statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the coordinate parameters, {\ct XB}, which can extend into multiple meshes.
+
+\subsubsection{Centroids}
+
+For a gas phase scalar quantity, $\phi(x,y,z)$, {\ct SPATIAL\_STATISTIC='CENTROID X'} produces the discrete analog of
+\be \frac{ \iiint x \, \phi(x,y,z) \; \d x \, \d y \, \d z}{\iiint \phi(x,y,z) \; \d x \, \d y \, \d z}  \ee
+Similar calculations are performed for {\ct 'CENTROID Y'} and {\ct 'CENTROID Z'}. Note that this statistic is only appropriate for gas phase quantities, and you must specify a volume to sum over via the coordinate parameters, {\ct XB}.
+
+\subsubsection{Volume Integral}
+
+For a gas phase scalar quantity, $\phi(x,y,z)$, {\ct SPATIAL\_STATISTIC='VOLUME INTEGRAL'} produces the discrete analog of
+\be \iiint \phi(x,y,z) \; \d x \, \d y \, \d z \ee
+This statistic is only appropriate for gas phase quantities, in particular those whose units involve m$^{-3}$. For example, heat release rate per unit volume is an appropriate output quantity. This statistic can also be used on a {\ct DEVC} line with an output quantity of {\ct DENSITY} to output the total mass within the volume bound by {\ct XB}. In all cases, you must specify a volume to sum over via the coordinate parameters, {\ct XB}, which can extend into multiple meshes.
+
+\subsubsection{Mass Integral}
+
+For a given gas phase output quantity, $\phi(x,y,z)$, {\ct SPATIAL\_STATISTIC='MASS INTEGRAL'} produces the discrete analog of
+\be \iiint \, \rho(x,y,z) \; \phi(x,y,z) \; \d x \, \d y \, \d z \ee
+Note that this statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the coordinate parameters, {\ct XB}, which can extend into multiple meshes.
+
+\subsubsection{Area Integral}
+
+For a gas phase scalar quantity, $\phi(x,y,z)$, {\ct SPATIAL\_STATISTIC='AREA INTEGRAL'} produces the discrete analog of
+\be
+   \int \phi(x,y,z) \; \d A
+\ee
+where $dA$ depends on the coordinates you specify for {\ct XB}. Note that this statistic is only appropriate for gas phase quantities, in particular those whose units involve m$^{-2}$. For example, the quantity {\ct 'MASS FLUX X'} along with {\ct SPEC\_ID='my gas'} is an appropriate output quantity if you want to know the mass flux of the gas species that you have named {\ct 'my gas'} through an area normal to the $x$ direction. Note also that you must specify an area to sum over via the coordinate parameters, {\ct XB}, which can extend into multiple meshes.
+
+\subsubsection{Area}
+
+This feature is usually used in conjunction with {\ct SPATIAL\_STATISTIC='AREA INTEGRAL'} above (use two separate {\ct DEVC} lines, each with the same {\ct QUANTITY}). When performing precise mass and energy balances, it is useful to know exactly the area of {\ct VENT} or {\ct SURF} of interest. Note that this may differ slightly from what is specified in the input file due to grid snapping for Cartesian geometries or due to the approximations used to represent curvilinear geometries.  Using {\ct SPATIAL\_STATISTIC='AREA'} produces the discrete analog of
+\be \int \; \d A \ee
+where $dA$ depends on the coordinates you specify for {\ct XB} or the discrete area of a {\ct SURF}.  Knowing this value is useful for reconstructing the average flux on a surface.
+
+\subsubsection{Surface Integral}
+
+For a solid phase scalar quantity, $\phi$, {\ct SPATIAL\_STATISTIC='SURFACE INTEGRAL'} produces the discrete analog of
+\be \int \phi \; \d A \ee
+Note that this statistic is only appropriate for solid phase quantities, in particular those whose units involve m$^{-2}$. For example, the various heat and mass fluxes are appropriate output quantities.
+
+\subsubsection{Limiting the Integration}
+
+The input parameter {\ct QUANTITY\_RANGE} can be used to limit the region of integration for {\ct 'AREA INTEGRAL'}, {\ct 'VOLUME INTEGRAL'}, {\ct 'MASS INTEGRAL'}, and {\ct 'SURFACE INTEGRAL'}.  If {\ct QUANTITY\_RANGE} is set, the integration will only be performed if the value of the {\ct QUANTITY} lies within the {\ct QUANTITY\_RANGE} where {\ct QUANTITY\_RANGE(1)} is the lower bound and {\ct QUANTITY\_RANGE(2)} is the upper bound.  For example:
+\begin{lstlisting}
+&DEVC XB=..., QUANTITY='MASS FRACTION', SPEC_ID='METHANE', SPATIAL_STATISTIC='MASS INTEGRAL', QUANTITY_RANGE=0.03,0.15/
+\end{lstlisting}
+would output the total mass of methane in the volume {\ct XB} where the mass fraction was between 0.03 and 0.15.
+
+A set of additional {\ct SPATIAL\_STATISTIC}'s are available for use with {\ct QUANTITY\_RANGE}: {\ct 'MASS'}, {\ct 'VOLUME'}, and {\ct 'SURFACE AREA'}.  These output the mass, volume, or surface area (for a solid phase quantity) where the {\ct QUANTITY} lies within the {\ct QUANTITY\_RANGE}.  For example:
+\begin{lstlisting}
+&DEVC XB=..., QUANTITY='TOTAL HEAT FLUX', SPATIAL_STATISTIC='SURFACE AREA', QUANTITY_RANGE(1)=10./
+\end{lstlisting}
+would output the total surface area in the volume {\ct XB} where the total heat flux exceeds 10~kW/m$^2$.
+
+
+
+\subsection{Temporally-Integrated Outputs}
+\label{info:time_integral}
+
+In addition to the spatial statistics, temporal statistics can be applied to {\ct DEVC} output via the parameter {\ct TEMPORAL\_STATISTIC}. Both {\ct SPATIAL\_STATISTIC} and {\ct TEMPORAL\_STATISTIC} can be specified simultaneously on the {\ct DEVC} line, assuming the combination makes sense. The {\ct SPATIAL\_STATISTIC} is applied first, say an integration of the {\ct QUANTITY} over a given volume {\ct XB}, followed by the {\ct TEMPORAL\_STATISTIC}, like a time integral.
+
+\subsubsection{Time Average}
+
+The {\ct TEMPORAL\_STATISTIC='TIME AVERAGE'} is typically applied by default, unless it is inappropriate for the chosen {\ct QUANTITY}. With this statistic, FDS outputs the average value of the {\ct QUANTITY} over the time period of {\ct DT\_DEVC}~s just prior to the time of output. The parameter {\ct DT\_DEVC} is specified on the {\ct DUMP} line.
+
+\subsubsection{Running Average}
+
+The {\ct TEMPORAL\_STATISTIC='RUNNING AVERAGE'} outputs the running average value of the {\ct QUANTITY} over the time period starting at {\ct STATISTICS\_START} and ending at {\ct STATISTICS\_END}. This is the default behavior of ``line'' devices discussed in Section~\ref{info:line_file}.
+
+\subsubsection{Favre Average}
+
+The {\ct TEMPORAL\_STATISTIC='FAVRE AVERAGE'} outputs the Favre (density weighted) running average value of the {\ct QUANTITY} over the time period starting at {\ct STATISTICS\_START} and ending at {\ct STATISTICS\_END}. If the scalar quantity of interest is $\phi$ and the density if $\rho$ and the running average is defined by an overbar (that is, $\overline{\phi}$ is the running average of the scalar), then the Favre average is denoted with a tilde and computed as $\tilde{\phi} = \overline{\rho \phi}/\overline{\rho}$.  This output is not compatible with {\ct INITIAL\_VALUE}.
+
+\subsubsection{Instantaneous Value}
+
+For various reasons you might want to output the value of the {\ct QUANTITY} that has not been time-averaged or processed in any way. Sometimes this is important for device and control functions. To output the instantaneous value, set {\ct TEMPORAL\_STATISTIC} to {\ct 'INSTANT VALUE'}.
+
+\subsubsection{Smoothed Value}
+
+Control functions that use devices as inputs use the value of the devices determined by the {\ct SMOOTHING\_FACTOR} for each device. To output this smoothed value of the device, set {\ct TEMPORAL\_STATISTIC} to {\ct 'SMOOTHED'}. This statistic outputs the instantaneous smoothed value, and it does not time-average the smoothed value over the output interval.
+
+\subsubsection{Time Integral}
+
+{\ct TEMPORAL\_STATISTIC='TIME INTEGRAL'} produces a discrete analog of the time integral:
+\be
+ \int_{t_0}^t \phi(\tau) \; \d \tau
+\ee
+
+\subsubsection{Minimum and Maximum Values over Time}
+
+Set {\ct TEMPORAL\_STATISTIC} to {\ct 'MIN'} or {\ct 'MAX'} to determine the minimum or maximum value of the {\ct QUANTITY} over a time interval:
+\be
+   \min_{t_0<=t<=t_1} \phi(t) \quad ; \quad  \max_{t_0<=t<=t_1} \phi(t)
+\ee
+where $t_0$ is {\ct STATISTICS\_START} and $t_1$ is {\ct STATISTICS\_END}.
+
+For some applications you might need to predict a minimum or maximum value of the {\ct QUANTITY} over a time interval that is longer than the simulation time. For example, in wind engineering the so-called 50~year maximum wind speed can be estimated using maximum yearly values collected over, say, 10~years. The idea is that extreme values conform to certain statistical distributions from which one can extrapolate extreme values over long time periods. In FDS, you can do something similar. If you add the parameter {\ct TIME\_PERIOD} to the {\ct DEVC} line where you have also set the {\ct TEMPORAL\_STATISTIC} to {\ct 'MIN'} or {\ct 'MAX'}, the time interval bounded by $t_0$ and $t_1$ is subdivided into $N=${\ct N\_INTERVALS} (default 10), and a minimum or maximum value is stored for each interval. At the end of the simulation, the set of maximum values (minimum values are handled similarly) are ranked in ascending order, $m=1,N$. Next, the cumulative statistical distribution is introduced~\cite{Harris:JWE1996}:
+\be
+   F(\phi) = 1 - \exp[-\exp(\phi)]  \quad ; \quad  \phi = \ln[-\ln(1-F)]
+\ee
+which represents the probability\footnote{Note that the parameterless form of the distribution is intended for extrapolation only.} of the value $\phi$ not being exceeded in the given time interval, $(t_1-t_0)/N$. The probabilities for each of the $N$ ascending maximum values are assumed to be $m/(N+1)$. Plotting $\phi$ versus the expression on the right yields an approximate straight line from which we can estimate the value of $\phi$ appropriate for the longer {\ct TIME\_PERIOD}; that is, the value for which the probability of not being exceeded in the relatively short time interval $(t_1-t_0)/N$ is very close to 1. Returning to the example from wind engineering, the probability of not exceeding the 50~year wind speed in a given year is $1-1/50=0.98$.
+
+\subsubsection{Time to Reach Minimum and Maximum Value}
+
+The time at which the given {\ct QUANTITY} achieves its maximum or minimum value is specified by the {\ct TEMPORAL\_STATISTIC} {\ct 'MAX TIME'} or {\ct 'MIN TIME'}, respectively.
+
+
+\subsubsection{Root Mean Square (RMS)}
+\label{info:rms}
+\label{info:rmscovcorr}
+
+{\ct TEMPORAL\_STATISTIC='RMS'} produces the unbiased estimate of the {\em root mean square} of the {\ct QUANTITY} $\phi$:
+\be
+   \phi_{\rm rms} = \sqrt{ \frac{ \sum_{i=1}^n (\phi_i - \overline{\phi})^2 }{n-1} }
+\ee
+The computation starts at {\ct STATISTICS\_START} and ends at {\ct STATISTICS\_END}.
+
+\subsubsection{Favre Root Mean Square}
+
+{\ct TEMPORAL\_STATISTIC='FAVRE RMS'} produces the unbiased estimate of the density-weighted {\em root mean square} of the {\ct QUANTITY} $\phi$:
+\be
+   \tilde{\phi}_{\rm rms} = \sqrt{ \frac{ \sum_{i=1}^n (\phi_i - \tilde{\phi})^2 }{n-1} } \quad ; \quad \tilde{\phi} = \overline{\rho \phi}/\overline{\rho}
+\ee
+The computation starts at {\ct STATISTICS\_START} and ends at {\ct STATISTICS\_END}.  This output is not compatible with {\ct INITIAL\_VALUE}.
+
+\subsubsection{Covariance}
+\label{info:covariance}
+
+If $u = U - \overline{U}$ and $v= V-\overline{V}$ are the deviations for two random variables, $U$ and $V$, then an unbiased estimate of the \emph{covariance} is given by
+\be
+   \overline{u\, v} = \frac{ \sum_{i=1}^n (U_i - \overline{U}) (V_i - \overline{V}) }{n-1}
+\ee
+To output this statistic you must add a {\ct QUANTITY2} to the {\ct DEVC} line and set {\ct TEMPORAL\_STATISTIC='COV'}.  The following lines would create a line of devices and a single point device equivalent to the first point in the line:
+\begin{lstlisting}
+&DEVC XB=X1,X2,Y1,Y2,Z1,Z2, QUANTITY='CELL W', QUANTITY2='TEMPERATURE',
+      TEMPORAL_STATISTIC='COV', ID='wT-cov_line', POINTS=20 /
+&DEVC XYZ=X1,Y1,Z1, QUANTITY='CELL W', QUANTITY2='TEMPERATURE',
+      TEMPORAL_STATISTIC='COV', ID='wT-cov_point', STATISTICS_START=20. /
+\end{lstlisting}
+
+\subsubsection{Correlation Coefficient}
+\label{info:corrcoef}
+
+Setting {\ct TEMPORAL\_STATISTIC='CORRCOEF'} outputs the \emph{correlation coefficient} given by
+\be
+   \rho_{uv} = \frac{ \overline{u\, v} }{ u_{\rm rms} \,v_{\rm rms} }
+\ee
+Here again you must add a {\ct QUANTITY2} to the device line.
 
 
 
@@ -8922,45 +9059,6 @@ This input line specifies a linear array of 20 points starting at $\bx=(1,5,8)$ 
 
 It is possible to translate and/or rotate a linear array of devices using parameters on a {\ct MOVE} line (see Section~\ref{info:MOVE}). To specify these parameters, use the character string {\ct MOVE\_ID} on the {\ct DEVC} line. Note that if a {\ct SPATIAL\_STATISTIC} is specified, the spatial bounds, {\ct DX}, {\ct DY}, and/or {\ct DZ}, are not transformed.
 
-
-\subsection{Quantities at Certain Depth}
-\label{info:DEPTH}
-
-To record the temperature inside the surface, you can use a device as follows:
-\begin{lstlisting}
-&DEVC XYZ=..., QUANTITY='INSIDE WALL TEMPERATURE', DEPTH=0.005, ID='Temp_1', IOR=3 /
-\end{lstlisting}
-The parameter {\ct DEPTH} (m) indicates the distance inside the solid surface. If {\ct DEPTH} is positive FDS outputs the temperature at the wall node given by moving {\ct DEPTH} from the front face of the surface. If negative, it is measured from the back surface (e.g. the location from the front given by the current solid surface thickness + {\ct DEPTH}). Note that if the wall thickness is decreasing over time due to the solid phase reactions, and the distance is measured from the current front surface, the measurement point will be moving towards the back side of the solid. Eventually, the measurement point may emerge from the solid, in which case it starts to show ambient temperature. Measuring the distance from the back surface can then be better suited for the purpose.
-
-Note that {\ct DEPTH} may not perfectly align with the discrete spatial position of the center corresponding to the solid cell temperature being output by {\ct 'INSIDE WALL TEMPERATURE'}.  Given the stretching and re-meshing done by the solid phase routines, it difficult to compute the local discrete cell position by hand.  If the discrete solid cell center position is needed, it may be output using
-\begin{lstlisting}
-&DEVC XYZ=..., QUANTITY='INSIDE WALL DEPTH', DEPTH=0.005, ID='XC_1', IOR=3 /
-\end{lstlisting}
-The output should lie within half a solid grid cell distance from the specified {\ct DEPTH}.
-
-To record the material component's density with time, use the output quantity {\ct 'SOLID DENSITY'} in the following way:
-\begin{lstlisting}
-&DEVC ID='...', XYZ=..., IOR=3, QUANTITY='SOLID DENSITY', MATL_ID='wood', DEPTH=0.001 /
-\end{lstlisting}
-This produces a time history of the density of the material referred to as {\ct 'wood'} on a {\ct MATL} line. The density is recorded 1~mm beneath the surface which is oriented in the positive $z$ direction. Note that if {\ct 'wood'} is part of a mixture, the density represents the mass of {\ct 'wood'} per unit volume of the mixture.
-
-To record the solid conductivity, use {\ct QUANTITY='SOLID CONDUCTIVITY'}. To record the solid specific heat, use {\ct QUANTITY='SOLID SPECIFIC HEAT'}. These quantities do not need the {\ct MATL\_ID} keyword.
-
-Note that these quantities are allowed only as a {\ct DEVC}, not a {\ct BNDF}, output.
-
-
-\subsection{Back Surface Temperature}
-\label{info:BACK}
-
-If you just want to know the temperature of the back surface of the ``wall,'' then use
-\begin{lstlisting}
-&DEVC XYZ=..., QUANTITY='BACK WALL TEMPERATURE', ID='Temp_b', IOR=3 /
-\end{lstlisting}
-Note that this quantity is only meaningful if the front or exposed surface of the ``wall'' has the attribute {\ct BACKING='EXPOSED'} on the {\ct SURF} line that defines it. The coordinates, {\ct XYZ}, and orientation, {\ct IOR}, refer to the front surface. To check that the heat conduction calculation is being done properly, you can add the additional line
-\begin{lstlisting}
-&DEVC XYZ=..., QUANTITY='WALL TEMPERATURE', ID='Temp_f', IOR=-3 /
-\end{lstlisting}
-where now {\ct XYZ} and {\ct IOR} refer to the coordinates and orientation of the back side of the wall. These two wall temperatures ought to be the same. Remember that the ``wall'' in this case can only be at most one mesh cell thick, and its {\ct THICKNESS} need not be the same as the mesh cell width. Rather, the {\ct THICKNESS} ought to be the actual thickness of the ``wall'' through which FDS performs a 1-D heat conduction calculation.
 
 
 \section{In-Depth Profiles within Solids: The \texorpdfstring{{\tt PROF}}{PROF} Namelist Group}
@@ -9164,8 +9262,6 @@ You may output properties of a single solid particle using a {\ct DEVC} (device)
 \end{lstlisting}
 output the surface temperature of a single particle that has been introduced into the simulation via an {\ct INIT} line.
 
-If the particle is split (by means of multiple {\ct ORIENTATION} vectors on the {\ct PART} line), you can specify which of the particle fragments you want using the parameter {\ct ORIENTATION\_NUMBER} on the {\ct DEVC} line.
-
 If the {\ct INIT} line has a {\ct MULT\_ID}; that is, an array of particles is introduced via this single {\ct INIT} line, then the {\ct INIT\_ID} for each takes the form {\ct '[ID]-00308'}, where {\ct ID} is that of the {\ct INIT} line, and 308 refers to the 308-th {\ct INIT} line generated by the multiplicative sequence. The {\ct INIT} lines are generated by looping over the $x$ indices, then $y$, then $z$. For example, the following input lines
 \begin{lstlisting}
 &INIT ID='P', PART_ID='CRIB1', XYZ=0.005,0.005,0.005 ,
@@ -9348,6 +9444,116 @@ The output quantity {\ct THERMOCOUPLE} is the temperature of a modeled thermocou
    \label{TC}
 \ee
 where $\epsilon_{\rm TC}$ is the emissivity of the thermocouple, $U$ is the integrated radiative intensity, $T_{\rm g}$ is the true gas temperature, and $h$ is the heat transfer coefficient to a small sphere, $h=k \, \NU / D_{\rm TC}$. The bead {\ct DIAMETER}, {\ct EMISSIVITY}, {\ct DENSITY}, and {\ct SPECIFIC\_HEAT} are given on the associated {\ct PROP} line. To over-ride the calculated value of the heat transfer coefficient, set {\ct HEAT\_TRANSFER\_COEFFICIENT} on the {\ct PROP} line (\si{W/(m.K)}). The default value for the bead diameter is 0.001~m. The default emissivity is 0.85. The default values for the bead density and specific heat are that of nickel; 8908~kg/m$^3$ and 0.44~kJ/kg/K, respectively. See the discussion on heat transfer to a water droplet in the Technical Reference Guide for details of the convective heat transfer to a small sphere.
+
+
+
+\subsection{Volume Flow}
+\label{info:volume_flow}
+
+A common quantity related to heating and ventilation systems is {\em volume flow}, typically denoted $\dot{V}$ and expressed in units of m$^3$/s or ft$^3$/min. The way volume flow output is specified depends on whether it is at a boundary or completely within the gas phase.
+
+\subsubsection{Volume Flow in the Gas Phase}
+
+Consider a flow of gases through a window located at $x=x_0$ and bounded by $y_1 \le y \le y_2$ and $z_1 \le z \le z_2$. Its volume flow is given by:
+\be
+   \dot{V}(t) = \int_{z_1}^{z_2} \int_{y_1}^{y_2} u(x_0,y,z) \, \d y \, \d z \approx
+   \sum_{k=k_1}^{k_2} \sum _{j=j_1}^{j_2} \, u_{ijk} \, \delta y \, \delta z
+   \label{volumeflow}
+\ee
+To specify volume flow as an output, use an input line like the following:
+\begin{lstlisting}
+&DEVC ID='Vdot', XB=X0,X0,Y1,Y2,Z1,Z2, QUANTITY='U-VELOCITY',
+      SPATIAL_STATISTIC='AREA INTEGRAL' /
+\end{lstlisting}
+This produces a column in the {\ct CHID\_devc.csv} containing the time history of the volume flow (m$^3$/s) through the window. Note that if the gas is flowing in the positive coordinate direction, the volume flow is positive. You can reverse the sign by adding {\ct CONVERSION\_FACTOR=-1} to the {\ct DEVC} line. If you want to distinguish the inflow from the outflow through the same window, use the parameters {\ct QUANTITY\_RANGE(1:2)} to set upper or lower bounds. For example, if you only want to record the volume flow in the negative coordinate direction, set {\ct QUANTITY\_RANGE(2)=0}, meaning that positive values of velocity are not counted in the summation.
+
+\subsubsection{Volume Flow at a Boundary}
+
+To record the volume flow at a solid surface or vent, add a line like the following:
+\begin{lstlisting}
+&DEVC ID='Vdot', XB=..., QUANTITY='NORMAL VELOCITY', SURF_ID='...',
+      SPATIAL_STATISTIC='SURFACE INTEGRAL' /
+\end{lstlisting}
+This line instructs FDS to sum the normal component of velocity over any surface with the given {\ct SURF\_ID} within the volume bounded by {\ct XB}. Note that a flow entering into the computational domain is negative.
+
+
+
+\subsection{Mass Flow}
+\label{info:mass_flow}
+
+There are several output options for mass flux and mass flow depending on whether a gas or solid phase quantity is desired, and the level of precision desired.
+
+\subsubsection{Mass Flow in the Gas Phase}
+
+The mass flow of gas species $\alpha$ through a window located at $x=x_0$ and bounded by $y_1 \le y \le y_2$ and $z_1 \le z \le z_2$ is given by:
+\be
+   \dot{m}_\alpha(t) = \int_{z_1}^{z_2} \int_{y_1}^{y_2} \rho Y_\alpha u \, \d y \, \d z \approx
+   \sum_{k=k_1}^{k_2} \sum _{j=j_1}^{j_2} \frac{\rho_{ijk}Y_{ijk}+\rho_{i+1,jk}Y_{i+1,jk}}{2} \, u_{ijk} \, \delta y \, \delta z
+   \label{mass_flow}
+\ee
+To instruct FDS to output this quantity, use the input line:
+\begin{lstlisting}
+&DEVC ID='m-dot', XB=x0,x0,y1,y2,z1,z2, QUANTITY='MASS FLUX X', SPEC_ID='ALPHA',
+      SPATIAL_STATISTIC='AREA INTEGRAL' /
+\end{lstlisting}
+To limit the integration to only flow in the positive or negative coordinate direction, set {\ct QUANTITY\_RANGE(1)} or {\ct QUANTITY\_RANGE(2)} to zero. If you want the total mass flow, omit the {\ct SPEC\_ID}.
+
+{\ct 'MASS FLUX X'} and its $y$ and $z$ counterparts are only estimates of the actual computed mass flux for two reasons.
+\begin{enumerate}
+\item These quantities use an estimate of the flux-limiting mass flux terms that are computed by FDS. Notice in Eq.~(\ref{mass_flow}) that the density $\rho$ and mass fraction $Y_\alpha$ are approximated at the forward $x$ face of cell $ijk$ with a simple average. The actual discrete approximation is more complicated than this, but these flux-limiting mass flux terms are normally not saved outside of the routine where they are computed.
+\item If a {\ct SPEC\_ID} is specified, Eq.~(\ref{mass_flow}) represents only the {\em advective} component of the total mass flux. In turbulent flows, the diffusive component, which includes turbulent diffusion, can be significant.
+\end{enumerate}
+If you want more precise output that includes the diffusive component of the mass flux and the exact flux limiter for the advective component, specify {\ct 'TOTAL MASS FLUX X'} rather than {\ct 'MASS FLUX X'} (or the $y$ or $z$ coordinate analogs). If you want to get a breakdown of the components, specify {\ct 'ADVECTIVE MASS FLUX X'} and {\ct 'DIFFUSIVE MASS FLUX X'} as well. Take care to specify {\ct XB} in unambiguous cell locations (i.e., not directly on a cell face or boundary).  With a {\ct DEVC} in cell ({\ct I,J,K}) the flux will be reported from the ({\ct I+1/2,J,K}) face, etc., on the staggered grid.
+
+
+\subsubsection{Mass Flow at a Boundary}
+\label{info:wallflux}
+\label{mass_flux_comparison}
+
+There are three quantities that may be used for recording the mass flux of a particular gas species at a boundary: {\ct 'MASS FLUX'}, {\ct 'MASS FLUX WALL'}, and {\ct TOTAL MASS FLUX WALL'}. Each takes a {\ct SPEC\_ID} if a particular gas species is desired; otherwise the sum of all gas species is given. The difference between the outputs is that {\ct 'MASS FLUX'} refers to the generation rate of a gas species or solid material component at a solid boundary, whether it be user-specified or the result of a pyrolysis model. {\ct 'MASS FLUX WALL'}, on the other hand, is the actual computed mass flux which might be slightly different than {\ct 'MASS FLUX'} due to small numerical error in the normal component of velocity at a solid wall. That is, {\ct 'MASS FLUX WALL'} is a direct computation of
+\be
+   \dot{m}_\alpha = \rho Y_\alpha u_n - \rho D_\alpha \partial Y_\alpha / \partial n
+\ee
+where $\mathbf{n}$ is the normal direction of the surface. The third mass flux output option is called {\ct 'TOTAL MASS FLUX WALL'}. This quantity is very similar to {\ct 'MASS FLUX WALL'} except that it combines the predicted and corrected mass flux over a single time step. It is the boundary analog of the gas phase quantities {\ct 'TOTAL MASS FLUX X/Y/Z'}.
+
+For each form of the boundary mass flux, a positive value means that mass is entering the computational domain. These quantities may be applied at a solid surface or vent. {\ct 'MASS FLUX WALL'} and {\ct 'TOTAL MASS FLUX WALL'} can also be applied at an {\ct OPEN} boundary.
+
+To demonstrate the difference between these various forms of mass flux output, consider Fig.~\ref{mass_flux_comparison_fig}. These plots show the spatially integrated mass flux of gas from a solid surface, where the mass flux has been ramped up linearly for 10~s, held steady for 20~s, and ramped down to zero linearly for 10~s. The {\ct 'MASS FLUX'} output merely mimics this specified curve. The {\ct 'MASS FLUX WALL'} and {\ct 'TOTAL MASS FLUX WALL'} output exhibit fluctuations caused by the fact that the mass flux is not perfectly applied at the solid surface---there are small fluctuations in the normal component of velocity caused by the inexact velocity-pressure coupling at the boundary. These flucuations are minor and average out close to the specified value, but sometimes it is useful to use the more exact output quantities for diagnostic purposes.
+
+\begin{figure}[ht]
+\includegraphics[width=3in]{SCRIPT_FIGURES/mass_flux_comparison}
+\includegraphics[width=3in]{SCRIPT_FIGURES/mass_flux_comparisonb}
+\caption[Results of the {\ct mass\_flux\_comparison} test case]{(Left) Mass flow rate of a gas from a solid boundary. (Right) Close-up view.}
+\label{mass_flux_comparison_fig}
+\end{figure}
+
+
+\subsection{Enthalpy Flow}
+\label{info:enthalpy_flux}
+
+
+\subsubsection{Enthalpy Flow in the Gas Phase}
+
+The flow of enthalpy through a window located at $x=x_0$ and bounded by $y_1 \le y \le y_2$ and $z_1 \le z \le z_2$ is given by:
+\begin{eqnarray}
+&& \dot{q}(t) = \int_{z_1}^{z_2} \int_{y_1}^{y_2} \left[ \rho \large( h_{\rm s}(T)-h_{\rm s}(T_\infty) \large) u - k \dod{T}{x} \right] \, \d y \, \d z \approx \nonumber \\
+&& \quad \quad \quad \quad \sum_{k=k_1}^{k_2} \sum _{j=j_1}^{j_2} \left[ \rho_{i+\ha,jk} \left( h_{\rm s}(T_{i+\ha,jk})-h_{\rm s}(T_\infty) \right) \, u_{ijk} - k_{ijk} \frac{T_{i+1,jk}-T_{ijk}}{\dx} \right] \, \delta y \, \delta z
+   \label{enthalpy_flow}
+\end{eqnarray}
+To instruct FDS to output this quantity, use the input line:
+\begin{lstlisting}
+&DEVC ID='q-dot', XB=x0,x0,y1,y2,z1,z2, QUANTITY='ENTHALPY FLUX X',
+      SPATIAL_STATISTIC='AREA INTEGRAL' /
+\end{lstlisting}
+
+\subsubsection{Enthalpy Flow at a Boundary}
+
+{\ct 'ENTHALPY FLUX WALL'} is the equivalent of {\ct 'ENTHALPY FLUX X/Y/Z'} at a boundary. It is the rate of energy advected {\em into} the domain at a vent or open boundary:
+\begin{equation}
+   \dot{q}_{\mathrm{w}}'' = -\rho_{\rm w} \, h_s(T_{\rm w}) \, \bu \cdot \bn - k \dod{T}{n}
+\end{equation}
+where $n$ is the coordinate direction pointing into the boundary; that is, out of the computational domain. Note that the enthalpy flux at a boundary is defined using the density, temperature, and sensible enthalpy of the gas mixture at the boundary, and is not relative to ambient conditions like its gas phase counterparts. For this reason, this quantity is often used in energy budget calculations to track the flow of enthalpy into and out of the computational domain. The quantity is positive for gas flow into the domain.
+
 
 
 \subsection{Heat Flux}
@@ -9761,249 +9967,6 @@ The parameter {\ct FED\_ACTIVITY} is an integer denoting that the person is at r
 
 There is an FED related quantity, {\ct INCAPACITATION TIME}, that can be output as a point device or a contour slice. This quantity shows the time in minutes until incapacitation for person exposed to the current conditions.
 
-\subsection{Spatially-Integrated Outputs}
-\label{info:statistics}
-
-A useful feature of a device ({\ct DEVC}) is to specify an output quantity along with a desired statistic. For example,
-\begin{lstlisting}
-&DEVC XB=..., QUANTITY='TEMPERATURE', ID='maxT', SPATIAL_STATISTIC='MAX' /
-\end{lstlisting}
-causes FDS to write out the maximum gas phase temperature over the volume bounded by {\ct XB}. Other {\ct SPATIAL\_STATISTIC}'s are discussed below.  Some are appropriate for gas phase output quantities, some for solid phase, and some for both. Note that if {\ct XB} is used for a point device without a {\ct SPATIAL\_STATISTIC}, then FDS will define {\ct XYZ} to be the center of the volume defined by {\ct XB}. 
-
-For solid phase output quantities, like heat fluxes and surface temperatures, the specification of a {\ct SURF\_ID} along with the appropriate statistic limits the calculation to only those surfaces. You can further limit the search by using the sextuplet of coordinates {\ct XB} to force FDS to only compute statistics for surface cells within the given volume. Be careful to account for the fact that the solid surface might shift to conform to the underlying numerical grid. Note that you do not (and should not) specify an orientation via the parameter {\ct IOR} when using a spatial statistic. {\ct IOR} is only needed to find a specific point on the solid surface.
-
-Note that a shortcut for specifying the six {\ct XB} values on the {\ct DEVC} line is to instead use {\ct DB='WHOLE DOMAIN'} ({\ct DB} stands for ``Domain Boundary'').
-
-\subsubsection{Linearly Interpolated Value}
-
-By default, FDS reports a given gas-phase {\ct QUANTITY} at a given point {\ct XYZ} to be the value computed at the center of the cell containing the point. However, in some instances, you might want to report a linearly-interpolated value over the nearest eight grid cells:
-\begin{lstlisting}
-&DEVC XYZ=..., QUANTITY='TEMPERATURE', ID='T', SPATIAL_STATISTIC='INTERPOLATION' /
-\end{lstlisting}
-Be careful when using this option near a thin obstruction or a collection of stair-stepped obstructions because the average value might include data from the opposite side of the obstructions. A notable example would be a sprinkler ``device'' located under a stair-stepped ceiling.
-
-
-\subsubsection{Minimum or Maximum Value}
-
-For a scalar quantity defined at the center of gas or solid phase cells, $\phi_{ijk}$, set {\ct SPATIAL\_STATISTIC} to {\ct 'MIN'} or {\ct 'MAX'} to compute the minimum or maximum value, respectively, over the cells that are included in the specified volume bounded by {\ct XB}:
-\be
-   \min_{ijk} \, \phi_{ijk} \quad ; \quad  \max_{ijk} \, \phi_{ijk}
-\ee
-Note also that you must specify a volume to sum over via the coordinate parameters, {\ct XB}, which can extend into multiple meshes.
-
-If you want to know where the specified {\ct QUANTITY} achieves its minimum or maximum value over the specified volume {\ct XB}, set {\ct SPATIAL\_STATISTIC} to {\ct 'MINLOC X'} or {\ct 'MAXLOC X'} for the $x$ coordinate. Substitute {\ct Y} or {\ct Z} if you desire the $y$ or $z$ coordinate, in m.
-
-
-\subsubsection{Average Value}
-
-For a gas phase scalar quantity defined at the center of each grid cell, $\phi_{ijk}$, the {\ct SPATIAL\_STATISTIC} {\ct 'MEAN'} computes the average value,
-\be \frac{1}{N} \; \sum_{ijk} \phi_{ijk}  \ee
-over the cells that are included in the specified volume bounded by {\ct XB}. Note that this statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the coordinate parameters, {\ct XB}, which can extend into multiple meshes.
-
-If you are interested in the average value over a plane, give the {\ct XB} volume a small thickness to either side of the plane location encompassing the storage locations of the values of interest.  For example, scalars like temperatures live at the cell center, so locate the plane at the cell center and add a small delta to either side of that plane for the {\ct XB}.
-
-\subsubsection{Volume-Weighted Mean}
-
-For a gas phase scalar quantity, $\phi(x,y,z)$, {\ct SPATIAL\_STATISTIC='VOLUME MEAN'} produces the discrete analog of
-\be \frac{1}{V} \; \iiint \phi(x,y,z) \; \d x \, \d y \, \d z \ee
-which is very similar to {\ct 'MEAN'}, but it weights the values according to the relative size of the mesh cell. Note that this statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the coordinate parameters, {\ct XB}, which can extend into multiple meshes.
-
-\subsubsection{Mass-Weighted Mean}
-
-For a gas phase scalar quantity, $\phi(x,y,z)$, {\ct SPATIAL\_STATISTIC='MASS MEAN'} produces the discrete analog of
-\be \frac{ \iiint \rho(x,y,z) \; \phi(x,y,z) \; \d x \, \d y \, \d z}{\iiint \rho \; \d x \, \d y \, \d z}  \ee
-which is similar to {\ct 'VOLUME MEAN'}, but it weights the values according to the relative mass of the mesh cell. Note that this statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the coordinate parameters, {\ct XB}, which can extend into multiple meshes.
-
-\subsubsection{Centroids}
-
-For a gas phase scalar quantity, $\phi(x,y,z)$, {\ct SPATIAL\_STATISTIC='CENTROID X'} produces the discrete analog of
-\be \frac{ \iiint x \, \phi(x,y,z) \; \d x \, \d y \, \d z}{\iiint \phi(x,y,z) \; \d x \, \d y \, \d z}  \ee
-Similar calculations are performed for {\ct 'CENTROID Y'} and {\ct 'CENTROID Z'}. Note that this statistic is only appropriate for gas phase quantities, and you must specify a volume to sum over via the coordinate parameters, {\ct XB}.
-
-\subsubsection{Volume Integral}
-
-For a gas phase scalar quantity, $\phi(x,y,z)$, {\ct SPATIAL\_STATISTIC='VOLUME INTEGRAL'} produces the discrete analog of
-\be \iiint \phi(x,y,z) \; \d x \, \d y \, \d z \ee
-This statistic is only appropriate for gas phase quantities, in particular those whose units involve m$^{-3}$. For example, heat release rate per unit volume is an appropriate output quantity. This statistic can also be used on a {\ct DEVC} line with an output quantity of {\ct DENSITY} to output the total mass within the volume bound by {\ct XB}. In all cases, you must specify a volume to sum over via the coordinate parameters, {\ct XB}, which can extend into multiple meshes.
-
-\subsubsection{Mass Integral}
-
-For a given gas phase output quantity, $\phi(x,y,z)$, {\ct SPATIAL\_STATISTIC='MASS INTEGRAL'} produces the discrete analog of
-\be \iiint \, \rho(x,y,z) \; \phi(x,y,z) \; \d x \, \d y \, \d z \ee
-Note that this statistic is only appropriate for gas phase quantities. Note also that you must specify a volume to sum over via the coordinate parameters, {\ct XB}, which can extend into multiple meshes.
-
-\subsubsection{Area Integral}
-
-For a gas phase scalar quantity, $\phi(x,y,z)$, {\ct SPATIAL\_STATISTIC='AREA INTEGRAL'} produces the discrete analog of
-\be \int \phi(x,y,z) \; \d A \ee
-where $dA$ depends on the coordinates you specify for {\ct XB}. Note that this statistic is only appropriate for gas phase quantities, in particular those whose units involve m$^{-2}$. For example,
-the quantity {\ct 'MASS FLUX X'} along with {\ct SPEC\_ID='my gas'} is an appropriate output quantity if you want to know the mass flux of the gas species that you have named {\ct 'my gas'} through an
-area normal to the $x$ direction. Note also that you must specify an area to sum over via the coordinate parameters, {\ct XB}, which can extend into multiple meshes.
-
-\subsubsection{Area}
-
-This feature is usually used in conjunction with {\ct SPATIAL\_STATISTIC='AREA INTEGRAL'} above (use two separate {\ct DEVC} lines, each with the same {\ct QUANTITY}). When performing precise mass and energy balances, it is useful to know exactly the area of {\ct VENT} or {\ct SURF} of interest. Note that this may differ slightly from what is specified in the input file due to grid snapping for Cartesian geometries or due to the approximations used to represent curvilinear geometries.  Using {\ct SPATIAL\_STATISTIC='AREA'} produces the discrete analog of
-\be \int \; \d A \ee
-where $dA$ depends on the coordinates you specify for {\ct XB} or the discrete area of a {\ct SURF}.  Knowing this value is useful for reconstructing the average flux on a surface.
-
-\subsubsection{Surface Integral}
-
-For a solid phase scalar quantity, $\phi$, {\ct SPATIAL\_STATISTIC='SURFACE INTEGRAL'} produces the discrete analog of
-\be \int \phi \; \d A \ee
-Note that this statistic is only appropriate for solid phase quantities, in particular those whose units involve m$^{-2}$. For example, the various heat and mass fluxes are appropriate output quantities.
-
-\subsubsection{Limiting the Integration}
-
-The input parameter {\ct QUANTITY\_RANGE} can be used to limit the region of integration for {\ct 'AREA INTEGRAL'}, {\ct 'VOLUME INTEGRAL'}, {\ct 'MASS INTEGRAL'}, and {\ct 'SURFACE INTEGRAL'}.  If {\ct QUANTITY\_RANGE} is set, the integration will only be performed if the value of the {\ct QUANTITY} lies within the {\ct QUANTITY\_RANGE} where {\ct QUANTITY\_RANGE(1)} is the lower bound and {\ct QUANTITY\_RANGE(2)} is the upper bound.  For example:
-\begin{lstlisting}
-&DEVC XB=..., QUANTITY='MASS FRACTION', SPEC_ID='METHANE', SPATIAL_STATISTIC='MASS INTEGRAL', QUANTITY_RANGE=0.03,0.15/
-\end{lstlisting}
-would output the total mass of methane in the volume {\ct XB} where the mass fraction was between 0.03 and 0.15.
-
-A set of additional {\ct SPATIAL\_STATISTIC}'s are available for use with {\ct QUANTITY\_RANGE}: {\ct 'MASS'}, {\ct 'VOLUME'}, and {\ct 'SURFACE AREA'}.  These output the mass, volume, or surface area (for a solid phase quantity) where the {\ct QUANTITY} lies within the {\ct QUANTITY\_RANGE}.  For example:
-\begin{lstlisting}
-&DEVC XB=..., QUANTITY='TOTAL HEAT FLUX', SPATIAL_STATISTIC='SURFACE AREA', QUANTITY_RANGE(1)=10./
-\end{lstlisting}
-would output the total surface area in the volume {\ct XB} where the total heat flux exceeds 10~kW/m$^2$.
-
-\subsubsection{Volume, Mass, and Heat Flow}
-\label{info:flows}
-
-The net flow of mass and energy into or out of a planar surface can be a useful diagnostic. There are several outputs that address these. All are prescribed via the device ({\ct DEVC}) namelist group only. For example:
-\begin{lstlisting}
-&DEVC XB=0.3,0.5,2.1,2.5,3.0,3.0, QUANTITY='MASS FLOW', ID='whatever' /
-\end{lstlisting}
-outputs the net integrated mass flux through the given planar area, oriented in the positive $z$ direction, in this case. The three flows {\ct 'VOLUME FLOW'}, {\ct 'MASS FLOW'}, and {\ct 'HEAT FLOW'} are defined:
-\begin{align}
-\dot{V} &= \int \bu \cdot \d \mathbf{S}  \\
-\dot{m} &= \int \rho \bu \cdot \d \mathbf{S} \\
-\dot{q} &= \int \rho c_p (T-T_\infty) \, \bu \cdot \d \mathbf{S}
-\end{align}
-The addition of a {\ct +} or {\ct -} to the {\ct QUANTITY} names yields the integral of the flow in the positive or negative direction only. In other words, if you want to know the mass flow out of a compartment, use {\ct 'MASS FLOW +'} or {\ct 'MASS FLOW -'}, depending on the orientation of the door.
-
-\vskip\baselineskip
-\noindent
-\fbox{
-\begin{minipage}{\textwidth}
-\emph{CAUTION:} {\ct FLOW} output quantities only provide an estimate of the \emph{advective} part of the total flow.  It is an estimate for mass and energy because the flux limiter is not applied in the output routine.  In turbulent flows, the diffusive part, which includes turbulent diffusion, can be significant. Large discrepancies in global mass and energy balances may be observed if these issues are ignored.  For this reason, you may want store the tranport mass fluxes, as discussed next.
-\end{minipage}
-}
-
-\subsubsection{Storing Species Mass Fluxes for Device Output}
-\label{info:store_species_flux}
-
-As discussed above, obtaining tight mass balances requires including the diffusive part of the mass flux for a given species and also using the correct state of the flux limiter for the advective part.  In practice, this means storing all the fluxes, which is memory intensive.  Hence, FDS does not do so by default.  If this functionality is needed, add {\ct STORE\_SPECIES\_FLUX} to the {\ct DUMP} line.  Then you will have access to the following output quantities (usually used with an {\ct 'AREA INTEGRAL'}):
-\begin{lstlisting}
-&DEVC XB=..., QUANTITY='ADVECTIVE MASS FLUX X', SPEC_ID=..., SPATIAL_STATISTIC='AREA INTEGRAL'/ also Y and Z
-&DEVC XB=..., QUANTITY='DIFFUSIVE MASS FLUX X', SPEC_ID=..., SPATIAL_STATISTIC='AREA INTEGRAL'/ also Y and Z
-&DEVC XB=..., QUANTITY='TOTAL MASS FLUX X',     SPEC_ID=..., SPATIAL_STATISTIC='AREA INTEGRAL'/ also Y and Z
-\end{lstlisting}
-Take care to place the {\ct DEVC}s in unambiguous cell locations (i.e., not directly on a cell face or boundary).  With a {\ct DEVC} in cell ({\ct I,J,K}) the flux will be reported from the ({\ct I+1/2,J,K}) face, etc., on the staggered grid.
-
-\subsubsection{Volume, Mass, and Heat Flow at a Wall}
-\label{info:wallflows}
-
-The quantities {\ct 'VOLUME FLOW'}, {\ct 'MASS FLOW'}, and {\ct 'HEAT FLOW'} cannot be applied at a solid boundary.  Instead, use the wall equivalents {\ct 'VOLUME FLOW WALL'}, {\ct 'MASS FLOW WALL'}, and {\ct 'HEAT FLOW WALL'}.  These quantities require an {\ct IOR} for the surface (positive points into the domain).  If you want the mass flow of a particular gas species, include the {\ct SPEC\_ID} of that gas species. Note that, in order to be a more useful diagnostic for global energy balances, the heat flow at the wall is defined using the sensible enthalpy of the mixture (composition taken at the wall) and is not relative to ambient conditions:
-\be
-\dot{q}_{\mathrm{w}} = \int \rho h_s(T) \, \bu \cdot \d \mathbf{S}
-\ee
-
-\subsubsection{Mass Flux at a Boundary}
-\label{info:wallflux}
-
-There are two quantities that may be used for measuring mass flux on boundaries: {\ct 'MASS FLUX'} and {\ct 'MASS FLUX WALL'}.  Each takes a {\ct SPEC\_ID} if a certain species is desired.  If {\ct SPEC\_ID} is omitted, then the total flux is given.  The difference between the two outputs is that {\ct 'MASS FLUX'} has been designed primarily to work with the solid phase solver, and only provides mass fluxes at a solid surface.  Those fluxes may have been specified by the user on a {\ct SURF} line or computed by the pyrolysis model.
-
-The purpose of {\ct 'MASS FLUX WALL'} is for generating detailed species mass balances including flows in and out of the domain at {\ct OPEN} boundaries.  The value of the flux for species $\alpha$ is $\rho Y_\alpha u_n - \rho D_\alpha \partial Y_\alpha / \partial n$ where $\mathbf{n}$ is the normal direction of the surface.  The convention used here is that positive fluxes are entering the domain and negative fluxes are leaving. The quantity may be applied at a solid surface, a flow vent, or an {\ct OPEN} boundary.  When used in conjunction with {\ct MASS\_FILE=T} on {\ct DUMP}, a tight species mass balance should be obtainable.
-
-
-\subsection{Temporally-Integrated Outputs}
-\label{info:time_integral}
-
-In addition to the spatial statistics, temporal statistics can be applied to {\ct DEVC} output via the parameter {\ct TEMPORAL\_STATISTIC}. Both {\ct SPATIAL\_STATISTIC} and {\ct TEMPORAL\_STATISTIC} can be specified simultaneously on the {\ct DEVC} line, assuming the combination makes sense. The {\ct SPATIAL\_STATISTIC} is applied first, say an integration of the {\ct QUANTITY} over a given volume {\ct XB}, followed by the {\ct TEMPORAL\_STATISTIC}, like a time integral.
-
-\subsubsection{Time Average}
-
-The {\ct TEMPORAL\_STATISTIC='TIME AVERAGE'} is typically applied by default, unless it is inappropriate for the chosen {\ct QUANTITY}. With this statistic, FDS outputs the average value of the {\ct QUANTITY} over the time period of {\ct DT\_DEVC}~s just prior to the time of output. The parameter {\ct DT\_DEVC} is specified on the {\ct DUMP} line.
-
-\subsubsection{Running Average}
-
-The {\ct TEMPORAL\_STATISTIC='RUNNING AVERAGE'} outputs the running average value of the {\ct QUANTITY} over the time period starting at {\ct STATISTICS\_START} and ending at {\ct STATISTICS\_END}. This is the default behavior of ``line'' devices discussed in Section~\ref{info:line_file}.
-
-\subsubsection{Favre Average}
-
-The {\ct TEMPORAL\_STATISTIC='FAVRE AVERAGE'} outputs the Favre (density weighted) running average value of the {\ct QUANTITY} over the time period starting at {\ct STATISTICS\_START} and ending at {\ct STATISTICS\_END}. If the scalar quantity of interest is $\phi$ and the density if $\rho$ and the running average is defined by an overbar (that is, $\overline{\phi}$ is the running average of the scalar), then the Favre average is denoted with a tilde and computed as $\tilde{\phi} = \overline{\rho \phi}/\overline{\rho}$.  This output is not compatible with {\ct INITIAL\_VALUE}.
-
-\subsubsection{Instantaneous Value}
-
-For various reasons you might want to output the value of the {\ct QUANTITY} that has not been time-averaged or processed in any way. Sometimes this is important for device and control functions. To output the instantaneous value, set {\ct TEMPORAL\_STATISTIC} to {\ct 'INSTANT VALUE'}.
-
-\subsubsection{Time Integral}
-
-{\ct TEMPORAL\_STATISTIC='TIME INTEGRAL'} produces a discrete analog of the time integral:
-\be
- \int_{t_0}^t \phi(\tau) \; \d \tau
-\ee
-
-\subsubsection{Minimum and Maximum Values over Time}
-
-Set {\ct TEMPORAL\_STATISTIC} to {\ct 'MIN'} or {\ct 'MAX'} to determine the minimum or maximum value of the {\ct QUANTITY} over a time interval:
-\be
-   \min_{t_0<=t<=t_1} \phi(t) \quad ; \quad  \max_{t_0<=t<=t_1} \phi(t)
-\ee
-where $t_0$ is {\ct STATISTICS\_START} and $t_1$ is {\ct STATISTICS\_END}.
-
-For some applications you might need to predict a minimum or maximum value of the {\ct QUANTITY} over a time interval that is longer than the simulation time. For example, in wind engineering the so-called 50~year maximum wind speed can be estimated using maximum yearly values collected over, say, 10~years. The idea is that extreme values conform to certain statistical distributions from which one can extrapolate extreme values over long time periods. In FDS, you can do something similar. If you add the parameter {\ct TIME\_PERIOD} to the {\ct DEVC} line where you have also set the {\ct TEMPORAL\_STATISTIC} to {\ct 'MIN'} or {\ct 'MAX'}, the time interval bounded by $t_0$ and $t_1$ is subdivided into $N=${\ct N\_INTERVALS} (default 10), and a minimum or maximum value is stored for each interval. At the end of the simulation, the set of maximum values (minimum values are handled similarly) are ranked in ascending order, $m=1,N$. Next, the cumulative statistical distribution is introduced~\cite{Harris:JWE1996}:
-\be
-   F(\phi) = 1 - \exp[-\exp(\phi)]  \quad ; \quad  \phi = \ln[-\ln(1-F)]
-\ee
-which represents the probability\footnote{Note that the parameterless form of the distribution is intended for extrapolation only.} of the value $\phi$ not being exceeded in the given time interval, $(t_1-t_0)/N$. The probabilities for each of the $N$ ascending maximum values are assumed to be $m/(N+1)$. Plotting $\phi$ versus the expression on the right yields an approximate straight line from which we can estimate the value of $\phi$ appropriate for the longer {\ct TIME\_PERIOD}; that is, the value for which the probability of not being exceeded in the relatively short time interval $(t_1-t_0)/N$ is very close to 1. Returning to the example from wind engineering, the probability of not exceeding the 50~year wind speed in a given year is $1-1/50=0.98$.
-
-\subsubsection{Time to Reach Minimum and Maximum Value}
-
-The time at which the given {\ct QUANTITY} achieves its maximum or minimum value is specified by the {\ct TEMPORAL\_STATISTIC} {\ct 'MAX TIME'} or {\ct 'MIN TIME'}, respectively.
-
-
-\subsubsection{Root Mean Square}
-\label{info:rms}
-\label{info:rmscovcorr}
-
-{\ct TEMPORAL\_STATISTIC='RMS'} produces the unbiased estimate of the {\em root mean square} of the {\ct QUANTITY} $\phi$:
-\be
-   \phi_{\rm rms} = \sqrt{ \frac{ \sum_{i=1}^n (\phi_i - \overline{\phi})^2 }{n-1} }
-\ee
-The computation starts at {\ct STATISTICS\_START} and ends at {\ct STATISTICS\_END}.
-
-\subsubsection{Favre Root Mean Square}
-
-{\ct TEMPORAL\_STATISTIC='FAVRE RMS'} produces the unbiased estimate of the density-weighted {\em root mean square} of the {\ct QUANTITY} $\phi$:
-\be
-   \tilde{\phi}_{\rm rms} = \sqrt{ \frac{ \sum_{i=1}^n (\phi_i - \tilde{\phi})^2 }{n-1} } \quad ; \quad \tilde{\phi} = \overline{\rho \phi}/\overline{\rho}
-\ee
-The computation starts at {\ct STATISTICS\_START} and ends at {\ct STATISTICS\_END}.  This output is not compatible with {\ct INITIAL\_VALUE}.
-
-\subsubsection{Covariance}
-\label{info:covariance}
-
-If $u = U - \overline{U}$ and $v= V-\overline{V}$ are the deviations for two random variables, $U$ and $V$, then an unbiased estimate of the \emph{covariance} is given by
-\be
-   \overline{u\, v} = \frac{ \sum_{i=1}^n (U_i - \overline{U}) (V_i - \overline{V}) }{n-1}
-\ee
-To output this statistic you must add a {\ct QUANTITY2} to the {\ct DEVC} line and set {\ct TEMPORAL\_STATISTIC='COV'}.  The following lines would create a line of devices and a single point device equivalent to the first point in the line:
-\begin{lstlisting}
-&DEVC XB=X1,X2,Y1,Y2,Z1,Z2, QUANTITY='CELL W', QUANTITY2='TEMPERATURE',
-      TEMPORAL_STATISTIC='COV', ID='wT-cov_line', POINTS=20 /
-&DEVC XYZ=X1,Y1,Z1, QUANTITY='CELL W', QUANTITY2='TEMPERATURE',
-      TEMPORAL_STATISTIC='COV', ID='wT-cov_point', STATISTICS_START=20. /
-\end{lstlisting}
-
-\subsubsection{Correlation Coefficient}
-\label{info:corrcoef}
-
-Setting {\ct TEMPORAL\_STATISTIC='CORRCOEF'} outputs the \emph{correlation coefficient} given by
-\be
-   \rho_{uv} = \frac{ \overline{u\, v} }{ u_{\rm rms} \,v_{\rm rms} }
-\ee
-Here again you must add a {\ct QUANTITY2} to the device line.
 
 
 \subsection{Histograms}
@@ -10414,13 +10377,15 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct DIVERGENCE}                                & $\nabla \cdot \bu$                            & 1/s            & D,I,P,S      \\ \hline
 {\ct DROPLET VOLUME FRACTION}$^2$               & Section~\ref{info:part_output}                &                & D,P,S        \\ \hline
 {\ct ENTHALPY}                                  & Section~\ref{info:Enthalpy}                   & kJ/m$^3$       & D,I,P,S      \\ \hline
+{\ct ENTHALPY FLUX X}                           & Section~\ref{info:enthalpy_flux}              & kW/m$^2$       & D,I,P,S      \\ \hline
+{\ct ENTHALPY FLUX Y}                           & Section~\ref{info:enthalpy_flux}              & kW/m$^2$       & D,I,P,S      \\ \hline
+{\ct ENTHALPY FLUX Z}                           & Section~\ref{info:enthalpy_flux}              & kW/m$^2$       & D,I,P,S      \\ \hline
 {\ct EXTINCTION COEFFICIENT}                    & Section~\ref{info:visibility}                 & 1/m            & D,I,P,S      \\ \hline
 {\ct FED}                                       & Section~\ref{info:FED}                        &                & D            \\ \hline
 {\ct FIC}                                       & Section~\ref{info:FED}                        &                & D,S          \\ \hline
 {\ct FRICTION VELOCITY}                         & Section~\ref{info:yplus}                      & m/s            & B,D          \\ \hline
 {\ct GAUGE HEAT FLUX}                           & Section~\ref{info:heat_flux}                  & kW/m$^2$       & B,D          \\ \hline
-{\ct HEAT FLOW}                                 & Section~\ref{info:flows}                      & kW             & D            \\ \hline
-{\ct HEAT FLOW WALL}                            & Section~\ref{info:flows}                      & kW             & D            \\ \hline
+{\ct ENTHALPY FLUX WALL}                        & Section~\ref{info:enthalpy_flux}              & kW/m$^2$       & B,D          \\ \hline
 {\ct TOTAL HEAT FLUX}                           & Section~\ref{info:heat_flux}                  & kW/m$^2$       & B,D          \\ \hline
 {\ct HRR}                                       & $\int \dq''' \; \d V$                         & kW             & D            \\ \hline
 {\ct HRRPUA}                                    & $\dq''$                                       & kW/m$^2$       & D            \\ \hline
@@ -10434,13 +10399,11 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct LAYER HEIGHT}                              & Section~\ref{info:layerheight}                & m              & D            \\ \hline
 {\ct LINK TEMPERATURE}                          & Section~\ref{info:heat_detectors}             & $^\circ$C      & D            \\ \hline
 {\ct LOWER TEMPERATURE}                         & Section~\ref{info:layerheight}                & $^\circ$C      & D            \\ \hline
-{\ct MASS FLOW}                                 & Section~\ref{info:flows}                      & kg/s           & D            \\ \hline
-{\ct MASS FLOW WALL}                            & Section~\ref{info:flows}                      & kg/s           & D            \\ \hline
 {\ct MASS FLUX}$^{1,4}$                         & Section~\ref{info:wallflux}                   & \si{kg/(m$^2$.s)} & B,D       \\ \hline
 {\ct MASS FLUX WALL}$^1$                        & Section~\ref{info:wallflux}                   & \si{kg/(m$^2$.s)} & B,D       \\ \hline
-{\ct MASS FLUX X}$^1$                           & $\rho u Y_\alpha$                             & \si{kg/(m$^2$.s)} & D,I,P,S   \\ \hline
-{\ct MASS FLUX Y}$^1$                           & $\rho v Y_\alpha$                             & \si{kg/(m$^2$.s)} & D,I,P,S   \\ \hline
-{\ct MASS FLUX Z}$^1$                           & $\rho w Y_\alpha$                             & \si{kg/(m$^2$.s)} & D,I,P,S   \\ \hline
+{\ct MASS FLUX X}$^1$                           & Section~\ref{info:mass_flow}                  & \si{kg/(m$^2$.s)} & D,I,P,S   \\ \hline
+{\ct MASS FLUX Y}$^1$                           & Section~\ref{info:mass_flow}                  & \si{kg/(m$^2$.s)} & D,I,P,S   \\ \hline
+{\ct MASS FLUX Z}$^1$                           & Section~\ref{info:mass_flow}                  & \si{kg/(m$^2$.s)} & D,I,P,S   \\ \hline
 {\ct MASS FRACTION}$^1$                         & $Y_\alpha$                                    & kg/kg          & D,I,P,S      \\ \hline
 {\ct MIXTURE FRACTION}                          & $Z$                                           & kg/kg          & D,I,P,S      \\ \hline
 {\ct MPUA}$^2$                                  & Section~\ref{info:part_output}                & kg/m$^2$       & B,D          \\ \hline
@@ -10502,8 +10465,6 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct VELOCITY}$^3$                              & Gas velocity                                  & m/s            & D,I,P,S      \\ \hline
 {\ct VISCOSITY}                                 & Effective viscosity, $\mu + \mu_{\mathrm{t}}$ & \si{kg/(m.s)}  & D,I,P,S      \\ \hline
 {\ct VISIBILITY}                                & Section~\ref{info:visibility}                 & m              & D,I,P,S      \\ \hline
-{\ct VOLUME FLOW}                               & Section~\ref{info:flows}                      & m$^3$/s        & D            \\ \hline
-{\ct VOLUME FLOW WALL}                          & Section~\ref{info:flows}                      & m$^3$/s        & D            \\ \hline
 {\ct VOLUME FRACTION}$^1$                       & $X_\alpha$                                    & mol/mol        & D,I,P,S      \\ \hline
 {\ct WALL CLOCK TIME}                           & Section~\ref{info:TIMING}                     & s              & D            \\ \hline
 {\ct WALL CLOCK TIME ITERATIONS}                & Section~\ref{info:TIMING}                     & s              & D            \\ \hline
@@ -10551,9 +10512,9 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct ADD\_Z}$^1$                                & Avg.~Droplet Diameter                             & $\mu$m         & D,I,P,S      \\ \hline
 {\ct ADT}$^2$                                   & Avg.~Droplet Temperature                          & $^\circ$C      & D,I,P,S      \\ \hline
 {\ct ADT\_Z}$^1$                                & Avg.~Droplet Temperature                          & $^\circ$C      & D,I,P,S      \\ \hline
-{\ct ADVECTIVE MASS FLUX X}$^1$ & $\overline{\rho Y_\alpha} u$, Section~\ref{info:store_species_flux} & kg/s/m$^2$    & D,I,P,S      \\ \hline
-{\ct ADVECTIVE MASS FLUX Y}$^1$ & $\overline{\rho Y_\alpha} v$, Section~\ref{info:store_species_flux} & kg/s/m$^2$    & D,I,P,S      \\ \hline
-{\ct ADVECTIVE MASS FLUX Z}$^1$ & $\overline{\rho Y_\alpha} w$, Section~\ref{info:store_species_flux} & kg/s/m$^2$    & D,I,P,S      \\ \hline
+{\ct ADVECTIVE MASS FLUX X}$^1$ & $\overline{\rho Y_\alpha} u$, Section~\ref{info:mass_flow} & kg/s/m$^2$    & D,I,P,S      \\ \hline
+{\ct ADVECTIVE MASS FLUX Y}$^1$ & $\overline{\rho Y_\alpha} v$, Section~\ref{info:mass_flow} & kg/s/m$^2$    & D,I,P,S      \\ \hline
+{\ct ADVECTIVE MASS FLUX Z}$^1$ & $\overline{\rho Y_\alpha} w$, Section~\ref{info:mass_flow} & kg/s/m$^2$    & D,I,P,S      \\ \hline
 {\ct ASSUMED GAS TEMPERATURE}                   & Section~\ref{solid_phase_verification}            & $^\circ$C      & D,I,P,S      \\ \hline
 {\ct C\_SMAG}                                   & Smagorinsky coefficient                           &                & D,I,P,S      \\ \hline
 {\ct AUTO IGNITION TEMPERATURE}$^5$             & Section \ref{info:ignition}                       & $^\circ$C      & D,I,P,S      \\ \hline
@@ -10570,9 +10531,9 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct CHEMISTRY SUBITERATIONS}                   & Section~\ref{info:chem_integration}               &                & D,S          \\ \hline
 {\ct COMBUSTION EFFICIENCY}                     & $\min(\delta t/\tau_{\mathrm{mix}},1)$, if $\dq'''>0$, else 0 &    & D,I,P,S      \\ \hline
 {\ct DIFFUSIVITY}$^1$                           & Species diffusivity                               & m$^2$/s        & D,I,P,S      \\ \hline
-{\ct DIFFUSIVE MASS FLUX X}$^1$ & $\rho D_\alpha \partial Y_\alpha/\partial x$, Section~\ref{info:store_species_flux} & kg/s/m$^2$ & D,I,P,S \\ \hline
-{\ct DIFFUSIVE MASS FLUX Y}$^1$ & $\rho D_\alpha \partial Y_\alpha/\partial y$, Section~\ref{info:store_species_flux} & kg/s/m$^2$ & D,I,P,S \\ \hline
-{\ct DIFFUSIVE MASS FLUX Z}$^1$ & $\rho D_\alpha \partial Y_\alpha/\partial z$, Section~\ref{info:store_species_flux} & kg/s/m$^2$ & D,I,P,S \\ \hline
+{\ct DIFFUSIVE MASS FLUX X}$^1$ & $\rho D_\alpha \partial Y_\alpha/\partial x$, Section~\ref{info:mass_flow} & kg/s/m$^2$ & D,I,P,S \\ \hline
+{\ct DIFFUSIVE MASS FLUX Y}$^1$ & $\rho D_\alpha \partial Y_\alpha/\partial y$, Section~\ref{info:mass_flow} & kg/s/m$^2$ & D,I,P,S \\ \hline
+{\ct DIFFUSIVE MASS FLUX Z}$^1$ & $\rho D_\alpha \partial Y_\alpha/\partial z$, Section~\ref{info:mass_flow} & kg/s/m$^2$ & D,I,P,S \\ \hline
 {\ct DISSIPATION RATE}                          & $\mu / \rho \times $ {\ct STRAIN RATE}            & m$^2$/s$^3$    & D,I,P,S      \\ \hline
 %{\ct DUDT}                                      & $\partial u/\partial t$                           & m/s$^2$        & D,I,P,S      \\ \hline
 %{\ct DVDT}                                      & $\partial v/\partial t$                           & m/s$^2$        & D,I,P,S      \\ \hline
@@ -10625,9 +10586,10 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct SUBSTEPS}                                  & Section~\ref{info:solid_phase_stability}          &                & B,D          \\ \hline
 {\ct SUM LUMPED MASS FRACTIONS}                 & $\sum_i Z_i$ (should be 1)                        &                & D,S          \\ \hline
 {\ct SUM PRIMITIVE MASS FRACTIONS}              & $\sum_\alpha Y_\alpha$ (should be 1)              &                & D,S          \\ \hline
-{\ct TOTAL MASS FLUX X}$^1$ & $\overline{\rho Y_\alpha} u + \rho D_\alpha \partial Y_\alpha/\partial x$, Sec.~\ref{info:store_species_flux} & kg/s/m$^2$ & D,I,P,S      \\ \hline
-{\ct TOTAL MASS FLUX Y}$^1$ & $\overline{\rho Y_\alpha} v + \rho D_\alpha \partial Y_\alpha/\partial y$, Sec.~\ref{info:store_species_flux} & kg/s/m$^2$ & D,I,P,S      \\ \hline
-{\ct TOTAL MASS FLUX Z}$^1$ & $\overline{\rho Y_\alpha} w + \rho D_\alpha \partial Y_\alpha/\partial z$, Sec.~\ref{info:store_species_flux} & kg/s/m$^2$ & D,I,P,S      \\ \hline
+{\ct TOTAL MASS FLUX WALL}$^1$ & $\overline{\rho Y_\alpha} u_n + \rho D_\alpha \partial Y_\alpha/\partial n$, Sec.~\ref{info:wallflux} & kg/s/m$^2$ & D,S      \\ \hline
+{\ct TOTAL MASS FLUX X}$^1$ & $\overline{\rho Y_\alpha} u + \rho D_\alpha \partial Y_\alpha/\partial x$, Sec.~\ref{info:mass_flow} & kg/s/m$^2$ & D,I,P,S      \\ \hline
+{\ct TOTAL MASS FLUX Y}$^1$ & $\overline{\rho Y_\alpha} v + \rho D_\alpha \partial Y_\alpha/\partial y$, Sec.~\ref{info:mass_flow} & kg/s/m$^2$ & D,I,P,S      \\ \hline
+{\ct TOTAL MASS FLUX Z}$^1$ & $\overline{\rho Y_\alpha} w + \rho D_\alpha \partial Y_\alpha/\partial z$, Sec.~\ref{info:mass_flow} & kg/s/m$^2$ & D,I,P,S      \\ \hline
 {\ct TURBULENT PRANDTL NUMBER}$^7$              & $\nu_t/\alpha_t$                                  &                & D,I,P,S      \\ \hline
 {\ct VELOCITY ERROR}                            & Section~\ref{info:PRES}                           &                & B            \\ \hline
 {\ct VISCOUS STRESS WALL}                       & Section~\ref{info:distributed_forces}             & Pa             & B,D          \\ \hline
@@ -10662,9 +10624,8 @@ $^7$                 \> Requires {\ct POTENTIAL\_TEMPERATURE\_CORRECTION=T} on {
 \section{Summary of HVAC Output Quantities}
 \label{info:hvacoutputquantities}
 
-Table~\ref{tab:hvacoutput} summarizes the various Output Quantities for HVAC systems.  HVAC output quantities do not require an {\ct XYZ} or {\ct XB}. Quantities for a duct require the specification
-of a {\ct DUCT\_ID}, quantities for a node require the specification of a {\ct NODE\_ID} and quantities for a duct cell (when {\ct HVAC\_MASS\_TRANSPORT=T}) require specification of both a {\ct DUCT\_ID} and a {\ct CELL\_L} (distance along the duct in meters where the desired cell is located).  Mass and volume fraction outputs also require the specification of a {\ct SPEC\_ID}. Fan and aircoil outputs require the {\ct DUCT\_ID} of the duct they are located in. Filter outputs require the {\ct NODE\_ID} of the node they are located in. The quantity {\ct NODE PRESSSURE DIFFERENCE} requires that one specify both elements of the array {\ct NODE\_ID}, and the pressure difference is calculated by subtracting the first node from the second.
- Note that HVAC output quantities can only be used with a {\ct DEVC}.
+Table~\ref{tab:hvacoutput} summarizes the various Output Quantities for HVAC systems.  HVAC output quantities are for {\ct DEVC} only and do not require an {\ct XYZ} or {\ct XB}. Quantities for a duct require the specification
+of a {\ct DUCT\_ID}, quantities for a node require the specification of a {\ct NODE\_ID} and quantities for a duct cell (when {\ct HVAC\_MASS\_TRANSPORT=T}) require specification of both a {\ct DUCT\_ID} and a {\ct CELL\_L} (distance along the duct in meters where the desired cell is located).  Mass and volume fraction outputs also require the specification of a {\ct SPEC\_ID}. Fan and aircoil outputs require the {\ct DUCT\_ID} of the duct they are located in. Filter outputs require the {\ct NODE\_ID} of the node they are located in. The quantity {\ct DUCT ENTHALPY FLOW} applies Eq.~\ref{enthalpy_flow} to the flow in the duct. To have the node output {\ct NODE ENTHALPY} reflect the duct quantity of {\ct DUCT ENTHALPY FLOW} set {\ct RELATIVE=.TRUE} for the node output. The quantity {\ct NODE PRESSSURE DIFFERENCE} requires that one specify both elements of the array {\ct NODE\_ID}, and the pressure difference is calculated by subtracting the first node from the second.
 
 \begin{longtable}{|l|l|l|l|@{\extracolsep{\fill}}}
 \caption[HVAC output quantities]{Summary of HVAC output quantities.}
@@ -10684,7 +10645,7 @@ of a {\ct DUCT\_ID}, quantities for a node require the specification of a {\ct N
 {\ct DUCT CELL MASS FRACTION}                   & Mass fraction of a species in a duct cell   &  kg/kg             & D   \\ \hline
 {\ct DUCT CELL TEMPERATURE}                     & Gas temperature in a duct cell              &  $^\circ$C         & D   \\ \hline
 {\ct DUCT CELL VOLUME FRACTION}                 & Volume fraction of a species in a duct cell &  mol/mol           & D   \\ \hline
-{\ct DUCT ENERGY FLOW}                          & Energy flow in a duct                       &  kW                & D   \\ \hline
+{\ct DUCT ENTHALPY FLOW}                        & Enthalpy flow in a duct                     &  kW                & D   \\ \hline
 {\ct DUCT MASS FLOW}                            & Mass flow in a duct                         &  kg/s              & D   \\ \hline
 {\ct DUCT MASS FRACTION}                        & Mass fraction of a species in a duct        &  kg/kg             & D   \\ \hline
 {\ct DUCT TEMPERATURE}                          & Temperature of the flow in a duct           & $^\circ$C          & D   \\ \hline
@@ -10696,6 +10657,7 @@ of a {\ct DUCT\_ID}, quantities for a node require the specification of a {\ct N
 {\ct FILTER LOSS}                               & Flow loss through a filter                  &                    & D   \\ \hline
 {\ct NODE DENSITY}                              & Density of the flow through a node          &  kg/m$^3$          & D   \\ \hline
 {\ct NODE ENTHALPY}                             & Enthalpy of a node                          &  kJ/kg             & D   \\ \hline
+{\ct NODE SENSIBLE ENTHALPY}                    & Sensible Enthalpy of a node                 &  kJ/kg             & D   \\ \hline
 {\ct NODE MASS FRACTION}                        & Mass fraction of a species in a node        &  kg/kg             & D   \\ \hline
 {\ct NODE PRESSURE}                             & Pressure of a node                          &       Pa           & D   \\ \hline
 {\ct NODE PRESSURE DIFFERENCE}                  & Pressure difference between two nodes       &       Pa           & D   \\ \hline
@@ -10717,7 +10679,6 @@ properties be specified as well. Simply prescribing as many properties as possib
 % FDS source are documented in the FDS user's guide.
 
 % ignore all keywords in the specified namelists
-% ignorenamelists: CORR, DOOR, EDEV, ENTR, EVAC, EVHO, EVSS, EXIT, PERS, STRS
 % ignorenamelists: TRNY, TRNZ
 
 % ignore namelist/keyword combinations
@@ -10894,7 +10855,6 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct CONSTANT}           & Real        & Section~\ref{info:CONTROL_MATH}         &    &                        \\ \hline
 {\ct DELAY}              & Real        & Section~\ref{info:dry_pipe}             & s  &  0.                    \\ \hline
 {\ct DIFFERENTIAL\_GAIN} & Real        & Section~\ref{info:CONTROL_PID}          &    &  0.                    \\ \hline
-{\ct EVACUATION}         & Logical     & Reference~\cite{FDS_Evac_Users_Guide}   &    & {\ct F}          \\ \hline
 {\ct FUNCTION\_TYPE}     & Character   & Section~\ref{info:basic_control}        &    &                        \\ \hline
 {\ct ID}                 & Character   & Section~\ref{info:CTRL}                 &    &                        \\ \hline
 {\ct INITIAL\_STATE}     & Logical     & Section~\ref{info:basic_control}        &    & {\ct F}          \\ \hline
@@ -10903,6 +10863,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct LATCH}              & Logical     & Section~\ref{info:basic_control}        &    & {\ct T}           \\ \hline
 {\ct N}                  & Integer     & Section~\ref{info:CTRL}                 &    &   1                    \\ \hline
 {\ct ON\_BOUND}          & Character   & Section~\ref{info:DEADBAND}             &    & {\ct LOWER}            \\ \hline
+{\ct PERCENTILE}         & Real        & Section~\ref{info:PERCENTILE}           &    &                        \\ \hline
 {\ct PROPORTIONAL\_GAIN} & Real        & Section~\ref{info:CONTROL_PID}          &    &  0.                    \\ \hline
 {\ct RAMP\_ID}           & Character   & Section~\ref{info:CUSTOM}               &    &                        \\ \hline
 {\ct SETPOINT(2)}        & Real        & Section~\ref{info:basic_control}        &    &                        \\ \hline
@@ -10930,6 +10891,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 \endhead
 {\ct ABSOLUTE\_VALUE}       & Logical         & Section~\ref{info:out:DEVC}                                     &       & {\ct F}       \\ \hline
 {\ct BYPASS\_FLOWRATE}      & Real            & Section~\ref{info:aspiration_detector}                          & kg/s  & 0             \\ \hline
+{\ct CELL\_L}               & Real            & Section~\ref{info:hvacoutputquantities}                         & m     &               \\ \hline
 {\ct CONVERSION\_ADDEND}    & Real            & Section~\ref{info:out:DEVC}                                     &       & 0             \\ \hline
 {\ct CONVERSION\_FACTOR}    & Real            & Section~\ref{info:out:DEVC}                                     &       & 1             \\ \hline
 {\ct COORD\_FACTOR}         & Real            & Section~\ref{info:line_file}                                    &       & 1             \\ \hline
@@ -10944,7 +10906,6 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct DX}                    & Real            & Section~\ref{info:line_file}                                    & m     & 0             \\ \hline
 {\ct DY}                    & Real            & Section~\ref{info:line_file}                                    & m     & 0             \\ \hline
 {\ct DZ}                    & Real            & Section~\ref{info:line_file}                                    & m     & 0             \\ \hline
-{\ct EVACUATION}            & Logical         & Reference~\cite{FDS_Evac_Users_Guide}                           &       & {\ct F}       \\ \hline
 {\ct FLOWRATE}              & Real            & Section~\ref{info:aspiration_detector}                          & kg/s  & 0             \\ \hline
 {\ct FORCE\_DIRECTION}      & Real(3)         & Section~\ref{info:distributed_forces}                           &       &               \\ \hline
 {\ct HIDE\_COORDINATES}     & Logical         & Section~\ref{info:line_file}                                    &       & {\ct F}       \\ \hline
@@ -10960,7 +10921,6 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct NO\_UPDATE\_CTRL\_ID}  & Character       & Section~\ref{info:freeze_device}                                &       &               \\ \hline
 {\ct NO\_UPDATE\_DEVC\_ID}  & Character       & Section~\ref{info:freeze_device}                                &       &               \\ \hline
 {\ct ORIENTATION}           & Real Triplet    & Section~\ref{info:DEVC}                                         &       & 0,0,-1        \\ \hline
-{\ct ORIENTATION\_NUMBER}   & Integer         & Section~\ref{info:part_output}                                  &       & 1             \\ \hline
 {\ct OUTPUT}                & Logical         & Section~\ref{info:out:DEVC}                                     &       & {\ct T}       \\ \hline
 {\ct PART\_ID}              & Character       & Section~\ref{info:outputquantities}                             &       &               \\ \hline
 {\ct PIPE\_INDEX}           & Integer         & Section~\ref{info:pressureramp}                                 &       &  1            \\ \hline
@@ -10998,8 +10958,6 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct Z\_ID}                 & Character       & Section~\ref{info:line_file}                                    &       &  {\ct ID-z}   \\ \hline
 {\ct XYZ\_UNITS}            & Character       & Section~\ref{info:line_file}                                    &       &  {\ct 'm'}    \\ \hline
 \end{longtable}
-
-% Undocumented: CELL_L (JF)
 
 \vspace{\baselineskip}
 
@@ -11060,7 +11018,6 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct SMOKE3D\_QUANTITY}             & Character    & Section~\ref{info:SMOKE3D}             &           &                                \\ \hline
 {\ct SMOKE3D\_SPEC\_ID}             & Character    & Section~\ref{info:SMOKE3D}             &           &                                \\ \hline
 {\ct STATUS\_FILES}                 & Logical      & Section~\ref{info:DUMP}                &           & {\ct F}                  \\ \hline
-{\ct STORE\_SPECIES\_FLUX}          & Logical      & Section~\ref{info:store_species_flux}  &           & {\ct F}                  \\ \hline
 {\ct SUPPRESS\_DIAGNOSTICS}         & Logical      & Section~\ref{info:monitoring_progress} &           & {\ct F}                  \\ \hline
 {\ct T\_RADF\_BEGIN}                & Real         & Section~\ref{info:RADF}                &  s        & {\ct T\_BEGIN}                 \\ \hline
 {\ct T\_RADF\_END}                  & Real         & Section~\ref{info:RADF}                &  s        & {\ct T\_END}                   \\ \hline
@@ -11192,9 +11149,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct COLOR    }    & Character         & Section~\ref{info:colors}                              &       &                 \\ \hline
 {\ct CTRL\_ID}     & Character         & Section~\ref{info:HOLE}                                &       &                 \\ \hline
 {\ct DEVC\_ID}     & Character         & Section~\ref{info:HOLE}                                &       &                 \\ \hline
-{\ct EVACUATION}   & Logical           & Reference~\cite{FDS_Evac_Users_Guide}                  &       &                 \\ \hline
 {\ct ID }          & Character         & Identifier for input line                              &       &                 \\ \hline
-{\ct MESH\_ID }    & Character         & Reference~\cite{FDS_Evac_Users_Guide}                  &       &                 \\ \hline
 {\ct MULT\_ID }    & Character         & Section~\ref{info:MULT}                                &       &                 \\ \hline
 {\ct RGB(3)   }    & Integer Triplet   & Section~\ref{info:colors}                              &       &                 \\ \hline
 {\ct TRANSPARENCY} & Real              & Section~\ref{info:HOLE}                                &       &                 \\ \hline
@@ -11395,6 +11350,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct HEAT\_OF\_REACTION\_RAMP(:)}   & Char.~Array     & Section~\ref{info:RAMP_Temperature}   &                   &               \\ \hline
 {\ct ID}                            & Character       & Section~\ref{info:SURF_MATL_Basics}   &                   &               \\ \hline
 {\ct MATL\_ID(:,:)}                 & Character       & Section~\ref{info:solid_pyrolysis}    &                   &               \\ \hline
+{\ct MAX\_REACTION\_RATE(:)}        & Real Array      & Section~\ref{sec:reaction_rates}      &                   & $\infty$      \\ \hline
 {\ct MW}                            & Real            & Section~\ref{info:liquid_fuels}       & g/mol             &               \\ \hline
 {\ct N\_O2(:)}                      & Real Array      & Section~\ref{info:solid_pyrolysis}    &                   & 0.            \\ \hline
 {\ct N\_REACTIONS}                  & Integer         & Section~\ref{info:solid_pyrolysis}    &                   & 0             \\ \hline
@@ -11441,10 +11397,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CHECK\_MESH\_ALIGNMENT}         & Logical                       & Section~\ref{info:mesh_alignment}         &    & {\ct F}    \\ \hline
 {\ct COLOR}                          & Character                     & Section~\ref{info:multimesh}              &    & {\ct 'BLACK'}    \\ \hline
 {\ct CYLINDRICAL}                    & Logical                       & Section~\ref{info:2D}                     &    & {\ct F}    \\ \hline
-{\ct EVACUATION}                     & Logical                       & Reference~\cite{FDS_Evac_Users_Guide}     &    & {\ct F}    \\ \hline
-{\ct EVAC\_HUMANS}                   & Logical                       & Reference~\cite{FDS_Evac_Users_Guide}     &    & {\ct F}    \\ \hline
-{\ct EVAC\_Z\_OFFSET}                & Real                          & Reference~\cite{FDS_Evac_Users_Guide}     & m  & 1                \\ \hline
-{\ct ID}                             & Character                     & Reference~\cite{FDS_Evac_Users_Guide}     &    &                  \\ \hline
 {\ct IJK}                            & Integer Triplet               & Section~\ref{info:MESH_Basics}            &    & 10,10,10         \\ \hline
 {\ct LEVEL}                          & Integer                       & For future use                            &    & 0                \\ \hline
 {\ct MPI\_PROCESS}                   & Integer                       & Section~\ref{info:multimesh}              &    &                  \\ \hline
@@ -11496,13 +11448,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct C\_VREMAN}                                     & Real         & Section~\ref{info:LES}                  &            & 0.07              \\ \hline
 {\ct C\_WALE}                                       & Real         & Section~\ref{info:LES}                  &            & 0.60              \\ \hline
 {\ct DEPOSITION}                                    & Logical      & Section~\ref{info:deposition}           &            & {\ct T}      \\ \hline
-{\ct EVACUATION\_DRILL}                             & Logical      & Reference~\cite{FDS_Evac_Users_Guide}   &            & {\ct F}     \\ \hline
-{\ct EVACUATION\_INITIALIZATION}                    & Logical      & Reference~\cite{FDS_Evac_Users_Guide}   &            & {\ct F}     \\ \hline
-{\ct EVACUATION\_MC\_MODE}                          & Logical      & Reference~\cite{FDS_Evac_Users_Guide}   &            & {\ct F}     \\ \hline
-{\ct EVACUATION\_WRITE\_FED}                        & Logical      & Reference~\cite{FDS_Evac_Users_Guide}   &            & {\ct F}     \\ \hline
-{\ct EVAC\_PRESSURE\_ITERATIONS}                    & Integer      & Reference~\cite{FDS_Evac_Users_Guide}   &            & 50                \\ \hline
-{\ct EVAC\_SURF\_DEFAULT}                           & Character    & Reference~\cite{FDS_Evac_Users_Guide}   &            &                   \\ \hline
-{\ct EVAC\_TIME\_ITERATIONS}                        & Integer      & Reference~\cite{FDS_Evac_Users_Guide}   &            & 50                \\ \hline
 {\ct FLUX\_LIMITER}                                 & Integer      & Section~\ref{info:flux_limiters}        &            & 2                 \\ \hline
 {\ct FREEZE\_VELOCITY}                              & Logical      & Section~\ref{info:freeze_velocity}      &            & {\ct F}     \\ \hline
 {\ct GAMMA}                                         & Real         & Section~\ref{gas_species_props}         &            & 1.4               \\ \hline
@@ -11522,10 +11467,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MAX\_LEAK\_PATHS}                              & Integer      & Section~\ref{info:Leaks}                &            &  200              \\ \hline
 {\ct MINIMUM\_FILM\_THICKNESS}                      & Real         & Section~\ref{info:surface_droplets}     &  m         & 0.00001           \\ \hline
 {\ct MPI\_TIMEOUT}                                  & Real         & Section~\ref{info:TIMING}               &  s         & 10.               \\ \hline
-{\ct NEAR\_WALL\_TURBULENCE\_MODEL}                 & Character    & Section~\ref{info:LES}                  &            &                   \\ \hline
 {\ct NOISE}                                         & Logical      & Section~\ref{info:NOISE}                &            & {\ct T}      \\ \hline
 {\ct NOISE\_VELOCITY}                               & Real         & Section~\ref{info:NOISE}                &  m/s       & 0.005             \\ \hline
-{\ct NO\_EVACUATION}                                & Logical      & Reference~\cite{FDS_Evac_Users_Guide}   &            & {\ct F}     \\ \hline
 {\ct NORTH\_BEARING}                                & Real         & Section~\ref{info:earth}                & deg.       &                   \\ \hline
 {\ct ORIGIN\_LAT}                                   & Real         & Section~\ref{info:earth}                & deg.       &                   \\ \hline
 {\ct ORIGIN\_LON}                                   & Real         & Section~\ref{info:earth}                & deg.       &                   \\ \hline
@@ -11673,14 +11616,12 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct COLOR    }               & Character       & Section~\ref{info:OBST_Basics}          &           &               \\ \hline
 {\ct CTRL\_ID }               & Character       & Section~\ref{info:activate_deactivate}  &           &               \\ \hline
 {\ct DEVC\_ID }               & Character       & Section~\ref{info:activate_deactivate}  &           &               \\ \hline
-{\ct EVACUATION}              & Logical         & Reference~\cite{FDS_Evac_Users_Guide}   &           & {\ct F} \\ \hline
 {\ct HEIGHT}                  & Real            & Section~\ref{info:multobst}             & m         &               \\ \hline
 {\ct HT3D}                    & Logical         & Section~\ref{info:ht3d}                 &           & {\ct F} \\ \hline
 {\ct ID }                     & Character       & Section~\ref{info:OBST_Basics}          &           &               \\ \hline
 {\ct INTERNAL\_HEAT\_SOURCE}  & Real            & Section~\ref{sec:heat_sources}          & kW/m$^3$  &               \\ \hline
 {\ct LENGTH}                  & Real            & Section~\ref{info:multobst}             & m         &               \\ \hline
 {\ct MATL\_ID}                & Character       & Section~\ref{sec:ht_only}               &           &               \\ \hline
-{\ct MESH\_ID}                & Character       & Reference~\cite{FDS_Evac_Users_Guide}   &           &               \\ \hline
 {\ct MULT\_ID }               & Character       & Section~\ref{info:MULT}                 &           &               \\ \hline
 {\ct ORIENTATION(3)}          & Real Array      & Section~\ref{info:multobst}             & m         & (0.,0.,1.)    \\ \hline
 {\ct OUTLINE}                 & Logical         & Section~\ref{info:OBST_Basics}          &           & {\ct F} \\ \hline
@@ -12086,7 +12027,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct AGL\_SLICE}        & Real              & Section~\ref{info:complex_terrain}        & m         &                   \\ \hline
 {\ct CELL\_CENTERED}    & Logical           & Section~\ref{info:SLCF}                   &           & {\ct F}     \\ \hline
 {\ct DB}                & Character         & Section~\ref{info:SLCF}                   &           &                   \\ \hline
-{\ct EVACUATION}        & Logical           & Reference~\cite{FDS_Evac_Users_Guide}     &           & {\ct F}     \\ \hline
 {\ct ID}                & Character         & Section~\ref{info:SLCF}                   &           &                   \\ \hline
 {\ct MAXIMUM\_VALUE}    & Real              & Reference~\cite{Smokeview_Users_Guide}    &           &                   \\ \hline
 {\ct MESH\_NUMBER}      & Integer           & Section~\ref{info:SLCF}                   &           &                   \\ \hline
@@ -12216,7 +12156,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct EMBER\_GENERATION\_HEIGHT(2)}                          & Real            & Section~\ref{info:particle_flux}          & m                   &                        \\ \hline
 {\ct EMISSIVITY}                                          & Real            & Section~\ref{info:convection}             &                     & 0.9                     \\ \hline
 {\ct EMISSIVITY\_BACK}                                    & Real            & Section~\ref{info:BACKING}                &                     &                         \\ \hline
-{\ct EVAC\_DEFAULT}                                       & Logical         & Reference~\cite{FDS_Evac_Users_Guide}     &                     & {\ct F}           \\ \hline
 {\ct EXTERNAL\_FLUX}                                      & Real            & Section~\ref{solid_phase_verification}    & \si{kW/m^2}         &                         \\ \hline
 {\ct EXTINCTION\_TEMPERATURE}                             & Real            & Section~\ref{info:specified_burning}      & $^\circ$C           & -273.                   \\ \hline
 {\ct FREE\_SLIP}                                          & Logical         & Section~\ref{info:WALL_MODEL}             &                     & {\ct F}           \\ \hline
@@ -12247,6 +12186,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MLRPUA }                                             & Real            & Section~\ref{info:gas_burner}             & \si{kg/(m^2.s)}     &                         \\ \hline
 {\ct MOISTURE\_FRACTION(:)}                               & Real Array      & Section~\ref{info:vegetation}             &                     & 0.                      \\ \hline
 {\ct N\_LAYER\_CELLS\_MAX}                                & Integer Array   & Section~\ref{info:solid_phase_stability}  &                     & 1000                    \\ \hline
+{\ct NEAR\_WALL\_TURBULENCE\_MODEL}                       & Character       & Section~\ref{info:LES}                    &                     &                        \\ \hline
+{\ct NEAR\_WALL\_EDDY\_VISCOSITY}                         & Real            & Section~\ref{info:LES}                    & m$^2$/s             &                        \\ \hline
 {\ct NET\_HEAT\_FLUX}                                     & Real            & Section~\ref{info:convection}             & kW/m$^2$            &                         \\ \hline
 {\ct NO\_SLIP}                                            & Logical         & Section~\ref{info:WALL_MODEL}             &                     & {\ct F}           \\ \hline
 {\ct NPPC}                                                & Integer         & Section~\ref{info:particle_flux}          &                     & 1                       \\ \hline
@@ -12372,8 +12313,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct DT}                        & Real       & Section~\ref{info:TIME_Control}           & s           &                 \\ \hline
 {\ct DT\_END\_FILL}             & Real       & Section~\ref{info:TIME_Control}           & s           & $1.0 \times 10^{-6}$  \\ \hline
 {\ct DT\_END\_MINIMUM}          & Real       & Section~\ref{info:TIME_Control}           & s           &  {\ct 2.*EPSILON}  \\ \hline
-{\ct EVAC\_DT\_FLOWFIELD}       & Real       & Reference~\cite{FDS_Evac_Users_Guide}     & s           &  0.01           \\ \hline
-{\ct EVAC\_DT\_STEADY\_STATE}   & Real       & Reference~\cite{FDS_Evac_Users_Guide}     & s           &  0.05           \\ \hline
 {\ct LIMITING\_DT\_RATIO}       & Real       & Section~\ref{info:Errors}                 &             &  0.0001         \\ \hline
 {\ct LOCK\_TIME\_STEP}          & Logical    & Section~\ref{info:TIME_Control}           &             & {\ct F}   \\ \hline
 {\ct RESTRICT\_TIME\_STEP}      & Logical    & Section~\ref{info:TIME_Control}           &             & {\ct T}    \\ \hline
@@ -12431,14 +12370,12 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct DB    }                & Character         & Section~\ref{info:VENT_Basics}                            &               &                     \\ \hline
 {\ct DEVC\_ID }             & Character         & Section~\ref{info:activate_deactivate}                    &               &                     \\ \hline
 {\ct DYNAMIC\_PRESSURE}     & Real              & Section~\ref{info:pressure_boundary}                      & Pa            & 0.                  \\ \hline
-{\ct EVACUATION    }        & Logical           & Reference~\cite{FDS_Evac_Users_Guide}                     &               &  {\ct F}            \\ \hline
 {\ct GEOM    }              & Logical           & Section~\ref{info:level_set}                              &               &  {\ct F}            \\ \hline
 {\ct ID }                   & Character         & Section~\ref{info:VENT_Basics}                            &               &                     \\ \hline
 {\ct IOR}                   & Integer           & Section~\ref{info:VENT_Trouble}                           &               &                     \\ \hline
 {\ct L\_EDDY}               & Real              & Section~\ref{info:synthetic_turbulence}                   & m             & 0.                  \\ \hline
 {\ct L\_EDDY\_IJ(3,3)}      & Real Array        & Section~\ref{info:synthetic_turbulence}                   & m             & 0.                  \\ \hline
 {\ct MB    }                & Character         & Section~\ref{info:VENT_Basics}                            &               &                     \\ \hline
-{\ct MESH\_ID    }          & Character         & Reference~\cite{FDS_Evac_Users_Guide}                     &               &                     \\ \hline
 {\ct MULT\_ID    }          & Character         & Section~\ref{info:MULT}                                   &               &                     \\ \hline
 {\ct N\_EDDY}               & Integer           & Section~\ref{info:synthetic_turbulence}                   &               & 0                   \\ \hline
 {\ct OBST\_ID }             & Character         & Section~\ref{info:activate_deactivate}                    &               &                     \\ \hline
@@ -12488,19 +12425,19 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct L}                                         & Real          & Section~\ref{info:WIND}                       & m             & 0                 \\ \hline
 {\ct LAPSE\_RATE}                               & Real          & Section~\ref{info:stratification}             & $^\circ$C/m   & 0                 \\ \hline
 {\ct LATITUDE}                                  & Real          & Section~\ref{info:coriolis_force}             & degrees       &                   \\ \hline
-{\ct POTENTIAL\_TEMPERATURE\_CORRECTION}        & Logical       & Section~\ref{info:potential_temperature_correction} &         & {\ct F}     \\ \hline
-{\ct RAMP\_DIRECTION}                           & Character     & Section~\ref{info:WIND}                       &               &                   \\ \hline
+{\ct POTENTIAL\_TEMPERATURE\_CORRECTION}        & Logical       & Section~\ref{info:potential_temperature_correction} &         & {\ct F}           \\ \hline
+{\ct RAMP\_DIRECTION\_T}                        & Character     & Section~\ref{info:WIND}                       &               &                   \\ \hline
+{\ct RAMP\_DIRECTION\_Z}                        & Character     & Section~\ref{info:WIND}                       &               &                   \\ \hline
 {\ct RAMP\_FVX\_T}                              & Character     & Section~\ref{info:force_vector}               &               &                   \\ \hline
 {\ct RAMP\_FVY\_T}                              & Character     & Section~\ref{info:force_vector}               &               &                   \\ \hline
 {\ct RAMP\_FVZ\_T}                              & Character     & Section~\ref{info:force_vector}               &               &                   \\ \hline
-{\ct RAMP\_SPEED}                               & Character     & Section~\ref{info:wind_ramps}                 &               &                   \\ \hline
+{\ct RAMP\_SPEED\_T}                            & Character     & Section~\ref{info:wind_ramps}                 &               &                   \\ \hline
+{\ct RAMP\_SPEED\_Z}                            & Character     & Section~\ref{info:wind_ramps}                 &               &                   \\ \hline
 {\ct RAMP\_TMP0\_Z}                             & Character     & Section~\ref{info:stratification}             &               &                   \\ \hline
-{\ct RAMP\_U0\_T}                               & Character     & Section~\ref{info:wind_ramps}                 &               &                   \\ \hline
-{\ct RAMP\_U0\_Z}                               & Character     & Section~\ref{info:wind_ramps}                 &               &                   \\ \hline
-{\ct RAMP\_V0\_T}                               & Character     & Section~\ref{info:wind_ramps}                 &               &                   \\ \hline
-{\ct RAMP\_V0\_Z}                               & Character     & Section~\ref{info:wind_ramps}                 &               &                   \\ \hline
+{\ct RAMP\_U0\_Z}                               & Character     & Section~\ref{info:wall_of_wind}               &               &                   \\ \hline
+{\ct RAMP\_V0\_Z}                               & Character     & Section~\ref{info:wall_of_wind}               &               &                   \\ \hline
 {\ct RAMP\_W0\_T}                               & Character     & Section~\ref{info:wind_ramps}                 &               &                   \\ \hline
-{\ct RAMP\_W0\_Z}                               & Character     & Section~\ref{info:wind_ramps}                 &               &                   \\ \hline
+{\ct RAMP\_W0\_Z}                               & Character     & Section~\ref{info:wall_of_wind}               &               &                   \\ \hline
 {\ct SIGMA\_THETA}                              & Real          & Section~\ref{info:wind_ramps}                 & degrees       &                   \\ \hline
 {\ct SPEED}                                     & Real          & Section~\ref{info:WIND}                       & m/s           & 0.                \\ \hline
 {\ct STRATIFICATION}                            & Logical       & Section~\ref{info:stratification}             &               & {\ct T}      \\ \hline
@@ -12536,7 +12473,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct LEAK\_PRESSURE\_EXPONENT(N)}  & Real                  & Section~\ref{info:Leaks}           &        & 0.5           \\ \hline
 {\ct LEAK\_REFERENCE\_PRESSURE(N)} & Real                  & Section~\ref{info:Leaks}           & Pa     & 4             \\ \hline
 {\ct PERIODIC}                     & Logical               & Section~\ref{info:ZONE_Basics}     &        & {\ct F} \\ \hline
-{\ct XB(6)}                        & Real Array            & Section~\ref{info:ZONE_Basics}     & m      &               \\ \hline
 {\ct XYZ(3,:)}                     & Real Array            & Section~\ref{info:ZONE_Basics}     & m      &               \\ \hline
 \end{longtable}
 
@@ -12601,13 +12537,11 @@ File Name  & Description  \\ \hline \hline
 {\ct devc.f90}   & Derived type definitions and constants for devices \\ \hline
 {\ct divg.f90}   & Compute the flow divergence \\ \hline
 {\ct dump.f90}   & Output data dumps into files \\ \hline
-{\ct evac.f90}   & Egress computations (future capability) \\ \hline
 {\ct fire.f90}   & Combustion routines \\ \hline
 {\ct func.f90}   & Global functions and subroutines \\ \hline
 {\ct geom.f90}   & Complex geometry physics routines \\ \hline
 {\ct gsmv.f90}   & Complex geometry visualization routines \\ \hline
 {\ct hvac.f90}   & Heating, Ventilation, and Air Conditioning \\ \hline
-{\ct ieva.f90}   & Support routines for evac.f90 \\ \hline
 {\ct init.f90}   & Initialize variables and Poisson solver \\ \hline
 {\ct main.f90}   & Main program \\ \hline
 {\ct mass.f90}   & Mass equation(s) and thermal boundary conditions \\ \hline
@@ -12703,6 +12637,18 @@ T(1) , -001   , 001    , ... , -001
             .
 \end{lstlisting}
 where {\ct N\_CTRL} is the number of controllers, {\ct ID(I)} is the user-defined ID of the {\ct I}th control function, and plus or minus 1's represent the state {\ct -1 = F and +1 = T} of the {\ct I}th control function at the particular time. The files can be imported into Microsoft Excel or almost any other spreadsheet program. If the number of control columns exceeds {\ct CTRL\_COLUMN\_LIMIT}, the file will automatically be split into smaller files.
+
+\section{Device and Control Log File}
+\label{out:DEVC_CTRL_log}
+
+Each time a device or control function changes its logical state, an event is recorded in a comma delimited format in a file called {\ct CHID\_devc\_ctrl\_log.csv}. A row is created for each state change. The format of the file is as follows:
+\begin{lstlisting}
+	Time (s) , Type    , ID    , State   , Value , Units
+	T(1)     , Type(1) , ID(1) , State(1), Val(1), Units(1)
+	.
+	.
+\end{lstlisting}
+where for the {\ct I}th state change {\ct T(I)} is the time of the state change, {\ct Type(I)} is type of the item that changed state (either {\ct DEVC} or {\ct CTRL}), {\ct ID(I)} is the {\ct ID} of item, {\ct State(I)} is the logical state of the item after the state change ({\ct T} for true or {\ct F} for false), {\ct Val(I)} is item value at the state change, and {\ct Units(I)} are the units associated with the value. No {\ct Value} is written for a logical control function (e.g. a {\ct FUNCTION\_TYPE} or {\ct ALL}, {\ct ANY}, {\ct ONLY}, {\ct AT\_LEAST}, {\ct X\_OF\_N}, {\ct KILL}, or {\ct RESTART}). For {\ct FUNCTION\_TYPE}s of {\ct DEADBAND} and {\ct CUSTOM} the input value to the function is written. No {\ct Units} value is written for a control function. If the device or control function does not have an {\ct ID} defined, then the number of the device or control function is written (i.e, if the item was the 5th device in the input file, then 5 would be written).
 
 \section{CPU Usage Data}
 \label{out:CPU}

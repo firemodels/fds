@@ -24,7 +24,6 @@ coupling -- just a fixed external heat flux of 50 kW/m2.
 &MATL ID='BLACKPMMA'
       ABSORPTION_COEFFICIENT=2700.
       REFRACTIVE_INDEX=1.5
-      N_REACTIONS=1
       A(1) = 8.5E12
       E(1) = 188000
       EMISSIVITY=0.85

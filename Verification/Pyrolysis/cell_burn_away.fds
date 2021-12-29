@@ -21,7 +21,6 @@
       BURN_AWAY = .TRUE. /
 
 &MATL ID = 'STUFF'
-      N_REACTIONS = 1
       A = 0.05
       E = 0.
       N_S = 0.

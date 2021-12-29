@@ -52,8 +52,6 @@ REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP=>NULL(),UP=>NULL(),VP=>NULL(),WP=>NU
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP=>NULL()
 INTEGER, POINTER, DIMENSION(:,:,:) :: CELL_COUNTER=>NULL()
 
-IF (DO_EVACUATION) RETURN ! No need to update viscosity, use initial one
-
 T_NOW = CURRENT_TIME()
 
 CALL POINT_TO_MESH(NM)
@@ -323,7 +321,7 @@ ENDDO
 
 IF (CC_IBM) THEN
    T_USED(4) = T_USED(4) + CURRENT_TIME() - T_NOW
-   CALL CCREGION_COMPUTE_KRES(NM,UU,VV,WW)
+   CALL CCREGION_COMPUTE_KRES(APPLY_TO_ESTIMATED_VARIABLES,NM)
    T_NOW = CURRENT_TIME()
 ENDIF
 
@@ -373,8 +371,12 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
          IF (SIM_MODE/=DNS_MODE) THEN
             DELTA = LES_FILTER_WIDTH_FUNCTION(DX(IIG),DY(JJG),DZ(KKG))
-            SELECT CASE(NEAR_WALL_TURB_MODEL)
-               CASE DEFAULT ! Constant Smagorinsky with Van Driest damping
+            SELECT CASE(SF%NEAR_WALL_TURB_MODEL)
+               CASE DEFAULT
+                  NU_EDDY = 0._EB
+               CASE(CONSTANT_EDDY_VISCOSITY)
+                  NU_EDDY = SF%NEAR_WALL_EDDY_VISCOSITY
+               CASE(CONSMAG) ! Constant Smagorinsky with Van Driest damping
                   VDF = 1._EB-EXP(-BP%Y_PLUS*RAPLUS)
                   NU_EDDY = (VDF*C_SMAGORINSKY*DELTA)**2*STRAIN_RATE(IIG,JJG,KKG)
                CASE(WALE)
@@ -882,19 +884,6 @@ ENDDO
 !$OMP END DO NOWAIT
 !$OMP END PARALLEL
 
-IF (DO_EVACUATION) THEN
-   FVZ = 0._EB
-   RETURN
-END IF
-
-! Restore previous substep velocities to gas cut-faces underlaying Cartesian faces.
-IF (CC_IBM) THEN
-   T_USED(4) = T_USED(4) + CURRENT_TIME() - T_NOW
-   IF(.NOT.CC_STRESS_METHOD) CALL CCIBM_INTERP_FACE_VEL(DT,NM,.FALSE.)
-   CALL CCIBM_VELOCITY_FLUX(NM,DT)
-   T_NOW=CURRENT_TIME()
-ENDIF
-
 ! Additional force terms
 
 IF (OPEN_WIND_BOUNDARY) CALL COMPUTE_WIND_COMPONENTS(T,NM)
@@ -904,6 +893,14 @@ IF (ANY(ABS(OVEC)>TWO_EPSILON_EB)) CALL CORIOLIS_FORCE             ! Coriolis fo
 IF (PATCH_VELOCITY)                CALL PATCH_VELOCITY_FLUX        ! Specified patch velocity
 IF (PERIODIC_TEST==7)              CALL MMS_VELOCITY_FLUX          ! Source term in manufactured solution
 IF (PERIODIC_TEST==21 .OR. PERIODIC_TEST==22 .OR. PERIODIC_TEST==23) CALL ROTATED_CUBE_VELOCITY_FLUX(NM,T)
+
+! Restore previous substep velocities to gas cut-faces underlaying Cartesian faces.
+IF (CC_IBM) THEN
+   T_USED(4) = T_USED(4) + CURRENT_TIME() - T_NOW
+   IF(.NOT.CC_STRESS_METHOD) CALL CCIBM_INTERP_FACE_VEL(DT,NM,.FALSE.)
+   CALL CCIBM_VELOCITY_FLUX(NM,DT)
+   T_NOW=CURRENT_TIME()
+ENDIF
 
 T_USED(4) = T_USED(4) + CURRENT_TIME() - T_NOW
 
@@ -1653,10 +1650,6 @@ IF (PERIODIC_TEST==7 .AND. .FALSE.) THEN
    ENDDO
 ENDIF
 
-! No vertical velocity in Evacuation meshes
-
-IF (DO_EVACUATION) WS = 0._EB
-
 ! Check the stability criteria, and if the time step is too small, send back a signal to kill the job
 
 CALL CHECK_STABILITY(DT,DT_NEW,NM)
@@ -1768,10 +1761,6 @@ IF (PERIODIC_TEST==7 .AND. .FALSE.) THEN
    ENDDO
 ENDIF
 
-! No vertical velocity in Evacuation meshes
-
-IF (DO_EVACUATION) W = 0._EB
-
 T_USED(4)=T_USED(4)+CURRENT_TIME()-T_NOW
 END SUBROUTINE VELOCITY_CORRECTOR
 
@@ -1876,14 +1865,6 @@ EDGE_LOOP: DO IE=1,N_EDGES
       ENDIF
    ENDDO
    IF (.NOT.PROCESS_EDGE) CYCLE EDGE_LOOP
-
-   ! If the edge is to be "smoothed," set tau and omega to zero and cycle
-
-   IF (DO_EVACUATION) THEN
-      OME_E(:,IE) = 0._EB
-      TAU_E(:,IE) = 0._EB
-      CYCLE EDGE_LOOP
-   ENDIF
 
    ! Unpack indices for the edge
 
@@ -2324,6 +2305,10 @@ EDGE_LOOP: DO IE=1,N_EDGES
                      ENDIF
                      ! SLIP_COEF = -1, no slip, VEL_GHOST=-VEL_GAS
                      ! SLIP_COEF =  1, free slip, VEL_GHOST=VEL_T
+                     ! Notes: This curious definition of VEL_GHOST was chosen to improve the treatment of edge vorticity
+                     ! especially at corners.  The stress still comes directly from U_TAU (i.e., the WALL_MODEL).
+                     ! DUIDXJ is used to compute the vorticity at the edge.  Without this definition, the ribbed_channel
+                     ! test series does not achieve the correct MEAN or RMS profiles without very high grid resolution.
                      VEL_GHOST = VEL_T + 0.5_EB*(SLIP_COEF-1._EB)*(VEL_GAS-VEL_T)
                      DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
                      MU_DUIDXJ(ICD_SGN) = RHO_WALL*U_TAU**2 * SIGN(1._EB,I_SGN*(VEL_GAS-VEL_T))
@@ -2426,7 +2411,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
                IF (JJ==JBAR .AND. IOR==-2) WW(II,JJ+1,KK) = VEL_GHOST
                IF (KK==0    .AND. IOR== 3) VV(II,JJ,KK)   = VEL_GHOST
                IF (KK==KBAR .AND. IOR==-3) VV(II,JJ,KK+1) = VEL_GHOST
-               IF (CORRECTOR .AND. JJ>0 .AND. JJ<JBAR .AND. KK>0 .AND. KK<KBAR) THEN
+               IF (CORRECTOR) THEN
                  IF (ICD==1) THEN
                     W_Y(II,JJ,KK) = 0.5_EB*(VEL_GHOST+VEL_GAS)
                  ELSE ! ICD=2
@@ -2438,7 +2423,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
                IF (II==IBAR .AND. IOR==-1) WW(II+1,JJ,KK) = VEL_GHOST
                IF (KK==0    .AND. IOR== 3) UU(II,JJ,KK)   = VEL_GHOST
                IF (KK==KBAR .AND. IOR==-3) UU(II,JJ,KK+1) = VEL_GHOST
-               IF (CORRECTOR .AND. II>0 .AND. II<IBAR .AND. KK>0 .AND. KK<KBAR) THEN
+               IF (CORRECTOR) THEN
                  IF (ICD==1) THEN
                     U_Z(II,JJ,KK) = 0.5_EB*(VEL_GHOST+VEL_GAS)
                  ELSE ! ICD=2
@@ -2450,7 +2435,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
                IF (II==IBAR .AND. IOR==-1) VV(II+1,JJ,KK) = VEL_GHOST
                IF (JJ==0    .AND. IOR== 2) UU(II,JJ,KK)   = VEL_GHOST
                IF (JJ==JBAR .AND. IOR==-2) UU(II,JJ+1,KK) = VEL_GHOST
-               IF (CORRECTOR .AND. II>0 .AND. II<IBAR .AND. JJ>0 .AND. JJ<JBAR) THEN
+               IF (CORRECTOR) THEN
                  IF (ICD==1) THEN
                     V_X(II,JJ,KK) = 0.5_EB*(VEL_GHOST+VEL_GAS)
                  ELSE ! ICD=2
@@ -2552,7 +2537,6 @@ TYPE (OMESH_TYPE), POINTER :: OM
 TYPE (MESH_TYPE), POINTER :: M2
 
 IF (SOLID_PHASE_ONLY) RETURN
-IF (DO_EVACUATION) RETURN
 
 T_NOW = CURRENT_TIME()
 
@@ -2764,7 +2748,6 @@ TYPE (MESH_TYPE), POINTER :: M2
 
 IF (NMESHES==1) RETURN
 IF (SOLID_PHASE_ONLY) RETURN
-IF (DO_EVACUATION) RETURN
 
 T_NOW = CURRENT_TIME()
 
@@ -2919,8 +2902,6 @@ REAL(EB) :: DT_NEW(NMESHES)
 INTEGER  :: I,J,K,IW,IIG,JJG,KKG, ICFL_TMP, JCFL_TMP, KCFL_TMP
 REAL(EB), PARAMETER :: DT_EPS = 1.E-10_EB
 
-IF (DO_EVACUATION) RETURN
-
 UVWMAX = 0._EB
 VN     = 0._EB
 MUTRM  = 1.E-9_EB
@@ -3061,6 +3042,7 @@ END SUBROUTINE CHECK_STABILITY
 SUBROUTINE BAROCLINIC_CORRECTION(T,NM)
 
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
+USE CC_SCALARS_IBM, ONLY: CCIBM_BAROCLINIC_CORRECTION
 REAL(EB), INTENT(IN) :: T
 INTEGER, INTENT(IN) :: NM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL(),RHOP=>NULL(),HP=>NULL(),RHMK=>NULL(),RRHO=>NULL()
@@ -3197,6 +3179,8 @@ DO K=0,KBAR
 ENDDO
 !$OMP END DO nowait
 !$OMP END PARALLEL
+
+IF(CC_IBM) CALL CCIBM_BAROCLINIC_CORRECTION(T,NM)
 
 T_USED(4) = T_USED(4) + CURRENT_TIME() - T_NOW
 

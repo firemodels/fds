@@ -165,14 +165,10 @@ $QFDS -d Energy_Budget energy_budget_particles.fds
 $QFDS -d Energy_Budget energy_budget_solid.fds
 $QFDS -d Energy_Budget energy_budget_tmix.fds
 
-#$QFDS -d Evacuation evac_smv_testcase0.fds
-#$QFDS -d Evacuation evac_smv_testcase2.fds
-#$QFDS -p 3 -d Evacuation evac_smv_testcase1.fds
-
 $QFDS -d Extinction extinction_1.fds
 $QFDS -d Extinction extinction_2.fds
 
-$QFDS -d Fires box_burn_away1.fds
+$QFDS -p 4 -d Fires box_burn_away1.fds
 $QFDS -d Fires box_burn_away2.fds
 $QFDS -d Fires box_burn_away3.fds
 $QFDS -d Fires box_burn_away4.fds
@@ -369,26 +365,25 @@ $QFDS -p 4 -d Pressure_Solver dancing_eddies_default.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_scarc.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_scarc_tight.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_uscarc.fds
+$QFDS -p 4 -d Pressure_Solver dancing_eddies_uscarc_inseparable.fds
 $QFDS -p 8 -d Pressure_Solver duct_flow.fds
 $QFDS -p 8 -d Pressure_Solver duct_flow_uglmat.fds
 $QFDS -p 8 -d Pressure_Solver duct_flow_uscarc.fds
 $QFDS -p 5 -d Pressure_Solver hallways.fds
 $QFDS -p 8 -d Pressure_Solver tunnel_demo.fds
 $QFDS -p 8 -d Pressure_Solver tunnel_demo_glmat.fds
-$QFDS -d Pressure_Solver pressure_iteration2d_1mesh.fds
+$QFDS -p 8 -d Pressure_Solver tunnel_demo_scarc_inseparable.fds
 $QFDS -p 8 -d Pressure_Solver pressure_iteration2d_default.fds
-$QFDS -p 8 -d Pressure_Solver pressure_iteration2d_tight.fds
 $QFDS -p 8 -d Pressure_Solver pressure_iteration2d_scarc.fds
-$QFDS -p 8 -d Pressure_Solver pressure_iteration2d_scarc_tight.fds
 $QFDS -p 8 -d Pressure_Solver pressure_iteration2d_uscarc.fds
-$QFDS -d Pressure_Solver pressure_iteration3d_1mesh.fds
+$QFDS -p 8 -d Pressure_Solver pressure_iteration2d_uglmat.fds
 $QFDS -p 8 -d Pressure_Solver pressure_iteration3d_default.fds
-$QFDS -p 8 -d Pressure_Solver pressure_iteration3d_tight.fds
 $QFDS -p 8 -d Pressure_Solver pressure_iteration3d_scarc.fds
-$QFDS -p 8 -d Pressure_Solver pressure_iteration3d_scarc_tight.fds
 $QFDS -p 8 -d Pressure_Solver pressure_iteration3d_uscarc.fds
+$QFDS -p 8 -d Pressure_Solver pressure_iteration3d_uglmat.fds
 $QFDS -p 2 -d Pressure_Solver ulmat_2zone.fds
-
+$QFDS -p 4 -d Pressure_Solver scarc_separable_4mesh.fds
+$QFDS -p 4 -d Pressure_Solver scarc_inseparable_4mesh.fds
 
 $QFDS -d Pyrolysis cable_11_insulation_mcc.fds
 $QFDS -d Pyrolysis cable_23_insulation_mcc.fds
@@ -414,7 +409,6 @@ $QFDS -d Pyrolysis surf_mass_part_char_cart_fuel.fds
 $QFDS -d Pyrolysis surf_mass_part_char_cart_gas.fds
 $QFDS -d Pyrolysis surf_mass_part_char_cyl_fuel.fds
 $QFDS -d Pyrolysis surf_mass_part_char_cyl_gas.fds
-$QFDS -d Pyrolysis surf_mass_part_char_cyl_gas_advanced.fds
 $QFDS -d Pyrolysis surf_mass_part_char_spher_fuel.fds
 $QFDS -d Pyrolysis surf_mass_part_char_spher_gas.fds
 $QFDS -d Pyrolysis surf_mass_part_nonchar_cart_fuel.fds
@@ -435,12 +429,6 @@ $QFDS -d Pyrolysis surf_mass_vent_nonchar_cyl_fuel.fds
 $QFDS -d Pyrolysis surf_mass_vent_nonchar_cyl_gas.fds
 $QFDS -d Pyrolysis surf_mass_vent_nonchar_spher_fuel.fds
 $QFDS -d Pyrolysis surf_mass_vent_nonchar_spher_gas.fds
-$QFDS -d Pyrolysis surf_mass_part_char_cart_fuel_split.fds
-$QFDS -d Pyrolysis surf_mass_part_char_cyl_fuel_split.fds
-$QFDS -d Pyrolysis surf_mass_part_char_spher_fuel_split.fds
-$QFDS -d Pyrolysis surf_mass_part_nonchar_cart_fuel_split.fds
-$QFDS -d Pyrolysis surf_mass_part_nonchar_cyl_fuel_split.fds
-$QFDS -d Pyrolysis surf_mass_part_nonchar_spher_fuel_split.fds
 $QFDS -d Pyrolysis surf_mass_part_specified.fds
 $QFDS -d Pyrolysis surf_mass_two_species_cart.fds
 $QFDS -d Pyrolysis surf_mass_two_species_cyl.fds
@@ -462,9 +450,6 @@ $QFDS -d Pyrolysis water_pool.fds
 $QFDS -d Radiation adiabatic_surface_temperature.fds
 $QFDS -d Radiation droplet_absorption_cart.fds
 $QFDS -d Radiation droplet_absorption_cyl.fds
-$QFDS -d Radiation particle_absorption_cart_surf_cart.fds
-$QFDS -d Radiation particle_absorption_cart_surf_cyl.fds
-$QFDS -d Radiation particle_absorption_cart_surf_sph.fds
 $QFDS -d Radiation emissivity.fds
 $QFDS -p 2 -d Radiation geom_rad.fds
 $QFDS -p 8 -d Radiation geom_rad_2.fds
@@ -543,6 +528,7 @@ $QFDS -d Species burke_schumann.fds
 $QFDS -d Species FED_FIC.fds
 $QFDS -d Species FED_FIC_SMIX.fds
 $QFDS -d Species FED_CO_HCN.fds
+$QFDS -d Species mass_flux_comparison.fds
 $QFDS -d Species methane_flame_simple.fds
 $QFDS -d Species methane_flame_simple_2.fds
 $QFDS -d Species methane_flame_primitive.fds
@@ -588,6 +574,7 @@ $QFDS -d Species wall_cond.fds
 $QFDS -d Species humidity.fds
 $QFDS -d Species mass_flux_wall_yindex.fds
 $QFDS -d Species mass_flux_wall_zindex.fds
+$QFDS -d Species mass_balance_gas_volume.fds
 $QFDS -p 8 -d Species mass_balance_reac.fds
 $QFDS -d Species mass_balance_reac_2.fds
 $QFDS -p 3 -d Species favre_test.fds
@@ -744,12 +731,12 @@ $QFDS -d Turbulence yplus_16.fds
 $QFDS -d Turbulence yplus_32.fds
 $QFDS -d Turbulence ribbed_channel_20.fds
 $QFDS -d Turbulence ribbed_channel_40.fds
-$QFDS -d Turbulence ribbed_channel_80.fds
-# $QFDS -p 4 -d Turbulence ribbed_channel_160.fds # output file committed to fds/Verification/Turbulence/
+$QFDS -p 4 -d Turbulence ribbed_channel_80.fds
+# $QFDS -p 32 -d Turbulence ribbed_channel_160.fds # output file committed to fds/Verification/Turbulence/
 $QFDS -d Turbulence ribbed_channel_geom_20.fds
 $QFDS -d Turbulence ribbed_channel_geom_40.fds
-$QFDS -d Turbulence ribbed_channel_geom_80.fds
-# $QFDS -p 4 -d Turbulence ribbed_channel_geom_160.fds # output file committed to fds/Verification/Turbulence/
+$QFDS -p 4 -d Turbulence ribbed_channel_geom_80.fds
+# $QFDS -p 32 -d Turbulence ribbed_channel_geom_160.fds # output file committed to fds/Verification/Turbulence/
 $QFDS -d Turbulence sem_flat_leddy_p2.fds
 $QFDS -d Turbulence sem_par_leddy_p2.fds
 $QFDS -d Turbulence sem_atm_leddy_p2.fds

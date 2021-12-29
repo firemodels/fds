@@ -20,6 +20,6 @@ This case just tests general functionality when multiple meshes are overlapping 
 &SLCF PBY=0, QUANTITY='VELOCITY', VECTOR=.TRUE. /
 &SLCF PBY=0, QUANTITY='H', CELL_CENTERED=.TRUE. /
 
-&DEVC XB=2.8,3.0,-0.1,0.1,3.5,3.5, QUANTITY='VOLUME FLOW', ID='Vdot' /
+&DEVC XB=2.8,3.0,-0.1,0.1,3.5,3.5, QUANTITY='W-VELOCITY', SPATIAL_STATISTIC='AREA INTEGRAL', ID='Vdot' /
 
 &TAIL /

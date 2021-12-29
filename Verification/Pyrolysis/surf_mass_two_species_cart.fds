@@ -32,7 +32,6 @@
       DENSITY = 500.
       CONDUCTIVITY = 0.2
       SPECIFIC_HEAT= 1.0
-      N_REACTIONS = 1
       REFERENCE_TEMPERATURE = 200.
       NU_MATL = 0.6
       NU_SPEC = 0.4
@@ -44,7 +43,6 @@
       DENSITY = 1000.
       CONDUCTIVITY = 0.1
       SPECIFIC_HEAT= 4.184
-      N_REACTIONS = 1
       REFERENCE_TEMPERATURE = 100.
       NU_SPEC = 1.0
       SPEC_ID = 'WATER VAPOR'

@@ -12,7 +12,6 @@ TYPE(SPECIES_MIXTURE_TYPE), POINTER :: SM
 TYPE(VENTS_TYPE), POINTER :: VT
 TYPE(WALL_TYPE), POINTER :: WC
 TYPE(BOUNDARY_COORD_TYPE), POINTER :: BC
-TYPE(BOUNDARY_PROPS_TYPE), POINTER :: BP
 TYPE(BOUNDARY_ONE_D_TYPE), POINTER :: ONE_D
 TYPE(EXTERNAL_WALL_TYPE), POINTER :: EWC
 
@@ -28,7 +27,6 @@ USE PHYSICAL_FUNCTIONS, ONLY: GET_CONDUCTIVITY,GET_SPECIFIC_HEAT,GET_SENSIBLE_EN
                               GET_VISCOSITY,GET_MOLECULAR_WEIGHT
 USE GEOMETRY_FUNCTIONS, ONLY: ASSIGN_PRESSURE_ZONE
 USE MANUFACTURED_SOLUTIONS, ONLY: DIFF_MMS,UF_MMS,WF_MMS,VD2D_MMS_Z_SRC !,RHO_0_MMS,RHO_1_MMS
-USE EVAC, ONLY: EVAC_EMESH_EXITS_TYPE, EMESH_EXITS, EMESH_NFIELDS, N_EXITS, N_CO_EXITS, N_DOORS
 USE COMPLEX_GEOMETRY, ONLY : IBM_CGSC, IBM_IDCC, IBM_IDCF, IBM_SOLID, IBM_CUTCFE
 USE CC_SCALARS_IBM, ONLY : SET_EXIMDIFFLX_3D,SET_DOMAINDIFFLX_3D,SET_EXIMRHOHSLIM_3D,SET_EXIMRHOZZLIM_3D,&
                            CCREGION_DIVERGENCE_PART_1,CFACE_PREDICT_NORMAL_VELOCITY
@@ -87,8 +85,6 @@ CALL MERGE_PRESSURE_ZONES
 
 CALL PREDICT_NORMAL_VELOCITY
 IF (CC_IBM) CALL CFACE_PREDICT_NORMAL_VELOCITY(T,DT)
-
-IF (DO_EVACUATION) GOTO 1000 ! Evacuation meshes jump directly to pressure zone loop
 
 ! Compute species-related finite difference terms
 
@@ -386,6 +382,28 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
             RHO_D_DZDN = -(SUM(RHO_D_DZDN_GET(:))-RHO_D_DZDN)
          ENDIF
          ONE_D%RHO_D_DZDN_F(N) = RHO_D_DZDN
+
+         IF (STORE_SPECIES_FLUX) THEN
+            IF (CORRECTOR) THEN
+               SELECT CASE(IOR)
+                  CASE(-1) ; DIF_FXS(IIG  ,JJG,KKG,N) = -RHO_D_DZDN
+                  CASE( 1) ; DIF_FXS(IIG-1,JJG,KKG,N) = -RHO_D_DZDN
+                  CASE(-2) ; DIF_FYS(IIG,JJG  ,KKG,N) = -RHO_D_DZDN
+                  CASE( 2) ; DIF_FYS(IIG,JJG-1,KKG,N) = -RHO_D_DZDN
+                  CASE(-3) ; DIF_FZS(IIG,JJG,KKG  ,N) = -RHO_D_DZDN
+                  CASE( 3) ; DIF_FZS(IIG,JJG,KKG-1,N) = -RHO_D_DZDN
+               END SELECT
+            ELSE
+               SELECT CASE(IOR)
+                  CASE(-1) ; DIF_FX(IIG  ,JJG,KKG,N) = 0.5_EB*(DIF_FXS(IIG , JJG,KKG,N)-RHO_D_DZDN)
+                  CASE( 1) ; DIF_FX(IIG-1,JJG,KKG,N) = 0.5_EB*(DIF_FXS(IIG-1,JJG,KKG,N)-RHO_D_DZDN)
+                  CASE(-2) ; DIF_FY(IIG,JJG  ,KKG,N) = 0.5_EB*(DIF_FYS(IIG,JJG  ,KKG,N)-RHO_D_DZDN)
+                  CASE( 2) ; DIF_FY(IIG,JJG-1,KKG,N) = 0.5_EB*(DIF_FYS(IIG,JJG-1,KKG,N)-RHO_D_DZDN)
+                  CASE(-3) ; DIF_FZ(IIG,JJG,KKG  ,N) = 0.5_EB*(DIF_FZS(IIG,JJG,KKG  ,N)-RHO_D_DZDN)
+                  CASE( 3) ; DIF_FZ(IIG,JJG,KKG-1,N) = 0.5_EB*(DIF_FZS(IIG,JJG,KKG-1,N)-RHO_D_DZDN)
+               END SELECT
+            ENDIF
+         ENDIF
 
          IF (PREDICTOR) THEN
             UN_P = ONE_D%U_NORMAL_S
@@ -764,8 +782,6 @@ IF (CC_IBM .AND. .NOT.COMPUTE_CUTCELLS_ONLY) THEN
    TNOW=CURRENT_TIME()
 ENDIF
 
-1000 CONTINUE ! Evacuation meshes jump here
-
 ! Calculate pressure rise in each of the pressure zones by summing divergence expression over each zone
 
 IF_PRESSURE_ZONES: IF (N_ZONE>0) THEN
@@ -773,8 +789,6 @@ IF_PRESSURE_ZONES: IF (N_ZONE>0) THEN
    USUM(1:N_ZONE,NM) = 0._EB
    DSUM(1:N_ZONE,NM) = 0._EB
    PSUM(1:N_ZONE,NM) = 0._EB
-
-   IF (DO_EVACUATION) RTRM=1._EB
 
    R_PFCT = 1._EB
    DO K=1,KBAR
@@ -1223,11 +1237,6 @@ SUBROUTINE MERGE_PRESSURE_ZONES
 
 CONNECTED_ZONES(:,:,NM) = .FALSE.
 
-IF (DO_EVACUATION) THEN
-   CALL EVACUATION_PRESSURE_ZONES
-   RETURN
-END IF
-
 DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    WC=>WALL(IW)
    IF (WC%BOUNDARY_TYPE/=NULL_BOUNDARY .AND. WC%BOUNDARY_TYPE/=OPEN_BOUNDARY .AND. WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE
@@ -1321,16 +1330,6 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
                      CASE(-3); ONE_D%U_NORMAL_S = ONE_D%U_NORMAL_S + TIME_RAMP_FACTOR*VT%W_EDDY(BC%II,BC%JJ)*PROFILE_FACTOR
                   END SELECT
                ENDIF
-               EVACUATION_BC_IF: IF (EVACUATION_ONLY(NM)) THEN
-                  II = EVAC_TIME_ITERATIONS / MAXVAL(EMESH_NFIELDS)
-                  IF ((ABS(ICYC)+1) > (WC%VENT_INDEX-1)*II .AND. (ABS(ICYC)+1) <= WC%VENT_INDEX*II) THEN
-                     TSI = T + DT - (MAXVAL(EMESH_NFIELDS)-WC%VENT_INDEX)*II*EVAC_DT_FLOWFIELD
-                     TIME_RAMP_FACTOR = EVALUATE_RAMP(TSI,SF%RAMP_INDEX(TIME_VELO),SF%TAU(TIME_VELO))
-                  ELSE
-                     TIME_RAMP_FACTOR = 0.0_EB
-                  END IF
-                  ONE_D%U_NORMAL_S = TIME_RAMP_FACTOR*ONE_D%U_NORMAL_0
-               END IF EVACUATION_BC_IF
             ENDIF VENT_IF
 
             ! ! Rescale WALL velocity if it is a cut-WALL:
@@ -1402,112 +1401,6 @@ ENDIF PREDICT_NORMALS
 
 END SUBROUTINE PREDICT_NORMAL_VELOCITY
 
-
-SUBROUTINE EVACUATION_PRESSURE_ZONES
-REAL(EB) :: X1,Y1,X2,Y2,Z1,Z2
-INTEGER :: ITMP,I,J,K,I_VENT,N_OVERLAP
-
-IF (.NOT.DO_EVACUATION) RETURN
-
-! Evacuation flow field calculation: Change the outflow vent pressure zone and initialize everything
-
-EVACUATION_PREDICTOR: IF (PREDICTOR) THEN
-   ITMP = EVAC_TIME_ITERATIONS / MAXVAL(EMESH_NFIELDS)
-   EVACUATION_NEW_FIELD: IF (MOD(ICYC-1,ITMP) == 0 .AND. ICYC < 0) THEN
-      ! New exit/door flow field calculation (new outflow-vent), do the necessary initializaions,
-      ! because same arrays are used for exits/doors at a main evacuation mesh.  Each evacuation
-      ! flow field calculation has just one exit/door, i.e., outflow vent, so the pressure zone
-      ! is defined so that the front of the door is in the pressure zone.  So, pressure zone
-      ! is also redefined for this main evacuation mesh.
-      ! One pressure zone is defined for each main evacuation mesh.
-
-      I_VENT = 0
-      ITMP = (ABS(ICYC)+1)/ITMP
-      FIND_EXIT_LOOP: DO I=1,N_EXITS-N_CO_EXITS+N_DOORS
-         IF (.NOT.EMESH_EXITS(I)%MAINMESH==NM) CYCLE
-         IF (.NOT.EMESH_EXITS(I)%DEFINE_MESH) CYCLE
-         I_VENT = I_VENT + 1
-         IF (I_VENT==ITMP) THEN
-            X1 = EMESH_EXITS(I)%XB(1); X2 = EMESH_EXITS(I)%XB(2)
-            Y1 = EMESH_EXITS(I)%XB(3); Y2 = EMESH_EXITS(I)%XB(4)
-            Z1 = EMESH_EXITS(I)%XB(5); Z2 = EMESH_EXITS(I)%XB(6)
-            SELECT CASE (EMESH_EXITS(I)%IOR)
-            CASE(+1)
-               X1 = EMESH_EXITS(I)%XB(1) - MESHES(EMESH_EXITS(I)%MAINMESH)%DXI
-            CASE(-1)
-               X2 = EMESH_EXITS(I)%XB(2) + MESHES(EMESH_EXITS(I)%MAINMESH)%DXI
-            CASE(+2)
-               Y1 = EMESH_EXITS(I)%XB(3) - MESHES(EMESH_EXITS(I)%MAINMESH)%DETA
-            CASE(-2)
-               Y2 = EMESH_EXITS(I)%XB(4) + MESHES(EMESH_EXITS(I)%MAINMESH)%DETA
-            END SELECT
-            EXIT FIND_EXIT_LOOP
-         END IF
-      END DO FIND_EXIT_LOOP
-      N = 0
-      DO I = 1,N_ZONE
-         IF (.NOT.(P_ZONE(I)%EVACUATION)) CYCLE
-         IF (P_ZONE(I)%MESH_INDEX==NM) THEN
-            N = I ! The ordinal number of the pressure zone of this main evacuation mesh
-            EXIT
-         END IF
-      END DO
-      IF (N==0) THEN
-         WRITE(LU_ERR,'(A,A)') 'ERROR FDS+Evac: Zone error, no pressure zone found for mesh ',TRIM(MESH_NAME(NM))
-      END IF
-
-      U=0._EB; V=0._EB; W=0._EB; US=0._EB; VS=0._EB; WS=0._EB; FVX=0._EB; FVY=0._EB; FVZ=0._EB
-      H=0._EB; HS=0._EB; KRES=0._EB; DDDT=0._EB; D=0._EB; DS=0._EB
-      P_0=P_INF; TMP_0=TMPA
-      PBAR=P_INF; PBAR_S=P_INF; R_PBAR=0._EB; D_PBAR_DT=0._EB; D_PBAR_DT_S=0._EB
-      RHO=RHO_0(1); RHOS=RHO_0(1); TMP=TMPA
-      USUM(:,NM) = 0.0_EB ; DSUM(:,NM) = 0.0_EB; PSUM(:,NM) = 0.0_EB
-      PRESSURE_ZONE = -1
-
-      ZONE_LOOP_EVAC: DO K=0,KBP1
-         DO J=0,JBP1
-            DO I=0,IBP1
-               IF (PRESSURE_ZONE(I,J,K)==N) CYCLE
-               IF (XC(I) - X1 >=0._EB .AND. XC(I) < X2 .AND. &
-                    YC(J) - Y1 >=0._EB .AND. YC(J) < Y2 .AND. &
-                    ZC(K) - Z1 >=0._EB .AND. ZC(K) < Z2) THEN
-                  PRESSURE_ZONE(I,J,K) = N
-                  IF (.NOT.SOLID(CELL_INDEX(I,J,K))) THEN
-                     CALL ASSIGN_PRESSURE_ZONE(NM,XC(I),YC(J),ZC(K),N,N_OVERLAP)
-                     EXIT ZONE_LOOP_EVAC
-                  ENDIF
-               ENDIF
-            ENDDO
-         ENDDO
-      ENDDO ZONE_LOOP_EVAC
-      DO K=0,KBP1
-         DO J=0,JBP1
-            DO I=0,IBP1
-               PRESSURE_ZONE(I,J,K) = MAX(0,PRESSURE_ZONE(I,J,K))
-            ENDDO
-         ENDDO
-      ENDDO
-
-      DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-         WC=>WALL(IW)
-         BC=>BOUNDARY_COORD(WC%BC_INDEX)
-         BP=>BOUNDARY_PROPS(WC%BP_INDEX)
-         ONE_D=>BOUNDARY_ONE_D(WC%OD_INDEX)
-         ONE_D%PRESSURE_ZONE = 0
-         ONE_D%U_NORMAL = 0._EB
-         BP%U_TAU = 0._EB
-         ONE_D%RHO_F = RHO_0(1)
-         BP%Y_PLUS = 1._EB
-         ONE_D%RHO_D_F = 0.1_EB ! Do not initialize to zero to avoid divide by zero in the first time step
-         IF (BC%KK==1) ONE_D%PRESSURE_ZONE = PRESSURE_ZONE(BC%IIG,BC%JJG,BC%KKG)
-      ENDDO
-
-   END IF EVACUATION_NEW_FIELD
-END IF EVACUATION_PREDICTOR
-
-END SUBROUTINE EVACUATION_PRESSURE_ZONES
-
-
 END SUBROUTINE DIVERGENCE_PART_1
 
 
@@ -1556,7 +1449,6 @@ RTRM => WORK1
 USUM_ADD = 0._EB
 
 DO IPZ=1,N_ZONE
-   IF (DO_EVACUATION .OR. P_ZONE(IPZ)%EVACUATION .OR. P_ZONE(IPZ)%PERIODIC) CYCLE
    SUM_P_PSUM = PBAR_P(1,IPZ)*PSUM(IPZ,NM)
    OPEN_ZONE  = .FALSE.
    SUM_USUM = USUM(IPZ,NM)

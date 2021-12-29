@@ -18,7 +18,7 @@ This script requires the Excel parsing module 'openpyxl' and the csv reader/writ
 import csv
 from openpyxl import load_workbook
 
-wb = load_workbook('LNG_database_validation_comparison_draftv2.xlsx')
+wb = load_workbook('MEPFires_database_comparison_draft.xlsx')
 
 param_file = open('csv2xlsx_parameters.csv','r')
 param_reader = csv.reader(param_file,delimiter=',')
@@ -46,4 +46,4 @@ for i in range(0,len(params)):
 
     csv_file.close()
 
-wb.save('LNG_database_validation_comparison_modified.xlsx')
+wb.save('MEPFires_database_comparison_draft_modified.xlsx')
