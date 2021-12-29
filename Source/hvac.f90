@@ -1,7 +1,7 @@
 !> \brief Compute the HVAC mass and energy transport
 !> \details Module contains routines to read the HVAC namelist inputs, intialize the HVAC solver, and solve
 !> the flow for each timestep. Note that the HVAC solver is only called for the first MPI process. This requires
-!> that HVAC boundary conditions at VENTs be aggregated over MPI processes and that the HVAC solution
+!> that HVAC boundary conditions at VENTs be aggregated over MPI processes and that the HVAC solution 
 !> be shared with all MPI processes.
 
 MODULE HVAC_ROUTINES
@@ -103,14 +103,14 @@ LOGICAL :: SQUARE !< Flag indicating DUCT has a square cross-section
 LOGICAL :: DAMPER !< Flag indicating that a damper is present in a DUCT.
 LOGICAL :: REVERSE !< Flag indicating that a specfied flow or FAN in a DUCT is from the second to the first node.
 LOGICAL :: AMBIENT !< Flag indicating a DUCTNODE is connected to the ambient.
-LOGICAL :: LEAK_ENTHALPY !< Flag indicating that the boundary condition for a LEAKAGE duct should preserve enthalpy.
+LOGICAL :: LEAK_ENTHALPY !< Flag indicating that the boundary condition for a LEAKAGE duct should preserve enthalpy. 
 LOGICAL :: INITIALIZED_HVAC_MASS_TRANSPORT !< Flag indicating DUCTs with N_CELLS>1 have been initiazed.
 LOGICAL :: QFAN_BETA=.FALSE. !< Routine accounting for multiple fans in connected grouping of ducts.
 CHARACTER(LABEL_LENGTH) :: AIRCOIL_ID !< ID of an AIRCOIL located in a DUCT.
 CHARACTER(LABEL_LENGTH) :: CTRL_ID !< Name of a control function controlling a FAN, damper, or AIRCOIL.
 CHARACTER(LABEL_LENGTH) :: DEVC_ID !< Name of a device controlling a FAN, damper, or AIRCOIL.
 CHARACTER(LABEL_LENGTH) :: DUCT_ID(MAX_DUCTS) !<IDs of DUCTs connected to a DUCTNODE.
-CHARACTER(LABEL_LENGTH) :: DUCT_INTERP_TYPE !<Method of interpolation for a DUCT with N_CELLS>1.
+CHARACTER(LABEL_LENGTH) :: DUCT_INTERP_TYPE !<Method of interpolation for a DUCT with N_CELLS>1. 
 CHARACTER(LABEL_LENGTH) :: FAN_ID !< ID of a FAN located in a DUCT.
 CHARACTER(LABEL_LENGTH) :: FILTER_ID !< ID of a FILTER located at a DUCTNODE.
 CHARACTER(LABEL_LENGTH) :: ID !< Name of an HVAC component
@@ -1160,6 +1160,7 @@ ENDIF FIRST_PASS_IF
 ITER = 0
 
 IF (N_ZONE >0) ALLOCATE(DPSTAR(1:N_ZONE))
+DPSTAR = 0._EB
 
 CALL DPSTARCALC
 DUCTNODE%P = DUCTNODE%P - P_INF
@@ -1230,8 +1231,8 @@ CALL UPDATE_NODE_BC
 
 IF (ALLOCATED(DPSTAR)) DEALLOCATE(DPSTAR)
 
-
 END SUBROUTINE HVAC_CALC
+
 
 !> \brief Solves the HVAC matrix and extracts the solutions for duct velocity and node pressure.
 !>
@@ -1551,7 +1552,6 @@ END SUBROUTINE RHSNODE
 !> \param NETWORK_INDEX Index indicating which HVAC network is being solved
 
 SUBROUTINE LHSNODE(NETWORK_INDEX)
-! Populates LHS matrix with nodal conservation data
 USE GLOBAL_CONSTANTS
 INTEGER, INTENT(IN)::NETWORK_INDEX
 INTEGER :: NN,ND, ARRAYLOC1,ARRAYLOC2
@@ -1625,6 +1625,7 @@ DO ND = 1, NE%N_DUCTS
       HEAD = HEAD + DN%P
    ELSEIF (DN%VENT .OR. DN%LEAKAGE) THEN
       HEAD = HEAD + DN%P
+      HEAD = HEAD - DU%RHO_D * DU%VEL(OLD) * DN%DIR(1) / (GAMMA * DT_HV)
       IF (N_ZONE > 0) THEN
          IPZ = DN%ZONE_INDEX
          IF (IPZ > 0) HEAD = HEAD + DPSTAR(IPZ)
@@ -1636,8 +1637,9 @@ DO ND = 1, NE%N_DUCTS
       HEAD = HEAD - DN%P
    ELSEIF (DN%VENT .OR. DN%LEAKAGE) THEN
       HEAD = HEAD - DN%P
+      HEAD = HEAD + DU%RHO_D * DU%VEL(OLD) * DN%DIR(1) / (GAMMA * DT_HV)
       IF (N_ZONE > 0) THEN
-         IPZ = DN%ZONE_INDEX
+         IPZ = DN%ZONE_INDEX  
          IF (IPZ > 0) HEAD = HEAD - DPSTAR(IPZ)
       ENDIF
    ENDIF
@@ -1696,6 +1698,7 @@ DUCT_LOOP: DO ND = 1, NE%N_DUCTS
          ENDDO
       ENDIF
    ELSE
+      LHS(ARRAYLOC1,ARRAYLOC1) = LHS(ARRAYLOC1,ARRAYLOC1) - DN%DIR(1)/(DU%LENGTH*GAMMA)
       IF (DN%ZONE_INDEX >0) THEN
          PZ => P_ZONE(DN%ZONE_INDEX)
          DO NN=1,PZ%N_DUCTNODES
@@ -1726,6 +1729,7 @@ DUCT_LOOP: DO ND = 1, NE%N_DUCTS
          ENDDO
       ENDIF
    ELSE
+      LHS(ARRAYLOC1,ARRAYLOC1) = LHS(ARRAYLOC1,ARRAYLOC1) + DN%DIR(1)/(DU%LENGTH*GAMMA)
       IF (DN%ZONE_INDEX >0) THEN
          PZ => P_ZONE(DN%ZONE_INDEX)
          DO NN=1,PZ%N_DUCTNODES
