@@ -52,6 +52,7 @@ cd Sandia_Plumes;  ./Run_All.sh $OPTIONS; cd ..
 cd Shell_LNG_Fireballs;  ./Run_All.sh $OPTIONS; cd ..
 cd Sippola_Aerosol_Deposition; ./Run_All.sh $OPTIONS; cd ..
 cd Smyth_Slot_Burner;  ./Run_All.sh $OPTIONS; cd ..
+cd SP_Wood_Cribs;  ./Run_All.sh $OPTIONS; cd ..
 cd SWJTU_Tunnels;  ./Run_All.sh $OPTIONS; cd ..
 cd Turbulent_Jet;  ./Run_All.sh $OPTIONS; cd ..
 cd UL_NFPRF;  ./Run_All.sh $OPTIONS; cd ..
