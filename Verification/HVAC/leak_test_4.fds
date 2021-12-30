@@ -3,9 +3,10 @@
 &MESH XB=-2.0,2.0,-2.0,2.0,-2.0,2.0, IJK=40,40,40 /
 
 &TIME T_END=30. /
+&DUMP NFRAMES=60/
 
 &ZONE XYZ=0.0,0.0,0.0, LEAK_AREA(0)=0.001 /
- 
+
 &MOVE ID='spin', AXIS=-1,-1,-1, X0=0.0, Y0=0.0, Z0=0.0, ROTATION_ANGLE=45. /
 &GEOM XB=-1.25, -1.0,-1.25, 1.25,-1.25, 1.25, MOVE_ID='spin' /
 &GEOM XB=  1.0, 1.25,-1.25, 1.25,-1.25, 1.25, MOVE_ID='spin' /
