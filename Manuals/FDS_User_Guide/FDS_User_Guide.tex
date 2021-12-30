@@ -4512,7 +4512,6 @@ There are several restrictions to assigning pressure zones. First, the declared 
 
 Note that if you remove a solid obstruction (like a door or window) separating two pressure zones, FDS will merge the two zones into one such that the background pressure within each remains nearly the same.
 
-For the special case where a pressure zone has periodic boundaries ({\ct SURF\_ID='PERIODIC'} on {\ct VENT}), you must add {\ct PERIODIC=T} on the {\ct ZONE} line.
 
 
 \subsubsection{Example Case: Pressure Rise in a Compartment}
@@ -12472,7 +12471,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct LEAK\_AREA(N)}                & Real                  & Section~\ref{info:Leaks}           & m$^2$  & 0             \\ \hline
 {\ct LEAK\_PRESSURE\_EXPONENT(N)}  & Real                  & Section~\ref{info:Leaks}           &        & 0.5           \\ \hline
 {\ct LEAK\_REFERENCE\_PRESSURE(N)} & Real                  & Section~\ref{info:Leaks}           & Pa     & 4             \\ \hline
-{\ct PERIODIC}                     & Logical               & Section~\ref{info:ZONE_Basics}     &        & {\ct F} \\ \hline
 {\ct XYZ(3,:)}                     & Real Array            & Section~\ref{info:ZONE_Basics}     & m      &               \\ \hline
 \end{longtable}
 
