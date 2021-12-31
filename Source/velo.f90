@@ -1981,7 +1981,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
          IF (IWM==0 .AND. IWP==0) CYCLE ORIENTATION_LOOP
 
-         ! If the edge is a corner, recorder this so we do not overwrite VEL_GHOST
+         ! If the edge is a corner, note this so we do not overwrite VEL_GHOST
 
          IF (IWM==0 .OR. IWP==0) CORNER_EDGE=.TRUE.
 
