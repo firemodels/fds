@@ -1787,7 +1787,7 @@ INTEGER :: I,J,K,NOM(2),IIO(2),JJO(2),KKO(2),IE,II,JJ,KK,IEC,IOR,IWM,IWP,ICMM,IC
            VELOCITY_BC_INDEX,IIGM,JJGM,KKGM,IIGP,JJGP,KKGP,SURF_INDEXM,SURF_INDEXP,ITMP,ICD_SGN,ICDO_SGN, &
            BOUNDARY_TYPE_M,BOUNDARY_TYPE_P,IS2,IWPI,IWMI,VENT_INDEX
 LOGICAL :: ALTERED_GRADIENT(-2:2),PROCESS_EDGE,SYNTHETIC_EDDY_METHOD,HVAC_TANGENTIAL,INTERPOLATED_EDGE,&
-           UPWIND_BOUNDARY,INFLOW_BOUNDARY
+           UPWIND_BOUNDARY,INFLOW_BOUNDARY,CORNER_EDGE
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,U_Y,U_Z,V_X,V_Z,W_X,W_Y,RHOP,VEL_OTHER
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP
 TYPE (OMESH_TYPE), POINTER :: OM
@@ -1854,6 +1854,7 @@ OME_E = -1.E6_EB
 EDGE_LOOP: DO IE=1,N_EDGES
 
    INTERPOLATED_EDGE = .FALSE.
+   CORNER_EDGE       = .FALSE.
 
    ! Throw out edges that are completely surrounded by blockages or the exterior of the domain
 
@@ -1980,6 +1981,10 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
          IF (IWM==0 .AND. IWP==0) CYCLE ORIENTATION_LOOP
 
+         ! If the edge is a corner, recorder this so we do not overwrite VEL_GHOST
+
+         IF (IWM==0 .OR. IWP==0) CORNER_EDGE=.TRUE.
+
          ! If there is a solid wall separating the two adjacent wall cells, cycle out of the loop.
 
          IF ((WALL(IWMI)%BOUNDARY_TYPE==SOLID_BOUNDARY .AND. SURFACE(WALL(IWM)%SURF_INDEX)%VELOCITY_BC_INDEX/=FREE_SLIP_BC) .OR. &
@@ -2057,8 +2062,8 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
          ! OPEN boundary conditions, both varieties, with and without a wind
 
-         OPEN_AND_WIND_BC: IF ((IWM==0.OR.WALL(IWM)%BOUNDARY_TYPE==OPEN_BOUNDARY) .AND. &
-                               (IWP==0.OR.WALL(IWP)%BOUNDARY_TYPE==OPEN_BOUNDARY)) THEN
+         OPEN_AND_WIND_BC: IF ((IWM==0 .OR. WALL(IWM)%BOUNDARY_TYPE==OPEN_BOUNDARY) .AND. &
+                               (IWP==0 .OR. WALL(IWP)%BOUNDARY_TYPE==OPEN_BOUNDARY)) THEN
 
             VENT_INDEX = MAX(WCM%VENT_INDEX,WCP%VENT_INDEX)
             VT => VENTS(VENT_INDEX)
@@ -2279,7 +2284,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
                   CASE (NO_SLIP_BC) BOUNDARY_CONDITION
 
-                     VEL_GHOST = 2._EB*VEL_T - VEL_GAS
+                     IF (.NOT.CORNER_EDGE) VEL_GHOST = 2._EB*VEL_T - VEL_GAS
                      DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
                      MU_DUIDXJ(ICD_SGN) = MUA*DUIDXJ(ICD_SGN)
                      ALTERED_GRADIENT(ICD_SGN) = .TRUE.
