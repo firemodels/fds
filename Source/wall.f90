@@ -45,7 +45,7 @@ REAL(EB) :: TNOW
 REAL(EB), INTENT(IN) :: T,DT
 INTEGER, INTENT(IN) :: NM
 
-IF (LEVEL_SET_MODE==1 .OR. LEVEL_SET_MODE==2 .OR. LEVEL_SET_MODE==3) RETURN
+IF (LEVEL_SET_MODE==1) RETURN  ! No need for boundary conditions if the simulation is uncoupled fire spread only
 
 TNOW=CURRENT_TIME()
 
