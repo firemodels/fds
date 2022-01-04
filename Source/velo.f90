@@ -1854,7 +1854,6 @@ OME_E = -1.E6_EB
 EDGE_LOOP: DO IE=1,N_EDGES
 
    INTERPOLATED_EDGE = .FALSE.
-   CORNER_EDGE       = .FALSE.
 
    ! Throw out edges that are completely surrounded by blockages or the exterior of the domain
 
@@ -1896,7 +1895,6 @@ EDGE_LOOP: DO IE=1,N_EDGES
          UUM(2)  = WW(II,JJ,KK)
          DXX(1)  = DY(JJ)
          DXX(2)  = DZ(KK)
-         MUA      = 0.25_EB*(MU(II,JJ,KK) + MU(II,JJ+1,KK) + MU(II,JJ+1,KK+1) + MU(II,JJ,KK+1) )
       CASE(2) COMPONENT
          UUP(1)  = WW(II+1,JJ,KK)
          UUM(1)  = WW(II,JJ,KK)
@@ -1904,7 +1902,6 @@ EDGE_LOOP: DO IE=1,N_EDGES
          UUM(2)  = UU(II,JJ,KK)
          DXX(1)  = DZ(KK)
          DXX(2)  = DX(II)
-         MUA      = 0.25_EB*(MU(II,JJ,KK) + MU(II+1,JJ,KK) + MU(II+1,JJ,KK+1) + MU(II,JJ,KK+1) )
       CASE(3) COMPONENT
          UUP(1)  = UU(II,JJ+1,KK)
          UUM(1)  = UU(II,JJ,KK)
@@ -1912,7 +1909,6 @@ EDGE_LOOP: DO IE=1,N_EDGES
          UUM(2)  = VV(II,JJ,KK)
          DXX(1)  = DX(II)
          DXX(2)  = DY(JJ)
-         MUA      = 0.25_EB*(MU(II,JJ,KK) + MU(II+1,JJ,KK) + MU(II+1,JJ+1,KK) + MU(II,JJ+1,KK) )
    END SELECT COMPONENT
 
    ! Indicate that the velocity gradients in the two orthogonal directions have not been changed yet
@@ -1983,6 +1979,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
          ! If the edge is a corner, note this so we do not overwrite VEL_GHOST
 
+         CORNER_EDGE=.FALSE.
          IF (IWM==0 .OR. IWP==0) CORNER_EDGE=.TRUE.
 
          ! If there is a solid wall separating the two adjacent wall cells, cycle out of the loop.
@@ -2211,7 +2208,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
                IF(VENTS(WCM%VENT_INDEX)%NODE_INDEX>0 .AND. WCM_ONE_D%U_NORMAL >= 0._EB) VELOCITY_BC_INDEX=FREE_SLIP_BC
             ENDIF
 
-            ! Compute the viscosity in the two adjacent gas cells
+            ! Compute the viscosity by averaging the two adjacent gas cells
 
             MUA = 0.5_EB*(MU(IIGM,JJGM,KKGM) + MU(IIGP,JJGP,KKGP))
 
@@ -2266,7 +2263,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
             HVAC_IF: IF (HVAC_TANGENTIAL)  THEN
 
-               VEL_GHOST = 2._EB*VEL_T - VEL_GAS
+               IF (.NOT.CORNER_EDGE) VEL_GHOST = 2._EB*VEL_T - VEL_GAS
                DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
                MU_DUIDXJ(ICD_SGN) = MUA*DUIDXJ(ICD_SGN)
                ALTERED_GRADIENT(ICD_SGN) = .TRUE.
