@@ -138,9 +138,9 @@ END SUBROUTINE INITIALIZE_LEVEL_SET_FIRESPREAD_1
 !> \param NM Mesh number
 !> \details First, retrieve terrain height, Z_LS, from other meshes. Then do various other set up chores.
 
-SUBROUTINE INITIALIZE_LEVEL_SET_FIRESPREAD_2(NM)
+SUBROUTINE INITIALIZE_LEVEL_SET_FIRESPREAD_2(NM,MODE)
 
-INTEGER, INTENT(IN) :: NM
+INTEGER, INTENT(IN) :: NM,MODE
 INTEGER :: I,IM1,IM2,IIG,IP1,IP2,J,JJG,JM1,JP1
 REAL(EB) :: DZT_DUM,G_EAST,G_WEST,G_SOUTH,G_NORTH
 
@@ -153,6 +153,13 @@ M => MESHES(NM)
 ! Retrieve terrain height, Z_LS, from other meshes above and below current mesh.
 
 CALL GET_BOUNDARY_VALUES
+
+Z_LS(   0,   0) = Z_LS(   1,   1)
+Z_LS(IBP1,   0) = Z_LS(IBAR,   1)
+Z_LS(   0,JBP1) = Z_LS(   1,JBAR)
+Z_LS(IBP1,JBP1) = Z_LS(IBAR,JBAR)
+
+IF (MODE==2) RETURN
 
 ! Allocate some work arrays
 
@@ -607,7 +614,15 @@ ENDIF
 IW = WALL_INDEX(IC,IOR)
 EWC=>EXTERNAL_WALL(IW)
 NOM = EWC%NOM
-IF (NOM==0) RETURN  ! there is no other mesh adjacent to the boundary
+IF (NOM==0) THEN  ! there is no other mesh adjacent to the boundary
+   SELECT CASE(IOR)
+      CASE(-1) ; Z_LS(II,JJ) = 2._EB*Z_LS(II+1,JJ) - Z_LS(II+2,JJ)
+      CASE( 1) ; Z_LS(II,JJ) = 2._EB*Z_LS(II-1,JJ) - Z_LS(II-2,JJ)
+      CASE(-2) ; Z_LS(II,JJ) = 2._EB*Z_LS(II,JJ+1) - Z_LS(II,JJ+2)
+      CASE( 2) ; Z_LS(II,JJ) = 2._EB*Z_LS(II,JJ-1) - Z_LS(II,JJ-2)
+   END SELECT
+   RETURN
+ENDIF
 
 PHI_LS_OTHER = 0._EB
 U_LS_OTHER = 0._EB
