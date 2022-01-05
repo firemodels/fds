@@ -1787,7 +1787,7 @@ INTEGER :: I,J,K,NOM(2),IIO(2),JJO(2),KKO(2),IE,II,JJ,KK,IEC,IOR,IWM,IWP,ICMM,IC
            VELOCITY_BC_INDEX,IIGM,JJGM,KKGM,IIGP,JJGP,KKGP,SURF_INDEXM,SURF_INDEXP,ITMP,ICD_SGN,ICDO_SGN, &
            BOUNDARY_TYPE_M,BOUNDARY_TYPE_P,IS2,IWPI,IWMI,VENT_INDEX
 LOGICAL :: ALTERED_GRADIENT(-2:2),PROCESS_EDGE,SYNTHETIC_EDDY_METHOD,HVAC_TANGENTIAL,INTERPOLATED_EDGE,&
-           UPWIND_BOUNDARY,INFLOW_BOUNDARY
+           UPWIND_BOUNDARY,INFLOW_BOUNDARY,CORNER_EDGE
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,U_Y,U_Z,V_X,V_Z,W_X,W_Y,RHOP,VEL_OTHER
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP
 TYPE (OMESH_TYPE), POINTER :: OM
@@ -1895,7 +1895,6 @@ EDGE_LOOP: DO IE=1,N_EDGES
          UUM(2)  = WW(II,JJ,KK)
          DXX(1)  = DY(JJ)
          DXX(2)  = DZ(KK)
-         MUA      = 0.25_EB*(MU(II,JJ,KK) + MU(II,JJ+1,KK) + MU(II,JJ+1,KK+1) + MU(II,JJ,KK+1) )
       CASE(2) COMPONENT
          UUP(1)  = WW(II+1,JJ,KK)
          UUM(1)  = WW(II,JJ,KK)
@@ -1903,7 +1902,6 @@ EDGE_LOOP: DO IE=1,N_EDGES
          UUM(2)  = UU(II,JJ,KK)
          DXX(1)  = DZ(KK)
          DXX(2)  = DX(II)
-         MUA      = 0.25_EB*(MU(II,JJ,KK) + MU(II+1,JJ,KK) + MU(II+1,JJ,KK+1) + MU(II,JJ,KK+1) )
       CASE(3) COMPONENT
          UUP(1)  = UU(II,JJ+1,KK)
          UUM(1)  = UU(II,JJ,KK)
@@ -1911,7 +1909,6 @@ EDGE_LOOP: DO IE=1,N_EDGES
          UUM(2)  = VV(II,JJ,KK)
          DXX(1)  = DX(II)
          DXX(2)  = DY(JJ)
-         MUA      = 0.25_EB*(MU(II,JJ,KK) + MU(II+1,JJ,KK) + MU(II+1,JJ+1,KK) + MU(II,JJ+1,KK) )
    END SELECT COMPONENT
 
    ! Indicate that the velocity gradients in the two orthogonal directions have not been changed yet
@@ -1979,6 +1976,11 @@ EDGE_LOOP: DO IE=1,N_EDGES
          ! If both adjacent wall cells are undefined, cycle out of the loop.
 
          IF (IWM==0 .AND. IWP==0) CYCLE ORIENTATION_LOOP
+
+         ! If the edge is a corner, note this so we do not overwrite VEL_GHOST
+
+         CORNER_EDGE=.FALSE.
+         IF (IWM==0 .OR. IWP==0) CORNER_EDGE=.TRUE.
 
          ! If there is a solid wall separating the two adjacent wall cells, cycle out of the loop.
 
@@ -2057,8 +2059,8 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
          ! OPEN boundary conditions, both varieties, with and without a wind
 
-         OPEN_AND_WIND_BC: IF ((IWM==0.OR.WALL(IWM)%BOUNDARY_TYPE==OPEN_BOUNDARY) .AND. &
-                               (IWP==0.OR.WALL(IWP)%BOUNDARY_TYPE==OPEN_BOUNDARY)) THEN
+         OPEN_AND_WIND_BC: IF ((IWM==0 .OR. WALL(IWM)%BOUNDARY_TYPE==OPEN_BOUNDARY) .AND. &
+                               (IWP==0 .OR. WALL(IWP)%BOUNDARY_TYPE==OPEN_BOUNDARY)) THEN
 
             VENT_INDEX = MAX(WCM%VENT_INDEX,WCP%VENT_INDEX)
             VT => VENTS(VENT_INDEX)
@@ -2206,7 +2208,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
                IF(VENTS(WCM%VENT_INDEX)%NODE_INDEX>0 .AND. WCM_ONE_D%U_NORMAL >= 0._EB) VELOCITY_BC_INDEX=FREE_SLIP_BC
             ENDIF
 
-            ! Compute the viscosity in the two adjacent gas cells
+            ! Compute the viscosity by averaging the two adjacent gas cells
 
             MUA = 0.5_EB*(MU(IIGM,JJGM,KKGM) + MU(IIGP,JJGP,KKGP))
 
@@ -2261,7 +2263,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
             HVAC_IF: IF (HVAC_TANGENTIAL)  THEN
 
-               VEL_GHOST = 2._EB*VEL_T - VEL_GAS
+               IF (.NOT.CORNER_EDGE) VEL_GHOST = 2._EB*VEL_T - VEL_GAS
                DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
                MU_DUIDXJ(ICD_SGN) = MUA*DUIDXJ(ICD_SGN)
                ALTERED_GRADIENT(ICD_SGN) = .TRUE.
@@ -2279,7 +2281,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
                   CASE (NO_SLIP_BC) BOUNDARY_CONDITION
 
-                     VEL_GHOST = 2._EB*VEL_T - VEL_GAS
+                     IF (.NOT.CORNER_EDGE) VEL_GHOST = 2._EB*VEL_T - VEL_GAS
                      DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
                      MU_DUIDXJ(ICD_SGN) = MUA*DUIDXJ(ICD_SGN)
                      ALTERED_GRADIENT(ICD_SGN) = .TRUE.
@@ -2303,15 +2305,12 @@ EDGE_LOOP: DO IE=1,N_EDGES
                      ELSE
                         CALL WALL_MODEL(SLIP_COEF,U_TAU,Y_PLUS,MU_WALL/RHO_WALL,SF%ROUGHNESS,0.5_EB*DXX(ICD),VEL_GAS-VEL_T)
                      ENDIF
-                     ! SLIP_COEF = -1, no slip, VEL_GHOST=-VEL_GAS
-                     ! SLIP_COEF =  1, free slip, VEL_GHOST=VEL_T
-                     ! Notes: This curious definition of VEL_GHOST was chosen to improve the treatment of edge vorticity
-                     ! especially at corners.  The stress still comes directly from U_TAU (i.e., the WALL_MODEL).
-                     ! DUIDXJ is used to compute the vorticity at the edge.  Without this definition, the ribbed_channel
-                     ! test series does not achieve the correct MEAN or RMS profiles without very high grid resolution.
-                     VEL_GHOST = VEL_T + 0.5_EB*(SLIP_COEF-1._EB)*(VEL_GAS-VEL_T)
+                     ! SLIP_COEF = -1, no slip, VEL_GHOST=2*VEL_T-VEL_GAS
+                     ! SLIP_COEF =  1, free slip, VEL_GHOST=VEL_GAS
+
+                     IF (.NOT.CORNER_EDGE) VEL_GHOST = VEL_T + SLIP_COEF*(VEL_GAS-VEL_T)
                      DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
-                     MU_DUIDXJ(ICD_SGN) = RHO_WALL*U_TAU**2 * SIGN(1._EB,I_SGN*(VEL_GAS-VEL_T))
+                     MU_DUIDXJ(ICD_SGN) = RHO_WALL*U_TAU**2 * SIGN(1._EB,DUIDXJ(ICD_SGN))
                      ALTERED_GRADIENT(ICD_SGN) = .TRUE.
 
                   CASE (BOUNDARY_FUEL_MODEL_BC) BOUNDARY_CONDITION
