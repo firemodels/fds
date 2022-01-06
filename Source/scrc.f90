@@ -59,11 +59,9 @@ INTEGER, PARAMETER :: NSCARC_EXCHANGE_MATRIX_COLSG   =  6        !< Type of data
 INTEGER, PARAMETER :: NSCARC_EXCHANGE_MATRIX_SIZES   =  7        !< Type of data exchange: size of Poisson matrix 
 INTEGER, PARAMETER :: NSCARC_EXCHANGE_MATRIX_VALS    =  8        !< Type of data exchange: values of Poisson matrix
 INTEGER, PARAMETER :: NSCARC_EXCHANGE_MGM_SINGLE     =  9        !< Type of data exchange: MGM - Mean value interface
-INTEGER, PARAMETER :: NSCARC_EXCHANGE_MGM_DOUBLE     = 10        !< Type of data exchange: MGM - True approximate interface
 INTEGER, PARAMETER :: NSCARC_EXCHANGE_MGM_VELO       = 11        !< Type of data exchange: MGM - Velocity interface
 INTEGER, PARAMETER :: NSCARC_EXCHANGE_SOLIDS         = 13        !< Type of data exchange: solid cell information
-INTEGER, PARAMETER :: NSCARC_EXCHANGE_VECTOR_MEAN    = 14        !< Type of data exchange: mean values of a vector
-INTEGER, PARAMETER :: NSCARC_EXCHANGE_VECTOR_PLAIN   = 15        !< Type of data exchange: plain values of a vector
+INTEGER, PARAMETER :: NSCARC_EXCHANGE_VECTOR         = 15        !< Type of data exchange: plain values of a vector
 
 INTEGER, PARAMETER :: NSCARC_MESH_STRUCTURED         =  1        !< Type of discretization: structured 
 INTEGER, PARAMETER :: NSCARC_MESH_UNSTRUCTURED       =  2        !< Type of discretization: unstructured 
@@ -709,8 +707,6 @@ END TYPE SCARC_OSCARC_TYPE
 !> \brief Measurement of CPU times
   
 TYPE SCARC_CPU_TYPE
-   REAL(EB) :: BUFFER_PACKING   = 0.0_EB                           !< Time for data exchange
-   REAL(EB) :: BUFFER_UNPACKING = 0.0_EB                           !< Time for data exchange
    REAL(EB) :: COARSE           = 0.0_EB                           !< Time for coarse grid solver
    REAL(EB) :: EXCHANGE         = 0.0_EB                           !< Time for data exchange
    REAL(EB) :: ITERATION        = 0.0_EB                           !< Time for Krylov solver
@@ -3202,18 +3198,16 @@ CHARACTER(LEN=LINE_LENGTH) :: LINE
 CHARACTER(LEN=LINE_LENGTH), DIMENSION(0:N_MPI_PROCESSES-1) :: LINE_ARRAY
 
 ! All MPI processes except root send their timings to the root process. The root process then writes them out to a file.
-WRITE(LINE,'(I5,11(",",ES10.3))') MY_RANK,                       &
-                                  CPU(MY_RANK)%OVERALL,          &
-                                  CPU(MY_RANK)%SETUP,            &
-                                  CPU(MY_RANK)%SOLVER,           &
-                                  CPU(MY_RANK)%ITERATION,        &
-                                  CPU(MY_RANK)%MATVEC_PRODUCT,   &
-                                  CPU(MY_RANK)%SCALAR_PRODUCT,   &
-                                  CPU(MY_RANK)%RELAXATION,       &
-                                  CPU(MY_RANK)%COARSE,           &
-                                  CPU(MY_RANK)%EXCHANGE,         &
-                                  CPU(MY_RANK)%BUFFER_PACKING,   &
-                                  CPU(MY_RANK)%BUFFER_UNPACKING
+WRITE(LINE,'(I5,9(",",ES10.3))') MY_RANK,                       &
+                                 CPU(MY_RANK)%OVERALL,          &
+                                 CPU(MY_RANK)%SETUP,            &
+                                 CPU(MY_RANK)%SOLVER,           &
+                                 CPU(MY_RANK)%ITERATION,        &
+                                 CPU(MY_RANK)%MATVEC_PRODUCT,   &
+                                 CPU(MY_RANK)%SCALAR_PRODUCT,   &
+                                 CPU(MY_RANK)%RELAXATION,       &
+                                 CPU(MY_RANK)%COARSE,           &
+                                 CPU(MY_RANK)%EXCHANGE
 
 IF (MY_RANK>0) THEN
    CALL MPI_SEND(LINE,LINE_LENGTH,MPI_CHARACTER,0,MY_RANK,MPI_COMM_WORLD,IERROR)
@@ -4066,12 +4060,10 @@ END SUBROUTINE SCARC_SETUP_EXCHANGES
 ! NSCARC_EXCHANGE_MATRIX_COLSG    :  exchange global columns of neighboring matrices 
 ! NSCARC_EXCHANGE_MATRIX_SIZES    :  exchange sizes of neighboring matrices 
 ! NSCARC_EXCHANGE_MATRIX_VALS     :  exchange values of neighboring matrices 
-! NSCARC_EXCHANGE_MGM_DOUBLE      :  exchange double neighbouring layers for true BC setting of MGM method
 ! NSCARC_EXCHANGE_MGM_SINGLE      :  exchange single neighbouring layer for all other BC settings of MGM method
 ! NSCARC_EXCHANGE_MGM_VELO        :  exchange neighboring velocity entries in MGM method
 ! NSCARC_EXCHANGE_SOLIDS          :  exchange information about adjacent solids
-! NSCARC_EXCHANGE_VECTOR_MEAN     :  exchange vector and build mean of neighboring and own data
-! NSCARC_EXCHANGE_VECTOR_PLAIN    :  exchange plain vector and only use neighboring data
+! NSCARC_EXCHANGE_VECTOR    :  exchange plain vector and only use neighboring data
 ! --------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_EXCHANGE (NTYPE, NPARAM, NL)
 INTEGER, INTENT(IN) :: NTYPE, NPARAM, NL
@@ -4130,10 +4122,7 @@ RECEIVE_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          CASE (NSCARC_EXCHANGE_SOLIDS)
             CALL SCARC_RECV_MESSAGE_INT (NM, NOM, NL, NSCARC_BUFFER_LAYER1, 'SOLIDS')
 
-         CASE (NSCARC_EXCHANGE_VECTOR_MEAN)
-            CALL SCARC_RECV_MESSAGE_REAL (NM, NOM, NL, NSCARC_BUFFER_LAYER2, 'VECTOR MEAN')
-
-         CASE (NSCARC_EXCHANGE_VECTOR_PLAIN)
+         CASE (NSCARC_EXCHANGE_VECTOR)
             CALL SCARC_RECV_MESSAGE_REAL (NM, NOM, NL, NSCARC_BUFFER_LAYER1, 'VECTOR PLAIN')
 
          CASE DEFAULT
@@ -4206,11 +4195,7 @@ SEND_PACK_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
             CALL SCARC_PACK_SOLIDS
             CALL SCARC_SEND_MESSAGE_INT (NM, NOM, NL, NSCARC_BUFFER_LAYER1, 'SOLIDS')
 
-         CASE (NSCARC_EXCHANGE_VECTOR_MEAN)
-            CALL SCARC_PACK_VECTOR_MEAN(NM, NL, NPARAM)
-            CALL SCARC_SEND_MESSAGE_REAL (NM, NOM, NL, NSCARC_BUFFER_LAYER2, 'VECTOR MEAN')
-
-         CASE (NSCARC_EXCHANGE_VECTOR_PLAIN)
+         CASE (NSCARC_EXCHANGE_VECTOR)
             CALL SCARC_PACK_VECTOR_PLAIN(NM, NL, NPARAM)
             CALL SCARC_SEND_MESSAGE_REAL (NM, NOM, NL, NSCARC_BUFFER_LAYER1, 'VECTOR PLAIN')
 
@@ -4269,19 +4254,13 @@ SEND_UNPACK_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          CASE (NSCARC_EXCHANGE_MGM_SINGLE)
             CALL SCARC_UNPACK_MGM_SINGLE (NM, NOM)
 
-         CASE (NSCARC_EXCHANGE_MGM_DOUBLE)
-            CALL SCARC_UNPACK_MGM_DOUBLE (NM, NOM)
-
          CASE (NSCARC_EXCHANGE_MGM_VELO)
             CALL SCARC_UNPACK_MGM_VELO (NM, NOM)
 
          CASE (NSCARC_EXCHANGE_SOLIDS)
             CALL SCARC_UNPACK_SOLIDS (NM, NOM)
 
-         CASE (NSCARC_EXCHANGE_VECTOR_MEAN)
-            CALL SCARC_UNPACK_VECTOR_MEAN (NM, NOM, NL, NPARAM)
-
-         CASE (NSCARC_EXCHANGE_VECTOR_PLAIN)
+         CASE (NSCARC_EXCHANGE_VECTOR)
             CALL SCARC_UNPACK_VECTOR_PLAIN (NM, NOM, NL, NPARAM)
 
          CASE DEFAULT
@@ -5085,66 +5064,6 @@ ENDDO
 END SUBROUTINE SCARC_UNPACK_SOLIDS
 
 ! --------------------------------------------------------------------------------------------------------------
-!> \brief Pack overlapping and internal parts of specified vector
-! --------------------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_PACK_VECTOR_MEAN(NM, NL, NVECTOR)
-INTEGER, INTENT(IN) :: NM, NL, NVECTOR
-REAL(EB), DIMENSION(:), POINTER :: VC
-INTEGER :: IOR0, ICG, ICW, ICE, LL
-
-VC => SCARC_POINT_TO_VECTOR(NM, NL, NVECTOR)
-LL = 1
-OS%SEND_BUFFER_REAL = NSCARC_REAL_EB_HUGE
-DO IOR0 = -3, 3
-   IF (OL%GHOST_LASTW(IOR0) == 0) CYCLE
-   DO ICG = OL%GHOST_FIRSTW(IOR0), OL%GHOST_LASTW(IOR0)
-      ICW = OG%ICG_TO_ICW(ICG, 1)
-      IF (ICW < 0) CYCLE                                          ! skip solid internal cells
-      OS%SEND_BUFFER_REAL(LL) = VC(ICW)
-      LL = LL + 1
-   ENDDO
-   DO ICG = OL%GHOST_FIRSTW(IOR0), OL%GHOST_LASTW(IOR0)
-      ICE = OG%ICG_TO_ICE(ICG, 1)
-      IF (ICE < 0) CYCLE                                          ! skip solid external cells
-      OS%SEND_BUFFER_REAL(LL) = VC(ICE)
-      LL = LL + 1
-   ENDDO
-ENDDO
-
-END SUBROUTINE SCARC_PACK_VECTOR_MEAN
-
-! --------------------------------------------------------------------------------------------------------------
-!> \brief Unpack overlapping and internal parts of specified vector
-! --------------------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_UNPACK_VECTOR_MEAN(NM, NOM, NL, NVECTOR)
-INTEGER, INTENT(IN) :: NM, NOM, NL, NVECTOR
-REAL(EB), DIMENSION(:), POINTER :: VC
-INTEGER :: IOR0, LL, ICG, ICW, ICE
-
-RECV_BUFFER_REAL => SCARC_POINT_TO_BUFFER_REAL (NM, NOM, 1)
-VC => SCARC_POINT_TO_VECTOR(NM, NL, NVECTOR)
-LL = 1
-DO IOR0 = -3, 3
-   IF (OL%GHOST_LASTW(IOR0) == 0) CYCLE
-   DO ICG = OL%GHOST_FIRSTE(IOR0), OL%GHOST_LASTE(IOR0)
-      ICW = G%ICG_TO_ICW(ICG,1)
-      IF (ICW < 0) CYCLE                                                       ! skip internal solid cells
-      VC(ICW) = 2.0_EB/3.0_EB * VC(ICW) + 1.0_EB/3.0_EB * RECV_BUFFER_REAL(LL)
-      !VC(ICW) = 0.5_EB * VC(ICW) + 0.5_EB * RECV_BUFFER_REAL(LL)
-      LL = LL + 1
-   ENDDO
-   DO ICG = OL%GHOST_FIRSTE(IOR0), OL%GHOST_LASTE(IOR0)
-      ICE = OG%ICG_TO_ICE(ICG,1)
-      IF (ICE < 0) CYCLE                                                       ! skip external solid cells
-      VC(ICE) = 1.0_EB/3.0_EB * VC(ICE) + 2.0_EB/3.0_EB * RECV_BUFFER_REAL(LL)
-      !VC(ICE) = 0.5_EB * VC(ICE) + 0.5_EB * RECV_BUFFER_REAL(LL)
-      LL = LL + 1
-   ENDDO
-ENDDO
-
-END SUBROUTINE SCARC_UNPACK_VECTOR_MEAN
-
-! --------------------------------------------------------------------------------------------------------------
 !> \brief Pack overlapping information about matrix columns (compact storage technique only)
 ! --------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_PACK_MATRIX_COLS(NMATRIX)                
@@ -5863,7 +5782,7 @@ TNOW = CURRENT_TIME()
 
 ! If this call is related to a globally acting solver, exchange internal boundary values of
 ! vector1 such that the ghost values contain the corresponding overlapped values of adjacent neighbor
-IF (TYPE_MATVEC == NSCARC_MATVEC_GLOBAL) CALL SCARC_EXCHANGE (NSCARC_EXCHANGE_VECTOR_PLAIN, NV1, NL)
+IF (TYPE_MATVEC == NSCARC_MATVEC_GLOBAL) CALL SCARC_EXCHANGE (NSCARC_EXCHANGE_VECTOR, NV1, NL)
 
 ! Perform global matrix-vector product:
 ! Note: - matrix already contains subdiagonal values from neighbor along internal boundaries
@@ -11296,7 +11215,7 @@ MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 
 ENDDO MESHES_LOOP
 
-CALL SCARC_EXCHANGE (NSCARC_EXCHANGE_VECTOR_PLAIN, X, NL)
+CALL SCARC_EXCHANGE (NSCARC_EXCHANGE_VECTOR, X, NL)
 
 IF (TYPE_SOLVER == NSCARC_SOLVER_MAIN) THEN
    CALL SCARC_UPDATE_MAINCELLS (NLEVEL_MIN)
@@ -12407,7 +12326,7 @@ INTEGER, INTENT(IN) :: NVB, NVC, NLF, NLC
 REAL(EB) :: RSUM
 INTEGER :: NM, IC, ICOL
 
-IF (NMESHES > 1) CALL SCARC_EXCHANGE (NSCARC_EXCHANGE_VECTOR_PLAIN, NVB, NLF)
+IF (NMESHES > 1) CALL SCARC_EXCHANGE (NSCARC_EXCHANGE_VECTOR, NVB, NLF)
 
 DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 
@@ -12455,7 +12374,7 @@ DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
    ENDDO
 
 ENDDO
-IF (NMESHES > 1) CALL SCARC_EXCHANGE (NSCARC_EXCHANGE_VECTOR_PLAIN, NVB, NLF)
+IF (NMESHES > 1) CALL SCARC_EXCHANGE (NSCARC_EXCHANGE_VECTOR, NVB, NLF)
 
 END SUBROUTINE SCARC_PROLONGATION
 
