@@ -12,10 +12,10 @@ IMPLICIT NONE (TYPE,EXTERNAL)
 
 ! constants used by smokeview for drawing surfaces
 
-INTEGER, PARAMETER :: SMV_regular=0              !< Parameter for smokeview drawing: surface drawn as a solid
-INTEGER, PARAMETER :: SMV_texture=1              !< Parameter for smokeview drawing: texture image drawn over the surface
-INTEGER, PARAMETER :: SMV_outline=2              !< Parameter for smokeview drawing: surface drawn as an outline
-INTEGER, PARAMETER :: SMV_hidden=-2              !< Parameter for smokeview drawing: surface not drawn
+INTEGER, PARAMETER :: SMV_REGULAR=0              !< Parameter for smokeview drawing: surface drawn as a solid
+INTEGER, PARAMETER :: SMV_TEXTURE=1              !< Parameter for smokeview drawing: texture image drawn over the surface
+INTEGER, PARAMETER :: SMV_OUTLINE=2              !< Parameter for smokeview drawing: surface drawn as an outline
+INTEGER, PARAMETER :: SMV_HIDDEN=-2              !< Parameter for smokeview drawing: surface not drawn
 
 INTEGER, PARAMETER :: DNS_MODE=1                 !< Flag for SIM_MODE: Direct Numerical Simulation
 INTEGER, PARAMETER :: LES_MODE=2                 !< Flag for SIM_MODE: Large Eddy Simulation
