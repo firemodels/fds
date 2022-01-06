@@ -7,24 +7,18 @@
 #ifndef BUILDDATE_PP
 #define BUILDDATE_PP "unknown"
 #endif
+
 PROGRAM FDS2ASCII
 
 ! Program to convert various FDS output files to ASCII
 
 IMPLICIT NONE
 
-INTERFACE
-SUBROUTINE PARSE(BUFFER,SB_TOKS,SE_TOKS,N_TOKS)
-IMPLICIT NONE
-CHARACTER(*), INTENT(INOUT) :: BUFFER
-INTEGER, DIMENSION(*), INTENT(OUT) :: SB_TOKS, SE_TOKS
-INTEGER, INTENT(OUT) :: N_TOKS
-END SUBROUTINE PARSE
-END INTERFACE
+EXTERNAL USAGE2, VERSION2, SEARCH, TOUPPER, PARSE, SEARCH2
 
 CHARACTER(255), PARAMETER :: f2aversion='2.1.0'
 INTEGER, PARAMETER :: FB = SELECTED_REAL_KIND(6)
-INTEGER, PARAMETER :: FILE_DIM = 2000
+INTEGER, PARAMETER :: FILE_DIM = 500000
 INTEGER :: IERR, NMESHES, NM, NOC, I, J, K, L
 INTEGER :: IDUM, IFILE, NSAM, NV, MV
 INTEGER :: I1, I2, J1, J2, K1, K2, I3, J3, K3
@@ -53,7 +47,6 @@ TYPE(MESH_TYPE), POINTER :: M
  
 REAL(FB), DIMENSION(60) :: SUM
 INTEGER, ALLOCATABLE, DIMENSION(:) :: IOR,I1B,I2B,J1B,J2B,K1B,K2B
-INTEGER, ALLOCATABLE, DIMENSION(:) :: AUTO_SLICES
 REAL(FB), ALLOCATABLE, DIMENSION(:,:,:,:) :: Q
 REAL(FB), ALLOCATABLE, DIMENSION(:,:,:) :: F
 LOGICAL, ALLOCATABLE, DIMENSION(:,:,:) :: ALREADY_USED
@@ -62,7 +55,7 @@ INTEGER IOR_SLCF
 CHARACTER(2) :: ANS
 CHARACTER(4) :: CHOICE
 CHARACTER(30) :: UNITJUNK
-CHARACTER(256) GRIDFILE,QNAME,CHID,QFILE,JUNK,FRMT,OUTFILE,SLCF_LABEL_DUMMY
+CHARACTER(256) GRIDFILE,CHID,QFILE,JUNK,FRMT,OUTFILE,SLCF_LABEL_DUMMY
 CHARACTER(256), DIMENSION(FILE_DIM) :: PL3D_FILE,SLCF_FILE,BNDF_FILE,SLCF_TEXT,BNDF_TEXT,SLCF_UNIT,BNDF_UNIT,SLCF_LABEL
 CHARACTER(256), DIMENSION(FILE_DIM) :: SLICE_LABELS
 CHARACTER(20), DIMENSION(FILE_DIM) :: BNDF_TYPE
@@ -78,12 +71,14 @@ INTEGER :: NFILES_EXIST
 REAL(FB) :: ZOFFSET
 INTEGER :: ZOFFSET_FLAG
 LOGICAL :: EXISTS
-INTEGER :: LU_IN, NARGS, IARG, LENSTRING, BATCHMODE
-CHARACTER(256) :: BUFFER, FILEIN
+INTEGER :: LU_IN, NARGS
+CHARACTER(256) :: BUFFER
 INTEGER, DIMENSION(256) :: SB_TOKS, SE_TOKS
 INTEGER :: N_TOKS
 INTEGER :: ERROR_STATUS
 CHARACTER(256) :: ARG
+
+character(len=100) :: io_emsg
 
 ! Optional arguments in the call sequence
 
@@ -107,24 +102,11 @@ ENDIF
 ZOFFSET=0.0
 ZOFFSET_FLAG=0
 EPS=0.001
-BATCHMODE=0
-FILEIN='STDIN'
+LU_IN=5
 
 ! Parse command line arguments
       
-IF (FILEIN.EQ.'STDIN') THEN
-   LU_IN=5
-ELSE
-   LU_IN=7
-   INQUIRE(FILE=FILEIN,EXIST=EXISTS)
-   IF (.NOT.EXISTS) THEN
-      WRITE(6,*)"*** Fatal error: The file: ",TRIM(FILEIN), " does not exist"
-      STOP
-   ENDIF
-   OPEN(LU_IN,FILE=FILEIN,STATUS='OLD',FORM='FORMATTED')
-ENDIF
-      
-IF (BATCHMODE==0) WRITE(6,*) ' Enter Job ID string (CHID):'
+WRITE(6,*) ' Enter Job ID string (CHID):'
 
 READ(LU_IN,'(a)') CHID
  
@@ -199,21 +181,17 @@ ENDDO READ_SMV
  
 ! Determine what kind of file to work with
 
-IF (BATCHMODE.EQ.0) THEN
-   write(6,*) ' What type of file to parse?'
-   write(6,*) ' PL3D file? Enter 1'
-   write(6,*) ' SLCF file? Enter 2'
-   write(6,*) ' BNDF file? Enter 3'
-ENDIF
+WRITE(6,*) ' What type of file to parse?'
+WRITE(6,*) ' PL3D file? Enter 1'
+WRITE(6,*) ' SLCF file? Enter 2'
+WRITE(6,*) ' BNDF file? Enter 3'
 
 READ(LU_IN,*) IFILE
  
 ! Get sampling factor for data
 
-IF (BATCHMODE.EQ.0) THEN
-   write(6,*) ' Enter Sampling Factor for Data?'
-   write(6,*) ' (1 for all data, 2 for every other point, etc.)'
-ENDIF
+WRITE(6,*) ' Enter Sampling Factor for Data?'
+WRITE(6,*) ' (1 for all data, 2 for every other point, etc.)'
 
 READ(LU_IN,*) NSAM
  
@@ -222,23 +200,16 @@ READ(LU_IN,*) NSAM
 ! ANS(1:1) may be 'y', 'n' or 'z' (or upper case equivalents)
 ! ANS(2:2) may be 'a' or ' '
  
-! y - domain size is limited
-! n - domain size is not limited
-! z - domain size is not limited z levels are offset by zoffset
-! a - slice files are selected based on slice file type and location
-
-IF (BATCHMODE.EQ.0)THEN
-   write(6,*) ' Domain selection:'
-   write(6,*) '   y - domain size is limited'
-   write(6,*) '   n - domain size is not limited'
-   write(6,*) '   z - domain size is not limited and z levels are offset'
-   write(6,*) '   ya, na or za - slice files are selected based on type and location.'
-   write(6,*) '       The y, n, z prefix are defined as before.  '
-ENDIF
+WRITE(6,*) ' Domain selection:'
+WRITE(6,*) '   y - domain size is limited'
+WRITE(6,*) '   n - domain size is not limited'
+WRITE(6,*) '   z - domain size is not limited and z levels are offset'
+WRITE(6,*) '   ya, na or za - slice files are selected based on type and location.'
+WRITE(6,*) '       The y, n, z prefix are defined as before.  '
 READ(LU_IN,'(A)') ANS
 CALL TOUPPER(ANS,ANS)
 IF (ANS(1:1).EQ.'Y') THEN
-   IF (BATCHMODE.EQ.0)write(6,*) ' Enter min/max x, y and z'
+   WRITE(6,*) ' Enter min/max x, y and z'
    READ(LU_IN,*) XS,XF,YS,YF,ZS,ZF
 ELSE
    XS = -100000.
@@ -284,37 +255,35 @@ EXTRA_PLOT3D_FILES: DO
       BACKSPACE(11) 
       READ(11,*) JUNK,PL3D_TIME(I),PL3D_MESH(I)
       READ(11,'(A)') PL3D_FILE(I)
+          PL3D_FILE(I)=TRIM(ADJUSTL(PL3D_FILE(I)))
       DO II=1,5
       IS(II) = II
       READ(11,'(A)') SLCF_TEXT(II)
       READ(11,*)
       READ(11,'(A)') SLCF_UNIT(II)
       ENDDO
-      OPEN(12,FILE=TRIM(PL3D_FILE(I)),FORM='UNFORMATTED',STATUS='OLD',IOSTAT=RCODE)
+      OPEN(12,FILE=TRIM(PL3D_FILE(I)),FORM='UNFORMATTED',STATUS='OLD',IOSTAT=RCODE,iomsg=io_emsg)
       CLOSE(12)
       FILE_EXISTS(I)=.TRUE.
       IF(RCODE.NE.0)THEN
         FILE_EXISTS(I)=.FALSE.
+                WRITE(6,*)"Message:",io_emsg
         CYCLE
       ENDIF
       NFILES_EXIST = NFILES_EXIST + 1
-      IF(BATCHMODE.EQ.0)THEN
-        write(6,'(I3,3X,A,A,I2,A,F5.0)') I,TRIM(PL3D_FILE(I)),', MESH ',PL3D_MESH(I),', Time: ',PL3D_TIME(I)
-      ENDIF
+      WRITE(6,'(I6,3X,A,A,I4,A,F5.0)') I,TRIM(PL3D_FILE(I)),', MESH ',PL3D_MESH(I),', Time: ',PL3D_TIME(I)
       ENDDO SEARCH_PL3D
  
       IF(NFILES_EXIST.EQ.0)THEN
-        write(6,*)"There are no PLOT3D files to convert"
+        WRITE(6,*)"There are no PLOT3D files to convert"
         STOP
       ENDIF
       
-      IF(BATCHMODE.EQ.0)THEN
-       write(6,'(/A)') ' Choose PLOT3D .q file by its index: (0 to end)'
-      ENDIF
+      WRITE(6,'(/A)') ' Choose PLOT3D .q file by its index: (0 to end)'
       READ(LU_IN,*) I
       IF(I.NE.0)THEN
         IF(.NOT.FILE_EXISTS(I))THEN
-          write(6,*)"The file, ",TRIM(PL3D_FILE(I)),", does not exist"
+          WRITE(6,*)"The file, ",TRIM(PL3D_FILE(I)),", does not exist"
           CYCLE
         ENDIF
       ENDIF
@@ -334,7 +303,7 @@ EXTRA_PLOT3D_FILES: DO
       IF (NEW_PLOT3D) ALLOCATE(Q(0:M%IBAR,0:M%JBAR,0:M%KBAR,5))
  
       OPEN(12,FILE=QFILE,FORM='UNFORMATTED',STATUS='OLD')
-      IF(BATCHMODE.EQ.0)write(6,*) ' Reading PLOT3D data file...'
+      WRITE(6,*) ' Reading PLOT3D data file...'
       READ(12) NXP,NYP,NZP
       READ(12) D1,D2,D3,D4
       READ(12) ((((Q(I,J,K,N),I=0,M%IBAR),J=0,M%JBAR),K=0,M%KBAR),N=1,5)
@@ -348,10 +317,10 @@ EXTRA_PLOT3D_FILES: DO
          SLCF_LABEL = 'null'
 
          IF (ZOFFSET_FLAG.EQ.0) THEN
-            IF (BATCHMODE.EQ.0) write(6,*) ' Enter starting and ending time for averaging (s)'
+            WRITE(6,*) ' Enter starting and ending time for averaging (s)'
             READ(LU_IN,*) TBEG,TEND
          ELSE
-            IF (BATCHMODE.EQ.0) write(6,*) ' Enter starting and ending time for averaging (s) and zoffset (m)'
+            WRITE(6,*) ' Enter starting and ending time for averaging (s) and zoffset (m)'
             READ(LU_IN,*) TBEG,TEND,ZOFFSET
          ENDIF
 
@@ -407,11 +376,9 @@ EXTRA_PLOT3D_FILES: DO
             Z1(I)=M%Z(K1)
             Z2(I)=M%Z(K2)
    
-            IF(AUTO_SLICE_FLAG.EQ.0)THEN
-               IF (BATCHMODE.EQ.0)THEN
-                  write(6,'(I5,1x,A,1x,A)')I,TRIM(SLCF_TEXT(I)),TRIM(SLCF_FILE(I))
-                  write(6,'(3x,A,6(1x,f8.2))')'slice bounds:',M%X(I1),M%X(I2),M%Y(J1),M%Y(J2),M%Z(K1),M%Z(K2)
-               ENDIF
+            IF (AUTO_SLICE_FLAG.EQ.0) THEN
+               WRITE(6,'(I5,1x,A,1x,A)')I,TRIM(SLCF_TEXT(I)),TRIM(SLCF_FILE(I))
+               WRITE(6,'(3x,A,6(1x,f8.2))')'slice bounds:',M%X(I1),M%X(I2),M%Y(J1),M%Y(J2),M%Z(K1),M%Z(K2)
             ENDIF
    
          ENDDO SEARCH_SLCF
@@ -423,7 +390,7 @@ EXTRA_PLOT3D_FILES: DO
 
          AUTO_SLICE_IF: IF (AUTO_SLICE_FLAG.EQ.0) THEN
 
-            IF(BATCHMODE.EQ.0) write(6,*)'How many variables to read:'
+            WRITE(6,*)'How many variables to read:'
             READ(LU_IN,*) NV
             N_AUTO_SLICES=1
 
@@ -431,12 +398,10 @@ EXTRA_PLOT3D_FILES: DO
 
             N_AUTO_SLICES=0
             AUTO_SLICE_FLAG=1
-            IF (BATCHMODE.EQ.0)THEN
-               write(6,*)' Enter slice file type index'
-               DO II=1, NSLICE_LABELS
-                  write(6,'(2x,I3,1x,A)')II,TRIM(SLICE_LABELS(II))
-               ENDDO
-            ENDIF
+            WRITE(6,*)' Enter slice file type index'
+            DO II=1, NSLICE_LABELS
+               WRITE(6,'(2x,I3,1x,A)')II,TRIM(SLICE_LABELS(II))
+            ENDDO
             READ(LU_IN,'(I3)')II
 
             AUTO_SLICE_LABEL=TRIM(SLICE_LABELS(II))
@@ -444,10 +409,10 @@ EXTRA_PLOT3D_FILES: DO
                IF(TRIM(AUTO_SLICE_LABEL).NE.TRIM(SLCF_TEXT(II))) CYCLE boundloop
                IF(X2(II)-X1(II).GT.EPS)CYCLE boundloop
                IF(Y2(II)-Y1(II).GT.EPS)CYCLE boundloop
-               IF(BATCHMODE.EQ.0) write(6,'(4(a,f8.3))')"x=",X1(II)," y=",Y1(II)," zmin=",Z1(II)," zmax=",Z2(II)
+               WRITE(6,'(4(a,f8.3))')"x=",X1(II)," y=",Y1(II)," zmin=",Z1(II)," zmax=",Z2(II)
             ENDDO boundloop
         
-            IF (BATCHMODE.EQ.0) write(6,*)"Enter 1D SLICE location (x y zmin zmax)"
+            WRITE(6,*)"Enter 1D SLICE location (x y zmin zmax)"
             READ(LU_IN,*)AX1, AY1, AZ1, AZ2
             EPS=0.001
 
@@ -500,12 +465,7 @@ EXTRA_PLOT3D_FILES: DO
  
       IF (AUTO_SLICE_FLAG.EQ.0)THEN
          SLCF_LABEL_DUMMY=' '
- ! note:  The following two lines of FORTRAN was my attempt at getting EOR to work.
- !        I got compile errors. (My "research" said that you can only use EOR with non-advancing IO)
- !  see http://www.pcc.qub.ac.uk/tec/courses/f77tof90/stu-notes/f90studentMIF_7.html for an example
-         !IF (BATCHMODE.EQ.0) write(6,'(A,I2)',ADVANCE='NO') ' Enter index for variable',MV
-         !READ(LU_IN,*,EOR=200,ADVANCE='NO') I,SLCF_LABEL_DUMMY
-         IF (BATCHMODE.EQ.0) write(6,'(A,I2)') ' Enter index for variable',MV
+         WRITE(6,'(A,I2)') ' Enter index for variable',MV
          READ(LU_IN,'(A)',IOSTAT=ERROR_STATUS) BUFFER
          IF(ERROR_STATUS.NE.0)THEN
              WRITE(6,*)"*** fatal error: read of variable index failed"
@@ -624,7 +584,7 @@ EXTRA_PLOT3D_FILES: DO
       ENDDO
       END SELECT
  
-      IF(BATCHMODE.EQ.0)write(6,'(A,A,A,ES12.4)') ' Integral of ',TRIM(SLCF_TEXT(IS(MV))),' = ',SUM(MV)
+      WRITE(6,'(A,A,A,ES12.4)') ' Integral of ',TRIM(SLCF_TEXT(IS(MV))),' = ',SUM(MV)
  
       ENDDO VARLOOP
 
@@ -633,11 +593,11 @@ EXTRA_PLOT3D_FILES: DO
          
       IF (AUTO_SLICE_FLAG.EQ.1) THEN
         IF(IAUTO.EQ.1)THEN
-          IF(BATCHMODE.EQ.0)write(6,*) 'Enter output file name:'
+          WRITE(6,*) 'Enter output file name:'
           READ(LU_IN,'(A)') OUTFILE
           OPEN(44,FILE=OUTFILE,FORM='FORMATTED',STATUS='UNKNOWN')
  
-          write(6,*) ' Writing to file...      ',TRIM(OUTFILE)
+          WRITE(6,*) ' Writing to file...      ',TRIM(OUTFILE)
           ZMIN=-1000000000000.0
         ENDIF
  
@@ -645,8 +605,8 @@ EXTRA_PLOT3D_FILES: DO
         J3 = J2 - J1 + 1
         K3 = K2 - K1 + 1
  
-! One-dimensional section file
-!    NOTE: IN AUTO_SLICE MODE ONLY VERTICAL 1D SLICES ARE SUPPORTED
+        ! One-dimensional section file
+        ! NOTE: IN AUTO_SLICE MODE ONLY VERTICAL 1D SLICES ARE SUPPORTED
  
         IF (I1.EQ.I2 .AND. J1.EQ.J2 .AND. K1.NE.K2) then
           IF(IAUTO.EQ.1)THEN
@@ -691,25 +651,25 @@ EXTRA_PLOT3D_FILES: DO
             NFILES_EXIST=NFILES_EXIST+1
             IF (CHOICE=='BNDC') BNDF_TYPE(I) = 'CENTERED'
             IF (CHOICE=='BNDF') BNDF_TYPE(I) = 'STAGGERED'
-            IF (BATCHMODE.EQ.0) write(6,'(I3,3X,A,I2,A,A)') I,'MESH ',BNDF_MESH(I), ', ',TRIM(BNDF_TEXT(I))
+            WRITE(6,'(I3,3X,A,I2,A,A)') I,'MESH ',BNDF_MESH(I), ', ',TRIM(BNDF_TEXT(I))
          ENDDO SEARCH_BNDF
     
          IF (NFILES_EXIST.EQ.0)THEN
-            IF(BATCHMODE.EQ.0) write(6,*)"There are no boundary files to convert"
+            WRITE(6,*)"There are no boundary files to convert"
             STOP
          ENDIF
          
-         IF (BATCHMODE.EQ.0) write(6,*) ' Enter starting and ending time for averaging (s)'
+         WRITE(6,*) ' Enter starting and ending time for averaging (s)'
          READ(LU_IN,*) TBEG,TEND
-         IF (BATCHMODE.EQ.0) write(6,*) ' Enter orientation: (plus or minus 1, 2 or 3)'
+         WRITE(6,*) ' Enter orientation: (plus or minus 1, 2 or 3)'
          READ(LU_IN,*) IOR_INPUT
     
-         IF(BATCHMODE.EQ.0)write(6,*) ' Enter number of variables'
+         WRITE(6,*) ' Enter number of variables'
          READ(LU_IN,*) NV
     
          BVARLOOP: DO MV=1,NV
    
-            IF (BATCHMODE.EQ.0) write(6,'(A,I2)') ' Enter boundary file index for variable',MV
+            WRITE(6,'(A,I2)') ' Enter boundary file index for variable',MV
             READ(LU_IN,*) I
             IB(MV) = I
             QFILE = BNDF_FILE(I)
@@ -841,11 +801,11 @@ EXTRA_PLOT3D_FILES: DO
 
    ! Write out the data to an ASCII file
 
-   IF(BATCHMODE.EQ.0)write(6,*) 'Enter output file name:'
+   WRITE(6,*) 'Enter output file name:'
    READ(LU_IN,'(A)') OUTFILE
    OPEN(44,FILE=OUTFILE,FORM='FORMATTED',STATUS='UNKNOWN')
  
-   write(6,*) ' Writing to file...      ',TRIM(OUTFILE)
+   WRITE(6,*) ' Writing to file...      ',TRIM(OUTFILE)
  
    SELECT CASE(IFILE)
  
@@ -865,7 +825,7 @@ EXTRA_PLOT3D_FILES: DO
         LOOP1: DO K=K1,K2,NSAM
         IF (M%Z(K).GT.ZF .OR. M%Z(K).LT.ZS) CYCLE LOOP1
         IF (ZOFFSET_FLAG.EQ.1.AND.M%Z(K)-ZOFFSET.LT.0.0) CYCLE LOOP1
-        write(44,FRMT) M%Z(K)-ZOFFSET,(Q(I2,J2,K,L),L=1,NV)
+        WRITE(44,FRMT) M%Z(K)-ZOFFSET,(Q(I2,J2,K,L),L=1,NV)
         enddo LOOP1
         endif
 
@@ -876,7 +836,7 @@ EXTRA_PLOT3D_FILES: DO
         WRITE(FRMT,'(A,I2.2,A)') "(",NV,"(E12.5,','),E12.5)"
         LOOP2: DO J=J1,J2,NSAM
         IF (M%Y(J).GT.YF .OR. M%Y(J).LT.YS) CYCLE LOOP2
-        write(44,FRMT) M%y(j),(q(i2,j,k2,l),l=1,nv)
+        WRITE(44,FRMT) M%y(j),(q(i2,j,k2,l),l=1,nv)
         enddo LOOP2
         endif
 
@@ -887,7 +847,7 @@ EXTRA_PLOT3D_FILES: DO
         WRITE(FRMT,'(A,I2.2,A)') "(",NV,"(E12.5,','),E12.5)"
         LOOP3: DO I=I1,I2,NSAM
         IF (M%X(I).GT.XF .OR. M%X(I).LT.XS) CYCLE LOOP3
-        write(44,FRMT) M%x(i),(q(i,j2,k2,l),l=1,nv)
+        WRITE(44,FRMT) M%x(i),(q(i,j2,k2,l),l=1,nv)
         enddo LOOP3
         endif
 
@@ -902,7 +862,7 @@ EXTRA_PLOT3D_FILES: DO
         LOOP4: DO J=J1,J2,NSAM
         IF (M%Y(J).GT.YF .OR. M%Y(J).LT.YS) CYCLE LOOP4
         IF (M%Z(K).GT.ZF .OR. M%Z(K).LT.ZS) CYCLE LOOP4
-        write(44,FRMT) M%y(j),M%z(k)-zoffset,(q(i2,j,k,l),l=1,nv)
+        WRITE(44,FRMT) M%y(j),M%z(k)-zoffset,(q(i2,j,k,l),l=1,nv)
         enddo LOOP4
         enddo
         endif
@@ -916,7 +876,7 @@ EXTRA_PLOT3D_FILES: DO
         LOOP5: DO I=I1,I2,NSAM
         IF (M%X(I).GT.XF .OR. M%X(I).LT.XS) CYCLE LOOP5
         IF (M%Z(K).GT.ZF .OR. M%Z(K).LT.ZS) CYCLE LOOP5
-        write(44,FRMT) M%x(i),M%z(k)-zoffset,(q(i,j2,k,l),l=1,nv)
+        WRITE(44,FRMT) M%x(i),M%z(k)-zoffset,(q(i,j2,k,l),l=1,nv)
         enddo LOOP5
         enddo
         endif
@@ -930,7 +890,7 @@ EXTRA_PLOT3D_FILES: DO
         LOOP6: DO I=I1,I2,NSAM
         IF (M%X(I).GT.XF .OR. M%X(I).LT.XS) CYCLE LOOP6
         IF (M%Y(J).GT.YF .OR. M%Y(J).LT.YS) CYCLE LOOP6
-        write(44,FRMT) M%x(i),M%y(j),(q(i,j,k2,l),l=1,nv)
+        WRITE(44,FRMT) M%x(i),M%y(j),(q(i,j,k2,l),l=1,nv)
         enddo LOOP6
         enddo
         endif
@@ -948,7 +908,7 @@ EXTRA_PLOT3D_FILES: DO
         IF (M%X(I).GT.XF .OR. M%X(I).LT.XS) CYCLE LOOP7
         IF (M%Y(J).GT.YF .OR. M%Y(J).LT.YS) CYCLE LOOP7
         IF (M%Z(K).GT.ZF .OR. M%Z(K).LT.ZS) CYCLE LOOP7
-        write(44,FRMT) M%x(i),M%y(j),M%z(k),(q(i,j,k,l),l=1,nv)
+        WRITE(44,FRMT) M%x(i),M%y(j),M%z(k),(q(i,j,k,l),l=1,nv)
         enddo LOOP7
         enddo
         enddo
@@ -1013,7 +973,6 @@ ENDDO EXTRA_PLOT3D_FILES
 STOP
 END PROGRAM FDS2ASCII
 
-! *********************** SEARCH *******************************
 
 SUBROUTINE SEARCH(STRING,LENGTH,LU,IERR)
 
@@ -1062,14 +1021,11 @@ RETURN
 
 END SUBROUTINE SEARCH2
 
-! *********************** USAGE2 *******************************
 
 SUBROUTINE USAGE2(f2aversion)
 IMPLICIT NONE
 
 CHARACTER(255), intent(in) :: f2aversion
-INTEGER :: lastchar
-        
         
 WRITE(6,*)"fds2ascii ",trim(f2aversion)," ",TRIM(GITHASH_PP)
 WRITE(6,*)""
@@ -1085,14 +1041,11 @@ WRITE(6,*)"   input - read input from a file named input or from"
 WRITE(6,*)"           the console if no file is specified"
 END SUBROUTINE USAGE2
 
-! *********************** VERSION2 *******************************
 
 SUBROUTINE VERSION2(f2aversion)
 IMPLICIT NONE
 
 CHARACTER(255), intent(in) :: f2aversion
-
-CHARACTER(60) :: DATE
 
 WRITE(6,'(/A/)')      ' fds2ascii'
 WRITE(6,'(A,A)')      ' Version          : ',TRIM(f2aversion)
@@ -1103,7 +1056,6 @@ WRITE(6,'(A,A/)')     ' Compilation Date : ',TRIM(BUILDDATE_PP)
 
 END SUBROUTINE VERSION2
 
-! *********************** PARSE *******************************
 
 SUBROUTINE PARSE(BUFFER,SB_TOKS,SE_TOKS,N_TOKS)
 
@@ -1159,7 +1111,6 @@ DO I = 1, N_TOKS
 END DO
 END SUBROUTINE PARSE
 
-! *********************** TOUPPER *******************************
 
 SUBROUTINE TOUPPER(BUFFERIN, BUFFEROUT)
 CHARACTER(LEN=*), INTENT(IN) :: BUFFERIN
