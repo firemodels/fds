@@ -81,18 +81,31 @@ $QFDS -d Complex_Geometry shunn3_128_cc_exp_gdv.fds
 $QFDS -d Complex_Geometry shunn3_256_cc_exp_gdv.fds
 $QFDS -d Complex_Geometry shunn3_384_cc_exp_gdv.fds
 
-$QFDS -d Complex_Geometry geom_poiseuille_N10a_theta0.fds
-$QFDS -d Complex_Geometry geom_poiseuille_N20a_theta0.fds
-$QFDS -d Complex_Geometry geom_poiseuille_N40a_theta0.fds
-$QFDS -d Complex_Geometry geom_poiseuille_N80a_theta0.fds
-$QFDS -d Complex_Geometry geom_poiseuille_N10na_theta0.fds
-$QFDS -d Complex_Geometry geom_poiseuille_N20na_theta0.fds
-$QFDS -d Complex_Geometry geom_poiseuille_N40na_theta0.fds
-$QFDS -d Complex_Geometry geom_poiseuille_N80na_theta0.fds
-$QFDS -d Complex_Geometry geom_poiseuille_N10nah_theta0.fds
-$QFDS -d Complex_Geometry geom_poiseuille_N20nah_theta0.fds
-$QFDS -d Complex_Geometry geom_poiseuille_N40nah_theta0.fds
-$QFDS -d Complex_Geometry geom_poiseuille_N80nah_theta0.fds
+$QFDS -d Complex_Geometry geom_poiseuille_N10a_theta0_ibm.fds
+$QFDS -d Complex_Geometry geom_poiseuille_N20a_theta0_ibm.fds
+$QFDS -d Complex_Geometry geom_poiseuille_N40a_theta0_ibm.fds
+$QFDS -d Complex_Geometry geom_poiseuille_N80a_theta0_ibm.fds
+$QFDS -d Complex_Geometry geom_poiseuille_N10na_theta0_ibm.fds
+$QFDS -d Complex_Geometry geom_poiseuille_N20na_theta0_ibm.fds
+$QFDS -d Complex_Geometry geom_poiseuille_N40na_theta0_ibm.fds
+$QFDS -d Complex_Geometry geom_poiseuille_N80na_theta0_ibm.fds
+$QFDS -d Complex_Geometry geom_poiseuille_N10nah_theta0_ibm.fds
+$QFDS -d Complex_Geometry geom_poiseuille_N20nah_theta0_ibm.fds
+$QFDS -d Complex_Geometry geom_poiseuille_N40nah_theta0_ibm.fds
+$QFDS -d Complex_Geometry geom_poiseuille_N80nah_theta0_ibm.fds
+
+$QFDS -d Complex_Geometry geom_poiseuille_N10a_theta0_stm.fds
+$QFDS -d Complex_Geometry geom_poiseuille_N20a_theta0_stm.fds
+$QFDS -d Complex_Geometry geom_poiseuille_N40a_theta0_stm.fds
+$QFDS -d Complex_Geometry geom_poiseuille_N80a_theta0_stm.fds
+$QFDS -d Complex_Geometry geom_poiseuille_N10na_theta0_stm.fds
+$QFDS -d Complex_Geometry geom_poiseuille_N20na_theta0_stm.fds
+$QFDS -d Complex_Geometry geom_poiseuille_N40na_theta0_stm.fds
+$QFDS -d Complex_Geometry geom_poiseuille_N80na_theta0_stm.fds
+$QFDS -d Complex_Geometry geom_poiseuille_N10nah_theta0_stm.fds
+$QFDS -d Complex_Geometry geom_poiseuille_N20nah_theta0_stm.fds
+$QFDS -d Complex_Geometry geom_poiseuille_N40nah_theta0_stm.fds
+$QFDS -d Complex_Geometry geom_poiseuille_N80nah_theta0_stm.fds
 
 $QFDS -d Complex_Geometry geom_bad_inconsistent_normals.fds
 $QFDS -d Complex_Geometry geom_bad_non_manifold_edge.fds

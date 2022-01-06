@@ -6514,18 +6514,31 @@ which can be used to compute the simulation error in $f$, as a function of the m
 %
 We define as $h$ the distance from the lower geometry wall to the closest grid line within it. The we consider discretizations with ${10,20,40,80}$ cells along the $z$ direction and cases: grid aligned $h=0$, grid dependent $h=\Delta z /3$, and fixed $h=\Delta z_{10}/11$, where $\Delta z_{10}$ is the wall normal cell size in the coarsest discretization used.
 
-Friction factor errors computed as $|f-f_{an}|$ are shown in figures~\ref{Fig:PoiseConvg}a,b. Second order convergence of this error measure in all cases can be seen.
-There is more noise on the fixed geometry case $h=\Delta z_{10}/11$, because the cut-cell size ratios and interpolation coefficients are changing from grid to grid. These error fluctuations are not seen when $h=\Delta z /3$, and cut-cells keep same sizes and interpolation coefficients respect to the Cartesian grids.
+Consider the case of forcing cross velocities via the immersed boundary method (IBM). Friction factor errors computed as $|f-f_{an}|$ are shown in figures~\ref{Fig:PoiseConvg}a,b. Second order convergence of this error measure in all cases can be seen. There is more noise on the fixed geometry case $h=\Delta z_{10}/11$, because the cut-cell size ratios and interpolation coefficients are changing from grid to grid. These error fluctuations are not seen when $h=\Delta z /3$, and cut-cells keep same sizes and interpolation coefficients respect to the Cartesian grids.
 %
 % figure
 \begin{figure}[h]
       \centering
       \includegraphics[trim = 5mm 0mm 5mm 0mm, clip,
-       width=0.49\linewidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/geom_poiseuille_convergence_theta0a.pdf}
+       width=0.49\linewidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/geom_poiseuille_convergence_theta0a_ibm.pdf}
       \includegraphics[trim = 5mm 0mm 5mm 0mm, clip,
-       width=0.49\linewidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/geom_poiseuille_convergence_theta0na.pdf}
-      \caption{Poiseuille flow created by two geometries: Convergence trends on friction factor (Moody) for $h=0$, grid dependent $h=\Delta z/3$ and fixed $h=\Delta z_{10}/11$. Fluctuations on the friction factor error in the last case are produced by changes in cut-cell aspect ratios and velocity interpolation stencils as grids are refined.}
+       width=0.49\linewidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/geom_poiseuille_convergence_theta0na_ibm.pdf}
+      \caption{Poiseuille flow created by two geometries, IBM for cross velocities: Convergence trends on friction factor (Moody) for $h=0$, grid dependent $h=\Delta z/3$ and fixed $h=\Delta z_{10}/11$. Fluctuations on the friction factor error in the last case are produced by changes in cut-cell aspect ratios and velocity interpolation stencils as grids are refined.}
       \label{Fig:PoiseConvg}
+\end{figure}
+%
+
+In case of stress method for cross velocities (STM), the friction factor convergence can be seen in figures~\ref{Fig:PoiseConvg2}a,b.
+%
+% figure
+\begin{figure}[h]
+      \centering
+      \includegraphics[trim = 5mm 0mm 5mm 0mm, clip,
+       width=0.49\linewidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/geom_poiseuille_convergence_theta0a_stm.pdf}
+      \includegraphics[trim = 5mm 0mm 5mm 0mm, clip,
+       width=0.49\linewidth]{../FDS_Verification_Guide/SCRIPT_FIGURES/geom_poiseuille_convergence_theta0na_stm.pdf}
+      \caption{Poiseuille flow created by two geometries, STM for cross velocities: Convergence trends on friction factor (Moody) for $h=0$, grid dependent $h=\Delta z/3$ and fixed $h=\Delta z_{10}/11$.}
+      \label{Fig:PoiseConvg2}
 \end{figure}
 %
 
