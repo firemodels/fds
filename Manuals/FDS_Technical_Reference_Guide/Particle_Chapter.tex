@@ -79,36 +79,25 @@ Here, $W$ is the relative area of ``white'' of the shadowgraph formed by sunligh
 \subsection{Drag Reduction}
 \label{sec:threeway}
 
-Typically, Lagrangian particle models only consider two-way coupling between the gas and particles. This means that each particle interacts with the carrier fluid individually. Momentum lost from a particle is added to the fluid and vice versa. If the spray is dense enough, however, the individual particles influence each other through aerodynamic interactions. These effects cannot be captured by the current Eulerian-Lagrangian model for two reasons. First, the Lagrangian particles occupy no volume in the Eulerian space. Second, the separation lengths would be of sub-grid scale in most practical simulations. The aerodynamic interactions start to have an effect when the average particle spacing is less than 10 diameters~\cite{Prahl:1,Prahl:2}. This corresponds to a particle volume fraction, $\alpha$, of approximately 0.01. Volume fractions as high as this can sometimes be achieved inside water mist sprays. If the spray is even more dense, particle-particle collisions or four-way coupling would need to be considered.
+Typically, Lagrangian particle models assume that the particles are independent of each other. If the spray is dense enough, however, the individual particles influence each other through aerodynamic interactions. These effects cannot be captured by the current Eulerian-Lagrangian model for two reasons. First, the Lagrangian particles occupy no volume in the Eulerian space. Second, the separation lengths would be of sub-grid scale in most practical simulations. The aerodynamic interactions start to have an effect when the average particle spacing is less than 10~diameters~\cite{Prahl:1,Prahl:2}. This corresponds to a particle volume fraction, $\alpha$, of approximately 0.01. Volume fractions as high as this can sometimes be achieved inside water mist sprays. If the spray is even more dense, particle-particle collisions or four-way coupling would need to be considered.
 
-In a configuration where two particles with the same diameter are directly in line, the reduction of the drag force on the second particle can be modeled by the following~\cite{Ramirez:1}:
+In a configuration where two particles with the same diameter are directly in line, the reduction of the drag force on the second particle is assumed to be:~\cite{Ramirez:1}:
 \be
-  C_{\rm d} = C_{\rm d,0} \, \frac{F}{F_0}, \label{eq:dragred}
+  C_{\rm d} = C_{\rm d,0} \, \frac{F}{F_0} \label{eq:dragred}
 \ee
 where $C_{\rm d,0}$ is the single particle drag coefficient and $F / F_0$ is the hydrodynamic force ratio of the trailing particle to an isolated particle:
 \be
-  \frac{F}{F_0} = W \left[ 1 + \frac{\RE}{16} \frac{1}{\left( L / D - 1
-  / 2 \right)^2} \exp \left( - \frac{\RE}{16} \frac{1}{\left( L / D - 1
-  / 2 \right)^{}} \right) \right]. \label{eq:dragredfact}
+  \frac{F}{F_0} = W \left[ 1 + \frac{\RE}{16} \frac{1}{\left( L / D - 1 \right)^2} \exp \left( - \frac{\RE}{16} \frac{1}{\left( L / D - 1 \right)^{}} \right) \right] \label{eq:dragredfact}
 \ee
-where $\RE$ is the single particle Reynolds number, $L$ is the distance between the particles, and $W$ is the non-dimensional, non-disturbed wake velocity at the center of the trailing particle
+where $\RE$ is the single particle Reynolds number, $L$ is the distance between the particle centers, and $W$ is the non-dimensional, non-disturbed wake velocity at the center of the trailing particle
 \be
-  W = 1 - \frac{C_{\rm d,0}}{2} \left[ 1 - \exp \left( - \frac{\RE}{16}
-  \frac{1}{\left( L / D - 1 / 2 \right)} \right) \right]. \label{eq:Wake-Vel}
+  W = 1 - \frac{C_{\rm d,0}}{2} \left[ 1 - \exp \left( - \frac{\RE}{16} \frac{1}{\left( L / D - 1  \right)} \right) \right] \label{eq:Wake-Vel}
 \ee
-This model assumes that the spheres are traveling directly in-line with each other. As such, this provides an upper bound for the strength of the aerodynamic interactions between two particles of the same size. The average separation distance $L/D$ between particle centers is calculated from the local particle volume fraction, $\alpha$, as follows:
+The average separation distance between particle centers, $L/D$, is calculated from the local particle volume fraction, $\alpha$, as follows:
 \be
-  L/D = \left(\pi/6\alpha \right)^{\frac{1}{3}}.
+  L/D = \left(\pi/6\alpha \right)^{\frac{1}{3}}
 \ee
-This simple approximation assumes that particles are uniformly distributed in each computational cell~\cite{Bhattacharyya2008}.
-
-In reality, the spray is not monodisperse and the separation distance between the interacting particles varies. In the simulation, the drag reduction factor in Eq.~\ref{eq:dragred} is only used when the local droplet volume fraction exceeds \num{1e-5}. The drag reduction model is turned on by default.
-
-As $L/D$ approaches zero, the drag coefficient approaches
-\be
-  C_{\rm d} = C_{\rm d,0} \left(1 - \frac{C_{\rm d,0}}{2}\right),
-\ee
-which is 78\% of that for an isolated spherical particle.
+This simple approximation assumes that particles are uniformly distributed in each computational cell~\cite{Bhattacharyya2008}. In reality, the spray is not monodisperse and the separation distance between the interacting particles varies. In the simulation, the drag reduction factor in Eq.~\ref{eq:dragred} is only used when the local droplet volume fraction exceeds \num{1e-5}.
 
 An alternative approach to drag reduction was provided by Prahl et al.~\cite{Prahl:1} who studied the interaction between two solid spheres in steady or pulsating flow by detailed numerical simulations. According to their study, the above equation underestimates the drag reduction significantly at small drop-to-drop distances. The inflow pulsations were found to reduce the effect of the drag reduction. At large distances, the two results are similar, the Ram\'{\i}rez-Mu\~{n}oz correlation showing more drag reduction. This is not surprising since the velocity profile of a fully developed axi-symmetric wake behind an axi-symmetric body is used in developing the drag reduction correction in Eqs.~\ref{eq:dragredfact} and \ref{eq:Wake-Vel}. At short distances, the wake is not fully developed and the assumption does not hold.
 
