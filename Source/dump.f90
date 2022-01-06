@@ -2435,9 +2435,7 @@ IF (SIM_MODE/=DNS_MODE) THEN
    END SELECT
    DO N=0,N_SURF
       SF=>SURFACE(N)
-      IF (N==INERT_SURF_INDEX .OR. &
-          N==HVAC_SURF_INDEX  .OR. &
-          SF%USER_DEFINED          ) THEN
+      IF ( N==DEFAULT_SURF_INDEX .OR. SF%USER_DEFINED .OR. (HVAC_SOLVE .AND. N==HVAC_SURF_INDEX) ) THEN
          SELECT CASE (SF%NEAR_WALL_TURB_MODEL)
             CASE(WALE)
                WRITE(LU_OUTPUT,'(A,A,A,F4.2,A)') '   Surface ',TRIM(SF%ID),' Eddy Viscosity: WALE Model (C_WALE = ',C_WALE,')'
