@@ -445,26 +445,34 @@ where {\ct N} is the number of OpenMP threads to assign to each MPI process for 
 
 If you wish to run FDS on more than one computer, do the following:
 \begin{enumerate}
-\item Create a text file, say {\ct hostfile.txt}, and in it list, line by line, the names of your computers.
+\item Create a text file, say {\ct hosts.txt}, and in it list, line by line, the names of your computers:
+
+      fred:3 \\
+      wilma:2 \\
+      dino:3
+      
+      where the number following the name is the number of MPI processes that you want to invoke on that computer. The sum of all the numbers should be the number of MPI processes for the job, usually equal to the number of meshes.
+      
 \item Test your network by running the following test program:
 
-    {\ct mpiexec -n <procs> -f hostfile.txt test\_mpi}
+    {\ct mpiexec -machine hosts.txt test\_mpi}
 
-    where {\ct <procs>} is the number of computers you want to test. If this command returns a ``Hello World'' message from each of your computers, proceed to the next step. If this command fails, check that you can ``see'' the other machines by ``pinging'' them, and check that the other computer can ``see'' your computer as well. Also, make sure that the same version of FDS is installed on the other computers.
+    If this command returns a ``Hello World'' message from each of the computers you listed in the {\ct hosts.txt} file, proceed to the next step. If this command fails, check that you can ``see'' the other computers by ``pinging'' them, and check that the other computers can ``see'' your computer as well. Also, make sure that the same version of FDS is installed on all computers.
 
 \item Share (with both read and write privilege) a working directory on your machine. Do not put this directory within the ``Program Files'' folder because it is write-protected. Share the working directory with everybody so that all other computers can see it. Note how this directory is defined on the other computers. Sometimes it is {\ct \textbackslash\textbackslash<my\_computer>\textbackslash<my\_shared\_directory>\textbackslash} and sometimes it is defined via the numerical IP address, like {\ct \textbackslash\textbackslash129.6.129.87\textbackslash<my\_shared\_directory>\textbackslash}. The definition depends on the way your domain name server (DNS) works. In any case, do not leave blank spaces within any directory or file names. We have found that blanks create all sorts of trouble. Unless you are a DOS/Windows expert, avoid them.
 
-\item Within the command prompt, {\ct cd} to the working directory. Find or create within the working directory a relatively small, simple, two mesh FDS input file. At the command prompt, type:
+\item Within the command prompt, {\ct cd} to the working directory. At the command prompt, type:
 
-   {\ct mpiexec -n <procs> -ppn <procs per node> -f hostfile.txt fds job\_name.fds}
+   {\ct mpiexec -wdir <working directory> -machine hosts.txt fds job\_name.fds}
 
-   where {\ct <procs>} is the number of MPI processes that you are launching and {\ct <procs per node>} is the number of MPI processes to run on each computer. Add the argument
+   where {\ct <working directory>} is the full path name of the directory from which the command was invoked. Add the argument
 
    {\ct -env OMP\_NUM\_THREADS <OpenMP threads>}
 
-   to set the number of OpenMP threads per MPI process on all computers. The default is {\em not} 1, but rather depends on the number of logical processors your computer has. If you accidently set too many OpenMP threads, you can overload your logical processors and reduce the job efficiency.
-
-\item If successful, you should see the usual FDS printout indicating the processes being assigned to the computers. If not successful, check with your network administrator or monitor the FDS help forums for advice.
+   to set the number of OpenMP threads per MPI process on all computers. The default is {\em not} 1, but rather depends on the number of logical processors your computer has. If you accidently set too many OpenMP threads, you can overload your logical processors and reduce the job efficiency. 
+   
+\item If successful, you should see the usual FDS printout indicating which MPI processes are assigned to which computer. If not successful, check with your network administrator or monitor the FDS help forums for advice.
+\item For more options, consult {\em Intel® MPI Library Developer Reference for Windows* OS, Developer Reference, Version: 2021.5 (or later), Global Hydra Options}.
 \end{enumerate}
 
 
@@ -6473,7 +6481,7 @@ This means that during the temperature update of a particular grid cell in Mesh~
 
 Lagrangian particles can represent a wide variety of subgrid-scale objects, from office clutter to vegetation. To create solid, non-liquid particles, you must add a {\ct SURF\_ID} to the {\ct PART} line. The specified {\ct SURF} line contains the parameters that describe the thermophysical properties and geometric parameters of the particle. These properties are the same as those you would apply to an {\ct OBST} or {\ct VENT}. FDS uses the same solid phase conduction and pyrolysis algorithm for particles as it does for solid walls.
 
-If the {\ct SURF} line that is associated with the particle class calls for it, the particles will heat up due to convection from the surrounding gases and radiation from near and distant sources. The convective heat transfer coefficient takes into account the particle geometry, and the radiative heat flux is based on the integrated intensity. That is, the radiation heat flux is the average over all angles. 
+If the {\ct SURF} line that is associated with the particle class calls for it, the particles will heat up due to convection from the surrounding gases and radiation from near and distant sources. The convective heat transfer coefficient takes into account the particle geometry, and the radiative heat flux is based on the integrated intensity. That is, the radiation heat flux is the average over all angles.
 
 
 \subsection{Basic Geometry and Boundary Conditions}
