@@ -1,6 +1,8 @@
 !> \brief Fire Dynamics Simulator (FDS) is a computational fluid dynamics (CFD) code designed to model
 !> fire and other thermal phenomena.
 
+! DUMMY change to test GitHub Actions CI
+
 PROGRAM FDS
 
 USE PRECISION_PARAMETERS
