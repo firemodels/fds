@@ -198,7 +198,7 @@ impi_intel_linux_64 : obj = fds_impi_intel_linux_64
 impi_intel_linux_64 : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
-impi_intel_linux_64_db : FFLAGS = -m64 -fc=$(I_IFORT) -check all -warn all -O0 -g -traceback -fpe0 -nofltconsistency -stand:f18 -no-wrap-margin $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL) -DUSE_IFPORT
+impi_intel_linux_64_db : FFLAGS = -m64 -fc=$(I_IFORT) -check all -warn all -diag-error=remark,warn,error -O0 -g -traceback -fpe0 -nofltconsistency -stand:f18 -no-wrap-margin $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL) -DUSE_IFPORT
 impi_intel_linux_64_db : LFLAGSMKL = $(LFLAGSMKL_INTEL)
 impi_intel_linux_64_db : LFLAGS =
 impi_intel_linux_64_db : FCOMPL = mpiifort
@@ -325,7 +325,7 @@ mpi_gnu_linux_64 : obj = fds_mpi_gnu_linux_64
 mpi_gnu_linux_64 : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
-mpi_gnu_linux_64_db : FFLAGS = -m64 -O0 -std=f2018 -ggdb -Wall -Wcharacter-truncation -Wno-target-lifetime -fcheck=all -fbacktrace -ffpe-trap=invalid,zero,overflow -frecursive -ffpe-summary=none -fall-intrinsics $(GITINFOGNU) $(GNU_COMPINFO) $(FFLAGSMKL_GNU_OPENMPI) $(GFORTRAN_OPTIONS)
+mpi_gnu_linux_64_db : FFLAGS = -m64 -O0 -std=f2018 -ggdb -Wall -Werror -Wcharacter-truncation -Wno-target-lifetime -fcheck=all -fbacktrace -ffpe-trap=invalid,zero,overflow -frecursive -ffpe-summary=none -fall-intrinsics $(GITINFOGNU) $(GNU_COMPINFO) $(FFLAGSMKL_GNU_OPENMPI) $(GFORTRAN_OPTIONS)
 mpi_gnu_linux_64_db : LFLAGSMKL = $(LFLAGSMKL_GNU_OPENMPI)
 mpi_gnu_linux_64_db : FCOMPL = mpifort
 mpi_gnu_linux_64_db : FOPENMPFLAGS = -fopenmp

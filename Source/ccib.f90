@@ -11276,9 +11276,10 @@ END SUBROUTINE IBM_RCEDGE_TAU_OMG
 
 SUBROUTINE IBM_EDGE_TAU_OMG
 
-REAL(EB) :: VEL_T,VEL_GHOST,MUA
-INTEGER  :: IEP,JEP,KEP,SURF_INDEX,ITMP,SKIP_FCT,NPE_LIST_START,NPE_LIST_COUNT,IRCEDG,IRC,JRC,KRC
-LOGICAL :: ALTERED_GRADIENT(-2:2)
+REAL(EB) :: VEL_T,VEL_GHOST,MUA,UUP(2),UUM(2)
+INTEGER  :: IEP,JEP,KEP,SURF_INDEX,ITMP,SKIP_FCT,NPE_LIST_START,NPE_LIST_COUNT,IRCEDG,IRC,JRC,KRC,&
+            N_SOLID_CELLS_ON_EDGE,IOR,IVL,IIGM,IIGP,JJGM,JJGP,KKGM,KKGP,ICMM,ICMP,ICPM,ICPP
+LOGICAL :: ALTERED_GRADIENT(-2:2),CORNER_EDGE
 REAL(EB):: XB_IB,OMEV_EP(-2:2),TAUV_EP(-2:2),DWDY,DVDZ,DUDZ,DWDX,DUDY,DVDX, &
            DUIDXJ_EP(-2:2),MU_DUIDXJ_EP(-2:2),EC_B(-2:2),EC_EP(-2:2),DEL_EP,VEL_GAS,CEP,CB
 
@@ -11293,6 +11294,36 @@ II = IJKE( 1,IE)
 JJ = IJKE( 2,IE)
 KK = IJKE( 3,IE)
 IEC= IJKE( 4,IE) ! IEC is the edges X1AXIS
+ICMM   = IJKE( 5,IE)
+ICPM   = IJKE( 6,IE)
+ICMP   = IJKE( 7,IE)
+ICPP   = IJKE( 8,IE)
+
+! Get the velocity components at the appropriate cell faces
+
+COMPONENT: SELECT CASE(IEC)
+   CASE(1) COMPONENT
+      UUP(1)  = VV(II,JJ,KK+1)
+      UUM(1)  = VV(II,JJ,KK)
+      UUP(2)  = WW(II,JJ+1,KK)
+      UUM(2)  = WW(II,JJ,KK)
+      DXX(1)  = DY(JJ)
+      DXX(2)  = DZ(KK)
+   CASE(2) COMPONENT
+      UUP(1)  = WW(II+1,JJ,KK)
+      UUM(1)  = WW(II,JJ,KK)
+      UUP(2)  = UU(II,JJ,KK+1)
+      UUM(2)  = UU(II,JJ,KK)
+      DXX(1)  = DZ(KK)
+      DXX(2)  = DX(II)
+   CASE(3) COMPONENT
+      UUP(1)  = UU(II,JJ+1,KK)
+      UUM(1)  = UU(II,JJ,KK)
+      UUP(2)  = VV(II+1,JJ,KK)
+      UUM(2)  = VV(II,JJ,KK)
+      DXX(1)  = DX(II)
+      DXX(2)  = DY(JJ)
+END SELECT COMPONENT
 
 ! Loop over all possible orientations of edge and reassign velocity gradients if appropriate
 EP=1
@@ -11303,6 +11334,10 @@ ORIENTATION_LOOP: DO IS=1,3
    IF (IS==IEC) CYCLE ORIENTATION_LOOP
    SIGN_LOOP: DO I_SGN=-1,1,2
 
+      ! IOR is the orientation of the wall cells adjacent to the edge
+
+      IOR = I_SGN*IS
+
       ! Determine Index_Coordinate_Direction
       ! IEC=1, ICD=1 refers to DWDY; ICD=2 refers to DVDZ
       ! IEC=2, ICD=1 refers to DUDZ; ICD=2 refers to DWDX
@@ -11311,6 +11346,46 @@ ORIENTATION_LOOP: DO IS=1,3
       IF (IS>IEC) ICD = IS-IEC
       IF (IS<IEC) ICD = IS-IEC+3
       ICD_SGN = I_SGN * ICD
+
+      ! Define the appropriate gas and ghost velocity
+
+      IF (ICD==1) THEN ! Used to pick the appropriate velocity component
+         IVL=2
+      ELSE !ICD==2
+         IVL=1
+      ENDIF
+
+      IF (IOR<0) THEN
+         VEL_GAS   = UUM(IVL)
+         VEL_GHOST = UUP(IVL)
+         IIGM = I_CELL(ICMM)
+         JJGM = J_CELL(ICMM)
+         KKGM = K_CELL(ICMM)
+         IF (ICD==1) THEN
+            IIGP = I_CELL(ICMP)
+            JJGP = J_CELL(ICMP)
+            KKGP = K_CELL(ICMP)
+         ELSE ! ICD==2
+            IIGP = I_CELL(ICPM)
+            JJGP = J_CELL(ICPM)
+            KKGP = K_CELL(ICPM)
+         ENDIF
+      ELSE
+         VEL_GAS   = UUP(IVL)
+         VEL_GHOST = UUM(IVL)
+         IF (ICD==1) THEN
+            IIGM = I_CELL(ICPM)
+            JJGM = J_CELL(ICPM)
+            KKGM = K_CELL(ICPM)
+         ELSE ! ICD==2
+            IIGM = I_CELL(ICMP)
+            JJGM = J_CELL(ICMP)
+            KKGM = K_CELL(ICMP)
+         ENDIF
+         IIGP = I_CELL(ICPP)
+         JJGP = J_CELL(ICPP)
+         KKGP = K_CELL(ICPP)
+      ENDIF
 
       IF(.NOT.IBM_EDGE%PROCESS_EDGE_ORIENTATION(ICD_SGN)) CYCLE SIGN_LOOP
 
@@ -11664,6 +11739,19 @@ ORIENTATION_LOOP: DO IS=1,3
 
       ALTERED_GRADIENT(ICD_SGN) = .TRUE.
 
+      ! Determine if the cell edge is an external corner:
+      CORNER_EDGE=.FALSE.
+      N_SOLID_CELLS_ON_EDGE=0
+      SELECT CASE(IEC)
+      CASE(1)
+         N_SOLID_CELLS_ON_EDGE=COUNT(CCVAR(II,JJ:JJ+1,KK:KK+1,IBM_CGSC)==IBM_SOLID)
+      CASE(2)
+         N_SOLID_CELLS_ON_EDGE=COUNT(CCVAR(II:II+1,JJ,KK:KK+1,IBM_CGSC)==IBM_SOLID)
+      CASE(3)
+         N_SOLID_CELLS_ON_EDGE=COUNT(CCVAR(II:II+1,JJ:JJ+1,KK,IBM_CGSC)==IBM_SOLID)
+      END SELECT
+      IF (N_SOLID_CELLS_ON_EDGE==1) CORNER_EDGE=.TRUE.
+
       ! Here we have a cut-face, and OME and TAU in an external EDGE for extrapolation to IBEDGE.
       ! Now get value at the boundary using wall model:
 
@@ -11673,7 +11761,7 @@ ORIENTATION_LOOP: DO IS=1,3
             DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/(2._EB*DXN_STRM_UB)
             MU_DUIDXJ(ICD_SGN) = MUA*DUIDXJ(ICD_SGN)
          CASE (NO_SLIP_BC)
-            VEL_GHOST = 2._EB*VEL_T - VEL_GAS
+            IF (.NOT.CORNER_EDGE) VEL_GHOST = 2._EB*VEL_T - VEL_GAS
             DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/(2._EB*DXN_STRM_UB)
             MU_DUIDXJ(ICD_SGN) = MUA*DUIDXJ(ICD_SGN)
          CASE (WALL_MODEL_BC)
@@ -11682,9 +11770,9 @@ ORIENTATION_LOOP: DO IS=1,3
             ! Finally OME_E, TAU_E:
             ! SLIP_COEF = -1, no slip, VEL_GHOST=-VEL_GAS
             ! SLIP_COEF =  1, free slip, VEL_GHOST=VEL_T
-            VEL_GHOST = VEL_T + 0.5_EB*(SLIP_FACTOR-1._EB)*(VEL_GAS-VEL_T)
+            IF (.NOT.CORNER_EDGE) VEL_GHOST = VEL_T + SLIP_FACTOR*(VEL_GAS-VEL_T)
             DUIDXJ(ICD_SGN) = REAL(I_SGN,EB)*(VEL_GAS-VEL_GHOST)/(2._EB*DXN_STRM_UB)
-            MU_DUIDXJ(ICD_SGN) = RHO_FACE*U_TAU**2 * SIGN(1._EB,REAL(I_SGN,EB)*(VEL_GAS-VEL_T))
+            MU_DUIDXJ(ICD_SGN) = RHO_FACE*U_TAU**2 * SIGN(1._EB,DUIDXJ(ICD_SGN))
       END SELECT
 
       ! VLG(ICD_SGN)=VEL_GAS
