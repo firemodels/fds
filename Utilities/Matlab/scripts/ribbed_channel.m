@@ -56,8 +56,8 @@ for ii=1:length(geom)
         Ub_fds = M{i}.data(:,2);
         H(1+i)=plot(t_fds,Ub_fds,fds_marker{i});
         t_range = find(t_fds>2);
-        if abs(mean(Ub_fds(t_range))-Ub)/Ub > 0.01
-            disp(['Matlab Warning: Ub mean nx ',num2str(nx(i)),' = ',num2str(mean(Ub_fds(t_range)))])
+        if abs(mean(Ub_fds(t_range))-Ub)/Ub > 0.1
+            disp(['Matlab Warning: Ub mean nx ',geom{ii},num2str(nx(i)),' = ',num2str(mean(Ub_fds(t_range)))])
         end
     end
 
