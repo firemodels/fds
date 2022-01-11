@@ -1949,27 +1949,23 @@ As seen in the left side of Fig.~\ref{fig_heated_channel}, the velocity profile 
 
 \subsection{Cartesian Geometry}
 
-In this test case, we compare FDS results with particle-image velocimetry (PIV) data from Casara and Arts \cite{Casara:1} for flow in a square duct with a ribbed obstruction.  The rib height is $h = 0.1$ m and the duct height is $D = 0.3$ m.  The distance between ribs in the periodic duct (the ``pitch'') is $10 \, h$.  The length of our domain is therefore 1 m.  The Reynolds number based on $D$ is nominally 40,000 (this is discussed more later). The FDS mesh is uniform in each direction.  We test grid resolutions of $h/\delta x = \{2,4,8,16\}$.
+In this test case, we compare FDS results with particle-image velocimetry (PIV) data from Casara and Arts \cite{Casara:1,Casara:2} for flow in a square duct with a ribbed obstruction. This configuration was also studied numerically by \cite{Lohasz:1}. The rib height is $h = 0.03$ m and the duct height is $D = 0.1$ m.  The distance between ribs in the periodic duct (the ,``pitch'') is $10 \, h$.  The length of our domain is therefore 0.3 m. The bulk velocity $U_b$ is 6.2 \si{m/s} with ambient air at 20 \si{\degreeCelsius} (density is 1.2 \si{kg/m^3} and the dynamic viscosity is $1.86 \times 10^{-5}$ \si{kg/m/s}). The Reynolds number based on $D$ is nominally 40,000. The streamwise mean pressure drop is adjusted to achieve the desired mean bulk flowrate (see Fig.~\ref{fig_ribbed_channel_Ubulk}).  The FDS mesh is uniform in each direction.  We test grid resolutions of $h/\delta x = \{3,6,12,24\}$.
 
-A side view image of mean velocity vectors in the 3D flow is shown in Fig.~\ref{fig_ribbed_channel_image} for the $h/\delta x = 8$ case.  The goals of this calculation are to predict the flow profile above the ribs and the recirculation patterns on the windward and leeward side of the ribs.  To measure the FDS results, a line of devices (represented by the green dots in the figure) is placed near the floor of the duct.  Where the mean $u$ velocity component changes sign indicates a reattachment location.  Results for the mean streamwise velocity near the surface are shown in the upper-left plot of Fig.~\ref{fig_ribbed_channel}.  The independent axis on the plots ranges from 0 m to 1 m, representing the center to center distance between ribs.  Note that the image is offset and ranges from -0.4 m to 0.6 m.  As can be seen from the plot, the $h/\delta x = 8$ resolution (green sideways triangles) slightly overpredicts the reattachment length, with the zero crossing near $x/h = 4.5$ (note that the correspondence with the vectors in the image).  The finest resolution, $h/\delta x=16$, is sufficient to accurately capture the reattachment zone.
+A side view image of mean velocity vectors in the 3D flow is shown in Fig.~\ref{fig_ribbed_channel_image} for the $h/\delta x = 12$ case.  The goals of this calculation are to predict the flow profile above the ribs and the recirculation patterns on the windward and leeward side of the ribs.  To measure the FDS results, a line of devices (represented by the green dots in the figure) is placed near the floor of the duct.  A change in sign of the mean $u$ velocity component indicates a reattachment location.  Results for the mean streamwise velocity near the surface are shown in the upper-left plot of Fig.~\ref{fig_ribbed_channel}.  The independent axis on the plots ranges from 0 m to 0.3 m, representing the center to center distance between ribs.  Note that the image is offset and ranges from -0.125 m to 0.175 m.  As can be seen from the plot, the $h/\delta x = 12$ resolution (green sideways triangles) provides sufficient accuracy of the reattachment length (note that the correspondence with the vectors in the image).  Despite the fact that the coarser cases do not perfectly capture the reattachment region, it is remarkable that with $h/\delta x = 3$ we achieve any recirculation at all.  The mean streamwise velocity profile at the rib centerline is shown in the upper-right plot of Fig.~\ref{fig_ribbed_channel}. The finest resolution, $h/\delta x=24$, is sufficient to accurately capture the root-mean-square velocity fluctuations on top of the rib, as can be seen in the bottom-right plot of the figure.
 
-Despite the fact that the coarser cases do not perfectly capture the reattachment region, it is remarkable that with $h/\delta x = 2$ we achieve any recirculation at all.  The wiggles in the solution are due to numerical dispersion error.
-
-The mean streamwise velocity profile at the rib centerline is shown in the upper-right plot of Fig.~\ref{fig_ribbed_channel}.  Here we point out that the setup for this case is basically copied from Loh\'asz et al.~\cite{Lohasz:1}.  Their method of forcing, however, is ambiguous.  Here we adjust the FDS \textct{FORCE\_VECTOR} to obtain a bulk velocity of 1 m/s; results are confirmed in Fig.~\ref{fig_ribbed_channel_Ubulk}.
+Note that the discrepancy between the model and experimental results for the mean streamwise profile above the rib (Fig.~\ref{fig_ribbed_channel}, upper-right) can be explained by an asymmetry in the PIV data, as can be seen in Figures 11 and 12 of \cite{Casara:2}.  These results should not be interpreted as spanwise means, they are based on PIV data along the centerline plane.
 
 \begin{figure}[ht]
 \centering
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/ribbed_channel_Ubulk}
-\caption[Bulk velocity {\ct ribbed\_channel} test case]{Bulk velocity for the ribbed channel cases measured in the duct section in front of the rib compared with the experimental value of 1 m/s.}
+\caption[Bulk velocity {\ct ribbed\_channel} test case]{Bulk velocity for the ribbed channel cases measured in the duct section in front of the rib compared with the experimental value of 6.2 m/s (thick black line).}
 \label{fig_ribbed_channel_Ubulk}
 \end{figure}
-
-The bottom-left and -right plots in Fig.~\ref{fig_ribbed_channel} show the RMS velocity along the duct floor and the center profile above the rib, respectively. As can be seen, the $h/\delta x = 16$ case provides accurate results.  This resolution for this problem corresponds to wall $y^+$ values around 30.
 
 \begin{figure}[ht]
 \centering
 \includegraphics[width=.8\textwidth]{SCRIPT_FIGURES/ribbed_channel_80_s1000}
-\caption[The {\ct ribbed\_channel} test case]{Mean velocity vectors colored by velocity magnitude (red is 2 m/s) for the ribbed square duct case with $h/\delta x = 8$.}
+\caption[The {\ct ribbed\_channel} test case]{Mean velocity vectors colored by velocity magnitude for the ribbed square duct case with $h/\delta x = 12$.}
 \label{fig_ribbed_channel_image}
 \end{figure}
 
@@ -1980,7 +1976,7 @@ The bottom-left and -right plots in Fig.~\ref{fig_ribbed_channel} show the RMS v
       \includegraphics[height=2.2in]{SCRIPT_FIGURES/ribbed_channel_urms_strm} &
       \includegraphics[height=2.2in]{SCRIPT_FIGURES/ribbed_channel_urms_prof} \\
    \end{tabular*}
-   \caption[Mean and RMS velocity profiles for ribbed square duct flow]{\label{fig_ribbed_channel} Mean and RMS velocity profiles for ribbed square duct flow. Comparison with PIV data from Casara and Arts \cite{Casara:1,Lohasz:1}.}
+   \caption[Mean and RMS velocity profiles for ribbed square duct flow]{\label{fig_ribbed_channel} Mean and RMS velocity profiles for ribbed square duct flow. Comparison with PIV data from Casara and Arts \cite{Casara:1,Casara:2}.}
 \end{figure}
 
 \clearpage
@@ -1991,7 +1987,7 @@ Below we plot the results for the {\ct ribbed\_channel\_geom} test series.  Thes
 \begin{figure}[ht]
 \centering
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/ribbed_channel_geom_Ubulk}
-\caption[Bulk velocity {\ct ribbed\_channel\_geom} test case]{Bulk velocity for ribbed channel geom cases measured in the duct section in front of the rib compared with the experimental value of 1 m/s.}
+\caption[Bulk velocity {\ct ribbed\_channel\_geom} test case]{Bulk velocity for ribbed channel geom cases measured in the duct section in front of the rib compared with the experimental value of 6.2 m/s.}
 \label{fig_ribbed_channel_geom_Ubulk}
 \end{figure}
 
@@ -2002,7 +1998,7 @@ Below we plot the results for the {\ct ribbed\_channel\_geom} test series.  Thes
       \includegraphics[height=2.2in]{SCRIPT_FIGURES/ribbed_channel_geom_urms_strm} &
       \includegraphics[height=2.2in]{SCRIPT_FIGURES/ribbed_channel_geom_urms_prof} \\
    \end{tabular*}
-   \caption[Mean and RMS velocity profiles for ribbed channel geom]{\label{fig_ribbed_channel_Geom} Mean and RMS velocity profiles for ribbed square duct flow with complex geometry. Comparison with PIV data from Casara and Arts \cite{Casara:1,Lohasz:1}.}
+   \caption[Mean and RMS velocity profiles for ribbed channel geom]{\label{fig_ribbed_channel_Geom} Mean and RMS velocity profiles for ribbed square duct flow with complex geometry. Comparison with PIV data from Casara and Arts \cite{Casara:1,Casara:2}.}
 \end{figure}
 
 
