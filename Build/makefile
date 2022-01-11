@@ -325,7 +325,7 @@ mpi_gnu_linux_64 : obj = fds_mpi_gnu_linux_64
 mpi_gnu_linux_64 : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
-mpi_gnu_linux_64_db : FFLAGS = -m64 -O0 -std=f2018 -ggdb -Wall -Werror -Wcharacter-truncation -Wno-target-lifetime -fcheck=all -fbacktrace -ffpe-trap=invalid,zero,overflow -frecursive -ffpe-summary=none -fall-intrinsics $(GITINFOGNU) $(GNU_COMPINFO) $(FFLAGSMKL_GNU_OPENMPI) $(GFORTRAN_OPTIONS)
+mpi_gnu_linux_64_db : FFLAGS = -m64 -O0 -std=f2018 -ggdb -Wall -Werror -Wunused-parameter -Wcharacter-truncation -Wno-target-lifetime -fcheck=all -fbacktrace -ffpe-trap=invalid,zero,overflow -frecursive -ffpe-summary=none -fall-intrinsics $(GITINFOGNU) $(GNU_COMPINFO) $(FFLAGSMKL_GNU_OPENMPI) $(GFORTRAN_OPTIONS)
 mpi_gnu_linux_64_db : LFLAGSMKL = $(LFLAGSMKL_GNU_OPENMPI)
 mpi_gnu_linux_64_db : FCOMPL = mpifort
 mpi_gnu_linux_64_db : FOPENMPFLAGS = -fopenmp
