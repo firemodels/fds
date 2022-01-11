@@ -74,7 +74,7 @@ for ii=1:length(geom)
 
     % add Git revision if file is available
 
-    Git_Filename = [datadir,'ribbed_channel',geom{ii},num2str(nx(end)),'_git.txt'];
+    Git_Filename = [datadir,'ribbed_channel',geom{ii},num2str(nx(1)),'_git.txt'];
     addverstr(gca,Git_Filename,'linear')
 
     % print to pdf
@@ -143,7 +143,7 @@ for ii=1:length(geom)
 
     % add Git revision if file is available
 
-    Git_Filename = [datadir,'ribbed_channel',geom{ii},num2str(nx(end)),'_git.txt'];
+    Git_Filename = [datadir,'ribbed_channel',geom{ii},num2str(nx(1)),'_git.txt'];
     addverstr(gca,Git_Filename,'linear')
 
     % print to pdf
@@ -245,7 +245,7 @@ for ii=1:length(geom)
 
     % add Git revision if file is available
 
-    Git_Filename = [datadir,'ribbed_channel',geom{ii},num2str(nx(end)),'_git.txt'];
+    Git_Filename = [datadir,'ribbed_channel',geom{ii},num2str(nx(1)),'_git.txt'];
     addverstr(gca,Git_Filename,'linear')
 
     % print to pdf
@@ -295,7 +295,7 @@ for ii=1:length(geom)
 
     % add Git revision if file is available
 
-    Git_Filename = [datadir,'ribbed_channel',geom{ii},num2str(nx(end)),'_git.txt'];
+    Git_Filename = [datadir,'ribbed_channel',geom{ii},num2str(nx(1)),'_git.txt'];
     addverstr(gca,Git_Filename,'linear')
 
     % print to pdf
