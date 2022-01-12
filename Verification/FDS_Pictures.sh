@@ -71,7 +71,6 @@ $RUNSMV -d Scalar_Analytical_Solution soborot_charm_square_wave_64
 $RUNSMV -d Sprinklers_and_Sprays cascade
 $RUNSMV -d Turbulence csmag_64
 $RUNSMV -d Turbulence dsmag_64
-$RUNSMV -d Turbulence ribbed_channel_80
 $RUNSMV -d WUI Bova_1a
 $RUNSMV -d WUI Bova_1b
 $RUNSMV -d WUI Bova_4a
