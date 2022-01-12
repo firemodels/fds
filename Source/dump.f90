@@ -9,6 +9,7 @@ MODULE DUMP
 USE PRECISION_PARAMETERS
 USE MESH_VARIABLES
 USE GLOBAL_CONSTANTS
+USE OUTPUT_CLOCKS
 USE MESH_POINTERS
 USE DEVICE_VARIABLES
 USE CONTROL_VARIABLES
@@ -134,18 +135,17 @@ IF (T>=PROF_CLOCK(M%PROF_COUNTER)) THEN
 ENDIF
 
 IF (T>=UVW_CLOCK(M%UVW_COUNTER)) THEN
-   WRITE(FN_UVW,'(A,A,I0,A,I0,A)') TRIM(CHID),'_uvw_t',M%UVW_COUNTER,'_m',NM,'.csv'
-   CALL DUMP_UVW(NM,FN_UVW)
+   IF (PERIODIC_TEST==9) THEN
+      WRITE(FN_SPEC,'(A,A,I0,A)') TRIM(CHID),'_spec_',M%UVW_COUNTER,'.csv'
+      CALL DUMP_UVW(NM,FN_SPEC)
+   ELSE
+      WRITE(FN_UVW,'(A,A,I0,A,I0,A)') TRIM(CHID),'_uvw_t',M%UVW_COUNTER,'_m',NM,'.csv'
+      CALL DUMP_UVW(NM,FN_UVW)
+   ENDIF
    M%UVW_COUNTER = M%UVW_COUNTER + 1
 ENDIF
 
 PERIODIC_TEST_SELECT: SELECT CASE(PERIODIC_TEST)
-   CASE(2)
-      IF (T>=UVW_CLOCK(M%UVW_COUNTER)) THEN
-         WRITE(FN_UVW,'(A,A,I0,A)') TRIM(CHID),'_uvw_',M%UVW_COUNTER,'.csv'
-         CALL DUMP_UVW(NM,FN_UVW)
-         M%UVW_COUNTER = M%UVW_COUNTER + 1
-      ENDIF
    CASE(7,11)
       IF (T>=MMS_TIMER .AND. NM==1) THEN
          WRITE(FN_MMS,'(A,A)') TRIM(CHID),'_mms.csv'
@@ -158,12 +158,12 @@ PERIODIC_TEST_SELECT: SELECT CASE(PERIODIC_TEST)
          CALL DUMP_ROTCUBE_MMS(NM,FN_MMS,T)
          MMS_TIMER=HUGE_EB
       ENDIF
-   CASE(9)
-      IF (T>=UVW_CLOCK(M%UVW_COUNTER)) THEN
-         WRITE(FN_SPEC,'(A,A,I0,A)') TRIM(CHID),'_spec_',M%UVW_COUNTER,'.csv'
-         CALL SPECTRAL_OUTPUT(NM,FN_SPEC)
-         M%UVW_COUNTER = M%UVW_COUNTER + 1
-      ENDIF
+!  CASE(9)
+!     IF (T>=UVW_CLOCK(M%UVW_COUNTER)) THEN
+!        WRITE(FN_SPEC,'(A,A,I0,A)') TRIM(CHID),'_spec_',M%UVW_COUNTER,'.csv'
+!        CALL SPECTRAL_OUTPUT(NM,FN_SPEC)
+!        M%UVW_COUNTER = M%UVW_COUNTER + 1
+!     ENDIF
       IF (T>=TURB_INIT_CLOCK) THEN
          TURB_INIT_CLOCK=HUGE_EB ! only write ini_salsa.dat file once
          CALL SANDIA_OUT(NM)
@@ -2849,9 +2849,8 @@ ENDIF
 
 ! Write out PLOT3D Info
 
-IF (DT_PL3D<T_END) THEN
+IF (PL3D_CLOCK(0)<T_END) THEN
    WRITE(LU_OUTPUT,'(//A/)')   ' PLOT3D Information'
-   WRITE(LU_OUTPUT,'(A,F8.1/)')'   Sampling Interval (s)          ',DT_PL3D
    DO N=1,5
       IF (PLOT3D_Y_INDEX(N)>0) THEN
          WRITE(LU_OUTPUT,'(I4,A,A,A,A)') N,' Quantity: ',TRIM(PLOT3D_QUANTITY(N)), &
@@ -2869,7 +2868,6 @@ ENDIF
 
 IF (N_ISOF>0) THEN
    WRITE(LU_OUTPUT,'(//A/)')   ' Isosurface File Information'
-   WRITE(LU_OUTPUT,'(A,F8.3/)')'   Sampling Interval (s)          ',DT_ISOF
    DO N=1,N_ISOF
       IS => ISOSURFACE_FILE(N)
       WRITE(LU_OUTPUT,'(I4,A,A,A,10F8.3)')N,' Quantity: ',TRIM(IS%SMOKEVIEW_LABEL),', VALUE(s):',(IS%VALUE(I),I=1,IS%N_VALUES)
@@ -2882,7 +2880,6 @@ MESH_LOOP_4: DO NM=1,NMESHES
    M => MESHES(NM)
    IF (M%N_SLCF>0) THEN
       WRITE(LU_OUTPUT,'(//A,I5/)')   ' Slice File Information, Mesh ',NM
-      WRITE(LU_OUTPUT,'(A,F8.3/)')'   Sampling Interval (s)          ',DT_SLCF
       DO N=1,M%N_SLCF
          SL=> M%SLICE(N)
          WRITE(LU_OUTPUT,'(I4,A,6I4,A,A)') N,' Nodes:',SL%I1,SL%I2,SL%J1,SL%J2,SL%K1,SL%K2,', Quantity: ',TRIM(SL%SMOKEVIEW_LABEL)
@@ -2894,7 +2891,6 @@ ENDDO MESH_LOOP_4
 
 IF (N_BNDF>0) THEN
    WRITE(LU_OUTPUT,'(//A/)')   ' Boundary File Information'
-   WRITE(LU_OUTPUT,'(A,F8.3/)')'   Sampling Interval (s)          ',DT_BNDF
    DO N=1,N_BNDF
       BF => BOUNDARY_FILE(N)
       WRITE(LU_OUTPUT,'(I4,A,A)') N,' Quantity: ',TRIM(BF%SMOKEVIEW_LABEL)
@@ -8961,7 +8957,7 @@ TENSOR_OUTPUT = RHOP*U_I*U_J + RHOP*(HP-KP) + TAU_IJ
 END FUNCTION TENSOR_OUTPUT
 
 
-!> \brief Write out to CHID_devc.csv the DEViCe output quantities every DT_DEVC s
+!> \brief Write out to CHID_devc.csv the DEViCe output quantities
 !> \param T Current simulation time (s)
 
 SUBROUTINE DUMP_DEVICES(T)
@@ -9147,7 +9143,7 @@ ENDIF
 END SUBROUTINE DUMP_DEVICES
 
 
-!> \brief Write out to CHID_ctrl.csv the ConTRoL output quantities every DT_CTRL s
+!> \brief Write out to CHID_ctrl.csv the ConTRoL output quantities
 !> \param T Current simulation time (s)
 
 SUBROUTINE DUMP_CONTROLS(T)
@@ -9174,7 +9170,7 @@ ENDDO
 END SUBROUTINE DUMP_CONTROLS
 
 
-!> \brief Write out to CHID_prof_nn.csv the PROFile data every DT_PROF s
+!> \brief Write out to CHID_prof_nn.csv the PROFile data
 !> \param T Current simulation time (s)
 !> \param NM Mesh number
 
@@ -9647,12 +9643,12 @@ FILE_LOOP: DO NF=1,N_BNDF
 
       ! Integrate the boundary quantity in time
 
-      IF (BF%TIME_INTEGRAL_INDEX>0) THEN
+      IF (BNDF_COUNTER>0 .AND. BF%TIME_INTEGRAL_INDEX>0) THEN
          DO N=N1,N2
             DO L=L1,L2
                NC = NC + 1
                BNDF_TIME_INTEGRAL(NC,BF%TIME_INTEGRAL_INDEX) = BNDF_TIME_INTEGRAL(NC,BF%TIME_INTEGRAL_INDEX) + &
-                                                               PP(L,N)*REAL(DT_BNDF,FB)
+                                                               PP(L,N)*(BNDF_CLOCK(BNDF_COUNTER)-BNDF_CLOCK(BNDF_COUNTER-1))
                PP(L,N) = BNDF_TIME_INTEGRAL(NC,BF%TIME_INTEGRAL_INDEX)
             ENDDO
          ENDDO

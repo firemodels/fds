@@ -520,35 +520,6 @@ INTEGER :: ICYC,ICYC_RESTART=0,NFRAMES,PERIODIC_TEST=0,SIM_MODE=3,TURB_MODEL=0,F
            STOP_AT_ITER=0,HT3D_TEST=0,WALL_INCREMENT=2,WALL_INCREMENT_HT3D=1,&
            CLIP_DT_RESTRICTIONS_MAX=5,BNDF_TIME_INTEGRALS=0
 
-! Clocks for output file dumps
-
-INTEGER :: RAMP_BNDF_INDEX=0  !< Ramp index for boundary file time series
-INTEGER :: RAMP_CTRL_INDEX=0  !< Ramp index for control file time series
-INTEGER :: RAMP_CPU_INDEX=0   !< Ramp index for CPU file time series
-INTEGER :: RAMP_DEVC_INDEX=0  !< Ramp index for device file time series
-INTEGER :: RAMP_FLSH_INDEX=0  !< Ramp index for flush time series
-INTEGER :: RAMP_GEOM_INDEX=0  !< Ramp index for geometry output
-INTEGER :: RAMP_HRR_INDEX =0  !< Ramp index for hrr file time series
-INTEGER :: RAMP_ISOF_INDEX=0  !< Ramp index for isosurface file time series
-INTEGER :: RAMP_MASS_INDEX=0  !< Ramp index for mass file time series
-INTEGER :: RAMP_PART_INDEX=0  !< Ramp index for particle file time series
-INTEGER :: RAMP_PL3D_INDEX=0  !< Ramp index for Plot3D file time series
-INTEGER :: RAMP_PROF_INDEX=0  !< Ramp index for profile file time series
-INTEGER :: RAMP_RADF_INDEX=0  !< Ramp index for radiation file time series
-INTEGER :: RAMP_RSRT_INDEX=0  !< Ramp index for restart file time series
-INTEGER :: RAMP_SLCF_INDEX=0  !< Ramp index for slice file time series
-INTEGER :: RAMP_SL3D_INDEX=0  !< Ramp index for 3D slice file time series
-INTEGER :: RAMP_SM3D_INDEX=0  !< Ramp index for smoke3d file time series
-INTEGER :: RAMP_UVW_INDEX =0  !< Ramp index for velocity file time series
-INTEGER :: CPU_COUNTER=0,CTRL_COUNTER=0,DEVC_COUNTER=0,FLSH_COUNTER=0,GEOM_COUNTER=0,HRR_COUNTER=0,MASS_COUNTER=0,RSRT_COUNTER=0
-REAL(EB), ALLOCATABLE, DIMENSION(:) :: BNDF_CLOCK, CPU_CLOCK,CTRL_CLOCK,DEVC_CLOCK,FLSH_CLOCK,GEOM_CLOCK, HRR_CLOCK,&
-                                       ISOF_CLOCK,MASS_CLOCK,PART_CLOCK,PL3D_CLOCK,PROF_CLOCK,RADF_CLOCK,RSRT_CLOCK,&
-                                       SLCF_CLOCK,SL3D_CLOCK,SM3D_CLOCK,UVW_CLOCK
-REAL(EB) :: TURB_INIT_CLOCK=-1.E10_EB
-REAL(EB) :: MMS_TIMER=1.E10_EB
-REAL(EB) :: DT_SLCF,DT_BNDF,DT_DEVC,DT_PL3D,DT_PART,DT_RESTART,DT_ISOF,DT_HRR,DT_MASS,DT_PROF,DT_CTRL,&
-            DT_FLUSH,DT_SL3D,DT_GEOM,DT_CPU,DT_RADF,DT_MOM,DT_SMOKE3D,DT_UVW
-REAL(EB) :: T_RADF_BEGIN,T_RADF_END
 LOGICAL  :: UPDATE_DEVICES_AGAIN=.FALSE.
 
 ! Miscellaneous mesh dimensions
@@ -752,6 +723,44 @@ REAL(EB) :: TGA_FINAL_TEMPERATURE=800._EB  !< Final Temperature (C) to use for s
 LOGICAL :: IBLANK_SMV=.TRUE.  !< Parameter passed to smokeview (in .smv file) to control generation of blockages
 
 END MODULE GLOBAL_CONSTANTS
+
+
+!> \brief Clocks for output file dumps
+
+MODULE OUTPUT_CLOCKS
+
+USE PRECISION_PARAMETERS
+IMPLICIT NONE (TYPE,EXTERNAL)
+
+INTEGER :: RAMP_BNDF_INDEX=0  !< Ramp index for boundary file time series
+INTEGER :: RAMP_CTRL_INDEX=0  !< Ramp index for control file time series
+INTEGER :: RAMP_CPU_INDEX=0   !< Ramp index for CPU file time series
+INTEGER :: RAMP_DEVC_INDEX=0  !< Ramp index for device file time series
+INTEGER :: RAMP_FLSH_INDEX=0  !< Ramp index for flush time series
+INTEGER :: RAMP_GEOM_INDEX=0  !< Ramp index for geometry output
+INTEGER :: RAMP_HRR_INDEX =0  !< Ramp index for hrr file time series
+INTEGER :: RAMP_ISOF_INDEX=0  !< Ramp index for isosurface file time series
+INTEGER :: RAMP_MASS_INDEX=0  !< Ramp index for mass file time series
+INTEGER :: RAMP_PART_INDEX=0  !< Ramp index for particle file time series
+INTEGER :: RAMP_PL3D_INDEX=0  !< Ramp index for Plot3D file time series
+INTEGER :: RAMP_PROF_INDEX=0  !< Ramp index for profile file time series
+INTEGER :: RAMP_RADF_INDEX=0  !< Ramp index for radiation file time series
+INTEGER :: RAMP_RSRT_INDEX=0  !< Ramp index for restart file time series
+INTEGER :: RAMP_SLCF_INDEX=0  !< Ramp index for slice file time series
+INTEGER :: RAMP_SL3D_INDEX=0  !< Ramp index for 3D slice file time series
+INTEGER :: RAMP_SM3D_INDEX=0  !< Ramp index for smoke3d file time series
+INTEGER :: RAMP_UVW_INDEX =0  !< Ramp index for velocity file time series
+INTEGER :: CPU_COUNTER=0,CTRL_COUNTER=0,DEVC_COUNTER=0,FLSH_COUNTER=0,GEOM_COUNTER=0,HRR_COUNTER=0,MASS_COUNTER=0,RSRT_COUNTER=0
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: BNDF_CLOCK, CPU_CLOCK,CTRL_CLOCK,DEVC_CLOCK,FLSH_CLOCK,GEOM_CLOCK, HRR_CLOCK,&
+                                       ISOF_CLOCK,MASS_CLOCK,PART_CLOCK,PL3D_CLOCK,PROF_CLOCK,RADF_CLOCK,RSRT_CLOCK,&
+                                       SLCF_CLOCK,SL3D_CLOCK,SM3D_CLOCK,UVW_CLOCK
+REAL(EB) :: TURB_INIT_CLOCK=-1.E10_EB
+REAL(EB) :: MMS_TIMER=1.E10_EB
+REAL(EB) :: DT_SLCF,DT_BNDF,DT_DEVC,DT_PL3D,DT_PART,DT_RESTART,DT_ISOF,DT_HRR,DT_MASS,DT_PROF,DT_CTRL,&
+            DT_FLUSH,DT_SL3D,DT_GEOM,DT_CPU,DT_RADF,DT_MOM,DT_SMOKE3D,DT_UVW
+
+END MODULE OUTPUT_CLOCKS
+
 
 !> \brief Radiation parameters
 
