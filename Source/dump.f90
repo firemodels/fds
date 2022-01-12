@@ -1539,6 +1539,10 @@ ENDDO
 WRITE(LU_SMV,'(/A)') 'NMESHES'
 WRITE(LU_SMV,'(I3)') NMESHES
 
+!  beginning and ending simulation time
+WRITE(LU_SMV,'(/A)') 'TIMES'
+WRITE(LU_SMV,'(2F11.3)') T_BEGIN, T_END
+
 ! Information used for touring in Smokeview
 
 WRITE(LU_SMV,'(/A)') 'VIEWTIMES'
