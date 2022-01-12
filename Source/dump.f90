@@ -9648,7 +9648,7 @@ FILE_LOOP: DO NF=1,N_BNDF
             DO L=L1,L2
                NC = NC + 1
                BNDF_TIME_INTEGRAL(NC,BF%TIME_INTEGRAL_INDEX) = BNDF_TIME_INTEGRAL(NC,BF%TIME_INTEGRAL_INDEX) + &
-                                                               PP(L,N)*(BNDF_CLOCK(BNDF_COUNTER)-BNDF_CLOCK(BNDF_COUNTER-1))
+                                                               PP(L,N)*REAL(BNDF_CLOCK(BNDF_COUNTER)-BNDF_CLOCK(BNDF_COUNTER-1),FB)
                PP(L,N) = BNDF_TIME_INTEGRAL(NC,BF%TIME_INTEGRAL_INDEX)
             ENDDO
          ENDDO
