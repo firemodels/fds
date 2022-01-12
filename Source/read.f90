@@ -12078,7 +12078,7 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
       ! Check if there are any devices with specified XB that do not fall within a mesh.
 
       IF (XB(1)>-1.E5_EB) THEN
-         IF (QUANTITY/='PATH OBSCURATION' .AND. QUANTITY/='TRANSMISSION') CALL CHECK_XB(XB)
+         CALL CHECK_XB(XB)
          BAD = .TRUE.
          CHECK_MESH_LOOP: DO NM=1,NMESHES
             M=>MESHES(NM)
