@@ -2313,7 +2313,7 @@ DT_PROF      = -1._EB                  ; RAMP_PROF    = 'null'
 DT_RADF      =  2._EB*(T_END-T_BEGIN)  ; RAMP_RADF    = 'null'
 DT_RESTART   =  2._EB*(T_END-T_BEGIN)  ; RAMP_RESTART = 'null'
 DT_SLCF      = -1._EB                  ; RAMP_SLCF    = 'null'
-DT_SL3D      =  2._EB*(T_END-T_BEGIN)  ; RAMP_SL3D    = 'null'
+DT_SL3D      =  (T_END-T_BEGIN)/5._EB  ; RAMP_SL3D    = 'null'
 DT_SMOKE3D   = -1._EB                  ; RAMP_SMOKE3D = 'null'
 DT_UVW       =  2._EB*(T_END-T_BEGIN)  ; RAMP_UVW     = 'null'
 
