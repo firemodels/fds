@@ -742,14 +742,6 @@ $QFDS -d Turbulence wale_64.fds
 $QFDS -d Turbulence yplus_8.fds
 $QFDS -d Turbulence yplus_16.fds
 $QFDS -d Turbulence yplus_32.fds
-$QFDS -d Turbulence ribbed_channel_20.fds
-$QFDS -d Turbulence ribbed_channel_40.fds
-# $QFDS -p 24 -d Turbulence ribbed_channel_80.fds # output file committed to fds/Verification/Turbulence/
-# $QFDS -p 192 -d Turbulence ribbed_channel_160.fds # output file committed to fds/Verification/Turbulence/
-$QFDS -d Turbulence ribbed_channel_geom_20.fds
-$QFDS -d Turbulence ribbed_channel_geom_40.fds
-# $QFDS -p 24 -d Turbulence ribbed_channel_geom_80.fds # output file committed to fds/Verification/Turbulence/
-# $QFDS -p 192 -d Turbulence ribbed_channel_geom_160.fds # output file committed to fds/Verification/Turbulence/
 $QFDS -d Turbulence sem_flat_leddy_p2.fds
 $QFDS -d Turbulence sem_par_leddy_p2.fds
 $QFDS -d Turbulence sem_atm_leddy_p2.fds
