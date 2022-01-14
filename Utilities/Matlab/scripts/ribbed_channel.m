@@ -5,7 +5,8 @@
 close all
 clear all
 
-datadir = '../../Verification/Turbulence/';
+outdir = '../../../out/Casara_Arts_Ribbed_Channel/';
+expdir = '../../../exp/Casara_Arts_Ribbed_Channel/';
 plotdir = '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/';
 
 plot_style
@@ -20,20 +21,20 @@ fds_marker = {'r+-' 'c^-' 'g>-' 'k-'};
 fds_key = {'FDS {\it h/\deltax}=3' 'FDS {\it h/\deltax}=6' 'FDS {\it h/\deltax}=12' 'FDS {\it h/\deltax}=24'};
 geom = {'_','_geom_'};
 
-if ~exist([datadir,'ribbed_channel_data.csv'])
-    display(['Error: File ' [datadir,'ribbed_channel_data.csv'] ' does not exist. Skipping case.'])
+if ~exist([expdir,'ribbed_channel_data.csv'])
+    display(['Error: File ' [expdir,'ribbed_channel_data.csv'] ' does not exist. Skipping case.'])
     return
 end
 
-DATA = importdata([datadir,'ribbed_channel_data.csv'],',',1);
+DATA = importdata([expdir,'ribbed_channel_data.csv'],',',1);
 
 for ii=1:length(geom)
 
     % check existence of device files
 
     for i=1:lnx
-        if ~exist([datadir,'ribbed_channel',geom{ii},num2str(nx(i)),'_devc.csv'])
-            display(['Error: File ' [datadir,'ribbed_channel',geom{ii},num2str(nx(i)),'_devc.csv'] ' does not exist. Skipping case.'])
+        if ~exist([outdir,'ribbed_channel',geom{ii},num2str(nx(i)),'_devc.csv'])
+            display(['Error: File ' [outdir,'ribbed_channel',geom{ii},num2str(nx(i)),'_devc.csv'] ' does not exist. Skipping case.'])
             return
         end
     end
@@ -41,7 +42,7 @@ for ii=1:length(geom)
     % check bulk velocity is 6.2 m/s
 
     for i=1:lnx
-        M{i} = importdata([datadir,'ribbed_channel',geom{ii},num2str(nx(i)),'_devc.csv'],',',2);
+        M{i} = importdata([outdir,'ribbed_channel',geom{ii},num2str(nx(i)),'_devc.csv'],',',2);
     end
 
     figure
@@ -56,7 +57,7 @@ for ii=1:length(geom)
         Ub_fds = M{i}.data(:,2);
         H(1+i)=plot(t_fds,Ub_fds,fds_marker{i});
         t_range = find(t_fds>2);
-        if abs(mean(Ub_fds(t_range))-Ub)/Ub > 0.1
+        if abs(mean(Ub_fds(t_range))-Ub)/Ub > 0.01
             disp(['Matlab Warning: Ub mean nx ',geom{ii},num2str(nx(i)),' = ',num2str(mean(Ub_fds(t_range)))])
         end
     end
@@ -74,7 +75,7 @@ for ii=1:length(geom)
 
     % add Git revision if file is available
 
-    Git_Filename = [datadir,'ribbed_channel',geom{ii},num2str(nx(1)),'_git.txt'];
+    Git_Filename = [outdir,'ribbed_channel',geom{ii},num2str(nx(1)),'_git.txt'];
     addverstr(gca,Git_Filename,'linear')
 
     % print to pdf
@@ -89,8 +90,8 @@ for ii=1:length(geom)
     % check existence of line device files
 
     for i=1:lnx
-        if ~exist([datadir,'ribbed_channel',geom{ii},num2str(nx(i)),'_line.csv'])
-            display(['Error: File ' [datadir,'ribbed_channel',geom{ii},num2str(nx(i)),'_line.csv'] ' does not exist. Skipping case.'])
+        if ~exist([outdir,'ribbed_channel',geom{ii},num2str(nx(i)),'_line.csv'])
+            display(['Error: File ' [outdir,'ribbed_channel',geom{ii},num2str(nx(i)),'_line.csv'] ' does not exist. Skipping case.'])
             return
         end
     end
@@ -98,7 +99,7 @@ for ii=1:length(geom)
     % read experimental and FDS data files
 
     for i=1:lnx
-        M{i} = importdata([datadir,'ribbed_channel',geom{ii},num2str(nx(i)),'_line.csv'],',',2);
+        M{i} = importdata([outdir,'ribbed_channel',geom{ii},num2str(nx(i)),'_line.csv'],',',2);
     end
 
     % organize and plot streamwise U along bottom of channel
@@ -143,7 +144,7 @@ for ii=1:length(geom)
 
     % add Git revision if file is available
 
-    Git_Filename = [datadir,'ribbed_channel',geom{ii},num2str(nx(1)),'_git.txt'];
+    Git_Filename = [outdir,'ribbed_channel',geom{ii},num2str(nx(1)),'_git.txt'];
     addverstr(gca,Git_Filename,'linear')
 
     % print to pdf
@@ -196,7 +197,7 @@ for ii=1:length(geom)
 
     % add Git revision if file is available
 
-    Git_Filename = [datadir,'ribbed_channel',geom{ii},num2str(nx(1)),'_git.txt'];
+    Git_Filename = [outdir,'ribbed_channel',geom{ii},num2str(nx(1)),'_git.txt'];
     addverstr(gca,Git_Filename,'linear')
 
     % print to pdf
@@ -245,7 +246,7 @@ for ii=1:length(geom)
 
     % add Git revision if file is available
 
-    Git_Filename = [datadir,'ribbed_channel',geom{ii},num2str(nx(1)),'_git.txt'];
+    Git_Filename = [outdir,'ribbed_channel',geom{ii},num2str(nx(1)),'_git.txt'];
     addverstr(gca,Git_Filename,'linear')
 
     % print to pdf
@@ -295,7 +296,7 @@ for ii=1:length(geom)
 
     % add Git revision if file is available
 
-    Git_Filename = [datadir,'ribbed_channel',geom{ii},num2str(nx(1)),'_git.txt'];
+    Git_Filename = [outdir,'ribbed_channel',geom{ii},num2str(nx(1)),'_git.txt'];
     addverstr(gca,Git_Filename,'linear')
 
     % print to pdf

@@ -32,6 +32,7 @@ shift $(($OPTIND-1))
 
 in=$1
 in=${in%*.*}
+serr=$in.serr
 
 if [ "$FED" == "" ]; then
   if [ "$MOVIE" == "" ]; then
@@ -46,7 +47,7 @@ fi
 
 fulldir=$BASEDIR/$dir
 echo ""
-echo "--- generating images for: $in.smv, `date`"
+echo "--- generating images for: $in.smv"
 
 scriptfile=$scratchdir/script.$$
 
@@ -70,5 +71,7 @@ fi
 
 #source ~/.bashrc_fds default
 cd $fulldir
-echo $SMV $FED $SMVBINDIR $RUNSCRIPT $in
-$SMV $FED $SMVBINDIR -redirect $RUNSCRIPT $in
+$SMV $FED $SMVBINDIR -redirect $RUNSCRIPT $in >& $serr
+grep -I -E "Segmentation|Error" $serr
+grep -i -I -E "Warning"         $serr | grep -v sRGB
+
