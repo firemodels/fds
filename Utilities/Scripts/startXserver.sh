@@ -17,7 +17,7 @@ GETNEWPORT ()
 }
 
 if [ "`uname`" != "Darwin" ]; then
-  PAUSE=30
+  PAUSE=8
   echo "setting up graphics environment (pausing $PAUSE s)"
   XVFB=Xvfb
   GETNEWPORT 
