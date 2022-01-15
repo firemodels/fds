@@ -247,7 +247,7 @@ mpi_intel_linux_64_db : setup $(obj_mpi)
 
 # OSX Intel Fortran and Open MPI
  
-mpi_intel_osx_64 : FFLAGS = -m64 -O2 -ipo -stand:f18 -no-wrap-margin $(GITINFO) $(OPENMPI_COMPINFO) $(FFLAGSMKL_CUSTOM)
+mpi_intel_osx_64 : FFLAGS = -m64 -O2 -stand:f18 -no-wrap-margin $(GITINFO) $(OPENMPI_COMPINFO) $(FFLAGSMKL_CUSTOM)
 mpi_intel_osx_64 : LFLAGSMKL = $(LFLAGSMKL_CUSTOM)
 mpi_intel_osx_64 : LFLAGS = -static-intel
 mpi_intel_osx_64 : FOPENMPFLAGS = -qopenmp -qopenmp-link static
