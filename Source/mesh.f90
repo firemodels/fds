@@ -74,7 +74,6 @@ TYPE MESH_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: M_DOT_PPP        !< Mass source term, \f$ \dot{m}_{\alpha,ijk}''' \f$
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: M_DOT_G_PPP_S    !< Mass source term, \f$ \dot{m}_{\alpha,ijk}''' \f$, 3D solid
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: RHO_ZZ_G_S
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: TRI_COR
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: ADV_FX
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: ADV_FY
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: ADV_FZ
@@ -348,7 +347,7 @@ REAL(EB), POINTER, DIMENSION(:,:,:) :: &
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZ,ZZS,REAC_SOURCE_TERM,DEL_RHO_D_DEL_Z,FX,FY,FZ, &
                                          SCALAR_WORK1,SCALAR_WORK2,SCALAR_WORK3,SCALAR_WORK4, &
                                          Q_REAC,AVG_DROP_DEN,AVG_DROP_TMP,AVG_DROP_RAD,AVG_DROP_AREA, &
-                                         M_DOT_PPP,M_DOT_G_PPP_S,RHO_ZZ_G_S,TRI_COR, &
+                                         M_DOT_PPP,M_DOT_G_PPP_S,RHO_ZZ_G_S, &
                                          ADV_FX,ADV_FY,ADV_FZ,DIF_FX,DIF_FY,DIF_FZ,DIF_FXS,DIF_FYS,DIF_FZS
 REAL(EB), POINTER, DIMENSION(:) :: U_EDGE_Y,U_EDGE_Z,V_EDGE_X,V_EDGE_Z,W_EDGE_X,W_EDGE_Y
 REAL(EB), POINTER :: POIS_PTB,POIS_ERR
@@ -518,7 +517,6 @@ QR=>M%QR
 QR_W=>M%QR_W
 KAPPA_GAS=>M%KAPPA_GAS
 UII=>M%UII
-TRI_COR=>M%TRI_COR
 TMP_FLAME=>M%TMP_FLAME
 M_DOT_PPP=>M%M_DOT_PPP
 AVG_DROP_DEN=>M%AVG_DROP_DEN
