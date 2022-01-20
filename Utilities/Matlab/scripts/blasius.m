@@ -45,11 +45,11 @@ z_64 = M(:,1);
 
 u0= max(u_64(:));
 zmax=0.3;
-[eta,fp] = blasius_analytic(u0, zmax);
-
 mu = 0.001;
 rho = 1.19987607036;
 xc = 0.05;
+
+[eta,f,fp] = blasius_analytic(u0, zmax, mu, rho, xc, 257, 0.3318);
 z_blasius=eta*sqrt(mu/rho*xc/u0);
 u_blasius=fp*u0;
 
