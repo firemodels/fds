@@ -46,7 +46,7 @@ z_64 = M(:,1);
 u0= max(u_64(:));
 zmax=0.3;
 mu = 0.001;
-rho = 1.19987607036;
+rho = 1.2;
 xc = 0.05;
 
 [eta,f,fp] = blasius_analytic(u0, zmax, mu, rho, xc, 257, 0.3318);
