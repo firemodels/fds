@@ -1517,25 +1517,25 @@ This test case is a replica of {\ct water\_evaporation\_1} in Sec.~\ref{water_ev
 \subsection{1-D Flow in a Tunnel (\texorpdfstring{\textct{tunnel\_const\_gamma}}{tunnel\_const\_gamma})}
 \label{tunnel_const_gamma}
 
-Consider a long tube with rectangular cross section. Air with density $\rho_\infty=1.16455$~kg/m$^3$, temperature $T_\infty=293.15$~K, and pressure $p_\infty=101325$~Pa, is blown at a constant rate, $u_\infty=1$~m/s, through the tube. A steady volumetric heat source is located in the middle of the tube. Ignoring wall friction, gravity, radiation transport, thermal conductivity, viscosity, and assuming that the heat source uniformly spans the cross section of the tube, a set of 1-D equations can be derived for the steady-state velocity, $u(x)$, density, $\rho(x)$, perturbation pressure, $\tp(x)$, and temperature, $T(x)$:
+Consider a long tube with rectangular cross section. Air with density $\rho_\infty=1.200$~kg/m$^3$, temperature $T_\infty=293.15$~K, and pressure $p_\infty=101325$~Pa, is blown at a constant rate, $u_\infty=1$~m/s, through the tube. A steady volumetric heat source is located in the middle of the tube. Ignoring wall friction, gravity, radiation transport, thermal conductivity, viscosity, and assuming that the heat source uniformly spans the cross section of the tube, a set of 1-D equations can be derived for the steady-state velocity, $u(x)$, density, $\rho(x)$, perturbation pressure, $\tp(x)$, and temperature, $T(x)$:
 \begin{eqnarray}
    \rho u = \rho_\infty u_\infty   \quad &;& \quad \frac{\d}{\d x} \left( \frac{u^2}{2} \right) + \frac{1}{\rho} \frac{\d \tp}{\d x} = 0 \label{mom1d} \\[.1in]
-   p_\infty = \R \rho T            \quad &;& \quad \frac{\d u}{\d x} = \frac{1}{\rho c_p T} \left( \dq''' - u \, \frac{\d}{\d x} (\rho h_{\rm s}) - (c_p T - h_{\rm s}) u \frac{\d \rho}{\d x}  \right)  \label{div1d}
+   p_\infty = \R \rho T / W            \quad &;& \quad \frac{\d u}{\d x} = \frac{1}{\rho c_p T} \left( \dq''' - u \, \frac{\d}{\d x} (\rho h_{\rm s}) - (c_p T - h_{\rm s}) u \frac{\d \rho}{\d x}  \right)  \label{div1d}
 \end{eqnarray}
-Note that $\R=296.8$~J/kg/K and the sensible enthalpy, $h_{\rm s}=\int_{T_\infty}^T c_p(T') \, \d T'$. The tube is 10~cm long, 1~mm wide and 4~mm tall, and discretized with 1~mm grid cells. A vertical column of cells contains a volumetric heat source that introduces heat at a rate of $\dq'''=2.5133 \times 10^8$~W/m$^3$ within each 1~mm cell. The velocity, density, pressure and temperature are constant starting at the inlet, and at the heat source, the velocity and temperature jump up, and the density and pressure drop down over the span of a single cell and remain steady until the outlet is reached, where the perturbation pressure is set to zero.
+Note that $\R=8314.5$~J/kmol/K and the sensible enthalpy, $h_{\rm s}=\int_{T_\infty}^T c_p(T') \, \d T'$. The tube is 10~cm long, 1~mm wide and 4~mm tall, and discretized with 1~mm grid cells. A vertical column of cells contains a volumetric heat source that introduces heat at a rate of $\dq'''=2.5133 \times 10^8$~W/m$^3$ within each 1~mm cell. The velocity, density, pressure and temperature are constant starting at the inlet, and at the heat source, the velocity and temperature jump up, and the density and pressure drop down over the span of a single cell and remain steady until the outlet is reached, where the perturbation pressure is set to zero.
 
-For the case where the ratio of specific heats are constant, $c_p=\gamma \, \R/(\gamma-1)=1038.8$~J/kg/K and $\rho c_p T=\gamma \, p_\infty / (\gamma-1)$. In the second equation of (\ref{div1d}), the second two terms on the right hand side are identically zero; thus, the jump in velocity can be computed
+For the case where the ratio of specific heats are constant with $\gamma=1.4$ and $W=28.85$ kg/kmol for air, $c_p=\gamma \, (\R/W) /(\gamma-1)=1008.7$~J/kg/K and $\rho c_p T=\gamma \, p_\infty / (\gamma-1)$. In the second equation of (\ref{div1d}), the second two terms on the right hand side are identically zero; thus, the jump in velocity can be computed
 \be
    \Delta u = \frac{\gamma-1}{\gamma \, p_\infty} \, \dq''' \, \Delta x \approx 0.7087 \; \hbox{m/s}
 \ee
-Using the first equations of (\ref{mom1d}) and (\ref{div1d}), the density and temperature downstream of the heat source are computed to be 0.6815~kg/m$^3$ and 500.94~K, respectively. To determine the drop in pressure, Eq.~(\ref{mom1d}) must be written in discretized form. Assume that the subscript 0 refers to the cell containing the heat source, 1 to the first cell downstream, and -1 to the first cell upstream. The velocity in cell 0 is the average of the velocity upstream and downstream, $u_0=1.3544$~m/s.
+Using the first equations of (\ref{mom1d}) and (\ref{div1d}), the density and temperature downstream of the heat source are computed to be 0.7023~kg/m$^3$ and 500.61~K, respectively. To determine the drop in pressure, Eq.~(\ref{mom1d}) must be written in discretized form. Assume that the subscript 0 refers to the cell containing the heat source, 1 to the first cell downstream, and -1 to the first cell upstream. The velocity in cell 0 is the average of the velocity upstream and downstream, $u_0=1.3544$~m/s.
 \begin{eqnarray}
-   \tp_1 - \tp_0    &=& - \frac{u_1^2 - u_0^2}{2}   \rho_1     \approx -0.3698 \; \hbox{Pa} \\
-   \tp_0 - \tp_{-1} &=& - \frac{u_0^2 - u_{-1}^2}{2}\rho_0  \approx -0.3850 \; \hbox{Pa}
+   \tp_1 - \tp_0    &=& - \frac{u_1^2 - u_0^2}{2}   \rho_1  \approx -0.3811 \; \hbox{Pa} \\
+   \tp_0 - \tp_{-1} &=& - \frac{u_0^2 - u_{-1}^2}{2}\rho_0  \approx -0.3968 \; \hbox{Pa}
 \end{eqnarray}
-Summing the two equations yields $\Delta \tp \equiv \tp_1-\tp_{-1} \approx -0.7548$~Pa. The jump in energy across the heat source is
+Summing the two equations yields $\Delta \tp \equiv \tp_1-\tp_{-1} \approx -0.7779$~Pa. The jump in energy across the heat source is
 \be
-   \frac{\d}{\d x} (u \rho c_p T) \approx 2.5129 \times 10^8 \; \hbox{W/m}^3
+   \frac{\d}{\d x} (u \rho c_p T) \approx 2.5113 \times 10^8 \; \hbox{W/m}^3
 \ee
 Plots of $u(x)$, $\rho(x)$, $\tp(x)$, and $T(x)$ are shown in Fig.~\ref{tunnel_const_gamma_plots}.
 
@@ -1558,7 +1558,7 @@ Plots of $u(x)$, $\rho(x)$, $\tp(x)$, and $T(x)$ are shown in Fig.~\ref{tunnel_c
 
 Considering the same layout and the same environmental conditions of the previous case. Air is blown at a constant rate, $u_\infty=1$~m/s, through a 10~cm long, 1~mm wide and 4~mm tall tube. A steady heat source is located in the middle of the tube, composed of a vertical column of cells containing a volumetric heat source that introduces heat at a rate of $\dq'''=2.5133 \times 10^8$~W/m$^3$ within each 1~mm cell . Ignoring wall friction, gravity, radiation transport, thermal conductivity, viscosity, and assuming that the heat source uniformly spans the cross section of the tube, a set of 1-D equations can be derived for the steady-state velocity, $u(x)$, density, $\rho(x)$, perturbation pressure, $\tp(x)$, and temperature, $T(x)$. This equations are the same used in the previous example in (\ref{mom1d}) and (\ref{div1d}).
 
-Remembering that $\R=296.8$~J/kg/K and the sensible enthalpy, $h_{\rm s}=\int_{T_\infty}^T c_p(T') \, \d T'$. The velocity, density, pressure and temperature are constant starting at the inlet, until the heat source, where the velocity and temperature jump up, and the density and pressure drop down over the span of a single cell and remain steady until the outlet is reached, where the perturbation pressure is set to zero.
+Remembering that $\R=8314.5$~J/kmol/K and the sensible enthalpy, $h_{\rm s}=\int_{T_\infty}^T c_p(T') \, \d T'$. The velocity, density, pressure and temperature are constant starting at the inlet, until the heat source, where the velocity and temperature jump up, and the density and pressure drop down over the span of a single cell and remain steady until the outlet is reached, where the perturbation pressure is set to zero.
 
 For the case where the specific heat varies as a function of the temperature. In the second equation of (\ref{div1d}), using the first equation of (\ref{mom1d}) and (\ref{div1d}), and some relationships among the variables is possible to arrive to a simpler expression.
 \begin{eqnarray}
@@ -1568,19 +1568,18 @@ For the case where the specific heat varies as a function of the temperature. In
   \frac{ \dq'''}{\rho_\infty u_\infty} &=&  \frac{\d}{\d x} (h_{\rm s})  \label{1stLaw}
 \end{eqnarray}
 
-Through the steps, the continuity, in (\ref{mom1d}), and state equation, in (\ref{div1d}), are used to make the temperature the only variable and simplifying equivalent terms until the equation (\ref{1stLaw}) is obtained. Equation (\ref{1stLaw}) corresponds to a 1D form of the first law of thermodynamics, prooving the divergence equation as a consistent energy balance. Then, for the case where the cp is a linear function of the temperature, $c_p=aT +b$.
+Through the steps, the continuity, in (\ref{mom1d}), and state equation, in (\ref{div1d}), are used to make the temperature the only variable and simplifying equivalent terms until the equation (\ref{1stLaw}) is obtained. Equation (\ref{1stLaw}) corresponds to a 1D form of the first law of thermodynamics, proving the divergence equation as a consistent energy balance. Then, for the case where the $c_p$ is a linear function of the temperature, $c_p=aT +b$, we have
 \begin{eqnarray}
   \frac{ \dq'''}{\rho_\infty u_\infty} \Delta x &=&  T^2 \frac{a}{2} +bT -  (T_\infty^2 \frac{a}{2} +bT_\infty) \label{LinearCP}
 \end{eqnarray}
-
- Calculating in equation (\ref{LinearCP}) for a= 0.1584 J/kg/K$^2$ and b=992.3565 J/kg/K the temperature downstream of the heat source is computed to be 497.71~K. Correspondingly, the velocity and density are, $u_1= 1.6978$~m/s and $\rho$= 0.6859~kg/m$^3$. To determine the drop in pressure, Eq.~(\ref{mom1d}) is written in discretized form as in the previous verification. Then assuming that the subscript 0 refers to the cell containing the heat source, 1 to the first cell downstream, and -1 to the first cell upstream. The velocity in cell 0 is the approximated as the average of the velocity upstream and downstream, $u_0=1.3489$~m/s.
+ Substituting in Eq.~(\ref{LinearCP}) for $a=0.1584$ J/kg/K$^2$ and $b=953.5650$ J/kg/K (these coefficients give $c_p(T_\infty)=1000$ J/kg/K) the temperature downstream of the heat source is computed to be 499.2~K. Correspondingly, the density and velocity are, $\rho_1$= 0.7046~\si{kg/m^3} and $u_1= 1.7030$~m/s. To determine the drop in pressure, Eq.~(\ref{mom1d}) is written in discretized form as in the previous verification. Then assuming that the subscript 0 refers to the cell containing the heat source, 1 to the first cell downstream, and -1 to the first cell upstream. The velocity in cell 0 is the approximated as the average of the velocity upstream and downstream, $u_0=1.3515$~m/s.
 \begin{eqnarray}
-   \tp_1 - \tp_0    &=& - \frac{u_1^2 - u_0^2}{2}   \rho_1    \approx -0.3646 \; \hbox{Pa} \\
-   \tp_0 - \tp_{-1} &=& - \frac{u_0^2 - u_{-1}^2}{2}  \rho_0  \approx -0.3791 \; \hbox{Pa}
+   \tp_1 - \tp_0    &=& - \frac{u_1^2 - u_0^2}{2}   \rho_1    \approx -0.3783 \; \hbox{Pa} \\
+   \tp_0 - \tp_{-1} &=& - \frac{u_0^2 - u_{-1}^2}{2}  \rho_0  \approx -0.3936 \; \hbox{Pa}
 \end{eqnarray}
-Summing both of the equations yields $\Delta \tp \equiv \tp_1-\tp_{-1} \approx -0.7437$~Pa. The jump in energy across the heat source is
+Summing both of the equations yields $\Delta \tp \equiv \tp_1-\tp_{-1} \approx -0.7718$~Pa. The jump in energy across the heat source is
 \be
-   \frac{\d}{\d x} (u \rho c_p T) \approx 2.6625 \times 10^8 \; \hbox{W/m}^3
+   \frac{\d}{\d x} (u \rho c_p T) \approx 2.6685 \times 10^8 \; \hbox{W/m}^3
 \ee
 Plots of $u(x)$, $\rho(x)$, $\tp(x)$, and $T(x)$ are shown in Fig.~\ref{tunnel_linear_cp_plots}.
 
