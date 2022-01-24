@@ -450,9 +450,9 @@ If you wish to run FDS on more than one computer, do the following:
       fred:3 \\
       wilma:2 \\
       dino:3
-      
+
       where the number following the name is the number of MPI processes that you want to invoke on that computer. The sum of all the numbers should be the number of MPI processes for the job, usually equal to the number of meshes.
-      
+
 \item Test your network by running the following test program:
 
     {\ct mpiexec -machine hosts.txt test\_mpi}
@@ -469,8 +469,8 @@ If you wish to run FDS on more than one computer, do the following:
 
    {\ct -env OMP\_NUM\_THREADS <OpenMP threads>}
 
-   to set the number of OpenMP threads per MPI process on all computers. The default is {\em not} 1, but rather depends on the number of logical processors your computer has. If you accidently set too many OpenMP threads, you can overload your logical processors and reduce the job efficiency. 
-   
+   to set the number of OpenMP threads per MPI process on all computers. The default is {\em not} 1, but rather depends on the number of logical processors your computer has. If you accidently set too many OpenMP threads, you can overload your logical processors and reduce the job efficiency.
+
 \item If successful, you should see the usual FDS printout indicating which MPI processes are assigned to which computer. If not successful, check with your network administrator or monitor the FDS help forums for advice.
 \item For more options, consult {\em Intel® MPI Library Developer Reference for Windows* OS, Developer Reference, Version: 2021.5 (or later), Global Hydra Options}.
 \end{enumerate}
@@ -1190,7 +1190,6 @@ Key Parameter                          & Section                        & {\ct '
 {\ct CHECK\_VN}                        & \ref{info:VN}                  & T           & T            & T             & F              \\ \hline
 {\ct CONSTANT\_SPECIFIC\_HEAT\_RATIO}  & \ref{info:Enthalpy}            & F           & F            & F             & T              \\ \hline
 {\ct MAX\_PRESSURE\_ITERATIONS}        & \ref{pressure_solver}          & 10          & 10           & 10            & 3              \\ \hline
-{\ct NEAR\_WALL\_TURBULENCE\_MODEL}    & \ref{info:LES}                 & None        & WALE         & Van Driest    & Van Driest     \\ \hline
 \end{tabular}
 \end{table}
 
