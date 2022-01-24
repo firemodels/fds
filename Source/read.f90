@@ -2481,6 +2481,7 @@ IF (SIMPLE_CHEMISTRY) THEN
       CASE(2) ; PREDEFINED_SMIX(1:4) = .TRUE. ; N_TRACKED_SPECIES = 4
    END SELECT
    IF (REACTION(1)%C <=0._EB .AND. REACTION(1)%H <=0._EB) PREDEFINED_SMIX(2)=.FALSE.
+   DEFINED_BACKGROUND = .TRUE.
 ELSE
    ! If not simple chemistry look for a background species and if none force creation of AIR lumped species
    REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
@@ -2521,10 +2522,17 @@ COUNT_SPEC_LOOP: DO
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 
+   ! Do not allow the user to specify 'AIR' in SIMPLE_CHEMISTRY
+
+   IF (ID=='AIR' .AND. SIMPLE_CHEMISTRY) THEN
+      WRITE(MESSAGE,'(A)') 'ERROR: AIR is predefined for the SIMPLE_CHEMISTRY model and should not be redefined'
+      CALL SHUTDOWN(MESSAGE) ; RETURN
+   ENDIF
+
    ! Prevent use of 'AIR' unless a new BACKGROUND has been defined.
 
    IF (ID=='AIR' .AND. .NOT. DEFINED_BACKGROUND) THEN
-      WRITE(MESSAGE,'(A,I0,A)') 'ERROR: SPEC ',N_SPEC_READ,': Cannot redefine AIR without defining a BACKGROUND species'
+      WRITE(MESSAGE,'(A,I0,A)') 'ERROR: SPEC ',N_SPEC_READ,': Cannot redefine AIR unless it is declared the BACKGROUND species'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 
@@ -2810,6 +2818,10 @@ PRIMITIVE_SPEC_READ_LOOP: DO WHILE (N_SPEC_READ < N_SPEC_READ_2 .OR. N < N_SPECI
    ENDIF
    H_F_IN = SS%H_F
    CALL GAS_PROPS(SS%PROP_ID,SS%SIG,SS%EPSK,SS%PR_USER,SS%MW,SS%FORMULA,SS%LISTED,SS%ATOMS,SS%H_F,SS%RADCAL_ID)
+   IF (.NOT.SS%LISTED) THEN
+      WRITE(MESSAGE,'(A,A,A)') 'WARNING: SPEC ',TRIM(ID),' is not listed and has been assigned the properties of nitrogen.'
+      IF (MY_RANK==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
+   ENDIF
    IF (SIMPLE_CHEMISTRY) THEN
       IF (TRIM(SS%ID)==TRIM(REACTION(1)%FUEL) .AND. .NOT. SS%LISTED) SS%H_F = H_F_IN
    ENDIF
