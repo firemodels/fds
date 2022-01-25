@@ -262,6 +262,7 @@ LOGICAL :: WRITE_DEVC_CTRL=.FALSE.                  !< Flag for writing DEVC and
 
 INTEGER, ALLOCATABLE, DIMENSION(:) :: CHANGE_TIME_STEP_INDEX      !< Flag to indicate if a mesh needs to change time step
 INTEGER, ALLOCATABLE, DIMENSION(:) :: SETUP_PRESSURE_ZONES_INDEX  !< Flag to indicate if a mesh needs to keep searching for ZONEs
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: MAX_CELL_ASPECT_RATIO      !< Max cell aspect ratio for each mesh
 
 ! Miscellaneous character strings
 
@@ -627,7 +628,8 @@ REAL(EB) :: RHOMAX                              !< Maximum gas density (kg/m3)
 ! Flux limiter
 
 INTEGER, PARAMETER :: CENTRAL_LIMITER=0,GODUNOV_LIMITER=1,SUPERBEE_LIMITER=2,MINMOD_LIMITER=3,CHARM_LIMITER=4,MP5_LIMITER=5
-INTEGER :: I_FLUX_LIMITER=SUPERBEE_LIMITER,CFL_VELOCITY_NORM=2
+INTEGER :: I_FLUX_LIMITER=SUPERBEE_LIMITER,CFL_VELOCITY_NORM=-999
+LOGICAL :: CFL_VELOCITY_NORM_USER_SPECIFIED=.FALSE.
 
 ! Numerical quadrature (used in TEST_FILTER)
 

@@ -2390,7 +2390,9 @@ IF (.NOT.SUPPRESS_DIAGNOSTICS) THEN
       WRITE(LU_OUTPUT,'(A,F10.3)')  '   Height (m)                  ',M%ZF-M%ZS
       WRITE(LU_OUTPUT,'(A,F10.3)')  '   Initial Time Step (s)       ',DT
    ENDDO MESH_LOOP
-   WRITE(LU_OUTPUT,'(/A,I9/)')    'Total Number of Grid Cells     ',CELL_COUNT
+   WRITE(LU_OUTPUT,'(/A,I9/)'  ) ' Total Number of Grid Cells     ',CELL_COUNT
+   WRITE(LU_OUTPUT,'(/A,F9.3)')  ' Maximum Cell Aspect Ratio      ',MAXVAL(MAX_CELL_ASPECT_RATIO)
+   WRITE(LU_OUTPUT,'(A,I9/)')    ' CFL Velocity Norm              ',CFL_VELOCITY_NORM
 ENDIF
 
 WRITE(LU_OUTPUT,'(/A/)')     ' Miscellaneous Parameters'
