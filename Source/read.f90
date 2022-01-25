@@ -12268,6 +12268,9 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
       DV%Y2                = XB(4)
       DV%Z1                = XB(5)
       DV%Z2                = XB(6)
+      DV%X0                = XBP(1)
+      DV%Y0                = XBP(3)
+      DV%Z0                = XBP(5)
       IF (ABS(DV%X1-DV%X2)<=SPACING(DV%X2) .AND. DV%IOR==0) DV%IOR_ASSUMED = 1
       IF (ABS(DV%Y1-DV%Y2)<=SPACING(DV%Y2) .AND. DV%IOR==0) DV%IOR_ASSUMED = 2
       IF (ABS(DV%Z1-DV%Z2)<=SPACING(DV%Z2) .AND. DV%IOR==0) DV%IOR_ASSUMED = 3

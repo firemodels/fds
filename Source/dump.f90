@@ -9134,7 +9134,7 @@ IF (N_DEVC_LINE>0) THEN
                                                                ',',DV%VALUE/DV%TIME_INTERVAL
             CASE(5)
                WRITE(TCFORM,'(5A)') "(1(",FMT_R,",A),",FMT_R,")"
-               WRITE(LINE_DEVC_VALUE(DV%LINE,DV%POINT),TCFORM) SQRT((DV%X-DV%X1)**2+(DV%Y-DV%Y1)**2+(DV%Z-DV%Z1)**2)&
+               WRITE(LINE_DEVC_VALUE(DV%LINE,DV%POINT),TCFORM) SQRT((DV%X-DV%X0)**2+(DV%Y-DV%Y0)**2+(DV%Z-DV%Z0)**2)&
                                               *DV%COORD_FACTOR,',',DV%VALUE/DV%TIME_INTERVAL
             CASE(12)
                WRITE(TCFORM,'(5A)') "(2(",FMT_R,",A),",FMT_R,")"
