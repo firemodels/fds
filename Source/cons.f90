@@ -262,6 +262,7 @@ LOGICAL :: WRITE_DEVC_CTRL=.FALSE.                  !< Flag for writing DEVC and
 
 INTEGER, ALLOCATABLE, DIMENSION(:) :: CHANGE_TIME_STEP_INDEX      !< Flag to indicate if a mesh needs to change time step
 INTEGER, ALLOCATABLE, DIMENSION(:) :: SETUP_PRESSURE_ZONES_INDEX  !< Flag to indicate if a mesh needs to keep searching for ZONEs
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: MAX_CELL_ASPECT_RATIO      !< Max cell aspect ratio for each mesh
 
 ! Miscellaneous character strings
 
