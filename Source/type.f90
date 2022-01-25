@@ -1,8 +1,8 @@
 !> \brief A collection of major derived types used in FDS.
 !> \details There are several TYPEs that require special attention. WALL, CFACE, and PARTICLE TYPES reference other
-!> derived types that start with BOUNDARY, like BOUNDARY_COORD or BOUNDARY_ONE_D. The number of real, integer, and logical scalar 
+!> derived types that start with BOUNDARY, like BOUNDARY_COORD or BOUNDARY_ONE_D. The number of real, integer, and logical scalar
 !> and array components of these derived types are denoted like this, for example: N_BOUNDARY_COORD_SCALAR_INTEGERS. You must
-!> adjust this value if you add or subtract components from the derived type. You should then use an existing component 
+!> adjust this value if you add or subtract components from the derived type. You should then use an existing component
 !> as a guide and trace it through func.f90 to see how to initialize this component.
 
 MODULE TYPES
@@ -616,7 +616,7 @@ TYPE MATERIAL_TYPE
    REAL(EB) :: THERMAL_DIFFUSIVITY                      !< Thermal diffusivity (m2/s)
    REAL(EB) :: KAPPA_S                                  !< Absorption coefficient (1/m)
    REAL(EB) :: TMP_BOIL                                 !< Boiling temperature (K) of a liquid
-   REAL(EB) :: REFRACTIVE_INDEX                         
+   REAL(EB) :: REFRACTIVE_INDEX
    REAL(EB) :: POROSITY=0._EB                           !< Porosity
    REAL(EB) :: MW=-1._EB                                !< Molecular weight (g/mol)
    REAL(EB) :: HEAT_OF_GASIFICATION                     !< Heat of gasification (J/kg)
@@ -1022,6 +1022,7 @@ TYPE IBM_CUTFACE_TYPE
    INTEGER,  DIMENSION(MAX_DIM+1)                  ::     IJK  ! [ i j k X1AXIS]
    REAL(EB), ALLOCATABLE, DIMENSION(:)             ::    AREA  ! Cut-faces areas.
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)           ::  XYZCEN  ! Cut-faces centroid locations.
+   LOGICAL,  ALLOCATABLE, DIMENSION(:)             ::  SHARED
    !Integrals to be used in cut-cell volume and centroid computations.
    REAL(EB), ALLOCATABLE, DIMENSION(:)             ::  INXAREA, INXSQAREA, JNYSQAREA, KNZSQAREA
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)           ::  BODTRI
@@ -1033,7 +1034,7 @@ TYPE IBM_CUTFACE_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)           ::  RHO_D_DZDN, H_RHO_D_DZDN
    REAL(EB), ALLOCATABLE, DIMENSION(:)             ::  VEL, VELS, FN, FN_B, VELINT
    INTEGER,  ALLOCATABLE, DIMENSION(:,:,:)         ::  JDH
-   REAL(EB) :: VELINT_CRF=0._EB,FV=0._EB,FV_B=0._EB,ALPHA_CF=1._EB
+   REAL(EB) :: VELINT_CRF=0._EB,FV=0._EB,FV_B=0._EB,ALPHA_CF=1._EB,VEL_CF=0._EB,VEL_CRT=0._EB
    INTEGER,  ALLOCATABLE, DIMENSION(:,:,:)         ::  CELL_LIST ! [RC_TYPE I J K ]
 
    ! Here: VIND=IAXIS:KAXIS, EP=1:INT_N_EXT_PTS,
@@ -1123,7 +1124,7 @@ TYPE IBM_CUTCELL_TYPE
                                                                                 ! fractions and rho*D_z,reaction source.
    INTEGER,  ALLOCATABLE, DIMENSION(:)                       :: UNKH,UNKZ ! Unknown number for pressure H,
                                                                           ! and scalars.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)                       ::      H,HS ! Pressure H containers.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)                       :: KRES,H,HS ! Kinetic Energy, Pressure H containers.
    REAL(EB), ALLOCATABLE, DIMENSION(:)                       :: RTRM,R_H_G,RHO_0,WVEL
 
    ! Here: VIND=0, EP=1:INT_N_EXT_PTS
@@ -1171,6 +1172,7 @@ TYPE IBM_RCFACE_TYPE
 END TYPE IBM_RCFACE_TYPE
 
 TYPE IBM_RCFACE_LST_TYPE
+   LOGICAL :: SHARED=.FALSE.
    INTEGER :: IWC=0
    REAL(EB):: TMP_FACE=0._EB
    INTEGER,  DIMENSION(MAX_DIM+1)                                  ::       IJK ! [ I J K x1axis]
@@ -1601,7 +1603,7 @@ TYPE DUCT_TYPE
    REAL(EB) :: ROUGHNESS                                  !< Wall roughness (m)
    REAL(EB) :: RSUM_D=0._EB                               !< Upstream specific gas constant (J/kg/K)
    REAL(EB) :: RSUM_D_OLD                                 !< Prior timestep upstream specific gas constant (J/kg/K)
-   REAL(EB) :: TAU=-1._EB                                 !< TANH or t2 ramp for flow 
+   REAL(EB) :: TAU=-1._EB                                 !< TANH or t2 ramp for flow
    REAL(EB) :: TMP_D=273.15_EB                            !< Upstream duct temperature (K)
    REAL(EB) :: TOTAL_LOSS=0._EB                           !< Current flow loss in duct
    REAL(EB) :: VEL(4)=0._EB                               !< Velocity in duct (old,new,guess,previous) (m/s)
