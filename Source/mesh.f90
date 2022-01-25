@@ -180,6 +180,7 @@ TYPE MESH_TYPE
    REAL(EB) :: RDYINT                            !< \f$ 500/\delta \eta \f$
    REAL(EB) :: RDZINT                            !< \f$ 500/\delta \zeta \f$
    REAL(EB) :: CELL_SIZE                         !< Approximate cell size, \f$ (\delta\xi\,\delta\eta\,\delta\zeta)^{1/3} \f$
+   REAL(EB) :: MAX_ASPECT_RATIO=1._EB            !< Maximum cell aspect ratio, if > 4:1 reset CFL_VELOCITY_NORM=1
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: R      !< Radial coordinate, \f$ r_i \f$, for CYLINDRICAL geometry
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: RC     !< Radial coordinate, cell center, \f$ (r_i+r_{i-1})/2 \f$
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: RRN    !< \f$ 2/(r_i+r_{i-1}) \f$
@@ -395,7 +396,7 @@ INTEGER, POINTER, DIMENSION(:) :: NEIGHBORING_MESH
 INTEGER, POINTER, DIMENSION(:) :: RGB
 REAL(EB), POINTER :: DXI,DETA,DZETA,RDXI,RDETA,RDZETA, &
    DXMIN,DXMAX,DYMIN,DYMAX,DZMIN,DZMAX, &
-   XS,XF,YS,YF,ZS,ZF,RDXINT,RDYINT,RDZINT,CELL_SIZE
+   XS,XF,YS,YF,ZS,ZF,RDXINT,RDYINT,RDZINT,CELL_SIZE,MAX_ASPECT_RATIO
 REAL(EB), POINTER, DIMENSION(:) :: R,RC,X,Y,Z,XC,YC,ZC,HX,HY,HZ, &
    DX,RDX,DXN,RDXN,DY,RDY,DYN,RDYN,DZ,RDZ,DZN,RDZN, &
    CELLSI,CELLSJ,CELLSK,RRN
@@ -705,6 +706,7 @@ DYMAX=>M%DYMAX
 DZMIN=>M%DZMIN
 DZMAX=>M%DZMAX
 CELL_SIZE=>M%CELL_SIZE
+MAX_ASPECT_RATIO=>M%MAX_ASPECT_RATIO
 XS=>M%XS
 XF=>M%XF
 YS=>M%YS
