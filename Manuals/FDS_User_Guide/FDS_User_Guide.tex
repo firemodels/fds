@@ -1297,7 +1297,7 @@ places a restriction on the time step due to the advection velocity.  The limits
 The exact CFL needed to maintain stability depends on the order (as well as other properties) of the time integration scheme and the choice of velocity norm. Four choices for velocity norm are available in FDS (set on {\ct MISC}):
 \vskip\baselineskip
 \noindent
-{\ct CFL\_VELOCITY\_NORM=0} (VLES default, corresponds to $L_\infty$ norm of velocity vector)
+{\ct CFL\_VELOCITY\_NORM=0} (corresponds to $L_\infty$ norm of velocity vector, despite the numerical code this is less restrictive than 1 or 2)
     \begin{equation}
     \frac{\|\mathbf{u}\|}{\Delta} = \max \left(\frac{|u|}{\delta x}, \frac{|v|}{\delta y}, \frac{|w|}{\delta z}\right) + |\nabla \cdot \bu|
     \end{equation}
@@ -1305,7 +1305,7 @@ The exact CFL needed to maintain stability depends on the order (as well as othe
     \begin{equation}
     \frac{\|\mathbf{u}\|}{\Delta} = \frac{|u|}{\delta x}+\frac{|v|}{\delta y}+\frac{|w|}{\delta z} + |\nabla \cdot \bu|
     \end{equation}
-{\ct CFL\_VELOCITY\_NORM=2} ($L_2$ norm of velocity vector)
+{\ct CFL\_VELOCITY\_NORM=2} (VLES default, $L_2$ norm of velocity vector)
     \begin{equation}
     \frac{\|\mathbf{u}\|}{\Delta} = \sqrt{ \left( \frac{u}{\delta x} \right)^2 + \left( \frac{v}{\delta y} \right)^2 + \left( \frac{w}{\delta z} \right)^2 } + |\nabla \cdot \bu|
     \end{equation}
@@ -1326,7 +1326,11 @@ We can argue that the case we are most concerned with is when $\rho^n$ is near z
 \delta t < \frac{\rho}{\overline{u}_i \left(\frac{\rho-0}{\delta x_i}\right) + \rho \nabla\cdot\mathbf{u}}
   = \left[ \frac{\overline{u}_i}{\delta x_i} + \nabla\cdot\mathbf{u} \right]^{-1}
 \ee
-Equation~(\ref{eqn_divstability}) basically adds the effect of thermal expansion to the CFL constraint.
+Equation~(\ref{eqn_divstability}) adds the effect of thermal expansion to the CFL constraint.  Further, note that the dot product implies summation over the subscripts $i$, which provides incentive for using the $L_1$ norm of the velocity vector as in {\ct CFL\_VELOCITY\_NORM=1}.
+
+\paragraph{Handling cells with large aspect ratios}
+
+In LES, it is usually better to use cubic cells to accurately capture turbulence.  However, there are situations where elongated or pancake shaped cells become necessary for computational efficiency, usually in either tunnel or atmospheric flow applications.  As the cell aspect ratio increases, the choice of velocity norm for the time step restriction becomes more important.  Numerical experiments have shown that beyond an aspect ratio of about 4:1, using {\ct CFL\_VELOCITY\_NORM=1} is required to avoid unphysical oscillations in the ambient temperature.  Thus, if not explicitly stated in the FDS input file, beyond a maximum cell aspect ratio of 4:1 FDS will automatically switch the stability check to use {\ct CFL\_VELOCITY\_NORM=1}.  The velocity norm used by FDS is reported in the output file ({\ct CHID.out}).
 
 \paragraph{Time step restrictions to avoid clipping}
 
