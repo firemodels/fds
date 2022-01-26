@@ -297,6 +297,9 @@ $QFDS -d Heat_Transfer ht3d_radiation_kappa100_n40.fds
 $QFDS -d Heat_Transfer ht3d_radiation_kappa2000_n10.fds
 $QFDS -d Heat_Transfer ht3d_radiation_kappa2000_n20.fds
 $QFDS -d Heat_Transfer ht3d_radiation_kappa2000_n40.fds
+$QFDS -p 16 -d Heat_Transfer Pohlhausen_Pr_p5.fds
+$QFDS -p 16 -d Heat_Transfer Pohlhausen_Pr_1.fds
+$QFDS -p 16 -d Heat_Transfer Pohlhausen_Pr_2.fds
 
 $QFDS -d HVAC ashrae7_fixed_flow.fds
 $QFDS -d HVAC ashrae7_quadratic.fds
