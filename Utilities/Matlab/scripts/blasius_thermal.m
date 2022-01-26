@@ -18,7 +18,7 @@ Pr=[0.5, 1, 2]; % Prandtl numbers
 u0=1;        % see FDS input file
 zmax=1;      % see FDS input file
 mu = 0.001;  % see FDS input and output files
-rho = 1.2; % taken from FDS output file
+rho = 1.2;   % taken from FDS output file
 nu = mu/rho;
 x = 5; % corresponds to the position of the DEVC array in the FDS input file
 neta=500;
@@ -29,6 +29,10 @@ etamax=eta(end);
 
 f1_key={};
 f2_key={};
+
+plot_style
+Font_Interpreter='LaTeX';
+figure
 
 for p=1:length(Pr)
 
@@ -50,9 +54,6 @@ for p=1:length(Pr)
         theta(ieta)=(num-deta)/(denom-deta);
     end
 
-    plot_style
-    Font_Interpreter='LaTeX';
-    f1=figure(1);
     set(gca,'Units',Plot_Units)
     set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
     H(p)=plot(eta(I),1-theta); hold on
@@ -64,7 +65,22 @@ for p=1:length(Pr)
     set(gca,'FontName',Font_Name)
     set(gca,'FontSize',Label_Font_Size)
 
-    % now plot the temperature profile in physical space
+end
+
+set(gcf,'Visible',Figure_Visibility);
+lh=legend(H,f1_key);
+set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
+set(gcf,'Units',Paper_Units);
+set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
+print(gcf,'-dpdf',[pltdir,'Pohlhausen_similarity_solution']);
+
+% now plot the temperature profile in physical space
+
+figure
+
+for p=1:length(Pr)
 
     Tw=21; % wall temerature
     T0=20; % ambient temperature
@@ -72,8 +88,6 @@ for p=1:length(Pr)
     T = Tw*ones(1,length(theta))+(T0-Tw)*theta;
     z = eta(I)*sqrt(nu*x/u0);
 
-    f2=figure(2);
-    Font_Interpreter='LaTeX';
     set(gca,'Units',Plot_Units)
     set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
     f2_key{end+1}=['Pohlhausen Pr=',num2str(Pr(p))];
@@ -99,27 +113,14 @@ for p=1:length(Pr)
 
 end
 
-figure(1)
-lh=legend(H,f1_key);
-set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
-
-set(f1,'Visible',Figure_Visibility);
-set(f1,'Units',Paper_Units);
-set(f1,'PaperUnits',Paper_Units);
-set(f1,'PaperSize',[Paper_Width Paper_Height]);
-set(f1,'Position',[0 0 Paper_Width Paper_Height]);
-print(f1,'-dpdf',[pltdir,'Pohlhausen_similarity_solution']);
-
-figure(2)
+set(gcf,'Visible',Figure_Visibility);
 lh2=legend(H2,f2_key);
 set(lh2,'FontName',Font_Name,'FontSize',Key_Font_Size)
-
-set(f2,'Visible',Figure_Visibility);
-set(f2,'Units',Paper_Units);
-set(f2,'PaperUnits',Paper_Units);
-set(f2,'PaperSize',[Paper_Width Paper_Height]);
-set(f2,'Position',[0 0 Paper_Width Paper_Height]);
-print(f2,'-dpdf',[pltdir,'Pohlhausen_Tz_profile']);
+set(gcf,'Units',Paper_Units);
+set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
+print(gcf,'-dpdf',[pltdir,'Pohlhausen_Tz_profile']);
 
 % % plot velocity field (debug)
 
