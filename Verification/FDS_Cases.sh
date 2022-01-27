@@ -209,6 +209,7 @@ $QFDS -p 8 -d Fires circular_burner.fds
 
 $QFDS -d Flowfields divergence_test_1.fds
 $QFDS -d Flowfields divergence_test_2.fds
+$QFDS -p 4 -d Flowfields divergence_test_3.fds
 $QFDS -d Flowfields cyl_test_1.fds
 $QFDS -d Flowfields cyl_test_2.fds
 $QFDS -d Flowfields cyl_test_3.fds
