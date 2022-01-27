@@ -2515,9 +2515,23 @@ The right hand plot of Fig.~\ref{divergence_test_fig} displays the volume integr
 \begin{figure}[!ht]
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/divergence_test_1}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/divergence_test_2}
-\caption[The \textct{divergence\_test} cases]{Minimum and maximum divergence for the \textct{divergence\_test} cases.}
+\caption[The \textct{divergence\_test} cases 1 and 2]{Minimum and maximum divergence for the \textct{divergence\_test} cases.}
 \label{divergence_test_fig}
 \end{figure}
+
+\subsection{Creating/Removing Obstructions (\texorpdfstring{\textct{divergence\_test\_3}}{divergence\_test\_3})}
+\label{divergence_test_3}
+
+In the third example, air is pushed through a two-dimensional channel where obstructions are created and removed at random times. The divergence of the flow should remain nearly zero throughout the entire domain. Figure.~\ref{divergence_test_3_fig} displays the maximum and minimum divergence as a function of time. These ought to remain less than approximately $10^{-12}$~s$^{-1}$ in absolute value.
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/divergence_test_3}
+\caption[The \textct{divergence\_test} case 3]{Minimum and maximum divergence for the \textct{divergence\_test\_3} case.}
+\label{divergence_test_3_fig}
+\end{figure}
+
+
 
 \section{Multi-mesh Pressure and Temperature Lapse (\texorpdfstring{\textct{lapse\_rate}}{lapse\_rate})}
 \label{lapse_rate}
