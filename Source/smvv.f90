@@ -938,10 +938,13 @@ SUBROUTINE SMOKE3D_TO_FILE(LU_SMOKE3D,LU_SMOKE3D_SIZE,TIME,DX,EXTCOEF,SMOKE_TYPE
   INTEGER :: NCHARS_IN
   REAL(FB) :: FACTOR, CUTMAX
   REAL(FB) TEMP_MIN, TEMP_MAX, CO2_MIN, CO2_MAX
+  REAL(FB) :: OUTPUT_MAX
   REAL(FB) :: VAL_FDS,VAL_SMV,MAX_VAL
   INTEGER :: I, NCHARS_OUT
   INTEGER :: NVALS, ONE=1, VERSION=0
+  LOGICAL OUTPUT_SOOT_ALPHAS
 
+  OUTPUT_SOOT_ALPHAS = .TRUE.
   NVALS=NX*NY*NZ
   NCHARS_IN=NVALS
 
@@ -959,13 +962,29 @@ SUBROUTINE SMOKE3D_TO_FILE(LU_SMOKE3D,LU_SMOKE3D_SIZE,TIME,DX,EXTCOEF,SMOKE_TYPE
 
   MAX_VAL=0.0_FB
   IF (SMOKE_TYPE == SOOT) THEN
-    FACTOR=-EXTCOEF*DX
-    DO I = 1, NVALS
-      VAL_FDS=MAX(0.0_FB,VALS(I))
-      VAL_SMV=254*(1.0_FB-EXP( FACTOR*VAL_FDS))+0.5_FB
-      BUFFER_IN(I)=CHAR(INT(VAL_SMV))
-      MAX_VAL = MAX(VAL_SMV,MAX_VAL) ! MAX_VAL for SOOT is an opacity, MAX_VAL=0 ==> soot in mesh is completely transparent
-    END DO
+    IF (OUTPUT_SOOT_ALPHAS) THEN
+       FACTOR=-EXTCOEF*DX
+       DO I = 1, NVALS
+         VAL_FDS=MAX(0.0_FB,VALS(I))
+         VAL_SMV=254*(1.0_FB-EXP( FACTOR*VAL_FDS))+0.5_FB
+         BUFFER_IN(I)=CHAR(INT(VAL_SMV))
+         MAX_VAL = MAX(VAL_SMV,MAX_VAL) ! MAX_VAL for SOOT is an opacity, MAX_VAL=0 ==> soot in mesh is completely transparent
+       END DO
+    ELSE
+        ! alpha = 254*(1 - exp(-K*S*DX))
+        ! solve for K*S
+        ! K*S(for alpha=1) = -LOG(1-1/254)/DX  - least dense soot that can be displayed (any soot less dense will be completely transparent)
+        ! assuming K*S's are passed to smokeview uniformly then
+        ! 254*K*S(for alpha=1)   most dense soot that can be displayed (this and higher densities will be opaque)
+       OUTPUT_MAX = -254.0_FB*LOG(253.0_FB/254.0_FB)/DX
+       DO I = 1, NVALS
+         VAL_FDS=MAX(0.0_FB,VALS(I))
+         VAL_SMV=254.0_FB*VAL_FDS*EXTCOEF/OUTPUT_MAX+0.5_FB
+         VAL_SMV = MAX(0.0_FB,MIN(VAL_SMV, 254.0_FB))
+         BUFFER_IN(I)=CHAR(INT(VAL_SMV))
+         MAX_VAL = MAX(VAL_SMV,MAX_VAL) ! MAX_VAL for SOOT is an opacity, MAX_VAL=0 ==> soot in mesh is completely transparent
+       END DO
+    ENDIF
     CALL RLE(BUFFER_IN,NCHARS_IN,BUFFER_OUT,NCHARS_OUT)
   ELSE IF (SMOKE_TYPE == FIRE) THEN
     CUTMAX=HRRPUV_MAX_SMV
