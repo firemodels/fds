@@ -8170,7 +8170,7 @@ Suppose, however, that you want to define your own ``smoke'' and that you want t
 &PROP ID='Acme Smoke', QUANTITY='CHAMBER OBSCURATION', SPEC_ID='MY SMOKE' /
 &DEVC XYZ=1.00,0.50,0.95, PROP_ID='Acme Smoke', ID='smoke_1' /
 
-&DUMP SMOKE3D_SPEC_ID='MY SMOKE' /
+&SM3D QUANTITY='DENSITY', SPEC_ID='MY SMOKE' /
 \end{lstlisting}
 The same smoke detector model is used that was described above, but now, the species {\ct 'MY SMOKE'} is used in the algorithm, rather than that associated with the lumped species. Note that your species will not participate in the radiation calculation. It will merely serve as a surrogate for smoke.
 
@@ -9203,7 +9203,7 @@ Past versions of FDS (1-5) output Plot3D files by default. Now, you must specify
 When you do a fire simulation, FDS automatically creates two output files that are rendered by Smokeview as realistic looking smoke and fire. By default, the output quantities are the {\ct 'DENSITY'} of {\ct 'SOOT'} and {\ct 'HRRPUV'} (Heat Release Rate Per Unit Volume). You have the option of rendering any other species besides {\ct 'SOOT'}, so long as the {\ct MASS\_EXTINCTION\_COEFFICIENT} on the {\ct SPEC} line is appropriate in describing the attenuation of visible light by the specified gas species. Here is an example of how to change the smoke species. Normally, you do not need to do this as the ``smoke'' is an assumed part of the default combustion model when a non-zero {\ct SOOT\_YIELD} is defined on the {\ct REAC} line.
 \begin{lstlisting}
 &SPEC ID='MY SMOKE', MW=29., MASS_EXTINCTION_COEFFICIENT=8700. /
-&DUMP SMOKE3D_SPEC_ID='MY SMOKE' /
+&SM3D QUANTITY='DENSITY', SPEC_ID='MY SMOKE' /
 \end{lstlisting}
 The {\ct MASS\_EXTINCTION\_COEFFICIENT} is passed to Smokeview to be used for visualization.
 
@@ -11064,8 +11064,6 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct SIG\_FIGS}                     & Integer      & Section~\ref{info:SIG_FIGS}            &           & 8                              \\ \hline
 {\ct SIG\_FIGS\_EXP}                & Integer      & Section~\ref{info:SIG_FIGS}            &           & 3                              \\ \hline
 {\ct SMOKE3D}                       & Logical      & Section~\ref{info:SMOKE3D}             &           & {\ct T}                   \\ \hline
-{\ct SMOKE3D\_QUANTITY}             & Character    & Section~\ref{info:SMOKE3D}             &           &                                \\ \hline
-{\ct SMOKE3D\_SPEC\_ID}             & Character    & Section~\ref{info:SMOKE3D}             &           &                                \\ \hline
 {\ct STATUS\_FILES}                 & Logical      & Section~\ref{info:DUMP}                &           & {\ct F}                  \\ \hline
 {\ct SUPPRESS\_DIAGNOSTICS}         & Logical      & Section~\ref{info:monitoring_progress} &           & {\ct F}                  \\ \hline
 {\ct VELOCITY\_ERROR\_FILE}         & Logical      & Section~\ref{info:TIMING}              &           & {\ct F}                  \\ \hline
@@ -12093,8 +12091,29 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 
 \vspace{\baselineskip}
 
-\section{\texorpdfstring{{\tt SPEC}}{SPEC} (Species Parameters)}
 
+\section{\texorpdfstring{{\tt SM3D}}{SM3D} (Smoke3D Parameters)}
+
+\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\caption[Smoke3D parameters ({\ct SM3D} namelist group)]{For more information see Section~\ref{info:SMOKE3D}.}
+\label{tbl:SM3D} \\
+\hline
+\multicolumn{5}{|c|}{{\ct SM3D} (Smoke3D Parameters)} \\
+\hline \hline
+\endfirsthead
+\caption[]{Continued} \\
+\hline
+\multicolumn{5}{|c|}{{\ct SM3D} (Smoke3D Parameters)} \\
+\hline \hline
+\endhead
+{\ct QUANTITY}    & Character   & Section~\ref{info:SMOKE3D}      &             &     \\ \hline
+{\ct SPEC\_ID}    & Character   & Section~\ref{info:SMOKE3D}      &             &     \\ \hline
+\end{longtable}
+
+\vspace{\baselineskip}
+
+
+\section{\texorpdfstring{{\tt SPEC}}{SPEC} (Species Parameters)}
 
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \caption[Species parameters ({\ct SPEC} namelist group)]{For more information see Section~\ref{info:SPEC}.}
