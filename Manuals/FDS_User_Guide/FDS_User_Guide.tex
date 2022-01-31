@@ -942,7 +942,7 @@ The pressure solver in FDS employs Fast Fourier Transforms (FFTs) in the $y$ and
 
 The governing equations solved in FDS are written in terms of a three dimensional Cartesian coordinate system. However, a two dimensional Cartesian or two dimensional cylindrical (axially-symmetric) calculation can be performed by setting the {\ct J} in the {\ct IJK} triplet to 1 on the {\ct MESH} line. For axial symmetry, add {\ct CYLINDRICAL=T} to the {\ct MESH} line, and the coordinate $x$ is then interpreted as the radial coordinate $r$. If you are using more than one mesh, all should be specified as 2-D or {\ct CYLINDRICAL}---you cannot mix 2-D, 3-D and cylindrical geometries. No boundary conditions should be set at the planes $y=\hbox{\ct YMIN=XB(3)}$ or $y=\hbox{\ct YMAX=XB(4)}$, nor at $r=\hbox{\ct XMIN=XB(1)}$ in an axially-symmetric calculation if $r=\hbox{\ct XB(1)=0}$ (Note that {\ct XB(1)} does not have to be 0). For better visualizations, the difference between {\ct XB(4)} and {\ct XB(3)} should be small so that the Smokeview rendering appears to be in 2-D. An example of an axially-symmetric helium plume is given in Section~\ref{baroclinic_torque}.
 
-When processing results for a {\ct CYLINDRICAL} simulation, note that integrated quantities like {\ct HRR} (Heat Release Rate) apply only to the specified 2-D or cylindrical coordinates. Thus, the cylindrical coordinates define a cylindrical sector, like a slice of cake, even though Smokeview will not render it this way. The fully integrated quantity, like {\ct HRR}, can be found by multiplying the reported value by $2 \pi \, \delta\theta$, where $\delta\theta$ is the difference between {\ct YMAX} and {\ct YMIN} in radians. It does not matter what values you choose for {\ct YMAX} and {\ct YMIN} as long as the rendering in Smokeview is to your liking.
+When processing results for a {\ct CYLINDRICAL} simulation, note that integrated output quantities with the {\ct SPATIAL\_STATISTIC} attribute apply only to the specified 2-D or cylindrical coordinates. Thus, the cylindrical coordinates define a cylindrical sector, like a slice of cake, even though Smokeview will not render it this way. The fully integrated quantity can be found by multiplying the reported value by $2 \pi \, \delta\theta$, where $\delta\theta$ is the difference between {\ct YMAX} and {\ct YMIN} in radians. It does not matter what values you choose for {\ct YMAX} and {\ct YMIN} as long as the rendering in Smokeview is to your liking.
 
 
 \subsection{Multiple Meshes}
@@ -3237,20 +3237,11 @@ FDS has several approaches for describing the pyrolysis of solids and liquids. T
 
 \label{info:gas_burner}
 
-Solids and liquid fuels can be modeled by specifying their relevant
-properties via the {\ct MATL} namelist group. However, if you simply
-want to specify a fire of a given heat release rate (HRR),
-you need not specify any material properties. A specified fire is
-basically modeled as the ejection of gaseous fuel
-from a solid surface or vent. This is essentially a burner, with a
-specified Heat Release Rate Per Unit Area, {\ct HRRPUA}, in units of
-kW/m$^2$. For example
+Solids and liquid fuels can be modeled by specifying their relevant properties via the {\ct MATL} namelist group. However, if you simply want to specify a fire of a given heat release rate (HRR), you need not specify any material properties. A specified fire is basically modeled as the ejection of gaseous fuel from a solid surface or vent. This is essentially a burner, with a specified Heat Release Rate Per Unit Area, {\ct HRRPUA}, in units of kW/m$^2$. For example
 \begin{lstlisting}
 &SURF ID='FIRE', HRRPUA=500. /
 \end{lstlisting}
-applies 500~kW/m$^2$ to any surface with the attribute
-{\ct SURF\_ID='FIRE'}. See the discussion of time-dependent quantities
-in Chapter~\ref{info:RAMP} to learn how to ramp the heat release rate up and down.
+applies 500~kW/m$^2$ to any surface with the attribute {\ct SURF\_ID='FIRE'}. See the discussion of time-dependent quantities in Chapter~\ref{info:RAMP} to learn how to ramp the heat release rate up and down.
 
 An alternative to {\ct HRRPUA} with the exact same functionality is {\ct MLRPUA}, except this parameter
 specifies the Mass Loss Rate of fuel gas Per Unit Area in \si{kg/(m$^2$.s)}. Do not specify both
@@ -10421,7 +10412,6 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct GAUGE HEAT FLUX}                           & Section~\ref{info:heat_flux}                  & kW/m$^2$       & B,D          \\ \hline
 {\ct ENTHALPY FLUX WALL}                        & Section~\ref{info:enthalpy_flux}              & kW/m$^2$       & B,D          \\ \hline
 {\ct TOTAL HEAT FLUX}                           & Section~\ref{info:heat_flux}                  & kW/m$^2$       & B,D          \\ \hline
-{\ct HRR}                                       & $\int \dq''' \; \d V$                         & kW             & D            \\ \hline
 {\ct HRRPUA}                                    & $\dq''$                                       & kW/m$^2$       & D            \\ \hline
 {\ct HRRPUV}                                    & $\dq'''$                                      & kW/m$^3$       & D,I,P,S      \\ \hline
 {\ct INCAPACITATION TIME}                       & Section~\ref{info:FED}                        & min            & D            \\ \hline
