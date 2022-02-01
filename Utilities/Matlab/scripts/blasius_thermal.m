@@ -69,6 +69,10 @@ end
 
 set(gcf,'Visible',Figure_Visibility);
 lh=legend(H,f1_key);
+
+git_file = [datdir, 'Pohlhausen_Pr_2_git.txt'];
+addverstr(gca,git_file,'linear')
+
 set(lh,'FontName',Font_Name,'FontSize',Key_Font_Size)
 set(gcf,'Units',Paper_Units);
 set(gcf,'PaperUnits',Paper_Units);
@@ -115,6 +119,10 @@ end
 
 set(gcf,'Visible',Figure_Visibility);
 lh2=legend(H2,f2_key);
+
+git_file = [datdir, 'Pohlhausen_Pr_2_git.txt'];
+addverstr(gca,git_file,'linear')
+
 set(lh2,'FontName',Font_Name,'FontSize',Key_Font_Size)
 set(gcf,'Units',Paper_Units);
 set(gcf,'PaperUnits',Paper_Units);
