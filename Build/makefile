@@ -369,7 +369,7 @@ rcal.o : func.o prec.o cons.o
 mesh.o : prec.o type.o
 func.o : prec.o cons.o type.o mesh.o devc.o
 gsmv.o : prec.o func.o cons.o mesh.o
-smvv.o : geom.o prec.o func.o
+smvv.o : geom.o prec.o func.o cons.o data.o
 turb.o : prec.o func.o cons.o mesh.o
 soot.o : prec.o mesh.o cons.o func.o turb.o
 pois.o : prec.o cons.o
@@ -402,7 +402,7 @@ rcal.obj : func.obj prec.obj cons.obj
 mesh.obj : prec.obj type.obj
 func.obj : prec.obj cons.obj type.obj mesh.obj devc.obj
 gsmv.obj : prec.obj func.obj cons.obj mesh.obj
-smvv.obj : geom.obj prec.obj func.obj
+smvv.obj : geom.obj prec.obj func.obj cons.obj data.obj
 turb.obj : prec.obj func.obj cons.obj mesh.obj
 soot.obj : prec.obj mesh.obj cons.obj func.obj turb.obj
 pois.obj : prec.obj cons.obj
