@@ -3775,7 +3775,7 @@ DATA_FILE_LOOP: DO N=1,N_SMOKE3D
    S3 => SMOKE3D_FILE(N)
    IF (S3%QUANTITY_INDEX==0) CYCLE
 
-   ! Write out soot, hrrpuv, temperature and co2 data files (if they exist)
+   ! Obtain Smoke3D output at cell centers
 
    DO K=0,KBP1
       DO J=0,JBP1
@@ -3807,7 +3807,7 @@ DATA_FILE_LOOP: DO N=1,N_SMOKE3D
       ENDDO
    ENDIF
 
-   ! Pack the data into a 1-D array and call routine that writes the file
+   ! Pack the data into a 1-D array and send to the routine that writes the file for Smokeview
 
    ALLOCATE(QQ_PACK(IBP1*JBP1*KBP1))
    QQ_PACK = PACK(QQ(0:IBAR,0:JBAR,0:KBAR,1),MASK=.TRUE.)
