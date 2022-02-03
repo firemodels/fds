@@ -134,9 +134,9 @@ for i = [1,2,3,4]
         case 4; err(i) = abs( mean(Tp)-mean(Tp_mean_Pr2p00,'omitnan') )/mean(Tp_mean_Pr2p00,'omitnan');
     end
 
-    if err(i)>0.2
-        disp(['Matlab Warning: heated_channel case ',num2str(i),' out of tolerance'])
-    end
+    % if err(i)>0.2
+    %     disp(['Matlab Warning: heated_channel case ',num2str(i),' out of tolerance'])
+    % end
 
 end
 
