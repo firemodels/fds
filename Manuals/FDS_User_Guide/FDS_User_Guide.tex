@@ -8187,19 +8187,23 @@ Note that the transmission is given in units of \%/m rather than \% like obscura
 
 
 \subsubsection{Example Case: A Beam Detector}
+\label{beam_detector}
 
-A 10~m by 10~m by 4~m compartment is filled with air at 20~$^\circ$C and a user-specified gas species representing smoke with a uniform mass fraction of $Y_{\rm s}=6.02 \times 10^{-5}$. The density of air is 1.195~kg/m$^3$; thus, the ``smoke'' density is $\rho_{\rm s}=7.19 \times 10^{-5}$~kg/m$^3$. Using the default mass extinction coefficient of $K_{\rm m}=8700$~m$^2$/kg, the optical depth is calculated to be $K_{\rm m} \rho_{\rm s} \approx 0.626$~\si{m^{-1}}.  The compartment has a series of obstructions located at increasing distance from the front in increments of 1~m.  The correlation for the output quantity {\ct VISIBILITY}, Eq.~(\ref{vis}), produces a visibility distance of 4.8~m. When viewing the smoke levels with Smokeview, you should just barely see the fifth obstacle which is at a distance of 5~m from the front of the compartment. If this is the case, Smokeview is properly displaying the obscuration of the smoke.  Three beam detectors are also placed in the compartment.  These all have a pathlength of 10~m, but are at different orientations within the compartment. Using the optical depth of 0.626~\si{m^{-1}} and the path length of 10~m, the expected total obscuration is 99.81~\%, which is the result computed by FDS for each of the three detectors.
+A 10~m by 10~m by 4~m compartment is filled with air at 20~$^\circ$C with a density of $\rho=1.195$~kg/m$^3$. A uniformly distributed gas species with a mass fraction of $Y_{\rm s}=3 \times 10^{-5}$ represents smoke. The ``smoke'' density is $\rho_{\rm s}\equiv \rho Y_{\rm s}=3.585 \times 10^{-5}$~kg/m$^3$. Using the default mass extinction coefficient of $K_{\rm m}=8700$~m$^2$/kg, the optical depth is calculated to be $K \equiv K_{\rm m} \rho_{\rm s} = 0.3119$~\si{m^{-1}}. Three beam detectors are located in the compartment, all with a path length of $L=10$~m but with different orientations. The expected path obscuration is $100(1-\exp(-KL))=95.58$~\%. Note that this case uses 8 meshes to span the computational domain, and the beams are permitted to pass from one mesh to another.
 
-Note that this case uses 8 meshes to span the computational domain, and the beams are permitted to pass from one mesh to another.
+This case also provides a check on the Smokeview rendering of the smoke-filled compartment. Nine columns are located at increasing distance from the front wall in increments of 1~m. Equation~(\ref{vis}) prodicts a visibility distance of $S \equiv 3/K=9.6$~m. Referring to Fig.~\ref{beam_detector_fig}, you should just barely see the ninth column at a distance of 8.9~m from the front wall. The plot at the bottom of Fig.~\ref{beam_detector_fig} compares the pixel values used by Smokeview to color the columns versus the expected values. The pixel values are integers between 0 and 255, where 255 is white and 0 is black.
 
-\begin{figure}[ht]
+\begin{figure}[p]
 \begin{center}
 \includegraphics[width=5.2in]{SCRIPT_FIGURES/beam_detector_nosmoke}
 \includegraphics[width=5.2in]{SCRIPT_FIGURES/beam_detector_smoke}
+\includegraphics[width=4.5in]{SCRIPT_FIGURES/beam_detector}
 \end{center}
-\caption[Results of the {\ct beam\_detector} test case]{Output of the {\ct beam\_detector} test case.}
-\label{beam_detector}
+\caption[Results of the {\ct beam\_detector} test case]{Smokeview rendering of a compartment filled with no smoke (top), smoke (center), and a comparison of the Smokeview pixel values with the expected values.}
+\label{beam_detector_fig}
 \end{figure}
+
+\FloatBarrier
 
 
 \subsection{Aspiration Detection Systems}
