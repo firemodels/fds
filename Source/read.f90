@@ -6249,7 +6249,7 @@ READ_MATL_LOOP: DO N=1,N_MATL
       CHAR_OXIDATION     = .TRUE.
       WALL_INCREMENT     = 1  ! Do pyrolysis every time step
       ML%PYROLYSIS_MODEL = PYROLYSIS_VEGETATION
-      IF (ML%MAX_REACTION_RATE(1)>1.E6_EB) ML%MAX_REACTION_RATE(1) = 1._EB  ! Limits run-away char reaction
+      IF (ML%MAX_REACTION_RATE(1)>1.E6_EB) ML%MAX_REACTION_RATE(1) = 500._EB  ! Limits run-away char reaction
    ELSE
       ML%PYROLYSIS_MODEL = PYROLYSIS_SOLID
    ENDIF
