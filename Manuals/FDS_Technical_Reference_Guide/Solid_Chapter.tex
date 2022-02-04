@@ -311,19 +311,15 @@ Solids can undergo simultaneous reactions under the following assumptions:
 \end{itemize}
 Each material component may undergo several competing reactions, and each of these reactions may produce some other solid component (residue) and gaseous species according to specified yield coefficients.  These coefficients should sum to 1, but yields summing to less than 1 can account for products that are not explicitly included in the simulation.
 
-The local density of material component $\alpha$ evolves in time according to the solid phase species conservation equation
+The mass per unit volume of material component $\alpha$, $\rho_{\rm s,\alpha}(\bx,t)$, evolves in time according to the solid phase species conservation equation
 \be
-  \dod{ }{t} \left( \frac{\rho_{\rm s,\alpha}}{\rho_{\rm s}(0)} \right) =
-    -\sum_{\beta=1}^{N_{\rm r,\alpha}} r_{\alpha \beta} + S_\alpha
+  \dod{\rho_{\rm s,\alpha} }{t}  = -\sum_{\beta=1}^{N_{\rm r,\alpha}} r_{\alpha \beta} + S_\alpha
   \label{solid_species_conservation}
 \ee
-where $N_{\rm r,\alpha}$ is the number of reactions for material $\alpha$, $r_{\alpha \beta}$ is the rate of reaction $\beta$ in units of \si{1/s},
-and $\rho_{\rm s}(0)$ is the initial density of the material layer. $S_\alpha$ is the production rate of material component $\alpha$ as a result of
-the reactions of the other components. The reaction rates are functions of solid and gas phase conditions and calculated as a combination of Arrhenius
-and power functions:
+where $N_{\rm r,\alpha}$ is the number of reactions for material $\alpha$, $r_{\alpha \beta}$ is the rate of reaction $\beta$ in units of \si{1/s}, and $S_\alpha$ is the production rate of material component $\alpha$ as a result of the reactions of the other components. The reaction rates are functions of solid and gas phase conditions and calculated as a combination of Arrhenius and power functions:
 \be
 r_{\alpha \beta} =
-    \underbrace{\left( \frac{\rho_{\rm s,\alpha}}{\rho_{\rm s}(0)}\right)^{n_{\rm s,\alpha\beta}}}_\textrm{Reactant dependency}
+    \underbrace{ \rho_{\rm s,\alpha}^{n_{\rm s,\alpha\beta}}}_\textrm{Reactant dependency}
     \underbrace{A_{\alpha \beta} \; \exp \left(-\frac{E_{\alpha\beta}}{RT_{\rm s}}\right)}_\textrm{Arrhenius function}
     \underbrace{\left[X_{\rm O_2}(x)\right]^{n_{\rm O_2,\alpha\beta}}}_\textrm{Oxidation function}
     \underbrace{\max \big[0,S_{\rm thr,\alpha,\beta}(T_{\rm s}-T_{\rm thr,\alpha \beta}) \big]^{n_{\rm t,\alpha\beta}}}_\textrm{Power function}
@@ -360,8 +356,7 @@ S_\alpha = \sum_{\alpha'=1}^{N_{\rm m}} \sum_{\beta=1}^{N_{\rm r,\alpha'}}
 where $\nu_{\alpha,\alpha' \beta}$ is the yield of component $\alpha$ from reaction $\beta$ of component $\alpha'$. The volumetric production rate of each gas species, $\gamma$, is
 \be
 \label{eq:pyrolyzate}
-\dot{m}_{\gamma}''' = \rho_{\rm s}(0)\; \sum_{\alpha=1}^{N_{\rm m}} \sum_{\beta=1}^{N_{\rm r,\alpha}}
-    \nu_{\rm \gamma,\alpha \beta} \; r_{\alpha \beta}
+\dot{m}_{\gamma}''' =  \sum_{\alpha=1}^{N_{\rm m}} \sum_{\beta=1}^{N_{\rm r,\alpha}} \nu_{\rm \gamma,\alpha \beta} \; r_{\alpha \beta}
 \ee
 It is assumed that the gases are transported instantaneously to the surface, where the
 mass fluxes are given by\footnote{In cylindrical and spherical coordinates, the mass fluxes are
@@ -376,7 +371,7 @@ mass fluxes are given by\footnote{In cylindrical and spherical coordinates, the 
 where $L$ is the thickness of the solid. The chemical source term in the heat conduction equation is
 \be
 \label{eq:qchem_solid}
-\dot{q}_{\rm s,c}'''(x) = -\rho_{\rm s}(0)\; \sum_{\alpha=1}^{N_{\rm m}} \sum_{\beta=1}^{N_{\rm r,\alpha}}  r_{\alpha \beta}(x) H_{\rm r,\alpha \beta}
+\dot{q}_{\rm s,c}'''(x) = - \sum_{\alpha=1}^{N_{\rm m}} \sum_{\beta=1}^{N_{\rm r,\alpha}}  r_{\alpha \beta}(x) H_{\rm r,\alpha \beta}
 \ee
 where $H_{\rm r,\alpha \beta}$ is the heat of reaction.
 
@@ -506,7 +501,7 @@ The movement of pyrolysis gas through the material to the solid surface is compl
 Similar to Eq.~(\ref{eq:pyrolyzate}), in 3D the mass generation rate per unit volume of pyrolysis gas component $\gamma$ in cell $i,j,k$ is given by
 \begin{equation}
 \label{eq:massprod}
-\dot{m}_{\gamma,i,j,k}''' = \rho_{\mathrm{s}}(0)_{i,j,k} \sum_{\alpha=1}^{N_{\mathrm{m}}} \sum_{\beta=1}^{N_{\mathrm{r},\alpha}} \nu_{\gamma,\alpha\beta} r_{\alpha\beta,i,j,k}
+\dot{m}_{\gamma,i,j,k}''' =  \sum_{\alpha=1}^{N_{\mathrm{m}}} \sum_{\beta=1}^{N_{\mathrm{r},\alpha}} \nu_{\gamma,\alpha\beta} r_{\alpha\beta,i,j,k}
 \end{equation}
 
 \subsubsection*{Instantaneous Transport}
