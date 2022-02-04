@@ -3393,19 +3393,17 @@ Note that the indices associated with the parameters are not needed {\em in this
 \subsection{Reaction Rates}
 \label{sec:reaction_rates}
 
-For each reaction that each material component undergoes you must specify kinetic parameters of the reaction rate. The general evolution equation for a material undergoing one or more reactions is:
+The mass per unit volume of material component $i$, $\rho_{{\rm s},i}(x,t)$, is a function of the depth into the solid, $x$, and time, $t$. It evolves in time according to the following equation:
 \be
-  \frac{\d Y_{{\rm s},i}}{\d t} = - \sum_{j=1}^{N_{{\rm r},i}} r_{ij} + \sum_{i'=1}^{N_{\rm m}} \sum_{j=1}^{N_{{\rm r},i'}} \nu_{{\rm s},i'j} \; r_{i'j} \quad (i' \neq i)
+  \frac{\partial \rho_{{\rm s},i}}{\partial t} = - \sum_{j=1}^{N_{{\rm r},i}} r_{ij} + \sum_{i'=1}^{N_{\rm m}} \sum_{j=1}^{N_{{\rm r},i'}} \nu_{{\rm s},i'j} \; r_{i'j} \quad (i' \neq i)
 \label{rr_tot}
 \ee
 where
 \be
-  r_{ij} = A_{ij} \; Y_{{\rm s},i}^{n_{{\rm s},ij}} \; \exp \left(-\frac{E_{ij}}{R \, T_{\rm s}} \right) X_{\rm O_2}^{n_{{\rm O_2},ij}}
-  \quad ; \quad Y_{{\rm s},i} = \left( \frac{\rho_{{\rm s},i}}{\rho_{\rm s}(0)} \right)
-  % \max\left[0,T_{\rm s}-T_{thr,ij}\right]^{n_{t,ij}}
+  r_{ij} = A_{ij} \; \rho_{{\rm s},i}^{n_{{\rm s},ij}} \; \exp \left(-\frac{E_{ij}}{R \, T_{\rm s}} \right) X_{\rm O_2}^{n_{{\rm O_2},ij}}
   \label{rr}
 \ee
-The term, $r_{ij}$, defines the rate of reaction at the temperature, $T_{\rm s}$, of the $i$th material undergoing its $j$th reaction. The second term on the right of the equation (\ref{rr_tot}) represents the contributions of other materials producing the $i$th material as a residue with a yield of $\nu_{{\rm s},i'j}$. This term is denoted by {\ct NU\_MATL(:,j)} on the $i'$-th {\ct MATL} line. $\rho_{{\rm s},i}$ is the density of the $i$th material component of the layer, defined as the mass of the $i$th material component divided by the volume of the layer.  $\rho_{\rm s}(0)$ is the initial density of the layer. Thus, $Y_{{\rm s},i}=\rho_{{\rm s},i}/\rho_{\rm s}(0)$ is a quantity that increases if the $i$th material component is produced as a residue of some other reaction, or decreases if the $i$th component decomposes.  If the layer is composed of only one material, then $\rho_{{\rm s},i}/\rho_{\rm s}(0)$ is initially 1. $n_{{\rm s},ij}$ is the reaction order and prescribed under the name {\ct N\_S(j)}, and is 1 by default. If the value of $n_{\rm s}$ is not known, it is a good starting point to assume it is 1.
+The term, $r_{ij}$, defines the rate of reaction at the temperature, $T_{\rm s}$, of the $i$th material undergoing its $j$th reaction. The second term on the right of the equation (\ref{rr_tot}) represents the contributions of other materials producing the $i$th material as a residue with a yield of $\nu_{{\rm s},i'j}$. This term is denoted by {\ct NU\_MATL(:,j)} on the $i'$-th {\ct MATL} line. $\rho_{{\rm s},i}$ is the density of the $i$th material component of the layer, defined as the mass of the $i$th material component divided by the volume of the layer. Thus, $\rho_{{\rm s},i}$ is a quantity that increases if the $i$th material component is produced as a residue of some other reaction, or decreases if the $i$th component decomposes. $n_{{\rm s},ij}$ is the reaction order and prescribed under the name {\ct N\_S(j)}, and is 1 by default. If the value of $n_{\rm s}$ is not known, it is a good starting point to assume it is 1.
 
 The pre-exponential factor, $A_{ij}$, is prescribed under the name {\ct A(j)} on the {\ct MATL} line of the $i$th material, with units of s$^{-1}$. $E_{ij}$, the activation energy, is prescribed via {\ct E(j)} in units of J/mol. Remember that 1~kcal is 4.184~kJ, and be careful with factors of 1000. For a given reaction, specify both $A$ and $E$, or neither. Do not specify only one of these two parameters. Typically, these parameters only have meaning when both are derived from a common set of experiments, like TGA (thermogravimetric analysis).
 
@@ -3580,7 +3578,7 @@ Equation~(\ref{rr}) describes the rate of the reaction as a function of temperat
 
 In FDS, the reaction rate expression in Eq.~(\ref{rr}) includes an optional term:
 \be
-  r_{ij} = A_{ij} \; Y_{{\rm s},i}^{n_{{\rm s},ij}} \; \exp \left(-\frac{E_{ij}}{R \, T_{\rm s}} \right) \;
+  r_{ij} = A_{ij} \; \rho_{{\rm s},i}^{n_{{\rm s},ij}} \; \exp \left(-\frac{E_{ij}}{R \, T_{\rm s}} \right) \;
   \max\left[0,S_{{\rm thr},ij}(T_{\rm s}-T_{{\rm thr},ij})\right]^{n_{{\rm t},ij}}
   \label{rr2}
 \ee
@@ -7333,16 +7331,14 @@ In the referenced papers~\cite{Porterie:2006,Morvan:CF2004,Houssami:2016}, the r
 \be
    \rho_{\rm s} = \rho_{\rm s,dry} + \rho_{\rm s,H_2O} + \rho_{\rm s,char} + \rho_{\rm s,ash}
 \ee
-The initial total density is denoted $\rho_{\rm s}(0)$.
-
 The reaction rates for evaporation of H$_2$O, pyrolysis of the dry vegetation, and char oxidation are:
 \begin{eqnarray}
-  r_{\rm H_2O} &=& \left( \frac{\rho_{\rm s, H_2O}}{\rho_{\rm s}(0)} \right)   \, A_{\rm H_2O} \, T^{-\frac{1}{2}} \exp \left(  -\frac{E_{\rm H_2O}}{R \, T} \right) \label{r_H2O} \\[.1in]
-  r_{\rm pyr}  &=& \left( \frac{\rho_{\rm s,dry}}{\rho_{\rm s}(0)}   \right)   \, A_{\rm pyr} \,                   \exp \left(  -\frac{E_{\rm pyr}}{R \, T}  \right)   \\[.1in]
-  r_{\rm char} &=& \left( \frac{\rho_{\rm s,char}}{\rho_{\rm s}(0)}  \right)^0 \, A_{\rm char} \,                  \exp \left(  -\frac{E_{\rm char}}{R \, T} \right) \,
-  \frac{ \rho \, Y_{\rm O_2} \, \sigma \, \left( 1+\beta_{\rm char}\sqrt{\RE} \right) }{\nu_{\rm O_2,char} \, \rho_{\rm s}(0)} \label{r_char}
+  r_{\rm H_2O} &=& \rho_{\rm s, H_2O}  \; A_{\rm H_2O} \, T^{-\frac{1}{2}} \exp \left(  -\frac{E_{\rm H_2O}}{R \, T} \right) \label{r_H2O} \\[.1in]
+  r_{\rm pyr}  &=& \rho_{\rm s,dry}    \; A_{\rm pyr} \,                   \exp \left(  -\frac{E_{\rm pyr}}{R \, T}  \right)   \\[.1in]
+  r_{\rm char} &=& \rho_{\rm s,char}^0 \; A_{\rm char} \,                  \exp \left(  -\frac{E_{\rm char}}{R \, T} \right) \,
+  \frac{ \rho \, Y_{\rm O_2} \, \sigma \, \left( 1+\beta_{\rm char}\sqrt{\RE} \right) }{\nu_{\rm O_2,char} } \label{r_char}
 \end{eqnarray}
-where $T$ is the temperature of the vegetation. Note that the exponent -1/2 in Eq.~(\ref{r_H2O}) is specified using {\ct N\_T=-0.5} on the {\ct MATL} line for water, and the exponent 0 in Eq.~(\ref{r_char}) is specified using {\ct N\_S=0} on the {\ct MATL} line for the char species. The default values of the kinetic constants are given in Table~\ref{tab:veg_kinetics}. The Reynolds number is $\RE = \rho U D_{\rm v} / \mu $ where $\rho$ is the gas density, $U$ is the gas velocity, and $D_{\rm v} = 4/\sigma$ for a cylinder, where $\sigma$ is the surface area to volume ratio. The term containing $\RE$ is included to account for the oxygen blowing effects on char oxidation and the constant $\beta_{\rm char}$ ({\ct BETA\_CHAR}) is equal to 0.2 by default, which is the value used by Porterie~et~al.~\cite{Porterie:2006}.
+where $T$ is the temperature of the vegetation. Note that the exponent $-1/2$ in Eq.~(\ref{r_H2O}) is specified using {\ct N\_T=-0.5} on the {\ct MATL} line for water, and the exponent 0 in Eq.~(\ref{r_char}) is specified using {\ct N\_S=0} on the {\ct MATL} line for the char species. The default values of the kinetic constants are given in Table~\ref{tab:veg_kinetics}. The Reynolds number is $\RE = \rho U D_{\rm v} / \mu $ where $\rho$ is the gas density, $U$ is the gas velocity, and $D_{\rm v} = 4/\sigma$ for a cylinder, where $\sigma$ is the surface area to volume ratio. The term containing $\RE$ is included to account for the oxygen blowing effects on char oxidation and the constant $\beta_{\rm char}$ ({\ct BETA\_CHAR}) is equal to 0.2 by default, which is the value used by Porterie~et~al.~\cite{Porterie:2006}.
 
 The reaction rate for char oxidation, $r_{\rm char}$, is susceptible to very large values if the oxygen concentration in the vicinity of the solid is relatively high, a common result of coarse resolution grids used for wildland fire simulations. To prevent thermal runaway in the char reaction, an upper bound of 1~s$^{-1}$ is applied to $r_{\rm char}$.
 
@@ -7371,7 +7367,7 @@ The equation governing the temperature of the thermally-thick solid is
 \ee
 where $I$ is 1 for cylindrical and 2 for spherical coordinates. The source term is given by
 \be
-\dot{q}'''_{\rm s} = -\rho_{\rm s}(0) \left( \Delta{h_{\rm H_2O}}\ r_{\rm H_2O} + \Delta {h_{\rm pyr}}\ r_{\rm pyr} +  \Delta{h_{\rm char}}\ r_{\rm char} \right)
+\dot{q}'''_{\rm s} = -\left( \Delta{h_{\rm H_2O}}\ r_{\rm H_2O} + \Delta {h_{\rm pyr}}\ r_{\rm pyr} +  \Delta{h_{\rm char}}\ r_{\rm char} \right)
 \ee
 and the boundary condition
 \be
@@ -7390,15 +7386,15 @@ c_{\rm H_2O} &=& 4.19
 \end{eqnarray}
 The rate of change of the total mass is
 \be
-\frac{\partial}{\partial t} \left( \frac{\rho_{\rm s}}{\rho_{\rm s}(0)} \right) = -r_{\rm H_2O} - (1 - \nu_{\rm char}) \, r_{\rm pyr} - (1-\nu_{\rm ash}) \, r_{\rm char}
+\frac{\partial \rho_{\rm s}}{\partial t} = -r_{\rm H_2O} - (1 - \nu_{\rm char}) \, r_{\rm pyr} - (1-\nu_{\rm ash}) \, r_{\rm char}
 \ee
 The rate of change for the components of the vegetative mass during thermal degradation are:
 \begin{eqnarray}
-\dod{}{t} \left( \frac{\rho_{\rm s,H_2O}}{\rho_{\rm s}(0)} \right) &=& -r_{\rm H_2O} \\[.1in]
-\dod{}{t} \left( \frac{\rho_{\rm s,dry}}{\rho_{\rm s}(0)}  \right) &=& -r_{\rm pyr}  \\[.1in]
-\dod{}{t} \left( \frac{\rho_{\rm s,char}}{\rho_{\rm s}(0)} \right) &=& -\nu_{\rm char}\ r_{\rm pyr} - r_{\rm char}
+\dod{\rho_{\rm s,H_2O}}{t}  &=& -r_{\rm H_2O} \\[.1in]
+\dod{\rho_{\rm s,dry}}{t}   &=& -r_{\rm pyr}  \\[.1in]
+\dod{\rho_{\rm s,char}}{t}  &=& -\nu_{\rm char}\ r_{\rm pyr} - r_{\rm char}
 \end{eqnarray}
-Gaseous products created during the thermal degradation process are water vapor (during evaporation), fuel vapor (during pyrolysis), and CO$_2$ (during char oxidation). The source terms (kg m$^{-3}$ s$^{-1}$) for these species are, respectively, $\rho_{\rm s}(0) \, r_{\rm H_2O}$, $(1-\nu_{\rm char}) \, \rho_{\rm s}(0) \, r_{\rm pyr}$, and  $(1+\nu_{\rm O_2,char} - \nu_{\rm ash}) \, \rho_{\rm s}(0) \, r_{\rm char}$. In addition, the char oxidation process consumes oxygen in the gas phase at a rate of $-\nu_{\rm O_2,char} \, \rho_{\rm s}(0) \, r_{\rm char}$.
+Gaseous products created during the thermal degradation process are water vapor (during evaporation), fuel vapor (during pyrolysis), and CO$_2$ (during char oxidation). The source terms (kg m$^{-3}$ s$^{-1}$) for these species are, respectively, $r_{\rm H_2O}$, $(1-\nu_{\rm char}) \, r_{\rm pyr}$, and  $(1+\nu_{\rm O_2,char} - \nu_{\rm ash}) \, r_{\rm char}$. In addition, the char oxidation process consumes oxygen in the gas phase at a rate of $-\nu_{\rm O_2,char} \, r_{\rm char}$.
 
 Figure~\ref{vege_inputs} includes sample input lines demonstrating how the vegetation model can be applied to particles that represent pine needles that are 1~mm in diameter and 5~cm long. Note that the specification of the parameter {\ct NU\_O2\_CHAR} on the {\ct MATL} line for char indicates that the special vegetation model is to be invoked. All parameters described above must be explicitly specified in the input file---there are no hard-wired default values.
 
