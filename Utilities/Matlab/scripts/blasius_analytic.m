@@ -2,7 +2,7 @@
 % 8-15-2012
 % blasius_analytic.m
 
-function [eta,fp] = blasius_analytic(u0, zmax)
+function [eta,f,fp] = blasius_analytic(u0, zmax, mu, rho, x, steps, fpp_init)
 
 % etamax = maximum eta for calculation
 % steps = number of steps between 0 and etamax
@@ -11,8 +11,7 @@ function [eta,fp] = blasius_analytic(u0, zmax)
 % eta - the similarity coordinate normal to the wall
 % f, fp, fpp, fppp - the Blasius function and it first 3 derivatives
 
-etamax=zmax/sqrt(1E-3/1.199*0.05/u0);
-steps=257;
+etamax=zmax/sqrt(mu/rho*x/u0);
 deta = etamax/(steps-1);
 eta = zeros(steps,1);
 f = zeros(steps,1);
@@ -20,7 +19,7 @@ fp = zeros(steps,1);
 fpp = zeros(steps,1);
 fppp = zeros(steps,1);
 % initial guess for fpp
-fpp(1) = 0.3318;
+fpp(1) = fpp_init;
 for i=1:steps-1
     eta(i+1) = eta(i) + deta;
     % predictor

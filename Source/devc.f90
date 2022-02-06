@@ -64,6 +64,10 @@ TYPE DEVICE_TYPE
    REAL(EB) :: X,Y,Z
    !> !\}
    !> !\{
+   !> Origin of a linear array of devices
+   REAL(EB) :: X0,Y0,Z0
+   !> !\}
+   !> !\{
    !> Physical coordinates for DEVC spanning a line, plane, or volume
    REAL(EB) :: X1,X2,Y1,Y2,Z1,Z2
    !> !\}

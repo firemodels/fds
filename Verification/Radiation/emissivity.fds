@@ -26,7 +26,7 @@ The emissivity is measured using EMISSIVITY output quantity.
       SPECIFIC_HEAT= 1.0
       DENSITY= 10.0 
       N_REACTIONS = 1
-      A = 0.1
+      A = 1.
       E = 0.
       N_S = 0.
       NU_MATL    = 1.0

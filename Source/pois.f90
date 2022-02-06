@@ -5609,27 +5609,23 @@ DO  IR = KDO,0,-1
   IF (IR==KDO) GO TO 430
 
   IF (IR/=0) GO TO 280
+
   DO  I = 1,NMAX,2
 
-    IF (I/=1) GO TO 230
-    DO  J = 1,M
-      Y(J,I) = Y(J,I) - CN(I)*Y(J,I+1)
-    END DO
+    IF (I==1) THEN
+       DO  J = 1,M
+         Y(J,I) = Y(J,I) - CN(I)*Y(J,I+1)
+       END DO
+    ELSEIF (I==NMAX) THEN
+       DO  J = 1,M
+         Y(J,I) = Y(J,I) - AN(I)*Y(J,I-1)
+       END DO
+    ELSE
+       DO  J = 1,M
+         Y(J,I) = Y(J,I) - AN(I)*Y(J,I-1) - CN(I)*Y(J,I+1)
+       END DO
+    ENDIF
 
-    CYCLE
-
-    230         CONTINUE
-    IF (I/=NMAX) GO TO 250
-    DO  J = 1,M
-      Y(J,I) = Y(J,I) - AN(I)*Y(J,I-1)
-    END DO
-
-    CYCLE
-
-    250         CONTINUE
-    DO  J = 1,M
-      Y(J,I) = Y(J,I) - AN(I)*Y(J,I-1) - CN(I)*Y(J,I+1)
-    END DO
   END DO
 
   GO TO 430

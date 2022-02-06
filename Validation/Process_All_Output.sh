@@ -46,6 +46,7 @@ PROCESS Bouchair_Solar_Chimney
 PROCESS BRE_Spray
 PROCESS Bryant_Doorway
 PROCESS CAROLFIRE
+PROCESS Casara_Arts_Ribbed_Channel
 PROCESS CHRISTIFIRE
 PROCESS Crown_Fires
 PROCESS CSIRO_Grassland_Fires

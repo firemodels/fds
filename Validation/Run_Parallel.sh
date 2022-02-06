@@ -12,6 +12,7 @@ cd Atmospheric_Dispersion;  ./Run_All.sh $OPTIONS; cd ..
 cd Backward_Facing_Step;  ./Run_All.sh $OPTIONS; cd ..
 cd BGC_GRI_LNG_Fires;  ./Run_All.sh $OPTIONS; cd ..
 cd Bouchair_Solar_Chimney;  ./Run_All.sh $OPTIONS; cd ..
+cd Casara_Arts_Ribbed_Channel;  ./Run_All.sh $OPTIONS; cd ..
 cd Crown_Fires;  ./Run_All.sh $OPTIONS; cd ..
 cd CSIRO_Grassland_Fires;  ./Run_All.sh $OPTIONS; cd ..
 cd CSTB_Tunnel;  ./Run_All.sh $OPTIONS; cd ..
