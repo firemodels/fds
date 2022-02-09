@@ -2396,8 +2396,17 @@ IF (ABS(TIME_SHRINK_FACTOR -1._EB)>SPACING(1._EB)) &
 WRITE(LU_OUTPUT,'(A,F8.1)')   '   Time Shrink Factor (s/s)      ',TIME_SHRINK_FACTOR
 WRITE(LU_OUTPUT,'(A,F8.1)')   '   Simulation Start Time (s)     ',T_BEGIN
 WRITE(LU_OUTPUT,'(A,F8.1)')   '   Simulation End Time (s)       ',(T_END-T_BEGIN) * TIME_SHRINK_FACTOR + T_BEGIN
+SELECT CASE (SIM_MODE)
+   CASE(DNS_MODE)
+      WRITE(LU_OUTPUT,'(A)')     '   DNS Calculation'
+   CASE(LES_MODE)
+      WRITE(LU_OUTPUT,'(A)')     '   LES Calculation'
+   CASE(VLES_MODE)
+      WRITE(LU_OUTPUT,'(A)')     '   VLES Calculation'
+   CASE(SVLES_MODE)
+      WRITE(LU_OUTPUT,'(A)')     '   SVLES Calculation'   
+END SELECT
 IF (SIM_MODE/=DNS_MODE) THEN
-   WRITE(LU_OUTPUT,'(A)')     '   LES Calculation'
    SELECT CASE (TURB_MODEL)
       CASE(CONSMAG)
          WRITE(LU_OUTPUT,'(A,F4.2,A)')    '   Eddy Viscosity: Smagorinsky (C_SMAGORINSKY = ',C_SMAGORINSKY,')'
