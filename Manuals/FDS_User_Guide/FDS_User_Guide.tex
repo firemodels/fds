@@ -9591,23 +9591,23 @@ There are various output quantities related to the thermal exposure of solid sur
 \item[\ct 'TOTAL HEAT FLUX']
 \hspace{1in} \newline The rate of radiative and convective energy absorbed at a solid surface:
 \be
-   \dq_{\rm net}'' = \epsilon_{\rm s} \, \left( \dq_{\rm inc,rad}'' - \sigma \, T_{\rm s}^4 \right) + h \, (T_{\rm gas} - T_{\rm s}) \label{net_flux}
+   \dq_{\rm tot}'' = \epsilon_{\rm s} \, \left( \dq_{\rm inc}'' - \sigma \, T_{\rm s}^4 \right) + h_{\rm c} \, (T_{\rm g} - T_{\rm s}) \label{net_flux}
 \ee
-where $\dot{q}_{\rm inc,rad}''$ is the {\em incident} radiative heat flux, $\epsilon_{\rm s}$ is the surface emissivity, $h$ is the convective heat transfer coefficient, $T_{\rm s}$ is the surface temperature, and $T_{\rm gas}$ is the gas temperature in the vicinity of the surface. The convective heat transfer coefficient, $h$, is calculated by FDS using the specified surface properties and the calculated near-boundary flow characteristics.
+where $\dot{q}_{\rm inc}''$ is the {\em incident} radiative heat flux, $\epsilon_{\rm s}$ is the surface emissivity, $h_{\rm c}$ is the convective heat transfer coefficient, $T_{\rm s}$ is the surface temperature, and $T_{\rm g}$ is the gas temperature in the vicinity of the surface. The convective heat transfer coefficient is calculated by FDS using the specified surface properties and the calculated near-boundary flow characteristics.
 
 \item[\ct 'RADIATIVE HEAT FLUX']
-\hspace{1in} \newline This is the net radiative component of Eq.~(\ref{net_flux}), $\quad \dq_{\rm r}'' = \epsilon_{\rm s} \, \left( \dq_{\rm inc,rad}'' - \sigma \, T_{\rm s}^4 \right)$.
+\hspace{1in} \newline This is the net radiative component of Eq.~(\ref{net_flux}), $\quad \dq_{\rm r}'' = \epsilon_{\rm s} \, \left( \dq_{\rm inc}'' - \sigma \, T_{\rm s}^4 \right)$.
 
 \item[\ct 'CONVECTIVE HEAT FLUX']
-\hspace{1in} \newline This is the convective component of Eq.~(\ref{net_flux}), $\quad \dq_{\rm c}'' = h \, (T_{\rm gas} - T_{\rm s})$.
+\hspace{1in} \newline This is the convective component of Eq.~(\ref{net_flux}), $\quad \dq_{\rm c}'' = h_{\rm c} \, (T_{\rm g} - T_{\rm s})$.
 
 \item[\ct 'INCIDENT HEAT FLUX']
-\hspace{1in} \newline This is the term $\dq_{\rm inc,rad}''$ in Eq.~(\ref{net_flux}).
+\hspace{1in} \newline This is the term $\dq_{\rm inc}''$ in Eq.~(\ref{net_flux}).
 
 \item[\ct 'GAUGE HEAT FLUX']
 \hspace{1in} \newline This quantity simulates a measurement made with a water-cooled heat flux gauge:
 \be
-   \dq_{\rm gauge}'' = \epsilon_{\rm gauge} \, \left( \dq_{\rm inc,rad}'' - \sigma \, T_{\rm gauge}^4 \right) + h \, (T_{\rm gas} - T_{\rm gauge})
+   \dq_{\rm gauge}'' = \epsilon_{\rm gauge} \, \left( \dq_{\rm inc}'' - \sigma \, T_{\rm gauge}^4 \right) + h_{\rm c} \, (T_{\rm g} - T_{\rm gauge})
    \label{gauge_heat_flux}
 \ee
 If the heat flux gauge used in an experiment has a temperature other than ambient or an emissivity other than 1, specify {\ct GAUGE\_TEMPERATURE} ($T_{\rm gauge}$, $^\circ$C) and {\ct GAUGE\_EMISSIVITY} ($\epsilon_{\rm gauge}$) on the {\ct PROP} line associated with the device:
@@ -9615,7 +9615,7 @@ If the heat flux gauge used in an experiment has a temperature other than ambien
 &DEVC ID='hf', XYZ=..., IOR=-2, QUANTITY='GAUGE HEAT FLUX', PROP_ID='hfp' /
 &PROP ID='hfp', GAUGE_TEMPERATURE=80., GAUGE_EMISSIVITY=0.9 /
 \end{lstlisting}
-By default, the heat transfer coefficient, $h$, in Eq.~(\ref{gauge_heat_flux}) is calculated at the solid surface to which the device is attached, based on the specified surface properties and characteristics of the surrounding flow field. However, you may specify a fixed {\ct HEAT\_TRANSFER\_COEFFICIENT} (W/(m$^2 \cdot$K)) for the gauge on the {\ct PROP} line.
+By default, the heat transfer coefficient, $h_{\rm c}$, in Eq.~(\ref{gauge_heat_flux}) is calculated at the solid surface to which the device is attached, based on the specified surface properties and characteristics of the surrounding flow field. However, you may specify a fixed {\ct HEAT\_TRANSFER\_COEFFICIENT} (W/(m$^2 \cdot$K)) for the gauge on the {\ct PROP} line.
 
 \item[\ct 'GAUGE HEAT FLUX GAS']
 \hspace{1in} \newline This quantity is the same as {\ct 'GAUGE HEAT FLUX'}, except that it can be located anywhere within the computational domain and not just at a solid surface. It also has an arbitrary {\ct ORIENTATION} vector that points in any desired direction, much like a heat flux gauge. The {\ct ORIENTATION} vector need not be normalized, as in the following:
@@ -9628,7 +9628,7 @@ Note that the parameter {\ct SPATIAL\_STATISTIC} is not appropriate for this qua
 \item[\ct 'RADIOMETER']
 \hspace{1in} \newline Similar to a water-cooled heat flux gauge, except that this quantity measures only the net radiative component:
 \be
-   \dq_{\rm radiometer}'' = \epsilon_{\rm gauge} \, \left( \dq_{\rm inc,rad}'' - \sigma \, T_{\rm gauge}^4 \right)
+   \dq_{\rm radiometer}'' = \epsilon_{\rm gauge} \, \left( \dq_{\rm inc}'' - \sigma \, T_{\rm gauge}^4 \right)
 \ee
 The {\ct GAUGE\_TEMPERATURE} ($T_{\rm gauge}$, $^\circ$C) and {\ct GAUGE\_EMISSIVITY} ($\epsilon_{\rm gauge}$) can be set on the {\ct PROP} line associated with the device if their values are different than ambient and 1, respectively.
 
@@ -9660,9 +9660,9 @@ The units for {\ct 'RADIANCE'} are kW/m$^2$/sr.
 
 FDS includes a calculation of the adiabatic surface temperature (AST), a way of expressing the thermal exposure of a solid surface. Following the idea proposed by Ulf Wickstr\"{o}m~\cite{Wickstrom:Interflam2007}, $T_{\hbox{\tiny AST}}$ is the surface temperature for which the total heat flux defined by Eq.~(\ref{net_flux}) is zero. The following equation can be solved using an analytical solution given by Malendowski~\cite{Malendowski:FT}:
 \be
-   \epsilon \, \left( \dq_{\rm inc,rad}'' - \sigma \, T_{\hbox{\tiny AST}}^4 \right) + h \, (T_{\rm gas} - T_{\hbox{\tiny AST}}) = 0
+   \epsilon_{\rm s} \, \left( \dq_{\rm inc}'' - \sigma \, T_{\hbox{\tiny AST}}^4 \right) + h_{\rm c} \, (T_{\rm g} - T_{\hbox{\tiny AST}}) = 0
 \ee
-where, $\dot{q}_{\rm inc,rad}''$ is the {\em incident} radiative heat flux onto the surface, $\epsilon$ is the surface emissivity, $h$ is the convective heat transfer coefficient, and $T_{\rm gas}$ is the surrounding gas temperature.
+where, $\dot{q}_{\rm inc}''$ is the {\em incident} radiative heat flux onto the surface, $\epsilon_{\rm s}$ is the surface emissivity, $h_{\rm c}$ is the convective heat transfer coefficient, and $T_{\rm g}$ is the surrounding gas temperature.
 
 To output the AST at a single point on a solid surface, include a device as follows:
 \begin{lstlisting}
