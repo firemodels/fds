@@ -6937,15 +6937,76 @@ The expected HRR curve is:
 
 \chapter{Wind and Atmospheric Stratification}
 
-Most of the parameters that describe the atmosphere are entered on a single namelist line called {\ct WIND}. There are three ways to specify a wind in FDS. The preferred method is to model the wind and corresponding temperature profile using Monin-Obukhov similarity theory (Section~\ref{info:WIND}). A second, more complicated method, is to specify a uniform horizontal forcing function and allow the wind field to develop naturally. This has proven more useful in wind tunnel applications than for natural winds (Section~\ref{info:force_vector}). The third method, which has traditionally been employed in older versions of FDS, is to create essentially a ``wall of wind'' where an entire side of the computational domain is turned into a giant fan blowing air laterally. This is the least preferred method of creating a wind (Section~\ref{info:wall_of_wind}).
+Most of the parameters that describe the atmosphere are entered on a single namelist line called {\ct WIND}. There are various ways to specify a wind in FDS: 
+\begin{enumerate}
+\item If you simply want to specify a wind speed and direction and perhaps vary these quantities in time and with height, see Section~\ref{info:wind_ramps}.
+\item If the periphery of your computational domain is relatively flat and you have some knowledge of the surface roughness and atmospheric conditions, see Section~\ref{info:WIND} on how to apply Monin-Obukhov similarity theory.
+\item If your domain spans kilometers and you would like to apply winds in terms of the pressure gradient and coriolis forces, or you want to apply a geostrophic wind, see Section~\ref{info:force_vector}. 
+\item If you want to model the wind as one would do for a wind tunnel; that is, to create essentially a ``wall of wind'' where an entire side of the computational domain is turned into a giant fan blowing air laterally, see Section~\ref{info:wall_of_wind}.
+\end{enumerate}
+The temperature stratification of the atmosphere is discussed in Section~\ref{info:stratification}. This is relevant unless you have chosen to apply wind and temperature profiles based on Monin-Obukhov theory. Finally, boundary conditions for outdoor simulations are discussed in Section~\ref{info:wind_BC}.
 
 
-\section{Wind Method 1: Monin-Obukhov Similarity}
+\section{Wind Method 1: Specified Wind Speed and Direction}
+\label{info:wind_ramps}
+
+The simplest way to introduce a wind in FDS is to specify its {\ct SPEED} and {\ct DIRECTION}. For example, for a southwesterly wind blowing 5~m/s, add the following line:
+\begin{lstlisting}
+&WIND SPEED=5., DIRECTION=225. /
+\end{lstlisting}
+It is assumed here that the wind speed and direction do not change with height save for the effect of ground friction. The wind {\ct DIRECTION} follows the usual meteorological convention---a northerly wind has direction of 0$^\circ$ and blows from north to south, or in the negative $y$ direction in the FDS coordinate system. An easterly wind has a direction of 90$^\circ$ and blows from east to west, or in the negative $x$ direction.
+
+The wind {\ct SPEED} and {\ct DIRECTION} can be made functions of time and/or height using {\ct RAMP} functions. With respect to time, consider the following lines of input:
+\begin{lstlisting}
+&WIND SPEED=1., RAMP_SPEED_T='spd', RAMP_DIRECTION_T='dir' /
+
+&RAMP ID='dir', T=   0, F=300 /
+&RAMP ID='dir', T= 600, F=330 /
+&RAMP ID='dir', T=1200, F=350 /
+.
+.
+&RAMP ID='spd', T=   0, F=2.8 /
+&RAMP ID='spd', T= 600, F=3.1 /
+&RAMP ID='spd', T=1200, F=3.5 /
+.
+.
+\end{lstlisting}
+These lines direct FDS to vary the wind speed and direction over time, according to the {\ct RAMP} functions {\ct 'spd'} and {\ct 'dir'}, respectively. The parameter {\ct T} is the time in s. For the direction ramp function, {\ct F} represents the direction angle in degrees from the north (positive $y$ direction). For the speed ramp function, {\ct F} represents a multiplier of the base {\ct SPEED}, which in this case is 1~m/s.
+
+You can also vary the wind velocity components with height using the ramp functions {\ct RAMP\_SPEED\_Z} and {\ct RAMP\_DIRECTION\_Z}.
+\begin{lstlisting}
+&WIND SPEED=1., RAMP_SPEED_Z='spd', RAMP_DIRECTION_Z='dir' /
+
+&RAMP ID='dir', Z=   0, F=300 /
+&RAMP ID='dir', Z= 200, F=330 /
+&RAMP ID='dir', Z= 500, F=350 /
+.
+.
+&RAMP ID='spd', Z=   0, F=1.0 /
+&RAMP ID='spd', Z= 200, F=1.5 /
+&RAMP ID='spd', Z= 500, F=1.8 /
+.
+.
+\end{lstlisting}
+The parameter {\ct Z} represents the height (m). As with the time functions above, for the direction ramp function, {\ct F} represents the direction angle in degrees from the north (positive $y$ direction). This value is added to any time-varying value set by {\ct RAMP\_DIRECTION\_T}. For the speed ramp function, {\ct F} represents a multiplier of the base {\ct SPEED}. This value is multiplied by any time-varying value set by {\ct RAMP\_SPEED\_T}.
+
+Often for longer simulations lasting hours, you may not know exactly how the wind {\ct DIRECTION} varies, but you can provide an estimate based on the {\em stability class} of the atmosphere. Using the terminology of the atmospheric dispersion community~\cite{Hanna:1982}, the perturbation to the wind {\ct DIRECTION} can be modeled as:
+\be
+   \theta'(t+\dt) = R^2 \, \theta'(t) + N\left( 0,\sqrt{1-R^2} \, \sigma_\theta \right) \quad ; \quad R={\rm e}^{-\dt/\tau}  \quad ; \quad \theta'(0) = 0
+\ee
+where $N(\mu,\sigma)$ denotes a normal random variable with mean $\mu$ and standard deviation $\sigma$, $\sigma_\theta$ ({\ct SIGMA\_THETA} specified with units of degrees on the {\ct WIND} line) depends on the stability class of the atmosphere and $\tau$ ({\ct TAU\_THETA}) is a time scale with a default value of 300~s.
+
+
+\newpage
+
+\section{Wind Method 2: Monin-Obukhov Similarity}
 \label{info:WIND}
+
+Monin-Obukhov similarity theory provides vertical wind and temperature profiles based on surface and atmospheric conditions. These profiles are applied at the exterior boundary of the computational domain; thus, the terrain must be relatively flat at the periphery. You might have a hill or valley within the domain, but the periphery should be flat to allow the wind field to develop naturally away from the boundary. 
 
 \subsection{Basic Equations}
 
-The atmospheric boundary layer in FDS is modeled using Monin-Obukhov similarity theory. The wind speed profile, $u$, and potential temperature\footnote{The potential temperature is given by $$\theta=T \left( \frac{p_0}{p} \right)^{R/(W_{\rm air} \, c_p)}$$ where $p_0$ is typically 100~kPa and $R/(W_{\rm air} \, c_p) \approx 0.286$.}, $\theta$, vary with height, $z$, according to:
+It is assumed that the wind speed profile, $u$, and potential temperature\footnote{The potential temperature is given by $$\theta=T \left( \frac{p_0}{p} \right)^{R/(W_{\rm air} \, c_p)}$$ where $p_0$ is typically 100~kPa and $R/(W_{\rm air} \, c_p) \approx 0.286$.}, $\theta$, vary with height, $z$, according to:
 \begin{eqnarray}
    u(z)      &=&            \frac{u_*}{\kappa}     \left[ \ln \left( \frac{z}{z_0} \right) - \Psi_{\rm m} \left( \frac{z}{L} \right) \right] \label{u_om} \\[.15in]
    \theta(z) &=& \theta_0 + \frac{\theta_*}{\kappa} \left[ \ln \left( \frac{z}{z_0} \right) - \Psi_{\rm h} \left( \frac{z}{L} \right) \right]
@@ -7019,27 +7080,18 @@ Figure~\ref{wind_profiles} displays a few sample wind profiles. Notice that the 
 \end{figure}
 
 
-\subsection{Adding a Wind to FDS}
+\subsection{Applying Monin-Obukhov Profiles to FDS}
 \label{info:wind_general}
 
-In simulations where wind and atmospheric effects are of interest, you usually have a limited amount of information about the conditions; typically a wind speed, direction, basic topography, and weather conditions. For example, for a southwesterly wind blowing 5~m/s over a relatively flat, rural landscape on a bright, sunny day, you could specify the following parameters:
+The following input line specifies a southwesterly wind blowing 5~m/s over a relatively flat, rural landscape on a bright, sunny day:
 \begin{lstlisting}
 &WIND SPEED=5., DIRECTION=225., L=-100., Z_0=0.03 /
-
-&VENT MB='ZMIN', SURF_ID='GROUND' /
-&VENT MB='ZMAX', SURF_ID='OPEN' /
-&VENT MB='XMIN', SURF_ID='OPEN' /
-&VENT MB='XMAX', SURF_ID='OPEN' /
-&VENT MB='YMIN', SURF_ID='OPEN' /
-&VENT MB='YMAX', SURF_ID='OPEN' /
 \end{lstlisting}
-It is assumed here that the wind speed is taken at a height 2~m off the ground and the temperature is the specified ambient ({\ct TMPA}). If it is not, set {\ct Z\_REF} (m) and {\ct TMP\_REF} ($^\circ$C) accordingly. The wind {\ct DIRECTION} follows the usual meteorological convention---a northerly wind has direction of 0$^\circ$ and blows from north to south, or in the negative $y$ direction in the FDS coordinate system. An easterly wind has a direction of 90$^\circ$ and blows from east to west, or in the negative $x$ direction.
+It is assumed here that the wind speed is taken at a height 2~m off the ground, where it is also assumed that the temperature is the specified ambient, {\ct TMPA}. If not, set {\ct Z\_REF} (m) and {\ct TMP\_REF} ($^\circ$C) accordingly. The wind {\ct DIRECTION} follows the usual meteorological convention---a northerly wind has direction of 0$^\circ$ and blows from north to south, or in the negative $y$ direction in the FDS coordinate system. An easterly wind has a direction of 90$^\circ$ and blows from east to west, or in the negative $x$ direction.
 
 If you know the value of $u_*$ or $\theta_*$, you can input these on the {\ct WIND} line as {\ct U\_STAR} (m) and {\ct THETA\_STAR} (K). Otherwise, they will be computed from $L$ and $z_0$.
 
-You may assign material properties to the {\ct GROUND} if you like, but be aware that FDS assumes the ground to be ambient temperature ({\ct TMPA}) initially, and the temperature of the atmosphere either increases or decreases with height according to the stability condition. The top of the domain is set to be {\ct 'OPEN'}, meaning that even though the wind field is more or less parallel to it, there might be, for example, a hot plume that can rise out of the computational domain.
 
-The side boundaries of the domain can be set either to {\ct SURF\_ID='OPEN'}, {\ct 'PERIODIC'}, or {\ct 'PERIODIC FLOW ONLY'}. {\ct SURF\_ID='OPEN'} is the usual inflow/outflow condition for any case where the computational domain is open to an infinite ambient void. {\ct SURF\_ID='PERIODIC'} assumes that the domain repeats itself endlessly in each direction. This is an important assumption because the turbulent atmospheric boundary layer that is modeled using Monin-Obukhov similarity theory is assumed to develop over distances far beyond the computational domain. {\ct SURF\_ID='PERIODIC FLOW ONLY'} is the same as {\ct 'PERIODIC'} except that only the velocity field is periodic, but scalar quantities are not. That is, you do not want a smoke plume that exits the eastern boundary of the domain to reappear instantly at the western boundary, even though you still might want the velocity field to be periodic. Wind speed and temperature profiles corresponding to various choices of Monin-Obukhov parameters are shown in Fig.~\ref{wind_profiles}.
 
 \subsubsection{Example Wind Simulation}
 \label{wind_example_5}
@@ -7064,49 +7116,6 @@ In the example called {\ct wind\_example\_32} there are various rectangular bloc
 \end{figure}
 
 
-\subsection{Temporal and Spatial Variation of the Wind}
-\label{info:wind_ramps}
-
-The wind {\ct SPEED} and {\ct DIRECTION} can be made a function of time and/or height using {\ct RAMP} functions. With respect to time, consider the following lines of input:
-\begin{lstlisting}
-&WIND SPEED=1., RAMP_SPEED_T='spd', RAMP_DIRECTION_T='dir' /
-
-&RAMP ID='dir', T=   0, F=300 /
-&RAMP ID='dir', T= 600, F=330 /
-&RAMP ID='dir', T=1200, F=350 /
-.
-.
-&RAMP ID='spd', T=   0, F=2.8 /
-&RAMP ID='spd', T= 600, F=3.1 /
-&RAMP ID='spd', T=1200, F=3.5 /
-.
-.
-\end{lstlisting}
-These lines direct FDS to vary the wind speed and direction over time, according to the {\ct RAMP} functions {\ct 'spd'} and {\ct 'dir'}, respectively. The parameter {\ct T} is the time in s. For the direction ramp function, {\ct F} represents the direction angle in degrees from the north (positive $y$ direction). For the speed ramp function, {\ct F} represents a multiplier of the base {\ct SPEED}, which in this case is unity.
-
-You can also vary the wind velocity components with height using the ramp functions {\ct RAMP\_SPEED\_Z} and {\ct RAMP\_DIRECTION\_Z}.
-\begin{lstlisting}
-&WIND SPEED=1., RAMP_SPEED_Z='spd', RAMP_DIRECTION_Z='dir' /
-
-&RAMP ID='dir', Z=   0, F=300 /
-&RAMP ID='dir', Z= 200, F=330 /
-&RAMP ID='dir', Z= 500, F=350 /
-.
-.
-&RAMP ID='spd', Z=   0, F=1.0 /
-&RAMP ID='spd', Z= 200, F=1.5 /
-&RAMP ID='spd', Z= 500, F=1.8 /
-.
-.
-\end{lstlisting}
-The parameter {\ct Z} represents the height (m). As with the time functions above, for the direction ramp function, {\ct F} represents the direction angle in degrees from the north (positive $y$ direction). This value is added to any time-varying value set by {\ct RAMP\_DIRECTION\_T}. For the speed ramp function, {\ct F} represents a multiplier of the base {\ct SPEED}. This value is multiplied by any time-varying value set by {\ct RAMP\_SPEED\_T}. Note that if you use Monin-Obukhov similarity parameters, you should not specify the vertical profile of the wind. It will be calculated automatically.
-
-Often for longer simulations lasting hours, you may not know exactly how the wind {\ct DIRECTION} varies, but you might have some estimate based on the {\em stability class} of the atmosphere. Using the terminology of the atmospheric dispersion community~\cite{Hanna:1982}, the perturbation to the wind {\ct DIRECTION} can be modeled as:
-\be
-   \theta'(t+\dt) = R^2 \, \theta'(t) + N\left( 0,\sqrt{1-R^2} \, \sigma_\theta \right) \quad ; \quad R={\rm e}^{-\dt/\tau}  \quad ; \quad \theta'(0) = 0
-\ee
-where $N(\mu,\sigma)$ denotes a normal random variable with mean $\mu$ and standard deviation $\sigma$, $\sigma_\theta$ ({\ct SIGMA\_THETA} specified with units of degrees on the {\ct WIND} line) depends on the stability class of the atmosphere and $\tau$ ({\ct TAU\_THETA}) is a time scale with a default value of 300~s.
-
 \subsection{Aerodynamic Roughness}
 \label{aerodynamic_roughness}
 
@@ -7130,20 +7139,22 @@ The ground temperature relative to the air temperature is an important considera
 where a negative value indicates that the ground is warmer than the air above. In the simulation, you can explicitly specify the {\ct CONVECTIVE\_HEAT\_FLUX} (kW/m$^2$) on the {\ct SURF} line to be $-\dot{q}_{\rm c}''$. Note that $\rho$ (kg/m$^3$) is the density of air near the ground and $c_p$ is the specific heat of air near the ground, approximately 1~kJ/(kg$\cdot$K).
 
 
+\newpage
 
+\section{Wind Method 3: Advanced Meteorological Concepts}
 
-\section{Wind Method 2: Letting the Wind Develop Naturally}
+If your computational domain spans kilometers, you might consider applying various meteorological concepts in applying a wind field. 
+
+\subsection{Pressure Gradient Force}
 \label{info:force_vector}
 
-You may specify a uniform force per unit volume by setting {\ct FORCE\_VECTOR(1:3)} on the {\ct WIND} line.  This is useful, for example, in specifying a mean pressure drop in a duct.  In the absence of other forces, the force vector $F_i$ affects the momentum equation by
+Winds are driven by horizontal pressure gradients that push air masses from regions of high to low surface pressure. Typically, pressure isobars on a meteorological map are given in 4~mbar increments. If you know the horizontal distance separating two isobars, you can estimate the wind speed. This estimate is subject to surface conditions and other factors, but at least it provides a starting point. The pressure gradient can be input into FDS using the parameter {\ct FORCE\_VECTOR(1:2)} on the {\ct WIND} line in units of Pa/m (1~mbar is 100~Pa). In the absence of other forces, the pressure gradient, $F_i$, is added to the momentum equation as follows:
 \begin{equation}
 \frac{\partial u_i}{\partial t} + \dots = F_i/\rho
 \end{equation}
-This feature is typically used together with periodic boundaries.  To specify a mean pressure drop of 0.01 Pa/m in the $x$ direction for a periodic duct, for example, use
+To specify a pressure gradient of 0.01~Pa/m in the $x$ direction, apply
 \begin{lstlisting}
 &WIND FORCE_VECTOR(1)=0.01 /
-&VENT MB='XMIN', SURF_ID='PERIODIC' /
-&VENT MB='XMAX', SURF_ID='PERIODIC' /
 \end{lstlisting}
 You may apply a time ramp to {\ct FORCE\_VECTOR(1)}, for example, via {\ct RAMP\_FVX\_T} on the {\ct WIND} line.
 
@@ -7168,9 +7179,9 @@ The nondimensional number that determines if the Coriolis force is significant i
 \end{equation}
 When the Rossby number is large, the Coriolis force is negligible.  In building fires, this is typically the case, as $U$ and $L$ are of order unity and $f_c = {\cal O}(10^4)$.
 
-\begin{figure}
+\begin{figure}[!ht]
 \centering
-\includegraphics[scale=1.5]{FIGURES/Coriolis_vector}
+\includegraphics[scale=1.0]{FIGURES/Coriolis_vector}
 \caption[Coriolis effect]{The rotation vector ${\bm\Omega}$ points from the Earth's center to the North Pole.  To apply the effect of rotation on our model, we need to know the components of the rotation vector in the reference frame of the computational domain.  Typically, we align the computational domain so that $x$ points east, $y$ points north, and $z$ represents elevation.  The angle $\phi$ [degrees] is the latitude, positive [$0^{\circ}$, $90^{\circ}$] in the northern hemisphere, negative [$0^{\circ}$, $-90^{\circ}$] in the southern hemisphere.  The rotation rate $\omega$ is (obviously) 1 rotation per day or $2\pi/(24 \times 3600) \approx 1.16 \times 10^{-5}$ $2\pi$/s.}
 \label{fig:rotation_vector}
 \end{figure}
@@ -7188,13 +7199,10 @@ V_g &= + \frac{1}{\rho f_c} \frac{\partial \bar{p}}{\partial x}
 If the geostrophic wind speed is known, it can be entered on the {\ct WIND} line via {\ct GEOSTROPHIC\_WIND(1:2)} = $(U_g, V_g)$.  Notice that specification of the wind in $x$ implies a mean pressure gradient in $y$ and vice versa.  When a geostropic wind is specified, FDS converts this value to the implied {\ct FORCE\_VECTOR} according to Eq.~(\ref{eq:geostrophic_wind}).  To achieve the specified geostrophic wind aloft, you must also have the Coriolis force turned on (see Sec.~\ref{info:coriolis_force}).  Since the geostrophic wind is equivalent to applying {\ct FORCE\_VECTOR}, you may also apply a time ramp (see Sec.~\ref{info:force_vector}).
 
 
-\subsection{Deardorff Potential Temperature Correction}
-\label{info:potential_temperature_correction}
 
-The turbulent transport of heat in the atmosphere is greatly affected by the local stability condition.  In his 1980 paper \cite{Deardorff:1980}, Deardorff suggests a correction to the local turbulent viscosity to suppress turbulent transport in stable conditions.  To implement this correction in FDS, set {\ct POTENTIAL\_TEMPERATURE\_CORRECTION=T} on the {\ct WIND} line.  In this case, the local turbulent Prandtl number will be computed dynamically as discussed in \cite{Deardorff:1980}.  Details of the model are also discussed in the FDS Technical Guide \cite{FDS_Math_Guide}.
+\newpage
 
-
-\section{Wind Method 3: The ``Wall of Wind''}
+\section{Wind Method 4: The ``Wall of Wind''}
 \label{info:wall_of_wind}
 
 An alternative to using Monin-Obukhov similarity theory in specifying a wind is to specify a power law wind profile at an external boundary of the computational domain. This essentially creates a ``wall of wind'' and for early versions of FDS it was the recommended method for specifying a wind. However, the techniques described above are preferable because they handle the lateral boundaries of the computational domain in a more natural way.
@@ -7208,11 +7216,12 @@ When using the ``wall of wind'' approach, be aware that the wind field requires 
 where {\ct U0}, {\ct V0}, and {\ct W0} are your desired initial wind field. Setting the velocity components directly will initialize the simulation with a constant flow field, but the flow field will die off and the {\ct SURF} line with the atmospheric profile will govern the wind flow. You can specify vertical profiles of these initial components with {\ct RAMP\_U0\_Z}, {\ct RAMP\_V0\_Z}, and {\ct RAMP\_W0\_Z} on the {\ct WIND} line.
 
 
+\newpage
 
-
-
-\section{Temperature Stratification without Wind}
+\section{Temperature Stratification}
 \label{info:stratification}
+
+Note: If you have chosen to apply Monin-Obukhov wind and temperature profiles, this section is not applicable.
 
 Typically, in the first few hundred meters of the atmosphere, the temperature decreases several degrees Celsius per kilometer. This small temperature change is important when considering the rise of smoke since the temperature of the smoke decreases rapidly as it rises. The {\ct LAPSE\_RATE} of the atmosphere can be specified on the {\ct WIND} line in units of $^\circ$C/m. A negative sign indicates that the temperature {\em decreases} with height. This need only be set for outdoor calculations where the height of the domain is tens or hundreds of meters. The default value of the {\ct LAPSE\_RATE} is 0~$^\circ$C/m.
 
@@ -7270,6 +7279,24 @@ where $ \Delta z$ is the distance from the leak point to the neutral plane.  Usi
    \label{fig_stack_effect}
 \end{figure}
 
+\subsection{Deardorff Potential Temperature Correction}
+\label{info:potential_temperature_correction}
+
+The turbulent transport of heat in the atmosphere is greatly affected by the local stability condition.  In his 1980 paper \cite{Deardorff:1980}, Deardorff suggests a correction to the local turbulent viscosity to suppress turbulent transport in stable conditions.  To implement this correction in FDS, set {\ct POTENTIAL\_TEMPERATURE\_CORRECTION=T} on the {\ct WIND} line.  In this case, the local turbulent Prandtl number will be computed dynamically as discussed in \cite{Deardorff:1980}.  Details of the model are also discussed in the FDS Technical Guide \cite{FDS_Math_Guide}.
+
+
+
+
+\section{External Boundary Conditions}
+\label{info:wind_BC}
+
+For typical outdoor simulations, the lateral exterior and upper boundaries of the computational domain are either open or periodic, and the lower boundary represents the earth. Do not change the gravity vector when doing outdoor simulations, as there are many assumptions made that assume that the ground is down and the sky is up.
+
+FDS assumes the ground to be ambient temperature, {\ct TMPA}, initially, and the temperature of the atmosphere either increases or decreases with height according to the stability condition. You can set the ground temperature to a different temperature using {\ct TMP\_FRONT}, or you provide material properties and allow the ground to heat up or cool down naturally. You may also set a {\ct CONVECTIVE\_HEAT\_FLUX}, where a positive value means that the ground is warmer than the air above.
+
+Usually, the top of the domain is set to be {\ct 'OPEN'}, meaning that even though the wind field is more or less parallel to it, there might be, for example, a hot plume that can rise out of the computational domain.
+
+The lateral boundaries of the domain can be set either to {\ct SURF\_ID='OPEN'}, {\ct 'PERIODIC'}, or {\ct 'PERIODIC FLOW ONLY'}. {\ct SURF\_ID='OPEN'} is the usual inflow/outflow condition for any case where the computational domain is open to an infinite ambient void. {\ct SURF\_ID='PERIODIC'} assumes that the domain repeats itself endlessly in each direction. This is an important assumption because the turbulent atmospheric boundary layer that is modeled using Monin-Obukhov similarity theory is assumed to develop over distances far beyond the computational domain. {\ct SURF\_ID='PERIODIC FLOW ONLY'} is the same as {\ct 'PERIODIC'} except that only the velocity field is periodic, but scalar quantities are not. That is, you do not want a smoke plume that exits the eastern boundary of the domain to reappear instantly at the western boundary, even though you still might want the velocity field to be periodic.
 
 
 
