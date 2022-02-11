@@ -1110,6 +1110,7 @@ TYPE IBM_CUTCELL_TYPE
    INTEGER :: NCELL, NFACE_CELL
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)                     ::    CCELEM ! Cut-cells faces connectivities in FACE_LIST.
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)                     :: FACE_LIST ! List of faces, cut-faces.
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)                     ::  IJK_LINK ! Cell/cut-cell each cut-cell is linked to.
    REAL(EB), ALLOCATABLE, DIMENSION(:)                       ::    VOLUME ! Cut-cell volumes.
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)                     ::    XYZCEN ! Cut-cell centroid locaitons.
    INTEGER,  DIMENSION(MAX_DIM)                              ::       IJK ! [ i j k ]
@@ -1164,6 +1165,7 @@ TYPE IBM_REGFACEZ_TYPE
 END TYPE IBM_REGFACEZ_TYPE
 
 TYPE IBM_RCFACE_TYPE
+   LOGICAL:: SHARED=.FALSE.
    INTEGER:: PRES_ZONE=-1
    INTEGER,  DIMENSION(MAX_DIM+1)                                  ::       IJK ! [ I J K x1axis]
    INTEGER,  DIMENSION(LOW_IND:HIGH_IND)                           ::       UNK
@@ -1445,7 +1447,9 @@ TYPE ZONE_MESH_TYPE
    INTEGER, ALLOCATABLE :: PT_H(:)
 #endif /* WITH_MKL */
    INTEGER :: NUNKH=0                                 !< Number of unknowns in pressure solution for a given ZONE_MESH
+   INTEGER :: NCVLH=0                                 !< Number of pressure control volumes for a given ZONE_MESH
    INTEGER :: NUNKH_CART=0                            !< Number of unknowns in Cartesian cells of ZONE_MESH
+   INTEGER :: NCVLH_CART=0                            !< Number of pressure CVs in Cartesian cells of ZONE_MESH
    INTEGER :: MTYPE=0                                 !< Matrix type (symmetric indefinite, or symm positive definite)
    LOGICAL :: ZONE_IN_MESH=.FALSE.                    !< ZONE is in MESH
    LOGICAL :: USE_FFT=.TRUE.                          !< Flag for use of FFT solver
