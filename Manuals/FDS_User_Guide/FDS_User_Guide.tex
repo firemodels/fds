@@ -6937,11 +6937,11 @@ The expected HRR curve is:
 
 \chapter{Wind and Atmospheric Stratification}
 
-Most of the parameters that describe the atmosphere are entered on a single namelist line called {\ct WIND}. There are various ways to specify a wind in FDS: 
+Most of the parameters that describe the atmosphere are entered on a single namelist line called {\ct WIND}. There are various ways to specify a wind in FDS:
 \begin{enumerate}
 \item If you simply want to specify a wind speed and direction and perhaps vary these quantities in time and with height, see Section~\ref{info:wind_ramps}.
 \item If the periphery of your computational domain is relatively flat and you have some knowledge of the surface roughness and atmospheric conditions, see Section~\ref{info:WIND} on how to apply Monin-Obukhov similarity theory.
-\item If your domain spans kilometers and you would like to apply winds in terms of the pressure gradient and coriolis forces, or you want to apply a geostrophic wind, see Section~\ref{info:force_vector}. 
+\item If your domain spans kilometers and you would like to apply winds in terms of the pressure gradient and coriolis forces, or you want to apply a geostrophic wind, see Section~\ref{info:force_vector}.
 \item If you want to model the wind as one would do for a wind tunnel; that is, to create essentially a ``wall of wind'' where an entire side of the computational domain is turned into a giant fan blowing air laterally, see Section~\ref{info:wall_of_wind}.
 \end{enumerate}
 The temperature stratification of the atmosphere is discussed in Section~\ref{info:stratification}. This is relevant unless you have chosen to apply wind and temperature profiles based on Monin-Obukhov theory. Finally, boundary conditions for outdoor simulations are discussed in Section~\ref{info:wind_BC}.
@@ -6996,13 +6996,26 @@ Often for longer simulations lasting hours, you may not know exactly how the win
 \ee
 where $N(\mu,\sigma)$ denotes a normal random variable with mean $\mu$ and standard deviation $\sigma$, $\sigma_\theta$ ({\ct SIGMA\_THETA} specified with units of degrees on the {\ct WIND} line) depends on the stability class of the atmosphere and $\tau$ ({\ct TAU\_THETA}) is a time scale with a default value of 300~s.
 
+\subsubsection{Example}
+\label{wind_example_5}
+\label{wind_example_10}
+
+The input files called {\ct wind\_example\_nn.fds} in the samples folder called {\ct Atmospheric\_Effects} demonstrate wind functionality. Each case considers a flat patch of terrain 1000~m by 1000~m by 100~m high. In the examples called {\ct wind\_example\_5} and {\ct wind\_example\_10}, a 5~m/s wind is turned 90$^\circ$ in 10~min. One case is run at 5~m resolution and other at 10~m. Figure~\ref{wind_example_fig_1} shows the delay in the mean velocity components due to the fact that the wind profile is imposed only at external boundaries.
+\begin{figure}[ht]
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/wind_example_5}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/wind_example_10}
+\caption[Results of the {\ct wind\_example\_5} and {\ct wind\_example\_10} test cases]{Mean velocity components of a 5~m/s wind turning 90$^\circ$ in 10~m. The grid resolutions are 5~m (left) and 10~m (right).}
+\label{wind_example_fig_1}
+\end{figure}
+
+
 
 \newpage
 
 \section{Wind Method 2: Monin-Obukhov Similarity}
 \label{info:WIND}
 
-Monin-Obukhov similarity theory provides vertical wind and temperature profiles based on surface and atmospheric conditions. These profiles are applied at the exterior boundary of the computational domain; thus, the terrain must be relatively flat at the periphery. You might have a hill or valley within the domain, but the periphery should be flat to allow the wind field to develop naturally away from the boundary. 
+Monin-Obukhov similarity theory provides vertical wind and temperature profiles based on surface and atmospheric conditions. These profiles are applied at the exterior boundary of the computational domain; thus, the terrain must be relatively flat at the periphery. You might have a hill or valley within the domain, but the periphery should be flat to allow the wind field to develop naturally away from the boundary.
 
 \subsection{Basic Equations}
 
@@ -7087,26 +7100,22 @@ The following input line specifies a southwesterly wind blowing 5~m/s over a rel
 \begin{lstlisting}
 &WIND SPEED=5., DIRECTION=225., L=-100., Z_0=0.03 /
 \end{lstlisting}
-It is assumed here that the wind speed is taken at a height 2~m off the ground, where it is also assumed that the temperature is the specified ambient, {\ct TMPA}. If not, set {\ct Z\_REF} (m) and {\ct TMP\_REF} ($^\circ$C) accordingly. The wind {\ct DIRECTION} follows the usual meteorological convention---a northerly wind has direction of 0$^\circ$ and blows from north to south, or in the negative $y$ direction in the FDS coordinate system. An easterly wind has a direction of 90$^\circ$ and blows from east to west, or in the negative $x$ direction.
+Setting a non-zero value of {\ct L} indicates that you want Monin-Obukhov profiles. If {\ct Z\_REF} is not specified, it is assumed that the wind speed is taken at a height 2~m off the ground. If {\ct TMP\_REF} is not specified, it is assumed that the temperature is the specified ambient, {\ct TMPA}. The wind {\ct DIRECTION} follows the usual meteorological convention---a northerly wind has direction of 0$^\circ$ and blows from north to south, or in the negative $y$ direction in the FDS coordinate system. An easterly wind has a direction of 90$^\circ$ and blows from east to west, or in the negative $x$ direction. You can vary the direction of the wind in time only, not in space:
+\begin{lstlisting}
+&WIND ..., RAMP_DIRECTION_T='dir' /
 
-If you know the value of $u_*$ or $\theta_*$, you can input these on the {\ct WIND} line as {\ct U\_STAR} (m) and {\ct THETA\_STAR} (K). Otherwise, they will be computed from $L$ and $z_0$.
+&RAMP ID='dir', T=   0, F=300 /
+&RAMP ID='dir', T= 600, F=330 /
+&RAMP ID='dir', T=1200, F=350 /
+\end{lstlisting}
+Here, {\ct T} is time in seconds and {\ct F} is the wind direction in degrees. You may not vary the speed in time or space.
 
+Also, if you know the value of $u_*$ or $\theta_*$, you can input these on the {\ct WIND} line as {\ct U\_STAR} (m/s) and {\ct THETA\_STAR} (K). Otherwise, they will be computed from $L$ and $z_0$.
 
-
-\subsubsection{Example Wind Simulation}
-\label{wind_example_5}
-\label{wind_example_10}
+\subsubsection{Example}
 \label{wind_example_32}
 
-The input files called {\ct wind\_example\_nn.fds} in the samples folder called {\ct Atmospheric\_Effects} demonstrate wind functionality. Each case considers a flat patch of terrain 1000~m by 1000~m by 100~m high. In the examples called {\ct wind\_example\_5} and {\ct wind\_example\_10}, a 5~m/s wind is turned 90$^\circ$ in 10~min. One case is run at 5~m resolution and other at 10~m. Figure~\ref{wind_example_fig_1} shows the delay in the mean velocity components due to the fact that the wind profile is imposed only at external boundaries.
-\begin{figure}[ht]
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/wind_example_5}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/wind_example_10}
-\caption[Results of the {\ct wind\_example\_5} and {\ct wind\_example\_10} test cases]{Mean velocity components of a 5~m/s wind turning 90$^\circ$ in 10~m. The grid resolutions are 5~m (left) and 10~m (right).}
-\label{wind_example_fig_1}
-\end{figure}
-
-In the example called {\ct wind\_example\_32} there are various rectangular blocks scattered about the domain to represent buildings and the wind is held steady. Figure~\ref{wind_example_fig_2} displays the specified wind speed and temperature profiles in the vertical direction compared to the computed time average profiles. The profiles should be similar, but not exactly the same.
+The input files called {\ct wind\_example\_nn.fds} in the samples folder called {\ct Atmospheric\_Effects} demonstrate wind functionality. Each case considers a flat patch of terrain 1000~m by 1000~m by 100~m high. In the example called {\ct wind\_example\_32} there are various rectangular blocks scattered about the domain to represent buildings and the wind is held steady. Figure~\ref{wind_example_fig_2} displays the specified wind speed and temperature profiles in the vertical direction compared to the computed time average profiles. The profiles should be similar, but not exactly the same.
 
 \begin{figure}[ht]
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/wind_example_u_prof}
@@ -7143,7 +7152,7 @@ where a negative value indicates that the ground is warmer than the air above. I
 
 \section{Wind Method 3: Advanced Meteorological Concepts}
 
-If your computational domain spans kilometers, you might consider applying various meteorological concepts in applying a wind field. 
+If your computational domain spans kilometers, you might consider applying various meteorological concepts in applying a wind field.
 
 \subsection{Pressure Gradient Force}
 \label{info:force_vector}
