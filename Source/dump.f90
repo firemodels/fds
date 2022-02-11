@@ -7746,7 +7746,8 @@ CC_IBM_IF: IF (CC_IBM) THEN
             CASE(11)  ! HRRPUV
                GAS_PHASE_OUTPUT_CC = GAS_PHASE_OUTPUT_CC + CUT_CELL(ICC)%Q(JCC)*0.001       * CUT_CELL(ICC)%VOLUME(JCC)
             CASE(12)  ! H
-               GAS_PHASE_OUTPUT_CC = GAS_PHASE_OUTPUT_CC + CUT_CELL(ICC)%H(JCC)             * CUT_CELL(ICC)%VOLUME(JCC)
+               GAS_PHASE_OUTPUT_CC = GAS_PHASE_OUTPUT_CC + 0.5_EB*(CUT_CELL(ICC)%H(JCC)+CUT_CELL(ICC)%HS(JCC)) &
+                                                                                            * CUT_CELL(ICC)%VOLUME(JCC)
             CASE(14)  ! DIVERGENCE
                GAS_PHASE_OUTPUT_CC = GAS_PHASE_OUTPUT_CC + CUT_CELL(ICC)%D(JCC)             * CUT_CELL(ICC)%VOLUME(JCC)
             CASE(15)  ! MIXING TIME
