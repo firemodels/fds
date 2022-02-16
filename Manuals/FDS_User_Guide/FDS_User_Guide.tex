@@ -7134,20 +7134,32 @@ The input files called {\ct wind\_example\_nn.fds} in the samples folder called 
 
 \section{Wind Method 3: Advanced Meteorological Concepts}
 
-If your computational domain spans kilometers, you might consider applying various meteorological concepts in applying a wind field.
+If your computational domain spans kilometers, you might consider a more fundamental set of parameters to describe the wind field. This is a challenge because it is difficult to infer far-field meteorological conditions from a few near-field, near-surface wind or temperature readings that you might have from a few weather stations. If you pursue this course, you will most likely need to use some trial and error to ensure that your far-field conditions yield something close to the data obtained at the weather stations.
 
 \subsection{Pressure Gradient Force}
 \label{info:force_vector}
 
-Winds are driven by horizontal pressure gradients that push air masses from regions of high to low surface pressure. Typically, pressure isobars on a meteorological map are given in 4~mbar increments. If you know the horizontal distance separating two isobars, you can estimate the wind speed. This estimate is subject to surface conditions and other factors, but at least it provides a starting point. The pressure gradient can be input into FDS using the parameter {\ct FORCE\_VECTOR(1:2)} on the {\ct WIND} line in units of Pa/m (1~mbar is 100~Pa). In the absence of other forces, the pressure gradient, $F_i$, is added to the momentum equation as follows:
+Winds are driven by horizontal pressure gradients that push air masses from regions of high to low surface pressure. This {\it pressure gradient force}, $\bF$, is added to the momentum equation as follows:
 \begin{equation}
-\frac{\partial u_i}{\partial t} + \dots = F_i/\rho
+\frac{\partial \bu}{\partial t} + \dots = \bF/\rho
 \end{equation}
-To specify a pressure gradient of 0.01~Pa/m in the $x$ direction, apply
+It can be related to the average wind speed, $U$, over the height of the boundary layer, $H$, by~\cite{Stull:2000}
+\be
+   \| \bF \| = \rho \, C_{\rm D} \, \frac{ U^2 }{H}
+\ee
+where $C_{\rm D}$ is a dimensionless drag coefficient ranging between $2 \times 10^{-3}$ for relatively smooth surfaces to $2 \times 10^{-2}$ for rough or forested surfaces. This relation is appropriate for neutrally stable conditions, i.e. windy and relatively low surface heating. For unstable conditions, i.e. light winds and strong surface heating, the relation becomes
+\be
+   \| \bF \| = \rho \, b_{\rm D} \sqrt{g H \frac{\Delta \theta}{\theta} } \, \frac{ U }{H}
+\ee
+where $b_{\rm D} = 1.83 \times 10^{-3}$ and $\Delta \theta /\theta$ is the relative change in potential temperature between the ground and the mid-height of the boundary layer.
+
+The pressure gradient force is input into FDS using the parameter {\ct FORCE\_VECTOR(1:2)} on the {\ct WIND} line in units of Pa/m. To specify a pressure gradient force of 0.01~Pa/m in the $x$ direction, apply
 \begin{lstlisting}
 &WIND FORCE_VECTOR(1)=0.01 /
 \end{lstlisting}
-You may apply a time ramp to {\ct FORCE\_VECTOR(1)}, for example, via {\ct RAMP\_FVX\_T} on the {\ct WIND} line.
+You may apply a time ramp to {\ct FORCE\_VECTOR(1)}, for example, via {\ct RAMP\_FVX\_T} on the {\ct WIND} line. It is not appropriate to apply a vertical profile---this should develop naturally based on the terrain, surface heating, and surface roughness.
+
+
 
 \subsection{Coriolis Force}
 \label{info:coriolis_force}
