@@ -2,6 +2,10 @@
 .DS_Store
 ._*
 
+# alias file
+*make.bat
+.vs
+
 # compiler output files
 *.exe
 *.o
@@ -57,6 +61,23 @@ Manuals/*/*Guide.pdf
 *.fed_smv
 *slice.info
 *svn.txt
+*.bf.bnd
+*.prt5.bnd
+*.sf.bnd
+*.binfo
+*.sinfo
+*.ter
+*.bingeom
+*.gbf
+*.be.bnd
+*.be
+*.gcf
+*.ge2
+*.ge
+*.gbnd
+*.gsf
+*.q.bnd
+
 Current_Results
 
 # smokeview files, directories
@@ -68,6 +89,10 @@ SMV/for_bundle/uploads
 # manuals script-generated files
 Manuals/*/SCRIPT_FIGURES/*/*.pdf
 Manuals/*/SCRIPT_FIGURES/*/*.tex
+Manuals/*/SCRIPT_FIGURES/*/*.csv
+Manuals/*/SCRIPT_FIGURES/*.pdf
+Manuals/*/SCRIPT_FIGURES/*.tex
+Manuals/*/SCRIPT_FIGURES/*.png
 
 # Validation script generated csv files
 Validation/*/FDS_Output_Files/*.csv
