@@ -102,5 +102,6 @@ disp('ht3d_cond...');                     ht3d_cond
 disp('ht3d_sphere...');                   ht3d_sphere
 disp('geom_positive_errors...');          geom_positive_errors
 disp('geom_channel_test...');             geom_channel_test
+disp('atmospheric_boundary_layer...');    atmospheric_boundary_layer
 
 display('verification scripts completed successfully!')
