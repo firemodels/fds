@@ -7069,13 +7069,13 @@ $z_0$ (m)    & Classification    & Landscape  \\  \hline \hline
 
 The scaling potential temperature, $\theta_*$, can be obtained from the relation:
 \be
-   \theta_* = \frac{u_*^2 \, \theta_0}{g \, \kappa \, L}
+   \theta_* = \frac{u_*^2 \, \theta_0}{g \, \kappa \, L}  \label{thera_star_eq}
 \ee
-Alternatively, the scaling potential temperature can be estimated from the expression for the the sensible heat flux:
+Alternatively, the scaling potential temperature can be estimated from the expression for the sensible heat flux:
 \be
-   \dot{q}'' = \rho \, c_p \, u_* \, \theta_*
+   \dot{q}''_{\rm c} = -\rho \, c_p \, u_* \, \theta_*   \label{heat_flux_ABL}
 \ee
-where a negative value indicates that the ground is warmer than the air above.
+Note that a positive value of the heat flux indicates that the ground is warmer than the air above.
 
 Figure~\ref{wind_profiles} displays a few sample wind profiles. Notice that the sign of $L$ determines whether the atmosphere is stable or unstable; that is, whether the temperature increases or decreases relative to the ground temperature.
 
@@ -7098,9 +7098,9 @@ Figure~\ref{wind_profiles} displays a few sample wind profiles. Notice that the 
 
 The following input line specifies a southwesterly wind blowing 5~m/s over a relatively flat, rural landscape on a bright, sunny day:
 \begin{lstlisting}
-&WIND SPEED=5., DIRECTION=225., L=-100., Z_0=0.03 /
+&WIND SPEED=5., Z_REF=3, DIRECTION=225., L=-100., Z_0=0.03 /
 \end{lstlisting}
-Setting a non-zero value of {\ct L} indicates that you want Monin-Obukhov profiles. If {\ct Z\_REF} is not specified, it is assumed that the wind speed is taken at a height 2~m off the ground. If {\ct TMP\_REF} is not specified, it is assumed that the temperature is the specified ambient, {\ct TMPA}. The wind {\ct DIRECTION} follows the usual meteorological convention---a northerly wind has direction of 0$^\circ$ and blows from north to south, or in the negative $y$ direction in the FDS coordinate system. An easterly wind has a direction of 90$^\circ$ and blows from east to west, or in the negative $x$ direction. You can vary the direction of the wind in time only, not in space:
+Setting a non-zero value of {\ct L} indicates that you want to use Monin-Obukhov profiles. The {\ct SPEED} indicates the wind speed at a height of {\ct Z\_REF} (m). If {\ct Z\_REF} is not specified, it is assumed that the wind speed is taken at a height 2~m off the ground. It is assumed that the temperature at {\ct Z\_REF} is the specified ambient, {\ct TMPA}, unless you specify {\ct TMP\_REF} ($^\circ$C). The wind {\ct DIRECTION} follows the usual meteorological convention---a northerly wind has direction of 0$^\circ$ and blows from north to south, or in the negative $y$ direction in the FDS coordinate system. An easterly wind has a direction of 90$^\circ$ and blows from east to west, or in the negative $x$ direction. You can vary the direction of the wind in time only, not in space:
 \begin{lstlisting}
 &WIND ..., RAMP_DIRECTION_T='dir' /
 
@@ -7110,7 +7110,9 @@ Setting a non-zero value of {\ct L} indicates that you want Monin-Obukhov profil
 \end{lstlisting}
 Here, {\ct T} is time in seconds and {\ct F} is the wind direction in degrees. You may not vary the speed in time or space.
 
-Also, if you know the value of $u_*$ or $\theta_*$, you can input these on the {\ct WIND} line as {\ct U\_STAR} (m/s) and {\ct THETA\_STAR} (K). Otherwise, they will be computed from $L$ and $z_0$.
+If you know the value of $u_*$ or $\theta_*$, you can input these on the {\ct WIND} line as {\ct U\_STAR} (m/s) and {\ct THETA\_STAR} (K). Otherwise, they will be computed from $L$ and $z_0$. Do not input all four of these parameters together. 
+
+Also, do not specify parameters on the {\ct SURF} line that defines the ground that might not be consistent with the specified M-O parameters. A fixed temperature is usually sufficient given that the atmospheric profile is being imposed at the boundaries.
 
 \subsubsection{Example}
 \label{wind_example_32}
@@ -7125,27 +7127,7 @@ The input files called {\ct wind\_example\_nn.fds} in the samples folder called 
 \end{figure}
 
 
-\subsection{Aerodynamic Roughness}
-\label{aerodynamic_roughness}
 
-The \emph{aerodynamic} roughness length, $z_0$, is not the same as the \emph{sand grain} roughness, $s$, discussed in Sec.~\ref{info:WALL_MODEL}. The default wall model used in FDS, in the ``fully rough'' limit, is given by the following log law:
-\be
-   \frac{u(z)}{u_*} = \frac{1}{\kappa} \, \ln \left( \frac{z}{s} \right) + 8.5
-\ee
-For the purpose of implementing the Monin-Obukhov model within FDS, the velocity profile given by Eq.~(\ref{u_om}) near the ground where $\psi_{\rm m} \approx 0$ can be superimposed, leading to the effective translation of roughness factors:
-\be
-\label{eq:roughness_conversion}
-   s = z_0 \, {\rm e}^{8.5 \, \kappa} \approx 32.6 \, z_0
-\ee
-You may set either {\ct ROUGHNESS} or {\ct Z\_0} on the {\ct SURF} line (both in meters).  FDS will use Eq.~(\ref{eq:roughness_conversion}) to convert between the two depending on the wall model.
-
-\subsection{Sensible Heat Flux}
-
-The ground temperature relative to the air temperature is an important consideration in ground level gas dispersion because it essentially defines the stability of the atmospheric boundary layer. Cold air blowing over a warm ground surface leads to greater dispersion than warm air blowing over cold ground. In FDS wind simulations, the ground temperature is assumed to be fixed at the specified ambient temperature {\ct TMPA}, and the choice of Monin-Obukhov parameters dictate the temperature profile of the atmosphere.  According to the model, the sensible heat flux is given by
-\be
-   \dot{q}_{\rm c}'' = \rho \, c_p \, u_* \theta_*
-\ee
-where a negative value indicates that the ground is warmer than the air above. In the simulation, you can explicitly specify the {\ct CONVECTIVE\_HEAT\_FLUX} (kW/m$^2$) on the {\ct SURF} line to be $-\dot{q}_{\rm c}''$. Note that $\rho$ (kg/m$^3$) is the density of air near the ground and $c_p$ is the specific heat of air near the ground, approximately 1~kJ/(kg$\cdot$K).
 
 
 \newpage
@@ -7207,6 +7189,48 @@ V_g &= + \frac{1}{\rho f_c} \frac{\partial \bar{p}}{\partial x}
 \end{align}
 If the geostrophic wind speed is known, it can be entered on the {\ct WIND} line via {\ct GEOSTROPHIC\_WIND(1:2)} = $(U_g, V_g)$.  Notice that specification of the wind in $x$ implies a mean pressure gradient in $y$ and vice versa.  When a geostropic wind is specified, FDS converts this value to the implied {\ct FORCE\_VECTOR} according to Eq.~(\ref{eq:geostrophic_wind}).  To achieve the specified geostrophic wind aloft, you must also have the Coriolis force turned on (see Sec.~\ref{info:coriolis_force}).  Since the geostrophic wind is equivalent to applying {\ct FORCE\_VECTOR}, you may also apply a time ramp (see Sec.~\ref{info:force_vector}).
 
+
+\subsection{Surface Roughness}
+\label{aerodynamic_roughness}
+
+The default wall model used in FDS, in the ``fully rough'' limit, is given by the following log law:
+\be
+   \frac{u(z)}{u_*} = \frac{1}{\kappa} \, \ln \left( \frac{z}{s} \right) + 8.5  \label{loglaw}
+\ee
+The \emph{sand grain} roughness, $s$, is related to the \emph{aerodynamic} roughness length, $z_0$, discussed in Section~\ref{info:WIND}.  Substituting the velocity profile given by Monin-Obukhov similarity theory, Eq.~(\ref{u_om}), into Eq.~(\ref{loglaw}), and noting that $\psi_{\rm m} \approx 0$ near the ground, the effective translation of roughness factors is
+\be
+\label{eq:roughness_conversion}
+   s = z_0 \, {\rm e}^{8.5 \, \kappa} \approx 32.6 \, z_0
+\ee
+The sand grain roughness, $s$, is specified on a {\ct SURF} line via the parameter {\ct ROUGHNESS} (m). This parameter has a more intuitive meaning than its counterpart in M-O similarity theory, $z_0$, because it can be viewed as the characteristic height of ground level obstructions. Table~\ref{z0} presents suggested values of $z_0$, and Eq.~\ref{eq:roughness_conversion} can be used to compute the {\ct ROUGHNESS} length that is input on the {\ct SURF} line that defines the ground.
+
+\subsection{Thermal Boundary Conditions at the Ground}
+
+The ground temperature relative to the air temperature is an important consideration in defining the stability of the atmospheric boundary layer. Cold air blowing over warm ground leads to greater dispersion than warm air blowing over cold ground. You can apply a variety of thermal boundary conditions on the {\ct SURF} line that defines the ground: (1) a fixed or time-varying temperature using {\ct WALL\_TEMPERATURE} ($^\circ$C), (2) a {\ct CONVECTIVE\_HEAT\_FLUX} (kW/m$^2$), or (3) parameters that define the ground as a thermally-thick solid. Setting the {\ct CONVECTIVE\_HEAT\_FLUX} is convenient if you want to make contact with Monin-Obukhov similarity theory, where Eqs.~(\ref{thera_star_eq}) and (\ref{heat_flux_ABL}) can be combined to provide an expression for the convective heat flux at the surface:
+\be
+   \dot{q}_{\rm c}'' = - \frac{u_*^3 \, \theta_0 \, \rho \, c_p}{g \, \kappa \, L}  \label{qdot_L}
+\ee
+Note that $\rho$ (kg/m$^3$) is the density and $c_p$ is the specific heat of the air near the ground.
+
+
+\subsection{Example}
+
+Figure~\ref{ABL_profiles} displays velocity and temperature profiles generated by FDS over a 1000~m square domain with periodic boundaries and a height of 200~m. The wind fields are generated using pressure gradient forces, $F$, of various values, and the ground is given several different values of {\ct CONVECTIVE\_HEAT\_FLUX} ($\dot{q}_{\rm c}''$) and surface {\ct ROUGHNESS} ($s$). Eqs.~(\ref{eq:roughness_conversion}) and (\ref{qdot_L}) are used to convert the specified $\dot{q}_{\rm c}''$ and $s$ to $L$ and $z_0$ that are then used to generate Monin-Obukhov velocity and temperature profiles with which to compare the simulations. Note that these simulations do not invoke the Monin-Obukhov profiles directly. Rather, the M-O profiles are used to test if the FDS simulations produce realistic vertical profiles using just a specified pressure gradient force, $F$, surface roughness, $s$, and surface heat flux, $\dot{q}_{\rm c}''$.
+
+\begin{figure}[p]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \includegraphics[width=3.1in]{SCRIPT_FIGURES/atmospheric_boundary_layer_1_vel}  &
+      \includegraphics[width=3.1in]{SCRIPT_FIGURES/atmospheric_boundary_layer_1_tmp}  \\
+      \includegraphics[width=3.1in]{SCRIPT_FIGURES/atmospheric_boundary_layer_2_vel}  &
+      \includegraphics[width=3.1in]{SCRIPT_FIGURES/atmospheric_boundary_layer_2_tmp}  \\
+      \includegraphics[width=3.1in]{SCRIPT_FIGURES/atmospheric_boundary_layer_3_vel}  &
+      \includegraphics[width=3.1in]{SCRIPT_FIGURES/atmospheric_boundary_layer_3_tmp}  \\
+      \includegraphics[width=3.1in]{SCRIPT_FIGURES/atmospheric_boundary_layer_4_vel}  &
+      \includegraphics[width=3.1in]{SCRIPT_FIGURES/atmospheric_boundary_layer_4_tmp}
+   \end{tabular*}
+   \caption[The {\ct atmospheric\_boundary\_layer} test cases]{Comparison of FDS-predicted velocity and temperature profiles compared to those generated using Monin-Obukhov similarity theory.}
+   \label{ABL_profiles}
+\end{figure}
 
 
 \newpage
