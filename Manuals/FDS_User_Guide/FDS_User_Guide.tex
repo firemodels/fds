@@ -4127,15 +4127,6 @@ Figure \ref{fig:sem_open_wind} shows results from a demonstration case ({\ct sem
 \label{fig:sem_open_wind}
 \end{figure}
 
-This test case also uses the atmospheric boundary layer (ABL) wall model (see Sec.~\ref{sec:abl_model}) for computing the wall stress and heat flux.  This model generates a local Monin-Obukhov (MO) length scale that is appropriate for solid phase output.  Here we compare the ground surface mean MO lenth scale, $L$, as a function of time with the prescribed {\ct L} on the {\ct WIND} line ($-667$ m).  The resulting time history is shown in Fig.~\ref{fig:sem_open_wind_LMO}.  Note that the negative MO length indicates an unstable boundary layer.  The initial transient (spike) is due to setting a uniform ambient temperature, which generates a large initial heat flux.
-
-\begin{figure}[ht]
-\centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/sem_open_wind_LMO}
-\caption[Monin-Obukhov length from ABL\_WALL\_MODEL]{Mean Monin-Obukhov length scale output from the ABL wall model compared to the input $L$.}
-\label{fig:sem_open_wind_LMO}
-\end{figure}
-
 
 \subsection{Random Mass Flux Variation}
 \label{info:MASS_FLUX_VAR}
