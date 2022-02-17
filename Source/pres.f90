@@ -1120,7 +1120,7 @@ IF (NZIM==1 .AND. M%ZONE_MESH(IPZIM)%USE_FFT) RETURN
 ! 3. Initialize:
 ! 3.a Add index per zone in MUNKH array, the test goes by PRESSURE_ZONE(I,J,K), and MUNKH(I,J,K).
 !     Similar to GET_MATRIX_INDEXES_H in GLOBMAT_SOLVER. Count number of unknowns ZM%NUNKH.
-ALLOCATE(M%MUNKH(1:IBAR,1:JBAR,1:KBAR)); M%MUNKH=IS_UNDEFINED
+ALLOCATE(M%MUNKH(0:IBAR+1,0:JBAR+1,0:KBAR+1)); M%MUNKH=IS_UNDEFINED
 CALL POINT_TO_MESH(NM)
 ZONE_MESH_LOOP_2: DO IPZ=0,N_ZONE
    ZM=>MESHES(NM)%ZONE_MESH(IPZ)
@@ -1287,14 +1287,14 @@ END SUBROUTINE ULMAT_SOLVER
 
 SUBROUTINE ULMAT_SOLVE_ZONE(NM,IPZ)
 
-USE COMPLEX_GEOMETRY, ONLY : IBM_UNDEFINED,IBM_IDCC
+USE COMPLEX_GEOMETRY, ONLY : IBM_UNDEFINED,IBM_IDCC,IBM_FFNF
 USE CC_SCALARS_IBM, ONLY : GET_FN_DIVERGENCE_CUTCELL,GRADH_ON_CARTESIAN
 
 INTEGER, INTENT(IN) :: NM, IPZ
 
 ! Local Variables:
-INTEGER :: NRHS,MAXFCT,MNUM,ERROR,I,J,K,ICC,JCC,IIG,JJG,KKG,IOR,IW,IROW,NCELL,ICFACE,IFACE,JFACE,ICVL
-REAL(EB):: SUM_FH(1:2),MEAN_FH,SUM_XH(1:2),MEAN_XH,DIV_FN_VOL,DIV_FN,IDX,AF,VAL
+INTEGER :: NRHS,MAXFCT,MNUM,ERROR,I,J,K,ICC,JCC,IIG,JJG,KKG,IOR,IW,IROW,NCELL,ICFACE,IFACE,JFACE,ICVL,ILH,JLH,KLH,IRC
+REAL(EB):: SUM_FH(1:2),MEAN_FH,SUM_XH(1:2),MEAN_XH,DIV_FN_VOL,DIV_FN,IDX,AF,VAL,BCV
 TYPE(ZONE_MESH_TYPE), POINTER :: ZM
 TYPE (WALL_TYPE),  POINTER :: WC
 TYPE (CFACE_TYPE), POINTER :: CFA
@@ -1366,23 +1366,21 @@ NOT_PRES_ON_CARTESIAN_IF :IF (.NOT.PRES_ON_CARTESIAN) THEN
             IF (ICC > 0) THEN; IROW = CUT_CELL(ICC)%UNKH(1); ELSE; CYCLE CFACE_LOOP; ENDIF
          ENDIF
          IOR   = BC%IOR
-
          ! Define centroid to centroid distance, normal to WC:
          IF(.NOT.GRADH_ON_CARTESIAN) THEN
             IDX=1._EB/(CUT_FACE(IFACE)%XCENHIGH(ABS(IOR),JFACE)-CUT_FACE(IFACE)%XCENLOW(ABS(IOR),JFACE))
          ELSE
             SELECT CASE (IOR)
-            CASE(-1); IDX = 1._EB / DXN(IIG);
-            CASE( 1); IDX = 1._EB / DXN(IIG-1)
-            CASE(-2); IDX = 1._EB / DYN(JJG)
-            CASE( 2); IDX = 1._EB / DYN(JJG-1)
-            CASE(-3); IDX = 1._EB / DZN(KKG)
-            CASE( 3); IDX = 1._EB / DZN(KKG-1)
+            CASE(-1); IDX = RDXN(IIG)
+            CASE( 1); IDX = RDXN(IIG-1)
+            CASE(-2); IDX = RDYN(JJG)
+            CASE( 2); IDX = RDYN(JJG-1)
+            CASE(-3); IDX = RDZN(KKG)
+            CASE( 3); IDX = RDZN(KKG-1)
             END SELECT
          ENDIF
-         VAL  = -2._EB*IDX * CFA%AREA * CFA%PRES_BXN
          ! Add to F_H:
-         ZM%F_H(IROW) = ZM%F_H(IROW) + VAL
+         ZM%F_H(IROW) = ZM%F_H(IROW) + (-2._EB*IDX * CFA%AREA * CFA%PRES_BXN)
       ENDIF IF_CFACE_DIRICHLET
    ENDDO CFACE_LOOP
 ENDIF NOT_PRES_ON_CARTESIAN_IF
@@ -1391,7 +1389,7 @@ ENDIF NOT_PRES_ON_CARTESIAN_IF
 WALL_CELL_LOOP_1 : DO IW=1,N_EXTERNAL_WALL_CELLS
    WC => WALL(IW)
    ! Drop if unstructured solve and this is a cut-face. Dealt with external CFACE.
-   IF (.NOT.PRES_ON_CARTESIAN    .AND. WC%CUT_FACE_INDEX>0) CYCLE WALL_CELL_LOOP_1
+   IF (.NOT.PRES_ON_CARTESIAN .AND. WC%CUT_FACE_INDEX>0) CYCLE WALL_CELL_LOOP_1
    ! Drop if not whole mesh solution and boundary type is NULL.
    IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_CELL_LOOP_1
    BC  => BOUNDARY_COORD(WC%BC_INDEX)
@@ -1442,34 +1440,35 @@ WALL_CELL_LOOP_1 : DO IW=1,N_EXTERNAL_WALL_CELLS
          IF (ICC > 0) THEN; IROW = CUT_CELL(ICC)%UNKH(1); ELSE; CYCLE WALL_CELL_LOOP_1; ENDIF
       ENDIF
       ! Define cell size, normal to WC:
+      ILH    = 0; JLH = 0; KLH = 0
       SELECT CASE (IOR)
       CASE(-1) ! -IAXIS oriented, high face of IIG cell.
-         IDX = 1._EB / DXN(IIG)
-         AF  =  ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*R(IIG  )) * DZ(KKG)
-         VAL = -2._EB*IDX*AF*BXF(JJG,KKG)
+         IDX = RDXN(IIG+ILH); BCV = BXF(JJG,KKG)
+         AF  = ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*R(IIG  )) * DZ(KKG)
       CASE( 1) ! +IAXIS oriented, low face of IIG cell.
-         IDX = 1._EB / DXN(IIG-1)
-         AF  =  ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*R(IIG-1)) * DZ(KKG)
-         VAL = -2._EB*IDX*AF*BXS(JJG,KKG)
+         ILH = -1; IDX = RDXN(IIG+ILH); BCV = BXS(JJG,KKG)
+         AF  = ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*R(IIG-1)) * DZ(KKG)
       CASE(-2) ! -JAXIS oriented, high face of JJG cell.
-         IDX = 1._EB / DYN(JJG)
-         AF  =  DX(IIG)*DZ(KKG)
-         VAL = -2._EB*IDX*AF*BYF(IIG,KKG)
+         IDX = RDYN(JJG+JLH); BCV = BYF(IIG,KKG)
+         AF  = DX(IIG)*DZ(KKG)
       CASE( 2) ! +JAXIS oriented, low face of JJG cell.
-         IDX = 1._EB / DYN(JJG-1)
-         AF  =  DX(IIG)*DZ(KKG)
-         VAL = -2._EB*IDX*AF*BYS(IIG,KKG)
+         JLH = -1; IDX = RDYN(JJG+JLH); BCV = BYS(IIG,KKG)
+         AF  = DX(IIG)*DZ(KKG)
       CASE(-3) ! -KAXIS oriented, high face of KKG cell.
-         IDX = 1._EB / DZN(KKG)
+         IDX = RDZN(KKG+KLH); BCV = BZF(IIG,JJG)
          AF  =  ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*RC(IIG  ))* DX(IIG)
-         VAL = -2._EB*IDX*AF*BZF(IIG,JJG)
       CASE( 3) ! +KAXIS oriented, low face of KKG cell.
-         IDX = 1._EB / DZN(KKG-1)
+         KLH = -1; IDX = RDZN(KKG+KLH); BCV = BZS(IIG,JJG)
          AF  =  ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*RC(IIG  ))* DX(IIG)
-         VAL = -2._EB*IDX*AF*BZS(IIG,JJG)
       END SELECT
+      ! Address case of RC face in the boundary:
+      IF (CC_IBM .AND. .NOT.PRES_ON_CARTESIAN .AND. .NOT.GRADH_ON_CARTESIAN) THEN
+         IRC = FCVAR(IIG+ILH,JJG+JLH,KKG+KLH,IBM_FFNF,ABS(BC%IOR))
+         IF(IRC > 0) IDX = 1._EB / ( IBM_RCFACE_Z(IRC)%XCEN(ABS(BC%IOR),HIGH_IND) - &
+                                     IBM_RCFACE_Z(IRC)%XCEN(ABS(BC%IOR),LOW_IND) )
+      ENDIF
       ! Add to F_H:
-      ZM%F_H(IROW) = ZM%F_H(IROW) + VAL
+      ZM%F_H(IROW) = ZM%F_H(IROW) + (-2._EB*IDX*AF*BCV)
    ENDIF IF_DIRICHLET_1
 ENDDO WALL_CELL_LOOP_1
 
@@ -1615,7 +1614,7 @@ ELSE
    ENDDO
 ENDIF
 
-! Fill external boundary conditions for Mesh, if necesary:
+! Fill external boundary conditions for Mesh, if necessary:
 WALL_CELL_LOOP_2 : DO IW=1,N_EXTERNAL_WALL_CELLS
    WC => WALL(IW)
    BC => BOUNDARY_COORD(WC%BC_INDEX)
@@ -2484,13 +2483,13 @@ END SUBROUTINE ULMAT_H_MATRIX
 ! -------------------------------- ULMAT_BCS_H_MATRIX ----------------------------------
 SUBROUTINE ULMAT_BCS_H_MATRIX(NM,IPZ)
 
-USE COMPLEX_GEOMETRY, ONLY : IBM_IDCC
-USE CC_SCALARS_IBM, ONLY : GET_CFACE_OPEN_BC_COEF
+USE COMPLEX_GEOMETRY, ONLY : IBM_IDCC, IBM_FFNF
+USE CC_SCALARS_IBM, ONLY : GET_CFACE_OPEN_BC_COEF,GRADH_ON_CARTESIAN
 INTEGER, INTENT(IN) :: NM,IPZ
 
 ! Local Variables:
 INTEGER :: DUM,H_MAT_IVEC
-INTEGER :: JLOC,JCOL,IND(LOW_IND:HIGH_IND)
+INTEGER :: JLOC,JCOL,IND(LOW_IND:HIGH_IND),ILH,JLH,KLH,IRC
 REAL(EB):: AF,IDX,BIJ
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
 TYPE (BOUNDARY_COORD_TYPE), POINTER :: BC
@@ -2519,20 +2518,26 @@ WALL_LOOP_1 : DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       IF (ICC > 0) THEN; IROW = CUT_CELL(ICC)%UNKH(1); ELSE; CYCLE WALL_LOOP_1; ENDIF
    ENDIF
    IND(LOW_IND)  = IROW
+   ILH           = 0; JLH = 0; KLH = 0
    SELECT CASE(BC%IOR)
    CASE( IAXIS)
-      AF = ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*R(IIG-1)) * DZ(KKG);            IDX= 1._EB/DXN(IIG-1)
+      AF  = ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*R(IIG-1)) * DZ(KKG); ILH = -1; IDX= RDXN(IIG+ILH)
    CASE(-IAXIS)
-      AF = ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*R(IIG  )) * DZ(KKG);            IDX= 1._EB/DXN(IIG  )
+      AF  = ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*R(IIG  )) * DZ(KKG);           IDX= RDXN(IIG+ILH)
    CASE( JAXIS)
-      AF = DX(IIG)*DZ(KKG);            IDX= 1._EB/DYN(JJG-1)
+      AF  = DX(IIG)*DZ(KKG); JLH= -1; IDX= RDYN(JJG+JLH)
    CASE(-JAXIS)
-      AF = DX(IIG)*DZ(KKG);            IDX= 1._EB/DYN(JJG  )
+      AF  = DX(IIG)*DZ(KKG);          IDX= RDYN(JJG+JLH)
    CASE( KAXIS)
-      AF = ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*RC(IIG  ))* DX(IIG);            IDX= 1._EB/DZN(KKG-1)
+      AF  = ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*RC(IIG  ))* DX(IIG); KLH = -1; IDX= RDZN(KKG+KLH)
    CASE(-KAXIS)
-      AF = ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*RC(IIG  ))* DX(IIG);            IDX= 1._EB/DZN(KKG  )
+      AF  = ((1._EB-CYL_FCT)*DY(JJG) + CYL_FCT*RC(IIG  ))* DX(IIG);           IDX= RDZN(KKG+KLH)
    END SELECT
+   IF (CC_IBM .AND. .NOT.PRES_ON_CARTESIAN .AND. .NOT.GRADH_ON_CARTESIAN) THEN
+      IRC = FCVAR(IIG+ILH,JJG+JLH,KKG+KLH,IBM_FFNF,ABS(BC%IOR))
+      IF(IRC > 0) IDX = 1._EB / ( IBM_RCFACE_Z(IRC)%XCEN(ABS(BC%IOR),HIGH_IND) - &
+                                  IBM_RCFACE_Z(IRC)%XCEN(ABS(BC%IOR),LOW_IND) )
+   ENDIF
 
    ! Now add to Adiff corresponding coeff:
    BIJ = IDX*AF
