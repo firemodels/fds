@@ -388,48 +388,6 @@ if Tmean_error>error_tolerance
     display(['Matlab Warning: sem_open_wind.fds Tmean_error = ',num2str(Tmean_error)])
 end
 
-% Monin-Obukhov length scale from ABL_WALL_MODEL
-% ----------------------------------------------
-figure
-set(gca,'Units',Plot_Units)
-set(gca,'Position',[Plot_X Plot_Y Plot_Width Plot_Height])
-
-M = importdata([datadir,'sem_open_wind_devc.csv'],',',2);
-
-t = M.data(:,find(strcmp(M.colheaders,'Time')));
-L_MO_fds = M.data(:,find(strcmp(M.colheaders,'"L_MO_MEAN"')));
-
-L_MO = -667;
-L_MO_exp = -667*ones(length(t),1);
-H(1)=plot(t,L_MO_exp,'k-'); hold on
-H(2)=plot(t,L_MO_fds,'k--');
-xlabel('time (s)','FontName',Font_Name,'FontSize',Label_Font_Size)
-ylabel('{\it L} (m)','FontName',Font_Name,'FontSize',Label_Font_Size)
-
-set(gca,'FontName',Font_Name)
-set(gca,'FontSize',Label_Font_Size)
-
-h = legend(H(1:2),'Prescribed MO length','FDS predicted MO length','location','southeast');
-set(h,'Interpreter',Font_Interpreter,'FontName',Font_Name,'FontSize',Label_Font_Size)
-
-Git_Filename = [datadir,'sem_open_wind_git.txt'];
-addverstr(gca,Git_Filename,'linear')
-
-set(gcf,'Visible',Figure_Visibility);
-set(gcf,'Units',Paper_Units);
-set(gcf,'PaperUnits',Paper_Units);
-set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
-
-% print to pdf
-print(gcf,'-dpdf',[plotdir,'sem_open_wind_LMO'])
-
-% compute error
-ii = round(length(t)/2):length(t);
-LMO_error = norm(L_MO_exp(ii)-L_MO_fds(ii))/abs(L_MO)/length(ii);
-if LMO_error>0.1
-    display(['Matlab Warning: sem_open_wind.fds LMO_error = ',num2str(LMO_error)])
-end
 
 
 
