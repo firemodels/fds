@@ -1993,6 +1993,21 @@ EDGE_LOOP: DO IE=1,N_EDGES
          CORNER_EDGE=.FALSE.
          IF (IWM==0 .OR. IWP==0) CORNER_EDGE=.TRUE.
 
+         ! Omit mesh boundary external corners
+
+         IF ( (II==0    .AND. KK==0   ) .OR. &
+              (II==0    .AND. KK==KBAR) .OR. &
+              (II==IBAR .AND. KK==0   ) .OR. &
+              (II==IBAR .AND. KK==KBAR) .OR. &
+              (II==0    .AND. JJ==0   ) .OR. &
+              (II==0    .AND. JJ==JBAR) .OR. &
+              (II==IBAR .AND. JJ==0   ) .OR. &
+              (II==IBAR .AND. JJ==JBAR) .OR. &
+              (JJ==0    .AND. KK==0   ) .OR. &
+              (JJ==0    .AND. KK==KBAR) .OR. &
+              (JJ==JBAR .AND. KK==0   ) .OR. &
+              (JJ==JBAR .AND. KK==KBAR)      ) CORNER_EDGE=.FALSE.
+
          ! If there is a solid wall separating the two adjacent wall cells, cycle out of the loop.
 
          IF ((WALL(IWMI)%BOUNDARY_TYPE==SOLID_BOUNDARY .AND. SURFACE(WALL(IWM)%SURF_INDEX)%VELOCITY_BC_INDEX/=FREE_SLIP_BC) .OR. &
