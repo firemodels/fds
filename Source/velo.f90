@@ -659,8 +659,11 @@ OMZ => WORK6
 
 IF (CC_IBM) THEN
    T_USED(4) = T_USED(4) + CURRENT_TIME() - T_NOW
-   CALL CUTFACE_VELOCITIES(NM,UU,VV,WW,CUTFACES=.TRUE.)
-   IF (.NOT.CC_STRESS_METHOD) CALL CCIBM_INTERP_FACE_VEL(DT,NM,.TRUE.)
+   IF (.NOT.CC_STRESS_METHOD) THEN
+      CALL CCIBM_INTERP_FACE_VEL(DT,NM,.TRUE.)
+   ELSE
+      CALL CUTFACE_VELOCITIES(NM,UU,VV,WW,CUTFACES=.TRUE.)
+   ENDIF
    T_NOW=CURRENT_TIME()
 ENDIF
 
@@ -901,8 +904,11 @@ IF (PERIODIC_TEST==21 .OR. PERIODIC_TEST==22 .OR. PERIODIC_TEST==23) CALL ROTATE
 ! Restore previous substep velocities to gas cut-faces underlaying Cartesian faces.
 IF (CC_IBM) THEN
    T_USED(4) = T_USED(4) + CURRENT_TIME() - T_NOW
-   CALL CUTFACE_VELOCITIES(NM,UU,VV,WW,CUTFACES=.FALSE.)
-   IF(.NOT.CC_STRESS_METHOD) CALL CCIBM_INTERP_FACE_VEL(DT,NM,.FALSE.)
+   IF(.NOT.CC_STRESS_METHOD) THEN
+      CALL CCIBM_INTERP_FACE_VEL(DT,NM,.FALSE.)
+   ELSE
+      CALL CUTFACE_VELOCITIES(NM,UU,VV,WW,CUTFACES=.FALSE.)
+   ENDIF
    CALL CCIBM_VELOCITY_FLUX(NM,DT)
    T_NOW=CURRENT_TIME()
 ENDIF
@@ -1986,6 +1992,21 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
          CORNER_EDGE=.FALSE.
          IF (IWM==0 .OR. IWP==0) CORNER_EDGE=.TRUE.
+
+         ! Omit mesh boundary external corners
+
+         IF ( (II==0    .AND. KK==0   ) .OR. &
+              (II==0    .AND. KK==KBAR) .OR. &
+              (II==IBAR .AND. KK==0   ) .OR. &
+              (II==IBAR .AND. KK==KBAR) .OR. &
+              (II==0    .AND. JJ==0   ) .OR. &
+              (II==0    .AND. JJ==JBAR) .OR. &
+              (II==IBAR .AND. JJ==0   ) .OR. &
+              (II==IBAR .AND. JJ==JBAR) .OR. &
+              (JJ==0    .AND. KK==0   ) .OR. &
+              (JJ==0    .AND. KK==KBAR) .OR. &
+              (JJ==JBAR .AND. KK==0   ) .OR. &
+              (JJ==JBAR .AND. KK==KBAR)      ) CORNER_EDGE=.FALSE.
 
          ! If there is a solid wall separating the two adjacent wall cells, cycle out of the loop.
 
