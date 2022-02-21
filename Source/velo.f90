@@ -919,33 +919,63 @@ CONTAINS
 
 SUBROUTINE DIRECT_FORCE()
 
-REAL(EB) :: TIME_RAMP_FACTOR
+REAL(EB) :: TIME_RAMP_FACTOR,SIN_THETA,COS_THETA,THETA
 
-TIME_RAMP_FACTOR = EVALUATE_RAMP(T,I_RAMP_FVX_T)
+IF (I_RAMP_DIRECTION_T/=0) THEN
+   THETA = EVALUATE_RAMP(T,I_RAMP_DIRECTION_T)*DEG2RAD
+   SIN_THETA = -SIN(THETA)
+   COS_THETA = -COS(THETA)
+ELSE
+   SIN_THETA = 1._EB
+   COS_THETA = 1._EB
+ENDIF
+
+IF (I_RAMP_FVX_T>0) THEN
+   TIME_RAMP_FACTOR = EVALUATE_RAMP(T,I_RAMP_FVX_T)
+ELSEIF (I_RAMP_PGF_T>0) THEN
+   TIME_RAMP_FACTOR = EVALUATE_RAMP(T,I_RAMP_PGF_T)
+ELSE
+   TIME_RAMP_FACTOR = 1._EB
+ENDIF
+
 !$OMP PARALLEL DO PRIVATE(RRHO) SCHEDULE(STATIC)
 DO K=1,KBAR
    DO J=1,JBAR
       DO I=0,IBAR
          RRHO = 2._EB/(RHOP(I,J,K)+RHOP(I+1,J,K))
-         FVX(I,J,K) = FVX(I,J,K) - RRHO*FVEC(1)*TIME_RAMP_FACTOR
+         FVX(I,J,K) = FVX(I,J,K) - RRHO*FVEC(1)*TIME_RAMP_FACTOR*SIN_THETA
       ENDDO
    ENDDO
 ENDDO
 !$OMP END PARALLEL DO
 
-TIME_RAMP_FACTOR = EVALUATE_RAMP(T,I_RAMP_FVY_T)
+IF (I_RAMP_FVY_T>0) THEN
+   TIME_RAMP_FACTOR = EVALUATE_RAMP(T,I_RAMP_FVY_T)
+ELSEIF (I_RAMP_PGF_T>0) THEN
+   TIME_RAMP_FACTOR = EVALUATE_RAMP(T,I_RAMP_PGF_T)
+ELSE
+   TIME_RAMP_FACTOR = 1._EB
+ENDIF
+
 !$OMP PARALLEL DO PRIVATE(RRHO) SCHEDULE(STATIC)
 DO K=1,KBAR
    DO J=0,JBAR
       DO I=1,IBAR
          RRHO = 2._EB/(RHOP(I,J,K)+RHOP(I,J+1,K))
-         FVY(I,J,K) = FVY(I,J,K) - RRHO*FVEC(2)*TIME_RAMP_FACTOR
+         FVY(I,J,K) = FVY(I,J,K) - RRHO*FVEC(2)*TIME_RAMP_FACTOR*COS_THETA
       ENDDO
    ENDDO
 ENDDO
 !$OMP END PARALLEL DO
 
-TIME_RAMP_FACTOR = EVALUATE_RAMP(T,I_RAMP_FVZ_T)
+IF (I_RAMP_FVZ_T>0) THEN
+   TIME_RAMP_FACTOR = EVALUATE_RAMP(T,I_RAMP_FVZ_T)
+ELSEIF (I_RAMP_PGF_T>0) THEN
+   TIME_RAMP_FACTOR = EVALUATE_RAMP(T,I_RAMP_PGF_T)
+ELSE
+   TIME_RAMP_FACTOR = 1._EB
+ENDIF
+
 !$OMP PARALLEL DO PRIVATE(RRHO) SCHEDULE(STATIC)
 DO K=0,KBAR
    DO J=1,JBAR
@@ -1993,20 +2023,22 @@ EDGE_LOOP: DO IE=1,N_EDGES
          CORNER_EDGE=.FALSE.
          IF (IWM==0 .OR. IWP==0) CORNER_EDGE=.TRUE.
 
-         ! Omit mesh boundary external corners
+         ! ! Omit mesh boundary external corners
 
-         IF ( (II==0    .AND. KK==0   ) .OR. &
-              (II==0    .AND. KK==KBAR) .OR. &
-              (II==IBAR .AND. KK==0   ) .OR. &
-              (II==IBAR .AND. KK==KBAR) .OR. &
-              (II==0    .AND. JJ==0   ) .OR. &
-              (II==0    .AND. JJ==JBAR) .OR. &
-              (II==IBAR .AND. JJ==0   ) .OR. &
-              (II==IBAR .AND. JJ==JBAR) .OR. &
-              (JJ==0    .AND. KK==0   ) .OR. &
-              (JJ==0    .AND. KK==KBAR) .OR. &
-              (JJ==JBAR .AND. KK==0   ) .OR. &
-              (JJ==JBAR .AND. KK==KBAR)      ) CORNER_EDGE=.FALSE.
+         ! IF ( (II==0    .AND. KK==0   ) .OR. &
+         !      (II==0    .AND. KK==KBAR) .OR. &
+         !      (II==IBAR .AND. KK==0   ) .OR. &
+         !      (II==IBAR .AND. KK==KBAR) .OR. &
+         !      (II==0    .AND. JJ==0   ) .OR. &
+         !      (II==0    .AND. JJ==JBAR) .OR. &
+         !      (II==IBAR .AND. JJ==0   ) .OR. &
+         !      (II==IBAR .AND. JJ==JBAR) .OR. &
+         !      (JJ==0    .AND. KK==0   ) .OR. &
+         !      (JJ==0    .AND. KK==KBAR) .OR. &
+         !      (JJ==JBAR .AND. KK==0   ) .OR. &
+         !      (JJ==JBAR .AND. KK==KBAR) ) THEN
+         !    CORNER_EDGE=.FALSE.
+         ! ENDIF
 
          ! If there is a solid wall separating the two adjacent wall cells, cycle out of the loop.
 

@@ -6932,7 +6932,7 @@ Most of the parameters that describe the atmosphere are entered on a single name
 \begin{enumerate}
 \item If you simply want to specify a wind speed and direction and perhaps vary these quantities in time and with height, see Section~\ref{info:wind_ramps}.
 \item If the periphery of your computational domain is relatively flat and you have some knowledge of the surface roughness and atmospheric conditions, see Section~\ref{info:WIND} on how to apply Monin-Obukhov similarity theory.
-\item If your domain spans kilometers and you would like to apply winds in terms of the pressure gradient and coriolis forces, or you want to apply a geostrophic wind, see Section~\ref{info:force_vector}.
+\item If your domain spans kilometers and you would like to apply winds in terms of the pressure gradient and coriolis forces, or you want to apply a geostrophic wind, see Section~\ref{info:atmospheric_forces}.
 \item If you want to model the wind as one would do for a wind tunnel; that is, to create essentially a ``wall of wind'' where an entire side of the computational domain is turned into a giant fan blowing air laterally, see Section~\ref{info:wall_of_wind}.
 \end{enumerate}
 The temperature stratification of the atmosphere is discussed in Section~\ref{info:stratification}. This is relevant unless you have chosen to apply wind and temperature profiles based on Monin-Obukhov theory. Finally, boundary conditions for outdoor simulations are discussed in Section~\ref{info:wind_BC}.
@@ -7101,7 +7101,7 @@ Setting a non-zero value of {\ct L} indicates that you want to use Monin-Obukhov
 \end{lstlisting}
 Here, {\ct T} is time in seconds and {\ct F} is the wind direction in degrees. You may not vary the speed in time or space.
 
-If you know the value of $u_*$ or $\theta_*$, you can input these on the {\ct WIND} line as {\ct U\_STAR} (m/s) and {\ct THETA\_STAR} (K). Otherwise, they will be computed from $L$ and $z_0$. Do not input all four of these parameters together. 
+If you know the value of $u_*$ or $\theta_*$, you can input these on the {\ct WIND} line as {\ct U\_STAR} (m/s) and {\ct THETA\_STAR} (K). Otherwise, they will be computed from $L$ and $z_0$. Do not input all four of these parameters together.
 
 Also, do not specify parameters on the {\ct SURF} line that defines the ground that might not be consistent with the specified M-O parameters. A fixed temperature is usually sufficient given that the atmospheric profile is being imposed at the boundaries.
 
@@ -7124,31 +7124,41 @@ The input files called {\ct wind\_example\_nn.fds} in the samples folder called 
 \newpage
 
 \section{Wind Method 3: Advanced Meteorological Concepts}
+\label{info:atmospheric_forces}
 
 If your computational domain spans kilometers, you might consider a more fundamental set of parameters to describe the wind field. This is a challenge because it is difficult to infer far-field meteorological conditions from a few near-field, near-surface wind or temperature readings that you might have from a few weather stations. If you pursue this course, you will most likely need to use some trial and error to ensure that your far-field conditions yield something close to the data obtained at the weather stations.
 
 \subsection{Pressure Gradient Force}
 \label{info:force_vector}
 
-Winds are driven by horizontal pressure gradients that push air masses from regions of high to low surface pressure. This {\it pressure gradient force}, $\bF$, is added to the momentum equation as follows:
+Winds are driven by horizontal pressure gradients that push air masses from regions of high to low surface pressure. This optional {\it pressure gradient force}, $\bF$, is an extra force term added to the momentum equation:
 \begin{equation}
 \frac{\partial \bu}{\partial t} + \dots = \bF/\rho
 \end{equation}
-It can be related to the average wind speed, $U$, over the height of the boundary layer, $H$, by~\cite{Stull:2000}
+The pressure gradient force can be related to the average wind speed, $U$, over the height of the boundary layer, $H$, by~\cite{Stull:2000}
 \be
-   \| \bF \| = \rho \, C_{\rm D} \, \frac{ U^2 }{H}
+   \| \bF \| \approx \rho \, C_{\rm D} \, \frac{ U^2 }{H}
 \ee
 where $C_{\rm D}$ is a dimensionless drag coefficient ranging between $2 \times 10^{-3}$ for relatively smooth surfaces to $2 \times 10^{-2}$ for rough or forested surfaces. This relation is appropriate for neutrally stable conditions, i.e. windy and relatively low surface heating. For unstable conditions, i.e. light winds and strong surface heating, the relation becomes
 \be
-   \| \bF \| = \rho \, b_{\rm D} \sqrt{g H \frac{\Delta \theta}{\theta} } \, \frac{ U }{H}
+   \| \bF \| \approx \rho \, b_{\rm D} \sqrt{g H \frac{\Delta \theta}{\theta} } \, \frac{ U }{H}
 \ee
-where $b_{\rm D} = 1.83 \times 10^{-3}$ and $\Delta \theta /\theta$ is the relative change in potential temperature between the ground and the mid-height of the boundary layer.
+where $b_{\rm D} = 1.83 \times 10^{-3}$ and $\Delta \theta /\theta$ is the relative change in potential temperature between the ground and the mid-height of the boundary layer. Note that these relationships are approximate. You need to conduct some numerical experiments if you want to match a particular wind measurement.
 
-The pressure gradient force is input into FDS using the parameter {\ct FORCE\_VECTOR(1:2)} on the {\ct WIND} line in units of Pa/m. To specify a pressure gradient force of 0.01~Pa/m in the $x$ direction, apply
+The {\ct PRESSURE\_GRADIENT\_FORCE} is input on the {\ct WIND} line in units of Pa/m, for example
 \begin{lstlisting}
-&WIND FORCE_VECTOR(1)=0.01 /
+&WIND PRESSURE_GRADIENT_FORCE=0.01, DIRECTION=315, INITIAL_SPEED=5 /
 \end{lstlisting}
-You may apply a time ramp to {\ct FORCE\_VECTOR(1)}, for example, via {\ct RAMP\_FVX\_T} on the {\ct WIND} line. It is not appropriate to apply a vertical profile---this should develop naturally based on the terrain, surface heating, and surface roughness.
+The wind {\ct DIRECTION} follows the usual meteorological convention---a northerly wind has direction of 0$^\circ$ and blows from north to south, or in the negative $y$ direction in the FDS coordinate system. An easterly wind has a direction of 90$^\circ$ and blows from east to west, or in the negative $x$ direction. You can vary the direction of the wind in time only, not in space:
+\begin{lstlisting}
+&WIND ..., RAMP_DIRECTION_T='dir' /
+&RAMP ID='dir', T=   0, F=300 /
+&RAMP ID='dir', T= 600, F=330 /
+&RAMP ID='dir', T=1200, F=350 /
+\end{lstlisting}
+Here, {\ct T} is time in seconds and {\ct F} is the wind direction in degrees. The {\ct INITIAL\_SPEED} sets the horizontal wind components at the start of the simulation. This is provided as a convenience because it may take on the order of hours of simulation time to slowly increase the wind speed via the pressure gradient force alone. The {\ct INITIAL\_SPEED} only sets the initial wind speed, but has no longer term effect. You may vary the {\ct PRESSURE\_GRADIENT\_FORCE} in time using {\ct RAMP\_PGF\_T}.
+
+There are some applications, like tunnels, where the pressure gradient force is a convenient way to introduce an air flow due to some external force. In such cases, it is sometimes more convenient to use the vector {\ct FORCE\_VECTOR(1:3)} along with the corresponding time ramps {\ct RAMP\_FVX\_T}, {\ct RAMP\_FVY\_T}, and {\ct RAMP\_FVZ\_T} to control each individual component. The {\ct PRESSURE\_GRADIENT\_FORCE} is simply the magnitude of the {\ct FORCE\_VECTOR} with the same units. 
 
 
 
@@ -7249,7 +7259,7 @@ When using the ``wall of wind'' approach, be aware that the wind field requires 
 \begin{lstlisting}
 &WIND U0=..., V0=..., W0=... /
 \end{lstlisting}
-where {\ct U0}, {\ct V0}, and {\ct W0} are your desired initial wind field. Setting the velocity components directly will initialize the simulation with a constant flow field, but the flow field will die off and the {\ct SURF} line with the atmospheric profile will govern the wind flow. You can specify vertical profiles of these initial components with {\ct RAMP\_U0\_Z}, {\ct RAMP\_V0\_Z}, and {\ct RAMP\_W0\_Z} on the {\ct WIND} line.
+where {\ct U0}, {\ct V0}, and {\ct W0} are your desired initial wind field. Setting the velocity components directly will initialize the simulation with a constant flow field, but the flow field will die off and the {\ct SURF} line with the atmospheric profile will govern the wind flow.
 
 
 \newpage
@@ -12537,25 +12547,24 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \endhead
 {\ct CORIOLIS\_VECTOR(3)}                       & Real          & Section~\ref{info:coriolis_force}             &               & 0.                \\ \hline
 {\ct DIRECTION}                                 & Real          & Section~\ref{info:WIND}                       & degrees       & 270               \\ \hline
-{\ct FORCE\_VECTOR(3)}                          & Real          & Section~\ref{info:force_vector}               &               & 0.                \\ \hline
+{\ct FORCE\_VECTOR(3)}                          & Real          & Section~\ref{info:force_vector}               & Pa/m          & 0.                \\ \hline
 {\ct GEOSTROPHIC\_WIND(2)}                      & Real          & Section~\ref{info:geostrophic_wind}           & m/s           &                   \\ \hline
 {\ct GROUND\_LEVEL}                             & Real          & Section~\ref{info:stratification}             & m             & 0.                \\ \hline
+{\ct INITIAL\_SPEED}                            & Real          & Section~\ref{info:force_vector}               & m/s           & 0.                \\ \hline
 {\ct L}                                         & Real          & Section~\ref{info:WIND}                       & m             & 0                 \\ \hline
 {\ct LAPSE\_RATE}                               & Real          & Section~\ref{info:stratification}             & $^\circ$C/m   & 0                 \\ \hline
 {\ct LATITUDE}                                  & Real          & Section~\ref{info:coriolis_force}             & degrees       &                   \\ \hline
 {\ct POTENTIAL\_TEMPERATURE\_CORRECTION}        & Logical       & Section~\ref{info:potential_temperature_correction} &         & {\ct F}           \\ \hline
+{\ct PRESSURE\_GRADIENT\_FORCE}                 & Real          & Section~\ref{info:force_vector}               & Pa/m          &                   \\ \hline
 {\ct RAMP\_DIRECTION\_T}                        & Character     & Section~\ref{info:WIND}                       &               &                   \\ \hline
 {\ct RAMP\_DIRECTION\_Z}                        & Character     & Section~\ref{info:WIND}                       &               &                   \\ \hline
 {\ct RAMP\_FVX\_T}                              & Character     & Section~\ref{info:force_vector}               &               &                   \\ \hline
 {\ct RAMP\_FVY\_T}                              & Character     & Section~\ref{info:force_vector}               &               &                   \\ \hline
 {\ct RAMP\_FVZ\_T}                              & Character     & Section~\ref{info:force_vector}               &               &                   \\ \hline
+{\ct RAMP\_PGF\_T}                              & Character     & Section~\ref{info:force_vector}               &               &                   \\ \hline
 {\ct RAMP\_SPEED\_T}                            & Character     & Section~\ref{info:wind_ramps}                 &               &                   \\ \hline
 {\ct RAMP\_SPEED\_Z}                            & Character     & Section~\ref{info:wind_ramps}                 &               &                   \\ \hline
 {\ct RAMP\_TMP0\_Z}                             & Character     & Section~\ref{info:stratification}             &               &                   \\ \hline
-{\ct RAMP\_U0\_Z}                               & Character     & Section~\ref{info:wall_of_wind}               &               &                   \\ \hline
-{\ct RAMP\_V0\_Z}                               & Character     & Section~\ref{info:wall_of_wind}               &               &                   \\ \hline
-{\ct RAMP\_W0\_T}                               & Character     & Section~\ref{info:wind_ramps}                 &               &                   \\ \hline
-{\ct RAMP\_W0\_Z}                               & Character     & Section~\ref{info:wall_of_wind}               &               &                   \\ \hline
 {\ct SIGMA\_THETA}                              & Real          & Section~\ref{info:wind_ramps}                 & degrees       &                   \\ \hline
 {\ct SPEED}                                     & Real          & Section~\ref{info:WIND}                       & m/s           & 0.                \\ \hline
 {\ct STRATIFICATION}                            & Logical       & Section~\ref{info:stratification}             &               & {\ct T}      \\ \hline
