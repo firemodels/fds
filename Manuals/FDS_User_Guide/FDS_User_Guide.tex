@@ -9343,10 +9343,11 @@ The parameter {\ct QUANTITIES} on the {\ct PART} line is an array of character s
 {\ct 'PARTICLE ACCEL X'}, {\ct 'PARTICLE ACCEL Y'}, {\ct 'PARTICLE ACCEL Z'} (m/s$^2$) \\
 {\ct 'PARTICLE DRAG FORCE X'}, {\ct 'PARTICLE DRAG FORCE Y'}, {\ct 'PARTICLE DRAG FORCE Z'} (N) \\
 {\ct 'PARTICLE DRAG COEFFICIENT'} \\
+{\ct 'PARTICLE BULK DENSITY'} (kg/m$^3$) \\
 \\
 By default, if no {\ct QUANTITIES} are specified and none are selected in Smokeview, then Smokeview will display particles with a single color. To select this color specify either {\ct RGB} or {\ct COLOR}. By default, water droplets are colored blue. All others are colored black.
 
-The {\ct PARTICLE WEIGHTING FACTOR} describes how many actual particles each of the computational particles represent.
+The {\ct PARTICLE WEIGHTING FACTOR} describes how many actual particles each of the computational particles represent. The {\ct PARTICLE BULK DENSITY} gives the weighted (total) mass per grid cell volume, which is an important parameter when using particles to represent porous media such as vegetation.
 
 For solid particles with a specified {\ct SURF\_ID}, you may specify any of the solid phase output quantities listed in Table~\ref{tab:output}. If the specified quantity is associated with a species, use the parameter \linebreak[4] {\ct QUANTITIES\_SPEC\_ID(N)} to specify the species. Here {\ct N} refers to the order of the specified output quantities on the {\ct PART} line.
 
@@ -10514,6 +10515,7 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct ORIENTED VELOCITY}$^5$                     & $(u,v,w)\cdot(n_x,n_y,n_z)$                   & m/s            & D            \\ \hline
 {\ct PATH OBSCURATION}                          & Section~\ref{info:beam_detector}              & \%             & D            \\ \hline
 {\ct PARTICLE AGE}                              & Section~\ref{info:part_output}                & s              & PA           \\ \hline
+{\ct PARTICLE BULK DENSITY}                     & Section~\ref{info:part_output}                & kg/(m$^3$)     & PA           \\ \hline
 {\ct PARTICLE DIAMETER}                         & Section~\ref{info:part_output}                & $\mu$m         & PA           \\ \hline
 {\ct PARTICLE FLUX X}$^2$                       & Section~\ref{info:part_output}                & \si{kg/(m$^2$.s)} & P,S       \\ \hline
 {\ct PARTICLE FLUX Y}$^2$                       & Section~\ref{info:part_output}                & \si{kg/(m$^2$.s)} & P,S       \\ \hline
