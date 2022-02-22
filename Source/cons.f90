@@ -259,6 +259,7 @@ LOGICAL :: PERIODIC_DOMAIN_Z=.FALSE.                !< The domain is periodic \f
 LOGICAL :: OPEN_WIND_BOUNDARY=.FALSE.               !< There is a prevailing wind
 LOGICAL :: HRR_GAS_ONLY=.FALSE.                     !< Surface oxidation is not included in total HRR
 LOGICAL :: WRITE_DEVC_CTRL=.FALSE.                  !< Flag for writing DEVC and CTRL logfile
+LOGICAL :: INIT_INVOKED_BY_SURF=.FALSE.             !< Flag indicating that a SURF line specifies an INIT line
 
 INTEGER, ALLOCATABLE, DIMENSION(:) :: CHANGE_TIME_STEP_INDEX      !< Flag to indicate if a mesh needs to change time step
 INTEGER, ALLOCATABLE, DIMENSION(:) :: SETUP_PRESSURE_ZONES_INDEX  !< Flag to indicate if a mesh needs to keep searching for ZONEs
