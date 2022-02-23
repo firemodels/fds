@@ -630,7 +630,7 @@ An FDS calculation may end before the specified time limit. Following is a list 
 \begin{lstlisting}
 forrtl: severe (47): write to READONLY file, unit 8598, file C:\Users\...\
 \end{lstlisting}
- The unit, in this case 8598, is just a number that FDS has associated with one of the output files. If this error occurs just after the start of the calculation, you can try adding the phrase \\ {\ct FLUSH\_FILE\_BUFFERS=F} \\ on the {\ct DUMP} line of the input file (see Section~\ref{info:DUMP}). This will prevent FDS from attempting to flush the contents of the internal buffers, something it does to make it possible to view the FDS output in Smokeview during the FDS simulation. On some Windows machines, you might encounter security settings that prevent command line programs such as FDS from writing to system folders that contain program files. In this case, try to rerun the case in a non-system folder (i.e., a location within your home directory).
+ The unit, in this case 8598, is just a number that FDS has associated with one of the output files. If this error occurs just after the start of the calculation, you can try adding the phrase \\ {\ct FLUSH\_FILE\_BUFFERS=F} \\ on the {\ct DUMP} line of the input file (see Section~\ref{info:DT_DUMP}). This will prevent FDS from attempting to flush the contents of the internal buffers, something it does to make it possible to view the FDS output in Smokeview during the FDS simulation. On some Windows machines, you might encounter security settings that prevent command line programs such as FDS from writing to system folders that contain program files. In this case, try to rerun the case in a non-system folder (i.e., a location within your home directory).
 \item[{\bf Poisson Initialization}:] Sometimes at the very start of a calculation, an error appears stating that there is a problem with the ``Poisson initialization.'' The equation for pressure in FDS is known as the Poisson equation. The Poisson solver consists of large system of linear equations that must be initialized at the start of the calculation. Most often, an error in the initialization step is due to a mesh {\ct IJK} dimension being less than 4 (except in the case of a two-dimensional calculation). It is also possible that something is fundamentally wrong with the coordinates of the computational domain. Diagnose the problem by checking the {\ct MESH} lines in the input file.
 \end{description}
 
@@ -6704,6 +6704,7 @@ It is not unusual to include hundreds of thousands of particles in a simulation.
 \item[{\ct SAMPLING\_FACTOR}] Sampling factor for the output file {\ct CHID.prt5}. This parameter can be used to reduce the size of the particle output file used to animate the simulation. The default value is 1 for {\ct MASSLESS} particles, meaning that every particle or droplet will be shown in Smokeview. The default is 10 for all other types of particles. {\ct MASSLESS} particles are discussed in Section~\ref{info:MASSLESS}.
 \item[{\ct AGE}]  Number of seconds the particle or droplet exists, after which time it is removed from the calculation. This is a useful parameter to use when trying to reduce the number of droplets or particles in a simulation.
 \end{description}
+Be careful when setting parameters related to particle/droplet insertion, as it is very easy to overwhelm the simulation with millions of them. The parameter {\ct MAXIMUM\_PARTICLES} on the {\ct DUMP} line sets the maximum number of particles that can be included on any given mesh at any given time. Its default value is 1000000. If this value is exceeded, FDS will automatically remove particles, starting with the oldest.
 
 
 
@@ -7644,8 +7645,8 @@ A coniferous tree (e.g. pine, spruce, fir) can be represented in FDS as a collec
 \begin{lstlisting}
 &PART ID='needles', DRAG_COEFFICIENT=2.8, SURF_ID='needle surface', STATIC=T,
       COLOR='FOREST GREEN' /
-&INIT ID='needles', PART_ID='needles', XYZ=..., CROWN_BASE_WIDTH=3.2, 
-      CROWN_BASE_HEIGHT=0.2, TREE_HEIGHT=2, SHAPE='CONE', N_PARTICLES_PER_CELL=1, 
+&INIT ID='needles', PART_ID='needles', XYZ=..., CROWN_BASE_WIDTH=3.2,
+      CROWN_BASE_HEIGHT=0.2, TREE_HEIGHT=2, SHAPE='CONE', N_PARTICLES_PER_CELL=1,
       PACKING_RATIO=0.02  /
 \end{lstlisting}
 These lines create a collection of particles in the shape of a cone. The dimensions of the cone are specified via the parameters {\ct CROWN\_BASE\_WIDTH}, the diameter of the base of the cone (m), {\ct CROWN\_BASE\_HEIGHT}, the distance (m) from the ground to the base of the cone, {\ct TREE\_HEIGHT}, the height (m) of the tree from ground to tip, and the position triplet, {\ct XYZ}, of the trunk at the ground. Note that in this example, exactly one particle is specified per grid cell, positioned randomly within the cell. The number of actual pine needles this single particle represents depends on the specified {\ct PACKING\_RATIO}, the ratio of the (dry) mass per unit volume to the density of the needle itself. That information would be provided by the {\ct SURF} line {\ct 'needle surface'} and associated {\ct MATL} lines that are described in the previous section.
@@ -8807,21 +8808,41 @@ It should be noted that devices are updated sequentially in the order that they 
 
 \chapter{Output}
 \label{info:outputdata}
-
-FDS has various types of output files that store computed data. Some of the files are in binary format and intended to be read and rendered by Smokeview. Some of the files are just comma-delimited text files. It is important to remember that you must explicitly declare in the input file most of the FDS output data. A considerable amount of the input file is usually devoted to this.
-
-To visualize the flow patterns better, save planar slices of data, either in the gas or solid phases, by using the {\ct SLCF} (SLiCe File) or {\ct BNDF} (BouNDary File) namelist group. Both of these output formats permit you to animate these quantities in time. For static pictures of the flow field, use the Plot3D output, a format that is used by many CFD programs as a simple way to store specified quantities over the entire mesh at one instant in time. Finally, tracer particles can be injected into the flow field from vents or obstacles, and then viewed in Smokeview. Use the {\ct PART} namelist group to control the injection rate, sampling rate and other parameters associated with particles.
-
-
-\section{Output Control Parameters: The \texorpdfstring{{\tt DUMP}}{DUMP} Namelist Group}
 \label{info:DUMP}
 
-The namelist group {\ct DUMP} contains parameters (Table \ref{tbl:DUMP}) that control the rate at which output files are written, and various other global parameters associated with output files. Its parameters include:
+FDS has various types of output files that store computed data. Some of the files are in binary format and intended to be read and rendered by Smokeview. Some of the files are just comma-delimited text files. In most cases, you must explicitly declare the data to output. A considerable amount of the input file is usually devoted to output declarations.
+\begin{itemize}
+\item To control the frequency of data outputs, see Section~\ref{info:DT_DUMP}.
+\item To record data at a given point or within a given volume, see Section~\ref{info:DEVC}.
+\item To record data inside solid boundaries, see Section~\ref{info:PROF}.
+\item To visualize planar contours of scalar or vector quantities, see Section~\ref{info:SLCF}.
+\item To visualize solid surface quantities, see Section~\ref{info:BNDF}. 
+\item To visualize 3-D contours of gas phase quantities, see Section~\ref{info:ISOF}.
+\item To visualize various scalar quantities over the entire domain, see Section~\ref{info:PL3D}.
+\item To visualize realistic smoke and fire, see Section~\ref{info:SMOKE3D}.
+\item To visualize particles and droplets, see Section~\ref{info:part_output}.
+\item For more information about particular output features, see Section~\ref{info:special_output}.
+\item A tool for extracting data from contour and boundary output files is described in Section~\ref{info:fds2ascii}.
+\item A list of the most frequently used output quantities is given in Section~\ref{info:outputquantities}.
+\item A list of the less frequently used output quantities is given in Section~\ref{info:oddoutputquantities}.
+\item A list of HVAC output quantities is given in Section~\ref{info:hvacoutputquantities}.
+\end{itemize}
+The namelist group {\ct DUMP} contains parameters (Table \ref{tbl:DUMP}) that control the rate at which output files are written, and various other global parameters associated with output files. There can only be one {\ct DUMP} line in the input file.
+
+
+\section{Controlling the Frequency of Output}
+\label{info:DT_DUMP}
+
+Point device data, slice (contour) data, particle data, isosurface data, 3D smoke data, boundary data, solid phase profile data, and control function data are written to file every {\ct (T\_END-T\_BEGIN)/NFRAMES} seconds unless otherwise specified using the parameters listed in Table~\ref{tbl:dt_params}. These parameters are written on the {\ct DUMP} line. You can also set {\ct NFRAMES} to a value other than 1000, its default. The parameters named {\ct DT\_XXXX} specify the uniform time interval between data dumps. The parameters {\ct RAMP\_XXXX} allow you to specify exactly which times to write out. For example, if you want to write boundary files at 10, 20, and 60~s, add the following:
+\begin{lstlisting}
+&DUMP ..., RAMP_BNDF='b-ramp' /
+&RAMP ID='b-ramp', T=10 /
+&RAMP ID='b-ramp', T=20 /
+&RAMP ID='b-ramp', T=60 /
+\end{lstlisting}
+A few things to note:
 \begin{description}
-\item[{\ct NFRAMES}] Number of output dumps per calculation. The default is 1000. Device data, slice data, particle data, isosurface data, 3D smoke data, boundary data, solid phase profile data, and control function data are saved every {\ct (T\_END-T\_BEGIN)/NFRAMES} seconds unless otherwise specified using the parameters listed in Table~\ref{tbl:dt_params}. Nonuniform discrete time output is available for {\ct SLCF}, {\ct SL3D}, and {\ct BNDF} files using \emph{timers}, as discussed below.
-\item[{\ct MASS\_FILE}] If {\ct T}, produce an output file listing the total masses of all gas species as a function of time. It is {\ct F} by default because the calculation of all gas species in all mesh cells is time-consuming. The parameter {\ct DT\_MASS} or {\ct RAMP\_MASS} controls the frequency of output.
-\item[{\ct MAXIMUM\_PARTICLES}] Maximum number of Lagrangian particles that can be included on any mesh at any given time. (Default 1000000)
-\item[{\ct SMOKE3D}] If {\ct F}, do not produce an animation of the smoke and fire. It is {\ct T} by default.
+\item[{\ct SMOKE3D}] If the simulation involves combustion, FDS automatically writes out Smoke3D files of soot density, heat release rate per unit volume, and temperature. These quantities are rendered in Smokeview as realistic looking smoke and fire. To turn off this feature, set {\ct SMOKE3D=F} on the {\ct DUMP} line.
 \item[{\ct DT\_PL3D}] The time between Plot3D file output. Note that versions of FDS before 6 output Plot3D files by default. Now, you must specify the interval of output using this parameter. Its default value is 1000000~s, meaning that there is no Plot3D output unless specified.
 \item[{\ct FLUSH\_FILE\_BUFFERS}] FDS purges the output file buffers periodically and forces the data to be written out into the respective output files. It does this to make it easier to view the case in Smokeview while it is running. It has been noticed on Windows machines that occasionally a runtime error occurs because of file access problems related to the buffer flushing. If this happens, set this parameter to {\ct F}, but be aware that it may not be possible to look at output in Smokeview until after the calculation is finished. You may also set {\ct DT\_FLUSH} to control the frequency of the file flushing. Its default value is the duration of the simulation divided by {\ct NFRAMES}.
 \item[{\ct STATUS\_FILES}] If {\ct T}, produces an output file {\ct CHID.notready} which is deleted, if the simulation is completed successfully. This file can be used as an error indicator. It is {\ct F} by default.
@@ -8859,9 +8880,10 @@ Uniform Output    & Non-Uniform Output    & Purpose                    \\ \hline
 \end{table}
 
 
-
+\newpage
 
 \section{Device Output: The \texorpdfstring{{\tt DEVC}}{DEVC} Namelist Group}
+\label{info:DEVC}
 
 Every device ({\ct DEVC}) contains a {\ct QUANTITY} that it monitors. Usually this {\ct QUANTITY} is written out to a comma-delimited spreadsheet file with the suffix {\ct \_devc.csv}. The quantities are listed in Table~\ref{tab:output}. Some quantities, such as {\ct 'MASS FLUX'} and {\ct 'VOLUME FRACTION'}, are marked with an asterisk in Table~\ref{tab:output} meaning that they require additional input, like a {\ct SPEC\_ID}, to be specified. Refer to Section~\ref{info:outputquantities} for more details.
 
@@ -9181,6 +9203,8 @@ It is possible to translate and/or rotate a linear array of devices using parame
 
 
 
+\newpage
+
 \section{In-Depth Profiles within Solids: The \texorpdfstring{{\tt PROF}}{PROF} Namelist Group}
 \label{info:PROF}
 
@@ -9202,6 +9226,7 @@ The {\ct QUANTITY} is the physical quantity to record. The choices are {\ct 'TEM
 There is a second optional format. If you specify {\ct FORMAT\_INDEX=2} on the {\ct PROF} line, the resulting file will contain columns containing only the final set of node coordinates and quantity values. This is handy for displaying a steady-state temperature profile.
 
 
+\newpage
 
 \section{Animated Planar Slices: The \texorpdfstring{{\tt SLCF}}{SLCF} Namelist Group}
 \label{info:SLCF}
@@ -9225,6 +9250,9 @@ By default, Smokeview will blank slice file data inside obstructions.  However, 
 You may add a name via {\ct ID} on the {\ct SLCF} as an identifier sent to Smokeview. It is only optional.
 
 
+
+\newpage
+
 \section{Animated Boundary Quantities: The \texorpdfstring{{\tt BNDF}}{BNDF} Namelist Group}
 \label{info:BNDF}
 
@@ -9235,6 +9263,7 @@ The {\ct BNDF} (``boundary file'') namelist group parameters allows you to recor
 Sometimes it is useful to render the {\ct QUANTITY} integrated over time. For example, a heat flux in units of kW/m$^2$ can be integrated in time producing the total energy absorbed by the surface in units of kJ/m$^2$. To do this, set {\ct TEMPORAL\_STATISTIC} equal to {\ct 'TIME INTEGRAL'} on the {\ct BNDF} line. Note that there are no other options for {\ct TEMPORAL\_STATISTIC} on a {\ct BNDF} line.
 
 
+\newpage
 
 \section{Animated Isosurfaces: The \texorpdfstring{{\tt ISOF}}{ISOF} Namelist Group}
 \label{info:ISOF}
@@ -9254,7 +9283,7 @@ draws a surface where the mixture fraction has a value of 0.05~kg/kg and colors 
 Any gas phase quantity can be animated via iso-surfaces, but use caution. To render an iso-surface, the desired quantity must be computed in every mesh cell at every output time step. For quantities like {\ct 'TEMPERATURE'}, this is not a problem, as FDS computes it and saves it anyway. However, species volume fractions demand substantial amounts of time to compute at each mesh cell. Remember to include the {\ct SPEC\_ID} corresponding to the given {\ct QUANTITY} if necessary.
 
 
-
+\newpage
 
 \section{Plot3D Static Data Dumps}
 \label{info:PL3D}
@@ -9271,7 +9300,6 @@ Plot3D data are stored in files with extension {\ct .q} . There is an optional f
 Past versions of FDS (1-5) output Plot3D files by default. Now, you must specify the time interval between dumps using {\ct DT\_PL3D} on the {\ct DUMP} line.
 
 
-
 \section{SMOKE3D: Realistic Smoke and Fire}
 \label{info:SMOKE3D}
 
@@ -9282,7 +9310,7 @@ When you do a fire simulation, FDS automatically creates two output files that a
 \end{lstlisting}
 The {\ct MASS\_EXTINCTION\_COEFFICIENT} is passed to Smokeview to be used for visualization.
 
-
+\newpage
 
 \section{Particle Output Quantities}
 \label{info:part_output}
@@ -9398,9 +9426,10 @@ Note that the parameter {\ct DX} on the {\ct INIT} line creates a line of partic
 
 
 
+\newpage
 
-
-\section{Special Output Quantities}
+\section{Special Output Features}
+\label{info:special_output}
 
 This section lists a variety of output quantities that are useful for studying thermally-driven flows, combustion, pyrolysis, and so forth. Note that some of the output quantities can be produced in a variety of ways.
 
@@ -9445,6 +9474,12 @@ As a test of the energy balance, a sample case called {\ct Pressure\_Solver/hall
 \caption[Results of the {\ct hallways} test case]{The energy budget for the {\ct hallways} test case.}
 \label{hallways_energy}
 \end{figure}
+
+
+\subsection{Gas Species Mass}
+\label{info:MASS_FILE}
+
+If you set {\ct MASS\_FILE=T} on the {\ct DUMP} line, a file called {\ct CHID\_mass.csv} is produced that lists the total mass of all gas species as a function of time. This flag is {\ct F} by default because the calculation of all gas species in all mesh cells is time-consuming. The parameter {\ct DT\_MASS} or {\ct RAMP\_MASS} controls the frequency of output.
 
 
 \subsection{Mass Loss Rates}
@@ -10383,7 +10418,7 @@ where $\tau_{\rm w} = \mu\,\partial |\mathbf{u}|/\partial n$ is the viscous stre
 In combustion, knowing if, when, or where chemical reactions have been extinguished is important. The output quantity {\ct EXTINCTION} tells the user whether or not combustion has been prevented by the extinction routine. By default, {\ct EXTINCTION} = 0, which means that the FDS extinction routine has not prevented combustion. An {\ct EXTINCTION} value of 1 means that the routine has prevented combustion. The criteria for an {\ct EXTINCTION} value of 1 is the presence of fuel and oxidizer without any energy release. An {\ct EXTINCTION} value of -1 means that there is either no fuel or no oxidizer present.
 
 
-
+\newpage
 
 \section{Extracting Numbers from the Output Data Files}
 \label{info:fds2ascii}
@@ -10434,6 +10469,7 @@ These commands tell {\ct fds2ascii} that you want to convert (binary) boundary f
 \end{description}
 
 
+\newpage
 
 \section{Summary of Frequently-Used Output Quantities}
 \label{info:outputquantities}
@@ -10777,6 +10813,8 @@ of a {\ct DUCT\_ID}, quantities for a node require the specification of a {\ct N
 
 
 
+
+
 \chapter{Alphabetical List of Input Parameters}
 
 This appendix lists all of the input parameters for FDS in separate tables grouped by namelist, these tables are in alphabetical order along with the parameters within them. This is intended to be used as a quick reference and does not replace reading the detailed description of the parameters in the main body of this guide. See Table \ref{tbl:namelistgroups} for a cross-reference of relevant sections and the tables in this appendix. The reason for this statement is that many of the listed parameters are mutually exclusive -- specifying more than one can cause the program to either fail or run in an unpredictable manner. Also, some of the parameters trigger the code to work in a certain mode when specified. For example, specifying the thermal conductivity of a solid surface triggers the code to assume the material to be thermally-thick, mandating that other
@@ -11076,7 +11114,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 \section{\texorpdfstring{{\tt DUMP}}{DUMP} (Output Parameters)}
 
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
-\caption[Output control parameters ({\ct DUMP} namelist group)]{For more information see Section~\ref{info:DUMP}.}
+\caption[Output control parameters ({\ct DUMP} namelist group)]{For more information see Chapter~\ref{info:DUMP}.}
 \label{tbl:DUMP} \\
 \hline
 \multicolumn{5}{|c|}{{\ct DUMP} (Output Parameters)} \\
@@ -11087,63 +11125,63 @@ properties be specified as well. Simply prescribing as many properties as possib
 \multicolumn{5}{|c|}{{\ct DUMP} (Output Parameters)} \\
 \hline \hline
 \endhead
-{\ct CFL\_FILE}                     & Logical      & Section~\ref{info:TIME_Control}        &           & {\ct F}                  \\ \hline
-{\ct CLIP\_RESTART\_FILES}          & Logical      & Section~\ref{info:restart}             &           & {\ct T}                   \\ \hline
-{\ct COLUMN\_DUMP\_LIMIT}           & Logical      & Section~\ref{info:out:DEVC}            &           & {\ct F}                  \\ \hline
+{\ct CFL\_FILE}                     & Logical      & Section~\ref{info:TIME_Control}        &           & {\ct F}                        \\ \hline
+{\ct CLIP\_RESTART\_FILES}          & Logical      & Section~\ref{info:restart}             &           & {\ct T}                        \\ \hline
+{\ct COLUMN\_DUMP\_LIMIT}           & Logical      & Section~\ref{info:out:DEVC}            &           & {\ct F}                        \\ \hline
 {\ct CTRL\_COLUMN\_LIMIT}           & Integer      & Section~\ref{info:out:DEVC}            &           & 254                            \\ \hline
 {\ct DEVC\_COLUMN\_LIMIT}           & Integer      & Section~\ref{info:out:DEVC}            &           & 254                            \\ \hline
-{\ct DT\_BNDF}                      & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /NFRAMES}    \\ \hline
+{\ct DT\_BNDF}                      & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
 {\ct DT\_CPU}                       & Real         & Section~\ref{out:CPU}                  &  s        & $2 \Delta t$                   \\ \hline
-{\ct DT\_CTRL}                      & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
-{\ct DT\_DEVC}                      & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
-{\ct DT\_FLUSH}                     & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
-{\ct DT\_HRR}                       & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
-{\ct DT\_ISOF}                      & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
-{\ct DT\_MASS}                      & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
-{\ct DT\_PART}                      & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
-{\ct DT\_PL3D}                      & Real         & Section~\ref{info:DUMP}                &  s        & $2 \Delta t$                   \\ \hline
-{\ct DT\_PROF}                      & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
+{\ct DT\_CTRL}                      & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
+{\ct DT\_DEVC}                      & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
+{\ct DT\_FLUSH}                     & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
+{\ct DT\_HRR}                       & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
+{\ct DT\_ISOF}                      & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
+{\ct DT\_MASS}                      & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
+{\ct DT\_PART}                      & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
+{\ct DT\_PL3D}                      & Real         & Section~\ref{info:DT_DUMP}             &  s        & $2 \Delta t$                   \\ \hline
+{\ct DT\_PROF}                      & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
 {\ct DT\_RADF}                      & Real         & Section~\ref{info:RADF}                &  s        & $2 \Delta t$                   \\ \hline
-{\ct DT\_RESTART}                   & Real         & Section~\ref{info:DUMP}                &  s        & $2 \Delta t$                   \\ \hline
-{\ct DT\_SL3D}                      & Real         & Section~\ref{info:DUMP}                &  s        & $2 \Delta t$                   \\ \hline
-{\ct DT\_SLCF}                      & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
-{\ct DT\_SMOKE3D}                   & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
-{\ct DT\_UVW}                       & Real         & Section~\ref{info:DUMP}                &  s        & $2 \Delta t$                   \\ \hline
-{\ct EB\_PART\_FILE}                & Logical      & Section~\ref{out:PART}                 &           & {\ct F}                  \\ \hline
-{\ct FLUSH\_FILE\_BUFFERS}          & Logical      & Section~\ref{info:DUMP}                &           & {\ct T}                   \\ \hline
-{\ct HRR\_GAS\_ONLY}                & Logical      & Section~\ref{info:HRR}                 &           & {\ct F}                  \\ \hline
-{\ct MASS\_FILE}                    & Logical      & Section~\ref{info:DUMP}                &           & {\ct F}                  \\ \hline
-{\ct MAXIMUM\_PARTICLES}            & Integer      & Section~\ref{info:DUMP}                &           & 1000000                        \\ \hline
+{\ct DT\_RESTART}                   & Real         & Section~\ref{info:DT_DUMP}             &  s        & $2 \Delta t$                   \\ \hline
+{\ct DT\_SL3D}                      & Real         & Section~\ref{info:DT_DUMP}             &  s        & $2 \Delta t$                   \\ \hline
+{\ct DT\_SLCF}                      & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
+{\ct DT\_SMOKE3D}                   & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
+{\ct DT\_UVW}                       & Real         & Section~\ref{info:DT_DUMP}             &  s        & $2 \Delta t$                   \\ \hline
+{\ct EB\_PART\_FILE}                & Logical      & Section~\ref{out:PART}                 &           & {\ct F}                        \\ \hline
+{\ct FLUSH\_FILE\_BUFFERS}          & Logical      & Section~\ref{info:DUMP}                &           & {\ct T}                        \\ \hline
+{\ct HRR\_GAS\_ONLY}                & Logical      & Section~\ref{info:HRR}                 &           & {\ct F}                        \\ \hline
+{\ct MASS\_FILE}                    & Logical      & Section~\ref{info:DUMP}                &           & {\ct F}                        \\ \hline
+{\ct MAXIMUM\_PARTICLES}            & Integer      & Section~\ref{info:controlling_droplets}&           & 1000000                        \\ \hline
 {\ct NFRAMES}                       & Integer      & Section~\ref{info:DUMP}                &           & 1000                           \\ \hline
 {\ct PLOT3D\_PART\_ID(5)}           & Char.~Quint  & Section~\ref{info:PL3D}                &           &                                \\ \hline
 {\ct PLOT3D\_QUANTITY(5)}           & Char.~Quint  & Section~\ref{info:PL3D}                &           &                                \\ \hline
 {\ct PLOT3D\_SPEC\_ID(5)}           & Char.~Quint  & Section~\ref{info:PL3D}                &           &                                \\ \hline
 {\ct PLOT3D\_VELO\_INDEX}           & Int.~Quint   & Section~\ref{info:velocity}            &           &  0                             \\ \hline
-{\ct RAMP\_BNDF}                    & Character    & Section~\ref{info:DUMP}                &           &                                \\ \hline
+{\ct RAMP\_BNDF}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
 {\ct RAMP\_CPU}                     & Character    & Section~\ref{out:CPU}                  &           &                                \\ \hline
-{\ct RAMP\_CTRL}                    & Character    & Section~\ref{info:DUMP}                &           &                                \\ \hline
-{\ct RAMP\_DEVC}                    & Character    & Section~\ref{info:DUMP}                &           &                                \\ \hline
-{\ct RAMP\_FLUSH}                   & Character    & Section~\ref{info:DUMP}                &           &                                \\ \hline
-{\ct RAMP\_HRR}                     & Character    & Section~\ref{info:DUMP}                &           &                                \\ \hline
-{\ct RAMP\_ISOF}                    & Character    & Section~\ref{info:DUMP}                &           &                                \\ \hline
-{\ct RAMP\_MASS}                    & Character    & Section~\ref{info:DUMP}                &           &                                \\ \hline
-{\ct RAMP\_PART}                    & Character    & Section~\ref{info:DUMP}                &           &                                \\ \hline
-{\ct RAMP\_PL3D}                    & Character    & Section~\ref{info:DUMP}                &           &                                \\ \hline
-{\ct RAMP\_PROF}                    & Character    & Section~\ref{info:DUMP}                &           &                                \\ \hline
+{\ct RAMP\_CTRL}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
+{\ct RAMP\_DEVC}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
+{\ct RAMP\_FLUSH}                   & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
+{\ct RAMP\_HRR}                     & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
+{\ct RAMP\_ISOF}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
+{\ct RAMP\_MASS}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
+{\ct RAMP\_PART}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
+{\ct RAMP\_PL3D}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
+{\ct RAMP\_PROF}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
 {\ct RAMP\_RADF}                    & Character    & Section~\ref{info:RADF}                &           &                                \\ \hline
-{\ct RAMP\_RESTART}                 & Character    & Section~\ref{info:DUMP}                &           &                                \\ \hline
-{\ct RAMP\_SL3D}                    & Character    & Section~\ref{info:DUMP}                &           &                                \\ \hline
-{\ct RAMP\_SLCF}                    & Character    & Section~\ref{info:DUMP}                &           &                                \\ \hline
-{\ct RAMP\_SMOKE3D}                 & Character    & Section~\ref{info:DUMP}                &           &                                \\ \hline
-{\ct RAMP\_UVW}                     & Character    & Section~\ref{info:DUMP}                &           &                                \\ \hline
+{\ct RAMP\_RESTART}                 & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
+{\ct RAMP\_SL3D}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
+{\ct RAMP\_SLCF}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
+{\ct RAMP\_SMOKE3D}                 & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
+{\ct RAMP\_UVW}                     & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
 {\ct RENDER\_FILE}                  & Character    & Reference~\cite{Smokeview_Users_Guide} &           &                                \\ \hline
 {\ct SIG\_FIGS}                     & Integer      & Section~\ref{info:SIG_FIGS}            &           & 8                              \\ \hline
 {\ct SIG\_FIGS\_EXP}                & Integer      & Section~\ref{info:SIG_FIGS}            &           & 3                              \\ \hline
-{\ct SMOKE3D}                       & Logical      & Section~\ref{info:SMOKE3D}             &           & {\ct T}                   \\ \hline
-{\ct STATUS\_FILES}                 & Logical      & Section~\ref{info:DUMP}                &           & {\ct F}                  \\ \hline
-{\ct SUPPRESS\_DIAGNOSTICS}         & Logical      & Section~\ref{info:monitoring_progress} &           & {\ct F}                  \\ \hline
-{\ct VELOCITY\_ERROR\_FILE}         & Logical      & Section~\ref{info:TIMING}              &           & {\ct F}                  \\ \hline
-{\ct WRITE\_XYZ}                    & Logical      & Section~\ref{info:PL3D}                &           & {\ct F}                  \\ \hline
+{\ct SMOKE3D}                       & Logical      & Section~\ref{info:SMOKE3D}             &           & {\ct T}                        \\ \hline
+{\ct STATUS\_FILES}                 & Logical      & Section~\ref{info:DUMP}                &           & {\ct F}                        \\ \hline
+{\ct SUPPRESS\_DIAGNOSTICS}         & Logical      & Section~\ref{info:monitoring_progress} &           & {\ct F}                        \\ \hline
+{\ct VELOCITY\_ERROR\_FILE}         & Logical      & Section~\ref{info:TIMING}              &           & {\ct F}                        \\ \hline
+{\ct WRITE\_XYZ}                    & Logical      & Section~\ref{info:PL3D}                &           & {\ct F}                        \\ \hline
 \end{longtable}
 
 % Undocumented: GET_CUTCELLS_VERBOSE(MV, debug), MMS_TIMER (RJM)
