@@ -154,7 +154,11 @@ fi
 #*** determine number of cores and default queue
 
 queue=batch
-ncores=`grep processor /proc/cpuinfo | wc -l`
+if [ "$QFDS_NCORES" == "" ]; then
+  ncores=`grep processor /proc/cpuinfo | wc -l`
+else
+  ncores=$QFDS_NCORES
+fi
 if [ "$NCORES_COMPUTENODE" == "" ]; then
   NCORES_COMPUTENODE=$ncores
 else
