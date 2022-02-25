@@ -7945,7 +7945,7 @@ Sprinklers, smoke detectors, heat flux gauges, and thermocouples may seem to be 
 All devices, in the broadest sense of the word, are designated via the namelist group {\ct DEVC}. In addition, advanced functionality and properties are accommodated via additional namelist groups called {\ct CTRL} (Control) and {\ct PROP} (Properties).
 
 
-\section{Device Location and Orientation: The \texorpdfstring{{\tt DEVC}}{DEVC} Namelist Group (Table \ref{tbl:DEVC})}
+\section{Device Location and Orientation}
 \label{info:DEVC}
 
 Regardless of the specific properties, each device needs to be sited either at a point within the computational domain, or
@@ -8813,7 +8813,7 @@ It should be noted that devices are updated sequentially in the order that they 
 FDS has various types of output files that store computed data. Some of the files are in binary format and intended to be read and rendered by Smokeview. Some of the files are just comma-delimited text files. In most cases, you must explicitly declare the data to output. A considerable amount of the input file is usually devoted to output declarations.
 \begin{itemize}
 \item To control the frequency of data outputs, see Section~\ref{info:DT_DUMP}.
-\item To record data at a given point or within a given volume, see Section~\ref{info:DEVC}.
+\item To record data at a given point or within a given volume, see Section~\ref{info:DEVC2}.
 \item To record data inside solid boundaries, see Section~\ref{info:PROF}.
 \item To visualize planar contours of scalar or vector quantities, see Section~\ref{info:SLCF}.
 \item To visualize solid surface quantities, see Section~\ref{info:BNDF}. 
@@ -8883,7 +8883,7 @@ Uniform Output    & Non-Uniform Output    & Purpose                    \\ \hline
 \newpage
 
 \section{Device Output: The \texorpdfstring{{\tt DEVC}}{DEVC} Namelist Group}
-\label{info:DEVC}
+\label{info:DEVC2}
 
 Every device ({\ct DEVC}) contains a {\ct QUANTITY} that it monitors. Usually this {\ct QUANTITY} is written out to a comma-delimited spreadsheet file with the suffix {\ct \_devc.csv}. The quantities are listed in Table~\ref{tab:output}. Some quantities, such as {\ct 'MASS FLUX'} and {\ct 'VOLUME FRACTION'}, are marked with an asterisk in Table~\ref{tab:output} meaning that they require additional input, like a {\ct SPEC\_ID}, to be specified. Refer to Section~\ref{info:outputquantities} for more details.
 
@@ -10601,7 +10601,7 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct SURFACE DEPOSITION}$^1$                    & Section~\ref{info:deposition}                 & kg/m$^2$       & B,D          \\ \hline
 {\ct TEMPERATURE}                               & Section~\ref{info:THERMOCOUPLE}               & $^\circ$C      & D,I,P,S      \\ \hline
 {\ct THERMOCOUPLE}                              & Section~\ref{info:THERMOCOUPLE}               & $^\circ$C      & D            \\ \hline
-{\ct TIME}                                      & Section~\ref{info:DEVC}                       & s              & D            \\ \hline
+{\ct TIME}                                      & Section~\ref{info:DEVC2}                      & s              & D            \\ \hline
 {\ct TIME STEP}                                 & Section~\ref{info:TIMING}                     & s              & D            \\ \hline
 {\ct TRANSMISSION}                              & Section~\ref{info:beam_detector}              & \%/m           & D            \\ \hline
 {\ct U-VELOCITY}                                & Gas velocity component, $u$                   & m/s            & D,I,P,S      \\ \hline
