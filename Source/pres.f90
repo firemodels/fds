@@ -5156,12 +5156,12 @@ IF (ITERATE_BAROCLINIC_TERM .OR. INSEPARABLE_POISSON) THEN
                IF(FCVAR(I  ,J  ,K  ,IBM_FGSC,KAXIS)==IS_SOLID) KPFCT = 0._EB
             ENDIF
             ! If surrounding wall_cell is type SOLID_BOUNDARY set FCT gradient factor to zero:
-            IF (WALL(WALL_INDEX(CELL_INDEX(I,J,K),-1))%BOUNDARY_TYPE==SOLID_BOUNDARY .AND. I/=1   ) IMFCT = 0._EB
-            IF (WALL(WALL_INDEX(CELL_INDEX(I,J,K), 1))%BOUNDARY_TYPE==SOLID_BOUNDARY .AND. I/=IBAR) IPFCT = 0._EB
-            IF (WALL(WALL_INDEX(CELL_INDEX(I,J,K),-2))%BOUNDARY_TYPE==SOLID_BOUNDARY .AND. J/=1   ) JMFCT = 0._EB
-            IF (WALL(WALL_INDEX(CELL_INDEX(I,J,K), 2))%BOUNDARY_TYPE==SOLID_BOUNDARY .AND. J/=JBAR) JPFCT = 0._EB
-            IF (WALL(WALL_INDEX(CELL_INDEX(I,J,K),-3))%BOUNDARY_TYPE==SOLID_BOUNDARY .AND. K/=1   ) KMFCT = 0._EB
-            IF (WALL(WALL_INDEX(CELL_INDEX(I,J,K), 3))%BOUNDARY_TYPE==SOLID_BOUNDARY .AND. K/=KBAR) KPFCT = 0._EB
+            IMFCT = GRADIENT_WEIGHT(NM, I, J, K, -1)
+            IPFCT = GRADIENT_WEIGHT(NM, I, J, K,  1)
+            JMFCT = GRADIENT_WEIGHT(NM, I, J, K, -2)
+            JPFCT = GRADIENT_WEIGHT(NM, I, J, K,  2)
+            KMFCT = GRADIENT_WEIGHT(NM, I, J, K, -3)
+            KPFCT = GRADIENT_WEIGHT(NM, I, J, K,  3)
             RHSS =(R(I-1)*(FVX(I-1,J,K)-FVX_B(I-1,J,K)*IMFCT) - R(I)*(FVX(I,J,K)-FVX_B(I,J,K)*IPFCT) )*RDX(I)*RRN(I)&
                  +(       (FVY(I,J-1,K)-FVY_B(I,J-1,K)*JMFCT) -      (FVY(I,J,K)-FVY_B(I,J,K)*JPFCT) )*RDY(J)       &
                  +(       (FVZ(I,J,K-1)-FVZ_B(I,J,K-1)*KMFCT) -      (FVZ(I,J,K)-FVZ_B(I,J,K)*KPFCT) )*RDZ(K)       &
@@ -5190,6 +5190,22 @@ ENDIF
 T_USED(5)=T_USED(5)+CURRENT_TIME()-TNOW
 END SUBROUTINE PRESSURE_SOLVER_CHECK_RESIDUALS_U
 
+! Determine if the gradient towards a solid cell must be considered or not
+! This is only the case if the solid cell is an internal cell or adjacent to a mesh interface
+
+REAL(EB) FUNCTION GRADIENT_WEIGHT(NM, I,J,K, IOR0)
+INTEGER, INTENT(IN) :: NM, I, J, K, IOR0
+INTEGER::  IW, NOM
+LOGICAL:: INTERNAL_WALL_CELL
+
+GRADIENT_WEIGHT = 1.0_EB
+IW = WALL_INDEX(CELL_INDEX(I,J,K), IOR0) ;  IF (IW == 0) RETURN
+
+INTERNAL_WALL_CELL = (IW > N_EXTERNAL_WALL_CELLS)
+NOM = 0 ;  IF (.NOT.INTERNAL_WALL_CELL) NOM = MESHES(NM)%EXTERNAL_WALL(IW)%NOM
+IF (WALL(IW)%BOUNDARY_TYPE == SOLID_BOUNDARY .AND. (INTERNAL_WALL_CELL .OR. NOM/=0)) GRADIENT_WEIGHT = 0.0_EB
+
+END FUNCTION GRADIENT_WEIGHT
 
 ! --------------------------- FINISH_GLMAT_SOLVER --------------------------------
 

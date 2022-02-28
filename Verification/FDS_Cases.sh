@@ -214,6 +214,7 @@ $QFDS -p 8 -d Fires circular_burner.fds
 $QFDS -d Flowfields divergence_test_1.fds
 $QFDS -d Flowfields divergence_test_2.fds
 $QFDS -p 4 -d Flowfields divergence_test_3.fds
+$QFDS -p 4 -d Flowfields divergence_test_3_uscarc_inseparable.fds
 $QFDS -d Flowfields cyl_test_1.fds
 $QFDS -d Flowfields cyl_test_2.fds
 $QFDS -d Flowfields cyl_test_3.fds
@@ -405,6 +406,7 @@ $QFDS -p 8 -d Pressure_Solver pressure_iteration3d_uglmat.fds
 $QFDS -p 2 -d Pressure_Solver ulmat_2zone.fds
 $QFDS -p 4 -d Pressure_Solver scarc_separable_4mesh.fds
 $QFDS -p 4 -d Pressure_Solver scarc_inseparable_4mesh.fds
+$QFDS -p 4 -d Pressure_Solver obst_activation_uscarc_inseparable.fds
 
 $QFDS -d Pyrolysis cable_11_insulation_mcc.fds
 $QFDS -d Pyrolysis cable_23_insulation_mcc.fds
