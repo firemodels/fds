@@ -2925,17 +2925,17 @@ TRACKED_SPEC_LOOP_1: DO WHILE (N_FOUND <= N_TRACKED_SPECIES .OR. .NOT. DEFINED_B
          IF (LUMPED_COMPONENT_ONLY .AND. N_BINS < 0) CYCLE FIND_TRACKED
          IF (COPY_LUMPED) THEN
             IF (N_BINS >0) THEN
-               WRITE(MESSAGE,'(A,A,A)') 'ERROR: SPEC ' ,TRIM(SM%ID),', cannot specify both COPY_LUMPED and N_BINS.'
+               WRITE(MESSAGE,'(A,A,A)') 'ERROR: SPEC ' ,TRIM(ID),', cannot specify both COPY_LUMPED and N_BINS.'
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
             IF (BACKGROUND) THEN
-               WRITE(MESSAGE,'(A,A,A)') 'ERROR: SPEC ' ,TRIM(SM%ID),', cannot specify both COPY_LUMPED and BACKGROUND.'
+               WRITE(MESSAGE,'(A,A,A)') 'ERROR: SPEC ' ,TRIM(ID),', cannot specify both COPY_LUMPED and BACKGROUND.'
                CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
             N_COPY = N_COPY+1
          ENDIF
          IF (ANY(MASS_FRACTION>0._EB) .AND. ANY(VOLUME_FRACTION>0._EB)) THEN
-            WRITE(MESSAGE,'(A,A,A)') 'ERROR: SPEC ' ,TRIM(SM%ID),', cannot specify both MASS_FRACTION and VOLUME_FRACTION.'
+            WRITE(MESSAGE,'(A,A,A)') 'ERROR: SPEC ' ,TRIM(ID),', cannot specify both MASS_FRACTION and VOLUME_FRACTION.'
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          EXIT
