@@ -740,97 +740,63 @@ USE MPI_F08
 
 IMPLICIT NONE (TYPE,EXTERNAL)
 
-! ---------- Basic definitions
- 
-CHARACTER(40) :: SCARC_MESH               = 'STRUCTURED'         !< Discretization type (STRUCTURED/UNSTRUCTURED)
-CHARACTER(40) :: SCARC_METHOD             = 'NONE'               !< Global (U)ScaRC solver (Krylov/MGM)
-CHARACTER(40) :: SCARC_POISSON            = 'SEPARABLE'          !< Type of Poisson equation (SEPARABLE/INSEPARABLE)
+! ---------- Parameters for different solvers/preconditioners
 
-! ---------- General iteration parameters
- 
-REAL (EB)     :: SCARC_CAPPA              =  0.0_EB              !< Convergence rate of selected (U)ScarC solver
-INTEGER       :: SCARC_ITERATIONS         =  0                   !< Number of iterations of selected (U)ScaRC solver
-REAL (EB)     :: SCARC_RESIDUAL           =  0.0_EB              !< Residual of globally selected (U)ScaRC solver
-REAL (EB)     :: SCARC_TOLERANCE          =  1.E-8_EB            !< Requested overall tolerance for (U)ScaRC solver
-CHARACTER(6)  :: SCARC_PRECISION          = 'DOUBLE'             !< Single/double precision (MKL preconditioner only)
+CHARACTER(40) :: SCARC_KRYLOV_INTERPOL   = 'CONSTANT'            !< Interpolation for 2-level Krylov (CONSTANT/BILINEAR)
+CHARACTER(40) :: SCARC_MGM_INTERPOLATION = 'LINEAR'              !< Type of interpolation for Laplace BC settings
+CHARACTER(40) :: SCARC_MKL_MTYPE         = 'SYMMETRIC'           !< Type of MKL solver
+CHARACTER(40) :: SCARC_PRECON_SCOPE      = 'LOCAL'               !< Scope of action (LOCAL/GLOBAL)
 
-! ---------- Parameters for coarse grid method
- 
-CHARACTER(40) :: SCARC_COARSE             = 'NONE'               !< Type of coarse grid solver (NONE/XMEAN/ITERATIVE/DIRECT)
-INTEGER       :: SCARC_COARSE_ITERATIONS  = 100                  !< Max number of iterations for iterative solver
-REAL (EB)     :: SCARC_COARSE_OMEGA       = 0.80E+0_EB           !< Relaxation parameter
-REAL (EB)     :: SCARC_COARSE_TOLERANCE   = 1.E-12_EB            !< Requested tolerance for coarse grid solver
+INTEGER  :: SCARC_COARSE_ITERATIONS = 100                        !< Max number of iterations for coarse grid solver
+REAL(EB) :: SCARC_COARSE_OMEGA      = 0.80E+0_EB                 !< Relaxation parameter
+REAL(EB) :: SCARC_COARSE_TOLERANCE  = 1.E-12_EB                  !< Requested tolerance for coarse grid solver
 
-! ---------- Parameters for Krylov type methods
- 
-CHARACTER(40) :: SCARC_KRYLOV_INTERPOL    = 'CONSTANT'           !< Twolevel-interpolation (CONSTANT/BILINEAR)
-REAL (EB)     :: SCARC_KRYLOV_TOLERANCE   = 1.E-8_EB             !< Requested tolerance for convergence
-INTEGER       :: SCARC_KRYLOV_ITERATIONS  = 1000                 !< Max number of iterations
-
-! ---------- Parameters for MGM method
-
-CHARACTER(40) :: SCARC_MGM_BOUNDARY         = 'MEAN'             !< Type of interface boundary condition for local Laplace problems
-LOGICAL       :: SCARC_MGM_CHECK_LAPLACE    = .FALSE.            !< Requested check of Laplace solutions against (U)ScaRC diff
-LOGICAL       :: SCARC_MGM_EXACT_INITIAL    = .FALSE.            !< Exact solutions for initialization of interface BCs are used
-CHARACTER(40) :: SCARC_MGM_INTERPOLATION    = 'LINEAR'           !< Type of interpolation for Laplace BC settings
-INTEGER       :: SCARC_MGM_ITERATIONS       = 20                 !< Maximum allowed number of Laplace iterations 
-CHARACTER(40) :: SCARC_MGM_LAPLACE_SOLVER   = 'OPTIMIZED'        !< Type of solver for local Laplace problems
-REAL(EB)      :: SCARC_MGM_TOLERANCE        = 1.E-4_EB           !< Requested tolerance for interface velocity error 
-LOGICAL       :: SCARC_MGM_USE_FFT          = .FALSE.            !< If local mesh is structured, use FFT as Laplace solver
-
-! ---------- Parameters for MKL method
-CHARACTER(40) :: SCARC_MKL_MTYPE            = 'SYMMETRIC'        !< Type of MKL solver
-
-! ---------- Parameters for preconditioning method (used in Krylov methods)
- 
-CHARACTER(40) :: SCARC_PRECON             = 'NONE'               !< Preconditioner for CG (JACOBI/SSOR/FFT/PARDISO/MG)
-INTEGER       :: SCARC_PRECON_ITERATIONS  = 100                  !< Max number of iterations
-REAL (EB)     :: SCARC_PRECON_OMEGA       = 1.50E+0_EB           !< Relaxation parameter
-CHARACTER(40) :: SCARC_PRECON_SCOPE       = 'LOCAL'              !< Scope of action (LOCAL/GLOBAL)
-REAL (EB)     :: SCARC_PRECON_TOLERANCE   = 1.E-10_EB            !< Requested tolerance for convergence
-
-! ---------- Dump out of error information and error handling
- 
-LOGICAL :: SCARC_ERROR_FILE = .FALSE.                            !< Print (U)ScaRC statistics into chid_scarc.csv (TRUE/FALSE)
-LOGICAL :: SCARC_VERBOSE = .FALSE.                               !< Print additional verbose messages (TRUE/FALSE)
-INTEGER :: IERROR  = 0                                           !< General error flag - used at different positions
+INTEGER  :: SCARC_PRECON_ITERATIONS = 100                        !< Max number of iterations for preconditioner
+REAL(EB) :: SCARC_PRECON_OMEGA      = 1.50E+0_EB                 !< Relaxation parameter
+REAL(EB) :: SCARC_PRECON_TOLERANCE  = 1.E-10_EB                  !< Requested tolerance for convergence
 
 ! ---------- Logical indicators for different methods and mechanisms
   
-LOGICAL :: IS_STRUCTURED         = .FALSE.                       !< Flag for structured discretization
-LOGICAL :: IS_UNSTRUCTURED       = .FALSE.                       !< Flag for unstructured discretization
-LOGICAL :: IS_PURE_NEUMANN       = .FALSE.                       !< Flag for pure Neumann system
-LOGICAL :: IS_KRYLOV             = .FALSE.                       !< Flag for Krylov method
-LOGICAL :: IS_MGM                = .FALSE.                       !< Flag for McKeeney-Greengard-Mayo method
-LOGICAL :: IS_LAPLACE            = .FALSE.                       !< Flag for use of Laplace matrix (MGM only)
-LOGICAL :: IS_POISSON            = .TRUE.                        !< Flag for use of Poisson matrix (MGM only)
-LOGICAL :: IS_MKL_LEVEL(2)       = .FALSE.                       !< Flag for level-dependent MKL method
+LOGICAL :: SCARC_MGM_CHECK_LAPLACE = .FALSE.                     !< Requested check of Laplace solutions against (U)ScaRC diff
+LOGICAL :: SCARC_MGM_EXACT_INITIAL = .FALSE.                     !< Exact solutions for initialization of interface BCs are used
+LOGICAL :: SCARC_MGM_USE_FFT       = .FALSE.                     !< If local mesh is structured, use FFT as Laplace solver
 
-LOGICAL :: HAS_CSV_DUMP          = .FALSE.                       !< Flag for CSV-file to be dumped out
-LOGICAL :: HAS_MULTIPLE_MESHES   = .FALSE.                       !< Flag for multiple discretization types
-LOGICAL :: HAS_COARSE_LEVEL      = .FALSE.                       !< Flag for two grid levels
-LOGICAL :: HAS_XMEAN_LEVEL       = .FALSE.                       !< Flag for two-level xmean values preconditioning
+LOGICAL :: SCARC_ERROR_FILE = .FALSE.                            !< Print (U)ScaRC statistics into chid_scarc.csv (TRUE/FALSE)
+
+LOGICAL :: IS_KRYLOV       = .FALSE.                             !< Flag for Krylov method
+LOGICAL :: IS_LAPLACE      = .FALSE.                             !< Flag for use of Laplace matrix (MGM only)
+LOGICAL :: IS_MGM          = .FALSE.                             !< Flag for McKeeney-Greengard-Mayo method
+LOGICAL :: IS_MKL_LEVEL(2) = .FALSE.                             !< Flag for level-dependent MKL method
+LOGICAL :: IS_POISSON      = .TRUE.                              !< Flag for use of Poisson matrix (MGM only)
+LOGICAL :: IS_PURE_NEUMANN = .FALSE.                             !< Flag for pure Neumann system
+LOGICAL :: IS_STRUCTURED   = .FALSE.                             !< Flag for structured discretization
+LOGICAL :: IS_UNSTRUCTURED = .FALSE.                             !< Flag for unstructured discretization
+  
+LOGICAL :: HAS_CSV_DUMP        = .FALSE.                         !< Flag for CSV-file to be dumped out
+LOGICAL :: HAS_COARSE_LEVEL    = .FALSE.                         !< Flag for two grid levels
+LOGICAL :: HAS_MULTIPLE_MESHES = .FALSE.                         !< Flag for multiple discretization types
+LOGICAL :: HAS_XMEAN_LEVEL     = .FALSE.                         !< Flag for two-level xmean values preconditioning
 
 ! ---------- Globally used types for different solvers parameters
   
-INTEGER :: TYPE_COARSE              = NSCARC_COARSE_NONE             !< Type of coarse grid solver
-INTEGER :: TYPE_EXCHANGE            = NSCARC_INT_UNDEF               !< Type of data exchange
-INTEGER :: TYPE_EXCHANGE_MATRIX     = NSCARC_MATRIX_POISSON          !< Type of matrix for exchange
-INTEGER :: TYPE_MESH                = NSCARC_MESH_STRUCTURED         !< Type of discretization 
-INTEGER :: TYPE_LEVEL(0:2)          = NSCARC_INT_UNDEF               !< Type of levels
-INTEGER :: TYPE_MATVEC              = NSCARC_MATVEC_GLOBAL           !< Type of matrix-vector multiplication
-INTEGER :: TYPE_METHOD              = NSCARC_METHOD_KRYLOV           !< Type of (U)ScaRC method
-INTEGER :: TYPE_MGM_BOUNDARY        = NSCARC_MGM_BOUNDARY_MEAN       !< Type of internal MGM boundary conditions
-INTEGER :: TYPE_MGM_LAPLACE         = NSCARC_MGM_LAPLACE_OPT         !< Type of solver for local Laplace problems
-INTEGER :: TYPE_MGM_INTERPOL        = NSCARC_MGM_INTERPOL_LINEAR     !< Type of internal MGM boundary conditions
-INTEGER :: TYPE_MKL(0:10)           = NSCARC_MKL_NONE                !< Type of use of MKL solvers
-INTEGER :: TYPE_PRECISION           = NSCARC_PRECISION_DOUBLE        !< Type of solver (MKL preconditioner only)
-INTEGER :: TYPE_PARENT              = NSCARC_INT_UNDEF               !< Type of parent (calling) solver
-INTEGER :: TYPE_POISSON             = NSCARC_POISSON_SEPARABLE       !< Type of Poisson equation
-INTEGER :: TYPE_PRECON              = NSCARC_INT_UNDEF               !< Type of preconditioner for iterative solver
-INTEGER :: TYPE_SCOPE(0:2)          = NSCARC_SCOPE_GLOBAL            !< Type of method scopes
-INTEGER :: TYPE_SOLVER              = NSCARC_SOLVER_MAIN             !< Type of surrounding solver stage
-INTEGER :: TYPE_VECTOR              = NSCARC_INT_UNDEF               !< Type of vector to point to
+INTEGER :: TYPE_COARSE          = NSCARC_COARSE_NONE             !< Type of coarse grid solver
+INTEGER :: TYPE_EXCHANGE        = NSCARC_INT_UNDEF               !< Type of data exchange
+INTEGER :: TYPE_EXCHANGE_MATRIX = NSCARC_MATRIX_POISSON          !< Type of matrix for exchange
+INTEGER :: TYPE_MESH            = NSCARC_MESH_STRUCTURED         !< Type of discretization 
+INTEGER :: TYPE_LEVEL(0:2)      = NSCARC_INT_UNDEF               !< Type of levels
+INTEGER :: TYPE_MATVEC          = NSCARC_MATVEC_GLOBAL           !< Type of matrix-vector multiplication
+INTEGER :: TYPE_METHOD          = NSCARC_METHOD_KRYLOV           !< Type of (U)ScaRC method
+INTEGER :: TYPE_MGM_BOUNDARY    = NSCARC_MGM_BOUNDARY_MEAN       !< Type of internal MGM boundary conditions
+INTEGER :: TYPE_MGM_LAPLACE     = NSCARC_MGM_LAPLACE_OPT         !< Type of solver for local Laplace problems
+INTEGER :: TYPE_MGM_INTERPOL    = NSCARC_MGM_INTERPOL_LINEAR     !< Type of internal MGM boundary conditions
+INTEGER :: TYPE_MKL(0:10)       = NSCARC_MKL_NONE                !< Type of use of MKL solvers
+INTEGER :: TYPE_PRECISION       = NSCARC_PRECISION_DOUBLE        !< Type of solver (MKL preconditioner only)
+INTEGER :: TYPE_PARENT          = NSCARC_INT_UNDEF               !< Type of parent (calling) solver
+INTEGER :: TYPE_POISSON         = NSCARC_POISSON_SEPARABLE       !< Type of Poisson equation
+INTEGER :: TYPE_PRECON          = NSCARC_INT_UNDEF               !< Type of preconditioner for iterative solver
+INTEGER :: TYPE_SCOPE(0:2)      = NSCARC_SCOPE_GLOBAL            !< Type of method scopes
+INTEGER :: TYPE_SOLVER          = NSCARC_SOLVER_MAIN             !< Type of surrounding solver stage
+INTEGER :: TYPE_VECTOR          = NSCARC_INT_UNDEF               !< Type of vector to point to
 
 ! ---------- Globally used parameters
  
@@ -843,48 +809,19 @@ INTEGER :: N_STACK_LAPLACE   = 0                            !< Stack position of
 
 INTEGER :: N_REQ, N_EXCHANGES, TAG                          !< Information for data exchange
 INTEGER :: SNODE, RNODE                                     !< Process Indicator for data exchange
-
-TYPE (MPI_REQUEST),  ALLOCATABLE, DIMENSION (:)  :: REQ     !< Request array for data exchange
 INTEGER,  ALLOCATABLE, DIMENSION (:)  :: COUNTS             !< Counter array for data exchange
 INTEGER,  ALLOCATABLE, DIMENSION (:)  :: DISPLS             !< Displacement array for data exchange
 INTEGER,  ALLOCATABLE, DIMENSION (:)  :: MESH_INT           !< Local integer data array for data exchange
 INTEGER,  ALLOCATABLE, DIMENSION (:)  :: NX_OFFSET          !< Offset array of offsets in x-direction
 REAL(EB), ALLOCATABLE, DIMENSION (:)  :: MESH_REAL          !< Local real data array for data exchange
+TYPE (MPI_REQUEST),  ALLOCATABLE, DIMENSION (:)  :: REQ     !< Request array for data exchange
 
 INTEGER  :: GLOBAL_INT,  RANK_INT
 REAL(EB) :: GLOBAL_REAL, RANK_REAL
 
 INTEGER :: FACE_ORIENTATION(6)  = (/1,-1,2,-2,3,-3/)        !< Coordinate direction related order of mesh faces
-
+INTEGER :: IERROR  = 0                                      !< General error flag - used at different positions
 CHARACTER(60) :: CNAME, CURRENT
-
-! ---------- Public variables
-  
-PUBLIC :: SCARC_CAPPA                     !< Resulting convergence rate of (U)ScaRC solver
-PUBLIC :: SCARC_COARSE                    !< Use additional coarse grid level (.FALSE./.TRUE.)
-PUBLIC :: SCARC_ERROR_FILE                !< Flag to print additional convergence information about current (U)ScaRC call
-PUBLIC :: SCARC_ITERATIONS                !< Final number of needed iterations for (U)ScaRC solver
-PUBLIC :: SCARC_MESH                      !< Selection parameter for requested grid variant (structured/unstructured)
-PUBLIC :: SCARC_METHOD                    !< Selection parameter for requested (U)ScaRC variant (Krylov/Multigrid/LU)
-PUBLIC :: SCARC_PRECISION                 !< Selection parameter for requested MKL precision (double/single)
-PUBLIC :: SCARC_POISSON                   !< Type of Poisson equation (separable/inseparable)
-PUBLIC :: SCARC_RESIDUAL                  !< Final residual after call of (U)ScaRC solver
-PUBLIC :: SCARC_TOLERANCE                 !< Requested overall tolerance for (U)ScaRC solver
-PUBLIC :: SCARC_VERBOSE                   !< Selection parameter for additional verbose messages
-
-PUBLIC :: SCARC_KRYLOV_INTERPOL           !< Selection parameter for interpolation type in case of a twolevel Krylov variant
-PUBLIC :: SCARC_KRYLOV_ITERATIONS         !< Maximum number of allowed Krylov iterations
-PUBLIC :: SCARC_KRYLOV_TOLERANCE          !< Requested tolerance for Krylov solver
-
-PUBLIC :: SCARC_MGM_BOUNDARY              !< Interface boundary conditions for Laplace problems of MGM method
-PUBLIC :: SCARC_MGM_ITERATIONS            !< Maximum number of allowed Laplace iterations for MGM method
-PUBLIC :: SCARC_MGM_TOLERANCE             !< Requested tolerance for velocity error of MGM method
-
-PUBLIC :: SCARC_PRECON                    !< Selection parameter for preconditioner
-PUBLIC :: SCARC_PRECON_ITERATIONS         !< Maximum number of allowed iterations for preconditioner
-PUBLIC :: SCARC_PRECON_OMEGA              !< Relaxation parameter for preconditioner
-PUBLIC :: SCARC_PRECON_SCOPE              !< Scope of activity for preconditioner (global/local)
-PUBLIC :: SCARC_PRECON_TOLERANCE          !< Requested accuracy for preconditioner 
 
 ! ---------- Type declarations
   
