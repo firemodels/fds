@@ -1,6 +1,6 @@
 &HEAD CHID='devc_interpolation_temperature'/
 
-&MESH IJK=10,1,10, XB=0,1,-.5,.5,0,1/
+&MESH IJK=5,1,5, XB=0,1,-.5,.5,0,1/
 
 &TIME T_END=200./
 
