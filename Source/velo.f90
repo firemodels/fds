@@ -2023,22 +2023,22 @@ EDGE_LOOP: DO IE=1,N_EDGES
          CORNER_EDGE=.FALSE.
          IF (IWM==0 .OR. IWP==0) CORNER_EDGE=.TRUE.
 
-         ! ! Omit mesh boundary external corners
+         ! Omit mesh boundary external corners
 
-         ! IF ( (II==0    .AND. KK==0   ) .OR. &
-         !      (II==0    .AND. KK==KBAR) .OR. &
-         !      (II==IBAR .AND. KK==0   ) .OR. &
-         !      (II==IBAR .AND. KK==KBAR) .OR. &
-         !      (II==0    .AND. JJ==0   ) .OR. &
-         !      (II==0    .AND. JJ==JBAR) .OR. &
-         !      (II==IBAR .AND. JJ==0   ) .OR. &
-         !      (II==IBAR .AND. JJ==JBAR) .OR. &
-         !      (JJ==0    .AND. KK==0   ) .OR. &
-         !      (JJ==0    .AND. KK==KBAR) .OR. &
-         !      (JJ==JBAR .AND. KK==0   ) .OR. &
-         !      (JJ==JBAR .AND. KK==KBAR) ) THEN
-         !    CORNER_EDGE=.FALSE.
-         ! ENDIF
+         IF ( (II==0    .AND. KK==0   ) .OR. &
+              (II==0    .AND. KK==KBAR) .OR. &
+              (II==IBAR .AND. KK==0   ) .OR. &
+              (II==IBAR .AND. KK==KBAR) .OR. &
+              (II==0    .AND. JJ==0   ) .OR. &
+              (II==0    .AND. JJ==JBAR) .OR. &
+              (II==IBAR .AND. JJ==0   ) .OR. &
+              (II==IBAR .AND. JJ==JBAR) .OR. &
+              (JJ==0    .AND. KK==0   ) .OR. &
+              (JJ==0    .AND. KK==KBAR) .OR. &
+              (JJ==JBAR .AND. KK==0   ) .OR. &
+              (JJ==JBAR .AND. KK==KBAR) ) THEN
+            CORNER_EDGE=.FALSE.
+         ENDIF
 
          ! If there is a solid wall separating the two adjacent wall cells, cycle out of the loop.
 
@@ -3317,9 +3317,9 @@ PREDICTOR_COND : IF (PREDICTOR) THEN
       IF (WC%BOUNDARY_TYPE/=SOLID_BOUNDARY .AND. WC%BOUNDARY_TYPE/=NULL_BOUNDARY) CYCLE
 
       BC => BOUNDARY_COORD(WC%BC_INDEX)
-      II  = BC%II 
-      JJ  = BC%JJ 
-      KK  = BC%KK 
+      II  = BC%II
+      JJ  = BC%JJ
+      KK  = BC%KK
       IIG = BC%IIG
       JJG = BC%JJG
       KKG = BC%KKG
@@ -3356,9 +3356,9 @@ ELSE ! Corrector
      IF (WC%BOUNDARY_TYPE/=SOLID_BOUNDARY .AND. WC%BOUNDARY_TYPE/=NULL_BOUNDARY) CYCLE
 
      BC => BOUNDARY_COORD(WC%BC_INDEX)
-     II  = BC%II 
-     JJ  = BC%JJ 
-     KK  = BC%KK 
+     II  = BC%II
+     JJ  = BC%JJ
+     KK  = BC%KK
      IIG = BC%IIG
      JJG = BC%JJG
      KKG = BC%KKG
