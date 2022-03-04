@@ -14,10 +14,8 @@ coupling -- just a fixed external heat flux of 50 kW/m2.
 
 &MATL ID='PET'
       ABSORPTION_COEFFICIENT=2937
-      N_REACTIONS=1
-      A(1) = 1
-      E(1) = 0
-      THRESHOLD_TEMPERATURE(1)=253.
+      REFERENCE_TEMPERATURE=253.
+      PYROLYSIS_RANGE=10.
       EMISSIVITY=0.903
       DENSITY=1380.
       NU_MATL=1.
@@ -28,7 +26,6 @@ coupling -- just a fixed external heat flux of 50 kW/m2.
 
 &MATL ID='Liq'
       ABSORPTION_COEFFICIENT=2937
-      N_REACTIONS=1
       A(1) = 4.50E18
       E(1) = 281000.
       EMISSIVITY=0.903

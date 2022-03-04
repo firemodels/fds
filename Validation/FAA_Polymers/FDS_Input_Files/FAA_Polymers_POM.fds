@@ -12,16 +12,12 @@ coupling -- just a fixed external heat flux of 50 kW/m2.
 
 &REAC FUEL='METHANE' /  No gas phase reaction with 1% O2 concentration
 
-
-
 &MATL ID='POM'
       ABSORPTION_COEFFICIENT=3550.
-      N_REACTIONS=1
-      A(1) = 1
-      E(1) = 0
       EMISSIVITY=0.949
       DENSITY=1425.
-      THRESHOLD_TEMPERATURE=165.
+      REFERENCE_TEMPERATURE=165.
+      PYROLYSIS_RANGE=10.
       NU_MATL=1.
       MATL_ID='Liq'
       HEAT_OF_REACTION=141.
@@ -30,7 +26,6 @@ coupling -- just a fixed external heat flux of 50 kW/m2.
 
 &MATL ID='Liq'
       ABSORPTION_COEFFICIENT=3550.
-      N_REACTIONS=1
       A(1) = 3.7E10
       E(1) = 1.57E5
       EMISSIVITY=0.949

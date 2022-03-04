@@ -14,14 +14,11 @@ coupling -- just a fixed external heat flux of 50 kW/m2.
 
 &MATL ID='PP'
       ABSORPTION_COEFFICIENT=966
-      A(1) = 1
-      E(1) = 0
       EMISSIVITY=0.959
       DENSITY=910.
-      N_REACTIONS=1
       HEAT_OF_REACTION=80.
-      HEAT_OF_COMBUSTION=1.e-99
-      THRESHOLD_TEMPERATURE=158.
+      REFERENCE_TEMPERATURE=158.
+      PYROLYSIS_RANGE=10.
       NU_MATL=1.
       MATL_ID='Liq'
       SPECIFIC_HEAT = 2.68
@@ -33,11 +30,9 @@ coupling -- just a fixed external heat flux of 50 kW/m2.
       E(1) = 352000.
       EMISSIVITY=0.959
       DENSITY=910.
-      N_REACTIONS=1
       NU_SPEC=1.
       SPEC_ID='METHANE'
       HEAT_OF_REACTION=1310.
-      HEAT_OF_COMBUSTION=1.e-99
       SPECIFIC_HEAT = 2.68
       CONDUCTIVITY = 0.24/
 
