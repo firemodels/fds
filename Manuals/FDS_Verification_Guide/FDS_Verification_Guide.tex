@@ -6715,7 +6715,7 @@ The Shunn manufactured solution (see Sec.~\ref{sec:shunn_mms}) provides a 2D ana
 \section{Interpolation}
 \label{sec:interpolation}
 
-For line devices ({\ct POINTS=...}) used together with {\ct SPATIAL\_STATISTIC='INTERPOLATION'} the near wall values are usually truncated to the cell value.  However, with temperature and velocity components, the wall value is used to provide an interpolation between the first cell value and the wall value.  In the test cases below, a linear field of velocity and temperature are generated with 100 points along the device and only 5 cells across the domain.  Three linear point arrays are created, one at each end along the periodic mesh boundary, and one in the center of the domain, which is also a cell center.
+For line devices ({\ct POINTS=...}) used together with {\ct SPATIAL\_STATISTIC='INTERPOLATION'} the near wall values are usually truncated to the cell value.  However, with temperature and velocity components the wall value is used to provide an interpolation between the first cell value and the wall value.  In the test cases below, a linear field of velocity and temperature are generated with 100 points along the device and only 5 cells across the domain.  Three linear point arrays are created, one at each end along the periodic mesh boundary, and one in the center of the domain, which is also a cell center.
 
 \begin{figure}[h]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
