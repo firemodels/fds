@@ -3818,7 +3818,7 @@ INTEGER, INTENT(IN), DIMENSION(:) :: MATL_INDEX(N_MATS)
 INTEGER :: N,NN,J,NS,SMIX_INDEX(N_MATS),NWP,NP,NP2,ITMP
 TYPE(MATERIAL_TYPE), POINTER :: ML
 TYPE(SURFACE_TYPE), POINTER :: SF
-REAL(EB) :: DTMP,REACTION_RATE,Y_O2,X_O2,Q_DOT_S_PPP,MW(N_MATS),Y_GAS(N_MATS),Y_TMP(N_MATS),Y_SV(N_MATS),X_SV(N_MATS),X_L(N_MATS),&
+REAL(EB) :: REACTION_RATE,Y_O2,X_O2,Q_DOT_S_PPP,MW(N_MATS),Y_GAS(N_MATS),Y_TMP(N_MATS),Y_SV(N_MATS),X_SV(N_MATS),X_L(N_MATS),&
             D_FILM,H_MASS,RE_L,SHERWOOD,MFLUX,MU_FILM,MU_AIR,SC_FILM,U_TANG,RDN,TMP_FILM,TMP_G,U2,V2,W2,VEL,&
             RHO_DOT,DR,R_S_0,R_S_1,H_R,H_R_B,H_S_B,H_S,LENGTH_SCALE,SUM_Y_GAS,SUM_Y_SV,&
             SUM_Y_SV_SMIX(N_TRACKED_SPECIES),X_L_SUM,RHO_DOT_EXTRA,MFLUX_MAX,RHO_FILM,CP_FILM,PR_FILM,K_FILM,EVAP_FILM_FAC
@@ -4068,26 +4068,15 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Loop over all materials in the cell (alpha subsc
          CASE (PYROLYSIS_SOLID)
 
             ! Reaction rate in 1/s (Tech Guide: r_alpha_beta)
+
             REACTION_RATE = ML%A(J)*(RHO_S(N))**ML%N_S(J)*EXP(-ML%E(J)/(R0*TMP_S))
 
             ! power term
-            DTMP = ML%THR_SIGN(J)*(TMP_S-ML%TMP_THR(J))
-            IF (ABS(ML%N_T(J))>=TWO_EPSILON_EB) THEN
-               IF (DTMP > 0._EB) THEN
-                  REACTION_RATE = REACTION_RATE * DTMP**ML%N_T(J)
-               ELSE
-                  REACTION_RATE = 0._EB
-               ENDIF
-            ELSE ! threshold
-               IF (DTMP < 0._EB) REACTION_RATE = 0._EB
-            ENDIF
-            ! Phase change reaction?
-            IF (ML%PCR(J)) THEN
-               ITMP = MIN(I_MAX_TEMP,NINT(TMP_S))
-               H_R = ML%H_R(J,ITMP)
-               REACTION_RATE = REACTION_RATE / ((ABS(H_R)/1000._EB) * DT_BC)
-            ENDIF
+
+            IF (ABS(ML%N_T(J))>=TWO_EPSILON_EB) REACTION_RATE = REACTION_RATE * TMP_S**ML%N_T(J)
+
             ! Oxidation reaction?
+
             IF ( (ML%N_O2(J)>0._EB) .AND. (O2_INDEX > 0)) THEN
                ! Get oxygen mass fraction
                ZZ_GET(1:N_TRACKED_SPECIES) = MAX(0._EB,ZZ(IIG,JJG,KKG,1:N_TRACKED_SPECIES))
