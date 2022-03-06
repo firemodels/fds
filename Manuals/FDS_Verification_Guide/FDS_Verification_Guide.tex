@@ -4632,62 +4632,6 @@ convective heat transfer has been turned off, and the correct steady-state tempe
 
 
 
-
-\section{Simple Phase Change Reaction (\texorpdfstring{\textct{pcm\_slab}}{pcm\_slab})}
-
-A semi-infinite layer of liquid in the semi-infinite region, $x>0$,
-is cooled by setting the surface, $x=0$, to a constant temperature, $T_0$,
-below the freezing temperature, $T_f$. Initially, the liquid is at temperature $T_i > T_f$. The position of the boundary between frozen and liquid layers
-is denoted by $x_f$. The heat conduction equations for the two regions are
-\begin{eqnarray}
-\dod{T_{\rm s}}{t} & = & \alpha_{\rm s} \dsods{T_{\rm s}}{x} \quad \quad (0 < x < x_f) \\ [0.2in]
-\dod{T_{\rm s}}{t} & = & \alpha_l \dsods{T_{\rm s}}{x} \quad \quad (x > x_f)
-\end{eqnarray}
-with boundary conditions
-\begin{eqnarray}
-T_{\rm s}(x,0)   &= & T_i \nonumber \\
-T_{\rm s}(0,t)   &= & T_0 \nonumber \\
-T_{\rm s}(x_f,t) &= & T_f \nonumber
-\end{eqnarray}
-The analytical solutions for the phase interface location and temperature are \cite{Carslaw:1}
-\be
-x_f(t) = 2 \lambda \sqrt{\alpha_l t}
-\ee
-\begin{eqnarray}
-\frac{T_{\rm s}(x,t)-T_0}{T_f - T_0} &=& \frac{\erf(x/2\sqrt{\alpha t})} {\erf (x_f/2\sqrt{\alpha t})} \quad \quad (0 < x < x_f) \\ [0.2in]
-\frac{T_i-T_{\rm s}(x,t)}{T_i - T_f} &=& \frac{\erfc(x/2\sqrt{\alpha t})}{\erfc(x_f/2\sqrt{\alpha t})} \quad \quad (x > x_f)
-\end{eqnarray}
-where $\lambda = x_f /2\sqrt{\alpha t}$ is obtained as a root of the (complicated)
-transcendental equation, given in \cite{Carslaw:1}.
-
-In the test case, the thickness of the liquid layer cannot be infinite. For practical purposes, a 50 cm thick layer was found to be sufficient.
-The fixed-temperature boundary condition, which is formally not available for the condensed-phase heat transfer solver in FDS,
-is implemented by assuming that the gas temperature is $T_0$ with a very high heat convection coefficient.
-For material properties, we choose $\rho_{\rm s} = \rho_l =1,000$~\si{kg/m^3},
-$k_{\rm s} = k_l = 2$~\si{W/(m.K)}, $c_{\rm s} = c_l = 2$~\si{kJ/(kg.K)}, $H_{r,\alpha\beta}=300$~kJ/kg, $T_f = 0$~\si{\degree C}, $T_i = +15$~\si{\degree C},
-and $T_0 = -15$~\si{\degree C}, which leads to a {\em Stefan number}
-\be
-\hbox{St}=\frac{c_{\rm s}\left(T_i - T_0\right)}{H_{r,\alpha\beta}} = 0.1
-\ee
-and $\lambda = 0.189$.
-
-Analytical and simulated results are compared in Fig.~\ref{pcm_slab}. The plot on the left shows the position of the phase boundary.
-From the FDS results, two estimates of $x_f$ are determined because in the numerical solution, the boundary of the two phases is not perfectly sharp.
-``FDS min'' is the largest value of $x$ for which $\rho_{\rm s} > 990$~\si{kg/m^3} and ``FDS max'' is the largest $x$ for which $\rho_{\rm s} > 0$~\si{kg/m^3}. The plot on the right
-shows temperatures at three depths from the surface: 1~cm, 5~cm, and 10~cm.
-\begin{figure}[!htb]
-\noindent
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/pcm_slab_xf} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/pcm_slab_T}
-\end{tabular*}
-\caption[The \textct{pcm\_slab} test cases]{Comparison of analytical and simulated results for the two-region Neumann problem with phase change.}
-\label{pcm_slab}
-\end{figure}
-
-
-
-
 \section{A Simple Two-Step Pyrolysis Example (\texorpdfstring{\textct{two\_step\_solid\_reaction}}{two\_step\_solid\_reaction})}
 \label{two_step_solid_reaction}
 

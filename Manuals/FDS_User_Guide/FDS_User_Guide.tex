@@ -3400,10 +3400,10 @@ The mass per unit volume of material component $i$, $\rho_{{\rm s},i}(x,t)$, is 
 \ee
 where
 \be
-  r_{ij} = A_{ij} \; \rho_{{\rm s},i}^{n_{{\rm s},ij}} \; \exp \left(-\frac{E_{ij}}{R \, T_{\rm s}} \right) X_{\rm O_2}^{n_{{\rm O_2},ij}}
+  r_{ij} = A_{ij} \; \rho_{{\rm s},i}^{n_{{\rm s},ij}} \;  T_{\rm s}^{n_{{\rm t},ij}} \; \exp \left(-\frac{E_{ij}}{R \, T_{\rm s}} \right) X_{\rm O_2}^{n_{{\rm O_2},ij}}
   \label{rr}
 \ee
-The term, $r_{ij}$, defines the rate of reaction at the temperature, $T_{\rm s}$, of the $i$th material undergoing its $j$th reaction. The second term on the right of the equation (\ref{rr_tot}) represents the contributions of other materials producing the $i$th material as a residue with a yield of $\nu_{{\rm s},i'j}$. This term is denoted by {\ct NU\_MATL(:,j)} on the $i'$-th {\ct MATL} line. $\rho_{{\rm s},i}$ is the density of the $i$th material component of the layer, defined as the mass of the $i$th material component divided by the volume of the layer. Thus, $\rho_{{\rm s},i}$ is a quantity that increases if the $i$th material component is produced as a residue of some other reaction, or decreases if the $i$th component decomposes. $n_{{\rm s},ij}$ is the reaction order and prescribed under the name {\ct N\_S(j)}, and is 1 by default. If the value of $n_{\rm s}$ is not known, it is a good starting point to assume it is 1.
+The term, $r_{ij}$, defines the rate of reaction at the temperature, $T_{\rm s}$, of the $i$th material undergoing its $j$th reaction. The second term on the right of the equation (\ref{rr_tot}) represents the contributions of other materials producing the $i$th material as a residue with a yield of $\nu_{{\rm s},i'j}$. This term is denoted by {\ct NU\_MATL(:,j)} on the $i'$-th {\ct MATL} line. $\rho_{{\rm s},i}$ is the density of the $i$th material component of the layer, defined as the mass of the $i$th material component divided by the volume of the layer. Thus, $\rho_{{\rm s},i}$ is a quantity that increases if the $i$th material component is produced as a residue of some other reaction, or decreases if the $i$th component decomposes. $n_{{\rm s},ij}$ is the reaction order and prescribed under the name {\ct N\_S(j)}, and is 1 by default. If the value of $n_{\rm s}$ is not known, it is a good starting point to assume it is 1.  $n_{{\rm t},j}$ is prescribed under the name {\ct N\_T(j)}. By default, $n_{{\rm t},j}$ is zero.
 
 The pre-exponential factor\footnote{For versions of FDS up to and including 6.7.7, the form of the reaction rate expression was slightly different than the one currently used. In these older versions, the density term on the right hand side of Eq.~(\ref{rr}) was divided by the initial density of the layer. For first-order reactions ($n_{{\rm s},ij}=1$), this older form is equivalent to the current form. However, for reactions that are not first-order ($n_{{\rm s},ij}\neq 1$), the new value of $A_{ij}=A_{ij}^{\rm old}/\rho_{\rm s}(0)^{n_{{\rm s},ij}-1}$, where $\rho_{\rm s}(0)$ is the initial density of the layer.}, $A_{ij}$, is prescribed under the name {\ct A(j)} on the {\ct MATL} line of the $i$th material, with units of s$^{-1}$. $E_{ij}$, the activation energy, is prescribed via {\ct E(j)} in units of J/mol. Remember that 1~kcal is 4.184~kJ, and be careful with factors of 1000. For a given reaction, specify both $A$ and $E$, or neither. Do not specify only one of these two parameters. Typically, these parameters only have meaning when both are derived from a common set of experiments, like TGA (thermogravimetric analysis).
 
@@ -3421,7 +3421,7 @@ You can specity {\ct MAX\_REACTION\_RATE(j)} (1/s) to limit the reaction rate, $
 
 It is very important to keep in mind that the kinetic constants, $A$ and $E$, are not available for most real materials.  However, there is a way to model such materials using a simplified reaction scheme. The key assumption is that the material components can undergo only one reaction, at most. If, for example, the material undergoes three distinct reactions, there must be at least three material components, each of which undergoes one reaction. If there is an additional residue left over, then a fourth material component is needed.
 
-In lieu of specifying $A$ and $E$, there are several parameters that can be used by FDS to derive effective values, the most important of which is the  {\ct REFERENCE\_TEMPERATURE} ($^\circ$C). To understand this parameter, consider the plot shown in Fig.~\ref{pyrolysis}. These curves represent the results of a hypothetical TGA experiment in which a single component material undergoes a single reaction that converts the solid into a gas. The Mass Fraction (blue curve) is the normalized density of the material ($Y_{\rm s}$) which decreases as the sample is slowly heated, in this case at a rate of 5~K/min. The Reaction Rate (green curve) is the rate of change of the mass fraction as a function of time ($-\d Y_{\rm s}/\d t$). Where this curve peaks is referred to in FDS as the {\ct REFERENCE\_TEMPERATURE}.\footnote{The term ``reference temperature'' is used simply to maintain backward compatibility with earlier versions of FDS.}  Note that the {\ct REFERENCE\_TEMPERATURE} is {\em not} the same as an ignition temperature, nor is it necessarily the surface temperature of the burning solid. Rather, it is simply the temperature at which the mass fraction of the material decreases at its maximum rate within the context of a TGA or similar experimental apparatus. Although you cannot specify an ignition temperature, you can specify a threshold temperature, see Section~\ref{info:threshold_temperature} for details.
+In lieu of specifying $A$ and $E$, there are several parameters that can be used by FDS to derive effective values, the most important of which is the  {\ct REFERENCE\_TEMPERATURE} ($^\circ$C). To understand this parameter, consider the plot shown in Fig.~\ref{pyrolysis}. These curves represent the results of a hypothetical TGA experiment in which a single component material undergoes a single reaction that converts the solid into a gas. The Mass Fraction (blue curve) is the normalized density of the material ($Y_{\rm s}$) which decreases as the sample is slowly heated, in this case at a rate of 5~K/min. The Reaction Rate (green curve) is the rate of change of the mass fraction as a function of time ($-\d Y_{\rm s}/\d t$). Where this curve peaks is referred to in FDS as the {\ct REFERENCE\_TEMPERATURE}.\footnote{The term ``reference temperature'' is used simply to maintain backward compatibility with earlier versions of FDS.}  Note that the {\ct REFERENCE\_TEMPERATURE} is {\em not} the same as an ignition temperature, nor is it necessarily the surface temperature of the burning solid. Rather, it is simply the temperature at which the mass fraction of the material decreases at its maximum rate within the context of a TGA or similar experimental apparatus.
 
 The kinetic constants for component $i$ of a multi-component solid are given by\footnote{These formulas have been derived from an analysis that considers a first-order reaction. When using the proposed method, do not specify non-unity value for the reaction order {\ct N\_S} on the {\ct MATL} line.}:
 \be
@@ -3571,36 +3571,6 @@ The system of ordinary differential equations that governs the transformation of
 \subsection{The Heat of Reaction}
 
 Equation~(\ref{rr}) describes the rate of the reaction as a function of temperature.  Most solid phase reactions require energy; that is, they are {\em endothermic}. The amount of energy consumed, per unit mass of reactant that is converted into reaction products, is specified by the {\ct HEAT\_OF\_REACTION(j)}. Technically, this is the enthalpy difference between the products and the reactant. A positive value indicates that the reaction is {\em endothermic}; that is, the reaction takes energy out of the system. Usually the {\ct HEAT\_OF\_REACTION} is accurately known only for simple phase change reactions like the vaporization of water. For other reactions, it must be determined empirically (e.g., by differential scanning calorimetry).
-
-
-\subsection{Special Topic: The ``Threshold'' Temperature}
-\label{info:threshold_temperature}
-
-In FDS, the reaction rate expression in Eq.~(\ref{rr}) includes an optional term:
-\be
-  r_{ij} = A_{ij} \; \rho_{{\rm s},i}^{n_{{\rm s},ij}} \; \exp \left(-\frac{E_{ij}}{R \, T_{\rm s}} \right) \;
-  \max\left[0,S_{{\rm thr},ij}(T_{\rm s}-T_{{\rm thr},ij})\right]^{n_{{\rm t},ij}}
-  \label{rr2}
-\ee
-$T_{{\rm thr},ij}$ is an optional ``threshold'' temperature that allows the definition of non-Arrhenius pyrolysis functions and ignition criteria, and is prescribed by {\ct THRESHOLD\_TEMPERATURE(j)}. $S_{{\rm thr},ij}$ is the ``threshold direction'' that allows the triggering of reaction when temperature gets ``above'' $T_{{\rm thr},ij}$ ($S_{{\rm thr},ij}=+1$) or ``below'' $T_{{\rm thr},ij}$ ($S_{{\rm thr},ij}=-1$). $n_{{\rm t},j}$ is prescribed under the name {\ct N\_T(j)} and $S_{{\rm thr},ij}$ under {\ct THRESHOLD\_SIGN}. By default, $T_{{\rm thr},ij}$ is -273.15 degrees Celsius, $n_{{\rm t},j}$ is zero and $S_{{\rm thr},ij}=+1$; thus, the last term of Equation~\ref{rr2} does not affect the pyrolysis rate. The term can be used to describe a threshold temperature for the pyrolysis reaction by setting $T_{{\rm thr},ij}$ and $n_{{\rm t},j}$ = 0. Then the term is equal to 0 at temperatures below $T_{{\rm thr},ij}$ and 1 at temperatures above.
-
-The threshold temperature can be used to simulate simple phase change reactions, such as melting and freezing. To make the reaction rate controlled by available energy, i.e., {\em not} kinetics, another optional term should be included in the reaction rate formula
-\be
-  r_{ij} = A_{ij}\frac{1}{H_{{\rm r},ij}\Delta t} \max\left[0,S_{{\rm thr},ij}(T_{\rm s}-T_{{\rm thr},ij})\right]^{n_{{\rm t},ij}}
-  \label{rr3}
-\ee
-This form of reaction rate can be implemented by setting a logical parameter {\ct PCR(j)=T}. The pre-exponental factor $A_{ij}$ should then be given a value that is close or slightly smaller than the specific heat (\si{kJ/(kg.K)}) of the material mixture at phase change temperature.
-
-The input file {\ct water\_ice\_water.fds} demonstrates the use of the ``threshold'' temperature. A small amount of liquid water at 10~$^\circ$C is cooled down to -10~$^\circ$C in 10~min, and then heated up again to 10~$^\circ$C. The concentration of the liquid water as a function of temperature is plotted in Fig.~\ref{water_ice_water_plot}. The cooling phase is indicated by the blue line and heating phase by the red line.
-
-\begin{figure}[ht]
-\begin{center}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_ice_water}
-\end{center}
-\caption[Results of the {\ct water\_ice\_water} test case]{Freezing and melting of water.}
-\label{water_ice_water_plot}
-\end{figure}
-
 
 
 
@@ -11519,7 +11489,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct NU\_PART(:,:)}                 & Real Array      & Section~\ref{info:solid_pyrolysis}    & kg/kg             & 0.            \\ \hline
 {\ct NU\_SPEC(:,:)}                 & Real Array      & Section~\ref{info:solid_pyrolysis}    & kg/kg             & 0.            \\ \hline
 {\ct PART\_ID(:,:)}                 & Char.~Array     & Section~\ref{info:solid_pyrolysis}    &                   &               \\ \hline
-{\ct PCR(:)}                        & Logical Array   & Section~\ref{info:solid_pyrolysis}    &                   & {\ct F}       \\ \hline
 {\ct PYROLYSIS\_RANGE(:)}           & Real Array      & Section~\ref{info:kinetic_parameters} & $^\circ$C         & 80.           \\ \hline
 {\ct REFERENCE\_RATE(:)}            & Real Array      & Section~\ref{info:solid_pyrolysis}    & 1/s               &               \\ \hline
 {\ct REFERENCE\_TEMPERATURE(:)}     & Real Array      & Section~\ref{info:solid_pyrolysis}    & $^\circ$C         &               \\ \hline
@@ -11527,8 +11496,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SPECIFIC\_HEAT}                & Real            & Section~\ref{info:thermal_properties} & \si{kJ/(kg.K)}    & 0.            \\ \hline
 {\ct SPECIFIC\_HEAT\_RAMP}          & Character       & Section~\ref{info:thermal_properties} &                   &               \\ \hline
 {\ct SPEC\_ID(:,:)}                 & Char.~Array     & Section~\ref{info:solid_pyrolysis}    &                   &               \\ \hline
-{\ct THRESHOLD\_SIGN(:)}            & Real Array      & Section~\ref{info:solid_pyrolysis}    &                   & 1.0           \\ \hline
-{\ct THRESHOLD\_TEMPERATURE(:)}     & Real Array      & Section~\ref{info:solid_pyrolysis}    & $^\circ$C         & -273.15       \\ \hline
 \end{longtable}
 
 % Undocumented: COLOR, REFRACTIVE_INDEX, RGB
