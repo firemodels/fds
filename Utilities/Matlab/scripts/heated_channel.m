@@ -211,15 +211,15 @@ print(f2,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/heated_cha
 
 % % Check heat balance
 
-figure
-for i = [1,2,3,4]
-    M = importdata([outdir,devcfile{i}],',',2);
-    t = M.data(:,find(strcmp(M.colheaders,'Time')));
-    j1 = find(strcmp(M.colheaders,'"NetHF0B"'));
-    j2 = find(strcmp(M.colheaders,'"NetHF0T"'));
-    q_w = mean(M.data(:,j1:j2),2);
-    plot(t,q_w); hold on
-end
+% figure
+% for i = [1,2,3,4]
+%     M = importdata([outdir,devcfile{i}],',',2);
+%     t = M.data(:,find(strcmp(M.colheaders,'Time')));
+%     j1 = find(strcmp(M.colheaders,'"NetHF0B"'));
+%     j2 = find(strcmp(M.colheaders,'"NetHF0T"'));
+%     q_w = mean(M.data(:,j1:j2),2);
+%     plot(t,q_w); hold on
+% end
 
 
 
