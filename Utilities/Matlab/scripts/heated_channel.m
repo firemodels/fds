@@ -76,15 +76,15 @@ cp = 1;
 mu = 1.8216e-5;
 T_w = 20;
 
-devcfile = {'heated_channel_Pr_0p10_32_devc.csv', ...
-            'heated_channel_Pr_0p71_32_devc.csv', ...
-            'heated_channel_Pr_1p00_32_devc.csv', ...
-            'heated_channel_Pr_2p00_32_devc.csv'};
+devcfile = {'heated_channel_Pr_0p10_16_devc.csv', ...
+            'heated_channel_Pr_0p71_16_devc.csv', ...
+            'heated_channel_Pr_1p00_16_devc.csv', ...
+            'heated_channel_Pr_2p00_16_devc.csv'};
 
-linefile = {'heated_channel_Pr_0p10_32_line.csv', ...
-            'heated_channel_Pr_0p71_32_line.csv', ...
-            'heated_channel_Pr_1p00_32_line.csv', ...
-            'heated_channel_Pr_2p00_32_line.csv'};
+linefile = {'heated_channel_Pr_0p10_16_line.csv', ...
+            'heated_channel_Pr_0p71_16_line.csv', ...
+            'heated_channel_Pr_1p00_16_line.csv', ...
+            'heated_channel_Pr_2p00_16_line.csv'};
 
 skip_case = 0;
 
@@ -154,7 +154,7 @@ set(h,'FontSize',Key_Font_Size)
 
 % add Git if file is available
 
-Git_Filename = [outdir,'heated_channel_Pr_1p00_32_git.txt'];
+Git_Filename = [outdir,'heated_channel_Pr_1p00_16_git.txt'];
 addverstr(a1,Git_Filename,'semilogx')
 
 % print pdf
@@ -172,7 +172,7 @@ set(h,'FontSize',Key_Font_Size)
 
 % add Git if file is available
 
-Git_Filename = [outdir,'heated_channel_Pr_0p71_32_git.txt'];
+Git_Filename = [outdir,'heated_channel_Pr_0p71_16_git.txt'];
 addverstr(a2,Git_Filename,'semilogx')
 
 % print pdf
