@@ -70,13 +70,10 @@ text(225,5,'Pr=0.10','Interpreter',Font_Interpreter,'Fontname',Font_Name,'FontSi
 % plot the FDS results
 
 H = 2;
-dpdx = 8.748e-6;
+dpdx = 9.0088e-6;
 tau_w = 0.5*dpdx*H;
-rho = 101325*29/(8414.5*293);
-u_tau = sqrt(tau_w/rho);
 cp = 1;
 mu = 1.8216e-5;
-delta_nu = (mu/rho)/u_tau;
 T_w = 20;
 
 devcfile = {'heated_channel_Pr_0p10_32_devc.csv', ...
@@ -100,7 +97,14 @@ for i = [1,2,3,4]
     end
 
     M = importdata([outdir,devcfile{i}],',',2);
-    q_w = mean(M.data(3,2:3));
+
+    rho = M.data(end,strcmp(M.colheaders,'"RHO"')); % should be about 1.19
+    u_tau = sqrt(tau_w/rho);
+    delta_nu = (mu/rho)/u_tau;
+
+    j1 = find(strcmp(M.colheaders,'"NetHF0B"'));
+    j2 = find(strcmp(M.colheaders,'"NetHF0T"'));
+    q_w = mean(M.data(end,j1:j2));
     T_tau = q_w/(rho*u_tau*cp);
 
     if ~exist([outdir,linefile{i}])
@@ -182,14 +186,42 @@ print(f2,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/heated_cha
 
 
 % % Compute pressure gradient from Re_tau
-%
+
 % mu=1.8216e-5
-% rho=101325*28.84852/(8314.5*293.15)
-% Re_tau=590
-% delta=1
-% u_tau=Re_tau*mu/rho/delta
+% rho=1.1934
+% Re_tau=180 % Kim and Moin, 1987
+% delta=1 % channel half height
+% u_tau=Re_tau*(mu/rho)/delta
 % tau_w=rho*u_tau^2
 % dpdx=tau_w/delta
+% Pr = 1;
+% Tref = 293;
+
+% q = 2/(Pr*Re_tau) * rho*cp*u_tau*Tref/delta
+
+% % Check bulk velocity
+
+% figure
+% for i = [1,2,3,4]
+%     M = importdata([outdir,devcfile{i}],',',2);
+%     t = M.data(:,find(strcmp(M.colheaders,'Time')));
+%     UVEL = M.data(:,find(strcmp(M.colheaders,'"U-VEL"')));
+%     plot(t,UVEL); hold on
+% end
+
+% % Check heat balance
+
+% figure
+% for i = [1,2,3,4]
+%     M = importdata([outdir,devcfile{i}],',',2);
+%     t = M.data(:,find(strcmp(M.colheaders,'Time')));
+%     j1 = find(strcmp(M.colheaders,'"NetHF0B"'));
+%     j2 = find(strcmp(M.colheaders,'"NetHF0T"'));
+%     q_w = mean(M.data(:,j1:j2),2);
+%     plot(t,q_w); hold on
+% end
+
+
 
 
 
