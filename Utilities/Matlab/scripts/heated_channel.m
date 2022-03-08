@@ -42,7 +42,7 @@ axis([1e0 1e3 0 30])
 set(a1,'FontName',Font_Name)
 set(a1,'FontSize',Title_Font_Size)
 
-xlabel('{\it y}^+','Interpreter',Font_Interpreter,'Fontname',Font_Name)
+xlabel('{\it z}^+','Interpreter',Font_Interpreter,'Fontname',Font_Name)
 ylabel('{\it u}^+','Interpreter',Font_Interpreter,'Fontname',Font_Name)
 
 
@@ -60,7 +60,7 @@ axis([1e0 1e3 0 30])
 set(a2,'FontName',Font_Name)
 set(a2,'FontSize',Label_Font_Size)
 
-xlabel('{\it y}^+','Interpreter',Font_Interpreter,'Fontname',Font_Name)
+xlabel('{\it z}^+','Interpreter',Font_Interpreter,'Fontname',Font_Name)
 ylabel('{\it T}^+','Interpreter',Font_Interpreter,'Fontname',Font_Name)
 
 text(225,26,'Pr=2.0','Interpreter',Font_Interpreter,'Fontname',Font_Name,'FontSize',Label_Font_Size)
