@@ -1104,13 +1104,14 @@ END TYPE CFACE_TYPE
 ! Cartesian Cells Cut-Cells data structure:
 
 INTEGER, PARAMETER :: IBM_MAXVERTS_CELL   =3072
-INTEGER, PARAMETER :: IBM_NPARAM_CCFACE   =   5 ! [face_type side iaxis cei icf]
+INTEGER, PARAMETER :: IBM_NPARAM_CCFACE   =   6 ! [face_type side iaxis cei icf to_master]
 
 TYPE IBM_CUTCELL_TYPE
    INTEGER :: NCELL, NFACE_CELL
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)                     ::    CCELEM ! Cut-cells faces connectivities in FACE_LIST.
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)                     :: FACE_LIST ! List of faces, cut-faces.
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)                     ::  IJK_LINK ! Cell/cut-cell each cut-cell is linked to.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)                       ::  LINK_LEV ! Level in local Linking Hierarchy tree.
    REAL(EB), ALLOCATABLE, DIMENSION(:)                       ::    VOLUME ! Cut-cell volumes.
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)                     ::    XYZCEN ! Cut-cell centroid locaitons.
    INTEGER,  DIMENSION(MAX_DIM)                              ::       IJK ! [ i j k ]
