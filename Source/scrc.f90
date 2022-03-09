@@ -58,9 +58,10 @@ INTEGER, PARAMETER :: NSCARC_EXCHANGE_MATRIX_COLSG   =  6        !< Type of data
 INTEGER, PARAMETER :: NSCARC_EXCHANGE_MATRIX_SIZES   =  7        !< Type of data exchange: size of Poisson matrix 
 INTEGER, PARAMETER :: NSCARC_EXCHANGE_MATRIX_VALS    =  8        !< Type of data exchange: values of Poisson matrix
 INTEGER, PARAMETER :: NSCARC_EXCHANGE_MGM_SINGLE     =  9        !< Type of data exchange: MGM - Mean value interface
-INTEGER, PARAMETER :: NSCARC_EXCHANGE_MGM_VELO       = 11        !< Type of data exchange: MGM - Velocity interface
-INTEGER, PARAMETER :: NSCARC_EXCHANGE_SOLIDS         = 13        !< Type of data exchange: solid cell information
-INTEGER, PARAMETER :: NSCARC_EXCHANGE_VECTOR         = 15        !< Type of data exchange: plain values of a vector
+INTEGER, PARAMETER :: NSCARC_EXCHANGE_MGM_VELO       = 10        !< Type of data exchange: MGM - Velocity interface
+INTEGER, PARAMETER :: NSCARC_EXCHANGE_SOLIDS         = 11        !< Type of data exchange: solid cell information
+INTEGER, PARAMETER :: NSCARC_EXCHANGE_VECTOR1        = 12        !< Type of data exchange: 1d-vector
+INTEGER, PARAMETER :: NSCARC_EXCHANGE_VECTOR3        = 13        !< Type of data exchange: 3d-vector
 
 INTEGER, PARAMETER :: NSCARC_MESH_STRUCTURED         =  1        !< Type of discretization: structured 
 INTEGER, PARAMETER :: NSCARC_MESH_UNSTRUCTURED       =  2        !< Type of discretization: unstructured 
@@ -172,6 +173,7 @@ INTEGER, PARAMETER :: NSCARC_VECTOR_H                =  8        !< Handle for 3
 INTEGER, PARAMETER :: NSCARC_VECTOR_HS               =  9        !< Handle for 3D-vector HS - corrector stage
 INTEGER, PARAMETER :: NSCARC_VECTOR_P                = 10        !< Handle for 3D-vector P  - predictor stage
 INTEGER, PARAMETER :: NSCARC_VECTOR_PS               = 11        !< Handle for 3D-vector PS - corrector stage
+INTEGER, PARAMETER :: NSCARC_VECTOR_RHO              = 12        !< Handle for 3D-vector RHO
 
 INTEGER, PARAMETER :: NSCARC_WARNING_NO_MKL_PRECON   =  1        !< Type of warning message: No MKL preconditioner available
 INTEGER, PARAMETER :: NSCARC_WARNING_NO_GLOBAL_SCOPE =  2        !< Type of warning message: No global scope solver available
@@ -3886,7 +3888,7 @@ END SUBROUTINE SCARC_SETUP_EXCHANGES
 ! NSCARC_EXCHANGE_MGM_SINGLE      :  exchange single neighbouring layer for all other BC settings of MGM method
 ! NSCARC_EXCHANGE_MGM_VELO        :  exchange neighboring velocity entries in MGM method
 ! NSCARC_EXCHANGE_SOLIDS          :  exchange information about adjacent solids
-! NSCARC_EXCHANGE_VECTOR          :  exchange 1D-vector and only use neighboring data
+! NSCARC_EXCHANGE_VECTOR1          :  exchange 1D-vector and only use neighboring data
 ! --------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_EXCHANGE (NTYPE, NPARAM, NL)
 INTEGER, INTENT(IN) :: NTYPE, NPARAM, NL
@@ -3945,8 +3947,11 @@ RECEIVE_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          CASE (NSCARC_EXCHANGE_SOLIDS)
             CALL SCARC_RECV_MESSAGE_INT (NM, NOM, NL, NSCARC_BUFFER_LAYER1, 'SOLIDS')
 
-         CASE (NSCARC_EXCHANGE_VECTOR)
-            CALL SCARC_RECV_MESSAGE_REAL (NM, NOM, NL, NSCARC_BUFFER_LAYER1, 'VECTOR PLAIN')
+         CASE (NSCARC_EXCHANGE_VECTOR1)
+            CALL SCARC_RECV_MESSAGE_REAL (NM, NOM, NL, NSCARC_BUFFER_LAYER1, 'VECTOR1')
+
+         CASE (NSCARC_EXCHANGE_VECTOR3)
+            CALL SCARC_RECV_MESSAGE_REAL (NM, NOM, NL, NSCARC_BUFFER_LAYER1, 'VECTOR3')
 
          CASE DEFAULT
             CALL SCARC_ERROR(NSCARC_ERROR_EXCHANGE_RECV, SCARC_NONE, TYPE_EXCHANGE)
@@ -4018,9 +4023,13 @@ SEND_PACK_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
             CALL SCARC_PACK_SOLIDS
             CALL SCARC_SEND_MESSAGE_INT (NM, NOM, NL, NSCARC_BUFFER_LAYER1, 'SOLIDS')
 
-         CASE (NSCARC_EXCHANGE_VECTOR)
-            CALL SCARC_PACK_VECTOR(NM, NL, NPARAM)
-            CALL SCARC_SEND_MESSAGE_REAL (NM, NOM, NL, NSCARC_BUFFER_LAYER1, 'VECTOR PLAIN')
+         CASE (NSCARC_EXCHANGE_VECTOR1)
+            CALL SCARC_PACK_VECTOR1(NM, NL, NPARAM)
+            CALL SCARC_SEND_MESSAGE_REAL (NM, NOM, NL, NSCARC_BUFFER_LAYER1, 'VECTOR1')
+
+         CASE (NSCARC_EXCHANGE_VECTOR3)
+            CALL SCARC_PACK_VECTOR3(NM, NPARAM)
+            CALL SCARC_SEND_MESSAGE_REAL (NM, NOM, NL, NSCARC_BUFFER_LAYER1, 'VECTOR3 ')
 
          CASE DEFAULT
             CALL SCARC_ERROR(NSCARC_ERROR_EXCHANGE_SEND, SCARC_NONE, TYPE_EXCHANGE)
@@ -4083,8 +4092,11 @@ SEND_UNPACK_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          CASE (NSCARC_EXCHANGE_SOLIDS)
             CALL SCARC_UNPACK_SOLIDS (NM, NOM)
 
-         CASE (NSCARC_EXCHANGE_VECTOR)
-            CALL SCARC_UNPACK_VECTOR (NM, NOM, NL, NPARAM)
+         CASE (NSCARC_EXCHANGE_VECTOR1)
+            CALL SCARC_UNPACK_VECTOR1 (NM, NOM, NL, NPARAM)
+
+         CASE (NSCARC_EXCHANGE_VECTOR3)
+            CALL SCARC_UNPACK_VECTOR3 (NM, NOM, NPARAM)
 
          CASE DEFAULT
             CALL SCARC_ERROR(NSCARC_ERROR_EXCHANGE_SEND, SCARC_NONE, TYPE_EXCHANGE)
@@ -4672,7 +4684,7 @@ END SUBROUTINE SCARC_UNPACK_MGM_VELO
 ! --------------------------------------------------------------------------------------------------------------
 !> \brief Pack overlapping parts of specified vector VC (numbered via IC values)
 ! --------------------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_PACK_VECTOR(NM, NL, NV)
+SUBROUTINE SCARC_PACK_VECTOR1(NM, NL, NV)
 INTEGER, INTENT(IN) :: NM, NL, NV
 REAL(EB), DIMENSION(:), POINTER :: VC
 INTEGER :: IOR0, ICG, ICW
@@ -4689,12 +4701,12 @@ DO IOR0 = -3, 3
    ENDDO
 ENDDO
 
-END SUBROUTINE SCARC_PACK_VECTOR
+END SUBROUTINE SCARC_PACK_VECTOR1
 
 ! --------------------------------------------------------------------------------------------------------------
 !> \brief Unpack overlapping parts of specified vector VC (numbered via IC values)
 ! --------------------------------------------------------------------------------------------------------------
-SUBROUTINE SCARC_UNPACK_VECTOR(NM, NOM, NL, NVECTOR)
+SUBROUTINE SCARC_UNPACK_VECTOR1(NM, NOM, NL, NVECTOR)
 INTEGER, INTENT(IN) :: NM, NOM, NL, NVECTOR
 REAL(EB), DIMENSION(:), POINTER :: VC
 INTEGER :: IOR0, LL, ICG, ICE
@@ -4712,7 +4724,59 @@ DO IOR0 = -3, 3
    ENDDO
 ENDDO
 
-END SUBROUTINE SCARC_UNPACK_VECTOR
+END SUBROUTINE SCARC_UNPACK_VECTOR1
+
+! --------------------------------------------------------------------------------------------------------------
+!> \brief Pack overlapping parts of specified Bernoulli integral pressure vector (predictor/corrector)
+! Note: Vector VC is numbered via I, J, K values
+! --------------------------------------------------------------------------------------------------------------
+SUBROUTINE SCARC_PACK_VECTOR3(NM, NVECTOR)
+INTEGER, INTENT(IN) :: NM, NVECTOR
+REAL(EB), DIMENSION(:,:,:), POINTER :: RRR
+INTEGER :: IOR0, ICG, IWG
+SELECT CASE (NVECTOR)
+   CASE (NSCARC_VECTOR_RHO)
+      RRR => MESHES(NM)%RHOS
+   CASE DEFAULT
+      WRITE(*,*) 'UNPACK_VECTOR3: Not yet implemented'
+END SELECT
+OS%SEND_BUFFER_REAL = NSCARC_REAL_EB_HUGE
+DO IOR0 = -3, 3
+   IF (OL%GHOST_LASTW(IOR0) == 0) CYCLE
+   DO ICG = OL%GHOST_FIRSTW(IOR0), OL%GHOST_LASTW(IOR0)
+      IWG = OG%ICG_TO_IWG(ICG)
+      CALL SCARC_POINT_TO_WALLCELL_INT(IWG)
+      OS%SEND_BUFFER_REAL(ICG) = RRR(IIG0, JJG0, KKG0)
+   ENDDO
+ENDDO
+END SUBROUTINE SCARC_PACK_VECTOR3
+
+! --------------------------------------------------------------------------------------------------------------
+!> \brief Unpack overlapping parts of specified Bernoulli integral pressure vector (predictor/corrector)
+! Note: Vector VC is numbered via I, J, K values
+! --------------------------------------------------------------------------------------------------------------
+SUBROUTINE SCARC_UNPACK_VECTOR3(NM, NOM, NVECTOR)
+INTEGER, INTENT(IN) :: NM, NOM, NVECTOR
+REAL(EB), DIMENSION(:,:,:), POINTER :: RRR
+INTEGER :: LL, IOR0, IWG, ICG
+RECV_BUFFER_REAL => SCARC_POINT_TO_BUFFER_REAL (NM, NOM, 1)
+SELECT CASE (NVECTOR)
+   CASE (NSCARC_VECTOR_RHO)
+      RRR => MESHES(NM)%RHOS
+   CASE DEFAULT
+      WRITE(*,*) 'UNPACK_VECTOR3: Not yet implemented'
+END SELECT
+LL = 1
+DO IOR0 = -3, 3
+   IF (OL%GHOST_LASTW(IOR0) == 0) CYCLE
+   UNPACK_BERNOULLI: DO ICG = OL%GHOST_FIRSTE(IOR0), OL%GHOST_LASTE(IOR0)
+      IWG = OG%ICG_TO_IWG(ICG)
+      CALL SCARC_POINT_TO_WALLCELL_EXT(IWG)
+      RRR(II0, JJ0, KK0) = RECV_BUFFER_REAL(LL)
+      LL = LL + 1
+   ENDDO UNPACK_BERNOULLI
+ENDDO
+END SUBROUTINE SCARC_UNPACK_VECTOR3
 
 ! --------------------------------------------------------------------------------------------------------------
 !> \brief Pack overlapping parts of solid vector IS_SOLID
@@ -5434,7 +5498,7 @@ END SUBROUTINE SCARC_VECTOR_INIT
 ! --------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_MATVEC_PRODUCT(NV1, NV2, NL)
 INTEGER, INTENT(IN) :: NV1, NV2, NL           
-REAL(EB) :: TNOW
+REAL(EB) :: TNOW, V2O
 INTEGER :: NM, IC, JC, ICOL
 #ifdef WITH_MKL
 EXTERNAL :: DAXPBY, DAXPY
@@ -5444,7 +5508,7 @@ TNOW = CURRENT_TIME()
 
 ! If this call is related to a globally acting solver, exchange internal boundary values of
 ! vector1 such that the ghost values contain the corresponding overlapped values of adjacent neighbor
-IF (TYPE_MATVEC == NSCARC_MATVEC_GLOBAL) CALL SCARC_EXCHANGE (NSCARC_EXCHANGE_VECTOR, NV1, NL)
+IF (TYPE_MATVEC == NSCARC_MATVEC_GLOBAL) CALL SCARC_EXCHANGE (NSCARC_EXCHANGE_VECTOR1, NV1, NL)
 
 ! Perform global matrix-vector product:
 ! Note: - matrix already contains subdiagonal values from neighbor along internal boundaries
@@ -5466,6 +5530,7 @@ MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
       DO IC = 1, G%NC
          ICOL = A%ROW(IC)                                                ! diagonal entry
          JC   = A%COL(ICOL)
+         V2O = V2(IC)
          V2(IC) = A%VAL(ICOL)* V1(JC)
          DO ICOL = A%ROW(IC)+1, A%ROW(IC+1)-1                            ! subdiagonal entries
             JC = A%COL(ICOL)
@@ -6351,15 +6416,18 @@ END SUBROUTINE SCARC_SETUP_WALLTYPES
 !> \brief Correct boundary type array related to internal obstructions on ghost cells
 ! ---------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_SETUP_OBST_BOUNDARY
-INTEGER :: IW
+INTEGER :: IW, NM
 
-DO IW = L%NWC_EXT+1, L%NWC_EXT + L%NWC_INT
-   CALL SCARC_POINT_TO_WALLCELL(IW)
-   IF (MWC%BOUNDARY_TYPE == SOLID_BOUNDARY) THEN
-      GWC%BTYPE=NEUMANN
-   ELSE
-      GWC%BTYPE=NULL_BOUNDARY
-   ENDIF
+DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
+   CALL SCARC_POINT_TO_GRID (NM, NLEVEL_MIN)     
+   DO IW = L%NWC_EXT+1, L%NWC_EXT + L%NWC_INT
+      CALL SCARC_POINT_TO_WALLCELL(IW)
+      IF (MWC%BOUNDARY_TYPE == SOLID_BOUNDARY) THEN
+         GWC%BTYPE=NEUMANN
+      ELSE
+         GWC%BTYPE=NULL_BOUNDARY
+      ENDIF
+   ENDDO
 ENDDO
 
 END SUBROUTINE SCARC_SETUP_OBST_BOUNDARY
@@ -7386,7 +7454,7 @@ POISSON_TYPE_SELECT: SELECT CASE (TYPE_POISSON)
          IF (TWO_D .AND. ABS(IOR0) == 2) CYCLE       
 
          F => L%FACE(IOR0)
-         I = WC_BC%IIG ;  J  = WC_BC%JJG ;  K  = WC_BC%KKG           ! mesh-inner cells indices in (U)ScaRC-structure
+         I = WC_BC%IIG ;  J  = WC_BC%JJG ;  K  = WC_BC%KKG      
 
          IF (IS_UNSTRUCTURED .AND. L%IS_SOLID(I, J, K)) CYCLE
 
@@ -10676,7 +10744,7 @@ MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 
 ENDDO MESHES_LOOP
 
-CALL SCARC_EXCHANGE (NSCARC_EXCHANGE_VECTOR, X, NL)
+CALL SCARC_EXCHANGE (NSCARC_EXCHANGE_VECTOR1, X, NL)
 
 IF (TYPE_SOLVER == NSCARC_SOLVER_MAIN) THEN
    CALL SCARC_UPDATE_MAINCELLS (NLEVEL_MIN)
@@ -11781,7 +11849,7 @@ INTEGER, INTENT(IN) :: NVB, NVC, NLF, NLC
 REAL(EB) :: RSUM
 INTEGER :: NM, IC, ICOL
 
-IF (NMESHES > 1) CALL SCARC_EXCHANGE (NSCARC_EXCHANGE_VECTOR, NVB, NLF)
+IF (NMESHES > 1) CALL SCARC_EXCHANGE (NSCARC_EXCHANGE_VECTOR1, NVB, NLF)
 
 DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 
@@ -11829,7 +11897,7 @@ DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
    ENDDO
 
 ENDDO
-IF (NMESHES > 1) CALL SCARC_EXCHANGE (NSCARC_EXCHANGE_VECTOR, NVB, NLF)
+IF (NMESHES > 1) CALL SCARC_EXCHANGE (NSCARC_EXCHANGE_VECTOR1, NVB, NLF)
 
 END SUBROUTINE SCARC_PROLONGATION
 
@@ -11962,6 +12030,7 @@ IF (IS_MGM) THEN
 ELSE
    CALL SCARC_SETUP_WALLS (TYPE_MESH)                 ; IF (STOP_STATUS==SETUP_STOP) RETURN
 ENDIF
+CALL SCARC_EXCHANGE(NSCARC_EXCHANGE_VECTOR3, NSCARC_VECTOR_RHO, NLEVEL_MIN)
 
 ! Reassign sizes and content of Poisson matrices 
 
@@ -11973,6 +12042,7 @@ IF (.NOT.INSEPARABLE_POISSON) THEN
 #endif
 ELSE
    CALL SCARC_SETUP_INSEPARABLE_ENVIRONMENT
+
 ENDIF
 
 ! Reassign sizes of working vectors needed for requested ScaRC solver
