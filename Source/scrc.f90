@@ -5498,7 +5498,7 @@ END SUBROUTINE SCARC_VECTOR_INIT
 ! --------------------------------------------------------------------------------------------------------------
 SUBROUTINE SCARC_MATVEC_PRODUCT(NV1, NV2, NL)
 INTEGER, INTENT(IN) :: NV1, NV2, NL           
-REAL(EB) :: TNOW, V2O
+REAL(EB) :: TNOW
 INTEGER :: NM, IC, JC, ICOL
 #ifdef WITH_MKL
 EXTERNAL :: DAXPBY, DAXPY
@@ -5530,7 +5530,6 @@ MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
       DO IC = 1, G%NC
          ICOL = A%ROW(IC)                                                ! diagonal entry
          JC   = A%COL(ICOL)
-         V2O = V2(IC)
          V2(IC) = A%VAL(ICOL)* V1(JC)
          DO ICOL = A%ROW(IC)+1, A%ROW(IC+1)-1                            ! subdiagonal entries
             JC = A%COL(ICOL)
