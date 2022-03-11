@@ -259,9 +259,11 @@ LOGICAL :: PERIODIC_DOMAIN_Z=.FALSE.                !< The domain is periodic \f
 LOGICAL :: OPEN_WIND_BOUNDARY=.FALSE.               !< There is a prevailing wind
 LOGICAL :: HRR_GAS_ONLY=.FALSE.                     !< Surface oxidation is not included in total HRR
 LOGICAL :: WRITE_DEVC_CTRL=.FALSE.                  !< Flag for writing DEVC and CTRL logfile
+LOGICAL :: INIT_INVOKED_BY_SURF=.FALSE.             !< Flag indicating that a SURF line specifies an INIT line
 
 INTEGER, ALLOCATABLE, DIMENSION(:) :: CHANGE_TIME_STEP_INDEX      !< Flag to indicate if a mesh needs to change time step
 INTEGER, ALLOCATABLE, DIMENSION(:) :: SETUP_PRESSURE_ZONES_INDEX  !< Flag to indicate if a mesh needs to keep searching for ZONEs
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: MAX_CELL_ASPECT_RATIO      !< Max cell aspect ratio for each mesh
 
 ! Miscellaneous character strings
 
@@ -460,8 +462,8 @@ REAL(EB) :: C_MIN=1._EB       !< Minimum value of RAD_Q_SUM/KFST4_SUM
 ! Ramping parameters
 
 CHARACTER(LABEL_LENGTH), POINTER, DIMENSION(:) :: RAMP_ID,RAMP_TYPE
-INTEGER :: I_RAMP_AGT,I_RAMP_W0_T,I_RAMP_U0_Z,I_RAMP_V0_Z,I_RAMP_W0_Z,I_RAMP_GX,I_RAMP_GY,I_RAMP_GZ,&
-           I_RAMP_FVX_T,I_RAMP_FVY_T,I_RAMP_FVZ_T,N_RAMP=0,I_RAMP_TMP0_Z=0,I_RAMP_P0_Z=0,&
+INTEGER :: I_RAMP_AGT,I_RAMP_GX,I_RAMP_GY,I_RAMP_GZ,&
+           I_RAMP_PGF_T,I_RAMP_FVX_T,I_RAMP_FVY_T,I_RAMP_FVZ_T,N_RAMP=0,I_RAMP_TMP0_Z=0,I_RAMP_P0_Z=0,&
            I_RAMP_SPEED_T=0,I_RAMP_SPEED_Z=0,I_RAMP_DIRECTION_T=0,I_RAMP_DIRECTION_Z=0
 INTEGER, PARAMETER :: TIME_HEAT=-1,TIME_VELO=-2,TIME_TEMP=-3,TIME_EFLUX=-4,TIME_PART=-5,TANH_RAMP=-2,TSQR_RAMP=-1,&
                       VELO_PROF_X=-6,VELO_PROF_Y=-7,VELO_PROF_Z=-8
@@ -513,6 +515,22 @@ REAL(EB), ALLOCATABLE, DIMENSION(:) :: H_BAR                     !< Pressure sol
 INTEGER, ALLOCATABLE, DIMENSION(:) :: COUNTS_TP                  !< Counter for MPI calls used for 1-D tunnel pressure solver
 INTEGER, ALLOCATABLE, DIMENSION(:) :: DISPLS_TP                  !< Displacements for MPI calls used for 1-D tunnel pressure solver
 INTEGER, ALLOCATABLE, DIMENSION(:) :: I_OFFSET                   !< Spatial index of tunnel
+CHARACTER(LABEL_LENGTH) :: SCARC_COARSE = 'NONE'                 !< Type of coarse grid solver
+CHARACTER(LABEL_LENGTH) :: SCARC_MESH = 'STRUCTURED'             !< Discretization type 
+CHARACTER(LABEL_LENGTH) :: SCARC_METHOD = 'NONE'                 !< Global (U)ScaRC solver 
+CHARACTER(LABEL_LENGTH) :: SCARC_MGM_BOUNDARY = 'MEAN'           !< Type of interface boundary condition for local Laplace problems
+CHARACTER(LABEL_LENGTH) :: SCARC_MGM_LAPLACE_SOLVER = 'OPTIMIZED'!< Type of solver for local Laplace problems
+CHARACTER(LABEL_LENGTH) :: SCARC_POISSON = 'SEPARABLE'           !< Type of discretization for Poisson equation 
+CHARACTER(LABEL_LENGTH) :: SCARC_PRECISION = 'DOUBLE'            !< Precision type for preconditioner (MKL only)
+CHARACTER(LABEL_LENGTH) :: SCARC_PRECON = 'NONE'                 !< Preconditioner for Krylov solver 
+REAL(EB) :: SCARC_CAPPA =  0.0_EB                                !< Convergence rate of selected (U)ScarC solver
+INTEGER  :: SCARC_ITERATIONS = 0                                 !> Number of (U)ScaRC iterations performed
+INTEGER  :: SCARC_KRYLOV_ITERATIONS = 1000                       !> Maximum number of allowed Krylov iterations
+REAL(EB) :: SCARC_KRYLOV_TOLERANCE = 1.E-8_EB                    !< Requested tolerance for convergence
+INTEGER  :: SCARC_MGM_ITERATIONS = 20                            !< Maximum allowed number of Laplace iterations 
+REAL(EB) :: SCARC_MGM_TOLERANCE = 1.E-4_EB                       !< Requested tolerance for interface velocity error 
+REAL(EB) :: SCARC_RESIDUAL =  0.0_EB                             !< Residual of globally selected (U)ScaRC solver
+LOGICAL  :: SCARC_VERBOSE = .FALSE.                              !< Flag for additional verbose messages 
 
 ! Miscellaneous integer constants
 
@@ -627,7 +645,8 @@ REAL(EB) :: RHOMAX                              !< Maximum gas density (kg/m3)
 ! Flux limiter
 
 INTEGER, PARAMETER :: CENTRAL_LIMITER=0,GODUNOV_LIMITER=1,SUPERBEE_LIMITER=2,MINMOD_LIMITER=3,CHARM_LIMITER=4,MP5_LIMITER=5
-INTEGER :: I_FLUX_LIMITER=SUPERBEE_LIMITER,CFL_VELOCITY_NORM=2
+INTEGER :: I_FLUX_LIMITER=SUPERBEE_LIMITER,CFL_VELOCITY_NORM=-999
+LOGICAL :: CFL_VELOCITY_NORM_USER_SPECIFIED=.FALSE.
 
 ! Numerical quadrature (used in TEST_FILTER)
 
@@ -653,6 +672,7 @@ LOGICAL :: STORE_CUTCELL_DIVERGENCE = .FALSE.
 LOGICAL :: STORE_CARTESIAN_DIVERGENCE=.FALSE.
 
 LOGICAL :: CC_IBM=.FALSE.
+LOGICAL :: LINKED_PRESSURE = .FALSE.
 REAL(EB):: GEOM_DEFAULT_THICKNESS=0.1_EB ! 10 cm.
 LOGICAL :: CHECK_MASS_CONSERVE =.FALSE.
 LOGICAL :: GLMAT_VERBOSE=.FALSE.

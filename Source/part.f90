@@ -121,19 +121,21 @@ SUBROUTINE INSERT_ALL_PARTICLES(T,NM)
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP,RANDOM_CHOICE
 USE GEOMETRY_FUNCTIONS, ONLY: RANDOM_RECTANGLE,RANDOM_CONE,RANDOM_RING,CONE_MESH_INTERSECTION_VOLUME,UNIFORM_RING,&
                               RING_MESH_INTERSECTION_ARC
+USE COMP_FUNCTIONS, ONLY: GET_FILE_NUMBER, SHUTDOWN
 USE TRAN, ONLY: GET_IJK
 USE DEVICE_VARIABLES
 USE CONTROL_VARIABLES
 REAL(EB), INTENT(IN) :: T
 INTEGER, INTENT(IN) :: NM
-REAL     :: RN,RN2,RN3
+REAL     :: RN,RN2,RN3,INIT_CALLS
 REAL(EB) :: PHI_RN,FLOW_RATE,THETA_RN,SPHI,CPHI,MASS_SUM,D_PRES_FACTOR, &
             STHETA,CTHETA,PWT0,PARTICLE_SPEED,SHIFT1,SHIFT2,XTMP,YTMP,ZTMP,VLEN, &
             TRIGT1,TRIGT2,TNOW,TSI,PIPE_PRESSURE,X1,X2,Y1,Y2,Z1,Z2, &
-            ETA,ETA_MAX,ETA_MIN,XI,YJ,ZK
+            ETA,ETA_MAX,ETA_MIN,XI,YJ,ZK,X_OFFSET,Y_OFFSET,Z_OFFSET, &
+            VXMIN,VXMAX,VYMIN,VYMAX,VZMIN,VZMAX,VDX,VDY,VDZ
 REAL(EB), PARAMETER :: VENT_OFFSET=0.5
-INTEGER :: IP,KS,II,JJ,KK,IC,IL,IU,ILPC,DROP_SUM,IIG,JJG,KKG,IW,IOR,STRATUM,IB,ICF
-INTEGER :: N,N_INSERT,ILAT,NEW_LP_INDEX
+INTEGER :: IP,KS,II,JJ,KK,IC,IL,IU,ILPC,DROP_SUM,IIG,JJG,KKG,IW,IOR,STRATUM,INIT_INDEX,ICF,ITS,ITERATIONS
+INTEGER :: N,N_INSERT,ILAT,NEW_LP_INDEX,III,IOS,LU_VEG_IN,NVOX,VXI
 INTEGER, ALLOCATABLE, DIMENSION(:) :: LP_INDEX_LOOKUP
 LOGICAL :: INSERT_ANOTHER_BATCH
 TYPE (PROPERTY_TYPE), POINTER :: PY=>NULL()
@@ -143,8 +145,10 @@ TYPE (SURFACE_TYPE), POINTER :: SF=>NULL()
 TYPE (LAGRANGIAN_PARTICLE_TYPE), POINTER :: LP=>NULL()
 TYPE (LAGRANGIAN_PARTICLE_CLASS_TYPE), POINTER :: LPC=>NULL()
 TYPE (INITIALIZATION_TYPE), POINTER :: IN=>NULL()
+TYPE (WALL_TYPE), POINTER :: WC
 TYPE (BOUNDARY_COORD_TYPE), POINTER :: BC
 TYPE (BOUNDARY_ONE_D_TYPE), POINTER :: ONE_D
+CHARACTER(MESSAGE_LENGTH) :: MESSAGE
 
 IF (N_LAGRANGIAN_CLASSES==0) RETURN ! Don't waste time if no particles
 
@@ -159,9 +163,92 @@ OVERALL_INSERT_LOOP: DO
 
    INSERT_ANOTHER_BATCH = .FALSE.
 
+   ! Insert spray particles/droplets
+
    CALL INSERT_SPRAY_PARTICLES
+
+   ! Insert particles at a solid boundary or vent.
+
    CALL INSERT_VENT_PARTICLES
-   CALL INSERT_VOLUMETRIC_PARTICLES
+
+   ! Insert particles within a volume specified by an INIT line.
+
+   DO INIT_INDEX=1,N_INIT
+      IN => INITIALIZATION(INIT_INDEX)
+      IF (IN%INVOKED_BY_SURF) CYCLE
+      X_OFFSET = 0._EB
+      Y_OFFSET = 0._EB
+      Z_OFFSET = 0._EB
+      ! Check if INIT line links to a binary file of bulk density data
+      IF (IN%BULK_DENSITY_FILE=='null') THEN
+         CALL INSERT_VOLUMETRIC_PARTICLES
+      ELSE
+         IF (.NOT. IN%ALREADY_INSERTED(NM)) THEN 
+            ! Build out of blocks
+            IN%SHAPE = 'BLOCK'
+            LU_VEG_IN = GET_FILE_NUMBER()
+            OPEN(UNIT=LU_VEG_IN,FILE=TRIM(IN%BULK_DENSITY_FILE),&
+               STATUS='OLD',FORM='UNFORMATTED',ACTION='READ',IOSTAT=IOS)
+            IF (IOS==0) THEN
+               READ(LU_VEG_IN) VXMIN,VXMAX,VYMIN,VYMAX,VZMIN,VZMAX
+               ! Skip if volume containing vegetation is entirely outside the current mesh
+               IF (VXMIN>XF .OR. VXMAX<XS .OR. VYMIN>YF .OR. VYMAX<YS .OR. VZMIN>ZF .OR. VZMAX<ZS) CYCLE
+               ! Voxel resolution
+               READ(LU_VEG_IN) VDX,VDY,VDZ
+               ! Number of vegetation containing voxels
+               READ(LU_VEG_IN) NVOX
+               ! Create a pseudo-INIT block for each voxel
+               VEG_INSERT_LOOP: DO VXI=1,NVOX
+                  CALL INSERT_VOLUMETRIC_PARTICLES
+               ENDDO VEG_INSERT_LOOP
+               CLOSE(LU_VEG_IN)
+               IN%ALREADY_INSERTED(NM) = .TRUE.
+            ELSE
+               WRITE(MESSAGE,'(A,I0,A,A,A)') 'ERROR: INIT ',INIT_INDEX,', could not read binary bulk density file ', &
+                                         TRIM(IN%BULK_DENSITY_FILE),'. Check file exists.'
+               CALL SHUTDOWN(MESSAGE); RETURN
+            ENDIF
+         ENDIF
+      ENDIF
+   ENDDO
+
+   ! Insert volumetric particles that are invoked by a particular SURF type.
+
+   IF (INIT_INVOKED_BY_SURF) THEN
+
+      DO IW=1,N_INTERNAL_WALL_CELLS+N_EXTERNAL_WALL_CELLS
+         WC => MESHES(NM)%WALL(IW)
+         BC => MESHES(NM)%BOUNDARY_COORD(WC%BC_INDEX)
+         SF => SURFACE(WC%SURF_INDEX)
+         IF (BC%IOR==3 .AND. SF%INIT_INDICES(1)>0) THEN
+            CALL RANDOM_NUMBER(RN)
+            X_OFFSET = BC%X + (RN-0.5_FB)*DX(BC%IIG)
+            CALL RANDOM_NUMBER(RN)
+            Y_OFFSET = BC%Y + (RN-0.5_FB)*DY(BC%JJG)
+            Z_OFFSET = BC%Z
+            ONE_D => MESHES(NM)%BOUNDARY_ONE_D(WC%OD_INDEX)
+            INIT_CALLS = REAL(SF%INIT_PER_AREA*ONE_D%AREA)
+            ITERATIONS = INT(INIT_CALLS)
+            CALL RANDOM_NUMBER(RN)
+            IF (RN<INIT_CALLS-ITERATIONS) ITERATIONS = ITERATIONS + 1
+            DO ITS=1,ITERATIONS
+               DO III=1,10
+                  IF (SF%INIT_IDS(III)=='null') CYCLE
+                  INIT_INDEX = SF%INIT_INDICES(III)
+                  CALL INSERT_VOLUMETRIC_PARTICLES
+               ENDDO
+            ENDDO
+         ENDIF
+      ENDDO
+
+      DO INIT_INDEX=1,N_INIT
+         IF (INITIALIZATION(INIT_INDEX)%INVOKED_BY_SURF) INITIALIZATION(INIT_INDEX)%ALREADY_INSERTED = .TRUE.
+      ENDDO
+ 
+   ENDIF
+
+   ! Insert particles in ducts
+
    IF (DUCT_HT) CALL INSERT_DUCT_PARTICLES
 
    ! Reset particle/PARTICLE insertion clocks
@@ -517,7 +604,6 @@ INTEGER, INTENT(IN), OPTIONAL :: WALL_INDEX,CFACE_INDEX
 INTEGER :: I,N_LPC,N_LPC_MAX,ITER,LPC_INDEX,INSERT_TYPE
 REAL(EB):: CFA_X, CFA_Y, CFA_Z, RN, VEL_PART, C_S, H_1, H_2, TMP_PART, TMP_GUESS
 LOGICAL :: RETURN_FLAG
-TYPE (WALL_TYPE), POINTER :: WC
 TYPE (CFACE_TYPE), POINTER :: CFA
 
 WALL_OR_CFACE_IF_1: IF (PRESENT(WALL_INDEX)) THEN
@@ -820,345 +906,366 @@ END SUBROUTINE PARTICLE_FACE_INSERT
 SUBROUTINE INSERT_VOLUMETRIC_PARTICLES
 
 INTEGER :: IIP,N_INSERT,I1,J1,K1,I2,J2,K2,N,N_PARTICLES_INSERT,ND
-REAL(EB) :: XC1,XC2,YC1,YC2,ZC1,ZC2,X0,Y0,Z0,RR,HH,INSERT_VOLUME,INPUT_VOLUME,VOLUME_SPLIT_FACTOR,LP_X,LP_Y,LP_Z,RAMP_FACTOR
+REAL(EB) :: XC1,XC2,YC1,YC2,ZC1,ZC2,X0,Y0,Z0,RR,HH,INSERT_VOLUME,INPUT_VOLUME,VOLUME_SPLIT_FACTOR,LP_X,LP_Y,LP_Z,RAMP_FACTOR,&
+            IN_X1,IN_X2,IN_Y1,IN_Y2,IN_Z1,IN_Z2,IN_X0,IN_Y0,IN_Z0,VCX,VCY,VCZ,MOIST_FRAC
 
-VOLUME_INSERT_LOOP: DO IB=1,N_INIT
+IN => INITIALIZATION(INIT_INDEX)
 
-   IN => INITIALIZATION(IB)
+! Determine if the INITIALIZATION type involves particles. If not, return.
 
-   ! Determine if the INITIALIZATION type involves particles. If not, cycle.
+ILPC = IN%PART_INDEX
+IF (ILPC<1) RETURN
+IF (IN%SINGLE_INSERTION .AND. IN%ALREADY_INSERTED(NM)) RETURN
 
-   ILPC = IN%PART_INDEX
-   IF (ILPC<1) CYCLE VOLUME_INSERT_LOOP
-   IF (IN%SINGLE_INSERTION .AND. IN%ALREADY_INSERTED(NM)) CYCLE VOLUME_INSERT_LOOP
+! If there is a RAMP for MASS_PER_TIME or MASS_PER_VOLUME, evaluate it now and if zero, return.
 
-   ! If there is a RAMP for MASS_PER_TIME or MASS_PER_VOLUME, evaluate it now and if zero, cycle.
+IF (IN%RAMP_PART_INDEX>0) THEN
+   RAMP_FACTOR = EVALUATE_RAMP(T,IN%RAMP_PART_INDEX)
+   IF (RAMP_FACTOR<TWO_EPSILON_EB) RETURN
+ELSE
+   RAMP_FACTOR = 1._EB
+ENDIF
 
-   IF (IN%RAMP_PART_INDEX>0) THEN
-      RAMP_FACTOR = EVALUATE_RAMP(T,IN%RAMP_PART_INDEX)
-      IF (RAMP_FACTOR<TWO_EPSILON_EB) CYCLE
-   ELSE
-      RAMP_FACTOR = 1._EB
+! Determine if the particles/PARTICLEs are controlled by devices
+
+LPC => LAGRANGIAN_PARTICLE_CLASS(ILPC)
+
+IF (IN%DEVC_INDEX>0) THEN
+   IF (.NOT.DEVICE(IN%DEVC_INDEX)%CURRENT_STATE) THEN
+      IN%PARTICLE_INSERT_CLOCK(NM) = T
+      RETURN
    ENDIF
+ENDIF
+IF (IN%CTRL_INDEX>0) THEN
+   IF (.NOT.CONTROL(IN%CTRL_INDEX)%CURRENT_STATE) THEN
+      IN%PARTICLE_INSERT_CLOCK(NM) = T
+      RETURN
+   ENDIF
+ENDIF
 
-   ! Determine if the particles/PARTICLEs are controlled by devices
+! If it is not time to insert particles for this INITIALIZATION block, cycle.
 
-   LPC => LAGRANGIAN_PARTICLE_CLASS(ILPC)
+IF (T < IN%PARTICLE_INSERT_CLOCK(NM)) RETURN
 
-   IF (IN%DEVC_INDEX>0) THEN
-      IF (.NOT.DEVICE(IN%DEVC_INDEX)%CURRENT_STATE) THEN
-         IN%PARTICLE_INSERT_CLOCK(NM) = T
-         CYCLE VOLUME_INSERT_LOOP
+! Start processing the INITIALIZATION info
+
+IF (IN%N_PARTICLES==0 .AND. IN%N_PARTICLES_PER_CELL==0) RETURN
+
+! Adjust INIT values for voxelized bulk density data
+IF (IN%BULK_DENSITY_FILE/='null') THEN
+   ! Center of voxel
+   READ(LU_VEG_IN) VCX,VCY,VCZ
+   IN%X1=VCX-VDX/2._EB
+   IN%X2=VCX+VDX/2._EB
+   IN%Y1=VCY-VDY/2._EB
+   IN%Y2=VCY+VDY/2._EB
+   IN%Z1=VCZ-VDZ/2._EB
+   IN%Z2=VCZ+VDZ/2._EB
+   ! Vegetation mass in voxel
+   READ(LU_VEG_IN) IN%MASS_PER_VOLUME
+   MOIST_FRAC=SURFACE(LAGRANGIAN_PARTICLE_CLASS(IN%PART_INDEX)%SURF_INDEX)%MOISTURE_FRACTION(1)
+   IF (MOIST_FRAC>=0._EB) IN%MASS_PER_VOLUME = IN%MASS_PER_VOLUME*(1._EB+MOIST_FRAC)
+ENDIF
+
+! Apply coordinate offset if needed
+
+IN_X1 = X_OFFSET + IN%X1
+IN_X2 = X_OFFSET + IN%X2
+IN_Y1 = Y_OFFSET + IN%Y1
+IN_Y2 = Y_OFFSET + IN%Y2
+IN_Z1 = Z_OFFSET + IN%Z1
+IN_Z2 = Z_OFFSET + IN%Z2
+IN_X0 = X_OFFSET + IN%X0
+IN_Y0 = X_OFFSET + IN%Y0
+IN_Z0 = X_OFFSET + IN%Z0
+
+! Cut off parts of the INIT region that are outside the current mesh
+
+IF (IN_X1>XF .OR. IN_X2<XS .OR. IN_Y1>YF .OR. IN_Y2<YS .OR. IN_Z1>ZF .OR. IN_Z2<ZS) RETURN
+! Skip mesh than is contained completely within a ring
+IF (IN%SHAPE=='RING' .AND. IN_X1<XS .AND. IN_X2>XF .AND. IN_Y1<YS .AND. IN_Y2>YF .AND. IN_Z1<ZS .AND. IN_Z2>ZF) RETURN
+X1 = MAX(IN_X1,XS)
+X2 = MIN(IN_X2,XF)
+Y1 = MAX(IN_Y1,YS)
+Y2 = MIN(IN_Y2,YF)
+Z1 = MAX(IN_Z1,ZS)
+Z2 = MIN(IN_Z2,ZF)
+
+! Compute the volume of the INIT region
+
+SELECT CASE(IN%SHAPE)
+   CASE('BLOCK')
+      INSERT_VOLUME = (X2-X1)*(Y2-Y1)*(Z2-Z1)
+      INPUT_VOLUME  = (IN_X2-IN_X1)*(IN_Y2-IN_Y1)*(IN_Z2-IN_Z1)
+   CASE('CONE','CYLINDER')
+      X0 = 0.5_EB*(IN_X1+IN_X2)
+      Y0 = 0.5_EB*(IN_Y1+IN_Y2)
+      Z0 = IN_Z1
+      RR = 0.5_EB*(IN_X2-IN_X1)
+      HH = IN_Z2-IN_Z1
+      IF (IN%SHAPE=='CONE') THEN
+         INSERT_VOLUME = CONE_MESH_INTERSECTION_VOLUME(NM,X0,Y0,Z0,RR,HH,1)
+         INPUT_VOLUME  = PI*(0.5_EB*(IN_X2-IN_X1))**2*(IN_Z2-IN_Z1)/3._EB
+      ELSE
+         INSERT_VOLUME = CONE_MESH_INTERSECTION_VOLUME(NM,X0,Y0,Z0,RR,HH,0)
+         INPUT_VOLUME  = PI*(0.5_EB*(IN_X2-IN_X1))**2*(IN_Z2-IN_Z1)
       ENDIF
-   ENDIF
-   IF (IN%CTRL_INDEX>0) THEN
-      IF (.NOT.CONTROL(IN%CTRL_INDEX)%CURRENT_STATE) THEN
-         IN%PARTICLE_INSERT_CLOCK(NM) = T
-         CYCLE VOLUME_INSERT_LOOP
-      ENDIF
-   ENDIF
-
-   ! If it is not time to insert particles for this INITIALIZATION block, cycle.
-
-   IF (T < IN%PARTICLE_INSERT_CLOCK(NM)) CYCLE VOLUME_INSERT_LOOP
-
-   ! Start processing the INITIALIZATION info
-
-   IF (IN%N_PARTICLES==0 .AND. IN%N_PARTICLES_PER_CELL==0) CYCLE VOLUME_INSERT_LOOP
-
-   ! Cut off parts of the INIT region that are outside the current mesh
-
-   IF (IN%X1>XF .OR. IN%X2<XS .OR. IN%Y1>YF .OR. IN%Y2<YS .OR. IN%Z1>ZF .OR. IN%Z2<ZS) CYCLE VOLUME_INSERT_LOOP
-   ! Skip mesh than is contained completely within a ring
-   IF (IN%SHAPE=='RING' .AND. IN%X1<XS .AND. IN%X2>XF .AND. IN%Y1<YS .AND. IN%Y2>YF &
-      .AND. IN%Z1<ZS .AND. IN%Z2>ZF) CYCLE VOLUME_INSERT_LOOP
-   X1 = MAX(IN%X1,XS)
-   X2 = MIN(IN%X2,XF)
-   Y1 = MAX(IN%Y1,YS)
-   Y2 = MIN(IN%Y2,YF)
-   Z1 = MAX(IN%Z1,ZS)
-   Z2 = MIN(IN%Z2,ZF)
-
-   ! Compute the volume of the INIT region
-
-   SELECT CASE(IN%SHAPE)
-      CASE('BLOCK')
-         INSERT_VOLUME = (X2-X1)*(Y2-Y1)*(Z2-Z1)
-         INPUT_VOLUME  = (IN%X2-IN%X1)*(IN%Y2-IN%Y1)*(IN%Z2-IN%Z1)
-      CASE('CONE','CYLINDER')
-         X0 = 0.5_EB*(IN%X1+IN%X2)
-         Y0 = 0.5_EB*(IN%Y1+IN%Y2)
-         Z0 = IN%Z1
-         RR = 0.5_EB*(IN%X2-IN%X1)
-         HH = IN%Z2-IN%Z1
-         IF (IN%SHAPE=='CONE') THEN
-            INSERT_VOLUME = CONE_MESH_INTERSECTION_VOLUME(NM,X0,Y0,Z0,RR,HH,1)
-            INPUT_VOLUME  = PI*(0.5_EB*(IN%X2-IN%X1))**2*(IN%Z2-IN%Z1)/3._EB
-         ELSE
-            INSERT_VOLUME = CONE_MESH_INTERSECTION_VOLUME(NM,X0,Y0,Z0,RR,HH,0)
-            INPUT_VOLUME  = PI*(0.5_EB*(IN%X2-IN%X1))**2*(IN%Z2-IN%Z1)
-         ENDIF
-      CASE('RING')
-         IF (IN%UNIFORM) THEN
-            INSERT_VOLUME = 0._EB
-            INPUT_VOLUME  = 0._EB
-         ELSE
-            ! proportion of the circle arc length within mesh (length not volume in this case)
-            X0 = 0.5_EB*(IN%X1+IN%X2)
-            Y0 = 0.5_EB*(IN%Y1+IN%Y2)
-            RR = 0.5_EB*(IN%X2-IN%X1)
-            INSERT_VOLUME = RING_MESH_INTERSECTION_ARC(NM,X0,Y0,RR)
-            INPUT_VOLUME  = TWOPI*RR
-         ENDIF
-      CASE('LINE')
-         ! proportion of the circle bounding box within mesh
+   CASE('RING')
+      IF (IN%UNIFORM) THEN
          INSERT_VOLUME = 0._EB
          INPUT_VOLUME  = 0._EB
-   END SELECT
-
-   IF (INSERT_VOLUME<=0._EB .AND. IN%MASS_PER_VOLUME>0._EB) CYCLE VOLUME_INSERT_LOOP
-
-   ! Assign properties to the particles
-
-   MASS_SUM = 0._EB
-
-   TOTAL_OR_PER_CELL: IF (IN%N_PARTICLES > 0) THEN
-
-      ! If the original INIT volume expands over multiple meshes, insert only a fraction of the specified N_PARTICLES.
-
-      IF (INPUT_VOLUME>TWO_EPSILON_EB) THEN
-         N_PARTICLES_INSERT = MAX(1,NINT(IN%N_PARTICLES*INSERT_VOLUME/INPUT_VOLUME))
       ELSE
-         N_PARTICLES_INSERT = IN%N_PARTICLES
+         ! proportion of the circle arc length within mesh (length not volume in this case)
+         X0 = 0.5_EB*(IN_X1+IN_X2)
+         Y0 = 0.5_EB*(IN_Y1+IN_Y2)
+         RR = 0.5_EB*(IN_X2-IN_X1)
+         INSERT_VOLUME = RING_MESH_INTERSECTION_ARC(NM,X0,Y0,RR)
+         INPUT_VOLUME  = TWOPI*RR
       ENDIF
-
-      ! Array for speeding up sort-by-age routine
-
-      ALLOCATE(LP_INDEX_LOOKUP(N_PARTICLES_INSERT))
-      LP_INDEX_LOOKUP = 0
-
-      ! Loop through the particles to be inserted, getting their position and then setting up array space.
-
-      N_INSERT = 0
-
-      INSERT_PARTICLE_LOOP: DO IP=1,N_PARTICLES_INSERT
-
-         ! Get particle coordinates by randomly choosing within the designated volume
-
-         N = 0
-         CHOOSE_XYZ_LOOP:  DO
-            N = N + 1
-            SELECT CASE(IN%SHAPE)
-               CASE('BLOCK')
-                  CALL RANDOM_RECTANGLE(LP_X,LP_Y,LP_Z,X1,X2,Y1,Y2,Z1,Z2)
-               CASE('CONE','CYLINDER')
-                  X0 = 0.5_EB*(IN%X1+IN%X2)
-                  Y0 = 0.5_EB*(IN%Y1+IN%Y2)
-                  Z0 = IN%Z1
-                  RR = 0.5_EB*(IN%X2-IN%X1)
-                  HH = IN%Z2-IN%Z1
-                  IF (IN%SHAPE=='CONE')     CALL RANDOM_CONE(NM,LP_X,LP_Y,LP_Z,X0,Y0,Z0,RR,HH,1)
-                  IF (IN%SHAPE=='CYLINDER') CALL RANDOM_CONE(NM,LP_X,LP_Y,LP_Z,X0,Y0,Z0,RR,HH,0)
-               CASE('RING')
-                  X0 = 0.5_EB*(IN%X1+IN%X2)
-                  Y0 = 0.5_EB*(IN%Y1+IN%Y2)
-                  RR = 0.5_EB*(IN%X2-IN%X1)
-                  LP_Z = IN%Z1
-                  IF (IN%UNIFORM) THEN
-                     CALL UNIFORM_RING(LP_X,LP_Y,X0,Y0,RR,IP,N_PARTICLES_INSERT)
-                  ELSE
-                     CALL RANDOM_RING(NM,LP_X,LP_Y,X0,Y0,RR)
-                  ENDIF
-               CASE('LINE')
-                  LP_X = IN%X1 + (IP-1)*IN%DX
-                  LP_Y = IN%Y1 + (IP-1)*IN%DY
-                  LP_Z = IN%Z1 + (IP-1)*IN%DZ
-                  IF (LPC%ID=='RESERVED TARGET PARTICLE') THEN
-                     DO ND=1,N_DEVC
-                        DV => DEVICE(ND)
-                        IF (IN%ID==DV%INIT_ID .AND. IP==DV%POINT) THEN
-                           LP_X = DV%X
-                           LP_Y = DV%Y
-                           LP_Z = DV%Z
-                        ENDIF
-                     ENDDO
-                  ENDIF
-            END SELECT
-
-            ! Reject particles that are not in the current mesh.
-
-            IF (LP_X<XS .OR. LP_X>XF .OR. LP_Y<YS .OR. LP_Y>YF .OR. LP_Z<ZS .OR. LP_Z>ZF) CYCLE INSERT_PARTICLE_LOOP
-
-            ! Get mesh indices for particle. If the particle is in a solid cell, get another random point. If the particle
-            ! is a member of a line of points and this point is SOLID, just skip it.
-
-            CALL GET_IJK(LP_X,LP_Y,LP_Z,NM,XI,YJ,ZK,II,JJ,KK)
-
-            IF (SOLID(CELL_INDEX(II,JJ,KK)) .AND. IN%SHAPE=='LINE') CYCLE INSERT_PARTICLE_LOOP
-            IF (.NOT.SOLID(CELL_INDEX(II,JJ,KK))) EXIT CHOOSE_XYZ_LOOP
-
-            ! If cannot find non-solid grid cell, stop searching
-
-            IF (N>N_PARTICLES_INSERT) EXIT INSERT_PARTICLE_LOOP
-
-         ENDDO CHOOSE_XYZ_LOOP
-
-         N_INSERT = N_INSERT + 1
-
-         ! Allocate space for the particle in the appropriate array
-
-         IF (NLP+1>MAXIMUM_PARTICLES) THEN
-            CALL REMOVE_OLDEST_PARTICLE(NM,ILPC,NLP,NEW_LP_INDEX)
-            IF (N_INSERT>1) LP_INDEX_LOOKUP(N_INSERT-1) = NEW_LP_INDEX
-         ELSE
-            NLP = NLP+1
-         ENDIF
-         LP_INDEX_LOOKUP(N_INSERT) = NLP
-
-         CALL ALLOCATE_STORAGE(NM,LP_INDEX=NLP,LPC_INDEX=ILPC,SURF_INDEX=LPC%SURF_INDEX)
-
-         LAGRANGIAN_PARTICLE => MESHES(NM)%LAGRANGIAN_PARTICLE
-         LP => LAGRANGIAN_PARTICLE(NLP)
-         LP%CLASS_INDEX = ILPC
-         PARTICLE_TAG = PARTICLE_TAG + NMESHES
-         LP%TAG = PARTICLE_TAG
-
-         BC => MESHES(NM)%BOUNDARY_COORD(LP%BC_INDEX)
-
-         BC%X = LP_X
-         BC%Y = LP_Y
-         BC%Z = LP_Z
-         LP%DX = DX(II)
-         LP%DY = DY(JJ)
-         LP%DZ = DZ(KK)
-
-         ! Initialize particle properties
-
-         CALL VOLUME_INIT_PARTICLE
-
-         IN => INITIALIZATION(IB)
-
-      ENDDO INSERT_PARTICLE_LOOP
-
-   ELSEIF (IN%N_PARTICLES_PER_CELL > 0) THEN TOTAL_OR_PER_CELL
-
-      N_INSERT = 0
+   CASE('LINE')
+      ! proportion of the circle bounding box within mesh
       INSERT_VOLUME = 0._EB
-      CALL GET_IJK(MIN(X1+MICRON,X2),MIN(Y1+MICRON,Y2),MIN(Z1+MICRON,Z2),NM,XI,YJ,ZK,I1,J1,K1)
-      CALL GET_IJK(MAX(X2-MICRON,X1),MAX(Y2-MICRON,Y1),MAX(Z2-MICRON,Z1),NM,XI,YJ,ZK,I2,J2,K2)
-      I2 = MIN(I2,IBAR)
-      J2 = MIN(J2,JBAR)
-      K2 = MIN(K2,KBAR)
-      N_INSERT = MIN(MAXIMUM_PARTICLES,(I2-I1+1)*(J2-J1+1)*(K2-K1+1)*IN%N_PARTICLES_PER_CELL)
-      ALLOCATE(LP_INDEX_LOOKUP(N_INSERT))
-      LP_INDEX_LOOKUP = 0
-      N_INSERT = 0
+      INPUT_VOLUME  = 0._EB
+END SELECT
 
-      DO KK=K1,K2
-         DO JJ=J1,J2
-            II_LOOP: DO II=I1,I2
-               IF (SOLID(CELL_INDEX(II,JJ,KK))) CYCLE II_LOOP
-               IF (IN%SHAPE=='CONE') THEN
-                  IF ((XC(II)-X0)**2+(YC(JJ)-Y0)**2>(RR*(1._EB-(ZC(KK)-Z0)/HH))**2) CYCLE II_LOOP
-               ENDIF
-               IF (IN%SHAPE=='CYLINDER') THEN
-                  IF ((XC(II)-X0)**2+(YC(JJ)-Y0)**2>RR**2) CYCLE II_LOOP
-               ENDIF
-               INSERT_VOLUME = INSERT_VOLUME + (MIN(X(II),IN%X2)-MAX(X(II-1),IN%X1)) &
-                                             * (MIN(Y(JJ),IN%Y2)-MAX(Y(JJ-1),IN%Y1)) &
-                                             * (MIN(Z(KK),IN%Z2)-MAX(Z(KK-1),IN%Z1))
-               INSERT_PARTICLE_LOOP_2: DO IP = 1, IN%N_PARTICLES_PER_CELL
-                  N_INSERT = N_INSERT + 1
-                  IF (N_INSERT > MAXIMUM_PARTICLES) THEN
-                     N_INSERT = N_INSERT - 1
-                     EXIT INSERT_PARTICLE_LOOP_2
-                  ENDIF
+IF (INSERT_VOLUME<=0._EB .AND. IN%MASS_PER_VOLUME>0._EB) RETURN
 
-                  IF (NLP+1>MAXIMUM_PARTICLES) THEN
-                     CALL REMOVE_OLDEST_PARTICLE(NM,ILPC,NLP,NEW_LP_INDEX)
-                     IF (N_INSERT>1) LP_INDEX_LOOKUP(N_INSERT-1) = NEW_LP_INDEX
-                  ELSE
-                     NLP = NLP+1
-                  ENDIF
-                  LP_INDEX_LOOKUP(N_INSERT) = NLP
+! Assign properties to the particles
 
-                  CALL ALLOCATE_STORAGE(NM,LP_INDEX=NLP,LPC_INDEX=ILPC,SURF_INDEX=LPC%SURF_INDEX)
+MASS_SUM = 0._EB
 
-                  LAGRANGIAN_PARTICLE => MESHES(NM)%LAGRANGIAN_PARTICLE
-                  LP => LAGRANGIAN_PARTICLE(NLP)
-                  LP%CLASS_INDEX = ILPC
+TOTAL_OR_PER_CELL: IF (IN%N_PARTICLES > 0) THEN
 
-                  BC => MESHES(NM)%BOUNDARY_COORD(LP%BC_INDEX)
+   ! If the original INIT volume expands over multiple meshes, insert only a fraction of the specified N_PARTICLES.
 
-                  PARTICLE_TAG = PARTICLE_TAG + NMESHES
-                  LP%TAG = PARTICLE_TAG
-
-                  ! Get particle coordinates by randomly choosing within the designated volume
-
-                  XC1 = MAX(X1,X(II-1))
-                  YC1 = MAX(Y1,Y(JJ-1))
-                  ZC1 = MAX(Z1,Z(KK-1))
-                  XC2 = MIN(X2,X(II))
-                  YC2 = MIN(Y2,Y(JJ))
-                  ZC2 = MIN(Z2,Z(KK))
-                  LP%DX = XC2 - XC1
-                  LP%DY = YC2 - YC1
-                  LP%DZ = ZC2 - ZC1
-
-                  IF (IN%CELL_CENTERED) THEN
-                     BC%X = 0.5_EB*(X(II-1)+X(II))
-                     BC%Y = 0.5_EB*(Y(JJ-1)+Y(JJ))
-                     BC%Z = 0.5_EB*(Z(KK-1)+Z(KK))
-                  ELSE
-                     CALL RANDOM_RECTANGLE(BC%X,BC%Y,BC%Z,XC1,XC2,YC1,YC2,ZC1,ZC2)
-                  ENDIF
-
-                  CALL VOLUME_INIT_PARTICLE
-
-                  IN => INITIALIZATION(IB)
-                  LP => LAGRANGIAN_PARTICLE(NLP)
-
-               ENDDO INSERT_PARTICLE_LOOP_2
-            ENDDO II_LOOP
-         ENDDO
-      ENDDO
-
-   ENDIF TOTAL_OR_PER_CELL
-
-   IF (N_INSERT>0) THEN
-
-      ! Adjust particle weighting factor PWT so that desired MASS_PER_VOLUME is achieved
-
-      IF (IN%MASS_PER_TIME>0._EB) THEN
-         VOLUME_SPLIT_FACTOR = 1._EB
-         IF (INPUT_VOLUME>TWO_EPSILON_EB .AND. INSERT_VOLUME>TWO_EPSILON_EB) VOLUME_SPLIT_FACTOR = INSERT_VOLUME/INPUT_VOLUME
-         PWT0 = VOLUME_SPLIT_FACTOR*RAMP_FACTOR*IN%MASS_PER_TIME*IN%DT_INSERT/MASS_SUM
-      ELSEIF (IN%MASS_PER_VOLUME>0._EB) THEN
-         PWT0 = RAMP_FACTOR*IN%MASS_PER_VOLUME*INSERT_VOLUME/MASS_SUM
-      ELSE
-         PWT0 = IN%PARTICLE_WEIGHT_FACTOR
-      ENDIF
-
-      DO IIP=1,MIN(MAXIMUM_PARTICLES,N_INSERT)
-         IP = LP_INDEX_LOOKUP(IIP)
-         LP => LAGRANGIAN_PARTICLE(IP)
-         IF (IN%MASS_PER_VOLUME>0._EB) THEN
-            BC => MESHES(NM)%BOUNDARY_COORD(LP%BC_INDEX)
-            LP%PWT = LP%PWT*PWT0*DX(BC%IIG)*DY(BC%JJG)*DZ(BC%KKG)*RDXI*RDETA*RDZETA
-         ELSE
-            LP%PWT = LP%PWT*PWT0
-         ENDIF
-         IF (ANY(IN%PATH_RAMP_INDEX>0)) LP%PATH_PARTICLE=.TRUE.
-         LP%INIT_INDEX = IB
-      ENDDO
-
+   IF (INPUT_VOLUME>TWO_EPSILON_EB) THEN
+      N_PARTICLES_INSERT = MAX(1,NINT(IN%N_PARTICLES*INSERT_VOLUME/INPUT_VOLUME))
+   ELSE
+      N_PARTICLES_INSERT = IN%N_PARTICLES
    ENDIF
 
-   DEALLOCATE(LP_INDEX_LOOKUP)
+   ! Array for speeding up sort-by-age routine
 
-   IN%ALREADY_INSERTED(NM) = .TRUE.
+   ALLOCATE(LP_INDEX_LOOKUP(N_PARTICLES_INSERT))
+   LP_INDEX_LOOKUP = 0
 
-ENDDO VOLUME_INSERT_LOOP
+   ! Loop through the particles to be inserted, getting their position and then setting up array space.
+
+   N_INSERT = 0
+
+   INSERT_PARTICLE_LOOP: DO IP=1,N_PARTICLES_INSERT
+
+      ! Get particle coordinates by randomly choosing within the designated volume
+
+      N = 0
+      CHOOSE_XYZ_LOOP:  DO
+         N = N + 1
+         SELECT CASE(IN%SHAPE)
+            CASE('BLOCK')
+               CALL RANDOM_RECTANGLE(LP_X,LP_Y,LP_Z,X1,X2,Y1,Y2,Z1,Z2)
+            CASE('CONE','CYLINDER')
+               X0 = 0.5_EB*(IN_X1+IN_X2)
+               Y0 = 0.5_EB*(IN_Y1+IN_Y2)
+               Z0 = IN_Z1
+               RR = 0.5_EB*(IN_X2-IN_X1)
+               HH = IN_Z2-IN_Z1
+               IF (IN%SHAPE=='CONE')     CALL RANDOM_CONE(NM,LP_X,LP_Y,LP_Z,X0,Y0,Z0,RR,HH,1)
+               IF (IN%SHAPE=='CYLINDER') CALL RANDOM_CONE(NM,LP_X,LP_Y,LP_Z,X0,Y0,Z0,RR,HH,0)
+            CASE('RING')
+               X0 = 0.5_EB*(IN_X1+IN_X2)
+               Y0 = 0.5_EB*(IN_Y1+IN_Y2)
+               RR = 0.5_EB*(IN_X2-IN_X1)
+               LP_Z = IN_Z1
+               IF (IN%UNIFORM) THEN
+                  CALL UNIFORM_RING(LP_X,LP_Y,X0,Y0,RR,IP,N_PARTICLES_INSERT)
+               ELSE
+                  CALL RANDOM_RING(NM,LP_X,LP_Y,X0,Y0,RR)
+               ENDIF
+            CASE('LINE')
+               LP_X = IN_X1 + (IP-1)*IN%DX
+               LP_Y = IN_Y1 + (IP-1)*IN%DY
+               LP_Z = IN_Z1 + (IP-1)*IN%DZ
+               IF (LPC%ID=='RESERVED TARGET PARTICLE') THEN
+                  DO ND=1,N_DEVC
+                     DV => DEVICE(ND)
+                     IF (IN%ID==DV%INIT_ID .AND. IP==DV%POINT) THEN
+                        LP_X = DV%X
+                        LP_Y = DV%Y
+                        LP_Z = DV%Z
+                     ENDIF
+                  ENDDO
+               ENDIF
+         END SELECT
+
+         ! Reject particles that are not in the current mesh.
+
+         IF (LP_X<XS .OR. LP_X>XF .OR. LP_Y<YS .OR. LP_Y>YF .OR. LP_Z<ZS .OR. LP_Z>ZF) CYCLE INSERT_PARTICLE_LOOP
+
+         ! Get mesh indices for particle. If the particle is in a solid cell, get another random point. If the particle
+         ! is a member of a line of points and this point is SOLID, just skip it.
+
+         CALL GET_IJK(LP_X,LP_Y,LP_Z,NM,XI,YJ,ZK,II,JJ,KK)
+
+         IF (SOLID(CELL_INDEX(II,JJ,KK)) .AND. IN%SHAPE=='LINE') CYCLE INSERT_PARTICLE_LOOP
+         IF (.NOT.SOLID(CELL_INDEX(II,JJ,KK))) EXIT CHOOSE_XYZ_LOOP
+
+         ! If cannot find non-solid grid cell, stop searching
+
+         IF (N>N_PARTICLES_INSERT) EXIT INSERT_PARTICLE_LOOP
+
+      ENDDO CHOOSE_XYZ_LOOP
+
+      N_INSERT = N_INSERT + 1
+
+      ! Allocate space for the particle in the appropriate array
+
+      IF (NLP+1>MAXIMUM_PARTICLES) THEN
+         CALL REMOVE_OLDEST_PARTICLE(NM,ILPC,NLP,NEW_LP_INDEX)
+         IF (N_INSERT>1) LP_INDEX_LOOKUP(N_INSERT-1) = NEW_LP_INDEX
+      ELSE
+         NLP = NLP+1
+      ENDIF
+      LP_INDEX_LOOKUP(N_INSERT) = NLP
+
+      CALL ALLOCATE_STORAGE(NM,LP_INDEX=NLP,LPC_INDEX=ILPC,SURF_INDEX=LPC%SURF_INDEX)
+
+      LAGRANGIAN_PARTICLE => MESHES(NM)%LAGRANGIAN_PARTICLE
+      LP => LAGRANGIAN_PARTICLE(NLP)
+      LP%CLASS_INDEX = ILPC
+      PARTICLE_TAG = PARTICLE_TAG + NMESHES
+      LP%TAG = PARTICLE_TAG
+
+      BC => MESHES(NM)%BOUNDARY_COORD(LP%BC_INDEX)
+
+      BC%X = LP_X
+      BC%Y = LP_Y
+      BC%Z = LP_Z
+      LP%DX = DX(II)
+      LP%DY = DY(JJ)
+      LP%DZ = DZ(KK)
+
+      ! Initialize particle properties
+
+      CALL VOLUME_INIT_PARTICLE
+
+   ENDDO INSERT_PARTICLE_LOOP
+
+ELSEIF (IN%N_PARTICLES_PER_CELL > 0) THEN TOTAL_OR_PER_CELL
+
+   N_INSERT = 0
+   INSERT_VOLUME = 0._EB
+   CALL GET_IJK(MIN(X1+MICRON,X2),MIN(Y1+MICRON,Y2),MIN(Z1+MICRON,Z2),NM,XI,YJ,ZK,I1,J1,K1)
+   CALL GET_IJK(MAX(X2-MICRON,X1),MAX(Y2-MICRON,Y1),MAX(Z2-MICRON,Z1),NM,XI,YJ,ZK,I2,J2,K2)
+   I2 = MIN(I2,IBAR)
+   J2 = MIN(J2,JBAR)
+   K2 = MIN(K2,KBAR)
+   N_INSERT = MIN(MAXIMUM_PARTICLES,(I2-I1+1)*(J2-J1+1)*(K2-K1+1)*IN%N_PARTICLES_PER_CELL)
+   ALLOCATE(LP_INDEX_LOOKUP(N_INSERT))
+   LP_INDEX_LOOKUP = 0
+   N_INSERT = 0
+
+   DO KK=K1,K2
+      DO JJ=J1,J2
+         II_LOOP: DO II=I1,I2
+            IF (SOLID(CELL_INDEX(II,JJ,KK))) CYCLE II_LOOP
+            IF (IN%SHAPE=='CONE') THEN
+               IF ((XC(II)-X0)**2+(YC(JJ)-Y0)**2>(RR*(1._EB-(ZC(KK)-Z0)/HH))**2) CYCLE II_LOOP
+            ENDIF
+            IF (IN%SHAPE=='CYLINDER') THEN
+               IF ((XC(II)-X0)**2+(YC(JJ)-Y0)**2>RR**2) CYCLE II_LOOP
+            ENDIF
+            INSERT_VOLUME = INSERT_VOLUME + (MIN(X(II),IN_X2)-MAX(X(II-1),IN_X1)) &
+                                          * (MIN(Y(JJ),IN_Y2)-MAX(Y(JJ-1),IN_Y1)) &
+                                          * (MIN(Z(KK),IN_Z2)-MAX(Z(KK-1),IN_Z1))
+            INSERT_PARTICLE_LOOP_2: DO IP = 1, IN%N_PARTICLES_PER_CELL
+               N_INSERT = N_INSERT + 1
+               IF (N_INSERT > MAXIMUM_PARTICLES) THEN
+                  N_INSERT = N_INSERT - 1
+                  EXIT INSERT_PARTICLE_LOOP_2
+               ENDIF
+
+               IF (NLP+1>MAXIMUM_PARTICLES) THEN
+                  CALL REMOVE_OLDEST_PARTICLE(NM,ILPC,NLP,NEW_LP_INDEX)
+                  IF (N_INSERT>1) LP_INDEX_LOOKUP(N_INSERT-1) = NEW_LP_INDEX
+               ELSE
+                  NLP = NLP+1
+               ENDIF
+               LP_INDEX_LOOKUP(N_INSERT) = NLP
+
+               CALL ALLOCATE_STORAGE(NM,LP_INDEX=NLP,LPC_INDEX=ILPC,SURF_INDEX=LPC%SURF_INDEX)
+
+               LAGRANGIAN_PARTICLE => MESHES(NM)%LAGRANGIAN_PARTICLE
+               LP => LAGRANGIAN_PARTICLE(NLP)
+               LP%CLASS_INDEX = ILPC
+
+               BC => MESHES(NM)%BOUNDARY_COORD(LP%BC_INDEX)
+
+               PARTICLE_TAG = PARTICLE_TAG + NMESHES
+               LP%TAG = PARTICLE_TAG
+
+               ! Get particle coordinates by randomly choosing within the designated volume
+
+               XC1 = MAX(X1,X(II-1))
+               YC1 = MAX(Y1,Y(JJ-1))
+               ZC1 = MAX(Z1,Z(KK-1))
+               XC2 = MIN(X2,X(II))
+               YC2 = MIN(Y2,Y(JJ))
+               ZC2 = MIN(Z2,Z(KK))
+               LP%DX = XC2 - XC1
+               LP%DY = YC2 - YC1
+               LP%DZ = ZC2 - ZC1
+
+               IF (IN%CELL_CENTERED) THEN
+                  BC%X = 0.5_EB*(X(II-1)+X(II))
+                  BC%Y = 0.5_EB*(Y(JJ-1)+Y(JJ))
+                  BC%Z = 0.5_EB*(Z(KK-1)+Z(KK))
+               ELSE
+                  CALL RANDOM_RECTANGLE(BC%X,BC%Y,BC%Z,XC1,XC2,YC1,YC2,ZC1,ZC2)
+               ENDIF
+
+               CALL VOLUME_INIT_PARTICLE
+
+               LP => LAGRANGIAN_PARTICLE(NLP)
+
+            ENDDO INSERT_PARTICLE_LOOP_2
+         ENDDO II_LOOP
+      ENDDO
+   ENDDO
+
+ENDIF TOTAL_OR_PER_CELL
+
+IF (N_INSERT>0) THEN
+
+   ! Adjust particle weighting factor PWT so that desired MASS_PER_VOLUME is achieved
+
+   IF (IN%MASS_PER_TIME>0._EB) THEN
+      VOLUME_SPLIT_FACTOR = 1._EB
+      IF (INPUT_VOLUME>TWO_EPSILON_EB .AND. INSERT_VOLUME>TWO_EPSILON_EB) VOLUME_SPLIT_FACTOR = INSERT_VOLUME/INPUT_VOLUME
+      PWT0 = VOLUME_SPLIT_FACTOR*RAMP_FACTOR*IN%MASS_PER_TIME*IN%DT_INSERT/MASS_SUM
+   ELSEIF (IN%MASS_PER_VOLUME>0._EB) THEN
+      PWT0 = RAMP_FACTOR*IN%MASS_PER_VOLUME*INSERT_VOLUME/MASS_SUM
+   ELSE
+      PWT0 = IN%PARTICLE_WEIGHT_FACTOR
+   ENDIF
+
+   DO IIP=1,MIN(MAXIMUM_PARTICLES,N_INSERT)
+      IP = LP_INDEX_LOOKUP(IIP)
+      LP => LAGRANGIAN_PARTICLE(IP)
+      IF (IN%MASS_PER_VOLUME>0._EB) THEN
+         BC => MESHES(NM)%BOUNDARY_COORD(LP%BC_INDEX)
+         LP%PWT = LP%PWT*PWT0*DX(BC%IIG)*DY(BC%JJG)*DZ(BC%KKG)*RDXI*RDETA*RDZETA
+      ELSE
+         LP%PWT = LP%PWT*PWT0
+      ENDIF
+      IF (ANY(IN%PATH_RAMP_INDEX>0)) LP%PATH_PARTICLE=.TRUE.
+      LP%INIT_INDEX = INIT_INDEX
+   ENDDO
+
+ENDIF
+
+DEALLOCATE(LP_INDEX_LOOKUP)
+
+IF (.NOT.IN%INVOKED_BY_SURF .AND. IN%BULK_DENSITY_FILE=='null') IN%ALREADY_INSERTED(NM) = .TRUE.
 
 END SUBROUTINE INSERT_VOLUMETRIC_PARTICLES
 
@@ -1178,8 +1285,6 @@ SUBROUTINE VOLUME_INIT_PARTICLE
 USE OUTPUT_DATA, ONLY: N_PROF
 INTEGER :: ND
 TYPE (PROFILE_TYPE), POINTER :: PF
-
-IN => INITIALIZATION(IB)
 
 BC%IIG = II
 BC%JJG = JJ

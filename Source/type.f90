@@ -1,8 +1,8 @@
 !> \brief A collection of major derived types used in FDS.
 !> \details There are several TYPEs that require special attention. WALL, CFACE, and PARTICLE TYPES reference other
-!> derived types that start with BOUNDARY, like BOUNDARY_COORD or BOUNDARY_ONE_D. The number of real, integer, and logical scalar 
+!> derived types that start with BOUNDARY, like BOUNDARY_COORD or BOUNDARY_ONE_D. The number of real, integer, and logical scalar
 !> and array components of these derived types are denoted like this, for example: N_BOUNDARY_COORD_SCALAR_INTEGERS. You must
-!> adjust this value if you add or subtract components from the derived type. You should then use an existing component 
+!> adjust this value if you add or subtract components from the derived type. You should then use an existing component
 !> as a guide and trace it through func.f90 to see how to initialize this component.
 
 MODULE TYPES
@@ -616,7 +616,7 @@ TYPE MATERIAL_TYPE
    REAL(EB) :: THERMAL_DIFFUSIVITY                      !< Thermal diffusivity (m2/s)
    REAL(EB) :: KAPPA_S                                  !< Absorption coefficient (1/m)
    REAL(EB) :: TMP_BOIL                                 !< Boiling temperature (K) of a liquid
-   REAL(EB) :: REFRACTIVE_INDEX                         
+   REAL(EB) :: REFRACTIVE_INDEX
    REAL(EB) :: POROSITY=0._EB                           !< Porosity
    REAL(EB) :: MW=-1._EB                                !< Molecular weight (g/mol)
    REAL(EB) :: HEAT_OF_GASIFICATION                     !< Heat of gasification (J/kg)
@@ -635,9 +635,7 @@ TYPE MATERIAL_TYPE
    INTEGER, ALLOCATABLE, DIMENSION(:,:) :: LPC_INDEX
    INTEGER, DIMENSION(3) :: RGB
    REAL(EB), DIMENSION(MAX_REACTIONS) :: TMP_REF
-   REAL(EB), DIMENSION(MAX_REACTIONS) :: TMP_THR
    REAL(EB), DIMENSION(MAX_REACTIONS) :: RATE_REF
-   REAL(EB), DIMENSION(MAX_REACTIONS) :: THR_SIGN
    REAL(EB), DIMENSION(MAX_REACTIONS) :: MAX_REACTION_RATE
    REAL(EB), DIMENSION(MAX_MATERIALS,MAX_REACTIONS) :: NU_RESIDUE=0._EB
    REAL(EB), DIMENSION(MAX_REACTIONS) :: A
@@ -662,7 +660,6 @@ TYPE MATERIAL_TYPE
    REAL(EB), DIMENSION(MAX_SPECIES,MAX_REACTIONS) :: NU_SPEC
    REAL(EB), DIMENSION(MAX_SPECIES,MAX_REACTIONS) :: HEAT_OF_COMBUSTION
    REAL(EB), DIMENSION(MAX_SPECIES) :: DIFFUSIVITY_SPEC
-   LOGICAL, DIMENSION(MAX_REACTIONS) :: PCR=.FALSE.
    LOGICAL :: ALLOW_SHRINKING
    LOGICAL :: ALLOW_SWELLING
    LOGICAL :: CONST_C=.TRUE.
@@ -735,6 +732,7 @@ TYPE SURFACE_TYPE
    REAL(EB) :: BURN_DURATION=1.E6_EB
    REAL(EB) :: CONE_HEAT_FLUX=-1._EB
    REAL(EB) :: PARTICLE_EXTRACTION_VELOCITY=1.E6_EB
+   REAL(EB) :: INIT_PER_AREA=0._EB
 
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: DX,RDX,RDXN,X_S,DX_WGT,MF_FRAC,PARTICLE_INSERT_CLOCK
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: RHO_0
@@ -746,6 +744,7 @@ TYPE SURFACE_TYPE
    INTEGER, DIMENSION(2) :: LEAK_PATH,DUCT_PATH
    INTEGER :: THERMAL_BC_INDEX,NPPC,SPECIES_BC_INDEX,VELOCITY_BC_INDEX,SURF_TYPE,N_CELLS_INI,N_CELLS_MAX=0, &
               PART_INDEX,PROP_INDEX=-1,RAMP_T_I_INDEX=-1, RAMP_T_B_INDEX=0
+   INTEGER, DIMENSION(10) :: INIT_INDICES=0
    INTEGER :: PYROLYSIS_MODEL
    INTEGER :: N_LAYERS,N_MATL,SUBSTEP_POWER=2,N_SPEC=0,N_LPC=0
    INTEGER :: N_ONE_D_STORAGE_REALS,N_ONE_D_STORAGE_INTEGERS,N_ONE_D_STORAGE_LOGICALS
@@ -778,6 +777,7 @@ TYPE SURFACE_TYPE
    CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: RAMP_MF
    CHARACTER(LABEL_LENGTH) :: ID,TEXTURE_MAP,LEAK_PATH_ID(2)
    CHARACTER(MESSAGE_LENGTH) :: FYI='null'
+   CHARACTER(LABEL_LENGTH), DIMENSION(10) :: INIT_IDS='null'
 
    ! 1D mass transfer
 
@@ -1022,6 +1022,7 @@ TYPE IBM_CUTFACE_TYPE
    INTEGER,  DIMENSION(MAX_DIM+1)                  ::     IJK  ! [ i j k X1AXIS]
    REAL(EB), ALLOCATABLE, DIMENSION(:)             ::    AREA  ! Cut-faces areas.
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)           ::  XYZCEN  ! Cut-faces centroid locations.
+   LOGICAL,  ALLOCATABLE, DIMENSION(:)             ::  SHARED
    !Integrals to be used in cut-cell volume and centroid computations.
    REAL(EB), ALLOCATABLE, DIMENSION(:)             ::  INXAREA, INXSQAREA, JNYSQAREA, KNZSQAREA
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)           ::  BODTRI
@@ -1033,7 +1034,7 @@ TYPE IBM_CUTFACE_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)           ::  RHO_D_DZDN, H_RHO_D_DZDN
    REAL(EB), ALLOCATABLE, DIMENSION(:)             ::  VEL, VELS, FN, FN_B, VELINT
    INTEGER,  ALLOCATABLE, DIMENSION(:,:,:)         ::  JDH
-   REAL(EB) :: VELINT_CRF=0._EB,FV=0._EB,FV_B=0._EB,ALPHA_CF=1._EB
+   REAL(EB) :: VELINT_CRF=0._EB,FV=0._EB,FV_B=0._EB,ALPHA_CF=1._EB,VEL_CF=0._EB,VEL_CRT=0._EB
    INTEGER,  ALLOCATABLE, DIMENSION(:,:,:)         ::  CELL_LIST ! [RC_TYPE I J K ]
 
    ! Here: VIND=IAXIS:KAXIS, EP=1:INT_N_EXT_PTS,
@@ -1103,12 +1104,14 @@ END TYPE CFACE_TYPE
 ! Cartesian Cells Cut-Cells data structure:
 
 INTEGER, PARAMETER :: IBM_MAXVERTS_CELL   =3072
-INTEGER, PARAMETER :: IBM_NPARAM_CCFACE   =   5 ! [face_type side iaxis cei icf]
+INTEGER, PARAMETER :: IBM_NPARAM_CCFACE   =   6 ! [face_type side iaxis cei icf to_master]
 
 TYPE IBM_CUTCELL_TYPE
    INTEGER :: NCELL, NFACE_CELL
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)                     ::    CCELEM ! Cut-cells faces connectivities in FACE_LIST.
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)                     :: FACE_LIST ! List of faces, cut-faces.
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)                     ::  IJK_LINK ! Cell/cut-cell each cut-cell is linked to.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)                       ::  LINK_LEV ! Level in local Linking Hierarchy tree.
    REAL(EB), ALLOCATABLE, DIMENSION(:)                       ::    VOLUME ! Cut-cell volumes.
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)                     ::    XYZCEN ! Cut-cell centroid locaitons.
    INTEGER,  DIMENSION(MAX_DIM)                              ::       IJK ! [ i j k ]
@@ -1123,7 +1126,7 @@ TYPE IBM_CUTCELL_TYPE
                                                                                 ! fractions and rho*D_z,reaction source.
    INTEGER,  ALLOCATABLE, DIMENSION(:)                       :: UNKH,UNKZ ! Unknown number for pressure H,
                                                                           ! and scalars.
-   REAL(EB), ALLOCATABLE, DIMENSION(:)                       ::      H,HS ! Pressure H containers.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)                       :: KRES,H,HS ! Kinetic Energy, Pressure H containers.
    REAL(EB), ALLOCATABLE, DIMENSION(:)                       :: RTRM,R_H_G,RHO_0,WVEL
 
    ! Here: VIND=0, EP=1:INT_N_EXT_PTS
@@ -1163,6 +1166,7 @@ TYPE IBM_REGFACEZ_TYPE
 END TYPE IBM_REGFACEZ_TYPE
 
 TYPE IBM_RCFACE_TYPE
+   LOGICAL:: SHARED=.FALSE.
    INTEGER:: PRES_ZONE=-1
    INTEGER,  DIMENSION(MAX_DIM+1)                                  ::       IJK ! [ I J K x1axis]
    INTEGER,  DIMENSION(LOW_IND:HIGH_IND)                           ::       UNK
@@ -1171,6 +1175,7 @@ TYPE IBM_RCFACE_TYPE
 END TYPE IBM_RCFACE_TYPE
 
 TYPE IBM_RCFACE_LST_TYPE
+   LOGICAL :: SHARED=.FALSE.
    INTEGER :: IWC=0
    REAL(EB):: TMP_FACE=0._EB
    INTEGER,  DIMENSION(MAX_DIM+1)                                  ::       IJK ! [ I J K x1axis]
@@ -1395,11 +1400,13 @@ TYPE INITIALIZATION_TYPE
    LOGICAL :: SINGLE_INSERTION=.TRUE.
    LOGICAL :: CELL_CENTERED=.FALSE.
    LOGICAL :: UNIFORM=.FALSE.
+   LOGICAL :: INVOKED_BY_SURF=.FALSE.  ! Invoked by a SURF line for repeated insertion
    LOGICAL, ALLOCATABLE, DIMENSION(:) :: ALREADY_INSERTED
    CHARACTER(LABEL_LENGTH) :: SHAPE
    CHARACTER(LABEL_LENGTH) :: DEVC_ID
    CHARACTER(LABEL_LENGTH) :: CTRL_ID
    CHARACTER(LABEL_LENGTH) :: ID
+   CHARACTER(MESSAGE_LENGTH) :: BULK_DENSITY_FILE
 END TYPE INITIALIZATION_TYPE
 
 TYPE (INITIALIZATION_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: INITIALIZATION
@@ -1443,7 +1450,9 @@ TYPE ZONE_MESH_TYPE
    INTEGER, ALLOCATABLE :: PT_H(:)
 #endif /* WITH_MKL */
    INTEGER :: NUNKH=0                                 !< Number of unknowns in pressure solution for a given ZONE_MESH
+   INTEGER :: NCVLH=0                                 !< Number of pressure control volumes for a given ZONE_MESH
    INTEGER :: NUNKH_CART=0                            !< Number of unknowns in Cartesian cells of ZONE_MESH
+   INTEGER :: NCVLH_CART=0                            !< Number of pressure CVs in Cartesian cells of ZONE_MESH
    INTEGER :: MTYPE=0                                 !< Matrix type (symmetric indefinite, or symm positive definite)
    LOGICAL :: ZONE_IN_MESH=.FALSE.                    !< ZONE is in MESH
    LOGICAL :: USE_FFT=.TRUE.                          !< Flag for use of FFT solver
@@ -1601,7 +1610,7 @@ TYPE DUCT_TYPE
    REAL(EB) :: ROUGHNESS                                  !< Wall roughness (m)
    REAL(EB) :: RSUM_D=0._EB                               !< Upstream specific gas constant (J/kg/K)
    REAL(EB) :: RSUM_D_OLD                                 !< Prior timestep upstream specific gas constant (J/kg/K)
-   REAL(EB) :: TAU=-1._EB                                 !< TANH or t2 ramp for flow 
+   REAL(EB) :: TAU=-1._EB                                 !< TANH or t2 ramp for flow
    REAL(EB) :: TMP_D=273.15_EB                            !< Upstream duct temperature (K)
    REAL(EB) :: TOTAL_LOSS=0._EB                           !< Current flow loss in duct
    REAL(EB) :: VEL(4)=0._EB                               !< Velocity in duct (old,new,guess,previous) (m/s)

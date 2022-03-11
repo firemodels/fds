@@ -19,6 +19,10 @@ $QFDS -d Aerosols propane_flame_deposition_thermophoretic.fds
 $QFDS -d Aerosols propane_flame_deposition_turbulent.fds
 $QFDS -d Aerosols soot_oxidation_wall.fds
 
+$QFDS -p 36 -d Atmospheric_Effects atmospheric_boundary_layer_1.fds
+$QFDS -p 36 -d Atmospheric_Effects atmospheric_boundary_layer_2.fds
+$QFDS -p 36 -d Atmospheric_Effects atmospheric_boundary_layer_3.fds
+$QFDS -p 36 -d Atmospheric_Effects atmospheric_boundary_layer_4.fds
 $QFDS -d Atmospheric_Effects lee_waves.fds
 $QFDS -d Atmospheric_Effects stack_effect.fds
 $QFDS -d Atmospheric_Effects lapse_rate.fds
@@ -209,6 +213,8 @@ $QFDS -p 8 -d Fires circular_burner.fds
 
 $QFDS -d Flowfields divergence_test_1.fds
 $QFDS -d Flowfields divergence_test_2.fds
+$QFDS -p 4 -d Flowfields divergence_test_3.fds
+$QFDS -p 4 -d Flowfields divergence_test_3_uscarc_inseparable.fds
 $QFDS -d Flowfields cyl_test_1.fds
 $QFDS -d Flowfields cyl_test_2.fds
 $QFDS -d Flowfields cyl_test_3.fds
@@ -297,6 +303,9 @@ $QFDS -d Heat_Transfer ht3d_radiation_kappa100_n40.fds
 $QFDS -d Heat_Transfer ht3d_radiation_kappa2000_n10.fds
 $QFDS -d Heat_Transfer ht3d_radiation_kappa2000_n20.fds
 $QFDS -d Heat_Transfer ht3d_radiation_kappa2000_n40.fds
+$QFDS -p 16 -d Heat_Transfer Pohlhausen_Pr_p5.fds
+$QFDS -p 16 -d Heat_Transfer Pohlhausen_Pr_1.fds
+$QFDS -p 16 -d Heat_Transfer Pohlhausen_Pr_2.fds
 
 $QFDS -d HVAC ashrae7_fixed_flow.fds
 $QFDS -d HVAC ashrae7_quadratic.fds
@@ -347,6 +356,8 @@ $QFDS -d Miscellaneous obst_cylinder_mass_flux.fds
 $QFDS -d Miscellaneous obst_cone_mass_flux.fds
 $QFDS -d Miscellaneous obst_box_mass_flux.fds
 $QFDS -p 2 -d Miscellaneous part_path_ramp_jog.fds
+$QFDS -d Miscellaneous devc_interpolation_velocity.fds
+$QFDS -d Miscellaneous devc_interpolation_temperature.fds
 
 $QFDS -d NS_Analytical_Solution ns2d_16.fds
 $QFDS -d NS_Analytical_Solution ns2d_16_nupt1.fds
@@ -397,6 +408,7 @@ $QFDS -p 8 -d Pressure_Solver pressure_iteration3d_uglmat.fds
 $QFDS -p 2 -d Pressure_Solver ulmat_2zone.fds
 $QFDS -p 4 -d Pressure_Solver scarc_separable_4mesh.fds
 $QFDS -p 4 -d Pressure_Solver scarc_inseparable_4mesh.fds
+$QFDS -p 4 -d Pressure_Solver obst_activation_uscarc_inseparable.fds
 
 $QFDS -d Pyrolysis cable_11_insulation_mcc.fds
 $QFDS -d Pyrolysis cable_23_insulation_mcc.fds
@@ -449,7 +461,6 @@ $QFDS -d Pyrolysis surf_mass_two_species_spher.fds
 $QFDS -d Pyrolysis tga_analysis.fds
 $QFDS -d Pyrolysis tga_sample.fds
 $QFDS -d Pyrolysis two_step_solid_reaction.fds
-$QFDS -d Pyrolysis pcm_slab.fds
 $QFDS -d Pyrolysis pyro3d_wood_char.fds
 $QFDS -d Pyrolysis pyro3d_vs_pyro1d.fds
 $QFDS -d Pyrolysis pyro3d_vs_pyro1d_wood_moist.fds
@@ -457,7 +468,6 @@ $QFDS -d Pyrolysis pyro3d_transport.fds
 $QFDS -d Pyrolysis solid_particle_decomposition_1.fds
 $QFDS -d Pyrolysis solid_particle_decomposition_2.fds
 $QFDS -d Pyrolysis solid_particle_decomposition_3.fds
-$QFDS -d Pyrolysis water_ice_water.fds
 $QFDS -d Pyrolysis water_pool.fds
 
 $QFDS -d Radiation adiabatic_surface_temperature.fds

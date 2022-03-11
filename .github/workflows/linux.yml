@@ -1,19 +1,32 @@
 name: github-linux
 
-on: [push, pull_request]
+
+on:
+  push:
+    paths:
+    - .github/**
+    - Build/**
+    - Source/**
+  pull_request:
+    paths:
+    - .github/**
+    - Build/**
+    - Source/**
+
 
 concurrency:
   group: ${{ github.event_name }}-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
-  
+
+
 jobs:
   linux-intel-intelmpi:
     # debug build on ubuntu using ifort and intelmpi
     # based on https://github.com/oneapi-src/oneapi-ci
-    
+
     name: linux intel intelmpi
     runs-on: [ubuntu-latest]
-    
+
     steps:
     - uses: actions/checkout@v2
     - name: setup apt repository
@@ -53,14 +66,15 @@ jobs:
 
   linux-gnu-openmpi:
     # debug build on ubuntu using gfortran and openmpi
-    
+
     name: linux gnu openmpi
     runs-on: [ubuntu-latest]
-    
+
     steps:
     - uses: actions/checkout@v2
     - name: install
       run: |
+        sudo apt-get update
         sudo apt-get install openmpi-bin
     - name: build
       run: |

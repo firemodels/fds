@@ -1517,25 +1517,25 @@ This test case is a replica of {\ct water\_evaporation\_1} in Sec.~\ref{water_ev
 \subsection{1-D Flow in a Tunnel (\texorpdfstring{\textct{tunnel\_const\_gamma}}{tunnel\_const\_gamma})}
 \label{tunnel_const_gamma}
 
-Consider a long tube with rectangular cross section. Air with density $\rho_\infty=1.16455$~kg/m$^3$, temperature $T_\infty=293.15$~K, and pressure $p_\infty=101325$~Pa, is blown at a constant rate, $u_\infty=1$~m/s, through the tube. A steady volumetric heat source is located in the middle of the tube. Ignoring wall friction, gravity, radiation transport, thermal conductivity, viscosity, and assuming that the heat source uniformly spans the cross section of the tube, a set of 1-D equations can be derived for the steady-state velocity, $u(x)$, density, $\rho(x)$, perturbation pressure, $\tp(x)$, and temperature, $T(x)$:
+Consider a long tube with rectangular cross section. Air with density $\rho_\infty=1.200$~kg/m$^3$, temperature $T_\infty=293.15$~K, and pressure $p_\infty=101325$~Pa, is blown at a constant rate, $u_\infty=1$~m/s, through the tube. A steady volumetric heat source is located in the middle of the tube. Ignoring wall friction, gravity, radiation transport, thermal conductivity, viscosity, and assuming that the heat source uniformly spans the cross section of the tube, a set of 1-D equations can be derived for the steady-state velocity, $u(x)$, density, $\rho(x)$, perturbation pressure, $\tp(x)$, and temperature, $T(x)$:
 \begin{eqnarray}
    \rho u = \rho_\infty u_\infty   \quad &;& \quad \frac{\d}{\d x} \left( \frac{u^2}{2} \right) + \frac{1}{\rho} \frac{\d \tp}{\d x} = 0 \label{mom1d} \\[.1in]
-   p_\infty = \R \rho T            \quad &;& \quad \frac{\d u}{\d x} = \frac{1}{\rho c_p T} \left( \dq''' - u \, \frac{\d}{\d x} (\rho h_{\rm s}) - (c_p T - h_{\rm s}) u \frac{\d \rho}{\d x}  \right)  \label{div1d}
+   p_\infty = \R \rho T / W            \quad &;& \quad \frac{\d u}{\d x} = \frac{1}{\rho c_p T} \left( \dq''' - u \, \frac{\d}{\d x} (\rho h_{\rm s}) - (c_p T - h_{\rm s}) u \frac{\d \rho}{\d x}  \right)  \label{div1d}
 \end{eqnarray}
-Note that $\R=296.8$~J/kg/K and the sensible enthalpy, $h_{\rm s}=\int_{T_\infty}^T c_p(T') \, \d T'$. The tube is 10~cm long, 1~mm wide and 4~mm tall, and discretized with 1~mm grid cells. A vertical column of cells contains a volumetric heat source that introduces heat at a rate of $\dq'''=2.5133 \times 10^8$~W/m$^3$ within each 1~mm cell. The velocity, density, pressure and temperature are constant starting at the inlet, and at the heat source, the velocity and temperature jump up, and the density and pressure drop down over the span of a single cell and remain steady until the outlet is reached, where the perturbation pressure is set to zero.
+Note that $\R=8314.5$~J/kmol/K and the sensible enthalpy, $h_{\rm s}=\int_{T_\infty}^T c_p(T') \, \d T'$. The tube is 10~cm long, 1~mm wide and 4~mm tall, and discretized with 1~mm grid cells. A vertical column of cells contains a volumetric heat source that introduces heat at a rate of $\dq'''=2.5133 \times 10^8$~W/m$^3$ within each 1~mm cell. The velocity, density, pressure and temperature are constant starting at the inlet, and at the heat source, the velocity and temperature jump up, and the density and pressure drop down over the span of a single cell and remain steady until the outlet is reached, where the perturbation pressure is set to zero.
 
-For the case where the ratio of specific heats are constant, $c_p=\gamma \, \R/(\gamma-1)=1038.8$~J/kg/K and $\rho c_p T=\gamma \, p_\infty / (\gamma-1)$. In the second equation of (\ref{div1d}), the second two terms on the right hand side are identically zero; thus, the jump in velocity can be computed
+For the case where the ratio of specific heats are constant with $\gamma=1.4$ and $W=28.85$ kg/kmol for air, $c_p=\gamma \, (\R/W) /(\gamma-1)=1008.7$~J/kg/K and $\rho c_p T=\gamma \, p_\infty / (\gamma-1)$. In the second equation of (\ref{div1d}), the second two terms on the right hand side are identically zero; thus, the jump in velocity can be computed
 \be
    \Delta u = \frac{\gamma-1}{\gamma \, p_\infty} \, \dq''' \, \Delta x \approx 0.7087 \; \hbox{m/s}
 \ee
-Using the first equations of (\ref{mom1d}) and (\ref{div1d}), the density and temperature downstream of the heat source are computed to be 0.6815~kg/m$^3$ and 500.94~K, respectively. To determine the drop in pressure, Eq.~(\ref{mom1d}) must be written in discretized form. Assume that the subscript 0 refers to the cell containing the heat source, 1 to the first cell downstream, and -1 to the first cell upstream. The velocity in cell 0 is the average of the velocity upstream and downstream, $u_0=1.3544$~m/s.
+Using the first equations of (\ref{mom1d}) and (\ref{div1d}), the density and temperature downstream of the heat source are computed to be 0.7023~kg/m$^3$ and 500.61~K, respectively. To determine the drop in pressure, Eq.~(\ref{mom1d}) must be written in discretized form. Assume that the subscript 0 refers to the cell containing the heat source, 1 to the first cell downstream, and -1 to the first cell upstream. The velocity in cell 0 is the average of the velocity upstream and downstream, $u_0=1.3544$~m/s.
 \begin{eqnarray}
-   \tp_1 - \tp_0    &=& - \frac{u_1^2 - u_0^2}{2}   \rho_1     \approx -0.3698 \; \hbox{Pa} \\
-   \tp_0 - \tp_{-1} &=& - \frac{u_0^2 - u_{-1}^2}{2}\rho_0  \approx -0.3850 \; \hbox{Pa}
+   \tp_1 - \tp_0    &=& - \frac{u_1^2 - u_0^2}{2}   \rho_1  \approx -0.3811 \; \hbox{Pa} \\
+   \tp_0 - \tp_{-1} &=& - \frac{u_0^2 - u_{-1}^2}{2}\rho_0  \approx -0.3968 \; \hbox{Pa}
 \end{eqnarray}
-Summing the two equations yields $\Delta \tp \equiv \tp_1-\tp_{-1} \approx -0.7548$~Pa. The jump in energy across the heat source is
+Summing the two equations yields $\Delta \tp \equiv \tp_1-\tp_{-1} \approx -0.7779$~Pa. The jump in energy across the heat source is
 \be
-   \frac{\d}{\d x} (u \rho c_p T) \approx 2.5129 \times 10^8 \; \hbox{W/m}^3
+   \frac{\d}{\d x} (u \rho c_p T) \approx 2.5113 \times 10^8 \; \hbox{W/m}^3
 \ee
 Plots of $u(x)$, $\rho(x)$, $\tp(x)$, and $T(x)$ are shown in Fig.~\ref{tunnel_const_gamma_plots}.
 
@@ -1558,7 +1558,7 @@ Plots of $u(x)$, $\rho(x)$, $\tp(x)$, and $T(x)$ are shown in Fig.~\ref{tunnel_c
 
 Considering the same layout and the same environmental conditions of the previous case. Air is blown at a constant rate, $u_\infty=1$~m/s, through a 10~cm long, 1~mm wide and 4~mm tall tube. A steady heat source is located in the middle of the tube, composed of a vertical column of cells containing a volumetric heat source that introduces heat at a rate of $\dq'''=2.5133 \times 10^8$~W/m$^3$ within each 1~mm cell . Ignoring wall friction, gravity, radiation transport, thermal conductivity, viscosity, and assuming that the heat source uniformly spans the cross section of the tube, a set of 1-D equations can be derived for the steady-state velocity, $u(x)$, density, $\rho(x)$, perturbation pressure, $\tp(x)$, and temperature, $T(x)$. This equations are the same used in the previous example in (\ref{mom1d}) and (\ref{div1d}).
 
-Remembering that $\R=296.8$~J/kg/K and the sensible enthalpy, $h_{\rm s}=\int_{T_\infty}^T c_p(T') \, \d T'$. The velocity, density, pressure and temperature are constant starting at the inlet, until the heat source, where the velocity and temperature jump up, and the density and pressure drop down over the span of a single cell and remain steady until the outlet is reached, where the perturbation pressure is set to zero.
+Remembering that $\R=8314.5$~J/kmol/K and the sensible enthalpy, $h_{\rm s}=\int_{T_\infty}^T c_p(T') \, \d T'$. The velocity, density, pressure and temperature are constant starting at the inlet, until the heat source, where the velocity and temperature jump up, and the density and pressure drop down over the span of a single cell and remain steady until the outlet is reached, where the perturbation pressure is set to zero.
 
 For the case where the specific heat varies as a function of the temperature. In the second equation of (\ref{div1d}), using the first equation of (\ref{mom1d}) and (\ref{div1d}), and some relationships among the variables is possible to arrive to a simpler expression.
 \begin{eqnarray}
@@ -1568,19 +1568,18 @@ For the case where the specific heat varies as a function of the temperature. In
   \frac{ \dq'''}{\rho_\infty u_\infty} &=&  \frac{\d}{\d x} (h_{\rm s})  \label{1stLaw}
 \end{eqnarray}
 
-Through the steps, the continuity, in (\ref{mom1d}), and state equation, in (\ref{div1d}), are used to make the temperature the only variable and simplifying equivalent terms until the equation (\ref{1stLaw}) is obtained. Equation (\ref{1stLaw}) corresponds to a 1D form of the first law of thermodynamics, prooving the divergence equation as a consistent energy balance. Then, for the case where the cp is a linear function of the temperature, $c_p=aT +b$.
+Through the steps, the continuity, in (\ref{mom1d}), and state equation, in (\ref{div1d}), are used to make the temperature the only variable and simplifying equivalent terms until the equation (\ref{1stLaw}) is obtained. Equation (\ref{1stLaw}) corresponds to a 1D form of the first law of thermodynamics, proving the divergence equation as a consistent energy balance. Then, for the case where the $c_p$ is a linear function of the temperature, $c_p=aT +b$, we have
 \begin{eqnarray}
   \frac{ \dq'''}{\rho_\infty u_\infty} \Delta x &=&  T^2 \frac{a}{2} +bT -  (T_\infty^2 \frac{a}{2} +bT_\infty) \label{LinearCP}
 \end{eqnarray}
-
- Calculating in equation (\ref{LinearCP}) for a= 0.1584 J/kg/K$^2$ and b=992.3565 J/kg/K the temperature downstream of the heat source is computed to be 497.71~K. Correspondingly, the velocity and density are, $u_1= 1.6978$~m/s and $\rho$= 0.6859~kg/m$^3$. To determine the drop in pressure, Eq.~(\ref{mom1d}) is written in discretized form as in the previous verification. Then assuming that the subscript 0 refers to the cell containing the heat source, 1 to the first cell downstream, and -1 to the first cell upstream. The velocity in cell 0 is the approximated as the average of the velocity upstream and downstream, $u_0=1.3489$~m/s.
+ Substituting in Eq.~(\ref{LinearCP}) for $a=0.1584$ J/kg/K$^2$ and $b=953.5650$ J/kg/K (these coefficients give $c_p(T_\infty)=1000$ J/kg/K) the temperature downstream of the heat source is computed to be 499.2~K. Correspondingly, the density and velocity are, $\rho_1$= 0.7046~\si{kg/m^3} and $u_1= 1.7030$~m/s. To determine the drop in pressure, Eq.~(\ref{mom1d}) is written in discretized form as in the previous verification. Then assuming that the subscript 0 refers to the cell containing the heat source, 1 to the first cell downstream, and -1 to the first cell upstream. The velocity in cell 0 is the approximated as the average of the velocity upstream and downstream, $u_0=1.3515$~m/s.
 \begin{eqnarray}
-   \tp_1 - \tp_0    &=& - \frac{u_1^2 - u_0^2}{2}   \rho_1    \approx -0.3646 \; \hbox{Pa} \\
-   \tp_0 - \tp_{-1} &=& - \frac{u_0^2 - u_{-1}^2}{2}  \rho_0  \approx -0.3791 \; \hbox{Pa}
+   \tp_1 - \tp_0    &=& - \frac{u_1^2 - u_0^2}{2}   \rho_1    \approx -0.3783 \; \hbox{Pa} \\
+   \tp_0 - \tp_{-1} &=& - \frac{u_0^2 - u_{-1}^2}{2}  \rho_0  \approx -0.3936 \; \hbox{Pa}
 \end{eqnarray}
-Summing both of the equations yields $\Delta \tp \equiv \tp_1-\tp_{-1} \approx -0.7437$~Pa. The jump in energy across the heat source is
+Summing both of the equations yields $\Delta \tp \equiv \tp_1-\tp_{-1} \approx -0.7718$~Pa. The jump in energy across the heat source is
 \be
-   \frac{\d}{\d x} (u \rho c_p T) \approx 2.6625 \times 10^8 \; \hbox{W/m}^3
+   \frac{\d}{\d x} (u \rho c_p T) \approx 2.6685 \times 10^8 \; \hbox{W/m}^3
 \ee
 Plots of $u(x)$, $\rho(x)$, $\tp(x)$, and $T(x)$ are shown in Fig.~\ref{tunnel_linear_cp_plots}.
 
@@ -1836,6 +1835,7 @@ With the same grid set up as described above the smooth walls, a series of cases
 
 
 \section{Blasius boundary layer (\texorpdfstring{\textct{blasius}}{blasius})}
+\label{sec:blasius}
 
 \textbf{Hyun-Wook Park and Jung-il Choi, Yonsei University, Seoul, South Korea}\\
 
@@ -1880,12 +1880,44 @@ where $k$ is the $z$ index. The value $u_k$ represents the FDS result for $u$ at
 \end{figure}
 
 
+\section{Pohlhausen thermal boundary layer (\texorpdfstring{\textct{Pohlhausen}}{Pohlhausen})}
+\label{sec:Pohlhausen}
+
+This write up follows Appendix B of \cite{Holman:1}.  The nondimensional temperature as a function of the similarity variable $\eta$ is taken to be
+\begin{equation}
+\label{eq:pohl_theta}
+\theta(\eta) \equiv \frac{T(\eta) - T_w}{T_\infty - T_w}
+\end{equation}
+The energy equation may then be written as
+\begin{equation}
+\label{eq:pohl_energy}
+\frac{\d^2 \theta}{\d\eta^2} + \frac{1}{2} \mathrm{Pr} f \frac{\d \theta}{\d \eta} = 0
+\end{equation}
+
+Given the boundary conditions $\theta=0$ at $y=0$, $\eta=0$ and $\theta=1$ at $y=\infty$, $\eta=\infty$, and the function $f(\eta)$ from the Blasius solution in Sec.~\ref{sec:blasius}, the Pohlhausen solution for the temperature profile is
+\begin{equation}
+\label{eq:pohl_soln}
+\theta(\eta) = \frac{\displaystyle \int_0^\eta \exp\left( - \frac{\mathrm{Pr}}{2} \int_0^\eta f \d \eta \right) \d \eta}{\displaystyle \int_0^\infty \exp\left( - \frac{\mathrm{Pr}}{2} \int_0^\eta f \d \eta \right)\d \eta}
+\end{equation}
+This solution is plotted in Fig.~\ref{fig:pohlhausen} (left) for different Prandtl numbers (Pr) and may be compared to the plot in Fig.~B-2 of \cite{Holman:1} for verification.
+
+In this test series, the 2D FDS domain is set 10 m in length and 1 m in height.  The simulation is run as a DNS with the viscosity, conductivity, and specific heat set to provide Prandtl numbers of [0.5, 1, 2].  The grid resolution (after a convergence study) is set to $\delta x=\delta z=1.25$ cm. The inlet velocity is set to 1 m/s with an ambient air temperature of $T_\infty=20$ \si{\degreeCelsius}. The wall boundary is set to a fixed temperature of $T_w=21$ \si{\degreeCelsius}. The outflow is set to {\ct OPEN}.  The top boundary is homogeneous Neumann for velocity and Dirichlet for temperature at $T_\infty=20$ \si{\degreeCelsius}.  The simulation is run to steady state.  The resulting temperature profiles $T(z)$ at $x=5$ m are shown in Fig.~\ref{fig:pohlhausen} (right).
+
+\begin{figure}[ht]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/Pohlhausen_similarity_solution} &
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/Pohlhausen_Tz_profile}
+   \end{tabular*}
+   \caption[Pohlhausen similarity solution and vertical profile]{(Left) Pohlhausen similarity solution for nondimensional temperature. (Right) FDS results for vertical profile of temperature at $x=5$ m for different Prandtl numbers compared to the Pohlhausen solution.}
+   \label{fig:pohlhausen}
+\end{figure}
+
 
 \section{Near-Wall Grid Resolution (\texorpdfstring{\textct{yplus}}{yplus})}
 
 \subsubsection{Abbas Jaber, NIST SURF student}
 
-\noindent The distance from the wall measured in viscous units is called $y^+$. In order to verify that $y^+$ is calculated correctly within FDS, we analyze an example of Poiseuille flow in a square channel with periodic boundaries. The pressure gradient in the $x$-direction, the dynamic viscosity, and the dimensions of the channel are known. This allows us to easily determine the expected values of wall shear stress,
+\noindent The distance from the wall measured in ``viscous wall units'' is called $y^+$. In order to verify that $y^+$ is calculated correctly within FDS, we analyze an example of Poiseuille flow in a square channel with periodic boundaries. The pressure gradient in the $x$-direction, the dynamic viscosity, and the dimensions of the channel are known. This allows us to easily determine the expected values of wall shear stress,
 \begin{equation}
 \label{wall stress}
 \tau_w = - \delta \frac{\d p}{\d x},
@@ -1901,21 +1933,19 @@ From here we calculate the exact value of $y^+$ for the given flow,
 y^+ \equiv \frac{y}{\delta_{\nu}} = \frac{u_{\tau}y}{\nu}.
 \end{equation}
 
-In FDS, $\tau_w$ is obtained only from the wall model. The resolution of the wall-normal streamwise velocity gradient increases with  mesh resolution; the value of $y^+$ decreases accordingly. In this verification case, a wall device is used to output $y^+$ for different mesh resolutions in the $z$-direction. $y^+$ is output for a given $\delta z$, height of a cell, $\delta z$ = [1/8, 1/16, 1/32]. Then, the device values obtained are compared with the exact value of $y^+$ for a given mesh resolution (Fig.~\ref{fig_yplus}). An FDS wall device outputs the mid-cell value of the first cell next to the wall, hence, the $z$ value ($y$ in Eq.~(\ref{eqn_yplus})) used to determine the exact $y^+$ varies with $\delta z$ $(z = \delta z/2)$.
+In FDS, $\tau_w$ is obtained only from the wall model. The resolution of the wall-normal streamwise velocity gradient increases with  mesh resolution; the value of $y^+$ decreases accordingly. In this verification case, a wall device is used to output $y^+$ for different mesh resolutions in the $y$-direction. $y^+$ is output for a given $\delta y$, height of a cell, $\delta y$ = [1/8, 1/16, 1/32]. Then, the device values obtained are compared with the exact value of $y^+$ for a given mesh resolution (Fig.~\ref{fig_yplus}). An FDS wall device outputs the mid-cell value of the first cell next to the wall, hence, the $y$ value ($y$ in Eq.~(\ref{eqn_yplus})) used to determine the exact $y^+$ varies with $\delta y$ $(y = \delta y/2)$.
 
 \begin{figure}[ht]
 \centering
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/yplus}
-\caption[Near-wall grid resolution]{Verification of FDS $y^+$ output for $\delta z=[1/8, 1/16, 1/32]$.}
+\caption[Near-wall grid resolution]{Verification of FDS $y^+$ output for $\delta y=[1/8, 1/16, 1/32]$.}
 \label{fig_yplus}
 \end{figure}
 
 
 \section{Heated Channel Flow (\texorpdfstring{\textct{heated\_channel}}{heated\_channel})}
 
-The simulation of turbulent channel flow (Re$_{\tau}=180$) with a heat source was performed to verify the log law near-wall model for heat transfer \cite{FDS_Tech_Guide}. The model was developed based on the law of wall for temperature and empirical equations \cite{Kader:1981}. These cases are located in the Verification/Turbulence subdirectory.
-
-The height of the channel is $H=2$ m, the width is $W=6$ m, and the length is $L=12$ m. There are 64 cells in the streamwise direction ($\delta x = 0.1875$ m) and 32 cells in the spanwise ($\delta y=0.1875$ m) and wall-normal directions ($\delta z=0.0625$ m).  The midpoint of the first cell in viscous units is $z^+ = 5$, which is a very highly resolved LES. For this reason, the dynamic Smagorinsky SGS model is used for the residual stress. Additionally, these cases were run in ``research mode'' (\textct{RESEARCH\_MODE=.TRUE.} on \textct{MISC}), which accounts for both molecular the turbulent transport coefficients, a must for distinguishing between fluids with different molecular Prandtl or Schmidt numbers (here the Re is so low that molecular effects may dominate locally).  The flow is maintained by a mean pressure gradient ($8.748 \times 10^{-6}$ Pa/m) in the streamwise direction. A constant volumetric heat source (0.5 W/m$^3$) is imposed on the fluid. The boundary conditions for momentum equations are no-slip at top and bottom walls and periodic for the streamwise and spanwise directions. The boundary condition for the energy equation is constant temperature ($T_w = 20 \,\mbox{\si{\degree C}} $) at the wall. To evaluate the effects of Prandtl number (Pr) and compare the DNS study \cite{Kim:1987} with FDS, the specific heat ($c_p = 1$ \si{kJ/(kg.K)}) and viscosity ($\mu = 1.8216 \times 10^{-5}$ \si{kg/(m.s)}) are fixed and the conductivity, $k$, of the fluid (air) is adjusted to:
+The simulation of turbulent channel flow (Re$_{\tau}=180$) with a heat source was performed to verify the log law near-wall model for heat transfer \cite{FDS_Tech_Guide}. The height of the channel is $H=2$ m, the width is $W=6$ m, and the length is $L=12$ m. There are 96 cells in the streamwise direction ($\delta x = 0.125$ m) and 48 cells in the spanwise and wall-normal directions ($\delta y=\delta z=0.125$ m).  The midpoint of the first cell in viscous units is $z^+ \approx 18$, putting the first velocity unknown within the buffer layer. For this reason, the dynamic Smagorinsky SGS model is used for the residual stress. Additionally, these cases were run with (\textct{SIMULATION\_MODE='LES'} on \textct{MISC}), which accounts for both molecular the turbulent transport coefficients, a must for distinguishing between fluids with different molecular Prandtl or Schmidt numbers (here the Reynolds number is so low that molecular effects may dominate locally).  The flow is maintained by a mean pressure gradient ($9.0 \times 10^{-6}$ Pa/m) in the streamwise direction (follows from Re$_{\tau}=180$). A constant volumetric heat source (0.5 W/m$^3$) is imposed on the fluid. The boundary conditions for momentum equations are no-slip at top and bottom walls and periodic for the streamwise and spanwise directions. The boundary condition for the energy equation is constant temperature ($T_w = 20 \,\mbox{\si{\degree C}} $) at the wall. To evaluate the effects of Prandtl number (Pr) and compare the DNS study \cite{Kim:1987} with FDS, the specific heat ($c_p = 1$ \si{kJ/(kg.K)}) and viscosity ($\mu = 1.8216 \times 10^{-5}$ \si{kg/(m.s)}) are fixed and the conductivity, $k$, of the fluid (air) is adjusted to:
 \begin{center}
 \begin{tabular}{ll}
 Pr & $k$ (\si{W/(m.K)}) \\
@@ -2516,9 +2546,23 @@ The right hand plot of Fig.~\ref{divergence_test_fig} displays the volume integr
 \begin{figure}[!ht]
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/divergence_test_1}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/divergence_test_2}
-\caption[The \textct{divergence\_test} cases]{Minimum and maximum divergence for the \textct{divergence\_test} cases.}
+\caption[The \textct{divergence\_test} cases 1 and 2]{Minimum and maximum divergence for the \textct{divergence\_test} cases.}
 \label{divergence_test_fig}
 \end{figure}
+
+\subsection{Creating/Removing Obstructions (\texorpdfstring{\textct{divergence\_test\_3}}{divergence\_test\_3})}
+\label{divergence_test_3}
+
+In the third example, air is pushed through a two-dimensional channel where obstructions are created and removed at random times. The divergence of the flow should remain nearly zero throughout the entire domain. Figure.~\ref{divergence_test_3_fig} displays the maximum and minimum divergence as a function of time. These ought to remain less than approximately $10^{-12}$~s$^{-1}$ in absolute value.
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/divergence_test_3}
+\caption[The \textct{divergence\_test} case 3]{Minimum and maximum divergence for the \textct{divergence\_test\_3} case.}
+\label{divergence_test_3_fig}
+\end{figure}
+
+
 
 \section{Multi-mesh Pressure and Temperature Lapse (\texorpdfstring{\textct{lapse\_rate}}{lapse\_rate})}
 \label{lapse_rate}
@@ -4586,62 +4630,6 @@ convective heat transfer has been turned off, and the correct steady-state tempe
 
 
 
-
-\section{Simple Phase Change Reaction (\texorpdfstring{\textct{pcm\_slab}}{pcm\_slab})}
-
-A semi-infinite layer of liquid in the semi-infinite region, $x>0$,
-is cooled by setting the surface, $x=0$, to a constant temperature, $T_0$,
-below the freezing temperature, $T_f$. Initially, the liquid is at temperature $T_i > T_f$. The position of the boundary between frozen and liquid layers
-is denoted by $x_f$. The heat conduction equations for the two regions are
-\begin{eqnarray}
-\dod{T_{\rm s}}{t} & = & \alpha_{\rm s} \dsods{T_{\rm s}}{x} \quad \quad (0 < x < x_f) \\ [0.2in]
-\dod{T_{\rm s}}{t} & = & \alpha_l \dsods{T_{\rm s}}{x} \quad \quad (x > x_f)
-\end{eqnarray}
-with boundary conditions
-\begin{eqnarray}
-T_{\rm s}(x,0)   &= & T_i \nonumber \\
-T_{\rm s}(0,t)   &= & T_0 \nonumber \\
-T_{\rm s}(x_f,t) &= & T_f \nonumber
-\end{eqnarray}
-The analytical solutions for the phase interface location and temperature are \cite{Carslaw:1}
-\be
-x_f(t) = 2 \lambda \sqrt{\alpha_l t}
-\ee
-\begin{eqnarray}
-\frac{T_{\rm s}(x,t)-T_0}{T_f - T_0} &=& \frac{\erf(x/2\sqrt{\alpha t})} {\erf (x_f/2\sqrt{\alpha t})} \quad \quad (0 < x < x_f) \\ [0.2in]
-\frac{T_i-T_{\rm s}(x,t)}{T_i - T_f} &=& \frac{\erfc(x/2\sqrt{\alpha t})}{\erfc(x_f/2\sqrt{\alpha t})} \quad \quad (x > x_f)
-\end{eqnarray}
-where $\lambda = x_f /2\sqrt{\alpha t}$ is obtained as a root of the (complicated)
-transcendental equation, given in \cite{Carslaw:1}.
-
-In the test case, the thickness of the liquid layer cannot be infinite. For practical purposes, a 50 cm thick layer was found to be sufficient.
-The fixed-temperature boundary condition, which is formally not available for the condensed-phase heat transfer solver in FDS,
-is implemented by assuming that the gas temperature is $T_0$ with a very high heat convection coefficient.
-For material properties, we choose $\rho_{\rm s} = \rho_l =1,000$~\si{kg/m^3},
-$k_{\rm s} = k_l = 2$~\si{W/(m.K)}, $c_{\rm s} = c_l = 2$~\si{kJ/(kg.K)}, $H_{r,\alpha\beta}=300$~kJ/kg, $T_f = 0$~\si{\degree C}, $T_i = +15$~\si{\degree C},
-and $T_0 = -15$~\si{\degree C}, which leads to a {\em Stefan number}
-\be
-\hbox{St}=\frac{c_{\rm s}\left(T_i - T_0\right)}{H_{r,\alpha\beta}} = 0.1
-\ee
-and $\lambda = 0.189$.
-
-Analytical and simulated results are compared in Fig.~\ref{pcm_slab}. The plot on the left shows the position of the phase boundary.
-From the FDS results, two estimates of $x_f$ are determined because in the numerical solution, the boundary of the two phases is not perfectly sharp.
-``FDS min'' is the largest value of $x$ for which $\rho_{\rm s} > 990$~\si{kg/m^3} and ``FDS max'' is the largest $x$ for which $\rho_{\rm s} > 0$~\si{kg/m^3}. The plot on the right
-shows temperatures at three depths from the surface: 1~cm, 5~cm, and 10~cm.
-\begin{figure}[!htb]
-\noindent
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/pcm_slab_xf} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/pcm_slab_T}
-\end{tabular*}
-\caption[The \textct{pcm\_slab} test cases]{Comparison of analytical and simulated results for the two-region Neumann problem with phase change.}
-\label{pcm_slab}
-\end{figure}
-
-
-
-
 \section{A Simple Two-Step Pyrolysis Example (\texorpdfstring{\textct{two\_step\_solid\_reaction}}{two\_step\_solid\_reaction})}
 \label{two_step_solid_reaction}
 
@@ -6664,6 +6652,20 @@ The Shunn manufactured solution (see Sec.~\ref{sec:shunn_mms}) provides a 2D ana
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/shunn_mms_FavreZ}
 \caption[Favre average test \textct{shunn3\_FavreZ}]{Output of the \textct{shunn3\_FavreZ} test cases in which the Favre average (continuous line) and running average (dashed line) at ($x=0,y=0$) are compared against expected values from the Shunn manufactured solution (see Sec.~\ref{sec:shunn_mms}).}
 \label{fig:shunn_mms_FavreZ}
+\end{figure}
+
+\section{Interpolation}
+\label{devc_interpolation}
+
+For line devices ({\ct POINTS=...}) used together with {\ct SPATIAL\_STATISTIC='INTERPOLATION'} the near wall values are usually truncated to the cell value.  However, with temperature and velocity components the wall value is used to provide an interpolation between the first cell value and the wall value.  In the test cases below, a linear field of velocity and temperature are generated with 100 points along the device and only 5 cells across the domain.  Three linear point arrays are created, one at each end along the periodic mesh boundary, and one in the center of the domain, which is also a cell center.
+
+\begin{figure}[h]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \scalebox{1}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/devc_interpolation_velocity} } &
+      \scalebox{1}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/devc_interpolation_temperature} }
+   \end{tabular*}
+\caption[Test of \textct{devc\_interpolation}]{Output of the \textct{devc\_interpolation} test cases.}
+\label{fig_devc_interpolation}
 \end{figure}
 
 

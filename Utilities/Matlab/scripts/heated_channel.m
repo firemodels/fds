@@ -42,7 +42,7 @@ axis([1e0 1e3 0 30])
 set(a1,'FontName',Font_Name)
 set(a1,'FontSize',Title_Font_Size)
 
-xlabel('{\it y}^+','Interpreter',Font_Interpreter,'Fontname',Font_Name)
+xlabel('{\it z}^+','Interpreter',Font_Interpreter,'Fontname',Font_Name)
 ylabel('{\it u}^+','Interpreter',Font_Interpreter,'Fontname',Font_Name)
 
 
@@ -60,7 +60,7 @@ axis([1e0 1e3 0 30])
 set(a2,'FontName',Font_Name)
 set(a2,'FontSize',Label_Font_Size)
 
-xlabel('{\it y}^+','Interpreter',Font_Interpreter,'Fontname',Font_Name)
+xlabel('{\it z}^+','Interpreter',Font_Interpreter,'Fontname',Font_Name)
 ylabel('{\it T}^+','Interpreter',Font_Interpreter,'Fontname',Font_Name)
 
 text(225,26,'Pr=2.0','Interpreter',Font_Interpreter,'Fontname',Font_Name,'FontSize',Label_Font_Size)
@@ -70,24 +70,21 @@ text(225,5,'Pr=0.10','Interpreter',Font_Interpreter,'Fontname',Font_Name,'FontSi
 % plot the FDS results
 
 H = 2;
-dpdx = 8.748e-6;
+dpdx = 9.0088e-6;
 tau_w = 0.5*dpdx*H;
-rho = 101325*29/(8414.5*293);
-u_tau = sqrt(tau_w/rho);
 cp = 1;
 mu = 1.8216e-5;
-delta_nu = (mu/rho)/u_tau;
 T_w = 20;
 
-devcfile = {'heated_channel_Pr_0p10_32_devc.csv', ...
-            'heated_channel_Pr_0p71_32_devc.csv', ...
-            'heated_channel_Pr_1p00_32_devc.csv', ...
-            'heated_channel_Pr_2p00_32_devc.csv'};
+devcfile = {'heated_channel_Pr_0p10_16_devc.csv', ...
+            'heated_channel_Pr_0p71_16_devc.csv', ...
+            'heated_channel_Pr_1p00_16_devc.csv', ...
+            'heated_channel_Pr_2p00_16_devc.csv'};
 
-linefile = {'heated_channel_Pr_0p10_32_line.csv', ...
-            'heated_channel_Pr_0p71_32_line.csv', ...
-            'heated_channel_Pr_1p00_32_line.csv', ...
-            'heated_channel_Pr_2p00_32_line.csv'};
+linefile = {'heated_channel_Pr_0p10_16_line.csv', ...
+            'heated_channel_Pr_0p71_16_line.csv', ...
+            'heated_channel_Pr_1p00_16_line.csv', ...
+            'heated_channel_Pr_2p00_16_line.csv'};
 
 skip_case = 0;
 
@@ -100,7 +97,14 @@ for i = [1,2,3,4]
     end
 
     M = importdata([outdir,devcfile{i}],',',2);
-    q_w = mean(M.data(3,2:3));
+
+    rho = M.data(end,strcmp(M.colheaders,'"RHO"')); % should be about 1.19
+    u_tau = sqrt(tau_w/rho);
+    delta_nu = (mu/rho)/u_tau;
+
+    j1 = find(strcmp(M.colheaders,'"NetHF0B"'));
+    j2 = find(strcmp(M.colheaders,'"NetHF0T"'));
+    q_w = mean(M.data(end,j1:j2));
     T_tau = q_w/(rho*u_tau*cp);
 
     if ~exist([outdir,linefile{i}])
@@ -126,6 +130,18 @@ for i = [1,2,3,4]
         set(groot,'CurrentFigure',f2);
         hfig2(1)=semilogx(zp,Tp,'ksq-');
     end
+
+    switch i
+        case 1; err(i) = abs( mean(Tp)-mean(Tp_mean_Pr0p10,'omitnan') )/mean(Tp_mean_Pr0p10,'omitnan');
+        case 2; err(i) = abs( mean(Tp)-mean(Tp_mean_Pr0p71,'omitnan') )/mean(Tp_mean_Pr0p71,'omitnan');
+        case 3; err(i) = abs( mean(up)-mean(up_mean,'omitnan')        )/mean(up_mean,'omitnan');
+        case 4; err(i) = abs( mean(Tp)-mean(Tp_mean_Pr2p00,'omitnan') )/mean(Tp_mean_Pr2p00,'omitnan');
+    end
+
+    % if err(i)>0.2
+    %     disp(['Matlab Warning: heated_channel case ',num2str(i),' out of tolerance'])
+    % end
+
 end
 
 if skip_case
@@ -138,7 +154,7 @@ set(h,'FontSize',Key_Font_Size)
 
 % add Git if file is available
 
-Git_Filename = [outdir,'heated_channel_Pr_1p00_32_git.txt'];
+Git_Filename = [outdir,'heated_channel_Pr_1p00_16_git.txt'];
 addverstr(a1,Git_Filename,'semilogx')
 
 % print pdf
@@ -156,7 +172,7 @@ set(h,'FontSize',Key_Font_Size)
 
 % add Git if file is available
 
-Git_Filename = [outdir,'heated_channel_Pr_0p71_32_git.txt'];
+Git_Filename = [outdir,'heated_channel_Pr_0p71_16_git.txt'];
 addverstr(a2,Git_Filename,'semilogx')
 
 % print pdf
@@ -170,14 +186,42 @@ print(f2,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/heated_cha
 
 
 % % Compute pressure gradient from Re_tau
-%
+
 % mu=1.8216e-5
-% rho=101325*28.84852/(8314.5*293.15)
-% Re_tau=590
-% delta=1
-% u_tau=Re_tau*mu/rho/delta
+% rho=1.1934
+% Re_tau=180 % Kim and Moin, 1987
+% delta=1 % channel half height
+% u_tau=Re_tau*(mu/rho)/delta
 % tau_w=rho*u_tau^2
 % dpdx=tau_w/delta
+% Pr = 1;
+% Tref = 293;
+
+% q = 2/(Pr*Re_tau) * rho*cp*u_tau*Tref/delta
+
+% % Check bulk velocity
+
+% figure
+% for i = [1,2,3,4]
+%     M = importdata([outdir,devcfile{i}],',',2);
+%     t = M.data(:,find(strcmp(M.colheaders,'Time')));
+%     UVEL = M.data(:,find(strcmp(M.colheaders,'"U-VEL"')));
+%     plot(t,UVEL); hold on
+% end
+
+% % Check heat balance
+
+% figure
+% for i = [1,2,3,4]
+%     M = importdata([outdir,devcfile{i}],',',2);
+%     t = M.data(:,find(strcmp(M.colheaders,'Time')));
+%     j1 = find(strcmp(M.colheaders,'"NetHF0B"'));
+%     j2 = find(strcmp(M.colheaders,'"NetHF0T"'));
+%     q_w = mean(M.data(:,j1:j2),2);
+%     plot(t,q_w); hold on
+% end
+
+
 
 
 

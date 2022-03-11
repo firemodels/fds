@@ -10,8 +10,7 @@ Ambient temperature
 
 Reaction
 
-&REAC ID='POLYURETHANE',
-      FUEL='REAC_FUEL',
+&REAC FUEL='POLYURETHANE',
       C=1.0,
       H=1.8,
       O=0.35,

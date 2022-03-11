@@ -63,6 +63,8 @@ ENDDO
 ALLOCATE(M%PHI_LS(0:IBP1,0:JBP1)) ; CALL ChkMemErr('VEGE:LEVEL SET','PHI_LS',IZERO)   ; PHI_LS  => M%PHI_LS  ; PHI_LS = PHI_LS_MIN
 ALLOCATE(M%PHI1_LS(0:IBP1,0:JBP1)); CALL ChkMemErr('VEGE:LEVEL SET','PHI1_LS',IZERO)  ; PHI1_LS => M%PHI1_LS ; PHI1_LS = PHI_LS_MIN
 
+ALLOCATE(M%TOA(0:IBP1,0:JBP1)) ; CALL ChkMemErr('VEGE:TOA','TOA',IZERO)   ; TOA  => M%TOA  ; TOA = -1._EB
+
 ! Wind speed components in the center of the first gas phsae cell above the ground.
 
 ALLOCATE(M%U_LS(0:IBP1,0:JBP1)) ; CALL ChkMemErr('VEGE:LEVEL SET','U_LS',IZERO) ; U_LS => M%U_LS ; U_LS = 0._EB
@@ -502,6 +504,7 @@ IF (.NOT.PREDICTOR) THEN
                   CFA => CFACE(CUT_FACE(ICF)%CFACE_INDEX(IW))
                   ONE_D => BOUNDARY_ONE_D(CFA%OD_INDEX)
                   IF (PHI_LS(IIG,JJG)>=0._EB .AND. ONE_D%T_IGN>1.E5_EB) CALL IGNITE_GRID_CELL
+                  IF (PHI_LS(IIG,JJG)>=0._EB .AND. TOA(IIG,JJG)<0._EB) TOA(IIG,JJG) = T
                   BP => BOUNDARY_PROPS(CFA%BP_INDEX)
                   BP%PHI_LS = PHI_LS(IIG,JJG)
                ENDDO
@@ -519,6 +522,7 @@ IF (.NOT.PREDICTOR) THEN
             WC => WALL(IW)
             ONE_D => BOUNDARY_ONE_D(WC%OD_INDEX)
             IF (PHI_LS(IIG,JJG)>=0._EB .AND. ONE_D%T_IGN>1.E5_EB) CALL IGNITE_GRID_CELL
+            IF (PHI_LS(IIG,JJG)>=0._EB .AND. TOA(IIG,JJG)<0._EB) TOA(IIG,JJG) = T
             BP => BOUNDARY_PROPS(WC%BP_INDEX)
             BP%PHI_LS = PHI_LS(IIG,JJG)
          ENDDO

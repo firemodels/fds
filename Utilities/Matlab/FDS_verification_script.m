@@ -68,8 +68,6 @@ disp('jet_decay...');                     jet_decay
 disp('wall_model...');                    wall_model
 disp('pyrolysis...');                     pyrolysis
 disp('birch_tga...');                     birch_tga
-disp('water_ice_water...');               water_ice_water
-disp('pcm_slab...');                      pcm_slab
 disp('pulsating...');                     pulsating
 disp('compression_wave...');              compression_wave
 disp('soborot_mass_transport...');        soborot_mass_transport
@@ -102,5 +100,6 @@ disp('ht3d_cond...');                     ht3d_cond
 disp('ht3d_sphere...');                   ht3d_sphere
 disp('geom_positive_errors...');          geom_positive_errors
 disp('geom_channel_test...');             geom_channel_test
+disp('atmospheric_boundary_layer...');    atmospheric_boundary_layer
 
 display('verification scripts completed successfully!')
