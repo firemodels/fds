@@ -1451,10 +1451,12 @@ TYPE ZONE_MESH_TYPE
 #endif /* WITH_MKL */
    INTEGER :: NUNKH=0                                 !< Number of unknowns in pressure solution for a given ZONE_MESH
    INTEGER :: NCVLH=0                                 !< Number of pressure control volumes for a given ZONE_MESH
+   INTEGER :: ICVL=0                                  !< Control volume counter for parent ZONE
+   INTEGER :: IROW=0                                  !< Parent ZONE matrix row index
    INTEGER :: NUNKH_CART=0                            !< Number of unknowns in Cartesian cells of ZONE_MESH
    INTEGER :: NCVLH_CART=0                            !< Number of pressure CVs in Cartesian cells of ZONE_MESH
    INTEGER :: MTYPE=0                                 !< Matrix type (symmetric indefinite, or symm positive definite)
-   LOGICAL :: ZONE_IN_MESH=.FALSE.                    !< ZONE is in MESH
+   INTEGER :: CONNECTED_ZONE_PARENT=0                 !< Index of first zone in a connected zone list
    LOGICAL :: USE_FFT=.TRUE.                          !< Flag for use of FFT solver
    INTEGER, ALLOCATABLE, DIMENSION(:,:) :: MESH_IJK   !< I,J,K positions of cell with unknown row IROW (1:3,1:NUNKH)
    REAL(EB),ALLOCATABLE, DIMENSION(:)   :: A_H        !< Matrix coefficients for ZONE_MESH, up triang part, CSR format.
