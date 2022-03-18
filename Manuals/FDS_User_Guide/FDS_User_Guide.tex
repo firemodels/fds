@@ -7631,7 +7631,14 @@ This line indicates that solid boundaries with the surface properties given by {
 \subsection{Bulk density input files}
 \label{info:bulk_density_files}
 
-In some cases, the user may have access to detailed 3-dimensional spatial information on the distribution of vegetation bulk density, or {\ct MASS\_PER\_VOLUME}, within a tree crown or a forest canopy. These data may be available in a voxelized (gridded) format and are increasingly common with the advancement of both remote sensing techniques (e.g. lidar) and tools for modeling forest canopy structure. It is possible to directly import such bulk density data by specifying a {\ct BULK\_DENSITY\_FILE} on the {\ct INIT} line. Each file should specify the bulk density values for the type of vegetation defined by the {\ct PART\_ID} and {\ct SURF\_ID} associated with the particular {\ct INIT} line. For example, one file may specify the spatial distribution of foliage, another for branches, and so on. The {\ct BULK\_DENSITY\_FILE} must be a FORTRAN unformatted (binary) file and follows the following convention:
+In some cases, the user may have access to detailed 3-dimensional spatial information on the distribution of vegetation bulk density, or {\ct MASS\_PER\_VOLUME}, within a tree crown or a forest canopy. These data may be available in a voxelized (gridded) format and are increasingly common with the advancement of both remote sensing techniques (e.g. lidar) and tools for modeling forest canopy structure. It is possible to directly import such bulk density data by specifying a {\ct BULK\_DENSITY\_FILE} on the {\ct INIT} line. Each file should specify the bulk density values for the type of vegetation defined by the {\ct PART\_ID} and {\ct SURF\_ID} associated with the particular {\ct INIT} line. For example, one file may specify the spatial distribution of foliage, another for branches, and so on:
+\begin{lstlisting}
+&INIT ID='insert', PART_ID='foliage part', BULK_DENSITY_FILE='canopy_foliage.bdf'/
+\end{lstlisting}
+For a full example, see the {\ct bulk\_density\_file.fds} test cases in the {\ct WUI} directory of the verification suite. Bulk density data are assumed to be provided on a dry-mass basis, with moisture mass added following the specification of the associated {\ct SURF}.
+
+
+The {\ct BULK\_DENSITY\_FILE} must be a FORTRAN unformatted (binary) file and follows the following convention:
 \begin{lstlisting}
 WRITE(LU_VEG_IN) VXMIN,VXMAX,VYMIN,VYMAX,VZMIN,VZMAX
 WRITE(LU_VEG_IN) VDX,VDY,VDZ
@@ -7643,8 +7650,7 @@ WRITE(LU_VEG_IN) MASS_PER_VOLUME
 WRITE(LU_VEG_IN) VCX,VCY,VCZ
 WRITE(LU_VEG_IN) MASS_PER_VOLUME
 \end{lstlisting}
-
-The sextuplet {\ct VXMIN,VXMAX,VYMIN,VYMAX,VZMIN,VZMAX} gives the bounds (upper and lower voxel faces) of the entire vegetation containing volume. This is uesd to determine whether a specific mesh contains any of the vegetation. The triplet {\ct VDX,VDY,VDZ} gives the spatial resolution of the input data and {\ct NVOX} is the total number of voxels which actually contain vegetation. The coordiantes of each voxel center are given by {\ct VCX,VCY,VCZ} and the bulk density by {\ct MASS\_PER\_VOLUME}. Third-party tools to create vegetation inputs are in development. However, an example python script for creating a custom {\ct BULK\_DENSITY\_FILE} can be found in the GitHub repository, {\ct firemodels/fds}, in the directory, {\ct Utilities/Python/scripts}.
+The sextuplet {\ct VXMIN,VXMAX,VYMIN,VYMAX,VZMIN,VZMAX} gives the bounds (upper and lower voxel faces) of the entire vegetation containing volume. This is uesd to determine whether a specific mesh contains any of the vegetation. The triplet {\ct VDX,VDY,VDZ} gives the spatial resolution of the input data and {\ct NVOX} is the total number of voxels which actually contain vegetation. The coordiantes of each voxel center are given by {\ct VCX,VCY,VCZ} and the bulk density by {\ct MASS\_PER\_VOLUME}. Third-party tools to create vegetation inputs are in development. However, an example python script for creating a custom {\ct BULK\_DENSITY\_FILE} can be found in the cad GitHub repository, {\ct firemodels/cad}.
 
 FDS effectively creats a {\ct BLOCK} shaped {\ct INIT} line for each voxel. In this way, it is possible to change the FDS resolution and meshing without needing to create a new {\ct BULK\_DENSITY\_FILE}. By default, if a {\ct BULK\_DENSITY\_FILE} is specified FDS will input vegetation with {\ct N\_PARTICLES\_PER\_CELL = 1} to minimize memory usage. However, if an FDS grid cell intersects multiple vegetation voxels (for example, due to misalignment between FDS and voxel resolution), more than one particle will be added to the cell. The input mass will be conserved; this will simply increase memory usage, and it is generally recommended to provide a {\ct BULK\_DENSITY\_FILE} with the same resolution as your simulation if possible.
 
