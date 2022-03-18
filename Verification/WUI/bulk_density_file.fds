@@ -1,0 +1,33 @@
+&HEAD CHID='bulk_density_file', TITLE='verification of reading binary bulk density data' /
+
+&MESH IJK=50,50,30, XB=0,50,0,50,0,30/
+
+&TIME T_END=0.1,DT=0.1 / 
+
+&VENT DB='XMIN', SURF_ID='OPEN' /
+&VENT DB='XMAX', SURF_ID='OPEN' /
+&VENT DB='YMIN', SURF_ID='OPEN' /
+&VENT DB='YMAX', SURF_ID='OPEN' /
+&VENT DB='ZMAX', SURF_ID='OPEN' /
+
+&MATL ID = 'vegetation'
+      DENSITY = 514.
+      CONDUCTIVITY = 0.11
+      SPECIFIC_HEAT = 2.0/
+
+&SURF ID = 'foliage surf'
+      MATL_ID = 'vegetation'
+      SURFACE_VOLUME_RATIO = 4000
+      LENGTH = 0.05
+      GEOMETRY = 'CYLINDRICAL'/
+&PART ID = 'foliage part', SURF_ID = 'foliage surf', DRAG_LAW='CYLINDER', 
+STATIC=T, QUANTITIES='PARTICLE BULK DENSITY'/
+
+&INIT ID='insert', PART_ID='foliage part', BULK_DENSITY_FILE='../../../cad/Binary_Bulk_Density_File/canopy_foliage.bdf'/
+
+&DEVC ID='number of voxels', XYZ=5,5,5, QUANTITY='NUMBER OF PARTICLES'/
+
+&DEVC ID='canopy mass', XB=0,50,0,50,0,30, QUANTITY='SURFACE DENSITY', MATL_ID='vegetation', 
+SPATIAL_STATISTIC='SURFACE INTEGRAL', PART_ID='foliage part'/
+
+&TAIL /
