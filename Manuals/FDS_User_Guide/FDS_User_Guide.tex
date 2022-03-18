@@ -4494,6 +4494,8 @@ This example tests several basic features of FDS. A narrow channel, 3~m long, 0.
 \subsubsection{Example Case: Breaking Pressure Zones}
 \label{zone_break_slow}
 \label{zone_break_fast}
+\label{zone_break_slow_ulmat}
+\label{zone_break_fast_ulmat}
 
 In this example, three simple compartments are initially isolated from each other and from the ambient environment outside. Each compartment is a separate pressure zone. Air is blown into Zone~1 at a constant rate of 0.1~kg/s, increasing its pressure approximately 2000~Pa by 10~s, at which time Zone~1 is opened to Zone~2, decreasing the overall pressure in the two zones to roughly one-third the original value because the volume of the combined pressure zone has been roughly tripled. At 15~s, the pressure is further decreased by opening a door to Zone~3, and, finally, at 20~s the pressure returns to ambient following the opening of a door to the outside. Figure~\ref{zone_break} displays the pressure within each compartment.
 \begin{figure}[ht]
