@@ -762,6 +762,7 @@ $QFDS -d Turbulence ramp_prof_u_z.fds
 $QFDS -d WUI Bova_1a.fds
 $QFDS -d WUI Bova_1b.fds
 $QFDS -d WUI Bova_4a.fds
+$QFDS -d WUI bulk_density_file.fds
 $QFDS -d WUI char_oxidation_1.fds
 $QFDS -d WUI char_oxidation_2.fds
 $QFDS -d WUI dragon_5a.fds
