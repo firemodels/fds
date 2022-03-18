@@ -634,6 +634,10 @@ MAIN_LOOP: DO
          CALL DIVERGENCE_PART_1(T,DT,NM)
       ENDDO COMPUTE_WALL_BC_LOOP_A
 
+      ! Update global pressure matrices after zone connections
+
+      IF (ICYC==1 .AND. FIRST_PASS) CALL GLOBAL_MATRIX_REASSIGN
+
       ! If there are pressure ZONEs, exchange integrated quantities mesh to mesh for use in the divergence calculation
 
       IF (N_ZONE>0) CALL EXCHANGE_DIVERGENCE_INFO
