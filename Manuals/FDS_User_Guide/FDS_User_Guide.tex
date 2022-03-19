@@ -7631,7 +7631,7 @@ This line indicates that solid boundaries with the surface properties given by {
 
 
 \subsection{Bulk density input files}
-\label{info:bulk_density_files}
+\label{bulk_density_file}
 
 In some cases, the user may have access to detailed 3-dimensional spatial information on the distribution of vegetation bulk density, or {\ct MASS\_PER\_VOLUME}, within a tree crown or a forest canopy. These data may be available in a voxelized (gridded) format and are increasingly common with the advancement of both remote sensing techniques (e.g. lidar) and tools for modeling forest canopy structure. It is possible to directly import such bulk density data by specifying a {\ct BULK\_DENSITY\_FILE} on the {\ct INIT} line. Each file should specify the bulk density values for the type of vegetation defined by the {\ct PART\_ID} and {\ct SURF\_ID} associated with the particular {\ct INIT} line. For example, one file may specify the spatial distribution of foliage, another for branches, and so on:
 \begin{lstlisting}
@@ -11395,7 +11395,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct INIT} (Initial Conditions)} \\
 \hline \hline
 \endhead
-{\ct BULK\_DENSITY\_FILE}         & Character         & Section~\ref{info:bulk_density_files}         &                &               \\ \hline
+{\ct BULK\_DENSITY\_FILE}         & Character         & Section~\ref{bulk_density_file}               &                &               \\ \hline
 {\ct CELL\_CENTERED}              & Logical           & Section~\ref{info:initial_droplets}           &                & {\ct F} \\ \hline
 {\ct CROWN\_BASE\_HEIGHT}         & Real              & Section~\ref{info:trees}                      & m              &               \\ \hline
 {\ct CROWN\_BASE\_WIDTH}          & Real              & Section~\ref{info:trees}                      & m              &               \\ \hline
