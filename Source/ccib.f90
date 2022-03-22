@@ -622,7 +622,7 @@ WITH_BAROC=.FALSE.; IF (DO_SEPARABLE) WITH_BAROC=.TRUE.
 
 ZONE_LOOP_1 : DO IPZ=0,N_ZONE
    ZM=>MESHES(NM)%ZONE_MESH(IPZ)
-   IF (.NOT.ZM%ZONE_IN_MESH .OR. ZM%NUNKH<1) CYCLE ZONE_LOOP_1
+   IF (ZM%CONNECTED_ZONE_PARENT/=IPZ .OR. ZM%NUNKH<1) CYCLE ZONE_LOOP_1
    ALLOCATE(RESV(1:ZM%NUNKH),LHSV(1:ZM%NUNKH),RHSV(1:ZM%NUNKH),VOLV(1:ZM%NUNKH))
    RESV(:)=0._EB; LHSV(:)=0._EB; RHSV(:)=0._EB; VOLV(:)=0._EB
 
@@ -13819,8 +13819,8 @@ MESHES_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
 
       ULMAT_IF : IF (PRES_FLAG==ULMAT_FLAG) THEN
          PRES_ZONE_LOOP : DO IPZ=0,N_ZONE
-            IF (.NOT.MESHES(NM)%ZONE_MESH(IPZ)%ZONE_IN_MESH) CYCLE
             ZM => MESHES(NM)%ZONE_MESH(IPZ)
+            IF (ZM%CONNECTED_ZONE_PARENT/=IPZ) CYCLE
             ALLOCATE(DPV(1:ZM%NUNKH),DIVV(1:ZM%NUNKH),VOLV(1:ZM%NUNKH),IJKV(MAX_DIM,1:ZM%NUNKH))
             DPV=0._EB; DIVV=0._EB; VOLV=0._EB; IJKV=0
             ! First Regular GASPHASE cells:
@@ -18426,8 +18426,11 @@ USE MPI_F08
 INTEGER :: NM, I, IPROC, IERR
 
 ! 1. Define unknown numbers for Scalars:
-CALL GET_LINKED_MATRIX_INDEXES_Z
-!CALL GET_MATRIX_INDEXES_Z
+IF(CC_UNSTRUCTURED_PROJECTION) THEN
+   CALL GET_LINKED_MATRIX_INDEXES_Z
+ELSE
+   CALL GET_MATRIX_INDEXES_Z
+ENDIF
 
 ! 2. For each IBM_GASPHASE (cut or regular) face, find global numeration of the volumes
 ! that share it, store a list of areas and centroids for diffussion operator in FV form.
@@ -21642,718 +21645,719 @@ END SUBROUTINE COPY_CC_UNKH_TO_HS
 
 
 ! ------------------ GET_MATRIX_INDEXES_Z ---------------------------
-! SUBROUTINE GET_MATRIX_INDEXES_Z
-! USE MPI_F08
-!
-! ! Local variables:
-! INTEGER :: NM
-! INTEGER :: ILO,IHI,JLO,JHI,KLO,KHI
-! INTEGER :: I,J,K,ICC,JCC,NCELL,INGH,JNGH,KNGH,IERR,IPT
-! INTEGER, PARAMETER :: IMPADD = 1
-! INTEGER, PARAMETER :: SHFTM(1:3,1:6) = RESHAPE((/-1,0,0,1,0,0,0,-1,0,0,1,0,0,0,-1,0,0,1/),(/3,6/))
-! LOGICAL :: CRTCELL_FLG
-!
-! INTEGER :: X1AXIS,LOWHIGH,ILH,IFC,IFACE,IFC2,IFACE2,ICC2,JCC2,VAL_UNKZ,I_LNK,J_LNK,K_LNK,JCC_LNK
-! REAL(EB):: CCVOL_THRES,VAL_CVOL
-!
-! LOGICAL :: QUITLINK_FLG
-!
-! ! Linking variables associated data:
-! LOGICAL, SAVE :: UNLINKED_1ST_CALL=.TRUE.
-! INTEGER :: LINK_ITER, ULINK_COUNT, II, JJ, KK
-! CHARACTER(MESSAGE_LENGTH) :: UNLINKED_FILE
-! REAL(EB) :: DV, DISTCELL
-! INTEGER, PARAMETER :: N_LINK_ATTMP = 50
-!
-! INTEGER, ALLOCATABLE, DIMENSION(:) :: CELLPUNKZ, INDUNKZ
-! INTEGER :: COUNT, ICF, CF_STATUS
-!
-! ! Define local number of cut-cell:
-! IF (ALLOCATED(NUNKZ_LOC)) DEALLOCATE(NUNKZ_LOC)
-! ALLOCATE(NUNKZ_LOC(1:NMESHES)); NUNKZ_LOC = 0
-!
-! ! Cell numbers for Scalar equations:
-! MAIN_MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-!
-!    CALL POINT_TO_MESH(NM)
-!
-!    ! Mesh sizes:
-!    NXB=IBAR
-!    NYB=JBAR
-!    NZB=KBAR
-!
-!    ! X direction bounds:
-!    ILO_FACE = 0                    ! Low mesh boundary face index.
-!    IHI_FACE = IBAR                 ! High mesh boundary face index.
-!    ILO_CELL = ILO_FACE + 1     ! First internal cell index. See notes.
-!    IHI_CELL = IHI_FACE ! Last internal cell index.
-!
-!    ! Y direction bounds:
-!    JLO_FACE = 0                    ! Low mesh boundary face index.
-!    JHI_FACE = JBAR                 ! High mesh boundary face index.
-!    JLO_CELL = JLO_FACE + 1     ! First internal cell index. See notes.
-!    JHI_CELL = JHI_FACE ! Last internal cell index.
-!
-!    ! Z direction bounds:
-!    KLO_FACE = 0                    ! Low mesh boundary face index.
-!    KHI_FACE = KBAR                 ! High mesh boundary face index.
-!    KLO_CELL = KLO_FACE + 1     ! First internal cell index. See notes.
-!    KHI_CELL = KHI_FACE ! Last internal cell index.
-!
-!    ! Initialize unknown numbers for Z:
-!    ! We assume SET_CUTCELLS_3D has been called and CCVAR has been allocated:
-!    CCVAR(:,:,:,IBM_UNKZ) = IBM_UNDEFINED
-!    DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
-!       CUT_CELL(ICC)%UNKZ(:) = IBM_UNDEFINED
-!    ENDDO
-!
-!    ! 1. Number regular GASPHASE cells:
-!    ILO = ILO_CELL; IHI = IHI_CELL
-!    JLO = JLO_CELL; JHI = JHI_CELL
-!    KLO = KLO_CELL; KHI = KHI_CELL
-!
-!    IF (PERIODIC_TEST==103 .OR. PERIODIC_TEST==11 .OR. PERIODIC_TEST==7) THEN
-!       DO K=KLO,KHI
-!          DO J=JLO,JHI
-!             DO I=ILO,IHI
-!                ! If regular cell centroid is outside the test box + DELTA -> drop:
-!                IF(XC(I) < (VAL_TESTX_LOW-DX(I) +GEOMEPS)) CYCLE; IF(XC(I) > (VAL_TESTX_HIGH+DX(I)-GEOMEPS)) CYCLE
-!                IF(YC(J) < (VAL_TESTY_LOW-DY(J) +GEOMEPS)) CYCLE; IF(YC(J) > (VAL_TESTY_HIGH+DY(J)-GEOMEPS)) CYCLE
-!                IF(ZC(K) < (VAL_TESTZ_LOW-DZ(K) +GEOMEPS)) CYCLE; IF(ZC(K) > (VAL_TESTZ_HIGH+DZ(K)-GEOMEPS)) CYCLE
-!                IF(CCVAR(I,J,K,IBM_CGSC) /= IBM_GASPHASE) CYCLE
-!                NUNKZ_LOC(NM) = NUNKZ_LOC(NM) + 1
-!                CCVAR(I,J,K,IBM_UNKZ) = NUNKZ_LOC(NM)
-!             ENDDO
-!          ENDDO
-!       ENDDO
-!    ENDIF
-!
-!    ! Loop on Cartesian cells, number unknowns for cells type IBM_CUTCFE and surrounding IBM_GASPHASE:
-!    DO K=KLO-1,KHI+1
-!       DO J=JLO-1,JHI+1
-!          DO I=ILO-1,IHI+1
-!             ! Drop if cartesian cell is not type IBM_CUTCFE:
-!             IF (  CCVAR(I,J,K,IBM_CGSC) /= IBM_CUTCFE ) CYCLE
-!
-!             ! First Add the Cut-Cell
-!             ICC  = CCVAR(I,J,K,IBM_IDCC)
-!             IF (ICC <= MESHES(NM)%N_CUTCELL_MESH .AND. .NOT.SOLID(CELL_INDEX(I,J,K)) ) THEN ! Don't number guard-cell cut-cells,
-!                NCELL= CUT_CELL(ICC)%NCELL                                                   ! or cutcells inside an OBST.
-!                CCVOL_THRES = CCVOL_LINK*DX(I)*DY(J)*DZ(K)
-!                DO JCC=1,NCELL
-!                   IF ( CUT_CELL(ICC)%VOLUME(JCC) < CCVOL_THRES) CYCLE ! Small cell, dealt with later.
-!                   NUNKZ_LOC(NM) = NUNKZ_LOC(NM) + 1
-!                   CUT_CELL(ICC)%UNKZ(JCC) = NUNKZ_LOC(NM)
-!                ENDDO
-!             ENDIF
-!
-!             ! First Run over Neighbors: Case 27 cells.
-!             SELECT CASE(IMPADD)
-!             CASE(0)
-!                ! No corner neighbors, only 6 face neighbors of Cartesian cell.
-!                DO IPT=1,6
-!                   KNGH=K+SHFTM(KAXIS,IPT)
-!                   IF ( (KNGH < KLO_CELL) .OR. (KNGH > KHI_CELL) ) CYCLE
-!                   JNGH=J+SHFTM(JAXIS,IPT)
-!                   IF ( (JNGH < JLO_CELL) .OR. (JNGH > JHI_CELL) ) CYCLE
-!                   INGH=I+SHFTM(IAXIS,IPT)
-!                   ! Either not GASPHASE or already counted:
-!                   IF ( (CCVAR(INGH,JNGH,KNGH,IBM_CGSC) /= IBM_GASPHASE) .OR. &
-!                        (CCVAR(INGH,JNGH,KNGH,IBM_UNKZ)  > 0) ) CYCLE
-!                   IF ( (INGH < ILO_CELL) .OR. (INGH > IHI_CELL) ) CYCLE
-!
-!                   ! Don't number a regular cell inside an OBST:
-!                   IF (SOLID(CELL_INDEX(INGH,JNGH,KNGH))) CYCLE
-!
-!                   ! Add Scalar unknown:
-!                   NUNKZ_LOC(NM) = NUNKZ_LOC(NM) + 1
-!                   CCVAR(INGH,JNGH,KNGH,IBM_UNKZ) = NUNKZ_LOC(NM)
-!                ENDDO
-!
-!             CASE DEFAULT
-!                ! Only Internal cells for the mesh in the stencil (I-IMPADD:I+IMPADD,J-IMPADD:J+IMPADD,K-IMPADD:K+IMPADD)
-!                ! aound Cartesian cell I,J,K of type IBM_CUTCFE:
-!                DO KNGH=K-IMPADD,K+IMPADD
-!                   IF ( (KNGH < KLO_CELL) .OR. (KNGH > KHI_CELL) ) CYCLE
-!                   DO JNGH=J-IMPADD,J+IMPADD
-!                      IF ( (JNGH < JLO_CELL) .OR. (JNGH > JHI_CELL) ) CYCLE
-!                      DO INGH=I-IMPADD,I+IMPADD
-!                         ! Either not GASPHASE or already counted:
-!                         IF ( (CCVAR(INGH,JNGH,KNGH,IBM_CGSC) /= IBM_GASPHASE) .OR. &
-!                              (CCVAR(INGH,JNGH,KNGH,IBM_UNKZ)  > 0) ) CYCLE
-!                         IF ( (INGH < ILO_CELL) .OR. (INGH > IHI_CELL) ) CYCLE
-!
-!                         ! Don't number a regular cell inside an OBST:
-!                         IF (SOLID(CELL_INDEX(INGH,JNGH,KNGH))) CYCLE
-!
-!                         ! Add Scalar unknown:
-!                         NUNKZ_LOC(NM) = NUNKZ_LOC(NM) + 1
-!                         CCVAR(INGH,JNGH,KNGH,IBM_UNKZ) = NUNKZ_LOC(NM)
-!                      ENDDO
-!                   ENDDO
-!                ENDDO
-!             END SELECT
-!
-!          ENDDO
-!       ENDDO
-!    ENDDO
-!
-! ENDDO MAIN_MESH_LOOP
-!
-! ! Now link small cells to surrounding cells in the mesh:
-! ! NOTE: This linking scheme assumes there are no small cells trapped against a block boundary, i.e. there is a path
-! ! within the mesh between them and a large cell.
-! ! NOTE2: Two remediation methods are used to link small cells trapped against a block boundary:
-! ! 1. Try linking them to the closest cell regular cell with UNKZ > 0.
-! ! 2. Set for Mass matrix entry the cut-cell volume to ~ a cartesian cell and give a UNKZ > 0 to said cut-cell.
-! !    This is done setting MESH(NM)%CUT_CELL(ICC)%USE_CC_VOL(JCC) = .FALSE., which will be used when building the
-! !    Mass matrix.
-! ! NOTE3: This scheme links two unknowns local to the mesh, therefore parallel consistency is not maintained.
-! MAIN_MESH_LOOP3 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-!
-!    CALL POINT_TO_MESH(NM)
-!
-!    ! Small Cell linking scheme:
-!    ! 1. Attempt to link to Regular GASPHASE cells with unknown UNKZ > 0.
-!    ! 2. Attempt to link to large or already linked cut-cells.
-!    ! 3. If there are unlinked cells after N_LINK_ATTMP:
-!    !    3.a 1st Try : Link to closest UNKZ > 0 regular cell in the mesh.
-!    !    3.b 2nd Try : Give small cell a local unknown number, set CUT_CELL(ICC)%USE_CC_VOL(JCC)=.FALSE., such that
-!    !                  its volume in mass matrix is CCVOL_THRES.
-!    ! Set counter to 0:
-!    LINK_ITER = 0
-!    LINK_LOOP : DO ! Cut-cell linking loop for small cells. -> Algo defined by CCVOL_LINK.
-!
-!       QUITLINK_FLG = .TRUE.
-!
-!       ! First attempt to link to regular GASPHASE cells:
-!       DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
-!          I = CUT_CELL(ICC)%IJK(IAXIS)
-!          J = CUT_CELL(ICC)%IJK(JAXIS)
-!          K = CUT_CELL(ICC)%IJK(KAXIS)
-!          ! Don't attempt to link cut-cells inside an OBST:
-!          IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-!          NCELL = CUT_CELL(ICC)%NCELL
-!          CCVOL_THRES = CCVOL_LINK*DX(I)*DY(J)*DZ(K)
-!          DO JCC=1,NCELL
-!             IF ( CUT_CELL(ICC)%UNKZ(JCC) > 0 ) CYCLE
-!             ! Small cells, get IBM_UNKZ from a large cell neighbor:
-!             VAL_UNKZ = IBM_UNDEFINED
-!             VAL_CVOL = CCVOL_THRES
-!             IFC_LOOP3A : DO IFC=1,CUT_CELL(ICC)%CCELEM(1,JCC)
-!                IFACE   = CUT_CELL(ICC)%CCELEM(IFC+1,JCC)
-!                LOWHIGH = CUT_CELL(ICC)%FACE_LIST(2,IFACE)
-!                ILH     = 2*LOWHIGH - 3 ! -1 for LOW_IND, 1 for HIGH_IND
-!                SELECT CASE(CUT_CELL(ICC)%FACE_LIST(1,IFACE)) ! 1. Check if a surrounding cell is a regular cell:
-!                CASE(IBM_FTYPE_RGGAS) ! REGULAR GASPHASE
-!                   X1AXIS  = CUT_CELL(ICC)%FACE_LIST(3,IFACE)
-!                   CRTCELL_FLG = .FALSE.
-!                   SELECT CASE(X1AXIS)
-!                   ! Using IBM_UNKZ in the following conditionals assures no guard-cells outside of the domain (except
-!                   ! case of periodic boundaries) are chosen. Deals with domain BCs.
-!                   CASE(IAXIS)
-!                      I_LNK = I+ILH; J_LNK = J; K_LNK = K
-!                      IF(CCVAR(I_LNK,J_LNK,K_LNK,IBM_UNKZ) > 0) THEN ! Regular Cartesian Cell
-!                         VAL_UNKZ = CCVAR(I_LNK,J_LNK,K_LNK,IBM_UNKZ)
-!                         CRTCELL_FLG = .TRUE.
-!                      ENDIF
-!                   CASE(JAXIS)
-!                      I_LNK = I; J_LNK = J+ILH; K_LNK = K
-!                      IF(CCVAR(I_LNK,J_LNK,K_LNK,IBM_UNKZ) > 0) THEN ! Regular Cartesian Cell
-!                         VAL_UNKZ = CCVAR(I_LNK,J_LNK,K_LNK,IBM_UNKZ)
-!                         CRTCELL_FLG = .TRUE.
-!                      ENDIF
-!                   CASE(KAXIS)
-!                      I_LNK = I; J_LNK = J; K_LNK = K+ILH
-!                      IF(CCVAR(I_LNK,J_LNK,K_LNK,IBM_UNKZ) > 0) THEN ! Regular Cartesian Cell
-!                         VAL_UNKZ = CCVAR(I_LNK,J_LNK,K_LNK,IBM_UNKZ)
-!                         CRTCELL_FLG = .TRUE.
-!                      ENDIF
-!                   END SELECT
-!                   IF ( CRTCELL_FLG ) EXIT IFC_LOOP3A
-!
-!                END SELECT
-!             ENDDO IFC_LOOP3A
-!             IF (VAL_UNKZ>0) THEN
-!                CUT_CELL(ICC)%UNKZ(JCC) = VAL_UNKZ     ! [    Cell Type,     I,     J,     K, JCC_LNK ]
-!                CUT_CELL(ICC)%IJK_LINK(1:KAXIS+2,JCC) = (/ IBM_GASPHASE, I_LNK, J_LNK, K_LNK,       0 /)
-!             ENDIF
-!          ENDDO
-!       ENDDO
-!
-!       ! Then attempt to connect to large cut-cells, or already connected small cells (CUT_CELL(ICC)%UNKZ(JCC) > 0):
-!       DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
-!          I = CUT_CELL(ICC)%IJK(IAXIS)
-!          J = CUT_CELL(ICC)%IJK(JAXIS)
-!          K = CUT_CELL(ICC)%IJK(KAXIS)
-!          ! Don't attempt to link cut-cells inside an OBST:
-!          IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-!          NCELL = CUT_CELL(ICC)%NCELL
-!          CCVOL_THRES = CCVOL_LINK*DX(I)*DY(J)*DZ(K)
-!          DO JCC=1,NCELL
-!             IF ( CUT_CELL(ICC)%UNKZ(JCC) > 0 ) CYCLE
-!
-!             ! Small cells, get IBM_UNKZ from a large cell neighbor:
-!             VAL_UNKZ = IBM_UNDEFINED
-!             VAL_CVOL = -GEOMEPS
-!             IFC_LOOP3 : DO IFC=1,CUT_CELL(ICC)%CCELEM(1,JCC)
-!                IFACE   = CUT_CELL(ICC)%CCELEM(IFC+1,JCC)
-!                IF((CUT_CELL(ICC)%FACE_LIST(1,IFACE)==IBM_FTYPE_CFINB) .OR. &
-!                   (CUT_CELL(ICC)%FACE_LIST(1,IFACE)==IBM_FTYPE_SVERT)) CYCLE IFC_LOOP3
-!                LOWHIGH = CUT_CELL(ICC)%FACE_LIST(2,IFACE)
-!                ILH     = 2*LOWHIGH - 3 ! -1 for LOW_IND, 1 for HIGH_IND
-!
-!                ! Cycle if surrounding cell is located in the guard-cell region, if so drop, as we don't have
-!                ! at this point unknown numbers on guard-cells/guard-cell ccs:
-!                X1AXIS  = CUT_CELL(ICC)%FACE_LIST(3,IFACE)
-!                SELECT CASE(X1AXIS)
-!                CASE(IAXIS)
-!                   IF( (I+ILH < 1) .OR. (I+ILH > IBAR) ) CYCLE IFC_LOOP3
-!                CASE(JAXIS)
-!                   IF( (J+ILH < 1) .OR. (J+ILH > JBAR) ) CYCLE IFC_LOOP3
-!                CASE(KAXIS)
-!                   IF( (K+ILH < 1) .OR. (K+ILH > KBAR) ) CYCLE IFC_LOOP3
-!                END SELECT
-!
-!                SELECT CASE(CUT_CELL(ICC)%FACE_LIST(1,IFACE)) ! 1. Check if a surrounding cell is a regular cell:
-!                CASE(IBM_FTYPE_RGGAS) ! REGULAR GASPHASE
-!                   SELECT CASE(X1AXIS)
-!                   CASE(IAXIS)
-!                      IF(CCVAR(I+ILH,J,K,IBM_UNKZ) <= 0) THEN ! Cut - cell. Array IBM_RCFACE_VEL is used.
-!                         CALL GET_ICC2_JCC2(ICC,IFACE,I+ILH,J,K,ICC2,JCC2)
-!                         IF ( ANY((/ ICC2, JCC2 /) == 0) ) CYCLE IFC_LOOP3
-!                         IF ( CUT_CELL(ICC2)%VOLUME(JCC2) < VAL_CVOL) CYCLE IFC_LOOP3
-!                         IF ( CUT_CELL(ICC2)%UNKZ(JCC2) <= 0) CYCLE IFC_LOOP3
-!                         I_LNK = I+ILH; J_LNK = J; K_LNK = K; JCC_LNK = JCC2
-!                         VAL_CVOL = CUT_CELL(ICC2)%VOLUME(JCC2)
-!                         VAL_UNKZ = CUT_CELL(ICC2)%UNKZ(JCC2)
-!                      ENDIF
-!                   CASE(JAXIS)
-!                      IF(CCVAR(I,J+ILH,K,IBM_UNKZ) <= 0) THEN ! Cut - cell. Array IBM_RCFACE_VEL is used.
-!                         CALL GET_ICC2_JCC2(ICC,IFACE,I,J+ILH,K,ICC2,JCC2)
-!                         IF ( ANY((/ ICC2, JCC2 /) == 0) ) CYCLE IFC_LOOP3
-!                         IF ( CUT_CELL(ICC2)%VOLUME(JCC2) < VAL_CVOL) CYCLE IFC_LOOP3
-!                         IF ( CUT_CELL(ICC2)%UNKZ(JCC2) <= 0) CYCLE IFC_LOOP3
-!                         I_LNK = I; J_LNK = J+ILH; K_LNK = K; JCC_LNK = JCC2
-!                         VAL_CVOL = CUT_CELL(ICC2)%VOLUME(JCC2)
-!                         VAL_UNKZ = CUT_CELL(ICC2)%UNKZ(JCC2)
-!                      ENDIF
-!                   CASE(KAXIS)
-!                      IF(CCVAR(I,J,K+ILH,IBM_UNKZ) <= 0) THEN ! Cut - cell. Array IBM_RCFACE_VEL is used.
-!                         CALL GET_ICC2_JCC2(ICC,IFACE,I,J,K+ILH,ICC2,JCC2)
-!                         IF ( ANY((/ ICC2, JCC2 /) == 0) ) CYCLE IFC_LOOP3
-!                         IF ( CUT_CELL(ICC2)%VOLUME(JCC2) < VAL_CVOL) CYCLE IFC_LOOP3
-!                         IF ( CUT_CELL(ICC2)%UNKZ(JCC2) <= 0) CYCLE IFC_LOOP3
-!                         I_LNK = I; J_LNK = J; K_LNK = K+ILH; JCC_LNK = JCC2
-!                         VAL_CVOL = CUT_CELL(ICC2)%VOLUME(JCC2)
-!                         VAL_UNKZ = CUT_CELL(ICC2)%UNKZ(JCC2)
-!                      ENDIF
-!                   END SELECT
-!                CASE(IBM_FTYPE_CFGAS) ! 2. Check for large surrounding cut-cells:
-!
-!                   IFC2    = CUT_CELL(ICC)%FACE_LIST(4,IFACE)
-!                   IFACE2  = CUT_CELL(ICC)%FACE_LIST(5,IFACE)
-!
-!                   ICC2    = CUT_FACE(IFC2)%CELL_LIST(2,LOWHIGH,IFACE2)
-!                   JCC2    = CUT_FACE(IFC2)%CELL_LIST(3,LOWHIGH,IFACE2)
-!
-!                   IF ( CUT_CELL(ICC2)%VOLUME(JCC2) < VAL_CVOL) CYCLE IFC_LOOP3
-!                   IF ( CUT_CELL(ICC2)%UNKZ(JCC2) <= 0) CYCLE IFC_LOOP3
-!                   I_LNK=CUT_CELL(ICC2)%IJK(IAXIS); J_LNK=CUT_CELL(ICC2)%IJK(JAXIS); K_LNK=CUT_CELL(ICC2)%IJK(KAXIS)
-!                   JCC_LNK  = JCC2
-!                   VAL_CVOL = CUT_CELL(ICC2)%VOLUME(JCC2)
-!                   VAL_UNKZ = CUT_CELL(ICC2)%UNKZ(JCC2)
-!                END SELECT
-!             ENDDO IFC_LOOP3
-!
-!             ! This small cut-cell still has an undefined unknown, redo link-loop to test for updated unknown number on
-!             ! neighbors:
-!             IF (VAL_UNKZ > 0) THEN
-!                CUT_CELL(ICC)%UNKZ(JCC) = VAL_UNKZ
-!                CUT_CELL(ICC)%IJK_LINK(1:KAXIS+2,JCC) = (/ IBM_CUTCFE, I_LNK, J_LNK, K_LNK, JCC_LNK /)
-!             ELSE
-!                QUITLINK_FLG = .FALSE.
-!             ENDIF
-!          ENDDO
-!       ENDDO
-!
-!       ! Then fuse cut-cell unknowns if several ccs in one Cartesian cell and one of them has CUT_CELL(ICC)%UNKZ(JCC)>0:
-!       IF(.NOT. CC_UNSTRUCTURED_PROJECTION) THEN
-!          DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
-!             I = CUT_CELL(ICC)%IJK(IAXIS)
-!             J = CUT_CELL(ICC)%IJK(JAXIS)
-!             K = CUT_CELL(ICC)%IJK(KAXIS)
-!             ! Don't attempt to link cut-cells inside an OBST:
-!             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-!             NCELL = CUT_CELL(ICC)%NCELL
-!             ! For cases with more than one cut-cell, define UNKZ of all cells to be the one of first cut-cell
-!             ! with UNKZ > 0:
-!             DO JCC=1,NCELL
-!                IF ( CUT_CELL(ICC)%UNKZ(JCC) > 0 ) EXIT
-!             ENDDO
-!             IF (JCC <= NCELL) THEN
-!                VAL_UNKZ = CUT_CELL(ICC)%UNKZ(JCC)
-!                CUT_CELL(ICC)%UNKZ(1:NCELL) = VAL_UNKZ
-!             ENDIF
-!          ENDDO
-!       ENDIF
-!
-!       IF (QUITLINK_FLG) EXIT LINK_LOOP
-!
-!       LINK_ITER = LINK_ITER + 1
-!       IF (LINK_ITER > N_LINK_ATTMP) THEN
-!           ! Count how many unlinked cells we have in this mesh:
-!           ULINK_COUNT = 0
-!           DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
-!              I = CUT_CELL(ICC)%IJK(IAXIS)
-!              J = CUT_CELL(ICC)%IJK(JAXIS)
-!              K = CUT_CELL(ICC)%IJK(KAXIS)
-!              ! Don't count cut-cells inside an OBST:
-!              IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-!              NCELL = CUT_CELL(ICC)%NCELL
-!              DO JCC=1,NCELL
-!                 IF ( CUT_CELL(ICC)%UNKZ(JCC) > 0 ) CYCLE
-!                 ULINK_COUNT = ULINK_COUNT + 1
-!              ENDDO
-!           ENDDO
-!
-!           IF (GET_CUTCELLS_VERBOSE) THEN
-!              ! Write out unlinked cells properties:
-!              ! Open file to write unlinked cells:
-!              WRITE(UNLINKED_FILE,'(A,A,I0,A)') TRIM(CHID),'_unlinked_',MY_RANK,'.log'
-!              ! Create file:
-!              IF (UNLINKED_1ST_CALL) THEN
-!                 LU_UNLNK = GET_FILE_NUMBER()
-!                 OPEN(UNIT=LU_UNLNK,FILE=TRIM(UNLINKED_FILE),STATUS='UNKNOWN')
-!                 WRITE(LU_UNLNK,*) 'Unlinked cut-cell Information for Process=',MY_RANK
-!                 CLOSE(LU_UNLNK)
-!                 UNLINKED_1ST_CALL = .FALSE.
-!              ENDIF
-!              ! Open file to write unlinked cell information:
-!              OPEN(UNIT=LU_UNLNK,FILE=TRIM(UNLINKED_FILE),STATUS='OLD',POSITION='APPEND')
-!              WRITE(LU_UNLNK,*) ' '
-!              WRITE(LU_UNLNK,'(A,I4,A,I4)') ' Mesh NM=',NM,', number of unlinked cells=',ULINK_COUNT
-!
-!              ! Dump info:
-!              ULINK_COUNT = 0
-!              DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
-!                 I = CUT_CELL(ICC)%IJK(IAXIS)
-!                 J = CUT_CELL(ICC)%IJK(JAXIS)
-!                 K = CUT_CELL(ICC)%IJK(KAXIS)
-!                 ! Don't count cut-cells inside an OBST:
-!                 IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-!                 NCELL = CUT_CELL(ICC)%NCELL
-!                 CCVOL_THRES = CCVOL_LINK*DX(I)*DY(J)*DZ(K)
-!                 DO JCC=1,NCELL
-!                    IF ( CUT_CELL(ICC)%UNKZ(JCC) > 0 ) CYCLE
-!                    ULINK_COUNT = ULINK_COUNT + 1
-!                    WRITE(LU_UNLNK,'(I8,A,5I8,A,5F22.8)') &
-!                    ULINK_COUNT,', I,J,K,ICC,JCC=',I,J,K,ICC,JCC,', X,Y,Z,CCVOL,CCVOL_CRT=',X(I),Y(J),Z(K), &
-!                    CUT_CELL(ICC)%VOLUME(JCC),DX(I)*DY(J)*DZ(K)
-!                 ENDDO
-!              ENDDO
-!              CLOSE(LU_UNLNK)
-!           ENDIF
-!
-!           ! 1st Try: Link each cell to closest unknown numbered regular cell in the mesh:
-!           DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
-!              I = CUT_CELL(ICC)%IJK(IAXIS)
-!              J = CUT_CELL(ICC)%IJK(JAXIS)
-!              K = CUT_CELL(ICC)%IJK(KAXIS)
-!              ! Drop cut-cells inside an OBST:
-!              IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-!              NCELL = CUT_CELL(ICC)%NCELL
-!              DO JCC=1,NCELL
-!                 IF ( CUT_CELL(ICC)%UNKZ(JCC) > 0 ) CYCLE
-!                 DISTCELL=1._EB/GEOMEPS
-!                 ! 3D LOOP over regular cells:
-!                 DO KK=1,KBAR
-!                    DO JJ=1,JBAR
-!                       DO II=1,IBAR
-!                          IF(CCVAR(II,JJ,KK,IBM_UNKZ) <= 0) CYCLE ! Cycle if not regular cell.
-!                          DV = SQRT( (X(II)-X(I))**2._EB + (Y(JJ)-Y(J))**2._EB + (Z(KK)-Z(K))**2._EB )
-!                          IF ( DV-GEOMEPS > DISTCELL ) CYCLE
-!                          DISTCELL=DV
-!                          CUT_CELL(ICC)%UNKZ(JCC) = CCVAR(II,JJ,KK,IBM_UNKZ) ! Assign reg cell unknown number
-!                          CUT_CELL(ICC)%IJK_LINK(1:KAXIS+2,JCC) = (/ IBM_GASPHASE, II, JJ, KK, 0 /)
-!                       ENDDO
-!                    ENDDO
-!                 ENDDO
-!              ENDDO
-!           ENDDO
-!
-!           ! Recount unlinked cells (i.e. no other viable cells in the mesh).
-!           ULINK_COUNT = 0
-!           DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
-!              I = CUT_CELL(ICC)%IJK(IAXIS)
-!              J = CUT_CELL(ICC)%IJK(JAXIS)
-!              K = CUT_CELL(ICC)%IJK(KAXIS)
-!              ! Drop cut-cells inside an OBST:
-!              IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-!              NCELL = CUT_CELL(ICC)%NCELL
-!              DO JCC=1,NCELL
-!                 IF ( CUT_CELL(ICC)%UNKZ(JCC) > 0 ) CYCLE
-!                 ULINK_COUNT = ULINK_COUNT + 1
-!              ENDDO
-!           ENDDO
-!
-!           IF (GET_CUTCELLS_VERBOSE) THEN
-!              ! Write out remaining unlinked cells properties.
-!              ! Open file to write unlinked cell information:
-!              OPEN(UNIT=LU_UNLNK,FILE=TRIM(UNLINKED_FILE),STATUS='OLD',POSITION='APPEND')
-!              WRITE(LU_UNLNK,*) ' '
-!              WRITE(LU_UNLNK,*) 'STATUS AFTER CUT-CELL REGION REGULAR CELL CARTESIAN SEARCH:'
-!              WRITE(LU_UNLNK,'(A,I4,A,I4)') ' Mesh NM=',NM,', number of unlinked cells after REG CELL approx=',ULINK_COUNT
-!              IF(ULINK_COUNT > 0) THEN
-!                 ! Dump info:
-!                 ULINK_COUNT = 0
-!                 DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
-!                    I = CUT_CELL(ICC)%IJK(IAXIS)
-!                    J = CUT_CELL(ICC)%IJK(JAXIS)
-!                    K = CUT_CELL(ICC)%IJK(KAXIS)
-!                    ! Drop cut-cells inside an OBST:
-!                    IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-!                    NCELL = CUT_CELL(ICC)%NCELL
-!                    CCVOL_THRES = CCVOL_LINK*DX(I)*DY(J)*DZ(K)
-!                    DO JCC=1,NCELL
-!                       IF ( CUT_CELL(ICC)%UNKZ(JCC) > 0 ) CYCLE
-!                       ULINK_COUNT = ULINK_COUNT + 1
-!                       WRITE(LU_UNLNK,'(I8,A,5I8,A,5F22.8)') &
-!                       ULINK_COUNT,', I,J,K,ICC,JCC=',I,J,K,ICC,JCC,', X,Y,Z,CCVOL,CCVOL_CRT=',X(I),Y(J),Z(K), &
-!                       CUT_CELL(ICC)%VOLUME(JCC),DX(I)*DY(J)*DZ(K)
-!                    ENDDO
-!                 ENDDO
-!              ENDIF
-!              CLOSE(LU_UNLNK)
-!           ENDIF
-!
-!           IF (ULINK_COUNT == 0) EXIT LINK_LOOP
-!
-!           ! 2nd Try : Loop over cut cells and give the ramining unlinked cells a UNKZ>0,
-!           ! plus CUT_CELL(ICC)%USE_CC_VOL(JCC) = .FALSE.:
-!           DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
-!              I = CUT_CELL(ICC)%IJK(IAXIS)
-!              J = CUT_CELL(ICC)%IJK(JAXIS)
-!              K = CUT_CELL(ICC)%IJK(KAXIS)
-!              ! Drop cut-cells inside an OBST:
-!              IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-!              NCELL = CUT_CELL(ICC)%NCELL
-!              DO JCC=1,NCELL
-!                 IF ( CUT_CELL(ICC)%UNKZ(JCC) > 0 ) CYCLE
-!                 NUNKZ_LOC(NM) = NUNKZ_LOC(NM) + 1
-!                 CUT_CELL(ICC)%UNKZ(JCC) = NUNKZ_LOC(NM)
-!                 CUT_CELL(ICC)%USE_CC_VOL(JCC) = .FALSE.
-!              ENDDO
-!           ENDDO
-!
-!           ! Recount unlinked cells (i.e. no other viable cells in the mesh).
-!           ULINK_COUNT = 0
-!           DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
-!              I = CUT_CELL(ICC)%IJK(IAXIS)
-!              J = CUT_CELL(ICC)%IJK(JAXIS)
-!              K = CUT_CELL(ICC)%IJK(KAXIS)
-!              ! Drop cut-cells inside an OBST:
-!              IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-!              NCELL = CUT_CELL(ICC)%NCELL
-!              DO JCC=1,NCELL
-!                 IF ( CUT_CELL(ICC)%UNKZ(JCC) > 0 ) CYCLE
-!                 ULINK_COUNT = ULINK_COUNT + 1
-!              ENDDO
-!           ENDDO
-!
-!           IF (GET_CUTCELLS_VERBOSE) THEN
-!              ! Write out final status:
-!              OPEN(UNIT=LU_UNLNK,FILE=TRIM(UNLINKED_FILE),STATUS='OLD',POSITION='APPEND')
-!              WRITE(LU_UNLNK,*) ' '
-!              WRITE(LU_UNLNK,*) 'STATUS AFTER SMALL CUT-CELL CUT_CELL(ICC)%USE_CC_VOL(JCC) change to .FALSE.:'
-!              WRITE(LU_UNLNK,'(A,I4,A,I4)') ' Mesh NM=',NM,', number of unlinked cells after Vol change approx=',ULINK_COUNT
-!              CLOSE(LU_UNLNK)
-!           ENDIF
-!
-!           EXIT LINK_LOOP
-!       ENDIF
-!    ENDDO LINK_LOOP
-!
-! ENDDO MAIN_MESH_LOOP3
-!
-! ! After fixing cut-cell unkz for a given Cartesian cells there might be UNKZ values that haven't been assigned.
-! ! Condense:
-! MAIN_MESH_LOOP31 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-!    IF(NUNKZ_LOC(NM) == 0) CYCLE
-!    CALL POINT_TO_MESH(NM)
-!
-!    ALLOCATE(CELLPUNKZ(1:NUNKZ_LOC(NM)), INDUNKZ(1:NUNKZ_LOC(NM))); CELLPUNKZ = 0; INDUNKZ = 0;
-!    DO K=1,KBAR
-!       DO J=1,JBAR
-!          DO I=1,IBAR
-!             IF(CCVAR(I,J,K,IBM_UNKZ) < 1) CYCLE
-!             CELLPUNKZ(CCVAR(I,J,K,IBM_UNKZ)) = CELLPUNKZ(CCVAR(I,J,K,IBM_UNKZ)) + 1
-!          ENDDO
-!       ENDDO
-!    ENDDO
-!    DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
-!       DO JCC=1,CUT_CELL(ICC)%NCELL
-!          IF (CUT_CELL(ICC)%UNKZ(JCC) < 1) CYCLE
-!          CELLPUNKZ(CUT_CELL(ICC)%UNKZ(JCC)) = CELLPUNKZ(CUT_CELL(ICC)%UNKZ(JCC)) + 1
-!       ENDDO
-!    ENDDO
-!
-!    ! Now re-index:
-!    COUNT=0
-!    DO I=1,NUNKZ_LOC(NM)
-!       IF(CELLPUNKZ(I) == 0) CYCLE ! This UNKZ_LOC value has no cells associated to it.
-!       COUNT = COUNT + 1
-!       INDUNKZ(I) = COUNT
-!    ENDDO
-!    NUNKZ_LOC(NM) = COUNT
-!
-!    DO K=1,KBAR
-!       DO J=1,JBAR
-!          DO I=1,IBAR
-!             IF(CCVAR(I,J,K,IBM_UNKZ) < 1) CYCLE
-!             VAL_UNKZ = CCVAR(I,J,K,IBM_UNKZ)
-!             CCVAR(I,J,K,IBM_UNKZ) = INDUNKZ(VAL_UNKZ) ! Condensed value.
-!          ENDDO
-!       ENDDO
-!    ENDDO
-!    DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
-!       DO JCC=1,CUT_CELL(ICC)%NCELL
-!          IF (CUT_CELL(ICC)%UNKZ(JCC) < 1) CYCLE
-!          VAL_UNKZ = CUT_CELL(ICC)%UNKZ(JCC)
-!          CUT_CELL(ICC)%UNKZ(JCC) = INDUNKZ(VAL_UNKZ) ! Condensed value.
-!       ENDDO
-!    ENDDO
-!    DEALLOCATE(CELLPUNKZ,INDUNKZ)
-!
-! ENDDO MAIN_MESH_LOOP31
-!
-!
-! ! Define total number of unknowns and global unknown index start per MESH:
-! IF (ALLOCATED(NUNKZ_TOT)) DEALLOCATE(NUNKZ_TOT)
-! ALLOCATE(NUNKZ_TOT(1:NMESHES)); NUNKZ_TOT = 0
-! IF (N_MPI_PROCESSES > 1) THEN
-!    CALL MPI_ALLREDUCE(NUNKZ_LOC, NUNKZ_TOT, NMESHES, MPI_INTEGER, MPI_SUM, MPI_COMM_WORLD, IERR)
-! ELSE
-!    NUNKZ_TOT = NUNKZ_LOC
-! ENDIF
-! ! Define global start indexes for each mesh:
-! IF (ALLOCATED(UNKZ_ILC)) DEALLOCATE(UNKZ_ILC)
-! ALLOCATE(UNKZ_ILC(1:NMESHES)); UNKZ_ILC(1:NMESHES) = 0
-! IF (ALLOCATED(UNKZ_IND)) DEALLOCATE(UNKZ_IND)
-! ALLOCATE(UNKZ_IND(1:NMESHES)); UNKZ_IND(1:NMESHES) = 0
-! DO NM=2,NMESHES
-!    UNKZ_ILC(NM) = UNKZ_ILC(NM-1) + NUNKZ_LOC(NM-1)
-!    UNKZ_IND(NM) = UNKZ_IND(NM-1) + NUNKZ_TOT(NM-1)
-! ENDDO
-!
-! ! Cell numbers for Scalar equations in global numeration:
-! MAIN_MESH_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-!
-!    CALL POINT_TO_MESH(NM)
-!
-!    ! Mesh sizes:
-!    NXB=IBAR; NYB=JBAR; NZB=KBAR
-!
-!    ! X direction bounds:
-!    ILO_FACE = 0                    ! Low mesh boundary face index.
-!    IHI_FACE = IBAR                 ! High mesh boundary face index.
-!    ILO_CELL = ILO_FACE + 1     ! First internal cell index. See notes.
-!    IHI_CELL = IHI_FACE ! Last internal cell index.
-!
-!    ! Y direction bounds:
-!    JLO_FACE = 0                    ! Low mesh boundary face index.
-!    JHI_FACE = JBAR                 ! High mesh boundary face index.
-!    JLO_CELL = JLO_FACE + 1     ! First internal cell index. See notes.
-!    JHI_CELL = JHI_FACE ! Last internal cell index.
-!
-!    ! Z direction bounds:
-!    KLO_FACE = 0                    ! Low mesh boundary face index.
-!    KHI_FACE = KBAR                 ! High mesh boundary face index.
-!    KLO_CELL = KLO_FACE + 1     ! First internal cell index. See notes.
-!    KHI_CELL = KHI_FACE ! Last internal cell index.
-!
-!    ! 1. Number regular GASPHASE cells within the implicit region:
-!    ILO = ILO_CELL; IHI = IHI_CELL
-!    JLO = JLO_CELL; JHI = JHI_CELL
-!    KLO = KLO_CELL; KHI = KHI_CELL
-!    DO K=KLO,KHI
-!       DO J=JLO,JHI
-!          DO I=ILO,IHI
-!             IF (CCVAR(I,J,K,IBM_CGSC) /= IBM_GASPHASE) CYCLE
-!             IF (CCVAR(I,J,K,IBM_UNKZ) <= 0 ) CYCLE ! Drop if regular GASPHASE cell has not been assigned unknown number.
-!             CCVAR(I,J,K,IBM_UNKZ) = CCVAR(I,J,K,IBM_UNKZ) + UNKZ_IND(NM)
-!          ENDDO
-!       ENDDO
-!    ENDDO
-!    ! 2. Number cut-cells:
-!    DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
-!       I = CUT_CELL(ICC)%IJK(IAXIS)
-!       J = CUT_CELL(ICC)%IJK(JAXIS)
-!       K = CUT_CELL(ICC)%IJK(KAXIS)
-!       ! Drop cut-cells inside an OBST:
-!       IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-!       NCELL = MESHES(NM)%CUT_CELL(ICC)%NCELL
-!       CCVOL_THRES = CCVOL_LINK*DX(I)*DY(J)*DZ(K)
-!       DO JCC=1,NCELL
-!          CUT_CELL(ICC)%UNKZ(JCC) = CUT_CELL(ICC)%UNKZ(JCC) + UNKZ_IND(NM)
-!       ENDDO
-!    ENDDO
-!
-! ENDDO MAIN_MESH_LOOP2
-!
-! ! Exchange Guardcell + guard cc information on IBM_UNKZ:
-! CALL FILL_UNKZ_GUARDCELLS
-!
-! ! finally set to solid Gasphase cut-faces which have a surrounding cut-cell inside an OBST:
-! DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
-!    CALL POINT_TO_MESH(NM)
-!    DO ICF=1,MESHES(NM)%N_CUTFACE_MESH
-!       IF (CUT_FACE(ICF)%STATUS /= IBM_GASPHASE) CYCLE
-!       I     =CUT_FACE(ICF)%IJK(IAXIS)
-!       J     =CUT_FACE(ICF)%IJK(JAXIS)
-!       K     =CUT_FACE(ICF)%IJK(KAXIS)
-!       X1AXIS=CUT_FACE(ICF)%IJK(KAXIS+1)
-!       CF_STATUS = IBM_GASPHASE
-!       SELECT CASE(X1AXIS)
-!       CASE(IAXIS)
-!          IF ( SOLID(CELL_INDEX(I,J,K)) .AND. SOLID(CELL_INDEX(I+1,J,K)) ) CF_STATUS = IBM_SOLID
-!       CASE(JAXIS)
-!          IF ( SOLID(CELL_INDEX(I,J,K)) .AND. SOLID(CELL_INDEX(I,J+1,K)) ) CF_STATUS = IBM_SOLID
-!       CASE(KAXIS)
-!          IF ( SOLID(CELL_INDEX(I,J,K)) .AND. SOLID(CELL_INDEX(I,J,K+1)) ) CF_STATUS = IBM_SOLID
-!       END SELECT
-!       CUT_FACE(ICF)%STATUS = CF_STATUS
-!    ENDDO
-! ENDDO
-!
-! RETURN
-!
-! CONTAINS
-!
-! SUBROUTINE GET_ICC2_JCC2(ICC,IFACE,INXT,JNXT,KNXT,ICC2,JCC2)
-! INTEGER, INTENT(IN) :: ICC,IFACE,INXT,JNXT,KNXT
-! INTEGER, INTENT(OUT):: ICC2, JCC2
-!
-! INTEGER :: IFC, IFACE2
-! ICC2=CCVAR(INXT,JNXT,KNXT,IBM_IDCC); IF (ICC2<=0) RETURN
-! DO JCC2=1,CUT_CELL(ICC2)%NCELL
-!    ! Loop faces and test:
-!    DO IFC=1,CUT_CELL(ICC2)%CCELEM(1,JCC2)
-!       IFACE2 = CUT_CELL(ICC2)%CCELEM(IFC+1,JCC2)
-!       ! If face type in face_list is not IBM_FTYPE_RGGAS, drop:
-!       IF(CUT_CELL(ICC2)%FACE_LIST(1,IFACE2) /= IBM_FTYPE_RGGAS) CYCLE
-!       ! Does X1AXIS match and LOWHIGH are different?
-!       IF(CUT_CELL(ICC2)%FACE_LIST(3,IFACE2) /= CUT_CELL(ICC)%FACE_LIST(3,IFACE)) CYCLE ! X1AXIS is different.
-!       IF(ABS(CUT_CELL(ICC2)%FACE_LIST(2,IFACE2)-CUT_CELL(ICC)%FACE_LIST(3,IFACE)) < 1) CYCLE ! Same LOWHIGH.
-!       ! Found the cut-cell ICC2,JCC2 on the other side of IFACE for cut-cell ICC,JCC.
-!       RETURN
-!    ENDDO
-! ENDDO
-! JCC2=0
-! RETURN
-! END SUBROUTINE GET_ICC2_JCC2
-!
-! END SUBROUTINE GET_MATRIX_INDEXES_Z
+
+SUBROUTINE GET_MATRIX_INDEXES_Z
+USE MPI_F08
+
+! Local variables:
+INTEGER :: NM
+INTEGER :: ILO,IHI,JLO,JHI,KLO,KHI
+INTEGER :: I,J,K,ICC,JCC,NCELL,INGH,JNGH,KNGH,IERR,IPT
+INTEGER, PARAMETER :: IMPADD = 1
+INTEGER, PARAMETER :: SHFTM(1:3,1:6) = RESHAPE((/-1,0,0,1,0,0,0,-1,0,0,1,0,0,0,-1,0,0,1/),(/3,6/))
+LOGICAL :: CRTCELL_FLG
+
+INTEGER :: X1AXIS,LOWHIGH,ILH,IFC,IFACE,IFC2,IFACE2,ICC2,JCC2,VAL_UNKZ,I_LNK,J_LNK,K_LNK,JCC_LNK
+REAL(EB):: CCVOL_THRES,VAL_CVOL
+
+LOGICAL :: QUITLINK_FLG
+
+! Linking variables associated data:
+LOGICAL, SAVE :: UNLINKED_1ST_CALL=.TRUE.
+INTEGER :: LU_UNLNK, LINK_ITER, ULINK_COUNT, II, JJ, KK
+CHARACTER(MESSAGE_LENGTH) :: UNLINKED_FILE
+REAL(EB) :: DV, DISTCELL
+INTEGER, PARAMETER :: N_LINK_ATTMP = 50
+
+INTEGER, ALLOCATABLE, DIMENSION(:) :: CELLPUNKZ, INDUNKZ
+INTEGER :: COUNT, ICF, CF_STATUS
+
+! Define local number of cut-cell:
+IF (ALLOCATED(NUNKZ_LOC)) DEALLOCATE(NUNKZ_LOC)
+ALLOCATE(NUNKZ_LOC(1:NMESHES)); NUNKZ_LOC = 0
+
+! Cell numbers for Scalar equations:
+MAIN_MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+
+   CALL POINT_TO_MESH(NM)
+
+   ! Mesh sizes:
+   NXB=IBAR
+   NYB=JBAR
+   NZB=KBAR
+
+   ! X direction bounds:
+   ILO_FACE = 0                    ! Low mesh boundary face index.
+   IHI_FACE = IBAR                 ! High mesh boundary face index.
+   ILO_CELL = ILO_FACE + 1     ! First internal cell index. See notes.
+   IHI_CELL = IHI_FACE ! Last internal cell index.
+
+   ! Y direction bounds:
+   JLO_FACE = 0                    ! Low mesh boundary face index.
+   JHI_FACE = JBAR                 ! High mesh boundary face index.
+   JLO_CELL = JLO_FACE + 1     ! First internal cell index. See notes.
+   JHI_CELL = JHI_FACE ! Last internal cell index.
+
+   ! Z direction bounds:
+   KLO_FACE = 0                    ! Low mesh boundary face index.
+   KHI_FACE = KBAR                 ! High mesh boundary face index.
+   KLO_CELL = KLO_FACE + 1     ! First internal cell index. See notes.
+   KHI_CELL = KHI_FACE ! Last internal cell index.
+
+   ! Initialize unknown numbers for Z:
+   ! We assume SET_CUTCELLS_3D has been called and CCVAR has been allocated:
+   CCVAR(:,:,:,IBM_UNKZ) = IBM_UNDEFINED
+   DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+      CUT_CELL(ICC)%UNKZ(:) = IBM_UNDEFINED
+   ENDDO
+
+   ! 1. Number regular GASPHASE cells:
+   ILO = ILO_CELL; IHI = IHI_CELL
+   JLO = JLO_CELL; JHI = JHI_CELL
+   KLO = KLO_CELL; KHI = KHI_CELL
+
+   IF (PERIODIC_TEST==103 .OR. PERIODIC_TEST==11 .OR. PERIODIC_TEST==7) THEN
+      DO K=KLO,KHI
+         DO J=JLO,JHI
+            DO I=ILO,IHI
+               ! If regular cell centroid is outside the test box + DELTA -> drop:
+               IF(XC(I) < (VAL_TESTX_LOW-DX(I) +GEOMEPS)) CYCLE; IF(XC(I) > (VAL_TESTX_HIGH+DX(I)-GEOMEPS)) CYCLE
+               IF(YC(J) < (VAL_TESTY_LOW-DY(J) +GEOMEPS)) CYCLE; IF(YC(J) > (VAL_TESTY_HIGH+DY(J)-GEOMEPS)) CYCLE
+               IF(ZC(K) < (VAL_TESTZ_LOW-DZ(K) +GEOMEPS)) CYCLE; IF(ZC(K) > (VAL_TESTZ_HIGH+DZ(K)-GEOMEPS)) CYCLE
+               IF(CCVAR(I,J,K,IBM_CGSC) /= IBM_GASPHASE) CYCLE
+               NUNKZ_LOC(NM) = NUNKZ_LOC(NM) + 1
+               CCVAR(I,J,K,IBM_UNKZ) = NUNKZ_LOC(NM)
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDIF
+
+   ! Loop on Cartesian cells, number unknowns for cells type IBM_CUTCFE and surrounding IBM_GASPHASE:
+   DO K=KLO-1,KHI+1
+      DO J=JLO-1,JHI+1
+         DO I=ILO-1,IHI+1
+            ! Drop if cartesian cell is not type IBM_CUTCFE:
+            IF (  CCVAR(I,J,K,IBM_CGSC) /= IBM_CUTCFE ) CYCLE
+
+            ! First Add the Cut-Cell
+            ICC  = CCVAR(I,J,K,IBM_IDCC)
+            IF (ICC <= MESHES(NM)%N_CUTCELL_MESH .AND. .NOT.SOLID(CELL_INDEX(I,J,K)) ) THEN ! Don't number guard-cell cut-cells,
+               NCELL= CUT_CELL(ICC)%NCELL                                                   ! or cutcells inside an OBST.
+               CCVOL_THRES = CCVOL_LINK*DX(I)*DY(J)*DZ(K)
+               DO JCC=1,NCELL
+                  IF ( CUT_CELL(ICC)%VOLUME(JCC) < CCVOL_THRES) CYCLE ! Small cell, dealt with later.
+                  NUNKZ_LOC(NM) = NUNKZ_LOC(NM) + 1
+                  CUT_CELL(ICC)%UNKZ(JCC) = NUNKZ_LOC(NM)
+               ENDDO
+            ENDIF
+
+            ! First Run over Neighbors: Case 27 cells.
+            SELECT CASE(IMPADD)
+            CASE(0)
+               ! No corner neighbors, only 6 face neighbors of Cartesian cell.
+               DO IPT=1,6
+                  KNGH=K+SHFTM(KAXIS,IPT)
+                  IF ( (KNGH < KLO_CELL) .OR. (KNGH > KHI_CELL) ) CYCLE
+                  JNGH=J+SHFTM(JAXIS,IPT)
+                  IF ( (JNGH < JLO_CELL) .OR. (JNGH > JHI_CELL) ) CYCLE
+                  INGH=I+SHFTM(IAXIS,IPT)
+                  ! Either not GASPHASE or already counted:
+                  IF ( (CCVAR(INGH,JNGH,KNGH,IBM_CGSC) /= IBM_GASPHASE) .OR. &
+                       (CCVAR(INGH,JNGH,KNGH,IBM_UNKZ)  > 0) ) CYCLE
+                  IF ( (INGH < ILO_CELL) .OR. (INGH > IHI_CELL) ) CYCLE
+
+                  ! Don't number a regular cell inside an OBST:
+                  IF (SOLID(CELL_INDEX(INGH,JNGH,KNGH))) CYCLE
+
+                  ! Add Scalar unknown:
+                  NUNKZ_LOC(NM) = NUNKZ_LOC(NM) + 1
+                  CCVAR(INGH,JNGH,KNGH,IBM_UNKZ) = NUNKZ_LOC(NM)
+               ENDDO
+
+            CASE DEFAULT
+               ! Only Internal cells for the mesh in the stencil (I-IMPADD:I+IMPADD,J-IMPADD:J+IMPADD,K-IMPADD:K+IMPADD)
+               ! aound Cartesian cell I,J,K of type IBM_CUTCFE:
+               DO KNGH=K-IMPADD,K+IMPADD
+                  IF ( (KNGH < KLO_CELL) .OR. (KNGH > KHI_CELL) ) CYCLE
+                  DO JNGH=J-IMPADD,J+IMPADD
+                     IF ( (JNGH < JLO_CELL) .OR. (JNGH > JHI_CELL) ) CYCLE
+                     DO INGH=I-IMPADD,I+IMPADD
+                        ! Either not GASPHASE or already counted:
+                        IF ( (CCVAR(INGH,JNGH,KNGH,IBM_CGSC) /= IBM_GASPHASE) .OR. &
+                             (CCVAR(INGH,JNGH,KNGH,IBM_UNKZ)  > 0) ) CYCLE
+                        IF ( (INGH < ILO_CELL) .OR. (INGH > IHI_CELL) ) CYCLE
+
+                        ! Don't number a regular cell inside an OBST:
+                        IF (SOLID(CELL_INDEX(INGH,JNGH,KNGH))) CYCLE
+
+                        ! Add Scalar unknown:
+                        NUNKZ_LOC(NM) = NUNKZ_LOC(NM) + 1
+                        CCVAR(INGH,JNGH,KNGH,IBM_UNKZ) = NUNKZ_LOC(NM)
+                     ENDDO
+                  ENDDO
+               ENDDO
+            END SELECT
+
+         ENDDO
+      ENDDO
+   ENDDO
+
+ENDDO MAIN_MESH_LOOP
+
+! Now link small cells to surrounding cells in the mesh:
+! NOTE: This linking scheme assumes there are no small cells trapped against a block boundary, i.e. there is a path
+! within the mesh between them and a large cell.
+! NOTE2: Two remediation methods are used to link small cells trapped against a block boundary:
+! 1. Try linking them to the closest cell regular cell with UNKZ > 0.
+! 2. Set for Mass matrix entry the cut-cell volume to ~ a cartesian cell and give a UNKZ > 0 to said cut-cell.
+!    This is done setting MESH(NM)%CUT_CELL(ICC)%USE_CC_VOL(JCC) = .FALSE., which will be used when building the
+!    Mass matrix.
+! NOTE3: This scheme links two unknowns local to the mesh, therefore parallel consistency is not maintained.
+MAIN_MESH_LOOP3 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+
+   CALL POINT_TO_MESH(NM)
+
+   ! Small Cell linking scheme:
+   ! 1. Attempt to link to Regular GASPHASE cells with unknown UNKZ > 0.
+   ! 2. Attempt to link to large or already linked cut-cells.
+   ! 3. If there are unlinked cells after N_LINK_ATTMP:
+   !    3.a 1st Try : Link to closest UNKZ > 0 regular cell in the mesh.
+   !    3.b 2nd Try : Give small cell a local unknown number, set CUT_CELL(ICC)%USE_CC_VOL(JCC)=.FALSE., such that
+   !                  its volume in mass matrix is CCVOL_THRES.
+   ! Set counter to 0:
+   LINK_ITER = 0
+   LINK_LOOP : DO ! Cut-cell linking loop for small cells. -> Algo defined by CCVOL_LINK.
+
+      QUITLINK_FLG = .TRUE.
+
+      ! First attempt to link to regular GASPHASE cells:
+      DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+         I = CUT_CELL(ICC)%IJK(IAXIS)
+         J = CUT_CELL(ICC)%IJK(JAXIS)
+         K = CUT_CELL(ICC)%IJK(KAXIS)
+         ! Don't attempt to link cut-cells inside an OBST:
+         IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+         NCELL = CUT_CELL(ICC)%NCELL
+         CCVOL_THRES = CCVOL_LINK*DX(I)*DY(J)*DZ(K)
+         DO JCC=1,NCELL
+            IF ( CUT_CELL(ICC)%UNKZ(JCC) > 0 ) CYCLE
+            ! Small cells, get IBM_UNKZ from a large cell neighbor:
+            VAL_UNKZ = IBM_UNDEFINED
+            VAL_CVOL = CCVOL_THRES
+            IFC_LOOP3A : DO IFC=1,CUT_CELL(ICC)%CCELEM(1,JCC)
+               IFACE   = CUT_CELL(ICC)%CCELEM(IFC+1,JCC)
+               LOWHIGH = CUT_CELL(ICC)%FACE_LIST(2,IFACE)
+               ILH     = 2*LOWHIGH - 3 ! -1 for LOW_IND, 1 for HIGH_IND
+               SELECT CASE(CUT_CELL(ICC)%FACE_LIST(1,IFACE)) ! 1. Check if a surrounding cell is a regular cell:
+               CASE(IBM_FTYPE_RGGAS) ! REGULAR GASPHASE
+                  X1AXIS  = CUT_CELL(ICC)%FACE_LIST(3,IFACE)
+                  CRTCELL_FLG = .FALSE.
+                  SELECT CASE(X1AXIS)
+                  ! Using IBM_UNKZ in the following conditionals assures no guard-cells outside of the domain (except
+                  ! case of periodic boundaries) are chosen. Deals with domain BCs.
+                  CASE(IAXIS)
+                     I_LNK = I+ILH; J_LNK = J; K_LNK = K
+                     IF(CCVAR(I_LNK,J_LNK,K_LNK,IBM_UNKZ) > 0) THEN ! Regular Cartesian Cell
+                        VAL_UNKZ = CCVAR(I_LNK,J_LNK,K_LNK,IBM_UNKZ)
+                        CRTCELL_FLG = .TRUE.
+                     ENDIF
+                  CASE(JAXIS)
+                     I_LNK = I; J_LNK = J+ILH; K_LNK = K
+                     IF(CCVAR(I_LNK,J_LNK,K_LNK,IBM_UNKZ) > 0) THEN ! Regular Cartesian Cell
+                        VAL_UNKZ = CCVAR(I_LNK,J_LNK,K_LNK,IBM_UNKZ)
+                        CRTCELL_FLG = .TRUE.
+                     ENDIF
+                  CASE(KAXIS)
+                     I_LNK = I; J_LNK = J; K_LNK = K+ILH
+                     IF(CCVAR(I_LNK,J_LNK,K_LNK,IBM_UNKZ) > 0) THEN ! Regular Cartesian Cell
+                        VAL_UNKZ = CCVAR(I_LNK,J_LNK,K_LNK,IBM_UNKZ)
+                        CRTCELL_FLG = .TRUE.
+                     ENDIF
+                  END SELECT
+                  IF ( CRTCELL_FLG ) EXIT IFC_LOOP3A
+
+               END SELECT
+            ENDDO IFC_LOOP3A
+            IF (VAL_UNKZ>0) THEN
+               CUT_CELL(ICC)%UNKZ(JCC) = VAL_UNKZ     ! [    Cell Type,     I,     J,     K, JCC_LNK ]
+               CUT_CELL(ICC)%IJK_LINK(1:KAXIS+2,JCC) = (/ IBM_GASPHASE, I_LNK, J_LNK, K_LNK,       0 /)
+            ENDIF
+         ENDDO
+      ENDDO
+
+      ! Then attempt to connect to large cut-cells, or already connected small cells (CUT_CELL(ICC)%UNKZ(JCC) > 0):
+      DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+         I = CUT_CELL(ICC)%IJK(IAXIS)
+         J = CUT_CELL(ICC)%IJK(JAXIS)
+         K = CUT_CELL(ICC)%IJK(KAXIS)
+         ! Don't attempt to link cut-cells inside an OBST:
+         IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+         NCELL = CUT_CELL(ICC)%NCELL
+         CCVOL_THRES = CCVOL_LINK*DX(I)*DY(J)*DZ(K)
+         DO JCC=1,NCELL
+            IF ( CUT_CELL(ICC)%UNKZ(JCC) > 0 ) CYCLE
+
+            ! Small cells, get IBM_UNKZ from a large cell neighbor:
+            VAL_UNKZ = IBM_UNDEFINED
+            VAL_CVOL = -GEOMEPS
+            IFC_LOOP3 : DO IFC=1,CUT_CELL(ICC)%CCELEM(1,JCC)
+               IFACE   = CUT_CELL(ICC)%CCELEM(IFC+1,JCC)
+               IF((CUT_CELL(ICC)%FACE_LIST(1,IFACE)==IBM_FTYPE_CFINB) .OR. &
+                  (CUT_CELL(ICC)%FACE_LIST(1,IFACE)==IBM_FTYPE_SVERT)) CYCLE IFC_LOOP3
+               LOWHIGH = CUT_CELL(ICC)%FACE_LIST(2,IFACE)
+               ILH     = 2*LOWHIGH - 3 ! -1 for LOW_IND, 1 for HIGH_IND
+
+               ! Cycle if surrounding cell is located in the guard-cell region, if so drop, as we don't have
+               ! at this point unknown numbers on guard-cells/guard-cell ccs:
+               X1AXIS  = CUT_CELL(ICC)%FACE_LIST(3,IFACE)
+               SELECT CASE(X1AXIS)
+               CASE(IAXIS)
+                  IF( (I+ILH < 1) .OR. (I+ILH > IBAR) ) CYCLE IFC_LOOP3
+               CASE(JAXIS)
+                  IF( (J+ILH < 1) .OR. (J+ILH > JBAR) ) CYCLE IFC_LOOP3
+               CASE(KAXIS)
+                  IF( (K+ILH < 1) .OR. (K+ILH > KBAR) ) CYCLE IFC_LOOP3
+               END SELECT
+
+               SELECT CASE(CUT_CELL(ICC)%FACE_LIST(1,IFACE)) ! 1. Check if a surrounding cell is a regular cell:
+               CASE(IBM_FTYPE_RGGAS) ! REGULAR GASPHASE
+                  SELECT CASE(X1AXIS)
+                  CASE(IAXIS)
+                     IF(CCVAR(I+ILH,J,K,IBM_UNKZ) <= 0) THEN ! Cut - cell. Array IBM_RCFACE_VEL is used.
+                        CALL GET_ICC2_JCC2(ICC,IFACE,I+ILH,J,K,ICC2,JCC2)
+                        IF ( ANY((/ ICC2, JCC2 /) == 0) ) CYCLE IFC_LOOP3
+                        IF ( CUT_CELL(ICC2)%VOLUME(JCC2) < VAL_CVOL) CYCLE IFC_LOOP3
+                        IF ( CUT_CELL(ICC2)%UNKZ(JCC2) <= 0) CYCLE IFC_LOOP3
+                        I_LNK = I+ILH; J_LNK = J; K_LNK = K; JCC_LNK = JCC2
+                        VAL_CVOL = CUT_CELL(ICC2)%VOLUME(JCC2)
+                        VAL_UNKZ = CUT_CELL(ICC2)%UNKZ(JCC2)
+                     ENDIF
+                  CASE(JAXIS)
+                     IF(CCVAR(I,J+ILH,K,IBM_UNKZ) <= 0) THEN ! Cut - cell. Array IBM_RCFACE_VEL is used.
+                        CALL GET_ICC2_JCC2(ICC,IFACE,I,J+ILH,K,ICC2,JCC2)
+                        IF ( ANY((/ ICC2, JCC2 /) == 0) ) CYCLE IFC_LOOP3
+                        IF ( CUT_CELL(ICC2)%VOLUME(JCC2) < VAL_CVOL) CYCLE IFC_LOOP3
+                        IF ( CUT_CELL(ICC2)%UNKZ(JCC2) <= 0) CYCLE IFC_LOOP3
+                        I_LNK = I; J_LNK = J+ILH; K_LNK = K; JCC_LNK = JCC2
+                        VAL_CVOL = CUT_CELL(ICC2)%VOLUME(JCC2)
+                        VAL_UNKZ = CUT_CELL(ICC2)%UNKZ(JCC2)
+                     ENDIF
+                  CASE(KAXIS)
+                     IF(CCVAR(I,J,K+ILH,IBM_UNKZ) <= 0) THEN ! Cut - cell. Array IBM_RCFACE_VEL is used.
+                        CALL GET_ICC2_JCC2(ICC,IFACE,I,J,K+ILH,ICC2,JCC2)
+                        IF ( ANY((/ ICC2, JCC2 /) == 0) ) CYCLE IFC_LOOP3
+                        IF ( CUT_CELL(ICC2)%VOLUME(JCC2) < VAL_CVOL) CYCLE IFC_LOOP3
+                        IF ( CUT_CELL(ICC2)%UNKZ(JCC2) <= 0) CYCLE IFC_LOOP3
+                        I_LNK = I; J_LNK = J; K_LNK = K+ILH; JCC_LNK = JCC2
+                        VAL_CVOL = CUT_CELL(ICC2)%VOLUME(JCC2)
+                        VAL_UNKZ = CUT_CELL(ICC2)%UNKZ(JCC2)
+                     ENDIF
+                  END SELECT
+               CASE(IBM_FTYPE_CFGAS) ! 2. Check for large surrounding cut-cells:
+
+                  IFC2    = CUT_CELL(ICC)%FACE_LIST(4,IFACE)
+                  IFACE2  = CUT_CELL(ICC)%FACE_LIST(5,IFACE)
+
+                  ICC2    = CUT_FACE(IFC2)%CELL_LIST(2,LOWHIGH,IFACE2)
+                  JCC2    = CUT_FACE(IFC2)%CELL_LIST(3,LOWHIGH,IFACE2)
+
+                  IF ( CUT_CELL(ICC2)%VOLUME(JCC2) < VAL_CVOL) CYCLE IFC_LOOP3
+                  IF ( CUT_CELL(ICC2)%UNKZ(JCC2) <= 0) CYCLE IFC_LOOP3
+                  I_LNK=CUT_CELL(ICC2)%IJK(IAXIS); J_LNK=CUT_CELL(ICC2)%IJK(JAXIS); K_LNK=CUT_CELL(ICC2)%IJK(KAXIS)
+                  JCC_LNK  = JCC2
+                  VAL_CVOL = CUT_CELL(ICC2)%VOLUME(JCC2)
+                  VAL_UNKZ = CUT_CELL(ICC2)%UNKZ(JCC2)
+               END SELECT
+            ENDDO IFC_LOOP3
+
+            ! This small cut-cell still has an undefined unknown, redo link-loop to test for updated unknown number on
+            ! neighbors:
+            IF (VAL_UNKZ > 0) THEN
+               CUT_CELL(ICC)%UNKZ(JCC) = VAL_UNKZ
+               CUT_CELL(ICC)%IJK_LINK(1:KAXIS+2,JCC) = (/ IBM_CUTCFE, I_LNK, J_LNK, K_LNK, JCC_LNK /)
+            ELSE
+               QUITLINK_FLG = .FALSE.
+            ENDIF
+         ENDDO
+      ENDDO
+
+      ! Then fuse cut-cell unknowns if several ccs in one Cartesian cell and one of them has CUT_CELL(ICC)%UNKZ(JCC)>0:
+      IF(.NOT. CC_UNSTRUCTURED_PROJECTION) THEN
+         DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+            I = CUT_CELL(ICC)%IJK(IAXIS)
+            J = CUT_CELL(ICC)%IJK(JAXIS)
+            K = CUT_CELL(ICC)%IJK(KAXIS)
+            ! Don't attempt to link cut-cells inside an OBST:
+            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+            NCELL = CUT_CELL(ICC)%NCELL
+            ! For cases with more than one cut-cell, define UNKZ of all cells to be the one of first cut-cell
+            ! with UNKZ > 0:
+            DO JCC=1,NCELL
+               IF ( CUT_CELL(ICC)%UNKZ(JCC) > 0 ) EXIT
+            ENDDO
+            IF (JCC <= NCELL) THEN
+               VAL_UNKZ = CUT_CELL(ICC)%UNKZ(JCC)
+               CUT_CELL(ICC)%UNKZ(1:NCELL) = VAL_UNKZ
+            ENDIF
+         ENDDO
+      ENDIF
+
+      IF (QUITLINK_FLG) EXIT LINK_LOOP
+
+      LINK_ITER = LINK_ITER + 1
+      IF (LINK_ITER > N_LINK_ATTMP) THEN
+          ! Count how many unlinked cells we have in this mesh:
+          ULINK_COUNT = 0
+          DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+             I = CUT_CELL(ICC)%IJK(IAXIS)
+             J = CUT_CELL(ICC)%IJK(JAXIS)
+             K = CUT_CELL(ICC)%IJK(KAXIS)
+             ! Don't count cut-cells inside an OBST:
+             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+             NCELL = CUT_CELL(ICC)%NCELL
+             DO JCC=1,NCELL
+                IF ( CUT_CELL(ICC)%UNKZ(JCC) > 0 ) CYCLE
+                ULINK_COUNT = ULINK_COUNT + 1
+             ENDDO
+          ENDDO
+
+          IF (GET_CUTCELLS_VERBOSE) THEN
+             ! Write out unlinked cells properties:
+             ! Open file to write unlinked cells:
+             WRITE(UNLINKED_FILE,'(A,A,I0,A)') TRIM(CHID),'_unlinked_',MY_RANK,'.log'
+             ! Create file:
+             IF (UNLINKED_1ST_CALL) THEN
+                LU_UNLNK = GET_FILE_NUMBER()
+                OPEN(UNIT=LU_UNLNK,FILE=TRIM(UNLINKED_FILE),STATUS='UNKNOWN')
+                WRITE(LU_UNLNK,*) 'Unlinked cut-cell Information for Process=',MY_RANK
+                CLOSE(LU_UNLNK)
+                UNLINKED_1ST_CALL = .FALSE.
+             ENDIF
+             ! Open file to write unlinked cell information:
+             OPEN(UNIT=LU_UNLNK,FILE=TRIM(UNLINKED_FILE),STATUS='OLD',POSITION='APPEND')
+             WRITE(LU_UNLNK,*) ' '
+             WRITE(LU_UNLNK,'(A,I4,A,I4)') ' Mesh NM=',NM,', number of unlinked cells=',ULINK_COUNT
+
+             ! Dump info:
+             ULINK_COUNT = 0
+             DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+                I = CUT_CELL(ICC)%IJK(IAXIS)
+                J = CUT_CELL(ICC)%IJK(JAXIS)
+                K = CUT_CELL(ICC)%IJK(KAXIS)
+                ! Don't count cut-cells inside an OBST:
+                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+                NCELL = CUT_CELL(ICC)%NCELL
+                CCVOL_THRES = CCVOL_LINK*DX(I)*DY(J)*DZ(K)
+                DO JCC=1,NCELL
+                   IF ( CUT_CELL(ICC)%UNKZ(JCC) > 0 ) CYCLE
+                   ULINK_COUNT = ULINK_COUNT + 1
+                   WRITE(LU_UNLNK,'(I8,A,5I8,A,5F22.8)') &
+                   ULINK_COUNT,', I,J,K,ICC,JCC=',I,J,K,ICC,JCC,', X,Y,Z,CCVOL,CCVOL_CRT=',X(I),Y(J),Z(K), &
+                   CUT_CELL(ICC)%VOLUME(JCC),DX(I)*DY(J)*DZ(K)
+                ENDDO
+             ENDDO
+             CLOSE(LU_UNLNK)
+          ENDIF
+
+          ! 1st Try: Link each cell to closest unknown numbered regular cell in the mesh:
+          DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+             I = CUT_CELL(ICC)%IJK(IAXIS)
+             J = CUT_CELL(ICC)%IJK(JAXIS)
+             K = CUT_CELL(ICC)%IJK(KAXIS)
+             ! Drop cut-cells inside an OBST:
+             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+             NCELL = CUT_CELL(ICC)%NCELL
+             DO JCC=1,NCELL
+                IF ( CUT_CELL(ICC)%UNKZ(JCC) > 0 ) CYCLE
+                DISTCELL=1._EB/GEOMEPS
+                ! 3D LOOP over regular cells:
+                DO KK=1,KBAR
+                   DO JJ=1,JBAR
+                      DO II=1,IBAR
+                         IF(CCVAR(II,JJ,KK,IBM_UNKZ) <= 0) CYCLE ! Cycle if not regular cell.
+                         DV = SQRT( (X(II)-X(I))**2._EB + (Y(JJ)-Y(J))**2._EB + (Z(KK)-Z(K))**2._EB )
+                         IF ( DV-GEOMEPS > DISTCELL ) CYCLE
+                         DISTCELL=DV
+                         CUT_CELL(ICC)%UNKZ(JCC) = CCVAR(II,JJ,KK,IBM_UNKZ) ! Assign reg cell unknown number
+                         CUT_CELL(ICC)%IJK_LINK(1:KAXIS+2,JCC) = (/ IBM_GASPHASE, II, JJ, KK, 0 /)
+                      ENDDO
+                   ENDDO
+                ENDDO
+             ENDDO
+          ENDDO
+
+          ! Recount unlinked cells (i.e. no other viable cells in the mesh).
+          ULINK_COUNT = 0
+          DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+             I = CUT_CELL(ICC)%IJK(IAXIS)
+             J = CUT_CELL(ICC)%IJK(JAXIS)
+             K = CUT_CELL(ICC)%IJK(KAXIS)
+             ! Drop cut-cells inside an OBST:
+             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+             NCELL = CUT_CELL(ICC)%NCELL
+             DO JCC=1,NCELL
+                IF ( CUT_CELL(ICC)%UNKZ(JCC) > 0 ) CYCLE
+                ULINK_COUNT = ULINK_COUNT + 1
+             ENDDO
+          ENDDO
+
+          IF (GET_CUTCELLS_VERBOSE) THEN
+             ! Write out remaining unlinked cells properties.
+             ! Open file to write unlinked cell information:
+             OPEN(UNIT=LU_UNLNK,FILE=TRIM(UNLINKED_FILE),STATUS='OLD',POSITION='APPEND')
+             WRITE(LU_UNLNK,*) ' '
+             WRITE(LU_UNLNK,*) 'STATUS AFTER CUT-CELL REGION REGULAR CELL CARTESIAN SEARCH:'
+             WRITE(LU_UNLNK,'(A,I4,A,I4)') ' Mesh NM=',NM,', number of unlinked cells after REG CELL approx=',ULINK_COUNT
+             IF(ULINK_COUNT > 0) THEN
+                ! Dump info:
+                ULINK_COUNT = 0
+                DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+                   I = CUT_CELL(ICC)%IJK(IAXIS)
+                   J = CUT_CELL(ICC)%IJK(JAXIS)
+                   K = CUT_CELL(ICC)%IJK(KAXIS)
+                   ! Drop cut-cells inside an OBST:
+                   IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+                   NCELL = CUT_CELL(ICC)%NCELL
+                   CCVOL_THRES = CCVOL_LINK*DX(I)*DY(J)*DZ(K)
+                   DO JCC=1,NCELL
+                      IF ( CUT_CELL(ICC)%UNKZ(JCC) > 0 ) CYCLE
+                      ULINK_COUNT = ULINK_COUNT + 1
+                      WRITE(LU_UNLNK,'(I8,A,5I8,A,5F22.8)') &
+                      ULINK_COUNT,', I,J,K,ICC,JCC=',I,J,K,ICC,JCC,', X,Y,Z,CCVOL,CCVOL_CRT=',X(I),Y(J),Z(K), &
+                      CUT_CELL(ICC)%VOLUME(JCC),DX(I)*DY(J)*DZ(K)
+                   ENDDO
+                ENDDO
+             ENDIF
+             CLOSE(LU_UNLNK)
+          ENDIF
+
+          IF (ULINK_COUNT == 0) EXIT LINK_LOOP
+
+          ! 2nd Try : Loop over cut cells and give the ramining unlinked cells a UNKZ>0,
+          ! plus CUT_CELL(ICC)%USE_CC_VOL(JCC) = .FALSE.:
+          DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+             I = CUT_CELL(ICC)%IJK(IAXIS)
+             J = CUT_CELL(ICC)%IJK(JAXIS)
+             K = CUT_CELL(ICC)%IJK(KAXIS)
+             ! Drop cut-cells inside an OBST:
+             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+             NCELL = CUT_CELL(ICC)%NCELL
+             DO JCC=1,NCELL
+                IF ( CUT_CELL(ICC)%UNKZ(JCC) > 0 ) CYCLE
+                NUNKZ_LOC(NM) = NUNKZ_LOC(NM) + 1
+                CUT_CELL(ICC)%UNKZ(JCC) = NUNKZ_LOC(NM)
+                CUT_CELL(ICC)%USE_CC_VOL(JCC) = .FALSE.
+             ENDDO
+          ENDDO
+
+          ! Recount unlinked cells (i.e. no other viable cells in the mesh).
+          ULINK_COUNT = 0
+          DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+             I = CUT_CELL(ICC)%IJK(IAXIS)
+             J = CUT_CELL(ICC)%IJK(JAXIS)
+             K = CUT_CELL(ICC)%IJK(KAXIS)
+             ! Drop cut-cells inside an OBST:
+             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+             NCELL = CUT_CELL(ICC)%NCELL
+             DO JCC=1,NCELL
+                IF ( CUT_CELL(ICC)%UNKZ(JCC) > 0 ) CYCLE
+                ULINK_COUNT = ULINK_COUNT + 1
+             ENDDO
+          ENDDO
+
+          IF (GET_CUTCELLS_VERBOSE) THEN
+             ! Write out final status:
+             OPEN(UNIT=LU_UNLNK,FILE=TRIM(UNLINKED_FILE),STATUS='OLD',POSITION='APPEND')
+             WRITE(LU_UNLNK,*) ' '
+             WRITE(LU_UNLNK,*) 'STATUS AFTER SMALL CUT-CELL CUT_CELL(ICC)%USE_CC_VOL(JCC) change to .FALSE.:'
+             WRITE(LU_UNLNK,'(A,I4,A,I4)') ' Mesh NM=',NM,', number of unlinked cells after Vol change approx=',ULINK_COUNT
+             CLOSE(LU_UNLNK)
+          ENDIF
+
+          EXIT LINK_LOOP
+      ENDIF
+   ENDDO LINK_LOOP
+
+ENDDO MAIN_MESH_LOOP3
+
+! After fixing cut-cell unkz for a given Cartesian cells there might be UNKZ values that haven't been assigned.
+! Condense:
+MAIN_MESH_LOOP31 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   IF(NUNKZ_LOC(NM) == 0) CYCLE
+   CALL POINT_TO_MESH(NM)
+
+   ALLOCATE(CELLPUNKZ(1:NUNKZ_LOC(NM)), INDUNKZ(1:NUNKZ_LOC(NM))); CELLPUNKZ = 0; INDUNKZ = 0;
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            IF(CCVAR(I,J,K,IBM_UNKZ) < 1) CYCLE
+            CELLPUNKZ(CCVAR(I,J,K,IBM_UNKZ)) = CELLPUNKZ(CCVAR(I,J,K,IBM_UNKZ)) + 1
+         ENDDO
+      ENDDO
+   ENDDO
+   DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+      DO JCC=1,CUT_CELL(ICC)%NCELL
+         IF (CUT_CELL(ICC)%UNKZ(JCC) < 1) CYCLE
+         CELLPUNKZ(CUT_CELL(ICC)%UNKZ(JCC)) = CELLPUNKZ(CUT_CELL(ICC)%UNKZ(JCC)) + 1
+      ENDDO
+   ENDDO
+
+   ! Now re-index:
+   COUNT=0
+   DO I=1,NUNKZ_LOC(NM)
+      IF(CELLPUNKZ(I) == 0) CYCLE ! This UNKZ_LOC value has no cells associated to it.
+      COUNT = COUNT + 1
+      INDUNKZ(I) = COUNT
+   ENDDO
+   NUNKZ_LOC(NM) = COUNT
+
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            IF(CCVAR(I,J,K,IBM_UNKZ) < 1) CYCLE
+            VAL_UNKZ = CCVAR(I,J,K,IBM_UNKZ)
+            CCVAR(I,J,K,IBM_UNKZ) = INDUNKZ(VAL_UNKZ) ! Condensed value.
+         ENDDO
+      ENDDO
+   ENDDO
+   DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+      DO JCC=1,CUT_CELL(ICC)%NCELL
+         IF (CUT_CELL(ICC)%UNKZ(JCC) < 1) CYCLE
+         VAL_UNKZ = CUT_CELL(ICC)%UNKZ(JCC)
+         CUT_CELL(ICC)%UNKZ(JCC) = INDUNKZ(VAL_UNKZ) ! Condensed value.
+      ENDDO
+   ENDDO
+   DEALLOCATE(CELLPUNKZ,INDUNKZ)
+
+ENDDO MAIN_MESH_LOOP31
+
+
+! Define total number of unknowns and global unknown index start per MESH:
+IF (ALLOCATED(NUNKZ_TOT)) DEALLOCATE(NUNKZ_TOT)
+ALLOCATE(NUNKZ_TOT(1:NMESHES)); NUNKZ_TOT = 0
+IF (N_MPI_PROCESSES > 1) THEN
+   CALL MPI_ALLREDUCE(NUNKZ_LOC, NUNKZ_TOT, NMESHES, MPI_INTEGER, MPI_SUM, MPI_COMM_WORLD, IERR)
+ELSE
+   NUNKZ_TOT = NUNKZ_LOC
+ENDIF
+! Define global start indexes for each mesh:
+IF (ALLOCATED(UNKZ_ILC)) DEALLOCATE(UNKZ_ILC)
+ALLOCATE(UNKZ_ILC(1:NMESHES)); UNKZ_ILC(1:NMESHES) = 0
+IF (ALLOCATED(UNKZ_IND)) DEALLOCATE(UNKZ_IND)
+ALLOCATE(UNKZ_IND(1:NMESHES)); UNKZ_IND(1:NMESHES) = 0
+DO NM=2,NMESHES
+   UNKZ_ILC(NM) = UNKZ_ILC(NM-1) + NUNKZ_LOC(NM-1)
+   UNKZ_IND(NM) = UNKZ_IND(NM-1) + NUNKZ_TOT(NM-1)
+ENDDO
+
+! Cell numbers for Scalar equations in global numeration:
+MAIN_MESH_LOOP2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+
+   CALL POINT_TO_MESH(NM)
+
+   ! Mesh sizes:
+   NXB=IBAR; NYB=JBAR; NZB=KBAR
+
+   ! X direction bounds:
+   ILO_FACE = 0                    ! Low mesh boundary face index.
+   IHI_FACE = IBAR                 ! High mesh boundary face index.
+   ILO_CELL = ILO_FACE + 1     ! First internal cell index. See notes.
+   IHI_CELL = IHI_FACE ! Last internal cell index.
+
+   ! Y direction bounds:
+   JLO_FACE = 0                    ! Low mesh boundary face index.
+   JHI_FACE = JBAR                 ! High mesh boundary face index.
+   JLO_CELL = JLO_FACE + 1     ! First internal cell index. See notes.
+   JHI_CELL = JHI_FACE ! Last internal cell index.
+
+   ! Z direction bounds:
+   KLO_FACE = 0                    ! Low mesh boundary face index.
+   KHI_FACE = KBAR                 ! High mesh boundary face index.
+   KLO_CELL = KLO_FACE + 1     ! First internal cell index. See notes.
+   KHI_CELL = KHI_FACE ! Last internal cell index.
+
+   ! 1. Number regular GASPHASE cells within the implicit region:
+   ILO = ILO_CELL; IHI = IHI_CELL
+   JLO = JLO_CELL; JHI = JHI_CELL
+   KLO = KLO_CELL; KHI = KHI_CELL
+   DO K=KLO,KHI
+      DO J=JLO,JHI
+         DO I=ILO,IHI
+            IF (CCVAR(I,J,K,IBM_CGSC) /= IBM_GASPHASE) CYCLE
+            IF (CCVAR(I,J,K,IBM_UNKZ) <= 0 ) CYCLE ! Drop if regular GASPHASE cell has not been assigned unknown number.
+            CCVAR(I,J,K,IBM_UNKZ) = CCVAR(I,J,K,IBM_UNKZ) + UNKZ_IND(NM)
+         ENDDO
+      ENDDO
+   ENDDO
+   ! 2. Number cut-cells:
+   DO ICC=1,MESHES(NM)%N_CUTCELL_MESH
+      I = CUT_CELL(ICC)%IJK(IAXIS)
+      J = CUT_CELL(ICC)%IJK(JAXIS)
+      K = CUT_CELL(ICC)%IJK(KAXIS)
+      ! Drop cut-cells inside an OBST:
+      IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+      NCELL = MESHES(NM)%CUT_CELL(ICC)%NCELL
+      CCVOL_THRES = CCVOL_LINK*DX(I)*DY(J)*DZ(K)
+      DO JCC=1,NCELL
+         CUT_CELL(ICC)%UNKZ(JCC) = CUT_CELL(ICC)%UNKZ(JCC) + UNKZ_IND(NM)
+      ENDDO
+   ENDDO
+
+ENDDO MAIN_MESH_LOOP2
+
+! Exchange Guardcell + guard cc information on IBM_UNKZ:
+CALL FILL_UNKZ_GUARDCELLS
+
+! finally set to solid Gasphase cut-faces which have a surrounding cut-cell inside an OBST:
+DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+   CALL POINT_TO_MESH(NM)
+   DO ICF=1,MESHES(NM)%N_CUTFACE_MESH
+      IF (CUT_FACE(ICF)%STATUS /= IBM_GASPHASE) CYCLE
+      I     =CUT_FACE(ICF)%IJK(IAXIS)
+      J     =CUT_FACE(ICF)%IJK(JAXIS)
+      K     =CUT_FACE(ICF)%IJK(KAXIS)
+      X1AXIS=CUT_FACE(ICF)%IJK(KAXIS+1)
+      CF_STATUS = IBM_GASPHASE
+      SELECT CASE(X1AXIS)
+      CASE(IAXIS)
+         IF ( SOLID(CELL_INDEX(I,J,K)) .AND. SOLID(CELL_INDEX(I+1,J,K)) ) CF_STATUS = IBM_SOLID
+      CASE(JAXIS)
+         IF ( SOLID(CELL_INDEX(I,J,K)) .AND. SOLID(CELL_INDEX(I,J+1,K)) ) CF_STATUS = IBM_SOLID
+      CASE(KAXIS)
+         IF ( SOLID(CELL_INDEX(I,J,K)) .AND. SOLID(CELL_INDEX(I,J,K+1)) ) CF_STATUS = IBM_SOLID
+      END SELECT
+      CUT_FACE(ICF)%STATUS = CF_STATUS
+   ENDDO
+ENDDO
+
+RETURN
+
+CONTAINS
+
+SUBROUTINE GET_ICC2_JCC2(ICC,IFACE,INXT,JNXT,KNXT,ICC2,JCC2)
+INTEGER, INTENT(IN) :: ICC,IFACE,INXT,JNXT,KNXT
+INTEGER, INTENT(OUT):: ICC2, JCC2
+
+INTEGER :: IFC, IFACE2
+ICC2=CCVAR(INXT,JNXT,KNXT,IBM_IDCC); IF (ICC2<=0) RETURN
+DO JCC2=1,CUT_CELL(ICC2)%NCELL
+   ! Loop faces and test:
+   DO IFC=1,CUT_CELL(ICC2)%CCELEM(1,JCC2)
+      IFACE2 = CUT_CELL(ICC2)%CCELEM(IFC+1,JCC2)
+      ! If face type in face_list is not IBM_FTYPE_RGGAS, drop:
+      IF(CUT_CELL(ICC2)%FACE_LIST(1,IFACE2) /= IBM_FTYPE_RGGAS) CYCLE
+      ! Does X1AXIS match and LOWHIGH are different?
+      IF(CUT_CELL(ICC2)%FACE_LIST(3,IFACE2) /= CUT_CELL(ICC)%FACE_LIST(3,IFACE)) CYCLE ! X1AXIS is different.
+      IF(ABS(CUT_CELL(ICC2)%FACE_LIST(2,IFACE2)-CUT_CELL(ICC)%FACE_LIST(3,IFACE)) < 1) CYCLE ! Same LOWHIGH.
+      ! Found the cut-cell ICC2,JCC2 on the other side of IFACE for cut-cell ICC,JCC.
+      RETURN
+   ENDDO
+ENDDO
+JCC2=0
+RETURN
+END SUBROUTINE GET_ICC2_JCC2
+
+END SUBROUTINE GET_MATRIX_INDEXES_Z
 
 
 ! ----------------------------- GET_LINKED_MATRIX_INDEXES_Z ---------------------------------

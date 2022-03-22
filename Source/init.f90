@@ -1088,24 +1088,6 @@ IF (N_ZONE > 0) THEN
    ENDDO ZONE_LOOP
 ENDIF
 
-! Allocate ZONE_MESH array for LOCMAT_SOLVER
-
-IF (PRES_FLAG==ULMAT_FLAG) THEN
-   ALLOCATE(M%ZONE_MESH(0:N_ZONE),STAT=IZERO)
-   CALL ChkMemErr('INIT','ZONE_MESH',IZERO)
-   ZONE_LOOP_2: DO IPZ = 0,N_ZONE
-      DO K=1,M%KBAR
-         DO J=1,M%JBAR
-            DO I=1,M%IBAR
-               IF (M%PRESSURE_ZONE(I,J,K) /= IPZ) CYCLE
-               IF (M%SOLID(M%CELL_INDEX(I,J,K)))  CYCLE
-               M%ZONE_MESH(IPZ)%ZONE_IN_MESH=.TRUE.
-            ENDDO
-         ENDDO
-      ENDDO
-   ENDDO ZONE_LOOP_2
-ENDIF
-
 ! Loop through WALL and CFACE cells and assign PRESSURE_ZONE. Also, check for
 ! inappropriate boundaries, such as thin obstructions that burn or blow.
 

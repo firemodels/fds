@@ -117,17 +117,25 @@
 &INIT PART_ID='large roundwood', XYZ=0.0,0.0,0.30, RADIUS=1.45, HEIGHT=4.3, SHAPE='CONE', N_PARTICLES_PER_CELL=1, PACKING_RATIO=0.00044 /
 
 &PART ID='ignitor', SAMPLING_FACTOR=1, SURF_ID='burner', STATIC=.TRUE. /
-&SURF ID='burner', HRRPUA=206., RAMP_Q='ignite', RADIUS=0.01, GEOMETRY='SPHERICAL' /
+&SURF ID='burner', TMP_FRONT=1500., RAMP_T='ignite', RADIUS=0.01, GEOMETRY='SPHERICAL' /
 &RAMP ID='ignite', T= 0.0, F=0. /
 &RAMP ID='ignite', T= 0.1, F=1. /
 &RAMP ID='ignite', T=30.0, F=1. /
 &RAMP ID='ignite', T=30.1, F=0. /
 &INIT PART_ID='ignitor', XYZ=0.0,0.0,0.32, RADIUS=0.60, SHAPE='RING', N_PARTICLES=1000  /
 
-&DEVC XB=-2.0,0.0,-2.0,0.0,0.0,4.0, QUANTITY='MPUV', PART_ID='foliage', ID='solid mass', STATISTICS='VOLUME INTEGRAL'  /
-&DEVC XB=-2.0,0.0,-2.0,0.0,0.0,4.0, QUANTITY='MPUV', PART_ID='small roundwood', ID='small roundwood', STATISTICS='VOLUME INTEGRAL'  /
-&DEVC XB=-2.0,0.0,-2.0,0.0,0.0,4.0, QUANTITY='MPUV', PART_ID='medium roundwood', ID='medium roundwood', STATISTICS='VOLUME INTEGRAL'  /
-&DEVC XB=-2.0,0.0,-2.0,0.0,0.0,4.0, QUANTITY='MPUV', PART_ID='large roundwood', ID='large roundwood', STATISTICS='VOLUME INTEGRAL'  /
+&DEVC XB=-2.0,2.0,-2.0,2.0,0.0,4.0, QUANTITY='MPUV', PART_ID='foliage', ID='solid mass', STATISTICS='VOLUME INTEGRAL'  /
+&DEVC XB=-2.0,2.0,-2.0,2.0,0.0,4.0, QUANTITY='MPUV', PART_ID='small roundwood', ID='small roundwood', STATISTICS='VOLUME INTEGRAL'  /
+&DEVC XB=-2.0,2.0,-2.0,2.0,0.0,4.0, QUANTITY='MPUV', PART_ID='medium roundwood', ID='medium roundwood', STATISTICS='VOLUME INTEGRAL'  /
+&DEVC XB=-2.0,2.0,-2.0,2.0,0.0,4.0, QUANTITY='MPUV', PART_ID='large roundwood', ID='large roundwood', STATISTICS='VOLUME INTEGRAL'  /
+
+&DEVC XB=-2.0,2.0,-2.0,2.0,0.0,4.0, OUTPUT=F, QUANTITY='MASS FLUX', PART_ID='foliage', ID='foliage mlr', STATISTICS='SURFACE INTEGRAL'/
+&DEVC XB=-2.0,2.0,-2.0,2.0,0.0,4.0, OUTPUT=F, QUANTITY='MASS FLUX', PART_ID='small roundwood', ID='small roundwood mlr', STATISTICS='SURFACE INTEGRAL'/
+&DEVC XB=-2.0,2.0,-2.0,2.0,0.0,4.0, OUTPUT=F, QUANTITY='MASS FLUX', PART_ID='medium roundwood', ID='medium roundwood mlr', STATISTICS='SURFACE INTEGRAL'/
+&DEVC XB=-2.0,2.0,-2.0,2.0,0.0,4.0, OUTPUT=F, QUANTITY='MASS FLUX', PART_ID='large roundwood', ID='large roundwood mlr', STATISTICS='SURFACE INTEGRAL'/
+
+&CTRL ID='mlr sum',FUNCTION_TYPE='SUM',INPUT_ID='foliage mlr','small roundwood mlr','medium roundwood mlr','large roundwood mlr'/
+&DEVC ID='total mlr',CTRL_ID='mlr sum' QUANTITY='CONTROL VALUE'/
 
 -- Heat flux gauges
 &DEVC XYZ=0.5,0,0.2,ORIENTATION=0,0,1,QUANTITY='GAUGE HEAT FLUX GAS',ID='HF1' /
