@@ -527,17 +527,15 @@ END FUNCTION READ_STOP
 
 SUBROUTINE READ_MESH
 
-USE GLOBAL_CONSTANTS, ONLY : OPENMP_USED_THREADS, OPENMP_USER_SET_THREADS, USE_OPENMP
 USE COMP_FUNCTIONS, ONLY : SEARCH_INPUT_FILE
 INTEGER :: IJK(3),NM,NM2,CURRENT_MPI_PROCESS,MPI_PROCESS,RGB(3),LEVEL,N_MESH_NEW,N,II,JJ,KK,NMESHES_READ,NNN, &
-           N_THREADS, JBAR_OLD_VALUE
+           JBAR_OLD_VALUE
 INTEGER, ALLOCATABLE, DIMENSION(:) :: NEIGHBOR_LIST
 LOGICAL :: OVERLAPPING_X,OVERLAPPING_Y,OVERLAPPING_Z,POSSIBLY_PERIODIC,CYLINDRICAL_OLD_VALUE,PERIODIC_FOUND_IN_FILE
 REAL(EB) :: XB1,XB2,XB3,XB4,XB5,XB6
 CHARACTER(25) :: COLOR
 CHARACTER(LABEL_LENGTH) :: MULT_ID,TRNX_ID,TRNY_ID,TRNZ_ID
-NAMELIST /MESH/ CHECK_MESH_ALIGNMENT,COLOR,CYLINDRICAL,FYI,ID,IJK,LEVEL,MPI_PROCESS,MULT_ID,&
-                N_THREADS,RGB,TRNX_ID,TRNY_ID,TRNZ_ID,XB
+NAMELIST /MESH/ CHECK_MESH_ALIGNMENT,COLOR,CYLINDRICAL,FYI,ID,IJK,LEVEL,MPI_PROCESS,MULT_ID,RGB,TRNX_ID,TRNY_ID,TRNZ_ID,XB
 TYPE (MESH_TYPE), POINTER :: M,M2
 TYPE (MULTIPLIER_TYPE), POINTER :: MR
 
@@ -633,7 +631,6 @@ MESH_LOOP: DO N=1,NMESHES_READ
    TRNX_ID = 'null'
    TRNY_ID = 'null'
    TRNZ_ID = 'null'
-   N_THREADS = -1
 
    ! Read the MESH line
 
@@ -742,37 +739,7 @@ MESH_LOOP: DO N=1,NMESHES_READ
                   CALL SHUTDOWN(MESSAGE) ; RETURN
                ENDIF
             ENDIF
-            IF (MY_RANK==0 .AND. VERBOSE) &
-               WRITE(LU_ERR,'(A,I0,A,I0)') ' Mesh ',NM,' is assigned to MPI Process ',PROCESS(NM)
-
-            ! Check the number of OMP threads for a valid value (positive, larger than 0), -1 indicates default unchanged value
-            IF (N_THREADS < 1 .AND. N_THREADS /= -1) THEN
-               WRITE(MESSAGE, '(A)') 'ERROR: N_THREADS must be at least 1'
-               CALL SHUTDOWN(MESSAGE) ; RETURN
-            ENDIF
-
-            ! If OMP number of threads is explicitly set for this mesh and the mesh is assigned to this MPI process,
-            ! then set this value
-            IF (MY_RANK == PROCESS(NM) .AND. N_THREADS > 0) THEN
-               ! Check if OPENMP is active
-               IF (USE_OPENMP .NEQV. .TRUE.) THEN
-                  WRITE(MESSAGE, '(A)') 'ERROR: setting N_THREADS, but OPENMP is not active'
-                  CALL SHUTDOWN(MESSAGE) ; RETURN
-               END IF
-
-               ! Check if the process' thread number was already set in a previous mesh definition
-               IF (OPENMP_USER_SET_THREADS .EQV. .TRUE.) THEN
-                  ! Check if previous definitions are consistent
-                  IF (N_THREADS .NE. OPENMP_USED_THREADS) THEN
-                     WRITE(MESSAGE, '(A)') 'ERROR: N_THREADS not consistent for MPI process'
-                     CALL SHUTDOWN(MESSAGE) ; RETURN
-                  END IF
-               END IF
-
-               ! set the value-changed-flag and the new thread number
-               OPENMP_USER_SET_THREADS = .TRUE.
-               OPENMP_USED_THREADS     = N_THREADS
-            END IF
+            IF (MY_RANK==0 .AND. VERBOSE) WRITE(LU_ERR,'(A,I0,A,I0)') ' Mesh ',NM,' is assigned to MPI Process ',PROCESS(NM)
 
             ! Mesh boundary colors
 

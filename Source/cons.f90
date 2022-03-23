@@ -661,8 +661,6 @@ REAL(EB) :: WALL_CLOCK_START_ITERATIONS=0._EB       !< MPI_WTIME i.e. wall clock
 REAL(EB) :: CPU_TIME_START                          !< CPU_TIME when FDS starts
 
 INTEGER :: OPENMP_AVAILABLE_THREADS = 1         !< OpenMP parameter
-INTEGER :: OPENMP_USED_THREADS      = 1         !< OpenMP parameter
-LOGICAL :: OPENMP_USER_SET_THREADS  = .FALSE.   !< OpenMP parameter
 LOGICAL :: USE_OPENMP               = .FALSE.   !< OpenMP parameter
 
 INTEGER :: N_CSVF=0  !< Number of external velocity (.csv) files
