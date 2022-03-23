@@ -445,6 +445,10 @@ where {\ct N} is the number of OpenMP threads to assign to each MPI process for 
 
 If you wish to run FDS on more than one computer, do the following:
 \begin{enumerate}
+\item The first time you run a job, you must provide your domain name and password by issuing this command:
+
+      {\ct mpiexec -register}
+      
 \item Create a text file, say {\ct hosts.txt}, and in it list, line by line, the names of your computers:
 
       fred:3 \\
