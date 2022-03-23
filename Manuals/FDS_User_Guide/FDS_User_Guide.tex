@@ -969,17 +969,6 @@ Usually in a MPI calculation, each mesh is assigned its own process, and each pr
 \end{lstlisting}
 The parameter {\ct MPI\_PROCESS} instructs FDS to assign that particular mesh to the given process. In this case, only four processes are to be started, numbered 0 through 3. Note that the processes need to be invoked in ascending order, starting with 0. Why would you do this? Suppose you only have four processors available for this job. By starting only four processes instead of six, you can save time because `mesh2' and `mesh3' can communicate directly with each other without having to transmit data using MPI calls over the network. Same goes for `mesh5' and `mesh6'. In essence, it is as if these mesh pairs are neighbors and need not send mail to each other via the postal system. The letters can just be walked next door.
 
-Additionally to the mesh assignment to individual MPI processes, the number of OpenMP threads for each MPI process may be specified. The parameter {\ct N\_THREADS} instructs FDS to set this number of threads and must be consistent for all meshes on the same MPI process, but may vary between them:
-\begin{lstlisting}
-&MESH ID='mesh1', IJK=..., XB=..., MPI_PROCESS=0 /
-&MESH ID='mesh2', IJK=..., XB=..., MPI_PROCESS=1, N_THREADS=2 /
-&MESH ID='mesh3', IJK=..., XB=..., MPI_PROCESS=1, N_THREADS=2 /
-&MESH ID='mesh4', IJK=..., XB=..., MPI_PROCESS=2, N_THREADS=4 /
-&MESH ID='mesh5', IJK=..., XB=..., MPI_PROCESS=3 /
-&MESH ID='mesh6', IJK=..., XB=..., MPI_PROCESS=3 /
-\end{lstlisting}
-Notes: An unspecified value will result in the default number of threads (see \ref{single_mesh}) on the MPI process. Some cluster systems do not support a heterogeneous distribution of resources, here computational cores, per MPI process. Therefore, the number of OpenMP threads may change, but not the amount of cores assigned to the MPI process.
-
 For cases involving many meshes, you might want to assign them colors using either the character string {\ct COLOR} or the integer triplet {\ct RGB}. You may also want to consider using the multiplying feature to easily create a 3-D array of meshes. See Section~\ref{info:MULT} for details.
 
 Some parallel computing environments do not have a centralized file system, in which case FDS must write the output files for each process to a separate disk. If your computing cluster does not have a {\ct SHARED\_FILE\_SYSTEM}, then set this parameter to {\ct F} on the {\ct MISC} line. This parameter is also handy for MPI jobs involving hundreds or thousands of processes, in which case writing a single Smokeview file is time-consuming. When {\ct SHARED\_FILE\_SYSTEM} is set to {\ct F}, the file that Smokeview reads is broken into pieces, one for each MPI process. By doing this, you avoid serially writing to the Smokeview file. One other useful parameter for larger MPI jobs is called {\ct VERBOSE} on the {\ct MISC} line. This logical parameter suppresses information related to MPI process and OpenMP thread assignments that is printed to the diagnostic output files. By default, its value is {\ct T} for MPI jobs involving 50 or less processes, and {\ct F} for larger jobs.
@@ -11554,7 +11543,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct LEVEL}                          & Integer                       & For future use                            &    & 0                \\ \hline
 {\ct MPI\_PROCESS}                   & Integer                       & Section~\ref{info:multimesh}              &    &                  \\ \hline
 {\ct MULT\_ID }                      & Character                     & Section~\ref{info:MULT}                   &    &                  \\ \hline
-{\ct N\_THREADS}                     & Integer                       & Section~\ref{info:multimesh}              &    &                  \\ \hline
 {\ct RGB}                            & Integer Triplet               & Section~\ref{info:multimesh}              &    & 0,0,0            \\ \hline
 {\ct TRNX\_ID}                       & Character                     & Section~\ref{info:TRNX}                   &    &                  \\ \hline
 {\ct TRNY\_ID}                       & Character                     & Section~\ref{info:TRNX}                   &    &                  \\ \hline
