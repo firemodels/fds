@@ -146,8 +146,6 @@ CALL READ_RADF    ; CALL CHECK_STOP_STATUS ; IF (STOP_STATUS/=NO_STOP) RETURN
 
 CLOSE (LU_INPUT)
 
-IF (MY_RANK==0 .AND. VERBOSE) WRITE(LU_ERR,'(A)') ' Input file read'
-
 ! Set QUANTITY ambient values
 
 CALL SET_QUANTITIES_AMBIENT
@@ -1810,7 +1808,10 @@ ENDIF
 
 ! Level Set parameters
 
-IF (LEVEL_SET_MODE>0) TERRAIN_CASE = .TRUE.
+IF (LEVEL_SET_MODE>0) THEN
+   TERRAIN_CASE = .TRUE.
+   NO_PRESSURE_ZONES = .TRUE.
+ENDIF
 
 SELECT CASE(LEVEL_SET_MODE)
    CASE(1)
@@ -2248,23 +2249,23 @@ ELSE
 ENDIF
 
 DT_BNDF      = -1._EB                  ; RAMP_BNDF    = 'null'
-DT_CPU       =  2._EB*(T_END-T_BEGIN)  ; RAMP_CPU     = 'null'
+DT_CPU       =  HUGE(EB)               ; RAMP_CPU     = 'null'
 DT_CTRL      = -1._EB                  ; RAMP_CTRL    = 'null'
 DT_DEVC      = -1._EB                  ; RAMP_DEVC    = 'null'
 DT_FLUSH     = -1._EB                  ; RAMP_FLUSH   = 'null'
-DT_GEOM      =  2._EB*(T_END-T_BEGIN)  ; RAMP_GEOM    = 'null'
+DT_GEOM      =  HUGE(EB)               ; RAMP_GEOM    = 'null'
 DT_HRR       = -1._EB                  ; RAMP_HRR     = 'null'
 DT_ISOF      = -1._EB                  ; RAMP_ISOF    = 'null'
 DT_MASS      = -1._EB                  ; RAMP_MASS    = 'null'
 DT_PART      = -1._EB                  ; RAMP_PART    = 'null'
-DT_PL3D      =  2._EB*(T_END-T_BEGIN)  ; RAMP_PL3D    = 'null'
+DT_PL3D      =  HUGE(EB)               ; RAMP_PL3D    = 'null'
 DT_PROF      = -1._EB                  ; RAMP_PROF    = 'null'
-DT_RADF      =  2._EB*(T_END-T_BEGIN)  ; RAMP_RADF    = 'null'
-DT_RESTART   =  2._EB*(T_END-T_BEGIN)  ; RAMP_RESTART = 'null'
+DT_RADF      =  HUGE(EB)               ; RAMP_RADF    = 'null'
+DT_RESTART   =  HUGE(EB)               ; RAMP_RESTART = 'null'
 DT_SLCF      = -1._EB                  ; RAMP_SLCF    = 'null'
 DT_SL3D      =  (T_END-T_BEGIN)/5._EB  ; RAMP_SL3D    = 'null'
 DT_SMOKE3D   = -1._EB                  ; RAMP_SMOKE3D = 'null'
-DT_UVW       =  2._EB*(T_END-T_BEGIN)  ; RAMP_UVW     = 'null'
+DT_UVW       =  HUGE(EB)               ; RAMP_UVW     = 'null'
 
 DT_DEVC_LINE = -1._EB
 T_DEVC_LINE_END=-1.E10_EB
