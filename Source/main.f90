@@ -123,6 +123,7 @@ IF (MY_RANK==0) THEN
    CALL WRITE_SUMMARY_INFO(LU_ERR)
    WRITE(LU_ERR,'(/A,A)')     ' Job TITLE        : ',TRIM(TITLE)
    WRITE(LU_ERR,'(A,A/)')     ' Job ID string    : ',TRIM(CHID)
+   IF (VERBOSE) CALL VERBOSE_PRINTOUT('Completed reading of input file')
 ENDIF
 
 ! If SOLID_HT3D=T in any mesh, then set SOLID_HT3D=T in all meshes.
