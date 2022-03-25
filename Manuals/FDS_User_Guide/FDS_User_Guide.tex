@@ -4542,12 +4542,16 @@ The pressure zone leakage approach is intended to capture the bulk leakage that 
 The first line designates a region of the computational domain to be Pressure Zone~1. Note that the order of the {\ct ZONE} lines is important; that is, the order implicitly defines Zone~1, Zone~2, etc. Zone 0 is by default the ambient pressure exterior. In this example, a leak exists between Zone~1 and the exterior Zone~0, and the area of the leak is 0.0001~m$^2$ (1 cm by 1 cm hole, for example). Zone~2 leaks to Zone~1 (and vice versa) with a leak area of 0.0002~m$^2$. Zone~2 also leaks to the outside with an area of 0.0003~m$^2$. Note that zones need not be physically connected for a leak to occur, but in each zone, except for the exterior, there must be some surface with a designated {\ct LEAK\_PATH}. Here, in Zones~1 and 2 there are surfaces defined by both {\ct 'LEAKY EXTERIOR WALL'} and {\ct 'LEAKY INTERIOR WALL'} so as to provide a surface over which to apply the leakage. Leakage is uniformly distributed over all of the solid surfaces assigned the {\ct LEAK\_PATH}. The order of the two pressure zones designated by {\ct LEAK\_PATH} is unimportant, and the solid obstructions where the leakage is applied need not form a boundary between the two zones. Note that {\ct LEAK\_PATH\_ID} can be used instead of {\ct LEAK\_PATH}. To use {\ct LEAK\_PATH\_ID} provide the {\ct ID} for the two {\ct ZONES} where specifying {\ct 'AMBIENT'} indicates Zone 0.
 
 The volume flow, $\dot{V}$, through a leak of area $A_{\rm L}$ is given by
-\be  \dot{V}_{\rm leak} = A_{\rm L} \; \hbox{sign} (\Delta p) \; \sqrt{2 \frac{ | \Delta p |}{\rho_\infty}} \ee
-where $\Delta p$ is the pressure difference between the adjacent compartments (in units of Pa) and $\rho_\infty$ is the ambient density (in units of kg/m$^3$). The discharge coefficient normally seen in this type of formula is assumed to be~1.
+\be  
+   \dot{V}_{\rm leak} = C_{\rm d} \, A_{\rm L} \; \hbox{sign} (\Delta p) \; \sqrt{2 \frac{ | \Delta p |}{\rho_\infty}}  \label{leak_formula}
+\ee
+where $C_{\rm d}$ is a discharge coefficient, $\Delta p$ is the pressure difference (Pa) between the adjacent compartments and $\rho_\infty$ is the ambient density (kg/m$^3$). The discharge coefficient normally seen in this type of formula is sometimes assumed to be~1, but you may change it.
 
-In a typical building as the interior pressure rises, the leakage area will grow as small gaps, cracks, and other leakage paths open up. Leakage tests performed according to test standards such as ASTM~E~779 provide two additional data points to quantify this behavior. These are the {\ct LEAK\_PRESSURE\_EXPONENT} and the {\ct LEAK\_REFERENCE\_PRESSURE}. The use of these additional inputs are shown in the equation below as $n$ and $\Delta p_{\rm ref}$ respectively where $A_{\rm L,ref}$ is given by {\ct LEAK\_AREA}.
-\be  A_{\rm L} = A_{\rm L,ref} \left( \frac{\Delta p}{\Delta p_{\rm ref}} \right)^{n-0.5} \ee
-By default, $n=0.5$ and $\Delta p_{\rm ref}=4$~Pa, meaning that the leak area will not change with pressure unless you specify an exponent other than 0.5.
+As the interior pressure rises in a typical building, the leakage area grows as small gaps, cracks, and other leakage paths open up. Leakage tests performed according to test standards such as ASTM~E779 provide two additional data points to quantify this behavior. These are the {\ct LEAK\_PRESSURE\_EXPONENT} and the {\ct LEAK\_REFERENCE\_PRESSURE}. The use of these additional inputs are shown in the equation below as $n$ and $\Delta p_{\rm ref}$ respectively where $A_{\rm L,ref}$ is given by {\ct LEAK\_AREA}.
+\be  
+   A_{\rm L} = A_{\rm L,ref} \left( \frac{\Delta p}{\Delta p_{\rm ref}} \right)^{n-0.5}  \label{leak_formula_2}
+\ee
+By default, $n=0.5$ and $\Delta p_{\rm ref}=4$~Pa, meaning that the leak area will not change with pressure unless you specify an exponent other than 0.5. The {\ct DISCHARGE\_COEFFICIENT} is 1 by default.
 
 The HVAC output quantities can be used to determine the leakage flows. FDS names the duct connecting Zone~A with Zone~B {\ct 'LEAK A B'} and the duct nodes {\ct 'LEAK A B'} for the Zone~A side of the leak and {\ct 'LEAK B A'} for the Zone~B side.  Note that for the duct names, FDS will use the lower numbered zone as Zone~A.
 
@@ -4556,19 +4560,18 @@ FDS is limited by default to a maximum of 200 {\ct ZONE} inputs.  This can be in
 \subsubsection{Localized Leakage}
 \label{info:local_leakage}
 
-The local leakage approach is intended to represent leakage through a specific crack. For example, a cracked open door might have a opening that is too small to resolve with the grid.  One would; however, still want to capture the fact that hot gases could escape the top of the crack and cold gases enter the bottom. The local leakage approach uses the local pressure rather than just the zone pressure. Therefore, one can define multiple leakage paths for different windows, over the height of a door, or over the height of a tall stairwell where stack effect might be important. To use this approach two {\ct VENT} inputs are linked via an {\ct HVAC} input with {\ct TYPE\_ID='LEAK'}. In the example below a 0.001 m$^2$ leakage path is created between the {\ct VENT} with {\ct ID='VENT 1'} and the {\ct VENT} with {\ct ID='VENT 2'}. Note that the {\ct SURF\_ID} for a {\ct VENT} with localized leakage is not {\ct 'HVAC'}. The input must correspond to a {\ct SURF} input. Wall heat transfer will be computed based upon the inputs on the referenced {\ct SURF} input.
+The local leakage approach is intended to represent leakage through a specific crack or for situations where the leakage is not necessarily from one sealed pressure zone to another. For example, a cracked open door might have a opening that is too small to resolve with the grid.  One would; however, still want to capture the fact that hot gases could escape the top of the crack and cold gases enter the bottom. The local leakage approach uses the local pressure rather than just the zone pressure. Therefore, one can define multiple leakage paths for different windows, over the height of a door, or over the height of a tall stairwell where stack effect might be important. To use this approach two {\ct VENT} inputs are linked via an {\ct HVAC} input with {\ct TYPE\_ID='LEAK'}. In the example below a 0.001 m$^2$ leakage path is created between the {\ct VENT} with {\ct ID='VENT 1'} and the {\ct VENT} with {\ct ID='VENT 2'}. Note that the {\ct SURF\_ID} for a {\ct VENT} with localized leakage is not {\ct 'HVAC'}. The input must correspond to a {\ct SURF} input. Wall heat transfer will be computed based upon the inputs on the referenced {\ct SURF} input.
 \begin{lstlisting}
 &VENT XB=...,SURF_ID='SURF 1',ID='VENT 1'/
 &VENT XB=...,SURF_ID='SURF 2',ID='VENT 2'/
 &HVAC ID='LEAK1',TYPE_ID='LEAK',VENT_ID='VENT 1',VENT2_ID='VENT 2',AREA=0.001/
 \end{lstlisting}
-This will create a duct with the name {\ct 'LEAK1'} whose two nodes will be named {\ct VENT\_ID} and {\ct VENT2\_ID}. If the leakage path is to connect to the ambient outside the domain, then set {\ct VENT2\_ID='AMBIENT'}. In this case the second node will be the first node name with {\ct AMB} appended (e.g. {\ct 'VENT 1 AMB'}). Note that each {\ct VENT} must lie in one pressure zone; however, it may span more than one {\ct MESH}.
+This will create a duct with the name {\ct 'LEAK1'} whose two nodes will be named {\ct VENT\_ID} and {\ct VENT2\_ID}. If the leakage path is to connect to the ambient outside the domain, then set {\ct VENT2\_ID='AMBIENT'}. In this case the second node will be the first node name with {\ct AMB} appended (e.g. {\ct 'VENT 1 AMB'}). Note that each {\ct VENT} must lie in one pressure zone; however, it may span more than one {\ct MESH}. You may add the parameters {\ct LEAK\_PRESSURE\_EXPONENT}, {\ct LEAK\_REFERENCE\_PRESSURE}, and {\ct DISCHARGE\_COEFFICIENT} to the {\ct HVAC} line, according to Eqs.~(\ref{leak_formula}) and. (\ref{leak_formula_2}).
 
 Unlike the zone leakage approach, this approach has the option to preserve the energy of the gas flowing through the leak. For example, for door crack using with pressure zone leakage, the outflowing gas at the top of the door would always be the same temperature as the outside of the door. To maintain hot gas flowing out of the leak, add {\ct LEAK\_ENTHALPY=T} to the {\ct HVAC} input. For each outflowing wall cell, this will compute the enthalpy difference between the temperature of the leak flow and the temperature of the surface and add it as a source of heat to the adjacent gas cell.  The default value is {\ct LEAK\_ENTHALPY=F}
 
 This approach also has the option of changing the flow loss by specifying {\ct LOSS} on the {\ct HVAC} input.  The default is {\ct LOSS=1}; the same as for pressure zone leakage.
 
-Note, for this approach it is not required that one have pressure zones defined; however, it is recommended to do so if different pressure zones do in fact exist in the model.
 
 \subsubsection{Example Case: door\_crack}
 \label{door_crack}
@@ -11333,6 +11336,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct DAMPER}                  & Logical       & Sections~\ref{info:HVACduct}, \ref{info:HVACdamper}                      &               & {\ct F}  \\ \hline
 {\ct DEVC\_ID}                & Character     & Sections ~\ref{info:HVACduct}, \ref{info:HVACfan}, \ref{info:HVACfilter} &               &                \\ \hline
 {\ct DIAMETER}                & Real          & Section~\ref{info:HVACduct}                                              &  m            &                \\ \hline
+{\ct DISCHARGE\_COEFFICIENT}  & Real          & Section~\ref{info:Leaks}                                                 &               & 1.             \\ \hline
 {\ct DUCT\_ID}                & Char.~Array   & Section~\ref{info:HVACnode}                                              &               &                \\ \hline
 {\ct DUCT\_INTERP\_TYPE}      & Character     & Section~\ref{info:hvacmasstransport}                                     &               & {\ct 'NODE1'}  \\ \hline
 {\ct EFFICIENCY}              & Real Array    & Sections~\ref{info:HVACfilter}, \ref{info:HVACaircoil}                   &               & 1.0            \\ \hline
@@ -11340,7 +11344,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct FILTER\_ID}              & Character     & Section~\ref{info:HVACnode}                                              &               &                \\ \hline
 {\ct FIXED\_Q}                & Real          & Section~\ref{info:HVACaircoil}                                           & kW            &                \\ \hline
 {\ct ID}                      & Character     & Section~\ref{info:HVAC}                                                  &               &                \\ \hline
-{\ct LEAK\_ENTHALPY}          & Logical       & Section~\ref{info:local_leakage}                                         &               & {\ct F}  \\ \hline
+{\ct LEAK\_ENTHALPY}          & Logical       & Section~\ref{info:local_leakage}                                         &               & {\ct F}        \\ \hline
+{\ct LEAK\_PRESSURE\_EXPONENT}& Real          & Section~\ref{info:Leaks}                                                 &               & 0.5            \\ \hline
+{\ct LEAK\_REFERENCE\_PRESSURE}& Real         & Section~\ref{info:Leaks}                                                 & Pa            & 4              \\ \hline
 {\ct LENGTH}                  & Real          & Section~\ref{info:HVACduct}                                              &  m            &                \\ \hline
 {\ct LOADING}                 & Real Array    & Section ~\ref{info:HVACfilter}                                           & kg            & 0.0            \\ \hline
 {\ct LOADING\_MULTIPLIER}     & Real Array    & Section ~\ref{info:HVACfilter}                                           & 1/kg          & 1.0            \\ \hline
@@ -12635,6 +12641,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct ZONE} (Pressure Zone Parameters)} \\
 \hline \hline
 \endhead
+{\ct DISCHARGE\_COEFFICIENT(N)}    & Real                  & Section~\ref{info:Leaks}           &        & 1.            \\ \hline
 {\ct ID}                           & Character             & Section~\ref{info:ZONE_Basics}     &        &               \\ \hline
 {\ct LEAK\_AREA(N)}                & Real                  & Section~\ref{info:Leaks}           & m$^2$  & 0             \\ \hline
 {\ct LEAK\_PRESSURE\_EXPONENT(N)}  & Real                  & Section~\ref{info:Leaks}           &        & 0.5           \\ \hline
