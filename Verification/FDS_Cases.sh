@@ -342,6 +342,7 @@ $QFDS -d HVAC leak_enthalpy.fds
 $QFDS -p 2 -d HVAC leak_test_3.fds
 $QFDS -d HVAC leak_test_4.fds
 $QFDS -d HVAC HVAC_leak_exponent.fds
+$QFDS -p 8 -d HVAC HVAC_leak_exponent_2.fds
 
 $QFDS -d Miscellaneous layer_1mesh.fds
 $QFDS -p 3 -d Miscellaneous layer_4mesh.fds

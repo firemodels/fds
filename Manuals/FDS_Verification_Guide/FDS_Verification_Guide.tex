@@ -5800,22 +5800,31 @@ The overall mass in the domain should not change. Figure~\ref{fig_zone_shape_2} 
    \label{fig_zone_shape_2}
 \end{figure}
 
+\FloatBarrier
 
 \subsection{Leak Pressure Exponent (\texorpdfstring{\textct{HVAC\_leak\_exponent}}{HVAC\_leak\_exponent})}
 \label{HVAC_leak_exponent}
+\label{HVAC_leak_exponent_2}
 
-In a typical building as the interior pressure rises, the leakage area will grow as small gaps, cracks, and other leakage paths open up. Leakage tests performed according to test standards such as ASTM~E~779 provide two additional data points to quantify this behavior. These are the {\ct LEAK\_PRESSURE\_EXPONENT} and the {\ct LEAK\_REFERENCE\_PRESSURE}. The use of these additional inputs are shown in the equation below as $n$ and $\Delta p_{\rm ref}$ respectively where $A_{\rm L,ref}$ is given by {\ct LEAK\_AREA}.
-\be  A_{\rm L} = A_{\rm L,ref} \left( \frac{\Delta p}{\Delta p_{\rm ref}} \right)^{n-0.5} \ee
-By default, $n=0.5$ and $\Delta p_{\rm ref}=4$~Pa, meaning that the leak area will not change with pressure unless you specify an exponent other than 0.5.
+As the interior pressure rises in a typical building, the leakage area will grow as small gaps, cracks, and other leakage paths open up. Leakage tests performed according to test standards such as ASTM~E779 provide two additional data points to quantify this behavior. These are the {\ct LEAK\_PRESSURE\_EXPONENT} and the {\ct LEAK\_REFERENCE\_PRESSURE}. The use of these additional inputs are shown in the equation below as $n$ and $\Delta p_{\rm ref}$ respectively where $A_{\rm L,ref}$ is given by {\ct LEAK\_AREA}. Additionally, a discharge coefficient, $C_{\rm d}$, is often applied in practice.
+\be  
+   \dot{V}_{\rm L} = C_{\rm d} \, A_{\rm L,ref} \left( \frac{|\Delta p|}{\Delta p_{\rm ref}} \right)^{n-0.5}  \sqrt{\frac{2 |\Delta p|}{\rho_0}}
+\ee
+By default, $C_{\rm d}=1$, $n=0.5$ and $\Delta p_{\rm ref}=4$~Pa, meaning that the leak area will not change with pressure unless you specify an exponent other than 0.5.
 
-This verification case has three 1000~m$^3$ compartments have 0.01~m$^2$ of leakage to the ambient. Each compartment is supplied with 0.16~$m^3/s$ of inlet flow. The first compartment has the default values for the exponent and reference pressure, the second changes the exponent to 0.6, and the third third changes exponent and the reference pressure respectively to 0.6 and 10~Pa. The expected leakage velocities for these conditions are 160~m/s, 11.8~m/s, and 12.8~m/s. Note in Figure \ref{leak_exponent_fig} the velocities are negative as the FDS output for the leakage velocity is from the lower numbered pressure zone (in this case ambient) to the higher number (inside the compartment). Negative velocity indicates flow from inside to outside as expected.
+The first verification case involves three 1000~m$^3$ compartments that have 0.01~m$^2$ of leakage to the ambient. Each compartment is supplied with 0.16~m$^3$/s of inlet flow. The first compartment has the default values for the exponent and reference pressure, the second changes the exponent to 0.6, and the third third changes exponent and the reference pressure respectively to 0.6 and 10~Pa. The expected leakage velocities for these conditions are 160~m/s, 11.8~m/s, and 12.8~m/s. Note in the left plot of Fig.~\ref{leak_exponent_fig} that the velocities are negative because the FDS output for the leakage velocity is from the lower numbered pressure zone (in this case ambient) to the higher number (inside the compartment). Negative velocity indicates flow from inside to outside as expected.
+
+The second case involves a steel enclosure with four localized leaks, two near the bottom and two near the top. The air flow into the compartment is ramped up slowly, and the right hand plot of Fig.~\ref{leak_exponent_fig} shows the ideal and predicted relationship between the volume flow and compartment pressure. In this case, $C_{\rm d}=0.61$, $n=0.6$, $\Delta p_{\rm ref}=1$~Pa, and $A_{\rm L,ref}=0.18$ at each of the four ``cracks.''
 
 \begin{figure}[ht]
-	\centering
-	\includegraphics[height=2.2in]{SCRIPT_FIGURES/HVAC_leak_exponent}
-	\caption[The \textct{HVAC\_leak\_exponent} case]{Velocities through leakage with varying \textct{LEAK\_PRESSURE\_EXPONENT} and \textct{LEAK\_REFERENCE\_PRESSURE}}
-	\label{leak_exponent_fig}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/HVAC_leak_exponent}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/HVAC_leak_exponent_2}
+\caption[The \textct{HVAC\_leak\_exponent} cases]{(Left) Leakage velocities resulting from varying \textct{LEAK\_PRESSURE\_EXPONENT} and \textct{LEAK\_REFERENCE\_PRESSURE}. (Right) Volume flow versus pressure for a leaking steel enclosure.}
+\label{leak_exponent_fig}
 \end{figure}
+
+\FloatBarrier
+
 
 \section{ASHRAE Sample Problem 7\\(\texorpdfstring{\textct{ashrae\_7\_fixed\_flow}}{ashrae\_7\_fixed\_flow}, \texorpdfstring{\textct{ashrae\_7\_quadratic}}{ashrae\_7\_quadratic}, \texorpdfstring{\textct{ashrae\_7\_table}}{ashrae\_7\_table})}
 \label{ashrae7}
