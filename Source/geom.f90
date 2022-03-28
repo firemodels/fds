@@ -119,6 +119,9 @@ INTEGER, PARAMETER :: NODS_VLEL = 4 ! Nodes of volume element (tetrahedra).
 INTEGER, PARAMETER :: LINSEARCH_LIMIT = 13  ! LINSEARCH_LIMIT-1 is the maximum size of array for linear search O(n). If
                                             ! Array larger -> binary search O(log(n)).
 
+TYPE(IBM_CUTCELL_TYPE), POINTER :: CC=>NULL()
+!TYPE(IBM_CUTFACE_TYPE), POINTER :: CF=>NULL()
+
 ! Auxiliary variables:
 TYPE(IBM_EDGECROSS_TYPE), ALLOCATABLE, DIMENSION(:) :: EDGE_CROSS_AUX
 TYPE(IBM_CUTEDGE_TYPE),   ALLOCATABLE, DIMENSION(:) :: CUT_EDGE_AUX
@@ -890,7 +893,7 @@ DEBUG_SET_CUTCELLS_COND : IF (DEBUG_SET_CUTCELLS) THEN
    ENDDO GEOM_LOOP
 ENDIF DEBUG_SET_CUTCELLS_COND
 
-! Select MESHES assigned to processor and OMESHES of these. Cut-cells will be computed for all of them. Done in GET_GEOM_TRIBIN
+! Select MESHES assigned to MY_RANK and OMESHES of these. Cut-cells computed for all of them. Done in GET_GEOM_TRIBIN
 
 IF (GET_CUTCELLS_VERBOSE) THEN
    NMESH_CC=0
@@ -1446,8 +1449,6 @@ MAIN_MESH_LOOP : DO NM=1,NMESHES
 
    ENDIF SNAP_IF
 
-   CALL GET_CCREGION_FACE_CELL_LIST_INFO(NM)
-
    ! Case of terrain, populate GEOM_ZMAX:
    IF (TERRAIN_CASE) THEN
       IF(ALLOCATED(MESHES(NM)%GEOM_ZMAX)) DEALLOCATE(MESHES(NM)%GEOM_ZMAX)
@@ -1462,6 +1463,8 @@ MAIN_MESH_LOOP : DO NM=1,NMESHES
    ENDIF
 
    IF(CC_CART_VOLAREA) CALL CC_SET_CARTESIAN_VOLAREA(NM)
+
+   CALL GET_CCREGION_FACE_CELL_LIST_INFO(NM)
 
    ! Block cut-cells whose volume factor is less than MIN_VOL_FACTOR:
    ! CALL BLOCK_SMALL_CUTCELLS(NM)
@@ -1565,21 +1568,19 @@ MAIN_MESH_LOOP : DO NM=1,NMESHES
    ENDIF
 
    ! Compute cut-face apertures for gasphase cut-faces:
-   IF (PROCESS(NM)==MY_RANK) THEN
-      DO ICF=1,MESHES(NM)%N_CUTFACE_MESH
-         IF(MESHES(NM)%CUT_FACE(ICF)%STATUS /= IBM_GASPHASE) CYCLE
-         NFACE  = MESHES(NM)%CUT_FACE(ICF)%NFACE
-         I      = MESHES(NM)%CUT_FACE(ICF)%IJK(IAXIS)
-         J      = MESHES(NM)%CUT_FACE(ICF)%IJK(JAXIS)
-         K      = MESHES(NM)%CUT_FACE(ICF)%IJK(KAXIS)
-         X1AXIS = MESHES(NM)%CUT_FACE(ICF)%IJK(KAXIS+1)
-         SELECT CASE(X1AXIS)
-         CASE(IAXIS); MESHES(NM)%CUT_FACE(ICF)%ALPHA_CF = SUM(MESHES(NM)%CUT_FACE(ICF)%AREA(1:NFACE))/(DY(J)*DZ(K))
-         CASE(JAXIS); MESHES(NM)%CUT_FACE(ICF)%ALPHA_CF = SUM(MESHES(NM)%CUT_FACE(ICF)%AREA(1:NFACE))/(DZ(K)*DX(I))
-         CASE(KAXIS); MESHES(NM)%CUT_FACE(ICF)%ALPHA_CF = SUM(MESHES(NM)%CUT_FACE(ICF)%AREA(1:NFACE))/(DX(I)*DY(J))
-         END SELECT
-      ENDDO
-   ENDIF
+   DO ICF=1,MESHES(NM)%N_CUTFACE_MESH
+      IF(MESHES(NM)%CUT_FACE(ICF)%STATUS /= IBM_GASPHASE) CYCLE
+      NFACE  = MESHES(NM)%CUT_FACE(ICF)%NFACE
+      I      = MESHES(NM)%CUT_FACE(ICF)%IJK(IAXIS)
+      J      = MESHES(NM)%CUT_FACE(ICF)%IJK(JAXIS)
+      K      = MESHES(NM)%CUT_FACE(ICF)%IJK(KAXIS)
+      X1AXIS = MESHES(NM)%CUT_FACE(ICF)%IJK(KAXIS+1)
+      SELECT CASE(X1AXIS)
+      CASE(IAXIS); MESHES(NM)%CUT_FACE(ICF)%ALPHA_CF = SUM(MESHES(NM)%CUT_FACE(ICF)%AREA(1:NFACE))/(DY(J)*DZ(K))
+      CASE(JAXIS); MESHES(NM)%CUT_FACE(ICF)%ALPHA_CF = SUM(MESHES(NM)%CUT_FACE(ICF)%AREA(1:NFACE))/(DZ(K)*DX(I))
+      CASE(KAXIS); MESHES(NM)%CUT_FACE(ICF)%ALPHA_CF = SUM(MESHES(NM)%CUT_FACE(ICF)%AREA(1:NFACE))/(DX(I)*DY(J))
+      END SELECT
+   ENDDO
 
    ! Face centered positions and cell sizes:
    IF (ALLOCATED(XFACE)) DEALLOCATE(XFACE)
@@ -1979,10 +1980,12 @@ CUT_CELL_LOOP : DO ICC=1,M%N_CUTCELL_MESH+M%N_GCCUTCELL_MESH
                M%CUT_FACE(ICF1)%CELL_LIST(IAXIS:KAXIS+1,HIGH_IND,ICF2) = &
                                    (/ IBM_FTYPE_CFGAS,     ICC,     JCC,     IFC  /)
                                    !  Cut-cell   CUT_CELL(icc),CCELEM(jcc,:) is cut vol.
+               M%CUT_FACE(ICF1)%XCENHIGH(IAXIS:KAXIS,ICF2) = M%CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,JCC)
             ELSE ! HIGH
                M%CUT_FACE(ICF1)%CELL_LIST(IAXIS:KAXIS+1,LOW_IND,ICF2) = &
                                    (/ IBM_FTYPE_CFGAS,     ICC,     JCC,     IFC  /)
                                    !  Cut-cell   CUT_CELL(icc),CCELEM(jcc,:) is cut vol.
+               M%CUT_FACE(ICF1)%XCENLOW(IAXIS:KAXIS,ICF2)  = M%CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,JCC)
             ENDIF
          CASE(IBM_FTYPE_CFINB) ! INBOUNDARY cut-face:
              ICF1    = M%CUT_CELL(ICC)%FACE_LIST(4,IFACE)
@@ -1991,6 +1994,7 @@ CUT_CELL_LOOP : DO ICC=1,M%N_CUTCELL_MESH+M%N_GCCUTCELL_MESH
              M%CUT_FACE(ICF1)%CELL_LIST(IAXIS:KAXIS+1,LOW_IND,ICF2) = &
                                  (/ IBM_FTYPE_CFGAS,     ICC,     JCC,     IFC  /)
                                  !  Cut-cell   CUT_CELL(icc),CCELEM(jcc,:) is cut vol.
+             M%CUT_FACE(ICF1)%XCENLOW(IAXIS:KAXIS,ICF2)  = M%CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,JCC)
          END SELECT
       ENDDO
    ENDDO
@@ -4626,21 +4630,22 @@ LINK_LOOP : DO ! Cut-cell linking loop for small cells. -> Algo defined by CCVOL
 
    IF (LINK_ITER==0) THEN
    ICC_LOOP_1 : DO ICC=1,M%N_CUTCELL_MESH
-      I = M%CUT_CELL(ICC)%IJK(IAXIS); J = M%CUT_CELL(ICC)%IJK(JAXIS); K = M%CUT_CELL(ICC)%IJK(KAXIS)
+      CC => M%CUT_CELL(ICC); I = CC%IJK(IAXIS); J = CC%IJK(JAXIS); K = CC%IJK(KAXIS)
       IF (M%SOLID(M%CELL_INDEX(I,J,K))) CYCLE
       CCVOL_THRES = CCVOL_LINK * (M%DX(I)*M%DY(J)*M%DZ(K))
 
-      JCC_LOOP_1 : DO JCC=1,M%CUT_CELL(ICC)%NCELL
-         IF ( M%CUT_CELL(ICC)%UNKZ(JCC) > 0 ) CYCLE
+      JCC_LOOP_1 : DO JCC=1,CC%NCELL
+         IF ( CC%UNKZ(JCC) > 0 ) CYCLE
          CRTCELL_FLG = .FALSE.
-
+         VAL_UNKZ = IBM_UNDEFINED
+         VAL_CVOL = CCVOL_THRES
          ! Find area averaged body surface normal:
          NRML(IAXIS:KAXIS) = 0._EB; AREA = 0._EB
-         DO IFC=1,M%CUT_CELL(ICC)%CCELEM(1,JCC)
-            IFACE   = M%CUT_CELL(ICC)%CCELEM(IFC+1,JCC)
-            IF(M%CUT_CELL(ICC)%FACE_LIST(1,IFACE)/=IBM_FTYPE_CFINB) CYCLE
-            IFC2    = M%CUT_CELL(ICC)%FACE_LIST(4,IFACE)
-            IFACE2  = M%CUT_CELL(ICC)%FACE_LIST(5,IFACE)
+         DO IFC=1,CC%CCELEM(1,JCC)
+            IFACE   = CC%CCELEM(IFC+1,JCC)
+            IF(CC%FACE_LIST(1,IFACE)/=IBM_FTYPE_CFINB) CYCLE
+            IFC2    = CC%FACE_LIST(4,IFACE)
+            IFACE2  = CC%FACE_LIST(5,IFACE)
             IBOD    = M%CUT_FACE(IFC2)%BODTRI(1,IFACE2)
             IWSEL   = M%CUT_FACE(IFC2)%BODTRI(2,IFACE2)
             AF      = M%CUT_FACE(IFC2)%AREA(    IFACE2)
@@ -4649,8 +4654,6 @@ LINK_LOOP : DO ! Cut-cell linking loop for small cells. -> Algo defined by CCVOL
          ENDDO
 
          ! With the surface normal search for a Regular Gasphase face in that direction.
-         VAL_UNKZ = IBM_UNDEFINED
-         VAL_CVOL = CCVOL_THRES
          AREA_IF_1 : IF (AREA > TWO_EPSILON_EB) THEN
             MASK(IAXIS:KAXIS) = .TRUE.
             INRM(1) = MAXLOC(ABS(NRML(IAXIS:KAXIS)),MASK=MASK,DIM=1); MASK(INRM(1))=.FALSE.
@@ -4658,11 +4661,11 @@ LINK_LOOP : DO ! Cut-cell linking loop for small cells. -> Algo defined by CCVOL
             INRM(3) = MAXLOC(ABS(NRML(IAXIS:KAXIS)),MASK=MASK,DIM=1)
             AXIS_LOOP_1 : DO DUM=IAXIS,KAXIS
                X1AXIS=INRM(DUM)
-               IFC_LOOP_1 : DO IFC=1,M%CUT_CELL(ICC)%CCELEM(1,JCC)
-                  IFACE   = M%CUT_CELL(ICC)%CCELEM(IFC+1,JCC)
-                  ILH     = 2*M%CUT_CELL(ICC)%FACE_LIST(2,IFACE) - 3 ! -1 for LOW_IND, 1 for HIGH_IND
-                  IF( (X1AXIS /= M%CUT_CELL(ICC)%FACE_LIST(3,IFACE)) .OR. &
-                      (M%CUT_CELL(ICC)%FACE_LIST(1,IFACE) /= IBM_FTYPE_RGGAS) .OR. &
+               IFC_LOOP_1 : DO IFC=1,CC%CCELEM(1,JCC)
+                  IFACE   = CC%CCELEM(IFC+1,JCC)
+                  ILH     = 2*CC%FACE_LIST(2,IFACE) - 3 ! -1 for LOW_IND, 1 for HIGH_IND
+                  IF( (X1AXIS /= CC%FACE_LIST(3,IFACE)) .OR. &
+                      (CC%FACE_LIST(1,IFACE) /= IBM_FTYPE_RGGAS) .OR. &
                       (ILH /= INT(SIGN(1._EB,NRML(X1AXIS)))) ) CYCLE IFC_LOOP_1
                   SELECT CASE(X1AXIS)
                   CASE(IAXIS)
@@ -4692,11 +4695,11 @@ LINK_LOOP : DO ! Cut-cell linking loop for small cells. -> Algo defined by CCVOL
          ! If not successful try any Regular Gasphase face.
          ! Small cells, get IBM_UNKZ from a large cell neighbor:
          IF (.NOT. CRTCELL_FLG) THEN
-            IFC_LOOP_2 : DO IFC=1,M%CUT_CELL(ICC)%CCELEM(1,JCC)
-               IFACE   = M%CUT_CELL(ICC)%CCELEM(IFC+1,JCC)
-               ILH     = 2*M%CUT_CELL(ICC)%FACE_LIST(2,IFACE) - 3
-               IF(M%CUT_CELL(ICC)%FACE_LIST(1,IFACE)/=IBM_FTYPE_RGGAS) CYCLE IFC_LOOP_2
-               X1AXIS  = M%CUT_CELL(ICC)%FACE_LIST(3,IFACE)
+            IFC_LOOP_2 : DO IFC=1,CC%CCELEM(1,JCC)
+               IFACE   = CC%CCELEM(IFC+1,JCC)
+               ILH     = 2*CC%FACE_LIST(2,IFACE) - 3
+               IF(CC%FACE_LIST(1,IFACE)/=IBM_FTYPE_RGGAS) CYCLE IFC_LOOP_2
+               X1AXIS  = CC%FACE_LIST(3,IFACE)
                SELECT CASE(X1AXIS)
                CASE(IAXIS)
                   I_LNK = I+ILH; J_LNK = J; K_LNK = K
@@ -4721,10 +4724,10 @@ LINK_LOOP : DO ! Cut-cell linking loop for small cells. -> Algo defined by CCVOL
             ENDDO IFC_LOOP_2
          ENDIF
          IF (VAL_UNKZ>0) THEN
-            M%CUT_CELL(ICC)%FACE_LIST(6,IFACE)      = INTEGER_ONE ! This face is shared with master.
-            M%CUT_CELL(ICC)%UNKZ(JCC) = VAL_UNKZ     !(/    Cell Type,     I,     J,     K, JCC_LNK /)
-            M%CUT_CELL(ICC)%IJK_LINK(1:KAXIS+2,JCC) = (/ IBM_GASPHASE, I_LNK, J_LNK, K_LNK,       0 /)
-            M%CUT_CELL(ICC)%LINK_LEV(JCC)           = -1 ! One link hierarchy level below regular cells (at LNK_LEV=0).
+            CC%FACE_LIST(6,IFACE)      = INTEGER_ONE ! This face is shared with master.
+            CC%UNKZ(JCC) = VAL_UNKZ     !(/    Cell Type,     I,     J,     K, JCC_LNK /)
+            CC%IJK_LINK(1:KAXIS+2,JCC) = (/ IBM_GASPHASE, I_LNK, J_LNK, K_LNK,       0 /)
+            CC%LINK_LEV(JCC)           = -1 ! One link hierarchy level below regular cells (at LNK_LEV=0).
          ENDIF
       ENDDO JCC_LOOP_1
    ENDDO ICC_LOOP_1
@@ -4733,22 +4736,22 @@ LINK_LOOP : DO ! Cut-cell linking loop for small cells. -> Algo defined by CCVOL
 
    ! Then attempt to connect to large cut-cells, or already connected small cells (CUT_CELL(ICC)%UNKZ(JCC) > 0):
    ICC_LOOP_2 : DO ICC=1,M%N_CUTCELL_MESH
-      I = M%CUT_CELL(ICC)%IJK(IAXIS); J = M%CUT_CELL(ICC)%IJK(JAXIS); K = M%CUT_CELL(ICC)%IJK(KAXIS)
+      CC => M%CUT_CELL(ICC); I = CC%IJK(IAXIS); J = CC%IJK(JAXIS); K = CC%IJK(KAXIS)
       IF (M%SOLID(M%CELL_INDEX(I,J,K))) CYCLE
       CCVOL_THRES = CCVOL_LINK * (M%DX(I)*M%DY(J)*M%DZ(K))
 
-      JCC_LOOP_2 : DO JCC=1,M%CUT_CELL(ICC)%NCELL
-         IF ( M%CUT_CELL(ICC)%UNKZ(JCC) > 0 ) CYCLE
+      JCC_LOOP_2 : DO JCC=1,CC%NCELL
+         IF ( CC%UNKZ(JCC) > 0 ) CYCLE
          VAL_UNKZ = IBM_UNDEFINED
          VAL_CVOL = -GEOMEPS
 
          ! Find area averaged body surface normal:
          NRML(IAXIS:KAXIS) = 0._EB; AREA = 0._EB
-         DO IFC=1,M%CUT_CELL(ICC)%CCELEM(1,JCC)
-            IFACE   = M%CUT_CELL(ICC)%CCELEM(IFC+1,JCC)
-            IF(M%CUT_CELL(ICC)%FACE_LIST(1,IFACE)/=IBM_FTYPE_CFINB) CYCLE
-            IFC2    = M%CUT_CELL(ICC)%FACE_LIST(4,IFACE)
-            IFACE2  = M%CUT_CELL(ICC)%FACE_LIST(5,IFACE)
+         DO IFC=1,CC%CCELEM(1,JCC)
+            IFACE   = CC%CCELEM(IFC+1,JCC)
+            IF(CC%FACE_LIST(1,IFACE)/=IBM_FTYPE_CFINB) CYCLE
+            IFC2    = CC%FACE_LIST(4,IFACE)
+            IFACE2  = CC%FACE_LIST(5,IFACE)
             IBOD    = M%CUT_FACE(IFC2)%BODTRI(1,IFACE2)
             IWSEL   = M%CUT_FACE(IFC2)%BODTRI(2,IFACE2)
             AF      = M%CUT_FACE(IFC2)%AREA(    IFACE2)
@@ -4763,12 +4766,12 @@ LINK_LOOP : DO ! Cut-cell linking loop for small cells. -> Algo defined by CCVOL
             INRM(3) = MAXLOC(ABS(NRML(IAXIS:KAXIS)),MASK=MASK,DIM=1)
             AXIS_LOOP_2 : DO DUM=IAXIS,KAXIS
                X1AXIS=INRM(DUM)
-               IFC_LOOP_3 : DO IFC=1,M%CUT_CELL(ICC)%CCELEM(1,JCC)
-                  IFACE   = M%CUT_CELL(ICC)%CCELEM(IFC+1,JCC)
-                  IF((M%CUT_CELL(ICC)%FACE_LIST(1,IFACE)==IBM_FTYPE_CFINB) .OR. &
-                     (M%CUT_CELL(ICC)%FACE_LIST(1,IFACE)==IBM_FTYPE_SVERT)) CYCLE IFC_LOOP_3
-                  ILH     = 2*M%CUT_CELL(ICC)%FACE_LIST(2,IFACE) - 3 ! -1 for LOW_IND, 1 for HIGH_IND
-                  IF( (X1AXIS /= M%CUT_CELL(ICC)%FACE_LIST(3,IFACE)) .OR. &
+               IFC_LOOP_3 : DO IFC=1,CC%CCELEM(1,JCC)
+                  IFACE   = CC%CCELEM(IFC+1,JCC)
+                  IF((CC%FACE_LIST(1,IFACE)==IBM_FTYPE_CFINB) .OR. &
+                     (CC%FACE_LIST(1,IFACE)==IBM_FTYPE_SVERT)) CYCLE IFC_LOOP_3
+                  ILH     = 2*CC%FACE_LIST(2,IFACE) - 3 ! -1 for LOW_IND, 1 for HIGH_IND
+                  IF( (X1AXIS /= CC%FACE_LIST(3,IFACE)) .OR. &
                       (ILH /= INT(SIGN(1._EB,NRML(X1AXIS)))) ) CYCLE IFC_LOOP_3
                   SELECT CASE(X1AXIS)
                   CASE(IAXIS)
@@ -4778,7 +4781,7 @@ LINK_LOOP : DO ! Cut-cell linking loop for small cells. -> Algo defined by CCVOL
                   CASE(KAXIS)
                      IF( (K+ILH < 1) .OR. (K+ILH > M%KBAR) ) CYCLE IFC_LOOP_3
                   END SELECT
-                  SELECT CASE(M%CUT_CELL(ICC)%FACE_LIST(1,IFACE)) ! 1. Check if a surrounding cell is a regular cell:
+                  SELECT CASE(CC%FACE_LIST(1,IFACE)) ! 1. Check if a surrounding cell is a regular cell:
                   CASE(IBM_FTYPE_RGGAS) ! REGULAR GASPHASE
                      SELECT CASE(X1AXIS)
                      CASE(IAXIS)
@@ -4810,10 +4813,10 @@ LINK_LOOP : DO ! Cut-cell linking loop for small cells. -> Algo defined by CCVOL
                         ENDIF
                      END SELECT
                   CASE(IBM_FTYPE_CFGAS) ! 2. Check for large surrounding cut-cells:
-                     IFC2    = M%CUT_CELL(ICC)%FACE_LIST(4,IFACE)
-                     IFACE2  = M%CUT_CELL(ICC)%FACE_LIST(5,IFACE)
-                     ICC2    = M%CUT_FACE(IFC2)%CELL_LIST(2,M%CUT_CELL(ICC)%FACE_LIST(2,IFACE),IFACE2)
-                     JCC2    = M%CUT_FACE(IFC2)%CELL_LIST(3,M%CUT_CELL(ICC)%FACE_LIST(2,IFACE),IFACE2)
+                     IFC2    = CC%FACE_LIST(4,IFACE)
+                     IFACE2  = CC%FACE_LIST(5,IFACE)
+                     ICC2    = M%CUT_FACE(IFC2)%CELL_LIST(2,CC%FACE_LIST(2,IFACE),IFACE2)
+                     JCC2    = M%CUT_FACE(IFC2)%CELL_LIST(3,CC%FACE_LIST(2,IFACE),IFACE2)
                      IF (M%CUT_CELL(ICC2)%UNKZ(JCC2)<1) CYCLE IFC_LOOP_3
                      IF (M%CUT_CELL(ICC2)%LINK_LEV(JCC2)/=LINK_LEV_UP)CYCLE IFC_LOOP_3
                      I_LNK    = M%CUT_CELL(ICC2)%IJK(IAXIS); J_LNK   = M%CUT_CELL(ICC2)%IJK(JAXIS);
@@ -4823,25 +4826,25 @@ LINK_LOOP : DO ! Cut-cell linking loop for small cells. -> Algo defined by CCVOL
                ENDDO IFC_LOOP_3
             ENDDO AXIS_LOOP_2
             IF (VAL_UNKZ > 0) THEN
-               M%CUT_CELL(ICC)%FACE_LIST(6,IFACE)      = INTEGER_ONE ! This face is shared with master.
-               M%CUT_CELL(ICC)%UNKZ(JCC)               = VAL_UNKZ
-               M%CUT_CELL(ICC)%IJK_LINK(1:KAXIS+2,JCC) = (/ IBM_CUTCFE, I_LNK, J_LNK, K_LNK, JCC_LNK /)
-               M%CUT_CELL(ICC)%LINK_LEV(JCC)           = LNK_LEV-1 ! One link hierarchy level below master cell.
+               CC%FACE_LIST(6,IFACE)      = INTEGER_ONE ! This face is shared with master.
+               CC%UNKZ(JCC)               = VAL_UNKZ
+               CC%IJK_LINK(1:KAXIS+2,JCC) = (/ IBM_CUTCFE, I_LNK, J_LNK, K_LNK, JCC_LNK /)
+               CC%LINK_LEV(JCC)           = LNK_LEV-1 ! One link hierarchy level below master cell.
                CYCLE JCC_LOOP_2
             ENDIF
          ENDIF AREA_IF_2
 
          ! Small cells, get IBM_UNKZ from a large cell neighbor:
          IFACE3 = IBM_UNDEFINED
-         IFC_LOOP_4 : DO IFC=1,M%CUT_CELL(ICC)%CCELEM(1,JCC)
-            IFACE   = M%CUT_CELL(ICC)%CCELEM(IFC+1,JCC)
-            IF((M%CUT_CELL(ICC)%FACE_LIST(1,IFACE)==IBM_FTYPE_CFINB) .OR. &
-               (M%CUT_CELL(ICC)%FACE_LIST(1,IFACE)==IBM_FTYPE_SVERT)) CYCLE IFC_LOOP_4
-            ILH     = 2*M%CUT_CELL(ICC)%FACE_LIST(2,IFACE) - 3 ! -1 for LOW_IND, 1 for HIGH_IND
+         IFC_LOOP_4 : DO IFC=1,CC%CCELEM(1,JCC)
+            IFACE   = CC%CCELEM(IFC+1,JCC)
+            IF((CC%FACE_LIST(1,IFACE)==IBM_FTYPE_CFINB) .OR. &
+               (CC%FACE_LIST(1,IFACE)==IBM_FTYPE_SVERT)) CYCLE IFC_LOOP_4
+            ILH     = 2*CC%FACE_LIST(2,IFACE) - 3 ! -1 for LOW_IND, 1 for HIGH_IND
 
             ! Cycle if surrounding cell is located in the guard-cell region, if so drop, as we don't have
             ! at this point unknown numbers on guard-cells/guard-cell ccs:
-            X1AXIS  = M%CUT_CELL(ICC)%FACE_LIST(3,IFACE)
+            X1AXIS  = CC%FACE_LIST(3,IFACE)
             SELECT CASE(X1AXIS)
             CASE(IAXIS)
                IF( (I+ILH < 1) .OR. (I+ILH > M%IBAR) ) CYCLE IFC_LOOP_4
@@ -4851,7 +4854,7 @@ LINK_LOOP : DO ! Cut-cell linking loop for small cells. -> Algo defined by CCVOL
                IF( (K+ILH < 1) .OR. (K+ILH > M%KBAR) ) CYCLE IFC_LOOP_4
             END SELECT
 
-            SELECT CASE(M%CUT_CELL(ICC)%FACE_LIST(1,IFACE)) ! 1. Check if a surrounding cell is a regular cell:
+            SELECT CASE(CC%FACE_LIST(1,IFACE)) ! 1. Check if a surrounding cell is a regular cell:
             CASE(IBM_FTYPE_RGGAS) ! REGULAR GASPHASE
                SELECT CASE(X1AXIS)
                CASE(IAXIS)
@@ -4886,10 +4889,10 @@ LINK_LOOP : DO ! Cut-cell linking loop for small cells. -> Algo defined by CCVOL
                   ENDIF
                END SELECT
             CASE(IBM_FTYPE_CFGAS) ! 2. Check for large surrounding cut-cells:
-               IFC2    = M%CUT_CELL(ICC)%FACE_LIST(4,IFACE)
-               IFACE2  = M%CUT_CELL(ICC)%FACE_LIST(5,IFACE)
-               ICC2    = M%CUT_FACE(IFC2)%CELL_LIST(2,M%CUT_CELL(ICC)%FACE_LIST(2,IFACE),IFACE2)
-               JCC2    = M%CUT_FACE(IFC2)%CELL_LIST(3,M%CUT_CELL(ICC)%FACE_LIST(2,IFACE),IFACE2)
+               IFC2    = CC%FACE_LIST(4,IFACE)
+               IFACE2  = CC%FACE_LIST(5,IFACE)
+               ICC2    = M%CUT_FACE(IFC2)%CELL_LIST(2,CC%FACE_LIST(2,IFACE),IFACE2)
+               JCC2    = M%CUT_FACE(IFC2)%CELL_LIST(3,CC%FACE_LIST(2,IFACE),IFACE2)
                IF(M%CUT_CELL(ICC2)%VOLUME(JCC2)<VAL_CVOL .OR. M%CUT_CELL(ICC2)%UNKZ(JCC2)<1) CYCLE IFC_LOOP_4
                IF(M%CUT_CELL(ICC2)%LINK_LEV(JCC2)/=LINK_LEV_UP)CYCLE IFC_LOOP_4
                I_LNK=M%CUT_CELL(ICC2)%IJK(IAXIS); J_LNK=M%CUT_CELL(ICC2)%IJK(JAXIS); K_LNK=M%CUT_CELL(ICC2)%IJK(KAXIS)
@@ -4901,10 +4904,10 @@ LINK_LOOP : DO ! Cut-cell linking loop for small cells. -> Algo defined by CCVOL
          ! This small cut-cell still has an undefined unknown, redo link-loop to test for updated unknown number on
          ! neighbors:
          IF (VAL_UNKZ > 0) THEN
-            M%CUT_CELL(ICC)%FACE_LIST(6,IFACE3)     = INTEGER_ONE ! This face is shared with master.
-            M%CUT_CELL(ICC)%UNKZ(JCC)               = VAL_UNKZ
-            M%CUT_CELL(ICC)%IJK_LINK(1:KAXIS+2,JCC) = (/ IBM_CUTCFE, I_LNK, J_LNK, K_LNK, JCC_LNK /)
-            M%CUT_CELL(ICC)%LINK_LEV(JCC)           = LNK_LEV-1 ! One link hierarchy level below master cell.
+            CC%FACE_LIST(6,IFACE3)     = INTEGER_ONE ! This face is shared with master.
+            CC%UNKZ(JCC)               = VAL_UNKZ
+            CC%IJK_LINK(1:KAXIS+2,JCC) = (/ IBM_CUTCFE, I_LNK, J_LNK, K_LNK, JCC_LNK /)
+            CC%LINK_LEV(JCC)           = LNK_LEV-1 ! One link hierarchy level below master cell.
          ELSE
             QUITLINK_FLG = .FALSE.
          ENDIF
@@ -4914,21 +4917,18 @@ LINK_LOOP : DO ! Cut-cell linking loop for small cells. -> Algo defined by CCVOL
    ! Then fuse cut-cell unknowns if several ccs in one Cartesian cell and one of them has CUT_CELL(ICC)%UNKZ(JCC)>0:
    IF(.NOT. CC_UNSTRUCTURED_PROJECTION) THEN
       DO ICC=1,M%N_CUTCELL_MESH
-         I = M%CUT_CELL(ICC)%IJK(IAXIS); J = M%CUT_CELL(ICC)%IJK(JAXIS); K = M%CUT_CELL(ICC)%IJK(KAXIS)
+         CC => M%CUT_CELL(ICC); I = CC%IJK(IAXIS); J = CC%IJK(JAXIS); K = CC%IJK(KAXIS)
          ! Don't attempt to link cut-cells inside an OBST:
-         IF (M%SOLID(M%CELL_INDEX(I,J,K))) CYCLE
-         ! For cases with more than one cut-cell, define UNKZ of all cells to be the one of first cut-cell
-         ! with UNKZ > 0:
-         DO JCC=1,M%CUT_CELL(ICC)%NCELL
-            IF ( M%CUT_CELL(ICC)%UNKZ(JCC) > 0 ) EXIT
-         ENDDO
+         IF ( M%SOLID(M%CELL_INDEX(I,J,K)) .OR. ALL(CC%UNKZ(1:CC%NCELL)>0) ) CYCLE
+         ! Cases with more than one cut-cell: define UNKZ of all cells to be the one of first cut-cell with UNKZ > 0:
+         DO JCC=1,CC%NCELL; IF(CC%UNKZ(JCC)>0) EXIT; ENDDO
          JCC_LNK = JCC
-         IF (JCC_LNK <= M%CUT_CELL(ICC)%NCELL) THEN
-            DO JCC=1,M%CUT_CELL(ICC)%NCELL
+         IF (JCC_LNK <= CC%NCELL) THEN
+            DO JCC=1,CC%NCELL
                IF(JCC==JCC_LNK) CYCLE
-               M%CUT_CELL(ICC)%UNKZ(JCC)               = M%CUT_CELL(ICC)%UNKZ(JCC_LNK)
-               M%CUT_CELL(ICC)%IJK_LINK(1:KAXIS+2,JCC) = (/ IBM_CUTCFE, I, J, K, JCC_LNK /)
-               M%CUT_CELL(ICC)%LINK_LEV(JCC)           = M%CUT_CELL(ICC)%LINK_LEV(JCC_LNK) - 1
+               CC%UNKZ(JCC)               = CC%UNKZ(JCC_LNK)
+               CC%IJK_LINK(1:KAXIS+2,JCC) = (/ IBM_CUTCFE, I, J, K, JCC_LNK /)
+               CC%LINK_LEV(JCC)           = CC%LINK_LEV(JCC_LNK) - 1
             ENDDO
          ENDIF
       ENDDO
@@ -4943,10 +4943,10 @@ LINK_LOOP : DO ! Cut-cell linking loop for small cells. -> Algo defined by CCVOL
        ! Count how many unlinked cells we have in this mesh:
        ULINK_COUNT = 0
        DO ICC=1,M%N_CUTCELL_MESH
-          I = M%CUT_CELL(ICC)%IJK(IAXIS); J = M%CUT_CELL(ICC)%IJK(JAXIS); K = M%CUT_CELL(ICC)%IJK(KAXIS)
+          CC => M%CUT_CELL(ICC); I = CC%IJK(IAXIS); J = CC%IJK(JAXIS); K = CC%IJK(KAXIS)
           IF (M%SOLID(M%CELL_INDEX(I,J,K))) CYCLE
-          DO JCC=1,M%CUT_CELL(ICC)%NCELL
-             IF ( M%CUT_CELL(ICC)%UNKZ(JCC) > 0 ) CYCLE
+          DO JCC=1,CC%NCELL
+             IF ( CC%UNKZ(JCC) > 0 ) CYCLE
              ULINK_COUNT = ULINK_COUNT + 1
           ENDDO
        ENDDO
@@ -4971,14 +4971,14 @@ LINK_LOOP : DO ! Cut-cell linking loop for small cells. -> Algo defined by CCVOL
           ! Dump info:
           ULINK_COUNT = 0
           DO ICC=1,M%N_CUTCELL_MESH
-             I = M%CUT_CELL(ICC)%IJK(IAXIS); J = M%CUT_CELL(ICC)%IJK(JAXIS); K = M%CUT_CELL(ICC)%IJK(KAXIS)
+             CC => M%CUT_CELL(ICC); I = CC%IJK(IAXIS); J = CC%IJK(JAXIS); K = CC%IJK(KAXIS)
              IF (M%SOLID(M%CELL_INDEX(I,J,K))) CYCLE
-             DO JCC=1,M%CUT_CELL(ICC)%NCELL
-                IF ( M%CUT_CELL(ICC)%UNKZ(JCC) > 0 ) CYCLE
+             DO JCC=1,CC%NCELL
+                IF (CC%UNKZ(JCC)>0) CYCLE
                 ULINK_COUNT = ULINK_COUNT + 1
                 WRITE(LU_UNLNK,'(I8,A,5I8,A,5F22.8)') &
                 ULINK_COUNT,', I,J,K,ICC,JCC=',I,J,K,ICC,JCC,', X,Y,Z,CCVOL,CCVOL_CRT=',M%X(I),M%Y(J),M%Z(K), &
-                M%CUT_CELL(ICC)%VOLUME(JCC),M%DX(I)*M%DY(J)*M%DZ(K)
+                CC%VOLUME(JCC),M%DX(I)*M%DY(J)*M%DZ(K)
              ENDDO
           ENDDO
           CLOSE(LU_UNLNK)
@@ -4996,10 +4996,10 @@ LINK_LOOP : DO ! Cut-cell linking loop for small cells. -> Algo defined by CCVOL
        ! Recount unlinked cells (i.e. no other viable cells in the mesh).
        ULINK_COUNT = 0
        DO ICC=1,M%N_CUTCELL_MESH
-          I = M%CUT_CELL(ICC)%IJK(IAXIS); J = M%CUT_CELL(ICC)%IJK(JAXIS); K = M%CUT_CELL(ICC)%IJK(KAXIS)
+          CC => M%CUT_CELL(ICC); I = CC%IJK(IAXIS); J = CC%IJK(JAXIS); K = CC%IJK(KAXIS)
           IF (M%SOLID(M%CELL_INDEX(I,J,K))) CYCLE
-          DO JCC=1,M%CUT_CELL(ICC)%NCELL
-             IF ( M%CUT_CELL(ICC)%UNKZ(JCC) > 0 .OR. M%CUT_CELL(ICC)%IJK_LINK(1,JCC)==IBM_SOLID) CYCLE
+          DO JCC=1,CC%NCELL
+             IF ( CC%UNKZ(JCC) > 0 .OR. CC%IJK_LINK(1,JCC)==IBM_SOLID) CYCLE
              ULINK_COUNT = ULINK_COUNT + 1
           ENDDO
        ENDDO
@@ -5015,14 +5015,14 @@ LINK_LOOP : DO ! Cut-cell linking loop for small cells. -> Algo defined by CCVOL
              ! Dump info:
              ULINK_COUNT = 0
              DO ICC=1,M%N_CUTCELL_MESH
-                I = M%CUT_CELL(ICC)%IJK(IAXIS); J = M%CUT_CELL(ICC)%IJK(JAXIS); K = M%CUT_CELL(ICC)%IJK(KAXIS)
+                CC => M%CUT_CELL(ICC); I = CC%IJK(IAXIS); J = CC%IJK(JAXIS); K = CC%IJK(KAXIS)
                 IF (M%SOLID(M%CELL_INDEX(I,J,K))) CYCLE
-                DO JCC=1,M%CUT_CELL(ICC)%NCELL
-                   IF ( M%CUT_CELL(ICC)%UNKZ(JCC) > 0 ) CYCLE
+                DO JCC=1,CC%NCELL
+                   IF (CC%UNKZ(JCC)>0) CYCLE
                    ULINK_COUNT = ULINK_COUNT + 1
                    WRITE(LU_UNLNK,'(I8,A,5I8,A,5F22.8)') &
                    ULINK_COUNT,', I,J,K,ICC,JCC=',I,J,K,ICC,JCC,', X,Y,Z,CCVOL,CCVOL_CRT=',M%X(I),M%Y(J),M%Z(K), &
-                   M%CUT_CELL(ICC)%VOLUME(JCC),M%DX(I)*M%DY(J)*M%DZ(K)
+                   CC%VOLUME(JCC),M%DX(I)*M%DY(J)*M%DZ(K)
                 ENDDO
              ENDDO
           ENDIF
@@ -5048,16 +5048,18 @@ INTEGER, INTENT(IN) :: ICC,IFACE,INXT,JNXT,KNXT
 INTEGER, INTENT(OUT):: ICC2, JCC2
 
 INTEGER :: IFC, IFACE2
+TYPE(IBM_CUTCELL_TYPE), POINTER :: CC2=>NULL()
 ICC2=M%CCVAR(INXT,JNXT,KNXT,IBM_IDCC); IF (ICC2<=0) RETURN
-DO JCC2=1,M%CUT_CELL(ICC2)%NCELL
+CC2 => M%CUT_CELL(ICC2)
+DO JCC2=1,CC2%NCELL
    ! Loop faces and test:
-   DO IFC=1,M%CUT_CELL(ICC2)%CCELEM(1,JCC2)
-      IFACE2 = M%CUT_CELL(ICC2)%CCELEM(IFC+1,JCC2)
+   DO IFC=1,CC2%CCELEM(1,JCC2)
+      IFACE2 = CC2%CCELEM(IFC+1,JCC2)
       ! If face type in face_list is not IBM_FTYPE_RGGAS, drop:
-      IF(M%CUT_CELL(ICC2)%FACE_LIST(1,IFACE2) /= IBM_FTYPE_RGGAS) CYCLE
+      IF(CC2%FACE_LIST(1,IFACE2) /= IBM_FTYPE_RGGAS) CYCLE
       ! Does X1AXIS match and LOWHIGH are different?
-      IF(    M%CUT_CELL(ICC2)%FACE_LIST(3,IFACE2) /= M%CUT_CELL(ICC)%FACE_LIST(3,IFACE)) CYCLE ! X1AXIS is different.
-      IF(ABS(M%CUT_CELL(ICC2)%FACE_LIST(2,IFACE2)  - M%CUT_CELL(ICC)%FACE_LIST(2,IFACE)) < 1) CYCLE ! Same LOWHIGH.
+      IF(    CC2%FACE_LIST(3,IFACE2) /= M%CUT_CELL(ICC)%FACE_LIST(3,IFACE)) CYCLE ! X1AXIS is different.
+      IF(ABS(CC2%FACE_LIST(2,IFACE2)  - M%CUT_CELL(ICC)%FACE_LIST(2,IFACE)) < 1) CYCLE ! Same LOWHIGH.
       ! Found the cut-cell ICC2,JCC2 on the other side of IFACE for cut-cell ICC,JCC.
       RETURN
    ENDDO
