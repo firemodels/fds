@@ -39,6 +39,7 @@ cd NIST_E119_Compartment;  ./Run_All.sh $OPTIONS; cd ..
 cd NIST_FSE_2008;  ./Run_All.sh $OPTIONS; cd ..
 cd NIST_NRC;  ./Run_All.sh $OPTIONS; cd ..
 cd NIST_NRC_Corner_Effects;  ./Run_All.sh $OPTIONS; cd ..
+cd NIST_NRC_OLIVE-Fire;  ./Run_All.sh $OPTIONS; cd ..
 cd NIST_NRC_Parallel_Panels;  ./Run_All.sh $OPTIONS; cd ..
 cd NIST_Pool_Fires;  ./Run_All.sh $OPTIONS; cd ..
 cd NIST_RSE_1994;  ./Run_All.sh $OPTIONS; cd ..
