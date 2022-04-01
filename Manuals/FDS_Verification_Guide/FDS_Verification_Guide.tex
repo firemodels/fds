@@ -4426,14 +4426,16 @@ Figure~\ref{surf_mass_two_species} shows the results of three test cases involvi
 
 \subsection{Rate of Solid Particle Decomposition (\texorpdfstring{\textct{solid\_particle\_decomposition}}{solid\_particle\_decomposition})}
 \label{sec:solid_particle_decomposition}
-\label{solid_particle_decomposition}
+\label{part_baking_soda}
 
-\textbf{Paul Papas and Changmin Cao, Raytheon Technologies}\\
+\textbf{Paul Papas (Raytheon Technologies) and Changmin Cao (Collins Aerospace Ireland)}\\
 
 In this set of cases we present a simple analytical solution for the solid phase decomposition of a spherical particle with a constant rate of reaction under isothermal conditions.  Let $m(t)$ denote the mass of a spherical particle with radius $r(t)$, changing with time, $t$.  The initial mass is $m_0 = m(t=0)$.  The extent of reaction is defined as
 \begin{equation}
 \alpha \equiv \frac{m_0-m}{m_0}
 \end{equation}
+
+\subsection*{First-order Reaction Model}
 
 The density of the material, $\rho$, is a constant.  The volume is denoted $V(t)$.  The rate of change of $\alpha$ for a first-order reaction is given by \cite{Khawam:2006}
 \begin{equation}
@@ -4460,14 +4462,57 @@ Integrating with constant density gives
 
 \subsection*{Example}
 
-In Fig.~\ref{fig:solid_particle_decomposition} below, we take $A = 3.4e11$ 1/s, $E_a = 103000$ J/mol, $r_0 = 2.5$ $\mu$m, and compare FDS with the analytical solution for $T=[420, 450, 500]$ K.
+We take $A = 3.4e11$ 1/s, $E_a = 103000$ J/mol, $r_0 = 2.5$ $\mu$m, and compare FDS with the analytical solution for $T=[420, 450, 500]$ K.  Results are presented in Fig.~\ref{fig:part_baking_soda} below.
+
+\subsection*{Contracting Volume Reaction Model}
+\label{part_baking_soda}
+
+The rate of change of $\alpha$ for a contracting volume is given by \cite{Khawam:2006}
+\begin{equation}
+\frac{\d \alpha}{\d t} = k \, 3(1-\alpha)^{2/3}
+\end{equation}
+For this model, it is helpful to first convert the extent of reaction back to the particle mass,
+\begin{equation}
+\label{eq:R3mass}
+\frac{\d m}{\d t} = - k \, 3 \, m_0^{1/3} \, m^{2/3}
+\end{equation}
+Integrating gives,
+\begin{equation}
+\int m^{-2/3} \,\d m = -k \, 3 \, m_0^{1/3} \int \d t
+\end{equation}
+\begin{equation}
+m^{1/3} = m_0^{1/3} (1-k \, t)
+\end{equation}
+\begin{equation}
+(\rho V)^{1/3} = (\rho_0 V_0)^{1/3} (1-k \, t)
+\end{equation}
+
+Physically, the density would remain constant and the volume would contract, leading to a linear decrease in the particle radius,
+\begin{equation}
+r = r_0 (1-k \, t)
+\end{equation}
+
+However, the FDS reaction equation is not set up to mimic the contracting volume model.  Instead, for the same kinetics parameters, we can achieve the correct mass decay of the particle by holding the volume constant ({\ct ALLOW\_SHRINKING=F}) and adjusting the preexponential factor to account for the initial mass.  By holding the volume constant, Eq.~(\ref{eq:R3mass}) may be written in terms of solid density for material $\alpha$ as follows,
+\begin{equation}
+\label{eq:R3rho}
+\frac{\d \rho_{s,\alpha}}{\d t} = - k \, \underbrace{3 \, \rho_{s,\alpha}(0)^{1/3}}_{\mathrm{adjustment \; factor}} \, \rho_{s,\alpha}^{2/3}
+\end{equation}
+Therefore, to match the initial decay of the contracting volume model, we must multiply $A$ by the factor $3 \, \rho_{s,\alpha}(0)^{1/3}$ and change the order of the reaction to $2/3$.
+
+\subsection*{Example}
+
+We consider the contracting volume model applied to a spherical baking soda (NaHCO$_3$) particle.  We take $A = 3.4e11 \times 3(2200)^{1/3} = 133e11$ 1/s (note: the initial density of the particle is $2200$ \si{kg/m^3}), $E_a = 103000$ J/mol, $r_0 = 2.5$ $\mu$m, and compare FDS with the analytical solution for the particle diameter with the rate constant evaluated at $T=[420, 450, 500]$ K.  We set {\ct ALLOW\_SHRINKING=F} and we report the particle diameter as the initial diameter times the cube root of the density ratio, $d(t) = d_0 (\rho_{s}[t]/\rho_s[0])^{1/3}$.  The results are shown in Fig.~\ref{fig:part_baking_soda} along with a comparison to the rate for the first-order model with the same Arrhenius parameters.  It is worth noting that the contracting volume model leads to a significantly higher decay rate than the first-order reaction for the same set of parameters.
 
 \begin{figure}[!h]
 \centering
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/solid_particle_decomposition}
-\caption[The \textct{solid\_particle\_decomposition} test cases]{Comparison of analytical and predicted particle diameter for a first-order solid phase reaction under isothermal conditions.}
-\label{fig:solid_particle_decomposition}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/part_baking_soda_420K}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/part_baking_soda_450K}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/part_baking_soda_500K}
+\caption[The \textct{part\_baking\_soda} test cases]{Comparison of analytical and predicted particle diameter for first-order and contracting volume solid phase reaction under isothermal conditions.}
+\label{fig:part_baking_soda}
 \end{figure}
+
+
 
 \section{Burning Rate of a Small Object (\texorpdfstring{\textct{cell\_burn\_away}}{cell\_burn\_away})}
 \label{cell_burn_away}
