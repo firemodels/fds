@@ -5130,7 +5130,16 @@ The common parameters used in all the simulations are: $C_{\rm d}=10$, $r_{\rm d
 \label{particle_drag_plots}
 \end{figure}
 
+Following the above notation, the total drag force can also be written as:
+\be F_d=\rho V B\left(\frac{u_{0}}{1 + B \, u_{0} \, t}\right)^2 \ee
+Checking this quantity is useful for confirming the \textct{PARTICLE DRAG FORCE X/Y/Z} output quantities and \textct{SPATIAL\_STATISTIC = 'SUM'} for a volume of particles. The computed results for Case~A are compared to the analytical solution in Fig.~\ref{particle_drag_sum}.
 
+\begin{figure}[ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/particle_drag_sum_A}
+\caption[Sample case of \textct{particle\_drag} sum]{Output of total drag from the \textct{particle\_drag\_U10\_N16} test case compared with analytical solution.}
+\label{particle_drag_sum}
+\end{figure}
 
 
 \subsection{Stationary Spherical Particles in a Duct (\texorpdfstring{\textct{sphere\_drag}}{sphere\_drag})}
