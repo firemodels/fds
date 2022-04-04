@@ -104,16 +104,6 @@ K-factor = 4.09E-6 kg/s/Pa^1/2
       PDPA_N=3
       /
 
-&PROP ID='pdpa_d43'
-      PART_ID='water drops'
-      QUANTITY='DIAMETER'
-      PDPA_RADIUS=0.012
-      PDPA_START=1.0
-      PDPA_END=50.0
-      PDPA_M=4
-      PDPA_N=3
-      /
-
 &PROP ID='pdpa_f'
       PART_ID='water drops'
       QUANTITY='PARTICLE FLUX Z'

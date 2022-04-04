@@ -445,6 +445,10 @@ where {\ct N} is the number of OpenMP threads to assign to each MPI process for 
 
 If you wish to run FDS on more than one computer, do the following:
 \begin{enumerate}
+\item The first time you run a job, you must provide your domain name and password by issuing this command:
+
+      {\ct mpiexec -register}
+      
 \item Create a text file, say {\ct hosts.txt}, and in it list, line by line, the names of your computers:
 
       fred:3 \\
@@ -630,7 +634,7 @@ An FDS calculation may end before the specified time limit. Following is a list 
 \begin{lstlisting}
 forrtl: severe (47): write to READONLY file, unit 8598, file C:\Users\...\
 \end{lstlisting}
- The unit, in this case 8598, is just a number that FDS has associated with one of the output files. If this error occurs just after the start of the calculation, you can try adding the phrase \\ {\ct FLUSH\_FILE\_BUFFERS=F} \\ on the {\ct DUMP} line of the input file (see Section~\ref{info:DUMP}). This will prevent FDS from attempting to flush the contents of the internal buffers, something it does to make it possible to view the FDS output in Smokeview during the FDS simulation. On some Windows machines, you might encounter security settings that prevent command line programs such as FDS from writing to system folders that contain program files. In this case, try to rerun the case in a non-system folder (i.e., a location within your home directory).
+ The unit, in this case 8598, is just a number that FDS has associated with one of the output files. If this error occurs just after the start of the calculation, you can try adding the phrase \\ {\ct FLUSH\_FILE\_BUFFERS=F} \\ on the {\ct DUMP} line of the input file (see Section~\ref{info:DT_DUMP}). This will prevent FDS from attempting to flush the contents of the internal buffers, something it does to make it possible to view the FDS output in Smokeview during the FDS simulation. On some Windows machines, you might encounter security settings that prevent command line programs such as FDS from writing to system folders that contain program files. In this case, try to rerun the case in a non-system folder (i.e., a location within your home directory).
 \item[{\bf Poisson Initialization}:] Sometimes at the very start of a calculation, an error appears stating that there is a problem with the ``Poisson initialization.'' The equation for pressure in FDS is known as the Poisson equation. The Poisson solver consists of large system of linear equations that must be initialized at the start of the calculation. Most often, an error in the initialization step is due to a mesh {\ct IJK} dimension being less than 4 (except in the case of a two-dimensional calculation). It is also possible that something is fundamentally wrong with the coordinates of the computational domain. Diagnose the problem by checking the {\ct MESH} lines in the input file.
 \end{description}
 
@@ -968,17 +972,6 @@ Usually in a MPI calculation, each mesh is assigned its own process, and each pr
 &MESH ID='mesh6', IJK=..., XB=..., MPI_PROCESS=3 /
 \end{lstlisting}
 The parameter {\ct MPI\_PROCESS} instructs FDS to assign that particular mesh to the given process. In this case, only four processes are to be started, numbered 0 through 3. Note that the processes need to be invoked in ascending order, starting with 0. Why would you do this? Suppose you only have four processors available for this job. By starting only four processes instead of six, you can save time because `mesh2' and `mesh3' can communicate directly with each other without having to transmit data using MPI calls over the network. Same goes for `mesh5' and `mesh6'. In essence, it is as if these mesh pairs are neighbors and need not send mail to each other via the postal system. The letters can just be walked next door.
-
-Additionally to the mesh assignment to individual MPI processes, the number of OpenMP threads for each MPI process may be specified. The parameter {\ct N\_THREADS} instructs FDS to set this number of threads and must be consistent for all meshes on the same MPI process, but may vary between them:
-\begin{lstlisting}
-&MESH ID='mesh1', IJK=..., XB=..., MPI_PROCESS=0 /
-&MESH ID='mesh2', IJK=..., XB=..., MPI_PROCESS=1, N_THREADS=2 /
-&MESH ID='mesh3', IJK=..., XB=..., MPI_PROCESS=1, N_THREADS=2 /
-&MESH ID='mesh4', IJK=..., XB=..., MPI_PROCESS=2, N_THREADS=4 /
-&MESH ID='mesh5', IJK=..., XB=..., MPI_PROCESS=3 /
-&MESH ID='mesh6', IJK=..., XB=..., MPI_PROCESS=3 /
-\end{lstlisting}
-Notes: An unspecified value will result in the default number of threads (see \ref{single_mesh}) on the MPI process. Some cluster systems do not support a heterogeneous distribution of resources, here computational cores, per MPI process. Therefore, the number of OpenMP threads may change, but not the amount of cores assigned to the MPI process.
 
 For cases involving many meshes, you might want to assign them colors using either the character string {\ct COLOR} or the integer triplet {\ct RGB}. You may also want to consider using the multiplying feature to easily create a 3-D array of meshes. See Section~\ref{info:MULT} for details.
 
@@ -3400,12 +3393,12 @@ The mass per unit volume of material component $i$, $\rho_{{\rm s},i}(x,t)$, is 
 \ee
 where
 \be
-  r_{ij} = A_{ij} \; \rho_{{\rm s},i}^{n_{{\rm s},ij}} \; \exp \left(-\frac{E_{ij}}{R \, T_{\rm s}} \right) X_{\rm O_2}^{n_{{\rm O_2},ij}}
+  r_{ij} = A_{ij} \; \rho_{{\rm s},i}^{n_{{\rm s},ij}} \;  T_{\rm s}^{n_{{\rm t},ij}} \; \exp \left(-\frac{E_{ij}}{R \, T_{\rm s}} \right) X_{\rm O_2}^{n_{{\rm O_2},ij}}
   \label{rr}
 \ee
-The term, $r_{ij}$, defines the rate of reaction at the temperature, $T_{\rm s}$, of the $i$th material undergoing its $j$th reaction. The second term on the right of the equation (\ref{rr_tot}) represents the contributions of other materials producing the $i$th material as a residue with a yield of $\nu_{{\rm s},i'j}$. This term is denoted by {\ct NU\_MATL(:,j)} on the $i'$-th {\ct MATL} line. $\rho_{{\rm s},i}$ is the density of the $i$th material component of the layer, defined as the mass of the $i$th material component divided by the volume of the layer. Thus, $\rho_{{\rm s},i}$ is a quantity that increases if the $i$th material component is produced as a residue of some other reaction, or decreases if the $i$th component decomposes. $n_{{\rm s},ij}$ is the reaction order and prescribed under the name {\ct N\_S(j)}, and is 1 by default. If the value of $n_{\rm s}$ is not known, it is a good starting point to assume it is 1.
+The term, $r_{ij}$, defines the rate of reaction at the temperature, $T_{\rm s}$, of the $i$th material undergoing its $j$th reaction. The second term on the right of the equation (\ref{rr_tot}) represents the contributions of other materials producing the $i$th material as a residue with a yield of $\nu_{{\rm s},i'j}$. This term is denoted by {\ct NU\_MATL(:,j)} on the $i'$-th {\ct MATL} line. $\rho_{{\rm s},i}$ is the density of the $i$th material component of the layer, defined as the mass of the $i$th material component divided by the volume of the layer. Thus, $\rho_{{\rm s},i}$ is a quantity that increases if the $i$th material component is produced as a residue of some other reaction, or decreases if the $i$th component decomposes. $n_{{\rm s},ij}$ is the reaction order and prescribed under the name {\ct N\_S(j)}, and is 1 by default. If the value of $n_{\rm s}$ is not known, it is a good starting point to assume it is 1.  $n_{{\rm t},j}$ is prescribed under the name {\ct N\_T(j)}. By default, $n_{{\rm t},j}$ is zero.
 
-The pre-exponential factor, $A_{ij}$, is prescribed under the name {\ct A(j)} on the {\ct MATL} line of the $i$th material, with units of s$^{-1}$. $E_{ij}$, the activation energy, is prescribed via {\ct E(j)} in units of J/mol. Remember that 1~kcal is 4.184~kJ, and be careful with factors of 1000. For a given reaction, specify both $A$ and $E$, or neither. Do not specify only one of these two parameters. Typically, these parameters only have meaning when both are derived from a common set of experiments, like TGA (thermogravimetric analysis).
+The pre-exponential factor\footnote{For versions of FDS up to and including 6.7.7, the form of the reaction rate expression was slightly different than the one currently used. In these older versions, the density term on the right hand side of Eq.~(\ref{rr}) was divided by the initial density of the layer. For first-order reactions ($n_{{\rm s},ij}=1$), this older form is equivalent to the current form. However, for reactions that are not first-order ($n_{{\rm s},ij}\neq 1$), the new value of $A_{ij}=A_{ij}^{\rm old}/\rho_{\rm s}(0)^{n_{{\rm s},ij}-1}$, where $\rho_{\rm s}(0)$ is the initial density of the layer.}, $A_{ij}$, is prescribed under the name {\ct A(j)} on the {\ct MATL} line of the $i$th material, with units of s$^{-1}$. $E_{ij}$, the activation energy, is prescribed via {\ct E(j)} in units of J/mol. Remember that 1~kcal is 4.184~kJ, and be careful with factors of 1000. For a given reaction, specify both $A$ and $E$, or neither. Do not specify only one of these two parameters. Typically, these parameters only have meaning when both are derived from a common set of experiments, like TGA (thermogravimetric analysis).
 
 The fourth term of the reaction rate equation (\ref{rr}) can be used to simulate oxidation reactions. If the heterogeneous reaction order $n_{{\rm O_2},ij}$ is greater than zero, the reaction rate is affected by the local oxygen volume fraction, $X_{\rm O_2}$. It is calculated from the gas phase (first grid cell) oxygen volume fraction $X_{\rm O_2,g}$ by assuming simultaneous diffusion and consumption so that the concentration profile is in equilibrium, and the concentration at depth $x$ is given by
 \be
@@ -3421,7 +3414,7 @@ You can specity {\ct MAX\_REACTION\_RATE(j)} (1/s) to limit the reaction rate, $
 
 It is very important to keep in mind that the kinetic constants, $A$ and $E$, are not available for most real materials.  However, there is a way to model such materials using a simplified reaction scheme. The key assumption is that the material components can undergo only one reaction, at most. If, for example, the material undergoes three distinct reactions, there must be at least three material components, each of which undergoes one reaction. If there is an additional residue left over, then a fourth material component is needed.
 
-In lieu of specifying $A$ and $E$, there are several parameters that can be used by FDS to derive effective values, the most important of which is the  {\ct REFERENCE\_TEMPERATURE} ($^\circ$C). To understand this parameter, consider the plot shown in Fig.~\ref{pyrolysis}. These curves represent the results of a hypothetical TGA experiment in which a single component material undergoes a single reaction that converts the solid into a gas. The Mass Fraction (blue curve) is the normalized density of the material ($Y_{\rm s}$) which decreases as the sample is slowly heated, in this case at a rate of 5~K/min. The Reaction Rate (green curve) is the rate of change of the mass fraction as a function of time ($-\d Y_{\rm s}/\d t$). Where this curve peaks is referred to in FDS as the {\ct REFERENCE\_TEMPERATURE}.\footnote{The term ``reference temperature'' is used simply to maintain backward compatibility with earlier versions of FDS.}  Note that the {\ct REFERENCE\_TEMPERATURE} is {\em not} the same as an ignition temperature, nor is it necessarily the surface temperature of the burning solid. Rather, it is simply the temperature at which the mass fraction of the material decreases at its maximum rate within the context of a TGA or similar experimental apparatus. Although you cannot specify an ignition temperature, you can specify a threshold temperature, see Section~\ref{info:threshold_temperature} for details.
+In lieu of specifying $A$ and $E$, there are several parameters that can be used by FDS to derive effective values, the most important of which is the  {\ct REFERENCE\_TEMPERATURE} ($^\circ$C). To understand this parameter, consider the plot shown in Fig.~\ref{pyrolysis}. These curves represent the results of a hypothetical TGA experiment in which a single component material undergoes a single reaction that converts the solid into a gas. The Mass Fraction (blue curve) is the normalized density of the material ($Y_{\rm s}$) which decreases as the sample is slowly heated, in this case at a rate of 5~K/min. The Reaction Rate (green curve) is the rate of change of the mass fraction as a function of time ($-\d Y_{\rm s}/\d t$). Where this curve peaks is referred to in FDS as the {\ct REFERENCE\_TEMPERATURE}.\footnote{The term ``reference temperature'' is used simply to maintain backward compatibility with earlier versions of FDS.}  Note that the {\ct REFERENCE\_TEMPERATURE} is {\em not} the same as an ignition temperature, nor is it necessarily the surface temperature of the burning solid. Rather, it is simply the temperature at which the mass fraction of the material decreases at its maximum rate within the context of a TGA or similar experimental apparatus.
 
 The kinetic constants for component $i$ of a multi-component solid are given by\footnote{These formulas have been derived from an analysis that considers a first-order reaction. When using the proposed method, do not specify non-unity value for the reaction order {\ct N\_S} on the {\ct MATL} line.}:
 \be
@@ -3571,36 +3564,6 @@ The system of ordinary differential equations that governs the transformation of
 \subsection{The Heat of Reaction}
 
 Equation~(\ref{rr}) describes the rate of the reaction as a function of temperature.  Most solid phase reactions require energy; that is, they are {\em endothermic}. The amount of energy consumed, per unit mass of reactant that is converted into reaction products, is specified by the {\ct HEAT\_OF\_REACTION(j)}. Technically, this is the enthalpy difference between the products and the reactant. A positive value indicates that the reaction is {\em endothermic}; that is, the reaction takes energy out of the system. Usually the {\ct HEAT\_OF\_REACTION} is accurately known only for simple phase change reactions like the vaporization of water. For other reactions, it must be determined empirically (e.g., by differential scanning calorimetry).
-
-
-\subsection{Special Topic: The ``Threshold'' Temperature}
-\label{info:threshold_temperature}
-
-In FDS, the reaction rate expression in Eq.~(\ref{rr}) includes an optional term:
-\be
-  r_{ij} = A_{ij} \; \rho_{{\rm s},i}^{n_{{\rm s},ij}} \; \exp \left(-\frac{E_{ij}}{R \, T_{\rm s}} \right) \;
-  \max\left[0,S_{{\rm thr},ij}(T_{\rm s}-T_{{\rm thr},ij})\right]^{n_{{\rm t},ij}}
-  \label{rr2}
-\ee
-$T_{{\rm thr},ij}$ is an optional ``threshold'' temperature that allows the definition of non-Arrhenius pyrolysis functions and ignition criteria, and is prescribed by {\ct THRESHOLD\_TEMPERATURE(j)}. $S_{{\rm thr},ij}$ is the ``threshold direction'' that allows the triggering of reaction when temperature gets ``above'' $T_{{\rm thr},ij}$ ($S_{{\rm thr},ij}=+1$) or ``below'' $T_{{\rm thr},ij}$ ($S_{{\rm thr},ij}=-1$). $n_{{\rm t},j}$ is prescribed under the name {\ct N\_T(j)} and $S_{{\rm thr},ij}$ under {\ct THRESHOLD\_SIGN}. By default, $T_{{\rm thr},ij}$ is -273.15 degrees Celsius, $n_{{\rm t},j}$ is zero and $S_{{\rm thr},ij}=+1$; thus, the last term of Equation~\ref{rr2} does not affect the pyrolysis rate. The term can be used to describe a threshold temperature for the pyrolysis reaction by setting $T_{{\rm thr},ij}$ and $n_{{\rm t},j}$ = 0. Then the term is equal to 0 at temperatures below $T_{{\rm thr},ij}$ and 1 at temperatures above.
-
-The threshold temperature can be used to simulate simple phase change reactions, such as melting and freezing. To make the reaction rate controlled by available energy, i.e., {\em not} kinetics, another optional term should be included in the reaction rate formula
-\be
-  r_{ij} = A_{ij}\frac{1}{H_{{\rm r},ij}\Delta t} \max\left[0,S_{{\rm thr},ij}(T_{\rm s}-T_{{\rm thr},ij})\right]^{n_{{\rm t},ij}}
-  \label{rr3}
-\ee
-This form of reaction rate can be implemented by setting a logical parameter {\ct PCR(j)=T}. The pre-exponental factor $A_{ij}$ should then be given a value that is close or slightly smaller than the specific heat (\si{kJ/(kg.K)}) of the material mixture at phase change temperature.
-
-The input file {\ct water\_ice\_water.fds} demonstrates the use of the ``threshold'' temperature. A small amount of liquid water at 10~$^\circ$C is cooled down to -10~$^\circ$C in 10~min, and then heated up again to 10~$^\circ$C. The concentration of the liquid water as a function of temperature is plotted in Fig.~\ref{water_ice_water_plot}. The cooling phase is indicated by the blue line and heating phase by the red line.
-
-\begin{figure}[ht]
-\begin{center}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_ice_water}
-\end{center}
-\caption[Results of the {\ct water\_ice\_water} test case]{Freezing and melting of water.}
-\label{water_ice_water_plot}
-\end{figure}
-
 
 
 
@@ -4524,6 +4487,8 @@ This example tests several basic features of FDS. A narrow channel, 3~m long, 0.
 \subsubsection{Example Case: Breaking Pressure Zones}
 \label{zone_break_slow}
 \label{zone_break_fast}
+\label{zone_break_slow_ulmat}
+\label{zone_break_fast_ulmat}
 
 In this example, three simple compartments are initially isolated from each other and from the ambient environment outside. Each compartment is a separate pressure zone. Air is blown into Zone~1 at a constant rate of 0.1~kg/s, increasing its pressure approximately 2000~Pa by 10~s, at which time Zone~1 is opened to Zone~2, decreasing the overall pressure in the two zones to roughly one-third the original value because the volume of the combined pressure zone has been roughly tripled. At 15~s, the pressure is further decreased by opening a door to Zone~3, and, finally, at 20~s the pressure returns to ambient following the opening of a door to the outside. Figure~\ref{zone_break} displays the pressure within each compartment.
 \begin{figure}[ht]
@@ -4577,12 +4542,16 @@ The pressure zone leakage approach is intended to capture the bulk leakage that 
 The first line designates a region of the computational domain to be Pressure Zone~1. Note that the order of the {\ct ZONE} lines is important; that is, the order implicitly defines Zone~1, Zone~2, etc. Zone 0 is by default the ambient pressure exterior. In this example, a leak exists between Zone~1 and the exterior Zone~0, and the area of the leak is 0.0001~m$^2$ (1 cm by 1 cm hole, for example). Zone~2 leaks to Zone~1 (and vice versa) with a leak area of 0.0002~m$^2$. Zone~2 also leaks to the outside with an area of 0.0003~m$^2$. Note that zones need not be physically connected for a leak to occur, but in each zone, except for the exterior, there must be some surface with a designated {\ct LEAK\_PATH}. Here, in Zones~1 and 2 there are surfaces defined by both {\ct 'LEAKY EXTERIOR WALL'} and {\ct 'LEAKY INTERIOR WALL'} so as to provide a surface over which to apply the leakage. Leakage is uniformly distributed over all of the solid surfaces assigned the {\ct LEAK\_PATH}. The order of the two pressure zones designated by {\ct LEAK\_PATH} is unimportant, and the solid obstructions where the leakage is applied need not form a boundary between the two zones. Note that {\ct LEAK\_PATH\_ID} can be used instead of {\ct LEAK\_PATH}. To use {\ct LEAK\_PATH\_ID} provide the {\ct ID} for the two {\ct ZONES} where specifying {\ct 'AMBIENT'} indicates Zone 0.
 
 The volume flow, $\dot{V}$, through a leak of area $A_{\rm L}$ is given by
-\be  \dot{V}_{\rm leak} = A_{\rm L} \; \hbox{sign} (\Delta p) \; \sqrt{2 \frac{ | \Delta p |}{\rho_\infty}} \ee
-where $\Delta p$ is the pressure difference between the adjacent compartments (in units of Pa) and $\rho_\infty$ is the ambient density (in units of kg/m$^3$). The discharge coefficient normally seen in this type of formula is assumed to be~1.
+\be  
+   \dot{V}_{\rm leak} = C_{\rm d} \, A_{\rm L} \; \hbox{sign} (\Delta p) \; \sqrt{2 \frac{ | \Delta p |}{\rho_\infty}}  \label{leak_formula}
+\ee
+where $C_{\rm d}$ is a discharge coefficient, $\Delta p$ is the pressure difference (Pa) between the adjacent compartments and $\rho_\infty$ is the ambient density (kg/m$^3$). The discharge coefficient normally seen in this type of formula is sometimes assumed to be~1, but you may change it.
 
-In a typical building as the interior pressure rises, the leakage area will grow as small gaps, cracks, and other leakage paths open up. Leakage tests performed according to test standards such as ASTM~E~779 provide two additional data points to quantify this behavior. These are the {\ct LEAK\_PRESSURE\_EXPONENT} and the {\ct LEAK\_REFERENCE\_PRESSURE}. The use of these additional inputs are shown in the equation below as $n$ and $\Delta p_{\rm ref}$ respectively where $A_{\rm L,ref}$ is given by {\ct LEAK\_AREA}.
-\be  A_{\rm L} = A_{\rm L,ref} \left( \frac{\Delta p}{\Delta p_{\rm ref}} \right)^{n-0.5} \ee
-By default, $n=0.5$ and $\Delta p_{\rm ref}=4$~Pa, meaning that the leak area will not change with pressure unless you specify an exponent other than 0.5.
+As the interior pressure rises in a typical building, the leakage area grows as small gaps, cracks, and other leakage paths open up. Leakage tests performed according to test standards such as ASTM~E779 provide two additional data points to quantify this behavior. These are the {\ct LEAK\_PRESSURE\_EXPONENT} and the {\ct LEAK\_REFERENCE\_PRESSURE}. The use of these additional inputs are shown in the equation below as $n$ and $\Delta p_{\rm ref}$ respectively where $A_{\rm L,ref}$ is given by {\ct LEAK\_AREA}.
+\be  
+   A_{\rm L} = A_{\rm L,ref} \left( \frac{\Delta p}{\Delta p_{\rm ref}} \right)^{n-0.5}  \label{leak_formula_2}
+\ee
+By default, $n=0.5$ and $\Delta p_{\rm ref}=4$~Pa, meaning that the leak area will not change with pressure unless you specify an exponent other than 0.5. The {\ct DISCHARGE\_COEFFICIENT} is 1 by default.
 
 The HVAC output quantities can be used to determine the leakage flows. FDS names the duct connecting Zone~A with Zone~B {\ct 'LEAK A B'} and the duct nodes {\ct 'LEAK A B'} for the Zone~A side of the leak and {\ct 'LEAK B A'} for the Zone~B side.  Note that for the duct names, FDS will use the lower numbered zone as Zone~A.
 
@@ -4591,19 +4560,18 @@ FDS is limited by default to a maximum of 200 {\ct ZONE} inputs.  This can be in
 \subsubsection{Localized Leakage}
 \label{info:local_leakage}
 
-The local leakage approach is intended to represent leakage through a specific crack. For example, a cracked open door might have a opening that is too small to resolve with the grid.  One would; however, still want to capture the fact that hot gases could escape the top of the crack and cold gases enter the bottom. The local leakage approach uses the local pressure rather than just the zone pressure. Therefore, one can define multiple leakage paths for different windows, over the height of a door, or over the height of a tall stairwell where stack effect might be important. To use this approach two {\ct VENT} inputs are linked via an {\ct HVAC} input with {\ct TYPE\_ID='LEAK'}. In the example below a 0.001 m$^2$ leakage path is created between the {\ct VENT} with {\ct ID='VENT 1'} and the {\ct VENT} with {\ct ID='VENT 2'}. Note that the {\ct SURF\_ID} for a {\ct VENT} with localized leakage is not {\ct 'HVAC'}. The input must correspond to a {\ct SURF} input. Wall heat transfer will be computed based upon the inputs on the referenced {\ct SURF} input.
+The local leakage approach is intended to represent leakage through a specific crack or for situations where the leakage is not necessarily from one sealed pressure zone to another. For example, a cracked open door might have a opening that is too small to resolve with the grid.  One would; however, still want to capture the fact that hot gases could escape the top of the crack and cold gases enter the bottom. The local leakage approach uses the local pressure rather than just the zone pressure. Therefore, one can define multiple leakage paths for different windows, over the height of a door, or over the height of a tall stairwell where stack effect might be important. To use this approach two {\ct VENT} inputs are linked via an {\ct HVAC} input with {\ct TYPE\_ID='LEAK'}. In the example below a 0.001 m$^2$ leakage path is created between the {\ct VENT} with {\ct ID='VENT 1'} and the {\ct VENT} with {\ct ID='VENT 2'}. Note that the {\ct SURF\_ID} for a {\ct VENT} with localized leakage is not {\ct 'HVAC'}. The input must correspond to a {\ct SURF} input. Wall heat transfer will be computed based upon the inputs on the referenced {\ct SURF} input.
 \begin{lstlisting}
 &VENT XB=...,SURF_ID='SURF 1',ID='VENT 1'/
 &VENT XB=...,SURF_ID='SURF 2',ID='VENT 2'/
 &HVAC ID='LEAK1',TYPE_ID='LEAK',VENT_ID='VENT 1',VENT2_ID='VENT 2',AREA=0.001/
 \end{lstlisting}
-This will create a duct with the name {\ct 'LEAK1'} whose two nodes will be named {\ct VENT\_ID} and {\ct VENT2\_ID}. If the leakage path is to connect to the ambient outside the domain, then set {\ct VENT2\_ID='AMBIENT'}. In this case the second node will be the first node name with {\ct AMB} appended (e.g. {\ct 'VENT 1 AMB'}). Note that each {\ct VENT} must lie in one pressure zone; however, it may span more than one {\ct MESH}.
+This will create a duct with the name {\ct 'LEAK1'} whose two nodes will be named {\ct VENT\_ID} and {\ct VENT2\_ID}. If the leakage path is to connect to the ambient outside the domain, then set {\ct VENT2\_ID='AMBIENT'}. In this case the second node will be the first node name with {\ct AMB} appended (e.g. {\ct 'VENT 1 AMB'}). Note that each {\ct VENT} must lie in one pressure zone; however, it may span more than one {\ct MESH}. You may add the parameters {\ct LEAK\_PRESSURE\_EXPONENT}, {\ct LEAK\_REFERENCE\_PRESSURE}, and {\ct DISCHARGE\_COEFFICIENT} to the {\ct HVAC} line, according to Eqs.~(\ref{leak_formula}) and. (\ref{leak_formula_2}).
 
 Unlike the zone leakage approach, this approach has the option to preserve the energy of the gas flowing through the leak. For example, for door crack using with pressure zone leakage, the outflowing gas at the top of the door would always be the same temperature as the outside of the door. To maintain hot gas flowing out of the leak, add {\ct LEAK\_ENTHALPY=T} to the {\ct HVAC} input. For each outflowing wall cell, this will compute the enthalpy difference between the temperature of the leak flow and the temperature of the surface and add it as a source of heat to the adjacent gas cell.  The default value is {\ct LEAK\_ENTHALPY=F}
 
 This approach also has the option of changing the flow loss by specifying {\ct LOSS} on the {\ct HVAC} input.  The default is {\ct LOSS=1}; the same as for pressure zone leakage.
 
-Note, for this approach it is not required that one have pressure zones defined; however, it is recommended to do so if different pressure zones do in fact exist in the model.
 
 \subsubsection{Example Case: door\_crack}
 \label{door_crack}
@@ -6704,6 +6672,7 @@ It is not unusual to include hundreds of thousands of particles in a simulation.
 \item[{\ct SAMPLING\_FACTOR}] Sampling factor for the output file {\ct CHID.prt5}. This parameter can be used to reduce the size of the particle output file used to animate the simulation. The default value is 1 for {\ct MASSLESS} particles, meaning that every particle or droplet will be shown in Smokeview. The default is 10 for all other types of particles. {\ct MASSLESS} particles are discussed in Section~\ref{info:MASSLESS}.
 \item[{\ct AGE}]  Number of seconds the particle or droplet exists, after which time it is removed from the calculation. This is a useful parameter to use when trying to reduce the number of droplets or particles in a simulation.
 \end{description}
+Be careful when setting parameters related to particle/droplet insertion, as it is very easy to overwhelm the simulation with millions of them. The parameter {\ct MAXIMUM\_PARTICLES} on the {\ct DUMP} line sets the maximum number of particles that can be included on any given mesh at any given time. Its default value is 1000000. If this value is exceeded, FDS will automatically remove particles, starting with the oldest.
 
 
 
@@ -7158,7 +7127,7 @@ The wind {\ct DIRECTION} follows the usual meteorological convention---a norther
 \end{lstlisting}
 Here, {\ct T} is time in seconds and {\ct F} is the wind direction in degrees. The {\ct INITIAL\_SPEED} sets the horizontal wind components at the start of the simulation. This is provided as a convenience because it may take on the order of hours of simulation time to slowly increase the wind speed via the pressure gradient force alone. The {\ct INITIAL\_SPEED} only sets the initial wind speed, but has no longer term effect. You may vary the {\ct PRESSURE\_GRADIENT\_FORCE} in time using {\ct RAMP\_PGF\_T}.
 
-There are some applications, like tunnels, where the pressure gradient force is a convenient way to introduce an air flow due to some external force. In such cases, it is sometimes more convenient to use the vector {\ct FORCE\_VECTOR(1:3)} along with the corresponding time ramps {\ct RAMP\_FVX\_T}, {\ct RAMP\_FVY\_T}, and {\ct RAMP\_FVZ\_T} to control each individual component. The {\ct PRESSURE\_GRADIENT\_FORCE} is simply the magnitude of the {\ct FORCE\_VECTOR} with the same units. 
+There are some applications, like tunnels, where the pressure gradient force is a convenient way to introduce an air flow due to some external force. In such cases, it is sometimes more convenient to use the vector {\ct FORCE\_VECTOR(1:3)} along with the corresponding time ramps {\ct RAMP\_FVX\_T}, {\ct RAMP\_FVY\_T}, and {\ct RAMP\_FVZ\_T} to control each individual component. The {\ct PRESSURE\_GRADIENT\_FORCE} is simply the magnitude of the {\ct FORCE\_VECTOR} with the same units.
 
 
 
@@ -7557,6 +7526,7 @@ $\Delta h_{\rm pyr}=400$~kJ/kg is the heat of reaction 1 and $\Delta h_{\rm char
 \end{figure}
 
 
+\newpage
 
 \section{Lagrangian Particle Model}
 \label{info:vegetation}
@@ -7643,10 +7613,44 @@ A coniferous tree (e.g. pine, spruce, fir) can be represented in FDS as a collec
 \begin{lstlisting}
 &PART ID='needles', DRAG_COEFFICIENT=2.8, SURF_ID='needle surface', STATIC=T,
       COLOR='FOREST GREEN' /
-&INIT PART_ID='needles', XYZ=..., CROWN_BASE_WIDTH=3.2, CROWN_BASE_HEIGHT=15.,
-      TREE_HEIGHT=2, SHAPE='CONE', N_PARTICLES_PER_CELL=1, PACKING_RATIO=0.02  /
+&INIT ID='needles', PART_ID='needles', XYZ=..., CROWN_BASE_WIDTH=3.2,
+      CROWN_BASE_HEIGHT=0.2, TREE_HEIGHT=2, SHAPE='CONE', N_PARTICLES_PER_CELL=1,
+      PACKING_RATIO=0.02  /
 \end{lstlisting}
 These lines create a collection of particles in the shape of a cone. The dimensions of the cone are specified via the parameters {\ct CROWN\_BASE\_WIDTH}, the diameter of the base of the cone (m), {\ct CROWN\_BASE\_HEIGHT}, the distance (m) from the ground to the base of the cone, {\ct TREE\_HEIGHT}, the height (m) of the tree from ground to tip, and the position triplet, {\ct XYZ}, of the trunk at the ground. Note that in this example, exactly one particle is specified per grid cell, positioned randomly within the cell. The number of actual pine needles this single particle represents depends on the specified {\ct PACKING\_RATIO}, the ratio of the (dry) mass per unit volume to the density of the needle itself. That information would be provided by the {\ct SURF} line {\ct 'needle surface'} and associated {\ct MATL} lines that are described in the previous section.
+
+A handy way to introduce many trees into a simulation is by way of a {\ct SURF} line as follows:
+\begin{lstlisting}
+&SURF ID='forest',..., INIT_IDS(1:2)='needles','branches', INIT_PER_AREA=0.1 /
+\end{lstlisting}
+This line indicates that solid boundaries with the surface properties given by {\ct 'forest'} shall have 1 tree per 10~m$^2$, as indicated by the parameter {\ct INIT\_PER\_AREA}. The trees may consist of more than one type of particle, as indicated by the array {\ct INIT\_IDS}. Note that this construct is designed for trees and is only invoked on upward-facing horizontal boundaries. Also note that the coordinates {\ct XYZ} on the {\ct INIT} line should be {\ct 0,0,0} so that it can be re-positioned accordingly.
+
+
+\subsection{Bulk density input files}
+\label{bulk_density_file}
+
+In some cases, the user may have access to detailed 3-dimensional spatial information on the distribution of vegetation bulk density, or {\ct MASS\_PER\_VOLUME}, within a tree crown or a forest canopy. These data may be available in a voxelized (gridded) format and are increasingly common with the advancement of both remote sensing techniques (e.g. lidar) and tools for modeling forest canopy structure. It is possible to directly import such bulk density data by specifying a {\ct BULK\_DENSITY\_FILE} on the {\ct INIT} line. Each file should specify the bulk density values for the type of vegetation defined by the {\ct PART\_ID} and {\ct SURF\_ID} associated with the particular {\ct INIT} line. For example, one file may specify the spatial distribution of foliage, another for branches, and so on:
+\begin{lstlisting}
+&INIT ID='insert', PART_ID='foliage part', BULK_DENSITY_FILE='canopy_foliage.bdf'/
+\end{lstlisting}
+For a full example, see the {\ct bulk\_density\_file.fds} test cases in the {\ct WUI} directory of the verification suite. Bulk density data are assumed to be provided on a dry-mass basis, with moisture mass added following the specification of the associated {\ct SURF}.
+
+
+The {\ct BULK\_DENSITY\_FILE} must be a FORTRAN unformatted (binary) file and follows the following convention:
+\begin{lstlisting}
+WRITE(LU_VEG_IN) VXMIN,VXMAX,VYMIN,VYMAX,VZMIN,VZMAX
+WRITE(LU_VEG_IN) VDX,VDY,VDZ
+WRITE(LU_VEG_IN) NVOX
+WRITE(LU_VEG_IN) VCX,VCY,VCZ
+WRITE(LU_VEG_IN) MASS_PER_VOLUME
+        .
+        .
+WRITE(LU_VEG_IN) VCX,VCY,VCZ
+WRITE(LU_VEG_IN) MASS_PER_VOLUME
+\end{lstlisting}
+The sextuplet {\ct VXMIN,VXMAX,VYMIN,VYMAX,VZMIN,VZMAX} gives the bounds (upper and lower voxel faces) of the entire vegetation containing volume. This is uesd to determine whether a specific mesh contains any of the vegetation. The triplet {\ct VDX,VDY,VDZ} gives the spatial resolution of the input data and {\ct NVOX} is the total number of voxels which actually contain vegetation. The coordiantes of each voxel center are given by {\ct VCX,VCY,VCZ} and the bulk density by {\ct MASS\_PER\_VOLUME}. Third-party tools to create vegetation inputs are in development. However, an example python script for creating a custom {\ct BULK\_DENSITY\_FILE} can be found in the cad GitHub repository, {\ct firemodels/cad}.
+
+FDS effectively creats a {\ct BLOCK} shaped {\ct INIT} line for each voxel. In this way, it is possible to change the FDS resolution and meshing without needing to create a new {\ct BULK\_DENSITY\_FILE}. By default, if a {\ct BULK\_DENSITY\_FILE} is specified FDS will input vegetation with {\ct N\_PARTICLES\_PER\_CELL = 1} to minimize memory usage. However, if an FDS grid cell intersects multiple vegetation voxels (for example, due to misalignment between FDS and voxel resolution), more than one particle will be added to the cell. The input mass will be conserved; this will simply increase memory usage, and it is generally recommended to provide a {\ct BULK\_DENSITY\_FILE} with the same resolution as your simulation if possible.
 
 \subsection{Firebrands}
 \label{info:firebrands}
@@ -7667,7 +7671,7 @@ The amount expected on the floor is approximately 0.024~kg.
 \end{figure}
 
 
-
+\newpage
 
 \section{Boundary Fuel Model}
 \label{info:boundary_fuel_model}
@@ -7720,6 +7724,7 @@ For scenarios where the fire's rate of spread (ROS) is relatively slow and the n
 The more grid cells spanning the front width, the better resolved the simulation. In badly resolved simulations, the time required for the fire to spread the width of a grid cell may be comparable or longer than the burnout time, $\Delta t_{\rm b}$. In such cases, it is necessary to specify an effective ``burnout time'' that accounts for the unresolved burning occurring at sub-grid scales. This parameter, {\ct MINIMUM\_BURNOUT\_TIME} (s), is specified on the {\ct SURF} line that provides parameters for the vegetation. By default, it has a very large value, meaning that it is ignored unless specified.
 
 
+\newpage
 
 
 \section{Comparing the Particle and Boundary Fuel Models of Vegetation}
@@ -7794,7 +7799,7 @@ The resulting vegetation temperatures are shown in Fig.~\ref{ground_vegetation_c
 \end{figure}
 
 
-\FloatBarrier
+\newpage
 
 
 
@@ -7933,7 +7938,7 @@ Sprinklers, smoke detectors, heat flux gauges, and thermocouples may seem to be 
 All devices, in the broadest sense of the word, are designated via the namelist group {\ct DEVC}. In addition, advanced functionality and properties are accommodated via additional namelist groups called {\ct CTRL} (Control) and {\ct PROP} (Properties).
 
 
-\section{Device Location and Orientation: The \texorpdfstring{{\tt DEVC}}{DEVC} Namelist Group (Table \ref{tbl:DEVC})}
+\section{Device Location and Orientation}
 \label{info:DEVC}
 
 Regardless of the specific properties, each device needs to be sited either at a point within the computational domain, or
@@ -8796,21 +8801,41 @@ It should be noted that devices are updated sequentially in the order that they 
 
 \chapter{Output}
 \label{info:outputdata}
-
-FDS has various types of output files that store computed data. Some of the files are in binary format and intended to be read and rendered by Smokeview. Some of the files are just comma-delimited text files. It is important to remember that you must explicitly declare in the input file most of the FDS output data. A considerable amount of the input file is usually devoted to this.
-
-To visualize the flow patterns better, save planar slices of data, either in the gas or solid phases, by using the {\ct SLCF} (SLiCe File) or {\ct BNDF} (BouNDary File) namelist group. Both of these output formats permit you to animate these quantities in time. For static pictures of the flow field, use the Plot3D output, a format that is used by many CFD programs as a simple way to store specified quantities over the entire mesh at one instant in time. Finally, tracer particles can be injected into the flow field from vents or obstacles, and then viewed in Smokeview. Use the {\ct PART} namelist group to control the injection rate, sampling rate and other parameters associated with particles.
-
-
-\section{Output Control Parameters: The \texorpdfstring{{\tt DUMP}}{DUMP} Namelist Group}
 \label{info:DUMP}
 
-The namelist group {\ct DUMP} contains parameters (Table \ref{tbl:DUMP}) that control the rate at which output files are written, and various other global parameters associated with output files. Its parameters include:
+FDS has various types of output files that store computed data. Some of the files are in binary format and intended to be read and rendered by Smokeview. Some of the files are just comma-delimited text files. In most cases, you must explicitly declare the data to output. A considerable amount of the input file is usually devoted to output declarations.
+\begin{itemize}
+\item To control the frequency of data outputs, see Section~\ref{info:DT_DUMP}.
+\item To record data at a given point or within a given volume, see Section~\ref{info:DEVC2}.
+\item To record data inside solid boundaries, see Section~\ref{info:PROF}.
+\item To visualize planar contours of scalar or vector quantities, see Section~\ref{info:SLCF}.
+\item To visualize solid surface quantities, see Section~\ref{info:BNDF}.
+\item To visualize 3-D contours of gas phase quantities, see Section~\ref{info:ISOF}.
+\item To visualize various scalar quantities over the entire domain, see Section~\ref{info:PL3D}.
+\item To visualize realistic smoke and fire, see Section~\ref{info:SMOKE3D}.
+\item To visualize particles and droplets, see Section~\ref{info:part_output}.
+\item For more information about particular output features, see Section~\ref{info:special_output}.
+\item A tool for extracting data from contour and boundary output files is described in Section~\ref{info:fds2ascii}.
+\item A list of the most frequently used output quantities is given in Section~\ref{info:outputquantities}.
+\item A list of the less frequently used output quantities is given in Section~\ref{info:oddoutputquantities}.
+\item A list of HVAC output quantities is given in Section~\ref{info:hvacoutputquantities}.
+\end{itemize}
+The namelist group {\ct DUMP} contains parameters (Table \ref{tbl:DUMP}) that control the rate at which output files are written, and various other global parameters associated with output files. There can only be one {\ct DUMP} line in the input file.
+
+
+\section{Controlling the Frequency of Output}
+\label{info:DT_DUMP}
+
+Point device data, slice (contour) data, particle data, isosurface data, 3D smoke data, boundary data, solid phase profile data, and control function data are written to file every {\ct (T\_END-T\_BEGIN)/NFRAMES} seconds unless otherwise specified using the parameters listed in Table~\ref{tbl:dt_params}. These parameters are written on the {\ct DUMP} line. You can also set {\ct NFRAMES} to a value other than 1000, its default. The parameters named {\ct DT\_XXXX} specify the uniform time interval between data dumps. The parameters {\ct RAMP\_XXXX} allow you to specify exactly which times to write out. For example, if you want to write boundary files at 10, 20, and 60~s, add the following:
+\begin{lstlisting}
+&DUMP ..., RAMP_BNDF='b-ramp' /
+&RAMP ID='b-ramp', T=10 /
+&RAMP ID='b-ramp', T=20 /
+&RAMP ID='b-ramp', T=60 /
+\end{lstlisting}
+A few things to note:
 \begin{description}
-\item[{\ct NFRAMES}] Number of output dumps per calculation. The default is 1000. Device data, slice data, particle data, isosurface data, 3D smoke data, boundary data, solid phase profile data, and control function data are saved every {\ct (T\_END-T\_BEGIN)/NFRAMES} seconds unless otherwise specified using the parameters listed in Table~\ref{tbl:dt_params}. Nonuniform discrete time output is available for {\ct SLCF}, {\ct SL3D}, and {\ct BNDF} files using \emph{timers}, as discussed below.
-\item[{\ct MASS\_FILE}] If {\ct T}, produce an output file listing the total masses of all gas species as a function of time. It is {\ct F} by default because the calculation of all gas species in all mesh cells is time-consuming. The parameter {\ct DT\_MASS} or {\ct RAMP\_MASS} controls the frequency of output.
-\item[{\ct MAXIMUM\_PARTICLES}] Maximum number of Lagrangian particles that can be included on any mesh at any given time. (Default 1000000)
-\item[{\ct SMOKE3D}] If {\ct F}, do not produce an animation of the smoke and fire. It is {\ct T} by default.
+\item[{\ct SMOKE3D}] If the simulation involves combustion, FDS automatically writes out Smoke3D files of soot density, heat release rate per unit volume, and temperature. These quantities are rendered in Smokeview as realistic looking smoke and fire. To turn off this feature, set {\ct SMOKE3D=F} on the {\ct DUMP} line.
 \item[{\ct DT\_PL3D}] The time between Plot3D file output. Note that versions of FDS before 6 output Plot3D files by default. Now, you must specify the interval of output using this parameter. Its default value is 1000000~s, meaning that there is no Plot3D output unless specified.
 \item[{\ct FLUSH\_FILE\_BUFFERS}] FDS purges the output file buffers periodically and forces the data to be written out into the respective output files. It does this to make it easier to view the case in Smokeview while it is running. It has been noticed on Windows machines that occasionally a runtime error occurs because of file access problems related to the buffer flushing. If this happens, set this parameter to {\ct F}, but be aware that it may not be possible to look at output in Smokeview until after the calculation is finished. You may also set {\ct DT\_FLUSH} to control the frequency of the file flushing. Its default value is the duration of the simulation divided by {\ct NFRAMES}.
 \item[{\ct STATUS\_FILES}] If {\ct T}, produces an output file {\ct CHID.notready} which is deleted, if the simulation is completed successfully. This file can be used as an error indicator. It is {\ct F} by default.
@@ -8848,9 +8873,10 @@ Uniform Output    & Non-Uniform Output    & Purpose                    \\ \hline
 \end{table}
 
 
-
+\newpage
 
 \section{Device Output: The \texorpdfstring{{\tt DEVC}}{DEVC} Namelist Group}
+\label{info:DEVC2}
 
 Every device ({\ct DEVC}) contains a {\ct QUANTITY} that it monitors. Usually this {\ct QUANTITY} is written out to a comma-delimited spreadsheet file with the suffix {\ct \_devc.csv}. The quantities are listed in Table~\ref{tab:output}. Some quantities, such as {\ct 'MASS FLUX'} and {\ct 'VOLUME FRACTION'}, are marked with an asterisk in Table~\ref{tab:output} meaning that they require additional input, like a {\ct SPEC\_ID}, to be specified. Refer to Section~\ref{info:outputquantities} for more details.
 
@@ -9170,6 +9196,8 @@ It is possible to translate and/or rotate a linear array of devices using parame
 
 
 
+\newpage
+
 \section{In-Depth Profiles within Solids: The \texorpdfstring{{\tt PROF}}{PROF} Namelist Group}
 \label{info:PROF}
 
@@ -9191,6 +9219,7 @@ The {\ct QUANTITY} is the physical quantity to record. The choices are {\ct 'TEM
 There is a second optional format. If you specify {\ct FORMAT\_INDEX=2} on the {\ct PROF} line, the resulting file will contain columns containing only the final set of node coordinates and quantity values. This is handy for displaying a steady-state temperature profile.
 
 
+\newpage
 
 \section{Animated Planar Slices: The \texorpdfstring{{\tt SLCF}}{SLCF} Namelist Group}
 \label{info:SLCF}
@@ -9214,6 +9243,9 @@ By default, Smokeview will blank slice file data inside obstructions.  However, 
 You may add a name via {\ct ID} on the {\ct SLCF} as an identifier sent to Smokeview. It is only optional.
 
 
+
+\newpage
+
 \section{Animated Boundary Quantities: The \texorpdfstring{{\tt BNDF}}{BNDF} Namelist Group}
 \label{info:BNDF}
 
@@ -9224,6 +9256,7 @@ The {\ct BNDF} (``boundary file'') namelist group parameters allows you to recor
 Sometimes it is useful to render the {\ct QUANTITY} integrated over time. For example, a heat flux in units of kW/m$^2$ can be integrated in time producing the total energy absorbed by the surface in units of kJ/m$^2$. To do this, set {\ct TEMPORAL\_STATISTIC} equal to {\ct 'TIME INTEGRAL'} on the {\ct BNDF} line. Note that there are no other options for {\ct TEMPORAL\_STATISTIC} on a {\ct BNDF} line.
 
 
+\newpage
 
 \section{Animated Isosurfaces: The \texorpdfstring{{\tt ISOF}}{ISOF} Namelist Group}
 \label{info:ISOF}
@@ -9243,7 +9276,7 @@ draws a surface where the mixture fraction has a value of 0.05~kg/kg and colors 
 Any gas phase quantity can be animated via iso-surfaces, but use caution. To render an iso-surface, the desired quantity must be computed in every mesh cell at every output time step. For quantities like {\ct 'TEMPERATURE'}, this is not a problem, as FDS computes it and saves it anyway. However, species volume fractions demand substantial amounts of time to compute at each mesh cell. Remember to include the {\ct SPEC\_ID} corresponding to the given {\ct QUANTITY} if necessary.
 
 
-
+\newpage
 
 \section{Plot3D Static Data Dumps}
 \label{info:PL3D}
@@ -9260,7 +9293,6 @@ Plot3D data are stored in files with extension {\ct .q} . There is an optional f
 Past versions of FDS (1-5) output Plot3D files by default. Now, you must specify the time interval between dumps using {\ct DT\_PL3D} on the {\ct DUMP} line.
 
 
-
 \section{SMOKE3D: Realistic Smoke and Fire}
 \label{info:SMOKE3D}
 
@@ -9271,7 +9303,7 @@ When you do a fire simulation, FDS automatically creates two output files that a
 \end{lstlisting}
 The {\ct MASS\_EXTINCTION\_COEFFICIENT} is passed to Smokeview to be used for visualization.
 
-
+\newpage
 
 \section{Particle Output Quantities}
 \label{info:part_output}
@@ -9343,10 +9375,11 @@ The parameter {\ct QUANTITIES} on the {\ct PART} line is an array of character s
 {\ct 'PARTICLE ACCEL X'}, {\ct 'PARTICLE ACCEL Y'}, {\ct 'PARTICLE ACCEL Z'} (m/s$^2$) \\
 {\ct 'PARTICLE DRAG FORCE X'}, {\ct 'PARTICLE DRAG FORCE Y'}, {\ct 'PARTICLE DRAG FORCE Z'} (N) \\
 {\ct 'PARTICLE DRAG COEFFICIENT'} \\
+{\ct 'PARTICLE BULK DENSITY'} (kg/m$^3$) \\
 \\
 By default, if no {\ct QUANTITIES} are specified and none are selected in Smokeview, then Smokeview will display particles with a single color. To select this color specify either {\ct RGB} or {\ct COLOR}. By default, water droplets are colored blue. All others are colored black.
 
-The {\ct PARTICLE WEIGHTING FACTOR} describes how many actual particles each of the computational particles represent.
+The {\ct PARTICLE WEIGHTING FACTOR} describes how many actual particles each of the computational particles represent. The {\ct PARTICLE BULK DENSITY} gives the weighted (total) mass per grid cell volume, which is an important parameter when using particles to represent porous media such as vegetation.
 
 For solid particles with a specified {\ct SURF\_ID}, you may specify any of the solid phase output quantities listed in Table~\ref{tab:output}. If the specified quantity is associated with a species, use the parameter \linebreak[4] {\ct QUANTITIES\_SPEC\_ID(N)} to specify the species. Here {\ct N} refers to the order of the specified output quantities on the {\ct PART} line.
 
@@ -9386,9 +9419,10 @@ Note that the parameter {\ct DX} on the {\ct INIT} line creates a line of partic
 
 
 
+\newpage
 
-
-\section{Special Output Quantities}
+\section{Special Output Features}
+\label{info:special_output}
 
 This section lists a variety of output quantities that are useful for studying thermally-driven flows, combustion, pyrolysis, and so forth. Note that some of the output quantities can be produced in a variety of ways.
 
@@ -9433,6 +9467,12 @@ As a test of the energy balance, a sample case called {\ct Pressure\_Solver/hall
 \caption[Results of the {\ct hallways} test case]{The energy budget for the {\ct hallways} test case.}
 \label{hallways_energy}
 \end{figure}
+
+
+\subsection{Gas Species Mass}
+\label{info:MASS_FILE}
+
+If you set {\ct MASS\_FILE=T} on the {\ct DUMP} line, a file called {\ct CHID\_mass.csv} is produced that lists the total mass of all gas species as a function of time. This flag is {\ct F} by default because the calculation of all gas species in all mesh cells is time-consuming. The parameter {\ct DT\_MASS} or {\ct RAMP\_MASS} controls the frequency of output.
 
 
 \subsection{Mass Loss Rates}
@@ -10371,7 +10411,7 @@ where $\tau_{\rm w} = \mu\,\partial |\mathbf{u}|/\partial n$ is the viscous stre
 In combustion, knowing if, when, or where chemical reactions have been extinguished is important. The output quantity {\ct EXTINCTION} tells the user whether or not combustion has been prevented by the extinction routine. By default, {\ct EXTINCTION} = 0, which means that the FDS extinction routine has not prevented combustion. An {\ct EXTINCTION} value of 1 means that the routine has prevented combustion. The criteria for an {\ct EXTINCTION} value of 1 is the presence of fuel and oxidizer without any energy release. An {\ct EXTINCTION} value of -1 means that there is either no fuel or no oxidizer present.
 
 
-
+\newpage
 
 \section{Extracting Numbers from the Output Data Files}
 \label{info:fds2ascii}
@@ -10422,6 +10462,7 @@ These commands tell {\ct fds2ascii} that you want to convert (binary) boundary f
 \end{description}
 
 
+\newpage
 
 \section{Summary of Frequently-Used Output Quantities}
 \label{info:outputquantities}
@@ -10514,6 +10555,7 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct ORIENTED VELOCITY}$^5$                     & $(u,v,w)\cdot(n_x,n_y,n_z)$                   & m/s            & D            \\ \hline
 {\ct PATH OBSCURATION}                          & Section~\ref{info:beam_detector}              & \%             & D            \\ \hline
 {\ct PARTICLE AGE}                              & Section~\ref{info:part_output}                & s              & PA           \\ \hline
+{\ct PARTICLE BULK DENSITY}                     & Section~\ref{info:part_output}                & kg/(m$^3$)     & PA           \\ \hline
 {\ct PARTICLE DIAMETER}                         & Section~\ref{info:part_output}                & $\mu$m         & PA           \\ \hline
 {\ct PARTICLE FLUX X}$^2$                       & Section~\ref{info:part_output}                & \si{kg/(m$^2$.s)} & P,S       \\ \hline
 {\ct PARTICLE FLUX Y}$^2$                       & Section~\ref{info:part_output}                & \si{kg/(m$^2$.s)} & P,S       \\ \hline
@@ -10552,7 +10594,7 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct SURFACE DEPOSITION}$^1$                    & Section~\ref{info:deposition}                 & kg/m$^2$       & B,D          \\ \hline
 {\ct TEMPERATURE}                               & Section~\ref{info:THERMOCOUPLE}               & $^\circ$C      & D,I,P,S      \\ \hline
 {\ct THERMOCOUPLE}                              & Section~\ref{info:THERMOCOUPLE}               & $^\circ$C      & D            \\ \hline
-{\ct TIME}                                      & Section~\ref{info:DEVC}                       & s              & D            \\ \hline
+{\ct TIME}                                      & Section~\ref{info:DEVC2}                      & s              & D            \\ \hline
 {\ct TIME STEP}                                 & Section~\ref{info:TIMING}                     & s              & D            \\ \hline
 {\ct TRANSMISSION}                              & Section~\ref{info:beam_detector}              & \%/m           & D            \\ \hline
 {\ct U-VELOCITY}                                & Gas velocity component, $u$                   & m/s            & D,I,P,S      \\ \hline
@@ -10761,6 +10803,8 @@ of a {\ct DUCT\_ID}, quantities for a node require the specification of a {\ct N
 {\ct NODE TEMPERATURE}                          & Temperature of the flow though a node       & $^\circ$C          & D   \\ \hline
 {\ct NODE VOLUME FRACTION}                      & Volume fraction of a species in a node      &  mol/mol           & D   \\ \hline
 \end{longtable}
+
+
 
 
 
@@ -11063,7 +11107,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 \section{\texorpdfstring{{\tt DUMP}}{DUMP} (Output Parameters)}
 
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
-\caption[Output control parameters ({\ct DUMP} namelist group)]{For more information see Section~\ref{info:DUMP}.}
+\caption[Output control parameters ({\ct DUMP} namelist group)]{For more information see Chapter~\ref{info:DUMP}.}
 \label{tbl:DUMP} \\
 \hline
 \multicolumn{5}{|c|}{{\ct DUMP} (Output Parameters)} \\
@@ -11074,63 +11118,63 @@ properties be specified as well. Simply prescribing as many properties as possib
 \multicolumn{5}{|c|}{{\ct DUMP} (Output Parameters)} \\
 \hline \hline
 \endhead
-{\ct CFL\_FILE}                     & Logical      & Section~\ref{info:TIME_Control}        &           & {\ct F}                  \\ \hline
-{\ct CLIP\_RESTART\_FILES}          & Logical      & Section~\ref{info:restart}             &           & {\ct T}                   \\ \hline
-{\ct COLUMN\_DUMP\_LIMIT}           & Logical      & Section~\ref{info:out:DEVC}            &           & {\ct F}                  \\ \hline
+{\ct CFL\_FILE}                     & Logical      & Section~\ref{info:TIME_Control}        &           & {\ct F}                        \\ \hline
+{\ct CLIP\_RESTART\_FILES}          & Logical      & Section~\ref{info:restart}             &           & {\ct T}                        \\ \hline
+{\ct COLUMN\_DUMP\_LIMIT}           & Logical      & Section~\ref{info:out:DEVC}            &           & {\ct F}                        \\ \hline
 {\ct CTRL\_COLUMN\_LIMIT}           & Integer      & Section~\ref{info:out:DEVC}            &           & 254                            \\ \hline
 {\ct DEVC\_COLUMN\_LIMIT}           & Integer      & Section~\ref{info:out:DEVC}            &           & 254                            \\ \hline
-{\ct DT\_BNDF}                      & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /NFRAMES}    \\ \hline
+{\ct DT\_BNDF}                      & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
 {\ct DT\_CPU}                       & Real         & Section~\ref{out:CPU}                  &  s        & $2 \Delta t$                   \\ \hline
-{\ct DT\_CTRL}                      & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
-{\ct DT\_DEVC}                      & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
-{\ct DT\_FLUSH}                     & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
-{\ct DT\_HRR}                       & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
-{\ct DT\_ISOF}                      & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
-{\ct DT\_MASS}                      & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
-{\ct DT\_PART}                      & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
-{\ct DT\_PL3D}                      & Real         & Section~\ref{info:DUMP}                &  s        & $2 \Delta t$                   \\ \hline
-{\ct DT\_PROF}                      & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
+{\ct DT\_CTRL}                      & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
+{\ct DT\_DEVC}                      & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
+{\ct DT\_FLUSH}                     & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
+{\ct DT\_HRR}                       & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
+{\ct DT\_ISOF}                      & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
+{\ct DT\_MASS}                      & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
+{\ct DT\_PART}                      & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
+{\ct DT\_PL3D}                      & Real         & Section~\ref{info:DT_DUMP}             &  s        & $2 \Delta t$                   \\ \hline
+{\ct DT\_PROF}                      & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
 {\ct DT\_RADF}                      & Real         & Section~\ref{info:RADF}                &  s        & $2 \Delta t$                   \\ \hline
-{\ct DT\_RESTART}                   & Real         & Section~\ref{info:DUMP}                &  s        & $2 \Delta t$                   \\ \hline
-{\ct DT\_SL3D}                      & Real         & Section~\ref{info:DUMP}                &  s        & $2 \Delta t$                   \\ \hline
-{\ct DT\_SLCF}                      & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
-{\ct DT\_SMOKE3D}                   & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
-{\ct DT\_UVW}                       & Real         & Section~\ref{info:DUMP}                &  s        & $2 \Delta t$                   \\ \hline
-{\ct EB\_PART\_FILE}                & Logical      & Section~\ref{out:PART}                 &           & {\ct F}                  \\ \hline
-{\ct FLUSH\_FILE\_BUFFERS}          & Logical      & Section~\ref{info:DUMP}                &           & {\ct T}                   \\ \hline
-{\ct HRR\_GAS\_ONLY}                & Logical      & Section~\ref{info:HRR}                 &           & {\ct F}                  \\ \hline
-{\ct MASS\_FILE}                    & Logical      & Section~\ref{info:DUMP}                &           & {\ct F}                  \\ \hline
-{\ct MAXIMUM\_PARTICLES}            & Integer      & Section~\ref{info:DUMP}                &           & 1000000                        \\ \hline
+{\ct DT\_RESTART}                   & Real         & Section~\ref{info:DT_DUMP}             &  s        & $2 \Delta t$                   \\ \hline
+{\ct DT\_SL3D}                      & Real         & Section~\ref{info:DT_DUMP}             &  s        & $2 \Delta t$                   \\ \hline
+{\ct DT\_SLCF}                      & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
+{\ct DT\_SMOKE3D}                   & Real         & Section~\ref{info:DT_DUMP}             &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
+{\ct DT\_UVW}                       & Real         & Section~\ref{info:DT_DUMP}             &  s        & $2 \Delta t$                   \\ \hline
+{\ct EB\_PART\_FILE}                & Logical      & Section~\ref{out:PART}                 &           & {\ct F}                        \\ \hline
+{\ct FLUSH\_FILE\_BUFFERS}          & Logical      & Section~\ref{info:DUMP}                &           & {\ct T}                        \\ \hline
+{\ct HRR\_GAS\_ONLY}                & Logical      & Section~\ref{info:HRR}                 &           & {\ct F}                        \\ \hline
+{\ct MASS\_FILE}                    & Logical      & Section~\ref{info:DUMP}                &           & {\ct F}                        \\ \hline
+{\ct MAXIMUM\_PARTICLES}            & Integer      & Section~\ref{info:controlling_droplets}&           & 1000000                        \\ \hline
 {\ct NFRAMES}                       & Integer      & Section~\ref{info:DUMP}                &           & 1000                           \\ \hline
 {\ct PLOT3D\_PART\_ID(5)}           & Char.~Quint  & Section~\ref{info:PL3D}                &           &                                \\ \hline
 {\ct PLOT3D\_QUANTITY(5)}           & Char.~Quint  & Section~\ref{info:PL3D}                &           &                                \\ \hline
 {\ct PLOT3D\_SPEC\_ID(5)}           & Char.~Quint  & Section~\ref{info:PL3D}                &           &                                \\ \hline
 {\ct PLOT3D\_VELO\_INDEX}           & Int.~Quint   & Section~\ref{info:velocity}            &           &  0                             \\ \hline
-{\ct RAMP\_BNDF}                    & Character    & Section~\ref{info:DUMP}                &           &                                \\ \hline
+{\ct RAMP\_BNDF}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
 {\ct RAMP\_CPU}                     & Character    & Section~\ref{out:CPU}                  &           &                                \\ \hline
-{\ct RAMP\_CTRL}                    & Character    & Section~\ref{info:DUMP}                &           &                                \\ \hline
-{\ct RAMP\_DEVC}                    & Character    & Section~\ref{info:DUMP}                &           &                                \\ \hline
-{\ct RAMP\_FLUSH}                   & Character    & Section~\ref{info:DUMP}                &           &                                \\ \hline
-{\ct RAMP\_HRR}                     & Character    & Section~\ref{info:DUMP}                &           &                                \\ \hline
-{\ct RAMP\_ISOF}                    & Character    & Section~\ref{info:DUMP}                &           &                                \\ \hline
-{\ct RAMP\_MASS}                    & Character    & Section~\ref{info:DUMP}                &           &                                \\ \hline
-{\ct RAMP\_PART}                    & Character    & Section~\ref{info:DUMP}                &           &                                \\ \hline
-{\ct RAMP\_PL3D}                    & Character    & Section~\ref{info:DUMP}                &           &                                \\ \hline
-{\ct RAMP\_PROF}                    & Character    & Section~\ref{info:DUMP}                &           &                                \\ \hline
+{\ct RAMP\_CTRL}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
+{\ct RAMP\_DEVC}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
+{\ct RAMP\_FLUSH}                   & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
+{\ct RAMP\_HRR}                     & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
+{\ct RAMP\_ISOF}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
+{\ct RAMP\_MASS}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
+{\ct RAMP\_PART}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
+{\ct RAMP\_PL3D}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
+{\ct RAMP\_PROF}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
 {\ct RAMP\_RADF}                    & Character    & Section~\ref{info:RADF}                &           &                                \\ \hline
-{\ct RAMP\_RESTART}                 & Character    & Section~\ref{info:DUMP}                &           &                                \\ \hline
-{\ct RAMP\_SL3D}                    & Character    & Section~\ref{info:DUMP}                &           &                                \\ \hline
-{\ct RAMP\_SLCF}                    & Character    & Section~\ref{info:DUMP}                &           &                                \\ \hline
-{\ct RAMP\_SMOKE3D}                 & Character    & Section~\ref{info:DUMP}                &           &                                \\ \hline
-{\ct RAMP\_UVW}                     & Character    & Section~\ref{info:DUMP}                &           &                                \\ \hline
+{\ct RAMP\_RESTART}                 & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
+{\ct RAMP\_SL3D}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
+{\ct RAMP\_SLCF}                    & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
+{\ct RAMP\_SMOKE3D}                 & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
+{\ct RAMP\_UVW}                     & Character    & Section~\ref{info:DT_DUMP}             &           &                                \\ \hline
 {\ct RENDER\_FILE}                  & Character    & Reference~\cite{Smokeview_Users_Guide} &           &                                \\ \hline
 {\ct SIG\_FIGS}                     & Integer      & Section~\ref{info:SIG_FIGS}            &           & 8                              \\ \hline
 {\ct SIG\_FIGS\_EXP}                & Integer      & Section~\ref{info:SIG_FIGS}            &           & 3                              \\ \hline
-{\ct SMOKE3D}                       & Logical      & Section~\ref{info:SMOKE3D}             &           & {\ct T}                   \\ \hline
-{\ct STATUS\_FILES}                 & Logical      & Section~\ref{info:DUMP}                &           & {\ct F}                  \\ \hline
-{\ct SUPPRESS\_DIAGNOSTICS}         & Logical      & Section~\ref{info:monitoring_progress} &           & {\ct F}                  \\ \hline
-{\ct VELOCITY\_ERROR\_FILE}         & Logical      & Section~\ref{info:TIMING}              &           & {\ct F}                  \\ \hline
-{\ct WRITE\_XYZ}                    & Logical      & Section~\ref{info:PL3D}                &           & {\ct F}                  \\ \hline
+{\ct SMOKE3D}                       & Logical      & Section~\ref{info:SMOKE3D}             &           & {\ct T}                        \\ \hline
+{\ct STATUS\_FILES}                 & Logical      & Section~\ref{info:DUMP}                &           & {\ct F}                        \\ \hline
+{\ct SUPPRESS\_DIAGNOSTICS}         & Logical      & Section~\ref{info:monitoring_progress} &           & {\ct F}                        \\ \hline
+{\ct VELOCITY\_ERROR\_FILE}         & Logical      & Section~\ref{info:TIMING}              &           & {\ct F}                        \\ \hline
+{\ct WRITE\_XYZ}                    & Logical      & Section~\ref{info:PL3D}                &           & {\ct F}                        \\ \hline
 \end{longtable}
 
 % Undocumented: GET_CUTCELLS_VERBOSE(MV, debug), MMS_TIMER (RJM)
@@ -11292,6 +11336,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct DAMPER}                  & Logical       & Sections~\ref{info:HVACduct}, \ref{info:HVACdamper}                      &               & {\ct F}  \\ \hline
 {\ct DEVC\_ID}                & Character     & Sections ~\ref{info:HVACduct}, \ref{info:HVACfan}, \ref{info:HVACfilter} &               &                \\ \hline
 {\ct DIAMETER}                & Real          & Section~\ref{info:HVACduct}                                              &  m            &                \\ \hline
+{\ct DISCHARGE\_COEFFICIENT}  & Real          & Section~\ref{info:Leaks}                                                 &               & 1.             \\ \hline
 {\ct DUCT\_ID}                & Char.~Array   & Section~\ref{info:HVACnode}                                              &               &                \\ \hline
 {\ct DUCT\_INTERP\_TYPE}      & Character     & Section~\ref{info:hvacmasstransport}                                     &               & {\ct 'NODE1'}  \\ \hline
 {\ct EFFICIENCY}              & Real Array    & Sections~\ref{info:HVACfilter}, \ref{info:HVACaircoil}                   &               & 1.0            \\ \hline
@@ -11299,7 +11344,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct FILTER\_ID}              & Character     & Section~\ref{info:HVACnode}                                              &               &                \\ \hline
 {\ct FIXED\_Q}                & Real          & Section~\ref{info:HVACaircoil}                                           & kW            &                \\ \hline
 {\ct ID}                      & Character     & Section~\ref{info:HVAC}                                                  &               &                \\ \hline
-{\ct LEAK\_ENTHALPY}          & Logical       & Section~\ref{info:local_leakage}                                         &               & {\ct F}  \\ \hline
+{\ct LEAK\_ENTHALPY}          & Logical       & Section~\ref{info:local_leakage}                                         &               & {\ct F}        \\ \hline
+{\ct LEAK\_PRESSURE\_EXPONENT}& Real          & Section~\ref{info:Leaks}                                                 &               & 0.5            \\ \hline
+{\ct LEAK\_REFERENCE\_PRESSURE}& Real         & Section~\ref{info:Leaks}                                                 & Pa            & 4              \\ \hline
 {\ct LENGTH}                  & Real          & Section~\ref{info:HVACduct}                                              &  m            &                \\ \hline
 {\ct LOADING}                 & Real Array    & Section ~\ref{info:HVACfilter}                                           & kg            & 0.0            \\ \hline
 {\ct LOADING\_MULTIPLIER}     & Real Array    & Section ~\ref{info:HVACfilter}                                           & 1/kg          & 1.0            \\ \hline
@@ -11347,6 +11394,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct INIT} (Initial Conditions)} \\
 \hline \hline
 \endhead
+{\ct BULK\_DENSITY\_FILE}         & Character         & Section~\ref{bulk_density_file}               &                &               \\ \hline
 {\ct CELL\_CENTERED}              & Logical           & Section~\ref{info:initial_droplets}           &                & {\ct F} \\ \hline
 {\ct CROWN\_BASE\_HEIGHT}         & Real              & Section~\ref{info:trees}                      & m              &               \\ \hline
 {\ct CROWN\_BASE\_WIDTH}          & Real              & Section~\ref{info:trees}                      & m              &               \\ \hline
@@ -11468,7 +11516,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct NU\_PART(:,:)}                 & Real Array      & Section~\ref{info:solid_pyrolysis}    & kg/kg             & 0.            \\ \hline
 {\ct NU\_SPEC(:,:)}                 & Real Array      & Section~\ref{info:solid_pyrolysis}    & kg/kg             & 0.            \\ \hline
 {\ct PART\_ID(:,:)}                 & Char.~Array     & Section~\ref{info:solid_pyrolysis}    &                   &               \\ \hline
-{\ct PCR(:)}                        & Logical Array   & Section~\ref{info:solid_pyrolysis}    &                   & {\ct F}       \\ \hline
 {\ct PYROLYSIS\_RANGE(:)}           & Real Array      & Section~\ref{info:kinetic_parameters} & $^\circ$C         & 80.           \\ \hline
 {\ct REFERENCE\_RATE(:)}            & Real Array      & Section~\ref{info:solid_pyrolysis}    & 1/s               &               \\ \hline
 {\ct REFERENCE\_TEMPERATURE(:)}     & Real Array      & Section~\ref{info:solid_pyrolysis}    & $^\circ$C         &               \\ \hline
@@ -11476,8 +11523,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SPECIFIC\_HEAT}                & Real            & Section~\ref{info:thermal_properties} & \si{kJ/(kg.K)}    & 0.            \\ \hline
 {\ct SPECIFIC\_HEAT\_RAMP}          & Character       & Section~\ref{info:thermal_properties} &                   &               \\ \hline
 {\ct SPEC\_ID(:,:)}                 & Char.~Array     & Section~\ref{info:solid_pyrolysis}    &                   &               \\ \hline
-{\ct THRESHOLD\_SIGN(:)}            & Real Array      & Section~\ref{info:solid_pyrolysis}    &                   & 1.0           \\ \hline
-{\ct THRESHOLD\_TEMPERATURE(:)}     & Real Array      & Section~\ref{info:solid_pyrolysis}    & $^\circ$C         & -273.15       \\ \hline
 \end{longtable}
 
 % Undocumented: COLOR, REFRACTIVE_INDEX, RGB
@@ -11508,7 +11553,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct LEVEL}                          & Integer                       & For future use                            &    & 0                \\ \hline
 {\ct MPI\_PROCESS}                   & Integer                       & Section~\ref{info:multimesh}              &    &                  \\ \hline
 {\ct MULT\_ID }                      & Character                     & Section~\ref{info:MULT}                   &    &                  \\ \hline
-{\ct N\_THREADS}                     & Integer                       & Section~\ref{info:multimesh}              &    &                  \\ \hline
 {\ct RGB}                            & Integer Triplet               & Section~\ref{info:multimesh}              &    & 0,0,0            \\ \hline
 {\ct TRNX\_ID}                       & Character                     & Section~\ref{info:TRNX}                   &    &                  \\ \hline
 {\ct TRNY\_ID}                       & Character                     & Section~\ref{info:TRNX}                   &    &                  \\ \hline
@@ -12296,6 +12340,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct HT3D}                                                & Logical         & Section~\ref{info:ht3d}                   &                     & {\ct F}           \\ \hline
 {\ct ID}                                                  & Character       & Section~\ref{info:SURF}                   &                     &                         \\ \hline
 {\ct IGNITION\_TEMPERATURE}                               & Real            & Section~\ref{info:specified_burning}      & $^\circ$C           & 5000.                   \\ \hline
+{\ct INIT\_IDS}                                           & Char.~Array     & Section~\ref{info:trees}                  &                     &                         \\ \hline
+{\ct INIT\_PER\_AREA}                                     & Real            & Section~\ref{info:trees}                  & m$^{-2}$            &                         \\ \hline
 {\ct INNER\_RADIUS}                                       & Real            & Section~\ref{info:PART_GEOMETRY}          & m                   &                         \\ \hline
 {\ct INTERNAL\_HEAT\_SOURCE}                              & Real Array      & Section~\ref{info:INTERNAL_HEAT_SOURCE}   & kW/m$^3$            &                         \\ \hline
 {\ct LAYER\_DIVIDE}                                       & Real            & Section~\ref{info:EXPOSED}                &                     & {\ct N\_LAYERS}/2       \\ \hline
@@ -12595,6 +12641,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct ZONE} (Pressure Zone Parameters)} \\
 \hline \hline
 \endhead
+{\ct DISCHARGE\_COEFFICIENT(N)}    & Real                  & Section~\ref{info:Leaks}           &        & 1.            \\ \hline
 {\ct ID}                           & Character             & Section~\ref{info:ZONE_Basics}     &        &               \\ \hline
 {\ct LEAK\_AREA(N)}                & Real                  & Section~\ref{info:Leaks}           & m$^2$  & 0             \\ \hline
 {\ct LEAK\_PRESSURE\_EXPONENT(N)}  & Real                  & Section~\ref{info:Leaks}           &        & 0.5           \\ \hline

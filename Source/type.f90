@@ -635,9 +635,7 @@ TYPE MATERIAL_TYPE
    INTEGER, ALLOCATABLE, DIMENSION(:,:) :: LPC_INDEX
    INTEGER, DIMENSION(3) :: RGB
    REAL(EB), DIMENSION(MAX_REACTIONS) :: TMP_REF
-   REAL(EB), DIMENSION(MAX_REACTIONS) :: TMP_THR
    REAL(EB), DIMENSION(MAX_REACTIONS) :: RATE_REF
-   REAL(EB), DIMENSION(MAX_REACTIONS) :: THR_SIGN
    REAL(EB), DIMENSION(MAX_REACTIONS) :: MAX_REACTION_RATE
    REAL(EB), DIMENSION(MAX_MATERIALS,MAX_REACTIONS) :: NU_RESIDUE=0._EB
    REAL(EB), DIMENSION(MAX_REACTIONS) :: A
@@ -662,7 +660,6 @@ TYPE MATERIAL_TYPE
    REAL(EB), DIMENSION(MAX_SPECIES,MAX_REACTIONS) :: NU_SPEC
    REAL(EB), DIMENSION(MAX_SPECIES,MAX_REACTIONS) :: HEAT_OF_COMBUSTION
    REAL(EB), DIMENSION(MAX_SPECIES) :: DIFFUSIVITY_SPEC
-   LOGICAL, DIMENSION(MAX_REACTIONS) :: PCR=.FALSE.
    LOGICAL :: ALLOW_SHRINKING
    LOGICAL :: ALLOW_SWELLING
    LOGICAL :: CONST_C=.TRUE.
@@ -735,6 +732,7 @@ TYPE SURFACE_TYPE
    REAL(EB) :: BURN_DURATION=1.E6_EB
    REAL(EB) :: CONE_HEAT_FLUX=-1._EB
    REAL(EB) :: PARTICLE_EXTRACTION_VELOCITY=1.E6_EB
+   REAL(EB) :: INIT_PER_AREA=0._EB
 
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: DX,RDX,RDXN,X_S,DX_WGT,MF_FRAC,PARTICLE_INSERT_CLOCK
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: RHO_0
@@ -746,6 +744,7 @@ TYPE SURFACE_TYPE
    INTEGER, DIMENSION(2) :: LEAK_PATH,DUCT_PATH
    INTEGER :: THERMAL_BC_INDEX,NPPC,SPECIES_BC_INDEX,VELOCITY_BC_INDEX,SURF_TYPE,N_CELLS_INI,N_CELLS_MAX=0, &
               PART_INDEX,PROP_INDEX=-1,RAMP_T_I_INDEX=-1, RAMP_T_B_INDEX=0
+   INTEGER, DIMENSION(10) :: INIT_INDICES=0
    INTEGER :: PYROLYSIS_MODEL
    INTEGER :: N_LAYERS,N_MATL,SUBSTEP_POWER=2,N_SPEC=0,N_LPC=0
    INTEGER :: N_ONE_D_STORAGE_REALS,N_ONE_D_STORAGE_INTEGERS,N_ONE_D_STORAGE_LOGICALS
@@ -778,6 +777,7 @@ TYPE SURFACE_TYPE
    CHARACTER(LABEL_LENGTH), ALLOCATABLE, DIMENSION(:) :: RAMP_MF
    CHARACTER(LABEL_LENGTH) :: ID,TEXTURE_MAP,LEAK_PATH_ID(2)
    CHARACTER(MESSAGE_LENGTH) :: FYI='null'
+   CHARACTER(LABEL_LENGTH), DIMENSION(10) :: INIT_IDS='null'
 
    ! 1D mass transfer
 
@@ -1104,13 +1104,14 @@ END TYPE CFACE_TYPE
 ! Cartesian Cells Cut-Cells data structure:
 
 INTEGER, PARAMETER :: IBM_MAXVERTS_CELL   =3072
-INTEGER, PARAMETER :: IBM_NPARAM_CCFACE   =   5 ! [face_type side iaxis cei icf]
+INTEGER, PARAMETER :: IBM_NPARAM_CCFACE   =   6 ! [face_type side iaxis cei icf to_master]
 
 TYPE IBM_CUTCELL_TYPE
    INTEGER :: NCELL, NFACE_CELL
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)                     ::    CCELEM ! Cut-cells faces connectivities in FACE_LIST.
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)                     :: FACE_LIST ! List of faces, cut-faces.
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)                     ::  IJK_LINK ! Cell/cut-cell each cut-cell is linked to.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)                       ::  LINK_LEV ! Level in local Linking Hierarchy tree.
    REAL(EB), ALLOCATABLE, DIMENSION(:)                       ::    VOLUME ! Cut-cell volumes.
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)                     ::    XYZCEN ! Cut-cell centroid locaitons.
    INTEGER,  DIMENSION(MAX_DIM)                              ::       IJK ! [ i j k ]
@@ -1399,11 +1400,13 @@ TYPE INITIALIZATION_TYPE
    LOGICAL :: SINGLE_INSERTION=.TRUE.
    LOGICAL :: CELL_CENTERED=.FALSE.
    LOGICAL :: UNIFORM=.FALSE.
+   LOGICAL :: INVOKED_BY_SURF=.FALSE.  ! Invoked by a SURF line for repeated insertion
    LOGICAL, ALLOCATABLE, DIMENSION(:) :: ALREADY_INSERTED
    CHARACTER(LABEL_LENGTH) :: SHAPE
    CHARACTER(LABEL_LENGTH) :: DEVC_ID
    CHARACTER(LABEL_LENGTH) :: CTRL_ID
    CHARACTER(LABEL_LENGTH) :: ID
+   CHARACTER(MESSAGE_LENGTH) :: BULK_DENSITY_FILE
 END TYPE INITIALIZATION_TYPE
 
 TYPE (INITIALIZATION_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: INITIALIZATION
@@ -1429,6 +1432,7 @@ TYPE P_ZONE_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: LEAK_AREA                !< Array of leak areas to other ZONEs
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: LEAK_REFERENCE_PRESSURE  !< Array of leak reference pressures
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: LEAK_PRESSURE_EXPONENT   !< Array of leak reference exponents
+   REAL(EB), ALLOCATABLE, DIMENSION(:) :: DISCHARGE_COEFFICIENT    !< Array of leak disharge coefficients
    INTEGER :: N_DUCTNODES                                          !< Number of duct nodes in the ZONE
    INTEGER :: MESH_INDEX=0                                         !< Index of the MESH where the ZONE is located
    INTEGER, ALLOCATABLE, DIMENSION(:) :: NODE_INDEX                !< Array of NODE indices connected to the ZONE
@@ -1448,10 +1452,12 @@ TYPE ZONE_MESH_TYPE
 #endif /* WITH_MKL */
    INTEGER :: NUNKH=0                                 !< Number of unknowns in pressure solution for a given ZONE_MESH
    INTEGER :: NCVLH=0                                 !< Number of pressure control volumes for a given ZONE_MESH
+   INTEGER :: ICVL=0                                  !< Control volume counter for parent ZONE
+   INTEGER :: IROW=0                                  !< Parent ZONE matrix row index
    INTEGER :: NUNKH_CART=0                            !< Number of unknowns in Cartesian cells of ZONE_MESH
    INTEGER :: NCVLH_CART=0                            !< Number of pressure CVs in Cartesian cells of ZONE_MESH
    INTEGER :: MTYPE=0                                 !< Matrix type (symmetric indefinite, or symm positive definite)
-   LOGICAL :: ZONE_IN_MESH=.FALSE.                    !< ZONE is in MESH
+   INTEGER :: CONNECTED_ZONE_PARENT=0                 !< Index of first zone in a connected zone list
    LOGICAL :: USE_FFT=.TRUE.                          !< Flag for use of FFT solver
    INTEGER, ALLOCATABLE, DIMENSION(:,:) :: MESH_IJK   !< I,J,K positions of cell with unknown row IROW (1:3,1:NUNKH)
    REAL(EB),ALLOCATABLE, DIMENSION(:)   :: A_H        !< Matrix coefficients for ZONE_MESH, up triang part, CSR format.
@@ -1614,6 +1620,9 @@ TYPE DUCT_TYPE
    REAL(EB) :: VOLUME_FLOW=1.E6_EB                        !< Current duct volume flow (m3/s)
    REAL(EB) :: VOLUME_FLOW_INITIAL=1.E6_EB                !< Input duct volume flow (m3/s)
    REAL(EB) :: LOSS(2)=0._EB                              !< Upstream specific heat (J/kg/K)
+   REAL(EB) :: LEAK_PRESSURE_EXPONENT=0.5_EB              !< Pressure exponent in leakage expression
+   REAL(EB) :: LEAK_REFERENCE_PRESSURE=4._EB              !< Reference pressure in leakage expression (Pa)
+   REAL(EB) :: DISCHARGE_COEFFICIENT=1._EB                !< Discharge coefficient, C, in leakage expression
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: CP_C            !< Current specific heat in each duct segment (J/kg/K)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: CP_C_OLD        !< Prior timestep specific heat in each duct segment (J/kg/K)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: RHO_C           !< Current density in each duct segment (kg/m3)

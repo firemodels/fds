@@ -1917,7 +1917,7 @@ In this test series, the 2D FDS domain is set 10 m in length and 1 m in height. 
 
 \subsubsection{Abbas Jaber, NIST SURF student}
 
-\noindent The distance from the wall measured in viscous units is called $y^+$. In order to verify that $y^+$ is calculated correctly within FDS, we analyze an example of Poiseuille flow in a square channel with periodic boundaries. The pressure gradient in the $x$-direction, the dynamic viscosity, and the dimensions of the channel are known. This allows us to easily determine the expected values of wall shear stress,
+\noindent The distance from the wall measured in ``viscous wall units'' is called $y^+$. In order to verify that $y^+$ is calculated correctly within FDS, we analyze an example of Poiseuille flow in a square channel with periodic boundaries. The pressure gradient in the $x$-direction, the dynamic viscosity, and the dimensions of the channel are known. This allows us to easily determine the expected values of wall shear stress,
 \begin{equation}
 \label{wall stress}
 \tau_w = - \delta \frac{\d p}{\d x},
@@ -1933,21 +1933,19 @@ From here we calculate the exact value of $y^+$ for the given flow,
 y^+ \equiv \frac{y}{\delta_{\nu}} = \frac{u_{\tau}y}{\nu}.
 \end{equation}
 
-In FDS, $\tau_w$ is obtained only from the wall model. The resolution of the wall-normal streamwise velocity gradient increases with  mesh resolution; the value of $y^+$ decreases accordingly. In this verification case, a wall device is used to output $y^+$ for different mesh resolutions in the $z$-direction. $y^+$ is output for a given $\delta z$, height of a cell, $\delta z$ = [1/8, 1/16, 1/32]. Then, the device values obtained are compared with the exact value of $y^+$ for a given mesh resolution (Fig.~\ref{fig_yplus}). An FDS wall device outputs the mid-cell value of the first cell next to the wall, hence, the $z$ value ($y$ in Eq.~(\ref{eqn_yplus})) used to determine the exact $y^+$ varies with $\delta z$ $(z = \delta z/2)$.
+In FDS, $\tau_w$ is obtained only from the wall model. The resolution of the wall-normal streamwise velocity gradient increases with  mesh resolution; the value of $y^+$ decreases accordingly. In this verification case, a wall device is used to output $y^+$ for different mesh resolutions in the $y$-direction. $y^+$ is output for a given $\delta y$, height of a cell, $\delta y$ = [1/8, 1/16, 1/32]. Then, the device values obtained are compared with the exact value of $y^+$ for a given mesh resolution (Fig.~\ref{fig_yplus}). An FDS wall device outputs the mid-cell value of the first cell next to the wall, hence, the $y$ value ($y$ in Eq.~(\ref{eqn_yplus})) used to determine the exact $y^+$ varies with $\delta y$ $(y = \delta y/2)$.
 
 \begin{figure}[ht]
 \centering
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/yplus}
-\caption[Near-wall grid resolution]{Verification of FDS $y^+$ output for $\delta z=[1/8, 1/16, 1/32]$.}
+\caption[Near-wall grid resolution]{Verification of FDS $y^+$ output for $\delta y=[1/8, 1/16, 1/32]$.}
 \label{fig_yplus}
 \end{figure}
 
 
 \section{Heated Channel Flow (\texorpdfstring{\textct{heated\_channel}}{heated\_channel})}
 
-The simulation of turbulent channel flow (Re$_{\tau}=180$) with a heat source was performed to verify the log law near-wall model for heat transfer \cite{FDS_Tech_Guide}. The model was developed based on the law of wall for temperature and empirical equations \cite{Kader:1981}. These cases are located in the Verification/Turbulence subdirectory.
-
-The height of the channel is $H=2$ m, the width is $W=6$ m, and the length is $L=12$ m. There are 64 cells in the streamwise direction ($\delta x = 0.1875$ m) and 32 cells in the spanwise ($\delta y=0.1875$ m) and wall-normal directions ($\delta z=0.0625$ m).  The midpoint of the first cell in viscous units is $z^+ = 5$, which is a very highly resolved LES. For this reason, the dynamic Smagorinsky SGS model is used for the residual stress. Additionally, these cases were run in ``research mode'' (\textct{RESEARCH\_MODE=.TRUE.} on \textct{MISC}), which accounts for both molecular the turbulent transport coefficients, a must for distinguishing between fluids with different molecular Prandtl or Schmidt numbers (here the Re is so low that molecular effects may dominate locally).  The flow is maintained by a mean pressure gradient ($8.748 \times 10^{-6}$ Pa/m) in the streamwise direction. A constant volumetric heat source (0.5 W/m$^3$) is imposed on the fluid. The boundary conditions for momentum equations are no-slip at top and bottom walls and periodic for the streamwise and spanwise directions. The boundary condition for the energy equation is constant temperature ($T_w = 20 \,\mbox{\si{\degree C}} $) at the wall. To evaluate the effects of Prandtl number (Pr) and compare the DNS study \cite{Kim:1987} with FDS, the specific heat ($c_p = 1$ \si{kJ/(kg.K)}) and viscosity ($\mu = 1.8216 \times 10^{-5}$ \si{kg/(m.s)}) are fixed and the conductivity, $k$, of the fluid (air) is adjusted to:
+The simulation of turbulent channel flow (Re$_{\tau}=180$) with a heat source was performed to verify the log law near-wall model for heat transfer \cite{FDS_Tech_Guide}. The height of the channel is $H=2$ m, the width is $W=6$ m, and the length is $L=12$ m. There are 96 cells in the streamwise direction ($\delta x = 0.125$ m) and 48 cells in the spanwise and wall-normal directions ($\delta y=\delta z=0.125$ m).  The midpoint of the first cell in viscous units is $z^+ \approx 18$, putting the first velocity unknown within the buffer layer. For this reason, the dynamic Smagorinsky SGS model is used for the residual stress. Additionally, these cases were run with (\textct{SIMULATION\_MODE='LES'} on \textct{MISC}), which accounts for both molecular the turbulent transport coefficients, a must for distinguishing between fluids with different molecular Prandtl or Schmidt numbers (here the Reynolds number is so low that molecular effects may dominate locally).  The flow is maintained by a mean pressure gradient ($9.0 \times 10^{-6}$ Pa/m) in the streamwise direction (follows from Re$_{\tau}=180$). A constant volumetric heat source (0.5 W/m$^3$) is imposed on the fluid. The boundary conditions for momentum equations are no-slip at top and bottom walls and periodic for the streamwise and spanwise directions. The boundary condition for the energy equation is constant temperature ($T_w = 20 \,\mbox{\si{\degree C}} $) at the wall. To evaluate the effects of Prandtl number (Pr) and compare the DNS study \cite{Kim:1987} with FDS, the specific heat ($c_p = 1$ \si{kJ/(kg.K)}) and viscosity ($\mu = 1.8216 \times 10^{-5}$ \si{kg/(m.s)}) are fixed and the conductivity, $k$, of the fluid (air) is adjusted to:
 \begin{center}
 \begin{tabular}{ll}
 Pr & $k$ (\si{W/(m.K)}) \\
@@ -4428,14 +4426,16 @@ Figure~\ref{surf_mass_two_species} shows the results of three test cases involvi
 
 \subsection{Rate of Solid Particle Decomposition (\texorpdfstring{\textct{solid\_particle\_decomposition}}{solid\_particle\_decomposition})}
 \label{sec:solid_particle_decomposition}
-\label{solid_particle_decomposition}
+\label{part_baking_soda}
 
-\textbf{Paul Papas and Changmin Cao, Raytheon Technologies}\\
+\textbf{Paul Papas (Raytheon Technologies) and Changmin Cao (Collins Aerospace Ireland)}\\
 
 In this set of cases we present a simple analytical solution for the solid phase decomposition of a spherical particle with a constant rate of reaction under isothermal conditions.  Let $m(t)$ denote the mass of a spherical particle with radius $r(t)$, changing with time, $t$.  The initial mass is $m_0 = m(t=0)$.  The extent of reaction is defined as
 \begin{equation}
 \alpha \equiv \frac{m_0-m}{m_0}
 \end{equation}
+
+\subsection*{First-order Reaction Model}
 
 The density of the material, $\rho$, is a constant.  The volume is denoted $V(t)$.  The rate of change of $\alpha$ for a first-order reaction is given by \cite{Khawam:2006}
 \begin{equation}
@@ -4462,14 +4462,56 @@ Integrating with constant density gives
 
 \subsection*{Example}
 
-In Fig.~\ref{fig:solid_particle_decomposition} below, we take $A = 3.4e11$ 1/s, $E_a = 103000$ J/mol, $r_0 = 2.5$ $\mu$m, and compare FDS with the analytical solution for $T=[420, 450, 500]$ K.
+We take $A = 3.4e11$ 1/s, $E_a = 103000$ J/mol, $r_0 = 2.5$ $\mu$m, and compare FDS with the analytical solution for $T=[420, 450, 500]$ K.  Results are presented in Fig.~\ref{fig:part_baking_soda} below.
+
+\subsection*{Contracting Volume Reaction Model}
+
+The rate of change of $\alpha$ for a contracting volume is given by \cite{Khawam:2006}
+\begin{equation}
+\frac{\d \alpha}{\d t} = k \, 3(1-\alpha)^{2/3}
+\end{equation}
+For this model, it is helpful to first convert the extent of reaction back to the particle mass,
+\begin{equation}
+\label{eq:R3mass}
+\frac{\d m}{\d t} = - k \, 3 \, m_0^{1/3} \, m^{2/3}
+\end{equation}
+Integrating gives,
+\begin{equation}
+\int m^{-2/3} \,\d m = -k \, 3 \, m_0^{1/3} \int \d t
+\end{equation}
+\begin{equation}
+m^{1/3} = m_0^{1/3} (1-k \, t)
+\end{equation}
+\begin{equation}
+(\rho V)^{1/3} = (\rho_0 V_0)^{1/3} (1-k \, t)
+\end{equation}
+
+Physically, the density would remain constant and the volume would contract, leading to a linear decrease in the particle radius,
+\begin{equation}
+r = r_0 (1-k \, t)
+\end{equation}
+
+However, the FDS reaction equation is not set up to mimic the contracting volume model.  Instead, for the same kinetics parameters, we can achieve the correct mass decay of the particle by holding the volume constant ({\ct ALLOW\_SHRINKING=F}) and adjusting the preexponential factor to account for the initial mass.  By holding the volume constant, Eq.~(\ref{eq:R3mass}) may be written in terms of solid density for material $\alpha$ as follows,
+\begin{equation}
+\label{eq:R3rho}
+\frac{\d \rho_{s,\alpha}}{\d t} = - k \, \underbrace{3 \, \rho_{s,\alpha}(0)^{1/3}}_{\mathrm{adjustment \; factor}} \, \rho_{s,\alpha}^{2/3}
+\end{equation}
+Therefore, to match the initial decay of the contracting volume model, we must multiply $A$ by the factor $3 \, \rho_{s,\alpha}(0)^{1/3}$ and change the order of the reaction to $2/3$.
+
+\subsection*{Example}
+
+We consider the contracting volume model applied to a spherical baking soda (NaHCO$_3$) particle.  We take $A = 3.4e11 \times 3(2200)^{1/3} = 133e11$ 1/s (note: the initial density of the particle is $2200$ \si{kg/m^3}), $E_a = 103000$ J/mol, $r_0 = 2.5$ $\mu$m, and compare FDS with the analytical solution for the particle diameter with the rate constant evaluated at $T=[420, 450, 500]$ K.  We set {\ct ALLOW\_SHRINKING=F} and we report the particle diameter as the initial diameter times the cube root of the density ratio, $d(t) = d_0 (\rho_{s}[t]/\rho_s[0])^{1/3}$.  The results are shown in Fig.~\ref{fig:part_baking_soda} along with a comparison to the rate for the first-order model with the same Arrhenius parameters.  It is worth noting that the contracting volume model leads to a significantly higher decay rate than the first-order reaction for the same set of parameters.
 
 \begin{figure}[!h]
 \centering
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/solid_particle_decomposition}
-\caption[The \textct{solid\_particle\_decomposition} test cases]{Comparison of analytical and predicted particle diameter for a first-order solid phase reaction under isothermal conditions.}
-\label{fig:solid_particle_decomposition}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/part_baking_soda_420K}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/part_baking_soda_450K}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/part_baking_soda_500K}
+\caption[The \textct{part\_baking\_soda} test cases]{Comparison of analytical and predicted particle diameter for first-order and contracting volume solid phase reaction under isothermal conditions.}
+\label{fig:part_baking_soda}
 \end{figure}
+
+
 
 \section{Burning Rate of a Small Object (\texorpdfstring{\textct{cell\_burn\_away}}{cell\_burn\_away})}
 \label{cell_burn_away}
@@ -4629,62 +4671,6 @@ The density and conductivity of both materials are 30~\si{kg/m^3} and 10~\si{W/(
 Note that the ``analytical'' solution is actually a simple numerical integration of the equations above with a small time step to ensure accuracy.
 This example (Fig.~\ref{fig:solid_phase_enthalpy}) tests a number of features, including the reaction rate, mass weighted specific heats, and radiation boundary conditions. Note that the
 convective heat transfer has been turned off, and the correct steady-state temperature is calculated by FDS.
-
-
-
-
-\section{Simple Phase Change Reaction (\texorpdfstring{\textct{pcm\_slab}}{pcm\_slab})}
-
-A semi-infinite layer of liquid in the semi-infinite region, $x>0$,
-is cooled by setting the surface, $x=0$, to a constant temperature, $T_0$,
-below the freezing temperature, $T_f$. Initially, the liquid is at temperature $T_i > T_f$. The position of the boundary between frozen and liquid layers
-is denoted by $x_f$. The heat conduction equations for the two regions are
-\begin{eqnarray}
-\dod{T_{\rm s}}{t} & = & \alpha_{\rm s} \dsods{T_{\rm s}}{x} \quad \quad (0 < x < x_f) \\ [0.2in]
-\dod{T_{\rm s}}{t} & = & \alpha_l \dsods{T_{\rm s}}{x} \quad \quad (x > x_f)
-\end{eqnarray}
-with boundary conditions
-\begin{eqnarray}
-T_{\rm s}(x,0)   &= & T_i \nonumber \\
-T_{\rm s}(0,t)   &= & T_0 \nonumber \\
-T_{\rm s}(x_f,t) &= & T_f \nonumber
-\end{eqnarray}
-The analytical solutions for the phase interface location and temperature are \cite{Carslaw:1}
-\be
-x_f(t) = 2 \lambda \sqrt{\alpha_l t}
-\ee
-\begin{eqnarray}
-\frac{T_{\rm s}(x,t)-T_0}{T_f - T_0} &=& \frac{\erf(x/2\sqrt{\alpha t})} {\erf (x_f/2\sqrt{\alpha t})} \quad \quad (0 < x < x_f) \\ [0.2in]
-\frac{T_i-T_{\rm s}(x,t)}{T_i - T_f} &=& \frac{\erfc(x/2\sqrt{\alpha t})}{\erfc(x_f/2\sqrt{\alpha t})} \quad \quad (x > x_f)
-\end{eqnarray}
-where $\lambda = x_f /2\sqrt{\alpha t}$ is obtained as a root of the (complicated)
-transcendental equation, given in \cite{Carslaw:1}.
-
-In the test case, the thickness of the liquid layer cannot be infinite. For practical purposes, a 50 cm thick layer was found to be sufficient.
-The fixed-temperature boundary condition, which is formally not available for the condensed-phase heat transfer solver in FDS,
-is implemented by assuming that the gas temperature is $T_0$ with a very high heat convection coefficient.
-For material properties, we choose $\rho_{\rm s} = \rho_l =1,000$~\si{kg/m^3},
-$k_{\rm s} = k_l = 2$~\si{W/(m.K)}, $c_{\rm s} = c_l = 2$~\si{kJ/(kg.K)}, $H_{r,\alpha\beta}=300$~kJ/kg, $T_f = 0$~\si{\degree C}, $T_i = +15$~\si{\degree C},
-and $T_0 = -15$~\si{\degree C}, which leads to a {\em Stefan number}
-\be
-\hbox{St}=\frac{c_{\rm s}\left(T_i - T_0\right)}{H_{r,\alpha\beta}} = 0.1
-\ee
-and $\lambda = 0.189$.
-
-Analytical and simulated results are compared in Fig.~\ref{pcm_slab}. The plot on the left shows the position of the phase boundary.
-From the FDS results, two estimates of $x_f$ are determined because in the numerical solution, the boundary of the two phases is not perfectly sharp.
-``FDS min'' is the largest value of $x$ for which $\rho_{\rm s} > 990$~\si{kg/m^3} and ``FDS max'' is the largest $x$ for which $\rho_{\rm s} > 0$~\si{kg/m^3}. The plot on the right
-shows temperatures at three depths from the surface: 1~cm, 5~cm, and 10~cm.
-\begin{figure}[!htb]
-\noindent
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/pcm_slab_xf} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/pcm_slab_T}
-\end{tabular*}
-\caption[The \textct{pcm\_slab} test cases]{Comparison of analytical and simulated results for the two-region Neumann problem with phase change.}
-\label{pcm_slab}
-\end{figure}
-
 
 
 
@@ -5143,7 +5129,16 @@ The common parameters used in all the simulations are: $C_{\rm d}=10$, $r_{\rm d
 \label{particle_drag_plots}
 \end{figure}
 
+Following the above notation, the total drag force can also be written as:
+\be F_d=\rho V B\left(\frac{u_{0}}{1 + B \, u_{0} \, t}\right)^2 \ee
+Checking this quantity is useful for confirming the \textct{PARTICLE DRAG FORCE X/Y/Z} output quantities and \textct{SPATIAL\_STATISTIC = 'SUM'} for a volume of particles. The computed results for Case~A are compared to the analytical solution in Fig.~\ref{particle_drag_sum}.
 
+\begin{figure}[ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/particle_drag_sum_A}
+\caption[Sample case of \textct{particle\_drag} sum]{Output of total drag from the \textct{particle\_drag\_U10\_N16} test case compared with analytical solution.}
+\label{particle_drag_sum}
+\end{figure}
 
 
 \subsection{Stationary Spherical Particles in a Duct (\texorpdfstring{\textct{sphere\_drag}}{sphere\_drag})}
@@ -5858,22 +5853,31 @@ The overall mass in the domain should not change. Figure~\ref{fig_zone_shape_2} 
    \label{fig_zone_shape_2}
 \end{figure}
 
+\FloatBarrier
 
 \subsection{Leak Pressure Exponent (\texorpdfstring{\textct{HVAC\_leak\_exponent}}{HVAC\_leak\_exponent})}
 \label{HVAC_leak_exponent}
+\label{HVAC_leak_exponent_2}
 
-In a typical building as the interior pressure rises, the leakage area will grow as small gaps, cracks, and other leakage paths open up. Leakage tests performed according to test standards such as ASTM~E~779 provide two additional data points to quantify this behavior. These are the {\ct LEAK\_PRESSURE\_EXPONENT} and the {\ct LEAK\_REFERENCE\_PRESSURE}. The use of these additional inputs are shown in the equation below as $n$ and $\Delta p_{\rm ref}$ respectively where $A_{\rm L,ref}$ is given by {\ct LEAK\_AREA}.
-\be  A_{\rm L} = A_{\rm L,ref} \left( \frac{\Delta p}{\Delta p_{\rm ref}} \right)^{n-0.5} \ee
-By default, $n=0.5$ and $\Delta p_{\rm ref}=4$~Pa, meaning that the leak area will not change with pressure unless you specify an exponent other than 0.5.
+As the interior pressure rises in a typical building, the leakage area will grow as small gaps, cracks, and other leakage paths open up. Leakage tests performed according to test standards such as ASTM~E779 provide two additional data points to quantify this behavior. These are the {\ct LEAK\_PRESSURE\_EXPONENT} and the {\ct LEAK\_REFERENCE\_PRESSURE}. The use of these additional inputs are shown in the equation below as $n$ and $\Delta p_{\rm ref}$ respectively where $A_{\rm L,ref}$ is given by {\ct LEAK\_AREA}. Additionally, a discharge coefficient, $C_{\rm d}$, is often applied in practice.
+\be  
+   \dot{V}_{\rm L} = C_{\rm d} \, A_{\rm L,ref} \left( \frac{|\Delta p|}{\Delta p_{\rm ref}} \right)^{n-0.5}  \sqrt{\frac{2 |\Delta p|}{\rho_0}}
+\ee
+By default, $C_{\rm d}=1$, $n=0.5$ and $\Delta p_{\rm ref}=4$~Pa, meaning that the leak area will not change with pressure unless you specify an exponent other than 0.5.
 
-This verification case has three 1000~m$^3$ compartments have 0.01~m$^2$ of leakage to the ambient. Each compartment is supplied with 0.16~$m^3/s$ of inlet flow. The first compartment has the default values for the exponent and reference pressure, the second changes the exponent to 0.6, and the third third changes exponent and the reference pressure respectively to 0.6 and 10~Pa. The expected leakage velocities for these conditions are 160~m/s, 11.8~m/s, and 12.8~m/s. Note in Figure \ref{leak_exponent_fig} the velocities are negative as the FDS output for the leakage velocity is from the lower numbered pressure zone (in this case ambient) to the higher number (inside the compartment). Negative velocity indicates flow from inside to outside as expected.
+The first verification case involves three 1000~m$^3$ compartments that have 0.01~m$^2$ of leakage to the ambient. Each compartment is supplied with 0.16~m$^3$/s of inlet flow. The first compartment has the default values for the exponent and reference pressure, the second changes the exponent to 0.6, and the third third changes exponent and the reference pressure respectively to 0.6 and 10~Pa. The expected leakage velocities for these conditions are 160~m/s, 11.8~m/s, and 12.8~m/s. Note in the left plot of Fig.~\ref{leak_exponent_fig} that the velocities are negative because the FDS output for the leakage velocity is from the lower numbered pressure zone (in this case ambient) to the higher number (inside the compartment). Negative velocity indicates flow from inside to outside as expected.
+
+The second case involves a steel enclosure with four localized leaks, two near the bottom and two near the top. The air flow into the compartment is ramped up slowly, and the right hand plot of Fig.~\ref{leak_exponent_fig} shows the ideal and predicted relationship between the volume flow and compartment pressure. In this case, $C_{\rm d}=0.61$, $n=0.6$, $\Delta p_{\rm ref}=1$~Pa, and $A_{\rm L,ref}=0.18$ at each of the four ``cracks.''
 
 \begin{figure}[ht]
-	\centering
-	\includegraphics[height=2.2in]{SCRIPT_FIGURES/HVAC_leak_exponent}
-	\caption[The \textct{HVAC\_leak\_exponent} case]{Velocities through leakage with varying \textct{LEAK\_PRESSURE\_EXPONENT} and \textct{LEAK\_REFERENCE\_PRESSURE}}
-	\label{leak_exponent_fig}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/HVAC_leak_exponent}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/HVAC_leak_exponent_2}
+\caption[The \textct{HVAC\_leak\_exponent} cases]{(Left) Leakage velocities resulting from varying \textct{LEAK\_PRESSURE\_EXPONENT} and \textct{LEAK\_REFERENCE\_PRESSURE}. (Right) Volume flow versus pressure for a leaking steel enclosure.}
+\label{leak_exponent_fig}
 \end{figure}
+
+\FloatBarrier
+
 
 \section{ASHRAE Sample Problem 7\\(\texorpdfstring{\textct{ashrae\_7\_fixed\_flow}}{ashrae\_7\_fixed\_flow}, \texorpdfstring{\textct{ashrae\_7\_quadratic}}{ashrae\_7\_quadratic}, \texorpdfstring{\textct{ashrae\_7\_table}}{ashrae\_7\_table})}
 \label{ashrae7}
@@ -6710,6 +6714,20 @@ The Shunn manufactured solution (see Sec.~\ref{sec:shunn_mms}) provides a 2D ana
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/shunn_mms_FavreZ}
 \caption[Favre average test \textct{shunn3\_FavreZ}]{Output of the \textct{shunn3\_FavreZ} test cases in which the Favre average (continuous line) and running average (dashed line) at ($x=0,y=0$) are compared against expected values from the Shunn manufactured solution (see Sec.~\ref{sec:shunn_mms}).}
 \label{fig:shunn_mms_FavreZ}
+\end{figure}
+
+\section{Interpolation}
+\label{devc_interpolation}
+
+For line devices ({\ct POINTS=...}) used together with {\ct SPATIAL\_STATISTIC='INTERPOLATION'} the near wall values are usually truncated to the cell value.  However, with temperature and velocity components the wall value is used to provide an interpolation between the first cell value and the wall value.  In the test cases below, a linear field of velocity and temperature are generated with 100 points along the device and only 5 cells across the domain.  Three linear point arrays are created, one at each end along the periodic mesh boundary, and one in the center of the domain, which is also a cell center.
+
+\begin{figure}[h]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \scalebox{1}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/devc_interpolation_velocity} } &
+      \scalebox{1}{ \includegraphics[height=2.2in]{SCRIPT_FIGURES/devc_interpolation_temperature} }
+   \end{tabular*}
+\caption[Test of \textct{devc\_interpolation}]{Output of the \textct{devc\_interpolation} test cases.}
+\label{fig_devc_interpolation}
 \end{figure}
 
 

@@ -259,6 +259,8 @@ LOGICAL :: PERIODIC_DOMAIN_Z=.FALSE.                !< The domain is periodic \f
 LOGICAL :: OPEN_WIND_BOUNDARY=.FALSE.               !< There is a prevailing wind
 LOGICAL :: HRR_GAS_ONLY=.FALSE.                     !< Surface oxidation is not included in total HRR
 LOGICAL :: WRITE_DEVC_CTRL=.FALSE.                  !< Flag for writing DEVC and CTRL logfile
+LOGICAL :: INIT_INVOKED_BY_SURF=.FALSE.             !< Flag indicating that a SURF line specifies an INIT line
+LOGICAL :: NO_PRESSURE_ZONES=.FALSE.                !< Flag to suppress pressure zones
 
 INTEGER, ALLOCATABLE, DIMENSION(:) :: CHANGE_TIME_STEP_INDEX      !< Flag to indicate if a mesh needs to change time step
 INTEGER, ALLOCATABLE, DIMENSION(:) :: SETUP_PRESSURE_ZONES_INDEX  !< Flag to indicate if a mesh needs to keep searching for ZONEs
@@ -514,6 +516,22 @@ REAL(EB), ALLOCATABLE, DIMENSION(:) :: H_BAR                     !< Pressure sol
 INTEGER, ALLOCATABLE, DIMENSION(:) :: COUNTS_TP                  !< Counter for MPI calls used for 1-D tunnel pressure solver
 INTEGER, ALLOCATABLE, DIMENSION(:) :: DISPLS_TP                  !< Displacements for MPI calls used for 1-D tunnel pressure solver
 INTEGER, ALLOCATABLE, DIMENSION(:) :: I_OFFSET                   !< Spatial index of tunnel
+CHARACTER(LABEL_LENGTH) :: SCARC_COARSE = 'NONE'                 !< Type of coarse grid solver
+CHARACTER(LABEL_LENGTH) :: SCARC_MESH = 'STRUCTURED'             !< Discretization type
+CHARACTER(LABEL_LENGTH) :: SCARC_METHOD = 'NONE'                 !< Global (U)ScaRC solver
+CHARACTER(LABEL_LENGTH) :: SCARC_MGM_BOUNDARY = 'MEAN'           !< Type of interface boundary condition for local Laplace problems
+CHARACTER(LABEL_LENGTH) :: SCARC_MGM_LAPLACE_SOLVER = 'OPTIMIZED'!< Type of solver for local Laplace problems
+CHARACTER(LABEL_LENGTH) :: SCARC_POISSON = 'SEPARABLE'           !< Type of discretization for Poisson equation
+CHARACTER(LABEL_LENGTH) :: SCARC_PRECISION = 'DOUBLE'            !< Precision type for preconditioner (MKL only)
+CHARACTER(LABEL_LENGTH) :: SCARC_PRECON = 'NONE'                 !< Preconditioner for Krylov solver
+REAL(EB) :: SCARC_CAPPA =  0.0_EB                                !< Convergence rate of selected (U)ScarC solver
+INTEGER  :: SCARC_ITERATIONS = 0                                 !> Number of (U)ScaRC iterations performed
+INTEGER  :: SCARC_KRYLOV_ITERATIONS = 1000                       !> Maximum number of allowed Krylov iterations
+REAL(EB) :: SCARC_KRYLOV_TOLERANCE = 1.E-8_EB                    !< Requested tolerance for convergence
+INTEGER  :: SCARC_MGM_ITERATIONS = 20                            !< Maximum allowed number of Laplace iterations
+REAL(EB) :: SCARC_MGM_TOLERANCE = 1.E-4_EB                       !< Requested tolerance for interface velocity error
+REAL(EB) :: SCARC_RESIDUAL =  0.0_EB                             !< Residual of globally selected (U)ScaRC solver
+LOGICAL  :: SCARC_VERBOSE = .FALSE.                              !< Flag for additional verbose messages
 
 ! Miscellaneous integer constants
 
@@ -616,6 +634,7 @@ REAL(EB) :: MIN_PARTICLE_DIAMETER(MAX_SPECIES),MAX_PARTICLE_DIAMETER(MAX_SPECIES
 
 INTEGER :: N_INIT,N_ZONE,N_MULT,N_MOVE
 LOGICAL, ALLOCATABLE, DIMENSION(:,:,:) :: CONNECTED_ZONES
+INTEGER, ALLOCATABLE, DIMENSION(:,:) :: CONNECTED_ZONES_LOC
 REAL(EB) :: PRESSURE_RELAX_TIME=1._EB
 
 ! Clipping values
@@ -643,8 +662,6 @@ REAL(EB) :: WALL_CLOCK_START_ITERATIONS=0._EB       !< MPI_WTIME i.e. wall clock
 REAL(EB) :: CPU_TIME_START                          !< CPU_TIME when FDS starts
 
 INTEGER :: OPENMP_AVAILABLE_THREADS = 1         !< OpenMP parameter
-INTEGER :: OPENMP_USED_THREADS      = 1         !< OpenMP parameter
-LOGICAL :: OPENMP_USER_SET_THREADS  = .FALSE.   !< OpenMP parameter
 LOGICAL :: USE_OPENMP               = .FALSE.   !< OpenMP parameter
 
 INTEGER :: N_CSVF=0  !< Number of external velocity (.csv) files

@@ -424,8 +424,8 @@ ENDDO WALL_LOOP
 
 IF(CC_IBM) THEN
    T_USED(4) = T_USED(4) + CURRENT_TIME() - T_NOW
-   CALL CUTFACE_VELOCITIES(NM,UU,VV,WW,CUTFACES=.FALSE.)
    CALL CCREGION_COMPUTE_VISCOSITY(0._EB,NM)
+   CALL CUTFACE_VELOCITIES(NM,UU,VV,WW,CUTFACES=.FALSE.)
    T_NOW = CURRENT_TIME()
 ENDIF
 
@@ -2023,22 +2023,24 @@ EDGE_LOOP: DO IE=1,N_EDGES
          CORNER_EDGE=.FALSE.
          IF (IWM==0 .OR. IWP==0) CORNER_EDGE=.TRUE.
 
-         ! ! Omit mesh boundary external corners
+         ! Omit mesh boundary external corners
 
-         ! IF ( (II==0    .AND. KK==0   ) .OR. &
-         !      (II==0    .AND. KK==KBAR) .OR. &
-         !      (II==IBAR .AND. KK==0   ) .OR. &
-         !      (II==IBAR .AND. KK==KBAR) .OR. &
-         !      (II==0    .AND. JJ==0   ) .OR. &
-         !      (II==0    .AND. JJ==JBAR) .OR. &
-         !      (II==IBAR .AND. JJ==0   ) .OR. &
-         !      (II==IBAR .AND. JJ==JBAR) .OR. &
-         !      (JJ==0    .AND. KK==0   ) .OR. &
-         !      (JJ==0    .AND. KK==KBAR) .OR. &
-         !      (JJ==JBAR .AND. KK==0   ) .OR. &
-         !      (JJ==JBAR .AND. KK==KBAR) ) THEN
-         !    CORNER_EDGE=.FALSE.
-         ! ENDIF
+         IF (CORNER_EDGE) THEN
+            IF ( (II==0    .AND. KK==0   ) .OR. &
+                 (II==0    .AND. KK==KBAR) .OR. &
+                 (II==IBAR .AND. KK==0   ) .OR. &
+                 (II==IBAR .AND. KK==KBAR) .OR. &
+                 (II==0    .AND. JJ==0   ) .OR. &
+                 (II==0    .AND. JJ==JBAR) .OR. &
+                 (II==IBAR .AND. JJ==0   ) .OR. &
+                 (II==IBAR .AND. JJ==JBAR) .OR. &
+                 (JJ==0    .AND. KK==0   ) .OR. &
+                 (JJ==0    .AND. KK==KBAR) .OR. &
+                 (JJ==JBAR .AND. KK==0   ) .OR. &
+                 (JJ==JBAR .AND. KK==KBAR) ) THEN
+               CORNER_EDGE=.FALSE.
+            ENDIF
+         ENDIF
 
          ! If there is a solid wall separating the two adjacent wall cells, cycle out of the loop.
 
@@ -3258,7 +3260,7 @@ SUBROUTINE WALL_VELOCITY_NO_GRADH(DT,STORE_UN)
 
 REAL(EB), INTENT(IN) :: DT
 LOGICAL, INTENT(IN) :: STORE_UN
-INTEGER :: IIG,JJG,KKG,IOR,IW,N_INTERNAL_WALL_CELLS_AUX
+INTEGER :: II,JJ,KK,IIG,JJG,KKG,IOR,IW,N_INTERNAL_WALL_CELLS_AUX
 REAL(EB) :: DHDN, VEL_N
 TYPE (WALL_TYPE), POINTER :: WC
 REAL(EB), SAVE, ALLOCATABLE, DIMENSION(:) :: UN_WALLS
@@ -3317,11 +3319,16 @@ PREDICTOR_COND : IF (PREDICTOR) THEN
       IF (WC%BOUNDARY_TYPE/=SOLID_BOUNDARY .AND. WC%BOUNDARY_TYPE/=NULL_BOUNDARY) CYCLE
 
       BC => BOUNDARY_COORD(WC%BC_INDEX)
+      II  = BC%II
+      JJ  = BC%JJ
+      KK  = BC%KK
       IIG = BC%IIG
       JJG = BC%JJG
       KKG = BC%KKG
-      IOR = BC%IOR
 
+      IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY .AND. .NOT.SOLID(CELL_INDEX(IIG,JJG,KKG)) .AND. .NOT.SOLID(CELL_INDEX(II,JJ,KK))) CYCLE
+
+      IOR = BC%IOR
       DHDN=0._EB ! Set the normal derivative of H to zero for solids.
 
      SELECT CASE(IOR)
@@ -3351,11 +3358,16 @@ ELSE ! Corrector
      IF (WC%BOUNDARY_TYPE/=SOLID_BOUNDARY .AND. WC%BOUNDARY_TYPE/=NULL_BOUNDARY) CYCLE
 
      BC => BOUNDARY_COORD(WC%BC_INDEX)
+     II  = BC%II
+     JJ  = BC%JJ
+     KK  = BC%KK
      IIG = BC%IIG
      JJG = BC%JJG
      KKG = BC%KKG
-     IOR = BC%IOR
 
+     IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY .AND. .NOT.SOLID(CELL_INDEX(IIG,JJG,KKG)) .AND. .NOT.SOLID(CELL_INDEX(II,JJ,KK))) CYCLE
+
+     IOR = BC%IOR
      DHDN=0._EB ! Set the normal derivative of H to zero for solids.
 
      VEL_N = UN_WALLS(IW)

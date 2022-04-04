@@ -214,6 +214,7 @@ $QFDS -p 8 -d Fires circular_burner.fds
 $QFDS -d Flowfields divergence_test_1.fds
 $QFDS -d Flowfields divergence_test_2.fds
 $QFDS -p 4 -d Flowfields divergence_test_3.fds
+$QFDS -p 4 -d Flowfields divergence_test_3_uscarc_inseparable.fds
 $QFDS -d Flowfields cyl_test_1.fds
 $QFDS -d Flowfields cyl_test_2.fds
 $QFDS -d Flowfields cyl_test_3.fds
@@ -341,6 +342,7 @@ $QFDS -d HVAC leak_enthalpy.fds
 $QFDS -p 2 -d HVAC leak_test_3.fds
 $QFDS -d HVAC leak_test_4.fds
 $QFDS -d HVAC HVAC_leak_exponent.fds
+$QFDS -p 8 -d HVAC HVAC_leak_exponent_2.fds
 
 $QFDS -d Miscellaneous layer_1mesh.fds
 $QFDS -p 3 -d Miscellaneous layer_4mesh.fds
@@ -355,6 +357,8 @@ $QFDS -d Miscellaneous obst_cylinder_mass_flux.fds
 $QFDS -d Miscellaneous obst_cone_mass_flux.fds
 $QFDS -d Miscellaneous obst_box_mass_flux.fds
 $QFDS -p 2 -d Miscellaneous part_path_ramp_jog.fds
+$QFDS -d Miscellaneous devc_interpolation_velocity.fds
+$QFDS -d Miscellaneous devc_interpolation_temperature.fds
 
 $QFDS -d NS_Analytical_Solution ns2d_16.fds
 $QFDS -d NS_Analytical_Solution ns2d_16_nupt1.fds
@@ -375,6 +379,8 @@ $QFDS -d Pressure_Effects pressure_boundary.fds
 $QFDS -d Pressure_Effects pressure_rise.fds
 $QFDS -d Pressure_Effects zone_break_fast.fds
 $QFDS -d Pressure_Effects zone_break_slow.fds
+$QFDS -d Pressure_Effects zone_break_fast_ulmat.fds
+$QFDS -d Pressure_Effects zone_break_slow_ulmat.fds
 $QFDS -p 2 -d Pressure_Effects zone_shape.fds
 $QFDS -p 8 -d Pressure_Effects zone_shape_2.fds
 
@@ -405,6 +411,8 @@ $QFDS -p 8 -d Pressure_Solver pressure_iteration3d_uglmat.fds
 $QFDS -p 2 -d Pressure_Solver ulmat_2zone.fds
 $QFDS -p 4 -d Pressure_Solver scarc_separable_4mesh.fds
 $QFDS -p 4 -d Pressure_Solver scarc_inseparable_4mesh.fds
+$QFDS -p 4 -d Pressure_Solver obst_activation_ulmat.fds
+$QFDS -p 4 -d Pressure_Solver obst_activation_uscarc_inseparable.fds
 
 $QFDS -d Pyrolysis cable_11_insulation_mcc.fds
 $QFDS -d Pyrolysis cable_23_insulation_mcc.fds
@@ -420,6 +428,9 @@ $QFDS -d Pyrolysis birch_tga_1step_20.fds
 $QFDS -d Pyrolysis enthalpy.fds
 $QFDS -d Pyrolysis liquid_mixture.fds
 $QFDS -p 8 -d Pyrolysis methanol_evaporation.fds
+$QFDS -d Pyrolysis part_baking_soda_420K.fds
+$QFDS -d Pyrolysis part_baking_soda_450K.fds
+$QFDS -d Pyrolysis part_baking_soda_500K.fds
 $QFDS -d Pyrolysis pyrolysis_1.fds
 $QFDS -d Pyrolysis pyrolysis_2.fds
 $QFDS -d Pyrolysis specified_hrr.fds
@@ -457,15 +468,10 @@ $QFDS -d Pyrolysis surf_mass_two_species_spher.fds
 $QFDS -d Pyrolysis tga_analysis.fds
 $QFDS -d Pyrolysis tga_sample.fds
 $QFDS -d Pyrolysis two_step_solid_reaction.fds
-$QFDS -d Pyrolysis pcm_slab.fds
 $QFDS -d Pyrolysis pyro3d_wood_char.fds
 $QFDS -d Pyrolysis pyro3d_vs_pyro1d.fds
 $QFDS -d Pyrolysis pyro3d_vs_pyro1d_wood_moist.fds
 $QFDS -d Pyrolysis pyro3d_transport.fds
-$QFDS -d Pyrolysis solid_particle_decomposition_1.fds
-$QFDS -d Pyrolysis solid_particle_decomposition_2.fds
-$QFDS -d Pyrolysis solid_particle_decomposition_3.fds
-$QFDS -d Pyrolysis water_ice_water.fds
 $QFDS -d Pyrolysis water_pool.fds
 
 $QFDS -d Radiation adiabatic_surface_temperature.fds
@@ -760,6 +766,7 @@ $QFDS -d Turbulence ramp_prof_u_z.fds
 $QFDS -d WUI Bova_1a.fds
 $QFDS -d WUI Bova_1b.fds
 $QFDS -d WUI Bova_4a.fds
+$QFDS -d WUI bulk_density_file.fds
 $QFDS -d WUI char_oxidation_1.fds
 $QFDS -d WUI char_oxidation_2.fds
 $QFDS -d WUI dragon_5a.fds

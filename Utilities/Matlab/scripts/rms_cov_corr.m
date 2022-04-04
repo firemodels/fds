@@ -130,7 +130,7 @@ else
     set(gca,'FontSize',Label_Font_Size)
     xlabel('Time (s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
     ylabel('{\it uw} cross correlation','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
-    legend('Analytic','FDS','Location','East')
+    legend('Analytic','FDS','Location','NorthEast')
 
     % add Git revision if file is available
     git_file = '../../Verification/Controls/rms_cov_corr_git.txt';

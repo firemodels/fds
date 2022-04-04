@@ -322,29 +322,19 @@ r_{\alpha \beta} =
     \underbrace{ \rho_{\rm s,\alpha}^{n_{\rm s,\alpha\beta}}}_\textrm{Reactant dependency}
     \underbrace{A_{\alpha \beta} \; \exp \left(-\frac{E_{\alpha\beta}}{RT_{\rm s}}\right)}_\textrm{Arrhenius function}
     \underbrace{\left[X_{\rm O_2}(x)\right]^{n_{\rm O_2,\alpha\beta}}}_\textrm{Oxidation function}
-    \underbrace{\max \big[0,S_{\rm thr,\alpha,\beta}(T_{\rm s}-T_{\rm thr,\alpha \beta}) \big]^{n_{\rm t,\alpha\beta}}}_\textrm{Power function}
+    \underbrace{T_{\rm s}^{n_{\rm t,\alpha\beta}}}_\textrm{Power function}
    \label{Arrhenius}
 \ee
-The first term describes the dependence of the reaction rate on the concentration of the reactant itself, with $n_{\rm s,\alpha\beta}$ being the partial
-reaction order. The second term is the Arrhenius function which is commonly used to describe the reaction kinetics, i.e. the dependence of the reaction
-rate on the material temperature. The chapter on pyrolysis in the FDS Verification Guide describes methods for determining the kinetic parameters
-$A_{\alpha \beta}$ and $E_{\alpha\beta}$ using bench-scale measurement techniques.
+The first term describes the dependence of the reaction rate on the concentration of the reactant itself, with $n_{\rm s,\alpha\beta}$ being the partial reaction order. The second term is the Arrhenius function which is commonly used to describe the reaction kinetics, i.e. the dependence of the reaction rate on the material temperature. The chapter on pyrolysis in the FDS Verification Guide describes methods for determining the kinetic parameters $A_{\alpha \beta}$ and $E_{\alpha\beta}$ using bench-scale measurement techniques.
 
-The third term can be used to describe the dependence on the
-local oxygen concentration $X_{\rm O_2}(x)$ and the heterogeneous reaction order, $n_{\rm O_2,\alpha\beta}$.
-The oxygen concentration profile within practical materials depends on the competition between diffusion and reactive consumption.
-As FDS does not solve for the transport of gaseous species within condensed phase materials, a simple exponential profile is assumed and the
-user is expected to specify the characteristic depth at which oxygen would be present.
+The third term can be used to describe the dependence on the local oxygen concentration $X_{\rm O_2}(x)$ and the heterogeneous reaction order, $n_{\rm O_2,\alpha\beta}$. The oxygen concentration profile within practical materials depends on the competition between diffusion and reactive consumption. As FDS does not solve for the transport of gaseous species within condensed phase materials, a simple exponential profile is assumed and the user is expected to specify the characteristic depth at which oxygen would be present.
 The local oxygen volume fraction at depth $x$ is calculated from the gas phase (first grid cell) oxygen volume fraction $X_{\rm O_2,g}$ as
 \be
 X_{\rm O_2}(x) = X_{\rm O_2,g}\exp(-x/L_{\rm g,\alpha\beta})
 \ee
-where $L_{\rm g,\alpha\beta}$ is the characteristic depth of oxygen diffusion. Specifying $L_{\rm g,\alpha\beta}=0$ means that the reaction takes place
-only at the surface of the material.
+where $L_{\rm g,\alpha\beta}$ is the characteristic depth of oxygen diffusion. Specifying $L_{\rm g,\alpha\beta}=0$ means that the reaction takes place only at the surface of the material.
 
-The fourth term is the power function where $T_{\rm thr,\alpha \beta}$ is a threshold temperature that can be used to dictate that the reaction must not occur below ($S_{\rm thr,\alpha,\beta}=+1$)  or above ($S_{\rm thr,\alpha,\beta}=-1$) a user-specified temperature. By default, the fourth term is deactivated ($S_{\rm thr,\alpha,\beta}=+1, T_{\rm thr,\alpha\beta}=0$ K).
-
-Note that the solid species conservation equation~\ref{solid_species_conservation} and the reaction rate equation~\ref{Arrhenius} are inconsistent with the common practice of chemical kinetics convention, where the unit of the reaction rate is usually \si{kg/(m^3.s)} or \si{mol/(m^3.s)}. The current form can be obtained by dividing a more conventional reaction rate equation by $\rho_{\rm s}(0)$. This form is very close to the form used in \cite{Gpyro:FSJ} with the exception that initial layer density $\rho_{\rm s}(0)$ is used for scaling instead of the instantaneous value.
+The fourth term is a power function for temperature.
 
 The production term $S_\alpha$ is the sum over all the reactions where the solid residue is material $\alpha$
 \be
@@ -375,20 +365,6 @@ where $L$ is the thickness of the solid. The chemical source term in the heat co
 \ee
 where $H_{\rm r,\alpha \beta}$ is the heat of reaction.
 
-\subsection{Phase Change Reactions}
-
-To describe freezing or melting of liquids, the two phases are separated by a sharp interface at the constant phase-change temperature, $T_{\rm f}$. The location of the phase boundary $x_{\rm f}$ is governed by the equation
-\be
-k_{\rm s,1} \dod{T_{\rm s,1}}{x}-k_{\rm s,2}\dod{T_{\rm s,2}}{x} = \rho_{\rm s} H_{\rm r,\alpha\beta} \dod{x_{\rm f}}{t}
-\ee
-where 1 and 2 refer to the materials on the two sides of the boundary. In the context of the fixed-grid finite-difference method, it is more convenient
-to allow a small deviation from $T_{\rm f}$ and solve for the amount of mass reacting during the time step, $\Delta t$,
-from the energy required to convert the mass from one phase to the other
-\be
-\dot{m}''' \Delta t = \frac{\rho_{\rm s} c_{\rm s}(T_{\rm s}-T_{\rm f})}{H_{\rm r,\alpha\beta}}
-\ee
-This reaction can be implemented by setting $T_{\rm thr,\alpha\beta} = T_{\rm f}$ and $A_{\alpha\beta} = c_{\rm s}$ and turning on a specific
-{\em phase-change reaction} mode. The reaction rate given by Eq.~\ref{Arrhenius} is then divided by the factor $H_{\rm r,\alpha\beta} \Delta t$.
 
 \subsection{Liquid Fuels}
 
