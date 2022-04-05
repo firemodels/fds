@@ -1304,19 +1304,19 @@ IF (FREEZE_VELOCITY .OR. SOLID_PHASE_ONLY) RETURN
 CALL POINT_TO_MESH(NM)
 
 ! Pressure Boundary conditions due to CFACES change BXS, BXF, BYS, BYF.. in external CFACES, and
-CALL GET_PRES_CFACE_BCS(NM,T,DT)
+IF(CC_IBM) CALL GET_PRES_CFACE_BCS(NM,T,DT)
 
 ! Loop over zones within MESH NM and solve the unstructured Poisson problem directly.
 
 ZONE_MESH_LOOP: DO IPZ=0,N_ZONE
 
    ZM=>ZONE_MESH(IPZ)
-   IF (ZM%CONNECTED_ZONE_PARENT/=IPZ .OR. ZM%NUNKH<1) CYCLE ZONE_MESH_LOOP
-
+   IF (ZM%CONNECTED_ZONE_PARENT/=IPZ) CYCLE ZONE_MESH_LOOP
    IF (ZM%USE_FFT) THEN
       CALL PRESSURE_SOLVER_FFT(NM)
       RETURN
    ELSE
+      IF(ZM%NUNKH<1) CYCLE ZONE_MESH_LOOP
       CALL ULMAT_SOLVE_ZONE(NM,IPZ)
    ENDIF
 
@@ -1687,7 +1687,7 @@ WALL_CELL_LOOP_2 : DO IW=1,N_EXTERNAL_WALL_CELLS
    IF_DIRICHLET_2 : IF (WC%PRESSURE_BC_INDEX==DIRICHLET) THEN
       I   = BC%II;  J   = BC%JJ;  K   = BC%KK
       ! Define cell size, normal to WC:
-      IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
+      IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. WC%BOUNDARY_TYPE==MIRROR_BOUNDARY) THEN
          SELECT CASE (IOR) ! Set Homogeneous Neumann in external SOLID_BOUNDARY.
             CASE(-1) ! -IAXIS oriented, high face of IIG cell.
                HP(I,J,K) =HP(IIG,JJG,KKG)
@@ -3226,7 +3226,7 @@ MESH_LOOP_2 : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          IOR = BC%IOR
 
          ! Define cell size, normal to WC:
-         IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
+         IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. WC%BOUNDARY_TYPE==MIRROR_BOUNDARY) THEN
             SELECT CASE (IOR) ! Set Homogeneous Neumann in external SOLID_BOUNDARY.
                CASE(-1) ! -IAXIS oriented, high face of IIG cell.
                   HP(I,J,K) =HP(IIG,JJG,KKG)
