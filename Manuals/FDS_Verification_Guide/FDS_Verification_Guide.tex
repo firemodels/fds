@@ -2502,6 +2502,9 @@ FDS has an option to perform an axially-symmetric calculation, which can be usef
 \label{cyl_test_fig}
 \end{figure}
 
+
+\newpage
+
 \section{Velocity boundary condition implementation (\texorpdfstring{\textct{velocity\_bc\_test}}{velocity\_bc\_test})}
 \label{velocity_bc_test}
 
@@ -2523,6 +2526,8 @@ In this example, a simple jet is created by pushing air through a square duct. T
 \label{velocity_bc_test_plot}
 \end{figure}
 
+
+\newpage
 
 \section{Checking the divergence constraint}
 \label{divergence_test}
@@ -2564,6 +2569,8 @@ In the third example, air is pushed through a two-dimensional channel where obst
 
 
 
+\newpage
+
 \section{Multi-mesh Pressure and Temperature Lapse (\texorpdfstring{\textct{lapse\_rate}}{lapse\_rate})}
 \label{lapse_rate}
 
@@ -2578,6 +2585,8 @@ A 10 m x 10 m x 40 m volume is initialized with {\ct LAPSE\_RATE=-0.01}.  The vo
 \label{lapse_rate_fig}
 \end{figure}
 
+
+\newpage
 
 \section{Randomly Overlapping Meshes (\texorpdfstring{\textct{random\_meshes}}{random\_meshes})}
 \label{random_meshes}
@@ -2594,6 +2603,8 @@ In most FDS simulations, multiple meshes are positioned adjacent to each other t
 \end{figure}
 
 
+\newpage
+
 \section{Spurious Obstruction Effects (\texorpdfstring{\textct{hole}}{hole})}
 \label{hole}
 
@@ -2606,6 +2617,8 @@ It is not uncommon for subtle differences between two nearly identical input fil
 \label{hole_fig}
 \end{figure}
 
+
+\newpage
 
 \section{OpenMP Thread Checking (\texorpdfstring{\textct{race\_test}}{race\_test})}
 \label{race_test}
@@ -2622,6 +2635,8 @@ OpenMP is used in FDS to sub-divide the work of the do-loops among multiple core
 \end{figure}
 
 
+\newpage
+
 \section{Multi-Mesh Layer Height Calculation (\texorpdfstring{\textct{layer}}{layer})}
 \label{layer}
 
@@ -2637,6 +2652,19 @@ The test cases called {\ct Miscellaneous/layer\_1mesh.fds} and {\ct layer\_4mesh
 \end{figure}
 
 
+\newpage
+
+\section{The Restart Feature}
+\label{device_restart}
+
+FDS has a feature with which users can stop and restart simulations. When a simulation is stopped, all necessary variables are packed into arrays and written out to a file. This feature can be fragile when the input file includes devices and controls that initiate actions at certain times. In the simulation named {\ct Restart/device\_restart\_a.fds}, a multi-room fire simulation is stopped and then restarted at 40~s. Before the restart, at 30~s, a door is opened and high temperature gases flow from the fire room into a corridor. After the restart, the case proceeds until 60~s. Another simulation called {\ct device\_restart\_base\_case} runs uninterrupted. The temperature just outside of the fire room door (Fig.~\ref{device_restart_fig}) should be similar in both simulations. The temperatures are not exactly the same because restarting a simulation can lead to minor changes in the algorithm at the time of the restart. 
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/device_restart}
+\caption[Result of the \textct{device\_restart} test case]{Temperature outside of a door to a fire room that is opened at 30~s.}
+\label{device_restart_fig}
+\end{figure}
 
 
 \chapter{Thermal Radiation}
@@ -6631,7 +6659,7 @@ as shown in Fig.~\ref{sphere_leak_fig}.
 \subsection{Restart Function}
 \label{geom_restart}
 
-In this test, a GEOM cube is heated from below by a surface at a fixed temperature.  The internal temperature inside the geometry is monitored.  The full calculation runs for 1,200 s.  At 700 s, a RESTART is performed and compared with the base case.  The results are shown in Fig.~\ref{fig:geom_restart}.
+In this test, a GEOM cube is heated from below by a surface at a fixed temperature.  The internal temperature inside the geometry is monitored.  The full calculation runs for 1,200 s.  At 700 s, a {\ct RESTART} is performed and compared with the base case.  The results are shown in Fig.~\ref{fig:geom_restart}.
 \begin{figure}[ht]
 \centering
 \includegraphics[width=3.2in]{../FDS_Verification_Guide/SCRIPT_FIGURES/geom_restart.pdf}
