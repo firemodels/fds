@@ -545,6 +545,8 @@ $QFDS -d Radiation TC_heating.fds
 $QFDS -d Radiation TC_view_factor.fds
 $QFDS -d Radiation wall_internal_radiation.fds
 
+$QFDS -p 4 -d Restart device_restart_a.fds
+$QFDS -p 4 -d Restart device_restart_base_case.fds
 $QFDS -d Restart restart_test1a.fds
 $QFDS -d Restart pyro3d_restart_a.fds
 $QFDS -d Restart pyro3d_restart_base_case.fds

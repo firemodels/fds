@@ -1,0 +1,35 @@
+&HEAD CHID='device_restart_a' /
+
+&TIME T_END=60.0/
+
+&DUMP DT_DEVC=2 /
+
+&MESH IJK=25, 5,7, XB=-12.8,-2.8, 5.2, 7.2,0,2.8 /
+&MESH IJK=25,19,7, XB= -2.8, 7.2,-0.4, 7.2,0,2.8 /
+&MESH IJK=18, 5,7, XB=  7.2,14.4, 5.2, 7.2,0,2.8 /
+&MESH IJK=24,33,7, XB= -6.4, 3.2, 7.2,20.4,0,2.8 /
+
+&MISC RESTART=T /
+
+&REAC FUEL='N-HEPTANE', SOOT_YIELD=0.1 /
+
+&OBST XB=-0.8,-2,6.8,7.2,0,2.8, DEVC_ID='TIMER', COLOR='GREEN' / 
+&DEVC ID='TIMER', QUANTITY='TIME', XYZ=1,1,1, SETPOINT=30.0, INITIAL_STATE=.TRUE. /
+
+
+&OBST ID='Fire', XB=-1.5,0.5,9.2,11.2,0.0,0.1, SURF_IDS='Fire'/ 
+&SURF ID='Fire',
+      COLOR='RED',
+      HRRPUA=250.0,
+      TAU_Q=-75.0,
+      TMP_FRONT=300.0/
+
+&OBST XB=-12.8,-2,6.8,7.2,0,2.8/
+&OBST XB=-0.8,14.4,6.8,7.2,0,2.8/ 
+
+&VENT SURF_ID='OPEN', XB=3.1,3.1,12.7,20.4,0.0,2.6/ 
+
+&DEVC ID='temp', XYZ=-1.5,6.4,2.6, QUANTITY='TEMPERATURE' /
+
+&TAIL /
+
