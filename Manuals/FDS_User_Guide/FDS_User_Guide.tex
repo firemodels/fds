@@ -2473,7 +2473,7 @@ of the ceiling, FDS will ignore the ceiling properties and apply the supply prop
 the second as it did in versions prior to FDS 5. Now, the rule for {\ct VENT}s is ``first come, first served.''
 Keep in mind, however, that the
 second {\ct VENT} is not rejected entirely -- only where there is overlap. FDS will also print out a warning to the screen (or to
-standard error) saying which {\ct VENT} has priority.  Also, be careful if any of the {\ct VENT}s are applying {\ct OPEN} boundary conditions -- {\ct OPEN} boundaries disable pressure {\ct ZONE}s, which will change the solutio of the problem.
+standard error) saying which {\ct VENT} has priority.  Also, be careful if any of the {\ct VENT}s are applying {\ct OPEN} boundary conditions -- {\ct OPEN} boundaries disable pressure {\ct ZONE}s, which will change the solution of the problem.
 
 Smokeview can help identify where two {\ct VENT}s overlap, assuming each has a unique {\ct COLOR}. Because Smokeview draws {\ct VENT}s
 on top of each other, areas of overlap will have a grainy, awkward appearance that changes pattern as you move the scene. In situations
@@ -4470,6 +4470,8 @@ The parameter {\ct XYZ}\footnote{Past versions of FDS also made use of the sextu
 There are several restrictions to assigning pressure zones. First, the declared pressure zones must be completely within a region of the domain that is bordered by solid obstructions. It is possible to ``break'' pressure zones by removing obstructions between them. An example of how to break pressure zones is given below. Second, pressure zones can span multiple meshes, but it is recommended that you check the pressure in each mesh to ensure consistency. If the {\ct ZONE} does span multiple meshes, you do {\em not}\footnote{Past versions of FDS required you to specify a separate {\ct XYZ} point for each mesh spanned by the pressure zone. This is no longer required.} need to add multiple {\ct XYZ} points for each mesh. A search algorithm will determine all other grid cells belonging to that pressure zone.
 
 Note that if you remove a solid obstruction (like a door or window) separating two pressure zones, FDS will merge the two zones into one such that the background pressure within each remains nearly the same.
+
+On rare occasions you may need to suppress pressure {\ct ZONE}s completely. This is not recommended, but might be useful for debugging or diagnostic purposes. If you need to remove all implicit {\ct ZONE}s, set {\ct NO\_PRESSURE\_ZONES} on the {\ct MISC} line.
 
 
 
@@ -11625,6 +11627,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MPI\_TIMEOUT}                                  & Real         & Section~\ref{info:TIMING}               &  s         & 10.               \\ \hline
 {\ct NOISE}                                         & Logical      & Section~\ref{info:NOISE}                &            & {\ct T}      \\ \hline
 {\ct NOISE\_VELOCITY}                               & Real         & Section~\ref{info:NOISE}                &  m/s       & 0.005             \\ \hline
+{\ct NO\_PRESSURE\_ZONES}                           & Logical      & Section~\ref{info:ZONE_Basics}          &            & {\ct F}           \\ \hline
 {\ct NORTH\_BEARING}                                & Real         & Section~\ref{info:earth}                & deg.       &                   \\ \hline
 {\ct ORIGIN\_LAT}                                   & Real         & Section~\ref{info:earth}                & deg.       &                   \\ \hline
 {\ct ORIGIN\_LON}                                   & Real         & Section~\ref{info:earth}                & deg.       &                   \\ \hline
