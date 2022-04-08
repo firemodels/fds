@@ -181,6 +181,8 @@ $QFDS -d Energy_Budget energy_budget_dns_100.fds
 $QFDS -d Energy_Budget energy_budget_particles.fds
 $QFDS -d Energy_Budget energy_budget_solid.fds
 $QFDS -d Energy_Budget energy_budget_tmix.fds
+$QFDS -d Energy_Budget test_hrr_2d_cyl.fds
+$QFDS -d Energy_Budget test_hrr_3d.fds
 
 $QFDS -d Extinction extinction_1.fds
 $QFDS -d Extinction extinction_2.fds
