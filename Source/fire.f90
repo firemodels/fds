@@ -683,8 +683,7 @@ KINETICS_SELECT: SELECT CASE(KINETICS)
             ENDIF
             IF(RN%REVERSE) THEN ! compute equilibrium constant
                CALL GET_GIBBS_FREE_ENERGY(DG_RXN,RN%NU,TMP_0)
-               RN%K = EXP(-DG_RXN/(R0*TMP_0))
-               DZ_F = DZ_F/RN%K
+               DZ_F = DZ_F*EXP(DG_RXN/(R0*TMP_0))
             ENDIF
             IF (DZ_F > TWO_EPSILON_EB) REACTANTS_PRESENT = .TRUE.
             Q_REAC_TMP(I) = RN%HEAT_OF_COMBUSTION * DZ_F * DT_LOC ! Note: here DZ_F=dZ/dt, hence need DT_LOC
