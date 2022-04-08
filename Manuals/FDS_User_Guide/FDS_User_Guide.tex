@@ -448,7 +448,7 @@ If you wish to run FDS on more than one computer, do the following:
 \item The first time you run a job, you must provide your domain name and password by issuing this command:
 
       {\ct mpiexec -register}
-      
+
 \item Create a text file, say {\ct hosts.txt}, and in it list, line by line, the names of your computers:
 
       fred:3 \\
@@ -1582,13 +1582,13 @@ To verify the accuracy of the pressure solution on each mesh, set {\ct CHECK\_PO
 \subsection{Optional Pressure Solvers}
 \label{optional_pressure_solver}
 
-The default Poisson solver in FDS ({\ct SOLVER='FFT'} on the {\ct PRES} line) is based on the package of linear algebra routines called CrayFishpak. However, in certain circumstances you may need to use one of several alternatives that is based on the Intel\textsuperscript{\textregistered} MKL Sparse Cluster Solver. 
+The default Poisson solver in FDS ({\ct SOLVER='FFT'} on the {\ct PRES} line) is based on the package of linear algebra routines called CrayFishpak. However, in certain circumstances you may need to use one of several alternatives that is based on the Intel\textsuperscript{\textregistered} MKL Sparse Cluster Solver.
 \begin{description}
 \item[{\ct SOLVER='ULMAT'}] With this solver, the unknown values of the pressure live only in gas-phase cells, allowing for the normal components of velocity at a solid surface to be computed exactly with no penetration error. Strictly speaking, in this mode, FDS is no longer using an ``immersed boundary method'' for flow obstructions---the pressure solution is now ``unstructured,'' hence the {\ct U} in its name. This solver does not guarantee that the normal component of velocity matches perfectly at mesh boundaries, and the iterative procedure used by the default {\ct 'FFT'} solver is still used to drive the velocity normals closer together. This solver option does allow for internal sealed regions within the domain for which additional matrices must be computed.
 \item[{\ct SOLVER='GLMAT'}]  This solver is for non-overlapping, non-stretched meshes at the same refinement level covering a single connected domain, i.e. a large rectangular box. With this solver, the pressure in both solid and gas cells is computed using an immersed boundary method for flow obstructions, the same as the default {\ct 'FFT'} solver.  This mode produces the exact same pressure solution as the {\ct 'FFT'} solver would if the domain were one single mesh. That is, velocity errors at any mesh boundaries are eliminated. Note that currently a single discretization matrix is built for all gas cells defined on the model, therefore the solver is not meant to be used in cases where ther are internal sealed regions within the domain.
 \item[{\ct SOLVER='UGLMAT'}] This solver is for non-overlapping, non-stretched meshes at the same refinement level covering a single connected domain, i.e. a large rectangular box. Like the solver {\ct 'ULMAT'}, the unknown values of the pressure live only in gas-phase cells, allowing for the normal components of velocity at a solid surface to be computed exactly (no velocity penetration error). In addition, this solver ensures that the normal component of velocity matches perfectly at mesh boundaries. The limitation of this solver is that it does not allow for internal sealed regions within the domain. It is also the most expensive of the alternative solvers.
 \end{description}
-Because these alternative methods are based on the Intel\textsuperscript{\textregistered} MKL parallel LU decomposition solver, they require computation and storage of global factorization matrices. Depending on the size of the problem, these operations can be expensive in terms of both CPU time and memory. It has been found suitable for problems with up to a million cells on a multi-core workstation with 64~GB of RAM. 
+Because these alternative methods are based on the Intel\textsuperscript{\textregistered} MKL parallel LU decomposition solver, they require computation and storage of global factorization matrices. Depending on the size of the problem, these operations can be expensive in terms of both CPU time and memory. It has been found suitable for problems with up to a million cells on a multi-core workstation with 64~GB of RAM.
 
 \subsection{Example Case: Pressure\_Solver/duct\_flow}
 \label{duct_flow}
@@ -4549,13 +4549,13 @@ The pressure zone leakage approach is intended to capture the bulk leakage that 
 The first line designates a region of the computational domain to be Pressure Zone~1. Note that the order of the {\ct ZONE} lines is important; that is, the order implicitly defines Zone~1, Zone~2, etc. Zone 0 is by default the ambient pressure exterior. In this example, a leak exists between Zone~1 and the exterior Zone~0, and the area of the leak is 0.0001~m$^2$ (1 cm by 1 cm hole, for example). Zone~2 leaks to Zone~1 (and vice versa) with a leak area of 0.0002~m$^2$. Zone~2 also leaks to the outside with an area of 0.0003~m$^2$. Note that zones need not be physically connected for a leak to occur, but in each zone, except for the exterior, there must be some surface with a designated {\ct LEAK\_PATH}. Here, in Zones~1 and 2 there are surfaces defined by both {\ct 'LEAKY EXTERIOR WALL'} and {\ct 'LEAKY INTERIOR WALL'} so as to provide a surface over which to apply the leakage. Leakage is uniformly distributed over all of the solid surfaces assigned the {\ct LEAK\_PATH}. The order of the two pressure zones designated by {\ct LEAK\_PATH} is unimportant, and the solid obstructions where the leakage is applied need not form a boundary between the two zones. Note that {\ct LEAK\_PATH\_ID} can be used instead of {\ct LEAK\_PATH}. To use {\ct LEAK\_PATH\_ID} provide the {\ct ID} for the two {\ct ZONES} where specifying {\ct 'AMBIENT'} indicates Zone 0.
 
 The volume flow, $\dot{V}$, through a leak of area $A_{\rm L}$ is given by
-\be  
+\be
    \dot{V}_{\rm leak} = C_{\rm d} \, A_{\rm L} \; \hbox{sign} (\Delta p) \; \sqrt{2 \frac{ | \Delta p |}{\rho_\infty}}  \label{leak_formula}
 \ee
 where $C_{\rm d}$ is a discharge coefficient, $\Delta p$ is the pressure difference (Pa) between the adjacent compartments and $\rho_\infty$ is the ambient density (kg/m$^3$). The discharge coefficient normally seen in this type of formula is sometimes assumed to be~1, but you may change it.
 
 As the interior pressure rises in a typical building, the leakage area grows as small gaps, cracks, and other leakage paths open up. Leakage tests performed according to test standards such as ASTM~E779 provide two additional data points to quantify this behavior. These are the {\ct LEAK\_PRESSURE\_EXPONENT} and the {\ct LEAK\_REFERENCE\_PRESSURE}. The use of these additional inputs are shown in the equation below as $n$ and $\Delta p_{\rm ref}$ respectively where $A_{\rm L,ref}$ is given by {\ct LEAK\_AREA}.
-\be  
+\be
    A_{\rm L} = A_{\rm L,ref} \left( \frac{\Delta p}{\Delta p_{\rm ref}} \right)^{n-0.5}  \label{leak_formula_2}
 \ee
 By default, $n=0.5$ and $\Delta p_{\rm ref}=4$~Pa, meaning that the leak area will not change with pressure unless you specify an exponent other than 0.5. The {\ct DISCHARGE\_COEFFICIENT} is 1 by default.
@@ -9465,7 +9465,7 @@ An additional column, {\ct Q\_TOTAL}, includes the sum of the terms on the right
 
 The other columns in the {\ct CHID\_hrr.csv} file contain the total burning rate of fuel, in units of kg/s, and the zone pressures. Note that the reported value of the burning rate is not adjusted to account for the possibility that each individual material might have a different heat of combustion. For this reason, it is not always the case that the reported total burning rate multiplied by the gas phase heat of combustion is equal to the reported heat release rate.
 
-Note that the volume integrations in Eq.~(\ref{eqn_enthalpytransport}) are performed over the entire domain. The differential, $\d V$, is the product of the local grid cell dimensions, $\d x \, \d y \, \d z$. For the special case of two-dimensional cylindrical coordinates, $\d V=r \, \d r \, \d \theta \, \d z$, where $r=x$, $\d r = \d x$, and $\d \theta = \d y$.
+Note that the volume integrations in Eq.~(\ref{eqn_enthalpytransport}) are performed over the entire domain. The differential, $\d V$, is the product of the local grid cell dimensions, $\d x \, \d y \, \d z$. For the special case of two-dimensional cylindrical coordinates, $\d V=r \, \d r \, \d \theta \, \d z$, where $r=x$, $\d r = \d x$, and $\d \theta = \d y$.  In the 2D Cartesian case (1 cell in the $y$ direction, {\ct CYLINDRICAL=.FALSE.}), the cell volumes and areas are divided by $\d y$ so that the column output is a value per unit length (e.g., kW/m).  In the 2D cylindrical case, the cell volumes are divided by $\d y$ (which represents radians in this case) and multiplied by $2\pi$ to account for complete integration in the $\theta$ direction.  The resulting value is nominally the same as the correponding 3D problem.
 
 As a test of the energy balance, a sample case called {\ct Pressure\_Solver/hallways.fds} simulates a fire near the end of five connected hallways. The other end of the hallways is open. As is seen in Fig.~\ref{hallways_energy}, the quantities {\ct Q\_ENTH} and {\ct Q\_TOTAL} are very closely matched, indicating that the sources of energy loss and gain are properly added and subtracted from the energy equation. As expected, the net energy gain/loss eventually goes to zero as the compartment reaches a quasi-steady state.
 \begin{figure}[ht]
