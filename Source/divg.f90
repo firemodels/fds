@@ -231,18 +231,12 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
                KKG = BC%KKG
                IOR = BC%IOR
                SELECT CASE(IOR)
-                  CASE( 1)
-                     RHO_D_DZDX(IIG-1,JJG,KKG,N) = 0._EB
-                  CASE(-1)
-                     RHO_D_DZDX(IIG,JJG,KKG,N)   = 0._EB
-                  CASE( 2)
-                     RHO_D_DZDY(IIG,JJG-1,KKG,N) = 0._EB
-                  CASE(-2)
-                     RHO_D_DZDY(IIG,JJG,KKG,N)   = 0._EB
-                  CASE( 3)
-                     RHO_D_DZDZ(IIG,JJG,KKG-1,N) = 0._EB
-                  CASE(-3)
-                     RHO_D_DZDZ(IIG,JJG,KKG,N)   = 0._EB
+                  CASE( 1); RHO_D_DZDX(IIG-1,JJG,KKG,N) = 0._EB
+                  CASE(-1); RHO_D_DZDX(IIG,JJG,KKG,N)   = 0._EB
+                  CASE( 2); RHO_D_DZDY(IIG,JJG-1,KKG,N) = 0._EB
+                  CASE(-2); RHO_D_DZDY(IIG,JJG,KKG,N)   = 0._EB
+                  CASE( 3); RHO_D_DZDZ(IIG,JJG,KKG-1,N) = 0._EB
+                  CASE(-3); RHO_D_DZDZ(IIG,JJG,KKG,N)   = 0._EB
                END SELECT
             ENDIF
          ENDDO
