@@ -567,7 +567,6 @@ TYPE REACTION_TYPE
    REAL(EB) :: A_IN                         !< Unajusted pre-exponential reaction kinetic parameter
    REAL(EB) :: E                            !< Activation energy (J/kmol)
    REAL(EB) :: E_IN                         !< User-specified activation energy (J/mol)
-   REAL(EB) :: K
    REAL(EB) :: MW_FUEL                      !< Molecular weight of fuel (g/mol)
    REAL(EB) :: MW_SOOT                      !< Molecular weight of soot surrogate gas (g/mol)
    REAL(EB) :: Y_O2_MIN                     !< Lower oxygen limit in terms of mass fraction
