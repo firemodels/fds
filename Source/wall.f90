@@ -296,20 +296,13 @@ METHOD_OF_HEAT_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
       ! Base inflow/outflow decision on velocity component with same predictor/corrector attribute
 
       SELECT CASE(IOR)
-         CASE( 1)
-            UN = UU(II,JJ,KK)
-         CASE(-1)
-            UN = -UU(II-1,JJ,KK)
-         CASE( 2)
-            UN = VV(II,JJ,KK)
-         CASE(-2)
-            UN = -VV(II,JJ-1,KK)
-         CASE( 3)
-            UN = WW(II,JJ,KK)
-         CASE(-3)
-            UN = -WW(II,JJ,KK-1)
-         CASE DEFAULT
-            UN = 0._EB
+         CASE( 1); UN =  UU(II,JJ,KK)
+         CASE(-1); UN = -UU(II-1,JJ,KK)
+         CASE( 2); UN =  VV(II,JJ,KK)
+         CASE(-2); UN = -VV(II,JJ-1,KK)
+         CASE( 3); UN =  WW(II,JJ,KK)
+         CASE(-3); UN = -WW(II,JJ,KK-1)
+         CASE DEFAULT; UN = 0._EB
       END SELECT
 
       IF (UN>TWO_EPSILON_EB) THEN  ! Assume the flow is coming into the domain
@@ -2043,17 +2036,23 @@ REAL(EB) :: RADIUS,AREA_SCALING,RVC,M_DOT_PPP_SINGLE,M_DOT_SINGLE,CP,MW_RATIO,H_
             ZZ_GET(1:N_TRACKED_SPECIES),DENOM,M_GAS,TMP_G,RHO_G,ZZ_G(1:N_TRACKED_SPECIES)
 REAL(EB), INTENT(IN) :: T,DT
 INTEGER, INTENT(IN) :: NM
-INTEGER :: II,JJ,KK,IIG,JJG,KKG,IW,IC,ICG,ICF,NS,IP,SPECIES_BC_INDEX,OBST_INDEX
+INTEGER :: II,JJ,KK,IIG,JJG,KKG,IW,IC,ICG,ICF,NS,IP,SPECIES_BC_INDEX,OBST_INDEX,IOR
 REAL(EB), POINTER, DIMENSION(:,:) :: PBAR_P
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP
-REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,RHOP
 REAL(EB) :: H_S_B
 
 IF (PREDICTOR) THEN
+   UU => US
+   VV => VS
+   WW => WS
    PBAR_P => PBAR_S
    ZZP => ZZS
    RHOP => RHOS
 ELSE
+   UU => U
+   VV => V
+   WW => W
    PBAR_P => PBAR
    ZZP => ZZ
    RHOP => RHO
@@ -2353,6 +2352,25 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
          ONE_D%ZZ_F(2) = 0.5_EB*(1._EB + COS(4._EB*PI*XC(BC%II)))
          ONE_D%ZZ_F(1) = 1._EB - ONE_D%ZZ_F(2)
       ENDIF
+
+      ! reconstruct species mass flux at the surface for output (some terms are lagged)
+
+      IIG = BC%IIG
+      JJG = BC%JJG
+      KKG = BC%KKG
+      IOR = BC%IOR
+      SELECT CASE(IOR)
+         CASE( 1); UN = UU(IIG-1,JJG,KKG)
+         CASE(-1); UN = UU(IIG,JJG,KKG)
+         CASE( 2); UN = VV(IIG,JJG-1,KKG)
+         CASE(-2); UN = VV(IIG,JJG,KKG)
+         CASE( 3); UN = WW(IIG,JJG,KKG-1)
+         CASE(-3); UN = WW(IIG,JJG,KKG)
+      END SELECT
+      DO N=1,N_TRACKED_SPECIES
+         ONE_D%M_DOT_G_PP_ADJUST(N) = SIGN(1._EB,REAL(IOR,EB))*( ONE_D%RHO_F*ONE_D%ZZ_F(N)*UN - ONE_D%RHO_D_DZDN_F(N) )
+         ONE_D%M_DOT_G_PP_ACTUAL(N) = ONE_D%M_DOT_G_PP_ADJUST(N)
+      ENDDO
 
    CASE (SPECIFIED_MASS_FLUX) METHOD_OF_MASS_TRANSFER
 
