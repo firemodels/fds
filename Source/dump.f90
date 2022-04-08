@@ -2387,28 +2387,25 @@ IF (ABS(TIME_SHRINK_FACTOR -1._EB)>SPACING(1._EB)) &
 WRITE(LU_OUTPUT,'(A,F8.1)')   '   Time Shrink Factor (s/s)      ',TIME_SHRINK_FACTOR
 WRITE(LU_OUTPUT,'(A,F8.1)')   '   Simulation Start Time (s)     ',T_BEGIN
 WRITE(LU_OUTPUT,'(A,F8.1)')   '   Simulation End Time (s)       ',(T_END-T_BEGIN) * TIME_SHRINK_FACTOR + T_BEGIN
+WRITE(LU_OUTPUT,'(A,F10.2)')  '   Background Pressure (Pa)    '  ,P_INF
+WRITE(LU_OUTPUT,'(A,F8.2)')   '   Ambient Temperature (C)       ',TMPA-TMPM
+
+IF (.NOT.TWO_D)                   WRITE(LU_OUTPUT,'(/3X,A)') '3D Cartesian'
+IF (TWO_D .AND. .NOT.CYLINDRICAL) WRITE(LU_OUTPUT,'(/3X,A)') '2D Cartesian'
+IF (TWO_D .AND.      CYLINDRICAL) WRITE(LU_OUTPUT,'(/3X,A)') '2D Cylindrical'
 SELECT CASE (SIM_MODE)
-   CASE(DNS_MODE)
-      WRITE(LU_OUTPUT,'(A)')     '   DNS Calculation'
-   CASE(LES_MODE)
-      WRITE(LU_OUTPUT,'(A)')     '   LES Calculation'
-   CASE(VLES_MODE)
-      WRITE(LU_OUTPUT,'(A)')     '   VLES Calculation'
-   CASE(SVLES_MODE)
-      WRITE(LU_OUTPUT,'(A)')     '   SVLES Calculation'   
+   CASE(DNS_MODE);   WRITE(LU_OUTPUT,'(3X,A)') 'DNS Calculation'
+   CASE(LES_MODE);   WRITE(LU_OUTPUT,'(3X,A)') 'LES Calculation'
+   CASE(VLES_MODE);  WRITE(LU_OUTPUT,'(3X,A)') 'VLES Calculation'
+   CASE(SVLES_MODE); WRITE(LU_OUTPUT,'(3X,A)') 'SVLES Calculation'
 END SELECT
 IF (SIM_MODE/=DNS_MODE) THEN
    SELECT CASE (TURB_MODEL)
-      CASE(CONSMAG)
-         WRITE(LU_OUTPUT,'(A,F4.2,A)')    '   Eddy Viscosity: Smagorinsky (C_SMAGORINSKY = ',C_SMAGORINSKY,')'
-      CASE(DYNSMAG)
-         WRITE(LU_OUTPUT,'(A)')           '   Eddy Viscosity: Dynamic Smagorinsky Model'
-      CASE(DEARDORFF)
-         WRITE(LU_OUTPUT,'(A,F4.2,A)')    '   Eddy Viscosity: Deardorff Model (C_DEARDORFF = ',C_DEARDORFF,')'
-      CASE(VREMAN)
-         WRITE(LU_OUTPUT,'(A,F4.2,A)')    '   Eddy Viscosity: Vreman Model (C_VREMAN = ',C_VREMAN,')'
-      CASE(WALE)
-         WRITE(LU_OUTPUT,'(A,F4.2,A)')    '   Eddy Viscosity: WALE Model (C_WALE = ',C_WALE,')'
+      CASE(CONSMAG);   WRITE(LU_OUTPUT,'(A,F4.2,A)') '   Eddy Viscosity: Smagorinsky (C_SMAGORINSKY = ',C_SMAGORINSKY,')'
+      CASE(DYNSMAG);   WRITE(LU_OUTPUT,'(A)')        '   Eddy Viscosity: Dynamic Smagorinsky Model'
+      CASE(DEARDORFF); WRITE(LU_OUTPUT,'(A,F4.2,A)') '   Eddy Viscosity: Deardorff Model (C_DEARDORFF = ',C_DEARDORFF,')'
+      CASE(VREMAN);    WRITE(LU_OUTPUT,'(A,F4.2,A)') '   Eddy Viscosity: Vreman Model (C_VREMAN = ',C_VREMAN,')'
+      CASE(WALE);      WRITE(LU_OUTPUT,'(A,F4.2,A)') '   Eddy Viscosity: WALE Model (C_WALE = ',C_WALE,')'
    END SELECT
    DO N=0,N_SURF
       SF=>SURFACE(N)
@@ -2433,8 +2430,6 @@ IF (SIM_MODE/=DNS_MODE) THEN
       WRITE(LU_OUTPUT,'(A,F8.2)')   '   Turbulent Schmidt Number:     ',SC
    ENDIF
 ENDIF
-WRITE(LU_OUTPUT,'(A,F10.2)')   '   Background Pressure (Pa):   '  ,P_INF
-WRITE(LU_OUTPUT,'(A,F8.2)')    '   Ambient Temperature (C):      ',TMPA-TMPM
 
 ! Print out information about background pressure and temperature stratification
 
