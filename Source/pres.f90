@@ -1142,6 +1142,14 @@ ZONE_MESH_LOOP: DO IPZ=0,N_ZONE
             ZM%USE_FFT=.FALSE.
             EXIT WALL_LOOP
          ENDIF
+
+         ! Test for obstructions on an open boundary or mirror set to dirichlet
+         IF ( (WC%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. WC%BOUNDARY_TYPE==MIRROR_BOUNDARY) &
+            .AND. WC%PRESSURE_BC_INDEX==DIRICHLET) THEN
+            ZM%USE_FFT=.FALSE.
+            EXIT WALL_LOOP
+         ENDIF
+
       ENDDO WALL_LOOP
    ENDIF
 
