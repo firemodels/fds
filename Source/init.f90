@@ -227,7 +227,16 @@ IF (STORE_SPECIES_FLUX) THEN
    M%DIF_FZS = 0._EB
 ENDIF
 
-! Allocate Array to store cut-cell divergence if needed:
+! Allocate array to store pressure Poisson residual for output
+
+IF (STORE_PRESSURE_POISSON_RESIDUAL) THEN
+   ALLOCATE(M%PP_RESIDUAL(0:IBP1,0:JBP1,0:KBP1),STAT=IZERO)
+   CALL ChkMemErr('INIT','PP_RESIDUAL',IZERO)
+   M%PP_RESIDUAL = 0._EB
+ENDIF
+
+! Allocate array to store cut-cell divergence if needed
+
 IF (STORE_CUTCELL_DIVERGENCE) THEN
    ALLOCATE(M%CCVELDIV(0:IBP1,0:JBP1,0:KBP1),STAT=IZERO)
    CALL ChkMemErr('INIT','CCVELDIV',IZERO)
