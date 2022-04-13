@@ -418,6 +418,7 @@ $QFDS -p 4 -d Pressure_Solver scarc_inseparable_4mesh.fds
 $QFDS -p 4 -d Pressure_Solver obst_activation_ulmat.fds
 $QFDS -p 4 -d Pressure_Solver obst_activation_uscarc_inseparable.fds
 $QFDS -p 4 -d Pressure_Solver obst_activation_2_uscarc_inseparable.fds
+$QFDS -d opening_ulmat.fds
 
 $QFDS -d Pyrolysis cable_11_insulation_mcc.fds
 $QFDS -d Pyrolysis cable_23_insulation_mcc.fds
