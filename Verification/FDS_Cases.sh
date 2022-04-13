@@ -374,6 +374,7 @@ $QFDS -d NS_Analytical_Solution vort2d_40.fds
 $QFDS -d NS_Analytical_Solution vort2d_80.fds
 $QFDS -d NS_Analytical_Solution vort2d_160.fds
 $QFDS -d NS_Analytical_Solution vort2d_320.fds
+$QFDS -p 4 -d NS_Analytical_Solution ns2d_4mesh_64_uscarc.fds
 
 $QFDS -d Pressure_Effects isentropic.fds
 $QFDS -d Pressure_Effects isentropic2.fds
@@ -383,6 +384,7 @@ $QFDS -d Pressure_Effects zone_break_fast.fds
 $QFDS -d Pressure_Effects zone_break_slow.fds
 $QFDS -d Pressure_Effects zone_break_fast_ulmat.fds
 $QFDS -d Pressure_Effects zone_break_slow_ulmat.fds
+$QFDS -d Pressure_Effects zone_break_slow_uscarc.fds
 $QFDS -p 2 -d Pressure_Effects zone_shape.fds
 $QFDS -p 8 -d Pressure_Effects zone_shape_2.fds
 
@@ -415,6 +417,7 @@ $QFDS -p 4 -d Pressure_Solver scarc_separable_4mesh.fds
 $QFDS -p 4 -d Pressure_Solver scarc_inseparable_4mesh.fds
 $QFDS -p 4 -d Pressure_Solver obst_activation_ulmat.fds
 $QFDS -p 4 -d Pressure_Solver obst_activation_uscarc_inseparable.fds
+$QFDS -p 4 -d Pressure_Solver obst_activation_2_uscarc_inseparable.fds
 
 $QFDS -d Pyrolysis cable_11_insulation_mcc.fds
 $QFDS -d Pyrolysis cable_23_insulation_mcc.fds
@@ -716,6 +719,7 @@ $QFDS -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_64.fds
 $QFDS -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_128.fds
 $QFDS -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_256.fds
 $QFDS -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_512.fds
+$QFDS -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_64_uscarc.fds
 $QFDS      -d Scalar_Analytical_Solution soborot_godunov_square_wave_16.fds
 $QFDS      -d Scalar_Analytical_Solution soborot_godunov_square_wave_32.fds
 $QFDS      -d Scalar_Analytical_Solution soborot_godunov_square_wave_64.fds
