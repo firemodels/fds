@@ -3104,19 +3104,17 @@ END SUBROUTINE CHECK_STABILITY
 
 SUBROUTINE BAROCLINIC_CORRECTION(T,NM)
 
-USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 USE CC_SCALARS_IBM, ONLY: CCIBM_BAROCLINIC_CORRECTION
 REAL(EB), INTENT(IN) :: T
 INTEGER, INTENT(IN) :: NM
-REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL(),RHOP=>NULL(),HP=>NULL(),RHMK=>NULL(),RRHO=>NULL()
-INTEGER  :: I,J,K,IW
-REAL(EB) :: P_EXTERNAL,TSI,TIME_RAMP_FACTOR,UN,T_NOW
-LOGICAL  :: INFLOW
-TYPE(VENTS_TYPE), POINTER :: VT=>NULL()
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,RHOP,HP,P,RRHO
+INTEGER  :: I,J,K
+REAL(EB) :: T_NOW
 
 IF (SOLID_PHASE_ONLY .OR. FREEZE_VELOCITY) RETURN
 
-T_NOW=CURRENT_TIME()
+T_NOW = CURRENT_TIME()
+
 CALL POINT_TO_MESH(NM)
 
 ! If the baroclinic torque term has been added to the momentum equation RHS, subtract it off.
@@ -3129,7 +3127,7 @@ ENDIF
 
 BAROCLINIC_TERMS_ATTACHED = .TRUE.
 
-RHMK => WORK1 ! p=rho*(H-K)
+P    => WORK1 ! p=rho*(H-K)
 RRHO => WORK2 ! reciprocal of rho
 
 IF (PREDICTOR) THEN
@@ -3148,55 +3146,17 @@ ENDIF
 
 ! Compute pressure and 1/rho in each grid cell
 
-!$OMP PARALLEL PRIVATE(WC, BC, ONE_D, VT, TSI, TIME_RAMP_FACTOR, P_EXTERNAL, &
-!$OMP& UN, INFLOW)
+!$OMP PARALLEL
 !$OMP DO SCHEDULE(static)
 DO K=0,KBP1
    DO J=0,JBP1
       DO I=0,IBP1
-         RHMK(I,J,K) = RHOP(I,J,K)*(HP(I,J,K)-KRES(I,J,K))
+         P(I,J,K) = RHOP(I,J,K)*(HP(I,J,K)-KRES(I,J,K))
          RRHO(I,J,K) = 1._EB/RHOP(I,J,K)
       ENDDO
    ENDDO
 ENDDO
 !$OMP END DO
-
-! Set baroclinic term to zero at outflow boundaries and P_EXTERNAL at inflow boundaries
-
-!$OMP MASTER
-EXTERNAL_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
-   WC=>WALL(IW)
-   IF (WC%BOUNDARY_TYPE/=OPEN_BOUNDARY) CYCLE EXTERNAL_WALL_LOOP
-   IF (WC%VENT_INDEX>0) THEN
-      VT => VENTS(WC%VENT_INDEX)
-      ONE_D => BOUNDARY_ONE_D(WC%OD_INDEX)
-      IF (ABS(ONE_D%T_IGN-T_BEGIN)<=SPACING(ONE_D%T_IGN) .AND. VT%PRESSURE_RAMP_INDEX>=1) THEN
-         TSI = T
-      ELSE
-         TSI = T - T_BEGIN
-      ENDIF
-      TIME_RAMP_FACTOR = EVALUATE_RAMP(TSI,VT%PRESSURE_RAMP_INDEX)
-      P_EXTERNAL = TIME_RAMP_FACTOR*VT%DYNAMIC_PRESSURE
-   ENDIF
-   BC => BOUNDARY_COORD(WC%BC_INDEX)
-   INFLOW = .FALSE.
-   IOR_SELECT: SELECT CASE(BC%IOR)
-      CASE( 1); UN = UU(BC%II,BC%JJ,BC%KK)
-      CASE(-1); UN = UU(BC%II-1,BC%JJ,BC%KK)
-      CASE( 2); UN = VV(BC%II,BC%JJ,BC%KK)
-      CASE(-2); UN = VV(BC%II,BC%JJ-1,BC%KK)
-      CASE( 3); UN = WW(BC%II,BC%JJ,BC%KK)
-      CASE(-3); UN = WW(BC%II,BC%JJ,BC%KK-1)
-   END SELECT IOR_SELECT
-   IF (UN*SIGN(1._EB,REAL(BC%IOR,EB))>TWO_EPSILON_EB) INFLOW=.TRUE.
-   IF (INFLOW) THEN
-      RHMK(BC%II,BC%JJ,BC%KK) = 2._EB*P_EXTERNAL - RHMK(BC%IIG,BC%JJG,BC%KKG)  ! Pressure at inflow boundary is P_EXTERNAL
-   ELSE
-      RHMK(BC%II,BC%JJ,BC%KK) = -RHMK(BC%IIG,BC%JJG,BC%KKG)                    ! No baroclinic correction for outflow boundary
-   ENDIF
-ENDDO EXTERNAL_WALL_LOOP
-!$OMP END MASTER
-!$OMP BARRIER
 
 ! Compute baroclinic term in the x momentum equation, p*d/dx(1/rho)
 
@@ -3204,7 +3164,7 @@ ENDDO EXTERNAL_WALL_LOOP
 DO K=1,KBAR
    DO J=1,JBAR
       DO I=0,IBAR
-         FVX_B(I,J,K) = -(RHMK(I,J,K)*RHOP(I+1,J,K)+RHMK(I+1,J,K)*RHOP(I,J,K))*(RRHO(I+1,J,K)-RRHO(I,J,K))*RDXN(I)/ &
+         FVX_B(I,J,K) = -(P(I,J,K)*RHOP(I+1,J,K)+P(I+1,J,K)*RHOP(I,J,K))*(RRHO(I+1,J,K)-RRHO(I,J,K))*RDXN(I)/ &
                          (RHOP(I+1,J,K)+RHOP(I,J,K))
          FVX(I,J,K) = FVX(I,J,K) + FVX_B(I,J,K)
       ENDDO
@@ -3219,7 +3179,7 @@ IF (.NOT.TWO_D) THEN
    DO K=1,KBAR
       DO J=0,JBAR
          DO I=1,IBAR
-            FVY_B(I,J,K) = -(RHMK(I,J,K)*RHOP(I,J+1,K)+RHMK(I,J+1,K)*RHOP(I,J,K))*(RRHO(I,J+1,K)-RRHO(I,J,K))*RDYN(J)/ &
+            FVY_B(I,J,K) = -(P(I,J,K)*RHOP(I,J+1,K)+P(I,J+1,K)*RHOP(I,J,K))*(RRHO(I,J+1,K)-RRHO(I,J,K))*RDYN(J)/ &
                             (RHOP(I,J+1,K)+RHOP(I,J,K))
             FVY(I,J,K) = FVY(I,J,K) + FVY_B(I,J,K)
          ENDDO
@@ -3234,7 +3194,7 @@ ENDIF
 DO K=0,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
-         FVZ_B(I,J,K) = -(RHMK(I,J,K)*RHOP(I,J,K+1)+RHMK(I,J,K+1)*RHOP(I,J,K))*(RRHO(I,J,K+1)-RRHO(I,J,K))*RDZN(K)/ &
+         FVZ_B(I,J,K) = -(P(I,J,K)*RHOP(I,J,K+1)+P(I,J,K+1)*RHOP(I,J,K))*(RRHO(I,J,K+1)-RRHO(I,J,K))*RDZN(K)/ &
                          (RHOP(I,J,K+1)+RHOP(I,J,K))
          FVZ(I,J,K) = FVZ(I,J,K) + FVZ_B(I,J,K)
       ENDDO
