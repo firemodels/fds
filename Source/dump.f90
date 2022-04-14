@@ -5515,14 +5515,14 @@ QUANTITY_LOOP: DO IQ=1,NQT
          OPEN(LU_SLCF(IQ,NM),FILE=FN_SLCF(IQ,NM),FORM='UNFORMATTED',STATUS='OLD',POSITION='APPEND')
          WRITE(LU_SLCF(IQ,NM)) STIME
          IF (SL%DEBUG) THEN
-            IF (I1 .NE. I2) THEN
+            IF (J1 .NE. J2 .AND. K1 .NE. K2 ) THEN
+               WRITE(LU_SLCF(IQ,NM)) (((MESHES(NM)%YPLT(J),I=I1,I2),J=J1,J2),K=K1,K2)
+            ELSE IF (I1 .NE. I2 .AND. K1 .NE. K2)THEN
+               WRITE(LU_SLCF(IQ,NM)) (((MESHES(NM)%ZPLT(K),I=I1,I2),J=J1,J2),K=K1,K2)
+            ELSE IF (I1 .NE. I2 .AND. J1 .NE. J2)THEN
                WRITE(LU_SLCF(IQ,NM)) (((MESHES(NM)%XPLT(I),I=I1,I2),J=J1,J2),K=K1,K2)
             ELSE
-               IF (J1 .NE. J2 )THEN
-                  WRITE(LU_SLCF(IQ,NM)) (((MESHES(NM)%YPLT(J),I=I1,I2),J=J1,J2),K=K1,K2)
-               ELSE
-                  WRITE(LU_SLCF(IQ,NM)) (((MESHES(NM)%ZPLT(K),I=I1,I2),J=J1,J2),K=K1,K2)
-               ENDIF
+               WRITE(LU_SLCF(IQ,NM)) (((MESHES(NM)%XPLT(I),I=I1,I2),J=J1,J2),K=K1,K2)
             ENDIF
          ELSE
             WRITE(LU_SLCF(IQ,NM)) (((QQ(I,J,K,1),I=I1,I2),J=J1,J2),K=K1,K2)
@@ -5556,17 +5556,18 @@ QUANTITY_LOOP: DO IQ=1,NQT
          ENDIF
 
          IF (SL%DEBUG) THEN
-            IF (I1 .NE. I2) THEN
+            IF (J1 .NE. J2 .AND. K1 .NE. K2 ) THEN
+               SLICE_MIN = MESHES(NM)%YPLT(J1)
+               SLICE_MAX = MESHES(NM)%YPLT(J2)
+            ELSE IF (I1 .NE. I2 .AND. K1 .NE. K2)THEN
+               SLICE_MIN = MESHES(NM)%ZPLT(K1)
+               SLICE_MAX = MESHES(NM)%ZPLT(K2)
+            ELSE IF (I1 .NE. I2 .AND. J1 .NE. J2)THEN
                SLICE_MIN = MESHES(NM)%XPLT(I1)
-               SLICE_MAX = MESHES(NM)%YPLT(I2)
+               SLICE_MAX = MESHES(NM)%XPLT(I2)
             ELSE
-               IF (J1 .NE. J2 )THEN
-                  SLICE_MIN = MESHES(NM)%YPLT(J1)
-                  SLICE_MAX = MESHES(NM)%YPLT(J2)
-               ELSE
-                  SLICE_MIN = MESHES(NM)%ZPLT(K1)
-                  SLICE_MAX = MESHES(NM)%ZPLT(K2)
-               ENDIF
+               SLICE_MIN = MESHES(NM)%XPLT(I1)
+               SLICE_MAX = MESHES(NM)%XPLT(I2)
             ENDIF
          ELSE
             IF (CC_CELL_CENTERED) THEN
