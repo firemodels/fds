@@ -1555,7 +1555,7 @@ TYPE DUCTNODE_TYPE
    REAL(EB) :: CP                                          !< Specific heat of node (J/kg/K)
    REAL(EB) :: CP_OLD                                      !< Prior timestep specific heat of node (J/kg/K)
    REAL(EB) :: CP_V                                        !< Specific heat of VENT connected to node (J/kg/K)
-   REAL(EB) :: XYZ(3)                                      !< Node (x,y,z) coordinate (m)
+   REAL(EB) :: XYZ(3)=(/0._EB,0._EB,0._EB/)                !< Node (x,y,z) coordinate (m)
    REAL(EB) :: FILTER_LOSS                                 !< Current loss for a filter in the node
    REAL(EB) :: P                                           !< Pressure at the node (Pa)
    REAL(EB) :: P_OLD                                       !< Prior timestep pressure at the node (Pa)
