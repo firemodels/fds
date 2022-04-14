@@ -1,4 +1,4 @@
-&HEAD CHID='obst_activation_2_uscarc_inseparable', TITLE='Test of various obst activation situations for inseparable UScaRC' 
+&HEAD CHID='obst_activation_2_uscarc_inseparable', TITLE='Test of various obst activation situations for inseparable UScaRC' /
 
 &MESH IJK=16,1,16, XB=0.0,0.8,-0.001,0.001,0.0,0.8 /
 &MESH IJK=16,1,16, XB=0.8,1.6,-0.001,0.001,0.0,0.8 /
