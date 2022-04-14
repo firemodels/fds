@@ -5514,18 +5514,15 @@ QUANTITY_LOOP: DO IQ=1,NQT
          STIME = REAL(T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR,FB)
          OPEN(LU_SLCF(IQ,NM),FILE=FN_SLCF(IQ,NM),FORM='UNFORMATTED',STATUS='OLD',POSITION='APPEND')
          WRITE(LU_SLCF(IQ,NM)) STIME
+         IF (.NOT. SL%DEBUG) WRITE(LU_SLCF(IQ,NM)) (((QQ(I,J,K,1),I=I1,I2),J=J1,J2),K=K1,K2)
          IF (SL%DEBUG) THEN
             IF (J1 .NE. J2 .AND. K1 .NE. K2 ) THEN
                WRITE(LU_SLCF(IQ,NM)) (((MESHES(NM)%YPLT(J),I=I1,I2),J=J1,J2),K=K1,K2)
             ELSE IF (I1 .NE. I2 .AND. K1 .NE. K2)THEN
                WRITE(LU_SLCF(IQ,NM)) (((MESHES(NM)%ZPLT(K),I=I1,I2),J=J1,J2),K=K1,K2)
-            ELSE IF (I1 .NE. I2 .AND. J1 .NE. J2)THEN
-               WRITE(LU_SLCF(IQ,NM)) (((MESHES(NM)%XPLT(I),I=I1,I2),J=J1,J2),K=K1,K2)
             ELSE
                WRITE(LU_SLCF(IQ,NM)) (((MESHES(NM)%XPLT(I),I=I1,I2),J=J1,J2),K=K1,K2)
             ENDIF
-         ELSE
-            WRITE(LU_SLCF(IQ,NM)) (((QQ(I,J,K,1),I=I1,I2),J=J1,J2),K=K1,K2)
          ENDIF
          CLOSE(LU_SLCF(IQ,NM))
 
@@ -5562,9 +5559,6 @@ QUANTITY_LOOP: DO IQ=1,NQT
             ELSE IF (I1 .NE. I2 .AND. K1 .NE. K2)THEN
                SLICE_MIN = MESHES(NM)%ZPLT(K1)
                SLICE_MAX = MESHES(NM)%ZPLT(K2)
-            ELSE IF (I1 .NE. I2 .AND. J1 .NE. J2)THEN
-               SLICE_MIN = MESHES(NM)%XPLT(I1)
-               SLICE_MAX = MESHES(NM)%XPLT(I2)
             ELSE
                SLICE_MIN = MESHES(NM)%XPLT(I1)
                SLICE_MAX = MESHES(NM)%XPLT(I2)
