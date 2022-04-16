@@ -192,7 +192,10 @@ OVERALL_INSERT_LOOP: DO
             IF (IOS==0) THEN
                READ(LU_VEG_IN) VXMIN,VXMAX,VYMIN,VYMAX,VZMIN,VZMAX
                ! Skip if volume containing vegetation is entirely outside the current mesh
-               IF (VXMIN>XF .OR. VXMAX<XS .OR. VYMIN>YF .OR. VYMAX<YS .OR. VZMIN>ZF .OR. VZMAX<ZS) CYCLE
+               IF (VXMIN>XF .OR. VXMAX<XS .OR. VYMIN>YF .OR. VYMAX<YS .OR. VZMIN>ZF .OR. VZMAX<ZS) THEN
+                  IN%ALREADY_INSERTED(NM)=.TRUE.
+                  CYCLE
+               ENDIF
                ! Voxel resolution
                READ(LU_VEG_IN) VDX,VDY,VDZ
                ! Number of vegetation containing voxels
