@@ -206,7 +206,7 @@ OVERALL_INSERT_LOOP: DO
             ELSE
                WRITE(MESSAGE,'(A,I0,A,A,A)') 'ERROR: INIT ',INIT_INDEX,', could not read binary bulk density file ', &
                                          TRIM(IN%BULK_DENSITY_FILE),'. Check file exists.'
-               CALL SHUTDOWN(MESSAGE); RETURN
+               CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.); RETURN
             ENDIF
          ENDIF
       ENDIF
@@ -3107,7 +3107,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
 
             IF (H_V < 0._EB) THEN
                WRITE(MESSAGE,'(A,A)') 'Numerical instability in particle energy transport, H_V for ',TRIM(SS%ID)
-               CALL SHUTDOWN(MESSAGE)
+               CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.)
                RETURN
             ENDIF
 
