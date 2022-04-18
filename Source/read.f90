@@ -5333,6 +5333,10 @@ PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
       RETURN
    ENDIF
 
+   ! If COLOR is not assigned to the PART class, use the SURF color
+
+   IF (ALL(LPC%RGB==0)) LPC%RGB=SF%RGB
+
    ! Set the flag to do particle exchanges between meshes
 
    OMESH_PARTICLES=.TRUE.
@@ -5454,7 +5458,8 @@ PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
 
    ENDIF SURF_OR_SPEC
 
-! Adjust the evaporation rate of fuel PARTICLEs to account for difference in HoC.
+   ! Adjust the evaporation rate of fuel PARTICLEs to account for difference in HoC.
+
    IF (LPC%HEAT_OF_COMBUSTION > 0._EB) THEN
       REAC_DO: DO NN=1,N_REACTIONS
          IF (TRIM(SPECIES_MIXTURE(LPC%Z_INDEX)%ID) == TRIM(REACTION(NN)%FUEL)) THEN
