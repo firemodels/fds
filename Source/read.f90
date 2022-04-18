@@ -5333,9 +5333,9 @@ PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
       RETURN
    ENDIF
 
-   ! If COLOR is not assigned to the PART class, use the SURF color
+   ! If COLOR is not assigned to the PART class, use the SURF color if it has been specified
 
-   IF (ALL(LPC%RGB==0)) LPC%RGB=SF%RGB
+   IF (ALL(LPC%RGB==0) .AND. .NOT.ALL(SF%RGB==SURFACE(INERT_SURF_INDEX)%RGB)) LPC%RGB=SF%RGB
 
    ! Set the flag to do particle exchanges between meshes
 
