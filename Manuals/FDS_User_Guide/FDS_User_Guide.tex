@@ -9396,7 +9396,7 @@ The parameter {\ct QUANTITIES} on the {\ct PART} line is an array of character s
 {\ct 'PARTICLE DRAG COEFFICIENT'} \\
 {\ct 'PARTICLE BULK DENSITY'} (kg/m$^3$) \\
 \\
-If no {\ct QUANTITIES} are specified and none are selected in Smokeview, then Smokeview will display particles with a single color determined by the color of the {\ct SURF\_ID} assigned to the {\ct PART} class, with the exception of water droplets and liquid fuel droplets, which are colored blue and yellow, respectively. You may override the {\ct SURF} color by specifying either {\ct RGB} or {\ct COLOR} on the {\ct PART} line.
+If no {\ct QUANTITIES} are specified and none are selected in Smokeview, then Smokeview will display particles with a single color determined by the color of the {\ct SURF\_ID} assigned to the {\ct PART} class, with the exception of water droplets and liquid fuel droplets, which are colored blue and yellow, respectively. If no color is specified on {\ct SURF} then the default solid particle color will revert to black.  You may override the {\ct SURF} color by specifying either {\ct RGB} or {\ct COLOR} on the {\ct PART} line.
 
 The {\ct PARTICLE WEIGHTING FACTOR} describes how many actual particles each of the computational particles represent. The {\ct PARTICLE BULK DENSITY} gives the weighted (total) mass per grid cell volume, which is an important parameter when using particles to represent porous media such as vegetation.
 
@@ -11860,7 +11860,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct BREAKUP\_SIGMA\_D}                  & Real        & Section~\ref{info:secondary_breakup}                                  &                   &                       \\ \hline
 {\ct CHECK\_DISTRIBUTION}                & Logical     & Section~\ref{info:particle_size}                                      &                   & {\ct F}               \\ \hline
 {\ct CNF\_RAMP\_ID}                      & Character   & Section~\ref{info:particle_size}                                      &                   &                       \\ \hline
-{\ct COLOR}                              & Character   & Section~\ref{info:part_output}                                        &                   &                       \\ \hline
+{\ct COLOR}                              & Character   & Section~\ref{info:part_output}                                        &                   & {\ct 'BLACK'}         \\ \hline
 {\ct COMPLEX\_REFRACTIVE\_INDEX}         & Real        & Section~\ref{radiative_part_props}                                    &                   & 0.01                  \\ \hline
 {\ct CTRL\_ID}                           & Character   & Section~\ref{info:particle_flux}                                      &                   &                       \\ \hline
 {\ct DENSE\_VOLUME\_FRACTION}            & Real        & Section~\ref{info:DENSE_VOLUME_FRACTION}                              &                   & $1\times 10^{-5}$     \\ \hline
