@@ -25,8 +25,6 @@ fi
 if [ "$BACKGROUND_LOAD" == "" ]; then
   export BACKGROUND_LOAD=75
 fi
-REGULAR=1
-BENCHMARK=1
 # make Intel MPI the default on a linux system
 INTEL=i
 INTEL2="-I"
@@ -37,16 +35,13 @@ if [ "`uname`" == "Darwin" ]; then
 fi
 WAIT=
 CHECKCASES=
-SUBSET=
 RESTART=
-FIREBOT_LITE=
 
 function usage {
 echo "Run_FDS_Cases.sh [ -d -h -m max_iterations -q queue_name -s "
 echo "Runs FDS verification suite"
 echo ""
 echo "Options"
-echo "-b - run only benchmark cases"
 echo "-C - check that cases ran (used by firebot)"
 echo "-d - use debug version of FDS"
 echo "-h - display this message"
@@ -57,9 +52,7 @@ echo "     example: an option of 10 would cause FDS to stop after 10 iterations"
 echo "-O - use OpenMPI version of FDS"
 echo "-q queue_name - run cases using the queue queue_name [default: batch]"
 echo "-r - run restart test cases"
-echo "-R - run only regular (non-benchmark) cases"
 echo "-s - stop FDS runs"
-echo "-S - run cases in FDS_Cases_Subset.sh"
 echo "-W - wait for cases to complete before returning"
 exit
 }
@@ -103,15 +96,9 @@ cd $SVNROOT
 export SVNROOT=`pwd`
 cd $CURDIR
 
-while getopts 'bCdhj:Jm:Oq:rRsSW' OPTION
+while getopts 'Cdhj:Jm:Oq:rsW' OPTION
 do
 case $OPTION in
-  b)
-   BENCHMARK=1
-   REGULAR=
-   RESTART=
-   SUBSET=
-   ;;
   C)
    CHECKCASES="1"
    ;;
@@ -140,35 +127,16 @@ case $OPTION in
    QUEUE="$OPTARG"
    ;;
   r)
-   BENCHMARK=
-   REGULAR=
    RESTART=1
-   SUBSET=
-   ;;
-  R)
-   BENCHMARK=
-   REGULAR=1
-   RESTART=
-   SUBSET=
    ;;
   s)
    export STOPFDS=1
-   ;;
-  S)
-   FIREBOT_LITE=1
    ;;
   W)
    WAIT="1"
    ;;
 esac
 done
-
-if [ "$FIREBOT_LITE" != "" ]; then
-   BENCHMARK=
-   REGULAR=
-   RESTART=
-   SUBSET=1
-fi
 
 if [ "$JOBPREFIX" == "" ]; then
   JOBPREFIX=FB_
@@ -194,34 +162,11 @@ else
   export QFDS="$QFDSSH $INTEL2 $QUEUE $DEBUG" 
 fi
 
-cd ..
-if [ "$BENCHMARK" == "1" ]; then
-  if [ "$SINGLE" == "" ]; then
-    ./FDS_Benchmark_Cases.sh
-  else
-    ./FDS_Benchmark_Cases_single.sh
-  fi
-  if [ "$CHECKCASES" == "" ]; then
-    echo Cases in FDS_Benchmark_Cases.sh submitted
-  fi
-fi
-
 cd $CURDIR
 cd ..
-if [ "$SUBSET" == "1" ]; then
-   ./FDS_Cases_Subset.sh
-   if [ "$CHECKCASES" == "" ]; then
-      echo Cases in FDS_Cases_Subset.sh submitted
-   fi
-fi
-
-cd $CURDIR
-cd ..
-if [ "$REGULAR" == "1" ]; then
-    ./FDS_Cases.sh
-   if [ "$CHECKCASES" == "" ]; then
-      echo Cases in FDS_Cases.sh submitted
-   fi
+./FDS_Cases.sh
+if [ "$CHECKCASES" == "" ]; then
+   echo Cases in FDS_Cases.sh submitted
 fi
 
 cd $CURDIR
@@ -235,7 +180,6 @@ fi
 
 cd $CURDIR
 cd ..
-
 if [ "$CHECKCASES" == "" ]; then
   if [ "$WAIT" == "1" ]; then
     wait_cases_end
