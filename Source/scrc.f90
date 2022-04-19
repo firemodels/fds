@@ -2289,7 +2289,7 @@ INTEGER, INTENT(IN) :: NL1, NR1, NINIT
 CHARACTER(*), INTENT(IN) :: CID, CSCOPE
 LOGICAL :: WRONG_SIZES, WRONG_BOUNDS
 
-WRONG_SIZES = .FALSE.;  
+WRONG_SIZES = .FALSE.  
 IF (ALLOCATED(WORKSPACE)) WRONG_SIZES = SIZE(WORKSPACE) < NR1-NL1+1
 WRONG_BOUNDS = NL1 /= 1
 
@@ -2321,7 +2321,7 @@ INTEGER, INTENT(IN) :: NL1, NR1, NL2, NR2, NINIT
 CHARACTER(*), INTENT(IN) :: CID, CSCOPE
 LOGICAL :: WRONG_SIZES, WRONG_BOUNDS
 
-WRONG_SIZES = .FALSE.; 
+WRONG_SIZES = .FALSE. 
 IF (ALLOCATED(WORKSPACE)) WRONG_SIZES = SIZE(WORKSPACE,1) < NR1-NL1+1 .OR. SIZE(WORKSPACE,2) < NR2-NL2+1
 WRONG_BOUNDS = NL1 /= 1 .OR. NL2 /= 1
 
@@ -2386,7 +2386,7 @@ INTEGER, INTENT(IN) :: NL1, NR1, NINIT
 CHARACTER(*), INTENT(IN) :: CID, CSCOPE
 LOGICAL :: WRONG_SIZES, WRONG_BOUNDS
 
-WRONG_SIZES = .FALSE.; 
+WRONG_SIZES = .FALSE. 
 IF (ALLOCATED(WORKSPACE)) WRONG_SIZES = SIZE(WORKSPACE) < NR1-NL1+1
 WRONG_BOUNDS = NL1 /= 1
 
@@ -2416,7 +2416,7 @@ INTEGER, INTENT(IN) :: NL1, NR1, NL2, NR2, NINIT
 CHARACTER(*), INTENT(IN) :: CID, CSCOPE
 LOGICAL :: WRONG_SIZES, WRONG_BOUNDS
 
-WRONG_SIZES = .FALSE.; 
+WRONG_SIZES = .FALSE.
 IF (ALLOCATED(WORKSPACE)) WRONG_SIZES = SIZE(WORKSPACE,1) < NR1-NL1+1 .OR. SIZE(WORKSPACE,2) < NR2-NL2+1
 WRONG_BOUNDS = NL1 /= 1 .OR. NL2 /= 1
 
@@ -2446,7 +2446,7 @@ INTEGER, INTENT(IN) :: NL1, NR1, NL2, NR2, NL3, NR3, NINIT
 CHARACTER(*), INTENT(IN) :: CID, CSCOPE
 LOGICAL :: WRONG_SIZES, WRONG_BOUNDS
 
-WRONG_SIZES = .FALSE.; 
+WRONG_SIZES = .FALSE. 
 IF (ALLOCATED(WORKSPACE)) &
    WRONG_SIZES  = SIZE(WORKSPACE,1) < NR1-NL1+1 .OR. SIZE(WORKSPACE,2) < NR2-NL2+1 .OR. SIZE(WORKSPACE,3) < NR3-NL3+1
 WRONG_BOUNDS = NL1 /= 1 .OR. NL2 /= 1 .OR. NL3 /= 1
@@ -10908,6 +10908,7 @@ PRESSURE_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
    ! Transfer current (U)ScaRC solution VEC%X to inseparable pressure PPP in mesh-inner cells
 
    PPP = 0.0_EB
+   !$OMP PARALLEL DO SCHEDULE(STATIC)
    DO K=1,M%KBAR
       DO J=1,M%JBAR
          DO I=1,M%IBAR
@@ -10917,6 +10918,7 @@ PRESSURE_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          ENDDO
       ENDDO
    ENDDO
+   !$OMP END PARALLEL DO
 
    ! Set correct ghost cell values for PPP according to boundary conditions
 
@@ -10971,6 +10973,7 @@ PRESSURE_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
    ! Now, HP must be recomputed from P by the relation H = P/RHO + KRES
    ! This is done including the ghost cells such that the upper BC's for the pressure already are used here
 
+   !$OMP PARALLEL DO SCHEDULE(STATIC)
    DO K=0,L%NZ+1
       DO J=0,L%NY+1
          DO I=0,L%NX+1
@@ -10978,6 +10981,7 @@ PRESSURE_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          ENDDO
       ENDDO
    ENDDO
+   !$OMP END PARALLEL DO
 
    ! Reset homogeneous Neumann boundary conditions for HP along solid boundaries
 
@@ -11014,6 +11018,8 @@ BAROCLINIC_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
    RRHO => M%WORK7
    RHMK => M%WORK8
 
+   !$OMP PARALLEL
+   !$OMP DO SCHEDULE(STATIC) 
    DO K=0,M%KBP1
       DO J=0,M%JBP1
          DO I=0,M%IBP1
@@ -11022,9 +11028,11 @@ BAROCLINIC_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          ENDDO
       ENDDO
    ENDDO
+   !$OMP END DO
 
    ! Compute baroclinic term in the x momentum equation, p*d/dx(1/rho), based on RHMK and accumulate full force term
    
+   !$OMP DO SCHEDULE(STATIC) 
    DO K=1,M%KBAR
       DO J=1,M%JBAR
          DO I=0,M%IBAR
@@ -11034,10 +11042,12 @@ BAROCLINIC_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          ENDDO
       ENDDO
    ENDDO
+   !$OMP END DO NOWAIT
    
    ! Compute baroclinic term in the y momentum equation, p*d/dy(1/rho), based on RHMK
    
    IF (.NOT.TWO_D) THEN
+      !$OMP DO SCHEDULE(STATIC) 
       DO K=1,M%KBAR
          DO J=0,M%JBAR
             DO I=1,M%IBAR
@@ -11047,10 +11057,12 @@ BAROCLINIC_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
             ENDDO
          ENDDO
       ENDDO
+      !$OMP END DO NOWAIT
    ENDIF
    
    ! Compute baroclinic term in the z momentum equation, p*d/dz(1/rho), based on RHMK
    
+   !$OMP DO SCHEDULE(STATIC) 
    DO K=0,M%KBAR
       DO J=1,M%JBAR
          DO I=1,M%IBAR
@@ -11060,6 +11072,8 @@ BAROCLINIC_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
          ENDDO
       ENDDO
    ENDDO
+   !$OMP END DO NOWAIT
+   !$OMP END PARALLEL
 
    ! Set no-flux conditions on final F = F_A + F_B, where F_B is up-to-date to current time step
    ! This will then be used in the velocity predictor/corrector routines
@@ -11109,6 +11123,7 @@ L%FVZ_H = FVZ
 RFODT = RELAXATION_FACTOR/DT0
 RHMK => WORK1
 
+!$OMP PARALLEL DO SCHEDULE(STATIC)
 DO K=0,KBP1
    DO J=0,JBP1
       DO I=0,IBP1
@@ -11116,6 +11131,7 @@ DO K=0,KBP1
       ENDDO
    ENDDO
 ENDDO
+!$OMP END PARALLEL DO
 
 ! Set the no-flux conditions for obstructions 
 ! Pressure- and KRES-gradients only comes into play in the structured case
