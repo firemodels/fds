@@ -164,14 +164,12 @@ fi
 
 cd $CURDIR
 cd ..
-./FDS_Cases.sh
-if [ "$CHECKCASES" == "" ]; then
-   echo Cases in FDS_Cases.sh submitted
-fi
-
-cd $CURDIR
-cd ..
-if [ "$RESTART" != "" ]; then
+if [ "$RESTART" == "" ]; then
+   ./FDS_Cases.sh
+   if [ "$CHECKCASES" == "" ]; then
+      echo Cases in FDS_Cases.sh submitted
+   fi
+else
     ./FDS_RESTART_Cases.sh 
    if [ "$CHECKCASES" == "" ]; then
       echo Cases in FDS_RESTART_Cases.sh submitted
