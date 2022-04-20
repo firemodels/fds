@@ -1,8 +1,5 @@
 @echo off
 set arg1=%1
-set arg2=%2
-
-call ..\Scripts\set_intel_compiler.bat %arg1% %arg2%
 
 :: setup compiler environment
 if x%arg1% == xbot goto endif1
