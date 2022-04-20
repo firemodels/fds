@@ -414,6 +414,7 @@ $QFDS -p 8 -d Pressure_Solver pressure_iteration3d_scarc.fds
 $QFDS -p 8 -d Pressure_Solver pressure_iteration3d_uscarc.fds
 $QFDS -p 8 -d Pressure_Solver pressure_iteration3d_uglmat.fds
 $QFDS -p 2 -d Pressure_Solver ulmat_2zone.fds
+$QFDS -p 2 -d Pressure_Solver uscarc_inseparable_2zone.fds
 $QFDS -p 4 -d Pressure_Solver scarc_separable_4mesh.fds
 $QFDS -p 4 -d Pressure_Solver scarc_inseparable_4mesh.fds
 $QFDS -p 4 -d Pressure_Solver obst_activation_ulmat.fds

@@ -192,7 +192,10 @@ OVERALL_INSERT_LOOP: DO
             IF (IOS==0) THEN
                READ(LU_VEG_IN) VXMIN,VXMAX,VYMIN,VYMAX,VZMIN,VZMAX
                ! Skip if volume containing vegetation is entirely outside the current mesh
-               IF (VXMIN>XF .OR. VXMAX<XS .OR. VYMIN>YF .OR. VYMAX<YS .OR. VZMIN>ZF .OR. VZMAX<ZS) CYCLE
+               IF (VXMIN>XF .OR. VXMAX<XS .OR. VYMIN>YF .OR. VYMAX<YS .OR. VZMIN>ZF .OR. VZMAX<ZS) THEN
+                  IN%ALREADY_INSERTED(NM)=.TRUE.
+                  CYCLE
+               ENDIF
                ! Voxel resolution
                READ(LU_VEG_IN) VDX,VDY,VDZ
                ! Number of vegetation containing voxels
@@ -206,7 +209,7 @@ OVERALL_INSERT_LOOP: DO
             ELSE
                WRITE(MESSAGE,'(A,I0,A,A,A)') 'ERROR: INIT ',INIT_INDEX,', could not read binary bulk density file ', &
                                          TRIM(IN%BULK_DENSITY_FILE),'. Check file exists.'
-               CALL SHUTDOWN(MESSAGE); RETURN
+               CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.); RETURN
             ENDIF
          ENDIF
       ENDIF
@@ -3107,7 +3110,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
 
             IF (H_V < 0._EB) THEN
                WRITE(MESSAGE,'(A,A)') 'Numerical instability in particle energy transport, H_V for ',TRIM(SS%ID)
-               CALL SHUTDOWN(MESSAGE)
+               CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.)
                RETURN
             ENDIF
 
