@@ -48,66 +48,34 @@ no_target:
 .f90.o:
 	$(FC) -c $(FFLAGS) $(FILTERF) $<
 
-# ------------- Win 64 ----------------
-#  64 bit windows
-
-intel_win_64 : FFLAGS    = -O2 /nologo /fpscomp:general $(GITINFO)
-intel_win_64 : FC        = ifort
-intel_win_64 : exe       = fds2ascii_win_64.exe
-
-intel_win_64 : $(objwin)
+intel_win : FFLAGS    = -O2 /nologo /fpscomp:general $(GITINFO)
+intel_win : FC        = ifort
+intel_win : exe       = fds2ascii_intel_win.exe
+intel_win : $(objwin)
 	$(FC) -o $(bin)/$(exe) $(objwin)
 
-# ------------- gnu win 64 ----------------
-
-gnu_win_64 : FFLAGS    = -O0 -m64 -x f95-cpp-input -ffree-form -frecord-marker=4
-gnu_win_64 : LFLAGS    = -m64
-gnu_win_64 : FC        = gfortran
-gnu_win_64 : exe       = fds2ascii_win_64.exe
-
-gnu_win_64 : $(obj) 
-	$(FC) -o $(bin)/$(exe) $(LFLAGS) $(obj)
-
-# ------------- gnu linux 64 ----------------
-#  64 bit gcc linux
-
-gnu_linux_64 : FFLAGS    = -O0 -m64 -ffree-form -frecord-marker=4  $(GITINFOGNU)
-gnu_linux_64 : FC        = gfortran
-gnu_linux_64 : exe       = fds2ascii_linux_64
-
-gnu_linux_64 : $(obj)
+gnu_linux : FFLAGS    = -O0 -m64 -ffree-form -frecord-marker=4  $(GITINFOGNU)
+gnu_linux : FC        = gfortran
+gnu_linux : exe       = fds2ascii_gnu_linux
+gnu_linux : $(obj)
 	$(FC) -o $(bin)/$(exe) $(obj)
 
-# ------------- gnu osx 64 ----------------
-#  64 bit gcc linux
-
-gnu_osx_64 : FFLAGS    = -O0 -m64 -ffree-form -frecord-marker=4  $(GITINFOGNU)
-gnu_osx_64 : FC        = gfortran
-gnu_osx_64 : exe       = fds2ascii_osx_64
-
-gnu_osx_64 : $(obj)
+gnu_osx : FFLAGS    = -O0 -m64 -ffree-form -frecord-marker=4  $(GITINFOGNU)
+gnu_osx : FC        = gfortran
+gnu_osx : exe       = fds2ascii_gnu_osx
+gnu_osx : $(obj)
 	$(FC) -o $(bin)/$(exe) $(obj)
 
-
-
-# ------------- Linux 64 ----------------
-#  64 bit linux
-
-intel_linux_64 : FFLAGS    = -O2 -m64 $(GITINFO)
-intel_linux_64 : FC        = ifort
-intel_linux_64 : exe       = fds2ascii_linux_64
-
-intel_linux_64 : $(obj)
+intel_linux : FFLAGS    = -O2 -m64 $(GITINFO)
+intel_linux : FC        = ifort
+intel_linux : exe       = fds2ascii_intel_linux
+intel_linux : $(obj)
 	$(FC) -o $(bin)/$(exe) $(obj)
 
-# ------------- OSX 64 ----------------
-#  64 bit OSX
-
-intel_osx_64 : FFLAGS    = -O2 -m64 $(GITINFO)
-intel_osx_64 : FC        = ifort
-intel_osx_64 : exe       = fds2ascii_osx_64
-
-intel_osx_64 : $(obj)
+intel_osx : FFLAGS    = -O2 -m64 $(GITINFO)
+intel_osx : FC        = ifort
+intel_osx : exe       = fds2ascii_intel_osx
+intel_osx : $(obj)
 	$(FC) -o $(bin)/$(exe) $(obj)
 
 #-------------- Clean Target to remove Object and Module files -----------
