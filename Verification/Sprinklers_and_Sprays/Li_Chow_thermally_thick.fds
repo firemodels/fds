@@ -33,8 +33,7 @@ Inputs based on Fig 6 Li Chow Fire Tech 44 351-381 2008
       GEOMETRY     = 'SPHERICAL'
       THICKNESS    = 5.E-5
       TMP_INNER    = 10.
-      MINIMUM_LAYER_THICKNESS = 1.E-10
-      BLOWING      = T /
+      MINIMUM_LAYER_THICKNESS = 1.E-10 /
 
 &MATL ID                     = 'WATER'
       EMISSIVITY             = 0.95
