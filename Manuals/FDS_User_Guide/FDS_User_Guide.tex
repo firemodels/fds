@@ -2944,10 +2944,6 @@ For some verification and validation cases, it is useful to employ a special cor
 \ee
 where $\hbox{Nu}$ is the Nusselt number, $k$ is the thermal conductivity of the gas, $D$ is the diameter of the cylinder, Ra is the Rayleigh number, Pr is the Prandtl number, $T_{\rm s}$ is the surface temperature, $T_\infty$ is the ambient or surrounding gas temperature, $g$ is the acceleration of gravity, $\nu=\mu/\rho$ is the kinematic viscosity of the gas, and $\alpha=k/(\rho c_p)$ is the thermal diffusivity. To specify this heat transfer model for a particular surface, set {\ct HEAT\_TRANSFER\_MODEL} equal to {\ct 'FREE HORIZONTAL CYLINDER'} on the {\ct SURF} line.
 
-\subsubsection{Heat Transfer with Blowing}
-
-During pyrolysis of a solid or evaporation of a liquid the mass transfer off the surface generats a blowing velocity that alters the thermal and momentum boundary layers, thus affecting the heat and mass transfer coefficients.  For a surface with blowing, consider using the correlations discussed in Sazhin \cite{Sazhin:2006} with the Spalding mass transfer corrections \cite{Spalding:1}.  These may be activated by setting {\ct BLOWING=T} on the {\ct SURF} line.  Note that for {\ct GEOMETRY='SPHERICAL'} or {\ct GEOMETRY='CYLINDRICAL'} used together with {\ct BLOWING=T} the time dependent {\ct THICKNESS} of the surface is used in computing the Reynolds number.  For {\ct GEOMETRY='CARTESIAN'} and {\ct BLOWING=T} the length scale for the Reynolds number is the usual {\ct CONVECTION\_LENGTH\_SCALE} set on the {\ct SURF} line.
-
 
 \subsection{Special Topic: Adiabatic Surfaces}
 \label{info:adiabatic}
@@ -3643,17 +3639,6 @@ An example demonstrating evaporation of a liquid mixture is found in the {\ct Py
 \label{liquid_mixture_plot}
 \end{figure}
 
-\subsubsection{Heat and Mass Transfer with Blowing}
-
-To invoke the heat and mass transfer relationships from \cite{Sazhin:2006}, set {\ct BLOWING=T} on the {\ct SURF} line.  For example,
-\begin{lstlisting}
-&SURF ID        = 'ETHANOL POOL'
-      COLOR     = 'YELLOW'
-      MATL_ID   = 'ETHANOL LIQUID'
-      THICKNESS = 0.1
-      BLOWING   = T /
-\end{lstlisting}
-Note that the default {\ct GEOMETRY} is {\ct 'CARTESIAN'} in which case the length scale used in the Reynolds number is taken from the {\ct 'CONVECTION\_LENGTH\_SCALE'} [default 1 m] on {\ct SURF}.  If the {\ct GEOMETRY} is set to {\ct 'SPHERICAL'} or {\ct 'CYLINDRICAL'}, then the time-dependent {\ct THICKNESS} is used as the radius, and the diameter is then used to compute the Reynolds number in the Sherwood and Nusselt correlations.
 
 
 \subsection{Fuel Burnout}
@@ -6476,7 +6461,7 @@ For  {\ct 'CYLINDRICAL'} or {\ct 'SPHERICAL'} particles, specify the {\ct INNER\
 \subsubsection{Thermally Thick Droplet Model}
 \label{info:themally_thick_droplet}
 
-Note that if the {\ct GEOMETRY} is set to {\ct 'SPHERICAL'} and a {\ct BOILING\_TEMPERATURE} is specified, thus invoking the liquid pyrolysis model, then the mass transfer relationships will follow those of an evaporating droplet.  The difference between this model and the default droplet model is that in this case the internal droplet temperature will be solved for using the 1D conduction solver.  Usually, the {\ct CELL\_SIZE\_FACTOR} needs to be decreased to get sufficient resolution inside the drop---you should double check the number of solid phase nodes by examining the {\ct CHID.out} file.  Also, you should set {\ct HEAT\_TRANSFER\_MODEL = 'BLOWING SPHERE'} on the {\ct SURF} line.
+Note that if the {\ct GEOMETRY} is set to {\ct 'SPHERICAL'} and a {\ct BOILING\_TEMPERATURE} is specified, thus invoking the liquid pyrolysis model, then the mass transfer relationships will follow those of an evaporating droplet.  The difference between this model and the default droplet model is that in this case the internal droplet temperature will be solved for using the 1D conduction solver.  Usually, the {\ct CELL\_SIZE\_FACTOR} needs to be decreased to get sufficient resolution inside the drop---you should double check the number of solid phase nodes by examining the {\ct CHID.out} file.
 
 
 
@@ -12338,7 +12323,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct ADIABATIC}                                           & Logical         & Section~\ref{info:adiabatic}              &                     & {\ct F}           \\ \hline
 {\ct AREA\_MULTIPLIER}                                    & Real            & Section~\ref{info:area_mult}              &                     & 1.0                     \\ \hline
 {\ct BACKING}                                             & Character       & Section~\ref{info:BACKING}                &                     & {\ct 'EXPOSED'}         \\ \hline
-{\ct BLOWING}                                             & Logical         & Section~\ref{info:convection}             &                     & {\ct F}           \\ \hline
 {\ct BURN\_AWAY}                                          & Logical         & Section~\ref{info:BURN_AWAY}              &                     & {\ct F}           \\ \hline
 {\ct BURN\_DURATION}                                      & Real            & Section~\ref{info:BURN_DURATION}          & s                   & 1000000                 \\ \hline
 {\ct CELL\_SIZE\_FACTOR}                                  & Real            & Section~\ref{info:solid_phase_stability}  &                     & 1.0                     \\ \hline
