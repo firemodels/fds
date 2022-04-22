@@ -2901,7 +2901,7 @@ For planar surfaces, the default values are $C_1=0$, $C_2=0.037$, $n=0.8$, $m=0.
 
 The last term of the $h$ formula aims to ensure that the LES convective heat flux converges to the DNS heat flux at fine resolutions.
 
-You can change the values of the empirical coefficient for natural convection, $C$, by specifying \linebreak[4]{\ct C\_HORIZONTAL} and {\ct C\_VERTICAL} on the {\ct SURF} line. The length scale, $L$, is specified by \linebreak[4]{\ct CONVECTION\_LENGTH\_SCALE} on the {\ct SURF} line. You can change the empirical coefficients for the forced convection model by using {\ct C\_FORCED\_CONSTANT}, {\ct C\_FORCED\_RE}, {\ct C\_FORCED\_RE\_EXP}, and \linebreak[4]{\ct C\_FORCED\_PR\_EXP} for the constants $C_1$, $C_2$, $n$, and $m$ in the Nusselt number correlation, all of which are input on the {\ct SURF} line. Note that setting both $C_1$ and $C_2$ zero turns on their default values.
+The length scale, $L$, is specified by {\ct CONVECTION\_LENGTH\_SCALE} on the {\ct SURF} line. 
 
 \subsubsection{Specified Convective Heat Transfer Coefficient}
 
@@ -12312,12 +12312,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct BURN\_AWAY}                                          & Logical         & Section~\ref{info:BURN_AWAY}              &                     & {\ct F}           \\ \hline
 {\ct BURN\_DURATION}                                      & Real            & Section~\ref{info:BURN_DURATION}          & s                   & 1000000                 \\ \hline
 {\ct CELL\_SIZE\_FACTOR}                                  & Real            & Section~\ref{info:solid_phase_stability}  &                     & 1.0                     \\ \hline
-{\ct C\_FORCED\_CONSTANT}                                 & Real            & Section~\ref{info:convection}             &                     & 0.0                     \\ \hline
-{\ct C\_FORCED\_PR\_EXP}                                  & Real            & Section~\ref{info:convection}             &                     & 0.0                     \\ \hline
-{\ct C\_FORCED\_RE}                                       & Real            & Section~\ref{info:convection}             &                     & 0.0                     \\ \hline
-{\ct C\_FORCED\_RE\_EXP}                                  & Real            & Section~\ref{info:convection}             &                     & 0.0                     \\ \hline
-{\ct C\_HORIZONTAL}                                       & Real            & Section~\ref{info:convection}             &                     & 1.52                    \\ \hline
-{\ct C\_VERTICAL}                                         & Real            & Section~\ref{info:convection}             &                     & 1.31                    \\ \hline
 {\ct COLOR    }                                           & Character       & Section~\ref{info:colors}                 &                     &                         \\ \hline
 {\ct CONE\_HEAT\_FLUX}                                    & Real            & Section~\ref{info:specified_burning}      & \si{kW/m^2}         &                         \\ \hline
 {\ct CONVECTION\_LENGTH\_SCALE}                           & Real            & Section~\ref{info:convection}             & m                   & 1.                      \\ \hline
