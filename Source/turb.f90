@@ -18,8 +18,8 @@ PUBLIC :: INIT_TURB_ARRAYS, VARDEN_DYNSMAG, &
           TWOD_VORTEX_CERFACS, TWOD_VORTEX_UMD, TWOD_SOBOROT_UMD, &
           LOGLAW_HEAT_FLUX_MODEL, &
           NS_ANALYTICAL_SOLUTION, NS_U_EXACT, NS_V_EXACT, NS_H_EXACT, SANDIA_DAT, SPECTRAL_OUTPUT, SANDIA_OUT, &
-          FILL_EDGES, NATURAL_CONVECTION_MODEL, FORCED_CONVECTION_MODEL, RAYLEIGH_HEAT_FLUX_MODEL, YUAN_HEAT_FLUX_MODEL, &
-          WALE_VISCOSITY, TAU_WALL_IJ, ABL_WALL_MODEL, RAYLEIGH_MASS_FLUX_MODEL
+          FILL_EDGES, NATURAL_CONVECTION_MODEL, FORCED_CONVECTION_MODEL, RAYLEIGH_HEAT_FLUX_MODEL, &
+          WALE_VISCOSITY, TAU_WALL_IJ, RAYLEIGH_MASS_FLUX_MODEL
 
 CONTAINS
 
@@ -1296,102 +1296,6 @@ ENDIF
 
 END SUBROUTINE WALL_MODEL
 
-!> \brief Wall model (stress and heat flux) for atmospheric boundary layer.
-!>
-!> \param SLIP_FACTOR
-!> \param HTC heat transfer coefficint (W/m2/K)
-!> \param U_STAR friction velocity (m/s), equivalent to U_TAU in WALL_MODEL
-!> \param L local Obukhov length (m)
-!> \param U_TANG resolved streamwise tangential velocity (m/s)
-!> \param Z_0 aerodynamic roughness length (m)
-!> \param Z_AGL height above ground level of cell center (m)
-!> \param ZC absolute elevation of cell center (m)
-!> \param TMP_G gas temperature (K)
-!> \param TMP_S surface temperature (K)
-!> \param MU_IN dynamic viscosity of gas cell (kg/m/s)
-!> \param RHO_IN density of first off-wall gas phase cell (kg/m3)
-!> \param CP_IN specific heat of first off-wall gas cell(J/kg/K)
-!> \param K_IN thermal conductivity of first off-wall gas cell (W/m/K)
-
-SUBROUTINE ABL_WALL_MODEL(SLIP_FACTOR,HTC,U_STAR,L,U_TANG,Z_0,Z_AGL,ZC,TMP_G,TMP_S,MU_IN,RHO_IN,CP_IN,K_IN)
-
-USE PHYSICAL_FUNCTIONS, ONLY: GET_POTENTIAL_TEMPERATURE, MONIN_OBUKHOV_STABILITY_CORRECTIONS
-
-REAL(EB), INTENT(OUT) :: SLIP_FACTOR,HTC,U_STAR,L
-REAL(EB), INTENT(IN) :: U_TANG,Z_0,Z_AGL,ZC,TMP_G,TMP_S,MU_IN,RHO_IN,CP_IN,K_IN
-REAL(EB) :: KAPPA,TAU_W,NAT_LOG_ZPLUS,Q_DOT_PP_S,PSI_H,PSI_M,THETA_G,THETA_S,DTHETA,DUDZ,DZ,L_OLD
-INTEGER :: ABL_TYPE,COUNT
-INTEGER, PARAMETER :: NEUTRAL_ABL=1,STABLE_ABL=2,UNSTABLE_ABL=3
-REAL(EB), PARAMETER :: EPS_Q=1.E-6_EB,EPS_L=1.E-3_EB
-
-! References:
-!
-! Stoll, R., Porte-Agel, F. (2008) Large-Eddy Simulation of the Stable Atmospheric
-! Boundary Layer using Dynamic Models with Different Averaging Schemes. Boundary-Layer
-! Meteorology, 126:1-28.
-
-! initial guesses
-
-SLIP_FACTOR = -1._EB
-TAU_W = MU_IN/RHO_IN*ABS(U_TANG)/Z_AGL              ! wall stress, actually tau_w/rho (m2/s2)
-U_STAR = SQRT(TAU_W)                                ! friction velocity (m/s)
-Q_DOT_PP_S = MU_IN/RHO_IN*RPR*(TMP_S-TMP_G)/Z_AGL   ! heat flux at the surface (m/s * K)
-L = 0._EB                                           ! temporary value of Obukhov length (m), no physical meaning
-
-IF (ABS(U_TANG)<EPS_Q) THEN
-   ! quiescent boundary layer
-   HTC = MAX(1.52_EB*ABS(TMP_S-TMP_G)**ONTH, K_IN/Z_AGL)
-   RETURN
-ENDIF
-
-NAT_LOG_ZPLUS = LOG(Z_AGL/Z_0)
-KAPPA = VON_KARMAN_CONSTANT
-
-L_OLD = HUGE(1._EB)
-COUNT = 0
-ABL_LOOP: DO WHILE (ABS(L-L_OLD)>EPS_L)
-   COUNT = COUNT + 1
-   L_OLD = L
-   ABL_TYPE = NEUTRAL_ABL
-   IF (Q_DOT_PP_S<-EPS_Q) THEN
-      ABL_TYPE = STABLE_ABL
-   ELSEIF (Q_DOT_PP_S>EPS_Q) THEN
-      ABL_TYPE = UNSTABLE_ABL
-   ENDIF
-   SELECT CASE (ABL_TYPE)
-      CASE (NEUTRAL_ABL)
-         U_STAR = ABS(U_TANG)*KAPPA/NAT_LOG_ZPLUS
-         HTC = K_IN/Z_AGL
-         Q_DOT_PP_S = HTC*(TMP_S-TMP_G)
-         L = 0._EB
-      CASE (STABLE_ABL,UNSTABLE_ABL)
-         THETA_G = GET_POTENTIAL_TEMPERATURE(TMP_G,ZC)
-         THETA_S = GET_POTENTIAL_TEMPERATURE(TMP_S,ZC-Z_AGL)
-         DTHETA = THETA_S-THETA_G
-         L = -U_STAR**3*THETA_G/(KAPPA*GRAV*Q_DOT_PP_S)
-         CALL MONIN_OBUKHOV_STABILITY_CORRECTIONS(PSI_M,PSI_H,Z_AGL,L)
-         IF (NAT_LOG_ZPLUS-PSI_M>TWO_EPSILON_EB) U_STAR = ABS(U_TANG)*KAPPA/(NAT_LOG_ZPLUS-PSI_M)
-         IF (NAT_LOG_ZPLUS-PSI_H>TWO_EPSILON_EB) Q_DOT_PP_S = DTHETA*U_STAR*KAPPA/(NAT_LOG_ZPLUS-PSI_H)
-         HTC = RHO_IN*CP_IN*Q_DOT_PP_S/(TMP_S-TMP_G)
-   END SELECT
-   IF (COUNT>10) THEN
-      ! punt and get out
-      SLIP_FACTOR = -1._EB
-      HTC = K_IN/Z_AGL
-      TAU_W = MU_IN/RHO_IN*ABS(U_TANG)/Z_AGL
-      U_STAR = SQRT(TAU_W)
-      L = 0._EB
-      RETURN
-   ENDIF
-ENDDO ABL_LOOP
-
-HTC = MAX(HTC,K_IN/Z_AGL)
-DUDZ = U_STAR/(KAPPA*Z_AGL) ! slip factor is based on gradient at cell center position
-DZ = 2._EB*Z_AGL
-SLIP_FACTOR = MAX(-1._EB,MIN(1._EB,1._EB-DUDZ*DZ/(ABS(U_TANG)+TWO_EPSILON_EB))) ! -1.0 <= SLIP_FACTOR <= 1.0
-
-END SUBROUTINE ABL_WALL_MODEL
-
 
 SUBROUTINE NATURAL_CONVECTION_MODEL(H_NATURAL,DELTA_TMP,C_VERTICAL,C_HORIZONTAL,SURF_GEOMETRY_INDEX,IOR,K_G,DN)
 
@@ -1590,66 +1494,6 @@ RAYLEIGH_LOOP: DO ITER=1,MAX_ITER
 ENDDO RAYLEIGH_LOOP
 
 END SUBROUTINE RAYLEIGH_MASS_FLUX_MODEL
-
-
-SUBROUTINE YUAN_HEAT_FLUX_MODEL(H,Y_STAR,DY,TMP_W,TMP_G,K_G,RHO_G,CP_G)
-
-!!!!! EXPERIMENTAL !!!!!
-
-! This model is very similar to RAYLEIGH_HEAT_FLUX_MODEL
-!
-! X. Yuan, A. Moser, P. Suter. Wall functions for numerical simulation of turbulent
-! natural convection along vertical plates. Int. J. Heat Mass Transfer, Vol. 36,
-! No. 18 pp. 4477-4485, 1993.
-
-REAL(EB), INTENT(OUT) :: H,Y_STAR
-REAL(EB), INTENT(IN) :: DY,TMP_W,TMP_G,K_G,RHO_G,CP_G
-REAL(EB) :: T_STAR,Q,YC,TQ,UQ,ALPHA,THETA,GAMMA,Q_OLD,ERROR
-INTEGER :: ITER
-INTEGER, PARAMETER :: MAX_ITER=10
-
-IF (ABS(TMP_W-TMP_G)<TWO_EPSILON_EB) THEN
-   H = 0._EB
-   Y_STAR = 0._EB
-   RETURN
-ENDIF
-
-YC = 0.5_EB*DY
-ALPHA = K_G/(RHO_G*CP_G)
-THETA = GRAV/TMP_W*ALPHA*(RHO_G*CP_G)**3
-GAMMA = GRAV/TMP_W*ALPHA/(RHO_G*CP_G)
-
-H = K_G/YC ! initial guess
-Q = H*ABS(TMP_W-TMP_G)
-
-YUAN_LOOP: DO ITER=1,MAX_ITER
-
-   UQ = ( Q / GAMMA )**0.25_EB
-
-   Y_STAR = YC*UQ/ALPHA ! Yuan et al. Eq. (15)
-
-   ! Yuan et al. Eqs. (22)-(24)
-   IF (Y_STAR<=1._EB) THEN
-      T_STAR = Y_STAR
-   ELSEIF (Y_STAR>1._EB .AND. Y_STAR<=100._EB) THEN
-      T_STAR = 1._EB + 1.36_EB*LOG(Y_STAR) - 0.135_EB*LOG(Y_STAR)**2
-   ELSE
-      T_STAR = 4.4_EB ! curvefit for AIR
-   ENDIF
-
-   TQ = ABS(TMP_W-TMP_G)/MAX(T_STAR,TWO_EPSILON_EB)
-   Q_OLD = Q
-   Q = (THETA*TQ**4)**ONTH
-
-   ERROR = ABS(Q-Q_OLD)/MAX(Q_OLD,TWO_EPSILON_EB)
-
-   IF (ERROR<0.001_EB) EXIT YUAN_LOOP
-
-ENDDO YUAN_LOOP
-
-H = MAX( K_G/YC, Q/ABS(TMP_W-TMP_G) )
-
-END SUBROUTINE YUAN_HEAT_FLUX_MODEL
 
 
 SUBROUTINE LOGLAW_HEAT_FLUX_MODEL(H,YPLUS,U_TAU,K_G,RHO_G,CP_G,MU_G)

@@ -264,7 +264,7 @@ END TYPE BOUNDARY_ONE_D_TYPE
 !> \brief Property variables associated with a WALL or CFACE boundary cell
 !> \details If you change the number of scalar variables in BOUNDARY_PROPS_TYPE, adjust the numbers below
 
-INTEGER, PARAMETER :: N_BOUNDARY_PROPS_SCALAR_REALS=8
+INTEGER, PARAMETER :: N_BOUNDARY_PROPS_SCALAR_REALS=7
 INTEGER, PARAMETER :: N_BOUNDARY_PROPS_SCALAR_INTEGERS=1
 INTEGER, PARAMETER :: N_BOUNDARY_PROPS_SCALAR_LOGICALS=0
 INTEGER, DIMENSION(10) :: BOUNDARY_PROPS_REALS_ARRAY_SIZE=0, &
@@ -286,7 +286,6 @@ TYPE BOUNDARY_PROPS_TYPE
    REAL(EB) :: WORK1=0._EB           !< Work array
    REAL(EB) :: WORK2=0._EB           !< Work array
    REAL(EB) :: K_SUPPRESSION=0._EB   !< Suppression coefficent (m2/kg/s)
-   REAL(EB) :: L_OBUKHOV=0._EB       !< Obukhov length (m)
 
    INTEGER  :: SURF_INDEX=-1         !< Surface index
 
@@ -763,7 +762,7 @@ TYPE SURFACE_TYPE
    LOGICAL :: BURN_AWAY,ADIABATIC,INTERNAL_RADIATION,USER_DEFINED=.TRUE., &
               FREE_SLIP=.FALSE.,NO_SLIP=.FALSE.,SPECIFIED_NORMAL_VELOCITY=.FALSE.,SPECIFIED_TANGENTIAL_VELOCITY=.FALSE., &
               SPECIFIED_NORMAL_GRADIENT=.FALSE.,CONVERT_VOLUME_TO_MASS=.FALSE.,SPECIFIED_HEAT_SOURCE=.FALSE.,&
-              IMPERMEABLE=.FALSE.,BOUNDARY_FUEL_MODEL=.FALSE.,ABL_MODEL=.FALSE., &
+              IMPERMEABLE=.FALSE.,BOUNDARY_FUEL_MODEL=.FALSE., &
               HT3D=.FALSE., MT1D=.FALSE.,SET_H=.FALSE.
    LOGICAL :: INCLUDE_BOUNDARY_COORD_TYPE=.TRUE.     !< This surface requires basic coordinate information
    LOGICAL :: INCLUDE_BOUNDARY_PROPS_TYPE=.TRUE.  !< This surface requires surface variables for heat and mass transfer
