@@ -61,7 +61,6 @@ INTEGER, PARAMETER :: ABL_HTC_MODEL=2                      !< Flag for SF\%HEAT_
 INTEGER, PARAMETER :: RAYLEIGH_HTC_MODEL=3                 !< Flag for SF\%HEAT_TRANSFER_MODEL
 INTEGER, PARAMETER :: YUAN_HTC_MODEL=4                     !< Flag for SF\%HEAT_TRANSFER_MODEL
 INTEGER, PARAMETER :: FREE_HORIZONTAL_CYLINDER_HTC_MODEL=5 !< Flag for SF\%HEAT_TRANSFER_MODEL
-INTEGER, PARAMETER :: BLOWING_HTC_MODEL=6                  !< Flag for SF\%HEAT_TRANSFER_MODEL
 INTEGER, PARAMETER :: BOUNDARY_FUEL_HTC_MODEL=7            !< Flag for SF\%HEAT_TRANSFER_MODEL
 
 INTEGER, PARAMETER :: WALL_MODEL_BC=2              !< Flag for SF\%VELOCITY_BC_INDEX
@@ -342,7 +341,7 @@ REAL(EB) :: ORIGIN_LON=-1.E6_EB                !< Longitude of terrain map
 REAL(EB) :: NORTH_BEARING=0._EB                !< North bearing for terrain map
 REAL(EB) :: LATITUDE=10000._EB                 !< Latitude for geostrophic calculation
 REAL(EB) :: GEOSTROPHIC_WIND(2)=0._EB          !< Wind vector (m/s)
-REAL(EB) :: DY_MIN_BLOWING=1.E-8_EB            !< Parameter in blowing algorithm (m)
+REAL(EB) :: DY_MIN_BLOWING=1.E-8_EB            !< Parameter in liquid evaporation algorithm (m)
 REAL(EB) :: MINIMUM_FILM_THICKNESS=1.E-5_EB    !< Minimum thickness of liquid film on a solid surface (m)
 REAL(EB) :: SOOT_DENSITY=1800._EB              !< Density of solid soot (kg/m3)
 
