@@ -115,7 +115,7 @@ y2 = np.abs(ftmi_result['AST2'])
 ftmi_ast=integrate.trapz(y2,x2)
 result=1-(ftmi_ast/fds_ast)
 tolerance=0.01
-if result<=tolerance:
+if abs(result)<=tolerance:
 	within_tolerance='Yes'
 else:
 	within_tolerance='No'
