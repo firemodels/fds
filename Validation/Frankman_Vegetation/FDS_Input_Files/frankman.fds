@@ -1,6 +1,6 @@
 &HEAD CHID='frankman', TITLE='Frankman CST Paper, 2010' /
 
-&MESH IJK=10,5,3, XB=0.0,0.5,-0.12,0.12,-0.08,0.08 /
+&MESH IJK=20,11,7, XB=0.0,0.6,-0.165,0.165,-0.105,0.105 /
 
 &TIME T_END=100. / 
 
@@ -22,18 +22,21 @@
 &SURF ID='Sm Ex'
       MATL_ID='Vegetation'
       GEOMETRY='CYLINDRICAL'
+      HORIZONTAL=T
       LENGTH=0.05
       THICKNESS=0.00022 /
 
 &SURF ID='Lg Ex'
       MATL_ID='Vegetation'
       GEOMETRY='CYLINDRICAL'
+      HORIZONTAL=T
       LENGTH=0.05
       THICKNESS=0.00065 /
 
 &SURF ID='Pine'
       MATL_ID='Vegetation'
       GEOMETRY='CYLINDRICAL'
+      HORIZONTAL=T
       LENGTH=0.05
       THICKNESS=0.00035 /
 
@@ -41,20 +44,20 @@
 &PART ID='Large Excelsior', SURF_ID='Lg Ex', STATIC=.TRUE. /
 &PART ID='Pond. Pine',      SURF_ID='Pine',  STATIC=.TRUE. /
 
-&INIT ID='Sm Ex 15', N_PARTICLES=1, XYZ=0.15,-.01,0.01, PART_ID='Small Excelsior' /
-&INIT ID='Sm Ex 25', N_PARTICLES=1, XYZ=0.25,-.01,0.01, PART_ID='Small Excelsior' /
-&INIT ID='Sm Ex 35', N_PARTICLES=1, XYZ=0.35,-.01,0.01, PART_ID='Small Excelsior' /
-&INIT ID='Sm Ex 45', N_PARTICLES=1, XYZ=0.45,-.01,0.01, PART_ID='Small Excelsior' /
+&INIT ID='Sm Ex 15', N_PARTICLES=1, XYZ=0.15,-.045,0.0, PART_ID='Small Excelsior' /
+&INIT ID='Sm Ex 25', N_PARTICLES=1, XYZ=0.25,-.045,0.0, PART_ID='Small Excelsior' /
+&INIT ID='Sm Ex 35', N_PARTICLES=1, XYZ=0.35,-.045,0.0, PART_ID='Small Excelsior' /
+&INIT ID='Sm Ex 45', N_PARTICLES=1, XYZ=0.45,-.045,0.0, PART_ID='Small Excelsior' /
 
-&INIT ID='Lg Ex 15', N_PARTICLES=1, XYZ=0.15,0.01,0.01, PART_ID='Large Excelsior' /
-&INIT ID='Lg Ex 25', N_PARTICLES=1, XYZ=0.25,0.01,0.01, PART_ID='Large Excelsior' /
-&INIT ID='Lg Ex 35', N_PARTICLES=1, XYZ=0.35,0.01,0.01, PART_ID='Large Excelsior' /
-&INIT ID='Lg Ex 45', N_PARTICLES=1, XYZ=0.45,0.01,0.01, PART_ID='Large Excelsior' /
+&INIT ID='Lg Ex 15', N_PARTICLES=1, XYZ=0.15,0.0,0.0, PART_ID='Large Excelsior' /
+&INIT ID='Lg Ex 25', N_PARTICLES=1, XYZ=0.25,0.0,0.0, PART_ID='Large Excelsior' /
+&INIT ID='Lg Ex 35', N_PARTICLES=1, XYZ=0.35,0.0,0.0, PART_ID='Large Excelsior' /
+&INIT ID='Lg Ex 45', N_PARTICLES=1, XYZ=0.45,0.0,0.0, PART_ID='Large Excelsior' /
 
-&INIT ID='Pine 15',  N_PARTICLES=1, XYZ=0.15,0.01,-.01, PART_ID='Pond. Pine' /
-&INIT ID='Pine 25',  N_PARTICLES=1, XYZ=0.25,0.01,-.01, PART_ID='Pond. Pine' /
-&INIT ID='Pine 35',  N_PARTICLES=1, XYZ=0.35,0.01,-.01, PART_ID='Pond. Pine' /
-&INIT ID='Pine 45',  N_PARTICLES=1, XYZ=0.45,0.01,-.01, PART_ID='Pond. Pine' /
+&INIT ID='Pine 15',  N_PARTICLES=1, XYZ=0.15,0.045,0.0, PART_ID='Pond. Pine' /
+&INIT ID='Pine 25',  N_PARTICLES=1, XYZ=0.25,0.045,0.0, PART_ID='Pond. Pine' /
+&INIT ID='Pine 35',  N_PARTICLES=1, XYZ=0.35,0.045,0.0, PART_ID='Pond. Pine' /
+&INIT ID='Pine 45',  N_PARTICLES=1, XYZ=0.45,0.045,0.0, PART_ID='Pond. Pine' /
 
 &DEVC XYZ=0.15,0.0,0.0, QUANTITY='WALL TEMPERATURE', ID='SmEx15', INIT_ID='Sm Ex 15', RELATIVE=.TRUE. /
 &DEVC XYZ=0.25,0.0,0.0, QUANTITY='WALL TEMPERATURE', ID='SmEx25', INIT_ID='Sm Ex 25', RELATIVE=.TRUE. /
@@ -71,6 +74,7 @@
 &DEVC XYZ=0.35,0.0,0.0, QUANTITY='WALL TEMPERATURE', ID='Pine35', INIT_ID='Pine 35',  RELATIVE=.TRUE. /
 &DEVC XYZ=0.45,0.0,0.0, QUANTITY='WALL TEMPERATURE', ID='Pine45', INIT_ID='Pine 45',  RELATIVE=.TRUE. /
 
-&SLCF PBY=0., QUANTITY='INTEGRATED INTENSITY' /
+&SLCF PBY=0., QUANTITY='INTEGRATED INTENSITY', CELL_CENTERED=T /
+&SLCF PBY=0., QUANTITY='VELOCITY', CELL_CENTERED=T /
 
 &TAIL /

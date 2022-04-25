@@ -1300,16 +1300,17 @@ END SUBROUTINE WALL_MODEL
 !> \brief Calculate the heat transfer coefficient for natural/free convection
 !> \param H_NATURAL Heat transfer coefficient (W/m2/K)
 !> \param DELTA_TMP Temperature difference between gas and surface (K)
+!> \param SURF_INDEX Indicator of the surface type
 !> \param SURF_GEOMETRY_INDEX Indicator of the surface geometry
 !> \param IOR Index of the surface orientation
 !> \param K_G Gas thermal conductivity (W/m/K)
 !> \param CONV_LENGTH Characteristic length (m)
 
-SUBROUTINE NATURAL_CONVECTION_MODEL(H_NATURAL,DELTA_TMP,SURF_GEOMETRY_INDEX,IOR,K_G,CONV_LENGTH)
+SUBROUTINE NATURAL_CONVECTION_MODEL(H_NATURAL,DELTA_TMP,SURF_INDEX,SURF_GEOMETRY_INDEX,IOR,K_G,CONV_LENGTH)
 
 REAL(EB), INTENT(OUT) :: H_NATURAL
 REAL(EB), INTENT(IN) :: DELTA_TMP,K_G,CONV_LENGTH
-INTEGER, INTENT(IN) :: SURF_GEOMETRY_INDEX,IOR
+INTEGER, INTENT(IN) :: SURF_GEOMETRY_INDEX,IOR,SURF_INDEX
 REAL(EB) :: NUSSELT
 
 SELECT CASE(SURF_GEOMETRY_INDEX)
@@ -1321,11 +1322,14 @@ SELECT CASE(SURF_GEOMETRY_INDEX)
             H_NATURAL = 1.52_EB*ABS(DELTA_TMP)**ONTH  ! Holman, Table 7-2, 7th edition
       END SELECT
    CASE (SURF_CYLINDRICAL)  ! Simplification of Eq. 9.34, Incropera and DeWitt, 7th edition
-      NUSSELT = (0.6_EB + 20.4_EB*ABS(DELTA_TMP)**0.1666*CONV_LENGTH**ONTH)**2
-      H_NATURAL = K_G*NUSSELT/CONV_LENGTH
-      H_NATURAL = 1.31_EB*ABS(DELTA_TMP)**ONTH  ! Holman, Table 7-2, 7th edition --- temporary
+      IF (SURFACE(SURF_INDEX)%HORIZONTAL) THEN
+         NUSSELT = (0.6_EB + 6.87_EB*ABS(DELTA_TMP)**0.1666*SQRT(CONV_LENGTH))**2  ! Incropera and DeWitt, Eq. 9.34, 7th edition
+         H_NATURAL = K_G*NUSSELT/CONV_LENGTH
+      ELSE
+         H_NATURAL = 1.31_EB*ABS(DELTA_TMP)**ONTH  ! Holman, Table 7-2, 7th edition
+      ENDIF
    CASE (SURF_SPHERICAL)  ! Simplification of Eq. 9.35, Incropera and DeWitt, 7th edition
-      NUSSELT = 2._EB + 41.9_EB*ABS(DELTA_TMP)**0.25_EB*CONV_LENGTH**0.75_EB
+      NUSSELT = 2._EB + 45.8_EB*ABS(DELTA_TMP)**0.25_EB*CONV_LENGTH**0.75_EB
       H_NATURAL = K_G*NUSSELT/CONV_LENGTH
       H_NATURAL = 0._EB  ! This is the old way -- only temporary
 END SELECT
