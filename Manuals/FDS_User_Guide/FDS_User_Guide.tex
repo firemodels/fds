@@ -2889,15 +2889,33 @@ This section is labeled as a special topic because normally you do not need to m
 
 In an LES calculation, the convective heat transfer coefficient, $h$, is based on a combination of natural and forced convection correlations:
 \be \dq_{\rm c}'' = h \, (T_{\rm g} - T_{\rm w}) \quad \hbox{W/m}^2 \quad ; \quad
-    h = \max \, \left[ \; C\, |T_{\rm g}-T_{\rm w}|^\ot \; ,
-      \;  \frac{k}{L} \, \NU \; ,
-      \; \frac{k}{\dn/2}\right]  \quad  \si{W/(m^2.K)}  \label{q_con}
+    h = \frac{k}{L} \, \NU  \quad  \si{W/(m^2.K)}  \label{q_con}
 \ee
-where $C$ is a empirical coefficient for natural convection (1.52 for a horizontal plate and 1.31 for a vertical plane or cylinder)~\cite{Holman:1}, $L$ is a characteristic length related to the size of the physical obstruction, $k$ is the thermal conductivity of the gas, and $\dn$ is the gas phase cell size. The Nusselt number (Nu) depends on the geometric and flow characteristics. For many flow regimes, it has the form:
+where $C$ is a empirical coefficient for natural convection (1.52 for a horizontal plate and 1.31 for a vertical plane or cylinder)~\cite{Holman:1}, $L$ is a characteristic length related to the size of the physical obstruction, $k$ is the thermal conductivity of the gas, and $\dn$ is the gas phase cell size. 
+
+For forced convection, the Nusselt number (Nu) takes the form:
 \be
-   \NU = C_1 + C_2 \, \RE^n \, \PR^m  \quad ; \quad \RE = \frac{\rho |\bu| L}{\mu} \quad ; \quad \PR = 0.7
+   \NU = C_0 + \left( C_1 \, \RE^n - C_2 \right) \, \PR^m  \quad ; \quad \RE = \frac{\rho |\bu| L}{\mu} \quad ; \quad \PR = 0.7 \quad ; \quad m=1/3
 \ee
-For planar surfaces, the default values are $C_1=0$, $C_2=0.037$, $n=0.8$, $m=0.33$, and $L=1$~m. For cylindrical surfaces, the default values are $C_1=0$, $C_2=0.683$, $n=0.466$, $m=0.33$, and $L=D$, the diameter of the cylinder. For spherical surfaces, the default values are $C_1=2$, $C_2=0.6$, $n=0.5$, $m=0.33$, and $L=D$, the diameter of the sphere. Note that for a sphere, the coefficient for natural convection, $C$, is assumed to be zero. It is possible to change these values for a particular application, but it is not possible to find a set of parameters that is appropriate for the wide variety of scenarios considered. Various correlations for planes, cylinders, and spheres can be found in Refs.~\cite{Holman:1,Incropera:1}.
+The values of the coefficients are given in Table~\ref{convective_heat_transfer_table}. For planar surfaces, $L=1$~m. For cylindrical and spherical surface, $L=D$, the diameter of the cylinder or sphere.
+
+\begin{table}[!ht]
+\caption[Coefficients used for forced convection heat transfer correlations]{Coefficients used for forced convection heat transfer correlations~\cite{Incropera:1}}
+\label{convective_heat_transfer_table}
+\begin{center}
+\begin{tabular}{|lccccc|}
+\hline
+Geometry     & $C_0$    & $C_1$   & $C_2$ & $n$    & Re             \\ \hline 
+Flat Plate   & 0        & 0.037   & 871   & 0.8    & $\le 10^8$     \\
+Cylinder     & 0        & 0.989   & 0     & 0.330  & $0.4-4$        \\
+Cylinder     & 0        & 0.911   & 0     & 0.385  & $4-40$         \\
+Cylinder     & 0        & 0.683   & 0     & 0.466  & $40-4000$      \\
+Cylinder     & 0        & 0.193   & 0     & 0.618  & $4000-40000$   \\
+Cylinder     & 0        & 0.027   & 0     & 0.805  & $40000-400000$ \\
+Sphere       & 2        & 0.6     & 0     & 0.5    &                \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
 
 The last term of the $h$ formula aims to ensure that the LES convective heat flux converges to the DNS heat flux at fine resolutions.
 
