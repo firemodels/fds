@@ -10908,7 +10908,7 @@ PRESSURE_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
    ! Transfer current (U)ScaRC solution VEC%X to inseparable pressure PPP in mesh-inner cells
 
    PPP = 0.0_EB
-   !$OMP PARALLEL DO SCHEDULE(STATIC)
+   !$OMP PARALLEL DO PRIVATE(I, J, K, IC) SCHEDULE(STATIC)
    DO K=1,M%KBAR
       DO J=1,M%JBAR
          DO I=1,M%IBAR
@@ -10973,7 +10973,7 @@ PRESSURE_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
    ! Now, HP must be recomputed from P by the relation H = P/RHO + KRES
    ! This is done including the ghost cells such that the upper BC's for the pressure already are used here
 
-   !$OMP PARALLEL DO SCHEDULE(STATIC)
+   !$OMP PARALLEL DO PRIVATE(I, J, K) SCHEDULE(STATIC)
    DO K=0,L%NZ+1
       DO J=0,L%NY+1
          DO I=0,L%NX+1
@@ -11019,7 +11019,7 @@ BAROCLINIC_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
    RHMK => M%WORK8
 
    !$OMP PARALLEL
-   !$OMP DO SCHEDULE(STATIC) 
+   !$OMP DO PRIVATE(I, J, K) SCHEDULE(STATIC) 
    DO K=0,M%KBP1
       DO J=0,M%JBP1
          DO I=0,M%IBP1
@@ -11032,7 +11032,7 @@ BAROCLINIC_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
 
    ! Compute baroclinic term in the x momentum equation, p*d/dx(1/rho), based on RHMK and accumulate full force term
    
-   !$OMP DO SCHEDULE(STATIC) 
+   !$OMP DO PRIVATE(I, J, K) SCHEDULE(STATIC) 
    DO K=1,M%KBAR
       DO J=1,M%JBAR
          DO I=0,M%IBAR
@@ -11047,7 +11047,7 @@ BAROCLINIC_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
    ! Compute baroclinic term in the y momentum equation, p*d/dy(1/rho), based on RHMK
    
    IF (.NOT.TWO_D) THEN
-      !$OMP DO SCHEDULE(STATIC) 
+      !$OMP DO PRIVATE(I, J, K) SCHEDULE(STATIC) 
       DO K=1,M%KBAR
          DO J=0,M%JBAR
             DO I=1,M%IBAR
@@ -11062,7 +11062,7 @@ BAROCLINIC_MESHES_LOOP: DO NM = LOWER_MESH_INDEX, UPPER_MESH_INDEX
    
    ! Compute baroclinic term in the z momentum equation, p*d/dz(1/rho), based on RHMK
    
-   !$OMP DO SCHEDULE(STATIC) 
+   !$OMP DO PRIVATE(I, J, K) SCHEDULE(STATIC) 
    DO K=0,M%KBAR
       DO J=1,M%JBAR
          DO I=1,M%IBAR
@@ -11123,7 +11123,7 @@ L%FVZ_H = FVZ
 RFODT = RELAXATION_FACTOR/DT0
 RHMK => WORK1
 
-!$OMP PARALLEL DO SCHEDULE(STATIC)
+!$OMP PARALLEL DO PRIVATE(I, J, K) SCHEDULE(STATIC)
 DO K=0,KBP1
    DO J=0,JBP1
       DO I=0,IBP1
