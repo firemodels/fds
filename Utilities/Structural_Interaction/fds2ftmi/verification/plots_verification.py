@@ -103,7 +103,7 @@ plt.ylabel('Temperature ($^{\circ}$C)', fontdict=font1)
 plt.legend(numpoints=1,loc=4, prop=font2)
 plt.text( 0.4, 590, 'Adiabatic Surface Temperature (simple_panel_hot)')
 plt.text( 7.5, 764, GIT, fontdict=font3)
-plt.savefig('simple_panel_hot'+'_ast'+'.pdf',format='pdf')
+plt.savefig('simple_panel'+'_ast'+'.pdf',format='pdf')
 plt.close()
 
 # calculating error
