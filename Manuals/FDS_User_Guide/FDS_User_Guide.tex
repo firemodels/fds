@@ -2901,7 +2901,7 @@ For planar surfaces, the default values are $C_1=0$, $C_2=0.037$, $n=0.8$, $m=0.
 
 The last term of the $h$ formula aims to ensure that the LES convective heat flux converges to the DNS heat flux at fine resolutions.
 
-You can change the values of the empirical coefficient for natural convection, $C$, by specifying \linebreak[4]{\ct C\_HORIZONTAL} and {\ct C\_VERTICAL} on the {\ct SURF} line. The length scale, $L$, is specified by \linebreak[4]{\ct CONVECTION\_LENGTH\_SCALE} on the {\ct SURF} line. You can change the empirical coefficients for the forced convection model by using {\ct C\_FORCED\_CONSTANT}, {\ct C\_FORCED\_RE}, {\ct C\_FORCED\_RE\_EXP}, and \linebreak[4]{\ct C\_FORCED\_PR\_EXP} for the constants $C_1$, $C_2$, $n$, and $m$ in the Nusselt number correlation, all of which are input on the {\ct SURF} line. Note that setting both $C_1$ and $C_2$ zero turns on their default values.
+The length scale, $L$, is specified by {\ct CONVECTION\_LENGTH\_SCALE} on the {\ct SURF} line. 
 
 \subsubsection{Specified Convective Heat Transfer Coefficient}
 
@@ -2922,19 +2922,6 @@ h = \frac{\dot{q}''_{\rm w}}{T_{\rm g}-T_{\rm w}} = \frac{\rho_{\rm w} \, c_{\rm
 \end{equation}
 Refer to the FDS Tech Guide \cite{FDS_Tech_Guide} for further details of the formulation. To specify this heat transfer model for a particular surface, set {\ct HEAT\_TRANSFER\_MODEL} equal to {\ct 'LOGLAW'} on the {\ct SURF} line. Note that the loglaw model is not well-suited for buoyant flows---it requires a well-resolved ``wind'' near the surface and is therefore mainly applicable to forced convection type flows with high grid resolution.
 
-\subsubsection{Atmospheric Boundary Layer Wall Model (Experimental)}
-\label{sec:abl_model}
-
-The incorporation of buoyancy into the wall function is the domain of Monin-Obukhov (MO) similarity theory, as discussed in Sec.~\ref{info:WIND}. Further mathematical details of the ABL wall model are discussed in the FDS Tech Guide \cite{FDS_Math_Guide}.  Note that the model assumes gravity to point in the $-z$ direction.  To specify this model for a particular surface, set {\ct HEAT\_TRANSFER\_MODEL} equal to {\ct 'ABL'} on the {\ct SURF} line together with the aerodynamic roughness length, {\ct Z\_0}.  For example,
-\begin{lstlisting}
-&SURF ID='ground', HEAT_TRANSFER_MODEL='ABL', Z_0=0.05 /
-\end{lstlisting}
-
-As discussed in Sec.~\ref{info:WIND}, there is a simple conversion between the aerodynamic roughness and the sandgrain roughness, which can be input using {\ct ROUGHNESS} on {\ct SURF}.  Either {\ct Z\_0} or {\ct ROUGHNESS} may be specified, but not both.  Also, if a {\ct WIND} line is present, {\ct Z\_0} must be consistent between {\ct SURF} and {\ct WIND} lines.  The value of {\ct Z\_0} on {\ct SURF} will override the default value from {\ct WIND}.
-
-When the ABL wall model is used, this also changes the wall stress model (see FDS Tech Guide~\cite{FDS_Math_Guide}).  The local Obukhov length, $L$ (see Sec.~\ref{info:WIND}), and viscous wall units, $y^+$ (see Sec.~\ref{info:yplus}), can be output using boundary files or wall devices.  Note that the perfectly ``neutral'' value for local $L$ is set to zero to avoid problems with the colorbar range that would occur if the physically correct value of infinity were used.  However, if the flow is not perfectly isothermal then usually there is enough of a temperature difference to register a physically realizable value for $L$ in the ABL model.
-
-A word of caution with this model: Experience has shown the ABL model can lead to instabilities when a specified heat flux is supplied as the surface boundary condition, which is often called for to achieve the correct mean stability behavior of the atmospheric flow.  This happens because very large values of the heat transfer coefficient may be needed to offset small temperature differenced for a given heat flux.
 
 \subsubsection{Free Convection, Horizontal Cylinder}
 
@@ -10705,7 +10692,6 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct INTEGRATED INTENSITY}                      & $U=\int I \, \d \bs$                              & kW/m$^2$       & D,I,P,S      \\ \hline
 {\ct KINETIC ENERGY}                            & Staggered $(u^2+v^2+w^2)/2$                       & (m/s)$^2$      & D,I,P,S      \\ \hline
 {\ct KOLMOGOROV LENGTH SCALE}                   & Section \ref{info:meshquality}                    & m              & D,I,P,S      \\ \hline
-{\ct OBUKHOV LENGTH}                            & Section \ref{sec:abl_model}                       & m              & B,D          \\ \hline
 {\ct MACH NUMBER}                               & $|\bu|/\sqrt{(R/\overline{W}) T \gamma}$          &                & S,D          \\ \hline
 {\ct MAXIMUM VELOCITY ERROR}                    & Section \ref{info:PRES}                           & m/s            & D            \\ \hline
 {\ct MIXING TIME}                               & Combustion mixing time                            & s              & D,I,P,S      \\ \hline
@@ -12326,12 +12312,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct BURN\_AWAY}                                          & Logical         & Section~\ref{info:BURN_AWAY}              &                     & {\ct F}           \\ \hline
 {\ct BURN\_DURATION}                                      & Real            & Section~\ref{info:BURN_DURATION}          & s                   & 1000000                 \\ \hline
 {\ct CELL\_SIZE\_FACTOR}                                  & Real            & Section~\ref{info:solid_phase_stability}  &                     & 1.0                     \\ \hline
-{\ct C\_FORCED\_CONSTANT}                                 & Real            & Section~\ref{info:convection}             &                     & 0.0                     \\ \hline
-{\ct C\_FORCED\_PR\_EXP}                                  & Real            & Section~\ref{info:convection}             &                     & 0.0                     \\ \hline
-{\ct C\_FORCED\_RE}                                       & Real            & Section~\ref{info:convection}             &                     & 0.0                     \\ \hline
-{\ct C\_FORCED\_RE\_EXP}                                  & Real            & Section~\ref{info:convection}             &                     & 0.0                     \\ \hline
-{\ct C\_HORIZONTAL}                                       & Real            & Section~\ref{info:convection}             &                     & 1.52                    \\ \hline
-{\ct C\_VERTICAL}                                         & Real            & Section~\ref{info:convection}             &                     & 1.31                    \\ \hline
 {\ct COLOR    }                                           & Character       & Section~\ref{info:colors}                 &                     &                         \\ \hline
 {\ct CONE\_HEAT\_FLUX}                                    & Real            & Section~\ref{info:specified_burning}      & \si{kW/m^2}         &                         \\ \hline
 {\ct CONVECTION\_LENGTH\_SCALE}                           & Real            & Section~\ref{info:convection}             & m                   & 1.                      \\ \hline
@@ -12455,7 +12435,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct WIDTH}                                               & Real            & Section~\ref{info:PART_GEOMETRY}          & m                   &                         \\ \hline
 {\ct XYZ(3)}                                              & Real Array      & Section~\ref{info:spread}                 & m                   &                         \\ \hline
 {\ct Z0 }                                                 & Real            & Section~\ref{info:stratification}         & m                   & 10.                     \\ \hline
-{\ct Z\_0 }                                               & Real            & Section~\ref{sec:abl_model}               & m                   & 0.                      \\ \hline
+{\ct Z\_0 }                                               & Real            & Section~\ref{info:wind_general}           & m                   & 0.                      \\ \hline
 \end{longtable}
 
 % Undocumented: FSK_A, FSK_K, FSK_W, IMPERMEABLE
