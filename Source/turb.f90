@@ -1323,9 +1323,11 @@ SELECT CASE(SURF_GEOMETRY_INDEX)
    CASE (SURF_CYLINDRICAL)  ! Simplification of Eq. 9.34, Incropera and DeWitt, 7th edition
       NUSSELT = (0.6_EB + 20.4_EB*ABS(DELTA_TMP)**0.1666*CONV_LENGTH**ONTH)**2
       H_NATURAL = K_G*NUSSELT/CONV_LENGTH
+      H_NATURAL = 1.31_EB*ABS(DELTA_TMP)**ONTH  ! Holman, Table 7-2, 7th edition --- temporary
    CASE (SURF_SPHERICAL)  ! Simplification of Eq. 9.35, Incropera and DeWitt, 7th edition
       NUSSELT = 2._EB + 41.9_EB*ABS(DELTA_TMP)**0.25_EB*CONV_LENGTH**0.75_EB
       H_NATURAL = K_G*NUSSELT/CONV_LENGTH
+      H_NATURAL = 0._EB  ! This is the old way -- only temporary
 END SELECT
 
 END SUBROUTINE NATURAL_CONVECTION_MODEL
