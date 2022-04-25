@@ -119,5 +119,5 @@ if abs(result)<=tolerance:
 	within_tolerance='Yes'
 else:
 	within_tolerance='No'
-results=([['simple\_panel\_hot',"{:1.3e}".format(fds_ast),"{:1.3e}".format(ftmi_ast),'Relative',"{:1.3e}".format(result),tolerance,within_tolerance]])
+results=([['simple\_panel',"{:1.3e}".format(fds_ast),"{:1.3e}".format(ftmi_ast),'Relative',"{:1.3e}".format(result),tolerance,within_tolerance]])
 np.savetxt("verification_statistics.tex", results, delimiter="&", fmt="%s", newline='\\\\ \n')
