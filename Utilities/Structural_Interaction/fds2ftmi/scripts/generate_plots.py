@@ -112,7 +112,7 @@ y2 = np.abs(ansys_result['AST2'])
 ansys_ast=integrate.trapz(y2,x2)
 result=1-(ansys_ast/fds_ast)
 tolerance=0.01
-if result<=tolerance:
+if abs(result)<=tolerance:
 	within_tolerance='Yes'
 else:
 	within_tolerance='No'
