@@ -43,12 +43,12 @@ LOGICAL, INTENT(IN) :: APPLY_TO_ESTIMATED_VARIABLES
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_GET
 REAL(EB) :: NU_EDDY,DELTA,KSGS,U2,V2,W2,AA,A_IJ(3,3),BB,B_IJ(3,3),&
             DUDX,DUDY,DUDZ,DVDX,DVDY,DVDZ,DWDX,DWDY,DWDZ,SLIP_COEF,VEL_GAS,VEL_T,RAMP_T,TSI,&
-            VDF,LS,THETA_0,THETA_1,THETA_2,DTDZBAR,WGT,T_NOW
+            VDF,WGT,T_NOW
 REAL(EB), PARAMETER :: RAPLUS=1._EB/26._EB, C_LS=0.76_EB
 INTEGER :: I,J,K,IIG,JJG,KKG,II,JJ,KK,IW,IOR,IC
 REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP=>NULL(),UP=>NULL(),VP=>NULL(),WP=>NULL(), &
                                        UP_HAT=>NULL(),VP_HAT=>NULL(),WP_HAT=>NULL(), &
-                                       UU=>NULL(),VV=>NULL(),WW=>NULL(),DTDZ=>NULL()
+                                       UU=>NULL(),VV=>NULL(),WW=>NULL()
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP=>NULL()
 INTEGER, POINTER, DIMENSION(:,:,:) :: CELL_COUNTER=>NULL()
 
@@ -183,51 +183,20 @@ SELECT_TURB: SELECT CASE (TURB_MODEL)
       CALL TEST_FILTER(VP_HAT,VP)
       CALL TEST_FILTER(WP_HAT,WP)
 
-      POTENTIAL_TEMPERATURE_IF: IF (.NOT.POTENTIAL_TEMPERATURE_CORRECTION) THEN
-         !$OMP PARALLEL DO PRIVATE(DELTA, KSGS, NU_EDDY) SCHEDULE(STATIC)
-         DO K=1,KBAR
-            DO J=1,JBAR
-               DO I=1,IBAR
-                  IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-                  DELTA = LES_FILTER_WIDTH_FUNCTION(DX(I),DY(J),DZ(K))
-                  KSGS = 0.5_EB*( (UP(I,J,K)-UP_HAT(I,J,K))**2 + (VP(I,J,K)-VP_HAT(I,J,K))**2 + (WP(I,J,K)-WP_HAT(I,J,K))**2 )
+      !$OMP PARALLEL DO PRIVATE(DELTA, KSGS, NU_EDDY) SCHEDULE(STATIC)
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+               DELTA = LES_FILTER_WIDTH_FUNCTION(DX(I),DY(J),DZ(K))
+               KSGS = 0.5_EB*( (UP(I,J,K)-UP_HAT(I,J,K))**2 + (VP(I,J,K)-VP_HAT(I,J,K))**2 + (WP(I,J,K)-WP_HAT(I,J,K))**2 )
 
-                  NU_EDDY = C_DEARDORFF*DELTA*SQRT(KSGS)
-                  MU(I,J,K) = MU_DNS(I,J,K) + RHOP(I,J,K)*NU_EDDY
-               ENDDO
+               NU_EDDY = C_DEARDORFF*DELTA*SQRT(KSGS)
+               MU(I,J,K) = MU_DNS(I,J,K) + RHOP(I,J,K)*NU_EDDY
             ENDDO
          ENDDO
-         !$OMP END PARALLEL DO
-      ELSE POTENTIAL_TEMPERATURE_IF
-         DTDZ => WORK7
-         DO K=0,KBAR
-            DO J=0,JBAR
-               DO I=0,IBAR
-                  THETA_1 = GET_POTENTIAL_TEMPERATURE(TMP(I,J,K),ZC(K))
-                  THETA_2 = GET_POTENTIAL_TEMPERATURE(TMP(I,J,K+1),ZC(K+1))
-                  DTDZ(I,J,K) = (THETA_2-THETA_1)*RDZN(K)
-               ENDDO
-            ENDDO
-         ENDDO
-         DO K=1,KBAR
-            DO J=1,JBAR
-               DO I=1,IBAR
-                  IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-                  DELTA = LES_FILTER_WIDTH_FUNCTION(DX(I),DY(J),DZ(K))
-                  LS = DELTA
-                  KSGS = 0.5_EB*( (UP(I,J,K)-UP_HAT(I,J,K))**2 + (VP(I,J,K)-VP_HAT(I,J,K))**2 + (WP(I,J,K)-WP_HAT(I,J,K))**2 )
-                  DTDZBAR = 0.5_EB*(DTDZ(I,J,K)+DTDZ(I,J,K+1))
-                  IF (DTDZBAR>0._EB) THEN
-                     THETA_0 = GET_POTENTIAL_TEMPERATURE(TMP_0(K),ZC(K))
-                     LS = C_LS*SQRT(KSGS)/SQRT(ABS(GVEC(3))/THETA_0*DTDZBAR) ! von Schoenberg Eq. (3.19)
-                  ENDIF
-                  NU_EDDY = C_DEARDORFF*MIN(LS,DELTA)*SQRT(KSGS)
-                  MU(I,J,K) = MU_DNS(I,J,K) + RHOP(I,J,K)*NU_EDDY
-                  PR_T(I,J,K) = 1._EB/(1._EB + (2._EB*MIN(LS,DELTA)/DELTA)) ! von Schoenberg Eq. (3.21)
-               ENDDO
-            ENDDO
-         ENDDO
-      ENDIF POTENTIAL_TEMPERATURE_IF
+      ENDDO
+      !$OMP END PARALLEL DO
 
    CASE (VREMAN) SELECT_TURB ! Vreman (2004) eddy viscosity model (experimental)
 
