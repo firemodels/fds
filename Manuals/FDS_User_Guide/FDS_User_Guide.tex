@@ -2891,7 +2891,7 @@ In an LES calculation, the convective heat transfer coefficient, $h$, is based o
 \be \dq_{\rm c}'' = h \, (T_{\rm g} - T_{\rm w}) \quad \hbox{W/m}^2 \quad ; \quad
     h = \frac{k}{L} \, \NU  \quad  \si{W/(m^2.K)}  \label{q_con}
 \ee
-where $C$ is a empirical coefficient for natural convection (1.52 for a horizontal plate and 1.31 for a vertical plane or cylinder)~\cite{Holman:1}, $L$ is a characteristic length related to the size of the physical obstruction, $k$ is the thermal conductivity of the gas, and $\dn$ is the gas phase cell size. 
+where $C$ is a empirical coefficient for natural convection (1.52 for a horizontal plate and 1.31 for a vertical plane or cylinder)~\cite{Holman:1}, $L$ is a characteristic length related to the size of the physical obstruction, $k$ is the thermal conductivity of the gas, and $\dn$ is the gas phase cell size.
 
 For forced convection, the Nusselt number (Nu) takes the form:
 \be
@@ -2905,7 +2905,7 @@ The values of the coefficients are given in Table~\ref{convective_heat_transfer_
 \begin{center}
 \begin{tabular}{|lccccc|}
 \hline
-Geometry     & $C_0$    & $C_1$   & $C_2$ & $n$    & Re             \\ \hline 
+Geometry     & $C_0$    & $C_1$   & $C_2$ & $n$    & Re             \\ \hline
 Flat Plate   & 0        & 0.037   & 871   & 0.8    & $\le 10^8$     \\
 Cylinder     & 0        & 0.989   & 0     & 0.330  & $0.4-4$        \\
 Cylinder     & 0        & 0.911   & 0     & 0.385  & $4-40$         \\
@@ -2919,7 +2919,7 @@ Sphere       & 2        & 0.6     & 0     & 0.5    &                \\ \hline
 
 The last term of the $h$ formula aims to ensure that the LES convective heat flux converges to the DNS heat flux at fine resolutions.
 
-The length scale, $L$, is specified by {\ct CONVECTION\_LENGTH\_SCALE} on the {\ct SURF} line. 
+The length scale, $L$, is specified by {\ct CONVECTION\_LENGTH\_SCALE} on the {\ct SURF} line.
 
 \subsubsection{Specified Convective Heat Transfer Coefficient}
 
@@ -7303,13 +7303,6 @@ where $ \Delta z$ is the distance from the leak point to the neutral plane.  Usi
    \label{fig_stack_effect}
 \end{figure}
 
-\subsection{Deardorff Potential Temperature Correction}
-\label{info:potential_temperature_correction}
-
-The turbulent transport of heat in the atmosphere is greatly affected by the local stability condition.  In his 1980 paper \cite{Deardorff:1980}, Deardorff suggests a correction to the local turbulent viscosity to suppress turbulent transport in stable conditions.  To implement this correction in FDS, set {\ct POTENTIAL\_TEMPERATURE\_CORRECTION=T} on the {\ct WIND} line.  In this case, the local turbulent Prandtl number will be computed dynamically as discussed in \cite{Deardorff:1980}.  Details of the model are also discussed in the FDS Technical Guide \cite{FDS_Math_Guide}.
-
-
-
 
 \section{External Boundary Conditions}
 \label{info:wind_BC}
@@ -10745,7 +10738,6 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct TOTAL MASS FLUX X}$^1$ & $\overline{\rho Y_\alpha} u + \rho D_\alpha \partial Y_\alpha/\partial x$, Sec.~\ref{info:mass_flow} & kg/s/m$^2$ & D,I,P,S      \\ \hline
 {\ct TOTAL MASS FLUX Y}$^1$ & $\overline{\rho Y_\alpha} v + \rho D_\alpha \partial Y_\alpha/\partial y$, Sec.~\ref{info:mass_flow} & kg/s/m$^2$ & D,I,P,S      \\ \hline
 {\ct TOTAL MASS FLUX Z}$^1$ & $\overline{\rho Y_\alpha} w + \rho D_\alpha \partial Y_\alpha/\partial z$, Sec.~\ref{info:mass_flow} & kg/s/m$^2$ & D,I,P,S      \\ \hline
-{\ct TURBULENT PRANDTL NUMBER}$^7$              & $\nu_t/\alpha_t$                                  &                & D,I,P,S      \\ \hline
 {\ct VELOCITY ERROR}                            & Section~\ref{info:PRES}                           &                & B            \\ \hline
 {\ct VISCOUS STRESS WALL}                       & Section~\ref{info:distributed_forces}             & Pa             & B,D          \\ \hline
 {\ct VISCOUS WALL UNITS}                        & Section~\ref{info:yplus}                          &                & B,D          \\ \hline
@@ -10770,7 +10762,6 @@ $^3$                 \> Requires specification of an additional scalar using {\c
 $^4$                 \> Allows for an optional {\ct MATL\_ID}. \\
 $^5$                 \> Allows for an optional {\ct REAC\_ID}.  Default is Reaction 1. \\
 $^6$                 \> Requires {\ct REAC\_ID}. \\
-$^7$                 \> Requires {\ct POTENTIAL\_TEMPERATURE\_CORRECTION=T} on {\ct WIND}.
 \end{tabbing}
 
 
@@ -12615,7 +12606,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct L}                                         & Real          & Section~\ref{info:WIND}                       & m             & 0                 \\ \hline
 {\ct LAPSE\_RATE}                               & Real          & Section~\ref{info:stratification}             & $^\circ$C/m   & 0                 \\ \hline
 {\ct LATITUDE}                                  & Real          & Section~\ref{info:coriolis_force}             & degrees       &                   \\ \hline
-{\ct POTENTIAL\_TEMPERATURE\_CORRECTION}        & Logical       & Section~\ref{info:potential_temperature_correction} &         & {\ct F}           \\ \hline
 {\ct PRESSURE\_GRADIENT\_FORCE}                 & Real          & Section~\ref{info:force_vector}               & Pa/m          &                   \\ \hline
 {\ct RAMP\_DIRECTION\_T}                        & Character     & Section~\ref{info:WIND}                       &               &                   \\ \hline
 {\ct RAMP\_DIRECTION\_Z}                        & Character     & Section~\ref{info:WIND}                       &               &                   \\ \hline

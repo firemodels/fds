@@ -151,33 +151,6 @@ where $\bar{u}$ is the average value of $u$ at the grid cell center (representin
 \ee
 The terms $\hat{\bar{v}}$ and $\hat{\bar{w}}$ are defined similarly.  The model constant is set to the literature value $C_\nu=0.1$ \cite{Pope:2000}.  The constant value is also derived theoretically in Appendix \ref{app:lilly_analysis}.  The algebraic form of subgrid kinetic energy is based on the ideas presented in the scale-similarity model of Bardina et al.~\cite{Bardina:1980}. (Note that Deardorff \cite{Deardorff:1980} solved a transport equation for $k_{\rm sgs}$.)
 
-\subsubsection*{Corrections for atmospheric stratification}
-\label{sec:potential_temp_correction}
-
-A stably stratified atmosphere will suppress the generation of turbulent eddies and hence it will reduce turbulent transport in the vertical direction.  Deardorff \cite{Deardorff:1980} proposed a modification to the eddy length scale in the eddy viscosity to account for local stratification (temperature gradient in the vertical direction).  The model for the length scale is
-\begin{equation}
-\label{eq:eddy_length_stability_correction}
-\ell_s = 0.76 \, \sqrt{ k_{\rm sgs} } \, \left(\frac{g}{\theta_0} \frac{\partial \theta}{\partial z}\right)^{-1/2}
-\end{equation}
-where the potential temperature is \cite{Stull:2000}
-\begin{equation}
-\label{eq:potential_tmp}
-\theta = T \left(\frac{1\times 10^5}{p}\right)^{R/(\overline{W}c_p)}
-\end{equation}
-When the potential temperature gradient is positive the local fluid is stably stratified.  With the gradient in the demoninator, the length scale is reduced, causing a reduction in the eddy viscosity.  When {\ct POTENTIAL\_TEMPERATURE\_CORRECTION=.TRUE.} the turbulent viscosity is computed from
-\be
-  \label{eq:mut_theta_cor}
-  \mu_{\rm t} = \rho \, C_\nu \, \min(\ell_s,\Delta) \, \sqrt{ k_{\rm sgs} }
-\ee
-
-\subsubsection*{Dynamic turbulent Prandtl number}
-\label{sec:dyn_turb_Pr}
-
-The turbulent Prandtl number is the ratio of the kinematic turbulent visocity to the turbulent thermal diffusivity, $\mbox{Pr}_t = \nu_t/\alpha_t$.  This parameter should approach unity if the flow is fully resolved.  To achieve this, Deardorff \cite{Deardorff:1980} proposed to compute the turbulent Prandtl number as follows:
-\begin{equation}
-\mbox{Pr}_t = \left(1 + \left[ \frac{2 \ell_s}{\Delta}\right]\right)^{-1}
-\end{equation}
-Hence, if $\ell_s = \Delta$, $\mbox{Pr}_t = 1/3$, and if $\ell_s = 0$, $\mbox{Pr}_t = 1$.  This dynamic turbulent Prandtl number is applied automatically if {\ct POTENTIAL\_TEMPERATURE\_CORRECTION=.TRUE.}.
 
 \subsection{Vreman's Model}
 \label{sec:vreman}
@@ -654,43 +627,6 @@ where $s^+ = s/\delta_\nu$ is the roughness length in viscous units and $s$ is t
 \end{equation}
 where $\tilde{B}_{\rm max} = 9.5$.
 
-\subsection{Atmospheric Boundary Layer Model (Experimental)}
-\label{sec:abl_wall_model}
-
-The formulation for the ABL wall model implemented in FDS follows \cite{Stoll:2008}.  The potential temperature is given by $$\theta=T \left( \frac{p_0}{p} \right)^{R/(W_{\rm air} \, c_p)}$$ where $p_0$ is typically 100~kPa and $R/(W_{\rm air} \, c_p) \approx 0.286$.  The heat flux at the wall is given by
-\be
-\dot{q}''_{\rm w} = h (\theta_{\rm w} - \theta_{\rm g}) = h\,\Delta \theta \,\mbox{,}
-\ee
-where $h$ is the heat transfer coefficient to be determined.  The potential temperatures at the wall and first gas phase cell center are $\theta_{\rm w}$ and $\theta_{\rm g}$, respectively.  A positive heat flux indicates an unstable boundary layer while a negative heat flux indicates a stable boundary layer.
-
-The key aspect of this model is that we require consistency between the surface heat flux, $\dot{q}''_{\rm w}$, and the wall stress obtained from the friction velocity, here denoted by $u_*$ to be consistent with the atmospheric literature ($u_* = u_\tau = \sqrt{\tau_w/\rho}$).  These quantities are linked via the Obukhov length, $L$.  The equations below for $L$, $u_*$, and $\dot{q}''_{\rm w}$ are solved simultaneously with $z=\Delta z/2$ being the distance of the first cell center away from the wall.  In practice, a simple Picard iteration usually converges to less than 1 \% error in three steps.
-
-\begin{equation}
-\label{eq:obukhov_length}
-L = -\frac{u_*^3 \theta_{\rm g}}{\kappa \,g\, \dot{q}''_{\rm w}}
-\end{equation}
-\begin{equation}
-\label{eq:ustar_abl_model}
-u_* = \frac{|u|\kappa}{\ln(z/z_0)-\Psi_M(z/L)}
-\end{equation}
-\begin{equation}
-\label{eq:q_abl_model}
-\dot{q}''_{\rm w} = \frac{\Delta \theta \,u_*\kappa}{\ln(z/z_0)-\Psi_H(z/L)}
-\end{equation}
-
-The stability corrections, $\Psi_M$ and $\Psi_H$, for momentum and heat flux, respectively, are given taken from Dyer~\cite{Dyer:1974}:
-\begin{eqnarray}
-   \Psi_{\rm M}\left(\frac{z}{L}\right) &=& \left\{ \begin{array}{c@{\quad:\quad}l} \displaystyle -5 \, \frac{z}{L} & L \ge 0 \\[.2in]  \displaystyle 2 \, \ln \left[\frac{1+\zeta}{2}\right] + \ln \left[\frac{1+\zeta^2}{2}\right]-2 \, \tan^{-1}(\zeta) + \frac{\pi}{2} & L<0 \end{array} \right.  \\[.2in]
-   \Psi_{\rm H}\left(\frac{z}{L}\right) &=& \left\{ \begin{array}{c@{\quad:\quad}l} \displaystyle -5 \, \frac{z}{L} & L \ge 0 \\[.2in]  \displaystyle 2 \, \ln \left[\frac{1+\zeta^2}{2}\right] & L<0 \quad \quad  \displaystyle \zeta=\left( 1 - \frac{16 \, z}{L} \right)^{1/4}  \end{array} \right.
-\end{eqnarray}
-
-\subsection{Wall Model Implementation}
-Once $u_\tau$ has been determined from the model profile, the stress may be obtained from
-\begin{equation}
-\label{eqn_wall_stress}
-\tau_w = \rho u_\tau^2
-\end{equation}
-Generally, this requires an iterative procedure since $\tau_w$ is needed to define $\delta_\nu$ and hence $y^+$.  The strategy employed in FDS is to first compute $\tau_w$ as if the flow is locally laminar (DNS), and if the calculation is an LES the laminar value is used as an initial guess.  Testing has shown that three iterations is sufficient to converge the residual error in the profile model to 1\%.
 
 \subsection{Near-Wall Eddy Viscosity Model}
 \label{sec:wall_wale_model}
