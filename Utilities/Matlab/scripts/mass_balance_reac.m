@@ -47,8 +47,8 @@ H(2)=plot(t,mdot_out,'b-');
 H(3)=plot(t,gen,'r-');
 H(4)=plot(t,bal,'k-');
 
-ylabel('mass flow (kg/s)', 'FontSize',Label_Font_Size)
-xlabel('time (s)', 'FontSize',Label_Font_Size)
+ylabel('Mass Flow (kg/s)', 'FontSize',Label_Font_Size)
+xlabel('Time (s)', 'FontSize',Label_Font_Size)
 
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
@@ -64,7 +64,7 @@ text(xl(1)+0.05*(xl(2)-xl(1)),yl(1)+0.9*(yl(2)-yl(1)),title_text,'FontSize',Titl
 % check balance and report error
 
 mass_error = abs(mean(bal))/m(end); % error normalized by the total mass in the domain
-if mass_error > 1.1e-3
+if mass_error > 1.5e-3
     disp(['Matlab Warning: mass error = ',num2str(mass_error),' in ',chid,' for species ',mass_id])
 end
 
