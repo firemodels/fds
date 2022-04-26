@@ -108,25 +108,12 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
 
    DEL_RHO_D_DEL_Z = 0._EB
    RHO_D => WORK4
-   IF (.NOT.POTENTIAL_TEMPERATURE_CORRECTION) THEN
-      ! default
-      IF (SIM_MODE/=DNS_MODE) THEN
-         IF (SIM_MODE==LES_MODE) THEN
-            RHO_D_TURB => WORK9
-            RHO_D_TURB = MAX(0._EB,MU-MU_DNS)*RSC
-         ELSE
-            RHO_D = MAX(0._EB,MU)*RSC
-         ENDIF
-      ENDIF
-   ELSE
-      ! dynamic turbulent Schmidt number (Deardorff, 1980)
-      IF (SIM_MODE/=DNS_MODE) THEN
-         IF (SIM_MODE==LES_MODE) THEN
-            RHO_D_TURB => WORK9
-            RHO_D_TURB = MAX(0._EB,MU-MU_DNS)/PR_T
-         ELSE
-            RHO_D = MAX(0._EB,MU)/PR_T
-         ENDIF
+   IF (SIM_MODE/=DNS_MODE) THEN
+      IF (SIM_MODE==LES_MODE) THEN
+         RHO_D_TURB => WORK9
+         RHO_D_TURB = MAX(0._EB,MU-MU_DNS)*RSC
+      ELSE
+         RHO_D = MAX(0._EB,MU)*RSC
       ENDIF
    ENDIF
 
@@ -491,20 +478,10 @@ K_DNS_OR_LES: IF (SIM_MODE==DNS_MODE .OR. SIM_MODE==LES_MODE) THEN
    DEALLOCATE(ZZ_GET)
 
    IF (SIM_MODE==LES_MODE) THEN
-      IF (.NOT.POTENTIAL_TEMPERATURE_CORRECTION) THEN
-         ! normal LES mode, constant turbulent Prandtl number
-         IF(.NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
-            KP = KP + MAX(0._EB,(MU-MU_DNS))*CP*RPR
-         ELSE
-            KP = KP + MAX(0._EB,(MU-MU_DNS))*CPOPR
-         ENDIF
+      IF(.NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
+         KP = KP + MAX(0._EB,(MU-MU_DNS))*CP*RPR
       ELSE
-         ! dynamic turbulent Prandtl number (Deardorff, 1980)
-         IF(.NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
-            KP = KP + MAX(0._EB,(MU-MU_DNS))*CP/PR_T
-         ELSE
-            KP = KP + MAX(0._EB,(MU-MU_DNS))*CPOPR*PR/PR_T
-         ENDIF
+         KP = KP + MAX(0._EB,(MU-MU_DNS))*CPOPR
       ENDIF
    ENDIF
 
@@ -518,9 +495,6 @@ ELSE K_DNS_OR_LES
 
    ! normal VLES mode
    KP = MU*CPOPR
-
-   ! dynamic turbulent Prandtl number (Deardorff, 1980)
-   IF (POTENTIAL_TEMPERATURE_CORRECTION)  KP = KP*PR/PR_T
 
 ENDIF K_DNS_OR_LES
 
