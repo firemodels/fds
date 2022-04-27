@@ -5495,7 +5495,7 @@ Figure~\ref{water_evaporation_4_plot}, left, displays the time history of the en
 \subsection{Case 5}
 \label{water_evaporation_5}
 
-This case is based upon one of the Ranz and Marshall experiments~\cite{Ranz} contained in the FDS Validation Guide~\cite{FDS_Validation_Guide}. The test involves a single evaporating water droplet in relatively dry air. In the FDS Validation Guide, the experiment is modeled using a thermally thin (isothermal) liquid droplet. The purpose of this verification test is to demonstrate that equivalent results are obtained with model the drop as a thermally-thick sphere using the liquid evaporation model for a solid surface with a temperature dependent heat of reaction (in this case vaporization) inputs. Fig.~\ref{water_evaporation_5_plot} compares the thermally-thick and thermally-thin results. The experimental data is also shown for reference.
+This case is based upon one of the Ranz and Marshall experiments~\cite{Ranz} contained in the FDS Validation Guide~\cite{FDS_Validation_Guide} in which a single, stationary water droplet of diameter 1043~$\mu$m in relatively dry air evaporates in approximately 15~min. The droplet is modeled using the thermally-thin liquid droplet model and the thermally-thick model usually used for solid particles. For the thermally-thick droplet, the evaporation model used for liquid pools is applied at the surface of the sphere. A temperature-dependent heat of vaporization is applied. Fig.~\ref{water_evaporation_5_plot} compares the droplet diameter of the thermally-thick and thermally-thin models compared to the experimental measurement.
 
 \begin{figure}[h!]
 \centering
@@ -5547,7 +5547,7 @@ The sum of all the terms, \textct{Q\_TOTAL}, is expected to be zero. The three o
 \subsection{Case 8}
 \label{water_evaporation_8}
 
-In this case, we compare FDS predictions against a 1D spherical heat transfer model evaporation using the FDS properties for water and air. This case replicates Fig.~6 of the Li and Chow paper in Ref.~\cite{LiChow:2008}.  The simulation consists of an injection of a 100~$\mu$m droplet at 10~$^\circ$C into 60~$^\circ$C air with an initial water vapor mass fraction of 10~\%. The initial speed of the droplet is 3 m/s in the negative $z$ direction (downward with gravity turned on).
+This case is similar to Case~5 except that here the droplet has a diameter of 100~$\mu$m and it is dropped with an initial velocity of 3~m/s. The measurements are described in Li and Chow~\cite{LiChow:2008}. The specific case is shown in Fig.~6 of the paper. The simulation consists of an injection of a 100~$\mu$m droplet at 10~$^\circ$C into 60~$^\circ$C air with an initial water vapor mass fraction of 10~\%. The initial speed of the droplet is 3~m/s in the negative $z$ direction (downward with gravity turned on).
 
 
 \begin{figure}[h!]
