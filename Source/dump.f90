@@ -2422,13 +2422,8 @@ IF (SIM_MODE/=DNS_MODE) THEN
          END SELECT
       ENDIF
    ENDDO
-   IF (POTENTIAL_TEMPERATURE_CORRECTION) THEN
-      WRITE(LU_OUTPUT,'(A)')        '   Turbulent Prandtl Number:      Dynamic (Deardorff Model)'
-      WRITE(LU_OUTPUT,'(A)')        '   Turbulent Schmidt Number:      Dynamic (Deardorff Model)'
-   ELSE
-      WRITE(LU_OUTPUT,'(A,F8.2)')   '   Turbulent Prandtl Number:     ',PR
-      WRITE(LU_OUTPUT,'(A,F8.2)')   '   Turbulent Schmidt Number:     ',SC
-   ENDIF
+   WRITE(LU_OUTPUT,'(A,F8.2)')   '   Turbulent Prandtl Number:     ',PR
+   WRITE(LU_OUTPUT,'(A,F8.2)')   '   Turbulent Schmidt Number:     ',SC
 ENDIF
 
 ! Print out information about background pressure and temperature stratification
@@ -7690,12 +7685,6 @@ IND_SELECT: SELECT CASE(IND)
       ENDIF
    CASE(523)  ! ABSOLUTE PRESSURE
       GAS_PHASE_OUTPUT_RES  = PBAR(KK,PRESSURE_ZONE(II,JJ,KK)) + RHO(II,JJ,KK)*(H(II,JJ,KK)-KRES(II,JJ,KK))
-   CASE(524)  ! TURBULENT PRANDTL NUMBER
-      IF (POTENTIAL_TEMPERATURE_CORRECTION) THEN
-         GAS_PHASE_OUTPUT_RES = PR_T(II,JJ,KK)
-      ELSE
-         GAS_PHASE_OUTPUT_RES = PR
-      ENDIF
    CASE(528)  ! ADVECTIVE MASS FLUX X
       GAS_PHASE_OUTPUT_RES = 0._EB
       IF (Z_INDEX>0) THEN
