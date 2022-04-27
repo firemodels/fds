@@ -2440,6 +2440,8 @@ IF (LPC%DRAG_LAW/=SCREEN_DRAG .AND. LPC%DRAG_LAW/=POROUS_DRAG) THEN
       A_DRAG = PI*R_D**2
    ELSE
       SELECT CASE(SF%GEOMETRY)
+         ! Note: LPC%SHAPE_FACTOR=0.25 by default, which is analytically correct for SURF_SPHERICAL,
+         !       and accounts for random orientations of other geometries
          CASE(SURF_CARTESIAN)
             A_DRAG = 2._EB*SF%LENGTH*SF%WIDTH*LPC%SHAPE_FACTOR
             ! For disk drag, allow for different area for each particle

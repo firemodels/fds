@@ -1297,65 +1297,59 @@ ENDIF
 END SUBROUTINE WALL_MODEL
 
 
-!> \brief Calculate the heat transfer coefficient for natural/free convection
-!> \param H_NATURAL Heat transfer coefficient (W/m2/K)
-!> \param DELTA_TMP Temperature difference between gas and surface (K)
+!> \brief Calculate the Nusselt number for natural/free convection
+!> \param NUSSELT Nusselt number
+!> \param RA Rayleigh number
 !> \param SURF_INDEX Indicator of the surface type
 !> \param SURF_GEOMETRY_INDEX Indicator of the surface geometry
 !> \param IOR Index of the surface orientation
-!> \param K_G Gas thermal conductivity (W/m/K)
-!> \param CONV_LENGTH Characteristic length (m)
 
-SUBROUTINE NATURAL_CONVECTION_MODEL(H_NATURAL,DELTA_TMP,SURF_INDEX,SURF_GEOMETRY_INDEX,IOR,K_G,CONV_LENGTH)
+SUBROUTINE NATURAL_CONVECTION_MODEL(NUSSELT,RA,SURF_INDEX,SURF_GEOMETRY_INDEX,IOR)
 
-REAL(EB), INTENT(OUT) :: H_NATURAL
-REAL(EB), INTENT(IN) :: DELTA_TMP,K_G,CONV_LENGTH
-INTEGER, INTENT(IN) :: SURF_GEOMETRY_INDEX,IOR,SURF_INDEX
-REAL(EB) :: NUSSELT
+REAL(EB), INTENT(OUT) :: NUSSELT
+REAL(EB), INTENT(IN) :: RA
+INTEGER, INTENT(IN) :: SURF_INDEX,SURF_GEOMETRY_INDEX,IOR
 
 SELECT CASE(SURF_GEOMETRY_INDEX)
    CASE (SURF_CARTESIAN)
       SELECT CASE(ABS(IOR))
          CASE(0:2)
-            H_NATURAL = 1.31_EB*ABS(DELTA_TMP)**ONTH  ! Holman, Table 7-2, 7th edition
+            NUSSELT = (0.825_EB + 0.324_EB*RA**ONSI)**2  ! Incropera and DeWitt, 7th edition, Eq. 9.26
          CASE(3)
-            H_NATURAL = 1.52_EB*ABS(DELTA_TMP)**ONTH  ! Holman, Table 7-2, 7th edition
+            IF (RA<1.E7_EB) THEN
+               NUSSELT = 0.54_EB*RA**0.25_EB  ! Incropera and DeWitt, 7th edition, Eq. 9.30
+            ELSE
+               NUSSELT = 0.15_EB*RA**ONTH     ! Incropera and DeWitt, 7th edition, Eq. 9.31
+            ENDIF
       END SELECT
    CASE (SURF_CYLINDRICAL)  ! Simplification of Eq. 9.34, Incropera and DeWitt, 7th edition
       IF (SURFACE(SURF_INDEX)%HORIZONTAL) THEN
-         NUSSELT = (0.6_EB + 6.87_EB*ABS(DELTA_TMP)**0.1666*SQRT(CONV_LENGTH))**2  ! Incropera and DeWitt, Eq. 9.34, 7th edition
-         H_NATURAL = K_G*NUSSELT/CONV_LENGTH
+         NUSSELT = (0.6_EB + 0.321_EB*RA**ONSI)**2   ! Incropera and DeWitt, 7th edition, Eq. 9.34
       ELSE
-         H_NATURAL = 1.31_EB*ABS(DELTA_TMP)**ONTH  ! Holman, Table 7-2, 7th edition
+         NUSSELT = (0.825_EB + 0.324_EB*RA**ONSI)**2 ! Incropera and DeWitt, 7th edition, Eq. 9.26
       ENDIF
-   CASE (SURF_SPHERICAL)  ! Simplification of Eq. 9.35, Incropera and DeWitt, 7th edition
-      NUSSELT = 2._EB + 45.8_EB*ABS(DELTA_TMP)**0.25_EB*CONV_LENGTH**0.75_EB
-      H_NATURAL = K_G*NUSSELT/CONV_LENGTH
-      H_NATURAL = 0._EB  ! This is the old way -- only temporary
+   CASE (SURF_SPHERICAL)
+      NUSSELT = 2._EB + 0.454_EB*RA**0.25_EB  ! Incropera and DeWitt, 7th edition, Eq. 9.35
 END SELECT
 
 END SUBROUTINE NATURAL_CONVECTION_MODEL
 
 
 !> \brief Calculate the heat transfer coefficient for forced convection
-!> \param H_FORCED Heat transfer coefficient (W/m2/K)
+!> \param NUSSELT Nusselt number
 !> \param RE Reynolds number
-!> \param K_G Gas thermal conductivity (W/m/K)
 !> \param PR_ONTH_IN Prandtl number to the 1/3 power
-!> \param CONV_LENGTH Characteristic length (m)
 !> \param SURF_GEOMETRY_INDEX Indicator of the surface geometry
 
-SUBROUTINE FORCED_CONVECTION_MODEL(H_FORCED,RE,K_G,PR_ONTH_IN,CONV_LENGTH,SURF_GEOMETRY_INDEX)
+SUBROUTINE FORCED_CONVECTION_MODEL(NUSSELT,RE,PR_ONTH_IN,SURF_GEOMETRY_INDEX)
 
-REAL(EB), INTENT(OUT) :: H_FORCED
-REAL(EB), INTENT(IN) :: RE,K_G,CONV_LENGTH,PR_ONTH_IN
+REAL(EB), INTENT(OUT) :: NUSSELT
+REAL(EB), INTENT(IN) :: RE,PR_ONTH_IN
 INTEGER, INTENT(IN) :: SURF_GEOMETRY_INDEX
-REAL(EB) :: NUSSELT
 
 SELECT CASE(SURF_GEOMETRY_INDEX)
    CASE (SURF_CARTESIAN)
-      ! Incropera and DeWitt, 7th, Table 7.7
-      NUSSELT = (0.037_EB*RE**0.8_EB-871._EB)*PR_ONTH_IN
+      NUSSELT = (0.037_EB*RE**0.8_EB-871._EB)*PR_ONTH_IN  ! Incropera and DeWitt, 7th, Table 7.7
    CASE (SURF_CYLINDRICAL)
       ! Incropera and DeWitt, 7th, Eq. 7.52
       IF (RE >= 40000._EB) THEN
@@ -1370,10 +1364,8 @@ SELECT CASE(SURF_GEOMETRY_INDEX)
          NUSSELT = 0.989_EB*RE**0.330_EB*PR_ONTH_IN
       ENDIF
    CASE (SURF_SPHERICAL)
-      ! Incropera and DeWitt, 7th, Eq. 7.57
-      NUSSELT = 2._EB + 0.6_EB*SQRT(RE)*PR_ONTH_IN
+      NUSSELT = 2._EB + 0.6_EB*SQRT(RE)*PR_ONTH_IN  ! Incropera and DeWitt, 7th, Eq. 7.57
 END SELECT
-H_FORCED = MAX(1._EB,NUSSELT)*K_G/CONV_LENGTH
 
 END SUBROUTINE FORCED_CONVECTION_MODEL
 
