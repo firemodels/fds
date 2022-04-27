@@ -1,25 +1,66 @@
-A test for evaluating the rate of evaporation for one single droplet in an ambient air
-Comparison of the droplet diameter versus time with experimental data extracted
-from Ranz and Marshall "Evaporation from drops - Part II" Chemical Engineering Progress, 48(4):173-180 (1952)
+Comparison of evaporation rate for one single droplet in ambient air, done with both thermally-thick and thin models.
+Measurement of droplet diameter versus time extracted from 
+Ranz and Marshall "Evaporation from drops - Part II" Chemical Engineering Progress, 48(4):173-180 (1952)
 
-&HEAD CHID='water_evaporation_5' /
+&HEAD CHID='water_evaporation_5', TITLE='Comparison of thermally-thick and thin water droplets' /
 
-&MESH IJK=9,9,9, XB=0.,1.0,0.,1.0,0.0,1.0 /
+&MESH IJK=4,4,4, XB=0.0,0.2,0.0,0.2,0.0,0.2 /
 
-&TIME T_END = 712. /
+&TIME T_END=712., DT=0.01 /
 
-&MISC NOISE=F, TMPA = 24.9, P_INF = 98791.9, HUMIDITY= 0, STRATIFICATION=F, Y_CO2_INFTY=0. /
+&MISC TMPA=24.9, P_INF=98791.9, HUMIDITY=10 /
 
 &RADI RADIATION=F /
 
-&SPEC ID ='WATER VAPOR' /
+&SPEC ID='WATER VAPOR' /
 
-&DUMP DT_DEVC = 2, MASS_FILE=.TRUE./
+&DUMP DT_DEVC=2 /
 
-&PART ID='water_drops', STATIC = .TRUE., SPEC_ID = 'WATER VAPOR', DIAMETER = 1048.8, SAMPLING_FACTOR = 1, MONODISPERSE = .TRUE.,
-      MINIMUM_DIAMETER = 5, MAXIMUM_DIAMETER = 2000, INITIAL_TEMPERATURE = 9.11 /
+&SURF ID           = 'MY DROPLET'
+      MATL_ID      = 'WATER'
+      COLOR        = 'BLUE'
+      GEOMETRY     = 'SPHERICAL'
+      THICKNESS    = 521.5E-6
+      TMP_INNER    = 9.1
+      CELL_SIZE_FACTOR = 0.01
+      MINIMUM_LAYER_THICKNESS = 5.E-6 /
 
-&INIT PART_ID = 'water_drops', XB = 0.5 0.5 0.5 0.5 0.5 0.5, N_PARTICLES= 1 /, MASS_PER_VOLUME = 0.075506905
+&MATL ID                     = 'WATER'
+      EMISSIVITY             = 0.95
+      DENSITY                = 1000.
+      SPEC_ID                = 'WATER VAPOR'
+      NU_SPEC                = 1
+      CONDUCTIVITY           = 0.609
+      SPECIFIC_HEAT_RAMP     = 'c_H2O'
+      HEAT_OF_REACTION_RAMP  = 'hv_H2O'
+      BOILING_TEMPERATURE    = 100. /
+
+! Ramps defined to match thermally-thin case
+
+&RAMP ID='hv_H2O', T=  0., F=2500.72 /
+&RAMP ID='hv_H2O', T=  5., F=2489.04 /
+&RAMP ID='hv_H2O', T= 10., F=2477.39 /
+&RAMP ID='hv_H2O', T= 15., F=2465.78 /
+&RAMP ID='hv_H2O', T= 20., F=2454.19 /
+&RAMP ID='hv_H2O', T= 25., F=2442.59 /
+&RAMP ID='hv_H2O', T= 30., F=2431.00 /
+&RAMP ID='hv_H2O', T=100., F=2269.09 /
+
+&RAMP ID='c_H2O', T= 0.,  F=4.227 /
+&RAMP ID='c_H2O', T= 5.,  F=4.198 /
+&RAMP ID='c_H2O', T= 10., F=4.185 /
+&RAMP ID='c_H2O', T= 15., F=4.182 /
+&RAMP ID='c_H2O', T= 20., F=4.182 /
+&RAMP ID='c_H2O', T= 25., F=4.183 /
+&RAMP ID='c_H2O', T= 30., F=4.183 /
+&RAMP ID='c_H2O', T=100., F=4.217 /
+
+&PART ID='thick drop', SURF_ID='MY DROPLET', STATIC=T, SAMPLING_FACTOR=1 /
+&INIT ID='thick', PART_ID='thick drop', XYZ=0.075,0.075,0.075, N_PARTICLES=1 /
+
+&PART ID='thin drop', STATIC=T, SPEC_ID='WATER VAPOR', DIAMETER=1043., SAMPLING_FACTOR=1, MONODISPERSE=T,
+      MINIMUM_DIAMETER=5, MAXIMUM_DIAMETER=2000, INITIAL_TEMPERATURE=9.1 /
+&INIT ID='thin', PART_ID='thin drop', XYZ=0.175,0.175,0.175, N_PARTICLES=1 /
 
 &VENT MB='XMIN',SURF_ID='OPEN'/
 &VENT MB='XMAX',SURF_ID='OPEN'/
@@ -28,8 +69,7 @@ from Ranz and Marshall "Evaporation from drops - Part II" Chemical Engineering P
 &VENT MB='ZMIN',SURF_ID='OPEN'/
 &VENT MB='ZMAX',SURF_ID='OPEN'/
 
-&PROP ID='pdpa', PART_ID='water_drops',PDPA_M=1, PDPA_N=0, PDPA_RADIUS=0.02, PDPA_START=0.0, PDPA_INTEGRATE=.FALSE. /
-
-&DEVC XYZ=0.5,0.5,0.5, QUANTITY='PDPA', PROP_ID='pdpa', ID='Diameter'/
+&DEVC ID='D_thick', QUANTITY='WALL THICKNESS',    INIT_ID='thick', CONVERSION_FACTOR=2.,   UNITS='m' /
+&DEVC ID='D_thin',  QUANTITY='PARTICLE DIAMETER', INIT_ID='thin',  CONVERSION_FACTOR=1E-6, UNITS='m' /
 
 &TAIL /
