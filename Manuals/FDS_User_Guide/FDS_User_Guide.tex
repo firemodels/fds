@@ -2887,17 +2887,30 @@ This section is labeled as a special topic because normally you do not need to m
 
 \subsubsection{Default Convective Heat Transfer Model}
 
-In an LES calculation, the convective heat transfer coefficient, $h$, is based on a combination of natural and forced convection correlations:
-\be \dq_{\rm c}'' = h \, (T_{\rm g} - T_{\rm w}) \quad \hbox{W/m}^2 \quad ; \quad
-    h = \frac{k}{L} \, \NU  \quad  \si{W/(m^2.K)}  \label{q_con}
+In an LES calculation, the convective heat transfer coefficient, $h$, is taken as the maximum of its free (natural) and forced forms:
+\be \dq_{\rm c}'' = h \, (T_{\rm g} - T_{\rm w}) \quad ; \quad  h = \frac{k}{L} \, \max \left( \NU_{\rm free} , \NU_{\rm forced} \right)   \label{q_con}
 \ee
-where $C$ is a empirical coefficient for natural convection (1.52 for a horizontal plate and 1.31 for a vertical plane or cylinder)~\cite{Holman:1}, $L$ is a characteristic length related to the size of the physical obstruction, $k$ is the thermal conductivity of the gas, and $\dn$ is the gas phase cell size.
+where $T_{\rm g}$ is the gas temperature in the gas phase cell adjacent to the surface, $T_{\rm w}$ is the wall (surface) temperature, $L$ is a characteristic length, and $k$ is the thermal conductivity of the gas. For planar surfaces, $L$ is taken as 1~m and for spheres and cylinders, $L$ is taken as the diameter, $D$.
 
-For forced convection, the Nusselt number (Nu) takes the form:
+For free (natural) convection, the Nusselt number is a function of the Rayleigh number:
 \be
-   \NU = C_0 + \left( C_1 \, \RE^n - C_2 \right) \, \PR^m  \quad ; \quad \RE = \frac{\rho |\bu| L}{\mu} \quad ; \quad \PR = 0.7 \quad ; \quad m=1/3
+   \hbox{Ra} = \frac{2 \, g \, |T_{\rm g}-T_{\rm w}| L^3}{ (T_{\rm g}+T_{\rm w}) \nu \alpha}  \quad ; \quad  \nu = \frac{\mu}{\rho} \quad ; \quad \alpha = \frac{k}{\rho c_p}  \quad ; \quad \PR=\frac{\nu}{\alpha} 
 \ee
-The values of the coefficients are given in Table~\ref{convective_heat_transfer_table}. For planar surfaces, $L=1$~m. For cylindrical and spherical surface, $L=D$, the diameter of the cylinder or sphere.
+The following expressions are simplifications of those given in Ref.~\cite{Incropera:1} under the assumption that $\PR=0.7$.
+\be
+   \NU_{\rm free} = \left\{ \begin{array}{ll}
+                                                \left( 0.825 +  0.324 \, \hbox{Ra}^{1/6}  \right)^2   &  \hbox{Vertical plate or cylinder} \\
+                                                0.54 \, \hbox{Ra}^{1/4}                               &  \hbox{Horizontal hot plate facing up or cold plate facing down, Ra}\le 10^7 \\
+                                                0.15 \, \hbox{Ra}^{1/3}                               &  \hbox{Horizontal hot plate facing up or cold plate facing down, Ra} >  10^7 \\
+                                                \left( 0.60 +  0.321 \, \hbox{Ra}^{1/6}  \right)^2    &  \hbox{Horizontal cylinder} \\
+                                                2 +  0.454 \, \hbox{Ra}^{1/4}                         &  \hbox{Sphere}
+       \end{array} \right.
+\ee
+For forced convection, the Nusselt number takes the form:
+\be
+   \NU_{\rm forced} = C_0 + \left( C_1 \, \RE^n - C_2 \right) \, \PR^m  \quad ; \quad \RE = \frac{\rho |\bu| L}{\mu}  \quad ; \quad m=1/3
+\ee
+The values of the coefficients are given in Table~\ref{convective_heat_transfer_table}.
 
 \begin{table}[!ht]
 \caption[Coefficients used for forced convection heat transfer correlations]{Coefficients used for forced convection heat transfer correlations~\cite{Incropera:1}}
@@ -2916,8 +2929,6 @@ Sphere       & 2        & 0.6     & 0     & 0.5    &                \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
-
-The last term of the $h$ formula aims to ensure that the LES convective heat flux converges to the DNS heat flux at fine resolutions.
 
 The length scale, $L$, is specified by {\ct CONVECTION\_LENGTH\_SCALE} on the {\ct SURF} line.
 
@@ -2940,14 +2951,6 @@ h = \frac{\dot{q}''_{\rm w}}{T_{\rm g}-T_{\rm w}} = \frac{\rho_{\rm w} \, c_{\rm
 \end{equation}
 Refer to the FDS Tech Guide \cite{FDS_Tech_Guide} for further details of the formulation. To specify this heat transfer model for a particular surface, set {\ct HEAT\_TRANSFER\_MODEL} equal to {\ct 'LOGLAW'} on the {\ct SURF} line. Note that the loglaw model is not well-suited for buoyant flows---it requires a well-resolved ``wind'' near the surface and is therefore mainly applicable to forced convection type flows with high grid resolution.
 
-
-\subsubsection{Free Convection, Horizontal Cylinder}
-
-For some verification and validation cases, it is useful to employ a special correlation for free convection from a horizontal cylinder~\cite{Incropera:1}:
-\be
-   h = \hbox{Nu} \, \frac{k}{D}  \quad ; \quad \hbox{Nu} = \left( 0.60 + \frac{ 0.387 \, \hbox{Ra}^{1/6} }{\left[ 1+ (0.559/\hbox{Pr})^{9/16} \right]^{8/27}} \right)^2  \quad ; \quad \hbox{Ra} = \frac{2 \, g \, (T_{\rm s}-T_\infty)D^3}{ (T_{\rm s}+T_\infty) \nu \alpha}
-\ee
-where $\hbox{Nu}$ is the Nusselt number, $k$ is the thermal conductivity of the gas, $D$ is the diameter of the cylinder, Ra is the Rayleigh number, Pr is the Prandtl number, $T_{\rm s}$ is the surface temperature, $T_\infty$ is the ambient or surrounding gas temperature, $g$ is the acceleration of gravity, $\nu=\mu/\rho$ is the kinematic viscosity of the gas, and $\alpha=k/(\rho c_p)$ is the thermal diffusivity. To specify this heat transfer model for a particular surface, set {\ct HEAT\_TRANSFER\_MODEL} equal to {\ct 'FREE HORIZONTAL CYLINDER'} on the {\ct SURF} line.
 
 
 \subsection{Special Topic: Adiabatic Surfaces}
