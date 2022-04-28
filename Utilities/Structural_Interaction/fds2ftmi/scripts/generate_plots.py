@@ -76,13 +76,13 @@ plt.close()
 # calculating error
 a=np.abs(ansys_result['T2'])
 b=np.abs(fds_result['T2'])
-result=1-a[19]/b[600]
+result=abs(1-a[19]/b[1000])
 tolerance=0.01
 if result<=tolerance:
 	within_tolerance='Yes'
 else:
 	within_tolerance='No'
-results=([['simple\_panel\_hot',"{:1.3e}".format(b[600]),"{:1.3e}".format(a[19]),'Relative',"{:1.3e}".format(result),tolerance,within_tolerance]])
+results=([['simple\_panel\_hot',"{:1.3e}".format(b[1000]),"{:1.3e}".format(a[19]),'Relative',"{:1.3e}".format(result),tolerance,within_tolerance]])
 
 
 # Plot 2 - simple_panel_hot - adiabatic surface temperature
@@ -110,7 +110,7 @@ fds_ast=integrate.trapz(y,x)
 x2 = np.abs(ansys_result['Time'])
 y2 = np.abs(ansys_result['AST2'])
 ansys_ast=integrate.trapz(y2,x2)
-result=1-(ansys_ast/fds_ast)
+result=abs(1-(ansys_ast/fds_ast))
 tolerance=0.01
 if abs(result)<=tolerance:
 	within_tolerance='Yes'
