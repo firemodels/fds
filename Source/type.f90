@@ -980,7 +980,7 @@ TYPE IBM_CUTEDGE_TYPE
    INTEGER,  DIMENSION(MAX_DIM+2)                  ::      IJK  ! [ i j k X2AXIS cetype]
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)           ::   INDSEG  ! [ntr tr1 tr2 ibod]
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)           ::      DXX  ! [DXX(1,JEC) DXX(2,JEC)]
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:)         ::FACE_LIST  ! [1:2, -2:2, JEC] Cut-face connected to edge.
+   INTEGER, ALLOCATABLE, DIMENSION(:,:,:)         ::FACE_LIST  ! [1:2, -2:2, JEC] Cut-face connected to edge.
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)           ::   DUIDXJ, MU_DUIDXJ ! Unstructured VelGrad components.
    INTEGER,  ALLOCATABLE, DIMENSION(:)             :: NOD_PERM  ! Permutation array for INSERT_FACE_VERT.
 END TYPE IBM_CUTEDGE_TYPE
