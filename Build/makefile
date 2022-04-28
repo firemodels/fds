@@ -79,10 +79,11 @@ ifeq ($(shell echo "check_quotes"),"check_quotes")
 ifeq ($(shell ..\Scripts\havemkl),1)
 # Use cluster_sparse_solver with intelmpi blacs
   FFLAGSMKL_INTEL = -DWITH_MKL /I"$(MKLROOT)"\include
-  LFLAGSMKL_INTEL = "$(MKLROOT)"\lib\intel64\mkl_intel_lp64.lib "$(MKLROOT)"\lib\intel64\mkl_intel_thread.lib "$(MKLROOT)"\lib\intel64\mkl_core.lib "$(MKLROOT)"\lib\intel64\mkl_blacs_intelmpi_lp64.lib
+  LFLAGSMKL_INTEL = "$(MKLROOT)"\lib\intel64\mkl_intel_lp64.lib "$(MKLROOT)"\lib\intel64\mkl_intel_sequential.lib "$(MKLROOT)"\lib\intel64\mkl_core.lib "$(MKLROOT)"\lib\intel64\mkl_blacs_intelmpi_lp64.lib
+  LFLAGSMKL_INTEL_OPENMP = "$(MKLROOT)"\lib\intel64\mkl_intel_lp64.lib "$(MKLROOT)"\lib\intel64\mkl_intel_thread.lib "$(MKLROOT)"\lib\intel64\mkl_core.lib "$(MKLROOT)"\lib\intel64\mkl_blacs_intelmpi_lp64.lib
 endif
 else
-# linux/osx
+# linux
 ifneq ("$(wildcard ${MKLROOT}/lib/intel64/libmkl_blacs_intelmpi_lp64.a)","")
 # Use cluster_sparse_solver with intelmpi blacs
   FFLAGSMKL_INTEL = -DWITH_MKL -I"${MKLROOT}/include"
@@ -176,7 +177,7 @@ impi_intel_win_openmp : FOPENMPFLAGS = /Qopenmp
 impi_intel_win_openmp : FCOMPL = $(I_IFORT)
 impi_intel_win_openmp : obj = fds_impi_intel_win_openmp
 impi_intel_win_openmp : setup_win $(objwin_mpi)
-	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB) $(LFLAGSMKL_INTEL)
+	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB) $(LFLAGSMKL_INTEL_OPENMP)
 
 impi_intel_win_dv : MPILIB = "$(IMPI_RELEASE_ROOT)\impi.lib"
 impi_intel_win_dv : MPIINCLUDE = "$(IMPI_INCLUDE)"
@@ -193,7 +194,7 @@ impi_intel_win_openmp_dv : FOPENMPFLAGS = /Qopenmp
 impi_intel_win_openmp_dv : FCOMPL = $(I_IFORT)
 impi_intel_win_openmp_dv : obj = fds_impi_intel_win_openmp_dv
 impi_intel_win_openmp_dv : setup_win $(objwin_mpi)
-	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB) $(LFLAGSMKL_INTEL)
+	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB) $(LFLAGSMKL_INTEL_OPENMP)
 
 impi_intel_win_db : MPILIB = "$(IMPI_DEBUG_ROOT)\impi.lib"
 impi_intel_win_db : MPIINCLUDE = "$(IMPI_INCLUDE)"
@@ -210,7 +211,7 @@ impi_intel_win_openmp_db : FOPENMPFLAGS = /Qopenmp
 impi_intel_win_openmp_db : FCOMPL = $(I_IFORT)
 impi_intel_win_openmp_db : obj = fds_impi_intel_win_openmp_db
 impi_intel_win_openmp_db : setup_win $(objwin_mpi)
-	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB) $(LFLAGSMKL_INTEL)
+	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB) $(LFLAGSMKL_INTEL_OPENMP)
 
 # Linux Intel Fortran Compiler and Intel MPI
  
@@ -222,7 +223,7 @@ impi_intel_linux : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
 impi_intel_linux_openmp : FFLAGS = -m64 -fc=$(I_IFORT) -O2 -ipo -no-wrap-margin $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL) -DUSE_IFPORT
-impi_intel_linux_openmp : LFLAGSMKL = $(LFLAGSMKL_INTEL)
+impi_intel_linux_openmp : LFLAGSMKL = $(LFLAGSMKL_INTEL_OPENMP)
 impi_intel_linux_openmp : FCOMPL = mpiifort
 impi_intel_linux_openmp : FOPENMPFLAGS = -qopenmp
 impi_intel_linux_openmp : obj = fds_impi_intel_linux_openmp
@@ -237,7 +238,7 @@ impi_intel_linux_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
 impi_intel_linux_openmp_db : FFLAGS = -m64 -fc=$(I_IFORT) -check all -warn all -diag-error=remark,warn,error -O0 -g -traceback -fpe0 -nofltconsistency -stand:f18 -no-wrap-margin $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL) -DUSE_IFPORT
-impi_intel_linux_openmp_db : LFLAGSMKL = $(LFLAGSMKL_INTEL)
+impi_intel_linux_openmp_db : LFLAGSMKL = $(LFLAGSMKL_INTEL_OPENMP)
 impi_intel_linux_openmp_db : FCOMPL = mpiifort
 impi_intel_linux_openmp_db : FOPENMPFLAGS = -qopenmp
 impi_intel_linux_openmp_db : obj = fds_impi_intel_linux_openmp_db
@@ -252,7 +253,7 @@ impi_intel_linux_dv : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi) $(LFLAGSMKL)
 
 impi_intel_linux_openmp_dv : FFLAGS = -m64 -fc=$(I_IFORT) -warn unused -O1 -g -traceback -no-wrap-margin $(GITINFO) $(INTELMPI_COMPINFO) $(FFLAGSMKL_INTEL) -DUSE_IFPORT
-impi_intel_linux_openmp_dv : LFLAGSMKL = $(LFLAGSMKL_INTEL)
+impi_intel_linux_openmp_dv : LFLAGSMKL = $(LFLAGSMKL_INTEL_OPENMP)
 impi_intel_linux_openmp_dv : FCOMPL = mpiifort
 impi_intel_linux_openmp_dv : FOPENMPFLAGS = -qopenmp
 impi_intel_linux_openmp_dv : obj = fds_impi_intel_linux_openmp_dv
