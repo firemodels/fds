@@ -19,7 +19,6 @@
       COLOR      = 'GRAY' /
 
 &SURF ID         = 'CEILING'
-      HEAT_TRANSFER_MODEL='LOGLAW'
       MATL_ID    = 'FGLASSE'
       THICKNESS  =  0.00058
       COLOR      = 'BROWN' /
