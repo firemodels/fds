@@ -21,19 +21,9 @@
 
 &RADI RADIATION=F/
 
-&WIND U0=10.0, LATITUDE=45, GEOSTROPHIC_WIND(1)=10, RAMP_FVY_T='geo wind ramp', STRATIFICATION=F/
+&WIND U0=7.0, LATITUDE=45, GEOSTROPHIC_WIND(1)=7, STRATIFICATION=F/
 
-&SURF ID='GROUND', Z_0=0.1, COLOR='FOREST GREEN', NET_HEAT_FLUX=-0.005, RAMP_Q='heat flux ramp'/
-
-&RAMP ID='heat flux ramp', T=0     ,F=0/
-&RAMP ID='heat flux ramp', T=21600, F=0/ 6 hrs
-&RAMP ID='heat flux ramp', T=21601, F=1/ Schoenberg applies flux for last "6+3" hours
-&RAMP ID='heat flux ramp', T=144000,F=1/
-
-&RAMP ID='geo wind ramp', T=0     ,F=1/
-&RAMP ID='geo wind ramp', T=21600, F=1/ 6 hrs
-&RAMP ID='geo wind ramp', T=21601, F=0.7/ Schoenberg applies flux for last "6+3" hours
-&RAMP ID='geo wind ramp', T=144000,F=0.7/
+&SURF ID='GROUND', Z_0=0.13, COLOR='FOREST GREEN', NET_HEAT_FLUX=-0.005/
 
 &VENT PBX=0,    SURF_ID = 'PERIODIC' /
 &VENT PBX=2000, SURF_ID = 'PERIODIC' /
