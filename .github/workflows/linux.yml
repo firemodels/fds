@@ -59,9 +59,9 @@ jobs:
     - name: build
       run: |
         source /opt/intel/oneapi/setvars.sh
-        cd ./Build/impi_intel_linux_64_db
+        cd ./Build/impi_intel_linux_db
         sh ./make_fds.sh
-        ./fds_impi_intel_linux_64_db
+        ./fds_impi_intel_linux_db
 
 
   linux-gnu-openmpi:
@@ -78,6 +78,6 @@ jobs:
         sudo apt-get install openmpi-bin
     - name: build
       run: |
-        cd ./Build/mpi_gnu_linux_64_db
+        cd ./Build/ompi_gnu_linux_db
         sh ./make_fds.sh
-        ./fds_mpi_gnu_linux_64_db
+        ./fds_ompi_gnu_linux_db

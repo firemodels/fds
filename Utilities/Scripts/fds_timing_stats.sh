@@ -28,7 +28,6 @@ if [[ "$MODE" == "smokebot" ]]; then
   scripts/WUI_Cases.sh >> $tmpout
 else
   ./FDS_Cases.sh >> $tmpout
-  ./FDS_Benchmark_Cases_single.sh >> $tmpout
 fi
 
 TOTAL_CPU_TIME=0.0
