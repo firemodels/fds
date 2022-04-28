@@ -8,7 +8,7 @@ call ..\Scripts\setup_intel_compilers.bat
 
 Title Building DV FDS (Intel MPI/%INTEL_IFORT%) for 64 bit Windows
 
-make SHELL="%ComSpec%" VPATH="../../Source" -f ..\makefile impi_intel_win_64_dv
+make SHELL="%ComSpec%" VPATH="../../Source" -f ..\makefile impi_intel_win_dv
 if x%arg1% == xbot goto endif2
 pause
 :endif2
