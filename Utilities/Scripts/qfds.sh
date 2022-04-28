@@ -5,7 +5,7 @@
 SCRIPTDIR=`dirname "$(readlink -f "$0")"`
 FDSROOT=$SCRIPTDIR/../../..
 cd $FDSROOT
-FIREROOT=`pwd`
+FDSROOT=`pwd`
 cd $SCRIPTDIR
 
 
