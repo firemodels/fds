@@ -1,14 +1,5 @@
 #!/bin/bash
 
-#*** define toplevel of the repos
-
-SCRIPTDIR=`dirname "$(readlink -f "$0")"`
-FDSROOT=$SCRIPTDIR/../../..
-cd $FDSROOT
-FDSROOT=`pwd`
-cd $SCRIPTDIR
-
-
 # ---------------------------- stop_fds_if_requested ----------------------------------
 
 function stop_fds_if_requested {
@@ -135,6 +126,15 @@ CURDIR=`pwd`
 cd $QFDS_PATH
 QFDS_DIR=`pwd`
 cd $CURDIR
+
+#*** define toplevel of the repos
+
+SCRIPTDIR=`dirname "$(readlink -f "$0")"`
+FDSROOT=$SCRIPTDIR/../../..
+cd $FDSROOT
+FDSROOT=`pwd`
+cd $CURDIR
+
 SLEEP=
 
 #*** determine platform
