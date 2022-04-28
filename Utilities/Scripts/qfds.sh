@@ -1,9 +1,5 @@
 #!/bin/bash
 
-# define FIREMODELS in your .bashrc 
-# FIREMODELS is the repo root directory containing fds, smv bot repos. For example:
-#   export FIREMODELS=/home/username/FireModels_fork
-
 # ---------------------------- stop_fds_if_requested ----------------------------------
 
 function stop_fds_if_requested {
@@ -130,14 +126,16 @@ CURDIR=`pwd`
 cd $QFDS_PATH
 QFDS_DIR=`pwd`
 cd $CURDIR
-SLEEP=
 
 #*** define toplevel of the repos
 
-FDSROOT=~/FDS-SMV
-if [ "$FIREMODELS" != "" ]; then
-  FDSROOT=$FIREMODELS
-fi
+SCRIPTDIR=`dirname "$(readlink -f "$0")"`
+FDSROOT=$SCRIPTDIR/../../..
+cd $FDSROOT
+FDSROOT=`pwd`
+cd $CURDIR
+
+SLEEP=
 
 #*** determine platform
 
