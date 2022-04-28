@@ -74,7 +74,7 @@ INTEGER, PARAMETER :: IBM_QUADRATIC_INTERPOLATION = 2
 INTEGER, PARAMETER :: IBM_WLS_INTERPOLATION       = 3
 INTEGER, SAVE :: STENCIL_INTERPOLATION        = IBM_LINEAR_INTERPOLATION ! Set to linear by default.
 
-LOGICAL, PARAMETER :: CFACE_INTERPOLATE = .TRUE.
+LOGICAL, SAVE :: CFACE_INTERPOLATE = .TRUE.
 
 ! Stress method TYPE implementation:
 ! CC_STM_TYPE :
@@ -134,12 +134,59 @@ PUBLIC :: ADD_INPLACE_NNZ_H_WHLDOM,CALL_FOR_GLMAT,CALL_FROM_GLMAT_SETUP,CCCOMPUT
           GET_PRES_CFACE, GET_PRES_CFACE_TEST, GET_UVWGAS_CFACE, GET_MUDNS_CFACE, GET_BOUNDFACE_GEOM_INFO_H, &
           GET_FH_FROM_PRHS_AND_BCS,GRADH_ON_CARTESIAN, &
           FINISH_CCIBM, INIT_CUTCELL_DATA,LINEARFIELDS_INTERP_TEST,LINKED_PRESSURE_POISSON_RESIDUAL,&
-          MASS_CONSERVE_INIT,MESH_CC_EXCHANGE,NUMBER_UNKH_CUTCELLS,&
+          MASS_CONSERVE_INIT,MESH_CC_EXCHANGE,NUMBER_UNKH_CUTCELLS,PARABOLIC_PROFILE_TEST,&
           ROTATED_CUBE_ANN_SOLN,ROTATED_CUBE_VELOCITY_FLUX,ROTATED_CUBE_RHS_ZZ,&
           SET_DOMAINDIFFLX_3D,SET_DOMAINADVFLX_3D,SET_EXIMADVFLX_3D,SET_EXIMDIFFLX_3D,SET_EXIMRHOHSLIM_3D,&
           SET_EXIMRHOZZLIM_3D,UNSTRUCTURED_POISSON_RESIDUAL,UNSTRUCTURED_POISSON_RESIDUAL_RC
 
 CONTAINS
+
+! --------------------------- PARABOLIC_PROFILE_TEST -------------------------------
+
+SUBROUTINE PARABOLIC_PROFILE_TEST(NM,T_BEGIN)
+
+! Z_MIN has to be 0._EB, Z_MAX=1.
+
+INTEGER, INTENT(IN)  :: NM
+REAL(EB), INTENT(IN) :: T_BEGIN
+
+INTEGER :: I,J,K,ICF,JCF
+REAL(EB):: H_CHANNEL,DH,Z_MIN,Z_MAX
+TYPE(IBM_CUTFACE_TYPE), POINTER :: CF
+
+CALL POINT_TO_MESH(NM)
+DH    = T_BEGIN
+Z_MIN = 0._EB; Z_MAX = 1._EB
+H_CHANNEL=Z_MAX-Z_MIN
+
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=0,IBP1
+         DH       = ZC(K)-Z_MIN
+         U(I,J,K) = 6._EB/H_CHANNEL**2._EB * DH*(H_CHANNEL-DH)
+         US(I,J,K)= U(I,J,K)
+      ENDDO
+   ENDDO
+ENDDO
+
+DO ICF=1,MESHES(NM)%N_CUTFACE_MESH+MESHES(NM)%N_GCCUTFACE_MESH
+   CF=>CUT_FACE(ICF)
+   IF(CF%IJK(KAXIS+1)/=IAXIS) CYCLE
+   I = CF%IJK(IAXIS); J = CF%IJK(JAXIS); K = CF%IJK(KAXIS)
+   DO JCF=1,CF%NFACE
+      DH = CF%XYZCEN(KAXIS,JCF)-Z_MIN
+      CF%VEL(JCF) = 6._EB/H_CHANNEL**2._EB * DH*(H_CHANNEL-DH)
+      CF%VELS(JCF)= CF%VEL(JCF)
+   ENDDO
+   CF%VEL_CF = DOT_PRODUCT(CF%VEL(1:CF%NFACE),CF%AREA(1:CF%NFACE))/SUM(CF%AREA(1:CF%NFACE))
+   CF%VEL_CRT= CF%ALPHA_CF*CF%VEL_CF
+   IF(I<0 .OR. I>IBP1) CYCLE
+   IF(J<0 .OR. J>JBP1) CYCLE
+   IF(K<0 .OR. K>KBP1) CYCLE
+   U(I,J,K)  = CF%VEL_CRT; US(I,J,K)= U(I,J,K)
+ENDDO
+
+END SUBROUTINE PARABOLIC_PROFILE_TEST
 
 ! ------------------------------ CUTFACE_VELOCITIES --------------------------------
 
@@ -5691,8 +5738,7 @@ IF(CC_STRESS_METHOD) THEN
    ALLOCATE(N_EDGES_DIM_CC(1:2,1:NMESHES)); N_EDGES_DIM_CC = 0
    DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       ! Define CELL_COUNT_CC(NM), N_EDGES_DIM_CC(1:2,NM), reallocate and populate FDS edge and cell topology variables
-      MESHES(NM)%ECVAR(:,:,:,IBM_IDCE,:) = IBM_UNDEFINED
-      IF(.NOT.CC_ONLY_IBEDGES_FLAG) CALL GET_REGULAR_CUTCELL_EDGES_BC(NM)
+      IF(.NOT.CC_ONLY_IBEDGES_FLAG) CALL GET_REGULAR_CUT_EDGES_BC(NM)
       CALL GET_SOLID_CUTCELL_EDGES_BC(NM)
    ENDDO
    ! Exchange CELL_COUNT_CC arrays:
@@ -5781,6 +5827,7 @@ REAL(EB), ALLOCATABLE, DIMENSION(:) :: DXN_UNKZ_LOC
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: VOL_UNKZ_LOC
 INTEGER, ALLOCATABLE, DIMENSION(:,:):: IJK_UNKZ_LOC
 
+IF(CCVOL_LINK < 0.5_EB+TWO_EPSILON_EB) CFACE_INTERPOLATE = .FALSE.
 
 IF (.NOT.CFACE_INTERPOLATE) THEN
 
@@ -6104,7 +6151,7 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
    ENDDO
 
    ! Gasphase Cut-faces inherit underlying Cartesian face values of Velocity (flux matched or not):
-   PERIODIC_TEST_COND : IF (PERIODIC_TEST /= 21 .AND. PERIODIC_TEST /= 22) THEN
+   PERIODIC_TEST_COND : IF (PERIODIC_TEST /= 21 .AND. PERIODIC_TEST /= 22 .AND. PERIODIC_TEST /= 24) THEN
 
       ! First GASPHASe cut-faces:
       CUTFACE_LOOP : DO ICF=1,MESHES(NM)%N_CUTFACE_MESH
@@ -11861,8 +11908,9 @@ REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: DUVW_EP
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL(),RHOP=>NULL()
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP=>NULL()
 REAL(EB) :: NU,MU_FACE,RHO_FACE,DXN_STRM_UB,SLIP_FACTOR,SRGH,U_TAU,Y_PLUS,TNOW,MU_EP,MU_DUIDXJ_USE(2),DUIDXJ_USE(2),&
-            DUIDXJ(-2:2),MU_DUIDXJ(-2:2),DXX(2),DF, DE, UE, UF, UB, A_CART, AREATOT, VEL_CART
+            DUIDXJ(-2:2),MU_DUIDXJ(-2:2),DXX(2),DF, DE, UE, UF, UB, A_CART, AREATOT, VEL_CART, PRFCT
 TYPE(IBM_EDGE_TYPE), POINTER :: IBM_EDGE
+TYPE(IBM_CUTEDGE_TYPE), POINTER :: CE
 LOGICAL :: IS_RCEDGE
 REAL(EB), SAVE :: AFCT=1._EB !, THRESF=100._EB
 
@@ -11876,12 +11924,14 @@ IF (APPLY_TO_ESTIMATED_VARIABLES) THEN
    WW   => WS
    ZZP  => ZZS
    RHOP => RHOS
+   PRFCT=  1._EB
 ELSE
    UU   => U
    VV   => V
    WW   => W
    ZZP  => ZZ
    RHOP => RHO
+   PRFCT=  0._EB
 ENDIF
 
 ALLOCATE(UVW_EP(IAXIS:KAXIS,0:INT_N_EXT_PTS,0:0))
@@ -11919,6 +11969,14 @@ RCEDGE_LOOP_1 : DO IEDGE=1,MESHES(NM)%IBM_NRCEDGE
    CALL IBM_RCEDGE_DUIDXJ
 ENDDO RCEDGE_LOOP_1
 
+! Compute DUIDXJ in gas cut-edges:
+IF (CC_UNSTRUCTURED_PROJECTION) THEN
+   CUTEDGE_LOOP_1 : DO IEDGE=1,MESHES(NM)%N_CUTEDGE_MESH
+      CE => CUT_EDGE(IEDGE)
+      CALL IBM_CUTEDGE_DUIDXJ_TAU_OMG
+   ENDDO CUTEDGE_LOOP_1
+ENDIF
+
 ! Wall Model to compute DUIDXJ, MUDUIDXJ in boundary B, extrapolate from External point and B to IBEDGE and compute TAU, OMG.
 IS_RCEDGE = .FALSE.
 IBEDGE_LOOP_1 : DO IEDGE=1,MESHES(NM)%IBM_NIBEDGE
@@ -11943,6 +12001,85 @@ T_USED(14) = T_USED(14) + CURRENT_TIME() - TNOW
 RETURN
 
 CONTAINS
+
+SUBROUTINE IBM_CUTEDGE_DUIDXJ_TAU_OMG
+
+INTEGER :: IOE,X1AXIS,X2AXIS,X3AXIS,X1BAR,X2BAR,X3BAR,ICF,JCF,JEDGE
+REAL(EB):: VEL_GAS(-2:2),MU_RC
+INTEGER, PARAMETER :: ICDOV(1:2) = (/2,1/)
+
+! Drop non gasphase or ghost-cell cut-edges.
+IF (CE%STATUS/=IBM_GASPHASE .OR. TWO_D) RETURN
+X1AXIS=CE%IJK(KAXIS+1)
+SELECT CASE(X1AXIS)
+CASE(IAXIS); X1BAR=IBAR; X2AXIS=JAXIS; X2BAR=JBAR; X3AXIS=KAXIS; X3BAR=KBAR
+CASE(JAXIS); X1BAR=JBAR; X2AXIS=KAXIS; X2BAR=KBAR; X3AXIS=IAXIS; X3BAR=IBAR
+CASE(KAXIS); X1BAR=KBAR; X2AXIS=IAXIS; X2BAR=IBAR; X3AXIS=JAXIS; X3BAR=JBAR
+END SELECT
+IF(CE%IJK(X1AXIS)<1 .OR. CE%IJK(X1AXIS)>X1BAR) RETURN
+IF(CE%IJK(X2AXIS)<0 .OR. CE%IJK(X2AXIS)>X2BAR) RETURN
+IF(CE%IJK(X3AXIS)<0 .OR. CE%IJK(X3AXIS)>X3BAR) RETURN
+
+IE     = CE%IE
+II     = IJKE( 1,IE)
+JJ     = IJKE( 2,IE)
+KK     = IJKE( 3,IE)
+IEC    = IJKE( 4,IE) ! IEC is the edges X1AXIS
+
+! We Keep viscosity outside of JEDGE loop for the moment.
+SELECT CASE(IEC)
+   CASE(IAXIS); MU_RC = 0.25_EB*(MU(II,JJ,KK)+MU(II,JJ+1,KK)+MU(II,JJ+1,KK+1)+MU(II,JJ,KK+1))
+   CASE(JAXIS); MU_RC = 0.25_EB*(MU(II,JJ,KK)+MU(II+1,JJ,KK)+MU(II+1,JJ,KK+1)+MU(II,JJ,KK+1))
+   CASE(KAXIS); MU_RC = 0.25_EB*(MU(II,JJ,KK)+MU(II+1,JJ,KK)+MU(II+1,JJ+1,KK)+MU(II,JJ+1,KK))
+END SELECT
+
+DO JEDGE=1,CE%NEDGE
+   VEL_GAS(-2:2) = 0._EB
+   ORIENTATION_LOOP: DO IS=1,3
+      IF (IS==IEC) CYCLE ORIENTATION_LOOP
+      SIGN_LOOP: DO I_SGN=-1,1,2
+         ! Determine Index_Coordinate_Direction
+         ! IEC=1, ICD=1 refers to DWDY; ICD=2 refers to DVDZ
+         ! IEC=2, ICD=1 refers to DUDZ; ICD=2 refers to DWDX
+         ! IEC=3, ICD=1 refers to DVDX; ICD=2 refers to DUDY
+         IF (IS>IEC) ICD = IS-IEC
+         IF (IS<IEC) ICD = IS-IEC+3
+         ICD_SGN = I_SGN * ICD
+
+         ICF = CE%FACE_LIST(1,ICD_SGN,JEDGE) ! Only one gas cut-edge per cartesian edge.
+         JCF = CE%FACE_LIST(2,ICD_SGN,JEDGE)
+         VEL_GAS(ICD_SGN) = PRFCT*CUT_FACE(ICF)%VELS(JCF) + (1._EB-PRFCT)*CUT_FACE(ICF)%VEL(JCF)
+      ENDDO SIGN_LOOP
+   ENDDO ORIENTATION_LOOP
+
+   ! IEC = IAXIS : DWDY (IOE=1), DVDZ (IOE=2):
+   ! IEC = JAXIS : DUDZ (IOE=1), DWDX (IOE=2):
+   ! IEC = KAXIS : DUDY (IOE=1), DVDX (IOE=2):
+   DO IOE = 1,2
+      CE%DUIDXJ((/-IOE,IOE/),JEDGE)    = (VEL_GAS(IOE)-VEL_GAS(-IOE))/CE%DXX(IOE,JEDGE)
+      CE%MU_DUIDXJ((/-IOE,IOE/),JEDGE) = MU_RC*CE%DUIDXJ((/-IOE,IOE/),JEDGE)
+   ENDDO
+ENDDO
+
+! For TAU_E OMG_E on the whole cartesian edge use value of JEDGE=1. Note this would be changed when each cut-edge
+! contributes to corresponfing cut-faces forces (completely unstructured momentum).
+JEDGE=1
+SIGN_LOOP_2: DO I_SGN=-1,1,2
+   ORIENTATION_LOOP_2: DO ICD=1,2
+      ICDO = ICDOV(ICD)
+      ICD_SGN = I_SGN*ICD
+         DUIDXJ_USE(ICD) =     CE%DUIDXJ(ICD_SGN,JEDGE)
+      MU_DUIDXJ_USE(ICD) =  CE%MU_DUIDXJ(ICD_SGN,JEDGE)
+      ICDO_SGN = I_SGN*ICDO
+         DUIDXJ_USE(ICDO)=    CE%DUIDXJ(ICDO_SGN,JEDGE)
+      MU_DUIDXJ_USE(ICDO)= CE%MU_DUIDXJ(ICDO_SGN,JEDGE)
+      OME_E(ICD_SGN,IE) = DUIDXJ_USE(1) -    DUIDXJ_USE(2)
+      TAU_E(ICD_SGN,IE) = MU_DUIDXJ_USE(1) + MU_DUIDXJ_USE(2)
+   ENDDO ORIENTATION_LOOP_2
+ENDDO SIGN_LOOP_2
+
+END SUBROUTINE IBM_CUTEDGE_DUIDXJ_TAU_OMG
+
 
 SUBROUTINE IBM_RCEDGE_DUIDXJ
 
@@ -11994,7 +12131,7 @@ ORIENTATION_LOOP: DO IS=1,3
                CASE( 1); IIF=II  ; JJF=JJ+1; KKF=KK  ; FAXIS=KAXIS
                CASE( 2); IIF=II  ; JJF=JJ  ; KKF=KK+1; FAXIS=JAXIS
             END SELECT
-            DXX(1)  = DY(JJF); DXX(2)  = DZ(KKF)
+            !DXX(1)  = DY(JJF); DXX(2)  = DZ(KKF)
             IF (FAXIS==JAXIS) THEN
                 !IF(CC_DO_CUTFACE_VELOCITIES) &
                 !AFCT = MIN(THRESF,DXX(2)/(XB_IB(ICD_SGN)+TWO_EPSILON_EB)) ! Rescale to CF veloc.
@@ -12013,7 +12150,7 @@ ORIENTATION_LOOP: DO IS=1,3
                CASE( 1); IIF=II  ; JJF=JJ  ; KKF=KK+1; FAXIS=IAXIS
                CASE( 2); IIF=II+1; JJF=JJ  ; KKF=KK  ; FAXIS=KAXIS
             END SELECT
-            DXX(1)  = DZ(KKF); DXX(2)  = DX(IIF)
+            !DXX(1)  = DZ(KKF); DXX(2)  = DX(IIF)
             IF (FAXIS==KAXIS) THEN
                !IF(CC_DO_CUTFACE_VELOCITIES) &
                !AFCT = MIN(THRESF,DXX(2)/(XB_IB(ICD_SGN)+TWO_EPSILON_EB)) ! Rescale to CF veloc.
@@ -12032,7 +12169,7 @@ ORIENTATION_LOOP: DO IS=1,3
                CASE( 1); IIF=II+1; JJF=JJ  ; KKF=KK  ; FAXIS=JAXIS
                CASE( 2); IIF=II  ; JJF=JJ+1; KKF=KK  ; FAXIS=IAXIS
             END SELECT
-            DXX(1)  = DX(IIF); DXX(2)  = DY(JJF)
+            !DXX(1)  = DX(IIF); DXX(2)  = DY(JJF)
             IF (FAXIS==IAXIS) THEN
                !IF(CC_DO_CUTFACE_VELOCITIES) &
                !AFCT = MIN(THRESF,DXX(2)/(XB_IB(ICD_SGN)+TWO_EPSILON_EB)) ! Rescale to CF veloc.
@@ -12325,7 +12462,16 @@ ORIENTATION_LOOP: DO IS=1,3
                MU_EP= 0.25_EB*(MU(IEP,JEP,KEP)+MU(IEP,JEP+1,KEP)+MU(IEP,JEP+1,KEP+1)+MU(IEP,JEP,KEP+1))
                IRCEDG = ECVAR(IEP,JEP,KEP,IBM_IDCE,IEC)
                IF (IRCEDG>0) THEN
-                  DWDY = IBM_RCEDGE(IRCEDG)%DUIDXJ(1); DVDZ = IBM_RCEDGE(IRCEDG)%DUIDXJ(2)
+                  IF(ECVAR(IEP,JEP,KEP,IBM_EGSC,IEC)==IBM_GASPHASE) THEN
+                     DWDY = IBM_RCEDGE(IRCEDG)%DUIDXJ(1); DVDZ = IBM_RCEDGE(IRCEDG)%DUIDXJ(2)
+                  ELSEIF(ECVAR(IEP,JEP,KEP,IBM_EGSC,IEC)==IBM_CUTCFE) THEN
+                     IF (CC_UNSTRUCTURED_PROJECTION) THEN
+                        DWDY = CUT_EDGE(IRCEDG)%DUIDXJ(1,1); DVDZ = CUT_EDGE(IRCEDG)%DUIDXJ(2,1)
+                     ELSE
+                        DWDY = (WW(IEP,JEP+1,KEP)-WW(IEP,JEP,KEP))/DXX(1)
+                        DVDZ = (VV(IEP,JEP,KEP+1)-VV(IEP,JEP,KEP))/DXX(2)
+                     ENDIF
+                  ENDIF
                ELSE
                   DWDY = (WW(IEP,JEP+1,KEP)-WW(IEP,JEP,KEP))/DXX(1); DVDZ = (VV(IEP,JEP,KEP+1)-VV(IEP,JEP,KEP))/DXX(2)
                ENDIF
@@ -12430,7 +12576,16 @@ ORIENTATION_LOOP: DO IS=1,3
                MU_EP= 0.25_EB*(MU(IEP,JEP,KEP)+MU(IEP+1,JEP,KEP)+MU(IEP+1,JEP,KEP+1)+MU(IEP,JEP,KEP+1))
                IRCEDG = ECVAR(IEP,JEP,KEP,IBM_IDCE,IEC)
                IF (IRCEDG>0) THEN
-                  DUDZ = IBM_RCEDGE(IRCEDG)%DUIDXJ(1); DWDX = IBM_RCEDGE(IRCEDG)%DUIDXJ(2)
+                  IF(ECVAR(IEP,JEP,KEP,IBM_EGSC,IEC)==IBM_GASPHASE) THEN
+                     DUDZ = IBM_RCEDGE(IRCEDG)%DUIDXJ(1); DWDX = IBM_RCEDGE(IRCEDG)%DUIDXJ(2)
+                  ELSEIF(ECVAR(IEP,JEP,KEP,IBM_EGSC,IEC)==IBM_CUTCFE) THEN
+                     IF (CC_UNSTRUCTURED_PROJECTION) THEN
+                        DUDZ = CUT_EDGE(IRCEDG)%DUIDXJ(1,1); DWDX = CUT_EDGE(IRCEDG)%DUIDXJ(2,1)
+                     ELSE
+                        DUDZ = (UU(IEP,JEP,KEP+1)-UU(IEP,JEP,KEP))/DXX(1)
+                        DWDX = (WW(IEP+1,JEP,KEP)-WW(IEP,JEP,KEP))/DXX(2)
+                     ENDIF
+                  ENDIF
                ELSE
                   DUDZ = (UU(IEP,JEP,KEP+1)-UU(IEP,JEP,KEP))/DXX(1); DWDX = (WW(IEP+1,JEP,KEP)-WW(IEP,JEP,KEP))/DXX(2)
                ENDIF
@@ -12543,7 +12698,16 @@ ORIENTATION_LOOP: DO IS=1,3
                MU_EP= 0.25_EB*(MU(IEP,JEP,KEP)+MU(IEP+1,JEP,KEP)+MU(IEP+1,JEP+1,KEP)+MU(IEP,JEP+1,KEP))
                IRCEDG = ECVAR(IEP,JEP,KEP,IBM_IDCE,IEC)
                IF (IRCEDG>0) THEN
-                  DVDX = IBM_RCEDGE(IRCEDG)%DUIDXJ(1); DUDY = IBM_RCEDGE(IRCEDG)%DUIDXJ(2)
+                  IF(ECVAR(IEP,JEP,KEP,IBM_EGSC,IEC)==IBM_GASPHASE) THEN
+                     DVDX = IBM_RCEDGE(IRCEDG)%DUIDXJ(1); DUDY = IBM_RCEDGE(IRCEDG)%DUIDXJ(2)
+                  ELSEIF(ECVAR(IEP,JEP,KEP,IBM_EGSC,IEC)==IBM_CUTCFE) THEN
+                     IF (CC_UNSTRUCTURED_PROJECTION) THEN
+                        DVDX = CUT_EDGE(IRCEDG)%DUIDXJ(1,1); DUDY = CUT_EDGE(IRCEDG)%DUIDXJ(2,1)
+                     ELSE
+                        DVDX = (VV(IEP+1,JEP,KEP)-VV(IEP,JEP,KEP))/DXX(1)
+                        DUDY = (UU(IEP,JEP+1,KEP)-UU(IEP,JEP,KEP))/DXX(2)
+                     ENDIF
+                  ENDIF
                ELSE
                   DVDX = (VV(IEP+1,JEP,KEP)-VV(IEP,JEP,KEP))/DXX(1); DUDY = (UU(IEP,JEP+1,KEP)-UU(IEP,JEP,KEP))/DXX(2)
                ENDIF
@@ -12584,6 +12748,11 @@ ORIENTATION_LOOP: DO IS=1,3
             ENDIF
 
       END SELECT IEC_SELECT
+
+      IF(CC_UNSTRUCTURED_PROJECTION) THEN
+         VEL_GAS     = UF
+         DXN_STRM_UB = DF
+      ENDIF
 
       ! Make collocated velocity point distance, half DELTA gas CF size:
       DXN_STRM_UB = DXN_STRM_UB/2._EB
@@ -12656,7 +12825,7 @@ ORIENTATION_LOOP: DO IS=1,3
                   DEL_EP = DEL_EP + DXX(2);
                   IRC=II; JRC=JJ; KRC=KK+I_SGN
                   IRCEDG = ECVAR(IRC,JRC,KRC,IBM_IDCE,IEC)
-                  IF (IRCEDG>0) THEN
+                  IF (IRCEDG>0 .AND. ECVAR(IRC,JRC,KRC,IBM_EGSC,IEC)==IBM_GASPHASE) THEN
                      CEP = (DXX(2) - ABS(XB_IB))/DEL_EP; CB=DXX(2)/DEL_EP
                      IBM_RCEDGE(IRCEDG)%DUIDXJ((/ -ICD, ICD /))    = 0.5_EB*(IBM_RCEDGE(IRCEDG)%DUIDXJ(ICD_SGN) + &
                                                                      CEP*   DUIDXJ_EP(ICD_SGN) + CB*   DUIDXJ(ICD_SGN))
@@ -12670,7 +12839,7 @@ ORIENTATION_LOOP: DO IS=1,3
                   DEL_EP = DEL_EP + DXX(1);
                   IRC=II; JRC=JJ+I_SGN; KRC=KK
                   IRCEDG = ECVAR(IRC,JRC,KRC,IBM_IDCE,IEC)
-                  IF (IRCEDG>0) THEN
+                  IF (IRCEDG>0 .AND. ECVAR(IRC,JRC,KRC,IBM_EGSC,IEC)==IBM_GASPHASE) THEN
                      CEP = (DXX(1) - ABS(XB_IB))/DEL_EP; CB=DXX(1)/DEL_EP
                      IBM_RCEDGE(IRCEDG)%DUIDXJ((/ -ICD, ICD /))    = 0.5_EB*(IBM_RCEDGE(IRCEDG)%DUIDXJ(ICD_SGN) + &
                                                                      CEP*   DUIDXJ_EP(ICD_SGN) + CB*   DUIDXJ(ICD_SGN))
@@ -12695,7 +12864,7 @@ ORIENTATION_LOOP: DO IS=1,3
                   DEL_EP = DEL_EP + DXX(2);
                   IRC=II+I_SGN; JRC=JJ; KRC=KK
                   IRCEDG = ECVAR(IRC,JRC,KRC,IBM_IDCE,IEC)
-                  IF (IRCEDG>0) THEN
+                  IF (IRCEDG>0 .AND. ECVAR(IRC,JRC,KRC,IBM_EGSC,IEC)==IBM_GASPHASE) THEN
                      CEP = (DXX(2) - ABS(XB_IB))/DEL_EP; CB=DXX(2)/DEL_EP
                      IBM_RCEDGE(IRCEDG)%DUIDXJ((/ -ICD, ICD /))    = 0.5_EB*(IBM_RCEDGE(IRCEDG)%DUIDXJ(ICD_SGN) + &
                                                                      CEP*   DUIDXJ_EP(ICD_SGN) + CB*   DUIDXJ(ICD_SGN))
@@ -12709,7 +12878,7 @@ ORIENTATION_LOOP: DO IS=1,3
                   DEL_EP = DEL_EP + DXX(1);
                   IRC=II; JRC=JJ; KRC=KK+I_SGN
                   IRCEDG = ECVAR(IRC,JRC,KRC,IBM_IDCE,IEC)
-                  IF (IRCEDG>0) THEN
+                  IF (IRCEDG>0 .AND. ECVAR(IRC,JRC,KRC,IBM_EGSC,IEC)==IBM_GASPHASE) THEN
                      CEP = (DXX(1) - ABS(XB_IB))/DEL_EP; CB=DXX(1)/DEL_EP
                      ! WRITE(LU_ERR,*) ' '
                      ! WRITE(LU_ERR,*) 'EDGE JAXIS=',IRC,JRC,KRC,CEP,CB
@@ -12742,7 +12911,7 @@ ORIENTATION_LOOP: DO IS=1,3
                   DEL_EP = DEL_EP + DXX(2);
                   IRC=II; JRC=JJ+I_SGN; KRC=KK
                   IRCEDG = ECVAR(IRC,JRC,KRC,IBM_IDCE,IEC)
-                  IF (IRCEDG>0) THEN
+                  IF (IRCEDG>0 .AND. ECVAR(IRC,JRC,KRC,IBM_EGSC,IEC)==IBM_GASPHASE) THEN
                      CEP = (DXX(2) - ABS(XB_IB))/DEL_EP; CB=DXX(2)/DEL_EP
                      IBM_RCEDGE(IRCEDG)%DUIDXJ((/ -ICD, ICD /))    = 0.5_EB*(IBM_RCEDGE(IRCEDG)%DUIDXJ(ICD_SGN) + &
                                                                      CEP*   DUIDXJ_EP(ICD_SGN) + CB*   DUIDXJ(ICD_SGN))
@@ -12756,7 +12925,7 @@ ORIENTATION_LOOP: DO IS=1,3
                   DEL_EP = DEL_EP + DXX(1);
                   IRC=II+I_SGN; JRC=JJ; KRC=KK
                   IRCEDG = ECVAR(IRC,JRC,KRC,IBM_IDCE,IEC)
-                  IF (IRCEDG>0) THEN
+                  IF (IRCEDG>0 .AND. ECVAR(IRC,JRC,KRC,IBM_EGSC,IEC)==IBM_GASPHASE) THEN
                      CEP = (DXX(1) - ABS(XB_IB))/DEL_EP; CB=DXX(1)/DEL_EP
                      IBM_RCEDGE(IRCEDG)%DUIDXJ((/ -ICD, ICD /))    = 0.5_EB*(IBM_RCEDGE(IRCEDG)%DUIDXJ(ICD_SGN) + &
                                                                      CEP*   DUIDXJ_EP(ICD_SGN) + CB*   DUIDXJ(ICD_SGN))
@@ -16293,9 +16462,13 @@ MESHES_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                      CASE( 2); IIF=II  ; JJF=JJ  ; KKF=KK+1; FAXIS=JAXIS
                   END SELECT
                   ! Compute XB_IB: For XB_IB we use the sum of gas cut-faces in the face and compare it with the face AREA:
-                  AREA_CF = 0._EB; ICF = FCVAR(IIF,JJF,KKF,IBM_IDCF,FAXIS)
-                  IF(ICF>0) AREA_CF = SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))
-                  DXX(1)  = DY(JJF); DXX(2)  = DZ(KKF); DEL_IBEDGE = DX(IIF)
+                  AREA_CF = 0._EB; DXX(1)  = DY(JJF); DXX(2)  = DZ(KKF); DEL_IBEDGE = DX(IIF)
+                  ICF = FCVAR(IIF,JJF,KKF,IBM_IDCF,FAXIS)
+                  IF(ICF>0) THEN
+                     AREA_CF = SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))
+                     DEL_IBEDGE = ABS(MAXVAL(CUT_FACE(ICF)%XYZVERT(IAXIS,1:CUT_FACE(ICF)%NVERT)) - &
+                                      MINVAL(CUT_FACE(ICF)%XYZVERT(IAXIS,1:CUT_FACE(ICF)%NVERT))) + TWO_EPSILON_EB
+                  ENDIF
                   IF (FAXIS==JAXIS) THEN
                      IBM_RCEDGE(IEDGE)%XB_IB(ICD_SGN) = DXX(2) ! Twice Distance to velocity collocation point.
                      IF(FCVAR(IIF,JJF,KKF,IBM_FGSC,FAXIS)==IBM_CUTCFE) THEN
@@ -16331,9 +16504,13 @@ MESHES_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                      CASE( 2); IIF=II+1; JJF=JJ  ; KKF=KK  ; FAXIS=KAXIS
                   END SELECT
                   ! Compute XB_IB: For XB_IB we use the sum of gas cut-faces in the face and compare it with the face AREA:
-                  AREA_CF = 0._EB; ICF = FCVAR(IIF,JJF,KKF,IBM_IDCF,FAXIS)
-                  IF(ICF>0) AREA_CF = SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))
-                  DXX(1)  = DZ(KKF); DXX(2)  = DX(IIF); DEL_IBEDGE = DY(JJF)
+                  AREA_CF = 0._EB; DXX(1)  = DZ(KKF); DXX(2)  = DX(IIF); DEL_IBEDGE = DY(JJF)
+                  ICF = FCVAR(IIF,JJF,KKF,IBM_IDCF,FAXIS)
+                  IF(ICF>0) THEN
+                     AREA_CF = SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))
+                     DEL_IBEDGE = ABS(MAXVAL(CUT_FACE(ICF)%XYZVERT(JAXIS,1:CUT_FACE(ICF)%NVERT)) - &
+                                      MINVAL(CUT_FACE(ICF)%XYZVERT(JAXIS,1:CUT_FACE(ICF)%NVERT))) + TWO_EPSILON_EB
+                  ENDIF
                   IF (FAXIS==KAXIS) THEN
                      IBM_RCEDGE(IEDGE)%XB_IB(ICD_SGN) = DXX(2) ! Twice Distance to velocity collocation point.
                      IF(FCVAR(IIF,JJF,KKF,IBM_FGSC,FAXIS)==IBM_CUTCFE) THEN
@@ -16367,9 +16544,13 @@ MESHES_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                      CASE( 2); IIF=II  ; JJF=JJ+1; KKF=KK  ; FAXIS=IAXIS
                   END SELECT
                   ! Compute XB_IB: For XB_IB we use the sum of gas cut-faces in the face and compare it with the face AREA:
-                  AREA_CF = 0._EB; ICF = FCVAR(IIF,JJF,KKF,IBM_IDCF,FAXIS)
-                  IF(ICF>0) AREA_CF = SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))
-                  DXX(1)  = DX(IIF); DXX(2)  = DY(JJF); DEL_IBEDGE = DZ(KKF)
+                  AREA_CF = 0._EB; DXX(1)  = DX(IIF); DXX(2)  = DY(JJF); DEL_IBEDGE = DZ(KKF)
+                  ICF = FCVAR(IIF,JJF,KKF,IBM_IDCF,FAXIS)
+                  IF(ICF>0) THEN
+                     AREA_CF = SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))
+                     DEL_IBEDGE = ABS(MAXVAL(CUT_FACE(ICF)%XYZVERT(KAXIS,1:CUT_FACE(ICF)%NVERT)) - &
+                                      MINVAL(CUT_FACE(ICF)%XYZVERT(KAXIS,1:CUT_FACE(ICF)%NVERT))) + TWO_EPSILON_EB
+                  ENDIF
                   IF (FAXIS==IAXIS) THEN
                      IBM_RCEDGE(IEDGE)%XB_IB(ICD_SGN) = DXX(2) ! Twice Distance to velocity collocation point.
                      IF(FCVAR(IIF,JJF,KKF,IBM_FGSC,FAXIS)==IBM_CUTCFE) THEN
@@ -16460,9 +16641,13 @@ MESHES_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                   IF(FCVAR(IIF,JJF,KKF,IBM_FGSC,FAXIS)/=IBM_CUTCFE) CYCLE SIGN_LOOP_1
                   ! Compute XB_IB, SURF_INDEX:
                   ! For XB_IB we use the sum of gas cut-faces in the face and compare it with the face AREA:
-                  AREA_CF = 0._EB; ICF = FCVAR(IIF,JJF,KKF,IBM_IDCF,FAXIS)
-                  IF(ICF>0) AREA_CF = SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))
-                  DXX(1)  = DY(JJF); DXX(2)  = DZ(KKF); DEL_IBEDGE = DX(IIF)
+                  AREA_CF = 0._EB; DXX(1)  = DY(JJF); DXX(2)  = DZ(KKF); DEL_IBEDGE = DX(IIF)
+                  ICF = FCVAR(IIF,JJF,KKF,IBM_IDCF,FAXIS)
+                  IF(ICF>0) THEN
+                     AREA_CF = SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))
+                     DEL_IBEDGE = ABS(MAXVAL(CUT_FACE(ICF)%XYZVERT(IAXIS,1:CUT_FACE(ICF)%NVERT)) - &
+                                      MINVAL(CUT_FACE(ICF)%XYZVERT(IAXIS,1:CUT_FACE(ICF)%NVERT))) + TWO_EPSILON_EB
+                  ENDIF
                   IF (FAXIS==JAXIS) THEN
                      ! XB_IB:
                      IBM_IBEDGE(IEDGE)%XB_IB(ICD_SGN) = -(DXX(2)-AREA_CF/DEL_IBEDGE) !-ve dist Bound to IBEDGE opposed to normal.
@@ -16510,9 +16695,13 @@ MESHES_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                   IF(FCVAR(IIF,JJF,KKF,IBM_FGSC,FAXIS)/=IBM_CUTCFE) CYCLE SIGN_LOOP_1
                   ! Compute XB_IB, SURF_INDEX:
                   ! For XB_IB we use the sum of gas cut-faces in the face and compare it with the face AREA:
-                  AREA_CF = 0._EB; ICF = FCVAR(IIF,JJF,KKF,IBM_IDCF,FAXIS)
-                  IF(ICF>0) AREA_CF = SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))
-                  DXX(1)  = DZ(KKF); DXX(2)  = DX(IIF); DEL_IBEDGE = DY(JJF)
+                  AREA_CF = 0._EB; DXX(1)  = DZ(KKF); DXX(2)  = DX(IIF); DEL_IBEDGE = DY(JJF)
+                  ICF = FCVAR(IIF,JJF,KKF,IBM_IDCF,FAXIS)
+                  IF(ICF>0) THEN
+                     AREA_CF = SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))
+                     DEL_IBEDGE = ABS(MAXVAL(CUT_FACE(ICF)%XYZVERT(JAXIS,1:CUT_FACE(ICF)%NVERT)) - &
+                                      MINVAL(CUT_FACE(ICF)%XYZVERT(JAXIS,1:CUT_FACE(ICF)%NVERT))) + TWO_EPSILON_EB
+                  ENDIF
                   IF (FAXIS==KAXIS) THEN
                      ! XB_IB:
                      IBM_IBEDGE(IEDGE)%XB_IB(ICD_SGN) = -(DXX(2)-AREA_CF/DEL_IBEDGE) !-ve dist Bound to IBEDGE opposed to normal.
@@ -16558,9 +16747,13 @@ MESHES_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                   IF(FCVAR(IIF,JJF,KKF,IBM_FGSC,FAXIS)/=IBM_CUTCFE) CYCLE SIGN_LOOP_1
                   ! Compute XB_IB, SURF_INDEX:
                   ! For XB_IB we use the sum of gas cut-faces in the face and compare it with the face AREA:
-                  AREA_CF = 0._EB; ICF = FCVAR(IIF,JJF,KKF,IBM_IDCF,FAXIS)
-                  IF(ICF>0) AREA_CF = SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))
-                  DXX(1)  = DX(IIF); DXX(2)  = DY(JJF); DEL_IBEDGE = DZ(KKF)
+                  AREA_CF = 0._EB; DXX(1)  = DX(IIF); DXX(2)  = DY(JJF); DEL_IBEDGE = DZ(KKF)
+                  ICF = FCVAR(IIF,JJF,KKF,IBM_IDCF,FAXIS)
+                  IF(ICF>0) THEN
+                     AREA_CF = SUM(CUT_FACE(ICF)%AREA(1:CUT_FACE(ICF)%NFACE))
+                     DEL_IBEDGE = ABS(MAXVAL(CUT_FACE(ICF)%XYZVERT(KAXIS,1:CUT_FACE(ICF)%NVERT)) - &
+                                      MINVAL(CUT_FACE(ICF)%XYZVERT(KAXIS,1:CUT_FACE(ICF)%NVERT))) + TWO_EPSILON_EB
+                  ENDIF
                   IF (FAXIS==IAXIS) THEN
                      ! XB_IB:
                      IBM_IBEDGE(IEDGE)%XB_IB(ICD_SGN) = -(DXX(2)-AREA_CF/DEL_IBEDGE) !-ve dist Bound to IBEDGE opposed to normal.
