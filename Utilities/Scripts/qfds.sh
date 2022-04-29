@@ -125,12 +125,10 @@ QFDS_PATH=$(dirname `which $0`)
 CURDIR=`pwd`
 cd $QFDS_PATH
 QFDS_DIR=`pwd`
-cd $CURDIR
 
 #*** define toplevel of the repos
 
-SCRIPTDIR=`dirname "$(readlink -f "$0")"`
-FDSROOT=$SCRIPTDIR/../../..
+FDSROOT=$QFDS_DIR/../../..
 cd $FDSROOT
 FDSROOT=`pwd`
 cd $CURDIR
