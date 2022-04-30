@@ -68,10 +68,10 @@ set(gcf,'Position',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf','../../Manuals/FDS_User_Guide/SCRIPT_FIGURES/openmp_timing_benchmarks')
 
 % check errors
-if time64(4) > 55.
+if time64(4) > 60.
    display(['Matlab Warning: Timing for openmp_test64 out of tolerance.',num2str(time64(4))])
 end
-if time128(4) > 55.
+if time128(4) > 60.
    display(['Matlab Warning: Timing for openmp_test128 out of tolerance.',num2str(time128(4))])
 end
 
