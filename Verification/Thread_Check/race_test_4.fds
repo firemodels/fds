@@ -7,7 +7,7 @@
 &MESH IJK= 6, 6,32, XB=-0.15, 0.15,-0.45,-0.15, 0.00, 1.60 /
 &MESH IJK= 6, 6,32, XB=-0.15, 0.15, 0.15, 0.45, 0.00, 1.60 /
 
-&TIME T_END=10. /
+&TIME T_END=5. /
 
 &REAC FUEL='N-HEXANE'
       CO_YIELD=0.100
