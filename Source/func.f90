@@ -3702,6 +3702,187 @@ END FUNCTION MP5
 
 END FUNCTION SCALAR_FACE_VALUE
 
+
+!> \brief This function computes the flux limited scalar value on a face.
+!> \param A    Velocity.
+!> \param U Scalar in 4 points, (1:2) lower index points to the face, (3:4) upper index points.
+!> \param LIMITER Flux limiter used.
+
+SUBROUTINE GET_SCALAR_FACE_VALUE(A,U,F,I1,I2,J1,J2,K1,K2,IOR,LIMITER)
+
+REAL(EB), INTENT(IN) :: A(0:,0:,0:),U(0:,0:,0:)
+REAL(EB), INTENT(OUT) :: F(0:,0:,0:)
+INTEGER, INTENT(IN) :: LIMITER,I1,I2,J1,J2,K1,K2,IOR
+REAL(EB) :: R,B,DU_UP,DU_LOC,V(-2:2)
+INTEGER :: I,J,K,IM1,JM1,KM1,IP1,JP1,KP1,IP2,JP2,KP2
+
+! The scalar is denoted U, and the velocity is denoted A.
+! The divergence (computed elsewhere) uses a central difference across
+! the cell subject to a flux LIMITER.  The flux LIMITER choices are:
+!
+! CENTRAL_LIMITER  = 0
+! GODUNOV_LIMITER  = 1
+! SUPERBEE_LIMITER = 2
+! MINMOD_LIMITER   = 3
+! CHARM_LIMITER    = 4
+! MP5_LIMITER      = 5
+!
+!                    location of face
+!
+!                            f
+!    |     o     |     o     |     o     |     o     |
+!                            A
+!         U(1)        U(2)        U(3)        U(4)
+
+SELECT CASE(IOR)
+   CASE(1) ; IM1=-1 ; JM1= 0 ; KM1= 0 ; IP1=1 ; JP1=0 ; KP1=0 ; IP2=2 ; JP2=0 ; KP2=0
+   CASE(2) ; IM1= 0 ; JM1=-1 ; KM1= 0 ; IP1=0 ; JP1=1 ; KP1=0 ; IP2=0 ; JP2=2 ; KP2=0
+   CASE(3) ; IM1= 0 ; JM1= 0 ; KM1=-1 ; IP1=0 ; JP1=0 ; KP1=1 ; IP2=0 ; JP2=0 ; KP2=2
+END SELECT
+
+!$OMP PARALLEL
+SELECT CASE(LIMITER)
+   CASE(0) ! central differencing
+      !$OMP DO SCHEDULE(STATIC)
+      DO K=K1,K2
+         DO J=J1,J2
+            DO I=I1,I2
+                  F(I,J,K) = 0.5_EB*(U(I,J,K) + U(I+IP1,J+JP1,K+KP1))
+            ENDDO
+         ENDDO
+      ENDDO
+      !$OMP END DO
+   CASE(1) ! first-order upwinding
+      !$OMP DO SCHEDULE(STATIC)
+      DO K=K1,K2
+         DO J=J1,J2
+            DO I=I1,I2
+               IF (A(I,J,K)>0._EB) THEN
+                  F(I,J,K) = U(I,J,K)
+               ELSE
+                  F(I,J,K) = U(I+IP1,J+JP1,K+KP1)
+               ENDIF
+            ENDDO
+         ENDDO
+      ENDDO
+      !$OMP END DO
+   CASE(2) ! SUPERBEE, Roe (1986)
+      !$OMP DO SCHEDULE(STATIC) PRIVATE(DU_UP,DU_LOC,B,R)
+      DO K=K1,K2
+         DO J=J1,J2
+            DO I=I1,I2
+               DU_LOC = U(I+IP1,J+JP1,K+KP1)-U(I,J,K)
+               IF (A(I,J,K)>0._EB) THEN
+                  DU_UP  = U(I,J,K)-U(I+IM1,J+JM1,K+KM1)
+                  R = DU_UP/(DU_LOC+SIGN(TWO_EPSILON_EB,DU_LOC))
+                  B = MAX(0._EB,MIN(2._EB*R,1._EB),MIN(R,2._EB))
+                  F(I,J,K) = U(I,J,K) + 0.5_EB*B*DU_LOC
+               ELSE
+                  DU_UP  = U(I+IP2,J+JP2,K+KP2)-U(I+IP1,J+JP1,K+KP1)
+                  R = DU_UP/(DU_LOC+SIGN(TWO_EPSILON_EB,DU_LOC))
+                  B = MAX(0._EB,MIN(2._EB*R,1._EB),MIN(R,2._EB))
+                  F(I,J,K) = U(I+IP1,J+JP1,K+KP1) - 0.5_EB*B*DU_LOC
+               ENDIF
+            ENDDO
+         ENDDO
+      ENDDO
+      !$OMP END DO
+   CASE(3) ! MINMOD
+      !$OMP DO SCHEDULE(STATIC) PRIVATE(DU_UP,DU_LOC,B,R)
+      DO K=K1,K2
+         DO J=J1,J2
+            DO I=I1,I2
+               DU_LOC = U(I+IP1,J+JP1,K+KP1)-U(I,J,K)
+               IF (A(I,J,K)>0._EB) THEN
+                  DU_UP  = U(I,J,K)-U(I+IM1,J+JM1,K+KM1)
+                  R = DU_UP/(DU_LOC+SIGN(TWO_EPSILON_EB,DU_LOC))
+                  B = MAX(0._EB,MIN(R,1._EB))
+                  F(I,J,K) = U(I,J,K) + 0.5_EB*B*DU_LOC
+               ELSE
+                  DU_UP  = U(I+IP2,J+JP2,K+KP2)-U(I+IP1,J+JP1,K+KP1)
+                  R = DU_UP/(DU_LOC+SIGN(TWO_EPSILON_EB,DU_LOC))
+                  B = MAX(0._EB,MIN(R,1._EB))
+                  F(I,J,K) = U(I+IP1,J+JP1,K+KP1) - 0.5_EB*B*DU_LOC
+               ENDIF
+            ENDDO
+         ENDDO
+      ENDDO
+      !$OMP END DO
+   CASE(4) ! CHARM
+      !$OMP DO SCHEDULE(STATIC) PRIVATE(DU_UP,DU_LOC,B,R)
+      DO K=K1,K2
+         DO J=J1,J2
+            DO I=I1,I2
+               DU_LOC = U(I+IP1,J+JP1,K+KP1)-U(I,J,K)
+               IF (A(I,J,K)>0._EB) THEN
+                  DU_UP  = U(I,J,K)-U(I+IM1,J+JM1,K+KM1)
+                  R = 0._EB
+                  B = 0._EB
+                  IF (ABS(DU_UP)>TWO_EPSILON_EB) R = DU_LOC/DU_UP
+                  IF (R>0._EB) B = R*(3._EB*R+1._EB)/((R+1._EB)**2)
+                  F(I,J,K) = U(I,J,K) + 0.5_EB*B*DU_UP
+               ELSE
+                  DU_UP  = U(I+IP2,J+JP2,K+KP2)-U(I+IP1,J+JP1,K+KP1)
+                  R = 0._EB
+                  B = 0._EB
+                  IF (ABS(DU_UP)>TWO_EPSILON_EB) R = DU_LOC/DU_UP
+                  IF (R>0._EB) B = R*(3._EB*R+1._EB)/((R+1._EB)**2)
+                  F(I,J,K) = U(I+IP1,J+JP1,K+KP1) - 0.5_EB*B*DU_UP
+               ENDIF
+            ENDDO
+         ENDDO
+      ENDDO
+      !$OMP END DO
+   CASE(5) ! MP5, Suresh and Huynh (1997)
+      DO K=K1,K2
+         DO J=J1,J2
+            DO I=I1,I2
+               IF (A(I,J,K)>0._EB) THEN
+                  V = (/2._EB*U(I+IM1,J+JM1,K+KM1)-U(I,J,K),&
+                       U(I+IP2,J+JP2,K+KP2),U(I+IP1,J+JP1,K+KP1),U(I,J,K),U(I+IM1,J+JM1,K+KM1)/)
+                  F(I,J,K) = MP5()
+               ELSE
+                  V = (/2._EB*U(I+IP2,J+JP2,K+KP2)-U(I+IP1,J+JP1,K+KP1),&
+                       U(I+IP2,J+JP2,K+KP2),U(I+IP1,J+JP1,K+KP1),U(I,J,K),U(I+IM1,J+JM1,K+KM1)/)
+                  F(I,J,K) = MP5()
+               ENDIF
+            ENDDO
+         ENDDO
+      ENDDO
+END SELECT
+!$OMP END PARALLEL
+
+CONTAINS
+
+REAL(EB) FUNCTION MP5()
+REAL(EB), PARAMETER :: B1 = 0.016666666666667_EB, B2 = 1.333333333333_EB, ALPHA=4._EB, EPSM=1.E-10_EB
+REAL(EB) :: VOR,VMP,DJM1,DJ,DJP1,DM4JPH,DM4JMH,VUL,VAV,VMD,VLC,VMIN,VMAX
+
+! Monotonicity preserving 5th-order scheme (MP5) of Suresh and Huynh, JCP 136, 83-99 (1997)
+
+VOR = B1*(2._EB*V(-2)-13._EB*V(-1)+47._EB*V(0)+27._EB*V(1)-3._EB*V(2))
+VMP = V(0) + MINMOD2(V(1)-V(0),ALPHA*(V(0)-V(-1)))
+IF ((VOR-V(0))*(VOR-VMP)<EPSM) THEN
+   MP5=VOR
+ELSE
+   DJM1 = V(-2)-2._EB*V(-1)+V(0)
+   DJ   = V(-1)-2._EB*V(0) +V(1)
+   DJP1 = V(0) -2._EB*V(1) +V(2)
+   DM4JPH = MINMOD4(4._EB*DJ-DJP1,4._EB*DJP1-DJ,DJ,DJP1)
+   DM4JMH = MINMOD4(4._EB*DJ-DJM1,4._EB*DJM1-DJ,DJ,DJM1)
+   VUL = V(0) + ALPHA*(V(0)-V(-1))
+   VAV = 0.5_EB*(V(0)+V(1))
+   VMD = VAV - 0.5_EB*DM4JPH
+   VLC = V(0) + 0.5_EB*(V(0)-V(-1)) + B2*DM4JMH
+   VMIN = MAX(MIN(V(0),V(1),VMD),MIN(V(0),VUL,VLC))
+   VMAX = MIN(MAX(V(0),V(1),VMD),MAX(V(0),VUL,VLC))
+   MP5 = VOR + MINMOD2(VMIN-VOR,VMAX-VOR)
+ENDIF
+
+END FUNCTION MP5
+
+END SUBROUTINE GET_SCALAR_FACE_VALUE
+
 END MODULE MATH_FUNCTIONS
 
 
