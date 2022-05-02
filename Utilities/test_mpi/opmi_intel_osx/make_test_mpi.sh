@@ -2,4 +2,4 @@
 
 echo Building with OpenMPI
 make -f ../makefile clean
-make VPATH=".." -f ../makefile mpi_intel_osx
+make VPATH=".." -f ../makefile ompi_intel_osx
