@@ -22,7 +22,7 @@ CONTAINS
 SUBROUTINE DIVERGENCE_PART_1(T,DT,NM)
 
 USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
-USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP,INTERPOLATE1D_UNIFORM,SCALAR_FACE_VALUE,GET_SCALAR_FACE_VALUE
+USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP,INTERPOLATE1D_UNIFORM,GET_SCALAR_FACE_VALUE
 USE PHYSICAL_FUNCTIONS, ONLY: GET_CONDUCTIVITY,GET_SPECIFIC_HEAT,GET_SENSIBLE_ENTHALPY_Z,GET_SENSIBLE_ENTHALPY,&
                               GET_VISCOSITY,GET_MOLECULAR_WEIGHT
 USE GEOMETRY_FUNCTIONS, ONLY: ASSIGN_PRESSURE_ZONE
@@ -42,8 +42,9 @@ REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP,RHO_D_DZDX,RHO_D_DZDY,RHO_D_DZDZ
 REAL(EB), POINTER, DIMENSION(:,:) :: PBAR_P
 REAL(EB) :: DELKDELT,VC,VC1,DTDX,DTDY,DTDZ,TNOW, &
             DZDX,DZDY,DZDZ,RDT,TSI,TIME_RAMP_FACTOR,&
-            TMP_G,DIV_DIFF_HEAT_FLUX,H_S,ZZZ(1:4),DU,DU_P,DU_M,UN,PROFILE_FACTOR, &
+            TMP_G,DIV_DIFF_HEAT_FLUX,H_S,DU,DU_P,DU_M,UN,PROFILE_FACTOR, &
             XHAT,ZHAT,TT,Q_Z,D_Z_TEMP,D_Z_N(0:I_MAX_TEMP),RHO_D_DZDN_GET(1:N_TRACKED_SPECIES),JCOR,UN_P,TMP_F_GAS,R_PFCT,RHO_D_DZDN
+REAL(EB), DIMENSION(0:3,0:3,0:3) :: U_TEMP,Z_TEMP,F_TEMP
 INTEGER :: IW,N,IOR,II,JJ,KK,IIG,JJG,KKG,I,J,K,IPZ,IOPZ,N_ZZ_MAX,ICC
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_GET
 
@@ -895,36 +896,48 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
             ! ///   II   ///  II+1  |  II+2  | ...
             !                       ^ WALL_INDEX(II+1,+1)
             IF ((UU(II+1,JJ,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II+1,JJ,KK),+1)>0)) THEN
-               ZZZ(1:3) = (/RHO_H_S_P(II+1,JJ,KK),RHO_H_S_P(II+1:II+2,JJ,KK)/)
-               FX_H_S(II+1,JJ,KK) = SCALAR_FACE_VALUE(UU(II+1,JJ,KK),ZZZ,I_FLUX_LIMITER)
+               Z_TEMP(0:2,1,1) = (/RHO_H_S_P(II+1,JJ,KK),RHO_H_S_P(II+1:II+2,JJ,KK)/)
+               U_TEMP(1,1,1) = UU(II+1,JJ,KK)
+               CALL GET_SCALAR_FACE_VALUE(U_TEMP,Z_TEMP,F_TEMP,1,1,1,1,1,1,1,I_FLUX_LIMITER)
+               FX_H_S(II+1,JJ,KK) = F_TEMP(1,1,1)
             ENDIF
          CASE(-1) OFF_WALL_SELECT_1
             !            FX/UU(II-2)     ghost
             ! ... |  II-2  |  II-1  ///   II   ///
             !              ^ WALL_INDEX(II-1,-1)
             IF ((UU(II-2,JJ,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II-1,JJ,KK),-1)>0)) THEN
-               ZZZ(2:4) = (/RHO_H_S_P(II-2:II-1,JJ,KK),RHO_H_S_P(II-1,JJ,KK)/)
-               FX_H_S(II-2,JJ,KK) = SCALAR_FACE_VALUE(UU(II-2,JJ,KK),ZZZ,I_FLUX_LIMITER)
+               Z_TEMP(1:3,1,1) = (/RHO_H_S_P(II-2:II-1,JJ,KK),RHO_H_S_P(II-1,JJ,KK)/)
+               U_TEMP(1,1,1) = UU(II-2,JJ,KK)
+               CALL GET_SCALAR_FACE_VALUE(U_TEMP,Z_TEMP,F_TEMP,1,1,1,1,1,1,1,I_FLUX_LIMITER)
+               FX_H_S(II-2,JJ,KK) = F_TEMP(1,1,1)
             ENDIF
          CASE( 2) OFF_WALL_SELECT_1
             IF ((VV(II,JJ+1,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ+1,KK),+2)>0)) THEN
-               ZZZ(1:3) = (/RHO_H_S_P(II,JJ+1,KK),RHO_H_S_P(II,JJ+1:JJ+2,KK)/)
-               FY_H_S(II,JJ+1,KK) = SCALAR_FACE_VALUE(VV(II,JJ+1,KK),ZZZ,I_FLUX_LIMITER)
+               Z_TEMP(1,0:2,1) = (/RHO_H_S_P(II,JJ+1,KK),RHO_H_S_P(II,JJ+1:JJ+2,KK)/)
+               U_TEMP(1,1,1) = VV(II,JJ+1,KK)
+               CALL GET_SCALAR_FACE_VALUE(U_TEMP,Z_TEMP,F_TEMP,1,1,1,1,1,1,2,I_FLUX_LIMITER)
+               FY_H_S(II,JJ+1,KK) = F_TEMP(1,1,1)
             ENDIF
          CASE(-2) OFF_WALL_SELECT_1
             IF ((VV(II,JJ-2,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ-1,KK),-2)>0)) THEN
-               ZZZ(2:4) = (/RHO_H_S_P(II,JJ-2:JJ-1,KK),RHO_H_S_P(II,JJ-1,KK)/)
-               FY_H_S(II,JJ-2,KK) = SCALAR_FACE_VALUE(VV(II,JJ-2,KK),ZZZ,I_FLUX_LIMITER)
+               Z_TEMP(1,1:3,1) = (/RHO_H_S_P(II,JJ-2:JJ-1,KK),RHO_H_S_P(II,JJ-1,KK)/)
+               U_TEMP(1,1,1) = VV(II,JJ-2,KK)
+               CALL GET_SCALAR_FACE_VALUE(U_TEMP,Z_TEMP,F_TEMP,1,1,1,1,1,1,2,I_FLUX_LIMITER)
+               FY_H_S(II,JJ-2,KK) = F_TEMP(1,1,1)
             ENDIF
          CASE( 3) OFF_WALL_SELECT_1
             IF ((WW(II,JJ,KK+1)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK+1),+3)>0)) THEN
-               ZZZ(1:3) = (/RHO_H_S_P(II,JJ,KK+1),RHO_H_S_P(II,JJ,KK+1:KK+2)/)
-               FZ_H_S(II,JJ,KK+1) = SCALAR_FACE_VALUE(WW(II,JJ,KK+1),ZZZ,I_FLUX_LIMITER)
+               Z_TEMP(1,1,0:2) = (/RHO_H_S_P(II,JJ,KK+1),RHO_H_S_P(II,JJ,KK+1:KK+2)/)
+               U_TEMP(1,1,1) = WW(II,JJ,KK+1)
+               CALL GET_SCALAR_FACE_VALUE(U_TEMP,Z_TEMP,F_TEMP,1,1,1,1,1,1,3,I_FLUX_LIMITER)
+               FZ_H_S(II,JJ,KK+1) = F_TEMP(1,1,1)
             ENDIF
          CASE(-3) OFF_WALL_SELECT_1
             IF ((WW(II,JJ,KK-2)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK-1),-3)>0)) THEN
-               ZZZ(2:4) = (/RHO_H_S_P(II,JJ,KK-2:KK-1),RHO_H_S_P(II,JJ,KK-1)/)
-               FZ_H_S(II,JJ,KK-2) = SCALAR_FACE_VALUE(WW(II,JJ,KK-2),ZZZ,I_FLUX_LIMITER)
+               Z_TEMP(1,1,1:3) = (/RHO_H_S_P(II,JJ,KK-2:KK-1),RHO_H_S_P(II,JJ,KK-1)/)
+               U_TEMP(1,1,1) = WW(II,JJ,KK-2)
+               CALL GET_SCALAR_FACE_VALUE(U_TEMP,Z_TEMP,F_TEMP,1,1,1,1,1,1,3,I_FLUX_LIMITER)
+               FZ_H_S(II,JJ,KK-2) = F_TEMP(1,1,1)
             ENDIF
       END SELECT OFF_WALL_SELECT_1
 
@@ -996,7 +1009,7 @@ RHO_Z_P=>WORK6
 U_DOT_DEL_RHO_Z=>WORK7
 U_DOT_DEL_RHO_Z=0._EB
 
-!$OMP PARALLEL PRIVATE(ZZZ)
+!$OMP PARALLEL
 !$OMP DO SCHEDULE(static) COLLAPSE(3)
 DO K=0,KBP1
    DO J=0,JBP1
@@ -1050,36 +1063,48 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
             ! ///   II   ///  II+1  |  II+2  | ...
             !                       ^ WALL_INDEX(II+1,+1)
             IF ((UU(II+1,JJ,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II+1,JJ,KK),+1)>0)) THEN
-               ZZZ(1:3) = (/RHO_Z_P(II+1,JJ,KK),RHO_Z_P(II+1:II+2,JJ,KK)/)
-               FX_ZZ(II+1,JJ,KK) = SCALAR_FACE_VALUE(UU(II+1,JJ,KK),ZZZ,I_FLUX_LIMITER)
+               Z_TEMP(0:2,1,1) = (/RHO_Z_P(II+1,JJ,KK),RHO_Z_P(II+1:II+2,JJ,KK)/)
+               U_TEMP(1,1,1) = UU(II+1,JJ,KK)
+               CALL GET_SCALAR_FACE_VALUE(U_TEMP,Z_TEMP,F_TEMP,1,1,1,1,1,1,1,I_FLUX_LIMITER)
+               FX_ZZ(II+1,JJ,KK) = F_TEMP(1,1,1)
             ENDIF
          CASE(-1) OFF_WALL_SELECT_2
             !            FX/UU(II-2)     ghost
             ! ... |  II-2  |  II-1  ///   II   ///
             !              ^ WALL_INDEX(II-1,-1)
             IF ((UU(II-2,JJ,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II-1,JJ,KK),-1)>0)) THEN
-               ZZZ(2:4) = (/RHO_Z_P(II-2:II-1,JJ,KK),RHO_Z_P(II-1,JJ,KK)/)
-               FX_ZZ(II-2,JJ,KK) = SCALAR_FACE_VALUE(UU(II-2,JJ,KK),ZZZ,I_FLUX_LIMITER)
+               Z_TEMP(1:3,1,1) = (/RHO_Z_P(II-2:II-1,JJ,KK),RHO_Z_P(II-1,JJ,KK)/)
+               U_TEMP(1,1,1) = UU(II-2,JJ,KK)
+               CALL GET_SCALAR_FACE_VALUE(U_TEMP,Z_TEMP,F_TEMP,1,1,1,1,1,1,1,I_FLUX_LIMITER)
+               FX_ZZ(II-2,JJ,KK) = F_TEMP(1,1,1)
             ENDIF
          CASE( 2) OFF_WALL_SELECT_2
             IF ((VV(II,JJ+1,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ+1,KK),+2)>0)) THEN
-               ZZZ(1:3) = (/RHO_Z_P(II,JJ+1,KK),RHO_Z_P(II,JJ+1:JJ+2,KK)/)
-               FY_ZZ(II,JJ+1,KK) = SCALAR_FACE_VALUE(VV(II,JJ+1,KK),ZZZ,I_FLUX_LIMITER)
+               Z_TEMP(1,0:2,1) = (/RHO_Z_P(II,JJ+1,KK),RHO_Z_P(II,JJ+1:JJ+2,KK)/)
+               U_TEMP(1,1,1) = VV(II,JJ+1,KK)
+               CALL GET_SCALAR_FACE_VALUE(U_TEMP,Z_TEMP,F_TEMP,1,1,1,1,1,1,2,I_FLUX_LIMITER)
+               FY_ZZ(II,JJ+1,KK) = F_TEMP(1,1,1)
             ENDIF
          CASE(-2) OFF_WALL_SELECT_2
             IF ((VV(II,JJ-2,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ-1,KK),-2)>0)) THEN
-               ZZZ(2:4) = (/RHO_Z_P(II,JJ-2:JJ-1,KK),RHO_Z_P(II,JJ-1,KK)/)
-               FY_ZZ(II,JJ-2,KK) = SCALAR_FACE_VALUE(VV(II,JJ-2,KK),ZZZ,I_FLUX_LIMITER)
+               Z_TEMP(1,1:3,1) = (/RHO_Z_P(II,JJ-2:JJ-1,KK),RHO_Z_P(II,JJ-1,KK)/)
+               U_TEMP(1,1,1) = VV(II,JJ-2,KK)
+               CALL GET_SCALAR_FACE_VALUE(U_TEMP,Z_TEMP,F_TEMP,1,1,1,1,1,1,2,I_FLUX_LIMITER)
+               FY_ZZ(II,JJ-2,KK) = F_TEMP(1,1,1)
             ENDIF
          CASE( 3) OFF_WALL_SELECT_2
             IF ((WW(II,JJ,KK+1)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK+1),+3)>0)) THEN
-               ZZZ(1:3) = (/RHO_Z_P(II,JJ,KK+1),RHO_Z_P(II,JJ,KK+1:KK+2)/)
-               FZ_ZZ(II,JJ,KK+1) = SCALAR_FACE_VALUE(WW(II,JJ,KK+1),ZZZ,I_FLUX_LIMITER)
+               Z_TEMP(1,1,0:2) = (/RHO_Z_P(II,JJ,KK+1),RHO_Z_P(II,JJ,KK+1:KK+2)/)
+               U_TEMP(1,1,1) = WW(II,JJ,KK+1)
+               CALL GET_SCALAR_FACE_VALUE(U_TEMP,Z_TEMP,F_TEMP,1,1,1,1,1,1,3,I_FLUX_LIMITER)
+               FZ_ZZ(II,JJ,KK+1) = F_TEMP(1,1,1)
             ENDIF
          CASE(-3) OFF_WALL_SELECT_2
             IF ((WW(II,JJ,KK-2)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK-1),-3)>0)) THEN
-               ZZZ(2:4) = (/RHO_Z_P(II,JJ,KK-2:KK-1),RHO_Z_P(II,JJ,KK-1)/)
-               FZ_ZZ(II,JJ,KK-2) = SCALAR_FACE_VALUE(WW(II,JJ,KK-2),ZZZ,I_FLUX_LIMITER)
+               Z_TEMP(1,1,1:3) = (/RHO_Z_P(II,JJ,KK-2:KK-1),RHO_Z_P(II,JJ,KK-1)/)
+               U_TEMP(1,1,1) = WW(II,JJ,KK-2)
+               CALL GET_SCALAR_FACE_VALUE(U_TEMP,Z_TEMP,F_TEMP,1,1,1,1,1,1,3,I_FLUX_LIMITER)
+               FZ_ZZ(II,JJ,KK-2) = F_TEMP(1,1,1)
             ENDIF
       END SELECT OFF_WALL_SELECT_2
 
