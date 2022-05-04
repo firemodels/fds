@@ -12,7 +12,7 @@ USE GLOBAL_CONSTANTS
 USE MESH_VARIABLES
 USE MESH_POINTERS
 USE COMP_FUNCTIONS, ONLY: CURRENT_TIME, GET_FILE_NUMBER
-USE MATH_FUNCTIONS, ONLY: SCALAR_FACE_VALUE
+USE MATH_FUNCTIONS, ONLY: GET_SCALAR_FACE_VALUE
 
 IMPLICIT NONE (TYPE,EXTERNAL)
 
@@ -58,6 +58,7 @@ INTEGER, ALLOCATABLE, DIMENSION(:)   :: JM_MAT_Z
 REAL(EB), ALLOCATABLE, DIMENSION(:)  :: F_Z, RZ_Z, RZ_ZS
 REAL(EB), ALLOCATABLE, DIMENSION(:,:):: F_Z0, RZ_Z0
 
+REAL(EB), DIMENSION(0:3,0:3,0:3) :: U_TEMP,Z_TEMP,F_TEMP
 
 ! Forcing control logicals:
 LOGICAL, PARAMETER :: FORCE_GAS_FACE      = .TRUE.
@@ -7706,7 +7707,11 @@ DO IFACE=1,MESHES(NM)%IBM_NRCFACE_Z
          ! Now Godunov flux limited value of rho*zz on face:
          VELC = UU(I,J,K)
          ! bar{rho*zz}:
-         FN_ZZ = SCALAR_FACE_VALUE(VELC,RHO_Z_PV(-2:1),I_FLUX_LIMITER)
+         Z_TEMP(0:3,1,1) = RHO_Z_PV(-2:1)
+         U_TEMP(1,1,1) = VELC
+         CALL GET_SCALAR_FACE_VALUE(U_TEMP,Z_TEMP,F_TEMP,1,1,1,1,1,1,1,I_FLUX_LIMITER)
+         FN_ZZ = F_TEMP(1,1,1)
+
          DO ISIDE=-1,0
             FCT = -REAL(2*ISIDE+1,EB) ! Factor to set +ve or -ve sign of dot with normal outside.
             SELECT CASE(IBM_RCFACE_Z(IFACE)%CELL_LIST(1,ISIDE+2))
@@ -7755,7 +7760,10 @@ DO IFACE=1,MESHES(NM)%IBM_NRCFACE_Z
          ! Now Godunov flux limited value of rho*zz on face:
          VELC = VV(I,J,K)
          ! bar{rho*zz}:
-         FN_ZZ = SCALAR_FACE_VALUE(VELC,RHO_Z_PV(-2:1),I_FLUX_LIMITER)
+         Z_TEMP(0:3,1,1) = RHO_Z_PV(-2:1)
+         U_TEMP(1,1,1) = VELC
+         CALL GET_SCALAR_FACE_VALUE(U_TEMP,Z_TEMP,F_TEMP,1,1,1,1,1,1,1,I_FLUX_LIMITER)
+         FN_ZZ = F_TEMP(1,1,1)
          DO ISIDE=-1,0
             FCT = -REAL(2*ISIDE+1,EB) ! Factor to set +ve or -ve sign of dot with normal outside.
             SELECT CASE(IBM_RCFACE_Z(IFACE)%CELL_LIST(1,ISIDE+2))
@@ -7804,7 +7812,10 @@ DO IFACE=1,MESHES(NM)%IBM_NRCFACE_Z
          ! Now Godunov flux limited value of rho*zz on face:
          VELC = WW(I,J,K)
          ! bar{rho*zz}:
-         FN_ZZ = SCALAR_FACE_VALUE(VELC,RHO_Z_PV(-2:1),I_FLUX_LIMITER)
+         Z_TEMP(0:3,1,1) = RHO_Z_PV(-2:1)
+         U_TEMP(1,1,1) = VELC
+         CALL GET_SCALAR_FACE_VALUE(U_TEMP,Z_TEMP,F_TEMP,1,1,1,1,1,1,1,I_FLUX_LIMITER)
+         FN_ZZ = F_TEMP(1,1,1)
          DO ISIDE=-1,0
             FCT = -REAL(2*ISIDE+1,EB) ! Factor to set +ve or -ve sign of dot with normal outside.
             SELECT CASE(IBM_RCFACE_Z(IFACE)%CELL_LIST(1,ISIDE+2))
@@ -7900,7 +7911,10 @@ DO ICF = 1,MESHES(NM)%N_CUTFACE_MESH
       END SELECT
       VELC  = PRFCTV *CUT_FACE(ICF)%VEL(IFACE) + (1._EB-PRFCTV)*CUT_FACE(ICF)%VELS(IFACE)
       ! bar{rho*zz}:
-      FN_ZZ = SCALAR_FACE_VALUE(VELC,RHO_Z_PV(-2:1),I_FLUX_LIMITER)
+      Z_TEMP(0:3,1,1) = RHO_Z_PV(-2:1)
+      U_TEMP(1,1,1) = VELC
+      CALL GET_SCALAR_FACE_VALUE(U_TEMP,Z_TEMP,F_TEMP,1,1,1,1,1,1,1,I_FLUX_LIMITER)
+      FN_ZZ = F_TEMP(1,1,1)
       DO ISIDE=-1,0
          FCT = -REAL(2*ISIDE+1,EB) ! Factor to set +ve or -ve sign of dot with normal outside.
          SELECT CASE(CUT_FACE(ICF)%CELL_LIST(1,ISIDE+2,IFACE))
@@ -8306,7 +8320,10 @@ DO IFACE=1,MESHES(NM)%IBM_NRCFACE_Z
          ENDIF
          ! Now Godunov flux limited value of rho*hs on face:
          VELC = UU(I,J,K)
-         FN_H_S = SCALAR_FACE_VALUE(VELC,RHO_H_S_PV(-2:1),I_FLUX_LIMITER)
+         Z_TEMP(0:3,1,1) = RHO_H_S_PV(-2:1)
+         U_TEMP(1,1,1) = VELC
+         CALL GET_SCALAR_FACE_VALUE(U_TEMP,Z_TEMP,F_TEMP,1,1,1,1,1,1,1,I_FLUX_LIMITER)
+         FN_H_S = F_TEMP(1,1,1)
          ! Add contribution to DP:
          DO ISIDE=-1,0
             FCT = -REAL(2*ISIDE+1,EB) ! Factor to set +ve or -ve sign of dot with normal outside.
@@ -8361,7 +8378,10 @@ DO IFACE=1,MESHES(NM)%IBM_NRCFACE_Z
          ENDIF
          ! Now Godunov flux limited value of rho*hs on face:
          VELC = VV(I,J,K)
-         FN_H_S = SCALAR_FACE_VALUE(VELC,RHO_H_S_PV(-2:1),I_FLUX_LIMITER)
+         Z_TEMP(0:3,1,1) = RHO_H_S_PV(-2:1)
+         U_TEMP(1,1,1) = VELC
+         CALL GET_SCALAR_FACE_VALUE(U_TEMP,Z_TEMP,F_TEMP,1,1,1,1,1,1,1,I_FLUX_LIMITER)
+         FN_H_S = F_TEMP(1,1,1)
          ! Add contribution to DP:
          DO ISIDE=-1,0
             FCT = -REAL(2*ISIDE+1,EB) ! Factor to set +ve or -ve sign of dot with normal outside.
@@ -8416,7 +8436,10 @@ DO IFACE=1,MESHES(NM)%IBM_NRCFACE_Z
          ENDIF
          ! Now Godunov flux limited value of rho*hs on face:
          VELC = WW(I,J,K)
-         FN_H_S = SCALAR_FACE_VALUE(VELC,RHO_H_S_PV(-2:1),I_FLUX_LIMITER)
+         Z_TEMP(0:3,1,1) = RHO_H_S_PV(-2:1)
+         U_TEMP(1,1,1) = VELC
+         CALL GET_SCALAR_FACE_VALUE(U_TEMP,Z_TEMP,F_TEMP,1,1,1,1,1,1,1,I_FLUX_LIMITER)
+         FN_H_S = F_TEMP(1,1,1)
          ! Add contribution to DP:
          ! Low side cell:
          DO ISIDE=-1,0
@@ -8524,7 +8547,10 @@ DO ICF = 1,MESHES(NM)%N_CUTFACE_MESH
          ENDIF
       END SELECT
       VELC    = PRFCTV *CUT_FACE(ICF)%VEL(IFACE) + (1._EB-PRFCTV)*CUT_FACE(ICF)%VELS(IFACE)
-      FN_H_S  = SCALAR_FACE_VALUE(VELC,RHO_H_S_PV(-2:1),I_FLUX_LIMITER)
+      Z_TEMP(0:3,1,1) = RHO_H_S_PV(-2:1)
+      U_TEMP(1,1,1) = VELC
+      CALL GET_SCALAR_FACE_VALUE(U_TEMP,Z_TEMP,F_TEMP,1,1,1,1,1,1,1,I_FLUX_LIMITER)
+      FN_H_S = F_TEMP(1,1,1)
       ! Add to divergence integral of surrounding cut-cells:
       DO ISIDE=-1,0
          FCT = -REAL(2*ISIDE+1,EB) ! Factor to set +ve or -ve sign of dot with normal outside.
@@ -10981,7 +11007,10 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             ! Now Godunov flux limited value of rho*zz on face:
             VELC = UU(I,J,K)
             ! bar{rho*zz}:
-            FN_ZZ = SCALAR_FACE_VALUE(VELC,RHO_Z_PV(-2:1),I_FLUX_LIMITER)
+            Z_TEMP(0:3,1,1) = RHO_Z_PV(-2:1)
+            U_TEMP(1,1,1) = VELC
+            CALL GET_SCALAR_FACE_VALUE(U_TEMP,Z_TEMP,F_TEMP,1,1,1,1,1,1,1,I_FLUX_LIMITER)
+            FN_ZZ = F_TEMP(1,1,1)
          CASE(JAXIS)
             AF = DX(I)*DZ(K)
             RHOPV(-2:1)      = RHOP(I,J-1:J+2,K)
@@ -11016,7 +11045,10 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             ! Now Godunov flux limited value of rho*zz on face:
             VELC = VV(I,J,K)
             ! bar{rho*zz}:
-            FN_ZZ = SCALAR_FACE_VALUE(VELC,RHO_Z_PV(-2:1),I_FLUX_LIMITER)
+            Z_TEMP(0:3,1,1) = RHO_Z_PV(-2:1)
+            U_TEMP(1,1,1) = VELC
+            CALL GET_SCALAR_FACE_VALUE(U_TEMP,Z_TEMP,F_TEMP,1,1,1,1,1,1,1,I_FLUX_LIMITER)
+            FN_ZZ = F_TEMP(1,1,1)
          CASE(KAXIS)
             AF = DX(I)*DY(J)
             RHOPV(-2:1)      = RHOP(I,J,K-1:K+2)
@@ -11051,7 +11083,10 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             ! Now Godunov flux limited value of rho*zz on face:
             VELC = WW(I,J,K)
             ! bar{rho*zz}:
-            FN_ZZ = SCALAR_FACE_VALUE(VELC,RHO_Z_PV(-2:1),I_FLUX_LIMITER)
+            Z_TEMP(0:3,1,1) = RHO_Z_PV(-2:1)
+            U_TEMP(1,1,1) = VELC
+            CALL GET_SCALAR_FACE_VALUE(U_TEMP,Z_TEMP,F_TEMP,1,1,1,1,1,1,1,I_FLUX_LIMITER)
+            FN_ZZ = F_TEMP(1,1,1)
       END SELECT
 
       DO ILOC=LOCROW_1,LOCROW_2
@@ -11159,7 +11194,10 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          END SELECT
          VELC  = PRFCT *CUT_FACE(ICF)%VEL(IFACE) + (1._EB-PRFCT)*CUT_FACE(ICF)%VELS(IFACE)
          ! bar{rho*zz}:
-         FN_ZZ = SCALAR_FACE_VALUE(VELC,RHO_Z_PV(-2:1),I_FLUX_LIMITER)
+         Z_TEMP(0:3,1,1) = RHO_Z_PV(-2:1)
+         U_TEMP(1,1,1) = VELC
+         CALL GET_SCALAR_FACE_VALUE(U_TEMP,Z_TEMP,F_TEMP,1,1,1,1,1,1,1,I_FLUX_LIMITER)
+         FN_ZZ = F_TEMP(1,1,1)
 
          DO ILOC=LOCROW_1,LOCROW_2
             IROW=IND_LOC(ILOC)     ! Process Local Unknown number.
