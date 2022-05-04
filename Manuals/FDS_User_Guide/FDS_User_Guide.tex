@@ -6686,6 +6686,7 @@ It is not unusual to include hundreds of thousands of particles in a simulation.
 \end{description}
 Be careful when setting parameters related to particle/droplet insertion, as it is very easy to overwhelm the simulation with millions of them. The parameter {\ct MAXIMUM\_PARTICLES} on the {\ct DUMP} line sets the maximum number of particles that can be included on any given mesh at any given time. Its default value is 1000000. If this value is exceeded, FDS will automatically remove particles, starting with the oldest.
 
+In some cases, you may need to begin a simulation with a large number of particles, such as with a wildland fire simulation. In this situation, the initialization stage may take a long time as the memory for storing particles is expanded by only 50 particles at a time. It is possible to override this by setting {\ct NEW\_PARTICLE\_INCREMENT} on the {\ct PART} line. This does not affect how particles are inserted into the domain (as described above), only how much new storage is reserved when the current allocation is exceeded. Be careful, as it is possible to massively over-allocate and reserve large amounts of unused memory. 
 
 
 \subsection{Particles Introduced at a Solid Surface}
@@ -11867,6 +11868,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MINIMUM\_DIAMETER}                  & Real        & Section~\ref{info:particle_size}                                      & $\mu$m            &                       \\ \hline
 {\ct MONODISPERSE}                       & Logical     & Section~\ref{info:particle_size}                                      &                   & {\ct F}               \\ \hline
 {\ct N\_STRATA}                          & Integer     & Section~\ref{info:particle_size}                                      &                   & 6                     \\ \hline
+{\ct NEW\_PARTICLE\_INCREMENT}        & Integer        & Section~\ref{info:controlling_droplets}
+                                      &                & 50                       \\ \hline
 {\ct ORIENTATION(1:3,:)}                 & Real Array  & Section~\ref{info:PART_SURF}                                          &                   &                       \\ \hline
 {\ct PERMEABILITY(3)}                    & Real Array  & Section~\ref{info:porous_media}                                       &                   &                       \\ \hline
 {\ct POROUS\_VOLUME\_FRACTION}           & Real        & Section~\ref{info:porous_media}                                       &                   &                       \\ \hline
