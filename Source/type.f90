@@ -77,8 +77,8 @@ TYPE LAGRANGIAN_PARTICLE_CLASS_TYPE
    REAL(EB) :: MEAN_DROPLET_VOLUME=0._EB  !< Mean droplet volume
    REAL(EB) :: RUNNING_AVERAGE_FACTOR     !< Fraction of older value to use for particle statistics summations
    REAL(EB) :: SHAPE_FACTOR               !< Ratio of particle cross sectional area to surface area
-   REAL(EB) :: EMBER_DENSITY_THRESHOLD    !< Density at which vegetative particle becomes a flying ember
-   REAL(EB) :: EMBER_VELOCITY_THRESHOLD   !< Velocity at which vegetative particle becomes a flying ember
+   REAL(EB) :: EMBER_DENSITY_THRESHOLD    !< Density at which vegetative particle becomes a flying ember (kg/m3)
+   REAL(EB) :: EMBER_DRAG_THRESHOLD       !< Force at which vegetative particle becomes a flying ember (N)
    REAL(EB) :: PRIMARY_BREAKUP_TIME       !< Time (s) after insertion when droplet breaks up
    REAL(EB) :: PRIMARY_BREAKUP_DRAG_REDUCTION_FACTOR   !< Drag reduction factor
    REAL(EB) :: RUNNING_AVERAGE_FACTOR_WALL             !< Fraction of old value used in summations of droplets stuck to walls
