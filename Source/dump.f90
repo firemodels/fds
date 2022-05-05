@@ -1845,6 +1845,13 @@ WRITE(LU_SMV,'(/A)') 'HRRPUVCUT'
 WRITE(LU_SMV,'(I6)') INTEGER_ONE
 WRITE(LU_SMV,'(F13.5)') MIN(200._EB,20._EB/CHARACTERISTIC_CELL_SIZE)
 
+! Write out heat of combustion
+
+IF (N_REACTIONS>0) THEN
+   WRITE(LU_SMV,'(/A)') 'HoC'
+   WRITE(LU_SMV,'(F13.5)') REACTION(1)%HOC_COMPLETE/1000._EB
+ENDIF
+
 ! Write out RAMP info to .smv file
 
 WRITE(LU_SMV,'(/A)') 'RAMP'
@@ -2558,6 +2565,12 @@ ENDDO
 
 IF (N_REACTIONS>0) WRITE(LU_OUTPUT,'(//A)') ' Gas Phase Reaction Information'
 
+IF (N_SIMPLE_CHEMISTRY_REACTIONS>1) THEN
+   WRITE(LU_OUTPUT,'(/3X,A)') 'Multiple step reaction'
+   WRITE(LU_OUTPUT,'(3X,A)')  'Fuel                                     Total Heat of Combustion (kJ/kg)'
+   WRITE(LU_OUTPUT,'(3X,A,1X,F12.4)') REACTION(1)%FUEL,REACTION(1)%HOC_COMPLETE/1000._EB
+ENDIF
+
 REACTION_LOOP: DO N=1,N_REACTIONS
    RN => REACTION(N)
    SELECT CASE (COMBUSTION_ODE_SOLVER)
@@ -2573,60 +2586,62 @@ REACTION_LOOP: DO N=1,N_REACTIONS
          EXTINCTION_MODEL = 'EXTINCTION 2'
    END SELECT
 
-   IF (RN%FYI/='null') WRITE(LU_OUTPUT,'(/3X,A)') TRIM(RN%FYI)
-   IF (RN%ID/='null')  WRITE(LU_OUTPUT,'(/3X,A,A)')   'Reaction ID:  ', TRIM(RN%ID)
-   IF (RN%REVERSE)     WRITE(LU_OUTPUT,'(/3X,A,A)')   'Reverse Reaction of ID:  ', TRIM(RN%FWD_ID)
+   IF (N_REACTIONS>1) THEN
+      IF (RN%ID/='null')  THEN
+         WRITE(LU_OUTPUT,'(/3X,A,A)')   'Reaction ID:  ', TRIM(RN%ID)
+      ELSE
+         WRITE(LU_OUTPUT,'(/3X,A,I0)')   'Reaction ',N
+      ENDIF
+      IF (RN%REVERSE)     WRITE(LU_OUTPUT,'(/6X,A,A)')   'Reverse Reaction of ID:  ', TRIM(RN%FWD_ID)
+   ENDIF
 
-   WRITE(LU_OUTPUT,'(/3X,A)')     'Fuel                                           Heat of Combustion (kJ/kg)'
-   WRITE(LU_OUTPUT,'(3X,A,1X,F12.4)') RN%FUEL,RN%HEAT_OF_COMBUSTION/1000._EB
+   WRITE(LU_OUTPUT,'(/6X,A)')     'Fuel                                           Heat of Combustion (kJ/kg)'
+   WRITE(LU_OUTPUT,'(6X,A,1X,F12.4)') RN%FUEL,RN%HEAT_OF_COMBUSTION/1000._EB
 
-   WRITE(LU_OUTPUT,'(/3X,A)')     'Stoichiometry'
-
-   WRITE(LU_OUTPUT,'(/3X,A)')     'Primitive Species Stoich. Coeff.'
-   WRITE(LU_OUTPUT,'(3X,A)')      'Species ID                                                          Molar'
+   WRITE(LU_OUTPUT,'(/6X,A)')     'Primitive Species Stoich. Coeff.'
+   WRITE(LU_OUTPUT,'(6X,A)')      'Species ID                                                          Molar'
    DO NN=1,N_SPECIES
       IF (ABS(RN%NU_SPECIES(NN))<=TWO_EPSILON_EB) CYCLE
-      WRITE(OUTFORM,'(A,I1,A,I1,A)') '(3X,A,1X,F12.',MAX(1,MIN(6,8-INT(LOG10(ABS(RN%NU_SPECIES(NN))))+1)),')'
+      WRITE(OUTFORM,'(A,I1,A,I1,A)') '(6X,A,1X,F12.',MAX(1,MIN(6,8-INT(LOG10(ABS(RN%NU_SPECIES(NN))))+1)),')'
       WRITE(LU_OUTPUT,OUTFORM) SPECIES(NN)%ID,RN%NU_SPECIES(NN)
    ENDDO
 
-   WRITE(LU_OUTPUT,'(/3X,A)')     'Tracked (Lumped) Species Stoich. Coeff.'
-   WRITE(LU_OUTPUT,'(3X,A)')      'Species ID                                             Molar         Mass'
+   WRITE(LU_OUTPUT,'(/6X,A)')     'Tracked (Lumped) Species Stoich. Coeff.'
+   WRITE(LU_OUTPUT,'(6X,A)')      'Species ID                                             Molar         Mass'
    DO NN=1,N_TRACKED_SPECIES
       IF (ABS(RN%NU(NN)) < TWO_EPSILON_EB) CYCLE
-      WRITE(OUTFORM,'(A,I1,A,I1,A)') '(3X,A,1X,F12.',MAX(1,MIN(6,8-INT(LOG10(ABS(RN%NU(NN))))+1)),',1X,F12.', &
+      WRITE(OUTFORM,'(A,I1,A,I1,A)') '(6X,A,1X,F12.',MAX(1,MIN(6,8-INT(LOG10(ABS(RN%NU(NN))))+1)),',1X,F12.', &
          MAX(1,MIN(6,8-INT(LOG10(ABS(RN%NU(NN))*SPECIES_MIXTURE(NN)%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW))+1)),')'
       WRITE(LU_OUTPUT,OUTFORM) SPECIES_MIXTURE(NN)%ID(1:47),RN%NU(NN),&
          RN%NU(NN)*SPECIES_MIXTURE(NN)%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW
    ENDDO
 
-   WRITE(LU_OUTPUT,'(/3X,A)')     'Reaction Kinetics'
+   WRITE(LU_OUTPUT,'(/6X,A)')     'Reaction Kinetics'
 
-   WRITE(LU_OUTPUT,'(/3X,A)')              'Arrhenius Parameters'
    IF (RN%FAST_CHEMISTRY) THEN
-      WRITE(LU_OUTPUT,'(3X,A)')            'Pre-exponential:    Infinite'
-      WRITE(LU_OUTPUT,'(3X,A)')            'Activation Energy:  N/A'
+      WRITE(LU_OUTPUT,'(/6X,A)')           'Fast chemistry'
    ELSE
-      WRITE(LU_OUTPUT,'(3X,A,1X,ES13.6)')  'Pre-exponential ((mol/cm^3)^(1-order)/s): ',RN%A_IN
-      WRITE(LU_OUTPUT,'(3X,A,1X,ES13.6)')  'Activation Energy (J/mol):                ',RN%E_IN
+      WRITE(LU_OUTPUT,'(/6X,A)')           'Arrhenius Parameters'
+      WRITE(LU_OUTPUT,'(6X,A,1X,ES13.6)')  'Pre-exponential ((mol/cm^3)^(1-order)/s): ',RN%A_IN
+      WRITE(LU_OUTPUT,'(6X,A,1X,ES13.6)')  'Activation Energy (J/mol):                ',RN%E_IN
    ENDIF
    IF (.NOT.RN%FAST_CHEMISTRY) THEN
-      WRITE(LU_OUTPUT,'(/3X,A)')  'Species ID                                                  Rate Exponent'
+      WRITE(LU_OUTPUT,'(/6X,A)')  'Species ID                                                  Rate Exponent'
       DO NN=1,N_SPECIES
          IF (RN%N_S(NN) <=-998._EB) CYCLE
-         WRITE(LU_OUTPUT,'(3X,A,1X,F12.6)') SPECIES(NN)%ID,RN%N_S(NN)
+         WRITE(LU_OUTPUT,'(6X,A,1X,F12.6)') SPECIES(NN)%ID,RN%N_S(NN)
       ENDDO
-      IF (ABS(RN%N_T)>TWO_EPSILON_EB) WRITE(LU_OUTPUT,'(3X,A,50X,F12.6)') 'Temperature',RN%N_T
+      IF (ABS(RN%N_T)>TWO_EPSILON_EB) WRITE(LU_OUTPUT,'(6X,A,50X,F12.6)') 'Temperature',RN%N_T
    ENDIF
 
-   WRITE(LU_OUTPUT,'(/3X,A,A)')      'ODE Solver:  ', TRIM(ODE_SOLVER)
+   WRITE(LU_OUTPUT,'(/6X,A,A)')      'ODE Solver:  ', TRIM(ODE_SOLVER)
    IF (N_FIXED_CHEMISTRY_SUBSTEPS>0) THEN
-      WRITE(LU_OUTPUT,'(/3X,A,I3)')  'Number of Fixed Substeps:  ', N_FIXED_CHEMISTRY_SUBSTEPS
+      WRITE(LU_OUTPUT,'(/6X,A,I3)')  'Number of Fixed Substeps:  ', N_FIXED_CHEMISTRY_SUBSTEPS
    ENDIF
    IF (SUPPRESSION .AND. RN%FAST_CHEMISTRY) THEN
-      WRITE(LU_OUTPUT,'(3X,A,A)')    'Extinction Model:  ', TRIM(EXTINCTION_MODEL)
-      WRITE(LU_OUTPUT,'(3X,A,F8.1)') 'Auto-Ignition Temperature (K):  ', AUTO_IGNITION_TEMPERATURE
-      WRITE(LU_OUTPUT,'(3X,A,F8.1)') 'Critical Flame Temperature (K): ', RN%CRIT_FLAME_TMP
+      WRITE(LU_OUTPUT,'(6X,A,A)')    'Extinction Model:  ', TRIM(EXTINCTION_MODEL)
+      WRITE(LU_OUTPUT,'(6X,A,F8.1)') 'Auto-Ignition Temperature (K):  ', AUTO_IGNITION_TEMPERATURE
+      WRITE(LU_OUTPUT,'(6X,A,F8.1)') 'Critical Flame Temperature (K): ', RN%CRIT_FLAME_TMP
    ENDIF
 
 ENDDO REACTION_LOOP
