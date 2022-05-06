@@ -66,8 +66,7 @@ SPECIES_LOOP: DO N=1,N_TOTAL_SCALARS
 
    RHO_Z_P=>WORK1
 
-   !$OMP PARALLEL
-   !$OMP DO SCHEDULE(STATIC)
+   !$OMP PARALLEL DO
    DO K=0,KBP1
       DO J=0,JBP1
          DO I=0,IBP1
@@ -75,8 +74,7 @@ SPECIES_LOOP: DO N=1,N_TOTAL_SCALARS
          ENDDO
       ENDDO
    ENDDO
-   !$OMP END DO
-   !$OMP END PARALLEL
+   !$OMP END PARALLEL DO
 
    ! Compute scalar face values
 
@@ -84,6 +82,7 @@ SPECIES_LOOP: DO N=1,N_TOTAL_SCALARS
    CALL GET_SCALAR_FACE_VALUE(VV,RHO_Z_P,FY(:,:,:,N),1,IBAR,1,JBM1,1,KBAR,2,I_FLUX_LIMITER)
    CALL GET_SCALAR_FACE_VALUE(WW,RHO_Z_P,FZ(:,:,:,N),1,IBAR,1,JBAR,1,KBM1,3,I_FLUX_LIMITER)
 
+   !$OMP PARALLEL DO PRIVATE(IW,WC,BC,ONE_D,II,JJ,KK,IIG,JJG,KKG,IOR,THIN_OBSTRUCTION,U_TEMP,Z_TEMP,F_TEMP)
    WALL_LOOP_2: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       WC=>WALL(IW)
       IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_LOOP_2
@@ -97,19 +96,6 @@ SPECIES_LOOP: DO N=1,N_TOTAL_SCALARS
       JJG = BC%JJG
       KKG = BC%KKG
       IOR = BC%IOR
-
-      ! Handle the case where OBST lives on an external boundary
-
-      IF (IW>N_EXTERNAL_WALL_CELLS) THEN
-         SELECT CASE(IOR)
-            CASE( 1); IF (IIG>IBAR) CYCLE WALL_LOOP_2
-            CASE(-1); IF (IIG<1)    CYCLE WALL_LOOP_2
-            CASE( 2); IF (JJG>JBAR) CYCLE WALL_LOOP_2
-            CASE(-2); IF (JJG<1)    CYCLE WALL_LOOP_2
-            CASE( 3); IF (KKG>KBAR) CYCLE WALL_LOOP_2
-            CASE(-3); IF (KKG<1)    CYCLE WALL_LOOP_2
-         END SELECT
-      ENDIF
 
       IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY .AND. .NOT.SOLID(CELL_INDEX(II,JJ,KK))) THEN
          THIN_OBSTRUCTION = .TRUE.
@@ -184,17 +170,20 @@ SPECIES_LOOP: DO N=1,N_TOTAL_SCALARS
       ENDIF OFF_WALL_IF_2
 
    ENDDO WALL_LOOP_2
+   !$OMP END PARALLEL DO
 
 ENDDO SPECIES_LOOP
 
 T_USED(3)=T_USED(3)+CURRENT_TIME()-TNOW
-
 END SUBROUTINE MASS_FINITE_DIFFERENCES
 
 
-SUBROUTINE DENSITY(T,DT,NM)
+!> \brief Update the species mass fractions and density
+!> \param T Simulation time (s)
+!> \param DT Time step (s)
+!> \param NM Mesh index
 
-! Update the species mass fractions and density
+SUBROUTINE DENSITY(T,DT,NM)
 
 USE COMP_FUNCTIONS, ONLY: CURRENT_TIME
 USE PHYSICAL_FUNCTIONS, ONLY : GET_SPECIFIC_GAS_CONSTANT
@@ -205,13 +194,13 @@ USE CC_SCALARS_IBM, ONLY : SET_EXIMADVFLX_3D,SET_DOMAINADVFLX_3D,ROTATED_CUBE_RH
 
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T,DT
-REAL(EB) :: TNOW,ZZ_GET(1:N_TRACKED_SPECIES),RHS,UN,Q_Z,XHAT,ZHAT
-INTEGER :: I,J,K,N,IW,IOR,IIG,JJG,KKG
-REAL(EB), POINTER, DIMENSION(:,:,:,:) :: DEL_RHO_D_DEL_Z__0=>NULL()
-REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL()
-TYPE(WALL_TYPE), POINTER :: WC=>NULL()
+REAL(EB) :: TNOW,RHS,Q_Z,XHAT,ZHAT
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_GET
+INTEGER :: I,J,K,N,IW
+REAL(EB), POINTER, DIMENSION(:,:,:,:) :: DEL_RHO_D_DEL_Z__0
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW
+TYPE(WALL_TYPE), POINTER :: WC
 TYPE(BOUNDARY_COORD_TYPE), POINTER :: BC
-TYPE(BOUNDARY_ONE_D_TYPE), POINTER :: ONE_D
 
 IF (SOLID_PHASE_ONLY) RETURN
 
@@ -224,11 +213,11 @@ SELECT CASE (PERIODIC_TEST)
    CASE (5,8)
       RETURN
    CASE (4,7,11,21,22)
-      ! CONTINUE
 END SELECT
 
 TNOW=CURRENT_TIME()
 CALL POINT_TO_MESH(NM)
+
 UU=>WORK1
 VV=>WORK2
 WW=>WORK3
@@ -251,52 +240,44 @@ CASE(.TRUE.) PREDICTOR_STEP
    VV=V
    WW=W
 
-   WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+   !$OMP PARALLEL
+
+   !$OMP DO PRIVATE(IW,WC,BC)
+   WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
       WC=>WALL(IW)
       IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE WALL_LOOP
       BC=>BOUNDARY_COORD(WC%BC_INDEX)
-      ONE_D=>BOUNDARY_ONE_D(WC%OD_INDEX)
-
-      IIG = BC%IIG
-      JJG = BC%JJG
-      KKG = BC%KKG
-      IOR = BC%IOR
-
-      SELECT CASE(WC%BOUNDARY_TYPE)
-         CASE DEFAULT; CYCLE WALL_LOOP
-         ! SOLID_BOUNDARY is not currently functional here, but keep for testing
-         CASE(SOLID_BOUNDARY);        UN = -SIGN(1._EB,REAL(IOR,EB))*ONE_D%U_NORMAL
-         CASE(INTERPOLATED_BOUNDARY); UN = UVW_SAVE(IW)
-      END SELECT
-
-      SELECT CASE(IOR)
-         CASE( 1); UU(IIG-1,JJG,KKG) = UN
-         CASE(-1); UU(IIG,JJG,KKG)   = UN
-         CASE( 2); VV(IIG,JJG-1,KKG) = UN
-         CASE(-2); VV(IIG,JJG,KKG)   = UN
-         CASE( 3); WW(IIG,JJG,KKG-1) = UN
-         CASE(-3); WW(IIG,JJG,KKG)   = UN
+      SELECT CASE(BC%IOR)
+         CASE( 1); UU(BC%IIG-1,BC%JJG  ,BC%KKG  ) = UVW_SAVE(IW)
+         CASE(-1); UU(BC%IIG  ,BC%JJG  ,BC%KKG  ) = UVW_SAVE(IW)
+         CASE( 2); VV(BC%IIG  ,BC%JJG-1,BC%KKG  ) = UVW_SAVE(IW)
+         CASE(-2); VV(BC%IIG  ,BC%JJG  ,BC%KKG  ) = UVW_SAVE(IW)
+         CASE( 3); WW(BC%IIG  ,BC%JJG  ,BC%KKG-1) = UVW_SAVE(IW)
+         CASE(-3); WW(BC%IIG  ,BC%JJG  ,BC%KKG  ) = UVW_SAVE(IW)
       END SELECT
    ENDDO WALL_LOOP
+   !$OMP END DO
 
    ! Predictor step for mass density
 
+   !$OMP DO PRIVATE(N,I,J,K,RHS)
    DO N=1,N_TOTAL_SCALARS
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-
                RHS = - DEL_RHO_D_DEL_Z__0(I,J,K,N) &
                    + (FX(I,J,K,N)*UU(I,J,K)*R(I) - FX(I-1,J,K,N)*UU(I-1,J,K)*R(I-1))*RDX(I)*RRN(I) &
                    + (FY(I,J,K,N)*VV(I,J,K)      - FY(I,J-1,K,N)*VV(I,J-1,K)       )*RDY(J)        &
                    + (FZ(I,J,K,N)*WW(I,J,K)      - FZ(I,J,K-1,N)*WW(I,J,K-1)       )*RDZ(K)
-
                ZZS(I,J,K,N) = RHO(I,J,K)*ZZ(I,J,K,N) - DT*RHS
             ENDDO
          ENDDO
       ENDDO
    ENDDO
+   !$OMP END DO
+
+   !$OMP END PARALLEL
 
    IF (CC_IBM) CALL SET_EXIMADVFLX_3D(NM,UU,VV,WW)
    IF (CHECK_MASS_CONSERVE) CALL SET_DOMAINADVFLX_3D(UU,VV,WW,PREDICTOR)
@@ -332,8 +313,13 @@ CASE(.TRUE.) PREDICTOR_STEP
       CALL ROTATED_CUBE_RHS_ZZ(T,DT,NM)
    ENDIF
 
+   !$OMP PARALLEL PRIVATE(ZZ_GET)
+
+   ALLOCATE(ZZ_GET(1:N_TOTAL_SCALARS))
+
    ! Get rho = sum(rho*Y_alpha)
 
+   !$OMP DO
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
@@ -342,13 +328,17 @@ CASE(.TRUE.) PREDICTOR_STEP
          ENDDO
       ENDDO
    ENDDO
+   !$OMP END DO
 
    ! Check mass density for positivity
 
+   !$OMP SINGLE
    CALL CHECK_MASS_DENSITY
+   !$OMP END SINGLE
 
    ! Extract mass fraction from RHO * ZZ
 
+   !$OMP DO
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
@@ -357,19 +347,25 @@ CASE(.TRUE.) PREDICTOR_STEP
          ENDDO
       ENDDO
    ENDDO
+   !$OMP END DO
 
    ! Passive scalars
 
+   !$OMP SINGLE
    CALL CLIP_PASSIVE_SCALARS
+   !$OMP END SINGLE
 
    ! Predict background pressure at next time step
 
+   !$OMP SINGLE
    DO I=1,N_ZONE
       PBAR_S(:,I) = PBAR(:,I) + D_PBAR_DT(I)*DT
    ENDDO
+   !$OMP END SINGLE
 
    ! Compute molecular weight term RSUM=R0*SUM(Y_i/W_i)
 
+   !$OMP DO
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
@@ -379,9 +375,11 @@ CASE(.TRUE.) PREDICTOR_STEP
          ENDDO
       ENDDO
    ENDDO
+   !$OMP END DO
 
    ! Extract predicted temperature at next time step from Equation of State
 
+   !$OMP DO
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
@@ -390,6 +388,11 @@ CASE(.TRUE.) PREDICTOR_STEP
          ENDDO
       ENDDO
    ENDDO
+   !$OMP END DO
+
+   DEALLOCATE(ZZ_GET)
+
+   !$OMP END PARALLEL
 
 ! The CORRECTOR step
 
@@ -401,54 +404,48 @@ CASE(.FALSE.) PREDICTOR_STEP
    VV=VS
    WW=WS
 
-   WALL_LOOP_2: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-      WC=>WALL(IW)
+   !$OMP PARALLEL
+
+   !$OMP DO PRIVATE(IW,WC,BC)
+   WALL_LOOP_2: DO IW=1,N_EXTERNAL_WALL_CELLS
+      WC => WALL(IW)
       IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE WALL_LOOP_2
-      BC=>BOUNDARY_COORD(WC%BC_INDEX)
-      ONE_D=>BOUNDARY_ONE_D(WC%OD_INDEX)
-
-      IIG = BC%IIG
-      JJG = BC%JJG
-      KKG = BC%KKG
-      IOR = BC%IOR
-
-      SELECT CASE(WC%BOUNDARY_TYPE)
-         CASE DEFAULT; CYCLE WALL_LOOP_2
-         ! SOLID_BOUNDARY is not currently functional here, but keep for testing
-         CASE(SOLID_BOUNDARY);        UN = -SIGN(1._EB,REAL(IOR,EB))*ONE_D%U_NORMAL_S
-         CASE(INTERPOLATED_BOUNDARY); UN = UVW_SAVE(IW)
-      END SELECT
-
-      SELECT CASE(IOR)
-         CASE( 1); UU(IIG-1,JJG,KKG) = UN
-         CASE(-1); UU(IIG,JJG,KKG)   = UN
-         CASE( 2); VV(IIG,JJG-1,KKG) = UN
-         CASE(-2); VV(IIG,JJG,KKG)   = UN
-         CASE( 3); WW(IIG,JJG,KKG-1) = UN
-         CASE(-3); WW(IIG,JJG,KKG)   = UN
+      BC => BOUNDARY_COORD(WC%BC_INDEX)
+      SELECT CASE(BC%IOR)
+         CASE( 1); UU(BC%IIG-1,BC%JJG  ,BC%KKG  ) = UVW_SAVE(IW)
+         CASE(-1); UU(BC%IIG  ,BC%JJG  ,BC%KKG  ) = UVW_SAVE(IW)
+         CASE( 2); VV(BC%IIG  ,BC%JJG-1,BC%KKG  ) = UVW_SAVE(IW)
+         CASE(-2); VV(BC%IIG  ,BC%JJG  ,BC%KKG  ) = UVW_SAVE(IW)
+         CASE( 3); WW(BC%IIG  ,BC%JJG  ,BC%KKG-1) = UVW_SAVE(IW)
+         CASE(-3); WW(BC%IIG  ,BC%JJG  ,BC%KKG  ) = UVW_SAVE(IW)
       END SELECT
    ENDDO WALL_LOOP_2
+   !$OMP END DO
 
+   !$OMP SINGLE
    IF (ANY(SPECIES_MIXTURE%DEPOSITING) .AND. (GRAVITATIONAL_SETTLING .OR. THERMOPHORETIC_SETTLING)) CALL SETTLING_VELOCITY(NM)
+   !$OMP END SINGLE
 
    ! Compute species mass density at the next time step
 
+   !$OMP DO PRIVATE(N,I,J,K,RHS)
    DO N=1,N_TOTAL_SCALARS
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-
                RHS = - DEL_RHO_D_DEL_Z(I,J,K,N) &
                    + (FX(I,J,K,N)*UU(I,J,K)*R(I) - FX(I-1,J,K,N)*UU(I-1,J,K)*R(I-1))*RDX(I)*RRN(I) &
                    + (FY(I,J,K,N)*VV(I,J,K)      - FY(I,J-1,K,N)*VV(I,J-1,K)       )*RDY(J)        &
                    + (FZ(I,J,K,N)*WW(I,J,K)      - FZ(I,J,K-1,N)*WW(I,J,K-1)       )*RDZ(K)
-
                ZZ(I,J,K,N) = .5_EB*( RHO(I,J,K)*ZZ(I,J,K,N) + RHOS(I,J,K)*ZZS(I,J,K,N) - DT*RHS )
             ENDDO
          ENDDO
       ENDDO
    ENDDO
+   !$OMP END DO
+
+   !$OMP END PARALLEL
 
    ! Add gas production source term
 
@@ -490,8 +487,13 @@ CASE(.FALSE.) PREDICTOR_STEP
       CALL ROTATED_CUBE_RHS_ZZ(T,DT,NM)
    ENDIF
 
+   !$OMP PARALLEL PRIVATE(ZZ_GET)
+
+   ALLOCATE(ZZ_GET(1:N_TOTAL_SCALARS))
+
    ! Get rho = sum(rho*Y_alpha)
 
+   !$OMP DO
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
@@ -500,13 +502,17 @@ CASE(.FALSE.) PREDICTOR_STEP
          ENDDO
       ENDDO
    ENDDO
+   !$OMP END DO
 
    ! Check mass density for positivity
 
+   !$OMP SINGLE
    CALL CHECK_MASS_DENSITY
+   !$OMP END SINGLE
 
    ! Extract Y_n from rho*Y_n
 
+   !$OMP DO
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
@@ -515,19 +521,25 @@ CASE(.FALSE.) PREDICTOR_STEP
          ENDDO
       ENDDO
    ENDDO
+   !$OMP END DO
 
    ! Passive scalars
 
+   !$OMP SINGLE
    CALL CLIP_PASSIVE_SCALARS
+   !$OMP END SINGLE
 
    ! Correct background pressure
 
+   !$OMP SINGLE
    DO I=1,N_ZONE
       PBAR(:,I) = 0.5_EB*(PBAR(:,I) + PBAR_S(:,I) + D_PBAR_DT_S(I)*DT)
    ENDDO
+   !$OMP END SINGLE
 
    ! Compute molecular weight term RSUM=R0*SUM(Y_i/W_i)
 
+   !$OMP DO
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
@@ -537,9 +549,11 @@ CASE(.FALSE.) PREDICTOR_STEP
          ENDDO
       ENDDO
    ENDDO
+   !$OMP END DO
 
    ! Extract predicted temperature at next time step from Equation of State
 
+   !$OMP DO
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
@@ -548,11 +562,15 @@ CASE(.FALSE.) PREDICTOR_STEP
          ENDDO
       ENDDO
    ENDDO
+   !$OMP END DO
+
+   DEALLOCATE(ZZ_GET)
+
+   !$OMP END PARALLEL
 
 END SELECT PREDICTOR_STEP
 
 T_USED(3)=T_USED(3)+CURRENT_TIME()-TNOW
-
 END SUBROUTINE DENSITY
 
 
@@ -594,7 +612,6 @@ DO K=1,KBAR
       VC1(-3)  = DY(J)  *DZ(K-1)
       VC1( 3)  = DY(J)  *DZ(K+1)
       DO I=1,IBAR
-
          IF (RHOP(I,J,K)>=RHOMIN .AND. RHOP(I,J,K)<=RHOMAX) CYCLE
          IC = CELL_INDEX(I,J,K)
          IF (SOLID(IC)) CYCLE
