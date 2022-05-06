@@ -1249,55 +1249,6 @@ END TYPE RESERVED_RAMPS_TYPE
 INTEGER :: N_RESERVED_RAMPS=0
 TYPE (RESERVED_RAMPS_TYPE), DIMENSION(10), TARGET :: RESERVED_RAMPS
 
-
-TYPE HUMAN_TYPE
-   CHARACTER(LABEL_LENGTH) :: NODE_NAME='null'
-   CHARACTER(LABEL_LENGTH) :: FFIELD_NAME='null'
-   REAL(EB) :: X=0._EB,Y=0._EB,Z=0._EB,U=0._EB,V=0._EB,W=0._EB,F_X=0._EB,F_Y=0._EB,&
-               X_old=0._EB,Y_old=0._EB,X_group=0._EB,Y_group=0._EB, U_CB=0.0_EB, V_CB=0.0_EB
-   REAL(EB) :: UBAR=0._EB, VBAR=0._EB, UBAR_Center=0._EB, VBAR_Center=0._EB, T_LastRead_CB=0.0_EB
-   REAL(EB) :: Speed=1.25_EB, Radius=0.255_EB, Mass=80.0_EB, Tpre=1._EB, Tau=1._EB, &
-               Eta=0._EB, Ksi=0._EB, Tdet=0._EB, Speed_ave=0._EB, T_Speed_ave=0._EB, &
-               X_CB=0.0_EB, Y_CB=0.0_EB, X2_CB=0.0_EB, Y2_CB=0.0_EB, UAVE_CB=0.0_EB, VAVE_CB=0.0_EB
-   REAL(EB) :: r_torso=0.15_EB, r_shoulder=0.095_EB, d_shoulder=0.055_EB, angle=0._EB, &
-               torque=0._EB, m_iner=4._EB
-   REAL(EB) :: tau_iner=0.2_EB, angle_old=0._EB, omega=0._EB
-   REAL(EB) :: A=2000._EB, B=0.08_EB, C_Young=120000._EB, Gamma=16000._EB, Kappa=40000._EB, &
-               Lambda=0.5_EB, Commitment=0._EB
-   REAL(EB) :: SumForces=0._EB, IntDose=0._EB, DoseCrit1=0._EB, DoseCrit2=0._EB, SumForces2=0._EB
-   REAL(EB) :: TempMax1=0._EB, FluxMax1=0._EB, TempMax2=0._EB, FluxMax2=0._EB, Density=0._EB, DensityR=0._EB, DensityL=0._EB
-   REAL(EB) :: P_detect_tot=0._EB, v0_fac=1._EB, D_Walls=0._EB
-   REAL(EB) :: T_FallenDown=0._EB, F_FallDown=0._EB, Angle_FallenDown=0._EB, SizeFac_FallenDown=0._EB, T_CheckFallDown=0._EB
-   INTEGER  :: IOR=-1, ILABEL=0, COLOR_INDEX=0, INODE=0, IMESH=-1, IPC=0, IEL=0, I_FFIELD=0, I_Target2=0, ID_CB=-1
-   INTEGER  :: GROUP_ID=0, DETECT1=0, GROUP_SIZE=0, I_Target=0, I_DoorAlgo=0, I_Door_Mode=0, STRS_Direction = 1
-   INTEGER  :: STR_SUB_INDX, SKIP_WALL_FORCE_IOR
-   LOGICAL  :: SHOW=.TRUE., NewRnd=.TRUE., CROWBAR_READ_IN=.FALSE., CROWBAR_UPDATE_V0=.FALSE.
-   LOGICAL  :: SeeDoorXB1=.FALSE., SeeDoorXB2=.FALSE., SeeDoorXYZ1=.FALSE., SeeDoorXYZ2=.FALSE.
-END TYPE HUMAN_TYPE
-
-TYPE HUMAN_GRID_TYPE
-! (x,y,z) Centers of the grid cells in the main evacuation meshes
-! SOOT_DENS: Smoke density at the center of the cell (mg/m3)
-! FED_CO_CO2_O2: Purser's FED for co, co2, and o2
-   REAL(EB) :: X,Y,Z,SOOT_DENS,FED_CO_CO2_O2,TMP_G,RADFLUX
-   INTEGER :: N, N_old, IGRID, IHUMAN, ILABEL
-! IMESH: (x,y,z) which fire mesh, if any
-! II,JJ,KK: Fire mesh cell reference
-   INTEGER  :: IMESH,II,JJ,KK
-END TYPE HUMAN_GRID_TYPE
-
-TYPE HUMAN_GRID_FED_TYPE
-! (x,y,z) Centers of the grid cells in the main evacuation meshes
-! SOOT_DENS: Smoke density at the center of the cell (mg/m3)
-! FED_CO_CO2_O2: Purser's FED for co, co2, and o2
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: X,Y,Z,SOOT_DENS,FED_CO_CO2_O2,TMP_G,RADFLUX
-   INTEGER, ALLOCATABLE, DIMENSION(:,:) :: II,JJ,KK,IMESH
-   INTEGER :: N, N_old, IGRID, IHUMAN, ILABEL
-! IMESH: (x,y,z) which fire mesh, if any
-! II,JJ,KK: Fire mesh cell reference
-   INTEGER  :: IBAR,JBAR,KBAR
-END TYPE HUMAN_GRID_FED_TYPE
-
 TYPE SLICE_TYPE
    INTEGER :: I1,I2,J1,J2,K1,K2,GEOM_INDEX=-1,TRNF_INDEX=-1,INDEX,INDEX2=0,Z_INDEX=-999,Y_INDEX=-999,MATL_INDEX=-999,&
               PART_INDEX=0,VELO_INDEX=0,PROP_INDEX=0,REAC_INDEX=0,SLCF_INDEX
