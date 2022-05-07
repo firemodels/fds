@@ -309,7 +309,7 @@ CASE(.TRUE.) PREDICTOR_STEP
       CALL ROTATED_CUBE_RHS_ZZ(T,DT,NM)
    ENDIF
 
-   !$OMP PARALLEL
+   !$OMP PARALLEL PRIVATE(ZZ_GET)
 
    ! Get rho = sum(rho*Y_alpha)
 
@@ -324,13 +324,12 @@ CASE(.TRUE.) PREDICTOR_STEP
    ENDDO
    !$OMP END DO
 
-   !$OMP END PARALLEL
-
    ! Check mass density for positivity
 
+   !$OMP MASTER
    CALL CHECK_MASS_DENSITY
-
-   !$OMP PARALLEL PRIVATE(ZZ_GET)
+   !$OMP END MASTER
+   !$OMP BARRIER
 
    ALLOCATE(ZZ_GET(1:N_TOTAL_SCALARS))
 
@@ -349,17 +348,19 @@ CASE(.TRUE.) PREDICTOR_STEP
 
    ! Passive scalars
 
-   !$OMP SINGLE
+   !$OMP MASTER
    CALL CLIP_PASSIVE_SCALARS
-   !$OMP END SINGLE
+   !$OMP END MASTER
+   !$OMP BARRIER
 
    ! Predict background pressure at next time step
 
-   !$OMP SINGLE
+   !$OMP MASTER
    DO I=1,N_ZONE
       PBAR_S(:,I) = PBAR(:,I) + D_PBAR_DT(I)*DT
    ENDDO
-   !$OMP END SINGLE
+   !$OMP END MASTER
+   !$OMP BARRIER
 
    ! Compute molecular weight term RSUM=R0*SUM(Y_i/W_i)
 
@@ -418,9 +419,10 @@ CASE(.FALSE.) PREDICTOR_STEP  ! CORRECTOR step
    ENDDO WALL_LOOP_2
    !$OMP END DO
 
-   !$OMP SINGLE
+   !$OMP MASTER
    IF (ANY(SPECIES_MIXTURE%DEPOSITING) .AND. (GRAVITATIONAL_SETTLING .OR. THERMOPHORETIC_SETTLING)) CALL SETTLING_VELOCITY(NM)
-   !$OMP END SINGLE
+   !$OMP END MASTER
+   !$OMP BARRIER
 
    ! Compute species mass density at the next time step
 
@@ -485,7 +487,9 @@ CASE(.FALSE.) PREDICTOR_STEP  ! CORRECTOR step
 
    ! Get rho = sum(rho*Y_alpha)
 
-   !$OMP PARALLEL DO
+   !$OMP PARALLEL PRIVATE(ZZ_GET)
+
+   !$OMP DO
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
@@ -494,13 +498,14 @@ CASE(.FALSE.) PREDICTOR_STEP  ! CORRECTOR step
          ENDDO
       ENDDO
    ENDDO
-   !$OMP END PARALLEL DO
+   !$OMP END DO
 
    ! Check mass density for positivity
 
+   !$OMP MASTER
    CALL CHECK_MASS_DENSITY
-
-   !$OMP PARALLEL PRIVATE(ZZ_GET)
+   !$OMP END MASTER
+   !$OMP BARRIER
 
    ALLOCATE(ZZ_GET(1:N_TOTAL_SCALARS))
 
@@ -519,17 +524,19 @@ CASE(.FALSE.) PREDICTOR_STEP  ! CORRECTOR step
 
    ! Passive scalars
 
-   !$OMP SINGLE
+   !$OMP MASTER
    CALL CLIP_PASSIVE_SCALARS
-   !$OMP END SINGLE
+   !$OMP END MASTER
+   !$OMP BARRIER
 
    ! Correct background pressure
 
-   !$OMP SINGLE
+   !$OMP MASTER
    DO I=1,N_ZONE
       PBAR(:,I) = 0.5_EB*(PBAR(:,I) + PBAR_S(:,I) + D_PBAR_DT_S(I)*DT)
    ENDDO
-   !$OMP END SINGLE
+   !$OMP END MASTER
+   !$OMP BARRIER
 
    ! Compute molecular weight term RSUM=R0*SUM(Y_i/W_i)
 
