@@ -313,9 +313,7 @@ CASE(.TRUE.) PREDICTOR_STEP
       CALL ROTATED_CUBE_RHS_ZZ(T,DT,NM)
    ENDIF
 
-   !$OMP PARALLEL PRIVATE(ZZ_GET)
-
-   ALLOCATE(ZZ_GET(1:N_TOTAL_SCALARS))
+   !$OMP PARALLEL
 
    ! Get rho = sum(rho*Y_alpha)
 
@@ -330,11 +328,15 @@ CASE(.TRUE.) PREDICTOR_STEP
    ENDDO
    !$OMP END DO
 
+   !$OMP END PARALLEL
+
    ! Check mass density for positivity
 
-   !$OMP SINGLE
    CALL CHECK_MASS_DENSITY
-   !$OMP END SINGLE
+
+   !$OMP PARALLEL PRIVATE(ZZ_GET)
+
+   ALLOCATE(ZZ_GET(1:N_TOTAL_SCALARS))
 
    ! Extract mass fraction from RHO * ZZ
 
@@ -487,13 +489,9 @@ CASE(.FALSE.) PREDICTOR_STEP
       CALL ROTATED_CUBE_RHS_ZZ(T,DT,NM)
    ENDIF
 
-   !$OMP PARALLEL PRIVATE(ZZ_GET)
-
-   ALLOCATE(ZZ_GET(1:N_TOTAL_SCALARS))
-
    ! Get rho = sum(rho*Y_alpha)
 
-   !$OMP DO
+   !$OMP PARALLEL DO
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
@@ -502,13 +500,15 @@ CASE(.FALSE.) PREDICTOR_STEP
          ENDDO
       ENDDO
    ENDDO
-   !$OMP END DO
+   !$OMP END PARALLEL DO
 
    ! Check mass density for positivity
 
-   !$OMP SINGLE
    CALL CHECK_MASS_DENSITY
-   !$OMP END SINGLE
+
+   !$OMP PARALLEL PRIVATE(ZZ_GET)
+
+   ALLOCATE(ZZ_GET(1:N_TOTAL_SCALARS))
 
    ! Extract Y_n from rho*Y_n
 
