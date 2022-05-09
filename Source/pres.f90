@@ -53,6 +53,8 @@ ELSE
    RHOP => RHOS
 ENDIF
 
+!$OMP PARALLEL
+
 ! Apply pressure boundary conditions at external cells.
 ! If Neumann, BXS, BXF, etc., contain dH/dx(x=XS), dH/dx(x=XF), etc.
 ! If Dirichlet, BXS, BXF, etc., contain H(x=XS), H(x=XF), etc.
@@ -60,12 +62,13 @@ ENDIF
 ! of boundary condition at x, y and z boundaries. See Crayfishpak
 ! manual for details.
 
+!$OMP DO PRIVATE(IW,WC,EWC,BC,ONE_D,I,J,K,IOR,NOM,H_OTHER,IIO,JJO,KKO,N_INT_CELLS,DX_OTHER,DY_OTHER,DZ_OTHER,VT,TSI) &
+!$OMP&   PRIVATE(TIME_RAMP_FACTOR,P_EXTERNAL,VEL_EDDY,ICF,H0)
 WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
 
    WC => WALL(IW)
    EWC => EXTERNAL_WALL(IW)
    BC => BOUNDARY_COORD(WC%BC_INDEX)
-   ONE_D => BOUNDARY_ONE_D(WC%OD_INDEX)
    I   = BC%II
    J   = BC%JJ
    K   = BC%KK
@@ -161,6 +164,7 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
 
       OPEN_IF: IF (WC%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
 
+         ONE_D => BOUNDARY_ONE_D(WC%OD_INDEX)
          VT => VENTS(WC%VENT_INDEX)
          IF (ABS(ONE_D%T_IGN-T_BEGIN)<=TWO_EPSILON_EB .AND. VT%PRESSURE_RAMP_INDEX >=1) THEN
             TSI = T
@@ -253,6 +257,7 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
    ENDIF IF_DIRICHLET
 
 ENDDO WALL_CELL_LOOP
+!$OMP END DO
 
 ! Compute the RHS of the Poisson equation
 
@@ -270,7 +275,7 @@ SELECT CASE(IPS)
          ENDDO
       ENDIF
       IF (.NOT.CYLINDRICAL) THEN
-         !$OMP PARALLEL DO SIMD PRIVATE(TRM1, TRM2, TRM3, TRM4) SCHEDULE(STATIC)
+         !$OMP DO PRIVATE(TRM1,TRM2,TRM3,TRM4)
          DO K=1,KBAR
             DO J=1,JBAR
                DO I=1,IBAR
@@ -282,7 +287,7 @@ SELECT CASE(IPS)
                ENDDO
             ENDDO
          ENDDO
-         !$OMP END PARALLEL DO SIMD
+         !$OMP END DO
 
       ENDIF
 
@@ -326,6 +331,8 @@ SELECT CASE(IPS)
       ENDDO
 
 END SELECT
+
+!$OMP END PARALLEL
 
 T_USED(5)=T_USED(5)+CURRENT_TIME()-TNOW
 END SUBROUTINE PRESSURE_SOLVER_COMPUTE_RHS
@@ -403,8 +410,11 @@ SELECT CASE(IPS)
       CALL H2CZSS(BXS,BXF,BYS,BYF,ITRN,PRHS,POIS_PTB,SAVE1,WORK,HX)
 END SELECT
 
+!$OMP PARALLEL
+
 SELECT CASE(IPS)
    CASE(:1,4,7)
+      !$OMP DO
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
@@ -412,7 +422,9 @@ SELECT CASE(IPS)
             ENDDO
          ENDDO
       ENDDO
+      !$OMP END DO
    CASE(2)
+      !$OMP DO
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
@@ -420,7 +432,9 @@ SELECT CASE(IPS)
             ENDDO
          ENDDO
       ENDDO
+      !$OMP END DO
    CASE(3,6)
+      !$OMP DO
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
@@ -428,7 +442,9 @@ SELECT CASE(IPS)
             ENDDO
          ENDDO
       ENDDO
+      !$OMP END DO
    CASE(5)
+      !$OMP DO
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
@@ -436,20 +452,25 @@ SELECT CASE(IPS)
             ENDDO
          ENDDO
       ENDDO
+      !$OMP END DO
 END SELECT
 
 ! For the special case of tunnels, add back 1-D global pressure solution to 3-D local pressure solution
 
 IF (TUNNEL_PRECONDITIONER) THEN
+   !$OMP MASTER
    DO I=1,IBAR
       HP(I,1:JBAR,1:KBAR) = HP(I,1:JBAR,1:KBAR) + H_BAR(I_OFFSET(NM)+I)  ! H = H' + H_bar
    ENDDO
    BXS = BXS + BXS_BAR  ! b = b' + b_bar
    BXF = BXF + BXF_BAR  ! b = b' + b_bar
+   !$OMP END MASTER
+   !$OMP BARRIER
 ENDIF
 
 ! Apply boundary conditions to H
 
+!$OMP DO
 DO K=1,KBAR
    DO J=1,JBAR
       IF (LBC==3 .OR. LBC==4)             HP(0,J,K)    = HP(1,J,K)    - DXI*BXS(J,K)
@@ -463,7 +484,9 @@ DO K=1,KBAR
       ENDIF
    ENDDO
 ENDDO
+!$OMP END DO
 
+!$OMP DO
 DO K=1,KBAR
    DO I=1,IBAR
       IF (MBC==3 .OR. MBC==4) HP(I,0,K)    = HP(I,1,K)    - DETA*BYS(I,K)
@@ -476,7 +499,9 @@ DO K=1,KBAR
       ENDIF
    ENDDO
 ENDDO
+!$OMP END DO
 
+!$OMP DO
 DO J=1,JBAR
    DO I=1,IBAR
       IF (NBC==3 .OR. NBC==4)  HP(I,J,0)    = HP(I,J,1)    - DZETA*BZS(I,J)
@@ -489,6 +514,9 @@ DO J=1,JBAR
       ENDIF
    ENDDO
 ENDDO
+!$OMP END DO
+
+!$OMP END PARALLEL
 
 T_USED(5)=T_USED(5)+CURRENT_TIME()-TNOW
 END SUBROUTINE PRESSURE_SOLVER_FFT
