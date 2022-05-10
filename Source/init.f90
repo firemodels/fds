@@ -397,8 +397,8 @@ M%WS    = M%W
 M%FVX   = 0._EB
 M%FVY   = 0._EB
 M%FVZ   = 0._EB
-M%H     = H0
-M%HS    = H0
+M%H     = 0._EB
+M%HS    = 0._EB
 M%KRES  = 0._EB
 
 M%DDDT  = 0._EB
