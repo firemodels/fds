@@ -26,7 +26,7 @@ REAL(EB), INTENT(IN) :: T,DT
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,HP,RHOP
 INTEGER :: I,J,K,IW,IOR,NOM,N_INT_CELLS,IIO,JJO,KKO,ICF
 REAL(EB) :: TRM1,TRM2,TRM3,TRM4,H_OTHER,TNOW, &
-            TSI,TIME_RAMP_FACTOR,DX_OTHER,DY_OTHER,DZ_OTHER,P_EXTERNAL,VEL_EDDY
+            TSI,TIME_RAMP_FACTOR,DX_OTHER,DY_OTHER,DZ_OTHER,P_EXTERNAL,VEL_EDDY,H0
 TYPE (VENTS_TYPE), POINTER :: VT
 TYPE (WALL_TYPE), POINTER :: WC
 TYPE (BOUNDARY_COORD_TYPE), POINTER :: BC
@@ -198,6 +198,12 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
 
          ! Wind inflow boundary conditions
 
+         IF (INITIAL_SPEED>0._EB) THEN
+            H0 = 0._EB
+         ELSE
+            H0 = 0.5_EB*(U0**2+V0**2+W0**2)
+         ENDIF
+
          IF (OPEN_WIND_BOUNDARY) THEN
             IF (ICF>0) THEN
                H0 = 0.5_EB*((U_WIND(K)+VEL_EDDY)**2 + (V_WIND(K)+VEL_EDDY)**2 + (W_WIND(K)+VEL_EDDY)**2)
@@ -265,6 +271,7 @@ SELECT CASE(IPS)
 
    CASE(:1,4,7)
       IF (CYLINDRICAL) THEN
+         !$OMP DO PRIVATE(TRM1,TRM3,TRM4)
          DO K=1,KBAR
             DO I=1,IBAR
                TRM1 = (R(I-1)*FVX(I-1,1,K)-R(I)*FVX(I,1,K))*RDX(I)*RRN(I)
@@ -273,6 +280,7 @@ SELECT CASE(IPS)
                PRHS(I,1,K) = TRM1 + TRM3 + TRM4
             ENDDO
          ENDDO
+         !$OMP END DO
       ENDIF
       IF (.NOT.CYLINDRICAL) THEN
          !$OMP DO PRIVATE(TRM1,TRM2,TRM3,TRM4)
@@ -292,6 +300,7 @@ SELECT CASE(IPS)
       ENDIF
 
    CASE(2)  ! Switch x and y
+      !$OMP DO PRIVATE(TRM1,TRM2,TRM3,TRM4)
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
@@ -303,8 +312,10 @@ SELECT CASE(IPS)
             ENDDO
          ENDDO
       ENDDO
+      !$OMP END DO
 
    CASE(3,6)  ! Switch x and z
+      !$OMP DO PRIVATE(TRM1,TRM2,TRM3,TRM4)
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
@@ -316,8 +327,10 @@ SELECT CASE(IPS)
             ENDDO
          ENDDO
       ENDDO
+      !$OMP END DO
 
    CASE(5)  ! Switch y and z
+      !$OMP DO PRIVATE(TRM1,TRM2,TRM3,TRM4)
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
@@ -329,6 +342,7 @@ SELECT CASE(IPS)
             ENDDO
          ENDDO
       ENDDO
+      !$OMP END DO
 
 END SELECT
 
