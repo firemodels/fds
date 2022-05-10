@@ -19,6 +19,9 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 
+permissions:
+  contents: read
+
 jobs:
   linux-intel-intelmpi:
     # debug build on ubuntu using ifort and intelmpi
