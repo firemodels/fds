@@ -1421,7 +1421,10 @@ Note that the {\em ceiling} function, $\lceil \hbox{CFL} \rceil$, denotes the le
 \begin{equation}
     \mathbf{x}_{\rm p}^{n+1} = \mathbf{x}_{\rm p}^n + \frac{\delta t_{\rm p}}{2} \left( \mathbf{u}_{\rm p}^{n+1} + \mathbf{u}_{\rm p}^n \right)
 \end{equation}
-where $\mathbf{u}_{\rm p}^{n+1}$ is given by Eq.~(\ref{part_soln}).
+where $\mathbf{u}_{\rm p}^{n+1}$ is given by Eq.~(\ref{part_soln}). The transfer of momentum from the particles to the gas is represented by the force term in the momentum equation which is computed by summing over all particles in each grid cell of volume $V$:
+\begin{equation}
+   \mathbf{f}_{\rm b} = \frac{1}{V} \sum_i \left[ m_{{\rm p},i} \left( \bg - \frac{\bu_{{\rm p},i}^{n+1}-\bu_{{\rm p},i}^n}{\d t} \right) + \dot{m}_{{\rm p},i}  (\mathbf{u}_{\rm p}^{n+1} - \mathbf{u}^n) \right]
+\end{equation}
 
 
 

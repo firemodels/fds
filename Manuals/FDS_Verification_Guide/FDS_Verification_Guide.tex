@@ -2050,11 +2050,13 @@ Atmospheric turbulence is affected by the stability of the boundary layer.  A st
 
 \section{Ekman Layers (\texorpdfstring{\textct{ekman\_}}{ekman\_})}
 
-In a simple turbulent channel flow, the resulting boundary layer profile results from the balance between the streamwise pressure gradient and the turbulent stresses.  In an Ekman layer, the Coriolis force is also part of in the balance.  Here, we are concerned with Ekman layers in the atmosphere.  The Coriolis force has the effect of twisting the atmospheric boundary layer---near the surface there is a component of the wind aligned with the pressure gradient, but aloft the winds tend to be geostrophic, meaning they run parallel to isobars (perpendicular to the pressure gradient).  In FDS, input of a geostrophic wind implies a mean pressure gradient in the orthogonal direction (see FDS User Guide \cite{FDS_Users_Guide}).
+In a simple turbulent channel flow, the resulting boundary layer profile results from the balance between the streamwise pressure gradient and the turbulent stresses.  In an Ekman layer, the Coriolis force is also part of the balance.  With Ekman layers the Coriolis force has the effect of twisting the atmospheric boundary layer---near the surface there is a component of the wind aligned with the pressure gradient, but aloft the winds tend to be geostrophic, meaning they run parallel to isobars (perpendicular to the pressure gradient).  In FDS, input of a geostrophic wind implies a mean pressure gradient in the orthogonal direction (see FDS User Guide \cite{FDS_Users_Guide}).
 
-In atmospheric flows, it is difficult to separate the forces for verification purposes.  In this section, we will undertake an admittedly weak form of verification, namely, code to code comparison.  We compare FDS with the results from Schoenberg \cite{Schoenberg:2004} where OpenFOAM is modified for atmospheric flows.  We use the same domain, grid resolution, and---as closely as possible---initial conditions as Schoenberg.  The latitude is specified as 45$^\circ$ north (for specifying the Coriolis force).  We use the Deardorff turbulence model with stability correction and we also implement a variable turbulent Prandtl number, as is done in Schoenberg.  The main difference in the models is that Schoenberg solves a transport equation for $k_{sgs}$ whereas FDS uses a simple algebraic closure (see FDS Tech Guide \cite{FDS_Math_Guide}).  Further, it was difficult to discern the exact initialization procedure from the Schoenberg report, so there are likely some minor differences that can account for the small discrepancies we see in the FDS results.  It should also be noted that the Schoenberg simulations apply a Boussinesq assumption and thus do not account for the pressure stratification term in the energy equation.  Hence, to match the Schoenberg results, we had to set {\ct STRATIFICATION=F} for FDS, which is counterintuitive for an atmospheric flow.  In practice, this should not be done.
+In atmospheric flows, it is difficult to separate the forces for verification purposes.  In this section, we will undertake an admittedly weak form of verification, namely, code-to-code comparison.  We compare FDS with the results from Schoenberg \cite{Schoenberg:2004} where OpenFOAM is modified for atmospheric flows.  We use the same domain, grid resolution, and---as closely as possible---initial conditions as Schoenberg.  The latitude is specified as 45$^\circ$ north (for specifying the Coriolis force).  We use the Deardorff turbulence model with constant turbulent Prandtl number, which differs from Schoenberg, who uses a dynamic turbulent Prantdl number.  The main difference in the models is that Schoenberg solves a transport equation for $k_{sgs}$ whereas FDS uses a simple algebraic closure (see FDS Tech Guide \cite{FDS_Math_Guide}).  Further, it was difficult to discern the exact initialization procedure from the Schoenberg report, so there are likely some minor differences that can account for the small discrepancies we see in the FDS results.  It should also be noted that the Schoenberg simulations apply a Boussinesq assumption and thus do not account for the pressure stratification term in the energy equation.  Hence, to match the Schoenberg results as closely as possible, we have set {\ct STRATIFICATION=F} for FDS, which is counterintuitive for an atmospheric flow.  In practice, this should not be done.
 
-Three cases are run: neutral, stable, and unstable boundary layers.  The domain size, grid resolution, surface flux condition, and geostrophic wind driving force are presented in Table \ref{tab:ekman_param} (adapted from \cite{Schoenberg:2004}). Note that the density and specific heat are specified in the FDS input file such that the surface heat flux in either \si{K.m/s} or \si{W/m^2} are roughly the same.  The boundary conditions are periodic in $x$ and $y$ and no flux at the top of the domain.  Note that this makes achieving a steady state impossible for the stable and unstable cases.  This is another reason why the code comparison is difficult---essentially we are comparing the resulting profiles after approximately 40 hours of real time evolution.  Schoenberg uses a spin up process of running the neutral case for up to 30 hours before transitioning to stratification.  The surface aerodynamic roughness used by Schoenberg is $z_0 = 0.1$ m.  This translates to a sand grain roughness of 3.0 m in FDS.  Note that the input files for the {\ct ekman\_*} series are stored with the validation suite (see {\ct fds/Validation/Schoenberg\_Ekman\_Layers/}), since the cases use 16 processors and take a few hours to complete.
+Three cases are run: neutral, stable, and unstable boundary layers.  The domain size, grid resolution, surface flux condition, and geostrophic wind driving force are presented in Table \ref{tab:ekman_param} (adapted from \cite{Schoenberg:2004}). Note that the density and specific heat are specified in the FDS input file such that the surface heat flux in either \si{K.m/s} or \si{W/m^2} are roughly the same.  The boundary conditions are periodic in $x$ and $y$ and no flux at the top of the domain.  Note that this makes achieving a steady state impossible for the stable and unstable cases.  This is another reason why the code comparison is difficult---essentially we are comparing the resulting profiles after approximately 40 hours of real time evolution.  Schoenberg uses a spin up process of running the neutral case for up to 30 hours before transitioning to stratification.  The surface aerodynamic roughness used by Schoenberg is $z_0 = 0.1$ m for the unstable and neutral cases and $z_0 = 0.13$ m for the stable case.  This translates to a sand grain roughness of 3.0 m and 3.9 m, respectively, in FDS.  Note that the input files for the {\ct ekman\_*} series are stored with the validation suite (see {\ct fds/Validation/Schoenberg\_Ekman\_Layers/}), since the cases use 16 processors and take a few hours to complete.
+
+The differences seen in the stable case may be attributed to (i) the use of a dynamic turbulent Prandtl number by Schoenberg and (ii) FDS not making the Boussinesq approximation. It may be noted that the winds aloft in the FDS run match the specified geostrophic wind $U_g=7$ m/s for the stable case.
 
 \begin{table}[ht]
 \centering
@@ -2502,6 +2504,9 @@ FDS has an option to perform an axially-symmetric calculation, which can be usef
 \label{cyl_test_fig}
 \end{figure}
 
+
+\newpage
+
 \section{Velocity boundary condition implementation (\texorpdfstring{\textct{velocity\_bc\_test}}{velocity\_bc\_test})}
 \label{velocity_bc_test}
 
@@ -2523,6 +2528,8 @@ In this example, a simple jet is created by pushing air through a square duct. T
 \label{velocity_bc_test_plot}
 \end{figure}
 
+
+\newpage
 
 \section{Checking the divergence constraint}
 \label{divergence_test}
@@ -2564,6 +2571,8 @@ In the third example, air is pushed through a two-dimensional channel where obst
 
 
 
+\newpage
+
 \section{Multi-mesh Pressure and Temperature Lapse (\texorpdfstring{\textct{lapse\_rate}}{lapse\_rate})}
 \label{lapse_rate}
 
@@ -2578,6 +2587,8 @@ A 10 m x 10 m x 40 m volume is initialized with {\ct LAPSE\_RATE=-0.01}.  The vo
 \label{lapse_rate_fig}
 \end{figure}
 
+
+\newpage
 
 \section{Randomly Overlapping Meshes (\texorpdfstring{\textct{random\_meshes}}{random\_meshes})}
 \label{random_meshes}
@@ -2594,6 +2605,8 @@ In most FDS simulations, multiple meshes are positioned adjacent to each other t
 \end{figure}
 
 
+\newpage
+
 \section{Spurious Obstruction Effects (\texorpdfstring{\textct{hole}}{hole})}
 \label{hole}
 
@@ -2606,6 +2619,8 @@ It is not uncommon for subtle differences between two nearly identical input fil
 \label{hole_fig}
 \end{figure}
 
+
+\newpage
 
 \section{OpenMP Thread Checking (\texorpdfstring{\textct{race\_test}}{race\_test})}
 \label{race_test}
@@ -2622,6 +2637,8 @@ OpenMP is used in FDS to sub-divide the work of the do-loops among multiple core
 \end{figure}
 
 
+\newpage
+
 \section{Multi-Mesh Layer Height Calculation (\texorpdfstring{\textct{layer}}{layer})}
 \label{layer}
 
@@ -2637,6 +2654,19 @@ The test cases called {\ct Miscellaneous/layer\_1mesh.fds} and {\ct layer\_4mesh
 \end{figure}
 
 
+\newpage
+
+\section{The Restart Feature}
+\label{device_restart}
+
+FDS has a feature with which users can stop and restart simulations. When a simulation is stopped, all necessary variables are packed into arrays and written out to a file. This feature can be fragile when the input file includes devices and controls that initiate actions at certain times. In the simulation named {\ct Restart/device\_restart\_a.fds}, a multi-room fire simulation is stopped and then restarted at 40~s. Before the restart, at 30~s, a door is opened and high temperature gases flow from the fire room into a corridor. After the restart, the case proceeds until 60~s. Another simulation called {\ct device\_restart\_base\_case} runs uninterrupted. The temperature just outside of the fire room door (Fig.~\ref{device_restart_fig}) should be similar in both simulations. The temperatures are not exactly the same because restarting a simulation can lead to minor changes in the algorithm at the time of the restart. 
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/device_restart}
+\caption[Result of the \textct{device\_restart} test case]{Temperature outside of a door to a fire room that is opened at 30~s.}
+\label{device_restart_fig}
+\end{figure}
 
 
 \chapter{Thermal Radiation}
@@ -4424,16 +4454,18 @@ Figure~\ref{surf_mass_two_species} shows the results of three test cases involvi
 
 \clearpage
 
-\subsection{Rate of Solid Particle Decomposition (\texorpdfstring{\textct{solid\_particle\_decomposition}}{solid\_particle\_decomposition})}
+\subsection{Rate of Solid Particle Decomposition (\texorpdfstring{\textct{part\_baking\_soda}}{part\_baking\_soda})}
 \label{sec:solid_particle_decomposition}
-\label{solid_particle_decomposition}
+\label{part_baking_soda}
 
-\textbf{Paul Papas and Changmin Cao, Raytheon Technologies}\\
+\textbf{Paul Papas (Raytheon Technologies) and Changmin Cao (Collins Aerospace Ireland)}\\
 
 In this set of cases we present a simple analytical solution for the solid phase decomposition of a spherical particle with a constant rate of reaction under isothermal conditions.  Let $m(t)$ denote the mass of a spherical particle with radius $r(t)$, changing with time, $t$.  The initial mass is $m_0 = m(t=0)$.  The extent of reaction is defined as
 \begin{equation}
 \alpha \equiv \frac{m_0-m}{m_0}
 \end{equation}
+
+\subsection*{First-order Reaction Model}
 
 The density of the material, $\rho$, is a constant.  The volume is denoted $V(t)$.  The rate of change of $\alpha$ for a first-order reaction is given by \cite{Khawam:2006}
 \begin{equation}
@@ -4460,14 +4492,56 @@ Integrating with constant density gives
 
 \subsection*{Example}
 
-In Fig.~\ref{fig:solid_particle_decomposition} below, we take $A = 3.4e11$ 1/s, $E_a = 103000$ J/mol, $r_0 = 2.5$ $\mu$m, and compare FDS with the analytical solution for $T=[420, 450, 500]$ K.
+We take $A = 3.4e11$ 1/s, $E_a = 103000$ J/mol, $r_0 = 2.5$ $\mu$m, and compare FDS with the analytical solution for $T=[420, 450, 500]$ K.  Results are presented in Fig.~\ref{fig:part_baking_soda} below.
+
+\subsection*{Contracting Volume Reaction Model}
+
+The rate of change of $\alpha$ for a contracting volume is given by \cite{Khawam:2006}
+\begin{equation}
+\frac{\d \alpha}{\d t} = k \, 3(1-\alpha)^{2/3}
+\end{equation}
+For this model, it is helpful to first convert the extent of reaction back to the particle mass,
+\begin{equation}
+\label{eq:R3mass}
+\frac{\d m}{\d t} = - k \, 3 \, m_0^{1/3} \, m^{2/3}
+\end{equation}
+Integrating gives,
+\begin{equation}
+\int m^{-2/3} \,\d m = -k \, 3 \, m_0^{1/3} \int \d t
+\end{equation}
+\begin{equation}
+m^{1/3} = m_0^{1/3} (1-k \, t)
+\end{equation}
+\begin{equation}
+(\rho V)^{1/3} = (\rho_0 V_0)^{1/3} (1-k \, t)
+\end{equation}
+
+Physically, the density would remain constant and the volume would contract, leading to a linear decrease in the particle radius,
+\begin{equation}
+r = r_0 (1-k \, t)
+\end{equation}
+
+However, the FDS reaction equation is not set up to mimic the contracting volume model.  Instead, for the same kinetics parameters, we can achieve the correct mass decay of the particle by holding the volume constant ({\ct ALLOW\_SHRINKING=F}) and adjusting the preexponential factor to account for the initial mass.  By holding the volume constant, Eq.~(\ref{eq:R3mass}) may be written in terms of solid density for material $\alpha$ as follows,
+\begin{equation}
+\label{eq:R3rho}
+\frac{\d \rho_{s,\alpha}}{\d t} = - k \, \underbrace{3 \, \rho_{s,\alpha}(0)^{1/3}}_{\mathrm{adjustment \; factor}} \, \rho_{s,\alpha}^{2/3}
+\end{equation}
+Therefore, to match the initial decay of the contracting volume model, we must multiply $A$ by the factor $3 \, \rho_{s,\alpha}(0)^{1/3}$ and change the order of the reaction to $2/3$.
+
+\subsection*{Example}
+
+We consider the contracting volume model applied to a spherical baking soda (NaHCO$_3$) particle.  We take $A = 3.4e11 \times 3(2200)^{1/3} = 133e11$ 1/s (note: the initial density of the particle is $2200$ \si{kg/m^3}), $E_a = 103000$ J/mol, $r_0 = 2.5$ $\mu$m, and compare FDS with the analytical solution for the particle diameter with the rate constant evaluated at $T=[420, 450, 500]$ K.  We set {\ct ALLOW\_SHRINKING=F} and we report the particle diameter as the initial diameter times the cube root of the density ratio, $d(t) = d_0 (\rho_{s}[t]/\rho_s[0])^{1/3}$.  The results are shown in Fig.~\ref{fig:part_baking_soda} along with a comparison to the rate for the first-order model with the same Arrhenius parameters.  It is worth noting that the contracting volume model leads to a significantly higher decay rate than the first-order reaction for the same set of parameters.
 
 \begin{figure}[!h]
 \centering
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/solid_particle_decomposition}
-\caption[The \textct{solid\_particle\_decomposition} test cases]{Comparison of analytical and predicted particle diameter for a first-order solid phase reaction under isothermal conditions.}
-\label{fig:solid_particle_decomposition}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/part_baking_soda_420K}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/part_baking_soda_450K}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/part_baking_soda_500K}
+\caption[The \textct{part\_baking\_soda} test cases]{Comparison of analytical and predicted particle diameter for first-order and contracting volume solid phase reaction under isothermal conditions.}
+\label{fig:part_baking_soda}
 \end{figure}
+
+
 
 \section{Burning Rate of a Small Object (\texorpdfstring{\textct{cell\_burn\_away}}{cell\_burn\_away})}
 \label{cell_burn_away}
@@ -5085,7 +5159,16 @@ The common parameters used in all the simulations are: $C_{\rm d}=10$, $r_{\rm d
 \label{particle_drag_plots}
 \end{figure}
 
+Following the above notation, the total drag force can also be written as:
+\be F_d=\rho V B\left(\frac{u_{0}}{1 + B \, u_{0} \, t}\right)^2 \ee
+Checking this quantity is useful for confirming the \textct{PARTICLE DRAG FORCE X/Y/Z} output quantities and \textct{SPATIAL\_STATISTIC = 'SUM'} for a volume of particles. The computed results for Case~A are compared to the analytical solution in Fig.~\ref{particle_drag_sum}.
 
+\begin{figure}[ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/particle_drag_sum_A}
+\caption[Sample case of \textct{particle\_drag} sum]{Output of total drag from the \textct{particle\_drag\_U10\_N16} test case compared with analytical solution.}
+\label{particle_drag_sum}
+\end{figure}
 
 
 \subsection{Stationary Spherical Particles in a Duct (\texorpdfstring{\textct{sphere\_drag}}{sphere\_drag})}
@@ -5414,7 +5497,7 @@ Figure~\ref{water_evaporation_4_plot}, left, displays the time history of the en
 \subsection{Case 5}
 \label{water_evaporation_5}
 
-This case is based upon one of the Ranz and Marshall experiments~\cite{Ranz} contained in the FDS Validation Guide~\cite{FDS_Validation_Guide}. The test involves a single evaporating water droplet in relatively dry air. In the FDS Validation Guide, the experiment is modeled using a thermally thin (isothermal) liquid droplet. The purpose of this verification test is to demonstrate that equivalent results are obtained with model the drop as a thermally-thick sphere using the liquid evaporation model for a solid surface with a temperature dependent heat of reaction (in this case vaporization) inputs. Fig.~\ref{water_evaporation_5_plot} compares the thermally-thick and thermally-thin results. The experimental data is also shown for reference.
+This case is based upon one of the Ranz and Marshall experiments~\cite{Ranz} contained in the FDS Validation Guide~\cite{FDS_Validation_Guide} in which a single, stationary water droplet of diameter 1043~$\mu$m in relatively dry air evaporates in approximately 15~min. The droplet is modeled using the thermally-thin liquid droplet model and the thermally-thick model usually used for solid particles. For the thermally-thick droplet, the evaporation model used for liquid pools is applied at the surface of the sphere. A temperature-dependent heat of vaporization is applied. Fig.~\ref{water_evaporation_5_plot} compares the droplet diameter of the thermally-thick and thermally-thin models compared to the experimental measurement.
 
 \begin{figure}[h!]
 \centering
@@ -5466,9 +5549,8 @@ The sum of all the terms, \textct{Q\_TOTAL}, is expected to be zero. The three o
 \subsection{Case 8}
 \label{water_evaporation_8}
 
-In this case, we compare FDS predictions against a 1D spherical heat transfer model evaporation using the FDS properties for water and air. This case replicates Fig.~6 of the Li and Chow paper in Ref.~\cite{LiChow:2008}.  The simulation consists of an injection of a 100~$\mu$m droplet at 10~$^\circ$C into 60~$^\circ$C air with an initial water vapor mass fraction of 10~\%. The initial speed of the droplet is 3 m/s in the negative $z$ direction (downward with gravity turned on).
+This case is similar to Case~5 except that here the droplet has a diameter of 100~$\mu$m and it is dropped with an initial velocity of 3~m/s. The measurements are described in Li and Chow~\cite{LiChow:2008}. The specific case is shown in Fig.~6 of the paper. The simulation consists of an injection of a 100~$\mu$m droplet at 10~$^\circ$C into 60~$^\circ$C air with an initial water vapor mass fraction of 10~\%. The initial speed of the droplet is 3~m/s in the negative $z$ direction (downward with gravity turned on).
 
-% Two sets of FDS results are shown for droplet position (left in Fig.~\ref{water_evaporation_8_plots}) and droplet diameter (right).  The circle markers show results from the FDS thermally thin (isothermal) droplet model. The squares show results using the liquid pyrolysis model for a blowing sphere and the thermally thick (spherically symmetric) heat transfer solution using about 10 cells along the radius of the droplet.
 
 \begin{figure}[h!]
 \noindent
@@ -5800,22 +5882,31 @@ The overall mass in the domain should not change. Figure~\ref{fig_zone_shape_2} 
    \label{fig_zone_shape_2}
 \end{figure}
 
+\FloatBarrier
 
 \subsection{Leak Pressure Exponent (\texorpdfstring{\textct{HVAC\_leak\_exponent}}{HVAC\_leak\_exponent})}
 \label{HVAC_leak_exponent}
+\label{HVAC_leak_exponent_2}
 
-In a typical building as the interior pressure rises, the leakage area will grow as small gaps, cracks, and other leakage paths open up. Leakage tests performed according to test standards such as ASTM~E~779 provide two additional data points to quantify this behavior. These are the {\ct LEAK\_PRESSURE\_EXPONENT} and the {\ct LEAK\_REFERENCE\_PRESSURE}. The use of these additional inputs are shown in the equation below as $n$ and $\Delta p_{\rm ref}$ respectively where $A_{\rm L,ref}$ is given by {\ct LEAK\_AREA}.
-\be  A_{\rm L} = A_{\rm L,ref} \left( \frac{\Delta p}{\Delta p_{\rm ref}} \right)^{n-0.5} \ee
-By default, $n=0.5$ and $\Delta p_{\rm ref}=4$~Pa, meaning that the leak area will not change with pressure unless you specify an exponent other than 0.5.
+As the interior pressure rises in a typical building, the leakage area will grow as small gaps, cracks, and other leakage paths open up. Leakage tests performed according to test standards such as ASTM~E779 provide two additional data points to quantify this behavior. These are the {\ct LEAK\_PRESSURE\_EXPONENT} and the {\ct LEAK\_REFERENCE\_PRESSURE}. The use of these additional inputs are shown in the equation below as $n$ and $\Delta p_{\rm ref}$ respectively where $A_{\rm L,ref}$ is given by {\ct LEAK\_AREA}. Additionally, a discharge coefficient, $C_{\rm d}$, is often applied in practice.
+\be  
+   \dot{V}_{\rm L} = C_{\rm d} \, A_{\rm L,ref} \left( \frac{|\Delta p|}{\Delta p_{\rm ref}} \right)^{n-0.5}  \sqrt{\frac{2 |\Delta p|}{\rho_0}}
+\ee
+By default, $C_{\rm d}=1$, $n=0.5$ and $\Delta p_{\rm ref}=4$~Pa, meaning that the leak area will not change with pressure unless you specify an exponent other than 0.5.
 
-This verification case has three 1000~m$^3$ compartments have 0.01~m$^2$ of leakage to the ambient. Each compartment is supplied with 0.16~$m^3/s$ of inlet flow. The first compartment has the default values for the exponent and reference pressure, the second changes the exponent to 0.6, and the third third changes exponent and the reference pressure respectively to 0.6 and 10~Pa. The expected leakage velocities for these conditions are 160~m/s, 11.8~m/s, and 12.8~m/s. Note in Figure \ref{leak_exponent_fig} the velocities are negative as the FDS output for the leakage velocity is from the lower numbered pressure zone (in this case ambient) to the higher number (inside the compartment). Negative velocity indicates flow from inside to outside as expected.
+The first verification case involves three 1000~m$^3$ compartments that have 0.01~m$^2$ of leakage to the ambient. Each compartment is supplied with 0.16~m$^3$/s of inlet flow. The first compartment has the default values for the exponent and reference pressure, the second changes the exponent to 0.6, and the third third changes exponent and the reference pressure respectively to 0.6 and 10~Pa. The expected leakage velocities for these conditions are 160~m/s, 11.8~m/s, and 12.8~m/s. Note in the left plot of Fig.~\ref{leak_exponent_fig} that the velocities are negative because the FDS output for the leakage velocity is from the lower numbered pressure zone (in this case ambient) to the higher number (inside the compartment). Negative velocity indicates flow from inside to outside as expected.
+
+The second case involves a steel enclosure with four localized leaks, two near the bottom and two near the top. The air flow into the compartment is ramped up slowly, and the right hand plot of Fig.~\ref{leak_exponent_fig} shows the ideal and predicted relationship between the volume flow and compartment pressure. In this case, $C_{\rm d}=0.61$, $n=0.6$, $\Delta p_{\rm ref}=1$~Pa, and $A_{\rm L,ref}=0.18$ at each of the four ``cracks.''
 
 \begin{figure}[ht]
-	\centering
-	\includegraphics[height=2.2in]{SCRIPT_FIGURES/HVAC_leak_exponent}
-	\caption[The \textct{HVAC\_leak\_exponent} case]{Velocities through leakage with varying \textct{LEAK\_PRESSURE\_EXPONENT} and \textct{LEAK\_REFERENCE\_PRESSURE}}
-	\label{leak_exponent_fig}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/HVAC_leak_exponent}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/HVAC_leak_exponent_2}
+\caption[The \textct{HVAC\_leak\_exponent} cases]{(Left) Leakage velocities resulting from varying \textct{LEAK\_PRESSURE\_EXPONENT} and \textct{LEAK\_REFERENCE\_PRESSURE}. (Right) Volume flow versus pressure for a leaking steel enclosure.}
+\label{leak_exponent_fig}
 \end{figure}
+
+\FloatBarrier
+
 
 \section{ASHRAE Sample Problem 7\\(\texorpdfstring{\textct{ashrae\_7\_fixed\_flow}}{ashrae\_7\_fixed\_flow}, \texorpdfstring{\textct{ashrae\_7\_quadratic}}{ashrae\_7\_quadratic}, \texorpdfstring{\textct{ashrae\_7\_table}}{ashrae\_7\_table})}
 \label{ashrae7}
@@ -6569,7 +6660,7 @@ as shown in Fig.~\ref{sphere_leak_fig}.
 \subsection{Restart Function}
 \label{geom_restart}
 
-In this test, a GEOM cube is heated from below by a surface at a fixed temperature.  The internal temperature inside the geometry is monitored.  The full calculation runs for 1,200 s.  At 700 s, a RESTART is performed and compared with the base case.  The results are shown in Fig.~\ref{fig:geom_restart}.
+In this test, a GEOM cube is heated from below by a surface at a fixed temperature.  The internal temperature inside the geometry is monitored.  The full calculation runs for 1,200 s.  At 700 s, a {\ct RESTART} is performed and compared with the base case.  The results are shown in Fig.~\ref{fig:geom_restart}.
 \begin{figure}[ht]
 \centering
 \includegraphics[width=3.2in]{../FDS_Verification_Guide/SCRIPT_FIGURES/geom_restart.pdf}

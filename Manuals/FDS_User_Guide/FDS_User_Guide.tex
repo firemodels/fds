@@ -445,6 +445,10 @@ where {\ct N} is the number of OpenMP threads to assign to each MPI process for 
 
 If you wish to run FDS on more than one computer, do the following:
 \begin{enumerate}
+\item The first time you run a job, you must provide your domain name and password by issuing this command:
+
+      {\ct mpiexec -register}
+
 \item Create a text file, say {\ct hosts.txt}, and in it list, line by line, the names of your computers:
 
       fred:3 \\
@@ -968,17 +972,6 @@ Usually in a MPI calculation, each mesh is assigned its own process, and each pr
 &MESH ID='mesh6', IJK=..., XB=..., MPI_PROCESS=3 /
 \end{lstlisting}
 The parameter {\ct MPI\_PROCESS} instructs FDS to assign that particular mesh to the given process. In this case, only four processes are to be started, numbered 0 through 3. Note that the processes need to be invoked in ascending order, starting with 0. Why would you do this? Suppose you only have four processors available for this job. By starting only four processes instead of six, you can save time because `mesh2' and `mesh3' can communicate directly with each other without having to transmit data using MPI calls over the network. Same goes for `mesh5' and `mesh6'. In essence, it is as if these mesh pairs are neighbors and need not send mail to each other via the postal system. The letters can just be walked next door.
-
-Additionally to the mesh assignment to individual MPI processes, the number of OpenMP threads for each MPI process may be specified. The parameter {\ct N\_THREADS} instructs FDS to set this number of threads and must be consistent for all meshes on the same MPI process, but may vary between them:
-\begin{lstlisting}
-&MESH ID='mesh1', IJK=..., XB=..., MPI_PROCESS=0 /
-&MESH ID='mesh2', IJK=..., XB=..., MPI_PROCESS=1, N_THREADS=2 /
-&MESH ID='mesh3', IJK=..., XB=..., MPI_PROCESS=1, N_THREADS=2 /
-&MESH ID='mesh4', IJK=..., XB=..., MPI_PROCESS=2, N_THREADS=4 /
-&MESH ID='mesh5', IJK=..., XB=..., MPI_PROCESS=3 /
-&MESH ID='mesh6', IJK=..., XB=..., MPI_PROCESS=3 /
-\end{lstlisting}
-Notes: An unspecified value will result in the default number of threads (see \ref{single_mesh}) on the MPI process. Some cluster systems do not support a heterogeneous distribution of resources, here computational cores, per MPI process. Therefore, the number of OpenMP threads may change, but not the amount of cores assigned to the MPI process.
 
 For cases involving many meshes, you might want to assign them colors using either the character string {\ct COLOR} or the integer triplet {\ct RGB}. You may also want to consider using the multiplying feature to easily create a 3-D array of meshes. See Section~\ref{info:MULT} for details.
 
@@ -1586,20 +1579,25 @@ By default, FDS will suspend the pressure iterations if the error does not drop 
 To verify the accuracy of the pressure solution on each mesh, set {\ct CHECK\_POISSON} to {\ct T} on the {\ct PRES} line, instructing FDS to check that the left-hand and right-hand sides of the Poisson equation are equivalent (see the FDS Tech Guide \cite{FDS_Math_Guide}).  The error is printed to the {\ct CHID.out} file. Note that this verifies the accuracy of the {\em local}, not the global, pressure solution. To check the accuracy of the global pressure solution, see Section~\ref{tunnel_demo}.
 
 
-\subsection{Optional Pressure Solver}
+\subsection{Optional Pressure Solvers}
 \label{optional_pressure_solver}
 
-The default Poisson solver in FDS ({\ct SOLVER='FFT'} on the {\ct PRES} line) is based on the package of linear algebra routines called CrayFishpak. For non-overlapping, non-stretched meshes at the same refinement level covering a single connected domain, you can specify {\ct SOLVER='UGLMAT'} on the {\ct PRES} line to solve the global Poisson equation over the entire domain. The solver used is the Intel\textsuperscript{\textregistered} MKL Sparse Cluster Solver. When using {\ct 'UGLMAT'}, the unknown values of the pressure live only in gas-phase cells, allowing for the normal components of velocity at a solid surface to be computed exactly (no velocity penetration error).  Strictly speaking, in this mode, FDS is no longer using an ``immersed boundary method'' for flow obstructions---the pressure solution is now ``unstructured.'' If you specify {\ct SOLVER='GLMAT'}, the pressure is solved in both solid and gas cells using an immersed boundary method for flow obstructions, the same as the default FFT solver.  This mode will reproduce the exact same pressure solution as a single mesh FFT solve.  That is, velocity errors at any mesh boundaries will be eliminated. As UGLMAT and GLMAT are based on Intel\textsuperscript{\textregistered} MKL parallel LU decomposition solver, they require computation and storage of global factorization matrices. Depending on the size of the problem, these operations can be expensive in terms of both CPU time and memory. Our tests find it suitable for problems with up to a million cells on a multi-core workstation with 64~GB of RAM. Note that currently a single discretization matrix is built for all gas cells defined on the model, therefore the solver is not meant to be used in cases where both sealed compartments and regions with open boundaries are present.
-
+The default Poisson solver in FDS ({\ct SOLVER='FFT'} on the {\ct PRES} line) is based on the package of linear algebra routines called CrayFishpak. However, in certain circumstances you may need to use one of several alternatives that is based on the Intel\textsuperscript{\textregistered} MKL Sparse Cluster Solver.
+\begin{description}
+\item[{\ct SOLVER='ULMAT'}] With this solver, the unknown values of the pressure live only in gas-phase cells, allowing for the normal components of velocity at a solid surface to be computed exactly with no penetration error. Strictly speaking, in this mode, FDS is no longer using an ``immersed boundary method'' for flow obstructions---the pressure solution is now ``unstructured,'' hence the {\ct U} in its name. This solver does not guarantee that the normal component of velocity matches perfectly at mesh boundaries, and the iterative procedure used by the default {\ct 'FFT'} solver is still used to drive the velocity normals closer together. This solver option does allow for internal sealed regions within the domain for which additional matrices must be computed.
+\item[{\ct SOLVER='GLMAT'}]  This solver is for non-overlapping, non-stretched meshes at the same refinement level covering a single connected domain, i.e. a large rectangular box. With this solver, the pressure in both solid and gas cells is computed using an immersed boundary method for flow obstructions, the same as the default {\ct 'FFT'} solver.  This mode produces the exact same pressure solution as the {\ct 'FFT'} solver would if the domain were one single mesh. That is, velocity errors at any mesh boundaries are eliminated. Note that currently a single discretization matrix is built for all gas cells defined on the model, therefore the solver is not meant to be used in cases where ther are internal sealed regions within the domain.
+\item[{\ct SOLVER='UGLMAT'}] This solver is for non-overlapping, non-stretched meshes at the same refinement level covering a single connected domain, i.e. a large rectangular box. Like the solver {\ct 'ULMAT'}, the unknown values of the pressure live only in gas-phase cells, allowing for the normal components of velocity at a solid surface to be computed exactly (no velocity penetration error). In addition, this solver ensures that the normal component of velocity matches perfectly at mesh boundaries. The limitation of this solver is that it does not allow for internal sealed regions within the domain. It is also the most expensive of the alternative solvers.
+\end{description}
+Because these alternative methods are based on the Intel\textsuperscript{\textregistered} MKL parallel LU decomposition solver, they require computation and storage of global factorization matrices. Depending on the size of the problem, these operations can be expensive in terms of both CPU time and memory. It has been found suitable for problems with up to a million cells on a multi-core workstation with 64~GB of RAM.
 
 \subsection{Example Case: Pressure\_Solver/duct\_flow}
 \label{duct_flow}
 
-To demonstrate how to improve the accuracy of the pressure solver, consider the flow of air through a square duct that crosses several meshes. In the sample input file, {\ct duct\_flow.fds}, air is pushed through a 1 m$^2$ duct at 1~m/s. With no thermal expansion, the volume flow into the duct ought to equal the volume flow out of the duct. Figure~\ref{duct_flow_fig} displays the computed inflow and outflow as a function of time and the number of pressure iterations required. The default pressure solution strategy uses block-wise direct FFT solves combined with a direct forcing immersed boundary method to model flow obstructions.  Hence, there are two sources of pressure error: one at a mesh interface and one at a solid boundary.  The default pressure iteration scheme tries to drive both sources of error to the specified (or default) velocity tolerance. In the {\ct duct\_flow} case, the {\ct VELOCITY\_TOLERANCE} has been set to 0.001~m/s with {\ct MAX\_PRESSURE\_ITERATIONS} set to 1000 and the grid cell size is 0.2~m.  For the default scheme (FFT + IBM), the outflow does not match the inflow exactly because of inaccuracies at the solid and mesh boundaries.  We have also included the results using the UGLMAT solver with an unstructured pressure matrix, which allows the flow solver to enforce the impermeability condition (zero normal component of velocity) at a solid boundary.
+To demonstrate how to improve the accuracy of the pressure solver, consider the flow of air through a square duct that crosses several meshes. In the sample input file, {\ct duct\_flow.fds}, air is pushed through a 1 m$^2$ duct at 1~m/s. With no thermal expansion, the volume flow into the duct ought to equal the volume flow out of the duct. Figure~\ref{duct_flow_fig} displays the computed inflow and outflow as a function of time and the number of pressure iterations required. The default pressure solution strategy uses block-wise direct FFT solves combined with a direct forcing immersed boundary method to model flow obstructions.  Hence, there are two sources of pressure error: one at a mesh interface and one at a solid boundary.  The default pressure iteration scheme tries to drive both sources of error to the specified (or default) velocity tolerance. In the {\ct duct\_flow} case, the {\ct VELOCITY\_TOLERANCE} has been set to 0.001~m/s with {\ct MAX\_PRESSURE\_ITERATIONS} set to 1000 and the grid cell size is 0.2~m.  For the default scheme (FFT + IBM), the outflow does not match the inflow exactly because of inaccuracies at the solid and mesh boundaries.  We have also included the results using the {\ct 'UGLMAT'} solver with an unstructured pressure matrix, which allows the flow solver to enforce the impermeability condition (zero normal component of velocity) at a solid boundary.
 \begin{lstlisting}
 &PRES SOLVER='UGLMAT' /
 \end{lstlisting}
-As seen in Fig.~\ref{duct_flow_fig}, the volume flow matches perfectly and the number of required pressure iterations is one.  Whether this pressure solver strategy is most efficient depends on the problem and the required error tolerance.  In this particular case, the UGLMAT case runs about 25 \% faster than the default FFT case, and it is more accurate. The reason is that a tight tolerance has been specified and the FFT solver is forced to iterate tens or hundreds of times per time step. When run with default error tolerances, the FFT solver is faster, but less accurate, than the GLMAT solvers.
+As seen in Fig.~\ref{duct_flow_fig}, the volume flow matches perfectly and the number of required pressure iterations is one.  Whether this pressure solver strategy is most efficient depends on the problem and the required error tolerance.  In this particular case, the {\ct 'UGLMAT'} case runs about 25 \% faster than the default FFT case, and it is more accurate. The reason is that a tight tolerance has been specified and the FFT solver is forced to iterate tens or hundreds of times per time step. When run with default error tolerances, the {\ct 'FFT'} solver is faster, but less accurate, than the alternative solvers.
 
 \begin{figure}[ht]
 \begin{center}
@@ -1614,7 +1612,7 @@ As seen in Fig.~\ref{duct_flow_fig}, the volume flow matches perfectly and the n
 \subsection{Example Case: Pressure\_Solver/dancing\_eddies}
 \label{dancing_eddies}
 
-In this example, air is pushed through a 30~cm long, two-dimensional channel at 0.5~m/s. A plate obstruction normal to the flow creates a Karman vortex street. The computational domain is divided into 4 meshes. Three simulations are performed: one in which the {\ct VELOCITY\_TOLERANCE} is set to the default value, one in which it is set to a relatively small value, and one in which the {\ct SOLVER='UGLMAT'} is used. Figure~\ref{dancing_eddies_figure} shows the downstream pressure histories for these cases compared to a simulation that uses only one mesh. The case with the tighter tolerance produces a better match to the single mesh solution, but at a higher computational cost---about a factor of 2.5 .  The {\ct SOLVER='UGLMAT'} case takes just a little longer than the default---by a factor of 1.25---but the error is machine precision.  These cases used MPI for domain decomposition, but only a single OpenMP thread.  Note, however, that the UGLMAT solver is threaded, whereas currently the FFT solver (FDS default) is not.
+In this example, air is pushed through a 30~cm long, two-dimensional channel at 0.5~m/s. A plate obstruction normal to the flow creates a Karman vortex street. The computational domain is divided into 4 meshes. Three simulations are performed: one in which the {\ct VELOCITY\_TOLERANCE} is set to the default value, one in which it is set to a relatively small value, and one in which the {\ct SOLVER='UGLMAT'} is used. Figure~\ref{dancing_eddies_figure} shows the downstream pressure histories for these cases compared to a simulation that uses only one mesh. The case with the tighter tolerance produces a better match to the single mesh solution, but at a higher computational cost---about a factor of 2.5 .  The {\ct SOLVER='UGLMAT'} case takes just a little longer than the default---by a factor of 1.25---but the error is machine precision.  These cases used MPI for domain decomposition, but only a single OpenMP thread.  Note, however, that the {\ct 'UGLMAT'} solver is threaded, whereas currently the {\ct 'FFT'} solver (FDS default) is not.
 
 \begin{figure}[ht]
 \begin{center}
@@ -1623,11 +1621,11 @@ In this example, air is pushed through a 30~cm long, two-dimensional channel at 
 \includegraphics[width=3in]{SCRIPT_FIGURES/dancing_eddies_uglmat}
 \includegraphics[width=\textwidth]{SCRIPT_FIGURES/dancing_eddies}
 \end{center}
-\caption[Results of the {\ct dancing\_eddies} test cases]{(Top) Comparison of pressure traces in the channel for three different settings of {\ct VELOCITY\_TOLERANCE}, the default value (upper-left), a tighter tolerance (upper-right), machine precision from the UGLMAT solver with a single iteration (middle). (Bottom) A contour plot of the pressure after 2~s with the default tolerance.}
+\caption[Results of the {\ct dancing\_eddies} test cases]{(Top) Comparison of pressure traces in the channel for three different settings of {\ct VELOCITY\_TOLERANCE}, the default value (upper-left), a tighter tolerance (upper-right), machine precision from the {\ct 'UGLMAT'} solver with a single iteration (middle). (Bottom) A contour plot of the pressure after 2~s with the default tolerance.}
 \label{dancing_eddies_figure}
 \end{figure}
 
-The case called {\ct dancing\_eddies\_tight} is rerun without the special pressure preconditioner {\ct dancing\_eddies\_tight\_no\_precon}. Figure~\ref{dancing_eddies_precon} shows the reduction in the number of pressure iterations (left) and the CPU time (right).
+The case called {\ct dancing\_eddies\_tight} is rerun without the special pressure preconditioner. Figure~\ref{dancing_eddies_precon} shows the reduction in the number of pressure iterations (left) and the CPU time (right).
 
 \begin{figure}[ht]
 \includegraphics[width=3in]{SCRIPT_FIGURES/dancing_eddies_iterations}
@@ -1710,9 +1708,9 @@ A common application of FDS is tunnel fires, but simulations of fires in long, r
 \item If you are using multiple meshes, reduce the value of {\ct VELOCITY\_TOLERANCE} on the {\ct PRES} line to force a tighter match of velocities at the mesh boundaries. The default value of {\ct VELOCITY\_TOLERANCE} (with units of m/s) is $\dx/2$. If you set {\ct TUNNEL\_PRECONDITIONER=T}, there is less of a need to decrease the {\ct VELOCITY\_TOLERANCE} from its default value, but it still may be necessary to increase the {\ct MAX\_PRESSURE\_ITERATIONS} to account for occasional excursions of pressure.
 \item Create {\ct OPEN} vents at various points along the length of the tunnel, near or at the floor. This models natural leakage in the tunnel, and alleviates, to some extent, wild oscillations in pressure. Note that even if the pressure equation is solved perfectly over the entire domain, the low Mach number assumption will still lead to fictitiously large fluctuations in pressure. The {\ct OPEN} boundaries can help relieve these pressure oscillations. If you do choose to create {\ct OPEN} boundaries along the length of the tunnel, you should {\em not} set {\ct TUNNEL\_PRECONDITIONER} to {\ct T}
 \item Reduce the value of {\ct PRESSURE\_TOLERANCE} on the {\ct PRES} line to alleviate the mismatch between old and new pressure fields. The default value is $20/\dx^2$~s$^{-2}$. A good value to try would be 1/5 to 1/10 of the default value.
-\item Use the GLMAT solver to strictly enforce the matching of normal velocity and pressure at mesh boundaries or the UGLMAT solver to do what GLMAT does plus enforce zero normal velocities at solid obstructions. If you use these solvers, you need not set the various tolerances described above or use the {\ct TUNNEL\_PRECONDITIONER}. However, these solvers are very expensive, so it is best to try a simple case first to determine how much CPU time the pressure solver consumes.
+\item Set {\ct SOLVER='GLMAT'} on the {\ct PRES} line to strictly enforce the matching of normal velocity and pressure at mesh boundaries or {\ct 'UGLMAT'} to do what {\ct 'GLMAT'} does plus enforce zero normal velocities at solid obstructions. If you use these solvers, you need not set the various tolerances described above or use the {\ct TUNNEL\_PRECONDITIONER}. However, these solvers are very expensive, so it is best to try a simple case first to determine how much CPU time the pressure solver consumes.
 \end{enumerate}
-Two simple test cases, {\ct Pressure\_Solver/tunnel\_demo.fds} and {\ct tunnel\_demo\_glmat.fds}, demonstrate some of the issues discussed in this section. The first case uses the default FFT-based pressure solver with the {\ct TUNNEL\_PRECONDITIONER} set to {\ct T}; the second uses the GLMAT solver. An 8~MW fire is situated in a 4~m by 4~m by 128~m long tunnel that is sloped 10$^\circ$, closed at the lower end and open at the upper end. The tunnel is divided into 8 meshes, all the same size, with a uniform grid of 20~cm. The cases run for a relatively short amount of time, and diagnostic files\footnote{Caution: the velocity error file can be quite large. Use it only for relatively short simulations only.} containing information about the velocity and pressure errors are printed out. These files are generated by setting {\ct VELOCITY\_ERROR\_FILE=T} on the {\ct DUMP} line. The names of the files are {\ct tunnel\_demo\_pressit.csv} and {\ct tunnel\_demo\_glmat\_pressit.csv}. A description of each column is as follows:
+Two simple test cases, {\ct Pressure\_Solver/tunnel\_demo.fds} and {\ct tunnel\_demo\_glmat.fds}, demonstrate some of the issues discussed in this section. The first case uses the default FFT-based pressure solver with the {\ct TUNNEL\_PRECONDITIONER} set to {\ct T}; the second uses the {\ct 'GLMAT'} solver. An 8~MW fire is situated in a 4~m by 4~m by 128~m long tunnel that is sloped 10$^\circ$, closed at the lower end and open at the upper end. The tunnel is divided into 8 meshes, all the same size, with a uniform grid of 20~cm. The cases run for a relatively short amount of time, and diagnostic files\footnote{Caution: the velocity error file can be quite large. Use it only for relatively short simulations only.} containing information about the velocity and pressure errors are printed out. These files are generated by setting {\ct VELOCITY\_ERROR\_FILE=T} on the {\ct DUMP} line. The names of the files are {\ct tunnel\_demo\_pressit.csv} and {\ct tunnel\_demo\_glmat\_pressit.csv}. A description of each column is as follows:
 \begin{description}
 \item[\ct Time:] Simulation time (s)
 \item[\ct Time Step:] The index of the time step
@@ -1724,7 +1722,7 @@ Two simple test cases, {\ct Pressure\_Solver/tunnel\_demo.fds} and {\ct tunnel\_
 \item[\ct Mesh,I,J,K:] The mesh and cell indices where the maximum pressure error occurs
 \item[\ct Pressure Error:] The quantity shown in Eq.~(\ref{pressure_error}) in units of s$^{-2}$
 \end{description}
-Figure~\ref{tunnel_demo_fig} shows the velocity and pressure errors for the two cases over a short span of the simulation. For each quantity, there is a default error tolerance which may or may not be reached depending on whether or not the {\ct MAX\_PRESSURE\_ITERATIONS} (default 10) has been reached, or whether or not the error is reduced by at least 25~\% over the previous iteration. In some situations, the error decreases slowly, and these criteria have been added to avoid excessive iterations that lead to little improvement in accuracy. The errors shown in Fig.~\ref{tunnel_demo_fig} are relatively large because fires in long, closed enclosures like tunnels can generate large fluctuations in pressure that challenge both the multiple mesh capability and the pressure solving algorithm discussed above. Note that the simulation using the GLMAT solver has no velocity error in this case because it solves the Poisson equation directly over the entire domain, not mesh by mesh. However, this simulation still requires iterations of the pressure solver to drive the solution closer to the true solution of the inseparable Poisson equation.
+Figure~\ref{tunnel_demo_fig} shows the velocity and pressure errors for the two cases over a short span of the simulation. For each quantity, there is a default error tolerance which may or may not be reached depending on whether or not the {\ct MAX\_PRESSURE\_ITERATIONS} (default 10) has been reached, or whether or not the error is reduced by at least 25~\% over the previous iteration. In some situations, the error decreases slowly, and these criteria have been added to avoid excessive iterations that lead to little improvement in accuracy. The errors shown in Fig.~\ref{tunnel_demo_fig} are relatively large because fires in long, closed enclosures like tunnels can generate large fluctuations in pressure that challenge both the multiple mesh capability and the pressure solving algorithm discussed above. Note that the simulation using the {\ct 'GLMAT'} solver has no velocity error in this case because it solves the Poisson equation directly over the entire domain, not mesh by mesh. However, this simulation still requires iterations of the pressure solver to drive the solution closer to the true solution of the inseparable Poisson equation.
 
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -1733,7 +1731,7 @@ Figure~\ref{tunnel_demo_fig} shows the velocity and pressure errors for the two 
 \includegraphics[width=3in]{SCRIPT_FIGURES/tunnel_demo_glmat_velocity} &
 \includegraphics[width=3in]{SCRIPT_FIGURES/tunnel_demo_glmat_pressure}
 \end{tabular*}
-\caption[Convergence test for the {\ct tunnel\_demo} test cases]{Reduction in velocity and pressure error due to iteration of the pressure solver. The top two plots are the result of the FFT-based solver; the lower two GLMAT.}
+\caption[Convergence test for the {\ct tunnel\_demo} test cases]{Reduction in velocity and pressure error due to iteration of the pressure solver. The top two plots are the result of the FFT-based solver; the lower two {\ct 'GLMAT'}.}
 \label{tunnel_demo_fig}
 \end{figure}
 
@@ -2475,7 +2473,7 @@ of the ceiling, FDS will ignore the ceiling properties and apply the supply prop
 the second as it did in versions prior to FDS 5. Now, the rule for {\ct VENT}s is ``first come, first served.''
 Keep in mind, however, that the
 second {\ct VENT} is not rejected entirely -- only where there is overlap. FDS will also print out a warning to the screen (or to
-standard error) saying which {\ct VENT} has priority.  Also, be careful if any of the {\ct VENT}s are applying {\ct OPEN} boundary conditions -- {\ct OPEN} boundaries disable pressure {\ct ZONE}s, which will change the solutio of the problem.
+standard error) saying which {\ct VENT} has priority.  Also, be careful if any of the {\ct VENT}s are applying {\ct OPEN} boundary conditions -- {\ct OPEN} boundaries disable pressure {\ct ZONE}s, which will change the solution of the problem.
 
 Smokeview can help identify where two {\ct VENT}s overlap, assuming each has a unique {\ct COLOR}. Because Smokeview draws {\ct VENT}s
 on top of each other, areas of overlap will have a grainy, awkward appearance that changes pattern as you move the scene. In situations
@@ -2889,21 +2887,50 @@ This section is labeled as a special topic because normally you do not need to m
 
 \subsubsection{Default Convective Heat Transfer Model}
 
-In an LES calculation, the convective heat transfer coefficient, $h$, is based on a combination of natural and forced convection correlations:
-\be \dq_{\rm c}'' = h \, (T_{\rm g} - T_{\rm w}) \quad \hbox{W/m}^2 \quad ; \quad
-    h = \max \, \left[ \; C\, |T_{\rm g}-T_{\rm w}|^\ot \; ,
-      \;  \frac{k}{L} \, \NU \; ,
-      \; \frac{k}{\dn/2}\right]  \quad  \si{W/(m^2.K)}  \label{q_con}
+In an LES calculation, the convective heat transfer coefficient, $h$, is taken as the maximum of its free (natural) and forced forms:
+\be \dq_{\rm c}'' = h \, (T_{\rm g} - T_{\rm w}) \quad ; \quad  h = \frac{k}{L} \, \max \left( \NU_{\rm free} , \NU_{\rm forced} \right)   \label{q_con}
 \ee
-where $C$ is a empirical coefficient for natural convection (1.52 for a horizontal plate and 1.31 for a vertical plane or cylinder)~\cite{Holman:1}, $L$ is a characteristic length related to the size of the physical obstruction, $k$ is the thermal conductivity of the gas, and $\dn$ is the gas phase cell size. The Nusselt number (Nu) depends on the geometric and flow characteristics. For many flow regimes, it has the form:
+where $T_{\rm g}$ is the gas temperature in the gas phase cell adjacent to the surface, $T_{\rm w}$ is the wall (surface) temperature, $L$ is a characteristic length, and $k$ is the thermal conductivity of the gas. For planar surfaces, $L$ is taken as 1~m and for spheres and cylinders, $L$ is taken as the diameter, $D$.
+
+For free (natural) convection, the Nusselt number is a function of the Rayleigh number:
 \be
-   \NU = C_1 + C_2 \, \RE^n \, \PR^m  \quad ; \quad \RE = \frac{\rho |\bu| L}{\mu} \quad ; \quad \PR = 0.7
+   \hbox{Ra} = \frac{2 \, g \, |T_{\rm g}-T_{\rm w}| L^3}{ (T_{\rm g}+T_{\rm w}) \nu \alpha}  \quad ; \quad  \nu = \frac{\mu}{\rho} \quad ; \quad \alpha = \frac{k}{\rho c_p}  \quad ; \quad \PR=\frac{\nu}{\alpha} 
 \ee
-For planar surfaces, the default values are $C_1=0$, $C_2=0.037$, $n=0.8$, $m=0.33$, and $L=1$~m. For cylindrical surfaces, the default values are $C_1=0$, $C_2=0.683$, $n=0.466$, $m=0.33$, and $L=D$, the diameter of the cylinder. For spherical surfaces, the default values are $C_1=2$, $C_2=0.6$, $n=0.5$, $m=0.33$, and $L=D$, the diameter of the sphere. Note that for a sphere, the coefficient for natural convection, $C$, is assumed to be zero. It is possible to change these values for a particular application, but it is not possible to find a set of parameters that is appropriate for the wide variety of scenarios considered. Various correlations for planes, cylinders, and spheres can be found in Refs.~\cite{Holman:1,Incropera:1}.
+The following expressions are simplifications of those given in Ref.~\cite{Incropera:1} under the assumption that $\PR=0.7$.
+\be
+   \NU_{\rm free} = \left\{ \begin{array}{ll}
+                                                \left( 0.825 +  0.324 \, \hbox{Ra}^{1/6}  \right)^2   &  \hbox{Vertical plate or cylinder} \\
+                                                0.54 \, \hbox{Ra}^{1/4}                               &  \hbox{Horizontal hot plate facing up or cold plate facing down, Ra}\le 10^7 \\
+                                                0.15 \, \hbox{Ra}^{1/3}                               &  \hbox{Horizontal hot plate facing up or cold plate facing down, Ra} >  10^7 \\
+                                                \left( 0.60 +  0.321 \, \hbox{Ra}^{1/6}  \right)^2    &  \hbox{Horizontal cylinder} \\
+                                                2 +  0.454 \, \hbox{Ra}^{1/4}                         &  \hbox{Sphere}
+       \end{array} \right.
+\ee
+For forced convection, the Nusselt number takes the form:
+\be
+   \NU_{\rm forced} = C_0 + \left( C_1 \, \RE^n - C_2 \right) \, \PR^m  \quad ; \quad \RE = \frac{\rho |\bu| L}{\mu}  \quad ; \quad m=1/3
+\ee
+The values of the coefficients are given in Table~\ref{convective_heat_transfer_table}.
 
-The last term of the $h$ formula aims to ensure that the LES convective heat flux converges to the DNS heat flux at fine resolutions.
+\begin{table}[!ht]
+\caption[Coefficients used for forced convection heat transfer correlations]{Coefficients used for forced convection heat transfer correlations~\cite{Incropera:1}}
+\label{convective_heat_transfer_table}
+\begin{center}
+\begin{tabular}{|lccccc|}
+\hline
+Geometry     & $C_0$    & $C_1$   & $C_2$ & $n$    & Re             \\ \hline
+Flat Plate   & 0        & 0.037   & 871   & 0.8    & $\le 10^8$     \\
+Cylinder     & 0        & 0.989   & 0     & 0.330  & $0.4-4$        \\
+Cylinder     & 0        & 0.911   & 0     & 0.385  & $4-40$         \\
+Cylinder     & 0        & 0.683   & 0     & 0.466  & $40-4000$      \\
+Cylinder     & 0        & 0.193   & 0     & 0.618  & $4000-40000$   \\
+Cylinder     & 0        & 0.027   & 0     & 0.805  & $40000-400000$ \\
+Sphere       & 2        & 0.6     & 0     & 0.5    &                \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
 
-You can change the values of the empirical coefficient for natural convection, $C$, by specifying \linebreak[4]{\ct C\_HORIZONTAL} and {\ct C\_VERTICAL} on the {\ct SURF} line. The length scale, $L$, is specified by \linebreak[4]{\ct CONVECTION\_LENGTH\_SCALE} on the {\ct SURF} line. You can change the empirical coefficients for the forced convection model by using {\ct C\_FORCED\_CONSTANT}, {\ct C\_FORCED\_RE}, {\ct C\_FORCED\_RE\_EXP}, and \linebreak[4]{\ct C\_FORCED\_PR\_EXP} for the constants $C_1$, $C_2$, $n$, and $m$ in the Nusselt number correlation, all of which are input on the {\ct SURF} line. Note that setting both $C_1$ and $C_2$ zero turns on their default values.
+The length scale, $L$, is specified by {\ct CONVECTION\_LENGTH\_SCALE} on the {\ct SURF} line.
 
 \subsubsection{Specified Convective Heat Transfer Coefficient}
 
@@ -2924,31 +2951,6 @@ h = \frac{\dot{q}''_{\rm w}}{T_{\rm g}-T_{\rm w}} = \frac{\rho_{\rm w} \, c_{\rm
 \end{equation}
 Refer to the FDS Tech Guide \cite{FDS_Tech_Guide} for further details of the formulation. To specify this heat transfer model for a particular surface, set {\ct HEAT\_TRANSFER\_MODEL} equal to {\ct 'LOGLAW'} on the {\ct SURF} line. Note that the loglaw model is not well-suited for buoyant flows---it requires a well-resolved ``wind'' near the surface and is therefore mainly applicable to forced convection type flows with high grid resolution.
 
-\subsubsection{Atmospheric Boundary Layer Wall Model (Experimental)}
-\label{sec:abl_model}
-
-The incorporation of buoyancy into the wall function is the domain of Monin-Obukhov (MO) similarity theory, as discussed in Sec.~\ref{info:WIND}. Further mathematical details of the ABL wall model are discussed in the FDS Tech Guide \cite{FDS_Math_Guide}.  Note that the model assumes gravity to point in the $-z$ direction.  To specify this model for a particular surface, set {\ct HEAT\_TRANSFER\_MODEL} equal to {\ct 'ABL'} on the {\ct SURF} line together with the aerodynamic roughness length, {\ct Z\_0}.  For example,
-\begin{lstlisting}
-&SURF ID='ground', HEAT_TRANSFER_MODEL='ABL', Z_0=0.05 /
-\end{lstlisting}
-
-As discussed in Sec.~\ref{info:WIND}, there is a simple conversion between the aerodynamic roughness and the sandgrain roughness, which can be input using {\ct ROUGHNESS} on {\ct SURF}.  Either {\ct Z\_0} or {\ct ROUGHNESS} may be specified, but not both.  Also, if a {\ct WIND} line is present, {\ct Z\_0} must be consistent between {\ct SURF} and {\ct WIND} lines.  The value of {\ct Z\_0} on {\ct SURF} will override the default value from {\ct WIND}.
-
-When the ABL wall model is used, this also changes the wall stress model (see FDS Tech Guide~\cite{FDS_Math_Guide}).  The local Obukhov length, $L$ (see Sec.~\ref{info:WIND}), and viscous wall units, $y^+$ (see Sec.~\ref{info:yplus}), can be output using boundary files or wall devices.  Note that the perfectly ``neutral'' value for local $L$ is set to zero to avoid problems with the colorbar range that would occur if the physically correct value of infinity were used.  However, if the flow is not perfectly isothermal then usually there is enough of a temperature difference to register a physically realizable value for $L$ in the ABL model.
-
-A word of caution with this model: Experience has shown the ABL model can lead to instabilities when a specified heat flux is supplied as the surface boundary condition, which is often called for to achieve the correct mean stability behavior of the atmospheric flow.  This happens because very large values of the heat transfer coefficient may be needed to offset small temperature differenced for a given heat flux.
-
-\subsubsection{Free Convection, Horizontal Cylinder}
-
-For some verification and validation cases, it is useful to employ a special correlation for free convection from a horizontal cylinder~\cite{Incropera:1}:
-\be
-   h = \hbox{Nu} \, \frac{k}{D}  \quad ; \quad \hbox{Nu} = \left( 0.60 + \frac{ 0.387 \, \hbox{Ra}^{1/6} }{\left[ 1+ (0.559/\hbox{Pr})^{9/16} \right]^{8/27}} \right)^2  \quad ; \quad \hbox{Ra} = \frac{2 \, g \, (T_{\rm s}-T_\infty)D^3}{ (T_{\rm s}+T_\infty) \nu \alpha}
-\ee
-where $\hbox{Nu}$ is the Nusselt number, $k$ is the thermal conductivity of the gas, $D$ is the diameter of the cylinder, Ra is the Rayleigh number, Pr is the Prandtl number, $T_{\rm s}$ is the surface temperature, $T_\infty$ is the ambient or surrounding gas temperature, $g$ is the acceleration of gravity, $\nu=\mu/\rho$ is the kinematic viscosity of the gas, and $\alpha=k/(\rho c_p)$ is the thermal diffusivity. To specify this heat transfer model for a particular surface, set {\ct HEAT\_TRANSFER\_MODEL} equal to {\ct 'FREE HORIZONTAL CYLINDER'} on the {\ct SURF} line.
-
-\subsubsection{Heat Transfer with Blowing}
-
-During pyrolysis of a solid or evaporation of a liquid the mass transfer off the surface generats a blowing velocity that alters the thermal and momentum boundary layers, thus affecting the heat and mass transfer coefficients.  For a surface with blowing, consider using the correlations discussed in Sazhin \cite{Sazhin:2006} with the Spalding mass transfer corrections \cite{Spalding:1}.  These may be activated by setting {\ct BLOWING=T} on the {\ct SURF} line.  Note that for {\ct GEOMETRY='SPHERICAL'} or {\ct GEOMETRY='CYLINDRICAL'} used together with {\ct BLOWING=T} the time dependent {\ct THICKNESS} of the surface is used in computing the Reynolds number.  For {\ct GEOMETRY='CARTESIAN'} and {\ct BLOWING=T} the length scale for the Reynolds number is the usual {\ct CONVECTION\_LENGTH\_SCALE} set on the {\ct SURF} line.
 
 
 \subsection{Special Topic: Adiabatic Surfaces}
@@ -3161,6 +3163,7 @@ The default parameters governing the node spacing are appropriate for simple hea
 \item[Make the mesh cells smaller] by setting {\ct CELL\_SIZE\_FACTOR} less than 1. For example, a value of 0.5 makes the mesh cells half the size. The scaling applies to all layers.
 \item[Improve the time resolution] by setting {\ct WALL\_INCREMENT=1} on the {\ct TIME} line. This forces the solid phase solution to be updated every time step instead of the default every 2 time steps. If this is still not sufficient, you can direct that FDS use smaller time steps to update the solid phase heat conduction calculation than that used by the gas phase solver. This can be done specifically for a selected surface ({\ct SURF}) type. The feature works by sub-dividing the gas phase time step into halves, quarters, eighths, etc., as specified by the {\ct SURF} line integer parameter {\ct SUBSTEP\_POWER}. Its default value is 2, meaning that the solid phase time step for that particular {\ct SURF} type can be sub-divided by {\em at most} a factor of $2^2=4$. If you set {\ct SUBSTEP\_POWER} to 4, the time step will be sub-divided by {\em at most} a factor of $2^4=16$. The decision to sub-divide the time step is based on the criterion that the internal temperature of the solid should not change by more than {\ct DELTA\_TMP\_MAX}~$^\circ$C during that sub-step. The default value of {\ct DELTA\_TMP\_MAX} is 10~$^\circ$C, and this is also a {\ct SURF} parameter. You can choose {\ct QUANTITY='SUBSTEPS'} on either a {\ct DEVC} or {\ct BNDF} output line to see how many sub-steps are being used by a particular surface cell or the entire domain.
 \item[Limit the number of cells in a layer] by setting {\ct N\_LAYER\_CELLS\_MAX(:)}. This array input has a default of 1000. Reducing this value does not necessarily improve accuracy, but it does save computing time. However, rarely does the solid phase require this many cells. The output file {\ct CHID.out} contains the coordinates of the solid phase nodes.
+\item[Change when a wall cell is renoded] by setting {\ct RENODE\_DELTA\_T}. If cells shrink during pyrolysis, FDS will try and renode the wall cell to reduce the number of wall nodes over time. If there is a large enough temperature difference between the first wall cell and the second wall cell, then renoding can result in large swings of the surface temperature which can cause spurious behavior in the pyrolysis model. {\ct RENODE\_DELTA\_T} defines a limit on the temperature difference between wall cells, where FDS will not renode the wall. The default value is 2~K.
 \end{description}
 If all the material components react and leave no solid residue, the thickness of the solid will shrink. Each of the shrinking layers will vanish from the computation when its thickness gets smaller than a prescribed limiting value. This value can be set on a {\ct SURF} line using {\ct MINIMUM\_LAYER\_THICKNESS}, defaulting to $1 \times 10^{-6}$~m. When all the material of a shrinking surface is consumed but {\ct BURN\_AWAY} is not prescribed, the surface temperature is set to {\ct TMP\_BACK}, convective heat flux to zero and burning rate to zero.
 
@@ -3644,17 +3647,6 @@ An example demonstrating evaporation of a liquid mixture is found in the {\ct Py
 \label{liquid_mixture_plot}
 \end{figure}
 
-\subsubsection{Heat and Mass Transfer with Blowing}
-
-To invoke the heat and mass transfer relationships from \cite{Sazhin:2006}, set {\ct BLOWING=T} on the {\ct SURF} line.  For example,
-\begin{lstlisting}
-&SURF ID        = 'ETHANOL POOL'
-      COLOR     = 'YELLOW'
-      MATL_ID   = 'ETHANOL LIQUID'
-      THICKNESS = 0.1
-      BLOWING   = T /
-\end{lstlisting}
-Note that the default {\ct GEOMETRY} is {\ct 'CARTESIAN'} in which case the length scale used in the Reynolds number is taken from the {\ct 'CONVECTION\_LENGTH\_SCALE'} [default 1 m] on {\ct SURF}.  If the {\ct GEOMETRY} is set to {\ct 'SPHERICAL'} or {\ct 'CYLINDRICAL'}, then the time-dependent {\ct THICKNESS} is used as the radius, and the diameter is then used to compute the Reynolds number in the Sherwood and Nusselt correlations.
 
 
 \subsection{Fuel Burnout}
@@ -4473,7 +4465,7 @@ There are several restrictions to assigning pressure zones. First, the declared 
 
 Note that if you remove a solid obstruction (like a door or window) separating two pressure zones, FDS will merge the two zones into one such that the background pressure within each remains nearly the same.
 
-
+On rare occasions you may need to suppress pressure {\ct ZONE}s completely. This is not recommended, but might be useful for debugging or diagnostic purposes. If you need to remove all implicit {\ct ZONE}s, set {\ct NO\_PRESSURE\_ZONES} on the {\ct MISC} line.
 
 \subsubsection{Example Case: Pressure Rise in a Compartment}
 \label{pressure_rise}
@@ -4496,6 +4488,7 @@ This example tests several basic features of FDS. A narrow channel, 3~m long, 0.
 \label{zone_break_fast}
 \label{zone_break_slow_ulmat}
 \label{zone_break_fast_ulmat}
+\label{opening_ulmat}
 
 In this example, three simple compartments are initially isolated from each other and from the ambient environment outside. Each compartment is a separate pressure zone. Air is blown into Zone~1 at a constant rate of 0.1~kg/s, increasing its pressure approximately 2000~Pa by 10~s, at which time Zone~1 is opened to Zone~2, decreasing the overall pressure in the two zones to roughly one-third the original value because the volume of the combined pressure zone has been roughly tripled. At 15~s, the pressure is further decreased by opening a door to Zone~3, and, finally, at 20~s the pressure returns to ambient following the opening of a door to the outside. Figure~\ref{zone_break} displays the pressure within each compartment.
 \begin{figure}[ht]
@@ -4549,12 +4542,16 @@ The pressure zone leakage approach is intended to capture the bulk leakage that 
 The first line designates a region of the computational domain to be Pressure Zone~1. Note that the order of the {\ct ZONE} lines is important; that is, the order implicitly defines Zone~1, Zone~2, etc. Zone 0 is by default the ambient pressure exterior. In this example, a leak exists between Zone~1 and the exterior Zone~0, and the area of the leak is 0.0001~m$^2$ (1 cm by 1 cm hole, for example). Zone~2 leaks to Zone~1 (and vice versa) with a leak area of 0.0002~m$^2$. Zone~2 also leaks to the outside with an area of 0.0003~m$^2$. Note that zones need not be physically connected for a leak to occur, but in each zone, except for the exterior, there must be some surface with a designated {\ct LEAK\_PATH}. Here, in Zones~1 and 2 there are surfaces defined by both {\ct 'LEAKY EXTERIOR WALL'} and {\ct 'LEAKY INTERIOR WALL'} so as to provide a surface over which to apply the leakage. Leakage is uniformly distributed over all of the solid surfaces assigned the {\ct LEAK\_PATH}. The order of the two pressure zones designated by {\ct LEAK\_PATH} is unimportant, and the solid obstructions where the leakage is applied need not form a boundary between the two zones. Note that {\ct LEAK\_PATH\_ID} can be used instead of {\ct LEAK\_PATH}. To use {\ct LEAK\_PATH\_ID} provide the {\ct ID} for the two {\ct ZONES} where specifying {\ct 'AMBIENT'} indicates Zone 0.
 
 The volume flow, $\dot{V}$, through a leak of area $A_{\rm L}$ is given by
-\be  \dot{V}_{\rm leak} = A_{\rm L} \; \hbox{sign} (\Delta p) \; \sqrt{2 \frac{ | \Delta p |}{\rho_\infty}} \ee
-where $\Delta p$ is the pressure difference between the adjacent compartments (in units of Pa) and $\rho_\infty$ is the ambient density (in units of kg/m$^3$). The discharge coefficient normally seen in this type of formula is assumed to be~1.
+\be
+   \dot{V}_{\rm leak} = C_{\rm d} \, A_{\rm L} \; \hbox{sign} (\Delta p) \; \sqrt{2 \frac{ | \Delta p |}{\rho_\infty}}  \label{leak_formula}
+\ee
+where $C_{\rm d}$ is a discharge coefficient, $\Delta p$ is the pressure difference (Pa) between the adjacent compartments and $\rho_\infty$ is the ambient density (kg/m$^3$). The discharge coefficient normally seen in this type of formula is sometimes assumed to be~1, but you may change it.
 
-In a typical building as the interior pressure rises, the leakage area will grow as small gaps, cracks, and other leakage paths open up. Leakage tests performed according to test standards such as ASTM~E~779 provide two additional data points to quantify this behavior. These are the {\ct LEAK\_PRESSURE\_EXPONENT} and the {\ct LEAK\_REFERENCE\_PRESSURE}. The use of these additional inputs are shown in the equation below as $n$ and $\Delta p_{\rm ref}$ respectively where $A_{\rm L,ref}$ is given by {\ct LEAK\_AREA}.
-\be  A_{\rm L} = A_{\rm L,ref} \left( \frac{\Delta p}{\Delta p_{\rm ref}} \right)^{n-0.5} \ee
-By default, $n=0.5$ and $\Delta p_{\rm ref}=4$~Pa, meaning that the leak area will not change with pressure unless you specify an exponent other than 0.5.
+As the interior pressure rises in a typical building, the leakage area grows as small gaps, cracks, and other leakage paths open up. Leakage tests performed according to test standards such as ASTM~E779 provide two additional data points to quantify this behavior. These are the {\ct LEAK\_PRESSURE\_EXPONENT} and the {\ct LEAK\_REFERENCE\_PRESSURE}. The use of these additional inputs are shown in the equation below as $n$ and $\Delta p_{\rm ref}$ respectively where $A_{\rm L,ref}$ is given by {\ct LEAK\_AREA}.
+\be
+   A_{\rm L} = A_{\rm L,ref} \left( \frac{\Delta p}{\Delta p_{\rm ref}} \right)^{n-0.5}  \label{leak_formula_2}
+\ee
+By default, $n=0.5$ and $\Delta p_{\rm ref}=4$~Pa, meaning that the leak area will not change with pressure unless you specify an exponent other than 0.5. The {\ct DISCHARGE\_COEFFICIENT} is 1 by default.
 
 The HVAC output quantities can be used to determine the leakage flows. FDS names the duct connecting Zone~A with Zone~B {\ct 'LEAK A B'} and the duct nodes {\ct 'LEAK A B'} for the Zone~A side of the leak and {\ct 'LEAK B A'} for the Zone~B side.  Note that for the duct names, FDS will use the lower numbered zone as Zone~A.
 
@@ -4563,19 +4560,19 @@ FDS is limited by default to a maximum of 200 {\ct ZONE} inputs.  This can be in
 \subsubsection{Localized Leakage}
 \label{info:local_leakage}
 
-The local leakage approach is intended to represent leakage through a specific crack. For example, a cracked open door might have a opening that is too small to resolve with the grid.  One would; however, still want to capture the fact that hot gases could escape the top of the crack and cold gases enter the bottom. The local leakage approach uses the local pressure rather than just the zone pressure. Therefore, one can define multiple leakage paths for different windows, over the height of a door, or over the height of a tall stairwell where stack effect might be important. To use this approach two {\ct VENT} inputs are linked via an {\ct HVAC} input with {\ct TYPE\_ID='LEAK'}. In the example below a 0.001 m$^2$ leakage path is created between the {\ct VENT} with {\ct ID='VENT 1'} and the {\ct VENT} with {\ct ID='VENT 2'}. Note that the {\ct SURF\_ID} for a {\ct VENT} with localized leakage is not {\ct 'HVAC'}. The input must correspond to a {\ct SURF} input. Wall heat transfer will be computed based upon the inputs on the referenced {\ct SURF} input.
+The local leakage approach is intended to represent leakage through a specific crack or for situations where the leakage is not necessarily from one sealed pressure zone to another. For example, a cracked open door might have a opening that is too small to resolve with the grid.  One would; however, still want to capture the fact that hot gases could escape the top of the crack and cold gases enter the bottom. The local leakage approach uses the local pressure rather than just the zone pressure. Therefore, one can define multiple leakage paths for different windows, over the height of a door, or over the height of a tall stairwell where stack effect might be important. To use this approach two {\ct VENT} inputs are linked via an {\ct HVAC} input with {\ct TYPE\_ID='LEAK'}. In the example below a 0.001 m$^2$ leakage path is created between the {\ct VENT} with {\ct ID='VENT 1'} and the {\ct VENT} with {\ct ID='VENT 2'}. Note that the {\ct SURF\_ID} for a {\ct VENT} with localized leakage is not {\ct 'HVAC'}. The input must correspond to a {\ct SURF} input. Wall heat transfer will be computed based upon the inputs on the referenced {\ct SURF} input.
 \begin{lstlisting}
 &VENT XB=...,SURF_ID='SURF 1',ID='VENT 1'/
 &VENT XB=...,SURF_ID='SURF 2',ID='VENT 2'/
 &HVAC ID='LEAK1',TYPE_ID='LEAK',VENT_ID='VENT 1',VENT2_ID='VENT 2',AREA=0.001/
 \end{lstlisting}
-This will create a duct with the name {\ct 'LEAK1'} whose two nodes will be named {\ct VENT\_ID} and {\ct VENT2\_ID}. If the leakage path is to connect to the ambient outside the domain, then set {\ct VENT2\_ID='AMBIENT'}. In this case the second node will be the first node name with {\ct AMB} appended (e.g. {\ct 'VENT 1 AMB'}). Note that each {\ct VENT} must lie in one pressure zone; however, it may span more than one {\ct MESH}.
+This will create a duct with the name {\ct 'LEAK1'} whose two nodes will be named {\ct VENT\_ID} and {\ct VENT2\_ID}. If the leakage path is to connect to the ambient outside the domain, then set {\ct VENT2\_ID='AMBIENT'}. In this case the second node will be the first node name with {\ct AMB} appended (e.g. {\ct 'VENT 1 AMB'}). Note that each {\ct VENT} must lie in one pressure zone; however, it may span more than one {\ct MESH}. You may add the parameters {\ct LEAK\_PRESSURE\_EXPONENT}, {\ct LEAK\_REFERENCE\_PRESSURE}, and {\ct DISCHARGE\_COEFFICIENT} to the {\ct HVAC} line, according to Eqs.~(\ref{leak_formula}) and. (\ref{leak_formula_2}).
 
 Unlike the zone leakage approach, this approach has the option to preserve the energy of the gas flowing through the leak. For example, for door crack using with pressure zone leakage, the outflowing gas at the top of the door would always be the same temperature as the outside of the door. To maintain hot gas flowing out of the leak, add {\ct LEAK\_ENTHALPY=T} to the {\ct HVAC} input. For each outflowing wall cell, this will compute the enthalpy difference between the temperature of the leak flow and the temperature of the surface and add it as a source of heat to the adjacent gas cell.  The default value is {\ct LEAK\_ENTHALPY=F}
 
 This approach also has the option of changing the flow loss by specifying {\ct LOSS} on the {\ct HVAC} input.  The default is {\ct LOSS=1}; the same as for pressure zone leakage.
 
-Note, for this approach it is not required that one have pressure zones defined; however, it is recommended to do so if different pressure zones do in fact exist in the model.
+Particles can be transported through a local leakage path by setting {\ct TRANSPORT\_PARTICLES=T} on the {\ct HVAC} input for that leakage path. This requires that the two {\ct VENT}s for the leakage path are identical in area and orientation and offset by no more than one grid cell.
 
 \subsubsection{Example Case: door\_crack}
 \label{door_crack}
@@ -6015,6 +6012,7 @@ Water sprays can remove aerosols from the air. For example, rain can lower the c
 
 If a species with liquid properties, e.g. {\ct WATER VAPOR}, is defined with {\ct AEROSOL=T}, then FDS will predict condensation for that species. FDS creates a second species called {\ct ID\_COND}. For example if the species is {\ct WATER VAPOR}, then the second species will be called {\ct WATER VAPOR\_COND}. This second species will be an aerosol species that tracks the condensed phase. The particle diameter for the condensed vapor is given by {\ct MEAN\_DIAMETER}, the condensed species specific heat will use the {\ct SPECIFIC\_HEAT\_LIQUID} liquid values, and the particle density will use {\ct DENSITY\_LIQUID} rather than {\ct DENSITY\_SOLID}. The initial mass fraction of condensed phase can be defined with {\ct MASS\_FRACTION\_COND\_0}. For example, the input below defines {\ct WATER VAPOR} as a condensable species with an initial vapor mass fraction of 0.1 and an initial condensate mass fraction of 0.05.
 
+The condensation routine requires the presence of nucleation sites to start the condensation process. If condensed gas is already present, the number of condensate particles is used. Otherwise, FDS assumes a background concentration of fine aerosols (pollen, bacterial spores, etc.). The default values is 10,000,000 nucleation sites per cubic meter. This value can be changed by setting {\ct NUCLEATION\_SITES} on {\ct MISC}.
 
 \begin{lstlisting}
 &SPEC ID='WATER VAPOR', AEROSOL=T,MEAN_DIAMETER=1.E-6,
@@ -6119,6 +6117,8 @@ The radiation properties of most common gases involved in combustion processes (
 
 You can output the gray absorption coefficient using the output {\ct QUANTITY} {\ct 'ABSORPTION COEFFICIENT'}.
 The Wide Band and WSGG  models employ several values of the absorption coefficients for each location, and the {\ct 'ABSORPTION COEFFICIENT'} output quantity only shows one of them, making this output practically useless.
+
+If aluminum oxide is being modeled, the optical properties of soot can be replaced by the optical properties of aluminum oxide by setting {\ct AEROSOL\_AL2O3=T} on {\ct MISC}. Any species with {\ct RADCAL\_ID='SOOT'} will be treated as aluminum oxide.
 
 \subsection{Gray Gas Model (default)}
 \label{info:RadCal}
@@ -6248,7 +6248,7 @@ To account for subgrid-scale turbulent motions, add {\ct TURBULENT\_DISPERSION=T
 \clearpage
 
 \section{Liquid Droplets}
-
+\label{info:liquid_droplets}
 Lagrangian particles that are not just massless tracers fall into two main categories -- liquid droplets or solid particles. This section describes the former; and the next, the latter.
 
 To define an evaporating liquid droplet, you must specify the name of the gas species created by evaporation via the {\ct SPEC\_ID} on the {\ct PART} line.  For example,
@@ -6257,6 +6257,14 @@ To define an evaporating liquid droplet, you must specify the name of the gas sp
 \end{lstlisting}
 By specifying a {\ct SPEC\_ID}, you are implicitly invoking the droplet evaporation model. Alternatively, if you specify a {\ct SURF\_ID}, you are designating a solid particle that behaves according to the given {\ct SURF} line. Solid particles are described in Section~\ref{info:PART_SURF}.
 
+By default liquid droplet evaporation uses the Ranz-Marshall correlation~\cite{Ranz} with a B-number. Additional correlations are available by setting {\ct EVAP\_MODEL} on {\ct MISC}. The available options are:
+
+\begin{itemize}
+	\item [-1] uses the Ranz-Marshall correlation with no B-number.
+	\item[0] uses Ranz-Marshall correlation along with an evaporating species B-number applied to both the Nusselt and Sherwood number correlations. This is the default value. This is the M0 model from Sazhin \cite{Sazhin:2006}.
+	\item[1] is the default correlation with the Sherwood number correlation using a B-number based on the Lewis number computed at the film condition. This is the M1 model from Sazhin \cite{Sazhin:2006}.
+	\item[2] is the previous model plus a flux limiting factor applied to the B-number. This is the M2 model from Sazhin \cite{Sazhin:2006}.
+\end{itemize}
 
 \subsection{Thermal Properties}
 \label{thermal_part_props}
@@ -6461,7 +6469,7 @@ For  {\ct 'CYLINDRICAL'} or {\ct 'SPHERICAL'} particles, specify the {\ct INNER\
 \subsubsection{Thermally Thick Droplet Model}
 \label{info:themally_thick_droplet}
 
-Note that if the {\ct GEOMETRY} is set to {\ct 'SPHERICAL'} and a {\ct BOILING\_TEMPERATURE} is specified, thus invoking the liquid pyrolysis model, then the mass transfer relationships will follow those of an evaporating droplet.  The difference between this model and the default droplet model is that in this case the internal droplet temperature will be solved for using the 1D conduction solver.  Usually, the {\ct CELL\_SIZE\_FACTOR} needs to be decreased to get sufficient resolution inside the drop---you should double check the number of solid phase nodes by examining the {\ct CHID.out} file.  Also, you should set {\ct HEAT\_TRANSFER\_MODEL = 'BLOWING SPHERE'} on the {\ct SURF} line.
+Note that if the {\ct GEOMETRY} is set to {\ct 'SPHERICAL'} and a {\ct BOILING\_TEMPERATURE} is specified, thus invoking the liquid pyrolysis model, then the mass transfer relationships will follow those of an evaporating droplet.  The difference between this model and the default droplet model is that in this case the internal droplet temperature will be solved for using the 1D conduction solver.  Usually, the {\ct CELL\_SIZE\_FACTOR} needs to be decreased to get sufficient resolution inside the drop---you should double check the number of solid phase nodes by examining the {\ct CHID.out} file.
 
 
 
@@ -6678,6 +6686,7 @@ It is not unusual to include hundreds of thousands of particles in a simulation.
 \end{description}
 Be careful when setting parameters related to particle/droplet insertion, as it is very easy to overwhelm the simulation with millions of them. The parameter {\ct MAXIMUM\_PARTICLES} on the {\ct DUMP} line sets the maximum number of particles that can be included on any given mesh at any given time. Its default value is 1000000. If this value is exceeded, FDS will automatically remove particles, starting with the oldest.
 
+In some cases, you may need to begin a simulation with a large number of particles, such as with a wildland fire simulation. In this situation, the initialization stage may take a long time as the memory for storing particles is expanded by only 50 particles at a time. It is possible to override this by setting {\ct NEW\_PARTICLE\_INCREMENT} on the {\ct PART} line. This does not affect how particles are inserted into the domain (as described above), only how much new storage is reserved when the current allocation is exceeded. Be careful, as it is possible to massively over-allocate and reserve large amounts of unused memory. 
 
 
 \subsection{Particles Introduced at a Solid Surface}
@@ -7297,13 +7306,6 @@ where $ \Delta z$ is the distance from the leak point to the neutral plane.  Usi
    \caption[Results of the {\ct stack\_effect} test case]{(Left) Velocity at the upper and lower vents for the {\ct stack\_effect} case.  (Right) Upper and lower exterior and interior densities.}
    \label{fig_stack_effect}
 \end{figure}
-
-\subsection{Deardorff Potential Temperature Correction}
-\label{info:potential_temperature_correction}
-
-The turbulent transport of heat in the atmosphere is greatly affected by the local stability condition.  In his 1980 paper \cite{Deardorff:1980}, Deardorff suggests a correction to the local turbulent viscosity to suppress turbulent transport in stable conditions.  To implement this correction in FDS, set {\ct POTENTIAL\_TEMPERATURE\_CORRECTION=T} on the {\ct WIND} line.  In this case, the local turbulent Prandtl number will be computed dynamically as discussed in \cite{Deardorff:1980}.  Details of the model are also discussed in the FDS Technical Guide \cite{FDS_Math_Guide}.
-
-
 
 
 \section{External Boundary Conditions}
@@ -9381,7 +9383,7 @@ The parameter {\ct QUANTITIES} on the {\ct PART} line is an array of character s
 {\ct 'PARTICLE DRAG COEFFICIENT'} \\
 {\ct 'PARTICLE BULK DENSITY'} (kg/m$^3$) \\
 \\
-By default, if no {\ct QUANTITIES} are specified and none are selected in Smokeview, then Smokeview will display particles with a single color. To select this color specify either {\ct RGB} or {\ct COLOR}. By default, water droplets are colored blue. All others are colored black.
+If no {\ct QUANTITIES} are specified and none are selected in Smokeview, then Smokeview will display particles with a single color determined by the color of the {\ct SURF\_ID} assigned to the {\ct PART} class, with the exception of water droplets and liquid fuel droplets, which are colored blue and yellow, respectively. If no color is specified on {\ct SURF} then the default solid particle color will revert to black.  You may override the {\ct SURF} color by specifying either {\ct RGB} or {\ct COLOR} on the {\ct PART} line.
 
 The {\ct PARTICLE WEIGHTING FACTOR} describes how many actual particles each of the computational particles represent. The {\ct PARTICLE BULK DENSITY} gives the weighted (total) mass per grid cell volume, which is an important parameter when using particles to represent porous media such as vegetation.
 
@@ -9434,6 +9436,7 @@ This section lists a variety of output quantities that are useful for studying t
 \subsection{Heat Release Rate and Energy Conservation}
 \label{info:HRR}
 \label{hallways}
+\label{test_hrr_2d_cyl}
 
 Quantities associated with the overall energy budget are reported in the comma delimited file {\ct CHID\_hrr.csv}.  This file is automatically generated; the only input parameters associated with it are {\ct DT\_HRR} and {\ct RAMP\_HRR} on the {\ct DUMP} line. The columns in this file record the time history of the integrals of the terms in the enthalpy transport equation. The columns are defined as follows:
 \begin{eqnarray}
@@ -9462,7 +9465,14 @@ An additional column, {\ct Q\_TOTAL}, includes the sum of the terms on the right
 
 The other columns in the {\ct CHID\_hrr.csv} file contain the total burning rate of fuel, in units of kg/s, and the zone pressures. Note that the reported value of the burning rate is not adjusted to account for the possibility that each individual material might have a different heat of combustion. For this reason, it is not always the case that the reported total burning rate multiplied by the gas phase heat of combustion is equal to the reported heat release rate.
 
-Note that the volume integrations in Eq.~(\ref{eqn_enthalpytransport}) are performed over the entire domain. The differential, $\d V$, is the product of the local grid cell dimensions, $\d x \, \d y \, \d z$. For the special case of two-dimensional cylindrical coordinates, $\d V=r \, \d r \, \d \theta \, \d z$, where $r=x$, $\d r = \d x$, and $\d \theta = \d y$.
+Note that the volume integrations in Eq.~(\ref{eqn_enthalpytransport}) are performed over the entire domain. The differential, $\d V$, is the product of the local grid cell dimensions, $\d x \, \d y \, \d z$. For the special case of two-dimensional cylindrical coordinates, $\d V=r \, \d r \, \d \theta \, \d z$, where $r=x$, $\d r = \d x$, and $\d \theta = \d y$.  In the 2D Cartesian case (1 cell in the $y$ direction, {\ct CYLINDRICAL=.FALSE.}), the cell volumes and areas are divided by $\d y$ so that the column output is a value per unit length (e.g., kW/m).  In the 2D cylindrical case, the cell volumes are divided by $\d y$ (which represents radians in this case) and multiplied by $2\pi$ to account for complete integration in the $\theta$ direction.  The resulting value is nominally the same as the correponding 3D problem.  An example is shown in Fig.~\ref{fig:test_hrr_2d_cyl}.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=3in]{SCRIPT_FIGURES/test_hrr_2d_cyl}
+\caption[Results of the {\ct test\_hrr\_2d\_cyl} test case]{Heat release rate for the {\ct test\_hrr\_2d\_cyl} test case compared with the corresponding 3D problem.}
+\label{fig:test_hrr_2d_cyl}
+\end{figure}
 
 As a test of the energy balance, a sample case called {\ct Pressure\_Solver/hallways.fds} simulates a fire near the end of five connected hallways. The other end of the hallways is open. As is seen in Fig.~\ref{hallways_energy}, the quantities {\ct Q\_ENTH} and {\ct Q\_TOTAL} are very closely matched, indicating that the sources of energy loss and gain are properly added and subtracted from the energy equation. As expected, the net energy gain/loss eventually goes to zero as the compartment reaches a quasi-steady state.
 \begin{figure}[ht]
@@ -10697,7 +10707,6 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct INTEGRATED INTENSITY}                      & $U=\int I \, \d \bs$                              & kW/m$^2$       & D,I,P,S      \\ \hline
 {\ct KINETIC ENERGY}                            & Staggered $(u^2+v^2+w^2)/2$                       & (m/s)$^2$      & D,I,P,S      \\ \hline
 {\ct KOLMOGOROV LENGTH SCALE}                   & Section \ref{info:meshquality}                    & m              & D,I,P,S      \\ \hline
-{\ct OBUKHOV LENGTH}                            & Section \ref{sec:abl_model}                       & m              & B,D          \\ \hline
 {\ct MACH NUMBER}                               & $|\bu|/\sqrt{(R/\overline{W}) T \gamma}$          &                & S,D          \\ \hline
 {\ct MAXIMUM VELOCITY ERROR}                    & Section \ref{info:PRES}                           & m/s            & D            \\ \hline
 {\ct MIXING TIME}                               & Combustion mixing time                            & s              & D,I,P,S      \\ \hline
@@ -10733,7 +10742,6 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct TOTAL MASS FLUX X}$^1$ & $\overline{\rho Y_\alpha} u + \rho D_\alpha \partial Y_\alpha/\partial x$, Sec.~\ref{info:mass_flow} & kg/s/m$^2$ & D,I,P,S      \\ \hline
 {\ct TOTAL MASS FLUX Y}$^1$ & $\overline{\rho Y_\alpha} v + \rho D_\alpha \partial Y_\alpha/\partial y$, Sec.~\ref{info:mass_flow} & kg/s/m$^2$ & D,I,P,S      \\ \hline
 {\ct TOTAL MASS FLUX Z}$^1$ & $\overline{\rho Y_\alpha} w + \rho D_\alpha \partial Y_\alpha/\partial z$, Sec.~\ref{info:mass_flow} & kg/s/m$^2$ & D,I,P,S      \\ \hline
-{\ct TURBULENT PRANDTL NUMBER}$^7$              & $\nu_t/\alpha_t$                                  &                & D,I,P,S      \\ \hline
 {\ct VELOCITY ERROR}                            & Section~\ref{info:PRES}                           &                & B            \\ \hline
 {\ct VISCOUS STRESS WALL}                       & Section~\ref{info:distributed_forces}             & Pa             & B,D          \\ \hline
 {\ct VISCOUS WALL UNITS}                        & Section~\ref{info:yplus}                          &                & B,D          \\ \hline
@@ -10758,7 +10766,6 @@ $^3$                 \> Requires specification of an additional scalar using {\c
 $^4$                 \> Allows for an optional {\ct MATL\_ID}. \\
 $^5$                 \> Allows for an optional {\ct REAC\_ID}.  Default is Reaction 1. \\
 $^6$                 \> Requires {\ct REAC\_ID}. \\
-$^7$                 \> Requires {\ct POTENTIAL\_TEMPERATURE\_CORRECTION=T} on {\ct WIND}.
 \end{tabbing}
 
 
@@ -11340,6 +11347,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct DAMPER}                  & Logical       & Sections~\ref{info:HVACduct}, \ref{info:HVACdamper}                      &               & {\ct F}  \\ \hline
 {\ct DEVC\_ID}                & Character     & Sections ~\ref{info:HVACduct}, \ref{info:HVACfan}, \ref{info:HVACfilter} &               &                \\ \hline
 {\ct DIAMETER}                & Real          & Section~\ref{info:HVACduct}                                              &  m            &                \\ \hline
+{\ct DISCHARGE\_COEFFICIENT}  & Real          & Section~\ref{info:Leaks}                                                 &               & 1.             \\ \hline
 {\ct DUCT\_ID}                & Char.~Array   & Section~\ref{info:HVACnode}                                              &               &                \\ \hline
 {\ct DUCT\_INTERP\_TYPE}      & Character     & Section~\ref{info:hvacmasstransport}                                     &               & {\ct 'NODE1'}  \\ \hline
 {\ct EFFICIENCY}              & Real Array    & Sections~\ref{info:HVACfilter}, \ref{info:HVACaircoil}                   &               & 1.0            \\ \hline
@@ -11347,7 +11355,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct FILTER\_ID}              & Character     & Section~\ref{info:HVACnode}                                              &               &                \\ \hline
 {\ct FIXED\_Q}                & Real          & Section~\ref{info:HVACaircoil}                                           & kW            &                \\ \hline
 {\ct ID}                      & Character     & Section~\ref{info:HVAC}                                                  &               &                \\ \hline
-{\ct LEAK\_ENTHALPY}          & Logical       & Section~\ref{info:local_leakage}                                         &               & {\ct F}  \\ \hline
+{\ct LEAK\_ENTHALPY}          & Logical       & Section~\ref{info:local_leakage}                                         &               & {\ct F}        \\ \hline
+{\ct LEAK\_PRESSURE\_EXPONENT}& Real          & Section~\ref{info:Leaks}                                                 &               & 0.5            \\ \hline
+{\ct LEAK\_REFERENCE\_PRESSURE}& Real         & Section~\ref{info:Leaks}                                                 & Pa            & 4              \\ \hline
 {\ct LENGTH}                  & Real          & Section~\ref{info:HVACduct}                                              &  m            &                \\ \hline
 {\ct LOADING}                 & Real Array    & Section ~\ref{info:HVACfilter}                                           & kg            & 0.0            \\ \hline
 {\ct LOADING\_MULTIPLIER}     & Real Array    & Section ~\ref{info:HVACfilter}                                           & 1/kg          & 1.0            \\ \hline
@@ -11366,6 +11376,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct TAU\_AC}                 & Real          & Section ~\ref{info:HVACaircoil}                                          & s             & 1.0            \\ \hline
 {\ct TAU\_FAN}                & Real          & Section ~\ref{info:HVACfan}                                              & s             & 1.0            \\ \hline
 {\ct TAU\_VF}                 & Real          & Section~\ref{info:HVACduct}                                              & s             & 1.0            \\ \hline
+{\ct TRANSPORT\_PARATICLES}   & Logical       & Section~\ref{info:local_leakage}                                         & s             & {\ct F}        \\ \hline
 {\ct TYPE\_ID}                & Character     & Section~\ref{info:HVAC}                                                  &               &                \\ \hline
 {\ct VENT\_ID}                & Character     & Section~\ref{info:HVACnode}                                              &               &                \\ \hline
 {\ct VENT2\_ID}               & Character     & Section~\ref{info:local_leakage}                                         &               &                \\ \hline
@@ -11554,7 +11565,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct LEVEL}                          & Integer                       & For future use                            &    & 0                \\ \hline
 {\ct MPI\_PROCESS}                   & Integer                       & Section~\ref{info:multimesh}              &    &                  \\ \hline
 {\ct MULT\_ID }                      & Character                     & Section~\ref{info:MULT}                   &    &                  \\ \hline
-{\ct N\_THREADS}                     & Integer                       & Section~\ref{info:multimesh}              &    &                  \\ \hline
 {\ct RGB}                            & Integer Triplet               & Section~\ref{info:multimesh}              &    & 0,0,0            \\ \hline
 {\ct TRNX\_ID}                       & Character                     & Section~\ref{info:TRNX}                   &    &                  \\ \hline
 {\ct TRNY\_ID}                       & Character                     & Section~\ref{info:TRNX}                   &    &                  \\ \hline
@@ -11581,6 +11591,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct MISC} (Miscellaneous Parameters)} \\
 \hline \hline
 \endhead
+{\ct AEROSOL\_AL2O3}                                & Logical      & Section~\ref{info:RADI_Gas_and_Soot}    &            & {\ct F}     \\ \hline
 {\ct AEROSOL\_SCRUBBING}                            & Logical      & Section~\ref{info:scrubbing}            &            & {\ct F}     \\ \hline
 {\ct AGGLOMERATION}                                 & Logical      & Section~\ref{info:agglomeration}        &            & {\ct T}      \\ \hline
 {\ct ALIGNMENT\_TOLERANCE}                          & Real         & Section~\ref{info:mesh_alignment}       &            & 0.001             \\ \hline
@@ -11601,6 +11612,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct C\_VREMAN}                                     & Real         & Section~\ref{info:LES}                  &            & 0.07              \\ \hline
 {\ct C\_WALE}                                       & Real         & Section~\ref{info:LES}                  &            & 0.60              \\ \hline
 {\ct DEPOSITION}                                    & Logical      & Section~\ref{info:deposition}           &            & {\ct T}      \\ \hline
+{\ct EVAP\_MODEL}                                   & Integer      & Section~\ref{info:liquid_droplets}      &            & 1            \\ \hline
 {\ct FLUX\_LIMITER}                                 & Integer      & Section~\ref{info:flux_limiters}        &            & 2                 \\ \hline
 {\ct FREEZE\_VELOCITY}                              & Logical      & Section~\ref{info:freeze_velocity}      &            & {\ct F}     \\ \hline
 {\ct GAMMA}                                         & Real         & Section~\ref{gas_species_props}         &            & 1.4               \\ \hline
@@ -11622,7 +11634,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MPI\_TIMEOUT}                                  & Real         & Section~\ref{info:TIMING}               &  s         & 10.               \\ \hline
 {\ct NOISE}                                         & Logical      & Section~\ref{info:NOISE}                &            & {\ct T}      \\ \hline
 {\ct NOISE\_VELOCITY}                               & Real         & Section~\ref{info:NOISE}                &  m/s       & 0.005             \\ \hline
+{\ct NO\_PRESSURE\_ZONES}                           & Logical      & Section~\ref{info:ZONE_Basics}          &            & {\ct F}           \\ \hline
 {\ct NORTH\_BEARING}                                & Real         & Section~\ref{info:earth}                & deg.       &                   \\ \hline
+{\ct NUCLEATION\_SITES}                 & Real         & Section~\ref{info:condensation}         & sites/m$^3$ & 1E7              \\ \hline
 {\ct ORIGIN\_LAT}                                   & Real         & Section~\ref{info:earth}                & deg.       &                   \\ \hline
 {\ct ORIGIN\_LON}                                   & Real         & Section~\ref{info:earth}                & deg.       &                   \\ \hline
 {\ct OVERWRITE}                                     & Logical      & Section~\ref{info:OVERWRITE}            &            & {\ct T}      \\ \hline
@@ -11822,13 +11836,13 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \endhead
 {\ct ADHERE\_TO\_SOLID}                  & Integer     & Section~\ref{info:surface_solid_particles}                            &                   & 0                     \\ \hline
 {\ct AGE}                                & Real        & Section~\ref{info:part_output}                                        & s                 & $1\times 10^5$        \\ \hline
-{\ct BREAKUP}                            & Logical     & Section~\ref{info:secondary_breakup}                                  &                   & {\ct F}         \\ \hline
+{\ct BREAKUP}                            & Logical     & Section~\ref{info:secondary_breakup}                                  &                   & {\ct F}               \\ \hline
 {\ct BREAKUP\_CNF\_RAMP\_ID}             & Character   & Section~\ref{info:secondary_breakup}                                  &                   &                       \\ \hline
 {\ct BREAKUP\_DISTRIBUTION}              & Character   & Section~\ref{info:secondary_breakup}                                  &                   & {\ct 'ROSIN...'}      \\ \hline
 {\ct BREAKUP\_GAMMA\_D}                  & Real        & Section~\ref{info:secondary_breakup}                                  &                   & 2.4                   \\ \hline
 {\ct BREAKUP\_RATIO}                     & Real        & Section~\ref{info:secondary_breakup}                                  &                   & $3/7$                 \\ \hline
 {\ct BREAKUP\_SIGMA\_D}                  & Real        & Section~\ref{info:secondary_breakup}                                  &                   &                       \\ \hline
-{\ct CHECK\_DISTRIBUTION}                & Logical     & Section~\ref{info:particle_size}                                      &                   & {\ct F}         \\ \hline
+{\ct CHECK\_DISTRIBUTION}                & Logical     & Section~\ref{info:particle_size}                                      &                   & {\ct F}               \\ \hline
 {\ct CNF\_RAMP\_ID}                      & Character   & Section~\ref{info:particle_size}                                      &                   &                       \\ \hline
 {\ct COLOR}                              & Character   & Section~\ref{info:part_output}                                        &                   & {\ct 'BLACK'}         \\ \hline
 {\ct COMPLEX\_REFRACTIVE\_INDEX}         & Real        & Section~\ref{radiative_part_props}                                    &                   & 0.01                  \\ \hline
@@ -11842,18 +11856,20 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct FREE\_AREA\_FRACTION}               & Real        & Section~\ref{info:particle_screen}                                    &                   &                       \\ \hline
 {\ct GAMMA\_D}                           & Real        & Section~\ref{info:particle_size}                                      &                   & 2.4                   \\ \hline
 {\ct HEAT\_OF\_COMBUSTION}               & Real        & Section~\ref{info:fuel_droplets}                                      & kJ/kg             &                       \\ \hline
-{\ct HEAT\_TRANSFER\_COEFFICIENT\_GAS}   & Real        & Section~\ref{thermal_part_props}                                      & W/m$^2$/K         &                      \\ \hline
-{\ct HEAT\_TRANSFER\_COEFFICIENT\_SOLID} & Real        & Section~\ref{info:surface_droplets}                                   & W/m$^2$/K         & 300                  \\ \hline
+{\ct HEAT\_TRANSFER\_COEFFICIENT\_GAS}   & Real        & Section~\ref{thermal_part_props}                                      & W/m$^2$/K         &                       \\ \hline
+{\ct HEAT\_TRANSFER\_COEFFICIENT\_SOLID} & Real        & Section~\ref{info:surface_droplets}                                   & W/m$^2$/K         & 300                   \\ \hline
 {\ct HORIZONTAL\_VELOCITY}               & Real        & Section~\ref{info:surface_droplets}                                   & m/s               &  0.2                  \\ \hline
 {\ct ID}                                 & Character   & Section~\ref{info:PART_Basics}                                        &                   &                       \\ \hline
 {\ct INITIAL\_TEMPERATURE}               & Real        & Section~\ref{thermal_part_props}                                      & $^\circ$C         & {\ct TMPA}            \\ \hline
 {\ct KILL\_DIAMETER}                     & Real        & Section~\ref{info:particle_size}                                      & $\mu$m            &                       \\ \hline
-{\ct MASSLESS}                           & Logical     & Section~\ref{info:MASSLESS}                                           &                   & {\ct F}         \\ \hline
-{\ct MASS\_TRANSFER\_COEFFICIENT}        & Real        & Section~\ref{thermal_part_props}                                      & m/s               &                      \\ \hline
+{\ct MASSLESS}                           & Logical     & Section~\ref{info:MASSLESS}                                           &                   & {\ct F}               \\ \hline
+{\ct MASS\_TRANSFER\_COEFFICIENT}        & Real        & Section~\ref{thermal_part_props}                                      & m/s               &                       \\ \hline
 {\ct MAXIMUM\_DIAMETER}                  & Real        & Section~\ref{info:particle_size}                                      & $\mu$m            & 1000000               \\ \hline
 {\ct MINIMUM\_DIAMETER}                  & Real        & Section~\ref{info:particle_size}                                      & $\mu$m            &                       \\ \hline
-{\ct MONODISPERSE}                       & Logical     & Section~\ref{info:particle_size}                                      &                   & {\ct F}         \\ \hline
+{\ct MONODISPERSE}                       & Logical     & Section~\ref{info:particle_size}                                      &                   & {\ct F}               \\ \hline
 {\ct N\_STRATA}                          & Integer     & Section~\ref{info:particle_size}                                      &                   & 6                     \\ \hline
+{\ct NEW\_PARTICLE\_INCREMENT}        & Integer        & Section~\ref{info:controlling_droplets}
+                                      &                & 50                       \\ \hline
 {\ct ORIENTATION(1:3,:)}                 & Real Array  & Section~\ref{info:PART_SURF}                                          &                   &                       \\ \hline
 {\ct PERMEABILITY(3)}                    & Real Array  & Section~\ref{info:porous_media}                                       &                   &                       \\ \hline
 {\ct POROUS\_VOLUME\_FRACTION}           & Real        & Section~\ref{info:porous_media}                                       &                   &                       \\ \hline
@@ -11869,11 +11885,11 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SHAPE\_FACTOR}                      & Real        & Section~\ref{pine_needles}                                            &                   & 0.25                  \\ \hline
 {\ct SIGMA\_D}                           & Real        & Section~\ref{info:particle_size}                                      &                   &                       \\ \hline
 {\ct SPEC\_ID}                           & Character   & Section~\ref{thermal_part_props}                                      &                   &                       \\ \hline
-{\ct STATIC}                             & Logical     & Section~\ref{info:PART_SURF}                                          &                   & {\ct F}         \\ \hline
+{\ct STATIC}                             & Logical     & Section~\ref{info:PART_SURF}                                          &                   & {\ct F}               \\ \hline
 {\ct SURFACE\_DIAMETER}                  & Real        & Section~\ref{info:surface_droplets}                                   & $\mu$m            & 1000.                 \\ \hline
 {\ct SURFACE\_TENSION}                   & Real        & Section~\ref{info:secondary_breakup}                                  & N/m               & $7.28 \times 10^{-2}$ \\ \hline
 {\ct SURF\_ID}                           & Character   & Section~\ref{info:PART_SURF}                                          &                   &                       \\ \hline
-{\ct TURBULENT\_DISPERSION}              & Logical     & Section~\ref{info:MASSLESS}                                           &                   & {\ct F}         \\ \hline
+{\ct TURBULENT\_DISPERSION}              & Logical     & Section~\ref{info:MASSLESS}                                           &                   & {\ct F}               \\ \hline
 {\ct VERTICAL\_VELOCITY}                 & Real        & Section~\ref{info:surface_droplets}                                   & m/s               &  0.5                  \\ \hline
 \end{longtable}
 
@@ -12276,6 +12292,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RAMP\_MU}                      & Character         & Section~\ref{gas_species_props}         &                   &               \\ \hline
 {\ct REFERENCE\_ENTHALPY}           & Real              & Section~\ref{gas_species_props}         & kJ/kg             &               \\ \hline
 {\ct REFERENCE\_TEMPERATURE}        & Real              & Section~\ref{gas_species_props}         & $^\circ$C         & 25.           \\ \hline
+{\ct RENODE\_DELTA\_T}              & Real              & Section~\ref{info:solid_phase_stability} & K                 & 2             \\ \hline
 {\ct SIGMALJ}                       & Real              & Section~\ref{gas_species_props}         &                   & 0             \\ \hline
 {\ct SPEC\_ID(:)}                   & Char.~Array       & Section~\ref{info:lumped}               &                   &               \\ \hline
 {\ct SPECIFIC\_HEAT}                & Real              & Section~\ref{gas_species_props}         & \si{kJ/(kg.K)}    &               \\ \hline
@@ -12307,16 +12324,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct ADIABATIC}                                           & Logical         & Section~\ref{info:adiabatic}              &                     & {\ct F}           \\ \hline
 {\ct AREA\_MULTIPLIER}                                    & Real            & Section~\ref{info:area_mult}              &                     & 1.0                     \\ \hline
 {\ct BACKING}                                             & Character       & Section~\ref{info:BACKING}                &                     & {\ct 'EXPOSED'}         \\ \hline
-{\ct BLOWING}                                             & Logical         & Section~\ref{info:convection}             &                     & {\ct F}           \\ \hline
 {\ct BURN\_AWAY}                                          & Logical         & Section~\ref{info:BURN_AWAY}              &                     & {\ct F}           \\ \hline
 {\ct BURN\_DURATION}                                      & Real            & Section~\ref{info:BURN_DURATION}          & s                   & 1000000                 \\ \hline
 {\ct CELL\_SIZE\_FACTOR}                                  & Real            & Section~\ref{info:solid_phase_stability}  &                     & 1.0                     \\ \hline
-{\ct C\_FORCED\_CONSTANT}                                 & Real            & Section~\ref{info:convection}             &                     & 0.0                     \\ \hline
-{\ct C\_FORCED\_PR\_EXP}                                  & Real            & Section~\ref{info:convection}             &                     & 0.0                     \\ \hline
-{\ct C\_FORCED\_RE}                                       & Real            & Section~\ref{info:convection}             &                     & 0.0                     \\ \hline
-{\ct C\_FORCED\_RE\_EXP}                                  & Real            & Section~\ref{info:convection}             &                     & 0.0                     \\ \hline
-{\ct C\_HORIZONTAL}                                       & Real            & Section~\ref{info:convection}             &                     & 1.52                    \\ \hline
-{\ct C\_VERTICAL}                                         & Real            & Section~\ref{info:convection}             &                     & 1.31                    \\ \hline
 {\ct COLOR    }                                           & Character       & Section~\ref{info:colors}                 &                     &                         \\ \hline
 {\ct CONE\_HEAT\_FLUX}                                    & Real            & Section~\ref{info:specified_burning}      & \si{kW/m^2}         &                         \\ \hline
 {\ct CONVECTION\_LENGTH\_SCALE}                           & Real            & Section~\ref{info:convection}             & m                   & 1.                      \\ \hline
@@ -12440,7 +12450,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct WIDTH}                                               & Real            & Section~\ref{info:PART_GEOMETRY}          & m                   &                         \\ \hline
 {\ct XYZ(3)}                                              & Real Array      & Section~\ref{info:spread}                 & m                   &                         \\ \hline
 {\ct Z0 }                                                 & Real            & Section~\ref{info:stratification}         & m                   & 10.                     \\ \hline
-{\ct Z\_0 }                                               & Real            & Section~\ref{sec:abl_model}               & m                   & 0.                      \\ \hline
+{\ct Z\_0 }                                               & Real            & Section~\ref{info:wind_general}           & m                   & 0.                      \\ \hline
 \end{longtable}
 
 % Undocumented: FSK_A, FSK_K, FSK_W, IMPERMEABLE
@@ -12602,7 +12612,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct L}                                         & Real          & Section~\ref{info:WIND}                       & m             & 0                 \\ \hline
 {\ct LAPSE\_RATE}                               & Real          & Section~\ref{info:stratification}             & $^\circ$C/m   & 0                 \\ \hline
 {\ct LATITUDE}                                  & Real          & Section~\ref{info:coriolis_force}             & degrees       &                   \\ \hline
-{\ct POTENTIAL\_TEMPERATURE\_CORRECTION}        & Logical       & Section~\ref{info:potential_temperature_correction} &         & {\ct F}           \\ \hline
 {\ct PRESSURE\_GRADIENT\_FORCE}                 & Real          & Section~\ref{info:force_vector}               & Pa/m          &                   \\ \hline
 {\ct RAMP\_DIRECTION\_T}                        & Character     & Section~\ref{info:WIND}                       &               &                   \\ \hline
 {\ct RAMP\_DIRECTION\_Z}                        & Character     & Section~\ref{info:WIND}                       &               &                   \\ \hline
@@ -12643,6 +12652,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct ZONE} (Pressure Zone Parameters)} \\
 \hline \hline
 \endhead
+{\ct DISCHARGE\_COEFFICIENT(N)}    & Real                  & Section~\ref{info:Leaks}           &        & 1.            \\ \hline
 {\ct ID}                           & Character             & Section~\ref{info:ZONE_Basics}     &        &               \\ \hline
 {\ct LEAK\_AREA(N)}                & Real                  & Section~\ref{info:Leaks}           & m$^2$  & 0             \\ \hline
 {\ct LEAK\_PRESSURE\_EXPONENT(N)}  & Real                  & Section~\ref{info:Leaks}           &        & 0.5           \\ \hline

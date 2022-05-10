@@ -181,6 +181,8 @@ $QFDS -d Energy_Budget energy_budget_dns_100.fds
 $QFDS -d Energy_Budget energy_budget_particles.fds
 $QFDS -d Energy_Budget energy_budget_solid.fds
 $QFDS -d Energy_Budget energy_budget_tmix.fds
+$QFDS -d Energy_Budget test_hrr_2d_cyl.fds
+$QFDS -d Energy_Budget test_hrr_3d.fds
 
 $QFDS -d Extinction extinction_1.fds
 $QFDS -d Extinction extinction_2.fds
@@ -342,6 +344,7 @@ $QFDS -d HVAC leak_enthalpy.fds
 $QFDS -p 2 -d HVAC leak_test_3.fds
 $QFDS -d HVAC leak_test_4.fds
 $QFDS -d HVAC HVAC_leak_exponent.fds
+$QFDS -p 8 -d HVAC HVAC_leak_exponent_2.fds
 
 $QFDS -d Miscellaneous layer_1mesh.fds
 $QFDS -p 3 -d Miscellaneous layer_4mesh.fds
@@ -371,6 +374,7 @@ $QFDS -d NS_Analytical_Solution vort2d_40.fds
 $QFDS -d NS_Analytical_Solution vort2d_80.fds
 $QFDS -d NS_Analytical_Solution vort2d_160.fds
 $QFDS -d NS_Analytical_Solution vort2d_320.fds
+$QFDS -p 4 -d NS_Analytical_Solution ns2d_4mesh_64_uscarc.fds
 
 $QFDS -d Pressure_Effects isentropic.fds
 $QFDS -d Pressure_Effects isentropic2.fds
@@ -380,10 +384,12 @@ $QFDS -d Pressure_Effects zone_break_fast.fds
 $QFDS -d Pressure_Effects zone_break_slow.fds
 $QFDS -d Pressure_Effects zone_break_fast_ulmat.fds
 $QFDS -d Pressure_Effects zone_break_slow_ulmat.fds
+$QFDS -d Pressure_Effects zone_break_slow_uscarc.fds
 $QFDS -p 2 -d Pressure_Effects zone_shape.fds
 $QFDS -p 8 -d Pressure_Effects zone_shape_2.fds
 
 $QFDS -d Pressure_Solver dancing_eddies_1mesh.fds
+$QFDS -d Pressure_Solver opening_ulmat.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_uglmat.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_tight.fds
 $QFDS -p 4 -d Pressure_Solver dancing_eddies_tight_no_precon.fds
@@ -408,10 +414,12 @@ $QFDS -p 8 -d Pressure_Solver pressure_iteration3d_scarc.fds
 $QFDS -p 8 -d Pressure_Solver pressure_iteration3d_uscarc.fds
 $QFDS -p 8 -d Pressure_Solver pressure_iteration3d_uglmat.fds
 $QFDS -p 2 -d Pressure_Solver ulmat_2zone.fds
+$QFDS -p 2 -d Pressure_Solver uscarc_inseparable_2zone.fds
 $QFDS -p 4 -d Pressure_Solver scarc_separable_4mesh.fds
 $QFDS -p 4 -d Pressure_Solver scarc_inseparable_4mesh.fds
 $QFDS -p 4 -d Pressure_Solver obst_activation_ulmat.fds
 $QFDS -p 4 -d Pressure_Solver obst_activation_uscarc_inseparable.fds
+$QFDS -p 4 -d Pressure_Solver obst_activation_2_uscarc_inseparable.fds
 
 $QFDS -d Pyrolysis cable_11_insulation_mcc.fds
 $QFDS -d Pyrolysis cable_23_insulation_mcc.fds
@@ -427,6 +435,9 @@ $QFDS -d Pyrolysis birch_tga_1step_20.fds
 $QFDS -d Pyrolysis enthalpy.fds
 $QFDS -d Pyrolysis liquid_mixture.fds
 $QFDS -p 8 -d Pyrolysis methanol_evaporation.fds
+$QFDS -d Pyrolysis part_baking_soda_420K.fds
+$QFDS -d Pyrolysis part_baking_soda_450K.fds
+$QFDS -d Pyrolysis part_baking_soda_500K.fds
 $QFDS -d Pyrolysis pyrolysis_1.fds
 $QFDS -d Pyrolysis pyrolysis_2.fds
 $QFDS -d Pyrolysis specified_hrr.fds
@@ -468,9 +479,6 @@ $QFDS -d Pyrolysis pyro3d_wood_char.fds
 $QFDS -d Pyrolysis pyro3d_vs_pyro1d.fds
 $QFDS -d Pyrolysis pyro3d_vs_pyro1d_wood_moist.fds
 $QFDS -d Pyrolysis pyro3d_transport.fds
-$QFDS -d Pyrolysis solid_particle_decomposition_1.fds
-$QFDS -d Pyrolysis solid_particle_decomposition_2.fds
-$QFDS -d Pyrolysis solid_particle_decomposition_3.fds
 $QFDS -d Pyrolysis water_pool.fds
 
 $QFDS -d Radiation adiabatic_surface_temperature.fds
@@ -544,6 +552,8 @@ $QFDS -d Radiation TC_heating.fds
 $QFDS -d Radiation TC_view_factor.fds
 $QFDS -d Radiation wall_internal_radiation.fds
 
+$QFDS -p 4 -d Restart device_restart_a.fds
+$QFDS -p 4 -d Restart device_restart_base_case.fds
 $QFDS -d Restart restart_test1a.fds
 $QFDS -d Restart pyro3d_restart_a.fds
 $QFDS -d Restart pyro3d_restart_base_case.fds
@@ -648,11 +658,9 @@ $QFDS -d Sprinklers_and_Sprays water_evaporation_3.fds
 $QFDS -d Sprinklers_and_Sprays water_evaporation_4.fds
 $QFDS -d Sprinklers_and_Sprays water_evaporation_4_np100.fds
 $QFDS -d Sprinklers_and_Sprays water_evaporation_5.fds
-$QFDS -d Sprinklers_and_Sprays Ranz_Marshall_thermally_thick.fds
 $QFDS -d Sprinklers_and_Sprays water_evaporation_6.fds
 $QFDS -d Sprinklers_and_Sprays water_evaporation_7.fds
 $QFDS -d Sprinklers_and_Sprays water_evaporation_8.fds
-$QFDS -d Sprinklers_and_Sprays Li_Chow_thermally_thick.fds
 $QFDS -d Sprinklers_and_Sprays water_fuel_sprays.fds
 $QFDS -d Sprinklers_and_Sprays screen_drag_1.fds
 $QFDS -d Sprinklers_and_Sprays screen_drag_2.fds
@@ -711,6 +719,7 @@ $QFDS -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_64.fds
 $QFDS -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_128.fds
 $QFDS -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_256.fds
 $QFDS -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_512.fds
+$QFDS -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_64_uscarc.fds
 $QFDS      -d Scalar_Analytical_Solution soborot_godunov_square_wave_16.fds
 $QFDS      -d Scalar_Analytical_Solution soborot_godunov_square_wave_32.fds
 $QFDS      -d Scalar_Analytical_Solution soborot_godunov_square_wave_64.fds
@@ -739,6 +748,23 @@ $QFDS -p 4 -d Scalar_Analytical_Solution soborot_mp5_cos_wave_128.fds
 
 $QFDS -o 1 -d Thread_Check race_test_1.fds
 $QFDS -o 4 -d Thread_Check race_test_4.fds
+
+$QFDS -t -o 1 -A -d Timing_Benchmarks openmp_test64a.fds
+$QFDS -t -o 2 -A -d Timing_Benchmarks openmp_test64b.fds
+$QFDS -t -o 3 -A -d Timing_Benchmarks openmp_test64c.fds
+$QFDS -t -o 4 -A -d Timing_Benchmarks openmp_test64d.fds
+$QFDS -t -o 5 -A -d Timing_Benchmarks openmp_test64e.fds
+$QFDS -t -o 6 -A -d Timing_Benchmarks openmp_test64f.fds
+$QFDS -t -o 7 -A -d Timing_Benchmarks openmp_test64g.fds
+$QFDS -t -o 8 -A -d Timing_Benchmarks openmp_test64h.fds
+$QFDS -t -o 1 -A -d Timing_Benchmarks openmp_test128a.fds
+$QFDS -t -o 2 -A -d Timing_Benchmarks openmp_test128b.fds
+$QFDS -t -o 3 -A -d Timing_Benchmarks openmp_test128c.fds
+$QFDS -t -o 4 -A -d Timing_Benchmarks openmp_test128d.fds
+$QFDS -t -o 5 -A -d Timing_Benchmarks openmp_test128e.fds
+$QFDS -t -o 6 -A -d Timing_Benchmarks openmp_test128f.fds
+$QFDS -t -o 7 -A -d Timing_Benchmarks openmp_test128g.fds
+$QFDS -t -o 8 -A -d Timing_Benchmarks openmp_test128h.fds
 
 $QFDS -d Turbulence csmag0_32.fds
 $QFDS -d Turbulence csmag_32.fds

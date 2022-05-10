@@ -257,7 +257,9 @@ for i=2:n_plots
                 elseif strcmp(Metric,'all')
                     Save_Measured_Metric(i,j,1:length(indices)) = M(indices,d1_Dep_Col)-d1_Initial_Value;
                 elseif strcmp(Metric,'threshold')
-                    Save_Measured_Metric(i,j,1) = min(M(indices,d1_Dep_Col));
+                    Save_Measured_Metric(i,j,1) = max(abs(M(indices,d1_Dep_Col)-d1_Initial_Value));
+                elseif strcmp(Metric,'tolerance')
+                    Save_Measured_Metric(i,j,1) = 0;
                 elseif strcmp(Metric,'area')
                     Save_Measured_Metric(i,j,1) = trapz(M(indices,d1_Ind_Col), M(indices,d1_Dep_Col))-d1_Initial_Value;
                 elseif strcmp(Metric,'ipct')
@@ -395,6 +397,8 @@ for i=2:n_plots
                     Save_Predicted_Metric(i,j,1:length(indices)) = M_Dep-d2_Initial_Value;
                 elseif strcmp(Metric,'threshold')
                     Save_Predicted_Metric(i,j,1) = min(M_Dep)-d2_Initial_Value;
+                elseif strcmp(Metric,'tolerance')
+                    Save_Predicted_Metric(i,j,1) = max(abs(M_Dep-d2_Initial_Value));
                 elseif strcmp(Metric,'area')
                     Save_Predicted_Metric(i,j,1) = trapz(M_Ind,M_Dep)-d2_Initial_Value;
                 elseif strcmp(Metric,'ipct')

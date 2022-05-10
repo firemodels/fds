@@ -163,7 +163,7 @@ This is used to create a virtual cell over the node position to search for resul
 The number of variables (1 or 2) is used to determine if the interface will get $h$ from FDS simulation or use a constant value. 
 If the number of variables is defines as 2, the code will extract both $T_{\hbox{\tiny AST}}$ and $h$ from FDS simulation. If the number of variables is defined as 1, the code will get just the results for $T_{\hbox{\tiny AST}}$ and a constant value of $h$ is prescribed in A{\footnotesize NSYS}. So, just in this case, the next value on this same line is $h$. 
 \paragraph{Time} 
-To address the time boundary, the code needs the starting, ending time and the time interval. The time interval that the results are written into {\ct BNDF} files can be controlled by {\ct DT\_BNDF} at {\ct DUMP} line, the default is given by $2 \Delta t$/{\footnotesize NFRAMES}.
+To address the time boundary, the code needs the starting, ending time and the time interval. The time interval that the results are written into {\ct BNDF} files can be controlled by {\ct DT\_BNDF} at {\ct DUMP} line, the default is given by $\Delta t$/{\footnotesize NFRAMES}.
 \paragraph{Number of average points} 
 In some scenarios, a constant exposure condition can be assumed. To calculate a constant steady-state exposure condition from 
 a short time history, a number of average points should be provided. If NO average is wanted, 0 (zero) should be prescribed.

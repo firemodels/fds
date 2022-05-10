@@ -1,9 +1,5 @@
 #!/bin/bash
 
-# define FIREMODELS in your .bashrc 
-# FIREMODELS is the repo root directory containing fds, smv bot repos. For example:
-#   export FIREMODELS=/home/username/FireModels_fork
-
 # ---------------------------- stop_fds_if_requested ----------------------------------
 
 function stop_fds_if_requested {
@@ -71,7 +67,7 @@ function usage {
   if [ "$use_intel_mpi" == "1" ]; then
     MPI=impi
   else
-    MPI=mpi
+    MPI=ompi
   fi
   echo "Usage: qfds.sh [-p n_mpi_processes] [-o nthreads] [-e fds_command] [-q queue]  casename.fds"
   echo ""
@@ -83,7 +79,7 @@ function usage {
   echo "then the currently loaded modules are used."
   echo ""
   echo " -e exe - full path of FDS used to run case "
-  echo "    [default: $FDSROOT/fds/Build/${MPI}_intel_${platform}_64$DB/fds_${MPI}_intel_${platform}_64$DB]"
+  echo "    [default: $FDSROOT/fds/Build/${MPI}_intel_${platform}$DB/fds_${MPI}_intel_${platform}$DB]"
   echo " -h   - show commonly used options"
   echo " -H   - show all options"
   echo " -o o - number of OpenMP threads per process [default: 1]"
@@ -129,15 +125,15 @@ QFDS_PATH=$(dirname `which $0`)
 CURDIR=`pwd`
 cd $QFDS_PATH
 QFDS_DIR=`pwd`
-cd $CURDIR
-SLEEP=
 
 #*** define toplevel of the repos
 
-FDSROOT=~/FDS-SMV
-if [ "$FIREMODELS" != "" ]; then
-  FDSROOT=$FIREMODELS
-fi
+FDSROOT=$QFDS_DIR/../../..
+cd $FDSROOT
+FDSROOT=`pwd`
+cd $CURDIR
+
+SLEEP=
 
 #*** determine platform
 
@@ -434,11 +430,14 @@ else
   fi
   if [ "$use_intel_mpi" == "1" ]; then
     if [ "$exe" == "" ]; then
-      exe=$FDSROOT/fds/Build/impi_intel_${platform}_64$DB/fds_impi_intel_${platform}_64$DB
+      exe=$FDSROOT/fds/Build/impi_intel_${platform}$DB/fds_impi_intel_${platform}$DB
+    fi
+    if [[ $n_openmp_threads > 1 ]]; then
+      exe=$FDSROOT/fds/Build/impi_intel_${platform}_openmp$DB/fds_impi_intel_${platform}_openmp$DB
     fi
   fi
   if [ "$exe" == "" ]; then
-    exe=$FDSROOT/fds/Build/mpi_intel_${platform}_64$DB/fds_mpi_intel_${platform}_64$DB
+    exe=$FDSROOT/fds/Build/ompi_intel_${platform}$DB/fds_ompi_intel_${platform}$DB
   fi
 fi
 

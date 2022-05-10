@@ -996,8 +996,8 @@ IF (PRESENT(LP_INDEX)) THEN
 
    LPC => LAGRANGIAN_PARTICLE_CLASS(LPC_INDEX)
    SF => SURFACE(LPC%SURF_INDEX)
+   N_NEW_STORAGE_SLOTS = LPC%NEW_PARTICLE_INCREMENT
    IF (LP_INDEX>M%NLPDIM) THEN
-      N_NEW_STORAGE_SLOTS = 50
       ALLOCATE(LP_DUMMY(M%NLPDIM))
       LP_DUMMY(1:M%NLPDIM) = M%LAGRANGIAN_PARTICLE(1:M%NLPDIM)
       DEALLOCATE(M%LAGRANGIAN_PARTICLE)
@@ -1023,8 +1023,8 @@ IF (PRESENT(LP_INDEX)) THEN
 ELSEIF (PRESENT(WALL_INDEX)) THEN
 
    SF => SURFACE(SURF_INDEX)
+   N_NEW_STORAGE_SLOTS = 1000
    IF (WALL_INDEX>M%N_WALL_CELLS_DIM) THEN
-      N_NEW_STORAGE_SLOTS = 1000
       ALLOCATE(WALL_DUMMY(0:M%N_WALL_CELLS_DIM))
       WALL_DUMMY(0:M%N_WALL_CELLS_DIM) = M%WALL(0:M%N_WALL_CELLS_DIM)
       DEALLOCATE(M%WALL)
@@ -1050,8 +1050,8 @@ ELSEIF (PRESENT(WALL_INDEX)) THEN
 ELSEIF (PRESENT(CFACE_INDEX)) THEN
 
    SF => SURFACE(SURF_INDEX)
+   N_NEW_STORAGE_SLOTS = 1000
    IF (CFACE_INDEX>M%N_CFACE_CELLS_DIM) THEN
-      N_NEW_STORAGE_SLOTS = 1000
       ALLOCATE(CFACE_DUMMY(0:M%N_CFACE_CELLS_DIM))
       CFACE_DUMMY(0:M%N_CFACE_CELLS_DIM) = M%CFACE(0:M%N_CFACE_CELLS_DIM)
       DEALLOCATE(M%CFACE)
@@ -1093,7 +1093,6 @@ IF (BC_INDEX==0) THEN
 ENDIF
 
 IF (BC_INDEX>M%N_BOUNDARY_COORD_DIM) THEN  ! There are no open slots for boundary coordinates
-   N_NEW_STORAGE_SLOTS = 1000
    ALLOCATE(BC_DUMMY(1:M%N_BOUNDARY_COORD_DIM+N_NEW_STORAGE_SLOTS))
    BC_DUMMY(1:M%N_BOUNDARY_COORD_DIM) = M%BOUNDARY_COORD(1:M%N_BOUNDARY_COORD_DIM)
    CALL MOVE_ALLOC(BC_DUMMY,M%BOUNDARY_COORD)
@@ -1125,7 +1124,6 @@ IF (OD_INDEX==0) THEN
 ENDIF
 
 IF (OD_INDEX>M%N_BOUNDARY_ONE_D_DIM) THEN  ! There are no open slots for boundary coordinates
-   N_NEW_STORAGE_SLOTS = 1000
    ALLOCATE(OD_DUMMY(1:M%N_BOUNDARY_ONE_D_DIM+N_NEW_STORAGE_SLOTS))
    OD_DUMMY(1:M%N_BOUNDARY_ONE_D_DIM) = M%BOUNDARY_ONE_D(1:M%N_BOUNDARY_ONE_D_DIM)
    CALL MOVE_ALLOC(OD_DUMMY,M%BOUNDARY_ONE_D)
@@ -1278,7 +1276,6 @@ IF (BP_INDEX==0) THEN
 ENDIF
 
 IF (BP_INDEX>M%N_BOUNDARY_PROPS_DIM) THEN  ! There are no open slots for boundary coordinates
-   N_NEW_STORAGE_SLOTS = 1000
    ALLOCATE(BP_DUMMY(1:M%N_BOUNDARY_PROPS_DIM+N_NEW_STORAGE_SLOTS))
    BP_DUMMY(1:M%N_BOUNDARY_PROPS_DIM) = M%BOUNDARY_PROPS(1:M%N_BOUNDARY_PROPS_DIM)
    CALL MOVE_ALLOC(BP_DUMMY,M%BOUNDARY_PROPS)
@@ -1335,7 +1332,6 @@ IF (BR_INDEX==0) THEN
 ENDIF
 
 IF (BR_INDEX>M%N_BOUNDARY_RADIA_DIM) THEN  ! There are no open slots for boundary coordinates
-   N_NEW_STORAGE_SLOTS = 1000
    ALLOCATE(BR_DUMMY(1:M%N_BOUNDARY_RADIA_DIM+N_NEW_STORAGE_SLOTS))
    BR_DUMMY(1:M%N_BOUNDARY_RADIA_DIM) = M%BOUNDARY_RADIA(1:M%N_BOUNDARY_RADIA_DIM)
    CALL MOVE_ALLOC(BR_DUMMY,M%BOUNDARY_RADIA)
@@ -1785,7 +1781,6 @@ RC=RC+1 ; CALL EQUATE(OS%REALS(RC,STORAGE_INDEX),BP%PHI_LS,UNPACK_IT)
 RC=RC+1 ; CALL EQUATE(OS%REALS(RC,STORAGE_INDEX),BP%WORK1,UNPACK_IT)
 RC=RC+1 ; CALL EQUATE(OS%REALS(RC,STORAGE_INDEX),BP%WORK2,UNPACK_IT)
 RC=RC+1 ; CALL EQUATE(OS%REALS(RC,STORAGE_INDEX),BP%K_SUPPRESSION,UNPACK_IT)
-RC=RC+1 ; CALL EQUATE(OS%REALS(RC,STORAGE_INDEX),BP%L_OBUKHOV,UNPACK_IT)
 
 I2 = RC
 
@@ -2155,45 +2150,27 @@ END FUNCTION INTERIOR
 
 !> \brief Assign the pressure zone for all cells connected to a given input point
 !> \param NM Mesh number
-!> \param XX x-coordinate of the point (m)
-!> \param YY y-coordinate of the point (m)
-!> \param ZZ z-coordinate of the point (m)
+!> \param II i-coordinate of the point (m)
+!> \param JJ j-coordinate of the point (m)
+!> \param KK k-coordinate of the point (m)
 !> \param I_ZONE Index of the pressure zone to assign to the connected cells
 !> \param I_ZONE_OVERLAP Index of a pressure zone that overlaps I_ZONE
 
-SUBROUTINE ASSIGN_PRESSURE_ZONE(NM,XX,YY,ZZ,I_ZONE,I_ZONE_OVERLAP)
+SUBROUTINE ASSIGN_PRESSURE_ZONE(NM,II,JJ,KK,I_ZONE,I_ZONE_OVERLAP)
 
 USE COMP_FUNCTIONS, ONLY : SHUTDOWN
-REAL(EB), INTENT(IN) :: XX,YY,ZZ
-REAL(EB) :: XI,YJ,ZK
-INTEGER, INTENT(IN) :: NM,I_ZONE
+INTEGER, INTENT(IN) :: NM,I_ZONE,II,JJ,KK
 INTEGER, INTENT(OUT) :: I_ZONE_OVERLAP
-INTEGER :: NN,IOR,IC,IC_OLD,II,JJ,KK,III,JJJ,KKK,Q_N
+INTEGER :: NN,IOR,IC,IC_OLD,IIN,JJN,KKN,III,JJJ,KKK,Q_N
 INTEGER, ALLOCATABLE, DIMENSION(:) :: Q_I,Q_J,Q_K
 CHARACTER(MESSAGE_LENGTH) :: MESSAGE
 TYPE (MESH_TYPE), POINTER :: M
 TYPE (OBSTRUCTION_TYPE), POINTER :: OB
 
-M=>MESHES(NM)
+M => MESHES(NM)
+
 I_ZONE_OVERLAP = -1
-
-IF (XX<M%XS-TWO_EPSILON_EB .OR. XX>M%XF+TWO_EPSILON_EB .OR. &
-    YY<M%YS-TWO_EPSILON_EB .OR. YY>M%YF+TWO_EPSILON_EB .OR. &
-    ZZ<M%ZS-TWO_EPSILON_EB .OR. ZZ>M%ZF+TWO_EPSILON_EB) RETURN
-
-ALLOCATE(Q_I(M%IBAR*M%JBAR*M%KBAR))
-ALLOCATE(Q_J(M%IBAR*M%JBAR*M%KBAR))
-ALLOCATE(Q_K(M%IBAR*M%JBAR*M%KBAR))
-
-! Find the cell indices corresponding to the given point
-
-XI  = MAX( 1._EB , MIN( REAL(M%IBAR,EB)+ALMOST_ONE , M%CELLSI(NINT((XX-M%XS)*M%RDXINT)) + 1._EB ) )
-YJ  = MAX( 1._EB , MIN( REAL(M%JBAR,EB)+ALMOST_ONE , M%CELLSJ(NINT((YY-M%YS)*M%RDYINT)) + 1._EB ) )
-ZK  = MAX( 1._EB , MIN( REAL(M%KBAR,EB)+ALMOST_ONE , M%CELLSK(NINT((ZZ-M%ZS)*M%RDZINT)) + 1._EB ) )
-II  = FLOOR(XI)
-JJ  = FLOOR(YJ)
-KK  = FLOOR(ZK)
-IC  = M%CELL_INDEX(II,JJ,KK)
+IC = M%CELL_INDEX(II,JJ,KK)
 
 IF (M%SOLID(IC)) THEN
    WRITE(MESSAGE,'(A,I3,A)')  'ERROR: XYZ point for ZONE ',I_ZONE,' is inside a solid obstruction. Choose another XYZ.'
@@ -2201,13 +2178,25 @@ IF (M%SOLID(IC)) THEN
    RETURN
 ENDIF
 
+IF (.NOT.M%SOLID(IC) .AND. M%PRESSURE_ZONE(II,JJ,KK)>=0 .AND.  M%PRESSURE_ZONE(II,JJ,KK)/=I_ZONE) THEN
+   I_ZONE_OVERLAP = M%PRESSURE_ZONE(II,JJ,KK)
+   RETURN
+ELSEIF (M%PRESSURE_ZONE(II,JJ,KK)>=0) THEN
+   RETURN
+ELSE
+   M%PRESSURE_ZONE(II,JJ,KK) = I_ZONE
+ENDIF
+
 ! Add the first entry to "queue" of cells that need a pressure zone number
+
+ALLOCATE(Q_I(M%IBAR*M%JBAR*M%KBAR))
+ALLOCATE(Q_J(M%IBAR*M%JBAR*M%KBAR))
+ALLOCATE(Q_K(M%IBAR*M%JBAR*M%KBAR))
 
 Q_I(1) = II
 Q_J(1) = JJ
 Q_K(1) = KK
 Q_N    = 1
-M%PRESSURE_ZONE(II,JJ,KK) = I_ZONE
 
 ! Look to all cells adjacent to the starting cell and determine if they are in the ZONE as well.
 ! Repeat process until all cells are found.
@@ -2237,34 +2226,34 @@ SORT_QUEUE: DO
       SELECT CASE(IOR)
          CASE(-1)
             IF (III==1) CYCLE SEARCH_LOOP
-            II = III-1
-            JJ = JJJ
-            KK = KKK
+            IIN = III-1
+            JJN = JJJ
+            KKN = KKK
          CASE( 1)
             IF (III==M%IBAR) CYCLE SEARCH_LOOP
-            II = III+1
-            JJ = JJJ
-            KK = KKK
+            IIN = III+1
+            JJN = JJJ
+            KKN = KKK
          CASE(-2)
             IF (JJJ==1) CYCLE SEARCH_LOOP
-            II = III
-            JJ = JJJ-1
-            KK = KKK
+            IIN = III
+            JJN = JJJ-1
+            KKN = KKK
          CASE( 2)
             IF (JJJ==M%JBAR) CYCLE SEARCH_LOOP
-            II = III
-            JJ = JJJ+1
-            KK = KKK
+            IIN = III
+            JJN = JJJ+1
+            KKN = KKK
          CASE(-3)
             IF (KKK==1) CYCLE SEARCH_LOOP
-            II = III
-            JJ = JJJ
-            KK = KKK-1
+            IIN = III
+            JJN = JJJ
+            KKN = KKK-1
          CASE( 3)
             IF (KKK==M%KBAR) CYCLE SEARCH_LOOP
-            II = III
-            JJ = JJJ
-            KK = KKK+1
+            IIN = III
+            JJN = JJJ
+            KKN = KKK+1
       END SELECT
 
       ! Look for thin obstructions bordering the current cell
@@ -2272,60 +2261,60 @@ SORT_QUEUE: DO
       DO NN=1,M%N_OBST
          OB=>M%OBSTRUCTION(NN)
          SELECT CASE(IOR)
-            CASE(-1)
-               IF (II==  OB%I1 .AND. II==  OB%I2 .AND. JJ>OB%J1 .AND. JJ<=OB%J2 .AND. KK>OB%K1 .AND. KK<=OB%K2) CYCLE SEARCH_LOOP
+            CASE(-1) 
+               IF (IIN==  OB%I1.AND.IIN==  OB%I2.AND.JJN>OB%J1.AND.JJN<=OB%J2.AND.KKN>OB%K1.AND.KKN<=OB%K2) CYCLE SEARCH_LOOP
             CASE( 1)
-               IF (II-1==OB%I1 .AND. II-1==OB%I2 .AND. JJ>OB%J1 .AND. JJ<=OB%J2 .AND. KK>OB%K1 .AND. KK<=OB%K2) CYCLE SEARCH_LOOP
+               IF (IIN-1==OB%I1.AND.IIN-1==OB%I2.AND.JJN>OB%J1.AND.JJN<=OB%J2.AND.KKN>OB%K1.AND.KKN<=OB%K2) CYCLE SEARCH_LOOP
             CASE(-2)
-               IF (JJ==  OB%J1 .AND. JJ==  OB%J2 .AND. II>OB%I1 .AND. II<=OB%I2 .AND. KK>OB%K1 .AND. KK<=OB%K2) CYCLE SEARCH_LOOP
+               IF (JJN==  OB%J1.AND.JJN==  OB%J2.AND.IIN>OB%I1.AND.IIN<=OB%I2.AND.KKN>OB%K1.AND.KKN<=OB%K2) CYCLE SEARCH_LOOP
             CASE( 2)
-               IF (JJ-1==OB%J1 .AND. JJ-1==OB%J2 .AND. II>OB%I1 .AND. II<=OB%I2 .AND. KK>OB%K1 .AND. KK<=OB%K2) CYCLE SEARCH_LOOP
+               IF (JJN-1==OB%J1.AND.JJN-1==OB%J2.AND.IIN>OB%I1.AND.IIN<=OB%I2.AND.KKN>OB%K1.AND.KKN<=OB%K2) CYCLE SEARCH_LOOP
             CASE(-3)
-               IF (KK==  OB%K1 .AND. KK==  OB%K2 .AND. II>OB%I1 .AND. II<=OB%I2 .AND. JJ>OB%J1 .AND. JJ<=OB%J2) CYCLE SEARCH_LOOP
+               IF (KKN==  OB%K1.AND.KKN==  OB%K2.AND.IIN>OB%I1.AND.IIN<=OB%I2.AND.JJN>OB%J1.AND.JJN<=OB%J2) CYCLE SEARCH_LOOP
             CASE( 3)
-               IF (KK-1==OB%K1 .AND. KK-1==OB%K2 .AND. II>OB%I1 .AND. II<=OB%I2 .AND. JJ>OB%J1 .AND. JJ<=OB%J2) CYCLE SEARCH_LOOP
+               IF (KKN-1==OB%K1.AND.KKN-1==OB%K2.AND.IIN>OB%I1.AND.IIN<=OB%I2.AND.JJN>OB%J1.AND.JJN<=OB%J2) CYCLE SEARCH_LOOP
          END SELECT
       ENDDO
 
       ! If the last cell was solid and the current cell is not solid, stop the current directional march.
 
       IC_OLD = IC
-      IC = M%CELL_INDEX(II,JJ,KK)
+      IC = M%CELL_INDEX(IIN,JJN,KKN)
 
       IF (M%SOLID(IC_OLD) .AND. .NOT.M%SOLID(IC)) CYCLE SEARCH_LOOP
 
       IF (CC_IBM) THEN
          ! Here IBM_CGSC=1, IBM_SOLID=1:
-         IF(M%CCVAR(III,JJJ,KKK,1)==1 .AND. M%CCVAR(II,JJ,KK,1)/=1) CYCLE SEARCH_LOOP
-         IF(M%CCVAR(III,JJJ,KKK,1)==0 .AND. M%CCVAR(II,JJ,KK,1)==0) THEN
+         IF(M%CCVAR(III,JJJ,KKK,1)==1 .AND. M%CCVAR(IIN,JJN,KKN,1)/=1) CYCLE SEARCH_LOOP
+         IF(M%CCVAR(III,JJJ,KKK,1)==0 .AND. M%CCVAR(IIN,JJN,KKN,1)==0) THEN
             IF(IOR>0 .AND. M%FCVAR(III,JJJ,KKK,1,ABS(IOR))==1) CYCLE SEARCH_LOOP
-            IF(IOR<0 .AND. M%FCVAR( II, JJ, KK,1,ABS(IOR))==1) CYCLE SEARCH_LOOP
+            IF(IOR<0 .AND. M%FCVAR( IIN, JJN, KKN,1,ABS(IOR))==1) CYCLE SEARCH_LOOP
          ENDIF
 
       ! If the current cell is not solid, but it is assigned another ZONE index, mark it as an overlap error and return
 
          ! Cell not SOLID for OBSTS, or GEOM cell not IBM_SOLID:
-         IF (.NOT.M%SOLID(IC) .AND. M%CCVAR(II,JJ,KK,1)/=1 .AND. &
-            M%PRESSURE_ZONE(II,JJ,KK)>=0 .AND.  M%PRESSURE_ZONE(II,JJ,KK)/=I_ZONE) THEN
-            I_ZONE_OVERLAP = M%PRESSURE_ZONE(II,JJ,KK)
-            RETURN
+         IF (.NOT.M%SOLID(IC) .AND. M%CCVAR(IIN,JJN,KKN,1)/=1 .AND. &
+            M%PRESSURE_ZONE(IIN,JJN,KKN)>=0 .AND.  M%PRESSURE_ZONE(IIN,JJN,KKN)/=I_ZONE) THEN
+            I_ZONE_OVERLAP = M%PRESSURE_ZONE(IIN,JJN,KKN)
+            EXIT SORT_QUEUE
          ENDIF
       ELSE
-         IF (.NOT.M%SOLID(IC) .AND. M%PRESSURE_ZONE(II,JJ,KK)>=0 .AND.  M%PRESSURE_ZONE(II,JJ,KK)/=I_ZONE) THEN
-            I_ZONE_OVERLAP = M%PRESSURE_ZONE(II,JJ,KK)
-            RETURN
+         IF (.NOT.M%SOLID(IC) .AND. M%PRESSURE_ZONE(IIN,JJN,KKN)>=0 .AND.  M%PRESSURE_ZONE(IIN,JJN,KKN)/=I_ZONE) THEN
+            I_ZONE_OVERLAP = M%PRESSURE_ZONE(IIN,JJN,KKN)
+            EXIT SORT_QUEUE
          ENDIF
       ENDIF
 
       ! If the current cell is unassigned, assign the cell the ZONE index, I_ZONE, and then add this cell to the
       ! queue so that further searches might originate from it.
 
-      IF (M%PRESSURE_ZONE(II,JJ,KK)<0) THEN
-         M%PRESSURE_ZONE(II,JJ,KK) = I_ZONE
+      IF (M%PRESSURE_ZONE(IIN,JJN,KKN)<0) THEN
+         M%PRESSURE_ZONE(IIN,JJN,KKN) = I_ZONE
          Q_N      = Q_N+1
-         Q_I(Q_N) = II
-         Q_J(Q_N) = JJ
-         Q_K(Q_N) = KK
+         Q_I(Q_N) = IIN
+         Q_J(Q_N) = JJN
+         Q_K(Q_N) = KKN
       ENDIF
 
    ENDDO SEARCH_LOOP
@@ -3585,98 +3574,162 @@ ENDIF
 END FUNCTION F_B
 
 
-!> \brief This function computes the flux limited scalar value on a face.
-!> \param A    Velocity.
-!> \param U Scalar in 4 points, (1:2) lower index points to the face, (3:4) upper index points.
-!> \param LIMITER Flux limiter used.
+!> \brief This subroutine computes the flux-limited scalar value on a face.
+!> \param A Array of velocity components (m/s)
+!> \param U Array of scalars
+!> \param F Array of flux-limited scalars
+!> \param I1 Lower I index
+!> \param I2 Upper I index
+!> \param J1 Lower J index
+!> \param J2 Upper J index
+!> \param K1 Lower K index
+!> \param K2 Upper K index
+!> \param IOR Orientation index (1, 2, or 3)
+!> \param LIMITER Indicator of the flux limiting scheme
 
-REAL(EB) FUNCTION SCALAR_FACE_VALUE(A,U,LIMITER)
+!> There are 6 options for flux LIMITER:
+!> 
+!> CENTRAL_LIMITER  = 0
+!> GODUNOV_LIMITER  = 1
+!> SUPERBEE_LIMITER = 2
+!> MINMOD_LIMITER   = 3
+!> CHARM_LIMITER    = 4
+!> MP5_LIMITER      = 5
+!>
+!> Example: x-direction (IOR=1)
+!>
+!>                   location of face
+!>                            
+!>                        F(I,J,K)
+!>   |     o     |     o     |     o     |     o     |
+!>                        A(I,J,K)
+!>     U(I-1,J,K)   U(I,J,K)   U(I+1,J,K)  U(I+2,J,K)
 
-REAL(EB), INTENT(IN) :: A,U(4)
-INTEGER, INTENT(IN) :: LIMITER
+SUBROUTINE GET_SCALAR_FACE_VALUE(A,U,F,I1,I2,J1,J2,K1,K2,IOR,LIMITER)
+
+REAL(EB), INTENT(IN) :: A(0:,0:,0:),U(0:,0:,0:)
+REAL(EB), INTENT(OUT) :: F(0:,0:,0:)
+INTEGER, INTENT(IN) :: LIMITER,I1,I2,J1,J2,K1,K2,IOR
 REAL(EB) :: R,B,DU_UP,DU_LOC,V(-2:2)
+INTEGER :: I,J,K,IM1,JM1,KM1,IP1,JP1,KP1,IP2,JP2,KP2
 
-! The scalar is denoted U, and the velocity is denoted A.
-! The divergence (computed elsewhere) uses a central difference across
-! the cell subject to a flux LIMITER.  The flux LIMITER choices are:
-!
-! CENTRAL_LIMITER  = 0
-! GODUNOV_LIMITER  = 1
-! SUPERBEE_LIMITER = 2
-! MINMOD_LIMITER   = 3
-! CHARM_LIMITER    = 4
-! MP5_LIMITER      = 5
-!
-!                    location of face
-!
-!                            f
-!    |     o     |     o     |     o     |     o     |
-!                            A
-!         U(1)        U(2)        U(3)        U(4)
+SELECT CASE(IOR)
+   CASE(1) ; IM1=-1 ; JM1= 0 ; KM1= 0 ; IP1=1 ; JP1=0 ; KP1=0 ; IP2=2 ; JP2=0 ; KP2=0
+   CASE(2) ; IM1= 0 ; JM1=-1 ; KM1= 0 ; IP1=0 ; JP1=1 ; KP1=0 ; IP2=0 ; JP2=2 ; KP2=0
+   CASE(3) ; IM1= 0 ; JM1= 0 ; KM1=-1 ; IP1=0 ; JP1=0 ; KP1=1 ; IP2=0 ; JP2=0 ; KP2=2
+END SELECT
 
-WIND_DIRECTION_IF: IF (A>0._EB) THEN
-
-   ! the flow is left to right
-   DU_UP  = U(2)-U(1)
-   DU_LOC = U(3)-U(2)
-
-   R = 0._EB
-   B = 0._EB
-
-   SELECT CASE(LIMITER)
-      CASE(0) ! central differencing
-         SCALAR_FACE_VALUE = 0.5_EB*(U(2)+U(3))
-      CASE(1) ! first-order upwinding
-         SCALAR_FACE_VALUE = U(2)
-      CASE(2) ! SUPERBEE, Roe (1986)
-         IF (ABS(DU_LOC)>TWO_EPSILON_EB) R = DU_UP/DU_LOC
-         B = MAX(0._EB,MIN(2._EB*R,1._EB),MIN(R,2._EB))
-         SCALAR_FACE_VALUE = U(2) + 0.5_EB*B*DU_LOC
-      CASE(3) ! MINMOD
-         IF (ABS(DU_LOC)>TWO_EPSILON_EB) R = DU_UP/DU_LOC
-         B = MAX(0._EB,MIN(1._EB,R))
-         SCALAR_FACE_VALUE = U(2) + 0.5_EB*B*DU_LOC
-      CASE(4) ! CHARM
-         IF (ABS(DU_UP)>TWO_EPSILON_EB) R = DU_LOC/DU_UP
-         IF (R>0._EB) B = R*(3._EB*R+1._EB)/((R+1._EB)**2)
-         SCALAR_FACE_VALUE = U(2) + 0.5_EB*B*DU_UP
-      CASE(5) ! MP5, Suresh and Huynh (1997)
-         V = (/2._EB*U(1)-U(2),U(1:4)/)
-         SCALAR_FACE_VALUE = MP5()
-   END SELECT
-
-ELSE WIND_DIRECTION_IF
-
-   ! the flow is right to left
-   DU_UP  = U(4)-U(3)
-   DU_LOC = U(3)-U(2)
-
-   R = 0._EB
-   B = 0._EB
-
-   SELECT CASE(LIMITER)
-      CASE(0) ! central differencing
-         SCALAR_FACE_VALUE = 0.5_EB*(U(2)+U(3))
-      CASE(1) ! first-order upwinding
-         SCALAR_FACE_VALUE = U(3)
-      CASE(2) ! SUPERBEE, Roe (1986)
-         IF (ABS(DU_LOC)>TWO_EPSILON_EB) R = DU_UP/DU_LOC
-         B = MAX(0._EB,MIN(2._EB*R,1._EB),MIN(R,2._EB))
-         SCALAR_FACE_VALUE = U(3) - 0.5_EB*B*DU_LOC
-      CASE(3) ! MINMOD
-         IF (ABS(DU_LOC)>TWO_EPSILON_EB) R = DU_UP/DU_LOC
-         B = MAX(0._EB,MIN(1._EB,R))
-         SCALAR_FACE_VALUE = U(3) - 0.5_EB*B*DU_LOC
-      CASE(4) ! CHARM
-         IF (ABS(DU_UP)>TWO_EPSILON_EB) R = DU_LOC/DU_UP
-         IF (R>0._EB) B = R*(3._EB*R+1._EB)/((R+1._EB)**2)
-         SCALAR_FACE_VALUE = U(3) - 0.5_EB*B*DU_UP
-      CASE(5) ! MP5, Suresh and Huynh (1997)
-         V = (/2._EB*U(4)-U(3),U(4),U(3),U(2),U(1)/)
-         SCALAR_FACE_VALUE = MP5()
-    END SELECT
-
-ENDIF WIND_DIRECTION_IF
+!$OMP PARALLEL IF(I2>1)
+SELECT CASE(LIMITER)
+   CASE(0) ! central differencing
+      !$OMP DO SCHEDULE(STATIC)
+      DO K=K1,K2
+         DO J=J1,J2
+            DO I=I1,I2
+                  F(I,J,K) = 0.5_EB*(U(I,J,K) + U(I+IP1,J+JP1,K+KP1))
+            ENDDO
+         ENDDO
+      ENDDO
+      !$OMP END DO
+   CASE(1) ! first-order upwinding
+      !$OMP DO SCHEDULE(STATIC)
+      DO K=K1,K2
+         DO J=J1,J2
+            DO I=I1,I2
+               IF (A(I,J,K)>0._EB) THEN
+                  F(I,J,K) = U(I,J,K)
+               ELSE
+                  F(I,J,K) = U(I+IP1,J+JP1,K+KP1)
+               ENDIF
+            ENDDO
+         ENDDO
+      ENDDO
+      !$OMP END DO
+   CASE(2) ! SUPERBEE, Roe (1986)
+      !$OMP DO SCHEDULE(STATIC) PRIVATE(DU_UP,DU_LOC,B,R)
+      DO K=K1,K2
+         DO J=J1,J2
+            DO I=I1,I2
+               DU_LOC = U(I+IP1,J+JP1,K+KP1)-U(I,J,K)
+               IF (A(I,J,K)>0._EB) THEN
+                  DU_UP  = U(I,J,K)-U(I+IM1,J+JM1,K+KM1)
+                  R = DU_UP/(DU_LOC+SIGN(TWO_EPSILON_EB,DU_LOC))
+                  B = MAX(0._EB,MIN(2._EB*R,1._EB),MIN(R,2._EB))
+                  F(I,J,K) = U(I,J,K) + 0.5_EB*B*DU_LOC
+               ELSE
+                  DU_UP  = U(I+IP2,J+JP2,K+KP2)-U(I+IP1,J+JP1,K+KP1)
+                  R = DU_UP/(DU_LOC+SIGN(TWO_EPSILON_EB,DU_LOC))
+                  B = MAX(0._EB,MIN(2._EB*R,1._EB),MIN(R,2._EB))
+                  F(I,J,K) = U(I+IP1,J+JP1,K+KP1) - 0.5_EB*B*DU_LOC
+               ENDIF
+            ENDDO
+         ENDDO
+      ENDDO
+      !$OMP END DO
+   CASE(3) ! MINMOD
+      !$OMP DO SCHEDULE(STATIC) PRIVATE(DU_UP,DU_LOC,B,R)
+      DO K=K1,K2
+         DO J=J1,J2
+            DO I=I1,I2
+               DU_LOC = U(I+IP1,J+JP1,K+KP1)-U(I,J,K)
+               IF (A(I,J,K)>0._EB) THEN
+                  DU_UP  = U(I,J,K)-U(I+IM1,J+JM1,K+KM1)
+                  R = DU_UP/(DU_LOC+SIGN(TWO_EPSILON_EB,DU_LOC))
+                  B = MAX(0._EB,MIN(R,1._EB))
+                  F(I,J,K) = U(I,J,K) + 0.5_EB*B*DU_LOC
+               ELSE
+                  DU_UP  = U(I+IP2,J+JP2,K+KP2)-U(I+IP1,J+JP1,K+KP1)
+                  R = DU_UP/(DU_LOC+SIGN(TWO_EPSILON_EB,DU_LOC))
+                  B = MAX(0._EB,MIN(R,1._EB))
+                  F(I,J,K) = U(I+IP1,J+JP1,K+KP1) - 0.5_EB*B*DU_LOC
+               ENDIF
+            ENDDO
+         ENDDO
+      ENDDO
+      !$OMP END DO
+   CASE(4) ! CHARM
+      !$OMP DO SCHEDULE(STATIC) PRIVATE(DU_UP,DU_LOC,B,R)
+      DO K=K1,K2
+         DO J=J1,J2
+            DO I=I1,I2
+               DU_LOC = U(I+IP1,J+JP1,K+KP1)-U(I,J,K)
+               IF (A(I,J,K)>0._EB) THEN
+                  DU_UP  = U(I,J,K)-U(I+IM1,J+JM1,K+KM1)
+                  R = 0._EB
+                  B = 0._EB
+                  IF (ABS(DU_UP)>TWO_EPSILON_EB) R = DU_LOC/DU_UP
+                  IF (R>0._EB) B = R*(3._EB*R+1._EB)/((R+1._EB)**2)
+                  F(I,J,K) = U(I,J,K) + 0.5_EB*B*DU_UP
+               ELSE
+                  DU_UP  = U(I+IP2,J+JP2,K+KP2)-U(I+IP1,J+JP1,K+KP1)
+                  R = 0._EB
+                  B = 0._EB
+                  IF (ABS(DU_UP)>TWO_EPSILON_EB) R = DU_LOC/DU_UP
+                  IF (R>0._EB) B = R*(3._EB*R+1._EB)/((R+1._EB)**2)
+                  F(I,J,K) = U(I+IP1,J+JP1,K+KP1) - 0.5_EB*B*DU_UP
+               ENDIF
+            ENDDO
+         ENDDO
+      ENDDO
+      !$OMP END DO
+   CASE(5) ! MP5, Suresh and Huynh (1997)
+      DO K=K1,K2
+         DO J=J1,J2
+            DO I=I1,I2
+               IF (A(I,J,K)>0._EB) THEN
+                  V = (/2._EB*U(I+IM1,J+JM1,K+KM1)-U(I,J,K),&
+                       U(I+IM1,J+JM1,K+KM1),U(I,J,K),U(I+IP1,J+JP1,K+KP1),U(I+IP2,J+JP2,K+KP2)/)
+                  F(I,J,K) = MP5()
+               ELSE
+                  V = (/2._EB*U(I+IP2,J+JP2,K+KP2)-U(I+IP1,J+JP1,K+KP1),&
+                       U(I+IP2,J+JP2,K+KP2),U(I+IP1,J+JP1,K+KP1),U(I,J,K),U(I+IM1,J+JM1,K+KM1)/)
+                  F(I,J,K) = MP5()
+               ENDIF
+            ENDDO
+         ENDDO
+      ENDDO
+END SELECT
+!$OMP END PARALLEL
 
 CONTAINS
 
@@ -3707,7 +3760,7 @@ ENDIF
 
 END FUNCTION MP5
 
-END FUNCTION SCALAR_FACE_VALUE
+END SUBROUTINE GET_SCALAR_FACE_VALUE
 
 END MODULE MATH_FUNCTIONS
 
@@ -5240,10 +5293,10 @@ END MODULE TRAN
 
 MODULE OPENMP_FDS
 
-USE GLOBAL_CONSTANTS, ONLY : OPENMP_AVAILABLE_THREADS, OPENMP_USED_THREADS, OPENMP_USER_SET_THREADS, USE_OPENMP
+USE GLOBAL_CONSTANTS, ONLY : OPENMP_AVAILABLE_THREADS, USE_OPENMP
 !$ USE OMP_LIB
 IMPLICIT NONE (TYPE,EXTERNAL)
-PUBLIC OPENMP_INIT, OPENMP_SET_THREADS, OPENMP_PRINT_STATUS
+PUBLIC OPENMP_INIT, OPENMP_PRINT_STATUS
 
 CONTAINS
 
@@ -5264,22 +5317,6 @@ SUBROUTINE OPENMP_INIT
 END SUBROUTINE OPENMP_INIT
 
 
-!> \brief Change the number of OpenMP threads if set by the user in the input file.
-
-SUBROUTINE OPENMP_SET_THREADS
-
-!$IF (OPENMP_USER_SET_THREADS .EQV. .TRUE.) THEN
-!$  IF (OPENMP_AVAILABLE_THREADS .NE. OPENMP_USED_THREADS) THEN
-!$      CALL OMP_SET_NUM_THREADS(OPENMP_USED_THREADS)
-!$  END IF
-!$ELSE
-!$  OPENMP_USED_THREADS = OPENMP_AVAILABLE_THREADS
-!$  CALL OMP_SET_NUM_THREADS(OPENMP_USED_THREADS)
-!$END IF
-
-END SUBROUTINE OPENMP_SET_THREADS
-
-
 !> \brief Write OpenMP status to standard error.
 
 SUBROUTINE OPENMP_PRINT_STATUS
@@ -5292,8 +5329,8 @@ SUBROUTINE OPENMP_PRINT_STATUS
   !$ THREAD_ID = OMP_GET_THREAD_NUM()
 
   !$OMP CRITICAL
-  IF (USE_OPENMP .AND. OPENMP_USED_THREADS>1 .AND. VERBOSE) WRITE(LU_ERR,91) " OpenMP thread ",THREAD_ID," of ",&
-     OPENMP_USED_THREADS-1," assigned to MPI process ",MY_RANK," of ",N_MPI_PROCESSES-1
+  IF (USE_OPENMP .AND. OPENMP_AVAILABLE_THREADS>1 .AND. VERBOSE) WRITE(LU_ERR,91) " OpenMP thread ",THREAD_ID," of ",&
+     OPENMP_AVAILABLE_THREADS-1," assigned to MPI process ",MY_RANK," of ",N_MPI_PROCESSES-1
   IF (.NOT.USE_OPENMP .AND. VERBOSE) WRITE(LU_ERR,92) " MPI process ",MY_RANK," of ",N_MPI_PROCESSES-1
   !$OMP END CRITICAL
 
@@ -5346,6 +5383,20 @@ WRITE(LU,'(/A,I1,A,I1)') ' MPI version: ',MPIVERSION,'.',MPISUBVERSION
 WRITE(LU,'(A,A)') ' MPI library version: ',TRIM(MPILIBVERSION)
 
 END SUBROUTINE WRITE_SUMMARY_INFO
+
+
+!> \brief Write VERBOSE diagnostic output
+
+SUBROUTINE VERBOSE_PRINTOUT(DIAGNOSTIC_MESSAGE)
+
+USE GLOBAL_CONSTANTS, ONLY: CPU_TIME_START,LU_ERR
+REAL CPUTIME
+CHARACTER(*), INTENT(IN) :: DIAGNOSTIC_MESSAGE
+
+CALL CPU_TIME(CPUTIME)
+WRITE(LU_ERR,'(1X,A,A,F8.3)') [CHARACTER(LEN=50)::DIAGNOSTIC_MESSAGE],' CPU Time:',CPUTIME-CPU_TIME_START
+
+END SUBROUTINE VERBOSE_PRINTOUT
 
 
 !> \brief Finds the device or control function assoicated with an input
