@@ -9425,7 +9425,7 @@ MESH_LOOP: DO NM=1,NMESHES
                ! Only allow the use of BULK_DENSITY if the obstruction has a non-zero volume
 
                OB%BULK_DENSITY = BULK_DENSITY
-               IF (VOL_ADJUSTED<TWO_EPSILON_EB .AND. OB%BULK_DENSITY>0._EB) OB%BULK_DENSITY = -1._EB
+               IF (BULK_DENSITY > 0._EB) OB%MASS = OB%BULK_DENSITY*(OB%X2-OB%X1)*(OB%Y2-OB%Y1)*(OB%Z2-OB%Z1)
 
                ! Error traps and warnings for HT3D
 
@@ -9626,6 +9626,7 @@ MESH_LOOP_2: DO NM=1,NMESHES
                      OBT%Y2 = M%Y(OBT%J2)
                      OBT%Z1 = M%Z(OBT%K1)
                      OBT%Z2 = M%Z(OBT%K2)
+                     IF (OB%BULK_DENSITY > 0._EB) OBT%MASS = OB%MASS/REAL(N_NEW_OBST,EB)
                   ENDDO
                 ENDDO
             ENDDO
