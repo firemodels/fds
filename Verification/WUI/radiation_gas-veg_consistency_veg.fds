@@ -22,6 +22,7 @@
       MATL_ID    = 'stuff'
       RADIUS     = 0.0007614
       HEAT_TRANSFER_COEFFICIENT = 0.0
+      EMISSIVITY = 1.
       GEOMETRY   = 'SPHERICAL' /
 &MATL ID = 'stuff'
       DENSITY = 514.
