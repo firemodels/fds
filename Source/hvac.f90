@@ -1413,14 +1413,14 @@ SUBSTEP_LOOP: DO NSS = 1, N_SUBSTEPS
                MTOT = MTOT + VFLOW * DU%RHO_D
                ETOT = ETOT + VFLOW * DU%RHO_D * DU%TMP_D * DU%CP_D
                TGUESS = TGUESS + VFLOW * DU%RHO_D * DU%TMP_D
-               IF (STRATIFICATION) THEN
-                  IF (DU%NODE_INDEX(1)==NE%NODE_INDEX(NN)) THEN
-                     DN2=>DUCTNODE(DU%NODE_INDEX(2))
-                  ELSE
-                     DN2=>DUCTNODE(DU%NODE_INDEX(1))
-                  ENDIF
-                  ETOT = ETOT + DU%RHO_D*VFLOW*GVEC(3)*(DN%XYZ(3)-DN2%XYZ(3))
-               ENDIF
+               !IF (STRATIFICATION) THEN
+               !   IF (DU%NODE_INDEX(1)==NE%NODE_INDEX(NN)) THEN
+               !      DN2=>DUCTNODE(DU%NODE_INDEX(2))
+               !   ELSE
+               !      DN2=>DUCTNODE(DU%NODE_INDEX(1))
+               !   ENDIF
+               !   ETOT = ETOT + DU%RHO_D*VFLOW*GVEC(3)*(DN%XYZ(3)-DN2%XYZ(3))
+               !ENDIF
                ZZTOT = ZZTOT + VFLOW * DU%RHO_D * DU%ZZ
             ELSE MASS_TRANSPORT_IF
                ! Duct is discretized: we need to find the end of the lump of mass advected within a (sub)step
@@ -1473,14 +1473,14 @@ SUBSTEP_LOOP: DO NSS = 1, N_SUBSTEPS
             DO NS = 1,N_TRACKED_SPECIES
                ETOT = ETOT - CPBAR_Z(ITMP,NS)*DU%TMP_D*DN%FILTER_LOADING(NS,3)
                !*** CHECK THIS
-               IF (STRATIFICATION .AND. .NOT. DN%VENT ) THEN
-                  IF (DU%NODE_INDEX(1)==NE%NODE_INDEX(NN)) THEN
-                     DN2=>DUCTNODE(DU%NODE_INDEX(2))
-                  ELSE
-                     DN2=>DUCTNODE(DU%NODE_INDEX(1))
-                  ENDIF
-                  ETOT = ETOT - DN%FILTER_LOADING(NS,3)*GVEC(3)*(DN%XYZ(3)-DN2%XYZ(3))
-               ENDIF
+               !IF (STRATIFICATION .AND. .NOT. DN%VENT ) THEN
+               !   IF (DU%NODE_INDEX(1)==NE%NODE_INDEX(NN)) THEN
+               !      DN2=>DUCTNODE(DU%NODE_INDEX(2))
+               !   ELSE
+               !      DN2=>DUCTNODE(DU%NODE_INDEX(1))
+               !   ENDIF
+               !   ETOT = ETOT - DN%FILTER_LOADING(NS,3)*GVEC(3)*(DN%XYZ(3)-DN2%XYZ(3))
+               !ENDIF
             ENDDO
          ENDIF
 
