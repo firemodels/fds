@@ -397,10 +397,14 @@ M%WS    = M%W
 M%FVX   = 0._EB
 M%FVY   = 0._EB
 M%FVZ   = 0._EB
-M%H     = 0._EB
-M%HS    = 0._EB
 M%KRES  = 0._EB
-
+IF (INITIAL_SPEED>0._EB) THEN
+   M%H  = 0._EB
+   M%HS = 0._EB
+ELSE
+   M%H  = 0.5_EB*(U0**2+V0**2+W0**2)
+   M%HS = 0.5_EB*(U0**2+V0**2+W0**2)
+ENDIF
 M%DDDT  = 0._EB
 M%D     = 0._EB
 M%DS    = 0._EB
