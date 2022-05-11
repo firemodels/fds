@@ -10,7 +10,7 @@
 
 &SURF ID                        = 'foliage'
       MATL_ID                   = 'vegetation'
-      MOISTURE_FRACTION         = 0.05
+      MOISTURE_FRACTION         = 0.10
       SURFACE_VOLUME_RATIO      = 3940.
       LENGTH                    = 0.05
       GEOMETRY                  = 'CYLINDRICAL'
@@ -22,16 +22,28 @@
       DENSITY               = 514.
       CONDUCTIVITY          = 0.11
       SPECIFIC_HEAT_RAMP    = 'cp_dry_veg'
-      NU_SPEC               = 0.55
+      NU_SPEC               = 0.50
       SPEC_ID               = 'CELLULOSE'
-      NU_MATL               = 0.45
+      NU_MATL               = 0.50
       MATL_ID               = 'CHAR'
       HEAT_OF_REACTION      = 416.
-      REFERENCE_TEMPERATURE = 260.
-      PYROLYSIS_RANGE       = 400. /
+      REFERENCE_TEMPERATURE = 200.
+      HEATING_RATE          = 1.6
+      PYROLYSIS_RANGE       = 260. /
 
 &RAMP ID='cp_dry_veg', T= 0.,    F=1.18 /
 &RAMP ID='cp_dry_veg', T= 1000., F=4.81 /
+
+&MATL ID                    = 'MOISTURE'
+      DENSITY               = 1000.
+      CONDUCTIVITY          = 0.62
+      SPECIFIC_HEAT         = 4.184
+      SPEC_ID               = 'WATER VAPOR'
+      NU_SPEC               = 1.
+      HEAT_OF_REACTION      = 2259.
+      REFERENCE_TEMPERATURE = 100.
+      HEATING_RATE          = 1.6
+      PYROLYSIS_RANGE       = 120./
 
 &MATL ID                    = 'CHAR'
       DENSITY               = 150.
@@ -44,9 +56,10 @@
       NU_SPEC               = 8.18,-7.2
       MATL_ID               = 'ASH'
       NU_MATL               = 0.02
-      HEAT_OF_REACTION      = -20500.
-      REFERENCE_TEMPERATURE = 375.
-      PYROLYSIS_RANGE       = 400. /
+      HEAT_OF_REACTION      = -32000.
+      REFERENCE_TEMPERATURE = 300.
+      HEATING_RATE          = 1.6
+      PYROLYSIS_RANGE       = 350. /
 
 &RAMP ID='cp_char', T=   27, F=0.715 /
 &RAMP ID='cp_char', T= 1724, F=2.04 /
