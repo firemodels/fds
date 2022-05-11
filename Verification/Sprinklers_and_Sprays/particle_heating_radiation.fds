@@ -15,6 +15,7 @@
       THICKNESS                 = 0.006203505
       HEAT_TRANSFER_COEFFICIENT = 0.
       TMP_INNER                 = 20.
+      EMISSIVITY                = 1.
       GEOMETRY                  = 'SPHERICAL' /
 
 &RADI RADIATION=T, TIME_STEP_INCREMENT=1, ANGLE_INCREMENT=1 /
