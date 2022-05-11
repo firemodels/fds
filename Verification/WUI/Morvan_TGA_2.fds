@@ -1,4 +1,4 @@
-&HEAD CHID='Morvan_TGA', TITLE='TGA analysis of Morvan 2004 data' /
+&HEAD CHID='Morvan_TGA_2', TITLE='TGA analysis of Morvan 2004 data' /
 
 &MESH IJK=5,5,5, XB=-1.2,3.6,-1.2,1.2,0.0,9.6
 
@@ -27,9 +27,8 @@
       NU_MATL               = 0.50
       MATL_ID               = 'CHAR'
       HEAT_OF_REACTION      = 416.
-      REFERENCE_TEMPERATURE = 210.
-      HEATING_RATE          = 1.6
-      PYROLYSIS_RANGE       = 120. /
+      A                     = 3.88E+06
+      E                     = 8.79E+04 /
 
 &RAMP ID='cp_dry_veg', T= 0.,    F=1.18 /
 &RAMP ID='cp_dry_veg', T= 1000., F=4.81 /
@@ -41,9 +40,8 @@
       SPEC_ID               = 'WATER VAPOR'
       NU_SPEC               = 1.
       HEAT_OF_REACTION      = 2259.
-      REFERENCE_TEMPERATURE = 100.
-      HEATING_RATE          = 1.6
-      PYROLYSIS_RANGE       = 20./
+      A                     = 8.16E+41
+      E                     = 3.15E+05 /
 
 &MATL ID                    = 'CHAR'
       DENSITY               = 150.
@@ -57,9 +55,8 @@
       MATL_ID               = 'ASH'
       NU_MATL               = 0.02
       HEAT_OF_REACTION      = -32000.
-      REFERENCE_TEMPERATURE = 320.
-      HEATING_RATE          = 1.6
-      PYROLYSIS_RANGE       = 300. /
+      A                     = 2.25E+01
+      E                     = 5.30E+04 /
 
 &RAMP ID='cp_char', T=   27, F=0.715 /
 &RAMP ID='cp_char', T= 1724, F=2.04 /
