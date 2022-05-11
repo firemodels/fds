@@ -802,6 +802,7 @@ $QFDS -p 2 -d WUI ground_vegetation_radi.fds
 $QFDS -d WUI hot_rods.fds
 $QFDS -d WUI level_set_fuel_model_1.fds
 $QFDS -d WUI Morvan_TGA.fds
+$QFDS -d WUI Morvan_TGA_2.fds
 $QFDS -d WUI Needle_TGA_A.fds
 $QFDS -d WUI Needle_TGA_B.fds
 $QFDS -d WUI Needle_TGA_C.fds
