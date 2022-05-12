@@ -311,11 +311,11 @@ It is assumed that the particles interact with the surrounding gas via an additi
 \ee
 where the summation is over all the particles within the cell. The effective absorption coefficient for a single particle is given by
 \be
-   \kappa_{\rm p} = \frac{A_{\rm p}}{4 \, \dx \, \dy \, \dz}
+   \kappa_{\rm p} = \frac{\epsilon_{\rm p} \, A_{\rm p}}{4 \, \dx \, \dy \, \dz}
 \ee
-where $A_{\rm p}$ is the surface area of the particle and $\dx \, \dy \, \dz$ is the volume of the cell. The net radiative heat flux onto the surface of the particle is
+where $\epsilon_{\rm p}$ is the emissivity of the particle, $A_{\rm p}$ is the surface area of the particle, and $\dx \, \dy \, \dz$ is the volume of the cell. The net radiative heat flux onto the surface of the particle is
 \be
-   \dq_{\rm r,p}'' = \epsilon \left( \frac{U_{ijk}}{4} - \sigma T_{\rm p}^4 \right)
+   \dq_{\rm r,p}'' = \epsilon_{\rm p} \left( \frac{U_{ijk}}{4} - \sigma T_{\rm p}^4 \right)
 \ee
 
 

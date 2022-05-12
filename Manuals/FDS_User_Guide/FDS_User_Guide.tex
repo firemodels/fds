@@ -6500,11 +6500,11 @@ If you are modeling a relatively dense collection of solid particles, like veget
 \subsection{Radiation Absorption and Emission}
 \label{info:particle_radiation_absorption}
 
-The absorption and emission of thermal radiation by a group of solid particles is controlled by the absorption coefficient:
+Solid particles absorb and emit thermal radiation. The contribution from particles to the radiation absorption coefficient in each grid cell, $ijk$, is given by:
 \be
-   \kappa_{\rm p} = \frac{\sum \, A_{\rm p,s}}{4 \, V}
+   \kappa_{{\rm p},ijk} = \frac{\sum \epsilon_{\rm p} \, A_{\rm p}}{4 \, V_{ijk}}
 \ee
-where $A_{\rm p,s}$ is the surface area of the particle and $V$ is the volume of the grid cell.
+where the summation is made over each grid cell of volume, $V_{ijk}$. The emissivity of each individual particle is given by $\epsilon_{\rm p}$ and $A_{\rm p}$ is the particle surface area.
 
 
 \subsection{Size Distribution}
