@@ -1590,28 +1590,28 @@ The default Poisson solver in FDS ({\ct SOLVER='FFT'} on the {\ct PRES} line) is
 \end{description}
 Because these alternative methods are based on the Intel\textsuperscript{\textregistered} MKL parallel LU decomposition solver, they require computation and storage of global factorization matrices. Depending on the size of the problem, these operations can be expensive in terms of both CPU time and memory. It has been found suitable for problems with up to a million cells on a multi-core workstation with 64~GB of RAM.
 
-\begin{landscape}
-\begin{table}[h]
-\centering
-\caption[Summary of available pressure solvers]{Summary of available pressure solvers.}
-\begin{tabular}{lccccc}
-\toprule
-\multicolumn{1}{c}{} & \multicolumn{3}{c}{\textbf{Global}} & \multicolumn{2}{c}{\textbf{Topic 3}} \\
-\cmidrule(rl){2-4} \cmidrule(rl){5-6}
-\textbf{Solver} & {A} & {B} & {C} & {D} & {E} \\
-\midrule
-\rowcolor{lavender}
-FFT (default)  & A.1 & B.1 & C.1 & D.1 & E.1 \\
-ULMAT          & A.2 & B.2 & C.2 & D.2 & E.2 \\
-\rowcolor{lavender}
-row3           & A.3 & B.3 & C.3 & D.3 & E.3 \\
-row4           & A.4 & B.4 & C.4 & D.4 & E.4 \\
-\rowcolor{lavender}
-row5 & A.5 & B.5 & C.5 & D.5 & E.5 \\
-\bottomrule
-\end{tabular}
-\end{table}
-\end{landscape}
+% \begin{landscape}
+% \begin{table}[h]
+% \centering
+% \caption[Summary of available pressure solvers]{Summary of available pressure solvers.}
+% \begin{tabular}{lccccc}
+% \toprule
+% \multicolumn{1}{c}{} & \multicolumn{3}{c}{\textbf{Global}} & \multicolumn{2}{c}{\textbf{Topic 3}} \\
+% \cmidrule(rl){2-4} \cmidrule(rl){5-6}
+% \textbf{Solver} & {A} & {B} & {C} & {D} & {E} \\
+% \midrule
+% \rowcolor{lavender}
+% FFT (default)  & A.1 & B.1 & C.1 & D.1 & E.1 \\
+% ULMAT          & A.2 & B.2 & C.2 & D.2 & E.2 \\
+% \rowcolor{lavender}
+% row3           & A.3 & B.3 & C.3 & D.3 & E.3 \\
+% row4           & A.4 & B.4 & C.4 & D.4 & E.4 \\
+% \rowcolor{lavender}
+% row5 & A.5 & B.5 & C.5 & D.5 & E.5 \\
+% \bottomrule
+% \end{tabular}
+% \end{table}
+% \end{landscape}
 
 \subsection{Example Case: Pressure\_Solver/duct\_flow}
 \label{duct_flow}
