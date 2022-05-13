@@ -1590,6 +1590,7 @@ The default Poisson solver in FDS ({\ct SOLVER='FFT'} on the {\ct PRES} line) is
 \end{description}
 Because these alternative methods are based on the Intel\textsuperscript{\textregistered} MKL parallel LU decomposition solver, they require computation and storage of global factorization matrices. Depending on the size of the problem, these operations can be expensive in terms of both CPU time and memory. It has been found suitable for problems with up to a million cells on a multi-core workstation with 64~GB of RAM.
 
+
 \subsection{Example Case: Pressure\_Solver/duct\_flow}
 \label{duct_flow}
 
@@ -2894,7 +2895,7 @@ where $T_{\rm g}$ is the gas temperature in the gas phase cell adjacent to the s
 
 For free (natural) convection, the Nusselt number is a function of the Rayleigh number:
 \be
-   \hbox{Ra} = \frac{2 \, g \, |T_{\rm g}-T_{\rm w}| L^3}{ (T_{\rm g}+T_{\rm w}) \nu \alpha}  \quad ; \quad  \nu = \frac{\mu}{\rho} \quad ; \quad \alpha = \frac{k}{\rho c_p}  \quad ; \quad \PR=\frac{\nu}{\alpha} 
+   \hbox{Ra} = \frac{2 \, g \, |T_{\rm g}-T_{\rm w}| L^3}{ (T_{\rm g}+T_{\rm w}) \nu \alpha}  \quad ; \quad  \nu = \frac{\mu}{\rho} \quad ; \quad \alpha = \frac{k}{\rho c_p}  \quad ; \quad \PR=\frac{\nu}{\alpha}
 \ee
 The following expressions are simplifications of those given in Ref.~\cite{Incropera:1} under the assumption that $\PR=0.7$.
 \be
@@ -6686,7 +6687,7 @@ It is not unusual to include hundreds of thousands of particles in a simulation.
 \end{description}
 Be careful when setting parameters related to particle/droplet insertion, as it is very easy to overwhelm the simulation with millions of them. The parameter {\ct MAXIMUM\_PARTICLES} on the {\ct DUMP} line sets the maximum number of particles that can be included on any given mesh at any given time. Its default value is 1000000. If this value is exceeded, FDS will automatically remove particles, starting with the oldest.
 
-In some cases, you may need to begin a simulation with a large number of particles, such as with a wildland fire simulation. In this situation, the initialization stage may take a long time as the memory for storing particles is expanded by only 50 particles at a time. It is possible to override this by setting {\ct NEW\_PARTICLE\_INCREMENT} on the {\ct PART} line. This does not affect how particles are inserted into the domain (as described above), only how much new storage is reserved when the current allocation is exceeded. Be careful, as it is possible to massively over-allocate and reserve large amounts of unused memory. 
+In some cases, you may need to begin a simulation with a large number of particles, such as with a wildland fire simulation. In this situation, the initialization stage may take a long time as the memory for storing particles is expanded by only 50 particles at a time. It is possible to override this by setting {\ct NEW\_PARTICLE\_INCREMENT} on the {\ct PART} line. This does not affect how particles are inserted into the domain (as described above), only how much new storage is reserved when the current allocation is exceeded. Be careful, as it is possible to massively over-allocate and reserve large amounts of unused memory.
 
 
 \subsection{Particles Introduced at a Solid Surface}
@@ -9370,18 +9371,19 @@ records the integrated mass flux of {\em all} particles passing through the give
 The parameter {\ct QUANTITIES} on the {\ct PART} line is an array of character strings indicating which scalar quantities should be used to color particles and droplets in Smokeview. The choices are \\
 \\
 {\ct 'PARTICLE AGE'} (s) \\
-{\ct 'PARTICLE DIAMETER'} ($\mu$m) \\
-{\ct 'PARTICLE TEMPERATURE'} ($^\circ$C) \\
+{\ct 'PARTICLE DIAMETER'} (\si{\micro m}) \\
+{\ct 'PARTICLE TEMPERATURE'} (\si{\degreeCelsius}) \\
 {\ct 'PARTICLE MASS'} (kg) \\
 {\ct 'PARTICLE PHASE'} \\
 {\ct 'PARTICLE VELOCITY'} (m/s) \\
 {\ct 'PARTICLE WEIGHTING FACTOR'} \\
 {\ct 'PARTICLE U'}, {\ct 'PARTICLE V'}, {\ct 'PARTICLE W'} (m/s) \\
 {\ct 'PARTICLE X'}, {\ct 'PARTICLE Y'}, {\ct 'PARTICLE Z'} (m) \\
-{\ct 'PARTICLE ACCEL X'}, {\ct 'PARTICLE ACCEL Y'}, {\ct 'PARTICLE ACCEL Z'} (m/s$^2$) \\
+{\ct 'PARTICLE ACCEL X'}, {\ct 'PARTICLE ACCEL Y'}, {\ct 'PARTICLE ACCEL Z'} (\si{m/s^2}) \\
 {\ct 'PARTICLE DRAG FORCE X'}, {\ct 'PARTICLE DRAG FORCE Y'}, {\ct 'PARTICLE DRAG FORCE Z'} (N) \\
 {\ct 'PARTICLE DRAG COEFFICIENT'} \\
-{\ct 'PARTICLE BULK DENSITY'} (kg/m$^3$) \\
+{\ct 'PARTICLE BULK DENSITY'} (\si{kg/m^3}) \\
+{\ct 'PARTICLE HEAT TRANSFER COEFFICIENT'} (\si{W/m^2/K}) \\
 \\
 If no {\ct QUANTITIES} are specified and none are selected in Smokeview, then Smokeview will display particles with a single color determined by the color of the {\ct SURF\_ID} assigned to the {\ct PART} class, with the exception of water droplets and liquid fuel droplets, which are colored blue and yellow, respectively. If no color is specified on {\ct SURF} then the default solid particle color will revert to black.  You may override the {\ct SURF} color by specifying either {\ct RGB} or {\ct COLOR} on the {\ct PART} line.
 
