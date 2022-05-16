@@ -4931,14 +4931,14 @@ It is assumed that the pine needle consists of moisture and three solid phase co
 \subsection{TGA of various Mediterranean vegetation (\texorpdfstring{\textct{Morvan\_TGA}}{Morvan\_TGA})}
 \label{Morvan_TGA}
 
-In this section we analyze the TGA data for various Mediterranean vegetation species presented in Morvan and Dupuy, 2004 \cite{Morvan:CF2004}.  The FDS feature {\ct TGA\_ANALYSIS=T} was used with the model set up with 5 \% moisture for the vegetation model.  The heating rate is 1.6 \si{\degreeCelsius}/min, as reported in the paper.  The reference temperature and pyrolysis range approach was used to tune the model to the data.  The parameters can be found in the input file {\ct Verification/WUI/Morvan\_TGA.fds}.  The results are shown in Fig.~\ref{fig:Morvan_TGA}.
+In this section we analyze the TGA data for various Mediterranean vegetation species presented in Morvan and Dupuy, 2004 \cite{Morvan:CF2004}.  The FDS feature {\ct TGA\_ANALYSIS=T} was used with the model set up with 10 \% moisture for the vegetation model.  The heating rate is 1.6 \si{\degreeCelsius}/min, as reported in the paper.  The reference temperature and pyrolysis range approach was used to tune the model to the data.  The parameters can be found in the input file {\ct Verification/WUI/Morvan\_TGA.fds}.  Note that an unusually high char fraction of 50 \% is needed to match the TGA data. The results are shown in Fig.~\ref{fig:Morvan_TGA}.
 
 \begin{figure}[h]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/Morvan_TGA_Total_Mass} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/Morvan_TGA_Total_MLR}
 \end{tabular*}
-\caption[Results of Morvan\_TGA analysis]{Results of performing the FDS TGA analysis on the data for various Mediterranean vegetation presented in Morvan and Dupuy, 2004 \cite{Morvan:CF2004}. (Left) Total mass vs time. (Right) Mass loss rate vs time---the Morvan and Dupuy data were Savitsky-Golay filtered and the derivative of the resulting curve was normalized to tive the dashed line.}
+\caption[Results of Morvan\_TGA analysis]{Results of performing the FDS TGA analysis on the data for various Mediterranean vegetation presented in Morvan and Dupuy, 2004 \cite{Morvan:CF2004}. (Left) Total mass vs time. (Right) Mass loss rate vs time---the Morvan and Dupuy data were Savitsky-Golay filtered and the derivative of the resulting curve was normalized to give the dashed line.}
 \label{fig:Morvan_TGA}
 \end{figure}
 
