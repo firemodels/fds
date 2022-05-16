@@ -1477,6 +1477,7 @@ TYPE FILTER_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: INITIAL_LOADING !< Array of containing initial filter loading (kg) for each species
    REAL(EB) :: CLEAN_LOSS                                 !< Loss coefficient of a filter when the loading is 0 kg.
    REAL(EB) :: LOADING_LOSS                               !< Multiplier applied to loading to determine filter loss
+   REAL(EB) :: AREA                                       !< Cross-sectional area of filter
 END TYPE FILTER_TYPE
 
 TYPE (FILTER_TYPE), DIMENSION(:), ALLOCATABLE,  TARGET :: FILTER

@@ -4185,7 +4185,7 @@ To reduce the computational cost of the HVAC solver, a duct should be considered
 \end{figure}
 
 This could be input as each individual fitting or duct with its associated area and loss as shown in the middle of the figure; however, this would result in five duct segments (one for each component) with six node connections resulting in eleven parameters (five velocities and six pressures) which must be solved for.  This is not needed since whatever the flow rate is in any one segment of the duct, that same flow rate exists in all other segments; thus, the velocities in any segment can be found by taking the area ratios, $v_1/v_2=A_2/A_1$.  Since flow losses are proportional to the square of the velocity, an equivalent duct can be constructed using the total length of the duct, and a representative area ($A_{\mbox{\tiny eff}}$) or diameter.  The pressure losses associated with all the segments of the duct can be collapsed to a single effective loss ($K_{\mbox{\tiny eff}}$) by summing all of the fitting losses ($K_{\mbox{\tiny minor}}$) through the duct as follows:
-\be K_{\mbox{\tiny eff}} = \sum_i {(K_{\mbox{\tiny minor}})_i \frac {A_{\mbox{\tiny eff}}}{A_i}} \ee
+\be K_{\mbox{\tiny eff}} = \sum_i {(K_{\mbox{\tiny minor}})_i \left( \frac {A_{\mbox{\tiny eff}}}{A_i} \right)^2 } \ee
 where $i$ is a fitting and $A_i$ is the area associated with the fitting loss.
 
 \subsection{HVAC Dampers}
@@ -4359,6 +4359,7 @@ A sample input for a filter is given by:
 \end{lstlisting}
 where:
 \begin{description}
+\item[{\ct AREA}] is the area in m$^2$ associated with the flow loss measurement. Typically this is the area of the filter. If not provided, the average of the two attached duct areas will be used.
 \item[{\ct CLEAN\_LOSS}] is the dimensionless loss coefficient for flow through the filter when it is clean (zero loading).
 \item[{\ct EFFICIENCY}] is an array of the species removal efficiency from 0 to 1 where 0 is no removal of that species and 1 is complete filtration of the species.  The species are identified using {\ct SPEC\_ID}.
 \item[{\ct LOADING}] is an array of the initial loading (kg) of the filter for each species being filtered.
