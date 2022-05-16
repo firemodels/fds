@@ -3787,11 +3787,11 @@ DTMP = TMP_G-0.5_EB*(ONE_D%TMP_F_OLD+ONE_D%TMP_F)
 
 ONE_D%TMP_F_OLD = ONE_D%TMP_F  ! Save this value for use at the next time step
 
-IF (ABS(DTMP)>TWO_EPSILON_EB .AND. ABS(ONE_D%Q_CON_F)>TWO_EPSILON_EB) THEN
-   ONE_D%HEAT_TRANS_COEF = ONE_D%Q_CON_F/DTMP
-ELSE
+!IF (ABS(DTMP)>TWO_EPSILON_EB .AND. ABS(ONE_D%Q_CON_F)>TWO_EPSILON_EB) THEN
+!   ONE_D%HEAT_TRANS_COEF = ONE_D%Q_CON_F/DTMP
+!ELSE
    ONE_D%HEAT_TRANS_COEF = HTCF
-ENDIF
+!ENDIF
 
 ! If any gas massflux is non-zero or the surface temperature exceeds the ignition temperature, set the ignition time
 
