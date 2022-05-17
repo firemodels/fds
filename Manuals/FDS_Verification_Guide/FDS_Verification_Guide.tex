@@ -4851,7 +4851,7 @@ This is an example of a comparison of a candidate solid phase model with TGA dat
 \subsection{TGA for a Charring Sample (\texorpdfstring{\textct{Needle\_TGA}}{Needle\_TGA})}
 \label{Needle_TGA}
 
-In this section, kinetic parameters for a longleaf pine needle are derived based on two TGA measurements\footnote{TGA data provided by the Forest Products Laboratory of the U.S. Forest Service} (Cases~A and B of Table~\ref{Needle_TGA_table}), one done in air and one done in nitrogen, and then checked against 6 further measurements done with a variety of moisture contents and test conditions, as shown in Table~\ref{Needle_TGA_table}.
+In this section, kinetic parameters for a longleaf pine needle are derived based on a set of TGA measurements\footnote{TGA data provided by the Forest Products Laboratory of the U.S. Forest Service}. Cases~A and B listed in Table~\ref{Needle_TGA_table} have been used to derive the kinetic parameters for all eight cases. The mass and mass loss rate curves for all eight cases are shown in Figs.~\ref{Needle_TGA_plot_A_B} through \ref{Needle_TGA_plot_G_H} on the following pages.
 
 \begin{table}[!ht]
 \centering
@@ -4871,7 +4871,17 @@ H    & 60                    & 1.33              & Air        \\ \hline
 \end{tabular}
 \end{table}
 
-It is assumed that the pine needle consists of moisture and three solid phase components making up 0.25, 0.50, and 0.25 of the total dry mass, and reaching peak decomposition rates at 250~$^\circ$C, 375~$^\circ$C, and 450~$^\circ$C, respectively. These estimates are obtained by inspection of the experimental data shown in the middle left plot of Fig.~\ref{Needle_TGA_plot_A_B}. It is further assumed that 0.25 of the dry mass is converted to char, and the kinetics of the oxidation reaction are estimated based on Case~B.
+It is assumed that the pine needle consists of moisture and three solid phase components making up 0.25, 0.50, and 0.25 of the total dry mass, and reaching peak decomposition rates at 250~$^\circ$C, 375~$^\circ$C, and 450~$^\circ$C, respectively. These estimates are obtained by inspection of the experimental data shown Fig.~\ref{Needle_TGA_plot_A_B_temp}. It is further assumed that 0.25 of the dry mass is converted to char, and the kinetics of the oxidation reaction are estimated based on Case~B.
+
+\begin{figure}[!h]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/Needle_TGA_A_MLR_temp} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/Needle_TGA_B_MLR_temp}
+\end{tabular*}
+\caption[Needle\_TGA calibration curves]{Mass loss rates for Cases A (left) and B (right). These cases are used to determine the kinetic parameters for all eight cases, A-H.}
+\label{Needle_TGA_plot_A_B_temp}
+\end{figure}
+
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -4882,7 +4892,7 @@ It is assumed that the pine needle consists of moisture and three solid phase co
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/Needle_TGA_A_MLR} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/Needle_TGA_B_MLR}
 \end{tabular*}
-\caption[Results of pine Needle\_TGA calibration exercise]{Results of TGA calibration exercise for a pine needle, Cases A (left) and B (right). (Top) Sample temperature vs time. (Middle) Sample mass fraction vs sample temperature. (Bottom) Sample mass loss rate vs sample temperature.}
+\caption[Results of pine Needle\_TGA calibration exercise, Cases A and B]{Results of TGA calibration exercise for a pine needle, Cases A (left) and B (right). (Top) Sample temperature vs time. (Middle) Sample mass fraction vs time. (Bottom) Sample mass loss rate vs time.}
 \label{Needle_TGA_plot_A_B}
 \end{figure}
 
@@ -4895,7 +4905,7 @@ It is assumed that the pine needle consists of moisture and three solid phase co
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/Needle_TGA_C_MLR} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/Needle_TGA_D_MLR}
 \end{tabular*}
-\caption[Results of pine Needle\_TGA calibration exercise]{Results of TGA calibration exercise for a pine needle, Cases C (left) and D (right). (Top) Sample temperature vs time. (Middle) Sample mass fraction vs sample temperature. (Bottom) Sample mass loss rate vs sample temperature.}
+\caption[Results of pine Needle\_TGA calibration exercise, Cases C and D]{Results of TGA calibration exercise for a pine needle, Cases C (left) and D (right). (Top) Sample temperature vs time. (Middle) Sample mass fraction vs time. (Bottom) Sample mass loss rate vs time.}
 \label{Needle_TGA_plot_C_D}
 \end{figure}
 
@@ -4908,7 +4918,7 @@ It is assumed that the pine needle consists of moisture and three solid phase co
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/Needle_TGA_E_MLR} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/Needle_TGA_F_MLR}
 \end{tabular*}
-\caption[Results of pine Needle\_TGA calibration exercise]{Results of TGA calibration exercise for a pine needle, Cases E (left) and F (right). (Top) Sample temperature vs time. (Middle) Sample mass fraction vs sample temperature. (Bottom) Sample mass loss rate vs sample temperature.}
+\caption[Results of pine Needle\_TGA calibration exercise, Cases E and F]{Results of TGA calibration exercise for a pine needle, Cases E (left) and F (right). (Top) Sample temperature vs time. (Middle) Sample mass fraction vs time. (Bottom) Sample mass loss rate vs time.}
 \label{Needle_TGA_plot_E_F}
 \end{figure}
 
@@ -4921,7 +4931,7 @@ It is assumed that the pine needle consists of moisture and three solid phase co
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/Needle_TGA_G_MLR} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/Needle_TGA_H_MLR}
 \end{tabular*}
-\caption[Results of pine Needle\_TGA calibration exercise]{Results of TGA calibration exercise for a pine needle, Cases G (left) and H (right). (Top) Sample temperature vs time. (Middle) Sample mass fraction vs sample temperature. (Bottom) Sample mass loss rate vs sample temperature.}
+\caption[Results of pine Needle\_TGA calibration exercise, Cases G and H]{Results of TGA calibration exercise for a pine needle, Cases G (left) and H (right). (Top) Sample temperature vs time. (Middle) Sample mass fraction vs time. (Bottom) Sample mass loss rate vs time.}
 \label{Needle_TGA_plot_G_H}
 \end{figure}
 
