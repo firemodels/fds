@@ -1584,11 +1584,50 @@ To verify the accuracy of the pressure solution on each mesh, set {\ct CHECK\_PO
 
 The default Poisson solver in FDS ({\ct SOLVER='FFT'} on the {\ct PRES} line) is based on the package of linear algebra routines called CrayFishpak. However, in certain circumstances you may need to use one of several alternatives that is based on the Intel\textsuperscript{\textregistered} MKL Sparse Cluster Solver.
 \begin{description}
-\item[{\ct SOLVER='ULMAT'}] With this solver, the unknown values of the pressure live only in gas-phase cells, allowing for the normal components of velocity at a solid surface to be computed exactly with no penetration error. Strictly speaking, in this mode, FDS is no longer using an ``immersed boundary method'' for flow obstructions---the pressure solution is now ``unstructured,'' hence the {\ct U} in its name. This solver does not guarantee that the normal component of velocity matches perfectly at mesh boundaries, and the iterative procedure used by the default {\ct 'FFT'} solver is still used to drive the velocity normals closer together. This solver option does allow for internal sealed regions within the domain for which additional matrices must be computed.
-\item[{\ct SOLVER='GLMAT'}]  This solver is for non-overlapping, non-stretched meshes at the same refinement level covering a single connected domain, i.e. a large rectangular box. With this solver, the pressure in both solid and gas cells is computed using an immersed boundary method for flow obstructions, the same as the default {\ct 'FFT'} solver.  This mode produces the exact same pressure solution as the {\ct 'FFT'} solver would if the domain were one single mesh. That is, velocity errors at any mesh boundaries are eliminated. Note that currently a single discretization matrix is built for all gas cells defined on the model, therefore the solver is not meant to be used in cases where ther are internal sealed regions within the domain.
-\item[{\ct SOLVER='UGLMAT'}] This solver is for non-overlapping, non-stretched meshes at the same refinement level covering a single connected domain, i.e. a large rectangular box. Like the solver {\ct 'ULMAT'}, the unknown values of the pressure live only in gas-phase cells, allowing for the normal components of velocity at a solid surface to be computed exactly (no velocity penetration error). In addition, this solver ensures that the normal component of velocity matches perfectly at mesh boundaries. The limitation of this solver is that it does not allow for internal sealed regions within the domain. It is also the most expensive of the alternative solvers.
+\item[{\ct SOLVER='ULMAT'}] With this solver, the unknown values of the pressure live only in gas-phase cells, allowing for the normal components of velocity at a solid surface to be computed exactly with no penetration error. Strictly speaking, in this mode, FDS is no longer using an ``immersed boundary method'' for flow obstructions---the pressure solution is now ``unstructured,'' hence the {\ct U} in its name. This solver does not guarantee that the normal component of velocity matches perfectly at mesh boundaries, and the iterative procedure used by the default {\ct 'FFT'} solver is still used to drive the mesh interface velocity normals closer together. This solver option does allow for refinement at mesh boundaries and for internal sealed regions within the domain for which additional matrices must be computed.
+\item[{\ct SOLVER='GLMAT'}]  This solver is for non-overlapping, non-stretched meshes at the same refinement level covering a single connected domain, i.e., a large rectangular box. With this solver, the pressure in both solid and gas cells is computed using an immersed boundary method for flow obstructions, the same as the default {\ct 'FFT'} solver.  This mode produces the exact same pressure solution as the {\ct 'FFT'} solver would if the domain were one single mesh. That is, velocity errors at any mesh boundaries are eliminated. Note that currently a single discretization matrix is built for all gas cells defined on the model, therefore the solver is not meant to be used in cases where ther are internal sealed regions within the domain.
+\item[{\ct SOLVER='UGLMAT'}] This solver is for non-overlapping, non-stretched meshes at the same refinement level covering a single connected domain, i.e., a large rectangular box. Like the solver {\ct 'ULMAT'}, the unknown values of the pressure live only in gas-phase cells, allowing for the normal components of velocity at a solid surface to be computed exactly (no velocity penetration error). In addition, this solver ensures that the normal component of velocity matches perfectly at mesh boundaries. The limitation of this solver is that it does not allow for internal sealed regions within the domain. It is also the most expensive of the alternative solvers.
 \end{description}
 Because these alternative methods are based on the Intel\textsuperscript{\textregistered} MKL parallel LU decomposition solver, they require computation and storage of global factorization matrices. Depending on the size of the problem, these operations can be expensive in terms of both CPU time and memory. It has been found suitable for problems with up to a million cells on a multi-core workstation with 64~GB of RAM.
+
+
+\begin{landscape}
+\begin{table}[h]
+\begin{threeparttable}
+\centering
+\caption[Summary of available pressure solvers]{Summary of available pressure solvers.}
+\begin{tabular}{lcccccccc}
+\toprule
+\multicolumn{1}{c}{} & \multicolumn{1}{c}{} & \multicolumn{1}{c}{} & \multicolumn{3}{c}{\textbf{Allows}} & \multicolumn{3}{c}{\textbf{Handling Errors}} \\
+\cmidrule(rl){4-6} \cmidrule(rl){7-9}
+\textbf{Solver} & \textbf{Global}$^1$ & \textbf{Unstructured}$^2$ & \textbf{Refinement}$^3$ & \textbf{Stretching} & \textbf{Zones} & \textbf{Velocity @ Mesh}$^4$ & \textbf{Velocity @ Solid}$^5$ & \textbf{Inseparability}$^6$ \\
+\midrule
+\rowcolor{lavender}
+FFT (default)  & $\times$ & $\times$   & \checkmark & 2 directions  & \checkmark & iterative & iterative  & iterative \\
+ULMAT          & $\times$ & \checkmark & \checkmark & \checkmark    & \checkmark & iterative & exact      & iterative \\
+\rowcolor{lavender}
+GLMAT          & \checkmark & $\times$   & $\times$ & $\times$      & \checkmark & exact      & iterative & iterative \\
+UGLMAT         & \checkmark & \checkmark & $\times$ & $\times$      & $\times$   & exact      & exact     & iterative \\
+% \rowcolor{lavender}
+% USCARC         & \checkmark & \checkmark & $\times$ & \checkmark    & \checkmark & exact      & exact     & exact   \\
+% PFFT (future)  & \checkmark & $\times$   & $\times$ & 1 direction   & \checkmark & exact      & iterative & iterative \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+    \small
+    \item Notes:
+    \begin{itemize}
+        \item[$^1$] ``Global'' refers to a global matrix solution, one matrix for the whole domain, as opposed to one matrix per mesh.  Thus, there are no mesh boundary errors for this type of solver.
+        \item[$^2$] ``Unstructured'' means the solid boundaries (e.g., {\ct OBST} boundaries) are treated as domain boundaries for the Poisson equation.  Unstructured solvers are the opposite of \emph{immersed boundary methods}.  So, any unstructured solver will have ``exact'' listed for handling errors under ``Velocity @ Solid''.
+        \item[$^3$] ``Refinement'' refers to allowing a change in mesh resolution for neighboring meshes.
+        \item[$^4$] ``Velocity @ Mesh'' refers to errors in the normal component of velocity at mesh boundaries, so-called ``interpolated'' boundaries in FDS.  For inexact solvers, this error may be controlled using the parameter {\ct VELOCITY\_TOLERANCE}.  Mass conservation errors are proportional to the velocity tolerance.
+        \item[$^5$] ``Velocity @ Solid'' refers to errors in the normal component of velocity at solid boundaries, so-called ``penetration'' errors that are present in \emph{immersed boundary methods} and lead to mass conservation errors.  These errors are particularly important to control for tightly sealed pressure zones. For inexact solvers, this error may be controlled using the parameter {\ct VELOCITY\_TOLERANCE}. Mass conservation errors are proportional to the velocity tolerance.
+        \item[$^6$] ``Inseparability'' refers to handling the error compared to the solution of the \emph{inseparable} Poisson equation incurred by lagging the pressure in the baroclinic term.  This error may be controlled using the parameter {\ct PRESSURE\_TOLERANCE}.
+    \end{itemize}
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+\end{landscape}
 
 
 \subsection{Example Case: Pressure\_Solver/duct\_flow}
