@@ -2656,6 +2656,7 @@ NODELOOP : DO NN=1,NE%N_DUCTNODES
    VFLOW = 0._EB
    DN => DUCTNODE(NE%NODE_INDEX(NN))
    IF (DN%LEAKAGE) CYCLE
+
    ! Add filter loss to the downstream duct if no flow split loss over the two ducts
    IF (DN%FILTER_INDEX > 0) THEN
       CALL FILTER_UPDATE(DT,NE%NODE_INDEX(NN))
@@ -2673,6 +2674,7 @@ NODELOOP : DO NN=1,NE%N_DUCTNODES
                                              DN%FILTER_LOSS*(DUCT(DN%DUCT_INDEX(1))%AREA/AREA)**2
       ENDIF
    ENDIF
+
    NODECLASS: IF(DN%VENT .OR. DN%AMBIENT) THEN
       ! If node is an external node loss is simply based on inflow or outflow or half loss if no flow
       IF (DUCT(DN%DUCT_INDEX(1))%AREA < TWO_EPSILON_EB .OR. DUCT(DN%DUCT_INDEX(1))%LOCALIZED_LEAKAGE) CYCLE
@@ -2693,6 +2695,7 @@ NODELOOP : DO NN=1,NE%N_DUCTNODES
          DUCT(DN%DUCT_INDEX(1))%TOTAL_LOSS = DUCT(DN%DUCT_INDEX(1))%TOTAL_LOSS + 0.5_EB*DN%LOSS_ARRAY(2,1)
          DUCT(DN%DUCT_INDEX(2))%TOTAL_LOSS = DUCT(DN%DUCT_INDEX(2))%TOTAL_LOSS + 0.5_EB*DN%LOSS_ARRAY(1,2)
       ENDIF
+
    ELSE NODECLASS
       ! For an internal node determine how many ducts are outflow
       NUM_OUT = 0
@@ -2700,6 +2703,7 @@ NODELOOP : DO NN=1,NE%N_DUCTNODES
          DU => DUCT(DN%DUCT_INDEX(ND))
          IF (DU%VEL(PREVIOUS)*DN%DIR(ND) < -1.E-6_EB) NUM_OUT = NUM_OUT + 1
       ENDDO
+
       NUM_OUT_IF: IF (NUM_OUT==0 .OR. NUM_OUT==DN%N_DUCTS) THEN
          ! If all are inflow or outflow each duct gets the average of its inflowing losses normalized by the number of ducts
          DO ND=1,DN%N_DUCTS
@@ -2711,8 +2715,9 @@ NODELOOP : DO NN=1,NE%N_DUCTNODES
             ENDDO
             DU%TOTAL_LOSS = LOSS_SUM / (DN%N_DUCTS-1) / DN%N_DUCTS
          ENDDO
+
       ELSEIF (NUM_OUT==1) THEN NUM_OUT_IF
-         ! If one duct is outflow weight the inflowing losses based on fraction of volume flow
+         ! If one duct is outflow weight the inflowing losses based area ratios
          DO ND=1,DN%N_DUCTS
             DU => DUCT(DN%DUCT_INDEX(ND))
             IF (DU%VEL(PREVIOUS)*DN%DIR(ND) <-1.E-6_EB) THEN
@@ -2725,6 +2730,7 @@ NODELOOP : DO NN=1,NE%N_DUCTNODES
             DU => DUCT(DN%DUCT_INDEX(ND))
             DU%TOTAL_LOSS = DU%TOTAL_LOSS + DN%LOSS_ARRAY(ND,NUM_OUT) * (DU%AREA/DUCT(DN%DUCT_INDEX(NUM_OUT))%AREA)**2
          ENDDO
+
       ELSEIF (NUM_OUT == DN%N_DUCTS - 1) THEN NUM_OUT_IF
          ! If one duct is inflow simply assign the losses of the inflowing duct
          DO ND=1,DN%N_DUCTS
@@ -2740,6 +2746,7 @@ NODELOOP : DO NN=1,NE%N_DUCTNODES
             IF (ND/=NUM_OUT) &
                DUCT(DN%DUCT_INDEX(ND))%TOTAL_LOSS = DUCT(DN%DUCT_INDEX(ND))%TOTAL_LOSS + DN%LOSS_ARRAY(NUM_OUT,ND)
          ENDDO
+
       ELSE NUM_OUT_IF
          ! If some are inflow and sum are outflow weight outflow losses as fraction of inflow volume flow
          DO ND=1,DN%N_DUCTS
@@ -3570,9 +3577,7 @@ LOSS_N = .FALSE.
 DO ND = 1, N_DUCTS
    IF (DUCT(ND)%VOLUME_FLOW_INITIAL<1.E6_EB .OR. DUCT(ND)%MASS_FLOW_INITIAL<1.E6_EB) LOSS_D(ND) = .TRUE.
    IF (ANY(DUCT(ND)%LOSS>0._EB) .OR. DUCT(ND)%ROUGHNESS > 0._EB) LOSS_D(ND) = .TRUE.
-   IF (DUCT(ND)%FAN_INDEX > 0) THEN
-      IF (FAN(DUCT(ND)%FAN_INDEX)%OFF_LOSS>0._EB) LOSS_D(ND) = .TRUE.
-   ENDIF
+   IF (DUCT(ND)%FAN_INDEX > 0) LOSS_D(ND) = .TRUE.
 ENDDO
 
 CHANGE = .TRUE.
@@ -3580,6 +3585,12 @@ CHANGE_LOOP: DO WHILE (CHANGE)
    CHANGE = .FALSE.
    NODELOOP: DO NN = 1,N_DUCTNODES
       IF (LOSS_N(NN)) CYCLE NODELOOP
+      IF (DUCTNODE(NN)%N_DUCTS==2) THEN
+         LOSS_N(NN) = .TRUE.
+         LOSS_D(DUCTNODE(NN)%DUCT_INDEX(1)) = .TRUE.
+         LOSS_D(DUCTNODE(NN)%DUCT_INDEX(2)) = .TRUE.
+         CYCLE NODELOOP
+      ENDIF
       IF (ANY(DUCTNODE(NN)%LOSS_ARRAY > 0._EB)) THEN
          LOSS_N(NN) = .TRUE.
          DO ND = 1,DUCTNODE(NN)%N_DUCTS
