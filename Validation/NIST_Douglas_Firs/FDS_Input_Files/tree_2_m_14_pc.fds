@@ -115,7 +115,7 @@
 &INIT PART_ID='large roundwood', XYZ=0.0,0.0,0.15, RADIUS=0.85, HEIGHT=1.9, SHAPE='CONE', N_PARTICLES_PER_CELL=1, PACKING_RATIO=0.00075 /
 
 &PART ID='ignitor', SAMPLING_FACTOR=1, SURF_ID='burner', STATIC=.TRUE. /
-&SURF ID='burner', TMP_FRONT=1500., HRRPUA=60., RAMP_T='ignite', RAMP_Q='ignite', RADIUS=0.01, GEOMETRY='SPHERICAL' /
+&SURF ID='burner', TMP_FRONT=1500., EMISSIVITY=1., HRRPUA=60., RAMP_T='ignite', RAMP_Q='ignite', RADIUS=0.01, GEOMETRY='SPHERICAL' /
 &RAMP ID='ignite', T= 0.0, F=0. /
 &RAMP ID='ignite', T= 0.1, F=1. /
 &RAMP ID='ignite', T=10.0, F=1. /
