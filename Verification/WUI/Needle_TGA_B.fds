@@ -33,13 +33,13 @@
 &MATL ID                    = 'MOISTURE'
       DENSITY               = 1000.
       CONDUCTIVITY          = 0.20
-      SPECIFIC_HEAT         = 1.0
+      SPECIFIC_HEAT         = 4.184
       REFERENCE_TEMPERATURE = 100.
       HEATING_RATE          = 10.
       PYROLYSIS_RANGE       = 100.
       NU_SPEC               = 1.00
       SPEC_ID               = 'WATER VAPOR'
-      HEAT_OF_REACTION      = 1000.   /
+      HEAT_OF_REACTION      = 2259.   /
 
 &MATL ID                    = 'comp 1'
       DENSITY 	            = 1000.
