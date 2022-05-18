@@ -966,7 +966,7 @@ ELSE DO_SEPARABLE_IF
    CCM1 = 0.5_EB; CCP1 = 0.5_EB
    IFC_LOOP_2 : DO IFC=1,CUT_CELL(ICC)%CCELEM(1,JCC)
       IFACE = CUT_CELL(ICC)%CCELEM(IFC+1,JCC)
-      AF    = 0._EB; FN = 0._EB
+      AF    = 0._EB; FN = 0._EB; FN_B = 0._EB
       SELECT CASE(CUT_CELL(ICC)%FACE_LIST(1,IFACE))
       CASE(IBM_FTYPE_RCGAS) ! REGULAR GASPHASE
          LOWHIGH = CUT_CELL(ICC)%FACE_LIST(2,IFACE)
@@ -1065,7 +1065,8 @@ ELSE DO_SEPARABLE_IF
          !FN   = FCT * ( 1._EB/RHOF * (P2-P1) + (KR2-KR1) )/(X2-X1) ! (1/rho*Grad(p)+Grad(Kres))
          !FN   = FCT*((P2/RHO2-P1/RHO1+KR2-KR1)/(X2-X1)+CUT_FACE(IFC2)%FN_B(IFACE2)) ! (Grad(p/rho) -
                                                                                      !  p*Grad(1/rho)+Grad(Kres))
-         FN = FCT*((P2/RHO2-P1/RHO1+KR2-KR1)/(X2-X1) + F_LINK(CUT_FACE(IFC2)%UNKF(IFACE2)))
+         IF(CUT_FACE(IFC2)%UNKF(IFACE2)>0) FN_B = F_LINK(CUT_FACE(IFC2)%UNKF(IFACE2))
+         FN = FCT*( (P2/RHO2-P1/RHO1+KR2-KR1)/(X2-X1) + FN_B )
       CASE(IBM_FTYPE_CFINB) ! INBOUNDARY CUT FACE
          FCT     = 1._EB    ! Normal vector defined into the body.
          IFC2    = CUT_CELL(ICC)%FACE_LIST(4,IFACE)
@@ -1352,7 +1353,10 @@ DO ICF=1,MESHES(NM)%N_CUTFACE_MESH
     ! Flags consistent with computation of FN=-DUDT in CCIBM_NO_FLUX, SOLID boundaries keep F_B = 0.
     FLG = EXTERNAL_WALL(CF%IWC)%NOM/=0 .AND. &
          .NOT.( ANY(WALL(CF%IWC)%BOUNDARY_TYPE==(/INTERPOLATED_BOUNDARY,PERIODIC_BOUNDARY/)) )
-    IF(FLG .OR. ANY(WALL(CF%IWC)%BOUNDARY_TYPE==(/SOLID_BOUNDARY,NULL_BOUNDARY,MIRROR_BOUNDARY/))) CYCLE
+    IF(FLG .OR. ANY(WALL(CF%IWC)%BOUNDARY_TYPE==(/SOLID_BOUNDARY,NULL_BOUNDARY,MIRROR_BOUNDARY/))) THEN
+       ! Boundary cut-faces on wall cells of type solid get F_B = 0:
+       DO JCF=1,CF%NFACE; IF(CF%UNKF(JCF)<1) CYCLE; F_LINK(CF%UNKF(JCF))=0._EB; A_LINK(CF%UNKF(JCF))=1._EB; ENDDO; CYCLE
+    ENDIF
    ENDIF
    I = CF%IJK(IAXIS); J = CF%IJK(JAXIS); K = CF%IJK(KAXIS); X1AXIS = CF%IJK(KAXIS+1)
    II1 = I; JJ1 = J; KK1 = K; II2 = I; JJ2 = J; KK2 = K
