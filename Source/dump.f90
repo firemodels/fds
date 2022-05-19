@@ -2647,6 +2647,9 @@ REACTION_LOOP: DO N=1,N_REACTIONS
       WRITE(LU_OUTPUT,'(6X,A,F8.1)') 'Auto-Ignition Temperature (K):  ', AUTO_IGNITION_TEMPERATURE
       WRITE(LU_OUTPUT,'(6X,A,F8.1)') 'Critical Flame Temperature (K): ', RN%CRIT_FLAME_TMP
    ENDIF
+   IF (SIM_MODE/=DNS_MODE) THEN
+      WRITE(LU_OUTPUT,'(/6X,A,F8.3)') 'Prescribed Radiative Fraction:  ', RN%CHI_R
+   ENDIF
 
 ENDDO REACTION_LOOP
 
@@ -2676,7 +2679,7 @@ MATL_LOOP: DO N=1,N_MATL
 
    ML => MATERIAL(N)
 
-   WRITE(LU_OUTPUT,'(/I4,1X,A)')    N,MATL_NAME(N)
+   WRITE(LU_OUTPUT,'(/I4,1X,A)')    N,TRIM(MATL_NAME(N))
    IF (ML%FYI/='null') WRITE(LU_OUTPUT,'(5X,A)') TRIM(ML%FYI)
    WRITE(LU_OUTPUT,'(A,F8.3)')    '     Emissivity                   ',ML%EMISSIVITY
    WRITE(LU_OUTPUT,'(A,F8.1)')    '     Density (kg/m3)              ',ML%RHO_S
