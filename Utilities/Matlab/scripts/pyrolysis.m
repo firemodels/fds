@@ -107,7 +107,7 @@ for i_plot=1:2
             FDS = csvread('pyrolysis_2_devc.csv',2,0);
         end
         h=plot(FDS(:,4),FDS(:,2),'b--');
-        h=plot(FDS(:,4),FDS(:,3)*500,'g--'); % Multiply by 500 for right axis
+        h=plot(FDS(:,4),FDS(:,3)*500,'r--'); % Multiply by 500 for right axis
     end
 
     % Plot attributes
@@ -119,8 +119,8 @@ for i_plot=1:2
     set(AX(2),'XTick',[])
     set(AX(2),'FontName',Font_Name)
     set(AX(2),'FontSize',Label_Font_Size)
-    set(get(AX(1),'Ylabel'),'String','Mass Fraction','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
-    set(get(AX(2),'Ylabel'),'String','Reaction Rate $\times 10^3$ (s$^{-1}$)','Interpreter','LaTeX','FontSize',Label_Font_Size,'FontName',Font_Name)
+    set(get(AX(1),'Ylabel'),'String','Normalized Mass','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
+    set(get(AX(2),'Ylabel'),'String','Normalized Mass Loss Rate $\times 10^3$ (s$^{-1}$)','Interpreter','LaTeX','FontSize',Label_Font_Size,'FontName',Font_Name)
     set(AX(1),'YLim',[0 1.1])
     set(AX(2),'YLim',[0 2.2])
     set(AX(1),'YTickMode','manual')
