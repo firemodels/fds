@@ -3478,6 +3478,7 @@ When in doubt about the values of these various parameters, just specify the {\c
 Note that the indices have been added to the reaction parameters to emphasize the fact that these parameters are stored in arrays of length equal to {\ct N\_REACTIONS}. If there is only one reaction, you need not include the {\ct (1)}, but it is a good habit to get into. Note also that if the default combustion model is used, you can denote that the reaction produces fuel gas using the appropriate {\ct SPEC\_ID}. Note also that the {\ct HEAT\_OF\_COMBUSTION} is the energy released per unit mass of fuel gas that mixes with oxygen and combusts.  This has nothing to do with the pyrolysis process, so why is it specified here? The answer is that when using the default combustion model in FDS there is only one {\em gas phase} reaction of fuel and oxygen, but there can be dozens of different materials and dozens of {\em solid phase} reactions. To ensure that the fuel vapors from different materials combust to produce the proper amount of energy, it is very important to specify a {\ct HEAT\_OF\_COMBUSTION} for each material. That way, the mass loss rate of fuel gases is automatically adjusted so that the effective mass loss rate multiplied by the single, global, gas phase heat of combustion produces the expected heat release rate. This adjustment uses the value of {\ct HOC\_COMPLETE}, see Section~\ref{info:hoc_complete}, on the {\ct REAC} line. If, for example, the {\ct HOC\_COMPLETE} specified on the {\ct REAC} line is twice that specified on the {\ct MATL} line, the mass of contained within wall cell will be decremented by that determined by the pyrolysis model, but the mass added to gas phase would be reduced by 50~\%. A different value of heat of combustion can be specified for each species, $i$, in each reaction, $j$, via the parameter {\ct HEAT\_OF\_COMBUSTION(i,j)}.
 
 \subsubsection{Modeling Upholstered Furnishings}
+\label{couch}
 
 The example input file called {\ct Fires/couch.fds} demonstrates a simple way to model upholstered furniture. Modeling a couch requires a simplification of its structure and materials.  At the very least, we want the upholstery to be modeled as a layer of fabric covering polyurethane foam. We need the thermal properties of each, along with estimates of the ``reference'' temperatures as described above. The foam might be described as follows:
 \begin{lstlisting}
@@ -3490,19 +3491,21 @@ The example input file called {\ct Fires/couch.fds} demonstrates a simple way to
       REFERENCE_TEMPERATURE = 280.
       HEAT_OF_REACTION      = 800. /
 \end{lstlisting}
-Note that these properties are completely made up.  Both the fabric and the foam decompose into fuel gases via single-step reactions. The fuel gases from each have different composition and heats of combustion. FDS automatically adjusts the mass loss rate of each so that the ``effective'' fuel gas is that which is specified on the {\ct REAC} line.  Figure~\ref{couch} shows the fire after 1~min, 2~min, 3~min, and 10~min. Only the flame zone of the fire is shown; the smoke is hidden so that you can see the fire progressing along the couch.
+Note that these properties are completely made up.  Both the fabric and the foam decompose into fuel gases via single-step reactions. The fuel gases from each have different composition and heats of combustion. FDS automatically adjusts the mass loss rate of each so that the ``effective'' fuel gas is that which is specified on the {\ct REAC} line.  Figure~\ref{couch_fig} shows the fire after 1~min, 2~min, 3~min, and 10~min. Only the flame zone of the fire is shown; the smoke is hidden so that you can see the fire progressing along the couch. Also shown in the Fig.~\ref{couch_fig} is the heat release rate of the burning couch. The ``Expected HRR'' is a rough estimate of the peak HRR of a piece of furniture of this size.
 
-\begin{figure}[ht]
+\begin{figure}[!ht]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/couch_60} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/couch_120} \\
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/couch_180} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/couch_600}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/couch_600} \\
+\multicolumn{2}{c}{\includegraphics[height=2.15in]{SCRIPT_FIGURES/couch}}
 \end{tabular*}
-\caption[Results of the {\ct couch} test case]{Output of {\ct couch} test case 1, 2, 3, and 10 min.}
-\label{couch}
+\caption[Results of the {\ct couch} test case]{Smokeview images of the {\ct couch} test case after 1, 2, 3, and 10 min, plus the heat release rate as a function of time.}
+\label{couch_fig}
 \end{figure}
 
+\FloatBarrier
 
 \subsection{Shrinking and swelling materials}
 \label{info:shrink_swell}
