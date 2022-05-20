@@ -1736,12 +1736,15 @@ IF (NOC(1)==0 .AND. NOC(2)==0 .AND. NOC(3)/=0) M%IPS=3
 IF (NOC(1)/=0 .AND. NOC(2)/=0 .AND. NOC(3)==0) M%IPS=4
 IF (NOC(1)/=0 .AND. NOC(2)==0 .AND. NOC(3)/=0) M%IPS=5
 IF (NOC(1)==0 .AND. NOC(2)/=0 .AND. NOC(3)/=0) M%IPS=6
-IF (NOC(1)/=0 .AND. NOC(2)/=0 .AND. NOC(3)/=0) THEN
+IF (PRES_FLAG/=FFT_FLAG) THEN
+   M%IPS=0
+ELSEIF (NOC(1)/=0 .AND. NOC(2)/=0 .AND. NOC(3)/=0) THEN
    WRITE(LU_ERR,'(A,I3)') 'ERROR: Stretch at most 2 coordinate directions in MESH ',NM
    STOP_STATUS = SETUP_STOP
    IERR = 1
    RETURN
 ENDIF
+
 
 IF (M%IPS<=1 .OR. M%IPS==4) THEN
    ITRN = IBP1
