@@ -1139,13 +1139,13 @@ In 2009, Mell et~al. measured the burning rate and heat fluxes from individual D
 
 \subsubsection{Modeling Notes}
 
-The trees are modeled as a collection of cylindrical Lagrangian particles. Mell~et~al.~\cite{Mell:2009} group the particles into three size classes. The pyrolysis model assigned to the particles is described in the FDS User's Guide~\cite{FDS_Users_Guide}, chapter ``Earth, Wind and Fire,'' Section~\ref{UG-vegetation_model}, ``Thermal Degradation Model for Vegetation.''
+The trees are modeled as a collection of cylindrical Lagrangian particles. Mell~et~al.~\cite{Mell:2009} group the particles into three size classes. The pyrolysis model applied to the particles is based on TGA measurements of longleaf pine needles described in the FDS Verification Guide~\cite{FDS_Verification_Guide}, chapter ``Pyrolysis,'' Section ``TGA for a Charring Sample (Needle\_TGA).''
 
-Measured properties of the trees are listed in Table~\ref{Properties_Trees}. Generic vegetation properties are listed in Table~\ref{Assumed_Properties_Trees}. These assumed properties are typically for wood or cellulosic fuels. The moisture is modeled as water. The vegetation is assumed to be composed primarily of cellulose. Reference~\cite{Mell:2009} provides an estimate of the distribution of mass for the foliage, roundwood less than 3~mm in diameter, roundwood 3~mm to 6~mm, and roundwood 6~mm to 10~mm. For the 2~m trees, the distribution is approximately 64~\%, 11~\%, 10~\%, and 15~\%, respectively. For the 5~m trees, it is 60~\%, 17~\%, 12~\%, and 11~\%, respectively.
+Measured properties of the trees are listed in Table~\ref{Properties_Trees}, and assumed properties are listed in Table~\ref{Assumed_Properties_Trees}. These assumed properties are typically for wood or cellulosic fuels. The moisture is modeled as water. The vegetation is assumed to be composed primarily of cellulose. Reference~\cite{Mell:2009} provides an estimate of the distribution of mass for the foliage, roundwood less than 3~mm in diameter, roundwood 3~mm to 6~mm, and roundwood 6~mm to 10~mm. For the 2~m trees, the distribution is approximately 64~\%, 11~\%, 10~\%, and 15~\%, respectively. For the 5~m trees, it is 60~\%, 17~\%, 12~\%, and 11~\%, respectively.
 
 \begin{table}[ht]
 \begin{center}
-\caption[Measured properties for the NIST Douglas fir trees]{Measured properties for the NIST Douglas fir trees~\cite{Mell:2009}.}
+\caption[Measured properties for the NIST Douglas Fir Experiments]{Measured properties for the NIST Douglas Fir Experiments~\cite{Mell:2009}.}
 \label{Properties_Trees}
 \begin{tabular}{|l|c|c|c|c|}
 \hline
@@ -1164,20 +1164,19 @@ Assumed Bulk Mass per Unit Volume       & kg/m$^3$      & 3.2           & 4.6   
 
 \begin{table}
 \begin{center}
-\caption[Assumed properties for the vegetation]{Assumed properties for the vegetation. Note that the Pyrolysis Temperature is taken to be the temperature at which the mass loss rate peaks in the TGA experiments of Morvan and Dupuy~\cite{Morvan:CF2004}.}
+\caption[Assumed properties for the NIST Douglas Fir Experiments]{Assumed properties for the NIST Douglas Fir Experiments.}
 \label{Assumed_Properties_Trees}
 \begin{tabular}{|l|c|c|c|}
 \hline
-Property                        & Units                 & Value                     & Reference                             \\ \hline \hline
-Chemical Composition            & --                    & C$_6$H$_{10}$O$_5$        & Assumption, Cellulose                 \\ \hline
-Heat of Combustion              & kJ/kg                 & 17700                     & \cite{Susott:FS1982}                  \\ \hline
-Soot Yield                      & kg/kg                 & 0.015                     & \cite{SFPE:Tewarson}                  \\ \hline
-Char Yield                      & kg/kg                 & 0.26                      & \cite{Susott:FS1982}                  \\ \hline
-Specific Heat                   & kJ/(kg$\cdot$K)       & 1.2                       & Various sources                       \\ \hline
-Conductivity                    & W/(m$\cdot$K)         & 2                         & Assumption                            \\ \hline
-Density                         & kg/m$^3$              & 514                       & \cite{Rothermel:1972}                 \\ \hline
-Heat of Pyrolysis               & kJ/kg                 & 418                       & \cite{Morvan:CF2004}                  \\ \hline
-Pyrolyis Temperature            & $^\circ$C             & 200                       & \cite{Morvan:CF2004}                  \\ \hline
+Property                        & Units                 & Value                              & Reference                             \\ \hline \hline
+Chemical Composition            & --                    & C$_{3.4}$H$_{6.2}$O$_{2.5}$        & \cite{Ritchie:1}                      \\ \hline
+Heat of Combustion              & kJ/kg                 & 17700                              & \cite{Susott:FS1982}                  \\ \hline
+Soot Yield                      & kg/kg                 & 0.02                               & \cite{Mell:2009}                      \\ \hline
+Char Yield                      & kg/kg                 & 0.26                               & \cite{Susott:FS1982}                  \\ \hline
+Specific Heat                   & kJ/(kg$\cdot$K)       & $1.1+0.0037 \, T$                  & \cite{Parker:1989}                    \\ \hline
+Conductivity                    & W/(m$\cdot$K)         & 0.2                                & Assumption                            \\ \hline
+Density                         & kg/m$^3$              & 514                                & \cite{Rothermel:1972}                 \\ \hline
+Heat of Pyrolysis               & kJ/kg                 & 416                                & \cite{Morvan:CF2004}                  \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
