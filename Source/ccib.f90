@@ -6048,6 +6048,11 @@ INTEGER :: N,IERR,NOM,SNODE
 INTEGER, ALLOCATABLE, DIMENSION(:) :: COUNTS, DISPLS
 TYPE (MESH_TYPE), POINTER :: M,M4
 
+INTEGER :: ICC,JCC,I,J,K,ICC2,JCC2,JCF,IFACE,FTYPE,IFC2,IFACE2,ICF2,JCF2
+REAL(EB):: ACRT
+TYPE(IBM_CUTCELL_TYPE), POINTER :: CC2
+TYPE(IBM_CUTFACE_TYPE), POINTER :: CF2
+
 TNOW2 = CURRENT_TIME()
 
 SET_CUTCELLS_CALL_IF : IF(FIRST_CALL) THEN
@@ -6278,6 +6283,59 @@ IF (GET_CUTCELLS_VERBOSE .AND. MY_RANK==0) THEN
    CALL CPU_TIME(TDEL)
    WRITE(LU_ERR,'(A,F8.3,A)') ' Executing SET_CFACES_ONE_D_RDN. Time taken : ',TDEL-TNOW,' sec.'
 ENDIF
+
+! Give information for a particular cell:
+IF (DEBUG_MATVEC_DATA) THEN
+   NM = 1; I = 17; J = 24; K = 19
+   CALL POINT_TO_MESH(NM)
+   IF (CCVAR(I,J,K,IBM_IDCC)<1) THEN
+      WRITE(LU_ERR,*) 'No cut-cells in cell NM,I,J,K=',NM,I,J,K
+   ELSE
+      ICC = CCVAR(I,J,K,IBM_IDCC); CC=>CUT_CELL(ICC)
+      WRITE(LU_ERR,*) 'Cut Cell in cell NM,I,J,K : ICC,NCELL=',NM,I,J,K,':',ICC,CC%NCELL
+      DO JCC=1,CC%NCELL
+         ! Linking Info on cut-cell ICC,JCC
+         WRITE(LU_ERR,*) 'JCC,ALPHA_CC, CC%IJK_LINK(:,JCC) : CC%LINK_LEV(JCC), UNKZ=',&
+         JCC,CC%VOLUME(JCC)/(DX(I)*DY(J)*DZ(K)),CC%IJK_LINK(:,JCC),':',CC%LINK_LEV(JCC),CC%UNKZ(JCC)
+         IF (CC%IJK_LINK(1,JCC)==IBM_CUTCFE) THEN
+            ICC2=CCVAR(CC%IJK_LINK(2,JCC),CC%IJK_LINK(3,JCC),CC%IJK_LINK(4,JCC),IBM_IDCC);
+            JCC2=CC%IJK_LINK(5,JCC)
+            CC2 => CUT_CELL(ICC2)
+            ! Linking Info on Parent if it is a cut-face:
+            WRITE(LU_ERR,*) 'Parent CC2 I,J,K,JCC2 : ALPHA_CC2, CC2%IJK_LINK(:,JCC2) : CC2%LINK_LEV(JCC2) UNKZ=',&
+            CC%IJK_LINK(2:5,JCC),':',CC2%VOLUME(JCC2)/(DX(I)*DY(J)*DZ(K)),CC2%IJK_LINK(:,JCC2),':',&
+            CC2%LINK_LEV(JCC2),CC2%UNKZ(JCC2)
+         ENDIF
+         ! Linking info on cut-faces for ICC,JCC:
+         DO JCF=2,CC%CCELEM(CC%CCELEM(1,JCC)+1,JCC)
+            IFACE = CC%CCELEM(JCF,JCC)
+            FTYPE = CC%FACE_LIST(1,IFACE)
+            IF (FTYPE==IBM_FTYPE_CFGAS) THEN
+               IFC2    = CC%FACE_LIST(4,IFACE)
+               IFACE2  = CC%FACE_LIST(5,IFACE)
+               CF => CUT_FACE(IFC2)
+               IF(CF%IJK(KAXIS+1)==IAXIS) ACRT = DY(J)*DZ(K)
+               IF(CF%IJK(KAXIS+1)==JAXIS) ACRT = DX(I)*DZ(K)
+               IF(CF%IJK(KAXIS+1)==KAXIS) ACRT = DX(I)*DY(J)
+               WRITE(LU_ERR,*) 'CC Cut-face JFC,ICF,JCF,ALPHA_CF : CF%LINK_LEV(JCF),CF%UNKF(JCF)=',&
+               JCF,IFC2,IFACE2,CF%AREA(IFACE2)/ACRT,':',CF%LINK_LEV(IFACE2),CF%UNKF(IFACE2)
+               WRITE(LU_ERR,*) 'CUT-FACES with UNKF(JCF) : ',CF%UNKF(IFACE2)
+               DO ICF2=1,MESHES(NM)%N_CUTFACE_MESH
+                  CF2=>CUT_FACE(ICF2); IF(CF2%STATUS/=IBM_GASPHASE) CYCLE
+                  DO JCF2=1,CF2%NFACE
+                     IF(CF2%UNKF(JCF2)==CF%UNKF(IFACE2)) THEN
+                        WRITE(LU_ERR,*) 'CF with UNKF(JCF) ICF2,JCF2,I2,J2,K2,AX2,ALPHA_2,LINK_LEV2=',&
+                        ICF2,JCF2,CF2%IJK(1:4),CF2%AREA(JCF2)/ACRT,':',CF2%LINK_LEV(JCF2),CF2%UNKF(JCF2)
+                     ENDIF
+                  ENDDO
+               ENDDO
+            ENDIF
+         ENDDO
+      ENDDO
+   ENDIF
+ENDIF
+
+
 
 IF(GET_CUTCELLS_VERBOSE) CLOSE(LU_SETCC)
 
@@ -24109,9 +24167,9 @@ END SUBROUTINE GET_LINKED_MATRIX_INDEXES_Z
 SUBROUTINE GET_LINKED_FACE_INDEXES_F
 
 INTEGER :: NM,I,J,K,X1AXIS,X2AXIS,X3AXIS,ICF,JCF,LO_UNKZ,HI_UNKZ,IEC,IEDGE,LOHI,II,JJ,KK,IIO,JJO,KKO,IERC,&
-           OFACE(3),OLO_UNKZ,OHI_UNKZ,OICF,OJCF,IECE,JECE,ILINK
-REAL(EB):: ACRT
-LOGICAL :: ALL_FLG
+           OFACE(3),OLO_UNKZ,OHI_UNKZ,OICF,OJCF,IECE,JECE,ILINK,ICC,JCC
+REAL(EB):: ACRT,CCVOL_THRES
+LOGICAL :: ALL_FLG,CC_LINKED
 TYPE(MESH_TYPE), POINTER :: M=>NULL()
 
 ! Define Face Linking:
@@ -24140,7 +24198,15 @@ MESH_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       CASE(KAXIS); ACRT = DY(J)*DX(I)
       END SELECT
       DO JCF=1,CF%NFACE
-         IF(CF%UNKF(JCF)<1 .AND. CF%AREA(JCF)>CCVOL_LINK*ACRT) THEN
+         ! Test if any of surrounding cut-cells are linked. If any link attempt to link cut-face.
+         CC_LINKED = .FALSE.
+         DO LOHI=LOW_IND,HIGH_IND
+            ICC = CF%CELL_LIST(2,LOHI,JCF); JCC = CF%CELL_LIST(3,LOHI,JCF); CC => M%CUT_CELL(ICC)
+            CCVOL_THRES = CCVOL_LINK * (M%DX(CC%IJK(IAXIS))*M%DY(CC%IJK(JAXIS))*M%DZ(CC%IJK(KAXIS)))
+            IF ( CC%VOLUME(JCC) <= CCVOL_THRES ) THEN; CC_LINKED = .TRUE.; EXIT; ENDIF
+         ENDDO
+         ! If surrounding cut-cells not linked, face UNKF not numbered and Area over threshold, add to NUNK_F:
+         IF(CF%UNKF(JCF)<1 .AND. CF%AREA(JCF)>CCVOL_LINK*ACRT .AND. .NOT.CC_LINKED) THEN
             M%NUNK_F = M%NUNK_F + 1
             CF%UNKF(JCF) = M%NUNK_F
             CF%LINK_LEV(JCF) = 0
