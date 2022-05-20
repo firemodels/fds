@@ -1935,7 +1935,8 @@ PRED_CORR_IF : IF (PREDICTOR) THEN
          ! Thermodynamic divergence * vol:
          DPCC= DPCC + ( (1._EB-PRFCT)*CUT_CELL(ICC)%D(JCC) + PRFCT*CUT_CELL(ICC)%DS(JCC) ) * CUT_CELL(ICC)%VOLUME(JCC)
          ! Add Pressure derivative to divergence:
-         IF (IPZ>0)  DPCC= DPCC - (R_PBAR(K,IPZ)-CUT_CELL(ICC)%RTRM(JCC))*D_PBAR_DT_P(IPZ) * CUT_CELL(ICC)%VOLUME(JCC)
+         IF (.NOT.CC_UNSTRUCTURED_PROJECTION .AND. IPZ>0)  &
+         DPCC= DPCC - (R_PBAR(K,IPZ)-CUT_CELL(ICC)%RTRM(JCC))*D_PBAR_DT_P(IPZ) * CUT_CELL(ICC)%VOLUME(JCC)
       ENDDO
       ! Define average DDDT for CUT_CELL(ICC):
       CUT_CELL(ICC)%DIVVOL_PR= DIVVOL
@@ -1959,7 +1960,8 @@ ELSEIF (CORRECTOR) THEN PRED_CORR_IF
          ! Thermodynamic divergence * vol:
          DPCC= DPCC + ( (1._EB-PRFCT)*CUT_CELL(ICC)%D(JCC) + PRFCT*CUT_CELL(ICC)%DS(JCC) ) * CUT_CELL(ICC)%VOLUME(JCC)
          ! Add Pressure derivative to divergence:
-         IF (IPZ>0)  DPCC= DPCC - (R_PBAR(K,IPZ)-CUT_CELL(ICC)%RTRM(JCC))*D_PBAR_DT_P(IPZ) * CUT_CELL(ICC)%VOLUME(JCC)
+         IF (.NOT.CC_UNSTRUCTURED_PROJECTION .AND. IPZ>0)  &
+         DPCC= DPCC - (R_PBAR(K,IPZ)-CUT_CELL(ICC)%RTRM(JCC))*D_PBAR_DT_P(IPZ) * CUT_CELL(ICC)%VOLUME(JCC)
       ENDDO
       ! Define average DDDT for CUT_CELL(ICC):
       CUT_CELL(ICC)%DDDTVOL  = (2._EB*DPCC-(DIVVOL+CUT_CELL(ICC)%DIVVOL_PR))*RDT
@@ -15199,6 +15201,7 @@ MESHES_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       ULMAT_IF : IF (PRES_FLAG==ULMAT_FLAG) THEN
          PRES_ZONE_LOOP : DO IPZ=0,N_ZONE
             ZM => MESHES(NM)%ZONE_MESH(IPZ)
+            IF(ZM%USE_FFT) CYCLE
             IF (ZM%CONNECTED_ZONE_PARENT/=IPZ) CYCLE
             ALLOCATE(DPV(1:ZM%NUNKH),DIVV(1:ZM%NUNKH),VOLV(1:ZM%NUNKH),IJKV(MAX_DIM,1:ZM%NUNKH))
             DPV=0._EB; DIVV=0._EB; VOLV=0._EB; IJKV=0
@@ -15231,7 +15234,7 @@ MESHES_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
                   ! Thermodynamic divergence * vol:
                   DPCC=((1._EB-PRFCT)*CUT_CELL(ICC)%D(JCC)+PRFCT*CUT_CELL(ICC)%DS(JCC))*CUT_CELL(ICC)%VOLUME(JCC)
                   ! Add Pressure derivative to divergence:
-                  IF (IPZ>0) &
+                  IF (.NOT.CC_UNSTRUCTURED_PROJECTION .AND. IPZ>0) &
                   DPCC= DPCC - (R_PBAR(K,IPZ)-CUT_CELL(ICC)%RTRM(JCC))*D_PBAR_DT_P(IPZ) * CUT_CELL(ICC)%VOLUME(JCC)
 
                   IROW       = CUT_CELL(ICC)%UNKH(JCC)
@@ -15365,7 +15368,7 @@ MESHES_LOOP : DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
             ! Thermodynamic divergence * vol:
             DPCC= DPCC + ((1._EB-PRFCT)*CUT_CELL(ICC)%D(JCC)+PRFCT*CUT_CELL(ICC)%DS(JCC))*CUT_CELL(ICC)%VOLUME(JCC)
             ! Add Pressure derivative to divergence:
-            IF (IPZ>0) &
+            IF (.NOT.CC_UNSTRUCTURED_PROJECTION .AND. IPZ>0) &
             DPCC= DPCC - (R_PBAR(K,IPZ)-CUT_CELL(ICC)%RTRM(JCC))*D_PBAR_DT_P(IPZ) * CUT_CELL(ICC)%VOLUME(JCC)
          ENDDO JCC_LOOP
 
