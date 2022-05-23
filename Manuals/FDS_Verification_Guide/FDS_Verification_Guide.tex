@@ -5123,6 +5123,19 @@ This section tests a model for extrapolating heat release rate data from a cone 
 	\label{fig:cone_demo_2}
 \end{figure}
 
+\section{Melting Ice Cube (\texorpdfstring{\textct{ice\_cube}}{ice\_cube})}
+\label{ice_cube}
+
+This section tests the ability for a {\ct MATL} reaction to produce particles. A 10~cm cube (1 kg) block of ice is defined with a 10~\si{kW/m^2} {\ct EXTERNAL\_FLUX}. The mass of water drops produced is tracked. The results are shown below in Fig~\ref{fig:ice_cube}.
+
+\begin{figure}[!ht]
+	\centering
+	\includegraphics[height=2.2in]{SCRIPT_FIGURES/ice_cube}
+	\caption[Check of the particle production by surface reaction feature (the {\ct ice\_cube} case)]{Check of the particle production by surface reaction feature.}
+	\label{fig:ice_cube}
+\end{figure}
+
+
 \chapter{Lagrangian Particles}
 
 This chapter contains verification cases that test all aspects of particles, droplets, sprays, and so on. Note that in FDS, Lagrangian particles are used for a variety of purposes, not just water droplets.
