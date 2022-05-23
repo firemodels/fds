@@ -432,6 +432,7 @@ $QFDS -d Pyrolysis cone_demo_2.fds
 $QFDS -d Pyrolysis birch_tga_1step_2.fds
 $QFDS -d Pyrolysis birch_tga_1step_20.fds
 $QFDS -d Pyrolysis enthalpy.fds
+$QFDS -d Pyrolysis ice_cube.fds
 $QFDS -d Pyrolysis liquid_mixture.fds
 $QFDS -p 8 -d Pyrolysis methanol_evaporation.fds
 $QFDS -d Pyrolysis part_baking_soda_420K.fds
