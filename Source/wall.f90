@@ -2408,6 +2408,7 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
          ONE_D%M_DOT_G_PP_ADJUST(1:N_TRACKED_SPECIES) = 0._EB
          ONE_D%M_DOT_G_PP_ACTUAL(1:N_TRACKED_SPECIES) = 0._EB
          ONE_D%M_DOT_S_PP(1:SF%N_MATL) = 0._EB
+         ONE_D%M_DOT_PART_ACTUAL = 0._EB
          RETURN
       ENDIF
 
@@ -2490,11 +2491,12 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
                OMESH(EWC%NOM)%N_EXTERNAL_OBST = OMESH(EWC%NOM)%N_EXTERNAL_OBST + 1
                LL = 2*OMESH(EWC%NOM)%N_EXTERNAL_OBST
                OMESH(EWC%NOM)%REAL_SEND_PKG8(LL-1) = REAL(OTHER_MESH_OBST_INDEX,EB)
-               OMESH(EWC%NOM)%REAL_SEND_PKG8(LL)   = SUM(ONE_D%M_DOT_G_PP_ACTUAL(1:N_TRACKED_SPECIES))*DT*ONE_D%AREA
+               OMESH(EWC%NOM)%REAL_SEND_PKG8(LL)   = &
+                  (ONE_D%M_DOT_PART_ACTUAL+SUM(ONE_D%M_DOT_G_PP_ACTUAL(1:N_TRACKED_SPECIES)))*DT*ONE_D%AREA
             ENDIF
          ELSE
             IF (OBST_INDEX>0) OBSTRUCTION(OBST_INDEX)%MASS = OBSTRUCTION(OBST_INDEX)%MASS - &
-               SUM(ONE_D%M_DOT_G_PP_ACTUAL(1:N_TRACKED_SPECIES))*DT*ONE_D%AREA
+               (ONE_D%M_DOT_PART_ACTUAL+SUM(ONE_D%M_DOT_G_PP_ACTUAL(1:N_TRACKED_SPECIES)))*DT*ONE_D%AREA
          ENDIF
       ENDIF CONSUME_MASS
 
@@ -2889,6 +2891,7 @@ IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
    ONE_D%M_DOT_S_PP(1:SF%N_MATL)                = 0._EB
    ONE_D%Q_DOT_G_PP                             = 0._EB
    ONE_D%Q_DOT_O2_PP                            = 0._EB
+   ONE_D%M_DOT_PART_ACTUAL                      = 0._EB
 ENDIF
 
 ! Get gas concentrations at boundaries
@@ -3495,6 +3498,10 @@ PYROLYSIS_PREDICTED_IF_2: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_PREDICTED) THEN
          ONE_D%M_DOT_S_PP(1:SF%N_MATL) = 0._EB
          ONE_D%N_LAYER_CELLS(1:SF%N_LAYERS) = 0
          ONE_D%BURNAWAY          = .TRUE.
+         ONE_D%PART_MASS(1:SF%N_LPC) = 0._EB
+         ONE_D%PART_ENTHALPY(1:SF%N_LPC) = 0._EB
+         ONE_D%T_MATL_PART = 0._EB
+         ONE_D%M_DOT_PART_ACTUAL = 0._EB
          IF (I_OBST > 0) THEN
             IF (OBSTRUCTION(I_OBST)%CONSUMABLE) OBSTRUCTION(I_OBST)%MASS = -1.
          ENDIF
@@ -3721,6 +3728,7 @@ IF (SF%N_LPC > 0) THEN
    ONE_D%PART_MASS(1:SF%N_LPC) = ONE_D%PART_MASS(1:SF%N_LPC) + DT_BC_SUB * M_DOT_PART_S(1:SF%N_LPC)
    ONE_D%PART_ENTHALPY(1:SF%N_LPC) = ONE_D%PART_ENTHALPY(1:SF%N_LPC) + DT_BC_SUB * Q_DOT_PART_S(1:SF%N_LPC)
    ONE_D%T_MATL_PART = ONE_D%T_MATL_PART + DT_BC_SUB
+   ONE_D%M_DOT_PART_ACTUAL = SUM(M_DOT_PART_S(1:SF%N_LPC))
 ENDIF
 
 ! Compute 1D mass transfer within the solid
@@ -3786,10 +3794,10 @@ ONE_D%Q_CON_F = ONE_D%Q_CON_F / DT_BC
 ONE_D%TMP_F_OLD = ONE_D%TMP_F  ! Save this value for output of effective HTC
 ONE_D%HEAT_TRANS_COEF = HTCF
 
-! If any gas massflux is non-zero or the surface temperature exceeds the ignition temperature, set the ignition time
+! If any gas massflux or particle mass flux is non-zero or the surface temperature exceeds the ignition temperature, set the ignition time
 
 IF (ONE_D%T_IGN > T) THEN
-   IF (SUM(ONE_D%M_DOT_G_PP_ADJUST(1:N_TRACKED_SPECIES)) > 0._EB) ONE_D%T_IGN = T
+   IF (SUM(ONE_D%M_DOT_G_PP_ADJUST(1:N_TRACKED_SPECIES)) > 0._EB .OR. ONE_D%M_DOT_PART_ACTUAL > 0._EB ) ONE_D%T_IGN = T
    IF (ONE_D%TMP_F>=SF%TMP_IGN) ONE_D%T_IGN = T
 ENDIF
 
