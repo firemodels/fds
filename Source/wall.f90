@@ -3794,7 +3794,8 @@ ONE_D%Q_CON_F = ONE_D%Q_CON_F / DT_BC
 ONE_D%TMP_F_OLD = ONE_D%TMP_F  ! Save this value for output of effective HTC
 ONE_D%HEAT_TRANS_COEF = HTCF
 
-! If any gas massflux or particle mass flux is non-zero or the surface temperature exceeds the ignition temperature, set the ignition time
+! If any gas massflux or particle mass flux is non-zero or the surface temperature exceeds the ignition temperature,
+! set the ignition time
 
 IF (ONE_D%T_IGN > T) THEN
    IF (SUM(ONE_D%M_DOT_G_PP_ADJUST(1:N_TRACKED_SPECIES)) > 0._EB .OR. ONE_D%M_DOT_PART_ACTUAL > 0._EB ) ONE_D%T_IGN = T
