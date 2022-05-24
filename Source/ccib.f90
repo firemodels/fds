@@ -6307,7 +6307,7 @@ IF (DEBUG_MATVEC_DATA) THEN
             CC2%LINK_LEV(JCC2),CC2%UNKZ(JCC2)
          ENDIF
          ! Linking info on cut-faces for ICC,JCC:
-         DO JCF=2,CC%CCELEM(CC%CCELEM(1,JCC)+1,JCC)
+         DO JCF=2,CC%CCELEM(1,JCC)+1
             IFACE = CC%CCELEM(JCF,JCC)
             FTYPE = CC%FACE_LIST(1,IFACE)
             IF (FTYPE==IBM_FTYPE_CFGAS) THEN
