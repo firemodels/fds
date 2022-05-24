@@ -3644,7 +3644,7 @@ IF(N_MPI_PROCESSES>1) CALL MPI_ALLREDUCE(MPI_IN_PLACE,DIRI_SET,NSETS,MPI_INTEGER
 
 ! Finally do test:
 IF (ANY(DIRI_SET(1:NSETS) == 0)) THEN
-   IF (MY_RANK==0) WRITE(LU_ERR,*) 'GLMAT Setup Error : Unsupported disjoint domains present on the model.'
+   IF (MY_RANK==0) WRITE(LU_ERR,*) 'GLMAT Setup Error : Unsupported disjoint domains present on the model. Consider using ULMAT.'
    DEALLOCATE(MESH_GRAPH,DSETS,MESH_LIST,COUNTED,DIRI_SET)
    SUPPORTED_MESH = .FALSE.
    STOP_STATUS = SETUP_STOP
