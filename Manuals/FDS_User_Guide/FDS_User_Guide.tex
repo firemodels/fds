@@ -812,7 +812,7 @@ Group Name  & Namelist Group Description   & Reference Section & Parameter Table
 
 The namelist group {\ct \&CATF} allows for the inclusion of input information from different files into a simulation. The input line:
 \begin{lstlisting}
-&CATF OTHER_FILES='file_1.txt','file_2.txt' / 
+&CATF OTHER_FILES='file_1.txt','file_2.txt' /
 \end{lstlisting}
 adds the contents of the two listed files into the current input file. Up to 20 files can be listed on one {\ct CATF} line, and multiple {\ct CATF} lines can be included in the input file. After reading the input file, FDS creates a new input file, {\ct CHID\_cat.fds}, and then runs the case.
 
@@ -3535,7 +3535,7 @@ You can prevent shrinking by setting {\ct ALLOW\_SHRINKING} to {\ct F} on the {\
 
 \subsection{Multiple Solid Phase Reactions}
 
-The solid phase reaction represented by Fig.~\ref{pyrolysis} is fairly simple---a single, homogeneous material is heated and gasified completely. Figure~\ref{pyrolysis_2} depicts a more complicated case. Here, a solid material that contains 10~\% (by mass) water and 90~\% dry solid. The water evaporates in the neighborhood of 100~$^\circ$C and the dry solid then pyrolyzes in the neighborhood of 300~$^\circ$C, leaving 20~\% of its mass behind in the form of a solid residue. The full set of parameters for this case are listed in {\ct pyrolysis\_2.fds}. 
+The solid phase reaction represented by Fig.~\ref{pyrolysis} is fairly simple---a single, homogeneous material is heated and gasified completely. Figure~\ref{pyrolysis_2} depicts a more complicated case. Here, a solid material that contains 10~\% (by mass) water and 90~\% dry solid. The water evaporates in the neighborhood of 100~$^\circ$C and the dry solid then pyrolyzes in the neighborhood of 300~$^\circ$C, leaving 20~\% of its mass behind in the form of a solid residue. The full set of parameters for this case are listed in {\ct pyrolysis\_2.fds}.
 
 \begin{figure}[ht]
 \noindent
@@ -8281,7 +8281,7 @@ This case also provides a check on the Smokeview rendering of the smoke-filled c
 \begin{center}
 \includegraphics[width=5.2in]{SCRIPT_FIGURES/beam_detector_nosmoke}
 \includegraphics[width=5.2in]{SCRIPT_FIGURES/beam_detector_smoke}
-\includegraphics[width=4.5in]{SCRIPT_FIGURES/beam_detector}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/beam_detector}
 \end{center}
 \caption[Results of the {\ct beam\_detector} test case]{Smokeview rendering of a compartment filled with no smoke (top), smoke (center), and a comparison of the Smokeview pixel values with the expected values.}
 \label{beam_detector_fig}
