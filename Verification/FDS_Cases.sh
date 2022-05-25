@@ -199,8 +199,7 @@ $QFDS -d Fires box_burn_away_2D.fds
 $QFDS -d Fires box_burn_away_2D_residue.fds
 $QFDS -d Fires box_burn_away1_pyro3d_vs_pyro1d.fds
 $QFDS -d Fires box_burn_away1_pyro3d_transport.fds
-$QFDS -d Fires couch.fds
-$QFDS -p 2 -d Fires couch2.fds
+$QFDS -p 4 -d Fires couch.fds
 $QFDS -d Fires fire_const_gamma.fds
 $QFDS -d Fires spray_burner.fds
 $QFDS -d Fires HoC_Ideal.fds
@@ -433,6 +432,7 @@ $QFDS -d Pyrolysis cone_demo_2.fds
 $QFDS -d Pyrolysis birch_tga_1step_2.fds
 $QFDS -d Pyrolysis birch_tga_1step_20.fds
 $QFDS -d Pyrolysis enthalpy.fds
+$QFDS -d Pyrolysis ice_cube.fds
 $QFDS -d Pyrolysis liquid_mixture.fds
 $QFDS -p 8 -d Pyrolysis methanol_evaporation.fds
 $QFDS -d Pyrolysis part_baking_soda_420K.fds
@@ -801,6 +801,8 @@ $QFDS -p 2 -d WUI ground_vegetation_load.fds
 $QFDS -p 2 -d WUI ground_vegetation_radi.fds
 $QFDS -d WUI hot_rods.fds
 $QFDS -d WUI level_set_fuel_model_1.fds
+$QFDS -d WUI Morvan_TGA.fds
+$QFDS -d WUI Morvan_TGA_2.fds
 $QFDS -d WUI Needle_TGA_A.fds
 $QFDS -d WUI Needle_TGA_B.fds
 $QFDS -d WUI Needle_TGA_C.fds

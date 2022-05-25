@@ -650,7 +650,16 @@ INSERT_TYPE_LOOP: DO INSERT_TYPE = 1,2
             ! specify generation only for regions of burning
             IF (.NOT. ONE_D%M_DOT_G_PP_ADJUST(REACTION(1)%FUEL_SMIX_INDEX)>0._EB) CYCLE INSERT_TYPE_LOOP
          ENDIF
-
+         ! If there is a flow ramp and the value is zero, return.
+         IF (SF%PARTICLE_MASS_FLUX > 0._EB) THEN
+            IF (ABS(ONE_D%T_IGN-T_BEGIN)<=TWO_EPSILON_EB .AND. SF%RAMP_INDEX(TIME_PART)>=1) THEN
+               TSI = T
+            ELSE
+               TSI = T - ONE_D%T_IGN
+            ENDIF
+            FLOW_RATE = EVALUATE_RAMP(TSI,SF%RAMP_INDEX(TIME_PART),TAU=SF%TAU(TIME_PART))*SF%PARTICLE_MASS_FLUX
+            IF (FLOW_RATE < TWO_EPSILON_EB) RETURN
+         ENDIF
          LPC => LAGRANGIAN_PARTICLE_CLASS(ILPC)
 
          ! Evalutate if we need to skip ILPC and return if no N_LPC
@@ -855,13 +864,7 @@ INSERT_TYPE_LOOP: DO INSERT_TYPE = 1,2
          SELECT CASE (INSERT_TYPE)
             CASE (1) ! PART_ID on SURF
                IF (MASS_SUM > 0._EB) THEN
-                  IF (SF%PARTICLE_MASS_FLUX > 0._EB) THEN
-                     IF (ABS(ONE_D%T_IGN-T_BEGIN)<=TWO_EPSILON_EB .AND. SF%RAMP_INDEX(TIME_PART)>=1) THEN
-                        TSI = T
-                     ELSE
-                        TSI = T - ONE_D%T_IGN
-                     ENDIF
-                     FLOW_RATE = EVALUATE_RAMP(TSI,SF%RAMP_INDEX(TIME_PART),TAU=SF%TAU(TIME_PART))*SF%PARTICLE_MASS_FLUX
+                  IF (SF%PARTICLE_MASS_FLUX > 0._EB) THEN                  
                      DO I=1,SF%NPPC
                         LP => LAGRANGIAN_PARTICLE(LP_INDEX_LOOKUP(I))
                         LP%PWT = LP%PWT * FLOW_RATE*ONE_D%AREA_ADJUST*ONE_D%AREA*SF%DT_INSERT/MASS_SUM
@@ -873,7 +876,6 @@ INSERT_TYPE_LOOP: DO INSERT_TYPE = 1,2
                      ENDDO
                   ENDIF
                ENDIF
-
 
             CASE (2) ! PART_ID on MATL
                IF (MASS_SUM > 0._EB) THEN
@@ -896,7 +898,7 @@ INSERT_TYPE_LOOP: DO INSERT_TYPE = 1,2
       ! Decrement mass, enthalpy, and aggregation time for current insertion interval
       ONE_D%PART_MASS = MAX(0._EB,1-SF%DT_INSERT/(ONE_D%T_MATL_PART+TINY_EB))*ONE_D%PART_MASS
       ONE_D%PART_ENTHALPY = MAX(0._EB,1-SF%DT_INSERT/(ONE_D%T_MATL_PART+TINY_EB))*ONE_D%PART_ENTHALPY
-      ONE_D%T_MATL_PART = MAX(0._EB,ONE_D%T_MATL_PART-SF%DT_INSERT)    
+      ONE_D%T_MATL_PART = MAX(0._EB,ONE_D%T_MATL_PART-SF%DT_INSERT)
    ENDIF
 
 ENDDO INSERT_TYPE_LOOP

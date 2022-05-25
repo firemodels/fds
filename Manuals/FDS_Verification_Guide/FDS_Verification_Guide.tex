@@ -4851,7 +4851,7 @@ This is an example of a comparison of a candidate solid phase model with TGA dat
 \subsection{TGA for a Charring Sample (\texorpdfstring{\textct{Needle\_TGA}}{Needle\_TGA})}
 \label{Needle_TGA}
 
-In this section, kinetic parameters for a longleaf pine needle are derived based on two TGA measurements\footnote{TGA data provided by the Forest Products Laboratory of the U.S. Forest Service} (Cases~A and B of Table~\ref{Needle_TGA_table}), one done in air and one done in nitrogen, and then checked against 6 further measurements done with a variety of moisture contents and test conditions, as shown in Table~\ref{Needle_TGA_table}.
+In this section, kinetic parameters for a longleaf pine needle are derived based on a set of TGA measurements\footnote{TGA data provided by the Forest Products Laboratory of the U.S. Forest Service}. Cases~A and B listed in Table~\ref{Needle_TGA_table} have been used to derive the kinetic parameters for all eight cases. The mass and mass loss rate curves for all eight cases are shown in Figs.~\ref{Needle_TGA_plot_A_B} through \ref{Needle_TGA_plot_G_H} on the following pages.
 
 \begin{table}[!ht]
 \centering
@@ -4871,7 +4871,17 @@ H    & 60                    & 1.33              & Air        \\ \hline
 \end{tabular}
 \end{table}
 
-It is assumed that the pine needle consists of moisture and three solid phase components making up 0.25, 0.50, and 0.25 of the total dry mass, and reaching peak decomposition rates at 250~$^\circ$C, 375~$^\circ$C, and 450~$^\circ$C, respectively. These estimates are obtained by inspection of the experimental data shown in the middle left plot of Fig.~\ref{Needle_TGA_plot_A_B}. It is further assumed that 0.25 of the dry mass is converted to char, and the kinetics of the oxidation reaction are estimated based on Case~B.
+It is assumed that the pine needle consists of moisture and three solid phase components making up 0.25, 0.50, and 0.25 of the total dry mass, and reaching peak decomposition rates at 250~$^\circ$C, 375~$^\circ$C, and 450~$^\circ$C, respectively. These estimates are obtained by inspection of the experimental data shown Fig.~\ref{Needle_TGA_plot_A_B_temp}. It is further assumed that 0.25 of the dry mass is converted to char, and the kinetics of the oxidation reaction are estimated based on Case~B.
+
+\begin{figure}[!h]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/Needle_TGA_A_MLR_temp} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/Needle_TGA_B_MLR_temp}
+\end{tabular*}
+\caption[Needle\_TGA calibration curves]{Mass loss rates for Cases A (left) and B (right). These cases are used to determine the kinetic parameters for all eight cases, A-H.}
+\label{Needle_TGA_plot_A_B_temp}
+\end{figure}
+
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -4882,7 +4892,7 @@ It is assumed that the pine needle consists of moisture and three solid phase co
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/Needle_TGA_A_MLR} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/Needle_TGA_B_MLR}
 \end{tabular*}
-\caption[Results of pine Needle\_TGA calibration exercise]{Results of TGA calibration exercise for a pine needle, Cases A (left) and B (right). (Top) Sample temperature vs time. (Middle) Sample mass fraction vs sample temperature. (Bottom) Sample mass loss rate vs sample temperature.}
+\caption[Results of pine Needle\_TGA calibration exercise, Cases A and B]{Results of TGA calibration exercise for a pine needle, Cases A (left) and B (right). (Top) Sample temperature vs time. (Middle) Sample mass fraction vs time. (Bottom) Sample mass loss rate vs time.}
 \label{Needle_TGA_plot_A_B}
 \end{figure}
 
@@ -4895,7 +4905,7 @@ It is assumed that the pine needle consists of moisture and three solid phase co
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/Needle_TGA_C_MLR} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/Needle_TGA_D_MLR}
 \end{tabular*}
-\caption[Results of pine Needle\_TGA calibration exercise]{Results of TGA calibration exercise for a pine needle, Cases C (left) and D (right). (Top) Sample temperature vs time. (Middle) Sample mass fraction vs sample temperature. (Bottom) Sample mass loss rate vs sample temperature.}
+\caption[Results of pine Needle\_TGA calibration exercise, Cases C and D]{Results of TGA calibration exercise for a pine needle, Cases C (left) and D (right). (Top) Sample temperature vs time. (Middle) Sample mass fraction vs time. (Bottom) Sample mass loss rate vs time.}
 \label{Needle_TGA_plot_C_D}
 \end{figure}
 
@@ -4908,7 +4918,7 @@ It is assumed that the pine needle consists of moisture and three solid phase co
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/Needle_TGA_E_MLR} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/Needle_TGA_F_MLR}
 \end{tabular*}
-\caption[Results of pine Needle\_TGA calibration exercise]{Results of TGA calibration exercise for a pine needle, Cases E (left) and F (right). (Top) Sample temperature vs time. (Middle) Sample mass fraction vs sample temperature. (Bottom) Sample mass loss rate vs sample temperature.}
+\caption[Results of pine Needle\_TGA calibration exercise, Cases E and F]{Results of TGA calibration exercise for a pine needle, Cases E (left) and F (right). (Top) Sample temperature vs time. (Middle) Sample mass fraction vs time. (Bottom) Sample mass loss rate vs time.}
 \label{Needle_TGA_plot_E_F}
 \end{figure}
 
@@ -4921,12 +4931,28 @@ It is assumed that the pine needle consists of moisture and three solid phase co
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/Needle_TGA_G_MLR} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/Needle_TGA_H_MLR}
 \end{tabular*}
-\caption[Results of pine Needle\_TGA calibration exercise]{Results of TGA calibration exercise for a pine needle, Cases G (left) and H (right). (Top) Sample temperature vs time. (Middle) Sample mass fraction vs sample temperature. (Bottom) Sample mass loss rate vs sample temperature.}
+\caption[Results of pine Needle\_TGA calibration exercise, Cases G and H]{Results of TGA calibration exercise for a pine needle, Cases G (left) and H (right). (Top) Sample temperature vs time. (Middle) Sample mass fraction vs time. (Bottom) Sample mass loss rate vs time.}
 \label{Needle_TGA_plot_G_H}
 \end{figure}
 
 
 \FloatBarrier
+
+\subsection{TGA of various Mediterranean vegetation (\texorpdfstring{\textct{Morvan\_TGA}}{Morvan\_TGA})}
+\label{Morvan_TGA}
+
+In this section we analyze the TGA data for various Mediterranean vegetation species presented in Morvan and Dupuy, 2004 \cite{Morvan:CF2004}.  The FDS feature {\ct TGA\_ANALYSIS=T} was used with the model set up with 10 \% moisture for the vegetation model.  The heating rate is 1.6 \si{\degreeCelsius}/min, as reported in the paper.  The reference temperature and pyrolysis range approach was used to tune the model to the data.  The parameters can be found in the input file {\ct Verification/WUI/Morvan\_TGA.fds}.  Note that an unusually high char fraction of 50 \% is needed to match the TGA data. The results are shown in Fig.~\ref{fig:Morvan_TGA}.
+
+\begin{figure}[h]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/Morvan_TGA_Total_Mass} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/Morvan_TGA_Total_MLR}
+\end{tabular*}
+\caption[Results of Morvan\_TGA analysis]{Results of performing the FDS TGA analysis on the data for various Mediterranean vegetation presented in Morvan and Dupuy, 2004 \cite{Morvan:CF2004}. (Left) Total mass vs time. (Right) Mass loss rate vs time---the Morvan and Dupuy data were Savitsky-Golay filtered and the derivative of the resulting curve was normalized to give the dashed line.}
+\label{fig:Morvan_TGA}
+\end{figure}
+
+\newpage
 
 
 \subsection{Interpreting MCC Data (\texorpdfstring{\textct{cable\_XX\_mcc}}{cable\_XX\_mcc})}
@@ -5096,6 +5122,19 @@ This section tests a model for extrapolating heat release rate data from a cone 
 	\caption[Cone data extrapolation model (the {\ct cone\_demo\_2} case)]{Check of the cone data extrapolation model.}
 	\label{fig:cone_demo_2}
 \end{figure}
+
+\section{Melting Ice Cube (\texorpdfstring{\textct{ice\_cube}}{ice\_cube})}
+\label{ice_cube}
+
+This section tests the ability for a {\ct MATL} reaction to produce particles. A 10~cm cube (1 kg) block of ice is defined with a 10~\si{kW/m^2} {\ct EXTERNAL\_FLUX}. The mass of water drops produced is tracked. The results are shown below in Fig~\ref{fig:ice_cube}.
+
+\begin{figure}[!ht]
+	\centering
+	\includegraphics[height=2.2in]{SCRIPT_FIGURES/ice_cube}
+	\caption[Check of the particle production by surface reaction feature (the {\ct ice\_cube} case)]{Check of the particle production by surface reaction feature.}
+	\label{fig:ice_cube}
+\end{figure}
+
 
 \chapter{Lagrangian Particles}
 

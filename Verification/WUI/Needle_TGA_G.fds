@@ -33,15 +33,16 @@
 &MATL ID                    = 'MOISTURE'
       DENSITY               = 1000.
       CONDUCTIVITY          = 0.20
-      SPECIFIC_HEAT         = 1.0
-      A                     = 842.
-      E                     = 30600.
+      SPECIFIC_HEAT         = 4.184
+      REFERENCE_TEMPERATURE = 100.
+      HEATING_RATE          = 10.
+      PYROLYSIS_RANGE       = 100.
       NU_SPEC               = 1.00
       SPEC_ID               = 'WATER VAPOR'
-      HEAT_OF_REACTION      = 1000.   /
+      HEAT_OF_REACTION      = 2259.   /
 
 &MATL ID                    = 'comp 1'
-      DENSITY 	            = 1000.
+      DENSITY 	            = 500. 
       CONDUCTIVITY          = 0.20
       SPECIFIC_HEAT         = 1.0 
       A                     = 91.22
@@ -50,10 +51,10 @@
       SPEC_ID               = 'OFF-GAS'
       NU_MATL               = 0.25
       MATL_ID               = 'char'
-      HEAT_OF_REACTION      = 1000.   /
+      HEAT_OF_REACTION      = 416.    /
 
 &MATL ID                    = 'comp 2'
-      DENSITY               = 1000.
+      DENSITY               = 500. 
       CONDUCTIVITY          = 0.20
       SPECIFIC_HEAT         = 1.0
       A                     = 3.66E6
@@ -62,10 +63,10 @@
       SPEC_ID               = 'OFF-GAS'
       NU_MATL               = 0.25
       MATL_ID               = 'char'
-      HEAT_OF_REACTION      = 1000. /
+      HEAT_OF_REACTION      = 416.  /
 
 &MATL ID                    = 'comp 3'
-      DENSITY               = 1000.
+      DENSITY               = 500. 
       CONDUCTIVITY          = 0.20
       SPECIFIC_HEAT         = 1.0
       A                     = 14.2
@@ -74,17 +75,17 @@
       SPEC_ID               = 'OFF-GAS'
       NU_MATL               = 0.25
       MATL_ID               = 'char'
-      HEAT_OF_REACTION      = 1000.  /
+      HEAT_OF_REACTION      = 416.   /
 
 &MATL ID                 = 'char'
       DENSITY            = 300.
       CONDUCTIVITY       = 0.052
       SPECIFIC_HEAT_RAMP = 'cp_char'
-      N_S                = 0.
       NU_O2_CHAR         = 1.65
-      BETA_CHAR          = 0.2
-      A                  = 5.65E9
-      E                  = 1.54E5
+      N_O2=1.
+      REFERENCE_TEMPERATURE=460
+      HEATING_RATE=10
+      PYROLYSIS_RANGE=40
       SPEC_ID            = 'CARBON DIOXIDE','OXYGEN'
       NU_SPEC            = 2.55,-1.65
       MATL_ID            = 'ash'

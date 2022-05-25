@@ -19,6 +19,9 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 
+permissions:
+  contents: read
+
 jobs:
   linux-intel-intelmpi:
     # debug build on ubuntu using ifort and intelmpi
@@ -28,7 +31,7 @@ jobs:
     runs-on: [ubuntu-latest]
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: setup apt repository
       run: |
         # oneapi-ci/scripts/setup_apt_repo_linux.sh
@@ -44,7 +47,7 @@ jobs:
                           intel-oneapi-mkl-devel | tee dependencies.txt
     - name: cache install
       id: cache-install
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: /opt/intel/oneapi
         key: install-${{ hashFiles('**/dependencies.txt') }}
@@ -71,7 +74,7 @@ jobs:
     runs-on: [ubuntu-latest]
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: install
       run: |
         sudo apt-get update
