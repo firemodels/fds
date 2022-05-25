@@ -26,7 +26,7 @@ goto eof
 :: -------------------------------------------------------------
 
   set program=%1
-  %program% --help 1> output.txt 2>&1
+  %program% 1> output.txt 2>&1
   type output.txt | find /i /c "not recognized" > output_count.txt
   set /p nothave=<output_count.txt
   if %nothave% == 1 (
