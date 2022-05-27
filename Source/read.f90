@@ -6154,13 +6154,12 @@ READ_MATL_LOOP: DO N=1,N_MATL
    CALL ChkMemErr('READ','MATERIAL',IZERO)
    ML%DIFFUSIVITY_GAS=0._EB
 
-   ! Additional logic
+   ! Decide which pyrolysis model to use
 
    IF (BOILING_TEMPERATURE<50000._EB) THEN
       ML%PYROLYSIS_MODEL = PYROLYSIS_LIQUID
       ML%N_REACTIONS = 1
-   ELSEIF (ML%NU_O2_CHAR(1)>0._EB) THEN
-      CHAR_OXIDATION     = .TRUE.
+   ELSEIF (ML%BETA_CHAR(1)>0._EB) THEN  ! Special char oxidation model for vegetation
       WALL_INCREMENT     = 1  ! Do pyrolysis every time step
       ML%PYROLYSIS_MODEL = PYROLYSIS_VEGETATION
       IF (ML%MAX_REACTION_RATE(1)>1.E6_EB) ML%MAX_REACTION_RATE(1) = 500._EB  ! Limits run-away char reaction
@@ -6168,7 +6167,16 @@ READ_MATL_LOOP: DO N=1,N_MATL
       ML%PYROLYSIS_MODEL = PYROLYSIS_SOLID
    ENDIF
 
+   ! If oxygen is consumed in the charring process, set a global variable for 
+   ! use in calculating the heat release rate based on oxygen consumption
+
+   IF (ML%NU_O2_CHAR(1)>0._EB) CHAR_OXIDATION = .TRUE.
+
+   ! No pyrolysis
+
    IF (N_REACTIONS==0) ML%PYROLYSIS_MODEL = PYROLYSIS_NONE
+
+   ! Optional temperature ramp for heat of reaction 
 
    IF (ANY(ML%RAMP_H_R/='null')) THEN
       DO NNN=1,MAX_REACTIONS
@@ -6176,8 +6184,9 @@ READ_MATL_LOOP: DO N=1,N_MATL
       ENDDO
    ENDIF
 
-   IF (ML%RAMP_K_S/='null') CALL GET_RAMP_INDEX(ML%RAMP_K_S,'TEMPERATURE',ML%I_RAMP_K_S)
+   ! Conductivity and specific heat temperature ramps
 
+   IF (ML%RAMP_K_S/='null') CALL GET_RAMP_INDEX(ML%RAMP_K_S,'TEMPERATURE',ML%I_RAMP_K_S)
    IF (ML%RAMP_C_S/='null') CALL GET_RAMP_INDEX(ML%RAMP_C_S,'TEMPERATURE',ML%I_RAMP_C_S)
 
    ! Determine A and E if REFERENCE_TEMPERATURE is specified
@@ -6244,7 +6253,7 @@ ABSORPTION_COEFFICIENT = 5.0E4_EB    ! 1/m, corresponds to 99.3% drop within 1E-
 ALLOW_SHRINKING        = .TRUE.
 ALLOW_SWELLING         = .TRUE.
 BOILING_TEMPERATURE    = 50000._EB    ! C
-BETA_CHAR              = 0.2_EB
+BETA_CHAR              = 0._EB
 COLOR                  = 'null'
 RGB                     = -1
 CONDUCTIVITY           = 0.0_EB      ! W/m/K
@@ -9425,7 +9434,7 @@ MESH_LOOP: DO NM=1,NMESHES
                ! Only allow the use of BULK_DENSITY if the obstruction has a non-zero volume
 
                OB%BULK_DENSITY = BULK_DENSITY
-               IF (VOL_ADJUSTED<TWO_EPSILON_EB .AND. OB%BULK_DENSITY>0._EB) OB%BULK_DENSITY = -1._EB
+               IF (BULK_DENSITY > 0._EB) OB%MASS = OB%BULK_DENSITY*(OB%X2-OB%X1)*(OB%Y2-OB%Y1)*(OB%Z2-OB%Z1)
 
                ! Error traps and warnings for HT3D
 
@@ -9626,6 +9635,7 @@ MESH_LOOP_2: DO NM=1,NMESHES
                      OBT%Y2 = M%Y(OBT%J2)
                      OBT%Z1 = M%Z(OBT%K1)
                      OBT%Z2 = M%Z(OBT%K2)
+                     IF (OB%BULK_DENSITY > 0._EB) OBT%MASS = OB%MASS/REAL(N_NEW_OBST,EB)
                   ENDDO
                 ENDDO
             ENDDO
@@ -11987,7 +11997,7 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
 
       IF (SPATIAL_STATISTIC=='INTERPOLATION') THEN
          CALL SEARCH_OTHER_MESHES(XYZ(1),XYZ(2),XYZ(3),NM,IIG,JJG,KKG,XI,YJ,ZK)
-         IF (IIG>0 .AND. JJG>0 .AND. KKG>0) THEN
+         IF (NM>0 .AND. IIG>0 .AND. JJG>0 .AND. KKG>0) THEN
             M => MESHES(NM)
             XB(1) = M%X(NINT(XI)) - 0.5_EB*M%DX(IIG)
             XB(2) = M%X(NINT(XI)) + 0.5_EB*M%DX(IIG)
