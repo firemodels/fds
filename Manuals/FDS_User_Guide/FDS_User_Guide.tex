@@ -4757,9 +4757,9 @@ where $f(t)$ is the result of evaluating the {\ct RAMP\_T} at time $t$, $T_0$ is
 \end{lstlisting}
 indicates that argon and nitrogen are to be injected at rates of 0.1~\si{kg/(m$^2$.s)} and 0.3~\si{kg/(m$^2$.s)} over time periods of approximately 5~s and 10~s, respectively.
 
-Table~\ref{tau_table} lists the various quantities that can be controlled by {\ct RAMP}s. 
+When a time-base {\ct RAMP} is evaluated, the time used for the {\ct RAMP} is the time since the item (e.g., {\ct VENT}, {\ct OBST}, {\ct DEVC}) using the {\ct RAMP} became active. This means {\ct RAMP}s use the actual time if the activation time of the item using the {\ct RAMP} is the same as {\ct T\_BEGIN} (see ~\ref{info:TIME_Basics}). Otherwise, they are evaluated using the time from when the {\ct RAMP} activates. Therefore, if you are setting {\ct T\_BEGIN} in order to test a time-based {\ct CTRL} or {\ct DEVC} that is ultimately linked to a {\ct RAMP}, then you should set {\ct T\_BEGIN} to be slightly less than the time the {\ct RAMP} will activate. For example, if you are testing a {\ct VENT} that is to open at 10~s whose {\ct SURF\_ID} uses a {\ct RAMP}, then {\ct T\_BEGIN} should be set slightly less than 10~s.
 
-When a time-base {\ct RAMP} is evaluated, the time used for the {\ct RAMP} is the time since the item (i.e., {\ct VENT}, {\ct OBST}, {\ct DEVC}) using the {\ct RAMP} became active. This means {\ct RAMP}s use the actual time if the activation time of the item using the {\ct RAMP} is the same as {\ct T\_BEGIN} (see ~\ref{info:TIME_Basics}). Otherwise, they are evaluated using the time from when the {\ct RAMP} activates. Therefore, if you are setting {\ct T\_BEGIN} in order to test a time-based {\ct CTRL} or {\ct DEVC} that is ultimately linked to a {\ct RAMP}, then you should set {\ct T\_BEGIN} to be slightly less than the time the {\ct RAMP} will activate. For example, if you are testing a {\ct VENT} that is to open at 10~s whose {\ct SURF\_ID} uses a {\ct RAMP}, then {\ct T\_BEGIN} should be set slightly less than 10~s.
+Table~\ref{tau_table} lists the various quantities that can be controlled by {\ct RAMP}s. 
 
 \begin{table}[ht]
 \caption[Parameters used to control time-dependence]{Parameters for controlling the time-dependence of given quantities.}
