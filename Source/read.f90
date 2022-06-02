@@ -11318,6 +11318,8 @@ INIT_LOOP: DO N=1,N_INIT_READ+N_INIT_RESERVED
 
             ! Warnings for over-specified vegetation inputs
             IF (IN%BULK_DENSITY_FILE/='null') THEN
+               ! BULK_DENSITY_FILES provide MASS_PER_VOLUME on a dry basis
+               IN%DRY = .TRUE.
                N_PARTICLES_PER_CELL = MAX(N_PARTICLES_PER_CELL,1)
                IF (IN%MASS_PER_VOLUME>0._EB) THEN 
                   WRITE(MESSAGE,'(A,I0,A)') 'WARNING: INIT ',N,' MASS_PER_VOLUME ignored in favor of BULK_DENSITY_FILE'
