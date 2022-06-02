@@ -7645,7 +7645,7 @@ In some cases, the user may have access to detailed 3-dimensional spatial inform
 \begin{lstlisting}
 &INIT ID='insert', PART_ID='foliage part', BULK_DENSITY_FILE='canopy_foliage.bdf'/
 \end{lstlisting}
-For a full example, see the {\ct bulk\_density\_file.fds} test cases in the {\ct WUI} directory of the verification suite. Bulk density data are assumed to be provided on a dry-mass basis, with moisture mass added following the specification of the associated {\ct SURF}.
+For a full example, see the {\ct bulk\_density\_file.fds} test cases in the {\ct WUI} directory of the verification suite. Bulk density data are assumed to be provided on a dry-mass basis. {\ct DRY=T} is set automatically and moisture mass is added following the specification of the associated {\ct SURF} (see Section~\ref{pine_needles} for detail).
 
 
 The {\ct BULK\_DENSITY\_FILE} must be a FORTRAN unformatted (binary) file and follows the following convention:
