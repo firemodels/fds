@@ -1,7 +1,7 @@
 program generate_files
 
 real, dimension(360) :: sigma,beta,delta,U,M,R
-character(10) :: test_name(360),endtime,windspeed,vegheight,moistfrac,svratio,packingratio,vegdensity,heatofreaction,&
+character(10) :: test_name(360),endtime,windspeed,vegheight,moistfrac,svratio,masspervolume,vegdensity,heatofreaction,&
                  ignitionend,ignitionp1
 character(80) :: command_string
 real :: density,heat_of_reaction,ignition_end,ignition_p1
@@ -43,10 +43,6 @@ do i=1,354
    command_string = "perl -pi -e 's/svratio/"//trim(svratio)//"/g' "//trim(test_name(i))//".fds"
    call execute_command_line(command_string)
 
-   write(packingratio,'(f5.3)') beta(i)
-   command_string = "perl -pi -e 's/packingratio/"//trim(packingratio)//"/g' "//trim(test_name(i))//".fds"
-   call execute_command_line(command_string)
-
    if (test_name(i)(1:2)=='MF') then
       density = 442.
       heat_of_reaction = 659.
@@ -68,6 +64,10 @@ do i=1,354
       ignition_end = 10.
       ignition_p1 = ignition_end + 1
    endif
+
+   write(masspervolume,'(f5.2)') beta(i)*density
+   command_string = "perl -pi -e 's/masspervolume/"//trim(masspervolume)//"/g' "//trim(test_name(i))//".fds"
+   call execute_command_line(command_string)
 
    write(vegdensity,'(f4.0)') density
    command_string = "perl -pi -e 's/vegdensity/"//trim(vegdensity)//"/g' "//trim(test_name(i))//".fds"

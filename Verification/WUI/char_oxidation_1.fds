@@ -98,7 +98,8 @@ CP_ASH = 1.244(TMP_VEG+273/[TMPA+273])**0.315 kJ/kg/C Lautenberger & Fernandez-P
       XB                   = -0.3, 0.1,-0.2, 0.2,0.4,0.6
       N_PARTICLES_PER_CELL = 1
       CELL_CENTERED        = .TRUE.
-      PACKING_RATIO        = 0.00323 /
+      MASS_PER_VOLUME      = 1.66
+      DRY                  = T /
 
 &SURF ID='radiant panel', TMP_FRONT=1500, COLOR='RED' /
 

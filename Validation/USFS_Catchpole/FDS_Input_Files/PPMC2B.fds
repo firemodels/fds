@@ -76,7 +76,8 @@
       XB                   = 0.0,8.0,-0.5,0.5,0,0.076
       N_PARTICLES_PER_CELL = 1
       CELL_CENTERED        = .TRUE.
-      PACKING_RATIO        = 0.032 /
+      MASS_PER_VOLUME      = 16.32
+      DRY                  = T /
 
 &SURF ID                   = 'NO BURN FUEL'
       MATL_ID              = 'NO BURN FUEL'
@@ -96,7 +97,8 @@
       XB                   = -0.4,0.0,-1.5,1.5,0,0.076
       N_PARTICLES_PER_CELL = 1
       CELL_CENTERED        = .TRUE.
-      PACKING_RATIO        = 0.032 /
+      MASS_PER_VOLUME      = 16.32
+      DRY                  = T /
 
 &MATL ID                 = 'NO BURN FUEL'
       DENSITY            = 510.
