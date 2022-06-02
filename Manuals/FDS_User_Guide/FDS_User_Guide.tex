@@ -7551,7 +7551,7 @@ First, the {\ct PART} line defines a class of solid particles that represent pin
 \be
    \bof_{\rm b} = \frac{\rho}{2} \, C_{\rm d} \, C_{\rm s} \, \beta \, \sigma \, \bu \, ||\bu||
 \ee
-where $\rho$ is the air density, $C_{\rm d}$ is the drag coefficient, $C_{\rm s}$ is the {\ct SHAPE\_FACTOR} (0.25 by default), $\beta$ is the packing ratio (see below), $\sigma$ is the surface area to volume ratio (see below), and $\bu$ is the air velocity.
+where $\rho$ is the air density, $C_{\rm d}$ is the drag coefficient, $C_{\rm s}$ is the {\ct SHAPE\_FACTOR} (0.25 by default), $\beta$ is the packing ratio (mass per unit volume divided by the material density), $\sigma$ is the surface area to volume ratio (see below), and $\bu$ is the air velocity.
 
 The {\ct PART} line also tells Smokeview to visualize each needle as a tube that is 0.1~m long and 0.5~mm in diameter:
 \begin{lstlisting}
@@ -7589,18 +7589,22 @@ The length of each needle is specified directly, but its diameter is specified v
       CONDUCTIVITY = 1.0
       SPECIFIC_HEAT = 1.6 /
 \end{lstlisting}
-Note that if you specify a {\ct MOISTURE\_FRACTION} on the {\ct SURF} line, FDS will automatically add a {\ct MATL} line for {\ct 'MOISTURE'} as it is written in Fig.~\ref{vege_inputs}.
+Note that if you specify a {\ct MOISTURE\_FRACTION} on the {\ct SURF} line, FDS will automatically add a {\ct MATL} line for {\ct 'MOISTURE'} as it is written in Fig.~\ref{vege_inputs}. FDS will also alter the {\ct DENSITY} of the dry vegetation, in this case {\ct 'dry pine'}, so that the size and wood content of the particle do not change when moisture is added. The modified density of the ``dry'' vegetation, $\tilde{\rho}_{\rm d}$, is given by:
+\be
+   \tilde{\rho}_{\rm d} = \frac{\rho_{\rm d}} {1-\frac{\rho_{\rm d}}{\rho_{\rm m}} M }
+\ee
+where $\rho_{\rm d}$ is the user-specified density of the dry vegetation and $\rho_{\rm m}$ is the density of the moisture, typically assumed to be 1000~kg/m$^3$. The rationale behind this adjustment is that dry vegetation contains small pores that trap moisture. Thus, when moisture is added, the size and vegetation content of the particle do not change.
 
 Each {\ct MATL} line must include the {\ct DENSITY}, {\ct CONDUCTIVITY} and {\ct SPECIFIC\_HEAT} of that component. If the material component undergoes a reaction, there needs to be either a {\ct REACTION\_TEMPERATURE} or more detailed kinetic parameters like the ones listed in Fig.~\ref{vege_inputs}. Material components that react need stoichiometric coefficients {\ct NU\_SPEC} and {\ct NU\_MATL} to designate how much of the material mass is converted to a gas {\ct SPEC}ies and how much to a solid {\ct MAT}eria{\ct L}. In this case, {\ct 'CELLULOSE'} is the gas-phase fuel specified on the {\ct REAC} line. The gas species {\ct 'WATER VAPOR'} is defined by a {\ct SPEC} line. Even though water vapor is included in the combustion products, you still need to explicitly specify {\ct 'WATER VAPOR'} as the gasified form of the moisture in the pine needles.
 
 Finally, the pine needles are introduced into the simulation via the {\ct INIT} line:
 \begin{lstlisting}
 &INIT PART_ID='pine needles', XB=0.,1.,0.,1.,0.,1., N_PARTICLES=1000,
-      PACKING_RATIO=0.0016 /
+      MASS_PER_VOLUME=0.8, DRY=T /
 \end{lstlisting}
-This line inserts 1000 Lagrangian particles representing pine needles randomly within a unit cube. The {\ct PACKING\_RATIO} is the volume of solid needles divided by the volume they occupy, typically denoted $\beta$. It is calculated by dividing the dry mass of vegetation per unit volume, the so-called ``bulk density,'' by the density of the dry vegetation, $\rho_{\rm d}$, specified on the {\ct MATL} line. If you have specified a {\ct MOISTURE\_FRACTION} on the {\ct SURF} line that describes the vegetation, then the actual mass per volume of wet vegetation is
+This line inserts 1000 Lagrangian particles representing pine needles randomly within a unit cube. The {\ct MASS\_PER\_VOLUME} is the mass (kg) of solid needles divided by the volume (m$^3$) they occupy, sometimes called the ``bulk density.'' The parameter {\ct DRY=T} means that if you have specified a {\ct MOISTURE\_FRACTION} on the {\ct SURF} line that describes the vegetation, then the actual mass per volume of wet vegetation is
 \be
-  m_{\rm w}''' = \rho_{\rm d}\, \beta \, (1+M)
+  m_{\rm w}''' = m_{\rm d}''' \, (1+M)
 \ee
 In the example, 1~kg of wet pine needles occupy 1~m$^3$. The number of particles used to represent the pine needles is somewhat arbitrary. FDS will automatically weight the specified number so that the total mass per volume is 1~kg. The vegetation is heated until all of the water and fuel evaporate. The fuel is not allowed to burn by setting the ambient oxygen concentration to 1~\%. Figure~\ref{pine_needles_fig} shows the evolution of the fuel, water and char mass. Agreement with the expected values means that mass is conserved.
 
@@ -7623,9 +7627,9 @@ A coniferous tree (e.g. pine, spruce, fir) can be represented in FDS as a collec
       COLOR='FOREST GREEN' /
 &INIT ID='needles', PART_ID='needles', XYZ=..., CROWN_BASE_WIDTH=3.2,
       CROWN_BASE_HEIGHT=0.2, TREE_HEIGHT=2, SHAPE='CONE', N_PARTICLES_PER_CELL=1,
-      PACKING_RATIO=0.02  /
+      MASS_PER_VOLUME=10., DRY=T /
 \end{lstlisting}
-These lines create a collection of particles in the shape of a cone. The dimensions of the cone are specified via the parameters {\ct CROWN\_BASE\_WIDTH}, the diameter of the base of the cone (m), {\ct CROWN\_BASE\_HEIGHT}, the distance (m) from the ground to the base of the cone, {\ct TREE\_HEIGHT}, the height (m) of the tree from ground to tip, and the position triplet, {\ct XYZ}, of the trunk at the ground. Note that in this example, exactly one particle is specified per grid cell, positioned randomly within the cell. The number of actual pine needles this single particle represents depends on the specified {\ct PACKING\_RATIO}, the ratio of the (dry) mass per unit volume to the density of the needle itself. That information would be provided by the {\ct SURF} line {\ct 'needle surface'} and associated {\ct MATL} lines that are described in the previous section.
+These lines create a collection of particles in the shape of a cone. The dimensions of the cone are specified via the parameters {\ct CROWN\_BASE\_WIDTH}, the diameter of the base of the cone (m), {\ct CROWN\_BASE\_HEIGHT}, the distance (m) from the ground to the base of the cone, {\ct TREE\_HEIGHT}, the height (m) of the tree from ground to tip, and the position triplet, {\ct XYZ}, of the trunk at the ground. Note that in this example, exactly one particle is specified per grid cell, positioned randomly within the cell. The number of actual pine needles this single particle represents depends on the specified (dry) {\ct MASS\_PER\_VOLUME}.
 
 A handy way to introduce many trees into a simulation is by way of a {\ct SURF} line as follows:
 \begin{lstlisting}
@@ -7693,10 +7697,10 @@ To invoke this {\em Boundary Fuel Model}, create a {\ct SURF} line similar to th
       MATL_ID(2,1) = 'Soil'
       MOISTURE_FRACTION(1) = 0.218
       SURFACE_VOLUME_RATIO(1) = 3092.
-      PACKING_RATIO(1) = 0.01
+      MASS_PER_VOLUME(1) = 5.
       THICKNESS(1:2) = 0.076,0.1 /
 \end{lstlisting}
-The presence of the parameters {\ct PACKING\_RATIO} and {\ct SURFACE\_VOLUME\_RATIO} automatically trigger the Boundary Fuel Model. Note that the argument for each refers to the first layer; the second layer being {\ct Soil}. If you specify a {\ct PACKING\_RATIO}, FDS will automatically add {\ct AIR} as an additional material, and you do not need to add it yourself unless you want to modify the default {\ct MATL} line:
+The presence of the parameters {\ct MASS\_PER\_VOLUME} and {\ct SURFACE\_VOLUME\_RATIO} automatically trigger the Boundary Fuel Model. Note that the argument for each refers to the first layer; the second layer being {\ct Soil}. If you specify a {\ct MASS\_PER\_VOLUME}, FDS will automatically add {\ct AIR} as an additional material, and you do not need to add it yourself unless you want to modify the default {\ct MATL} line:
 \begin{lstlisting}
 &MATL ID = 'AIR'
       DENSITY = 1.2
@@ -7709,7 +7713,7 @@ The drag exerted on the wind flowing through the vegetation is imposed as a forc
 \be
     \bof_{\rm b} = \frac{\rho}{2} \, C_{\rm s} \, \sigma \, \beta \, C_{\rm d} \, \frac{h_{\rm b}}{\dz} \, \bu ||\bu||
 \ee
-where $\rho$ is the density of the gas, $C_{\rm s}$ is the {\ct SHAPE\_FACTOR} of the subgrid-scale vegetation (0.25 by default), $\sigma$ is the surface area to volume ratio ({\ct SURFACE\_VOLUME\_RATIO}), $\beta$ is the {\ct PACKING\_RATIO}, $C_{\rm d}$ is the {\ct DRAG\_COEFFICIENT} (2.8 by default), $h_{\rm b}$ is the depth of the vegetation ({\ct THICKNESS(1)}), $\dz$ is the height of the grid cell, and $\bu$ is the gas velocity in the first grid cell.
+where $\rho$ is the density of the gas, $C_{\rm s}$ is the {\ct SHAPE\_FACTOR} of the subgrid-scale vegetation (0.25 by default), $\sigma$ is the surface area to volume ratio ({\ct SURFACE\_VOLUME\_RATIO}), $\beta$ is the packing ratio (mass per volume divided by the solid density), $C_{\rm d}$ is the {\ct DRAG\_COEFFICIENT} (2.8 by default), $h_{\rm b}$ is the depth of the vegetation ({\ct THICKNESS(1)}), $\dz$ is the height of the grid cell, and $\bu$ is the gas velocity in the first grid cell.
 
 Thermal radiation is absorbed in depth according to a 1-D radiative transport solver. The absorption coefficient is given by:
 \be
@@ -7743,11 +7747,11 @@ For the purpose of comparing the two methods of representing ground vegetation, 
 \subsection{Combustible Load}
 \label{ground_vegetation_load}
 
-In the first case, {\ct WUI/ground\_vegetation\_load.fds}, two 3~m long channels contain $A=1$~m$^2$ of generic ground vegetation with a packing ratio, $\beta=0.01$, dry density, $\rho_{\rm dry}=400$~kg/m$^3$, height, $h_{\rm b}=0.075$~m, char yield, $y_{\rm char}=0.25$, moisture fraction, $M=0.1$. The ceiling of the channel is set to 700~$^\circ$C and the lateral walls are periodic, mimicking an infinitely wide fire front. No wind is imposed in this example. The total amount of combustibles is:
+In the first case, {\ct WUI/ground\_vegetation\_load.fds}, two 3~m long channels contain $A=1$~m$^2$ of generic ground vegetation with a dry mass per unit volume, $m_{\rm d}'''=4$~kg/m$^3$, dry density, $\rho_{\rm d}=400$~kg/m$^3$, height, $h_{\rm b}=0.075$~m, char yield, $y_{\rm char}=0.25$, moisture fraction, $M=0.1$. The ceiling of the channel is set to 700~$^\circ$C and the lateral walls are periodic, mimicking an infinitely wide fire front. No wind is imposed in this example. The total amount of combustibles is:
 \be
-   \beta \, \rho_{\rm dry} \, h_{\rm b} \, (1-y_{\rm char}) \, A = 0.225 \; \hbox{kg}
+   m_{\rm d}''' \, h_{\rm b} \, (1-y_{\rm char}) \, A = 0.225 \; \hbox{kg}
 \ee
-Notice that the moisture fraction is not used to determine the combustible load---the packing ratio is based on the dry fuel load.
+Notice that the moisture fraction is not used to determine the combustible load---the mass per volume represents the dry fuel load.
 
 Figure~\ref{ground_vegetation_load_fig} displays the heat release rate (left) and cumulative mass consumption (right) of the two calculations.
 
@@ -11422,6 +11426,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct DENSITY}                     & Real              & Section~\ref{info:init_density}               & kg/m$^3$       & Ambient       \\ \hline
 {\ct DEVC\_ID}                    & Character         & Section~\ref{info:initial_droplets}           &                &               \\ \hline
 {\ct DIAMETER}                    & Real              & Section~\ref{info:initial_droplets}           & \si{\micro m}  &               \\ \hline
+{\ct DRY}                         & Logical           & Section~\ref{pine_needles}                    &                & {\ct F}       \\ \hline
 {\ct DT\_INSERT}                  & Real              & Section~\ref{info:initial_droplets}           & s              &               \\ \hline
 {\ct DX}                          & Real              & Section~\ref{info:initial_droplets}           & m              & 0.            \\ \hline
 {\ct DY}                          & Real              & Section~\ref{info:initial_droplets}           & m              & 0.            \\ \hline
@@ -11435,7 +11440,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MULT\_ID }                   & Character         & Section~\ref{info:MULT}                       &                &               \\ \hline
 {\ct N\_PARTICLES}                & Integer           & Section~\ref{info:initial_droplets}           &                & 0             \\ \hline
 {\ct N\_PARTICLES\_PER\_CELL}     & Integer           & Section~\ref{info:initial_droplets}           &                & 0             \\ \hline
-{\ct PACKING\_RATIO}              & Real              & Section~\ref{pine_needles}                    &                &               \\ \hline
 {\ct PART\_ID}                    & Character         & Section~\ref{info:initial_droplets}           &                &               \\ \hline
 {\ct PARTICLE\_WEIGHT\_FACTOR}    & Real              & Section~\ref{info:initial_droplets}           &                & 1.            \\ \hline
 {\ct PATH\_RAMP(3)}               & Character         & Section~\ref{info:path_ramp}                  &                &               \\ \hline
@@ -12370,6 +12374,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MASS\_FLUX\_TOTAL}                                   & Real            & Section~\ref{info:MASS_FLUX_TOTAL}        & \si{kg/(m^2.s)}     &                         \\ \hline
 {\ct MASS\_FLUX\_VAR}                                     & Real            & Section~\ref{info:MASS_FLUX_VAR}          &                     &                         \\ \hline
 {\ct MASS\_FRACTION(:)}                                   & Real Array      & Section~\ref{info:MASS_FLUX}              &                     &                         \\ \hline
+{\ct MASS\_PER\_VOLUME(:) }                               & Real Array      & Section~\ref{pine_needles}                & kg/m$^3$            &                         \\ \hline
 {\ct MASS\_TRANSFER\_COEFFICIENT}                         & Real            & Section~\ref{info:liquid_fuels}           & m/s                 &                         \\ \hline
 {\ct MATL\_ID(:,:)}                                       & Char.~Array     & Section~\ref{info:solid_pyrolysis}        &                     &                         \\ \hline
 {\ct MATL\_MASS\_FRACTION(:,:)}                           & Real Array      & Section~\ref{info:solid_pyrolysis}        &                     &                         \\ \hline
@@ -12383,7 +12388,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct NET\_HEAT\_FLUX}                                     & Real            & Section~\ref{info:convection}             & kW/m$^2$            &                         \\ \hline
 {\ct NO\_SLIP}                                            & Logical         & Section~\ref{info:WALL_MODEL}             &                     & {\ct F}           \\ \hline
 {\ct NPPC}                                                & Integer         & Section~\ref{info:particle_flux}          &                     & 1                       \\ \hline
-{\ct PACKING\_RATIO(:) }                                  & Real Array      & Section~\ref{pine_needles}                &                     &                         \\ \hline
 {\ct PARTICLE\_EXTRACTION\_VELOCITY}                      & Real            & Section~\ref{info:particle_removal}       & m/s                 &                         \\ \hline
 {\ct PARTICLE\_MASS\_FLUX}                                & Real            & Section~\ref{info:particle_flux}          & \si{kg/(m^2.s)}     &                         \\ \hline
 {\ct PARTICLE\_SURFACE\_DENSITY}                          & Real            & Section~\ref{info:particle_flux}          & kg/m$^2$            &                         \\ \hline
