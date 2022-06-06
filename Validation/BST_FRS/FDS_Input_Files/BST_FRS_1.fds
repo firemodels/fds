@@ -1,4 +1,4 @@
-&HEAD CHID='BST_FRS_1', TITLE='Cardington test BST-FRS-1 for predictive wood crib validation' /  
+&HEAD CHID='BST_FRS_1', TITLE='Cardington test BST_FRS_1 for predictive wood crib validation' /  
 
 &TIME T_END=6000, T_BEGIN=0 /
 
@@ -16,12 +16,12 @@
 &MESH ID='MESH 11', XB=23, 25,   0,5.6, 0, 5.6, IJK=10,28,28 MPI_PROCESS=11 /
 
 &DUMP SMOKE3D=.TRUE,
-	DT_DEVC=1.0
-	DT_HRR=1.0,
-	DT_SLCF=4.0,
-	DT_BNDF=4.0,
+	DT_DEVC=10.0
+	DT_HRR=60.0,
+	DT_SLCF=10.0,
+	DT_BNDF=10.0,
 	DT_ISOF=1000000,
-	DT_PL3D=1000000
+	DT_PL3D=1000000 
 	DT_RESTART=600 /
 
 &MISC TMPA=20 /
@@ -108,12 +108,12 @@ HRR ramp to control the wood burning
 &RAMP ID='hramp', T=1000,  F=0.4 /
 &RAMP ID='hramp', T=2250,  F=0.0 	/
 	
-&MATL ID='pine_inert',
-     SPECIFIC_HEAT=1.35,
-     CONDUCTIVITY=0.11,
-     DENSITY=370.0 /  This amounts to 597 MJ/m2
+&MATL ID='pine_inert'
+     SPECIFIC_HEAT=1.35
+     CONDUCTIVITY=0.11
+     DENSITY=450.0 / 
 	  
-&MATL ID='vapor_inert',
+&MATL ID='vapor_inert'
       SPECIFIC_HEAT=4.184,
       CONDUCTIVITY=0.1,
       DENSITY=1000.0	/
@@ -205,7 +205,6 @@ Char Cp Gupta et al.
 &VENT XB=1.4,1.7,0.6,1.6,0,0, SURF_ID='IGNITOR' /
 &VENT XB=1.4,1.7,2.5,3.5,0,0, SURF_ID='IGNITOR' /
 &VENT XB=1.4,1.7,4.4,5.4,0,0, SURF_ID='IGNITOR' /
-
 
 &VENT XB = 23,23, 0,5.6,   2.8,5.6, SURF_ID='OPEN' /
 &VENT XB = 25,25, 0,5.6,   0.0,5.6, SURF_ID='OPEN' /
