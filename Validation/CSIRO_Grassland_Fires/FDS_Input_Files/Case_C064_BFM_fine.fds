@@ -50,7 +50,7 @@
       MATL_ID                   = 'DRY GRASS','DIRT'
       THICKNESS(1:2)            = 0.21,0.10
       MOISTURE_FRACTION(1)      = 0.063
-      PACKING_RATIO(1)          = 0.0026
+      MASS_PER_VOLUME(1)        = 1.33
       DRAG_COEFFICIENT          = 2.8
       MINIMUM_BURNOUT_TIME      = 10.
       SURFACE_VOLUME_RATIO(1)   = 9770. /
