@@ -225,5 +225,5 @@ fi
 
 if [ ! $DONOTCOPY ] ; then
   # Copy FDS input files to $INDIR (Current_Results) directory
-  cp $BASEDIR/FDS_Input_Files/*.fds $BASEDIR/$INDIR
+  cp $BASEDIR/FDS_Input_Files/*.fds $BASEDIR/FDS_Input_Files/*.txt $BASEDIR/$INDIR
 fi

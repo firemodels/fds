@@ -15,7 +15,7 @@
 
 &SPEC ID='NITROGEN', MASS_FRACTION_0=1.00, BACKGROUND=T /
 &SPEC ID='OXYGEN', MASS_FRACTION_0=0.00 /
-&SPEC ID='OFF-GAS' / 
+&SPEC ID='FUEL VAPOR' / 
 &SPEC ID='WATER VAPOR' / 
 &SPEC ID='CARBON DIOXIDE' / 
 
@@ -30,93 +30,6 @@
       MATL_ID(1,1:3) = 'comp 1','comp 2','comp 3'
       MATL_MASS_FRACTION(1,1:3) = 0.25,0.50,0.25 /
 
-&MATL ID                    = 'MOISTURE'
-      DENSITY               = 1000.
-      CONDUCTIVITY          = 0.20
-      SPECIFIC_HEAT         = 4.184
-      REFERENCE_TEMPERATURE = 100.
-      HEATING_RATE          = 10.
-      PYROLYSIS_RANGE       = 100.
-      NU_SPEC               = 1.00
-      SPEC_ID               = 'WATER VAPOR'
-      HEAT_OF_REACTION      = 2259.   /
-
-&MATL ID                    = 'comp 1'
-      DENSITY 	            = 500.
-      CONDUCTIVITY          = 0.20
-      SPECIFIC_HEAT         = 1.0 
-      A                     = 91.22
-      E                     = 44500.
-      NU_SPEC               = 0.75
-      SPEC_ID               = 'OFF-GAS'
-      NU_MATL               = 0.25
-      MATL_ID               = 'char'
-      HEAT_OF_REACTION      = 416.    /
-
-&MATL ID                    = 'comp 2'
-      DENSITY               = 500. 
-      CONDUCTIVITY          = 0.20
-      SPECIFIC_HEAT         = 1.0
-      A                     = 3.66E6
-      E                     = 1.05E5
-      NU_SPEC               = 0.75
-      SPEC_ID               = 'OFF-GAS'
-      NU_MATL               = 0.25
-      MATL_ID               = 'char'
-      HEAT_OF_REACTION      = 416.  /
-
-&MATL ID                    = 'comp 3'
-      DENSITY               = 500. 
-      CONDUCTIVITY          = 0.20
-      SPECIFIC_HEAT         = 1.0
-      A                     = 14.2
-      E                     = 49200.
-      NU_SPEC               = 0.75
-      SPEC_ID               = 'OFF-GAS'
-      NU_MATL               = 0.25
-      MATL_ID               = 'char'
-      HEAT_OF_REACTION      = 416.   /
-
-&MATL ID                 = 'char'
-      DENSITY            = 300.
-      CONDUCTIVITY       = 0.052
-      SPECIFIC_HEAT_RAMP = 'cp_char'
-      NU_O2_CHAR         = 1.65
-      N_O2=1.
-      REFERENCE_TEMPERATURE=460
-      HEATING_RATE=10
-      PYROLYSIS_RANGE=40
-      SPEC_ID            = 'CARBON DIOXIDE','OXYGEN'
-      NU_SPEC            = 2.55,-1.65
-      MATL_ID            = 'ash'
-      NU_MATL            = 0.16
-      HEAT_OF_REACTION   = -32000. /
-
-&RAMP ID='cp_char', T=   27, F=0.715 /
-&RAMP ID='cp_char', T= 1724, F=2.04 /
-
-&MATL ID            = 'ash'
-      DENSITY       = 67.
-      CONDUCTIVITY  = 0.1
-      SPECIFIC_HEAT = 2.0 /
-
-&DUMP DT_DEVC=5., MASS_FILE=T /
-
-&DEVC ID='T',      XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='WALL TEMPERATURE' /
-&DEVC ID='mass',   XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='NORMALIZED MASS' /
-&DEVC ID='mass w', XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='NORMALIZED MASS', MATL_ID='MOISTURE' /
-&DEVC ID='mass 1', XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='NORMALIZED MASS', MATL_ID='comp 1' /
-&DEVC ID='mass 2', XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='NORMALIZED MASS', MATL_ID='comp 2' /
-&DEVC ID='mass 3', XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='NORMALIZED MASS', MATL_ID='comp 3' /
-&DEVC ID='mass c', XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='NORMALIZED MASS', MATL_ID='char' /
-&DEVC ID='mass a', XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='NORMALIZED MASS', MATL_ID='ash' /
-&DEVC ID='mlr',    XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='NORMALIZED MASS LOSS RATE' /
-&DEVC ID='mlr o',  XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='NORMALIZED MASS LOSS RATE', SPEC_ID='OFF-GAS' /
-&DEVC ID='mlr w',  XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='NORMALIZED MASS LOSS RATE', SPEC_ID='WATER VAPOR' /
-&DEVC ID='mlr 1',  XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='NORMALIZED MASS LOSS RATE', MATL_ID='comp 1' /
-&DEVC ID='mlr 2',  XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='NORMALIZED MASS LOSS RATE', MATL_ID='comp 2' /
-&DEVC ID='mlr 3',  XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='NORMALIZED MASS LOSS RATE', MATL_ID='comp 3' /
-&DEVC ID='mlr c',  XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='NORMALIZED MASS LOSS RATE', MATL_ID='char' /
-&DEVC ID='mlr a',  XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='NORMALIZED MASS LOSS RATE', MATL_ID='ash' /
+&CATF OTHER_FILES='Needle_TGA_Model.txt','Needle_TGA_Output.txt' /
 
 &TAIL /

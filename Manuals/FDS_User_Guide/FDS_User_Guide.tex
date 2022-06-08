@@ -4759,7 +4759,7 @@ indicates that argon and nitrogen are to be injected at rates of 0.1~\si{kg/(m$^
 
 When a time-base {\ct RAMP} is evaluated, the time used for the {\ct RAMP} is the time since the item (e.g., {\ct VENT}, {\ct OBST}, {\ct DEVC}) using the {\ct RAMP} became active. This means {\ct RAMP}s use the actual time if the activation time of the item using the {\ct RAMP} is the same as {\ct T\_BEGIN} (see ~\ref{info:TIME_Basics}). Otherwise, they are evaluated using the time from when the {\ct RAMP} activates. Therefore, if you are setting {\ct T\_BEGIN} in order to test a time-based {\ct CTRL} or {\ct DEVC} that is ultimately linked to a {\ct RAMP}, then you should set {\ct T\_BEGIN} to be slightly less than the time the {\ct RAMP} will activate. For example, if you are testing a {\ct VENT} that is to open at 10~s whose {\ct SURF\_ID} uses a {\ct RAMP}, then {\ct T\_BEGIN} should be set slightly less than 10~s.
 
-Table~\ref{tau_table} lists the various quantities that can be controlled by {\ct RAMP}s. 
+Table~\ref{tau_table} lists the various quantities that can be controlled by {\ct RAMP}s.
 
 \begin{table}[ht]
 \caption[Parameters used to control time-dependence]{Parameters for controlling the time-dependence of given quantities.}
@@ -7346,9 +7346,9 @@ FDS contains an optional pyrolysis model that was developed specifically for veg
  {\rm Wet\ Vegetation} \rightarrow \nu_{\rm H_2O} \, {\rm H_2O} + (1-\nu_{\rm H_2O}) \, {\rm Dry\ Vegetation} \quad ; \quad \nu_{\rm H_2O} = \frac{M}{1+M}
 \ee
 
-\noindent 2. Endothermic pyrolysis of dry vegetation
+\noindent 2. Endothermic pyrolysis of Dry Vegetation
 \be
- {\rm Dry\ Vegetation} \rightarrow \nu_{\rm char} \, {\rm Char} + (1-\nu_{\rm char}) \, {\rm Fuel\ Gas}
+ {\rm Dry\ Vegetation} \rightarrow \nu_{\rm char} \, {\rm Char} + (1-\nu_{\rm char}) \, {\rm Fuel\ Gas}  \label{pyr_reac}
 \ee
 
 \noindent 3. Exothermic char oxidation
@@ -7360,7 +7360,14 @@ $M$ is the vegetation {\em moisture content} or {\em moisture fraction} determin
 \be
   Y_{\rm H_2O} = \frac{M}{1+M}
 \ee
-$\nu_{\rm char}$ is the mass fraction of dry vegetation that is converted to char during pyrolysis. It is specified with the parameter {\ct NU\_MATL} on the {\ct MATL} line describing the dry vegetation. The character string {\ct MATL\_ID} on the same {\ct MATL} line indicates the name of the char.  $\nu_{\rm O_2,char}$ ({\ct NU\_O2\_CHAR} on the {\ct MATL} line that defines the char properties) is the mass of oxygen required per unit mass of char consumed. $\nu_{\rm ash}$ ({\ct NU\_MATL} on the {\ct MATL} line describing the char) is the mass fraction of char that is converted to ash during char oxidation.
+$\nu_{\rm char}$ is the mass fraction of Dry Vegetation that is converted to char during pyrolysis. It is specified with the parameter {\ct NU\_MATL} on the {\ct MATL} line that describes the Dry Vegetation. The character string {\ct MATL\_ID} on the same {\ct MATL} line indicates the name of the char.  $\nu_{\rm O_2,char}$ ({\ct NU\_O2\_CHAR} on the {\ct MATL} line that defines the char properties) is the mass of oxygen required per unit mass of char consumed. $\nu_{\rm ash}$ ({\ct NU\_MATL} on the {\ct MATL} line describing the char) is the mass fraction of char that is converted to ash during char oxidation.
+
+It is assumed that the Dry Vegetation in Eq.~(\ref{pyr_reac}) is 47~\% (by mass) carbon~\cite{Ma:BGS2018} with an effective chemical formula C$_{3.4}$H$_{6.2}$O$_{2.5}$~\cite{Ritchie:1}. It is also assumed that the Char in Eq.~(\ref{pyr_reac}) has an effective chemical formula C$_x$O$_z$ where
+\be
+   x = \frac{(1+ \nu_{\rm O_2,char} - \nu_{\rm ash})\nu_{\rm char} W_{\rm fuel}}{W_{\rm CO_2}} \quad ; \quad
+   z = 2x - 2 \frac{\nu_{\rm O_2,char} \nu_{\rm char} W_{\rm fuel}}{W_{\rm O_2}}
+\ee
+This implies that the Fuel Gas in Eq.~(\ref{pyr_reac}) has an effective chemical formula C$_{3.4-x}$H$_{6.2}$O$_{2.5-z}$. The heat of combustion of the one step gas phase reaction can be estimated using the heat release per unit mass of oxygen consumed, $E=13.98$~MJ/kg, measured by Tihay et al.~\cite{Tihay:CF2014}.
 
 The char reaction, Eq.~(\ref{char_reaction}), is usually modified in FDS when the default ``simple chemistry'' model is used; that is, the one-step, mixing-controlled reaction for the lumped species Fuel, Air, and Products. In this case, O$_2$ and CO$_2$ are not explicitly calculated, but rather are implicitly defined in terms of the lumped species, {\ct AIR} and {\ct PRODUCTS}, which are defined based on the stoichiometry of the reaction. Equation~(\ref{char_reaction}) cannot be written in terms of the lumped species, but a close approximation is as follows:
 \be
@@ -7399,7 +7406,7 @@ The reaction rate for char oxidation, $r_{\rm char}$, is susceptible to very lar
 \begin{center}
 \begin{tabular}{|l|l|}
 \hline
-Constant                        &   Default Value  \\ \hline \hline
+Constant                        & Value            \\ \hline \hline
 $A_{\rm H_2O}$ ($\sqrt{K}$/s )  & 600,000          \\ \hline
 $E_{\rm H_2O}$ (J/mol)          & 48,200           \\ \hline
 $A_{\rm pyr}$ (1/s)             & 36,300           \\ \hline
@@ -7407,6 +7414,9 @@ $E_{\rm pyr}$ (J/mol)           & 60,300           \\ \hline
 $A_{\rm char}$ (m/s)            & 430              \\ \hline
 $E_{\rm char}$ (J/mol)          & 74,800           \\ \hline
 $\nu_{\rm O_2,char}$            & 1.65             \\ \hline
+$\Delta{h_{\rm pyr}}$ (kJ/kg)   & 418              \\ \hline
+$\Delta{h_{\rm char}}$ (kJ/kg)  & -12,000          \\ \hline
+$\Delta{h_{\rm H_2O}}$ (kJ/kg)  & 2,259            \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
@@ -7423,15 +7433,16 @@ and the boundary condition
 \be
 k \frac{\partial T_{\rm s}}{\partial r} = \dot{q}_{\rm c}''  +  \dot{q}_{\rm r}''
 \ee
-The heats of reaction are $\Delta{h_{\rm H_2O}} = 2259$~kJ/kg;  $\Delta{h_{\rm pyr}} = 418$~kJ/kg~\cite{Morvan:CF2001}; $\Delta{h_{\rm char}} = -32000$~kJ/kg~\cite{Dahale:2013}. The specific heat of the composite solid is given by
+The specific heat of the composite solid is given by
 \be
 c_{\rm s} = \frac{\sum \rho_{\rm s,\alpha} \, c_\alpha}{\rho_{\rm s}}
 \ee
-Suggested values for the specific heats, in units of kJ/(kg$\cdot$ K), as functions of temperature (K) are listed here:
+Suggested values~\cite{Boardman:Fuel_2021} for the specific heats, in units of kJ/(kg$\cdot$ K), as functions of temperature ($^\circ$C) are listed here:
 \begin{eqnarray}
-c_{\rm dry}  &=& 0.01 + 0.0037 \, T ~~~ ({\rm Ritchie~et~al.~\cite{Ritchie:1}})  \\[.1in]
-c_{\rm char} &=& 0.42 + 0.002 \, T + 6.85 \times 10^{-7} \, T^2 ~~~({\rm Park~et~al.~ 2010}) \\[.1in]
-c_{\rm ash}  &=& 1.244 \, (T / 300)^{0.315}~~~({\rm Lautenberger~et~al.~\cite{GPyro:FSJ}}) \\[.1in]
+c_{\rm dry}, \; c_{\rm char}  &=& \left\{ \begin{array}{cl}
+           1.1+0.01 \, T & T<200 \; ^\circ {\rm C} \\
+           2             & T\ge 200 ^\circ {\rm C} \end{array} \right.  \\
+c_{\rm ash}  &=& 2 \\[.1in]
 c_{\rm H_2O} &=& 4.19
 \end{eqnarray}
 The rate of change of the total mass is
@@ -7502,16 +7513,15 @@ Figure~\ref{vege_inputs} includes sample input lines demonstrating how the veget
 \subsection{Heat of Combustion for Charring Vegetation}
 \label{char_oxidation_1}
 
-The heat generated by burning vegetation is due to both the gas phase combustion of the pyrolyzed plant matter and the solid phase exothermic char oxidation reaction. The effective heat of combustion, $\Delta h_{\rm eff}$, for most types of vegetation ranges between 19000~kJ/kg and 23000~kJ/kg~\cite{Susott:FS1982}, but the heat of reaction for the char oxidation is approximately $\Delta h_{\rm char} \approx -32000$~kJ/kg (the minus sign in this instance refers to an {\em exothermic} solid phase reaction). The heat of combustion of the fuel vapor that pyrolyzes initially, $\Delta h_{\rm pyr}$, can be found from the following relation:
+The heat generated by burning vegetation is due to both the gas phase combustion of the pyrolyzed plant matter and the solid phase exothermic char oxidation reaction. The effective heat of combustion, $\Delta h_{\rm eff}$, is a weighted average of the two reactions. The heat of reaction for the char oxidation is approximately $\Delta h_{\rm char} \approx -12000$~kJ/kg (the minus sign in this instance refers to an {\em exothermic} solid phase reaction). The heat of combustion of the fuel vapor that pyrolyzes initially, $\Delta h_{\rm pyr}$, can be found from the following relation:
 \be
    (1-\nu_{\rm char}\nu_{\rm ash}) \, \Delta h_{\rm eff} =  (1-\nu_{\rm char}) \Delta h_{\rm pyr} + \nu_{\rm char}(1-\nu_{\rm ash}) (-\Delta h_{\rm char}) \label{DeltaHeff}
 \ee
-Consider the sample case called {\ct WUI/char\_oxidation\_1.fds} where $m=0.0531$~kg of dry vegetation is completely consumed by fire except for a small amount of ash. The char and ash yields are $\nu_{\rm char}=0.154$ and $\nu_{\rm ash}=0.02$. The heat of combustion of the pyrolyzed fuel vapor is $\Delta h_{\rm pyr}=17260$~kJ/kg; thus the effective heat of combustion for the mass of vegetation consumed is $\Delta h_{\rm eff}=19490$~kJ/kg according to Eq.~(\ref{DeltaHeff}). The area under the heat release rate curve in the left hand plot of Fig.~\ref{char_oxidation_1_fig} should be $m (1-\nu_{\rm char}\nu_{\rm ash}) \Delta h_{\rm eff} \approx 1031$~kJ and the mass of ash remaining should be $\nu_{\rm char}\nu_{\rm ash} m \approx 0.00016$~kg, as shown in the right hand plot of Fig.~\ref{char_oxidation_1_fig}.
+Consider the sample case called {\ct WUI/char\_oxidation\_1.fds} where $m=0.0531$~kg of dry vegetation is completely consumed by fire except for a small amount of ash. The char and ash yields are $\nu_{\rm char}=0.25$ and $\nu_{\rm ash}=0.02$. The heat of combustion of the pyrolyzed fuel vapor is $\Delta h_{\rm pyr}=17700$~kJ/kg; thus the effective heat of combustion for the mass of vegetation consumed is $\Delta h_{\rm eff}=16296$~kJ/kg according to Eq.~(\ref{DeltaHeff}). The area under the heat release rate curve in the left hand plot of Fig.~\ref{char_oxidation_1_fig} should be $m (1-\nu_{\rm char}\nu_{\rm ash}) \Delta h_{\rm eff} \approx 861$~kJ and the mass of ash remaining should be $\nu_{\rm char}\nu_{\rm ash} m \approx 0.000266$~kg, as shown in the right hand plot of Fig.~\ref{char_oxidation_1_fig}.
 \begin{figure}[ht]
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/char_oxidation_1_hrr}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/char_oxidation_1_mass}
-\caption[The {\ct char\_oxidation\_1} test case]{Heat release rate (left) and total mass
- (right) as functions of time in the {\ct char\_oxidation\_1} test case.}
+\caption[The {\ct char\_oxidation\_1} test case]{Heat release rate (left) and total mass (right) as functions of time in the {\ct char\_oxidation\_1} test case.}
 \label{char_oxidation_1_fig}
 \end{figure}
 
