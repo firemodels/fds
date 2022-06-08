@@ -7331,7 +7331,7 @@ There are three ways of simulating wildland fire spread in FDS:
 \item {\bf Boundary Fuel Model:} Ground vegetation is modeled like a porous solid with a thickness equal to the height of the vegetation (Section~\ref{info:boundary_fuel_model}).
 \item {\bf Level Set Model:} The fire front propagates using purely empirical rules (Section~\ref{info:level_set}).
 \end{enumerate}
-The Particle Model and Boundary Fuel Model use the same basic pyrolysis model, and the fire spread rate is {\em predicted} by the model. The Level Set Model relies on a set of experimentally-determined spread rates for different types of vegetation and wind speeds.
+The Particle Model and Boundary Fuel Model use the same basic pyrolysis model (Section~\ref{vegetation_model}), and the fire spread rate is {\em predicted} by the model. The Level Set Model relies on a set of experimentally-determined spread rates for different types of vegetation and wind speeds.
 
 
 \section{Thermal Degradation Model for Vegetation}
@@ -7343,7 +7343,7 @@ FDS contains an optional pyrolysis model that was developed specifically for veg
 
 \noindent 1. Endothermic moisture evaporation
 \be
- {\rm Wet\ Vegetation} \rightarrow \nu_{\rm H_2O} \, {\rm H_2O} + (1-\nu_{\rm H_2O}) \, {\rm Dry\ Vegetation} \quad ; \quad \nu_{\rm H_2O} = \frac{M}{1+M}
+ {\rm Wet\ Vegetation} \rightarrow \nu_{\rm H_2O} \, {\rm H_2O} + (1-\nu_{\rm H_2O}) \, {\rm Dry\ Vegetation} \quad ; \quad \nu_{\rm H_2O} = \frac{M}{1+M} \label{water_reac}
 \ee
 
 \noindent 2. Endothermic pyrolysis of Dry Vegetation
@@ -7354,7 +7354,7 @@ FDS contains an optional pyrolysis model that was developed specifically for veg
 \noindent 3. Exothermic char oxidation
 \be
  \label{char_reaction}
- {\rm Char} + \nu_{\rm O_2, char} \, {\rm O_2} \rightarrow (1+ \nu_{\rm O_2,char} - \nu_{\rm ash}) \, {\rm CO_2} + \nu_{\rm ash} \, {\rm Ash}
+ {\rm Char} + \nu_{\rm O_2, char} \, {\rm O_2} \rightarrow (1+ \nu_{\rm O_2,char} - \nu_{\rm ash}) \, {\rm CO_2} + \nu_{\rm ash} \, {\rm Ash}  
 \ee
 $M$ is the vegetation {\em moisture content} or {\em moisture fraction} determined on a dry weight basis. $M$ is related to the mass fraction of water within the solid via the relation:
 \be
@@ -7362,12 +7362,7 @@ $M$ is the vegetation {\em moisture content} or {\em moisture fraction} determin
 \ee
 $\nu_{\rm char}$ is the mass fraction of Dry Vegetation that is converted to char during pyrolysis. It is specified with the parameter {\ct NU\_MATL} on the {\ct MATL} line that describes the Dry Vegetation. The character string {\ct MATL\_ID} on the same {\ct MATL} line indicates the name of the char.  $\nu_{\rm O_2,char}$ ({\ct NU\_O2\_CHAR} on the {\ct MATL} line that defines the char properties) is the mass of oxygen required per unit mass of char consumed. $\nu_{\rm ash}$ ({\ct NU\_MATL} on the {\ct MATL} line describing the char) is the mass fraction of char that is converted to ash during char oxidation.
 
-It is assumed that the Dry Vegetation in Eq.~(\ref{pyr_reac}) is 47~\% (by mass) carbon~\cite{Ma:BGS2018} with an effective chemical formula C$_{3.4}$H$_{6.2}$O$_{2.5}$~\cite{Ritchie:1}. It is also assumed that the Char in Eq.~(\ref{pyr_reac}) has an effective chemical formula C$_x$O$_z$ where
-\be
-   x = \frac{(1+ \nu_{\rm O_2,char} - \nu_{\rm ash})\nu_{\rm char} W_{\rm fuel}}{W_{\rm CO_2}} \quad ; \quad
-   z = 2x - 2 \frac{\nu_{\rm O_2,char} \nu_{\rm char} W_{\rm fuel}}{W_{\rm O_2}}
-\ee
-This implies that the Fuel Gas in Eq.~(\ref{pyr_reac}) has an effective chemical formula C$_{3.4-x}$H$_{6.2}$O$_{2.5-z}$. The heat of combustion of the one step gas phase reaction can be estimated using the heat release per unit mass of oxygen consumed, $E=13.98$~MJ/kg, measured by Tihay et al.~\cite{Tihay:CF2014}.
+It is assumed that the Dry Vegetation in Eq.~(\ref{pyr_reac}) is 47~\% (by mass) carbon~\cite{Ma:BGS2018} with an effective organic component C$_{3.4}$H$_{6.2}$O$_{2.5}$~\cite{Ritchie:1}. A discussion of the composition of the Char and Fuel Gas is given in Section~\ref{char_oxidation_1}.
 
 The char reaction, Eq.~(\ref{char_reaction}), is usually modified in FDS when the default ``simple chemistry'' model is used; that is, the one-step, mixing-controlled reaction for the lumped species Fuel, Air, and Products. In this case, O$_2$ and CO$_2$ are not explicitly calculated, but rather are implicitly defined in terms of the lumped species, {\ct AIR} and {\ct PRODUCTS}, which are defined based on the stoichiometry of the reaction. Equation~(\ref{char_reaction}) cannot be written in terms of the lumped species, but a close approximation is as follows:
 \be
@@ -7397,26 +7392,28 @@ The reaction rates for evaporation of H$_2$O, pyrolysis of the dry vegetation, a
 \end{eqnarray}
 where $T$ is the temperature of the vegetation. Note that the exponent $-1/2$ in Eq.~(\ref{r_H2O}) is specified using {\ct N\_T=-0.5} on the {\ct MATL} line for water, and the exponent 0 in Eq.~(\ref{r_char}) is specified using {\ct N\_S=0} on the {\ct MATL} line for the char species. The default values of the kinetic constants are given in Table~\ref{tab:veg_kinetics}. The Reynolds number is $\RE = \rho U D_{\rm v} / \mu $ where $\rho$ is the gas density, $U$ is the gas velocity, and $D_{\rm v} = 4/\sigma$ for a cylinder, where $\sigma$ is the surface area to volume ratio. The term containing $\RE$ is included to account for the oxygen blowing effects on char oxidation and the constant $\beta_{\rm char}$ ({\ct BETA\_CHAR}) is equal to 0.2 by default, which is the value used by Porterie~et~al.~\cite{Porterie:2006}.
 
-The reaction rate for char oxidation, $r_{\rm char}$, is susceptible to very large values if the oxygen concentration in the vicinity of the solid is relatively high, a common result of coarse resolution grids used for wildland fire simulations. To prevent thermal runaway in the char reaction, an upper bound of 1~s$^{-1}$ is applied to $r_{\rm char}$.
+The reaction rate for char oxidation, $r_{\rm char}$, is susceptible to very large values if the oxygen concentration in the vicinity of the solid is relatively high, a common result of coarse resolution grids used for wildland fire simulations. To prevent thermal runaway in the char reaction, an upper bound of 500~kg/(m$^3 \cdot$s) is applied to $r_{\rm char}$.
 
 \begin{table}[!ht]
-\caption[Default vegetation kinetic constants]{Default vegetation kinetic constants (from Porterie et al.~\cite{Porterie:2006})}
+\caption[Default vegetation kinetic constants]{Default vegetation pyrolysis constants.}
 \vspace{0.1in}
 \label{tab:veg_kinetics}
 \begin{center}
-\begin{tabular}{|l|l|}
+\begin{tabular}{|l|l|l|}
 \hline
-Constant                        & Value            \\ \hline \hline
-$A_{\rm H_2O}$ ($\sqrt{K}$/s )  & 600,000          \\ \hline
-$E_{\rm H_2O}$ (J/mol)          & 48,200           \\ \hline
-$A_{\rm pyr}$ (1/s)             & 36,300           \\ \hline
-$E_{\rm pyr}$ (J/mol)           & 60,300           \\ \hline
-$A_{\rm char}$ (m/s)            & 430              \\ \hline
-$E_{\rm char}$ (J/mol)          & 74,800           \\ \hline
-$\nu_{\rm O_2,char}$            & 1.65             \\ \hline
-$\Delta{h_{\rm pyr}}$ (kJ/kg)   & 418              \\ \hline
-$\Delta{h_{\rm char}}$ (kJ/kg)  & -12,000          \\ \hline
-$\Delta{h_{\rm H_2O}}$ (kJ/kg)  & 2,259            \\ \hline
+Parameter               & Value                         & Reference                                  \\ \hline \hline
+Dry Vegetation          & $\rm{C_{3.4}H_{6.2}O_{2.5}}$  & Ritchie et al.~\cite{Ritchie:1}            \\ \hline
+$A_{\rm H_2O}$          & 600,000 $\sqrt{K}$/s          & Porterie et al.~\cite{Porterie:2006}       \\ \hline
+$E_{\rm H_2O}$          & 48,200 J/mol                  & Porterie et al.~\cite{Porterie:2006}        \\ \hline
+$A_{\rm pyr}$           & 36,300 s$^{-1}$               & Porterie et al.~\cite{Porterie:2006}        \\ \hline
+$E_{\rm pyr}$           & 60,300 J/mol                  & Porterie et al.~\cite{Porterie:2006}        \\ \hline
+$A_{\rm char}$          & 430  m/s                      & Porterie et al.~\cite{Porterie:2006}        \\ \hline
+$E_{\rm char}$          & 74,800 J/mol                  & Porterie et al.~\cite{Porterie:2006}        \\ \hline
+$\beta_{\rm char}$      & 0.2                           & Porterie et al.~\cite{Porterie:2006}        \\ \hline
+$\nu_{\rm O_2,char}$    & 1.65                          & Porterie et al.~\cite{Porterie:2006}        \\ \hline
+$\Delta{h_{\rm pyr}}$   & 418 kJ/kg                     & Porterie et al.~\cite{Porterie:2006}        \\ \hline
+$\Delta{h_{\rm char}}$  & -12,000 kJ/kg                 & Porterie et al.~\cite{Porterie:2006}        \\ \hline
+$\Delta{h_{\rm H_2O}}$  & 2,259 kJ/kg                   & Porterie et al.~\cite{Porterie:2006}        \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
@@ -7478,10 +7475,10 @@ Figure~\ref{vege_inputs} includes sample input lines demonstrating how the veget
       SPECIFIC_HEAT_RAMP = '...'
       A = 36300.
       E = 60300.
-      NU_MATL = 0.26
+      NU_MATL = 0.25
       MATL_ID = 'CHAR'
       NU_SPEC = 0.74
-      SPEC_ID = 'CELLULOSE'
+      SPEC_ID = 'Fuel Gas'
       HEAT_OF_REACTION = 418. /
 
 &MATL ID = 'CHAR'
@@ -7497,7 +7494,7 @@ Figure~\ref{vege_inputs} includes sample input lines demonstrating how the veget
       NU_MATL = 0.10
       SPEC_ID = 'PRODUCTS','AIR'
       NU_SPEC = 8.07,-7.17
-      HEAT_OF_REACTION= -32000. /
+      HEAT_OF_REACTION= -12000. /
 
 &MATL ID = 'ASH'
       DENSITY = 67.
@@ -7513,6 +7510,29 @@ Figure~\ref{vege_inputs} includes sample input lines demonstrating how the veget
 \subsection{Heat of Combustion for Charring Vegetation}
 \label{char_oxidation_1}
 
+To estimate the heat of combustion of the gas phase reaction of fuel vapors generated by the pyrolysis of vegetation, the decomposition reaction given in Eqs.~(\ref{pyr_reac}) and (\ref{char_reaction}) is written as an equivalent set of reactions assuming that the Dry Vegetation is given by the effective formula C$_{\rm x}$H$_{\rm y}$O$_{\rm z}$A, where A represents the inorganic components that eventually form the Ash.
+\begin{eqnarray}
+   \mathrm{C_xH_yO_zA \; (s)}                      &\rightarrow& \mathrm{C_{x'}H_yO_{z'}A \; (s) + C_{x-x'}H_yO_{z-z'} \; (g)} \\
+   \mathrm{C_{x'}H_yO_{z'}A \; (s) + \nu_{\rm O_2} O_2 \; (g)} &\rightarrow& \mathrm{\nu_{\rm CO_2} \, CO_2 \; (g) + A \; (s)} 
+\end{eqnarray}
+\be
+   \nu_{\rm O_2} = \frac{\nu_{\rm O_2,char} \, \nu_{\rm char} \, W_{\rm fuel}}{W_{\rm O_2}}   \quad ; \quad
+   \nu_{\rm CO_2} =  \frac{(1+ \nu_{\rm O_2,char} - \nu_{\rm ash}) \, \nu_{\rm char} \, W_{\rm fuel}}{W_{\rm CO_2}}  \quad ; \quad
+   W_{\rm fuel} = \frac{12 {\rm x} + 6.2 + 16 {\rm z}}{1- \nu_{\rm ash} \, \nu_{\rm char}}
+\ee
+\be
+   x' = \nu_{\rm CO_2}  \quad ; \quad
+   z' = 2 \left(\nu_{\rm CO_2} - \nu_{\rm O_2} \right)
+\ee
+The heat of combustion of the one step gas phase reaction can be estimated using the heat release per unit mass of oxygen consumed, $E=13.98$~MJ/kg, measured by Tihay et al.~\cite{Tihay:CF2014}.
+\be
+   \mathrm{C_{x-x'}H_yO_{z-z'} + \nu_{\rm O_2}'} \, O_2 \rightarrow \mathrm{(x-x') \, CO_2 + \frac{y}{2} \, H_2O }  \quad : \quad
+   \mathrm{\nu_{\rm O_2}'} = \frac{2(x-x')+y/2-(z-z')}{2}
+\ee
+The effective heat of combustion can be estimated
+\be
+   \mathrm{ \Delta h_{\rm pyr} \approx  \frac{W_{\rm O_2} \,  \nu_{\rm O_2}'}{12(x-x')+y+16(z-z')} } E
+\ee
 The heat generated by burning vegetation is due to both the gas phase combustion of the pyrolyzed plant matter and the solid phase exothermic char oxidation reaction. The effective heat of combustion, $\Delta h_{\rm eff}$, is a weighted average of the two reactions. The heat of reaction for the char oxidation is approximately $\Delta h_{\rm char} \approx -12000$~kJ/kg (the minus sign in this instance refers to an {\em exothermic} solid phase reaction). The heat of combustion of the fuel vapor that pyrolyzes initially, $\Delta h_{\rm pyr}$, can be found from the following relation:
 \be
    (1-\nu_{\rm char}\nu_{\rm ash}) \, \Delta h_{\rm eff} =  (1-\nu_{\rm char}) \Delta h_{\rm pyr} + \nu_{\rm char}(1-\nu_{\rm ash}) (-\Delta h_{\rm char}) \label{DeltaHeff}
