@@ -5,13 +5,9 @@
 
 &TIME T_END=180. /
 
-&MISC TMPA=34. /
+&MISC SIMULATION_MODE='SVLES', TMPA=34. /
 
 &WIND SPEED=4.8, DIRECTION=270., L=-500., Z_0=0.03 /
-
-&REAC FUEL='CELLULOSE', C=6, H=10, O=5, SOOT_YIELD=0.001, HEAT_OF_COMBUSTION=15600. /
-
-&SPEC ID='WATER VAPOR' /
 
 &SURF ID='IGNITION', HRRPUA=1460., COLOR='RED', TMP_FRONT=100., RAMP_Q='ignitor' /
 &RAMP ID='ignitor', T= 0., F=0. /
@@ -49,7 +45,8 @@
 
 &SURF ID                        = 'wet vegetation'
       COLOR                     = 'BROWN'
-      MATL_ID                   = 'DRY GRASS','DIRT'
+      MATL_ID(1,1:1)            = 'GENERIC VEGETATION'
+      MATL_ID(2,1)              = 'DIRT'
       THICKNESS(1:2)            = 0.51,0.10
       MOISTURE_FRACTION(1)      = 0.058
       MASS_PER_VOLUME(1)        = 0.6144
@@ -57,43 +54,7 @@
       MINIMUM_BURNOUT_TIME      = 10.
       SURFACE_VOLUME_RATIO(1)   = 12240. /
 
-&MATL ID                 = 'DRY GRASS'
-      DENSITY            = 512.
-      CONDUCTIVITY       = 0.1
-      SPECIFIC_HEAT_RAMP = 'c_v'
-      A                  = 36300.
-      E                  = 60300.
-      MATL_ID            = 'CHAR'
-      NU_MATL            = 0.2
-      SPEC_ID            = 'CELLULOSE'
-      NU_SPEC            = 0.8
-      HEAT_OF_REACTION   = 416. /
-
-&RAMP ID='c_v', T= 20., F=1.184 /
-&RAMP ID='c_v', T=800., F=4.070 /
-
-&MATL ID                 = 'CHAR'
-      DENSITY            = 300.
-      CONDUCTIVITY       = 0.052
-      SPECIFIC_HEAT_RAMP = 'cp_char'
-      N_S                = 0.
-      NU_O2_CHAR         = 1.65
-      BETA_CHAR          = 0.2
-      A                  = 430.
-      E                  = 74800.
-      SPEC_ID            = 'PRODUCTS','AIR'
-      NU_SPEC            = 8.18,-7.2
-      MATL_ID            = 'ASH'
-      NU_MATL            = 0.02
-      HEAT_OF_REACTION   = -32000. /
-
-&RAMP ID='cp_char', T=   27, F=0.715 /
-&RAMP ID='cp_char', T= 1724, F=2.04 /
-
-&MATL ID            = 'ASH'
-      DENSITY       = 67.
-      CONDUCTIVITY  = 0.1
-      SPECIFIC_HEAT = 2.0 /
+&CATF OTHER_FILES='vegetation_model.txt' /
 
 &DUMP DT_HRR=1., DT_DEVC=1., DT_SLCF=1., SIG_FIGS=4, SIG_FIGS_EXP=2 /
 
