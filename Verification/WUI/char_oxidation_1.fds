@@ -5,10 +5,8 @@
 &MESH IJK=10,10,30 XB=-0.5,0.5,-0.5,0.5,0,3.0 /
 
 &REAC FUEL='FUEL VAPOR'
-      FYI='Ritchie, et al., 5th IAFSS, C_3.4 H_6.2 O_2.5'
-      SOOT_YIELD = 0.02
-      O          = 2.5
-      C          = 3.4 
+      O          = 2.2
+      C          = 1.1 
       H          = 6.2 /
 
 &SPEC ID='WATER VAPOR' /
@@ -31,58 +29,31 @@
       SPEC_ID            = 'FUEL VAPOR'
       NU_SPEC            = 0.75
       HEAT_OF_REACTION   = 416.
-      HEAT_OF_COMBUSTION = 17700. /
+      HEAT_OF_COMBUSTION = 17400. /
 
-CP_VEG = 1.02 + 0.0037*TMP_VEG kJ/kg/C Ritchie IAFSS 1997:177-188
-&RAMP ID='c_v', T= 10.,  F=1.057 /
-&RAMP ID='c_v', T=2400., F=9.90 /
+&RAMP ID='c_v', T=   0., F=1.1 /
+&RAMP ID='c_v', T= 200., F=2.0 /
+&RAMP ID='c_v', T= 800., F=2.0 /
 
 &MATL ID                 = 'CHAR'
       DENSITY            = 300.
       CONDUCTIVITY       = 0.052
-      SPECIFIC_HEAT_RAMP = 'cp_char'
+      SPECIFIC_HEAT_RAMP = 'c_v'
       N_S                = 0.
       NU_O2_CHAR         = 1.65
       BETA_CHAR          = 0.2
       A                  = 430.
       E                  = 74800.
       MATL_ID            = 'ASH'
-      NU_MATL            = 0.02
-      NU_SPEC            = 8.18,-7.2
+      NU_MATL            = 0.04
+      NU_SPEC            = 8.16,-7.2
       SPEC_ID            = 'PRODUCTS','AIR'
       HEAT_OF_REACTION   = -12000. /
-
-CP_CHAR  = 1.04  + 2.46E-3*TMP_VEG + 6.85E-7*TMP_VEG**2 !J/kg/C Park etal. C&F 2010 147:481-494
-&RAMP ID='cp_char', T=   10, F=1.06 /
-&RAMP ID='cp_char', T=  250, F=1.70 /
-&RAMP ID='cp_char', T=  500, F=2.44 /
-&RAMP ID='cp_char', T=  750, F=3.27 /
-&RAMP ID='cp_char', T= 1000, F=4.19 /
-&RAMP ID='cp_char', T= 1250, F=5.19 /
-&RAMP ID='cp_char', T= 1500, F=6.27 /
-&RAMP ID='cp_char', T= 1750, F=7.44 /
-&RAMP ID='cp_char', T= 2000, F=8.70 /
-&RAMP ID='cp_char', T= 2250, F=10.04 /
-&RAMP ID='cp_char', T= 2500, F=11.47 /
-
 
 &MATL ID            = 'ASH'
       DENSITY       = 67.
       CONDUCTIVITY  = 0.1
-      SPECIFIC_HEAT_RAMP = 'cp_ash' /
-
-CP_ASH = 1.244(TMP_VEG+273/[TMPA+273])**0.315 kJ/kg/C Lautenberger & Fernandez-Pell, C&F 2009 156:1503-1513
-&RAMP ID='cp_ash', T=   20, F=1.24 /
-&RAMP ID='cp_ash', T=  250, F=1.49 /
-&RAMP ID='cp_ash', T=  500, F=1.68 /
-&RAMP ID='cp_ash', T=  750, F=1.84 /
-&RAMP ID='cp_ash', T= 1000, F=1.97 /
-&RAMP ID='cp_ash', T= 1250, F=2.08 /
-&RAMP ID='cp_ash', T= 1500, F=2.19 /
-&RAMP ID='cp_ash', T= 1750, F=2.28 /
-&RAMP ID='cp_ash', T= 2000, F=2.36 /
-&RAMP ID='cp_ash', T= 2250, F=2.44 /
-&RAMP ID='cp_ash', T= 2500, F=2.52 /
+      SPECIFIC_HEAT_RAMP = 'c_v' /
 
 &PART ID='foliage part'
       SAMPLING_FACTOR=1 
