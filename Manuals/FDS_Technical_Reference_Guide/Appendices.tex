@@ -1421,7 +1421,10 @@ Note that the {\em ceiling} function, $\lceil \hbox{CFL} \rceil$, denotes the le
 \begin{equation}
     \mathbf{x}_{\rm p}^{n+1} = \mathbf{x}_{\rm p}^n + \frac{\delta t_{\rm p}}{2} \left( \mathbf{u}_{\rm p}^{n+1} + \mathbf{u}_{\rm p}^n \right)
 \end{equation}
-where $\mathbf{u}_{\rm p}^{n+1}$ is given by Eq.~(\ref{part_soln}).
+where $\mathbf{u}_{\rm p}^{n+1}$ is given by Eq.~(\ref{part_soln}). The transfer of momentum from the particles to the gas is represented by the force term in the momentum equation which is computed by summing over all particles in each grid cell of volume $V$:
+\begin{equation}
+   \mathbf{f}_{\rm b} = \frac{1}{V} \sum_i \left[ m_{{\rm p},i} \left( \bg - \frac{\bu_{{\rm p},i}^{n+1}-\bu_{{\rm p},i}^n}{\d t} \right) + \dot{m}_{{\rm p},i}  (\mathbf{u}_{\rm p}^{n+1} - \mathbf{u}^n) \right]
+\end{equation}
 
 
 
@@ -1590,7 +1593,7 @@ r_{c,i}^I = \left\{
                    \sqrt{ ( r_i^3 - r_{i-1}^3)/(3 \, \delta r_i) } & I=2 \quad \hbox{(spherical)}
 \end{array} \right.
 \end{equation}
-The temperatures at the front and back surface of a Cartesian slab (or center of a cylinder or sphere) are determined from the boundary conditions. In any of the coordinate systems, the boundary condition at the front surface, using the Crank-Nicholson scheme, is
+The temperatures at the front and back surface of a Cartesian slab (or center of a cylinder or sphere) are determined from the boundary conditions. In any of the coordinate systems, the boundary condition at the front surface, using the Crank-Nicolson scheme, is
 \begin{equation}
 \label{bc_front}
  \frac{-k_{\rm s,1}}{2} \left( \frac{T_{\rm s,1}^{n+1}-T_{\rm s,0}^{n+1}}{\delta r_{\frac{1}{2}}} + \frac{T_{\rm s,1}^{n}-T_{\rm s,0}^{n}}{\delta r_{\frac{1}{2}}} \right)

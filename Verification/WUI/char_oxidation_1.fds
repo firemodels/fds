@@ -2,9 +2,9 @@
 
 &TIME T_END=40 / 
 
-&MESH IJK=10,10,20 XB=-0.5,0.5,-0.5,0.5,0,2.0 /
+&MESH IJK=10,10,30 XB=-0.5,0.5,-0.5,0.5,0,3.0 /
 
-&REAC FUEL='WOOD FUEL VAPOR'
+&REAC FUEL='FUEL VAPOR'
       FYI='Ritchie, et al., 5th IAFSS, C_3.4 H_6.2 O_2.5'
       SOOT_YIELD = 0.02
       O          = 2.5
@@ -27,16 +27,15 @@
       A                  = 36300.
       E                  = 60300.
       MATL_ID            = 'CHAR'
-      NU_MATL            = 0.154
-      SPEC_ID            = 'WOOD FUEL VAPOR'
-      NU_SPEC            = 0.846
+      NU_MATL            = 0.25
+      SPEC_ID            = 'FUEL VAPOR'
+      NU_SPEC            = 0.75
       HEAT_OF_REACTION   = 416.
-      HEAT_OF_COMBUSTION = 17260. /
+      HEAT_OF_COMBUSTION = 17700. /
 
 CP_VEG = 1.02 + 0.0037*TMP_VEG kJ/kg/C Ritchie IAFSS 1997:177-188
 &RAMP ID='c_v', T= 10.,  F=1.057 /
 &RAMP ID='c_v', T=2400., F=9.90 /
-
 
 &MATL ID                 = 'CHAR'
       DENSITY            = 300.
@@ -51,7 +50,7 @@ CP_VEG = 1.02 + 0.0037*TMP_VEG kJ/kg/C Ritchie IAFSS 1997:177-188
       NU_MATL            = 0.02
       NU_SPEC            = 8.18,-7.2
       SPEC_ID            = 'PRODUCTS','AIR'
-      HEAT_OF_REACTION   = -32000. /
+      HEAT_OF_REACTION   = -12000. /
 
 CP_CHAR  = 1.04  + 2.46E-3*TMP_VEG + 6.85E-7*TMP_VEG**2 !J/kg/C Park etal. C&F 2010 147:481-494
 &RAMP ID='cp_char', T=   10, F=1.06 /
@@ -95,12 +94,13 @@ CP_ASH = 1.244(TMP_VEG+273/[TMPA+273])**0.315 kJ/kg/C Lautenberger & Fernandez-P
 
 &INIT ID                   = 'foliage part',
       PART_ID              = 'foliage part' 
-      XB                   = -0.2, 0.2,-0.2, 0.2,0.4,0.6
+      XB                   = -0.3, 0.1,-0.2, 0.2,0.4,0.6
       N_PARTICLES_PER_CELL = 1
       CELL_CENTERED        = .TRUE.
-      PACKING_RATIO        = 0.00323 /
+      MASS_PER_VOLUME      = 1.66
+      DRY                  = T /
 
-&SURF ID='radiant panel', TMP_FRONT=1500, COLOR='RED' /
+&SURF ID='radiant panel', TMP_FRONT=1800, COLOR='RED' /
 
 &VENT MB='XMIN',SURF_ID='radiant panel' /
 &VENT MB='XMAX',SURF_ID='OPEN' /
@@ -109,7 +109,7 @@ CP_ASH = 1.244(TMP_VEG+273/[TMPA+273])**0.315 kJ/kg/C Lautenberger & Fernandez-P
 &VENT MB='ZMIN',SURF_ID='OPEN' /
 &VENT MB='ZMAX',SURF_ID='OPEN' /
  
-&DEVC XB=-0.2, 0.3,-0.2,0.3,0.3,0.7, QUANTITY='MPUV', PART_ID='foliage part', ID='mass foliage', STATISTICS='VOLUME INTEGRAL'  /
+&DEVC XB=-0.5, 0.5,-0.5,0.5,0.0,3.0, QUANTITY='MPUV', PART_ID='foliage part', ID='mass foliage', STATISTICS='VOLUME INTEGRAL'  /
 &DEVC ID='T_surf', INIT_ID='foliage part', QUANTITY='WALL TEMPERATURE'/
 
 &TAIL /

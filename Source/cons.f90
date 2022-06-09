@@ -54,15 +54,9 @@ INTEGER, PARAMETER :: INFLOW_OUTFLOW=4           !< Flag for SF\%THERMAL_BC_INDE
 INTEGER, PARAMETER :: INTERPOLATED_BC=6          !< Flag for SF\%THERMAL_BC_INDEX: Interface between two meshes
 INTEGER, PARAMETER :: THERMALLY_THICK_HT3D=7     !< Flag for SF\%THERMAL_BC_INDEX: Thermally thick 3-D solid
 
-INTEGER, PARAMETER :: CUSTOM_HTC_MODEL=-1                  !< Flag for SF\%HEAT_TRANSFER_MODEL
 INTEGER, PARAMETER :: DEFAULT_HTC_MODEL=0                  !< Flag for SF\%HEAT_TRANSFER_MODEL
 INTEGER, PARAMETER :: LOGLAW_HTC_MODEL=1                   !< Flag for SF\%HEAT_TRANSFER_MODEL
-INTEGER, PARAMETER :: ABL_HTC_MODEL=2                      !< Flag for SF\%HEAT_TRANSFER_MODEL
 INTEGER, PARAMETER :: RAYLEIGH_HTC_MODEL=3                 !< Flag for SF\%HEAT_TRANSFER_MODEL
-INTEGER, PARAMETER :: YUAN_HTC_MODEL=4                     !< Flag for SF\%HEAT_TRANSFER_MODEL
-INTEGER, PARAMETER :: FREE_HORIZONTAL_CYLINDER_HTC_MODEL=5 !< Flag for SF\%HEAT_TRANSFER_MODEL
-INTEGER, PARAMETER :: BLOWING_HTC_MODEL=6                  !< Flag for SF\%HEAT_TRANSFER_MODEL
-INTEGER, PARAMETER :: BOUNDARY_FUEL_HTC_MODEL=7            !< Flag for SF\%HEAT_TRANSFER_MODEL
 
 INTEGER, PARAMETER :: WALL_MODEL_BC=2              !< Flag for SF\%VELOCITY_BC_INDEX
 INTEGER, PARAMETER :: FREE_SLIP_BC=3               !< Flag for SF\%VELOCITY_BC_INDEX
@@ -165,6 +159,7 @@ INTEGER :: HCN_INDEX=0                     !< Index for HCN
 INTEGER :: NO_INDEX=0                      !< Index for NO
 INTEGER :: NO2_INDEX=0                     !< Index for NO2
 INTEGER :: ZETA_INDEX=0                    !< Index for unmixed fuel fraction, ZETA
+INTEGER :: MOISTURE_INDEX=0                !< Index for MATL MOISTURE
 
 INTEGER :: STOP_STATUS=NO_STOP             !< Indicator of whether and why to stop the job
 INTEGER :: INPUT_FILE_LINE_NUMBER=0        !< Indicator of what line in the input file is being read
@@ -229,7 +224,6 @@ LOGICAL :: INIT_HRRPUV=.FALSE.              !< Assume an initial spatial distrib
 LOGICAL :: SYNTHETIC_EDDY_METHOD=.FALSE.
 LOGICAL :: UVW_RESTART=.FALSE.              !< Initialize velocity field with values from a file
 LOGICAL :: PARTICLE_CFL=.FALSE.             !< Include particle velocity as a constraint on time step
-LOGICAL :: POTENTIAL_TEMPERATURE_CORRECTION=.FALSE.
 LOGICAL :: RTE_SOURCE_CORRECTION=.TRUE.     !< Apply a correction to the radiation source term to achieve desired rad fraction
 LOGICAL :: OBST_CREATED_OR_REMOVED=.FALSE.  !< An obstruction has just been created or removed and wall cells must be reassigned
 LOGICAL :: CHECK_REALIZABILITY=.FALSE.
@@ -252,6 +246,7 @@ LOGICAL :: USE_ATMOSPHERIC_INTERPOLATION=.FALSE.
 LOGICAL :: POSITIVE_ERROR_TEST=.FALSE.
 LOGICAL :: OBST_SHAPE_AREA_ADJUST=.FALSE.
 LOGICAL :: STORE_SPECIES_FLUX=.FALSE.
+LOGICAL :: STORE_PRESSURE_POISSON_RESIDUAL=.FALSE.
 LOGICAL :: CHAR_OXIDATION=.FALSE.
 LOGICAL :: PERIODIC_DOMAIN_X=.FALSE.                !< The domain is periodic \f$ x \f$
 LOGICAL :: PERIODIC_DOMAIN_Y=.FALSE.                !< The domain is periodic \f$ y \f$
@@ -299,7 +294,7 @@ REAL(EB) :: GM1OG                              !< \f$ (\gamma-1)/\gamma \f$
 REAL(EB) :: U0                                 !< Wind speed in the \f$ x \f$ direction (m/s)
 REAL(EB) :: V0                                 !< Wind speed in the \f$ y \f$ direction (m/s)
 REAL(EB) :: W0                                 !< Wind speed in the \f$ z \f$ direction (m/s)
-REAL(EB) :: H0                                 !< 0.5_EB*(U0**2+V0**2+W0**2)
+REAL(EB) :: INITIAL_SPEED=-1._EB               !< Initial wind speed (m/s) which is assumed to die off
 REAL(EB) :: GVEC(3)                            !< Gravity vector (m/s2)
 REAL(EB) :: FVEC(3)=0._EB                      !< Force vector (N/m3)
 REAL(EB) :: OVEC(3)=0._EB                      !< Coriolis vector (1/s)
@@ -341,7 +336,7 @@ REAL(EB) :: ORIGIN_LON=-1.E6_EB                !< Longitude of terrain map
 REAL(EB) :: NORTH_BEARING=0._EB                !< North bearing for terrain map
 REAL(EB) :: LATITUDE=10000._EB                 !< Latitude for geostrophic calculation
 REAL(EB) :: GEOSTROPHIC_WIND(2)=0._EB          !< Wind vector (m/s)
-REAL(EB) :: DY_MIN_BLOWING=1.E-8_EB            !< Parameter in blowing algorithm (m)
+REAL(EB) :: DY_MIN_BLOWING=1.E-8_EB            !< Parameter in liquid evaporation algorithm (m)
 REAL(EB) :: MINIMUM_FILM_THICKNESS=1.E-5_EB    !< Minimum thickness of liquid film on a solid surface (m)
 REAL(EB) :: SOOT_DENSITY=1800._EB              !< Density of solid soot (kg/m3)
 
@@ -683,7 +678,7 @@ LOGICAL :: CC_ZEROIBM_VELO=.FALSE.
 LOGICAL :: CC_SLIPIBM_VELO=.FALSE.
 LOGICAL :: CC_STRESS_METHOD=.TRUE.
 LOGICAL :: CC_ONLY_IBEDGES_FLAG=.TRUE.
-LOGICAL :: CC_UNSTRUCTURED_PROJECTION=.FALSE.
+LOGICAL :: CC_UNSTRUCTURED_PROJECTION=.TRUE.
 
 ! Threshold factor for volume of cut-cells respect to volume of Cartesian cells:
 ! Currently used in the thermo div definition of cut-cells.

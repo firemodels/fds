@@ -119,6 +119,7 @@ TYPE LAGRANGIAN_PARTICLE_CLASS_TYPE
    INTEGER :: N_STORAGE_REALS=0           !< Number of reals to store for this particle class
    INTEGER :: N_STORAGE_INTEGERS=0        !< Number of integers to store for this particle class
    INTEGER :: N_STORAGE_LOGICALS=0        !< Number of logicals to store for this particle class
+   INTEGER :: NEW_PARTICLE_INCREMENT=50   !< Number of new storage slots to allocate when NPLDIM is exceeded
 
    INTEGER, ALLOCATABLE, DIMENSION(:) :: STRATUM_INDEX_LOWER  !< Lower index of size distribution band
    INTEGER, ALLOCATABLE, DIMENSION(:) :: STRATUM_INDEX_UPPER  !< Upper index of size distribution band
@@ -197,7 +198,7 @@ END TYPE BOUNDARY_COORD_TYPE
 !> \brief Variables associated with a WALL, PARTICLE, or CFACE boundary cell
 !> \details If you change the number of scalar variables in BOUNDARY_ONE_D_TYPE, adjust the numbers below
 
-INTEGER, PARAMETER :: N_ONE_D_SCALAR_REALS=26
+INTEGER, PARAMETER :: N_ONE_D_SCALAR_REALS=27
 INTEGER, PARAMETER :: N_ONE_D_SCALAR_INTEGERS=4
 INTEGER, PARAMETER :: N_ONE_D_SCALAR_LOGICALS=1
 
@@ -256,6 +257,7 @@ TYPE BOUNDARY_ONE_D_TYPE
    REAL(EB) :: Q_SCALE=0._EB         !< Scaled integrated heat release for a surface with CONE_HEAT_FLUX
    REAL(EB) :: T_MATL_PART=0._EB     !< Time interval for current value in PART_MASS and PART_ENTHALPY arrays (s)
    REAL(EB) :: B_NUMBER=0._EB        !< B number for droplet or wall
+   REAL(EB) :: M_DOT_PART_ACTUAL     !< Mass flux of all particles (kg/m2/s)
 
    LOGICAL :: BURNAWAY=.FALSE.       !< Indicater if cell can burn away when fuel is exhausted
 
@@ -264,7 +266,7 @@ END TYPE BOUNDARY_ONE_D_TYPE
 !> \brief Property variables associated with a WALL or CFACE boundary cell
 !> \details If you change the number of scalar variables in BOUNDARY_PROPS_TYPE, adjust the numbers below
 
-INTEGER, PARAMETER :: N_BOUNDARY_PROPS_SCALAR_REALS=8
+INTEGER, PARAMETER :: N_BOUNDARY_PROPS_SCALAR_REALS=7
 INTEGER, PARAMETER :: N_BOUNDARY_PROPS_SCALAR_INTEGERS=1
 INTEGER, PARAMETER :: N_BOUNDARY_PROPS_SCALAR_LOGICALS=0
 INTEGER, DIMENSION(10) :: BOUNDARY_PROPS_REALS_ARRAY_SIZE=0, &
@@ -286,7 +288,6 @@ TYPE BOUNDARY_PROPS_TYPE
    REAL(EB) :: WORK1=0._EB           !< Work array
    REAL(EB) :: WORK2=0._EB           !< Work array
    REAL(EB) :: K_SUPPRESSION=0._EB   !< Suppression coefficent (m2/kg/s)
-   REAL(EB) :: L_OBUKHOV=0._EB       !< Obukhov length (m)
 
    INTEGER  :: SURF_INDEX=-1         !< Surface index
 
@@ -567,7 +568,6 @@ TYPE REACTION_TYPE
    REAL(EB) :: A_IN                         !< Unajusted pre-exponential reaction kinetic parameter
    REAL(EB) :: E                            !< Activation energy (J/kmol)
    REAL(EB) :: E_IN                         !< User-specified activation energy (J/mol)
-   REAL(EB) :: K
    REAL(EB) :: MW_FUEL                      !< Molecular weight of fuel (g/mol)
    REAL(EB) :: MW_SOOT                      !< Molecular weight of soot surrogate gas (g/mol)
    REAL(EB) :: Y_O2_MIN                     !< Lower oxygen limit in terms of mass fraction
@@ -764,12 +764,13 @@ TYPE SURFACE_TYPE
    LOGICAL :: BURN_AWAY,ADIABATIC,INTERNAL_RADIATION,USER_DEFINED=.TRUE., &
               FREE_SLIP=.FALSE.,NO_SLIP=.FALSE.,SPECIFIED_NORMAL_VELOCITY=.FALSE.,SPECIFIED_TANGENTIAL_VELOCITY=.FALSE., &
               SPECIFIED_NORMAL_GRADIENT=.FALSE.,CONVERT_VOLUME_TO_MASS=.FALSE.,SPECIFIED_HEAT_SOURCE=.FALSE.,&
-              IMPERMEABLE=.FALSE.,BOUNDARY_FUEL_MODEL=.FALSE.,BLOWING=.FALSE.,ABL_MODEL=.FALSE., &
+              IMPERMEABLE=.FALSE.,BOUNDARY_FUEL_MODEL=.FALSE., &
               HT3D=.FALSE., MT1D=.FALSE.,SET_H=.FALSE.
    LOGICAL :: INCLUDE_BOUNDARY_COORD_TYPE=.TRUE.     !< This surface requires basic coordinate information
    LOGICAL :: INCLUDE_BOUNDARY_PROPS_TYPE=.TRUE.  !< This surface requires surface variables for heat and mass transfer
    LOGICAL :: INCLUDE_BOUNDARY_ONE_D_TYPE=.TRUE.     !< This surface requires in-depth 1-D conduction/reaction arrays
    LOGICAL :: INCLUDE_BOUNDARY_RADIA_TYPE=.TRUE.     !< This surface requires angular-specific radiation intensities
+   LOGICAL :: HORIZONTAL=.FALSE.                     !< Indicates if a cylinder is horizontally oriented
    INTEGER :: N_WALL_STORAGE_REALS=0,N_WALL_STORAGE_INTEGERS=0,N_WALL_STORAGE_LOGICALS=0
    INTEGER :: N_CFACE_STORAGE_REALS=0,N_CFACE_STORAGE_INTEGERS=0,N_CFACE_STORAGE_LOGICALS=0
    INTEGER :: GEOMETRY,BACKING,PROFILE,HEAT_TRANSFER_MODEL=0,NEAR_WALL_TURB_MODEL=5
@@ -793,9 +794,6 @@ TYPE SURFACE_TYPE
                VEG_LSET_M1,VEG_LSET_M10,VEG_LSET_M100,VEG_LSET_MLW,VEG_LSET_MLH,VEG_LSET_SURF_LOAD,VEG_LSET_FIREBASE_TIME, &
                VEG_LSET_CHAR_FRACTION
    INTEGER :: VEG_LSET_FUEL_INDEX
-
-   !HTC Custom
-   REAL(EB) :: C_FORCED_CONSTANT=0._EB,C_FORCED_PR_EXP=0._EB,C_FORCED_RE=0._EB,C_FORCED_RE_EXP=0._EB,C_HORIZONTAL,C_VERTICAL
 
    TYPE(STORAGE_TYPE) :: WALL_STORAGE,CFACE_STORAGE
 
@@ -977,18 +975,23 @@ END TYPE IBM_EDGECROSS_TYPE
 
 ! Cartesian Edge Cut-Edges data structure:
 TYPE IBM_CUTEDGE_TYPE
+   INTEGER :: IE=0
    INTEGER :: NVERT, NEDGE, NEDGE1, STATUS         ! Local Vertices, cut-edges and status of this Cartesian edge.
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:)           :: XYZVERT  ! Locations of vertices.
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:)           ::  CEELEM  ! Cut-Edge connectivities.
-   INTEGER,  DIMENSION(MAX_DIM+2)                  ::     IJK  ! [ i j k X2AXIS cetype]
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:)           ::  INDSEG  ! [ntr tr1 tr2 ibod]
-   INTEGER,  ALLOCATABLE, DIMENSION(:)             ::NOD_PERM  ! Permutation array for INSERT_FACE_VERT.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)           ::  XYZVERT  ! Locations of vertices.
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)           ::   CEELEM  ! Cut-Edge connectivities.
+   INTEGER,  DIMENSION(MAX_DIM+2)                  ::      IJK  ! [ i j k X2AXIS cetype]
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)           ::   INDSEG  ! [ntr tr1 tr2 ibod]
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)           ::      DXX  ! [DXX(1,JEC) DXX(2,JEC)]
+   INTEGER, ALLOCATABLE, DIMENSION(:,:,:)         ::FACE_LIST  ! [1:2, -2:2, JEC] Cut-face connected to edge.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:)           ::   DUIDXJ, MU_DUIDXJ ! Unstructured VelGrad components.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)             :: NOD_PERM  ! Permutation array for INSERT_FACE_VERT.
 END TYPE IBM_CUTEDGE_TYPE
 
 ! IBM_EDGE type, used for computation of wall model turbulent viscosity, shear stress, vorticity.
 TYPE IBM_EDGE_TYPE
    INTEGER,  DIMENSION(MAX_DIM+1)                  ::     IJK  ! [ i j k X1AXIS]
    INTEGER :: IE=0
+   INTEGER, ALLOCATABLE, DIMENSION(:,:)            ::FACE_LIST  ! [1:3, -2:2] Reg/Cut face connected to edge.
    ! Here: VIND=IAXIS:KAXIS, EP=1:INT_N_EXT_PTS,
    ! INT_VEL_IND = 1; INT_VELS_IND = 2; INT_FV_IND = 3; INT_DHDX_IND = 4; N_INT_FVARS = 4;
    ! INT_NPE_LO = INT_NPE(LOW,VIND,EP,IFACE); INT_NPE_LO = INT_NPE(HIGH,VIND,EP,IEDGE).
@@ -1019,10 +1022,12 @@ TYPE IBM_CUTFACE_TYPE
    INTEGER :: NVERT=0, NSVERT=0, NFACE=0, NSFACE=0, STATUS !Local Vertices, cut-faces and status of this Cartesian face.
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)           :: XYZVERT  ! Locations of vertices.
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)           ::  CFELEM  ! Cut-faces connectivities.
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)           ::  CEDGES  ! Cut-Edges. Points to EDGE_LIST.
    INTEGER,  DIMENSION(MAX_DIM+1)                  ::     IJK  ! [ i j k X1AXIS]
    REAL(EB), ALLOCATABLE, DIMENSION(:)             ::    AREA  ! Cut-faces areas.
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)           ::  XYZCEN  ! Cut-faces centroid locations.
    LOGICAL,  ALLOCATABLE, DIMENSION(:)             ::  SHARED
+   INTEGER,  ALLOCATABLE, DIMENSION(:)             ::  LINK_LEV ! Level in local Face Linking Hierarchy.
    !Integrals to be used in cut-cell volume and centroid computations.
    REAL(EB), ALLOCATABLE, DIMENSION(:)             ::  INXAREA, INXSQAREA, JNYSQAREA, KNZSQAREA
    INTEGER,  ALLOCATABLE, DIMENSION(:,:)           ::  BODTRI
@@ -1035,7 +1040,8 @@ TYPE IBM_CUTFACE_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:)             ::  VEL, VELS, FN, FN_B, VELINT
    INTEGER,  ALLOCATABLE, DIMENSION(:,:,:)         ::  JDH
    REAL(EB) :: VELINT_CRF=0._EB,FV=0._EB,FV_B=0._EB,ALPHA_CF=1._EB,VEL_CF=0._EB,VEL_CRT=0._EB
-   INTEGER,  ALLOCATABLE, DIMENSION(:,:,:)         ::  CELL_LIST ! [RC_TYPE I J K ]
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:)           ::  EDGE_LIST ! [CE_TYPE IEC JEC] or [RG_TYPE SIDE LOHI_AXIS]
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:,:)         ::  CELL_LIST ! [RC_TYPE I J K  ]
 
    ! Here: VIND=IAXIS:KAXIS, EP=1:INT_N_EXT_PTS,
    ! INT_VEL_IND = 1; INT_VELS_IND = 2; INT_FV_IND = 3; INT_DHDX_IND = 4; N_INT_FVARS = 4;
@@ -1058,7 +1064,7 @@ TYPE IBM_CUTFACE_TYPE
 
    REAL(EB), ALLOCATABLE, DIMENSION(:,:)      :: RHOPVN
    INTEGER :: NOMICF(2)=0  ! [NOM icf]
-   INTEGER,  ALLOCATABLE, DIMENSION(:)        :: CFACE_INDEX, SURF_INDEX
+   INTEGER,  ALLOCATABLE, DIMENSION(:)        :: CFACE_INDEX, SURF_INDEX, UNKF
 END TYPE IBM_CUTFACE_TYPE
 
 
@@ -1176,7 +1182,7 @@ END TYPE IBM_RCFACE_TYPE
 
 TYPE IBM_RCFACE_LST_TYPE
    LOGICAL :: SHARED=.FALSE.
-   INTEGER :: IWC=0
+   INTEGER :: IWC=0, UNKF=0
    REAL(EB):: TMP_FACE=0._EB
    INTEGER,  DIMENSION(MAX_DIM+1)                                  ::       IJK ! [ I J K x1axis]
    INTEGER,  DIMENSION(LOW_IND:HIGH_IND)                           ::       UNK
@@ -1246,62 +1252,13 @@ END TYPE RESERVED_RAMPS_TYPE
 INTEGER :: N_RESERVED_RAMPS=0
 TYPE (RESERVED_RAMPS_TYPE), DIMENSION(10), TARGET :: RESERVED_RAMPS
 
-
-TYPE HUMAN_TYPE
-   CHARACTER(LABEL_LENGTH) :: NODE_NAME='null'
-   CHARACTER(LABEL_LENGTH) :: FFIELD_NAME='null'
-   REAL(EB) :: X=0._EB,Y=0._EB,Z=0._EB,U=0._EB,V=0._EB,W=0._EB,F_X=0._EB,F_Y=0._EB,&
-               X_old=0._EB,Y_old=0._EB,X_group=0._EB,Y_group=0._EB, U_CB=0.0_EB, V_CB=0.0_EB
-   REAL(EB) :: UBAR=0._EB, VBAR=0._EB, UBAR_Center=0._EB, VBAR_Center=0._EB, T_LastRead_CB=0.0_EB
-   REAL(EB) :: Speed=1.25_EB, Radius=0.255_EB, Mass=80.0_EB, Tpre=1._EB, Tau=1._EB, &
-               Eta=0._EB, Ksi=0._EB, Tdet=0._EB, Speed_ave=0._EB, T_Speed_ave=0._EB, &
-               X_CB=0.0_EB, Y_CB=0.0_EB, X2_CB=0.0_EB, Y2_CB=0.0_EB, UAVE_CB=0.0_EB, VAVE_CB=0.0_EB
-   REAL(EB) :: r_torso=0.15_EB, r_shoulder=0.095_EB, d_shoulder=0.055_EB, angle=0._EB, &
-               torque=0._EB, m_iner=4._EB
-   REAL(EB) :: tau_iner=0.2_EB, angle_old=0._EB, omega=0._EB
-   REAL(EB) :: A=2000._EB, B=0.08_EB, C_Young=120000._EB, Gamma=16000._EB, Kappa=40000._EB, &
-               Lambda=0.5_EB, Commitment=0._EB
-   REAL(EB) :: SumForces=0._EB, IntDose=0._EB, DoseCrit1=0._EB, DoseCrit2=0._EB, SumForces2=0._EB
-   REAL(EB) :: TempMax1=0._EB, FluxMax1=0._EB, TempMax2=0._EB, FluxMax2=0._EB, Density=0._EB, DensityR=0._EB, DensityL=0._EB
-   REAL(EB) :: P_detect_tot=0._EB, v0_fac=1._EB, D_Walls=0._EB
-   REAL(EB) :: T_FallenDown=0._EB, F_FallDown=0._EB, Angle_FallenDown=0._EB, SizeFac_FallenDown=0._EB, T_CheckFallDown=0._EB
-   INTEGER  :: IOR=-1, ILABEL=0, COLOR_INDEX=0, INODE=0, IMESH=-1, IPC=0, IEL=0, I_FFIELD=0, I_Target2=0, ID_CB=-1
-   INTEGER  :: GROUP_ID=0, DETECT1=0, GROUP_SIZE=0, I_Target=0, I_DoorAlgo=0, I_Door_Mode=0, STRS_Direction = 1
-   INTEGER  :: STR_SUB_INDX, SKIP_WALL_FORCE_IOR
-   LOGICAL  :: SHOW=.TRUE., NewRnd=.TRUE., CROWBAR_READ_IN=.FALSE., CROWBAR_UPDATE_V0=.FALSE.
-   LOGICAL  :: SeeDoorXB1=.FALSE., SeeDoorXB2=.FALSE., SeeDoorXYZ1=.FALSE., SeeDoorXYZ2=.FALSE.
-END TYPE HUMAN_TYPE
-
-TYPE HUMAN_GRID_TYPE
-! (x,y,z) Centers of the grid cells in the main evacuation meshes
-! SOOT_DENS: Smoke density at the center of the cell (mg/m3)
-! FED_CO_CO2_O2: Purser's FED for co, co2, and o2
-   REAL(EB) :: X,Y,Z,SOOT_DENS,FED_CO_CO2_O2,TMP_G,RADFLUX
-   INTEGER :: N, N_old, IGRID, IHUMAN, ILABEL
-! IMESH: (x,y,z) which fire mesh, if any
-! II,JJ,KK: Fire mesh cell reference
-   INTEGER  :: IMESH,II,JJ,KK
-END TYPE HUMAN_GRID_TYPE
-
-TYPE HUMAN_GRID_FED_TYPE
-! (x,y,z) Centers of the grid cells in the main evacuation meshes
-! SOOT_DENS: Smoke density at the center of the cell (mg/m3)
-! FED_CO_CO2_O2: Purser's FED for co, co2, and o2
-   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: X,Y,Z,SOOT_DENS,FED_CO_CO2_O2,TMP_G,RADFLUX
-   INTEGER, ALLOCATABLE, DIMENSION(:,:) :: II,JJ,KK,IMESH
-   INTEGER :: N, N_old, IGRID, IHUMAN, ILABEL
-! IMESH: (x,y,z) which fire mesh, if any
-! II,JJ,KK: Fire mesh cell reference
-   INTEGER  :: IBAR,JBAR,KBAR
-END TYPE HUMAN_GRID_FED_TYPE
-
 TYPE SLICE_TYPE
    INTEGER :: I1,I2,J1,J2,K1,K2,GEOM_INDEX=-1,TRNF_INDEX=-1,INDEX,INDEX2=0,Z_INDEX=-999,Y_INDEX=-999,MATL_INDEX=-999,&
               PART_INDEX=0,VELO_INDEX=0,PROP_INDEX=0,REAC_INDEX=0,SLCF_INDEX
    REAL(FB), DIMENSION(2) :: MINMAX
    REAL(FB) :: RLE_MIN, RLE_MAX
    REAL(EB):: AGL_SLICE
-   LOGICAL :: TERRAIN_SLICE=.FALSE.,CELL_CENTERED=.FALSE.,FACE_CENTERED=.FALSE.,RLE=.FALSE.
+   LOGICAL :: TERRAIN_SLICE=.FALSE.,CELL_CENTERED=.FALSE.,FACE_CENTERED=.FALSE.,RLE=.FALSE.,DEBUG=.FALSE.
    CHARACTER(LABEL_LENGTH) :: SLICETYPE='STRUCTURED',SMOKEVIEW_LABEL
    CHARACTER(LABEL_LENGTH) :: SMOKEVIEW_BAR_LABEL,ID='null',MATL_ID='null',TRNF_ID='null'
 END TYPE SLICE_TYPE
@@ -1382,7 +1339,6 @@ TYPE INITIALIZATION_TYPE
    REAL(EB) :: RADIUS           !< Radius of initialization region, like a cone (m)
    REAL(EB) :: DIAMETER=-1._EB  !< Diameter of liquid droplets specified on an INIT line (m)
    REAL(EB) :: PARTICLE_WEIGHT_FACTOR !< Multiplicative factor for particles specified on the INIT line
-   REAL(EB) :: PACKING_RATIO    !< Volume of particles divided by the volume of gas
    REAL(EB) :: CHI_R            !< Radiative fraction of HRRPUV
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: PARTICLE_INSERT_CLOCK  !< Time of last particle insertion (s)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: MASS_FRACTION          !< Mass fraction of gas components
@@ -1401,6 +1357,7 @@ TYPE INITIALIZATION_TYPE
    LOGICAL :: CELL_CENTERED=.FALSE.
    LOGICAL :: UNIFORM=.FALSE.
    LOGICAL :: INVOKED_BY_SURF=.FALSE.  ! Invoked by a SURF line for repeated insertion
+   LOGICAL :: DRY=.FALSE.              ! Indicates if MASS_PER_VOLUME refers to dry material only
    LOGICAL, ALLOCATABLE, DIMENSION(:) :: ALREADY_INSERTED
    CHARACTER(LABEL_LENGTH) :: SHAPE
    CHARACTER(LABEL_LENGTH) :: DEVC_ID
@@ -1523,6 +1480,7 @@ TYPE FILTER_TYPE
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: INITIAL_LOADING !< Array of containing initial filter loading (kg) for each species
    REAL(EB) :: CLEAN_LOSS                                 !< Loss coefficient of a filter when the loading is 0 kg.
    REAL(EB) :: LOADING_LOSS                               !< Multiplier applied to loading to determine filter loss
+   REAL(EB) :: AREA                                       !< Cross-sectional area of filter
 END TYPE FILTER_TYPE
 
 TYPE (FILTER_TYPE), DIMENSION(:), ALLOCATABLE,  TARGET :: FILTER
@@ -1556,7 +1514,7 @@ TYPE DUCTNODE_TYPE
    REAL(EB) :: CP                                          !< Specific heat of node (J/kg/K)
    REAL(EB) :: CP_OLD                                      !< Prior timestep specific heat of node (J/kg/K)
    REAL(EB) :: CP_V                                        !< Specific heat of VENT connected to node (J/kg/K)
-   REAL(EB) :: XYZ(3)                                      !< Node (x,y,z) coordinate (m)
+   REAL(EB) :: XYZ(3)=(/0._EB,0._EB,0._EB/)                !< Node (x,y,z) coordinate (m)
    REAL(EB) :: FILTER_LOSS                                 !< Current loss for a filter in the node
    REAL(EB) :: P                                           !< Pressure at the node (Pa)
    REAL(EB) :: P_OLD                                       !< Prior timestep pressure at the node (Pa)

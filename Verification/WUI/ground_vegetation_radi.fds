@@ -33,7 +33,7 @@
 
 &SURF ID = 'GRASS'
       MATL_ID = 'Dry Grass'
-      PACKING_RATIO(1) = 0.02
+      MASS_PER_VOLUME(1) = 80.
       COLOR = 'FOREST GREEN'
       DRAG_COEFFICIENT = 2.8
       SURFACE_VOLUME_RATIO(1) = 3092. 
@@ -57,7 +57,8 @@
       XB                   = 1.5,2.5,-0.5,0.5,0.0,0.05
       N_PARTICLES_PER_CELL = 1
       CELL_CENTERED        = .TRUE.
-      PACKING_RATIO        = 0.02 /
+      MASS_PER_VOLUME      = 80.
+      DRY                  = T /
 
 &MATL ID                 = 'Dry Grass'
       EMISSIVITY         = 1.

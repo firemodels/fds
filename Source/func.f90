@@ -996,8 +996,8 @@ IF (PRESENT(LP_INDEX)) THEN
 
    LPC => LAGRANGIAN_PARTICLE_CLASS(LPC_INDEX)
    SF => SURFACE(LPC%SURF_INDEX)
+   N_NEW_STORAGE_SLOTS = LPC%NEW_PARTICLE_INCREMENT
    IF (LP_INDEX>M%NLPDIM) THEN
-      N_NEW_STORAGE_SLOTS = 50
       ALLOCATE(LP_DUMMY(M%NLPDIM))
       LP_DUMMY(1:M%NLPDIM) = M%LAGRANGIAN_PARTICLE(1:M%NLPDIM)
       DEALLOCATE(M%LAGRANGIAN_PARTICLE)
@@ -1023,8 +1023,8 @@ IF (PRESENT(LP_INDEX)) THEN
 ELSEIF (PRESENT(WALL_INDEX)) THEN
 
    SF => SURFACE(SURF_INDEX)
+   N_NEW_STORAGE_SLOTS = 1000
    IF (WALL_INDEX>M%N_WALL_CELLS_DIM) THEN
-      N_NEW_STORAGE_SLOTS = 1000
       ALLOCATE(WALL_DUMMY(0:M%N_WALL_CELLS_DIM))
       WALL_DUMMY(0:M%N_WALL_CELLS_DIM) = M%WALL(0:M%N_WALL_CELLS_DIM)
       DEALLOCATE(M%WALL)
@@ -1050,8 +1050,8 @@ ELSEIF (PRESENT(WALL_INDEX)) THEN
 ELSEIF (PRESENT(CFACE_INDEX)) THEN
 
    SF => SURFACE(SURF_INDEX)
+   N_NEW_STORAGE_SLOTS = 1000
    IF (CFACE_INDEX>M%N_CFACE_CELLS_DIM) THEN
-      N_NEW_STORAGE_SLOTS = 1000
       ALLOCATE(CFACE_DUMMY(0:M%N_CFACE_CELLS_DIM))
       CFACE_DUMMY(0:M%N_CFACE_CELLS_DIM) = M%CFACE(0:M%N_CFACE_CELLS_DIM)
       DEALLOCATE(M%CFACE)
@@ -1093,7 +1093,6 @@ IF (BC_INDEX==0) THEN
 ENDIF
 
 IF (BC_INDEX>M%N_BOUNDARY_COORD_DIM) THEN  ! There are no open slots for boundary coordinates
-   N_NEW_STORAGE_SLOTS = 1000
    ALLOCATE(BC_DUMMY(1:M%N_BOUNDARY_COORD_DIM+N_NEW_STORAGE_SLOTS))
    BC_DUMMY(1:M%N_BOUNDARY_COORD_DIM) = M%BOUNDARY_COORD(1:M%N_BOUNDARY_COORD_DIM)
    CALL MOVE_ALLOC(BC_DUMMY,M%BOUNDARY_COORD)
@@ -1125,7 +1124,6 @@ IF (OD_INDEX==0) THEN
 ENDIF
 
 IF (OD_INDEX>M%N_BOUNDARY_ONE_D_DIM) THEN  ! There are no open slots for boundary coordinates
-   N_NEW_STORAGE_SLOTS = 1000
    ALLOCATE(OD_DUMMY(1:M%N_BOUNDARY_ONE_D_DIM+N_NEW_STORAGE_SLOTS))
    OD_DUMMY(1:M%N_BOUNDARY_ONE_D_DIM) = M%BOUNDARY_ONE_D(1:M%N_BOUNDARY_ONE_D_DIM)
    CALL MOVE_ALLOC(OD_DUMMY,M%BOUNDARY_ONE_D)
@@ -1228,6 +1226,7 @@ ONE_D%DDSUM(1:SF%N_LAYERS) = SF%DDSUM(1:SF%N_LAYERS)
 ONE_D%SMALLEST_CELL_SIZE(1:SF%N_LAYERS) = SF%SMALLEST_CELL_SIZE(1:SF%N_LAYERS)
 ONE_D%PART_MASS = 0._EB
 ONE_D%PART_ENTHALPY = 0._EB
+ONE_D%M_DOT_PART_ACTUAL = 0._EB
 DO NN=1,SF%N_MATL
    ONE_D%MATL_COMP(NN)%RHO_DOT = 0._EB
    ONE_D%MATL_COMP(NN)%RHO(0:SF%N_CELLS_INI+1) = SF%RHO_0(0:SF%N_CELLS_INI+1,NN)
@@ -1278,7 +1277,6 @@ IF (BP_INDEX==0) THEN
 ENDIF
 
 IF (BP_INDEX>M%N_BOUNDARY_PROPS_DIM) THEN  ! There are no open slots for boundary coordinates
-   N_NEW_STORAGE_SLOTS = 1000
    ALLOCATE(BP_DUMMY(1:M%N_BOUNDARY_PROPS_DIM+N_NEW_STORAGE_SLOTS))
    BP_DUMMY(1:M%N_BOUNDARY_PROPS_DIM) = M%BOUNDARY_PROPS(1:M%N_BOUNDARY_PROPS_DIM)
    CALL MOVE_ALLOC(BP_DUMMY,M%BOUNDARY_PROPS)
@@ -1335,7 +1333,6 @@ IF (BR_INDEX==0) THEN
 ENDIF
 
 IF (BR_INDEX>M%N_BOUNDARY_RADIA_DIM) THEN  ! There are no open slots for boundary coordinates
-   N_NEW_STORAGE_SLOTS = 1000
    ALLOCATE(BR_DUMMY(1:M%N_BOUNDARY_RADIA_DIM+N_NEW_STORAGE_SLOTS))
    BR_DUMMY(1:M%N_BOUNDARY_RADIA_DIM) = M%BOUNDARY_RADIA(1:M%N_BOUNDARY_RADIA_DIM)
    CALL MOVE_ALLOC(BR_DUMMY,M%BOUNDARY_RADIA)
@@ -1684,6 +1681,7 @@ RC=RC+1 ; CALL EQUATE(OS%REALS(RC,STORAGE_INDEX),ONE_D%T_SCALE,UNPACK_IT)
 RC=RC+1 ; CALL EQUATE(OS%REALS(RC,STORAGE_INDEX),ONE_D%Q_SCALE,UNPACK_IT)
 RC=RC+1 ; CALL EQUATE(OS%REALS(RC,STORAGE_INDEX),ONE_D%T_MATL_PART,UNPACK_IT)
 RC=RC+1 ; CALL EQUATE(OS%REALS(RC,STORAGE_INDEX),ONE_D%B_NUMBER,UNPACK_IT)
+RC=RC+1 ; CALL EQUATE(OS%REALS(RC,STORAGE_INDEX),ONE_D%M_DOT_PART_ACTUAL,UNPACK_IT)
 
 I2 = RC  ! I1 and I2 continue counting reals
 
@@ -1785,7 +1783,6 @@ RC=RC+1 ; CALL EQUATE(OS%REALS(RC,STORAGE_INDEX),BP%PHI_LS,UNPACK_IT)
 RC=RC+1 ; CALL EQUATE(OS%REALS(RC,STORAGE_INDEX),BP%WORK1,UNPACK_IT)
 RC=RC+1 ; CALL EQUATE(OS%REALS(RC,STORAGE_INDEX),BP%WORK2,UNPACK_IT)
 RC=RC+1 ; CALL EQUATE(OS%REALS(RC,STORAGE_INDEX),BP%K_SUPPRESSION,UNPACK_IT)
-RC=RC+1 ; CALL EQUATE(OS%REALS(RC,STORAGE_INDEX),BP%L_OBUKHOV,UNPACK_IT)
 
 I2 = RC
 
@@ -3579,98 +3576,162 @@ ENDIF
 END FUNCTION F_B
 
 
-!> \brief This function computes the flux limited scalar value on a face.
-!> \param A    Velocity.
-!> \param U Scalar in 4 points, (1:2) lower index points to the face, (3:4) upper index points.
-!> \param LIMITER Flux limiter used.
+!> \brief This subroutine computes the flux-limited scalar value on a face.
+!> \param A Array of velocity components (m/s)
+!> \param U Array of scalars
+!> \param F Array of flux-limited scalars
+!> \param I1 Lower I index
+!> \param I2 Upper I index
+!> \param J1 Lower J index
+!> \param J2 Upper J index
+!> \param K1 Lower K index
+!> \param K2 Upper K index
+!> \param IOR Orientation index (1, 2, or 3)
+!> \param LIMITER Indicator of the flux limiting scheme
 
-REAL(EB) FUNCTION SCALAR_FACE_VALUE(A,U,LIMITER)
+!> There are 6 options for flux LIMITER:
+!> 
+!> CENTRAL_LIMITER  = 0
+!> GODUNOV_LIMITER  = 1
+!> SUPERBEE_LIMITER = 2
+!> MINMOD_LIMITER   = 3
+!> CHARM_LIMITER    = 4
+!> MP5_LIMITER      = 5
+!>
+!> Example: x-direction (IOR=1)
+!>
+!>                   location of face
+!>                            
+!>                        F(I,J,K)
+!>   |     o     |     o     |     o     |     o     |
+!>                        A(I,J,K)
+!>     U(I-1,J,K)   U(I,J,K)   U(I+1,J,K)  U(I+2,J,K)
 
-REAL(EB), INTENT(IN) :: A,U(4)
-INTEGER, INTENT(IN) :: LIMITER
+SUBROUTINE GET_SCALAR_FACE_VALUE(A,U,F,I1,I2,J1,J2,K1,K2,IOR,LIMITER)
+
+REAL(EB), INTENT(IN) :: A(0:,0:,0:),U(0:,0:,0:)
+REAL(EB), INTENT(OUT) :: F(0:,0:,0:)
+INTEGER, INTENT(IN) :: LIMITER,I1,I2,J1,J2,K1,K2,IOR
 REAL(EB) :: R,B,DU_UP,DU_LOC,V(-2:2)
+INTEGER :: I,J,K,IM1,JM1,KM1,IP1,JP1,KP1,IP2,JP2,KP2
 
-! The scalar is denoted U, and the velocity is denoted A.
-! The divergence (computed elsewhere) uses a central difference across
-! the cell subject to a flux LIMITER.  The flux LIMITER choices are:
-!
-! CENTRAL_LIMITER  = 0
-! GODUNOV_LIMITER  = 1
-! SUPERBEE_LIMITER = 2
-! MINMOD_LIMITER   = 3
-! CHARM_LIMITER    = 4
-! MP5_LIMITER      = 5
-!
-!                    location of face
-!
-!                            f
-!    |     o     |     o     |     o     |     o     |
-!                            A
-!         U(1)        U(2)        U(3)        U(4)
+SELECT CASE(IOR)
+   CASE(1) ; IM1=-1 ; JM1= 0 ; KM1= 0 ; IP1=1 ; JP1=0 ; KP1=0 ; IP2=2 ; JP2=0 ; KP2=0
+   CASE(2) ; IM1= 0 ; JM1=-1 ; KM1= 0 ; IP1=0 ; JP1=1 ; KP1=0 ; IP2=0 ; JP2=2 ; KP2=0
+   CASE(3) ; IM1= 0 ; JM1= 0 ; KM1=-1 ; IP1=0 ; JP1=0 ; KP1=1 ; IP2=0 ; JP2=0 ; KP2=2
+END SELECT
 
-WIND_DIRECTION_IF: IF (A>0._EB) THEN
-
-   ! the flow is left to right
-   DU_UP  = U(2)-U(1)
-   DU_LOC = U(3)-U(2)
-
-   R = 0._EB
-   B = 0._EB
-
-   SELECT CASE(LIMITER)
-      CASE(0) ! central differencing
-         SCALAR_FACE_VALUE = 0.5_EB*(U(2)+U(3))
-      CASE(1) ! first-order upwinding
-         SCALAR_FACE_VALUE = U(2)
-      CASE(2) ! SUPERBEE, Roe (1986)
-         IF (ABS(DU_LOC)>TWO_EPSILON_EB) R = DU_UP/DU_LOC
-         B = MAX(0._EB,MIN(2._EB*R,1._EB),MIN(R,2._EB))
-         SCALAR_FACE_VALUE = U(2) + 0.5_EB*B*DU_LOC
-      CASE(3) ! MINMOD
-         IF (ABS(DU_LOC)>TWO_EPSILON_EB) R = DU_UP/DU_LOC
-         B = MAX(0._EB,MIN(1._EB,R))
-         SCALAR_FACE_VALUE = U(2) + 0.5_EB*B*DU_LOC
-      CASE(4) ! CHARM
-         IF (ABS(DU_UP)>TWO_EPSILON_EB) R = DU_LOC/DU_UP
-         IF (R>0._EB) B = R*(3._EB*R+1._EB)/((R+1._EB)**2)
-         SCALAR_FACE_VALUE = U(2) + 0.5_EB*B*DU_UP
-      CASE(5) ! MP5, Suresh and Huynh (1997)
-         V = (/2._EB*U(1)-U(2),U(1:4)/)
-         SCALAR_FACE_VALUE = MP5()
-   END SELECT
-
-ELSE WIND_DIRECTION_IF
-
-   ! the flow is right to left
-   DU_UP  = U(4)-U(3)
-   DU_LOC = U(3)-U(2)
-
-   R = 0._EB
-   B = 0._EB
-
-   SELECT CASE(LIMITER)
-      CASE(0) ! central differencing
-         SCALAR_FACE_VALUE = 0.5_EB*(U(2)+U(3))
-      CASE(1) ! first-order upwinding
-         SCALAR_FACE_VALUE = U(3)
-      CASE(2) ! SUPERBEE, Roe (1986)
-         IF (ABS(DU_LOC)>TWO_EPSILON_EB) R = DU_UP/DU_LOC
-         B = MAX(0._EB,MIN(2._EB*R,1._EB),MIN(R,2._EB))
-         SCALAR_FACE_VALUE = U(3) - 0.5_EB*B*DU_LOC
-      CASE(3) ! MINMOD
-         IF (ABS(DU_LOC)>TWO_EPSILON_EB) R = DU_UP/DU_LOC
-         B = MAX(0._EB,MIN(1._EB,R))
-         SCALAR_FACE_VALUE = U(3) - 0.5_EB*B*DU_LOC
-      CASE(4) ! CHARM
-         IF (ABS(DU_UP)>TWO_EPSILON_EB) R = DU_LOC/DU_UP
-         IF (R>0._EB) B = R*(3._EB*R+1._EB)/((R+1._EB)**2)
-         SCALAR_FACE_VALUE = U(3) - 0.5_EB*B*DU_UP
-      CASE(5) ! MP5, Suresh and Huynh (1997)
-         V = (/2._EB*U(4)-U(3),U(4),U(3),U(2),U(1)/)
-         SCALAR_FACE_VALUE = MP5()
-    END SELECT
-
-ENDIF WIND_DIRECTION_IF
+!$OMP PARALLEL IF(I2>1)
+SELECT CASE(LIMITER)
+   CASE(0) ! central differencing
+      !$OMP DO SCHEDULE(STATIC)
+      DO K=K1,K2
+         DO J=J1,J2
+            DO I=I1,I2
+                  F(I,J,K) = 0.5_EB*(U(I,J,K) + U(I+IP1,J+JP1,K+KP1))
+            ENDDO
+         ENDDO
+      ENDDO
+      !$OMP END DO
+   CASE(1) ! first-order upwinding
+      !$OMP DO SCHEDULE(STATIC)
+      DO K=K1,K2
+         DO J=J1,J2
+            DO I=I1,I2
+               IF (A(I,J,K)>0._EB) THEN
+                  F(I,J,K) = U(I,J,K)
+               ELSE
+                  F(I,J,K) = U(I+IP1,J+JP1,K+KP1)
+               ENDIF
+            ENDDO
+         ENDDO
+      ENDDO
+      !$OMP END DO
+   CASE(2) ! SUPERBEE, Roe (1986)
+      !$OMP DO SCHEDULE(STATIC) PRIVATE(DU_UP,DU_LOC,B,R)
+      DO K=K1,K2
+         DO J=J1,J2
+            DO I=I1,I2
+               DU_LOC = U(I+IP1,J+JP1,K+KP1)-U(I,J,K)
+               IF (A(I,J,K)>0._EB) THEN
+                  DU_UP  = U(I,J,K)-U(I+IM1,J+JM1,K+KM1)
+                  R = DU_UP/(DU_LOC+SIGN(TWO_EPSILON_EB,DU_LOC))
+                  B = MAX(0._EB,MIN(2._EB*R,1._EB),MIN(R,2._EB))
+                  F(I,J,K) = U(I,J,K) + 0.5_EB*B*DU_LOC
+               ELSE
+                  DU_UP  = U(I+IP2,J+JP2,K+KP2)-U(I+IP1,J+JP1,K+KP1)
+                  R = DU_UP/(DU_LOC+SIGN(TWO_EPSILON_EB,DU_LOC))
+                  B = MAX(0._EB,MIN(2._EB*R,1._EB),MIN(R,2._EB))
+                  F(I,J,K) = U(I+IP1,J+JP1,K+KP1) - 0.5_EB*B*DU_LOC
+               ENDIF
+            ENDDO
+         ENDDO
+      ENDDO
+      !$OMP END DO
+   CASE(3) ! MINMOD
+      !$OMP DO SCHEDULE(STATIC) PRIVATE(DU_UP,DU_LOC,B,R)
+      DO K=K1,K2
+         DO J=J1,J2
+            DO I=I1,I2
+               DU_LOC = U(I+IP1,J+JP1,K+KP1)-U(I,J,K)
+               IF (A(I,J,K)>0._EB) THEN
+                  DU_UP  = U(I,J,K)-U(I+IM1,J+JM1,K+KM1)
+                  R = DU_UP/(DU_LOC+SIGN(TWO_EPSILON_EB,DU_LOC))
+                  B = MAX(0._EB,MIN(R,1._EB))
+                  F(I,J,K) = U(I,J,K) + 0.5_EB*B*DU_LOC
+               ELSE
+                  DU_UP  = U(I+IP2,J+JP2,K+KP2)-U(I+IP1,J+JP1,K+KP1)
+                  R = DU_UP/(DU_LOC+SIGN(TWO_EPSILON_EB,DU_LOC))
+                  B = MAX(0._EB,MIN(R,1._EB))
+                  F(I,J,K) = U(I+IP1,J+JP1,K+KP1) - 0.5_EB*B*DU_LOC
+               ENDIF
+            ENDDO
+         ENDDO
+      ENDDO
+      !$OMP END DO
+   CASE(4) ! CHARM
+      !$OMP DO SCHEDULE(STATIC) PRIVATE(DU_UP,DU_LOC,B,R)
+      DO K=K1,K2
+         DO J=J1,J2
+            DO I=I1,I2
+               DU_LOC = U(I+IP1,J+JP1,K+KP1)-U(I,J,K)
+               IF (A(I,J,K)>0._EB) THEN
+                  DU_UP  = U(I,J,K)-U(I+IM1,J+JM1,K+KM1)
+                  R = 0._EB
+                  B = 0._EB
+                  IF (ABS(DU_UP)>TWO_EPSILON_EB) R = DU_LOC/DU_UP
+                  IF (R>0._EB) B = R*(3._EB*R+1._EB)/((R+1._EB)**2)
+                  F(I,J,K) = U(I,J,K) + 0.5_EB*B*DU_UP
+               ELSE
+                  DU_UP  = U(I+IP2,J+JP2,K+KP2)-U(I+IP1,J+JP1,K+KP1)
+                  R = 0._EB
+                  B = 0._EB
+                  IF (ABS(DU_UP)>TWO_EPSILON_EB) R = DU_LOC/DU_UP
+                  IF (R>0._EB) B = R*(3._EB*R+1._EB)/((R+1._EB)**2)
+                  F(I,J,K) = U(I+IP1,J+JP1,K+KP1) - 0.5_EB*B*DU_UP
+               ENDIF
+            ENDDO
+         ENDDO
+      ENDDO
+      !$OMP END DO
+   CASE(5) ! MP5, Suresh and Huynh (1997)
+      DO K=K1,K2
+         DO J=J1,J2
+            DO I=I1,I2
+               IF (A(I,J,K)>0._EB) THEN
+                  V = (/2._EB*U(I+IM1,J+JM1,K+KM1)-U(I,J,K),&
+                       U(I+IM1,J+JM1,K+KM1),U(I,J,K),U(I+IP1,J+JP1,K+KP1),U(I+IP2,J+JP2,K+KP2)/)
+                  F(I,J,K) = MP5()
+               ELSE
+                  V = (/2._EB*U(I+IP2,J+JP2,K+KP2)-U(I+IP1,J+JP1,K+KP1),&
+                       U(I+IP2,J+JP2,K+KP2),U(I+IP1,J+JP1,K+KP1),U(I,J,K),U(I+IM1,J+JM1,K+KM1)/)
+                  F(I,J,K) = MP5()
+               ENDIF
+            ENDDO
+         ENDDO
+      ENDDO
+END SELECT
+!$OMP END PARALLEL
 
 CONTAINS
 
@@ -3701,7 +3762,7 @@ ENDIF
 
 END FUNCTION MP5
 
-END FUNCTION SCALAR_FACE_VALUE
+END SUBROUTINE GET_SCALAR_FACE_VALUE
 
 END MODULE MATH_FUNCTIONS
 

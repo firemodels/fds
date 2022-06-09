@@ -192,7 +192,10 @@ OVERALL_INSERT_LOOP: DO
             IF (IOS==0) THEN
                READ(LU_VEG_IN) VXMIN,VXMAX,VYMIN,VYMAX,VZMIN,VZMAX
                ! Skip if volume containing vegetation is entirely outside the current mesh
-               IF (VXMIN>XF .OR. VXMAX<XS .OR. VYMIN>YF .OR. VYMAX<YS .OR. VZMIN>ZF .OR. VZMAX<ZS) CYCLE
+               IF (VXMIN>XF .OR. VXMAX<XS .OR. VYMIN>YF .OR. VYMAX<YS .OR. VZMIN>ZF .OR. VZMAX<ZS) THEN
+                  IN%ALREADY_INSERTED(NM)=.TRUE.
+                  CYCLE
+               ENDIF
                ! Voxel resolution
                READ(LU_VEG_IN) VDX,VDY,VDZ
                ! Number of vegetation containing voxels
@@ -206,7 +209,7 @@ OVERALL_INSERT_LOOP: DO
             ELSE
                WRITE(MESSAGE,'(A,I0,A,A,A)') 'ERROR: INIT ',INIT_INDEX,', could not read binary bulk density file ', &
                                          TRIM(IN%BULK_DENSITY_FILE),'. Check file exists.'
-               CALL SHUTDOWN(MESSAGE); RETURN
+               CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.); RETURN
             ENDIF
          ENDIF
       ENDIF
@@ -647,7 +650,16 @@ INSERT_TYPE_LOOP: DO INSERT_TYPE = 1,2
             ! specify generation only for regions of burning
             IF (.NOT. ONE_D%M_DOT_G_PP_ADJUST(REACTION(1)%FUEL_SMIX_INDEX)>0._EB) CYCLE INSERT_TYPE_LOOP
          ENDIF
-
+         ! If there is a flow ramp and the value is zero, return.
+         IF (SF%PARTICLE_MASS_FLUX > 0._EB) THEN
+            IF (ABS(ONE_D%T_IGN-T_BEGIN)<=TWO_EPSILON_EB .AND. SF%RAMP_INDEX(TIME_PART)>=1) THEN
+               TSI = T
+            ELSE
+               TSI = T - ONE_D%T_IGN
+            ENDIF
+            FLOW_RATE = EVALUATE_RAMP(TSI,SF%RAMP_INDEX(TIME_PART),TAU=SF%TAU(TIME_PART))*SF%PARTICLE_MASS_FLUX
+            IF (FLOW_RATE < TWO_EPSILON_EB) RETURN
+         ENDIF
          LPC => LAGRANGIAN_PARTICLE_CLASS(ILPC)
 
          ! Evalutate if we need to skip ILPC and return if no N_LPC
@@ -852,13 +864,7 @@ INSERT_TYPE_LOOP: DO INSERT_TYPE = 1,2
          SELECT CASE (INSERT_TYPE)
             CASE (1) ! PART_ID on SURF
                IF (MASS_SUM > 0._EB) THEN
-                  IF (SF%PARTICLE_MASS_FLUX > 0._EB) THEN
-                     IF (ABS(ONE_D%T_IGN-T_BEGIN)<=TWO_EPSILON_EB .AND. SF%RAMP_INDEX(TIME_PART)>=1) THEN
-                        TSI = T
-                     ELSE
-                        TSI = T - ONE_D%T_IGN
-                     ENDIF
-                     FLOW_RATE = EVALUATE_RAMP(TSI,SF%RAMP_INDEX(TIME_PART),TAU=SF%TAU(TIME_PART))*SF%PARTICLE_MASS_FLUX
+                  IF (SF%PARTICLE_MASS_FLUX > 0._EB) THEN                  
                      DO I=1,SF%NPPC
                         LP => LAGRANGIAN_PARTICLE(LP_INDEX_LOOKUP(I))
                         LP%PWT = LP%PWT * FLOW_RATE*ONE_D%AREA_ADJUST*ONE_D%AREA*SF%DT_INSERT/MASS_SUM
@@ -870,7 +876,6 @@ INSERT_TYPE_LOOP: DO INSERT_TYPE = 1,2
                      ENDDO
                   ENDIF
                ENDIF
-
 
             CASE (2) ! PART_ID on MATL
                IF (MASS_SUM > 0._EB) THEN
@@ -893,7 +898,7 @@ INSERT_TYPE_LOOP: DO INSERT_TYPE = 1,2
       ! Decrement mass, enthalpy, and aggregation time for current insertion interval
       ONE_D%PART_MASS = MAX(0._EB,1-SF%DT_INSERT/(ONE_D%T_MATL_PART+TINY_EB))*ONE_D%PART_MASS
       ONE_D%PART_ENTHALPY = MAX(0._EB,1-SF%DT_INSERT/(ONE_D%T_MATL_PART+TINY_EB))*ONE_D%PART_ENTHALPY
-      ONE_D%T_MATL_PART = MAX(0._EB,ONE_D%T_MATL_PART-SF%DT_INSERT)    
+      ONE_D%T_MATL_PART = MAX(0._EB,ONE_D%T_MATL_PART-SF%DT_INSERT)
    ENDIF
 
 ENDDO INSERT_TYPE_LOOP
@@ -2232,15 +2237,15 @@ END SUBROUTINE MOVE_ON_SOLID
 
 SUBROUTINE MOVE_IN_GAS
 
-USE PHYSICAL_FUNCTIONS, ONLY : DRAG, GET_VISCOSITY, LES_FILTER_WIDTH_FUNCTION
+USE PHYSICAL_FUNCTIONS, ONLY : DRAG, GET_VISCOSITY, LES_FILTER_WIDTH_FUNCTION, SURFACE_DENSITY
 USE MATH_FUNCTIONS, ONLY : AFILL2, EVALUATE_RAMP, RANDOM_CHOICE, BOX_MULLER
 REAL(EB) :: UBAR,VBAR,WBAR,RVC,UREL,VREL,WREL,QREL,RHO_G,TMP_G,MU_FILM, &
             U_OLD,V_OLD,W_OLD,ZZ_GET(1:N_TRACKED_SPECIES),WAKE_VEL,DROP_VOL_FRAC,RE_WAKE,&
             WE_G,T_BU_BAG,T_BU_STRIP,MPOM,SFAC,BREAKUP_RADIUS(0:NDC),&
             DD,DD_X,DD_Y,DD_Z,DW_X,DW_Y,DW_Z,K_TERM(3),Y_TERM(3),C_DRAG,A_DRAG,X_WGT,Y_WGT,Z_WGT,&
-            GX_LOC,GY_LOC,GZ_LOC,DRAG_MAX(3)=0._EB,SUM_RHO,K_SGS,U_P,KN,M_DOT
+            GX_LOC,GY_LOC,GZ_LOC,DRAG_MAX(3)=0._EB,K_SGS,U_P,KN,M_DOT,EMBER_DENSITY,EMBER_VOLUME
 REAL(EB), SAVE :: BETA
-INTEGER :: IIX,JJY,KKZ,SURF_INDEX,N
+INTEGER :: IIX,JJY,KKZ
 
 ! Save current values of particle velocity components
 
@@ -2437,6 +2442,8 @@ IF (LPC%DRAG_LAW/=SCREEN_DRAG .AND. LPC%DRAG_LAW/=POROUS_DRAG) THEN
       A_DRAG = PI*R_D**2
    ELSE
       SELECT CASE(SF%GEOMETRY)
+         ! Note: LPC%SHAPE_FACTOR=0.25 by default, which is analytically correct for SURF_SPHERICAL,
+         !       and accounts for random orientations of other geometries
          CASE(SURF_CARTESIAN)
             A_DRAG = 2._EB*SF%LENGTH*SF%WIDTH*LPC%SHAPE_FACTOR
             ! For disk drag, allow for different area for each particle
@@ -2452,13 +2459,18 @@ ENDIF
 ! Experimental ember generation model
 
 IF (LPC%EMBER_PARTICLE .AND. .NOT.LP%EMBER) THEN
-   SURF_INDEX = LAGRANGIAN_PARTICLE_CLASS(LP%CLASS_INDEX)%SURF_INDEX
-   SF => SURFACE(SURF_INDEX)
-   SUM_RHO = 0._EB
-   DO N=1,SF%N_MATL
-      SUM_RHO = SUM_RHO + ONE_D%MATL_COMP(N)%RHO(1)
-   ENDDO
-   IF ( SUM_RHO < LPC%EMBER_DENSITY_THRESHOLD .AND. QREL > LPC%EMBER_VELOCITY_THRESHOLD ) LP%EMBER = .TRUE.
+   SELECT CASE(SF%GEOMETRY)
+      CASE(SURF_CARTESIAN)
+         EMBER_VOLUME = SF%LENGTH * SF%WIDTH * 2._EB*R_D
+      CASE(SURF_CYLINDRICAL)
+         EMBER_VOLUME = SF%LENGTH * PI*R_D**2
+      CASE(SURF_SPHERICAL)
+         EMBER_VOLUME = FOTHPI * R_D**3
+   END SELECT
+   EMBER_DENSITY = 0._EB
+   IF (EMBER_VOLUME>TWO_EPSILON_EB) EMBER_DENSITY = LP%MASS/EMBER_VOLUME
+   IF ( EMBER_DENSITY < LPC%EMBER_DENSITY_THRESHOLD .AND. &
+        QREL > LPC%EMBER_VELOCITY_THRESHOLD ) LP%EMBER = .TRUE.
 ENDIF
 
 ! Move the particles unless they are STATIC
@@ -2500,9 +2512,9 @@ PARTICLE_NON_STATIC_IF: IF (.NOT.LPC%STATIC .OR. LP%EMBER) THEN ! Move airborne,
    IF (BETA>TWO_EPSILON_EB) THEN
       MPOM = LP%PWT*RVC/RHO_G
       M_DOT = SUM(ONE_D%M_DOT_G_PP_ACTUAL(1:N_TRACKED_SPECIES))*ONE_D%AREA
-      LP%ACCEL_X = LP%ACCEL_X + MPOM*(LP%MASS*(U_OLD-LP%U)/DT + M_DOT*UREL)
-      LP%ACCEL_Y = LP%ACCEL_Y + MPOM*(LP%MASS*(V_OLD-LP%V)/DT + M_DOT*VREL)
-      LP%ACCEL_Z = LP%ACCEL_Z + MPOM*(LP%MASS*(W_OLD-LP%W)/DT + M_DOT*WREL)
+      LP%ACCEL_X = LP%ACCEL_X + MPOM*(LP%MASS*((U_OLD-LP%U)/DT_P+GX_LOC) + M_DOT*UREL)
+      LP%ACCEL_Y = LP%ACCEL_Y + MPOM*(LP%MASS*((V_OLD-LP%V)/DT_P+GY_LOC) + M_DOT*VREL)
+      LP%ACCEL_Z = LP%ACCEL_Z + MPOM*(LP%MASS*((W_OLD-LP%W)/DT_P+GZ_LOC) + M_DOT*WREL)
    ELSE
       LP%ACCEL_X  = 0._EB
       LP%ACCEL_Y  = 0._EB
@@ -3107,7 +3119,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
 
             IF (H_V < 0._EB) THEN
                WRITE(MESSAGE,'(A,A)') 'Numerical instability in particle energy transport, H_V for ',TRIM(SS%ID)
-               CALL SHUTDOWN(MESSAGE)
+               CALL SHUTDOWN(MESSAGE,PROCESS_0_ONLY=.FALSE.)
                RETURN
             ENDIF
 

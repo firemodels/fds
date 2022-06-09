@@ -19,7 +19,7 @@
 
  WIND SPEED=1. /
 
-&SURF ID='HOT', TMP_FRONT=700., EMISSIVITY=1., HEAT_TRANSFER_COEFFICIENT=0. /
+&SURF ID='HOT', TMP_FRONT=800., EMISSIVITY=1., HEAT_TRANSFER_COEFFICIENT=0. /
 
 &MATL ID = 'SOIL'
       CONDUCTIVITY = 0.25             
@@ -34,7 +34,7 @@
 &SURF ID = 'GRASS'
       MATL_ID = 'Dry Grass','SOIL' 
       MOISTURE_FRACTION(1) = 0.1
-      PACKING_RATIO(1) = 0.01
+      MASS_PER_VOLUME(1) = 4.
       COLOR = 'FOREST GREEN'
       DRAG_COEFFICIENT = 2.8
       SURFACE_VOLUME_RATIO(1) = 3092. 
@@ -58,7 +58,8 @@
       XB                   = 1.0,2.0,-0.5,0.5,1.5,1.575
       N_PARTICLES_PER_CELL = 1
       CELL_CENTERED        = .TRUE.
-      PACKING_RATIO        = 0.01 /
+      MASS_PER_VOLUME      = 4.
+      DRY                  = T /
 
 &REAC FUEL='WOOD FUEL VAPOR'
       FYI='Ritchie, et al., 5th IAFSS, C_3.4 H_6.2 O_2.5'

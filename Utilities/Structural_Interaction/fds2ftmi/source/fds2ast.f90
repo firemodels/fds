@@ -363,7 +363,7 @@ LOOP_FDS2AST:DO P=1,COUNTER
    END IF
    IF (VCOUNT(3)>1) THEN
       DO I=1,V
-      M_AST(I,3)=M_AST(I,3)/VCOUNT(3)
+         M_AST(I,3)=M_AST(I,3)/VCOUNT(3)
       END DO
    END IF
    IF (VCOUNT(5)>1) THEN

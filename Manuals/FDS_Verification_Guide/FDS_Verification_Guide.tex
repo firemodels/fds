@@ -2050,11 +2050,13 @@ Atmospheric turbulence is affected by the stability of the boundary layer.  A st
 
 \section{Ekman Layers (\texorpdfstring{\textct{ekman\_}}{ekman\_})}
 
-In a simple turbulent channel flow, the resulting boundary layer profile results from the balance between the streamwise pressure gradient and the turbulent stresses.  In an Ekman layer, the Coriolis force is also part of in the balance.  Here, we are concerned with Ekman layers in the atmosphere.  The Coriolis force has the effect of twisting the atmospheric boundary layer---near the surface there is a component of the wind aligned with the pressure gradient, but aloft the winds tend to be geostrophic, meaning they run parallel to isobars (perpendicular to the pressure gradient).  In FDS, input of a geostrophic wind implies a mean pressure gradient in the orthogonal direction (see FDS User Guide \cite{FDS_Users_Guide}).
+In a simple turbulent channel flow, the resulting boundary layer profile results from the balance between the streamwise pressure gradient and the turbulent stresses.  In an Ekman layer, the Coriolis force is also part of the balance.  With Ekman layers the Coriolis force has the effect of twisting the atmospheric boundary layer---near the surface there is a component of the wind aligned with the pressure gradient, but aloft the winds tend to be geostrophic, meaning they run parallel to isobars (perpendicular to the pressure gradient).  In FDS, input of a geostrophic wind implies a mean pressure gradient in the orthogonal direction (see FDS User Guide \cite{FDS_Users_Guide}).
 
-In atmospheric flows, it is difficult to separate the forces for verification purposes.  In this section, we will undertake an admittedly weak form of verification, namely, code to code comparison.  We compare FDS with the results from Schoenberg \cite{Schoenberg:2004} where OpenFOAM is modified for atmospheric flows.  We use the same domain, grid resolution, and---as closely as possible---initial conditions as Schoenberg.  The latitude is specified as 45$^\circ$ north (for specifying the Coriolis force).  We use the Deardorff turbulence model with stability correction and we also implement a variable turbulent Prandtl number, as is done in Schoenberg.  The main difference in the models is that Schoenberg solves a transport equation for $k_{sgs}$ whereas FDS uses a simple algebraic closure (see FDS Tech Guide \cite{FDS_Math_Guide}).  Further, it was difficult to discern the exact initialization procedure from the Schoenberg report, so there are likely some minor differences that can account for the small discrepancies we see in the FDS results.  It should also be noted that the Schoenberg simulations apply a Boussinesq assumption and thus do not account for the pressure stratification term in the energy equation.  Hence, to match the Schoenberg results, we had to set {\ct STRATIFICATION=F} for FDS, which is counterintuitive for an atmospheric flow.  In practice, this should not be done.
+In atmospheric flows, it is difficult to separate the forces for verification purposes.  In this section, we will undertake an admittedly weak form of verification, namely, code-to-code comparison.  We compare FDS with the results from Schoenberg \cite{Schoenberg:2004} where OpenFOAM is modified for atmospheric flows.  We use the same domain, grid resolution, and---as closely as possible---initial conditions as Schoenberg.  The latitude is specified as 45$^\circ$ north (for specifying the Coriolis force).  We use the Deardorff turbulence model with constant turbulent Prandtl number, which differs from Schoenberg, who uses a dynamic turbulent Prantdl number.  The main difference in the models is that Schoenberg solves a transport equation for $k_{sgs}$ whereas FDS uses a simple algebraic closure (see FDS Tech Guide \cite{FDS_Math_Guide}).  Further, it was difficult to discern the exact initialization procedure from the Schoenberg report, so there are likely some minor differences that can account for the small discrepancies we see in the FDS results.  It should also be noted that the Schoenberg simulations apply a Boussinesq assumption and thus do not account for the pressure stratification term in the energy equation.  Hence, to match the Schoenberg results as closely as possible, we have set {\ct STRATIFICATION=F} for FDS, which is counterintuitive for an atmospheric flow.  In practice, this should not be done.
 
-Three cases are run: neutral, stable, and unstable boundary layers.  The domain size, grid resolution, surface flux condition, and geostrophic wind driving force are presented in Table \ref{tab:ekman_param} (adapted from \cite{Schoenberg:2004}). Note that the density and specific heat are specified in the FDS input file such that the surface heat flux in either \si{K.m/s} or \si{W/m^2} are roughly the same.  The boundary conditions are periodic in $x$ and $y$ and no flux at the top of the domain.  Note that this makes achieving a steady state impossible for the stable and unstable cases.  This is another reason why the code comparison is difficult---essentially we are comparing the resulting profiles after approximately 40 hours of real time evolution.  Schoenberg uses a spin up process of running the neutral case for up to 30 hours before transitioning to stratification.  The surface aerodynamic roughness used by Schoenberg is $z_0 = 0.1$ m.  This translates to a sand grain roughness of 3.0 m in FDS.  Note that the input files for the {\ct ekman\_*} series are stored with the validation suite (see {\ct fds/Validation/Schoenberg\_Ekman\_Layers/}), since the cases use 16 processors and take a few hours to complete.
+Three cases are run: neutral, stable, and unstable boundary layers.  The domain size, grid resolution, surface flux condition, and geostrophic wind driving force are presented in Table \ref{tab:ekman_param} (adapted from \cite{Schoenberg:2004}). Note that the density and specific heat are specified in the FDS input file such that the surface heat flux in either \si{K.m/s} or \si{W/m^2} are roughly the same.  The boundary conditions are periodic in $x$ and $y$ and no flux at the top of the domain.  Note that this makes achieving a steady state impossible for the stable and unstable cases.  This is another reason why the code comparison is difficult---essentially we are comparing the resulting profiles after approximately 40 hours of real time evolution.  Schoenberg uses a spin up process of running the neutral case for up to 30 hours before transitioning to stratification.  The surface aerodynamic roughness used by Schoenberg is $z_0 = 0.1$ m for the unstable and neutral cases and $z_0 = 0.13$ m for the stable case.  This translates to a sand grain roughness of 3.0 m and 3.9 m, respectively, in FDS.  Note that the input files for the {\ct ekman\_*} series are stored with the validation suite (see {\ct fds/Validation/Schoenberg\_Ekman\_Layers/}), since the cases use 16 processors and take a few hours to complete.
+
+The differences seen in the stable case may be attributed to (i) the use of a dynamic turbulent Prandtl number by Schoenberg and (ii) FDS not making the Boussinesq approximation. It may be noted that the winds aloft in the FDS run match the specified geostrophic wind $U_g=7$ m/s for the stable case.
 
 \begin{table}[ht]
 \centering
@@ -2502,6 +2504,9 @@ FDS has an option to perform an axially-symmetric calculation, which can be usef
 \label{cyl_test_fig}
 \end{figure}
 
+
+\newpage
+
 \section{Velocity boundary condition implementation (\texorpdfstring{\textct{velocity\_bc\_test}}{velocity\_bc\_test})}
 \label{velocity_bc_test}
 
@@ -2523,6 +2528,8 @@ In this example, a simple jet is created by pushing air through a square duct. T
 \label{velocity_bc_test_plot}
 \end{figure}
 
+
+\newpage
 
 \section{Checking the divergence constraint}
 \label{divergence_test}
@@ -2564,6 +2571,8 @@ In the third example, air is pushed through a two-dimensional channel where obst
 
 
 
+\newpage
+
 \section{Multi-mesh Pressure and Temperature Lapse (\texorpdfstring{\textct{lapse\_rate}}{lapse\_rate})}
 \label{lapse_rate}
 
@@ -2578,6 +2587,8 @@ A 10 m x 10 m x 40 m volume is initialized with {\ct LAPSE\_RATE=-0.01}.  The vo
 \label{lapse_rate_fig}
 \end{figure}
 
+
+\newpage
 
 \section{Randomly Overlapping Meshes (\texorpdfstring{\textct{random\_meshes}}{random\_meshes})}
 \label{random_meshes}
@@ -2594,6 +2605,8 @@ In most FDS simulations, multiple meshes are positioned adjacent to each other t
 \end{figure}
 
 
+\newpage
+
 \section{Spurious Obstruction Effects (\texorpdfstring{\textct{hole}}{hole})}
 \label{hole}
 
@@ -2606,6 +2619,8 @@ It is not uncommon for subtle differences between two nearly identical input fil
 \label{hole_fig}
 \end{figure}
 
+
+\newpage
 
 \section{OpenMP Thread Checking (\texorpdfstring{\textct{race\_test}}{race\_test})}
 \label{race_test}
@@ -2622,6 +2637,8 @@ OpenMP is used in FDS to sub-divide the work of the do-loops among multiple core
 \end{figure}
 
 
+\newpage
+
 \section{Multi-Mesh Layer Height Calculation (\texorpdfstring{\textct{layer}}{layer})}
 \label{layer}
 
@@ -2637,6 +2654,19 @@ The test cases called {\ct Miscellaneous/layer\_1mesh.fds} and {\ct layer\_4mesh
 \end{figure}
 
 
+\newpage
+
+\section{The Restart Feature}
+\label{device_restart}
+
+FDS has a feature with which users can stop and restart simulations. When a simulation is stopped, all necessary variables are packed into arrays and written out to a file. This feature can be fragile when the input file includes devices and controls that initiate actions at certain times. In the simulation named {\ct Restart/device\_restart\_a.fds}, a multi-room fire simulation is stopped and then restarted at 40~s. Before the restart, at 30~s, a door is opened and high temperature gases flow from the fire room into a corridor. After the restart, the case proceeds until 60~s. Another simulation called {\ct device\_restart\_base\_case} runs uninterrupted. The temperature just outside of the fire room door (Fig.~\ref{device_restart_fig}) should be similar in both simulations. The temperatures are not exactly the same because restarting a simulation can lead to minor changes in the algorithm at the time of the restart. 
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/device_restart}
+\caption[Result of the \textct{device\_restart} test case]{Temperature outside of a door to a fire room that is opened at 30~s.}
+\label{device_restart_fig}
+\end{figure}
 
 
 \chapter{Thermal Radiation}
@@ -4424,7 +4454,7 @@ Figure~\ref{surf_mass_two_species} shows the results of three test cases involvi
 
 \clearpage
 
-\subsection{Rate of Solid Particle Decomposition (\texorpdfstring{\textct{solid\_particle\_decomposition}}{solid\_particle\_decomposition})}
+\subsection{Rate of Solid Particle Decomposition (\texorpdfstring{\textct{part\_baking\_soda}}{part\_baking\_soda})}
 \label{sec:solid_particle_decomposition}
 \label{part_baking_soda}
 
@@ -4821,7 +4851,7 @@ This is an example of a comparison of a candidate solid phase model with TGA dat
 \subsection{TGA for a Charring Sample (\texorpdfstring{\textct{Needle\_TGA}}{Needle\_TGA})}
 \label{Needle_TGA}
 
-In this section, kinetic parameters for a longleaf pine needle are derived based on two TGA measurements\footnote{TGA data provided by the Forest Products Laboratory of the U.S. Forest Service} (Cases~A and B of Table~\ref{Needle_TGA_table}), one done in air and one done in nitrogen, and then checked against 6 further measurements done with a variety of moisture contents and test conditions, as shown in Table~\ref{Needle_TGA_table}.
+In this section, kinetic parameters for a longleaf pine needle are derived based on a set of TGA measurements\footnote{TGA data provided by the Forest Products Laboratory of the U.S. Forest Service}. Cases~A and B listed in Table~\ref{Needle_TGA_table} have been used to derive the kinetic parameters for all eight cases. The mass and mass loss rate curves for all eight cases are shown in Figs.~\ref{Needle_TGA_plot_A_B} through \ref{Needle_TGA_plot_G_H} on the following pages.
 
 \begin{table}[!ht]
 \centering
@@ -4841,7 +4871,17 @@ H    & 60                    & 1.33              & Air        \\ \hline
 \end{tabular}
 \end{table}
 
-It is assumed that the pine needle consists of moisture and three solid phase components making up 0.25, 0.50, and 0.25 of the total dry mass, and reaching peak decomposition rates at 250~$^\circ$C, 375~$^\circ$C, and 450~$^\circ$C, respectively. These estimates are obtained by inspection of the experimental data shown in the middle left plot of Fig.~\ref{Needle_TGA_plot_A_B}. It is further assumed that 0.25 of the dry mass is converted to char, and the kinetics of the oxidation reaction are estimated based on Case~B.
+It is assumed that the pine needle consists of moisture and three solid phase components making up 0.25, 0.50, and 0.25 of the total dry mass, and reaching peak decomposition rates at 250~$^\circ$C, 350~$^\circ$C, and 425~$^\circ$C, respectively. These estimates are obtained by inspection of the experimental data shown Fig.~\ref{Needle_TGA_plot_A_B_temp}. It is further assumed that 0.25 of the dry mass is converted to char, and the kinetics of the oxidation reaction are estimated based on Case~B.
+
+\begin{figure}[!h]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/Needle_TGA_A_MLR_temp} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/Needle_TGA_B_MLR_temp}
+\end{tabular*}
+\caption[Needle\_TGA calibration curves]{Mass loss rates for Cases A (left) and B (right). These cases are used to determine the kinetic parameters for all eight cases, A-H.}
+\label{Needle_TGA_plot_A_B_temp}
+\end{figure}
+
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -4852,7 +4892,7 @@ It is assumed that the pine needle consists of moisture and three solid phase co
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/Needle_TGA_A_MLR} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/Needle_TGA_B_MLR}
 \end{tabular*}
-\caption[Results of pine Needle\_TGA calibration exercise]{Results of TGA calibration exercise for a pine needle, Cases A (left) and B (right). (Top) Sample temperature vs time. (Middle) Sample mass fraction vs sample temperature. (Bottom) Sample mass loss rate vs sample temperature.}
+\caption[Results of pine Needle\_TGA calibration exercise, Cases A and B]{Results of TGA calibration exercise for a pine needle, Cases A (left) and B (right). (Top) Sample temperature vs time. (Middle) Sample mass fraction vs time. (Bottom) Sample mass loss rate vs time.}
 \label{Needle_TGA_plot_A_B}
 \end{figure}
 
@@ -4865,7 +4905,7 @@ It is assumed that the pine needle consists of moisture and three solid phase co
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/Needle_TGA_C_MLR} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/Needle_TGA_D_MLR}
 \end{tabular*}
-\caption[Results of pine Needle\_TGA calibration exercise]{Results of TGA calibration exercise for a pine needle, Cases C (left) and D (right). (Top) Sample temperature vs time. (Middle) Sample mass fraction vs sample temperature. (Bottom) Sample mass loss rate vs sample temperature.}
+\caption[Results of pine Needle\_TGA calibration exercise, Cases C and D]{Results of TGA calibration exercise for a pine needle, Cases C (left) and D (right). (Top) Sample temperature vs time. (Middle) Sample mass fraction vs time. (Bottom) Sample mass loss rate vs time.}
 \label{Needle_TGA_plot_C_D}
 \end{figure}
 
@@ -4878,7 +4918,7 @@ It is assumed that the pine needle consists of moisture and three solid phase co
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/Needle_TGA_E_MLR} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/Needle_TGA_F_MLR}
 \end{tabular*}
-\caption[Results of pine Needle\_TGA calibration exercise]{Results of TGA calibration exercise for a pine needle, Cases E (left) and F (right). (Top) Sample temperature vs time. (Middle) Sample mass fraction vs sample temperature. (Bottom) Sample mass loss rate vs sample temperature.}
+\caption[Results of pine Needle\_TGA calibration exercise, Cases E and F]{Results of TGA calibration exercise for a pine needle, Cases E (left) and F (right). (Top) Sample temperature vs time. (Middle) Sample mass fraction vs time. (Bottom) Sample mass loss rate vs time.}
 \label{Needle_TGA_plot_E_F}
 \end{figure}
 
@@ -4891,12 +4931,28 @@ It is assumed that the pine needle consists of moisture and three solid phase co
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/Needle_TGA_G_MLR} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/Needle_TGA_H_MLR}
 \end{tabular*}
-\caption[Results of pine Needle\_TGA calibration exercise]{Results of TGA calibration exercise for a pine needle, Cases G (left) and H (right). (Top) Sample temperature vs time. (Middle) Sample mass fraction vs sample temperature. (Bottom) Sample mass loss rate vs sample temperature.}
+\caption[Results of pine Needle\_TGA calibration exercise, Cases G and H]{Results of TGA calibration exercise for a pine needle, Cases G (left) and H (right). (Top) Sample temperature vs time. (Middle) Sample mass fraction vs time. (Bottom) Sample mass loss rate vs time.}
 \label{Needle_TGA_plot_G_H}
 \end{figure}
 
 
 \FloatBarrier
+
+\subsection{TGA of various Mediterranean vegetation (\texorpdfstring{\textct{Morvan\_TGA}}{Morvan\_TGA})}
+\label{Morvan_TGA}
+
+In this section we analyze the TGA data for various Mediterranean vegetation species presented in Morvan and Dupuy, 2004 \cite{Morvan:CF2004}.  The FDS feature {\ct TGA\_ANALYSIS=T} was used with the model set up with 10 \% moisture for the vegetation model.  The heating rate is 1.6 \si{\degreeCelsius}/min, as reported in the paper.  The reference temperature and pyrolysis range approach was used to tune the model to the data.  The parameters can be found in the input file {\ct Verification/WUI/Morvan\_TGA.fds}.  Note that an unusually high char fraction of 50 \% is needed to match the TGA data. The results are shown in Fig.~\ref{fig:Morvan_TGA}.
+
+\begin{figure}[h]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/Morvan_TGA_Total_Mass} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/Morvan_TGA_Total_MLR}
+\end{tabular*}
+\caption[Results of Morvan\_TGA analysis]{Results of performing the FDS TGA analysis on the data for various Mediterranean vegetation presented in Morvan and Dupuy, 2004 \cite{Morvan:CF2004}. (Left) Total mass vs time. (Right) Mass loss rate vs time---the Morvan and Dupuy data were Savitsky-Golay filtered and the derivative of the resulting curve was normalized to give the dashed line.}
+\label{fig:Morvan_TGA}
+\end{figure}
+
+\newpage
 
 
 \subsection{Interpreting MCC Data (\texorpdfstring{\textct{cable\_XX\_mcc}}{cable\_XX\_mcc})}
@@ -5066,6 +5122,19 @@ This section tests a model for extrapolating heat release rate data from a cone 
 	\caption[Cone data extrapolation model (the {\ct cone\_demo\_2} case)]{Check of the cone data extrapolation model.}
 	\label{fig:cone_demo_2}
 \end{figure}
+
+\section{Melting Ice Cube (\texorpdfstring{\textct{ice\_cube}}{ice\_cube})}
+\label{ice_cube}
+
+This section tests the ability for a {\ct MATL} reaction to produce particles. A 10~cm cube (1 kg) block of ice is defined with a 10~\si{kW/m^2} {\ct EXTERNAL\_FLUX}. The mass of water drops produced is tracked. The results are shown below in Fig~\ref{fig:ice_cube}.
+
+\begin{figure}[!ht]
+	\centering
+	\includegraphics[height=2.2in]{SCRIPT_FIGURES/ice_cube}
+	\caption[Check of the particle production by surface reaction feature (the {\ct ice\_cube} case)]{Check of the particle production by surface reaction feature.}
+	\label{fig:ice_cube}
+\end{figure}
+
 
 \chapter{Lagrangian Particles}
 
@@ -5467,7 +5536,7 @@ Figure~\ref{water_evaporation_4_plot}, left, displays the time history of the en
 \subsection{Case 5}
 \label{water_evaporation_5}
 
-This case is based upon one of the Ranz and Marshall experiments~\cite{Ranz} contained in the FDS Validation Guide~\cite{FDS_Validation_Guide}. The test involves a single evaporating water droplet in relatively dry air. In the FDS Validation Guide, the experiment is modeled using a thermally thin (isothermal) liquid droplet. The purpose of this verification test is to demonstrate that equivalent results are obtained with model the drop as a thermally-thick sphere using the liquid evaporation model for a solid surface with a temperature dependent heat of reaction (in this case vaporization) inputs. Fig.~\ref{water_evaporation_5_plot} compares the thermally-thick and thermally-thin results. The experimental data is also shown for reference.
+This case is based upon one of the Ranz and Marshall experiments~\cite{Ranz} contained in the FDS Validation Guide~\cite{FDS_Validation_Guide} in which a single, stationary water droplet of diameter 1043~$\mu$m in relatively dry air evaporates in approximately 15~min. The droplet is modeled using the thermally-thin liquid droplet model and the thermally-thick model usually used for solid particles. For the thermally-thick droplet, the evaporation model used for liquid pools is applied at the surface of the sphere. A temperature-dependent heat of vaporization is applied. Fig.~\ref{water_evaporation_5_plot} compares the droplet diameter of the thermally-thick and thermally-thin models compared to the experimental measurement.
 
 \begin{figure}[h!]
 \centering
@@ -5519,9 +5588,8 @@ The sum of all the terms, \textct{Q\_TOTAL}, is expected to be zero. The three o
 \subsection{Case 8}
 \label{water_evaporation_8}
 
-In this case, we compare FDS predictions against a 1D spherical heat transfer model evaporation using the FDS properties for water and air. This case replicates Fig.~6 of the Li and Chow paper in Ref.~\cite{LiChow:2008}.  The simulation consists of an injection of a 100~$\mu$m droplet at 10~$^\circ$C into 60~$^\circ$C air with an initial water vapor mass fraction of 10~\%. The initial speed of the droplet is 3 m/s in the negative $z$ direction (downward with gravity turned on).
+This case is similar to Case~5 except that here the droplet has a diameter of 100~$\mu$m and it is dropped with an initial velocity of 3~m/s. The measurements are described in Li and Chow~\cite{LiChow:2008}. The specific case is shown in Fig.~6 of the paper. The simulation consists of an injection of a 100~$\mu$m droplet at 10~$^\circ$C into 60~$^\circ$C air with an initial water vapor mass fraction of 10~\%. The initial speed of the droplet is 3~m/s in the negative $z$ direction (downward with gravity turned on).
 
-% Two sets of FDS results are shown for droplet position (left in Fig.~\ref{water_evaporation_8_plots}) and droplet diameter (right).  The circle markers show results from the FDS thermally thin (isothermal) droplet model. The squares show results using the liquid pyrolysis model for a blowing sphere and the thermally thick (spherically symmetric) heat transfer solution using about 10 cells along the radius of the droplet.
 
 \begin{figure}[h!]
 \noindent
@@ -6631,7 +6699,7 @@ as shown in Fig.~\ref{sphere_leak_fig}.
 \subsection{Restart Function}
 \label{geom_restart}
 
-In this test, a GEOM cube is heated from below by a surface at a fixed temperature.  The internal temperature inside the geometry is monitored.  The full calculation runs for 1,200 s.  At 700 s, a RESTART is performed and compared with the base case.  The results are shown in Fig.~\ref{fig:geom_restart}.
+In this test, a GEOM cube is heated from below by a surface at a fixed temperature.  The internal temperature inside the geometry is monitored.  The full calculation runs for 1,200 s.  At 700 s, a {\ct RESTART} is performed and compared with the base case.  The results are shown in Fig.~\ref{fig:geom_restart}.
 \begin{figure}[ht]
 \centering
 \includegraphics[width=3.2in]{../FDS_Verification_Guide/SCRIPT_FIGURES/geom_restart.pdf}

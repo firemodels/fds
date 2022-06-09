@@ -244,6 +244,10 @@ DO NN=1,N_HVAC_READ
          I_DUCT = I_DUCT + 1
          DU=> DUCT(I_DUCT)
          DU%ID   = ID
+         IF (TRIM(ID)=='null' ) THEN
+            WRITE(MESSAGE,'(A,I5)') 'ERROR: Duct has no ID, HVAC line number:',NN
+            CALL SHUTDOWN(MESSAGE); RETURN
+         ENDIF         
          IF (DIAMETER < 0._EB .AND. AREA < 0._EB .AND. PERIMETER < 0._EB) THEN
             WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR: Duct has no AREA, DIAMETER, or PERIMTER. Duct ID:',TRIM(ID),&
                                         ', HVAC line number:',NN
@@ -423,6 +427,10 @@ DO NN=1,N_HVAC_READ
          NODE_FILTER_A(I_DUCTNODE) = FILTER_ID
          DN => DUCTNODE(I_DUCTNODE)
          DN%ID = ID
+         IF (TRIM(ID)=='null' ) THEN
+            WRITE(MESSAGE,'(A,I5)') 'ERROR: Ductnode has no ID, HVAC line number:',NN
+            CALL SHUTDOWN(MESSAGE); RETURN
+         ENDIF         
          DN%VENT_ID = VENT_ID
          DN%READ_IN = .TRUE.
          IF (TRIM(VENT_ID)/='null') DN%VENT=.TRUE.
@@ -453,8 +461,8 @@ DO NN=1,N_HVAC_READ
             WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR: No ducts specified for ductnode ID:',TRIM(DN%ID),', HVAC line number ',NN
             CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
-         IF (DN%N_DUCTS > 2 .AND. TRIM(FILTER_ID)/='null') THEN
-            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR: Ductnode with a filter must have <=2 ducts. Ductnode ID:',TRIM(DN%ID),&
+         IF (DN%N_DUCTS /= 2 .AND. TRIM(FILTER_ID)/='null') THEN
+            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR: Ductnode with a filter must have 2 ducts. Ductnode ID:',TRIM(DN%ID),&
                                         ', HVAC line number:',NN
             CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
@@ -470,6 +478,10 @@ DO NN=1,N_HVAC_READ
       CASE('FAN')
          I_FAN = I_FAN + 1
          FAN(I_FAN)%ID = ID
+         IF (TRIM(ID)=='null' ) THEN
+            WRITE(MESSAGE,'(A,I5)') 'ERROR: Fan has no ID, HVAC line number:',NN
+            CALL SHUTDOWN(MESSAGE); RETURN
+         ENDIF         
          FAN(I_FAN)%OFF_LOSS = LOSS(1,1)
          IF (FAN(I_FAN)%OFF_LOSS<TWO_EPSILON_EB) FAN(I_FAN)%OFF_LOSS = 1._EB
          FAN(I_FAN)%FAN_RAMP = RAMP_ID
@@ -513,6 +525,10 @@ DO NN=1,N_HVAC_READ
       CASE('FILTER')
          I_FILTER = I_FILTER + 1
          FILTER(I_FILTER)%ID = ID
+         IF (TRIM(ID)=='null' ) THEN
+            WRITE(MESSAGE,'(A,I5)') 'ERROR: Filter has no ID, HVAC line number:',NN
+            CALL SHUTDOWN(MESSAGE); RETURN
+         ENDIF                  
          FILTER(I_FILTER)%CLEAN_LOSS = CLEAN_LOSS
          IF (TRIM(RAMP_ID)/='null') CALL GET_RAMP_INDEX(RAMP_ID,'FILTER',FILTER(I_FILTER)%RAMP_INDEX)
          ALLOCATE(FILTER(I_FILTER)%EFFICIENCY(1:N_TRACKED_SPECIES))
@@ -537,6 +553,7 @@ DO NN=1,N_HVAC_READ
                ENDIF
             ENDDO
          ENDDO SPEC_LOOP2
+         FILTER(I_FILTER)%AREA = AREA
       CASE('AIRCOIL')
          I_AIRCOIL = I_AIRCOIL+1
          AIRCOIL(I_AIRCOIL)%COOLANT_SPECIFIC_HEAT   = COOLANT_SPECIFIC_HEAT*1000._EB
@@ -545,6 +562,10 @@ DO NN=1,N_HVAC_READ
          AIRCOIL(I_AIRCOIL)%EFFICIENCY   = EFFICIENCY(1)
          AIRCOIL(I_AIRCOIL)%FIXED_Q      = FIXED_Q*1000._EB
          AIRCOIL(I_AIRCOIL)%ID           = ID
+         IF (TRIM(ID)=='null' ) THEN
+            WRITE(MESSAGE,'(A,I5)') 'ERROR: Aircoil has no ID, HVAC line number:',NN
+            CALL SHUTDOWN(MESSAGE); RETURN
+         ENDIF                  
          AIRCOIL(I_AIRCOIL)%TAU          = TAU_AC
          IF (TAU_AC > 0._EB) AIRCOIL(I_AIRCOIL)%RAMP_INDEX = TANH_RAMP
          IF (TAU_AC < 0._EB) AIRCOIL(I_AIRCOIL)%RAMP_INDEX = TSQR_RAMP
@@ -555,6 +576,10 @@ DO NN=1,N_HVAC_READ
          NODE_FILTER_A(I_DUCTNODE) = 'null'
          DN => DUCTNODE(I_DUCTNODE)
          DN%ID = VENT_ID
+         IF (TRIM(ID)=='null' ) THEN
+            WRITE(MESSAGE,'(A,I5)') 'ERROR: Localized leakage has no ID, HVAC line number:',NN
+            CALL SHUTDOWN(MESSAGE); RETURN
+         ENDIF                  
          DN%VENT_ID = VENT_ID
          DN%VENT=.TRUE.
          DN%READ_IN = .FALSE.
@@ -636,8 +661,12 @@ DO NN=1,N_HVAC_READ
    END SELECT
 ENDDO
 
-NODE_Z_MIN = MINVAL(DUCTNODE%XYZ(3))
-NODE_Z_MAX = MAXVAL(DUCTNODE%XYZ(3))
+NODE_Z_MIN =  HUGE(EB)
+NODE_Z_MAX = -HUGE(EB)
+DO N=1,N_DUCTNODES
+   NODE_Z_MIN = MIN(NODE_Z_MIN,DUCTNODE(N)%XYZ(3))
+   NODE_Z_MAX = MAX(NODE_Z_MAX,DUCTNODE(N)%XYZ(3))
+ENDDO
 
 T_USED(13)=T_USED(13)+CURRENT_TIME()-TNOW
 
@@ -1169,10 +1198,12 @@ ENDIF FIRST_PASS_IF
 
 ITER = 0
 
-IF (N_ZONE >0) ALLOCATE(DPSTAR(1:N_ZONE))
-DPSTAR = 0._EB
+IF (N_ZONE>0) THEN
+   ALLOCATE(DPSTAR(1:N_ZONE))
+   DPSTAR = 0._EB
+   CALL DPSTARCALC
+ENDIF
 
-CALL DPSTARCALC
 DUCTNODE%P = DUCTNODE%P - P_INF
 
 IF (QFAN_BETA_TEST) THEN
@@ -1319,7 +1350,7 @@ REAL(EB),INTENT(IN) :: DT
 INTEGER, INTENT(IN) :: NNE
 INTEGER :: NN,ND,NC,NS,NSS,ITMP,ITCOUNT,N_SUBSTEPS,N_SUBSTEPS_DUCT
 LOGICAL :: CYCLE_FLAG,SUB_CYCLE_FLAG
-TYPE (DUCTNODE_TYPE), POINTER :: DN=>NULL(),DN2=>NULL()
+TYPE (DUCTNODE_TYPE), POINTER :: DN=>NULL()
 TYPE (DUCT_TYPE), POINTER :: DU=>NULL()
 TYPE (NETWORK_TYPE), POINTER :: NE=>NULL()
 
@@ -1407,14 +1438,14 @@ SUBSTEP_LOOP: DO NSS = 1, N_SUBSTEPS
                MTOT = MTOT + VFLOW * DU%RHO_D
                ETOT = ETOT + VFLOW * DU%RHO_D * DU%TMP_D * DU%CP_D
                TGUESS = TGUESS + VFLOW * DU%RHO_D * DU%TMP_D
-               IF (STRATIFICATION) THEN
-                  IF (DU%NODE_INDEX(1)==NE%NODE_INDEX(NN)) THEN
-                     DN2=>DUCTNODE(DU%NODE_INDEX(2))
-                  ELSE
-                     DN2=>DUCTNODE(DU%NODE_INDEX(1))
-                  ENDIF
-                  ETOT = ETOT + DU%RHO_D*VFLOW*GVEC(3)*(DN%XYZ(3)-DN2%XYZ(3))
-               ENDIF
+               !IF (STRATIFICATION) THEN
+               !   IF (DU%NODE_INDEX(1)==NE%NODE_INDEX(NN)) THEN
+               !      DN2=>DUCTNODE(DU%NODE_INDEX(2))
+               !   ELSE
+               !      DN2=>DUCTNODE(DU%NODE_INDEX(1))
+               !   ENDIF
+               !   ETOT = ETOT + DU%RHO_D*VFLOW*GVEC(3)*(DN%XYZ(3)-DN2%XYZ(3))
+               !ENDIF
                ZZTOT = ZZTOT + VFLOW * DU%RHO_D * DU%ZZ
             ELSE MASS_TRANSPORT_IF
                ! Duct is discretized: we need to find the end of the lump of mass advected within a (sub)step
@@ -1467,14 +1498,14 @@ SUBSTEP_LOOP: DO NSS = 1, N_SUBSTEPS
             DO NS = 1,N_TRACKED_SPECIES
                ETOT = ETOT - CPBAR_Z(ITMP,NS)*DU%TMP_D*DN%FILTER_LOADING(NS,3)
                !*** CHECK THIS
-               IF (STRATIFICATION .AND. .NOT. DN%VENT ) THEN
-                  IF (DU%NODE_INDEX(1)==NE%NODE_INDEX(NN)) THEN
-                     DN2=>DUCTNODE(DU%NODE_INDEX(2))
-                  ELSE
-                     DN2=>DUCTNODE(DU%NODE_INDEX(1))
-                  ENDIF
-                  ETOT = ETOT - DN%FILTER_LOADING(NS,3)*GVEC(3)*(DN%XYZ(3)-DN2%XYZ(3))
-               ENDIF
+               !IF (STRATIFICATION .AND. .NOT. DN%VENT ) THEN
+               !   IF (DU%NODE_INDEX(1)==NE%NODE_INDEX(NN)) THEN
+               !      DN2=>DUCTNODE(DU%NODE_INDEX(2))
+               !   ELSE
+               !      DN2=>DUCTNODE(DU%NODE_INDEX(1))
+               !   ENDIF
+               !   ETOT = ETOT - DN%FILTER_LOADING(NS,3)*GVEC(3)*(DN%XYZ(3)-DN2%XYZ(3))
+               !ENDIF
             ENDDO
          ENDIF
 
@@ -2608,7 +2639,7 @@ END SUBROUTINE SETUP_SOLUTION_SYSTEM_POINTERS
 SUBROUTINE UPDATE_LOSS(T,DT,NNE)
 USE PHYSICAL_FUNCTIONS,ONLY:GET_VISCOSITY
 USE MATH_FUNCTIONS,ONLY:EVALUATE_RAMP
-REAL(EB) :: FRICTION_FACTOR,LOSS_SUM,ZZ_GET(1:N_TRACKED_SPECIES),VISCOSITY
+REAL(EB) :: FRICTION_FACTOR,LOSS_SUM,ZZ_GET(1:N_TRACKED_SPECIES),VISCOSITY,AREA,VFLOW
 INTEGER, INTENT(IN) :: NNE
 REAL(EB), INTENT(IN) :: T,DT
 INTEGER :: ND,ND2, NN,NUM_OUT
@@ -2622,96 +2653,118 @@ DO ND = 1, NE%N_DUCTS
    DUCT(NE%DUCT_INDEX(ND))%TOTAL_LOSS=0._EB
 ENDDO
 NODELOOP : DO NN=1,NE%N_DUCTNODES
-  DN => DUCTNODE(NE%NODE_INDEX(NN))
-  NODECLASS: IF (DN%FILTER_INDEX > 0) THEN
-     CALL FILTER_UPDATE(DT,NE%NODE_INDEX(NN))
-     IF (DUCT(DN%DUCT_INDEX(1))%AREA < TWO_EPSILON_EB .OR. DUCT(DN%DUCT_INDEX(2))%AREA < TWO_EPSILON_EB) CYCLE
-     IF(DUCT(DN%DUCT_INDEX(1))%VEL(PREVIOUS)*DN%DIR(1) > 0._EB) THEN
-           DUCT(DN%DUCT_INDEX(1))%TOTAL_LOSS = DUCT(DN%DUCT_INDEX(1))%TOTAL_LOSS + &
-              DN%FILTER_LOSS*DUCT(DN%DUCT_INDEX(1))%AREA/DUCT(DN%DUCT_INDEX(2))%AREA
-     ELSE
-        DUCT(DN%DUCT_INDEX(2))%TOTAL_LOSS = DUCT(DN%DUCT_INDEX(2))%TOTAL_LOSS + DN%FILTER_LOSS
-     ENDIF
-  ELSEIF(DN%VENT .OR. DN%AMBIENT) THEN NODECLASS
-     IF (DUCT(DN%DUCT_INDEX(1))%AREA < TWO_EPSILON_EB) CYCLE
-     IF(DUCT(DN%DUCT_INDEX(1))%VEL(PREVIOUS)*DN%DIR(1) < 0._EB) THEN
-        DUCT(DN%DUCT_INDEX(1))%TOTAL_LOSS = DUCT(DN%DUCT_INDEX(1))%TOTAL_LOSS + DN%LOSS_ARRAY(1,2)
-     ELSE
-        DUCT(DN%DUCT_INDEX(1))%TOTAL_LOSS = DUCT(DN%DUCT_INDEX(1))%TOTAL_LOSS + DN%LOSS_ARRAY(2,1)
-     ENDIF
-  ELSEIF(DN%FILTER_INDEX <=0 .AND. DN%N_DUCTS==2) THEN
-     IF (DUCT(DN%DUCT_INDEX(1))%AREA < TWO_EPSILON_EB .OR. DUCT(DN%DUCT_INDEX(2))%AREA < TWO_EPSILON_EB) CYCLE
-     IF(ABS(DUCT(DN%DUCT_INDEX(1))%VEL(PREVIOUS)) > 1.E-6_EB) THEN
-        IF(DUCT(DN%DUCT_INDEX(1))%VEL(PREVIOUS)*DN%DIR(1) > 0._EB) THEN
-           DUCT(DN%DUCT_INDEX(2))%TOTAL_LOSS = DUCT(DN%DUCT_INDEX(2))%TOTAL_LOSS + DN%LOSS_ARRAY(1,2)
-        ELSE
-           DUCT(DN%DUCT_INDEX(1))%TOTAL_LOSS = DUCT(DN%DUCT_INDEX(1))%TOTAL_LOSS + DN%LOSS_ARRAY(1,2)
-        ENDIF
-     ELSE
-        LOSS_SUM = 0.5_EB*(DN%LOSS_ARRAY(1,2) + DN%LOSS_ARRAY(2,1)*DUCT(DN%DUCT_INDEX(2))%AREA/DUCT(DN%DUCT_INDEX(1))%AREA)
-        DUCT(DN%DUCT_INDEX(1))%TOTAL_LOSS = DUCT(DN%DUCT_INDEX(1))%TOTAL_LOSS + &
-                                            LOSS_SUM*DUCT(DN%DUCT_INDEX(1))%AREA/DUCT(DN%DUCT_INDEX(2))%AREA
-        DUCT(DN%DUCT_INDEX(2))%TOTAL_LOSS = DUCT(DN%DUCT_INDEX(2))%TOTAL_LOSS + LOSS_SUM
-     ENDIF
-  ELSE NODECLASS
-     NUM_OUT = 0
-     DO ND=1,DN%N_DUCTS
-        DU => DUCT(DN%DUCT_INDEX(ND))
-        IF (DU%VEL(PREVIOUS)*DN%DIR(ND) < 0._EB .AND. ABS(DU%VEL(PREVIOUS)) > 1.E-6_EB) NUM_OUT = NUM_OUT + 1
-     ENDDO
-     IF (NUM_OUT==0) THEN
-        DO ND=1,DN%N_DUCTS
-           DU => DUCT(DN%DUCT_INDEX(ND))
-           DO ND2=1,DN%N_DUCTS
-              IF (ND2==ND) CYCLE
-              DU%TOTAL_LOSS = DU%TOTAL_LOSS + DN%LOSS_ARRAY(ND2,ND)/DN%N_DUCTS
-           ENDDO
-        ENDDO
-     ELSEIF (NUM_OUT==1) THEN
-        DO ND=1,DN%N_DUCTS
-           DU => DUCT(DN%DUCT_INDEX(ND))
-           IF (DU%VEL(PREVIOUS)*DN%DIR(ND) < 0._EB .AND. ABS(DU%VEL(PREVIOUS)) > 1.E-6_EB) THEN
-              NUM_OUT = ND
-              EXIT
-           ENDIF
-        ENDDO
-        DO ND=1,DN%N_DUCTS
-           IF (ND==NUM_OUT) CYCLE
-           DUCT(DN%DUCT_INDEX(ND))%TOTAL_LOSS = DUCT(DN%DUCT_INDEX(ND))%TOTAL_LOSS + &
-                                                DN%LOSS_ARRAY(ND,NUM_OUT)*DU%AREA/DUCT(DN%DUCT_INDEX(NUM_OUT))%AREA
-        ENDDO
-     ELSEIF (NUM_OUT == DN%N_DUCTS - 1) THEN
-        DO ND=1,DN%N_DUCTS
-           DU => DUCT(DN%DUCT_INDEX(ND))
-           IF (DU%VEL(PREVIOUS)*DN%DIR(ND) < 0._EB .AND. ABS(DU%VEL(PREVIOUS)) > 1.E-6_EB) THEN
-              CYCLE
-           ELSE
-              NUM_OUT = ND
-              EXIT
-           ENDIF
-        ENDDO
-        DO ND=1,DN%N_DUCTS
-           IF (ND==NUM_OUT) CYCLE
-           DUCT(DN%DUCT_INDEX(ND))%TOTAL_LOSS = DUCT(DN%DUCT_INDEX(ND))%TOTAL_LOSS + DN%LOSS_ARRAY(NUM_OUT,ND)
-        ENDDO
-     ELSE
-         LOSS_SUM = 0._EB
+   VFLOW = 0._EB
+   DN => DUCTNODE(NE%NODE_INDEX(NN))
+   IF (DN%LEAKAGE) CYCLE
+
+   ! Add filter loss to the downstream duct if no flow split loss over the two ducts
+   IF (DN%FILTER_INDEX > 0) THEN
+      CALL FILTER_UPDATE(DT,NE%NODE_INDEX(NN))
+      IF (DUCT(DN%DUCT_INDEX(1))%AREA < TWO_EPSILON_EB .OR. DUCT(DN%DUCT_INDEX(2))%AREA < TWO_EPSILON_EB) CYCLE
+      IF (FILTER(DN%FILTER_INDEX)%AREA > 0._EB) THEN
+         AREA = FILTER(DN%FILTER_INDEX)%AREA
+      ELSE
+         AREA = 0.5_EB*(DUCT(DN%DUCT_INDEX(1))%AREA+DUCT(DN%DUCT_INDEX(2))%AREA)
+      ENDIF  
+      IF(DUCT(DN%DUCT_INDEX(1))%VEL(PREVIOUS)*DN%DIR(1) > 0._EB) THEN
+         DUCT(DN%DUCT_INDEX(2))%TOTAL_LOSS = DUCT(DN%DUCT_INDEX(2))%TOTAL_LOSS + &
+                                             DN%FILTER_LOSS*(DUCT(DN%DUCT_INDEX(2))%AREA/AREA)**2
+      ELSE
+         DUCT(DN%DUCT_INDEX(1))%TOTAL_LOSS = DUCT(DN%DUCT_INDEX(1))%TOTAL_LOSS + &
+                                             DN%FILTER_LOSS*(DUCT(DN%DUCT_INDEX(1))%AREA/AREA)**2
+      ENDIF
+   ENDIF
+
+   NODECLASS: IF(DN%VENT .OR. DN%AMBIENT) THEN
+      ! If node is an external node loss is simply based on inflow or outflow or half loss if no flow
+      IF (DUCT(DN%DUCT_INDEX(1))%AREA < TWO_EPSILON_EB .OR. DUCT(DN%DUCT_INDEX(1))%LOCALIZED_LEAKAGE) CYCLE
+      IF(DUCT(DN%DUCT_INDEX(1))%VEL(PREVIOUS)*DN%DIR(1) > 1.E-6_EB) THEN
+         DUCT(DN%DUCT_INDEX(1))%TOTAL_LOSS = DUCT(DN%DUCT_INDEX(1))%TOTAL_LOSS + DN%LOSS_ARRAY(1,2)
+      ELSEIF(DUCT(DN%DUCT_INDEX(1))%VEL(PREVIOUS)*DN%DIR(1) < -1.E-6_EB) THEN
+         DUCT(DN%DUCT_INDEX(1))%TOTAL_LOSS = DUCT(DN%DUCT_INDEX(1))%TOTAL_LOSS + DN%LOSS_ARRAY(2,1)
+      ELSE
+         DUCT(DN%DUCT_INDEX(1))%TOTAL_LOSS = DUCT(DN%DUCT_INDEX(1))%TOTAL_LOSS + 0.5_EB*(DN%LOSS_ARRAY(1,2)+DN%LOSS_ARRAY(2,1))
+      ENDIF
+   ELSEIF(DN%FILTER_INDEX <=0 .AND. DN%N_DUCTS==2) THEN NODECLASS
+      IF (DUCT(DN%DUCT_INDEX(1))%AREA < TWO_EPSILON_EB .OR. DUCT(DN%DUCT_INDEX(2))%AREA < TWO_EPSILON_EB) CYCLE
+      IF(DUCT(DN%DUCT_INDEX(1))%VEL(PREVIOUS)*DN%DIR(1) > 1.E-6_EB) THEN
+         DUCT(DN%DUCT_INDEX(2))%TOTAL_LOSS = DUCT(DN%DUCT_INDEX(2))%TOTAL_LOSS + DN%LOSS_ARRAY(1,2)
+      ELSEIF (DUCT(DN%DUCT_INDEX(1))%VEL(PREVIOUS)*DN%DIR(1) < -1.E-6_EB) THEN
+         DUCT(DN%DUCT_INDEX(1))%TOTAL_LOSS = DUCT(DN%DUCT_INDEX(1))%TOTAL_LOSS + DN%LOSS_ARRAY(2,1)
+      ELSE
+         DUCT(DN%DUCT_INDEX(1))%TOTAL_LOSS = DUCT(DN%DUCT_INDEX(1))%TOTAL_LOSS + 0.5_EB*DN%LOSS_ARRAY(2,1)
+         DUCT(DN%DUCT_INDEX(2))%TOTAL_LOSS = DUCT(DN%DUCT_INDEX(2))%TOTAL_LOSS + 0.5_EB*DN%LOSS_ARRAY(1,2)
+      ENDIF
+
+   ELSE NODECLASS
+      ! For an internal node determine how many ducts are outflow
+      NUM_OUT = 0
+      DO ND=1,DN%N_DUCTS
+         DU => DUCT(DN%DUCT_INDEX(ND))
+         IF (DU%VEL(PREVIOUS)*DN%DIR(ND) < -1.E-6_EB) NUM_OUT = NUM_OUT + 1
+      ENDDO
+
+      NUM_OUT_IF: IF (NUM_OUT==0 .OR. NUM_OUT==DN%N_DUCTS) THEN
+         ! If all are inflow or outflow each duct gets the average of its inflowing losses normalized by the number of ducts
          DO ND=1,DN%N_DUCTS
             DU => DUCT(DN%DUCT_INDEX(ND))
-            IF(DU%VEL(PREVIOUS)*DN%DIR(ND) > 0._EB)  LOSS_SUM = LOSS_SUM + DU%VEL(PREVIOUS)*DN%DIR(ND)*DU%AREA
+            LOSS_SUM = 0._EB
+            DO ND2=1,DN%N_DUCTS
+               IF (ND2==ND) CYCLE
+               LOSS_SUM = LOSS_SUM + DN%LOSS_ARRAY(ND2,ND)
+            ENDDO
+            DU%TOTAL_LOSS = LOSS_SUM / (DN%N_DUCTS-1) / DN%N_DUCTS
+         ENDDO
+
+      ELSEIF (NUM_OUT==1) THEN NUM_OUT_IF
+         ! If one duct is outflow weight the inflowing losses based area ratios
+         DO ND=1,DN%N_DUCTS
+            DU => DUCT(DN%DUCT_INDEX(ND))
+            IF (DU%VEL(PREVIOUS)*DN%DIR(ND) <-1.E-6_EB) THEN
+               NUM_OUT = ND
+               EXIT
+            ENDIF
+         ENDDO
+         DO ND=1,DN%N_DUCTS
+            IF (ND==NUM_OUT) CYCLE
+            DU => DUCT(DN%DUCT_INDEX(ND))
+            DU%TOTAL_LOSS = DU%TOTAL_LOSS + DN%LOSS_ARRAY(ND,NUM_OUT) * (DU%AREA/DUCT(DN%DUCT_INDEX(NUM_OUT))%AREA)**2
+         ENDDO
+
+      ELSEIF (NUM_OUT == DN%N_DUCTS - 1) THEN NUM_OUT_IF
+         ! If one duct is inflow simply assign the losses of the inflowing duct
+         DO ND=1,DN%N_DUCTS
+            DU => DUCT(DN%DUCT_INDEX(ND))
+            IF (DU%VEL(PREVIOUS)*DN%DIR(ND) < -1.E-6_EB) THEN
+               CYCLE
+            ELSE
+               NUM_OUT = ND
+               EXIT
+            ENDIF
+         ENDDO
+         DO ND=1,DN%N_DUCTS
+            IF (ND/=NUM_OUT) &
+               DUCT(DN%DUCT_INDEX(ND))%TOTAL_LOSS = DUCT(DN%DUCT_INDEX(ND))%TOTAL_LOSS + DN%LOSS_ARRAY(NUM_OUT,ND)
+         ENDDO
+
+      ELSE NUM_OUT_IF
+         ! If some are inflow and sum are outflow weight outflow losses as fraction of inflow volume flow
+         DO ND=1,DN%N_DUCTS
+            DU => DUCT(DN%DUCT_INDEX(ND))
+            IF(.NOT. DU%VEL(PREVIOUS)*DN%DIR(ND) < -1.E-6_EB)  VFLOW = VFLOW + (ABS(DU%VEL(PREVIOUS))+TWO_EPSILON_EB)*DU%AREA
          ENDDO
          DO ND=1,DN%N_DUCTS
             DU => DUCT(DN%DUCT_INDEX(ND))
-            IF (DU%VEL(PREVIOUS)*DN%DIR(ND) < 0._EB .AND. ABS(DU%VEL(PREVIOUS)) > 1.E-6_EB) THEN
+            IF (DU%VEL(PREVIOUS)*DN%DIR(ND) < -1.E-6_EB) THEN
                DO ND2=1,DN%N_DUCTS
                   DU2 => DUCT(DN%DUCT_INDEX(ND2))
-                  IF (DU2%VEL(PREVIOUS)*DN%DIR(ND2) > 0._EB) DU%TOTAL_LOSS = DU%TOTAL_LOSS + &
-                                                          DU2%VEL(PREVIOUS)*DN%DIR(ND2)*DU2%AREA*DN%LOSS_ARRAY(ND2,ND)/LOSS_SUM
+                  IF (.NOT. DU2%VEL(PREVIOUS)*DN%DIR(ND2) < -1.E-6_EB) DU%TOTAL_LOSS = DU%TOTAL_LOSS + &
+                     (ABS(DU2%VEL(PREVIOUS))+TWO_EPSILON_EB)*DU2%AREA/VFLOW*DN%LOSS_ARRAY(ND2,ND)
                ENDDO
             ENDIF
          ENDDO
-     ENDIF
-  ENDIF NODECLASS
+      ENDIF NUM_OUT_IF
+   ENDIF NODECLASS
 ENDDO NODELOOP
 
 DO ND = 1, NE%N_DUCTS
@@ -3339,6 +3392,7 @@ COIL_LOOP: DO ND = 1,N_DUCTS
       DU%COIL_Q = AC%FIXED_Q*EVALUATE_RAMP(TSI,AC%RAMP_INDEX,TAU=AC%TAU)
       ZZ_GET = DU%ZZ
       MDOT_DU = DU%RHO_D*ABS(DU%VEL(NEW))*DU%AREA
+      IF (ABS(DU%COIL_Q) < TWO_EPSILON_EB .OR. MDOT_DU < TWO_EPSILON_EB) CYCLE COIL_LOOP
       CALL GET_SPECIFIC_HEAT(ZZ_GET,CP1,DU%TMP_D)
       TMP_GUESS = DU%TMP_D+DU%COIL_Q/(CP1*MDOT_DU)
       IF (INT(TMP_GUESS) >= I_MAX_TEMP) THEN
@@ -3522,10 +3576,8 @@ LOSS_N = .FALSE.
 
 DO ND = 1, N_DUCTS
    IF (DUCT(ND)%VOLUME_FLOW_INITIAL<1.E6_EB .OR. DUCT(ND)%MASS_FLOW_INITIAL<1.E6_EB) LOSS_D(ND) = .TRUE.
-   IF (ANY(DUCT(ND)%LOSS>0._EB)) LOSS_D(ND) = .TRUE.
-   IF (DUCT(ND)%FAN_INDEX > 0) THEN
-      IF (FAN(DUCT(ND)%FAN_INDEX)%OFF_LOSS>0._EB) LOSS_D(ND) = .TRUE.
-   ENDIF
+   IF (ANY(DUCT(ND)%LOSS>0._EB) .OR. DUCT(ND)%ROUGHNESS > 0._EB) LOSS_D(ND) = .TRUE.
+   IF (DUCT(ND)%FAN_INDEX > 0) LOSS_D(ND) = .TRUE.
 ENDDO
 
 CHANGE = .TRUE.
@@ -3533,6 +3585,12 @@ CHANGE_LOOP: DO WHILE (CHANGE)
    CHANGE = .FALSE.
    NODELOOP: DO NN = 1,N_DUCTNODES
       IF (LOSS_N(NN)) CYCLE NODELOOP
+      IF (DUCTNODE(NN)%N_DUCTS==2) THEN
+         LOSS_N(NN) = .TRUE.
+         LOSS_D(DUCTNODE(NN)%DUCT_INDEX(1)) = .TRUE.
+         LOSS_D(DUCTNODE(NN)%DUCT_INDEX(2)) = .TRUE.
+         CYCLE NODELOOP
+      ENDIF
       IF (ANY(DUCTNODE(NN)%LOSS_ARRAY > 0._EB)) THEN
          LOSS_N(NN) = .TRUE.
          DO ND = 1,DUCTNODE(NN)%N_DUCTS
