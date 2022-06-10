@@ -7337,13 +7337,17 @@ The Particle Model and Boundary Fuel Model use the same basic pyrolysis model (S
 \section{Thermal Degradation Model for Vegetation}
 \label{vegetation_model}
 
-FDS contains an optional pyrolysis model that was developed specifically for vegetation~\cite{Porterie:2006,Morvan:CF2004,Houssami:2016}. The solid-phase thermal degradation process consists of three reactions:
+FDS contains an optional pyrolysis model that was developed specifically for vegetation~\cite{Porterie:2006,Morvan:CF2004,Houssami:2016}. 
+
+\subsection{Solid Phase}
+
+The solid-phase thermal degradation process for generic vegetation consists of three reactions (note that the stoichiometric coefficients are mass-based):
 
 \vspace{\baselineskip}
 
 \noindent 1. Endothermic moisture evaporation
 \be
- {\rm Wet\ Vegetation} \rightarrow \nu_{\rm H_2O} \, {\rm H_2O} + (1-\nu_{\rm H_2O}) \, {\rm Dry\ Vegetation} \quad ; \quad \nu_{\rm H_2O} = \frac{M}{1+M} \label{water_reac}
+ {\rm Wet\ Vegetation} \rightarrow \nu_{\rm moist} \, {\rm Moisture} + (1-\nu_{\rm moist}) \, {\rm Dry\ Vegetation} \quad ; \quad \nu_{\rm moist} = \frac{M}{1+M} \label{water_reac}
 \ee
 
 \noindent 2. Endothermic pyrolysis of Dry Vegetation
@@ -7356,13 +7360,9 @@ FDS contains an optional pyrolysis model that was developed specifically for veg
  \label{char_reaction}
  {\rm Char} + \nu_{\rm O_2, char} \, {\rm O_2} \rightarrow (1+ \nu_{\rm O_2,char} - \nu_{\rm ash}) \, {\rm CO_2} + \nu_{\rm ash} \, {\rm Ash}  
 \ee
-$M$ is the vegetation {\em moisture content} or {\em moisture fraction} determined on a dry weight basis. $M$ is related to the mass fraction of water within the solid via the relation:
-\be
-  Y_{\rm H_2O} = \frac{M}{1+M}
-\ee
-$\nu_{\rm char}$ is the mass fraction of Dry Vegetation that is converted to char during pyrolysis. It is specified with the parameter {\ct NU\_MATL} on the {\ct MATL} line that describes the Dry Vegetation. The character string {\ct MATL\_ID} on the same {\ct MATL} line indicates the name of the char.  $\nu_{\rm O_2,char}$ ({\ct NU\_O2\_CHAR} on the {\ct MATL} line that defines the char properties) is the mass of oxygen required per unit mass of char consumed. $\nu_{\rm ash}$ ({\ct NU\_MATL} on the {\ct MATL} line describing the char) is the mass fraction of char that is converted to ash during char oxidation.
+$M$ is the vegetation {\em moisture content} or {\em moisture fraction} determined on a dry weight basis, specified with {\ct MOISTURE\_FRACTION} on the {\ct SURF} line. $\nu_{\rm char}$ is the mass fraction of Dry Vegetation that is converted to char during pyrolysis, specified with the parameter {\ct NU\_MATL} on the {\ct MATL} line that describes the Dry Vegetation. The character string {\ct MATL\_ID} on the same {\ct MATL} line indicates the name of the char.  $\nu_{\rm O_2,char}$ is the mass of oxygen consumed per unit mass of char oxidized, specified by {\ct NU\_O2\_CHAR} on the {\ct MATL} line that defines the char properties. $\nu_{\rm ash}$ is the mass fraction of char that is converted to ash during char oxidation, specified by {\ct NU\_MATL} on the {\ct MATL} line describing the char.
 
-It is assumed that the Dry Vegetation in Eq.~(\ref{pyr_reac}) is 47~\% (by mass) carbon~\cite{Ma:BGS2018} with an effective organic component C$_{3.4}$H$_{6.2}$O$_{2.5}$~\cite{Ritchie:1}. A discussion of the composition of the Char and Fuel Gas is given in Section~\ref{char_oxidation_1}.
+It is assumed that the Dry Vegetation in Eq.~(\ref{pyr_reac}) is 47~\% (by mass) carbon~\cite{Ma:BGS2018} with an effective organic component C$_{3.4}$H$_{6.2}$O$_{2.5}$~\cite{Ritchie:1}. A discussion of the composition of the Char and Fuel Gas is given in Section~\ref{veg_pyrolysis_gas_phase}.
 
 The char reaction, Eq.~(\ref{char_reaction}), is usually modified in FDS when the default ``simple chemistry'' model is used; that is, the one-step, mixing-controlled reaction for the lumped species Fuel, Air, and Products. In this case, O$_2$ and CO$_2$ are not explicitly calculated, but rather are implicitly defined in terms of the lumped species, {\ct AIR} and {\ct PRODUCTS}, which are defined based on the stoichiometry of the reaction. Equation~(\ref{char_reaction}) cannot be written in terms of the lumped species, but a close approximation is as follows:
 \be
@@ -7403,8 +7403,8 @@ The reaction rate for char oxidation, $r_{\rm char}$, is susceptible to very lar
 \hline
 Parameter               & Value                         & Reference                                  \\ \hline \hline
 Dry Vegetation          & $\rm{C_{3.4}H_{6.2}O_{2.5}A}$ & Ritchie et al.~\cite{Ritchie:1}            \\ \hline
-Fuel Gas                & $\rm{C_{2.1}H_{6.2}O_{2.2}}$  & Section~\ref{char_oxidation_1}             \\ \hline
-Char                    & $\rm{C_{1.3}O_{0.3}A}$        & Section~\ref{char_oxidation_1}             \\ \hline
+Fuel Gas                & $\rm{C_{2.1}H_{6.2}O_{2.2}}$  & Section~\ref{veg_pyrolysis_gas_phase}      \\ \hline
+Char                    & $\rm{C_{1.3}O_{0.3}A}$        & Section~\ref{veg_pyrolysis_gas_phase}      \\ \hline
 $A_{\rm H_2O}$          & 600,000 $\sqrt{K}$/s          & Porterie et al.~\cite{Porterie:2006}       \\ \hline
 $E_{\rm H_2O}$          & 48,200 J/mol                  & Porterie et al.~\cite{Porterie:2006}        \\ \hline
 $A_{\rm pyr}$           & 36,300 s$^{-1}$               & Porterie et al.~\cite{Porterie:2006}        \\ \hline
@@ -7415,7 +7415,7 @@ $\beta_{\rm char}$      & 0.2                           & Porterie et al.~\cite{
 $\nu_{\rm O_2,char}$    & 1.65                          & Porterie et al.~\cite{Porterie:2006}        \\ \hline
 $\nu_{\rm char}$        & 0.25                          & Assumption                                  \\ \hline
 $\nu_{\rm ash}$         & 0.04                          & Assumption                                  \\ \hline
-$\Delta h_{\rm c}$      & 17,400 kJ/kg                  & Section~\ref{char_oxidation_1}             \\ \hline
+$\Delta h_{\rm c}$      & 17,400 kJ/kg                  & Section~\ref{veg_pyrolysis_gas_phase}      \\ \hline
 $\Delta h_{\rm pyr}$    & 418 kJ/kg                     & Porterie et al.~\cite{Porterie:2006}        \\ \hline
 $\Delta h_{\rm char}$   & -12,000 kJ/kg                 & Porterie et al.~\cite{Porterie:2006}        \\ \hline
 $\Delta h_{\rm H_2O}$   & 2,259 kJ/kg                   & Porterie et al.~\cite{Porterie:2006}        \\ \hline
@@ -7512,8 +7512,8 @@ Figure~\ref{vege_inputs} includes sample input lines demonstrating how the veget
 
 \FloatBarrier
 
-\subsection{Heat of Combustion for Charring Vegetation}
-\label{char_oxidation_1}
+\subsection{Gas Phase}
+\label{veg_pyrolysis_gas_phase}
 
 To estimate the heat of combustion of the gas phase reaction of fuel vapors generated by the pyrolysis of vegetation, the decomposition reaction given in Eqs.~(\ref{pyr_reac}) and (\ref{char_reaction}) is written as an equivalent set of reactions assuming that the Dry Vegetation is given by the effective formula C$_{\rm x}$H$_{\rm y}$O$_{\rm z}$A, where A represents the inorganic components that eventually form the Ash.
 \begin{eqnarray}
@@ -7529,19 +7529,24 @@ To estimate the heat of combustion of the gas phase reaction of fuel vapors gene
    x' = \nu_{\rm CO_2}  \quad ; \quad
    z' = 2 \left(\nu_{\rm CO_2} - \nu_{\rm O_2} \right)
 \ee
-The heat of combustion of the one step gas phase reaction can be estimated using the heat release per unit mass of oxygen consumed, $E=13.98$~MJ/kg, measured by Tihay et al.~\cite{Tihay:CF2014}.
+The ideal one step gas phase reaction of the Fuel Gas is as follows:
 \be
    \mathrm{C_{x-x'}H_yO_{z-z'} + \nu_{\rm O_2}' \, O_2} \rightarrow \mathrm{(x-x') \, CO_2 + \frac{y}{2} \, H_2O }  \quad : \quad
    \mathrm{\nu_{\rm O_2}'} = \frac{2(x-x')+y/2-(z-z')}{2}
 \ee
-The heat of combustion can be estimated
+The heat of combustion of the gas phase reaction (heat release per unit mass fuel gas consumed) can be estimated from the heat release per unit mass of oxygen consumed, $E=13.98$~MJ/kg, measured by Tihay et al.~\cite{Tihay:CF2014}:
 \be
    \mathrm{ \Delta h_{\rm c} \approx  \frac{W_{\rm O_2} \,  \nu_{\rm O_2}'}{12(x-x')+y+16(z-z')} } E   \label{Delta_h_pyr}
 \ee
-The heat generated by burning vegetation is due to both the gas phase combustion of the pyrolyzed plant matter and the solid phase exothermic char oxidation reaction. The effective heat of combustion, $\Delta h_{\rm c,eff}$, is a weighted average of the two reactions. The heat of combustion of the pyrolyzed plant matter, $\Delta h_{\rm c}$, is approximately 17,400~kJ/kg according to Eq.~(\ref{Delta_h_pyr}). The heat of reaction for the char oxidation, $\Delta h_{\rm char}$ is approximately -12000~kJ/kg (the minus sign in this instance refers to an {\em exothermic} solid phase reaction). The effective heat of combustion is found from:
+The total heat release rate of burning vegetation is the sum of both the gas phase combustion of pyrolyzed plant matter and the solid phase exothermic char oxidation reaction. The effective heat of combustion, $\Delta h_{\rm c,eff}$, is a weighted average of the two reactions. The heat of combustion of the pyrolyzed plant matter, $\Delta h_{\rm c}$, is approximately 17,400~kJ/kg according to Eq.~(\ref{Delta_h_pyr}). The heat of reaction for the char oxidation, $\Delta h_{\rm char}$ is approximately -12000~kJ/kg (the minus sign in this instance refers to an {\em exothermic} solid phase reaction). The effective heat of combustion is found from:
 \be
    (1-\nu_{\rm char}\nu_{\rm ash}) \, \Delta h_{\rm c,eff} =  (1-\nu_{\rm char}) \Delta h_{\rm c} + \nu_{\rm char}(1-\nu_{\rm ash}) (-\Delta h_{\rm char}) \label{DeltaHeff}
 \ee
+
+\subsection{Examples}
+\label{char_oxidation_1}
+\label{char_oxidation_2}
+
 Consider the sample case called {\ct WUI/char\_oxidation\_1.fds} where $m=0.0531$~kg of dry vegetation is completely consumed by fire except for a small amount of ash. The char and ash yields are $\nu_{\rm char}=0.25$ and $\nu_{\rm ash}=0.04$. The heat of combustion of the pyrolyzed fuel vapor is $\Delta h_{\rm c}=17400$~kJ/kg; thus the effective heat of combustion for the mass of vegetation consumed is $\Delta h_{\rm c,eff}=16091$~kJ/kg according to Eq.~(\ref{DeltaHeff}). The area under the heat release rate curve in the left hand plot of Fig.~\ref{char_oxidation_1_fig} should be $m (1-\nu_{\rm char}\nu_{\rm ash}) \Delta h_{\rm c,eff} \approx 846$~kJ and the mass of ash remaining should be $\nu_{\rm char}\nu_{\rm ash} m \approx 0.000531$~kg, as shown in the right hand plot of Fig.~\ref{char_oxidation_1_fig}.
 \begin{figure}[ht]
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/char_oxidation_1_hrr}
@@ -7551,14 +7556,11 @@ Consider the sample case called {\ct WUI/char\_oxidation\_1.fds} where $m=0.0531
 \end{figure}
 
 
-\subsection{Vegetation Decomposition in an Inert Environment}
-\label{char_oxidation_2}
-
-Consider a sample case called {\ct Verification/WUI/char\_oxidation\_2.fds} which involves a single pine needle with initial temperature $T_{\rm s,i}=293.15$~K introduced into an adiabatic box with a volume $V=0.001$~m$^3$ and initial temperature $T_{\rm g,i}=1073.15$~K. The needle is a cylinder with length $L=0.1$~m and radius $r=0.0005$~m. It is composed of plant matter with a density of $\rho_{\rm s}=500$~kg/m$^3$, specific heat $c_{\rm s}=1$~kJ/(kg$\cdot$K), and mass $m_{\rm p}=\pi r^2 L \rho_{\rm s}$. The box is initially filled with nitrogen and oxygen, the latter with an initial mass fraction of 0.05. The vegetation undergoes two reactions, one in which $(1-\nu_{\rm char}) \, m_{\rm p}$ is converted to fuel gas and $\nu_{\rm char} \, m_{\rm p}$ to solid char, and the second in which the char oxidizes to form CO$_2$ gas and solid ash. The char yield $\nu_{\rm char}=0.25$ and the ash yield $\nu_{\rm ash}=0.02$. Note that the ash yield is the faction of char that is converted to ash, not the fraction of the original pine needle. The internal energy gained by the gas, $\Delta E_{\rm gas}$, is equal to the energy lost by the pine needle minus the energies associated with the endothermic reaction 1 and exothermic reaction 2:
+The sample case called {\ct Verification/WUI/char\_oxidation\_2.fds} considers a single pine needle with initial temperature $T_{\rm s,i}=293.15$~K introduced into an adiabatic box with a volume $V=0.001$~m$^3$ and initial temperature $T_{\rm g,i}=1073.15$~K. The needle is a cylinder with length $L=0.1$~m and radius $r=0.0005$~m. It is composed of plant matter with a density of $\rho_{\rm s}=500$~kg/m$^3$, specific heat $c_{\rm s}=1$~kJ/(kg$\cdot$K), and mass $m_{\rm p}=\pi r^2 L \rho_{\rm s}$. The box is initially filled with nitrogen and oxygen, the latter with an initial mass fraction of 0.05. The vegetation undergoes two reactions, one in which $(1-\nu_{\rm char}) \, m_{\rm p}$ is converted to fuel gas and $\nu_{\rm char} \, m_{\rm p}$ to solid char, and the second in which the char oxidizes to form CO$_2$ gas and solid ash. The char yield $\nu_{\rm char}=0.25$ and the ash yield $\nu_{\rm ash}=0.02$. Note that the ash yield is the faction of char that is converted to ash, not the fraction of the original pine needle. The internal energy gained by the gas, $\Delta E_{\rm gas}$, is equal to the energy lost by the pine needle minus the energies associated with the endothermic reaction 1 and exothermic reaction 2:
 \be
    \Delta E_{\rm gas} =  m_{\rm p}  \, \left( (1-\nu_{\rm char} \nu_{\rm ash}) \, c_{\rm s} \, T_{\rm s,i} - \Delta h_{\rm pyr} - \nu_{\rm char} \, \Delta h_{\rm char} \right)
 \ee
-$\Delta h_{\rm pyr}=400$~kJ/kg is the heat of reaction 1 and $\Delta h_{\rm char}=-32000$~kJ/kg is the heat of reaction 2. The top left plot in Fig.~\ref{char_oxidation_2_fig} displays the evolution in time of the total mass of the pine needle (foliage), the virgin material (dry foliage), char, and ash. The top right plot displays the wood fuel vapor, CO$_2$, and O$_2$. The bottom left plot displays the energy lost by the particle and gained by the gas, $\Delta E_{\rm gas}$. The bottom right plot displays the temperature of the pine needle.
+$\Delta h_{\rm pyr}=400$~kJ/kg is the heat of reaction 1 and $\Delta h_{\rm char}=-12000$~kJ/kg is the heat of reaction 2. The top left plot in Fig.~\ref{char_oxidation_2_fig} displays the evolution in time of the total mass of the pine needle (needle), the plant material (pulp), char, and ash. The top right plot displays the fuel vapor, CO$_2$, and O$_2$. The bottom left plot displays the energy lost by the particle and gained by the gas, $\Delta E_{\rm gas}$. The bottom right plot displays the temperature of the pine needle.
 \begin{figure}[ht]
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/char_oxidation_2_solid_mass}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/char_oxidation_2_mass} \\

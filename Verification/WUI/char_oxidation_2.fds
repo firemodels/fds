@@ -1,8 +1,8 @@
 &HEAD CHID='char_oxidation_2', TITLE='Test of FDS veg particles' /
 
-&TIME T_END=10, DT=0.001, WALL_INCREMENT=1 / 
+&TIME T_END=90, DT=0.01, WALL_INCREMENT=1 / 
 
-&MISC TMPA=800., CHECK_HT=T /
+&MISC TMPA=800. /
 
 &RADI RADIATION=T, TIME_STEP_INCREMENT=1, ANGLE_INCREMENT=1 /
 
@@ -79,7 +79,7 @@
       NU_SPEC            = -1.65,2.63
       MATL_ID            = 'ASH'
       NU_MATL            = 0.02
-      HEAT_OF_REACTION   = -32000. /
+      HEAT_OF_REACTION   = -12000. /
 
 &MATL ID            = 'ASH'
       DENSITY       = 67.
