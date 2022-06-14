@@ -1,58 +1,56 @@
 #6/2-14/2022 Noelle Crump, to convert data from Deep Fuel Bed Exp csv file
 #into a paramfile to run through swaps.py to create input files for DFB
-#code based on The MATLAB script of the same purpose by Rudy
+#code based on The MATLAB script of the same purpose by Ruddy Mell
 
 import math
-import csv
-import os
-import numpy
+import numpy as np
+import pandas as pd
 
-file_n = 'experiments.csv'
+filename = 'exp_params.csv'
 paramfile = 'paramfile.csv'
 
-n_data = numpy.loadtxt(fname= file_n, delimiter=',')
-data = n_data
-#initailize final matrix to write excluding the top line
+df = pd.read_csv(filename, header=0) 
+
+
+#Initalize matrix to write final dataframe:    
 FINAL = []
 
-#Initalize data to write param file:    
         #read the data in the file:
-for irow in range(len(data)):    
-    file_no = str(data[irow,0])             #
-    burn_no = str(int(data[irow,1]))        # burn number
-    spacing = data[irow,2]/100              # spacing, cm -> m
-    spacing_s = str(int(data[irow,2]))      # spacing as a string (without decimal)
-    angle = data[irow,3]
-    angle_s = str(int(data[irow,3]))       # angle as a string   (without decimal)
-    angle_r = numpy.radians(data[irow,3])  # degrees-> radians
-    depth = data[irow,4]*0.0254            # in -> meters
-    depth_s = str(int(data[irow,4]))       # depth as a string   (without decimal)
-    m_ct = data[irow,5]/100                # percent to decimal percent                                     
-    res1 = data[irow,6]                    # res 1 to be used for platform spacing
-    res2 = data[irow,7]                    # res 2 to be used for IJK
-    temp = (data[irow,8]-32)/1.8           # ambient temprature F -> C
-    hmdy_rh = data[irow,9]                 # ambient humidity
-    burned_yn =int(data[irow,10])          # did the fire spread 1=y 0=n.
-    pct_burn =str(data[irow,11])+'%.'      # spread percentage (as whole %)
-    #roundint = int()                      #for readability all data is rounded before it prints to the param file
-                                           #the minimum round number is 4, but at higer resolutions, it should increase
-        
-        #Hardwires:
-    #res1= 0.025          # temporary hardwire for low resoluiton runs
-    n_ptcls = 1000      # for now, hardwire Number of particles and
-    #param7IJK = 30      # mesh IJK. later they should all be connected
-    param7IJK = res2      # mesh IJK. later they should all be connected
+for irow in df.index:
+    file_no = str(df.loc[irow,'RUN_NO'])
+    burn_no = str(int(df.loc[irow,'BURN_NO']))        # burn number
+    spacing = df.loc[irow,'SPACING']/100              # spacing, cm -> m
+    spacing_s = str(int(df.loc[irow,'SPACING']))      # spacing as a string (without decimal)
+    angle_s = str(int(df.loc[irow,'SLOPE']))          # angle as a string   (without decimal)
+    angle_r = np.radians(df.loc[irow,'SLOPE'])        # degrees-> radians
+    depth = df.loc[irow,'DEPTH']*0.0254               # in -> meters
+    depth_s = str(int(df.loc[irow,'DEPTH']))          # depth as a string   (without decimal)
+    m_ct = df.loc[irow,'MOISTURE_CONTENT']/100        # moisture, whole number percent to decimal percent                                     
+    res1 = df.loc[irow,'DX1']                         # res 1 to be used for platform spacing
+    res2 = df.loc[irow,'DX2']                         # res 2 to be used for IJK
     s_res1 = 'p'+str(res1)[2:len(str(res1))]
     s_res2 = str(int(res2))
+    temp = (df.loc[irow,'TMPA']-32)/1.8               # ambient temprature F -> C
+    hmdy_rh = df.loc[irow,'HUMIDITY']                 # ambient humidity
+    burned_yn =int(df.loc[irow,'SPREAD'])             # did the fire spread 1=y 0=n.
+    pct_burn =str(df.loc[irow,'BURN_PERCENT'])        # spread percentage (as whole %)
+        
+#        #Hardwires:
+#    #res1= 0.025          # temporary hardwire for low resoluiton runs
+    n_ptcls = 1000      # for now, hardwire Number of particles and
+#    #param7IJK = 30      # mesh IJK. later they should all be connected
+    param7IJK = res2      # mesh IJK. later they should all be connected
     
-#Start Writing the file: 
+
+
+##Start Writing the file: 
         #Begin the row for that file, with the Filename:
-    param_line =[burn_no+"burnno_"+depth_s+"D_"+angle_s+"S_"+spacing_s+"L_"+"DFB.fds"] 
+    param_line =["burn"+burn_no+"_"+depth_s+"D_"+angle_s+"S_"+spacing_s+"L"+".fds"] 
         # HEAD, CHID, and coments about the exp outcome
     param1HEAD =depth_s+"D_"+angle_s+"S_"+spacing_s+"L_"+s_res2+"res-"+s_res1
-    param2TITLE ="'Deep fuel bed-"+depth_s+" in deep- "+angle_s+" degrees- "+spacing_s+" cm spacing. expburn#"+burn_no+". Matlab RUN"+file_no+"'"
+    param2TITLE ="USFS Deep Fuel Beds burn"+burn_no+"-- "+depth_s+" in deep- "+angle_s+" degrees- "+spacing_s+" cm spacing"
     burnstring=['did not burn','burned sucsessfully']
-    burnpctstr =['.',' with a burn percentage of '+pct_burn ]
+    burnpctstr =['',' with a burn percentage of '+pct_burn]
     param3BURN = "During the trial this run "+ burnstring[burned_yn]+burnpctstr[burned_yn]
     param_line = param_line + [param1HEAD]+[param2TITLE]+[param3BURN]
         # FDS Params tempature, humidity, and moisture content
@@ -61,9 +59,6 @@ for irow in range(len(data)):
     param6MRCT = str(round(m_ct,4))
     param_line = param_line +[param4TEMP]+[param5HMDY]+[param6MRCT]
     
-    #~-Fuel particle density =  514 kg/m^3 from the notes(Russ/Mark)
-   # n_ptcls = str(1000)# for now, hardwire Number of particles
-    #param7IJK = 30 #and mesh resolution. later they should be connected
     param_line = param_line+[str(param7IJK)]
     n_baisicparams= len(param_line)
     
@@ -145,32 +140,25 @@ for irow in range(len(data)):
     for n in range(n_baisicparams, len(param_line)):
         param_line[n]=round(param_line[n],4)
 
-
-        
+       
     FINAL = FINAL + [param_line]
-    
-# Write the paramfile    
-if os.path.isfile(paramfile):
-    os.remove(paramfile)
-print('writing to param file')
 
+
+## Write the paramfile    
 topline = ['Template.fds']
 
 #add baisic params
 for i in range((n_baisicparams-1)):
-    topline = topline +["'param"+ str(i+1)+"'"]
+    topline = topline +["param"+ str(i+1)]
 
 #add tree params
 param_header=[]
 for n in range(8):
-    topline = topline+ ["'paramf"+str(n+1)+"'"]
+    topline = topline+ ["paramf"+str(n+1)]
 
 for m in range(8):
-    topline = topline+ ["'paramo"+str(m+1)+"'"]
+    topline = topline+ ["paramo"+str(m+1)]
 
-#write final param file
-with open(paramfile, 'w', encoding='UTF8', newline='') as f:
-    writer = csv.writer(f)
-    writer.writerow(topline)
-    for row in range(len(data)):
-        writer.writerow(FINAL[row])
+dfout = pd.DataFrame(FINAL,columns=topline)
+##write final param file
+dfout.to_csv(paramfile, index = False)
