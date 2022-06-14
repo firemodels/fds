@@ -793,7 +793,7 @@ $QFDS -d WUI Bova_1b.fds
 $QFDS -d WUI Bova_4a.fds
 $QFDS -d WUI bulk_density_file.fds
 $QFDS -d WUI char_oxidation_1.fds
-$QFDS -d WUI char_oxidation_2.fds
+$QFDS -p 2 -d WUI char_oxidation_2.fds
 $QFDS -d WUI dragon_5a.fds
 $QFDS -p 2 -d WUI ground_vegetation_conv.fds
 $QFDS -p 2 -d WUI ground_vegetation_drag.fds

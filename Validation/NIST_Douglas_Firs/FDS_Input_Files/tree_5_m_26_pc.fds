@@ -7,10 +7,6 @@
 
 &MISC TMPA=28. /
 
-&REAC FUEL='CELLULOSE', C=3.4, H=6.2, O=2.5, SOOT_YIELD=0.02, HEAT_OF_COMBUSTION=17700. /
-
-&SPEC ID='WATER VAPOR' /
-
 &VENT MB='XMIN', SURF_ID='OPEN' /
 &VENT MB='XMAX', SURF_ID='OPEN' /
 &VENT MB='YMIN', SURF_ID='OPEN' /
@@ -35,126 +31,54 @@
       CONDUCTIVITY = 0.3  /
 
 &SURF ID                        = 'foliage'
-      MATL_ID(1,1:3) = 'comp 1','comp 2','comp 3'
-      MATL_MASS_FRACTION(1,1:3) = 0.25,0.50,0.25
+      MATL_ID(1,1) = 'GENERIC VEGETATION'
+      MATL_MASS_FRACTION(1,1) = 1.0
       MOISTURE_FRACTION         = 0.26
       SURFACE_VOLUME_RATIO      = 3940.
       LENGTH                    = 0.05
       GEOMETRY                  = 'CYLINDRICAL' /
 
 &SURF ID                        = 'small roundwood'
-      MATL_ID(1,1:3) = 'comp 1','comp 2','comp 3'
-      MATL_MASS_FRACTION(1,1:3) = 0.25,0.50,0.25
+      MATL_ID(1,1) = 'GENERIC VEGETATION'
+      MATL_MASS_FRACTION(1,1) = 1.0
       MOISTURE_FRACTION         = 0.26
       SURFACE_VOLUME_RATIO      = 2667.
       LENGTH                    = 0.10
       GEOMETRY                  = 'CYLINDRICAL' /
 
 &SURF ID                        = 'medium roundwood'
-      MATL_ID(1,1:3) = 'comp 1','comp 2','comp 3'
-      MATL_MASS_FRACTION(1,1:3) = 0.25,0.50,0.25
+      MATL_ID(1,1) = 'GENERIC VEGETATION'
+      MATL_MASS_FRACTION(1,1) = 1.0
       MOISTURE_FRACTION         = 0.26
       SURFACE_VOLUME_RATIO      = 888.
       LENGTH                    = 0.10
       GEOMETRY                  = 'CYLINDRICAL' /
 
 &SURF ID                        = 'large roundwood'
-      MATL_ID(1,1:3) = 'comp 1','comp 2','comp 3'
-      MATL_MASS_FRACTION(1,1:3) = 0.25,0.50,0.25
+      MATL_ID(1,1) = 'GENERIC VEGETATION'
+      MATL_MASS_FRACTION(1,1) = 1.0
       MOISTURE_FRACTION         = 0.26
       SURFACE_VOLUME_RATIO      = 500.
       LENGTH                    = 0.10
       GEOMETRY                  = 'CYLINDRICAL' /
 
-&MATL ID                    = 'MOISTURE'
-      DENSITY               = 1000.
-      CONDUCTIVITY          = 0.20
-      SPECIFIC_HEAT         = 4.22
-      REFERENCE_TEMPERATURE = 100.
-      HEATING_RATE          = 10.
-      PYROLYSIS_RANGE       = 100.
-      NU_SPEC               = 1.00
-      SPEC_ID               = 'WATER VAPOR'
-      HEAT_OF_REACTION      = 2259.   /
-
-&MATL ID                    = 'comp 1'
-      DENSITY               = 514.
-      CONDUCTIVITY          = 0.20
-      SPECIFIC_HEAT_RAMP    = 'c_v'
-      A                     = 91.22
-      E                     = 44500.
-      NU_SPEC               = 0.75
-      SPEC_ID               = 'CELLULOSE'
-      NU_MATL               = 0.26
-      MATL_ID               = 'char'
-      HEAT_OF_REACTION      = 416.   /
-
-&MATL ID                    = 'comp 2'
-      DENSITY               = 514.
-      CONDUCTIVITY          = 0.20
-      SPECIFIC_HEAT_RAMP    = 'c_v'
-      A                     = 3.66E6
-      E                     = 1.05E5
-      NU_SPEC               = 0.75
-      SPEC_ID               = 'CELLULOSE'
-      NU_MATL               = 0.26
-      MATL_ID               = 'char'
-      HEAT_OF_REACTION      = 416. /
-
-&MATL ID                    = 'comp 3'
-      DENSITY               = 514.
-      CONDUCTIVITY          = 0.20
-      SPECIFIC_HEAT_RAMP    = 'c_v'
-      A                     = 14.2
-      E                     = 49200.
-      NU_SPEC               = 0.75
-      SPEC_ID               = 'CELLULOSE'
-      NU_MATL               = 0.26
-      MATL_ID               = 'char'
-      HEAT_OF_REACTION      = 416.  /
-
-&MATL ID                 = 'char'
-      DENSITY            = 300.
-      CONDUCTIVITY       = 0.052
-      SPECIFIC_HEAT_RAMP = 'cp_char'
-      NU_O2_CHAR         = 1.65
-      N_O2=1.
-      MAX_REACTION_RATE  = 100.
-      REFERENCE_TEMPERATURE=460
-      HEATING_RATE=10
-      PYROLYSIS_RANGE=40
-      SPEC_ID            = 'PRODUCTS','AIR'
-      NU_SPEC            = 8.18,-7.2
-      MATL_ID            = 'ash'
-      NU_MATL            = 0.02
-      HEAT_OF_REACTION   = -12000. /
-
-&RAMP ID='cp_char', T=   27, F=0.715 /
-&RAMP ID='cp_char', T= 1724, F=2.04 /
-
-&RAMP ID='c_v', T=  20, F=1.184 /
-&RAMP ID='c_v', T= 800, F=4.070 /
-
-&MATL ID            = 'ash'
-      DENSITY       = 67.
-      CONDUCTIVITY  = 0.1
-      SPECIFIC_HEAT = 2.0 /
+&CATF OTHER_FILES='vegetation_model.txt' /
 
 &PART ID='foliage', DRAG_COEFFICIENT=2.8, SAMPLING_FACTOR=10, SURF_ID='foliage'
       QUANTITIES='PARTICLE TEMPERATURE','PARTICLE MASS', STATIC=.TRUE., COLOR='FOREST GREEN' /
-&INIT PART_ID='foliage', XYZ=0.0,0.0,0.30, RADIUS=1.45, HEIGHT=4.3, SHAPE='CONE', N_PARTICLES_PER_CELL=1, PACKING_RATIO=0.0024 /
+&INIT PART_ID='foliage', XYZ=0.0,0.0,0.30, RADIUS=1.45, HEIGHT=4.3, SHAPE='CONE', N_PARTICLES_PER_CELL=1, DRY=T, MASS_PER_VOLUME=1.2336 /
 
 &PART ID='small roundwood', DRAG_COEFFICIENT=2.8, SAMPLING_FACTOR=10, SURF_ID='small roundwood'
       QUANTITIES='PARTICLE TEMPERATURE','PARTICLE MASS','PARTICLE DIAMETER', STATIC=.TRUE., COLOR='BROWN' /
-&INIT PART_ID='small roundwood', XYZ=0.0,0.0,0.30, RADIUS=1.45, HEIGHT=4.3, SHAPE='CONE', N_PARTICLES_PER_CELL=1, PACKING_RATIO=0.00068 /
+&INIT PART_ID='small roundwood', XYZ=0.0,0.0,0.30, RADIUS=1.45, HEIGHT=4.3, SHAPE='CONE', N_PARTICLES_PER_CELL=1, DRY=T, MASS_PER_VOLUME=0.3495 /
 
 &PART ID='medium roundwood', DRAG_COEFFICIENT=2.8, SAMPLING_FACTOR=10, SURF_ID='medium roundwood'
       QUANTITIES='PARTICLE TEMPERATURE','PARTICLE MASS','PARTICLE DIAMETER', STATIC=.TRUE., COLOR='BROWN' /
-&INIT PART_ID='medium roundwood', XYZ=0.0,0.0,0.30, RADIUS=1.45, HEIGHT=4.3, SHAPE='CONE', N_PARTICLES_PER_CELL=1, PACKING_RATIO=0.00048 /
+&INIT PART_ID='medium roundwood', XYZ=0.0,0.0,0.30, RADIUS=1.45, HEIGHT=4.3, SHAPE='CONE', N_PARTICLES_PER_CELL=1, DRY=T, MASS_PER_VOLUME=0.2467 /
 
 &PART ID='large roundwood', DRAG_COEFFICIENT=2.8, SAMPLING_FACTOR=10, SURF_ID='large roundwood'
       QUANTITIES='PARTICLE TEMPERATURE','PARTICLE MASS','PARTICLE DIAMETER', STATIC=.TRUE., COLOR='BROWN' /
-&INIT PART_ID='large roundwood', XYZ=0.0,0.0,0.30, RADIUS=1.45, HEIGHT=4.3, SHAPE='CONE', N_PARTICLES_PER_CELL=1, PACKING_RATIO=0.00044 /
+&INIT PART_ID='large roundwood', XYZ=0.0,0.0,0.30, RADIUS=1.45, HEIGHT=4.3, SHAPE='CONE', N_PARTICLES_PER_CELL=1, DRY=T, MASS_PER_VOLUME=0.2262 /
 
 &PART ID='ignitor', SAMPLING_FACTOR=1, SURF_ID='burner', STATIC=.TRUE. /
 &SURF ID='burner', TMP_FRONT=1500., EMISSIVITY=1., HRRPUA=103., RAMP_T='ignite', RAMP_Q='ignite', RADIUS=0.01, GEOMETRY='SPHERICAL' /

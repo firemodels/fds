@@ -1339,7 +1339,6 @@ TYPE INITIALIZATION_TYPE
    REAL(EB) :: RADIUS           !< Radius of initialization region, like a cone (m)
    REAL(EB) :: DIAMETER=-1._EB  !< Diameter of liquid droplets specified on an INIT line (m)
    REAL(EB) :: PARTICLE_WEIGHT_FACTOR !< Multiplicative factor for particles specified on the INIT line
-   REAL(EB) :: PACKING_RATIO    !< Volume of particles divided by the volume of gas
    REAL(EB) :: CHI_R            !< Radiative fraction of HRRPUV
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: PARTICLE_INSERT_CLOCK  !< Time of last particle insertion (s)
    REAL(EB), ALLOCATABLE, DIMENSION(:) :: MASS_FRACTION          !< Mass fraction of gas components
@@ -1358,6 +1357,7 @@ TYPE INITIALIZATION_TYPE
    LOGICAL :: CELL_CENTERED=.FALSE.
    LOGICAL :: UNIFORM=.FALSE.
    LOGICAL :: INVOKED_BY_SURF=.FALSE.  ! Invoked by a SURF line for repeated insertion
+   LOGICAL :: DRY=.FALSE.              ! Indicates if MASS_PER_VOLUME refers to dry material only
    LOGICAL, ALLOCATABLE, DIMENSION(:) :: ALREADY_INSERTED
    CHARACTER(LABEL_LENGTH) :: SHAPE
    CHARACTER(LABEL_LENGTH) :: DEVC_ID
