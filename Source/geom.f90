@@ -751,9 +751,9 @@ REAL(EB):: SLEN_GEOM, AREA_GEOM, VOLUME_GEOM, SLEN_IBCC, SLEN, DV(MAX_DIM), XYZC
            DM_XYZCEN(MAX_DIM), CCGP_XYZCEN(MAX_DIM), DM_XYZCEN_AUX(MAX_DIM), CCGP_XYZCEN_AUX(MAX_DIM)
 INTEGER :: SEG(NOD1:NOD2), NEDGE, IEDGE, IFACE, IG
 
-INTEGER :: NCUTFACE_INB, ICC1, ICC2, NCELL, IGC
+INTEGER :: NCUTFACE_INB, ICC1, ICC2, NCELL, IGC, ICF2, JCF2, JCF, FTYPE, ILH
 REAL(EB):: CF_AREA_INB=0._EB, CF_INXAREA_INB=0._EB, CF_INXSQAREA_INB=0._EB, &
-           CF_JNYSQAREA_INB=0._EB, CF_KNZSQAREA_INB=0._EB, CF_AREA_INB_AUX=0._EB
+           CF_JNYSQAREA_INB=0._EB, CF_KNZSQAREA_INB=0._EB, CF_AREA_INB_AUX=0._EB, ACRT
 REAL(EB):: CC_VOLUME_INB=0._EB, DM_VOLUME=0._EB, GP_VOLUME=0._EB, &
            CC_VOLUME_INB_AUX=0._EB, DM_VOLUME_AUX=0._EB, GP_VOLUME_AUX=0._EB
 INTEGER, DIMENSION(5) ::  MIN_CC_IJK_ICCJCC, MAX_CC_IJK_ICCJCC
@@ -1948,12 +1948,12 @@ CCVERBOSE_COND : IF(GET_CUTCELLS_VERBOSE) THEN
                IF(CC%VOLUME(ICC2) < MIN_CC_VOL) THEN
                   MIN_CC_VOL   = CC%VOLUME(ICC2)
                   MIN_ALPHA_CV = MIN_CC_VOL / ( DX(CC%IJK(IAXIS))*DY(CC%IJK(JAXIS))*DZ(CC%IJK(KAXIS)) )
-                  MIN_CC_IJK_ICCJCC(1:5) = (/ CUT_CELL(ICC1)%IJK(1:3), ICC1, ICC2  /)
+                  MIN_CC_IJK_ICCJCC(1:5) = (/ CC%IJK(1:3), ICC1, ICC2  /)
                ENDIF
-               IF(CUT_CELL(ICC1)%VOLUME(ICC2) > MAX_CC_VOL) THEN
-                  MAX_CC_VOL   = CUT_CELL(ICC1)%VOLUME(ICC2)
+               IF(CC%VOLUME(ICC2) > MAX_CC_VOL) THEN
+                  MAX_CC_VOL   = CC%VOLUME(ICC2)
                   MAX_ALPHA_CV = MAX_CC_VOL / ( DX(CC%IJK(IAXIS))*DY(CC%IJK(JAXIS))*DZ(CC%IJK(KAXIS)) )
-                  MAX_CC_IJK_ICCJCC(1:5) = (/ CUT_CELL(ICC1)%IJK(1:3), ICC1, ICC2  /)
+                  MAX_CC_IJK_ICCJCC(1:5) = (/ CC%IJK(1:3), ICC1, ICC2  /)
                ENDIF
             ENDDO
          ENDDO
@@ -1961,6 +1961,47 @@ CCVERBOSE_COND : IF(GET_CUTCELLS_VERBOSE) THEN
          WRITE(LU_SETCC,*) 'CUTCELL=',PROCESS(NM),NM,MESHES(NM)%N_CUTCELL_MESH
          WRITE(LU_SETCC,*) 'MIN VOL=',MIN_CC_IJK_ICCJCC(1:5),MIN_CC_VOL,MIN_ALPHA_CV
          WRITE(LU_SETCC,*) 'MAX VOL=',MAX_CC_IJK_ICCJCC(1:5),MAX_CC_VOL,MAX_ALPHA_CV
+
+         ! Dump info for Max Size Cut-cell:
+         DO IG=1,2
+            IF(IG==1) THEN; ICC1 = MIN_CC_IJK_ICCJCC(4); ICC2 = MIN_CC_IJK_ICCJCC(5); ENDIF
+            IF(IG==2) THEN; ICC1 = MAX_CC_IJK_ICCJCC(4); ICC2 = MAX_CC_IJK_ICCJCC(5); ENDIF
+            IF(ICC1==0) CYCLE
+            CC => CUT_CELL(ICC1)
+            I = CC%IJK(IAXIS); J = CC%IJK(JAXIS); K = CC%IJK(KAXIS)
+            IF(IG==1) THEN; WRITE(LU_SETCC,*) 'MIN VOL CC cut-faces:',I,J,K; ENDIF
+            IF(IG==2) THEN; WRITE(LU_SETCC,*) 'MAX VOL CC cut-faces:',I,J,K; ENDIF
+            DO JCF=2,CC%CCELEM(1,ICC2)+1
+               IFACE = CC%CCELEM(JCF,ICC2)
+               FTYPE = CC%FACE_LIST(1,IFACE)
+               ILH   = CC%FACE_LIST(2,IFACE) - 2 ! -1 for LOW_IND, 0 for HIGH_IND
+               X1AXIS= CC%FACE_LIST(3,IFACE)
+               SELECT CASE(FTYPE)
+               CASE(IBM_FTYPE_RCGAS)
+                  SELECT CASE(X1AXIS)
+                  CASE(IAXIS); I=CC%IJK(IAXIS)+ILH; ACRT = DY(CC%IJK(JAXIS))*DZ(CC%IJK(KAXIS))
+                  CASE(JAXIS); J=CC%IJK(JAXIS)+ILH; ACRT = DX(CC%IJK(IAXIS))*DZ(CC%IJK(KAXIS))
+                  CASE(KAXIS); K=CC%IJK(KAXIS)+ILH; ACRT = DY(CC%IJK(JAXIS))*DX(CC%IJK(IAXIS))
+                  END SELECT
+                  WRITE(LU_SETCC,*) JCF-1,' RCGAS ',I,J,K,X1AXIS,ACRT,ACRT/ACRT
+               CASE(IBM_FTYPE_CFGAS)
+                  SELECT CASE(X1AXIS)
+                  CASE(IAXIS); ACRT = DY(J)*DZ(K)
+                  CASE(JAXIS); ACRT = DX(I)*DZ(K)
+                  CASE(KAXIS); ACRT = DY(J)*DX(I)
+                  END SELECT
+                  ICF2  = CC%FACE_LIST(4,IFACE)
+                  JCF2  = CC%FACE_LIST(5,IFACE)
+                  WRITE(LU_SETCC,*) JCF-1,' CFGAS ',CUT_FACE(ICF2)%IJK(1:KAXIS+1),CUT_FACE(ICF2)%AREA(JCF2),&
+                  CUT_FACE(ICF2)%AREA(JCF2)/ACRT
+               CASE(IBM_FTYPE_CFINB)
+                  ICF2  = CC%FACE_LIST(4,IFACE)
+                  JCF2  = CC%FACE_LIST(5,IFACE)
+                  ACRT = 1._EB/3._EB*(DY(J)*DZ(K)+DX(I)*DZ(K)+DY(J)*DX(I))
+                  WRITE(LU_SETCC,*) JCF-1,' CFINB ',CUT_FACE(ICF2)%IJK(1:KAXIS+1),CUT_FACE(ICF2)%AREA(JCF2)
+               END SELECT
+            ENDDO
+         ENDDO
 
       ENDDO TESTS_MESH_LOOP_2
    ENDIF WRITE_CFACE_STATS_COND
@@ -16329,6 +16370,39 @@ DO K=KLO,KHI
 
          ENDDO ICF_LOOP
 
+         ! IF((NM==3 .AND. I==4 .AND. J==6 .AND. K==36)) THEN
+         !    LU_DB_SETCC = GET_FILE_NUMBER()
+         !    WRITE(LU_ERR,*) 'Writing Cartcell_cutfaces.dat... 11111'
+         !    OPEN(UNIT=LU_DB_SETCC,FILE="./Cartcell_cutfaces.dat", STATUS='REPLACE')
+         !    ! Info pertaining to the Cartesian Cell:
+         !    WRITE(LU_DB_SETCC,*) 'I,J,K:',CF%NFACE
+         !    WRITE(LU_DB_SETCC,*) I,J,K,GEOMEPS
+         !    WRITE(LU_DB_SETCC,*) 'XC(I),DX(I),YC(J),DY(J),ZC(K),DZ(K):'
+         !    WRITE(LU_DB_SETCC,*) XCELL(I),DXCELL(I) ! MESHES(NM)%XC(I),MESHES(NM)%DX(I)
+         !    WRITE(LU_DB_SETCC,*) YCELL(J),DYCELL(J) ! MESHES(NM)%YC(J),MESHES(NM)%DY(J)
+         !    WRITE(LU_DB_SETCC,*) ZCELL(K),DZCELL(K) ! MESHES(NM)%ZC(K),MESHES(NM)%DZ(K)
+         !    WRITE(LU_DB_SETCC,*) 'NVERT,NSEG,NSEG_FACE,COUNTR,NSEG_LEFT:'
+         !    WRITE(LU_DB_SETCC,*) NVERT,NSEG,NSEG_FACE,COUNTR,NSEG_LEFT,CF%NFACE
+         !    WRITE(LU_DB_SETCC,*) 'XYZVERT(IAXIS:KAXIS,1:NVERT):'
+         !    DO IDUM=1,NVERT
+         !       WRITE(LU_DB_SETCC,*) IDUM,XYZVERT(IAXIS:KAXIS,IDUM)
+         !    ENDDO
+         !    WRITE(LU_DB_SETCC,*) 'SEG_CELL(NOD1:NOD2,1:NSEG),SEG_CELL(3:6,1:NSEG):'
+         !    DO IDUM=1,NSEG
+         !       WRITE(LU_DB_SETCC,*) IDUM,SEG_CELL(NOD1:NOD2,IDUM),SEG_CELL(3:6,IDUM)
+         !    ENDDO
+         !    WRITE(LU_DB_SETCC,*) 'ICF,BOD_TRI:'
+         !    WRITE(LU_DB_SETCC,*) ICF,NBODTRI
+         !    DO IDUM=1,NBODTRI
+         !       WRITE(LU_DB_SETCC,*) BOD_TRI(1:2,IDUM)
+         !    ENDDO
+         !    WRITE(LU_DB_SETCC,*) 'CFELEM:'
+         !    DO IDUM=1,CF%NFACE
+         !        WRITE(LU_DB_SETCC,*) IDUM,CF%CFELEM(1:CF%CFELEM(1,IDUM)+1,IDUM)
+         !    ENDDO
+         !    CLOSE(LU_DB_SETCC)
+         ! ENDIF
+
          ! IF(.NOT.CYCLE_CELL) THEN
          ! DO ICF = 1, CF%NFACE
          !    DO ISEG=1,CF%CEDGES(1,ICF)
@@ -16555,36 +16629,44 @@ DO K=KLO,KHI
             D23 = XYZVERT(IAXIS:KAXIS,CFELEM(1+NOD3,ICF)) - XYZVERT(IAXIS:KAXIS,CFELEM(1+NOD2,ICF))
             D12 = XYZVERT(IAXIS:KAXIS,CFELEM(1+NOD2,ICF)) - XYZVERT(IAXIS:KAXIS,CFELEM(1+NOD1,ICF))
             CALL CROSS_PRODUCT(NORMTRI,D12,D23)
+            ! Test RH rule for CFACE normal outside of body (into gas phase):
+            RH_ORIENTED = ( GEOMETRY(IBOD)%FACES_NORMAL(IAXIS,ITRI)*NORMTRI(IAXIS) + &
+                            GEOMETRY(IBOD)%FACES_NORMAL(JAXIS,ITRI)*NORMTRI(JAXIS) + &
+                            GEOMETRY(IBOD)%FACES_NORMAL(KAXIS,ITRI)*NORMTRI(KAXIS) ) > -TWO_EPSILON_EB
+            IF(.NOT.RH_ORIENTED) THEN ! Swap normal for triangle:
+               IDUM = CFELEM(1+NOD2,ICF); CFELEM(1+NOD2,ICF) = CFELEM(1+NOD1,ICF); CFELEM(1+NOD1,ICF) = IDUM
+               D23 = XYZVERT(IAXIS:KAXIS,CFELEM(1+NOD3,ICF)) - XYZVERT(IAXIS:KAXIS,CFELEM(1+NOD2,ICF))
+               D12 = XYZVERT(IAXIS:KAXIS,CFELEM(1+NOD2,ICF)) - XYZVERT(IAXIS:KAXIS,CFELEM(1+NOD1,ICF))
+               CALL CROSS_PRODUCT(NORMTRI,D12,D23)
+            ENDIF
             NNORM                = NORM2(NORMTRI)
             IF (NNORM < 2._EB*GEOMEPS**2._EB) CYCLE
             NORMTRI(IAXIS:KAXIS) = NORMTRI(IAXIS:KAXIS) / NNORM
 
             ! First test if INB face is on Cartesian face and pointing
             ! outside of Cartesian cell. If so drop:
-            XYZ(IAXIS:KAXIS) = XYZVERT(IAXIS:KAXIS,CFELEM(1+NOD1,ICF))
-            ! IAXIS:
-            IF ( (ABS(NORMTRI(IAXIS)+1._EB) < GEOMEPS) .AND. &
-                 (ABS(XFACE(I-FCELL  )-XYZ(IAXIS)) < GEOMEPS) ) CYCLE ! Low Face
-            IF ( (ABS(NORMTRI(IAXIS)-1._EB) < GEOMEPS) .AND. &
-                 (ABS(XFACE(I-FCELL+1)-XYZ(IAXIS)) < GEOMEPS) ) CYCLE ! High Face
-            ! JAXIS:
-            IF ( (ABS(NORMTRI(JAXIS)+1._EB) < GEOMEPS) .AND. &
-                 (ABS(YFACE(J-FCELL  )-XYZ(JAXIS)) < GEOMEPS) ) CYCLE ! Low Face
-            IF ( (ABS(NORMTRI(JAXIS)-1._EB) < GEOMEPS) .AND. &
-                 (ABS(YFACE(J-FCELL+1)-XYZ(JAXIS)) < GEOMEPS) ) CYCLE ! High Face
-            ! KAXIS:
-            IF ( (ABS(NORMTRI(KAXIS)+1._EB) < GEOMEPS) .AND. &
-                 (ABS(ZFACE(K-FCELL  )-XYZ(KAXIS)) < GEOMEPS) ) CYCLE ! Low Face
-            IF ( (ABS(NORMTRI(KAXIS)-1._EB) < GEOMEPS) .AND. &
-                 (ABS(ZFACE(K-FCELL+1)-XYZ(KAXIS)) < GEOMEPS) ) CYCLE ! High Face
-
-            ! Area:
-            AREA  = 0.5_EB*NNORM
-
             ! Face Vertices average location:
             ACEN(IAXIS:KAXIS) = 1._EB/3._EB*(XYZVERT(IAXIS:KAXIS,CFELEM(1+NOD1,ICF)) + &
                                              XYZVERT(IAXIS:KAXIS,CFELEM(1+NOD2,ICF)) + &
                                              XYZVERT(IAXIS:KAXIS,CFELEM(1+NOD3,ICF)))
+            ! IAXIS:
+            IF ( (ABS(NORMTRI(IAXIS)+1._EB) < GEOMEPS) .AND. &
+                 (ABS(XFACE(I-FCELL  )-ACEN(IAXIS)) < GEOMEPS) ) CYCLE ! Low Face
+            IF ( (ABS(NORMTRI(IAXIS)-1._EB) < GEOMEPS) .AND. &
+                 (ABS(XFACE(I-FCELL+1)-ACEN(IAXIS)) < GEOMEPS) ) CYCLE ! High Face
+            ! JAXIS:
+            IF ( (ABS(NORMTRI(JAXIS)+1._EB) < GEOMEPS) .AND. &
+                 (ABS(YFACE(J-FCELL  )-ACEN(JAXIS)) < GEOMEPS) ) CYCLE ! Low Face
+            IF ( (ABS(NORMTRI(JAXIS)-1._EB) < GEOMEPS) .AND. &
+                 (ABS(YFACE(J-FCELL+1)-ACEN(JAXIS)) < GEOMEPS) ) CYCLE ! High Face
+            ! KAXIS:
+            IF ( (ABS(NORMTRI(KAXIS)+1._EB) < GEOMEPS) .AND. &
+                 (ABS(ZFACE(K-FCELL  )-ACEN(KAXIS)) < GEOMEPS) ) CYCLE ! Low Face
+            IF ( (ABS(NORMTRI(KAXIS)-1._EB) < GEOMEPS) .AND. &
+                 (ABS(ZFACE(K-FCELL+1)-ACEN(KAXIS)) < GEOMEPS) ) CYCLE ! High Face
+
+            ! Area:
+            AREA  = 0.5_EB*NNORM
 
             ! dot(i,nc) int(x)dA
             INXAREA = NORMTRI(IAXIS)*ACEN(IAXIS)*AREA ! Single Gauss pt integration.
@@ -16628,6 +16710,39 @@ DO K=KLO,KHI
          ENDDO
          DEALLOCATE(CFELEM,SEG_CELL_AUX,CEDGES)
          CF%NFACE = NCF
+
+         ! IF((NM==3 .AND. I==4 .AND. J==6 .AND. K==36)) THEN
+         !    LU_DB_SETCC = GET_FILE_NUMBER()
+         !    WRITE(LU_ERR,*) 'Writing Cartcell_cutfaces.dat...'
+         !    OPEN(UNIT=LU_DB_SETCC,FILE="./Cartcell_cutfaces.dat", STATUS='REPLACE')
+         !    ! Info pertaining to the Cartesian Cell:
+         !    WRITE(LU_DB_SETCC,*) 'I,J,K:',CF%NFACE
+         !    WRITE(LU_DB_SETCC,*) I,J,K,GEOMEPS
+         !    WRITE(LU_DB_SETCC,*) 'XC(I),DX(I),YC(J),DY(J),ZC(K),DZ(K):'
+         !    WRITE(LU_DB_SETCC,*) XCELL(I),DXCELL(I) ! MESHES(NM)%XC(I),MESHES(NM)%DX(I)
+         !    WRITE(LU_DB_SETCC,*) YCELL(J),DYCELL(J) ! MESHES(NM)%YC(J),MESHES(NM)%DY(J)
+         !    WRITE(LU_DB_SETCC,*) ZCELL(K),DZCELL(K) ! MESHES(NM)%ZC(K),MESHES(NM)%DZ(K)
+         !    WRITE(LU_DB_SETCC,*) 'NVERT,NSEG,NSEG_FACE,COUNTR,NSEG_LEFT:'
+         !    WRITE(LU_DB_SETCC,*) NVERT,NSEG,NSEG_FACE,COUNTR,NSEG_LEFT,CF%NFACE
+         !    WRITE(LU_DB_SETCC,*) 'XYZVERT(IAXIS:KAXIS,1:NVERT):'
+         !    DO IDUM=1,NVERT
+         !       WRITE(LU_DB_SETCC,*) IDUM,XYZVERT(IAXIS:KAXIS,IDUM)
+         !    ENDDO
+         !    WRITE(LU_DB_SETCC,*) 'SEG_CELL(NOD1:NOD2,1:NSEG),SEG_CELL(3:6,1:NSEG):'
+         !    DO IDUM=1,NSEG
+         !       WRITE(LU_DB_SETCC,*) IDUM,SEG_CELL(NOD1:NOD2,IDUM),SEG_CELL(3:6,IDUM)
+         !    ENDDO
+         !    WRITE(LU_DB_SETCC,*) 'ICF,BOD_TRI:'
+         !    WRITE(LU_DB_SETCC,*) ICF,NBODTRI
+         !    DO IDUM=1,NBODTRI
+         !       WRITE(LU_DB_SETCC,*) BOD_TRI(1:2,IDUM)
+         !    ENDDO
+         !    WRITE(LU_DB_SETCC,*) 'CFELEM:'
+         !    DO IDUM=1,CF%NFACE
+         !        WRITE(LU_DB_SETCC,*) IDUM,CF%CFELEM(1:CF%CFELEM(1,IDUM)+1,IDUM)
+         !    ENDDO
+         !    CLOSE(LU_DB_SETCC)
+         ! ENDIF
 
          ! Now add cut-edges product of linearization to CUT_EDGE:
          DO ICF = 1, CF%NFACE
@@ -17850,13 +17965,17 @@ DO K=KLO,KHI
                   XYZCEN(IAXIS:KAXIS,ICELL) = XYZCEN(IAXIS:KAXIS,ICELL)+AREAVARS(2:4,IFACE)
                ENDDO
                IF(VOL(ICELL) < GEOMEPS) THEN ! Volume too small for correct calculation of XYZCEN-> take cartcell centroid.
-                  JJ = 0
-                  VOL(ICELL) = ABS(VOL(ICELL))
-                  IF (VOL(ICELL)<TWO_EPSILON_EB) VOL(ICELL) = DX(I)*DY(J)*DZ(K)
+                  VOL(ICELL) = ABS(VOL(ICELL));
+                  IF(VOL(ICELL)<TWO_EPSILON_EB .OR. VOL(ICELL)>DXCELL(I)*DYCELL(J)*DZCELL(K)) &
+                  VOL(ICELL) = DXCELL(I)*DYCELL(J)*DZCELL(K)
                   XYZCEN(IAXIS:KAXIS,ICELL) = (/ XCELL(I), YCELL(J), ZCELL(K) /)
                ELSE
+                  IF(VOL(ICELL) > DXCELL(I)*DYCELL(J)*DZCELL(K)) VOL(ICELL) = DXCELL(I)*DYCELL(J)*DZCELL(K)
                   ! divide xyzcen by 2*vol:
                   XYZCEN(IAXIS:KAXIS,ICELL) = XYZCEN(IAXIS:KAXIS,ICELL) / (2._EB*VOL(ICELL))
+                  IF(XYZCEN(IAXIS,ICELL)<XFACE(I-1) .OR. XYZCEN(IAXIS,ICELL)>XFACE(I)) XYZCEN(IAXIS,ICELL) = XCELL(I)
+                  IF(XYZCEN(JAXIS,ICELL)<YFACE(J-1) .OR. XYZCEN(JAXIS,ICELL)>YFACE(J)) XYZCEN(JAXIS,ICELL) = YCELL(J)
+                  IF(XYZCEN(KAXIS,ICELL)<ZFACE(K-1) .OR. XYZCEN(KAXIS,ICELL)>ZFACE(K)) XYZCEN(KAXIS,ICELL) = ZCELL(K)
                ENDIF
             ENDDO
 
@@ -17885,6 +18004,24 @@ DO K=KLO,KHI
          FACE_LIST(1:IBM_NPARAM_CCFACE,1:NFACE_CELL)
          MESHES(NM)%CUT_CELL(NCUTCELL)%VOLUME(1:NCELL)                  = VOL(1:NCELL)
          MESHES(NM)%CUT_CELL(NCUTCELL)%XYZCEN(IAXIS:KAXIS,1:NCELL)      = XYZCEN(IAXIS:KAXIS,1:NCELL)
+
+         ! IF((NM==3 .AND. I==4 .AND. J==6 .AND. K==36)) THEN
+         !    WRITE(LU_ERR,*) 'Found LARGE CUTCELL=',&
+         !    MESHES(NM)%N_CUTCELL_MESH+MESHES(NM)%N_GCCUTCELL_MESH+1,VOL(1),SIZE(XYZVERT,DIM=2)
+         !       WRITE(LU_ERR,*) 'CC 1 I,J,K,INB NFACE,NFACE_CELL=',I,J,K,&
+         !       MESHES(NM)%CUT_FACE(CEI)%NFACE,NFACE_CELL,':',MESHES(NM)%CUT_CELL(NCUTCELL)%NCELL,CYCLE_CELL
+         !       OPEN(666,FILE='VERTS.txt',STATUS='REPLACE')
+         !       DO IP=1,NVERT_CELL
+         !          WRITE(666,*) XYZVERT(1:3,IP)
+         !       ENDDO
+         !       CLOSE(666)
+         !       IFACE=MAXVAL(FACE_CELL(1,1:NFACE_CELL))
+         !       OPEN(666,FILE='FACES.txt',STATUS='REPLACE')
+         !       DO IP=1,NFACE_CELL
+         !          WRITE(666,*) FACE_CELL(1:IFACE+1,IP),FACE_LIST(1,IP)
+         !       ENDDO
+         !       CLOSE(666)
+         ! ENDIF
 
       ENDDO ! I
    ENDDO ! J
