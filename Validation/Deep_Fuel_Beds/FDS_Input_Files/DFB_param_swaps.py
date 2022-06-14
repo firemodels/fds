@@ -1,4 +1,4 @@
-#6/2/2022 Noelle Crump, to convert data from Deep Fuel Bed Exp csv file
+#6/2-14/2022 Noelle Crump, to convert data from Deep Fuel Bed Exp csv file
 #into a paramfile to run through swaps.py to create input files for DFB
 #code based on The MATLAB script of the same purpose by Rudy
 
@@ -29,7 +29,7 @@ for irow in range(len(data)):
     depth_s = str(int(data[irow,4]))       # depth as a string   (without decimal)
     m_ct = data[irow,5]/100                # percent to decimal percent                                     
     res1 = data[irow,6]                    # res 1 to be used for platform spacing
-    res2 = data[irow,7]                    # res 1 to be used for IJK
+    res2 = data[irow,7]                    # res 2 to be used for IJK
     temp = (data[irow,8]-32)/1.8           # ambient temprature F -> C
     hmdy_rh = data[irow,9]                 # ambient humidity
     burned_yn =int(data[irow,10])          # did the fire spread 1=y 0=n.
@@ -38,16 +38,18 @@ for irow in range(len(data)):
                                            #the minimum round number is 4, but at higer resolutions, it should increase
         
         #Hardwires:
-    res1= 0.25          # temporary hardwire for low resoluiton runs
+    #res1= 0.025          # temporary hardwire for low resoluiton runs
     n_ptcls = 1000      # for now, hardwire Number of particles and
+    #param7IJK = 30      # mesh IJK. later they should all be connected
     param7IJK = res2      # mesh IJK. later they should all be connected
-
-
+    s_res1 = 'p'+str(res1)[2:len(str(res1))]
+    s_res2 = str(int(res2))
+    
 #Start Writing the file: 
         #Begin the row for that file, with the Filename:
     param_line =[burn_no+"burnno_"+depth_s+"D_"+angle_s+"S_"+spacing_s+"L_"+"DFB.fds"] 
         # HEAD, CHID, and coments about the exp outcome
-    param1HEAD =depth_s+"D_"+angle_s+"S_"+spacing_s+"L_"+"res-"+s_res
+    param1HEAD =depth_s+"D_"+angle_s+"S_"+spacing_s+"L_"+s_res2+"res-"+s_res1
     param2TITLE ="'Deep fuel bed-"+depth_s+" in deep- "+angle_s+" degrees- "+spacing_s+" cm spacing. expburn#"+burn_no+". Matlab RUN"+file_no+"'"
     burnstring=['did not burn','burned sucsessfully']
     burnpctstr =['.',' with a burn percentage of '+pct_burn ]
