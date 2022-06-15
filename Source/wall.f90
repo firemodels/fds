@@ -4164,7 +4164,9 @@ MATERIAL_LOOP: DO N=1,N_MATS  ! Loop over all materials in the cell (alpha subsc
 
       ! Optional limiting of fuel burnout time
 
-      IF (SF%MINIMUM_BURNOUT_TIME<1.E5_EB) RHO_DOT = MIN(RHO_DOT,1._EB/SF%MINIMUM_BURNOUT_TIME)
+      IF (SF%MINIMUM_BURNOUT_TIME<1.E5_EB) THEN
+         RHO_DOT = MIN(RHO_DOT,SF%LAYER_DENSITY(LAYER_INDEX(SOLID_CELL_INDEX))/SF%MINIMUM_BURNOUT_TIME)
+      ENDIF
 
       ! Compute new component density, RHO_S(N)
 

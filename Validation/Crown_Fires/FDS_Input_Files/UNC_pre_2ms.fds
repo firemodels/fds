@@ -21,16 +21,6 @@
 &VENT MB='YMAX', SURF_ID='MIRROR' /
 &VENT MB='ZMAX', SURF_ID='MIRROR' /
 
-&SPEC ID='WATER VAPOR' /
-
-&REAC ID='WOOD FUEL VAPOR'
-      FYI='Ritchie, et al., 5th IAFSS, C_3.4 H_6.2 O_2.5'
-      SOOT_YIELD = 0.02
-      O          = 2.5
-      C          = 3.4
-      H          = 6.2
-      HEAT_OF_COMBUSTION = 17700 /
-
 &SURF ID='IGN FIRE', HRRPUA=275., COLOR='RED', RAMP_Q='fireramp' /
 &RAMP ID='fireramp', T= 0., F=0. /
 &RAMP ID='fireramp', T= 2., F=1. /
@@ -38,10 +28,12 @@
 &RAMP ID='fireramp', T=31., F=0. /
 &OBST XB=680,683,50,350,0.0,0.1, SURF_ID='IGN FIRE'/
 
+&CATF OTHER_FILES='vegetation_model.txt' /
+
 &SURF ID                      = 'Ground Vegetation'
       DEFAULT                 = .TRUE.
       MINIMUM_BURNOUT_TIME    = 30.
-      MATL_ID(1,1)            = 'Dry Regular Excelsior'
+      MATL_ID(1,1)            = 'GENERIC VEGETATION'
       MATL_ID(2,1)            = 'Soil'
       MOISTURE_FRACTION(1)    = 0.05
       SURFACE_VOLUME_RATIO(1) = 5710.
@@ -50,49 +42,11 @@
 
 &SURF ID                   = 'Generic Foliage'
       MINIMUM_BURNOUT_TIME = 30.
-      MATL_ID              = 'Dry Regular Excelsior'
+      MATL_ID              = 'GENERIC VEGETATION'
       MOISTURE_FRACTION    = 1.0 
       SURFACE_VOLUME_RATIO = 4000.
       LENGTH               = 0.05
       GEOMETRY             = 'CYLINDRICAL' /
-
-&MATL ID                 = 'Dry Regular Excelsior'
-      DENSITY            = 510.
-      CONDUCTIVITY       = 0.11
-      SPECIFIC_HEAT_RAMP = 'cp_dry_veg'
-      A                  = 36300.
-      E                  = 60300.
-      MATL_ID            = 'Regular Excelsior Char'
-      NU_MATL            = 0.27
-      SPEC_ID            = 'WOOD FUEL VAPOR'
-      NU_SPEC            = 0.73
-      HEAT_OF_REACTION   = 609. /
-
-&MATL ID                 = 'Regular Excelsior Char'
-      DENSITY            = 300.
-      CONDUCTIVITY       = 0.052
-      SPECIFIC_HEAT_RAMP = 'cp_char'
-      N_S                = 0.
-      NU_O2_CHAR         = 1.65
-      BETA_CHAR          = 0.2
-      A                  = 430.
-      E                  = 74800.
-      MATL_ID            = 'Regular Excelsior Ash'
-      NU_MATL            = 0.02
-      SPEC_ID            = 'PRODUCTS','AIR'
-      NU_SPEC            = 8.18,-7.2
-      HEAT_OF_REACTION   = -12000. /
-
-&MATL ID            = 'Regular Excelsior Ash'
-      DENSITY       = 67.
-      CONDUCTIVITY  = 0.1
-      SPECIFIC_HEAT = 2.0 /
-
-&RAMP ID='cp_dry_veg', T= 0.,    F=1.16 /
-&RAMP ID='cp_dry_veg', T= 1000., F=5.027 /
-
-&RAMP ID='cp_char', T=   27, F=0.715 /
-&RAMP ID='cp_char', T= 1724, F=2.04 /
 
 &MATL ID='Soil'
       CONDUCTIVITY = 0.25

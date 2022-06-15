@@ -1,8 +1,8 @@
 &HEAD CHID='Test_1_20', TITLE='University of Corsica simulation using Lagrangian particles' /
 
-&MISC TMPA=20, GVEC=-3.355,0,-9.218 /
+&MISC GVEC=-3.355,0,-9.218 /
 
-&TIME T_END= 350. /
+&TIME T_END=350. /
 
 &MESH IJK=40,30,20, XB=-0.2,0.6,-0.6,-0.0,0.0,0.40, MULT_ID='mesh' /
 &MULT ID='mesh', DX=0.8, DY=0.6, DZ=0.4, I_UPPER=2, J_UPPER=1, K_UPPER=1 /
@@ -26,20 +26,8 @@
       COLOR     = 'GRAY'
       THICKNESS = 0.04 /
 
-&REAC FUEL='WOOD FUEL VAPOR', SPEC_ID_NU='WOOD FUEL VAPOR','OXYGEN','CARBON DIOXIDE','WATER VAPOR','SOOT'
-      NU=-1.,-4.608157,4.247666,3.160981,0.180371
-      RADIATIVE_FRACTION = 0.24
-      HEAT_OF_COMBUSTION = 16360. /
-
-&SPEC ID='NITROGEN',        BACKGROUND=T /
-&SPEC ID='WOOD FUEL VAPOR', MASS_FRACTION_0=0.000000, FORMULA='C4.41O2.44H6.34' /
-&SPEC ID='OXYGEN',          MASS_FRACTION_0=0.230997 /
-&SPEC ID='CARBON DIOXIDE',  MASS_FRACTION_0=0.000591 /
-&SPEC ID='WATER VAPOR',     MASS_FRACTION_0=0.005941 /
-&SPEC ID='SOOT',            MASS_FRACTION_0=0.000000 /
-
 &SURF ID                   = 'Pine Needles'
-      MATL_ID              = 'Dry Pine'
+      MATL_ID              = 'GENERIC VEGETATION'
       MOISTURE_FRACTION    = 0.03
       SURFACE_VOLUME_RATIO = 3057.
       LENGTH               = 0.02
@@ -59,43 +47,7 @@
       MASS_PER_VOLUME      = 16.9
       DRY                  = T /
 
-&MATL ID                 = 'Dry Pine'
-      DENSITY            = 511.
-      CONDUCTIVITY       = 0.11
-      SPECIFIC_HEAT_RAMP = 'cp_dry_veg'
-      A                  = 36300.
-      E                  = 60300.
-      MATL_ID            = 'Char' 
-      NU_MATL            = 0.27
-      SPEC_ID            = 'WOOD FUEL VAPOR'
-      NU_SPEC            = 0.73
-      HEAT_OF_REACTION   = 418. /
- 
-&MATL ID                 = 'Char'
-      DENSITY            = 138.
-      CONDUCTIVITY       = 0.052
-      SPECIFIC_HEAT_RAMP = 'cp_char'
-      N_S                = 0.
-      NU_O2_CHAR         = 1.65
-      BETA_CHAR          = 0.2
-      A                  = 215.
-      E                  = 74800. 
-      MATL_ID            = 'Ash'
-      NU_MATL            = 0.11 
-      SPEC_ID            = 'OXYGEN','CARBON DIOXIDE'
-      NU_SPEC            = -1.65,2.54
-      HEAT_OF_REACTION   = -32000. /
-
-&MATL ID            = 'Ash'
-      DENSITY       = 15.
-      CONDUCTIVITY  = 0.1
-      SPECIFIC_HEAT = 2.0 /
-
-&RAMP ID='cp_dry_veg', T= 0.,    F=1.16 /
-&RAMP ID='cp_dry_veg', T= 1000., F=5.027 /
-
-&RAMP ID='cp_char', T=   27, F=0.715 /
-&RAMP ID='cp_char', T= 1724, F=2.04 /
+&CATF OTHER_FILES='vegetation_model.txt' /
 
 &SURF ID='IGN FIRE', HRRPUA=800., RAMP_Q='RAMPFIRE', COLOR='RED' /
 
