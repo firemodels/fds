@@ -66,7 +66,7 @@
       HEAT_OF_REACTION = 2500 /
 
 &MATL ID = 'CHAR'
-      DENSITY                = 200.
+      DENSITY                = 200
       CONDUCTIVITY           = 1.0
       SPECIFIC_HEAT          = 1.6 /
 
@@ -84,7 +84,7 @@
 &MULT ID='platform',DXB=paramo5,paramo5,0,0,paramo6,paramo6,N_LOWER=0,N_UPPER=paramo7 /
 
 - Ignitor fire
-&SURF ID='IGN FIRE',HRRPUA=100.,RAMP_Q='RAMPFIRE',RGB=255,0,0 /
+&SURF ID='IGN FIRE',HRRPUA=100,RAMP_Q='RAMPFIRE',RGB=255,0,0 /
 &RAMP ID='RAMPFIRE',T=0, F=0.0 /
 &RAMP ID='RAMPFIRE',T=3, F=0.0 /
 &RAMP ID='RAMPFIRE',T=4, F=1.0 /
