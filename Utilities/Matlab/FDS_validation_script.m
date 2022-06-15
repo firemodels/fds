@@ -80,7 +80,6 @@ sandia_methane_fire
 spray_attenuation
 flame_height2
 purdue_flames
-christifire
 VTT_Sprays
 fm_datacenter_veltest
 mccaffrey_plume
