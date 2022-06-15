@@ -2658,6 +2658,7 @@ The test cases called {\ct Miscellaneous/layer\_1mesh.fds} and {\ct layer\_4mesh
 
 \section{The Restart Feature}
 \label{device_restart}
+\label{clocks_restart}
 
 FDS has a feature with which users can stop and restart simulations. When a simulation is stopped, all necessary variables are packed into arrays and written out to a file. This feature can be fragile when the input file includes devices and controls that initiate actions at certain times. In the simulation named {\ct Restart/device\_restart\_a.fds}, a multi-room fire simulation is stopped and then restarted at 40~s. Before the restart, at 30~s, a door is opened and high temperature gases flow from the fire room into a corridor. After the restart, the case proceeds until 60~s. Another simulation called {\ct device\_restart\_base\_case} runs uninterrupted. The temperature just outside of the fire room door (Fig.~\ref{device_restart_fig}) should be similar in both simulations. The temperatures are not exactly the same because restarting a simulation can lead to minor changes in the algorithm at the time of the restart. 
 
