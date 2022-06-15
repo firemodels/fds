@@ -159,6 +159,7 @@ INTEGER :: HCN_INDEX=0                     !< Index for HCN
 INTEGER :: NO_INDEX=0                      !< Index for NO
 INTEGER :: NO2_INDEX=0                     !< Index for NO2
 INTEGER :: ZETA_INDEX=0                    !< Index for unmixed fuel fraction, ZETA
+INTEGER :: MOISTURE_INDEX=0                !< Index for MATL MOISTURE
 
 INTEGER :: STOP_STATUS=NO_STOP             !< Indicator of whether and why to stop the job
 INTEGER :: INPUT_FILE_LINE_NUMBER=0        !< Indicator of what line in the input file is being read
@@ -677,7 +678,7 @@ LOGICAL :: CC_ZEROIBM_VELO=.FALSE.
 LOGICAL :: CC_SLIPIBM_VELO=.FALSE.
 LOGICAL :: CC_STRESS_METHOD=.TRUE.
 LOGICAL :: CC_ONLY_IBEDGES_FLAG=.TRUE.
-LOGICAL :: CC_UNSTRUCTURED_PROJECTION=.FALSE.
+LOGICAL :: CC_UNSTRUCTURED_PROJECTION=.TRUE.
 
 ! Threshold factor for volume of cut-cells respect to volume of Cartesian cells:
 ! Currently used in the thermo div definition of cut-cells.

@@ -19,7 +19,7 @@
 
 &SURF ID = 'Grass Fuel Boundary A'
       MATL_ID = 'Dry Grass' 
-      PACKING_RATIO = 0.01
+      MASS_PER_VOLUME = 4.0
       COLOR = 'FOREST GREEN'
       DRAG_COEFFICIENT = 2.8
       BACKING = 'INSULATED'
@@ -29,7 +29,7 @@
 
 &SURF ID = 'Grass Fuel Boundary B'
       MATL_ID = 'Dry Grass'
-      PACKING_RATIO = 0.01
+      MASS_PER_VOLUME = 4.0
       COLOR = 'FOREST GREEN'
       DRAG_COEFFICIENT = 2.8
       BACKING = 'INSULATED'
@@ -70,14 +70,16 @@
       XB                   = 0.45,0.50,-0.05,0.0,0.3,0.305
       N_PARTICLES_PER_CELL = 1
       CELL_CENTERED        = .TRUE.
-      PACKING_RATIO        = 0.01 /
+      MASS_PER_VOLUME      = 4.0
+      DRY                  = T /
 
 &INIT PART_ID              = 'Grass Particle B'
       ID                   = 'Grass Particle B'
       XB                   = 0.45,0.50,0.00,0.05,0.3,0.305
       N_PARTICLES_PER_CELL = 1
       CELL_CENTERED        = .TRUE.
-      PACKING_RATIO        = 0.01 /
+      MASS_PER_VOLUME      = 4.0
+      DRY                  = T /
 
 &MATL ID               = 'AIR'
       DENSITY          = 1.2
