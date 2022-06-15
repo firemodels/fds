@@ -5,6 +5,7 @@
 import math
 import numpy as np
 import pandas as pd
+import os
 
 filename = 'exp_params.csv'
 paramfile = 'paramfile.csv'
@@ -162,3 +163,6 @@ for m in range(8):
 dfout = pd.DataFrame(FINAL,columns=topline)
 ##write final param file
 dfout.to_csv(paramfile, index = False)
+
+#run swaps.py
+os.system('python ../../../Utilities/Input_File_Tools/swaps.py')
