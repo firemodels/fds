@@ -127,6 +127,7 @@ INTEGER, PARAMETER :: LINSEARCH_LIMIT = 13  ! LINSEARCH_LIMIT-1 is the maximum s
 
 TYPE(IBM_CUTCELL_TYPE), POINTER :: CC=>NULL()
 TYPE(IBM_CUTFACE_TYPE), POINTER :: CF=>NULL()
+TYPE(IBM_CUTEDGE_TYPE), POINTER :: CE=>NULL()
 
 ! Auxiliary variables:
 TYPE(IBM_EDGECROSS_TYPE), ALLOCATABLE, DIMENSION(:) :: EDGE_CROSS_AUX
@@ -2019,38 +2020,38 @@ INTEGER, INTENT(IN) :: NM
 ! Local Vars:
 INTEGER :: ICC,JCC,IFC,IFACE,ICF1,ICF2,JCF,ICE,JCE,IIE,JJE,KKE,IIF,JJF,KKF,X1AXIS,EAXIS,IEDG_LOC,IEDGE
 TYPE(MESH_TYPE), POINTER :: M=>NULL()
-TYPE(IBM_CUTFACE_TYPE), POINTER :: CF=>NULL()
 M=>MESHES(NM)
 
 ! FACE-CELL incidence:
 CUT_CELL_LOOP : DO ICC=1,M%N_CUTCELL_MESH+M%N_GCCUTCELL_MESH
-   DO JCC=1,M%CUT_CELL(ICC)%NCELL
+   CC => M%CUT_CELL(ICC)
+   DO JCC=1,CC%NCELL
       ! Loop faces and test:
-      DO IFC=1,M%CUT_CELL(ICC)%CCELEM(1,JCC)
-         IFACE = M%CUT_CELL(ICC)%CCELEM(IFC+1,JCC)
-         SELECT CASE(M%CUT_CELL(ICC)%FACE_LIST(1,IFACE))
+      DO IFC=1,CC%CCELEM(1,JCC)
+         IFACE = CC%CCELEM(IFC+1,JCC)
+         SELECT CASE(CC%FACE_LIST(1,IFACE))
          CASE(IBM_FTYPE_CFGAS) ! GASPHASE cut-face:
-            ICF1    = M%CUT_CELL(ICC)%FACE_LIST(4,IFACE)
-            ICF2    = M%CUT_CELL(ICC)%FACE_LIST(5,IFACE)
-            IF (M%CUT_CELL(ICC)%FACE_LIST(2,IFACE) == LOW_IND) THEN ! Cut-face on low side of cut-cell:
-               M%CUT_FACE(ICF1)%CELL_LIST(IAXIS:KAXIS+1,HIGH_IND,ICF2) = &
+            ICF1    = CC%FACE_LIST(4,IFACE)
+            ICF2    = CC%FACE_LIST(5,IFACE); CF => M%CUT_FACE(ICF1)
+            IF (CC%FACE_LIST(2,IFACE) == LOW_IND) THEN ! Cut-face on low side of cut-cell:
+               CF%CELL_LIST(IAXIS:KAXIS+1,HIGH_IND,ICF2) = &
                                    (/ IBM_FTYPE_CFGAS,     ICC,     JCC,     IFC  /)
                                    !  Cut-cell   CUT_CELL(icc),CCELEM(jcc,:) is cut vol.
-               M%CUT_FACE(ICF1)%XCENHIGH(IAXIS:KAXIS,ICF2) = M%CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,JCC)
+               CF%XCENHIGH(IAXIS:KAXIS,ICF2) = CC%XYZCEN(IAXIS:KAXIS,JCC)
             ELSE ! HIGH
-               M%CUT_FACE(ICF1)%CELL_LIST(IAXIS:KAXIS+1,LOW_IND,ICF2) = &
+               CF%CELL_LIST(IAXIS:KAXIS+1,LOW_IND,ICF2) = &
                                    (/ IBM_FTYPE_CFGAS,     ICC,     JCC,     IFC  /)
                                    !  Cut-cell   CUT_CELL(icc),CCELEM(jcc,:) is cut vol.
-               M%CUT_FACE(ICF1)%XCENLOW(IAXIS:KAXIS,ICF2)  = M%CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,JCC)
+               CF%XCENLOW(IAXIS:KAXIS,ICF2)  = CC%XYZCEN(IAXIS:KAXIS,JCC)
             ENDIF
          CASE(IBM_FTYPE_CFINB) ! INBOUNDARY cut-face:
-             ICF1    = M%CUT_CELL(ICC)%FACE_LIST(4,IFACE)
-             ICF2    = M%CUT_CELL(ICC)%FACE_LIST(5,IFACE)
+             ICF1    = CC%FACE_LIST(4,IFACE)
+             ICF2    = CC%FACE_LIST(5,IFACE); CF => M%CUT_FACE(ICF1)
              ! We add the cut-cell related info in LOW_IND
-             M%CUT_FACE(ICF1)%CELL_LIST(IAXIS:KAXIS+1,LOW_IND,ICF2) = &
+             CF%CELL_LIST(IAXIS:KAXIS+1,LOW_IND,ICF2) = &
                                  (/ IBM_FTYPE_CFGAS,     ICC,     JCC,     IFC  /)
                                  !  Cut-cell   CUT_CELL(icc),CCELEM(jcc,:) is cut vol.
-             M%CUT_FACE(ICF1)%XCENLOW(IAXIS:KAXIS,ICF2)  = M%CUT_CELL(ICC)%XYZCEN(IAXIS:KAXIS,JCC)
+             CF%XCENLOW(IAXIS:KAXIS,ICF2)  = CC%XYZCEN(IAXIS:KAXIS,JCC)
          END SELECT
       ENDDO
    ENDDO
@@ -2060,13 +2061,20 @@ ENDDO CUT_CELL_LOOP
 ! EDGE-FACE incidence:
 ! First Allocate DXX and FACE_LIST for CUT_EDGEs:
 DO ICE=1,M%N_CUTEDGE_MESH
-   NEDGE=M%CUT_EDGE(ICE)%NEDGE
-   IF(ALLOCATED(M%CUT_EDGE(ICE)%DXX))       DEALLOCATE(M%CUT_EDGE(ICE)%DXX)
-   IF(ALLOCATED(M%CUT_EDGE(ICE)%FACE_LIST)) DEALLOCATE(M%CUT_EDGE(ICE)%FACE_LIST)
+   CE => M%CUT_EDGE(ICE)
+   IF(ALLOCATED(CE%DXX))       DEALLOCATE(CE%DXX)
+   IF(ALLOCATED(CE%FACE_LIST)) DEALLOCATE(CE%FACE_LIST)
    !                        DXX(1), DXX(2)
-   ALLOCATE(M%CUT_EDGE(ICE)%DXX(1:2,NEDGE)); M%CUT_EDGE(ICE)%DXX = 0._EB
+   ALLOCATE(CE%DXX(1:2,CE%NEDGE))
+   ! Assign DXX:
+   I=CE%IJK(IAXIS); J=CE%IJK(JAXIS); K=CE%IJK(KAXIS); X1AXIS=CE%IJK(KAXIS+1)
+   SELECT CASE(X1AXIS)
+   CASE(IAXIS); CE%DXX(1,:)=DYFACE(J); CE%DXX(2,:)=DZFACE(K)
+   CASE(JAXIS); CE%DXX(1,:)=DZFACE(K); CE%DXX(2,:)=DXFACE(I)
+   CASE(KAXIS); CE%DXX(1,:)=DXFACE(I); CE%DXX(2,:)=DYFACE(J)
+   END SELECT
    !                        ! ICF JCF, dir -2 -1 1 2, JCE.
-   ALLOCATE(M%CUT_EDGE(ICE)%FACE_LIST(1:2,-2:2,NEDGE)); M%CUT_EDGE(ICE)%FACE_LIST = IBM_UNDEFINED
+   ALLOCATE(CE%FACE_LIST(1:2,-2:2,CE%NEDGE)); CE%FACE_LIST = IBM_UNDEFINED
 ENDDO
 
 CUTFACE_LOOP : DO ICF=1,M%N_CUTFACE_MESH+M%N_GCCUTFACE_MESH
@@ -2083,57 +2091,56 @@ CUTFACE_LOOP : DO ICF=1,M%N_CUTFACE_MESH+M%N_GCCUTFACE_MESH
          CASE(IBM_ETYPE_CFGAS) ! Gas cut-edge
             ICE  = CF%EDGE_LIST(2,IEDGE)
             JCE  = CF%EDGE_LIST(3,IEDGE)
-            IIE  = M%CUT_EDGE(ICE)%IJK(IAXIS)
-            JJE  = M%CUT_EDGE(ICE)%IJK(JAXIS)
-            KKE  = M%CUT_EDGE(ICE)%IJK(KAXIS)
-            EAXIS= M%CUT_EDGE(ICE)%IJK(KAXIS+1)
+            CE  => M%CUT_EDGE(ICE)
+            IIE  = CE%IJK(IAXIS); JJE  = CE%IJK(JAXIS); KKE  = CE%IJK(KAXIS)
+            EAXIS= CE%IJK(KAXIS+1)
             SELECT CASE(EAXIS)
             CASE(IAXIS) ! Edge in x dir.
                IF(X1AXIS==KAXIS) THEN ! Face in z dir, +/- y.
-                  M%CUT_EDGE(ICE)%DXX(1,JCE) = M%CUT_EDGE(ICE)%DXX(1,JCE) + ABS(YFACE(JJE)-CF%XYZCEN(JAXIS,JCF))
+                  CE%DXX(1,JCE) = CE%DXX(1,JCE) + ABS(YFACE(JJE)-CF%XYZCEN(JAXIS,JCF))
                   IF(JJF==JJE) THEN ! Face -1, resp to IEDGE.
-                     M%CUT_EDGE(ICE)%FACE_LIST(1:2,-1,JCE) = (/ICF,JCF/)
+                     CE%FACE_LIST(1:2,-1,JCE) = (/ICF,JCF/)
                   ELSEIF(JJF==JJE+1) THEN
-                     M%CUT_EDGE(ICE)%FACE_LIST(1:2, 1,JCE) = (/ICF,JCF/)
+                     CE%FACE_LIST(1:2, 1,JCE) = (/ICF,JCF/)
                   ENDIF
                ELSEIF(X1AXIS==JAXIS) THEN ! Face in y dir, +/- z:
-                  M%CUT_EDGE(ICE)%DXX(2,JCE) = M%CUT_EDGE(ICE)%DXX(2,JCE) + ABS(ZFACE(KKE)-CF%XYZCEN(KAXIS,JCF))
+                  CE%DXX(2,JCE) = CE%DXX(2,JCE) + ABS(ZFACE(KKE)-CF%XYZCEN(KAXIS,JCF))
                   IF(KKF==KKE) THEN ! Face -2, resp to IEDGE.
-                     M%CUT_EDGE(ICE)%FACE_LIST(1:2,-2,JCE) = (/ICF,JCF/)
+                     CE%FACE_LIST(1:2,-2,JCE) = (/ICF,JCF/)
                   ELSEIF(KKF==KKE+1) THEN
-                     M%CUT_EDGE(ICE)%FACE_LIST(1:2, 2,JCE) = (/ICF,JCF/)
+                     CE%FACE_LIST(1:2, 2,JCE) = (/ICF,JCF/)
                   ENDIF
                ENDIF
             CASE(JAXIS) ! Edge in y dir.
                IF(X1AXIS==IAXIS) THEN ! Face in x dir, +/- z.
-                  M%CUT_EDGE(ICE)%DXX(1,JCE) = M%CUT_EDGE(ICE)%DXX(1,JCE) + ABS(ZFACE(KKE)-CF%XYZCEN(KAXIS,JCF))
+                  CE%DXX(1,JCE) = CE%DXX(1,JCE) + ABS(ZFACE(KKE)-CF%XYZCEN(KAXIS,JCF))
                   IF(KKF==KKE) THEN ! Face -1, resp to IEDGE.
-                     M%CUT_EDGE(ICE)%FACE_LIST(1:2,-1,JCE) = (/ICF,JCF/)
+                     CE%FACE_LIST(1:2,-1,JCE) = (/ICF,JCF/)
                   ELSEIF(KKF==KKE+1) THEN
-                     M%CUT_EDGE(ICE)%FACE_LIST(1:2, 1,JCE) = (/ICF,JCF/)
+                     CE%FACE_LIST(1:2, 1,JCE) = (/ICF,JCF/)
                   ENDIF
                ELSEIF(X1AXIS==KAXIS) THEN ! Face in z dir, +/- x
-                  M%CUT_EDGE(ICE)%DXX(2,JCE) = M%CUT_EDGE(ICE)%DXX(2,JCE) + ABS(XFACE(IIE)-CF%XYZCEN(IAXIS,JCF))
+                  CE%DXX(2,JCE) = CE%DXX(2,JCE) + ABS(XFACE(IIE)-CF%XYZCEN(IAXIS,JCF))
                   IF(IIF==IIE) THEN ! Face -2, resp to IEDGE.
-                     M%CUT_EDGE(ICE)%FACE_LIST(1:2,-2,JCE) = (/ICF,JCF/)
+                     CE%FACE_LIST(1:2,-2,JCE) = (/ICF,JCF/)
                   ELSEIF(IIF==IIE+1) THEN
-                     M%CUT_EDGE(ICE)%FACE_LIST(1:2, 2,JCE) = (/ICF,JCF/)
+                     CE%FACE_LIST(1:2, 2,JCE) = (/ICF,JCF/)
                   ENDIF
                ENDIF
             CASE(KAXIS) ! Edge in z dir.
                IF(X1AXIS==JAXIS) THEN ! Face in y dir, +/- x.
-                  M%CUT_EDGE(ICE)%DXX(1,JCE) = M%CUT_EDGE(ICE)%DXX(1,JCE) + ABS(XFACE(IIE)-CF%XYZCEN(IAXIS,JCF))
+                  CE%DXX(1,JCE) = CE%DXX(1,JCE) + ABS(XFACE(IIE)-CF%XYZCEN(IAXIS,JCF))
                   IF(IIF==IIE) THEN ! Face -1, resp to IEDGE.
-                     M%CUT_EDGE(ICE)%FACE_LIST(1:2,-1,JCE) = (/ICF,JCF/)
+                     CE%FACE_LIST(1:2,-1,JCE) = (/ICF,JCF/)
                   ELSEIF(IIF==IIE+1) THEN
-                     M%CUT_EDGE(ICE)%FACE_LIST(1:2, 1,JCE) = (/ICF,JCF/)
+                     CE%FACE_LIST(1:2, 1,JCE) = (/ICF,JCF/)
                   ENDIF
                ELSEIF(X1AXIS==IAXIS) THEN ! Face in x dir, +/- y.
-                  M%CUT_EDGE(ICE)%DXX(2,JCE) = M%CUT_EDGE(ICE)%DXX(2,JCE) + ABS(YFACE(JJE)-CF%XYZCEN(JAXIS,JCF))
+                  CE%DXX(2,JCE) = CE%DXX(2,JCE) + ABS(YFACE(JJE)-CF%XYZCEN(JAXIS,JCF))
                   IF(JJF==JJE) THEN ! Face -2, resp to IEDGE.
-                     M%CUT_EDGE(ICE)%FACE_LIST(1:2,-2,JCE) = (/ICF,JCF/)
+                     CE%FACE_LIST(1:2,-2,JCE) = (/ICF,JCF/)
                   ELSEIF(JJF==JJE+1) THEN
-                     M%CUT_EDGE(ICE)%FACE_LIST(1:2, 2,JCE) = (/ICF,JCF/)
+                     CE%FACE_LIST(1:2, 2,JCE) = (/ICF,JCF/)
                   ENDIF
                ENDIF
             END SELECT
@@ -2147,10 +2154,10 @@ ENDDO CUTFACE_LOOP
 
 ! Allocate for gas CUT_EDGEs DUIDXJ, MU_DUIDXJ
 DO ICE=1,M%N_CUTEDGE_MESH
-   IF(M%CUT_EDGE(ICE)%STATUS/=IBM_GASPHASE) CYCLE
-   IF(.NOT.ALLOCATED(M%CUT_EDGE(ICE)%DUIDXJ)) THEN
-      ALLOCATE(M%CUT_EDGE(ICE)%DUIDXJ(   -2:2,1:M%CUT_EDGE(ICE)%NEDGE)); M%CUT_EDGE(ICE)%DUIDXJ    = 0._EB
-      ALLOCATE(M%CUT_EDGE(ICE)%MU_DUIDXJ(-2:2,1:M%CUT_EDGE(ICE)%NEDGE)); M%CUT_EDGE(ICE)%MU_DUIDXJ = 0._EB
+   CE => M%CUT_EDGE(ICE); IF(CE%STATUS/=IBM_GASPHASE) CYCLE
+   IF(.NOT.ALLOCATED(CE%DUIDXJ)) THEN
+      ALLOCATE(CE%DUIDXJ(   -2:2,1:CE%NEDGE)); CE%DUIDXJ    = 0._EB
+      ALLOCATE(CE%MU_DUIDXJ(-2:2,1:CE%NEDGE)); CE%MU_DUIDXJ = 0._EB
    ENDIF
 ENDDO
 
