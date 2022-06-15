@@ -1,4 +1,4 @@
-&REAC FUEL='FUEL VAPOR', C=2.09, H=6.2, O=2.12, SOOT_YIELD=0.01, HEAT_OF_COMBUSTION=17700. /
+&REAC FUEL='FUEL VAPOR', C=2.10, H=6.20, O=2.16, SOOT_YIELD=0.01, HEAT_OF_COMBUSTION=17425., IDEAL=T /
 
 &SPEC ID='WATER VAPOR' /
 
@@ -24,9 +24,9 @@
       A                     = 430.
       E                     = 74800.
       SPEC_ID               = 'PRODUCTS','AIR'
-      NU_SPEC               = 8.18,-7.2
+      NU_SPEC               = 8.13,-7.17
       MATL_ID               = 'ASH'
-      NU_MATL               = 0.02
+      NU_MATL               = 0.04
       HEAT_OF_REACTION      = -12000. /
 
 &MATL ID                    = 'ASH'
