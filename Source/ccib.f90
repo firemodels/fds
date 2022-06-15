@@ -12697,7 +12697,7 @@ DO JEDGE=1,CE%NEDGE
 
          ICF = CE%FACE_LIST(1,ICD_SGN,JEDGE) ! Only one gas cut-edge per cartesian edge.
          JCF = CE%FACE_LIST(2,ICD_SGN,JEDGE)
-         VEL_GAS(ICD_SGN) = PRFCT*CUT_FACE(ICF)%VELS(JCF) + (1._EB-PRFCT)*CUT_FACE(ICF)%VEL(JCF)
+         IF(ICF>0) VEL_GAS(ICD_SGN) = PRFCT*CUT_FACE(ICF)%VELS(JCF) + (1._EB-PRFCT)*CUT_FACE(ICF)%VEL(JCF)
       ENDDO SIGN_LOOP
    ENDDO ORIENTATION_LOOP
 
@@ -24389,6 +24389,7 @@ ICF_LOOP_2 : DO ICF=1,M%N_CUTFACE_MESH
                       IF(KKO<1 .OR. KKO>M%KBAR) CYCLE IAXIS_IEC_LOOP
                    ENDIF
                    OICF     = OFACE(2); OJCF     = OFACE(3)
+                   IF(OICF<1 .OR. OJCF<1) CYCLE IAXIS_IEC_LOOP
                    OLO_UNKZ = M%CUT_FACE(OICF)%UNKZ(LOW_IND,OJCF)
                    OHI_UNKZ = M%CUT_FACE(OICF)%UNKZ(HIGH_IND,OJCF)
                    IF(LO_UNKZ==OLO_UNKZ .OR. HI_UNKZ==OHI_UNKZ .OR. ALL_FLG) THEN ! Link cut-face to other cut-face:
@@ -24509,6 +24510,7 @@ ICF_LOOP_2 : DO ICF=1,M%N_CUTFACE_MESH
                       IF(KKO<1 .OR. KKO>M%KBAR) CYCLE JAXIS_IEC_LOOP
                    ENDIF
                    OICF     = OFACE(2); OJCF     = OFACE(3)
+                   IF(OICF<1 .OR. OJCF<1) CYCLE JAXIS_IEC_LOOP
                    OLO_UNKZ = M%CUT_FACE(OICF)%UNKZ(LOW_IND,OJCF)
                    OHI_UNKZ = M%CUT_FACE(OICF)%UNKZ(HIGH_IND,OJCF)
                    IF(LO_UNKZ==OLO_UNKZ .OR. HI_UNKZ==OHI_UNKZ .OR. ALL_FLG) THEN ! Link cut-face to other cut-face:
@@ -24631,6 +24633,7 @@ ICF_LOOP_2 : DO ICF=1,M%N_CUTFACE_MESH
                       IF(JJO<1 .OR. JJO>M%JBAR) CYCLE KAXIS_IEC_LOOP
                    ENDIF
                    OICF     = OFACE(2); OJCF     = OFACE(3)
+                   IF(OICF<1 .OR. OJCF<1) CYCLE KAXIS_IEC_LOOP
                    OLO_UNKZ = M%CUT_FACE(OICF)%UNKZ(LOW_IND,OJCF)
                    OHI_UNKZ = M%CUT_FACE(OICF)%UNKZ(HIGH_IND,OJCF)
                    IF(LO_UNKZ==OLO_UNKZ .OR. HI_UNKZ==OHI_UNKZ .OR. ALL_FLG) THEN ! Link cut-face to other cut-face:
