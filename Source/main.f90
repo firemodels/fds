@@ -384,6 +384,10 @@ IF (RESTART) THEN
    DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       CALL READ_RESTART(T,DT,NM)
    ENDDO
+   IF (ABS(T-T_END)<TWO_EPSILON_EB) THEN
+      STOP_STATUS = SETUP_STOP
+      IF (MY_RANK==0) WRITE(LU_ERR,*) 'ERROR: RESTART initial time equals T_END'
+   ENDIF
    IF (CC_IBM) CALL INIT_CUTCELL_DATA(T,DT)  ! Init centroid data (i.e. rho,zz) on cut-cells and cut-faces.
    CALL STOP_CHECK(1)
 ENDIF
