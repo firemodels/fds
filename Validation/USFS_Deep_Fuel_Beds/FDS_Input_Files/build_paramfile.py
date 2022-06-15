@@ -13,7 +13,7 @@ paramfile = 'paramfile.csv'
 df = pd.read_csv(filename, header=0) 
 
 
-#Initalize matrix to write final dataframe:    
+#Initalize matrix to write final dataframe:
 FINAL = []
 
         #read the data in the file:
@@ -26,7 +26,7 @@ for irow in df.index:
     angle_r = np.radians(df.loc[irow,'SLOPE'])        # degrees-> radians
     depth = df.loc[irow,'DEPTH']*0.0254               # in -> meters
     depth_s = str(int(df.loc[irow,'DEPTH']))          # depth as a string   (without decimal)
-    m_ct = df.loc[irow,'MOISTURE_CONTENT']/100        # moisture, whole number percent to decimal percent                                     
+    m_ct = df.loc[irow,'MOISTURE_CONTENT']/100        # moisture, whole number percent to decimal percent
     res1 = df.loc[irow,'DX1']                         # res 1 to be used for platform spacing
     res2 = df.loc[irow,'DX2']                         # res 2 to be used for IJK
     s_res1 = 'p'+str(res1)[2:len(str(res1))]
@@ -46,10 +46,10 @@ for irow in df.index:
 
 ##Start Writing the file: 
         #Begin the row for that file, with the Filename:
-    param_line =["burn"+burn_no+"_"+depth_s+"D_"+angle_s+"S_"+spacing_s+"L"+".fds"] 
+    param_line =["burn"+burn_no+"_"+depth_s+"D_"+angle_s+"S_"+spacing_s+"L"+".fds"]
         # HEAD, CHID, and coments about the exp outcome
     param1HEAD =depth_s+"D_"+angle_s+"S_"+spacing_s+"L_"+s_res2+"res-"+s_res1
-    param2TITLE ="USFS Deep Fuel Beds burn"+burn_no+"-- "+depth_s+" in deep- "+angle_s+" degrees- "+spacing_s+" cm spacing"
+    param2TITLE ="USFS Deep Fuel Beds burn"+burn_no+" - "+depth_s+" in. deep - "+angle_s+" degree slope - "+spacing_s+" cm spacing"
     burnstring=['did not burn','burned sucsessfully']
     burnpctstr =['',' with a burn percentage of '+pct_burn]
     param3BURN = "During the trial this run "+ burnstring[burned_yn]+burnpctstr[burned_yn]
