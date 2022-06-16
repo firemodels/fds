@@ -6743,7 +6743,7 @@ Sometimes it is convenient to introduce Lagrangian particles within a particular
 
 \subsubsection{Randomly Distributed Particles within a Specified Volume}
 
-The parameter {\ct N\_PARTICLES} on the {\ct INIT} line indicates the number of particles to insert within a specified region of the domain. This region can take on a number of shapes, depending on the parameter {\ct SHAPE = (['BLOCK']\footnote{There is no need to specify {\ct SHAPE='BLOCK'}, just omit {\ct SHAPE} in this case.},'CONE','LINE','RING')}. For {\ct 'BLOCK'}, {\ct 'CONE'}, and {\ct 'RING'} the particle positions are randomly distributed by default.  For {\ct 'RING'} you can position the particles uniformly by setting {\ct UNIFORM=T} on the {\ct INIT} line.  By default, the region is a rectangular {\ct 'BLOCK'} designated with the real sextuplet {\ct XB}. The format for {\ct XB} is the same as that used on the {\ct OBST} line.
+The parameter {\ct N\_PARTICLES} on the {\ct INIT} line indicates the number of particles to insert within a specified region of the domain. This region can take on a number of shapes, depending on the parameter {\ct SHAPE = (['BLOCK']\footnote{There is no need to specify {\ct SHAPE='BLOCK'}, just omit {\ct SHAPE} in this case.},'CYLINDER','CONE','LINE','RING')}. For {\ct 'BLOCK'}, {\ct 'CONE'}, and {\ct 'RING'} the particle positions are randomly distributed by default.  For {\ct 'RING'} you can position the particles uniformly by setting {\ct UNIFORM=T} on the {\ct INIT} line.  By default, the region is a rectangular {\ct 'BLOCK'} designated with the real sextuplet {\ct XB}. The format for {\ct XB} is the same as that used on the {\ct OBST} line.
 \begin{lstlisting}
 &INIT PART_ID='my particles', XB=..., N_PARTICLES=..., MASS_PER_VOLUME=... /
 \end{lstlisting}
@@ -7337,7 +7337,7 @@ The Particle Model and Boundary Fuel Model use the same basic pyrolysis model (S
 \section{Thermal Degradation Model for Vegetation}
 \label{vegetation_model}
 
-FDS contains an optional pyrolysis model that was developed specifically for vegetation~\cite{Porterie:2006,Morvan:CF2004,Houssami:2016}. 
+FDS contains an optional pyrolysis model that was developed specifically for vegetation~\cite{Porterie:2006,Morvan:CF2004,Houssami:2016}.
 
 \subsection{Solid Phase}
 
@@ -7358,7 +7358,7 @@ The solid-phase thermal degradation process for generic vegetation consists of t
 \noindent 3. Exothermic char oxidation
 \be
  \label{char_reaction}
- {\rm Char} + \nu_{\rm O_2, char} \, {\rm O_2} \rightarrow (1+ \nu_{\rm O_2,char} - \nu_{\rm ash}) \, {\rm CO_2} + \nu_{\rm ash} \, {\rm Ash}  
+ {\rm Char} + \nu_{\rm O_2, char} \, {\rm O_2} \rightarrow (1+ \nu_{\rm O_2,char} - \nu_{\rm ash}) \, {\rm CO_2} + \nu_{\rm ash} \, {\rm Ash}
 \ee
 $M$ is the vegetation {\em moisture content} or {\em moisture fraction} determined on a dry weight basis, specified with {\ct MOISTURE\_FRACTION} on the {\ct SURF} line. $\nu_{\rm char}$ is the mass fraction of Dry Vegetation that is converted to char during pyrolysis, specified with the parameter {\ct NU\_MATL} on the {\ct MATL} line that describes the Dry Vegetation. The character string {\ct MATL\_ID} on the same {\ct MATL} line indicates the name of the char.  $\nu_{\rm O_2,char}$ is the mass of oxygen consumed per unit mass of char oxidized, specified by {\ct NU\_O2\_CHAR} on the {\ct MATL} line that defines the char properties. $\nu_{\rm ash}$ is the mass fraction of char that is converted to ash during char oxidation, specified by {\ct NU\_MATL} on the {\ct MATL} line describing the char.
 
