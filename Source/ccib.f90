@@ -14789,7 +14789,7 @@ UNSTRUCTURED_PROJECTION_IF : IF (CC_UNSTRUCTURED_PROJECTION) THEN
                                  ENDDO
                                  IDX = IDX / AREA_FC
                               ENDIF
-                              DVDT = -OM%FVY(IIO,JJO-1,KKO) - M2%RDYN(JJO-1)*(OM%H(IIO,JJO,KKO)-OM%H(IIO,JJO-1,KKO))
+                              DVDT = -OM%FVY(IIO,JJO-1,KKO) - IDX*(OM%H(IIO,JJO,KKO)-OM%H(IIO,JJO-1,KKO))
                               UN_NEW_OTHER = UN_NEW_OTHER + (OM%V(IIO,JJO-1,KKO)/CF2%ALPHA_CF + DT*DVDT)*AREA_FC
                            ELSE
                               AREA_FC  = M2%DX(IIO)*M2%DZ(KKO); AREA_TOT = AREA_TOT + AREA_FC
@@ -14816,7 +14816,7 @@ UNSTRUCTURED_PROJECTION_IF : IF (CC_UNSTRUCTURED_PROJECTION) THEN
                                  ENDDO
                                  IDX = IDX / AREA_FC
                               ENDIF
-                              DWDT = -OM%FVZ(IIO,JJO,KKO)   - M2%RDZN(KKO)  *(OM%H(IIO,JJO,KKO+1)-OM%H(IIO,JJO,KKO))
+                              DWDT = -OM%FVZ(IIO,JJO,KKO)   - IDX*(OM%H(IIO,JJO,KKO+1)-OM%H(IIO,JJO,KKO))
                               UN_NEW_OTHER = UN_NEW_OTHER + (OM%W(IIO,JJO,KKO)/CF2%ALPHA_CF   + DT*DWDT)*AREA_FC
                            ELSE
                               AREA_FC  = M2%DX(IIO)*M2%DY(JJO); AREA_TOT = AREA_TOT + AREA_FC
@@ -14843,7 +14843,7 @@ UNSTRUCTURED_PROJECTION_IF : IF (CC_UNSTRUCTURED_PROJECTION) THEN
                                  ENDDO
                                  IDX = IDX / AREA_FC
                               ENDIF
-                              DWDT = -OM%FVZ(IIO,JJO,KKO-1) - M2%RDZN(KKO-1)*(OM%H(IIO,JJO,KKO)-OM%H(IIO,JJO,KKO-1))
+                              DWDT = -OM%FVZ(IIO,JJO,KKO-1) - IDX*(OM%H(IIO,JJO,KKO)-OM%H(IIO,JJO,KKO-1))
                               UN_NEW_OTHER = UN_NEW_OTHER + (OM%W(IIO,JJO,KKO-1)/CF2%ALPHA_CF + DT*DWDT)*AREA_FC
                            ELSE
                               AREA_FC  = M2%DX(IIO)*M2%DY(JJO); AREA_TOT = AREA_TOT + AREA_FC
@@ -15051,6 +15051,7 @@ UNSTRUCTURED_PROJECTION_IF : IF (CC_UNSTRUCTURED_PROJECTION) THEN
 
       IDX = ONE_D%RDN
       IF(.NOT.GRADH_ON_CARTESIAN) THEN
+         IDX = 0._EB
          DO JCF=1,CF%NFACE
             IDX = IDX + 1._EB/(CF%XCENHIGH(X1AXIS,JCF)-CF%XCENLOW(X1AXIS,JCF))*CF%AREA(JCF)
          ENDDO

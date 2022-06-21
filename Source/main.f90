@@ -1370,6 +1370,11 @@ ELSE
    ITERATE_BAROCLINIC_TERM = .FALSE.
 ENDIF
 
+IF(CC_IBM .AND. CC_UNSTRUCTURED_PROJECTION) THEN
+   IF(PREDICTOR) CALL MESH_EXCHANGE(6) ! Exchange linked face averaged velocities to be used in UN_NEW_OTHER estimation.
+   IF(CORRECTOR) CALL MESH_EXCHANGE(3)
+ENDIF
+
 PRESSURE_ITERATION_LOOP: DO
 
    PRESSURE_ITERATIONS = PRESSURE_ITERATIONS + 1
@@ -3611,7 +3616,7 @@ EXCHANGE_DEVICE: IF (N_DEVC>0) THEN
                   TC_LOC(N)            = TC_LOC(N)          + SDV%VALUE_1
                   TC_LOC(N+N_DEVC)     = TC_LOC(N+N_DEVC)   + SDV%VALUE_2
                   TC_LOC(N+2*N_DEVC)   = TC_LOC(N+2*N_DEVC) + SDV%VALUE_3
-                  TC_LOC(N+3*N_DEVC)   = TC_LOC(N+3*N_DEVC) + SDV%VALUE_4                  
+                  TC_LOC(N+3*N_DEVC)   = TC_LOC(N+3*N_DEVC) + SDV%VALUE_4
                CASE(2)
                   IF (SDV%VALUE_1<TC2_LOC(1,N)) THEN
                      TC2_LOC(1,N) = SDV%VALUE_1
