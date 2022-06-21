@@ -51,7 +51,7 @@ for irow in df.index:
     param6MRCT = str(round(m_ct,4))
     param_line = param_line + [param4TEMP] + [param5HMDY] + [param6MRCT]
 
-    param_line = param_line+[str(param7IJK)]+[str(angle_d)]
+    param_line = param_line + [str(param7IJK)] + [str(angle_d)]
     n_baisicparams = len(param_line)
 
 # Record the fuel array parameters
@@ -69,9 +69,9 @@ for irow in df.index:
     if (angle_r == 0.0):
         zpos1 = 0
     else:
-        zpos1 = (0.5*(xpos1 + xpos2) - startx)*math.tan(angle_r)
+        zpos1 = (0.5*(xpos1+xpos2)-startx)*math.tan(angle_r)
     zpos2 = zpos1 + depth
-    param_group = [rg_gap] + [(math.floor(4/spacing) - 1)] + [zpos1] + [zpos2] +[dz_ht]
+    param_group = [rg_gap] + [(math.floor(4/spacing)-1)] + [zpos1] + [zpos2] + [dz_ht]
     param_line = param_line + param_group
 
     #round off large trailing decimals
@@ -85,7 +85,7 @@ for irow in df.index:
     #make the header list
 topline = ['Template.fds']
     #add basic params
-for i in range(n_baisicparams - 1):
+for i in range(n_baisicparams-1):
     topline = topline + ["param"+str(i+1)]
     #add fuel params
 for n in range(len(param_group)):
