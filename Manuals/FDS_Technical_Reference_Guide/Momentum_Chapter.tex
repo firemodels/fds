@@ -757,9 +757,9 @@ Note that the heat flux, $\dot{q}''_{\rm c}$, has units of \si{W/m$^2$}.  Thus, 
 
 \subsection{Adjusting the Time Step}
 
-In the default LES mode of operation, the CFL is increased or decreased to remain between 0.8 and 1.  To be clear, the CFL constraint is now given by
+By default, the CFL is increased or decreased to remain between 0.8 and 1.  To be clear, the CFL constraint is now given by
 \begin{equation}
-\mbox{CFL} = \delta t \left( \frac{\|\mathbf{u}\|}{\delta x} + |\nabla\cdot\mathbf{u}| \right)
+\mbox{CFL} = \delta t \frac{\|\mathbf{u}\|}{\delta x}
 \end{equation}
 In DNS mode, the time step is also adjusted to maintain VN between 0.4 and 0.5. If either the CFL or VN is too large then the new time step is set to 90\% of the allowable value.  If both CFL and VN are below their minimum values then the current time step is increased by 10\%.  See the User's Guide~\cite{FDS_Users_Guide} for details.
 
