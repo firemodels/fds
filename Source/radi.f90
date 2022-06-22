@@ -4596,6 +4596,10 @@ END SUBROUTINE RADIATION_FVM
 
 
 !> \brief Add user-specified HRRPUV to the heat release rate term, Q
+!> \param MODE Indicator of whether volumetric heat release rate, HRRPUV, is to be added to or subtracted from Q
+!> \details If MODE=0, add the user-specified volumetric HRRPUV to the total, Q (W/m3)
+!> \details If MODE=1, add the user-specified volumetric HRRPUV to the total, Q (W/m3), and add radiative emission
+!> \details If MODE=2, subtract the user-specified volumetric HRRPUV from the total, Q (W/m3)
 
 SUBROUTINE ADD_VOLUMETRIC_HEAT_SOURCE(MODE)
 
