@@ -678,18 +678,24 @@ places a restriction on the time step due to the advection velocity. Physically,
 The exact CFL needed to maintain stability depends on the order (as well as other properties) of the time integration scheme and the choice of velocity norm. Three choices for velocity norm are available in FDS (set on \textct{MISC}):
 \vskip\baselineskip
 \noindent
-\textct{CFL\_VELOCITY\_NORM=0} (default, least restrictive, corresponds to $L_\infty$ norm of velocity vector)
+\textct{CFL\_VELOCITY\_NORM=0} (corresponds to $L_\infty$ norm of velocity vector)
+    \begin{equation}
+    \frac{\|\mathbf{u}\|}{\delta x} = \max \left(\frac{|u|}{\delta x}, \frac{|v|}{\delta y}, \frac{|w|}{\delta z}\right) + |\nabla\cdot\mathbf{u}|
+    \end{equation}
+\textct{CFL\_VELOCITY\_NORM=1} (DNS and LES default, most restrictive, corresponds to $L_1$ norm of velocity vector)
+    \begin{equation}
+    \frac{\|\mathbf{u}\|}{\delta x} = \frac{|u|}{\delta x}+\frac{|v|}{\delta y}+\frac{|w|}{\delta z} + |\nabla\cdot\mathbf{u}|
+    \end{equation}
+\textct{CFL\_VELOCITY\_NORM=2} (VLES default, $L_2$ norm of velocity vector)
+    \begin{equation}
+    \frac{\|\mathbf{u}\|}{\delta x} = \sqrt{ (u/\delta x)^2+(v/\delta y)^2+(w/\delta z)^2 } + |\nabla\cdot\mathbf{u}|
+    \end{equation}
+\textct{CFL\_VELOCITY\_NORM=3} (SVLES default, least restrictive, corresponds to $L_\infty$ norm of velocity vector)
     \begin{equation}
     \frac{\|\mathbf{u}\|}{\delta x} = \max \left(\frac{|u|}{\delta x}, \frac{|v|}{\delta y}, \frac{|w|}{\delta z}\right)
     \end{equation}
-\textct{CFL\_VELOCITY\_NORM=1} (most restrictive, corresponds to $L_1$ norm of velocity vector)
-    \begin{equation}
-    \frac{\|\mathbf{u}\|}{\delta x} = \frac{|u|}{\delta x}+\frac{|v|}{\delta y}+\frac{|w|}{\delta z}
-    \end{equation}
-\textct{CFL\_VELOCITY\_NORM=2} ($L_2$ norm of velocity vector)
-    \begin{equation}
-    \frac{\|\mathbf{u}\|}{\delta x} = \sqrt{ (u/\delta x)^2+(v/\delta y)^2+(w/\delta z)^2 }
-    \end{equation}
+
+The addition of the magnitude of the velocity divergence to the velocity norm is discussed below in Sec.~\ref{sec:mass_density_constraint}.  Notice that {\ct CFL\_VELOCITY\_NORM=3} omits this restriction and should therefore only be used for incompressible flows.
 
 \subsection{The Von Neumann Constraint}
 
@@ -706,6 +712,7 @@ u_i^{n+1} = u_i^n + \frac{\delta t \, \nu}{\delta x^2} \left( u_{i-1}^n - 2u_i^n
 Very simply, notice that if $\delta t \nu/\delta x^2 = 1/2$ then $u_i^{n+1} = (u_{i-1}^n + u_{i+1}^n)/2$.  If the time step is any larger we overshoot the straight line connecting neighboring cell values.  Of course, this restriction is only guaranteed to be TVD if the $u$ field is ``smooth'', else the neighboring cell values may be shifting in the opposite direction.  Unfortunately, in LES there is no such guarantee and so the VN constraint can be particularly devilish in generating instabilities. For this reason, some practitioners like to employ implicit methods for the diffusive terms.
 
 \subsection{Realizable Mass Density Constraint}
+\label{sec:mass_density_constraint}
 
 In an explicit Euler update of the continuity equation, if the time increment is too large the computational cell may be totally drained of mass, which of course is not physical. The constraint $\rho^{n+1}>0$ therefore leads to the following restriction on the time step:
 \begin{equation}
