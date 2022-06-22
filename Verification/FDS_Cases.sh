@@ -37,6 +37,7 @@ $QFDS -d Complex_Geometry geom_channel2.fds
 $QFDS -d Complex_Geometry geom_channel_tmp.fds
 $QFDS -d Complex_Geometry geom_channel_tmp2.fds
 $QFDS -d Complex_Geometry geom_extruded_poly.fds
+$QFDS -d Complex_Geometry geom_hrrpuv_init.fds
 $QFDS -d Complex_Geometry geom_intersection.fds
 $QFDS -d Complex_Geometry geom_bad_inverted_normals.fds
 $QFDS -p 4 -d Complex_Geometry geom_particle_cascade_2.fds
@@ -45,6 +46,7 @@ $QFDS -d Complex_Geometry geom_simple.fds
 #$QFDS -d Complex_Geometry geom_elev.fds
 #$QFDS -d Complex_Geometry geom_scale.fds
 $QFDS -d Complex_Geometry geom_obst.fds
+$QFDS -d Complex_Geometry geom_part_init.fds
 $QFDS -d Complex_Geometry geom_sphere1a.fds
 $QFDS -d Complex_Geometry geom_sphere1c.fds
 $QFDS -d Complex_Geometry geom_sphere1e.fds
