@@ -4601,7 +4601,7 @@ SUBROUTINE ADD_VOLUMETRIC_HEAT_SOURCE(MODE)
 
 INTEGER, INTENT(IN) :: MODE
 REAL(EB) :: TIME_RAMP_FACTOR,RR
-INTEGER :: N,I,J,K
+INTEGER :: N,I,J,K,ICC,JCC
 TYPE(INITIALIZATION_TYPE), POINTER :: IN
 
 DO N=1,N_INIT
@@ -4629,6 +4629,17 @@ DO N=1,N_INIT
             ELSE
                Q(I,J,K) = Q(I,J,K) + TIME_RAMP_FACTOR*IN%HRRPUV*IN%VOLUME_ADJUST(NM)
             ENDIF
+            ! handle HRRPUV initialization in cutcells
+            ! note: CC not yet connected to radiant fraction correction
+            CC_IBM_IF: IF (CC_IBM) THEN
+               IF (CCVAR(I,J,K,IBM_CGSC) == IBM_SOLID) EXIT CC_IBM_IF
+               IF (CCVAR(I,J,K,IBM_IDCC) > 0) THEN ! we have a cutcell
+                  ICC=CCVAR(I,J,K,IBM_IDCC)
+                  DO JCC=1,CUT_CELL(ICC)%NCELL
+                     CUT_CELL(ICC)%Q(JCC) = CUT_CELL(ICC)%Q(JCC) + TIME_RAMP_FACTOR*IN%HRRPUV
+                  ENDDO
+               ENDIF
+            ENDIF CC_IBM_IF
          ENDDO
       ENDDO
    ENDDO

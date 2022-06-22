@@ -408,7 +408,7 @@ ENDIF
 M%DDDT  = 0._EB
 M%D     = 0._EB
 M%DS    = 0._EB
-M%Q  = 0._EB
+M%Q     = 0._EB
 
 ! Viscosity
 
@@ -496,7 +496,7 @@ ENDDO
 
 ! Allocate and Initialize Mesh-Dependent Radiation Arrays
 
-M%QR    = 0._EB
+M%QR  = 0._EB
 M%UII = 4._EB*SIGMA*TMPA4
 M%ANGLE_INC_COUNTER = 0
 M%RAD_CALL_COUNTER  = 0
