@@ -1,34 +1,26 @@
 &HEAD CHID='param1', TITLE='param2' / 
 
--- 16 Coarse meshes aroud the fuel beds. can be made more fine
-&MULT ID='fire_block',DX=1.5,DY=1.5,DZ=1.5,
-      I_LOWER=0,I_UPPER=3,J_LOWER=0,J_UPPER=1,K_LOWER=0,K_UPPER=1 /
-&MESH IJK=param7,param7,param7,XB=0,1.5,-1.50,0,0,1.5,MULT_ID='fire_block' /
+! &MESH IJK=30,20,20, XB=-3,9,-4,4,0,6/ single coarse mesh for testing
 
--- 6 Coarse meshes along the middle, both on top, upwing and downwind of the fuel beds
-&MULT ID='cntr_blocks',DX=3,DY=3,DZ=3,
-      I_LOWER=0,I_UPPER=3,I_LOWER_SKIP=1,I_UPPER_SKIP=2,
-      K_LOWER=0,K_UPPER=1,K_LOWER_SKIP=0,K_UPPER_SKIP=0 /
-&MESH IJK=30,30,30,XB=-3,0,-1.5,1.5,0,3,MULT_ID='cntr_blocks' /
-
--- 16 Coarse meshes along bottom and top boundaries, both lower and upper level
-&MULT ID='bndry_blocks',DX=3,DY=5.5,DZ=3,
-      I_LOWER=0,I_UPPER=3,J_LOWER=0,J_UPPER=1,K_LOWER=0,K_UPPER=1 /
-&MESH IJK=30,25,30,XB=-3,0,-4.0,-1.5,0,3,MULT_ID='bndry_blocks' /
+&MULT ID='m1',DX=3,DY=4,DZ=3,
+      I_LOWER=0,I_UPPER=3,
+      J_LOWER=0,J_UPPER=1,
+      K_LOWER=0,K_UPPER=1 / 16 mesh
+&MESH IJK=30,40,30,XB=-3,0,-4,0,0,3, MULT_ID='m1' /
 
 &TIME T_END=180 /
 &DUMP DT_SLCF=0.5,DT_PART=0.5 /
-&MISC HUMIDITY=param5,TMPA=param4 /
+&MISC STRATIFICATION=F, NOISE=F, HUMIDITY=param5,TMPA=param4 /
 
-&PRES SOLVER='ULMAT' /
+&PRES SOLVER='UGLMAT' /
 
-&RADI NUMBER_RADIATION_ANGLES=16, TIME_STEP_INCREMENT=1, ANGLE_INCREMENT=1, PATH_LENGTH=0.14 /
+&RADI NUMBER_RADIATION_ANGLES=16, TIME_STEP_INCREMENT=1, ANGLE_INCREMENT=1, PATH_LENGTH=0.10 /
 
-&VENT XB=-3,-3,-4, 4,0.0,6.0, SURF_ID='OPEN' /
-&VENT XB= 9, 9,-4, 4,0.0,6.0, SURF_ID='OPEN' /
-&VENT XB=-3, 9,-4,-4,0.0,6.0, SURF_ID='OPEN' /
-&VENT XB=-3, 9, 4, 4,0.0,6.0, SURF_ID='OPEN' /
-&VENT XB=-3, 9,-4, 4,6.0,6.0, SURF_ID='OPEN' /
+&VENT DB='XMIN', SURF_ID='OPEN' /
+&VENT DB='XMAX', SURF_ID='OPEN' /
+&VENT DB='YMIN', SURF_ID='OPEN' /
+&VENT DB='YMAX', SURF_ID='OPEN' /
+&VENT DB='ZMAX', SURF_ID='OPEN' /
 
 &REAC FUEL = 'WOOD'
       O          = 2.5
@@ -84,29 +76,26 @@
 
 - Fine mesh Platform underneath fuel array and out 40 cm on each side
 &SURF ID='platform',COLOR='GRAY' /
-!&OBST XB=paramf1,paramo2,-1.45,1.45,paramo3,paramo4,SURF_ID='platform',MULT_ID='platform' / 
-!&MULT ID='platform',DXB=paramo5,paramo5,0,0,paramo6,paramo6,N_LOWER=0,N_UPPER=paramo7 /
 
 &MOVE ID='mv1', X0=0.6, AXIS=0,1,0, ROTATION_ANGLE=-param8 /
-&GEOM XB=0.6,4.6,-1.45,1.45,-0.1,0, SURF_ID='platform', MOVE_ID='mv1'/
+&GEOM XB=0.6,5.4,-1.45,1.45,-0.2,0, SURF_ID='platform', MOVE_ID='mv1'/
 
+- Ignitor
+&RAMP ID='RAMP IGN',T=0,  F=1.0 /
+&RAMP ID='RAMP IGN',T=10, F=1.0 /
+&RAMP ID='RAMP IGN',T=20, F=0.0 /
+&RAMP ID='RAMP IGN',T=180, F=0.0 /
 
-!- Ignitor fire
-!&SURF ID='IGN FIRE',HRRPUA=100,RAMP_Q='RAMPFIRE',RGB=255,0,0 /
-!&RAMP ID='RAMPFIRE',T=0, F=0.0 /
-!&RAMP ID='RAMPFIRE',T=3, F=0.0 /
-!&RAMP ID='RAMPFIRE',T=4, F=1.0 /
-!&RAMP ID='RAMPFIRE',T=14,F=1.0 /
-!&RAMP ID='RAMPFIRE',T=16,F=0.0 /
-!&VENT XB=paramf1,paramo2,-0.60,0.60,paramo1,paramo1,IOR=3,SURF_ID='IGN FIRE',MULT_ID='ignition' /
-!&MULT ID='ignition',DXB=paramo5,paramo5,0,0,paramo6,paramo6,N_LOWER=0,N_UPPER=paramo8 /
+&INIT XB=0.6,0.75,-0.60,0.60,0.05,0.20, HRRPUV=333, RAMP_Q='RAMP IGN' /
 
-&INIT XB=0.6,0.75,-0.60,0.60,0.05,0.55, HRRPUV=333 /
 
 &SLCF PBY=0.0, QUANTITY='VELOCITY', VECTOR=T /
 &SLCF PBY=0.0, QUANTITY='TEMPERATURE', CELL_CENTERED=T /
+&SLCF PBY=0.0, QUANTITY='HRRPUV', VECTOR=T /
+
 
 &SLCF PBZ=0.5, QUANTITY='VELOCITY', VECTOR=T /
 &SLCF PBZ=0.5, QUANTITY='TEMPERATURE', CELL_CENTERED=T /
+&SLCF PBZ=0.5, QUANTITY='HRRPUV', VECTOR=T /
 
 &TAIL /

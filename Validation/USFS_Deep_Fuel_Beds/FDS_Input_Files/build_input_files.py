@@ -16,24 +16,22 @@ FINAL = []
 for irow in df.index:
 #    file_no = str(df.loc[irow,'RUN_NO'])
     burn_no = str(int(df.loc[irow,'BURN_NO']))    # burn number
-    spacing = df.loc[irow,'SPACING']/100          # spacing, cm -> m
-    spacing_s = str(int(df.loc[irow,'SPACING']))  # spacing as a string (without decimal)
+    spacing = df.loc[irow,'SPACING']*0.0254       # spacing, in -> m
+    spacing_s = str(int(spacing*98.4252))         # spacing as a string in cm (36->35)
     angle_d =  int(df.loc[irow,'SLOPE'])          # angle in degrees
-    angle_s = str(angle_d)                        # angle as a string   (without decimal)
-    angle_r = math.radians(df.loc[irow,'SLOPE'])    # angle in radians
-    depth = df.loc[irow,'DEPTH']*0.0250           # in -> m !!!NOTE, in the exp the heights were conducted in cm,
-                                                  # but are recorded in the .csv as in, ergo: *.0250 not *.0254
-    depth_s = str(int(depth*100))                 # depth as a string in cm  (without decimal)
-    m_ct = df.loc[irow,'MOISTURE_CONTENT']/100    # moisture, whole number percent to decimal percent
+    angle_s = str(angle_d)                        # angle as a string
+    angle_r = math.radians(df.loc[irow,'SLOPE'])  # angle in radians
+    depth = df.loc[irow,'DEPTH']*0.0254           # in -> m 
+    depth_s = str(int(depth*98.4252))             # depth as a string in cm (121 -> 120)
+    m_ct = df.loc[irow,'MOISTURE_CONTENT']/100    # moisture, whole number % to decimal %
     res1 = df.loc[irow,'DX1']                     # res 1 to be used for platform spacing
     res2 = df.loc[irow,'DX2']                     # res 2 to be used for IJK
-    s_res1 = 'p'+str(res1)[2:len(str(res1))]
-    s_res2 = str(int(res2))
+    s_res1 = 'p'+str(res1)[2:len(str(res1))]      # res 1 as a string (0.25-> p25)
+    s_res2 = str(int(res2))                       # res 2 as a string
     temp = (df.loc[irow,'TMPA']-32.0)/1.8         # ambient temprature F -> C
     hmdy_rh = df.loc[irow,'HUMIDITY']             # ambient humidity
     burned_yn = int(df.loc[irow,'SPREAD'])        # did the fire spread 1=y 0=n.
     pct_burn = str(df.loc[irow,'BURN_PERCENT'])   # spread percentage (as whole %)
-    param7IJK = res2                              # mesh IJK. later they should all be connected
 
 # Record the baisic parameters:
     # begin the row for that file, with the filename:
@@ -51,27 +49,27 @@ for irow in df.index:
     param6MRCT = str(round(m_ct,4))
     param_line = param_line + [param4TEMP] + [param5HMDY] + [param6MRCT]
 
-    param_line = param_line + [str(param7IJK)] + [str(angle_d)]
+    param_line = param_line + [str(res2)] + [str(angle_d)]
     n_baisicparams = len(param_line)
 
 # Record the fuel array parameters
     # calculate effective geometry descriptors
-    startx = 0.6; # leftmost edge of the fuel rod arrays (and the platform they are on).
-    rg_gap = spacing * math.cos(angle_r); # the slope distance, the effective horizontal distance between fuel rods.
+    startx = 0.6; # leftmost edge of the fuel rod platform.
+    rg_gap = spacing * math.cos(angle_r); # effective horizontal distance between fuel rods.
     dz_ht = rg_gap * math.tan(angle_r)
 #    eff_ht = rg_gap * math.tan(angle_r) + depth ; # effective height of bed
-    rod_width = 0.15; # width of a fuel rod in m. (actually, should be .1524 but good enough for the cell size)
+    rod_width = 0.1524; # width of a fuel rod in m. (6 in)
 #    firegrid_top = max(round((max_ht+0.5),0)+2.0,2.0); # don't go any lower than 2.0 m.
 
     # calculate fuel array parameters
-    xpos1 = startx
+    xpos1 = startx + 0.5*math.cos(angle_r) # first row is ~50 cm from the edge of the platform.
     xpos2 = xpos1 + rod_width
     if (angle_r == 0.0):
         zpos1 = 0
     else:
         zpos1 = (0.5*(xpos1+xpos2)-startx)*math.tan(angle_r)
     zpos2 = zpos1 + depth
-    param_group = [rg_gap] + [(math.floor(4/spacing)-1)] + [zpos1] + [zpos2] + [dz_ht]
+    param_group = [rg_gap] + [(math.floor((4.8-0.5)/spacing)-1)] + [zpos1] + [zpos2] + [dz_ht]
     param_line = param_line + param_group
 
     #round off large trailing decimals
