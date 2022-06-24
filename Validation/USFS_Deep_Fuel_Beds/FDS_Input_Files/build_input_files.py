@@ -62,14 +62,14 @@ for irow in df.index:
 #    firegrid_top = max(round((max_ht+0.5),0)+2.0,2.0); # don't go any lower than 2.0 m.
 
     # calculate fuel array parameters
-    xpos1 = startx + 0.5*math.cos(angle_r) # first row is ~50 cm from the edge of the platform.
+    xpos1 = startx
     xpos2 = xpos1 + rod_width
     if (angle_r == 0.0):
         zpos1 = 0
     else:
         zpos1 = (0.5*(xpos1+xpos2)-startx)*math.tan(angle_r)
     zpos2 = zpos1 + depth
-    param_group = [rg_gap] + [(math.floor((4.8-0.5)/spacing)-1)] + [zpos1] + [zpos2] + [dz_ht]
+    param_group = [rg_gap] + [(math.floor(4.8/spacing)-1)] + [zpos1] + [zpos2] + [dz_ht]
     param_line = param_line + param_group
 
     #round off large trailing decimals
