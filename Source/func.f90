@@ -2807,20 +2807,53 @@ END SUBROUTINE BLOCK_MESH_INTERSECTION_VOLUME
 REAL(EB) FUNCTION CIRCLE_CELL_INTERSECTION_AREA(X0,Y0,RAD,X1,X2,Y1,Y2)
 
 REAL(EB), INTENT(IN) :: X0,Y0,RAD,X1,X2,Y1,Y2
-INTEGER :: NN,II,JJ
-REAL(EB) :: DELTA_AREA,XX,YY
+INTEGER :: NX,NY,II,JJ
+REAL(EB) :: DELTA_AREA,XX,YY,CIRCLE_BBOX_AREA,RECT_BBOX_AREA,CX1,CY1,BBDX,BBDY
+
+CIRCLE_BBOX_AREA = 4._EB*RAD*RAD
+RECT_BBOX_AREA = (X2-X1)*(Y2-Y1)
 
 CIRCLE_CELL_INTERSECTION_AREA = 0._EB
-NN = 50
-DELTA_AREA = (X2-X1)*(Y2-Y1)/REAL(NN,EB)**2
 
-DO JJ=1,NN
-   DO II=1,NN
-      XX = X1 + (X2-X1)*(II-0.5_EB)/REAL(NN,EB)
-      YY = Y1 + (Y2-Y1)*(JJ-0.5_EB)/REAL(NN,EB)
-      IF ( ((XX-X0)**2+(YY-Y0)**2)<RAD**2 ) CIRCLE_CELL_INTERSECTION_AREA = CIRCLE_CELL_INTERSECTION_AREA + DELTA_AREA
+BBOX_IF: IF (RECT_BBOX_AREA<CIRCLE_BBOX_AREA) THEN ! more efficient to descretize the rectangle
+   ! make area elements nominally square
+   IF ((X2-X1)<(Y2-Y1)) THEN
+      NX = 50
+      BBDX = (X2-X1)/REAL(NX,EB)
+      NY = NINT((Y2-Y1)/BBDX)
+      BBDY = (Y2-Y1)/REAL(NY,EB)
+   ELSE
+      NY = 50
+      BBDY = (Y2-Y1)/REAL(NY,EB)
+      NX = NINT((X2-X1)/BBDY)
+      BBDX = (X2-X1)/REAL(NX,EB)
+   ENDIF
+   DELTA_AREA = BBDX*BBDY
+   DO JJ=1,NY
+      DO II=1,NX
+         XX = X1 + BBDX*(II-0.5_EB)
+         YY = Y1 + BBDY*(JJ-0.5_EB)
+         IF ( ((XX-X0)**2+(YY-Y0)**2)<RAD**2 ) CIRCLE_CELL_INTERSECTION_AREA = CIRCLE_CELL_INTERSECTION_AREA + DELTA_AREA
+      ENDDO
    ENDDO
-ENDDO
+ELSE BBOX_IF ! more efficient to descretize the circle
+   NX = 50
+   NY = 50
+   CX1 = X0-RAD
+   CY1 = Y0-RAD
+   BBDX = 2._EB*RAD/REAL(NX,EB)
+   BBDY = BBDX
+   DELTA_AREA = BBDX*BBDY
+   DO JJ=1,NY
+      DO II=1,NX
+         XX = CX1 + BBDX*(II-0.5_EB)
+         YY = CY1 + BBDY*(JJ-0.5_EB)
+         IF ( ((XX-X0)**2+(YY-Y0)**2)<RAD**2 .AND. &
+                XX>=X1 .AND. XX<=X2          .AND. &
+                YY>=Y1 .AND. YY<=Y2                ) CIRCLE_CELL_INTERSECTION_AREA = CIRCLE_CELL_INTERSECTION_AREA + DELTA_AREA
+      ENDDO
+   ENDDO
+ENDIF BBOX_IF
 
 END FUNCTION CIRCLE_CELL_INTERSECTION_AREA
 
@@ -3559,7 +3592,7 @@ Z1 = A*SIN(TWOPI*U2)
 END SUBROUTINE BOX_MULLER
 
 
-!> \brief Flux-limiting function
+!> \brief Flux-limiting function related to mass transfer B-number
 
 REAL(EB) FUNCTION F_B(B)
 REAL(EB), INTENT(IN) :: B
